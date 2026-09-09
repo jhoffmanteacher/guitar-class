@@ -19,6 +19,10 @@ see `WORKFLOW.md` and the git commit log.
   pressing "Play tab" ran the loop at double speed. Each chord now appears
   twice, one strum per beat, the same way Module 3's Half-Bar ladder already
   played it.
+- **Module 2's Watchtower bass riff strikes each root twice.** The assessment
+  riff now reads A A G G F F G G — the same eight beats the Song Journey shows,
+  and the record's real pace. The notes and fingering haven't changed; each root
+  is held for two beats instead of one, so the loop is a bar longer.
 
 ## 2026-09-09 — A link that opens one activity
 

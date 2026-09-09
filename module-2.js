@@ -699,8 +699,8 @@ SETS.push(
           },
           {
             label: 'Challenge 3 — "Watchtower" Bass Riff (your module assessment piece)', label_es: 'Reto 3 — Riff de bajo de "Watchtower" (tu pieza de evaluación)',
-            text: 'Using the TAB:<ul><li>Play the "All Along the Watchtower" bass line on the low E string only — A · G · F · G, looping — one note per beat at 60 BPM.</li></ul>You\'ve got it when: the riff start to finish from memory, in time, with clean tone and correct fingering. Click any note name to hear how it should sound. <a href="tabs/all-along-the-watchtower.html" target="_blank">&#x1F9F5; Song Journey: this is Layer 2 of 5</a>.',
-            text_es: 'Usando el TAB:<ul><li>Toca la línea de bajo de "All Along the Watchtower" solo en la cuerda Mi grave — A · G · F · G, en bucle — una nota por pulso a 60 BPM.</li></ul>Lo tienes cuando: el riff de principio a fin de memoria, a tiempo, con tono limpio y digitación correcta. Haz clic en cualquier nombre de nota para escuchar cómo debe sonar. <a href="tabs/all-along-the-watchtower.html" target="_blank">&#x1F9F5; Recorrido de la canción: esto es la Capa 2 de 5</a>.',
+            text: 'Using the TAB:<ul><li>Play the "All Along the Watchtower" bass line on the low E string only — A · G · F · G, looping — one note per beat at 60 BPM. Each root gets struck twice before it changes.</li></ul>You\'ve got it when: the riff start to finish from memory, in time, with clean tone and correct fingering. Click any note name to hear how it should sound. <a href="tabs/all-along-the-watchtower.html" target="_blank">&#x1F9F5; Song Journey: this is Layer 2 of 5</a>.',
+            text_es: 'Usando el TAB:<ul><li>Toca la línea de bajo de "All Along the Watchtower" solo en la cuerda Mi grave — A · G · F · G, en bucle — una nota por pulso a 60 BPM. Cada raíz se pulsa dos veces antes de cambiar.</li></ul>Lo tienes cuando: el riff de principio a fin de memoria, a tiempo, con tono limpio y digitación correcta. Haz clic en cualquier nombre de nota para escuchar cómo debe sonar. <a href="tabs/all-along-the-watchtower.html" target="_blank">&#x1F9F5; Recorrido de la canción: esto es la Capa 2 de 5</a>.',
             hint: 'Fingering: index on fret 1 (F), ring on fret 3 (G), pinky on fret 5 (A) — a one-fret stretch past your usual index=1/middle=2/ring=3/pinky=4 hand position, since this riff climbs past fret 4. Keep your thumb behind the neck. Let each note ring fully before the next. Drill it until you can run it with your eyes closed — then play it for the &#x1F3A4; Listening Coach below the TAB: that\'s your module-end assessment piece.',
             hint_es: 'Digitación: índice en el traste 1 (F), anular en el traste 3 (G), meñique en el traste 5 (A) — un estiramiento de un traste más allá de tu posición habitual índice=1/medio=2/anular=3/meñique=4, porque este riff sube más allá del traste 4. Mantén el pulgar detrás del mástil. Deja que cada nota suene por completo antes de la siguiente. Practícalo hasta que puedas tocarlo con los ojos cerrados — luego tócalo para el &#x1F3A4; Entrenador de Escucha debajo del TAB: esa es tu pieza de evaluación de fin de módulo.',
             stuck: 'Loop just F–G (frets 1–3) until the finger change is clean, then add the A on fret 5.',
@@ -709,16 +709,16 @@ SETS.push(
             levelUp_es: 'Toca el riff completo con los ojos cerrados — esa es la verdadera prueba "de memoria".',
             skills: [1, 2, 4, 5, 6],
             tab: {
-              caption: '"All Along the Watchtower" — bass-note riff · Low E string · loops · 60 BPM',
-              caption_es: '"All Along the Watchtower" — riff de bajo · cuerda Mi grave · en bucle · 60 BPM',
+              caption: '"All Along the Watchtower" — bass-note riff · Low E string · each root twice · loops · 60 BPM',
+              caption_es: '"All Along the Watchtower" — riff de bajo · cuerda Mi grave · cada raíz dos veces · en bucle · 60 BPM',
               notes: [
                 { string: 'E', fret: 5, note: 'A', midi: 45 },
-                { string: 'E', fret: 3, note: 'G', midi: 43 },
-                { string: 'E', fret: 1, note: 'F', midi: 41 },
-                { string: 'E', fret: 3, note: 'G', midi: 43 },
                 { string: 'E', fret: 5, note: 'A', midi: 45 },
                 { string: 'E', fret: 3, note: 'G', midi: 43 },
+                { string: 'E', fret: 3, note: 'G', midi: 43 },
                 { string: 'E', fret: 1, note: 'F', midi: 41 },
+                { string: 'E', fret: 1, note: 'F', midi: 41 },
+                { string: 'E', fret: 3, note: 'G', midi: 43 },
                 { string: 'E', fret: 3, note: 'G', midi: 43 }
               ]
             },
@@ -767,8 +767,8 @@ SETS.push(
             steps: [
               {
                 label: 'Challenge — "Watchtower" bass line', label_es: 'Reto — Línea de bajo de "Watchtower"',
-                text: '<ul><li>Play the "All Along the Watchtower" bass loop on the low E string — A · G · F · G — one note per beat at 60 BPM, four laps without stopping.</li></ul>You\'ve got it when: four laps, every note landing on the click. <a href="tabs/all-along-the-watchtower.html" target="_blank">&#x1F9F5; Song Journey: this is Layer 2 of 5</a>.',
-                text_es: '<ul><li>Toca el bucle de bajo de "All Along the Watchtower" en la cuerda Mi grave — A · G · F · G — una nota por pulso a 60 BPM, cuatro vueltas sin parar.</li></ul>Lo tienes cuando: cuatro vueltas, cada nota cayendo con el clic. <a href="tabs/all-along-the-watchtower.html" target="_blank">&#x1F9F5; Recorrido de la canción: esto es la Capa 2 de 5</a>.',
+                text: '<ul><li>Play the "All Along the Watchtower" bass loop on the low E string — A · G · F · G, each root struck twice — one note per beat at 60 BPM, four laps without stopping.</li></ul>You\'ve got it when: four laps, every note landing on the click. <a href="tabs/all-along-the-watchtower.html" target="_blank">&#x1F9F5; Song Journey: this is Layer 2 of 5</a>.',
+                text_es: '<ul><li>Toca el bucle de bajo de "All Along the Watchtower" en la cuerda Mi grave — A · G · F · G, con cada raíz pulsada dos veces — una nota por pulso a 60 BPM, cuatro vueltas sin parar.</li></ul>Lo tienes cuando: cuatro vueltas, cada nota cayendo con el clic. <a href="tabs/all-along-the-watchtower.html" target="_blank">&#x1F9F5; Recorrido de la canción: esto es la Capa 2 de 5</a>.',
                 hint: 'Three notes carry this whole song. Keep your eyes one note ahead of your pick.',
                 hint_es: 'Tres notas sostienen toda esta canción. Mantén tus ojos una nota por delante de tu púa.',
                 stuck: 'Loop just A → G until the shift is smooth, then add the F.',
@@ -777,12 +777,16 @@ SETS.push(
                 levelUp_es: 'Di cada nombre de nota en voz alta mientras tocas, o duplica el bucle a ocho vueltas sin tropezar.',
                 skills: [1, 2, 4, 5, 6],
                 tab: {
-                  caption: '"All Along the Watchtower" — bass loop · Low E string · 60 BPM',
-                  caption_es: '"All Along the Watchtower" — bucle de bajo · cuerda Mi grave · 60 BPM',
+                  caption: '"All Along the Watchtower" — bass loop · Low E string · each root twice · 60 BPM',
+                  caption_es: '"All Along the Watchtower" — bucle de bajo · cuerda Mi grave · cada raíz dos veces · 60 BPM',
                   notes: [
                     { string: 'E', fret: 5, note: 'A', midi: 45 },
+                    { string: 'E', fret: 5, note: 'A', midi: 45 },
+                    { string: 'E', fret: 3, note: 'G', midi: 43 },
                     { string: 'E', fret: 3, note: 'G', midi: 43 },
                     { string: 'E', fret: 1, note: 'F', midi: 41 },
+                    { string: 'E', fret: 1, note: 'F', midi: 41 },
+                    { string: 'E', fret: 3, note: 'G', midi: 43 },
                     { string: 'E', fret: 3, note: 'G', midi: 43 }
                   ]
                 },
