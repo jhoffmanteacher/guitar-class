@@ -572,8 +572,8 @@ SETS.push(
             steps: [
           {
             label: 'Play and name the D-string notes', label_es: 'Toca y nombra las notas de la cuerda Re',
-            text: 'Play the natural notes on the D string:<ol><li>Click any note below the TAB to hear it.</li><li>Then play and NAME each one up the string — D · E · F · G · A · B · C.</li></ol>You\'ll drill this without looking at the chart at the practice station.',
-            text_es: 'Toca las notas naturales de la cuerda Re:<ol><li>Presiona cualquier nota debajo del TAB para escucharla.</li><li>Luego toca y NOMBRA cada una subiendo por la cuerda — D · E · F · G · A · B · C.</li></ol>Vas a ejercitar esto sin mirar el diagrama en la estación de práctica.',
+            text: 'Play the natural notes on the D string:<ol><li>Click any note below the TAB to hear it.</li><li>Then play and NAME each one up the string — D · E · F · G · A · B · C.</li></ol>You\'ll drill this without looking at the chart further down this set.',
+            text_es: 'Toca las notas naturales de la cuerda Re:<ol><li>Presiona cualquier nota debajo del TAB para escucharla.</li><li>Luego toca y NOMBRA cada una subiendo por la cuerda — D · E · F · G · A · B · C.</li></ol>Vas a ejercitar esto sin mirar el diagrama más adelante en esta unidad.',
             hint: 'It\'s the same musical alphabet you know from the E and A strings. The gap between E–F and B–C is one fret (a half step). Every other gap is two frets (a whole step).',
             hint_es: 'Es el mismo alfabeto musical que conoces de las cuerdas Mi y La. La distancia entre E–F y B–C es un traste (un semitono). Cualquier otra distancia es de dos trastes (un tono).',
             skills: [7],

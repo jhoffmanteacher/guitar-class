@@ -698,8 +698,8 @@ SETS.push(
               },
               {
                 label: 'Name all 12 roots', label_es: 'Nombra las 12 raíces',
-                text: 'Run through all 12 chromatic notes out loud and, for each, name the fret where an E-shape barre would land on that root — you\'ll drill this same idea for both shapes at the practice station.',
-                text_es: 'Recorre en voz alta las 12 notas cromáticas y, para cada una, nombra el traste donde caería una cejilla en forma de E sobre esa raíz — vas a practicar esta misma idea con ambas formas en la estación de práctica.',
+                text: 'Run through all 12 chromatic notes out loud and, for each, name the fret where an E-shape barre would land on that root — you\'ll drill this same idea for both shapes further down this set.',
+                text_es: 'Recorre en voz alta las 12 notas cromáticas y, para cada una, nombra el traste donde caería una cejilla en forma de E sobre esa raíz — vas a practicar esta misma idea con ambas formas más adelante en esta unidad.',
                 hint: 'One shape, twelve chords — the ONLY thing that changes is which fret you barre.',
                 hint_es: 'Una forma, doce acordes — lo ÚNICO que cambia es en cuál traste pones la cejilla.',
                 skills: [5],
@@ -740,8 +740,8 @@ SETS.push(
               },
               {
                 label: 'Quick check: the blues chords', label_es: 'Revisión rápida: los acordes del blues',
-                text: 'Check yourself on the form\'s ingredients before you play it at the practice station.',
-                text_es: 'Ponte a prueba con los ingredientes de la forma antes de tocarla en la estación de práctica.',
+                text: 'Check yourself on the form\'s ingredients before you play it in the challenges below.',
+                text_es: 'Ponte a prueba con los ingredientes de la forma antes de tocarla en los retos de abajo.',
                 response: { type: 'mc', prompt: 'A standard 12-bar blues in A uses which three chords?',
                   prompt_es: 'Un blues de 12 compases estándar en A usa cuáles tres acordes:',
                   answer: 0,

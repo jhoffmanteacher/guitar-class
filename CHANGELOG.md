@@ -5,6 +5,17 @@ Notable changes to the Guitar Class site. Newest first.
 For the full session-by-session history (and the reasoning behind each change),
 see `WORKFLOW.md` and the git commit log.
 
+## 2026-09-09 — Cards no longer send you to a "station"
+
+### Changed
+
+- **Ten cards told you to go to the "practice station" or the "computer
+  station."** The room stopped running that rotation, and a set is one
+  continuous ladder now — so those cards pointed at a place you can't see.
+  They now say where in the set to look instead: "further down this set,"
+  "earlier in this set," "in the challenges below." Same work, in both
+  languages, across Modules 1, 2, 4, 7, 8, 9 and 11.
+
 ## 2026-09-09 — "Seven Nation Army" moves to Module 2
 
 ### Changed

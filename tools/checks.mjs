@@ -524,6 +524,87 @@ function checkRetiredStationWording() {
 }
 
 /* ════════════════════════════════════════════════════════════════════
+   1n2. ROTATION-STATION NAMES IN STUDENT-FACING TEXT — the sibling of
+   1n. Where 1n bans the retired "Station B/C" labels, this bans the two
+   places they named: the "computer station" and the "practice station".
+   Since WO7 (2026-08-27) a set renders as ONE continuous ladder, so a
+   card that says "you'll drill this at the practice station" points at a
+   room layout the student cannot see. The station titles are not even
+   rendered any more — buildLesson()'s seam divider keeps only what
+   follows the em-dash ("Practice station — melodies & TAB" shows as
+   "Now practice — melodies & TAB"), so the words reach nobody.
+
+   The 2026-09-09 sweep rewrote 10 EN/ES pairs across modules 1, 2, 4, 7,
+   8, 9 and 11 into ladder-relative wording — "further down this set",
+   "earlier in this set", "in the challenges below" / "más adelante en
+   esta unidad", "antes en esta unidad", "en los retos de abajo".
+   Fix a relapse the same way: say where in the ladder, not which station.
+
+   Scope is deliberately the two NAMES, not the word "station". Module 13
+   uses "your station is clear" for the student's own work area during a
+   restring — a different sense, still correct — and Spanish "estacionados"
+   ("i-m-a stay parked") shares the stem. Banning the bare word would
+   force a whitelist for both, which is exactly the fragile shape
+   CLAUDE.md warns about; the two-name ban collides with neither.
+
+   The `stations.b` / `stations.c` DATA and their `title` fields are
+   untouched and out of scope — progress keys hang off them, and the
+   titles are internal labels now. So the field list below deliberately
+   omits `title`, and `\b` keeps `title` from matching inside `tabTitle`.
+
+   HONEST LIMIT: this pins the two retired names, not every way of
+   naming a place. "Over at the computers" would slip past. That is the
+   same trade 1k and 1w make — catch the exact wording a sweep retired.
+   ════════════════════════════════════════════════════════════════════ */
+const STATION_NAME_RE =
+  /\b(?:computer|practice)\s+stations?\b|\bestaci[oó]n(?:es)?\s+de\s+(?:computadora|pr[aá]ctica)\b/gi;
+function checkStationNames() {
+  head('1n2. Rotation-station names in student-facing text');
+  const RE = STATION_NAME_RE;
+  let bad = 0;
+  const flag = (file, li, phrase) => {
+    err(`${file}:${li + 1}: names a rotation station — "${phrase}" (the ladder is one block; say where in the set)`);
+    problems++; bad++;
+  };
+
+  /* Module content + class activities — student-facing authoring fields in
+     BOTH languages. `title`/`title_es` are excluded on purpose (see above);
+     Spanish matters as much as English here, since nothing else reads it. */
+  const FIELD_RE = new RegExp(
+    '\\b(?:text|hint|stuck|levelUp|gotItWhen|explain|forward|subtitle|meta|intro|note|label|prompt|placeholder|caption|sub|tabTitle|tabSub)' +
+    '(?:_es)?:\\s*\'((?:\\\\.|[^\'\\\\])*)\'', 'g');
+  for (const file of [...MODULE_FILES, 'class-activities.js']) {
+    let lines;
+    try { lines = readFileSync(join(ROOT, file), 'utf8').split('\n'); } catch { continue; }
+    lines.forEach((line, li) => {
+      for (const f of line.matchAll(FIELD_RE))
+        for (const m of f[1].matchAll(RE)) flag(file, li, m[0]);
+    });
+  }
+
+  /* i18n.js — both sides of each key. */
+  const VAL_RE = /\b(?:en|es):\s*(?:'((?:\\.|[^'\\])*)'|"((?:\\.|[^"\\])*)")/g;
+  try {
+    readFileSync(join(ROOT, 'i18n.js'), 'utf8').split('\n').forEach((line, li) => {
+      for (const e of line.matchAll(VAL_RE))
+        for (const m of (e[1] ?? e[2] ?? '').matchAll(RE)) flag('i18n.js', li, m[0]);
+    });
+  } catch { /* checked elsewhere */ }
+
+  /* Shell + Journey pages — visible text and data-es alike. */
+  for (const file of ['index.html', ...TAB_PAGES]) {
+    let lines;
+    try { lines = readFileSync(join(ROOT, file), 'utf8').split('\n'); } catch { continue; }
+    lines.forEach((line, li) => {
+      if (/^\s*<!--/.test(line)) return;
+      for (const m of line.matchAll(RE)) flag(file, li, m[0]);
+    });
+  }
+
+  if (bad === 0) ok('no rotation-station names in student-facing text');
+}
+
+/* ════════════════════════════════════════════════════════════════════
    1o. TAB CAN SCROLL SIDEWAYS AGAIN — the inline TAB board is laid out to
    fill its card and wrap a long phrase onto a second staff (WO7,
    2026-08-28). Nothing about it may scroll horizontally: a student on a
@@ -2958,6 +3039,7 @@ async function liveCheck() {
   checkSlangPhrasing();
   checkJourneyLickLabels();
   checkRetiredStationWording();
+  checkStationNames();
   checkTabNoScroll();
   checkContrast();
   checkJourneyThemeDrift();
