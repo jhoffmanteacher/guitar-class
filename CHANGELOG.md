@@ -23,6 +23,10 @@ see `WORKFLOW.md` and the git commit log.
   riff now reads A A G G F F G G — the same eight beats the Song Journey shows,
   and the record's real pace. The notes and fingering haven't changed; each root
   is held for two beats instead of one, so the loop is a bar longer.
+- **Module 3's "Luna" vamp TAB shows the whole arrangement.** It drew a single
+  F5 and a single A5, which didn't match the card's "two downbeat strums per
+  bar." It now runs F5 F5 F5 F5 A5 A5 A5 A5 — each chord holding two bars,
+  the same arrangement the Luna Song Journey page shows.
 
 ## 2026-09-09 — A link that opens one activity
 

@@ -814,20 +814,26 @@ SETS.push(
               },
               {
                 label: 'Challenge — "Luna", full vamp', label_es: 'Reto — "Luna", vamp completo',
-                text: 'The whole song rides F5 ↔ A5.<ul><li>Play along with the teaching arrangement — two downbeat strums per bar, changing where the record changes.</li></ul>You\'ve got it when: a full verse and chorus without losing a downbeat, F5 ringing as clean as A5. <a href="tabs/luna.html" target="_blank">&#x1F9F5; Song Journey: this is Layer 3 of 5</a>.',
-                text_es: 'Toda la canción se apoya en F5 ↔ A5.<ul><li>Toca junto con el arreglo didáctico — dos rasgueos en el tiempo fuerte por compás, cambiando donde cambia la grabación.</li></ul>Lo tienes cuando: una estrofa y un coro completos sin perder un tiempo fuerte, con F5 sonando tan limpio como A5. <a href="tabs/luna.html" target="_blank">&#x1F9F5; Recorrido de la canción: esto es la Capa 3 de 5</a>.',
-                hint: 'This is the same F5↔A5 slide from the drill above — the only change is following where the record changes instead of a fixed count.',
-                hint_es: 'Es el mismo deslizamiento F5↔A5 del ejercicio de arriba — el único cambio es seguir donde cambia la grabación en vez de una cuenta fija.',
+                text: 'The whole song rides F5 ↔ A5.<ul><li>Play along with the teaching arrangement — two downbeat strums per bar at 60 BPM, changing every two bars: F5, F5, A5, A5.</li></ul>You\'ve got it when: a full verse and chorus without losing a downbeat, F5 ringing as clean as A5. <a href="tabs/luna.html" target="_blank">&#x1F9F5; Song Journey: this is Layer 3 of 5</a>.',
+                text_es: 'Toda la canción se apoya en F5 ↔ A5.<ul><li>Toca junto con el arreglo didáctico — dos rasgueos en el tiempo fuerte por compás a 60 BPM, cambiando cada dos compases: F5, F5, A5, A5.</li></ul>Lo tienes cuando: una estrofa y un coro completos sin perder un tiempo fuerte, con F5 sonando tan limpio como A5. <a href="tabs/luna.html" target="_blank">&#x1F9F5; Recorrido de la canción: esto es la Capa 3 de 5</a>.',
+                hint: 'This is the same F5↔A5 slide from the drill above, where you switched on every downbeat. Here each chord holds for two bars — four downbeats — before you slide, which is where the record changes.',
+                hint_es: 'Es el mismo deslizamiento F5↔A5 del ejercicio de arriba, donde cambiabas en cada tiempo fuerte. Aquí cada acorde se sostiene dos compases — cuatro tiempos fuertes — antes de que deslices, que es donde cambia la grabación.',
                 stuck: 'Loop the F5↔A5 slide with no song for a few rounds first, then drop in following the record.',
                 stuck_es: 'Repite el deslizamiento F5↔A5 sin la canción por unas cuantas rondas primero, y luego entra siguiendo la grabación.',
                 levelUp: 'Add a light palm mute for the verse, then let it ring open for the chorus — instant dynamics.',
                 levelUp_es: 'Agrega un silenciado ligero con la palma para la estrofa, y luego déjalo sonar abierto para el coro — dinámica instantánea.',
                 skills: [3, 4],
                 tab: {
-                  caption: '"Luna" — the vamp as power chords (teaching arrangement) · 60 BPM',
-                  caption_es: '"Luna" — el vamp como acordes de potencia (arreglo didáctico) · 60 BPM',
+                  caption: '"Luna" — the vamp as power chords (teaching arrangement) · 2 strums per bar, change every 2 bars · 60 BPM',
+                  caption_es: '"Luna" — el vamp como acordes de potencia (arreglo didáctico) · 2 rasgueos por compás, cambio cada 2 compases · 60 BPM',
                   notes: [
                     { frets: [['A', 3], ['E', 1]], note: 'F5', midi: [48, 41] },
+                    { frets: [['A', 3], ['E', 1]], note: 'F5', midi: [48, 41] },
+                    { frets: [['A', 3], ['E', 1]], note: 'F5', midi: [48, 41] },
+                    { frets: [['A', 3], ['E', 1]], note: 'F5', midi: [48, 41] },
+                    { frets: [['A', 7], ['E', 5]], note: 'A5', midi: [52, 45] },
+                    { frets: [['A', 7], ['E', 5]], note: 'A5', midi: [52, 45] },
+                    { frets: [['A', 7], ['E', 5]], note: 'A5', midi: [52, 45] },
                     { frets: [['A', 7], ['E', 5]], note: 'A5', midi: [52, 45] }
                   ]
                 },
