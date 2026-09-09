@@ -5,6 +5,16 @@ Notable changes to the Guitar Class site. Newest first.
 For the full session-by-session history (and the reasoning behind each change),
 see `WORKFLOW.md` and the git commit log.
 
+## 2026-09-09 — Watchtower power chords, strummed twice each
+
+### Changed
+
+- **The Watchtower power-chord tab now shows each chord twice.** Layer 3 of the
+  Song Journey drew A5 G5 F5 G5 once apiece, which read as one strum held for
+  two beats. It's one strum per beat — each chord struck twice before it
+  changes — so the tab, its title and the play line now say that, matching the
+  bass line in Layer 2. The Level up is now "change chords on every beat."
+
 ## 2026-09-09 — A link that opens one activity
 
 ### Added
