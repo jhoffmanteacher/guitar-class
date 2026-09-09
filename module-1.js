@@ -8,7 +8,7 @@ SETS.push(
 
   {
     id: 'w1',
-    songThread: [{ name: '"All Along the Watchtower"', journey: 'tabs/all-along-the-watchtower.html', layer: 1, note: 'first listen' }],
+    songThread: [{ name: '"All Along the Watchtower"', journey: 'tabs/all-along-the-watchtower.html', layer: 1, note: 'first listen' }, { name: '"Seven Nation Army"', journey: 'tabs/seven-nation-army.html', layer: 1, note: 'first listen' }],
     label: 'Set 1',
     locked: false,
     module: 'Introductions: You and The Guitar',

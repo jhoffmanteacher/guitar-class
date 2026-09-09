@@ -18,7 +18,7 @@ SETS.push(
 
   {
     id: 'm2w1',
-    songThread: [{ name: '"Seven Nation Army"', journey: 'tabs/seven-nation-army.html', layer: 2, note: 'the riff in time at 60 BPM' }],
+    songThread: [{ name: '"Seven Nation Army"', journey: 'tabs/seven-nation-army.html', layer: 2, note: 'the riff, note by note' }],
     label: 'Set 1',
     locked: false,
     module: 'Notes on the E & A Strings',
@@ -137,10 +137,10 @@ SETS.push(
               },
               {
                 label: 'Preview the "Seven Nation Army" riff', label_es: 'Adelanto del riff de "Seven Nation Army"',
-                text: '<ol><li>Click the note names below the TAB to hear how this riff should sound — it lives entirely on the A string, and every note in it is one you just named.</li><li>Then find the first few on your own guitar, slowly.</li></ol>You\'ve got it when: you can match the first three notes to what you heard. You will play the whole riff at the practice station. <a href="tabs/seven-nation-army.html" target="_blank">&#x1F9F5; Song Journey: this is Layer 2 of 5</a>.',
-                text_es: '<ol><li>Haz clic en los nombres de las notas debajo del TAB para escuchar cómo debe sonar este riff — vive completamente en la cuerda La, y cada nota que lo forma es una que acabas de nombrar.</li><li>Luego encuentra las primeras en tu propia guitarra, despacio.</li></ol>Lo tienes cuando: puedes hacer coincidir las primeras tres notas con lo que escuchaste. Vas a tocar el riff completo en la estación de práctica. <a href="tabs/seven-nation-army.html" target="_blank">&#x1F9F5; Recorrido de la canción: esto es la Capa 2 de 5</a>.',
-                hint: 'The riff starts high on the neck and walks down toward the nut — fret 7 is E, fret 10 is G, then 5, 3 and 2 are D, C and B. To fret a note, set your fingertip just behind the fret and press firm; if it buzzes, move a little closer to the fret or press harder.',
-                hint_es: 'El riff empieza arriba en el mástil y baja caminando hacia la cejuela — el traste 7 es E, el 10 es G, y luego el 5, el 3 y el 2 son D, C y B. Para trastear una nota, coloca la punta del dedo justo detrás del traste y presiona firme; si zumba, acércate un poco más al traste o presiona más fuerte.',
+                text: '<ol><li>Click the note names below the TAB to hear how this riff should sound — it lives entirely on the A string, and every note in it is one you just named.</li><li>Then find the first few on your own guitar, slowly.</li></ol>You\'ve got it when: you can match the first three notes to what you heard. You\'ll play the whole riff further down this set. <a href="tabs/seven-nation-army.html" target="_blank">&#x1F9F5; Song Journey: this is Layer 2 of 5</a>.',
+                text_es: '<ol><li>Haz clic en los nombres de las notas debajo del TAB para escuchar cómo debe sonar este riff — vive completamente en la cuerda La, y cada nota que lo forma es una que acabas de nombrar.</li><li>Luego encuentra las primeras en tu propia guitarra, despacio.</li></ol>Lo tienes cuando: puedes hacer coincidir las primeras tres notas con lo que escuchaste. Vas a tocar el riff completo más adelante en esta unidad. <a href="tabs/seven-nation-army.html" target="_blank">&#x1F9F5; Recorrido de la canción: esto es la Capa 2 de 5</a>.',
+                hint: 'The riff opens on fret 7 (E), reaches up to fret 10 (G), then walks down — 5, 3 and 2 are D, C and B. To fret a note, set your fingertip just behind the fret and press firm; if it buzzes, move a little closer to the fret or press harder.',
+                hint_es: 'El riff abre en el traste 7 (E), estira hasta el traste 10 (G), y luego va bajando — el 5, el 3 y el 2 son D, C y B. Para trastear una nota, coloca la punta del dedo justo detrás del traste y presiona firme; si zumba, acércate un poco más al traste o presiona más fuerte.',
                 stuck: 'Just the first two notes: click a note name to hear it, then find fret 7 on the A string. Get that solid before adding the next.',
                 stuck_es: 'Solo las primeras dos notas: haz clic en el nombre de una nota para escucharla, y luego encuentra el traste 7 en la cuerda La. Deja esa bien firme antes de agregar la siguiente.',
                 levelUp: 'Play the first four notes in a row, naming each one as you land it.',
@@ -296,8 +296,8 @@ SETS.push(
               },
               {
                 label: 'Ear: find the "Seven Nation Army" riff', label_es: 'Oído: encuentra el riff de "Seven Nation Army"',
-                text: 'Name That Riff (try it!): pick out the "Seven Nation Army" riff (a riff = a short musical phrase that repeats) by ear on the A string — the same string you just mapped. No score — just try it.',
-                text_es: 'Adivina el riff (¡pruébalo!): saca de oído el riff de "Seven Nation Army" (un riff = una frase musical corta que se repite) en la cuerda La — la misma cuerda que acabas de mapear. Sin puntaje — solo pruébalo.',
+                text: 'Name That Riff (try it!): you saw this riff at the computer station — now find the "Seven Nation Army" riff (a riff = a short musical phrase that repeats) on the A string from memory and ear alone, chart closed. No score — just try it.',
+                text_es: 'Adivina el riff (¡pruébalo!): viste este riff en la estación de computadora — ahora encuentra el riff de "Seven Nation Army" (un riff = una frase musical corta que se repite) en la cuerda La solo de memoria y de oído, con la tabla cerrada. Sin puntaje — solo pruébalo.',
                 hint: 'Use the A-string note map from the Challenge 2 chart (frets 0 · 2 · 3 · 5 · 7 · 8 · 10 · 12). Don\'t worry about getting it perfect — the attempt trains your ear.',
                 hint_es: 'Usa el mapa de notas de la cuerda La de la tabla del Reto 2 (trastes 0 · 2 · 3 · 5 · 7 · 8 · 10 · 12). No te preocupes por hacerlo perfecto — el intento entrena tu oído.',
               }
@@ -339,12 +339,12 @@ SETS.push(
                 response: { type: 'short', prompt: 'A lap without looking at the chart — clean or not yet? What note still needs a look at the chart?', prompt_es: 'Una vuelta sin mirar la tabla — ¿limpia o todavía no? ¿Qué nota todavía necesita una miradita a la tabla?', placeholder: 'e.g. clean! / still peeking at the G', placeholder_es: 'ej. ¡limpia! / todavía miro la G' }
               },
               {
-                label: 'Challenge — "Seven Nation Army," the riff', label_es: 'Reto — "Seven Nation Army," el riff',
-                text: '<ol><li>Play the riff on the A string — frets 7 → 7 → 10 → 7, then 5 → 3 → 2.</li><li>Say each note name out loud as you play it — E · E · G · E · D · C · B.</li></ol>You\'ve got it when: all seven notes in the right order, each one ringing clean, every name said correctly. Speed comes later — Set 2 takes this same riff to 60 BPM. <a href="tabs/seven-nation-army.html" target="_blank">&#x1F9F5; Song Journey: this is Layer 2 of 5</a>.',
-                text_es: '<ol><li>Toca el riff en la cuerda La — trastes 7 → 7 → 10 → 7, luego 5 → 3 → 2.</li><li>Di cada nombre de nota en voz alta mientras la tocas — E · E · G · E · D · C · B.</li></ol>Lo tienes cuando: las siete notas en el orden correcto, cada una sonando limpia, cada nombre dicho correctamente. La velocidad viene después — en la Unidad 2 este mismo riff va a 60 BPM. <a href="tabs/seven-nation-army.html" target="_blank">&#x1F9F5; Recorrido de la canción: esto es la Capa 2 de 5</a>.',
-                hint: 'Every fret here is one you just named on the A string — 7 is E, 10 is G, 5 is D, 3 is C, 2 is B. Name it, then play it. Two things about this version: we play it as straight, even quarter notes — one per beat — so it is easy to count, and it sits on the A string, where the riff lives at true pitch, so it lines up with the record.',
+                label: 'Challenge — "Seven Nation Army", the riff', label_es: 'Reto — "Seven Nation Army", el riff',
+                text: '<ul><li>Play the riff on the A string — frets 7 → 7 → 10 → 7, then 5 → 3 → 2.</li><li>Say each note name out loud as you play it — E · E · G · E · D · C · B.</li></ul>You\'ve got it when: all seven notes in the right order, each one ringing clean, every name said correctly. Speed comes later. <a href="tabs/seven-nation-army.html" target="_blank">&#x1F9F5; Song Journey: this is Layer 2 of 5</a>.',
+                text_es: '<ul><li>Toca el riff en la cuerda La — trastes 7 → 7 → 10 → 7, luego 5 → 3 → 2.</li><li>Di cada nombre de nota en voz alta mientras la tocas — E · E · G · E · D · C · B.</li></ul>Lo tienes cuando: las siete notas en el orden correcto, cada una sonando limpia, cada nombre dicho correctamente. La velocidad viene después. <a href="tabs/seven-nation-army.html" target="_blank">&#x1F9F5; Recorrido de la canción: esto es la Capa 2 de 5</a>.',
+                hint: 'Every fret here is one you just named on the A string — 7 is E, 10 is G, 5 is D, 3 is C, 2 is B. Name it, then play it. Two things about this version: we play it as straight, even quarter notes — one per beat — so it\'s easy to count, and it sits on the A string, where the riff lives at true pitch, so it lines up with the record.',
                 hint_es: 'Cada traste aquí es uno que acabas de nombrar en la cuerda La — el 7 es E, el 10 es G, el 5 es D, el 3 es C, el 2 es B. Nómbralo, luego tócalo. Dos cosas sobre esta versión: la tocamos con negras rectas y parejas — una por pulso — para que sea fácil de contar, y vive en la cuerda La, donde el riff suena en su tono real, así que sí coincide con la grabación.',
-                stuck: 'Two halves: 7 · 7 · 10 · 7, then 5 · 3 · 2. Learn the first half cold before you join them. Click a note name below the TAB to hear the pitch you are aiming for.',
+                stuck: 'Two halves: 7 · 7 · 10 · 7, then 5 · 3 · 2. Learn the first half cold before you join them. Click a note name below the TAB to hear the pitch you\'re aiming for.',
                 stuck_es: 'Dos mitades: 7 · 7 · 10 · 7, y luego 5 · 3 · 2. Apréndete bien la primera mitad antes de unirlas. Haz clic en un nombre de nota debajo del TAB para escuchar el tono que buscas.',
                 levelUp: 'Play it twice through without stopping, then once more with your eyes closed.',
                 levelUp_es: 'Tócalo dos veces seguidas sin parar, y luego una vez más con los ojos cerrados.',
@@ -453,7 +453,7 @@ SETS.push(
 
   {
     id: 'm2w2',
-    songThread: [{ name: '"All Along the Watchtower"', journey: 'tabs/all-along-the-watchtower.html', layer: 2, note: 'the bass-note line — your assessment piece' }, { name: '"Seven Nation Army"', journey: 'tabs/seven-nation-army.html', layer: 2, note: 'the riff, note by note' }, { name: '"Sweet Child O\' Mine"', journey: 'tabs/sweet-child-o-mine.html', layer: 2, note: 'the bass roots' }, { name: '"Luna"', journey: 'tabs/luna.html', layer: 2, note: 'the single-note line' }, { name: '"Let It Be"', journey: 'tabs/let-it-be.html', layer: 2, note: 'the C–G–A–F bass outline' }],
+    songThread: [{ name: '"All Along the Watchtower"', journey: 'tabs/all-along-the-watchtower.html', layer: 2, note: 'the bass-note line — your assessment piece' }, { name: '"Seven Nation Army"', journey: 'tabs/seven-nation-army.html', layer: 2, note: 'the riff in time at 60 BPM' }, { name: '"Sweet Child O\' Mine"', journey: 'tabs/sweet-child-o-mine.html', layer: 2, note: 'the bass roots' }, { name: '"Luna"', journey: 'tabs/luna.html', layer: 2, note: 'the single-note line' }, { name: '"Let It Be"', journey: 'tabs/let-it-be.html', layer: 2, note: 'the C–G–A–F bass outline' }],
     label: 'Set 2',
     locked: false,
     module: 'Notes on the E & A Strings',
