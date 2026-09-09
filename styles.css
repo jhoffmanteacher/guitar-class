@@ -1670,6 +1670,16 @@ li.step.step-flash{animation:stepFlash 2.6s ease-out}
 .issue-status{font-size:0.8125rem;min-height:1.2em;margin-top:8px}
 .issue-status.ok{color:var(--green-text)}
 .issue-status.err{color:var(--red-text)}
+/* "Which class are you in?" — the blocking period picker (app.js
+   maybeShowPeriodPicker). Reuses the .daily5-overlay/.daily5-modal shell and
+   .panel-next-btn's colours; only the two-up layout and the sign-out link are
+   new, so nothing here introduces a colour pair of its own. */
+.period-modal{width:min(420px,100%)}
+.period-choices{display:flex;gap:10px;margin-top:14px}
+.period-btn{flex:1;font-size:1.0625rem;padding:16px 12px}
+.period-btn:disabled{opacity:0.6;cursor:default}
+.period-out{margin-top:14px;text-align:center}
+.period-signout{font-family:inherit;font-size:0.8125rem;padding:4px 6px;border:0;background:transparent;color:var(--text2);text-decoration:underline;cursor:pointer}
 
 .song-thread-name{font-weight:600;color:var(--text)}
 

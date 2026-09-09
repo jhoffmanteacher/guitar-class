@@ -136,6 +136,16 @@ let games       = {};   // per-game bests from the games arcade (coach.js) — i
 let streak      = { count:0, lastDay:null };   // site-wide practice streak, independent of any one game
 let gamesAccessOn = true; // whether the Games arcade is available to THIS student (teacher-controlled; see loadClassConfig)
 let accountPaused = false; // teacher put this student on hold (see loadClassConfig / showPausedScreen)
+/* Which class period this student is in — 4 or 7, nothing else. Two halves,
+   deliberately: `studentPeriod` is the student's own answer, living on their
+   progress doc (which only they can write); `periodOverride` is the teacher's
+   correction, read from config/class. They are split because firestore.rules
+   gives the teacher READ-only access to progress/{uid} on purpose (see the
+   comment block in that file), so the console has no way to fix a wrong tap
+   in place. Effective period = override || own answer. See
+   maybeShowPeriodPicker(). */
+let studentPeriod = '';    // progress/{uid}.period — '4' | '7' | '' (not answered yet)
+let periodOverride = '';   // config/class.periodOverrides[uid] — teacher's correction, read-only here
 let hiddenActivityIds = {}; // In-Class Activities the teacher has temporarily hidden (see loadClassConfig) — id -> true
 let activityDates = {}; // In-Class Activities release dates, teacher-set in the console (see loadClassConfig) — id -> 'YYYY-MM-DD'
 let activityTitles = {}; // In-Class Activity renames, teacher-set in the console (see loadClassConfig / caTitle) — id -> { en, base }
@@ -270,7 +280,7 @@ async function ensureModuleRendered(num){
   // until the next language toggle. Mark them right away instead of waiting.
   if(typeof applyI18n === 'function') applyI18n(c);
 }
-let _dirtyKeys = new Set();   // which categories need writing: skills · place · responses · completed · classActivities · games · streak · practiceLog
+let _dirtyKeys = new Set();   // which categories need writing: skills · place · responses · completed · classActivities · games · streak · practiceLog · period
 const escAttr = s => String(s==null?'':s).replace(/&/g,'&amp;').replace(/"/g,'&quot;').replace(/'/g,'&#39;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
 const escHtml = s => String(s==null?'':s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
 
@@ -497,7 +507,7 @@ if(auth) auth.onAuthStateChanged(async user=>{
       if(accountPaused) showPausedScreen(user); else showApp(user);
     }
   } else {
-    currentUser = null; progress = {}; responses = {}; completed = {}; completedDeletes = new Set(); classActivities = {}; classActivitiesDeletes = new Set(); exitChecks = {}; games = {}; streak = { count:0, lastDay:null }; gamesAccessOn = true; hiddenActivityIds = {}; activityDates = {}; activityTitles = {}; activityNumbers = {}; progressLoadFailed = false;
+    currentUser = null; progress = {}; responses = {}; completed = {}; completedDeletes = new Set(); classActivities = {}; classActivitiesDeletes = new Set(); exitChecks = {}; games = {}; streak = { count:0, lastDay:null }; gamesAccessOn = true; studentPeriod = ''; periodOverride = ''; hiddenActivityIds = {}; activityDates = {}; activityTitles = {}; activityNumbers = {}; progressLoadFailed = false;
     if(typeof gamesResetForUser === 'function') gamesResetForUser();   // Note Runner's module caches must not leak into the next signed-in user
     if(typeof lqStopListening === 'function') lqStopListening();       // and the live-quiz listener must not keep firing under the next student
     practiceLog = loadLocalPracticeLog();   // per-skill rep history: back to the local copy on sign-out
@@ -554,7 +564,9 @@ function showApp(user){
   // A bookmarked/reloaded explore-page URL (#games, #songs, #keep-practicing,
   // #daily-review, #my-progress) opens that page once the app is on screen.
   routeExploreHash();
-  maybeShowCaReminder();
+  // The period question blocks the whole app, so the class-activity reminder
+  // waits for the next sign-in rather than stacking underneath it.
+  if(!maybeShowPeriodPicker()) maybeShowCaReminder();
   // One long-lived listener on the live-quiz session doc, so a game the
   // teacher starts mid-period reaches a student who's had the site open all
   // along. Guarded: live-quiz.js is a separate deferred script.
@@ -600,8 +612,9 @@ async function loadProgress(){
       savePracticeLogLocal();
       songReady     = doc.data().songReady || {};
       songReadyAt   = doc.data().songReadyAt || {};
-    } else { progress={}; lastModuleNum=1; lastSetId=null; responses={}; completed={}; classActivities={}; exitChecks={}; games={}; streak={ count:0, lastDay:null }; practiceLog=loadLocalPracticeLog(); songReady={}; songReadyAt={}; restoreLocalPlace(); }
-  } catch(e){ progressLoadFailed=true; console.warn('[guitar-class] progress load failed — running read-only on derived data', e); progress={}; lastModuleNum=1; lastSetId=null; responses={}; completed={}; classActivities={}; exitChecks={}; games={}; streak={ count:0, lastDay:null }; practiceLog=loadLocalPracticeLog(); songReady={}; songReadyAt={}; restoreLocalPlace(); }
+      studentPeriod = doc.data().period || '';
+    } else { progress={}; lastModuleNum=1; lastSetId=null; responses={}; completed={}; classActivities={}; exitChecks={}; games={}; streak={ count:0, lastDay:null }; practiceLog=loadLocalPracticeLog(); songReady={}; songReadyAt={}; studentPeriod=''; restoreLocalPlace(); }
+  } catch(e){ progressLoadFailed=true; console.warn('[guitar-class] progress load failed — running read-only on derived data', e); progress={}; lastModuleNum=1; lastSetId=null; responses={}; completed={}; classActivities={}; exitChecks={}; games={}; streak={ count:0, lastDay:null }; practiceLog=loadLocalPracticeLog(); songReady={}; songReadyAt={}; studentPeriod=''; restoreLocalPlace(); }
 }
 
 /* ── Games access (teacher-controlled) ──
@@ -614,6 +627,7 @@ async function loadProgress(){
 async function loadClassConfig(){
   gamesAccessOn = true;
   accountPaused = false;
+  periodOverride = '';
   hiddenActivityIds = {};
   activityDates = {};
   activityTitles = {};
@@ -628,6 +642,10 @@ async function loadClassConfig(){
     // security — the real boundary is the Firestore rules, which already
     // stop a student reading or writing anyone else's doc.
     accountPaused = (d.paused||{})[currentUser.uid] === true;
+    // Teacher's period correction (teacher.js Manage view). Same fail-open
+    // convention as everything else in here: a failed read leaves it '', which
+    // just means the student's own answer stands.
+    periodOverride = (d.periodOverrides||{})[currentUser.uid] || '';
     const ov = (d.gameOverrides||{})[currentUser.uid];
     if(ov===true)       gamesAccessOn = true;
     else if(ov===false) gamesAccessOn = false;
@@ -806,6 +824,7 @@ async function flushSave(){
   if(keys.has('games'))     payload.games     = games;
   if(keys.has('streak'))    payload.streak    = streak;
   if(keys.has('practiceLog')) payload.practiceLog = practiceLog;
+  if(keys.has('period'))    payload.period    = studentPeriod;
   try{
     await ensureDb();
     /* The delete sentinels are stamped in HERE, after ensureDb(), and not
@@ -1789,6 +1808,76 @@ async function submitIssueReport(){
     if(status){ status.textContent = t('issue.failed'); status.className = 'issue-status err'; }
     if(btn){ btn.disabled = false; btn.textContent = t('issue.submit'); }
   }
+}
+
+/* ══════════ "Which class are you in?" ══════════
+   Every student is tagged Period 4 or Period 7 so the teacher dashboard can
+   be filtered by period. The student answers for themselves, once, into
+   progress/{uid}.period; the teacher fixes a wrong tap from the console,
+   but that correction lands in config/class.periodOverrides instead, because
+   firestore.rules gives the teacher read-only access to a student's progress
+   doc on purpose. See the globals near the top of this file.
+
+   It BLOCKS, unlike every other overlay here: no backdrop click, no Escape,
+   no ✕. A dismissed modal means an untagged student, and an untagged student
+   is invisible to a period-filtered dashboard — which is the whole point of
+   asking. The one way past it without answering is Sign out, for the shared
+   Chromebook where the last student never signed themselves out.
+
+   Returns true if it put the modal up, so showApp can hold back the
+   class-activity reminder rather than stack two dialogs. */
+function maybeShowPeriodPicker(){
+  if(studentPeriod || periodOverride) return false;          // answered, or the teacher already tagged them
+  if(isDevBypassUser() || isGatePreviewer()) return false;    // dev bypass and the teacher previewing the student app
+  if(progressLoadFailed) return false;                        // never ask a question we can't save the answer to
+  if(document.getElementById('period-overlay')) return false;
+  const ov=document.createElement('div');
+  ov.className='daily5-overlay';
+  ov.id='period-overlay';
+  ov.innerHTML=`<div class="daily5-modal period-modal" role="dialog" aria-modal="true" aria-labelledby="period-title">
+      <div class="daily5-head"><h3 id="period-title" style="font:inherit;margin:0" data-i18n="period.title">${escHtml(t('period.title'))}</h3></div>
+      <p class="coach-tip" data-i18n="period.body">${escHtml(t('period.body'))}</p>
+      <div class="period-choices">
+        <button type="button" class="panel-next-btn period-btn" id="period-btn-4" onclick="periodPick('4')" data-i18n="period.p4">${escHtml(t('period.p4'))}</button>
+        <button type="button" class="panel-next-btn period-btn" onclick="periodPick('7')" data-i18n="period.p7">${escHtml(t('period.p7'))}</button>
+      </div>
+      <div class="issue-status" id="period-status" aria-live="polite"></div>
+      <div class="period-out"><button type="button" class="period-signout" onclick="signOut()" data-i18n="period.wrongAccount">${escHtml(t('period.wrongAccount'))}</button></div>
+    </div>`;
+  document.body.appendChild(ov);
+  if(typeof applyI18n === 'function') applyI18n(ov);
+  openOverlay(ov, document.getElementById('period-btn-4'));
+  return true;
+}
+async function periodPick(value){
+  if(value!=='4' && value!=='7') return;
+  const ov=document.getElementById('period-overlay'); if(!ov) return;
+  const status=document.getElementById('period-status');
+  const btns=[...ov.querySelectorAll('.period-btn')];
+  btns.forEach(b=>{ b.disabled=true; });
+  if(status){ status.textContent=''; status.className='issue-status'; }
+  studentPeriod=value;
+  queueSave('period');
+  clearTimeout(saveTimer);   // the modal is waiting on this write — don't sit out the 800ms debounce
+  await flushSave();
+  /* flushSave never throws: it catches, re-queues the keys it couldn't write
+     and arms its own retry. So "did it land?" is read off the dirty set
+     rather than a try/catch — which keeps this on the one shared save path
+     instead of opening a second writer for a single field. studentPeriod is
+     NOT rolled back on failure: it is the student's answer either way, and
+     the queued retry needs the real value, not an empty one. */
+  if(_dirtyKeys.has('period')){
+    btns.forEach(b=>{ b.disabled=false; });
+    if(status){ status.textContent=t('period.failed'); status.className='issue-status err'; }
+    return;
+  }
+  closePeriodPicker();
+}
+function closePeriodPicker(){
+  const ov=document.getElementById('period-overlay');
+  if(!ov) return;
+  ov.remove();
+  closeOverlay();
 }
 
 // Teacher (signed into the student app as the class teacher) and the localhost

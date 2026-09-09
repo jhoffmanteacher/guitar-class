@@ -175,6 +175,21 @@
                       es: 'El Sr. Hoffman puso tu cuenta en pausa. Habla con él en clase y puede volver a activarla.' },
     'paused.safe':  { en: 'Nothing you have done is lost — all of your progress is saved and will be right where you left it.',
                       es: 'No se ha perdido nada de lo que hiciste — todo tu progreso está guardado y estará justo donde lo dejaste.' },
+    /* "Which class are you in?" — the one-time period tag (app.js
+       maybeShowPeriodPicker). Periods 4 and 7 are the only two classes, so
+       the two buttons are the whole question. The body line promises it is
+       fixable, because the modal blocks the app and a student who thinks a
+       wrong tap is permanent will tap nothing at all. */
+    'period.title':        { en: 'Which class are you in?',
+                             es: '¿En cuál clase estás?' },
+    'period.body':         { en: 'Pick your class period. Your teacher can fix this later if you tap the wrong one.',
+                             es: 'Elige tu periodo de clase. Tu maestro puede corregirlo después si tocas el que no es.' },
+    'period.p4':           { en: 'Period 4', es: 'Periodo 4' },
+    'period.p7':           { en: 'Period 7', es: 'Periodo 7' },
+    'period.wrongAccount': { en: 'Not you? Sign out', es: '¿No eres tú? Cierra sesión' },
+    'period.failed':       { en: 'Could not save that. Check your connection and try again.',
+                             es: 'No se pudo guardar. Revisa tu conexión e intenta de nuevo.' },
+
     'header.railToggleAria': { en: 'Open navigation menu', es: 'Abrir el menú de navegación' },
     'header.searchAria':     { en: 'Find it — search the whole site', es: 'Buscar — busca en todo el sitio' },
     // Tooltip on the Español button — it always names what the click DOES,
