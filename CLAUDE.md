@@ -149,7 +149,8 @@ activity title series numbering (1l), Journey tab-card markup (1q), text
 contrast in both palettes across all four stylesheets (1s), Journey↔app CSS
 drift (1t), figure intrinsic sizes and the two class-activity renderers (1v),
 video-title drift (inside the link check), slang and figurative phrasing in
-student-facing text (1w), Journey lick labels naming the shape (1w2).
+student-facing text (1w), Journey lick labels naming the shape (1w2),
+orphaned `img/`/`audio/` files and unused `DECKS`/`EAR_POOLS` ids (1x).
 
 Not every class can be guarded by a banned-phrase list. 1w2 pins the Journey
 lick labels *positively* — every `Lick N — ...` card must use one of four

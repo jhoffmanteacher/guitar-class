@@ -1047,6 +1047,77 @@ function checkFigureDimensions() {
   if (bad === 0) ok(`${imgs} figures in module data carry width+height; ${cas} class-activity figures match the ${W}x${H} board in both renderers`);
 }
 
+/* ── 1x. Orphaned assets and content pools ──────────────────────────────
+   The mirror image of checkPrecacheCoverage: that one proves every path the
+   site *references* exists on disk, this one proves every file on disk is
+   still referenced by something. Both directions rot — a figure gets redrawn
+   under a new name, a deck gets retired from the step that used it — and the
+   leftovers are invisible until someone goes looking. A by-hand sweep on
+   2026-09-09 found none, so this starts clean and stays that way.
+
+   Reference sources are SHELL_FILES, deliberately NOT sw.js: the ASSETS
+   precache list mirrors the references, so counting it would let a dead file
+   keep itself alive and the check could never fail. Totals aren't pinned —
+   adding a figure or a deck is ordinary content work, and a file going
+   *missing* is already caught by checkPrecacheCoverage. */
+function checkOrphanAssets() {
+  head('1x. Orphaned assets and content pools');
+  let bad = 0;
+  const flag = m => { err(m); problems++; bad++; };
+
+  /* Two reference shapes, both matched whole so a name can never be kept alive
+     by a longer one containing it (img/ca-hb-a.svg vs img/ca-hb-a-full.svg):
+
+       - a prefixed path, how most step data stores it (figure: 'img/…')
+       - a bare filename in its own string literal, how a helper that prepends
+         the directory takes it — module-13.js's m13Photo('m13-step-1-….png')
+         builds `img/${file}`, so the path never appears in the source at all.
+
+     The bare form is matched only as a complete quoted literal ending in an
+     asset extension, so it stays exact rather than a substring search. */
+  const refs = new Set(), bare = new Set();
+  for (const f of SHELL_FILES) {
+    let src;
+    try { src = readFileSync(join(ROOT, f), 'utf8'); } catch { continue; }
+    for (const m of src.matchAll(/\b(?:img|audio)\/[A-Za-z0-9._%-]+\.[A-Za-z0-9]+/g)) refs.add(m[0]);
+    for (const m of src.matchAll(/['"`]([A-Za-z0-9._%-]+\.(?:svg|png|jpe?g|gif|webp|avif|mp3|m4a|wav|ogg))['"`]/g)) bare.add(m[1]);
+  }
+
+  let assets = 0;
+  for (const [dir, skip] of [['img', /\.md$/], ['audio', null]]) {
+    let files;
+    try { files = readdirSync(join(ROOT, dir)).filter(f => !(skip && skip.test(f))).sort(); }
+    catch { flag(`${dir}/ is unreadable — orphaned assets NOT checked`); continue; }
+    for (const f of files) {
+      assets++;
+      if (!refs.has(`${dir}/${f}`) && !bare.has(f))
+        flag(`${dir}/${f} is not referenced by any shipped file — delete it, or wire it up. Either way it is still in the repo every student clones.`);
+    }
+  }
+
+  /* DECKS / EAR_POOLS are defined in app.js and addressed from step data by id
+     (drill: { type:'deck', deck:'numerals-C' } / pool:'…'), so only the step
+     data is scanned — app.js's own definition would otherwise count as a use. */
+  let pools = 0;
+  let steps = '';
+  for (const f of [...MODULE_FILES, 'class-activities.js']) {
+    try { steps += maskComments(readFileSync(join(ROOT, f), 'utf8')); } catch { /* covered by 0/1 */ }
+  }
+  for (const [name, field] of [['DECKS', 'deck'], ['EAR_POOLS', 'pool']]) {
+    let obj;
+    try { obj = loadConstObject(readFileSync(join(ROOT, 'app.js'), 'utf8'), name); }
+    catch (e) { warn(`could not enumerate ${name} from app.js: ${e.message}`); warnings++; continue; }
+    for (const id of Object.keys(obj)) {
+      pools++;
+      const lit = id.replace(/[.*+?^${}()|[\]\\-]/g, '\\$&');
+      if (!new RegExp(`${field}\\s*:\\s*['"\`]${lit}['"\`]`).test(steps))
+        flag(`app.js ${name}['${id}'] is defined but no step uses ${field}:'${id}' — a retired pool still carries its i18n keys and reads as live content.`);
+    }
+  }
+
+  if (bad === 0) ok(`${assets} files in img/ and audio/ are all referenced; ${pools} DECKS/EAR_POOLS ids are all in use`);
+}
+
 function checkJourneyTabCards() {
   head('1q. Journey-page tab cards');
   let bad = 0;
@@ -2754,6 +2825,7 @@ async function liveCheck() {
   checkJourneyThemeDrift();
   checkJourneyTabCards();
   checkFigureDimensions();
+  checkOrphanAssets();
   if (!SKIP_LINKS) await checkLinks();
   else warn('skipping link check (--skip-links)');
   bumpServiceWorker();
