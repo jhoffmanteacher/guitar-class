@@ -9,6 +9,13 @@ see `WORKFLOW.md` and the git commit log.
 
 ### Fixed
 
+- **Every chord was written as half its real length.** The page told students to
+  count two beats per chord; measured against the backing track (click grid
+  recovered from the metronome render: 143.0 BPM), each chord lasts a full bar
+  of the felt pulse — 8 clicks, 3.36 s, 2 bars of 4/4 at 143. Every TAB now
+  shows the root or chord struck four times before it moves. Layer 6 already
+  had this right at one bar per chord; the "(the record changes twice as fast)"
+  note attached to it was the thing that was wrong.
 - **The site was teaching a progression the song doesn't have.** "the cure"
   was presented as one five-chord loop (Am · C · Dm · F · G/B) with the song
   map claiming verse and chorus share chords. Checked against the official

@@ -1314,8 +1314,8 @@ window.CLASS_ACTIVITIES = [
       {
         label:    'F and A — the hand you know',
         label_es: 'F y A — la mano que ya conoces',
-        text: 'Play the two low roots the same way you play Watchtower.<ol><li>Finger 1 just behind fret 1: "F"</li><li>Finger 4 (the pinky) on the dot at fret 5: "A"</li></ol>Two beats per note at 60 BPM, names out loud. Same hand as Watchtower — the ring finger sits out on this one.<br>You\'ve got it when: three clean reps in a row, no buzz. Pinky buzzing on the A? Bring your thumb lower behind the neck so the pinky can stand on its tip.',
-        text_es: 'Toca las dos raíces graves igual que tocas Watchtower.<ol><li>Dedo 1 justo detrás del traste 1: "F"</li><li>Dedo 4 (el meñique) en el punto del traste 5: "A"</li></ol>Dos tiempos por nota a 60 BPM, con los nombres en voz alta. La misma mano que Watchtower — el dedo anular no se usa en esta.<br>Lo tienes cuando: tres repeticiones limpias seguidas, sin zumbidos. ¿Zumba el meñique en el A? Baja el pulgar detrás del mástil para que el meñique pueda pararse en la punta.',
+        text: 'Play the two low roots the same way you play Watchtower.<ol><li>Finger 1 just behind fret 1: "F"</li><li>Finger 4 (the pinky) on the dot at fret 5: "A"</li></ol>Four beats each at 60 BPM — one strike per beat, a full bar per note — names out loud. Same hand as Watchtower — the ring finger sits out on this one.<br>You\'ve got it when: three clean reps in a row, no buzz. Pinky buzzing on the A? Bring your thumb lower behind the neck so the pinky can stand on its tip.',
+        text_es: 'Toca las dos raíces graves igual que tocas Watchtower.<ol><li>Dedo 1 justo detrás del traste 1: "F"</li><li>Dedo 4 (el meñique) en el punto del traste 5: "A"</li></ol>Cuatro tiempos cada una a 60 BPM — un golpe por tiempo, un compás completo por nota — con los nombres en voz alta. La misma mano que Watchtower — el dedo anular no se usa en esta.<br>Lo tienes cuando: tres repeticiones limpias seguidas, sin zumbidos. ¿Zumba el meñique en el A? Baja el pulgar detrás del mástil para que el meñique pueda pararse en la punta.',
         tab: {
           caption: 'Low E only · F A',
           caption_es: 'Solo la cuerda Mi grave · F A',
@@ -1328,8 +1328,8 @@ window.CLASS_ACTIVITIES = [
       {
         label:    'C — up the neck',
         label_es: 'C — más arriba del mástil',
-        text: 'Slide the whole hand up so finger 1 sits behind fret 8: "C". Two beats at 60 BPM, name out loud. The frets are closer together up here, so the hand feels smaller — keep the thumb behind the neck and let the finger stand on its tip.<br>You\'ve got it when: three clean reps in a row, no buzz. Landing on the wrong fret? Find the fret-7 dot and go one past it.',
-        text_es: 'Desliza toda la mano hacia arriba para que el dedo 1 quede detrás del traste 8: "C". Dos tiempos a 60 BPM, con el nombre en voz alta. Aquí arriba los trastes están más juntos, así que la mano se siente más chica — mantén el pulgar detrás del mástil y deja que el dedo se pare en la punta.<br>Lo tienes cuando: tres repeticiones limpias seguidas, sin zumbidos. ¿Caes en el traste equivocado? Busca el punto del traste 7 y ve uno más allá.',
+        text: 'Slide the whole hand up so finger 1 sits behind fret 8: "C". Four beats at 60 BPM — one strike per beat, a full bar — name out loud. The frets are closer together up here, so the hand feels smaller — keep the thumb behind the neck and let the finger stand on its tip.<br>You\'ve got it when: three clean reps in a row, no buzz. Landing on the wrong fret? Find the fret-7 dot and go one past it.',
+        text_es: 'Desliza toda la mano hacia arriba para que el dedo 1 quede detrás del traste 8: "C". Cuatro tiempos a 60 BPM — un golpe por tiempo, un compás completo — con el nombre en voz alta. Aquí arriba los trastes están más juntos, así que la mano se siente más chica — mantén el pulgar detrás del mástil y deja que el dedo se pare en la punta.<br>Lo tienes cuando: tres repeticiones limpias seguidas, sin zumbidos. ¿Caes en el traste equivocado? Busca el punto del traste 7 y ve uno más allá.',
         tab: {
           caption: 'Low E only · C',
           caption_es: 'Solo la cuerda Mi grave · C',
@@ -1369,11 +1369,11 @@ window.CLASS_ACTIVITIES = [
       {
         label:    'The whole verse line',
         label_es: 'La línea completa de la estrofa',
-        text: 'Join it all: <b>A · C · A · C</b>, then <b>F · C · F · C</b>, two beats per note at 60 BPM, every note on the low E. That\'s the whole verse, twice through the pattern.<br>You\'ve got it when: two clean laps (a lap = one full time through) without stopping and without looking down. Falling apart at the jump? Go back to the hand-moves rung for a minute, then try the whole line again.',
-        text_es: 'Únelo todo: <b>A · C · A · C</b>, y luego <b>F · C · F · C</b>, dos tiempos por nota a 60 BPM, cada nota en la cuerda Mi grave. Esa es la estrofa completa, dos veces el patrón.<br>Lo tienes cuando: dos vueltas limpias (una vuelta = una pasada completa) sin detenerte y sin mirar hacia abajo. ¿Se te desarma en el salto? Regresa un minuto al peldaño de los movimientos de la mano y después intenta la línea completa otra vez.',
+        text: 'Join it all: <b>A · C · A · C</b>, then <b>F · C · F · C</b>. Four beats per note at 60 BPM — one strike per beat, a full bar per root — every note on the low E. That\'s the whole verse, twice through the pattern.<br>You\'ve got it when: two clean laps (a lap = one full time through) without stopping and without looking down. Falling apart at the jump? Go back to the hand-moves rung for a minute, then try the whole line again.',
+        text_es: 'Únelo todo: <b>A · C · A · C</b>, y luego <b>F · C · F · C</b>. Cuatro tiempos por nota a 60 BPM — un golpe por tiempo, un compás completo por raíz — cada nota en la cuerda Mi grave. Esa es la estrofa completa, dos veces el patrón.<br>Lo tienes cuando: dos vueltas limpias (una vuelta = una pasada completa) sin detenerte y sin mirar hacia abajo. ¿Se te desarma en el salto? Regresa un minuto al peldaño de los movimientos de la mano y después intenta la línea completa otra vez.',
         tab: {
-          caption: 'Verse root line on the low E · 2 beats per note',
-          caption_es: 'Línea de raíces de la estrofa en la cuerda Mi grave · 2 tiempos por nota',
+          caption: 'Verse root line on the low E · 4 beats per note',
+          caption_es: 'Línea de raíces de la estrofa en la cuerda Mi grave · 4 tiempos por nota',
           phrases: [
             {
               label: 'First half — A C A C',
