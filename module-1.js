@@ -274,7 +274,6 @@ SETS.push(
 
   {
     id: 'w2',
-    songThread: [{ name: '"Seven Nation Army"', journey: 'tabs/seven-nation-army.html', layer: 1, note: 'first look at the riff' }],
     label: 'Set 2',
     locked: false,
     module: 'Introductions: You and The Guitar',
@@ -527,39 +526,6 @@ SETS.push(
             ] }
           }
             ]
-          },
-          {
-            title: 'Preview the "Seven Nation Army" riff',
-            title_es: 'Adelanto del riff de "Seven Nation Army"',
-            steps: [
-          {
-            label: 'Preview the "Seven Nation Army" riff', label_es: 'Adelanto del riff de "Seven Nation Army"',
-            text: '<ol><li>Click the note names below the TAB (the little chart below — each number is a fret to press on the A string, the one just below the thickest string) to hear how it should sound.</li><li>Then try just the first few notes to get the feel.</li></ol>You\'ve got it when: you can match the first three notes to what you heard. This song grows with you through the whole course — <a href="tabs/seven-nation-army.html" target="_blank"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" style="width:1em;height:1em;vertical-align:-0.15em"><circle cx="5" cy="6" r="2"/><circle cx="19" cy="18" r="2"/><path d="M5 8c0 6 14 2 14 8"/></svg> Song Journey: this is Layer 1 of 5</a>.',
-            text_es: '<ol><li>Haz clic en los nombres de las notas debajo del TAB (el pequeño diagrama de abajo — cada número es un traste que debes presionar en la cuerda La, la que está justo debajo de la cuerda más gruesa) para escuchar cómo debe sonar.</li><li>Luego prueba solo las primeras notas para agarrar la sensación.</li></ol>Lo tienes cuando: puedes hacer coincidir las primeras tres notas con lo que escuchaste. Esta canción crece contigo durante todo el curso — <a href="tabs/seven-nation-army.html" target="_blank"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" style="width:1em;height:1em;vertical-align:-0.15em"><circle cx="5" cy="6" r="2"/><circle cx="19" cy="18" r="2"/><path d="M5 8c0 6 14 2 14 8"/></svg> Recorrido de la canción: esto es la Capa 1 de 5</a>.',
-            hint: 'You\'ll play the whole riff at the practice station — this is just the preview. Note: this site teaches it as straight, even quarter notes — one per beat — to make it easy to count while you\'re learning it; the actual record swings it a bit looser than that, which you\'ll start to hear naturally once the shape feels solid. It sits on the A string, which is where the riff lives at true pitch, so it lines up with the record. Listen first, then match it — one note at a time. To fret a note, set your fingertip just behind the fret and press firm; if it buzzes, move a little closer to the fret or press harder.',
-            hint_es: 'Vas a tocar el riff completo en la estación de práctica — esto es solo el adelanto. Aviso: aquí se enseña con negras rectas y parejas — una nota por pulso — para que sea fácil de contar mientras lo aprendes; la grabación original lo toca con un poco más de swing (vaivén) que eso, algo que empezarás a notar de oído en cuanto domines bien la forma. Además, vive en la cuerda La, que es donde el riff suena en su tono real, así que sí coincide con la grabación. Escucha primero y luego iguálalo — una nota a la vez. Para trastear una nota, coloca la punta del dedo justo detrás del traste y presiona firme; si zumba, acércate un poco más al traste o presiona más fuerte.',
-            stuck: 'Just the first two notes: click a note name to hear it, then find it on the A string. Get those solid before adding the next.',
-            stuck_es: 'Solo las primeras dos notas: haz clic en el nombre de una nota para escucharla, y luego encuéntrala en la cuerda La. Deja esas bien firmes antes de agregar la siguiente.',
-            levelUp: 'Play the first four notes in a row, in time, humming the riff as you go.',
-            levelUp_es: 'Toca las primeras cuatro notas seguidas, a tiempo, tarareando el riff mientras tocas.',
-            response: { type: 'short', placeholder: 'How did the riff sound, and which note was hardest to find?',
-              placeholder_es: '¿Cómo sonó el riff, y qué nota fue la más difícil de encontrar?' },
-            tab: {
-              bpm: 40,
-              caption: '"Seven Nation Army" — main riff · A string · 7 notes',
-              caption_es: '"Seven Nation Army" — riff principal · cuerda La · 7 notas',
-              notes: [
-                { string: 'A', fret: 7,  note: 'E', midi: 52 },
-                { string: 'A', fret: 7,  note: 'E', midi: 52 },
-                { string: 'A', fret: 10, note: 'G', midi: 55 },
-                { string: 'A', fret: 7,  note: 'E', midi: 52 },
-                { string: 'A', fret: 5,  note: 'D', midi: 50 },
-                { string: 'A', fret: 3,  note: 'C', midi: 48 },
-                { string: 'A', fret: 2,  note: 'B', midi: 47 }
-              ]
-            }
-          }
-            ]
           }
         ]
       },
@@ -603,8 +569,8 @@ SETS.push(
           },
           {
             label: 'Your first fretted note', label_es: 'Tu primera nota trasteada',
-            text: 'You brushed against fretting in the riff preview — now slow down and learn to do it right:<ol><li>Set the very tip of your index finger on the low E string just BEHIND the 3rd fret — the metal wire — not on top of it and not back in the middle of the gap.</li><li>Arch that finger so it comes down onto the string from above and its pad doesn\'t flop onto the string next door.</li><li>Rest your thumb flat on the BACK of the neck, roughly behind that finger — not hooked over the top.</li><li>Press only hard enough to stop the buzz, then pluck. Too little and it rattles; more than that just tires your hand out.</li></ol>You\'ve got it when: the note rings clear five times in a row and your hand still feels relaxed.',
-            text_es: 'Rozaste el trasteo en el adelanto del riff — ahora ve más despacio y aprende a hacerlo bien:<ol><li>Coloca la punta de tu dedo índice en la cuerda Mi grave justo DETRÁS del traste 3 — el metal — no encima de él ni atrás, a media distancia.</li><li>Arquea ese dedo para que baje sobre la cuerda desde arriba y su yema no se recueste sobre la cuerda de al lado.</li><li>Apoya el pulgar plano en la parte de ATRÁS del mástil, más o menos detrás de ese dedo — no enganchado por encima.</li><li>Presiona solo lo suficiente para que deje de zumbar, y luego pulsa. Menos de eso y traquetea; más que eso solo te cansa la mano.</li></ol>Lo tienes cuando: la nota suena clara cinco veces seguidas y tu mano sigue relajada.',
+            text: 'Every open string you just played rang without a finger on it. Now add one — pressing a string down onto a fret is called fretting, and it is worth slowing down to get right:<ol><li>Set the very tip of your index finger on the low E string just BEHIND the 3rd fret — the metal wire — not on top of it and not back in the middle of the gap.</li><li>Arch that finger so it comes down onto the string from above and its pad doesn\'t flop onto the string next door.</li><li>Rest your thumb flat on the BACK of the neck, roughly behind that finger — not hooked over the top.</li><li>Press only hard enough to stop the buzz, then pluck. Too little and it rattles; more than that just tires your hand out.</li></ol>You\'ve got it when: the note rings clear five times in a row and your hand still feels relaxed.',
+            text_es: 'Cada cuerda al aire que acabas de tocar sonó sin ningún dedo encima. Ahora agrega uno — presionar una cuerda contra un traste se llama trastear, y vale la pena ir despacio para hacerlo bien:<ol><li>Coloca la punta de tu dedo índice en la cuerda Mi grave justo DETRÁS del traste 3 — el metal — no encima de él ni atrás, a media distancia.</li><li>Arquea ese dedo para que baje sobre la cuerda desde arriba y su yema no se recueste sobre la cuerda de al lado.</li><li>Apoya el pulgar plano en la parte de ATRÁS del mástil, más o menos detrás de ese dedo — no enganchado por encima.</li><li>Presiona solo lo suficiente para que deje de zumbar, y luego pulsa. Menos de eso y traquetea; más que eso solo te cansa la mano.</li></ol>Lo tienes cuando: la nota suena clara cinco veces seguidas y tu mano sigue relajada.',
             hint: 'Getting closer to the fret wire always beats pressing harder. If the note buzzes, slide your fingertip a hair toward the wire before you add any pressure.',
             hint_es: 'Acercarte al metal del traste siempre funciona mejor que presionar más fuerte. Si la nota zumba, desliza la punta del dedo un poquito hacia el traste antes de agregar presión.',
             stuck: 'Go back and forth: open low E, then fret 3, open, fret 3. If the fretted one sounds dead or rattly, look at where your fingertip actually is — nine times out of ten it\'s too far back from the wire.',
@@ -612,31 +578,6 @@ SETS.push(
             levelUp: 'Do the same on frets 1, 2 and 5 one at a time, every note clean — then try it without looking at your hand.',
             levelUp_es: 'Haz lo mismo en los trastes 1, 2 y 5 uno por uno, cada nota limpia — y luego inténtalo sin mirarte la mano.',
             playSeq: { label: 'Hear the target note (low E, fret 3)', label_es: 'Escucha la nota objetivo (Mi grave, traste 3)', bpm: 60, notes: [43] }
-          },
-          {
-            label: 'Challenge 3 — "Seven Nation Army" Riff (try it!)', label_es: 'Reto 3 — Riff de "Seven Nation Army" (¡pruébalo!)',
-            text: '<ul><li>Play the "Seven Nation Army" riff on the A string — slow and clean.</li></ul>You\'ve got it when: all 7 notes in the right order, each ringing clean — speed comes later. No score on this one, just try it. Click any note name below the TAB to hear how it should sound.',
-            text_es: '<ul><li>Toca el riff de "Seven Nation Army" en la cuerda La — despacio y limpio.</li></ul>Lo tienes cuando: las 7 notas en el orden correcto, cada una sonando limpia — la velocidad viene después. Este no tiene puntaje, solo pruébalo. Haz clic en cualquier nombre de nota debajo del TAB para escuchar cómo debe sonar.',
-            hint: 'Slow and clean is better than fast and buzzy. One note at a time. Set your fingertip just behind the fret and press firm; if it buzzes, move a little closer to the fret or press harder. Two heads-ups about how this version sounds: we play it as straight, even quarter notes — one per beat — so it\'s easy to count, and it sits on the A string, where the riff lives at true pitch, so it lines up with the record.',
-            hint_es: 'Despacio y limpio es mejor que rápido y con zumbido. Una nota a la vez. Coloca la punta del dedo justo detrás del traste y presiona firme; si zumba, acércate un poco más al traste o presiona más fuerte. Dos avisos sobre cómo suena esta versión: la tocamos con negras rectas y parejas — una por pulso — para que sea fácil de contar, y vive en la cuerda La, donde el riff suena en su tono real, así que sí coincide con la grabación.',
-            stuck: 'Break the 7 notes into two chunks and learn the first chunk cold. Click each note name to hear its pitch, then find it before you play on.',
-            stuck_es: 'Divide las 7 notas en dos partes y apréndete bien la primera parte. Haz clic en cada nombre de nota para escuchar su tono, y encuéntrala antes de seguir tocando.',
-            levelUp: 'Play all 7 notes in time with a slow metronome at 60 BPM, keeping each one clean.',
-            levelUp_es: 'Toca las 7 notas a tiempo con el metrónomo despacio a 60 BPM, manteniendo cada una limpia.',
-            tab: {
-              bpm: 40,
-              caption: '"Seven Nation Army" — main riff · A string · 7 notes',
-              caption_es: '"Seven Nation Army" — riff principal · cuerda La · 7 notas',
-              notes: [
-                { string: 'A', fret: 7,  note: 'E', midi: 52 },
-                { string: 'A', fret: 7,  note: 'E', midi: 52 },
-                { string: 'A', fret: 10, note: 'G', midi: 55 },
-                { string: 'A', fret: 7,  note: 'E', midi: 52 },
-                { string: 'A', fret: 5,  note: 'D', midi: 50 },
-                { string: 'A', fret: 3,  note: 'C', midi: 48 },
-                { string: 'A', fret: 2,  note: 'B', midi: 47 }
-              ]
-            }
           }
             ]
           }
@@ -645,9 +586,6 @@ SETS.push(
     },
 
     songs: [
-      { name: '"Seven Nation Army" — The White Stripes', meta: 'Play the A-string riff — your first core-thread riff', meta_es: 'Toca el riff en la cuerda La — tu primer riff del hilo principal', type: 'Core', core: true, journeyUrl: 'tabs/seven-nation-army.html',
-        originalUrl: 'https://www.youtube.com/watch?v=0J2QdDbelmY',
-        tutorialUrl: 'https://www.youtube.com/watch?v=YaR6mzdNjOw' },
       { name: '"Happy Birthday"', meta: 'Your Module 1 assessment song — all four phrases on the low E string, learned in Class Activities #1–#2', meta_es: 'Tu canción de la evaluación del Módulo 1 — las cuatro frases en la cuerda Mi grave, aprendida en las Actividades de clase #1–#2', type: 'Supp', core: false,
         tutorialUrl: 'https://www.youtube.com/watch?v=wwiLAOjj16w&start=46' },
       { name: '"Sailor Song" — Gigi Perez', meta: 'Listen — fingerpicked vs. strummed guitar', meta_es: 'Escucha — guitarra punteada con los dedos vs. rasgueada', type: 'Choice', core: false, level: 3,

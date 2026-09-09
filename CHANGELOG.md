@@ -5,6 +5,24 @@ Notable changes to the Guitar Class site. Newest first.
 For the full session-by-session history (and the reasoning behind each change),
 see `WORKFLOW.md` and the git commit log.
 
+## 2026-09-09 — "Seven Nation Army" moves to Module 2
+
+### Changed
+
+- **You now learn the "Seven Nation Army" riff in Module 2, not Module 1.** The
+  riff lives on the A string at frets 7, 10, 5, 3 and 2 — and until Module 2 you
+  hadn't been shown a single note name on that string, so Module 1 was asking
+  you to find frets you had no map for. The riff preview and the "try it"
+  challenge have both moved to Module 2, Set 1, right after you name every note
+  on the A string. Every fret in the riff is now one you just learned.
+- **Module 1, Set 2 is about the guitar itself.** Parts, posture, tuning, string
+  names and your first clean fretted note — no riff to chase. Its "first fretted
+  note" card now introduces fretting on its own instead of referring back to the
+  riff preview.
+- **You still meet the song on day one.** "Seven Nation Army" stays on Module 1's
+  listening day, which is Layer 1 of its Song Journey — listen to it, hum it,
+  count the riff. Playing it is Layer 2, and Layer 2 has always been Module 2.
+
 ## 2026-09-09 — Telling the site which class you're in
 
 ### Added
