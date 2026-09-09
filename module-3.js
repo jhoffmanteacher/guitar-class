@@ -285,8 +285,8 @@ SETS.push(
             steps: [
           {
             label: 'Challenge 7 — "Watchtower" Loop (your assessment piece)', label_es: 'Reto 7 — Vuelta de "Watchtower" (tu pieza de evaluación)',
-            text: '<ul><li>Play A5–G5–F5–G5, two beats per chord at 60 BPM — this is exactly how the record\'s chorus cycles.</li></ul>You\'ve got it when: four times through, changing on the beat every time, with no stops. <a href="tabs/all-along-the-watchtower.html" target="_blank">&#x1F9F5; Song Journey: this is Layer 3 of 5</a>.',
-            text_es: '<ul><li>Toca A5–G5–F5–G5, dos tiempos por acorde a 60 BPM — así es exactamente como cicla el coro de la grabación.</li></ul>Lo tienes cuando: cuatro veces seguidas, cambiando a tiempo cada vez, sin detenerte. <a href="tabs/all-along-the-watchtower.html" target="_blank">&#x1F9F5; Recorrido de la canción: esto es la Capa 3 de 5</a>.',
+            text: '<ul><li>Play A5–G5–F5–G5, two beats per chord at 60 BPM — one strum per beat, so each chord is struck twice before it changes. This is exactly how the record\'s chorus cycles.</li></ul>You\'ve got it when: four times through, changing on the beat every time, with no stops. <a href="tabs/all-along-the-watchtower.html" target="_blank">&#x1F9F5; Song Journey: this is Layer 3 of 5</a>.',
+            text_es: '<ul><li>Toca A5–G5–F5–G5, dos tiempos por acorde a 60 BPM — un rasgueo por tiempo, así que cada acorde suena dos veces antes de cambiar. Así es exactamente como cicla el coro de la grabación.</li></ul>Lo tienes cuando: cuatro veces seguidas, cambiando a tiempo cada vez, sin detenerte. <a href="tabs/all-along-the-watchtower.html" target="_blank">&#x1F9F5; Recorrido de la canción: esto es la Capa 3 de 5</a>.',
             hint: 'A5 = 5th fret E string, G5 = 3rd fret E string, F5 = 1st fret E string. Shift smoothly — aim to land exactly on beat 1. (The original song uses an Am chord, but as a power chord it\'s just A5 — no major or minor.) This is your Set 1 check-off loop — record a lap and listen back.',
             hint_es: 'A5 = traste 5 de la cuerda Mi, G5 = traste 3 de la cuerda Mi, F5 = traste 1 de la cuerda Mi. Cambia con suavidad — apunta a caer exactamente en el tiempo 1. (La canción original usa un acorde de Am, pero como acorde de potencia es solo A5 — sin mayor ni menor.) Esta es tu vuelta de verificación de la Unidad 1 — graba una vuelta y escúchala después.',
             stuck: 'Loop just A5–G5 (frets 5 and 3) until that change is clean, then add F5.',
@@ -761,8 +761,8 @@ SETS.push(
             steps: [
               {
                 label: 'Challenge — "Watchtower", verse', label_es: 'Reto — "Watchtower", estrofa',
-                text: '<ul><li>Play the "All Along the Watchtower" loop as power chords rooted on the low E string — A5 · G5 · F5 · G5 — two beats per chord at 60 BPM.</li></ul>You\'ve got it when: four clean laps, every change landing on the beat. <a href="tabs/all-along-the-watchtower.html" target="_blank">&#x1F9F5; Song Journey: this is Layer 3 of 5</a>.',
-                text_es: '<ul><li>Toca la vuelta de "All Along the Watchtower" como acordes de potencia con raíz en la cuerda Mi grave — A5 · G5 · F5 · G5 — dos tiempos por acorde a 60 BPM.</li></ul>Lo tienes cuando: cuatro vueltas limpias, cada cambio cayendo a tiempo. <a href="tabs/all-along-the-watchtower.html" target="_blank">&#x1F9F5; Recorrido de la canción: esto es la Capa 3 de 5</a>.',
+                text: '<ul><li>Play the "All Along the Watchtower" loop as power chords rooted on the low E string — A5 · G5 · F5 · G5 — two beats per chord at 60 BPM, one strum per beat, so each chord is struck twice.</li></ul>You\'ve got it when: four clean laps, every change landing on the beat. <a href="tabs/all-along-the-watchtower.html" target="_blank">&#x1F9F5; Song Journey: this is Layer 3 of 5</a>.',
+                text_es: '<ul><li>Toca la vuelta de "All Along the Watchtower" como acordes de potencia con raíz en la cuerda Mi grave — A5 · G5 · F5 · G5 — dos tiempos por acorde a 60 BPM, un rasgueo por tiempo, así que cada acorde suena dos veces.</li></ul>Lo tienes cuando: cuatro vueltas limpias, cada cambio cayendo a tiempo. <a href="tabs/all-along-the-watchtower.html" target="_blank">&#x1F9F5; Recorrido de la canción: esto es la Capa 3 de 5</a>.',
                 hint: 'Same three roots you played in Module 2 — now each root note also sounds its fifth.',
                 hint_es: 'Las mismas tres raíces que tocaste en el Módulo 2 — ahora cada nota raíz también suena su quinta.',
                 stuck: 'Drop to roots-only for a lap, then add the second string back on just the A5.',
@@ -771,12 +771,16 @@ SETS.push(
                 levelUp_es: 'Un tiempo por acorde en vez de dos — el mismo 60 BPM, el doble de cambios.',
                 skills: [3, 4],
                 tab: {
-                  caption: '"All Along the Watchtower" — verse loop as power chords · 60 BPM',
-                  caption_es: '"All Along the Watchtower" — vuelta de la estrofa como acordes de potencia · 60 BPM',
+                  caption: '"All Along the Watchtower" — verse loop as power chords · one strum per beat, each chord twice · 60 BPM',
+                  caption_es: '"All Along the Watchtower" — vuelta de la estrofa como acordes de potencia · un rasgueo por tiempo, cada acorde dos veces · 60 BPM',
                   notes: [
                     { frets: [['A', 7], ['E', 5]], note: 'A5', midi: [52, 45] },
+                    { frets: [['A', 7], ['E', 5]], note: 'A5', midi: [52, 45] },
+                    { frets: [['A', 5], ['E', 3]], note: 'G5', midi: [50, 43] },
                     { frets: [['A', 5], ['E', 3]], note: 'G5', midi: [50, 43] },
                     { frets: [['A', 3], ['E', 1]], note: 'F5', midi: [48, 41] },
+                    { frets: [['A', 3], ['E', 1]], note: 'F5', midi: [48, 41] },
+                    { frets: [['A', 5], ['E', 3]], note: 'G5', midi: [50, 43] },
                     { frets: [['A', 5], ['E', 3]], note: 'G5', midi: [50, 43] }
                   ]
                 },
@@ -784,8 +788,8 @@ SETS.push(
               },
               {
                 label: 'Challenge — "the cure" as power chords', label_es: 'Reto — "the cure" como acordes de potencia',
-                text: 'This gentle acoustic song isn\'t usually played this way — that\'s the point. It\'s marked ◐, our flag for a song played against its natural style.<ul><li>Play its progression as power chords — A5 · C5 · D5 · F5 — two beats per chord at 60 BPM, quietly.</li></ul>You\'ve got it when: two laps clean AND soft — power chords don\'t have to be loud. No score — just try it. <a href="tabs/the-cure.html" target="_blank">&#x1F9F5; Song Journey: this is Layer 3 of 5</a>.',
-                text_es: 'Esta canción acústica y suave normalmente no se toca así — ese es el punto. Lleva la marca ◐, nuestra señal para una canción tocada en contra de su estilo natural.<ul><li>Toca su progresión como acordes de potencia — A5 · C5 · D5 · F5 — dos tiempos por acorde a 60 BPM, suavemente.</li></ul>Lo tienes cuando: dos vueltas limpias Y suaves — los acordes de potencia no tienen que ser fuertes. Sin puntaje — solo pruébalo. <a href="tabs/the-cure.html" target="_blank">&#x1F9F5; Recorrido de la canción: esto es la Capa 3 de 5</a>.',
+                text: 'This gentle acoustic song isn\'t usually played this way — that\'s the point. It\'s marked ◐, our flag for a song played against its natural style.<ul><li>Play its progression as power chords — A5 · C5 · D5 · F5 — two beats per chord at 60 BPM, one strum per beat, quietly.</li></ul>You\'ve got it when: two laps clean AND soft — power chords don\'t have to be loud. No score — just try it. <a href="tabs/the-cure.html" target="_blank">&#x1F9F5; Song Journey: this is Layer 3 of 5</a>.',
+                text_es: 'Esta canción acústica y suave normalmente no se toca así — ese es el punto. Lleva la marca ◐, nuestra señal para una canción tocada en contra de su estilo natural.<ul><li>Toca su progresión como acordes de potencia — A5 · C5 · D5 · F5 — dos tiempos por acorde a 60 BPM, un rasgueo por tiempo, suavemente.</li></ul>Lo tienes cuando: dos vueltas limpias Y suaves — los acordes de potencia no tienen que ser fuertes. Sin puntaje — solo pruébalo. <a href="tabs/the-cure.html" target="_blank">&#x1F9F5; Recorrido de la canción: esto es la Capa 3 de 5</a>.',
                 hint: 'You already know these roots from Module 2. The challenge here is touch: light pick, both strings ringing, no harsh sound.',
                 hint_es: 'Ya conoces estas raíces del Módulo 2. El reto aquí es el toque: púa ligera, ambas cuerdas sonando, sin sonido áspero.',
                 stuck: 'Roots-only as quietly as you can first — get the dynamics, then add the fifths.',
@@ -793,12 +797,16 @@ SETS.push(
                 levelUp: 'Add G5 before looping back to A5, or play one lap loud and one lap soft and hear the difference.',
                 levelUp_es: 'Agrega G5 antes de volver a A5, o toca una vuelta fuerte y una vuelta suave y escucha la diferencia.',
                 tab: {
-                  caption: '"the cure" — progression as power chords (teaching arrangement) · 60 BPM',
-                  caption_es: '"the cure" — progresión como acordes de potencia (arreglo didáctico) · 60 BPM',
+                  caption: '"the cure" — progression as power chords (teaching arrangement) · one strum per beat, each chord twice · 60 BPM',
+                  caption_es: '"the cure" — progresión como acordes de potencia (arreglo didáctico) · un rasgueo por tiempo, cada acorde dos veces · 60 BPM',
                   notes: [
                     { frets: [['A', 7], ['E', 5]], note: 'A5', midi: [52, 45] },
+                    { frets: [['A', 7], ['E', 5]], note: 'A5', midi: [52, 45] },
+                    { frets: [['D', 5], ['A', 3]], note: 'C5', midi: [55, 48] },
                     { frets: [['D', 5], ['A', 3]], note: 'C5', midi: [55, 48] },
                     { frets: [['D', 7], ['A', 5]], note: 'D5', midi: [57, 50] },
+                    { frets: [['D', 7], ['A', 5]], note: 'D5', midi: [57, 50] },
+                    { frets: [['A', 3], ['E', 1]], note: 'F5', midi: [48, 41] },
                     { frets: [['A', 3], ['E', 1]], note: 'F5', midi: [48, 41] }
                   ]
                 },

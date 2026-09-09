@@ -14,6 +14,11 @@ see `WORKFLOW.md` and the git commit log.
   two beats. It's one strum per beat — each chord struck twice before it
   changes — so the tab, its title and the play line now say that, matching the
   bass line in Layer 2. The Level up is now "change chords on every beat."
+- **Module 3's Watchtower and "the cure" TABs match.** Both cards said two beats
+  per chord, but their TABs drew — and played back — one strum per chord, so
+  pressing "Play tab" ran the loop at double speed. Each chord now appears
+  twice, one strum per beat, the same way Module 3's Half-Bar ladder already
+  played it.
 
 ## 2026-09-09 — A link that opens one activity
 
