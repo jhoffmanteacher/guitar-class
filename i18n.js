@@ -277,6 +277,34 @@
     'ca.stepLabel':            { en: 'Step {n}', es: 'Paso {n}' },
     'ca.print':                { en: 'Print this activity', es: 'Imprimir esta actividad' },
     'ca.printTitle':           { en: 'Print this activity as a handout', es: 'Imprimir esta actividad como hoja de trabajo' },
+
+    // ── Exit checks (kind:'check' class activities — see class-activities.js) ──
+    // "Boleto de salida" is the everyday classroom term; "comprobación de
+    // salida" reads like a technical manual. Song titles stay English in both
+    // languages, as they do everywhere else on the site.
+    'check.prefix':            { en: 'Exit check', es: 'Boleto de salida' },
+    'check.start':             { en: 'Start the check', es: 'Empezar el boleto' },
+    'check.oneTry':            { en: 'One try. Listen as many times as you need before you pick.',
+                                 es: 'Un solo intento. Escucha todas las veces que necesites antes de elegir.' },
+    'check.retakeOk':          { en: 'You can try this one as many times as you like.',
+                                 es: 'Puedes intentar este todas las veces que quieras.' },
+    'check.q':                 { en: 'Question {n} of {total}', es: 'Pregunta {n} de {total}' },
+    'check.whatNext':          { en: 'What note comes next?', es: '¿Qué nota sigue?' },
+    'check.whatNote':          { en: 'What note is this?', es: '¿Qué nota es esta?' },
+    'check.playNote':          { en: 'Play the note', es: 'Tocar la nota' },
+    'check.choiceFret':        { en: 'fret {fret} · {note}', es: 'traste {fret} · {note}' },
+    'check.choiceOpen':        { en: 'open · {note}', es: 'al aire · {note}' },
+    'check.score':             { en: 'You got {score} of {total}.', es: 'Acertaste {score} de {total}.' },
+    'check.turnedIn':          { en: 'Turned in', es: 'Entregado' },
+    'check.right':             { en: 'Right', es: 'Correcto' },
+    'check.wrong':             { en: 'You picked {pick} — the answer is {answer}.',
+                                 es: 'Elegiste {pick} — la respuesta es {answer}.' },
+    'check.retake':            { en: 'Try again', es: 'Intentar otra vez' },
+    'check.notSaved':          { en: 'Your score could not be saved. Tell your teacher what you got.',
+                                 es: 'No se pudo guardar tu puntaje. Dile a tu maestro cuánto sacaste.' },
+    'check.previewNote':       { en: 'Preview — picks here are not saved.',
+                                 es: 'Vista previa — lo que elijas aquí no se guarda.' },
+
     'skill.gettingIt':         { en: 'Getting it', es: 'Ya le voy agarrando' },
     'skill.gotItShort':        { en: 'Got it', es: 'Ya lo tengo' },
     'skill.checklistIntro':    { en: 'Check each skill as you practice. Use "Still working on it" while you\'re learning, then mark "I\'ve got it!" once you can do it consistently.',

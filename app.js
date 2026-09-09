@@ -131,6 +131,7 @@ let progress    = {};
 let responses   = {};
 let completed   = {};
 let classActivities = {};   // In-Class Activities completion: id → true (own top-level Firestore field, not a `completed` key — see the work order this shipped from)
+let exitChecks  = {};   // Exit-check results: id -> { score, total, picks, at, attempts } (see caCheckBodyHtml / class-activities.js kind:'check')
 let games       = {};   // per-game bests from the games arcade (coach.js) — its own save category
 let streak      = { count:0, lastDay:null };   // site-wide practice streak, independent of any one game
 let gamesAccessOn = true; // whether the Games arcade is available to THIS student (teacher-controlled; see loadClassConfig)
@@ -496,7 +497,7 @@ if(auth) auth.onAuthStateChanged(async user=>{
       if(accountPaused) showPausedScreen(user); else showApp(user);
     }
   } else {
-    currentUser = null; progress = {}; responses = {}; completed = {}; completedDeletes = new Set(); classActivities = {}; classActivitiesDeletes = new Set(); games = {}; streak = { count:0, lastDay:null }; gamesAccessOn = true; hiddenActivityIds = {}; activityDates = {}; activityTitles = {}; activityNumbers = {}; progressLoadFailed = false;
+    currentUser = null; progress = {}; responses = {}; completed = {}; completedDeletes = new Set(); classActivities = {}; classActivitiesDeletes = new Set(); exitChecks = {}; games = {}; streak = { count:0, lastDay:null }; gamesAccessOn = true; hiddenActivityIds = {}; activityDates = {}; activityTitles = {}; activityNumbers = {}; progressLoadFailed = false;
     if(typeof gamesResetForUser === 'function') gamesResetForUser();   // Note Runner's module caches must not leak into the next signed-in user
     if(typeof lqStopListening === 'function') lqStopListening();       // and the live-quiz listener must not keep firing under the next student
     practiceLog = loadLocalPracticeLog();   // per-skill rep history: back to the local copy on sign-out
@@ -589,6 +590,7 @@ async function loadProgress(){
       responses     = doc.data().responses || {};
       completed     = doc.data().completed || {};
       classActivities = doc.data().classActivities || {};
+      exitChecks    = doc.data().exitChecks || {};
       games         = doc.data().games || {};
       streak        = doc.data().streak || { count:0, lastDay:null };
       // practiceLog (per-skill rep history): Firestore is the source of truth
@@ -598,8 +600,8 @@ async function loadProgress(){
       savePracticeLogLocal();
       songReady     = doc.data().songReady || {};
       songReadyAt   = doc.data().songReadyAt || {};
-    } else { progress={}; lastModuleNum=1; lastSetId=null; responses={}; completed={}; classActivities={}; games={}; streak={ count:0, lastDay:null }; practiceLog=loadLocalPracticeLog(); songReady={}; songReadyAt={}; restoreLocalPlace(); }
-  } catch(e){ progressLoadFailed=true; console.warn('[guitar-class] progress load failed — running read-only on derived data', e); progress={}; lastModuleNum=1; lastSetId=null; responses={}; completed={}; classActivities={}; games={}; streak={ count:0, lastDay:null }; practiceLog=loadLocalPracticeLog(); songReady={}; songReadyAt={}; restoreLocalPlace(); }
+    } else { progress={}; lastModuleNum=1; lastSetId=null; responses={}; completed={}; classActivities={}; exitChecks={}; games={}; streak={ count:0, lastDay:null }; practiceLog=loadLocalPracticeLog(); songReady={}; songReadyAt={}; restoreLocalPlace(); }
+  } catch(e){ progressLoadFailed=true; console.warn('[guitar-class] progress load failed — running read-only on derived data', e); progress={}; lastModuleNum=1; lastSetId=null; responses={}; completed={}; classActivities={}; exitChecks={}; games={}; streak={ count:0, lastDay:null }; practiceLog=loadLocalPracticeLog(); songReady={}; songReadyAt={}; restoreLocalPlace(); }
 }
 
 /* ── Games access (teacher-controlled) ──
@@ -756,7 +758,7 @@ let _saveFailCount = 0;
    alone. So we hold back only these three, and only until a load succeeds —
    skipping a save costs one session's streak bump; letting it through costs
    the record itself. */
-const LOAD_DEPENDENT_SAVE_KEYS = new Set(['streak','games','practiceLog']);
+const LOAD_DEPENDENT_SAVE_KEYS = new Set(['streak','games','practiceLog','exitChecks']);
 function queueSave(...keys){
   if(!currentUser) return;
   keys.forEach(k=>{ if(!(progressLoadFailed && LOAD_DEPENDENT_SAVE_KEYS.has(k))) _dirtyKeys.add(k); });
@@ -798,6 +800,9 @@ async function flushSave(){
   // into local state.
   if(keys.has('completed'))       payload.completed       = Object.assign({}, completed);
   if(keys.has('classActivities')) payload.classActivities = Object.assign({}, classActivities);
+  // Whole map, {merge:true} as everywhere else. No delete path: a student
+  // never removes an exit-check result, only adds or (on a retake) replaces one.
+  if(keys.has('exitChecks')) payload.exitChecks = exitChecks;
   if(keys.has('games'))     payload.games     = games;
   if(keys.has('streak'))    payload.streak    = streak;
   if(keys.has('practiceLog')) payload.practiceLog = practiceLog;
@@ -866,6 +871,7 @@ function onClassActivityChange(id, isDone){
   saveClassActivities();
 }
 function saveClassActivities(){ queueSave('classActivities'); }
+function saveExitChecks(){ queueSave('exitChecks'); }
 function saveGames(){ queueSave('games'); }   // per-game bests (games arcade, coach.js)
 function saveStreak(){ queueSave('streak'); }
 
@@ -7235,6 +7241,10 @@ function caClosePanel(){
   if(typeof shuffleDrills === 'object' && typeof sdStop === 'function'){
     Object.keys(shuffleDrills).forEach(k => sdStop(k));
   }
+  /* Same reasoning for an exit check mid-run: its stimulus auto-plays, so
+     closing the screen while a line is sounding would leave the notes
+     ringing over whatever the student opened next. */
+  if(typeof stopAllDemoAudio === 'function') stopAllDemoAudio();
   syncExploreNav();
 }
 function openClassActivitiesScreen(){
@@ -7320,6 +7330,7 @@ function caStepHtml(a, step, si, isOpen, isDone){
     + `</li>`;
 }
 function caActivityCardHtml(a){
+  if(a.kind === 'check') return caCheckCardHtml(a);
   const done = classActivities[a.id] === true;
   const open = caOpenId === a.id;
   const openStepIdx = caStepOpen[a.id] !== undefined ? caStepOpen[a.id] : caDefaultOpenStep(a);
@@ -7344,6 +7355,267 @@ function caActivityCardHtml(a){
       <button type="button" class="ca-mark-btn ${done ? 'done' : ''}" onclick="caToggleComplete('${escAttr(a.id)}')">${escHtml(markLabel)}</button>
     </div>
   </details>`;
+}
+/* ── Exit checks (class activity, kind:'check') ─────────────────────────
+   Five short auto-graded questions, one try, and the result is the
+   student's turn-in for the period: it lands on
+   progress/{uid}.exitChecks[id] and also sets classActivities[id] = true,
+   so the console's existing Done count and the unfinished-activities
+   reminder both keep working without knowing checks exist.
+
+   ONE body renderer, deliberately. caCheckBodyHtml() draws the card for
+   the student AND for the teacher console's preview
+   (renderTeacherCheckDetail in teacher.js passes { preview:true }). The
+   two-renderers rule in CLAUDE.md exists because a step FIELD wired into
+   caStepHtml() is invisible in the teacher's copy — a whole new card has
+   no such split to fall into, and forking it would just recreate the bug
+   the rule is there to prevent. The only preview differences are the ones
+   that can't work otherwise: its own bpm key namespace, a "not saved"
+   note, and ecSubmit writing to memory instead of Firestore (the same
+   IS_TEACHER_MODE bail sdSaveBest/dkSaveBest make — previewing isn't
+   turning in).
+
+   Run state is in-memory only, like caStepDone: a reload mid-check starts
+   it over. That is the honest behaviour for a one-try assessment — a
+   half-finished run is not a score, and persisting one would mean deciding
+   what a resumed attempt counts as. */
+let ecRuns = {};          // id -> { i, picks } while a check is being taken
+let ecViewOpts = {};      // id -> the render opts that card was started with
+let ecPreviewResult = {}; // id -> a teacher-preview result; never persisted
+function ecActivity(id){ return (window.CLASS_ACTIVITIES || []).find(x => x.id === id); }
+function ecBodyId(opts){ return (opts && opts.preview) ? 'ec-preview-body-' : 'ec-body-'; }
+function ecItems(a){ return (a && a.check && a.check.items) || []; }
+/* "fret 5 · A", or "open · E" — the label on a choice chip and on both
+   halves of a wrong-answer line, so a student reads the same words back. */
+function ecChipLabel(fret, note){
+  return Number(fret) === 0 ? t('check.choiceOpen', {note}) : t('check.choiceFret', {fret, note});
+}
+function ecChipI18n(fret, note){
+  const key = Number(fret) === 0 ? 'check.choiceOpen' : 'check.choiceFret';
+  const params = Number(fret) === 0 ? {note} : {fret, note};
+  return ` data-i18n="${key}" data-i18n-params='${escAttr(JSON.stringify(params))}'`;
+}
+/* Grades a full set of picks. Picks are LANGUAGE-STABLE strings — the fret
+   number for nextNote, the note letter for noteName — so a student who
+   answers in Spanish and reloads in English still reads the same result. */
+function ecGrade(a, picks){
+  const type = (a.check || {}).type;
+  const items = ecItems(a);
+  picks = picks || [];
+  let score = 0;
+  const rows = items.map((item, i) => {
+    const pick = picks[i] === undefined || picks[i] === null ? '' : String(picks[i]);
+    const ok = type === 'nextNote'
+      ? pick === String(item.answer.fret)
+      : pick === item.answer;
+    if(ok) score++;
+    return { item, i, pick, ok };
+  });
+  return { score, total: items.length, rows };
+}
+/* The choice row. nextNote chips are shuffled by mcOrder; noteName's seven
+   naturals stay in alphabetical order, the same tap-the-name row the
+   shuffle drill uses — an alphabet is a lookup, and shuffling it would
+   just cost reading time on every question.
+
+   The shuffle is seeded on the FRET+NOTE pairs, never on the rendered chip
+   labels: "fret 5 · A" and "traste 5 · A" would otherwise seed differently
+   and deal the same student a different order in each language. */
+function ecChoicesHtml(a, item, id){
+  const type = (a.check || {}).type;
+  const btn = (pick, inner, attrs) =>
+    `<button type="button" class="step-mc-opt" data-pick="${escAttr(pick)}" onclick="ecPick('${escAttr(id)}', this)">`
+    + `<span class="step-mc-text"${attrs || ''}>${inner}</span></button>`;
+  let opts;
+  if(type === 'nextNote'){
+    const choices = item.choices || [];
+    const keys = choices.map(c => `${c.fret}·${c.note}`);
+    opts = mcOrder(keys, mcSeed({prompt: item.label || '', choices: keys})).map(ci => {
+      const c = choices[ci];
+      return btn(String(c.fret), escHtml(ecChipLabel(c.fret, c.note)), ecChipI18n(c.fret, c.note));
+    }).join('');
+  } else {
+    opts = SD_NATURALS.map(n => btn(n, escHtml(n))).join('');
+  }
+  return `<div class="step-resp-mc step-mc-keyed ec-choices">${opts}</div>`;
+}
+/* The played notes as a tab (fret numbers, note names, per-column play
+   buttons, the ▶ button and the beat cursor) — buildTab already does all of
+   that, so a check gets the same player the lesson tabs use. The label
+   heads the tab card rather than being printed twice above it: it is the
+   only thing distinguishing two items that play the same four notes. */
+function ecStimulusHtml(a, item, i, opts){
+  const c = a.check || {};
+  if(c.type === 'nextNote'){
+    return buildTab(
+      { caption: tf(item, 'label'), notes: item.notes || [], bpm: c.bpm || 80, noCoach: true },
+      { keyPrefix: `bpm:${(opts && opts.keyPrefix) || 'ca'}:${a.id}:${i}:tab`, suppressCoach: true });
+  }
+  const kind = c.string || 'lowE';
+  const midi = SD_OPEN_MIDI[kind] + item.fret;
+  /* Drawn at runtime, not shipped as an img/ file: one board per fret would
+     be a dozen near-identical assets for sw.js to precache. theme:'web'
+     (the site's light-mode hex) + the dark-mode invert in styles.css is the
+     same treatment every generated ca-*.svg already gets — the diagram's
+     fretted-note circle is a hardcoded light green, so leaving it on CSS
+     variables would put light text on a light circle in dark mode. px:1
+     stamps width/height, which reserves the box before layout settles. */
+  const svg = (typeof localStringNotesSvg === 'function')
+    ? (localStringNotesSvg(kind, [[item.fret, '?']], {theme: 'web', px: 1}) || '') : '';
+  return `<span class="step-figure ec-figure">${svg}</span>`
+    + `<button type="button" class="tab-note-btn ec-play" data-midis="[${Number(midi)}]" onclick="playBeat(this)">`
+    + `<span data-i18n="check.playNote">${escHtml(t('check.playNote'))}</span></button>`;
+}
+/* One of three states: a run in progress, a finished result, or the
+   not-started front page. A run outranks a result so a retake shows the
+   question rather than the score it is replacing. */
+function caCheckBodyHtml(a, opts){
+  opts = opts || {};
+  const preview = !!opts.preview;
+  const items = ecItems(a);
+  const introHtml = `<p class="coach-tip">${escHtml(tf(a, 'intro'))}</p>`;
+  const run = ecRuns[a.id];
+  const res = preview ? ecPreviewResult[a.id] : exitChecks[a.id];
+
+  if(run){
+    const i = Math.min(run.i, items.length - 1);
+    const item = items[i];
+    const promptKey = (a.check || {}).type === 'nextNote' ? 'check.whatNext' : 'check.whatNote';
+    const qParams = {n: i + 1, total: items.length};
+    return introHtml
+      + `<div class="ec-q" data-i18n="check.q" data-i18n-params='${escAttr(JSON.stringify(qParams))}'>${escHtml(t('check.q', qParams))}</div>`
+      + ecStimulusHtml(a, item, i, opts)
+      + `<div class="ec-prompt" data-i18n="${promptKey}">${escHtml(t(promptKey))}</div>`
+      + ecChoicesHtml(a, item, a.id);
+  }
+
+  if(res){
+    const g = ecGrade(a, res.picks);
+    const sParams = {score: res.score, total: res.total};
+    const rowsHtml = g.rows.map(r => {
+      const item = r.item;
+      let head, answerLabel, pickLabel;
+      if((a.check || {}).type === 'nextNote'){
+        const frets = (item.notes || []).map(n => n.fret).join(' ');
+        head = `${tf(item, 'label')} — ${frets} → ?`;
+        answerLabel = ecChipLabel(item.answer.fret, item.answer.note);
+        const pc = (item.choices || []).find(c => String(c.fret) === r.pick);
+        pickLabel = pc ? ecChipLabel(pc.fret, pc.note) : r.pick;
+      } else {
+        head = ecChipLabel(item.fret, item.answer);
+        answerLabel = item.answer;
+        pickLabel = r.pick;
+      }
+      const verdict = r.ok
+        ? `<span class="ec-ok">✓ ${escHtml(t('check.right'))}</span>`
+        : `<span class="ec-bad">✗ ${escHtml(t('check.wrong', {pick: pickLabel, answer: answerLabel}))}</span>`;
+      return `<div class="ec-result-row"><span class="ec-result-q">${escHtml(head)}</span>${verdict}</div>`;
+    }).join('');
+    // notSaved is stamped in memory by ecSubmit and never reaches Firestore
+    // (LOAD_DEPENDENT_SAVE_KEYS holds the whole map back when the load failed),
+    // so it can only ever be true for the session that hit the failure.
+    const stamp = res.notSaved
+      ? `<p class="ec-notsaved" data-i18n="check.notSaved">${escHtml(t('check.notSaved'))}</p>`
+      : `<span class="ca-chip">${escHtml(t('check.turnedIn'))}${res.at ? ` · ${escHtml(caFormatDate(res.at))}` : ''}</span>`;
+    const again = (a.check || {}).retake
+      ? `<button type="button" class="ca-mark-btn" onclick="ecRetake('${escAttr(a.id)}', ${preview ? 'true' : 'false'})"><span data-i18n="check.retake">${escHtml(t('check.retake'))}</span></button>`
+      : '';
+    return introHtml
+      + `<p class="ec-score" data-i18n="check.score" data-i18n-params='${escAttr(JSON.stringify(sParams))}'>${escHtml(t('check.score', sParams))}</p>`
+      + stamp + `<div class="ec-results">${rowsHtml}</div>` + again;
+  }
+
+  const rule = (a.check || {}).retake ? 'check.retakeOk' : 'check.oneTry';
+  return introHtml
+    + (preview ? `<p class="ec-preview-note">${escHtml(t('check.previewNote'))}</p>` : '')
+    + `<p class="ec-rule" data-i18n="${rule}">${escHtml(t(rule))}</p>`
+    + `<button type="button" class="ca-mark-btn" onclick="ecStart('${escAttr(a.id)}', ${preview ? 'true' : 'false'})"><span data-i18n="check.start">${escHtml(t('check.start'))}</span></button>`;
+}
+/* The check's own card — the ordinary .ca-card shell minus the two things a
+   check has no use for: the print button (a quiz on paper can't be graded
+   by the site) and Mark complete (submitting IS completing it). */
+function caCheckCardHtml(a){
+  const done = classActivities[a.id] === true;
+  const open = caOpenId === a.id;
+  const dateLabel = caFormatDate(caDate(a));
+  return `<details class="ca-card ec-card" ${open ? 'open' : ''} data-id="${escAttr(a.id)}" ontoggle="caOnToggle(this)">
+    <summary class="ca-card-summary">
+      ${dateLabel ? `<span class="ca-chip">${escHtml(dateLabel)}</span>` : ''}
+      <span class="ca-card-title"><span data-i18n="check.prefix">${escHtml(t('check.prefix'))}</span> &middot; ${escHtml(caTitle(a))}</span>
+      ${done ? `<span class="ca-done-mark" aria-hidden="true">${TCK_CHECK_SVG_INLINE}</span>` : ''}
+    </summary>
+    <div class="ca-card-body" id="ec-body-${escAttr(a.id)}">${caCheckBodyHtml(a, {})}</div>
+  </details>`;
+}
+function ecRender(id){
+  const a = ecActivity(id);
+  if(!a) return;
+  const opts = ecViewOpts[id] || {};
+  const el = document.getElementById(ecBodyId(opts) + id);
+  if(!el) return;
+  el.innerHTML = caCheckBodyHtml(a, opts);
+  if(typeof applyI18n === 'function') applyI18n(el);
+}
+/* Each item sounds once as it appears — the question is "what did you just
+   hear", so making them press play first is a step with no teaching in it.
+   Safe to click straight away: the Start (or previous choice) click already
+   unlocked the AudioContext, and replays stay unlimited. */
+function ecAutoPlay(id){
+  const el = document.getElementById(ecBodyId(ecViewOpts[id] || {}) + id);
+  if(!el) return;
+  const btn = el.querySelector('.play-seq-btn') || el.querySelector('.ec-play');
+  if(btn) btn.click();
+}
+function ecStart(id, preview){
+  ecViewOpts[id] = preview ? {preview: true, keyPrefix: 'ca-preview'} : {keyPrefix: 'ca'};
+  ecRuns[id] = {i: 0, picks: []};
+  ecRender(id);
+  ecAutoPlay(id);
+}
+function ecRetake(id, preview){
+  const a = ecActivity(id);
+  if(!a || !(a.check || {}).retake) return;
+  ecStart(id, preview);
+}
+function ecPick(id, btn){
+  const run = ecRuns[id];
+  const a = ecActivity(id);
+  if(!run || !a) return;
+  const items = ecItems(a);
+  if(run.picks.length >= items.length) return;   // a double-tap must not consume two questions
+  run.picks.push(btn.dataset.pick);
+  if(typeof stopAllDemoAudio === 'function') stopAllDemoAudio();
+  if(run.picks.length < items.length){
+    run.i = run.picks.length;
+    ecRender(id);
+    ecAutoPlay(id);
+  } else {
+    ecSubmit(id);
+  }
+}
+function ecSubmit(id){
+  const a = ecActivity(id);
+  if(!a) return;
+  const run = ecRuns[id];
+  const picks = run ? run.picks.slice() : [];
+  const g = ecGrade(a, picks);
+  delete ecRuns[id];
+  const prev = IS_TEACHER_MODE ? ecPreviewResult[id] : exitChecks[id];
+  const res = {score: g.score, total: g.total, picks, at: dayStr(new Date()), attempts: ((prev && prev.attempts) || 0) + 1};
+  /* Teacher preview: graded and shown, written nowhere. Same exception
+     shape (and same reason) as sdSaveBest/dkSaveBest bailing on
+     IS_TEACHER_MODE — checking the day's activity before class must not
+     file a score on the teacher's own progress doc. */
+  if(IS_TEACHER_MODE){ ecPreviewResult[id] = res; ecRender(id); return; }
+  exitChecks[id] = res;
+  // In memory only: 'exitChecks' is a LOAD_DEPENDENT_SAVE_KEY, so a failed
+  // load means the whole map is held back rather than overwriting a score
+  // this session never read.
+  if(progressLoadFailed) res.notSaved = true;
+  saveExitChecks();
+  onClassActivityChange(id, true);
+  caOpenId = id;               // keep the card open through the re-render
+  renderClassActivities();     // repaints the body AND the summary's done-mark
 }
 /* Print ONE activity as a handout — the paper version of the circuit, for
    days the Chromebooks or the Wi-Fi fail, or for a sub who wants it on a
@@ -7431,6 +7703,11 @@ function caMarkStepDone(btn, id, si){
   }
 }
 function caToggleComplete(id){
+  // Checks render no Mark-complete button — submitting the quiz is what
+  // completes them (ecSubmit). Guarded anyway so a stale handler can't
+  // un-mark a turned-in check and desync it from its saved score.
+  const a = (window.CLASS_ACTIVITIES || []).find(x => x.id === id);
+  if(a && a.kind === 'check') return;
   const isDone = classActivities[id] === true;
   onClassActivityChange(id, !isDone);
   caOpenId = id;   // keep the card open through the re-render
@@ -7494,7 +7771,12 @@ function caNumberMap(activities, overrides){
     return (o && Number.isFinite(Number(o.n)) && Number(o.base) === shipped(a)) ? Number(o.n) : shipped(a);
   };
   const map = {};
-  [...(activities||[])]
+  /* Exit checks (kind:'check') never take a #N slot — they carry no `number`
+     at all, and a check dropped into the middle of the course must not shove
+     every later activity's prefix along by one. Filtering here is what makes
+     that true for students (caNumber) and the console alike, since
+     teacherActivityNumbers() delegates straight to this function. */
+  [...(activities||[])].filter(a => a && a.kind !== 'check')
     .sort((x, y) => (effective(x) - effective(y)) || (shipped(x) - shipped(y)) || String(x.id).localeCompare(String(y.id)))
     .forEach((a, i) => { map[a.id] = i + 1; });
   return map;
@@ -7505,6 +7787,7 @@ function caNumberMap(activities, overrides){
 // the whole list once per comparison.
 let caNumberCache = null;
 function caNumber(a){
+  if(a && a.kind === 'check') return 0;   // checks are unnumbered — see caNumberMap
   if(!caNumberCache || caNumberCache.src !== activityNumbers)
     caNumberCache = { src: activityNumbers, map: caNumberMap(window.CLASS_ACTIVITIES || [], activityNumbers) };
   return caNumberCache.map[a.id] || Number(a.number) || 0;

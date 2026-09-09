@@ -170,6 +170,55 @@
      ],
    }
 
+   ── EXIT CHECKS (kind: 'check') ──
+   A check is an activity with `kind: 'check'`, no `number`, no `steps`, and
+   a `check` object. It is dated/hidden/renamed from the console like any
+   other activity. It never takes a #N slot — the student sees
+   "Exit check · <title>" (i18n `check.prefix`), so don't bake that prefix
+   into `title` any more than you'd bake in "#N - ". Result lands on
+   progress/{uid}.exitChecks[id] = { score, total, picks, at, attempts } and
+   also sets classActivities[id] = true, so the console's existing Done
+   count keeps working. One try unless `retake: true`.
+
+   The body is the quiz — a check has no step ladder, no print button and no
+   "Mark complete" button, because submitting IS the completion. Engine is
+   the ec* functions in app.js; the student card and the teacher console's
+   preview share caCheckBodyHtml() on purpose (see CLAUDE.md — this is one
+   card, not a new step field, so there is nothing to fork). checks.mjs (1y)
+   recomputes every answer key from the fretboard, so a typo in an `answer`
+   fails the push rather than marking a right answer wrong in class.
+
+   {
+     id:    'ca-14',
+     kind:  'check',
+     title: '…', title_es: '…',
+     intro: '…', intro_es: '…',
+     check: {
+       type: 'nextNote',            // 'nextNote' | 'noteName'
+       bpm: 80,                     // nextNote only; playback tempo
+       retake: false,               // optional — unlimited retries, latest kept
+       // nextNote items — the site plays `notes` and shows their frets, the
+       // student picks the note that comes next. Each note is the same
+       // { string, fret, note, midi } shape a step `tab` uses, and midi must
+       // equal OPEN[string] + fret (1y checks it).
+       items: [
+         { label: '…', label_es: '…',
+           notes:  [ { string:'E', fret:0, note:'E', midi:40 }, … ],   // played + shown
+           answer: { string:'E', fret:5, note:'A', midi:45 },           // the next note
+           choices: [ { fret:5, note:'A' }, { fret:4, note:'G#' }, … ] // >=3, distinct
+                                    // frets, exactly one matching `answer`,
+                                    // shuffled at render by mcOrder
+         }
+       ]
+       // noteName items — one fret lights up on the string diagram with its
+       // name hidden, the student names it. Choices are always the seven
+       // naturals A–G in alphabetical order, NOT shuffled (same tap-the-name
+       // row as the shuffle drill), so items carry no `choices`.
+       //   string: 'lowE'  (diagram kind — lowE|A|D|G|B|highE — at check level)
+       //   items: [ { fret: 3, answer: 'G' }, … ]
+     }
+   }
+
    v1 ships EMPTY — real activities come from future lesson-planning
    sessions. Do not hand-write example content here; the schema above is
    documentation, not a template to copy live.
@@ -1355,5 +1404,85 @@ window.CLASS_ACTIVITIES = [
         text_es: 'Tres formas de exigirte más, en el orden que quieras:<ul><li>Toca el ciclo contra la pista de acompañamiento de la canción en su página de Recorrido de la canción — esta línea es la Capa 2 de 5</li><li>Sube el tempo: +10 BPM cada vez que logres dos vueltas limpias</li><li>Toca las mismas cinco raíces en dos cuerdas: A · C · D en la cuerda La (al aire · 3 · 5), y luego F · G en la cuerda Mi grave (1 · 3). Los mismos nombres — un cruce de cuerda en vez de un salto</li></ul>Lo tienes cuando: puedes tocar el ciclo con la pista durante una estrofa completa sin salirte.',
       },
     ],
+  },
+  /* An EXIT CHECK, not a step ladder — see the kind:'check' block in the
+     schema above. Every note here is lifted verbatim from ca-1's whole-song
+     tab (line A `0 0 2 0 5 4`, B `0 0 2 0 7 5`, C `0 0 12 9 5 4 2`,
+     D `10 10 9 5 7 5`), so the check can't drift away from the activity that
+     taught it. Items 1 and 3 deliberately play the SAME four notes and differ
+     only in which line they are: the question is whether the student knows
+     the song, not whether they can extend a pattern. */
+  {
+    id:    'ca-14',
+    kind:  'check',
+    title:    'Happy Birthday — what comes next?',
+    title_es: 'Happy Birthday — ¿qué nota sigue?',
+    intro:    'The site plays the start of a line of Happy Birthday and shows the frets. Pick the note that comes next. Five questions, one try — listen as many times as you want before you pick.',
+    intro_es: 'El sitio toca el inicio de una línea de Happy Birthday y muestra los trastes. Elige la nota que sigue. Cinco preguntas, un solo intento — escucha todas las veces que quieras antes de elegir.',
+    check: {
+      type: 'nextNote',
+      bpm: 80,
+      items: [
+        {
+          label:    'Line 1 — "Hap-py birth-day to you"',
+          label_es: 'Línea 1 — "Hap-py birth-day to you"',
+          notes: [
+            { string: 'E', fret: 0, note: 'E',  midi: 40 },
+            { string: 'E', fret: 0, note: 'E',  midi: 40 },
+            { string: 'E', fret: 2, note: 'F#', midi: 42 },
+            { string: 'E', fret: 0, note: 'E',  midi: 40 }
+          ],
+          answer: { string: 'E', fret: 5, note: 'A', midi: 45 },
+          choices: [ { fret: 5, note: 'A' }, { fret: 4, note: 'G#' }, { fret: 7, note: 'B' }, { fret: 2, note: 'F#' } ]
+        },
+        {
+          label:    'Line 1 — "Hap-py birth-day to you"',
+          label_es: 'Línea 1 — "Hap-py birth-day to you"',
+          notes: [
+            { string: 'E', fret: 0, note: 'E',  midi: 40 },
+            { string: 'E', fret: 0, note: 'E',  midi: 40 },
+            { string: 'E', fret: 2, note: 'F#', midi: 42 },
+            { string: 'E', fret: 0, note: 'E',  midi: 40 },
+            { string: 'E', fret: 5, note: 'A',  midi: 45 }
+          ],
+          answer: { string: 'E', fret: 4, note: 'G#', midi: 44 },
+          choices: [ { fret: 4, note: 'G#' }, { fret: 5, note: 'A' }, { fret: 2, note: 'F#' }, { fret: 7, note: 'B' } ]
+        },
+        {
+          label:    'Line 2 — "Hap-py birth-day to you" (the ending climbs higher)',
+          label_es: 'Línea 2 — "Hap-py birth-day to you" (el final sube más)',
+          notes: [
+            { string: 'E', fret: 0, note: 'E',  midi: 40 },
+            { string: 'E', fret: 0, note: 'E',  midi: 40 },
+            { string: 'E', fret: 2, note: 'F#', midi: 42 },
+            { string: 'E', fret: 0, note: 'E',  midi: 40 }
+          ],
+          answer: { string: 'E', fret: 7, note: 'B', midi: 47 },
+          choices: [ { fret: 7, note: 'B' }, { fret: 5, note: 'A' }, { fret: 4, note: 'G#' }, { fret: 9, note: 'C#' } ]
+        },
+        {
+          label:    'Line 3 — "Hap-py birth-day dear ____"',
+          label_es: 'Línea 3 — "Hap-py birth-day dear ____"',
+          notes: [
+            { string: 'E', fret: 0,  note: 'E', midi: 40 },
+            { string: 'E', fret: 0,  note: 'E', midi: 40 },
+            { string: 'E', fret: 12, note: 'E', midi: 52 }
+          ],
+          answer: { string: 'E', fret: 9, note: 'C#', midi: 49 },
+          choices: [ { fret: 9, note: 'C#' }, { fret: 10, note: 'D' }, { fret: 7, note: 'B' }, { fret: 5, note: 'A' } ]
+        },
+        {
+          label:    'Line 4 — "Hap-py birth-day to you"',
+          label_es: 'Línea 4 — "Hap-py birth-day to you"',
+          notes: [
+            { string: 'E', fret: 10, note: 'D',  midi: 50 },
+            { string: 'E', fret: 10, note: 'D',  midi: 50 },
+            { string: 'E', fret: 9,  note: 'C#', midi: 49 }
+          ],
+          answer: { string: 'E', fret: 5, note: 'A', midi: 45 },
+          choices: [ { fret: 5, note: 'A' }, { fret: 7, note: 'B' }, { fret: 4, note: 'G#' }, { fret: 12, note: 'E' } ]
+        }
+      ]
+    }
   },
 ];

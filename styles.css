@@ -408,6 +408,34 @@ body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,"Helvetica N
   .step-figure img[src*="m13-step-"]{
     filter:invert(1) hue-rotate(180deg) brightness(1.06);background:transparent}
 }
+/* ── Exit checks (kind:'check' class activities — see app.js ec*) ──
+   Reuses .step-mc-keyed/.step-mc-opt for the choice row and .step-figure for
+   the board, so a check inherits both palettes and needs no colours of its
+   own. min-height is the one addition: a graded one-try question is the
+   worst place on the site to mis-tap, and the shared .step-mc-opt padding
+   lands around 32px. */
+.ec-q{font-size:0.875rem;color:var(--text2);margin:12px 0 2px}
+.ec-prompt{font-weight:600;margin:12px 0 2px}
+.ec-choices{margin-top:10px}
+.ec-choices .step-mc-opt{min-height:44px;align-items:center}
+.ec-play{margin:8px 0}
+.ec-score{font-weight:600;margin:10px 0 6px}
+.ec-results{margin-top:10px}
+.ec-result-row{display:flex;gap:8px;align-items:flex-start;padding:4px 0;border-top:1px solid var(--border);font-size:0.9062rem;line-height:1.45;flex-wrap:wrap}
+.ec-result-q{flex:1 1 55%;color:var(--text2)}
+.ec-ok{color:var(--green-text)}
+.ec-bad{color:var(--amber-text)}
+.ec-notsaved{color:var(--amber-text);margin:6px 0}
+.ec-preview-note{color:var(--text2);font-size:0.875rem;margin:6px 0}
+/* The board is an inline <svg> drawn at runtime, not an <img>, so
+   .step-figure img above doesn't reach it. theme:'web' draws it in the
+   site's light-mode hex; the invert below is the same treatment the
+   generated ca-*.svg files get, and it exists because the fretted-note
+   circle is a hardcoded light green that CSS variables can't re-theme. */
+.ec-figure svg{display:block;width:100%;height:auto;border-radius:10px;border:1px solid var(--border2)}
+@media(prefers-color-scheme:dark){
+  .ec-figure svg{filter:invert(1) hue-rotate(180deg) brightness(1.06)}
+}
 .step-figure.dual{display:flex;gap:10px}
 .step-figure.dual img{width:calc(50% - 5px)}
 @media(max-width:520px){.step-figure.dual{flex-wrap:wrap}.step-figure.dual img{width:100%}}

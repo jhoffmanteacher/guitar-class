@@ -239,7 +239,7 @@ async function loadAllStudents(){
         else skills[k]='none';
       });
       const gamesData=doc.data().games||{};
-      allStudentsRaw.push({uid:doc.id,skills,name:doc.data().name||'',email:doc.data().email||'',responses:doc.data().responses||{},coachSkill:gamesData.coachSkill||{},drillSkill:gamesData.drillSkill||{},classActivities:doc.data().classActivities||{}});
+      allStudentsRaw.push({uid:doc.id,skills,name:doc.data().name||'',email:doc.data().email||'',responses:doc.data().responses||{},coachSkill:gamesData.coachSkill||{},drillSkill:gamesData.drillSkill||{},classActivities:doc.data().classActivities||{},exitChecks:doc.data().exitChecks||{}});
     });
     // Pause/archive flags live in config/class, so it has to be in hand
     // before the roster is filtered — otherwise the first paint shows
@@ -599,12 +599,29 @@ function renderTeacherActivities(opts){
       return dirMul*(nums[a.id]-nums[b.id]);
     });
     const total=allStudents.length;
+    // Checks hold no teaching-order slot, so they don't widen the range a
+    // number box will accept — see caNumberMap() in app.js.
+    const numberedCount=activities.filter(x=>x.kind!=='check').length;
     const rows=sorted.map(a=>{
-      const notDone=allStudents.filter(s=>(s.classActivities||{})[a.id]!==true);
+      const isCheck=a.kind==='check';
+      // A check is "done" when it has been turned in — the same
+      // classActivities flag, which ecSubmit sets alongside the score, so
+      // this column needs no second source of truth. What it adds is the
+      // score: a 12/12 turned-in count over an average of 2.1 is the thing
+      // worth seeing before the next lesson.
+      const notDone=allStudents.filter(s=>isCheck
+        ? !(s.exitChecks||{})[a.id]
+        : (s.classActivities||{})[a.id]!==true);
       const doneCount=total-notDone.length;
       const listHtml=notDone.length
         ? notDone.map(s=>`<div style="padding:2px 0">${escHtml(s.name||'(no name)')}${s.email?` &middot; ${escHtml(s.email)}`:''}</div>`).join('')
-        : '<div style="padding:2px 0">Everyone has finished this one.</div>';
+        : `<div style="padding:2px 0">Everyone has ${isCheck?'turned this one in':'finished this one'}.</div>`;
+      const results=isCheck?allStudents.map(s=>(s.exitChecks||{})[a.id]).filter(Boolean):[];
+      const itemTotal=isCheck?(((a.check||{}).items)||[]).length:0;
+      const avg=results.length?(results.reduce((n,r)=>n+(Number(r.score)||0),0)/results.length).toFixed(1):null;
+      const doneCell=isCheck
+        ? `${doneCount} / ${total} turned in${avg!==null?` &middot; avg ${avg}/${itemTotal}`:' &middot; avg —'}`
+        : `${doneCount} / ${total} students`;
       const isHidden=!!hidden[a.id];
       const dateVal=dates[a.id]||'';
       const isScheduled=dateVal && dateVal>today;
@@ -624,10 +641,15 @@ function renderTeacherActivities(opts){
       // and a live number box otherwise — typing a new position there moves
       // the activity, exactly the way the date input publishes it.
       const shown=teacherActivityTitle(a,cfg);
-      const num=nums[a.id]?`#${nums[a.id]} - `:'';
-      const numCell=nums[a.id]
-        ? `#<input type="number" class="t-act-num-input" data-set-activity-number data-id="${escAttr(a.id)}" value="${nums[a.id]}" min="1" max="${activities.length}" step="1" title="Teaching-order number — type a new one to move this activity" aria-label="Teaching-order number for ${escAttr(shown)}"> - `
-        : '';
+      // Checks take no teaching-order slot (caNumberMap filters them out), so
+      // they get the student-facing "Exit check · " prefix where the number
+      // would be — and no number box, because there is no position to type.
+      const num=isCheck?'Exit check \u00b7 ':(nums[a.id]?`#${nums[a.id]} - `:'');
+      const numCell=isCheck
+        ? escHtml(num)
+        : (nums[a.id]
+          ? `#<input type="number" class="t-act-num-input" data-set-activity-number data-id="${escAttr(a.id)}" value="${nums[a.id]}" min="1" max="${numberedCount}" step="1" title="Teaching-order number — type a new one to move this activity" aria-label="Teaching-order number for ${escAttr(shown)}"> - `
+          : '');
       const renamed=shown!==a.title;
       let titleCell;
       if(activityEditId===a.id){
@@ -659,8 +681,8 @@ function renderTeacherActivities(opts){
           +`<button class="t-act-pencil" data-rename-activity data-id="${escAttr(a.id)}" title="Rename this activity" aria-label="Rename ${escAttr(shown)}">&#x270E;</button>`
           +`${renameNote}</td>`;
       }
-      return `<tr${isHidden?' style="opacity:.55"':''}><td>${dateCell}</td>${titleCell}<td>${doneCount} / ${total} students</td>
-        <td><details><summary>Who hasn't finished (${notDone.length})</summary>${listHtml}</details></td>
+      return `<tr${isHidden?' style="opacity:.55"':''}><td>${dateCell}</td>${titleCell}<td>${doneCell}</td>
+        <td><details><summary>Who hasn't ${isCheck?'turned it in':'finished'} (${notDone.length})</summary>${listHtml}</details></td>
         <td><div class="tg-seg">${visBtns}</div></td></tr>`;
     }).join('');
     // Arrow shows only on whichever column is currently driving the sort.
@@ -771,7 +793,11 @@ function teacherActivityNumbers(cfg){
    Nothing is keyed to `number` (ids are), so this is safe in a way that
    renumbering ids never would be. */
 async function teacherSetActivityNumber(id, value){
-  const activities=(window.CLASS_ACTIVITIES||[]);
+  /* Exit checks are excluded from the whole rewrite, not just from the row
+     being moved: caNumberMap() gives them no position, so leaving one in
+     `order` would splice it into the 1..N run and write it an override with
+     base:NaN — a number for something that never shows one. */
+  const activities=(window.CLASS_ACTIVITIES||[]).filter(x=>x.kind!=='check');
   const a=activities.find(x=>x.id===id);
   if(!a) return;
   const n=Math.round(Number(value));
@@ -834,6 +860,8 @@ function renderTeacherActivityDetail(id){
   const back=`<button type="button" class="stu-back" data-back-to-activities>&#x2190; All activities</button>`;
   const a=(window.CLASS_ACTIVITIES||[]).find(x=>x.id===id);
   if(!a){ box.innerHTML=`${back}<div class="t-loading">Could not find that activity — it may have been renamed or removed.</div>`; return; }
+  // A check has no steps — its detail page is a results grid, see below.
+  if(a.kind==='check') return renderTeacherCheckDetail(a, back);
   const num=teacherActivityNumbers(teacherClassConfig)[a.id];
   const stepsHtml=(a.steps||[]).map((s,si)=>{
     const media=[];
@@ -868,6 +896,63 @@ function renderTeacherActivityDetail(id){
     <div class="stu-section-head" style="margin-top:0">${num?`#${num} - `:''}${escHtml(teacherActivityTitle(a,teacherClassConfig))} <span style="opacity:.55;font-size:.72em">(${escHtml(a.id)})</span></div>
     ${a.intro?`<div class="coach-tip" style="margin:0 2px 16px">${escHtml(a.intro)}</div>`:''}
     ${stepsHtml || '<div class="stu-empty">No steps on this activity yet.</div>'}`;
+}
+/* An exit check's detail page: who turned it in, what they picked, and
+   which question the room missed. Deliberately NOT the plain step list
+   above — a check has no steps, and the thing worth reading before the
+   next lesson is the "Missed by" row.
+
+   The preview at the bottom calls caCheckBodyHtml() in app.js, the same
+   renderer the student card uses. Picks made there are graded and shown
+   but written nowhere (ecSubmit bails on IS_TEACHER_MODE), so previewing
+   is not turning in. */
+function renderTeacherCheckDetail(a, back){
+  const box=document.getElementById('t-grid-container');
+  const c=a.check||{};
+  const items=c.items||[];
+  const dates=(teacherClassConfig&&teacherClassConfig.activityDates)||{};
+  const dateVal=dates[a.id]||'';
+  const dateNote=dateVal?`Dated ${escHtml(dateVal)}`:'No date set — hidden from students';
+  // Item headings: the fret run for nextNote, the fret itself for noteName.
+  const heads=items.map((it,i)=>c.type==='nextNote'
+    ? `Q${i+1}: ${escHtml((it.notes||[]).map(n=>n.fret).join(' '))} &rarr; ${escHtml(String(it.answer.fret))}`
+    : `Q${i+1}: fret ${escHtml(String(it.fret))} = ${escHtml(it.answer)}`);
+  const withRes=[], without=[];
+  allStudents.forEach(s=>{
+    const r=(s.exitChecks||{})[a.id];
+    if(r) withRes.push({s,r}); else without.push(s);
+  });
+  const byName=(x,y)=>String(x.s?x.s.name:x.name||'').localeCompare(String(y.s?y.s.name:y.name||''));
+  withRes.sort(byName); without.sort((x,y)=>String(x.name||'').localeCompare(String(y.name||'')));
+  // Per-item miss counts across submitted students only — a student who
+  // hasn't turned it in hasn't missed anything.
+  const missed=items.map(()=>0);
+  withRes.forEach(({r})=>{
+    ecGrade(a,r.picks).rows.forEach((row,i)=>{ if(!row.ok) missed[i]++; });
+  });
+  const cell=ok=>`<span class="tck yes" style="display:inline-flex;align-items:center;justify-content:center;width:22px;height:22px;border:2px solid var(--${ok?'green':'amber'}-text);color:var(--${ok?'green':'amber'}-text)">${ok?TCK_CHECK_SVG:TCK_MINUS_SVG}</span>`;
+  const bodyRows=withRes.map(({s,r})=>{
+    const g=ecGrade(a,r.picks);
+    const cells=g.rows.map(row=>`<td style="text-align:center">${cell(row.ok)}<div style="font-size:.72em;opacity:.7">${escHtml(row.pick||'—')}</div></td>`).join('');
+    return `<tr><td class="nc">${escHtml(s.name||'(no name)')}</td><td>${r.score}/${r.total}</td><td>${escHtml(r.at||'')}</td>${cells}</tr>`;
+  }).join('');
+  const missRow=withRes.length
+    ? `<tr><td class="nc" style="font-style:italic">Missed by</td><td colspan="2"></td>`
+      +missed.map(m=>`<td style="text-align:center">${m}</td>`).join('')+`</tr>`
+    : '';
+  const noneRows=without.map(s=>`<tr style="opacity:.55"><td class="nc">${escHtml(s.name||'(no name)')}</td><td colspan="${2+items.length}">not turned in</td></tr>`).join('');
+  const table=allStudents.length
+    ? `<div class="t-grid-wrap"><table><thead><tr><th class="nc">Student</th><th>Score</th><th>Date</th>${heads.map(h=>`<th>${h}</th>`).join('')}</tr></thead>`
+      +`<tbody>${bodyRows}${missRow}${noneRows}</tbody></table></div>`
+    : '<div class="t-loading">No student data yet — students need to sign in first.</div>';
+  box.innerHTML=`${back}
+    <div class="stu-section-head" style="margin-top:0">Exit check &middot; ${escHtml(teacherActivityTitle(a,teacherClassConfig))} <span style="opacity:.55;font-size:.72em">(${escHtml(a.id)})</span></div>
+    <div class="tg-note">${dateNote}. ${withRes.length} of ${allStudents.length} turned in. Checks take no #number — they never enter the teaching-order run.</div>
+    ${a.intro?`<div class="coach-tip" style="margin:0 2px 16px">${escHtml(a.intro)}</div>`:''}
+    ${table}
+    <div class="stu-section-head">Preview</div>
+    <div class="tg-note">Try the check yourself — nothing you pick here is saved.</div>
+    <div id="ec-preview-body-${escAttr(a.id)}">${caCheckBodyHtml(a,{preview:true,keyPrefix:'ca-preview'})}</div>`;
 }
 async function teacherSetActivityHidden(id, state){
   const on = state==='hide';
@@ -1512,6 +1597,22 @@ function renderTeacherStudentDetail(uid){
   });
   if(!skillsHtml) skillsHtml='<div class="stu-empty">No skills started yet.</div>';
 
+  /* Exit checks this student has turned in. Skipped entirely when the map
+     is empty, rather than showing an empty heading on every student who
+     hasn't met one yet. An id with no activity left in class-activities.js
+     still prints — a retired check's score is a real thing they earned. */
+  const ecEntries=Object.keys(stu.exitChecks||{}).map(id=>{
+    const a=(window.CLASS_ACTIVITIES||[]).find(x=>x.id===id);
+    const r=stu.exitChecks[id]||{};
+    return {id, name:a?teacherActivityTitle(a,teacherClassConfig):id, r};
+  }).sort((x,y)=>String(y.r.at||'').localeCompare(String(x.r.at||'')));
+  const exitChecksHtml=ecEntries.length
+    ? `<div class="stu-section-head">Exit checks</div>`
+      +ecEntries.map(e=>`<div class="tr-card"><div class="tr-name">Exit check &middot; ${escHtml(e.name)}</div>`
+        +`${e.r.score}/${e.r.total}${e.r.at?` &mdash; ${escHtml(e.r.at)}`:''}`
+        +`${Number(e.r.attempts)>1?` <span style="opacity:.6">(${Number(e.r.attempts)} attempts)</span>`:''}</div>`).join('')
+    : '';
+
   box.innerHTML = `
     ${back}
     <div class="stu-detail-name">${escHtml(displayName)}</div>
@@ -1532,6 +1633,7 @@ function renderTeacherStudentDetail(uid){
 
     <div class="stu-section-head" style="margin-top:0">Written responses</div>
     ${responsesHtml}
+    ${exitChecksHtml}
 
     <div class="stu-section-head">Module-by-module progress</div>
     ${modRows}

@@ -1297,11 +1297,16 @@ const SLANG_PHRASES = [
   'rock solid', 'like a pro', 'wants to be played', 'dialed down', 'the boss',
   'big finish', 'gets bigger every time', 'skinny',
 ];
+/* Hoisted to module scope so 1y can sweep exit-check item labels with the
+   exact same list — 1w's own FIELD_RE has no `label`, and widening it would
+   re-scan every module step label. matchAll clones the regex, so sharing one
+   /g instance across checks carries no lastIndex state between them. */
+const SLANG_RE = new RegExp(
+  '\\b(?:' + SLANG_PHRASES.map(p => p.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')).join('|') + ')\\b',
+  'gi');
 function checkSlangPhrasing() {
   head('1w. Slang and figurative phrasing in student-facing text');
-  const RE = new RegExp(
-    '\\b(?:' + SLANG_PHRASES.map(p => p.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')).join('|') + ')\\b',
-    'gi');
+  const RE = SLANG_RE;
   let bad = 0;
   const flag = (file, li, phrase) => {
     err(`${file}:${li + 1} — "${phrase}"`);
@@ -1609,12 +1614,27 @@ function validateClassActivities() {
     if (!idRe.test(a.id || '')) { err(`${where}: id "${a.id}" doesn't match ^ca-\\d+$`); problems++; }
     else if (seenIds.has(a.id)) { err(`${where}: duplicate id "${a.id}"`); problems++; }
     else seenIds.add(a.id);
-    if (!Number.isInteger(a.number) || a.number < 1) { err(`${where}: number "${a.number}" is not a positive integer`); problems++; }
-    else if (seenNumbers.has(a.number)) { err(`${where}: duplicate number ${a.number}`); problems++; }
-    else seenNumbers.add(a.number);
+    /* An EXIT CHECK (kind:'check') carries no `number` and no `steps` — it
+       never enters the teaching-order run and its body is a quiz, not a
+       ladder. Everything else about it is an ordinary activity, so the id,
+       the _es twins and the no-`date` rule all still apply. Its own data is
+       validated by 1y below. */
+    const isCheck = a.kind === 'check';
+    if (isCheck) {
+      if ('number' in a) { err(`${where}: kind:'check' must not carry a "number" — checks take no #N slot`); problems++; }
+      if ('steps' in a) { err(`${where}: kind:'check' must not carry "steps" — the check object is the card body`); problems++; }
+    } else if (a.kind !== undefined) {
+      err(`${where}: unknown kind "${a.kind}" — the only kind is 'check'`); problems++;
+    }
+    if (!isCheck) {
+      if (!Number.isInteger(a.number) || a.number < 1) { err(`${where}: number "${a.number}" is not a positive integer`); problems++; }
+      else if (seenNumbers.has(a.number)) { err(`${where}: duplicate number ${a.number}`); problems++; }
+      else seenNumbers.add(a.number);
+    }
     reqEs(where, a, 'title');
     reqEs(where, a, 'intro');
-    if (!Array.isArray(a.steps) || !a.steps.length) { err(`${where}: "steps" should be a non-empty array`); problems++; }
+    if (isCheck) { /* no steps — see 1y */ }
+    else if (!Array.isArray(a.steps) || !a.steps.length) { err(`${where}: "steps" should be a non-empty array`); problems++; }
     else {
       a.steps.forEach((s, si) => {
         const sWhere = `${where} · steps[${si}]`;
@@ -1660,17 +1680,135 @@ function validateClassActivities() {
   // header of class-activities.js) — so instead of pinning it to the id, pin
   // the SET: 1..N, no gaps. A gap is the tell that a resequence was left
   // half-done, and it would show students a jump like "#3 … #5".
-  if (seenNumbers.size === activities.length) {
+  // Exit checks hold no position, so the 1..N run is over the numbered
+  // activities only — a check in the middle of the file must not read as a gap.
+  const numbered = activities.filter(a => a && a.kind !== 'check');
+  if (seenNumbers.size === numbered.length) {
     const missing = [];
-    for (let n = 1; n <= activities.length; n++) if (!seenNumbers.has(n)) missing.push(n);
+    for (let n = 1; n <= numbered.length; n++) if (!seenNumbers.has(n)) missing.push(n);
     if (missing.length) {
-      err(`CLASS_ACTIVITIES: "number" must run 1..${activities.length} with no gaps — missing ${missing.join(', ')}`);
+      err(`CLASS_ACTIVITIES: "number" must run 1..${numbered.length} with no gaps — missing ${missing.join(', ')}`);
       problems++;
     }
   }
 
-  if (problems === 0) ok(`${activities.length} class activit${activities.length === 1 ? 'y' : 'ies'} — all valid, teaching order 1..${activities.length}`);
+  const checks = activities.length - numbered.length;
+  if (problems === 0) ok(`${activities.length} class activit${activities.length === 1 ? 'y' : 'ies'} (${checks} exit check${checks === 1 ? '' : 's'}) — all valid, teaching order 1..${numbered.length}`);
+  checkExitChecks(activities);
   checkActivityTitleNumbers(activities);
+}
+
+/* ════════════════════════════════════════════════════════════════════
+   1y. EXIT-CHECK DATA — every kind:'check' activity in class-activities.js
+   is a self-grading assessment, which makes a typo in it worse than a typo
+   anywhere else on the site: a wrong `answer` doesn't look broken, it just
+   silently marks a correct student wrong and lands that score on their
+   progress doc in front of the teacher.
+
+   So this does not merely shape-check the data — it RECOMPUTES every
+   answer from the fretboard. A noteName answer is checked against
+   NOTE_NAMES[(OPEN[string] + fret) % 12] (the same 12-name table app.js
+   uses as SD_NOTE_NAMES), and every nextNote note and answer must carry
+   the midi its own string+fret implies. The choice list is checked for
+   exactly one entry matching the answer, so an item can neither be
+   unanswerable nor have two right answers.
+
+   noteName answers must also be NATURALS: the choice row is the seven
+   naturals A–G in fixed order (app.js SD_NATURALS), so a fret whose true
+   note is a sharp has no correct button to press.
+
+   Item `label`s are swept for the same retired slang 1w guards. 1w's own
+   FIELD_RE has no `label` (widening it would re-scan every module step
+   label), so the compiled regex is hoisted to module scope and reused here.
+   ════════════════════════════════════════════════════════════════════ */
+const EC_OPEN_MIDI = { E: 40, A: 45, D: 50, G: 55, B: 59, e: 64 };
+const EC_STRING_KINDS = { lowE: 40, A: 45, D: 50, G: 55, B: 59, highE: 64 };
+const EC_NOTE_NAMES = ['C', 'C♯', 'D', 'D♯', 'E', 'F', 'F♯', 'G', 'G♯', 'A', 'A♯', 'B'];
+const EC_NATURALS = new Set(['A', 'B', 'C', 'D', 'E', 'F', 'G']);
+const ecNorm = n => String(n == null ? '' : n).replace(/#/g, '♯').trim();
+
+function checkExitChecks(activities) {
+  head('1y. Exit-check data (answers recomputed from the fretboard)');
+  const checks = (activities || []).filter(a => a && a.kind === 'check');
+  if (!checks.length) { ok('no exit checks yet'); return; }
+  let bad = 0;
+  const fail = (where, msg) => { err(`${where}: ${msg}`); problems++; bad++; };
+
+  for (const a of checks) {
+    const w = `${a.id}`;
+    const c = a.check;
+    if (!c || typeof c !== 'object') { fail(w, 'missing a "check" object'); continue; }
+    if (c.type !== 'nextNote' && c.type !== 'noteName') { fail(w, `check.type "${c.type}" is not 'nextNote' or 'noteName'`); continue; }
+    if ('retake' in c && typeof c.retake !== 'boolean') fail(w, `check.retake "${c.retake}" is not a boolean`);
+    const items = c.items;
+    if (!Array.isArray(items) || !items.length) { fail(w, 'check.items should be a non-empty array'); continue; }
+    if (items.length > 10) fail(w, `check.items has ${items.length} items — 10 is the ceiling (a check is a quick turn-in, not a test)`);
+
+    // Slang sweep over item labels — 1w's field list can't see these.
+    items.forEach((it, i) => {
+      for (const f of ['label', 'label_es']) {
+        if (!it || !it[f]) continue;
+        for (const m of String(it[f]).matchAll(SLANG_RE)) fail(`${w} · items[${i}].${f}`, `banned phrase "${m[0]}" (see 1w)`);
+      }
+    });
+
+    if (c.type === 'nextNote') {
+      if ('bpm' in c && (!Number.isInteger(c.bpm) || c.bpm < 40 || c.bpm > 160))
+        fail(w, `check.bpm "${c.bpm}" is not an integer 40–160`);
+      const note = (n, nw) => {
+        if (!n || typeof n !== 'object') { fail(nw, 'not an object'); return; }
+        if (!/^[eBGDAE]$/.test(n.string || '')) { fail(nw, `string "${n.string}" is not one of e/B/G/D/A/E`); return; }
+        if (!Number.isInteger(n.fret) || n.fret < 0) { fail(nw, `fret "${n.fret}" is not an integer >= 0`); return; }
+        if (n.note === undefined || n.note === null || n.note === '') { fail(nw, 'missing "note"'); return; }
+        if (typeof n.midi !== 'number') { fail(nw, `midi "${n.midi}" is not numeric`); return; }
+        const want = EC_OPEN_MIDI[n.string] + n.fret;
+        if (n.midi !== want) fail(nw, `midi ${n.midi} does not match ${n.string}-string fret ${n.fret} (should be ${want}) — the site would play a note the tab doesn't show`);
+        const trueNote = EC_NOTE_NAMES[want % 12];
+        if (ecNorm(n.note) !== trueNote) fail(nw, `note "${n.note}" is not ${n.string}-string fret ${n.fret} (that is ${trueNote})`);
+      };
+      items.forEach((it, i) => {
+        const iw = `${w} · items[${i}]`;
+        if (!it || typeof it !== 'object') { fail(iw, 'not an object'); return; }
+        for (const f of ['label', 'label_es']) if (!it[f]) fail(iw, `missing "${f}"`);
+        if (!Array.isArray(it.notes) || !it.notes.length) fail(iw, '"notes" should be a non-empty array');
+        else it.notes.forEach((n, ni) => note(n, `${iw} · notes[${ni}]`));
+        if (!it.answer || typeof it.answer !== 'object') { fail(iw, 'missing an "answer" note'); return; }
+        note(it.answer, `${iw} · answer`);
+        const ch = it.choices;
+        if (!Array.isArray(ch) || ch.length < 3) { fail(iw, `"choices" needs at least 3 entries (has ${Array.isArray(ch) ? ch.length : 0})`); return; }
+        const frets = new Set();
+        ch.forEach((x, xi) => {
+          const cw = `${iw} · choices[${xi}]`;
+          if (!x || typeof x !== 'object') { fail(cw, 'not an object'); return; }
+          if (!Number.isInteger(x.fret) || x.fret < 0) fail(cw, `fret "${x.fret}" is not an integer >= 0`);
+          if (!x.note) fail(cw, 'missing "note"');
+          // Picks are stored as the fret alone, so two choices on one fret
+          // would be indistinguishable in the saved result.
+          if (frets.has(x.fret)) fail(cw, `fret ${x.fret} appears twice — a pick is stored as its fret, so duplicates are ambiguous`);
+          frets.add(x.fret);
+        });
+        const hits = ch.filter(x => x && x.fret === it.answer.fret && ecNorm(x.note) === ecNorm(it.answer.note)).length;
+        if (hits !== 1) fail(iw, `${hits} of ${ch.length} choices match the answer (fret ${it.answer.fret} · ${it.answer.note}) — exactly 1 required`);
+      });
+    } else {
+      const open = EC_STRING_KINDS[c.string];
+      if (open === undefined) { fail(w, `check.string "${c.string}" is not one of lowE/A/D/G/B/highE`); continue; }
+      items.forEach((it, i) => {
+        const iw = `${w} · items[${i}]`;
+        if (!it || typeof it !== 'object') { fail(iw, 'not an object'); return; }
+        if (!Number.isInteger(it.fret) || it.fret < 0 || it.fret > 12) { fail(iw, `fret "${it.fret}" is not an integer 0–12`); return; }
+        const trueNote = EC_NOTE_NAMES[(open + it.fret) % 12];
+        if (!EC_NATURALS.has(trueNote))
+          fail(iw, `${c.string} fret ${it.fret} is ${trueNote}, a sharp — the choice row is the seven naturals, so this item has no right button`);
+        else if (ecNorm(it.answer) !== trueNote)
+          fail(iw, `answer "${it.answer}" is wrong — ${c.string} fret ${it.fret} is ${trueNote}`);
+      });
+    }
+  }
+  if (bad === 0) {
+    const n = checks.reduce((t, a) => t + ((a.check && a.check.items) || []).length, 0);
+    ok(`${checks.length} exit check${checks.length === 1 ? '' : 's'}, ${n} question${n === 1 ? '' : 's'} — every answer key recomputed from the fretboard`);
+  }
 }
 
 /* ════════════════════════════════════════════════════════════════════
