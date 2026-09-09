@@ -1485,4 +1485,29 @@ window.CLASS_ACTIVITIES = [
       ]
     }
   },
+  /* The second exit check, and the other item type: one fret lights up with
+     its name hidden and the student names it. ca-11 (the activity that
+     teaches this) is unchanged — a check never replaces the activity it
+     checks. The five frets are all naturals by necessity, not by taste: the
+     choice row is A–G, so a sharp fret would have no right button, and
+     checks.mjs 1y fails the push on one. */
+  {
+    id:    'ca-15',
+    kind:  'check',
+    title:    'Notes on the Low E String',
+    title_es: 'Notas en la cuerda Mi grave',
+    intro:    'One fret lights up on the low E string and the site plays it. Tap the name of the note. Five questions, one try — the neck dots are your map.',
+    intro_es: 'Un traste se ilumina en la cuerda Mi grave y el sitio lo toca. Toca el nombre de la nota. Cinco preguntas, un solo intento — los puntos del mástil son tu mapa.',
+    check: {
+      type: 'noteName',
+      string: 'lowE',
+      items: [
+        { fret: 3,  answer: 'G' },
+        { fret: 8,  answer: 'C' },
+        { fret: 5,  answer: 'A' },
+        { fret: 10, answer: 'D' },
+        { fret: 1,  answer: 'F' }
+      ]
+    }
+  },
 ];

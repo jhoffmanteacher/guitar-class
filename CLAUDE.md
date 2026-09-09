@@ -374,6 +374,37 @@ GitHub Pages doesn't deploy Firestore rules. After any push that touches
 the file, Publish. Until that happens the live quiz's answer writes are
 rejected and the game looks broken with no error students can see.
 
+## Exit checks — the end-of-period product
+
+An exit check is a class activity with `kind: 'check'` (schema at the top of
+`class-activities.js`): five auto-graded questions, one try, result on
+`progress/{uid}.exitChecks[id]` plus `classActivities[id] = true`. Two item
+types, `nextNote` and `noteName`. Engine is the `ec*` functions in `app.js`;
+the student card and the console preview share `caCheckBodyHtml()` **on
+purpose** — the two-renderers rule exists for a step FIELD going invisible in
+the teacher's copy, and a whole new card has no such split, so don't fork it.
+Console: the Activities table shows the turned-in count and average; the
+activity's detail page shows the per-student, per-question grid and a
+"Missed by" row. Data is guarded by checks.mjs **1y** (`1x` is the
+orphaned-assets check), which recomputes every answer key from the fretboard
+rather than shape-checking it — a wrong `answer` doesn't look broken, it just
+marks a correct student wrong. Checks take no `#N` number: `caNumberMap()`
+skips them, which covers `caNumber` and `teacherActivityNumbers` at once, and
+`teacherSetActivityNumber()` filters them out of its whole-list rewrite. No
+`firestore.rules` change was needed — the result is a field on the progress
+doc the teacher already reads whole. About one check per week is the intended
+pace (Jonathan, 2026-09-09).
+
+Two rules that are easy to break without noticing:
+
+- **Seed the MC shuffle on language-stable data.** `ecChoicesHtml` seeds on
+  the `fret·note` pairs, never the rendered chip labels — "fret 5 · A" and
+  "traste 5 · A" would hash differently and deal one student a different
+  order per language.
+- **The `noteName` board is drawn with `theme:'web'` plus the dark-mode
+  invert**, not on CSS variables: its fretted-note circle is a hardcoded
+  light green, so a variable-themed `?` would be light-on-light in dark mode.
+
 ## Videos
 
 - **Never invent YouTube IDs from memory** — even for famous songs or channels.

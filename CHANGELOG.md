@@ -5,6 +5,20 @@ Notable changes to the Guitar Class site. Newest first.
 For the full session-by-session history (and the reasoning behind each change),
 see `WORKFLOW.md` and the git commit log.
 
+## 2026-09-09 — Exit checks: a five-question turn-in at the end of class
+
+### Added
+
+- **Exit checks** in In-Class Activities. When your teacher dates one, it
+  shows up like any activity, but instead of steps it asks five quick
+  questions and grades them on the spot. One try, so listen as many times
+  as you need before you pick. Your score is saved and your teacher can
+  see it — that's your turn-in for the day.
+- The first two: **Happy Birthday — what comes next?** (the site plays the
+  start of a line and shows the frets; you pick the next note) and
+  **Notes on the Low E String** (a fret lights up on the board; you tap
+  its name). Both in English and Spanish.
+
 ## 2026-09-08 — Song Journey pages print like the rest of the site
 
 ### Fixed

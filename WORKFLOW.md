@@ -79,6 +79,16 @@
 
 ## Open work
 
+- [x] **2026-09-09 exit checks — work order at
+  `exit-checks-work-order-2026-09-09.md`.** Engine + `ca-14` (Phase 1),
+  `ca-15` + docs (Phase 2). Both pushed to `main` and deploy-verified.
+  The ratchet shipped as **1y**, not the 1x the order named — `1x` was
+  claimed the same morning by db377ce (orphaned assets), which is the
+  argument for reading `checks.mjs` before reserving a letter. Deferred,
+  not rejected: a console toggle for `retake` (today it's a data field);
+  a `chordName` item type; a per-class average on the Students view;
+  adding the `kind:'check'` schema to the `guitar-class-activity` skill.
+
 - [x] **2026-09-05 site audit — work order at `OPUSPLAN-site-audit-2026-09-05.md`.**
   **All six phases are done and pushed** (four commits, one per phase group).
   The plan's closing section lists the handful of items deliberately left
