@@ -64,11 +64,17 @@ patch-pair handoff it doesn't need.
 
 - **Claude Code on the web pushes normally.** It runs in its own ephemeral
   container with a writable clone and authenticated HTTPS to `origin`, so the
-  ordinary "push to GitHub" workflow applies, `main` included. Two limits:
-  there is no `gh` CLI (use the GitHub MCP tools instead), and the sandbox
-  proxy blocks the live site, so `checks.mjs --live` comes back HTTP 403 —
-  the deploy has to be confirmed from a local machine. (Verified 2026-09-04,
-  pushing the Journey tab-card restyle.)
+  ordinary "push to GitHub" workflow applies, `main` included. Three limits:
+  there is no `gh` CLI (use the GitHub MCP tools instead); the sandbox proxy
+  blocks the live site, so `checks.mjs --live` comes back HTTP 403 — the
+  deploy has to be confirmed from a local machine; and **the credentials push
+  commits but cannot delete refs**, so branch cleanup is a local job. A
+  `git push origin --delete` fails with a bare `RPC failed; HTTP 403` from
+  GitHub itself, and the GitHub MCP server has `create_branch` but no
+  delete-branch tool — there is no way around it from a web session, so hand
+  Jonathan the command (or the repo's Branches page) instead of retrying.
+  (Pushing verified 2026-09-04, shipping the Journey tab-card restyle; the
+  delete limit 2026-09-09, cleaning up six merged branches.)
 - **Cowork sessions can't push** — GitHub access is read-only and git writes
   through the device-bridge folder fail on lock files. Never attempt them.
   Instead: run full `node tools/checks.mjs`, commit, `git format-patch`, and
