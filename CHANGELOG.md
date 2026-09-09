@@ -5,6 +5,27 @@ Notable changes to the Guitar Class site. Newest first.
 For the full session-by-session history (and the reasoning behind each change),
 see `WORKFLOW.md` and the git commit log.
 
+## 2026-09-09 — "the cure" now follows the real song
+
+### Fixed
+
+- **The site was teaching a progression the song doesn't have.** "the cure"
+  was presented as one five-chord loop (Am · C · Dm · F · G/B) with the song
+  map claiming verse and chorus share chords. Checked against the official
+  chord chart, the verse is Am · C, then F · C, and the chorus is a
+  different progression: Dm · F, then C · G/B. The backing track follows the
+  real song, so Layers 2, 3 and 5 did not fit their own jam track.
+- **Layer 2 and class activity #12 now teach the verse root line** — A · C ·
+  A · C, then F · C · F · C on the low E (frets 5 · 8 and 1 · 8). The seven-
+  fret jump from C at fret 8 back to F at fret 1 is the new skill, and it is
+  a real move in the actual verse.
+- **Layer 3 now teaches the chorus** as power chords — D5 · F5 · C5 · G5,
+  one shape, root on the low E. A new fold explains why the chord written
+  G/B is played as G5 while the record's bassline plays B at fret 7.
+- **Layers 5 and 6, Module 2, Module 5 and Module 8** all updated to name
+  the verse and chorus separately. Spanish rewritten on every changed line.
+  New figure img/ca-cure-roots-verse.svg.
+
 ## 2026-09-09 — Cards no longer send you to a "station"
 
 ### Changed

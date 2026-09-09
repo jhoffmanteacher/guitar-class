@@ -641,8 +641,8 @@ SETS.push(
             hint_es: 'La barra en "G/B" se lee "acorde de G, con B en el bajo." No es una forma nueva — ya conoces cada posición de dedo desde G. Lo único que cambia es en qué cuerda empieza tu rasgueo.',
             stuck: 'If the low E slips into your strum, rest the side of your strumming hand lightly against it, or angle your pick to start from the A string.',
             stuck_es: 'Si la Mi grave se cuela en tu rasgueo, apoya ligeramente el borde de tu mano de rasgueo sobre ella, o inclina tu púa para empezar desde la cuerda La.',
-            levelUp: 'Drop it into the "the cure" turnaround — Am · C · Dm · F · G/B, then back to Am — right below.',
-            levelUp_es: 'Insértalo en el giro de "the cure" — Am · C · Dm · F · G/B, y de vuelta a Am — justo abajo.',
+            levelUp: 'Drop it into the "the cure" chorus — Dm · F, then C · G/B — right below.',
+            levelUp_es: 'Insértalo en el coro de "the cure" — Dm · F, y luego C · G/B — justo abajo.',
             skills: [8],
             chords: [
               { name: 'G/B', chord: [[6,'x'],[5,2,'1'],[4,0],[3,0],[2,0],[1,3,'3']], position: 0 }
@@ -691,12 +691,12 @@ SETS.push(
               },
               {
                 label: 'Challenge — "the cure" play-along', label_es: 'Reto — "the cure" tocando junto',
-                text: '<ol><li>Loop Olivia\'s chords with a down-strum — Am · C · Dm · F, two beats each, then G/B to turn it around.</li><li>Speed up in steps: 60 → 65 → 70 BPM.</li></ol>Open chords, no capo. Shapes are pre-loaded below. You\'ve got it when: two clean loops at 70 BPM, every change on beat 1, every string ringing clear. <a href="tabs/the-cure.html" target="_blank">&#x1F9F5; Song Journey: this is Layer 5 of 5 — Open Chords</a>.',
-                text_es: '<ol><li>Repite los acordes de Olivia con un rasgueo hacia abajo — Am · C · Dm · F, dos tiempos cada uno, y luego G/B para dar la vuelta.</li><li>Acelera en pasos: 60 → 65 → 70 BPM.</li></ol>Acordes al aire, sin capo. Las formas están precargadas abajo. Lo tienes cuando: dos vueltas limpias a 70 BPM, cada cambio en el tiempo 1, cada cuerda sonando clara. <a href="tabs/the-cure.html" target="_blank">&#x1F9F5; Recorrido de la canción: esto es la Capa 5 de 5 — Acordes al aire</a>.',
+                text: '<ol><li>Loop Olivia\'s chords with a down-strum, two beats each — the verse is Am · C, then F · C; the chorus is Dm · F, then C · G/B.</li><li>Speed up in steps: 60 → 65 → 70 BPM.</li></ol>Open chords, no capo. Shapes are pre-loaded below. You\'ve got it when: two clean loops of each — verse and chorus — at 70 BPM, every change on beat 1, every string ringing clear. <a href="tabs/the-cure.html" target="_blank">&#x1F9F5; Song Journey: this is Layer 5 of 5 — Open Chords</a>.',
+                text_es: '<ol><li>Repite los acordes de Olivia con un rasgueo hacia abajo, dos tiempos cada uno — la estrofa es Am · C, y luego F · C; el coro es Dm · F, y luego C · G/B.</li><li>Acelera en pasos: 60 → 65 → 70 BPM.</li></ol>Acordes al aire, sin capo. Las formas están precargadas abajo. Lo tienes cuando: dos vueltas limpias de cada una — estrofa y coro — a 70 BPM, cada cambio en el tiempo 1, cada cuerda sonando clara. <a href="tabs/the-cure.html" target="_blank">&#x1F9F5; Recorrido de la canción: esto es la Capa 5 de 5 — Acordes al aire</a>.',
                 hint: 'The backing track\'s metronome reads 144, but it feels half that fast — so 70 BPM here already puts you close to the record\'s real pace. You just learned Dm and the G/B turnaround above — Am, C, and F are all Group 1 chords you already know.',
                 hint_es: 'El metrónomo de la pista base marca 144, pero se siente a la mitad de esa velocidad — así que 70 BPM aquí ya te acerca bastante al ritmo real de la grabación. Acabas de aprender Dm y el giro G/B arriba — Am, C y F son todos acordes del Grupo 1 que ya conoces.',
-                stuck: 'Get Am · C · Dm · F clean in open position first, then add the G/B turnaround — or drop back to a plain G if the bass-string skip trips you up, and swap in G/B once the loop is steady.',
-                stuck_es: 'Deja Am · C · Dm · F limpios en posición abierta primero, y luego agrega el giro G/B — o vuelve a un G normal si saltarte la cuerda grave te complica, y cambia a G/B cuando la vuelta esté firme.',
+                stuck: 'Get the verse — Am · C · F · C — clean in open position first, then add the chorus — Dm · F · C · G/B. If the bass-string skip on G/B trips you up, drop back to a plain G until the loop is steady.',
+                stuck_es: 'Deja la estrofa — Am · C · F · C — limpia en posición abierta primero, y luego agrega el coro — Dm · F · C · G/B. Si saltarte la cuerda grave en G/B te complica, vuelve a un G normal hasta que la vuelta esté firme.',
                 levelUp: 'Switch to a down-up strum. Ready for the full-tempo version? Press &#x25B6; on the Song Journey page and play along with the actual 144 BPM backing track.',
                 levelUp_es: 'Cambia a un rasgueo abajo-arriba. ¿Listo para la versión a tempo completo? Presiona &#x25B6; en la página de Recorrido de la canción y toca junto con la pista base real a 144 BPM.',
                 skills: [6, 7, 8],
@@ -707,11 +707,14 @@ SETS.push(
                   { name: 'F',  chord: [[6,'x'],[5,'x'],[4,3,'3'],[3,2,'2'],[2,1,'1'],[1,1,'1']], position: 0 },
                   { name: 'G/B', chord: [[6,'x'],[5,2,'1'],[4,0],[3,0],[2,0],[1,3,'3']], position: 0 }
                 ],
-                playSeq: { label: 'Hear it — Am · C · Dm · F, two felt beats each, then G/B to turn it around', label_es: 'Escúchalo — Am · C · Dm · F, dos tiempos sentidos cada uno, y luego G/B para dar la vuelta', bpm: 60, notes: [
+                playSeq: { label: 'Hear it — verse: Am · C · F · C, then chorus: Dm · F · C · G/B, two felt beats each', label_es: 'Escúchalo — estrofa: Am · C · F · C, y luego coro: Dm · F · C · G/B, dos tiempos sentidos cada uno', bpm: 60, notes: [
                   { midi: [45,52,57,60,64], beats: 2 },
+                  { midi: [48,52,55,60,64], beats: 2 },
+                  { midi: [53,57,60,65], beats: 2 },
                   { midi: [48,52,55,60,64], beats: 2 },
                   { midi: [50,57,62,65], beats: 2 },
                   { midi: [53,57,60,65], beats: 2 },
+                  { midi: [48,52,55,60,64], beats: 2 },
                   { midi: [47,50,55,59,67], beats: 2 }
                 ] },
                 response: { type: 'short', prompt: 'Your cleanest tempo on the "the cure" loop today (BPM)?', prompt_es: '¿Tu tempo más limpio hoy en la vuelta de "the cure" (BPM)?', placeholder: 'e.g. 65 — 70 next session', placeholder_es: 'p. ej. 65 — 70 la próxima sesión' }
@@ -1626,7 +1629,7 @@ MODULE_SONGS[5] = [
       { name: '"All Along the Watchtower" — Dylan / Hendrix', meta: 'Full performance with open chords', meta_es: 'Interpretación completa con acordes al aire', type: 'Core', core: true, journeyUrl: 'tabs/all-along-the-watchtower.html',
         originalUrl: 'https://www.youtube.com/watch?v=bT7Hj-ea0VE',
         tutorialUrl: 'https://www.youtube.com/watch?v=Tnm1jWVLaC8' },
-      { name: '"the cure" — Olivia Rodrigo', meta: 'Open-chord play-along · Am–C–Dm–F–G/B', meta_es: 'Toca junto con acordes al aire · Am–C–Dm–F–G/B', type: 'Core', core: true, journeyUrl: 'tabs/the-cure.html',
+      { name: '"the cure" — Olivia Rodrigo', meta: 'Open-chord play-along · verse Am–C–F–C · chorus Dm–F–C–G/B', meta_es: 'Toca junto con acordes al aire · estrofa Am–C–F–C · coro Dm–F–C–G/B', type: 'Core', core: true, journeyUrl: 'tabs/the-cure.html',
         originalUrl: 'https://www.youtube.com/watch?v=B402rKl4bUg',
         tutorialUrl: 'https://www.youtube.com/watch?v=adW_zSkClaY' },
       { name: '"Luna" — Peso Pluma, Junior H', meta: 'Full-song performance · F–Am–Dm', meta_es: 'Interpretación de la canción completa · F–Am–Dm', type: 'Core', core: true, journeyUrl: 'tabs/luna.html',

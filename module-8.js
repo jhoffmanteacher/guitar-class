@@ -226,8 +226,8 @@ SETS.push(
                 hint_es: 'La estrofa de Olivia está tocada con fingerpicking exactamente por esta razón — suave y cercana. La muñeca se mantiene arqueada; solo se mueven los dedos. Cuatro notas, cuatro tiempos, un compás de 4/4 — la Unidad 2 estira esta misma idea en un patrón más largo sobre la misma canción. (Este ritmo de un compás por acorde es un conteo de enseñanza lento — la grabación en realidad siente cada acorde en dos tiempos, casi el doble de rápido.)',
                 stuck: 'Run p-i-m-a on open strings first (no chord at all), then add the Am under it.',
                 stuck_es: 'Toca p-i-m-a en cuerdas al aire primero (sin acorde alguno), y luego agrega el Am debajo.',
-                levelUp: 'Add Dm and F: the thumb travels to the D string for both — and now you have the song\'s whole verse loop (Am · C · Dm · F).',
-                levelUp_es: 'Agrega Dm y F: el pulgar viaja a la cuerda Re para ambos — y ahora tienes todo el loop de la estrofa de la canción (Am · C · Dm · F).',
+                levelUp: 'Add F: the thumb travels to the D string for it — and now you have the song\'s whole verse loop (Am · C · F · C).',
+                levelUp_es: 'Agrega F: el pulgar viaja a la cuerda Re para tocarlo — y ahora tienes todo el loop de la estrofa de la canción (Am · C · F · C).',
                 skills: [5, 6],
                 playSeq: { label: '"the cure" feel — p-i-m-a on Am', label_es: 'Sensación de "the cure" — p-i-m-a en Am', bpm: 60, notes: [45, 57, 60, 64] },
                 chords: [
@@ -530,18 +530,18 @@ SETS.push(
             steps: [
               {
                 label: 'Challenge — "the cure", verse', label_es: 'Reto — "the cure", estrofa',
-                text: '"the cure" is in 4/4 — four beats a bar, not the six you just drilled on Em — so stretch the pattern to eight notes, p-i-m-a-m-i-m-i, two notes per beat:<ul><li>Play it over the verse loop — Am · C · Dm · F, one bar each at 60 BPM.</li><li>Thumb on the A string for Am and C.</li><li>Thumb on the D string for Dm and F.</li><li>i-m-a never leave G-B-e.</li></ul>You\'ve got it when: one full lap with the pattern unbroken at every change. <a href="tabs/the-cure.html#layer-6" target="_blank">&#x1F9F5; Song Journey: the fingerpicked verse</a>.',
-                text_es: '"the cure" está en 4/4 — cuatro tiempos por compás, no los seis que acabas de ejercitar en Em — así que estira el patrón a ocho notas, p-i-m-a-m-i-m-i, dos notas por tiempo:<ul><li>Tócalo sobre el loop de la estrofa — Am · C · Dm · F, un compás cada uno a 60 BPM.</li><li>Pulgar en la cuerda La para Am y C.</li><li>Pulgar en la cuerda Re para Dm y F.</li><li>i-m-a nunca dejan Sol, Si y mi aguda.</li></ul>Lo tienes cuando: una vuelta completa con el patrón sin interrupciones en cada cambio. <a href="tabs/the-cure.html#layer-6" target="_blank">&#x1F9F5; Recorrido de la canción: la estrofa con fingerpicking</a>.',
-                hint: 'Eight too many? Use Set 1\'s four-note p-i-m-a instead, one note per beat — four notes, four beats, one bar. That is exactly what you played on "the cure" in Set 1, so the two sets ask for the same thing at two sizes. Either way the four bass notes pair up: Am and C both live on the A string, Dm and F both live on the D string — the thumb travels only once, at C→Dm, then stays. The fingers never move at all. (One bar per chord is a slow teaching count — the record actually feels each chord in two beats, about twice as fast.)',
-                hint_es: '¿Ocho son demasiadas? Usa el p-i-m-a de cuatro notas de la Unidad 1, una nota por tiempo — cuatro notas, cuatro tiempos, un compás. Eso es exactamente lo que tocaste en "the cure" en la Unidad 1, así que las dos unidades piden lo mismo en dos tamaños. De cualquier forma, las cuatro notas graves se emparejan: Am y C viven en la cuerda La, Dm y F viven en la cuerda Re — el pulgar viaja solo una vez, en C→Dm, y luego se queda. Los dedos nunca se mueven. (Un compás por acorde es un conteo de enseñanza lento — la grabación en realidad siente cada acorde en dos tiempos, casi el doble de rápido.)',
-                stuck: 'Loop Am → C until your fretting hand lands on fret 3 without looking — the thumb just keeps plucking the A string — then add Dm and F as their own pair.',
-                stuck_es: 'Repite Am → C hasta que tu mano de trastear caiga en el traste 3 sin mirar — el pulgar sigue pulsando la cuerda La — y luego agrega Dm y F como su propio par.',
+                text: '"the cure" is in 4/4 — four beats a bar, not the six you just drilled on Em — so stretch the pattern to eight notes, p-i-m-a-m-i-m-i, two notes per beat:<ul><li>Play it over the verse loop — Am · C · F · C, one bar each at 60 BPM.</li><li>Thumb on the A string for Am and C.</li><li>Thumb on the D string for F.</li><li>i-m-a never leave G-B-e.</li></ul>You\'ve got it when: one full lap with the pattern unbroken at every change. <a href="tabs/the-cure.html#layer-6" target="_blank">&#x1F9F5; Song Journey: the fingerpicked verse</a>.',
+                text_es: '"the cure" está en 4/4 — cuatro tiempos por compás, no los seis que acabas de ejercitar en Em — así que estira el patrón a ocho notas, p-i-m-a-m-i-m-i, dos notas por tiempo:<ul><li>Tócalo sobre el loop de la estrofa — Am · C · F · C, un compás cada uno a 60 BPM.</li><li>Pulgar en la cuerda La para Am y C.</li><li>Pulgar en la cuerda Re para F.</li><li>i-m-a nunca dejan Sol, Si y mi aguda.</li></ul>Lo tienes cuando: una vuelta completa con el patrón sin interrupciones en cada cambio. <a href="tabs/the-cure.html#layer-6" target="_blank">&#x1F9F5; Recorrido de la canción: la estrofa con fingerpicking</a>.',
+                hint: 'Eight too many? Use Set 1\'s four-note p-i-m-a instead, one note per beat — four notes, four beats, one bar. That is exactly what you played on "the cure" in Set 1, so the two sets ask for the same thing at two sizes. Either way: Am and C both live on the A string, F lives on the D string — the thumb travels to the D string for F, then back to the A string for the final C. The fingers never move at all. (One bar per chord is a slow teaching count — the record actually feels each chord in two beats, about twice as fast.)',
+                hint_es: '¿Ocho son demasiadas? Usa el p-i-m-a de cuatro notas de la Unidad 1, una nota por tiempo — cuatro notas, cuatro tiempos, un compás. Eso es exactamente lo que tocaste en "the cure" en la Unidad 1, así que las dos unidades piden lo mismo en dos tamaños. De cualquier forma: Am y C viven en la cuerda La, F vive en la cuerda Re — el pulgar viaja a la cuerda Re para el F, y luego regresa a la cuerda La para el C final. Los dedos nunca se mueven. (Un compás por acorde es un conteo de enseñanza lento — la grabación en realidad siente cada acorde en dos tiempos, casi el doble de rápido.)',
+                stuck: 'Loop Am → C until your fretting hand lands on fret 3 without looking — the thumb just keeps plucking the A string — then add F and the return to C as their own pair.',
+                stuck_es: 'Repite Am → C hasta que tu mano de trastear caiga en el traste 3 sin mirar — el pulgar sigue pulsando la cuerda La — y luego agrega F y el regreso a C como su propio par.',
                 levelUp: 'Hum the melody over your own picking — this is the actual sound of the record.',
                 levelUp_es: 'Tararea la melodía sobre tu propio punteo — este es el sonido real de la grabación.',
                 skills: [4, 6],
                 tab: {
-                  caption: '"the cure" — fingerstyle bass roots · Am · C · Dm · F · one bar each · 60 BPM',
-                  caption_es: '"the cure" — raíces graves de fingerstyle · Am · C · Dm · F · un compás cada uno · 60 BPM',
+                  caption: '"the cure" — fingerstyle bass roots · Am · C · F · C · one bar each · 60 BPM',
+                  caption_es: '"the cure" — raíces graves de fingerstyle · Am · C · F · C · un compás cada uno · 60 BPM',
                   notes: [
                     { string: 'A', fret: 0, note: 'A', midi: 45 },
                     { string: 'A', fret: 0, note: 'A', midi: 45 },
@@ -551,17 +551,17 @@ SETS.push(
                     { string: 'A', fret: 3, note: 'C', midi: 48 },
                     { string: 'A', fret: 3, note: 'C', midi: 48 },
                     { string: 'A', fret: 3, note: 'C', midi: 48 },
-                    { string: 'D', fret: 0, note: 'D', midi: 50 },
-                    { string: 'D', fret: 0, note: 'D', midi: 50 },
-                    { string: 'D', fret: 0, note: 'D', midi: 50 },
-                    { string: 'D', fret: 0, note: 'D', midi: 50 },
                     { string: 'D', fret: 3, note: 'F', midi: 53 },
                     { string: 'D', fret: 3, note: 'F', midi: 53 },
                     { string: 'D', fret: 3, note: 'F', midi: 53 },
-                    { string: 'D', fret: 3, note: 'F', midi: 53 }
+                    { string: 'D', fret: 3, note: 'F', midi: 53 },
+                    { string: 'A', fret: 3, note: 'C', midi: 48 },
+                    { string: 'A', fret: 3, note: 'C', midi: 48 },
+                    { string: 'A', fret: 3, note: 'C', midi: 48 },
+                    { string: 'A', fret: 3, note: 'C', midi: 48 }
                   ]
                 },
-                response: { type: 'short', prompt: 'Which change broke the pattern more — Am→C or C→Dm?', prompt_es: '¿Qué cambio rompió más el patrón — Am→C o C→Dm?', placeholder: 'e.g. C→Dm — the thumb overshoots the D string', placeholder_es: 'p. ej. C→Dm — el pulgar se pasa de la cuerda Re' }
+                response: { type: 'short', prompt: 'Which change broke the pattern more — C→F, or F back to C?', prompt_es: '¿Qué cambio rompió más el patrón — C→F, o el regreso de F a C?', placeholder: 'e.g. C→F — the thumb overshoots the D string', placeholder_es: 'p. ej. C→F — el pulgar se pasa de la cuerda Re' }
               }
             ]
           },
@@ -996,7 +996,7 @@ SETS.push(
 
 globalThis.MODULE_SONGS = globalThis.MODULE_SONGS || {};
 MODULE_SONGS[8] = [
-      { name: '"the cure" — Olivia Rodrigo', meta: 'Fingerpick the verse for a soft feel · Am–C–Dm–F', meta_es: 'Toca la estrofa con fingerpicking para una sensación suave · Am–C–Dm–F', type: 'Core', core: true, journeyUrl: 'tabs/the-cure.html',
+      { name: '"the cure" — Olivia Rodrigo', meta: 'Fingerpick the verse for a soft feel · Am–C–F–C', meta_es: 'Toca la estrofa con fingerpicking para una sensación suave · Am–C–F–C', type: 'Core', core: true, journeyUrl: 'tabs/the-cure.html',
         originalUrl: 'https://www.youtube.com/watch?v=B402rKl4bUg',
         tutorialUrl: 'https://www.youtube.com/watch?v=adW_zSkClaY' },
       { name: '"Let It Be" — The Beatles', meta: 'Fingerpick the verse · C–G–Am–F', meta_es: 'Toca la estrofa con fingerpicking · C–G–Am–F', type: 'Core', core: true, journeyUrl: 'tabs/let-it-be.html',
