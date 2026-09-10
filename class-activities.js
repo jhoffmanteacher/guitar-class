@@ -147,6 +147,12 @@
                                                       // span idiom; any img/
                                                       // asset also goes in
                                                       // sw.js ASSETS
+         figureAlt:    'What the diagram shows, in words — a screen-reader
+                         student gets this instead of the image. Required
+                         alongside `figure`; rendered via tf(step,
+                         'figureAlt') in both caStepHtml() (app.js) and
+                         renderTeacherActivityDetail() (teacher.js).',
+         figureAlt_es: '…',
          tab: {                                      // optional — same spec
            caption: '…', caption_es: '…',             // shape as module step
            // either notes: [...] directly, or phrases: [{ label, label_es,
@@ -234,6 +240,8 @@ window.CLASS_ACTIVITIES = [
     steps: [
       {
         figure: 'img/ca-hb-fingers.svg',
+        figureAlt: 'Diagram of the fretting hand on the low E string showing finger numbers 1 (index), 2 (middle), 3 (ring), and 4 (pinky), with the thumb behind the neck and landing-mark dots at frets 5 and 7.',
+        figureAlt_es: 'Diagrama de la mano de trastear en la cuerda Mi grave mostrando los números de los dedos 1 (índice), 2 (medio), 3 (anular) y 4 (meñique), con el pulgar detrás del mástil y puntos de referencia en los trastes 5 y 7.',
         text: 'The whole song lives on the low E string (the thickest one), and your fretting fingers have numbers — 1 = index, 2 = middle, 3 = ring, 4 = pinky. The thumb has none; it stays behind the neck. Home spot: finger 1 → fret 2, finger 3 → fret 4, finger 4 → fret 5. Today the map grows past the home spot — fret 7 first, then higher still. The dots at 5 and 7 are your landing marks.',
         text_es: 'La canción completa vive en la cuerda Mi grave (la más gruesa), y los dedos de tu mano de trastear tienen números — 1 = índice, 2 = medio, 3 = anular, 4 = meñique. El pulgar no tiene; se queda detrás del mástil. Posición base: dedo 1 → traste 2, dedo 3 → traste 4, dedo 4 → traste 5. Hoy el mapa crece más allá de la posición base — primero el traste 7, y después más arriba. Los puntos en el 5 y el 7 son tus marcas de referencia.',
       },
@@ -273,6 +281,8 @@ window.CLASS_ACTIVITIES = [
       },
       {
         figure: 'img/ca-hb-low-e-all.svg',
+        figureAlt: 'Low E string fretboard diagram showing the double-dot landing mark at fret 12 and the single dot at fret 9, alongside the earlier marks at frets 2, 4, 5, and 7.',
+        figureAlt_es: 'Diagrama del diapasón de la cuerda Mi grave mostrando el punto doble de referencia en el traste 12 y el punto sencillo en el traste 9, junto con las marcas anteriores en los trastes 2, 4, 5 y 7.',
         text: 'The back half of the song lives further up the same string. Two new landing marks:<ul><li>The double dot at fret 12 — that note is an E, the same one you get open, an octave higher</li><li>The single dot at fret 9</li></ul>Play open, 12, 9, 5 — look at the dot before your hand moves, then try it without looking.<br>You\'ve got it when: you land on 12 and on 9 without hunting for them, three times out of three.',
         text_es: 'La segunda mitad de la canción vive más arriba en la misma cuerda. Dos marcas de referencia nuevas:<ul><li>El punto doble del traste 12 — esa nota es un E, la misma que suena al aire, una octava más arriba</li><li>El punto sencillo del traste 9</li></ul>Toca al aire, 12, 9, 5 — mira el punto antes de mover la mano, y después inténtalo sin mirar.<br>Lo tienes cuando: caes en el 12 y en el 9 sin andarlos buscando, tres de tres veces.',
         tab: {
@@ -382,6 +392,8 @@ window.CLASS_ACTIVITIES = [
       },
       {
         figure: 'img/ca-hb-a.svg',
+        figureAlt: 'Fretboard diagram comparing the low E and A strings, showing the same landing frets — 2, 4, 5, and 7 — mirrored on the A string.',
+        figureAlt_es: 'Diagrama del diapasón comparando las cuerdas Mi grave y La, mostrando los mismos trastes de referencia — 2, 4, 5 y 7 — reflejados en la cuerda La.',
         text: 'Level up: the same song without the trip up the neck. It takes a second string. Meet the A string — one string down from the low E, the second-thickest. Same map: frets 2, 4, 5 and 7, and the dots at 5 and 7 are still your landing marks.<ul><li>Pluck the open low E, then the open A, back and forth — no fretting hand yet</li><li>The pick moves one string; ONLY one string rings each time</li><li>Both sound? Slow the pick down and look at where it lands</li></ul>You\'ve got it when: low E, A, low E, A — three clean reps in a row, one string per pluck.',
         text_es: 'Sube de nivel: la misma canción sin el viaje mástil arriba. Eso pide una segunda cuerda. Esta es la cuerda La — la que está justo debajo de la cuerda Mi grave, la segunda más gruesa. El mismo mapa: trastes 2, 4, 5 y 7, y los puntos en el 5 y el 7 siguen siendo tus marcas de referencia.<ul><li>Pulsa la cuerda Mi grave al aire, luego la cuerda La al aire, ida y vuelta — todavía sin la mano de trastear</li><li>La púa se mueve una sola cuerda; SOLO una cuerda suena cada vez</li><li>¿Suenan las dos? Mueve la púa más despacio y mira dónde cae</li></ul>Lo tienes cuando: cuerda Mi grave, cuerda La, cuerda Mi grave, cuerda La — tres repeticiones limpias seguidas, una cuerda por pulsación.',
         tab: {
@@ -397,6 +409,8 @@ window.CLASS_ACTIVITIES = [
       },
       {
         figure: 'img/ca-hb-fingers-a.svg',
+        figureAlt: 'Diagram of the fretting hand on the A string for phrases C and D, showing finger 4 at fret 7, finger 3 at fret 4, and the string crossing back to the low E string.',
+        figureAlt_es: 'Diagrama de la mano de trastear en la cuerda La para las frases C y D, mostrando el dedo 4 en el traste 7, el dedo 3 en el traste 4 y el cruce de regreso a la cuerda Mi grave.',
         text: 'Phrases C and D again, this time on the A string — every note stays inside the first seven frets.<ul><li>Phrase C: two open notes on the low E → finger 4 on fret 7 of the A, finger 3 on fret 4, then the open A → back to the low E for 4 and 2</li><li>Finger 3 crosses strings without changing frets: fret 4 on the A, then fret 4 on the low E</li><li>Phrase D lives entirely on the A string, back in the home spot: 4, 4, 3, open, 1, open</li></ul>You\'ve got it when: phrase C into phrase D, three clean runs, no hunting for the string. Buzz twice? Drop the BPM by 10 and try again.',
         text_es: 'Las frases C y D otra vez, ahora en la cuerda La — todas las notas se quedan dentro de los primeros siete trastes.<ul><li>Frase C: dos notas al aire en la cuerda Mi grave → dedo 4 en el traste 7 de la cuerda La, dedo 3 en el traste 4, y luego la cuerda La al aire → de vuelta a la Mi grave para el 4 y el 2</li><li>El dedo 3 cruza a la otra cuerda sin cambiar de traste: traste 4 en la cuerda La, y luego traste 4 en la cuerda Mi grave</li><li>La frase D vive completa en la cuerda La, de vuelta en la posición base: 4, 4, 3, al aire, 1, al aire</li></ul>Lo tienes cuando: de la frase C a la frase D, tres pasadas limpias, sin andar buscando la cuerda. ¿Zumbó dos veces? Baja el BPM 10 puntos y vuelve a intentarlo.',
         tab: {
@@ -502,6 +516,8 @@ window.CLASS_ACTIVITIES = [
     steps: [
       {
         figure: 'img/ca-fg-gym-zone.svg',
+        figureAlt: 'Diagram of the first five frets of the low E string, the training zone for today\'s Finger Gym.',
+        figureAlt_es: 'Diagrama de los primeros cinco trastes de la cuerda Mi grave, la zona de entrenamiento del Gimnasio de Dedos de hoy.',
         text: 'This is the gym: the first five frets of the low E string (the thickest one). A fret is the space between two metal strips — fret 1 is closest to the tuning pegs.',
         text_es: 'Este es el gimnasio: los primeros cinco trastes de la cuerda Mi grave (la más gruesa). Un traste es el espacio entre dos barras de metal — el traste 1 es el más cercano a las clavijas.',
       },
@@ -585,6 +601,8 @@ window.CLASS_ACTIVITIES = [
     steps: [
       {
         figure: 'img/ca-fg-gym-zone.svg',
+        figureAlt: 'Diagram of the first five frets of the low E string, the training zone for today\'s Finger Gym.',
+        figureAlt_es: 'Diagrama de los primeros cinco trastes de la cuerda Mi grave, la zona de entrenamiento del Gimnasio de Dedos de hoy.',
         text: 'This is the same gym as last time: the first five frets. Two things change today — the direction you travel, and how many strings you use.',
         text_es: 'Este es el mismo gimnasio que la vez pasada: los primeros cinco trastes. Hoy cambian dos cosas — la dirección en la que te mueves, y cuántas cuerdas usas.',
       },
@@ -675,6 +693,8 @@ window.CLASS_ACTIVITIES = [
     steps: [
       {
         figure: 'img/ca-fg-dots.svg',
+        figureAlt: 'Neck diagram highlighting the landing-mark dots at frets 5, 7, 9, and the double dot at fret 12.',
+        figureAlt_es: 'Diagrama del mástil resaltando los puntos de referencia en los trastes 5, 7, 9 y el punto doble en el traste 12.',
         text: 'The dots on the neck are your landing marks: frets 5, 7, 9, and the double dot at 12. Learn to find them with your eyes before your hand goes there.',
         text_es: 'Los puntos en el mástil son tus marcas de referencia: los trastes 5, 7, 9 y el punto doble en el 12. Aprende a encontrarlos con la vista antes de que llegue tu mano.',
       },
@@ -753,6 +773,8 @@ window.CLASS_ACTIVITIES = [
     steps: [
       {
         figure: 'img/ca-fg-gym-zone.svg',
+        figureAlt: 'Diagram of the first five frets of the low E string, the training zone for today\'s Finger Gym.',
+        figureAlt_es: 'Diagrama de los primeros cinco trastes de la cuerda Mi grave, la zona de entrenamiento del Gimnasio de Dedos de hoy.',
         text: 'You\'re back in the first five frets. The notes are the same as Gym 1 — what changes is that nothing lifts.',
         text_es: 'Estás de vuelta en los primeros cinco trastes. Las notas son las mismas del Gimnasio 1 — lo que cambia es que nada se levanta.',
       },
@@ -828,6 +850,8 @@ window.CLASS_ACTIVITIES = [
     steps: [
       {
         figure: 'img/ca-fg-gym-zone-skip.svg',
+        figureAlt: 'Diagram of three strings — low E, A, and D — out to fret 6, showing the wider, deeper training zone for today\'s Finger Gym.',
+        figureAlt_es: 'Diagrama de tres cuerdas — Mi grave, La y Re — hasta el traste 6, mostrando la zona de entrenamiento más ancha y profunda del Gimnasio de Dedos de hoy.',
         text: 'The gym grows today: three strings deep — low E, A, and D — and one fret wider, out to fret 6. The distance is sideways now as well as along the neck.',
         text_es: 'Hoy el gimnasio crece: tres cuerdas de profundidad — Mi grave, La y Re — y un traste más de ancho, hasta el traste 6. Ahora la distancia también es de lado, además de a lo largo del mástil.',
       },
@@ -905,6 +929,8 @@ window.CLASS_ACTIVITIES = [
     steps: [
       {
         figure: 'img/ca-fg-gym-zone.svg',
+        figureAlt: 'Diagram of the first five frets of the low E string, the training zone for today\'s Finger Gym.',
+        figureAlt_es: 'Diagrama de los primeros cinco trastes de la cuerda Mi grave, la zona de entrenamiento del Gimnasio de Dedos de hoy.',
         text: 'Three events, same as always: the Ladder, the Spider, the Reach. Today they get run for time and tempo instead of learned.',
         text_es: 'Tres eventos, como siempre: la Escalera, la Araña y el Estiramiento. Hoy se corren por tiempo y tempo, no se aprenden.',
       },
@@ -982,6 +1008,8 @@ window.CLASS_ACTIVITIES = [
     steps: [
       {
         figure: 'img/ca-hb-low-e.svg',
+        figureAlt: 'Low E string fretboard diagram showing open string, fret 2 (F#), fret 4 (G#), and fret 5 (A), with faint landing-mark dots at frets 3, 5, 7, 9, and 12.',
+        figureAlt_es: 'Diagrama del diapasón de la cuerda Mi grave mostrando la cuerda al aire, el traste 2 (F#), el traste 4 (G#) y el traste 5 (A), con puntos tenues de referencia en los trastes 3, 5, 7, 9 y 12.',
         text: 'This is the low E string — the thick one, closest to your face.<ul><li>The whole phrase lives here: open (0 = no finger) is E, fret 2 is F#, fret 4 is G#, fret 5 is A</li><li>The faint dots — frets 3, 5, 7, 9 and 12 — are a map; the dot at fret 5 is your landing mark</li></ul>',
         text_es: 'Esta es la cuerda Mi grave — la más gruesa, la que queda más cerca de tu cara.<ul><li>Toda la frase vive aquí: al aire (0 = sin dedo) es E, el traste 2 es F#, el traste 4 es G# y el traste 5 es A</li><li>Los puntos tenues — trastes 3, 5, 7, 9 y 12 — son un mapa; el punto del traste 5 es tu marca para caer</li></ul>',
       },
@@ -1051,6 +1079,8 @@ window.CLASS_ACTIVITIES = [
     steps: [
       {
         figure: 'img/ca-sna-riff-map.svg',
+        figureAlt: 'Diagram of the A string with the riff\'s notes circled at frets 2, 3, 5, 7, and 10, alongside the neck\'s landmark dots at frets 3, 5, 7, and 9.',
+        figureAlt_es: 'Diagrama de la cuerda La con las notas del riff marcadas en círculo en los trastes 2, 3, 5, 7 y 10, junto con los puntos de referencia del mástil en los trastes 3, 5, 7 y 9.',
         text: 'This is where the riff lives: the A string — the one just below the thickest string. The circled letters are the riff\'s notes; the small gray dots between them are the neck\'s own landmark dots at frets 3, 5, 7, and 9.',
         text_es: 'Aquí vive el riff: la cuerda La — la que está justo debajo de la cuerda Mi grave. Las letras en círculo son las notas del riff; los puntos grises pequeños son las marcas del mástil en los trastes 3, 5, 7 y 9.',
       },
@@ -1115,6 +1145,8 @@ window.CLASS_ACTIVITIES = [
     steps: [
       {
         figure: 'img/ca-lowe-naturals.svg',
+        figureAlt: 'Low E string fretboard diagram with every natural note circled — E, F, G, A, B, C, D, E — from the open string up to the octave at fret 12.',
+        figureAlt_es: 'Diagrama del diapasón de la cuerda Mi grave con cada nota natural marcada en círculo — E, F, G, A, B, C, D, E — desde la cuerda al aire hasta la octava en el traste 12.',
         text: 'This is the low E string — the thick one — with its natural notes circled: the plain letter names, no sharps.<ul><li>E F G A B C D E: it starts on open E (0 = no finger) and lands on E again at fret 12 — same name, higher sound. That repeat is called an octave</li><li>The neck dots are your map: the dots at frets 3, 5 and 7 carry G, A and B, and the double dot at 12 is E again, an octave up</li></ul>',
         text_es: 'Esta es la cuerda Mi grave — la más gruesa — con sus notas naturales en círculos: los nombres de letra simples, sin sostenidos.<ul><li>E F G A B C D E: empieza al aire (0 = sin dedo) con E y vuelve a caer en E en el traste 12 — mismo nombre, sonido más agudo. Esa repetición se llama octava</li><li>Los puntos del mástil son tu mapa: los puntos de los trastes 3, 5 y 7 llevan G, A y B, y el punto doble del 12 es E otra vez, una octava arriba</li></ul>',
       },
@@ -1198,6 +1230,8 @@ window.CLASS_ACTIVITIES = [
         label:    'Read the map',
         label_es: 'Lee el mapa',
         figure: 'img/ca-lowe-naturals.svg',
+        figureAlt: 'Low E string fretboard diagram with every natural note circled — E, F, G, A, B, C, D, E — from the open string up to the octave at fret 12.',
+        figureAlt_es: 'Diagrama del diapasón de la cuerda Mi grave con cada nota natural marcada en círculo — E, F, G, A, B, C, D, E — desde la cuerda al aire hasta la octava en el traste 12.',
         text: 'The low E string, with its natural notes circled — no sharps.<ul><li>E F G A B C D E, open string up to fret 12</li><li>The dots at 3, 5 and 7 are G, A and B. The double dot at 12 is E again</li></ul>Read it once, then cover it. The next two stops test it.',
         text_es: 'La cuerda Mi grave, con sus notas naturales en círculos — sin sostenidos.<ul><li>E F G A B C D E, de la cuerda al aire al traste 12</li><li>Los puntos del 3, el 5 y el 7 son G, A y B. El punto doble del 12 es E otra vez</li></ul>Léelo una vez y después tápalo. Las dos paradas que siguen lo prueban.',
       },
@@ -1308,6 +1342,8 @@ window.CLASS_ACTIVITIES = [
         label:    'The low E map',
         label_es: 'El mapa de la cuerda Mi grave',
         figure: 'img/ca-cure-roots-verse.svg',
+        figureAlt: 'Low E string fretboard diagram marking the three verse root notes: F at fret 1, A at fret 5, and C at fret 8.',
+        figureAlt_es: 'Diagrama del diapasón de la cuerda Mi grave marcando las tres raíces de la estrofa: F en el traste 1, A en el traste 5 y C en el traste 8.',
         text: 'Three roots on the thickest string. <b>F</b> at fret 1 and <b>A</b> at fret 5 — the first dot on the neck — are both from Watchtower. <b>C</b> at fret 8 is new: one past the dot at fret 7.',
         text_es: 'Tres raíces en la cuerda más gruesa. <b>F</b> en el traste 1 y <b>A</b> en el traste 5 — el primer punto del mástil — ya las conoces de Watchtower. <b>C</b> en el traste 8 es nueva: uno después del punto del traste 7.',
       },

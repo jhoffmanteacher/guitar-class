@@ -399,8 +399,15 @@ document.addEventListener('keydown',e=>{
    gap, and one of them can open ON TOP of a full-screen overlay (z-index 150
    over 120). They're appended to <body> after #app, so the LAST match in
    document order is the topmost one — trap that, or a modal stacked over the
-   games screen would be the one thing Tab couldn't reach. */
-const MODAL_OVERLAY_SEL = '.games-screen:not([hidden]), .daily5-overlay';
+   games screen would be the one thing Tab couldn't reach.
+   .lq-invite (live-quiz.js's join dialog) belongs here too — same
+   role="dialog" aria-modal="true" shape, appended to <body> the same way,
+   and it auto-pops on ANY page (including the six Journey pages, which have
+   no games-screen/daily5-overlay at all) the moment the teacher starts a
+   game, so a keyboard student mid-lesson can hit it with no warning. It has
+   no [hidden] toggle — lqSyncInvite() removes the element outright when it
+   isn't showing — so the selector needs no :not([hidden]) qualifier. */
+const MODAL_OVERLAY_SEL = '.games-screen:not([hidden]), .daily5-overlay, .lq-invite';
 const MODAL_FOCUSABLE_SEL = 'a[href], button:not([disabled]), input:not([disabled]), select:not([disabled]), textarea:not([disabled]), iframe, [tabindex]:not([tabindex="-1"])';
 document.addEventListener('keydown', e => {
   if(e.key !== 'Tab') return;

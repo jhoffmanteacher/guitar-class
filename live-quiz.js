@@ -188,6 +188,9 @@ let lqJoinedId  = null;   // sessionId we've already announced ourselves for
 // left further down the file it was a temporal-dead-zone error waiting for
 // the first caller that ran before the script finished. See lqInviteDismissed().
 let lqInviteAnsweredId = null;
+// Element to refocus when the invite dialog closes — whatever had focus
+// before it auto-popped. See lqSyncInvite().
+let _lqInviteReturnFocus = null;
 let lqQOpenedAt = 0;      // performance.now() when THIS round opened locally
 let lqSendError = false;
 let lqTick      = null;   // countdown interval, only while limitSec > 0
@@ -304,8 +307,22 @@ function lqSyncInvite(){
   const show = !!live && live.state !== 'ended' && !onScreen
             && lqInviteDismissed() !== live.sessionId;
   let el = document.getElementById('lq-invite');
-  if(!show){ if(el){ el.remove(); document.body.classList.remove('lq-invite-open'); } return; }
+  if(!show){
+    if(el){
+      el.remove(); document.body.classList.remove('lq-invite-open');
+      // Return focus to wherever it was before the dialog auto-popped —
+      // without this a keyboard student is left on whatever the focus trap
+      // last put them on (the Join/Not now buttons), not where they were
+      // reading before the invite interrupted them.
+      if(_lqInviteReturnFocus && document.contains(_lqInviteReturnFocus)){
+        try { _lqInviteReturnFocus.focus(); } catch(e){}
+      }
+      _lqInviteReturnFocus = null;
+    }
+    return;
+  }
   if(el) return;
+  _lqInviteReturnFocus = document.activeElement;
 
   // DOM nodes, not innerHTML — this runs on the Journey pages too, which
   // have no escHtml(). data-i18n on every string so a language switch
@@ -661,7 +678,11 @@ function renderTeacherLiveQuiz(){
    teacher's own clock) since the stage has no server round-trip to wait on. */
 function lqStageSyncTick(){
   const s = lqTSession && lqTSession.state ? lqTSession : null;
-  const need = !!(s && s.state === 'question' && Number(s.limitSec) && teacherView === 'livequiz' && document.getElementById('lq-st-timer'));
+  // Defensive guard, same as the gc-langchange listener above: renderTeacherLiveQuiz
+  // (the only caller of this function) is teacher-console-only today, so teacherView
+  // is currently unreachable-undefined here — but this file also ships on the six
+  // Journey pages, which have no teacher.js and thus no teacherView global at all.
+  const need = !!(s && s.state === 'question' && Number(s.limitSec) && typeof teacherView !== 'undefined' && teacherView === 'livequiz' && document.getElementById('lq-st-timer'));
   if(need && !lqTTick) lqTTick = setInterval(lqStageUpdateTimer, 250);
   if(!need) lqStageStopTick();
   if(need) lqStageUpdateTimer();
@@ -692,12 +713,12 @@ function lqTeacherListen(){
       if(lqTSession && lqTSession.state === 'question' && (!prev || prev.sessionId !== lqTSession.sessionId || prev.qIndex !== lqTSession.qIndex)){
         lqTQOpenedAt = performance.now();
       }
-      if(teacherView === 'livequiz'){ lqPaintStage(); lqPaintControls(); }
+      if(typeof teacherView !== 'undefined' && teacherView === 'livequiz'){ lqPaintStage(); lqPaintControls(); }
       lqStageSyncTick();
     }, e => console.warn('[live-quiz] teacher session listener stopped', e));
     lqTUnsubAns = lqDoc().collection('answers').onSnapshot(snap => {
       lqTAnswers = snap.docs.map(d => d.data() || {});
-      if(teacherView === 'livequiz'){ lqPaintStage(); lqPaintControls(); }
+      if(typeof teacherView !== 'undefined' && teacherView === 'livequiz'){ lqPaintStage(); lqPaintControls(); }
     }, e => console.warn('[live-quiz] teacher answers listener stopped', e));
   }).catch(()=>{});
 }

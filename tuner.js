@@ -25,6 +25,21 @@ let tunerRunning = false, tunerStream = null, tunerCtx = null,
     tunerTargetString = 'auto', tunerStartToken = 0,
     tunerShownCents = null, tunerInTune = false;
 
+/* The four tuner readout elements are static markup in index.html (the
+   popup is shown/hidden, never rebuilt), so looking them up fresh every
+   tunerLoop() tick — ~16×/second for the life of a tuning session — is
+   pure waste. Cached lazily on first use; tunerEls() is the one place that
+   populates or reuses the cache, so tunerLoop()/stopTuner() never call
+   getElementById directly. */
+let tunerNoteEl = null, tunerFreqEl = null, tunerNeedleEl = null, tunerStatusElCached = null;
+function tunerEls(){
+  if (!tunerNoteEl) tunerNoteEl = document.getElementById('tuner-note');
+  if (!tunerFreqEl) tunerFreqEl = document.getElementById('tuner-freq');
+  if (!tunerNeedleEl) tunerNeedleEl = document.getElementById('tuner-needle');
+  if (!tunerStatusElCached) tunerStatusElCached = document.getElementById('tuner-status');
+  return { noteEl: tunerNoteEl, freqEl: tunerFreqEl, needle: tunerNeedleEl, statusEl: tunerStatusElCached };
+}
+
 /* Anti-jitter layer: a short rolling-median window sits between the raw
    per-frame detections and the smoothing/display code. A single bogus frame
    (octave error, between-pluck noise) can never reach the needle — the
@@ -249,10 +264,7 @@ function tunerLoop() {
     freq = bestDist < (2 / 12) ? best : -1;
   }
 
-  const noteEl   = document.getElementById('tuner-note');
-  const freqEl   = document.getElementById('tuner-freq');
-  const needle   = document.getElementById('tuner-needle');
-  const statusEl = document.getElementById('tuner-status');
+  const { noteEl, freqEl, needle, statusEl } = tunerEls();
 
   // Median-stabilise: lone outlier frames are swallowed here; a real new
   // note (3 consecutive far readings) resets the window and passes through.
@@ -402,6 +414,15 @@ async function startTuner() {
     if (tunerCtx.state !== 'running'){
       try { await tunerCtx.resume(); } catch(e){}
     }
+    if (myStartToken !== tunerStartToken) {
+      // Tuner was closed while that resume() was pending — stopTuner() has
+      // already nulled tunerCtx/tunerStream, so `stream`/`tunerCtx` here are
+      // now orphaned. Tear this stale context down instead of wiring it up
+      // (setting onstatechange on it would throw on the already-null global).
+      stream.getTracks().forEach(t => t.stop());
+      try { tunerCtx.close(); } catch(e){}
+      return;
+    }
     // Belt-and-suspenders: Safari can also suspend a live context on an audio
     // route change (AirPods connecting/disconnecting mid-session).
     tunerCtx.onstatechange = () => {
@@ -426,10 +447,7 @@ function stopTuner() {
   tunerStream = null; tunerCtx = null; tunerAnalyser = null; tunerFreqAnalyser = null;
   tunerHP = null; tunerLP = null;
   tunerResetSmoothing();
-  const noteEl = document.getElementById('tuner-note');
-  const freqEl = document.getElementById('tuner-freq');
-  const needle = document.getElementById('tuner-needle');
-  const statusEl = document.getElementById('tuner-status');
+  const { noteEl, freqEl, needle, statusEl } = tunerEls();
   if (noteEl)   { noteEl.textContent = '—'; noteEl.classList.remove('in-tune', 'in-tune-pop'); }
   if (freqEl)   setToolText(freqEl, 'tools.playAString');
   if (needle)   { needle.style.left = '50%'; needle.style.background = 'var(--border2)'; }

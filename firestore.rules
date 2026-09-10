@@ -172,10 +172,38 @@ service cloud.firestore {
     /* Student-filed issue reports. A student may file one under their own
        uid and cannot read the pile back — reports can name other students,
        so they are teacher-eyes-only. No update or delete for anyone: a
-       report should not be editable after filing. */
+       report should not be editable after filing.
+
+       hasOnly + the type/size checks below pin this to the exact shape
+       submitIssueReport() (app.js) writes — the same reasoning as the
+       answers rule above, just without that rule's live-round timing
+       conditions (a report isn't scored, so there's nothing to referee).
+       Without them a signed-in student could smuggle extra fields into a
+       doc the teacher console reads back, or send an unbounded `message`
+       (bounded only by Firestore's 1MB doc cap otherwise) — not XSS, the
+       console escapes everything, but a data-validation gap worth closing
+       the same way `answers` already is. */
     match /issueReports/{reportId} {
       allow create: if isSignedIn()
-                    && request.resource.data.uid == request.auth.uid;
+                    && request.resource.data.uid == request.auth.uid
+                    && request.resource.data.keys().hasOnly(
+                         ['uid','email','name','message','location','moduleNum','setId','lang','userAgent','createdAt'])
+                    && request.resource.data.message is string
+                    && request.resource.data.message.size() > 0
+                    && request.resource.data.message.size() <= 4000
+                    && request.resource.data.email is string
+                    && request.resource.data.email.size() <= 200
+                    && request.resource.data.name is string
+                    && request.resource.data.name.size() <= 200
+                    && request.resource.data.location is string
+                    && request.resource.data.location.size() <= 200
+                    && request.resource.data.lang is string
+                    && request.resource.data.lang.size() <= 10
+                    && request.resource.data.userAgent is string
+                    && request.resource.data.userAgent.size() <= 500
+                    && request.resource.data.moduleNum is number
+                    && (request.resource.data.setId == null
+                        || (request.resource.data.setId is string && request.resource.data.setId.size() <= 100));
       allow read:   if isTeacher();
     }
   }

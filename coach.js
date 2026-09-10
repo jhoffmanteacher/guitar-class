@@ -1377,6 +1377,9 @@ function coachScoreCompletion(){
   let maxGap = hitIdx.length ? hitIdx[0] : slots.length;
   for (let k = 1; k < hitIdx.length; k++) maxGap = Math.max(maxGap, hitIdx[k] - hitIdx[k - 1] - 1);
   const tailMiss = hitIdx.length ? slots.length - 1 - hitIdx[hitIdx.length - 1] : slots.length;
+  // A trailing miss is a gap too — without folding it in, stopping early
+  // near the end still reads as a clean, no-gap run.
+  maxGap = Math.max(maxGap, tailMiss);
   let level, sentence;
   if (coverage >= 0.9 && maxGap <= 1){
     level = 3; sentence = t('coach.crit.completion.great');
@@ -2220,7 +2223,6 @@ function ccStop(){
 }
 
 function ccBody(){ return document.getElementById('cc-body'); }
-function ccProgLabel(prog){ return prog.chords.join(' → '); }
 /* Draw four distinct chords from the pool, in random order — the Random-4 mode. */
 function ccRandomFour(){
   const pool = CC_RANDOM_POOL.slice(), pick = [];

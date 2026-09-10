@@ -5,6 +5,26 @@ Notable changes to the Guitar Class site. Newest first.
 For the full session-by-session history (and the reasoning behind each change),
 see `WORKFLOW.md` and the git commit log.
 
+## 2026-09-10 — Code audit fixes: coach feedback, tuner, screen-reader diagrams
+
+### Fixed
+
+- **Listening Coach no longer praises a run that stopped early.** Playing
+  cleanly through most of a piece and then just stopping near the end used
+  to score as a perfect, no-gaps run ("Start to finish with no stops"). A
+  trailing gap now counts the same as a gap in the middle.
+- **The tuner could wrongly say "Microphone access denied."** Closing the
+  tuner at just the wrong moment on Safari could show that message even
+  though nothing was denied.
+- **Ear Spark's "deal more" no longer risks a stuck reload guard** after a
+  round finishes.
+- **In-Class Activity diagrams and chord diagrams now describe themselves to
+  screen readers** — a fretboard figure or chord box used to be silent to a
+  screen reader even when the step text pointed right at it.
+- **The live-quiz join popup is now included in the keyboard focus trap** on
+  every page, including the six Song Journey pages, so tabbing out of it
+  can't land you on hidden header controls.
+
 ## 2026-09-09 — Song Journey sweep: measured harmonic rhythm, full-song power chords
 
 ### Fixed

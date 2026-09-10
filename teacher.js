@@ -454,10 +454,16 @@ function renderTeacherGrid(){
   const w=SETS.find(x=>x.id===teacherSetId);
   if(!w||!w.skills||w.skills.length===0){ document.getElementById('t-grid-container').innerHTML='<div class="t-loading">No skills for this set yet.</div>'; return; }
   if(allStudents.length===0){ document.getElementById('t-grid-container').innerHTML='<div class="t-loading">No student data yet — students need to sign in and check off skills first.</div>'; return; }
-  const sorted=[...allStudents].sort((a,b)=>w.skills.filter(s=>b.skills[s.id]==='gotit').length-w.skills.filter(s=>a.skills[s.id]==='gotit').length);
+  // Decorate-sort-undecorate: each student's "gotit" count used to be
+  // recomputed from scratch by every comparison the sort made, then a third
+  // time per row below — O(n log n) skill-filters on a table redrawn on
+  // essentially every teacher-console navigation. Compute it once per
+  // student instead, reused for both the ordering and the Progress pill.
+  const doneCounts=new Map(allStudents.map(stu=>[stu.uid, w.skills.filter(s=>stu.skills[s.id]==='gotit').length]));
+  const sorted=[...allStudents].sort((a,b)=>doneCounts.get(b.uid)-doneCounts.get(a.uid));
   const headerCells=w.skills.map(s=>`<th title="${escAttr(s.text)}">${escHtml(abbreviate(s.text))}</th>`).join('');
   const rows=sorted.map(stu=>{
-    const done=w.skills.filter(s=>stu.skills[s.id]==='gotit').length;
+    const done=doneCounts.get(stu.uid);
     const total=w.skills.length;
     const pct=Math.round(done/total*100);
     const pillClass=pct===100?'pp-hi':pct>=50?'pp-mid':'pp-lo';
@@ -748,7 +754,7 @@ function renderTeacherActivities(opts){
       const dateNote = !dateVal
         ? ' <span style="opacity:.65;font-size:.85em">(no date — hidden from students)</span>'
         : (isScheduled ? ' <span style="opacity:.65;font-size:.85em">(scheduled)</span>' : '');
-      const dateCell=`<input type="date" class="t-date-input" data-set-activity-date data-id="${escAttr(a.id)}" value="${escAttr(dateVal)}">${dateNote}`;
+      const dateCell=`<input type="date" class="t-date-input" data-set-activity-date data-id="${escAttr(a.id)}" value="${escAttr(dateVal)}" aria-label="Release date for ${escAttr(teacherActivityTitle(a,cfg))}">${dateNote}`;
       // Same "#N - Title" form the student card (app.js) and the activity
       // detail page use, so the number reads as part of the name rather than
       // the column needing its own. Two renderings of the same thing: plain
@@ -773,7 +779,7 @@ function renderTeacherActivities(opts){
         // and throw away what's been typed.
         titleCell=`<td class="nc">`
           +`<span class="t-act-title-lbl">${escHtml(num)}rename (English)</span>`
-          +`<input type="text" class="t-act-title-edit" data-id="${escAttr(a.id)}" value="${escAttr(shown)}" maxlength="120" spellcheck="false">`
+          +`<input type="text" class="t-act-title-edit" data-id="${escAttr(a.id)}" value="${escAttr(shown)}" maxlength="120" spellcheck="false" aria-label="Rename ${escAttr(shown)} (English)">`
           +`<span class="t-act-title-hint">Students see this right away, in English in both languages, until the Spanish twin ships in the next update.</span>`
           +`<div style="margin-top:7px;display:flex;gap:6px;flex-wrap:wrap">`
           +`<button class="tg-seg-btn on" data-rename-save data-id="${escAttr(a.id)}">Save</button>`
@@ -987,7 +993,7 @@ function renderTeacherActivityDetail(id){
     const media=[];
     /* width/height: see caStepHtml() in app.js — same 640x244 board, and
        checks.mjs (1v) fails the push if the two renderers disagree. */
-    if(s.figure) media.push(`<span class="step-figure"><img src="${escAttr(s.figure)}" alt="" width="640" height="244"></span>`);
+    if(s.figure) media.push(`<span class="step-figure"><img src="${escAttr(s.figure)}" alt="${escAttr(s.figureAlt||'')}" width="640" height="244"></span>`);
     if(s.video && s.video.id){
       const url=`https://www.youtube.com/watch?v=${encodeURIComponent(s.video.id)}${s.video.start?`&start=${Number(s.video.start)}`:''}`;
       const vLabel=s.video.label?escHtml(s.video.label):'Watch video';
@@ -1055,13 +1061,13 @@ function renderTeacherCheckDetail(a, back){
   const bodyRows=withRes.map(({s,r})=>{
     const g=ecGrade(a,r.picks);
     const cells=g.rows.map(row=>`<td style="text-align:center">${cell(row.ok)}<div style="font-size:.72em;opacity:.7">${escHtml(row.pick||'—')}</div></td>`).join('');
-    return `<tr><td class="nc">${escHtml(s.name||'(no name)')}</td><td>${r.score}/${r.total}</td><td>${escHtml(r.at||'')}</td>${cells}</tr>`;
+    return `<tr><td class="nc">${escHtml(s.name||s.email||'(no name)')}</td><td>${r.score}/${r.total}</td><td>${escHtml(r.at||'')}</td>${cells}</tr>`;
   }).join('');
   const missRow=withRes.length
     ? `<tr><td class="nc" style="font-style:italic">Missed by</td><td colspan="2"></td>`
       +missed.map(m=>`<td style="text-align:center">${m}</td>`).join('')+`</tr>`
     : '';
-  const noneRows=without.map(s=>`<tr style="opacity:.55"><td class="nc">${escHtml(s.name||'(no name)')}</td><td colspan="${2+items.length}">not turned in</td></tr>`).join('');
+  const noneRows=without.map(s=>`<tr style="opacity:.55"><td class="nc">${escHtml(s.name||s.email||'(no name)')}</td><td colspan="${2+items.length}">not turned in</td></tr>`).join('');
   const table=allStudents.length
     ? `<div class="t-grid-wrap"><table><thead><tr><th class="nc">Student</th><th>Score</th><th>Date</th>${heads.map(h=>`<th>${h}</th>`).join('')}</tr></thead>`
       +`<tbody>${bodyRows}${missRow}${noneRows}</tbody></table></div>`
@@ -1647,7 +1653,10 @@ function renderTeacherStudents(){
 
 function renderTeacherStudentDetail(uid){
   const box=document.getElementById('t-grid-container');
-  const stu=allStudents.find(s=>s.uid===uid);
+  // Fall back to the unfiltered roster: this is an explicit uid lookup, not
+  // a list render, so a period/archive filter change while this page is
+  // open must not make a present student read as "removed".
+  const stu=allStudents.find(s=>s.uid===uid) || (allStudentsRaw||[]).find(s=>s.uid===uid);
   const back=`<button type="button" class="stu-back" data-back-to-students>&#x2190; All students</button>`;
   if(!stu){ box.innerHTML=`${back}<div class="t-loading">Could not find that student — they may have signed out or been removed.</div>`; return; }
   const universe=teacherSkillUniverse();

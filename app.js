@@ -951,7 +951,14 @@ function renderAll(){
   // wrong guess corrects itself without the student having to touch anything.
   if(!_fullModuleDataQueued){
     _fullModuleDataQueued = true;
-    ensureAllModuleData().then(()=> populateModuleDropdown());
+    ensureAllModuleData().then(()=>{
+      populateModuleDropdown();
+      // The dropdown redraw only fixes the 🔒 marker there — the visible
+      // panel for the module already on screen was gated on the same stale
+      // guess, so re-run the gate check against it too (idempotent: lands
+      // back on the same set when the guess was already right).
+      onModuleChange(lastModuleNum, lastSetId);
+    });
   }
 }
 
@@ -5231,7 +5238,7 @@ function erUndo(key){
 }
 function erReveal(key){
   const st = earDrills[key]; if(!st) return;
-  st.revealed = true; erBox(key).innerHTML = erRunHtml(key);
+  st.revealed = true; st.phase = 'done'; erBox(key).innerHTML = erRunHtml(key);
 }
 /* 100%-clean reveal earns the offer to check the skill off right here,
    the same "no memory trip to the checklist tab" move as sdCheckOff/
@@ -7442,7 +7449,7 @@ function caStepHtml(a, step, si, isOpen, isDone){
      same 640x244 board; checks.mjs (1v) fails the push if one isn't, and if
      this line and renderTeacherActivityDetail() in teacher.js ever disagree.
      TWO RENDERERS — patch both (CLAUDE.md). */
-  if(step.figure) parts.push(`<span class="step-figure"><img src="${escAttr(step.figure)}" alt="" width="640" height="244"></span>`);
+  if(step.figure) parts.push(`<span class="step-figure"><img src="${escAttr(step.figure)}" alt="${escAttr(step.figureAlt ? tf(step, 'figureAlt') : '')}" width="640" height="244"></span>`);
   if(step.video && step.video.id){
     const url = `https://www.youtube.com/watch?v=${encodeURIComponent(step.video.id)}${step.video.start ? `&start=${Number(step.video.start)}` : ''}`;
     const vLabel = step.video.label ? escHtml(tf(step.video, 'label')) : escHtml(t('ca.watchVideo'));

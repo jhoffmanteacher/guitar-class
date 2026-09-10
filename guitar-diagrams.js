@@ -52,7 +52,9 @@ var GD_SANS = "Calibri,-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif";
 /* Matches app.js's escHtml exactly — kept private so this file has
    no dependency on app.js load order. */
 function gdEsc(s){
-  return String(s == null ? '' : s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+  // Escaping quotes too (harmless in text content) means this is also safe
+  // to drop into an attribute value, as the new aria-label use below does.
+  return String(s == null ? '' : s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
 }
 
 function gdTheme(opts){
@@ -93,6 +95,25 @@ function gdFF(t, original){
   return t.standalone ? '' : ' font-family="' + original + '"';
 }
 
+/* Accessible description of a chord box's fingering — the adjacent
+   chord-box-label div (when there is one) already names the CHORD for a
+   screen-reader student; this is what tells them how to fret it. Built from
+   cfg.chord alone, so it works for every caller (module data, class
+   activities, the string/note diagrams that reuse this same renderer). */
+function gdChordAriaLabel(cfg){
+  var ind = {};
+  (cfg.chord || []).forEach(function(e){ ind[e[0]] = e[1]; });
+  var parts = [];
+  for (var n = 6; n >= 1; n--) {
+    if (!(n in ind)) continue;
+    var fr = ind[n], string = STRING_NUM_TO_LABEL[n];
+    if (fr === 'x') parts.push(gdT('diagram.chordAriaMuted', '{string} muted', { string: string }));
+    else if (fr === 0) parts.push(gdT('diagram.chordAriaOpen', '{string} open', { string: string }));
+    else parts.push(gdT('diagram.chordAriaFret', '{string} fret {fret}', { string: string, fret: fr }));
+  }
+  return gdT('diagram.chordAriaLabel', 'Chord diagram: {parts}', { parts: parts.join(', ') });
+}
+
 /* ══════════════════════════════════════════════════════════════
    VERTICAL CHORD BOX
    cfg = { position, chord: [[stringNum, fret, finger], …] }
@@ -117,13 +138,19 @@ function chordDiagramSVG(cfg, opts){
   var ind = {}, chordArr = cfg.chord || [];
   chordArr.forEach(function(e){ ind[e[0]] = { fret: e[1], finger: e[2] }; });
 
-  /* css mode keeps the original: width/height present, no root font-family */
+  var ariaLabel = gdChordAriaLabel(cfg);
+
+  /* css mode keeps the original: width/height present, no root font-family
+     (the aria-label/role/<title> below are additive, not part of that
+     byte-identical original markup). */
   var s;
   if (t.standalone) {
-    s = gdOpen(W, H, t, opts) + gdGround(W, H, t);
+    s = gdOpen(W, H, t, opts).replace('>', ' role="img" aria-label="' + gdEsc(ariaLabel) + '">') + gdGround(W, H, t);
   } else {
-    s = '<svg xmlns="http://www.w3.org/2000/svg" width="' + W + '" height="' + H + '" viewBox="0 0 ' + W + ' ' + H + '">';
+    s = '<svg xmlns="http://www.w3.org/2000/svg" width="' + W + '" height="' + H + '" viewBox="0 0 ' + W + ' ' + H
+      +  '" role="img" aria-label="' + gdEsc(ariaLabel) + '">';
   }
+  s += '<title>' + gdEsc(ariaLabel) + '</title>';
 
   if (label) {
     s += '<text x="' + (W / 2) + '" y="' + (labelH - 3) + '" text-anchor="middle" font-size="' + t.b(13)

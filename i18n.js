@@ -785,6 +785,14 @@
     'diagram.noteOpen':      { en: '{note} · {string} open', es: '{note} · cuerda {string} al aire' },
     'diagram.noteFret':      { en: '{note} · {string} string, {ord} fret',
                                es: '{note} · cuerda {string}, traste {ord}' },
+    // ── Chord-diagram accessible description (chordDiagramSVG, guitar-
+    //    diagrams.js) — a screen-reader student gets the fingering, not just
+    //    the chord name printed beside the box. {parts} is a joined list of
+    //    the per-string fragments below. ──
+    'diagram.chordAriaLabel': { en: 'Chord diagram: {parts}', es: 'Diagrama de acorde: {parts}' },
+    'diagram.chordAriaOpen':  { en: '{string} open', es: '{string} al aire' },
+    'diagram.chordAriaMuted': { en: '{string} muted', es: '{string} apagada' },
+    'diagram.chordAriaFret':  { en: '{string} fret {fret}', es: '{string} traste {fret}' },
 
     // ── Sequential-gate messages + locked-pill tooltips/aria ──
     'gate.lockedUntilAria':  { en: '{set} — locked until {prev} is finished', es: '{set} — bloqueada hasta terminar la {prev}' },
