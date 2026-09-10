@@ -1366,6 +1366,8 @@ body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,"Helvetica N
   body.print-activity .page-topbar,body.print-activity #week-panels,
   body.print-activity .resume-card{display:none !important}
   body.print-activity .ca-card:not(.ca-print-target){display:none !important}
+  body.print-activity .ca-finished-summary{display:none !important}
+  body.print-activity .ca-finished-group,body.print-activity .ca-finished-body{margin:0;opacity:1}
   body.print-activity .ca-print-target{border:1px solid #000}
   body.print-activity .ca-card-summary{cursor:auto}
   body.print-activity .ca-card-summary::before{display:none !important}
@@ -1791,6 +1793,16 @@ body.explore-open #week-panels{display:none}
 .ca-step-donebtn{font-family:inherit;font-size:0.8438rem;font-weight:600;padding:7px 14px;border-radius:16px;border:1px solid var(--ca-accent);background:transparent;color:var(--ca-accent);cursor:pointer}
 .ca-step-donebtn:hover{background:var(--ca-accent-bg)}
 .ca-step-donebtn.is-done{background:var(--ca-accent-bg)}
+/* Finished-activities group (renderClassActivities/caFinishedGroupHtml) —
+   a plain <details>, closed by default, holding the same .ca-card markup
+   as the main list. Deliberately quieter than .ca-card: no left accent, so
+   it reads as an archive rather than another item to act on. */
+.ca-finished-group{margin-top:4px}
+.ca-finished-summary{display:flex;align-items:center;gap:8px;padding:10px 4px;font-weight:600;color:var(--text2);cursor:pointer;list-style:none}
+.ca-finished-summary::-webkit-details-marker{display:none}
+.ca-finished-summary::before{content:'';width:8px;height:8px;border-right:2px solid var(--text3);border-bottom:2px solid var(--text3);transform:rotate(-45deg);transition:transform .15s;flex-shrink:0}
+.ca-finished-group[open] .ca-finished-summary::before{transform:rotate(45deg)}
+.ca-finished-body{opacity:.85}
 .ca-reminder-modal{border-top:3px solid var(--ca-accent)}
 .ca-reminder-list{list-style:none;margin:10px 0;padding:0;font-size:0.9375rem}
 .ca-reminder-list li{padding:6px 0;border-bottom:1px solid var(--border);display:flex;align-items:center;gap:8px}

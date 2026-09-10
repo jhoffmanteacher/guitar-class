@@ -7765,12 +7765,14 @@ function ecSubmit(id){
    clipboard. Same shape as printRoutine(): a body class scopes the @media
    print rules to the one card, restored on afterprint.
 
-   Two bits of state have to be forced open and put back, because a closed
-   <details> and a collapsed step both print nothing: the card itself, and
-   the step accordion (only one step is ever open on screen — a handout that
-   printed just that one would be worse than useless). afterprint fires on
-   cancel as well as on a real print, so the restore runs either way; it's
-   `once` so a second print doesn't stack listeners. */
+   Three bits of state have to be forced open and put back, because a closed
+   <details> and a collapsed step both print nothing: the card itself, the
+   step accordion (only one step is ever open on screen — a handout that
+   printed just that one would be worse than useless), and — for a finished
+   activity — the .ca-finished-group it now lives inside, whose own closed
+   state hides everything under it regardless of the card's own `open`.
+   afterprint fires on cancel as well as on a real print, so the restore
+   runs either way; it's `once` so a second print doesn't stack listeners. */
 function printActivity(ev, id){
   // The button lives inside the <summary>, whose default action toggles the
   // card — swallow it or printing would also collapse what we just opened.
@@ -7778,6 +7780,9 @@ function printActivity(ev, id){
   const card = document.querySelector(`.ca-card[data-id="${CSS.escape(id)}"]`);
   if(!card) return;
   const wasOpen = card.open;
+  const group = card.closest('.ca-finished-group');
+  const groupWasOpen = group ? group.open : null;
+  if(group) group.open = true;
   const collapsed = Array.from(card.querySelectorAll('.ca-step.ca-step-collapsed'));
   card.open = true;
   collapsed.forEach(li => li.classList.remove('ca-step-collapsed'));
@@ -7788,6 +7793,7 @@ function printActivity(ev, id){
     card.classList.remove('ca-print-target');
     collapsed.forEach(li => li.classList.add('ca-step-collapsed'));
     card.open = wasOpen;
+    if(group) group.open = groupWasOpen;
   };
   window.addEventListener('afterprint', done, { once: true });
   window.print();
@@ -7966,10 +7972,33 @@ function renderClassActivities(){
   if(!list.length){
     bodyEl.innerHTML = missing + `<div class="coach-tip" data-i18n="ca.empty">${escHtml(t('ca.empty'))}</div>`;
   } else {
-    bodyEl.innerHTML = missing + list.map(caActivityCardHtml).join('');
+    // Done work collapses into its own group (caFinishedGroupHtml) so the
+    // list a student actually needs to act on isn't buried under everything
+    // already turned in — finished stays in the same sort order, just moved
+    // out of the main flow.
+    const pending = list.filter(a => classActivities[a.id] !== true);
+    const finished = list.filter(a => classActivities[a.id] === true);
+    const pendingHtml = pending.length ? pending.map(caActivityCardHtml).join('')
+      : (finished.length ? `<div class="coach-tip" data-i18n="ca.allDone">${escHtml(t('ca.allDone'))}</div>` : '');
+    bodyEl.innerHTML = missing + pendingHtml + (finished.length ? caFinishedGroupHtml(finished) : '');
   }
   if(typeof applyI18n === 'function') applyI18n(bodyEl);
 }
+// Closed by default each render — caFinishedOpen carries the student's choice
+// across re-renders the same way caOpenId does for a single card, so marking
+// one more activity complete doesn't yank an already-open group shut. Also
+// forced open when the focused/just-toggled card (caOpenId) lives in it, so
+// caFocusActivity's deep link and caToggleComplete's "keep it open" both
+// still land on a visible card instead of one hidden inside a closed group.
+let caFinishedOpen = false;
+function caFinishedGroupHtml(finished){
+  const open = caFinishedOpen || finished.some(a => a.id === caOpenId);
+  return `<details class="ca-finished-group" ${open ? 'open' : ''} ontoggle="caOnFinishedToggle(this)">
+    <summary class="ca-finished-summary">${escHtml(t('ca.finishedGroup', {n: finished.length}))}</summary>
+    <div class="ca-finished-body">${finished.map(caActivityCardHtml).join('')}</div>
+  </details>`;
+}
+function caOnFinishedToggle(details){ caFinishedOpen = details.open; }
 
 /* ── Reminder popup: unfinished activities, once per visit ──
    Shown only after a successful progress load for a signed-in, non-dev

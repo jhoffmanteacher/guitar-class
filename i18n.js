@@ -289,6 +289,12 @@
                                  es: 'Ese enlace apunta a una actividad que todavía no está publicada. Abajo está todo lo que tu clase ya hizo.' },
     'ca.markComplete':         { en: 'Mark complete', es: 'Marcar como completado' },
     'ca.completed':            { en: 'Completed ✓ — tap to un-mark', es: 'Completado ✓ — toca para desmarcar' },
+    // The group every finished card collapses into (renderClassActivities) —
+    // closed by default, so the list a student still has to act on isn't
+    // buried under everything already turned in.
+    'ca.finishedGroup':        { en: 'Finished ({n})', es: 'Terminadas ({n})' },
+    'ca.allDone':              { en: 'Everything here is marked complete — see it under Finished below.',
+                                 es: 'Todo aquí está marcado como completo — velo en Terminadas abajo.' },
     'ca.reminderTitle':        { en: 'In-class activities to finish', es: 'Actividades de clase por terminar' },
     'ca.reminderMore':         { en: '+ {n} more', es: '+ {n} más' },
     'ca.reminderGo':           { en: 'Go to activities', es: 'Ir a las actividades' },
