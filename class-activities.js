@@ -1238,9 +1238,9 @@ window.CLASS_ACTIVITIES = [
       {
         label:    'Name the fret',
         label_es: 'Di la nota',
-        text: 'The quiz gives you a fret. You name the note, three seconds a card.<ul><li>Diagram covered</li><li>Say the note out loud, then press its button</li><li>Play the fret too</li></ul>You\'ve got it when: 9 of 10 in time. Missing some? The results screen names them — run it again.',
-        text_es: 'El juego te da un traste. Tú dices la nota, tres segundos por carta.<ul><li>Diagrama tapado</li><li>Di la nota en voz alta, y después presiona su botón</li><li>Toca el traste también</li></ul>Lo tienes cuando: 9 de 10 dentro del tiempo. ¿Fallas algunas? La pantalla de resultados te dice cuáles — repítelo.',
-        drill: { type: 'shuffle', string: 'lowE', maxFret: 12, rounds: 10, seconds: 3, pile: 'naturals' },
+        text: 'The quiz gives you a fret. You name the note, five seconds a card.<ul><li>Diagram covered</li><li>Say the note out loud, then press its button</li><li>Play the fret too</li></ul>You\'ve got it when: 9 of 10 in time. Missing some? The results screen names them — run it again.',
+        text_es: 'El juego te da un traste. Tú dices la nota, cinco segundos por carta.<ul><li>Diagrama tapado</li><li>Di la nota en voz alta, y después presiona su botón</li><li>Toca el traste también</li></ul>Lo tienes cuando: 9 de 10 dentro del tiempo. ¿Fallas algunas? La pantalla de resultados te dice cuáles — repítelo.',
+        drill: { type: 'shuffle', string: 'lowE', maxFret: 12, rounds: 10, seconds: 5, pile: 'naturals' },
       },
       {
         label:    'Find the note',
