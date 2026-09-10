@@ -1061,10 +1061,10 @@ function checkJourneyThemeDrift() {
 /* Per-page tab-card counts, pinned. See the note where they're compared. */
 const JOURNEY_TAB_COUNTS = {
   'all-along-the-watchtower.html': 10,
-  'let-it-be.html': 11,
+  'let-it-be.html': 12,
   'luna.html': 13,
   'seven-nation-army.html': 9,
-  'sweet-child-o-mine.html': 10,
+  'sweet-child-o-mine.html': 12,
   'the-cure.html': 10,
 };
 /* ════════════════════════════════════════════════════════════════════

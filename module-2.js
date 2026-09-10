@@ -781,23 +781,23 @@ SETS.push(
           },
           {
             label: 'Bonus: "Sweet Child O\' Mine" roots', label_es: 'Extra: raíces de "Sweet Child O\' Mine"',
-            text: 'Bonus riff — "Sweet Child O\' Mine" (Guns N\' Roses) bass roots on the E & A strings:<ol><li>Each verse chord lasts a full bar — D, then C, then G, then back to D.</li><li>Play that chord\'s root TWICE inside its bar, on beats 1 and 3, at 60 BPM. The chord changes once a bar; the note gets struck twice.</li><li>Click any note name to hear how it should sound.</li></ol><a href="tabs/sweet-child-o-mine.html" target="_blank">&#x1F9F5; Song Journey: this is Layer 2 of 5</a>.',
-            text_es: 'Riff extra — raíces de bajo de "Sweet Child O\' Mine" (Guns N\' Roses) en las cuerdas Mi y La:<ol><li>Cada acorde de la estrofa dura un compás completo — D, luego C, luego G, y de vuelta a D.</li><li>Toca la raíz de ese acorde DOS veces dentro de su compás, en los tiempos 1 y 3, a 60 BPM. El acorde cambia una vez por compás; la nota se pulsa dos veces.</li><li>Haz clic en cualquier nombre de nota para escuchar cómo debe sonar.</li></ol><a href="tabs/sweet-child-o-mine.html" target="_blank">&#x1F9F5; Recorrido de la canción: esto es la Capa 2 de 5</a>.',
-            hint: 'These are the roots of the D–C–G verse loop — one chord per bar, but two strikes of the root inside each bar, which is why the TAB shows eight notes and not four. Note: the original recording is tuned a half-step lower, so your notes will sound slightly higher than the recording — that\'s normal, not a mistake.',
-            hint_es: 'Estas son las raíces del bucle D–C–G de la estrofa — un acorde por compás, pero dos pulsaciones de la raíz dentro de cada compás, y por eso el TAB muestra ocho notas y no cuatro. Nota: la grabación original está afinada medio tono más abajo, así que tus notas sonarán un poco más agudas que la grabación — eso es normal, no un error.',
+            text: 'Bonus riff — "Sweet Child O\' Mine" (Guns N\' Roses) bass roots on the E & A strings:<ol><li>Each verse chord lasts TWO full bars — D, then C, then G, then back to D.</li><li>Play that chord\'s root once per bar, on beat 1, at 60 BPM. The chord changes every two bars; the note gets struck twice, once each bar.</li><li>Click any note name to hear how it should sound.</li></ol><a href="tabs/sweet-child-o-mine.html" target="_blank">&#x1F9F5; Song Journey: this is Layer 2 of 5</a>.',
+            text_es: 'Riff extra — raíces de bajo de "Sweet Child O\' Mine" (Guns N\' Roses) en las cuerdas Mi y La:<ol><li>Cada acorde de la estrofa dura DOS compases completos — D, luego C, luego G, y de vuelta a D.</li><li>Toca la raíz de ese acorde una vez por compás, en el tiempo 1, a 60 BPM. El acorde cambia cada dos compases; la nota se pulsa dos veces, una en cada compás.</li><li>Haz clic en cualquier nombre de nota para escuchar cómo debe sonar.</li></ol><a href="tabs/sweet-child-o-mine.html" target="_blank">&#x1F9F5; Recorrido de la canción: esto es la Capa 2 de 5</a>.',
+            hint: 'These are the roots of the D–C–G verse loop — one chord per two bars, with the root struck once each bar (not twice within one bar), which is why the TAB shows eight notes and not four. Note: the original recording is tuned a half-step lower, so your notes will sound slightly higher than the recording — that\'s normal, not a mistake.',
+            hint_es: 'Estas son las raíces del bucle D–C–G de la estrofa — un acorde cada dos compases, con la raíz pulsada una vez en cada compás (no dos veces dentro de uno solo), y por eso el TAB muestra ocho notas y no cuatro. Nota: la grabación original está afinada medio tono más abajo, así que tus notas sonarán un poco más agudas que la grabación — eso es normal, no un error.',
             skills: [4, 5],
             tab: {
               caption: '"Sweet Child O\' Mine" — verse bass roots · E & A strings · 60 BPM',
               caption_es: '"Sweet Child O\' Mine" — raíces de bajo de la estrofa · cuerdas Mi y La · 60 BPM',
               notes: [
-                { string: 'A', fret: 5, note: 'D', midi: 50, beats: 2 },
-                { string: 'A', fret: 5, note: 'D', midi: 50, beats: 2 },
-                { string: 'A', fret: 3, note: 'C', midi: 48, beats: 2 },
-                { string: 'A', fret: 3, note: 'C', midi: 48, beats: 2 },
-                { string: 'E', fret: 3, note: 'G', midi: 43, beats: 2 },
-                { string: 'E', fret: 3, note: 'G', midi: 43, beats: 2 },
-                { string: 'A', fret: 5, note: 'D', midi: 50, beats: 2 },
-                { string: 'A', fret: 5, note: 'D', midi: 50, beats: 2 }
+                { string: 'A', fret: 5, note: 'D', midi: 50, beats: 4 },
+                { string: 'A', fret: 5, note: 'D', midi: 50, beats: 4 },
+                { string: 'A', fret: 3, note: 'C', midi: 48, beats: 4 },
+                { string: 'A', fret: 3, note: 'C', midi: 48, beats: 4 },
+                { string: 'E', fret: 3, note: 'G', midi: 43, beats: 4 },
+                { string: 'E', fret: 3, note: 'G', midi: 43, beats: 4 },
+                { string: 'A', fret: 5, note: 'D', midi: 50, beats: 4 },
+                { string: 'A', fret: 5, note: 'D', midi: 50, beats: 4 }
               ]
             }
           },

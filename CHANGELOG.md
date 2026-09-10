@@ -5,6 +5,34 @@ Notable changes to the Guitar Class site. Newest first.
 For the full session-by-session history (and the reasoning behind each change),
 see `WORKFLOW.md` and the git commit log.
 
+## 2026-09-09 — Song Journey sweep: measured harmonic rhythm, full-song power chords
+
+### Fixed
+
+- **"Sweet Child O' Mine" chords change every two bars, not every bar.**
+  Measured against the original master on a click grid recovered from the
+  metronome render (125.0 BPM), the verse loop D · C · G · D holds each chord
+  8 beats. Layers 2, 3 and 5 all said one bar and ran twice as fast as the
+  record. TABs now show the repeats.
+- **"Seven Nation Army" Layer 5 stretched the riff over four bars.** The riff
+  cycles every 2 bars (pitch-tracked: E E · D C C B, 3.85 s per cycle), about
+  one note per beat — which is what Layers 2 and 3 already said. Layer 5's
+  "two beats per chord" contradicted both of them and the record; it is now
+  one chord per beat.
+
+### Changed
+
+- **Layer 3 carries the whole song, not one section** (standing rule from here
+  on). "Sweet Child O' Mine" gains its chorus (A5 · C5 · D5) and its
+  "where do we go now" outro (Em5 · G5 · A5 · C5 · D5) — together roughly half
+  the record, none of which was playable from the site. "Let It Be" gains the
+  Am · G · F · C chorus turnaround; "Luna" gains its passing Dm. Watchtower and
+  Seven Nation Army were already whole-song.
+- **The Sweet Child song map named only the verse.** It now names the chorus
+  too, and says that the chorus moves twice as fast as the verse.
+- All Along the Watchtower, Let It Be and Luna were measured and found correct.
+  No changes; the numbers on those pages are now confirmed, not assumed.
+
 ## 2026-09-09 — "the cure" now follows the real song
 
 ### Fixed
