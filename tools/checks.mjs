@@ -1247,6 +1247,56 @@ function checkJourneyTabCards() {
 }
 
 /* ════════════════════════════════════════════════════════════════════
+   1z. JOURNEY TAB-ASCII COLUMN ALIGNMENT — a Journey page's <pre
+   class="tab-ascii"> block is hand-typed text (these pages have no
+   app.js to compute it, unlike an in-module tab's structured
+   fret/string data — see the note on checkJourneyTabCards above), so
+   nothing stops one string's dash padding from drifting out of step
+   with the rest when a fret number's digit count changes (7 → 10). On
+   2026-09-10 "the cure"'s Layer 3 power-chord tab shipped with its
+   A-string row 1-2 characters short per cell, so its fret numbers sat
+   left of the low-E row they're meant to stack on — two notes played
+   together read as two different beats.
+
+   Every string row in a block must have the same length between each
+   pair of "|"s as every other string row, column for column — that's
+   the only way two simultaneous notes land in the same character
+   column. <span class="hl"> wrappers are stripped first since they add
+   no visible width.
+   ════════════════════════════════════════════════════════════════════ */
+function checkTabAsciiAlignment() {
+  head('1z. Journey tab-ascii column alignment');
+  let bad = 0, blocks = 0;
+  const flag = m => { err(m); problems++; bad++; };
+
+  for (const file of TAB_PAGES.filter(f => f.endsWith('.html'))) {
+    let src;
+    try { src = readFileSync(join(ROOT, file), 'utf8'); } catch { continue; }
+    for (const m of src.matchAll(/<pre class="tab-ascii">([\s\S]*?)<\/pre>/g)) {
+      blocks++;
+      const startLine = src.slice(0, m.index).split('\n').length; // 1-based line of the <pre> tag; block line 0 shares it
+      const blockLines = m[1].replace(/<span[^>]*>/g, '').replace(/<\/span>/g, '').split('\n');
+      const rows = [];
+      blockLines.forEach((line, li) => {
+        if (!/^[a-zA-Z] \|/.test(line)) return; // a string row: one letter, space, pipe
+        const parts = line.split('|');
+        rows.push({ letter: line[0], line: startLine + li, segs: parts.slice(1, -1).map(s => s.length) });
+      });
+      if (rows.length < 2) continue;
+      const ncols = Math.max(...rows.map(r => r.segs.length));
+      for (let c = 0; c < ncols; c++) {
+        const lens = rows.map(r => r.segs[c]).filter(x => x !== undefined);
+        if (new Set(lens).size > 1) {
+          const detail = rows.map(r => `${r.letter}=${r.segs[c] ?? '—'}`).join(', ');
+          flag(`${file}:${rows[0].line}: tab-ascii cell ${c + 1} isn't the same width on every string (${detail}) — fret numbers will drift instead of stacking on the same beat`);
+        }
+      }
+    }
+  }
+  if (bad === 0) ok(`${blocks} Journey tab-ascii blocks — every string row lines up column-for-column`);
+}
+
+/* ════════════════════════════════════════════════════════════════════
    1p. playSeq PITCHES MUST EXIST ON THE STRING THE STEP NAMES — a step
    whose wording names exactly one string, then plays a ▶ sequence
    containing a note BELOW that string's open pitch, is asking for a
@@ -3044,6 +3094,7 @@ async function liveCheck() {
   checkContrast();
   checkJourneyThemeDrift();
   checkJourneyTabCards();
+  checkTabAsciiAlignment();
   checkFigureDimensions();
   checkOrphanAssets();
   if (!SKIP_LINKS) await checkLinks();
