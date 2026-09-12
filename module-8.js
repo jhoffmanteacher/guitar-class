@@ -18,8 +18,8 @@ SETS.push(
     title: 'Set 1',
     subtitle: 'Hand position · p-i-m-a · Thumb on bass · Fingers on treble',
     subtitle_es: 'Posición de la mano · p-i-m-a · Pulgar en el bajo · Dedos en las agudas',
-    skillFocus: 'A relaxed fingerpicking hand position · Thumb on the bass strings, fingers on the treble · Rest stroke vs. free stroke',
-    skillFocus_es: 'Una posición relajada de la mano de fingerpicking · Pulgar en las cuerdas graves, dedos en las agudas · Apoyando (toque de apoyo) vs. tirando (toque libre)',
+    skillFocus: 'A relaxed fingerpicking hand position · Thumb on the bass strings, fingers on the treble',
+    skillFocus_es: 'Una posición relajada de la mano de fingerpicking · Pulgar en las cuerdas graves, dedos en las agudas',
     comingSoon: false,
 
     stations: {

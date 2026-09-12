@@ -110,7 +110,7 @@
 
    SCHEMA
    {
-     id:      'ca-9',            // permanent — next unused 'ca-<n>' counter
+     id:      'ca-16',           // permanent — next unused 'ca-<n>' counter
      number:  3,                 // teaching-order position, resequence freely
                                   // (see above) — the "#3" a student sees.
                                   // Renders as "#N - Title"; don't bake the
@@ -246,8 +246,8 @@ window.CLASS_ACTIVITIES = [
     number: 2,
     title:    'Playing Happy Birthday — The Whole Song',
     title_es: 'Tocando Happy Birthday — La canción completa',
-    intro:    'You played phrase A already. Today you play all four phrases without ever leaving the low E string — the melody climbs to the double dot at fret 12 and walks back home. Once you can play that reliably, there\'s a second way to play the back half that never leaves the first five frets.',
-    intro_es: 'Ya tocaste la frase A. Hoy tocas las cuatro frases sin salirte nunca de la cuerda Mi grave — la melodía sube hasta el punto doble del traste 12 y regresa caminando. Cuando ya la puedas tocar con seguridad, hay una segunda forma de tocar la segunda mitad que nunca se sale de los primeros cinco trastes.',
+    intro:    'You played phrase A already. Today you play all four phrases without ever leaving the low E string — the melody climbs to the double dot at fret 12 and walks back home. Once you can play that reliably, there\'s a second way to play the back half that never leaves the first seven frets.',
+    intro_es: 'Ya tocaste la frase A. Hoy tocas las cuatro frases sin salirte nunca de la cuerda Mi grave — la melodía sube hasta el punto doble del traste 12 y regresa caminando. Cuando ya la puedas tocar con seguridad, hay una segunda forma de tocar la segunda mitad que nunca se sale de los primeros siete trastes.',
     steps: [
       {
         figure: 'img/ca-hb-fingers.svg',

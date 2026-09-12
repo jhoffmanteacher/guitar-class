@@ -2174,7 +2174,7 @@ function resumeLessonCounts(w){
     if(!s) return;
     if(s.sections && s.sections.length){
       visibleSections(s, w.moduleNum)
-        .forEach(({sec,gi})=>count(visibleSteps(sec), `${stationId}-sec${gi}`));   // gi = storage index, never the visible position
+        .forEach(({sec,gi})=>count(visibleSteps(sec, w.moduleNum), `${stationId}-sec${gi}`));   // gi = storage index, never the visible position
     } else if(s.steps){
       count(s.steps.map((st,idx)=>({st,idx})).filter(p=>!p.st.hidden), stationId);
     }
@@ -2927,11 +2927,17 @@ function isSpicyLevelUpStep(s){
    walked for a count, a "next step", or a DOM position; checks.mjs 1ac
    requires the functions it knows about to call one of these rather than
    iterating `.sections`/`.steps` directly. */
-function visibleSteps(sec){
+function visibleSteps(sec, moduleNum){
   // A take-to-song section renders its Journey link card in place of a step
-  // list (journeyLinkCardHtml) — none of its steps are ever rendered or
-  // counted, regardless of any step-level `hidden` flag.
-  if(isTakeToSongSection(sec)) return [];
+  // list (journeyLinkCardHtml) ONLY when this module has a Journey layer to
+  // link to (modules 1–5) — its own steps are what's hidden then, regardless
+  // of any step-level `hidden` flag. A module with no layer (6+) has no card
+  // to show, so the section falls back to its normal step list instead of
+  // vanishing outright (2026-09-12 fix: the first cut hid these
+  // unconditionally and silently deleted real content across Modules 6–12,
+  // Module 12's only graded assessment-piece card among it — Jonathan's call
+  // was to restore the steps rather than leave the card-or-nothing rule).
+  if(isTakeToSongSection(sec) && journeySongsFor(moduleNum).length > 0) return [];
   return (sec.steps || []).map((st, idx) => ({ st, idx })).filter(p => !p.st.hidden);
 }
 /* ── The storage namespace rule (2026-09-12 hotfix) ──
@@ -2959,13 +2965,15 @@ function storageSections(station, moduleNum){
 }
 function isRenderableSection(sec, moduleNum){
   if(isRoutineSection(sec) || isEarSparkSection(sec) || isReflectionSection(sec)) return false;
-  // A take-to-song section is empty when this set's module has no Journey
-  // layer to link to (module 6+) — same reasoning as the next line, just a
-  // card with nothing in it instead of a step list with nothing in it.
-  if(isTakeToSongSection(sec)) return journeySongsFor(moduleNum).length > 0;
+  // A take-to-song section swaps in the Journey link card in place of its
+  // steps when this module has a layer to link to (modules 1–5) — always
+  // renderable then, card or not. With no layer (6+) there's no card, so it
+  // falls through to a normal section's own "does it have any steps" check
+  // below (visibleSteps() already stops hiding its steps in that case too).
+  if(isTakeToSongSection(sec) && journeySongsFor(moduleNum).length > 0) return true;
   // A section whose every step got hidden (its one purpose now taught by a
   // class activity) is empty — don't render a heading over nothing.
-  if(visibleSteps(sec).length === 0) return false;
+  if(visibleSteps(sec, moduleNum).length === 0) return false;
   return true;
 }
 function visibleSections(station, moduleNum){
@@ -3216,7 +3224,7 @@ function buildLesson(w){
   // otherwise make the pill impossible to complete.
   const lessonStepCounts = () => {
     let total=0, done=0;
-    flat.forEach(({sec,ns}) => visibleSteps(sec).forEach(p=>{
+    flat.forEach(({sec,ns}) => visibleSteps(sec, w.moduleNum).forEach(p=>{
       total++;
       if(completed[`${w.id}-${ns}-${p.idx}`]===true) done++;
     }));
@@ -3258,26 +3266,30 @@ function buildLesson(w){
     // Focus mode hides every section label except the one holding the open
     // step (`.sec-cur`, kept in sync by syncStationFocus() as the student
     // moves) — the heading of the group you're actually in, nothing else.
-    const noneLeft = focusMode && !flat.some(({sec,ns}) => visibleSteps(sec).some(p=>completed[`${w.id}-${ns}-${p.idx}`]!==true));
+    const noneLeft = focusMode && !flat.some(({sec,ns}) => visibleSteps(sec, w.moduleNum).some(p=>completed[`${w.id}-${ns}-${p.idx}`]!==true));
     let numOffset = 0, foundCur = false, curNs = null;
     const rendered = new Map();
     flat.forEach(({sec,ns}, k)=>{
-      const pairs = visibleSteps(sec);
+      const pairs = visibleSteps(sec, w.moduleNum);
       const allowCur = !foundCur;
       const hasCur = allowCur && pairs.some(p=>completed[`${w.id}-${ns}-${p.idx}`]!==true);
       const openIfNoCur = noneLeft && k === 0;   // whole ladder done → section 1, step 1 stays open
       if(hasCur || openIfNoCur) curNs = ns;
       const title = tf(sec,'title');
       // A take-to-song section renders the Journey link card in its slot
-      // instead of a step list — its own steps never render or count (3b).
+      // instead of a step list, but only when this module has a layer to
+      // link to (modules 1–5) — its own steps never render or count then
+      // (3b). With no layer (6+) there's no card, so it falls back to its
+      // normal step list, same as any other section (2026-09-12 fix).
       // The card carries its own title (journey.takeItTitle), so the
-      // section's own heading is suppressed here rather than stacking two.
-      const isSong = isTakeToSongSection(sec);
-      const bodyHtml = isSong
+      // section's own heading is suppressed only when the card is what's
+      // actually shown, rather than stacking two.
+      const hasJourneyCard = isTakeToSongSection(sec) && journeySongsFor(w.moduleNum).length > 0;
+      const bodyHtml = hasJourneyCard
         ? journeyLinkCardHtml(w)
         : `<ul class="steps">${stepsHtml(pairs, ns, numOffset, allowCur, openIfNoCur)}</ul>`;
       const html = `<div class="stp-sec${(hasCur || openIfNoCur) ? ' sec-cur' : ''}" data-ns="${escAttr(ns)}">
-      ${title && !isSong ? `<div class="stp-sec-label">${isEarSparkSection(sec) ? ICO_BOLT + ' ' : isSpicyLevelUpSection(sec) ? ICO_CHILI + ' ' : ''}${title}</div>` : ''}
+      ${title && !hasJourneyCard ? `<div class="stp-sec-label">${isEarSparkSection(sec) ? ICO_BOLT + ' ' : isSpicyLevelUpSection(sec) ? ICO_CHILI + ' ' : ''}${title}</div>` : ''}
       ${bodyHtml}
     </div>`;
       if(hasCur) foundCur = true;
@@ -3623,7 +3635,7 @@ function moduleStepsFlat(moduleNum){
       const sections = stn.sections
         ? visibleSections(stn, w.moduleNum).map(p => p.sec)
         : (stn.steps ? [{title:'', steps:stn.steps}] : []);
-      sections.forEach(sec=>visibleSteps(sec).forEach(p=>out.push({set:w, station:st, secTitle:sec.title||'', step:p.st})));
+      sections.forEach(sec=>visibleSteps(sec, w.moduleNum).forEach(p=>out.push({set:w, station:st, secTitle:sec.title||'', step:p.st})));
     });
   });
   return out;
@@ -6980,7 +6992,7 @@ async function buildSearchIndex(){
       const sections = stn.sections && stn.sections.length
         ? visibleSections(stn, w.moduleNum).map(p => p.sec)
         : (stn.steps ? [{title: '', steps: stn.steps}] : []);
-      sections.forEach((sec, secIdx) => visibleSteps(sec).forEach((p, stepIdx) => {
+      sections.forEach((sec, secIdx) => visibleSteps(sec, w.moduleNum).forEach((p, stepIdx) => {
         const step = p.st;
         const text = stripTags(tf(step, 'text') || '');
         const hayExtra = [stripTags(step.text_es || ''), stripTags(step.label_es || ''), sec.title_es || ''].filter(Boolean).join(' ');
@@ -7556,9 +7568,17 @@ function assessCurrentModuleNum(){
   return mr ? Number(mr[1]) : 1;
 }
 const assessOpen = {};   // moduleNum -> true once the student opens it (sticky across re-renders, like caOpenId)
-function assessModuleBodyHtml(num){
+function assessModuleBodyHtml(num, loaded){
   const mr = (typeof MODULE_REVIEWS !== 'undefined') && MODULE_REVIEWS[num];
-  if(!mr) return `<div class="assess-loading" data-i18n="assess.loading">${escHtml(t('assess.loading'))}</div>`;
+  // A module with no MODULE_REVIEWS entry is either not loaded yet (show
+  // "Loading…") or loaded and genuinely reviewless — Module 13 is
+  // single-flow, no separate Module Review, so it never gets one — in which
+  // case fall through to the "nothing to show" message instead of showing
+  // "Loading…" forever (assessEnsureModule passes loaded once its fetch
+  // resolves either way; 2026-09-12 fix, was previously stuck permanently).
+  if(!mr) return loaded
+    ? `<p class="assess-none">${escHtml(t('assess.none'))}</p>`
+    : `<div class="assess-loading" data-i18n="assess.loading">${escHtml(t('assess.loading'))}</div>`;
   const items = tf(mr, 'assessItems');
   if(!items || !items.length) return `<p class="assess-none">${escHtml(t('assess.none'))}</p>`;
   return `<ul class="mr-assess-list">${items.map(i => `<li>${i}</li>`).join('')}</ul>
@@ -7587,12 +7607,12 @@ function assessOnToggle(details){
 // Fill one accordion body once its module file is in — a no-op re-fill
 // when the data was already loaded (the common case for the current module).
 function assessEnsureModule(num){
-  const fill = () => {
+  const fill = (loaded) => {
     const body = document.querySelector(`.assess-mod[data-module="${num}"] .assess-mod-body`);
-    if(body) body.innerHTML = assessModuleBodyHtml(num);
+    if(body) body.innerHTML = assessModuleBodyHtml(num, loaded);
   };
-  if((typeof MODULE_REVIEWS !== 'undefined') && MODULE_REVIEWS[num]){ fill(); return; }
-  loadModuleData(num).then(fill).catch(() => {
+  if((typeof MODULE_REVIEWS !== 'undefined') && MODULE_REVIEWS[num]){ fill(true); return; }
+  loadModuleData(num).then(() => fill(true)).catch(() => {
     const body = document.querySelector(`.assess-mod[data-module="${num}"] .assess-mod-body`);
     if(body) body.innerHTML = `<p class="assess-none">${escHtml(t('assess.none'))}</p>`;
   });

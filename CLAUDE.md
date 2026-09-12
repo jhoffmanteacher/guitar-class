@@ -683,7 +683,9 @@ other and the site's tempo numbers are close enough for teaching.
   loop is built from Neil Young's 1992 Dylan-30th-anniversary performance,
   which the Journey page's history paragraph states outright. The slug names
   the source recording, not the song's credited writer. Don't "fix" it.
-- **Sweet Child O' Mine** — verse `D–C–G`, **full bar each**, ~123–125 BPM.
+- **Sweet Child O' Mine** — verse `D–C–G`, **two bars each**, ~123–125 BPM. (Corrected
+  2026-09-12 — content across module-2/3/5/7 and the Journey page is
+  consistently "two bars each"; the old "full bar each" here was the outlier.)
 - **Let It Be** — verse `C–G–Am–F`, **two beats per chord**, ~71–76 BPM.
 - **"the cure"** — `Am–C–Dm–F` + `G/B` turnaround, **two felt beats per chord**
   (track reads 144 BPM but feels ~72). Tell students "big slow beats, about 72."

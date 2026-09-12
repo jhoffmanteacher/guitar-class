@@ -5,6 +5,30 @@ Notable changes to the Guitar Class site. Newest first.
 For the full session-by-session history (and the reasoning behind each change),
 see `WORKFLOW.md` and the git commit log.
 
+## 2026-09-12 — Error sweep: restored missing content, fixed several wrong facts
+
+### Fixed
+
+- **Modules 6–12's "Take It to a Song" challenge cards were invisible** —
+  including Module 12's only graded assessment-piece card ("Full-Verse
+  Rehearsal") and the sole teaching step for seven different skills. They're
+  back.
+- The **Assessments page's Module 13 accordion** no longer gets stuck on
+  "Loading…" forever.
+- Fixed a few wrong facts: Luna's Dm passing chord (contradicted itself about
+  where it happens), Luna's chord-change rate in one Set 3 card (said "every
+  bar," should be "every two bars"), a Happy Birthday activity's fret range
+  (said "five frets," the tab uses seven), a Sweet Child O' Mine outro chord
+  labeled "Em5" (power chords don't have a minor version — it's E5), and the
+  Seven Nation Army solo's octave count (it's two octaves up from Layer 2, not
+  one).
+- Straightened out a couple of notes: Module 8's Set 1 no longer promises
+  "rest stroke vs. free stroke," which the set never actually teaches; Module
+  11's barre-graduation card no longer claims to be the first time (Module 7
+  already did it for the same song).
+- Six Journey-page tab diagrams had their note-name labels sitting over the
+  wrong fret column; relabeled to line up correctly.
+
 ## 2026-09-12 — Live quiz: Fretboard tap
 
 ### Added

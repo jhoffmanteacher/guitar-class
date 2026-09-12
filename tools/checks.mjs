@@ -3366,7 +3366,12 @@ function checkStorageNamespaces(sets, buildSet, ctx) {
           problems++; bad++;
         }
         if (RENDER_HIDDEN_KINDS.has(sec.kind)) return;
-        if (sec.kind === 'take-to-song') { if (journeySongsFor(w.moduleNum).length) expected.push(`${stId}-sec${gi}`); return; }
+        // A take-to-song section swaps in the Journey link card (always
+        // renderable) only when this module has a layer to link to; with no
+        // layer (module 6+) it falls back to a normal section's own "does it
+        // have any steps" check below (2026-09-12 restore fix — the first
+        // cut of this rule dropped these sections outright).
+        if (sec.kind === 'take-to-song' && journeySongsFor(w.moduleNum).length) { expected.push(`${stId}-sec${gi}`); return; }
         if (!(sec.steps || []).some(st => !st.hidden)) return;
         expected.push(`${stId}-sec${gi}`);
       });

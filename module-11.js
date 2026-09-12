@@ -834,8 +834,8 @@ SETS.push(
             steps: [
               {
                 label: 'Challenge — "Oye Mi Amor", full barre', label_es: 'Reto — "Oye Mi Amor", cejilla completa',
-                text: '<ul><li>Play the verse\'s Bm–A with a full A-shape barre Bm — the song\'s last beginner shortcut, gone for good.</li></ul>You\'ve got it when: four laps (a lap = one full time through) where the full Bm rings as clean as the A.',
-                text_es: '<ul><li>Toca el Bm–A de la estrofa con una cejilla completa en forma de A para Bm — el último atajo de principiante de la canción, desaparecido para siempre.</li></ul>Lo tienes cuando: cuatro vueltas (una vuelta = un recorrido completo) donde el Bm completo suena tan limpio como el A.',
+                text: '<ul><li>Return to the verse\'s Bm–A with the full A-shape barre Bm you built in Module 7 — this time as a harmony tool, trading it back and forth with a partner or the class.</li></ul>You\'ve got it when: four laps (a lap = one full time through) where the full Bm rings as clean as the A.',
+                text_es: '<ul><li>Vuelve al Bm–A de la estrofa con la cejilla completa en forma de A para Bm que construiste en el Módulo 7 — esta vez como herramienta de armonía, intercambiándola con un compañero o con la clase.</li></ul>Lo tienes cuando: cuatro vueltas (una vuelta = un recorrido completo) donde el Bm completo suena tan limpio como el A.',
                 hint: 'This is where Module 7\'s barre becomes useful — a harmony tool instead of a shape you just get through.',
                 hint_es: 'Aquí es donde la cejilla del Módulo 7 se vuelve útil — una herramienta de armonía en lugar de solo una forma que hay que superar.',
                 stuck: 'Warm up the A-shape Bm alone for a minute before adding the A change.',
