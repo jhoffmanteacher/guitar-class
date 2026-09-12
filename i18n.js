@@ -323,7 +323,10 @@
     'ca.stillToDo':            { en: 'Still to do', es: 'Todavía por hacer' },
     // Button under an activity's steps when it names a Song Journey page
     // (`journey` in class-activities.js) — opens that page in a new tab.
-    'ca.openJourney':          { en: 'Open the {song} Song Journey page', es: 'Abrir la página Song Journey de {song}' },
+    // Quoted, not bare — SONG_JOURNEYS' name for "the cure" is lowercase with
+    // no leading article, so the unquoted template read "Open the the cure
+    // Song Journey page" (Jonathan/Claude, 2026-09-12, found live).
+    'ca.openJourney':          { en: 'Open the "{song}" Song Journey page', es: 'Abrir la página Song Journey de "{song}"' },
     // Shown above the Do-now group only while the activity gate (below) is
     // on — it's the thing standing between the student and the rest of the
     // site, so it needs to say that plainly.
