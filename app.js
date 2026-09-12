@@ -150,6 +150,7 @@ let hiddenActivityIds = {}; // In-Class Activities the teacher has temporarily h
 let activityDates = {}; // In-Class Activities release dates, teacher-set in the console (see loadClassConfig) — id -> 'YYYY-MM-DD'
 let activityTitles = {}; // In-Class Activity renames, teacher-set in the console (see loadClassConfig / caTitle) — id -> { en, base }
 let activityNumbers = {}; // In-Class Activity renumbering, teacher-set in the console (see loadClassConfig / caNumber) — id -> { n, base }
+let activityClears = {}; // Per-student activity-gate clears, teacher-set in the console (see loadClassConfig / caBlockers) — uid -> { activityId -> true }
 let saveTimer   = null;
 
 /* ── Lazy module loading ──
@@ -507,7 +508,8 @@ if(auth) auth.onAuthStateChanged(async user=>{
       if(accountPaused) showPausedScreen(user); else showApp(user);
     }
   } else {
-    currentUser = null; progress = {}; responses = {}; completed = {}; completedDeletes = new Set(); classActivities = {}; classActivitiesDeletes = new Set(); exitChecks = {}; games = {}; streak = { count:0, lastDay:null }; gamesAccessOn = true; studentPeriod = ''; periodOverride = ''; hiddenActivityIds = {}; activityDates = {}; activityTitles = {}; activityNumbers = {}; progressLoadFailed = false;
+    currentUser = null; progress = {}; responses = {}; completed = {}; completedDeletes = new Set(); classActivities = {}; classActivitiesDeletes = new Set(); exitChecks = {}; games = {}; streak = { count:0, lastDay:null }; gamesAccessOn = true; studentPeriod = ''; periodOverride = ''; hiddenActivityIds = {}; activityDates = {}; activityTitles = {}; activityNumbers = {}; activityClears = {}; progressLoadFailed = false;
+    document.body.classList.remove('ca-gated');   // next sign-in recomputes it fresh — don't leave a stale gate showing over the sign-in wall
     if(typeof gamesResetForUser === 'function') gamesResetForUser();   // Note Runner's module caches must not leak into the next signed-in user
     if(typeof lqStopListening === 'function') lqStopListening();       // and the live-quiz listener must not keep firing under the next student
     practiceLog = loadLocalPracticeLog();   // per-skill rep history: back to the local copy on sign-out
@@ -561,12 +563,19 @@ function showApp(user){
   document.getElementById('user-area').innerHTML=userHeaderHtml(user);
   renderAll();
   applyGamesAccess();
-  // A bookmarked/reloaded explore-page URL (#games, #songs, #keep-practicing,
-  // #daily-review, #my-progress) opens that page once the app is on screen.
+  // The activity gate (see caBlockers/applyActivityGate) — computed before
+  // the landing-hash decision below, since a gated student's bookmarked hash
+  // has to be overridden by it.
+  applyActivityGate();
+  // Today is the home page (Today-first work order, Phase 1): a fresh or
+  // bookmarked-bare visit lands there. A hash that's already present — an
+  // explore page, or one this router doesn't own — is left for
+  // routeExploreHash to resolve, same as always.
+  if(!location.hash) goExploreHash('class-activities');
   routeExploreHash();
-  // The period question blocks the whole app, so the class-activity reminder
-  // waits for the next sign-in rather than stacking underneath it.
-  if(!maybeShowPeriodPicker()) maybeShowCaReminder();
+  // The period question blocks the whole app, so it still gets first crack
+  // at the screen on sign-in.
+  maybeShowPeriodPicker();
   // One long-lived listener on the live-quiz session doc, so a game the
   // teacher starts mid-period reaches a student who's had the site open all
   // along. Guarded: live-quiz.js is a separate deferred script.
@@ -632,11 +641,12 @@ async function loadClassConfig(){
   activityDates = {};
   activityTitles = {};
   activityNumbers = {};
+  activityClears = {};
   try{
     await ensureDb();
-    if(!db){ restoreActivityDatesFromCache(); return; }
+    if(!db){ restoreClassConfigFromCache(); applyActivityGate(); return; }
     const doc = await db.collection('config').doc('class').get();
-    if(!doc.exists){ restoreActivityDatesFromCache(); return; }
+    if(!doc.exists){ restoreClassConfigFromCache(); applyActivityGate(); return; }
     const d = doc.data()||{};
     // Teacher-set hold (teacher.js Manage view). Classroom management, not
     // security — the real boundary is the Firestore rules, which already
@@ -660,7 +670,7 @@ async function loadClassConfig(){
     // Unlike hiddenActivityIds, a failed/missing read here must NOT fail
     // open (that would show every activity, dated or not, to everyone) —
     // it fails to the last successfully loaded copy in localStorage instead,
-    // via restoreActivityDatesFromCache() in every early-return/catch path.
+    // via restoreClassConfigFromCache() in every early-return/catch path.
     activityDates = d.activityDates || {};
     try{ localStorage.setItem('caDates', JSON.stringify(activityDates)); }catch(e){}
     // Teacher renames (teacher.js Class activities view) — id -> { en, base }.
@@ -672,17 +682,30 @@ async function loadClassConfig(){
     // {} like the renames: losing it shows the shipped teaching order,
     // which is a cosmetic fallback. See caNumber().
     activityNumbers = d.activityNumbers || {};
-  }catch(e){ restoreActivityDatesFromCache(); /* leave games on, nothing hidden */ }
+    // Per-student activity-gate clears (teacher.js Class activities /
+    // Students view) — uid -> { activityId -> true }, see caBlockers().
+    // Same "must not fail open" rule as activityDates above: a failed read
+    // here must not look like every blocker just got cleared, so it falls
+    // back to the cache too rather than to {}.
+    activityClears = d.activityClears || {};
+    try{ localStorage.setItem('caClears', JSON.stringify(activityClears)); }catch(e){}
+  }catch(e){ restoreClassConfigFromCache(); /* leave games on, nothing hidden */ }
+  applyActivityGate();
 }
 // A student who has loaded config at least once keeps seeing that last-known
-// set of release dates through a later offline/blocked read, rather than
-// every activity going dark. A student who has NEVER loaded config sees no
-// activities — acceptable, since they also have no progress connection yet.
-function restoreActivityDatesFromCache(){
+// set of release dates (and gate clears) through a later offline/blocked
+// read, rather than every activity going dark or every blocker snapping back
+// on. A student who has NEVER loaded config sees no activities — acceptable,
+// since they also have no progress connection yet.
+function restoreClassConfigFromCache(){
   try{
     const raw = localStorage.getItem('caDates');
     if(raw) activityDates = JSON.parse(raw) || {};
   }catch(e){ /* ignore — activityDates stays {} */ }
+  try{
+    const raw = localStorage.getItem('caClears');
+    if(raw) activityClears = JSON.parse(raw) || {};
+  }catch(e){ /* ignore — activityClears stays {} */ }
 }
 /* Show/hide the 🎮 Games button to match this student's access, and if games
    get turned off while the arcade is open, close it. */
@@ -2577,6 +2600,18 @@ function routeExploreHash(){
   // must fall through untouched — otherwise it would close every explore
   // panel + search out from under whatever the student was reading.
   if(!EXPLORE_HASHES.includes(h)) return;
+  /* The activity gate: while it's on, Today and Live quiz are the only
+     reachable pages (caBlockers/applyActivityGate) — anything else
+     (including the bare Practice hash, '') is rewritten back to Today
+     rather than opened, so a bookmarked/typed/Back-button hash can't walk
+     straight past the gate. replaceState, not push — this is a correction,
+     not a real navigation, and shouldn't cost a Back tap of its own. */
+  if(document.body.classList.contains('ca-gated') && h !== '#class-activities' && h !== '#live-quiz'){
+    gateToast(t('gate.activityFirst'));
+    history.replaceState(null, '', location.pathname + location.search + '#class-activities');
+    routeExploreHash();
+    return;
+  }
   /* A back/forward across a hash-only entry fires popstate *and* hashchange
      in most browsers, and goExploreHash routes by hand on top of that.
      Routing is idempotent, but the scroll stash below is not — so bail on a
@@ -2631,6 +2666,11 @@ window.addEventListener('popstate', routeExploreHash);
 /* "Practice" nav item: leave whatever explore page or panel is open and
    return to the practice view. Reuses the existing close-all helper. */
 function returnToPractice(){
+  // Gated: there is no practice view to return to — same redirect-and-say-so
+  // as routeExploreHash's own guard (practice-nav-btn is hidden by CSS, but
+  // this is also reachable by keyboard/existing focus, so it needs its own
+  // check rather than trusting the button to stay unclickable).
+  if(document.body.classList.contains('ca-gated')){ gateToast(t('gate.activityFirst')); return; }
   // Leaving an explore page restores the student's place in the set
   // (syncExploreNav); a plain "Practice" click with nothing open still
   // means "take me back to the top". Games counts as an explore page here
@@ -7949,22 +7989,70 @@ function caNumber(a){
   return caNumberCache.map[a.id] || Number(a.number) || 0;
 }
 /* An activity is visible to students once its console-set release date has
-   arrived (local calendar day) — same "hidden until it happens" default as
-   the reminder popup below, so an activity with no date set yet (every
-   activity's starting state) or a future one doesn't leak to students who
-   click ahead. The teacher-only hide toggle (hiddenActivityIds, see
-   loadClassConfig()) is independent and can hide/reveal on top of this.
-   Dev-bypass users skip the date gate — the whole point of that mode is
-   previewing UI that isn't live yet. */
+   arrived (local calendar day) — "hidden until it happens" by default, so an
+   activity with no date set yet (every activity's starting state) or a
+   future one doesn't leak to students who click ahead. The teacher-only hide
+   toggle (hiddenActivityIds, see loadClassConfig()) is independent and can
+   hide/reveal on top of this. Dev-bypass users skip the date gate — the
+   whole point of that mode is previewing UI that isn't live yet. */
 function caIsVisible(a){
   if(hiddenActivityIds[a.id] === true) return false;
   if(isDevBypassUser()) return true;
   const d = caDate(a);
   return d ? d <= dayStr(new Date()) : false;
 }
+/* ── The activity gate (Today-first work order, Phase 1, approved by
+   Jonathan 2026-09-11) ──
+   A visible, undone, uncleared activity — any kind, checks included — blocks
+   the rest of the site: body.ca-gated is the single on/off switch, and the
+   CSS it drives (styles.css) hides everything but Today and Live quiz. Never
+   lock on a guess, same rule as the sequential set gate: a teacher/dev
+   preview and a failed progress load both read as "nothing blocking". */
+function caBlockers(){
+  if(isGatePreviewer() || progressLoadFailed) return [];
+  const clears = (activityClears || {})[currentUser && currentUser.uid] || {};
+  return (window.CLASS_ACTIVITIES || []).filter(a =>
+    caIsVisible(a) && classActivities[a.id] !== true && clears[a.id] !== true);
+}
+/* Manual test hook, localhost only: dev bypass IS a gate previewer
+   (isGatePreviewer), so it's the one account that can never see its own
+   gate — window.__forceGate lets a local session (or a driving script)
+   force it on anyway to walk the gated UI. Never honored off localhost. */
+function applyActivityGate(){
+  const forced = IS_LOCALHOST && window.__forceGate;
+  document.body.classList.toggle('ca-gated', forced || caBlockers().length > 0);
+}
+/* A teacher's console clear (or a new activity going live) has to reach a
+   student tab that's just sitting open, not only the next reload — same
+   visibilitychange re-check live-quiz.js's invite uses, and the same reason:
+   nobody is staring at the site when the teacher clears someone, so the
+   first chance to notice is the tab coming back to the foreground. */
+document.addEventListener('visibilitychange', () => {
+  if(document.hidden || !currentUser || IS_TEACHER_MODE) return;
+  loadClassConfig().then(() => {
+    if(typeof renderClassActivities === 'function'){
+      const screen = document.getElementById('class-activities-screen');
+      if(screen && !screen.hasAttribute('hidden')) renderClassActivities();
+    }
+  });
+});
+/* Today — three groups, in this order (Today-first work order, Phase 1):
+     1. Do now      — the first pending card, forced open.
+     2. Still to do — the rest of the pending cards, under a divider label
+                       (skipped when there's only one pending card — nothing
+                       left to divide it from).
+     3. Earlier      — finished work, the existing collapsed group.
+   Ends with the resume card (moved here from the practice column, see
+   index.html) when the activity gate is off — once today's work is done,
+   "Your practice" is the next thing on the page. */
 function renderClassActivities(){
   const bodyEl = document.getElementById('class-activities-body');
   if(!bodyEl) return;
+  // Recomputed up front — the gate intro line and the resume card below both
+  // read body.ca-gated, and a completion just made in THIS render pass
+  // (caToggleComplete/ecSubmit, both call this) has to be reflected before
+  // either of them looks at it.
+  applyActivityGate();
   // Everything in this list is visible, hence dated — except under dev
   // bypass, where caIsVisible skips the date gate and caDate(a) can be null.
   // Treat null as '' so an undated entry sinks to the bottom of the sort
@@ -7985,11 +8073,35 @@ function renderClassActivities(){
     // out of the main flow.
     const pending = list.filter(a => classActivities[a.id] !== true);
     const finished = list.filter(a => classActivities[a.id] === true);
-    const pendingHtml = pending.length ? pending.map(caActivityCardHtml).join('')
-      : (finished.length ? `<div class="coach-tip" data-i18n="ca.allDone">${escHtml(t('ca.allDone'))}</div>` : '');
-    bodyEl.innerHTML = missing + pendingHtml + (finished.length ? caFinishedGroupHtml(finished) : '');
+    // The Do-now card renders open by default — but only once: after the
+    // first render caOpenId is sticky (same "don't yank it shut on a
+    // re-render" rule as caFinishedOpen), so a student who collapses it, or
+    // opens a different card, keeps that choice through Mark complete /
+    // language switch.
+    if(caOpenId === null && pending.length) caOpenId = pending[0].id;
+    let pendingHtml;
+    if(!pending.length){
+      pendingHtml = finished.length ? `<div class="coach-tip" data-i18n="ca.allDone">${escHtml(t('ca.allDone'))}</div>` : '';
+    } else {
+      const rest = pending.length > 1
+        ? `<div class="ca-stilltodo-divider" data-i18n="ca.stillToDo">${escHtml(t('ca.stillToDo'))}</div>`
+          + pending.slice(1).map(caActivityCardHtml).join('')
+        : '';
+      pendingHtml = caActivityCardHtml(pending[0]) + rest;
+    }
+    const gateIntro = document.body.classList.contains('ca-gated')
+      ? `<p class="ca-gate-intro" data-i18n="today.gateIntro">${escHtml(t('today.gateIntro'))}</p>` : '';
+    bodyEl.innerHTML = missing + gateIntro + pendingHtml + (finished.length ? caFinishedGroupHtml(finished) : '');
   }
   if(typeof applyI18n === 'function') applyI18n(bodyEl);
+  // The resume card only belongs on a finished Today page — gated, there's
+  // nothing to resume to yet. renderResumeCard() itself still skips a
+  // day-one student with nothing to resume.
+  const resumeHost = document.getElementById('resume-card');
+  if(resumeHost){
+    if(document.body.classList.contains('ca-gated')){ resumeHost.hidden = true; resumeHost.innerHTML = ''; }
+    else if(typeof renderResumeCard === 'function') renderResumeCard();
+  }
 }
 // Closed by default each render — caFinishedOpen carries the student's choice
 // across re-renders the same way caOpenId does for a single card, so marking
@@ -8007,47 +8119,10 @@ function caFinishedGroupHtml(finished){
 }
 function caOnFinishedToggle(details){ caFinishedOpen = details.open; }
 
-/* ── Reminder popup: unfinished activities, once per visit ──
-   Shown only after a successful progress load for a signed-in, non-dev
-   student — an empty classActivities from a failed load is indistinguishable
-   from "nothing done yet", so we can't tell a real gap from a read error. */
-function maybeShowCaReminder(){
-  if(progressLoadFailed || isDevBypassUser()) return;
-  const pending = (window.CLASS_ACTIVITIES || []).filter(a => classActivities[a.id] !== true && caIsVisible(a));
-  if(!pending.length) return;
-  try{ if(sessionStorage.getItem('caReminderShown') === '1') return; }catch(e){}
-  const shown = pending.slice().sort((a, b) => (caDate(b) || '').localeCompare(caDate(a) || '')).slice(0, 5);
-  const more = pending.length - shown.length;
-  const itemsHtml = shown.map(a => `<li><span class="ca-chip">${escHtml(caFormatDate(caDate(a)))}</span> ${escHtml(caTitle(a))}</li>`).join('');
-  const ov = document.createElement('div');
-  ov.className = 'daily5-overlay ca-reminder-overlay';
-  ov.id = 'ca-reminder-overlay';
-  ov.innerHTML = `<div class="daily5-modal ca-reminder-modal" role="dialog" aria-modal="true" aria-label="${escAttr(t('ca.reminderTitle'))}">
-    <div class="daily5-head"><h3 style="font:inherit;margin:0">${escHtml(t('ca.reminderTitle'))}</h3>
-      <button type="button" class="tp-close" onclick="closeCaReminder()" aria-label="${escAttr(t('gate.closeAria'))}">&#x2715;</button></div>
-    <ul class="ca-reminder-list">${itemsHtml}${more > 0 ? `<li class="ca-reminder-more">${escHtml(t('ca.reminderMore',{n:more}))}</li>` : ''}</ul>
-    <div class="issue-actions">
-      <button type="button" class="ca-mark-btn" onclick="caReminderGo()">${escHtml(t('ca.reminderGo'))}</button>
-      <button type="button" class="tp-btn" onclick="closeCaReminder()">${escHtml(t('ca.reminderLater'))}</button>
-    </div>`;
-  ov.addEventListener('click', e => { if(e.target === ov) closeCaReminder(); });
-  document.body.appendChild(ov);
-  document.addEventListener('keydown', caReminderEscClose);
-  openOverlay(ov);
-  try{ sessionStorage.setItem('caReminderShown', '1'); }catch(e){}
-}
-function caReminderEscClose(e){ if(e.key === 'Escape') closeCaReminder(); }
-function closeCaReminder(){
-  const ov = document.getElementById('ca-reminder-overlay');
-  if(!ov) return;
-  ov.remove();
-  document.removeEventListener('keydown', caReminderEscClose);
-  closeOverlay();
-}
-function caReminderGo(){
-  closeCaReminder();
-  goExploreHash('class-activities');
-}
+/* The unfinished-activities reminder popup (maybeShowCaReminder) was retired
+   2026-09-11 (Today-first work order, Phase 1) — landing on Today replaces
+   it, and the activity gate makes it redundant besides. Deleted rather than
+   stubbed, per CLAUDE.md; see git history for the old implementation. */
 
 /* ════════════════════════════════════════════════
    Service worker — light PWA / offline resilience.

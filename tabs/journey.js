@@ -426,6 +426,54 @@ function flushSave(){
     .catch(function(){ dirty = true; setSaveMsg('journey.saveFailed'); });
 }
 
+/* ── Activity gate (Today-first work order, Phase 1) ──
+   A bookmarked Journey page sits behind the same gate as the main site — see
+   caIsVisible/caBlockers in app.js, which this deliberately does NOT share:
+   app.js's own `activityDates`/`hiddenActivityIds`/`activityClears` globals
+   are populated only by loadClassConfig(), the main app's boot path, which
+   this page never runs. class-activities.js (a plain data array, no
+   dependencies of its own) is loaded on these six pages just for this check.
+   If the visibility/blocker rule ever changes, change it in both places. */
+function journeyDayStr(d){
+  return d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0') + '-' + String(d.getDate()).padStart(2, '0');
+}
+function journeyIsVisible(a, cfg){
+  if(((cfg && cfg.hiddenActivities) || {})[a.id] === true) return false;
+  var d = ((cfg && cfg.activityDates) || {})[a.id];
+  return d ? d <= journeyDayStr(new Date()) : false;
+}
+function journeyBlockers(cfg, classActivities, uid){
+  var clears = ((cfg && cfg.activityClears) || {})[uid] || {};
+  return (window.CLASS_ACTIVITIES || []).filter(function(a){
+    return journeyIsVisible(a, cfg) && (classActivities || {})[a.id] !== true && clears[a.id] !== true;
+  });
+}
+/* Replaces the whole page — header, layers, tools dock, everything — with
+   one card pointing back to Today. A gated Journey page has nothing else to
+   offer, so this is deliberately total rather than an overlay: nothing
+   underneath should still be interactive (or precious CPU/battery running)
+   while the student is supposed to be on the main site instead. */
+function showJourneyGate(){
+  document.body.innerHTML = '';
+  var card = document.createElement('div');
+  card.className = 'ca-gate-card';
+  var h = document.createElement('h1');
+  h.className = 'ca-gate-title';
+  h.setAttribute('data-i18n', 'journey.gatedTitle');
+  h.textContent = t('journey.gatedTitle');
+  var p = document.createElement('p');
+  p.className = 'ca-gate-body';
+  p.setAttribute('data-i18n', 'journey.gatedBody');
+  p.textContent = t('journey.gatedBody');
+  var btn = document.createElement('a');
+  btn.className = 'ca-gate-btn';
+  btn.href = '../index.html#class-activities';
+  btn.setAttribute('data-i18n', 'journey.gatedBtn');
+  btn.textContent = t('journey.gatedBtn');
+  card.appendChild(h); card.appendChild(p); card.appendChild(btn);
+  document.body.appendChild(card);
+}
+
 function loadFirestoreSdk(){
   return new Promise(function(resolve, reject){
     if(firebase.firestore){ resolve(); return; }
@@ -482,6 +530,21 @@ window.addEventListener('load', function(){
     }).then(function(doc){
       var data = doc && doc.exists ? doc.data() : null;
       applyReady(data && data.songReady && data.songReady[SONG_ID]);
+      // Activity gate — skipped for the teacher's own account, same as
+      // everywhere else it applies. class-activities.js is a second script
+      // tag on this page (see index.html gate work order); CLASS_ACTIVITIES
+      // is undefined only if that tag is ever removed, which journeyBlockers
+      // treats as "nothing to block on" ([] default).
+      if(typeof TEACHER_EMAIL !== 'undefined' && user.email === TEACHER_EMAIL) return;
+      var classActivities = (data && data.classActivities) || {};
+      return fbDb.collection('config').doc('class').get().then(function(cfgDoc){
+        var cfg = cfgDoc && cfgDoc.exists ? cfgDoc.data() : {};
+        if(journeyBlockers(cfg, classActivities, user.uid).length) showJourneyGate();
+      }).catch(function(){
+        /* Never lock on a guess: a failed config read leaves the page open,
+           same fail-open rule as everywhere else the gate applies to an
+           unreadable doc. */
+      });
     }).catch(function(){
       /* An offline first read is fine — clicks still queue saves. But if the
          Firestore SDK itself never loaded, fbUser never arrives and NOTHING

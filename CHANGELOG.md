@@ -5,6 +5,25 @@ Notable changes to the Guitar Class site. Newest first.
 For the full session-by-session history (and the reasoning behind each change),
 see `WORKFLOW.md` and the git commit log.
 
+## 2026-09-12 — Today first: the day's activities are now the home page
+
+### Changed
+
+- **"In-Class Activities" is now called Today, and it's the first thing you
+  see** when you sign in — not the module ladder. It's split into what's
+  still ahead (**Do now**, with the newest one already open) and what's
+  **Earlier**, already finished.
+- **Today's activities block the rest of the site until they're done.**
+  While one is unfinished, every other page — Practice, Games, Songs, Mood
+  Chart, Keep practicing, Daily Review, My progress, even a Song Journey
+  page you'd bookmarked — points you back to Today instead. Finish (or your
+  teacher clears you past) the last one and everything opens right away, no
+  reload needed. The tuner, metronome, timer and recorder stay available the
+  whole time.
+- **"Pick up where you left off" now lives at the bottom of Today** instead
+  of above the module ladder — once today's work is done, it's the very
+  next thing on the page.
+
 ## 2026-09-10 — Code audit fixes: coach feedback, tuner, screen-reader diagrams
 
 ### Fixed

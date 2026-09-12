@@ -234,7 +234,10 @@
     'nav.moodChart':      { en: 'Mood Chart', es: 'Tabla de estados de ánimo' },
     'nav.keepPracticing': { en: 'Keep practicing', es: 'Sigue practicando' },
     'nav.myProgress':     { en: 'My progress', es: 'Mi progreso' },
-    'nav.classActivities':{ en: 'In-Class Activities', es: 'Actividades de clase' },
+    // Renamed from "In-Class Activities" 2026-09-11 (Today-first work order,
+    // Phase 1) — the key stays the same, so the hash/deep-link/console-link
+    // wiring built on it doesn't move.
+    'nav.classActivities':{ en: 'Today', es: 'Hoy' },
     'nav.moduleReview':   { en: 'Module review', es: 'Repaso del módulo' },
     'nav.setN':           { en: 'Set {n}', es: 'Unidad {n}' },
     // The room's B/C station rotation retired in 2026-08: one group is with the
@@ -273,6 +276,11 @@
     'gate.markAnyway':         { en: 'Mark it anyway', es: 'Marcarlo de todos modos' },
     'gate.closeAria':          { en: 'Close', es: 'Cerrar' },
 
+    // ── Activity gate (Today-first work order, Phase 1) — toast shown when a
+    // gated student's hash is rewritten back to Today (routeExploreHash). ──
+    'gate.activityFirst':      { en: 'Finish today\'s activity first.',
+                                 es: 'Primero termina la actividad de hoy.' },
+
     // ── Shuffle-deck check-off gate (soft: student can always override) ──
     'dgate.title':             { en: 'Prove it with the deck', es: 'Demuéstralo con el mazo' },
     'dgate.body':              { en: 'This skill has its own shuffle deck, and the deck can check it off for you — 9 of 10 within the time limit, right there. Give it a run first; it takes under a minute, and it makes "I\'ve got it!" mean something.',
@@ -291,14 +299,22 @@
     'ca.completed':            { en: 'Completed ✓ — tap to un-mark', es: 'Completado ✓ — toca para desmarcar' },
     // The group every finished card collapses into (renderClassActivities) —
     // closed by default, so the list a student still has to act on isn't
-    // buried under everything already turned in.
-    'ca.finishedGroup':        { en: 'Finished ({n})', es: 'Terminadas ({n})' },
-    'ca.allDone':              { en: 'Everything here is marked complete — see it under Finished below.',
-                                 es: 'Todo aquí está marcado como completo — velo en Terminadas abajo.' },
-    'ca.reminderTitle':        { en: 'In-class activities to finish', es: 'Actividades de clase por terminar' },
-    'ca.reminderMore':         { en: '+ {n} more', es: '+ {n} más' },
-    'ca.reminderGo':           { en: 'Go to activities', es: 'Ir a las actividades' },
-    'ca.reminderLater':        { en: 'Not now', es: 'Ahora no' },
+    // buried under everything already turned in. Relabeled "Earlier" from
+    // "Finished" 2026-09-11 (Today-first work order) to read as the third of
+    // three groups — Do now / Still to do / Earlier — rather than a stray
+    // archive.
+    'ca.finishedGroup':        { en: 'Earlier ({n})', es: 'Antes ({n})' },
+    'ca.allDone':              { en: 'Everything here is marked complete — see it under Earlier below.',
+                                 es: 'Todo aquí está marcado como completo — velo en Antes abajo.' },
+    // The divider label ahead of everything past the first pending card
+    // (renderClassActivities) — skipped when there's only one pending card,
+    // since there's nothing left to divide it from.
+    'ca.stillToDo':            { en: 'Still to do', es: 'Todavía por hacer' },
+    // Shown above the Do-now group only while the activity gate (below) is
+    // on — it's the thing standing between the student and the rest of the
+    // site, so it needs to say that plainly.
+    'today.gateIntro':         { en: 'Finish these before anything else opens.',
+                                 es: 'Termina estas actividades antes de que se abra lo demás.' },
     'ca.watchVideo':           { en: 'Watch video', es: 'Ver video' },
     'ca.stepLabel':            { en: 'Step {n}', es: 'Paso {n}' },
     'ca.print':                { en: 'Print this activity', es: 'Imprimir esta actividad' },
@@ -889,6 +905,13 @@
     'journey.slow':          { en: 'Slow ({bpm} BPM)', es: 'Lento ({bpm} BPM)' },
     'journey.playalongTitle':{ en: 'Play-along backing track', es: 'Pista de acompañamiento para tocar encima' },
     'journey.trackFabAria':  { en: 'Play backing track', es: 'Reproducir pista de acompañamiento' },
+    // Activity gate (Today-first work order, Phase 1) — a bookmarked Journey
+    // page is behind the same gate as the main site; journey.js replaces the
+    // page body with this card rather than opening it when blocked.
+    'journey.gatedTitle':    { en: 'Finish today\'s activity first', es: 'Primero termina la actividad de hoy' },
+    'journey.gatedBody':     { en: 'Head back to the site to finish today\'s work — this page will be here when you\'re done.',
+                               es: 'Vuelve al sitio para terminar el trabajo de hoy — esta página seguirá aquí cuando termines.' },
+    'journey.gatedBtn':      { en: 'Go to Today', es: 'Ir a Hoy' },
 
 
     // ── 🎧 Listening Coach + 🎮 Games arcade (coach.js — every

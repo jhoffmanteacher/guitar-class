@@ -1297,6 +1297,34 @@ function checkTabAsciiAlignment() {
 }
 
 /* ════════════════════════════════════════════════════════════════════
+   1aa. GATE-SAFE NAV — the activity gate (app.js applyActivityGate,
+   Today-first work order, Phase 1) hides every rail .nav-btn except Today
+   and Live quiz while it's on. The CSS that does it keys off
+   data-gate="hide" (styles.css body.ca-gated [data-gate="hide"]), not a
+   hand-kept id list — so a new nav item with no data-gate attribute at all
+   would silently leak past the gate, reachable while the rest of the site
+   is supposed to be blocked. Every .nav-btn must carry data-gate="keep" or
+   data-gate="hide" so there is no third, unguarded state.
+   ════════════════════════════════════════════════════════════════════ */
+function checkGateSafeNav() {
+  head('1aa. Gate-safe nav — every rail .nav-btn is tagged keep/hide');
+  let bad = 0, total = 0;
+  const flag = m => { err(m); problems++; bad++; };
+  let src;
+  try { src = readFileSync(join(ROOT, 'index.html'), 'utf8'); }
+  catch { flag('index.html unreadable — 1aa cannot check this'); return; }
+  src.split('\n').forEach((line, li) => {
+    for (const m of line.matchAll(/<button\b[^>]*\bclass="[^"]*\bnav-btn\b[^"]*"[^>]*>/g)) {
+      total++;
+      if (!/\bdata-gate="(?:keep|hide)"/.test(m[0]))
+        flag(`index.html:${li + 1}: a .nav-btn with no data-gate="keep"/"hide" — the activity gate hides nav items by this attribute, not a hand-kept id list, so a new one with none of it would leak straight past the gate. "${m[0].slice(0, 90)}…"`);
+    }
+  });
+  if (!total) { flag('index.html: no .nav-btn found at all — 1aa cannot see what it is supposed to guard'); return; }
+  if (bad === 0) ok(`${total} rail nav buttons all carry data-gate="keep"/"hide"`);
+}
+
+/* ════════════════════════════════════════════════════════════════════
    1p. playSeq PITCHES MUST EXIST ON THE STRING THE STEP NAMES — a step
    whose wording names exactly one string, then plays a ▶ sequence
    containing a note BELOW that string's open pitch, is asking for a
@@ -2268,10 +2296,15 @@ function checkMissingI18nKeys(I18N) {
   for (const f of I18N_SCAN_JS_FILES) scanI18nRefs(f, KEYS, used, missing);
   for (const f of MODULE_FILES) scanI18nRefs(f, KEYS, used, missing);
   for (const f of htmlFiles) scanI18nRefs(f, KEYS, used, missing);
+  // tabs/journey.js calls t() too (journey.saving/saved/gatedTitle/…) but
+  // isn't in I18N_SCAN_JS_FILES — it's the one shipped script that's neither
+  // a shell script nor a Journey HTML page. Scanned on its own rather than
+  // widening that list, since it's the only exception.
+  scanI18nRefs('tabs/journey.js', KEYS, used, missing);
 
   for (const m of missing) { err(`${m.file}:${m.line} references i18n key '${m.key}' which does not exist`); problems++; }
   if (missing.length === 0 && dynamicBad === 0) {
-    ok(`every i18n key reference across ${I18N_SCAN_JS_FILES.length + MODULE_FILES.length + htmlFiles.length} files (+ the dynamic deck/ear/fret-string/live-quiz families) resolves`);
+    ok(`every i18n key reference across ${I18N_SCAN_JS_FILES.length + MODULE_FILES.length + htmlFiles.length + 1} files (+ the dynamic deck/ear/fret-string/live-quiz families) resolves`);
   }
 }
 
@@ -3095,6 +3128,7 @@ async function liveCheck() {
   checkJourneyThemeDrift();
   checkJourneyTabCards();
   checkTabAsciiAlignment();
+  checkGateSafeNav();
   checkFigureDimensions();
   checkOrphanAssets();
   if (!SKIP_LINKS) await checkLinks();

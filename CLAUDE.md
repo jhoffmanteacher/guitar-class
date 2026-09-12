@@ -151,7 +151,8 @@ drift (1t), figure intrinsic sizes and the two class-activity renderers (1v),
 video-title drift (inside the link check), slang and figurative phrasing in
 student-facing text (1w), Journey lick labels naming the shape (1w2),
 orphaned `img/`/`audio/` files and unused `DECKS`/`EAR_POOLS` ids (1x), Journey
-tab-ascii column alignment across string rows (1z).
+tab-ascii column alignment across string rows (1z), every rail `.nav-btn`
+tagged `data-gate="keep"/"hide"` for the activity gate (1aa).
 
 Not every class can be guarded by a banned-phrase list. 1w2 pins the Journey
 lick labels *positively* — every `Lick N — ...` card must use one of four
@@ -414,6 +415,69 @@ Two rules that are easy to break without noticing:
 - **The `noteName` board is drawn with `theme:'web'` plus the dark-mode
   invert**, not on CSS variables: its fretted-note circle is a hardcoded
   light green, so a variable-themed `?` would be light-on-light in dark mode.
+
+## Today page & the activity gate
+Work order: "Today-first site simplification," Phase 1, shipped 2026-09-12.
+"In-Class Activities" is renamed **Today** (`nav.classActivities` — same i18n
+key, same hash `#class-activities`, same deep links) and is the site's home
+page: `showApp()` opens it whenever the URL carries no explore hash at all,
+gated or not. `renderClassActivities()` (app.js) builds three groups —
+**Do now** (the first pending card, forced open), **Still to do** (a divider,
+skipped when there's only one card left), **Earlier** (`ca.finishedGroup`,
+now "Earlier" not "Finished") — and appends the resume card
+(`renderResumeCard()`) at the end when nothing is blocking. The `#resume-card`
+element itself moved in `index.html` from a sibling of `#week-panels` into
+the Today page's own body; it no longer renders in the module/set view at
+all.
+
+**The gate:** `caBlockers()` — a visible (`caIsVisible`), undone
+(`classActivities[id]!==true`), uncleared activity or check — drives
+`body.ca-gated` via `applyActivityGate()`. Teacher/dev bypass are gate
+previewers (`isGatePreviewer()`) and never see it; a failed progress load
+(`progressLoadFailed`) also reads as "nothing blocking" — never lock on a
+guess, same rule as the sequential set gate. `applyActivityGate()` runs from
+`showApp()`, at every exit of `loadClassConfig()`, and inside
+`renderClassActivities()` itself (so a completion or an exit-check submit
+lifts it live, no reload). CSS keys the hiding off `data-gate="hide"` on
+every rail `.nav-btn` except Today and Live quiz (`data-gate="keep"`) —
+checks.mjs **1aa** fails the push on a nav button with neither — plus
+`.g-module`/`.g-set`/`#resume-card`/`#week-panels`; `#search-btn` needs
+`!important` because `showApp()`/sign-out already toggle its inline
+`style.display`. `routeExploreHash()` rewrites any hash but `#class-activities`/
+`#live-quiz` back to Today with a `gateToast()` while gated (`returnToPractice()`
+gets the same guard); `window.__forceGate` (localhost only) lets a session
+that can't otherwise trigger the gate (dev bypass, the teacher account) force
+it on to check the UI.
+
+**Per-student clears:** `config/class.activityClears` (`{ uid: { id: true } }`)
+lets a teacher let one student past a specific blocker without them finishing
+it — a sub day, a connectivity problem, work done on paper. Written by
+`teacherSetActivityClear`/`teacherClearAllBlockers` in teacher.js, same
+merge-patch shape as `hiddenActivities`/`gameOverrides`; no `firestore.rules`
+change (already teacher-write/student-read). UI: a Clear toggle in the
+per-student grid on both `renderTeacherActivityDetail` (new — regular
+activities had no such grid before this) and `renderTeacherCheckDetail`
+(existing, gained a Gate column); a "Blocked by N" badge and a per-student
+"Today's activity gate" section with Clear all on the Students views. Cached
+in `localStorage` (`caClears`, restored by `restoreClassConfigFromCache` —
+renamed from `restoreActivityDatesFromCache`) with the same fail-to-cache
+(never fail open) rule as `activityDates`.
+
+**Journey pages gate too.** The six `tabs/*.html` pages now also load
+`class-activities.js` (a plain data array, no dependency of its own) so
+`journey.js` can compute the same blockers after its own Firestore boot
+(`journeyIsVisible`/`journeyBlockers` — deliberately NOT shared with
+app.js's `caIsVisible`/`caBlockers`, which read globals only the main app's
+boot path populates) and, on a hit, replace the whole page with a
+`.ca-gate-card` (styles in `tabs/journey-theme.css`, no `styles.css`
+counterpart — the main app's gate stays on the existing Today page rather
+than a full-page swap) linking back to `index.html#class-activities`. Skipped
+for the teacher's own account by email; a failed config read fails open (no
+gate), never on a guess. `mood-chart.html` is not one of the six and is never
+gated.
+
+Phases 2 (nav collapse) and 3 (render-time hiding of module sections that
+duplicate a class activity) are still ahead — see the work order.
 
 ## Videos
 

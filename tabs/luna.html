@@ -448,6 +448,11 @@ document.querySelectorAll('.chord-svg[data-chord]').forEach(function(el){
   if (svg) el.innerHTML = svg;
 });
 </script>
+<!-- The activity gate (Today-first work order, Phase 1): a plain data
+     array, loaded here just so journey.js can check it — see its own
+     comment. No dependency of its own, confirmed by this file needing
+     nothing else from it. -->
+<script src="../class-activities.js"></script>
 <script src="journey.js"></script>
 <!-- Live quiz: the banner only. This page has no app.js, so live-quiz.js
      is written not to need one — see its header. -->

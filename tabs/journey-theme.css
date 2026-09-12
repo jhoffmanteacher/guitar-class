@@ -336,3 +336,23 @@ body.lq-invite-open{overflow:hidden}
 .lq-invite-later:hover{color:var(--text);background:var(--bg3)}
 @keyframes lq-fade{from{opacity:0}to{opacity:1}}
 @media(prefers-reduced-motion:reduce){.lq-invite{animation:none}}
+
+/* ── Activity gate (Today-first work order, Phase 1) ──
+   showJourneyGate() (journey.js) replaces the whole page with this one card
+   when today's class activities aren't done/cleared yet. No styles.css
+   counterpart to mirror: the main app's gate stays on the existing Today
+   page rather than swapping in a full-page replacement, so there's nothing
+   on that side doing the same job. */
+.ca-gate-card{max-width:480px;margin:60px auto;text-align:center;padding:32px 28px;
+  background:var(--bg2);border:1px solid var(--border2);border-radius:14px}
+.ca-gate-title{font-family:var(--font-display,inherit);font-size:1.25rem;font-weight:600;margin:0 0 10px}
+.ca-gate-body{color:var(--text2);line-height:1.5;margin:0 0 20px}
+.ca-gate-btn{display:inline-flex;align-items:center;justify-content:center;min-height:44px;
+  padding:0 20px;font:inherit;font-weight:700;font-size:0.9375rem;color:#fff;
+  background:var(--brand);border:1px solid var(--brand);border-radius:20px;text-decoration:none}
+.ca-gate-btn:hover{filter:brightness(0.92)}
+@media (prefers-color-scheme:dark){
+  /* dark-mode --brand is a light purple — white text loses contrast on it,
+     same fix as .fab-track above: use the purple chip palette instead. */
+  .ca-gate-btn{color:var(--purple-text);background:var(--purple-bg);border-color:var(--purple-border)}
+}

@@ -51,6 +51,17 @@ function teacherPeriodPillHtml(stu){
   const p=teacherStudentPeriod(stu);
   return p?` <span class="stu-period" title="Class period ${escAttr(p)}">P${escHtml(p)}</span>`:'';
 }
+// "Blocked by N" tag beside a student's name in the Students list — how many
+// of today's activities/checks are currently holding them out of the rest of
+// the site (see the activity gate, app.js caBlockers). Silent when there's
+// nothing blocking, same reasoning as the period pill: an empty badge on
+// every row would read as broken, not as "all clear". Defined here (and not
+// beside teacherBlockersFor, further down) so it sits next to the pill it
+// renders alongside.
+function teacherBlockedBadgeHtml(stu){
+  const n=teacherBlockersFor(stu, teacherClassConfig).length;
+  return n?` <span class="stu-period stu-blocked" title="${n} today's activit${n===1?'y':'ies'} not yet done or cleared">Blocked by ${n}</span>`:'';
+}
 /* 'all' | '4' | '7' | 'none'. Persisted per-device so a mid-period reload
    comes back to the class the teacher was actually looking at. */
 let teacherPeriodFilter=(function(){
@@ -180,6 +191,10 @@ async function showTeacherApp(user){
       if(period){ teacherSetStudentPeriod(period.dataset.uid, period.dataset.value); return; }
       const actHidden=e.target.closest('[data-set-activity-hidden]');
       if(actHidden){ teacherSetActivityHidden(actHidden.dataset.id, actHidden.dataset.state); return; }
+      const actClear=e.target.closest('[data-set-activity-clear]');
+      if(actClear){ teacherSetActivityClear(actClear.dataset.uid, actClear.dataset.id, actClear.dataset.state); return; }
+      const clearAll=e.target.closest('[data-clear-all-blockers]');
+      if(clearAll){ teacherClearAllBlockers(clearAll.dataset.uid); return; }
       const sortTh=e.target.closest('[data-sort-activities]');
       if(sortTh){ teacherSetActivitySort(sortTh.dataset.sortActivities); return; }
       // Rename controls sit INSIDE the title cell, which is itself the
@@ -1018,10 +1033,31 @@ function renderTeacherActivityDetail(id){
     const head=`Step ${si+1}${s.label?`: ${escHtml(s.label)}`:''}`;
     return `<div class="tr-card ca-prev-step" style="margin-bottom:12px"><div class="tr-name">${head}</div>${wrapGotItWhen(s.text||'')}${media.join('')}</div>`;
   }).join('');
+  // Per-student status + gate clear (Today-first work order, Phase 1) — same
+  // uid -> { activityId -> true } map, and the same Clear toggle, as the
+  // exit-check grid below (renderTeacherCheckDetail). Sorted by name, not by
+  // done/not-done, so a teacher looking for one student doesn't have to
+  // scan two groups.
+  const clearsMap=teacherClassConfig.activityClears||{};
+  const sortedStudents=[...allStudents].sort((x,y)=>String(x.name||x.email||'').localeCompare(String(y.name||y.email||'')));
+  const studentRows=sortedStudents.map(s=>{
+    const done=(s.classActivities||{})[a.id]===true;
+    const cleared=!!((clearsMap[s.uid]||{})[a.id]);
+    return `<tr><td class="nc">${escHtml(s.name||s.email||'(no name)')}</td>
+      <td>${done?'Done ✓':'Not yet'}</td>
+      <td><button class="tg-seg-btn ${cleared?'on':''}" data-set-activity-clear data-uid="${escAttr(s.uid)}" data-id="${escAttr(a.id)}" data-state="${cleared?'unclear':'clear'}" title="Lets this student past the gate without finishing.">${cleared?'Cleared':'Clear'}</button></td></tr>`;
+  }).join('');
+  const studentTable=sortedStudents.length
+    ? `<div class="t-grid-wrap"><table><thead><tr><th class="nc">Student</th><th>Status</th><th>Gate</th></tr></thead><tbody>${studentRows}</tbody></table></div>`
+    : '<div class="t-loading">No student data yet — students need to sign in first.</div>';
   box.innerHTML=`${back}
     <div class="stu-section-head" style="margin-top:0">${num?`#${num} - `:''}${escHtml(teacherActivityTitle(a,teacherClassConfig))} <span style="opacity:.55;font-size:.72em">(${escHtml(a.id)})</span></div>
     ${linkRow(a)}
     ${a.intro?`<div class="coach-tip" style="margin:0 2px 16px">${escHtml(a.intro)}</div>`:''}
+    <div class="stu-section-head">Students</div>
+    <div class="tg-note">Gate: today's activities block the rest of the site until they're done (see the Today-first work order). Clear lets one student past this one without finishing it — a sub day, a connectivity problem, work done on paper.</div>
+    ${studentTable}
+    <div class="stu-section-head">Preview</div>
     ${stepsHtml || '<div class="stu-empty">No steps on this activity yet.</div>'}`;
 }
 /* An exit check's detail page: who turned it in, what they picked, and
@@ -1058,18 +1094,28 @@ function renderTeacherCheckDetail(a, back){
     ecGrade(a,r.picks).rows.forEach((row,i)=>{ if(!row.ok) missed[i]++; });
   });
   const cell=ok=>`<span class="tck yes" style="display:inline-flex;align-items:center;justify-content:center;width:22px;height:22px;border:2px solid var(--${ok?'green':'amber'}-text);color:var(--${ok?'green':'amber'}-text)">${ok?TCK_CHECK_SVG:TCK_MINUS_SVG}</span>`;
+  // Gate clear (Today-first work order, Phase 1) — same uid -> { activityId
+  // -> true } map, and the same toggle, as the regular-activity grid above
+  // (renderTeacherActivityDetail). A student who hasn't turned the check in
+  // yet can still be cleared — a sub day, a connectivity problem — so it's
+  // its own column rather than folded into the score cells.
+  const clearsMap=teacherClassConfig.activityClears||{};
+  const clearCell=uid=>{
+    const cleared=!!((clearsMap[uid]||{})[a.id]);
+    return `<td><button class="tg-seg-btn ${cleared?'on':''}" data-set-activity-clear data-uid="${escAttr(uid)}" data-id="${escAttr(a.id)}" data-state="${cleared?'unclear':'clear'}" title="Lets this student past the gate without finishing.">${cleared?'Cleared':'Clear'}</button></td>`;
+  };
   const bodyRows=withRes.map(({s,r})=>{
     const g=ecGrade(a,r.picks);
     const cells=g.rows.map(row=>`<td style="text-align:center">${cell(row.ok)}<div style="font-size:.72em;opacity:.7">${escHtml(row.pick||'—')}</div></td>`).join('');
-    return `<tr><td class="nc">${escHtml(s.name||s.email||'(no name)')}</td><td>${r.score}/${r.total}</td><td>${escHtml(r.at||'')}</td>${cells}</tr>`;
+    return `<tr><td class="nc">${escHtml(s.name||s.email||'(no name)')}</td><td>${r.score}/${r.total}</td><td>${escHtml(r.at||'')}</td>${cells}${clearCell(s.uid)}</tr>`;
   }).join('');
   const missRow=withRes.length
     ? `<tr><td class="nc" style="font-style:italic">Missed by</td><td colspan="2"></td>`
-      +missed.map(m=>`<td style="text-align:center">${m}</td>`).join('')+`</tr>`
+      +missed.map(m=>`<td style="text-align:center">${m}</td>`).join('')+`<td></td></tr>`
     : '';
-  const noneRows=without.map(s=>`<tr style="opacity:.55"><td class="nc">${escHtml(s.name||s.email||'(no name)')}</td><td colspan="${2+items.length}">not turned in</td></tr>`).join('');
+  const noneRows=without.map(s=>`<tr style="opacity:.55"><td class="nc">${escHtml(s.name||s.email||'(no name)')}</td><td colspan="${2+items.length}">not turned in</td>${clearCell(s.uid)}</tr>`).join('');
   const table=allStudents.length
-    ? `<div class="t-grid-wrap"><table><thead><tr><th class="nc">Student</th><th>Score</th><th>Date</th>${heads.map(h=>`<th>${h}</th>`).join('')}</tr></thead>`
+    ? `<div class="t-grid-wrap"><table><thead><tr><th class="nc">Student</th><th>Score</th><th>Date</th>${heads.map(h=>`<th>${h}</th>`).join('')}<th>Gate</th></tr></thead>`
       +`<tbody>${bodyRows}${missRow}${noneRows}</tbody></table></div>`
     : '<div class="t-loading">No student data yet — students need to sign in first.</div>';
   box.innerHTML=`${back}
@@ -1125,6 +1171,75 @@ async function teacherSetActivityDate(id, value){
     alert('Could not save that change — check your connection and Firestore rules.');
   }
   if(teacherView==='activities') renderTeacherActivities();
+}
+
+/* ── Per-student activity-gate clears (Today-first work order, Phase 1) ──
+   config/class.activityClears: uid -> { activityId -> true }. Lets a student
+   past the gate (app.js caBlockers) without finishing a specific activity —
+   a sub day, a connectivity problem, a kid who did the work on paper. Same
+   doc, same teacher-writes/student-reads rule as hiddenActivities/
+   activityDates/gameOverrides above; no firestore.rules change needed.
+
+   teacherActivityVisible/teacherBlockersFor mirror caIsVisible/caBlockers in
+   app.js, deliberately NOT shared with them: those read app.js's own
+   `activityDates`/`hiddenActivityIds` globals, which only loadClassConfig()
+   (the STUDENT boot path) ever populates — a teacher session never calls it,
+   so those globals would read as empty here. This reads straight off the
+   student's own doc (allStudents) and the config object this file already
+   has in hand. If the visibility rule ever changes, change it in both. */
+function teacherActivityVisible(a, cfg, today){
+  if(((cfg&&cfg.hiddenActivities)||{})[a.id]===true) return false;
+  const d=((cfg&&cfg.activityDates)||{})[a.id];
+  return d ? d<=today : false;
+}
+function teacherBlockersFor(stu, cfg){
+  const today=dayStr(new Date());
+  const clears=((cfg&&cfg.activityClears)||{})[stu.uid]||{};
+  return (window.CLASS_ACTIVITIES||[]).filter(a=>
+    teacherActivityVisible(a,cfg,today) && (stu.classActivities||{})[a.id]!==true && clears[a.id]!==true);
+}
+async function teacherSetActivityClear(uid, id, state){
+  const on=state==='clear';
+  if(!teacherClassConfig.activityClears) teacherClassConfig.activityClears={};
+  if(!teacherClassConfig.activityClears[uid]) teacherClassConfig.activityClears[uid]={};
+  const had=Object.prototype.hasOwnProperty.call(teacherClassConfig.activityClears[uid], id);
+  const prev=teacherClassConfig.activityClears[uid][id];
+  if(on) teacherClassConfig.activityClears[uid][id]=true; else delete teacherClassConfig.activityClears[uid][id];
+  try{
+    await ensureDb();
+    const fv=firebase.firestore.FieldValue;
+    const patch=on ? {activityClears:{[uid]:{[id]:true}}} : {activityClears:{[uid]:{[id]:fv.delete()}}};
+    await db.collection('config').doc('class').set(patch,{merge:true});
+  }catch(e){
+    if(had) teacherClassConfig.activityClears[uid][id]=prev; else delete teacherClassConfig.activityClears[uid][id];
+    alert('Could not save that change — check your connection and Firestore rules.');
+  }
+  if(activityDetailId) renderTeacherActivityDetail(activityDetailId);
+  else if(teacherView==='students') studentDetailUid ? renderTeacherStudentDetail(studentDetailUid) : renderTeacherStudents();
+}
+// "Clear all" on a student's detail page — every CURRENT blocker for them,
+// in one write. Recomputed at click time rather than reusing whatever list
+// last rendered, so a stale page (another tab just marked one done) can't
+// clear something that already stopped blocking.
+async function teacherClearAllBlockers(uid){
+  const stu=allStudents.find(s=>s.uid===uid) || (allStudentsRaw||[]).find(s=>s.uid===uid);
+  if(!stu) return;
+  const blockers=teacherBlockersFor(stu, teacherClassConfig);
+  if(!blockers.length) return;
+  if(!teacherClassConfig.activityClears) teacherClassConfig.activityClears={};
+  if(!teacherClassConfig.activityClears[uid]) teacherClassConfig.activityClears[uid]={};
+  const prev={...teacherClassConfig.activityClears[uid]};
+  blockers.forEach(a=>{ teacherClassConfig.activityClears[uid][a.id]=true; });
+  try{
+    await ensureDb();
+    const patch={activityClears:{[uid]:{}}};
+    blockers.forEach(a=>{ patch.activityClears[uid][a.id]=true; });
+    await db.collection('config').doc('class').set(patch,{merge:true});
+  }catch(e){
+    teacherClassConfig.activityClears[uid]=prev;
+    alert('Could not save that change — check your connection and Firestore rules.');
+  }
+  if(teacherView==='students') studentDetailUid ? renderTeacherStudentDetail(studentDetailUid) : renderTeacherStudents();
 }
 
 /* ── Games access (teacher control) ──────────────────────────────────────
@@ -1633,7 +1748,7 @@ function renderTeacherStudents(){
       ? `<span class="stu-mod">&mdash;</span><span class="stu-count">0 / ${universe.total}</span>`
       : `<span class="stu-mod">M${tally.furthest}</span><span class="stu-count">${tally.got} / ${universe.total}</span>`;
     return `<button type="button" class="stu-row" data-open-student data-uid="${escAttr(stu.uid)}">
-        <div class="stu-name" title="${escAttr(displayName)}">${escHtml(displayName)}${teacherPeriodPillHtml(stu)}</div>
+        <div class="stu-name" title="${escAttr(displayName)}">${escHtml(displayName)}${teacherPeriodPillHtml(stu)}${teacherBlockedBadgeHtml(stu)}</div>
         ${teacherBarFillHtml(tally.got,tally.working,universe.total)}
         <div class="stu-right">${rightLbl}</div>
       </button>`;
@@ -1790,10 +1905,28 @@ function renderTeacherStudentDetail(uid){
         +`${Number(e.r.attempts)>1?` <span style="opacity:.6">(${Number(e.r.attempts)} attempts)</span>`:''}</div>`).join('')
     : '';
 
+  // Today's activity gate (Today-first work order, Phase 1) — shown first,
+  // ahead of the module chart: a blocked student is the thing that needs
+  // acting on right now, and Clear all + a per-activity Clear both reach the
+  // same teacherSetActivityClear/teacherClearAllBlockers writers the
+  // activity/check detail pages use.
+  const blockers=teacherBlockersFor(stu, teacherClassConfig);
+  const gateHtml=blockers.length
+    ? `<div class="stu-section-head" style="margin-top:0">Today's activity gate</div>
+       <div class="tg-note">Blocked by ${blockers.length} — not yet done or cleared.
+         <button type="button" class="tg-seg-btn" data-clear-all-blockers data-uid="${escAttr(stu.uid)}" style="margin-left:8px">Clear all</button>
+       </div>
+       <div class="t-grid-wrap"><table><thead><tr><th class="nc">Activity</th><th>Gate</th></tr></thead><tbody>
+         ${blockers.map(a=>`<tr><td class="nc" data-open-activity data-id="${escAttr(a.id)}" style="cursor:pointer">${escHtml(teacherActivityTitle(a,teacherClassConfig))}</td>`
+           +`<td><button type="button" class="tg-seg-btn" data-set-activity-clear data-uid="${escAttr(stu.uid)}" data-id="${escAttr(a.id)}" data-state="clear" title="Lets this student past the gate without finishing.">Clear</button></td></tr>`).join('')}
+       </tbody></table></div>`
+    : '';
+
   box.innerHTML = `
     ${back}
-    <div class="stu-detail-name">${escHtml(displayName)}${teacherPeriodPillHtml(stu)}</div>
+    <div class="stu-detail-name">${escHtml(displayName)}${teacherPeriodPillHtml(stu)}${teacherBlockedBadgeHtml(stu)}</div>
     <div class="stu-detail-email">${escHtml(email)}</div>
+    ${gateHtml}
     <div class="stu-chart" style="margin-bottom:22px">
       ${teacherAxisHeaderHtml(universe)}
       <div class="stu-rows">

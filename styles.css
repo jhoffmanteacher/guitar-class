@@ -938,6 +938,10 @@ body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,"Helvetica N
 .t-period-filter{margin:0 0 16px 10px;vertical-align:top}
 /* "P4" tag beside a student's name in the Students list and detail page. */
 .stu-period{font-size:0.6875rem;font-weight:600;color:var(--text2);border:1px solid var(--border2);border-radius:9px;padding:0 6px;margin-left:6px;vertical-align:1px}
+/* "Blocked by N" tag, same shape as .stu-period — amber, the In-Class
+   Activities accent family, so it reads as tied to that feature at a glance
+   (Today-first work order, Phase 1: teacherBlockedBadgeHtml). */
+.stu-blocked{color:var(--ca-accent);border-color:var(--ca-accent)}
 /* Paused-student screen (teacher hold — app.js showPausedScreen) */
 .paused-screen{display:none;padding:48px 20px}
 .paused-card{max-width:520px;margin:0 auto;text-align:center;padding:32px 28px;border:1px solid var(--border2);border-radius:var(--radius);background:var(--bg2)}
@@ -1803,11 +1807,33 @@ body.explore-open #week-panels{display:none}
 .ca-finished-summary::before{content:'';width:8px;height:8px;border-right:2px solid var(--text3);border-bottom:2px solid var(--text3);transform:rotate(-45deg);transition:transform .15s;flex-shrink:0}
 .ca-finished-group[open] .ca-finished-summary::before{transform:rotate(45deg)}
 .ca-finished-body{opacity:.85}
-.ca-reminder-modal{border-top:3px solid var(--ca-accent)}
-.ca-reminder-list{list-style:none;margin:10px 0;padding:0;font-size:0.9375rem}
-.ca-reminder-list li{padding:6px 0;border-bottom:1px solid var(--border);display:flex;align-items:center;gap:8px}
-.ca-reminder-list li:last-child{border-bottom:none}
-.ca-reminder-more{color:var(--text2);font-size:0.875rem}
+/* ── Today page groups (renderClassActivities) — Today-first work order,
+   Phase 1. The gate intro sits above the Do-now card while the activity
+   gate is on (body.ca-gated, below); the divider labels the start of
+   "Still to do" ahead of everything past the first pending card. */
+.ca-gate-intro{background:var(--ca-accent-bg);border:1px solid var(--ca-accent);color:var(--text);
+  border-radius:var(--radius);padding:10px 14px;margin:0 0 12px;font-weight:600;font-size:0.9375rem}
+.ca-stilltodo-divider{font-weight:600;color:var(--text2);font-size:0.8125rem;
+  text-transform:uppercase;letter-spacing:.02em;margin:16px 4px 8px}
+
+/* ── The activity gate (Today-first work order, Phase 1) ──
+   body.ca-gated is the one switch (app.js applyActivityGate) — a visible,
+   undone, uncleared activity stands between a student and the rest of the
+   site. Today and Live quiz (data-gate="keep") stay reachable; every other
+   nav item (data-gate="hide", see checks.mjs 1aa) and the module/set rail
+   groups disappear along with the search button and the practice view.
+   Tools dock (.rail-tools) deliberately stays — a student still needs the
+   tuner/metronome/timer/recorder to work an activity step. */
+body.ca-gated .g-module,
+body.ca-gated .g-set,
+body.ca-gated [data-gate="hide"],
+body.ca-gated #resume-card,
+body.ca-gated #week-panels{display:none}
+/* #search-btn carries its own inline style="display:flex" (showApp/sign-out
+   in app.js toggle it directly, same as #fab-group) — an inline style
+   always wins over a plain selector, so this one needs !important or the
+   button would keep showing right through the gate. */
+body.ca-gated #search-btn{display:none!important}
 
 /* Module-review assessment pop-up — fires when the student opens the review
    panel; the full assessment box still lives at the bottom of that panel, so
