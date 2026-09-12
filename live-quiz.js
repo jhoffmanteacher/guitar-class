@@ -32,7 +32,15 @@
        quizId      key into LIVE_QUIZZES below
        state       'lobby' | 'question' | 'reveal' | 'ended' | 'off'
        qIndex      round number, 0-based (-1 while in the lobby)
-       correct     the choice id, written ONLY at reveal
+       correct     the choice id, written ONLY at reveal. For a `type:'fret'`
+                   quiz this is the lowest-fret id of a possibly-several
+                   correct answer (existing s.correct readers keep working);
+                   `correctIds` below is the full set.
+       correctIds  fret quizzes only: every '<string>:<fret>' id that counts
+                   as correct (octaves both count), written only at reveal.
+       target      fret quizzes only: { string, note } — the note the
+                   teacher picked from the control strip, written when the
+                   question opens. null for an mc quiz.
        tally       {choiceId: count}, written only at reveal
        scores      {uid: {name, pts, right, answered, last, lastRight}}
        speedBonus  false ⇒ every correct answer is worth the same
@@ -46,11 +54,16 @@
 
    ── Who decides what is correct ──
    The teacher does, at reveal time, by clicking the right choice on the
-   dashboard. There is no answer key in this file, and that is deliberate:
-   the dashboard is on the classroom projector, so anything the app knew in
-   advance would either have to be hidden from the room or would spoil the
-   round. It also fits the first quiz exactly — Jonathan plays a string and
-   only he knows which one until he says so.
+   dashboard. There is no answer key in this file for an mc quiz, and that
+   is deliberate: the dashboard is on the classroom projector, so anything
+   the app knew in advance would either have to be hidden from the room or
+   would spoil the round. It also fits the first quiz exactly — Jonathan
+   plays a string and only he knows which one until he says so.
+   `type:'fret'` quizzes are the one exception (see CLAUDE.md, "Live quiz"):
+   the app itself scores the round from LQ_NATURALS below, because the
+   target note is a fact of the fretboard, not something only the teacher
+   knows. The projector rule still holds — nothing on the stage shows the
+   answer before Reveal.
    ════════════════════════════════════════════════════════════════════ */
 
 /* ── The quiz bank ──
@@ -65,7 +78,14 @@
    question opens, sometimes more than once, so scoring by reaction time
    would just punish whoever waited to hear it properly. Omit the field, or
    set it true, and the quiz defaults to speed scoring — see
-   `lqDefaultScoring()`. */
+   `lqDefaultScoring()`.
+   `type` picks the question shape. Missing ⇒ 'mc' (labelled buttons,
+   `choices`). 'fret' ⇒ the student taps a fret on a board: the quiz
+   declares `strings` (guitar-diagrams kinds) and no `choices`; the
+   teacher picks a target note per question from the control strip; the
+   answer id is '<string>:<fret>'. A fret quiz has no `teacherHint`
+   about marking — the app scores it at Reveal (see CLAUDE.md, "Live
+   quiz", for why this one type is allowed to know the answer). */
 const LIVE_QUIZZES = {
   'string-id': {
     id: 'string-id',
@@ -82,11 +102,52 @@ const LIVE_QUIZZES = {
       { id:'B',  key:'lq.string.b',     color:'#5b3f96' },
       { id:'e1', key:'lq.string.highE', color:'#0f6b64' }
     ]
+  },
+  'fret-lowE': {
+    id: 'fret-lowE',
+    type: 'fret',
+    titleKey:  'lq.title.fretLowE',
+    promptKey: 'lq.prompt.fretTap',
+    teacherHint: 'Pick a note below to open the question. Students tap the fret; press Reveal when the count stops climbing.',
+    strings: ['lowE']
   }
+  // Phase 2: fret-lowE-A, fret-all
 };
 const LQ_DEFAULT_QUIZ = 'string-id';
 function lqQuiz(id){ return LIVE_QUIZZES[id] || LIVE_QUIZZES[LQ_DEFAULT_QUIZ]; }
 function lqChoice(quiz, id){ return quiz.choices.find(c=>c.id===id) || null; }
+function lqType(quiz){ return quiz.type === 'fret' ? 'fret' : 'mc'; }
+// Natural notes per string, fret → letter. Mirrors app.js FG_NATURALS; kept
+// here because this file must not depend on app.js (Journey pages).
+const LQ_NATURALS = {
+  lowE:  {0:'E',1:'F',3:'G',5:'A',7:'B',8:'C',10:'D',12:'E'},
+  A:     {0:'A',2:'B',3:'C',5:'D',7:'E',8:'F',10:'G',12:'A'},
+  D:     {0:'D',2:'E',3:'F',5:'G',7:'A',9:'B',10:'C',12:'D'},
+  G:     {0:'G',2:'A',4:'B',5:'C',7:'D',9:'E',10:'F',12:'G'},
+  B:     {0:'B',1:'C',3:'D',5:'E',6:'F',8:'G',10:'A',12:'B'},
+  highE: {0:'E',1:'F',3:'G',5:'A',7:'B',8:'C',10:'D',12:'E'}
+};
+const LQ_STRING_KEY = { lowE:'fret.stringLowE', A:'fret.stringA', D:'fret.stringD', G:'fret.stringG', B:'fret.stringB', highE:'fret.stringHighE' };
+// Same six colours as the string-id quiz's choices (keyed by the fret 'kind'
+// names above rather than that quiz's own choice ids, E6/e1) — the note
+// picker's buttons reuse this palette so a string reads the same colour in
+// both quizzes. Not a new colour per 1s: these are copied, not invented.
+const LQ_STRING_COLOR = { lowE:'#b3372a', A:'#a2530b', D:'#3b6d11', G:'#185fa5', B:'#5b3f96', highE:'#0f6b64' };
+function lqFretId(string, fret){ return string + ':' + fret; }
+function lqParseFretId(id){
+  const m = /^(lowE|A|D|G|B|highE):(\d{1,2})$/.exec(String(id || ''));
+  return m ? { string: m[1], fret: Number(m[2]) } : null;
+}
+// Every fret on `string` that sounds `note` — E on low E is frets 0 and 12.
+function lqFretIdsFor(string, note){
+  const map = LQ_NATURALS[string] || {};
+  return Object.keys(map).filter(f => map[f] === note).map(f => lqFretId(string, Number(f)));
+}
+// Params for the prompt: the note letter and the string's localized name.
+function lqTargetParams(target, langOrNull){
+  const key = LQ_STRING_KEY[target.string] || 'fret.stringLowE';
+  return { note: target.note, string: langOrNull ? tIn(key, langOrNull) : t(key) };
+}
 // Speed scoring is the overall default — a fast, correct answer should beat
 // a slow, correct one. A quiz opts OUT with `speedBonus: false` (e.g.
 // string-id, where the teacher's note sounds AFTER the question opens, so
@@ -489,6 +550,58 @@ function lqRenderStudent(){
   else                            html = title + lqStudentEndedHtml(s);
   body.innerHTML = html;
   if(typeof applyI18n === 'function') applyI18n(body);
+  lqPaintMarkers(body, s, quiz);
+}
+
+/* Post-paint marker classes for a fret board — pure DOM, run after
+   applyI18n (a language switch rebuilds the whole innerHTML, so nothing set
+   beforehand would survive it). `sid` matches the `sid` fgBoardSvg was
+   called with: 'lq' (default) for the student's own #lq-board, 'lqst' for
+   the projector's static #lq-st-board. No-op for an mc quiz or a state with
+   no board on screen.
+   Question (student board only — the stage shows no board while a question
+   is open): the student's own tap gets the neutral fg-pick state, no
+   right/wrong colour before the reveal.
+   Reveal: every correct id gets fg-good on both boards. The student board
+   also gets fg-bad on the student's own tap, but only if it ISN'T also
+   correct, so a right answer never carries both classes. The stage board
+   instead gets fg-count on every marker with at least one tap, its digit
+   replaced by that count — nothing student-identifying, just a number. */
+function lqPaintMarkers(root, s, quiz, sid){
+  if(!s || lqType(quiz) !== 'fret') return;
+  sid = sid || 'lq';
+  const board = root.querySelector(sid === 'lq' ? '#lq-board' : '#lq-st-board');
+  if(!board) return;
+  const markerFor = id => {
+    const p = lqParseFretId(id);
+    return p ? board.querySelector(`#fgm-${sid}-${p.string}-${p.fret}`) : null;
+  };
+  if(s.state === 'question'){
+    if(sid !== 'lq') return;   // the stage shows no marks before the reveal
+    const mine = (lqMyAnswer && lqMyAnswer.qIndex === s.qIndex) ? lqMyAnswer.choice : null;
+    const m = mine && markerFor(mine);
+    if(m) m.classList.add('fg-pick');
+    return;
+  }
+  if(s.state === 'reveal'){
+    const correctIds = lqCorrectIds(s);
+    correctIds.forEach(id => { const m = markerFor(id); if(m) m.classList.add('fg-good'); });
+    if(sid === 'lq'){
+      const mine = (lqMyAnswer && lqMyAnswer.qIndex === s.qIndex) ? lqMyAnswer.choice : null;
+      if(mine && !correctIds.includes(mine)){ const m = markerFor(mine); if(m) m.classList.add('fg-bad'); }
+    } else {
+      const tally = s.tally || {};
+      Object.keys(tally).forEach(id => {
+        const n = Number(tally[id]) || 0;
+        if(!n) return;
+        const m = markerFor(id);
+        if(!m) return;
+        m.classList.add('fg-count');
+        const txt = m.querySelector('text');
+        if(txt) txt.textContent = String(n);
+      });
+    }
+  }
 }
 
 function lqStudentLobbyHtml(){
@@ -499,6 +612,7 @@ function lqStudentLobbyHtml(){
 }
 
 function lqStudentQuestionHtml(s, quiz){
+  if(lqType(quiz) === 'fret') return lqStudentFretQuestionHtml(s, quiz);
   const n = Number(s.qIndex) + 1;
   const head = `<div class="lq-qnum" data-i18n="lq.qLabel" data-i18n-params="${escAttr(JSON.stringify({n}))}">${escHtml(t('lq.qLabel',{n}))}</div>`
     + `<div class="lq-prompt" data-i18n="${escAttr(quiz.promptKey)}">${escHtml(t(quiz.promptKey))}</div>`
@@ -517,7 +631,39 @@ function lqStudentQuestionHtml(s, quiz){
   return head + `<div class="lq-choices">${btns}</div>`;
 }
 
+// A fret pick's display label — 'Fret 3 · low E' or, for an open string,
+// 'Open · low E'. Shared by the locked-in line and the tally rows.
+function lqFretPickLabel(id){
+  const p = lqParseFretId(id);
+  if(!p) return id;
+  const string = t(LQ_STRING_KEY[p.string] || 'fret.stringLowE');
+  return p.fret === 0 ? t('lq.pickedOpen', {string}) : t('lq.pickedFret', {n:p.fret, string});
+}
+
+function lqStudentFretQuestionHtml(s, quiz){
+  const n = Number(s.qIndex) + 1;
+  const head = `<div class="lq-qnum" data-i18n="lq.qLabel" data-i18n-params="${escAttr(JSON.stringify({n}))}">${escHtml(t('lq.qLabel',{n}))}</div>`;
+  if(!s.target) return head + `<div class="lq-prompt" data-i18n="lq.noTapYet">${escHtml(t('lq.noTapYet'))}</div>`;
+  const params = lqTargetParams(s.target);
+  const top = head
+    + `<div class="lq-prompt" data-i18n="${escAttr(quiz.promptKey)}" data-i18n-params="${escAttr(JSON.stringify(params))}">${escHtml(t(quiz.promptKey, params))}</div>`
+    + lqTimerHtml(s);
+  const mine = (lqMyAnswer && lqMyAnswer.qIndex === s.qIndex) ? lqMyAnswer.choice : null;
+  const board = `<div class="lq-board" id="lq-board">${typeof fgBoardSvg === 'function' ? fgBoardSvg('lq', null, { strings: quiz.strings, clickFn: 'lqTap', hit: !mine }) : ''}</div>`;
+  if(mine){
+    const p = lqParseFretId(mine);
+    const bg = (p && LQ_STRING_COLOR[p.string]) || '#555';
+    const err = lqSendError ? `<p class="lq-note lq-note-bad" data-i18n="lq.saveFailed">${escHtml(t('lq.saveFailed'))}</p>` : '';
+    return top + `<div class="lq-locked"><div class="lq-locked-lbl" data-i18n="lq.locked">${escHtml(t('lq.locked'))}</div>`
+      + `<div class="lq-locked-pick" style="background:${bg}">${escHtml(lqFretPickLabel(mine))}</div>`
+      + `<div class="lq-locked-wait" data-i18n="lq.lockedWait">${escHtml(t('lq.lockedWait'))}</div>${err}</div>`
+      + board;
+  }
+  return top + `<p class="lq-note" data-i18n="lq.tapHint">${escHtml(t('lq.tapHint'))}</p>` + board;
+}
+
 function lqStudentRevealHtml(s, quiz){
+  if(lqType(quiz) === 'fret') return lqStudentFretRevealHtml(s, quiz);
   const correct = lqChoice(quiz, s.correct);
   const mine = (lqMyAnswer && lqMyAnswer.qIndex === s.qIndex) ? lqMyAnswer.choice : null;
   const me = (s.scores || {})[lqUid()] || null;
@@ -537,6 +683,45 @@ function lqStudentRevealHtml(s, quiz){
   return verdict + answer + lqTallyHtml(s, quiz, mine) + lqScoreLineHtml(s);
 }
 
+// correctIds off the session doc — s.correct alone (a reveal written before
+// this feature, or a non-fret quiz read through the fret path by mistake)
+// falls back to a one-id array so callers never have to null-check twice.
+function lqCorrectIds(s){ return s.correctIds || (s.correct != null ? [s.correct] : []); }
+
+function lqStudentFretRevealHtml(s, quiz){
+  const correctIds = lqCorrectIds(s);
+  const mine = (lqMyAnswer && lqMyAnswer.qIndex === s.qIndex) ? lqMyAnswer.choice : null;
+  const me = (s.scores || {})[lqUid()] || null;
+  let verdict;
+  if(!mine){
+    verdict = `<div class="lq-verdict lq-v-none" data-i18n="lq.noAnswer">${escHtml(t('lq.noAnswer'))}</div>`;
+  } else if(correctIds.includes(mine)){
+    const pts = me && me.last ? me.last : LQ_MAX_POINTS;
+    verdict = `<div class="lq-verdict lq-v-yes"><span data-i18n="lq.correct">${escHtml(t('lq.correct'))}</span>`
+      + ` <span class="lq-plus">+${escHtml(String(pts))}</span></div>`;
+  } else {
+    verdict = `<div class="lq-verdict lq-v-no" data-i18n="lq.wrong">${escHtml(t('lq.wrong'))}</div>`;
+  }
+  const board = `<div class="lq-board" id="lq-board">${typeof fgBoardSvg === 'function' ? fgBoardSvg('lq', null, { strings: quiz.strings, hit: false }) : ''}</div>`;
+  return verdict + lqFretAnswerHtml(correctIds) + board + lqTallyHtml(s, quiz, mine) + lqScoreLineHtml(s);
+}
+
+// One correct id (the common case) or two (an octave pair, e.g. E on the
+// low E string is fret 0 AND fret 12) — never more than two on a 12-fret
+// board, since a natural note repeats at most once in that span.
+function lqFretAnswerHtml(correctIds){
+  const first = lqParseFretId(correctIds[0]);
+  if(!first) return '';
+  const string = t(LQ_STRING_KEY[first.string] || 'fret.stringLowE');
+  if(correctIds.length < 2){
+    const params = { n: first.fret, string };
+    return `<div class="lq-answer" data-i18n="lq.answerFret" data-i18n-params="${escAttr(JSON.stringify(params))}">${escHtml(t('lq.answerFret', params))}</div>`;
+  }
+  const second = lqParseFretId(correctIds[1]);
+  const params = { n: first.fret, m: second ? second.fret : correctIds[1], string };
+  return `<div class="lq-answer" data-i18n="lq.answerFretAlso" data-i18n-params="${escAttr(JSON.stringify(params))}">${escHtml(t('lq.answerFretAlso', params))}</div>`;
+}
+
 function lqStudentEndedHtml(s){
   const rows = lqRanked(s.scores);
   const me = rows.find(r => r.uid && r.uid === lqUid()) || null;
@@ -552,17 +737,44 @@ function lqStudentEndedHtml(s){
     + mine + `<ol class="lq-lb">${top}</ol></div>`;
 }
 
+// One row per tally bar. `mc`: quiz.choices as-is (order fixed, no shuffle —
+// see the quiz-bank comment up top). `fret`: every fret id that got at least
+// one tap, sorted by count then fret number, top 6 — a fret-all board has
+// 6 strings × 13 frets to scatter across, so the spread only needs the
+// popular picks. No `key` (no data-i18n) on a fret row: the label is already
+// rendered through t() with params, and gc-langchange's full re-render
+// covers a language switch same as everywhere else on this screen.
+function lqTallyRows(s, quiz){
+  if(lqType(quiz) !== 'fret') return quiz.choices.map(c => ({ id:c.id, label:t(c.key), key:c.key, color:c.color }));
+  const tally = s.tally || {};
+  const correctIds = lqCorrectIds(s);
+  return Object.keys(tally)
+    .filter(id => Number(tally[id]) > 0)
+    .sort((a,b) => (Number(tally[b])||0) - (Number(tally[a])||0) || ((lqParseFretId(a)||{}).fret||0) - ((lqParseFretId(b)||{}).fret||0))
+    .slice(0, 6)
+    .map(id => ({ id, label: lqFretPickLabel(id), key: null, color: correctIds.includes(id) ? '#3b6d11' : '#185fa5' }));
+}
+
 // The class's answer spread, correct bar in green. Same builder both sides;
 // `mine` marks the student's own pick and is null on the projector.
 function lqTallyHtml(s, quiz, mine){
+  const rows = lqTallyRows(s, quiz);
   const tally = s.tally || {};
-  const total = quiz.choices.reduce((n,c)=> n + (Number(tally[c.id]) || 0), 0);
-  const bars = quiz.choices.map(c => {
-    const n = Number(tally[c.id]) || 0;
+  const correctIds = lqCorrectIds(s);
+  // fret: percentages are of every tap the round got, not just the top-6
+  // rows on screen, so the bars read as a true share even when they don't
+  // sum to 100. mc keeps its original total (quiz.choices only) unchanged.
+  const total = lqType(quiz) === 'fret'
+    ? Object.keys(tally).reduce((n,k)=> n + (Number(tally[k]) || 0), 0)
+    : quiz.choices.reduce((n,c)=> n + (Number(tally[c.id]) || 0), 0);
+  const bars = rows.map(r => {
+    const n = Number(tally[r.id]) || 0;
     const pct = total ? Math.round(n / total * 100) : 0;
-    const cls = 'lq-bar' + (c.id === s.correct ? ' right' : '') + (mine && c.id === mine ? ' mine' : '');
-    return `<div class="${cls}"><span class="lq-bar-lbl" data-i18n="${escAttr(c.key)}">${escHtml(t(c.key))}</span>`
-      + `<span class="lq-bar-track"><span class="lq-bar-fill" style="width:${pct}%;background:${c.color}"></span></span>`
+    const cls = 'lq-bar' + (correctIds.includes(r.id) ? ' right' : '') + (mine && r.id === mine ? ' mine' : '');
+    const lbl = r.key ? `<span class="lq-bar-lbl" data-i18n="${escAttr(r.key)}">${escHtml(r.label)}</span>`
+                      : `<span class="lq-bar-lbl">${escHtml(r.label)}</span>`;
+    return `<div class="${cls}">${lbl}`
+      + `<span class="lq-bar-track"><span class="lq-bar-fill" style="width:${pct}%;background:${r.color}"></span></span>`
       + `<span class="lq-bar-n">${n}</span></div>`;
   }).join('');
   return `<div class="lq-tally">${bars}</div>`;
@@ -606,6 +818,7 @@ function lqUpdateTimer(){
   el.classList.toggle('out', left === 0);
   if(left === 0){
     document.querySelectorAll('#live-quiz-body .lq-choice').forEach(b=>{ b.disabled = true; });
+    document.getElementById('lq-board')?.classList.add('lq-board-off');   // belt-and-braces: lqAnswer already refuses a late tap
     lqStopTick();
   }
 }
@@ -635,6 +848,11 @@ function lqAnswer(choiceId){
     }
   });
 }
+// A fret question's "choice" — the hit zones on fgBoardSvg's board call this
+// instead of lqAnswer directly, so the wire format stays one '<string>:<fret>'
+// id and every rule above (first tap wins, rollback on a failed write) is
+// reused as-is.
+function lqTap(sid, string, fret){ lqAnswer(lqFretId(string, fret)); }
 
 // The screen is built once per state change, so a language switch has to
 // rebuild it — same reasoning as data-i18n-params everywhere else.
@@ -656,6 +874,7 @@ let lqTTick = null;         // stage countdown interval, only while a timed ques
 let lqTScoring = lqDefaultScoring(LQ_DEFAULT_QUIZ);   // 'flat' | 'speed' — picked before Start
 let lqTPickedQuizId = LQ_DEFAULT_QUIZ;                 // whichever quiz is chosen in the pre-start picker
 let lqTBusy = false;        // one write at a time; the buttons gate on it
+let lqTFretString = null;   // fret quiz only — the string picked in the strip; defaults to quiz.strings[0]
 
 function renderTeacherLiveQuiz(){
   const box = document.getElementById('t-grid-container');
@@ -752,6 +971,7 @@ function lqPaintStage(){
   else if(s.state === 'question') stage.innerHTML = lqStageQuestionHtml(s, quiz);
   else if(s.state === 'reveal')   stage.innerHTML = lqStageRevealHtml(s, quiz);
   else                            stage.innerHTML = lqStageEndedHtml(s);
+  lqPaintMarkers(stage, s, quiz, 'lqst');
 }
 
 // Both languages side by side on the projector: every student reads the
@@ -759,6 +979,13 @@ function lqPaintStage(){
 // off the wall together.
 function lqBilingual(key, cls){
   const en = tIn(key, 'en'), es = tIn(key, 'es');
+  return `<div class="${cls}">${escHtml(en)}</div>`
+    + (es && es !== en ? `<div class="${cls}-es" lang="es">${escHtml(es)}</div>` : '');
+}
+// Same as lqBilingual, but for a parameterised string — the fret prompt and
+// answer line are the first ones on the stage that need per-language params.
+function lqBilingualParams(key, cls, paramsEn, paramsEs){
+  const en = tIn(key, 'en', paramsEn), es = tIn(key, 'es', paramsEs);
   return `<div class="${cls}">${escHtml(en)}</div>`
     + (es && es !== en ? `<div class="${cls}-es" lang="es">${escHtml(es)}</div>` : '');
 }
@@ -773,6 +1000,7 @@ function lqStageLobbyHtml(s, quiz){
 }
 
 function lqStageQuestionHtml(s, quiz){
+  if(lqType(quiz) === 'fret') return lqStageFretQuestionHtml(s, quiz);
   const n = Number(s.qIndex) + 1;
   const inCount = lqRoundAnswers(s, s.qIndex).length;
   const roster = lqRoster(s).length;
@@ -785,7 +1013,25 @@ function lqStageQuestionHtml(s, quiz){
     + `<span class="lq-st-cap">answered</span></div>`;
 }
 
+// No board here — nothing on the projector before Reveal may show which
+// fret is right, and a board with no marker on it would add nothing anyway.
+function lqStageFretQuestionHtml(s, quiz){
+  const n = Number(s.qIndex) + 1;
+  const inCount = lqRoundAnswers(s, s.qIndex).length;
+  const roster = lqRoster(s).length;
+  const timer = Number(s.limitSec)
+    ? `<div class="lq-st-timer" id="lq-st-timer">${escHtml(String(s.limitSec))}</div>` : '';
+  const prompt = s.target
+    ? lqBilingualParams(quiz.promptKey, 'lq-st-prompt', lqTargetParams(s.target, 'en'), lqTargetParams(s.target, 'es'))
+    : lqBilingual('lq.noTapYet', 'lq-st-prompt');
+  return `<div class="lq-st-qnum">Question ${n}</div>`
+    + prompt + timer
+    + `<div class="lq-st-count"><span class="lq-st-big">${inCount}${roster ? ' / ' + roster : ''}</span>`
+    + `<span class="lq-st-cap">answered</span></div>`;
+}
+
 function lqStageRevealHtml(s, quiz){
+  if(lqType(quiz) === 'fret') return lqStageFretRevealHtml(s, quiz);
   const c = lqChoice(quiz, s.correct);
   const answer = c ? lqBilingual(c.key, 'lq-st-answer') : '';
   const board = lqRanked(s.scores).slice(0, 5).map(r =>
@@ -796,12 +1042,63 @@ function lqStageRevealHtml(s, quiz){
     + `<div class="lq-st-split">${lqTallyHtml(s, quiz, null)}<ol class="lq-lb lq-lb-stage">${board}</ol></div>`;
 }
 
+// Bilingual answer line for a fret reveal — mirrors lqFretAnswerHtml, one
+// correct id or the E/E-style octave pair, but both languages at once.
+function lqFretBilingualAnswer(correctIds){
+  const first = lqParseFretId(correctIds[0]);
+  if(!first) return '';
+  const key = LQ_STRING_KEY[first.string] || 'fret.stringLowE';
+  const stringEn = tIn(key, 'en'), stringEs = tIn(key, 'es');
+  if(correctIds.length < 2){
+    return lqBilingualParams('lq.answerFret', 'lq-st-answer', {n:first.fret, string:stringEn}, {n:first.fret, string:stringEs});
+  }
+  const second = lqParseFretId(correctIds[1]);
+  const m = second ? second.fret : correctIds[1];
+  return lqBilingualParams('lq.answerFretAlso', 'lq-st-answer', {n:first.fret, m, string:stringEn}, {n:first.fret, m, string:stringEs});
+}
+
+// The board on the left (static, correct fret(s) green, every tapped marker
+// showing its count — nothing student-identifying), the tally bars and the
+// top-5 leaderboard stacked on the right.
+function lqStageFretRevealHtml(s, quiz){
+  const correctIds = lqCorrectIds(s);
+  const answer = correctIds.length ? lqFretBilingualAnswer(correctIds) : '';
+  const board = `<div class="lq-board" id="lq-st-board">${typeof fgBoardSvg === 'function' ? fgBoardSvg('lqst', null, { strings: quiz.strings, hit: false }) : ''}</div>`;
+  const lb = lqRanked(s.scores).slice(0, 5).map(r =>
+    `<li><span class="lq-lb-rank">${r.rank}</span><span class="lq-lb-name">${escHtml(r.name || '—')}</span>`
+    + `<span class="lq-lb-pts">${escHtml(String(r.pts || 0))}</span></li>`).join('');
+  return `<div class="lq-st-qnum">Question ${Number(s.qIndex) + 1} &mdash; the answer</div>`
+    + answer
+    + `<div class="lq-st-split">${board}<div>${lqTallyHtml(s, quiz, null)}<ol class="lq-lb lq-lb-stage">${lb}</ol></div></div>`;
+}
+
 function lqStageEndedHtml(s){
   const rows = lqRanked(s.scores);
   const board = rows.slice(0, 10).map(r =>
     `<li><span class="lq-lb-rank">${r.rank}</span><span class="lq-lb-name">${escHtml(r.name || '—')}</span>`
     + `<span class="lq-lb-pts">${escHtml(String(r.pts || 0))}</span></li>`).join('');
   return `<div class="lq-st-title">Final scores</div><ol class="lq-lb lq-lb-stage">${board}</ol>`;
+}
+
+/* The note picker for a fret quiz's control strip — shown instead of the
+   plain "First/Next question" button, both before question 1 (lobby) and
+   after every question (reveal). One row of string chips (skipped for a
+   one-string quiz; the selected one shown in `.go` instead of `.ghost` —
+   existing classes, no new CSS for "highlighted") plus a row of the seven
+   natural notes (always all seven, drawn from LQ_NATURALS) plus Random.
+   Nothing here names a fret — the strip is on the projector too. */
+function lqFretPickerHtml(quiz, busy){
+  const cur = quiz.strings.includes(lqTFretString) ? lqTFretString : quiz.strings[0];
+  const strings = quiz.strings.length > 1
+    ? `<div class="lq-ctl-marks">${quiz.strings.map(k =>
+        `<button type="button" class="lq-ctl${k === cur ? ' go' : ' ghost'}" onclick="lqTFretString='${k}';lqPaintControls()">${escHtml(tIn(LQ_STRING_KEY[k], 'en'))}</button>`).join('')}</div>`
+    : '';
+  const present = new Set(Object.values(LQ_NATURALS[cur] || {}));
+  const notes = ['A','B','C','D','E','F','G'].filter(n => present.has(n));
+  const noteBtns = notes.map(n =>
+    `<button type="button" class="lq-ctl mark" style="--lq-c:${LQ_STRING_COLOR[cur] || '#555'}" onclick="lqTeacherOpenFret('${cur}','${n}')"${busy}>${n}</button>`).join('');
+  const random = `<button type="button" class="lq-ctl go" onclick="lqTeacherOpenFret('${cur}','random')"${busy}>Random</button>`;
+  return strings + `<div class="lq-ctl-marks">${noteBtns}${random}</div>`;
 }
 
 /* ── The control strip (what Jonathan drives it with) ── */
@@ -827,22 +1124,33 @@ function lqPaintControls(){
     return;
   }
   const quiz = lqQuiz(s.quizId);
+  const fret = lqType(quiz) === 'fret';
   if(s.state === 'lobby'){
-    el.innerHTML = `<button type="button" class="lq-ctl go" onclick="lqTeacherNext()"${busy}>First question</button>`
+    const opener = fret ? lqFretPickerHtml(quiz, busy)
+      : `<button type="button" class="lq-ctl go" onclick="lqTeacherNext()"${busy}>First question</button>`;
+    el.innerHTML = opener
       + `<button type="button" class="lq-ctl ghost" onclick="lqTeacherClose()"${busy}>Cancel</button>${full}`
       + `<div class="lq-ctl-hint">${escHtml(quiz.teacherHint)}</div>`;
     return;
   }
   if(s.state === 'question'){
-    const picks = quiz.choices.map(c =>
-      `<button type="button" class="lq-ctl mark" style="--lq-c:${c.color}" onclick="lqTeacherReveal('${c.id}')"${busy}>`
-      + `${escHtml(tIn(c.key, 'en'))}</button>`).join('');
-    el.innerHTML = `<span class="lq-ctl-lbl">Mark the correct answer:</span><div class="lq-ctl-marks">${picks}</div>`
+    let head;
+    if(fret){
+      head = `<button type="button" class="lq-ctl go" onclick="lqTeacherRevealFret()"${busy}>Reveal</button>`;
+    } else {
+      const picks = quiz.choices.map(c =>
+        `<button type="button" class="lq-ctl mark" style="--lq-c:${c.color}" onclick="lqTeacherReveal('${c.id}')"${busy}>`
+        + `${escHtml(tIn(c.key, 'en'))}</button>`).join('');
+      head = `<span class="lq-ctl-lbl">Mark the correct answer:</span><div class="lq-ctl-marks">${picks}</div>`;
+    }
+    el.innerHTML = head
       + `<button type="button" class="lq-ctl ghost" onclick="lqTeacherEnd()"${busy}>End game</button>${full}`
       + `<div class="lq-ctl-hint">${escHtml(quiz.teacherHint)}</div>`;
     return;
   }
-  el.innerHTML = `<button type="button" class="lq-ctl go" onclick="lqTeacherNext()"${busy}>Next question</button>`
+  const opener = fret ? lqFretPickerHtml(quiz, busy)
+    : `<button type="button" class="lq-ctl go" onclick="lqTeacherNext()"${busy}>Next question</button>`;
+  el.innerHTML = opener
     + `<button type="button" class="lq-ctl ghost" onclick="lqTeacherEnd()"${busy}>End game</button>${full}`;
 }
 
@@ -886,35 +1194,64 @@ async function lqTeacherStart(){
   // scores, tally or correct answer.
   await lqWrite({
     sessionId, quizId, state: 'lobby', qIndex: -1,
-    correct: null, tally: null, scores: {},
+    correct: null, correctIds: null, tally: null, scores: {}, target: null,
     speedBonus: speed, limitSec: speed ? 20 : (quiz.limitSec || 0),
     startedAt: firebase.firestore.FieldValue.serverTimestamp(),
     askedAt: null, endedAt: null
   }, true);
 }
 
-async function lqTeacherNext(){
+// `target` is set only by lqTeacherOpenFret (a fret quiz's note picker); the
+// plain "First/Next question" button calls this with no argument, same as
+// always, and an mc quiz never reads s.target.
+async function lqTeacherNext(target){
   const s = lqTSession;
   if(!s) return;
   const next = s.state === 'lobby' ? 0 : Number(s.qIndex) + 1;
   await lqWrite({
-    state: 'question', qIndex: next, correct: null, tally: null,
+    state: 'question', qIndex: next, correct: null, correctIds: null, tally: null,
+    target: target || null,
     askedAt: firebase.firestore.FieldValue.serverTimestamp()
   });
+}
+
+// Opens a fret question: validates the string against the quiz, resolves
+// Random to a real string+note, and bails silently on a note with no fret
+// on that string (shouldn't happen — every natural exists on every string —
+// but a bad Random pick must never open a dead question).
+async function lqTeacherOpenFret(string, note){
+  const s = lqTSession; if(!s) return;
+  const quiz = lqQuiz(s.quizId);
+  if(!quiz.strings || !quiz.strings.includes(string)) return;
+  if(note === 'random'){ ({ string, note } = lqRandomTarget(quiz, s.target)); }
+  if(!lqFretIdsFor(string, note).length) return;
+  lqTFretString = string;
+  await lqTeacherNext({ string, note });
+}
+// Any string in the quiz, any natural on it, never the same target twice
+// running (a fresh one is more useful to the class than an accidental
+// repeat) — falls through to a repeat only if 20 tries can't avoid it,
+// which only happens on a one-string, one-note-left edge case.
+function lqRandomTarget(quiz, prev){
+  const notesAll = ['A','B','C','D','E','F','G'];
+  let string, note, tries = 0;
+  do {
+    string = quiz.strings[Math.floor(Math.random() * quiz.strings.length)];
+    const present = notesAll.filter(n => new Set(Object.values(LQ_NATURALS[string] || {})).has(n));
+    note = present[Math.floor(Math.random() * present.length)];
+    tries++;
+  } while(prev && string === prev.string && note === prev.note && tries < 20);
+  return { string, note };
 }
 
 /* Reveal is where the scoring happens. The teacher's browser is the only
    judge — it reads this round's answer docs, marks them against the choice
    just clicked, and writes the running totals back onto the session doc so
-   they survive a dashboard refresh and every student can see their own. */
-async function lqTeacherReveal(correctId){
-  const s = lqTSession;
-  if(!s || s.state !== 'question') return;
-  const quiz = lqQuiz(s.quizId);
-  if(!lqChoice(quiz, correctId)) return;
-  const rows = lqRoundAnswers(s, s.qIndex);
+   they survive a dashboard refresh and every student can see their own.
+   Shared by the mc and fret reveal below. */
+function lqScoreRound(s, rows, isRight, tallyKeys, isValidId){
   const tally = {};
-  quiz.choices.forEach(c => { tally[c.id] = 0; });
+  if(tallyKeys) tallyKeys.forEach(k => { tally[k] = 0; });
   const scores = {};
   // Carry every known player forward with last round's result cleared, so a
   // student who sat this one out doesn't see the previous "+1000" again.
@@ -923,8 +1260,12 @@ async function lqTeacherReveal(correctId){
   });
   rows.forEach(a => {
     if(!a.uid) return;
-    if(tally[a.choice] != null) tally[a.choice]++;
-    const right = a.choice === correctId;
+    if(tallyKeys){
+      if(tally[a.choice] != null) tally[a.choice]++;
+    } else if(!isValidId || isValidId(a.choice)){
+      tally[a.choice] = (tally[a.choice] || 0) + 1;
+    }
+    const right = isRight(a);
     const pts = right ? lqPoints(a.ms, s) : 0;
     const cur = scores[a.uid] || { name: a.name || '', pts: 0, right: 0, answered: 0 };
     cur.name = a.name || cur.name || '';
@@ -934,7 +1275,34 @@ async function lqTeacherReveal(correctId){
     cur.last = pts; cur.lastRight = right;
     scores[a.uid] = cur;
   });
+  return { tally, scores };
+}
+
+async function lqTeacherReveal(correctId){
+  const s = lqTSession;
+  if(!s || s.state !== 'question') return;
+  const quiz = lqQuiz(s.quizId);
+  if(!lqChoice(quiz, correctId)) return;
+  const rows = lqRoundAnswers(s, s.qIndex);
+  const { tally, scores } = lqScoreRound(s, rows, a => a.choice === correctId, quiz.choices.map(c => c.id));
   await lqWrite({ state: 'reveal', correct: correctId, tally, scores });
+}
+
+// Octaves both count: every fret on the target string that sounds the
+// target note is correct (E on low E is fret 0 AND fret 12). A stray answer
+// that isn't even a real fret on this quiz's strings is dropped from the
+// tally (nothing to draw a bar for) but still scored wrong, same as any
+// other wrong pick.
+async function lqTeacherRevealFret(){
+  const s = lqTSession;
+  if(!s || s.state !== 'question' || !s.target) return;
+  const quiz = lqQuiz(s.quizId);
+  const ids = lqFretIdsFor(s.target.string, s.target.note);
+  if(!ids.length){ console.warn('[live-quiz] lqTeacherRevealFret: no frets for target', s.target); return; }
+  const rows = lqRoundAnswers(s, s.qIndex);
+  const isValidId = choice => { const p = lqParseFretId(choice); return !!p && quiz.strings.includes(p.string); };
+  const { tally, scores } = lqScoreRound(s, rows, a => ids.includes(a.choice), null, isValidId);
+  await lqWrite({ state: 'reveal', correct: ids[0], correctIds: ids, tally, scores });
 }
 
 async function lqTeacherEnd(){

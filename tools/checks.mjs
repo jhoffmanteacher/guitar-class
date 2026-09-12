@@ -2482,6 +2482,15 @@ function checkMissingI18nKeys(I18N) {
      deleted key would show a student the raw key at the exact moment a whole
      class is looking at it. Enumerated from the real bank, same as DECKS and
      EAR_POOLS above — an added quiz is covered automatically. */
+  /* `type` picks the question shape — missing/'mc' needs `choices`
+     (each with id/key/color); 'fret' needs `strings` instead (a valid,
+     de-duped guitar-diagrams kind list) and no `choices`, plus a promptKey
+     whose EN and ES text both carry {note} and {string} (the live quiz's
+     tIn() fills them in per-language on the projector). Any other `type`
+     is an error. Structural, not just key-existence — a fret quiz that
+     silently kept an mc `choices` array, or a prompt missing a param in
+     just one language, wouldn't show up as a missing i18n key. */
+  const LQ_VALID_STRINGS = new Set(['lowE', 'A', 'D', 'G', 'B', 'highE']);
   try {
     const LIVE_QUIZZES = loadConstObject(readFileSync(join(ROOT, 'live-quiz.js'), 'utf8'), 'LIVE_QUIZZES');
     for (const id of Object.keys(LIVE_QUIZZES)) {
@@ -2490,6 +2499,37 @@ function checkMissingI18nKeys(I18N) {
       for (const k of keys) {
         if (!k) { err(`live-quiz.js LIVE_QUIZZES['${id}'] is missing an i18n key (titleKey/promptKey/choice key)`); problems++; dynamicBad++; continue; }
         if (!KEYS.has(k)) { err(`live-quiz.js LIVE_QUIZZES['${id}'] references i18n key '${k}' which does not exist`); problems++; dynamicBad++; }
+      }
+      const type = q.type == null ? 'mc' : q.type;
+      if (type === 'mc') {
+        if (!Array.isArray(q.choices) || !q.choices.length) {
+          err(`live-quiz.js LIVE_QUIZZES['${id}'] is type 'mc' but has no choices`); problems++; dynamicBad++;
+        } else {
+          for (const c of q.choices) {
+            if (!c.id || !c.key || !c.color) { err(`live-quiz.js LIVE_QUIZZES['${id}'] has a choice missing id/key/color`); problems++; dynamicBad++; }
+          }
+        }
+      } else if (type === 'fret') {
+        if (q.choices) { err(`live-quiz.js LIVE_QUIZZES['${id}'] is type 'fret' but also has choices`); problems++; dynamicBad++; }
+        const strings = Array.isArray(q.strings) ? q.strings : [];
+        if (!strings.length) { err(`live-quiz.js LIVE_QUIZZES['${id}'] is type 'fret' but has no strings`); problems++; dynamicBad++; }
+        const seen = new Set();
+        for (const k2 of strings) {
+          if (!LQ_VALID_STRINGS.has(k2)) { err(`live-quiz.js LIVE_QUIZZES['${id}'].strings has invalid entry '${k2}'`); problems++; dynamicBad++; }
+          if (seen.has(k2)) { err(`live-quiz.js LIVE_QUIZZES['${id}'].strings has a duplicate entry '${k2}'`); problems++; dynamicBad++; }
+          seen.add(k2);
+        }
+        const entry = I18N && q.promptKey ? I18N[q.promptKey] : null;
+        if (entry) {
+          for (const lang of ['en', 'es']) {
+            const str = entry[lang] || '';
+            if (!str.includes('{note}') || !str.includes('{string}')) {
+              err(`live-quiz.js LIVE_QUIZZES['${id}'].promptKey '${q.promptKey}' (${lang}) must contain both {note} and {string}`); problems++; dynamicBad++;
+            }
+          }
+        }
+      } else {
+        err(`live-quiz.js LIVE_QUIZZES['${id}'] has unknown type '${q.type}'`); problems++; dynamicBad++;
       }
     }
   } catch (e) { warn(`could not enumerate LIVE_QUIZZES from live-quiz.js: ${e.message}`); warnings++; }

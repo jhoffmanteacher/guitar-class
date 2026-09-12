@@ -4593,9 +4593,18 @@ const fretGames = {};
    fretboard (localStringFretboardSvg): nut, fret wires, inlay dots, fret
    numbers — prominent string lines and a transparent hit zone per
    string × fret. Rows compact themselves when there are 3+ strings so the
-   'all' board still fits a Chromebook column. */
-function fgBoardSvg(sid, kind){
-  const strs = fgStringsFor(kind).filter(k => FG_NATURALS[k]);
+   'all' board still fits a Chromebook column.
+   `opts` (all optional — every existing caller passes none, so their output
+   is byte-identical): `strings` overrides `fgStringsFor(kind)` with an
+   explicit kind list (the live quiz picks its own subset, so `kind` can be
+   null); `clickFn` names the global the hit zones call instead of `fgClick`
+   (the live quiz points them at `lqTap`); `hit:false` skips the hit-zone
+   layer entirely for a static, unclickable board (the projector's reveal
+   board). Marker ids stay `fgm-${sid}-${k}-${f}` regardless of caller. */
+function fgBoardSvg(sid, kind, opts){
+  opts = opts || {};
+  const clickFn = opts.clickFn || 'fgClick';
+  const strs = (opts.strings || fgStringsFor(kind)).filter(k => FG_NATURALS[k]);
   if(!strs.length) return '';
   const n = strs.length, multi = n > 1, compact = n >= 3;
   const W = 600, padR = 8, openW = 44, maxF = 12;
@@ -4645,11 +4654,11 @@ function fgBoardSvg(sid, kind){
       `</g>`;
     }
   });
-  strs.forEach((k, i) => {
+  if(opts.hit !== false) strs.forEach((k, i) => {
     const bandTop = multi ? stringYs[i] - rowGap / 2 : wireTop - 8;
     const bandH   = multi ? rowGap : (wireBot - wireTop) + 16;
     for(let f = 0; f <= maxF; f++){
-      s += `<rect class="fg-hit" x="${colX(f)}" y="${bandTop}" width="${colW(f)}" height="${bandH}" rx="6" onclick="fgClick('${sid}','${k}',${f})" aria-label="${escAttr(t(FRET_STRING_KEY[k]))} — ${escAttr(t('fret.fretN',{n:f}))}"><title>${escHtml(t('fret.fretN',{n:f}))}</title></rect>`;
+      s += `<rect class="fg-hit" x="${colX(f)}" y="${bandTop}" width="${colW(f)}" height="${bandH}" rx="6" onclick="${clickFn}('${sid}','${k}',${f})" aria-label="${escAttr(t(FRET_STRING_KEY[k]))} — ${escAttr(t('fret.fretN',{n:f}))}"><title>${escHtml(t('fret.fretN',{n:f}))}</title></rect>`;
     }
   });
   return s + '</svg>';

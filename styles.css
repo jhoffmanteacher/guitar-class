@@ -2670,6 +2670,20 @@ a.jl-song-btn{display:inline-block;text-decoration:none}
 .lq-bar.mine .lq-bar-track{outline:2px solid var(--text3);outline-offset:1px}
 @media(prefers-reduced-motion:reduce){.lq-bar-fill{transition:none}}
 
+/* Fretboard tap — the board is fgBoardSvg() (app.js), reused as-is; these
+   rules only place it and add the marker states a live quiz needs beyond
+   the practice game's fg-good/fg-bad (see the .fg-marker rules near the
+   board's own definition): fg-pick (student's own tap, no verdict yet) and
+   fg-count (projector reveal — every tapped marker shows its count). */
+.lq-board{margin:14px auto 0;max-width:640px}
+.lq-board .fg-svg{width:100%}
+.lq-board-off .fg-hit{pointer-events:none}
+.fg-marker.fg-pick{opacity:1}
+.fg-marker.fg-pick circle{fill:var(--bg2);stroke:var(--text2)}
+.fg-marker.fg-count{opacity:1}
+.fg-marker.fg-count text{fill:var(--text);font-weight:700}
+.lq-st-split .lq-board{margin:0;flex:1 1 55%}
+
 .lq-lb{list-style:none;margin:14px 0 0;padding:0;display:flex;flex-direction:column;gap:5px}
 .lq-lb li{display:flex;align-items:center;gap:10px;padding:8px 12px;border-radius:10px;
   background:var(--bg3);font-size:0.9375rem}

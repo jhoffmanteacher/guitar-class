@@ -2142,7 +2142,18 @@
     'lq.string.d':           { en: 'D', es: 'cuerda Re' },
     'lq.string.g':           { en: 'G', es: 'cuerda Sol' },
     'lq.string.b':           { en: 'B', es: 'cuerda Si' },
-    'lq.string.highE':       { en: 'high e', es: 'cuerda mi aguda' }
+    'lq.string.highE':       { en: 'high e', es: 'cuerda mi aguda' },
+    // ── Fretboard tap (type:'fret' live quiz) — see live-quiz.js §1 ──
+    'lq.title.fretLowE':     { en: 'Fretboard tap — low E string', es: 'Toca el traste — cuerda Mi grave' },
+    'lq.title.fretLowEA':    { en: 'Fretboard tap — low E and A strings', es: 'Toca el traste — cuerdas Mi grave y La' },
+    'lq.title.fretAll':      { en: 'Fretboard tap — all six strings', es: 'Toca el traste — las seis cuerdas' },
+    'lq.prompt.fretTap':     { en: 'Find {note} on the {string} string', es: 'Encuentra {note} en la cuerda {string}' },
+    'lq.tapHint':            { en: 'Tap the fret. Your first tap is your answer.', es: 'Toca el traste. Tu primer toque es tu respuesta.' },
+    'lq.pickedFret':         { en: 'Fret {n} · {string}', es: 'Traste {n} · {string}' },
+    'lq.pickedOpen':         { en: 'Open · {string}', es: 'Al aire · {string}' },
+    'lq.answerFret':         { en: 'The answer: fret {n} on the {string} string', es: 'La respuesta: traste {n} en la cuerda {string}' },
+    'lq.answerFretAlso':     { en: 'The answer: fret {n} or fret {m} on the {string} string', es: 'La respuesta: traste {n} o traste {m} en la cuerda {string}' },
+    'lq.noTapYet':           { en: 'Waiting for the question…', es: 'Esperando la pregunta…' }
   };
 
   let lang = 'en';
@@ -2163,15 +2174,23 @@
   }
 
   /* Same lookup as t(), but for an EXPLICIT language rather than the one the
-     reader picked. Exactly one caller: the live quiz's projected stage, which
-     shows the question in English and Spanish at the same time because the
-     whole room reads it off the wall together (each student's own device
-     still renders in their own language through t()). No {param} support —
-     nothing bilingual on that stage is parameterised. */
-  function tIn(key, l){
+     reader picked. Used by the live quiz's projected stage, which shows the
+     question in English and Spanish at the same time because the whole room
+     reads it off the wall together (each student's own device still renders
+     in their own language through t()). Takes an optional third `params`
+     argument — the fret prompt is the first parameterised string on the
+     stage — with the same split/join loop as t() (not .replace(), see there
+     for why). */
+  function tIn(key, l, params){
     const entry = I18N[key];
     if(!entry) return key;
-    return (l === 'es' ? entry.es : entry.en) || entry.en;
+    let str = (l === 'es' ? entry.es : entry.en) || entry.en;
+    if(params){
+      Object.keys(params).forEach(k=>{
+        str = str.split('{'+k+'}').join(String(params[k]));
+      });
+    }
+    return str;
   }
 
   // "Set 1" / "Set 2" … are literal strings baked into each module-N.js
