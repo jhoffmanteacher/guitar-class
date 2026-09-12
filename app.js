@@ -2477,25 +2477,30 @@ function syncRailStations(){
   });
 }
 
-/* ── Explore pages: Games · Songs · Keep practicing · My progress ──
-   All four share the plumbing — one hash each (browser Back exits), one
+/* ── Explore pages: Games · Songs · My progress ──
+   All three share the plumbing — one hash each (browser Back exits), one
    router, one close path, and the rail item lights up while its page is open.
    They differ in one axis only, `overlay`:
-     overlay: false (Songs · Keep practicing · My progress) — loads INTO the
-       main column, replacing #week-panels while the rail and header stay put,
-       so a student can hop between them the way they hop between sets.
+     overlay: false (Songs · My progress) — loads INTO the main column,
+       replacing #week-panels while the rail and header stay put, so a
+       student can hop between them the way they hop between sets.
      overlay: true (Games) — takes the whole viewport, covering rail and
        header. Jonathan asked for this on 2026-07-28, the day after the three
        screens were unified: the arcade is a place you go, not a page you
        browse, and the rail's practice scaffolding is noise once you're
        playing.
    Anything new in this group joins the table below and picks one of those two,
-   rather than inventing a third. */
+   rather than inventing a third.
+
+   Keep practicing (#keep-practicing) and Daily Review (#daily-review) used
+   to have their own rows here — they're sections inside My progress instead
+   since 2026-09-12 (Today-first work order, Phase 2, nav collapse). Their
+   hashes stay in EXPLORE_HASHES below as redirects to #my-progress (an old
+   bookmark or Journey link still has to resolve), which is why they're not
+   EXPLORE_PAGES rows any more: nothing opens a screen by those names now. */
 const EXPLORE_PAGES = [
   { hash: '#games',           screen: 'games-screen',           btn: 'games-btn', overlay: true },
   { hash: '#songs',           screen: 'songs-screen',           btn: 'songs-hub-btn' },
-  { hash: '#keep-practicing', screen: 'keep-practicing-screen', btn: 'keep-practicing-btn' },
-  { hash: '#daily-review',    screen: 'sr-screen',              btn: 'sr-btn' },
   { hash: '#my-progress',     screen: 'my-progress-screen',     btn: 'my-progress-btn' },
   { hash: '#class-activities', screen: 'class-activities-screen', btn: 'class-activities-btn' },
   /* The second overlay, and the one place the choice isn't about browsing
@@ -2594,12 +2599,23 @@ function exploreHashTail(h){
   return i === -1 ? '' : decodeURIComponent(h.slice(i + 1));
 }
 function routeExploreHash(){
-  const full = location.hash;
-  const h = exploreHashBase(full);
+  let full = location.hash;
+  let h = exploreHashBase(full);
   // A hash this router doesn't own (e.g. #main-content from the skip link)
   // must fall through untouched — otherwise it would close every explore
   // panel + search out from under whatever the student was reading.
   if(!EXPLORE_HASHES.includes(h)) return;
+  /* Keep practicing / Daily Review folded into My progress 2026-09-12
+     (Today-first work order, Phase 2) — kept in EXPLORE_HASHES only so an
+     old bookmark or Journey link still resolves, onto the merged page
+     instead of a retired standalone one. Canonicalized before everything
+     below (the gate check, the dedup guard, the scroll stash) so either
+     alias behaves exactly like a #my-progress visit. */
+  if(h === '#keep-practicing' || h === '#daily-review'){
+    h = '#my-progress';
+    full = '#my-progress';
+    history.replaceState(history.state, '', location.pathname + location.search + '#my-progress');
+  }
   /* The activity gate: while it's on, Today and Live quiz are the only
      reachable pages (caBlockers/applyActivityGate) — anything else
      (including the bare Practice hash, '') is rewritten back to Today
@@ -2629,8 +2645,6 @@ function routeExploreHash(){
   }
   if(h !== '#games' && typeof gamesClosePanel === 'function') gamesClosePanel();
   if(h !== '#songs') songsClosePanel();
-  if(h !== '#keep-practicing') kpClosePanel();
-  if(h !== '#daily-review') srClosePanel();
   if(h !== '#my-progress') mpClosePanel();
   if(h !== '#class-activities') caClosePanel();
   if(h !== '#live-quiz' && typeof lqClosePanel === 'function') lqClosePanel();
@@ -2640,8 +2654,6 @@ function routeExploreHash(){
     ensureCoachJs().then(() => openGamesScreen()).catch(()=>{});
   }
   else if(h === '#songs') openSongsScreen();
-  else if(h === '#keep-practicing') openKeepPracticingScreen();
-  else if(h === '#daily-review') openDailyReviewScreen();
   else if(h === '#my-progress') openMyProgressScreen();
   else if(h === '#class-activities') openClassActivitiesScreen(exploreHashTail(full));
   else if(h === '#live-quiz' && typeof openLiveQuizScreen === 'function') openLiveQuizScreen();
@@ -5330,7 +5342,7 @@ function reviewCardHtml(){
     <div class="review-head"><span aria-hidden="true">&#x2726;</span><span data-i18n="review.title">${t('review.title')}</span></div>
     <div class="review-explainer" data-i18n="review.explainer">${t('review.explainer')}</div>
     <div class="review-items">${items}</div>
-    <button type="button" class="review-sr-link" onclick="goExploreHash('daily-review')"><span data-i18n="sr.title">${t('sr.title')}</span> &rarr;</button>
+    <button type="button" class="review-sr-link" onclick="goExploreHash('my-progress')"><span data-i18n="sr.title">${t('sr.title')}</span> &rarr;</button>
   </div>`;
 }
 function refreshReviewCards(){
@@ -5363,7 +5375,7 @@ async function reviewJump(sid, wid){
     row.scrollIntoView({ behavior: scrollBehavior(), block:'center' });
     flashClass(row, 'review-flash', 1800);
     // Keyboard path: closing the Daily Review page bounced focus back to the
-    // rail button (srClosePanel) — move it to the row we just jumped to.
+    // rail button (mpClosePanel) — move it to the row we just jumped to.
     row.setAttribute('tabindex','-1');
     row.focus({ preventScroll:true });
   }, 60);
@@ -5759,12 +5771,14 @@ window.addEventListener('gc-langchange', function(){
      the topbar labels are data-i18n-tagged and already re-translated. */
   const songsScreen = document.getElementById('songs-screen');
   if(songsScreen && !songsScreen.hidden && typeof renderSongsHub === 'function') renderSongsHub();
-  const kpScreen = document.getElementById('keep-practicing-screen');
-  if(kpScreen && !kpScreen.hidden && typeof renderKeepPracticing === 'function') renderKeepPracticing();
-  const srScreen = document.getElementById('sr-screen');
-  if(srScreen && !srScreen.hidden && typeof renderDailyReview === 'function') renderDailyReview();
+  // My progress holds all three sections now (Today-first work order,
+  // Phase 2) — Daily Review and Keep practicing re-render along with it.
   const mpScreen = document.getElementById('my-progress-screen');
-  if(mpScreen && !mpScreen.hidden && typeof renderMyProgress === 'function') renderMyProgress();
+  if(mpScreen && !mpScreen.hidden){
+    if(typeof renderDailyReview === 'function') renderDailyReview();
+    if(typeof renderKeepPracticing === 'function') renderKeepPracticing();
+    if(typeof renderMyProgress === 'function') renderMyProgress();
+  }
   const caScreen = document.getElementById('class-activities-screen');
   if(caScreen && !caScreen.hidden && typeof renderClassActivities === 'function') renderClassActivities();
   // A live Daily 5 overlay just rebuilds its modal body in place.
@@ -6534,15 +6548,13 @@ initBackToTop();
 function closeTopPanels(except){
   /* Hash-based full pages close through their own close fns (which clear
      the URL hash); plain drop-over panels just get hidden. */
-  const SCREEN_IDS = { games: 'games-screen', 'songs-hub': 'songs-screen', 'keep-practicing': 'keep-practicing-screen', 'daily-review': 'sr-screen', 'my-progress': 'my-progress-screen', 'class-activities': 'class-activities-screen', 'live-quiz': 'live-quiz-screen' };
-  ['games', 'songs-hub', 'search', 'keep-practicing', 'daily-review', 'my-progress', 'class-activities', 'live-quiz'].forEach(k => {
+  const SCREEN_IDS = { games: 'games-screen', 'songs-hub': 'songs-screen', 'my-progress': 'my-progress-screen', 'class-activities': 'class-activities-screen', 'live-quiz': 'live-quiz-screen' };
+  ['games', 'songs-hub', 'search', 'my-progress', 'class-activities', 'live-quiz'].forEach(k => {
     if(k === except) return;
     const p = document.getElementById(SCREEN_IDS[k] || k + '-panel');
     if(p && !p.hasAttribute('hidden')){
       if(k === 'games' && typeof closeGamesScreen === 'function'){ closeGamesScreen(); return; }
       if(k === 'songs-hub'){ closeSongsScreen(); return; }
-      if(k === 'keep-practicing'){ closeKeepPracticingScreen(); return; }
-      if(k === 'daily-review'){ closeDailyReviewScreen(); return; }
       if(k === 'my-progress'){ closeMyProgressScreen(); return; }
       if(k === 'class-activities'){ closeClassActivitiesScreen(); return; }
       if(k === 'live-quiz' && typeof closeLiveQuizScreen === 'function'){ closeLiveQuizScreen(); return; }
@@ -6559,7 +6571,7 @@ function closeTopPanels(except){
    click "did nothing" as far as the student could see. Close whichever panel
    is covering the page and scroll up so the new set is actually visible. */
 function leaveTopPanelForSet(){
-  const covering = ['games-screen', 'search-panel', 'songs-screen', 'keep-practicing-screen', 'sr-screen', 'my-progress-screen', 'class-activities-screen', 'live-quiz-screen']
+  const covering = ['games-screen', 'search-panel', 'songs-screen', 'my-progress-screen', 'class-activities-screen', 'live-quiz-screen']
     .some(id => { const el = document.getElementById(id); return el && !el.hasAttribute('hidden'); });
   if(!covering) return;
   practiceScrollTop = 0;   // the async popstate below would otherwise restore the OLD set's scroll offset after activateSet scrolls to top
@@ -6668,7 +6680,16 @@ async function renderSongsHub(){
   const groupsHtml = `<div class="sh-sec-title">${t('hub.choiceTitle')}</div>` + groups.map((g, gi) =>
     `<div class="sh-group${gi === 0 ? ' open' : ''}"><button type="button" class="sh-group-head" aria-expanded="${gi === 0}" onclick="toggleHubGroup(this)"><span>${g.title}</span><span class="sh-group-sub">${g.sub}</span><span class="sh-group-count">${t('hub.groupCount', {n: g.entries.length})}</span></button><div class="sh-group-body">${renderRows(g.entries)}</div></div>`).join('');
   const requestHtml = requestEntries.length ? `<div class="card">${renderRows(requestEntries)}</div>` : '';
-  p.innerHTML = `<div class="legend"><div class="leg"><div class="dot dc" style="margin-top:0"></div>${t('hub.legendCore')}</div><div class="leg"><div class="dot dch" style="margin-top:0"></div>${t('hub.legendChoice')}</div></div>
+  // Mood Chart's own rail button retired 2026-09-12 (Today-first work order,
+  // Phase 2, nav collapse) — same "opens in a new tab" pattern as a Song
+  // Journey link, now living here instead.
+  const moodChartHtml = `<div class="sh-group sh-mood"><button type="button" class="sh-group-head sh-mood-head" onclick="window.open('mood-chart.html','_blank','noopener')">
+    <span class="ico" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M3 9h18M3 15h18M9 3v18M15 3v18"/></svg></span>
+    <span data-i18n="hub.moodChart">${escHtml(t('hub.moodChart'))}</span>
+    <span class="sh-mood-arrow" aria-hidden="true">&#x2197;</span>
+  </button></div>`;
+  p.innerHTML = `${moodChartHtml}
+    <div class="legend"><div class="leg"><div class="dot dc" style="margin-top:0"></div>${t('hub.legendCore')}</div><div class="leg"><div class="dot dch" style="margin-top:0"></div>${t('hub.legendChoice')}</div></div>
     ${coreHtml}${groupsHtml}${requestHtml}`;
 }
 
@@ -7046,23 +7067,11 @@ async function searchGoSet(moduleNum, wid){
 /* ── 🔁 Keep practicing: its own full-screen page — #keep-practicing in the
       URL, browser Back exits (the games-screen pattern, in the site's normal
       look). Decision + full-page treatment for My progress: 2026-07-23. ── */
-function toggleKeepPracticing(){
-  const screen = document.getElementById('keep-practicing-screen');
-  if(!screen) return;
-  if(screen.hasAttribute('hidden')) goExploreHash('keep-practicing');
-  else closeKeepPracticingScreen();
-}
-function openKeepPracticingScreen(){
-  const screen = document.getElementById('keep-practicing-screen');
-  if(!screen || !screen.hasAttribute('hidden')) return;
-  closeTopPanels('keep-practicing');
-  screen.removeAttribute('hidden');
-  syncExploreNav();
-  /* Focus follows into the page; kpClosePanel hands it back to the button. */
-  const exit = screen.querySelector('.page-exit');
-  if(exit) exit.focus();
-  renderKeepPracticing();
-}
+/* Keep practicing is a section inside My progress (openMyProgressScreen),
+   not its own page, since 2026-09-12 (Today-first work order, Phase 2) —
+   see the retired toggleKeepPracticing/openKeepPracticingScreen/
+   closeKeepPracticingScreen/kpClosePanel in git history. renderKeepPracticing
+   itself is unchanged; only its caller and its host page moved. */
 async function renderKeepPracticing(){
   const bodyEl = document.getElementById('keep-practicing-body');
   if(!bodyEl) return;
@@ -7095,22 +7104,10 @@ async function renderKeepPracticing(){
       <div class="search-results" style="max-height:none">${rows}</div>`;
   }).join('');
 }
-function closeKeepPracticingScreen(){
-  if(location.hash === '#keep-practicing'){ exitExploreHash(); return; }  // the router finishes the job
-  kpClosePanel();
-}
-function kpClosePanel(){
-  const screen = document.getElementById('keep-practicing-screen');
-  const wasOpen = screen && !screen.hasAttribute('hidden');
-  if(screen) screen.setAttribute('hidden', '');
-  const btn = document.getElementById('keep-practicing-btn');
-  if(btn && wasOpen) btn.focus();   // return focus to where the page was opened
-  syncExploreNav();
-}
 
-/* ── 🗓️ Daily Review (spaced review): its own full-screen page — #daily-review
-   in the URL, same pattern as Keep practicing above. Four already-earned
-   skills (progress==='gotit'), preferring ones outside the module the
+/* ── 🗓️ Daily Review (spaced review): a section inside My progress (see
+   Keep practicing above) — not its own page since 2026-09-12. Four
+   already-earned skills (progress==='gotit'), preferring ones outside the module the
    student is currently in (those are already in rotation) and weighted
    toward whichever has gone longest without a rep. This is the retention
    fix for "learned it in Module 3, lost it by Module 9" — deliberately
@@ -7222,8 +7219,10 @@ function srCheckComplete(ids){
   saveGames();
   awardArcadeXp(false);
 }
+// My progress is the merged page now (openMyProgressScreen) — check ITS
+// hidden state, not a standalone Daily Review screen, which no longer exists.
 function srRefreshIfOpen(){
-  const screen = document.getElementById('sr-screen');
+  const screen = document.getElementById('my-progress-screen');
   if(screen && !screen.hasAttribute('hidden') && typeof renderDailyReview === 'function') renderDailyReview();
 }
 // Closes the full-screen page first — reviewJump scrolls/flashes a row
@@ -7234,24 +7233,8 @@ function srPracticeThis(sid, wid){
   // top of reviewJump's scrollIntoView. Same race leaveTopPanelForSet
   // defends against, same fix: the jump owns the scroll now.
   practiceScrollTop = 0;
-  closeDailyReviewScreen();
+  closeMyProgressScreen();
   reviewJump(sid, wid);
-}
-function toggleDailyReview(){
-  const screen = document.getElementById('sr-screen');
-  if(!screen) return;
-  if(screen.hasAttribute('hidden')) goExploreHash('daily-review');
-  else closeDailyReviewScreen();
-}
-function openDailyReviewScreen(){
-  const screen = document.getElementById('sr-screen');
-  if(!screen || !screen.hasAttribute('hidden')) return;
-  closeTopPanels('daily-review');
-  screen.removeAttribute('hidden');
-  syncExploreNav();
-  const exit = screen.querySelector('.page-exit');
-  if(exit) exit.focus();
-  renderDailyReview();
 }
 async function renderDailyReview(){
   const bodyEl = document.getElementById('sr-screen-body');
@@ -7295,21 +7278,13 @@ async function renderDailyReview(){
     ${allDone ? `<div class="sr-alldone" data-i18n="sr.allDone">${t('sr.allDone')}</div>` : ''}
     <div class="sr-cards">${rows}</div>`;
 }
-function closeDailyReviewScreen(){
-  if(location.hash === '#daily-review'){ exitExploreHash(); return; }  // the router finishes the job
-  srClosePanel();
-}
-function srClosePanel(){
-  const screen = document.getElementById('sr-screen');
-  const wasOpen = screen && !screen.hasAttribute('hidden');
-  if(screen) screen.setAttribute('hidden', '');
-  const btn = document.getElementById('sr-btn');
-  if(btn && wasOpen) btn.focus();   // return focus to where the page was opened
-  syncExploreNav();
-}
-
-/* ── 📊 My progress: done/total for every module + a total mastered count.
-      Full-screen page like Keep practicing — #my-progress, Back exits. ── */
+/* ── 📊 My progress: Daily Review, then Keep practicing, then done/total for
+   every module + a total mastered count — three sections, one full-screen
+   page, #my-progress in the URL, Back exits. Merged 2026-09-12 (Today-first
+   work order, Phase 2, nav collapse); see the retired toggleDailyReview/
+   openDailyReviewScreen/closeDailyReviewScreen/srClosePanel and
+   toggleKeepPracticing/openKeepPracticingScreen/closeKeepPracticingScreen/
+   kpClosePanel in git history. ── */
 function toggleMyProgress(){
   const screen = document.getElementById('my-progress-screen');
   if(!screen) return;
@@ -7324,6 +7299,11 @@ function openMyProgressScreen(){
   syncExploreNav();
   const exit = screen.querySelector('.page-exit');
   if(exit) exit.focus();
+  // Three sections, three render calls — Daily Review first (it carries the
+  // once-a-day bonus, so it shouldn't be buried), then Keep practicing, then
+  // the module-by-module tally.
+  renderDailyReview();
+  renderKeepPracticing();
   renderMyProgress();
 }
 function closeMyProgressScreen(){

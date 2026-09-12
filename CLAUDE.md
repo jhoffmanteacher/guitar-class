@@ -476,8 +476,23 @@ for the teacher's own account by email; a failed config read fails open (no
 gate), never on a guess. `mood-chart.html` is not one of the six and is never
 gated.
 
-Phases 2 (nav collapse) and 3 (render-time hiding of module sections that
-duplicate a class activity) are still ahead — see the work order.
+**Phase 2 (nav collapse), shipped 2026-09-12:** the rail is five items —
+Today · Practice · Songs · Games · My progress, no "Explore" heading (the
+`nav.explore` i18n key stays: it's still the rail `<nav>`'s aria-label, just
+not a visible span any more). Keep practicing and Daily Review are sections
+inside My progress now, not their own pages — `renderKeepPracticing()` and
+`renderDailyReview()` are UNCHANGED, only their host div moved in
+`index.html` and `openMyProgressScreen()` calls all three renderers (Daily
+Review first, then Keep practicing, then the module tally). `#keep-practicing`
+and `#daily-review` stay in `EXPLORE_HASHES`, but `routeExploreHash()`
+canonicalizes both to `#my-progress` before anything else runs (the gate
+check, the dedup guard, the scroll stash) — so an old bookmark or Journey
+link still resolves, onto the merged page. Mood Chart lost its rail button;
+`renderSongsHub()` opens it from a row at the top of the Songs page instead,
+same `window.open(...,'_blank','noopener')` as a Journey link.
+
+Phase 3 (render-time hiding of module sections that duplicate a class
+activity) is still ahead — see the work order.
 
 ## Videos
 

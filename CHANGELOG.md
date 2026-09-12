@@ -5,6 +5,19 @@ Notable changes to the Guitar Class site. Newest first.
 For the full session-by-session history (and the reasoning behind each change),
 see `WORKFLOW.md` and the git commit log.
 
+## 2026-09-12 — A shorter, simpler rail: five things instead of nine
+
+### Changed
+
+- **The rail is now Today · Practice · Songs · Games · My progress** — no
+  more "Explore" heading over it; that's the whole list.
+- **Keep practicing and Daily Review moved inside My progress**, as two
+  sections above the module-by-module tally (Daily Review first — it's the
+  one with the once-a-day bonus). Nothing about either one changed except
+  where they live; an old bookmark still gets you there.
+- **Mood Chart moved into the Songs page**, as the first row — same "opens
+  in a new tab" behavior as before, just not its own rail button anymore.
+
 ## 2026-09-12 — Today first: the day's activities are now the home page
 
 ### Changed

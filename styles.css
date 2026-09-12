@@ -94,14 +94,14 @@ body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,"Helvetica N
    the header instead. Journey pages (tabs/) have their own styles and no
    sticky header, so their "open at the top" behavior is untouched. */
 .tabs,.tab-panel,.week-panel,li.step,.wpill,.step-folds,
-#games-screen,#songs-screen,#search-panel,#keep-practicing-screen,#my-progress-screen{
+#games-screen,#songs-screen,#search-panel,#my-progress-screen{
   scroll-margin-top:calc(var(--hdr) + 10px)}
 /* …except inside the app shell, where .main is its own scroll container: the
    header is outside that scrollport and can't cover anything, so the only
    thing overlapping a scroll target is the sticky .set-eyebrow band. */
 .app-layout .tab-panel,.app-layout .week-panel,.app-layout li.step,
 .app-layout .wpill,.app-layout .step-folds,.app-layout #songs-screen,
-.app-layout #search-panel,.app-layout #keep-practicing-screen,.app-layout #my-progress-screen{
+.app-layout #search-panel,.app-layout #my-progress-screen{
   scroll-margin-top:var(--eyebrow)}
 .user-area{display:flex;align-items:center;gap:10px}
 .avatar{width:32px;height:32px;border-radius:50%;object-fit:cover}
@@ -524,6 +524,15 @@ body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,"Helvetica N
 /* Song Journey is the course's own deep content — the leading affordance
    among the four a row can show. */
 .song-vid-btn.journey{color:var(--blue-text)}
+/* Mood Chart row atop the Songs hub — same card/row shell as a difficulty
+   group (.sh-group/.sh-group-head), minus the expand caret: this one opens
+   mood-chart.html in a new tab rather than disclosing anything in place.
+   Replaces the rail button retired 2026-09-12 (Today-first work order,
+   Phase 2, nav collapse). */
+.sh-mood{margin-bottom:14px}
+.sh-mood-head::before{content:none}
+.sh-mood-head .ico{width:1.1em;height:1.1em;flex-shrink:0;color:var(--text2)}
+.sh-mood-arrow{margin-left:auto;font-size:0.8125rem;color:var(--text2)}
 .legend{display:flex;gap:14px;margin-bottom:8px}
 .leg{display:flex;align-items:center;gap:5px;font-size:0.875rem;color:var(--text2)}
 .ablock{background:var(--bg3);border-radius:var(--radius-sm);padding:12px 14px;margin-bottom:8px}
