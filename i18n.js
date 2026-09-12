@@ -236,6 +236,15 @@
     // 2026-09-12 (Today-first work order, Phase 2, nav collapse).
     'nav.keepPracticing': { en: 'Keep practicing', es: 'Sigue practicando' },
     'nav.myProgress':     { en: 'My progress', es: 'Mi progreso' },
+    // Assessments page (2026-09-12) — every module's in-person assessment
+    // list, reachable behind the activity gate.
+    'nav.assessments':    { en: 'Assessments', es: 'Evaluaciones' },
+    'btn.back':           { en: 'Back', es: 'Volver' },
+    'assess.intro':       { en: 'Each module ends with an assessment you play for your teacher, in person. This is what each one asks for.',
+                            es: 'Cada módulo termina con una evaluación que tocas para tu maestro, en persona. Esto es lo que pide cada una.' },
+    'assess.current':     { en: 'Your module', es: 'Tu módulo' },
+    'assess.loading':     { en: 'Loading…', es: 'Cargando…' },
+    'assess.none':        { en: 'This module has no in-person assessment list.', es: 'Este módulo no tiene lista de evaluación en persona.' },
     // Renamed from "In-Class Activities" 2026-09-11 (Today-first work order,
     // Phase 1) — the key stays the same, so the hash/deep-link/console-link
     // wiring built on it doesn't move.
@@ -312,6 +321,9 @@
     // (renderClassActivities) — skipped when there's only one pending card,
     // since there's nothing left to divide it from.
     'ca.stillToDo':            { en: 'Still to do', es: 'Todavía por hacer' },
+    // Button under an activity's steps when it names a Song Journey page
+    // (`journey` in class-activities.js) — opens that page in a new tab.
+    'ca.openJourney':          { en: 'Open the {song} Song Journey page', es: 'Abrir la página Song Journey de {song}' },
     // Shown above the Do-now group only while the activity gate (below) is
     // on — it's the thing standing between the student and the rest of the
     // site, so it needs to say that plainly.

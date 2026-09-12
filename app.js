@@ -2502,6 +2502,7 @@ const EXPLORE_PAGES = [
   { hash: '#games',           screen: 'games-screen',           btn: 'games-btn', overlay: true },
   { hash: '#songs',           screen: 'songs-screen',           btn: 'songs-hub-btn' },
   { hash: '#my-progress',     screen: 'my-progress-screen',     btn: 'my-progress-btn' },
+  { hash: '#assessments',     screen: 'assessments-screen',     btn: 'assessments-btn' },
   { hash: '#class-activities', screen: 'class-activities-screen', btn: 'class-activities-btn' },
   /* The second overlay, and the one place the choice isn't about browsing
      comfort: a student answering a live question must not be able to
@@ -2578,11 +2579,17 @@ function exitExploreHash(){
   routeExploreHash();
 }
 
+/* The pages a gated student may still open — Today, Live quiz, and (Jonathan,
+   2026-09-12) Assessments: what each module's in-person assessment asks for
+   is never something today's activity should hide. Mirrors data-gate="keep"
+   on the rail buttons (checks.mjs 1aa) — add to both or neither. */
+const GATE_OPEN_HASHES = ['#class-activities', '#live-quiz', '#assessments'];
+
 /* Hash router for all the pages. Closes the others FIRST (through their
    panel-only close fns, which don't touch the hash — the hash is already
    whatever we're routing to), then opens the target. */
 let lastRoutedHash = null;
-const EXPLORE_HASHES = ['', '#games', '#songs', '#keep-practicing', '#daily-review', '#my-progress', '#class-activities', '#live-quiz', '#search'];
+const EXPLORE_HASHES = ['', '#games', '#songs', '#keep-practicing', '#daily-review', '#my-progress', '#assessments', '#class-activities', '#live-quiz', '#search'];
 /* A hash may carry a deep-link target after a slash — today only
    '#class-activities/ca-15', the shareable link to one activity or exit
    check (see caFocusActivity). Everything that decides WHICH page a hash
@@ -2622,7 +2629,7 @@ function routeExploreHash(){
      rather than opened, so a bookmarked/typed/Back-button hash can't walk
      straight past the gate. replaceState, not push — this is a correction,
      not a real navigation, and shouldn't cost a Back tap of its own. */
-  if(document.body.classList.contains('ca-gated') && h !== '#class-activities' && h !== '#live-quiz'){
+  if(document.body.classList.contains('ca-gated') && !GATE_OPEN_HASHES.includes(h)){
     gateToast(t('gate.activityFirst'));
     history.replaceState(null, '', location.pathname + location.search + '#class-activities');
     routeExploreHash();
@@ -2646,6 +2653,7 @@ function routeExploreHash(){
   if(h !== '#games' && typeof gamesClosePanel === 'function') gamesClosePanel();
   if(h !== '#songs') songsClosePanel();
   if(h !== '#my-progress') mpClosePanel();
+  if(h !== '#assessments') asClosePanel();
   if(h !== '#class-activities') caClosePanel();
   if(h !== '#live-quiz' && typeof lqClosePanel === 'function') lqClosePanel();
   if(h !== '#search') searchClosePanel();
@@ -2655,6 +2663,7 @@ function routeExploreHash(){
   }
   else if(h === '#songs') openSongsScreen();
   else if(h === '#my-progress') openMyProgressScreen();
+  else if(h === '#assessments') openAssessmentsScreen();
   else if(h === '#class-activities') openClassActivitiesScreen(exploreHashTail(full));
   else if(h === '#live-quiz' && typeof openLiveQuizScreen === 'function') openLiveQuizScreen();
   else if(h === '#search') openSearchPanel();
@@ -5934,6 +5943,8 @@ window.addEventListener('gc-langchange', function(){
   }
   const caScreen = document.getElementById('class-activities-screen');
   if(caScreen && !caScreen.hidden && typeof renderClassActivities === 'function') renderClassActivities();
+  const asScreen = document.getElementById('assessments-screen');
+  if(asScreen && !asScreen.hidden && typeof renderAssessments === 'function') renderAssessments();
   // A live Daily 5 overlay just rebuilds its modal body in place.
   const d5 = document.querySelector('#daily5-overlay .daily5-modal');
   if(d5 && typeof buildDaily5 === 'function'){
@@ -6701,14 +6712,15 @@ initBackToTop();
 function closeTopPanels(except){
   /* Hash-based full pages close through their own close fns (which clear
      the URL hash); plain drop-over panels just get hidden. */
-  const SCREEN_IDS = { games: 'games-screen', 'songs-hub': 'songs-screen', 'my-progress': 'my-progress-screen', 'class-activities': 'class-activities-screen', 'live-quiz': 'live-quiz-screen' };
-  ['games', 'songs-hub', 'search', 'my-progress', 'class-activities', 'live-quiz'].forEach(k => {
+  const SCREEN_IDS = { games: 'games-screen', 'songs-hub': 'songs-screen', 'my-progress': 'my-progress-screen', 'assessments': 'assessments-screen', 'class-activities': 'class-activities-screen', 'live-quiz': 'live-quiz-screen' };
+  ['games', 'songs-hub', 'search', 'my-progress', 'assessments', 'class-activities', 'live-quiz'].forEach(k => {
     if(k === except) return;
     const p = document.getElementById(SCREEN_IDS[k] || k + '-panel');
     if(p && !p.hasAttribute('hidden')){
       if(k === 'games' && typeof closeGamesScreen === 'function'){ closeGamesScreen(); return; }
       if(k === 'songs-hub'){ closeSongsScreen(); return; }
       if(k === 'my-progress'){ closeMyProgressScreen(); return; }
+      if(k === 'assessments'){ closeAssessmentsScreen(); return; }
       if(k === 'class-activities'){ closeClassActivitiesScreen(); return; }
       if(k === 'live-quiz' && typeof closeLiveQuizScreen === 'function'){ closeLiveQuizScreen(); return; }
       if(k === 'search'){ closeSearchPanel(); return; }
@@ -6724,7 +6736,7 @@ function closeTopPanels(except){
    click "did nothing" as far as the student could see. Close whichever panel
    is covering the page and scroll up so the new set is actually visible. */
 function leaveTopPanelForSet(){
-  const covering = ['games-screen', 'search-panel', 'songs-screen', 'my-progress-screen', 'class-activities-screen', 'live-quiz-screen']
+  const covering = ['games-screen', 'search-panel', 'songs-screen', 'my-progress-screen', 'assessments-screen', 'class-activities-screen', 'live-quiz-screen']
     .some(id => { const el = document.getElementById(id); return el && !el.hasAttribute('hidden'); });
   if(!covering) return;
   practiceScrollTop = 0;   // the async popstate below would otherwise restore the OLD set's scroll offset after activateSet scrolls to top
@@ -7479,6 +7491,98 @@ function mpClosePanel(){
   if(btn && wasOpen) btn.focus();   // return focus to where the page was opened
   syncExploreNav();
 }
+/* ── 📋 Assessments: what each module's in-person assessment asks for ──
+   One accordion per module (MODULE_MANIFEST order), the student's current
+   module open, each body the module's `assessItems` from MODULE_REVIEWS —
+   the same list the Module Review's heads-up pop shows, read-only here.
+   Reachable behind the activity gate (GATE_OPEN_HASHES, data-gate="keep")
+   — Jonathan, 2026-09-12. Module data is lazy (loadModuleData), so a module
+   the student hasn't opened yet is fetched when its accordion opens; the
+   current module is fetched up front. Same page plumbing as My progress
+   (#assessments, Back exits). ── */
+function toggleAssessments(){
+  const screen = document.getElementById('assessments-screen');
+  if(!screen) return;
+  if(screen.hasAttribute('hidden')) goExploreHash('assessments');
+  else closeAssessmentsScreen();
+}
+function openAssessmentsScreen(){
+  const screen = document.getElementById('assessments-screen');
+  if(!screen || !screen.hasAttribute('hidden')) return;
+  closeTopPanels('assessments');
+  screen.removeAttribute('hidden');
+  syncExploreNav();
+  const exit = screen.querySelector('.page-exit');
+  if(exit) exit.focus();
+  renderAssessments();
+}
+function closeAssessmentsScreen(){
+  // Gated: "back" means Today — the practice view the exit would normally
+  // land on is hidden, and routeExploreHash would only bounce there anyway.
+  if(document.body.classList.contains('ca-gated')){ goExploreHash('class-activities'); return; }
+  if(location.hash === '#assessments'){ exitExploreHash(); return; }  // the router finishes the job
+  asClosePanel();
+}
+function asClosePanel(){
+  const screen = document.getElementById('assessments-screen');
+  const wasOpen = screen && !screen.hasAttribute('hidden');
+  if(screen) screen.setAttribute('hidden', '');
+  const btn = document.getElementById('assessments-btn');
+  if(btn && wasOpen) btn.focus();   // return focus to where the page was opened
+  syncExploreNav();
+}
+// The module the student is working in: the set they last opened, else
+// Module 1. Read from lastSetId (already saved with progress) rather than
+// the DOM, so it's right even when the practice view isn't rendered.
+function assessCurrentModuleNum(){
+  const w = lastSetId && SETS.find(x => x.id === lastSetId);
+  if(w && w.moduleNum) return w.moduleNum;
+  const mr = lastSetId && String(lastSetId).match(/^mr(\d+)$/);
+  return mr ? Number(mr[1]) : 1;
+}
+const assessOpen = {};   // moduleNum -> true once the student opens it (sticky across re-renders, like caOpenId)
+function assessModuleBodyHtml(num){
+  const mr = (typeof MODULE_REVIEWS !== 'undefined') && MODULE_REVIEWS[num];
+  if(!mr) return `<div class="assess-loading" data-i18n="assess.loading">${escHtml(t('assess.loading'))}</div>`;
+  const items = tf(mr, 'assessItems');
+  if(!items || !items.length) return `<p class="assess-none">${escHtml(t('assess.none'))}</p>`;
+  return `<ul class="mr-assess-list">${items.map(i => `<li>${i}</li>`).join('')}</ul>
+    <p class="assess-note">${escHtml(t('review.assessSignupBody', { n: num }))}</p>`;
+}
+function renderAssessments(){
+  const bodyEl = document.getElementById('assessments-body');
+  if(!bodyEl) return;
+  const cur = assessCurrentModuleNum();
+  if(assessOpen[cur] === undefined) assessOpen[cur] = true;
+  const manifest = (typeof MODULE_MANIFEST !== 'undefined') ? MODULE_MANIFEST : [];
+  bodyEl.innerHTML = `<p class="coach-tip" data-i18n="assess.intro">${escHtml(t('assess.intro'))}</p>` + manifest.map(m => {
+    const open = assessOpen[m.num] === true;
+    return `<details class="assess-mod${m.num === cur ? ' assess-cur' : ''}" data-module="${m.num}" ${open ? 'open' : ''} ontoggle="assessOnToggle(this)">
+      <summary class="assess-mod-head"><span class="assess-mod-num">${escHtml(t('review.assessHead', { n: m.num }))}</span><span class="assess-mod-name">${escHtml(tf(m, 'name'))}</span>${m.num === cur ? `<span class="assess-cur-tag">${escHtml(t('assess.current'))}</span>` : ''}</summary>
+      <div class="assess-mod-body">${open ? assessModuleBodyHtml(m.num) : ''}</div>
+    </details>`;
+  }).join('');
+  manifest.filter(m => assessOpen[m.num] === true).forEach(m => assessEnsureModule(m.num));
+}
+function assessOnToggle(details){
+  const num = Number(details.dataset.module);
+  assessOpen[num] = details.open;
+  if(details.open) assessEnsureModule(num);
+}
+// Fill one accordion body once its module file is in — a no-op re-fill
+// when the data was already loaded (the common case for the current module).
+function assessEnsureModule(num){
+  const fill = () => {
+    const body = document.querySelector(`.assess-mod[data-module="${num}"] .assess-mod-body`);
+    if(body) body.innerHTML = assessModuleBodyHtml(num);
+  };
+  if((typeof MODULE_REVIEWS !== 'undefined') && MODULE_REVIEWS[num]){ fill(); return; }
+  loadModuleData(num).then(fill).catch(() => {
+    const body = document.querySelector(`.assess-mod[data-module="${num}"] .assess-mod-body`);
+    if(body) body.innerHTML = `<p class="assess-none">${escHtml(t('assess.none'))}</p>`;
+  });
+}
+
 function renderMyProgress(){
   const bodyEl = document.getElementById('my-progress-body');
   if(!bodyEl) return;
@@ -7660,6 +7764,25 @@ function caStepHtml(a, step, si, isOpen, isDone){
     + `<div class="ca-step-detail">${detailHtml}</div>`
     + `</li>`;
 }
+/* An activity that names a Song Journey page (`journey: '<slug>'`, see the
+   JOURNEY note atop class-activities.js) gets a link button under its steps
+   — the same .jl-song-btn the module ladder's Take-it-to-a-song card uses,
+   opening tabs/<slug>.html (#layer-<n> when `journeyLayer` is set) in a new
+   tab. journey.js leaves that page ungated while this activity is pending;
+   the button is just the door. TWO RENDERERS — teacher.js's
+   renderTeacherActivityDetail() shows the same button in the console
+   preview (as a plain link there, since the preview lives outside #app). */
+function caJourneyUrl(a){
+  const sg = a.journey && SONG_JOURNEYS.find(s => s.id === a.journey);
+  if(!sg) return '';
+  return sg.url + (a.journeyLayer ? `#layer-${Number(a.journeyLayer)}` : '');
+}
+function caJourneyLinkHtml(a){
+  const url = caJourneyUrl(a);
+  if(!url) return '';
+  const sg = SONG_JOURNEYS.find(s => s.id === a.journey);
+  return `<div class="ca-journey-row"><button type="button" class="jl-song-btn" onclick="window.open('${escAttr(url)}','_blank','noopener')">${escHtml(t('ca.openJourney', { song: sg.name }))} &#x2197;</button></div>`;
+}
 function caActivityCardHtml(a){
   if(a.kind === 'check') return caCheckCardHtml(a);
   const done = classActivities[a.id] === true;
@@ -7683,6 +7806,7 @@ function caActivityCardHtml(a){
     <div class="ca-card-body">
       <p class="coach-tip">${escHtml(tf(a,'intro'))}</p>
       ${stepsHtml ? `<ol class="ca-steps">${stepsHtml}</ol>` : ''}
+      ${caJourneyLinkHtml(a)}
       <button type="button" class="ca-mark-btn ${done ? 'done' : ''}" onclick="caToggleComplete('${escAttr(a.id)}')">${escHtml(markLabel)}</button>
     </div>
   </details>`;
@@ -8161,7 +8285,30 @@ function caBlockers(){
    force it on anyway to walk the gated UI. Never honored off localhost. */
 function applyActivityGate(){
   const forced = IS_LOCALHOST && window.__forceGate;
-  document.body.classList.toggle('ca-gated', forced || caBlockers().length > 0);
+  const wasOn = document.body.classList.contains('ca-gated');
+  const on = forced || caBlockers().length > 0;
+  document.body.classList.toggle('ca-gated', on);
+  /* Off → on while the student is somewhere else (a new activity went live
+     under an open Games/Songs/My progress screen — the visibilitychange
+     re-check below is the usual path): the CSS hides the rail, but an
+     already-open screen stays open, so walk them to Today the same way
+     routeExploreHash does for a typed hash. showApp()'s own first call
+     lands here too, harmlessly — it's about to route the landing hash
+     itself, and goExploreHash is a no-op when the hash already matches. */
+  if(on && !wasOn && appIsOnScreen()){
+    const h = exploreHashBase(location.hash);
+    if(!GATE_OPEN_HASHES.includes(h)){
+      if(h) gateToast(t('gate.activityFirst'));   // a bare hash is the practice view — no "wrong page" to name
+      goExploreHash('class-activities');
+    }
+  }
+}
+// The redirect above must not fire from loadClassConfig()'s boot-time run —
+// that lands before showApp() has rendered anything to route within; showApp
+// does its own landing-hash pass right after. Only a live app gets walked.
+function appIsOnScreen(){
+  const app = document.getElementById('app');
+  return !!app && app.style.display === 'block';
 }
 /* A teacher's console clear (or a new activity going live) has to reach a
    student tab that's just sitting open, not only the next reload — same

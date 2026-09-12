@@ -1975,6 +1975,23 @@ function validateClassActivities() {
     }
     reqEs(where, a, 'title');
     reqEs(where, a, 'intro');
+    /* `journey: '<slug>'` (see the JOURNEY note atop class-activities.js)
+       has to name a real tabs/<slug>.html page, and `journeyLayer` a layer
+       that page actually has (counted from its layer-num spans) — a typo
+       here would exempt nothing from the gate and open a 404 in a new tab. */
+    if ('journey' in a) {
+      const page = join(ROOT, 'tabs', `${a.journey}.html`);
+      let pageSrc = null;
+      try { pageSrc = readFileSync(page, 'utf8'); } catch {}
+      if (typeof a.journey !== 'string' || !/^[a-z0-9-]+$/.test(a.journey) || pageSrc === null) {
+        err(`${where}: journey "${a.journey}" — no tabs/${a.journey}.html Journey page exists`); problems++;
+      } else if ('journeyLayer' in a) {
+        const layers = [...pageSrc.matchAll(/<span class="layer-num"[^>]*>(\d+)<\/span>/g)].map(m => Number(m[1]));
+        if (!Number.isInteger(a.journeyLayer) || !layers.includes(a.journeyLayer)) {
+          err(`${where}: journeyLayer ${a.journeyLayer} — tabs/${a.journey}.html has layers ${layers.join(', ') || '(none found)'}`); problems++;
+        }
+      }
+    } else if ('journeyLayer' in a) { err(`${where}: journeyLayer without journey`); problems++; }
     if (isCheck) { /* no steps — see 1y */ }
     else if (!Array.isArray(a.steps) || !a.steps.length) { err(`${where}: "steps" should be a non-empty array`); problems++; }
     else {

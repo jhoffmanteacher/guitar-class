@@ -1058,7 +1058,8 @@ function renderTeacherActivityDetail(id){
     <div class="tg-note">Gate: today's activities block the rest of the site until they're done (see the Today-first work order). Clear lets one student past this one without finishing it — a sub day, a connectivity problem, work done on paper.</div>
     ${studentTable}
     <div class="stu-section-head">Preview</div>
-    ${stepsHtml || '<div class="stu-empty">No steps on this activity yet.</div>'}`;
+    ${stepsHtml || '<div class="stu-empty">No steps on this activity yet.</div>'}
+    ${caJourneyUrl(a)?`<div class="ca-journey-row"><a class="jl-song-btn" href="${escAttr(caJourneyUrl(a))}" target="_blank" rel="noopener">${escHtml(t('ca.openJourney',{song:(SONG_JOURNEYS.find(s=>s.id===a.journey)||{}).name||''}))} &#x2197;</a> <span class="tg-note" style="display:inline">— this page stays open behind the gate while the activity is pending.</span></div>`:''}`;
 }
 /* An exit check's detail page: who turned it in, what they picked, and
    which question the room missed. Deliberately NOT the plain step list

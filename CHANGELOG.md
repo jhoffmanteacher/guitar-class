@@ -5,6 +5,24 @@ Notable changes to the Guitar Class site. Newest first.
 For the full session-by-session history (and the reasoning behind each change),
 see `WORKFLOW.md` and the git commit log.
 
+## 2026-09-12 — Assessments page, and activities open their own Song Journey page
+
+### Added
+
+- **Assessments** is a new item on the left — what each module's in-person
+  assessment asks you to play, one module at a time, with your current
+  module already open. It stays available even while today's activity is
+  still waiting on you.
+
+### Changed
+
+- **An activity that sends you to a Song Journey page now has a button for
+  it** ("Open the … Song Journey page"), and that page opens even while the
+  activity is still unfinished — it's part of the work. Other Journey pages
+  still wait until today's activities are done.
+- **If a new activity goes live while you're on Games, Songs or My
+  progress, you're taken to Today** instead of the menu just disappearing.
+
 ## 2026-09-12 — Fix: Module 2 Set 1 step progress shows again
 
 ### Fixed

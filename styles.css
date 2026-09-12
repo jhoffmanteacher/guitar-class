@@ -2456,6 +2456,26 @@ body.games-open{overflow:hidden}
 .jl-songs{display:flex;flex-wrap:wrap;gap:8px}
 .jl-song-btn{background:var(--purple-bg);color:var(--purple-text);border:1px solid var(--purple-border);border-radius:20px;padding:8px 14px;font:inherit;font-size:0.875rem;font-weight:600;cursor:pointer;min-height:40px}
 .jl-song-btn:hover{background:var(--purple-text);color:var(--bg);border-color:var(--purple-text)}
+/* ── Assessments page (renderAssessments) — one accordion per module, the
+   current one tagged; the list itself reuses .mr-assess-list from the Module
+   Review's heads-up pop so the two never drift. ── */
+.assess-mod{border:1px solid var(--border);border-radius:var(--radius);background:var(--bg2);margin-bottom:10px;box-shadow:var(--shadow-card)}
+.assess-mod.assess-cur{border-color:var(--purple-border);background:var(--purple-bg2)}
+.assess-mod-head{display:flex;flex-wrap:wrap;align-items:baseline;gap:6px 10px;padding:12px 14px;cursor:pointer;font-weight:600;list-style:none}
+.assess-mod-head::-webkit-details-marker{display:none}
+.assess-mod-head::before{content:'\25B8';color:var(--text2);font-size:.85em;margin-right:2px}
+.assess-mod[open]>.assess-mod-head::before{content:'\25BE'}
+.assess-mod-num{color:var(--purple-text)}
+.assess-mod-name{color:var(--text2);font-weight:500;font-size:.9375rem}
+.assess-cur-tag{margin-left:auto;font-size:.75rem;font-weight:700;text-transform:uppercase;letter-spacing:.02em;color:var(--purple-text);border:1px solid var(--purple-border);border-radius:20px;padding:2px 8px}
+.assess-mod-body{padding:0 16px 14px}
+.assess-mod-body .mr-assess-list{margin-top:0}
+.assess-note,.assess-none,.assess-loading{font-size:.875rem;color:var(--text2);margin:10px 0 0;line-height:1.5}
+
+/* An activity's own Journey link (caJourneyLinkHtml / the console preview)
+   — same pill as the ladder's Take-it-to-a-song buttons, one per card. */
+.ca-journey-row{margin:4px 0 12px}
+a.jl-song-btn{display:inline-block;text-decoration:none}
 .skill-row.review-flash{animation:reviewFlash 1.8s ease}
 @keyframes reviewFlash{0%{background:var(--purple-bg)}100%{background:transparent}}
 /* Listening Coach check-off gate: pulse the Coach button the gate sent you to.

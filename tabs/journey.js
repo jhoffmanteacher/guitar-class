@@ -539,7 +539,13 @@ window.addEventListener('load', function(){
       var classActivities = (data && data.classActivities) || {};
       return fbDb.collection('config').doc('class').get().then(function(cfgDoc){
         var cfg = cfgDoc && cfgDoc.exists ? cfgDoc.data() : {};
-        if(journeyBlockers(cfg, classActivities, user.uid).length) showJourneyGate();
+        var blockers = journeyBlockers(cfg, classActivities, user.uid);
+        // The one exemption: a pending activity that NAMES this page
+        // (`journey: '<slug>'` in class-activities.js) is sending the
+        // student here as part of the work — gating it would block the
+        // very step they're on. Any other page stays gated.
+        var sentHere = blockers.some(function(a){ return a.journey === SONG_ID; });
+        if(blockers.length && !sentHere) showJourneyGate();
       }).catch(function(){
         /* Never lock on a guess: a failed config read leaves the page open,
            same fail-open rule as everywhere else the gate applies to an

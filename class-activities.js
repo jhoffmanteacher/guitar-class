@@ -22,6 +22,17 @@
    first at render time (app.js sorts, this file doesn't need to be kept in
    any order).
 
+   JOURNEY — `journey: '<slug>'` (optional; one of the six SONG_JOURNEYS ids
+   in app.js: seven-nation-army, all-along-the-watchtower, sweet-child-o-mine,
+   luna, let-it-be, the-cure; optional `journeyLayer: <n>` to land on a
+   specific layer). Set it on an activity whose steps send the student to
+   that Song Journey page. Two things happen: the card renders an "Open the
+   Song Journey page" button under its steps (both renderers), and that one
+   Journey page stays OPEN behind the activity gate while this activity is
+   pending — journey.js exempts a page any pending activity names, since the
+   page is part of the work. Every other Journey page stays gated as usual.
+   checks.mjs 1d validates the slug (and the layer against JOURNEY_LAYERS).
+
    ids are PERMANENT — never renumber or reuse one. Student completion is
    keyed to the id in Firestore (classActivities: { [id]: true }), same rule
    as skill ids in the module files. An id is `ca-<n>` where n is simply the
@@ -1072,6 +1083,7 @@ window.CLASS_ACTIVITIES = [
   {
     id:    'ca-10',
     number: 10,
+    journey: 'seven-nation-army',   // the last step sends them to this Song Journey page — see JOURNEY below
     title:    'Seven Nation Army — The Riff',
     title_es: 'Seven Nation Army — El riff',
     intro:    'Your fingers trained for this. One riff, one string, seven notes — and five of them sit right on the neck dots you already know.',
@@ -1333,6 +1345,7 @@ window.CLASS_ACTIVITIES = [
   {
     id:    'ca-13',
     number: 12,
+    journey: 'the-cure',   // the last step sends them to this Song Journey page — see JOURNEY below
     title:    '"the cure" — The Verse Root Line',
     title_es: '"the cure" — La línea de raíces de la estrofa',
     intro:    'The Watchtower line stayed on one string, and so does this one. Every chord in "the cure" has a root note, and in the verse those roots — A, C, and F — make a bassline you can play on the low E string alone. Two of them are the hand you already have. The third sits higher up the neck, and getting to it is the new thing today.',

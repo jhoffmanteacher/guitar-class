@@ -476,9 +476,44 @@ counterpart — the main app's gate stays on the existing Today page rather
 than a full-page swap) linking back to `index.html#class-activities`. Skipped
 for the teacher's own account by email; a failed config read fails open (no
 gate), never on a guess. `mood-chart.html` is not one of the six and is never
-gated.
+gated. **The one exemption (2026-09-12):** a pending activity that names a
+Journey page — `journey: '<slug>'` in `class-activities.js` (ca-10 →
+seven-nation-army, ca-13 → the-cure), optional `journeyLayer` — is sending
+the student there as part of the work, so `journey.js` leaves THAT page open
+while the activity blocks; every other Journey page stays gated. The card
+renders an "Open the … Song Journey page" button under its steps
+(`caJourneyLinkHtml()`; the console preview in `renderTeacherActivityDetail`
+shows the same link — two renderers, patched together). checks.mjs 1d
+validates the slug against `tabs/<slug>.html` and the layer against that
+page's `layer-num` spans.
 
-**Phase 2 (nav collapse), shipped 2026-09-12:** the rail is five items —
+**Gate flips on mid-session → Today.** `applyActivityGate()` detects the
+off→on transition (a new activity going live under an open Games/Songs/My
+progress screen, via the `visibilitychange` re-check) and, once the app is
+on screen (`appIsOnScreen()`), walks the student to Today with the same
+toast `routeExploreHash` uses. The CSS alone only hid the rail; an open
+screen stayed open.
+
+**What a gated student can still open is one list — `GATE_OPEN_HASHES`**
+(`#class-activities`, `#live-quiz`, `#assessments`) — read by
+`routeExploreHash`'s guard and the flip redirect; it mirrors the
+`data-gate="keep"` buttons in the rail (1aa). Add to both or neither.
+
+**Assessments page (2026-09-12, Jonathan's ask):** `#assessments`, rail
+button after My progress, `data-gate="keep"` — a student can always read
+what each module's in-person assessment asks for. `renderAssessments()`
+builds one `<details>` per `MODULE_MANIFEST` entry, the current module
+(`assessCurrentModuleNum()`, from `lastSetId`) open and tagged, each body
+the module's `assessItems` from `MODULE_REVIEWS` — the same list the Module
+Review's heads-up pop shows, read-only, plus the `review.assessSignupBody`
+line. Module data is lazy, so an accordion fetches its `module-N.js` on
+open (`assessEnsureModule`). Its Back goes to Today while gated
+(`closeAssessmentsScreen`), to practice otherwise. Same page plumbing as My
+progress (EXPLORE_PAGES row, closeTopPanels, leaveTopPanelForSet,
+gc-langchange re-render).
+
+**Phase 2 (nav collapse), shipped 2026-09-12:** the rail is five items (six
+since the Assessments page above) —
 Today · Practice · Songs · Games · My progress, no "Explore" heading (the
 `nav.explore` i18n key stays: it's still the rail `<nav>`'s aria-label, just
 not a visible span any more). Keep practicing and Daily Review are sections
