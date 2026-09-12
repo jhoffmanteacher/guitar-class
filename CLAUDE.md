@@ -551,9 +551,10 @@ same `window.open(...,'_blank','noopener')` as a Journey link.
 (step 2), per the work order's own "Order of work."** Four section
 `kind`s beyond the pre-existing `tuning-warmup` (ratchet 1r):
 `take-to-song` (renders a Journey link card, `journeyLinkCardHtml()`, in
-place of its steps), `routine`/`ear-spark`/`reflection` (the section is
-skipped entirely — "My Practice Routine", "Ear Spark — optional ear bonus",
-"Checkpoint"/"Wrap-Up"). **Kind-ONLY matching, deliberately NOT kind-or-title
+place of its steps — **but only when this module has a Journey layer to
+link to**; see the 2026-09-12 correction below), `routine`/`ear-spark`/
+`reflection` (the section is skipped entirely — "My Practice Routine",
+"Ear Spark — optional ear bonus", "Checkpoint"/"Wrap-Up"). **Kind-ONLY matching, deliberately NOT kind-or-title
 like `isTuningWarmupSection`** — `isEarSparkSection`/`isRoutineSection`/
 `isReflectionSection`/`isTakeToSongSection` in app.js check `sec.kind`
 alone: these four titles repeat across nearly every module, so a title
@@ -561,8 +562,8 @@ fallback would hide every module's copy the moment the code shipped, not
 just Module 2's. A step-level `hidden: true` flag (song previews now taught
 by a class activity) works the same way, no title involved.
 
-**`visibleSteps(sec)` / `visibleSections(station, moduleNum)`** (app.js) are
-the one gateway everything student-facing reads through — `buildLesson()`,
+**`visibleSteps(sec, moduleNum)` / `visibleSections(station, moduleNum)`**
+(app.js) are the one gateway everything student-facing reads through — `buildLesson()`,
 `resumeLessonCounts()`, `buildSearchIndex()`, `moduleStepsFlat()` (the
 Daily 5 candidate pool) (checks.mjs **1ac** requires the call). The one deliberate exception is teacher.js's `setShortResponses()`:
 it walks `storageSections()` (every section but tuning-warmup) because it's
@@ -580,8 +581,7 @@ pairs the same way — **`gi` is the STORAGE index and comes from
 `storageSections()`: the section's position after excluding ONLY
 tuning-warmup sections**, the convention every Firestore key has been
 written under since July 2026 (pre-semester, so that one hide is baked into
-the keys). Every other hide — routine / ear-spark / reflection, a
-`take-to-song` section with no Journey layer for that module (6+), a section
+the keys). Every other hide — routine / ear-spark / reflection, a section
 with zero visible steps — is render-only and never renumbers `gi`; the
 pair's position in the returned array is its DOM position and nothing
 else. The first cut (066dc05, one day live) numbered `gi` over the
@@ -599,6 +599,32 @@ today uniformly Module 1→Layer 1 … 5→5, anything past 5 an unnumbered
 drift. The button opens `tabs/<slug>.html#layer-<n>`; **journey.js needed no
 changes** — `openFromHash()` already opens `#layer-N` on load and on
 `hashchange`.
+
+### ⚠️ No Journey layer → the take-to-song section renders its OWN STEPS
+**Correction, 2026-09-12 (same day as Phase 3, found by an error sweep).**
+The first cut swapped a `take-to-song` section's steps for the Journey card
+*unconditionally*, and dropped the whole section when the card came back
+empty. Since `JOURNEY_LAYERS` stops at Module 5, that made **every one of
+the 20 take-to-song sections in Modules 6–12 render nothing at all** —
+silently deleting ~26 challenge cards, Module 12's only graded
+assessment-piece card ("Full-Verse Rehearsal") among them, plus the sole
+teaching step for 7 skills (m9w1-s5, m9w2-s5, m10w1-s4, m10w3-s6, m11w3-s6,
+m12w1-s6, m12w3-s6). The tagging was mechanical and title-matched, so it
+hit sections whose content was never a mere song pointer.
+
+The rule now: **the card replaces the steps only when `journeySongsFor(
+moduleNum)` is non-empty.** With no layer (module 6+) there is no card, so
+the section falls back to a normal section — its own steps, its own heading
+— and is "empty" only if those steps are. Lives in three places that must
+agree: `visibleSteps()`, `isRenderableSection()`, and `buildLesson()`'s
+`hasJourneyCard` branch (which also decides whether the section heading is
+suppressed, since the card carries its own title). checks.mjs **1af** keeps
+its own independent copy of the rule and caught the drift the moment app.js
+changed — update both together. Render-only as ever: `gi` is untouched, so
+no progress key moved. Jonathan's call was to restore the steps rather than
+keep the card-or-nothing rule; **don't re-simplify this back to an
+unconditional swap.** If a Journey page ever grows a Module 6+ layer, adding
+it to `JOURNEY_LAYERS` flips that module to the card automatically.
 
 **Ratchets:** 1ab (JOURNEY_LAYERS parity), **1ac** (the four callers above
 must still call `visibleSteps(`/`visibleSections(` — a positive assertion,
