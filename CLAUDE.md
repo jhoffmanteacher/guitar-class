@@ -451,6 +451,13 @@ gets the same guard); `window.__forceGate` (localhost only) lets a session
 that can't otherwise trigger the gate (dev bypass, the teacher account) force
 it on to check the UI.
 
+**Absent students stay blocked — by design** (Jonathan, 2026-09-12): every
+visible, undone, uncleared activity blocks, however old, until the student
+finishes it or is cleared per student. No blocking window, no
+activity-level "stop blocking everyone" toggle — don't propose one again;
+the per-student Clear (and Hide, which also removes it from Earlier) are
+the tools. One release date serves both periods, also by choice.
+
 **Per-student clears:** `config/class.activityClears` (`{ uid: { id: true } }`)
 lets a teacher let one student past a specific blocker without them finishing
 it — a sub day, a connectivity problem, work done on paper. Written by
@@ -545,8 +552,8 @@ by a class activity) works the same way, no title involved.
 
 **`visibleSteps(sec)` / `visibleSections(station, moduleNum)`** (app.js) are
 the one gateway everything student-facing reads through — `buildLesson()`,
-`resumeLessonCounts()`, `buildSearchIndex()` (checks.mjs **1ac** requires
-the call). The one deliberate exception is teacher.js's `setShortResponses()`:
+`resumeLessonCounts()`, `buildSearchIndex()`, `moduleStepsFlat()` (the
+Daily 5 candidate pool) (checks.mjs **1ac** requires the call). The one deliberate exception is teacher.js's `setShortResponses()`:
 it walks `storageSections()` (every section but tuning-warmup) because it's
 an audit of what students actually wrote, and the Checkpoint / Wrap-Up /
 Practice Routine answers from Modules 1–2 are still real after those

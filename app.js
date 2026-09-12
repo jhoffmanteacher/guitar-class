@@ -3614,10 +3614,16 @@ function moduleStepsFlat(moduleNum){
   SETS.filter(w=>w.moduleNum===moduleNum && !w.comingSoon).forEach(w=>{
     ['b','c'].forEach(st=>{
       const stn=w.stations && w.stations[st]; if(!stn) return;
-      const sections=stn.sections || (stn.steps ? [{title:'', steps:stn.steps}] : []);
-      // A hidden step (its skill now taught by a class activity) isn't
-      // candidate material for the Daily 5 routine card either.
-      sections.forEach(sec=>(sec.steps||[]).forEach(step=>{ if(!step.hidden) out.push({set:w, station:st, secTitle:sec.title||'', step}); }));
+      // Only what the ladder still shows is candidate material for the
+      // Daily 5 routine card: a hidden step (its skill now taught by a class
+      // activity) is out, and so is every step of a retired section
+      // (Checkpoint / Wrap-Up / Practice Routine / Ear Spark, or a
+      // take-to-song card) — the same visibleSections/visibleSteps gateway
+      // buildLesson reads through, so the two can't disagree.
+      const sections = stn.sections
+        ? visibleSections(stn, w.moduleNum).map(p => p.sec)
+        : (stn.steps ? [{title:'', steps:stn.steps}] : []);
+      sections.forEach(sec=>visibleSteps(sec).forEach(p=>out.push({set:w, station:st, secTitle:sec.title||'', step:p.st})));
     });
   });
   return out;

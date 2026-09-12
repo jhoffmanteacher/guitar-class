@@ -1460,6 +1460,7 @@ const VISIBLE_HELPER_CALLERS = [
   { file: 'app.js', fn: 'resumeLessonCounts' },
   { file: 'app.js', fn: 'buildLesson' },
   { file: 'app.js', fn: 'buildSearchIndex' },
+  { file: 'app.js', fn: 'moduleStepsFlat' },   // Daily 5 candidates — a retired section's step must never be dealt
   // The teacher's response audit walks ALL storage sections on purpose
   // (retired prompts still hold real answers) — so it must call
   // storageSections(, and must NOT be narrowed back to visibleSections(.
