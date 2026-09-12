@@ -308,18 +308,14 @@ function checkTuningWarmupTag(allSets) {
    1ad. RENDER-TIME SECTION KIND ↔ TITLE — Today-first work order, Phase 3.
    Four more `kind` values (take-to-song, routine, ear-spark, reflection)
    now drive visibleSections() in app.js, same render-time-hiding mechanism
-   1r protects for tuning-warmup. Checked ONE DIRECTION ONLY for now: a
-   section that carries one of these kinds must have the matching title.
-
-   The reverse direction — a section titled like one of these must carry
-   the kind — is what 1r enforces for tuning-warmup, but it can't run here
-   yet: these titles ("Checkpoint", "Wrap-Up", "Take It to a Song", "My
-   Practice Routine…") are reused across most modules, and Phase 3 tags
-   them module by module on purpose (Module 2 first, reviewed, before the
-   rest). Turning on the reverse check before every module is tagged would
-   fail the push on every untagged module's copy. Tighten this to the full
-   two-way check 1r does once Phase 3's rollout finishes (all 36 sets
-   tagged) — see CLAUDE.md.
+   1r protects for tuning-warmup. Module 2 alone shipped one-way (kind ⇒
+   title only) while the rest of the course was still untagged; now that
+   every module (1, 3–13) is tagged too (step 2 of the work order), this
+   checks BOTH directions, same shape as 1r: a tagged section must have the
+   matching title, AND a section titled like one of these must carry the
+   kind — so a title copy-edit and a dropped tag are equally loud instead
+   of one of them silently reshuffling every later section's progress keys
+   in that station.
    ════════════════════════════════════════════════════════════════════ */
 const KIND_TITLE_TABLE = [
   { kind: 'take-to-song', titles: ['Take It to a Song'] },
@@ -330,13 +326,15 @@ const KIND_TITLE_TABLE = [
   { kind: 'ear-spark', titles: ['Ear Spark — optional ear bonus'] },
   { kind: 'reflection', titles: ['Checkpoint', 'Wrap-Up'] },
 ];
+const TITLE_TO_KIND = new Map(KIND_TITLE_TABLE.flatMap(r => r.titles.map(t => [t, r.kind])));
 // Pinned per kind — a drop usually means a section lost its kind tag while
 // keeping its title (or vice versa via a copy-paste), which is exactly the
 // silent-renumber risk this ratchet exists to catch. Only a deliberate
-// widening of Phase 3's rollout (tagging more sections) should raise these.
-const KIND_TITLE_COUNTS = { 'take-to-song': 2, 'routine': 1, 'ear-spark': 1, 'reflection': 4 };
+// widening (a set gains a genuinely new one of these sections) or
+// narrowing (Phase 3's step-level hiding removes one) should move these.
+const KIND_TITLE_COUNTS = { 'take-to-song': 29, 'routine': 5, 'ear-spark': 7, 'reflection': 62 };
 function checkSectionKindTitle(allSets) {
-  head('1ad. Render-time section kind ↔ title (Phase 3, one-way during rollout)');
+  head('1ad. Render-time section kind ↔ title');
   let bad = 0;
   const counts = {};
   for (const { kind } of KIND_TITLE_TABLE) counts[kind] = 0;
@@ -344,11 +342,17 @@ function checkSectionKindTitle(allSets) {
     for (const stId of Object.keys(w.stations || {})) {
       const sections = (w.stations[stId] || {}).sections || [];
       sections.forEach((sec, si) => {
-        if (!sec.kind || !(sec.kind in counts)) return;
-        counts[sec.kind]++;
-        const row = KIND_TITLE_TABLE.find(r => r.kind === sec.kind);
-        if (!row.titles.includes(sec.title)) {
-          err(`${w.id} · station "${stId}" · section ${si + 1}: kind:'${sec.kind}' but titled "${sec.title}" — expected one of ${row.titles.map(t => `"${t}"`).join(' / ')}`);
+        const where = `${w.id} · station "${stId}" · section ${si + 1}`;
+        const expectedKind = TITLE_TO_KIND.get(sec.title);
+        if (sec.kind && sec.kind in counts) {
+          counts[sec.kind]++;
+          const row = KIND_TITLE_TABLE.find(r => r.kind === sec.kind);
+          if (!row.titles.includes(sec.title)) {
+            err(`${where}: kind:'${sec.kind}' but titled "${sec.title}" — expected one of ${row.titles.map(t => `"${t}"`).join(' / ')}`);
+            problems++; bad++;
+          }
+        } else if (expectedKind) {
+          err(`${where}: titled "${sec.title}" but has no kind:'${expectedKind}' tag — without it visibleSections() won't hide it, and it silently renumbers every later section's progress keys once it eventually is tagged`);
           problems++; bad++;
         }
       });
@@ -356,7 +360,7 @@ function checkSectionKindTitle(allSets) {
   }
   for (const kind of Object.keys(KIND_TITLE_COUNTS)) {
     if (counts[kind] !== KIND_TITLE_COUNTS[kind]) {
-      err(`${counts[kind]} sections carry kind:'${kind}', expected ${KIND_TITLE_COUNTS[kind]} — if Phase 3's rollout genuinely tagged more (or fewer) of these, update KIND_TITLE_COUNTS in checks.mjs in the same commit.`);
+      err(`${counts[kind]} sections carry kind:'${kind}', expected ${KIND_TITLE_COUNTS[kind]} — if this kind was genuinely added to (or removed from) a set, update KIND_TITLE_COUNTS in checks.mjs in the same commit.`);
       problems++; bad++;
     }
   }

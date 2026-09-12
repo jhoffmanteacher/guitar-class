@@ -100,6 +100,7 @@ SETS.push(
             ]
           },
           {
+            kind: 'reflection',
             title: 'Checkpoint',
             title_es: 'Punto de control',
             steps: [
@@ -369,6 +370,7 @@ SETS.push(
             ]
           },
           {
+            kind: 'reflection',
             title: 'Checkpoint',
             title_es: 'Punto de control',
             steps: [
@@ -462,6 +464,7 @@ SETS.push(
             ]
           },
           {
+            kind: 'take-to-song',
             title: 'Take It to a Song',
             title_es: 'Llévalo a una canción',
             steps: [
@@ -480,6 +483,7 @@ SETS.push(
             ]
           },
           {
+            kind: 'reflection',
             title: 'Wrap-Up',
             title_es: 'Cierre',
             steps: [
@@ -659,6 +663,7 @@ SETS.push(
             ]
           },
           {
+            kind: 'reflection',
             title: 'Checkpoint',
             title_es: 'Punto de control',
             steps: [
@@ -741,6 +746,7 @@ SETS.push(
             ]
           },
           {
+            kind: 'take-to-song',
             title: 'Take It to a Song',
             title_es: 'Llévalo a una canción',
             steps: [
@@ -759,6 +765,7 @@ SETS.push(
             ]
           },
           {
+            kind: 'reflection',
             title: 'Wrap-Up',
             title_es: 'Cierre',
             steps: [
@@ -931,6 +938,7 @@ SETS.push(
             ]
           },
           {
+            kind: 'reflection',
             title: 'Checkpoint',
             title_es: 'Punto de control',
             steps: [
@@ -1088,6 +1096,7 @@ SETS.push(
             ]
           },
           {
+            kind: 'reflection',
             title: 'Wrap-Up',
             title_es: 'Cierre',
             steps: [

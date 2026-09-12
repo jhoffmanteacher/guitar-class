@@ -491,9 +491,9 @@ link still resolves, onto the merged page. Mood Chart lost its rail button;
 `renderSongsHub()` opens it from a row at the top of the Songs page instead,
 same `window.open(...,'_blank','noopener')` as a Journey link.
 
-**Phase 3 (render-time hiding), Module 2 piloted 2026-09-12 — the rest of
-the course NOT yet touched, by design (see "Order of work" in the work
-order: Module 2 first, reviewed, before propagating).** Four section
+**Phase 3 (render-time hiding), shipped 2026-09-12 — Module 2 piloted first
+(step 1), then the section-kind tagging rolled out to every other module
+(step 2), per the work order's own "Order of work."** Four section
 `kind`s beyond the pre-existing `tuning-warmup` (ratchet 1r):
 `take-to-song` (renders a Journey link card, `journeyLinkCardHtml()`, in
 place of its steps), `routine`/`ear-spark`/`reflection` (the section is
@@ -530,25 +530,46 @@ drift. The button opens `tabs/<slug>.html#layer-<n>`; **journey.js needed no
 changes** — `openFromHash()` already opens `#layer-N` on load and on
 `hashchange`.
 
-**Ratchets added:** 1ab (JOURNEY_LAYERS parity), **1ac** (the four callers
-above must still call `visibleSteps(`/`visibleSections(` — a positive
-assertion, not an exhaustive raw-iteration scan, so it can't catch a raw
+**Ratchets:** 1ab (JOURNEY_LAYERS parity), **1ac** (the four callers above
+must still call `visibleSteps(`/`visibleSections(` — a positive assertion,
+not an exhaustive raw-iteration scan, so it can't catch a raw
 `.steps.forEach` added *alongside* a leftover unrelated call), **1ad** (kind
-→ title, Module-2-tagged sections only — **one direction only** until every
-module is tagged; the reverse, matching 1r's full two-way check, would flag
-every untagged module's "Checkpoint" as an error mid-rollout — tighten it
-once Phase 3's rollout finishes), **1ae** (every `hidden: true` step needs a
-`// ... ca-<n>` comment on the line above it).
+↔ title, full two-way now that every module is tagged — same shape as 1r:
+a tagged section's title must match, and a section titled like one of
+these must carry the kind; `KIND_TITLE_COUNTS` pins the total per kind at
+`{take-to-song:29, routine:5, ear-spark:7, reflection:62}` across all 36
+sets), **1ae** (every `hidden: true` step needs a `// ... ca-<n>` comment on
+the line above it, still just the 3 from Module 2 — see below).
 
-**Known, deliberate, temporary side effect:** `isEarSparkSection()` used to
-match by title alone (safe — it only chose an icon). Making it kind-only for
-Phase 3 means every module's Ear Spark section keeps rendering fully, just
-without its bolt icon, until that module is tagged too.
+**All 13 modules are section-kind-tagged** (mechanical, title-matched,
+2026-09-12) — every "Checkpoint"/"Wrap-Up"/"Take It to a Song"/"My Practice
+Routine…"/"Ear Spark…" section in the course now carries its `kind`, so
+`isEarSparkSection()`'s brief kind-only/no-icon gap (modules not yet tagged
+showing Ear Spark without its bolt) is gone too — every instance is tagged.
+Module 1 has only one such section (its own "session check-in" `routine`
+variant — it predates the take-to-song/Checkpoint/Wrap-Up pattern
+entirely); Module 13 (single-flow) has none.
 
-Phase 3's own remaining rollout (work order step 2/3 — tagging Modules 1,
-3–13, and the harder judgment call of which Modules 3–8 song-preview steps
-duplicate a shipped `ca-<n>`) is still ahead; the separately-deferred
-Phase 4 in the work order is unrelated (content backfill, not this rollout).
+**Step-level `hidden: true` (song previews a class activity now teaches)
+stays at Module 2's original 3** — checked Modules 3–8 against every
+shipped `ca-<n>` and found no genuine duplicates to add. The Finger Gym
+activities (ca-2…ca-7) are generic dexterity drills, not song previews.
+"Notes on the Low E String" (ca-11) and "Sub Day Circuit" (ca-12) are
+Module 1/2-era content. `"the cure" — The Verse Root Line` (ca-13) teaches
+a single-note bass line, but Modules 3–8's own "the cure" steps each teach
+a *different* technique on it — power chords (Module 3), soloing (Module
+4), open-chord strumming (Module 5), fingerpicking (Module 8) — so none of
+them duplicate ca-13's single-note reading (nor does Module 7's Seven
+Nation Army "real rhythm" step duplicate ca-10 — different skill, rhythm
+notation vs. frets). Real content, not a shortcut: verified with a search
+across every Module 3–8 "the cure"/"Seven Nation Army" mention. Leave these
+for Phase 4 (new class activities, if any come to duplicate a module step,
+would be the trigger to hide it then) — see the work order.
+
+Verified 2026-09-12: a full walk of all 36 sets in both languages (pill
+step-total == rendered `<li>` count, zero orphan section headings, no
+exceptions) — the closest this repo gets to the work order's "headless
+walk," since there's no Playwright harness to run one for real.
 
 ## Videos
 

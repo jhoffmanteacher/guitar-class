@@ -5,6 +5,24 @@ Notable changes to the Guitar Class site. Newest first.
 For the full session-by-session history (and the reasoning behind each change),
 see `WORKFLOW.md` and the git commit log.
 
+## 2026-09-12 — Every module's ladder: Checkpoint/Wrap-Up/Practice Routine/
+Ear Spark retired, Take It to a Song links out
+
+### Changed
+
+- **"Take It to a Song" now links straight to the Song Journey everywhere**
+  it appears (Modules 1–13, wherever the module has a Journey layer to link
+  to) — one button per song, instead of its own steps.
+- **Checkpoint, Wrap-Up, Practice Routine and Ear Spark are gone from every
+  module's lesson ladder** — reflection and bonus content the ladder
+  doesn't need alongside the day's activities.
+- Nothing about the skills checklist changed anywhere — every skill still
+  checks off exactly as it did.
+- Module 2 keeps the three retired "Seven Nation Army" ear/preview steps
+  from last time; no other module lost a step this round — checked every
+  Module 3–8 song preview against the class activities that exist today and
+  found none that duplicate one closely enough to retire yet.
+
 ## 2026-09-12 — Module 2's lesson ladder: skill practice only (pilot)
 
 ### Changed

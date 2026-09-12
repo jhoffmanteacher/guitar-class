@@ -199,6 +199,7 @@ SETS.push(
             ]
           },
           {
+            kind: 'routine',
             title: 'My Practice Routine — session check-in (never graded)',
             title_es: 'Mi rutina de práctica — check-in de la sesión (nunca se califica)',
             steps: [
