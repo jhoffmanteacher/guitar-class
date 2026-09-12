@@ -544,9 +544,15 @@ just Module 2's. A step-level `hidden: true` flag (song previews now taught
 by a class activity) works the same way, no title involved.
 
 **`visibleSteps(sec)` / `visibleSections(station, moduleNum)`** (app.js) are
-the one gateway everything reads through — `buildLesson()`, `resumeLessonCounts()`,
-`buildSearchIndex()`, teacher.js's `setShortResponses()` (checks.mjs **1ac**
-requires the call). `visibleSteps` returns `{st, idx}` pairs: `idx` is the
+the one gateway everything student-facing reads through — `buildLesson()`,
+`resumeLessonCounts()`, `buildSearchIndex()` (checks.mjs **1ac** requires
+the call). The one deliberate exception is teacher.js's `setShortResponses()`:
+it walks `storageSections()` (every section but tuning-warmup) because it's
+an audit of what students actually wrote, and the Checkpoint / Wrap-Up /
+Practice Routine answers from Modules 1–2 are still real after those
+sections were retired from the ladder — a slot in a non-renderable section
+or on a `hidden` step is tagged `retired` and its label says "(retired)".
+1ac requires `storageSections(` there and fails on `visibleSections(`. `visibleSteps` returns `{st, idx}` pairs: `idx` is the
 step's real position in `sec.steps` — what every storage key (doneKey,
 responses, bpm, drills) is built from, so a hidden step earlier in the array
 can never shift a later one's saved progress — while the pair's position in

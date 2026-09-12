@@ -1460,7 +1460,10 @@ const VISIBLE_HELPER_CALLERS = [
   { file: 'app.js', fn: 'resumeLessonCounts' },
   { file: 'app.js', fn: 'buildLesson' },
   { file: 'app.js', fn: 'buildSearchIndex' },
-  { file: 'teacher.js', fn: 'setShortResponses' },
+  // The teacher's response audit walks ALL storage sections on purpose
+  // (retired prompts still hold real answers) — so it must call
+  // storageSections(, and must NOT be narrowed back to visibleSections(.
+  { file: 'teacher.js', fn: 'setShortResponses', helper: 'storageSections', forbid: 'visibleSections' },
 ];
 function checkVisibleHelperUsage() {
   head('1ac. Section/step counters call visibleSteps()/visibleSections()');
@@ -1471,8 +1474,14 @@ function checkVisibleHelperUsage() {
     const decls = topLevelFunctionDecls(src).filter(d => d.name === fn);
     if (!decls.length) { err(`${file}: no top-level function '${fn}' found — 1ac's whitelist is stale`); problems++; bad++; continue; }
     const body = functionBodyAt(src, decls[0].index);
-    if (!/\bvisible(Steps|Sections)\s*\(/.test(body)) {
-      err(`${file}: ${fn}() no longer calls visibleSteps(/visibleSections( — a hidden step or section would count again`);
+    const { helper, forbid } = VISIBLE_HELPER_CALLERS.find(c => c.file === file && c.fn === fn);
+    const want = helper ? new RegExp(`\\b${helper}\\s*\\(`) : /\bvisible(Steps|Sections)\s*\(/;
+    if (!want.test(body)) {
+      err(`${file}: ${fn}() no longer calls ${helper ? helper + '(' : 'visibleSteps(/visibleSections('} — ${helper ? 'retired prompts would vanish from the audit' : 'a hidden step or section would count again'}`);
+      problems++; bad++;
+    }
+    if (forbid && new RegExp(`\\b${forbid}\\s*\\(`).test(body)) {
+      err(`${file}: ${fn}() calls ${forbid}( — this audit must walk every storage section, not just the rendered ones`);
       problems++; bad++;
     }
   }

@@ -1505,26 +1505,23 @@ function prNum(v){ const m=String(v).match(/\d{2,3}/); return m?m[0]:null; }
 /* Enumerate every short free-text response slot in a set, in display order,
    rebuilding the exact keys the student app saves under
    (`${set}-${station}[-sec{n}]-${stepIndex}`). Tags PR (BPM) prompts. */
-// visibleSections() is defined in app.js, loaded before this file on every
-// page that includes teacher.js — buildLesson() there drops tuning-warmup
-// and (Today-first work order, Phase 3) routine/ear-spark/reflection/empty
-// take-to-song sections from the rendered/saved section list, so the
-// section-index (gi) math here relies on that same global function rather
-// than keeping its own copy (both are classic scripts sharing one global
-// scope; a second definition here would silently shadow app.js's instead of
-// independently verifying it).
-//
-// STEPS are deliberately NOT filtered through visibleSteps() here, unlike
-// every student-facing counter — this view is a historical audit of what a
-// student actually wrote, not a completion count, and a step that's since
-// gone hidden (or sits inside a now-card-only take-to-song section) may
-// still hold a real response from before it was retired. Only the SECTION
-// list needs to match app.js's filtering, to keep gi (and so the key) correct.
+// storageSections() / isRenderableSection() are defined in app.js, loaded
+// before this file on every page that includes teacher.js. This view walks
+// EVERY storage section (all but tuning-warmup — the one hide baked into the
+// keys, see storageSections' comment), not just the ones the ladder renders:
+// it is a historical audit of what a student actually wrote, and the
+// Checkpoint / Wrap-Up / Practice Routine prompts students answered in
+// Modules 1–2 are still real responses after those sections were retired
+// from the ladder (Today-first, Phase 3). A slot in a section the ladder no
+// longer shows — or a step that has since gone `hidden` — is tagged
+// `retired` and its label says so, so Jonathan can tell an old answer from a
+// prompt students can still reach. gi comes from the pair, never from the
+// position in a filtered list, so the rebuilt key matches what was saved.
 function setShortResponses(w){
   const out=[];
   ['b','c'].forEach(stationId=>{
     const stn=w.stations&&w.stations[stationId]; if(!stn) return;
-    const pushStep=(st,ns,i)=>{
+    const pushStep=(st,ns,i,retired)=>{
       if(!st.response||st.response.type!=='short') return;
       const prompt=st.response.prompt||'';
       const isPR=/personal record/i.test(prompt)||/\bBPM\b/i.test(prompt);
@@ -1542,12 +1539,14 @@ function setShortResponses(w){
       else if(prompt) label=prompt.replace(/\s+/g,' ').slice(0,70);
       else if(ph && !/^e\.g\./i.test(ph)) label=ph.replace(/\s+/g,' ').slice(0,70); // placeholder is the question, not an example
       else label=chal?chal[1].trim():'Written response';
-      out.push({key:`${w.id}-${ns}-${i}`, label, isPR});
+      if(retired) label+=' (retired)';
+      out.push({key:`${w.id}-${ns}-${i}`, label, isPR, retired:!!retired});
     };
-    // {sec, gi} pairs — gi is the storage index (storageSections in app.js),
-    // never the visible position, so the rebuilt key matches what was saved.
-    if(stn.sections) visibleSections(stn,w.moduleNum).forEach(({sec,gi})=>(sec.steps||[]).forEach((st,i)=>pushStep(st,`${stationId}-sec${gi}`,i)));
-    else if(stn.steps) stn.steps.forEach((st,i)=>pushStep(st,stationId,i));
+    if(stn.sections) storageSections(stn,w.moduleNum).forEach(({sec,gi})=>{
+      const secRetired=!isRenderableSection(sec,w.moduleNum);
+      (sec.steps||[]).forEach((st,i)=>pushStep(st,`${stationId}-sec${gi}`,i,secRetired||st.hidden===true));
+    });
+    else if(stn.steps) stn.steps.forEach((st,i)=>pushStep(st,stationId,i,st.hidden===true));
   });
   return out;
 }
