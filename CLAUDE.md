@@ -22,7 +22,9 @@ set renders as ONE continuous step ladder: B's sections, a seam divider
 carrying C's own title words, then C's sections, numbered straight through.
 `stations.b` / `stations.c` in the module files are unchanged and so is every
 progress key (`${w.id}-b-sec{gi}-{i}` / `${w.id}-c-sec{gi}-{i}`) — never
-"simplify" the data to match the display. `buildLesson()` in `app.js` is the
+"simplify" the data to match the display. **`gi` is the section's position
+after excluding only tuning-warmup sections (`storageSections()`); render-time
+hiding never renumbers it** — checks.mjs 1af. `buildLesson()` in `app.js` is the
 renderer; the single tab-panel suffix is `LESSON_TAB` (still the literal
 `'station-b'`, so old deep links resolve). Sections are addressed by
 `data-ns`, never by DOM position. Don't reintroduce "Station B/C" wording in
@@ -514,13 +516,22 @@ step's real position in `sec.steps` — what every storage key (doneKey,
 responses, bpm, drills) is built from, so a hidden step earlier in the array
 can never shift a later one's saved progress — while the pair's position in
 the *returned array* is the visible step number and the only thing "which
-step is current" compares against. `visibleSections` reindexes `gi` fresh
-over the survivors, same safe-because-it's-a-first-rollout reasoning as
-`isTuningWarmupSection`'s existing filter (see CLAUDE.md's top-of-file
-progress-key warning) — a section with zero visible steps (its one purpose
-now taught in class) is dropped too, and a `take-to-song` section with no
-Journey layer for that module (module 6+) is dropped rather than rendering
-an empty card.
+step is current" compares against. `visibleSections` returns `{sec, gi}`
+pairs the same way — **`gi` is the STORAGE index and comes from
+`storageSections()`: the section's position after excluding ONLY
+tuning-warmup sections**, the convention every Firestore key has been
+written under since July 2026 (pre-semester, so that one hide is baked into
+the keys). Every other hide — routine / ear-spark / reflection, a
+`take-to-song` section with no Journey layer for that module (6+), a section
+with zero visible steps — is render-only and never renumbers `gi`; the
+pair's position in the returned array is its DOM position and nothing
+else. The first cut (066dc05, one day live) numbered `gi` over the
+survivors and moved Module 2 Set 1 station B's "Play along with the note
+map" from `b-sec2` to `b-sec1` — "safe because it's a first rollout" was
+true for tuning-warmup in July, not mid-semester. checks.mjs **1af**
+rebuilds the expected `data-ns` list for all 36 sets from raw module data
+and compares it to what `buildSet()` renders, and pins the Module 2 Set 1
+sections by title.
 
 **The Journey link card (3b):** `JOURNEY_LAYERS` in app.js (`{slug: {moduleNum:
 layerNum}}`) is authored from the six pages' real `.layer-unit` spans —

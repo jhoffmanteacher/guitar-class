@@ -3249,6 +3249,71 @@ function renderCheck() {
     }
   }
   if (!bad) ok(`all ${sets.length} sets render`);
+  checkStorageNamespaces(sets, buildSet, ctx);
+}
+
+/* ════════════════════════════════════════════════════════════════════
+   1af. STORAGE NAMESPACES NEVER MOVE — the progress-key rule (app.js
+   storageSections, 2026-09-12 hotfix). Every section-level key is
+   `${set}-${station}-sec${gi}-${idx}`, and gi is the section's position in
+   `station.sections` after excluding ONLY tuning-warmup sections — the
+   convention every key in Firestore was written under since July 2026.
+   Render-time hides (routine / ear-spark / reflection / empty take-to-song /
+   all-steps-hidden) must never renumber gi; the first cut of Phase 3 did,
+   and moved Module 2 Set 1 station B's "Play along with the note map" from
+   b-sec2 to b-sec1 on the live site for a day.
+
+   Independent of app.js: this rebuilds the expected `data-ns` list for
+   every set from the raw module data with its own copy of the rule, renders
+   the set through the real buildSet(), and compares the two lists exactly.
+   The take-to-song emptiness rule (module has no Journey layer) is the one
+   thing borrowed from the sandbox, since that table lives in app.js.
+   ════════════════════════════════════════════════════════════════════ */
+const RENDER_HIDDEN_KINDS = new Set(['routine', 'ear-spark', 'reflection']);
+// Pinned by name so a data edit can't silently re-key a section students are
+// mid-way through: set id → station → { section title: expected gi }.
+const PINNED_NS = {
+  // (m2w1 station C's first section is the tuning warm-up, so "A string" is
+  // raw index 2 but storage index 1 — the July convention, not the raw one.)
+  m2w1: { b: { 'Play along with the note map': 2 }, c: { 'Name every note on the A string (frets 0–12)': 1 } },
+};
+function checkStorageNamespaces(sets, buildSet, ctx) {
+  head('1af. Storage namespaces (progress keys) never move');
+  const journeySongsFor = vm.runInContext('typeof journeySongsFor === "function" ? journeySongsFor : null', ctx);
+  if (!journeySongsFor) { err('app.js: journeySongsFor() not found — 1af cannot judge take-to-song emptiness'); problems++; return; }
+  let bad = 0, checked = 0;
+  const isTuning = (sec, moduleNum) => moduleNum !== 1 && (sec.kind === 'tuning-warmup' || sec.title === 'Warm-up — tuning check (Module 1)');
+  for (const w of sets) {
+    const expected = [];
+    for (const stId of ['b', 'c']) {
+      const stn = w.stations && w.stations[stId];
+      if (!stn) continue;
+      if (!(stn.sections && stn.sections.length)) { if (stn.steps) expected.push(stId); continue; }
+      let gi = -1;
+      stn.sections.forEach(sec => {
+        if (isTuning(sec, w.moduleNum)) return;
+        gi++;                                                         // the ONLY hide that counts toward gi
+        const pin = ((PINNED_NS[w.id] || {})[stId] || {})[sec.title];
+        if (pin !== undefined && pin !== gi) {
+          err(`${w.id} · station "${stId}": "${sec.title}" is at storage index ${gi}, pinned at ${pin} — a section was inserted/removed before it, which re-keys students' saved progress`);
+          problems++; bad++;
+        }
+        if (RENDER_HIDDEN_KINDS.has(sec.kind)) return;
+        if (sec.kind === 'take-to-song') { if (journeySongsFor(w.moduleNum).length) expected.push(`${stId}-sec${gi}`); return; }
+        if (!(sec.steps || []).some(st => !st.hidden)) return;
+        expected.push(`${stId}-sec${gi}`);
+      });
+    }
+    let html;
+    try { html = buildSet(w); } catch { continue; }                    // 0b already reported the throw
+    const rendered = [...html.matchAll(/<div class="stp-sec[^"]*" data-ns="([^"]+)"/g)].map(m => m[1]);
+    checked++;
+    if (rendered.join(' ') !== expected.join(' ')) {
+      err(`${w.id}: rendered section namespaces [${rendered.join(', ')}] ≠ expected [${expected.join(', ')}] — a render-time hide is renumbering progress keys`);
+      problems++; bad++;
+    }
+  }
+  if (!bad) ok(`${checked} sets render every section under its July-convention storage namespace (${Object.keys(PINNED_NS).length} pinned by name)`);
 }
 
 /* ════════════════════════════════════════════════════════════════════

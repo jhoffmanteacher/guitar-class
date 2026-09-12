@@ -1543,7 +1543,9 @@ function setShortResponses(w){
       else label=chal?chal[1].trim():'Written response';
       out.push({key:`${w.id}-${ns}-${i}`, label, isPR});
     };
-    if(stn.sections) visibleSections(stn,w.moduleNum).forEach((sec,gi)=>(sec.steps||[]).forEach((st,i)=>pushStep(st,`${stationId}-sec${gi}`,i)));
+    // {sec, gi} pairs — gi is the storage index (storageSections in app.js),
+    // never the visible position, so the rebuilt key matches what was saved.
+    if(stn.sections) visibleSections(stn,w.moduleNum).forEach(({sec,gi})=>(sec.steps||[]).forEach((st,i)=>pushStep(st,`${stationId}-sec${gi}`,i)));
     else if(stn.steps) stn.steps.forEach((st,i)=>pushStep(st,stationId,i));
   });
   return out;

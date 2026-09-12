@@ -2174,7 +2174,7 @@ function resumeLessonCounts(w){
     if(!s) return;
     if(s.sections && s.sections.length){
       visibleSections(s, w.moduleNum)
-        .forEach((sec,gi)=>count(visibleSteps(sec), `${stationId}-sec${gi}`));
+        .forEach(({sec,gi})=>count(visibleSteps(sec), `${stationId}-sec${gi}`));   // gi = storage index, never the visible position
     } else if(s.steps){
       count(s.steps.map((st,idx)=>({st,idx})).filter(p=>!p.st.hidden), stationId);
     }
@@ -2925,19 +2925,42 @@ function visibleSteps(sec){
   if(isTakeToSongSection(sec)) return [];
   return (sec.steps || []).map((st, idx) => ({ st, idx })).filter(p => !p.st.hidden);
 }
+/* ── The storage namespace rule (2026-09-12 hotfix) ──
+   Every section-level progress key is `${set}-${station}-sec${gi}-${idx}`,
+   and `gi` is the section's position in `station.sections` AFTER EXCLUDING
+   ONLY tuning-warmup sections — the convention every key in Firestore was
+   written under from July 2026 on. That filter predates the semester, so it
+   is the one hide that is baked into the keys. Nothing else ever renumbers
+   gi: the Phase 3 kinds (routine / ear-spark / reflection / empty
+   take-to-song) and all-steps-hidden sections are RENDER-ONLY hides. The
+   first cut of visibleSections() numbered gi over the survivors of those
+   hides too, which moved Module 2 Set 1 station B's "Play along with the
+   note map" from b-sec2 to b-sec1 on the live site for a day — checks.mjs
+   1af now pins every rendered section to its July-convention gi.
+
+   storageSections() is the single source of gi: `{ sec, gi }` pairs for
+   every non-tuning-warmup section. visibleSections() filters those pairs
+   down to what renders — a pair's `gi` is what ns is built from, its
+   POSITION in the returned array is its visible/DOM position, exactly the
+   idx/pos split visibleSteps() already makes at step level. */
+function storageSections(station, moduleNum){
+  return ((station && station.sections) || [])
+    .filter(sec => !isTuningWarmupSection(sec, moduleNum))        // superseded by the Daily 5 — the one key-shifting hide
+    .map((sec, gi) => ({ sec, gi }));
+}
+function isRenderableSection(sec, moduleNum){
+  if(isRoutineSection(sec) || isEarSparkSection(sec) || isReflectionSection(sec)) return false;
+  // A take-to-song section is empty when this set's module has no Journey
+  // layer to link to (module 6+) — same reasoning as the next line, just a
+  // card with nothing in it instead of a step list with nothing in it.
+  if(isTakeToSongSection(sec)) return journeySongsFor(moduleNum).length > 0;
+  // A section whose every step got hidden (its one purpose now taught by a
+  // class activity) is empty — don't render a heading over nothing.
+  if(visibleSteps(sec).length === 0) return false;
+  return true;
+}
 function visibleSections(station, moduleNum){
-  return ((station && station.sections) || []).filter(sec => {
-    if(isTuningWarmupSection(sec, moduleNum)) return false;        // superseded by the Daily 5
-    if(isRoutineSection(sec) || isEarSparkSection(sec) || isReflectionSection(sec)) return false;
-    // A take-to-song section is empty when this set's module has no Journey
-    // layer to link to (module 6+) — same reasoning as the next line, just a
-    // card with nothing in it instead of a step list with nothing in it.
-    if(isTakeToSongSection(sec)) return journeySongsFor(moduleNum).length > 0;
-    // A section whose every step got hidden (its one purpose now taught by a
-    // class activity) is empty — don't render a heading over nothing.
-    if(visibleSteps(sec).length === 0) return false;
-    return true;
-  });
+  return storageSections(station, moduleNum).filter(p => isRenderableSection(p.sec, moduleNum));
 }
 
 /* ── "Take It to a Song" → a Journey link card (Today-first work order,
@@ -3164,15 +3187,16 @@ function buildLesson(w){
      storage namespace its steps are keyed under. A station with flat `steps:`
      (no sections) becomes one untitled pseudo-section whose ns is the bare
      station letter — exactly the key shape stepsHtml() already wrote for it.
-     visibleSections() folds the tuning-warmup exclusion in with the newer
-     routine/ear-spark/reflection/empty-take-to-song ones (Phase 3) — gi is
-     assigned fresh over the survivors, same convention as the pre-existing
-     tuning-warmup filter it replaces (see visibleSections' own comment). */
+     visibleSections() returns {sec, gi} pairs: gi is the section's STORAGE
+     index (position after the tuning-warmup filter only — see
+     storageSections), so a routine/reflection/ear-spark/empty section hidden
+     at render time never renumbers the sections after it. The pair's own
+     position in the array is its DOM position, nothing more. */
   const groups = ['b','c'].map(id => ({ id, s: w.stations && w.stations[id] })).filter(g => !!g.s)
     .map(g => ({
       ...g,
       secs: (g.s.sections && g.s.sections.length)
-        ? visibleSections(g.s, w.moduleNum).map((sec,gi) => ({ sec, ns: `${g.id}-sec${gi}` }))
+        ? visibleSections(g.s, w.moduleNum).map(({sec,gi}) => ({ sec, ns: `${g.id}-sec${gi}` }))
         : (g.s.steps ? [{ sec: { title:'', steps: g.s.steps }, ns: g.id }] : [])
     }));
   const flat = groups.flatMap(g => g.secs);
@@ -6924,8 +6948,10 @@ async function buildSearchIndex(){
       // visible steps, so secIdx/stepIdx here must be visible positions too,
       // not raw array indices (those are what doneKey uses, a different
       // thing — see visibleSteps' own comment).
+      // (visibleSections returns {sec, gi} pairs — only `sec` matters here:
+      // the storage index gi is a key concern, and search never builds keys.)
       const sections = stn.sections && stn.sections.length
-        ? visibleSections(stn, w.moduleNum)
+        ? visibleSections(stn, w.moduleNum).map(p => p.sec)
         : (stn.steps ? [{title: '', steps: stn.steps}] : []);
       sections.forEach((sec, secIdx) => visibleSteps(sec).forEach((p, stepIdx) => {
         const step = p.st;

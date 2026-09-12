@@ -5,6 +5,16 @@ Notable changes to the Guitar Class site. Newest first.
 For the full session-by-session history (and the reasoning behind each change),
 see `WORKFLOW.md` and the git commit log.
 
+## 2026-09-12 — Fix: Module 2 Set 1 step progress shows again
+
+### Fixed
+
+- **Module 2 Set 1, "Play along with the note map":** for about a day, the
+  two steps in this group forgot they'd been marked done, and marking them
+  again saved to the wrong place. Old marks and written answers are back;
+  nothing was deleted. (Behind the scenes: retiring a group from the ladder
+  must never renumber the groups after it — now checked on every push.)
+
 ## 2026-09-12 — Every module's ladder: Checkpoint/Wrap-Up/Practice Routine/
 Ear Spark retired, Take It to a Song links out
 
