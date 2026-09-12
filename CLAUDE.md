@@ -343,10 +343,21 @@ All of it is in `live-quiz.js`: the quiz bank, the student overlay, and the
 teacher's projected stage (`?teacher=true` → **Live quiz**). One game runs at
 a time, in `liveQuiz/current` (+ an `answers/{uid}` subcollection).
 
-- **The teacher is the only judge.** There is no answer key in the bank —
-  Jonathan marks the correct choice at reveal time. That's deliberate: the
-  dashboard is on the classroom projector, so anything the app knew in
-  advance would either spoil the round or need hiding from the room.
+- **The teacher is the only judge — for `mc` quizzes.** There is no answer
+  key in the bank for those; Jonathan marks the correct choice at reveal.
+  That's deliberate: the dashboard is on the classroom projector, so anything
+  the app knew in advance would either spoil the round or need hiding from
+  the room.
+- **`type:'fret'` quizzes are the one exception.** The teacher picks a
+  target note from the strip; the app scores the round from `LQ_NATURALS`
+  when Reveal is pressed. Allowed because the answer is a fact of the
+  fretboard, not something only the teacher knows — and the projector
+  rule still holds: during a fret question the stage shows the prompt and
+  the answered count, never the board with a marker, and the strip shows
+  one Reveal button, never the fret. Answer ids are `'<string>:<fret>'`;
+  octaves both count (`correctIds`). The board is `app.js`'s
+  `fgBoardSvg(sid, kind, opts)` behind a `typeof` guard — the fret UI
+  only ever renders on `index.html`, never on a Journey page.
 - **Nothing on the stage may reveal the answer before the reveal.** During a
   question the projector shows the prompt and an answered-count, nothing else.
   Any new stage content gets checked against that.

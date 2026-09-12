@@ -79,6 +79,13 @@
 
 ## Open work
 
+- [x] **2026-09-12 Fretboard Tap — work order at
+  `OPUSPLAN-fretboard-tap-2026-09-12.md`.** `type:'fret'` live-quiz
+  questions; `fret-lowE` (Phase 1), `fret-lowE-A` + `fret-all` (Phase 2).
+  Both phases pushed to `main`, checks green. Deferred, not rejected: a
+  chord-builder (multi-dot) type; a per-student tap breakdown on the
+  console; sharp/flat targets.
+
 - [x] **2026-09-09 exit checks — work order at
   `exit-checks-work-order-2026-09-09.md`.** Engine + `ca-14` (Phase 1),
   `ca-15` + docs (Phase 2). Both pushed to `main` and deploy-verified.

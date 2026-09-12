@@ -110,8 +110,23 @@ const LIVE_QUIZZES = {
     promptKey: 'lq.prompt.fretTap',
     teacherHint: 'Pick a note below to open the question. Students tap the fret; press Reveal when the count stops climbing.',
     strings: ['lowE']
+  },
+  'fret-lowE-A': {
+    id: 'fret-lowE-A',
+    type: 'fret',
+    titleKey:  'lq.title.fretLowEA',
+    promptKey: 'lq.prompt.fretTap',
+    teacherHint: 'Pick a string and a note below to open the question. Students tap the fret; press Reveal when the count stops climbing.',
+    strings: ['lowE', 'A']
+  },
+  'fret-all': {
+    id: 'fret-all',
+    type: 'fret',
+    titleKey:  'lq.title.fretAll',
+    promptKey: 'lq.prompt.fretTap',
+    teacherHint: 'Pick a string and a note below to open the question. Students tap the fret; press Reveal when the count stops climbing.',
+    strings: ['highE', 'B', 'G', 'D', 'A', 'lowE']
   }
-  // Phase 2: fret-lowE-A, fret-all
 };
 const LQ_DEFAULT_QUIZ = 'string-id';
 function lqQuiz(id){ return LIVE_QUIZZES[id] || LIVE_QUIZZES[LQ_DEFAULT_QUIZ]; }

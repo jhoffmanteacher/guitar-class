@@ -5,6 +5,17 @@ Notable changes to the Guitar Class site. Newest first.
 For the full session-by-session history (and the reasoning behind each change),
 see `WORKFLOW.md` and the git commit log.
 
+## 2026-09-12 — Live quiz: Fretboard tap
+
+### Added
+
+- **Fretboard tap**, a new kind of live quiz. Your teacher names a note
+  ("Find G on the low E string"), a fretboard appears on your screen, and
+  you tap the fret. Your first tap is your answer. At the reveal you see
+  the right fret, your tap, and where the whole class tapped. Three
+  versions: low E string, low E and A strings, all six strings. English
+  and Spanish.
+
 ## 2026-09-12 — Assessments page, and activities open their own Song Journey page
 
 ### Added
