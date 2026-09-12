@@ -1504,13 +1504,21 @@ function prNum(v){ const m=String(v).match(/\d{2,3}/); return m?m[0]:null; }
 /* Enumerate every short free-text response slot in a set, in display order,
    rebuilding the exact keys the student app saves under
    (`${set}-${station}[-sec{n}]-${stepIndex}`). Tags PR (BPM) prompts. */
-// isTuningWarmupSection() is defined in app.js, loaded before this file on
-// every page that includes teacher.js — sectionsHtml() there drops the
-// generic tuning warm-up section from the rendered/saved section list for
-// every module except 1, so the section-index math here relies on that same
-// global function rather than keeping its own copy (both are classic
-// scripts sharing one global scope; a second definition here would silently
-// shadow app.js's instead of independently verifying it).
+// visibleSections() is defined in app.js, loaded before this file on every
+// page that includes teacher.js — buildLesson() there drops tuning-warmup
+// and (Today-first work order, Phase 3) routine/ear-spark/reflection/empty
+// take-to-song sections from the rendered/saved section list, so the
+// section-index (gi) math here relies on that same global function rather
+// than keeping its own copy (both are classic scripts sharing one global
+// scope; a second definition here would silently shadow app.js's instead of
+// independently verifying it).
+//
+// STEPS are deliberately NOT filtered through visibleSteps() here, unlike
+// every student-facing counter — this view is a historical audit of what a
+// student actually wrote, not a completion count, and a step that's since
+// gone hidden (or sits inside a now-card-only take-to-song section) may
+// still hold a real response from before it was retired. Only the SECTION
+// list needs to match app.js's filtering, to keep gi (and so the key) correct.
 function setShortResponses(w){
   const out=[];
   ['b','c'].forEach(stationId=>{
@@ -1535,7 +1543,7 @@ function setShortResponses(w){
       else label=chal?chal[1].trim():'Written response';
       out.push({key:`${w.id}-${ns}-${i}`, label, isPR});
     };
-    if(stn.sections) stn.sections.filter(sec=>!isTuningWarmupSection(sec,w.moduleNum)).forEach((sec,gi)=>(sec.steps||[]).forEach((st,i)=>pushStep(st,`${stationId}-sec${gi}`,i)));
+    if(stn.sections) visibleSections(stn,w.moduleNum).forEach((sec,gi)=>(sec.steps||[]).forEach((st,i)=>pushStep(st,`${stationId}-sec${gi}`,i)));
     else if(stn.steps) stn.steps.forEach((st,i)=>pushStep(st,stationId,i));
   });
   return out;

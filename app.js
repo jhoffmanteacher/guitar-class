@@ -2165,18 +2165,18 @@ let _resumeCardClosed = false;   // …and never resurrect after dismiss/use
    any panel is built. If the key scheme ever changes, change both. */
 function resumeLessonCounts(w){
   let total=0, done=0;
-  const count=(steps,ns)=>steps.forEach((st,idx)=>{
+  const count=(pairs,ns)=>pairs.forEach(p=>{
     total++;
-    if(completed[`${w.id}-${ns}-${idx}`]===true) done++;
+    if(completed[`${w.id}-${ns}-${p.idx}`]===true) done++;
   });
   ['b','c'].forEach(stationId=>{
     const s = w.stations && w.stations[stationId];
     if(!s) return;
     if(s.sections && s.sections.length){
-      s.sections.filter(sec=>!isTuningWarmupSection(sec, w.moduleNum))
-        .forEach((sec,gi)=>count(sec.steps, `${stationId}-sec${gi}`));
+      visibleSections(s, w.moduleNum)
+        .forEach((sec,gi)=>count(visibleSteps(sec), `${stationId}-sec${gi}`));
     } else if(s.steps){
-      count(s.steps, stationId);
+      count(s.steps.map((st,idx)=>({st,idx})).filter(p=>!p.st.hidden), stationId);
     }
   });
   return total ? { total, done } : null;
@@ -2852,15 +2852,42 @@ const ICO_BOLT = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" str
   'stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" ' +
   'style="width:1em;height:1em;vertical-align:-0.15em"><path d="M13 2 3 14h9l-1 8 10-12h-9l1-8z"/></svg>';
 
-/* Ear Spark — the optional ear-training bonus at the end of a ladder. Matched
-   on the English title the same way isTuningWarmupSection() does, so the _es
-   twin and any future translation come along for free. The step's own lead-in
-   is matched on the untranslated `text` for the same reason. */
+/* Ear Spark — the optional ear-training bonus at the end of a ladder.
+   Kind-ONLY (Today-first work order, Phase 3, rolled out module by module) —
+   unlike isTuningWarmupSection's kind-or-title backstop, this exact title is
+   reused across most modules, so a title fallback here would hide every
+   module's Ear Spark section (and cost it the bolt icon below) the moment
+   this code shipped, not just the ones tagged kind:'ear-spark' so far. A
+   module not yet tagged just keeps its Ear Spark section fully visible
+   (without the bolt) until a later session tags it. */
 function isEarSparkSection(sec){
-  return sec.title === 'Ear Spark — optional ear bonus';
+  return sec.kind === 'ear-spark';
 }
 function isEarSparkStep(s){
   return /^Ear Spark \(/.test(s.text || '');
+}
+/* Three more render-time-hidden section kinds, same Phase 3 rollout and the
+   same kind-ONLY reasoning as isEarSparkSection above — every title below is
+   reused across most modules, so matching on title would hide the whole
+   course's copies at once instead of staging module by module.
+     take-to-song — renders a Journey link card in place of its steps (3b),
+       rather than being hidden outright.
+     routine      — "My Practice Routine" weekly check-in (Module 1: "session
+       check-in" — same kind, the title varies by module on purpose).
+     reflection   — the mid-set Checkpoint and end-of-set Wrap-Up.
+   checks.mjs 1ad checks kind → title (a tagged section's title must be one
+   of these); it does NOT yet check the reverse (a matching title must carry
+   the kind) — during the staged rollout that direction would flag every
+   not-yet-tagged module as an error. Tighten it to match isTuningWarmupTag's
+   full two-way check once every module is tagged (Phase 3, step 2/3). */
+function isTakeToSongSection(sec){
+  return sec.kind === 'take-to-song';
+}
+function isRoutineSection(sec){
+  return sec.kind === 'routine';
+}
+function isReflectionSection(sec){
+  return sec.kind === 'reflection';
 }
 
 /* The chili that marks the spicy optional level-up card (Module 7's Sweet
@@ -2883,6 +2910,79 @@ function isSpicyLevelUpStep(s){
   return /^Learn the most famous riff/.test(s.text || '');
 }
 
+/* ── Render-time hiding: which sections/steps a station actually shows ──
+   (Today-first work order, Phase 3.) A hidden step or section still exists
+   in the data and keeps its real index/gi for progress-key purposes — only
+   what's RENDERED and COUNTED changes, never what a doneKey/response-key is
+   built from. Use these two everywhere a station's sections/steps are
+   walked for a count, a "next step", or a DOM position; checks.mjs 1ac
+   requires the functions it knows about to call one of these rather than
+   iterating `.sections`/`.steps` directly. */
+function visibleSteps(sec){
+  // A take-to-song section renders its Journey link card in place of a step
+  // list (journeyLinkCardHtml) — none of its steps are ever rendered or
+  // counted, regardless of any step-level `hidden` flag.
+  if(isTakeToSongSection(sec)) return [];
+  return (sec.steps || []).map((st, idx) => ({ st, idx })).filter(p => !p.st.hidden);
+}
+function visibleSections(station, moduleNum){
+  return ((station && station.sections) || []).filter(sec => {
+    if(isTuningWarmupSection(sec, moduleNum)) return false;        // superseded by the Daily 5
+    if(isRoutineSection(sec) || isEarSparkSection(sec) || isReflectionSection(sec)) return false;
+    // A take-to-song section is empty when this set's module has no Journey
+    // layer to link to (module 6+) — same reasoning as the next line, just a
+    // card with nothing in it instead of a step list with nothing in it.
+    if(isTakeToSongSection(sec)) return journeySongsFor(moduleNum).length > 0;
+    // A section whose every step got hidden (its one purpose now taught by a
+    // class activity) is empty — don't render a heading over nothing.
+    if(visibleSteps(sec).length === 0) return false;
+    return true;
+  });
+}
+
+/* ── "Take It to a Song" → a Journey link card (Today-first work order,
+   Phase 3b) ── One core song per module-that-has-a-layer-for-it: button
+   text is the song name, the link opens tabs/<slug>.html#layer-<n> — <n>
+   is the Journey layer whose .layer-unit reads "Module N" for THIS set's
+   module (journey.js's existing openFromHash already opens #layer-N on
+   load and on hashchange; nothing there needed to change for this).
+   A song with no layer for this module is left out; a card with zero
+   songs (module 6+, no core-song layer past 5) is hidden entirely — the
+   section then contributes nothing, same as any other empty section.
+
+   JOURNEY_LAYERS is authored here, at build time, from the six pages'
+   real .layer-unit spans (every song currently reads Module 1→Layer 1,
+   2→2, 3→3, 4→4, 5→5, with anything past Layer 5 an unnumbered "Extra"
+   layer) — checks.mjs 1ab rebuilds the same map from those spans and
+   fails the push on drift, so a relabeled layer can't go stale here. */
+const JOURNEY_LAYERS = {
+  'seven-nation-army':        { 1: 1, 2: 2, 3: 3, 4: 4, 5: 5 },
+  'all-along-the-watchtower': { 1: 1, 2: 2, 3: 3, 4: 4, 5: 5 },
+  'sweet-child-o-mine':       { 1: 1, 2: 2, 3: 3, 4: 4, 5: 5 },
+  'luna':                     { 1: 1, 2: 2, 3: 3, 4: 4, 5: 5 },
+  'let-it-be':                { 1: 1, 2: 2, 3: 3, 4: 4, 5: 5 },
+  'the-cure':                 { 1: 1, 2: 2, 3: 3, 4: 4, 5: 5 },
+};
+// Shared by journeyLinkCardHtml (below) and visibleSections (which needs to
+// know whether a take-to-song section's card would be empty, so it can drop
+// the whole section rather than render a heading-less, button-less wrapper).
+function journeySongsFor(moduleNum){
+  return SONG_JOURNEYS.filter(sg => (JOURNEY_LAYERS[sg.id] || {})[moduleNum]);
+}
+function journeyLinkCardHtml(w){
+  const songs = journeySongsFor(w.moduleNum);
+  const buttons = songs.map(sg => {
+    const layer = JOURNEY_LAYERS[sg.id][w.moduleNum];
+    return `<button type="button" class="jl-song-btn" onclick="window.open('${sg.url}#layer-${layer}','_blank','noopener')">${escHtml(sg.name)}</button>`;
+  }).join('');
+  if(!buttons) return '';
+  return `<div class="jl-card">
+    <div class="jl-title">${escHtml(t('journey.takeItTitle'))}</div>
+    <p class="jl-sub">${escHtml(t('journey.takeItSub'))}</p>
+    <div class="jl-songs">${buttons}</div>
+  </div>`;
+}
+
 /* ── The lesson ladder ──
    The classroom no longer runs a three-group B/C rotation — one group is with
    the teacher, one is on the site — so a set's job here is a single, linear
@@ -2900,12 +3000,23 @@ function buildLesson(w){
      emits the one open row, so the stepper bar can label it "Step n of m". */
   const focusMode = stationViewIsFocus();
   let openNum = 0;
-  const stepsHtml=(steps,ns,numOffset=0,allowCur=true,openIfNoCur=false)=>{
-   const curIdx = allowCur ? steps.findIndex((st,idx)=>completed[`${w.id}-${ns}-${idx}`]!==true) : -1;
+  /* `pairs` is visibleSteps(sec) — {st,idx} for every step this ladder
+     actually shows. `idx` is the step's real position in the section's own
+     `steps` array (what every storage key below is built from — doneKey,
+     response keys, bpm keys, drill keys — so a hidden step earlier in the
+     array can never shift a later one's saved progress onto the wrong key).
+     `pos`, the pair's own position in `pairs`, is the VISIBLE step number and
+     the only thing curIdx/openIdx (now curPos/openPos) compare against — a
+     hidden step is invisible to "which one is current", too, or a step that
+     can never be marked done here again would permanently block every real
+     step after it. */
+  const stepsHtml=(pairs,ns,numOffset=0,allowCur=true,openIfNoCur=false)=>{
+   const curPos = allowCur ? pairs.findIndex(p=>completed[`${w.id}-${ns}-${p.idx}`]!==true) : -1;
    // Every step done → no `.cur` anywhere. Focus mode hides collapsed rows, so
    // a card with nothing open would render empty: step 1 stays open instead.
-   const openIdx = curIdx >= 0 ? curIdx : (openIfNoCur ? 0 : -1);
-   return steps.map((s,i)=>{
+   const openPos = curPos >= 0 ? curPos : (openIfNoCur ? 0 : -1);
+   return pairs.map((p,pos)=>{
+    const s = p.st, i = p.idx;
     const text=((isEarSparkStep(s) ? ICO_BOLT + ' ' : isSpicyLevelUpStep(s) ? ICO_CHILI + ' ' : '') + tf(s,'text')).replace(/<a href="(https?:\/\/(?:www\.)?(?:youtube\.com|youtu\.be)[^"]*)"([^>]*)>([^<]*)<\/a>/g,(match,url,attrs,label)=>{
       const safe=label.replace(/'/g,"\\'");
       // data-ext links can't be embedded (official recordings block it) — open on YouTube in a new tab.
@@ -3024,13 +3135,13 @@ function buildLesson(w){
     const drillHtml = s.drill ? renderShuffleDrill(s.drill, `${w.id}-${ns}-${i}`, w.id) : '';
     const doneKey = `${w.id}-${ns}-${i}`;
     const isDone = completed[doneKey] === true;
-    const isCur = i === curIdx;
-    const isOpen = i === openIdx;
+    const isCur = pos === curPos;
+    const isOpen = pos === openPos;
     // Mark-done is the last row of the step.
     const doneBtn = `<div class="step-done-row"><button class="step-done-btn${isDone ? ' is-done' : ''}" type="button" aria-pressed="${isDone}" onclick="toggleStepDone(this,'${doneKey}')">${stepDoneHtml(isDone)}</button></div>`;
     const skillsAttr = (s.skills && s.skills.length) ? ` data-skills="${s.skills.join(',')}"` : '';
     const label = stepLabel(s);
-    const num = numOffset + i + 1;
+    const num = numOffset + pos + 1;
     const ariaLabel = t(isDone ? 'step.ariaLabelDone' : 'step.ariaLabel', { n: num, label });
     const statusIcon = isDone ? '&#x2713;' : String(num);
     if(isOpen) openNum = num;
@@ -3052,22 +3163,29 @@ function buildLesson(w){
   /* Every renderable section of the whole ladder, in order, each carrying the
      storage namespace its steps are keyed under. A station with flat `steps:`
      (no sections) becomes one untitled pseudo-section whose ns is the bare
-     station letter — exactly the key shape stepsHtml() already wrote for it. */
+     station letter — exactly the key shape stepsHtml() already wrote for it.
+     visibleSections() folds the tuning-warmup exclusion in with the newer
+     routine/ear-spark/reflection/empty-take-to-song ones (Phase 3) — gi is
+     assigned fresh over the survivors, same convention as the pre-existing
+     tuning-warmup filter it replaces (see visibleSections' own comment). */
   const groups = ['b','c'].map(id => ({ id, s: w.stations && w.stations[id] })).filter(g => !!g.s)
     .map(g => ({
       ...g,
       secs: (g.s.sections && g.s.sections.length)
-        ? g.s.sections.filter(sec => !isTuningWarmup(sec)).map((sec,gi) => ({ sec, ns: `${g.id}-sec${gi}` }))
+        ? visibleSections(g.s, w.moduleNum).map((sec,gi) => ({ sec, ns: `${g.id}-sec${gi}` }))
         : (g.s.steps ? [{ sec: { title:'', steps: g.s.steps }, ns: g.id }] : [])
     }));
   const flat = groups.flatMap(g => g.secs);
   // Steps done / total for the ladder's progress pill — mirrors stepsHtml's
   // ns-per-section scheme, now summed across BOTH stations (one card, one pill).
+  // visibleSteps() is what keeps a hidden step (or a whole take-to-song
+  // section) out of "N of M" — a step nobody can ever mark done again would
+  // otherwise make the pill impossible to complete.
   const lessonStepCounts = () => {
     let total=0, done=0;
-    flat.forEach(({sec,ns}) => sec.steps.forEach((st,idx)=>{
+    flat.forEach(({sec,ns}) => visibleSteps(sec).forEach(p=>{
       total++;
-      if(completed[`${w.id}-${ns}-${idx}`]===true) done++;
+      if(completed[`${w.id}-${ns}-${p.idx}`]===true) done++;
     }));
     return {total,done};
   };
@@ -3107,21 +3225,30 @@ function buildLesson(w){
     // Focus mode hides every section label except the one holding the open
     // step (`.sec-cur`, kept in sync by syncStationFocus() as the student
     // moves) — the heading of the group you're actually in, nothing else.
-    const noneLeft = focusMode && !flat.some(({sec,ns}) => sec.steps.some((st,idx)=>completed[`${w.id}-${ns}-${idx}`]!==true));
+    const noneLeft = focusMode && !flat.some(({sec,ns}) => visibleSteps(sec).some(p=>completed[`${w.id}-${ns}-${p.idx}`]!==true));
     let numOffset = 0, foundCur = false, curNs = null;
     const rendered = new Map();
     flat.forEach(({sec,ns}, k)=>{
+      const pairs = visibleSteps(sec);
       const allowCur = !foundCur;
-      const hasCur = allowCur && sec.steps.some((st,idx)=>completed[`${w.id}-${ns}-${idx}`]!==true);
+      const hasCur = allowCur && pairs.some(p=>completed[`${w.id}-${ns}-${p.idx}`]!==true);
       const openIfNoCur = noneLeft && k === 0;   // whole ladder done → section 1, step 1 stays open
       if(hasCur || openIfNoCur) curNs = ns;
       const title = tf(sec,'title');
+      // A take-to-song section renders the Journey link card in its slot
+      // instead of a step list — its own steps never render or count (3b).
+      // The card carries its own title (journey.takeItTitle), so the
+      // section's own heading is suppressed here rather than stacking two.
+      const isSong = isTakeToSongSection(sec);
+      const bodyHtml = isSong
+        ? journeyLinkCardHtml(w)
+        : `<ul class="steps">${stepsHtml(pairs, ns, numOffset, allowCur, openIfNoCur)}</ul>`;
       const html = `<div class="stp-sec${(hasCur || openIfNoCur) ? ' sec-cur' : ''}" data-ns="${escAttr(ns)}">
-      ${title ? `<div class="stp-sec-label">${isEarSparkSection(sec) ? ICO_BOLT + ' ' : isSpicyLevelUpSection(sec) ? ICO_CHILI + ' ' : ''}${title}</div>` : ''}
-      <ul class="steps">${stepsHtml(sec.steps, ns, numOffset, allowCur, openIfNoCur)}</ul>
+      ${title && !isSong ? `<div class="stp-sec-label">${isEarSparkSection(sec) ? ICO_BOLT + ' ' : isSpicyLevelUpSection(sec) ? ICO_CHILI + ' ' : ''}${title}</div>` : ''}
+      ${bodyHtml}
     </div>`;
       if(hasCur) foundCur = true;
-      numOffset += sec.steps.length;
+      numOffset += pairs.length;
       rendered.set(ns, html);
     });
     /* One wrapper per station so the seam divider can hide itself in focus
@@ -3455,7 +3582,9 @@ function moduleStepsFlat(moduleNum){
     ['b','c'].forEach(st=>{
       const stn=w.stations && w.stations[st]; if(!stn) return;
       const sections=stn.sections || (stn.steps ? [{title:'', steps:stn.steps}] : []);
-      sections.forEach(sec=>(sec.steps||[]).forEach(step=>out.push({set:w, station:st, secTitle:sec.title||'', step})));
+      // A hidden step (its skill now taught by a class activity) isn't
+      // candidate material for the Daily 5 routine card either.
+      sections.forEach(sec=>(sec.steps||[]).forEach(step=>{ if(!step.hidden) out.push({set:w, station:st, secTitle:sec.title||'', step}); }));
     });
   });
   return out;
@@ -6789,11 +6918,17 @@ async function buildSearchIndex(){
     ['b', 'c'].forEach(st => {
       const stn = w.stations && w.stations[st];
       if(!stn) return;
-      const rawSections = stn.sections || (stn.steps ? [{title: '', steps: stn.steps}] : []);
-      // Must mirror sectionsHtml()'s filtering — jumpToStep() indexes into
-      // the rendered `.stp-sec` DOM, which drops tuning-warmup sections.
-      const sections = rawSections.filter(sec => !isTuningWarmupSection(sec, w.moduleNum));
-      sections.forEach((sec, secIdx) => (sec.steps || []).forEach((step, stepIdx) => {
+      // Must mirror buildLesson()'s filtering (visibleSections/visibleSteps)
+      // — jumpToStep() indexes into the rendered `.stp-sec` DOM by POSITION
+      // (querySelectorAll('li.step')[stepIdx]), which only ever holds
+      // visible steps, so secIdx/stepIdx here must be visible positions too,
+      // not raw array indices (those are what doneKey uses, a different
+      // thing — see visibleSteps' own comment).
+      const sections = stn.sections && stn.sections.length
+        ? visibleSections(stn, w.moduleNum)
+        : (stn.steps ? [{title: '', steps: stn.steps}] : []);
+      sections.forEach((sec, secIdx) => visibleSteps(sec).forEach((p, stepIdx) => {
+        const step = p.st;
         const text = stripTags(tf(step, 'text') || '');
         const hayExtra = [stripTags(step.text_es || ''), stripTags(step.label_es || ''), sec.title_es || ''].filter(Boolean).join(' ');
         // secTitle is the always-English title (it feeds `hay`, which must

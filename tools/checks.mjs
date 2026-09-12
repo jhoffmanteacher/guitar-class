@@ -246,6 +246,8 @@ function validateModules() {
   checkMcAnswerTells(allSets);
   checkPlaySeqStrings(allSets);
   checkTuningWarmupTag(allSets);
+  checkSectionKindTitle(allSets);
+  checkHiddenStepComments();
   return allSets;
 }
 
@@ -300,6 +302,94 @@ function checkTuningWarmupTag(allSets) {
     problems++; bad++;
   }
   if (bad === 0) ok(`${tagged} tuning warm-up sections tagged and titled consistently`);
+}
+
+/* ════════════════════════════════════════════════════════════════════
+   1ad. RENDER-TIME SECTION KIND ↔ TITLE — Today-first work order, Phase 3.
+   Four more `kind` values (take-to-song, routine, ear-spark, reflection)
+   now drive visibleSections() in app.js, same render-time-hiding mechanism
+   1r protects for tuning-warmup. Checked ONE DIRECTION ONLY for now: a
+   section that carries one of these kinds must have the matching title.
+
+   The reverse direction — a section titled like one of these must carry
+   the kind — is what 1r enforces for tuning-warmup, but it can't run here
+   yet: these titles ("Checkpoint", "Wrap-Up", "Take It to a Song", "My
+   Practice Routine…") are reused across most modules, and Phase 3 tags
+   them module by module on purpose (Module 2 first, reviewed, before the
+   rest). Turning on the reverse check before every module is tagged would
+   fail the push on every untagged module's copy. Tighten this to the full
+   two-way check 1r does once Phase 3's rollout finishes (all 36 sets
+   tagged) — see CLAUDE.md.
+   ════════════════════════════════════════════════════════════════════ */
+const KIND_TITLE_TABLE = [
+  { kind: 'take-to-song', titles: ['Take It to a Song'] },
+  { kind: 'routine', titles: [
+    'My Practice Routine — weekly check-in (never graded)',
+    'My Practice Routine — session check-in (never graded)',   // Module 1's variant
+  ] },
+  { kind: 'ear-spark', titles: ['Ear Spark — optional ear bonus'] },
+  { kind: 'reflection', titles: ['Checkpoint', 'Wrap-Up'] },
+];
+// Pinned per kind — a drop usually means a section lost its kind tag while
+// keeping its title (or vice versa via a copy-paste), which is exactly the
+// silent-renumber risk this ratchet exists to catch. Only a deliberate
+// widening of Phase 3's rollout (tagging more sections) should raise these.
+const KIND_TITLE_COUNTS = { 'take-to-song': 2, 'routine': 1, 'ear-spark': 1, 'reflection': 4 };
+function checkSectionKindTitle(allSets) {
+  head('1ad. Render-time section kind ↔ title (Phase 3, one-way during rollout)');
+  let bad = 0;
+  const counts = {};
+  for (const { kind } of KIND_TITLE_TABLE) counts[kind] = 0;
+  for (const w of allSets) {
+    for (const stId of Object.keys(w.stations || {})) {
+      const sections = (w.stations[stId] || {}).sections || [];
+      sections.forEach((sec, si) => {
+        if (!sec.kind || !(sec.kind in counts)) return;
+        counts[sec.kind]++;
+        const row = KIND_TITLE_TABLE.find(r => r.kind === sec.kind);
+        if (!row.titles.includes(sec.title)) {
+          err(`${w.id} · station "${stId}" · section ${si + 1}: kind:'${sec.kind}' but titled "${sec.title}" — expected one of ${row.titles.map(t => `"${t}"`).join(' / ')}`);
+          problems++; bad++;
+        }
+      });
+    }
+  }
+  for (const kind of Object.keys(KIND_TITLE_COUNTS)) {
+    if (counts[kind] !== KIND_TITLE_COUNTS[kind]) {
+      err(`${counts[kind]} sections carry kind:'${kind}', expected ${KIND_TITLE_COUNTS[kind]} — if Phase 3's rollout genuinely tagged more (or fewer) of these, update KIND_TITLE_COUNTS in checks.mjs in the same commit.`);
+      problems++; bad++;
+    }
+  }
+  if (bad === 0) ok(`${Object.values(counts).reduce((a, b) => a + b, 0)} render-time-hidden sections tagged and titled consistently`);
+}
+
+/* ════════════════════════════════════════════════════════════════════
+   1ae. HIDDEN STEPS NAME THEIR ACTIVITY — every `hidden: true` step
+   (Today-first work order, Phase 3: a song preview a class activity now
+   teaches) carries a `// ... ca-<n>` comment on the line directly above it.
+   A hidden step is otherwise a step with no visible explanation for why —
+   the next person reading the module file (including a future audit) has
+   nothing to tell them it's deliberate, let alone which activity replaced
+   it. Mechanical: a line-above-line text check, not a data-shape one.
+   ════════════════════════════════════════════════════════════════════ */
+function checkHiddenStepComments() {
+  head('1ae. Hidden steps carry a // ca-<n> comment');
+  let bad = 0, hiddenCount = 0;
+  for (const file of MODULE_FILES) {
+    let lines;
+    try { lines = readFileSync(join(ROOT, file), 'utf8').split('\n'); } catch { continue; }
+    lines.forEach((line, li) => {
+      if (!/^\s*hidden:\s*true\s*,?\s*$/.test(line)) return;
+      hiddenCount++;
+      const prev = (lines[li - 1] || '').trim();
+      if (!/^\/\/.*\bca-\d+\b/.test(prev)) {
+        err(`${file}:${li + 1}: 'hidden: true' with no "// ... ca-<n>" comment on the line above it — say which class activity now teaches this step`);
+        problems++; bad++;
+      }
+    });
+  }
+  if (hiddenCount === 0) { warn('no hidden:true steps found yet — 1ae has nothing to check'); warnings++; return; }
+  if (bad === 0) ok(`${hiddenCount} hidden steps all carry a // ca-<n> comment above them`);
 }
 
 /* ════════════════════════════════════════════════════════════════════
@@ -1294,6 +1384,95 @@ function checkTabAsciiAlignment() {
     }
   }
   if (bad === 0) ok(`${blocks} Journey tab-ascii blocks — every string row lines up column-for-column`);
+}
+
+/* ════════════════════════════════════════════════════════════════════
+   1ab. JOURNEY_LAYERS ↔ tabs/*.html — the "Take It to a Song" link card
+   (Today-first work order, Phase 3b) opens tabs/<slug>.html#layer-<n> off
+   app.js's JOURNEY_LAYERS map. Rebuilds the real map from every Journey
+   page's own .layer-num/.layer-unit spans and fails on any drift — a
+   relabeled or reordered layer silently pointing a module's link card at
+   the wrong (or a bonus) layer would otherwise only surface as a wrong
+   card in the room. Pins the song count: six pages, no more, no fewer,
+   without a deliberate update here.
+   ════════════════════════════════════════════════════════════════════ */
+const JOURNEY_LAYERS_SONG_COUNT = 6;
+function checkJourneyLayers() {
+  head('1ab. JOURNEY_LAYERS ↔ tabs/*.html layer-unit spans');
+  let bad = 0;
+  const flag = m => { err(m); problems++; bad++; };
+  let JOURNEY_LAYERS;
+  try {
+    JOURNEY_LAYERS = loadConstObject(readFileSync(join(ROOT, 'app.js'), 'utf8'), 'JOURNEY_LAYERS');
+  } catch (e) { flag(`app.js: could not load JOURNEY_LAYERS — ${e.message}`); return; }
+
+  const real = {};
+  const layerRe = /<span class="layer-num"[^>]*>(\d+)<\/span>.*?<span class="layer-unit"[^>]*>([^<]*)<\/span>/g;
+  for (const file of TAB_PAGES.filter(f => f.endsWith('.html'))) {
+    let src;
+    try { src = readFileSync(join(ROOT, file), 'utf8'); } catch { continue; }
+    const slug = file.replace(/^tabs\//, '').replace(/\.html$/, '');
+    const map = {};
+    for (const m of src.matchAll(layerRe)) {
+      const layerNum = Number(m[1]);
+      const mod = m[2].match(/^Module (\d+)$/);
+      if (mod) map[Number(mod[1])] = layerNum;   // "Extra"/"Bonus" layers carry no module number — left out on purpose
+    }
+    if (Object.keys(map).length) real[slug] = map;
+  }
+
+  const slugs = new Set([...Object.keys(real), ...Object.keys(JOURNEY_LAYERS)]);
+  for (const slug of slugs) {
+    const r = real[slug], j = JOURNEY_LAYERS[slug];
+    if (!r) { flag(`JOURNEY_LAYERS has '${slug}' but no tabs/${slug}.html layer-unit spans were found`); continue; }
+    if (!j) { flag(`tabs/${slug}.html has layer-unit spans but JOURNEY_LAYERS['${slug}'] is missing`); continue; }
+    const mods = new Set([...Object.keys(r), ...Object.keys(j)].map(Number));
+    for (const mod of mods) {
+      if (r[mod] !== j[mod]) {
+        flag(`${slug}: Module ${mod} is Layer ${r[mod] ?? '—'} on the page but JOURNEY_LAYERS says Layer ${j[mod] ?? '—'}`);
+      }
+    }
+  }
+  if (Object.keys(real).length !== JOURNEY_LAYERS_SONG_COUNT) {
+    flag(`${Object.keys(real).length} Journey pages have layer-unit spans, expected ${JOURNEY_LAYERS_SONG_COUNT} — update JOURNEY_LAYERS_SONG_COUNT in checks.mjs if a song was genuinely added or removed.`);
+  }
+  if (bad === 0) ok(`JOURNEY_LAYERS matches all ${JOURNEY_LAYERS_SONG_COUNT} Journey pages' layer-unit spans`);
+}
+
+/* ════════════════════════════════════════════════════════════════════
+   1ac. visibleSteps/visibleSections ACTUALLY USED — the render-time-hiding
+   helpers (Today-first work order, Phase 3) are only as good as every place
+   that used to iterate `.sections`/`.steps` raw switching over to them. This
+   can't prove NO raw iteration slipped back in (that needs a real parser),
+   but it proves the positive: each function below still calls
+   visibleSteps(/visibleSections( at least once. A regression that deletes
+   the call — the shape a careless revert takes — fails here even though a
+   narrower "no raw .sections./.steps." scan would also flag ordinary
+   presence checks (`if (stn.sections)`) as false positives.
+   HONEST LIMIT: doesn't catch a raw iteration added ALONGSIDE a leftover,
+   unrelated call to the helper elsewhere in the same function.
+   ════════════════════════════════════════════════════════════════════ */
+const VISIBLE_HELPER_CALLERS = [
+  { file: 'app.js', fn: 'resumeLessonCounts' },
+  { file: 'app.js', fn: 'buildLesson' },
+  { file: 'app.js', fn: 'buildSearchIndex' },
+  { file: 'teacher.js', fn: 'setShortResponses' },
+];
+function checkVisibleHelperUsage() {
+  head('1ac. Section/step counters call visibleSteps()/visibleSections()');
+  let bad = 0;
+  for (const { file, fn } of VISIBLE_HELPER_CALLERS) {
+    let src;
+    try { src = readFileSync(join(ROOT, file), 'utf8'); } catch { err(`${file} unreadable — 1ac cannot check ${fn}()`); problems++; bad++; continue; }
+    const decls = topLevelFunctionDecls(src).filter(d => d.name === fn);
+    if (!decls.length) { err(`${file}: no top-level function '${fn}' found — 1ac's whitelist is stale`); problems++; bad++; continue; }
+    const body = functionBodyAt(src, decls[0].index);
+    if (!/\bvisible(Steps|Sections)\s*\(/.test(body)) {
+      err(`${file}: ${fn}() no longer calls visibleSteps(/visibleSections( — a hidden step or section would count again`);
+      problems++; bad++;
+    }
+  }
+  if (bad === 0) ok(`${VISIBLE_HELPER_CALLERS.length} section/step counters all call visibleSteps()/visibleSections()`);
 }
 
 /* ════════════════════════════════════════════════════════════════════
@@ -3128,7 +3307,9 @@ async function liveCheck() {
   checkJourneyThemeDrift();
   checkJourneyTabCards();
   checkTabAsciiAlignment();
+  checkJourneyLayers();
   checkGateSafeNav();
+  checkVisibleHelperUsage();
   checkFigureDimensions();
   checkOrphanAssets();
   if (!SKIP_LINKS) await checkLinks();

@@ -2445,6 +2445,17 @@ body.games-open{overflow:hidden}
 .review-item-when{font-size:0.7812rem;color:var(--text3);margin-top:2px}
 .review-go-btn{flex-shrink:0;background:var(--purple-bg);color:var(--purple-text);border:1px solid var(--purple-border);border-radius:20px;padding:5px 13px;font:inherit;font-size:0.8125rem;font-weight:500;cursor:pointer;display:inline-flex;align-items:center;gap:5px;line-height:1.3}
 .review-go-btn:hover{background:var(--purple-text);color:var(--bg);border-color:var(--purple-text)}
+
+/* ── "Take It to a Song" link card (Today-first work order, Phase 3b) ──
+   Sits in the ladder where a Take It to a Song section's own steps used to
+   render — one button per core song with a Journey layer for this module.
+   Same purple "special card" family as .review-card/.resume-card above. */
+.jl-card{border:1.5px solid var(--purple-border);background:var(--purple-bg2);border-radius:var(--radius);padding:14px 16px;margin-bottom:14px;box-shadow:var(--shadow-card)}
+.jl-title{font-size:1rem;font-weight:700;color:var(--purple-text);margin-bottom:3px}
+.jl-sub{font-size:0.8437rem;color:var(--text2);margin:0 0 10px;line-height:1.5}
+.jl-songs{display:flex;flex-wrap:wrap;gap:8px}
+.jl-song-btn{background:var(--purple-bg);color:var(--purple-text);border:1px solid var(--purple-border);border-radius:20px;padding:8px 14px;font:inherit;font-size:0.875rem;font-weight:600;cursor:pointer;min-height:40px}
+.jl-song-btn:hover{background:var(--purple-text);color:var(--bg);border-color:var(--purple-text)}
 .skill-row.review-flash{animation:reviewFlash 1.8s ease}
 @keyframes reviewFlash{0%{background:var(--purple-bg)}100%{background:transparent}}
 /* Listening Coach check-off gate: pulse the Coach button the gate sent you to.

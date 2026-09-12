@@ -491,8 +491,64 @@ link still resolves, onto the merged page. Mood Chart lost its rail button;
 `renderSongsHub()` opens it from a row at the top of the Songs page instead,
 same `window.open(...,'_blank','noopener')` as a Journey link.
 
-Phase 3 (render-time hiding of module sections that duplicate a class
-activity) is still ahead — see the work order.
+**Phase 3 (render-time hiding), Module 2 piloted 2026-09-12 — the rest of
+the course NOT yet touched, by design (see "Order of work" in the work
+order: Module 2 first, reviewed, before propagating).** Four section
+`kind`s beyond the pre-existing `tuning-warmup` (ratchet 1r):
+`take-to-song` (renders a Journey link card, `journeyLinkCardHtml()`, in
+place of its steps), `routine`/`ear-spark`/`reflection` (the section is
+skipped entirely — "My Practice Routine", "Ear Spark — optional ear bonus",
+"Checkpoint"/"Wrap-Up"). **Kind-ONLY matching, deliberately NOT kind-or-title
+like `isTuningWarmupSection`** — `isEarSparkSection`/`isRoutineSection`/
+`isReflectionSection`/`isTakeToSongSection` in app.js check `sec.kind`
+alone: these four titles repeat across nearly every module, so a title
+fallback would hide every module's copy the moment the code shipped, not
+just Module 2's. A step-level `hidden: true` flag (song previews now taught
+by a class activity) works the same way, no title involved.
+
+**`visibleSteps(sec)` / `visibleSections(station, moduleNum)`** (app.js) are
+the one gateway everything reads through — `buildLesson()`, `resumeLessonCounts()`,
+`buildSearchIndex()`, teacher.js's `setShortResponses()` (checks.mjs **1ac**
+requires the call). `visibleSteps` returns `{st, idx}` pairs: `idx` is the
+step's real position in `sec.steps` — what every storage key (doneKey,
+responses, bpm, drills) is built from, so a hidden step earlier in the array
+can never shift a later one's saved progress — while the pair's position in
+the *returned array* is the visible step number and the only thing "which
+step is current" compares against. `visibleSections` reindexes `gi` fresh
+over the survivors, same safe-because-it's-a-first-rollout reasoning as
+`isTuningWarmupSection`'s existing filter (see CLAUDE.md's top-of-file
+progress-key warning) — a section with zero visible steps (its one purpose
+now taught in class) is dropped too, and a `take-to-song` section with no
+Journey layer for that module (module 6+) is dropped rather than rendering
+an empty card.
+
+**The Journey link card (3b):** `JOURNEY_LAYERS` in app.js (`{slug: {moduleNum:
+layerNum}}`) is authored from the six pages' real `.layer-unit` spans —
+today uniformly Module 1→Layer 1 … 5→5, anything past 5 an unnumbered
+"Extra". checks.mjs **1ab** rebuilds the map from those spans and fails on
+drift. The button opens `tabs/<slug>.html#layer-<n>`; **journey.js needed no
+changes** — `openFromHash()` already opens `#layer-N` on load and on
+`hashchange`.
+
+**Ratchets added:** 1ab (JOURNEY_LAYERS parity), **1ac** (the four callers
+above must still call `visibleSteps(`/`visibleSections(` — a positive
+assertion, not an exhaustive raw-iteration scan, so it can't catch a raw
+`.steps.forEach` added *alongside* a leftover unrelated call), **1ad** (kind
+→ title, Module-2-tagged sections only — **one direction only** until every
+module is tagged; the reverse, matching 1r's full two-way check, would flag
+every untagged module's "Checkpoint" as an error mid-rollout — tighten it
+once Phase 3's rollout finishes), **1ae** (every `hidden: true` step needs a
+`// ... ca-<n>` comment on the line above it).
+
+**Known, deliberate, temporary side effect:** `isEarSparkSection()` used to
+match by title alone (safe — it only chose an icon). Making it kind-only for
+Phase 3 means every module's Ear Spark section keeps rendering fully, just
+without its bolt icon, until that module is tagged too.
+
+Phase 3's own remaining rollout (work order step 2/3 — tagging Modules 1,
+3–13, and the harder judgment call of which Modules 3–8 song-preview steps
+duplicate a shipped `ca-<n>`) is still ahead; the separately-deferred
+Phase 4 in the work order is unrelated (content backfill, not this rollout).
 
 ## Videos
 

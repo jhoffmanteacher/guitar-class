@@ -919,6 +919,12 @@
     'journey.gatedBody':     { en: 'Head back to the site to finish today\'s work — this page will be here when you\'re done.',
                                es: 'Vuelve al sitio para terminar el trabajo de hoy — esta página seguirá aquí cuando termines.' },
     'journey.gatedBtn':      { en: 'Go to Today', es: 'Ir a Hoy' },
+    // "Take It to a Song" link card (Today-first work order, Phase 3b) — the
+    // module ladder's own Take It to a Song steps are replaced by this card,
+    // one button per core song that has a Journey layer for that module.
+    'journey.takeItTitle':   { en: 'Take it to a song', es: 'Llévalo a una canción' },
+    'journey.takeItSub':     { en: 'Same skill, six songs — pick one.',
+                               es: 'Misma destreza, seis canciones — elige una.' },
 
 
     // ── 🎧 Listening Coach + 🎮 Games arcade (coach.js — every

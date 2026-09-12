@@ -83,6 +83,8 @@ SETS.push(
             title_es: 'Escucha y encuentra notas de oído',
             steps: [
               {
+                // ca-10 (Seven Nation Army — The Riff) now teaches finding this by ear.
+                hidden: true,
                 label: 'Ear: find the "Seven Nation Army" notes', label_es: 'Oído: notas de "Seven Nation Army"',
                 text: 'Listen to the "Seven Nation Army" riff — press ▶ to hear it, then hum along and see if you can identify which notes of the riff live on the A string, and roughly where.',
                 text_es: 'Escucha el riff de "Seven Nation Army" — presiona ▶ para escucharlo, luego tararea y trata de identificar qué notas del riff viven en la cuerda La, y más o menos dónde.',
@@ -136,6 +138,8 @@ SETS.push(
                   placeholder_es: '¿Qué notaste sobre alguna de las notas? ¿Alguna se sintió o sonó parecida a otra?' }
               },
               {
+                // ca-10 (Seven Nation Army — The Riff) now teaches this preview.
+                hidden: true,
                 label: 'Preview the "Seven Nation Army" riff', label_es: 'Adelanto del riff de "Seven Nation Army"',
                 text: '<ol><li>Click the note names below the TAB to hear how this riff should sound — it lives entirely on the A string, and every note in it is one you just named.</li><li>Then find the first few on your own guitar, slowly.</li></ol>You\'ve got it when: you can match the first three notes to what you heard. You\'ll play the whole riff further down this set. <a href="tabs/seven-nation-army.html" target="_blank">&#x1F9F5; Song Journey: this is Layer 2 of 5</a>.',
                 text_es: '<ol><li>Haz clic en los nombres de las notas debajo del TAB para escuchar cómo debe sonar este riff — vive completamente en la cuerda La, y cada nota que lo forma es una que acabas de nombrar.</li><li>Luego encuentra las primeras en tu propia guitarra, despacio.</li></ol>Lo tienes cuando: puedes hacer coincidir las primeras tres notas con lo que escuchaste. Vas a tocar el riff completo más adelante en esta unidad. <a href="tabs/seven-nation-army.html" target="_blank">&#x1F9F5; Recorrido de la canción: esto es la Capa 2 de 5</a>.',
@@ -166,6 +170,7 @@ SETS.push(
             ]
           },
           {
+            kind: 'reflection',
             title: 'Checkpoint',
             title_es: 'Punto de control',
             steps: [
@@ -295,6 +300,8 @@ SETS.push(
                 skills: [2, 4]
               },
               {
+                // ca-10 (Seven Nation Army — The Riff) now teaches this by ear.
+                hidden: true,
                 label: 'Ear: find the "Seven Nation Army" riff', label_es: 'Oído: encuentra el riff de "Seven Nation Army"',
                 text: 'Name That Riff (try it!): you saw this riff earlier in this set — now find the "Seven Nation Army" riff (a riff = a short musical phrase that repeats) on the A string from memory and ear alone, chart closed. No score — just try it.',
                 text_es: 'Adivina el riff (¡pruébalo!): viste este riff antes en esta unidad — ahora encuentra el riff de "Seven Nation Army" (un riff = una frase musical corta que se repite) en la cuerda La solo de memoria y de oído, con la tabla cerrada. Sin puntaje — solo pruébalo.',
@@ -304,6 +311,7 @@ SETS.push(
             ]
           },
           {
+            kind: 'take-to-song',
             title: 'Take It to a Song',
             title_es: 'Llévalo a una canción',
             steps: [
@@ -368,6 +376,7 @@ SETS.push(
             ]
           },
           {
+            kind: 'routine',
             title: 'My Practice Routine — weekly check-in (never graded)',
             title_es: 'Mi rutina de práctica — check-in semanal (nunca se califica)',
             steps: [
@@ -383,6 +392,7 @@ SETS.push(
             ]
           },
           {
+            kind: 'reflection',
             title: 'Wrap-Up',
             title_es: 'Cierre',
             steps: [
@@ -396,6 +406,7 @@ SETS.push(
             ]
           },
           {
+            kind: 'ear-spark',
             title: 'Ear Spark — optional ear bonus',
             title_es: 'Chispa auditiva — bono opcional de oído',
             steps: [
@@ -621,6 +632,7 @@ SETS.push(
             ]
           },
           {
+            kind: 'reflection',
             title: 'Checkpoint',
             title_es: 'Punto de control',
             steps: [
@@ -817,6 +829,7 @@ SETS.push(
             ]
           },
           {
+            kind: 'take-to-song',
             title: 'Take It to a Song',
             title_es: 'Llévalo a una canción',
             steps: [
@@ -980,6 +993,7 @@ SETS.push(
             ]
           },
           {
+            kind: 'reflection',
             title: 'Wrap-Up',
             title_es: 'Cierre',
             steps: [
