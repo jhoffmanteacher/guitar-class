@@ -4,3 +4,8 @@
 
 # Screenshot output from local visual checks — never committed
 screens/
+
+# Scratch working folder for building the Song Journey paper packets
+# (source .js/build script/intermediate img+pdf) — the finished packets
+# that ship from it live in "song journeys for copying/", which IS tracked.
+song-journey-build/
