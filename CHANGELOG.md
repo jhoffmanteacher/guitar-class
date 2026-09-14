@@ -5,6 +5,16 @@ Notable changes to the Guitar Class site. Newest first.
 For the full session-by-session history (and the reasoning behind each change),
 see `WORKFLOW.md` and the git commit log.
 
+## 2026-09-14 — Song Journey: fixed a mislabeled rung
+
+### Fixed
+
+- **"the cure," "Sweet Child O' Mine," "Let It Be," and "Luna" Song Journeys**
+  called their hammer-on/slide rung "Hammer-ons and pull-offs" — a copy-paste
+  leftover from "Seven Nation Army," the one song that actually teaches a
+  pull-off. Renamed to "Hammer-ons and slides" (and the Spanish twin) to match
+  what's actually taught. Same fix applied to the matching paper packet.
+
 ## 2026-09-12 — Error sweep: restored missing content, fixed several wrong facts
 
 ### Fixed
