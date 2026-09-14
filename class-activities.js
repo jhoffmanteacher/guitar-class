@@ -968,7 +968,7 @@ window.CLASS_ACTIVITIES = [
   },
   {
     id:    'ca-10',
-    number: 10,
+    number: 11,
     journey: 'seven-nation-army',   // the last step sends them to this Song Journey page — see JOURNEY below
     title:    'Seven Nation Army — The Riff',
     title_es: 'Seven Nation Army — El riff',
@@ -1118,7 +1118,7 @@ window.CLASS_ACTIVITIES = [
   },
   {
     id:    'ca-12',
-    number: 11,
+    number: 12,
     title:    'Sub Day Circuit',
     title_es: 'Circuito para el día con suplente',
     intro:    'Your teacher is out today, so this one runs itself: seven stops, in order. Everything on it you have already met — today you do it on your own.',
@@ -1230,7 +1230,7 @@ window.CLASS_ACTIVITIES = [
   },
   {
     id:    'ca-13',
-    number: 12,
+    number: 13,
     journey: 'the-cure',   // the last step sends them to this Song Journey page — see JOURNEY below
     title:    '"the cure" — The Verse Root Line',
     title_es: '"the cure" — La línea de raíces de la estrofa',
@@ -1338,6 +1338,136 @@ window.CLASS_ACTIVITIES = [
         label_es: 'Sigue adelante',
         text: 'Three ways to push it, in any order:<ul><li>Play the line against the song\'s backing track on its Song Journey page — this is Layer 2 of 5, and the track\'s verse is exactly these chords</li><li>Climb the tempo: +10 BPM every time you get two clean laps</li><li>Play the same roots on the A string instead: A open, C at fret 3, with F staying on the low E at fret 1. Same names — a string cross instead of a jump</li></ul>You\'ve got it when: you can play the line with the track for a full verse without dropping out.',
         text_es: 'Tres formas de exigirte más, en el orden que quieras:<ul><li>Toca la línea contra la pista de acompañamiento de la canción en su página de Recorrido de la canción — esta es la Capa 2 de 5, y la estrofa de la pista es exactamente estas raíces</li><li>Sube el tempo: +10 BPM cada vez que logres dos vueltas limpias</li><li>Toca las mismas raíces en la cuerda La: A al aire, C en el traste 3, con el F quedándose en la cuerda Mi grave, traste 1. Los mismos nombres — un cruce de cuerda en vez de un salto</li></ul>Lo tienes cuando: puedes tocar la línea con la pista durante una estrofa completa sin salirte.',
+      },
+    ],
+  },
+  /* The A-string half of Happy Birthday, pulled out of ca-1 on 2026-09-14 so
+     it can be released on the day the class actually meets the A string.
+     Phrases C and D are the same melody ca-1 teaches up at frets 9-12; here
+     they drop onto the A string and stay inside the first seven frets, which
+     is the point — a string cross instead of a trip up the neck. Both
+     figures (ca-hb-a.svg, ca-hb-fingers-a.svg) came over with the steps. */
+  {
+    id:    'ca-16',
+    number: 10,
+    title:    'Happy Birthday — The A-String Way',
+    title_es: 'Happy Birthday — La versión con la cuerda La',
+    intro:    'You already play Happy Birthday start to finish on the low E string — the version that climbs to the double dot at fret 12 and walks back home. There is a second way to play the back half that never leaves the first seven frets. It takes one more string: the A.',
+    intro_es: 'Ya tocas Happy Birthday de principio a fin en la cuerda Mi grave — la versión que sube hasta el punto doble del traste 12 y regresa caminando. Hay una segunda forma de tocar la segunda mitad que nunca se sale de los primeros siete trastes. Solo pide una cuerda más: la cuerda La.',
+    steps: [
+      {
+        figure: 'img/ca-hb-a.svg',
+        figureAlt: 'Fretboard diagram comparing the low E and A strings, showing the same landing frets — 2, 4, 5, and 7 — mirrored on the A string.',
+        figureAlt_es: 'Diagrama del diapasón comparando las cuerdas Mi grave y La, mostrando los mismos trastes de referencia — 2, 4, 5 y 7 — reflejados en la cuerda La.',
+        text: 'The same song without the trip up the neck. It takes a second string. Meet the A string — one string down from the low E, the second-thickest. Same map: frets 2, 4, 5 and 7, and the dots at 5 and 7 are still your landing marks.<ul><li>Pluck the open low E, then the open A, back and forth — no fretting hand yet</li><li>The pick moves one string; ONLY one string rings each time</li><li>Both sound? Slow the pick down and look at where it lands</li></ul>You\'ve got it when: low E, A, low E, A — three clean reps in a row, one string per pluck.',
+        text_es: 'La misma canción sin el viaje mástil arriba. Eso pide una segunda cuerda. Esta es la cuerda La — la que está justo debajo de la cuerda Mi grave, la segunda más gruesa. El mismo mapa: trastes 2, 4, 5 y 7, y los puntos en el 5 y el 7 siguen siendo tus marcas de referencia.<ul><li>Pulsa la cuerda Mi grave al aire, luego la cuerda La al aire, ida y vuelta — todavía sin la mano de trastear</li><li>La púa se mueve una sola cuerda; SOLO una cuerda suena cada vez</li><li>¿Suenan las dos? Mueve la púa más despacio y mira dónde cae</li></ul>Lo tienes cuando: cuerda Mi grave, cuerda La, cuerda Mi grave, cuerda La — tres repeticiones limpias seguidas, una cuerda por pulsación.',
+        tab: {
+          caption: 'String crossing · open strings only',
+          caption_es: 'Cruce de cuerdas · solo cuerdas al aire',
+          notes: [
+            { string: 'E', fret: 0, note: 'E', midi: 40 },
+            { string: 'A', fret: 0, note: 'A', midi: 45 },
+            { string: 'E', fret: 0, note: 'E', midi: 40 },
+            { string: 'A', fret: 0, note: 'A', midi: 45 }
+          ]
+        },
+      },
+      {
+        figure: 'img/ca-hb-fingers-a.svg',
+        figureAlt: 'Diagram of the fretting hand on the A string for phrases C and D, showing finger 4 at fret 7, finger 3 at fret 4, and the string crossing back to the low E string.',
+        figureAlt_es: 'Diagrama de la mano de trastear en la cuerda La para las frases C y D, mostrando el dedo 4 en el traste 7, el dedo 3 en el traste 4 y el cruce de regreso a la cuerda Mi grave.',
+        text: 'Phrases C and D again, this time on the A string — every note stays inside the first seven frets.<ul><li>Phrase C: two open notes on the low E → finger 4 on fret 7 of the A, finger 3 on fret 4, then the open A → back to the low E for 4 and 2</li><li>Finger 3 crosses strings without changing frets: fret 4 on the A, then fret 4 on the low E</li><li>Phrase D lives entirely on the A string, back in the home spot: 4, 4, 3, open, 1, open</li></ul>You\'ve got it when: phrase C into phrase D, three clean runs, no hunting for the string. Buzz twice? Drop the BPM by 10 and try again.',
+        text_es: 'Las frases C y D otra vez, ahora en la cuerda La — todas las notas se quedan dentro de los primeros siete trastes.<ul><li>Frase C: dos notas al aire en la cuerda Mi grave → dedo 4 en el traste 7 de la cuerda La, dedo 3 en el traste 4, y luego la cuerda La al aire → de vuelta a la Mi grave para el 4 y el 2</li><li>El dedo 3 cruza a la otra cuerda sin cambiar de traste: traste 4 en la cuerda La, y luego traste 4 en la cuerda Mi grave</li><li>La frase D vive completa en la cuerda La, de vuelta en la posición base: 4, 4, 3, al aire, 1, al aire</li></ul>Lo tienes cuando: de la frase C a la frase D, tres pasadas limpias, sin andar buscando la cuerda. ¿Zumbó dos veces? Baja el BPM 10 puntos y vuelve a intentarlo.',
+        tab: {
+          caption: 'Second half · the A-string way',
+          caption_es: 'Segunda mitad · la versión con la cuerda La',
+          phrases: [
+            {
+              label: 'Phrase C — "Hap-py birth-day dear ______"',
+              label_es: 'Frase C — "Hap-py birth-day dear ______"',
+              notes: [
+                { string: 'E', fret: 0, note: 'E',  midi: 40 },
+                { string: 'E', fret: 0, note: 'E',  midi: 40 },
+                { string: 'A', fret: 7, note: 'E',  midi: 52 },
+                { string: 'A', fret: 4, note: 'C#', midi: 49 },
+                { string: 'A', fret: 0, note: 'A',  midi: 45 },
+                { string: 'E', fret: 4, note: 'G#', midi: 44 },
+                { string: 'E', fret: 2, note: 'F#', midi: 42 }
+              ]
+            },
+            {
+              label: 'Phrase D — "Hap-py birth-day to you"',
+              label_es: 'Frase D — "Hap-py birth-day to you"',
+              notes: [
+                { string: 'A', fret: 5, note: 'D',  midi: 50 },
+                { string: 'A', fret: 5, note: 'D',  midi: 50 },
+                { string: 'A', fret: 4, note: 'C#', midi: 49 },
+                { string: 'A', fret: 0, note: 'A',  midi: 45 },
+                { string: 'A', fret: 2, note: 'B',  midi: 47 },
+                { string: 'A', fret: 0, note: 'A',  midi: 45 }
+              ]
+            }
+          ]
+        },
+      },
+      {
+        text: 'The whole song the A-string way — same four phrases, two strings, no stopping in between. Phrases A and B have not moved; they are the low-E lines you already play.<ul><li>Every clean pass: raise the BPM by 10</li><li>Fast already? Play it for the person next to you and have them sing along — someone in this room has a birthday coming</li></ul>You\'ve got it when: you\'ve played the A-string way start to finish and raised the tempo at least three times without breaking down — then keep climbing.',
+        text_es: 'La canción completa en la versión con la cuerda La — las mismas cuatro frases, dos cuerdas, sin detenerte entre medio. Las frases A y B no se movieron; son las líneas de la cuerda Mi grave que ya tocas.<ul><li>Cada pasada limpia: sube el BPM 10 puntos</li><li>¿Ya vas rápido? Tócala para la persona de al lado y que cante contigo — alguien en este salón cumple años pronto</li></ul>Lo tienes cuando: tocaste la versión con la cuerda La de principio a fin y subiste el tempo al menos tres veces sin perder el ritmo — y de ahí, sigue subiendo.',
+        tab: {
+          caption: 'Whole song · phrases A–D · low E and A strings',
+          caption_es: 'Canción completa · frases A–D · cuerdas Mi grave y La',
+          phrases: [
+            {
+              label: 'Phrase A — "Hap-py birth-day to you"',
+              label_es: 'Frase A — "Hap-py birth-day to you"',
+              notes: [
+                { string: 'E', fret: 0, note: 'E',  midi: 40 },
+                { string: 'E', fret: 0, note: 'E',  midi: 40 },
+                { string: 'E', fret: 2, note: 'F#', midi: 42 },
+                { string: 'E', fret: 0, note: 'E',  midi: 40 },
+                { string: 'E', fret: 5, note: 'A',  midi: 45 },
+                { string: 'E', fret: 4, note: 'G#', midi: 44 }
+              ]
+            },
+            {
+              label: 'Phrase B — "Hap-py birth-day to you" (the ending climbs higher)',
+              label_es: 'Frase B — "Hap-py birth-day to you" (el final sube más alto)',
+              notes: [
+                { string: 'E', fret: 0, note: 'E',  midi: 40 },
+                { string: 'E', fret: 0, note: 'E',  midi: 40 },
+                { string: 'E', fret: 2, note: 'F#', midi: 42 },
+                { string: 'E', fret: 0, note: 'E',  midi: 40 },
+                { string: 'E', fret: 7, note: 'B',  midi: 47 },
+                { string: 'E', fret: 5, note: 'A',  midi: 45 }
+              ]
+            },
+            {
+              label: 'Phrase C — "Hap-py birth-day dear ______"',
+              label_es: 'Frase C — "Hap-py birth-day dear ______"',
+              notes: [
+                { string: 'E', fret: 0, note: 'E',  midi: 40 },
+                { string: 'E', fret: 0, note: 'E',  midi: 40 },
+                { string: 'A', fret: 7, note: 'E',  midi: 52 },
+                { string: 'A', fret: 4, note: 'C#', midi: 49 },
+                { string: 'A', fret: 0, note: 'A',  midi: 45 },
+                { string: 'E', fret: 4, note: 'G#', midi: 44 },
+                { string: 'E', fret: 2, note: 'F#', midi: 42 }
+              ]
+            },
+            {
+              label: 'Phrase D — "Hap-py birth-day to you"',
+              label_es: 'Frase D — "Hap-py birth-day to you"',
+              notes: [
+                { string: 'A', fret: 5, note: 'D',  midi: 50 },
+                { string: 'A', fret: 5, note: 'D',  midi: 50 },
+                { string: 'A', fret: 4, note: 'C#', midi: 49 },
+                { string: 'A', fret: 0, note: 'A',  midi: 45 },
+                { string: 'A', fret: 2, note: 'B',  midi: 47 },
+                { string: 'A', fret: 0, note: 'A',  midi: 45 }
+              ]
+            }
+          ]
+        },
       },
     ],
   },

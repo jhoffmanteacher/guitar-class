@@ -7,13 +7,18 @@ see `WORKFLOW.md` and the git commit log.
 
 ## 2026-09-14 — Happy Birthday: the A-string half moves to its own day
 
+### Added
+
+- **"Happy Birthday — The A-String Way"**, a new in-class activity: meet the A
+  string, play phrases C and D on it without the trip up the neck, then the
+  whole song across both strings. It's the same material that used to close
+  the whole-song activity, now with its own day.
+
 ### Changed
 
 - **"Playing Happy Birthday — The Whole Song"** is now just that: all four
-  phrases on the low E string. The "level up" half that crossed over to the A
-  string has been pulled out of it — it comes back as its own activity on the
-  day the class actually meets the A string. The activity still ends by
-  climbing the tempo.
+  phrases on the low E string. The half that crossed over to the A string has
+  moved to the new activity above. It still ends by climbing the tempo.
 
 ## 2026-09-14 — Song Journey: fixed a mislabeled rung
 
