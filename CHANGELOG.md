@@ -5,6 +5,16 @@ Notable changes to the Guitar Class site. Newest first.
 For the full session-by-session history (and the reasoning behind each change),
 see `WORKFLOW.md` and the git commit log.
 
+## 2026-09-14 — Happy Birthday: the A-string half moves to its own day
+
+### Changed
+
+- **"Playing Happy Birthday — The Whole Song"** is now just that: all four
+  phrases on the low E string. The "level up" half that crossed over to the A
+  string has been pulled out of it — it comes back as its own activity on the
+  day the class actually meets the A string. The activity still ends by
+  climbing the tempo.
+
 ## 2026-09-14 — Song Journey: fixed a mislabeled rung
 
 ### Fixed
