@@ -13,9 +13,10 @@ see `WORKFLOW.md` and the git commit log.
   and the string rows a little tighter, so a tab with several phrases takes up
   less of the screen and you scroll less to see the whole thing. The board
   itself gained back the space the padding was using, so each fret number has
-  more room around it. Nothing about how a long phrase wraps onto a second
-  staff has changed, and tabs still fit a phone screen without sliding
-  sideways.
+  more room around it. The circled finger numbers on Finger Gym tabs came down
+  a size with them, so the fret number stays the thing your eye lands on
+  first. Nothing about how a long phrase wraps onto a second staff has
+  changed, and tabs still fit a phone screen without sliding sideways.
 
 ## 2026-09-14 — Happy Birthday: the A-string half moves to its own day
 

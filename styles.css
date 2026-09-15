@@ -1165,8 +1165,15 @@ body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,"Helvetica N
    in a light-purple circle where the note name would sit — the teacher-deck
    convention (fret on the line, circled finger below, no note names). Ink
    text on the purple tint, same ring as the staff; the beat cursor and the
-   Coach column recolor it through the shared .beat-now / .coach-col rules. */
-.tab-note-btn.has-finger{justify-self:center;padding:0;margin-top:12px;width:100%;max-width:30px;aspect-ratio:1/1;height:auto;box-sizing:border-box;border-radius:50%;background:var(--purple-bg);border:1.5px solid var(--text);color:var(--text);font-size:1.0625rem}
+   Coach column recolor it through the shared .beat-now / .coach-col rules.
+   SIZED AGAINST .tab-fret, not on its own: the circle sits directly under a
+   fret number and reads as the heavier of the two the moment it outgrows it.
+   When the fret dropped to 1.25rem (2026-09-14) a 30px circle went from
+   1.25x the fret's type size to 1.5x, so the circle is now 26px with a
+   0.9375rem numeral — the same pairing the phone override below has always
+   used against a 1.25rem fret, which is why the two values now agree. Shrink
+   or grow .tab-fret again and this has to move with it. */
+.tab-note-btn.has-finger{justify-self:center;padding:0;margin-top:12px;width:100%;max-width:26px;aspect-ratio:1/1;height:auto;box-sizing:border-box;border-radius:50%;background:var(--purple-bg);border:1.5px solid var(--text);color:var(--text);font-size:0.9375rem}
 .tab-note-btn.has-finger:hover,.tab-note-btn.has-finger:focus-visible{background:var(--purple-border);border-color:var(--text)}
 .tab-note-btn.has-finger.beat-now,.tab-note-btn.has-finger.beat-now:hover{background:var(--blue-text);border-color:var(--blue-text);color:var(--bg)}
 .tab-finger{line-height:1}
@@ -1176,7 +1183,9 @@ body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,"Helvetica N
   .tab-cell .tab-fret{font-size:1.25rem;padding:0 4px}
   .tab-note-btn{font-size:0.9375rem;padding:2px 2px}
   /* 8 columns in a 390px card leave ~22px each — the circle shrinks with the
-     column (width:100%) rather than forcing the grid wider. */
+     column (width:100%) rather than forcing the grid wider. max-width and
+     font-size match the desktop rule today (see the note there); they stay
+     spelled out so a future desktop change can't drag the phone with it. */
   .tab-note-btn.has-finger{max-width:26px;font-size:0.9375rem;padding:0;margin-top:10px}
   .tab-spkr{font-size:0.75rem}
 }
