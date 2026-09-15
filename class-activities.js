@@ -110,7 +110,7 @@
 
    SCHEMA
    {
-     id:      'ca-16',           // permanent — next unused 'ca-<n>' counter
+     id:      'ca-17',           // permanent — next unused 'ca-<n>' counter
      number:  3,                 // teaching-order position, resequence freely
                                   // (see above) — the "#3" a student sees.
                                   // Renders as "#N - Title"; don't bake the
