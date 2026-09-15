@@ -5,6 +5,22 @@ Notable changes to the Guitar Class site. Newest first.
 For the full session-by-session history (and the reasoning behind each change),
 see `WORKFLOW.md` and the git commit log.
 
+## 2026-09-14 — Power chords use both root strings
+
+### Changed
+
+- **"the cure" as power chords** now roots C5 and D5 on the A string instead of
+  reaching up to frets 8 and 10 on the low E. Same chords, same notes — the
+  whole song now sits inside the first five frets. On the Song Journey page and
+  in the Module 3 challenge.
+- **"All Along the Watchtower" power chords** now play A5 on the open A string,
+  with G5 and F5 on the low E, so the loop crosses both root strings every time
+  around. It's the same A you were already playing at the 5th fret, in its other
+  home. On the Song Journey page and in every Module 3 Watchtower drill,
+  including the Set 1 check-off loop.
+- **"Seven Nation Army" stays on the A string** on purpose — moving its E and G
+  down to the low E string would drop them an octave and break the riff.
+
 ## 2026-09-14 — TAB boards read better on a Chromebook
 
 ### Changed
