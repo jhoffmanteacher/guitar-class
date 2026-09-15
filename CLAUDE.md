@@ -483,6 +483,36 @@ in `localStorage` (`caClears`, restored by `restoreClassConfigFromCache` —
 renamed from `restoreActivityDatesFromCache`) with the same fail-to-cache
 (never fail open) rule as `activityDates`.
 
+**Archive / Delete (2026-09-15, Jonathan's ask):** two buttons per row in the
+console's Class activities table, in a new **Archive** column beside
+Visible/Hidden. `config/class.archivedActivities` and `.deletedActivities`
+(`{ id: true }`, same merge-patch shape and teacher-write/student-read rule as
+`hiddenActivities`) — no `firestore.rules` change; the rules edit that shipped
+with this was comments only, so nothing needs pasting into Firebase. Students
+merge the two maps into one `retiredActivityIds` set (they draw no distinction)
+and `caIsVisible()` fails on it **before** the dev-bypass line, unlike the date
+gate — a retired activity isn't "not live yet", it's out of the course, so
+there's nothing to preview. Everything downstream follows for free: off Today,
+out of `caBlockers()`, and a deep link reads as not-posted. The visibility rule
+is mirrored in all three places as ever — `caIsVisible` (app.js),
+`teacherActivityVisible` (teacher.js), `journeyIsVisible` (journey.js).
+
+The difference between the two is what **Restore** gives back: Archive keeps the
+release date, rename, `#number` and per-student clears, so the row returns
+unchanged; Delete wipes all four on the way out (behind a `confirm()`), so a
+restored one comes back **undated** — invisible until it's published again from
+scratch. The two flags are mutually exclusive by construction, each writer
+clearing the other. Neither touches students' `classActivities` completion
+records (the teacher has no write on `progress/{uid}`, and it's grade data), and
+neither removes the entry from `class-activities.js` — only a push does. Retired
+rows keep their teaching-order slot (`caNumberMap` is untouched), the same way
+an undated or hidden one already does, so archiving mid-course doesn't shuffle
+every later `#N`. Console-side they fold out of the table behind
+`Show archived (N)` / `Show deleted (N)`, the Manage view's own idiom. Cached in
+`localStorage` (`caRetired`) with the same fail-to-cache rule as
+`activityDates` / `activityClears` — a blocked read must not bring a retired
+activity back and let it start gating the site again.
+
 **Journey pages gate too.** The six `tabs/*.html` pages now also load
 `class-activities.js` (a plain data array, no dependency of its own) so
 `journey.js` can compute the same blockers after its own Firestore boot

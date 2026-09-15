@@ -20,8 +20,9 @@ rules_version = '2';
      progress/{uid}   one doc per student: skills, responses, completed,
                       games, streak, practiceLog, name, email
      config/class     one shared doc: gamesEnabled, gameOverrides,
-                      paused, archived, hiddenActivities, activityDates,
-                      activityTitles, activityNumbers
+                      paused, archived, periodOverrides, hiddenActivities,
+                      activityDates, activityTitles, activityNumbers,
+                      activityClears, archivedActivities, deletedActivities
                       (teacher writes, students read)
      liveQuiz/current the whole-class live quiz's state (teacher writes,
                       students read) + an answers/{uid} subcollection each
@@ -66,9 +67,10 @@ service cloud.firestore {
 
     /* Class-wide settings. Every signed-in student must read this doc —
        app.js loadClassConfig() needs gamesEnabled/gameOverrides for the
-       arcade, `paused` for the access hold, and `hiddenActivities` to skip
-       any In-Class Activity the teacher has temporarily pulled back — so it
-       cannot be teacher-only.
+       arcade, `paused` for the access hold, and `hiddenActivities` /
+       `archivedActivities` / `deletedActivities` to skip any In-Class
+       Activity the teacher has pulled back or retired — so it cannot be
+       teacher-only.
 
        What that exposes: the uid→bool maps for the whole class (plus an
        activity-id→bool map, which isn't sensitive — activity ids already

@@ -151,6 +151,13 @@ let activityDates = {}; // In-Class Activities release dates, teacher-set in the
 let activityTitles = {}; // In-Class Activity renames, teacher-set in the console (see loadClassConfig / caTitle) — id -> { en, base }
 let activityNumbers = {}; // In-Class Activity renumbering, teacher-set in the console (see loadClassConfig / caNumber) — id -> { n, base }
 let activityClears = {}; // Per-student activity-gate clears, teacher-set in the console (see loadClassConfig / caBlockers) — uid -> { activityId -> true }
+/* Activities the teacher has retired from the console — config/class's
+   archivedActivities (tucked away, restorable with its date/rename/number
+   intact) and deletedActivities (gone, and everything the console set for it
+   wiped). Students draw no distinction between the two, so the two maps are
+   MERGED into one id -> true set here; the console keeps them apart because
+   that is where "can I get it back the way it was?" is answered. */
+let retiredActivityIds = {};
 let saveTimer   = null;
 
 /* ── Lazy module loading ──
@@ -508,7 +515,7 @@ if(auth) auth.onAuthStateChanged(async user=>{
       if(accountPaused) showPausedScreen(user); else showApp(user);
     }
   } else {
-    currentUser = null; progress = {}; responses = {}; completed = {}; completedDeletes = new Set(); classActivities = {}; classActivitiesDeletes = new Set(); exitChecks = {}; games = {}; streak = { count:0, lastDay:null }; gamesAccessOn = true; studentPeriod = ''; periodOverride = ''; hiddenActivityIds = {}; activityDates = {}; activityTitles = {}; activityNumbers = {}; activityClears = {}; progressLoadFailed = false;
+    currentUser = null; progress = {}; responses = {}; completed = {}; completedDeletes = new Set(); classActivities = {}; classActivitiesDeletes = new Set(); exitChecks = {}; games = {}; streak = { count:0, lastDay:null }; gamesAccessOn = true; studentPeriod = ''; periodOverride = ''; hiddenActivityIds = {}; activityDates = {}; activityTitles = {}; activityNumbers = {}; activityClears = {}; retiredActivityIds = {}; progressLoadFailed = false;
     document.body.classList.remove('ca-gated');   // next sign-in recomputes it fresh — don't leave a stale gate showing over the sign-in wall
     if(typeof gamesResetForUser === 'function') gamesResetForUser();   // Note Runner's module caches must not leak into the next signed-in user
     if(typeof lqStopListening === 'function') lqStopListening();       // and the live-quiz listener must not keep firing under the next student
@@ -642,6 +649,7 @@ async function loadClassConfig(){
   activityTitles = {};
   activityNumbers = {};
   activityClears = {};
+  retiredActivityIds = {};
   try{
     await ensureDb();
     if(!db){ restoreClassConfigFromCache(); applyActivityGate(); return; }
@@ -689,6 +697,15 @@ async function loadClassConfig(){
     // back to the cache too rather than to {}.
     activityClears = d.activityClears || {};
     try{ localStorage.setItem('caClears', JSON.stringify(activityClears)); }catch(e){}
+    /* Archived + deleted activities (teacher.js Class activities view),
+       merged into one set — see retiredActivityIds. Cached like the dates
+       and the clears, and for the same "must not fail open" reason: a
+       blocked read that reset this to {} would bring a retired activity
+       back onto Today, and a retired activity a student can no longer see
+       the point of is exactly the kind of thing that should not start
+       blocking the site again on a flaky connection. */
+    retiredActivityIds = Object.assign({}, d.archivedActivities || {}, d.deletedActivities || {});
+    try{ localStorage.setItem('caRetired', JSON.stringify(retiredActivityIds)); }catch(e){}
   }catch(e){ restoreClassConfigFromCache(); /* leave games on, nothing hidden */ }
   applyActivityGate();
 }
@@ -706,6 +723,10 @@ function restoreClassConfigFromCache(){
     const raw = localStorage.getItem('caClears');
     if(raw) activityClears = JSON.parse(raw) || {};
   }catch(e){ /* ignore — activityClears stays {} */ }
+  try{
+    const raw = localStorage.getItem('caRetired');
+    if(raw) retiredActivityIds = JSON.parse(raw) || {};
+  }catch(e){ /* ignore — retiredActivityIds stays {} */ }
 }
 /* Show/hide the 🎮 Games button to match this student's access, and if games
    get turned off while the arcade is open, close it. */
@@ -8294,8 +8315,16 @@ function caNumber(a){
    future one doesn't leak to students who click ahead. The teacher-only hide
    toggle (hiddenActivityIds, see loadClassConfig()) is independent and can
    hide/reveal on top of this. Dev-bypass users skip the date gate — the
-   whole point of that mode is previewing UI that isn't live yet. */
+   whole point of that mode is previewing UI that isn't live yet.
+
+   Archive/Delete (retiredActivityIds) come FIRST and are absolute: unlike
+   the date gate they hold for dev bypass too, because a retired activity is
+   not "not live yet", it is out of the course — there is nothing left to
+   preview. Everything downstream inherits that for free: it drops off
+   Today (both groups), stops blocking the gate (caBlockers), and a deep
+   link to it reads as not-posted (caFocusActivity). */
 function caIsVisible(a){
+  if(retiredActivityIds[a.id] === true) return false;
   if(hiddenActivityIds[a.id] === true) return false;
   if(isDevBypassUser()) return true;
   const d = caDate(a);

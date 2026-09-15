@@ -191,6 +191,12 @@ async function showTeacherApp(user){
       if(period){ teacherSetStudentPeriod(period.dataset.uid, period.dataset.value); return; }
       const actHidden=e.target.closest('[data-set-activity-hidden]');
       if(actHidden){ teacherSetActivityHidden(actHidden.dataset.id, actHidden.dataset.state); return; }
+      const actArch=e.target.closest('[data-set-activity-archived]');
+      if(actArch){ teacherSetActivityArchived(actArch.dataset.id, actArch.dataset.state); return; }
+      const actDel=e.target.closest('[data-delete-activity]');
+      if(actDel){ teacherDeleteActivity(actDel.dataset.id); return; }
+      if(e.target.closest('[data-show-archived-activities]')){ teacherToggleShowArchivedActivities(); return; }
+      if(e.target.closest('[data-show-deleted-activities]')){ teacherToggleShowDeletedActivities(); return; }
       const actClear=e.target.closest('[data-set-activity-clear]');
       if(actClear){ teacherSetActivityClear(actClear.dataset.uid, actClear.dataset.id, actClear.dataset.state); return; }
       const clearAll=e.target.closest('[data-clear-all-blockers]');
@@ -517,6 +523,39 @@ let activityEditId=null;
 // change anyone's expectations.
 let activitySortKey='date';   // 'date' | 'number'
 let activitySortDir='desc';   // 'asc' | 'desc'
+/* ── Archive / Delete (Class activities view) ──────────────────────────
+   Two console-only ways to take an activity out of circulation, both stored
+   on config/class like every other knob in this view:
+
+     archivedActivities  id -> true   Tucked away. Students stop seeing it
+                                      (Today, both groups) and it stops
+                                      gating the site, but its release date,
+                                      rename, teaching-order number and
+                                      per-student clears are all kept, so
+                                      Restore puts it back exactly as it was.
+     deletedActivities   id -> true   Gone. Same student-side effect, plus
+                                      everything this console ever set for
+                                      it is wiped on the way out. Restore
+                                      brings back a BLANK activity: undated,
+                                      un-renamed, at its shipped number —
+                                      i.e. invisible until it's published
+                                      again from scratch.
+
+   What neither can touch, and the note in the table says so: the card
+   itself ships in class-activities.js, so only a git push really removes
+   it; and students' completion records live on their own progress docs,
+   which the teacher cannot write (firestore.rules) and which are grade
+   data worth keeping regardless — archive a semester's work and the Done
+   counts are still there when you restore it.
+
+   The two are mutually exclusive by construction — each writer clears the
+   other flag — so a row is live, archived or deleted, never two at once.
+
+   Both are folded OUT of the table by default; these toggles fold them back
+   in, the same idiom (and the same wording) as teacherShowArchived on the
+   Manage view. Purely local view state, like the sort above. */
+let teacherShowArchivedActivities=false;
+let teacherShowDeletedActivities=false;
 function applyTeacherViewChrome(v){
   document.querySelectorAll('.t-vt').forEach(b=>b.classList.toggle('on',b.dataset.view===v));
   const legend=document.getElementById('t-legend'); if(legend) legend.style.display = v==='skills' ? '' : 'none';
@@ -726,7 +765,18 @@ function renderTeacherActivities(opts){
     // so flipping the arrow shouldn't shuffle it in among them — and
     // tiebreaks/undated activities fall back to number in the same direction.
     const dirMul = activitySortDir==='asc' ? 1 : -1;
-    const sorted=[...activities].sort((a,b)=>{
+    /* Archived and deleted rows are folded out of the table by default and
+       folded back in by their own toggles — the Manage view's "Show
+       archived" idiom. Counted over EVERY activity, not the filtered list,
+       so the toggle can say how many are behind it. */
+    const archCount=activities.filter(x=>teacherActivityArchived(x.id,cfg)).length;
+    const delCount=activities.filter(x=>teacherActivityDeleted(x.id,cfg)).length;
+    const inTable=activities.filter(x=>{
+      if(teacherActivityDeleted(x.id,cfg)) return teacherShowDeletedActivities;
+      if(teacherActivityArchived(x.id,cfg)) return teacherShowArchivedActivities;
+      return true;
+    });
+    const sorted=[...inTable].sort((a,b)=>{
       if(activitySortKey==='number') return dirMul*(nums[a.id]-nums[b.id]);
       const da=dates[a.id]||'', db=dates[b.id]||'';
       if(da && !db) return -1;
@@ -739,6 +789,13 @@ function renderTeacherActivities(opts){
     // number box will accept — see caNumberMap() in app.js.
     const numberedCount=activities.filter(x=>x.kind!=='check').length;
     const rows=sorted.map(a=>{
+      // Retired rows keep their teaching-order slot — #N is numbered over
+      // every activity in the file (caNumberMap), exactly as it already is
+      // for an undated or hidden one, so archiving something in the middle
+      // of the course doesn't shuffle every later activity's prefix.
+      const isArchived=teacherActivityArchived(a.id,cfg);
+      const isDeleted=teacherActivityDeleted(a.id,cfg);
+      const isRetired=isArchived||isDeleted;
       const isCheck=a.kind==='check';
       // A check is "done" when it has been turned in — the same
       // classActivities flag, which ecSubmit sets alongside the score, so
@@ -766,7 +823,25 @@ function renderTeacherActivities(opts){
       const visBtns=
         `<button class="tg-seg-btn ${!isHidden?'on':''}" data-set-activity-hidden data-id="${escAttr(a.id)}" data-state="show">Visible</button>`+
         `<button class="tg-seg-btn ${isHidden?'on':''}" data-set-activity-hidden data-id="${escAttr(a.id)}" data-state="hide">Hidden</button>`;
-      const dateNote = !dateVal
+      /* Archive/Delete, or Restore once it's retired. One Restore serves both
+         states (teacherSetActivityArchived clears either flag); Delete stays
+         offered on an archived row, so "tuck it away now, decide later" is a
+         real path rather than a dead end. A deleted row has nothing left to
+         delete, so it gets Restore alone. */
+      const retireBtns=isDeleted
+        ? `<button class="tg-seg-btn" data-set-activity-archived data-id="${escAttr(a.id)}" data-state="restore" title="Put this activity back — it returns undated, so set a date to publish it again">Restore</button>`
+        : (isArchived
+          ? `<button class="tg-seg-btn" data-set-activity-archived data-id="${escAttr(a.id)}" data-state="restore" title="Put this activity back, with its date, name and #number as they were">Restore</button>`
+            +`<button class="tg-seg-btn t-act-danger" data-delete-activity data-id="${escAttr(a.id)}" title="Clear this activity's date, name, #number and gate clears too">Delete</button>`
+          : `<button class="tg-seg-btn" data-set-activity-archived data-id="${escAttr(a.id)}" data-state="archive" title="Take this off students' Today page but keep its date, name and #number">Archive</button>`
+            +`<button class="tg-seg-btn t-act-danger" data-delete-activity data-id="${escAttr(a.id)}" title="Take it off students' Today page AND clear its date, name, #number and gate clears">Delete</button>`);
+      /* One note, in priority order — archived/deleted beats every reason the
+         date alone would give, because it's the one that's actually deciding. */
+      const dateNote = isDeleted
+        ? ' <span style="opacity:.65;font-size:.85em">(deleted — hidden from students)</span>'
+        : isArchived
+        ? ' <span style="opacity:.65;font-size:.85em">(archived — hidden from students)</span>'
+        : !dateVal
         ? ' <span style="opacity:.65;font-size:.85em">(no date — hidden from students)</span>'
         : (isScheduled ? ' <span style="opacity:.65;font-size:.85em">(scheduled)</span>' : '');
       const dateCell=`<input type="date" class="t-date-input" data-set-activity-date data-id="${escAttr(a.id)}" value="${escAttr(dateVal)}" aria-label="Release date for ${escAttr(teacherActivityTitle(a,cfg))}">${dateNote}`;
@@ -818,17 +893,30 @@ function renderTeacherActivities(opts){
           +`<button class="tg-seg-btn t-act-link" data-copy-activity-link data-id="${escAttr(a.id)}" title="Copy the student link straight to this ${isCheck?'exit check':'activity'}" aria-label="Copy the student link to ${escAttr(shown)}">Copy link</button>`
           +`${renameNote}</td>`;
       }
-      return `<tr${isHidden?' style="opacity:.55"':''}><td>${dateCell}</td>${titleCell}<td>${doneCell}</td>
+      return `<tr${(isHidden||isRetired)?' style="opacity:.55"':''}><td>${dateCell}</td>${titleCell}<td>${doneCell}</td>
         <td><details><summary>Who hasn't ${isCheck?'turned it in':'finished'} (${notDone.length})</summary>${listHtml}</details></td>
-        <td><div class="tg-seg">${visBtns}</div></td></tr>`;
+        <td><div class="tg-seg">${visBtns}</div></td>
+        <td><div class="tg-seg">${retireBtns}</div></td></tr>`;
     }).join('');
     // Arrow shows only on whichever column is currently driving the sort.
     const sortArrow=key=> activitySortKey===key ? (activitySortDir==='asc'?' ▲':' ▼') : '';
-    box.innerHTML=`<div class="tg-note">An activity with no date set is invisible to students — that's its normal starting state, not an error; set one here to publish it. Hidden activities disappear for students regardless of date, same as if they hadn't been pushed yet. Use Hidden to pull back something already live; un-hide any time. The &#x270E; next to a title renames the activity for everyone. Copy link gives you a URL that opens the site straight to that one activity, card already open — paste it into Classroom when you want students on a specific exit check. Type over the #number to move an activity in the teaching order — everything else renumbers around it, for students too. (That only moves the &#8220;#N&#8221; prefix: a number inside a title, like Finger Gym 2, is part of the name and stays put.) Click Date or Activity below to sort by it; click again to flip the order.</div>`+
-      `<div class="t-grid-wrap t-act-wrap"><table><thead><tr>`
-      +`<th class="t-sort-th" data-sort-activities="date" title="Sort by date">Date${sortArrow('date')}</th>`
-      +`<th class="nc t-sort-th" data-sort-activities="number" title="Sort by activity number">Activity${sortArrow('number')}</th>`
-      +`<th>Done</th><th>Not yet</th><th>Visibility</th></tr></thead><tbody>${rows}</tbody></table></div>`;
+    // Only offered when there is something behind them — a "Show deleted (0)"
+    // button is a button that can only ever redraw the same table.
+    const retireToggles=(archCount||delCount)
+      ? `<div class="tg-seg" style="margin-bottom:12px">`
+        +(archCount?`<button class="tg-seg-btn ${teacherShowArchivedActivities?'on':''}" data-show-archived-activities>${teacherShowArchivedActivities?'Hide archived':'Show archived'} (${archCount})</button>`:'')
+        +(delCount?`<button class="tg-seg-btn ${teacherShowDeletedActivities?'on':''}" data-show-deleted-activities>${teacherShowDeletedActivities?'Hide deleted':'Show deleted'} (${delCount})</button>`:'')
+        +`</div>` : '';
+    // Every row filtered out — say which toggle brings them back rather than
+    // leaving an empty table that reads as "no activities".
+    const tableHtml=rows
+      ? `<div class="t-grid-wrap t-act-wrap"><table><thead><tr>`
+        +`<th class="t-sort-th" data-sort-activities="date" title="Sort by date">Date${sortArrow('date')}</th>`
+        +`<th class="nc t-sort-th" data-sort-activities="number" title="Sort by activity number">Activity${sortArrow('number')}</th>`
+        +`<th>Done</th><th>Not yet</th><th>Visibility</th><th>Archive</th></tr></thead><tbody>${rows}</tbody></table></div>`
+      : `<div class="t-loading">Every activity is archived or deleted — use the buttons above to bring them back into the table.</div>`;
+    box.innerHTML=`<div class="tg-note">An activity with no date set is invisible to students — that's its normal starting state, not an error; set one here to publish it. Hidden activities disappear for students regardless of date, same as if they hadn't been pushed yet. Use Hidden to pull back something already live; un-hide any time. <strong>Archive</strong> retires an activity for good: students stop seeing it on Today and it stops gating the site, but its date, name and #number are kept, so Restore puts it back the way it was. <strong>Delete</strong> does that AND clears its date, rename, #number and per-student gate clears, so a restored one starts blank — it comes back undated, ready to publish from scratch. Neither one removes the activity from the site's code (only an update does) or touches what students have already finished, so the Done counts survive both; archived and deleted rows leave this table until you show them again. The &#x270E; next to a title renames the activity for everyone. Copy link gives you a URL that opens the site straight to that one activity, card already open — paste it into Classroom when you want students on a specific exit check. Type over the #number to move an activity in the teaching order — everything else renumbers around it, for students too. (That only moves the &#8220;#N&#8221; prefix: a number inside a title, like Finger Gym 2, is part of the name and stays put. Archived and deleted activities keep their place in that order, the same way an unpublished one does.) Click Date or Activity below to sort by it; click again to flip the order.</div>`+
+      retireToggles+tableHtml;
     // Opening the editor is a full re-render, so focus has to be re-placed
     // afterwards or the pencil click would leave you looking at a box you
     // still have to click into. select() so typing replaces the old name.
@@ -1052,6 +1140,7 @@ function renderTeacherActivityDetail(id){
     : '<div class="t-loading">No student data yet — students need to sign in first.</div>';
   box.innerHTML=`${back}
     <div class="stu-section-head" style="margin-top:0">${num?`#${num} - `:''}${escHtml(teacherActivityTitle(a,teacherClassConfig))} <span style="opacity:.55;font-size:.72em">(${escHtml(a.id)})</span></div>
+    ${teacherRetiredBanner(a.id)}
     ${linkRow(a)}
     ${a.intro?`<div class="coach-tip" style="margin:0 2px 16px">${escHtml(a.intro)}</div>`:''}
     <div class="stu-section-head">Students</div>
@@ -1076,7 +1165,9 @@ function renderTeacherCheckDetail(a, back){
   const items=c.items||[];
   const dates=(teacherClassConfig&&teacherClassConfig.activityDates)||{};
   const dateVal=dates[a.id]||'';
-  const dateNote=dateVal?`Dated ${escHtml(dateVal)}`:'No date set — hidden from students';
+  const dateNote=teacherActivityRetired(a.id,teacherClassConfig)
+    ? (teacherActivityDeleted(a.id,teacherClassConfig)?'Deleted — hidden from students':'Archived — hidden from students')
+    : (dateVal?`Dated ${escHtml(dateVal)}`:'No date set — hidden from students');
   // Item headings: the fret run for nextNote, the fret itself for noteName.
   const heads=items.map((it,i)=>c.type==='nextNote'
     ? `Q${i+1}: ${escHtml((it.notes||[]).map(n=>n.fret).join(' '))} &rarr; ${escHtml(String(it.answer.fret))}`
@@ -1121,6 +1212,7 @@ function renderTeacherCheckDetail(a, back){
     : '<div class="t-loading">No student data yet — students need to sign in first.</div>';
   box.innerHTML=`${back}
     <div class="stu-section-head" style="margin-top:0">Exit check &middot; ${escHtml(teacherActivityTitle(a,teacherClassConfig))} <span style="opacity:.55;font-size:.72em">(${escHtml(a.id)})</span></div>
+    ${teacherRetiredBanner(a.id)}
     <div class="tg-note">${dateNote}. ${withRes.length} of ${allStudents.length} turned in. Checks take no #number — they never enter the teaching-order run.</div>
     ${linkRow(a)}
     ${a.intro?`<div class="coach-tip" style="margin:0 2px 16px">${escHtml(a.intro)}</div>`:''}
@@ -1174,6 +1266,99 @@ async function teacherSetActivityDate(id, value){
   if(teacherView==='activities') renderTeacherActivities();
 }
 
+/* ── Archive / Delete an activity ───────────────────────────────────────
+   Schema, the difference between the two, and what neither can reach: the
+   block by teacherShowArchivedActivities above.
+
+   Both mirror teacherSetActivityHidden's write shape — optimistic local
+   mutation, one merge patch, roll the mutation back and say so if the write
+   fails — just across several maps instead of one. */
+async function teacherSetActivityArchived(id, state){
+  const on = state==='archive';
+  const cfg = teacherClassConfig;
+  if(!cfg.archivedActivities) cfg.archivedActivities={};
+  if(!cfg.deletedActivities) cfg.deletedActivities={};
+  const hadA=Object.prototype.hasOwnProperty.call(cfg.archivedActivities,id), prevA=cfg.archivedActivities[id];
+  const hadD=Object.prototype.hasOwnProperty.call(cfg.deletedActivities,id),  prevD=cfg.deletedActivities[id];
+  if(on) cfg.archivedActivities[id]=true; else delete cfg.archivedActivities[id];
+  // Restoring reaches BOTH maps on purpose: one Restore button serves an
+  // archived row and a deleted one, so it has to clear whichever flag is set.
+  delete cfg.deletedActivities[id];
+  try{
+    await ensureDb();
+    const fv=firebase.firestore.FieldValue;
+    await db.collection('config').doc('class').set({
+      archivedActivities:{[id]: on ? true : fv.delete()},
+      deletedActivities:{[id]: fv.delete()}
+    },{merge:true});
+  }catch(e){
+    if(hadA) cfg.archivedActivities[id]=prevA; else delete cfg.archivedActivities[id];
+    if(hadD) cfg.deletedActivities[id]=prevD; else delete cfg.deletedActivities[id];
+    alert('Could not save that change — check your connection and Firestore rules.');
+  }
+  if(teacherView==='activities') renderTeacherActivities();
+}
+/* Delete = archive, plus wipe every console setting this activity has. The
+   wipe is the whole point of having a second button: it is what makes a
+   restored activity start over (undated, so invisible until it is published
+   again) rather than snap back onto Today the moment the flag comes off.
+
+   Confirmed first, because unlike Archive it throws away work — a release
+   date, a rename, a hand-typed teaching position, a set of per-student gate
+   clears. Deliberately NOT touching students' progress docs: the teacher has
+   no write there (firestore.rules), and a completion record is grade data. */
+async function teacherDeleteActivity(id){
+  const cfg = teacherClassConfig;
+  const a = (window.CLASS_ACTIVITIES||[]).find(x=>x.id===id);
+  const shown = a ? teacherActivityTitle(a,cfg) : id;
+  if(!window.confirm(
+    'Delete \u201c'+shown+'\u201d?\n\n'
+    +'Students stop seeing it, and its release date, rename, #number and per-student gate clears are all cleared.\n\n'
+    +'You can bring it back from \u201cShow deleted\u201d, but it comes back blank \u2014 undated, so you would publish it again from scratch.\n\n'
+    +'What stays either way: the activity itself (it ships in the site\u2019s code, so only a code update really removes it) and every student\u2019s record of having finished it.\n\n'
+    +'To tuck it away and keep its settings, cancel and use Archive instead.')) return;
+  const MAPS=['archivedActivities','deletedActivities','hiddenActivities','activityDates','activityTitles','activityNumbers'];
+  MAPS.forEach(m=>{ if(!cfg[m]) cfg[m]={}; });
+  if(!cfg.activityClears) cfg.activityClears={};
+  const clears=cfg.activityClears;
+  // Only the uids that actually hold a clear for THIS activity — activityClears
+  // is uid -> { activityId -> true }, so the patch has to name each uid's row.
+  const clearUids=Object.keys(clears).filter(uid=>clears[uid] && Object.prototype.hasOwnProperty.call(clears[uid],id));
+  const before={}, beforeClears={};
+  MAPS.forEach(m=>{ before[m]=Object.prototype.hasOwnProperty.call(cfg[m],id) ? cfg[m][id] : undefined; });
+  clearUids.forEach(uid=>{ beforeClears[uid]=clears[uid][id]; });
+  cfg.deletedActivities[id]=true;
+  MAPS.filter(m=>m!=='deletedActivities').forEach(m=>{ delete cfg[m][id]; });
+  clearUids.forEach(uid=>{ delete clears[uid][id]; });
+  try{
+    await ensureDb();
+    const fv=firebase.firestore.FieldValue;
+    const patch={deletedActivities:{[id]:true}};
+    MAPS.filter(m=>m!=='deletedActivities').forEach(m=>{ patch[m]={[id]:fv.delete()}; });
+    if(clearUids.length){
+      patch.activityClears={};
+      clearUids.forEach(uid=>{ patch.activityClears[uid]={[id]:fv.delete()}; });
+    }
+    await db.collection('config').doc('class').set(patch,{merge:true});
+  }catch(e){
+    MAPS.forEach(m=>{ if(before[m]===undefined) delete cfg[m][id]; else cfg[m][id]=before[m]; });
+    clearUids.forEach(uid=>{ clears[uid][id]=beforeClears[uid]; });
+    alert('Could not delete that activity — check your connection and Firestore rules.');
+  }
+  // A deleted row leaves the table, so an open rename box on it would be
+  // editing something that is no longer there.
+  if(activityEditId===id) activityEditId=null;
+  if(teacherView==='activities') renderTeacherActivities();
+}
+function teacherToggleShowArchivedActivities(){
+  teacherShowArchivedActivities=!teacherShowArchivedActivities;
+  renderTeacherActivities({cached:true});   // a filter flip over rows we already have
+}
+function teacherToggleShowDeletedActivities(){
+  teacherShowDeletedActivities=!teacherShowDeletedActivities;
+  renderTeacherActivities({cached:true});
+}
+
 /* ── Per-student activity-gate clears (Today-first work order, Phase 1) ──
    config/class.activityClears: uid -> { activityId -> true }. Lets a student
    past the gate (app.js caBlockers) without finishing a specific activity —
@@ -1189,9 +1374,25 @@ async function teacherSetActivityDate(id, value){
    student's own doc (allStudents) and the config object this file already
    has in hand. If the visibility rule ever changes, change it in both. */
 function teacherActivityVisible(a, cfg, today){
+  if(teacherActivityRetired(a.id, cfg)) return false;   // archived/deleted — see caIsVisible in app.js
   if(((cfg&&cfg.hiddenActivities)||{})[a.id]===true) return false;
   const d=((cfg&&cfg.activityDates)||{})[a.id];
   return d ? d<=today : false;
+}
+// The one place the two retire maps are read together — everything that only
+// cares "is this still in circulation?" goes through here.
+function teacherActivityArchived(id, cfg){ return ((cfg&&cfg.archivedActivities)||{})[id]===true; }
+function teacherActivityDeleted(id, cfg){ return ((cfg&&cfg.deletedActivities)||{})[id]===true; }
+function teacherActivityRetired(id, cfg){ return teacherActivityArchived(id,cfg) || teacherActivityDeleted(id,cfg); }
+/* Both detail pages are reachable from a shown archived/deleted row, and
+   everything else on them (a release date, a per-student Clear, "students
+   block on this") reads as if the activity were still in play. One banner
+   up top, so the page can't quietly contradict the table. */
+function teacherRetiredBanner(id){
+  const cfg=teacherClassConfig;
+  if(!teacherActivityRetired(id,cfg)) return '';
+  const del=teacherActivityDeleted(id,cfg);
+  return `<div class="tg-note"><strong>${del?'Deleted':'Archived'}.</strong> Students don't see this activity and it doesn't gate the site${del?' — and its date, rename, #number and gate clears have been cleared':''}. Restore it from the Class activities table${del?' (“Show deleted”)':' (“Show archived”)'}.</div>`;
 }
 function teacherBlockersFor(stu, cfg){
   const today=dayStr(new Date());

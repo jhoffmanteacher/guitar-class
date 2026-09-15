@@ -5,6 +5,16 @@ Notable changes to the Guitar Class site. Newest first.
 For the full session-by-session history (and the reasoning behind each change),
 see `WORKFLOW.md` and the git commit log.
 
+## 2026-09-15 — Old activities can be retired
+
+### Changed
+
+- **Your teacher can now retire an activity from Today.** Once an activity is
+  retired it leaves your Today page for good — out of "Do now", out of
+  "Earlier" — and it stops being something you have to finish before the rest
+  of the site opens up. Anything you already turned in still counts; retiring
+  an activity doesn't undo your work on it.
+
 ## 2026-09-14 — Power chords use both root strings
 
 ### Changed

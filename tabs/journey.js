@@ -438,6 +438,10 @@ function journeyDayStr(d){
   return d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0') + '-' + String(d.getDate()).padStart(2, '0');
 }
 function journeyIsVisible(a, cfg){
+  // Archived or deleted from the console — out of the course entirely, so it
+  // can never gate a Journey page. Mirrors retiredActivityIds in app.js.
+  if(((cfg && cfg.archivedActivities) || {})[a.id] === true) return false;
+  if(((cfg && cfg.deletedActivities) || {})[a.id] === true) return false;
   if(((cfg && cfg.hiddenActivities) || {})[a.id] === true) return false;
   var d = ((cfg && cfg.activityDates) || {})[a.id];
   return d ? d <= journeyDayStr(new Date()) : false;

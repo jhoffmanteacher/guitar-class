@@ -17,10 +17,17 @@
    future-scheduled one, and always has full access to the separate manual
    "hide" toggle (config/class.hiddenActivities, read by loadClassConfig() in
    app.js) for pulling something back temporarily after it's gone live — that
-   toggle and the date gate are independent, either one hides. Activities
-   never retire otherwise: this file is a permanent archive, newest-dated
-   first at render time (app.js sorts, this file doesn't need to be kept in
-   any order).
+   toggle and the date gate are independent, either one hides.
+
+   Retiring one for good is the console's Archive / Delete pair
+   (config/class.archivedActivities / .deletedActivities, same read path):
+   Archive keeps its date, rename and #number so Restore puts it back
+   unchanged, Delete clears all of that so a restored one comes back blank.
+   Both hide it from students and stop it gating the site; neither removes
+   the entry from THIS file — a card only really leaves the course by being
+   deleted here and pushed. Otherwise activities never retire: this file is
+   a permanent archive, newest-dated first at render time (app.js sorts,
+   this file doesn't need to be kept in any order).
 
    JOURNEY — `journey: '<slug>'` (optional; one of the six SONG_JOURNEYS ids
    in app.js: seven-nation-army, all-along-the-watchtower, sweet-child-o-mine,
