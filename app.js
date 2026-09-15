@@ -1108,7 +1108,7 @@ function renderTabSystem(chunk, off, cols){
   });
   for (let pi = chunk.length; pi < cols; pi++) noteBtns.push('<div></div>');
   return `
-      <div class="tab-grid" style="grid-template-columns:34px repeat(${cols},1fr)">
+      <div class="tab-grid" style="grid-template-columns:28px repeat(${cols},1fr)">
         <div class="tab-box" style="grid-column:2/${cols + 2};grid-row:1/7"></div>
         ${rows}
         ${noteBtns.join('')}

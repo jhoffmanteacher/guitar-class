@@ -149,7 +149,7 @@ h1{font-family:var(--font-display);font-size:1.875rem;font-weight:650;margin:4px
 .tab-head .tab-icon{font-size:0.9375rem;flex-shrink:0;display:inline-flex}
 .tab-head .tab-title{flex:1;min-width:0}
 .tab-head .tab-kind{font-size:0.75rem;font-weight:700;letter-spacing:0.1em;background:rgba(255,255,255,0.22);padding:2px 7px;border-radius:10px;text-transform:uppercase;flex-shrink:0}
-.tab-body{padding:10px 14px 12px}
+.tab-body{padding:10px 9px 12px}
 .tab-ascii{background:var(--bg);border:1px solid var(--border);border-radius:6px;padding:10px 12px;color:var(--text);font-family:ui-monospace,"SF Mono",Menlo,Consolas,monospace;font-size:0.8125rem;line-height:1.5;overflow-x:auto}
 /* Highlighted frets (the notes a layer adds). Blue is the app's accent for
    a picked-out note — .tab-cell.beat-now / .tab-note-btn in styles.css. */
