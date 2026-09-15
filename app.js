@@ -8389,7 +8389,10 @@ document.addEventListener('visibilitychange', () => {
   });
 });
 /* Today — three groups, in this order (Today-first work order, Phase 1):
-     1. Do now      — the first pending card, forced open.
+     1. Do now      — the first pending card. Collapsed like every other
+                       card (Jonathan, 2026-09-15): the whole point of the
+                       page is seeing the day's work at a glance, and a
+                       forced-open first card pushed the rest below the fold.
      2. Still to do — the rest of the pending cards, under a divider label
                        (skipped when there's only one pending card — nothing
                        left to divide it from).
@@ -8425,12 +8428,11 @@ function renderClassActivities(){
     // out of the main flow.
     const pending = list.filter(a => classActivities[a.id] !== true);
     const finished = list.filter(a => classActivities[a.id] === true);
-    // The Do-now card renders open by default — but only once: after the
-    // first render caOpenId is sticky (same "don't yank it shut on a
-    // re-render" rule as caFinishedOpen), so a student who collapses it, or
-    // opens a different card, keeps that choice through Mark complete /
-    // language switch.
-    if(caOpenId === null && pending.length) caOpenId = pending[0].id;
+    // Every card starts collapsed, Do-now included — nothing is opened here.
+    // caOpenId only ever becomes non-null because the student opened a card
+    // (caOnActivityToggle), a deep link focused one (caFocusActivity), or a
+    // toggle wants to keep its card open through the re-render; it stays
+    // sticky after that, so a re-render never yanks their choice shut.
     let pendingHtml;
     if(!pending.length){
       pendingHtml = finished.length ? `<div class="coach-tip" data-i18n="ca.allDone">${escHtml(t('ca.allDone'))}</div>` : '';

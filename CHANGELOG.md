@@ -5,6 +5,14 @@ Notable changes to the Guitar Class site. Newest first.
 For the full session-by-session history (and the reasoning behind each change),
 see `WORKFLOW.md` and the git commit log.
 
+## 2026-09-15 — Today opens with every activity in view
+
+### Changed
+
+- **Activities on Today now start closed, including the first one.** The page
+  used to open the "Do now" card for you, which pushed everything else down.
+  Now you see the whole day's list at a glance and open the one you want.
+
 ## 2026-09-15 — Old activities can be retired
 
 ### Changed
