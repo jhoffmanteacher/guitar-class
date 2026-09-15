@@ -9,3 +9,6 @@ screens/
 # (source .js/build script/intermediate img+pdf) — the finished packets
 # that ship from it live in "song journeys for copying/", which IS tracked.
 song-journey-build/
+
+# macOS Finder metadata — per-machine junk, never useful in the repo
+.DS_Store
