@@ -464,7 +464,7 @@ SETS.push(
 
   {
     id: 'm2w2',
-    songThread: [{ name: '"All Along the Watchtower"', journey: 'tabs/all-along-the-watchtower.html', layer: 2, note: 'the bass-note line — your assessment piece' }, { name: '"Seven Nation Army"', journey: 'tabs/seven-nation-army.html', layer: 2, note: 'the riff in time at 60 BPM' }, { name: '"Sweet Child O\' Mine"', journey: 'tabs/sweet-child-o-mine.html', layer: 2, note: 'the bass roots' }, { name: '"Luna"', journey: 'tabs/luna.html', layer: 2, note: 'the single-note line' }, { name: '"Let It Be"', journey: 'tabs/let-it-be.html', layer: 2, note: 'the C–G–A–F bass outline' }],
+    songThread: [{ name: '"All Along the Watchtower"', journey: 'tabs/all-along-the-watchtower.html', layer: 2, note: 'the bass-note line — your low-E assessment piece' }, { name: '"Seven Nation Army"', journey: 'tabs/seven-nation-army.html', layer: 2, note: 'the riff — your A-string assessment piece' }, { name: '"Sweet Child O\' Mine"', journey: 'tabs/sweet-child-o-mine.html', layer: 2, note: 'the bass roots' }, { name: '"Luna"', journey: 'tabs/luna.html', layer: 2, note: 'the single-note line' }, { name: '"Let It Be"', journey: 'tabs/let-it-be.html', layer: 2, note: 'the C–G–A–F bass outline' }],
     label: 'Set 2',
     locked: false,
     module: 'Notes on the E & A Strings',
@@ -765,9 +765,9 @@ SETS.push(
             }
           },
           {
-            label: 'Challenge 3 — "Watchtower" Bass Riff (your module assessment piece)', label_es: 'Reto 3 — Riff de bajo de "Watchtower" (tu pieza de evaluación)',
-            text: 'Using the TAB:<ul><li>Play the "All Along the Watchtower" bass line on the low E string only — A · G · F · G, looping — one note per beat at 60 BPM. Each root gets struck twice before it changes.</li></ul>You\'ve got it when: the riff start to finish from memory, in time, with clean tone and correct fingering. Click any note name to hear how it should sound. <a href="tabs/all-along-the-watchtower.html" target="_blank">&#x1F9F5; Song Journey: this is Layer 2 of 5</a>.',
-            text_es: 'Usando el TAB:<ul><li>Toca la línea de bajo de "All Along the Watchtower" solo en la cuerda Mi grave — A · G · F · G, en bucle — una nota por pulso a 60 BPM. Cada raíz se pulsa dos veces antes de cambiar.</li></ul>Lo tienes cuando: el riff de principio a fin de memoria, a tiempo, con tono limpio y digitación correcta. Haz clic en cualquier nombre de nota para escuchar cómo debe sonar. <a href="tabs/all-along-the-watchtower.html" target="_blank">&#x1F9F5; Recorrido de la canción: esto es la Capa 2 de 5</a>.',
+            label: 'Challenge 3 — "Watchtower" Bass Riff (your low-E assessment piece)', label_es: 'Reto 3 — Riff de bajo de "Watchtower" (tu pieza de evaluación en la cuerda Mi grave)',
+            text: 'Using the TAB:<ul><li>Play the "All Along the Watchtower" bass line on the low E string only — A · G · F · G, looping — one note per beat — start at 60 BPM, pass line 100 BPM, then the Am backing track. Each root gets struck twice before it changes.</li></ul>You\'ve got it when: the riff from memory at 100 BPM, in time, clean tone, correct fingering. Click any note name to hear how it should sound. <a href="tabs/all-along-the-watchtower.html" target="_blank">&#x1F9F5; Song Journey: this is Layer 2 of 5</a>.',
+            text_es: 'Usando el TAB:<ul><li>Toca la línea de bajo de "All Along the Watchtower" solo en la cuerda Mi grave — A · G · F · G, en bucle — una nota por pulso — empieza a 60 BPM, pasa la línea a 100 BPM, y luego la pista de acompañamiento en Am. Cada raíz se pulsa dos veces antes de cambiar.</li></ul>Lo tienes cuando: el riff de memoria a 100 BPM, a tiempo, tono limpio, digitación correcta. Haz clic en cualquier nombre de nota para escuchar cómo debe sonar. <a href="tabs/all-along-the-watchtower.html" target="_blank">&#x1F9F5; Recorrido de la canción: esto es la Capa 2 de 5</a>.',
             hint: 'Fingering: index on fret 1 (F), ring on fret 3 (G), pinky on fret 5 (A) — a one-fret stretch past your usual index=1/middle=2/ring=3/pinky=4 hand position, since this riff climbs past fret 4. Keep your thumb behind the neck. Let each note ring fully before the next. Drill it until you can run it with your eyes closed — then play it for the &#x1F3A4; Listening Coach below the TAB: that\'s your module-end assessment piece.',
             hint_es: 'Digitación: índice en el traste 1 (F), anular en el traste 3 (G), meñique en el traste 5 (A) — un estiramiento de un traste más allá de tu posición habitual índice=1/medio=2/anular=3/meñique=4, porque este riff sube más allá del traste 4. Mantén el pulgar detrás del mástil. Deja que cada nota suene por completo antes de la siguiente. Practícalo hasta que puedas tocarlo con los ojos cerrados — luego tócalo para el &#x1F3A4; Entrenador de Escucha debajo del TAB: esa es tu pieza de evaluación de fin de módulo.',
             stuck: 'Loop just F–G (frets 1–3) until the finger change is clean, then add the A on fret 5.',
@@ -861,9 +861,9 @@ SETS.push(
                 response: { type: 'short', prompt: 'How many clean laps in a row did you get at 60 BPM?', prompt_es: '¿Cuántas vueltas limpias seguidas lograste a 60 BPM?', placeholder: 'e.g. 4 — try for a higher number next session', placeholder_es: 'ej. 4 — intenta superarlo la próxima sesión' }
               },
               {
-                label: 'Challenge — "Seven Nation Army" at 60 BPM', label_es: 'Reto — "Seven Nation Army" a 60 BPM',
-                text: '<ul><li>Play the riff on the A string — E · E · G · E · D · C · B — with the metronome at 60 BPM, one note per beat.</li></ul>You\'ve got it when: two clean laps in a row, in time, every note named. <a href="tabs/seven-nation-army.html" target="_blank">&#x1F9F5; Song Journey: this is Layer 2 of 5</a>.',
-                text_es: '<ul><li>Toca el riff en la cuerda La — E · E · G · E · D · C · B — con el metrónomo a 60 BPM, una nota por pulso.</li></ul>Lo tienes cuando: dos vueltas limpias seguidas, a tiempo, cada nota nombrada. <a href="tabs/seven-nation-army.html" target="_blank">&#x1F9F5; Recorrido de la canción: esto es la Capa 2 de 5</a>.',
+                label: 'Challenge — "Seven Nation Army" (your A-string assessment piece)', label_es: 'Reto — "Seven Nation Army" (tu pieza de evaluación en la cuerda La)',
+                text: '<ul><li>Play the riff on the A string — E · E · G · E · D · C · B — with the metronome — start at 60 BPM, pass line 100 BPM, then the track — one note per beat.</li></ul>You\'ve got it when: two clean laps in a row at 100 BPM, every note named. <a href="tabs/seven-nation-army.html" target="_blank">&#x1F9F5; Song Journey: this is Layer 2 of 5</a>.',
+                text_es: '<ul><li>Toca el riff en la cuerda La — E · E · G · E · D · C · B — con el metrónomo — empieza a 60 BPM, pasa la línea a 100 BPM, y luego la pista — una nota por pulso.</li></ul>Lo tienes cuando: dos vueltas limpias seguidas a 100 BPM, cada nota nombrada. <a href="tabs/seven-nation-army.html" target="_blank">&#x1F9F5; Recorrido de la canción: esto es la Capa 2 de 5</a>.',
                 hint: 'You know this riff from Set 1. The metronome now sets the timing: land each note right on the beat, and let the open A string ring between phrases.',
                 hint_es: 'Ya conoces este riff de la Unidad 1. Ahora el metrónomo marca el tiempo: cae en cada nota justo en el pulso, y deja sonar la cuerda La al aire entre frases.',
                 stuck: 'Turn the metronome off and play one free lap to remind your hand of the moves, then turn the click back on and match it.',
@@ -872,8 +872,8 @@ SETS.push(
                 levelUp_es: 'Toca dos vueltas sin mirar la TAB, luego una tercera con los ojos cerrados — cayendo igual en el pulso.',
                 skills: [1, 2, 4, 5, 6],
                 tab: {
-                  caption: '"Seven Nation Army" — main riff · A string · 60 BPM',
-                  caption_es: '"Seven Nation Army" — riff principal · cuerda La · 60 BPM',
+                  caption: '"Seven Nation Army" — main riff · A string · 60 → 100 BPM',
+                  caption_es: '"Seven Nation Army" — riff principal · cuerda La · 60 → 100 BPM',
                   notes: [
                     { string: 'A', fret: 7,  note: 'E', midi: 52 },
                     { string: 'A', fret: 7,  note: 'E', midi: 52 },
@@ -887,31 +887,99 @@ SETS.push(
                 response: { type: 'short', prompt: 'Which note pulls you off the beat most often — and what did you do about it?', prompt_es: '¿Qué nota te saca del pulso más seguido — y qué hiciste al respecto?', placeholder: 'e.g. the G at fret 10 — I slowed down and reset', placeholder_es: 'ej. la G del traste 10 — bajé la velocidad y reinicié' }
               },
               {
-                label: 'Challenge — "the cure," root line', label_es: 'Reto — "the cure," línea de raíces',
-                text: '<ul><li>Play the verse roots of Olivia Rodrigo\'s "the cure" on the low E string only — A · C · A · C, then F · C · F · C, at frets 5 · 8 and 1 · 8 — four beats per note at 60 BPM, one strike per beat.</li></ul>You\'ve got it when: two clean laps with the hand landing on fret 8 and back on fret 1 without looking down. <a href="tabs/the-cure.html" target="_blank">&#x1F9F5; Song Journey: this is Layer 2 of 5</a>.',
-                text_es: '<ul><li>Toca las raíces de la estrofa de "the cure" de Olivia Rodrigo solo en la cuerda Mi grave — A · C · A · C, y luego F · C · F · C, en los trastes 5 · 8 y 1 · 8 — cuatro tiempos por nota a 60 BPM, un golpe por tiempo.</li></ul>Lo tienes cuando: dos vueltas limpias con la mano cayendo en el traste 8 y de regreso en el traste 1 sin mirar hacia abajo. <a href="tabs/the-cure.html" target="_blank">&#x1F9F5; Recorrido de la canción: esto es la Capa 2 de 5</a>.',
-                hint: 'These three roots are the verse; the chorus has its own set, and you\'ll meet both as power chords in Module 3.',
-                hint_es: 'Estas tres raíces son la estrofa; el coro tiene su propio conjunto, y conocerás ambos como acordes de potencia en el Módulo 3.',
-                stuck: 'Split it in two: A and C first (pinky on fret 5, then slide the index to fret 8), then F and C (index on 1, index on 8). Join them when the jump back from 8 to 1 is automatic.',
-                stuck_es: 'Divídelo en dos: primero A y C (meñique en el traste 5, y luego desliza el índice al traste 8), y después F y C (índice en el 1, índice en el 8). Únelas cuando el salto de regreso del 8 al 1 sea automático.',
-                levelUp: 'Play the same roots on the A string instead — A open, C at fret 3 — with F staying on the low E at fret 1. Same names, a string cross instead of a jump.',
-                levelUp_es: 'Toca las mismas raíces en la cuerda La — A al aire, C en el traste 3 — con el F quedándose en la cuerda Mi grave, traste 1. Los mismos nombres, un cruce de cuerda en vez de un salto.',
+                label: 'Challenge — "the cure," verse and chorus roots (your assessment option)', label_es: 'Reto — "the cure," raíces de la estrofa y el coro (tu opción de evaluación)',
+                text: '<ul><li>Play the verse and chorus root line of Olivia Rodrigo\'s "the cure" on the low E and A strings — verse: A · C, then F · C; chorus: D · F, then C · G — four beats per note, one strike per beat.</li><li>Fingering: index at fret 1 (F), ring at fret 3 (C on the A string, G on the low E), pinky at fret 5 (A on the low E, D on the A string).</li><li>Start at 60 BPM, pass line 100 BPM, then play it with the backing track.</li></ul>You\'ve got it when: verse and chorus twice through at 100 BPM without stopping. <a href="tabs/the-cure.html" target="_blank">&#x1F9F5; Song Journey: this is Layer 2 of 5</a>.',
+                text_es: '<ul><li>Toca la línea de raíces de la estrofa y el coro de "the cure" de Olivia Rodrigo en las cuerdas Mi grave y La — estrofa: A · C, y luego F · C; coro: D · F, y luego C · G — cuatro tiempos por nota, un golpe por tiempo.</li><li>Digitación: índice en el traste 1 (F), anular en el traste 3 (C en la cuerda La, G en la cuerda Mi grave), meñique en el traste 5 (A en la cuerda Mi grave, D en la cuerda La).</li><li>Empieza a 60 BPM, pasa la línea a 100 BPM, y luego tócala con la pista de acompañamiento.</li></ul>Lo tienes cuando: la estrofa y el coro dos veces seguidas a 100 BPM sin detenerte. <a href="tabs/the-cure.html" target="_blank">&#x1F9F5; Recorrido de la canción: esto es la Capa 2 de 5</a>.',
+                hint: 'One hand position covers every note: index fret 1, ring fret 3, pinky fret 5. The roots become power chords in Module 3 on exactly these frets.',
+                hint_es: 'Una sola posición de mano cubre cada nota: índice traste 1, anular traste 3, meñique traste 5. Las raíces se convierten en acordes de potencia en el Módulo 3 en exactamente estos trastes.',
+                stuck: 'Two halves. Verse first — A and C are a pinky-then-ring move across the two strings; F and C are index-then-ring. Then chorus — D and F, then C and G. Join the halves when each one runs twice clean.',
+                stuck_es: 'Dos mitades. Primero la estrofa — A y C son un movimiento de meñique y luego anular entre las dos cuerdas; F y C son índice y luego anular. Después el coro — D y F, y luego C y G. Únelas cuando cada una corra dos veces limpia.',
+                levelUp: 'Play the verse on the low E only: A at fret 5, C at fret 8, F at fret 1 — the hand slides up for the C and jumps back down for the F. Same notes, a different kind of hard.',
+                levelUp_es: 'Toca la estrofa solo en la cuerda Mi grave: A en el traste 5, C en el traste 8, F en el traste 1 — la mano sube deslizándose para el C y salta de vuelta para el F. Las mismas notas, un tipo distinto de difícil.',
                 skills: [1, 2, 4, 5, 6],
                 tab: {
-                  caption: '"the cure" — verse root line, low E only (teaching arrangement) · 60 BPM',
-                  caption_es: '"the cure" — línea de raíces de la estrofa, solo la cuerda Mi grave (arreglo didáctico) · 60 BPM',
-                  notes: [
-                    { string: 'E', fret: 5, note: 'A', midi: 45 },
-                    { string: 'E', fret: 8, note: 'C', midi: 48 },
-                    { string: 'E', fret: 5, note: 'A', midi: 45 },
-                    { string: 'E', fret: 8, note: 'C', midi: 48 },
-                    { string: 'E', fret: 1, note: 'F', midi: 41 },
-                    { string: 'E', fret: 8, note: 'C', midi: 48 },
-                    { string: 'E', fret: 1, note: 'F', midi: 41 },
-                    { string: 'E', fret: 8, note: 'C', midi: 48 }
+                  caption: '"the cure" — verse and chorus root line · low E and A strings · 4 beats per note',
+                  caption_es: '"the cure" — línea de raíces de la estrofa y el coro · cuerdas Mi grave y La · 4 tiempos por nota',
+                  phrases: [
+                    {
+                      label: 'Verse — A C A C, F C F C',
+                      label_es: 'Estrofa — A C A C, F C F C',
+                      notes: [
+                        { string: 'E', fret: 5, note: 'A', midi: 45 },
+                        { string: 'E', fret: 5, note: 'A', midi: 45 },
+                        { string: 'E', fret: 5, note: 'A', midi: 45 },
+                        { string: 'E', fret: 5, note: 'A', midi: 45 },
+                        { string: 'A', fret: 3, note: 'C', midi: 48 },
+                        { string: 'A', fret: 3, note: 'C', midi: 48 },
+                        { string: 'A', fret: 3, note: 'C', midi: 48 },
+                        { string: 'A', fret: 3, note: 'C', midi: 48 },
+                        { string: 'E', fret: 5, note: 'A', midi: 45 },
+                        { string: 'E', fret: 5, note: 'A', midi: 45 },
+                        { string: 'E', fret: 5, note: 'A', midi: 45 },
+                        { string: 'E', fret: 5, note: 'A', midi: 45 },
+                        { string: 'A', fret: 3, note: 'C', midi: 48 },
+                        { string: 'A', fret: 3, note: 'C', midi: 48 },
+                        { string: 'A', fret: 3, note: 'C', midi: 48 },
+                        { string: 'A', fret: 3, note: 'C', midi: 48 },
+                        { string: 'E', fret: 1, note: 'F', midi: 41 },
+                        { string: 'E', fret: 1, note: 'F', midi: 41 },
+                        { string: 'E', fret: 1, note: 'F', midi: 41 },
+                        { string: 'E', fret: 1, note: 'F', midi: 41 },
+                        { string: 'A', fret: 3, note: 'C', midi: 48 },
+                        { string: 'A', fret: 3, note: 'C', midi: 48 },
+                        { string: 'A', fret: 3, note: 'C', midi: 48 },
+                        { string: 'A', fret: 3, note: 'C', midi: 48 },
+                        { string: 'E', fret: 1, note: 'F', midi: 41 },
+                        { string: 'E', fret: 1, note: 'F', midi: 41 },
+                        { string: 'E', fret: 1, note: 'F', midi: 41 },
+                        { string: 'E', fret: 1, note: 'F', midi: 41 },
+                        { string: 'A', fret: 3, note: 'C', midi: 48 },
+                        { string: 'A', fret: 3, note: 'C', midi: 48 },
+                        { string: 'A', fret: 3, note: 'C', midi: 48 },
+                        { string: 'A', fret: 3, note: 'C', midi: 48 }
+                      ]
+                    },
+                    {
+                      label: 'Chorus — D F D F, C G C G',
+                      label_es: 'Coro — D F D F, C G C G',
+                      notes: [
+                        { string: 'A', fret: 5, note: 'D', midi: 50 },
+                        { string: 'A', fret: 5, note: 'D', midi: 50 },
+                        { string: 'A', fret: 5, note: 'D', midi: 50 },
+                        { string: 'A', fret: 5, note: 'D', midi: 50 },
+                        { string: 'E', fret: 1, note: 'F', midi: 41 },
+                        { string: 'E', fret: 1, note: 'F', midi: 41 },
+                        { string: 'E', fret: 1, note: 'F', midi: 41 },
+                        { string: 'E', fret: 1, note: 'F', midi: 41 },
+                        { string: 'A', fret: 5, note: 'D', midi: 50 },
+                        { string: 'A', fret: 5, note: 'D', midi: 50 },
+                        { string: 'A', fret: 5, note: 'D', midi: 50 },
+                        { string: 'A', fret: 5, note: 'D', midi: 50 },
+                        { string: 'E', fret: 1, note: 'F', midi: 41 },
+                        { string: 'E', fret: 1, note: 'F', midi: 41 },
+                        { string: 'E', fret: 1, note: 'F', midi: 41 },
+                        { string: 'E', fret: 1, note: 'F', midi: 41 },
+                        { string: 'A', fret: 3, note: 'C', midi: 48 },
+                        { string: 'A', fret: 3, note: 'C', midi: 48 },
+                        { string: 'A', fret: 3, note: 'C', midi: 48 },
+                        { string: 'A', fret: 3, note: 'C', midi: 48 },
+                        { string: 'E', fret: 3, note: 'G', midi: 43 },
+                        { string: 'E', fret: 3, note: 'G', midi: 43 },
+                        { string: 'E', fret: 3, note: 'G', midi: 43 },
+                        { string: 'E', fret: 3, note: 'G', midi: 43 },
+                        { string: 'A', fret: 3, note: 'C', midi: 48 },
+                        { string: 'A', fret: 3, note: 'C', midi: 48 },
+                        { string: 'A', fret: 3, note: 'C', midi: 48 },
+                        { string: 'A', fret: 3, note: 'C', midi: 48 },
+                        { string: 'E', fret: 3, note: 'G', midi: 43 },
+                        { string: 'E', fret: 3, note: 'G', midi: 43 },
+                        { string: 'E', fret: 3, note: 'G', midi: 43 },
+                        { string: 'E', fret: 3, note: 'G', midi: 43 }
+                      ]
+                    }
                   ]
                 },
-                response: { type: 'short', prompt: 'Which was harder — sliding up from A at fret 5 to C at fret 8, or jumping back down from C at fret 8 to F at fret 1?', prompt_es: '¿Qué fue más difícil — deslizarte hacia arriba de A en el traste 5 a C en el traste 8, o saltar hacia abajo de C en el traste 8 a F en el traste 1?', placeholder: 'e.g. the jump down — C to F', placeholder_es: 'ej. el salto hacia abajo — C a F' }
+                response: { type: 'short', prompt: 'Which string cross was hardest — A to C, C to F, D to F, or C to G?', prompt_es: '¿Qué cruce de cuerda fue el más difícil — A a C, C a F, D a F, o C a G?', placeholder: 'e.g. C to G — same finger, new string', placeholder_es: 'ej. C a G — mismo dedo, cuerda nueva' }
               },
               {
                 label: 'Challenge — "Luna," bass roots', label_es: 'Reto — "Luna," raíces de bajo',
@@ -1072,10 +1140,10 @@ SETS.push(
 
 globalThis.MODULE_SONGS = globalThis.MODULE_SONGS || {};
 MODULE_SONGS[2] = [
-      { name: '"All Along the Watchtower" — Dylan / Hendrix', meta: 'Play bass-note riff on low E string from memory', meta_es: 'Toca de memoria el riff de notas graves en la cuerda Mi grave', type: 'Core', core: true, journeyUrl: 'tabs/all-along-the-watchtower.html',
+      { name: '"All Along the Watchtower" — Dylan / Hendrix', meta: 'Your low-E assessment piece — the bass-note riff from memory', meta_es: 'Tu pieza de evaluación en la cuerda Mi grave — el riff de notas graves de memoria', type: 'Core', core: true, journeyUrl: 'tabs/all-along-the-watchtower.html',
         originalUrl: 'https://www.youtube.com/watch?v=bT7Hj-ea0VE',
         tutorialUrl: 'https://www.youtube.com/watch?v=Tnm1jWVLaC8' },
-      { name: '"Seven Nation Army" — The White Stripes', meta: 'A string TAB — great first riff, now in time with the metronome', meta_es: 'TAB en la cuerda La — un gran primer riff, ahora a tiempo con el metrónomo', type: 'Core', core: true, journeyUrl: 'tabs/seven-nation-army.html',
+      { name: '"Seven Nation Army" — The White Stripes', meta: 'Your A-string assessment piece — the riff in time with the metronome', meta_es: 'Tu pieza de evaluación en la cuerda La — el riff a tiempo con el metrónomo', type: 'Core', core: true, journeyUrl: 'tabs/seven-nation-army.html',
         originalUrl: 'https://www.youtube.com/watch?v=0J2QdDbelmY',
         tutorialUrl: 'https://www.youtube.com/watch?v=YaR6mzdNjOw' },
       { name: '"Luna" — Peso Pluma, Junior H', meta: 'Listen ahead — our Latin core song; you play its bass roots this module', meta_es: 'Escucha con anticipación — nuestra canción principal en español; tocas sus notas graves este módulo', type: 'Core', core: true, journeyUrl: 'tabs/luna.html',
@@ -1084,7 +1152,7 @@ MODULE_SONGS[2] = [
       { name: '"Sweet Child O\' Mine" — Guns N\' Roses', meta: 'Play verse bass roots on E & A strings', meta_es: 'Toca las notas graves del verso en las cuerdas Mi y La', type: 'Core', core: true, journeyUrl: 'tabs/sweet-child-o-mine.html',
         originalUrl: 'https://www.youtube.com/watch?v=1w7OgIMMRc4',
         tutorialUrl: 'https://www.youtube.com/watch?v=0ASVeXINKYM&start=282&end=938' },
-      { name: '"the cure" — Olivia Rodrigo', meta: 'Play the verse bassline as single-note roots (A C A C F C F C)', meta_es: 'Toca la línea de bajo de la estrofa como notas individuales (A C A C F C F C)', type: 'Core', core: true, journeyUrl: 'tabs/the-cure.html',
+      { name: '"the cure" — Olivia Rodrigo', meta: 'Verse and chorus roots on both strings — the other way to pass Unit 2', meta_es: 'Raíces de la estrofa y el coro en las dos cuerdas — la otra forma de aprobar la Unidad 2', type: 'Core', core: true, journeyUrl: 'tabs/the-cure.html',
         originalUrl: 'https://www.youtube.com/watch?v=B402rKl4bUg',
         tutorialUrl: 'https://www.youtube.com/watch?v=adW_zSkClaY' },
       { name: '"Let It Be" — The Beatles', meta: 'Play the bassline as single-note roots (C G A F)', meta_es: 'Toca la línea de bajo como notas individuales (C G A F)', type: 'Core', core: true, journeyUrl: 'tabs/let-it-be.html',
@@ -1118,16 +1186,16 @@ MODULE_REVIEWS[2] = {
     { id: 'mr2-s4', text: 'I can press notes cleanly with no fret buzz', text_es: 'Puedo presionar notas limpias sin zumbido', set: 'm2w2' },
     { id: 'mr2-s6', text: 'I can use one finger per fret (index=1, middle=2, ring=3, pinky=4)', text_es: 'Puedo usar un dedo por traste (índice=1, medio=2, anular=3, meñique=4)', set: 'm2w2' },
     { id: 'mr2-s5', text: 'I can read a basic TAB and play a 4-bar melody in time at 60 BPM', text_es: 'Puedo leer un TAB básico y tocar una melodía de 4 compases a tiempo a 60 BPM', set: 'm2w2' },
-    { id: 'mr2-s7', text: 'I can play the "Watchtower" bass line — or "the cure" root line — from memory at 60 BPM with clean tone and correct fingering', text_es: 'Puedo tocar la línea de bajo de "Watchtower" — o la línea de raíces de "the cure" — de memoria a 60 BPM con tono limpio y digitación correcta', set: 'm2w2' }
+    { id: 'mr2-s7', text: 'I can play the "Watchtower" bass line on the low E and the "Seven Nation Army" riff on the A string — or the "the cure" verse and chorus roots on both strings — from memory at 100 BPM with clean tone and correct fingering', text_es: 'Puedo tocar la línea de bajo de "Watchtower" en la cuerda Mi grave y el riff de "Seven Nation Army" en la cuerda La — o las raíces de la estrofa y el coro de "the cure" en las dos cuerdas — de memoria a 100 BPM con tono limpio y digitación correcta', set: 'm2w2' }
   ],
   assessItems: [
     'Name the notes on the E and A strings from memory through fret 12',
-    'Play "All Along the Watchtower" bass-note line using only the E string — or the single-note root line from "the cure" — from memory, to the metronome at 60 BPM without stopping, with clean tone and correct fingering (fingertips just behind the fret, thumb behind the neck)',
+    'Play from memory at song tempo with the backing track: the "All Along the Watchtower" line on the low E and the "Seven Nation Army" riff on the A string — or the verse and chorus root line from "the cure" on both strings — without stopping, with clean tone and correct fingering (fingertips just behind the fret, thumb behind the neck)',
     'Sight-read a short 2-bar bass line from TAB and play it'
   ],
   assessItems_es: [
     'Nombrar las notas en las cuerdas Mi y La de memoria hasta el traste 12',
-    'Tocar la línea de bajo de "All Along the Watchtower" usando solo la cuerda Mi grave — o la línea alterna de raíces de una sola nota de "the cure" — de memoria, con el metrónomo a 60 BPM sin detenerse, con tono limpio y digitación correcta (las yemas justo detrás del traste, pulgar detrás del mástil)',
+    'Tocar de memoria al tempo de la canción con la pista de acompañamiento: la línea de "All Along the Watchtower" en la cuerda Mi grave y el riff de "Seven Nation Army" en la cuerda La — o la línea de raíces de la estrofa y el coro de "the cure" en las dos cuerdas — sin detenerse, con tono limpio y digitación correcta (las yemas justo detrás del traste, pulgar detrás del mástil)',
     'Leer a primera vista una línea corta de bajo de 2 compases desde el TAB y tocarla'
   ],
   forward: 'The E &amp; A notes you just learned become the <strong>roots of every power chord in Module 3</strong> — when you play an A5 or G5, you\'re landing on the exact frets you just memorized. Knowing the fretboard is what lets you move chords around freely.',

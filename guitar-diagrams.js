@@ -466,6 +466,93 @@ function localStringNotesSvg(kind, notes, opts){
   return s + '</svg>';
 }
 
+/* Same board as localStringNotesSvg, but circles an explicit [fret, label]
+   list across MULTIPLE strings in one figure — for a bassline that crosses
+   strings (e.g. roots split between the low E and A strings). specs is
+   [{kind, notes}, ...], each `notes` the same [fret, label] shape
+   localStringNotesSvg takes. Every listed string renders as a target
+   (green) string; localStringNotesSvg itself is untouched so existing
+   single-string figures and the noteName exit-check board (app.js) render
+   exactly as before. */
+function localStringMultiNotesSvg(specs, opts){
+  if (!specs || !specs.length) return null;
+  var sNums = specs.map(function(sp){ return STRING_KIND_TO_NUM[sp.kind]; });
+  if (sNums.some(function(n){ return !n; })) return null;
+  var t = gdTheme(opts);
+  var maxFret = (opts && opts.maxFret) || 12;
+
+  var W = 640, H = 244, padL = 62, padR = 20, padT = 22, padB = 56;
+  var openW = 26;
+  var fretW = (W - padL - padR - openW) / maxFret;
+  var boxH = H - padT - padB;
+  var strGap = boxH / 5;
+  var nutX = padL + openW;
+  var fretX = function(f){ return nutX + f * fretW; };
+  var midY = padT + 2.5 * strGap;
+  var openX = padL + openW / 2;
+
+  var s = gdOpen(W, H, t, opts, "-apple-system,'Segoe UI',Roboto,Arial,sans-serif") + gdGround(W, H, t);
+
+  FRETBOARD_INLAYS.filter(function(f){ return f <= maxFret; }).forEach(function(f){
+    var cx = nutX + (f - 0.5) * fretW;
+    s += '<circle cx="' + cx + '" cy="' + midY + '" r="' + t.b(3) + '" fill="' + t.text3 + '" opacity="0.35"/>';
+    if (f === 12) {
+      s += '<circle cx="' + cx + '" cy="' + (midY - strGap) + '" r="' + t.b(3) + '" fill="' + t.text3 + '" opacity="0.35"/>';
+      s += '<circle cx="' + cx + '" cy="' + (midY + strGap) + '" r="' + t.b(3) + '" fill="' + t.text3 + '" opacity="0.35"/>';
+    }
+  });
+
+  for (var f1 = 1; f1 <= maxFret; f1++) {
+    var x = fretX(f1);
+    s += '<line x1="' + x + '" y1="' + padT + '" x2="' + x + '" y2="' + (padT + boxH)
+      +  '" stroke="' + t.text3 + '" stroke-width="' + t.b(1) + '"/>';
+  }
+  s += '<rect x="' + (nutX - 2.5) + '" y="' + (padT - 2) + '" width="5" height="' + (boxH + 4) + '" fill="' + t.text + '" rx="1"/>';
+
+  for (var n = 1; n <= 6; n++) {
+    var y = padT + (n - 1) * strGap;
+    var isTarget = sNums.indexOf(n) > -1;
+    var stroke = isTarget ? t.green : t.text3;
+    var sw = t.b(isTarget ? 2.6 : 1);
+    s += '<line x1="' + padL + '" y1="' + y + '" x2="' + fretX(maxFret) + '" y2="' + y
+      +  '" stroke="' + stroke + '" stroke-width="' + sw + '" stroke-linecap="round"/>';
+    var labelColor = isTarget ? t.green : t.text2;
+    var labelWeight = isTarget ? '600' : '400';
+    s += '<text x="' + (padL - 8) + '" y="' + y + '" text-anchor="end" dominant-baseline="central" font-size="'
+      +  t.b(13) + '" font-weight="' + labelWeight + '" fill="' + labelColor + '">' + STRING_NUM_TO_LABEL[n] + '</text>';
+  }
+
+  specs.forEach(function(sp){
+    var targetY = padT + (STRING_KIND_TO_NUM[sp.kind] - 1) * strGap;
+    (sp.notes || []).forEach(function(pair){
+      var fret = pair[0];
+      var cx = fret === 0 ? openX : nutX + (fret - 0.5) * fretW;
+      var isOpen = fret === 0;
+      s += '<circle cx="' + cx + '" cy="' + targetY + '" r="' + t.b(12) + '" fill="' + (isOpen ? t.bg : NATURALS_LIGHT_GREEN)
+        +  '" stroke="' + t.green + '" stroke-width="' + t.b(1.8) + '"/>';
+    });
+  });
+  s += '<g font-size="' + t.b(13) + '" font-weight="700" fill="' + t.text + '" text-anchor="middle" dominant-baseline="central">';
+  specs.forEach(function(sp){
+    var targetY = padT + (STRING_KIND_TO_NUM[sp.kind] - 1) * strGap;
+    (sp.notes || []).forEach(function(pair){
+      var fret = pair[0], note = pair[1];
+      var cx = fret === 0 ? openX : nutX + (fret - 0.5) * fretW;
+      s += '<text x="' + cx + '" y="' + targetY + '">' + gdEsc(note) + '</text>';
+    });
+  });
+  s += '</g>';
+
+  s += '<g font-size="' + t.b(12) + '" fill="' + t.text2 + '" text-anchor="middle">';
+  for (var f2 = 0; f2 <= maxFret; f2++) {
+    var cx2 = f2 === 0 ? openX : nutX + (f2 - 0.5) * fretW;
+    s += '<text x="' + cx2 + '" y="' + (padT + boxH + 30) + '">' + f2 + '</text>';
+  }
+  s += '</g>';
+
+  return s + '</svg>';
+}
+
 /* ══════════════════════════════════════════════════════════════
    SINGLE NOTE ON THE FRETBOARD
    Strings drawn top→bottom: high E (top) to low E (bottom),
@@ -597,6 +684,6 @@ if (typeof module !== 'undefined' && module.exports) {
     STRING_KIND_TO_NUM, STRING_SHORT_LABEL, STRING_NUM_TO_LABEL, FRETBOARD_INLAYS,
     STRING_NATURALS,
     chordDiagramSVG, localChordSvg, localStringSvg, localStringFretboardSvg,
-    localStringNaturalsSvg, localStringNotesSvg, localNoteSvg, noteFullLabel, ordinal, chordSvg, chordSheetSvg,
+    localStringNaturalsSvg, localStringNotesSvg, localStringMultiNotesSvg, localNoteSvg, noteFullLabel, ordinal, chordSvg, chordSheetSvg,
   };
 }

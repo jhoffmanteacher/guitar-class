@@ -5,6 +5,13 @@ Notable changes to the Guitar Class site. Newest first.
 For the full session-by-session history (and the reasoning behind each change),
 see `WORKFLOW.md` and the git commit log.
 
+## 2026-09-15 — "the cure" root line is now verse + chorus on both strings; Unit 2 assessment text updated
+
+### Changed
+- **"the cure" root line = verse and chorus, low E and A strings, frets 1–5 only** — A(E5) C(A3) F(E1); D(A5) F(E1) C(A3) G(E3). One hand position, no slides. Journey Layer 2, the Module 2 challenge, and class activity #12 all teach this version; the old low-E-only verse (5 · 8 / 1 · 8) is the Level up.
+- **Unit 2 assessment text** (Assessments page, Module Review pop, mr2-s7): Watchtower on the low E + SNA on the A string, or "the cure" verse and chorus on both strings — at song tempo with the backing track. Practice cards now ladder 60 → 100 BPM → track.
+- Watchtower and SNA challenge titles name their string. New figure `img/ca-cure-roots-both.svg`. Spanish matched on every edited line.
+
 ## 2026-09-15 — Today opens with every activity in view
 
 ### Changed
