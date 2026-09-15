@@ -79,6 +79,28 @@
 
 ## Open work
 
+- [x] **2026-09-15 "the cure" both-strings root line — plan at
+  `archive/PLAN-unit-2-assessment-site-v2-2026-09-15.md`.** Verse+chorus root
+  line now crosses the low E and A strings — A(low E 5) C(A 3), F(low E 1)
+  C(A 3); D(A 5) F(low E 1), C(A 3) G(low E 3), one hand position (index 1,
+  ring 3, pinky 5), matching Layer 3's existing power-chord roots. Updated
+  in Journey Layer 2, `ca-13` (retitled "Verse and Chorus Roots," all six
+  rungs rewritten), and Module 2's "the cure" challenge card; the old
+  low-E-only verse survives as the Level up everywhere. Unit 2 assessment
+  text (Assessments page, `mr2-s7`, `assessItems`) now reads Watchtower
+  (low E) + SNA (A string) OR "the cure" both-strings, at song tempo with
+  the backing track; practice cards ladder 60 → 100 BPM → track. Watchtower
+  and SNA challenge titles now name their string. Pushed `6e73cd9`, checks
+  green, deploy-verified live. **Hit the plan's own stop condition**
+  (figure needs two strings marked, the CLI only did one) — Jonathan chose
+  extending the diagram library over the other options offered; `guitar-
+  diagrams.js`/the CLI gained `localStringMultiNotesSvg`, a real two-string
+  notes renderer, used for the new `img/ca-cure-roots-both.svg`. The
+  retired `ca-cure-roots-verse.svg` had no actual "archive" exception in
+  checks.mjs (the plan assumed one that didn't exist) — kept in use by
+  wiring it into `ca-13`'s Level up rung instead of deleting it or leaving
+  it orphaned.
+
 - [x] **2026-09-12 Fretboard Tap — work order at
   `OPUSPLAN-fretboard-tap-2026-09-12.md`.** `type:'fret'` live-quiz
   questions; `fret-lowE` (Phase 1), `fret-lowE-A` + `fret-all` (Phase 2).
