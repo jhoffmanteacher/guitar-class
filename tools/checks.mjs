@@ -3415,6 +3415,75 @@ async function liveCheck() {
   return 'mismatch';
 }
 
+/* ════════════════════════════════════════════════════════════════════
+   1ag. CHORD BLITZ RANKS COVER THE DECKS — Chord Blitz (coach.js) climbs:
+   a round starts with only the easiest chords in the deck in play and
+   unlocks the next level every CB_PROMOTE_EVERY right answers. Which
+   level a chord belongs to comes from ONE table, CB_RANK, and the deck's
+   levels are derived from it (cbDeckLevels). So a chord added to a deck
+   without a rank does not look broken — cbRankOf() falls back to 1 and it
+   quietly turns up on card one, which for a partial barre is the whole
+   point of the climb undone. A rank left behind for a chord no longer in
+   any deck is the mirror image: dead data that reads as intentional.
+
+   Same shape as 1x (unused DECKS/EAR_POOLS ids): both directions, exact.
+   ════════════════════════════════════════════════════════════════════ */
+function checkChordBlitzRanks() {
+  head('1ag. Chord Blitz difficulty ranks cover every deck');
+  const src = readFileSync(join(ROOT, 'coach.js'), 'utf8');
+  let decks, rank;
+  try {
+    /* CB_DECKS is an array literal, so loadConstObject (which hunts for the
+       first `{`) would read only its first deck — slice the array itself. */
+    const m = src.match(/const CB_DECKS = (\[[\s\S]*?\n\]);/);
+    if (!m) throw new Error('could not find "const CB_DECKS = [...]" in coach.js');
+    decks = vm.runInNewContext(`(${m[1]})`, vm.createContext({}));
+    rank = loadConstObject(src, 'CB_RANK');
+  } catch (e) {
+    err(`coach.js: ${e.message}`);
+    problems++;
+    return;
+  }
+  let bad = 0;
+  const inADeck = new Set();
+  for (const d of decks) {
+    if (!Array.isArray(d.chords)) { err(`coach.js CB_DECKS['${d.id}'] has no chords array`); problems++; bad++; continue; }
+    for (const n of d.chords) {
+      inADeck.add(n);
+      if (!Object.prototype.hasOwnProperty.call(rank, n)) {
+        err(`coach.js CB_RANK has no entry for '${n}' (deck '${d.id}') — it would silently play at level 1`);
+        problems++; bad++;
+      }
+    }
+  }
+  for (const n of Object.keys(rank)) {
+    if (!inADeck.has(n)) {
+      err(`coach.js CB_RANK['${n}'] is in no CB_DECKS deck — dead rank`);
+      problems++; bad++;
+    }
+  }
+  /* Every deck must split into at least one level, and the two decks that
+     are meant to climb must actually reach their top inside a round. */
+  const CARDS = Number((src.match(/const CB_CARDS = (\d+)/) || [])[1]);
+  const EVERY = Number((src.match(/const CB_PROMOTE_EVERY = (\d+)/) || [])[1]);
+  if (!CARDS || !EVERY) { err('coach.js: CB_CARDS / CB_PROMOTE_EVERY not found'); problems++; bad++; }
+  else {
+    for (const d of decks) {
+      const levels = new Set((d.chords || []).map(n => rank[n]).filter(r => r != null)).size;
+      if (!levels) continue;
+      const needed = (levels - 1) * EVERY;
+      if (needed >= CARDS) {
+        err(`coach.js deck '${d.id}' has ${levels} levels — ${needed} right answers to top out, but a round is only ${CARDS} cards`);
+        problems++; bad++;
+      }
+    }
+  }
+  if (bad === 0) {
+    const levels = decks.map(d => `${d.id}:${new Set(d.chords.map(n => rank[n])).size}`).join(' ');
+    ok(`${Object.keys(rank).length} Chord Blitz chords ranked, every deck tops out inside ${CARDS} cards (levels — ${levels})`);
+  }
+}
+
 (async function main() {
   if (LIVE_ONLY) {
     console.log(`${C.bold}Guitar Class — post-push live check${C.reset}`);
@@ -3453,6 +3522,7 @@ async function liveCheck() {
   checkVisibleHelperUsage();
   checkFigureDimensions();
   checkOrphanAssets();
+  checkChordBlitzRanks();
   if (!SKIP_LINKS) await checkLinks();
   else warn('skipping link check (--skip-links)');
   bumpServiceWorker();

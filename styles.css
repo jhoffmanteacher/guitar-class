@@ -1939,6 +1939,20 @@ body.games-open{overflow:hidden}
 .cb-newbest{font-size:0.9375rem;font-weight:700;color:var(--amber-text);background:var(--amber-bg);border:1px solid var(--amber-text);border-radius:8px;padding:8px 10px;margin:8px 0;display:inline-block}
 .cb-done-score{font-size:2.875rem;font-weight:800;text-align:center;color:var(--text);font-variant-numeric:tabular-nums;line-height:1.1}
 
+/* Chord Blitz only — the per-card fuse, the card counter and the level chip.
+   Deliberately NOT named into the shared .cb-hud/.cb-answer shell that Fret
+   Zap, Chord Detective, Riff ID, Pattern Detective and Build-a-Chord all
+   borrow: those games have no card clock and no levels, and a shared name
+   would drag these rules into all five. */
+.cb-meta{display:flex;align-items:center;justify-content:space-between;gap:10px;margin:2px 0 6px;min-height:22px}
+.cb-count{font-size:0.8125rem;font-weight:600;color:var(--text3);font-variant-numeric:tabular-nums}
+.cb-level{font-size:0.8125rem;font-weight:700;color:var(--text);background:var(--bg2);border:1px solid var(--purple-accent);border-radius:999px;padding:2px 10px}
+.cb-level.up{animation:cbLevelPop .5s}
+@keyframes cbLevelPop{0%{transform:scale(1)}40%{transform:scale(1.16)}100%{transform:scale(1)}}
+.cb-fuse{height:6px;border-radius:999px;background:var(--bg2);border:1px solid var(--border2);overflow:hidden;margin:0 0 10px}
+.cb-fuse-fill{height:100%;width:100%;background:var(--purple-accent);border-radius:999px}
+@media(prefers-reduced-motion:reduce){.cb-level.up{animation:none}}
+
 /* ── 💥 Fret Zap (coach.js) — reuses the .cb-* HUD / answer / done classes;
    only the card gradient and the fretboard prompt are new. */
 .games-card.gc-fretzap::before{background:var(--red-text)}

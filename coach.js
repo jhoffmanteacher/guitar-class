@@ -1980,7 +1980,7 @@ function gamesRenderHub(p){
         parseInt(sessionStorage.getItem(cbBestKey(d.id, 'spot')), 10) || 0);
     }
   } catch(e){}
-  const cbChip = gamesBestChip(saved.cb && saved.cb.best, cbBest);
+  const cbChip = gamesBestChip(cbSavedBest(saved), cbBest);
   let fzBest = 0;
   try {
     for (const d of FZ_DECKS){
@@ -2580,16 +2580,29 @@ function ccAgain(d){
 }
 
 /* ════════════════════════════════════════════════════════════════════
-   CHORD BLITZ — 90-second chord-shape flashcard sprint. No mic and no
-   guitar: pick a deck, then either name the shape you see ("Name it")
-   or pick the shape for the name you see ("Spot it"). Right answers
-   build a streak that multiplies points; a wrong answer shows the right
-   button and the missed chord comes back a few cards later. Best per
-   deck+direction is session-scoped (hub chip says "today"); the
-   cross-session best goes to the progress doc via the 'games' category.
+   CHORD BLITZ — a ten-card chord-shape sprint with FIVE SECONDS a card.
+   No mic and no guitar: pick a deck, then either name the shape you see
+   ("Name it") or pick the shape for the name you see ("Spot it").
+
+   The round CLIMBS. Only the easiest chords in the deck are in play at
+   the start; every CB_PROMOTE_EVERY right answers adds the next level's
+   chords to the pool and the level chip ticks up. A miss never demotes —
+   the ladder only goes one way, so a bad card can't spiral. Running the
+   card clock out is a miss too, minus the point penalty (nothing was
+   guessed wrong). Right answers build a streak that multiplies points,
+   and points scale with the level, so climbing is what a big score is
+   made of. Best per deck+direction is session-scoped (hub chip says
+   "today"); the cross-session best goes to the progress doc via the
+   'games' category.
+
+   Was a flat 90-second block with the whole deck in play from card one
+   (Jonathan, 2026-09-16: "1:30 is way too long").
    ════════════════════════════════════════════════════════════════════ */
 
-const CB_SECONDS = 90;
+const CB_CARDS = 10;          // cards in a round
+const CB_CARD_MS = 5000;      // 5 seconds a card, then it counts as missed
+const CB_PROMOTE_EVERY = 2;   // right answers per level
+
 // labelKey resolved at render time in cbRenderSetup() — never here (this
 // table is built once at load, so t() here would freeze one language in).
 const CB_DECKS = [
@@ -2598,6 +2611,19 @@ const CB_DECKS = [
   { id: 'barre', labelKey: 'games.cb.deck.barre', chords: ['Bm','F#m','C#m'] },
   { id: 'all',   labelKey: 'games.cb.deck.all',   chords: ['E','Em','A','Am','D','Dm','G','C','F','E5','G5','A5','C5','D5','Bm','B7','F#m','C#m'] }
 ];
+
+/* One difficulty rank per chord, in the order the COURSE teaches them —
+   Module 5's Group 1 (C F Am G), then Group 2 (D A Em) alongside the open
+   power shapes, then Dm and the movable power shapes, then Group 3 (E, B7)
+   and the partial barres. A deck's levels are DERIVED from these ranks
+   (cbDeckLevels), so no deck carries its own tier list and the two can't
+   drift apart. Adding a chord to a deck means adding it here too. */
+const CB_RANK = {
+  C: 1, F: 1, Am: 1, G: 1,
+  D: 2, A: 2, Em: 2, E5: 2, A5: 2, D5: 2,
+  Dm: 3, G5: 3, C5: 3,
+  E: 4, B7: 4, Bm: 4, 'F#m': 4, 'C#m': 4
+};
 
 let cb = null, cbTick = null;
 
@@ -2611,10 +2637,29 @@ function cbStop(){
 }
 
 function cbBody(){ return document.getElementById('cb-body'); }
-function cbBestKey(deck, dir){ return 'cbBest:' + deck + ':' + dir; }
+/* Bumped from 'cbBest:' when the round became 10 cards — a score from the
+   old 90-second block is 30-odd cards' worth and would never be beaten. */
+function cbBestKey(deck, dir){ return 'cbBest2:' + deck + ':' + dir; }
 function cbDeckChords(){
   const d = CB_DECKS.find(x => x.id === cb.deck);
   return (d || CB_DECKS[0]).chords;
+}
+function cbRankOf(n){ return CB_RANK[n] || 1; }
+
+/* The deck's chords bucketed into levels: the distinct CB_RANK values the
+   deck actually contains, lowest first, renumbered 1..N. A deck whose
+   chords all share a rank (Partial barres) is one level — the climb just
+   has nowhere to go, which is fine. */
+function cbDeckLevels(){
+  const chords = cbDeckChords();
+  const ranks = Array.from(new Set(chords.map(cbRankOf))).sort((a, b) => a - b);
+  return ranks.map(r => chords.filter(n => cbRankOf(n) === r));
+}
+
+/* Everything unlocked so far — levels are cumulative, so an early chord
+   keeps coming back instead of being retired the moment you climb. */
+function cbPool(){
+  return cb.levels.slice(0, cb.level).reduce((a, lvl) => a.concat(lvl), []);
 }
 
 function cbSetup(){
@@ -2670,13 +2715,16 @@ function cbStart(){
   s.score = 0; s.streak = 0; s.answered = 0; s.correct = 0;
   s.cur = null; s.prev = null; s.opts = [];
   s.requeue = []; s.locked = false;
+  s.levels = cbDeckLevels();
+  s.level = 1; s.topLevel = 1; s.promoted = false;
+  s.cardEndAt = 0;
   (s.timeouts || []).forEach(clearTimeout);
   s.timeouts = [];
-  s.endAt = performance.now() + CB_SECONDS * 1000;
   document.addEventListener('keydown', cbKeydown);   // laptop: 1–4 answer
   if (cbTick) clearInterval(cbTick);
-  /* 200ms so the finish check can't drift a second late; display is 1Hz anyway. */
-  cbTick = setInterval(cbTimerTick, 200);
+  /* 50ms: the fuse bar is only five seconds wide, so a coarser tick would
+     move it in visible jumps. Cheap — nothing else runs during a card. */
+  cbTick = setInterval(cbTimerTick, 50);
   cbNext();
 }
 
@@ -2686,18 +2734,16 @@ function cbTimerTick(){
     return;
   }
   if (!cbBody()){ cbStop(); return; }   // panel swapped under us
-  const left = cb.endAt - performance.now();
+  if (cb.locked) return;                // reveal pause — the card clock waits
+  const left = cb.cardEndAt - performance.now();
+  const fill = document.getElementById('cb-fuse-fill');
+  if (fill) fill.style.width = Math.max(0, Math.min(100, (left / CB_CARD_MS) * 100)) + '%';
   const el = document.getElementById('cb-timer');
   if (el){
-    el.textContent = cbFmtTime(left);
-    el.classList.toggle('low', left <= 10000);
+    el.textContent = String(Math.max(0, Math.ceil(left / 1000)));
+    el.classList.toggle('low', left <= 2000);
   }
-  if (left <= 0) cbFinish();
-}
-
-function cbFmtTime(ms){
-  const t = Math.max(0, Math.ceil(ms / 1000));
-  return Math.floor(t / 60) + ':' + String(t % 60).padStart(2, '0');
+  if (left <= 0) cbTimeUp();
 }
 
 function cbKeydown(e){
@@ -2710,12 +2756,13 @@ function cbKeydown(e){
 }
 
 /* A missed chord is due again 3–5 cards later; otherwise random from the
-   deck. Never the same card twice in a row. */
+   chords unlocked so far. Never the same card twice in a row. */
 function cbPickCard(){
   const i = cb.requeue.findIndex(q => q.due <= cb.answered && q.name !== cb.prev);
   if (i >= 0) return cb.requeue.splice(i, 1)[0].name;
-  const pool = cbDeckChords().filter(n => n !== cb.prev);
-  return pool[Math.floor(Math.random() * pool.length)];
+  const unlocked = cbPool();
+  const pool = unlocked.filter(n => n !== cb.prev);
+  return (pool.length ? pool : unlocked)[Math.floor(Math.random() * (pool.length || unlocked.length))];
 }
 
 function cbShuffle(arr){
@@ -2726,8 +2773,20 @@ function cbShuffle(arr){
   return arr;
 }
 
+/* Distractors come from the chords unlocked so far, topped up in rank order
+   from the rest of the deck when that pool is small — four buttons drawn
+   from a four-chord level 1 would be the same four names every card. An
+   unfamiliar distractor only makes a card easier, never harder. */
+function cbOptionPool(){
+  const unlocked = cbPool();
+  if (unlocked.length >= 6) return unlocked;
+  const rest = cbDeckChords().filter(n => unlocked.indexOf(n) < 0)
+    .sort((a, b) => cbRankOf(a) - cbRankOf(b));
+  return unlocked.concat(rest.slice(0, 6 - unlocked.length));
+}
+
 function cbOptions(correct){
-  let pool = cbDeckChords().filter(n => n !== correct);
+  let pool = cbOptionPool().filter(n => n !== correct);
   if (pool.length < 3){   // tiny deck: borrow distractors from the full library
     const all = CB_DECKS[CB_DECKS.length - 1].chords;
     pool = pool.concat(all.filter(n => n !== correct && pool.indexOf(n) < 0));
@@ -2737,15 +2796,26 @@ function cbOptions(correct){
   return cbShuffle(opts);
 }
 
+/* 10 a card at level 1, rising 5 a level, times the streak multiplier. */
+function cbCardPoints(s){
+  return (10 + 5 * (s.level - 1)) * Math.min(4, 1 + Math.floor(s.streak / 5));
+}
+
 function cbNext(){
   if (!cb || cb.phase !== 'play') return;
   const body = cbBody();
   if (!body){ cbStop(); return; }
   const s = cb;
+  if (s.answered >= CB_CARDS){ cbFinish(); return; }
+  const was = s.level;
+  s.level = Math.min(s.levels.length, 1 + Math.floor(s.correct / CB_PROMOTE_EVERY));
+  s.promoted = s.level > was;
+  if (s.level > s.topLevel) s.topLevel = s.level;
   s.cur = cbPickCard();
   s.prev = s.cur;
   s.opts = cbOptions(s.cur);
   s.locked = false;
+  s.cardEndAt = performance.now() + CB_CARD_MS;
   const svg = n => (typeof localChordSvg === 'function' && localChordSvg(n)) || '';
   const prompt = s.dir === 'name'
     ? `<div class="cb-prompt"><div class="cb-prompt-dia">${svg(s.cur)}</div></div>`
@@ -2756,15 +2826,47 @@ function cbNext(){
     `</button>`
   ).join('');
   const mult = Math.min(4, 1 + Math.floor(s.streak / 5));
-  const left = s.endAt - performance.now();
+  /* A one-level deck has nothing to climb, so it shows no level chip. */
+  const levelChip = s.levels.length > 1
+    ? `<span class="cb-level${s.promoted ? ' up' : ''}">${t('games.cb.level', { n: s.level })}${s.promoted ? ' &#x2191;' : ''}</span>`
+    : '';
   body.innerHTML =
     `<div class="cb-hud">
-       <span class="cb-timer${left <= 10000 ? ' low' : ''}" id="cb-timer">${cbFmtTime(left)}</span>
+       <span class="cb-timer" id="cb-timer">${Math.ceil(CB_CARD_MS / 1000)}</span>
        <span class="cb-score" id="cb-score">${t('games.common.score', { n: s.score })}</span>
        <span class="cb-streak" id="cb-streak">${s.streak >= 2 ? '&#x1F525; ' + t('games.common.inARow', { n: s.streak }) + (mult > 1 ? ' &mdash; &times;' + mult : '') : '&nbsp;'}</span>
      </div>
+     <div class="cb-meta">
+       <span class="cb-count">${t('games.cb.cardOf', { n: s.answered + 1, total: CB_CARDS })}</span>
+       ${levelChip}
+     </div>
+     <div class="cb-fuse"><div class="cb-fuse-fill" id="cb-fuse-fill"></div></div>
      ${prompt}
      <div class="cb-answers">${answers}</div>`;
+}
+
+/* Wrong, or out of time: show the right button for a beat (inputs locked)
+   and requeue the card. Pass the tapped index to flag it, or null when the
+   clock ran out and nothing was tapped. */
+function cbRevealThenNext(wrongIdx){
+  const s = cb;
+  s.locked = true;
+  if (wrongIdx !== null){
+    const hit = document.getElementById('cb-opt-' + wrongIdx);
+    if (hit) hit.classList.add('wrong');
+  }
+  const right = document.getElementById('cb-opt-' + s.opts.indexOf(s.cur));
+  if (right) right.classList.add('reveal');
+  const fill = document.getElementById('cb-fuse-fill');
+  if (fill) fill.style.width = '0%';
+  const scoreEl = document.getElementById('cb-score');
+  if (scoreEl) scoreEl.textContent = t('games.common.score', { n: s.score });
+  const streakEl = document.getElementById('cb-streak');
+  if (streakEl) streakEl.innerHTML = '&nbsp;';
+  s.timeouts.push(setTimeout(() => {
+    if (cb !== s || s.phase !== 'play') return;
+    cbNext();
+  }, 800));
 }
 
 function cbAnswer(i){
@@ -2776,28 +2878,26 @@ function cbAnswer(i){
   if (pick === s.cur){
     s.correct++;
     s.streak++;
-    s.score += 10 * Math.min(4, 1 + Math.floor(s.streak / 5));
+    s.score += cbCardPoints(s);
     if (typeof strumChord === 'function') strumChord(s.cur);   // reward: hear the chord you just named
     cbNext();
     return;
   }
-  /* Wrong: show the right button for a beat (inputs locked), requeue the card. */
   s.score = Math.max(0, s.score - 5);
   s.streak = 0;
   s.requeue.push({ name: s.cur, due: s.answered + 2 + Math.floor(Math.random() * 3) });
-  s.locked = true;
-  const hit = document.getElementById('cb-opt-' + i);
-  if (hit) hit.classList.add('wrong');
-  const right = document.getElementById('cb-opt-' + s.opts.indexOf(s.cur));
-  if (right) right.classList.add('reveal');
-  const scoreEl = document.getElementById('cb-score');
-  if (scoreEl) scoreEl.textContent = t('games.common.score', { n: s.score });
-  const streakEl = document.getElementById('cb-streak');
-  if (streakEl) streakEl.innerHTML = '&nbsp;';
-  s.timeouts.push(setTimeout(() => {
-    if (cb !== s || s.phase !== 'play') return;
-    cbNext();
-  }, 800));
+  cbRevealThenNext(i);
+}
+
+/* Out of time. Costs the card and the streak, but no points — nothing was
+   guessed wrong, and docking a frozen student twice isn't the lesson. */
+function cbTimeUp(){
+  if (!cb || cb.phase !== 'play' || cb.locked) return;
+  const s = cb;
+  s.answered++;
+  s.streak = 0;
+  s.requeue.push({ name: s.cur, due: s.answered + 2 + Math.floor(Math.random() * 3) });
+  cbRevealThenNext(null);
 }
 
 function cbFinish(){
@@ -2813,14 +2913,22 @@ function cbFinish(){
     if (cb.score > cb.prevBest) sessionStorage.setItem(k, String(cb.score));
   } catch(e){}
   /* Cross-session best → the student's progress doc. Skipped in dev bypass
-     (Firestore rejects that uid; the session best above still counts). */
+     (Firestore rejects that uid; the session best above still counts).
+     v:2 marks a score from the 10-card round — a v:1 record is from the old
+     90-second block and is read as no best at all rather than as a wall. */
   if (typeof saveGames === 'function' && currentUser && !isDevBypassUser()){
-    const old = (games.cb && games.cb.best) || 0;
+    const old = cbSavedBest(games);
     const isNewBest = cb.score > old;
-    if (isNewBest) games.cb = { best: cb.score, deck: cb.deck, dir: cb.dir, at: new Date().toISOString().slice(0, 10) };
+    if (isNewBest) games.cb = { v: 2, best: cb.score, deck: cb.deck, dir: cb.dir, level: cb.topLevel, at: new Date().toISOString().slice(0, 10) };
     awardArcadeXp(isNewBest);
   }
   cbRenderDone();
+}
+
+/* The saved cross-session best, or 0 if the only record is a pre-10-card one. */
+function cbSavedBest(saved){
+  const rec = saved && saved.cb;
+  return (rec && rec.v === 2 && rec.best) || 0;
 }
 
 function cbRenderDone(){
@@ -2833,10 +2941,14 @@ function cbRenderDone(){
   } else if (cb.prevBest > 0){
     bestLine = `<div class="coach-tip">${t('games.common.bestTodayLabel')}: ${cb.prevBest}.</div>`;
   }
+  const levelLine = cb.levels.length > 1
+    ? `<div class="coach-overall">${t('games.cb.reachedLevel', { n: cb.topLevel, total: cb.levels.length })}</div>`
+    : '';
   body.innerHTML =
     `<div class="coach-report">
        <div class="cb-done-score">${cb.score}</div>
        <div class="coach-overall">${GAME_ICO.blitz} ${t(cb.answered === 1 ? 'games.common.cardsAnsweredOne' : 'games.common.cardsAnsweredMany', { answered: cb.answered, correct: cb.correct, acc })}</div>
+       ${levelLine}
        ${bestLine}
        <div class="coach-actions">
          <button type="button" class="coach-start" onclick="cbStart()">&#x21BB; ${t('games.common.playAgain')}</button>

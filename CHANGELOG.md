@@ -5,6 +5,20 @@ Notable changes to the Guitar Class site. Newest first.
 For the full session-by-session history (and the reasoning behind each change),
 see `WORKFLOW.md` and the git commit log.
 
+## 2026-09-16 — Chord Blitz: five seconds a card, and a level that climbs
+
+### Changed
+- **Chord Blitz is shorter and it gets harder as you go.** A round used to be
+  one flat 90 seconds with every chord in the deck showing up from the first
+  card. Now you get **five seconds a card and ten cards a round** — a bar under
+  the score drains while you decide, and letting it run out costs you the card
+  (but no points: you didn't answer wrong). The deck starts with the easiest
+  shapes only, and **every 2 right answers raises the level**, which brings
+  harder chord shapes in and makes each card worth more. A level chip next to
+  the card count shows where you are. Missing one never drops you back down.
+  Your best score starts fresh, since a score from the old long round was
+  three times as many cards.
+
 ## 2026-09-16 — "the cure": the intro arrives, and the chorus gets its own day
 
 ### Changed
