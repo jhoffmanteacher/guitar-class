@@ -1159,7 +1159,7 @@ const JOURNEY_TAB_COUNTS = {
   'luna.html': 13,
   'seven-nation-army.html': 9,
   'sweet-child-o-mine.html': 12,
-  'the-cure.html': 10,
+  'the-cure.html': 11,
 };
 /* ════════════════════════════════════════════════════════════════════
    1v. FIGURES RESERVE THEIR SPACE — an <img> with no width/height has no

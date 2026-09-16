@@ -14,6 +14,9 @@ see `WORKFLOW.md` and the git commit log.
   and A strings, still frets 1-5, no new notes. New rungs for the three
   handoffs where one section passes to the next, and a link to Layer 2 of the
   "the cure" Song Journey page to play it with the track.
+- **The intro is on the Song Journey page too.** Layer 2 of "the cure" now
+  opens with its own four-bar intro tab above the verse-and-chorus one, so the
+  page and the activity teach the same thing.
 
 ## 2026-09-15 — "the cure" root line is now verse + chorus on both strings; Unit 2 assessment text updated
 
