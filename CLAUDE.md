@@ -154,9 +154,9 @@ video-title drift (inside the link check), slang and figurative phrasing in
 student-facing text (1w), Journey lick labels naming the shape (1w2),
 orphaned `img/`/`audio/` files and unused `DECKS`/`EAR_POOLS` ids (1x), Journey
 tab-ascii column alignment across string rows (1z), every rail `.nav-btn`
-tagged `data-gate="keep"/"hide"` for the activity gate (1aa), Chord Blitz's
-difficulty ranks ↔ its decks, both directions, plus every deck topping out
-inside a round (1ag).
+tagged `data-gate="keep"/"hide"` for the activity gate (1aa), the shared
+`CHORD_RANK` table ↔ every Chord Blitz and Chord Detective deck, both
+directions, plus every deck topping out inside a round (1ag).
 
 Not every class can be guarded by a banned-phrase list. 1w2 pins the Journey
 lick labels *positively* — every `Lick N — ...` card must use one of four

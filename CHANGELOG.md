@@ -5,6 +5,23 @@ Notable changes to the Guitar Class site. Newest first.
 For the full session-by-session history (and the reasoning behind each change),
 see `WORKFLOW.md` and the git commit log.
 
+## 2026-09-16 — Chord Detective matches Chord Blitz: five seconds a card
+
+### Changed
+- **Chord Detective is shorter, and it gets harder as you go.** Same change
+  Chord Blitz just got: **five seconds a card and ten cards a round** instead
+  of one flat 60 seconds, the deck starting with the easiest chords only and
+  **every 2 right answers raising the level** to bring harder ones in and make
+  each card worth more. Running the five seconds out costs you the card but no
+  points.
+- **The clock waits while the chord is sounding.** This one is by ear, so the
+  five seconds are five seconds of *thinking* — they don't start until the
+  chord stops. Press Play as many times as you want: every replay parks the
+  clock and hands you a fresh five seconds afterward. Listening properly is
+  never what runs you out of time.
+- Your best score starts fresh, since a score from the old longer round was
+  many more cards.
+
 ## 2026-09-16 — Class activity #15: "the cure" verse on two strings
 
 ### Added
