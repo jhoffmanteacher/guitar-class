@@ -887,23 +887,61 @@ SETS.push(
                 response: { type: 'short', prompt: 'Which note pulls you off the beat most often — and what did you do about it?', prompt_es: '¿Qué nota te saca del pulso más seguido — y qué hiciste al respecto?', placeholder: 'e.g. the G at fret 10 — I slowed down and reset', placeholder_es: 'ej. la G del traste 10 — bajé la velocidad y reinicié' }
               },
               {
-                label: 'Challenge — "the cure," verse and chorus roots (your assessment option)', label_es: 'Reto — "the cure," raíces de la estrofa y el coro (tu opción de evaluación)',
-                text: '<ul><li>Play the verse and chorus root line of Olivia Rodrigo\'s "the cure" on the low E and A strings — verse: A · C, then F · C; chorus: D · F, then C · G — four beats per note, one strike per beat.</li><li>Fingering: index at fret 1 (F), ring at fret 3 (C on the A string, G on the low E), pinky at fret 5 (A on the low E, D on the A string).</li><li>Start at 60 BPM, pass line 100 BPM, then play it with the backing track.</li></ul>You\'ve got it when: verse and chorus twice through at 100 BPM without stopping. <a href="tabs/the-cure.html" target="_blank">&#x1F9F5; Song Journey: this is Layer 2 of 5</a>.',
-                text_es: '<ul><li>Toca la línea de raíces de la estrofa y el coro de "the cure" de Olivia Rodrigo en las cuerdas Mi grave y La — estrofa: A · C, y luego F · C; coro: D · F, y luego C · G — cuatro tiempos por nota, un golpe por tiempo.</li><li>Digitación: índice en el traste 1 (F), anular en el traste 3 (C en la cuerda La, G en la cuerda Mi grave), meñique en el traste 5 (A en la cuerda Mi grave, D en la cuerda La).</li><li>Empieza a 60 BPM, pasa la línea a 100 BPM, y luego tócala con la pista de acompañamiento.</li></ul>Lo tienes cuando: la estrofa y el coro dos veces seguidas a 100 BPM sin detenerte. <a href="tabs/the-cure.html" target="_blank">&#x1F9F5; Recorrido de la canción: esto es la Capa 2 de 5</a>.',
-                hint: 'One hand position covers every note: index fret 1, ring fret 3, pinky fret 5. The roots become power chords in Module 3 on exactly these frets.',
-                hint_es: 'Una sola posición de mano cubre cada nota: índice traste 1, anular traste 3, meñique traste 5. Las raíces se convierten en acordes de potencia en el Módulo 3 en exactamente estos trastes.',
-                stuck: 'Two halves. Verse first — A and C are a pinky-then-ring move across the two strings; F and C are index-then-ring. Then chorus — D and F, then C and G. Join the halves when each one runs twice clean.',
-                stuck_es: 'Dos mitades. Primero la estrofa — A y C son un movimiento de meñique y luego anular entre las dos cuerdas; F y C son índice y luego anular. Después el coro — D y F, y luego C y G. Únelas cuando cada una corra dos veces limpia.',
-                levelUp: 'Play the verse on the low E only: A at fret 5, C at fret 8, F at fret 1 — the hand slides up for the C and jumps back down for the F. Same notes, a different kind of hard.',
-                levelUp_es: 'Toca la estrofa solo en la cuerda Mi grave: A en el traste 5, C en el traste 8, F en el traste 1 — la mano sube deslizándose para el C y salta de vuelta para el F. Las mismas notas, un tipo distinto de difícil.',
+                label: 'Challenge — "the cure," the root line (your assessment option)', label_es: 'Reto — "the cure," la línea de raíces (tu opción de evaluación)',
+                text: '<ul><li>Start on the low E string alone. The verse of Olivia Rodrigo\'s "the cure" is A · C, then F · C — A at fret 5, C at fret 8, F at fret 1. Its first four bars are also the song\'s intro, the guitar on its own.</li><li>Then move the same line onto two strings, where nothing sits past fret 5, and add the chorus: D · F, then C · G.</li><li>Two-string fingering: index at fret 1 (F), ring at fret 3 (C on the A string, G on the low E), pinky at fret 5 (A on the low E, D on the A string).</li><li>Four beats per note, one strike per beat. Start at 60 BPM, pass line 100 BPM, then play it with the backing track.</li></ul>You\'ve got it when: verse and chorus twice through at 100 BPM without stopping. <a href="tabs/the-cure.html" target="_blank">&#x1F9F5; Song Journey: this is Layer 2 of 5</a>.',
+                text_es: '<ul><li>Empieza solo en la cuerda Mi grave. La estrofa de "the cure" de Olivia Rodrigo es A · C, y luego F · C — A en el traste 5, C en el traste 8, F en el traste 1. Sus primeros cuatro compases son también la intro de la canción, la guitarra sola.</li><li>Después pasa esa misma línea a dos cuerdas, donde nada queda más allá del traste 5, y agrega el coro: D · F, y luego C · G.</li><li>Digitación en dos cuerdas: índice en el traste 1 (F), anular en el traste 3 (C en la cuerda La, G en la cuerda Mi grave), meñique en el traste 5 (A en la cuerda Mi grave, D en la cuerda La).</li><li>Cuatro tiempos por nota, un golpe por tiempo. Empieza a 60 BPM, pasa la línea a 100 BPM, y luego tócala con la pista de acompañamiento.</li></ul>Lo tienes cuando: la estrofa y el coro dos veces seguidas a 100 BPM sin detenerte. <a href="tabs/the-cure.html" target="_blank">&#x1F9F5; Recorrido de la canción: esto es la Capa 2 de 5</a>.',
+                hint: 'On the low E the hand has two homes — up at fret 5 (index on A, pinky on C at fret 8) and down at fret 1 (index on F). On two strings it stops moving: index fret 1, ring fret 3, pinky fret 5. Those roots become power chords in Module 3 on exactly these frets.',
+                hint_es: 'En la cuerda Mi grave la mano tiene dos casas — arriba en el traste 5 (índice en A, meñique en C en el traste 8) y abajo en el traste 1 (índice en F). En dos cuerdas deja de moverse: índice traste 1, anular traste 3, meñique traste 5. Esas raíces se convierten en acordes de potencia en el Módulo 3 en exactamente estos trastes.',
+                stuck: 'One string first. Get A at fret 5 and C at fret 8 running twice clean before you add the F down at fret 1. Once the low E version holds together, the two-string version is the same notes with no trip up the neck. Chorus last — D and F, then C and G.',
+                stuck_es: 'Primero una sola cuerda. Haz que A en el traste 5 y C en el traste 8 corran dos veces limpios antes de agregar el F allá abajo en el traste 1. Cuando la versión en la cuerda Mi grave se sostenga, la versión en dos cuerdas son las mismas notas sin el viaje por el mástil. El coro al final — D y F, y luego C y G.',
+                levelUp: 'Play the chorus on the low E only as well: D at fret 10, F at fret 1, C at fret 8, G at fret 3. The whole song on one string, and the hand covers ten frets to do it.',
+                levelUp_es: 'Toca el coro también solo en la cuerda Mi grave: D en el traste 10, F en el traste 1, C en el traste 8, G en el traste 3. La canción entera en una sola cuerda, y la mano recorre diez trastes para lograrlo.',
                 skills: [1, 2, 4, 5, 6],
                 tab: {
-                  caption: '"the cure" — verse and chorus root line · low E and A strings · 4 beats per note',
-                  caption_es: '"the cure" — línea de raíces de la estrofa y el coro · cuerdas Mi grave y La · 4 tiempos por nota',
+                  caption: '"the cure" — root line · the low E first, then both strings · 4 beats per note',
+                  caption_es: '"the cure" — línea de raíces · primero la cuerda Mi grave, luego las dos · 4 tiempos por nota',
                   phrases: [
                     {
-                      label: 'Verse — A C A C, F C F C',
-                      label_es: 'Estrofa — A C A C, F C F C',
+                      label: 'Verse on the low E — A C A C, F C F C',
+                      label_es: 'Estrofa en la cuerda Mi grave — A C A C, F C F C',
+                      notes: [
+                        { string: 'E', fret: 5, note: 'A', midi: 45 },
+                        { string: 'E', fret: 5, note: 'A', midi: 45 },
+                        { string: 'E', fret: 5, note: 'A', midi: 45 },
+                        { string: 'E', fret: 5, note: 'A', midi: 45 },
+                        { string: 'E', fret: 8, note: 'C', midi: 48 },
+                        { string: 'E', fret: 8, note: 'C', midi: 48 },
+                        { string: 'E', fret: 8, note: 'C', midi: 48 },
+                        { string: 'E', fret: 8, note: 'C', midi: 48 },
+                        { string: 'E', fret: 5, note: 'A', midi: 45 },
+                        { string: 'E', fret: 5, note: 'A', midi: 45 },
+                        { string: 'E', fret: 5, note: 'A', midi: 45 },
+                        { string: 'E', fret: 5, note: 'A', midi: 45 },
+                        { string: 'E', fret: 8, note: 'C', midi: 48 },
+                        { string: 'E', fret: 8, note: 'C', midi: 48 },
+                        { string: 'E', fret: 8, note: 'C', midi: 48 },
+                        { string: 'E', fret: 8, note: 'C', midi: 48 },
+                        { string: 'E', fret: 1, note: 'F', midi: 41 },
+                        { string: 'E', fret: 1, note: 'F', midi: 41 },
+                        { string: 'E', fret: 1, note: 'F', midi: 41 },
+                        { string: 'E', fret: 1, note: 'F', midi: 41 },
+                        { string: 'E', fret: 8, note: 'C', midi: 48 },
+                        { string: 'E', fret: 8, note: 'C', midi: 48 },
+                        { string: 'E', fret: 8, note: 'C', midi: 48 },
+                        { string: 'E', fret: 8, note: 'C', midi: 48 },
+                        { string: 'E', fret: 1, note: 'F', midi: 41 },
+                        { string: 'E', fret: 1, note: 'F', midi: 41 },
+                        { string: 'E', fret: 1, note: 'F', midi: 41 },
+                        { string: 'E', fret: 1, note: 'F', midi: 41 },
+                        { string: 'E', fret: 8, note: 'C', midi: 48 },
+                        { string: 'E', fret: 8, note: 'C', midi: 48 },
+                        { string: 'E', fret: 8, note: 'C', midi: 48 },
+                        { string: 'E', fret: 8, note: 'C', midi: 48 }
+                      ]
+                    },
+                    {
+                      label: 'Verse on two strings — A C A C, F C F C',
+                      label_es: 'Estrofa en dos cuerdas — A C A C, F C F C',
                       notes: [
                         { string: 'E', fret: 5, note: 'A', midi: 45 },
                         { string: 'E', fret: 5, note: 'A', midi: 45 },
@@ -940,8 +978,8 @@ SETS.push(
                       ]
                     },
                     {
-                      label: 'Chorus — D F D F, C G C G',
-                      label_es: 'Coro — D F D F, C G C G',
+                      label: 'Chorus on two strings — D F D F, C G C G',
+                      label_es: 'Coro en dos cuerdas — D F D F, C G C G',
                       notes: [
                         { string: 'A', fret: 5, note: 'D', midi: 50 },
                         { string: 'A', fret: 5, note: 'D', midi: 50 },
@@ -979,7 +1017,7 @@ SETS.push(
                     }
                   ]
                 },
-                response: { type: 'short', prompt: 'Which string cross was hardest — A to C, C to F, D to F, or C to G?', prompt_es: '¿Qué cruce de cuerda fue el más difícil — A a C, C a F, D a F, o C a G?', placeholder: 'e.g. C to G — same finger, new string', placeholder_es: 'ej. C a G — mismo dedo, cuerda nueva' }
+                response: { type: 'short', prompt: 'Which was harder — the trip down to the F on the low E, or the string crosses on two strings?', prompt_es: '¿Qué fue más difícil — el viaje hasta el F en la cuerda Mi grave, o los cruces de cuerda en dos cuerdas?', placeholder: 'e.g. the trip — I kept landing on fret 2', placeholder_es: 'ej. el viaje — seguía cayendo en el traste 2' }
               },
               {
                 label: 'Challenge — "Luna," bass roots', label_es: 'Reto — "Luna," raíces de bajo',
@@ -1152,7 +1190,7 @@ MODULE_SONGS[2] = [
       { name: '"Sweet Child O\' Mine" — Guns N\' Roses', meta: 'Play verse bass roots on E & A strings', meta_es: 'Toca las notas graves del verso en las cuerdas Mi y La', type: 'Core', core: true, journeyUrl: 'tabs/sweet-child-o-mine.html',
         originalUrl: 'https://www.youtube.com/watch?v=1w7OgIMMRc4',
         tutorialUrl: 'https://www.youtube.com/watch?v=0ASVeXINKYM&start=282&end=938' },
-      { name: '"the cure" — Olivia Rodrigo', meta: 'Verse and chorus roots on both strings — the other way to pass Unit 2', meta_es: 'Raíces de la estrofa y el coro en las dos cuerdas — la otra forma de aprobar la Unidad 2', type: 'Core', core: true, journeyUrl: 'tabs/the-cure.html',
+      { name: '"the cure" — Olivia Rodrigo', meta: 'Root line — the low E first, then both strings — the other way to pass Unit 2', meta_es: 'Línea de raíces — primero la cuerda Mi grave, luego las dos — la otra forma de aprobar la Unidad 2', type: 'Core', core: true, journeyUrl: 'tabs/the-cure.html',
         originalUrl: 'https://www.youtube.com/watch?v=B402rKl4bUg',
         tutorialUrl: 'https://www.youtube.com/watch?v=adW_zSkClaY' },
       { name: '"Let It Be" — The Beatles', meta: 'Play the bassline as single-note roots (C G A F)', meta_es: 'Toca la línea de bajo como notas individuales (C G A F)', type: 'Core', core: true, journeyUrl: 'tabs/let-it-be.html',

@@ -1547,8 +1547,87 @@ window.CLASS_ACTIVITIES = [
       {
         label:    'Keep going',
         label_es: 'Sigue adelante',
-        text: 'Three ways to push it, any order:<ul><li>Climb the tempo: +10 BPM every two clean laps, up to 100</li><li>Play it with the backing track on the Song Journey page — Layer 2 of 5. Your one-string version is the <b>Level up</b> fold on that layer</li><li>Level up: make the trip down audible — keep the index finger touching the string as the hand travels from fret 5 to fret 1, so you hear the slide</li></ul>You\'ve got it when: the intro and the verse with the track, twice through, without dropping out.',
-        text_es: 'Tres formas de exigirte más, en cualquier orden:<ul><li>Sube el tempo: +10 BPM cada dos vueltas limpias, hasta 100</li><li>Tócala con la pista de acompañamiento en la página de Recorrido de la canción — Capa 2 de 5. Tu versión de una sola cuerda es el desplegable <b>Sube de nivel</b> de esa capa</li><li>Sube de nivel: haz que se oiga el viaje — deja el índice tocando la cuerda mientras la mano baja del traste 5 al traste 1, para que se escuche el deslizamiento</li></ul>Lo tienes cuando: la intro y la estrofa con la pista, dos veces seguidas, sin salirte.',
+        text: 'Three ways to push it, any order:<ul><li>Climb the tempo: +10 BPM every two clean laps, up to 100</li><li>Play it with the backing track on the Song Journey page — Layer 2 of 5. It opens with these same two tabs</li><li>Level up: make the trip down audible — keep the index finger touching the string as the hand travels from fret 5 to fret 1, so you hear the slide</li></ul>You\'ve got it when: the intro and the verse with the track, twice through, without dropping out.',
+        text_es: 'Tres formas de exigirte más, en cualquier orden:<ul><li>Sube el tempo: +10 BPM cada dos vueltas limpias, hasta 100</li><li>Tócala con la pista de acompañamiento en la página de Recorrido de la canción — Capa 2 de 5. Abre con estas mismas dos tablaturas</li><li>Sube de nivel: haz que se oiga el viaje — deja el índice tocando la cuerda mientras la mano baja del traste 5 al traste 1, para que se escuche el deslizamiento</li></ul>Lo tienes cuando: la intro y la estrofa con la pista, dos veces seguidas, sin salirte.',
+      },
+    ],
+  },
+  /* Day 17 mini-card: "the cure" verse alone, moved from the low E (ca-13's
+     A · C · F on frets 5 · 8 · 1) onto two strings with the hand parked in
+     frets 1–5. Four rungs on purpose — it shares a day with ca-17 (Notes on
+     the A String). ca-18, the next class day, re-teaches this verse and adds
+     the chorus; the overlap is intended (Jonathan, 2026-09-16). Figure is
+     ca-18's, already in sw.js. */
+  {
+    id:    'ca-19',
+    number: 15,
+    journey: 'the-cure',
+    journeyLayer: 2,
+    title:    '"the cure" — The Verse on Two Strings',
+    title_es: '"the cure" — La estrofa en dos cuerdas',
+    intro:    'You play the verse of "the cure" on the low E string, with the trip up to fret 8 for C. Today C moves to the A string, fret 3. Same three notes, no trip — the hand stays inside the first five frets.',
+    intro_es: 'Ya tocas la estrofa de "the cure" en la cuerda Mi grave, con el viaje hasta el traste 8 para el C. Hoy el C se pasa a la cuerda La, traste 3. Las mismas tres notas, sin viaje — la mano se queda dentro de los primeros cinco trastes.',
+    steps: [
+      {
+        label:    'The map — three roots, two strings',
+        label_es: 'El mapa — tres raíces, dos cuerdas',
+        figure: 'img/ca-cure-roots-both.svg',
+        figureAlt: 'Fretboard diagram marking five root notes on two strings: F at fret 1, G at fret 3, and A at fret 5 on the low E string; C at fret 3 and D at fret 5 on the A string.',
+        figureAlt_es: 'Diagrama del diapasón marcando cinco notas raíz en dos cuerdas: F en el traste 1, G en el traste 3 y A en el traste 5 en la cuerda Mi grave; C en el traste 3 y D en el traste 5 en la cuerda La.',
+        text: 'Five roots are marked. The verse uses three of them. Low E string: <b>A</b> at fret 5 (pinky) and <b>F</b> at fret 1 (index). A string: <b>C</b> at fret 3 (ring). One finger owns each fret — nothing slides today. G and D wait for the chorus.',
+        text_es: 'Hay cinco raíces marcadas. La estrofa usa tres. Cuerda Mi grave: <b>A</b> en el traste 5 (meñique) y <b>F</b> en el traste 1 (índice). Cuerda La: <b>C</b> en el traste 3 (anular). Cada traste tiene su dedo fijo — hoy nada se desliza. G y D esperan al coro.',
+      },
+      {
+        label:    'A · C — cross the string',
+        label_es: 'A · C — cruza la cuerda',
+        text: 'The new move is the pick crossing from the low E to the A string. Four beats per note.<ol><li>Pinky, low E fret 5: "A". Count 1 2 3 4</li><li>Ring, A string fret 3: "C". Count 1 2 3 4</li><li>Back to A. Say each name as you land it</li></ol>You\'ve got it when: A, C, A, C — four clean notes in a row at 60 BPM, one string ringing at a time. Both strings sounding on the C? Smaller pick motion, and check that the ring finger stands on its tip.',
+        text_es: 'El movimiento nuevo es la púa cruzando de la cuerda Mi grave a la cuerda La. Cuatro tiempos por nota.<ol><li>Meñique, cuerda Mi grave traste 5: "A". Cuenta 1 2 3 4</li><li>Anular, cuerda La traste 3: "C". Cuenta 1 2 3 4</li><li>De regreso al A. Di cada nombre al caer en la nota</li></ol>Lo tienes cuando: A, C, A, C — cuatro notas limpias seguidas a 60 BPM, una sola cuerda sonando a la vez. ¿Suenan las dos cuerdas en el C? Un movimiento de púa más chico, y revisa que el anular esté parado en la punta.',
+        tab: {
+          caption: 'A · C, twice · 4 beats each',
+          caption_es: 'A · C, dos veces · 4 tiempos cada una',
+          notes: [
+            { string: 'E', fret: 5, note: 'A', midi: 45 },
+            { string: 'A', fret: 3, note: 'C', midi: 48 },
+            { string: 'E', fret: 5, note: 'A', midi: 45 },
+            { string: 'A', fret: 3, note: 'C', midi: 48 }
+          ]
+        },
+      },
+      {
+        label:    'F · C — the answer',
+        label_es: 'F · C — la respuesta',
+        text: 'Same idea, lower on the neck. Four beats per note.<ol><li>Index, low E fret 1: "F"</li><li>Ring, A string fret 3: "C" — the same C as before</li><li>F again, then C again</li></ol>The index and the ring stay on their frets the whole time; only the pick moves.\nYou\'ve got it when: F, C, F, C — four clean notes in a row at 60 BPM. Index buzzing on the F? Move it right up behind fret 1 and press with the tip, not the pad.',
+        text_es: 'La misma idea, más abajo en el mástil. Cuatro tiempos por nota.<ol><li>Índice, cuerda Mi grave traste 1: "F"</li><li>Anular, cuerda La traste 3: "C" — el mismo C de antes</li><li>F otra vez, y luego C otra vez</li></ol>El índice y el anular se quedan en sus trastes todo el tiempo; solo se mueve la púa.\nLo tienes cuando: F, C, F, C — cuatro notas limpias seguidas a 60 BPM. ¿Zumba el índice en el F? Acércalo justo detrás del traste 1 y presiona con la punta, no con la yema.',
+        tab: {
+          caption: 'F · C, twice · 4 beats each',
+          caption_es: 'F · C, dos veces · 4 tiempos cada una',
+          notes: [
+            { string: 'E', fret: 1, note: 'F', midi: 41 },
+            { string: 'A', fret: 3, note: 'C', midi: 48 },
+            { string: 'E', fret: 1, note: 'F', midi: 41 },
+            { string: 'A', fret: 3, note: 'C', midi: 48 }
+          ]
+        },
+      },
+      {
+        label:    'The whole verse',
+        label_es: 'La estrofa completa',
+        text: 'Join the two pairs: <b>A · C · A · C · F · C · F · C</b>, four beats each. The one place to watch is C to F — ring finger stays on the A string, index lands on the low E, and the pick crosses back to the thicker string.\nYou\'ve got it when: two clean verses in a row at 60 BPM, no stops. Then push it: +10 BPM each time you get two clean verses, or open the "the cure" Song Journey page and play the verse with the backing track.',
+        text_es: 'Une los dos pares: <b>A · C · A · C · F · C · F · C</b>, cuatro tiempos cada una. El único lugar que hay que cuidar es de C a F — el anular se queda en la cuerda La, el índice cae en la cuerda Mi grave, y la púa cruza de regreso a la cuerda más gruesa.\nLo tienes cuando: dos estrofas limpias seguidas a 60 BPM, sin detenerte. Después exígete más: +10 BPM cada vez que logres dos estrofas limpias, o abre la página del Recorrido de la canción de "the cure" y toca la estrofa con la pista de acompañamiento.',
+        tab: {
+          caption: 'Verse · A C A C, F C F C · 4 beats each',
+          caption_es: 'Estrofa · A C A C, F C F C · 4 tiempos cada una',
+          notes: [
+            { string: 'E', fret: 5, note: 'A', midi: 45 },
+            { string: 'A', fret: 3, note: 'C', midi: 48 },
+            { string: 'E', fret: 5, note: 'A', midi: 45 },
+            { string: 'A', fret: 3, note: 'C', midi: 48 },
+            { string: 'E', fret: 1, note: 'F', midi: 41 },
+            { string: 'A', fret: 3, note: 'C', midi: 48 },
+            { string: 'E', fret: 1, note: 'F', midi: 41 },
+            { string: 'A', fret: 3, note: 'C', midi: 48 }
+          ]
+        },
       },
     ],
   },
@@ -1560,10 +1639,11 @@ window.CLASS_ACTIVITIES = [
      on the low E — then runs all three sections in song order. The intro and the
      verse are taught again from scratch, so a student who missed ca-13 can still
      start here. The two cards are consecutive class days, not a replacement
-     (Jonathan, 2026-09-16: ca-13 is the intro and the verse, low E only). */
+     (Jonathan, 2026-09-16: ca-13 is the intro and the verse, low E only).
+     (ca-19, the two-string verse alone, sits between them — 2026-09-16) */
   {
     id:    'ca-18',
-    number: 15,
+    number: 16,
     journey: 'the-cure',   // the last step sends them to this Song Journey page — see JOURNEY above
     journeyLayer: 2,
     title:    '"the cure" — Intro, Verse and Chorus',

@@ -5,6 +5,16 @@ Notable changes to the Guitar Class site. Newest first.
 For the full session-by-session history (and the reasoning behind each change),
 see `WORKFLOW.md` and the git commit log.
 
+## 2026-09-16 — Class activity #15: "the cure" verse on two strings
+
+### Added
+
+- **"the cure" — The Verse on Two Strings (`ca-19`)** — a four-rung mini
+  card for the Day 17 calendar item "play the cure verse on E and A
+  strings": A · C · F with the hand parked in frets 1–5, string cross
+  instead of the trip to fret 8. Reuses `img/ca-cure-roots-both.svg`.
+  "the cure" — Intro, Verse and Chorus moves from #15 to #16.
+
 ## 2026-09-16 — Chord Blitz: five seconds a card, and a level that climbs
 
 ### Changed
@@ -37,9 +47,16 @@ see `WORKFLOW.md` and the git commit log.
   D and G — and all three sections played in song order. New rungs for the
   three handoffs where one section passes to the next, and a link to Layer 2 of
   the "the cure" Song Journey page to play it with the track.
-- **The intro is on the Song Journey page too.** Layer 2 of "the cure" now
-  opens with its own four-bar intro tab above the verse-and-chorus one, so the
-  page and the activities teach the same thing.
+- **Module 2's "the cure" challenge follows it too.** The card now starts you
+  on the low E string — the verse is A · C then F · C, and its first four bars
+  are the song's intro — before moving the same line onto two strings and
+  adding the chorus. Its TAB runs all three. What the assessment asks for is
+  unchanged: verse and chorus on both strings, twice through at 100 BPM.
+- **The Song Journey page follows the same path.** Layer 2 of "the cure" now
+  runs four tabs in the order the class meets them: the intro and the verse on
+  the low E string alone, then the same line on two strings with nothing past
+  fret 5, then the chorus. The Level up is the chorus on the low E too — D at
+  fret 10, F at fret 1, C at fret 8, G at fret 3, the whole song on one string.
 
 ## 2026-09-15 — "the cure" root line is now verse + chorus on both strings; Unit 2 assessment text updated
 
