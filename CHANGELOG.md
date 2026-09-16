@@ -5,6 +5,16 @@ Notable changes to the Guitar Class site. Newest first.
 For the full session-by-session history (and the reasoning behind each change),
 see `WORKFLOW.md` and the git commit log.
 
+## 2026-09-16 — Class activity #15: "the cure" verse on two strings
+
+### Added
+
+- **"the cure" — The Verse on Two Strings (`ca-19`)** — a four-rung mini
+  card for the Day 17 calendar item "play the cure verse on E and A
+  strings": A · C · F with the hand parked in frets 1–5, string cross
+  instead of the trip to fret 8. Reuses `img/ca-cure-roots-both.svg`.
+  "the cure" — Intro, Verse and Chorus moves from #15 to #16.
+
 ## 2026-09-16 — "the cure": the intro arrives, and the chorus gets its own day
 
 ### Changed
