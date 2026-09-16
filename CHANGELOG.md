@@ -23,6 +23,11 @@ see `WORKFLOW.md` and the git commit log.
   D and G — and all three sections played in song order. New rungs for the
   three handoffs where one section passes to the next, and a link to Layer 2 of
   the "the cure" Song Journey page to play it with the track.
+- **Module 2's "the cure" challenge follows it too.** The card now starts you
+  on the low E string — the verse is A · C then F · C, and its first four bars
+  are the song's intro — before moving the same line onto two strings and
+  adding the chorus. Its TAB runs all three. What the assessment asks for is
+  unchanged: verse and chorus on both strings, twice through at 100 BPM.
 - **The Song Journey page follows the same path.** Layer 2 of "the cure" now
   runs four tabs in the order the class meets them: the intro and the verse on
   the low E string alone, then the same line on two strings with nothing past
