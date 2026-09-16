@@ -5,6 +5,21 @@ Notable changes to the Guitar Class site. Newest first.
 For the full session-by-session history (and the reasoning behind each change),
 see `WORKFLOW.md` and the git commit log.
 
+## 2026-09-16 — The site no longer looks like it signed you in twice
+
+### Fixed
+
+- **A site update landing right as you signed in no longer makes you sit
+  through the sign-in again.** When a new version of the site goes up, your
+  page refreshes itself to pick it up. It already knew to wait while the
+  Google window was open — but not for the few seconds after it, while your
+  progress was still loading. Refreshing in there threw that away and started
+  the whole sign-in over. It now waits until your work is on screen.
+- **And when the site does refresh itself, it says so.** You used to see
+  "Checking your sign-in…" and then "Signed in — loading your progress…" all
+  over again, which looked exactly like being signed in a second time. It now
+  says "Updating to the newest version…" instead.
+
 ## 2026-09-16 — The A string: note names and Happy Birthday are one activity
 
 ### Changed

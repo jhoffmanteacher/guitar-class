@@ -491,6 +491,22 @@ function clearAuthStallTimer(){
   const el = document.getElementById('auth-stalled');
   if(el) el.hidden = true;
 }
+/* Was this page load OUR OWN post-deploy reload (service worker, bottom of
+   this file)? Then say so. Without this the wall replays "Checking your
+   sign-in…" → "Signed in — loading your progress…" exactly as it does after a
+   real sign-in, so a routine update reads as the site making you sign in a
+   second time — which is what it gets reported as. sessionStorage is per-tab
+   and signOut() clears it, so the flag can't leak to another tab or to the
+   next student on a shared Chromebook. */
+const SW_UPDATE_BOOT = (()=>{
+  try{
+    if(sessionStorage.getItem('gcSwUpdating') !== '1') return false;
+    sessionStorage.removeItem('gcSwUpdating');   // consumed — a later manual reload is not an update
+    return true;
+  }catch(e){ return false; }
+})();
+if(SW_UPDATE_BOOT) setAuthWallChecking('auth.updating');
+
 let _authRevealTimer = firebaseReady ? setTimeout(revealAuthWallSignIn, 6000) : null;
 if(!firebaseReady) revealAuthWallSignIn();   // wall content is being replaced anyway — don't strand the checking note
 
@@ -505,16 +521,33 @@ if(auth) auth.onAuthStateChanged(async user=>{
     // The header goes straight to the real user header rather than blank: their
     // own name appearing is the clearest possible "it worked, stop clicking",
     // and it's the same markup showApp()/showTeacherApp() is about to write.
-    setAuthWallChecking('auth.loading');
+    /* The sign-in is NOT over when the popup closes. __authPopupPending clears
+       the instant signInWithPopup resolves, but showApp() is still a ~100 KB
+       Firestore SDK download and two reads away — 5-15 s on school Wi-Fi, and
+       almost exactly how long a new service worker takes to precache the shell.
+       A post-deploy reload landing in that window throws the finished sign-in
+       away and replays the whole sequence: the "it signed me in twice" report.
+       The reload at the bottom of this file waits on this flag, bounded by its
+       own 5-minute cap so a Firestore read that never returns still can't pin
+       a tab to the old build for the rest of the day. */
+    window.__authBootPending = true;
+    setAuthWallChecking(SW_UPDATE_BOOT ? 'auth.updating' : 'auth.loading');
     document.getElementById('user-area').innerHTML = userHeaderHtml(user);
     startAuthStallTimer();   // ...but don't strand them there if the load never finishes
-    if(IS_TEACHER_MODE){ await ensureTeacherJs(); showTeacherApp(user); clearAuthStallTimer(); }
-    else {
-      await loadProgress(); await loadClassConfig();
-      clearAuthStallTimer();   // cleared here, not inside showApp/showPausedScreen, so every exit from the wait is covered
-      if(accountPaused) showPausedScreen(user); else showApp(user);
+    try{
+      if(IS_TEACHER_MODE){ await ensureTeacherJs(); showTeacherApp(user); clearAuthStallTimer(); }
+      else {
+        await loadProgress(); await loadClassConfig();
+        clearAuthStallTimer();   // cleared here, not inside showApp/showPausedScreen, so every exit from the wait is covered
+        if(accountPaused) showPausedScreen(user); else showApp(user);
+      }
+    } finally {
+      // finally, not after the branch: a throw in there must not leave the flag
+      // set, or the tab would sit on old code until the 5-minute cap expires.
+      window.__authBootPending = false;
     }
   } else {
+    window.__authBootPending = false;
     currentUser = null; progress = {}; responses = {}; completed = {}; completedDeletes = new Set(); classActivities = {}; classActivitiesDeletes = new Set(); exitChecks = {}; games = {}; streak = { count:0, lastDay:null }; gamesAccessOn = true; studentPeriod = ''; periodOverride = ''; hiddenActivityIds = {}; activityDates = {}; activityTitles = {}; activityNumbers = {}; activityClears = {}; retiredActivityIds = {}; progressLoadFailed = false;
     document.body.classList.remove('ca-gated');   // next sign-in recomputes it fresh — don't leave a stale gate showing over the sign-in wall
     if(typeof gamesResetForUser === 'function') gamesResetForUser();   // Note Runner's module caches must not leak into the next signed-in user
@@ -8515,6 +8548,11 @@ if ('serviceWorker' in navigator && location.protocol.startsWith('http')) {
       const busyReason = () => {
         // A live mic check / count-in (coach.js), or a take still recording:
         // a MediaRecorder blob lives in memory until the student keeps it.
+        // Mid-sign-in. __authPopupPending (checked separately, and unbounded)
+        // only covers the Google popup itself; this covers the Firestore boot
+        // that follows it, which is the part that looks like a second sign-in
+        // when a reload lands in it. See onAuthStateChanged.
+        if (window.__authBootPending) return 'auth';
         if (window.coachMicLive) return 'mic';
         if (anyValue(recState, s => s.starting || s.recording)) return 'recording';
         // Mid-round in a Shuffle ('play') / Deck or Ear ('run') drill: the
@@ -8536,6 +8574,10 @@ if ('serviceWorker' in navigator && location.protocol.startsWith('http')) {
           clearTimeout(saveTimer);
           try { await flushSave(); } catch(e){ /* reload regardless — nothing better is available */ }
         }
+        /* Tell the next load this refresh was the site updating itself, so the
+           wall says "Updating…" rather than walking the student back through
+           the sign-in screens it shows after a real sign-in. */
+        try { sessionStorage.setItem('gcSwUpdating', '1'); } catch(e) { /* storage blocked — reload anyway, just without the message */ }
         location.reload();
       };
       reload();

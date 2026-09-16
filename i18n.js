@@ -201,6 +201,10 @@
     // Shown between "signed in" and the app appearing, in place of the sign-in
     // button — see setAuthWallChecking() in app.js.
     'auth.loading':       { en: 'Signed in — loading your progress…', es: 'Sesión iniciada: cargando tu progreso…' },
+    // Shown instead of the two lines above when the page reloaded itself to pick
+    // up a new version (service worker, app.js) — otherwise a routine update
+    // replays the sign-in screens and reads as being signed in twice.
+    'auth.updating':      { en: 'Updating to the newest version…', es: 'Actualizando a la versión más reciente…' },
     // The 20 s escape hatch under that line — there is no sign-in button during
     // the load, so this is the student's only way out of a stalled network.
     'auth.stalled':       { en: 'This is taking longer than usual — the network may be slow. Your work is safe.',
