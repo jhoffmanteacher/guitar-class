@@ -580,14 +580,43 @@ function openStudentDetail(uid){
   renderTeacherBody();
 }
 function backToStudentsRoster(){ studentDetailUid=null; renderTeacherBody(); }
-// Jumps straight to one activity's detail page — from the Class activities
-// table's title cell.
+/* Where the Class activities table was scrolled when a title was clicked, so
+   Back can put you down on the row you left rather than the top of a long
+   list. Only meaningful coming FROM that table — a "Blocked by" row on a
+   student's page opens the same detail with no row to return to. */
+let activityListScrollY = 0;
+let restoreActivityScroll = false;
+/* Jumps straight to one activity's detail page — from the Class activities
+   table's title cell, or a "Blocked by" row on a student's page.
+
+   The scroll reset is the whole reason clicking a title looked broken. The
+   table is usually taller than the window, so a row low in it is clicked
+   from a scrolled page — and the detail page that replaces it is taller than
+   the window too (one row per student), so the browser has nothing to clamp
+   the scroll back to. Without this you stay parked at the same offset,
+   looking at the middle of a student table that reads just like the one you
+   just clicked in. renderTeacherStudentDetail has ended with the same line
+   since it was written; this was the copy that was missing.
+
+   It lives HERE rather than at the end of the two detail renderers because
+   those re-render in place — teacherSetActivityClear repaints the page on
+   every per-student Clear, and jumping to the top mid-way down a 60-row
+   grid is its own bug. Opening is the only moment the scroll should move.
+   window, not a scroll pane: the dashboard is a plain long page, and #app
+   (which does have its own pane — scrollPane() in app.js) is hidden the
+   whole time teacher mode is up. */
 function openActivityDetail(id){
+  activityListScrollY = (teacherView==='activities' && !activityDetailId) ? window.scrollY : 0;
   teacherView='activities'; activityDetailId=id;
   applyTeacherViewChrome('activities');
+  renderTeacherBody();   // synchronous for a detail page — renderTeacherActivities returns early before its config promise
+  window.scrollTo({top:0});
+}
+function backToActivitiesList(){
+  activityDetailId=null;
+  restoreActivityScroll=true;   // the table paints from a promise — see renderTeacherActivities
   renderTeacherBody();
 }
-function backToActivitiesList(){ activityDetailId=null; renderTeacherBody(); }
 function renderTeacherBody(){
   if(teacherView==='games') renderTeacherGames();
   else if(teacherView==='responses') renderTeacherResponses();
@@ -924,6 +953,11 @@ function renderTeacherActivities(opts){
       const inp=box.querySelector('.t-act-title-edit');
       if(inp){ inp.focus(); inp.select(); }
     }
+    // Back from a detail page: land on the row that was clicked. Done here,
+    // not in backToActivitiesList, because the table is painted from this
+    // promise — scrolling before it resolves would only hit the one-line
+    // "Loading…" box, which has nowhere to scroll to.
+    if(restoreActivityScroll){ restoreActivityScroll=false; window.scrollTo({top:activityListScrollY}); }
   });
 }
 // Clicking a sort header: same column clicked again flips direction,
