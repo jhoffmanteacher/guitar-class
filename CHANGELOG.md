@@ -5,6 +5,18 @@ Notable changes to the Guitar Class site. Newest first.
 For the full session-by-session history (and the reasoning behind each change),
 see `WORKFLOW.md` and the git commit log.
 
+## 2026-09-16 — The A string: note names and Happy Birthday are one activity
+
+### Changed
+
+- **Notes on the A String, Then Happy Birthday (`ca-17`)** — the two A-string
+  activities are now one card. It starts by teaching the note names on the A
+  string (map, dot notes, the full row, the quiz, the deck), then puts them to
+  work: cross from the low E to the A string, phrases C and D, and the whole
+  song, naming each A-string note out loud. Every step now has a short title.
+  "Happy Birthday — The A-String Way" (`ca-16`) is retired, and the activities
+  after it move up one number (#10–#15).
+
 ## 2026-09-16 — Class activity #15: "the cure" verse on two strings
 
 ### Added
