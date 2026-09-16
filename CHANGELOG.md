@@ -5,18 +5,24 @@ Notable changes to the Guitar Class site. Newest first.
 For the full session-by-session history (and the reasoning behind each change),
 see `WORKFLOW.md` and the git commit log.
 
-## 2026-09-16 — "the cure": the intro joins the verse and chorus
+## 2026-09-16 — "the cure": the intro arrives, and the chorus gets its own day
+
+### Changed
+- **"the cure" — Intro and Verse Roots.** The activity that was Verse and
+  Chorus Roots now opens with the song's intro — the guitar on its own, A then
+  C, twice — teaches the verse, and stops there. The chorus moved to the next
+  day's card, so one class is one new section instead of two.
 
 ### Added
-- **New activity: "the cure" — Intro, Verse and Chorus Roots.** The song's
-  opening — the guitar on its own, A then C, twice — plus the verse and chorus
-  roots you already know, then all three played in song order. Still the low E
-  and A strings, still frets 1-5, no new notes. New rungs for the three
-  handoffs where one section passes to the next, and a link to Layer 2 of the
-  "the cure" Song Journey page to play it with the track.
+- **New activity: "the cure" — Intro, Verse and Chorus Roots.** The next day's
+  card. The intro and the verse again from the top, then the chorus — the last
+  two roots, D and G — and all three sections played in song order. Still the
+  low E and A strings, still frets 1-5. New rungs for the three handoffs where
+  one section passes to the next, and a link to Layer 2 of the "the cure" Song
+  Journey page to play it with the track.
 - **The intro is on the Song Journey page too.** Layer 2 of "the cure" now
   opens with its own four-bar intro tab above the verse-and-chorus one, so the
-  page and the activity teach the same thing.
+  page and the activities teach the same thing.
 
 ## 2026-09-15 — "the cure" root line is now verse + chorus on both strings; Unit 2 assessment text updated
 
