@@ -210,6 +210,10 @@ async function showTeacherApp(user){
       if(bump){ teacherBoardBump(bump.dataset.id, bump.dataset.dir); return; }
       const fold=e.target.closest('[data-board-fold]');
       if(fold){ teacherBoardFold(fold.dataset.module); return; }
+      if(e.target.closest('[data-board-flip]')){ teacherBoardFlipDir(); return; }
+      // The sort select is a live input on the board's own chrome — swallow
+      // the click so it can't fall through to anything behind it.
+      if(e.target.closest('[data-board-sort]')) return;
       // Rename controls sit INSIDE the title line, which is itself the
       // data-open-activity link — so they have to be matched before it, or
       // clicking the pencil would navigate away instead of opening the editor.
@@ -247,6 +251,8 @@ async function showTeacherApp(user){
       // they name, same as dropping a card on a section's empty space.
       const moveSel=e.target.closest('[data-move-activity]');
       if(moveSel && moveSel.value!==''){ teacherMoveActivity(moveSel.dataset.id, Number(moveSel.value), null); return; }
+      const sortSel=e.target.closest('[data-board-sort]');
+      if(sortSel){ teacherBoardSetSort(sortSel.value); return; }
     });
     /* An <details> in the board remembers whether it was open across the
        next re-render — the board repaints on every write, and an Archived
@@ -577,7 +583,15 @@ let activityEditId=null;
    that section's "Archived (N)" disclosure — it still holds its place, so
    Restore puts it back where it was. A DELETED one is taken off the board
    as well, so it lands back in Built with everything else unplaced. */
+/* The Class activities board is the one teacher view that wants the whole
+   window — two columns of cards, where .t-main's 900px reading column left
+   most of a 1366px Chromebook empty. Everything else here is a table or a
+   page of text and stays centred, so this is a body class rather than a
+   change to .t-main. Off for the activity DETAIL pages too: those are
+   reading, not laying out. */
+function setBoardWide(on){ document.body.classList.toggle('t-wide', !!on); }
 function applyTeacherViewChrome(v){
+  if(v!=='activities') setBoardWide(false);
   document.querySelectorAll('.t-vt').forEach(b=>b.classList.toggle('on',b.dataset.view===v));
   const legend=document.getElementById('t-legend'); if(legend) legend.style.display = v==='skills' ? '' : 'none';
   // Games, Trouble-spots and Students are all class-wide, not per-week —
@@ -770,9 +784,38 @@ function teacherCopyActivityLink(id, btn){
    open, and which card a drag is currently carrying. Same convention as
    activityEditId above: it lives for as long as the tab is open and starts
    fresh on re-entry, because none of it is worth a Firestore round trip. */
-let boardSectionClosed={};     // module number -> true (default: open)
+let boardSectionClosed={};     // module number -> true; undefined = never touched, default open
 let boardArchOpen={};          // module number (or 'built') -> true
 let boardDragId=null;          // the id a drag is carrying — never in dataTransfer
+/* ── How the board is SHOWN (Jonathan, 2026-09-16) ──────────────────────
+   Sorting here is the teacher's view and nothing else: it never writes, and
+   students always read the course order the board holds. The `#N` on a card
+   is its real position either way, so a descending view reads 9, 8, 7 …
+
+   Descending is the DEFAULT, on both axes: the newest module at the top and
+   the newest activity at the top of it, because the work being set up is
+   almost always the most recent and scrolling past a semester to reach it
+   was the whole complaint. Ascending is one click away.
+
+   Unsorted is pinned first regardless of direction — it is the tray of
+   cards not yet placed in the course, not a module with a number, so it
+   belongs where it will be noticed rather than at whichever end the sort
+   happens to put module 0. */
+let boardSortKey='order';      // 'order' | 'date' | 'title' | 'done'
+let boardSortDir='desc';       // 'desc' = newest/highest first
+/* Everything that MOVES a card counts positions in the board's own
+   ascending order (teacherBoardModuleIds), but the screen is descending by
+   default — so "drop this above that one" and "▲" both mean the OPPOSITE
+   position from the one the maths would reach for. These two are the single
+   place that mismatch is resolved; every mover goes through them.
+
+   boardCanReorder(): dragging to a position and ▲▼ only make sense while
+   the list on screen IS the board order. Sorted by date or name, "above"
+   names no position at all, so those affordances are withdrawn rather than
+   left to do something arbitrary — a drop then just moves the card into
+   the section, and the # box (which names a position outright) still works. */
+function boardDescending(){ return boardSortDir==='desc'; }
+function boardCanReorder(){ return boardSortKey==='order'; }
 // The migration is a one-shot write, but renderTeacherActivities can paint
 // several times before it lands (a view switch, a language change). One
 // in-flight guard so it is attempted once per session, not once per paint.
@@ -903,10 +946,12 @@ function renderTeacherActivities(opts){
   if(activityDetailId){ renderTeacherActivityDetail(activityDetailId); return; }
   const activities=(window.CLASS_ACTIVITIES||[]);
   if(!activities.length){
+    setBoardWide(false);
     box.innerHTML='<div class="t-loading">No activities yet — they\'ll appear here once one is pushed to the site.</div>';
     return;
   }
   if(allStudents.length===0){
+    setBoardWide(false);
     box.innerHTML='<div class="t-loading">No student data yet — students need to sign in first.</div>';
     return;
   }
@@ -1023,8 +1068,11 @@ function renderTeacherActivities(opts){
     };
 
     /* ── Left column: Built ─────────────────────────────────────────── */
+    // Newest id first by default (boardSortDir 'desc'), like everything else
+    // on the board — the card just pushed is the one being placed.
+    const dirMul = boardSortDir==='desc' ? -1 : 1;
     const builtAll=activities.filter(a=>!view.assigned[a.id])
-      .sort((x,y)=>teacherActivityIdNum(y)-teacherActivityIdNum(x));   // newest id first
+      .sort((x,y)=>dirMul*(teacherActivityIdNum(x)-teacherActivityIdNum(y)));
     const builtCard=a=>{
       const isRetired=teacherActivityRetired(a.id,cfg);
       const strays=[];
@@ -1085,7 +1133,7 @@ function renderTeacherActivities(opts){
           ? `<button class="tg-seg-btn" data-set-activity-archived data-id="${escAttr(a.id)}" data-state="restore" title="Put this activity back in this module, where it was, with its date and name">Restore</button>`
             +`<button class="tg-seg-btn t-act-danger" data-delete-activity data-id="${escAttr(a.id)}" title="Clear this activity's date, name and gate clears, and take it off the board">Delete</button>`
           : `<button class="tg-seg-btn" data-set-activity-archived data-id="${escAttr(a.id)}" data-state="archive" title="Take this off students' Today page but keep its place, date and name">Archive</button>`);
-      const moveBtns=isRetired ? '' :
+      const moveBtns=(isRetired || !boardCanReorder()) ? '' :
         `<button class="tg-seg-btn" data-board-bump data-id="${escAttr(a.id)}" data-dir="up" title="Move up within this module" aria-label="Move up">&#x25B2;</button>`
         +`<button class="tg-seg-btn" data-board-bump data-id="${escAttr(a.id)}" data-dir="down" title="Move down within this module" aria-label="Move down">&#x25BC;</button>`;
       // Not draggable once retired: every other move control is hidden on
@@ -1107,19 +1155,49 @@ function renderTeacherActivities(opts){
         +retireBtns+`</span></div>`
         +`</div>`;
     };
-    /* One block per section — EVERY module gets one, even an empty one, so
-       there is always somewhere to drop a card. Unsorted is the exception:
-       it's a holding pen, so it shows only while it holds something. */
+    /* Card order INSIDE a section. 'order' is the board's own order, which
+       is the one students read; the other keys are a way of looking through
+       the list and never leave this screen. Nothing here writes, and `#N` on
+       each card stays its real position whichever way the list is pointed. */
+    const sortIds=ids=>{
+      const arr=ids.slice();
+      if(boardSortKey==='order') return dirMul<0 ? arr.reverse() : arr;
+      const doneOf=id=>{
+        const a=byId[id]; if(!a) return 0;
+        return a.kind==='check'
+          ? allStudents.filter(s=>(s.exitChecks||{})[id]).length
+          : allStudents.filter(s=>(s.classActivities||{})[id]===true).length;
+      };
+      const cmp=(x,y)=>{
+        if(boardSortKey==='date'){
+          const dx=dates[x]||'', dy=dates[y]||'';
+          // An undated card isn't "earlier" or "later" than a dated one, so
+          // it sinks to the bottom whichever way the arrow points — same
+          // rule the old Class activities table used.
+          if(dx && !dy) return -1;
+          if(!dx && dy) return 1;
+          return dirMul*dx.localeCompare(dy);
+        }
+        if(boardSortKey==='title')
+          return dirMul*String(teacherActivityTitle(byId[x]||{},cfg)).localeCompare(String(teacherActivityTitle(byId[y]||{},cfg)));
+        return dirMul*(doneOf(x)-doneOf(y));
+      };
+      return arr.sort((x,y)=>cmp(x,y) || (teacherActivityIdNum(byId[x]||{})-teacherActivityIdNum(byId[y]||{})));
+    };
+    /* One block per section that HOLDS something. An empty module used to
+       render as a drop target, which meant scrolling past eleven "Drop an
+       activity here" boxes to reach the one module in use (Jonathan,
+       2026-09-16); "Assign to…" / "Move to…" still list every module, so
+       nothing became unreachable. A module appears the moment it has a card. */
     const sectionsById={}; view.sections.forEach(sec=>{ sectionsById[sec.module]=sec; });
-    const sectionOrder=[0].concat(manifest.map(m=>m.num));
+    const holds=mn=>{ const s=sectionsById[mn]; return !!(s && (s.ids.length || s.retiredIds.length)); };
     const sectionHtml=mn=>{
       const sec=sectionsById[mn]||{module:mn, ids:[], retiredIds:[]};
-      if(mn===0 && !sec.ids.length && !sec.retiredIds.length) return '';
       const mod=manifest.find(m=>m.num===mn);
       const label=mn===0?'Unsorted':`Module ${mn} — ${escHtml(mod?mod.name:'(unknown module)')}`;
       const closed=boardSectionClosed[mn]===true;
-      const cards=sec.ids.map(id=>byId[id]).filter(Boolean).map(assignedCard).join('');
-      const arch=sec.retiredIds.map(id=>byId[id]).filter(Boolean);
+      const cards=sortIds(sec.ids).map(id=>byId[id]).filter(Boolean).map(assignedCard).join('');
+      const arch=sortIds(sec.retiredIds).map(id=>byId[id]).filter(Boolean);
       return `<div class="t-board-section${closed?' t-board-closed':''}" data-board-section data-module="${mn}">`
         +`<div class="t-board-sechead" data-board-fold data-module="${mn}">`
         +`<span class="t-board-caret" aria-hidden="true"></span><span>${label}</span>`
@@ -1129,15 +1207,33 @@ function renderTeacherActivities(opts){
         +(arch.length?`<details class="t-board-arch" ${boardArchOpen[mn]?'open':''} data-board-arch data-module="${mn}"><summary>Archived (${arch.length})</summary>${arch.map(assignedCard).join('')}</details>`:'')
         +`</div></div>`;
     };
-    const unknownModules=Object.keys(sectionsById).map(Number)
-      .filter(mn=>mn!==0 && !manifest.some(m=>m.num===mn)).sort((x,y)=>x-y);
+    // Unsorted pinned first (see boardSortKey), then the modules that hold
+    // something, highest number first by default.
+    const moduleNums=manifest.map(m=>m.num)
+      .concat(Object.keys(sectionsById).map(Number).filter(mn=>mn!==0 && !manifest.some(m=>m.num===mn)))
+      .filter(holds).sort((x,y)=>dirMul*(x-y));
+    const sectionOrder=(holds(0)?[0]:[]).concat(moduleNums);
     const assignedCount=view.sections.reduce((n,sec)=>n+sec.ids.length,0);
+    const hiddenModules=manifest.length-moduleNums.filter(mn=>manifest.some(m=>m.num===mn)).length;
+    const SORT_LABELS={order:'Course order', date:'Release date', title:'Name', done:'How many done'};
+    const sortBar=`<div class="t-board-sortbar">`
+      +`<label class="t-board-sortlbl" for="t-board-sort">Sort</label>`
+      +`<select class="t-board-move" id="t-board-sort" data-board-sort aria-label="Sort the board (your view only)">`
+      +Object.keys(SORT_LABELS).map(k=>`<option value="${k}"${boardSortKey===k?' selected':''}>${escHtml(SORT_LABELS[k])}</option>`).join('')
+      +`</select>`
+      +`<button class="tg-seg-btn" data-board-flip title="${escAttr(boardSortDir==='desc'?'Highest first — click for lowest first':'Lowest first — click for highest first')}" aria-label="Reverse the order">${boardSortDir==='desc'?'\u2193 Highest first':'\u2191 Lowest first'}</button>`
+      +`<span class="t-board-sortnote">Your view only — students always read the course order.${boardCanReorder()?'':' Switch back to Course order to drag cards into position.'}</span>`
+      +`</div>`;
     const assignedHtml=`<section class="t-board-assigned">`
       +`<div class="t-board-head">Assigned to students (${assignedCount})</div>`
-      +`<div class="t-board-hint">This is the order students read them in, and where the #numbers come from.</div>`
-      +sectionOrder.concat(unknownModules).map(sectionHtml).join('')
+      +`<div class="t-board-hint">This is the order students read them in, and where the #numbers come from.`
+      +(hiddenModules>0?` ${hiddenModules} empty module${hiddenModules===1?'' :'s'} not shown — use “Assign to…” on a card to put something in one.`:'')
+      +`</div>`
+      +sortBar
+      +sectionOrder.map(sectionHtml).join('')
       +`</section>`;
 
+    setBoardWide(true);
     box.innerHTML=`<div class="tg-note">Drag a built activity into a module to assign it. It goes live for students on its release date.</div>`
       +`<details class="tg-help"><summary>How this page works</summary>`
       +`<div class="tg-note">A card shows to students only when all four are true: it is <strong>assigned</strong> to a module here, its <strong>release date</strong> has arrived, it is not <strong>Hidden</strong>, and it is not <strong>Archived</strong>. Publish now dates it today; scheduling a later day holds it until then; Unpublish clears the date. A card's date stays editable once it's live, so you can move it to another day without unpublishing first — type a future day and it goes back to Scheduled. Use Hidden to pull back something already live, then un-hide any time — the date and the Hidden switch are independent, either one hides.<br><br>`
@@ -1163,6 +1259,9 @@ function teacherBoardFold(module){
   boardSectionClosed[mn]=!boardSectionClosed[mn];
   renderTeacherActivities({cached:true});   // a fold over cards we already have
 }
+// Both write nothing — see the boardSortKey comment. Repaint from cache.
+function teacherBoardSetSort(key){ boardSortKey=key; renderTeacherActivities({cached:true}); }
+function teacherBoardFlipDir(){ boardSortDir = boardSortDir==='desc' ? 'asc' : 'desc'; renderTeacherActivities({cached:true}); }
 function teacherBoardArchToggle(key, open){ boardArchOpen[key]=!!open; }
 
 /* ── The one writer every move goes through ─────────────────────────────
@@ -1254,7 +1353,10 @@ function teacherBoardBump(id, dir){
      a dead click that still wrote to Firestore. */
   const live=all.filter(x=>!teacherActivityRetired(x,cfg));
   const li=live.indexOf(id);
-  const lj=dir==='up'?li-1:li+1;
+  // ▲ means "up the screen". The list runs the other way when the view is
+  // descending, so the step has to flip with it — see boardDescending().
+  const up = boardDescending() ? dir!=='up' : dir==='up';
+  const lj=up?li-1:li+1;
   if(li<0 || lj<0 || lj>=live.length){ renderTeacherActivities({cached:true}); return; }  // already at the end
   // Translate back to a position in the full list: land immediately before
   // the live neighbour when moving up, immediately after it when moving down.
@@ -1262,7 +1364,7 @@ function teacherBoardBump(id, dir){
   const rest=all.filter(x=>x!==id);
   const ni=rest.indexOf(nb);
   if(ni<0){ renderTeacherActivities({cached:true}); return; }
-  teacherMoveActivity(id, mn, dir==='up' ? ni+1 : ni+2);
+  teacherMoveActivity(id, mn, up ? ni+1 : ni+2);
 }
 /* Typing a position into a card's # box. "#n" means the slot the card that
    currently shows #n is sitting in: the typed card lands in THAT card's
@@ -1340,10 +1442,13 @@ function teacherBoardDragOver(e){
   // Over a card: the line goes above or below it depending on which half
   // the cursor is in, the ordinary list-reorder idiom. Over the header or
   // the empty space under the cards: append, so the section itself lights up.
-  if(over && over.dataset.id!==boardDragId && section.contains(over)){
+  // Under a non-course-order sort the drop can only add the card to the
+  // module, so the whole section lights up instead of drawing a line at a
+  // position that would be thrown away (boardCanReorder).
+  if(over && over.dataset.id!==boardDragId && section.contains(over) && boardCanReorder()){
     const r=over.getBoundingClientRect();
     over.classList.add(e.clientY < r.top + r.height/2 ? 't-board-drop-before' : 't-board-drop-after');
-  } else if(!over){
+  } else {
     section.classList.add('t-board-drop-in');
   }
 }
@@ -1360,14 +1465,35 @@ function teacherBoardDrop(e){
   if(built){ teacherUnassignActivity(id); return; }
   const mn=Number(section.dataset.module)||0;
   const over=t.closest('[data-board-card]');
-  if(!over || over.dataset.id===id || !section.contains(over)){ teacherMoveActivity(id, mn, null); return; }
+  /* A drop that names no position — on the section's header or its empty
+     space — means "put this in this module", and that appends to the end of
+     the module's course order whichever way the view happens to be pointed.
+     An earlier cut flipped this to position 1 under a descending view, which
+     silently renumbered every card in the module on a drop the teacher
+     thought was a plain "add it here". Only a drop ON a card names a
+     position, and that one does follow the view (below). */
+  const append=()=>teacherMoveActivity(id, mn, null);
+  /* Sorted by date/name/done, the list on screen is not the course order, so
+     no drop inside it names a position. Dropping a card back into the module
+     it already sits in is then a no-op rather than a silent re-pack — an
+     aborted drag must not be a write. */
+  if(!boardCanReorder()){
+    const cur=(teacherClassConfig.activityBoard||{})[id];
+    if(cur && (Number(cur.module)||0)===mn){ renderTeacherActivities({cached:true}); return; }
+    append(); return;
+  }
+  if(!over || over.dataset.id===id || !section.contains(over)){ append(); return; }
   // pos is counted in the target module AFTER the dragged card is removed,
   // which is exactly what teacherMoveActivity does with it.
   const list=teacherBoardModuleIds(teacherClassConfig, mn).filter(x=>x!==id);
   const idx=list.indexOf(over.dataset.id);
-  if(idx<0){ teacherMoveActivity(id, mn, null); return; }
+  if(idx<0){ append(); return; }
   const r=over.getBoundingClientRect();
-  teacherMoveActivity(id, mn, (e.clientY < r.top + r.height/2) ? idx+1 : idx+2);
+  // Above the midpoint means "before this card" on screen. In a descending
+  // view that is AFTER it in course order — see boardDescending().
+  const above=e.clientY < r.top + r.height/2;
+  const before=boardDescending() ? !above : above;
+  teacherMoveActivity(id, mn, before ? idx+1 : idx+2);
 }
 /* The name to SHOW for an activity in the console: the teacher's rename if
    one is live, otherwise the title class-activities.js ships. Deliberately
@@ -1443,6 +1569,7 @@ async function teacherSetActivityTitle(id, value){
 const linkRow=a=>`<div class="tg-note">Student link: <code>${escHtml(activityStudentLink(a.id))}</code> `
   +`<button class="tg-seg-btn t-act-link" data-copy-activity-link data-id="${escAttr(a.id)}">Copy link</button></div>`;
 function renderTeacherActivityDetail(id){
+  setBoardWide(false);
   const box=document.getElementById('t-grid-container');
   const back=`<button type="button" class="stu-back" data-back-to-activities>&#x2190; All activities</button>`;
   const a=(window.CLASS_ACTIVITIES||[]).find(x=>x.id===id);
