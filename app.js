@@ -8577,16 +8577,22 @@ function renderClassActivities(){
   // (caToggleComplete/ecSubmit, both call this) has to be reflected before
   // either of them looks at it.
   applyActivityGate();
-  /* Reading order is the console board's order (caBoardOrder), module
-     section by module section — not a date sort any more. The board IS the
-     teaching order, so the page now reads top to bottom the way the course
-     runs, and the "#N - " prefix on each card counts down the same list. */
+  /* The console board (caBoardOrder) still owns the TEACHING order — the
+     "#N" on a card is that order, ascending, unchanged (numbering, gating
+     and deep links all key off it and must not move). What flips here
+     (Jonathan, 2026-09-17) is purely the READING order on this page: newest
+     module first, and within a module the most recently assigned card
+     (highest board position) first — so a student lands on current work
+     without scrolling past everything already behind them. Reversing
+     view.sections and each section's ids does that without touching
+     caBoardOrder/caNumber, which every other reader (teacher console,
+     caIsVisible, deep links) still expects in course order. */
   const byId = {};
   (window.CLASS_ACTIVITIES || []).forEach(a => { byId[a.id] = a; });
   const view = caBoardView();
-  const groups = view.sections.map(sec => ({
+  const groups = view.sections.slice().reverse().map(sec => ({
     sec,
-    cards: sec.ids.map(id => byId[id]).filter(a => a && caIsVisible(a)),
+    cards: sec.ids.slice().reverse().map(id => byId[id]).filter(a => a && caIsVisible(a)),
   })).filter(g => g.cards.length);
   const list = groups.reduce((acc, g) => acc.concat(g.cards), []);
   // A deep link whose id isn't published (or is mistyped) says so, above the
@@ -8599,9 +8605,10 @@ function renderClassActivities(){
   } else {
     // Done work collapses into its own group (caFinishedGroupHtml) so the
     // list a student actually needs to act on isn't buried under everything
-    // already turned in — finished keeps the board order, just reversed, so
-    // the thing they turned in most recently is at the top of it.
-    const finished = list.filter(a => classActivities[a.id] === true).reverse();
+    // already turned in — `list` is already newest-module/newest-card
+    // first (see above), so filtering it straight through puts the thing
+    // they turned in most recently at the top, same as it always has.
+    const finished = list.filter(a => classActivities[a.id] === true);
     // Every card starts collapsed, Do-now included — nothing is opened here.
     // caOpenId only ever becomes non-null because the student opened a card
     // (caOnActivityToggle), a deep link focused one (caFocusActivity), or a

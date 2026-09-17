@@ -5,6 +5,17 @@ Notable changes to the Guitar Class site. Newest first.
 For the full session-by-session history (and the reasoning behind each change),
 see `WORKFLOW.md` and the git commit log.
 
+## 2026-09-17 — Today reads newest module first
+
+### Changed
+
+- **Your Today page now lists your newest module first**, with the most
+  recently assigned activity in it at the top — so you land on your current
+  work instead of scrolling past everything from earlier in the course. The
+  "#N" on each card still counts the same way it always has (1 is still your
+  very first activity); only the order they're listed in flipped. "Earlier"
+  (finished work) follows the same newest-first order.
+
 ## 2026-09-17 — Your activity list can't jump back to an older order
 
 ### Fixed
