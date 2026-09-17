@@ -5,6 +5,21 @@ Notable changes to the Guitar Class site. Newest first.
 For the full session-by-session history (and the reasoning behind each change),
 see `WORKFLOW.md` and the git commit log.
 
+## 2026-09-17 — Your activity list can't jump back to an older order
+
+### Fixed
+
+- **A change your teacher makes in one place no longer gets undone from
+  another.** The teacher's settings page can be open in more than one place at
+  once — a laptop and the classroom computer, say. Until now, if a change was
+  made in one of them and then a button was clicked in the other, that second
+  click was worked out from the older copy of the settings and could quietly
+  put the first change back: the order your activities appear in on Today, or
+  whether one was posted to you at all. The site now spots that the settings
+  have moved on, refuses to save the out-of-date version and says so — so what
+  your teacher sets is what stays. Nothing you have finished is affected
+  either way.
+
 ## 2026-09-16 — Today's activities are grouped by module
 
 ### Changed
