@@ -998,7 +998,13 @@ function renderTeacherActivities(opts){
       let status, controls;
       if(!dateVal){ status=`<span class="t-board-status">Not published</span>`; controls=pubNow+` <span class="t-board-sched">or schedule ${dateInput}</span>`; }
       else if(dateVal>today){ status=`<span class="t-board-status t-board-sched-on">Scheduled ${escHtml(dateVal)}</span>`; controls=dateInput+' '+unpub; }
-      else { status=`<span class="t-board-status ${isHidden?'t-board-hidden-on':'t-board-live'}">${isHidden?'Hidden':'Live'}</span>`; controls=`<span class="t-board-sched">${escHtml(dateVal)}</span> `+unpub; }
+      /* A live card's date is editable too (Jonathan, 2026-09-16). It used
+         to render read-only, which meant moving something already out to
+         students to a different day took Unpublish → re-date — two writes,
+         and a window where the card vanished from Today in between. Typing
+         a new day straight into the box is one write either way: a past
+         date just re-dates it, a future one pulls it back to Scheduled. */
+      else { status=`<span class="t-board-status ${isHidden?'t-board-hidden-on':'t-board-live'}">${isHidden?'Hidden':'Live'}</span>`; controls=dateInput+' '+unpub; }
       return `<div class="t-board-publish">${status}<span class="t-board-pubctl">${controls}</span></div>`;
     };
     const visSeg=a=>{
@@ -1134,7 +1140,7 @@ function renderTeacherActivities(opts){
 
     box.innerHTML=`<div class="tg-note">Drag a built activity into a module to assign it. It goes live for students on its release date.</div>`
       +`<details class="tg-help"><summary>How this page works</summary>`
-      +`<div class="tg-note">A card shows to students only when all four are true: it is <strong>assigned</strong> to a module here, its <strong>release date</strong> has arrived, it is not <strong>Hidden</strong>, and it is not <strong>Archived</strong>. Publish now dates it today; scheduling a later day holds it until then; Unpublish clears the date. Use Hidden to pull back something already live, then un-hide any time — the date and the Hidden switch are independent, either one hides.<br><br>`
+      +`<div class="tg-note">A card shows to students only when all four are true: it is <strong>assigned</strong> to a module here, its <strong>release date</strong> has arrived, it is not <strong>Hidden</strong>, and it is not <strong>Archived</strong>. Publish now dates it today; scheduling a later day holds it until then; Unpublish clears the date. A card's date stays editable once it's live, so you can move it to another day without unpublishing first — type a future day and it goes back to Scheduled. Use Hidden to pull back something already live, then un-hide any time — the date and the Hidden switch are independent, either one hides.<br><br>`
       +`<strong>Archive</strong> takes a card off students' Today page for good but keeps its place in its module, its date and its name, so Restore puts it back exactly where it was. Archived cards hold no #number, so the ones after them count down by one. <strong>Delete</strong> also clears the date, rename and per-student gate clears, and takes the card off the board entirely — it comes back in Built, blank, to be placed and published from scratch. Neither one removes the activity from the site's code (only an update does) and neither touches what students have already finished, so the Done counts survive both.<br><br>`
       +`<strong>Un-assign</strong> sends a card back to Built without clearing anything. The &#x270E; renames an activity for everyone, in both languages, until the Spanish twin ships. Copy link gives you a URL that opens the site straight to that one activity, card already open — paste it into Classroom. Type over a <strong>#number</strong> to move a card to that position; a number inside a title, like Finger Gym 2, is part of the name and stays put.</div></details>`
       +`<div class="t-board">${builtHtml}${assignedHtml}</div>`;
