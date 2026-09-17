@@ -156,7 +156,8 @@ orphaned `img/`/`audio/` files and unused `DECKS`/`EAR_POOLS` ids (1x), Journey
 tab-ascii column alignment across string rows (1z), every rail `.nav-btn`
 tagged `data-gate="keep"/"hide"` for the activity gate (1aa), the shared
 `CHORD_RANK` table ↔ every Chord Blitz and Chord Detective deck, both
-directions, plus every deck topping out inside a round (1ag).
+directions, plus every deck topping out inside a round (1ag), every
+config/class write going through the stale-write guard (1ai).
 
 Not every class can be guarded by a banned-phrase list. 1w2 pins the Journey
 lick labels *positively* — every `Lick N — ...` card must use one of four
@@ -192,6 +193,40 @@ a typed `#N` — goes through `teacherMoveActivity()`, which re-packs `pos`
 1..N in both the section left and the section joined. **Never write
 `progress/{uid}` from any of this**; completion is keyed to the id and is
 never touched by assign / un-assign / publish / archive / restore.
+
+### ⚠️ Every write to `config/class` goes through `teacherWriteConfig()`
+**2026-09-17.** The console reads `config/class` once per view and computes
+every merge patch from that in-memory copy (`teacherClassConfig`). Nothing
+listens to the doc, so a second console — another tab, the laptop beside the
+projector machine, the other OS — makes that copy stale, and a stale merge
+used to just win: Firestore accepted it, the other session's change was gone,
+and neither screen said anything. The board is where that corrupts rather
+than merely loses, since a move re-packs `pos` 1..N for a whole module from
+the board this tab holds.
+
+`config/class` now carries **`configVersion`**, a counter every write bumps
+inside a transaction, against the version this tab read. Two modes, and the
+caller picks:
+
+- **Strict** (`teacherWriteConfig(patch)`, no `base`) — any concurrent write
+  at all refuses. For anything derived from more of the doc than its patch
+  names: the three board writers, Delete (it re-packs), Clear all.
+- **Cell-checked** (`teacherWriteConfig(patch, base)`, `base` = the values
+  the write was worked out from, `undefined` for "was absent") — an
+  unrelated concurrent edit goes through; a cell that moved underneath us
+  refuses. For the single-cell toggles (a date, Hidden, a period, a clear).
+
+Blanket-strict would fail hiding an activity here because a period was
+corrected there, and a false alarm every time two tabs are open is what
+teaches Jonathan to click through the one that matters. So **omitting `base`
+is the safe default** — a writer that forgets gets strict, not nothing.
+Failures report through `teacherConfigSaveFailed(e, msg)`, which tells a
+stale rejection ("nothing was saved, reloading") apart from a dropped
+connection. checks.mjs **1ai** bans a bare `.set()` on the doc, pins the
+writer count at 15, and requires the transaction — add a writer and it fails
+until you bump `CONFIG_WRITERS` on purpose. `firestore.rules` deliberately
+does NOT enforce the counter (it would lock the Firebase console out of the
+one doc you'd repair by hand); that edit was comments only, nothing to paste.
 
 `number` in `class-activities.js` is **legacy and optional** now: the only
 thing that still reads it is the one-time seeding of a board that has never

@@ -3571,6 +3571,71 @@ function checkChordBlitzRanks() {
   if (bad === 0) ok(`${Object.keys(rank).length} chords ranked, every deck tops out inside its round (${summary.join(' | ')})`);
 }
 
+/* ═════════════════════════════════════════════════════════════════
+   1ai. NO CONFIG WRITE SKIPS THE STALE-WRITE GUARD — teacher.js reads
+   config/class once per view and computes every merge patch from that
+   in-memory copy. Nothing listens to the doc, so a second console (another
+   tab, the other machine) makes that copy stale, and a stale merge used to
+   win silently: Firestore accepted it, the other session's change vanished,
+   and neither screen said anything. teacherWriteConfig() is the fix — a
+   transaction that compares config/class's `configVersion` with the one this
+   tab read, and either rejects the write loudly or, for a caller that named
+   the cells it depends on, lets an unrelated concurrent edit through.
+
+   It only holds while EVERY writer goes through it. A `.set()` written
+   straight onto the doc looks exactly like the fifteen that came before it
+   and is invisible in review, so the detector is a flat ban: in teacher.js
+   the only things allowed to touch config/class are the one `.get()` in
+   loadTeacherClassConfig and the one document ref inside teacherWriteConfig
+   itself. The writer count is pinned for the same reason 1ad pins its title
+   counts — a sixteenth writer is fine, but it should be typed here
+   deliberately, after a look at whether it can pass a `base` or needs the
+   strict default.
+   ═════════════════════════════════════════════════════════════════ */
+const CONFIG_WRITERS = 15;   // teacherWriteConfig() call sites in teacher.js
+function checkConfigWriteGuard() {
+  head('1ai. Every config/class write goes through the stale-write guard');
+  let bad = 0;
+  const flag = m => { err(m); problems++; bad++; };
+  let src;
+  try { src = readFileSync(join(ROOT, 'teacher.js'), 'utf8'); }
+  catch { flag('teacher.js unreadable — 1ai cannot check this'); return; }
+
+  /* The guard itself, before anything is measured against it. Each piece is
+     load-bearing: without the transaction the check-then-write races, and
+     without configVersion there is nothing to check. */
+  const guard = (src.match(/async function teacherWriteConfig\([\s\S]*?\n}\n/) || [])[0];
+  if (!guard) { flag('teacher.js: teacherWriteConfig() not found — the stale-write guard is gone'); return; }
+  for (const [needle, why] of [
+    ['runTransaction', 'the version check and the write must be one atomic step, or two tabs can both pass it'],
+    ['configVersion', 'there is no version to compare'],
+    ['teacherStaleConfigError', 'a rejected write must throw something teacherConfigSaveFailed can recognise'],
+  ]) if (!guard.includes(needle)) flag(`teacher.js teacherWriteConfig(): no ${needle} — ${why}`);
+  if (!/teacherConfigVersion = Number\(cfg\.configVersion\)/.test(src))
+    flag('teacher.js loadTeacherClassConfig(): does not record cfg.configVersion — the guard would compare against a version this tab never read');
+
+  // Every mention of the doc, and the two that are allowed to be there.
+  src.split('\n').forEach((line, li) => {
+    if (!line.includes("doc('class')")) return;
+    const okGet = /\.doc\('class'\)\.get\(\)/.test(line);
+    const okRef = /const ref = dbh\.collection\('config'\)\.doc\('class'\);/.test(line) && guard.includes(line.trim());
+    if (!okGet && !okRef)
+      flag(`teacher.js:${li + 1}: config/class touched outside teacherWriteConfig() — a write here skips the version check and would silently overwrite another console's change. "${line.trim().slice(0, 80)}"`);
+  });
+
+  const writers = (src.match(/await teacherWriteConfig\(/g) || []).length;
+  if (writers !== CONFIG_WRITERS)
+    flag(`teacher.js: ${writers} teacherWriteConfig() call sites, expected ${CONFIG_WRITERS} — if that is a new writer, decide whether it can name the cells it depends on (a \`base\`) or needs the strict default, then bump CONFIG_WRITERS here`);
+  /* Every writer reports through the shared handler, which is the only
+     thing that tells a stale rejection apart from a dropped connection.
+     +1 for the function's own declaration. */
+  const reporters = (src.match(/teacherConfigSaveFailed\(e,/g) || []).length;
+  if (reporters !== CONFIG_WRITERS + 1)
+    flag(`teacher.js: ${reporters - 1} catch blocks call teacherConfigSaveFailed(e, …), expected ${CONFIG_WRITERS} — a writer left on a bare alert() reports a stale write as a connection problem`);
+
+  if (bad === 0) ok(`${CONFIG_WRITERS} config/class writers, all behind teacherWriteConfig() and reporting through teacherConfigSaveFailed()`);
+}
+
 (async function main() {
   if (LIVE_ONLY) {
     console.log(`${C.bold}Guitar Class — post-push live check${C.reset}`);
@@ -3611,6 +3676,7 @@ function checkChordBlitzRanks() {
   checkOrphanAssets();
   checkVisibilityParity();
   checkChordBlitzRanks();
+  checkConfigWriteGuard();
   if (!SKIP_LINKS) await checkLinks();
   else warn('skipping link check (--skip-links)');
   bumpServiceWorker();

@@ -898,11 +898,12 @@ async function teacherMigrateActivityBoard(cfg){
     .sort((x,y)=>(legacyN(x)-legacyN(y))||(shipped(x)-shipped(y))||(teacherActivityIdNum(x)-teacherActivityIdNum(y)))
     .forEach((a,i)=>{ board[a.id]={module:0, pos:i+1}; });
   try{
-    await ensureDb();
-    await db.collection('config').doc('class').set({activityBoard:board, activityBoardSeeded:true},{merge:true});
+    // Strict (no base): this replaces the board wholesale, so any other
+    // write since this tab's read is a reason to stop and look.
+    await teacherWriteConfig({activityBoard:board, activityBoardSeeded:true});
   }catch(e){
     boardMigrating=false;
-    alert('Could not set up the activity board — check your connection and Firestore rules.');
+    teacherConfigSaveFailed(e, 'Could not set up the activity board — check your connection and Firestore rules.');
     return false;
   }
   cfg.activityBoard=board;
@@ -1301,11 +1302,13 @@ async function teacherMoveActivity(id, module, pos){
   if(!Object.keys(patch).length){ renderTeacherActivities({cached:true}); return; }
   cfg.activityBoard=next;
   try{
-    await ensureDb();
-    await db.collection('config').doc('class').set({activityBoard:patch},{merge:true});
+    /* Strict (no base): `pos` is re-packed 1..N from the copy of the board
+       this tab holds, so a base one move out of date writes a run with a
+       duplicate or a hole in it — and nothing downstream would notice. */
+    await teacherWriteConfig({activityBoard:patch});
   }catch(e){
     cfg.activityBoard=prev;
-    alert('Could not save that move — check your connection and Firestore rules.');
+    teacherConfigSaveFailed(e, 'Could not save that move — check your connection and Firestore rules.');
   }
   if(teacherView==='activities') renderTeacherActivities();
 }
@@ -1328,13 +1331,14 @@ async function teacherUnassignActivity(id){
   });
   cfg.activityBoard=next;
   try{
-    await ensureDb();
+    await ensureDb();   // for FieldValue — teacherWriteConfig calls it again, cached
     const fv=firebase.firestore.FieldValue;
     patch[id]=fv.delete();
-    await db.collection('config').doc('class').set({activityBoard:patch},{merge:true});
+    // Strict, same re-packing reason as teacherMoveActivity.
+    await teacherWriteConfig({activityBoard:patch});
   }catch(e){
     cfg.activityBoard=prev;
-    alert('Could not un-assign that activity — check your connection and Firestore rules.');
+    teacherConfigSaveFailed(e, 'Could not un-assign that activity — check your connection and Firestore rules.');
   }
   if(teacherView==='activities') renderTeacherActivities();
 }
@@ -1539,14 +1543,14 @@ async function teacherSetActivityTitle(id, value){
     await ensureDb();
     const fv=firebase.firestore.FieldValue;
     const patch = clear ? {activityTitles:{[id]:fv.delete()}} : {activityTitles:{[id]:{en:name, base:a.title}}};
-    await db.collection('config').doc('class').set(patch,{merge:true});
+    await teacherWriteConfig(patch, {['activityTitles.'+id]: had?prev:undefined});
   }catch(e){
     if(had) teacherClassConfig.activityTitles[id]=prev; else delete teacherClassConfig.activityTitles[id];
     // Leave the editor exactly as it is — re-rendering here would repaint the
     // box from the server's (unchanged) copy and silently discard what was
     // typed, which on a flaky connection is the worst possible outcome.
     activityEditId=id;
-    alert('Could not save that rename — check your connection and Firestore rules. What you typed is still in the box.');
+    teacherConfigSaveFailed(e, 'Could not save that rename — check your connection and Firestore rules. What you typed is still in the box.', {keepEditor:true});
     return;
   }
   if(teacherView==='activities') renderTeacherActivities();
@@ -1722,12 +1726,12 @@ async function teacherSetActivityHidden(id, state){
     // Clear the flag rather than writing false, so config/class doesn't
     // accumulate a row per activity that was ever hidden.
     const patch = on ? {hiddenActivities:{[id]:true}} : {hiddenActivities:{[id]:fv.delete()}};
-    await db.collection('config').doc('class').set(patch,{merge:true});
+    await teacherWriteConfig(patch, {['hiddenActivities.'+id]: had?prev:undefined});
   }catch(e){
     // Save failed — undo the optimistic local mutation so the re-render
     // below reflects what Firestore actually holds, not what we hoped for.
     if(had) teacherClassConfig.hiddenActivities[id]=prev; else delete teacherClassConfig.hiddenActivities[id];
-    alert('Could not save that change — check your connection and Firestore rules.');
+    teacherConfigSaveFailed(e, 'Could not save that change — check your connection and Firestore rules.');
   }
   if(teacherView==='activities') renderTeacherActivities();
 }
@@ -1747,10 +1751,10 @@ async function teacherSetActivityDate(id, value){
     // Clear the field rather than writing '', so config/class doesn't
     // accumulate a row per activity that was ever dated then un-dated.
     const patch = value ? {activityDates:{[id]:value}} : {activityDates:{[id]:fv.delete()}};
-    await db.collection('config').doc('class').set(patch,{merge:true});
+    await teacherWriteConfig(patch, {['activityDates.'+id]: had?prev:undefined});
   }catch(e){
     if(had) teacherClassConfig.activityDates[id]=prev; else delete teacherClassConfig.activityDates[id];
-    alert('Could not save that change — check your connection and Firestore rules.');
+    teacherConfigSaveFailed(e, 'Could not save that change — check your connection and Firestore rules.');
   }
   if(teacherView==='activities') renderTeacherActivities();
 }
@@ -1776,14 +1780,17 @@ async function teacherSetActivityArchived(id, state){
   try{
     await ensureDb();
     const fv=firebase.firestore.FieldValue;
-    await db.collection('config').doc('class').set({
+    await teacherWriteConfig({
       archivedActivities:{[id]: on ? true : fv.delete()},
       deletedActivities:{[id]: fv.delete()}
-    },{merge:true});
+    }, {
+      ['archivedActivities.'+id]: hadA?prevA:undefined,
+      ['deletedActivities.'+id]:  hadD?prevD:undefined
+    });
   }catch(e){
     if(hadA) cfg.archivedActivities[id]=prevA; else delete cfg.archivedActivities[id];
     if(hadD) cfg.deletedActivities[id]=prevD; else delete cfg.deletedActivities[id];
-    alert('Could not save that change — check your connection and Firestore rules.');
+    teacherConfigSaveFailed(e, 'Could not save that change — check your connection and Firestore rules.');
   }
   if(teacherView==='activities') renderTeacherActivities();
 }
@@ -1850,12 +1857,14 @@ async function teacherDeleteActivity(id){
       patch.activityClears={};
       clearUids.forEach(uid=>{ patch.activityClears[uid]={[id]:fv.delete()}; });
     }
-    await db.collection('config').doc('class').set(patch,{merge:true});
+    // Strict (no base): like a move, this re-packs the module the card
+    // leaves, so it depends on more of the board than the patch names.
+    await teacherWriteConfig(patch);
   }catch(e){
     MAPS.forEach(m=>{ if(before[m]===undefined) delete cfg[m][id]; else cfg[m][id]=before[m]; });
     Object.keys(beforeRepack).forEach(k=>{ if(beforeRepack[k]===undefined) delete cfg.activityBoard[k]; else cfg.activityBoard[k]=beforeRepack[k]; });
     clearUids.forEach(uid=>{ clears[uid][id]=beforeClears[uid]; });
-    alert('Could not delete that activity — check your connection and Firestore rules.');
+    teacherConfigSaveFailed(e, 'Could not delete that activity — check your connection and Firestore rules.');
   }
   // A deleted row leaves the table, so an open rename box on it would be
   // editing something that is no longer there.
@@ -1920,10 +1929,10 @@ async function teacherSetActivityClear(uid, id, state){
     await ensureDb();
     const fv=firebase.firestore.FieldValue;
     const patch=on ? {activityClears:{[uid]:{[id]:true}}} : {activityClears:{[uid]:{[id]:fv.delete()}}};
-    await db.collection('config').doc('class').set(patch,{merge:true});
+    await teacherWriteConfig(patch, {['activityClears.'+uid+'.'+id]: had?prev:undefined});
   }catch(e){
     if(had) teacherClassConfig.activityClears[uid][id]=prev; else delete teacherClassConfig.activityClears[uid][id];
-    alert('Could not save that change — check your connection and Firestore rules.');
+    teacherConfigSaveFailed(e, 'Could not save that change — check your connection and Firestore rules.');
   }
   if(activityDetailId) renderTeacherActivityDetail(activityDetailId);
   else if(teacherView==='students') studentDetailUid ? renderTeacherStudentDetail(studentDetailUid) : renderTeacherStudents();
@@ -1945,10 +1954,13 @@ async function teacherClearAllBlockers(uid){
     await ensureDb();
     const patch={activityClears:{[uid]:{}}};
     blockers.forEach(a=>{ patch.activityClears[uid][a.id]=true; });
-    await db.collection('config').doc('class').set(patch,{merge:true});
+    /* Strict (no base): which activities are blocking is read off the dates,
+       the hidden and archived maps and the board all at once — far more of
+       the doc than this patch names. */
+    await teacherWriteConfig(patch);
   }catch(e){
     teacherClassConfig.activityClears[uid]=prev;
-    alert('Could not save that change — check your connection and Firestore rules.');
+    teacherConfigSaveFailed(e, 'Could not save that change — check your connection and Firestore rules.');
   }
   if(teacherView==='students') studentDetailUid ? renderTeacherStudentDetail(studentDetailUid) : renderTeacherStudents();
 }
@@ -1997,7 +2009,129 @@ async function loadTeacherClassConfig(){
   teacherClassConfig = cfg;
   teacherClassConfigLoaded = true;
   teacherClassConfigReadOk = ok;
+  teacherConfigVersion = Number(cfg.configVersion) || 0;
   return teacherClassConfig;
+}
+
+/* ── Stale writes to config/class fail loudly ───────────────────────
+   Every writer in this file is read-modify-write: it works out a merge patch
+   from `teacherClassConfig`, the copy this tab read when its view last
+   loaded. Nothing listens to the doc, so that copy goes stale the moment
+   another console writes it — a second tab, the laptop beside the projector
+   machine, the other OS. Until now a stale write simply won: Firestore
+   merged it without complaint, whatever the other session had done was
+   gone, and nothing on either screen said so.
+
+   The board is where that corrupts data rather than just losing a click. A
+   move re-packs `pos` 1..N across a whole module from the board this tab
+   holds, so a base one move out of date writes a run with a duplicate or a
+   hole in it — and the board renders that without complaint too.
+
+   So config/class carries `configVersion`, a counter every write through
+   here bumps inside a transaction, and `teacherConfigVersion` is the one
+   this tab read. Equal means nothing has changed since — write. Unequal
+   means somebody else wrote, and what happens next is the caller's call:
+
+     STRICT (no `base` given) — any other write at all is a reason to stop.
+       For anything derived from more of the doc than it names: the board
+       writers, Delete (which re-packs), Clear all.
+     CELL-CHECKED (`base`: the values this write was worked out from, with
+       `undefined` for "was absent") — the patch is compared against what is
+       live now, cell by cell. Untouched cells mean the other session's edit
+       was unrelated, so the write goes through; a cell that moved underneath
+       us throws and the caller rolls back and says so.
+
+   Both, not one: strict everywhere would reject hiding an activity here
+   because a period was corrected there, and a false alarm every time two
+   tabs are open is what teaches Jonathan to click through the one that
+   matters. Cell-checked everywhere would let a board write computed from a
+   stale board through, which is the bug this whole block exists for — so
+   omitting `base` is the SAFE default, and a future writer that forgets one
+   gets the strict treatment rather than none.
+
+   Paths are dotted. Activity ids (`ca-<n>`) and Firestore uids contain no
+   dots, which is what makes that spelling safe here. */
+let teacherConfigVersion = 0;
+function teacherConfigAt(obj, path) {
+  let cur = obj;
+  const parts = String(path).split('.');
+  for (let i = 0; i < parts.length; i++) {
+    if (cur === null || typeof cur !== 'object' || !Object.prototype.hasOwnProperty.call(cur, parts[i])) return undefined;
+    cur = cur[parts[i]];
+  }
+  return cur;
+}
+/* config/class holds strings, numbers, booleans and the board's {module,pos}
+   pairs, so JSON compares them exactly. `undefined` — the cell was absent —
+   is its own case, because JSON.stringify gives undefined back for it and
+   would then equal any other absent value by accident. */
+function teacherConfigSame(a, b) {
+  if (a === undefined || b === undefined) return a === b;
+  return JSON.stringify(a) === JSON.stringify(b);
+}
+async function teacherWriteConfig(patch, base) {
+  const dbh = await ensureDb();
+  if (!dbh) throw new Error('Firestore is not available');
+  const ref = dbh.collection('config').doc('class');
+  let wrote = 0, diverged = false;
+  await dbh.runTransaction(async t => {
+    // Re-read inside the transaction on every attempt — Firestore may run
+    // this function more than once, and the second run has to judge the
+    // doc as it is then, not as the first run found it.
+    const snap = await t.get(ref);
+    const live = snap.exists ? (snap.data() || {}) : {};
+    const liveV = Number(live.configVersion) || 0;
+    diverged = liveV !== teacherConfigVersion;
+    if (diverged) {
+      // An empty `base` is strict too: "this write depends on nothing in the
+      // doc" is never true of a writer here, so it reads as one that forgot.
+      if (!base || !Object.keys(base).length) throw teacherStaleConfigError(null);
+      const moved = Object.keys(base).filter(k => !teacherConfigSame(teacherConfigAt(live, k), base[k]));
+      if (moved.length) throw teacherStaleConfigError(moved);
+    }
+    wrote = liveV + 1;
+    t.set(ref, Object.assign({}, patch, { configVersion: wrote }), { merge: true });
+  });
+  teacherConfigVersion = wrote;
+  if (teacherClassConfig) teacherClassConfig.configVersion = wrote;
+  if (diverged) {
+    /* The patch was safe, but this tab is still missing whatever the other
+       session changed — and the version number now claims it is current, so
+       the next write would sail through its check on a copy that isn't.
+       Awaited, not fired and forgotten: the caller repaints as soon as we
+       return, and it should repaint from the merged truth. */
+    await loadTeacherClassConfig();
+  }
+}
+function teacherStaleConfigError(paths) {
+  const e = new Error('config/class moved underneath this tab'
+    + (paths ? ', at: ' + paths.join(', ') : ' (strict writer — any concurrent write refuses)'));
+  e.staleConfig = true;
+  return e;
+}
+/* The one place a failed config write is reported. A stale rejection is a
+   different event from a dropped connection and has to read like one:
+   nothing was saved, the other session's newer copy is intact, and this
+   page is about to repaint from it. Everything else keeps the caller's own
+   wording — those messages name the thing that didn't save. */
+function teacherConfigSaveFailed(e, msg, opts) {
+  if (e && e.staleConfig) {
+    /* `keepEditor` — the rename box. Repainting it would pull the server's
+       (unchanged) title back over what was typed, which is the one failure
+       this file has always refused to cause; the config is still refreshed
+       underneath, so the next repaint is honest. */
+    const keep = !!(opts && opts.keepEditor);
+    console.warn('[guitar-class] stale write blocked — ' + e.message);
+    alert('Nothing was saved.\n\n'
+      + 'The class settings changed after this page loaded — another tab, or another computer. '
+      + 'What you just clicked was worked out from the older copy, so saving it could have quietly undone that change.\n\n'
+      + (keep
+          ? 'What you typed is still in the box — have a look at what changed, then save it again.'
+          : 'This page is loading the current settings now. Have a look, then make the change again.'));
+    loadTeacherClassConfig().then(cfg => { if (cfg && !keep) renderTeacherBody(); });
+    return;
+  }
+  alert(msg);
 }
 function renderTeacherGames(){
   const box=document.getElementById('t-grid-container');
@@ -2039,11 +2173,10 @@ async function teacherSetClassGames(enabled){
   const prev = teacherClassConfig.gamesEnabled;
   teacherClassConfig.gamesEnabled=enabled;
   try{
-    await ensureDb();
-    await db.collection('config').doc('class').set({gamesEnabled:enabled},{merge:true});
+    await teacherWriteConfig({gamesEnabled:enabled}, {gamesEnabled: prev});
   }catch(e){
     teacherClassConfig.gamesEnabled = prev;
-    alert('Could not save that change — check your connection and Firestore rules.');
+    teacherConfigSaveFailed(e, 'Could not save that change — check your connection and Firestore rules.');
   }
   if(teacherView==='games') renderTeacherGames();   // skip if the view changed while the save was in flight
 }
@@ -2133,10 +2266,10 @@ async function teacherSetStudentPaused(uid, state){
     // Clear the flag rather than writing false, so config/class doesn't
     // accumulate a row per student who was ever paused.
     const patch = on ? {paused:{[uid]:true}} : {paused:{[uid]:fv.delete()}};
-    await db.collection('config').doc('class').set(patch,{merge:true});
+    await teacherWriteConfig(patch, {['paused.'+uid]: had?prev:undefined});
   }catch(e){
     if(had) teacherClassConfig.paused[uid]=prev; else delete teacherClassConfig.paused[uid];
-    alert('Could not save that change — check your connection and Firestore rules.');
+    teacherConfigSaveFailed(e, 'Could not save that change — check your connection and Firestore rules.');
   }
   if(teacherView==='manage') renderTeacherManage();
 }
@@ -2150,10 +2283,10 @@ async function teacherSetStudentArchived(uid, state){
     await ensureDb();
     const fv=firebase.firestore.FieldValue;
     const patch = on ? {archived:{[uid]:true}} : {archived:{[uid]:fv.delete()}};
-    await db.collection('config').doc('class').set(patch,{merge:true});
+    await teacherWriteConfig(patch, {['archived.'+uid]: had?prev:undefined});
   }catch(e){
     if(had) teacherClassConfig.archived[uid]=prev; else delete teacherClassConfig.archived[uid];
-    alert('Could not save that change — check your connection and Firestore rules.');
+    teacherConfigSaveFailed(e, 'Could not save that change — check your connection and Firestore rules.');
   }
   teacherApplyRosterFilter();
   if(teacherView==='manage') renderTeacherManage();
@@ -2178,10 +2311,10 @@ async function teacherSetStudentPeriod(uid, value){
     await ensureDb();
     const fv=firebase.firestore.FieldValue;
     const patch = clear ? {periodOverrides:{[uid]:fv.delete()}} : {periodOverrides:{[uid]:value}};
-    await db.collection('config').doc('class').set(patch,{merge:true});
+    await teacherWriteConfig(patch, {['periodOverrides.'+uid]: had?prev:undefined});
   }catch(e){
     if(had) teacherClassConfig.periodOverrides[uid]=prev; else delete teacherClassConfig.periodOverrides[uid];
-    alert('Could not save that change — check your connection and Firestore rules.');
+    teacherConfigSaveFailed(e, 'Could not save that change — check your connection and Firestore rules.');
   }
   teacherApplyRosterFilter();
   if(teacherView==='manage') renderTeacherManage();
@@ -2204,10 +2337,10 @@ async function teacherSetStudentGames(uid, state){
     const patch = state==='default'
       ? {gameOverrides:{[uid]:fv.delete()}}
       : {gameOverrides:{[uid]:state==='on'}};
-    await db.collection('config').doc('class').set(patch,{merge:true});
+    await teacherWriteConfig(patch, {['gameOverrides.'+uid]: had?prev:undefined});
   }catch(e){
     if(had) teacherClassConfig.gameOverrides[uid]=prev; else delete teacherClassConfig.gameOverrides[uid];
-    alert('Could not save that change — check your connection and Firestore rules.');
+    teacherConfigSaveFailed(e, 'Could not save that change — check your connection and Firestore rules.');
   }
   if(teacherView==='games') renderTeacherGames();   // skip if the view changed while the save was in flight
 }

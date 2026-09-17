@@ -22,7 +22,8 @@ rules_version = '2';
      config/class     one shared doc: gamesEnabled, gameOverrides,
                       paused, archived, periodOverrides, hiddenActivities,
                       activityDates, activityTitles, activityNumbers,
-                      activityClears, archivedActivities, deletedActivities
+                      activityClears, archivedActivities, deletedActivities,
+                      activityBoard, activityBoardSeeded, configVersion
                       (teacher writes, students read)
      liveQuiz/current the whole-class live quiz's state (teacher writes,
                       students read) + an answers/{uid} subcollection each
@@ -82,7 +83,17 @@ service cloud.firestore {
        their own row.
 
        Scoped to the specific "class" doc — config/{doc} would let any
-       signed-in user read every doc under config/, not just this one. */
+       signed-in user read every doc under config/, not just this one.
+
+       `configVersion` is a counter the console bumps on every write, inside
+       a transaction, so a second console cannot merge a patch it worked out
+       from a copy of this doc that has since moved (teacherWriteConfig in
+       teacher.js, checks.mjs 1ai). Deliberately NOT enforced here: a rule
+       like `request.resource.data.configVersion == resource.data.configVersion + 1`
+       would make the doc unwritable from the Firebase console by hand, which
+       is the one repair path left when something goes wrong with it. The
+       guard is there to stop an accident, not an attacker — and only the
+       teacher can write this doc at all. */
     match /config/class {
       allow read:  if isSignedIn();
       allow write: if isTeacher();
