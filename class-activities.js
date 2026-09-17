@@ -1467,8 +1467,8 @@ window.CLASS_ACTIVITIES = [
     journeyLayer: 2,
     title:    '"the cure" — Intro and Verse on the Low E',
     title_es: '"the cure" — Intro y estrofa en la cuerda Mi grave',
-    intro:    'Watchtower lives on the low E string, and so does this. Every chord in "the cure" has a root note; play the roots and you\'re playing the song\'s bassline. Three notes, one string, and the hand gets to travel further up the neck than it ever has.',
-    intro_es: 'Watchtower vive en la cuerda Mi grave, y esta también. Cada acorde de "the cure" tiene una nota raíz; toca las raíces y estás tocando la línea de bajo de la canción. Tres notas, una cuerda, y la mano llega más arriba del mástil que nunca.',
+    intro:    'Watchtower lives on the low E string, and so does this. Every chord in "the cure" has a root note; play the roots and you\'re playing the song\'s bassline. Three notes, one string, and one finger plays them all.',
+    intro_es: 'Watchtower vive en la cuerda Mi grave, y esta también. Cada acorde de "the cure" tiene una nota raíz; toca las raíces y estás tocando la línea de bajo de la canción. Tres notas, una cuerda, y un solo dedo las toca todas.',
     steps: [
       {
         label:    'The map — one string, three notes',
@@ -1476,14 +1476,14 @@ window.CLASS_ACTIVITIES = [
         figure: 'img/ca-cure-roots-verse.svg',
         figureAlt: 'Low E string fretboard diagram marking the three root notes: F at fret 1, A at fret 5, and C at fret 8.',
         figureAlt_es: 'Diagrama del diapasón de la cuerda Mi grave marcando las tres notas raíz: F en el traste 1, A en el traste 5 y C en el traste 8.',
-        text: 'Everything today is on the low E string: <b>F</b> at fret 1, <b>A</b> at fret 5, <b>C</b> at fret 8. The hand has two homes.<ul><li><b>Up at fret 5</b> — index on A (fret 5), pinky on C (fret 8). Both notes without moving the hand</li><li><b>Down at fret 1</b> — index on F</li></ul>A is still fret 5, the same note Watchtower gave your pinky. Here your index takes it, because the whole hand has moved up.',
-        text_es: 'Todo lo de hoy está en la cuerda Mi grave: <b>F</b> en el traste 1, <b>A</b> en el traste 5, <b>C</b> en el traste 8. La mano tiene dos casas.<ul><li><b>Arriba en el traste 5</b> — índice en A (traste 5), meñique en C (traste 8). Las dos notas sin mover la mano</li><li><b>Abajo en el traste 1</b> — índice en F</li></ul>A sigue siendo el traste 5, la misma nota que en Watchtower tocabas con el meñique. Aquí la toma el índice, porque la mano entera se movió hacia arriba.',
+        text: 'Everything is on the low E string: <b>F</b> at fret 1, <b>A</b> at fret 5, <b>C</b> at fret 8. Play every note with your index finger — the hand moves, the finger stays the same.',
+        text_es: 'Todo está en la cuerda Mi grave: <b>F</b> en el traste 1, <b>A</b> en el traste 5, <b>C</b> en el traste 8. Toca cada nota con el índice — la mano se mueve, el dedo es siempre el mismo.',
       },
       {
         label:    'The intro — A · C, twice',
         label_es: 'La intro — A · C, dos veces',
-        text: 'The song opens with the guitar by itself, and it is two chords repeated — Am and C, which means the roots <b>A</b> and <b>C</b>. Put the hand up at fret 5 and leave it there. Four beats each.<ol><li>Index, fret 5: "A". Count 1 2 3 4, one strike per beat</li><li>Pinky, fret 8: "C". Count it the same way</li><li>Play the pair a second time — A, then C</li><li>Count out loud the whole way, so the last C ends on beat 4 and the verse can start on beat 1</li></ol>You\'ve got it when: the intro twice in a row at 60 BPM, counting out loud, no stops. Pinky not reaching fret 8? Drop the thumb down the back of the neck and let the hand open out.',
-        text_es: 'La canción abre con la guitarra sola, y son dos acordes repetidos — Am y C, o sea las raíces <b>A</b> y <b>C</b>. Pon la mano arriba en el traste 5 y déjala ahí. Cuatro tiempos cada una.<ol><li>Índice, traste 5: "A". Cuenta 1 2 3 4, un golpe por tiempo</li><li>Meñique, traste 8: "C". Cuéntala igual</li><li>Toca el par una segunda vez — A, y luego C</li><li>Cuenta en voz alta todo el tiempo, para que el último C termine en el tiempo 4 y la estrofa pueda empezar en el tiempo 1</li></ol>Lo tienes cuando: la intro dos veces seguidas a 60 BPM, contando en voz alta, sin detenerte. ¿El meñique no alcanza el traste 8? Baja el pulgar por detrás del mástil y deja que la mano se abra.',
+        text: 'Read the tab. Index finger on every note, four beats each.<ol><li>Play each note once, slowly, and say its name</li><li>Play the tab, counting 1 2 3 4 out loud</li><li>Turn on the metronome at 60 BPM and play it again</li></ol>You\'ve got it when: the intro twice in a row at 60 BPM, no stops.',
+        text_es: 'Lee la tablatura. Índice en cada nota, cuatro tiempos cada una.<ol><li>Toca cada nota una vez, despacio, y di su nombre</li><li>Toca la tablatura contando 1 2 3 4 en voz alta</li><li>Pon el metrónomo a 60 BPM y tócala otra vez</li></ol>Lo tienes cuando: la intro dos veces seguidas a 60 BPM, sin detenerte.',
         tab: {
           caption: 'Intro · A C A C · low E string · 4 beats each',
           caption_es: 'Intro · A C A C · cuerda Mi grave · 4 tiempos cada una',
@@ -1498,8 +1498,8 @@ window.CLASS_ACTIVITIES = [
       {
         label:    'The verse — A · C, F · C',
         label_es: 'La estrofa — A · C, F · C',
-        text: 'The verse opens with the pair you just played and answers it with a note way down at the other end of the string. Four beats per note.<ol><li>Index fret 5: "A". Pinky fret 8: "C"</li><li>A, then C again — hand still up at fret 5</li><li>Now the hand travels: index down to fret 1 for "F"</li><li>Hand back up for "C" at fret 8</li><li>F, then C again</li></ol>Say every name. The hard part is the trip between fret 1 and fret 8, and it happens four times a verse — go slowly enough that you land on the beat every time.<br>You\'ve got it when: two clean verses in a row at 60 BPM. Landing late on the F? Start the hand moving on beat 4 of the C, before you need the note.',
-        text_es: 'La estrofa abre con el par que acabas de tocar y lo responde con una nota allá abajo, en el otro extremo de la cuerda. Cuatro tiempos por nota.<ol><li>Índice traste 5: "A". Meñique traste 8: "C"</li><li>A, y luego C otra vez — la mano sigue arriba en el traste 5</li><li>Ahora la mano viaja: índice abajo al traste 1 para el "F"</li><li>La mano de vuelta arriba para el "C" en el traste 8</li><li>F, y luego C otra vez</li></ol>Di cada nombre. Lo difícil es el viaje entre el traste 1 y el traste 8, y pasa cuatro veces por estrofa — ve tan despacio como haga falta para caer en el tiempo todas las veces.<br>Lo tienes cuando: dos estrofas limpias seguidas a 60 BPM. ¿Llegas tarde al F? Empieza a mover la mano en el tiempo 4 del C, antes de necesitar la nota.',
+        text: 'Read the tab. Index finger on every note, four beats each.<ol><li>Play just the second half — F C F C — until the move between fret 1 and fret 8 feels easy</li><li>Play the whole tab slowly, counting out loud</li><li>Then play it at 60 BPM</li></ol>You\'ve got it when: two clean verses in a row at 60 BPM. Late on a note? Start moving the hand on beat 4.',
+        text_es: 'Lee la tablatura. Índice en cada nota, cuatro tiempos cada una.<ol><li>Toca solo la segunda mitad — F C F C — hasta que el movimiento entre el traste 1 y el traste 8 se sienta fácil</li><li>Toca la tablatura entera despacio, contando en voz alta</li><li>Después tócala a 60 BPM</li></ol>Lo tienes cuando: dos estrofas limpias seguidas a 60 BPM. ¿Llegas tarde a una nota? Empieza a mover la mano en el tiempo 4.',
         tab: {
           caption: 'Verse · A C, F C · low E string · 4 beats each',
           caption_es: 'Estrofa · A C, F C · cuerda Mi grave · 4 tiempos cada una',
@@ -1518,8 +1518,8 @@ window.CLASS_ACTIVITIES = [
       {
         label:    'The hand shift',
         label_es: 'El cambio de mano',
-        text: 'The whole song is one string, so nothing crosses — what moves is the hand. Three moves. Play each pair, stop, repeat.<ul><li>A → C (fret 5 to fret 8) — index to pinky, hand stays put</li><li>C → F (fret 8 to fret 1) — the hand travels down. Let the index finger lead and keep it near the string</li><li>F → C (fret 1 to fret 8) — the same trip back up</li></ul>You\'ve got it when: eight clean moves in a row without looking at your fretting hand. Landing on the wrong fret after a trip? Look once, play it five times, then look away again.',
-        text_es: 'La canción entera es una sola cuerda, así que nada cruza — lo que se mueve es la mano. Tres movimientos. Toca cada par, para, repite.<ul><li>A → C (del traste 5 al traste 8) — del índice al meñique, la mano no se mueve</li><li>C → F (del traste 8 al traste 1) — la mano viaja hacia abajo. Deja que el índice vaya adelante y mantenlo cerca de la cuerda</li><li>F → C (del traste 1 al traste 8) — el mismo viaje de regreso</li></ul>Lo tienes cuando: ocho movimientos limpios seguidos sin mirarte la mano del mástil. ¿Caes en el traste equivocado después de un viaje? Mira una vez, tócalo cinco veces, y vuelve a mirar a otro lado.',
+        text: 'Each pair in the tab is one move of the hand.<ol><li>Play a pair, stop, play it again — five times each</li><li>Keep the index finger lightly touching the string while the hand moves</li><li>Then try each pair without looking</li></ol>You\'ve got it when: eight clean moves in a row without looking at your fretting hand.',
+        text_es: 'Cada par de la tablatura es un movimiento de la mano.<ol><li>Toca un par, para, tócalo otra vez — cinco veces cada uno</li><li>Deja el índice tocando la cuerda suavemente mientras la mano se mueve</li><li>Después prueba cada par sin mirar</li></ol>Lo tienes cuando: ocho movimientos limpios seguidos sin mirarte la mano del mástil.',
         tab: {
           caption: 'The hand shift · three two-note pairs · low E string',
           caption_es: 'El cambio de mano · tres pares de dos notas · cuerda Mi grave',
@@ -1554,8 +1554,8 @@ window.CLASS_ACTIVITIES = [
       {
         label:    'Intro into verse',
         label_es: 'De la intro a la estrofa',
-        text: 'Run them the way the song runs them, four beats per note, no stops.<ol><li>Intro: A C, A C</li><li>Verse: A C, F C</li><li>Verse again — straight through, no pause between them</li></ol>Start at 60 BPM and keep counting out loud.<br>You\'ve got it when: intro, verse, verse at 60 BPM without stopping, then once at 100 BPM. Falling apart on the trip down to the F? Back to rung 4 for one minute, then start the run again.',
-        text_es: 'Tócalas como las toca la canción, cuatro tiempos por nota, sin parar.<ol><li>Intro: A C, A C</li><li>Estrofa: A C, F C</li><li>La estrofa otra vez — seguido, sin pausa entre ellas</li></ol>Empieza a 60 BPM y sigue contando en voz alta.<br>Lo tienes cuando: intro, estrofa, estrofa a 60 BPM sin detenerte, y luego una vez a 100 BPM. ¿Se te desarma en el viaje hacia el F? Vuelve al peldaño 4 por un minuto, y después empieza la vuelta otra vez.',
+        text: 'Play the tab straight through: intro, then verse.<ol><li>60 BPM, counting out loud</li><li>Made a mistake? Keep going — don\'t restart</li><li>After a clean run, try 100 BPM</li></ol>You\'ve got it when: intro into verse at 60 BPM with no stops, then once at 100 BPM. Stuck on a move? Go back to rung 4 for one minute.',
+        text_es: 'Toca la tablatura de principio a fin: intro, y luego estrofa.<ol><li>60 BPM, contando en voz alta</li><li>¿Te equivocaste? Sigue — no vuelvas a empezar</li><li>Después de una vuelta limpia, prueba a 100 BPM</li></ol>Lo tienes cuando: de la intro a la estrofa a 60 BPM sin detenerte, y luego una vez a 100 BPM. ¿Te trabas en un movimiento? Vuelve al peldaño 4 por un minuto.',
         tab: {
           caption: 'Intro and verse · low E string · 4 beats per note',
           caption_es: 'Intro y estrofa · cuerda Mi grave · 4 tiempos por nota',
@@ -1626,8 +1626,8 @@ window.CLASS_ACTIVITIES = [
       {
         label:    'Keep going',
         label_es: 'Sigue adelante',
-        text: 'Three ways to push it, any order:<ul><li>Climb the tempo: +10 BPM every two clean laps, up to 100</li><li>Play it with the backing track on the Song Journey page — Layer 2 of 5. It opens with these same two tabs</li><li>Level up: make the trip down audible — keep the index finger touching the string as the hand travels from fret 5 to fret 1, so you hear the slide</li></ul>You\'ve got it when: the intro and the verse with the track, twice through, without dropping out.',
-        text_es: 'Tres formas de exigirte más, en cualquier orden:<ul><li>Sube el tempo: +10 BPM cada dos vueltas limpias, hasta 100</li><li>Tócala con la pista de acompañamiento en la página de Recorrido de la canción — Capa 2 de 5. Abre con estas mismas dos tablaturas</li><li>Sube de nivel: haz que se oiga el viaje — deja el índice tocando la cuerda mientras la mano baja del traste 5 al traste 1, para que se escuche el deslizamiento</li></ul>Lo tienes cuando: la intro y la estrofa con la pista, dos veces seguidas, sin salirte.',
+        text: 'Pick one:<ul><li>+10 BPM every two clean runs, up to 100</li><li>Play along with the backing track on the Song Journey page, Layer 2</li></ul>You\'ve got it when: the intro and the verse with the track, twice through, without dropping out.',
+        text_es: 'Escoge una:<ul><li>+10 BPM cada dos vueltas limpias, hasta 100</li><li>Toca con la pista de acompañamiento en la página de Recorrido de la canción, Capa 2</li></ul>Lo tienes cuando: la intro y la estrofa con la pista, dos veces seguidas, sin salirte.',
       },
     ],
   },

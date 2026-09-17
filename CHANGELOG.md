@@ -5,6 +5,16 @@ Notable changes to the Guitar Class site. Newest first.
 For the full session-by-session history (and the reasoning behind each change),
 see `WORKFLOW.md` and the git commit log.
 
+## 2026-09-16 — "the cure" on the low E: shorter directions, one finger
+
+### Changed
+
+- **"the cure" — Intro and Verse on the Low E (`ca-13`)** — every note is now
+  played with your index finger; no more reaching fret 8 with the pinky. The
+  directions are much shorter: the tab shows you the notes, and each step just
+  tells you how to practice it (slowly, counting out loud, then with the
+  metronome).
+
 ## 2026-09-16 — The site no longer looks like it signed you in twice
 
 ### Fixed
