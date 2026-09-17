@@ -180,7 +180,7 @@ Journey tab cards, 27 tuning warm-ups) so it cannot drop silently.
 written by the two-column **Class activities board** in `teacher.js` — Built
 on the left (pushed, not placed), Assigned on the right (grouped by module,
 in the order students read them). It decides the order, the module headings
-students see on Today, and the `#N` prefix. A card with no entry is invisible
+students see on In-Class Activities, and the `#N` prefix. A card with no entry is invisible
 to everyone; **assigned + dated-and-arrived + not Hidden + not
 archived/deleted** is the full live-for-students rule (`caIsVisible`).
 
@@ -488,19 +488,31 @@ Two rules that are easy to break without noticing:
   invert**, not on CSS variables: its fretted-note circle is a hardcoded
   light green, so a variable-themed `?` would be light-on-light in dark mode.
 
-## Today page & the activity gate
+## In-Class Activities page & the activity gate
 Work order: "Today-first site simplification," Phase 1, shipped 2026-09-12.
-"In-Class Activities" is renamed **Today** (`nav.classActivities` — same i18n
-key, same hash `#class-activities`, same deep links) and is the site's home
+Renamed **In-Class Activities → Today** for that work order, then **back to
+In-Class Activities** 2026-09-17 (Jonathan's call) — `nav.classActivities` is
+the same i18n key both times, so the hash `#class-activities`, every deep
+link, and the console's Copy-link URLs never moved. It is the site's home
 page: `showApp()` opens it whenever the URL carries no explore hash at all,
 gated or not. `renderClassActivities()` (app.js) builds three groups —
-**Do now** (the first pending card, forced open), **Still to do** (a divider,
-skipped when there's only one card left), **Earlier** (`ca.finishedGroup`,
-now "Earlier" not "Finished") — and appends the resume card
-(`renderResumeCard()`) at the end when nothing is blocking. The `#resume-card`
-element itself moved in `index.html` from a sibling of `#week-panels` into
-the Today page's own body; it no longer renders in the module/set view at
-all.
+**Do now** (the first pending card; collapsed like every other card, not
+forced open — Jonathan, 2026-09-15), **Still to do** (a divider, skipped when
+there's only one card left), **Earlier** (`ca.finishedGroup`, now "Earlier"
+not "Finished") — and appends the resume card (`renderResumeCard()`) at the
+end when nothing is blocking. The `#resume-card` element itself moved in
+`index.html` from a sibling of `#week-panels` into this page's own body; it
+no longer renders in the module/set view at all.
+
+**Reading order is newest-first, not the teaching order** (Jonathan,
+2026-09-17): the newest module's section renders at the top, and within a
+module the most recently assigned card (highest board position) renders
+first — so a student lands on current work without scrolling past everything
+behind them. `caBoardOrder()`/`caNumber()` still compute the true ascending
+course order underneath (teacher console, gating, and deep links all key off
+it), and the "#N" a card carries never moves — only `renderClassActivities()`
+reverses `view.sections` and each section's ids for display. The "Earlier"
+group's order falls out of the same reversal now, not a second `.reverse()`.
 
 **The gate:** `caBlockers()` — a visible (`caIsVisible`), undone
 (`classActivities[id]!==true`), uncleared activity or check — drives
@@ -511,12 +523,13 @@ guess, same rule as the sequential set gate. `applyActivityGate()` runs from
 `showApp()`, at every exit of `loadClassConfig()`, and inside
 `renderClassActivities()` itself (so a completion or an exit-check submit
 lifts it live, no reload). CSS keys the hiding off `data-gate="hide"` on
-every rail `.nav-btn` except Today and Live quiz (`data-gate="keep"`) —
-checks.mjs **1aa** fails the push on a nav button with neither — plus
-`.g-module`/`.g-set`/`#resume-card`/`#week-panels`; `#search-btn` needs
-`!important` because `showApp()`/sign-out already toggle its inline
-`style.display`. `routeExploreHash()` rewrites any hash but `#class-activities`/
-`#live-quiz` back to Today with a `gateToast()` while gated (`returnToPractice()`
+every rail `.nav-btn` except In-Class Activities and Live quiz
+(`data-gate="keep"`) — checks.mjs **1aa** fails the push on a nav button with
+neither — plus `.g-module`/`.g-set`/`#resume-card`/`#week-panels`;
+`#search-btn` needs `!important` because `showApp()`/sign-out already toggle
+its inline `style.display`. `routeExploreHash()` rewrites any hash but
+`#class-activities`/`#live-quiz` back to In-Class Activities with a
+`gateToast()` while gated (`returnToPractice()`
 gets the same guard); `window.__forceGate` (localhost only) lets a session
 that can't otherwise trigger the gate (dev bypass, the teacher account) force
 it on to check the UI.
@@ -551,8 +564,9 @@ with this was comments only, so nothing needs pasting into Firebase. Students
 merge the two maps into one `retiredActivityIds` set (they draw no distinction)
 and `caIsVisible()` fails on it **before** the dev-bypass line, unlike the date
 gate — a retired activity isn't "not live yet", it's out of the course, so
-there's nothing to preview. Everything downstream follows for free: off Today,
-out of `caBlockers()`, and a deep link reads as not-posted. The visibility rule
+there's nothing to preview. Everything downstream follows for free: off
+In-Class Activities, out of `caBlockers()`, and a deep link reads as
+not-posted. The visibility rule
 is mirrored in all three places as ever — `caIsVisible` (app.js),
 `teacherActivityVisible` (teacher.js), `journeyIsVisible` (journey.js).
 
@@ -581,8 +595,9 @@ activity back and let it start gating the site again.
 app.js's `caIsVisible`/`caBlockers`, which read globals only the main app's
 boot path populates) and, on a hit, replace the whole page with a
 `.ca-gate-card` (styles in `tabs/journey-theme.css`, no `styles.css`
-counterpart — the main app's gate stays on the existing Today page rather
-than a full-page swap) linking back to `index.html#class-activities`. Skipped
+counterpart — the main app's gate stays on the existing In-Class Activities
+page rather than a full-page swap) linking back to
+`index.html#class-activities`. Skipped
 for the teacher's own account by email; a failed config read fails open (no
 gate), never on a guess. `mood-chart.html` is not one of the six and is never
 gated. **The one exemption (2026-09-12):** a pending activity that names a
@@ -596,11 +611,12 @@ shows the same link — two renderers, patched together). checks.mjs 1d
 validates the slug against `tabs/<slug>.html` and the layer against that
 page's `layer-num` spans.
 
-**Gate flips on mid-session → Today.** `applyActivityGate()` detects the
-off→on transition (a new activity going live under an open Games/Songs/My
-progress screen, via the `visibilitychange` re-check) and, once the app is
-on screen (`appIsOnScreen()`), walks the student to Today with the same
-toast `routeExploreHash` uses. The CSS alone only hid the rail; an open
+**Gate flips on mid-session → In-Class Activities.** `applyActivityGate()`
+detects the off→on transition (a new activity going live under an open
+Games/Songs/My progress screen, via the `visibilitychange` re-check) and,
+once the app is on screen (`appIsOnScreen()`), walks the student to In-Class
+Activities with the same toast `routeExploreHash` uses. The CSS alone only
+hid the rail; an open
 screen stayed open.
 
 **What a gated student can still open is one list — `GATE_OPEN_HASHES`**
@@ -616,14 +632,14 @@ builds one `<details>` per `MODULE_MANIFEST` entry, the current module
 the module's `assessItems` from `MODULE_REVIEWS` — the same list the Module
 Review's heads-up pop shows, read-only, plus the `review.assessSignupBody`
 line. Module data is lazy, so an accordion fetches its `module-N.js` on
-open (`assessEnsureModule`). Its Back goes to Today while gated
+open (`assessEnsureModule`). Its Back goes to In-Class Activities while gated
 (`closeAssessmentsScreen`), to practice otherwise. Same page plumbing as My
 progress (EXPLORE_PAGES row, closeTopPanels, leaveTopPanelForSet,
 gc-langchange re-render).
 
 **Phase 2 (nav collapse), shipped 2026-09-12:** the rail is five items (six
 since the Assessments page above) —
-Today · Practice · Songs · Games · My progress, no "Explore" heading (the
+In-Class Activities · Practice · Songs · Games · My progress, no "Explore" heading (the
 `nav.explore` i18n key stays: it's still the rail `<nav>`'s aria-label, just
 not a visible span any more). Keep practicing and Daily Review are sections
 inside My progress now, not their own pages — `renderKeepPracticing()` and

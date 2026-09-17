@@ -178,7 +178,7 @@
             <button type="button" class="nav-btn lq-nav" id="live-quiz-btn" data-gate="keep" onclick="toggleLiveQuiz()" aria-expanded="false" aria-controls="live-quiz-screen" style="display:none">
               <span class="ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M13 2 4 14h6l-1 8 9-12h-6z"/></svg></span><span data-i18n="lq.navTitle">Live quiz</span></button>
             <button type="button" class="nav-btn ca-nav" id="class-activities-btn" data-gate="keep" onclick="toggleClassActivities()">
-              <span class="ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="5" y="3" width="14" height="18" rx="2"/><path d="M9 3h6v2a1 1 0 0 1-1 1h-4a1 1 0 0 1-1-1z"/><path d="m9 13 2 2 4-4"/></svg></span><span data-i18n="nav.classActivities">Today</span></button>
+              <span class="ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="5" y="3" width="14" height="18" rx="2"/><path d="M9 3h6v2a1 1 0 0 1-1 1h-4a1 1 0 0 1-1-1z"/><path d="m9 13 2 2 4-4"/></svg></span><span data-i18n="nav.classActivities">In-Class Activities</span></button>
             <button type="button" class="nav-btn active" id="practice-nav-btn" data-gate="hide" aria-current="page" onclick="returnToPractice()">
               <span class="ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 7C10.3 5.9 7.8 5.4 4 5.4V18c3.8 0 6.3.5 8 1.6 1.7-1.1 4.2-1.6 8-1.6V5.4c-3.8 0-6.3.5-8 1.6z"/><path d="M12 7v12.6"/></svg></span><span data-i18n="nav.practice">Practice</span></button>
             <button type="button" class="nav-btn" id="songs-hub-btn" data-gate="hide" onclick="toggleSongsHub()">
@@ -429,11 +429,11 @@
           </div>
         </div>
       </div>
-      <div class="page-screen ca-screen" id="class-activities-screen" role="region" aria-label="In-class activities" data-i18n-attr="aria-label:nav.classActivities" hidden>
+      <div class="page-screen ca-screen" id="class-activities-screen" role="region" aria-label="In-Class Activities" data-i18n-attr="aria-label:nav.classActivities" hidden>
         <div class="page-shell">
           <div class="page-topbar">
             <button type="button" class="page-exit" onclick="closeClassActivitiesScreen()">&larr; <span data-i18n="btn.backToPractice">Back to practice</span></button>
-            <div class="page-title"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="5" y="3" width="14" height="18" rx="2"/><path d="M9 3h6v2a1 1 0 0 1-1 1h-4a1 1 0 0 1-1-1z"/><path d="m9 13 2 2 4-4"/></svg> <span data-i18n="nav.classActivities">Today</span></div>
+            <div class="page-title"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="5" y="3" width="14" height="18" rx="2"/><path d="M9 3h6v2a1 1 0 0 1-1 1h-4a1 1 0 0 1-1-1z"/><path d="m9 13 2 2 4-4"/></svg> <span data-i18n="nav.classActivities">In-Class Activities</span></div>
             <span class="page-topbar-spacer"></span>
           </div>
           <div class="page-body" id="class-activities-body"></div>

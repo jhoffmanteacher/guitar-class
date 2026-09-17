@@ -5,6 +5,14 @@ Notable changes to the Guitar Class site. Newest first.
 For the full session-by-session history (and the reasoning behind each change),
 see `WORKFLOW.md` and the git commit log.
 
+## 2026-09-17 — "Today" is "In-Class Activities" again
+
+### Changed
+
+- **The "Today" tab is renamed back to "In-Class Activities."** Same page,
+  same link, same everything else — just the name on the tab and at the top
+  of the page.
+
 ## 2026-09-17 — Today reads newest module first
 
 ### Changed

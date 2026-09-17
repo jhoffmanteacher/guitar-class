@@ -570,7 +570,7 @@ let activityEditId=null;
    on config/class like every other knob in this view:
 
      archivedActivities  id -> true   Tucked away. Students stop seeing it
-                                      (Today, both groups) and it stops
+                                      (In-Class Activities, both groups) and it stops
                                       gating the site, but its release date,
                                       rename, teaching-order number and
                                       per-student clears are all kept, so
@@ -1073,7 +1073,8 @@ function renderTeacherActivities(opts){
       /* A live card's date is editable too (Jonathan, 2026-09-16). It used
          to render read-only, which meant moving something already out to
          students to a different day took Unpublish → re-date — two writes,
-         and a window where the card vanished from Today in between. Typing
+         and a window where the card vanished from In-Class Activities in
+         between. Typing
          a new day straight into the box is one write either way: a past
          date just re-dates it, a future one pulls it back to Scheduled. */
       else { status=`<span class="t-board-status ${isHidden?'t-board-hidden-on':'t-board-live'}">${isHidden?'Hidden':'Live'}</span>`; controls=dateInput+' '+unpub; }
@@ -1159,7 +1160,7 @@ function renderTeacherActivities(opts){
         : (teacherActivityArchived(a.id,cfg)
           ? `<button class="tg-seg-btn" data-set-activity-archived data-id="${escAttr(a.id)}" data-state="restore" title="Put this activity back in this module, where it was, with its date and name">Restore</button>`
             +`<button class="tg-seg-btn t-act-danger" data-delete-activity data-id="${escAttr(a.id)}" title="Clear this activity's date, name and gate clears, and take it off the board">Delete</button>`
-          : `<button class="tg-seg-btn" data-set-activity-archived data-id="${escAttr(a.id)}" data-state="archive" title="Take this off students' Today page but keep its place, date and name">Archive</button>`);
+          : `<button class="tg-seg-btn" data-set-activity-archived data-id="${escAttr(a.id)}" data-state="archive" title="Take this off students' In-Class Activities page but keep its place, date and name">Archive</button>`);
       const moveBtns=(isRetired || !boardCanReorder()) ? '' :
         `<button class="tg-seg-btn" data-board-bump data-id="${escAttr(a.id)}" data-dir="up" title="Move up within this module" aria-label="Move up">&#x25B2;</button>`
         +`<button class="tg-seg-btn" data-board-bump data-id="${escAttr(a.id)}" data-dir="down" title="Move down within this module" aria-label="Move down">&#x25BC;</button>`;
@@ -1264,7 +1265,7 @@ function renderTeacherActivities(opts){
     box.innerHTML=`<div class="tg-note">Drag a built activity into a module to assign it. It goes live for students on its release date.</div>`
       +`<details class="tg-help"><summary>How this page works</summary>`
       +`<div class="tg-note">A card shows to students only when all four are true: it is <strong>assigned</strong> to a module here, its <strong>release date</strong> has arrived, it is not <strong>Hidden</strong>, and it is not <strong>Archived</strong>. Publish now dates it today; scheduling a later day holds it until then; Unpublish clears the date. A card's date stays editable once it's live, so you can move it to another day without unpublishing first — type a future day and it goes back to Scheduled. Use Hidden to pull back something already live, then un-hide any time — the date and the Hidden switch are independent, either one hides.<br><br>`
-      +`<strong>Archive</strong> takes a card off students' Today page for good but keeps its place in its module, its date and its name, so Restore puts it back exactly where it was. Archived cards hold no #number, so the ones after them count down by one. <strong>Delete</strong> also clears the date, rename and per-student gate clears, and takes the card off the board entirely — it comes back in Built, blank, to be placed and published from scratch. Neither one removes the activity from the site's code (only an update does) and neither touches what students have already finished, so the Done counts survive both.<br><br>`
+      +`<strong>Archive</strong> takes a card off students' In-Class Activities page for good but keeps its place in its module, its date and its name, so Restore puts it back exactly where it was. Archived cards hold no #number, so the ones after them count down by one. <strong>Delete</strong> also clears the date, rename and per-student gate clears, and takes the card off the board entirely — it comes back in Built, blank, to be placed and published from scratch. Neither one removes the activity from the site's code (only an update does) and neither touches what students have already finished, so the Done counts survive both.<br><br>`
       +`<strong>Un-assign</strong> sends a card back to Built without clearing anything. The &#x270E; renames an activity for everyone, in both languages, until the Spanish twin ships. Copy link gives you a URL that opens the site straight to that one activity, card already open — paste it into Classroom. Type over a <strong>#number</strong> to move a card to that position; a number inside a title, like Finger Gym 2, is part of the name and stays put.</div></details>`
       +`<div class="t-board">${builtHtml}${assignedHtml}</div>`;
     // Opening the editor is a full re-render, so focus has to be re-placed
@@ -1823,7 +1824,7 @@ async function teacherSetActivityArchived(id, state){
 /* Delete = archive, plus wipe every console setting this activity has. The
    wipe is the whole point of having a second button: it is what makes a
    restored activity start over (undated, so invisible until it is published
-   again) rather than snap back onto Today the moment the flag comes off.
+   again) rather than snap back onto In-Class Activities the moment the flag comes off.
 
    Confirmed first, because unlike Archive it throws away work — a release
    date, a rename, a place on the board, a set of per-student gate clears.
@@ -2017,7 +2018,7 @@ let teacherClassConfigLoaded = false;
    (a missing gamesEnabled just means "on"), but the activity board's
    one-time migration is not: it reads activityDates to decide what to place,
    so a failed read would seed an EMPTY board, write activityBoardSeeded, and
-   take every activity off every student's Today page — with the ordering
+   take every activity off every student's In-Class Activities page — with the ordering
    work gone and no way to tell it apart from a deliberate empty board. So
    the read's success is recorded explicitly rather than inferred. */
 let teacherClassConfigReadOk = false;

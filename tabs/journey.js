@@ -447,7 +447,7 @@ function journeyIsVisible(a, cfg){
      (app.js), and it MATTERS here more than anywhere: un-assigning a card
      deliberately keeps its release date, so without this a dated card pulled
      back to Built would stop blocking the main site while still blanking all
-     six Journey pages — a lock with nothing left on Today to clear it.
+     six Journey pages — a lock with nothing left on In-Class Activities to clear it.
      Keyed off activityBoardSeeded, never off the board being empty, for the
      reason activityBoardOn in app.js spells out. */
   if(cfg && cfg.activityBoardSeeded === true && !((cfg.activityBoard || {})[a.id])) return false;
@@ -462,7 +462,7 @@ function journeyBlockers(cfg, classActivities, uid){
   });
 }
 /* Replaces the whole page — header, layers, tools dock, everything — with
-   one card pointing back to Today. A gated Journey page has nothing else to
+   one card pointing back to In-Class Activities. A gated Journey page has nothing else to
    offer, so this is deliberately total rather than an overlay: nothing
    underneath should still be interactive (or precious CPU/battery running)
    while the student is supposed to be on the main site instead. */

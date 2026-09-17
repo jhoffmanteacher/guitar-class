@@ -249,10 +249,11 @@
     'assess.current':     { en: 'Your module', es: 'Tu módulo' },
     'assess.loading':     { en: 'Loading…', es: 'Cargando…' },
     'assess.none':        { en: 'This module has no in-person assessment list.', es: 'Este módulo no tiene lista de evaluación en persona.' },
-    // Renamed from "In-Class Activities" 2026-09-11 (Today-first work order,
-    // Phase 1) — the key stays the same, so the hash/deep-link/console-link
-    // wiring built on it doesn't move.
-    'nav.classActivities':{ en: 'Today', es: 'Hoy' },
+    // Renamed to "Today" 2026-09-11 (Today-first work order, Phase 1), then
+    // back to "In-Class Activities" 2026-09-17 (Jonathan's call) — the key
+    // stays the same both times, so the hash/deep-link/console-link wiring
+    // built on it never moves.
+    'nav.classActivities':{ en: 'In-Class Activities', es: 'Actividades de clase' },
     'nav.moduleReview':   { en: 'Module review', es: 'Repaso del módulo' },
     'nav.setN':           { en: 'Set {n}', es: 'Unidad {n}' },
     // The room's B/C station rotation retired in 2026-08: one group is with the
@@ -943,7 +944,7 @@
     'journey.gatedTitle':    { en: 'Finish today\'s activity first', es: 'Primero termina la actividad de hoy' },
     'journey.gatedBody':     { en: 'Head back to the site to finish today\'s work — this page will be here when you\'re done.',
                                es: 'Vuelve al sitio para terminar el trabajo de hoy — esta página seguirá aquí cuando termines.' },
-    'journey.gatedBtn':      { en: 'Go to Today', es: 'Ir a Hoy' },
+    'journey.gatedBtn':      { en: 'Go to In-Class Activities', es: 'Ir a Actividades de clase' },
     // "Take It to a Song" link card (Today-first work order, Phase 3b) — the
     // module ladder's own Take It to a Song steps are replaced by this card,
     // one button per core song that has a Journey layer for that module.

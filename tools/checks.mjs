@@ -3432,7 +3432,7 @@ async function liveCheck() {
    not — the board's new "assigned" condition went into app.js alone. The
    result was not a cosmetic drift: un-assigning a still-dated activity
    stopped blocking the main site while still blanking all six Journey
-   pages, with nothing left on Today to clear it. The console meanwhile
+   pages, with nothing left on In-Class Activities to clear it. The console meanwhile
    kept counting it as a blocker for every student.
 
    So: each copy must test every CONCEPT below, and each must have the

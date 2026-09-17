@@ -154,9 +154,9 @@ let activityNumbers = {}; // LEGACY In-Class Activity renumbering — see caBoar
    console's two-column Class activities board (teacher.js). id -> { module,
    pos }: `module` is a MODULE_MANIFEST number, or 0 for the board's Unsorted
    holding pen, and `pos` is 1..N within that module. An activity with an
-   entry is ASSIGNED — placed in the course, and a candidate for Today once
-   its release date arrives. One with no entry has only been pushed to the
-   site; it is Built, not placed, and no student sees it.
+   entry is ASSIGNED — placed in the course, and a candidate for In-Class
+   Activities once its release date arrives. One with no entry has only
+   been pushed to the site; it is Built, not placed, and no student sees it.
 
    This is what drives BOTH the order students read the cards in and the
    "#N - " prefix on them (caBoardOrder / caNumber), replacing the shipped
@@ -628,7 +628,7 @@ function showApp(user){
   // the landing-hash decision below, since a gated student's bookmarked hash
   // has to be overridden by it.
   applyActivityGate();
-  // Today is the home page (Today-first work order, Phase 1): a fresh or
+  // In-Class Activities is the home page (Today-first work order, Phase 1): a fresh or
   // bookmarked-bare visit lands there. A hash that's already present — an
   // explore page, or one this router doesn't own — is left for
   // routeExploreHash to resolve, same as always.
@@ -757,7 +757,7 @@ async function loadClassConfig(){
        merged into one set — see retiredActivityIds. Cached like the dates
        and the clears, and for the same "must not fail open" reason: a
        blocked read that reset this to {} would bring a retired activity
-       back onto Today, and a retired activity a student can no longer see
+       back onto In-Class Activities, and a retired activity a student can no longer see
        the point of is exactly the kind of thing that should not start
        blocking the site again on a flaky connection. */
     retiredActivityIds = Object.assign({}, d.archivedActivities || {}, d.deletedActivities || {});
@@ -765,7 +765,8 @@ async function loadClassConfig(){
     /* The activity board (teacher.js) — which activities are placed in the
        course, in which module, in what order. Cached, and for the same
        "must not fail open" reason as the dates: an empty board reads as
-       "nothing has been placed yet" and would take every card off Today,
+       "nothing has been placed yet" and would take every card off
+       In-Class Activities,
        so a blocked read has to fall back to the last known copy rather
        than to {}. See caBoardOrder. */
     activityBoard = d.activityBoard || {};
@@ -2670,7 +2671,7 @@ function exitExploreHash(){
   routeExploreHash();
 }
 
-/* The pages a gated student may still open — Today, Live quiz, and (Jonathan,
+/* The pages a gated student may still open — In-Class Activities, Live quiz, and (Jonathan,
    2026-09-12) Assessments: what each module's in-person assessment asks for
    is never something today's activity should hide. Mirrors data-gate="keep"
    on the rail buttons (checks.mjs 1aa) — add to both or neither. */
@@ -2714,10 +2715,10 @@ function routeExploreHash(){
     full = '#my-progress';
     history.replaceState(history.state, '', location.pathname + location.search + '#my-progress');
   }
-  /* The activity gate: while it's on, Today and Live quiz are the only
-     reachable pages (caBlockers/applyActivityGate) — anything else
-     (including the bare Practice hash, '') is rewritten back to Today
-     rather than opened, so a bookmarked/typed/Back-button hash can't walk
+  /* The activity gate: while it's on, In-Class Activities and Live quiz are
+     the only reachable pages (caBlockers/applyActivityGate) — anything else
+     (including the bare Practice hash, '') is rewritten back to In-Class
+     Activities rather than opened, so a bookmarked/typed/Back-button hash can't walk
      straight past the gate. replaceState, not push — this is a correction,
      not a real navigation, and shouldn't cost a Back tap of its own. */
   if(document.body.classList.contains('ca-gated') && !GATE_OPEN_HASHES.includes(h)){
@@ -7635,7 +7636,7 @@ function openAssessmentsScreen(){
   renderAssessments();
 }
 function closeAssessmentsScreen(){
-  // Gated: "back" means Today — the practice view the exit would normally
+  // Gated: "back" means In-Class Activities — the practice view the exit would normally
   // land on is hidden, and routeExploreHash would only bounce there anyway.
   if(document.body.classList.contains('ca-gated')){ goExploreHash('class-activities'); return; }
   if(location.hash === '#assessments'){ exitExploreHash(); return; }  // the router finishes the job
@@ -8477,7 +8478,7 @@ function caNumber(a){
    the date gate they hold for dev bypass too, because a retired activity is
    not "not live yet", it is out of the course — there is nothing left to
    preview. Everything downstream inherits that for free: it drops off
-   Today (both groups), stops blocking the gate (caBlockers), and a deep
+   In-Class Activities (both groups), stops blocking the gate (caBlockers), and a deep
    link to it reads as not-posted (caFocusActivity). */
 function caIsVisible(a){
   if(retiredActivityIds[a.id] === true) return false;
@@ -8490,7 +8491,7 @@ function caIsVisible(a){
      An UNSEEDED board — the console has never written one, activityBoardOn
      is false — is not the same as "nothing is assigned" and must not read
      that way, or the first load after this shipped would empty every
-     student's Today page. caBoardOrder treats it as everything-assigned and
+     student's In-Class Activities page. caBoardOrder treats it as everything-assigned and
      this inherits that, same never-lock-on-a-guess rule as the gate itself.
      An emptied board is a different answer and does hide everything. */
   if(!caBoardView().assigned[a.id]) return false;
@@ -8503,7 +8504,8 @@ function caIsVisible(a){
    Jonathan 2026-09-11) ──
    A visible, undone, uncleared activity — any kind, checks included — blocks
    the rest of the site: body.ca-gated is the single on/off switch, and the
-   CSS it drives (styles.css) hides everything but Today and Live quiz. Never
+   CSS it drives (styles.css) hides everything but In-Class Activities and
+   Live quiz. Never
    lock on a guess, same rule as the sequential set gate: a teacher/dev
    preview and a failed progress load both read as "nothing blocking". */
 function caBlockers(){
@@ -8524,7 +8526,7 @@ function applyActivityGate(){
   /* Off → on while the student is somewhere else (a new activity went live
      under an open Games/Songs/My progress screen — the visibilitychange
      re-check below is the usual path): the CSS hides the rail, but an
-     already-open screen stays open, so walk them to Today the same way
+     already-open screen stays open, so walk them to In-Class Activities the same way
      routeExploreHash does for a typed hash. showApp()'s own first call
      lands here too, harmlessly — it's about to route the landing hash
      itself, and goExploreHash is a no-op when the hash already matches. */
@@ -8557,7 +8559,7 @@ document.addEventListener('visibilitychange', () => {
     }
   });
 });
-/* Today — three groups, in this order (Today-first work order, Phase 1):
+/* In-Class Activities — three groups, in this order (Today-first work order, Phase 1):
      1. Do now      — the first pending card. Collapsed like every other
                        card (Jonathan, 2026-09-15): the whole point of the
                        page is seeing the day's work at a glance, and a
@@ -8652,7 +8654,7 @@ function renderClassActivities(){
     bodyEl.innerHTML = missing + gateIntro + pendingHtml + (finished.length ? caFinishedGroupHtml(finished) : '');
   }
   if(typeof applyI18n === 'function') applyI18n(bodyEl);
-  // The resume card only belongs on a finished Today page — gated, there's
+  // The resume card only belongs on a finished In-Class Activities page — gated, there's
   // nothing to resume to yet. renderResumeCard() itself still skips a
   // day-one student with nothing to resume.
   const resumeHost = document.getElementById('resume-card');
@@ -8678,8 +8680,8 @@ function caFinishedGroupHtml(finished){
 function caOnFinishedToggle(details){ caFinishedOpen = details.open; }
 
 /* The unfinished-activities reminder popup (maybeShowCaReminder) was retired
-   2026-09-11 (Today-first work order, Phase 1) — landing on Today replaces
-   it, and the activity gate makes it redundant besides. Deleted rather than
+   2026-09-11 (Today-first work order, Phase 1) — landing on In-Class
+   Activities replaces it, and the activity gate makes it redundant besides. Deleted rather than
    stubbed, per CLAUDE.md; see git history for the old implementation. */
 
 /* ════════════════════════════════════════════════
