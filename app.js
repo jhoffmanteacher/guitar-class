@@ -2498,7 +2498,19 @@ function activateSet(id, opts){
   // Every set opens at the top, every time — no scroll-position memory.
   scrollPaneTop();
   // Opening the Module Review pops the assessment heads-up (once per visit).
-  if(isMr) maybeShowMrAssess(parseInt(id.slice(2),10));
+  // Only when the review panel is actually what the student is looking at,
+  // though — showApp()'s boot-time restore calls activateSet() on the
+  // student's last set/review regardless of which page is on top, so
+  // landing on In-Class Activities (or Songs, My progress, a live quiz…)
+  // used to pop this reminder in the background before the student had
+  // asked to see the review at all (Jonathan, 2026-09-17). Stash it and let
+  // syncExploreNav() fire it once that page closes and the review is
+  // genuinely on screen, instead of dropping it.
+  if(isMr){
+    const mrNum = parseInt(id.slice(2),10);
+    if(anyExplorePageOpen()) pendingMrAssessModule = mrNum;
+    else maybeShowMrAssess(mrNum);
+  }
 }
 
 /* ── Rail set switcher ─────────────────────────────────────────────────
@@ -2601,6 +2613,12 @@ const EXPLORE_PAGES = [
      half-see (or mis-tap into) the set panels underneath. */
   { hash: '#live-quiz',       screen: 'live-quiz-screen',       btn: 'live-quiz-btn', overlay: true },
 ];
+// Whether any explore page (in-column or overlay) is covering the practice
+// view right now — the one check activateSet() needs before popping the
+// Module Review reminder on top of a page the student didn't ask to leave.
+function anyExplorePageOpen(){
+  return EXPLORE_PAGES.some(p => { const el = document.getElementById(p.screen); return el && !el.hasAttribute('hidden'); });
+}
 /* Single source of truth for "which explore page is showing": reads the DOM
    rather than tracking state, so it stays right no matter which path opened
    or closed a page (click, hash, Back button, teacher turning games off). */
@@ -2610,6 +2628,16 @@ function syncExploreNav(){
     const el = document.getElementById(p.screen);
     return el && !el.hasAttribute('hidden');
   });
+  // A Module Review reminder activateSet() had to hold back because an
+  // explore page was covering the practice view (see there) fires now that
+  // the last one has closed — but only if the review is still what's
+  // actually on screen; a student who navigated straight to a different set
+  // in the meantime shouldn't get surprised by it.
+  if(!open && pendingMrAssessModule !== null){
+    const num = pendingMrAssessModule;
+    pendingMrAssessModule = null;
+    if(lastSetId === `mr${num}`) maybeShowMrAssess(num);
+  }
   /* In-column pages hide #week-panels: the practice view is swapped OUT, not
      covered up, so .main would otherwise clamp its scroll to the short explore
      page and lose the student's place in a long set. Stash it on the way in,
@@ -4003,7 +4031,13 @@ function goToNextModule(moduleNum){
    in-person assessment can't be scrolled past unseen. Deliberately NOT
    once-per-visit (Jonathan's call, 2026-08-13): the point is that every trip
    to the review restates what the assessment asks for. Skipped on a locked
-   (preview) panel — the review isn't theirs to take yet. */
+   (preview) panel — the review isn't theirs to take yet.
+
+   "Every trip to the review" means every trip a student actually takes —
+   not activateSet() rebuilding the panel in the background while an explore
+   page sits on top of it (see the pendingMrAssessModule handoff in
+   activateSet()/syncExploreNav() above). */
+let pendingMrAssessModule = null;
 function maybeShowMrAssess(moduleNum){
   const mr = MODULE_REVIEWS[moduleNum];
   if(!mr) return;
