@@ -3598,7 +3598,7 @@ function checkConfigWriteGuard() {
   let bad = 0;
   const flag = m => { err(m); problems++; bad++; };
   let src;
-  try { src = readFileSync(join(ROOT, 'teacher.js'), 'utf8'); }
+  try { src = readFileSync(join(ROOT, 'teacher.js'), 'utf8').replace(/\r\n/g, '\n'); }
   catch { flag('teacher.js unreadable — 1ai cannot check this'); return; }
 
   /* The guard itself, before anything is measured against it. Each piece is
