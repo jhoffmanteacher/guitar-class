@@ -913,6 +913,7 @@ body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,"Helvetica N
    900px reading column. */
 body.t-wide .t-main{max-width:none}
 .t-header{margin-bottom:20px}
+.t-header-row{display:flex;align-items:flex-start;justify-content:space-between;gap:12px;flex-wrap:wrap}
 .t-title{font-size:1.25rem;font-weight:500;margin-bottom:3px;font-family:var(--font-display)}
 .t-sub{font-size:0.9375rem;color:var(--text2)}
 .t-summary{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:10px;margin-bottom:20px}
@@ -1060,6 +1061,8 @@ body.t-wide .t-main{max-width:none}
 .t-board-move{font:inherit;font-size:0.8125rem;color:inherit;background:var(--bg);
   border:1px solid var(--border2);border-radius:16px;padding:3px 8px;max-width:190px}
 .t-board-done{font-size:0.8125rem;color:var(--text2);flex:0 1 auto;min-width:0}
+.t-board-done-row{display:block}
+.t-board-done-row+.t-board-done-row{margin-top:3px}
 .t-board-done details{display:inline}
 .t-board-done summary{display:inline;cursor:pointer;color:var(--text3);text-decoration:underline dotted}
 /* The rarely-used half of a card's controls, behind a hairline. */

@@ -488,8 +488,13 @@
 <div id="teacher-app" style="display:none">
   <div class="t-main">
     <div class="t-header">
-      <div class="t-title">Class progress</div>
-      <div class="t-sub">Sequoia High School — Beginning Guitar · Year 1 · Teacher view</div>
+      <div class="t-header-row">
+        <div>
+          <div class="t-title">Class progress</div>
+          <div class="t-sub">Sequoia High School — Beginning Guitar · Year 1 · Teacher view</div>
+        </div>
+        <button type="button" class="tg-seg-btn" onclick="teacherOpenStudentView()" title="Opens the site in a new tab the way a student sees it — no dashboard, no gate. Since it's still your own account, it skips the sequential set gate like any teacher preview.">Student view</button>
+      </div>
     </div>
     <div class="t-summary" id="t-summary"></div>
     <!-- Which view is showing was conveyed by the .on class alone. Mirrored to

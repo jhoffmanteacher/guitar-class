@@ -107,6 +107,20 @@ function teacherSetPeriodFilter(v){
   if(teacherView==='manage') renderTeacherManage();   // Manage shows everyone, but its filter chrome still repaints
   else { renderTeacherBody(); renderTeacherSummary(); }
 }
+/* "Student view" button in the dashboard header. Opens the site root in a
+   new tab with no ?teacher=true and no hash — same browser, same signed-in
+   Firebase session, so it lands on the ordinary student app AS the teacher's
+   own account. That still isn't a real student session: isGatePreviewer()
+   in app.js recognizes TEACHER_EMAIL and skips the sequential set gate and
+   the day's-activities gate, and there's no progress on the teacher's own
+   account to show — it's for checking layout/copy/flow, not standing in for
+   a specific student. */
+function teacherOpenStudentView(){
+  const url=new URL(window.location.href);
+  url.search='';
+  url.hash='';
+  window.open(url.toString(), '_blank', 'noopener');
+}
 
 async function showTeacherApp(user){
   document.getElementById('auth-wall').style.display='none';
@@ -979,29 +993,41 @@ function renderTeacherActivities(opts){
     const view=teacherBoardView(cfg);
     const nums=view.number;
     const byId={}; activities.forEach(a=>{ byId[a.id]=a; });
-    const total=allStudents.length;
     const manifest=(typeof MODULE_MANIFEST!=='undefined')?MODULE_MANIFEST:[];
 
     /* ── Shared card parts ──────────────────────────────────────────── */
-    // How many students have finished this one, and who hasn't. Reads the
-    // SAME student docs the Students tab already fetched (loadAllStudents)
-    // — no second Firestore read path for completion data.
+    // How many students have finished this one, and who hasn't — broken out
+    // by period so the number can't be misread as the whole class when the
+    // dashboard's period filter (t-period-filter) is narrowed to P4, P7, or
+    // Unassigned. Deliberately reads the FULL roster (allStudentsRaw, minus
+    // archived) rather than `allStudents`, which follows that filter — this
+    // card is meant to answer "who's done" for the whole class regardless of
+    // whatever the teacher is currently looking at elsewhere on the page.
+    // Reads the SAME student docs the Students tab already fetched
+    // (loadAllStudents) — no second Firestore read path for completion data.
+    const doneSummaryRoster=(teacherShowArchived?allStudentsRaw:allStudentsRaw.filter(s=>!((cfg.archived||{})[s.uid])));
     const doneSummary=a=>{
       const isCheck=a.kind==='check';
-      const notDone=allStudents.filter(s=>isCheck
-        ? !(s.exitChecks||{})[a.id]
-        : (s.classActivities||{})[a.id]!==true);
-      const doneCount=total-notDone.length;
-      const listHtml=notDone.length
-        ? notDone.map(s=>`<div style="padding:2px 0">${escHtml(s.name||'(no name)')}${s.email?` &middot; ${escHtml(s.email)}`:''}</div>`).join('')
-        : `<div style="padding:2px 0">Everyone has ${isCheck?'turned this one in':'finished this one'}.</div>`;
-      const results=isCheck?allStudents.map(s=>(s.exitChecks||{})[a.id]).filter(Boolean):[];
-      const itemTotal=isCheck?(((a.check||{}).items)||[]).length:0;
-      const avg=results.length?(results.reduce((n,r)=>n+(Number(r.score)||0),0)/results.length).toFixed(1):null;
-      const head=isCheck
-        ? `${doneCount} / ${total} turned in${avg!==null?` &middot; avg ${avg}/${itemTotal}`:' &middot; avg —'}`
-        : `${doneCount} / ${total} done`;
-      return `<div class="t-board-done"><strong>${head}</strong> &middot; <details><summary>who hasn't ${isCheck?'turned it in':'finished'} (${notDone.length})</summary>${listHtml}</details></div>`;
+      const groups=[['4','P4'],['7','P7'],['','Unassigned']]
+        .map(([val,label])=>({label, students:doneSummaryRoster.filter(s=>teacherStudentPeriod(s)===val)}))
+        .filter(g=>g.students.length);
+      const rows=groups.map(g=>{
+        const notDone=g.students.filter(s=>isCheck
+          ? !(s.exitChecks||{})[a.id]
+          : (s.classActivities||{})[a.id]!==true);
+        const doneCount=g.students.length-notDone.length;
+        const listHtml=notDone.length
+          ? notDone.map(s=>`<div style="padding:2px 0">${escHtml(s.name||'(no name)')}${s.email?` &middot; ${escHtml(s.email)}`:''}</div>`).join('')
+          : `<div style="padding:2px 0">Everyone has ${isCheck?'turned this one in':'finished this one'}.</div>`;
+        const results=isCheck?g.students.map(s=>(s.exitChecks||{})[a.id]).filter(Boolean):[];
+        const itemTotal=isCheck?(((a.check||{}).items)||[]).length:0;
+        const avg=results.length?(results.reduce((n,r)=>n+(Number(r.score)||0),0)/results.length).toFixed(1):null;
+        const head=isCheck
+          ? `${g.label}: ${doneCount} / ${g.students.length} turned in${avg!==null?` &middot; avg ${avg}/${itemTotal}`:' &middot; avg —'}`
+          : `${g.label}: ${doneCount} / ${g.students.length} done`;
+        return `<div class="t-board-done-row"><strong>${head}</strong> &middot; <details><summary>who hasn't ${isCheck?'turned it in':'finished'} (${notDone.length})</summary>${listHtml}</details></div>`;
+      }).join('');
+      return `<div class="t-board-done">${rows||'<div class="t-board-done-row">No student data yet.</div>'}</div>`;
     };
     // Title line: the rename editor when it's open on this card, otherwise
     // the name + pencil + id + Copy link. The whole line is the link into
