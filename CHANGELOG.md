@@ -5,7 +5,7 @@ Notable changes to the Guitar Class site. Newest first.
 For the full session-by-session history (and the reasoning behind each change),
 see `WORKFLOW.md` and the git commit log.
 
-## 2026-09-16 — "the cure" on the low E: shorter directions, one finger
+## 2026-09-16 — "the cure" activities: shorter directions
 
 ### Changed
 
@@ -14,6 +14,11 @@ see `WORKFLOW.md` and the git commit log.
   directions are much shorter: the tab shows you the notes, and each step just
   tells you how to practice it (slowly, counting out loud, then with the
   metronome).
+- **"the cure" — The Verse on Two Strings (`ca-19`) and "the cure" — Intro,
+  Verse and Chorus (`ca-18`)** get the same short directions. The fingering
+  stays one finger per fret (index, ring, pinky on frets 1, 3, 5), and the map
+  step is the only place that says so — the rest of each step is how to
+  practice the tab.
 
 ## 2026-09-16 — The site no longer looks like it signed you in twice
 
