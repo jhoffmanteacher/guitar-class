@@ -195,18 +195,25 @@ async function showTeacherApp(user){
       if(actArch){ teacherSetActivityArchived(actArch.dataset.id, actArch.dataset.state); return; }
       const actDel=e.target.closest('[data-delete-activity]');
       if(actDel){ teacherDeleteActivity(actDel.dataset.id); return; }
-      if(e.target.closest('[data-show-archived-activities]')){ teacherToggleShowArchivedActivities(); return; }
-      if(e.target.closest('[data-show-deleted-activities]')){ teacherToggleShowDeletedActivities(); return; }
       const actClear=e.target.closest('[data-set-activity-clear]');
       if(actClear){ teacherSetActivityClear(actClear.dataset.uid, actClear.dataset.id, actClear.dataset.state); return; }
       const clearAll=e.target.closest('[data-clear-all-blockers]');
       if(clearAll){ teacherClearAllBlockers(clearAll.dataset.uid); return; }
-      const sortTh=e.target.closest('[data-sort-activities]');
-      if(sortTh){ teacherSetActivitySort(sortTh.dataset.sortActivities); return; }
-      // Rename controls sit INSIDE the title cell, which is itself the
+      // ── The activity board (renderTeacherActivities) ──
+      const pub=e.target.closest('[data-publish-activity]');
+      // Publish now / Unpublish both go through the ordinary date writer —
+      // the date IS the publish switch, these are just its two shortcuts.
+      if(pub){ teacherSetActivityDate(pub.dataset.id, pub.dataset.state==='now' ? dayStr(new Date()) : ''); return; }
+      const unassign=e.target.closest('[data-unassign-activity]');
+      if(unassign){ teacherUnassignActivity(unassign.dataset.id); return; }
+      const bump=e.target.closest('[data-board-bump]');
+      if(bump){ teacherBoardBump(bump.dataset.id, bump.dataset.dir); return; }
+      const fold=e.target.closest('[data-board-fold]');
+      if(fold){ teacherBoardFold(fold.dataset.module); return; }
+      // Rename controls sit INSIDE the title line, which is itself the
       // data-open-activity link — so they have to be matched before it, or
       // clicking the pencil would navigate away instead of opening the editor.
-      // Also inside the title cell, so it's matched before the open-detail
+      // Also inside the title line, so it's matched before the open-detail
       // link below for the same reason the rename controls are.
       const actLink=e.target.closest('[data-copy-activity-link]');
       if(actLink){ teacherCopyActivityLink(actLink.dataset.id, actLink); return; }
@@ -217,11 +224,11 @@ async function showTeacherApp(user){
       if(actSave){ teacherSaveActivityTitle(actSave.dataset.id); return; }
       const actReset=e.target.closest('[data-rename-reset]');
       if(actReset){ teacherSetActivityTitle(actReset.dataset.id, ''); return; }
-      // The number box sits inside the title cell too, and it's a live input
-      // rather than a button — swallow the click so aiming at it doesn't
-      // navigate to the detail page out from under the cursor. The write
-      // happens on 'change', below.
-      if(e.target.closest('[data-set-activity-number]')) return;
+      // The # box and the Move-to select are live inputs sitting on the same
+      // card as the open-detail title — swallow the click so aiming at one
+      // doesn't navigate to the detail page out from under the cursor. Their
+      // writes happen on 'change', below.
+      if(e.target.closest('[data-board-number]') || e.target.closest('[data-move-activity]')) return;
       const openAct=e.target.closest('[data-open-activity]');
       if(openAct){ openActivityDetail(openAct.dataset.id); return; }
       if(e.target.closest('[data-back-to-activities]')){ backToActivitiesList(); return; }
@@ -234,15 +241,36 @@ async function showTeacherApp(user){
     shell.addEventListener('change', e=>{
       const actDate=e.target.closest('[data-set-activity-date]');
       if(actDate){ teacherSetActivityDate(actDate.dataset.id, actDate.value); return; }
-      const actNum=e.target.closest('[data-set-activity-number]');
-      if(actNum) teacherSetActivityNumber(actNum.dataset.id, actNum.value);
+      const actNum=e.target.closest('[data-board-number]');
+      if(actNum){ teacherMoveActivityToNumber(actNum.dataset.id, actNum.value); return; }
+      // "Assign to…" / "Move to…" — both append at the end of the section
+      // they name, same as dropping a card on a section's empty space.
+      const moveSel=e.target.closest('[data-move-activity]');
+      if(moveSel && moveSel.value!==''){ teacherMoveActivity(moveSel.dataset.id, Number(moveSel.value), null); return; }
     });
+    /* An <details> in the board remembers whether it was open across the
+       next re-render — the board repaints on every write, and an Archived
+       list that snapped shut each time would be unusable. `toggle` doesn't
+       bubble, hence the capture phase. */
+    shell.addEventListener('toggle', e=>{
+      if(!e.target || typeof e.target.closest!=='function') return;
+      const arch=e.target.closest('[data-board-arch]');
+      if(arch) teacherBoardArchToggle(arch.dataset.module, arch.open);
+    }, true);
+    /* Drag and drop for the board. Bound to the same stable shell for the
+       same reason as the click listener — the board's innerHTML is replaced
+       on every render, so per-card listeners would have to be re-bound. */
+    shell.addEventListener('dragstart', teacherBoardDragStart);
+    shell.addEventListener('dragover',  teacherBoardDragOver);
+    shell.addEventListener('dragenter', teacherBoardDragOver);
+    shell.addEventListener('drop',      teacherBoardDrop);
+    shell.addEventListener('dragend',   teacherBoardDragEnd);
     // Enter saves, Escape backs out — the rename box is a one-line field in a
     // table cell, not a form, so there's no submit event to lean on.
     shell.addEventListener('keydown', e=>{
       // A number box isn't in a form either, so Enter has nothing to submit —
       // blur it, which fires the 'change' the writer above listens for.
-      const numBox=e.target.closest('.t-act-num-input');
+      const numBox=e.target.closest('.t-board-num');
       if(numBox){ if(e.key==='Enter'){ e.preventDefault(); numBox.blur(); } return; }
       const box=e.target.closest('.t-act-title-edit');
       if(!box) return;
@@ -517,12 +545,6 @@ let activityDetailId=null;
 // Which row (if any) currently has its rename box open. Purely local view
 // state, cleared on every save/cancel and whenever the tab is re-entered.
 let activityEditId=null;
-// Class activities table sort: which column drives the order, and which way.
-// Purely local view state (not persisted) — defaults reproduce the table's
-// original fixed order (newest-dated first) so switching to this UI didn't
-// change anyone's expectations.
-let activitySortKey='date';   // 'date' | 'number'
-let activitySortDir='desc';   // 'asc' | 'desc'
 /* ── Archive / Delete (Class activities view) ──────────────────────────
    Two console-only ways to take an activity out of circulation, both stored
    on config/class like every other knob in this view:
@@ -551,11 +573,10 @@ let activitySortDir='desc';   // 'asc' | 'desc'
    The two are mutually exclusive by construction — each writer clears the
    other flag — so a row is live, archived or deleted, never two at once.
 
-   Both are folded OUT of the table by default; these toggles fold them back
-   in, the same idiom (and the same wording) as teacherShowArchived on the
-   Manage view. Purely local view state, like the sort above. */
-let teacherShowArchivedActivities=false;
-let teacherShowDeletedActivities=false;
+   On the board, an ARCHIVED card stays inside its own module, folded into
+   that section's "Archived (N)" disclosure — it still holds its place, so
+   Restore puts it back where it was. A DELETED one is taken off the board
+   as well, so it lands back in Built with everything else unplaced. */
 function applyTeacherViewChrome(v){
   document.querySelectorAll('.t-vt').forEach(b=>b.classList.toggle('on',b.dataset.view===v));
   const legend=document.getElementById('t-legend'); if(legend) legend.style.display = v==='skills' ? '' : 'none';
@@ -717,22 +738,6 @@ function renderTeacherTrouble(){
    This table lists every activity regardless of date — deliberate, so a
    future or not-yet-dated activity can be pushed and reviewed here ahead of
    its lesson. See loadClassConfig() in app.js for the student-facing read. */
-/* opts.cached: repaint from the config already in memory instead of going
-   back to Firestore.
-
-   Only for repaints that changed NOTHING in Firestore — a sort click, opening
-   or cancelling the rename box, a rejected number entry. Every repaint that
-   FOLLOWS A WRITE must stay fresh, and deliberately so: the failure paths in
-   teacherSetActivityHidden/Date roll their optimistic change back in memory
-   and then repaint to show what Firestore actually holds, and
-   teacherSetActivityNumber notes that painting before the read would pull the
-   pre-write copy back over the new state. Fresh is therefore the DEFAULT, so
-   a call site I misjudged costs one extra read rather than showing the
-   teacher stale data.
-
-   The win is not really the read — it is that a sort click no longer blanks
-   the table to "Loading…" and waits on a network round trip to redraw rows it
-   already has. */
 /* ── The link a student can be handed ──
    '#class-activities/ca-15' opens the Class activities page with that one
    card expanded and scrolled to (caFocusActivity in app.js) — the URL to
@@ -760,6 +765,138 @@ function teacherCopyActivityLink(id, btn){
   }
   window.prompt('Copy this link:', url);
 }
+/* ── Board state (view-only, not persisted) ─────────────────────────────
+   Which sections are folded shut, which "Archived (N)" disclosures are
+   open, and which card a drag is currently carrying. Same convention as
+   activityEditId above: it lives for as long as the tab is open and starts
+   fresh on re-entry, because none of it is worth a Firestore round trip. */
+let boardSectionClosed={};     // module number -> true (default: open)
+let boardArchOpen={};          // module number (or 'built') -> true
+let boardDragId=null;          // the id a drag is carrying — never in dataTransfer
+// The migration is a one-shot write, but renderTeacherActivities can paint
+// several times before it lands (a view switch, a language change). One
+// in-flight guard so it is attempted once per session, not once per paint.
+let boardMigrating=false;
+
+/* The board's read of config/class, in the shape app.js's caBoardOrder
+   hands back. Deliberately the SAME function students read through
+   (caBoardView in app.js), fed this file's config object instead of app.js's
+   student-side globals — same split as caTitle/teacherActivityTitle, and the
+   reason the console's #N can't drift from the one on a student's card. */
+function teacherBoardView(cfg){
+  const retired=Object.assign({}, (cfg&&cfg.archivedActivities)||{}, (cfg&&cfg.deletedActivities)||{});
+  return caBoardOrder(window.CLASS_ACTIVITIES||[], (cfg&&cfg.activityBoard)||{}, {
+    retired,
+    legacyNumbers:(cfg&&cfg.activityNumbers)||{},
+    seeded: !!(cfg&&cfg.activityBoardSeeded),
+  });
+}
+/* Every id currently placed in one module, in board order, archived rows
+   INCLUDED — the ordering primitive every writer below splices against. An
+   archived card keeps its slot inside its module precisely so Restore puts
+   it back where it was, so it has to be in this list even though it never
+   renders in the live run of cards. */
+function teacherBoardModuleIds(cfg, module){
+  const b=(cfg&&cfg.activityBoard)||{};
+  return (window.CLASS_ACTIVITIES||[]).filter(a=>b[a.id] && (Number(b[a.id].module)||0)===Number(module))
+    .sort((x,y)=>{
+      const px=Number(b[x.id].pos), py=Number(b[y.id].pos);
+      return ((Number.isFinite(px)?px:Infinity)-(Number.isFinite(py)?py:Infinity))
+        || (teacherActivityIdNum(x)-teacherActivityIdNum(y));
+    })
+    .map(a=>a.id);
+}
+function teacherActivityIdNum(a){ const m=/^ca-(\d+)$/.exec(String(a&&a.id)); return m?Number(m[1]):Infinity; }
+/* One line saying where a card sits, for the two detail pages. Reads the
+   same board view students' #N comes from, so the detail page can't
+   disagree with the board that linked to it. */
+function teacherActivityPlace(id){
+  const cfg=teacherClassConfig;
+  const e=(cfg.activityBoard||{})[id];
+  if(!e) return 'Built \u2014 not assigned to a module yet, so no student sees it.';
+  const mn=Number(e.module)||0;
+  const manifest=(typeof MODULE_MANIFEST!=='undefined')?MODULE_MANIFEST:[];
+  const mod=manifest.find(m=>m.num===mn);
+  const where=mn===0?'Unsorted':(mod?`Module ${mn} \u2014 ${mod.name}`:`Module ${mn}`);
+  if(teacherActivityDeleted(id,cfg)) return `${where} \u00b7 deleted \u2014 no number, and students don't see it.`;
+  if(teacherActivityArchived(id,cfg)) return `${where} \u00b7 archived \u2014 no number, and students don't see it.`;
+  const n=teacherBoardView(cfg).number[id];
+  return n ? `${where} \u00b7 #${n}` : `${where} \u00b7 no number \u2014 exit checks never take a #N slot.`;
+}
+
+/* ── One-time migration: place what's already published ─────────────────
+   Runs on the first board render where config/class has never held a board
+   (activityBoardSeeded absent — NOT "activityBoard is empty", which is a
+   board the teacher emptied on purpose; see activityBoardOn in app.js).
+
+   What lands: every activity that already has a release date, in the order
+   students are reading them RIGHT NOW — the shipped `number` with the
+   console's old activityNumbers overrides applied. Seeding by date instead
+   would have been simpler and wrong: those overrides ARE the teaching order
+   Jonathan typed, and a date-ordered board would have shuffled it on the
+   first load (Jonathan, 2026-09-16). Everything undated stays in Built.
+
+   All of it goes into module 0, the Unsorted pen, to be dragged into real
+   modules from the board — the one thing the old data genuinely cannot
+   answer is which module an activity belongs to. */
+async function teacherMigrateActivityBoard(cfg){
+  if(boardMigrating || !cfg || cfg.activityBoardSeeded) return false;
+  // Never seed off a config we didn't actually read — see
+  // teacherClassConfigReadOk. This is the one write in the file that is
+  // destructive when handed an empty object.
+  if(!teacherClassConfigReadOk) return false;
+  boardMigrating=true;
+  const dates=cfg.activityDates||{};
+  const ov=cfg.activityNumbers||{};
+  const shipped=a=>{ const n=Number(a.number); return Number.isFinite(n)?n:Infinity; };
+  const legacyN=a=>{ const o=ov[a.id]; return (o&&Number.isFinite(Number(o.n))&&Number(o.base)===shipped(a))?Number(o.n):shipped(a); };
+  const board={};
+  (window.CLASS_ACTIVITIES||[]).filter(a=>dates[a.id])
+    .sort((x,y)=>(legacyN(x)-legacyN(y))||(shipped(x)-shipped(y))||(teacherActivityIdNum(x)-teacherActivityIdNum(y)))
+    .forEach((a,i)=>{ board[a.id]={module:0, pos:i+1}; });
+  try{
+    await ensureDb();
+    await db.collection('config').doc('class').set({activityBoard:board, activityBoardSeeded:true},{merge:true});
+  }catch(e){
+    boardMigrating=false;
+    alert('Could not set up the activity board — check your connection and Firestore rules.');
+    return false;
+  }
+  cfg.activityBoard=board;
+  cfg.activityBoardSeeded=true;
+  console.log('[guitar-class] activity board created — placed '+Object.keys(board).length
+    +' published activit'+(Object.keys(board).length===1?'y':'ies')+' in Unsorted: '
+    +Object.keys(board).sort((x,y)=>board[x].pos-board[y].pos).join(', '));
+  return true;
+}
+
+/* ── Class activities: the board ────────────────────────────────────────
+   Two columns. LEFT, "Built": every activity that has been pushed to the
+   site but not yet placed in the course — newest first, because the one
+   just pushed is the one being placed. RIGHT, "Assigned": the cards that
+   ARE placed, grouped by module and ordered inside each module, which is
+   exactly the order (and the #N numbering) students read.
+
+   Dragging a Built card into a module assigns it; dragging one back to
+   Built un-assigns it. Every keyboard/touch path to the same move exists
+   beside the drag — the "Assign to"/"Move to" selects, the ▲▼ buttons, and
+   the # box — because a drag is the only affordance here that a Chromebook
+   trackpad, a phone and a screen reader all handle differently.
+
+   PUBLISHING is still the release date, unchanged: config/class.activityDates
+   and app.js's caIsVisible(). Assigned is a second, independent condition,
+   not a replacement — a card goes live for students when it is assigned AND
+   its date has arrived AND it isn't hidden AND it isn't archived/deleted.
+
+   opts.cached: repaint from the config already in memory instead of going
+   back to Firestore. Only for repaints that changed NOTHING in Firestore —
+   folding a section, opening or cancelling the rename box, a rejected #
+   entry. Every repaint that FOLLOWS A WRITE stays fresh, deliberately: the
+   failure paths below roll their optimistic change back in memory and then
+   repaint to show what Firestore actually holds, and painting before the
+   read would pull the pre-write copy back over the new state. Fresh is the
+   DEFAULT, so a call site misjudged costs one extra read rather than
+   showing the teacher stale data. */
 function renderTeacherActivities(opts){
   const cached = !!(opts && opts.cached) && teacherClassConfigLoaded;
   const box=document.getElementById('t-grid-container');
@@ -774,63 +911,37 @@ function renderTeacherActivities(opts){
     return;
   }
   if(!cached) box.innerHTML='<div class="t-loading">Loading…</div>';
-  (cached ? Promise.resolve(teacherClassConfig) : loadTeacherClassConfig()).then(cfg=>{
+  (cached ? Promise.resolve(teacherClassConfig) : loadTeacherClassConfig()).then(async cfg=>{
     if(teacherView!=='activities') return;   // switched views mid-flight
     if(!cfg) return;                         // superseded by a newer toggle
+    // First ever board render: place what's already published, then paint.
+    if(!cfg.activityBoardSeeded && !boardMigrating){
+      if(!teacherClassConfigReadOk){
+        box.innerHTML='<div class="t-loading">Could not read the class settings, so the activity board hasn\'t been set up yet — check your connection and reload.</div>';
+        return;
+      }
+      const done=await teacherMigrateActivityBoard(cfg);
+      if(teacherView!=='activities' || activityDetailId) return;
+      if(!done && !cfg.activityBoardSeeded){
+        box.innerHTML='<div class="t-loading">Could not set up the activity board — reload to try again.</div>';
+        return;
+      }
+    }
     const hidden=cfg.hiddenActivities||{};
     const dates=cfg.activityDates||{};
-    // Teaching-order numbers with the console's own resequencing applied —
-    // id -> 1..N, see teacherActivityNumbers below. Everything in this view
-    // that shows or sorts by a number reads THIS, never a.number, or the
-    // table would disagree with the students' cards the moment one is moved.
-    const nums=teacherActivityNumbers(cfg);
     const today=dayStr(new Date());
-    // Sortable by either column, either direction — driven by
-    // activitySortKey/activitySortDir (toggled by clicking a header, see
-    // teacherSetActivitySort). 'number' sorts on the resolved teaching-order
-    // position, never the id (localeCompare would misorder ca-10 before ca-2). 'date' always
-    // keeps dated activities ahead of undated ones regardless of direction —
-    // an activity with no date isn't "earlier" or "later" than a dated one,
-    // so flipping the arrow shouldn't shuffle it in among them — and
-    // tiebreaks/undated activities fall back to number in the same direction.
-    const dirMul = activitySortDir==='asc' ? 1 : -1;
-    /* Archived and deleted rows are folded out of the table by default and
-       folded back in by their own toggles — the Manage view's "Show
-       archived" idiom. Counted over EVERY activity, not the filtered list,
-       so the toggle can say how many are behind it. */
-    const archCount=activities.filter(x=>teacherActivityArchived(x.id,cfg)).length;
-    const delCount=activities.filter(x=>teacherActivityDeleted(x.id,cfg)).length;
-    const inTable=activities.filter(x=>{
-      if(teacherActivityDeleted(x.id,cfg)) return teacherShowDeletedActivities;
-      if(teacherActivityArchived(x.id,cfg)) return teacherShowArchivedActivities;
-      return true;
-    });
-    const sorted=[...inTable].sort((a,b)=>{
-      if(activitySortKey==='number') return dirMul*(nums[a.id]-nums[b.id]);
-      const da=dates[a.id]||'', db=dates[b.id]||'';
-      if(da && !db) return -1;
-      if(!da && db) return 1;
-      if(da && db) return dirMul*da.localeCompare(db) || dirMul*(nums[a.id]-nums[b.id]);
-      return dirMul*(nums[a.id]-nums[b.id]);
-    });
+    const view=teacherBoardView(cfg);
+    const nums=view.number;
+    const byId={}; activities.forEach(a=>{ byId[a.id]=a; });
     const total=allStudents.length;
-    // Checks hold no teaching-order slot, so they don't widen the range a
-    // number box will accept — see caNumberMap() in app.js.
-    const numberedCount=activities.filter(x=>x.kind!=='check').length;
-    const rows=sorted.map(a=>{
-      // Retired rows keep their teaching-order slot — #N is numbered over
-      // every activity in the file (caNumberMap), exactly as it already is
-      // for an undated or hidden one, so archiving something in the middle
-      // of the course doesn't shuffle every later activity's prefix.
-      const isArchived=teacherActivityArchived(a.id,cfg);
-      const isDeleted=teacherActivityDeleted(a.id,cfg);
-      const isRetired=isArchived||isDeleted;
+    const manifest=(typeof MODULE_MANIFEST!=='undefined')?MODULE_MANIFEST:[];
+
+    /* ── Shared card parts ──────────────────────────────────────────── */
+    // How many students have finished this one, and who hasn't. Reads the
+    // SAME student docs the Students tab already fetched (loadAllStudents)
+    // — no second Firestore read path for completion data.
+    const doneSummary=a=>{
       const isCheck=a.kind==='check';
-      // A check is "done" when it has been turned in — the same
-      // classActivities flag, which ecSubmit sets alongside the score, so
-      // this column needs no second source of truth. What it adds is the
-      // score: a 12/12 turned-in count over an average of 2.1 is the thing
-      // worth seeing before the next lesson.
       const notDone=allStudents.filter(s=>isCheck
         ? !(s.exitChecks||{})[a.id]
         : (s.classActivities||{})[a.id]!==true);
@@ -841,111 +952,192 @@ function renderTeacherActivities(opts){
       const results=isCheck?allStudents.map(s=>(s.exitChecks||{})[a.id]).filter(Boolean):[];
       const itemTotal=isCheck?(((a.check||{}).items)||[]).length:0;
       const avg=results.length?(results.reduce((n,r)=>n+(Number(r.score)||0),0)/results.length).toFixed(1):null;
-      const doneCell=isCheck
+      const head=isCheck
         ? `${doneCount} / ${total} turned in${avg!==null?` &middot; avg ${avg}/${itemTotal}`:' &middot; avg —'}`
-        : `${doneCount} / ${total} students`;
-      const isHidden=!!hidden[a.id];
-      const dateVal=dates[a.id]||'';
-      const isScheduled=dateVal && dateVal>today;
-      // data-id + the delegated listeners in showTeacherApp — an activity id
-      // is never spliced into an inline JS string literal.
-      const visBtns=
-        `<button class="tg-seg-btn ${!isHidden?'on':''}" data-set-activity-hidden data-id="${escAttr(a.id)}" data-state="show">Visible</button>`+
-        `<button class="tg-seg-btn ${isHidden?'on':''}" data-set-activity-hidden data-id="${escAttr(a.id)}" data-state="hide">Hidden</button>`;
-      /* Archive/Delete, or Restore once it's retired. One Restore serves both
-         states (teacherSetActivityArchived clears either flag); Delete stays
-         offered on an archived row, so "tuck it away now, decide later" is a
-         real path rather than a dead end. A deleted row has nothing left to
-         delete, so it gets Restore alone. */
-      const retireBtns=isDeleted
-        ? `<button class="tg-seg-btn" data-set-activity-archived data-id="${escAttr(a.id)}" data-state="restore" title="Put this activity back — it returns undated, so set a date to publish it again">Restore</button>`
-        : (isArchived
-          ? `<button class="tg-seg-btn" data-set-activity-archived data-id="${escAttr(a.id)}" data-state="restore" title="Put this activity back, with its date, name and #number as they were">Restore</button>`
-            +`<button class="tg-seg-btn t-act-danger" data-delete-activity data-id="${escAttr(a.id)}" title="Clear this activity's date, name, #number and gate clears too">Delete</button>`
-          : `<button class="tg-seg-btn" data-set-activity-archived data-id="${escAttr(a.id)}" data-state="archive" title="Take this off students' Today page but keep its date, name and #number">Archive</button>`
-            +`<button class="tg-seg-btn t-act-danger" data-delete-activity data-id="${escAttr(a.id)}" title="Take it off students' Today page AND clear its date, name, #number and gate clears">Delete</button>`);
-      /* One note, in priority order — archived/deleted beats every reason the
-         date alone would give, because it's the one that's actually deciding. */
-      const dateNote = isDeleted
-        ? ' <span style="opacity:.65;font-size:.85em">(deleted — hidden from students)</span>'
-        : isArchived
-        ? ' <span style="opacity:.65;font-size:.85em">(archived — hidden from students)</span>'
-        : !dateVal
-        ? ' <span style="opacity:.65;font-size:.85em">(no date — hidden from students)</span>'
-        : (isScheduled ? ' <span style="opacity:.65;font-size:.85em">(scheduled)</span>' : '');
-      const dateCell=`<input type="date" class="t-date-input" data-set-activity-date data-id="${escAttr(a.id)}" value="${escAttr(dateVal)}" aria-label="Release date for ${escAttr(teacherActivityTitle(a,cfg))}">${dateNote}`;
-      // Same "#N - Title" form the student card (app.js) and the activity
-      // detail page use, so the number reads as part of the name rather than
-      // the column needing its own. Two renderings of the same thing: plain
-      // text while the rename editor is open (one editable thing per cell),
-      // and a live number box otherwise — typing a new position there moves
-      // the activity, exactly the way the date input publishes it.
+        : `${doneCount} / ${total} done`;
+      return `<div class="t-board-done"><strong>${head}</strong> &middot; <details><summary>who hasn't ${isCheck?'turned it in':'finished'} (${notDone.length})</summary>${listHtml}</details></div>`;
+    };
+    // Title line: the rename editor when it's open on this card, otherwise
+    // the name + pencil + id + Copy link. The whole line is the link into
+    // the detail page, so the buttons inside it are matched FIRST by the
+    // delegated click listener (see showTeacherApp).
+    const titleBlock=a=>{
       const shown=teacherActivityTitle(a,cfg);
-      // Checks take no teaching-order slot (caNumberMap filters them out), so
-      // they get the student-facing "Exit check · " prefix where the number
-      // would be — and no number box, because there is no position to type.
-      const num=isCheck?'Exit check \u00b7 ':(nums[a.id]?`#${nums[a.id]} - `:'');
-      const numCell=isCheck
-        ? escHtml(num)
-        : (nums[a.id]
-          ? `#<input type="number" class="t-act-num-input" data-set-activity-number data-id="${escAttr(a.id)}" value="${nums[a.id]}" min="1" max="${numberedCount}" step="1" title="Teaching-order number — type a new one to move this activity" aria-label="Teaching-order number for ${escAttr(shown)}"> - `
-          : '');
       const renamed=shown!==a.title;
-      let titleCell;
       if(activityEditId===a.id){
-        // Not wrapped in data-open-activity — a click anywhere in an open
-        // editor (including a mis-aimed one) must not navigate off the row
-        // and throw away what's been typed.
-        titleCell=`<td class="nc">`
-          +`<span class="t-act-title-lbl">${escHtml(num)}rename (English)</span>`
+        return `<div class="t-board-title">`
+          +`<span class="t-act-title-lbl">rename (English)</span>`
           +`<input type="text" class="t-act-title-edit" data-id="${escAttr(a.id)}" value="${escAttr(shown)}" maxlength="120" spellcheck="false" aria-label="Rename ${escAttr(shown)} (English)">`
           +`<span class="t-act-title-hint">Students see this right away, in English in both languages, until the Spanish twin ships in the next update.</span>`
           +`<div style="margin-top:7px;display:flex;gap:6px;flex-wrap:wrap">`
           +`<button class="tg-seg-btn on" data-rename-save data-id="${escAttr(a.id)}">Save</button>`
           +`<button class="tg-seg-btn" data-rename-cancel>Cancel</button>`
           +(renamed?`<button class="tg-seg-btn" data-rename-reset data-id="${escAttr(a.id)}">Undo rename</button>`:'')
-          +`</div></td>`;
-      }else{
-        // The title cell doubles as a link into the activity's detail page —
-        // handled by the delegated data-id listener in showTeacherApp, same
-        // "clickable row, cursor:pointer only" idiom as the Students name cell.
-        const renameNote=renamed
-          ? `<span class="t-act-title-hint">Renamed — students see this in both languages until the Spanish twin ships. Was: ${escHtml(a.title)}</span>`
-          : '';
-        // The raw ca-<n> id, shown muted after the title for teacher
-        // reference only (Jonathan, 2026-08-24) — students never see it, and
-        // it stays put through renames and `number` resequencing since the
-        // id is the one permanent handle.
-        titleCell=`<td class="nc" data-open-activity data-id="${escAttr(a.id)}" style="cursor:pointer" title="${escAttr(num+shown)}">`
-          +`${numCell}${escHtml(shown)} <span style="opacity:.55;font-size:.85em">(${escHtml(a.id)})</span> `
-          +`<button class="t-act-pencil" data-rename-activity data-id="${escAttr(a.id)}" title="Rename this activity" aria-label="Rename ${escAttr(shown)}">&#x270E;</button>`
-          +`<button class="tg-seg-btn t-act-link" data-copy-activity-link data-id="${escAttr(a.id)}" title="Copy the student link straight to this ${isCheck?'exit check':'activity'}" aria-label="Copy the student link to ${escAttr(shown)}">Copy link</button>`
-          +`${renameNote}</td>`;
+          +`</div></div>`;
       }
-      return `<tr${(isHidden||isRetired)?' style="opacity:.55"':''}><td>${dateCell}</td>${titleCell}<td>${doneCell}</td>
-        <td><details><summary>Who hasn't ${isCheck?'turned it in':'finished'} (${notDone.length})</summary>${listHtml}</details></td>
-        <td><div class="tg-seg">${visBtns}</div></td>
-        <td><div class="tg-seg">${retireBtns}</div></td></tr>`;
-    }).join('');
-    // Arrow shows only on whichever column is currently driving the sort.
-    const sortArrow=key=> activitySortKey===key ? (activitySortDir==='asc'?' ▲':' ▼') : '';
-    // Only offered when there is something behind them — a "Show deleted (0)"
-    // button is a button that can only ever redraw the same table.
-    const retireToggles=(archCount||delCount)
-      ? `<div class="tg-seg" style="margin-bottom:12px">`
-        +(archCount?`<button class="tg-seg-btn ${teacherShowArchivedActivities?'on':''}" data-show-archived-activities>${teacherShowArchivedActivities?'Hide archived':'Show archived'} (${archCount})</button>`:'')
-        +(delCount?`<button class="tg-seg-btn ${teacherShowDeletedActivities?'on':''}" data-show-deleted-activities>${teacherShowDeletedActivities?'Hide deleted':'Show deleted'} (${delCount})</button>`:'')
-        +`</div>` : '';
-    // Every row filtered out — say which toggle brings them back rather than
-    // leaving an empty table that reads as "no activities".
-    const tableHtml=rows
-      ? `<div class="t-grid-wrap t-act-wrap"><table><thead><tr>`
-        +`<th class="t-sort-th" data-sort-activities="date" title="Sort by date">Date${sortArrow('date')}</th>`
-        +`<th class="nc t-sort-th" data-sort-activities="number" title="Sort by activity number">Activity${sortArrow('number')}</th>`
-        +`<th>Done</th><th>Not yet</th><th>Visibility</th><th>Archive</th></tr></thead><tbody>${rows}</tbody></table></div>`
-      : `<div class="t-loading">Every activity is archived or deleted — use the buttons above to bring them back into the table.</div>`;
-    box.innerHTML=`<div class="tg-note">An activity with no date set is invisible to students — that's its normal starting state, not an error; set one here to publish it. Hidden activities disappear for students regardless of date, same as if they hadn't been pushed yet. Use Hidden to pull back something already live; un-hide any time. <strong>Archive</strong> retires an activity for good: students stop seeing it on Today and it stops gating the site, but its date, name and #number are kept, so Restore puts it back the way it was. <strong>Delete</strong> does that AND clears its date, rename, #number and per-student gate clears, so a restored one starts blank — it comes back undated, ready to publish from scratch. Neither one removes the activity from the site's code (only an update does) or touches what students have already finished, so the Done counts survive both; archived and deleted rows leave this table until you show them again. The &#x270E; next to a title renames the activity for everyone. Copy link gives you a URL that opens the site straight to that one activity, card already open — paste it into Classroom when you want students on a specific exit check. Type over the #number to move an activity in the teaching order — everything else renumbers around it, for students too. (That only moves the &#8220;#N&#8221; prefix: a number inside a title, like Finger Gym 2, is part of the name and stays put. Archived and deleted activities keep their place in that order, the same way an unpublished one does.) Click Date or Activity below to sort by it; click again to flip the order.</div>`+
-      retireToggles+tableHtml;
+      const prefix=a.kind==='check'?'Exit check · ':'';
+      return `<div class="t-board-title" data-open-activity data-id="${escAttr(a.id)}" title="${escAttr(prefix+shown)}">`
+        +`${escHtml(prefix)}<span class="t-board-name">${escHtml(shown)}</span> `
+        +`<span class="t-board-id">(${escHtml(a.id)})</span> `
+        +`<button class="t-act-pencil" data-rename-activity data-id="${escAttr(a.id)}" title="Rename this activity" aria-label="Rename ${escAttr(shown)}">&#x270E;</button>`
+        +`<button class="tg-seg-btn t-act-link" data-copy-activity-link data-id="${escAttr(a.id)}" title="Copy the student link straight to this ${a.kind==='check'?'exit check':'activity'}" aria-label="Copy the student link to ${escAttr(shown)}">Copy link</button>`
+        +(renamed?`<span class="t-act-title-hint">Renamed — students see this in both languages until the Spanish twin ships. Was: ${escHtml(a.title)}</span>`:'')
+        +`</div>`;
+    };
+    /* Publish controls, driven entirely by activityDates[id] — there is no
+       separate published flag. Three states, and the button that leaves each
+       one: undated (Publish now writes today, or schedule a day), scheduled
+       (change the day, or Unpublish), live (Unpublish). All three go through
+       the existing teacherSetActivityDate writer; '' clears. */
+    const publishBlock=a=>{
+      const dateVal=dates[a.id]||'';
+      const isHidden=hidden[a.id]===true;
+      const dateInput=`<input type="date" class="t-date-input" data-set-activity-date data-id="${escAttr(a.id)}" value="${escAttr(dateVal)}" aria-label="Release date for ${escAttr(teacherActivityTitle(a,cfg))}">`;
+      const pubNow=`<button class="tg-seg-btn" data-publish-activity data-id="${escAttr(a.id)}" data-state="now" title="Publish today — students see it as soon as they reload">Publish now</button>`;
+      const unpub=`<button class="tg-seg-btn" data-publish-activity data-id="${escAttr(a.id)}" data-state="off" title="Clear the release date — students stop seeing it">Unpublish</button>`;
+      let status, controls;
+      if(!dateVal){ status=`<span class="t-board-status">Not published</span>`; controls=pubNow+` <span class="t-board-sched">or schedule ${dateInput}</span>`; }
+      else if(dateVal>today){ status=`<span class="t-board-status t-board-sched-on">Scheduled ${escHtml(dateVal)}</span>`; controls=dateInput+' '+unpub; }
+      else { status=`<span class="t-board-status ${isHidden?'t-board-hidden-on':'t-board-live'}">${isHidden?'Hidden':'Live'}</span>`; controls=`<span class="t-board-sched">${escHtml(dateVal)}</span> `+unpub; }
+      return `<div class="t-board-publish">${status}<span class="t-board-pubctl">${controls}</span></div>`;
+    };
+    const visSeg=a=>{
+      const isHidden=hidden[a.id]===true;
+      return `<div class="tg-seg">`
+        +`<button class="tg-seg-btn ${!isHidden?'on':''}" data-set-activity-hidden data-id="${escAttr(a.id)}" data-state="show">Visible</button>`
+        +`<button class="tg-seg-btn ${isHidden?'on':''}" data-set-activity-hidden data-id="${escAttr(a.id)}" data-state="hide">Hidden</button></div>`;
+    };
+    // Where a card can be sent without a drag. Used as "Assign to" in Built
+    // and "Move to" in Assigned; both append at the end of the section they
+    // name, which is what a drag onto empty space does too.
+    const moveSelect=(a,label,curModule)=>{
+      const opts=[`<option value="">${escHtml(label)}</option>`,`<option value="0"${curModule===0?' disabled':''}>Unsorted</option>`]
+        .concat(manifest.map(m=>`<option value="${m.num}"${curModule===m.num?' disabled':''}>Module ${m.num} — ${escHtml(m.name)}</option>`));
+      return `<select class="t-board-move" data-move-activity data-id="${escAttr(a.id)}" aria-label="${escAttr(label+' '+teacherActivityTitle(a,cfg))}">${opts.join('')}</select>`;
+    };
+
+    /* ── Left column: Built ─────────────────────────────────────────── */
+    const builtAll=activities.filter(a=>!view.assigned[a.id])
+      .sort((x,y)=>teacherActivityIdNum(y)-teacherActivityIdNum(x));   // newest id first
+    const builtCard=a=>{
+      const isRetired=teacherActivityRetired(a.id,cfg);
+      const strays=[];
+      if(dates[a.id]) strays.push(`release date ${escHtml(dates[a.id])}`);
+      if(hidden[a.id]===true) strays.push('Hidden');
+      return `<div class="t-board-card${isRetired?' t-board-retired':''}"${isRetired?'':' draggable="true"'} data-board-card data-id="${escAttr(a.id)}">`
+        +`<div class="t-board-row">${isRetired?'':'<span class="t-board-grip" aria-hidden="true">&#x2630;</span>'}${titleBlock(a)}</div>`
+        // A leftover date or Hidden flag on an unplaced card decides nothing
+        // on its own (unassigned already means invisible), so it's stated,
+        // not offered — the controls for it appear once the card is placed.
+        +(strays.length?`<div class="t-board-stray">Carries: ${strays.join(' &middot; ')} — no effect until it's assigned.</div>`:'')
+        /* A retired card in Built is offered Restore, NOT "Assign to…": it is
+           out of the course, and placing it somewhere while it's still
+           archived would put it straight into that module's Archived list —
+           a move with no visible effect. Restore first, then place it. This
+           is also the ONLY route back for something archived while it was
+           unassigned, which is where every archived-and-never-placed
+           activity lives. */
+        +(isRetired
+          ? `<div class="t-board-stray">${teacherActivityDeleted(a.id,cfg)?'Deleted':'Archived'} — out of the course. Restore it to place it again.</div>`
+            +`<div class="t-board-ctl">`
+            +`<button class="tg-seg-btn" data-set-activity-archived data-id="${escAttr(a.id)}" data-state="restore" title="${escAttr(teacherActivityDeleted(a.id,cfg)?'Put this activity back — it returns blank, ready to place and publish':'Put this activity back, with its date and name')}">Restore</button>`
+            +(teacherActivityDeleted(a.id,cfg)?'':`<button class="tg-seg-btn t-act-danger" data-delete-activity data-id="${escAttr(a.id)}" title="Clear this activity's date, name and gate clears too">Delete</button>`)
+            +`<button class="tg-seg-btn" data-open-activity data-id="${escAttr(a.id)}">Preview</button></div>`
+          : `<div class="t-board-ctl">${moveSelect(a,'Assign to…',null)}`
+            +`<button class="tg-seg-btn" data-open-activity data-id="${escAttr(a.id)}">Preview</button>`
+            +`<span class="t-board-ctl-sp">`
+            +`<button class="tg-seg-btn" data-set-activity-archived data-id="${escAttr(a.id)}" data-state="archive" title="Retire this activity without ever placing it">Archive</button>`
+            +`<button class="tg-seg-btn t-act-danger" data-delete-activity data-id="${escAttr(a.id)}" title="Retire it AND clear its date, name and gate clears">Delete</button>`
+            +`</span></div>`)
+        +`</div>`;
+    };
+    const builtLive=builtAll.filter(a=>!teacherActivityRetired(a.id,cfg));
+    const builtRetired=builtAll.filter(a=>teacherActivityRetired(a.id,cfg));
+    const builtHtml=`<section class="t-board-built" data-board-built>`
+      +`<div class="t-board-head">Built (${builtLive.length})</div>`
+      +`<div class="t-board-hint">Pushed to the site, not placed in the course yet. Students see none of these.</div>`
+      +(builtLive.length?builtLive.map(builtCard).join(''):`<div class="t-board-empty">Everything built has been placed.</div>`)
+      +(builtRetired.length
+        ? `<details class="t-board-arch" ${boardArchOpen.built?'open':''} data-board-arch data-module="built"><summary>Archived / deleted (${builtRetired.length})</summary>${builtRetired.map(builtCard).join('')}</details>`
+        : '')
+      +`</section>`;
+
+    /* ── Right column: Assigned ─────────────────────────────────────── */
+    const assignedCard=a=>{
+      const isRetired=teacherActivityRetired(a.id,cfg);
+      const isCheck=a.kind==='check';
+      const n=nums[a.id];
+      // Checks never take a #N slot, and a retired card has dropped out of
+      // the run (Jonathan, 2026-09-16) — neither gets a box to type in.
+      const numBox=(isCheck||isRetired||!n)
+        ? `<span class="t-board-nonum">${isCheck?'Check':'—'}</span>`
+        : `<span class="t-board-hash">#<input type="number" class="t-board-num" data-board-number data-id="${escAttr(a.id)}" value="${n}" min="1" step="1" title="Position in the course — type a new one to move this activity" aria-label="Position for ${escAttr(teacherActivityTitle(a,cfg))}"></span>`;
+      const curModule=Number(((cfg.activityBoard||{})[a.id]||{}).module)||0;
+      const retireBtns=teacherActivityDeleted(a.id,cfg)
+        ? `<button class="tg-seg-btn" data-set-activity-archived data-id="${escAttr(a.id)}" data-state="restore" title="Put this activity back — it returns undated, so set a date to publish it again">Restore</button>`
+        : (teacherActivityArchived(a.id,cfg)
+          ? `<button class="tg-seg-btn" data-set-activity-archived data-id="${escAttr(a.id)}" data-state="restore" title="Put this activity back in this module, where it was, with its date and name">Restore</button>`
+            +`<button class="tg-seg-btn t-act-danger" data-delete-activity data-id="${escAttr(a.id)}" title="Clear this activity's date, name and gate clears, and take it off the board">Delete</button>`
+          : `<button class="tg-seg-btn" data-set-activity-archived data-id="${escAttr(a.id)}" data-state="archive" title="Take this off students' Today page but keep its place, date and name">Archive</button>`);
+      const moveBtns=isRetired ? '' :
+        `<button class="tg-seg-btn" data-board-bump data-id="${escAttr(a.id)}" data-dir="up" title="Move up within this module" aria-label="Move up">&#x25B2;</button>`
+        +`<button class="tg-seg-btn" data-board-bump data-id="${escAttr(a.id)}" data-dir="down" title="Move down within this module" aria-label="Move down">&#x25BC;</button>`;
+      // Not draggable once retired: every other move control is hidden on
+      // these, and a stray drag would rewrite the very slot Restore uses to
+      // put the card back where it was.
+      return `<div class="t-board-card${isRetired?' t-board-retired':''}${hidden[a.id]===true?' t-board-dim':''}"${isRetired?'':' draggable="true"'} data-board-card data-id="${escAttr(a.id)}">`
+        +`<div class="t-board-row">${isRetired?'':'<span class="t-board-grip" aria-hidden="true">&#x2630;</span>'}${numBox}${titleBlock(a)}</div>`
+        +(isRetired
+          ? `<div class="t-board-stray">${teacherActivityDeleted(a.id,cfg)?'Deleted':'Archived'} — students don't see it and it holds no number. Restore puts it back here.</div>`
+          : publishBlock(a)+`<div class="t-board-ctl">${visSeg(a)}${moveSelect(a,'Move to…',curModule)}${moveBtns}</div>`)
+        /* Footer: what this card IS (how many have done it) and the actions
+           that take it out of the run, behind a hairline — so the row above,
+           which is what gets used every day, reads as the card's controls
+           and these read as the ones you reach for rarely. */
+        +`<div class="t-board-ctl t-board-foot">${doneSummary(a)}`
+        +`<span class="t-board-ctl-sp"><button class="tg-seg-btn" data-open-activity data-id="${escAttr(a.id)}">Preview</button>`
+        +`<button class="tg-seg-btn" data-copy-activity-link data-id="${escAttr(a.id)}">Copy link</button>`
+        +(isRetired?'':`<button class="tg-seg-btn" data-unassign-activity data-id="${escAttr(a.id)}" title="Send this back to Built — it keeps its date and name">Un-assign</button>`)
+        +retireBtns+`</span></div>`
+        +`</div>`;
+    };
+    /* One block per section — EVERY module gets one, even an empty one, so
+       there is always somewhere to drop a card. Unsorted is the exception:
+       it's a holding pen, so it shows only while it holds something. */
+    const sectionsById={}; view.sections.forEach(sec=>{ sectionsById[sec.module]=sec; });
+    const sectionOrder=[0].concat(manifest.map(m=>m.num));
+    const sectionHtml=mn=>{
+      const sec=sectionsById[mn]||{module:mn, ids:[], retiredIds:[]};
+      if(mn===0 && !sec.ids.length && !sec.retiredIds.length) return '';
+      const mod=manifest.find(m=>m.num===mn);
+      const label=mn===0?'Unsorted':`Module ${mn} — ${escHtml(mod?mod.name:'(unknown module)')}`;
+      const closed=boardSectionClosed[mn]===true;
+      const cards=sec.ids.map(id=>byId[id]).filter(Boolean).map(assignedCard).join('');
+      const arch=sec.retiredIds.map(id=>byId[id]).filter(Boolean);
+      return `<div class="t-board-section${closed?' t-board-closed':''}" data-board-section data-module="${mn}">`
+        +`<div class="t-board-sechead" data-board-fold data-module="${mn}">`
+        +`<span class="t-board-caret" aria-hidden="true"></span><span>${label}</span>`
+        +`<span class="t-board-count">${sec.ids.length}</span></div>`
+        +`<div class="t-board-secbody">`
+        +(cards||`<div class="t-board-empty">Drop an activity here, or use “Assign to…”.</div>`)
+        +(arch.length?`<details class="t-board-arch" ${boardArchOpen[mn]?'open':''} data-board-arch data-module="${mn}"><summary>Archived (${arch.length})</summary>${arch.map(assignedCard).join('')}</details>`:'')
+        +`</div></div>`;
+    };
+    const unknownModules=Object.keys(sectionsById).map(Number)
+      .filter(mn=>mn!==0 && !manifest.some(m=>m.num===mn)).sort((x,y)=>x-y);
+    const assignedCount=view.sections.reduce((n,sec)=>n+sec.ids.length,0);
+    const assignedHtml=`<section class="t-board-assigned">`
+      +`<div class="t-board-head">Assigned to students (${assignedCount})</div>`
+      +`<div class="t-board-hint">This is the order students read them in, and where the #numbers come from.</div>`
+      +sectionOrder.concat(unknownModules).map(sectionHtml).join('')
+      +`</section>`;
+
+    box.innerHTML=`<div class="tg-note">Drag a built activity into a module to assign it. It goes live for students on its release date.</div>`
+      +`<details class="tg-help"><summary>How this page works</summary>`
+      +`<div class="tg-note">A card shows to students only when all four are true: it is <strong>assigned</strong> to a module here, its <strong>release date</strong> has arrived, it is not <strong>Hidden</strong>, and it is not <strong>Archived</strong>. Publish now dates it today; scheduling a later day holds it until then; Unpublish clears the date. Use Hidden to pull back something already live, then un-hide any time — the date and the Hidden switch are independent, either one hides.<br><br>`
+      +`<strong>Archive</strong> takes a card off students' Today page for good but keeps its place in its module, its date and its name, so Restore puts it back exactly where it was. Archived cards hold no #number, so the ones after them count down by one. <strong>Delete</strong> also clears the date, rename and per-student gate clears, and takes the card off the board entirely — it comes back in Built, blank, to be placed and published from scratch. Neither one removes the activity from the site's code (only an update does) and neither touches what students have already finished, so the Done counts survive both.<br><br>`
+      +`<strong>Un-assign</strong> sends a card back to Built without clearing anything. The &#x270E; renames an activity for everyone, in both languages, until the Spanish twin ships. Copy link gives you a URL that opens the site straight to that one activity, card already open — paste it into Classroom. Type over a <strong>#number</strong> to move a card to that position; a number inside a title, like Finger Gym 2, is part of the name and stays put.</div></details>`
+      +`<div class="t-board">${builtHtml}${assignedHtml}</div>`;
     // Opening the editor is a full re-render, so focus has to be re-placed
     // afterwards or the pencil click would leave you looking at a box you
     // still have to click into. select() so typing replaces the old name.
@@ -953,21 +1145,223 @@ function renderTeacherActivities(opts){
       const inp=box.querySelector('.t-act-title-edit');
       if(inp){ inp.focus(); inp.select(); }
     }
-    // Back from a detail page: land on the row that was clicked. Done here,
-    // not in backToActivitiesList, because the table is painted from this
-    // promise — scrolling before it resolves would only hit the one-line
-    // "Loading…" box, which has nowhere to scroll to.
+    // Back from a detail page: land where the card was. Done here, not in
+    // backToActivitiesList, because the board paints from this promise —
+    // scrolling before it resolves would only hit the one-line "Loading…"
+    // box, which has nowhere to scroll to.
     if(restoreActivityScroll){ restoreActivityScroll=false; window.scrollTo({top:activityListScrollY}); }
   });
 }
-// Clicking a sort header: same column clicked again flips direction,
-// switching columns picks a sensible default for that column (newest date
-// first, lowest activity number first) rather than carrying over whatever
-// direction the previous column was left on.
-function teacherSetActivitySort(key){
-  if(activitySortKey===key) activitySortDir = activitySortDir==='asc' ? 'desc' : 'asc';
-  else { activitySortKey=key; activitySortDir = key==='date' ? 'desc' : 'asc'; }
-  renderTeacherActivities({cached:true});   // sorting rows we already have
+function teacherBoardFold(module){
+  const mn=Number(module);
+  boardSectionClosed[mn]=!boardSectionClosed[mn];
+  renderTeacherActivities({cached:true});   // a fold over cards we already have
+}
+function teacherBoardArchToggle(key, open){ boardArchOpen[key]=!!open; }
+
+/* ── The one writer every move goes through ─────────────────────────────
+   A drag, an "Assign to"/"Move to" pick, a ▲▼ bump and a typed #number all
+   end here, so there is exactly one place that knows how to keep `pos`
+   contiguous — the same reason the old teacherSetActivityNumber rewrote the
+   whole run instead of storing "ca-10 is now #4" and leaving the rest to a
+   tiebreak.
+
+   pos is 1-based within the TARGET module, counted after the card has been
+   taken out of wherever it was; null appends. Both the section it leaves
+   and the one it joins are re-packed 1..N, and only rows whose entry
+   actually changed are sent — a move inside Module 3 never rewrites
+   Module 7. */
+async function teacherMoveActivity(id, module, pos){
+  const cfg=teacherClassConfig;
+  const a=(window.CLASS_ACTIVITIES||[]).find(x=>x.id===id);
+  if(!a) return;
+  const mn=Number(module)||0;
+  const prev=cfg.activityBoard||{};
+  const from=prev[id] ? (Number(prev[id].module)||0) : null;
+  const target=teacherBoardModuleIds(cfg,mn).filter(x=>x!==id);
+  const at=(pos===null||pos===undefined) ? target.length : Math.max(0, Math.min(target.length, Math.round(pos)-1));
+  target.splice(at,0,id);
+  const next={};
+  Object.keys(prev).forEach(k=>{ next[k]=prev[k]; });
+  target.forEach((x,i)=>{ next[x]={module:mn, pos:i+1}; });
+  if(from!==null && from!==mn) teacherBoardModuleIds(cfg,from).filter(x=>x!==id).forEach((x,i)=>{ next[x]={module:from, pos:i+1}; });
+  // Only what actually moved. An unchanged row re-sent would cost nothing
+  // but noise, and the patch is easier to read in the console when it names
+  // exactly the cards that moved.
+  const patch={};
+  Object.keys(next).forEach(k=>{
+    const p=prev[k];
+    if(!p || Number(p.module)!==next[k].module || Number(p.pos)!==next[k].pos) patch[k]=next[k];
+  });
+  if(!Object.keys(patch).length){ renderTeacherActivities({cached:true}); return; }
+  cfg.activityBoard=next;
+  try{
+    await ensureDb();
+    await db.collection('config').doc('class').set({activityBoard:patch},{merge:true});
+  }catch(e){
+    cfg.activityBoard=prev;
+    alert('Could not save that move — check your connection and Firestore rules.');
+  }
+  if(teacherView==='activities') renderTeacherActivities();
+}
+/* Back to Built. The entry goes away and the module it left is re-packed;
+   the release date, the rename and the Hidden flag are deliberately left
+   alone — they are independent knobs, and a card un-assigned by accident
+   should come back with its settings when it's dropped in again. */
+async function teacherUnassignActivity(id){
+  const cfg=teacherClassConfig;
+  const prev=cfg.activityBoard||{};
+  if(!prev[id]) return;
+  const from=Number(prev[id].module)||0;
+  const next={};
+  Object.keys(prev).forEach(k=>{ if(k!==id) next[k]=prev[k]; });
+  const patch={};
+  teacherBoardModuleIds(cfg,from).filter(x=>x!==id).forEach((x,i)=>{
+    next[x]={module:from, pos:i+1};
+    const p=prev[x];
+    if(!p || Number(p.module)!==from || Number(p.pos)!==i+1) patch[x]=next[x];
+  });
+  cfg.activityBoard=next;
+  try{
+    await ensureDb();
+    const fv=firebase.firestore.FieldValue;
+    patch[id]=fv.delete();
+    await db.collection('config').doc('class').set({activityBoard:patch},{merge:true});
+  }catch(e){
+    cfg.activityBoard=prev;
+    alert('Could not un-assign that activity — check your connection and Firestore rules.');
+  }
+  if(teacherView==='activities') renderTeacherActivities();
+}
+// ▲ / ▼ — one place within the card's own module. The keyboard and touch
+// equivalent of a short drag; anything further is the "Move to" select.
+function teacherBoardBump(id, dir){
+  const cfg=teacherClassConfig;
+  const e=(cfg.activityBoard||{})[id];
+  if(!e) return;
+  const mn=Number(e.module)||0;
+  const all=teacherBoardModuleIds(cfg,mn);
+  /* Step over the cards the teacher can SEE in the run, not over the raw
+     board list: that list deliberately includes archived rows (they hold
+     their slot for Restore), and they render in a separate collapsed list.
+     Counting them would make the first press of ▲ next to an archived card
+     a dead click that still wrote to Firestore. */
+  const live=all.filter(x=>!teacherActivityRetired(x,cfg));
+  const li=live.indexOf(id);
+  const lj=dir==='up'?li-1:li+1;
+  if(li<0 || lj<0 || lj>=live.length){ renderTeacherActivities({cached:true}); return; }  // already at the end
+  // Translate back to a position in the full list: land immediately before
+  // the live neighbour when moving up, immediately after it when moving down.
+  const nb=live[lj];
+  const rest=all.filter(x=>x!==id);
+  const ni=rest.indexOf(nb);
+  if(ni<0){ renderTeacherActivities({cached:true}); return; }
+  teacherMoveActivity(id, mn, dir==='up' ? ni+1 : ni+2);
+}
+/* Typing a position into a card's # box. "#n" means the slot the card that
+   currently shows #n is sitting in: the typed card lands in THAT card's
+   module, just before it when moving up the list and just after it when
+   moving down — the same result as dragging it there, which is the point of
+   having both. Out of range, unparseable or unchanged repaints from cache
+   (putting the old number back in the box) and writes nothing. */
+function teacherMoveActivityToNumber(id, value){
+  const cfg=teacherClassConfig;
+  const view=teacherBoardView(cfg);
+  const ordered=[];
+  view.sections.forEach(sec=>sec.ids.forEach(x=>{ if(view.number[x]) ordered.push(x); }));
+  const cur=view.number[id];
+  const n=Math.round(Number(value));
+  if(!Number.isFinite(n) || n<1 || n>ordered.length || !cur || n===cur){
+    renderTeacherActivities({cached:true});   // nothing was written
+    return;
+  }
+  const targetId=ordered[n-1];
+  const tmod=Number(((cfg.activityBoard||{})[targetId]||{}).module)||0;
+  const tlist=teacherBoardModuleIds(cfg,tmod).filter(x=>x!==id);
+  const ti=tlist.indexOf(targetId);
+  if(ti<0){ renderTeacherActivities({cached:true}); return; }
+  teacherMoveActivity(id, tmod, n>cur ? ti+2 : ti+1);
+}
+
+/* ── Drag and drop ──────────────────────────────────────────────────────
+   HTML5 DnD, delegated on the same stable shell the click listener uses
+   (showTeacherApp), because the board's innerHTML is replaced on every
+   render and per-card listeners would have to be re-bound each time. The
+   dragged id lives in a module-level variable rather than dataTransfer:
+   dataTransfer's contents are unreadable during dragover in most browsers,
+   and the drop indicator has to know what it's carrying to draw itself.
+
+   No touch drag — a touchstart-based reimplementation of DnD is a lot of
+   code to maintain for a board that already has "Assign to…", "Move to…"
+   and ▲▼ doing the same three jobs. */
+function teacherBoardClearDropMarks(){
+  document.querySelectorAll('.t-board-drop-before,.t-board-drop-after,.t-board-drop-in')
+    .forEach(el=>el.classList.remove('t-board-drop-before','t-board-drop-after','t-board-drop-in'));
+}
+// e.target on a stray drag elsewhere in the console (a text selection, a
+// dragged link) can be a node without .closest — every board handler checks
+// for it before reaching for an ancestor.
+function boardEl(e){ return (e && e.target && typeof e.target.closest==='function') ? e.target : null; }
+function teacherBoardDragStart(e){
+  const t=boardEl(e); if(!t) return;
+  const card=t.closest('[data-board-card]');
+  if(!card) return;
+  boardDragId=card.dataset.id;
+  card.classList.add('t-board-dragging');
+  // Chrome refuses to start a drag at all unless something is set here.
+  try{ e.dataTransfer.setData('text/plain', card.dataset.id); e.dataTransfer.effectAllowed='move'; }catch(err){}
+}
+function teacherBoardDragEnd(){
+  boardDragId=null;
+  document.querySelectorAll('.t-board-dragging').forEach(el=>el.classList.remove('t-board-dragging'));
+  teacherBoardClearDropMarks();
+}
+function teacherBoardDragOver(e){
+  if(!boardDragId) return;
+  const t=boardEl(e); if(!t) return;
+  const section=t.closest('[data-board-section]');
+  const built=t.closest('[data-board-built]');
+  if(!section && !built) return;
+  e.preventDefault();                       // without this the drop never fires
+  try{ e.dataTransfer.dropEffect='move'; }catch(err){}
+  teacherBoardClearDropMarks();
+  if(built){
+    // Un-assign has no position to choose, so the whole column lights up.
+    built.classList.add('t-board-drop-in');
+    return;
+  }
+  const over=t.closest('[data-board-card]');
+  // Over a card: the line goes above or below it depending on which half
+  // the cursor is in, the ordinary list-reorder idiom. Over the header or
+  // the empty space under the cards: append, so the section itself lights up.
+  if(over && over.dataset.id!==boardDragId && section.contains(over)){
+    const r=over.getBoundingClientRect();
+    over.classList.add(e.clientY < r.top + r.height/2 ? 't-board-drop-before' : 't-board-drop-after');
+  } else if(!over){
+    section.classList.add('t-board-drop-in');
+  }
+}
+function teacherBoardDrop(e){
+  const id=boardDragId;
+  if(!id) return;
+  const t=boardEl(e); if(!t) return;
+  const section=t.closest('[data-board-section]');
+  const built=t.closest('[data-board-built]');
+  if(!section && !built) return;
+  e.preventDefault();
+  teacherBoardClearDropMarks();
+  boardDragId=null;
+  if(built){ teacherUnassignActivity(id); return; }
+  const mn=Number(section.dataset.module)||0;
+  const over=t.closest('[data-board-card]');
+  if(!over || over.dataset.id===id || !section.contains(over)){ teacherMoveActivity(id, mn, null); return; }
+  // pos is counted in the target module AFTER the dragged card is removed,
+  // which is exactly what teacherMoveActivity does with it.
+  const list=teacherBoardModuleIds(teacherClassConfig, mn).filter(x=>x!==id);
+  const idx=list.indexOf(over.dataset.id);
+  if(idx<0){ teacherMoveActivity(id, mn, null); return; }
+  const r=over.getBoundingClientRect();
+  teacherMoveActivity(id, mn, (e.clientY < r.top + r.height/2) ? idx+1 : idx+2);
 }
 /* The name to SHOW for an activity in the console: the teacher's rename if
    one is live, otherwise the title class-activities.js ships. Deliberately
@@ -1025,82 +1419,6 @@ async function teacherSetActivityTitle(id, value){
   }
   if(teacherView==='activities') renderTeacherActivities();
 }
-/* Teaching-order numbers for the whole list, id -> 1..N, with the console's
-   resequencing applied. caNumberMap() in app.js does the work and students
-   read the same function through caNumber(), so a number shown here is the
-   number on their card — this wrapper only feeds it the config doc this view
-   already holds instead of app.js's student-side globals. (teacher.js loads
-   after app.js and already leans on its helpers; unlike teacherActivityTitle
-   there's nothing to fork, because the resolution rule is identical.) */
-function teacherActivityNumbers(cfg){
-  return caNumberMap(window.CLASS_ACTIVITIES||[], (cfg&&cfg.activityNumbers)||{});
-}
-/* Move an activity to position n, and renumber everything around it.
-
-   Written as a whole-list rewrite rather than one id -> n row because the
-   set has to stay 1..N with no gaps or duplicates — the same contract
-   checks.mjs (1d) holds class-activities.js to. Storing just "ca-10 is now
-   #4" would leave the old #4 to be resolved by a tiebreak, i.e. by luck.
-   So: take the order currently on screen, pull this activity out, splice it
-   back in at n, and write the result. Positions that land back on the
-   shipped number are DELETED rather than stored, so the map holds only the
-   rows that actually differ from the file and empties itself when the order
-   is folded back into class-activities.js.
-
-   Each row carries the shipped number it was typed against as `base`, which
-   is what expires the override on that fold-in — see caNumberMap in app.js.
-   Nothing is keyed to `number` (ids are), so this is safe in a way that
-   renumbering ids never would be. */
-async function teacherSetActivityNumber(id, value){
-  /* Exit checks are excluded from the whole rewrite, not just from the row
-     being moved: caNumberMap() gives them no position, so leaving one in
-     `order` would splice it into the 1..N run and write it an override with
-     base:NaN — a number for something that never shows one. */
-  const activities=(window.CLASS_ACTIVITIES||[]).filter(x=>x.kind!=='check');
-  const a=activities.find(x=>x.id===id);
-  if(!a) return;
-  const n=Math.round(Number(value));
-  const cur=teacherActivityNumbers(teacherClassConfig);
-  // Out of range, unparseable, or already there: repaint, which puts the old
-  // number back in the box, and write nothing.
-  if(!Number.isFinite(n) || n<1 || n>activities.length || n===cur[id]){
-    if(teacherView==='activities') renderTeacherActivities({cached:true});   // nothing was written
-    return;
-  }
-  const order=activities.slice().sort((x,y)=>cur[x.id]-cur[y.id]).filter(x=>x.id!==id);
-  order.splice(n-1, 0, a);
-  const prev=teacherClassConfig.activityNumbers||{};
-  const next={};          // what config/class should hold afterwards
-  const drop=[];          // rows to clear, because they're back on their shipped number
-  order.forEach((x,i)=>{
-    const pos=i+1, base=Number(x.number);
-    if(pos===base){ if(Object.prototype.hasOwnProperty.call(prev,x.id)) drop.push(x.id); }
-    else next[x.id]={n:pos, base};
-  });
-  // Overrides for ids no longer in class-activities.js (a retired activity)
-  // are carried over untouched — this is a reorder, not a cleanup pass, and
-  // caNumberMap ignores them anyway.
-  Object.keys(prev).forEach(k=>{ if(!(k in next) && drop.indexOf(k)<0) next[k]=prev[k]; });
-  teacherClassConfig.activityNumbers=next;
-  try{
-    await ensureDb();
-    // FieldValue only exists once ensureDb has pulled in the Firestore SDK —
-    // same reason every other writer in this file reaches for it in here.
-    const fv=firebase.firestore.FieldValue;
-    const patch={};
-    Object.keys(next).forEach(k=>{ patch[k]=next[k]; });
-    drop.forEach(k=>{ patch[k]=fv.delete(); });
-    if(Object.keys(patch).length)
-      await db.collection('config').doc('class').set({activityNumbers:patch},{merge:true});
-  }catch(e){
-    teacherClassConfig.activityNumbers=prev;
-    alert('Could not save that order — check your connection and Firestore rules.');
-  }
-  // Rendering only after the write lands: renderTeacherActivities re-reads
-  // config/class, so painting first would just pull the pre-write copy back
-  // over the optimistic state. Same order as every other writer here.
-  if(teacherView==='activities') renderTeacherActivities();
-}
 // One activity's full content, read-only — the actual "click to go to the
 // activity" destination. Built straight from window.CLASS_ACTIVITIES (the
 // same source the student-facing card in app.js reads), not from
@@ -1125,7 +1443,10 @@ function renderTeacherActivityDetail(id){
   if(!a){ box.innerHTML=`${back}<div class="t-loading">Could not find that activity — it may have been renamed or removed.</div>`; return; }
   // A check has no steps — its detail page is a results grid, see below.
   if(a.kind==='check') return renderTeacherCheckDetail(a, back);
-  const num=teacherActivityNumbers(teacherClassConfig)[a.id];
+  // Where this card sits in the course, straight off the board — "Module 3
+  // · #7", or the reason it has no number. Same view students' #N comes
+  // from (caBoardOrder), so the two can't disagree.
+  const place=teacherActivityPlace(a.id);
   const stepsHtml=(a.steps||[]).map((s,si)=>{
     const media=[];
     /* width/height: see caStepHtml() in app.js — same 640x244 board, and
@@ -1173,7 +1494,8 @@ function renderTeacherActivityDetail(id){
     ? `<div class="t-grid-wrap"><table><thead><tr><th class="nc">Student</th><th>Status</th><th>Gate</th></tr></thead><tbody>${studentRows}</tbody></table></div>`
     : '<div class="t-loading">No student data yet — students need to sign in first.</div>';
   box.innerHTML=`${back}
-    <div class="stu-section-head" style="margin-top:0">${num?`#${num} - `:''}${escHtml(teacherActivityTitle(a,teacherClassConfig))} <span style="opacity:.55;font-size:.72em">(${escHtml(a.id)})</span></div>
+    <div class="stu-section-head" style="margin-top:0">${escHtml(teacherActivityTitle(a,teacherClassConfig))} <span style="opacity:.55;font-size:.72em">(${escHtml(a.id)})</span></div>
+    <div class="tg-note">${escHtml(place)}</div>
     ${teacherRetiredBanner(a.id)}
     ${linkRow(a)}
     ${a.intro?`<div class="coach-tip" style="margin:0 2px 16px">${escHtml(a.intro)}</div>`:''}
@@ -1247,7 +1569,7 @@ function renderTeacherCheckDetail(a, back){
   box.innerHTML=`${back}
     <div class="stu-section-head" style="margin-top:0">Exit check &middot; ${escHtml(teacherActivityTitle(a,teacherClassConfig))} <span style="opacity:.55;font-size:.72em">(${escHtml(a.id)})</span></div>
     ${teacherRetiredBanner(a.id)}
-    <div class="tg-note">${dateNote}. ${withRes.length} of ${allStudents.length} turned in. Checks take no #number — they never enter the teaching-order run.</div>
+    <div class="tg-note">${escHtml(teacherActivityPlace(a.id))} ${dateNote}. ${withRes.length} of ${allStudents.length} turned in. Checks take no #number — they never enter the course's numbered run.</div>
     ${linkRow(a)}
     ${a.intro?`<div class="coach-tip" style="margin:0 2px 16px">${escHtml(a.intro)}</div>`:''}
     ${table}
@@ -1302,7 +1624,7 @@ async function teacherSetActivityDate(id, value){
 
 /* ── Archive / Delete an activity ───────────────────────────────────────
    Schema, the difference between the two, and what neither can reach: the
-   block by teacherShowArchivedActivities above.
+   Archive / Delete block above renderTeacherActivities.
 
    Both mirror teacherSetActivityHidden's write shape — optimistic local
    mutation, one merge patch, roll the mutation back and say so if the write
@@ -1338,20 +1660,25 @@ async function teacherSetActivityArchived(id, state){
    again) rather than snap back onto Today the moment the flag comes off.
 
    Confirmed first, because unlike Archive it throws away work — a release
-   date, a rename, a hand-typed teaching position, a set of per-student gate
-   clears. Deliberately NOT touching students' progress docs: the teacher has
-   no write there (firestore.rules), and a completion record is grade data. */
+   date, a rename, a place on the board, a set of per-student gate clears.
+   Deliberately NOT touching students' progress docs: the teacher has no
+   write there (firestore.rules), and a completion record is grade data. */
 async function teacherDeleteActivity(id){
   const cfg = teacherClassConfig;
   const a = (window.CLASS_ACTIVITIES||[]).find(x=>x.id===id);
   const shown = a ? teacherActivityTitle(a,cfg) : id;
   if(!window.confirm(
     'Delete \u201c'+shown+'\u201d?\n\n'
-    +'Students stop seeing it, and its release date, rename, #number and per-student gate clears are all cleared.\n\n'
-    +'You can bring it back from \u201cShow deleted\u201d, but it comes back blank \u2014 undated, so you would publish it again from scratch.\n\n'
+    +'Students stop seeing it, and its release date, rename, place on the board and per-student gate clears are all cleared.\n\n'
+    +'You can bring it back from the Built column\u2019s \u201cArchived / deleted\u201d list, but it comes back blank \u2014 unplaced and undated, so you would assign and publish it again from scratch.\n\n'
     +'What stays either way: the activity itself (it ships in the site\u2019s code, so only a code update really removes it) and every student\u2019s record of having finished it.\n\n'
     +'To tuck it away and keep its settings, cancel and use Archive instead.')) return;
-  const MAPS=['archivedActivities','deletedActivities','hiddenActivities','activityDates','activityTitles','activityNumbers'];
+  // activityBoard is in the list because Delete un-places the card as well:
+  // a restored one comes back in Built, blank, to be placed and published
+  // from scratch. Archive deliberately does NOT touch it — that's the whole
+  // difference between the two, and why Restore-from-archive puts the card
+  // back in its own module at its own position.
+  const MAPS=['archivedActivities','deletedActivities','hiddenActivities','activityDates','activityTitles','activityNumbers','activityBoard'];
   MAPS.forEach(m=>{ if(!cfg[m]) cfg[m]={}; });
   if(!cfg.activityClears) cfg.activityClears={};
   const clears=cfg.activityClears;
@@ -1361,14 +1688,31 @@ async function teacherDeleteActivity(id){
   const before={}, beforeClears={};
   MAPS.forEach(m=>{ before[m]=Object.prototype.hasOwnProperty.call(cfg[m],id) ? cfg[m][id] : undefined; });
   clearUids.forEach(uid=>{ beforeClears[uid]=clears[uid][id]; });
+  /* Taking the card off the board leaves a hole in its module's 1..N run,
+     so the survivors are re-packed in the same write — same contract every
+     other board writer keeps (teacherMoveActivity). Computed BEFORE the
+     entry is deleted, since teacherBoardModuleIds reads the board. */
+  const boardEntry=cfg.activityBoard[id];
+  const repack={};
+  if(boardEntry){
+    const from=Number(boardEntry.module)||0;
+    teacherBoardModuleIds(cfg,from).filter(x=>x!==id).forEach((x,i)=>{
+      const p=cfg.activityBoard[x];
+      if(!p || Number(p.pos)!==i+1) repack[x]={module:from, pos:i+1};
+    });
+  }
+  const beforeRepack={};
+  Object.keys(repack).forEach(k=>{ beforeRepack[k]=cfg.activityBoard[k]; });
   cfg.deletedActivities[id]=true;
   MAPS.filter(m=>m!=='deletedActivities').forEach(m=>{ delete cfg[m][id]; });
+  Object.keys(repack).forEach(k=>{ cfg.activityBoard[k]=repack[k]; });
   clearUids.forEach(uid=>{ delete clears[uid][id]; });
   try{
     await ensureDb();
     const fv=firebase.firestore.FieldValue;
     const patch={deletedActivities:{[id]:true}};
     MAPS.filter(m=>m!=='deletedActivities').forEach(m=>{ patch[m]={[id]:fv.delete()}; });
+    Object.keys(repack).forEach(k=>{ patch.activityBoard[k]=repack[k]; });
     if(clearUids.length){
       patch.activityClears={};
       clearUids.forEach(uid=>{ patch.activityClears[uid]={[id]:fv.delete()}; });
@@ -1376,6 +1720,7 @@ async function teacherDeleteActivity(id){
     await db.collection('config').doc('class').set(patch,{merge:true});
   }catch(e){
     MAPS.forEach(m=>{ if(before[m]===undefined) delete cfg[m][id]; else cfg[m][id]=before[m]; });
+    Object.keys(beforeRepack).forEach(k=>{ if(beforeRepack[k]===undefined) delete cfg.activityBoard[k]; else cfg.activityBoard[k]=beforeRepack[k]; });
     clearUids.forEach(uid=>{ clears[uid][id]=beforeClears[uid]; });
     alert('Could not delete that activity — check your connection and Firestore rules.');
   }
@@ -1383,14 +1728,6 @@ async function teacherDeleteActivity(id){
   // editing something that is no longer there.
   if(activityEditId===id) activityEditId=null;
   if(teacherView==='activities') renderTeacherActivities();
-}
-function teacherToggleShowArchivedActivities(){
-  teacherShowArchivedActivities=!teacherShowArchivedActivities;
-  renderTeacherActivities({cached:true});   // a filter flip over rows we already have
-}
-function teacherToggleShowDeletedActivities(){
-  teacherShowDeletedActivities=!teacherShowDeletedActivities;
-  renderTeacherActivities({cached:true});
 }
 
 /* ── Per-student activity-gate clears (Today-first work order, Phase 1) ──
@@ -1409,6 +1746,11 @@ function teacherToggleShowDeletedActivities(){
    has in hand. If the visibility rule ever changes, change it in both. */
 function teacherActivityVisible(a, cfg, today){
   if(teacherActivityRetired(a.id, cfg)) return false;   // archived/deleted — see caIsVisible in app.js
+  // Not placed on the board = not in the course. Same condition, same
+  // position, as the assigned check in caIsVisible() — without it the
+  // console keeps counting an un-assigned card as a blocker ("Blocked by N",
+  // the per-student gate list, Clear all) for students it no longer blocks.
+  if(cfg && cfg.activityBoardSeeded && !((cfg.activityBoard||{})[a.id])) return false;
   if(((cfg&&cfg.hiddenActivities)||{})[a.id]===true) return false;
   const d=((cfg&&cfg.activityDates)||{})[a.id];
   return d ? d<=today : false;
@@ -1426,7 +1768,7 @@ function teacherRetiredBanner(id){
   const cfg=teacherClassConfig;
   if(!teacherActivityRetired(id,cfg)) return '';
   const del=teacherActivityDeleted(id,cfg);
-  return `<div class="tg-note"><strong>${del?'Deleted':'Archived'}.</strong> Students don't see this activity and it doesn't gate the site${del?' — and its date, rename, #number and gate clears have been cleared':''}. Restore it from the Class activities table${del?' (“Show deleted”)':' (“Show archived”)'}.</div>`;
+  return `<div class="tg-note"><strong>${del?'Deleted':'Archived'}.</strong> Students don't see this activity and it doesn't gate the site${del?' — and its date, rename, place on the board and gate clears have been cleared':''}. Restore it from the Class activities board${del?' — it\'s in Built, under “Archived / deleted”':' — it\'s under “Archived” inside its module'}.</div>`;
 }
 function teacherBlockersFor(stu, cfg){
   const today=dayStr(new Date());
@@ -1498,18 +1840,30 @@ let teacherClassConfigReq = 0;
    as visible and undated. Cached paints fall back to a fresh read until this
    is true. */
 let teacherClassConfigLoaded = false;
+/* Did the LAST completed read actually reach Firestore? A failed read
+   returns {} — indistinguishable, by its contents alone, from a class whose
+   config doc is genuinely empty. Every view in this file was happy with that
+   (a missing gamesEnabled just means "on"), but the activity board's
+   one-time migration is not: it reads activityDates to decide what to place,
+   so a failed read would seed an EMPTY board, write activityBoardSeeded, and
+   take every activity off every student's Today page — with the ordering
+   work gone and no way to tell it apart from a deliberate empty board. So
+   the read's success is recorded explicitly rather than inferred. */
+let teacherClassConfigReadOk = false;
 async function loadTeacherClassConfig(){
   const req = ++teacherClassConfigReq;
-  let cfg;
+  let cfg, ok = false;
   try{
     await ensureDb();
     const doc = await db.collection('config').doc('class').get();
     cfg = doc.exists ? (doc.data()||{}) : {};
+    ok = true;                      // a doc that doesn't exist yet still counts: we reached Firestore and it said so
   }catch(e){ cfg = {}; }
   if(!cfg.gameOverrides) cfg.gameOverrides = {};
   if(req !== teacherClassConfigReq) return null;   // a newer request is in flight — discard this one
   teacherClassConfig = cfg;
   teacherClassConfigLoaded = true;
+  teacherClassConfigReadOk = ok;
   return teacherClassConfig;
 }
 function renderTeacherGames(){

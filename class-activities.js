@@ -21,12 +21,13 @@
 
    Retiring one for good is the console's Archive / Delete pair
    (config/class.archivedActivities / .deletedActivities, same read path):
-   Archive keeps its date, rename and #number so Restore puts it back
-   unchanged, Delete clears all of that so a restored one comes back blank.
+   Archive keeps its date, rename and its place on the board so Restore puts
+   it back unchanged, Delete clears all of that — and takes it off the board
+   — so a restored one comes back blank, in Built.
    Both hide it from students and stop it gating the site; neither removes
    the entry from THIS file — a card only really leaves the course by being
    deleted here and pushed. Otherwise activities never retire: this file is
-   a permanent archive, newest-dated first at render time (app.js sorts,
+   a permanent archive, rendered in the console board's order (app.js sorts,
    this file doesn't need to be kept in any order).
 
    JOURNEY — `journey: '<slug>'` (optional; one of the six SONG_JOURNEYS ids
@@ -56,35 +57,40 @@
    2026-09-16: its steps were merged into `ca-17`, after the A-string note
    names. Same orphan-key story for anyone who had ticked it.
 
-   `number` is the TEACHING-ORDER number, and it is NOT locked to the id.
-   It's the position a student sees in the "#N - " prefix, so it has to
-   follow the order the class is actually taught in, which isn't the order
-   activities get authored in — an activity written late can be taught first.
-   Resequencing `number` is therefore expected and safe: nothing is keyed to
-   it (ids are), it only drives the "#N - " prefix and the sort tiebreak in
-   app.js / teacher.js — and it can be resequenced from the teacher console
-   too, without a push (see RENUMBERING FROM THE CONSOLE below). Keep the set
-   contiguous 1..N with no gaps or
-   duplicates — checks.mjs (1d) enforces that, and enforces id uniqueness
-   separately. Renumbering ids to match is the one thing that would break
-   students' saved progress; don't.
+   ORDER AND MODULE PLACEMENT LIVE ON THE CONSOLE BOARD, NOT IN THIS FILE
+   (2026-09-16). config/class.activityBoard — { id -> { module, pos } },
+   written by the two-column Class activities board in teacher.js — decides
+   which module an activity sits in, what order the cards come in, and the
+   "#N - " prefix students read. An activity with no entry there is BUILT:
+   pushed to the site, not placed in the course, invisible to everyone.
 
-   A NUMBER BAKED INTO A TITLE IS A SERIES NUMBER, NOT THE TEACHING-ORDER
-   ONE. Some activities come in a named series ("Finger Gym 1", "Finger
-   Gym 2", …). That digit counts within the series — the first Finger Gym is
-   Finger Gym 1 even when the class meets it as activity #3 — so it does NOT
-   track `number` and does NOT move when the surrounding activities are
-   resequenced (Jonathan, 2026-08-20). "#3 - Finger Gym 1" is correct and
+   `number` is therefore LEGACY and optional on a new entry. It survives as
+   one thing only: the tiebreak that seeds the board the first time, for a
+   class that has never had one (see caBoardOrder in app.js). Leave the
+   existing values alone, don't bother resequencing them, and don't add one
+   to a new activity unless you want it to land somewhere specific in that
+   one-time seeding. checks.mjs (1d) no longer requires it or checks it for
+   a 1..N run; it still enforces id uniqueness, which is the thing students'
+   progress is actually keyed to. Renumbering ids is still the one edit that
+   would break saved progress; don't.
+
+   A NUMBER BAKED INTO A TITLE IS A SERIES NUMBER, NOT A COURSE POSITION.
+   Some activities come in a named series ("Finger Gym 1", "Finger Gym 2",
+   …). That digit counts within the series — the first Finger Gym is Finger
+   Gym 1 even when the class meets it as activity #3 — so it does NOT track
+   the "#N" the board hands out and does NOT move when the board is
+   reordered (Jonathan, 2026-08-20). "#3 - Finger Gym 1" is correct and
    intended; the prefix says where we are in the course, the title says which
    Gym it is.
 
-   What a series DOES have to be is 1..N in teaching order, with no gaps,
-   duplicates or backwards jumps — checks.mjs (1l) groups titles by the words
-   before the digit, sorts by `number`, and fails the push if the series
-   digits don't read 1, 2, 3, …, in EN and ES separately. Inserting a new
-   Gym in the middle therefore does mean retyping the digit in every later
-   Gym's `title` AND `title_es`, and chasing any "same as Gym 1" /
-   "del Gimnasio 1" cross-reference in another activity's step text.
+   What a series DOES have to be is 1..N, with no gaps, duplicates or
+   backwards jumps — checks.mjs (1l) groups titles by the words before the
+   digit, sorts by NUMERIC ID (a series is authored in order, and ids never
+   move), and fails the push if the series digits don't read 1, 2, 3, …, in
+   EN and ES separately. Inserting a new Gym in the middle therefore does
+   mean retyping the digit in every later Gym's `title` AND `title_es`, and
+   chasing any "same as Gym 1" / "del Gimnasio 1" cross-reference in another
+   activity's step text.
 
    RENAMES FROM THE CONSOLE — the teacher can rename an activity from the
    Class activities table, which writes config/class.activityTitles as
@@ -99,19 +105,14 @@
    isn't in this file, that's a rename waiting to be folded in. See caTitle()
    in app.js and teacherActivityTitle() in teacher.js.
 
-   RENUMBERING FROM THE CONSOLE works the same way, on the same doc: typing
-   over the "#N" in the Class activities table moves that activity in the
-   teaching order and renumbers everything around it, writing
-   config/class.activityNumbers as { id -> { n, base } } — one row per
-   activity that no longer sits on its shipped number, `base` being the
-   shipped number it was moved from. Students see the new "#N - " prefix
-   immediately, in both languages (a number needs no translating, so unlike a
-   rename there's nothing owed to Spanish afterwards). Folding the order in
-   here — retype the `number` fields to match what the console shows — expires
-   those overrides automatically, exactly like a rename. Until it's folded in,
-   the file and the console disagree about the order and the CONSOLE is what
-   students see. See caNumberMap()/caNumber() in app.js and
-   teacherSetActivityNumber() in teacher.js.
+   ORDERING FROM THE CONSOLE is the board, and there is nothing to fold back
+   in here afterwards — unlike a rename, the board IS the record. Drag a card
+   between modules or within one, or type over its "#N"; both write
+   config/class.activityBoard and students see the new order and numbering
+   immediately, in both languages. The old activityNumbers overrides are
+   retired: nothing writes them any more and only the one-time board seeding
+   still reads them. See caBoardOrder()/caNumber() in app.js and
+   teacherMoveActivity() in teacher.js.
 
    Every display string carries an `_es` twin, same convention as module
    files — rendered through tf(obj, field) in app.js (see the "field on a
@@ -121,9 +122,10 @@
    SCHEMA
    {
      id:      'ca-17',           // permanent — next unused 'ca-<n>' counter
-     number:  3,                 // teaching-order position, resequence freely
-                                  // (see above) — the "#3" a student sees.
-                                  // Renders as "#N - Title"; don't bake the
+     number:  3,                 // OPTIONAL, legacy — see above. The "#N"
+                                  // a student sees comes from the console
+                                  // board now; this only seeds a board that
+                                  // has never been written. Never bake a
                                   // "#N - " prefix into title itself.
      title:    'Power Chord Relay',
      title_es: 'Relevo de acordes de poder',

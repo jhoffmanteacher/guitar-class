@@ -173,20 +173,42 @@ because they could not see what they guarded — a selector written twice, an
 was printed but never pinned. Where a total is meaningful, **pin it** (63
 Journey tab cards, 27 tuning warm-ups) so it cannot drop silently.
 
-### ⚠️ A number in an activity title is a SERIES number, not `number`
-`number` in `class-activities.js` drives the "#N - " prefix students see. A
-digit inside the title counts within its own series instead: the first Finger
-Gym is **Finger Gym 1** even though the class meets it as activity **#3**
-(Jonathan, 2026-08-20). Don't "fix" `#3 - Finger Gym 1` — that's the intended
-reading. What a series must be is contiguous 1..N in teaching order, EN and ES,
-which checks.mjs 1l enforces; inserting one in the middle means retyping every
-later title's digit plus any "same as Gym 1" / "del Gimnasio 1" cross-reference
-in another activity's step text, in the SAME edit. Ids (`ca-<n>`) never move —
-student progress is keyed to them. The teaching-order `number` can also be
-resequenced from the teacher console (type over the `#N` in the Class
-activities table) — that writes `config/class.activityNumbers` as
-`{ id -> { n, base } }` and expires by itself once the new order is folded
-into `class-activities.js`, same `base` rule as a console rename.
+### ⚠️ Activity order and module placement live on the console board
+**Not in `class-activities.js`** (2026-09-16). `config/class.activityBoard`
+(`{ id -> { module, pos } }`, `module: 0` = the board's Unsorted pen) is
+written by the two-column **Class activities board** in `teacher.js` — Built
+on the left (pushed, not placed), Assigned on the right (grouped by module,
+in the order students read them). It decides the order, the module headings
+students see on Today, and the `#N` prefix. A card with no entry is invisible
+to everyone; **assigned + dated-and-arrived + not Hidden + not
+archived/deleted** is the full live-for-students rule (`caIsVisible`).
+
+`caBoardOrder()` in `app.js` is the one resolver, read by students
+(`caBoardView`/`caNumber`) and by the console (`teacherBoardView`) so the two
+can't disagree. Archived cards keep their slot in their module but hold no
+`#N`, so the ones after them count down (Jonathan, 2026-09-16); Delete also
+takes the card off the board. Every move — drag, `Assign to…`/`Move to…`, ▲▼,
+a typed `#N` — goes through `teacherMoveActivity()`, which re-packs `pos`
+1..N in both the section left and the section joined. **Never write
+`progress/{uid}` from any of this**; completion is keyed to the id and is
+never touched by assign / un-assign / publish / archive / restore.
+
+`number` in `class-activities.js` is **legacy and optional** now: the only
+thing that still reads it is the one-time seeding of a board that has never
+been written (`activityBoardSeeded`). Don't resequence it, and checks.mjs 1d
+no longer enforces a 1..N run. `activityNumbers` is retired — nothing writes
+it; leave any old rows in Firestore alone.
+
+**A number in an activity title is still a SERIES number.** A digit inside
+the title counts within its own series: the first Finger Gym is **Finger Gym
+1** even though the class meets it as activity **#3** (Jonathan,
+2026-08-20). Don't "fix" `#3 - Finger Gym 1`. A series must be contiguous
+1..N, EN and ES, which checks.mjs 1l enforces — **sorted by numeric id since
+2026-09-16**, because the course position is no longer in the file.
+Inserting one in the middle means retyping every later title's digit plus any
+"same as Gym 1" / "del Gimnasio 1" cross-reference in another activity's step
+text, in the SAME edit. Ids (`ca-<n>`) never move — student progress is keyed
+to them.
 
 ### ⚠️ Editing a module's skills? Update `MODULE_MANIFEST` in `config-main.js`
 Add or remove a `skills:` entry and you must bump that module's `skillCount`.
@@ -405,9 +427,9 @@ activity's detail page shows the per-student, per-question grid and a
 "Missed by" row. Data is guarded by checks.mjs **1y** (`1x` is the
 orphaned-assets check), which recomputes every answer key from the fretboard
 rather than shape-checking it — a wrong `answer` doesn't look broken, it just
-marks a correct student wrong. Checks take no `#N` number: `caNumberMap()`
-skips them, which covers `caNumber` and `teacherActivityNumbers` at once, and
-`teacherSetActivityNumber()` filters them out of its whole-list rewrite. No
+marks a correct student wrong. Checks take no `#N` number: `caBoardOrder()`
+skips them when it hands out 1..N, which covers the student card and the
+console board at once, and the board renders "Check" where the `#` box goes. No
 `firestore.rules` change was needed — the result is a field on the progress
 doc the teacher already reads whole. About one check per week is the intended
 pace (Jonathan, 2026-09-09).
@@ -500,17 +522,19 @@ is mirrored in all three places as ever — `caIsVisible` (app.js),
 `teacherActivityVisible` (teacher.js), `journeyIsVisible` (journey.js).
 
 The difference between the two is what **Restore** gives back: Archive keeps the
-release date, rename, `#number` and per-student clears, so the row returns
-unchanged; Delete wipes all four on the way out (behind a `confirm()`), so a
-restored one comes back **undated** — invisible until it's published again from
-scratch. The two flags are mutually exclusive by construction, each writer
-clearing the other. Neither touches students' `classActivities` completion
-records (the teacher has no write on `progress/{uid}`, and it's grade data), and
-neither removes the entry from `class-activities.js` — only a push does. Retired
-rows keep their teaching-order slot (`caNumberMap` is untouched), the same way
-an undated or hidden one already does, so archiving mid-course doesn't shuffle
-every later `#N`. Console-side they fold out of the table behind
-`Show archived (N)` / `Show deleted (N)`, the Manage view's own idiom. Cached in
+release date, rename, board slot and per-student clears, so the card returns
+exactly where it was; Delete wipes all of that on the way out (behind a
+`confirm()`) **including the board entry**, so a restored one comes back in
+Built — unplaced and undated, to be assigned and published from scratch. The two
+flags are mutually exclusive by construction, each writer clearing the other.
+Neither touches students' `classActivities` completion records (the teacher has
+no write on `progress/{uid}`, and it's grade data), and neither removes the
+entry from `class-activities.js` — only a push does. **Retired cards hold no
+`#N`** (changed 2026-09-16 with the board — Jonathan's call): the ones after
+them count down, so the list students read is always 1,2,3 with no gaps.
+Console-side an archived card folds into its module's own `Archived (N)`
+disclosure, and an archived-but-unplaced one into Built's
+`Archived / deleted (N)`. Cached in
 `localStorage` (`caRetired`) with the same fail-to-cache rule as
 `activityDates` / `activityClears` — a blocked read must not bring a retired
 activity back and let it start gating the site again.

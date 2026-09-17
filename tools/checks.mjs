@@ -1928,11 +1928,19 @@ function checkI18nCompleteness(manifest, allSets, reviewsByModule, moduleSongsBy
    1d. IN-CLASS ACTIVITIES — class-activities.js loads cleanly and every
    entry (once any exist — v1 ships CLASS_ACTIVITIES empty) matches the
    schema documented at the top of that file: a permanent, unique `ca-<n>`
-   id (an authoring counter — NOT locked to `number`, which is the
-   resequence-able teaching order and has to run 1..N), NO `date` field (release dates live in
-   Firestore config/class.activityDates now, set from the teacher console —
-   see app.js/teacher.js), an _es twin on every required string, and any
+   id (an authoring counter, and the only permanent handle — student
+   progress is keyed to it), NO `date` field (release dates live in
+   Firestore config/class.activityDates, set from the teacher console — see
+   app.js/teacher.js), an _es twin on every required string, and any
    figure/video referenced actually exists / isn't a placeholder.
+
+   `number` is NO LONGER CHECKED for a 1..N run, and is optional on a new
+   entry (2026-09-16): order and module placement moved to the teacher
+   console's activity board (config/class.activityBoard), so the file no
+   longer decides either. It survives only as the migration tiebreak for a
+   class whose board hasn't been seeded yet — see caBoardOrder in app.js. A
+   `number` that IS present still has to be a positive integer, since a
+   string or a zero there would sort as garbage.
    ════════════════════════════════════════════════════════════════════ */
 function validateClassActivities() {
   head('1d. In-Class Activities data');
@@ -1952,7 +1960,6 @@ function validateClassActivities() {
 
   const idRe = /^ca-\d+$/;
   const seenIds = new Set();
-  const seenNumbers = new Set();
   const hasVal = v => v !== undefined && v !== null && v !== '';
   const reqEs = (where, obj, field) => {
     if (!obj || !hasVal(obj[field])) return;
@@ -1978,10 +1985,10 @@ function validateClassActivities() {
     } else if (a.kind !== undefined) {
       err(`${where}: unknown kind "${a.kind}" — the only kind is 'check'`); problems++;
     }
-    if (!isCheck) {
-      if (!Number.isInteger(a.number) || a.number < 1) { err(`${where}: number "${a.number}" is not a positive integer`); problems++; }
-      else if (seenNumbers.has(a.number)) { err(`${where}: duplicate number ${a.number}`); problems++; }
-      else seenNumbers.add(a.number);
+    // Optional now (see the header above), but still has to be a real
+    // number if it's there — the legacy ordering fallback sorts on it.
+    if (!isCheck && 'number' in a && (!Number.isInteger(a.number) || a.number < 1)) {
+      err(`${where}: number "${a.number}" is not a positive integer — it is optional now, but a present one has to be a real position`); problems++;
     }
     reqEs(where, a, 'title');
     reqEs(where, a, 'intro');
@@ -2045,24 +2052,16 @@ function validateClassActivities() {
     }
   });
 
-  // `number` is teaching order, deliberately decoupled from the id (see the
-  // header of class-activities.js) — so instead of pinning it to the id, pin
-  // the SET: 1..N, no gaps. A gap is the tell that a resequence was left
-  // half-done, and it would show students a jump like "#3 … #5".
-  // Exit checks hold no position, so the 1..N run is over the numbered
-  // activities only — a check in the middle of the file must not read as a gap.
+  /* The old 1..N contiguity rule is GONE (2026-09-16). It guarded a
+     teaching order the file no longer owns: the console's activity board
+     does, and `number` there is only the tiebreak used to seed a board
+     that has never been written. A gap in it now means nothing, and
+     failing a push over one would force a pointless retype every time an
+     activity is added or retired. Ids are still unique (checked above) and
+     that is the one thing progress is keyed to. */
   const numbered = activities.filter(a => a && a.kind !== 'check');
-  if (seenNumbers.size === numbered.length) {
-    const missing = [];
-    for (let n = 1; n <= numbered.length; n++) if (!seenNumbers.has(n)) missing.push(n);
-    if (missing.length) {
-      err(`CLASS_ACTIVITIES: "number" must run 1..${numbered.length} with no gaps — missing ${missing.join(', ')}`);
-      problems++;
-    }
-  }
-
   const checks = activities.length - numbered.length;
-  if (problems === 0) ok(`${activities.length} class activit${activities.length === 1 ? 'y' : 'ies'} (${checks} exit check${checks === 1 ? '' : 's'}) — all valid, teaching order 1..${numbered.length}`);
+  if (problems === 0) ok(`${activities.length} class activit${activities.length === 1 ? 'y' : 'ies'} (${checks} exit check${checks === 1 ? '' : 's'}) — all valid; order lives on the console board`);
   checkExitChecks(activities);
   checkActivityTitleNumbers(activities);
 }
@@ -2185,14 +2184,17 @@ function checkExitChecks(activities) {
    named series ("Finger Gym 1", "Finger Gym 2", …). That digit counts
    within the series, NOT within the course: the first Finger Gym is
    Finger Gym 1 even though the class meets it as activity #3 (Jonathan,
-   2026-08-20). So it is deliberately independent of `number`, and this
-   check does NOT pin the two together — an earlier version did, which is
-   what pushed the series to 3..8 in the first place.
+   2026-08-20). So it is deliberately independent of the course position,
+   and this check does NOT pin the two together — an earlier version did,
+   which is what pushed the series to 3..8 in the first place.
 
-   What it does enforce is that each series reads 1, 2, 3, … in teaching
-   order: group titles by the words before the digit, sort by `number`,
-   and fail on a gap, a duplicate, or a backwards jump. Inserting a Gym
-   in the middle therefore still means retyping every later Gym's digit.
+   What it does enforce is that each series reads 1, 2, 3, … : group
+   titles by the words before the digit, sort, and fail on a gap, a
+   duplicate, or a backwards jump. The sort is by NUMERIC ID (2026-09-16),
+   not by `number` as it was — a series is authored in order, ids are
+   handed out in order and never move, and the course position now lives
+   on the console's activity board where this file can't see it. Inserting
+   a Gym in the middle still means retyping every later Gym's digit.
    EN and ES are grouped separately, so a translated series has to stay
    in step with itself too.
 
@@ -2202,11 +2204,12 @@ function checkExitChecks(activities) {
    title ever legitimately ends in a non-series number, reword it rather
    than loosening this.
    ════════════════════════════════════════════════════════════════════ */
+const activityIdNum = id => { const m = /^ca-(\d+)$/.exec(String(id)); return m ? Number(m[1]) : Infinity; };
 function checkActivityTitleNumbers(activities) {
-  head('1l. Numbered activity series run 1..N in teaching order');
+  head('1l. Numbered activity series run 1..N in order');
   // A standalone integer that ends the string or hands off to a separator.
   const POS_RE = /(?:^|\s)(\d+)(?=\s*(?:[—–:-]\s|$))/;
-  // series key -> [{ id, number, seriesNum, title }], one map per language.
+  // series key -> [{ id, idNum, seriesNum, title }], one map per language.
   const series = new Map();
   for (const a of activities) {
     for (const field of ['title', 'title_es']) {
@@ -2218,21 +2221,21 @@ function checkActivityTitleNumbers(activities) {
       if (!name) continue;               // a bare "3" is prose, not a series
       const key = `${field}::${name.toLowerCase()}`;
       if (!series.has(key)) series.set(key, { field, name, entries: [] });
-      series.get(key).entries.push({ id: a.id, number: a.number, seriesNum: Number(m[1]), title });
+      series.get(key).entries.push({ id: a.id, idNum: activityIdNum(a.id), seriesNum: Number(m[1]), title });
     }
   }
   let bad = 0;
   for (const { field, name, entries } of series.values()) {
-    entries.sort((x, y) => x.number - y.number);
+    entries.sort((x, y) => x.idNum - y.idNum);
     entries.forEach((e, i) => {
       if (e.seriesNum === i + 1) return;
-      err(`${e.id}: ${field} "${e.title}" is #${i + 1} of the "${name}" series (by teaching order) but reads ${e.seriesNum} — the series has to run 1..${entries.length} (see class-activities.js header)`);
+      err(`${e.id}: ${field} "${e.title}" is #${i + 1} of the "${name}" series (by authoring order) but reads ${e.seriesNum} — the series has to run 1..${entries.length} (see class-activities.js header)`);
       problems++; bad++;
     });
   }
   if (bad === 0) {
     const n = series.size;
-    ok(n ? `${n} numbered title series — each runs 1..N in teaching order` : 'no numbered activity title series');
+    ok(n ? `${n} numbered title series — each runs 1..N by authoring order` : 'no numbered activity title series');
   }
 }
 
@@ -3416,6 +3419,78 @@ async function liveCheck() {
 }
 
 /* ════════════════════════════════════════════════════════════════════
+   1ah. THE THREE VISIBILITY RULES STAY IN STEP — "can a student see this
+   class activity?" is answered by three hand-kept copies that deliberately
+   do NOT share code, because each reads a different source: caIsVisible()
+   in app.js (the student's own globals, populated by loadClassConfig),
+   teacherActivityVisible() in teacher.js (the config object the console
+   already holds), and journeyIsVisible() in tabs/journey.js (the config
+   journey.js fetches for itself, on pages that never load app.js).
+
+   All three carry a comment telling the next person to change them
+   together, and on 2026-09-16 two of the three were changed and one was
+   not — the board's new "assigned" condition went into app.js alone. The
+   result was not a cosmetic drift: un-assigning a still-dated activity
+   stopped blocking the main site while still blanking all six Journey
+   pages, with nothing left on Today to clear it. The console meanwhile
+   kept counting it as a blocker for every student.
+
+   So: each copy must test every CONCEPT below, and each must have the
+   pinned number of early "not visible" guards. The counts are what make
+   this a real ratchet rather than a keyword sweep — adding a fifth
+   condition to one copy and not the others fails the push, which is the
+   exact mistake it exists to catch. Journey's count is one higher because
+   it reads the two retire maps separately instead of a merged set.
+   ════════════════════════════════════════════════════════════════════ */
+function checkVisibilityParity() {
+  head('1ah. caIsVisible / teacherActivityVisible / journeyIsVisible stay in step');
+  const COPIES = [
+    { file: 'app.js',          fn: 'caIsVisible',            guards: 3 },
+    { file: 'teacher.js',      fn: 'teacherActivityVisible', guards: 3 },
+    { file: 'tabs/journey.js', fn: 'journeyIsVisible',       guards: 4 },
+  ];
+  // Concept -> the token each copy is allowed to express it with. A copy
+  // satisfies the concept if ANY of its patterns appears in its body.
+  const CONCEPTS = [
+    { name: 'archived/deleted', re: /retiredActivityIds|teacherActivityRetired|archivedActivities/ },
+    { name: 'assigned to the board', re: /caBoardView\(\)\.assigned|activityBoardSeeded/ },
+    { name: 'teacher hide toggle', re: /hiddenActivityIds|hiddenActivities/ },
+    { name: 'release date', re: /caDate\(|activityDates/ },
+  ];
+  let bad = 0;
+  for (const c of COPIES) {
+    let src;
+    try { src = readFileSync(join(ROOT, c.file), 'utf8'); }
+    catch { err(`${c.file} is missing`); problems++; bad++; continue; }
+    const start = src.indexOf(`function ${c.fn}(`);
+    if (start < 0) { err(`${c.file}: ${c.fn}() not found — if it was renamed, update 1ah`); problems++; bad++; continue; }
+    // Body = from the opening brace to its balancing one.
+    const open = src.indexOf('{', start);
+    let depth = 0, end = -1;
+    for (let i = open; i < src.length; i++) {
+      const skip = skipStringOrComment(src, i);
+      if (skip !== null) { i = skip - 1; continue; }
+      if (src[i] === '{') depth++;
+      else if (src[i] === '}' && --depth === 0) { end = i; break; }
+    }
+    if (end < 0) { err(`${c.file}: could not read ${c.fn}()'s body`); problems++; bad++; continue; }
+    const body = src.slice(open, end + 1);
+    for (const con of CONCEPTS) {
+      if (!con.re.test(body)) {
+        err(`${c.file} · ${c.fn}(): never tests "${con.name}" — the other copies do, and all three have to agree on what hides an activity`);
+        problems++; bad++;
+      }
+    }
+    const guards = (body.match(/return false;/g) || []).length;
+    if (guards !== c.guards) {
+      err(`${c.file} · ${c.fn}(): ${guards} early "return false" guards, expected ${c.guards} — a condition was added or removed here without matching the other two copies (see 1ah)`);
+      problems++; bad++;
+    }
+  }
+  if (bad === 0) ok('all 3 visibility rules test the same 4 conditions, with matching guard counts');
+}
+
+/* ════════════════════════════════════════════════════════════════════
    1ag. CHORD RANKS COVER BOTH GAMES' DECKS — Chord Blitz (shapes, by eye)
    and Chord Detective (the same chords, by ear) both climb: a round starts
    with only the easiest chords in the deck in play and unlocks the next
@@ -3534,6 +3609,7 @@ function checkChordBlitzRanks() {
   checkVisibleHelperUsage();
   checkFigureDimensions();
   checkOrphanAssets();
+  checkVisibilityParity();
   checkChordBlitzRanks();
   if (!SKIP_LINKS) await checkLinks();
   else warn('skipping link check (--skip-links)');

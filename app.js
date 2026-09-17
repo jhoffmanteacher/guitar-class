@@ -149,7 +149,28 @@ let periodOverride = '';   // config/class.periodOverrides[uid] — teacher's co
 let hiddenActivityIds = {}; // In-Class Activities the teacher has temporarily hidden (see loadClassConfig) — id -> true
 let activityDates = {}; // In-Class Activities release dates, teacher-set in the console (see loadClassConfig) — id -> 'YYYY-MM-DD'
 let activityTitles = {}; // In-Class Activity renames, teacher-set in the console (see loadClassConfig / caTitle) — id -> { en, base }
-let activityNumbers = {}; // In-Class Activity renumbering, teacher-set in the console (see loadClassConfig / caNumber) — id -> { n, base }
+let activityNumbers = {}; // LEGACY In-Class Activity renumbering — see caBoardOrder's fallback note; read only while activityBoard is unseeded
+/* The activity board — config/class.activityBoard, written by the teacher
+   console's two-column Class activities board (teacher.js). id -> { module,
+   pos }: `module` is a MODULE_MANIFEST number, or 0 for the board's Unsorted
+   holding pen, and `pos` is 1..N within that module. An activity with an
+   entry is ASSIGNED — placed in the course, and a candidate for Today once
+   its release date arrives. One with no entry has only been pushed to the
+   site; it is Built, not placed, and no student sees it.
+
+   This is what drives BOTH the order students read the cards in and the
+   "#N - " prefix on them (caBoardOrder / caNumber), replacing the shipped
+   `number` field and the console's old activityNumbers overrides. */
+let activityBoard = {};
+/* config/class.activityBoardSeeded — has the console ever written a board?
+   It has to be its own flag rather than "activityBoard is non-empty",
+   because those two states differ in the one case that matters: a board the
+   teacher has emptied by un-assigning every card means NOTHING is placed
+   (no student sees anything), while a board that was never written means
+   the feature hasn't started yet and every card should keep rendering the
+   way it did before. Guessing from emptiness would flip the second reading
+   into the first the moment the last card came off. */
+let activityBoardOn = false;
 let activityClears = {}; // Per-student activity-gate clears, teacher-set in the console (see loadClassConfig / caBlockers) — uid -> { activityId -> true }
 /* Activities the teacher has retired from the console — config/class's
    archivedActivities (tucked away, restorable with its date/rename/number
@@ -548,7 +569,7 @@ if(auth) auth.onAuthStateChanged(async user=>{
     }
   } else {
     window.__authBootPending = false;
-    currentUser = null; progress = {}; responses = {}; completed = {}; completedDeletes = new Set(); classActivities = {}; classActivitiesDeletes = new Set(); exitChecks = {}; games = {}; streak = { count:0, lastDay:null }; gamesAccessOn = true; studentPeriod = ''; periodOverride = ''; hiddenActivityIds = {}; activityDates = {}; activityTitles = {}; activityNumbers = {}; activityClears = {}; retiredActivityIds = {}; progressLoadFailed = false;
+    currentUser = null; progress = {}; responses = {}; completed = {}; completedDeletes = new Set(); classActivities = {}; classActivitiesDeletes = new Set(); exitChecks = {}; games = {}; streak = { count:0, lastDay:null }; gamesAccessOn = true; studentPeriod = ''; periodOverride = ''; hiddenActivityIds = {}; activityDates = {}; activityTitles = {}; activityNumbers = {}; activityBoard = {}; activityBoardOn = false; activityClears = {}; retiredActivityIds = {}; progressLoadFailed = false;
     document.body.classList.remove('ca-gated');   // next sign-in recomputes it fresh — don't leave a stale gate showing over the sign-in wall
     if(typeof gamesResetForUser === 'function') gamesResetForUser();   // Note Runner's module caches must not leak into the next signed-in user
     if(typeof lqStopListening === 'function') lqStopListening();       // and the live-quiz listener must not keep firing under the next student
@@ -681,6 +702,8 @@ async function loadClassConfig(){
   activityDates = {};
   activityTitles = {};
   activityNumbers = {};
+  activityBoard = {};
+  activityBoardOn = false;
   activityClears = {};
   retiredActivityIds = {};
   try{
@@ -739,6 +762,15 @@ async function loadClassConfig(){
        blocking the site again on a flaky connection. */
     retiredActivityIds = Object.assign({}, d.archivedActivities || {}, d.deletedActivities || {});
     try{ localStorage.setItem('caRetired', JSON.stringify(retiredActivityIds)); }catch(e){}
+    /* The activity board (teacher.js) — which activities are placed in the
+       course, in which module, in what order. Cached, and for the same
+       "must not fail open" reason as the dates: an empty board reads as
+       "nothing has been placed yet" and would take every card off Today,
+       so a blocked read has to fall back to the last known copy rather
+       than to {}. See caBoardOrder. */
+    activityBoard = d.activityBoard || {};
+    activityBoardOn = d.activityBoardSeeded === true;
+    try{ localStorage.setItem('caBoard', JSON.stringify({on: activityBoardOn, map: activityBoard})); }catch(e){}
   }catch(e){ restoreClassConfigFromCache(); /* leave games on, nothing hidden */ }
   applyActivityGate();
 }
@@ -760,6 +792,11 @@ function restoreClassConfigFromCache(){
     const raw = localStorage.getItem('caRetired');
     if(raw) retiredActivityIds = JSON.parse(raw) || {};
   }catch(e){ /* ignore — retiredActivityIds stays {} */ }
+  try{
+    const raw = localStorage.getItem('caBoard');
+    const cached = raw ? JSON.parse(raw) : null;
+    if(cached && typeof cached === 'object'){ activityBoard = cached.map || {}; activityBoardOn = cached.on === true; }
+  }catch(e){ /* ignore — activityBoard stays {}, unseeded */ }
 }
 /* Show/hide the 🎮 Games button to match this student's access, and if games
    get turned off while the arcade is open, close it. */
@@ -8291,56 +8328,142 @@ function caTitle(a){
   }
   return tf(a,'title');
 }
-/* ── Teaching-order numbers ──
-   `number` in class-activities.js is the teaching order the class actually
-   runs in, and it drives the "#N - " prefix students read. The teacher can
-   resequence it from the console (teacher.js Class activities view), which
-   lands in config/class.activityNumbers as id -> { n, base }.
+/* ── The activity board: order, module grouping and the "#N" prefix ──
+   config/class.activityBoard (see the global above) is the single source of
+   both the order students read their activities in and the number on each
+   card. caBoardOrder() takes the whole list rather than one activity because
+   the thing being resolved is an ORDER, not a value: it groups the assigned
+   activities into sections and hands back positions 1..N across them.
 
-   `base` is the SHIPPED number the renumbering was typed against, and it
-   plays exactly the role it plays for renames (see caTitle): the override
-   applies only while the shipped number still equals `base`, so folding the
-   new order into class-activities.js expires it by itself — no Firestore
-   cleanup, and no forgotten override quietly shadowing a hand-set order.
+   Returns { sections, number, assigned }:
+     sections  [{ module, mod, ids, retiredIds }] — Unsorted (module 0) first
+               if it holds anything, then MODULE_MANIFEST order, each section
+               only if it holds a card. `mod` is the MODULE_MANIFEST ENTRY
+               itself, not a copied name: the caller renders tf(mod,'name')
+               (student, EN/ES) or mod.name (console), so the module's display
+               title has exactly one home. `ids` are the live cards in board
+               order; `retiredIds` the archived/deleted ones in the same
+               section, kept separate because they are shown only in the
+               console and never numbered.
+     number    id -> 1..N over the non-check, non-retired cards in reading
+               order. Checks (kind:'check') take no slot — a check dropped
+               into the middle of the course must not shove every later
+               card's prefix along by one — and neither does a retired one
+               (Jonathan, 2026-09-16: the list should read 1,2,3 with no
+               gaps, so archiving #4 renumbers the rest down).
+     assigned  id -> true for every activity with a board entry, i.e. the
+               ones that are actually placed in the course.
 
-   caNumberMap() takes the whole list rather than one activity because the
-   thing being resolved is an ORDER, not a value: it sorts by the effective
-   number and hands back positions 1..N. That normalisation is what keeps the
-   prefix honest through a partial expiry — if a push folds in some of the
-   overrides and not others, the raw numbers can briefly collide or leave a
-   gap, and students would otherwise see two #5s. Ties break on the shipped
-   number, then the id, so the result is stable across renders and clients.
+   opts.retired is the id -> true set of archived/deleted activities
+   (retiredActivityIds here, the two console maps in teacher.js).
+
+   opts.seeded says whether a board has ever been written
+   (config/class.activityBoardSeeded). False means the console has not run
+   its one-time migration yet, so there is nothing to order by and every
+   activity is treated as assigned, in the legacy order below — see
+   activityBoardOn for why an empty board is NOT the same question.
+
+   opts.legacyNumbers is the TRANSITIONAL fallback, and the only thing left
+   that reads config/class.activityNumbers: until the console writes a board
+   for the first time (teacherMigrateActivityBoard), there is nothing to
+   order by, so an unseeded board falls back to the shipped `number` with the
+   old console overrides applied — which is exactly the order students were
+   already reading. Without it, the first load after this shipped would have
+   reshuffled every card until the teacher happened to open the console.
+   Delete the fallback (and the activityNumbers global with it) once no live
+   class is running on an unseeded board.
+
    Exported plainly (not a closure) because teacher.js calls it too, with the
    config doc it already has in hand instead of this file's student-side
    globals — same split as caTitle/teacherActivityTitle, minus the copy. */
-function caNumberMap(activities, overrides){
-  const ov = overrides || {};
+function caBoardOrder(activities, board, opts){
+  const o = opts || {};
+  const b = board || {};
+  const retired = o.retired || {};
+  const legacy = o.legacyNumbers || {};
+  const list = (activities || []).filter(a => a && a.id);
+  const manifest = (typeof MODULE_MANIFEST !== 'undefined') ? MODULE_MANIFEST : [];
   const shipped = a => { const n = Number(a.number); return Number.isFinite(n) ? n : Infinity; };
-  const effective = a => {
-    const o = ov[a.id];
-    return (o && Number.isFinite(Number(o.n)) && Number(o.base) === shipped(a)) ? Number(o.n) : shipped(a);
+  // Numeric part of `ca-<n>`, never localeCompare on the id — that orders
+  // ca-10 before ca-2.
+  const idNum = a => { const m = /^ca-(\d+)$/.exec(String(a.id)); return m ? Number(m[1]) : Infinity; };
+  const legacyN = a => {
+    const ov = legacy[a.id];
+    return (ov && Number.isFinite(Number(ov.n)) && Number(ov.base) === shipped(a)) ? Number(ov.n) : shipped(a);
   };
-  const map = {};
-  /* Exit checks (kind:'check') never take a #N slot — they carry no `number`
-     at all, and a check dropped into the middle of the course must not shove
-     every later activity's prefix along by one. Filtering here is what makes
-     that true for students (caNumber) and the console alike, since
-     teacherActivityNumbers() delegates straight to this function. */
-  [...(activities||[])].filter(a => a && a.kind !== 'check')
-    .sort((x, y) => (effective(x) - effective(y)) || (shipped(x) - shipped(y)) || String(x.id).localeCompare(String(y.id)))
-    .forEach((a, i) => { map[a.id] = i + 1; });
-  return map;
+  const posOf = a => { const e = b[a.id]; const n = e && Number(e.pos); return Number.isFinite(n) ? n : Infinity; };
+  const cmp = (x, y) => (posOf(x) - posOf(y)) || (legacyN(x) - legacyN(y)) || (idNum(x) - idNum(y));
+
+  const assigned = {};
+  const buckets = new Map();   // module number -> activities
+  // Defaulted, not inferred, for callers that genuinely can't know — both
+  // real ones (app.js caBoardView, teacher.js's board) pass it explicitly.
+  const seeded = (o.seeded === undefined) ? Object.keys(b).length > 0 : !!o.seeded;
+  if(seeded){
+    list.forEach(a => {
+      const e = b[a.id];
+      if(!e) return;
+      assigned[a.id] = true;
+      const mn = Number(e.module) || 0;
+      if(!buckets.has(mn)) buckets.set(mn, []);
+      buckets.get(mn).push(a);
+    });
+  } else {
+    // Unseeded board — one Unsorted section holding everything, in the order
+    // students are reading today. See opts.legacyNumbers above.
+    list.forEach(a => { assigned[a.id] = true; });
+    buckets.set(0, list.slice());
+  }
+
+  const order = [0].concat(manifest.map(m => m.num));
+  const sections = [];
+  order.forEach(mn => {
+    const items = buckets.get(mn);
+    if(!items || !items.length) return;
+    items.sort(cmp);
+    const mod = mn === 0 ? null : manifest.find(m => m.num === mn) || null;
+    sections.push({
+      module: mn,
+      mod,
+      ids: items.filter(a => retired[a.id] !== true).map(a => a.id),
+      retiredIds: items.filter(a => retired[a.id] === true).map(a => a.id),
+    });
+  });
+  // A module the manifest doesn't know about (a board row left behind by a
+  // renumbered manifest) still has to render somewhere rather than vanish —
+  // it lands after the known modules, in numeric order.
+  [...buckets.keys()].filter(mn => mn !== 0 && !manifest.some(m => m.num === mn)).sort((x, y) => x - y)
+    .forEach(mn => {
+      const items = buckets.get(mn).sort(cmp);
+      sections.push({ module: mn, mod: null,
+        ids: items.filter(a => retired[a.id] !== true).map(a => a.id),
+        retiredIds: items.filter(a => retired[a.id] === true).map(a => a.id) });
+    });
+
+  const byId = {};
+  list.forEach(a => { byId[a.id] = a; });
+  const number = {};
+  let n = 0;
+  sections.forEach(sec => sec.ids.forEach(id => {
+    if(byId[id] && byId[id].kind === 'check') return;
+    number[id] = ++n;
+  }));
+  return { sections, number, assigned };
 }
-// The map is rebuilt only when activityNumbers is REPLACED (loadClassConfig
-// assigns a fresh object every time, and so does the sign-out reset), not on
-// every card — renderClassActivities' comparator alone would otherwise sort
-// the whole list once per comparison.
-let caNumberCache = null;
+// Rebuilt only when activityBoard is REPLACED (loadClassConfig assigns a
+// fresh object every time, and so does the sign-out reset), not on every
+// card — renderClassActivities' comparator alone would otherwise sort the
+// whole list once per comparison.
+let caBoardCache = null;
+function caBoardView(){
+  if(!caBoardCache || caBoardCache.src !== activityBoard)
+    caBoardCache = { src: activityBoard, view: caBoardOrder(window.CLASS_ACTIVITIES || [], activityBoard,
+      { retired: retiredActivityIds, legacyNumbers: activityNumbers, seeded: activityBoardOn }) };
+  return caBoardCache.view;
+}
 function caNumber(a){
-  if(a && a.kind === 'check') return 0;   // checks are unnumbered — see caNumberMap
-  if(!caNumberCache || caNumberCache.src !== activityNumbers)
-    caNumberCache = { src: activityNumbers, map: caNumberMap(window.CLASS_ACTIVITIES || [], activityNumbers) };
-  return caNumberCache.map[a.id] || Number(a.number) || 0;
+  if(a && a.kind === 'check') return 0;   // checks are unnumbered — see caBoardOrder
+  return caBoardView().number[a.id] || 0;
 }
 /* An activity is visible to students once its console-set release date has
    arrived (local calendar day) — "hidden until it happens" by default, so an
@@ -8358,6 +8481,19 @@ function caNumber(a){
    link to it reads as not-posted (caFocusActivity). */
 function caIsVisible(a){
   if(retiredActivityIds[a.id] === true) return false;
+  /* Not placed on the console's board = not part of the course yet, so it
+     ranks with Archive/Delete rather than with the date gate: an unassigned
+     activity has been pushed to the site and nothing more. Held ahead of the
+     dev-bypass line for the same reason they are — there is no "not live
+     yet" to preview.
+
+     An UNSEEDED board — the console has never written one, activityBoardOn
+     is false — is not the same as "nothing is assigned" and must not read
+     that way, or the first load after this shipped would empty every
+     student's Today page. caBoardOrder treats it as everything-assigned and
+     this inherits that, same never-lock-on-a-guess rule as the gate itself.
+     An emptied board is a different answer and does hide everything. */
+  if(!caBoardView().assigned[a.id]) return false;
   if(hiddenActivityIds[a.id] === true) return false;
   if(isDevBypassUser()) return true;
   const d = caDate(a);
@@ -8441,12 +8577,18 @@ function renderClassActivities(){
   // (caToggleComplete/ecSubmit, both call this) has to be reflected before
   // either of them looks at it.
   applyActivityGate();
-  // Everything in this list is visible, hence dated — except under dev
-  // bypass, where caIsVisible skips the date gate and caDate(a) can be null.
-  // Treat null as '' so an undated entry sinks to the bottom of the sort
-  // instead of localeCompare throwing on a non-string.
-  const list = (window.CLASS_ACTIVITIES || []).filter(caIsVisible)
-    .sort((a, b) => (caDate(b) || '').localeCompare(caDate(a) || '') || (caNumber(b) - caNumber(a)));
+  /* Reading order is the console board's order (caBoardOrder), module
+     section by module section — not a date sort any more. The board IS the
+     teaching order, so the page now reads top to bottom the way the course
+     runs, and the "#N - " prefix on each card counts down the same list. */
+  const byId = {};
+  (window.CLASS_ACTIVITIES || []).forEach(a => { byId[a.id] = a; });
+  const view = caBoardView();
+  const groups = view.sections.map(sec => ({
+    sec,
+    cards: sec.ids.map(id => byId[id]).filter(a => a && caIsVisible(a)),
+  })).filter(g => g.cards.length);
+  const list = groups.reduce((acc, g) => acc.concat(g.cards), []);
   // A deep link whose id isn't published (or is mistyped) says so, above the
   // archive it did open — see caFocusActivity.
   const missing = caLinkMissingId
@@ -8457,24 +8599,46 @@ function renderClassActivities(){
   } else {
     // Done work collapses into its own group (caFinishedGroupHtml) so the
     // list a student actually needs to act on isn't buried under everything
-    // already turned in — finished stays in the same sort order, just moved
-    // out of the main flow.
-    const pending = list.filter(a => classActivities[a.id] !== true);
-    const finished = list.filter(a => classActivities[a.id] === true);
+    // already turned in — finished keeps the board order, just reversed, so
+    // the thing they turned in most recently is at the top of it.
+    const finished = list.filter(a => classActivities[a.id] === true).reverse();
     // Every card starts collapsed, Do-now included — nothing is opened here.
     // caOpenId only ever becomes non-null because the student opened a card
     // (caOnActivityToggle), a deep link focused one (caFocusActivity), or a
     // toggle wants to keep its card open through the re-render; it stays
     // sticky after that, so a re-render never yanks their choice shut.
+    const pendingGroups = groups
+      .map(g => ({ sec: g.sec, cards: g.cards.filter(a => classActivities[a.id] !== true) }))
+      .filter(g => g.cards.length);
+    const pendingCount = pendingGroups.reduce((n, g) => n + g.cards.length, 0);
+    /* Module headings, EN and ES, from the ONE place the site already keeps
+       a module's display name — the MODULE_MANIFEST entry caBoardOrder hands
+       back on the section. Unsorted (module 0) and a section whose module
+       the manifest doesn't know get no heading: there is no honest name to
+       put there, and an invented one would be a second source of truth. */
+    const headHtml = sec => sec.mod
+      ? `<div class="ca-mod-head" data-i18n="ca.moduleHead" data-i18n-params="${escAttr(JSON.stringify({n: sec.mod.num, mod: tf(sec.mod, 'name')}))}">${escHtml(t('ca.moduleHead', {n: sec.mod.num, mod: tf(sec.mod, 'name')}))}</div>`
+      : '';
     let pendingHtml;
-    if(!pending.length){
+    if(!pendingCount){
       pendingHtml = finished.length ? `<div class="coach-tip" data-i18n="ca.allDone">${escHtml(t('ca.allDone'))}</div>` : '';
+    } else if(pendingGroups.some(g => g.sec.mod)){
+      // Module headings are the structure here, so the flat "Still to do"
+      // divider below would only compete with them.
+      pendingHtml = pendingGroups.map(g => headHtml(g.sec) + g.cards.map(caActivityCardHtml).join('')).join('');
     } else {
-      const rest = pending.length > 1
+      // Nothing placed in a module yet (everything still in the board's
+      // Unsorted pen) — no headings to group by, so the page keeps the flat
+      // first-card-then-the-rest shape it had before the board. EVERY
+      // group's cards, not just the first: with no heading to separate them
+      // they are one list, and taking only pendingGroups[0] would drop cards
+      // off the page that are still blocking the gate.
+      const flat = pendingGroups.reduce((acc, g) => acc.concat(g.cards), []);
+      const rest = flat.length > 1
         ? `<div class="ca-stilltodo-divider" data-i18n="ca.stillToDo">${escHtml(t('ca.stillToDo'))}</div>`
-          + pending.slice(1).map(caActivityCardHtml).join('')
+          + flat.slice(1).map(caActivityCardHtml).join('')
         : '';
-      pendingHtml = caActivityCardHtml(pending[0]) + rest;
+      pendingHtml = caActivityCardHtml(flat[0]) + rest;
     }
     const gateIntro = document.body.classList.contains('ca-gated')
       ? `<p class="ca-gate-intro" data-i18n="today.gateIntro">${escHtml(t('today.gateIntro'))}</p>` : '';

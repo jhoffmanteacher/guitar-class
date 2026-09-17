@@ -5,6 +5,19 @@ Notable changes to the Guitar Class site. Newest first.
 For the full session-by-session history (and the reasoning behind each change),
 see `WORKFLOW.md` and the git commit log.
 
+## 2026-09-16 — Today's activities are grouped by module
+
+### Changed
+
+- **Your activities on Today are now in the order your teacher set**, and the
+  "#N" on a card counts down that same list — so the numbers read 1, 2, 3 with
+  no jumps. As your teacher sorts them into modules, each group gets a heading
+  with the module's own name — "Module 2 — Notes on the E & A Strings" — in
+  English and Spanish.
+- **Activities your teacher has put away no longer take up a number.** When
+  one is archived, the activities after it move up instead of leaving a gap
+  in the numbering. Anything you already finished stays marked complete.
+
 ## 2026-09-16 — "the cure" activities: shorter directions
 
 ### Changed

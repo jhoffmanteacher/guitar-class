@@ -310,6 +310,12 @@
     // so this heads the archive rather than replacing it.
     'ca.linkMissing':          { en: 'That link points to an activity that isn’t posted yet. Everything your class has done is below.',
                                  es: 'Ese enlace apunta a una actividad que todavía no está publicada. Abajo está todo lo que tu clase ya hizo.' },
+    /* The heading over each module's block of activities on Today
+       (renderClassActivities). {mod} is the module's own display name, taken
+       from MODULE_MANIFEST and never retyped here — same wording pattern as
+       review.doneNext. Cards the teacher hasn't placed in a module yet get
+       no heading at all rather than an invented one. */
+    'ca.moduleHead':           { en: 'Module {n} — {mod}', es: 'Módulo {n} — {mod}' },
     'ca.markComplete':         { en: 'Mark complete', es: 'Marcar como completado' },
     'ca.completed':            { en: 'Completed ✓ — tap to un-mark', es: 'Completado ✓ — toca para desmarcar' },
     // The group every finished card collapses into (renderClassActivities) —

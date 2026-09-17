@@ -442,6 +442,15 @@ function journeyIsVisible(a, cfg){
   // can never gate a Journey page. Mirrors retiredActivityIds in app.js.
   if(((cfg && cfg.archivedActivities) || {})[a.id] === true) return false;
   if(((cfg && cfg.deletedActivities) || {})[a.id] === true) return false;
+  /* Not placed on the console's activity board = not in the course, so it
+     cannot gate anything either. Mirrors the assigned check in caIsVisible()
+     (app.js), and it MATTERS here more than anywhere: un-assigning a card
+     deliberately keeps its release date, so without this a dated card pulled
+     back to Built would stop blocking the main site while still blanking all
+     six Journey pages — a lock with nothing left on Today to clear it.
+     Keyed off activityBoardSeeded, never off the board being empty, for the
+     reason activityBoardOn in app.js spells out. */
+  if(cfg && cfg.activityBoardSeeded === true && !((cfg.activityBoard || {})[a.id])) return false;
   if(((cfg && cfg.hiddenActivities) || {})[a.id] === true) return false;
   var d = ((cfg && cfg.activityDates) || {})[a.id];
   return d ? d <= journeyDayStr(new Date()) : false;
