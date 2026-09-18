@@ -1317,6 +1317,10 @@ body.t-wide .t-main{max-width:none}
 .snip-toggle{display:inline-flex;align-items:center;gap:6px;min-height:36px;padding:0 12px;font:inherit;font-size:0.8125rem;font-weight:600;color:var(--text2);background:var(--bg2);border:1px solid var(--border2);border-radius:16px;cursor:pointer}
 .snip-toggle:hover{background:var(--bg3)}
 .snip-toggle.on{background:var(--text);color:var(--bg);border-color:var(--text)}
+/* A Metronome button with the guitar in and no full+click export — see
+   snippetHasFullMetronome(). Dead on purpose, and it says why on hover. */
+.snip-toggle:disabled{opacity:0.45;cursor:not-allowed}
+.snip-toggle:disabled:hover{background:var(--bg2)}
 /* One dot per bar of the window, lit as the loop passes it. A loop with no
    visible position is the thing that makes a student decide the player is
    broken — same rule as the TAB's beat cursor: the moving thing is the thing

@@ -1055,6 +1055,9 @@ window.CLASS_ACTIVITIES = [
       {
         text: 'Put it together — the whole riff, straight through without stopping: 7 – 7 – 10 – 7 – 5 – 3 – 2.\nYou\'ve got it when: four times through without stopping, any speed.',
         text_es: 'Júntalo todo — el riff completo, seguido sin parar: 7 – 7 – 10 – 7 – 5 – 3 – 2.\nLo tienes cuando: cuatro veces seguidas sin detenerte, a cualquier velocidad.',
+        snippet: { track: 'seven-nation-army', fromBar: 1, bars: 4,
+                   label:    'The riff, with the band',
+                   label_es: 'El riff, con la banda' },
         tab: {
           caption: 'The whole riff · 7-7-10-7-5-3-2',
           caption_es: 'El riff completo · 7-7-10-7-5-3-2',
@@ -1070,6 +1073,9 @@ window.CLASS_ACTIVITIES = [
         },
       },
       {
+        snippet: { track: 'seven-nation-army', fromBar: 1, bars: 8,
+                   label:    'Four laps with the band',
+                   label_es: 'Cuatro vueltas con la banda' },
         text: 'Raise the tempo.<ul><li>Every clean pass: raise the BPM by 10 and go again</li><li>Playing it fast already? Add the feel — hold the first note of each pair longer, like the recording</li><li>Then open the Seven Nation Army Song Journey page and play it over the backing track</li></ul>You\'ve got it when: you\'ve raised the tempo at least three times without breaking down — then keep climbing.',
         text_es: 'Sube el tempo.<ul><li>Cada pasada limpia: sube el BPM 10 puntos y vuelve a intentarlo</li><li>¿Ya lo tocas rápido? Dale la sensación — sostén más la primera nota de cada pareja, como en la grabación</li><li>Después abre el Recorrido de la canción de Seven Nation Army y tócalo sobre la pista de acompañamiento</li></ul>Lo tienes cuando: subiste el tempo al menos tres veces sin perder el ritmo — y de ahí, sigue subiendo.',
       },

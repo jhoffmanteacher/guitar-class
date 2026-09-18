@@ -1344,12 +1344,39 @@ function buildTab(spec, opts){
    beat of bar 1, put it in `anchor`, flip `anchorVerified` to true. A wrong
    anchor puts every snippet on that song out by the SAME amount, so there is
    exactly one number to fix, not one per step. */
+/* THE GUITAR TOGGLE and the four OPTIONAL `full*` paths below.
+   Every shipped mp3 is a `rhythm-down` mix — the part the student is learning
+   is turned down so they supply it. That is deliberate and course-wide, and
+   it is also why a student cannot tell a right note from a wrong one: there
+   is nothing to check against. So a track may ALSO declare a full mix, and
+   the card gets a Guitar toggle that swaps between them mid-loop, on by
+   default: hear the record play it, then turn the guitar off and carry it
+   yourself. Same file-switching path as the Slow toggle.
+
+   The `full*` paths are OPTIONAL and independent per track. A track without
+   them renders no Guitar toggle and plays the rhythm-down mix exactly as
+   before — so a song whose full mix has not been exported yet is a card with
+   one fewer button, never a broken one. Declare `srcFull` and you must
+   declare `srcFullSlow` too (checks.mjs 1ak): a Guitar toggle that silently
+   dies the moment Slow is pressed is worse than no toggle.
+
+   The METRONOME pair (`srcFullMetronome`/`srcFullSlowMetronome`) is optional
+   on top of that, because a full mix has the record's own drums in it and the
+   click is mostly redundant there. Without them the Metronome toggle disables
+   itself while the guitar is on, rather than quietly dropping the guitar to
+   get its click — a button that undoes another button is the kind of thing
+   nobody ever debugs in a room of 30. */
 const SNIPPET_TRACKS = {
   'the-cure': {
     src:              'audio/olivia-rodrigo-the-cure-backing-Am-144bpm-440hz-rhythm-down.mp3',
     srcMetronome:     'audio/olivia-rodrigo-the-cure-backing-Am-144bpm-440hz-rhythm-down-metronome.mp3',
     srcSlow:          'audio/olivia-rodrigo-the-cure-backing-Am-120bpm-440hz-rhythm-down.mp3',
     srcSlowMetronome: 'audio/olivia-rodrigo-the-cure-backing-Am-120bpm-440hz-rhythm-down-metronome.mp3',
+    // ── Full mix: NOT EXPORTED YET. Uncomment once these two exist in audio/
+    //    and the Guitar toggle turns itself on. Names follow the backing-track
+    //    convention in CLAUDE.md, mix `full`.
+    // srcFull:     'audio/olivia-rodrigo-the-cure-backing-Am-144bpm-440hz-full.mp3',
+    // srcFullSlow: 'audio/olivia-rodrigo-the-cure-backing-Am-120bpm-440hz-full.mp3',
     trackBpm: 144, trackBpmSlow: 120,   // what the FILES are, for the slow-tier rescale
     feltBpm: 72,                        // what the ROOM counts — 144 felt in half
     beatsPerBar: 4,                     // felt beats per chord; one chord = one bar
@@ -1357,7 +1384,36 @@ const SNIPPET_TRACKS = {
     anchor: 0,                          // ← MEASURE ME, then flip anchorVerified
     anchorVerified: false,
   },
+  /* Seven Nation Army counts at its printed tempo — no halving, unlike "the
+     cure": 123 BPM is what the room counts and a bar is four of those beats.
+     The riff is two bars, so the windows below are whole numbers of laps.
+     The slow tier is the same master stretched (239.2 s at 123 against
+     294.2 s at 100, exactly 123/100), same as every other track here. */
+  'seven-nation-army': {
+    src:              'audio/the-white-stripes-seven-nation-army-backing-Em-123bpm-440hz-rhythm-down.mp3',
+    srcMetronome:     'audio/the-white-stripes-seven-nation-army-backing-Em-123bpm-440hz-rhythm-down-metronome.mp3',
+    srcSlow:          'audio/the-white-stripes-seven-nation-army-backing-Em-100bpm-440hz-rhythm-down.mp3',
+    srcSlowMetronome: 'audio/the-white-stripes-seven-nation-army-backing-Em-100bpm-440hz-rhythm-down-metronome.mp3',
+    // ── Full mix: NOT EXPORTED YET — and this is the song that needs it most.
+    //    The rhythm-down mix turns the RIFF down (the Journey page says so
+    //    outright), which is the whole of what ca-10 teaches, so without the
+    //    full mix a student has nothing to check their riff against.
+    // srcFull:     'audio/the-white-stripes-seven-nation-army-backing-Em-123bpm-440hz-full.mp3',
+    // srcFullSlow: 'audio/the-white-stripes-seven-nation-army-backing-Em-100bpm-440hz-full.mp3',
+    trackBpm: 123, trackBpmSlow: 100,
+    feltBpm: 123,                       // counted at record speed, not halved
+    beatsPerBar: 4,
+    durationSec: 239,
+    anchor: 0,                          // ← MEASURE ME, then flip anchorVerified
+    anchorVerified: false,
+  },
 };
+/* Does this track have a full mix at all? Both tiers or neither — the toggle
+   has to survive the Slow button. */
+function snippetHasFull(tr){ return !!(tr && tr.srcFull && tr.srcFullSlow); }
+/* …and a click to go with it, which decides whether Metronome stays usable
+   while the guitar is in. */
+function snippetHasFullMetronome(tr){ return !!(tr && tr.srcFullMetronome && tr.srcFullSlowMetronome); }
 /* Where a snippet's window falls in whichever tempo tier is playing.
    Everything downstream (the loop, the bar dots, the tier switch) reads the
    window from here so there is one copy of the bar arithmetic. */
@@ -1367,7 +1423,13 @@ function snippetWindow(tr, spec, slow){
   const start = (tr.anchor * scale) + (Math.max(1, spec.fromBar) - 1) * bar;
   return { start, end: start + Math.max(1, spec.bars) * bar, bar };
 }
-function snippetSrc(tr, slow, metro){
+function snippetSrc(tr, slow, metro, guitar){
+  // Guitar on is only ever honoured when the full mix is actually there; a
+  // missing export falls back to rhythm-down rather than a 404 on press.
+  if(guitar && snippetHasFull(tr)){
+    if(!metro || !snippetHasFullMetronome(tr)) return slow ? tr.srcFullSlow : tr.srcFull;
+    return slow ? tr.srcFullSlowMetronome : tr.srcFullMetronome;
+  }
   if(slow) return metro ? tr.srcSlowMetronome : tr.srcSlow;
   return metro ? tr.srcMetronome : tr.src;
 }
@@ -1392,14 +1454,28 @@ function buildSnippet(spec, opts){
     `<span class="snip-bar"><span class="snip-bar-n">${i + 1}</span></span>`).join('');
   const cal = (typeof IS_LOCALHOST !== 'undefined' && IS_LOCALHOST && window.__snipCal)
     ? `<div class="snip-cal">0.00 s</div>` : '';
-  return `<div class="snip" data-snip="${escAttr(data)}">`
+  /* The Guitar toggle exists only where the full mix does, and starts ON: the
+     point of it is that the student hears the part played correctly before
+     they are asked to supply it. data-guitar carries that initial state so
+     the engine and the button agree without the engine reading aria- state. */
+  const hasFull = snippetHasFull(tr);
+  const guitarBtn = hasFull
+    ? `<button type="button" class="snip-toggle snip-guitar on" aria-pressed="true" onclick="snipSetTier(this,'guitar')" title="${escAttr(t('ca.snipGuitarTitle'))}">&#x1F3B8; ${escHtml(t('ca.snipGuitar'))}</button>`
+    : '';
+  // With the guitar in and no full+click export, the click has nothing to
+  // play against — disable it rather than let it yank the guitar back out.
+  const metroDead = hasFull && !snippetHasFullMetronome(tr);
+  const metroDisabled = metroDead ? ' disabled' : '';
+  const metroTitle = metroDead ? ` title="${escAttr(t('ca.snipMetroOffTitle'))}"` : '';
+  return `<div class="snip" data-snip="${escAttr(data)}"${hasFull ? ' data-guitar="1"' : ''}>`
     + `<div class="snip-head"><span class="snip-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" style="width:1em;height:1em;vertical-align:-0.15em"><path d="M3 12h2l2-6 3 14 3-11 2 5h6"/></svg></span>`
     + `<span class="snip-title">${escHtml(title)}</span><span class="snip-kind">${escHtml(t('ca.snipKind'))}</span></div>`
     + `<div class="snip-body">`
     + `<div class="snip-controls">`
     + `<button type="button" class="snip-play" onclick="snipToggle(this)">${snipPlayBtnHtml(false)}</button>`
     + `<button type="button" class="snip-toggle snip-slow" aria-pressed="false" onclick="snipSetTier(this,'slow')">&#x1F422; ${escHtml(t('journey.slow', { bpm: slowFelt }))}</button>`
-    + `<button type="button" class="snip-toggle snip-metro" aria-pressed="false" onclick="snipSetTier(this,'metro')">&#x1F3B5; ${escHtml(t('tools.metronome'))}</button>`
+    + `<button type="button" class="snip-toggle snip-metro"${metroDisabled} aria-pressed="false" onclick="snipSetTier(this,'metro')"${metroTitle}>&#x1F3B5; ${escHtml(t('tools.metronome'))}</button>`
+    + guitarBtn
     + `</div>`
     + `<div class="snip-bars" aria-hidden="true">${dots}</div>`
     + `<div class="snip-note">${escHtml(t('ca.snipLoopNote', { n: bars }))}</div>`
@@ -1440,11 +1516,12 @@ function snipToggle(btn){
   const tr = spec && SNIPPET_TRACKS[spec.track];
   if(!tr) return;
   const slow = card.dataset.slow === '1', metro = card.dataset.metro === '1';
+  const guitar = card.dataset.guitar === '1';
   const win = snippetWindow(tr, spec, slow);
   const audio = new Audio();
   audio.preload = 'auto';
   audio.loop = false;                  // the window is looped by hand, below
-  audio.src = snippetSrc(tr, slow, metro);
+  audio.src = snippetSrc(tr, slow, metro, guitar);
   snipState = { card, audio, spec, tr, win, raf: 0, cal: card.querySelector('.snip-cal') };
   btn.innerHTML = snipPlayBtnHtml(true);
   btn.classList.add('playing');
@@ -1488,15 +1565,18 @@ function snipSetTier(btn, which){
   const on = btn.getAttribute('aria-pressed') !== 'true';
   btn.setAttribute('aria-pressed', on ? 'true' : 'false');
   btn.classList.toggle('on', on);
-  card.dataset[which === 'slow' ? 'slow' : 'metro'] = on ? '1' : '';
+  // `which` is the dataset key outright — a two-way ternary silently filed
+  // 'guitar' under 'metro' when the third toggle arrived.
+  card.dataset[which] = on ? '1' : '';
   if(!snipState || snipState.card !== card) return;
   const { audio, spec, tr } = snipState;
   const slow = card.dataset.slow === '1', metro = card.dataset.metro === '1';
+  const guitar = card.dataset.guitar === '1';
   const barsIn = (audio.currentTime - snipState.win.start) / snipState.win.bar;
   const win = snippetWindow(tr, spec, slow);
   snipState.win = win;
   const at = win.start + (isFinite(barsIn) && barsIn > 0 ? barsIn : 0) * win.bar;
-  const src = snippetSrc(tr, slow, metro);
+  const src = snippetSrc(tr, slow, metro, guitar);
   if(audio.getAttribute('src') === src || audio.src.endsWith(src)){
     try { audio.currentTime = at; } catch(e) {}
     return;

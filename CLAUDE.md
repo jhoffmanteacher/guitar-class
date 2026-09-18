@@ -417,6 +417,26 @@ and `playSequence()` calls `snipStop()`. Two unsynced sources in one step —
 the tab's synthesised notes over the record — is the one way this gets
 genuinely confusing, so it's closed off at both ends.
 
+**The Guitar toggle** (2026-09-18, Jonathan's ask: students should be able to
+hear the part and check themselves). A track may declare `srcFull`/
+`srcFullSlow` beside its rhythm-down paths; the card then grows a third
+toggle, **on by default** — the record plays the part, turn it off and carry
+it yourself. Optional per track and both tiers or neither, so a song whose
+full mix isn't exported is a card with one fewer button, never a broken one
+(checks.mjs 1ak fails a half-declared pair, and a declared path whose file
+isn't there). The metronome pair on top (`srcFullMetronome`/
+`srcFullSlowMetronome`) is optional again, because a full mix carries the
+record's own drums; without it the Metronome toggle **disables itself while
+the guitar is on** rather than quietly dropping the guitar to get its click —
+a button that undoes another button is what nobody debugs in a room of 30.
+
+**No full mix has been exported yet**, so as of 2026-09-18 no Guitar toggle
+renders anywhere. 1ak warns the count on every push. What it needs is two
+files per song, at both tempos, mix `full` — e.g.
+`the-white-stripes-seven-nation-army-backing-Em-123bpm-440hz-full.mp3` and
+its `-100bpm-` twin — then uncommenting the two lines already sitting in that
+track's `SNIPPET_TRACKS` entry.
+
 **Quiz answers are shuffled at render time** by `mcOrder(choices, seed)` —
 deterministic, catch-alls pinned via `MC_PINNED`, fewer than 3 choices left
 alone. The two MC paths store differently: the graded step persists the choice
@@ -831,9 +851,23 @@ walk," since there's no Playwright harness to run one for real.
 ## Backing tracks
 
 `<artist-slug>-<song-slug>-backing-<key>-<bpm>bpm-<tuning>hz-<mix>.mp3`, lowercase
-kebab-case; the artist stays out of the app's display metadata. Mixes in use:
-`rhythm-down`, `rhythm-down-metronome`, `no-gtr`, `full`, `drums-only`,
-`slow-<bpm>`.
+kebab-case; the artist stays out of the app's display metadata.
+
+**What actually ships is TWO mixes, not six** (corrected 2026-09-18 — the old
+list here named `no-gtr`, `full`, `drums-only` and `slow-<bpm>` as "in use"
+and not one of them has ever existed in `audio/`). The 20 files on disk are
+`rhythm-down` and `rhythm-down-metronome`, ten of each: six songs, some at
+two tempos. Every slow tier is the same master time-stretched, so its grid is
+the fast one's scaled by the tempo ratio — checked on two songs to three
+decimal places. The other four names stay reserved for when something is
+really exported; don't cite one as available without listing `audio/` first.
+
+**`rhythm-down` means the part the student is learning is turned down**, so
+they supply it — deliberate and course-wide. The cost is that a student has
+nothing to check themselves against, and on Seven Nation Army that is total:
+the riff IS the turned-down part, so ca-10's play-along is drums and bass
+with a riff-shaped hole. A `full` mix per song is what fixes that; see the
+Guitar toggle under the snippet section.
 
 **Every track ships at A=440** — `tuner.js` is hardcoded to A4=440Hz, so a track
 mastered at any other reference will sound out of tune against it. Export at 440

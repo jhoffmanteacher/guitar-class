@@ -5,6 +5,15 @@ Notable changes to the Guitar Class site. Newest first.
 For the full session-by-session history (and the reasoning behind each change),
 see `WORKFLOW.md` and the git commit log.
 
+## 2026-09-18 — Seven Nation Army gets the band too
+
+### Added
+
+- **The Seven Nation Army riff activity now has the backing track in it**, the
+  same way "the cure" does — one loop on the whole-riff step and a longer,
+  four-lap one on the step where you raise the tempo. Slow is the 100 BPM
+  stepping stone; leave it off and you are at the record's own 123.
+
 ## 2026-09-18 — Play "the cure" with the band, a few bars at a time
 
 ### Added

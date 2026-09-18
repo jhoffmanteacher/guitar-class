@@ -3811,6 +3811,22 @@ function checkBackingSnippets() {
         flag(`SNIPPET_TRACKS['${name}'].${f}: "${tr[f]}" is not a positive number`);
       }
     }
+    /* The OPTIONAL full mix (the Guitar toggle). Both tempo tiers or neither:
+       a toggle that dies the moment Slow is pressed is worse than no toggle.
+       Same for the metronome pair on top of it. Any path declared has to
+       point at a file that is actually there — a typo'd full-mix name is a
+       Play button that 404s, and only in the one mode a student reaches by
+       pressing the button that is on by default. */
+    const FULL_PAIRS = [['srcFull', 'srcFullSlow'], ['srcFullMetronome', 'srcFullSlowMetronome']];
+    for (const [fast, slow] of FULL_PAIRS) {
+      if (!!tr[fast] !== !!tr[slow])
+        flag(`SNIPPET_TRACKS['${name}']: has ${tr[fast] ? fast : slow} but not ${tr[fast] ? slow : fast} — a full mix needs both tempo tiers or neither, or the toggle breaks on Slow`);
+    }
+    if (tr.srcFullMetronome && !tr.srcFull)
+      flag(`SNIPPET_TRACKS['${name}']: declares a full+metronome mix but no plain full mix — nothing can reach it`);
+    for (const f of FULL_PAIRS.flat()) {
+      if (tr[f] && !existsSync(join(ROOT, tr[f]))) flag(`SNIPPET_TRACKS['${name}'].${f}: ${tr[f]} does not exist`);
+    }
     if (!(Number(tr.anchor) >= 0)) flag(`SNIPPET_TRACKS['${name}'].anchor: "${tr.anchor}" is not a number ≥ 0`);
     // The slow tier is DERIVED from these two, never measured separately —
     // a slow file that is not a straight time-stretch would put every
@@ -3860,10 +3876,15 @@ function checkBackingSnippets() {
   }
 
   if (unverified) {
-    warn(`${unverified} snippet track${unverified > 1 ? 's have' : ' has'} anchorVerified:false — its first downbeat has not been measured, so every snippet on that song starts in the wrong place. Measure it with ?snipcal=1 on localhost (see SNIPPET_TRACKS in app.js).`);
+    warn(`${unverified} snippet track${unverified > 1 ? 's have' : ' has'} anchorVerified:false — ${unverified > 1 ? 'their first downbeats have' : 'its first downbeat has'} not been measured, so every snippet on ${unverified > 1 ? 'those songs starts' : 'that song starts'} in the wrong place. Measure ${unverified > 1 ? 'them' : 'it'} with ?snipcal=1 on localhost (see SNIPPET_TRACKS in app.js).`);
     warnings++;
   }
-  if (bad === 0) ok(`${snippets} backing-track snippet${snippets === 1 ? '' : 's'} across ${trackNames.length} track${trackNames.length === 1 ? '' : 's'} — every window lands inside its file, both renderers build them`);
+  const withFull = Object.values(TRACKS).filter(tr => tr.srcFull && tr.srcFullSlow).length;
+  if (withFull < trackNames.length) {
+    warn(`${trackNames.length - withFull} of ${trackNames.length} snippet track${trackNames.length === 1 ? '' : 's'} have no full mix exported, so their cards show no Guitar toggle — students hear the rhythm-down mix only and cannot check the part they are learning against the record.`);
+    warnings++;
+  }
+  if (bad === 0) ok(`${snippets} backing-track snippet${snippets === 1 ? '' : 's'} across ${trackNames.length} track${trackNames.length === 1 ? '' : 's'} (${withFull} with a full mix) — every window lands inside its file, both renderers build them`);
 }
 
 (async function main() {

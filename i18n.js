@@ -359,6 +359,15 @@
     'ca.snipDefaultTitle':     { en: 'Play with the band', es: 'Toca con la banda' },
     'ca.snipLoopNote':         { en: '{n} bars of the record, looping — the same bars as the tab. Stop it when you want.',
                                  es: '{n} compases del disco, en bucle — los mismos compases que la tablatura. Detenlo cuando quieras.' },
+    // The Guitar toggle only appears where a full mix has been exported (see
+    // SNIPPET_TRACKS in app.js). On = the record plays the part the student
+    // is learning, so they can hear whether they've got it; off = the
+    // rhythm-down mix and they carry it.
+    'ca.snipGuitar':           { en: 'Guitar', es: 'Guitarra' },
+    'ca.snipGuitarTitle':      { en: 'The record plays the part. Turn it off to carry it yourself.',
+                                 es: 'El disco toca la parte. Apágala para llevarla tú.' },
+    'ca.snipMetroOffTitle':    { en: 'Not available with the guitar on — the record has its own drums.',
+                                 es: 'No disponible con la guitarra encendida — el disco trae su propia batería.' },
 
     // ── Exit checks (kind:'check' class activities — see class-activities.js) ──
     // "Boleto de salida" is the everyday classroom term; "comprobación de
