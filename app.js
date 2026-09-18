@@ -433,12 +433,14 @@ const IS_TEACHER_MODE = new URLSearchParams(window.location.search).has('teacher
 // Dev bypass is for local UI testing only. Only show/allow it when the site is
 // running on localhost — never on the live (GitHub Pages) site.
 const IS_LOCALHOST = ['localhost','127.0.0.1','[::1]'].includes(location.hostname);
-/* ?snipcal=1 turns on the backing-track snippet's live timecode, which is
+/* ?snipcal=1 turns on the backing-track snippet's calibration panel, which is
    how a track's `anchor` (its first downbeat) gets measured — see
-   SNIPPET_TRACKS. Localhost only, same rule as the dev bypass and
-   __forceGate: it is an authoring instrument, not something a student
-   should ever be able to switch on. */
-if(IS_LOCALHOST && new URLSearchParams(window.location.search).get('snipcal') === '1') window.__snipCal = true;
+   SNIPPET_TRACKS. Deliberately NOT localhost-only, unlike the dev bypass and
+   __forceGate: those hand out access, this shows a number. Gating it to
+   localhost meant the one measurement the feature still needs could not be
+   taken on the deployed site, which is where Jonathan was actually standing
+   (2026-09-18). A student cannot reach it without typing the query param. */
+if(new URLSearchParams(window.location.search).get('snipcal') === '1') window.__snipCal = true;
 function devBypass(){
   if(!IS_LOCALHOST){ console.warn('Dev bypass is disabled outside localhost.'); return; }
   currentUser = {uid:'dev-user',displayName:'Dev User',email:'dev@test.local',photoURL:null};
@@ -1466,8 +1468,10 @@ function buildSnippet(spec, opts){
   // player's beat cursor follows.
   const dots = Array.from({ length: bars }, (_, i) =>
     `<span class="snip-bar"><span class="snip-bar-n">${i + 1}</span></span>`).join('');
-  const cal = (typeof IS_LOCALHOST !== 'undefined' && IS_LOCALHOST && window.__snipCal)
-    ? `<div class="snip-cal">0.00 s</div>` : '';
+  const cal = window.__snipCal
+    ? `<div class="snip-cal"><span class="snip-cal-time">0.00 s</span>`
+      + `<button type="button" class="snip-cal-find" onclick="snipFindAnchor(this)">Find the first click</button>`
+      + `<span class="snip-cal-out"></span></div>` : '';
   /* The Guitar toggle exists only where the full mix does, and starts ON: the
      point of it is that the student hears the part played correctly before
      they are asked to supply it. data-guitar carries that initial state so
@@ -1504,6 +1508,72 @@ function buildSnippet(spec, opts){
     + `<div class="snip-note">${escHtml(t('ca.snipLoopNote', { n: bars }))}</div>`
     + cal
     + `</div></div>`;
+}
+/* ── ?snipcal=1 : measuring a track's `anchor` ──────────────────────────
+   The anchor is the first downbeat of the file in seconds, and it is the one
+   number in SNIPPET_TRACKS that cannot be derived (see the block comment
+   there). Reading it off a moving timecode by ear costs whatever your
+   reaction time is — a fifth of a second, which is a fifth of a beat at this
+   tempo — so this finds it instead.
+
+   It decodes the track's rhythm-down-METRONOME file, where every beat has a
+   click on it, and reports the first one. The click is the loudest thing in
+   the first seconds of that mix by a wide margin, so a peak threshold
+   relative to the file's own maximum is enough; no onset-detection
+   cleverness, and nothing to tune per song. It prints the gaps between the
+   first few clicks too, which is the sanity check: they should be even, and
+   they should match 60/BPM for whatever the file's printed tempo is.
+
+   Authoring instrument, reachable only by typing the query param, so the
+   strings here are deliberately English-only — a student never sees it.
+   Deliberately NOT localhost-gated: it hands out a number, not access, and
+   gating it meant it was unreachable from the deployed site. */
+function snipFindAnchor(btn){
+  const card = btn.closest('.snip');
+  const out = card && card.querySelector('.snip-cal-out');
+  if(!card || !out) return;
+  let spec; try { spec = JSON.parse(card.dataset.snip); } catch(e) { return; }
+  const tr = spec && SNIPPET_TRACKS[spec.track];
+  if(!tr || !tr.srcMetronome){ out.textContent = ' — no metronome file for this track'; return; }
+  btn.disabled = true;
+  out.textContent = ' — decoding…';
+  fetch(tr.srcMetronome)
+    .then(r => { if(!r.ok) throw new Error('HTTP ' + r.status); return r.arrayBuffer(); })
+    .then(buf => getAudioCtx().decodeAudioData(buf))
+    .then(audioBuf => {
+      const data = audioBuf.getChannelData(0);
+      const rate = audioBuf.sampleRate;
+      const span = Math.min(data.length, Math.floor(rate * 40));   // first 40 s is plenty
+      const hop = Math.floor(rate * 0.005);                        // 5 ms resolution
+      // Peak per hop, and the loudest hop in the span — the threshold is
+      // relative to the file's own level so it needs no per-song tuning.
+      const peaks = [];
+      for(let i = 0; i + hop <= span; i += hop){
+        let p = 0;
+        for(let j = i; j < i + hop; j++){ const v = Math.abs(data[j]); if(v > p) p = v; }
+        peaks.push(p);
+      }
+      const max = peaks.reduce((m, v) => Math.max(m, v), 0);
+      if(!max){ out.textContent = ' — that file decodes to silence'; return; }
+      const thr = max * 0.4;
+      const hits = [];
+      for(let k = 0; k < peaks.length && hits.length < 6; k++){
+        if(peaks[k] < thr) continue;
+        // Refine to the rising edge inside the hop, then skip 100 ms so one
+        // click cannot register as several.
+        let i = k * hop;
+        while(i < (k + 1) * hop && Math.abs(data[i]) < thr * 0.5) i++;
+        hits.push(i / rate);
+        k += Math.ceil(0.1 / 0.005);
+      }
+      if(!hits.length){ out.textContent = ' — found no click above threshold'; return; }
+      const gaps = hits.slice(1).map((t, i) => (t - hits[i]).toFixed(3)).join(', ');
+      out.innerHTML = ` &rarr; <b>anchor: ${hits[0].toFixed(3)}</b>`
+        + `<span class="snip-cal-sub">gaps after it: ${gaps || '(only one click found)'} s`
+        + ` &middot; expect ${(60 / tr.trackBpm).toFixed(3)} s at ${tr.trackBpm} BPM</span>`;
+    })
+    .catch(e => { out.textContent = ' — could not read that file (' + e.message + ')'; })
+    .finally(() => { btn.disabled = false; });
 }
 /* The Guitar button's label names WHO PLAYS THE PART rather than claiming an
    on/off, because "off" is the rhythm-down mix and that only turns the part
@@ -1584,7 +1654,7 @@ function snipTick(){
   }
   const bar = Math.max(0, Math.min(spec.bars - 1, Math.floor((now - win.start) / win.bar)));
   card.querySelectorAll('.snip-bar').forEach((d, i) => d.classList.toggle('bar-now', i === bar));
-  if(cal) cal.textContent = now.toFixed(2) + ' s';
+  if(cal){ const tEl = cal.querySelector('.snip-cal-time'); if(tEl) tEl.textContent = now.toFixed(2) + ' s'; }
   snipState.raf = requestAnimationFrame(snipTick);
 }
 /* Slow and Metronome are independent, exactly as on the Journey page, and

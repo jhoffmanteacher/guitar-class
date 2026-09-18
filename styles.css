@@ -1331,7 +1331,12 @@ body.t-wide .t-main{max-width:none}
 .snip-note{font-size:0.8125rem;color:var(--text2);font-weight:500}
 /* ?snipcal=1, localhost only — the live timecode a track's `anchor` is
    measured against (SNIPPET_TRACKS in app.js). Never renders for a student. */
-.snip-cal{margin-top:6px;font-size:0.9375rem;font-weight:700;color:var(--ca-accent);font-variant-numeric:tabular-nums}
+.snip-cal{margin-top:6px;font-size:0.9375rem;font-weight:700;color:var(--ca-accent);font-variant-numeric:tabular-nums;display:flex;flex-wrap:wrap;align-items:center;gap:8px}
+.snip-cal-find{font:inherit;font-size:0.8125rem;padding:3px 10px;border:1px solid var(--ca-accent);border-radius:12px;background:transparent;color:var(--ca-accent);cursor:pointer}
+.snip-cal-find:hover{background:var(--ca-accent-bg)}
+.snip-cal-find:disabled{opacity:0.5;cursor:progress}
+.snip-cal-out{font-weight:600}
+.snip-cal-sub{display:block;font-size:0.75rem;font-weight:500;color:var(--text2)}
 .tab-note-btn{font-family:inherit;font-size:1rem;font-weight:700;padding:4px 6px;margin:14px 0 0;background:transparent;border:1px solid transparent;border-radius:6px;color:var(--blue-text);cursor:pointer;display:inline-flex;align-items:center;justify-content:center;gap:2px;white-space:nowrap;line-height:1}
 .tab-note-btn:hover,.tab-note-btn:focus-visible{background:var(--blue-bg);border-color:var(--blue-text)}
 .tab-note-btn:active{transform:scale(0.94)}

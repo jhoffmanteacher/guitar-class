@@ -400,9 +400,19 @@ and **one measured number per song — `anchor`, the track's first downbeat**.
 Everything else is derived: the slow tier is the same master time-stretched
 (297.1 s at 144 against 356.5 s at 120, exactly 144/120), so its grid is the
 fast file's scaled by `trackBpm/trackBpmSlow`. **Never measure a second
-anchor.** Measure the one with `?snipcal=1` on localhost, which grows a live
-timecode on the card, then flip `anchorVerified` — checks.mjs 1ak warns on
-every push until it's true. A wrong anchor puts every snippet on that song
+anchor.** Add `?snipcal=1` to the URL and the card grows a calibration panel:
+a live timecode plus a **Find the first click** button that decodes the
+track's rhythm-down-metronome file and reports the first click to the
+millisecond, with the gaps after it to sanity-check against 60/BPM. Paste
+that number into `anchor` and flip `anchorVerified` — checks.mjs 1ak warns on
+every push until it's true.
+
+**The panel is NOT localhost-gated**, unlike the dev bypass and
+`__forceGate`. Those hand out access; this shows a number, and a student
+cannot reach it without typing the query param. It was localhost-only for
+half a day, which meant the one measurement this feature still needed could
+not be taken on the deployed site — which is where Jonathan was standing
+(2026-09-18). A wrong anchor puts every snippet on that song
 out by the same amount, so there's exactly one number to fix.
 
 One builder, `buildSnippet()`, called by `caStepHtml()` (app.js) and
