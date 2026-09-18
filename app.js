@@ -8803,6 +8803,10 @@ function caMarkStepDone(btn, id, si){
   const status = li.querySelector('.ca-step-status');
   if(status) status.innerHTML = caStepStatusHtml(si + 1, nowDone);
   if(!nowDone) return;   // unmarking just restores the number/label above
+  /* Marking a step done collapses it, so anything still playing would be
+     coming out of a step nobody can see — and this path re-renders nothing,
+     so neither the snippet nor the tab would stop on its own. */
+  stopAllDemoAudio();
   li.classList.add('ca-step-collapsed');
   const head = li.querySelector('.ca-step-head');
   if(head) head.setAttribute('aria-expanded', 'false');
@@ -8823,6 +8827,12 @@ function caToggleComplete(id){
   // un-mark a turned-in check and desync it from its saved score.
   const a = (window.CLASS_ACTIVITIES || []).find(x => x.id === id);
   if(a && a.kind === 'check') return;
+  /* Silence whatever the card was playing. renderClassActivities() already
+     calls snipStop(), so the backing-track loop was covered — but the TAB
+     player is scheduled setTimeouts, not a DOM object, so rebuilding the card
+     left its notes sounding out of a card that no longer exists. One call
+     covers both, plus chord strums, the ear drill and the metronome. */
+  stopAllDemoAudio();
   const isDone = classActivities[id] === true;
   onClassActivityChange(id, !isDone);
   caOpenId = id;   // keep the card open through the re-render

@@ -5,6 +5,15 @@ Notable changes to the Guitar Class site. Newest first.
 For the full session-by-session history (and the reasoning behind each change),
 see `WORKFLOW.md` and the git commit log.
 
+## 2026-09-18 — Marking something done stops the sound
+
+### Fixed
+
+- **Marking an activity complete, or a step done, now stops whatever was
+  playing.** The backing-track loop already stopped when you completed a
+  card, but a tab you had left playing kept going — and marking a single
+  step done stopped neither, even though the step collapses out of sight.
+
 ## 2026-09-18 — "the cure" verse and chorus are eight bars
 
 ### Fixed
