@@ -426,9 +426,19 @@ full mix isn't exported is a card with one fewer button, never a broken one
 (checks.mjs 1ak fails a half-declared pair, and a declared path whose file
 isn't there). The metronome pair on top (`srcFullMetronome`/
 `srcFullSlowMetronome`) is optional again, because a full mix carries the
-record's own drums; without it the Metronome toggle **disables itself while
-the guitar is on** rather than quietly dropping the guitar to get its click —
-a button that undoes another button is what nobody debugs in a room of 30.
+record's own drums. Without it there is no file with both the guitar and a
+click, so **Metronome and Guitar are mutually exclusive — pressing one
+visibly releases the other**, both directions, in `snipSetTier()`.
+
+The first cut DISABLED the Metronome button in that case instead, reasoning
+that a button undoing another button is what nobody debugs in a room of 30.
+That was wrong twice over and shipped: Guitar starts ON, so the moment both
+songs had a full mix the click was dead on every card by default (found in
+the room, 2026-09-18, and it also blocked the `?snipcal=1` anchor
+measurement, which needs the click). And a greyed-out control reads as
+broken, not as a choice. The original objection was really about doing it
+SILENTLY — releasing the other toggle where the student watches it pop out
+is just how a pair of mutually exclusive controls behaves.
 
 **Both snippet songs have their full mix as of 2026-09-18** — Seven Nation
 Army and "the cure" — so the Guitar toggle renders on all 12 snippets. A new

@@ -1466,11 +1466,20 @@ function buildSnippet(spec, opts){
   const guitarBtn = hasFull
     ? `<button type="button" class="snip-toggle snip-guitar on" aria-pressed="true" onclick="snipSetTier(this,'guitar')" title="${escAttr(t('ca.snipGuitarTitle'))}">&#x1F3B8; ${escHtml(t('ca.snipGuitar'))}</button>`
     : '';
-  // With the guitar in and no full+click export, the click has nothing to
-  // play against — disable it rather than let it yank the guitar back out.
-  const metroDead = hasFull && !snippetHasFullMetronome(tr);
-  const metroDisabled = metroDead ? ' disabled' : '';
-  const metroTitle = metroDead ? ` title="${escAttr(t('ca.snipMetroOffTitle'))}"` : '';
+  /* With the guitar in and no full+click export, the click and the guitar
+     cannot both sound — there is no file with both on it. The first cut
+     DISABLED the Metronome button for that case, which was wrong twice over:
+     the Guitar toggle starts on, so once both songs had a full mix the click
+     was dead on every card by default (found in the room, 2026-09-18), and a
+     greyed-out button reads as broken rather than as a choice. They are
+     mutually exclusive instead — pressing one visibly releases the other, in
+     both directions, handled in snipSetTier(). The old objection to "a button
+     that undoes another button" was about doing it SILENTLY; doing it where
+     the student can watch the other button pop out is just how a pair of
+     mutually exclusive controls behaves. */
+  const metroExclusive = hasFull && !snippetHasFullMetronome(tr);
+  const metroDisabled = '';
+  const metroTitle = metroExclusive ? ` title="${escAttr(t('ca.snipMetroOffTitle'))}"` : '';
   return `<div class="snip" data-snip="${escAttr(data)}"${hasFull ? ' data-guitar="1"' : ''}>`
     + `<div class="snip-head"><span class="snip-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" style="width:1em;height:1em;vertical-align:-0.15em"><path d="M3 12h2l2-6 3 14 3-11 2 5h6"/></svg></span>`
     + `<span class="snip-title">${escHtml(title)}</span><span class="snip-kind">${escHtml(t('ca.snipKind'))}</span></div>`
@@ -1572,6 +1581,23 @@ function snipSetTier(btn, which){
   // `which` is the dataset key outright — a two-way ternary silently filed
   // 'guitar' under 'metro' when the third toggle arrived.
   card.dataset[which] = on ? '1' : '';
+  /* Metronome and Guitar are mutually exclusive unless the track ships a
+     full mix WITH a click on it — there is simply no file that has both.
+     Release the other one visibly rather than leaving a button lit that
+     isn't doing anything. */
+  if(on && (which === 'metro' || which === 'guitar')){
+    let spec; try { spec = JSON.parse(card.dataset.snip); } catch(e) { spec = null; }
+    const track = spec && SNIPPET_TRACKS[spec.track];
+    if(track && snippetHasFull(track) && !snippetHasFullMetronome(track)){
+      const otherKey = which === 'metro' ? 'guitar' : 'metro';
+      const otherBtn = card.querySelector(otherKey === 'metro' ? '.snip-metro' : '.snip-guitar');
+      if(otherBtn && card.dataset[otherKey] === '1'){
+        card.dataset[otherKey] = '';
+        otherBtn.setAttribute('aria-pressed', 'false');
+        otherBtn.classList.remove('on');
+      }
+    }
+  }
   if(!snipState || snipState.card !== card) return;
   const { audio, spec, tr } = snipState;
   const slow = card.dataset.slow === '1', metro = card.dataset.metro === '1';

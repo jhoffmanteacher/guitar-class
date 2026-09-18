@@ -366,8 +366,8 @@
     'ca.snipGuitar':           { en: 'Guitar', es: 'Guitarra' },
     'ca.snipGuitarTitle':      { en: 'The record plays the part. Turn it off to carry it yourself.',
                                  es: 'El disco toca la parte. Apágala para llevarla tú.' },
-    'ca.snipMetroOffTitle':    { en: 'Not available with the guitar on — the record has its own drums.',
-                                 es: 'No disponible con la guitarra encendida — el disco trae su propia batería.' },
+    'ca.snipMetroOffTitle':    { en: 'Turns the guitar off — this track has no full mix with a click on it.',
+                                 es: 'Apaga la guitarra — esta pista no tiene mezcla completa con clic.' },
 
     // ── Exit checks (kind:'check' class activities — see class-activities.js) ──
     // "Boleto de salida" is the everyday classroom term; "comprobación de
