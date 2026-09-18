@@ -904,13 +904,14 @@ function cssRGB(c) {
   }
   return null;   // transparent, currentColor, gradients, named colours
 }
+/* WCAG relative luminance and contrast ratio, shared by 1s and 1aj. */
+function lum(c) {
+  const [r, g, b] = c.map(v => { v /= 255; return v <= 0.03928 ? v / 12.92 : Math.pow((v + 0.055) / 1.055, 2.4); });
+  return 0.2126 * r + 0.7152 * g + 0.0722 * b;
+}
+function ratio(a, b) { const [hi, lo] = [lum(a), lum(b)].sort((p, q) => q - p); return (hi + 0.05) / (lo + 0.05); }
 function checkContrast() {
   head('1s. Text contrast in both palettes');
-  const lum = c => {
-    const [r, g, b] = c.map(v => { v /= 255; return v <= 0.03928 ? v / 12.92 : Math.pow((v + 0.055) / 1.055, 2.4); });
-    return 0.2126 * r + 0.7152 * g + 0.0722 * b;
-  };
-  const ratio = (a, b) => { const [hi, lo] = [lum(a), lum(b)].sort((p, q) => q - p); return (hi + 0.05) / (lo + 0.05); };
 
   let bad = 0, pairs = 0, files = 0;
   const flag = m => { err(m); problems++; bad++; };
@@ -3636,6 +3637,85 @@ function checkConfigWriteGuard() {
   if (bad === 0) ok(`${CONFIG_WRITERS} config/class writers, all behind teacherWriteConfig() and reporting through teacherConfigSaveFailed()`);
 }
 
+/* ═════════════════════════════════════════════════════════════════
+   1aj. THE ACTIVITY BOARD'S MODULE COLOURS — each module section on the
+   teacher's Class activities board paints its heading a solid hue,
+   hsl(--sec-h, --sec-s, --sec-wash-l), with the lightness set per palette
+   on .t-board-section. Two kinds of text sit on that band: the module name
+   (--text) and, in the corner, the card count (--text3, the tighter of the
+   two).
+
+   1s cannot judge any of it. Its palette is :root, and these are
+   element-scoped custom properties, so `background-color:hsl(var(--sec-h),
+   …)` resolves to nothing and the pair is skipped — which is exactly the
+   shape of thing that drifts: "make the tint a bit stronger" moves one
+   number and quietly takes the count below 4.5:1 in a palette nobody is
+   looking at. So this check rebuilds all 13 washes from the stylesheet and
+   scores them itself.
+
+   The count is pinned for the same reason 1ad pins its title counts: a
+   module losing its hue would otherwise just read as one fewer thing
+   checked. A fourteenth module means typing 14 here, on purpose.
+   ═════════════════════════════════════════════════════════════════ */
+const BOARD_MODULE_HUES = 13;   // .t-board-section[data-module="1".."13"]
+function checkBoardModuleColours() {
+  head('1aj. Activity-board module colours');
+  let bad = 0;
+  const flag = m => { err(m); problems++; bad++; };
+  let css;
+  try { css = readFileSync(join(ROOT, 'styles.css'), 'utf8'); }
+  catch { flag('styles.css unreadable — 1aj cannot check this'); return; }
+  const map = cssRuleMap(css);
+
+  const rootByMedia = map.get(':root');
+  const secByMedia = map.get('.t-board-section');
+  if (!rootByMedia || !secByMedia) { flag('styles.css: no :root or no .t-board-section rule — 1aj cannot check this'); return; }
+  const darkRootKey = [...rootByMedia.keys()].find(isDarkMedia);
+  const darkSecKey = [...secByMedia.keys()].find(isDarkMedia);
+  if (!darkRootKey) { flag('styles.css: no dark :root block — 1aj would silently check only the light palette'); return; }
+  if (!darkSecKey) { flag('styles.css: .t-board-section has no dark override — the wash lightness must flip with the palette, or one of the two is wrong'); return; }
+
+  const base = secByMedia.get('') || new Map();
+  const dark = secByMedia.get(darkSecKey) || new Map();
+  const washL = { light: base.get('--sec-wash-l'), dark: dark.get('--sec-wash-l') || base.get('--sec-wash-l') };
+  if (!washL.light || !washL.dark) { flag('styles.css: .t-board-section sets no --sec-wash-l — the heading wash has no lightness to check'); return; }
+
+  const pal = {
+    light: Object.fromEntries(rootByMedia.get('') || []),
+    dark: { ...Object.fromEntries(rootByMedia.get('') || []), ...Object.fromEntries(rootByMedia.get(darkRootKey)) },
+  };
+  // Every module's own hue+saturation, falling back to .t-board-section's
+  // defaults — which is what Unsorted renders with, so a missing one is a
+  // real value here, not a hole.
+  const mods = [];
+  for (const [sel, byMedia] of map) {
+    const m = /^\.t-board-section\[data-module="(\d+)"\]$/.exec(sel);
+    if (!m) continue;
+    const d = byMedia.get('') || new Map();
+    mods.push({ num: Number(m[1]), h: d.get('--sec-h') || base.get('--sec-h'), s: d.get('--sec-s') || base.get('--sec-s') });
+  }
+  if (mods.length !== BOARD_MODULE_HUES)
+    flag(`styles.css: ${mods.length} module hues on the activity board, expected ${BOARD_MODULE_HUES} — if a module was added or dropped, bump BOARD_MODULE_HUES here`);
+
+  let worst = { r: Infinity };
+  for (const mod of mods) {
+    if (!mod.h || !mod.s) { flag(`styles.css: .t-board-section[data-module="${mod.num}"] sets no --sec-h/--sec-s and .t-board-section has no default`); continue; }
+    for (const mode of ['light', 'dark']) {
+      const wash = cssRGB(`hsl(${mod.h},${mod.s},${washL[mode]})`);
+      if (!wash) { flag(`styles.css: module ${mod.num}'s ${mode} wash hsl(${mod.h},${mod.s},${washL[mode]}) does not parse`); continue; }
+      for (const token of ['--text', '--text3']) {
+        const fg = cssRGB(cssVar(`var(${token})`, pal[mode]));
+        if (!fg) { flag(`styles.css: ${token} missing from the ${mode} palette`); continue; }
+        const r = ratio(fg, wash);
+        if (r < worst.r) worst = { r, mode, num: mod.num, token };
+        if (r < 4.5)
+          flag(`styles.css: module ${mod.num}'s heading — ${r.toFixed(2)}:1 in ${mode} mode (${token} on the hsl(${mod.h},${mod.s},${washL[mode]}) wash); needs 4.5. Move --sec-wash-l away from mid-gray (${mode === 'light' ? 'lighter' : 'darker'}), or drop --sec-s.`);
+      }
+    }
+  }
+  if (bad === 0) ok(`${mods.length} module washes on the activity board — every heading and count ≥ 4.5:1 in both palettes (tightest ${worst.r.toFixed(2)}:1, module ${worst.num} ${worst.token} in ${worst.mode})`);
+}
+
 (async function main() {
   if (LIVE_ONLY) {
     console.log(`${C.bold}Guitar Class — post-push live check${C.reset}`);
@@ -3677,6 +3757,7 @@ function checkConfigWriteGuard() {
   checkVisibilityParity();
   checkChordBlitzRanks();
   checkConfigWriteGuard();
+  checkBoardModuleColours();
   if (!SKIP_LINKS) await checkLinks();
   else warn('skipping link check (--skip-links)');
   bumpServiceWorker();

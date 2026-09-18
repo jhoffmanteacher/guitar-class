@@ -157,7 +157,8 @@ tab-ascii column alignment across string rows (1z), every rail `.nav-btn`
 tagged `data-gate="keep"/"hide"` for the activity gate (1aa), the shared
 `CHORD_RANK` table ↔ every Chord Blitz and Chord Detective deck, both
 directions, plus every deck topping out inside a round (1ag), every
-config/class write going through the stale-write guard (1ai).
+config/class write going through the stale-write guard (1ai), the activity
+board's per-module heading washes (1aj).
 
 Not every class can be guarded by a banned-phrase list. 1w2 pins the Journey
 lick labels *positively* — every `Lick N — ...` card must use one of four

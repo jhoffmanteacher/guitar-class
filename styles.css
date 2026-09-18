@@ -1090,35 +1090,39 @@ body.t-wide .t-main{max-width:none}
    ── A colour per module ──
    Folded up, thirteen sections are thirteen identical gray bars, and this
    board gets read at a glance between periods. Each module carries a hue:
-   a line down its left edge and a wash behind its heading. One hue drives
-   both, out of the three --sec-* custom properties set per module below,
-   so a module is one line of CSS rather than four. The wash is
-   TRANSLUCENT and sits over --bg3, so both palettes come out of the same
-   numbers — only the line's lightness is nudged for dark mode. Unsorted
-   (module 0) is the pen, not a module, so it stays near-neutral. */
-.t-board-section{--sec-h:220;--sec-s:4%;--sec-l:50%;--sec-a:0;
-  border:1px solid var(--border);border-left:3px solid hsl(var(--sec-h),var(--sec-s),var(--sec-l));
+   a line down its left edge and a wash behind its heading. One hue and one
+   saturation drive both, so a module is one line of CSS rather than four;
+   the two lightnesses are palette-level and live on this rule, a pale wash
+   over near-white in light mode and a deep one in dark.
+
+   The wash is SOLID, so its contrast is fixed rather than depending on
+   what shows through. checks.mjs 1s cannot judge it — its palette is
+   :root, and these are element-scoped properties — so the numbers were
+   computed by hand across all 13 hues: the heading text (--text) clears
+   9:1 in both palettes, and the muted count beside it (--text3, the tight
+   one) bottoms out at 4.74:1 light / 4.77:1 dark. That is what fixes the
+   wash lightnesses at 88% and 13%; taking either further toward mid-gray
+   is what erodes the count. Unsorted (module 0) is the pen, not a module,
+   so it takes the neutral default above and has no line of its own. */
+.t-board-section{--sec-h:40;--sec-s:18%;--sec-line-l:50%;--sec-wash-l:88%;
+  border:1px solid var(--border);border-left:3px solid hsl(var(--sec-h),var(--sec-s),var(--sec-line-l));
   border-radius:var(--radius);background:var(--bg);margin-bottom:10px}
-.t-board-section[data-module="0"]{--sec-h:40;--sec-s:7%;--sec-a:.10}
-.t-board-section[data-module="1"]{--sec-h:265;--sec-s:54%;--sec-a:.16}
-.t-board-section[data-module="2"]{--sec-h:235;--sec-s:54%;--sec-a:.16}
-.t-board-section[data-module="3"]{--sec-h:208;--sec-s:54%;--sec-a:.16}
-.t-board-section[data-module="4"]{--sec-h:188;--sec-s:54%;--sec-a:.16}
-.t-board-section[data-module="5"]{--sec-h:165;--sec-s:54%;--sec-a:.16}
-.t-board-section[data-module="6"]{--sec-h:142;--sec-s:54%;--sec-a:.16}
-.t-board-section[data-module="7"]{--sec-h:112;--sec-s:54%;--sec-a:.16}
-.t-board-section[data-module="8"]{--sec-h:82;--sec-s:54%;--sec-a:.18}
-.t-board-section[data-module="9"]{--sec-h:48;--sec-s:58%;--sec-a:.18}
-.t-board-section[data-module="10"]{--sec-h:22;--sec-s:58%;--sec-a:.16}
-.t-board-section[data-module="11"]{--sec-h:355;--sec-s:54%;--sec-a:.16}
-.t-board-section[data-module="12"]{--sec-h:328;--sec-s:54%;--sec-a:.16}
-.t-board-section[data-module="13"]{--sec-h:295;--sec-s:54%;--sec-a:.16}
-/* background-COLOR plus a flat gradient, not one `background`: the wash has
-   to sit ON --bg3 rather than replace it, and this keeps the heading's real
-   surface resolvable (checks.mjs 1s reads background/background-color). */
+.t-board-section[data-module="1"]{--sec-h:265;--sec-s:65%}
+.t-board-section[data-module="2"]{--sec-h:235;--sec-s:65%}
+.t-board-section[data-module="3"]{--sec-h:208;--sec-s:65%}
+.t-board-section[data-module="4"]{--sec-h:188;--sec-s:65%}
+.t-board-section[data-module="5"]{--sec-h:165;--sec-s:65%}
+.t-board-section[data-module="6"]{--sec-h:142;--sec-s:65%}
+.t-board-section[data-module="7"]{--sec-h:112;--sec-s:65%}
+.t-board-section[data-module="8"]{--sec-h:82;--sec-s:65%}
+.t-board-section[data-module="9"]{--sec-h:48;--sec-s:68%}
+.t-board-section[data-module="10"]{--sec-h:22;--sec-s:68%}
+.t-board-section[data-module="11"]{--sec-h:355;--sec-s:65%}
+.t-board-section[data-module="12"]{--sec-h:328;--sec-s:65%}
+.t-board-section[data-module="13"]{--sec-h:295;--sec-s:65%}
 .t-board-sechead{display:flex;align-items:center;gap:8px;padding:8px 10px;cursor:pointer;
-  font-weight:600;font-size:0.875rem;color:var(--text);background-color:var(--bg3);
-  background-image:linear-gradient(hsla(var(--sec-h),var(--sec-s),var(--sec-l),var(--sec-a)),hsla(var(--sec-h),var(--sec-s),var(--sec-l),var(--sec-a)));
+  font-weight:600;font-size:0.875rem;color:var(--text);
+  background-color:hsl(var(--sec-h),var(--sec-s),var(--sec-wash-l));
   border-radius:var(--radius) var(--radius) 0 0}
 .t-board-caret{width:7px;height:7px;border-right:2px solid var(--text3);border-bottom:2px solid var(--text3);
   transform:rotate(45deg);transition:transform .15s;flex:0 0 auto;margin-left:2px}
@@ -1131,11 +1135,12 @@ body.t-wide .t-main{max-width:none}
    palettes, which keeps this a half-step and not a stripe. Direct children
    only: the Archived <details> and its cards sit outside the count. */
 .t-board-secbody>.t-board-card:nth-child(even){background:var(--bg2)}
-/* The module line is a mid-tone on white; on the dark palette it wants a
-   little more lightness to stay visible against --bg. Set on the same
-   selector as the defaults above, after them, so the per-module hue rules
-   (which never set --sec-l) are unaffected. */
-@media(prefers-color-scheme:dark){.t-board-section{--sec-l:57%}}
+/* Both lightnesses flip for the dark palette: the wash goes deep so the
+   heading still reads as the darker band, and the line gains a little to
+   stay visible against --bg. Set on the same selector as the defaults
+   above, after them, so the per-module rules (which carry only a hue and a
+   saturation) are untouched either way. */
+@media(prefers-color-scheme:dark){.t-board-section{--sec-line-l:57%;--sec-wash-l:13%}}
 .t-board-arch{margin-top:4px;font-size:0.8125rem}
 .t-board-arch>summary{cursor:pointer;color:var(--text3);padding:4px 2px}
 
