@@ -1394,12 +1394,14 @@ const SNIPPET_TRACKS = {
     srcMetronome:     'audio/the-white-stripes-seven-nation-army-backing-Em-123bpm-440hz-rhythm-down-metronome.mp3',
     srcSlow:          'audio/the-white-stripes-seven-nation-army-backing-Em-100bpm-440hz-rhythm-down.mp3',
     srcSlowMetronome: 'audio/the-white-stripes-seven-nation-army-backing-Em-100bpm-440hz-rhythm-down-metronome.mp3',
-    // ── Full mix: NOT EXPORTED YET — and this is the song that needs it most.
-    //    The rhythm-down mix turns the RIFF down (the Journey page says so
-    //    outright), which is the whole of what ca-10 teaches, so without the
-    //    full mix a student has nothing to check their riff against.
-    // srcFull:     'audio/the-white-stripes-seven-nation-army-backing-Em-123bpm-440hz-full.mp3',
-    // srcFullSlow: 'audio/the-white-stripes-seven-nation-army-backing-Em-100bpm-440hz-full.mp3',
+    /* The full mix, and this is the song that needed it most: the rhythm-down
+       mix turns the RIFF down (the Journey page says so outright), which is
+       the whole of what ca-10 teaches — so until these landed a student had
+       nothing to check their riff against. Same Moises project, stems up:
+       239.151 s against the rhythm-down twin's 239.151 s, and 294.113 s
+       against 294.217 s. 1ak re-checks that on every push. */
+    srcFull:     'audio/the-white-stripes-seven-nation-army-backing-Em-123bpm-440hz-full.mp3',
+    srcFullSlow: 'audio/the-white-stripes-seven-nation-army-backing-Em-100bpm-440hz-full.mp3',
     trackBpm: 123, trackBpmSlow: 100,
     feltBpm: 123,                       // counted at record speed, not halved
     beatsPerBar: 4,

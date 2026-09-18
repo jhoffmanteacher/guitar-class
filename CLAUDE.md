@@ -430,12 +430,21 @@ record's own drums; without it the Metronome toggle **disables itself while
 the guitar is on** rather than quietly dropping the guitar to get its click —
 a button that undoes another button is what nobody debugs in a room of 30.
 
-**No full mix has been exported yet**, so as of 2026-09-18 no Guitar toggle
-renders anywhere. 1ak warns the count on every push. What it needs is two
-files per song, at both tempos, mix `full` — e.g.
-`the-white-stripes-seven-nation-army-backing-Em-123bpm-440hz-full.mp3` and
-its `-100bpm-` twin — then uncommenting the two lines already sitting in that
-track's `SNIPPET_TRACKS` entry.
+**Seven Nation Army has its full mix (2026-09-18); "the cure" does not yet**,
+so the Guitar toggle renders on ca-10's two snippets and nowhere else. 1ak
+warns the count on every push. Each remaining song needs two files, at both
+tempos, mix `full` — for "the cure",
+`olivia-rodrigo-the-cure-backing-Am-144bpm-440hz-full.mp3` and its `-120bpm-`
+twin — then uncommenting the two lines already sitting in that track's
+`SNIPPET_TRACKS` entry.
+
+**Export it from the same Moises project with the stems up** — same tempo, no
+count-in, no re-trim, no transposition. 1ak measures the result against its
+rhythm-down twin and fails beyond 0.25 s, because two mixes of one take have
+to be one length; a re-trim is the only failure here nobody can hear (both
+files play fine alone, the toggle just jumps the loop). Correct pitch by
+SHIFTING, never resampling: a resample fixes pitch by changing speed, which
+moves the length and makes the two mixes drift apart as the loop runs.
 
 **Quiz answers are shuffled at render time** by `mcOrder(choices, seed)` —
 deterministic, catch-alls pinned via `MC_PINNED`, fewer than 3 choices left
@@ -853,21 +862,30 @@ walk," since there's no Playwright harness to run one for real.
 `<artist-slug>-<song-slug>-backing-<key>-<bpm>bpm-<tuning>hz-<mix>.mp3`, lowercase
 kebab-case; the artist stays out of the app's display metadata.
 
-**What actually ships is TWO mixes, not six** (corrected 2026-09-18 — the old
-list here named `no-gtr`, `full`, `drums-only` and `slow-<bpm>` as "in use"
-and not one of them has ever existed in `audio/`). The 20 files on disk are
-`rhythm-down` and `rhythm-down-metronome`, ten of each: six songs, some at
-two tempos. Every slow tier is the same master time-stretched, so its grid is
+**What ships is `rhythm-down`, `rhythm-down-metronome` and — since
+2026-09-18, for Seven Nation Army only — `full`** (the old list here also
+named `no-gtr`, `drums-only` and `slow-<bpm>` as "in use", and none of those
+has ever existed in `audio/`). That is 22 files: six songs, some at two
+tempos, plus the one full pair. Every slow tier is the same master time-stretched, so its grid is
 the fast one's scaled by the tempo ratio — checked on two songs to three
 decimal places. The other four names stay reserved for when something is
 really exported; don't cite one as available without listing `audio/` first.
 
 **`rhythm-down` means the part the student is learning is turned down**, so
 they supply it — deliberate and course-wide. The cost is that a student has
-nothing to check themselves against, and on Seven Nation Army that is total:
-the riff IS the turned-down part, so ca-10's play-along is drums and bass
-with a riff-shaped hole. A `full` mix per song is what fixes that; see the
-Guitar toggle under the snippet section.
+nothing to check themselves against, and on Seven Nation Army that was total:
+the riff IS the turned-down part, so ca-10's play-along was drums and bass
+with a riff-shaped hole. The `full` pair fixes it per song; see the Guitar
+toggle under the snippet section.
+
+**The A=440 labelling is unverified.** Moises names its exports by the pitch
+it DETECTS in the record (the source files read 441/442/443 Hz), and nothing
+in `audio/` has been confirmed as actually corrected — the 2026-09-18 Seven
+Nation Army full mixes came in byte-for-byte the size of their 442 originals.
+Every file carries the same label and the same treatment, so the library is
+at least self-consistent, which is what matters for the Guitar toggle: what
+would be audible is one mix corrected and its twin not. Before correcting any
+single file, play it against its twin — locked means leave both alone.
 
 **Every track ships at A=440** — `tuner.js` is hardcoded to A4=440Hz, so a track
 mastered at any other reference will sound out of tune against it. Export at 440

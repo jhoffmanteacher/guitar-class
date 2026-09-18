@@ -5,6 +5,16 @@ Notable changes to the Guitar Class site. Newest first.
 For the full session-by-session history (and the reasoning behind each change),
 see `WORKFLOW.md` and the git commit log.
 
+## 2026-09-18 — Hear the Seven Nation Army riff, then play it
+
+### Added
+
+- **The Seven Nation Army loops now have a 🎸 Guitar button, on to start
+  with.** The backing track used to have the riff turned down so you could
+  play it — which also meant there was nothing to check yourself against.
+  Leave Guitar on and the record plays the riff with you; turn it off and
+  it's yours to carry. Same loop either way, so you can flip it mid-practice.
+
 ## 2026-09-18 — Seven Nation Army gets the band too
 
 ### Added
