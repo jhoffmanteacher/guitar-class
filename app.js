@@ -1414,8 +1414,10 @@ const SNIPPET_TRACKS = {
     feltBpm: 72,                        // what the ROOM counts — 144 felt in half
     beatsPerBar: 4,                     // felt beats per chord; one chord = one bar
     durationSec: 297,                   // the fast file, so 1ak can catch a window past the end
-    anchor: 0,                          // ← MEASURE ME, then flip anchorVerified
-    anchorVerified: false,
+    // Measured 2026-09-18 with ?snipcal=1 -> Find the first click, off the
+    // rhythm-down-metronome file's own first click.
+    anchor: 0.565,
+    anchorVerified: true,
   },
   /* Seven Nation Army counts at its printed tempo — no halving, unlike "the
      cure": 123 BPM is what the room counts and a bar is four of those beats.

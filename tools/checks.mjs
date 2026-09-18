@@ -3939,7 +3939,7 @@ function checkBackingSnippets() {
   }
 
   if (unverified) {
-    warn(`${unverified} snippet track${unverified > 1 ? 's have' : ' has'} anchorVerified:false — ${unverified > 1 ? 'their first downbeats have' : 'its first downbeat has'} not been measured, so every snippet on ${unverified > 1 ? 'those songs starts' : 'that song starts'} in the wrong place. Measure ${unverified > 1 ? 'them' : 'it'} with ?snipcal=1 on localhost (see SNIPPET_TRACKS in app.js).`);
+    warn(`${unverified} snippet track${unverified > 1 ? 's have' : ' has'} anchorVerified:false — ${unverified > 1 ? 'their first downbeats have' : 'its first downbeat has'} not been measured, so every snippet on ${unverified > 1 ? 'those songs starts' : 'that song starts'} in the wrong place. Measure ${unverified > 1 ? 'them' : 'it'} by adding ?snipcal=1 to the URL (works on the live site too) and pressing Find the first click — see SNIPPET_TRACKS in app.js.`);
     warnings++;
   }
   const withFull = Object.values(TRACKS).filter(tr => tr.srcFull && tr.srcFullSlow).length;
