@@ -5,6 +5,17 @@ Notable changes to the Guitar Class site. Newest first.
 For the full session-by-session history (and the reasoning behind each change),
 see `WORKFLOW.md` and the git commit log.
 
+## 2026-09-18 — The loop buttons say what they actually do
+
+### Changed
+
+- **The 🎸 button now says "Record plays it" or "You play it"** instead of
+  just "Guitar". Pressing it doesn't silence the guitar — it turns the
+  record's part down so you're the one leading. Now the button says so.
+- **The metronome works again on loops that have the 🎸 button.** The record
+  and the click can't both play, so pressing one releases the other — you'll
+  see the other button pop out.
+
 ## 2026-09-18 — "the cure" loops get the Guitar button too
 
 ### Added

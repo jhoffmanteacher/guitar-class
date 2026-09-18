@@ -363,11 +363,17 @@
     // SNIPPET_TRACKS in app.js). On = the record plays the part the student
     // is learning, so they can hear whether they've got it; off = the
     // rhythm-down mix and they carry it.
-    'ca.snipGuitar':           { en: 'Guitar', es: 'Guitarra' },
-    'ca.snipGuitarTitle':      { en: 'The record plays the part. Turn it off to carry it yourself.',
-                                 es: 'El disco toca la parte. Apágala para llevarla tú.' },
-    'ca.snipMetroOffTitle':    { en: 'Turns the guitar off — this track has no full mix with a click on it.',
-                                 es: 'Apaga la guitarra — esta pista no tiene mezcla completa con clic.' },
+    // The label says WHO IS PLAYING THE PART, and flips with the button,
+    // because the off state is the rhythm-down mix — where the guitar is
+    // turned DOWN, not removed. A button called "Guitar" reads as a mute,
+    // and a student who presses it and still hears guitar concludes the site
+    // is broken (Jonathan, 2026-09-18, from the room).
+    'ca.snipGuitarOn':         { en: 'Record plays it', es: 'Lo toca el disco' },
+    'ca.snipGuitarOff':        { en: 'You play it',     es: 'Lo tocas tú' },
+    'ca.snipGuitarTitle':      { en: 'Who plays the part. Press it and the record\u2019s guitar drops back so you lead — it gets quieter, not silent.',
+                                 es: 'Quién toca la parte. Presiónalo y la guitarra del disco baja para que tú lleves la melodía — se hace más suave, no desaparece.' },
+    'ca.snipMetroOffTitle':    { en: 'Drops the record\u2019s guitar back — this track has no full mix with a click on it.',
+                                 es: 'Baja la guitarra del disco — esta pista no tiene mezcla completa con clic.' },
 
     // ── Exit checks (kind:'check' class activities — see class-activities.js) ──
     // "Boleto de salida" is the everyday classroom term; "comprobación de

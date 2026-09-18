@@ -1464,7 +1464,7 @@ function buildSnippet(spec, opts){
      the engine and the button agree without the engine reading aria- state. */
   const hasFull = snippetHasFull(tr);
   const guitarBtn = hasFull
-    ? `<button type="button" class="snip-toggle snip-guitar on" aria-pressed="true" onclick="snipSetTier(this,'guitar')" title="${escAttr(t('ca.snipGuitarTitle'))}">&#x1F3B8; ${escHtml(t('ca.snipGuitar'))}</button>`
+    ? `<button type="button" class="snip-toggle snip-guitar on" aria-pressed="true" onclick="snipSetTier(this,'guitar')" title="${escAttr(t('ca.snipGuitarTitle'))}">&#x1F3B8; <span class="snip-guitar-label">${escHtml(t('ca.snipGuitarOn'))}</span></button>`
     : '';
   /* With the guitar in and no full+click export, the click and the guitar
      cannot both sound — there is no file with both on it. The first cut
@@ -1494,6 +1494,15 @@ function buildSnippet(spec, opts){
     + `<div class="snip-note">${escHtml(t('ca.snipLoopNote', { n: bars }))}</div>`
     + cal
     + `</div></div>`;
+}
+/* The Guitar button's label names WHO PLAYS THE PART rather than claiming an
+   on/off, because "off" is the rhythm-down mix and that only turns the part
+   DOWN. Called from both paths that can change the state — the press itself
+   and the Metronome exclusivity release — so it cannot go stale. */
+function snipGuitarLabel(btn, on){
+  if(!btn) return;
+  const lab = btn.querySelector('.snip-guitar-label');
+  if(lab) lab.textContent = t(on ? 'ca.snipGuitarOn' : 'ca.snipGuitarOff');
 }
 function snipPlayBtnHtml(playing){
   return (playing ? '&#x25A0; ' : '&#x25B6; ')
@@ -1581,6 +1590,7 @@ function snipSetTier(btn, which){
   // `which` is the dataset key outright — a two-way ternary silently filed
   // 'guitar' under 'metro' when the third toggle arrived.
   card.dataset[which] = on ? '1' : '';
+  if(which === 'guitar') snipGuitarLabel(btn, on);
   /* Metronome and Guitar are mutually exclusive unless the track ships a
      full mix WITH a click on it — there is simply no file that has both.
      Release the other one visibly rather than leaving a button lit that
@@ -1595,6 +1605,7 @@ function snipSetTier(btn, which){
         card.dataset[otherKey] = '';
         otherBtn.setAttribute('aria-pressed', 'false');
         otherBtn.classList.remove('on');
+        if(otherKey === 'guitar') snipGuitarLabel(otherBtn, false);
       }
     }
   }

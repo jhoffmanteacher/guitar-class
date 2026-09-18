@@ -421,7 +421,16 @@ genuinely confusing, so it's closed off at both ends.
 hear the part and check themselves). A track may declare `srcFull`/
 `srcFullSlow` beside its rhythm-down paths; the card then grows a third
 toggle, **on by default** — the record plays the part, turn it off and carry
-it yourself. Optional per track and both tiers or neither, so a song whose
+it yourself.
+
+**Its label names who is playing, and flips with the button** — "Record plays
+it" / "You play it", not "Guitar". The off state is the rhythm-down mix,
+which turns the part DOWN rather than removing it, so a button called
+"Guitar" promises a mute it cannot deliver: pressed on "the cure", where the
+part is a strummed acoustic under vocals, bass and drums, it sounds like
+nothing happened and the site reads as broken (Jonathan, 2026-09-18, from the
+room). `snipGuitarLabel()` is the one relabeller, called by the press AND by
+the Metronome exclusivity release so the label can't go stale. Optional per track and both tiers or neither, so a song whose
 full mix isn't exported is a card with one fewer button, never a broken one
 (checks.mjs 1ak fails a half-declared pair, and a declared path whose file
 isn't there). The metronome pair on top (`srcFullMetronome`/
