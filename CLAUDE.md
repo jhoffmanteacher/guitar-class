@@ -424,6 +424,15 @@ to find the real figure. It shifts the DOTS only — the loop's seek stays on
 the true decoder position, or the last buffered milliseconds would be clipped
 off every lap.
 
+**The dots still lead the beat slightly at 80 ms, and that is correct — don't
+"fix" it** (Jonathan, 2026-09-18: "slightly early, but in an accurate way").
+A visual cue has to arrive before the sound for a player to land on the beat;
+a dot lighting exactly on the downbeat reads as late, because moving a hand
+to it takes longer than hearing it. Anyone tempted to raise the constant
+until the dots sit dead on the beat would be making it worse. The number to
+watch instead is whether the lead is CONSTANT across the four dots: a growing
+one is a wrong `win.bar` for that song, not latency.
+
 One builder, `buildSnippet()`, called by `caStepHtml()` (app.js) and
 `renderTeacherActivityDetail()` (teacher.js) — same shape as `buildTab()`,
 which is how a step field satisfies the two-renderers rule without two
