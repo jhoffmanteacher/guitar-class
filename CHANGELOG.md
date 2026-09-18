@@ -5,6 +5,15 @@ Notable changes to the Guitar Class site. Newest first.
 For the full session-by-session history (and the reasoning behind each change),
 see `WORKFLOW.md` and the git commit log.
 
+## 2026-09-18 — "the cure" loops get the Guitar button too
+
+### Added
+
+- **Every "the cure" loop now has the 🎸 Guitar button**, the same one Seven
+  Nation Army got: leave it on and the record plays the part with you, turn
+  it off and it's yours to carry. All twelve backing-track loops across the
+  four song activities have it now.
+
 ## 2026-09-18 — Hear the Seven Nation Army riff, then play it
 
 ### Added

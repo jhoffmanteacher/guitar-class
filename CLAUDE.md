@@ -430,13 +430,11 @@ record's own drums; without it the Metronome toggle **disables itself while
 the guitar is on** rather than quietly dropping the guitar to get its click —
 a button that undoes another button is what nobody debugs in a room of 30.
 
-**Seven Nation Army has its full mix (2026-09-18); "the cure" does not yet**,
-so the Guitar toggle renders on ca-10's two snippets and nowhere else. 1ak
-warns the count on every push. Each remaining song needs two files, at both
-tempos, mix `full` — for "the cure",
-`olivia-rodrigo-the-cure-backing-Am-144bpm-440hz-full.mp3` and its `-120bpm-`
-twin — then uncommenting the two lines already sitting in that track's
-`SNIPPET_TRACKS` entry.
+**Both snippet songs have their full mix as of 2026-09-18** — Seven Nation
+Army and "the cure" — so the Guitar toggle renders on all 12 snippets. A new
+snippet song needs two files, at both tempos, mix `full`, and a `srcFull`/
+`srcFullSlow` pair in its `SNIPPET_TRACKS` entry; 1ak warns the count of
+tracks still without one.
 
 **Export it from the same Moises project with the stems up** — same tempo, no
 count-in, no re-trim, no transposition. 1ak measures the result against its
@@ -863,10 +861,10 @@ walk," since there's no Playwright harness to run one for real.
 kebab-case; the artist stays out of the app's display metadata.
 
 **What ships is `rhythm-down`, `rhythm-down-metronome` and — since
-2026-09-18, for Seven Nation Army only — `full`** (the old list here also
+2026-09-18 — `full`, for the two snippet songs** (the old list here also
 named `no-gtr`, `drums-only` and `slow-<bpm>` as "in use", and none of those
-has ever existed in `audio/`). That is 22 files: six songs, some at two
-tempos, plus the one full pair. Every slow tier is the same master time-stretched, so its grid is
+has ever existed in `audio/`). That is 24 files: six songs, some at two
+tempos, plus a full pair each for Seven Nation Army and "the cure". Every slow tier is the same master time-stretched, so its grid is
 the fast one's scaled by the tempo ratio — checked on two songs to three
 decimal places. The other four names stay reserved for when something is
 really exported; don't cite one as available without listing `audio/` first.
@@ -898,6 +896,13 @@ length, so the two mixes drift apart as the loop runs and 1ak fails the push.
 **Every track ships at A=440** — `tuner.js` is hardcoded to A4=440Hz, so a track
 mastered at any other reference will sound out of tune against it. Export at 440
 from Moises; ffmpeg/rubberband only as fallback.
+
+**And as mp3, at 320k.** Moises will hand you `.m4a`; `sw.js`'s `AUDIO_RE`
+and the audio fingerprint both accept it, so it would have worked — but a
+2026-09-18 m4a pair was re-exported as mp3 on Jonathan's call, to keep one
+format and one bitrate across `audio/` rather than have the Guitar toggle
+step between codecs. (The one bitrate is aspirational: the existing
+rhythm-down set is 320k except "the cure" at 120bpm, which is 192k.)
 
 ## Settled song facts — do not re-flag in audits
 

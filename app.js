@@ -1372,11 +1372,13 @@ const SNIPPET_TRACKS = {
     srcMetronome:     'audio/olivia-rodrigo-the-cure-backing-Am-144bpm-440hz-rhythm-down-metronome.mp3',
     srcSlow:          'audio/olivia-rodrigo-the-cure-backing-Am-120bpm-440hz-rhythm-down.mp3',
     srcSlowMetronome: 'audio/olivia-rodrigo-the-cure-backing-Am-120bpm-440hz-rhythm-down-metronome.mp3',
-    // ── Full mix: NOT EXPORTED YET. Uncomment once these two exist in audio/
-    //    and the Guitar toggle turns itself on. Names follow the backing-track
-    //    convention in CLAUDE.md, mix `full`.
-    // srcFull:     'audio/olivia-rodrigo-the-cure-backing-Am-144bpm-440hz-full.mp3',
-    // srcFullSlow: 'audio/olivia-rodrigo-the-cure-backing-Am-120bpm-440hz-full.mp3',
+    /* The full mix — 297.038 s against the rhythm-down twin's 297.064 s, and
+       356.441 s against 356.545 s, both inside 1ak's 0.25 s. Note the slow
+       twin is a 192k encode where this is 320k; that asymmetry predates the
+       full mixes and is inaudible on a classroom speaker, but it is why the
+       two files differ in size far more than in length. */
+    srcFull:     'audio/olivia-rodrigo-the-cure-backing-Am-144bpm-440hz-full.mp3',
+    srcFullSlow: 'audio/olivia-rodrigo-the-cure-backing-Am-120bpm-440hz-full.mp3',
     trackBpm: 144, trackBpmSlow: 120,   // what the FILES are, for the slow-tier rescale
     feltBpm: 72,                        // what the ROOM counts — 144 felt in half
     beatsPerBar: 4,                     // felt beats per chord; one chord = one bar
