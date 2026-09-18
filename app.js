@@ -1379,6 +1379,11 @@ const SNIPPET_TRACKS = {
        two files differ in size far more than in length. */
     srcFull:     'audio/olivia-rodrigo-the-cure-backing-Am-144bpm-440hz-full.mp3',
     srcFullSlow: 'audio/olivia-rodrigo-the-cure-backing-Am-120bpm-440hz-full.mp3',
+    // …and the same two with the click on, which is what lets Metronome and
+    // Guitar both be on at once. Without this pair there is no file carrying
+    // the record's guitar AND a click, so the two toggles have to take turns.
+    srcFullMetronome:     'audio/olivia-rodrigo-the-cure-backing-Am-144bpm-440hz-full-metronome.mp3',
+    srcFullSlowMetronome: 'audio/olivia-rodrigo-the-cure-backing-Am-120bpm-440hz-full-metronome.mp3',
     trackBpm: 144, trackBpmSlow: 120,   // what the FILES are, for the slow-tier rescale
     feltBpm: 72,                        // what the ROOM counts — 144 felt in half
     beatsPerBar: 4,                     // felt beats per chord; one chord = one bar
@@ -1404,6 +1409,11 @@ const SNIPPET_TRACKS = {
        against 294.217 s. 1ak re-checks that on every push. */
     srcFull:     'audio/the-white-stripes-seven-nation-army-backing-Em-123bpm-440hz-full.mp3',
     srcFullSlow: 'audio/the-white-stripes-seven-nation-army-backing-Em-100bpm-440hz-full.mp3',
+    // …and the same two with the click on, which is what lets Metronome and
+    // Guitar both be on at once. Without this pair there is no file carrying
+    // the record's guitar AND a click, so the two toggles have to take turns.
+    srcFullMetronome:     'audio/the-white-stripes-seven-nation-army-backing-Em-123bpm-440hz-full-metronome.mp3',
+    srcFullSlowMetronome: 'audio/the-white-stripes-seven-nation-army-backing-Em-100bpm-440hz-full-metronome.mp3',
     trackBpm: 123, trackBpmSlow: 100,
     feltBpm: 123,                       // counted at record speed, not halved
     beatsPerBar: 4,

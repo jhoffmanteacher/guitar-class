@@ -5,6 +5,14 @@ Notable changes to the Guitar Class site. Newest first.
 For the full session-by-session history (and the reasoning behind each change),
 see `WORKFLOW.md` and the git commit log.
 
+## 2026-09-18 — Metronome and the record, at the same time
+
+### Fixed
+
+- **The click and the record's guitar no longer fight each other.** Turning
+  the metronome on used to drop the guitar back; now you can have both, or
+  either, in any combination. Every loop on both songs.
+
 ## 2026-09-18 — The loop buttons say what they actually do
 
 ### Changed

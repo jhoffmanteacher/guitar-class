@@ -433,11 +433,19 @@ room). `snipGuitarLabel()` is the one relabeller, called by the press AND by
 the Metronome exclusivity release so the label can't go stale. Optional per track and both tiers or neither, so a song whose
 full mix isn't exported is a card with one fewer button, never a broken one
 (checks.mjs 1ak fails a half-declared pair, and a declared path whose file
-isn't there). The metronome pair on top (`srcFullMetronome`/
-`srcFullSlowMetronome`) is optional again, because a full mix carries the
-record's own drums. Without it there is no file with both the guitar and a
-click, so **Metronome and Guitar are mutually exclusive — pressing one
-visibly releases the other**, both directions, in `snipSetTier()`.
+isn't there). The metronome pair on top (`srcFullMetronome`/`srcFullSlowMetronome`) is
+what lets Metronome and Guitar both be on at once. **Both current tracks
+have it as of 2026-09-18**, so the two toggles are fully independent and the
+fallback below never fires today.
+
+Without that pair there is no file carrying the record's guitar AND a click,
+so **Metronome and Guitar become mutually exclusive — pressing one visibly
+releases the other**, both directions, in `snipSetTier()`. That is the
+fallback for a future track exported without the click, not a design choice:
+Jonathan reported the coupling as a bug the day it shipped, and he was right
+— nothing about the two controls should be linked, they were just competing
+for a file that didn't exist. If a new song's toggles start interacting, the
+missing export is the fix, not the code.
 
 The first cut DISABLED the Metronome button in that case instead, reasoning
 that a button undoing another button is what nobody debugs in a room of 30.
@@ -880,10 +888,12 @@ walk," since there's no Playwright harness to run one for real.
 kebab-case; the artist stays out of the app's display metadata.
 
 **What ships is `rhythm-down`, `rhythm-down-metronome` and — since
-2026-09-18 — `full`, for the two snippet songs** (the old list here also
-named `no-gtr`, `drums-only` and `slow-<bpm>` as "in use", and none of those
-has ever existed in `audio/`). That is 24 files: six songs, some at two
-tempos, plus a full pair each for Seven Nation Army and "the cure". Every slow tier is the same master time-stretched, so its grid is
+2026-09-18 — `full` and `full-metronome`, for the two snippet songs** (the
+old list here also named `no-gtr`, `drums-only` and `slow-<bpm>` as "in use",
+and none of those has ever existed in `audio/`). That is 28 files: six songs,
+some at two tempos, plus four mixes each for Seven Nation Army and "the
+cure". A snippet song wants all four: `full` alone gives the Guitar toggle,
+and `full-metronome` is what stops it fighting the Metronome toggle. Every slow tier is the same master time-stretched, so its grid is
 the fast one's scaled by the tempo ratio — checked on two songs to three
 decimal places. The other four names stay reserved for when something is
 really exported; don't cite one as available without listing `audio/` first.
