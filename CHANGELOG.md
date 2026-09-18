@@ -5,6 +5,18 @@ Notable changes to the Guitar Class site. Newest first.
 For the full session-by-session history (and the reasoning behind each change),
 see `WORKFLOW.md` and the git commit log.
 
+## 2026-09-18 — "the cure" verse and chorus are eight bars
+
+### Fixed
+
+- **The "the cure" Song Journey page was showing the verse and chorus as four
+  bars each.** They are eight: the verse is Am · C · Am · C, then F · C · F ·
+  C, and the chorus is Dm · F · Dm · F, then C · G/B · C · G/B. The power
+  chord, open chord and fingerpicking tabs now all show the full eight, and
+  so does every chord map on the page. If you learned it from the four-bar
+  version, you were playing the right chords in the right order — there was
+  just twice as much of it than the page let on.
+
 ## 2026-09-18 — Metronome and the record, at the same time
 
 ### Fixed

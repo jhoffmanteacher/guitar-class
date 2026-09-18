@@ -989,8 +989,20 @@ other and the site's tempo numbers are close enough for teaching.
   2026-09-12 — content across module-2/3/5/7 and the Journey page is
   consistently "two bars each"; the old "full bar each" here was the outlier.)
 - **Let It Be** — verse `C–G–Am–F`, **two beats per chord**, ~71–76 BPM.
-- **"the cure"** — `Am–C–Dm–F` + `G/B` turnaround, **two felt beats per chord**
-  (track reads 144 BPM but feels ~72). Tell students "big slow beats, about 72."
+- **"the cure"** — **FOUR felt beats per chord, one full bar** (track reads
+  144 BPM but feels ~72). This line said "two felt beats per chord" until
+  2026-09-18; every tab on the Journey page, every class activity and the
+  snippet arithmetic all say four, and the snippet loops were confirmed
+  against the record by ear, so this was the outlier. At two beats a chord
+  would be 1.67 s and every snippet window would be half the length it is.
+  Tell students "big slow beats, about 72."
+  **The verse and the chorus are EIGHT bars each** (Jonathan, 2026-09-18) —
+  verse `Am · C · Am · C`, then `F · C · F · C`; chorus `Dm · F · Dm · F`,
+  then `C · G/B · C · G/B`. Each pair plays twice before the next; it is NOT
+  the four-chord loop played through twice. Layers 3, 5 and 6 of the Journey
+  page showed the four-bar shorthand until that date, while Layer 2 and
+  ca-13 / ca-18 / ca-19 had it right — a student following the backing-track
+  loop would have heard the disagreement.
   No capo, by design. **Module 12's fingerpicking-as-native-style framing stays**
   (Jonathan's call, 2026-07-31): the record's guitar is rapidly strummed, but
   the fingerstyle arrangement and its ◐-comes-off lesson are a deliberate
