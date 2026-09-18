@@ -407,6 +407,12 @@ millisecond, with the gaps after it to sanity-check against 60/BPM. Paste
 that number into `anchor` and flip `anchorVerified` — checks.mjs 1ak warns on
 every push until it's true.
 
+**The param is read from the hash as well as `location.search`** — this site
+is hash-routed, so typing `?snipcal=1` onto a URL that already ends in
+`#class-activities` puts it in the FRAGMENT, where `location.search` never
+sees it and the panel simply never appears. Both shapes work; it is captured
+once at load, because the app rewrites the hash as the student navigates.
+
 **The panel is NOT localhost-gated**, unlike the dev bypass and
 `__forceGate`. Those hand out access; this shows a number, and a student
 cannot reach it without typing the query param. It was localhost-only for

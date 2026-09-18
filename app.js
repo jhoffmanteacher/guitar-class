@@ -440,7 +440,31 @@ const IS_LOCALHOST = ['localhost','127.0.0.1','[::1]'].includes(location.hostnam
    localhost meant the one measurement the feature still needs could not be
    taken on the deployed site, which is where Jonathan was actually standing
    (2026-09-18). A student cannot reach it without typing the query param. */
-if(new URLSearchParams(window.location.search).get('snipcal') === '1') window.__snipCal = true;
+/* Read from the hash's query part as well as location.search. This site is
+   hash-routed, so the natural thing to type onto a URL that already ends in
+   `#class-activities` puts the param in the FRAGMENT, where location.search
+   never sees it — which is exactly what happened, and the panel simply never
+   appeared (2026-09-18). Both shapes work now:
+     …/index.html?snipcal=1#class-activities
+     …/index.html#class-activities?snipcal=1
+   Captured once at load into window.__snipCal / __snipLat, because the app
+   rewrites the hash as the student navigates and a param living there would
+   otherwise vanish mid-session. */
+function snipUrlParam(name){
+  const q = new URLSearchParams(window.location.search).get(name);
+  if(q !== null) return q;
+  const h = window.location.hash || '';
+  const i = h.indexOf('?');
+  return i < 0 ? null : new URLSearchParams(h.slice(i + 1)).get(name);
+}
+if(snipUrlParam('snipcal') === '1'){
+  window.__snipCal = true;
+  const raw = snipUrlParam('lat');
+  if(raw !== null && raw.trim() !== ''){
+    const ms = Number(raw);
+    if(isFinite(ms) && ms >= 0) window.__snipLat = ms / 1000;
+  }
+}
 function devBypass(){
   if(!IS_LOCALHOST){ console.warn('Dev bypass is disabled outside localhost.'); return; }
   currentUser = {uid:'dev-user',displayName:'Dev User',email:'dev@test.local',photoURL:null};
@@ -1660,18 +1684,11 @@ function snipToggle(btn){
    short every lap. */
 const SNIP_OUTPUT_LATENCY = 0.08;
 function snipLatency(){
-  if(window.__snipCal){
-    /* `get` returns null for an absent param, and Number(null) is 0 — which
-       isFinite() and >= 0 both accept, so the first cut switched the
-       compensation OFF for the one URL that is always used to test it
-       (?snipcal=1 with no &lat). Check the raw value before trusting it. */
-    const raw = new URLSearchParams(window.location.search).get('lat');
-    if(raw !== null && raw.trim() !== ''){
-      const ms = Number(raw);
-      if(isFinite(ms) && ms >= 0) return ms / 1000;
-    }
-  }
-  return SNIP_OUTPUT_LATENCY;
+  // Captured at load (see snipUrlParam) rather than re-read here, so a hash
+  // rewrite mid-session can't drop it. An absent param leaves it undefined,
+  // NOT 0 — Number(null) is 0 and passes isFinite, which is how the override
+  // once switched the compensation off for the very URL used to test it.
+  return typeof window.__snipLat === 'number' ? window.__snipLat : SNIP_OUTPUT_LATENCY;
 }
 /* The loop itself. rAF rather than `timeupdate`, which fires about four
    times a second — at that granularity the window would overrun by up to a
