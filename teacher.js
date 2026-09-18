@@ -312,6 +312,11 @@ async function showTeacherApp(user){
   renderTeacherSetTabs();
   const firstSet=SETS.find(w=>!w.locked&&w.skills&&w.skills.length>0);
   if(firstSet){ teacherSetId=firstSet.id; activateTeacherSetTab(firstSet.id); }
+  // Match the chrome to whichever view the console opens on (Class
+  // activities) — index.html's markup is written for the skills grid, and
+  // the runtime buttons above ship with no aria-pressed of their own.
+  applyTeacherViewChrome(teacherView);
+  syncPressedGroup('#t-viewtoggle','.t-vt','on');
   loadAllStudents();
 }
 
@@ -555,7 +560,12 @@ function abbreviate(text){ const words=text.split(' '); if(words.length<=4) retu
    one renderTeacherBody shows, kept separate from teacherView so a name
    click in the skills grid can jump straight to a student's detail without
    a view flag of its own. */
-let teacherView='skills';
+/* The console opens on Class activities — the board is what gets touched
+   before and during a period, where the skills grid is a look-back. The
+   static .t-vt "on" class in index.html still says Skills grid, so
+   showTeacherApp calls applyTeacherViewChrome once the runtime buttons are
+   in to bring the chrome into line. */
+let teacherView='activities';
 let studentDetailUid=null;
 // Which activity's detail is showing in the Class activities view — same
 // "list vs. one detail page" split as studentDetailUid above, its own flag
