@@ -407,11 +407,14 @@ millisecond, with the gaps after it to sanity-check against 60/BPM. Paste
 that number into `anchor` and flip `anchorVerified` — checks.mjs 1ak warns on
 every push until it's true.
 
-**The param is read from the hash as well as `location.search`** — this site
-is hash-routed, so typing `?snipcal=1` onto a URL that already ends in
-`#class-activities` puts it in the FRAGMENT, where `location.search` never
-sees it and the panel simply never appears. Both shapes work; it is captured
-once at load, because the app rewrites the hash as the student navigates.
+**The param is matched anywhere in `location.href`**, not parsed out of
+`location.search`, because on 2026-09-18 every way of typing it onto a real
+URL failed in turn: `#class-activities?snipcal=1` lands in the fragment where
+`search` is empty, and `?teacher=true?snipcal=1` — the console already has a
+query — makes `URLSearchParams` read the value as `true?snipcal=1`. A
+delimiter-anchored regex accepts all of them and still won't match a longer
+name ending in this one. Captured once at load, since the app rewrites the
+hash as the student navigates.
 
 **The panel is NOT localhost-gated**, unlike the dev bypass and
 `__forceGate`. Those hand out access; this shows a number, and a student

@@ -451,11 +451,17 @@ const IS_LOCALHOST = ['localhost','127.0.0.1','[::1]'].includes(location.hostnam
    rewrites the hash as the student navigates and a param living there would
    otherwise vanish mid-session. */
 function snipUrlParam(name){
-  const q = new URLSearchParams(window.location.search).get(name);
-  if(q !== null) return q;
-  const h = window.location.hash || '';
-  const i = h.indexOf('?');
-  return i < 0 ? null : new URLSearchParams(h.slice(i + 1)).get(name);
+  /* Scan the WHOLE href rather than parsing location.search, because every
+     way of typing this onto a real URL has now failed once:
+       ?snipcal=1                      — the shape that always worked
+       #class-activities?snipcal=1     — hash-routed site, search is empty
+       ?teacher=true?snipcal=1         — console URL already has a query, so
+                                         the second ? makes URLSearchParams
+                                         read the value as "true?snipcal=1"
+     A delimiter-anchored match accepts all of them, and still won't match a
+     longer name that merely ends in this one. */
+  const m = new RegExp('[?&#]' + name + '=([^&#]*)').exec(window.location.href || '');
+  return m ? decodeURIComponent(m[1]) : null;
 }
 if(snipUrlParam('snipcal') === '1'){
   window.__snipCal = true;
