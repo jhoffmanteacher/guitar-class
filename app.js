@@ -1661,8 +1661,15 @@ function snipToggle(btn){
 const SNIP_OUTPUT_LATENCY = 0.08;
 function snipLatency(){
   if(window.__snipCal){
-    const ms = Number(new URLSearchParams(window.location.search).get('lat'));
-    if(isFinite(ms) && ms >= 0) return ms / 1000;
+    /* `get` returns null for an absent param, and Number(null) is 0 — which
+       isFinite() and >= 0 both accept, so the first cut switched the
+       compensation OFF for the one URL that is always used to test it
+       (?snipcal=1 with no &lat). Check the raw value before trusting it. */
+    const raw = new URLSearchParams(window.location.search).get('lat');
+    if(raw !== null && raw.trim() !== ''){
+      const ms = Number(raw);
+      if(isFinite(ms) && ms >= 0) return ms / 1000;
+    }
   }
   return SNIP_OUTPUT_LATENCY;
 }
