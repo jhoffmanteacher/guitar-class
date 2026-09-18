@@ -1292,6 +1292,42 @@ body.t-wide .t-main{max-width:none}
   .bpm-slider{width:96px}
   .bpm-readout{font-size:0.75rem;min-width:48px}
 }
+
+/* ── Backing-track snippet (a step's `snippet` — buildSnippet() in app.js) ──
+   The same card chrome as the TAB it sits under, in the In-Class Activities
+   amber rather than the brand plum: the two live together in one step and
+   have to read as a pair without reading as the same control. The tab's
+   play button is blue, the band's is amber — a student glancing down knows
+   which one makes which sound.
+
+   Every filled surface uses `color:var(--bg)`, never a hard-coded #fff:
+   --ca-accent goes LIGHT in dark mode (#f2a33d), so white-on-amber would be
+   unreadable there and checks.mjs 1s would fail the push. */
+.snip{display:block;max-width:100%;margin:8px 0 4px;border-radius:10px;overflow:hidden;border:1px solid var(--border2);background:var(--bg);box-shadow:0 1px 0 var(--border),0 4px 14px rgba(180,83,9,0.10)}
+.snip-head{background:var(--ca-accent);color:var(--bg);padding:7px 14px;display:flex;align-items:center;gap:10px;font-weight:600;font-size:0.8438rem;line-height:1.3}
+.snip-head .snip-icon{font-size:0.9375rem;flex-shrink:0;display:inline-flex}
+.snip-head .snip-title{flex:1;min-width:0}
+.snip-head .snip-kind{font-size:0.75rem;font-weight:700;letter-spacing:0.1em;background:rgba(255,255,255,0.22);padding:2px 7px;border-radius:10px;text-transform:uppercase;flex-shrink:0}
+.snip-body{padding:10px 9px 12px}
+.snip-controls{display:flex;flex-wrap:wrap;align-items:center;gap:8px;margin-bottom:8px}
+.snip-play{font-family:inherit;font-size:0.9375rem;font-weight:600;padding:5px 11px;background:transparent;border:1px solid var(--ca-accent);border-radius:14px;color:var(--ca-accent);cursor:pointer;display:inline-flex;align-items:center;gap:4px;line-height:1.25;min-height:36px}
+.snip-play:hover{background:var(--ca-accent-bg)}
+.snip-play:active{transform:scale(0.96)}
+.snip-play.playing{background:var(--ca-accent);color:var(--bg)}
+.snip-toggle{display:inline-flex;align-items:center;gap:6px;min-height:36px;padding:0 12px;font:inherit;font-size:0.8125rem;font-weight:600;color:var(--text2);background:var(--bg2);border:1px solid var(--border2);border-radius:16px;cursor:pointer}
+.snip-toggle:hover{background:var(--bg3)}
+.snip-toggle.on{background:var(--text);color:var(--bg);border-color:var(--text)}
+/* One dot per bar of the window, lit as the loop passes it. A loop with no
+   visible position is the thing that makes a student decide the player is
+   broken — same rule as the TAB's beat cursor: the moving thing is the thing
+   making the noise. */
+.snip-bars{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:6px}
+.snip-bar{width:26px;height:26px;border-radius:50%;border:1px solid var(--border2);background:var(--bg2);color:var(--text3);font-size:0.75rem;font-weight:700;display:inline-flex;align-items:center;justify-content:center;font-variant-numeric:tabular-nums}
+.snip-bar.bar-now{background:var(--ca-accent);color:var(--bg);border-color:var(--ca-accent)}
+.snip-note{font-size:0.8125rem;color:var(--text2);font-weight:500}
+/* ?snipcal=1, localhost only — the live timecode a track's `anchor` is
+   measured against (SNIPPET_TRACKS in app.js). Never renders for a student. */
+.snip-cal{margin-top:6px;font-size:0.9375rem;font-weight:700;color:var(--ca-accent);font-variant-numeric:tabular-nums}
 .tab-note-btn{font-family:inherit;font-size:1rem;font-weight:700;padding:4px 6px;margin:14px 0 0;background:transparent;border:1px solid transparent;border-radius:6px;color:var(--blue-text);cursor:pointer;display:inline-flex;align-items:center;justify-content:center;gap:2px;white-space:nowrap;line-height:1}
 .tab-note-btn:hover,.tab-note-btn:focus-visible{background:var(--blue-bg);border-color:var(--blue-text)}
 .tab-note-btn:active{transform:scale(0.94)}
@@ -1425,7 +1461,11 @@ body.t-wide .t-main{max-width:none}
   #google_translate_element,.btn-translate,.user-area,
   .print-set-btn,.daily5-panel,.daily5-overlay,.games-screen,.page-screen,
   .back-to-top,.panel-next,.mr-done,.sk-where-btn,
-  .step-done-row,.mr-rec,.mr-locked-banner,.set-peek-banner{display:none !important}
+  .step-done-row,.mr-rec,.mr-locked-banner,.set-peek-banner,
+  /* A snippet's transport is dead weight on paper — but its head and the
+     "N bars of the record" line stay, so the handout still says which bars
+     the student is meant to play along to. */
+  .snip-controls,.snip-bars,.snip-cal{display:none !important}
 
   /* Only the active set prints; expand the lesson ladder + the checklist, drop songs */
   .week-panel{display:none !important}

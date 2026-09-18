@@ -158,7 +158,8 @@ tagged `data-gate="keep"/"hide"` for the activity gate (1aa), the shared
 `CHORD_RANK` table ↔ every Chord Blitz and Chord Detective deck, both
 directions, plus every deck topping out inside a round (1ag), every
 config/class write going through the stale-write guard (1ai), the activity
-board's per-module heading washes (1aj).
+board's per-module heading washes (1aj), backing-track snippet windows
+and both of their renderers (1ak).
 
 Not every class can be guarded by a banned-phrase list. 1w2 pins the Journey
 lick labels *positively* — every `Lick N — ...` card must use one of four
@@ -379,6 +380,42 @@ scissors, index cards or a pen. Three `step.drill` types share one dispatcher:
 `drill: { type:'deck', deck:'numerals-C', skill:'m11w1-s3' }`. Decks live in
 `DECKS` in `app.js`; ear pools in `EAR_POOLS`. Drop the "Got someone around?"
 partner line from any card that gets a deck; no paper-fallback line.
+
+### ⚠️ A backing-track snippet is bars, never seconds
+A step that drills four or eight bars can loop THOSE bars of the real
+backing track — `snippet: { track:'the-cure', fromBar:5, bars:8, label,
+label_es }` on the step, beside its `tab`. Content, not code: it plays a
+window of the same mp3s the Journey page uses (sw.js already serves
+byte-Range requests for `audio/`), so no new files and no export.
+
+The window is in **bars of the song, counted from bar 1, at the FELT pulse
+the course teaches** — "the cure" reads 144 BPM and the room counts 72, one
+chord per bar, so its 20-bar form is intro 1–4, verse 5–12, chorus 13–20.
+Make the window agree with the step's own tab: an eight-bar tab wants an
+eight-bar window, or the loop comes round mid-phrase and the student
+concludes they're the one who's wrong.
+
+`SNIPPET_TRACKS` in `app.js` holds the four mp3 paths, the tempo arithmetic
+and **one measured number per song — `anchor`, the track's first downbeat**.
+Everything else is derived: the slow tier is the same master time-stretched
+(297.1 s at 144 against 356.5 s at 120, exactly 144/120), so its grid is the
+fast file's scaled by `trackBpm/trackBpmSlow`. **Never measure a second
+anchor.** Measure the one with `?snipcal=1` on localhost, which grows a live
+timecode on the card, then flip `anchorVerified` — checks.mjs 1ak warns on
+every push until it's true. A wrong anchor puts every snippet on that song
+out by the same amount, so there's exactly one number to fix.
+
+One builder, `buildSnippet()`, called by `caStepHtml()` (app.js) and
+`renderTeacherActivityDetail()` (teacher.js) — same shape as `buildTab()`,
+which is how a step field satisfies the two-renderers rule without two
+copies. 1ak pins both calls, **inside the function body and with comments
+stripped**: its first cut matched the words "see buildSnippet()" in the
+comment above the call and stayed green when the call was deleted.
+
+Only one thing plays at a time: starting the band calls `stopAllDemoAudio()`,
+and `playSequence()` calls `snipStop()`. Two unsynced sources in one step —
+the tab's synthesised notes over the record — is the one way this gets
+genuinely confusing, so it's closed off at both ends.
 
 **Quiz answers are shuffled at render time** by `mcOrder(choices, seed)` —
 deterministic, catch-alls pinned via `MC_PINNED`, fewer than 3 choices left

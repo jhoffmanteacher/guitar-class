@@ -33,7 +33,7 @@
    Exit code is non-zero if anything fails, so a push can be aborted.
    ════════════════════════════════════════════════════════════════════ */
 
-import { readFileSync, writeFileSync, readdirSync, mkdtempSync, rmSync } from 'node:fs';
+import { readFileSync, writeFileSync, readdirSync, mkdtempSync, rmSync, existsSync } from 'node:fs';
 import { spawnSync } from 'node:child_process';
 import { createHash } from 'node:crypto';
 import { fileURLToPath } from 'node:url';
@@ -3716,6 +3716,156 @@ function checkBoardModuleColours() {
   if (bad === 0) ok(`${mods.length} module washes on the activity board — every heading and count ≥ 4.5:1 in both palettes (tightest ${worst.r.toFixed(2)}:1, module ${worst.num} ${worst.token} in ${worst.mode})`);
 }
 
+/* ═════════════════════════════════════════════════════════════════
+   1ak. BACKING-TRACK SNIPPETS — a class-activity step's `snippet`
+   ({ track, fromBar, bars }) loops a WINDOW of a real backing-track mp3,
+   placed by bar arithmetic off SNIPPET_TRACKS in app.js. None of it fails
+   loudly in the room: a window past the end of the file is a play button
+   that produces silence, a typo'd track name is a card that renders
+   nothing at all, and a bars count that disagrees with the step's own tab
+   just comes round early — a student mid-phrase concludes they are the one
+   who is wrong. All three look identical from the console board's preview
+   tile, so they are checked here.
+
+   Also pins the two-renderers rule for this field. buildSnippet() is called
+   by caStepHtml() in app.js and renderTeacherActivityDetail() in
+   teacher.js; drop either call and the day's loop is silently missing from
+   one of the two places it has to be (CLAUDE.md), which is exactly how the
+   ca-11 drills shipped invisible to the teacher in August.
+
+   ANCHOR: a track's `anchor` is its first downbeat in seconds and the one
+   number here that has to be measured by ear (?snipcal=1 on localhost).
+   While `anchorVerified` is false this WARNS rather than fails — an
+   unmeasured anchor is a snippet that starts in the wrong place, not a
+   broken build, and failing the push would block the very session doing the
+   measuring. It stays noisy on every push until someone flips it.
+   ═════════════════════════════════════════════════════════════════ */
+/* The source of one top-level `function name(...) { ... }`, brace-matched.
+   Null when there is no such function — a caller that renames one should be
+   told its check went blind, not quietly pass. Brace counting ignores braces
+   inside strings, template literals and comments (skipStringOrComment). */
+function jsFunctionBody(src, name) {
+  const m = new RegExp(`function\\s+${name}\\s*\\(`).exec(src);
+  if (!m) return null;
+  let i = src.indexOf('{', m.index);
+  if (i < 0) return null;
+  const start = i;
+  let depth = 0;
+  while (i < src.length) {
+    const c = src[i];
+    if (c === "'" || c === '"' || c === '`' || (c === '/' && (src[i + 1] === '/' || src[i + 1] === '*'))) {
+      const skip = skipStringOrComment(src, i);
+      if (skip > i) { i = skip; continue; }
+    }
+    if (c === '{') depth++;
+    else if (c === '}') { depth--; if (!depth) return src.slice(start, i + 1); }
+    i++;
+  }
+  return null;
+}
+const SNIPPET_TRACK_FIELDS = ['src', 'srcMetronome', 'srcSlow', 'srcSlowMetronome',
+                              'trackBpm', 'trackBpmSlow', 'feltBpm', 'beatsPerBar', 'durationSec'];
+function checkBackingSnippets() {
+  head('1ak. Backing-track snippets');
+  let bad = 0;
+  const flag = m => { err(m); problems++; bad++; };
+
+  let appSrc, teacherSrc, TRACKS;
+  try { appSrc = readFileSync(join(ROOT, 'app.js'), 'utf8'); }
+  catch { flag('app.js unreadable — 1ak cannot check this'); return; }
+  try { teacherSrc = readFileSync(join(ROOT, 'teacher.js'), 'utf8'); }
+  catch { flag('teacher.js unreadable — 1ak cannot check this'); return; }
+  try { TRACKS = loadConstObject(appSrc, 'SNIPPET_TRACKS'); }
+  catch (e) { flag(`app.js: could not load SNIPPET_TRACKS — ${e.message}`); return; }
+
+  /* Two renderers, one builder — both sides must call it, INSIDE the
+     function that renders a step and with comments stripped first. The
+     first cut of this searched app.js from caStepHtml() to the end of the
+     file and matched the words "see buildSnippet()" in the comment sitting
+     directly above the call: deleting the call left the check green. That
+     is the exact shape of dead ratchet the 2026-09-07 review found five of
+     — so this one is proved by deleting each call in turn and watching it
+     go red. */
+  const callsBuildSnippet = (src, fnName) => {
+    const body = jsFunctionBody(src, fnName);
+    return body !== null && /buildSnippet\s*\(/.test(stripJsComments(body));
+  };
+  if (jsFunctionBody(appSrc, 'caStepHtml') === null)
+    flag('app.js: no caStepHtml() found — 1ak cannot tell whether students get the snippet');
+  else if (!callsBuildSnippet(appSrc, 'caStepHtml'))
+    flag('app.js: caStepHtml() never calls buildSnippet() — a step\'s snippet would be invisible to students');
+  if (jsFunctionBody(teacherSrc, 'renderTeacherActivityDetail') === null)
+    flag('teacher.js: no renderTeacherActivityDetail() found — 1ak cannot tell whether the console preview gets the snippet');
+  else if (!callsBuildSnippet(teacherSrc, 'renderTeacherActivityDetail'))
+    flag('teacher.js: renderTeacherActivityDetail() never calls buildSnippet() — the console preview would not play the day\'s loop (two renderers, see CLAUDE.md)');
+
+  // Every track is fully specified, and its files exist.
+  const trackNames = Object.keys(TRACKS);
+  let unverified = 0;
+  for (const [name, tr] of Object.entries(TRACKS)) {
+    for (const f of SNIPPET_TRACK_FIELDS) {
+      if (tr[f] === undefined) { flag(`SNIPPET_TRACKS['${name}']: missing ${f}`); continue; }
+      if (f.startsWith('src')) {
+        if (!existsSync(join(ROOT, tr[f]))) flag(`SNIPPET_TRACKS['${name}'].${f}: ${tr[f]} does not exist`);
+      } else if (!(Number(tr[f]) > 0)) {
+        flag(`SNIPPET_TRACKS['${name}'].${f}: "${tr[f]}" is not a positive number`);
+      }
+    }
+    if (!(Number(tr.anchor) >= 0)) flag(`SNIPPET_TRACKS['${name}'].anchor: "${tr.anchor}" is not a number ≥ 0`);
+    // The slow tier is DERIVED from these two, never measured separately —
+    // a slow file that is not a straight time-stretch would put every
+    // window on that song out by a growing amount as it plays.
+    if (Number(tr.trackBpmSlow) >= Number(tr.trackBpm))
+      flag(`SNIPPET_TRACKS['${name}']: trackBpmSlow (${tr.trackBpmSlow}) must be below trackBpm (${tr.trackBpm}) — the Slow toggle is the slower file`);
+    if (!tr.anchorVerified) unverified++;
+  }
+
+  // Every step's snippet resolves, and its window lands inside the file.
+  let src;
+  try { src = readFileSync(join(ROOT, 'class-activities.js'), 'utf8'); }
+  catch { flag('class-activities.js unreadable — 1ak cannot check the steps'); return; }
+  const sandbox = { console };
+  sandbox.window = sandbox;
+  vm.createContext(sandbox);
+  try { vm.runInContext(src, sandbox, { filename: 'class-activities.js' }); }
+  catch { flag('class-activities.js failed to load — 1ak cannot check the steps'); return; }
+  const activities = sandbox.CLASS_ACTIVITIES || [];
+
+  let snippets = 0;
+  for (const a of activities) {
+    for (const [si, step] of (a.steps || []).entries()) {
+      const sn = step && step.snippet;
+      if (!sn) continue;
+      snippets++;
+      const where = `${a.id} step ${si + 1}`;
+      const tr = TRACKS[sn.track];
+      if (!tr) {
+        flag(`${where}: snippet track "${sn.track}" is not in SNIPPET_TRACKS (have: ${trackNames.join(', ') || 'none'})`);
+        continue;
+      }
+      if (!Number.isInteger(sn.fromBar) || sn.fromBar < 1)
+        flag(`${where}: fromBar "${sn.fromBar}" is not a bar number — bars count from 1`);
+      if (!Number.isInteger(sn.bars) || sn.bars < 1)
+        flag(`${where}: bars "${sn.bars}" is not a positive whole number of bars`);
+      if (sn.label === undefined || sn.label_es === undefined)
+        flag(`${where}: snippet needs both label and label_es — never ship an English-only string`);
+      if (!Number.isInteger(sn.fromBar) || !Number.isInteger(sn.bars)) continue;
+      // The fast file is the one anchor/durationSec are measured against;
+      // the slow tier is the same music, so checking one covers both.
+      const barSec = tr.beatsPerBar * 60 / tr.feltBpm;
+      const end = Number(tr.anchor) + (sn.fromBar - 1 + sn.bars) * barSec;
+      if (end > Number(tr.durationSec))
+        flag(`${where}: bars ${sn.fromBar}–${sn.fromBar + sn.bars - 1} end at ${end.toFixed(1)}s, past the end of ${sn.track} (${tr.durationSec}s) — the loop would play silence`);
+    }
+  }
+
+  if (unverified) {
+    warn(`${unverified} snippet track${unverified > 1 ? 's have' : ' has'} anchorVerified:false — its first downbeat has not been measured, so every snippet on that song starts in the wrong place. Measure it with ?snipcal=1 on localhost (see SNIPPET_TRACKS in app.js).`);
+    warnings++;
+  }
+  if (bad === 0) ok(`${snippets} backing-track snippet${snippets === 1 ? '' : 's'} across ${trackNames.length} track${trackNames.length === 1 ? '' : 's'} — every window lands inside its file, both renderers build them`);
+}
+
 (async function main() {
   if (LIVE_ONLY) {
     console.log(`${C.bold}Guitar Class — post-push live check${C.reset}`);
@@ -3758,6 +3908,7 @@ function checkBoardModuleColours() {
   checkChordBlitzRanks();
   checkConfigWriteGuard();
   checkBoardModuleColours();
+  checkBackingSnippets();
   if (!SKIP_LINKS) await checkLinks();
   else warn('skipping link check (--skip-links)');
   bumpServiceWorker();

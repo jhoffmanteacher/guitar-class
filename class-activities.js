@@ -194,6 +194,36 @@
            // the push on a finger outside 1-4.
            notes: [ { string: 'E', fret: 0, note: 'E', midi: 40 } ],
          },
+         // Optional — the real backing track, looping the exact bars this
+         // step drills, so a student practising eight bars of the verse
+         // hears those eight bars over and over instead of being turned
+         // loose on the whole five-minute record.
+         //
+         // The window is in BARS of the song, counted from bar 1, using the
+         // FELT pulse the course teaches ("the cure" reads 144 BPM and the
+         // room counts 72, one chord per bar). Put it on the step whose tab
+         // it matches and make the two agree: an eight-bar tab wants an
+         // eight-bar window, or the loop comes round while the student is
+         // mid-phrase and they will assume they are the ones who are wrong.
+         //
+         // `track` is a key of SNIPPET_TRACKS in app.js, which holds the
+         // four mp3 paths (fast/slow x with/without metronome), the tempo
+         // arithmetic, and the one measured number — the track's `anchor`,
+         // its first downbeat — that places every window on every step of
+         // that song. The card renders a Slow and a Metronome toggle off
+         // the same files the Song Journey page uses, and the student can
+         // only ever hear one thing at a time: starting the band stops the
+         // tab player, and starting the tab stops the band.
+         //
+         // Built by buildSnippet() in app.js, called from caStepHtml()
+         // there AND from renderTeacherActivityDetail() in teacher.js —
+         // one builder, so a step field cannot go invisible in the
+         // teacher's preview (CLAUDE.md, two renderers). Validated by
+         // checks.mjs 1ak: unknown track, a non-positive fromBar/bars, or
+         // a window running off the end of the file fails the push.
+         snippet: { track: 'the-cure', fromBar: 5, bars: 8,
+                    label:    'The verse, with the band',
+                    label_es: 'La estrofa, con la banda' },
        },
        // …
      ],
@@ -1486,6 +1516,9 @@ window.CLASS_ACTIVITIES = [
         label_es: 'La intro — A · C, dos veces',
         text: 'Read the tab. Index finger on every note, four beats each.<ol><li>Play each note once, slowly, and say its name</li><li>Play the tab, counting 1 2 3 4 out loud</li><li>Turn on the metronome at 60 BPM and play it again</li></ol>You\'ve got it when: the intro twice in a row at 60 BPM, no stops.',
         text_es: 'Lee la tablatura. Índice en cada nota, cuatro tiempos cada una.<ol><li>Toca cada nota una vez, despacio, y di su nombre</li><li>Toca la tablatura contando 1 2 3 4 en voz alta</li><li>Pon el metrónomo a 60 BPM y tócala otra vez</li></ol>Lo tienes cuando: la intro dos veces seguidas a 60 BPM, sin detenerte.',
+        snippet: { track: 'the-cure', fromBar: 1, bars: 4,
+                   label:    'The intro, with the band',
+                   label_es: 'La intro, con la banda' },
         tab: {
           caption: 'Intro · A C A C · low E string · 4 beats each',
           caption_es: 'Intro · A C A C · cuerda Mi grave · 4 tiempos cada una',
@@ -1502,6 +1535,9 @@ window.CLASS_ACTIVITIES = [
         label_es: 'La estrofa — A · C, F · C',
         text: 'Read the tab. Index finger on every note, four beats each.<ol><li>Play just the second half — F C F C — until the move between fret 1 and fret 8 feels easy</li><li>Play the whole tab slowly, counting out loud</li><li>Then play it at 60 BPM</li></ol>You\'ve got it when: two clean verses in a row at 60 BPM. Late on a note? Start moving the hand on beat 4.',
         text_es: 'Lee la tablatura. Índice en cada nota, cuatro tiempos cada una.<ol><li>Toca solo la segunda mitad — F C F C — hasta que el movimiento entre el traste 1 y el traste 8 se sienta fácil</li><li>Toca la tablatura entera despacio, contando en voz alta</li><li>Después tócala a 60 BPM</li></ol>Lo tienes cuando: dos estrofas limpias seguidas a 60 BPM. ¿Llegas tarde a una nota? Empieza a mover la mano en el tiempo 4.',
+        snippet: { track: 'the-cure', fromBar: 5, bars: 8,
+                   label:    'The verse, with the band',
+                   label_es: 'La estrofa, con la banda' },
         tab: {
           caption: 'Verse · A C, F C · low E string · 4 beats each',
           caption_es: 'Estrofa · A C, F C · cuerda Mi grave · 4 tiempos cada una',
@@ -1558,6 +1594,9 @@ window.CLASS_ACTIVITIES = [
         label_es: 'De la intro a la estrofa',
         text: 'Play the tab straight through: intro, then verse.<ol><li>60 BPM, counting out loud</li><li>Made a mistake? Keep going — don\'t restart</li><li>After a clean run, try 100 BPM</li></ol>You\'ve got it when: intro into verse at 60 BPM with no stops, then once at 100 BPM. Stuck on a move? Go back to rung 4 for one minute.',
         text_es: 'Toca la tablatura de principio a fin: intro, y luego estrofa.<ol><li>60 BPM, contando en voz alta</li><li>¿Te equivocaste? Sigue — no vuelvas a empezar</li><li>Después de una vuelta limpia, prueba a 100 BPM</li></ol>Lo tienes cuando: de la intro a la estrofa a 60 BPM sin detenerte, y luego una vez a 100 BPM. ¿Te trabas en un movimiento? Vuelve al peldaño 4 por un minuto.',
+        snippet: { track: 'the-cure', fromBar: 1, bars: 12,
+                   label:    'Intro into verse, with the band',
+                   label_es: 'De la intro a la estrofa, con la banda' },
         tab: {
           caption: 'Intro and verse · low E string · 4 beats per note',
           caption_es: 'Intro y estrofa · cuerda Mi grave · 4 tiempos por nota',
@@ -1663,6 +1702,9 @@ window.CLASS_ACTIVITIES = [
         label_es: 'A · C — cruza la cuerda',
         text: 'Read the tab. Four beats per note.<ol><li>Play each note once, slowly, and say its name</li><li>Play the tab, counting 1 2 3 4 out loud</li><li>Turn on the metronome at 60 BPM and play it again</li></ol>You\'ve got it when: A, C, A, C at 60 BPM, one string ringing at a time.',
         text_es: 'Lee la tablatura. Cuatro tiempos por nota.<ol><li>Toca cada nota una vez, despacio, y di su nombre</li><li>Toca la tablatura contando 1 2 3 4 en voz alta</li><li>Pon el metrónomo a 60 BPM y tócala otra vez</li></ol>Lo tienes cuando: A, C, A, C a 60 BPM, una sola cuerda sonando a la vez.',
+        snippet: { track: 'the-cure', fromBar: 5, bars: 4,
+                   label:    'The first half of the verse, with the band',
+                   label_es: 'La primera mitad de la estrofa, con la banda' },
         tab: {
           caption: 'A · C, twice · 4 beats each',
           caption_es: 'A · C, dos veces · 4 tiempos cada una',
@@ -1679,6 +1721,9 @@ window.CLASS_ACTIVITIES = [
         label_es: 'F · C — la respuesta',
         text: 'Read the tab. Four beats per note.<ol><li>Put both fingers down and leave them there — only the pick moves</li><li>Play the tab slowly, counting out loud</li><li>Then play it at 60 BPM</li></ol>You\'ve got it when: F, C, F, C at 60 BPM, four clean notes in a row.',
         text_es: 'Lee la tablatura. Cuatro tiempos por nota.<ol><li>Pon los dos dedos y déjalos ahí — solo se mueve la púa</li><li>Toca la tablatura despacio, contando en voz alta</li><li>Después tócala a 60 BPM</li></ol>Lo tienes cuando: F, C, F, C a 60 BPM, cuatro notas limpias seguidas.',
+        snippet: { track: 'the-cure', fromBar: 9, bars: 4,
+                   label:    'The second half of the verse, with the band',
+                   label_es: 'La segunda mitad de la estrofa, con la banda' },
         tab: {
           caption: 'F · C, twice · 4 beats each',
           caption_es: 'F · C, dos veces · 4 tiempos cada una',
@@ -1695,6 +1740,9 @@ window.CLASS_ACTIVITIES = [
         label_es: 'La estrofa completa',
         text: 'Read the tab — it joins the two pairs.<ol><li>Play just the C → F move, five times</li><li>Play the whole tab slowly, counting out loud</li><li>Then play it at 60 BPM. Made a mistake? Keep going — don\'t restart</li></ol>You\'ve got it when: two clean verses in a row at 60 BPM. Then add 10 BPM each time, or play along with the backing track on the Song Journey page.',
         text_es: 'Lee la tablatura — une los dos pares.<ol><li>Toca solo el movimiento de C → F, cinco veces</li><li>Toca la tablatura entera despacio, contando en voz alta</li><li>Después tócala a 60 BPM. ¿Te equivocaste? Sigue — no vuelvas a empezar</li></ol>Lo tienes cuando: dos estrofas limpias seguidas a 60 BPM. Después súbele 10 BPM cada vez, o toca con la pista de acompañamiento en la página de Recorrido de la canción.',
+        snippet: { track: 'the-cure', fromBar: 5, bars: 8,
+                   label:    'The whole verse, with the band',
+                   label_es: 'La estrofa completa, con la banda' },
         tab: {
           caption: 'Verse · A C A C, F C F C · 4 beats each',
           caption_es: 'Estrofa · A C A C, F C F C · 4 tiempos cada una',
@@ -1746,6 +1794,9 @@ window.CLASS_ACTIVITIES = [
         label_es: 'La intro — A · C, dos veces',
         text: 'Read the tab. Four beats per note.<ol><li>Play each note once, slowly, and say its name</li><li>Play the tab, counting 1 2 3 4 out loud</li><li>Turn on the metronome at 60 BPM and play it again</li></ol>You\'ve got it when: the intro twice in a row at 60 BPM, no stops.',
         text_es: 'Lee la tablatura. Cuatro tiempos por nota.<ol><li>Toca cada nota una vez, despacio, y di su nombre</li><li>Toca la tablatura contando 1 2 3 4 en voz alta</li><li>Pon el metrónomo a 60 BPM y tócala otra vez</li></ol>Lo tienes cuando: la intro dos veces seguidas a 60 BPM, sin detenerte.',
+        snippet: { track: 'the-cure', fromBar: 1, bars: 4,
+                   label:    'The intro, with the band',
+                   label_es: 'La intro, con la banda' },
         tab: {
           caption: 'Intro · A C A C · 4 beats each',
           caption_es: 'Intro · A C A C · 4 tiempos cada una',
@@ -1762,6 +1813,9 @@ window.CLASS_ACTIVITIES = [
         label_es: 'La estrofa — A · C, F · C',
         text: 'Read the tab. Four beats per note.<ol><li>Play just the second half — F C F C — until the move from C to F feels easy</li><li>Play the whole tab slowly, counting out loud</li><li>Then play it at 60 BPM</li></ol>You\'ve got it when: two clean verses in a row at 60 BPM.',
         text_es: 'Lee la tablatura. Cuatro tiempos por nota.<ol><li>Toca solo la segunda mitad — F C F C — hasta que el movimiento de C a F se sienta fácil</li><li>Toca la tablatura entera despacio, contando en voz alta</li><li>Después tócala a 60 BPM</li></ol>Lo tienes cuando: dos estrofas limpias seguidas a 60 BPM.',
+        snippet: { track: 'the-cure', fromBar: 5, bars: 8,
+                   label:    'The verse, with the band',
+                   label_es: 'La estrofa, con la banda' },
         tab: {
           caption: 'Verse · A C, F C · 4 beats each',
           caption_es: 'Estrofa · A C, F C · 4 tiempos cada una',
@@ -1782,6 +1836,9 @@ window.CLASS_ACTIVITIES = [
         label_es: 'El coro — D · F, C · G',
         text: 'Read the tab — this part is new. Four beats per note.<ol><li>Play each note once, slowly, and say its name</li><li>Play the first half (D F D F) until it feels easy, then the second half (C G C G)</li><li>Play the whole tab at 60 BPM</li></ol>You\'ve got it when: two clean choruses in a row at 60 BPM.',
         text_es: 'Lee la tablatura — esta parte es nueva. Cuatro tiempos por nota.<ol><li>Toca cada nota una vez, despacio, y di su nombre</li><li>Toca la primera mitad (D F D F) hasta que se sienta fácil, y luego la segunda mitad (C G C G)</li><li>Toca la tablatura entera a 60 BPM</li></ol>Lo tienes cuando: dos coros limpios seguidos a 60 BPM.',
+        snippet: { track: 'the-cure', fromBar: 13, bars: 8,
+                   label:    'The chorus, with the band',
+                   label_es: 'El coro, con la banda' },
         tab: {
           caption: 'Chorus · D F, C G · 4 beats each',
           caption_es: 'Coro · D F, C G · 4 tiempos cada una',
@@ -1838,6 +1895,9 @@ window.CLASS_ACTIVITIES = [
         label_es: 'La canción en orden',
         text: 'Play the tab straight through: intro, verse, chorus — then the verse and the chorus again.<ol><li>60 BPM, counting out loud</li><li>Made a mistake? Keep going — don\'t restart</li><li>After a clean run, try 100 BPM</li></ol>You\'ve got it when: intro, verse, chorus, verse, chorus at 60 BPM with no stops, then once at 100 BPM. Stuck where two sections meet? Go back to the handoffs for one minute.',
         text_es: 'Toca la tablatura de principio a fin: intro, estrofa, coro — y luego la estrofa y el coro otra vez.<ol><li>60 BPM, contando en voz alta</li><li>¿Te equivocaste? Sigue — no vuelvas a empezar</li><li>Después de una vuelta limpia, prueba a 100 BPM</li></ol>Lo tienes cuando: intro, estrofa, coro, estrofa, coro a 60 BPM sin detenerte, y luego una vez a 100 BPM. ¿Te trabas donde se juntan dos secciones? Vuelve a los enlaces por un minuto.',
+        snippet: { track: 'the-cure', fromBar: 1, bars: 20,
+                   label:    'The song in order, with the band',
+                   label_es: 'La canción en orden, con la banda' },
         tab: {
           caption: 'Intro, verse, chorus · 4 beats per note',
           caption_es: 'Intro, estrofa, coro · 4 tiempos por nota',

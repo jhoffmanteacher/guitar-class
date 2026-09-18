@@ -348,6 +348,18 @@
     'ca.print':                { en: 'Print this activity', es: 'Imprimir esta actividad' },
     'ca.printTitle':           { en: 'Print this activity as a handout', es: 'Imprimir esta actividad como hoja de trabajo' },
 
+    // ── Backing-track snippets (a step's `snippet` — see SNIPPET_TRACKS in
+    // app.js). "Pista" alone for the card's kind pill, matching the TAB
+    // card's one-word "Tab"/"Tablatura"; the full "pista de acompañamiento"
+    // of journey.playalongTitle is too long for a pill. "Compás" for bar,
+    // per the glossary at the top of this file.
+    'ca.snipKind':             { en: 'Track', es: 'Pista' },
+    'ca.snipPlay':             { en: 'Play with the band', es: 'Toca con la banda' },
+    'ca.snipStop':             { en: 'Stop', es: 'Detener' },
+    'ca.snipDefaultTitle':     { en: 'Play with the band', es: 'Toca con la banda' },
+    'ca.snipLoopNote':         { en: '{n} bars of the record, looping — the same bars as the tab. Stop it when you want.',
+                                 es: '{n} compases del disco, en bucle — los mismos compases que la tablatura. Detenlo cuando quieras.' },
+
     // ── Exit checks (kind:'check' class activities — see class-activities.js) ──
     // "Boleto de salida" is the everyday classroom term; "comprobación de
     // salida" reads like a technical manual. Song titles stay English in both

@@ -433,6 +433,12 @@ const IS_TEACHER_MODE = new URLSearchParams(window.location.search).has('teacher
 // Dev bypass is for local UI testing only. Only show/allow it when the site is
 // running on localhost — never on the live (GitHub Pages) site.
 const IS_LOCALHOST = ['localhost','127.0.0.1','[::1]'].includes(location.hostname);
+/* ?snipcal=1 turns on the backing-track snippet's live timecode, which is
+   how a track's `anchor` (its first downbeat) gets measured — see
+   SNIPPET_TRACKS. Localhost only, same rule as the dev bypass and
+   __forceGate: it is an authoring instrument, not something a student
+   should ever be able to switch on. */
+if(IS_LOCALHOST && new URLSearchParams(window.location.search).get('snipcal') === '1') window.__snipCal = true;
 function devBypass(){
   if(!IS_LOCALHOST){ console.warn('Dev bypass is disabled outside localhost.'); return; }
   currentUser = {uid:'dev-user',displayName:'Dev User',email:'dev@test.local',photoURL:null};
@@ -1294,6 +1300,215 @@ function buildTab(spec, opts){
   const body = renderTabBlock(spec.notes);
   if (!body) return '';
   return `<div class="tab">${headHtml}<div class="tab-body">${captionHtml}${controlsHtml}${body}</div></div>`;
+}
+
+/* ── Backing-track snippets (a step's `snippet`) ───────────────────────
+   A class-activity step that drills four or eight bars of a song can play
+   THOSE BARS of the real backing track, on a loop, right in the step —
+   instead of sending the student to the Song Journey page and turning them
+   loose on the whole five-minute record. Drilling the verse of "the cure"
+   used to mean starting at the top of the song every time and hearing the
+   verse once.
+
+   Nothing new is downloaded: this plays a WINDOW of the same mp3s the
+   Journey page already uses. sw.js serves byte-Range requests for audio/
+   and warms the full file in the background, so seeking into the middle is
+   cheap and cached after the first play.
+
+   THE WINDOW IS EXPRESSED IN BARS, NOT SECONDS — `{ track, fromBar, bars }`.
+   Seconds would have to be re-measured for every tempo tier and retyped for
+   every step; bars mean ONE measured number per song, the track's `anchor`,
+   fixes the whole grid:
+
+       barSeconds = beatsPerBar * 60 / feltBpm
+       start      = anchor + (fromBar - 1) * barSeconds
+       end        = start + bars * barSeconds
+
+   THE SLOW TIER IS DERIVED, NOT MEASURED. The two files are the same Moises
+   master, one of them time-stretched — 297.1 s at 144 BPM against 356.5 s at
+   120, a ratio of exactly 144/120 — so the slow file's grid is the fast
+   file's scaled by trackBpm/trackBpmSlow. That is the same rescale
+   journey.js does when its own Slow toggle flips mid-song. Measure `anchor`
+   against the FAST file only; never measure a second one.
+
+   FELT tempo, not the file's printed tempo. "the cure" reads 144 BPM but the
+   room counts 72, four felt beats to a chord (CLAUDE.md, settled song facts),
+   so feltBpm is 72 and beatsPerBar counts FELT beats. Get this wrong and the
+   loop is half or double the length the tab is.
+
+   ⚠️ `anchor` IS THE FIRST DOWNBEAT, IN SECONDS, AND IT HAS TO BE MEASURED
+   BY EAR — it is the one number nothing here can compute. Until it is,
+   `anchorVerified: false` keeps checks.mjs (1ak) warning on every push. To
+   measure it: open the activity on localhost with ?snipcal=1 on the URL and
+   press play — the card grows a live timecode. Note the reading on the first
+   beat of bar 1, put it in `anchor`, flip `anchorVerified` to true. A wrong
+   anchor puts every snippet on that song out by the SAME amount, so there is
+   exactly one number to fix, not one per step. */
+const SNIPPET_TRACKS = {
+  'the-cure': {
+    src:              'audio/olivia-rodrigo-the-cure-backing-Am-144bpm-440hz-rhythm-down.mp3',
+    srcMetronome:     'audio/olivia-rodrigo-the-cure-backing-Am-144bpm-440hz-rhythm-down-metronome.mp3',
+    srcSlow:          'audio/olivia-rodrigo-the-cure-backing-Am-120bpm-440hz-rhythm-down.mp3',
+    srcSlowMetronome: 'audio/olivia-rodrigo-the-cure-backing-Am-120bpm-440hz-rhythm-down-metronome.mp3',
+    trackBpm: 144, trackBpmSlow: 120,   // what the FILES are, for the slow-tier rescale
+    feltBpm: 72,                        // what the ROOM counts — 144 felt in half
+    beatsPerBar: 4,                     // felt beats per chord; one chord = one bar
+    durationSec: 297,                   // the fast file, so 1ak can catch a window past the end
+    anchor: 0,                          // ← MEASURE ME, then flip anchorVerified
+    anchorVerified: false,
+  },
+};
+/* Where a snippet's window falls in whichever tempo tier is playing.
+   Everything downstream (the loop, the bar dots, the tier switch) reads the
+   window from here so there is one copy of the bar arithmetic. */
+function snippetWindow(tr, spec, slow){
+  const scale = slow ? (tr.trackBpm / tr.trackBpmSlow) : 1;
+  const bar = (tr.beatsPerBar * 60 / tr.feltBpm) * scale;
+  const start = (tr.anchor * scale) + (Math.max(1, spec.fromBar) - 1) * bar;
+  return { start, end: start + Math.max(1, spec.bars) * bar, bar };
+}
+function snippetSrc(tr, slow, metro){
+  if(slow) return metro ? tr.srcSlowMetronome : tr.srcSlow;
+  return metro ? tr.srcMetronome : tr.src;
+}
+/* ONE builder, called by caStepHtml() in app.js AND
+   renderTeacherActivityDetail() in teacher.js — the same shape buildTab()
+   already has, which is how a step field satisfies the two-renderers rule
+   without two copies of it (CLAUDE.md). The preview plays for real: audio
+   needs nothing from inside #app, unlike the YouTube panel. */
+function buildSnippet(spec, opts){
+  if(!spec || !spec.track) return '';
+  const tr = SNIPPET_TRACKS[spec.track];
+  if(!tr) return '';
+  const bars = Math.max(1, spec.bars || 4);
+  const title = spec.label ? tf(spec, 'label') : t('ca.snipDefaultTitle');
+  const slowFelt = Math.round(tr.feltBpm * tr.trackBpmSlow / tr.trackBpm);
+  const data = JSON.stringify({ track: spec.track, fromBar: Math.max(1, spec.fromBar || 1), bars });
+  // One dot per bar of the loop, lit as it passes. A loop with no visible
+  // position is the thing that makes a student think it's broken — this is
+  // the same "the moving thing is the thing making noise" rule the TAB
+  // player's beat cursor follows.
+  const dots = Array.from({ length: bars }, (_, i) =>
+    `<span class="snip-bar"><span class="snip-bar-n">${i + 1}</span></span>`).join('');
+  const cal = (typeof IS_LOCALHOST !== 'undefined' && IS_LOCALHOST && window.__snipCal)
+    ? `<div class="snip-cal">0.00 s</div>` : '';
+  return `<div class="snip" data-snip="${escAttr(data)}">`
+    + `<div class="snip-head"><span class="snip-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" style="width:1em;height:1em;vertical-align:-0.15em"><path d="M3 12h2l2-6 3 14 3-11 2 5h6"/></svg></span>`
+    + `<span class="snip-title">${escHtml(title)}</span><span class="snip-kind">${escHtml(t('ca.snipKind'))}</span></div>`
+    + `<div class="snip-body">`
+    + `<div class="snip-controls">`
+    + `<button type="button" class="snip-play" onclick="snipToggle(this)">${snipPlayBtnHtml(false)}</button>`
+    + `<button type="button" class="snip-toggle snip-slow" aria-pressed="false" onclick="snipSetTier(this,'slow')">&#x1F422; ${escHtml(t('journey.slow', { bpm: slowFelt }))}</button>`
+    + `<button type="button" class="snip-toggle snip-metro" aria-pressed="false" onclick="snipSetTier(this,'metro')">&#x1F3B5; ${escHtml(t('tools.metronome'))}</button>`
+    + `</div>`
+    + `<div class="snip-bars" aria-hidden="true">${dots}</div>`
+    + `<div class="snip-note">${escHtml(t('ca.snipLoopNote', { n: bars }))}</div>`
+    + cal
+    + `</div></div>`;
+}
+function snipPlayBtnHtml(playing){
+  return (playing ? '&#x25A0; ' : '&#x25B6; ')
+    + `<span class="snip-play-label">${escHtml(t(playing ? 'ca.snipStop' : 'ca.snipPlay'))}</span>`;
+}
+/* One snippet plays at a time, and it shares the site's one-sound-at-a-time
+   rule with the TAB player: starting either stops the other (see
+   playSequence and stopAllDemoAudio). Two unsynced sources in one step —
+   the tab's synthesised notes over the band — is the one way this feature
+   gets genuinely confusing, so it is closed off at both ends. */
+let snipState = null;
+function snipStop(){
+  if(!snipState) return;
+  const { card, audio, raf } = snipState;
+  snipState = null;                    // first, so the tick's own guard bails
+  if(raf) cancelAnimationFrame(raf);
+  try { audio.pause(); audio.src = ''; } catch(e) {}
+  if(card && card.isConnected){
+    const btn = card.querySelector('.snip-play');
+    if(btn){ btn.innerHTML = snipPlayBtnHtml(false); btn.classList.remove('playing'); }
+    card.querySelectorAll('.snip-bar').forEach(d => d.classList.remove('bar-now'));
+  }
+}
+function snipToggle(btn){
+  const card = btn.closest('.snip');
+  if(!card) return;
+  if(snipState && snipState.card === card){ snipStop(); return; }
+  snipStop();
+  // Everything else the site can play, silenced — including a TAB sequence
+  // running in a sibling step.
+  if(typeof stopAllDemoAudio === 'function') stopAllDemoAudio();
+  let spec; try { spec = JSON.parse(card.dataset.snip); } catch(e) { return; }
+  const tr = spec && SNIPPET_TRACKS[spec.track];
+  if(!tr) return;
+  const slow = card.dataset.slow === '1', metro = card.dataset.metro === '1';
+  const win = snippetWindow(tr, spec, slow);
+  const audio = new Audio();
+  audio.preload = 'auto';
+  audio.loop = false;                  // the window is looped by hand, below
+  audio.src = snippetSrc(tr, slow, metro);
+  snipState = { card, audio, spec, tr, win, raf: 0, cal: card.querySelector('.snip-cal') };
+  btn.innerHTML = snipPlayBtnHtml(true);
+  btn.classList.add('playing');
+  // preload='none' would leave currentTime unsettable until metadata lands;
+  // seek as soon as it does, whichever side of the event we are on.
+  const begin = () => {
+    if(!snipState || snipState.audio !== audio) return;
+    try { audio.currentTime = win.start; } catch(e) {}
+    audio.play().catch(() => {});
+    snipState.raf = requestAnimationFrame(snipTick);
+  };
+  if(audio.readyState >= 1) begin();
+  else audio.addEventListener('loadedmetadata', begin, { once: true });
+}
+/* The loop itself. rAF rather than `timeupdate`, which fires about four
+   times a second — at that granularity the window would overrun by up to a
+   quarter of a beat and the seam would swing audibly from lap to lap. At
+   frame rate the overshoot is one frame, and the seek back is the only
+   artefact left (a short stumble; an mp3 cannot be looped gaplessly by
+   seeking). */
+function snipTick(){
+  if(!snipState) return;
+  const { audio, win, card, spec, cal } = snipState;
+  if(!card.isConnected){ snipStop(); return; }   // a re-render pulled the card out
+  const now = audio.currentTime;
+  if(now >= win.end - 0.02 || now < win.start - 0.5){
+    try { audio.currentTime = win.start; } catch(e) {}
+  }
+  const bar = Math.max(0, Math.min(spec.bars - 1, Math.floor((now - win.start) / win.bar)));
+  card.querySelectorAll('.snip-bar').forEach((d, i) => d.classList.toggle('bar-now', i === bar));
+  if(cal) cal.textContent = now.toFixed(2) + ' s';
+  snipState.raf = requestAnimationFrame(snipTick);
+}
+/* Slow and Metronome are independent, exactly as on the Journey page, and
+   either can be set before playing or flipped mid-loop. Flipping mid-loop
+   keeps the MUSICAL position — how far into the window we are, in bars —
+   rather than the second, because the two files run on different clocks. */
+function snipSetTier(btn, which){
+  const card = btn.closest('.snip');
+  if(!card) return;
+  const on = btn.getAttribute('aria-pressed') !== 'true';
+  btn.setAttribute('aria-pressed', on ? 'true' : 'false');
+  btn.classList.toggle('on', on);
+  card.dataset[which === 'slow' ? 'slow' : 'metro'] = on ? '1' : '';
+  if(!snipState || snipState.card !== card) return;
+  const { audio, spec, tr } = snipState;
+  const slow = card.dataset.slow === '1', metro = card.dataset.metro === '1';
+  const barsIn = (audio.currentTime - snipState.win.start) / snipState.win.bar;
+  const win = snippetWindow(tr, spec, slow);
+  snipState.win = win;
+  const at = win.start + (isFinite(barsIn) && barsIn > 0 ? barsIn : 0) * win.bar;
+  const src = snippetSrc(tr, slow, metro);
+  if(audio.getAttribute('src') === src || audio.src.endsWith(src)){
+    try { audio.currentTime = at; } catch(e) {}
+    return;
+  }
+  const wasPlaying = !audio.paused;
+  const resume = () => {
+    try { audio.currentTime = at; } catch(e) {}
+    if(wasPlaying) audio.play().catch(() => {});
+  };
+  audio.addEventListener('loadedmetadata', resume, { once: true });
+  audio.src = src;
+  audio.load();
 }
 
 function toggleTabChoice(btn){
@@ -6331,6 +6546,7 @@ function stopPlaySeq(){
    never scores the speakers. */
 function stopAllDemoAudio(){
   stopPlaySeq();
+  snipStop();   // a looping backing-track snippet is site-generated sound as well
   chordStrumTimeouts.forEach(clearTimeout);
   chordStrumTimeouts = [];
   erStopAll();
@@ -6348,6 +6564,7 @@ function playSequence(midis, bpm, btnEl){
     if(wasSame) return;
   }
   if(window.coachMicLive) return;  // but no NEW demo audio while the Coach listens
+  snipStop();                      // one sound at a time — the band yields to the tab
   const interval = 60000 / (bpm || 60);
   /* Beat cursor: when the button lives inside a TAB, highlight the sounding
      column — the moving thing is the thing making noise (Ableton's rule). */
@@ -7902,6 +8119,10 @@ function caStepHtml(a, step, si, isOpen, isDone){
     parts.push(`<button type="button" class="rp-trigger" onclick="loadPanel('youtube','${escAttr(url)}','${escAttr(t('nav.classActivities'))}','YouTube')">&#x25B6; ${vLabel}</button>`);
   }
   if(step.tab) parts.push(buildTab(step.tab, { keyPrefix: `bpm:ca:${a.id}:${si}:tab` }));
+  /* Right under the tab on purpose: the snippet is those same bars played by
+     the band, so the two read as one pair. ONE builder, shared with
+     teacher.js's renderTeacherActivityDetail() — see buildSnippet(). */
+  if(step.snippet) parts.push(buildSnippet(step.snippet));
   /* Same step-level drill widgets the module sets get (shuffle/deck/ear) —
      activities replace paper self-quizzes the same way module steps do. The
      key namespace is `<activityId>-s<i>`, which can't collide with the
@@ -8276,6 +8497,12 @@ function printActivity(ev, id){
 const TCK_CHECK_SVG_INLINE = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" style="width:14px;height:14px"><path d="M5 12l5 5L19 7"/></svg>';
 function caOnToggle(details){
   caOpenId = details.open ? details.dataset.id : (caOpenId === details.dataset.id ? null : caOpenId);
+  // Closing the card hides a playing snippet's Stop button without stopping
+  // the sound — an <audio> element keeps going whether or not anything on
+  // screen can reach it. (A step COLLAPSE deliberately doesn't do this: the
+  // ladder is a single-open accordion, so opening the next step would cut
+  // off the loop the student just started.)
+  if(!details.open && snipState && details.contains(snipState.card)) snipStop();
 }
 // Steps within one activity are a single-open accordion, independent of the
 // module-station .dp builder's own step/focus-mode machinery (deliberately —
@@ -8608,6 +8835,11 @@ document.addEventListener('visibilitychange', () => {
 function renderClassActivities(){
   const bodyEl = document.getElementById('class-activities-body');
   if(!bodyEl) return;
+  // This rebuilds every card, so a snippet playing in one of them is about to
+  // be detached — and a detached <audio> keeps playing with nothing left on
+  // screen to stop it. (snipTick's own isConnected guard is the backstop for
+  // a card pulled out some other way; this is the one path we know about.)
+  snipStop();
   // Recomputed up front — the gate intro line and the resume card below both
   // read body.ca-gated, and a completion just made in THIS render pass
   // (caToggleComplete/ecSubmit, both call this) has to be reflected before

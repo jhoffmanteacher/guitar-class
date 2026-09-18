@@ -5,6 +5,23 @@ Notable changes to the Guitar Class site. Newest first.
 For the full session-by-session history (and the reasoning behind each change),
 see `WORKFLOW.md` and the git commit log.
 
+## 2026-09-18 — Play "the cure" with the band, a few bars at a time
+
+### Added
+
+- **The "the cure" activities now play the real backing track, looping just
+  the bars you are working on.** Practising the eight bars of the verse used
+  to mean opening the Song Journey page and starting the whole song from the
+  top — you got your eight bars once, then the song moved on without you.
+  Now the step itself has a Play with the band button that loops those exact
+  bars until you stop it, with a dot lighting up for each bar so you can see
+  where you are.
+- **A Slow toggle and a Metronome toggle on every one of them**, the same two
+  the Song Journey page has. Slow is the 60-BPM take — the tempo the steps
+  ask for.
+- The intro, the verse, the chorus and the full run-through all have their
+  own loop, across all three "the cure" activities.
+
 ## 2026-09-17 — "Today" is "In-Class Activities" again
 
 ### Changed

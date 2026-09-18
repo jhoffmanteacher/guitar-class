@@ -1636,6 +1636,13 @@ function renderTeacherActivityDetail(id){
     // suppressCoach: the Listening Coach mic-check button opens a panel
     // that's also inside #app — pointless (and confusing) to show here.
     if(s.tab) media.push(buildTab(s.tab,{keyPrefix:`bpm:ca-preview:${a.id}:${si}:tab`,suppressCoach:true}));
+    /* The backing-track snippet, from the SAME builder the student card uses
+       (buildSnippet in app.js, loaded before this file) — a step field with
+       one renderer can't go invisible on one side of it, which is the whole
+       point of the two-renderers rule. Nothing here needs #app: it is an
+       <audio> element, unlike the YouTube panel above. It plays for real, so
+       Jonathan can hear the day's loop before class. */
+    if(s.snippet && typeof buildSnippet==='function') media.push(buildSnippet(s.snippet));
     // Drills are playable in the preview — this is where the day's activity
     // gets checked before class, and a quiz you can't try isn't previewed.
     // Own key namespace (`ca-preview-…`) so a drill open here and the same
