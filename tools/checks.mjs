@@ -3740,6 +3740,48 @@ function checkBoardModuleColours() {
    broken build, and failing the push would block the very session doing the
    measuring. It stays noisy on every push until someone flips it.
    ═════════════════════════════════════════════════════════════════ */
+/* Duration of an mp3, in seconds, by walking its frame headers — no decode
+   and no dependency. Layer III only, MPEG 1 / 2 / 2.5, CBR or VBR (it sums
+   real frames rather than trusting the first one's bitrate).
+
+   Used by 1ak to compare a full mix against its rhythm-down twin. Two mixes
+   of the same song at the same tempo are the same performance with different
+   stems muted, so they have to be the same length; a mismatch means one of
+   them was trimmed or stretched differently, and THAT is the failure nobody
+   can hear — both files play fine on their own, and the Guitar toggle just
+   jumps the loop somewhere into the song. */
+const MP3_BITRATES = {
+  1: [0,32,40,48,56,64,80,96,112,128,160,192,224,256,320,0],   // MPEG 1 Layer III
+  2: [0,8,16,24,32,40,48,56,64,80,96,112,128,144,160,0],       // MPEG 2/2.5 Layer III
+};
+const MP3_RATES = { 3: [44100,48000,32000], 2: [22050,24000,16000], 0: [11025,12000,8000] };
+function mp3DurationSec(file) {
+  let buf;
+  try { buf = readFileSync(file); } catch { return null; }
+  let i = 0;
+  // Skip an ID3v2 tag if there is one (syncsafe size, 7 bits per byte).
+  if (buf.length > 10 && buf[0] === 0x49 && buf[1] === 0x44 && buf[2] === 0x33)
+    i = 10 + ((buf[6] << 21) | (buf[7] << 14) | (buf[8] << 7) | buf[9]);
+  let samples = 0, rate = 0, frames = 0;
+  while (i < buf.length - 4) {
+    if (buf[i] !== 0xFF || (buf[i + 1] & 0xE0) !== 0xE0) { i++; continue; }
+    const verBits = (buf[i + 1] >> 3) & 3;          // 3=MPEG1, 2=MPEG2, 0=MPEG2.5
+    const layer = (buf[i + 1] >> 1) & 3;            // 1 = Layer III
+    const brIdx = (buf[i + 2] >> 4) & 15;
+    const srIdx = (buf[i + 2] >> 2) & 3;
+    const pad = (buf[i + 2] >> 1) & 1;
+    if (layer !== 1 || verBits === 1 || srIdx === 3 || brIdx === 0 || brIdx === 15) { i++; continue; }
+    const sr = (MP3_RATES[verBits] || [])[srIdx];
+    const br = MP3_BITRATES[verBits === 3 ? 1 : 2][brIdx] * 1000;
+    if (!sr || !br) { i++; continue; }
+    const spf = verBits === 3 ? 1152 : 576;         // samples per frame
+    const len = Math.floor(spf / 8 * br / sr) + pad;
+    if (len < 4) { i++; continue; }
+    samples += spf; rate = sr; frames++;
+    i += len;
+  }
+  return (frames && rate) ? samples / rate : null;
+}
 /* The source of one top-level `function name(...) { ... }`, brace-matched.
    Null when there is no such function — a caller that renames one should be
    told its check went blind, not quietly pass. Brace counting ignores braces
@@ -3827,6 +3869,27 @@ function checkBackingSnippets() {
     for (const f of FULL_PAIRS.flat()) {
       if (tr[f] && !existsSync(join(ROOT, tr[f]))) flag(`SNIPPET_TRACKS['${name}'].${f}: ${tr[f]} does not exist`);
     }
+    /* A full mix and its rhythm-down twin are the same performance at the
+       same tempo with different stems muted, so they are the same length.
+       A mismatch means one was trimmed, stretched or count-in'd differently
+       — and that is the one failure nobody can hear: both files play fine
+       alone, and the Guitar toggle simply jumps the loop somewhere else in
+       the song. 0.25 s of slack absorbs mp3 encoder padding (~50 ms) while
+       still catching a real re-trim. */
+    const TWINS = [['srcFull', 'src'], ['srcFullSlow', 'srcSlow'],
+                   ['srcFullMetronome', 'srcMetronome'], ['srcFullSlowMetronome', 'srcSlowMetronome']];
+    for (const [full, plain] of TWINS) {
+      if (!tr[full] || !existsSync(join(ROOT, tr[full])) || !existsSync(join(ROOT, tr[plain]))) continue;
+      const a = mp3DurationSec(join(ROOT, tr[full])), b = mp3DurationSec(join(ROOT, tr[plain]));
+      if (a === null || b === null) { flag(`SNIPPET_TRACKS['${name}']: could not read the length of ${a === null ? tr[full] : tr[plain]} — not a readable mp3?`); continue; }
+      if (Math.abs(a - b) > 0.25)
+        flag(`SNIPPET_TRACKS['${name}']: ${full} is ${a.toFixed(2)}s but ${plain} is ${b.toFixed(2)}s (${(a - b > 0 ? '+' : '')}${(a - b).toFixed(2)}s) — the two mixes must be the same performance, so the Guitar toggle would jump the loop. Re-export the full mix at the same tempo with no count-in and no re-trim.`);
+    }
+    /* durationSec is hand-typed and is what catches a window running off the
+       end of the track, so a typo there quietly disarms that check. */
+    const realDur = existsSync(join(ROOT, tr.src)) ? mp3DurationSec(join(ROOT, tr.src)) : null;
+    if (realDur !== null && Math.abs(realDur - Number(tr.durationSec)) > 1.5)
+      flag(`SNIPPET_TRACKS['${name}'].durationSec says ${tr.durationSec} but ${tr.src} is ${realDur.toFixed(1)}s — fix the number, it is what stops a window running past the end`);
     if (!(Number(tr.anchor) >= 0)) flag(`SNIPPET_TRACKS['${name}'].anchor: "${tr.anchor}" is not a number ≥ 0`);
     // The slow tier is DERIVED from these two, never measured separately —
     // a slow file that is not a straight time-stretch would put every
