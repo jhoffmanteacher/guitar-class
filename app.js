@@ -1452,8 +1452,10 @@ const SNIPPET_TRACKS = {
     feltBpm: 123,                       // counted at record speed, not halved
     beatsPerBar: 4,
     durationSec: 239,
-    anchor: 0,                          // ← MEASURE ME, then flip anchorVerified
-    anchorVerified: false,
+    // Measured 2026-09-18 with ?snipcal=1 -> Find the first click, off the
+    // rhythm-down-metronome file's own first click.
+    anchor: 1.135,
+    anchorVerified: true,
   },
 };
 /* Does this track have a full mix at all? Both tiers or neither — the toggle
