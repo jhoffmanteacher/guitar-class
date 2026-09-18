@@ -1085,16 +1085,57 @@ body.t-wide .t-main{max-width:none}
 .t-board-sortnote{font-size:0.75rem;color:var(--text3)}
 
 /* A module's block. The header folds it. Only modules that hold something
-   are rendered at all — see the sectionHtml comment in teacher.js. */
-.t-board-section{border:1px solid var(--border);border-radius:var(--radius);background:var(--bg);margin-bottom:10px}
+   are rendered at all — see the sectionHtml comment in teacher.js.
+
+   ── A colour per module ──
+   Folded up, thirteen sections are thirteen identical gray bars, and this
+   board gets read at a glance between periods. Each module carries a hue:
+   a line down its left edge and a wash behind its heading. One hue drives
+   both, out of the three --sec-* custom properties set per module below,
+   so a module is one line of CSS rather than four. The wash is
+   TRANSLUCENT and sits over --bg3, so both palettes come out of the same
+   numbers — only the line's lightness is nudged for dark mode. Unsorted
+   (module 0) is the pen, not a module, so it stays near-neutral. */
+.t-board-section{--sec-h:220;--sec-s:4%;--sec-l:50%;--sec-a:0;
+  border:1px solid var(--border);border-left:3px solid hsl(var(--sec-h),var(--sec-s),var(--sec-l));
+  border-radius:var(--radius);background:var(--bg);margin-bottom:10px}
+.t-board-section[data-module="0"]{--sec-h:40;--sec-s:7%;--sec-a:.10}
+.t-board-section[data-module="1"]{--sec-h:265;--sec-s:54%;--sec-a:.16}
+.t-board-section[data-module="2"]{--sec-h:235;--sec-s:54%;--sec-a:.16}
+.t-board-section[data-module="3"]{--sec-h:208;--sec-s:54%;--sec-a:.16}
+.t-board-section[data-module="4"]{--sec-h:188;--sec-s:54%;--sec-a:.16}
+.t-board-section[data-module="5"]{--sec-h:165;--sec-s:54%;--sec-a:.16}
+.t-board-section[data-module="6"]{--sec-h:142;--sec-s:54%;--sec-a:.16}
+.t-board-section[data-module="7"]{--sec-h:112;--sec-s:54%;--sec-a:.16}
+.t-board-section[data-module="8"]{--sec-h:82;--sec-s:54%;--sec-a:.18}
+.t-board-section[data-module="9"]{--sec-h:48;--sec-s:58%;--sec-a:.18}
+.t-board-section[data-module="10"]{--sec-h:22;--sec-s:58%;--sec-a:.16}
+.t-board-section[data-module="11"]{--sec-h:355;--sec-s:54%;--sec-a:.16}
+.t-board-section[data-module="12"]{--sec-h:328;--sec-s:54%;--sec-a:.16}
+.t-board-section[data-module="13"]{--sec-h:295;--sec-s:54%;--sec-a:.16}
+/* background-COLOR plus a flat gradient, not one `background`: the wash has
+   to sit ON --bg3 rather than replace it, and this keeps the heading's real
+   surface resolvable (checks.mjs 1s reads background/background-color). */
 .t-board-sechead{display:flex;align-items:center;gap:8px;padding:8px 10px;cursor:pointer;
-  font-weight:600;font-size:0.875rem;color:var(--text);background:var(--bg3);border-radius:var(--radius) var(--radius) 0 0}
+  font-weight:600;font-size:0.875rem;color:var(--text);background-color:var(--bg3);
+  background-image:linear-gradient(hsla(var(--sec-h),var(--sec-s),var(--sec-l),var(--sec-a)),hsla(var(--sec-h),var(--sec-s),var(--sec-l),var(--sec-a)));
+  border-radius:var(--radius) var(--radius) 0 0}
 .t-board-caret{width:7px;height:7px;border-right:2px solid var(--text3);border-bottom:2px solid var(--text3);
   transform:rotate(45deg);transition:transform .15s;flex:0 0 auto;margin-left:2px}
 .t-board-closed .t-board-caret{transform:rotate(-45deg)}
 .t-board-closed .t-board-secbody{display:none}
 .t-board-count{margin-left:auto;color:var(--text3);font-weight:400;font-size:0.8125rem}
 .t-board-secbody{padding:10px}
+/* Very slight banding down a module's cards, so a long section reads as rows
+   rather than one wall. --bg2 is the site's own "next surface up" in both
+   palettes, which keeps this a half-step and not a stripe. Direct children
+   only: the Archived <details> and its cards sit outside the count. */
+.t-board-secbody>.t-board-card:nth-child(even){background:var(--bg2)}
+/* The module line is a mid-tone on white; on the dark palette it wants a
+   little more lightness to stay visible against --bg. Set on the same
+   selector as the defaults above, after them, so the per-module hue rules
+   (which never set --sec-l) are unaffected. */
+@media(prefers-color-scheme:dark){.t-board-section{--sec-l:57%}}
 .t-board-arch{margin-top:4px;font-size:0.8125rem}
 .t-board-arch>summary{cursor:pointer;color:var(--text3);padding:4px 2px}
 
