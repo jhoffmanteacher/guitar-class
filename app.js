@@ -1638,6 +1638,34 @@ function snipToggle(btn){
   if(audio.readyState >= 1) begin();
   else audio.addEventListener('loadedmetadata', begin, { once: true });
 }
+/* ── Why the bar dots lag audio.currentTime ────────────────────────────
+   currentTime is the DECODER's position, not what has reached the speakers:
+   the buffered audio is still on its way out, by tens of milliseconds on
+   internal speakers and by a couple of hundred over Bluetooth. A dot that
+   lights exactly when currentTime crosses a bar boundary therefore lights
+   BEFORE the downbeat is audible, which is what it looks like — the numbers
+   running slightly ahead of the music (Jonathan, 2026-09-18).
+
+   There is no API that reports this for an <audio> element (AudioContext has
+   outputLatency, but the snippet player is a plain media element, not routed
+   through the context), so it is a constant. 80 ms is about right for a
+   laptop's own speakers; Bluetooth wants far more. `?snipcal=1&lat=<ms>`
+   overrides it live so the real number can be found by eye rather than
+   guessed — if a value other than 80 turns out to be right on the room's
+   machines, change the constant.
+
+   This shifts ONLY the dots. The loop's own seek stays on the true decoder
+   position: seeking when the decoder reaches the end is what lets the last
+   buffered milliseconds play out, so compensating there would clip the loop
+   short every lap. */
+const SNIP_OUTPUT_LATENCY = 0.08;
+function snipLatency(){
+  if(window.__snipCal){
+    const ms = Number(new URLSearchParams(window.location.search).get('lat'));
+    if(isFinite(ms) && ms >= 0) return ms / 1000;
+  }
+  return SNIP_OUTPUT_LATENCY;
+}
 /* The loop itself. rAF rather than `timeupdate`, which fires about four
    times a second — at that granularity the window would overrun by up to a
    quarter of a beat and the seam would swing audibly from lap to lap. At
@@ -1652,7 +1680,10 @@ function snipTick(){
   if(now >= win.end - 0.02 || now < win.start - 0.5){
     try { audio.currentTime = win.start; } catch(e) {}
   }
-  const bar = Math.max(0, Math.min(spec.bars - 1, Math.floor((now - win.start) / win.bar)));
+  // `heard` is roughly where the music is by the time it reaches the room —
+  // see SNIP_OUTPUT_LATENCY. The dots follow the ears, not the decoder.
+  const heard = now - snipLatency();
+  const bar = Math.max(0, Math.min(spec.bars - 1, Math.floor((heard - win.start) / win.bar)));
   card.querySelectorAll('.snip-bar').forEach((d, i) => d.classList.toggle('bar-now', i === bar));
   if(cal){ const tEl = cal.querySelector('.snip-cal-time'); if(tEl) tEl.textContent = now.toFixed(2) + ' s'; }
   snipState.raf = requestAnimationFrame(snipTick);

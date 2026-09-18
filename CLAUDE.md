@@ -415,6 +415,15 @@ not be taken on the deployed site — which is where Jonathan was standing
 (2026-09-18). A wrong anchor puts every snippet on that song
 out by the same amount, so there's exactly one number to fix.
 
+**The bar dots run ~80 ms behind `audio.currentTime`** — `SNIP_OUTPUT_LATENCY`.
+currentTime is the decoder's position, not what has left the speakers, so a
+dot lighting exactly on the boundary lights before the downbeat is audible
+(reported as the numbers running early, 2026-09-18). No API reports this for
+a media element, so it is a constant; `?snipcal=1&lat=<ms>` overrides it live
+to find the real figure. It shifts the DOTS only — the loop's seek stays on
+the true decoder position, or the last buffered milliseconds would be clipped
+off every lap.
+
 One builder, `buildSnippet()`, called by `caStepHtml()` (app.js) and
 `renderTeacherActivityDetail()` (teacher.js) — same shape as `buildTab()`,
 which is how a step field satisfies the two-renderers rule without two
