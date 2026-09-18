@@ -878,14 +878,22 @@ the riff IS the turned-down part, so ca-10's play-along was drums and bass
 with a riff-shaped hole. The `full` pair fixes it per song; see the Guitar
 toggle under the snippet section.
 
-**The A=440 labelling is unverified.** Moises names its exports by the pitch
-it DETECTS in the record (the source files read 441/442/443 Hz), and nothing
-in `audio/` has been confirmed as actually corrected — the 2026-09-18 Seven
-Nation Army full mixes came in byte-for-byte the size of their 442 originals.
-Every file carries the same label and the same treatment, so the library is
-at least self-consistent, which is what matters for the Guitar toggle: what
-would be audible is one mix corrected and its twin not. Before correcting any
-single file, play it against its twin — locked means leave both alone.
+**Moises names its exports by the pitch it DETECTS** in the record, so the
+source files in Drive read 441/442/443 Hz; what lands in `audio/` is the
+440 export. Jonathan makes these himself and has confirmed the Seven Nation
+Army pair (2026-09-18).
+
+**Don't try to infer that from file size** — every track here is CBR 320 or
+192, where size is duration times bitrate and nothing else, so a 440 export
+and its 442 source of the same length weigh exactly the same. A 2026-09-18
+session read that coincidence as evidence the files had only been renamed.
+It isn't evidence of anything.
+
+The rule that does matter: **never pitch-correct one file on its own.** A
+uniform library costs students a few cents against the tuner; one mix
+corrected and its twin not is audible every time the Guitar toggle is
+pressed. And correct by SHIFTING, never resampling — a resample changes the
+length, so the two mixes drift apart as the loop runs and 1ak fails the push.
 
 **Every track ships at A=440** — `tuner.js` is hardcoded to A4=440Hz, so a track
 mastered at any other reference will sound out of tune against it. Export at 440
