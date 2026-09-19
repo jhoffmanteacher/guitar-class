@@ -1842,7 +1842,12 @@ window.CLASS_ACTIVITIES = [
         label_es: 'El coro — D · F, C · G',
         text: 'Read the tab — this part is new. Four beats per note.<ol><li>Play each note once, slowly, and say its name</li><li>Play the first half (D F D F) until it feels easy, then the second half (C G C G)</li><li>Play the whole tab at 60 BPM</li></ol>You\'ve got it when: two clean choruses in a row at 60 BPM.',
         text_es: 'Lee la tablatura — esta parte es nueva. Cuatro tiempos por nota.<ol><li>Toca cada nota una vez, despacio, y di su nombre</li><li>Toca la primera mitad (D F D F) hasta que se sienta fácil, y luego la segunda mitad (C G C G)</li><li>Toca la tablatura entera a 60 BPM</li></ol>Lo tienes cuando: dos coros limpios seguidos a 60 BPM.',
-        snippet: { track: 'the-cure', fromBar: 13, bars: 8,
+        // The chorus is at bar 21, not 13: the verse's eight bars play TWICE
+        // (5-12 and 13-20) before it. Measured off the mix — bars 13-20 are
+        // harmonically the verse again, and the chorus is the louder section
+        // that follows. A window at 13 had the band playing Am-C-F-C under a
+        // student reading D-F-C-G.
+        snippet: { track: 'the-cure', fromBar: 21, bars: 8,
                    label:    'The chorus, with the band',
                    label_es: 'El coro, con la banda' },
         tab: {
@@ -1899,14 +1904,19 @@ window.CLASS_ACTIVITIES = [
       {
         label:    'The song in order',
         label_es: 'La canción en orden',
-        text: 'Play the tab straight through: intro, verse, chorus — then the verse and the chorus again.<ol><li>60 BPM, counting out loud</li><li>Made a mistake? Keep going — don\'t restart</li><li>After a clean run, try 100 BPM</li></ol>You\'ve got it when: intro, verse, chorus, verse, chorus at 60 BPM with no stops, then once at 100 BPM. Stuck where two sections meet? Go back to the handoffs for one minute.',
-        text_es: 'Toca la tablatura de principio a fin: intro, estrofa, coro — y luego la estrofa y el coro otra vez.<ol><li>60 BPM, contando en voz alta</li><li>¿Te equivocaste? Sigue — no vuelvas a empezar</li><li>Después de una vuelta limpia, prueba a 100 BPM</li></ol>Lo tienes cuando: intro, estrofa, coro, estrofa, coro a 60 BPM sin detenerte, y luego una vez a 100 BPM. ¿Te trabas donde se juntan dos secciones? Vuelve a los enlaces por un minuto.',
-        snippet: { track: 'the-cure', fromBar: 1, bars: 20,
+        text: 'Play the tab straight through: intro, verse, the verse again, then the chorus — the order the record goes in.<ol><li>60 BPM, counting out loud</li><li>Made a mistake? Keep going — don\'t restart</li><li>After a clean run, try 100 BPM</li></ol>You\'ve got it when: intro, verse, verse, chorus at 60 BPM with no stops, then once at 100 BPM. Stuck where two sections meet? Go back to the handoffs for one minute.',
+        text_es: 'Toca la tablatura de principio a fin: intro, estrofa, la estrofa otra vez, y luego el coro — el orden del disco.<ol><li>60 BPM, contando en voz alta</li><li>¿Te equivocaste? Sigue — no vuelvas a empezar</li><li>Después de una vuelta limpia, prueba a 100 BPM</li></ol>Lo tienes cuando: intro, estrofa, estrofa, coro a 60 BPM sin detenerte, y luego una vez a 100 BPM. ¿Te trabas donde se juntan dos secciones? Vuelve a los enlaces por un minuto.',
+        /* 28 bars, not 20: the record is intro (4), verse (8), verse AGAIN
+           (8), then the chorus (8). A 20-bar window stopped in the middle of
+           the second verse and never reached the chorus the tab teaches, so
+           the tab carries the repeated verse and the window runs to the end
+           of the first chorus. */
+        snippet: { track: 'the-cure', fromBar: 1, bars: 28,
                    label:    'The song in order, with the band',
                    label_es: 'La canción en orden, con la banda' },
         tab: {
-          caption: 'Intro, verse, chorus · 4 beats per note',
-          caption_es: 'Intro, estrofa, coro · 4 tiempos por nota',
+          caption: 'Intro, verse, verse, chorus · 4 beats per note',
+          caption_es: 'Intro, estrofa, estrofa, coro · 4 tiempos por nota',
           phrases: [
             {
               label: 'Intro — A C A C',
@@ -1933,6 +1943,44 @@ window.CLASS_ACTIVITIES = [
             {
               label: 'Verse — A C A C, F C F C',
               label_es: 'Estrofa — A C A C, F C F C',
+              notes: [
+                { string: 'E', fret: 5, note: 'A', midi: 45 },
+                { string: 'E', fret: 5, note: 'A', midi: 45 },
+                { string: 'E', fret: 5, note: 'A', midi: 45 },
+                { string: 'E', fret: 5, note: 'A', midi: 45 },
+                { string: 'A', fret: 3, note: 'C', midi: 48 },
+                { string: 'A', fret: 3, note: 'C', midi: 48 },
+                { string: 'A', fret: 3, note: 'C', midi: 48 },
+                { string: 'A', fret: 3, note: 'C', midi: 48 },
+                { string: 'E', fret: 5, note: 'A', midi: 45 },
+                { string: 'E', fret: 5, note: 'A', midi: 45 },
+                { string: 'E', fret: 5, note: 'A', midi: 45 },
+                { string: 'E', fret: 5, note: 'A', midi: 45 },
+                { string: 'A', fret: 3, note: 'C', midi: 48 },
+                { string: 'A', fret: 3, note: 'C', midi: 48 },
+                { string: 'A', fret: 3, note: 'C', midi: 48 },
+                { string: 'A', fret: 3, note: 'C', midi: 48 },
+                { string: 'E', fret: 1, note: 'F', midi: 41 },
+                { string: 'E', fret: 1, note: 'F', midi: 41 },
+                { string: 'E', fret: 1, note: 'F', midi: 41 },
+                { string: 'E', fret: 1, note: 'F', midi: 41 },
+                { string: 'A', fret: 3, note: 'C', midi: 48 },
+                { string: 'A', fret: 3, note: 'C', midi: 48 },
+                { string: 'A', fret: 3, note: 'C', midi: 48 },
+                { string: 'A', fret: 3, note: 'C', midi: 48 },
+                { string: 'E', fret: 1, note: 'F', midi: 41 },
+                { string: 'E', fret: 1, note: 'F', midi: 41 },
+                { string: 'E', fret: 1, note: 'F', midi: 41 },
+                { string: 'E', fret: 1, note: 'F', midi: 41 },
+                { string: 'A', fret: 3, note: 'C', midi: 48 },
+                { string: 'A', fret: 3, note: 'C', midi: 48 },
+                { string: 'A', fret: 3, note: 'C', midi: 48 },
+                { string: 'A', fret: 3, note: 'C', midi: 48 }
+              ]
+            },
+            {
+              label: 'Verse again — A C A C, F C F C',
+              label_es: 'La estrofa otra vez — A C A C, F C F C',
               notes: [
                 { string: 'E', fret: 5, note: 'A', midi: 45 },
                 { string: 'E', fret: 5, note: 'A', midi: 45 },

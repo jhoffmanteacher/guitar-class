@@ -159,7 +159,8 @@ tagged `data-gate="keep"/"hide"` for the activity gate (1aa), the shared
 directions, plus every deck topping out inside a round (1ag), every
 config/class write going through the stale-write guard (1ai), the activity
 board's per-module heading washes (1aj), backing-track snippet windows
-and both of their renderers (1ak).
+and both of their renderers (1ak), untranslated English prose inside a
+Journey tab-ascii block (1al).
 
 Not every class can be guarded by a banned-phrase list. 1w2 pins the Journey
 lick labels *positively* — every `Lick N — ...` card must use one of four
@@ -325,7 +326,7 @@ something looks or is ordered rather than what it says.
 ### ⚠️ Journey tabs are hand-typed copies of the app's tab card
 A tab inside a set is built by `buildTab()` in `app.js`; a tab on a
 `tabs/*.html` Journey page is hand-written HTML, because those pages have no
-`app.js`. Since 2026-09-04 the 63 Journey tabs use the same markup the app
+`app.js`. Since 2026-09-04 the 69 Journey tabs use the same markup the app
 emits — `.tab` > `.tab-head` (icon + `.tab-title` + "Tab" pill) > `.tab-body` >
 a board — with `.tab-ascii` standing in for the app's rendered `.tab-board`
 grid (Journey tabs are ASCII, and stay ASCII). Write a new one that way:
@@ -609,6 +610,16 @@ isn't published yet gets `ca.linkMissing` above the archive, not a dead end.
 
 Two rules that are easy to break without noticing:
 
+- **Stored exit-check picks are POSITIONAL — editing a shipped check's
+  `items` silently re-grades every result.** `res.picks` is an array indexed
+  by item position and `ecGrade()` re-grades it against whatever `items` says
+  now, so inserting, removing or reordering an item in a check students have
+  already taken leaves their stored `score` (which the console prints) beside
+  recomputed per-question cells for different questions, and makes the
+  "Missed by" row fiction. checks.mjs 1y recomputes the answer KEYS from the
+  fretboard and passes straight through this. Same hazard as rewording a
+  graded MC's choices, one layer down: edit a check before students reach it,
+  or treat its `items` as frozen once they have.
 - **Seed the MC shuffle on language-stable data.** `ecChoicesHtml` seeds on
   the `fret·note` pairs, never the rendered chip labels — "fret 5 · A" and
   "traste 5 · A" would hash differently and deal one student a different
@@ -714,8 +725,13 @@ Console-side an archived card folds into its module's own `Archived (N)`
 disclosure, and an archived-but-unplaced one into Built's
 `Archived / deleted (N)`. Cached in
 `localStorage` (`caRetired`) with the same fail-to-cache rule as
-`activityDates` / `activityClears` — a blocked read must not bring a retired
-activity back and let it start gating the site again.
+`activityDates` / `activityClears` / `hiddenActivities` (`caHidden`) — a
+blocked read must not bring a retired or hidden activity back and let it
+start gating the site again. **`hiddenActivities` joined that list
+2026-09-18**: it used to fail open to `{}` on the reasoning that a stray
+visible card was cosmetic, which stopped being true when the gate shipped —
+an activity the teacher pulled would come back on a flaky read and block the
+whole site on work nobody could finish.
 
 **Journey pages gate too.** The six `tabs/*.html` pages now also load
 `class-activities.js` (a plain data array, no dependency of its own) so
@@ -1002,7 +1018,21 @@ other and the site's tempo numbers are close enough for teaching.
   the four-chord loop played through twice. Layers 3, 5 and 6 of the Journey
   page showed the four-bar shorthand until that date, while Layer 2 and
   ca-13 / ca-18 / ca-19 had it right — a student following the backing-track
-  loop would have heard the disagreement.
+  loop would have heard the disagreement. **Modules 3, 5 and 8 still carried
+  the four-bar verse in playable data until 2026-09-18** (module-3's
+  power-chord tab, module-5's `playSeq`, module-8's fingerstyle tab, plus
+  three prose lines) and were rewritten to eight; Jonathan's call was to
+  match the record rather than relabel the loop.
+  **SECTION ORDER ON THE BACKING TRACK, measured off the mp3 2026-09-18:**
+  intro bars **1-4**, verse bars **5-12**, the verse **AGAIN** bars
+  **13-20**, chorus bars **21-28**. The verse plays twice before the first
+  chorus — so a snippet window meaning "the chorus" starts at bar 21, and
+  bar 13 is the second verse, not the chorus. (ca-18 step 4 sat at 13 for a
+  day: the band played `Am-C-F-C` under a student reading `D-F-C-G`.) The
+  Journey page's own song map reads "Verse → Chorus → …" and omits that
+  repeat; it is a section list, not a bar grid. Anything placing a window by
+  section has to be measured, not inferred — checks.mjs 1ak deliberately
+  does not guess at `fromBar` (see its comment).
   No capo, by design. **Module 12's fingerpicking-as-native-style framing stays**
   (Jonathan's call, 2026-07-31): the record's guitar is rapidly strummed, but
   the fingerstyle arrangement and its ◐-comes-off lesson are a deliberate

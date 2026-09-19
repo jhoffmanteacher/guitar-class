@@ -1402,6 +1402,55 @@ function checkTabAsciiAlignment() {
    without a deliberate update here.
    ════════════════════════════════════════════════════════════════════ */
 const JOURNEY_LAYERS_SONG_COUNT = 6;
+/* ════════════════════════════════════════════════════════════════════
+   1al. ENGLISH WORDS INSIDE A JOURNEY TAB-ASCII BLOCK — journey.js
+   translates a page by swapping innerHTML on every [data-es], so a word
+   sitting as a bare text node inside <pre class="tab-ascii"> has no twin
+   to swap and stays English for a Spanish reader. tabs/the-cure.html
+   already shows the fix: wrap the token in its own
+   <span data-es="…">…</span>. On 2026-09-18 ten of these were found and
+   wrapped — (loop) x8, (rest), (roll ↑) — which is why this exists.
+
+   What is legitimately English-free-of-a-twin inside these blocks, and so
+   allowed: chord and note symbols (Am, C#m, G/B, A5, Em7, x/o markers),
+   the string-name letters that open each row, fret/beat digits, and tab
+   punctuation. So the rule is: a run of 3+ ASCII letters that is not a
+   chord symbol and is not inside a data-es span is prose, and fails.
+   ════════════════════════════════════════════════════════════════════ */
+function checkTabAsciiEnglish() {
+  head('1al. English words inside Journey tab-ascii blocks');
+  let bad = 0, blocks = 0, wrapped = 0;
+  const flag = m => { err(m); problems++; bad++; };
+  // A chord/note symbol: root letter, optional accidental, optional
+  // quality/extension, optional /bass. Also the bare string-name letters.
+  const CHORD = /^(?:[A-Ga-g](?:#|b)?(?:m|maj|min|sus|add|dim|aug|M)?\d*(?:\/[A-Ga-g](?:#|b)?)?)$/;
+  for (const file of TAB_PAGES.filter(f => f.endsWith('.html'))) {
+    let src;
+    try { src = readFileSync(join(ROOT, file), 'utf8'); } catch { continue; }
+    for (const m of src.matchAll(/<pre class="tab-ascii">([\s\S]*?)<\/pre>/g)) {
+      blocks++;
+      const startLine = src.slice(0, m.index).split('\n').length;
+      // Drop every <span …>…</span> that carries a data-es: those ARE
+      // translated. Keep other spans' text (e.g. .hl fret highlights),
+      // which is digits and so can't trip the letter rule below.
+      let body = m[1].replace(/<span[^>]*data-es=(?:"[^"]*"|'[^']*')[^>]*>[\s\S]*?<\/span>/g,
+        () => { wrapped++; return ' '; });
+      body = body.replace(/<[^>]+>/g, ' ').replace(/&[a-zA-Z]+;|&#x?[0-9A-Fa-f]+;/g, ' ');
+      body.split('\n').forEach((line, li) => {
+        // A string row opens "e |" / "B |" — strip that leading label so the
+        // single letter isn't read as a word.
+        const text = /^[a-zA-Z] \|/.test(line) ? line.slice(1) : line;
+        for (const w of text.match(/[A-Za-z]{3,}/g) || []) {
+          if (CHORD.test(w)) continue;
+          flag(`${file}:${startLine + li}: tab-ascii holds the English word "${w}" with no data-es twin — `
+             + `wrap it (<span data-es="…">${w}</span>), the way tabs/the-cure.html does, or a Spanish reader sees English inside the tab`);
+        }
+      });
+    }
+  }
+  if (bad === 0) ok(`${blocks} Journey tab-ascii blocks — no untranslated English prose (${wrapped} translated spans)`);
+}
+
 function checkJourneyLayers() {
   head('1ab. JOURNEY_LAYERS ↔ tabs/*.html layer-unit spans');
   let bad = 0;
@@ -3721,11 +3770,22 @@ function checkBoardModuleColours() {
    ({ track, fromBar, bars }) loops a WINDOW of a real backing-track mp3,
    placed by bar arithmetic off SNIPPET_TRACKS in app.js. None of it fails
    loudly in the room: a window past the end of the file is a play button
-   that produces silence, a typo'd track name is a card that renders
-   nothing at all, and a bars count that disagrees with the step's own tab
-   just comes round early — a student mid-phrase concludes they are the one
-   who is wrong. All three look identical from the console board's preview
+   that produces silence, and a typo'd track name is a card that renders
+   nothing at all. Both look identical from the console board's preview
    tile, so they are checked here.
+
+   NOT checked, deliberately: whether `bars` agrees with the step's own tab.
+   There is no uniform beats-per-note convention to read it off — "the cure"
+   tabs write ONE note per bar (caption "4 beats each", no `beats` field),
+   while Seven Nation Army's riff writes seven notes across two bars — so a
+   note count maps to bars only if the tab declares which it is, and none do.
+   An earlier version of this comment claimed the check existed; it never
+   did. Don't re-add it without giving tabs that declaration first, because
+   the plausible-looking `notes.length / beatsPerBar` rule is wrong for
+   every "the cure" snippet on the site. `fromBar` is unguardable the same
+   way and for a deeper reason: only the recording knows where a section
+   starts (on 2026-09-18 a chorus window sat 8 bars early, at the repeat of
+   the verse, and only measuring the mp3 found it).
 
    Also pins the two-renderers rule for this field. buildSnippet() is called
    by caStepHtml() in app.js and renderTeacherActivityDetail() in
@@ -3983,6 +4043,7 @@ function checkBackingSnippets() {
   checkJourneyThemeDrift();
   checkJourneyTabCards();
   checkTabAsciiAlignment();
+  checkTabAsciiEnglish();
   checkJourneyLayers();
   checkGateSafeNav();
   checkVisibleHelperUsage();

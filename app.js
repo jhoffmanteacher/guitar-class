@@ -22,14 +22,19 @@ if('scrollRestoration' in history) history.scrollRestoration = 'manual';
         + 'background:#514a7d;color:#fff;font:14px/1.45 system-ui,-apple-system,sans-serif;'
         + 'box-shadow:0 6px 24px rgba(0,0,0,.28)';
       const msg = document.createElement('span');
-      msg.textContent = 'Something went wrong. Your saved progress is safe — please refresh the page to keep going. ';
+      // i18n.js loads before app.js and this only fires on an error event, so
+      // t() is there — same as the offline banner below, which it mirrors.
+      msg.setAttribute('data-i18n', 'err.body');
+      msg.textContent = t('err.body');
       const refresh = document.createElement('button');
-      refresh.textContent = 'Refresh';
+      refresh.setAttribute('data-i18n', 'err.refresh');
+      refresh.textContent = t('err.refresh');
       refresh.style.cssText = 'margin-left:4px;padding:3px 12px;border:0;border-radius:14px;'
         + 'background:#fff;color:#514a7d;font-weight:600;cursor:pointer';
       refresh.onclick = () => location.reload();
       const close = document.createElement('button');
-      close.setAttribute('aria-label','Dismiss');
+      close.setAttribute('data-i18n-attr', 'aria-label:offline.dismiss');
+      close.setAttribute('aria-label', t('offline.dismiss'));
       close.textContent = '×';
       close.style.cssText = 'position:absolute;top:8px;right:12px;background:none;border:0;'
         + 'color:#fff;font-size:1.25rem;line-height:1;cursor:pointer';
@@ -762,11 +767,18 @@ async function loadClassConfig(){
     if(ov===true)       gamesAccessOn = true;
     else if(ov===false) gamesAccessOn = false;
     else                gamesAccessOn = (d.gamesEnabled!==false);   // field absent ⇒ on
-    // In-Class Activities the teacher has hidden (teacher.js Class activities
-    // view) — a rare, temporary override for something pushed early. A doc
-    // that's missing or fails to load leaves this {} (fail open: a student
-    // sees the activity), same convention as gamesAccessOn above.
+    /* In-Class Activities the teacher has hidden (teacher.js Class activities
+       view) — pulling something back, either because it went out early or
+       because the room ran out of time. Cached, and for the same "must not
+       fail open" reason as the dates, the clears and the retired map below:
+       this stopped being a cosmetic field when the activity gate shipped.
+       An assigned, dated, already-live activity that the teacher has hidden
+       would come back on a blocked read — the cache restores the date and
+       the board entry, so it reads visible again — and then BLOCK the whole
+       site on a card nobody can finish, with only a per-student Clear as the
+       way out. Last known beats {} here. */
     hiddenActivityIds = d.hiddenActivities || {};
+    try{ localStorage.setItem('caHidden', JSON.stringify(hiddenActivityIds)); }catch(e){}
     // Release dates (teacher.js Class activities view) — the actual on/off
     // switch for an activity now that class-activities.js ships them undated.
     // Unlike hiddenActivityIds, a failed/missing read here must NOT fail
@@ -776,9 +788,10 @@ async function loadClassConfig(){
     activityDates = d.activityDates || {};
     try{ localStorage.setItem('caDates', JSON.stringify(activityDates)); }catch(e){}
     // Teacher renames (teacher.js Class activities view) — id -> { en, base }.
-    // Fails open to {} like hiddenActivityIds rather than to a cache like the
-    // dates: losing a rename shows the shipped title, which is a cosmetic
-    // fallback, not a leak of unreleased content. See caTitle().
+    // This one really does fail open to {} rather than to a cache: losing a
+    // rename shows the shipped title, which is a cosmetic fallback, not a
+    // leak of unreleased content and not something that can gate the site.
+    // See caTitle().
     activityTitles = d.activityTitles || {};
     // Teacher renumbering (same view) — id -> { n, base }. Fails open to
     // {} like the renames: losing it shows the shipped teaching order,
@@ -831,6 +844,10 @@ function restoreClassConfigFromCache(){
     const raw = localStorage.getItem('caRetired');
     if(raw) retiredActivityIds = JSON.parse(raw) || {};
   }catch(e){ /* ignore — retiredActivityIds stays {} */ }
+  try{
+    const raw = localStorage.getItem('caHidden');
+    if(raw) hiddenActivityIds = JSON.parse(raw) || {};
+  }catch(e){ /* ignore — hiddenActivityIds stays {} */ }
   try{
     const raw = localStorage.getItem('caBoard');
     const cached = raw ? JSON.parse(raw) : null;
@@ -1644,6 +1661,13 @@ function snipToggle(btn){
   const card = btn.closest('.snip');
   if(!card) return;
   if(snipState && snipState.card === card){ snipStop(); return; }
+  /* Same guard playSequence() and strumChord() open with: the Coach's mic
+     check renders inside class-activity tab cards (buildTab is called there
+     without suppressCoach), and the snippet sits directly under it — so
+     without this, pressing Play two inches below a live mic scores the
+     speakers instead of the student, and the full mix is playing the exact
+     part being graded. */
+  if(window.coachMicLive) return;
   snipStop();
   // Everything else the site can play, silenced — including a TAB sequence
   // running in a sibling step.
@@ -1663,6 +1687,15 @@ function snipToggle(btn){
   btn.classList.add('playing');
   // preload='none' would leave currentTime unsettable until metadata lands;
   // seek as soon as it does, whichever side of the event we are on.
+  /* These files are big (the full mixes are ~14 MB) and are not precached —
+     sw.js warms audio/ on first play — so a classroom Wi-Fi stall on a first
+     press means loadedmetadata never fires. Without this the card sits on
+     "Stop" over silence with no dots and nothing to explain it. */
+  audio.addEventListener('error', () => {
+    if(!snipState || snipState.audio !== audio) return;
+    snipStop();
+    if(typeof gateToast === 'function') gateToast(t('ca.snipLoadFailed'));
+  }, { once: true });
   const begin = () => {
     if(!snipState || snipState.audio !== audio) return;
     try { audio.currentTime = win.start; } catch(e) {}
@@ -2294,7 +2327,10 @@ function handleReportClick(a){
 function buildIssueModalHtml(){
   return `<div class="daily5-head"><h3 style="font:inherit;margin:0">${t('btn.reportProblem')}</h3><button type="button" class="tp-close" onclick="closeIssueModal()" aria-label="${escAttr(t('issue.closeAria'))}">&#x2715;</button></div>
     <p class="coach-tip">${escHtml(t('issue.contextLabel',{loc:currentReportContext()}))}</p>
-    <textarea id="issue-text" class="reflection-ta" placeholder="${escAttr(t('issue.placeholder'))}" rows="5"></textarea>
+    <!-- 4000 is the ceiling firestore.rules puts on message.size(); without it
+         a long paste is rejected on write and the student only sees the
+         generic issue.failed. -->
+    <textarea id="issue-text" class="reflection-ta" placeholder="${escAttr(t('issue.placeholder'))}" rows="5" maxlength="4000"></textarea>
     <div class="issue-status" id="issue-status" aria-live="polite"></div>
     <div class="issue-actions">
       <button type="button" class="panel-next-btn" id="issue-submit-btn" onclick="submitIssueReport()">${t('issue.submit')}</button>
@@ -3259,8 +3295,17 @@ function routeExploreHash(){
   if(h !== '#live-quiz' && typeof lqClosePanel === 'function') lqClosePanel();
   if(h !== '#search') searchClosePanel();
   if(h === '#games'){
-    // coach.js owns the arcade and is loaded on demand — see ensureCoachJs().
-    ensureCoachJs().then(() => openGamesScreen()).catch(()=>{});
+    /* coach.js owns the arcade and is loaded on demand — see ensureCoachJs().
+       It sits in sw.js's best-effort precache tier, so a first visit on school
+       Wi-Fi can legitimately finish install without it; swallowing the
+       rejection left the button looking broken AND made the second tap a
+       no-op (goExploreHash returns early once the hash is already '#games').
+       Say so, and drop the hash so pressing it again really retries. Same
+       shape as coachOpenLazy(). */
+    ensureCoachJs().then(() => openGamesScreen()).catch(() => {
+      exitExploreHash();
+      if(typeof gateToast === 'function') gateToast(t('coach.loadFailed'));
+    });
   }
   else if(h === '#songs') openSongsScreen();
   else if(h === '#my-progress') openMyProgressScreen();
@@ -3309,7 +3354,7 @@ function returnToPractice(){
 
 function buildComingSoon(w){
   const setTag = w.title ? `<span class="obj-set-tag" data-i18n-setlabel="${escAttr(w.title)}" translate="no">${escHtml(tSetLabel(w.title))}</span>` : '';
-  const titleSpan = w.unit ? `<span class="set-eyebrow-title">${w.unit}</span>` : '';
+  const titleSpan = w.unit ? `<span class="set-eyebrow-title">${tf(w,'unit')}</span>` : '';
   const eyebrow = (setTag || titleSpan) ? `<div class="set-eyebrow">${setTag}${titleSpan}</div>` : '';
   const sub = w.subtitle ? `<p class="obj-sub">${tf(w,'subtitle')}</p>` : '';
   return `${eyebrow}${sub}
@@ -7591,17 +7636,21 @@ async function buildSearchIndex(){
       const stn = w.stations && w.stations[st];
       if(!stn) return;
       // Must mirror buildLesson()'s filtering (visibleSections/visibleSteps)
-      // — jumpToStep() indexes into the rendered `.stp-sec` DOM by POSITION
-      // (querySelectorAll('li.step')[stepIdx]), which only ever holds
-      // visible steps, so secIdx/stepIdx here must be visible positions too,
-      // not raw array indices (those are what doneKey uses, a different
-      // thing — see visibleSteps' own comment).
-      // (visibleSections returns {sec, gi} pairs — only `sec` matters here:
-      // the storage index gi is a key concern, and search never builds keys.)
+      // — jumpToStep() indexes into the rendered section's steps by POSITION
+      // (querySelectorAll('li.step')[stepIdx]), which only ever holds visible
+      // steps, so stepIdx here must be a VISIBLE position, not the raw array
+      // index (that is what doneKey uses, a different thing — see
+      // visibleSteps' own comment). secIdx is the opposite: see below.
+      // (visibleSections returns {sec, gi} pairs and BOTH matter: jumpToStep
+      // finds the section by `data-ns="<station>-sec<gi>"`, the STORAGE index,
+      // so the pair's position in this array is the wrong number to index by —
+      // a render-hidden section earlier in the station makes them differ and
+      // the jump lands on another card, or on nothing. `gi` is null for a
+      // section-less station, where jumpToStep falls back to a bare `b`/`c`.)
       const sections = stn.sections && stn.sections.length
-        ? visibleSections(stn, w.moduleNum).map(p => p.sec)
-        : (stn.steps ? [{title: '', steps: stn.steps}] : []);
-      sections.forEach((sec, secIdx) => visibleSteps(sec, w.moduleNum).forEach((p, stepIdx) => {
+        ? visibleSections(stn, w.moduleNum)
+        : (stn.steps ? [{sec: {title: '', steps: stn.steps}, gi: null}] : []);
+      sections.forEach(({sec, gi}) => visibleSteps(sec, w.moduleNum).forEach((p, stepIdx) => {
         const step = p.st;
         const text = stripTags(tf(step, 'text') || '');
         const hayExtra = [stripTags(step.text_es || ''), stripTags(step.label_es || ''), sec.title_es || ''].filter(Boolean).join(' ');
@@ -7609,7 +7658,7 @@ async function buildSearchIndex(){
         // match English queries in either language); secLabel is what the
         // result line SHOWS, so it goes through tf(). The index is thrown away
         // and rebuilt on gc-langchange, so a stale language can't stick.
-        if(text) ix.push(searchEntry({ kind: 'step', moduleNum: w.moduleNum, wid: w.id, label: w.label, station: st, secIdx, stepIdx, secTitle: sec.title || '', secLabel: tf(sec, 'title') || '', title: stripTags(tf(step, 'label') || '') || (sec.title || ''), text, hayExtra }));
+        if(text) ix.push(searchEntry({ kind: 'step', moduleNum: w.moduleNum, wid: w.id, label: w.label, station: st, secIdx: gi, stepIdx, secTitle: sec.title || '', secLabel: tf(sec, 'title') || '', title: stripTags(tf(step, 'label') || '') || (sec.title || ''), text, hayExtra }));
       }));
     });
   });
@@ -8716,7 +8765,18 @@ function ecSubmit(id){
   // this session never read.
   if(progressLoadFailed) res.notSaved = true;
   saveExitChecks();
-  onClassActivityChange(id, true);
+  /* The turned-in mark follows the SCORE. 'exitChecks' is a
+     LOAD_DEPENDENT_SAVE_KEY so saveExitChecks() above holds the whole map
+     back on a failed load, but 'classActivities' is not — and letting that
+     one through on its own files a completion with no score behind it:
+     the card reads done (caCheckCardHtml reads classActivities) while the
+     console's check detail lists the student under "not turned in", and
+     because caCheckBodyHtml renders off exitChecks, next session a one-try
+     check offers its Start button again to someone who already knows all
+     five questions. So hold both or neither — in memory either way, so this
+     session still shows the result (stamped check.notSaved above). */
+  if(progressLoadFailed){ classActivities[id] = true; classActivitiesDeletes.delete(id); }
+  else onClassActivityChange(id, true);
   caOpenId = id;               // keep the card open through the re-render
   renderClassActivities();     // repaints the body AND the summary's done-mark
 }
@@ -8785,6 +8845,12 @@ function caToggleStepOpen(btn){
     if(h) h.setAttribute('aria-expanded', 'false');
   });
   li.classList.toggle('ca-step-collapsed', !willOpen);
+  /* Closing the step that is PLAYING hides its own Stop button along with the
+     rest of the card, leaving the loop running with nothing on screen to stop
+     it. Opening a different step still leaves the loop alone — that is the
+     accordion collapsing a sibling, which is the deliberate case the
+     caOnToggle comment above describes. */
+  if(!willOpen && snipState && li.contains(snipState.card)) snipStop();
   btn.setAttribute('aria-expanded', String(willOpen));
   const activityId = list.closest('.ca-card').dataset.id;
   caStepOpen[activityId] = willOpen ? Number(li.dataset.idx) : -1;
@@ -8859,11 +8925,18 @@ function caDate(a){ return activityDates[a.id] || null; }
 
    `es` is honoured if it's ever set, so a future console field for it (or a
    hand-written doc edit) works without touching this. */
+/* A teacher rename (teacher.js Class activities view) wins over the shipped
+   title, but only while it still names the SAME shipped card — o.base guards a
+   rename left stranded by an edit to class-activities.js.
+   The rename is English-only: the console writes {en, base} and has no Spanish
+   box, so a Spanish reader sees the English rename rather than the shipped _es
+   title. That is the deliberate trade — a teacher renaming a card mid-class
+   needs it to say what they typed, in the room's own words — not an oversight.
+   There is no o.es to read, so don't add a branch for one without also adding
+   the box that would write it. */
 function caTitle(a){
   const o = activityTitles[a.id];
-  if(o && o.en && o.base === a.title){
-    return (typeof getLang === 'function' && getLang()==='es' && o.es) ? o.es : o.en;
-  }
+  if(o && o.en && o.base === a.title) return o.en;
   return tf(a,'title');
 }
 /* ── The activity board: order, module grouping and the "#N" prefix ──
@@ -9088,7 +9161,13 @@ function appIsOnScreen(){
    nobody is staring at the site when the teacher clears someone, so the
    first chance to notice is the tab coming back to the foreground. */
 document.addEventListener('visibilitychange', () => {
-  if(document.hidden || !currentUser || IS_TEACHER_MODE) return;
+  /* The snippet loop is closed by rAF (snipTick), and rAF stops firing in a
+     hidden tab while an <audio> element keeps playing — so a backgrounded tab
+     abandons the 4-bar window and plays the whole 4-minute track. On a
+     Chromebook that is just switching tabs to look something up. Stop the
+     band when the tab goes away; the student presses Play again. */
+  if(document.hidden){ snipStop(); return; }
+  if(!currentUser || IS_TEACHER_MODE) return;
   loadClassConfig().then(() => {
     if(typeof renderClassActivities === 'function'){
       const screen = document.getElementById('class-activities-screen');

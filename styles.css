@@ -1329,8 +1329,12 @@ body.t-wide .t-main{max-width:none}
 .snip-bar{width:26px;height:26px;border-radius:50%;border:1px solid var(--border2);background:var(--bg2);color:var(--text3);font-size:0.75rem;font-weight:700;display:inline-flex;align-items:center;justify-content:center;font-variant-numeric:tabular-nums}
 .snip-bar.bar-now{background:var(--ca-accent);color:var(--bg);border-color:var(--ca-accent)}
 .snip-note{font-size:0.8125rem;color:var(--text2);font-weight:500}
-/* ?snipcal=1, localhost only — the live timecode a track's `anchor` is
-   measured against (SNIPPET_TRACKS in app.js). Never renders for a student. */
+/* ?snipcal=1 — the live timecode a track's `anchor` is measured against
+   (SNIPPET_TRACKS in app.js). Reachable off localhost too since 2026-09-18
+   (anchors get measured on the machine the speakers are on), but only ever
+   from a hand-typed URL: snipUrlParam wants a [?&#] delimiter in front of
+   the literal, and nothing in the app ever links or rewrites one. A student
+   cannot arrive here by clicking, and the panel is read-only. */
 .snip-cal{margin-top:6px;font-size:0.9375rem;font-weight:700;color:var(--ca-accent);font-variant-numeric:tabular-nums;display:flex;flex-wrap:wrap;align-items:center;gap:8px}
 .snip-cal-find{font:inherit;font-size:0.8125rem;padding:3px 10px;border:1px solid var(--ca-accent);border-radius:12px;background:transparent;color:var(--ca-accent);cursor:pointer}
 .snip-cal-find:hover{background:var(--ca-accent-bg)}
@@ -2984,6 +2988,23 @@ a.jl-song-btn{display:inline-block;text-decoration:none}
   font-size:clamp(1.75rem,4vw,3.25rem);font-weight:700;font-variant-numeric:tabular-nums}
 .lq-st-idle-title{font-family:var(--font-display);font-size:1.75rem;font-weight:600}
 .lq-st-idle-sub{color:var(--text2);margin-top:6px}
+/* The Spanish half of every bilingual stage line (lqBilingual appends
+   `<cls>-es`). Without these the ES line inherits body text — about 1rem
+   beside a 3rem English line, which is unreadable from the back of the room
+   the projector is for. Each one tracks its English sibling's scale at
+   ~0.72 of it, in the secondary colour so the pair reads as one unit. */
+.lq-st-title-es{font-family:var(--font-display);font-size:clamp(1.25rem,2.9vw,2.35rem);
+  font-weight:600;line-height:1.15;color:var(--text2)}
+.lq-st-prompt-es{font-size:clamp(1.0625rem,2.6vw,2.15rem);font-weight:700;
+  line-height:1.2;color:var(--text2)}
+.lq-st-answer-es{font-size:clamp(1.25rem,3.2vw,2.5rem);font-weight:700;
+  line-height:1.15;color:var(--green-text);opacity:.82}
+.lq-st-qnum-es,.lq-st-cap-es{font-size:clamp(0.75rem,1.15vw,0.9375rem);font-weight:700;
+  letter-spacing:0.08em;text-transform:uppercase;color:var(--text3)}
+.lq-st-join-es{font-size:clamp(0.875rem,1.5vw,1.125rem);color:var(--text3)}
+.lq-st-idle-title-es{font-family:var(--font-display);font-size:1.25rem;font-weight:600;
+  color:var(--text2)}
+.lq-st-idle-sub-es{color:var(--text3);font-size:0.9375rem}
 .lq-chips{display:flex;flex-wrap:wrap;gap:6px;justify-content:center;margin-top:6px}
 .lq-chip{background:var(--bg3);border-radius:999px;padding:4px 12px;font-size:0.9375rem}
 /* Reveal shows the spread and the standings side by side; one column on a

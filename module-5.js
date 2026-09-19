@@ -700,8 +700,8 @@ SETS.push(
                 text_es: '<ol><li>Repite los acordes de Olivia con un rasgueo hacia abajo, un compás completo (cuatro tiempos) cada uno — la estrofa es Am · C, y luego F · C; el coro es Dm · F, y luego C · G/B.</li><li>Acelera en pasos: 60 → 65 → 70 BPM.</li></ol>Acordes al aire, sin capo. Las formas están precargadas abajo. Lo tienes cuando: dos vueltas limpias de cada una — estrofa y coro — a 70 BPM, un compás completo por acorde, cada cambio en el tiempo 1, cada cuerda sonando clara. <a href="tabs/the-cure.html" target="_blank">&#x1F9F5; Recorrido de la canción: esto es la Capa 5 de 5 — Acordes al aire</a>.',
                 hint: 'The backing track\'s metronome reads 144, but it feels half that fast — so 70 BPM here already puts you close to the record\'s real pace. You just learned Dm and the G/B turnaround above — Am, C, and F are all Group 1 chords you already know.',
                 hint_es: 'El metrónomo de la pista base marca 144, pero se siente a la mitad de esa velocidad — así que 70 BPM aquí ya te acerca bastante al ritmo real de la grabación. Acabas de aprender Dm y el giro G/B arriba — Am, C y F son todos acordes del Grupo 1 que ya conoces.',
-                stuck: 'Get the verse — Am · C · F · C — clean in open position first, then add the chorus — Dm · F · C · G/B. If the bass-string skip on G/B trips you up, drop back to a plain G until the loop is steady.',
-                stuck_es: 'Deja la estrofa — Am · C · F · C — limpia en posición abierta primero, y luego agrega el coro — Dm · F · C · G/B. Si saltarte la cuerda grave en G/B te complica, vuelve a un G normal hasta que la vuelta esté firme.',
+                stuck: 'Get the verse — Am · C · Am · C, then F · C · F · C — clean in open position first, then add the chorus — Dm · F · Dm · F, then C · G/B · C · G/B. If the bass-string skip on G/B trips you up, drop back to a plain G until the loop is steady.',
+                stuck_es: 'Deja la estrofa — Am · C · Am · C, y luego F · C · F · C — limpia en posición abierta primero, y luego agrega el coro — Dm · F · Dm · F, y luego C · G/B · C · G/B. Si saltarte la cuerda grave en G/B te complica, vuelve a un G normal hasta que la vuelta esté firme.',
                 levelUp: 'Switch to a down-up strum. Ready for the full-tempo version? Press &#x25B6; on the Song Journey page and play along with the actual 144 BPM backing track.',
                 levelUp_es: 'Cambia a un rasgueo abajo-arriba. ¿Listo para la versión a tempo completo? Presiona &#x25B6; en la página de Recorrido de la canción y toca junto con la pista base real a 144 BPM.',
                 skills: [6, 7, 8],
@@ -712,13 +712,21 @@ SETS.push(
                   { name: 'F',  chord: [[6,'x'],[5,'x'],[4,3,'3'],[3,2,'2'],[2,1,'1'],[1,1,'1']], position: 0 },
                   { name: 'G/B', chord: [[6,'x'],[5,2,'1'],[4,0],[3,0],[2,0],[1,3,'3']], position: 0 }
                 ],
-                playSeq: { label: 'Hear it — verse: Am · C · F · C, then chorus: Dm · F · C · G/B, one full bar (four beats) each', label_es: 'Escúchalo — estrofa: Am · C · F · C, y luego coro: Dm · F · C · G/B, un compás completo (cuatro tiempos) cada uno', bpm: 60, notes: [
+                playSeq: { label: 'Hear it — verse: Am · C · Am · C, then F · C · F · C; chorus: Dm · F · Dm · F, then C · G/B · C · G/B — one full bar (four beats) each, eight bars a section', label_es: 'Escúchalo — estrofa: Am · C · Am · C, y luego F · C · F · C; coro: Dm · F · Dm · F, y luego C · G/B · C · G/B — un compás completo (cuatro tiempos) cada uno, ocho compases por sección', bpm: 60, notes: [
                   { midi: [45,52,57,60,64], beats: 4 },
+                  { midi: [48,52,55,60,64], beats: 4 },
+                  { midi: [45,52,57,60,64], beats: 4 },
+                  { midi: [48,52,55,60,64], beats: 4 },
+                  { midi: [53,57,60,65], beats: 4 },
                   { midi: [48,52,55,60,64], beats: 4 },
                   { midi: [53,57,60,65], beats: 4 },
                   { midi: [48,52,55,60,64], beats: 4 },
                   { midi: [50,57,62,65], beats: 4 },
                   { midi: [53,57,60,65], beats: 4 },
+                  { midi: [50,57,62,65], beats: 4 },
+                  { midi: [53,57,60,65], beats: 4 },
+                  { midi: [48,52,55,60,64], beats: 4 },
+                  { midi: [47,50,55,59,67], beats: 4 },
                   { midi: [48,52,55,60,64], beats: 4 },
                   { midi: [47,50,55,59,67], beats: 4 }
                 ] },

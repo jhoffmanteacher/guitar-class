@@ -977,8 +977,8 @@ function lqPaintStage(){
   if(!stage) return;
   const s = lqTSession;
   if(!s || !s.state || s.state === 'off'){
-    stage.innerHTML = `<div class="lq-st-idle"><div class="lq-st-idle-title">Live quiz</div>`
-      + `<div class="lq-st-idle-sub">Nothing running. Pick a quiz below and press Start.</div></div>`;
+    stage.innerHTML = `<div class="lq-st-idle">${lqBilingual('lq.stageIdleTitle', 'lq-st-idle-title')}`
+      + `${lqBilingual('lq.stageIdleSub', 'lq-st-idle-sub')}</div>`;
     return;
   }
   const quiz = lqQuiz(s.quizId);
@@ -1009,8 +1009,9 @@ function lqStageLobbyHtml(s, quiz){
   const here = lqRoster(s);
   const chips = here.map(r => `<span class="lq-chip">${escHtml(r.name || '—')}</span>`).join('');
   return lqBilingual(quiz.titleKey, 'lq-st-title')
-    + `<div class="lq-st-join">Open the site &rarr; <strong>Live quiz</strong></div>`
-    + `<div class="lq-st-count"><span class="lq-st-big">${here.length}</span><span class="lq-st-cap">in the game</span></div>`
+    + lqBilingual('lq.stageJoin', 'lq-st-join')
+    + `<div class="lq-st-count"><span class="lq-st-big">${here.length}</span>`
+    + `${lqBilingual('lq.stageInGame', 'lq-st-cap')}</div>`
     + `<div class="lq-chips">${chips}</div>`;
 }
 
@@ -1021,11 +1022,11 @@ function lqStageQuestionHtml(s, quiz){
   const roster = lqRoster(s).length;
   const timer = Number(s.limitSec)
     ? `<div class="lq-st-timer" id="lq-st-timer">${escHtml(String(s.limitSec))}</div>` : '';
-  return `<div class="lq-st-qnum">Question ${n}</div>`
+  return lqBilingualParams('lq.qLabel', 'lq-st-qnum', {n}, {n})
     + lqBilingual(quiz.promptKey, 'lq-st-prompt')
     + timer
     + `<div class="lq-st-count"><span class="lq-st-big">${inCount}${roster ? ' / ' + roster : ''}</span>`
-    + `<span class="lq-st-cap">answered</span></div>`;
+    + `${lqBilingual('lq.stageAnswered', 'lq-st-cap')}</div>`;
 }
 
 // No board here — nothing on the projector before Reveal may show which
@@ -1039,10 +1040,10 @@ function lqStageFretQuestionHtml(s, quiz){
   const prompt = s.target
     ? lqBilingualParams(quiz.promptKey, 'lq-st-prompt', lqTargetParams(s.target, 'en'), lqTargetParams(s.target, 'es'))
     : lqBilingual('lq.noTapYet', 'lq-st-prompt');
-  return `<div class="lq-st-qnum">Question ${n}</div>`
+  return lqBilingualParams('lq.qLabel', 'lq-st-qnum', {n}, {n})
     + prompt + timer
     + `<div class="lq-st-count"><span class="lq-st-big">${inCount}${roster ? ' / ' + roster : ''}</span>`
-    + `<span class="lq-st-cap">answered</span></div>`;
+    + `${lqBilingual('lq.stageAnswered', 'lq-st-cap')}</div>`;
 }
 
 function lqStageRevealHtml(s, quiz){
@@ -1052,7 +1053,7 @@ function lqStageRevealHtml(s, quiz){
   const board = lqRanked(s.scores).slice(0, 5).map(r =>
     `<li><span class="lq-lb-rank">${r.rank}</span><span class="lq-lb-name">${escHtml(r.name || '—')}</span>`
     + `<span class="lq-lb-pts">${escHtml(String(r.pts || 0))}</span></li>`).join('');
-  return `<div class="lq-st-qnum">Question ${Number(s.qIndex) + 1} &mdash; the answer</div>`
+  return lqBilingualParams('lq.stageAnswerLabel', 'lq-st-qnum', {n: Number(s.qIndex) + 1}, {n: Number(s.qIndex) + 1})
     + answer
     + `<div class="lq-st-split">${lqTallyHtml(s, quiz, null)}<ol class="lq-lb lq-lb-stage">${board}</ol></div>`;
 }
@@ -1082,7 +1083,7 @@ function lqStageFretRevealHtml(s, quiz){
   const lb = lqRanked(s.scores).slice(0, 5).map(r =>
     `<li><span class="lq-lb-rank">${r.rank}</span><span class="lq-lb-name">${escHtml(r.name || '—')}</span>`
     + `<span class="lq-lb-pts">${escHtml(String(r.pts || 0))}</span></li>`).join('');
-  return `<div class="lq-st-qnum">Question ${Number(s.qIndex) + 1} &mdash; the answer</div>`
+  return lqBilingualParams('lq.stageAnswerLabel', 'lq-st-qnum', {n: Number(s.qIndex) + 1}, {n: Number(s.qIndex) + 1})
     + answer
     + `<div class="lq-st-split">${board}<div>${lqTallyHtml(s, quiz, null)}<ol class="lq-lb lq-lb-stage">${lb}</ol></div></div>`;
 }
@@ -1092,7 +1093,7 @@ function lqStageEndedHtml(s){
   const board = rows.slice(0, 10).map(r =>
     `<li><span class="lq-lb-rank">${r.rank}</span><span class="lq-lb-name">${escHtml(r.name || '—')}</span>`
     + `<span class="lq-lb-pts">${escHtml(String(r.pts || 0))}</span></li>`).join('');
-  return `<div class="lq-st-title">Final scores</div><ol class="lq-lb lq-lb-stage">${board}</ol>`;
+  return lqBilingual('lq.finalTitle', 'lq-st-title') + `<ol class="lq-lb lq-lb-stage">${board}</ol>`;
 }
 
 /* The note picker for a fret quiz's control strip — shown instead of the

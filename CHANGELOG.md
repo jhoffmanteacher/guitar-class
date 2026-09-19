@@ -5,6 +5,49 @@ Notable changes to the Guitar Class site. Newest first.
 For the full session-by-session history (and the reasoning behind each change),
 see `WORKFLOW.md` and the git commit log.
 
+## 2026-09-18 — "the cure" plays the right bars, and a sweep of fixes
+
+### Fixed
+
+- **"The chorus, with the band" was playing the verse.** In *"the cure" —
+  Intro, Verse and Chorus*, the chorus loop started eight bars too early, at
+  the point where the verse comes round a second time — so the band played
+  A-C-F-C under a chorus tab reading D-F-C-G and nothing lined up. It now
+  starts where the chorus actually starts.
+- **"The song in order" now reaches the chorus.** It looped the intro and
+  the verse twice and stopped before the chorus the tab teaches. The run is
+  longer now — intro, verse, verse, chorus — and the tab shows the repeated
+  verse, which is the order the record goes in.
+- **The verse is eight bars everywhere.** Modules 3, 5 and 8 taught it as a
+  four-bar loop (Am · C · F · C) while the Song Journey page and the backing
+  track have eight (Am · C · Am · C, then F · C · F · C). The power-chord
+  tab, the "hear it" playback and the fingerstyle tab all play the full
+  eight bars now, so they fit the track.
+- **Searching for a step lands on the right card.** Some search results
+  opened the set and then did nothing, and two in Module 12 jumped to a
+  different exercise than the one searched for.
+- **The band stops when you switch tabs.** Leaving the page mid-loop used to
+  abandon the loop and play the whole song in the background.
+- **The band no longer plays into the Listening Coach.** Pressing play on a
+  loop while the Coach's mic was listening had it grading the speakers.
+- **Closing a playing step stops it.** The loop used to keep going with its
+  own Stop button hidden.
+- **A loop that fails to load says so** instead of leaving the button on
+  "Stop" over silence.
+- **An exit check can't be accidentally re-opened.** If your connection
+  dropped at just the wrong moment, a one-try check could offer its Start
+  button again next time you visited.
+- **A hidden activity stays hidden** on a bad connection, instead of
+  reappearing and blocking the rest of the site.
+- **Games says something when it can't load** rather than quietly doing
+  nothing.
+- **Spanish:** the projected live-quiz screen, the "something went wrong"
+  message, one Strum Hero pattern name, and the "(loop)", "(rest)" and
+  "(roll)" labels inside Song Journey tabs are all in Spanish now.
+- Luna's play-along track is labelled with the song's key, F.
+- The "page not found" page points at the Songs page for Song Journeys,
+  which is where they are.
+
 ## 2026-09-18 — Marking something done stops the sound
 
 ### Fixed

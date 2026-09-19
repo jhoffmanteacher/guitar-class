@@ -356,6 +356,8 @@
     'ca.snipKind':             { en: 'Track', es: 'Pista' },
     'ca.snipPlay':             { en: 'Play with the band', es: 'Toca con la banda' },
     'ca.snipStop':             { en: 'Stop', es: 'Detener' },
+    'ca.snipLoadFailed':       { en: 'The track didn\u2019t load. Check the connection and press play again.',
+                                 es: 'La pista no se cargó. Revisa la conexión y vuelve a darle play.' },
     'ca.snipDefaultTitle':     { en: 'Play with the band', es: 'Toca con la banda' },
     'ca.snipLoopNote':         { en: '{n} bars of the record, looping — the same bars as the tab. Stop it when you want.',
                                  es: '{n} compases del disco, en bucle — los mismos compases que la tablatura. Detenlo cuando quieras.' },
@@ -502,6 +504,13 @@
     'offline.body':          { en: "You're offline — practice pages still work; videos and saving resume when you reconnect.",
                                 es: 'Estás sin conexión — las páginas de práctica siguen funcionando; los videos y el guardado se reanudan al reconectarte.' },
     'offline.dismiss':       { en: 'Dismiss', es: 'Cerrar' },
+    /* The crash safety net (app.js). Separate from offline.* because it says
+       something different: not "you're offline" but "something broke and your
+       work is safe". It only renders on an error event, long after i18n.js
+       has loaded, so t() is always available there. */
+    'err.body':              { en: 'Something went wrong. Your saved progress is safe — please refresh the page to keep going. ',
+                               es: 'Algo salió mal. Tu progreso guardado está a salvo — actualiza la página para seguir. ' },
+    'err.refresh':           { en: 'Refresh', es: 'Actualizar' },
 
     // ── Chord/string/note link hover popups (onChordLinkHover etc.) ──
     'popup.chordDiagram':    { en: 'Guitar chord diagram', es: 'Diagrama de acorde de guitarra' },
@@ -2030,7 +2039,7 @@
     'games.sh.pattern.faithful.hint': { en: 'Down, down-up, up-down-up. On the dots your hand still swings — it just misses the strings.',
       es: 'Abajo, abajo-arriba, arriba-abajo-arriba. En los puntos tu mano sigue moviéndose — solo que no toca las cuerdas.' },
     'games.sh.pattern.faithful.label': { en: 'Old Faithful (D-DU-UDU)',
-      es: 'Old Faithful (D-DU-UDU)' },
+      es: 'El rasgueo de siempre (D-DU-UDU)' },
     'games.sh.pattern.reggae.hint': { en: 'Upstrums only, on every "+". Stay silent on the beat — the click plays it for you.',
       es: 'Solo rasgueos hacia arriba, en cada "+". Queda en silencio en el tiempo — el clic lo marca por ti.' },
     'games.sh.pattern.reggae.label': { en: 'Reggae chop',
@@ -2176,6 +2185,19 @@
     'lq.points':             { en: '{n} points', es: '{n} puntos' },
     'lq.rank':               { en: 'Place {n} of {total}', es: 'Lugar {n} de {total}' },
     'lq.finalTitle':         { en: 'Final scores', es: 'Puntajes finales' },
+    /* The projected stage's own chrome. The room reads the wall together, so
+       these go up in both languages through lqBilingual() like the quiz text
+       itself — a student's phone saying "Pregunta 3" beside a projector
+       saying "Question 3" is the thing to avoid. */
+    'lq.stageIdleTitle':     { en: 'Live quiz', es: 'Concurso en vivo' },
+    'lq.stageIdleSub':       { en: 'Nothing running. Pick a quiz below and press Start.',
+                               es: 'Nada en marcha. Elige un concurso abajo y pulsa Empezar.' },
+    'lq.stageJoin':          { en: 'Open the site \u2192 Live quiz',
+                               es: 'Abre el sitio \u2192 Concurso en vivo' },
+    'lq.stageInGame':        { en: 'in the game', es: 'en el juego' },
+    'lq.stageAnswered':      { en: 'answered', es: 'han respondido' },
+    'lq.stageAnswerLabel':   { en: 'Question {n} \u2014 the answer',
+                               es: 'Pregunta {n} \u2014 la respuesta' },
     'lq.timeUp':             { en: 'Time!', es: '¡Tiempo!' },
     'lq.saveFailed':         { en: "That answer didn't send — tap again.", es: 'Esa respuesta no se envió: toca de nuevo.' },
     'lq.devBypass':          { en: 'Dev bypass cannot join the live quiz — nothing saves.', es: 'El modo de prueba no puede entrar al concurso en vivo: nada se guarda.' },

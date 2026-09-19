@@ -2183,6 +2183,16 @@ function renderTeacherGames(){
   loadTeacherClassConfig().then(cfg=>{
     if(teacherView!=='games') return;   // teacher switched views while the get was in flight — don't stomp the current view's DOM
     if(!cfg) return;   // superseded by a newer toggle — leave the newer render's DOM alone
+    /* A failed read leaves cfg = {} (loadTeacherClassConfig's catch), which
+       renders as all-defaults with nothing to say so — "nobody is paused",
+       "games on for everyone" — and this is the screen classroom decisions
+       get made from. renderTeacherActivities already refuses to draw the
+       board on a bad read; do the same here rather than show a confident
+       wrong answer. */
+    if(!teacherClassConfigReadOk){
+      box.innerHTML='<div class="t-loading">Could not read the class settings — check your connection and reload. Nothing below would be accurate, so it isn\'t shown.</div>';
+      return;
+    }
     const classOn = cfg.gamesEnabled!==false;
     const ov = cfg.gameOverrides||{};
     const classCtl=`
@@ -2241,6 +2251,16 @@ function renderTeacherManage(){
   loadTeacherClassConfig().then(cfg=>{
     if(teacherView!=='manage') return;   // switched views mid-flight — don't stomp the new view's DOM
     if(!cfg) return;                     // superseded by a newer toggle
+    /* A failed read leaves cfg = {} (loadTeacherClassConfig's catch), which
+       renders as all-defaults with nothing to say so — "nobody is paused",
+       "games on for everyone" — and this is the screen classroom decisions
+       get made from. renderTeacherActivities already refuses to draw the
+       board on a bad read; do the same here rather than show a confident
+       wrong answer. */
+    if(!teacherClassConfigReadOk){
+      box.innerHTML='<div class="t-loading">Could not read the class settings — check your connection and reload. Nothing below would be accurate, so it isn\'t shown.</div>';
+      return;
+    }
     teacherApplyRosterFilter();
     const paused=cfg.paused||{}, arch=cfg.archived||{};
     const archCount=allStudentsRaw.filter(s=>arch[s.uid]).length;
@@ -2443,7 +2463,14 @@ function setShortResponses(w){
     };
     if(stn.sections) storageSections(stn,w.moduleNum).forEach(({sec,gi})=>{
       const secRetired=!isRenderableSection(sec,w.moduleNum);
-      (sec.steps||[]).forEach((st,i)=>pushStep(st,`${stationId}-sec${gi}`,i,secRetired||st.hidden===true));
+      /* A step can be unreachable even when its SECTION still renders: a
+         take-to-song section in a module with a Journey layer renders the
+         link card INSTEAD of its steps, so isRenderableSection() is true
+         while visibleSteps() is empty. Tag off the steps the ladder actually
+         shows, or those slots read as live and Jonathan can't tell "nobody
+         has done this yet" from "this prompt left the course". */
+      const live=new Set(visibleSteps(sec,w.moduleNum).map(p=>p.idx));
+      (sec.steps||[]).forEach((st,i)=>pushStep(st,`${stationId}-sec${gi}`,i,secRetired||st.hidden===true||!live.has(i)));
     });
     else if(stn.steps) stn.steps.forEach((st,i)=>pushStep(st,stationId,i,st.hidden===true));
   });
