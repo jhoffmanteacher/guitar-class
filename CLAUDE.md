@@ -455,6 +455,21 @@ and `playSequence()` calls `snipStop()`. Two unsynced sources in one step —
 the tab's synthesised notes over the record — is the one way this gets
 genuinely confusing, so it's closed off at both ends.
 
+**Two silencers, and picking the wrong one takes the student's metronome
+with it** (2026-09-19). `stopCardAudio()` stops what the SITE is playing at a
+card's request — tab player, backing-track loop, chord strums, ear drill.
+`stopAllDemoAudio()` is that plus `stopMetro()`, and the FAB metronome is a
+tool the student started themselves, with its own Start/Stop, that no card
+owns. So the full sweep is only for the two cases that earn it: **the mic is
+about to open** (every coach.js site; fab-tools.js when the tuner opens), or
+**the site is about to play something that has to be heard clean** (a tab
+sequence, a snippet, an exit-check stimulus). A plain "mark this done" is
+neither — `caMarkStepDone()` and `caToggleComplete()` used the full sweep
+until 2026-09-19, so a student practising to their own click lost it by
+ticking a box, while the ordinary lesson-step path (`onCompleteChange()`)
+never did: the same gesture with a different outcome depending on which kind
+of card it was. New "silence it" call site → default to `stopCardAudio()`.
+
 **Which tempo a card OPENS on is per track — `defaultSlow` in
 `SNIPPET_TRACKS`.** `"the cure"` sets it (Jonathan, 2026-09-19): 29 of its
 steps tell the student to play at 60 BPM, and its slow tier IS 60 (feltBpm 72

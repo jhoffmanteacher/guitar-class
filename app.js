@@ -6872,7 +6872,13 @@ function stopPlaySeq(){
 /* Kill every site-generated sound (demo sequences, chord strums, metronome
    click). The Coach/games call this when the mic goes live so the analyser
    never scores the speakers. */
-function stopAllDemoAudio(){
+/* Everything the SITE is playing at a card's request — the tab player, a
+   backing-track loop, chord strums, the ear drill. Deliberately NOT the FAB
+   metronome: that is a tool the student started themselves, with its own
+   Start/Stop, and it is not this card's sound to end. Use this when a card
+   stops being visible or gets rebuilt; use stopAllDemoAudio() below when the
+   site is about to listen or to play something that has to be heard clean. */
+function stopCardAudio(){
   stopPlaySeq();
   snipStop();   // a looping backing-track snippet is site-generated sound as well
   chordStrumTimeouts.forEach(clearTimeout);
@@ -6881,6 +6887,15 @@ function stopAllDemoAudio(){
   killRingingPlucks();   // the timeouts above only stop notes that haven't sounded yet
   // clearing the strum timeouts also cancels their '.playing' cleanup — sweep it
   document.querySelectorAll('.playing').forEach(el => el.classList.remove('playing'));
+}
+/* The above PLUS the student's metronome. For the two cases that earn it: the
+   mic is about to open (a click would be recorded and scored — coach.js, and
+   fab-tools.js when the tuner opens), or the site is about to play something
+   the student has to hear on its own (a tab sequence, a snippet, an
+   exit-check stimulus). A plain "mark this done" is neither — see
+   stopCardAudio(). */
+function stopAllDemoAudio(){
+  stopCardAudio();
   // metroRunning/stopMetro live in fab-tools.js (always loaded alongside
   // app.js on index.html) — guarded for robustness, not because it's optional.
   if(typeof metroRunning !== 'undefined' && metroRunning) stopMetro();
@@ -8888,8 +8903,12 @@ function caMarkStepDone(btn, id, si){
   if(!nowDone) return;   // unmarking just restores the number/label above
   /* Marking a step done collapses it, so anything still playing would be
      coming out of a step nobody can see — and this path re-renders nothing,
-     so neither the snippet nor the tab would stop on its own. */
-  stopAllDemoAudio();
+     so neither the snippet nor the tab would stop on its own.
+     stopCardAudio(), not stopAllDemoAudio(): this used to take the FAB
+     metronome with it, so a student practising to their own click lost it by
+     ticking a box (and the ordinary lesson-step done path, onCompleteChange,
+     never did that — same gesture, different outcome). */
+  stopCardAudio();
   li.classList.add('ca-step-collapsed');
   const head = li.querySelector('.ca-step-head');
   if(head) head.setAttribute('aria-expanded', 'false');
@@ -8914,8 +8933,9 @@ function caToggleComplete(id){
      calls snipStop(), so the backing-track loop was covered — but the TAB
      player is scheduled setTimeouts, not a DOM object, so rebuilding the card
      left its notes sounding out of a card that no longer exists. One call
-     covers both, plus chord strums, the ear drill and the metronome. */
-  stopAllDemoAudio();
+     covers both, plus chord strums and the ear drill — and deliberately NOT
+     the FAB metronome, which the student started and which no card owns. */
+  stopCardAudio();
   const isDone = classActivities[id] === true;
   onClassActivityChange(id, !isDone);
   caOpenId = id;   // keep the card open through the re-render

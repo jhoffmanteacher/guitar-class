@@ -5,6 +5,17 @@ Notable changes to the Guitar Class site. Newest first.
 For the full session-by-session history (and the reasoning behind each change),
 see `WORKFLOW.md` and the git commit log.
 
+## 2026-09-19 — Your metronome keeps going when you tick a box
+
+### Fixed
+
+- **Marking an activity step done no longer stops your metronome.** If you
+  had the metronome running while you worked, ticking a step off — or marking
+  the whole card complete — switched it off along with the card's own sound.
+  It keeps going now, and stops when you stop it. Anything the card itself
+  was playing still stops, and the metronome still gets out of the way when
+  the Listening Coach or the tuner needs the mic.
+
 ## 2026-09-19 — "the cure" loops start at the tempo the card asks for
 
 ### Changed
