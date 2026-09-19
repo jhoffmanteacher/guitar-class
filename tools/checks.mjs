@@ -3926,6 +3926,18 @@ function checkBackingSnippets() {
     }
     if (tr.srcFullMetronome && !tr.srcFull)
       flag(`SNIPPET_TRACKS['${name}']: declares a full+metronome mix but no plain full mix — nothing can reach it`);
+    /* defaultSlow (optional) opens the card on the slow tier — buildSnippet
+       writes data-slow AND the turtle's aria-pressed from it, so a non-boolean
+       here would light the button without moving the engine, or the reverse.
+       It also has to be a tier the track can actually play: the slow sources
+       are required above, but a truthy value on a track whose slow files were
+       removed would open every card on a 404. */
+    if (tr.defaultSlow !== undefined) {
+      if (typeof tr.defaultSlow !== 'boolean')
+        flag(`SNIPPET_TRACKS['${name}'].defaultSlow: ${JSON.stringify(tr.defaultSlow)} is not a boolean — buildSnippet tests it with === true, so anything else silently means "fast" for the engine while the turtle may still light up`);
+      else if (tr.defaultSlow && !tr.srcSlow)
+        flag(`SNIPPET_TRACKS['${name}']: defaultSlow is true but there is no srcSlow — every card on this track would open on a tier with no file`);
+    }
     for (const f of FULL_PAIRS.flat()) {
       if (tr[f] && !existsSync(join(ROOT, tr[f]))) flag(`SNIPPET_TRACKS['${name}'].${f}: ${tr[f]} does not exist`);
     }

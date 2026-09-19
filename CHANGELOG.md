@@ -5,6 +5,16 @@ Notable changes to the Guitar Class site. Newest first.
 For the full session-by-session history (and the reasoning behind each change),
 see `WORKFLOW.md` and the git commit log.
 
+## 2026-09-19 — "the cure" loops start at the tempo the card asks for
+
+### Changed
+
+- **The play-along loops on "the cure" now start slow (60 BPM)** — the tempo
+  every step on that song tells you to play. They used to start at full
+  speed, about 20% faster, so doing what the card said and then pressing play
+  left you behind. The 🐢 button is still there: press it once for full speed
+  when a clean run says you're ready. Seven Nation Army is unchanged.
+
 ## 2026-09-18 — "the cure" plays the right bars, and a sweep of fixes
 
 ### Fixed

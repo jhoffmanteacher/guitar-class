@@ -1441,6 +1441,17 @@ const SNIPPET_TRACKS = {
     // rhythm-down-metronome file's own first click.
     anchor: 0.565,
     anchorVerified: true,
+    /* Cards on this track open on the SLOW tier (Jonathan, 2026-09-19).
+       Every "the cure" step tells the student to play at 60 BPM — 29 of them
+       say so outright — and this track's slow tier IS 60: feltBpm 72 scaled
+       by 120/144. So the fast tier was handing a Module-2 beginner a loop 20%
+       above the tempo the card had just asked for, with nothing pointing at
+       the turtle. The turtle still renders (pressed), so one press goes to
+       full speed, which is what the steps ask for after a clean run.
+       Seven Nation Army deliberately does NOT get this: its slow tier is 100
+       against a taught 123, so neither tier matches a "play at N" line the
+       way this one does. */
+    defaultSlow: true,
   },
   /* Seven Nation Army counts at its printed tempo — no halving, unlike "the
      cure": 123 BPM is what the room counts and a bar is four of those beats.
@@ -1513,6 +1524,12 @@ function buildSnippet(spec, opts){
   const title = spec.label ? tf(spec, 'label') : t('ca.snipDefaultTitle');
   const slowFelt = Math.round(tr.feltBpm * tr.trackBpmSlow / tr.trackBpm);
   const data = JSON.stringify({ track: spec.track, fromBar: Math.max(1, spec.fromBar || 1), bars });
+  /* Which tempo the card opens on — see defaultSlow in SNIPPET_TRACKS. The
+     engine reads data-slow and the turtle reads aria-pressed, so both have to
+     be written from the same value or the button lies about what is playing.
+     Nothing persists the tier, so this is the state on every render, including
+     the teacher console's preview (same builder, both renderers). */
+  const startSlow = tr.defaultSlow === true;
   // One dot per bar of the loop, lit as it passes. A loop with no visible
   // position is the thing that makes a student think it's broken — this is
   // the same "the moving thing is the thing making noise" rule the TAB
@@ -1545,13 +1562,13 @@ function buildSnippet(spec, opts){
   const metroExclusive = hasFull && !snippetHasFullMetronome(tr);
   const metroDisabled = '';
   const metroTitle = metroExclusive ? ` title="${escAttr(t('ca.snipMetroOffTitle'))}"` : '';
-  return `<div class="snip" data-snip="${escAttr(data)}"${hasFull ? ' data-guitar="1"' : ''}>`
+  return `<div class="snip" data-snip="${escAttr(data)}"${hasFull ? ' data-guitar="1"' : ''}${startSlow ? ' data-slow="1"' : ''}>`
     + `<div class="snip-head"><span class="snip-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" style="width:1em;height:1em;vertical-align:-0.15em"><path d="M3 12h2l2-6 3 14 3-11 2 5h6"/></svg></span>`
     + `<span class="snip-title">${escHtml(title)}</span><span class="snip-kind">${escHtml(t('ca.snipKind'))}</span></div>`
     + `<div class="snip-body">`
     + `<div class="snip-controls">`
     + `<button type="button" class="snip-play" onclick="snipToggle(this)">${snipPlayBtnHtml(false)}</button>`
-    + `<button type="button" class="snip-toggle snip-slow" aria-pressed="false" onclick="snipSetTier(this,'slow')">&#x1F422; ${escHtml(t('journey.slow', { bpm: slowFelt }))}</button>`
+    + `<button type="button" class="snip-toggle snip-slow${startSlow ? ' on' : ''}" aria-pressed="${startSlow ? 'true' : 'false'}" onclick="snipSetTier(this,'slow')">&#x1F422; ${escHtml(t('journey.slow', { bpm: slowFelt }))}</button>`
     + `<button type="button" class="snip-toggle snip-metro"${metroDisabled} aria-pressed="false" onclick="snipSetTier(this,'metro')"${metroTitle}>&#x1F3B5; ${escHtml(t('tools.metronome'))}</button>`
     + guitarBtn
     + `</div>`

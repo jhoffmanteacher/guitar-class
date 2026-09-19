@@ -455,6 +455,20 @@ and `playSequence()` calls `snipStop()`. Two unsynced sources in one step —
 the tab's synthesised notes over the record — is the one way this gets
 genuinely confusing, so it's closed off at both ends.
 
+**Which tempo a card OPENS on is per track — `defaultSlow` in
+`SNIPPET_TRACKS`.** `"the cure"` sets it (Jonathan, 2026-09-19): 29 of its
+steps tell the student to play at 60 BPM, and its slow tier IS 60 (feltBpm 72
+scaled by 120/144), so opening on the fast tier handed a Module-2 beginner a
+loop 20% above the tempo the card had just asked for, with nothing pointing
+at the turtle. Seven Nation Army deliberately does NOT set it — its slow tier
+is 100 against a taught 123, so neither tier matches a "play at N" line the
+way this one does. `buildSnippet()` writes `data-slow` (what the engine
+reads) AND the turtle's `aria-pressed`/`.on` (what the student sees) from the
+one value — write only one and the button lies about what is playing. Nothing
+persists the tier, so this is the state on every render, the teacher console's
+preview included. checks.mjs 1ak requires it to be a boolean and refuses
+`true` on a track with no `srcSlow`.
+
 **The Guitar toggle** (2026-09-18, Jonathan's ask: students should be able to
 hear the part and check themselves). A track may declare `srcFull`/
 `srcFullSlow` beside its rhythm-down paths; the card then grows a third
