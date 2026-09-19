@@ -464,11 +464,18 @@ owns. So the full sweep is only for the two cases that earn it: **the mic is
 about to open** (every coach.js site; fab-tools.js when the tuner opens), or
 **the site is about to play something that has to be heard clean** (a tab
 sequence, a snippet, an exit-check stimulus). A plain "mark this done" is
-neither — `caMarkStepDone()` and `caToggleComplete()` used the full sweep
-until 2026-09-19, so a student practising to their own click lost it by
-ticking a box, while the ordinary lesson-step path (`onCompleteChange()`)
-never did: the same gesture with a different outcome depending on which kind
-of card it was. New "silence it" call site → default to `stopCardAudio()`.
+neither, and **nor is leaving a screen** — `caMarkStepDone()`,
+`caToggleComplete()` and `caClosePanel()` all used the full sweep until
+2026-09-19, so a student practising to their own click lost it by ticking a
+box or by navigating away, while the ordinary lesson-step path
+(`onCompleteChange()`) never did: the same gesture with a different outcome
+depending on which kind of card it was. `fab-tools.js` already draws this
+line for dismissing a popup ("the student shouldn't silently lose the click
+they're practicing to"), so nothing in `app.js` should be stricter.
+After that change the full sweep has exactly three callers in `app.js` —
+`snipToggle()`, `erPlay()`, `ecPick()`, all "about to play" — plus the
+mic-opening ones in `coach.js` and `fab-tools.js`. New "silence it" call site
+→ default to `stopCardAudio()`.
 
 **Which tempo a card OPENS on is per track — `defaultSlow` in
 `SNIPPET_TRACKS`.** `"the cure"` sets it (Jonathan, 2026-09-19): 29 of its

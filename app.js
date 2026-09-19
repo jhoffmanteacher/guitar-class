@@ -8366,8 +8366,15 @@ function caClosePanel(){
   }
   /* Same reasoning for an exit check mid-run: its stimulus auto-plays, so
      closing the screen while a line is sounding would leave the notes
-     ringing over whatever the student opened next. */
-  if(typeof stopAllDemoAudio === 'function') stopAllDemoAudio();
+     ringing over whatever the student opened next.
+     stopCardAudio(), not stopAllDemoAudio() (2026-09-19): notes ringing out
+     of a screen that is gone are this page's mess to clean up, but the FAB
+     metronome belongs to the student and rides along to whatever they open
+     next — it is on every screen, with its own Stop. fab-tools.js already
+     draws exactly this line for dismissing a popup ("the student shouldn't
+     silently lose the click they're practicing to"), so navigating away
+     should not be stricter than that. */
+  if(typeof stopCardAudio === 'function') stopCardAudio();
   syncExploreNav();
 }
 function openClassActivitiesScreen(focusId){
