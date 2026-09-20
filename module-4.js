@@ -368,12 +368,12 @@ SETS.push(
                 label: 'Challenge — "Seven Nation Army", the real rhythm (by ear)', label_es: 'Reto — "Seven Nation Army", el ritmo real (de oído)',
                 text: '<ol><li>Press the two &#x25B6; buttons below to hear the difference before you clap it.</li><li>Listen to the recording on repeat.</li><li>Clap the riff\'s rhythm with no guitar — some notes clipped short, some held longer — until it\'s in your hands.</li><li>Add the frets back once the feel is there.</li></ol>You\'ve got it when: you can loop the riff along with the record and stay locked with its groove. <a href="tabs/seven-nation-army.html" target="_blank">&#x1F9F5; Song Journey: revisit Layer 2 of 5</a>.',
                 text_es: '<ol><li>Presiona los dos botones &#x25B6; de abajo para escuchar la diferencia antes de aplaudirlo.</li><li>Escucha la grabación una y otra vez.</li><li>Aplaude el ritmo del riff sin guitarra — algunas notas cortas, algunas sostenidas más — hasta que esté en tus manos.</li><li>Vuelve a agregar los trastes una vez que tengas la sensación.</li></ol>Lo tienes cuando: puedes repetir el riff junto con la grabación y mantenerte sincronizado con su groove (el groove = la sensación rítmica que te hace mover el cuerpo). <a href="tabs/seven-nation-army.html" target="_blank">&#x1F9F5; Recorrido de la canción: vuelve a la Capa 2 de 5</a>.',
-                hint: 'You\'ve played this riff since Module 2 as straight, even quarter notes — but the record swings it looser than that. For now, trust your ear: don\'t reach for counts or note values yet — this is ear training, the same way you learned to clap "Watchtower"\'s rhythm. Your ear already knows this riff; you\'re just teaching your hands to match it.',
-                hint_es: 'Has tocado este riff desde el Módulo 2 como negras parejas y rectas — pero la grabación lo balancea más suelto que eso. Por ahora, confía en tu oído: no busques contar tiempos o valores de nota todavía — esto es entrenamiento de oído, igual que aprendiste a aplaudir el ritmo de "Watchtower". Tu oído ya conoce este riff; solo estás enseñándole a tus manos a igualarlo.',
+                hint: 'You\'ve played this riff since Module 2 as straight, even quarter notes — but on the record the notes are not all the same length, and some of them land between the beats. For now, trust your ear: don\'t reach for counts or note values yet — this is ear training, the same way you learned to clap "Watchtower"\'s rhythm. Your ear already knows this riff; you\'re just teaching your hands to match it.',
+                hint_es: 'Has tocado este riff desde el Módulo 2 como negras parejas y rectas — pero en la grabación las notas no duran todas lo mismo, y algunas caen entre los tiempos. Por ahora, confía en tu oído: no busques contar tiempos o valores de nota todavía — esto es entrenamiento de oído, igual que aprendiste a aplaudir el ritmo de "Watchtower". Tu oído ya conoce este riff; solo estás enseñándole a tus manos a igualarlo.',
                 stuck: 'Clap just the first half of the riff (E · E · G · E) on loop until that half locks with the record, then add the second half (D · C · B).',
                 stuck_es: 'Aplaude solo la primera mitad del riff (E · E · G · E) en bucle hasta que esa mitad encaje con la grabación, y luego agrega la segunda mitad (D · C · B).',
-                levelUp: 'Play it as power chords instead of single notes, keeping the same swung feel — the same method as "Watchtower"\'s real-rhythm level-up.',
-                levelUp_es: 'Tócalo como acordes de potencia en vez de notas sueltas, manteniendo la misma sensación de balanceo — el mismo método que el nivel superior del ritmo real de "Watchtower".',
+                levelUp: 'Play it as power chords instead of single notes, keeping the same timing — the same method as "Watchtower"\'s real-rhythm level-up.',
+                levelUp_es: 'Tócalo como acordes de potencia en vez de notas sueltas, manteniendo el mismo ritmo — el mismo método que el nivel superior del ritmo real de "Watchtower".',
                 tabs: [
                   {
                     title: 'How you learned it — straight teaching count',
@@ -399,13 +399,13 @@ SETS.push(
                     bpm: 60,
                     maxBpm: 130,
                     notes: [
-                      { string: 'A', fret: 7,  note: 'E', midi: 52, beats: 1.5 },
+                      { string: 'A', fret: 7,  note: 'E', midi: 52 },
                       { string: 'A', fret: 7,  note: 'E', midi: 52, beats: 0.5 },
                       { string: 'A', fret: 10, note: 'G', midi: 55, beats: 0.5 },
                       { string: 'A', fret: 7,  note: 'E', midi: 52, beats: 0.5 },
                       { string: 'A', fret: 5,  note: 'D', midi: 50, beats: 0.5 },
-                      { string: 'A', fret: 3,  note: 'C', midi: 48, beats: 2 },
-                      { string: 'A', fret: 2,  note: 'B', midi: 47, beats: 2.5 }
+                      { string: 'A', fret: 3,  note: 'C', midi: 48 },
+                      { string: 'A', fret: 2,  note: 'B', midi: 47, beats: 4 }
                     ]
                   }
                 ],

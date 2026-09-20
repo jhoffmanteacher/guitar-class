@@ -33,6 +33,10 @@ see `WORKFLOW.md` and the git commit log.
 - **Vibrato is taught on the G string**, with the ring finger, as a small
   even bend up and down — easier to feel than on the thinnest string.
 - **"Read and clap the rhythm" has a rhythm to read.**
+- **The "Seven Nation Army" real-rhythm card is fixed.** The C now lands
+  on beat 4 where it belongs, and nothing calls the riff "swung" any
+  more — the notes just are not all the same length, and some land
+  between the beats.
 
 ## 2026-09-20 — Less typing, more playing
 
