@@ -32,6 +32,25 @@ student-facing text — the mid-set reflection card is **Checkpoint / Punto de
 control**, the end-of-set one is **Wrap-Up / Cierre**; checks.mjs 1n fails the
 push on a relapse.
 
+**A long set can be shown as TWO PARTS — also display only** (2026-09-19).
+`partOne` on a set and `partBreak` on one of its sections split the ladder
+into Part 1 / Part 2: a heading at the top, a heavier divider above the
+breaking section, a per-part progress pill and "Step n of m", and two jump
+links in the rail. **Only `m5w2` uses it** (13 steps + 7), and checks.mjs
+**1ao** pins that count at 1. Nothing in the data moves — same set id, same
+arrays, same `gi`, so no progress key moves; 1af proves that independently
+and must stay green with NO change to its expected `data-ns` lists.
+`lessonParts()` in `app.js` is the resolver, `lessonGroups()` the shared
+section walk. A set is still complete when the SET is complete: the sets
+gate, the checklist, Module Review, search and the Daily 5 never see a part,
+and `resumeLessonCounts()` stays whole-set. One consequence worth knowing:
+in focus mode the B→C seam now also hides once the open step is in Part 2 —
+it heads the sections at the top of station C, which in m5w2 are all inside
+Part 1, and it was otherwise stacking directly above the Part 2 divider
+saying "Now practice it". Same "don't head a part you're not in" rule the
+part marks follow. Field docs live in the schema comment at the top of
+`module-2.js`.
+
 **There is no student tour.** `tour.html` + `tour-img/` were deleted 2026-08-27
 (they taught the retired B/C model and every screenshot was stale). Jonathan is
 building a new one — don't resurrect the old file from git.
@@ -160,7 +179,8 @@ directions, plus every deck topping out inside a round (1ag), every
 config/class write going through the stale-write guard (1ai), the activity
 board's per-module heading washes (1aj), backing-track snippet windows
 and both of their renderers (1ak), untranslated English prose inside a
-Journey tab-ascii block (1al).
+Journey tab-ascii block (1al), the `partOne`/`partBreak` pair on a set shown
+in two parts (1ao).
 
 Not every class can be guarded by a banned-phrase list. 1w2 pins the Journey
 lick labels *positively* — every `Lick N — ...` card must use one of four

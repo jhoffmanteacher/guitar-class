@@ -467,6 +467,9 @@
 
     // ── Progress strings (parameterized — never concatenate numbers by hand) ──
     'progress.stepsDone':      { en: '{done} of {total} steps done', es: '{done} de {total} pasos completados' },
+    /* A set shown in two parts (display only — lessonParts() in app.js)
+       counts within the part the student is in, not across the whole set. */
+    'progress.partStepsDone':  { en: 'Part {n} · {done} of {total}', es: 'Parte {n} · {done} de {total}' },
     /* "Pick up where you left off" card (renderResumeCard, app.js) */
     'resume.title':         { en: 'Pick up where you left off', es: 'Retoma donde lo dejaste' },
     'resume.continue':      { en: 'Continue', es: 'Continuar' },
@@ -742,6 +745,17 @@
        is the set's OWN practice-half wording, pulled from the module data at
        render time — this key is only the lead-in. */
     'lesson.nowPractice':    { en: 'Now practice it', es: 'Ahora practícalo' },
+    /* The PART marks in a ladder shown as two parts. The part TITLES come
+       from the module data (`partOne` on the set, `partBreak` on a
+       section, each with its own _es twin); these three are the chrome
+       around them — the stop-here line under the Part 2 divider, the
+       button that lifts that divider when it stands in as its own screen,
+       and the short "Part 1" / "Part 2" the rail jump links and the
+       progress pill use. */
+    'lesson.partStopHere':   { en: 'Part 1 done? This is a good place to stop for today.',
+                               es: '¿Terminaste la Parte 1? Este es un buen lugar para parar por hoy.' },
+    'lesson.partKeepGoing':  { en: 'Keep going →', es: 'Seguir →' },
+    'lesson.partN':          { en: 'Part {n}', es: 'Parte {n}' },
     'daily5.tuneWarmupHtml': { en: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" style="width:1em;height:1em;vertical-align:-0.15em"><path d="M13 2 3 14h9l-1 8 10-12h-9l1-8z"/></svg> <strong>Tune and warm up first:</strong> today’s Daily 5 has tuning, a finger warm-up, and one drill (a short exercise you repeat to build a skill) from this module — five minutes and your hands are ready. {btn}',
                                 es: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" style="width:1em;height:1em;vertical-align:-0.15em"><path d="M13 2 3 14h9l-1 8 10-12h-9l1-8z"/></svg> <strong>Primero afina y calienta:</strong> el Daily 5 de hoy tiene afinación, un calentamiento de dedos, y un ejercicio de este módulo — cinco minutos y tus manos estarán listas. {btn}' },
     'daily5.openToday':      { en: 'Open today’s Daily 5', es: 'Abrir el Daily 5 de hoy' },

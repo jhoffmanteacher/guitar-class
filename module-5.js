@@ -307,6 +307,12 @@ SETS.push(
     unit: 'Module 5 · Open Chords',
     unit_es: 'Módulo 5 · Acordes al aire',
     title: 'Set 2',
+    /* This set is long (20 visible steps), so it RENDERS as two parts —
+       display only, exactly like the B/C merge. `partOne` names the first
+       part; the second opens at the section carrying `partBreak` below.
+       No id, section or step moves, so every stored key is unchanged. */
+    partOne: { title: 'Part 1 — C, F and G: your first chord loop',
+               title_es: 'Parte 1 — C, F y G: tu primera vuelta de acordes' },
     subtitle: 'Chord Group 1: C, F, Am, G · Down-up strumming · Smooth transitions',
     subtitle_es: 'Grupo de acordes 1: C, F, Am, G · Rasgueo abajo-arriba · Transiciones suaves',
     skillFocus: 'Fretting the C, F, and G chords · Switching chords smoothly · Playing down-up strum patterns',
@@ -440,7 +446,7 @@ SETS.push(
             title_es: 'Nombra la nota raíz de cada acorde antes de rasguear',
             steps: [
           {
-            label: 'Challenge — Name the Root', label_es: 'Reto — Nombra la raíz',
+            label: 'Challenge 1 — Name the Root', label_es: 'Reto 1 — Nombra la raíz',
             text: 'Before you strum each chord, find and say its ROOT — the note the chord is named after, on the lowest string you strum:<ul><li>C = C (A string, 3rd fret).</li><li>G = G (low E, 3rd fret).</li><li>Am = A (A string, open).</li><li>F = F (D string, 3rd fret).</li></ul>You\'ve got it when: name all four roots correctly.',
             text_es: 'Antes de rasguear cada acorde, encuentra y di su RAÍZ — la nota que le da nombre al acorde, en la cuerda más grave que rasgueas:<ul><li>C = C (cuerda La, traste 3).</li><li>G = G (Mi grave, traste 3).</li><li>Am = A (cuerda La, al aire).</li><li>F = F (cuerda Re, traste 3).</li></ul>Lo tienes cuando: nombras correctamente las cuatro raíces.',
             hint: 'Knowing where a chord\'s root lives on the neck is the same Module 2 note-name skill. The root tells you the chord\'s name.',
@@ -464,7 +470,7 @@ SETS.push(
             title_es: 'Trastea C limpio',
             steps: [
           {
-            label: 'Challenge — Clean C', label_es: 'Reto — C limpio',
+            label: 'Challenge 2 — Clean C', label_es: 'Reto 2 — C limpio',
             text: '<ol><li>Fret C major (index finger on the B string, fret 1 · middle finger on the D string, fret 2 · ring finger on the A string, fret 3).</li><li>Strum from the A string down (skip the low E).</li></ol>You\'ve got it when: pluck the B string by itself and it rings clear — that\'s the string this chord loses most often.',
             text_es: '<ol><li>Trastea C mayor (dedo índice en la cuerda Si, traste 1 · dedo medio en la cuerda Re, traste 2 · dedo anular en la cuerda La, traste 3).</li><li>Rasguea desde la cuerda La hacia abajo (sin la Mi grave).</li></ol>Lo tienes cuando: pulsas la cuerda Si sola y suena clara — esa es la cuerda que este acorde más pierde.',
             hint: 'The B string is the tricky one in C — your index finger has to arch up so it doesn\'t lean on it while your ring finger reaches for fret 3. Press just behind the frets, not on them.',
@@ -485,7 +491,7 @@ SETS.push(
             title_es: 'Trastea F limpio (simplificado)',
             steps: [
           {
-            label: 'Challenge — Clean F (simplified)', label_es: 'Reto — F limpio (simplificado)',
+            label: 'Challenge 3 — Clean F (simplified)', label_es: 'Reto 3 — F limpio (simplificado)',
             text: '<ol><li>Fret the simplified F (xx3211): index finger flat across the high e and B strings, fret 1 · middle finger on the G string, fret 2 · ring finger on the D string, fret 3.</li><li>Strum from the D string down only — skip the low E and A strings.</li></ol>You\'ve got it when: all four strings ring with no buzz — check that your index finger isn\'t collapsing flat and muting one of the two strings under it.',
             text_es: '<ol><li>Trastea el F simplificado (xx3211): dedo índice plano sobre las cuerdas mi aguda y Si, traste 1 · dedo medio en la cuerda Sol, traste 2 · dedo anular en la cuerda Re, traste 3.</li><li>Rasguea solo desde la cuerda Re hacia abajo — sáltate la Mi grave y la La.</li></ol>Lo tienes cuando: las cuatro cuerdas suenan sin zumbido — revisa que tu dedo índice no se colapse y silencie una de las dos cuerdas que tiene debajo.',
             hint: 'This simplified shape trades the full 6-string barre for a small 2-string mini-barre under your index finger — much easier on beginner hands. Keep that finger flat and straight across both strings — unlike your other fingers, this one can\'t arch up onto the tip, or it\'ll only touch one of the two strings instead of both.',
@@ -506,7 +512,7 @@ SETS.push(
             title_es: 'Trastea G limpio',
             steps: [
           {
-            label: 'Challenge — Clean G', label_es: 'Reto — G limpio',
+            label: 'Challenge 4 — Clean G', label_es: 'Reto 4 — G limpio',
             text: '<ol><li>Fret G major (index finger on the A string, fret 2 · middle finger on the low E string, fret 3 · ring finger on the high e string, fret 3).</li><li>Strum all 6 strings.</li></ol>You\'ve got it when: every string rings — especially the open D and G strings in the middle, which beginners tend to mute by accident.',
             text_es: '<ol><li>Trastea G mayor (dedo índice en la cuerda La, traste 2 · dedo medio en la cuerda Mi grave, traste 3 · dedo anular en la cuerda mi aguda, traste 3).</li><li>Rasguea las 6 cuerdas.</li></ol>Lo tienes cuando: cada cuerda suena — especialmente las cuerdas Re y Sol al aire en el medio, que los principiantes tienden a silenciar por accidente.',
             hint: 'Your three fingers form a wide triangle across the low and high strings, leaving the two middle strings open. Keep your fingers arched so they don\'t brush against the open D and G strings in between.',
@@ -527,7 +533,7 @@ SETS.push(
             title_es: 'Usa un dedo pivote común (Am ↔ C)',
             steps: [
           {
-            label: 'Challenge 1 — Pivot Finger (Am ↔ C)', label_es: 'Reto 1 — Dedo pivote (Am ↔ C)',
+            label: 'Challenge 5 — Pivot Finger (Am ↔ C)', label_es: 'Reto 5 — Dedo pivote (Am ↔ C)',
             text: '<ul><li>Switch Am ↔ C keeping your index finger planted on the B string, fret 1, and your middle finger planted on the D string, fret 2 — only your ring finger moves.</li></ul>You\'ve got it when: clean changes both ways without ever lifting either pivot finger.',
             text_es: '<ul><li>Cambia Am ↔ C manteniendo tu dedo índice plantado en la cuerda Si, traste 1, y tu dedo medio plantado en la cuerda Re, traste 2 — solo se mueve el anular.</li></ul>Lo tienes cuando: cambios limpios en ambas direcciones sin levantar nunca ninguno de los dos dedos pivote.',
             hint: 'Common-finger pivots cut your transition time in half. Look for other chords in this group that share a finger position.',
@@ -545,7 +551,7 @@ SETS.push(
             title_es: 'Toca la vuelta C–G–Am–F a tiempo',
             steps: [
           {
-            label: 'Challenge 2 — C–G–Am–F Loop', label_es: 'Reto 2 — Vuelta C–G–Am–F',
+            label: 'Challenge 6 — C–G–Am–F Loop', label_es: 'Reto 6 — Vuelta C–G–Am–F',
             text: 'At 60 BPM:<ol><li>Play 2 bars of C.</li><li>Then 2 bars of G.</li><li>Then 2 bars of Am.</li><li>Then 2 bars of F, and repeat.</li></ol>You\'ve got it when: change on beat 1 every time — then speed up in steps — 60 → 65 → 70 — and hold 70 BPM clean (that\'s the assessment tempo).',
             text_es: 'A 60 BPM:<ol><li>Toca 2 compases de C.</li><li>Luego 2 compases de G.</li><li>Luego 2 compases de Am.</li><li>Luego 2 compases de F, y repite.</li></ol>Lo tienes cuando: cambias en el tiempo 1 cada vez — y luego acelera en pasos — 60 → 65 → 70 — y sostén 70 BPM limpio (ese es el tempo de la evaluación).',
             hint: 'If you miss a change, keep going. You can slow to 50 BPM if needed. Gradually increase by 5 BPM each time through, aiming for a clean 70. Set the ⏱ Timer for 3 minutes and see how clean the loop gets before it beeps.',
@@ -563,7 +569,7 @@ SETS.push(
             title_es: 'Toca un patrón de rasgueo abajo-arriba',
             steps: [
           {
-            label: 'Challenge 3 — Down-Up Strum', label_es: 'Reto 3 — Rasgueo abajo-arriba',
+            label: 'Challenge 7 — Down-Up Strum', label_es: 'Reto 7 — Rasgueo abajo-arriba',
             text: '<ol><li>Play the loop strumming down on 1 2 3 4 and up on each "+".</li><li>Count "1 + 2 + 3 + 4 +" aloud as you play.</li><li>Build the tempo up to 70 BPM.</li></ol>You\'ve got it when: a steady, relaxed pendulum at 70 BPM with lighter upstrokes and no stumbles.<span class="step-figure"><img src="img/m6-strum-pendulum.jpg" alt="Photo of a strumming hand holding a pick over the soundhole of an acoustic guitar, with a curved double-headed arrow tracing the down-up arc of the wrist\'s pendulum swing." width="1200" height="654"></span>',
             text_es: '<ol><li>Toca la vuelta rasgueando hacia abajo en 1 2 3 4 y hacia arriba en cada "+".</li><li>Cuenta "1 + 2 + 3 + 4 +" en voz alta mientras tocas.</li><li>Sube el tempo hasta 70 BPM.</li></ol>Lo tienes cuando: un péndulo constante y relajado a 70 BPM con rasgueos hacia arriba más ligeros y sin tropiezos.<span class="step-figure"><img src="img/m6-strum-pendulum.jpg" alt="Foto de una mano de rasgueo sosteniendo una púa sobre la boca de una guitarra acústica, con una flecha curva de dos puntas que marca el arco abajo-arriba del balanceo de péndulo de la muñeca." width="1200" height="654"></span>',
             hint: 'Start slower than you think you need to, then climb to 70. The upstroke should be lighter than the downstroke. Your wrist should move like a relaxed pendulum.',
@@ -581,7 +587,7 @@ SETS.push(
             title_es: 'Cambios de un minuto — intenta superar tu número',
             steps: [
               {
-                label: 'Challenge 4 — One-Minute Changes (C ↔ G)', label_es: 'Reto 4 — Cambios de un minuto (C ↔ G)',
+                label: 'Challenge 8 — One-Minute Changes (C ↔ G)', label_es: 'Reto 8 — Cambios de un minuto (C ↔ G)',
                 text: '<ol><li>Set the ⏱ Timer for 60 seconds.</li><li>Switch C→G→C→G as many times as you can — only CLEAN changes count.</li></ol>You\'ve got it when: type your count below and aim for a higher count than your Set 1 number.',
                 text_es: '<ol><li>Pon el ⏱ Temporizador en 60 segundos.</li><li>Cambia C→G→C→G tantas veces como puedas — solo cuentan los cambios LIMPIOS.</li></ol>Lo tienes cuando: escribes tu cuenta abajo y apuntas a superar el número de la Unidad 1.',
                 hint: 'C and G share no easy anchor finger, so pre-shape the next chord in the air before you land it. Quality first — slow down until each one rings.',
@@ -600,7 +606,7 @@ SETS.push(
             title_es: 'Sorteo de acordes al azar — Grupo 1',
             steps: [
               {
-                label: 'Challenge — Random Chord Draw', label_es: 'Reto — Sorteo de acordes',
+                label: 'Challenge 9 — Random Chord Draw', label_es: 'Reto 9 — Sorteo de acordes',
                 text: '<ol><li>Run the Group 1 chord deck below.</li><li>Play whatever chord it deals you cleanly before moving to the next card.</li></ol>You\'ve got it when: you run the whole deck with no hesitation on any chord.',
                 text_es: '<ol><li>Corre la baraja de acordes del Grupo 1 de abajo.</li><li>Toca limpio el acorde que te reparta antes de pasar a la siguiente carta.</li></ol>Lo tienes cuando: corres toda la baraja sin dudar en ningún acorde.',
                 drill: { type: 'deck', deck: 'chords-group1', skill: 'm5w2-s6' },
@@ -615,9 +621,12 @@ SETS.push(
           {
             title: 'Fret Dm cleanly',
             title_es: 'Trastea Dm limpio',
+            // Part 2 opens here (display only — see `partOne` on the set).
+            partBreak: { title: 'Part 2 — Dm, G/B and faster changes',
+                         title_es: 'Parte 2 — Dm, G/B y cambios más rápidos' },
             steps: [
           {
-            label: 'Challenge — Clean Dm', label_es: 'Reto — Dm limpio',
+            label: 'Challenge 1 — Clean Dm', label_es: 'Reto 1 — Dm limpio',
             text: '<ol><li>Fret Dm (index finger on the high e string, fret 1 · middle finger on the G string, fret 2 · ring finger on the B string, fret 3 — the D string rings open).</li><li>Strum from the D string down only (not the low E or A strings).</li></ol>You\'ve got it when: all four strings ring clean — this is the one new chord shape "the cure" needs. You\'ll play it in that song\'s Song Journey card.',
             text_es: '<ol><li>Trastea Dm (dedo índice en la cuerda mi aguda, traste 1 · dedo medio en la cuerda Sol, traste 2 · dedo anular en la cuerda Si, traste 3 — la cuerda Re suena al aire).</li><li>Rasguea solo de la cuerda Re hacia abajo (no la Mi grave ni la La).</li></ol>Lo tienes cuando: las cuatro cuerdas suenan limpias — esta es la única forma de acorde nueva que necesita "the cure". La tocarás en la tarjeta del Recorrido de la canción de esa canción.',
             hint: 'Dm is a small triangle on the top three strings — index, middle and ring each press their own string, all inside the first three frets, with the point of the triangle on the high e. Keep your fingers arched and your thumb behind the neck so the high e string doesn\'t get muted.',
@@ -638,7 +647,7 @@ SETS.push(
             title_es: 'Toca el giro de bajo G/B',
             steps: [
           {
-            label: 'Challenge — G/B Turnaround', label_es: 'Reto — Giro G/B',
+            label: 'Challenge 2 — G/B Turnaround', label_es: 'Reto 2 — Giro G/B',
             text: '<ol><li>Fret your regular G shape — all three fingers, nothing moves (index on the A string, fret 2 · middle on the low E string, fret 3 · ring on the high e string, fret 3).</li><li>Strum from the A string down — skip the low E so the B note on the A string becomes the bass instead of the low G. Your middle finger stays planted on the low E even though it sits out the strum — that\'s why the diagram marks that string ✕ (silent).</li></ol>You\'ve got it when: the chord rings clean with a B in the bass — same G shape, just a different string to start the strum on.',
             text_es: '<ol><li>Trastea tu forma normal de G — los tres dedos, nada se mueve (índice en la cuerda La, traste 2 · medio en la cuerda Mi grave, traste 3 · anular en la cuerda mi aguda, traste 3).</li><li>Rasguea de la cuerda La hacia abajo — sáltate la Mi grave para que la nota B en la cuerda La se convierta en el bajo en vez de la G grave. Tu dedo medio se queda plantado en la Mi grave aunque no entre en el rasgueo — por eso el diagrama marca esa cuerda con ✕ (en silencio).</li></ol>Lo tienes cuando: el acorde suena limpio con una B en el bajo — la misma forma de G, solo que empiezas el rasgueo en una cuerda distinta.',
             hint: 'The slash in "G/B" reads "G chord, B in the bass." It\'s not a new shape — you already know every finger position from G. The only change is which string your strum starts on.',
@@ -739,9 +748,9 @@ SETS.push(
             title_es: 'Cambios más rápidos — cada dos tiempos, y luego cada tiempo',
             steps: [
           {
-            label: 'Challenge — Half-Bar Changes (2 chords)', label_es: 'Reto — Cambios de medio compás (2 acordes)',
-            text: 'Challenge 2 held each chord for 2 bars. Here you go much faster — switch Am ↔ C every TWO beats, at 60 BPM:<ol><li>Two down-strums on Am.</li><li>Two down-strums on C, and repeat.</li></ol>That\'s four times as many changes as that 2-bars-per-chord loop. You\'ve got it when: four laps where every switch lands right on beat 1 and 3, no stops. Press &#x25B6; to hear the target.',
-            text_es: 'En el Reto 2 sostuviste cada acorde 2 compases. Aquí vas mucho más rápido — cambia Am ↔ C cada DOS tiempos, a 60 BPM:<ol><li>Dos rasgueos hacia abajo en Am.</li><li>Dos rasgueos hacia abajo en C, y repite.</li></ol>Eso es cuatro veces más cambios que esa vuelta de 2 compases por acorde. Lo tienes cuando: cuatro vueltas donde cada cambio cae justo en el tiempo 1 y 3, sin detenerte. Presiona &#x25B6; para escuchar el objetivo.',
+            label: 'Challenge 3 — Half-Bar Changes (2 chords)', label_es: 'Reto 3 — Cambios de medio compás (2 acordes)',
+            text: 'The C–G–Am–F Loop back in Part 1 held each chord for 2 bars. Here you go much faster — switch Am ↔ C every TWO beats, at 60 BPM:<ol><li>Two down-strums on Am.</li><li>Two down-strums on C, and repeat.</li></ol>That\'s four times as many changes as that 2-bars-per-chord loop. You\'ve got it when: four laps where every switch lands right on beat 1 and 3, no stops. Press &#x25B6; to hear the target.',
+            text_es: 'En la Vuelta C–G–Am–F de la Parte 1 sostuviste cada acorde 2 compases. Aquí vas mucho más rápido — cambia Am ↔ C cada DOS tiempos, a 60 BPM:<ol><li>Dos rasgueos hacia abajo en Am.</li><li>Dos rasgueos hacia abajo en C, y repite.</li></ol>Eso es cuatro veces más cambios que esa vuelta de 2 compases por acorde. Lo tienes cuando: cuatro vueltas donde cada cambio cae justo en el tiempo 1 y 3, sin detenerte. Presiona &#x25B6; para escuchar el objetivo.',
             hint: 'Am and C share an anchor: your 1st finger stays on the B string (fret 1) and your 2nd finger stays on the D string (fret 2). Only your 3rd finger jumps (to the A string for C). Pivot on the two fingers that don\'t move.',
             hint_es: 'Am y C comparten un ancla: tu dedo 1 se queda en la cuerda Si (traste 1) y tu dedo 2 se queda en la cuerda Re (traste 2). Solo tu dedo 3 salta (a la cuerda La para C). Pivotea con los dos dedos que no se mueven.',
             stuck: 'Drop to 50 BPM. Start moving your 3rd finger on the "and" after beat 2, so C is ready before you strum it.',
@@ -756,7 +765,7 @@ SETS.push(
             playSeq: { label: 'Hear it — Am·Am · C·C (change every 2 beats)', label_es: 'Escúchalo — Am·Am · C·C (cambio cada 2 tiempos)', bpm: 60, notes: [[45,52,57,60,64],[45,52,57,60,64],[48,52,55,60,64],[48,52,55,60,64],[45,52,57,60,64],[45,52,57,60,64],[48,52,55,60,64],[48,52,55,60,64]] }
           },
           {
-            label: 'Challenge — Three-Chord Half-Bar (3 chords)', label_es: 'Reto — Medio compás con tres acordes (3 acordes)',
+            label: 'Challenge 4 — Three-Chord Half-Bar (3 chords)', label_es: 'Reto 4 — Medio compás con tres acordes (3 acordes)',
             text: '<ul><li>Play three shapes now, still two beats each — G · C · Am, then back to G, looping at 60 BPM.</li></ul>Three chords this fast is chorus speed for a lot of songs. You\'ve got it when: two clean laps, every change on the beat.',
             text_es: '<ul><li>Toca ahora tres formas, todavía dos tiempos cada una — G · C · Am, y de vuelta a G, repitiendo a 60 BPM.</li></ul>Tres acordes a esta velocidad es la velocidad de coro para muchas canciones. Lo tienes cuando: dos vueltas limpias, cada cambio a tiempo.',
             hint: 'G → C keeps your 2nd finger near the same spot; C → Am keeps the 1st finger planted on the B string. Look for the finger that can stay put in each move.',
@@ -774,7 +783,7 @@ SETS.push(
             playSeq: { label: 'Hear it — G·G · C·C · Am·Am (every 2 beats)', label_es: 'Escúchalo — G·G · C·C · Am·Am (cada 2 tiempos)', bpm: 60, notes: [[43,47,50,55,59,67],[43,47,50,55,59,67],[48,52,55,60,64],[48,52,55,60,64],[45,52,57,60,64],[45,52,57,60,64]] }
           },
           {
-            label: 'Challenge — Four-Chord Half-Bar ("Let It Be", fast)', label_es: 'Reto — Medio compás con cuatro acordes ("Let It Be", rápido)',
+            label: 'Challenge 5 — Four-Chord Half-Bar ("Let It Be", fast)', label_es: 'Reto 5 — Medio compás con cuatro acordes ("Let It Be", rápido)',
             text: '<ul><li>Play the whole C · G · Am · F loop from your song, but two beats each at 60 BPM instead of a full bar.</li></ul>Same chords, twice the changes — this is exactly how the record\'s verse actually moves. You\'ve got it when: two clean laps, every change landing on the beat.',
             text_es: '<ul><li>Toca toda la vuelta C · G · Am · F de tu canción, pero dos tiempos cada uno a 60 BPM en vez de un compás completo.</li></ul>Los mismos acordes, el doble de cambios — así es exactamente como se mueve la estrofa en la grabación. Lo tienes cuando: dos vueltas limpias, cada cambio cayendo a tiempo.',
             hint: 'You already know this loop slow. The only new demand is your hands resetting faster — pre-shape each chord in the air while the last one is still ringing.',
@@ -793,9 +802,9 @@ SETS.push(
             playSeq: { label: 'Hear it — C·G·Am·F (every 2 beats)', label_es: 'Escúchalo — C·G·Am·F (cada 2 tiempos)', bpm: 60, notes: [[48,52,55,60,64],[48,52,55,60,64],[43,47,50,55,59,67],[43,47,50,55,59,67],[45,52,57,60,64],[45,52,57,60,64],[53,57,60,65],[53,57,60,65]] }
           },
           {
-            label: 'Challenge — One Chord Per Beat ("Let It Be", fastest)', label_es: 'Reto — Un acorde por tiempo ("Let It Be", lo más rápido)',
-            text: 'The top of the ladder — a new chord on every single beat.<ul><li>Play C · G · Am · F, one down-strum per beat at 60 BPM, looping.</li></ul>This is the real test of clean, fast switching: the next shape has to be ready before you get to it. You\'ve got it when: four laps clean at 60 — then, if you can, climb to 65.',
-            text_es: 'El escalón más alto — un acorde nuevo en cada tiempo.<ul><li>Toca C · G · Am · F, un rasgueo hacia abajo por tiempo a 60 BPM, repitiendo.</li></ul>Esta es la prueba real de cambio limpio y rápido: la siguiente forma tiene que estar lista antes de llegar a ella. Lo tienes cuando: cuatro vueltas limpias a 60 — y luego, si puedes, sube a 65.',
+            label: 'Bonus — One Chord Per Beat ("Let It Be", fastest)', label_es: 'Bono — Un acorde por tiempo ("Let It Be", lo más rápido)',
+            text: 'This one is a bonus. Part 2 is complete without it. The top of the ladder — a new chord on every single beat.<ul><li>Play C · G · Am · F, one down-strum per beat at 60 BPM, looping.</li></ul>This is the real test of clean, fast switching: the next shape has to be ready before you get to it. You\'ve got it when: four laps clean at 60 — then, if you can, climb to 65.',
+            text_es: 'Esto es un bono. La Parte 2 está completa sin él. El escalón más alto — un acorde nuevo en cada tiempo.<ul><li>Toca C · G · Am · F, un rasgueo hacia abajo por tiempo a 60 BPM, repitiendo.</li></ul>Esta es la prueba real de cambio limpio y rápido: la siguiente forma tiene que estar lista antes de llegar a ella. Lo tienes cuando: cuatro vueltas limpias a 60 — y luego, si puedes, sube a 65.',
             hint: 'At this speed you can\'t watch your hands. Trust the shapes and keep the strum steady — a change that\'s slightly buzzy but in time beats a clean one that\'s late.',
             hint_es: 'A esta velocidad no puedes mirar tus manos. Confía en las formas y mantén el rasgueo constante — un cambio con un poco de zumbido pero a tiempo es mejor que uno limpio pero tarde.',
             stuck: 'Cut it in half: loop just C · G, one per beat, until it\'s smooth, then add Am and F back one at a time.',
@@ -844,7 +853,7 @@ SETS.push(
             title_es: 'El rasgueo folk (D–D–U–U–D–U)',
             steps: [
               {
-                label: 'Challenge — The Folk Strum', label_es: 'Reto — El rasgueo folk',
+                label: 'Challenge 6 — The Folk Strum', label_es: 'Reto 6 — El rasgueo folk',
                 text: '<ol><li>Over one bar, strum down, down-up, up-down-up — written D · D U · U D U.</li><li>Count all eight slots out loud — "1 and 2 and 3 and 4 and" — and skip two of them: the "and" of beat 1, and the down on beat 3.</li><li>Start on one chord (G is a great one).</li></ol>You\'ve got it when: it loops smoothly 4 times in a row on one chord without stopping.',
                 text_es: '<ol><li>En un compás, rasguea abajo, abajo-arriba, arriba-abajo-arriba — escrito D · D U · U D U.</li><li>Cuenta los ocho espacios en voz alta — "1 y 2 y 3 y 4 y" — y sáltate dos: el "y" del tiempo 1, y el "abajo" del tiempo 3.</li><li>Empieza con un solo acorde (G es excelente).</li></ol>Lo tienes cuando: se repite suavemente 4 veces seguidas en un solo acorde sin detenerte.',
                 hint: 'This is the classic singalong strum the down-up strum skill is really testing. Say the full count "1 and 2 and 3 and 4 and" while your hand swings nonstop. A bar has eight slots and you strum six of them — 1, 2, the "and" of 2, the "and" of 3, 4, and the "and" of 4. TWO get skipped, not one: the up on the "and" of beat 1, and the down on beat 3. Those two misses are the whole secret of the groove (the steady rhythmic feel). Upstrokes stay lighter than downstrokes.',

@@ -3389,6 +3389,7 @@ function renderCheck() {
   }
   if (!bad) ok(`all ${sets.length} sets render`);
   checkStorageNamespaces(sets, buildSet, ctx);
+  checkSetParts(sets, buildSet, ctx);
 }
 
 /* ════════════════════════════════════════════════════════════════════
@@ -3458,6 +3459,110 @@ function checkStorageNamespaces(sets, buildSet, ctx) {
     }
   }
   if (!bad) ok(`${checked} sets render every section under its July-convention storage namespace (${Object.keys(PINNED_NS).length} pinned by name)`);
+}
+
+/* ════════════════════════════════════════════════════════════════════
+   1ao. SETS SHOWN IN TWO PARTS — `partOne` on a set and `partBreak` on
+   one of its sections split a long ladder into Part 1 / Part 2 for
+   DISPLAY ONLY (m5w2, 2026-09-19; see lessonParts() in app.js and the
+   schema note at the top of module-2.js). Nothing moves in the data, so
+   no progress key moves — 1af above proves that independently. What this
+   one guards is the pair of fields themselves, where the failures are
+   silent rather than loud: a break on the first renderable section
+   renders a Part 1 heading over nothing; a `partBreak` with no `partOne`
+   leaves Part 1 unnamed; a missing `title_es` ships an English heading to
+   a Spanish reader with nothing to catch it afterwards; a part with zero
+   visible steps is a pill that reads "0 of 0".
+
+   It keeps its OWN copy of the render rule (which sections and steps a
+   student actually sees), the same way 1af does, so a change in app.js
+   can't quietly move what "the first renderable section" means. The last
+   assertion goes the other way and reads the real rendered HTML, so
+   deleting the render call fails here too.
+   ════════════════════════════════════════════════════════════════════ */
+// Pinned: only Module 5 Set 2 is split today. A second split set is a
+// deliberate content decision — bump this in the same edit.
+const PARTED_SETS_EXPECTED = 1;
+function checkSetParts(sets, buildSet, ctx) {
+  head('1ao. Sets shown in two parts');
+  const journeySongsFor = vm.runInContext('typeof journeySongsFor === "function" ? journeySongsFor : null', ctx);
+  if (!journeySongsFor) { err('app.js: journeySongsFor() not found — 1ao cannot judge take-to-song emptiness'); problems++; return; }
+  const isTuning = (sec, moduleNum) => moduleNum !== 1 && (sec.kind === 'tuning-warmup' || sec.title === 'Warm-up — tuning check (Module 1)');
+  /* The sections a student actually sees, in render order, each with its
+     visible step count — b's sections then c's, same as buildLesson. */
+  const renderable = (w) => {
+    const out = [];
+    for (const stId of ['b', 'c']) {
+      const stn = w.stations && w.stations[stId];
+      if (!stn) continue;
+      if (!(stn.sections && stn.sections.length)) {
+        if (stn.steps) out.push({ sec: {}, steps: (stn.steps || []).filter(st => !st.hidden).length });
+        continue;
+      }
+      for (const sec of stn.sections) {
+        if (isTuning(sec, w.moduleNum)) continue;
+        if (RENDER_HIDDEN_KINDS.has(sec.kind)) continue;
+        // A take-to-song section with a Journey layer renders the link
+        // card instead of steps: it is renderable, and it contributes no
+        // steps to the part's count.
+        if (sec.kind === 'take-to-song' && journeySongsFor(w.moduleNum).length) { out.push({ sec, steps: 0 }); continue; }
+        const n = (sec.steps || []).filter(st => !st.hidden).length;
+        if (!n) continue;
+        out.push({ sec, steps: n });
+      }
+    }
+    return out;
+  };
+  const titled = (w, name, obj) => {
+    for (const f of ['title', 'title_es']) {
+      if (typeof obj[f] !== 'string' || !obj[f].trim()) {
+        err(`${w.id}: ${name} has no ${f} — ${f === 'title_es' ? 'a Spanish reader would get the English heading, and nothing downstream catches that' : 'the heading would render blank'}`);
+        problems++;
+      }
+    }
+  };
+  let parted = 0, bad = 0;
+  for (const w of sets) {
+    const allSecs = ['b', 'c'].flatMap(id => ((w.stations && w.stations[id] && w.stations[id].sections) || []));
+    const breaks = allSecs.filter(sec => sec && sec.partBreak);
+    if (w.partBreak) { err(`${w.id}: partBreak sits on the SET — it belongs on the section Part 2 opens at`); problems++; bad++; }
+    if (!breaks.length && !w.partOne) continue;
+    parted++;
+    const before = problems;
+    if (breaks.length > 1) { err(`${w.id}: ${breaks.length} sections carry partBreak — a set is two parts, so at most one break`); problems++; }
+    if (!breaks.length) { err(`${w.id}: partOne with no partBreak — Part 2 never opens`); problems++; }
+    if (breaks.length && !w.partOne) { err(`${w.id}: a section carries partBreak but the set has no partOne — Part 1 would render unnamed`); problems++; }
+    if (w.partOne) titled(w, 'partOne', w.partOne);
+    breaks.forEach(sec => titled(w, `partBreak on "${sec.title}"`, sec.partBreak));
+    const secs = renderable(w);
+    const at = secs.findIndex(x => x.sec && x.sec.partBreak);
+    if (breaks.length && at < 0) {
+      err(`${w.id}: the section carrying partBreak never renders (hidden kind, or every step hidden) — Part 2 would never open`); problems++;
+    } else if (at === 0) {
+      err(`${w.id}: partBreak sits on the set's FIRST renderable section — Part 1 would be a heading over nothing`); problems++;
+    } else if (at > 0) {
+      const p1 = secs.slice(0, at).reduce((n, x) => n + x.steps, 0);
+      const p2 = secs.slice(at).reduce((n, x) => n + x.steps, 0);
+      if (!p1 || !p2) { err(`${w.id}: Part 1 has ${p1} visible steps, Part 2 has ${p2} — a part with no steps is a pill reading "0 of 0"`); problems++; }
+    }
+    // And the other direction: the renderer really emits both marks.
+    if (problems === before) {
+      let html = '';
+      try { html = buildSet(w); } catch { /* 0b already reported the throw */ }
+      const ones = (html.match(/class="stp-partmark stp-partone/g) || []).length;
+      const twos = (html.match(/class="stp-partmark stp-partbreak/g) || []).length;
+      if (ones !== 1 || twos !== 1) {
+        err(`${w.id}: data declares two parts but the ladder rendered ${ones} Part 1 heading(s) and ${twos} Part 2 divider(s) — buildLesson() stopped honouring partOne/partBreak`);
+        problems++;
+      }
+    }
+    if (problems !== before) bad++;
+  }
+  if (parted !== PARTED_SETS_EXPECTED) {
+    err(`${parted} set${parted === 1 ? '' : 's'} declare parts, expected ${PARTED_SETS_EXPECTED} — splitting another set is a content decision, so bump PARTED_SETS_EXPECTED in the same edit`);
+    problems++; bad++;
+  }
+  if (!bad) ok(`${parted} set shown in two parts (m5w2), both titles in both languages, neither part empty, both marks rendered`);
 }
 
 /* ════════════════════════════════════════════════════════════════════

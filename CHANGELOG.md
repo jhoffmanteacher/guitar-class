@@ -5,6 +5,32 @@ Notable changes to the Guitar Class site. Newest first.
 For the full session-by-session history (and the reasoning behind each change),
 see `WORKFLOW.md` and the git commit log.
 
+## 2026-09-19 — Module 5 Set 2 now comes in two parts
+
+### Changed
+
+- **Module 5 Set 2 is now Part 1 and Part 2.** It was the longest set on the
+  site — twenty steps in one run. Nothing has moved and nothing has been
+  taken out; the ladder just names where the first sitting can end. **Part 1
+  — C, F and G: your first chord loop** is thirteen steps, and **Part 2 —
+  Dm, G/B and faster changes** is seven. Anything you already ticked off is
+  still ticked off.
+- **The step counter counts within the part you're in**, so it reads
+  "Part 1 · 0 of 13" instead of "0 of 20 steps done". One at a time shows
+  "Step 4 of 13" the same way.
+- **A stopping point between them.** Working one step at a time, the step
+  after Part 1 is the divider itself: *Part 1 done? This is a good place to
+  stop for today.* Press **Keep going →** if you want to carry on. Come back
+  tomorrow and you land straight on Part 2 without seeing it again.
+- **Jump straight to either part** from **Part 1** / **Part 2** under "The
+  lesson" in the left rail.
+- **The challenges in that set are numbered straight through again** —
+  Challenge 1 to 9 in Part 1, Challenge 1 to 6 in Part 2. The one-chord-per-
+  beat card at the very fast end is now labelled **Bonus**, and says so:
+  Part 2 is complete without it.
+- **The Start → button on the Start here card gets out of the way** once you
+  open the card. It comes back, reading **Keep going →**, when you close it.
+
 ## 2026-09-19 — A "Start here" card, smaller bites, and the nav where you can reach it
 
 ### Added

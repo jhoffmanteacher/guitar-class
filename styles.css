@@ -694,6 +694,15 @@ body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,"Helvetica N
   background:transparent;color:var(--text);font-family:inherit;cursor:pointer;transition:background .13s}
 .rail-station:hover{background:rgba(0,0,0,0.05)}
 .rail-station[hidden]{display:none}
+/* Part jump links for a set shown in two parts — a quiet indented pair
+   under "The lesson", not rail items of their own: a part is a chunk of
+   one set, not a place to go. Hidden for every other set. */
+.rail-parts{display:flex;gap:6px;margin:-2px 0 2px 44px}
+.rail-parts[hidden]{display:none}
+.rail-part{padding:3px 10px;border-radius:11px;border:1px solid var(--border2);
+  background:transparent;color:var(--text2);font-family:inherit;font-size:0.75rem;
+  font-weight:600;cursor:pointer;transition:background .13s}
+.rail-part:hover{background:rgba(0,0,0,0.05)}
 .rs-num{width:22px;height:22px;flex:0 0 22px;border-radius:50%;background:rgba(0,0,0,0.07);
   display:flex;align-items:center;justify-content:center;font-size:0.75rem;font-weight:700;color:var(--text2)}
 .rs-check{border-radius:6px}
@@ -1416,6 +1425,49 @@ body.t-wide .t-main{max-width:none}
    .div-cur is toggled by syncStationFocus() as the student moves. */
 .dp.focus .stp-divider{display:none}
 .dp.focus .stp-group.div-cur .stp-divider{display:flex}
+/* ── Part marks: a long set shown as two parts (m5w2, 2026-09-19) ──
+   Display only — no set id, section or step moves, so no stored key moves
+   (see lessonParts() in app.js). A step heavier than the B→C seam above,
+   deliberately: the seam is a handoff, this is a stopping point. Two of
+   them per parted set — a heading naming Part 1 at the top of the ladder
+   and the divider that opens Part 2 — and in focus mode each shows only
+   while the open row is inside the part it names, the same rule .div-cur
+   follows for the seam. */
+.stp-partmark{margin:30px 0 4px}
+.stp-partone{margin-top:0}
+.stp-part-band{display:flex;align-items:center;gap:10px}
+.stp-part-band::before,.stp-part-band::after{content:'';flex:1;height:4px;background:var(--purple-accent);opacity:.55;border-radius:2px}
+.stp-part-title{font-size:0.9375rem;font-weight:800;letter-spacing:.01em;color:var(--text);text-align:center}
+.stp-part-stop{margin:7px 0 0;text-align:center;font-size:0.8125rem;color:var(--text2)}
+.stp-partmark + .stp-sec > .stp-sec-label{border-top:0;padding-top:8px}
+.dp.focus .stp-partmark{display:none}
+.dp.focus .stp-partmark.part-cur{display:block}
+/* The Part 2 divider standing in as its own screen: pressing Next across
+   the boundary shows the stopping point ALONE, once (stationStepNav). Its
+   "Keep going" button exists only in that state — everywhere else the
+   divider is a heading, and a button under a heading would read as a
+   second, competing way forward. Nothing here is stored, so a student
+   resuming later lands on Part 2's first undone step without replaying
+   it. */
+.stp-part-go{display:none}
+.dp.focus.pd-showing li.step{display:none}
+.dp.focus.pd-showing .jl-card,
+.dp.focus.pd-showing .daily5-inline,
+.dp.focus.pd-showing .dp-stepnav{display:none}
+/* These two are written long on purpose: the rules they have to beat are
+   the focus-mode "show the current one" rules above (.stp-sec.sec-cur
+   .stp-sec-label and .stp-group.div-cur .stp-divider), which carry more
+   classes than a plain .dp.focus.pd-showing selector does. */
+.dp.focus.pd-showing .stp-sec.sec-cur .stp-sec-label,
+.dp.focus.pd-showing .stp-sec .stp-sec-label,
+.dp.focus.pd-showing .stp-group.div-cur .stp-divider,
+.dp.focus.pd-showing .stp-group .stp-divider{display:none}
+.dp.focus.pd-showing .stp-partmark{display:none}
+.dp.focus.pd-showing .stp-partmark.stp-partbreak{display:block;margin:34px 0 0}
+.dp.focus.pd-showing .stp-part-go{display:block;margin:18px auto 8px;
+  padding:11px 22px;border:0;border-radius:22px;cursor:pointer;
+  font-family:inherit;font-size:0.9375rem;font-weight:700;
+  background:var(--purple-accent);color:var(--bg)}
 .chord-popup{position:absolute;z-index:1000;background:var(--bg);border:1px solid var(--border2);border-radius:var(--radius);padding:10px 12px;box-shadow:0 4px 18px rgba(0,0,0,0.20);pointer-events:none;display:none;flex-direction:column;align-items:center;gap:4px;max-width:220px}
 .chord-popup.wide{max-width:360px}
 .chord-popup.visible{display:flex}
@@ -1509,6 +1561,11 @@ body.t-wide .t-main{max-width:none}
      every row and every section label, exactly as it printed before it existed. */
   .dp.focus li.step{display:list-item !important}
   .dp.focus .stp-divider{display:flex !important}
+  /* Part marks print as plain headings, and the divider-as-a-screen state
+     never suppresses the steps on paper. */
+  .dp.focus .stp-partmark{display:block !important}
+  .dp.focus.pd-showing li.step{display:list-item !important}
+  .stp-part-go{display:none !important}
   .dp.focus .step + .step{border-top:1px solid var(--border) !important}
   .dp.focus .stp-sec-label{display:block !important}
   .dp-stepper,.dp-stepnav{display:none !important}
@@ -2112,6 +2169,15 @@ body.explore-open #week-panels{display:none}
 .ca-hero-cta{display:block;text-align:center;font-weight:700;font-size:0.9375rem;
   padding:11px 14px;border-radius:22px;background:var(--ca-accent);color:var(--bg)}
 .ca-card--hero-check .ca-hero-cta{background:var(--blue-text)}
+/* Open card → no CTA. "Start →" sitting above an already-open step ladder
+   reads as a second thing still to begin (post-ship review, 2026-09-19);
+   collapsing the card brings it back, reading "Keep going →" once any step
+   is ticked. The thumbnail stays — it's the card's picture, not a control.
+   A hero with no figure (and every exit-check hero) has nothing else in the
+   right-hand column, so the whole column goes rather than holding a 210px
+   gap open beside the body. */
+.ca-card--hero[open] .ca-hero-cta{display:none}
+.ca-card--hero[open] .ca-hero-side--cta-only{display:none}
 .ca-card--hero-check{border-left-color:var(--blue-text)}
 .ca-start-tag--check{background:var(--blue-bg);color:var(--blue-text)}
 /* The little disclosure triangle reads as redundant next to a full-width

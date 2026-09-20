@@ -197,6 +197,10 @@
             <button type="button" class="rail-station st-b" data-station="station-b" onclick="railStation('station-b')">
               <span class="rs-num">1</span><span class="rs-text"><span class="rs-title" data-i18n="nav.lessonTitle">The lesson</span><span class="rs-sub" data-i18n="nav.lessonSub">Watch &middot; Listen &middot; Practice</span></span>
             </button>
+            <!-- Jump links for a set shown in two parts (display only — see
+                 lessonParts() in app.js). Filled by syncRailStations() from
+                 the set's own data and hidden for every other set. -->
+            <div class="rail-parts" id="rail-parts" hidden></div>
             <button type="button" class="rail-station st-chk" data-station="checklist" onclick="railStation('checklist')">
               <span class="rs-num rs-check" aria-hidden="true"><svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="4"/><path d="M7 12l3 3 7-7"/></svg></span><span class="rs-text"><span class="rs-title" data-i18n="nav.checklistTitle">My skills checklist</span><span class="rs-sub" data-i18n="nav.checklistSub">Track what you can do</span></span>
             </button>

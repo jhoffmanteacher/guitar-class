@@ -12,6 +12,30 @@
 //    Known open item: Set 2 computer station keeps 3 short timestamped
 //    videos (vs the ≤2 guideline) — each anchors a distinct skill and
 //    carries an active during-watching job; revisit if it runs long.
+//
+//  ── OPTIONAL SET FIELDS — showing a long set in two parts ─────────
+//    A set of ~20 steps is a lot to meet in one sitting, so it can RENDER
+//    as Part 1 and Part 2. Two fields, both optional, both DISPLAY ONLY —
+//    exactly like the B/C merge:
+//
+//      on the SET:      partOne: { title: 'Part 1 — …', title_es: '…' }
+//      on a SECTION:    partBreak: { title: 'Part 2 — …', title_es: '…' }
+//
+//    Part 2 opens immediately above the section carrying `partBreak`;
+//    everything before it is Part 1. Nothing is added, removed, moved or
+//    reordered to do this — the set keeps its id, the stations keep their
+//    arrays, and every `${set}-${station}-sec{gi}-{i}` progress key is the
+//    key it always was. The parts are chrome: the ladder's headings, the
+//    progress pill and "Step n of m". Set completion, the sequential set
+//    gate, the checklist, Module Review, search and the Daily 5 never see
+//    one — a set is complete when the SET is complete.
+//
+//    Rules (enforced by checks.mjs 1ao): both fields carry `title` and
+//    `title_es`; `partBreak` never sits on a set's first RENDERABLE
+//    section (that would leave Part 1 empty) and appears at most once per
+//    set; `partOne` is required with it and forbidden without it; neither
+//    part may end up with zero visible steps. Only m5w2 uses this today,
+//    and the count of sets with parts is pinned at 1.
 // ============================================================
 
 SETS.push(

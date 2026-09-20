@@ -3089,6 +3089,25 @@ function railStation(tab){
   leaveTopPanelForSet();
   switchTabById(panel.dataset.id, tab);   // switchTab() calls syncRailStations() to reflect it
 }
+/* A rail Part link: open the lesson ladder and land on that part's first
+   step. Same addressing as jumpToStep() — the section's storage namespace,
+   which is the only stable handle a section has. */
+function railJumpToPart(btn){
+  const panel = activeWeekPanel();
+  const ns = btn && btn.dataset.ns;
+  if(!panel || !ns) return;
+  leaveTopPanelForSet();
+  switchTabById(panel.dataset.id, LESSON_TAB, true);
+  const sec = panel.querySelector(`.stp-sec[data-ns="${ns}"]`);
+  if(!sec) return;
+  const li = sec.querySelector('li.step');
+  if(li){
+    expandStepEl(li);
+    li.scrollIntoView({ block:'start', behavior: scrollBehavior() });
+  } else {
+    sec.scrollIntoView({ block:'start', behavior: scrollBehavior() });
+  }
+}
 function syncRailStations(){
   const group = document.getElementById('rail-set-group');
   const list  = document.getElementById('rail-stations');
@@ -3114,6 +3133,20 @@ function syncRailStations(){
   if(bSub) bSub.textContent = (single && w.stations.b.tabSub) ? tf(w.stations.b,'tabSub') : lessonSubLabel(w);
   const chkSubEl = list.querySelector('.rail-station.st-chk .rs-sub');
   if(chkSubEl) chkSubEl.textContent = (single && w.checklistSub) ? tf(w,'checklistSub') : t('nav.checklistSub');
+  /* A set shown in two parts gets two jump links under "The lesson". They
+     address each part's FIRST section by its storage namespace (data-ns),
+     never by DOM position — the ladder runs both stations through one
+     panel and render-time hides move rows around, so position identifies
+     nothing. Hidden for every other set, which is every set but m5w2. */
+  const partsEl = document.getElementById('rail-parts');
+  if(partsEl){
+    const lp = (w && !w.comingSoon) ? lessonParts(w) : null;
+    partsEl.hidden = !lp;
+    partsEl.innerHTML = lp ? [[1, lp.firstNs], [2, lp.breakNs]].map(([n, ns]) =>
+      `<button type="button" class="rail-part" data-ns="${escAttr(ns)}" onclick="railJumpToPart(this)"`
+      + ` data-i18n="lesson.partN" data-i18n-params="${escAttr(JSON.stringify({n}))}">${escHtml(t('lesson.partN',{n}))}</button>`
+    ).join('') : '';
+  }
   // Reflect whichever tab-panel is currently active back onto the rail buttons.
   const activePanel = panel.querySelector('.tab-panel.active');
   const activeTab = activePanel ? activePanel.id.slice(wid.length + 1) : LESSON_TAB;
@@ -3695,6 +3728,56 @@ function journeyLinkCardHtml(w){
   </div>`;
 }
 
+/* ── The ladder's sections, in render order ──
+   Shared by buildLesson() (which renders them) and lessonParts() (which
+   only needs the order). `{sec, ns}` per renderable section, ns being the
+   storage namespace its steps are keyed under — visibleSections() returns
+   `{sec, gi}` pairs whose gi is the STORAGE index (see storageSections),
+   so a render-time hide never renumbers the sections after it. A station
+   with flat `steps:` and no sections becomes one untitled pseudo-section
+   whose ns is the bare station letter, exactly the key shape it has
+   always been written under. */
+function lessonGroups(w){
+  return ['b','c'].map(id => ({ id, s: w.stations && w.stations[id] })).filter(g => !!g.s)
+    .map(g => ({
+      ...g,
+      secs: (g.s.sections && g.s.sections.length)
+        ? visibleSections(g.s, w.moduleNum).map(({sec,gi}) => ({ sec, ns: `${g.id}-sec${gi}` }))
+        : (g.s.steps ? [{ sec: { title:'', steps: g.s.steps }, ns: g.id }] : [])
+    }));
+}
+
+/* ── A long set shown as two parts (Module 5 Set 2, 2026-09-19) ───────
+   DISPLAY ONLY, exactly the way stations B and C are merged in display
+   only. `partOne` on the SET names the first part; `partBreak` on a
+   SECTION opens the second one immediately above that section. Nothing is
+   added, removed, moved or reordered in the data — the set keeps its one
+   id, `stations.b`/`stations.c` keep their arrays, and every
+   `${set}-${station}-sec{gi}-{i}` key is the key it always was. Splitting
+   m5w2 into two real sets would have moved all of them.
+
+   A part is chrome: the ladder's heading, the progress pill and the
+   "Step n of m" counter. Set completion, the sequential set gate, the
+   checklist, Module Review, search and the Daily 5 never see one — a set
+   is complete when the SET is complete.
+
+   Returns null for every ordinary set, and for a break that would leave
+   Part 1 empty (checks.mjs 1ao refuses that in the data; this refuses to
+   render it either way). */
+function lessonParts(w, flat){
+  if(!w || !w.partOne) return null;
+  const secs = flat || lessonGroups(w).flatMap(g => g.secs);
+  const at = secs.findIndex(({sec}) => sec && sec.partBreak);
+  if(at <= 0) return null;
+  return {
+    at,
+    firstNs: secs[0].ns,
+    breakNs: secs[at].ns,
+    title1: tf(w.partOne, 'title'),
+    title2: tf(secs[at].sec.partBreak, 'title'),
+  };
+}
+
 /* ── The lesson ladder ──
    The classroom no longer runs a three-group B/C rotation — one group is with
    the teacher, one is on the site — so a set's job here is a single, linear
@@ -3722,7 +3805,14 @@ function buildLesson(w){
      hidden step is invisible to "which one is current", too, or a step that
      can never be marked done here again would permanently block every real
      step after it. */
-  const stepsHtml=(pairs,ns,numOffset=0,allowCur=true,openIfNoCur=false)=>{
+  /* `numOffset` is the running count across the WHOLE ladder and is what
+     openNum (and therefore Back/Next, .at-end and "which part am I in")
+     are measured in — those all have to keep counting 1..20 whatever the
+     circles say. `dispOffset` is the only thing the printed step number
+     comes from, so a set with parts can restart its circles at 1 in Part 2
+     to match the per-part pill and the "Challenge 1…" labels. They are the
+     same number for every set without parts. */
+  const stepsHtml=(pairs,ns,numOffset=0,allowCur=true,openIfNoCur=false,dispOffset=numOffset)=>{
    const curPos = allowCur ? pairs.findIndex(p=>completed[`${w.id}-${ns}-${p.idx}`]!==true) : -1;
    // Every step done → no `.cur` anywhere. Focus mode hides collapsed rows, so
    // a card with nothing open would render empty: step 1 stays open instead.
@@ -3856,10 +3946,11 @@ function buildLesson(w){
     const doneBtn = `<div class="step-done-row"><button class="step-done-btn${isDone ? ' is-done' : ''}" type="button" aria-pressed="${isDone}" onclick="toggleStepDone(this,'${doneKey}')">${stepDoneHtml(isDone)}</button></div>`;
     const skillsAttr = (s.skills && s.skills.length) ? ` data-skills="${s.skills.join(',')}"` : '';
     const label = stepLabel(s);
-    const num = numOffset + pos + 1;
+    const gnum = numOffset + pos + 1;          // position in the whole ladder
+    const num = dispOffset + pos + 1;          // the number the student sees
     const ariaLabel = t(isDone ? 'step.ariaLabelDone' : 'step.ariaLabel', { n: num, label });
     const statusIcon = isDone ? '&#x2713;' : String(num);
-    if(isOpen) openNum = num;
+    if(isOpen) openNum = gnum;
     const curAttr = isCur ? ' aria-current="step"' : '';
     return `<li class="step${isDone ? ' step-done' : ''}${isCur ? ' cur' : ''}${isOpen ? '' : ' collapsed'}"${skillsAttr} data-num="${num}">`
       + `<button type="button" class="step-head" aria-expanded="${isOpen}" onclick="toggleStepOpen(this)" aria-label="${escAttr(ariaLabel)}"${curAttr}>`
@@ -3875,23 +3966,16 @@ function buildLesson(w){
      starts with the tune-up): render a pointer card above the numbered
      sections instead of taking a numbered slot itself. */
   const isTuningWarmup = sec => isTuningWarmupSection(sec, w.moduleNum);
-  /* Every renderable section of the whole ladder, in order, each carrying the
-     storage namespace its steps are keyed under. A station with flat `steps:`
-     (no sections) becomes one untitled pseudo-section whose ns is the bare
-     station letter — exactly the key shape stepsHtml() already wrote for it.
-     visibleSections() returns {sec, gi} pairs: gi is the section's STORAGE
-     index (position after the tuning-warmup filter only — see
-     storageSections), so a routine/reflection/ear-spark/empty section hidden
-     at render time never renumbers the sections after it. The pair's own
-     position in the array is its DOM position, nothing more. */
-  const groups = ['b','c'].map(id => ({ id, s: w.stations && w.stations[id] })).filter(g => !!g.s)
-    .map(g => ({
-      ...g,
-      secs: (g.s.sections && g.s.sections.length)
-        ? visibleSections(g.s, w.moduleNum).map(({sec,gi}) => ({ sec, ns: `${g.id}-sec${gi}` }))
-        : (g.s.steps ? [{ sec: { title:'', steps: g.s.steps }, ns: g.id }] : [])
-    }));
+  /* Every renderable section of the whole ladder, in order, each carrying
+     the storage namespace its steps are keyed under — see lessonGroups()
+     for the gi-is-the-storage-index rule that makes that safe. */
+  const groups = lessonGroups(w);
   const flat = groups.flatMap(g => g.secs);
+  /* A set shown as two parts (display only — see lessonParts). `parts.at`
+     is the index in `flat` where Part 2 begins; everything before it is
+     Part 1. Null for every ordinary set, which is every set but m5w2. */
+  const parts = lessonParts(w, flat);
+  const partOfIdx = k => (parts && k >= parts.at) ? 2 : 1;
   // Steps done / total for the ladder's progress pill — mirrors stepsHtml's
   // ns-per-section scheme, now summed across BOTH stations (one card, one pill).
   // visibleSteps() is what keeps a hidden step (or a whole take-to-song
@@ -3904,6 +3988,19 @@ function buildLesson(w){
       if(completed[`${w.id}-${ns}-${p.idx}`]===true) done++;
     }));
     return {total,done};
+  };
+  /* The same sum, split at the part break — the in-ladder pill and the
+     "Step n of m" counter go per-part for a set with parts, while
+     resumeLessonCounts() (the resume card, My progress) stays whole-set:
+     parts are chunks to work through, not a smaller set. */
+  const partStepCounts = () => {
+    const c = {1:{total:0,done:0}, 2:{total:0,done:0}};
+    flat.forEach(({sec,ns}, k) => visibleSteps(sec, w.moduleNum).forEach(pr=>{
+      const bucket = c[partOfIdx(k)];
+      bucket.total++;
+      if(completed[`${w.id}-${ns}-${pr.idx}`]===true) bucket.done++;
+    }));
+    return c;
   };
   /* The B→C seam. Station-level titles ("Computer station — …" / "Practice
      station — …") are no longer rendered — the room has no stations to name —
@@ -3921,6 +4018,24 @@ function buildLesson(w){
     const tail = stationTail(s);
     return `<div class="stp-divider"><span class="stp-divider-label">${escHtml(t('lesson.nowPractice'))}${tail ? ' — ' + escHtml(tail) : ''}</span></div>`;
   };
+  /* The PART marks — a heavier rule than the seam above, because this one
+     is a stopping point and the seam is not. Two of them: a heading over
+     the top of the ladder naming Part 1, and the divider that opens Part 2
+     immediately above its first section. The Part 2 one carries the
+     stop-here line and a "Keep going" button, which only shows while the
+     divider is standing in as its own screen (stationStepNav →
+     .pd-showing). Both hide in focus mode unless the open step is inside
+     the part they name — same rule the seam follows one level down, kept
+     live by syncStationFocus() and baked in here so a student resuming
+     inside Part 2 never gets a Part 1 heading over nothing. */
+  const partMarkHtml = (n, title, cur) =>
+    `<div class="stp-partmark stp-part${n === 2 ? 'break' : 'one'}${cur ? ' part-cur' : ''}" data-part="${n}">`
+    + `<div class="stp-part-band"><span class="stp-part-title">${escHtml(title)}</span></div>`
+    + (n === 2
+        ? `<p class="stp-part-stop">${escHtml(t('lesson.partStopHere'))}</p>`
+          + `<button type="button" class="stp-part-go" onclick="dismissPartBreak(this)" data-i18n="lesson.partKeepGoing">${escHtml(t('lesson.partKeepGoing'))}</button>`
+        : '')
+    + `</div>`;
   const ladderHtml=()=>{
     const reminder = groups.some(g => (g.s.sections||[]).some(isTuningWarmup))
       ? `<div class="daily5-inline">${t('daily5.tuneWarmupHtml',{btn:`<button type="button" class="daily5-inline-btn" onclick="openDaily5Here()">${ICO_BOLT} ${t('daily5.openToday')}</button>`})}</div>`
@@ -3942,14 +4057,17 @@ function buildLesson(w){
     // step (`.sec-cur`, kept in sync by syncStationFocus() as the student
     // moves) — the heading of the group you're actually in, nothing else.
     const noneLeft = focusMode && !flat.some(({sec,ns}) => visibleSteps(sec, w.moduleNum).some(p=>completed[`${w.id}-${ns}-${p.idx}`]!==true));
-    let numOffset = 0, foundCur = false, curNs = null;
+    let numOffset = 0, dispOffset = 0, foundCur = false, curNs = null, curPart = 1;
     const rendered = new Map();
     flat.forEach(({sec,ns}, k)=>{
+      // Part 2's circles start at 1 again — display only: numOffset (and
+      // so every storage key, Back/Next and openNum) keeps counting.
+      if(parts && k === parts.at) dispOffset = 0;
       const pairs = visibleSteps(sec, w.moduleNum);
       const allowCur = !foundCur;
       const hasCur = allowCur && pairs.some(p=>completed[`${w.id}-${ns}-${p.idx}`]!==true);
       const openIfNoCur = noneLeft && k === 0;   // whole ladder done → section 1, step 1 stays open
-      if(hasCur || openIfNoCur) curNs = ns;
+      if(hasCur || openIfNoCur){ curNs = ns; curPart = partOfIdx(k); }
       const title = tf(sec,'title');
       // A take-to-song section renders the Journey link card in its slot
       // instead of a step list, but only when this module has a layer to
@@ -3962,15 +4080,23 @@ function buildLesson(w){
       const hasJourneyCard = isTakeToSongSection(sec) && journeySongsFor(w.moduleNum).length > 0;
       const bodyHtml = hasJourneyCard
         ? journeyLinkCardHtml(w)
-        : `<ul class="steps">${stepsHtml(pairs, ns, numOffset, allowCur, openIfNoCur)}</ul>`;
-      const html = `<div class="stp-sec${(hasCur || openIfNoCur) ? ' sec-cur' : ''}" data-ns="${escAttr(ns)}">
+        : `<ul class="steps">${stepsHtml(pairs, ns, numOffset, allowCur, openIfNoCur, dispOffset)}</ul>`;
+      // data-part goes AFTER data-ns on purpose: checks.mjs 1af reads the
+      // rendered namespaces with a regex anchored on `class="stp-sec…"
+      // data-ns="…"`, so anything new has to follow, never come between.
+      const html = `<div class="stp-sec${(hasCur || openIfNoCur) ? ' sec-cur' : ''}" data-ns="${escAttr(ns)}"${parts ? ` data-part="${partOfIdx(k)}"` : ''}>
       ${title && !hasJourneyCard ? `<div class="stp-sec-label">${isEarSparkSection(sec) ? ICO_BOLT + ' ' : isSpicyLevelUpSection(sec) ? ICO_CHILI + ' ' : ''}${title}</div>` : ''}
       ${bodyHtml}
     </div>`;
       if(hasCur) foundCur = true;
       numOffset += pairs.length;
+      dispOffset += pairs.length;
       rendered.set(ns, html);
     });
+    // Part 2's divider rides immediately above the section that opens it,
+    // inside that section's own station wrapper — the B→C seam still
+    // renders exactly where it does today (in m5w2 it falls inside Part 1).
+    if(parts) rendered.set(parts.breakNs, partMarkHtml(2, parts.title2, curPart === 2) + rendered.get(parts.breakNs));
     /* One wrapper per station so the seam divider can hide itself in focus
        mode until the student is actually in the practice half (syncStationFocus
        toggles .div-cur) — a lone divider floating above a hidden step reads as
@@ -3979,8 +4105,19 @@ function buildLesson(w){
        render is the common case (every set open, every language switch) and a
        student resuming inside the practice half would otherwise get a seam
        that only appears once they touch something. */
-    return reminder + groups.map(g =>
-      `<div class="stp-group${g.secs.some(({ns}) => ns === curNs) ? ' div-cur' : ''}" data-group="${g.id}">`
+    const partOneHtml = parts ? partMarkHtml(1, parts.title1, curPart === 1) : '';
+    /* .div-cur, baked in (see above). For a set with parts there's a
+       second condition: the seam introduces the sections at the TOP of
+       its station, which in m5w2 are all in Part 1 — so once the open
+       step is in Part 2, "Now practice it" is a heading for a half that
+       started nine steps ago, stacked right above the Part 2 divider.
+       Same "don't head a part you're not in" rule the part marks follow. */
+    // `!parts ||` first: a set without a partBreak never reaches the second
+    // test, so its seam behaves exactly as it did before parts existed.
+    const groupCur = g => g.secs.some(({ns}) => ns === curNs)
+      && (!parts || partOfIdx(flat.findIndex(f => f.ns === g.secs[0].ns)) === curPart);
+    return reminder + partOneHtml + groups.map(g =>
+      `<div class="stp-group${groupCur(g) ? ' div-cur' : ''}" data-group="${g.id}">`
       + (g.id === 'c' ? dividerHtml(g.s) : '')
       + g.secs.map(({ns}) => rendered.get(ns)).join('')
       + `</div>`).join('');
@@ -3991,15 +4128,35 @@ function buildLesson(w){
   const single = !(w.stations && w.stations.c);
   const body = ladderHtml();
   const {total: stepTotal, done: stepDone} = lessonStepCounts();
+  /* Which part the chrome reports on: the one holding the open row. With
+     no row open at all (list view can leave every step collapsed) it's the
+     first part that still has unfinished work — so a student who has
+     finished Part 1 sees Part 2's numbers, which is the work order's "once
+     Part 1 is complete OR the student is past the divider". */
+  const pc = parts ? partStepCounts() : null;
+  const curPartNum = !parts ? 0
+    : openNum > 0 ? (openNum > pc[1].total ? 2 : 1)
+    : (pc[1].done >= pc[1].total ? 2 : 1);
+  const pillKey = parts ? 'progress.partStepsDone' : 'progress.stepsDone';
+  const pillParams = parts
+    ? {n: curPartNum, done: pc[curPartNum].done, total: pc[curPartNum].total}
+    : {done: stepDone, total: stepTotal};
+  const pillPct = parts
+    ? (pc[curPartNum].total ? pc[curPartNum].done / pc[curPartNum].total : 0)
+    : (stepTotal ? stepDone / stepTotal : 0);
   const pillHtml = stepTotal > 0 ? `<span class="prog-pill-wrap">`
-    + `<span class="prog-pill" data-i18n="progress.stepsDone" data-i18n-params="${escAttr(JSON.stringify({done:stepDone,total:stepTotal}))}">${t('progress.stepsDone',{done:stepDone,total:stepTotal})}</span>`
-    + `<span class="prog-mini"><i style="width:${Math.round(stepDone/stepTotal*100)}%"></i></span>`
+    + `<span class="prog-pill" data-i18n="${pillKey}" data-i18n-params="${escAttr(JSON.stringify(pillParams))}">${t(pillKey, pillParams)}</span>`
+    + `<span class="prog-mini"><i style="width:${Math.round(pillPct*100)}%"></i></span>`
     + `</span>` : '';
   const titleHtml = (single && w.stations.b && w.stations.b.title) ? `<h3 class="dp-title">${tf(w.stations.b,'title')}</h3>` : '';
   const headHtml = (titleHtml || pillHtml) ? `<div class="dp-head">${titleHtml}${pillHtml}</div>` : '';
   /* Stepper bar: where-am-I counter (focus mode only) + the view toggle,
      which stays visible in BOTH views — it's the only way back to focus. */
-  const countParams = {n: openNum || 1, m: stepTotal};
+  // "Step n of m" counts within the current part for a set with parts;
+  // Back/Next below stay whole-ladder, so Next still crosses the divider.
+  const countParams = parts
+    ? {n: Math.max(1, (openNum || 1) - (curPartNum === 2 ? pc[1].total : 0)), m: pc[curPartNum].total}
+    : {n: openNum || 1, m: stepTotal};
   const toggleKey = focusMode ? 'fm.listView' : 'fm.focusView';
   const stepperHtml = stepTotal > 0 ? `<div class="dp-stepper">`
     + `<span class="fm-count" aria-live="polite" data-i18n="fm.stepOf" data-i18n-params="${escAttr(JSON.stringify(countParams))}">${t('fm.stepOf', countParams)}</span>`
@@ -4017,7 +4174,7 @@ function buildLesson(w){
   // step to advance to, kept live by syncStationFocus() as the student moves.
   const atEnd = (openNum || 1) >= stepTotal;
   return `
-    <div class="dp${focusMode ? ' focus' : ''}${atEnd ? ' at-end' : ''}" id="${w.id}-dp-b">
+    <div class="dp${focusMode ? ' focus' : ''}${atEnd ? ' at-end' : ''}${parts ? ' has-parts' : ''}" id="${w.id}-dp-b">
       ${headHtml}
       ${stepperHtml}
       ${body}
@@ -4072,6 +4229,9 @@ function toggleStationView(){
 }
 function applyStationView(dp, focus){
   dp.classList.toggle('focus', focus);
+  // The part-divider screen belongs to focus mode's Back/Next; flipping the
+  // view is the other way out of it, so it never survives the switch.
+  dp.classList.remove('pd-showing');
   /* Entering focus mode: land on exactly one row. List view can leave none
      open (everything collapsed → an empty card) or several ("Show me where"
      lights up every step that teaches a skill), so pick the first open one,
@@ -4107,13 +4267,38 @@ function syncStationFocus(dp){
   dp.querySelectorAll('.stp-sec').forEach(sec=>sec.classList.toggle('sec-cur', !!open && sec.contains(open)));
   // Same rule one level up: in focus mode the B→C seam divider only shows
   // while the open step is in the practice half it introduces.
-  dp.querySelectorAll('.stp-group').forEach(g=>g.classList.toggle('div-cur', !!open && g.contains(open)));
+  /* And once more for a set shown in two parts: the Part 1 heading and the
+     Part 2 divider each show only while the open row is inside the part
+     they name — otherwise a student resuming inside Part 2 gets a Part 1
+     heading with nothing under it. */
+  const parted = dp.classList.contains('has-parts');
+  const part = parted ? lessonCurrentPart(dp) : null;
+  if(parted) dp.querySelectorAll('.stp-partmark').forEach(m=>m.classList.toggle('part-cur', m.dataset.part === part));
+  dp.querySelectorAll('.stp-group').forEach(g=>{
+    // The seam is subject to the same rule: it heads the sections at the
+    // top of its station, and in a parted set those are all in Part 1, so
+    // it stops showing once the open row is in Part 2 rather than sitting
+    // directly above the Part 2 divider saying "now practice it".
+    // `!parted ||` first: data-part is only emitted for a set with a
+    // partBreak, so a set without one never reaches the second test and
+    // keeps the plain "open step is in this group" rule it always had.
+    const first = g.querySelector('.stp-sec[data-part]');
+    const on = !!open && g.contains(open) && (!parted || !first || first.dataset.part === part);
+    g.classList.toggle('div-cur', on);
+  });
+  // The counter is per-part too; Back/Next below stay whole-ladder so Next
+  // can still carry the student across the divider.
+  const scope = parted ? lessonPartSteps(dp, part) : steps;
   const count = dp.querySelector('.fm-count');
   if(count){
-    const params = {n: open ? (Number(open.dataset.num) || idx + 1) : 1, m: steps.length};
+    const sIdx = open ? scope.indexOf(open) : -1;
+    const params = parted
+      ? {n: sIdx >= 0 ? sIdx + 1 : 1, m: scope.length}
+      : {n: open ? (Number(open.dataset.num) || idx + 1) : 1, m: steps.length};
     count.setAttribute('data-i18n-params', JSON.stringify(params));
     count.textContent = t('fm.stepOf', params);
   }
+  if(parted) refreshLessonPill(dp);
   dp.classList.toggle('at-end', idx < 0 || idx >= steps.length - 1);
   const nav = dp.querySelector('.dp-stepnav');
   if(nav){
@@ -4134,7 +4319,34 @@ function stationStepNav(btn, dir){
   const target = idx < 0 ? steps[0] : steps[idx + dir];
   if(!target) return;
   expandStepEl(target);
+  /* Crossing the part divider going FORWARD: show the divider as its own
+     screen, once. Part 2's first step is already the open row underneath,
+     so "Keep going" only lifts the screen — and because nothing about
+     this is stored (a fresh render never sets the class), a student
+     resuming later lands straight on Part 2 without replaying it. */
+  if(dir > 0 && dp.classList.contains('focus') && crossedPartBreak(dp, open, target)){
+    dp.classList.add('pd-showing');
+    const mark = dp.querySelector('.stp-partbreak');
+    if(mark) requestAnimationFrame(()=>mark.scrollIntoView({block:'start'}));
+    return;
+  }
   nudgeStepIntoView(target, true);
+}
+function crossedPartBreak(dp, from, to){
+  if(!from || dp.dataset.pdSeen === '1') return false;
+  const mark = dp.querySelector('.stp-partbreak');
+  if(!mark) return false;
+  const AFTER = Node.DOCUMENT_POSITION_FOLLOWING;
+  return !!(from.compareDocumentPosition(mark) & AFTER) && !!(mark.compareDocumentPosition(to) & AFTER);
+}
+function dismissPartBreak(btn){
+  const dp = btn.closest('.dp');
+  if(!dp) return;
+  dp.dataset.pdSeen = '1';
+  dp.classList.remove('pd-showing');
+  const open = dp.querySelector('li.step:not(.collapsed)');
+  if(open) nudgeStepIntoView(open, true);
+  syncStationFocus(dp);
 }
 
 /* Collapsing a taller open step ABOVE this one shortens the page, which
@@ -4231,14 +4443,39 @@ function collapseAndAdvance(li){
   syncStationFocus(dp);
 }
 
-function updateProgressPill(li){
-  const dp = li.closest('.dp');
+function updateProgressPill(li){ refreshLessonPill(li.closest('.dp')); }
+/* ── Per-part chrome helpers (a set with `partOne`/`partBreak`) ───────
+   All three read the DOM rather than the module data, so they work the
+   same whether the card was just built or a student has been ticking
+   steps in it for ten minutes. A set with no parts carries no
+   `data-part`, so `parted` is false everywhere and nothing changes. */
+function lessonPartSteps(dp, part){
+  return [...dp.querySelectorAll(`.stp-sec[data-part="${part}"] li.step`)];
+}
+/* Which part the chrome reports on: the one holding the open row, or —
+   with nothing open (list view can leave every step collapsed) — the
+   first part that still has unfinished work, falling back to the last. */
+function lessonCurrentPart(dp){
+  const open = dp.querySelector('li.step:not(.collapsed)');
+  const sec = open && open.closest('.stp-sec');
+  if(sec && sec.dataset.part) return sec.dataset.part;
+  const nums = [...new Set([...dp.querySelectorAll('.stp-sec[data-part]')].map(x=>x.dataset.part))];
+  return nums.find(n => lessonPartSteps(dp, n).some(li=>!li.classList.contains('step-done')))
+    || nums[nums.length-1] || '1';
+}
+function refreshLessonPill(dp){
   const pill = dp && dp.querySelector('.prog-pill');
   if(!pill) return;
-  const total = dp.querySelectorAll('li.step').length;
-  const done = dp.querySelectorAll('li.step.step-done').length;
-  pill.setAttribute('data-i18n-params', JSON.stringify({done, total}));
-  pill.textContent = t('progress.stepsDone', {done, total});
+  const parted = dp.classList.contains('has-parts');
+  const part = parted ? lessonCurrentPart(dp) : null;
+  const scope = parted ? lessonPartSteps(dp, part) : [...dp.querySelectorAll('li.step')];
+  const total = scope.length;
+  const done = scope.filter(li=>li.classList.contains('step-done')).length;
+  const key = parted ? 'progress.partStepsDone' : 'progress.stepsDone';
+  const params = parted ? {n: Number(part), done, total} : {done, total};
+  pill.setAttribute('data-i18n', key);
+  pill.setAttribute('data-i18n-params', JSON.stringify(params));
+  pill.textContent = t(key, params);
   const mini = dp.querySelector('.prog-mini i');
   if(mini) mini.style.width = `${Math.round(total ? done/total*100 : 0)}%`;
 }
@@ -8672,6 +8909,12 @@ function caHeroCardHtml(a){
   const blurb = caFirstSentence(tf(a, 'intro'));
   const doneAny = (a.steps || []).some((s, si) => caStepDone[`${a.id}:${si}`] === true);
   const ctaKey = doneAny ? 'ca.heroKeepGoing' : 'ca.heroStart';
+  /* The CTA hides itself once the card is open (CSS, .ca-card--hero[open]) —
+     "Start →" over an already-open step ladder reads as a second, unstarted
+     thing to do (post-ship review, 2026-09-19). With no thumbnail there is
+     nothing left in the right-hand column, so the column goes too rather
+     than holding a 210px hole open. */
+  const thumbHtml = caHeroThumbHtml(a);
   return `<details class="ca-card ca-card--hero" ${open ? 'open' : ''} data-id="${escAttr(a.id)}" ontoggle="caOnToggle(this)">
     <summary class="ca-card-summary ca-hero-summary">
       <div class="ca-hero-main">
@@ -8681,8 +8924,8 @@ function caHeroCardHtml(a){
         ${blurb ? `<p class="ca-hero-blurb">${escHtml(blurb)}</p>` : ''}
         ${caChunkMetaHtml(a)}
       </div>
-      <div class="ca-hero-side">
-        ${caHeroThumbHtml(a)}
+      <div class="ca-hero-side${thumbHtml ? '' : ' ca-hero-side--cta-only'}">
+        ${thumbHtml}
         <span class="ca-hero-cta">${escHtml(t(ctaKey))} &rarr;</span>
       </div>
     </summary>
@@ -8710,7 +8953,7 @@ function caHeroCheckHtml(a){
         ${blurb ? `<p class="ca-hero-blurb">${escHtml(blurb)}</p>` : ''}
         ${caCheckMetaHtml(a)}
       </div>
-      <div class="ca-hero-side">
+      <div class="ca-hero-side ca-hero-side--cta-only">
         <span class="ca-hero-cta">${escHtml(t('ca.heroStartCheck'))} &rarr;</span>
       </div>
     </summary>
