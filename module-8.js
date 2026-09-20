@@ -381,18 +381,18 @@ SETS.push(
             response: { type: 'mc', prompt: 'In a typical fingerpicked arpeggio, what role does the THUMB usually play?',
               prompt_es: 'En un arpegio típico de fingerpicking, ¿qué papel suele cumplir el PULGAR?',
               answer: 0,
-              explain: 'The thumb is the anchor — it stays on a bass string and lays down the foundation while i, m, and a handle the higher, faster notes.',
-              explain_es: 'El pulgar es el ancla — se queda en una cuerda grave y sienta la base mientras i, m y a se encargan de las notas más agudas y rápidas.',
+              explain: 'The thumb is the anchor — it stays on a bass string and lays down the foundation while i, m, and a handle the higher, faster notes. It is the slowest-moving finger in the pattern, not the fastest, and it never doubles a treble string: the thumb owns the bass and the fingers own the top.',
+              explain_es: 'El pulgar es el ancla — se queda en una cuerda grave y sienta la base mientras i, m y a se encargan de las notas más agudas y rápidas. Es el dedo que menos se mueve del patrón, no el que más, y nunca dobla una cuerda aguda: el pulgar es dueño de los graves y los dedos del agudo.',
               choices: [
               'It moves least — it stays on a bass string',
               'It moves fastest, switching strings every beat',
-              'It doesn\'t play at all in arpeggios',
+              'It doubles whatever the index finger plays',
               'It plays the highest notes'
             ],
               choices_es: [
               'Es el que menos se mueve — se queda en una cuerda grave',
               'Es el que más rápido se mueve, cambiando de cuerda en cada tiempo',
-              'No toca para nada en los arpegios',
+              'Dobla lo que toque el dedo índice',
               'Toca las notas más agudas'
             ] }
           }
@@ -663,10 +663,10 @@ SETS.push(
         gotItWhen_es: 'en un cambio de acorde, solo tu pulgar se mueve para encontrar la nueva nota raíz — i-m-a se quedan estacionados en Sol, Si y mi aguda. El patrón continúa sin interrupciones.',
         practice: { type: 'mc', prompt: 'You\'re fingerpicking and the chord changes Em → Am. What changes for your PICKING hand?',
           prompt_es: 'Estás tocando fingerpicking y el acorde cambia de Em → Am. ¿Qué cambia para tu mano de PUNTEO?',
-          choices: ['Only the thumb — it shifts from low E to the A string', 'All four fingers shift up one string', 'Nothing at all, ever', 'i-m-a move to new strings; the thumb stays put'],
-          choices_es: ['Solo el pulgar — pasa de la cuerda Mi grave a la cuerda La', 'Los cuatro dedos suben una cuerda', 'Nada en absoluto, nunca', 'i-m-a se mueven a cuerdas nuevas; el pulgar se queda en su lugar'], answer: 0,
-          explain: 'The thumb hunts the new root; i-m-a stay parked on G, B, and high e. Moving everything is what breaks the pattern at changes.',
-          explain_es: 'El pulgar busca la nueva raíz; i-m-a se quedan estacionados en Sol, Si y mi aguda. Mover todo es lo que rompe el patrón en los cambios.' } }
+          choices: ['Only the thumb — it shifts from low E to the A string', 'All four fingers shift up one string', 'Nothing — the picking hand repeats the same pattern', 'i-m-a move to new strings; the thumb stays put'],
+          choices_es: ['Solo el pulgar — pasa de la cuerda Mi grave a la cuerda La', 'Los cuatro dedos suben una cuerda', 'Nada — la mano de puntear repite el mismo patrón', 'i-m-a se mueven a cuerdas nuevas; el pulgar se queda en su lugar'], answer: 0,
+          explain: 'The thumb hunts the new root note; i, m and a stay parked on the G, B and high e strings. Em is rooted on the low E string and Am on the A string, so the thumb is the only one with anywhere to go — moving everything breaks the pattern at the change, and moving nothing leaves the bass on the wrong note.',
+          explain_es: 'El pulgar busca la nueva nota raíz; i, m y a se quedan en las cuerdas Sol, Si y mi aguda. Em tiene su raíz en la cuerda Mi grave y Am en la cuerda La, así que el pulgar es el único que tiene a dónde ir — mover todo rompe el patrón en el cambio, y no mover nada deja el bajo en la nota equivocada.' } }
     ]
   },
 
@@ -705,18 +705,18 @@ SETS.push(
             response: { type: 'mc', prompt: 'In Travis picking, what does the THUMB do?',
               prompt_es: 'En el Travis picking, ¿qué hace el PULGAR?',
               answer: 1,
-              explain: 'The Travis "engine" is the thumb alternating between two bass strings (usually the root and the 5th) in steady time, while the fingers add melody on top.',
-              explain_es: 'El "motor" del Travis picking es el pulgar alternando entre dos cuerdas graves (normalmente la raíz y la quinta) en tiempo constante, mientras los dedos agregan melodía encima.',
+              explain: 'The Travis "engine" is the thumb alternating between two bass strings (usually the root and the 5th) in steady time, while the fingers add melody on top. Staying on one bass note gives you a drone instead of that rocking pulse, and the melody belongs to i, m and a — never to the thumb.',
+              explain_es: 'El "motor" del Travis picking es el pulgar alternando entre dos cuerdas graves (normalmente la raíz y la quinta) en tiempo constante, mientras los dedos agregan melodía encima. Quedarse en una sola nota grave da un zumbido en lugar de ese pulso que se mece, y la melodía es de i, m y a — nunca del pulgar.',
               choices: [
               'Plays the same bass note over and over',
               'Alternates between two bass notes',
-              'Doesn\'t play at all',
+              'Follows the melody a beat behind',
               'Plays the melody'
             ],
               choices_es: [
               'Toca la misma nota grave una y otra vez',
               'Alterna entre dos notas graves',
-              'No toca en absoluto',
+              'Sigue la melodía un tiempo después',
               'Toca la melodía'
             ] }
           },
@@ -992,12 +992,12 @@ SETS.push(
         text_es: 'Anticipar el siguiente acorde moviendo la mano de trastear en la última nota del compás',
         gotItWhen: 'your fretting hand starts repositioning for the next chord BEFORE the current bar ends — by the time the new bar starts, you\'re ready.',
         gotItWhen_es: 'tu mano de trastear empieza a reposicionarse para el siguiente acorde ANTES de que termine el compás actual — para cuando empieza el nuevo compás, ya estás listo.',
-        practice: { type: 'mc', prompt: 'When should your FRETTING hand start moving toward the next chord?',
-          prompt_es: '¿Cuándo debería tu mano de TRASTEAR empezar a moverse hacia el siguiente acorde?',
-          choices: ['On the first beat of the new bar', 'On the LAST note of the current bar', 'Halfway through the current bar', 'Never — wait for the change'],
-          choices_es: ['En el primer tiempo del nuevo compás', 'En la ÚLTIMA nota del compás actual', 'A la mitad del compás actual', 'Nunca — espera al cambio'], answer: 1,
-          explain: 'Chord changes arrive late because the hand leaves late. Starting the move on the last note of the bar buys you a full beat of travel time, so the picking hand never has to pause and wait.',
-          explain_es: 'Los cambios de acorde llegan tarde porque la mano sale tarde. Empezar el movimiento en la última nota del compás te da un tiempo completo de viaje, así la mano de punteo nunca tiene que detenerse a esperar.' } },
+        practice: { type: 'mc', prompt: 'You are fingerpicking a bar of Em and the next bar is Am. When does your fretting hand leave Em?',
+          prompt_es: 'Estás tocando con los dedos un compás de Em y el siguiente compás es Am. ¿Cuándo deja tu mano de trastear el Em?',
+          choices: ['On the first beat of the new Am bar', 'While the last Em note is still ringing', 'Halfway through the Em bar', 'Once you hear the Am chord start'],
+          choices_es: ['En el primer tiempo del nuevo compás de Am', 'Mientras la última nota de Em todavía suena', 'A la mitad del compás de Em', 'Cuando escuchas empezar el acorde de Am'], answer: 1,
+          explain: 'Chord changes arrive late because the hand leaves late. Start the move while the last note of the bar is still sounding and you buy a whole beat of travel time, so the picking hand never has to stop and wait. Waiting for the new bar — or for the sound of the new chord — is already too late; by then the change should have happened.',
+          explain_es: 'Los cambios de acorde llegan tarde porque la mano sale tarde. Empieza el movimiento mientras la última nota del compás todavía suena y ganas un tiempo entero de viaje, así la mano de punteo nunca tiene que detenerse a esperar. Esperar al compás nuevo — o al sonido del acorde nuevo — ya es demasiado tarde; para entonces el cambio debería haber ocurrido.' } },
       { id: 'm8w3-s5', text: 'Play a full verse of a fingerpicked song from start to finish',
         text_es: 'Tocar una estrofa completa de una canción con fingerpicking de principio a fin',
         gotItWhen: 'you can fingerpick through a complete verse of "House of the Rising Sun" or "Hallelujah" (from Module 5\'s song list) without stopping — mistakes ok, but you keep going.',

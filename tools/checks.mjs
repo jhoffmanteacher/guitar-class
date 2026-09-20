@@ -245,6 +245,9 @@ function validateModules() {
   validateNoteBeats(allSets);
   checkMcAnswerTells(allSets);
   checkFrozenGradedMcs(allSets);
+  checkMcShoutedAnswer(allSets);
+  checkMcCatchAllDistractors(allSets);
+  checkMcAnswerOnCard(allSets);
   checkPlaySeqStrings(allSets);
   checkTuningWarmupTag(allSets);
   checkSectionKindTitle(allSets);
@@ -617,6 +620,235 @@ function checkFrozenGradedMcs(allSets) {
   }
   if (bad === 0) ok(`${Object.keys(seen).length} graded MCs in Modules 1–${FROZEN_MC_THROUGH_MODULE} match their pinned choices`);
   else console.log(`  ${C.dim}current fingerprints:\n${Object.entries(seen).map(([k, v]) => `    '${k}': '${v}',`).join('\n')}${C.reset}`);
+}
+
+/* ════════════════════════════════════════════════════════════════════
+   MC GIVEAWAY DETECTORS (1at / 1au / 1av) — added 2026-09-20 after a
+   sweep of Modules 7–13 found 47 questions a student could answer
+   without knowing the material. All three walk the same surface: every
+   MC in the course, graded and practice, in both languages.
+
+   Shared helper — the strings that render on the SAME card as an MC,
+   so a detector can ask "was the answer already on screen?".
+     · a GRADED MC lives on a lesson step: its label, text, hint, stuck
+       and levelUp all render around it (buildLesson in app.js).
+     · a PRACTICE MC lives on a skill: buildChecklist prints the skill's
+       `text` as an always-visible .sk-label right above the practice
+       button (app.js:5140), and `gotItWhen` behind the #gi-<id> fold.
+   ════════════════════════════════════════════════════════════════════ */
+function mcCards(allSets) {
+  const out = [];
+  for (const w of allSets) {
+    for (const stId of Object.keys(w.stations || {})) {
+      const st = w.stations[stId];
+      const sections = st.sections || (st.steps ? [{ steps: st.steps }] : []);
+      sections.forEach((sec, si) => (sec.steps || []).forEach((step, i) => {
+        if (!step.response || step.response.type !== 'mc') return;
+        out.push({
+          key: `${w.id}·${stId}·sec${si}·step${i}`, moduleNum: Number(w.moduleNum), kind: 'graded',
+          label: step.label, mc: step.response,
+          visible: ['label', 'text', 'hint', 'stuck', 'levelUp'].map(f => step[f] || '').join(' '),
+          visible_es: ['label_es', 'text_es', 'hint_es', 'stuck_es', 'levelUp_es'].map(f => step[f] || '').join(' '),
+        });
+      }));
+    }
+    (Array.isArray(w.skills) ? w.skills : []).forEach(sk => {
+      if (!sk || !sk.practice || sk.practice.type !== 'mc') return;
+      out.push({
+        key: `skill ${sk.id}`, moduleNum: Number(w.moduleNum), kind: 'practice',
+        label: sk.text, mc: sk.practice,
+        visible: `${sk.text || ''} ${sk.gotItWhen || ''}`,
+        visible_es: `${sk.text_es || ''} ${sk.gotItWhen_es || ''}`,
+      });
+    });
+  }
+  return out;
+}
+
+/* ════════════════════════════════════════════════════════════════════
+   1at. THE KEYED CHOICE IS THE ONLY ONE SHOUTING — a choice that
+   emphasises a word in CAPITALS when none of its neighbours do is a
+   free answer: the student scans for the shouted word and never reads
+   the question. A 2026-09-20 sweep found 8, all in Modules 7–12
+   ("On the BACK of the neck", "then HAMMER onto fret 7", "contains
+   ALL the chords").
+
+   No allowlist and no innocent twin: chord symbols, note names, Roman
+   numerals and the handful of real acronyms are excluded by NOT_SHOUT,
+   and anything left is emphasis, which CLAUDE.md already says belongs
+   at render time rather than in content. The fix is to drop the caps —
+   or, where the emphasis genuinely teaches a contrast, to mirror it
+   into the distractor it contrasts with (m10w2's relative/parallel
+   pair does exactly that).
+
+   Prompts are NOT scanned: a shouted word there ("which STRING?") is
+   site convention and gives nothing away.
+   ════════════════════════════════════════════════════════════════════ */
+const NOT_SHOUT = /^(?:TAB|BPM|[A-G]|I{1,3}|IV|V|VI{1,2}|X|XX|EADGBE|DAH|ONE|TWO|OK|PDF|USA|AC|DC)$/;
+function checkMcShoutedAnswer(allSets) {
+  head('1at. Keyed MC choice is the only one shouting a word');
+  let bad = 0, total = 0;
+  const shouts = c => [...String(c).matchAll(/\b[A-Z]{2,}\b/g)].map(m => m[0]).filter(x => !NOT_SHOUT.test(x));
+  for (const card of mcCards(allSets)) {
+    for (const [lang, arr] of [['en', card.mc.choices], ['es', card.mc.choices_es]]) {
+      if (!Array.isArray(arr) || arr.length < 3 || typeof card.mc.answer !== 'number') continue;
+      total++;
+      const withCaps = arr.map((c, i) => (shouts(c).length ? i : -1)).filter(i => i >= 0);
+      if (withCaps.length === 1 && withCaps[0] === card.mc.answer) {
+        err(`${card.key} [${lang}] — "${card.label}": the keyed choice is the ONLY one emphasising a word (${shouts(arr[card.mc.answer]).join(', ')}) — "${String(arr[card.mc.answer]).slice(0, 60)}". A student can find the answer by scanning for the capitals. Drop the caps, or mirror the emphasis into the distractor it contrasts with.`);
+        problems++; bad++;
+      }
+    }
+  }
+  if (bad === 0) ok(`no keyed-choice emphasis tells across ${total} MC choice lists (both languages)`);
+}
+
+/* ════════════════════════════════════════════════════════════════════
+   1au. NEVER-CORRECT DISTRACTORS — "It doesn't matter", "Either works
+   equally well", "Nothing at all, ever", "Any string you like", "You
+   can't". A student who has learned nothing but how tests are written
+   crosses these off for free, so a four-choice question quietly becomes
+   a two-choice one. The 2026-09-20 sweep found 30 across 26 MCs.
+
+   ── WHY THIS ONE HAS AN ALLOWLIST AND 1at DOESN'T ──
+   CLAUDE.md: "Reach for a whitelist over a blacklist whenever the
+   banned word has an innocent twin." Several of these are real beginner
+   beliefs, not filler — m4w1-s6's "Never repeating anything" is the
+   plausible OPPOSITE of its keyed "repeat an idea, vary it, leave
+   space", and m11w2-s6's "Can't tell from chords alone" is what a
+   cautious student genuinely answers. Those are the best distractors on
+   their cards, so the phrase list alone cannot decide. MC_CATCHALL_ALLOW
+   holds every reviewed exception as `<card key>|<choice index>|<lang>`;
+   anything not on it fails the push.
+
+   The KEYED choice is never scanned — exactly two in the course contain
+   an absolute ("At exactly the same time", "Never breaks at performance
+   tempo") and both are correct. Neither are prompts or explains, where
+   "the thumb never stops" is ordinary teaching.
+
+   Entries below in Modules 1–6 are pre-existing and were reviewed, not
+   fixed: Module 1–2 graded MCs are frozen (see 1ap), and the rest were
+   out of that sweep's scope. `w2·b·sec0·step0|2` is a genuine defect
+   deferred to next summer — see CLAUDE.md "Reword next summer".
+   ════════════════════════════════════════════════════════════════════ */
+const MC_CATCHALL_EN = /it doesn'?t matter|either [^.]{0,12}works|equally well|any [^.]{0,20}you like|whichever [^.]{0,20}(?:you like|happens)|as long as you|at random|wherever it|\bnever\b|\balways\b|can'?t be|you can'?t|it isn'?t|it can'?t|exactly the same|nothing at all|only ever|automatically|just pick one|your choice|doesn'?t play at all|can'?t tell/i;
+const MC_CATCHALL_ES = /no importa|da igual|cualquier [^.]{0,25}quieras|al azar|donde sea|\bnunca\b|\bsiempre\b|jamás|no se puede|exactamente lo mismo|funciona igual/i;
+const MC_CATCHALL_ALLOW = new Set([
+  'w2·b·sec0·step0|2|en',        // "It doesn't matter which way" — FROZEN graded (1ap); reword next summer
+  'w2·b·sec0·step0|2|es',        //   same card, Spanish twin
+  'skill m3w1-s3|1|en',          // "only ever hit the two strings you want" — a real beginner belief about aim
+  'm4w1·b·sec1·step0|3|es',      // "No importa qué dedo" — pre-existing Module 4 debt, outside the 7–13 sweep
+  'skill m4w1-s6|2|en',          // "Never repeating anything" — the plausible opposite of the keyed answer
+  'skill m4w1-s6|2|es',          //   same card, Spanish twin
+  'm4w2·b·sec1·step0|3|en',      // "They sound exactly the same" — a genuine hammer-on misconception
+  'skill m5w2-s5|3|es',          // "Al azar" — a real (wrong) way students pick a practice order
+  'skill m11w2-s6|3|en',         // "Can't tell from chords alone" — what a cautious student really answers
+  'skill m11w2-s6|3|es',         //   same card, Spanish twin
+]);
+function checkMcCatchAllDistractors(allSets) {
+  head('1au. Never-correct catch-all distractors');
+  let bad = 0, allowed = 0;
+  for (const card of mcCards(allSets)) {
+    for (const [lang, arr, re] of [['en', card.mc.choices, MC_CATCHALL_EN], ['es', card.mc.choices_es, MC_CATCHALL_ES]]) {
+      if (!Array.isArray(arr) || typeof card.mc.answer !== 'number') continue;
+      arr.forEach((c, i) => {
+        if (i === card.mc.answer || !re.test(String(c))) return;
+        const id = `${card.key}|${i}|${lang}`;
+        if (MC_CATCHALL_ALLOW.has(id)) { allowed++; return; }
+        err(`${card.key} [${lang}] choice ${i} — "${card.label}": never-correct catch-all distractor "${String(c).slice(0, 60)}". A student crosses it off without knowing anything. Replace it with a near-miss a real beginner might believe — or, if it IS one, add '${id}' to MC_CATCHALL_ALLOW with a reason.`);
+        problems++; bad++;
+      });
+    }
+  }
+  if (bad === 0) ok(`no unreviewed catch-all distractors (${allowed} reviewed exceptions allowed)`);
+}
+
+/* ════════════════════════════════════════════════════════════════════
+   1av. THE ANSWER IS ALREADY ON THE CARD — the keyed choice repeats a
+   phrase from text the same screen is already showing, and no
+   distractor shares it. The student matches strings instead of knowing
+   anything. This was the single biggest class in the 2026-09-20 sweep
+   and the one every reviewer under-counted, because the leak is usually
+   in the step's `hint` or the skill's own always-visible label rather
+   than in the question.
+
+   Matching is on 3-word content n-grams after stripping HTML and
+   stopwords. Three clauses keep it honest:
+     (a) the n-gram appears in the visible text,
+     (b) it appears in NO distractor — a phrase shared with a distractor
+         is common vocabulary, not a tell, and this clause is the whole
+         discriminator,
+     (c) it is absent from the prompt, which may legitimately repeat a
+         term from the answer.
+   Plus MC_LEAK_VOCAB: an n-gram made only of course vocabulary ("the
+   low E", "on the fret") says nothing, so at least one token must come
+   from outside that list.
+
+   A card whose job IS to restate its own teaching (Module 1's tuner
+   step, where the MC is a read-the-card check) goes in MC_LEAK_ALLOW,
+   keyed `<card key>|<n-gram>`, the way JOURNEY_ALLOWED_DIFFS works.
+   ════════════════════════════════════════════════════════════════════ */
+const MC_LEAK_STOP = new Set((
+  'the a an and or of to in on at it is are you your for that this from then than so no not but as be by ' +
+  'can do does if into its just like make more most one only other out over same some such their them they ' +
+  'very what when where which while who will would ' +
+  /* Spanish stopwords matter as much as the English ones: without them an
+     n-gram like "la nota trasteada" is two articles and a noun, and the check
+     fires on ordinary grammar rather than on a leak. */
+  'el la los las un una unos unas de del al en y o que se su sus lo le les por para con como es son esta ' +
+  'estan ser estar hace hacer no ni mas muy ya si cuando donde cual cuales esto este esos esas tu tus mi ' +
+  'mis te cada todo toda todos todas otro otra pero tambien solo entre sobre desde hasta cuerda cuerdas'
+).split(' '));
+const MC_LEAK_VOCAB = new Set('string strings fret frets chord chords note notes beat beats bar bars play plays played playing thumb finger fingers barre pattern scale guitar hand strum strums low high open'.split(' '));
+/* Every entry here is in Modules 1–6, which the 2026-09-20 sweep did not cover
+   (it ran over 7–13). They are reviewed and deliberately carried, not tuned
+   away — Modules 1–2's graded MCs are frozen for the year (1ap), so two of
+   them cannot be reworded until progress resets. Clearing the rest is a
+   separate job; when a module gets swept, delete its entries here first and
+   let the check tell you what is left. */
+const MC_LEAK_ALLOW = new Set([
+  'w2·b·sec0·step4|high loosen peg',        // Module 1 tuner card — the MC IS the read-the-card check; FROZEN (1ap)
+  'skill w2-s3|3 4 mm',                     // a string gauge; the skill label has to state it
+  'skill m2w2-s6|behind middle finger',     // pre-existing Module 2 debt, outside the 7–13 sweep
+  'skill m2w2-s6|menos detras dedo',        //   same card, Spanish twin
+  'm4w3·b·sec1·step0|5 quinta bemol',       // pre-existing Module 4 debt
+  'skill m4w3-s1|3 5 6',                    //   scale degrees; both languages produce this same n-gram
+  'skill m6w3-s2|golpes hacia abajo',       // pre-existing Module 6 debt
+  'skill m4w2-s1|p mf f',                   // the skill label has to define p / mf / f to be teachable at all
+  'm4w3·b·sec1·step0|5 flat 5',             // pre-existing Module 4 debt
+  'm5w4·b·sec0·step1|practice makes permanent', // the step exists to teach that one phrase
+]);
+function checkMcAnswerOnCard(allSets) {
+  head('1av. Keyed MC answer already printed on the same card');
+  /* Strip accents BEFORE dropping punctuation — otherwise "más" becomes the two
+     tokens "m" and "s" and every Spanish n-gram turns to noise. */
+  const words = s => String(s || '').toLowerCase().normalize('NFD').replace(/\p{M}/gu, '')
+    .replace(/<[^>]*>/g, ' ').replace(/[^a-z0-9#]+/g, ' ')
+    .split(' ').filter(x => x && !MC_LEAK_STOP.has(x));
+  const grams = (a, n) => { const o = []; for (let i = 0; i + n <= a.length; i++) o.push(a.slice(i, i + n).join(' ')); return o; };
+  let bad = 0, allowed = 0, total = 0;
+  for (const card of mcCards(allSets)) {
+    for (const [lang, arr, vis] of [['en', card.mc.choices, card.visible], ['es', card.mc.choices_es, card.visible_es]]) {
+      if (!Array.isArray(arr) || typeof card.mc.answer !== 'number' || !arr[card.mc.answer]) continue;
+      total++;
+      const visG = new Set(grams(words(vis), 3));
+      if (!visG.size) continue;
+      const promptG = new Set(grams(words(lang === 'es' ? card.mc.prompt_es : card.mc.prompt), 3));
+      const distG = new Set(arr.filter((_, i) => i !== card.mc.answer).flatMap(c => grams(words(c), 3)));
+      const leaked = grams(words(arr[card.mc.answer]), 3).filter(g =>
+        visG.has(g) && !distG.has(g) && !promptG.has(g) && g.split(' ').some(t => !MC_LEAK_VOCAB.has(t)));
+      if (!leaked.length) continue;
+      /* An allowlist entry excuses the CARD, not the phrase. A leaking answer
+         usually overlaps its own card in several places at once, so a
+         per-phrase exception would just surface the next n-gram and invite
+         whoever is holding the push to paste that one in too. One reviewed
+         decision per card is the honest unit. */
+      if (leaked.some(g => MC_LEAK_ALLOW.has(`${card.key}|${g}`))) { allowed++; continue; }
+      err(`${card.key} [${lang}] — "${card.label}": the keyed choice repeats "${leaked[0]}" from text already on screen (its ${card.kind === 'practice' ? 'skill label or gotItWhen' : 'step text or hint'}), and no distractor uses it. Reword whichever one you can — or add '${card.key}|${leaked[0]}' to MC_LEAK_ALLOW with a reason.`);
+      problems++; bad++;
+    }
+  }
+  if (bad === 0) ok(`no keyed answers printed on their own card across ${total} MC choice lists (${allowed} reviewed exceptions allowed)`);
 }
 
 /* ════════════════════════════════════════════════════════════════════
@@ -1841,13 +2073,20 @@ function checkSlangPhrasing() {
 
   /* Module content + class activities — the EN authoring fields only. */
   const FIELD_RE =
-    /\b(text|hint|stuck|levelUp|gotItWhen|explain|forward|subtitle|meta|intro|note):\s*'((?:\\.|[^'\\])*)'/g;
+    /\b(text|hint|stuck|levelUp|gotItWhen|explain|forward|subtitle|meta|intro|note|prompt|placeholder):\s*'((?:\\.|[^'\\])*)'/g;
+  /* `choices` is an ARRAY, so the field regex above cannot see inside it — and
+     until 2026-09-20 neither could 1w, which is how a banned phrase in an
+     answer choice shipped while the identical phrase in its `explain` failed
+     the push. Sweep every quoted string on a choices line separately. */
+  const CHOICES_RE = /\bchoices(?:_es)?:\s*\[((?:[^\]\\]|\\.)*)\]/g;
   for (const file of [...MODULE_FILES, 'class-activities.js']) {
     let lines;
     try { lines = readFileSync(join(ROOT, file), 'utf8').split('\n'); } catch { continue; }
     lines.forEach((line, li) => {
       for (const f of line.matchAll(FIELD_RE))
         for (const m of f[2].matchAll(RE)) flag(file, li, m[0]);
+      for (const c of line.matchAll(CHOICES_RE))
+        for (const m of c[1].matchAll(RE)) flag(file, li, m[0]);
     });
   }
 

@@ -210,7 +210,10 @@ in two parts (1ao), graded-MC choices frozen in the modules students have
 already reached (1ap),
 Happy Birthday's tab rhythm and the prose that describes it (1aq), the
 short-response budget for Modules 3–6 (1ar), the Daily 5's off switch
-still being a switch (1as).
+still being a switch (1as), and three MC-giveaway detectors — the keyed
+choice shouting a word no other choice shouts (1at), a never-correct
+catch-all distractor (1au), and the keyed answer already printed on its
+own card (1av).
 
 Not every class can be guarded by a banned-phrase list. 1w2 pins the Journey
 lick labels *positively* — every `Lick N — ...` card must use one of four
@@ -662,12 +665,60 @@ video never mentions reggae in its 0:00–4:00 range — so those two questions
 were rewritten to match what the student actually watches. **Check the watch
 range before writing a question about a video**, not just the title.
 
+**Three MC-giveaway ratchets — 1at, 1au, 1av** (2026-09-20). A sweep of
+Modules 7–13 found **47 of 141 questions** a student could answer without
+knowing the material, so the classes are now detectors rather than a rule
+nobody can enforce:
+
+- **1at — the keyed choice is the only one shouting a word.** "On the BACK of
+  the neck" among three quiet choices is a free answer: scan for the capitals.
+  No allowlist, because there is no innocent twin — chord symbols, note names
+  and Roman numerals are excluded by name, and what is left is emphasis, which
+  belongs at render time. Fix by dropping the caps, or, where the emphasis
+  teaches a real contrast, by **mirroring it into the distractor it contrasts
+  with** (m10w2's relative/parallel pair now does exactly that).
+- **1au — a never-correct catch-all in a distractor** ("It doesn't matter",
+  "Either works equally well", "Any string you like", "You can't"). This one
+  DOES have an allowlist, because several are genuine beginner beliefs:
+  m4w1-s6's "Never repeating anything" is the plausible opposite of its keyed
+  answer, and m11w2-s6's "Can't tell from chords alone" is what a cautious
+  student really writes. The keyed choice is never scanned — two correct
+  answers in the course contain an absolute.
+- **1av — the keyed answer is already printed on the card.** The biggest class
+  and the one every reviewer under-counts, because the leak is usually in the
+  step's `hint` or in the skill's own always-visible `.sk-label`, not in the
+  question. Matching is on 3-word content n-grams, and the discriminator is
+  that **no distractor shares the phrase** — a phrase the distractors also use
+  is vocabulary, not a tell. An allowlist entry excuses the **card**, not the
+  phrase, because a leaking answer usually overlaps its card in several places
+  and a per-phrase exception would just surface the next one.
+
+Every allowlist entry is in Modules 1–6, which that sweep did not cover. They
+are carried deliberately, not tuned away; when a module gets swept, delete its
+entries first and let the check say what is left.
+
+**1w was blind to the fields this all lives in.** Its `FIELD_RE` listed
+`text|hint|stuck|levelUp|gotItWhen|explain|…` and never `prompt`, and
+`choices` is an array a `field: '...'` regex cannot see into at all — so a
+banned phrase in an answer choice shipped while the identical phrase in its
+`explain` failed the push. Widened 2026-09-20 (it caught a real one in
+`module-9.js` the same day). **A new authoring field needs adding to
+`FIELD_RE`, and a new array field needs its own sweep beside `CHOICES_RE`.**
+
 **Reword next summer, when progress resets for the new year.** These three
 graded Module 1 Set 2 cards are frozen mid-year only because students have
-already answered them; each has a throwaway distractor worth replacing:
+already answered them; each has throwaway distractors worth replacing:
 - "Which of these is NOT a part of the guitar?" → "Hinge"
-- "If a string's pitch is too LOW…" → "Take the string off and put it back on"
+- "If a string's pitch is too LOW…" → **two** dead choices, "Take the string
+  off and put it back on" AND "It doesn't matter which way" (the second is
+  carried in checks.mjs `MC_CATCHALL_ALLOW`, so 1au does not fail the push on
+  it — clear the allowlist entry in the same edit)
 - "The needle is to the RIGHT of center…" → "The tuner is broken — restart it"
+
+The same card's read-the-tuner twin (`w2·b·sec0·step4`) is in
+`MC_LEAK_ALLOW` for 1av: its keyed answer repeats the step's own text, which
+is fine while the card's job is to check that you read the card, but worth
+re-deciding when the rest is reworded.
 
 ## Live quiz — the whole-class game
 

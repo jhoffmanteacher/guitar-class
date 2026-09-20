@@ -5,6 +5,19 @@ Notable changes to the Guitar Class site. Newest first.
 For the full session-by-session history (and the reasoning behind each change),
 see `WORKFLOW.md` and the git commit log.
 
+## 2026-09-20 — The same quiz clean-up, across Modules 7–13
+
+### Changed
+
+- **Quiz questions in Modules 7 through 13 were rewritten so no answer gives
+  itself away.** Some had an option nobody would pick, so the real choice was
+  only between two. Some shouted the right answer in capital letters while the
+  other choices stayed quiet. And in a lot of them the answer was already
+  printed further up the same card — in the hint, or in the skill title right
+  above the question — so you could match the words without knowing anything.
+  Forty-seven questions were reworked, in English and Spanish. Nothing you
+  have already answered was touched, and no question moved.
+
 ## 2026-09-20 — Happy Birthday in its real rhythm, and gentler on-ramps
 
 ### Changed

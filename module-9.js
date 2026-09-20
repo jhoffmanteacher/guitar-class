@@ -242,10 +242,10 @@ SETS.push(
         gotItWhen_es: 'puedes mirar una línea corta de TAB que no hayas practicado, identificar a cuál cuerda y traste se refiere cada número, y tocarla — eso es lectura a primera vista.',
         practice: { type: 'mc', prompt: 'A new TAB shows a "3" on the second line from the bottom, then "0 2" side by side on the bottom line. What do you play?',
           prompt_es: 'Un TAB nuevo muestra un "3" en la segunda línea desde abajo, y luego "0 2" lado a lado en la línea de abajo. ¿Qué tocas?',
-          choices: ['A string fret 3, then open low E, then low E fret 2', 'All three notes at once, as a single chord', 'Fingers 3, 0, and 2 on any strings you like', 'Frets 3, 0, 2 all on the top string'],
-          choices_es: ['Cuerda La traste 3, luego Mi grave al aire y traste 2', 'Las tres notas a la vez, como un solo acorde', 'Dedos 3, 0 y 2 en las cuerdas que quieras', 'Trastes 3, 0 y 2 todos en la cuerda más aguda'], answer: 0,
-          explain: 'Side-by-side numbers are played in order; only STACKED numbers sound together. The bottom line is the low E, the line above it is the A.',
-          explain_es: 'Los números lado a lado se tocan en orden; solo los números APILADOS suenan juntos. La línea de abajo es la Mi grave; la línea de arriba de ella es la La.' } },
+          choices: ['A string fret 3, then open low E, then low E fret 2', 'All three notes at once, as a single chord', 'Low E fret 3, then open A, then A fret 2', 'Frets 3, 0, 2 all on the top string'],
+          choices_es: ['Cuerda La traste 3, luego Mi grave al aire y traste 2', 'Las tres notas a la vez, como un solo acorde', 'Mi grave traste 3, luego La al aire y traste 2', 'Trastes 3, 0 y 2 todos en la cuerda más aguda'], answer: 0,
+          explain: 'Side-by-side numbers are played in order; only stacked numbers sound together. The bottom line is the low E string and the line above it is the A, so the "3" belongs to the A string and the "0 2" underneath are both on the low E. Swapping those two lines is the most common TAB misread there is.',
+          explain_es: 'Los números lado a lado se tocan en orden; solo los números apilados suenan juntos. La línea de abajo es la cuerda Mi grave y la de encima es la La, así que el "3" es de la cuerda La y los "0 2" de abajo van los dos en la Mi grave. Confundir esas dos líneas es el error de lectura de TAB más común que hay.' } },
       { id: 'm9w0-s6', text: 'RE-TEST: Fingerpick p-i-m-a over Am without stopping',
         text_es: 'REPASO: Tocar con fingerpicking p-i-m-a sobre Am sin detenerte',
         gotItWhen: 'you can switch your THUMB from low E to A string when the chord changes Em → Am, while i-m-a stay on G-B-e the whole time.',
@@ -534,9 +534,9 @@ SETS.push(
         gotItWhen_es: 'puedes tocar las primeras cuatro notas de la intro alrededor de los trastes 12–15 y nombrar las tres de las cuerdas Re y Sol — la nota de la cuerda Si es un adelanto, no algo que se espera que nombres todavía.',
         practice: { type: 'mc', prompt: 'The "Sweet Child" intro TAB starts at fret 12 on the D string. Using today\'s fretboard knowledge, what note is that?',
           prompt_es: 'El TAB de la intro de "Sweet Child" empieza en el traste 12 de la cuerda Re. Usando lo que sabes hoy del diapasón, ¿qué nota es?',
-          choices: ['D — fret 12 repeats the open string\'s name', 'C — one below the octave', 'E — fret 12 is always E', 'Notes don\'t have names above fret 5'],
-          choices_es: ['D — el traste 12 repite el nombre de la cuerda al aire', 'C — una nota debajo de la octava', 'E — el traste 12 siempre es E', 'Las notas no tienen nombre arriba del traste 5'], answer: 0,
-          explain: 'Fret 12 is the octave — every string repeats its open name there, so the whole map restarts. That\'s what makes riffs up high readable, not scary.',
+          choices: ['D — fret 12 repeats the open string', 'C — one fret below the octave', 'E — the next letter up from D', 'A — fret 12 is A on every string'],
+          choices_es: ['D — el traste 12 repite la cuerda al aire', 'C — un traste debajo de la octava', 'E — la siguiente letra después de D', 'A — el traste 12 es A en toda cuerda'], answer: 0,
+          explain: 'Fret 12 is the octave — every string repeats its OWN open name there, so the D string gives you D again and the whole map restarts. That is what makes riffs up high readable instead of scary. The letter after D is E, but letters only move one step per fret; and fret 12 is not the same note on every string, because each string starts from a different open note.',
           explain_es: 'El traste 12 es la octava — cada cuerda repite ahí el nombre de su cuerda al aire, así que todo el mapa vuelve a empezar. Eso hace que los riffs arriba sean legibles, no aterradores.' } },
       { id: 'm9w1-s6', text: 'Say which two natural notes any sharp or flat on D or G sits between',
         text_es: 'Decir entre cuáles dos notas naturales se ubica cualquier sostenido o bemol en la cuerda Re o Sol',
@@ -858,10 +858,10 @@ SETS.push(
                 response: { type: 'mc', prompt: 'In TAB, the TOP line represents:',
                   prompt_es: 'En el TAB, la línea SUPERIOR representa:',
                   answer: 1,
-                  explain: 'TAB puts the highest-sounding string on top — the thinnest one. That\'s the OPPOSITE of what you see looking down at your own guitar, which is why it\'s the most common beginner reading mistake.',
-                  explain_es: 'El TAB pone la cuerda más aguda arriba — la más delgada. Es lo CONTRARIO de lo que ves al mirar tu guitarra desde arriba, y por eso es el error de lectura más común entre principiantes.',
-                  choices: ['The low E string (thickest)', 'The high e string (thinnest)', 'Whichever string you like', 'The B string'],
-                  choices_es: ['La cuerda Mi grave (la más gruesa)', 'La cuerda mi aguda (la más delgada)', 'La que tú prefieras', 'La cuerda Si'] }
+                  explain: 'TAB puts the highest-sounding string on top — the thinnest one. That\'s the OPPOSITE of what you see looking down at your own guitar, where the thickest string is the one nearest your face — and that flip is why it\'s the most common beginner reading mistake.',
+                  explain_es: 'El TAB pone la cuerda más aguda arriba — la más delgada. Es lo CONTRARIO de lo que ves al mirar tu guitarra desde arriba, donde la cuerda más gruesa es la que queda más cerca de tu cara — y ese giro es la razón por la que es el error de lectura más común entre principiantes.',
+                  choices: ['The low E string (thickest)', 'The high e string (thinnest)', 'The string closest to your face when you look down', 'The B string'],
+                  choices_es: ['La cuerda Mi grave (la más gruesa)', 'La cuerda mi aguda (la más delgada)', 'La cuerda más cercana a tu cara cuando miras hacia abajo', 'La cuerda Si'] }
               },
               {
                 label: 'Watch: writing your own TAB', label_es: 'Mira: escribe tu propio TAB',
@@ -915,10 +915,10 @@ SETS.push(
                 response: { type: 'mc', prompt: 'The chord G/B (say "G over B") means:',
                   prompt_es: 'El acorde G/B (di "G sobre B") significa:',
                   answer: 1,
-                  explain: 'Slash chords name the chord, then the bass note — you met G/B inside "the cure"\'s progression.',
+                  explain: 'A slash chord names the chord first and the bass note second, so G/B is still a G chord — only its lowest note changes, to B. It does not mean two chords one after the other, and it says nothing about where on the neck you play it. You met G/B inside "the cure"\'s progression.',
                   explain_es: 'Los acordes con barra diagonal nombran el acorde y luego la nota grave — conociste G/B dentro de la progresión de "the cure".',
-                  choices: ['Play a G chord, then a B chord', 'A G chord with B as its lowest note', 'A B chord with G as its top note', 'Either G or B, your choice'],
-                  choices_es: ['Tocar un acorde de G, y luego uno de B', 'Un acorde de G con B como su nota más grave', 'Un acorde de B con G como su nota más aguda', 'G o B, cualquiera de los dos, tú eliges'] }
+                  choices: ['Play a G chord, then a B chord', 'A G chord with B as its lowest note', 'A B chord with G as its top note', 'A G chord played higher up the neck'],
+                  choices_es: ['Tocar un acorde de G, y luego uno de B', 'Un acorde de G con B como su nota más grave', 'Un acorde de B con G como su nota más aguda', 'Un acorde de G tocado más arriba en el mástil'] }
               },
               {
                 label: 'Try spacing TAB rhythm', label_es: 'Prueba espaciar el ritmo del TAB',
@@ -1072,8 +1072,8 @@ SETS.push(
                   answer: 1,
                   explain: 'An X above a string means don\'t play it. The three lowest strings — low E, A, and D — are X\'d, so only the top three — G, B, and high e — ring out. A partial shape is just a full chord\'s top slice.',
                   explain_es: 'Una X sobre una cuerda significa que no la toques. Las tres cuerdas más graves — Mi grave, La y Re — tienen X, así que solo suenan las tres de arriba — Sol, Si y mi aguda. Una forma parcial es solo la rebanada superior de un acorde completo.',
-                  choices: ['All six strings, top to bottom', 'Only the three fretted strings', 'Only the strings marked with an X', 'The three lowest strings only'],
-                  choices_es: ['Las seis cuerdas, de arriba a abajo', 'Solo las tres cuerdas trasteadas', 'Solo las cuerdas marcadas con X', 'Solo las tres cuerdas más graves'] }
+                  choices: ['All six strings, top to bottom', 'Only the G, B and high e strings', 'Only the strings marked with an X', 'The three lowest strings only'],
+                  choices_es: ['Las seis cuerdas, de arriba a abajo', 'Solo las cuerdas Sol, Si y mi aguda', 'Solo las cuerdas marcadas con X', 'Solo las tres cuerdas más graves'] }
               }
             ]
           },
@@ -1130,9 +1130,9 @@ SETS.push(
         gotItWhen_es: 'lo tocas correctamente un día después, leyendo solo lo que hay en la página — sin necesitar la memoria.',
         practice: { type: 'mc', prompt: 'You\'re writing TAB for a riff that lives on the D string. Which of the six lines does it go on?',
           prompt_es: 'Estás escribiendo el TAB de un riff que vive en la cuerda Re. ¿En cuál de las seis líneas va?',
-          choices: ['The 3rd line from the bottom', 'The 3rd line from the top', 'The bottom line — thickest string goes lowest, D is thick-ish', 'Any line, as long as you label it'],
-          choices_es: ['La 3ª línea desde abajo', 'La 3ª línea desde arriba', 'La línea de abajo — la cuerda más gruesa va más abajo, y la Re es algo gruesa', 'Cualquier línea, siempre que la etiquetes'], answer: 0,
-          explain: 'TAB lines mirror the strings with the low E at the bottom: E-A-D from the bottom up, so the D string is line 3. Writing it on the wrong line is the #1 TAB-writing error.',
+          choices: ['The 3rd line from the bottom', 'The 3rd line from the top', 'The bottom line — thickest string goes lowest, D is thick-ish', 'The middle line — D is the middle of the six strings'],
+          choices_es: ['La 3ª línea desde abajo', 'La 3ª línea desde arriba', 'La línea de abajo — la cuerda más gruesa va más abajo, y la Re es algo gruesa', 'La línea del medio — la Re está a la mitad de las seis cuerdas'], answer: 0,
+          explain: 'TAB lines mirror the strings with the low E at the bottom: low E, A, D from the bottom up, so the D string is the third line from the bottom. Counting from the top instead lands you on the G string. And D is not the middle of the six — two strings sit below it and three above — so "the middle line" is the wrong idea as well as the wrong line.',
           explain_es: 'Las líneas del TAB reflejan las cuerdas con la Mi grave abajo: Mi grave-La-Re de abajo hacia arriba, así que la cuerda Re es la línea 3. Escribirla en la línea equivocada es el error número uno al escribir TAB.' } },
       { id: 'm9w3-s3', text: 'Space my TAB so the rhythm is readable',
         text_es: 'Espaciar mi TAB para que el ritmo sea legible',
@@ -1140,9 +1140,9 @@ SETS.push(
         gotItWhen_es: 'tu espaciado por sí solo muestra el ritmo con la claridad suficiente para que un desconocido lo lea sin que se lo expliques.',
         practice: { type: 'mc', prompt: 'In hand-written TAB, rhythm is shown mainly by:',
           prompt_es: 'En el TAB escrito a mano, el ritmo se muestra principalmente por:',
-          choices: ['The shapes of the note heads', 'The spacing between numbers', 'Color coding of the numbers', 'It can\'t be shown in TAB'],
-          choices_es: ['Las formas de las cabezas de nota', 'El espaciado entre los números', 'Un código de colores en los números', 'No se puede mostrar en el TAB'], answer: 1,
-          explain: 'Plain TAB has no note-head shapes to carry rhythm, so spacing does the job: numbers packed close together are fast, numbers spread far apart are held. Sloppy spacing is why your own TAB can be unreadable a week later.',
+          choices: ['The shapes of the note heads', 'The spacing between numbers', 'Color coding of the numbers', 'The order the numbers are written in'],
+          choices_es: ['Las formas de las cabezas de nota', 'El espaciado entre los números', 'Un código de colores en los números', 'El orden en que se escriben los números'], answer: 1,
+          explain: 'Plain TAB has no note-head shapes to carry rhythm, so spacing does the job: numbers packed close together are fast, numbers spread far apart are held. The order the numbers are written in tells you which note comes next, but not how long to hold it — and that is exactly what spacing adds. Sloppy spacing is why your own TAB can be unreadable a week later.',
           explain_es: 'El TAB simple no tiene formas de cabeza de nota que lleven el ritmo, así que el espaciado hace ese trabajo: los números muy juntos son rápidos, los números muy separados se sostienen. Un espaciado descuidado es la razón por la que tu propio TAB puede ser ilegible una semana después.' } },
       { id: 'm9w3-s4', text: 'Read a slash chord (like G/B) from a chart and play it',
         text_es: 'Leer un acorde con barra diagonal (como G/B) de un diagrama y tocarlo',
@@ -1165,7 +1165,7 @@ SETS.push(
         text_es: 'Tocar correctamente al primer intento un TAB escrito a mano que no me sea familiar — uno que escribí hace días',
         gotItWhen: 'a TAB you wrote days ago comes out right on the first try, reading only what\'s on the page.',
         gotItWhen_es: 'un TAB que escribiste hace días sale bien al primer intento, leyendo solo lo que hay en la página.',
-        practice: { type: 'pr', prompt: '<ol><li>Pull out a TAB you wrote days ago and sight-read it cold.</li><li>Count how many of its bars you played correctly on the very first pass.</li><li>Log your best.</li></ol>',
+        practice: { type: 'pr', prompt: '<ol><li>Pull out a TAB you wrote days ago and read it straight through, without practising it first.</li><li>Count how many of its bars you played correctly on the very first pass.</li><li>Log your best.</li></ol>',
           prompt_es: '<ol><li>Saca un TAB que escribiste hace días y léelo a primera vista.</li><li>Cuenta cuántos de sus compases tocaste correctamente en la primerísima pasada.</li><li>Anota tu mejor número.</li></ol>',
           unit: 'count', placeholder: 'e.g. 3 of 4 bars — try for all of them', placeholder_es: 'p. ej. 3 de 4 compases — intenta lograrlos todos' } }
     ]

@@ -34,8 +34,8 @@ SETS.push(
                 label: 'Watch: Travis picking basics (Lauren Bateman)', label_es: 'Mira: bases del Travis picking (Lauren Bateman)',
                 text: 'Watch: <a href="https://www.youtube.com/watch?v=JvtFd7vkea0" target="_blank">How To Travis Pick on Guitar - The ULTIMATE Fingerpicking Pattern – Lauren Bateman (0:00–9:00)</a>. While you watch: watch her thumb and notice it never stops, even while her fingers add notes on top. You\'ve got it when: you can describe what the thumb is doing while the fingers play.',
                 text_es: 'Mira: <a href="https://www.youtube.com/watch?v=JvtFd7vkea0" target="_blank">How To Travis Pick on Guitar - The ULTIMATE Fingerpicking Pattern – Lauren Bateman (0:00–9:00)</a>. Mientras miras: mira su pulgar y nota que nunca se detiene, incluso mientras sus dedos agregan notas encima. Lo tienes cuando: puedes describir qué está haciendo el pulgar mientras tocan los dedos.',
-                hint: 'In Travis-style picking, the thumb keeps everything moving — steady quarter notes on two bass strings while the fingers decorate on top.',
-                hint_es: 'En el picking estilo Travis, el pulgar mantiene todo en movimiento — negras constantes en dos cuerdas graves mientras los dedos decoran encima.',
+                hint: 'In Travis-style picking, the thumb is the engine that keeps everything moving while the fingers decorate on top. Watch which strings it visits, and how often.',
+                hint_es: 'En el picking estilo Travis, el pulgar es el motor que mantiene todo en movimiento mientras los dedos decoran encima. Fíjate en qué cuerdas visita, y con qué frecuencia.',
                 skills: [1, 2],
                 response: { type: 'mc', prompt: 'In Travis-style picking, the thumb\'s job is to:',
                   prompt_es: 'En el picking estilo Travis, el trabajo del pulgar es:',
@@ -78,8 +78,8 @@ SETS.push(
                   answer: 0,
                   explain: 'The root (A string, fret 3 = C) and its 5th, fretted on the low E string (fret 3 = G) — the thumb reaches down to a string the open chord shape doesn\'t normally use.',
                   explain_es: 'La raíz (cuerda La, traste 3 = C) y su 5ª, trasteada en la cuerda Mi grave (traste 3 = G) — el pulgar llega hasta una cuerda que la forma abierta del acorde normalmente no usa.',
-                  choices: ['The low E and A strings', 'The A and D strings', 'The B and high e strings', 'Any two strings at random'],
-                  choices_es: ['Las cuerdas Mi grave y La', 'Las cuerdas La y Re', 'Las cuerdas Si y mi aguda', 'Cualquier par de cuerdas al azar'] }
+                  choices: ['The low E and A strings', 'The A and D strings', 'The B and high e strings', 'The D and G strings'],
+                  choices_es: ['Las cuerdas Mi grave y La', 'Las cuerdas La y Re', 'Las cuerdas Si y mi aguda', 'Las cuerdas Re y Sol'] }
               }
             ]
           },
@@ -430,8 +430,8 @@ SETS.push(
             steps: [
               {
                 label: 'Try the cure fingerstyle', label_es: 'Prueba the cure con fingerstyle',
-                text: 'Playing "the cure" fingerstyle removes its ◐ flag — fingerpicking IS the song\'s native style, not "against the grain" (playing a song in a style that fights its natural feel) like power-chording a gentle ballad. Try picking through Am–C–Dm–F, one bar each.',
-                text_es: 'Tocar "the cure" con fingerstyle le quita su marca ◐ — el fingerpicking ES el estilo nativo de la canción, no "a contrapelo" (tocar una canción en un estilo que pelea contra su sensación natural) como tocar una balada suave con acordes de potencia. Prueba a puntear a través de Am–C–Dm–F, un compás cada uno.',
+                text: 'Playing "the cure" fingerstyle removes its ◐ flag. That flag marks a song taught "against the grain" — in a style that fights its natural feel, like power-chording a gentle ballad. Try picking through Am–C–Dm–F, one bar each, then work out what the flag was there for.',
+                text_es: 'Tocar "the cure" con fingerstyle le quita su marca ◐. Esa marca señala una canción enseñada "a contrapelo" — en un estilo que pelea contra su sensación natural, como tocar una balada suave con acordes de potencia. Prueba a puntear a través de Am–C–Dm–F, un compás cada uno, y luego descubre para qué estaba ahí la marca.',
                 hint: 'The ◐ flag marked renderings that fought a song\'s nature. Fingerpicked, "the cure" is finally itself.',
                 hint_es: 'La marca ◐ señalaba versiones que peleaban contra la naturaleza de una canción. Con fingerpicking, "the cure" por fin es ella misma.',
                 skills: [3, 5],
@@ -440,8 +440,8 @@ SETS.push(
                   answer: 1,
                   explain: 'Fingerpicking IS the song\'s native style — no more "against the grain."',
                   explain_es: 'El fingerpicking ES el estilo nativo de la canción — ya no está más "a contrapelo".',
-                  choices: ['It\'s easier than strumming the chords', 'Fingerpicking IS the song\'s native style', 'It uses fewer chords than the strummed version', 'The flag was a mistake in the first place'],
-                  choices_es: ['Es más fácil que rasguear los acordes', 'El fingerpicking ES el estilo nativo de la canción', 'Usa menos acordes que la versión rasgueada', 'La marca fue un error desde el principio'] }
+                  choices: ['It\'s easier than strumming the chords', 'Fingerpicking is the song\'s native style', 'It uses fewer chords than the strummed version', 'The ◐ flag only applies to electric guitar'],
+                  choices_es: ['Es más fácil que rasguear los acordes', 'El fingerpicking es el estilo nativo de la canción', 'Usa menos acordes que la versión rasgueada', 'La marca ◐ solo aplica a la guitarra eléctrica'] }
               }
             ]
           },
@@ -662,10 +662,10 @@ SETS.push(
               },
               {
                 label: 'Watch: "Luna"\'s fingerpicked intro', label_es: 'Mira: la intro fingerstyle de "Luna"',
-                text: 'Watch: <a href="tabs/luna.html#layer-6" target="_blank">"Luna"\'s Song Journey — Layer 6, the fingerpicked intro</a>. This on-site lesson shows the intro rolling through the little-F shape.',
-                text_es: 'Mira: <a href="tabs/luna.html#layer-6" target="_blank">Recorrido de "Luna" — Capa 6, la intro con fingerpicking</a>. Esta lección del sitio muestra la intro en un floreo a través de la forma del F pequeño.',
-                hint: 'Same little-F you learned in Module 5 — the intro arpeggiates it one note at a time, and leaves the high e open rather than fretted.',
-                hint_es: 'El mismo F pequeño que aprendiste en el Módulo 5 — la intro lo arpegia una nota a la vez, y deja la mi aguda al aire en vez de trastearla.',
+                text: 'Watch: <a href="tabs/luna.html#layer-6" target="_blank">"Luna"\'s Song Journey — Layer 6, the fingerpicked intro</a>. This on-site lesson shows which shape the intro rolls through, one note at a time.',
+                text_es: 'Mira: <a href="tabs/luna.html#layer-6" target="_blank">Recorrido de "Luna" — Capa 6, la intro con fingerpicking</a>. Esta lección del sitio muestra por cuál forma pasa la intro, una nota a la vez.',
+                hint: 'You already know this shape from Module 5. The intro arpeggiates it one note at a time — watch which string is left ringing open rather than fretted.',
+                hint_es: 'Ya conoces esta forma desde el Módulo 5. La intro la arpegia una nota a la vez — fíjate en cuál cuerda queda sonando al aire en vez de trasteada.',
                 skills: [1],
                 response: { type: 'mc', prompt: '"Luna"\'s fingerpicked intro rolls through which chord shape?',
                   prompt_es: '¿La intro de "Luna" con fingerpicking hace un floreo a través de cuál forma de acorde?',
@@ -683,8 +683,8 @@ SETS.push(
             steps: [
               {
                 label: 'Listen: melody on top', label_es: 'Escucha: melodía arriba',
-                text: '"Melody on top" in fingerstyle means the melody is played on the thin, high strings while the thumb keeps the bass going underneath — two jobs, one hand. Listen for it in "Luna" or "Está Dañada".',
-                text_es: '"Melodía arriba" en fingerstyle significa que la melodía se toca en las cuerdas delgadas y agudas mientras el pulgar mantiene el bajo sonando debajo — dos trabajos, una mano. Escúchalo en "Luna" o en "Está Dañada".',
+                text: '"Melody on top" is the texture behind both of this module\'s songs — two jobs, one hand. Listen for it in "Luna" or "Está Dañada", and work out which part of the hand is carrying the tune and which is carrying the bass.',
+                text_es: '"Melodía arriba" es la textura detrás de las dos canciones de este módulo — dos trabajos, una mano. Escúchalo en "Luna" o en "Está Dañada", y descubre qué parte de la mano lleva la melodía y cuál lleva el bajo.',
                 hint: 'Two jobs, one hand — the requinto texture in short.',
                 hint_es: 'Dos trabajos, una mano — la textura del requinto en pocas palabras.',
                 skills: [4],
@@ -706,16 +706,16 @@ SETS.push(
                 label: 'Try melody on top over C', label_es: 'Prueba la melodía arriba sobre C',
                 text: 'Over a C chord, keep the thumb on steady quarters and pick a 3-note melody on the high e and B strings on top.',
                 text_es: 'Sobre un acorde de C, mantén el pulgar en negras constantes y puntea una melodía de 3 notas en las cuerdas mi aguda y Si encima.',
-                hint: 'Fingerpicking makes our regional-Mexican songs sound MORE authentic than power chords did — sierreño is an acoustic, fingerpicked tradition, and this is its real tone.',
-                hint_es: 'El fingerpicking hace que nuestras canciones de música regional mexicana suenen MÁS auténticas de lo que sonaban con acordes de potencia — el sierreño es una tradición acústica de fingerpicking, y este es su verdadero sonido.',
+                hint: 'Think about what these records actually sound like. Which instruments are playing, and how are they being played?',
+                hint_es: 'Piensa en cómo suenan de verdad estas grabaciones. ¿Qué instrumentos están tocando, y de qué manera?',
                 skills: [4, 5],
                 response: { type: 'mc', prompt: 'Why does fingerstyle make our regional-Mexican songs sound MORE authentic than power chords did?',
                   prompt_es: '¿Por qué el fingerstyle hace que nuestras canciones de música regional mexicana suenen MÁS auténticas de lo que sonaban con acordes de potencia?',
                   answer: 1,
                   explain: 'Sierreño is an acoustic, fingerpicked tradition — this is its real tone.',
                   explain_es: 'El sierreño es una tradición acústica de fingerpicking — este es su verdadero sonido.',
-                  choices: ['It\'s louder than power chords ever were', 'Sierreño is an acoustic, fingerpicked tradition', 'It isn\'t — the two sound exactly the same', 'Distortion is illegal on these songs'],
-                  choices_es: ['Es más fuerte de lo que fueron los acordes de potencia', 'El sierreño es una tradición acústica de fingerpicking', 'No es así — los dos suenan exactamente igual', 'La distorsión es ilegal en estas canciones'] }
+                  choices: ['It\'s louder than power chords ever were', 'Sierreño is an acoustic, fingerpicked tradition', 'Power chords only work on electric guitar', 'Fingerstyle is harder, so it sounds better'],
+                  choices_es: ['Es más fuerte de lo que fueron los acordes de potencia', 'El sierreño es una tradición acústica de fingerpicking', 'Los acordes de potencia solo funcionan en guitarra eléctrica', 'El fingerstyle es más difícil, así que suena mejor'] }
               }
             ]
           },
@@ -881,8 +881,8 @@ SETS.push(
           unit: 'count', placeholder: 'e.g. 3 clean passes — try for a higher number', placeholder_es: 'p. ej. 3 pasadas limpias — intenta superarlo' } },
       { id: 'm12w3-s3', text: 'Explain the requinto\'s role in sierreño / corridos tumbados (a modern Mexican regional style)',
         text_es: 'Explicar el papel del requinto en el sierreño / los corridos tumbados (un estilo regional mexicano moderno)',
-        gotItWhen: 'you can explain that the requinto carries the melodic lead lines — the role you\'ve heard in "Luna."',
-        gotItWhen_es: 'puedes explicar que el requinto lleva las líneas melódicas principales — el papel que has escuchado en "Luna."',
+        gotItWhen: 'you can explain what the requinto does in the group, and point to where you have heard it in "Luna."',
+        gotItWhen_es: 'puedes explicar qué hace el requinto en el grupo, y señalar dónde lo has escuchado en "Luna."',
         practice: { type: 'mc', prompt: 'The requinto\'s job in the group is:',
           prompt_es: 'El trabajo del requinto en el grupo es:',
           choices: ['Strumming the rhythm chords', 'The melodic lead lines', 'Bass', 'Percussion'],
@@ -895,8 +895,8 @@ SETS.push(
         gotItWhen_es: 'el pulgar nunca vacila mientras la melodía viaja arriba.',
         practice: { type: 'mc', prompt: 'You\'re blending a tune into your picking pattern, requinto-style. Where do the melody notes go?',
           prompt_es: 'Estás combinando una melodía en tu patrón de punteo, al estilo requinto. ¿Dónde van las notas de la melodía?',
-          choices: ['On the high strings, above the thumb\'s steady bass', 'In the bass — the thumb carries the tune', 'On whichever string happens to have a free finger', 'You pause the bass whenever the melody plays'],
-          choices_es: ['En las agudas, encima del bajo constante del pulgar', 'En el bajo — es el pulgar quien lleva la melodía', 'En la cuerda que casualmente tenga un dedo libre', 'Pausas el bajo cada vez que suena la melodía'], answer: 0,
+          choices: ['On the high strings, above the thumb\'s steady bass', 'In the bass — the thumb carries the tune', 'On the same strings as the bass, one beat later', 'You pause the bass whenever the melody plays'],
+          choices_es: ['En las agudas, encima del bajo constante del pulgar', 'En el bajo — es el pulgar quien lleva la melodía', 'En las mismas cuerdas del bajo, un tiempo después', 'Pausas el bajo cada vez que suena la melodía'], answer: 0,
           explain: 'Two jobs, one hand: the thumb never stops the bass, and i-m-a sing the tune on top. Stopping the bass for the melody is the habit this skill breaks.',
           explain_es: 'Dos trabajos, una mano: el pulgar nunca detiene el bajo, e i-m-a cantan la melodía encima. Detener el bajo para la melodía es el hábito que esta destreza rompe.' } },
       { id: 'm12w3-s5', text: 'Choose and name the picking pattern I\'ll perform with',

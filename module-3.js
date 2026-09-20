@@ -477,8 +477,8 @@ SETS.push(
             label: 'Watch: using a metronome', label_es: 'Mira: usar el metrónomo',
             text: 'Watch: <a href="https://youtu.be/sNa44EmrsDc" target="_blank">How & Why to Use a Metronome – JustinGuitar</a> (0:00–4:00). While you watch, set your own metronome and tap along with it. You\'ve got it when: you can play one down strum on every click, right with the click, and you\'ve tapped along at least once.',
             text_es: 'Mira: <a href="https://youtu.be/sNa44EmrsDc" target="_blank">How & Why to Use a Metronome – JustinGuitar</a> (0:00–4:00). Mientras miras, pon tu propio metrónomo y sigue el ritmo con la mano. Lo tienes cuando: puedes tocar un rasgueo hacia abajo en cada clic, justo con el clic, y ya lo seguiste al menos una vez.',
-            hint: 'He sets his app to 80 BPM and does one thing with it: a single down strum on every click. Do that with him. Most beginners rush — aim to land right on the click, not a little before it. Slow and clean first, and speed comes on its own.',
-            hint_es: 'Él pone su aplicación en 80 BPM y hace una sola cosa con ella: un rasgueo hacia abajo en cada clic. Hazlo junto con él. La mayoría de los principiantes se apuran — busca caer justo en el clic, no un poco antes. Despacio y limpio primero, y la velocidad llega sola.',
+            hint: 'He sets his app to 80 BPM before he plays a note. Watch what his picking hand does against the click and copy it exactly. Most beginners rush — aim to land on the click, not a little before it. Slow and clean first, and speed comes on its own.',
+            hint_es: 'Él pone su aplicación en 80 BPM antes de tocar una nota. Fíjate en lo que hace su mano de rasgueo contra el clic y cópialo exactamente. La mayoría de los principiantes se apuran — busca caer en el clic, no un poco antes. Despacio y limpio primero, y la velocidad llega sola.',
             skills: [1, 2],
             response: { type: 'mc', prompt: 'According to the video, what is the first thing to practice with a metronome?',
               prompt_es: 'Según el video, ¿qué es lo primero que hay que practicar con el metrónomo?',
@@ -486,13 +486,13 @@ SETS.push(
               explain: 'Justin starts as simply as it gets: one down strum on each click, sitting right on the beat — not a little early, not a little late. Most beginners rush. Chasing the fastest tempo you can reach, or playing a whole song at full speed, comes much later; the exercise here is landing with the click every time.',
               explain_es: 'Justin empieza de la forma más simple posible: un rasgueo hacia abajo en cada clic, justo sobre el pulso — ni un poco antes, ni un poco después. La mayoría de los principiantes se apuran. Buscar el tempo más rápido que puedas alcanzar, o tocar una canción entera a toda velocidad, viene mucho después; el ejercicio aquí es caer con el clic cada vez.',
               choices: [
-              'One down strum on every click, right with it',
+              'A single stroke on each click, landing with it',
               'A different strum pattern on every click',
               'The fastest tempo you can reach without stopping',
               'A full song at its real speed, all the way through'
             ],
               choices_es: [
-              'Un rasgueo hacia abajo en cada clic, justo con él',
+              'Un solo golpe en cada clic, cayendo junto con él',
               'Un patrón de rasgueo distinto en cada clic',
               'El tempo más rápido que puedas alcanzar sin parar',
               'Una canción completa a su velocidad real, de principio a fin'
