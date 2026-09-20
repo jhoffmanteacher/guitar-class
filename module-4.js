@@ -399,13 +399,13 @@ SETS.push(
                     bpm: 60,
                     maxBpm: 130,
                     notes: [
-                      { string: 'A', fret: 7,  note: 'E', midi: 52 },
+                      { string: 'A', fret: 7,  note: 'E', midi: 52, beats: 1.5 },
                       { string: 'A', fret: 7,  note: 'E', midi: 52, beats: 0.5 },
-                      { string: 'A', fret: 10, note: 'G', midi: 55, beats: 0.5 },
-                      { string: 'A', fret: 7,  note: 'E', midi: 52, beats: 0.5 },
+                      { string: 'A', fret: 10, note: 'G', midi: 55, beats: 0.75 },
+                      { string: 'A', fret: 7,  note: 'E', midi: 52, beats: 0.75 },
                       { string: 'A', fret: 5,  note: 'D', midi: 50, beats: 0.5 },
-                      { string: 'A', fret: 3,  note: 'C', midi: 48 },
-                      { string: 'A', fret: 2,  note: 'B', midi: 47, beats: 4 }
+                      { string: 'A', fret: 3,  note: 'C', midi: 48, beats: 2 },
+                      { string: 'A', fret: 2,  note: 'B', midi: 47, beats: 2 }
                     ]
                   }
                 ],
