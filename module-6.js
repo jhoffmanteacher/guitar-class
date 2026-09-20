@@ -58,13 +58,11 @@ SETS.push(
           },
           {
             label: 'Watch: count your strums', label_es: 'Mira: cuenta tus rasgueos',
-            text: 'Watch: <a href="https://youtu.be/NCV9IgeSYuU" target="_blank">Beginner Guitar Strumming Patterns You MUST Know! – Marty Music</a> (0:00–3:00). Your task while you watch: count "1 + 2 + 3 + 4 +" out loud with him for the first pattern and notice which counts get a down and which get an up.',
-            text_es: 'Mira: <a href="https://youtu.be/NCV9IgeSYuU" target="_blank">Beginner Guitar Strumming Patterns You MUST Know! – Marty Music</a> (0:00–3:00). Tu tarea mientras miras: cuenta "1 + 2 + 3 + 4 +" en voz alta con él para el primer patrón y fíjate qué tiempos llevan un golpe hacia abajo y cuáles hacia arriba.',
+            text: 'Watch: <a href="https://youtu.be/NCV9IgeSYuU" target="_blank">Beginner Guitar Strumming Patterns You MUST Know! – Marty Music</a> (0:00–3:00). Your task while you watch: count "1 + 2 + 3 + 4 +" out loud with him for the first pattern and notice which counts get a down and which get an up.</p>You\'ve got it when: you have counted "1 + 2 + 3 + 4 +" out loud through four bars while strumming down on the numbers and up on the "+".',
+            text_es: 'Mira: <a href="https://youtu.be/NCV9IgeSYuU" target="_blank">Beginner Guitar Strumming Patterns You MUST Know! – Marty Music</a> (0:00–3:00). Tu tarea mientras miras: cuenta "1 + 2 + 3 + 4 +" en voz alta con él para el primer patrón y fíjate qué tiempos llevan un golpe hacia abajo y cuáles hacia arriba.</p>Lo tienes cuando: ya contaste "1 + 2 + 3 + 4 +" en voz alta durante cuatro compases rasgueando hacia abajo en los números y hacia arriba en los "+".',
             hint: 'Count out loud with him: "1 + 2 + 3 + 4 +". Saying the count is the fastest way to internalize the pulse.',
             hint_es: 'Cuenta en voz alta con él: "1 + 2 + 3 + 4 +". Decir el conteo en voz alta es la forma más rápida de interiorizar el pulso.',
             skills: [3],
-            response: { type: 'short', placeholder: 'When you count "1 + 2 + 3 + 4 +", which counts are the downstrokes? Which are the upstrokes?',
-              placeholder_es: 'Cuando cuentas "1 + 2 + 3 + 4 +", ¿cuáles tiempos son los golpes hacia abajo? ¿Cuáles son los golpes hacia arriba?' }
           }
             ]
           },
@@ -125,8 +123,6 @@ SETS.push(
             label: 'Checkpoint', label_es: 'Punto de control',
             text: 'Checkpoint — pause and think: which was harder to keep steady today — your strum hand swinging non-stop like a pendulum, or counting "1 + 2 + 3 + 4 +" out loud the whole time? What started to feel easier?',
             text_es: 'Punto de control — pausa y piensa: ¿qué se sintió más difícil mantener estable hoy — tu mano de rasgueo balanceándose sin parar como un péndulo, o contar "1 + 2 + 3 + 4 +" en voz alta todo el tiempo? ¿Qué empezó a sentirse más fácil?',
-            response: { type: 'short', placeholder: 'e.g. my hand kept freezing on the chord change — slowing to 50 BPM helped it keep swinging',
-              placeholder_es: 'p. ej. mi mano se congelaba en el cambio de acorde — bajar a 50 BPM ayudó a que siguiera balanceándose' }
           }
             ]
           }
@@ -200,8 +196,8 @@ SETS.push(
             steps: [
           {
             label: 'Challenge 3 — Em ↔ Am Switch', label_es: 'Reto 3 — Cambio Em ↔ Am',
-            text: '<ol><li>Switch Em ↔ Am every 2 bars while the down-up strum never stops.</li><li>Set the ⏱ Timer for 3 minutes and loop it.</li></ol>You\'ve got it when: the strum hand keeps swinging right through every chord change — let the chord catch up.',
-            text_es: '<ol><li>Cambia entre Em ↔ Am cada 2 compases mientras el rasgueo abajo-arriba nunca se detiene.</li><li>Pon el ⏱ Temporizador en 3 minutos y repítelo.</li></ol>Lo tienes cuando: la mano de rasgueo sigue balanceándose durante cada cambio de acorde — deja que el acorde te alcance.',
+            text: '<ol><li>Switch Em ↔ Am every 2 bars while the down-up strum never stops.</li><li>Set the ⏱ Timer for 3 minutes and loop it.</li></ol>You\'ve got it when: four laps of Em&rarr;Am with the strum hand never stopping, not one missed swing — let the chord catch up.',
+            text_es: '<ol><li>Cambia entre Em ↔ Am cada 2 compases mientras el rasgueo abajo-arriba nunca se detiene.</li><li>Pon el ⏱ Temporizador en 3 minutos y repítelo.</li></ol>Lo tienes cuando: cuatro vueltas de Em&rarr;Am con la mano de rasgueo sin detenerse nunca, sin un solo balanceo perdido — deja que el acorde te alcance.',
             hint: 'The #1 beginner mistake is stopping the strum to fix the chord. Keep the wrist moving — let the chord catch up.',
             hint_es: 'El error #1 de los principiantes es detener el rasgueo para arreglar el acorde. Mantén la muñeca en movimiento — deja que el acorde te alcance.',
             stuck: 'Keep fingers 2 and 3 glued together and slide the pair one string over — don\'t lift them independently. Drop to 50 BPM so the change has room.',
@@ -209,7 +205,6 @@ SETS.push(
             levelUp: 'Switch every bar instead of every 2 bars, or climb to 75 BPM with the strum still unbroken.',
             levelUp_es: 'Cambia cada compás en lugar de cada 2, o sube a 75 BPM con el rasgueo aún sin interrupciones.',
             skills: [4, 5, 6],
-            response: { type: 'short', prompt: 'Personal record — strum unbroken through Em↔Am: play it cleanly at 60 BPM, then go +10 at a time. Your fastest CLEAN switch today (BPM)?', prompt_es: 'Récord personal — rasgueo sin interrupciones a través de Em↔Am: tócalo limpio a 60 BPM, y luego sube de 10 en 10. ¿Tu cambio LIMPIO más rápido hoy (BPM)?', placeholder: 'e.g. 80 — try for a higher number next time', placeholder_es: 'p. ej. 80 — intenta superarlo la próxima vez' },
             playSeq: { label: 'Em → Am roots (2 beats each)', label_es: 'Raíces Em → Am (2 tiempos cada una)', bpm: 60, notes: [40, 40, 45, 45] },
             chords: [
               { name: 'Em', chord: [[6,0],[5,2,'2'],[4,2,'3'],[3,0],[2,0],[1,0]], position: 0 },
@@ -307,7 +302,6 @@ SETS.push(
               { name: 'Am', chord: [[6,'x'],[5,0],[4,2,'2'],[3,2,'3'],[2,1,'1'],[1,0]], position: 0 }
             ],
             playSeq: { label: 'Em·Am roots (one chord per beat)', label_es: 'Raíces Em·Am (un acorde por tiempo)', bpm: 60, notes: [40, 45, 40, 45, 40, 45, 40, 45] },
-            response: { type: 'short', prompt: 'Your fastest CLEAN one-chord-per-beat Em↔Am today (BPM)?', prompt_es: '¿Tu Em↔Am más rápido y LIMPIO hoy, un acorde por tiempo (BPM)?', placeholder: 'e.g. 60 — 65 next session', placeholder_es: 'p. ej. 60 — 65 la próxima sesión' }
           }
             ]
           },
@@ -339,7 +333,6 @@ SETS.push(
                 levelUp: 'Sing or hum a line over your own strumming, or speed up to 70 BPM with the 8ths still even.',
                 levelUp_es: 'Canta o tararea una línea sobre tu propio rasgueo, o acelera a 70 BPM manteniendo las corcheas parejas.',
                 skills: [2, 4],
-                response: { type: 'short', prompt: 'Personal record — full laps in a row with the strum hand never stopping. Your count today?', prompt_es: 'Récord personal — vueltas completas seguidas con la mano de rasgueo sin detenerse nunca. ¿Tu cuenta de hoy?', placeholder: 'e.g. 3 — try for a higher number next time', placeholder_es: 'p. ej. 3 — intenta superarlo la próxima vez' }
               }
             ]
           }
@@ -375,10 +368,10 @@ SETS.push(
           choices_es: ['Los tiempos de "+" (la "y")', 'Los números (1, 2, 3, 4)', 'Todos', 'Solo el tiempo 1'], answer: 1,
           explain: 'The numbers are the beats, and your hand is always traveling down when a beat arrives — so numbers = downstrokes, "+" = upstrokes. Keeping that fixed means you never have to decide mid-bar.',
           explain_es: 'Los números son los tiempos, y tu mano siempre va bajando cuando llega un tiempo — así que números = rasgueos hacia abajo, "+" = rasgueos hacia arriba. Mantener eso fijo hace que nunca tengas que decidirlo a mitad del compás.' } },
-      { id: 'm6w1-s4', text: 'Strum with even volume — downstrokes and upstrokes feel equally controlled',
-        text_es: 'Rasguear con volumen parejo — los golpes hacia abajo y hacia arriba se sienten igual de controlados',
-        gotItWhen: 'your downstrokes and upstrokes sound roughly the same volume — neither overpowers the other, and your pick doesn\'t catch the strings on the way up.',
-        gotItWhen_es: 'tus golpes hacia abajo y hacia arriba suenan más o menos con el mismo volumen — ninguno domina al otro, y tu púa no engancha las cuerdas en el camino hacia arriba.',
+      { id: 'm6w1-s4', text: 'Strum with even timing — upstrokes stay lighter than downstrokes, and both stay controlled',
+        text_es: 'Rasguear con tiempo parejo — los golpes hacia arriba se quedan más ligeros que los de abajo, y los dos se mantienen controlados',
+        gotItWhen: 'your strums land evenly spaced, with the upstrokes lighter than the downstrokes — and your pick doesn\'t catch the strings on the way up.',
+        gotItWhen_es: 'tus rasgueos caen parejos en el tiempo, con los de arriba más ligeros que los de abajo — y tu púa no engancha las cuerdas en el camino hacia arriba.',
         practice: { type: 'mc', prompt: 'Your upstrokes sound weak and clunky compared to your downstrokes. What\'s the classic fix?',
           prompt_es: 'Tus golpes hacia arriba suenan débiles y torpes comparados con los de abajo. ¿Cuál es el arreglo clásico?',
           choices: ['Relax the wrist and brush just the top few strings', 'Grip the pick harder and dig in on the way up', 'Skip the upstrokes until they\'re perfect', 'Swing the whole arm up for more power'],
@@ -455,13 +448,11 @@ SETS.push(
           },
           {
             label: 'Watch: backbeat accents', label_es: 'Mira: acentos en el contratiempo',
-            text: 'Watch: <a href="https://youtu.be/0JDGO0n6tjw" target="_blank">Step-by-Step Easy Strumming Patterns – Marty Music</a> (0:00–3:00). Your task while you watch: clap a little louder on beats 2 and 4 along with him, and feel how that "backbeat" makes the pattern groove.',
-            text_es: 'Mira: <a href="https://youtu.be/0JDGO0n6tjw" target="_blank">Step-by-Step Easy Strumming Patterns – Marty Music</a> (0:00–3:00). Tu tarea mientras miras: aplaude un poco más fuerte en los tiempos 2 y 4 junto con él, y siente cómo ese "contratiempo" le da groove al patrón.',
+            text: 'Watch: <a href="https://youtu.be/0JDGO0n6tjw" target="_blank">Step-by-Step Easy Strumming Patterns – Marty Music</a> (0:00–3:00). Your task while you watch: clap a little louder on beats 2 and 4 along with him, and feel how that "backbeat" makes the pattern groove.</p>You\'ve got it when: you have strummed four bars with beats 2 and 4 clearly louder than beats 1 and 3.',
+            text_es: 'Mira: <a href="https://youtu.be/0JDGO0n6tjw" target="_blank">Step-by-Step Easy Strumming Patterns – Marty Music</a> (0:00–3:00). Tu tarea mientras miras: aplaude un poco más fuerte en los tiempos 2 y 4 junto con él, y siente cómo ese "contratiempo" le da groove al patrón.</p>Lo tienes cuando: ya rasgueaste cuatro compases con los tiempos 2 y 4 claramente más fuertes que el 1 y el 3.',
             hint: 'Marty stacks patterns from easiest to harder, accenting beats 2 and 4 as he goes. The accents give the strum a "backbeat" feel, like a drummer\'s snare.',
             hint_es: 'Marty apila patrones de más fácil a más difícil, acentuando los tiempos 2 y 4 a medida que avanza. Los acentos le dan al rasgueo una sensación de "contratiempo", como el tambor de un baterista.',
             skills: [1, 3],
-            response: { type: 'short', placeholder: 'Why might emphasizing beats 2 and 4 (instead of 1 and 3) make a strum pattern sound more "groovy"?',
-              placeholder_es: '¿Por qué acentuar los tiempos 2 y 4 (en lugar de 1 y 3) podría hacer que un patrón de rasgueo suene con más "groove"?' }
           }
             ]
           },
@@ -522,8 +513,6 @@ SETS.push(
             label: 'Checkpoint', label_es: 'Punto de control',
             text: 'Checkpoint — pause and think: in the D-DU-UDU pattern, what trips you up more right now — skipping a strum while the wrist keeps moving, or landing the accents on beats 2 and 4? What helped today?',
             text_es: 'Punto de control — pausa y piensa: en el patrón D-DU-UDU, ¿qué te confunde más ahora mismo — saltarte un rasgueo mientras la muñeca sigue en movimiento, o hacer caer los acentos en los tiempos 2 y 4? ¿Qué te ayudó hoy?',
-            response: { type: 'short', placeholder: 'e.g. I keep actually hitting the strings on the skip — pulling the pick back just slightly fixed it',
-              placeholder_es: 'p. ej. sigo tocando las cuerdas en el rasgueo que debo saltarme — alejar la púa un poco lo arregló' }
           }
             ]
           }
@@ -590,16 +579,15 @@ SETS.push(
             steps: [
           {
             label: 'Challenge 3 — G → D, Pattern Locked (your assessment piece)', label_es: 'Reto 3 — G → D, patrón asegurado (tu pieza de evaluación)',
-            text: '<ol><li>Loop G → D every 2 bars playing D-DU-UDU.</li><li>Set the ⏱ Timer for 3 minutes to keep going.</li></ol>You\'ve got it when: the pattern stays identical through the change — only the chord moves (drop to 50 BPM if it falls apart).',
-            text_es: '<ol><li>Repite G → D cada 2 compases tocando D-DU-UDU.</li><li>Pon el ⏱ Temporizador en 3 minutos para seguir.</li></ol>Lo tienes cuando: el patrón se mantiene idéntico a través del cambio — solo el acorde se mueve (baja a 50 BPM si se desarma).',
+            text: '<ol><li>Loop G → D every 2 bars playing D-DU-UDU.</li><li>Change the chord on the LAST upstroke of the bar, while your hand is already moving up — that is the free moment to jump from G to D.</li><li>Set the ⏱ Timer for 3 minutes to keep going.</li></ol>You\'ve got it when: four bars of G into four bars of D, twice through, with all six strums in every bar and the pattern identical on both chords (drop to 50 BPM if it falls apart).',
+            text_es: '<ol><li>Repite G → D cada 2 compases tocando D-DU-UDU.</li><li>Cambia el acorde en el ÚLTIMO golpe hacia arriba del compás, mientras tu mano ya está subiendo — ese es el momento libre para saltar de G a D.</li><li>Pon el ⏱ Temporizador en 3 minutos para seguir.</li></ol>Lo tienes cuando: cuatro compases de G y cuatro de D, dos veces seguidas, con los seis rasgueos en cada compás y el patrón idéntico en los dos acordes (baja a 50 BPM si se desarma).',
             hint: 'If the pattern falls apart during the chord change, slow to 50 BPM. The pattern is the GROOVE — losing it is worse than missing a note in the chord.',
             hint_es: 'Si el patrón se desarma durante el cambio de acorde, baja a 50 BPM. El patrón ES el groove — perderlo es peor que fallar una nota en el acorde.',
-            stuck: 'Change the chord on the LAST upstroke of the bar, while your hand is already moving up — that\'s the free moment to jump from G to D. Loop just 2 bars until the join between the two bars (the seam) is smooth.',
-            stuck_es: 'Cambia el acorde en el ÚLTIMO golpe hacia arriba del compás, mientras tu mano ya está subiendo — ese es el momento libre para saltar de G a D. Repite solo 2 compases hasta que la unión entre ambos (la costura) salga fluida.',
+            stuck: 'Loop just 2 bars until the join between them (the seam) is smooth, keeping the chord change on that last upstroke.',
+            stuck_es: 'Repite solo 2 compases hasta que la unión entre ambos (la costura) salga fluida, manteniendo el cambio de acorde en ese último golpe hacia arriba.',
             levelUp: 'Add a third chord (G → D → Em), or run it at 75 BPM with no break at the change.',
             levelUp_es: 'Agrega un tercer acorde (G → D → Em), o tócalo a 75 BPM sin interrupción en el cambio.',
             skills: [1, 4],
-            response: { type: 'short', prompt: 'Personal record — D-DU-UDU through the G→D change: play it cleanly at 60 BPM, then go +10 at a time. Your fastest CLEAN loop today (BPM)?', prompt_es: 'Récord personal — D-DU-UDU a través del cambio G→D: tócalo limpio a 60 BPM, y luego sube de 10 en 10. ¿Tu vuelta LIMPIA más rápida hoy (BPM)?', placeholder: 'e.g. 80 — try for a higher number next time', placeholder_es: 'p. ej. 80 — intenta superarlo la próxima vez' }
           }
             ]
           },
@@ -635,7 +623,6 @@ SETS.push(
                 chords: [
                   { name: 'Bm', chord: [[6,'x'],[5,'x'],[4,4,'4'],[3,4,'3'],[2,3,'2'],[1,2,'1']], position: 2 }
                 ],
-                response: { type: 'short', prompt: 'Which fought you more — the small Bm shape, or keeping the pattern through the change?', prompt_es: '¿Qué te costó más — la forma pequeña de Bm, o mantener el patrón a través del cambio?', placeholder: 'e.g. the Bm — my pinky keeps missing fret 4', placeholder_es: 'p. ej. el Bm — mi meñique sigue fallando el traste 4' }
               }
             ]
           },
@@ -728,8 +715,8 @@ SETS.push(
     unit: 'Module 6 · Strumming Patterns with Chords',
     unit_es: 'Módulo 6 · Patrones de rasgueo con acordes',
     title: 'Set 3',
-    subtitle: 'Multiple strum patterns · Folk, rock, reggae styles · Choosing the right groove',
-    subtitle_es: 'Varios patrones de rasgueo · Estilos folk, rock, reggae · Elegir el groove correcto',
+    subtitle: 'Multiple strum patterns · Soft, rock, reggae styles · Choosing the right groove',
+    subtitle_es: 'Varios patrones de rasgueo · Estilos suave, rock, reggae · Elegir el groove correcto',
     skillFocus: 'Playing different strum styles · Matching a pattern to the song · Switching patterns mid-song',
     skillFocus_es: 'Tocar distintos estilos de rasgueo · Ajustar un patrón a la canción · Cambiar de patrón a mitad de la canción',
     comingSoon: false,
@@ -770,13 +757,11 @@ SETS.push(
           },
           {
             label: 'Watch: strumming exercise (Andy Guitar)', label_es: 'Mira: ejercicio de rasgueo (Andy Guitar)',
-            text: 'Watch: <a href="https://youtu.be/vMt8T5Jqf10?t=39" target="_blank">Best Strumming Exercise For Beginners and Improvers – Andy Guitar</a> — a different teacher\'s method for building ANY pattern. Strum along with his exercise in real time, and notice how his approach differs from Justin\'s in the first video.',
-            text_es: 'Mira: <a href="https://youtu.be/vMt8T5Jqf10?t=39" target="_blank">Best Strumming Exercise For Beginners and Improvers – Andy Guitar</a> — el método de un maestro distinto para construir CUALQUIER patrón. Rasguea junto con su ejercicio en tiempo real, y fíjate en cómo su enfoque difiere del de Justin en el primer video.',
+            text: 'Watch: <a href="https://youtu.be/vMt8T5Jqf10?t=39" target="_blank">Best Strumming Exercise For Beginners and Improvers – Andy Guitar</a> — a different teacher\'s method for building ANY pattern. Strum along with his exercise in real time, and notice how his approach differs from Justin\'s in the first video.</p>You\'ve got it when: you have strummed along with his exercise for four bars without losing the count.',
+            text_es: 'Mira: <a href="https://youtu.be/vMt8T5Jqf10?t=39" target="_blank">Best Strumming Exercise For Beginners and Improvers – Andy Guitar</a> — el método de un maestro distinto para construir CUALQUIER patrón. Rasguea junto con su ejercicio en tiempo real, y fíjate en cómo su enfoque difiere del de Justin en el primer video.</p>Lo tienes cuando: ya rasgueaste junto con su ejercicio durante cuatro compases sin perder la cuenta.',
             hint: 'There is no single "correct" pattern for a song — listen to the original recording and feel which fits. Andy\'s exercise builds the control to play whichever one you choose.',
             hint_es: 'No hay un único patrón "correcto" para una canción — escucha la grabación original y siente cuál encaja. El ejercicio de Andy construye el control para tocar el que elijas.',
             skills: [4, 5],
-            response: { type: 'short', placeholder: 'Pick a song you like. Describe the strum pattern in your own words — is it gentle, driving, choppy? What gives it that feel?',
-              placeholder_es: 'Elige una canción que te guste. Describe el patrón de rasgueo con tus propias palabras — ¿es suave, impulsor, entrecortado? ¿Qué le da esa sensación?' }
           }
             ]
           },
@@ -819,10 +804,8 @@ SETS.push(
             steps: [
           {
             label: 'Checkpoint', label_es: 'Punto de control',
-            text: 'Checkpoint — pause and think: of the three feels you tried — folk, rock, reggae — which was hardest to make sound convincing on your guitar, and what gave it away as "not quite right"?',
-            text_es: 'Punto de control — pausa y piensa: de las tres sensaciones que probaste — folk, rock, reggae — ¿cuál fue la más difícil de hacer sonar convincente en tu guitarra, y qué la delataba como "no del todo correcta"?',
-            response: { type: 'short', placeholder: 'e.g. reggae — my offbeat upstrokes were too heavy, so it sounded like rock with gaps',
-              placeholder_es: 'p. ej. reggae — mis golpes hacia arriba en el contratiempo eran demasiado pesados, así que sonaba como rock con huecos' }
+            text: 'Checkpoint — pause and think: of the three feels you tried — soft, rock, reggae — which was hardest to make sound convincing on your guitar, and what gave it away as "not quite right"?',
+            text_es: 'Punto de control — pausa y piensa: de las tres sensaciones que probaste — suave, rock, reggae — ¿cuál fue la más difícil de hacer sonar convincente en tu guitarra, y qué la delataba como "no del todo correcta"?',
           }
             ]
           }
@@ -838,8 +821,8 @@ SETS.push(
             steps: [
               {
                 label: 'Warm-up: all three feels', label_es: 'Calentamiento: las tres sensaciones',
-                text: 'Tune to green, then on a G chord play 2 bars each of:<ol><li>Steady down-up (folk).</li><li>Heavy down-up (rock).</li><li>Up-only on the "+" (reggae).</li></ol>You\'ve got it when: in tune and your hand remembers all three feels before you refine them.',
-                text_es: 'Afina hasta que esté en verde, y luego con un acorde G toca 2 compases de cada uno:<ol><li>Abajo-arriba constante (folk).</li><li>Abajo-arriba pesado (rock).</li><li>Solo arriba en el "+" (reggae).</li></ol>Lo tienes cuando: estás afinado y tu mano recuerda las tres sensaciones antes de refinarlas.',
+                text: 'Tune to green. Today you meet three ways of strumming the same chords. Try each one on a G chord for 2 bars — this is a first taste, not a test:<ol><li>Soft: steady down-up, light and even.</li><li>Rock: the same down-up, but heavier.</li><li>Reggae: strum only on the "+", skipping every number.</li></ol>You\'ve got it when: you are in tune and you have played 2 bars of each of the three.',
+                text_es: 'Afina hasta que esté en verde. Hoy conoces tres maneras de rasguear los mismos acordes. Prueba cada una con un acorde G durante 2 compases — esto es una primera probada, no un examen:<ol><li>Suave: abajo-arriba constante, ligero y parejo.</li><li>Rock: el mismo abajo-arriba, pero más pesado.</li><li>Reggae: rasguea solo en el "+", saltándote cada número.</li></ol>Lo tienes cuando: estás afinado y ya tocaste 2 compases de cada una de las tres.',
                 hint: 'A quick 60-second pass through all three styles refreshes the patterns you\'ll polish this set.',
                 hint_es: 'Un repaso rápido de 60 segundos por los tres estilos refresca los patrones que vas a pulir en esta unidad.',
                 playSeq: { label: 'Hear all 6 strings in tune', label_es: 'Escucha las 6 cuerdas afinadas', bpm: 50, notes: [40, 45, 50, 55, 59, 64] }
@@ -847,15 +830,15 @@ SETS.push(
             ]
           },
           {
-            title: 'Play a folk feel',
-            title_es: 'Toca una sensación folk',
+            title: 'Play a soft feel',
+            title_es: 'Toca una sensación suave',
             steps: [
           {
-            label: 'Challenge 1 — Folk Feel', label_es: 'Reto 1 — Sensación folk',
+            label: 'Challenge 1 — Soft Feel', label_es: 'Reto 1 — Sensación suave',
             text: '<ol><li>Hold G.</li><li>Strum all downstrokes, one per beat, at 70 BPM — quiet and steady, singalong style.</li></ol>You\'ve got it when: even, soft, supportive strumming with no accents sticking out.<div class="strum-line">D       D       D       D\n<span class="su-count">1   +   2   +   3   +   4   +</span></div>',
             text_es: '<ol><li>Sostén G.</li><li>Rasguea todo hacia abajo, uno por tiempo, a 70 BPM — tranquilo y constante, estilo para cantar junto.</li></ol>Lo tienes cuando: un rasgueo parejo, suave, que acompaña, sin acentos que sobresalgan.<div class="strum-line">D       D       D       D\n<span class="su-count">1   +   2   +   3   +   4   +</span></div>',
-            hint: 'Folk here means a FEEL, not one particular pattern — it\'s about supporting the singer instead of standing out. Soft attack, even volume, no accents. Module 5\'s "folk strum" (D · D U · U D U) played gently counts as a folk feel too; these steady downstrokes are just the plainest version of it.',
-            hint_es: 'Folk aquí significa una SENSACIÓN, no un patrón concreto — se trata de acompañar al cantante en vez de sobresalir. Ataque suave, volumen parejo, sin acentos. El "rasgueo folk" del Módulo 5 (D · D U · U D U) tocado con suavidad también cuenta como sensación folk; estos golpes hacia abajo constantes son solo su versión más simple.',
+            hint: 'Soft here means a FEEL, not one particular pattern — it\'s about supporting the singer instead of standing out. Light attack, even volume, no accents. Module 5\'s "folk strum" (D · D U · U D U) played gently is one way to get it; these steady downstrokes are just the plainest way.',
+            hint_es: 'Suave aquí significa una SENSACIÓN, no un patrón concreto — se trata de acompañar al cantante en vez de sobresalir. Ataque ligero, volumen parejo, sin acentos. El "rasgueo folk" del Módulo 5 (D · D U · U D U) tocado con suavidad es una manera de lograrla; estos golpes hacia abajo constantes son la más simple.',
             stuck: 'Strum from the wrist only and let the pick barely graze the strings — imagine someone is singing and you must not cover them up.',
             stuck_es: 'Rasguea solo desde la muñeca y deja que la púa apenas roce las cuerdas — imagina que alguien está cantando y no debes taparlo.',
             levelUp: 'Add a gentle up-strum on the "+" of beats 2 and 4 for a fuller singalong feel.',
@@ -907,16 +890,15 @@ SETS.push(
             steps: [
           {
             label: 'Challenge 4 — Two Feels, One Song (your assessment piece)', label_es: 'Reto 4 — Dos sensaciones, una canción (tu pieza de evaluación)',
-            text: '<ol><li>Take G–D–Em–C and play 8 bars folk, then switch to rock for 8 bars — same chords, two clearly different feels, no break at the switch.</li><li>Set the ⏱ Timer for 3 minutes and loop it.</li></ol>',
-            text_es: '<ol><li>Toma G–D–Em–C y toca 8 compases estilo folk, y luego cambia a rock durante 8 compases — mismos acordes, dos sensaciones claramente distintas, sin interrupción en el cambio.</li><li>Pon el ⏱ Temporizador en 3 minutos y repítelo.</li></ol>',
+            text: '<ol><li>Take G–D–Em–C and play 8 bars soft, then switch to rock for 8 bars — same chords, two clearly different feels, no break at the switch.</li><li>Set the ⏱ Timer for 3 minutes and loop it.</li></ol>You\'ve got it when: three times through the 8-bars-soft, 8-bars-rock loop with no break at either seam, and a listener could name the bar where the feel changed.',
+            text_es: '<ol><li>Toma G–D–Em–C y toca 8 compases estilo suave, y luego cambia a rock durante 8 compases — mismos acordes, dos sensaciones claramente distintas, sin interrupción en el cambio.</li><li>Pon el ⏱ Temporizador en 3 minutos y repítelo.</li></ol>Lo tienes cuando: tres pasadas por la vuelta de 8 compases suave y 8 compases rock sin interrupción en ninguna costura, y alguien que escuche podría decir en qué compás cambió la sensación.',
             hint: 'The switch is the skill. Change the feel on the downbeat of a new bar so the transition lands cleanly.',
             hint_es: 'El cambio es la destreza. Cambia la sensación en el tiempo fuerte de un compás nuevo para que la transición caiga limpia.',
-            stuck: 'Keep the chords and tempo identical — change ONLY your strum hand. Drill just the 2-bar seam where folk becomes rock until it\'s smooth.',
-            stuck_es: 'Mantén los acordes y el tempo idénticos — cambia SOLO tu mano de rasgueo. Practica solo la costura de 2 compases donde el folk se vuelve rock hasta que salga fluido.',
+            stuck: 'Keep the chords and tempo identical — change ONLY your strum hand. Drill just the 2-bar seam where soft becomes rock until it\'s smooth.',
+            stuck_es: 'Mantén los acordes y el tempo idénticos — cambia SOLO tu mano de rasgueo. Practica solo la costura de 2 compases donde lo suave se vuelve rock hasta que salga fluido.',
             levelUp: 'Add reggae as a third 8-bar section, or switch feels every 4 bars instead of every 8.',
             levelUp_es: 'Agrega el reggae como una tercera sección de 8 compases, o cambia de sensación cada 4 compases en lugar de cada 8.',
             skills: [5, 6],
-            response: { type: 'short', prompt: 'Which two feels did you switch between, and on which song would you use them?', prompt_es: '¿Entre qué dos sensaciones cambiaste, y en qué canción las usarías?', placeholder: 'e.g. folk verse → rock chorus on "Bad Moon Rising"', placeholder_es: 'p. ej. estrofa folk → coro rock en "Bad Moon Rising"' },
             playSeq: { label: 'G · D · Em · C progression (try each feel)', label_es: 'Progresión G · D · Em · C (prueba cada sensación)', bpm: 70, notes: [43, 50, 40, 48] }
           }
             ]
@@ -942,16 +924,15 @@ SETS.push(
             steps: [
               {
                 label: 'Challenge — "Watchtower", two ways', label_es: 'Reto — "Watchtower", de dos formas',
-                text: '<ol><li>Play Am · G · F · G with a soft folk strum for 8 bars.</li><li>Then play the same loop rock-style — strum harder, accent the downs — for 8 bars, no break at the switch.</li></ol>You\'ve got it when: on a quick recording of yourself you can hear the exact bar the feel changed — Dylan\'s version becoming Hendrix\'s, live from your chair. <a href="tabs/all-along-the-watchtower.html" target="_blank">&#x1F9F5; Song Journey: five layers deep and still growing</a>.',
-                text_es: '<ol><li>Toca Am · G · F · G con un rasgueo folk suave durante 8 compases.</li><li>Luego toca el mismo loop estilo rock — rasguea más fuerte, acentúa los golpes hacia abajo — durante 8 compases, sin interrupción en el cambio.</li></ol>Lo tienes cuando: en una grabación rápida de ti mismo puedes escuchar el compás exacto donde cambió la sensación — la versión de Dylan volviéndose la de Hendrix, en vivo desde tu silla. <a href="tabs/all-along-the-watchtower.html" target="_blank">&#x1F9F5; Recorrido de la canción: cinco capas de profundidad y sigue creciendo</a>.',
+                text: '<ol><li>Play Am · G · F · G with a soft strum for 8 bars.</li><li>Then play the same loop rock-style — strum harder, accent the downs — for 8 bars, no break at the switch.</li></ol>You\'ve got it when: on a quick recording of yourself you can hear the exact bar the feel changed — Dylan\'s version becoming Hendrix\'s, live from your chair. <a href="tabs/all-along-the-watchtower.html" target="_blank">&#x1F9F5; Song Journey: five layers deep and still growing</a>.',
+                text_es: '<ol><li>Toca Am · G · F · G con un rasgueo suave durante 8 compases.</li><li>Luego toca el mismo loop estilo rock — rasguea más fuerte, acentúa los golpes hacia abajo — durante 8 compases, sin interrupción en el cambio.</li></ol>Lo tienes cuando: en una grabación rápida de ti mismo puedes escuchar el compás exacto donde cambió la sensación — la versión de Dylan volviéndose la de Hendrix, en vivo desde tu silla. <a href="tabs/all-along-the-watchtower.html" target="_blank">&#x1F9F5; Recorrido de la canción: cinco capas de profundidad y sigue creciendo</a>.',
                 hint: 'You heard exactly this in Module 1 — acoustic Dylan vs. electric Hendrix. Same chords, same tempo; ONLY your strum hand changes.',
                 hint_es: 'Escuchaste exactamente esto en el Módulo 1 — Dylan acústico vs. Hendrix eléctrico. Mismos acordes, mismo tempo; SOLO tu mano de rasgueo cambia.',
-                stuck: 'Make the switch on beat 1 of a new bar and drill just the 2-bar seam where folk becomes rock.',
-                stuck_es: 'Haz el cambio en el tiempo 1 de un compás nuevo y practica solo la costura de 2 compases donde el folk se vuelve rock.',
+                stuck: 'Make the switch on beat 1 of a new bar and drill just the 2-bar seam where soft becomes rock.',
+                stuck_es: 'Haz el cambio en el tiempo 1 de un compás nuevo y practica solo la costura de 2 compases donde lo suave se vuelve rock.',
                 levelUp: 'Add the reggae chop as a third 8-bar section — three eras of the same song.',
                 levelUp_es: 'Agrega el picoteo reggae como una tercera sección de 8 compases — tres épocas de la misma canción.',
                 skills: [5, 6],
-                response: { type: 'short', prompt: 'Which feel suited "Watchtower" better to your ear — folk or rock — and why?', prompt_es: '¿Qué sensación le quedó mejor a "Watchtower" para tu oído — folk o rock — y por qué?', placeholder: 'e.g. rock — the accents make the loop feel dangerous', placeholder_es: 'p. ej. rock — los acentos hacen que el loop se sienta peligroso' }
               },
               {
                 label: 'Challenge — "Three Little Birds", reggae chop', label_es: 'Reto — "Three Little Birds", picoteo reggae',
@@ -972,11 +953,11 @@ SETS.push(
     },
 
     skills: [
-      { id: 'm6w3-s1', text: 'Play a folk FEEL — gentle, even downstrokes that sit under a singer (a touch, not a particular pattern)',
-        text_es: 'Tocar una SENSACIÓN folk — golpes hacia abajo suaves y parejos que se quedan debajo del cantante (un toque, no un patrón concreto)',
+      { id: 'm6w3-s1', text: 'Play a soft FEEL — gentle, even downstrokes that sit under a singer (a touch, not a particular pattern)',
+        text_es: 'Tocar una SENSACIÓN suave — golpes hacia abajo suaves y parejos que se quedan debajo del cantante (un toque, no un patrón concreto)',
         gotItWhen: 'you can play a chord progression with even, soft downstrokes that supports a singer — no accents, no aggressive attack.',
         gotItWhen_es: 'puedes tocar una progresión de acordes con golpes hacia abajo parejos y suaves que acompañan a un cantante — sin acentos, sin ataque agresivo.',
-        practice: { type: 'playSeq', label: 'Folk feel — soft, even strums (G root, one per beat)', label_es: 'Sensación folk — rasgueos suaves y parejos (raíz de G, uno por tiempo)', bpm: 70,
+        practice: { type: 'playSeq', label: 'Soft feel — light, even strums (G root, one per beat)', label_es: 'Sensación suave — rasgueos ligeros y parejos (raíz de G, uno por tiempo)', bpm: 70,
           notes: [43, 43, 43, 43, 43, 43, 43, 43] } },
       { id: 'm6w3-s2', text: 'Play a rock strum (heavy downstrokes with accent and weight)',
         text_es: 'Tocar un rasgueo rock (golpes hacia abajo pesados con acento y peso)',
@@ -1004,10 +985,10 @@ SETS.push(
         gotItWhen_es: 'puedes poner cualquier canción nueva, escuchar 15 segundos, y elegir un patrón de rasgueo que encaje — sin que un tutorial te diga qué tocar.',
         practice: { type: 'mc', prompt: 'You hear a song with a slow, gentle, acoustic feel and a singer-songwriter vibe. Which strum suits it best?',
           prompt_es: 'Escuchas una canción con una sensación lenta, suave, acústica y un aire de cantautor. ¿Qué rasgueo le queda mejor?',
-          choices: ['Heavy rock chops on every downstroke', 'Reggae offbeat upstrokes', 'Gentle folk strum (soft down-up)', 'No strum at all'],
-          choices_es: ['Golpes pesados de rock en cada golpe hacia abajo', 'Golpes hacia arriba de contratiempo reggae', 'Rasgueo folk suave (abajo-arriba suave)', 'Sin rasgueo alguno'], answer: 2,
-          explain: 'Match the strum to the energy of the song: a soft, slow song wants a gentle folk strum that stays quieter than the singer. Rock chops or a reggae offbeat would clash with the mood.',
-          explain_es: 'Ajusta el rasgueo a la energía de la canción: una canción suave y lenta pide un rasgueo folk suave que se mantenga más bajo que el cantante. Los golpes de rock o el contratiempo reggae chocarían con el ambiente.' } },
+          choices: ['Heavy rock chops on every downstroke', 'Reggae offbeat upstrokes', 'Gentle soft strum (light down-up)', 'No strum at all'],
+          choices_es: ['Golpes pesados de rock en cada golpe hacia abajo', 'Golpes hacia arriba de contratiempo reggae', 'Rasgueo suave y parejo (abajo-arriba ligero)', 'Sin rasgueo alguno'], answer: 2,
+          explain: 'Match the strum to the energy of the song: a soft, slow song wants a gentle strum that stays quieter than the singer. Rock chops or a reggae offbeat would clash with the mood.',
+          explain_es: 'Ajusta el rasgueo a la energía de la canción: una canción suave y lenta pide un rasgueo suave que se mantenga más bajo que el cantante. Los golpes de rock o el contratiempo reggae chocarían con el ambiente.' } },
       { id: 'm6w3-s5', text: 'Switch strum patterns mid-song (e.g., verse vs. chorus)',
         text_es: 'Cambiar de patrón de rasgueo a mitad de la canción (p. ej., estrofa vs. coro)',
         gotItWhen: 'you can play 8 bars of one pattern, then switch cleanly to a different pattern for the next 8 bars — without losing the beat at the transition.',
@@ -1017,8 +998,8 @@ SETS.push(
           unit: 'count', placeholder: 'e.g. 6 switches — try for a longer streak', placeholder_es: 'p. ej. 6 cambios — intenta una racha más larga' } },
       { id: 'm6w3-s6', text: 'Play 2+ different patterns over the same chord progression',
         text_es: 'Tocar 2 o más patrones distintos sobre la misma progresión de acordes',
-        gotItWhen: 'you can take G–D–Em–C and play it two different ways (e.g., folk then rock) and the two versions actually sound like different songs.',
-        gotItWhen_es: 'puedes tomar G–D–Em–C y tocarlo de dos formas distintas (p. ej., folk y luego rock) y las dos versiones en verdad suenan como canciones diferentes.',
+        gotItWhen: 'you can take G–D–Em–C and play it two different ways (e.g., soft then rock) and the two versions actually sound like different songs.',
+        gotItWhen_es: 'puedes tomar G–D–Em–C y tocarlo de dos formas distintas (p. ej., suave y luego rock) y las dos versiones en verdad suenan como canciones diferentes.',
         practice: { type: 'playSeq', label: 'G · D · Em · C progression (try with each style)', label_es: 'Progresión G · D · Em · C (prueba con cada estilo)', bpm: 70,
           notes: [43, 50, 40, 48] } }
     ]
@@ -1083,12 +1064,12 @@ MODULE_REVIEWS[6] = {
   assessItems: [
     'Play Em for 4 bars, then Am for 4 bars, with a non-stop down-up strum at 60 BPM',
     'Loop G for 2 bars, then D for 2 bars, playing D-DU-UDU with the pattern staying identical through the change',
-    'Take G–D–Em–C and play it two ways — folk, then rock — switching feel with no break at the seam'
+    'Take G–D–Em–C and play it two ways — soft, then rock — switching feel with no break at the seam'
   ],
   assessItems_es: [
     'Toca Em durante 4 compases, y luego Am durante 4 compases, con un rasgueo abajo-arriba sin interrupciones a 60 BPM',
     'Repite G durante 2 compases, y luego D durante 2 compases, tocando D-DU-UDU con el patrón idéntico a través del cambio',
-    'Toma G–D–Em–C y tócalo de dos formas — folk, y luego rock — cambiando la sensación sin interrupción en la costura'
+    'Toma G–D–Em–C y tócalo de dos formas — suave, y luego rock — cambiando la sensación sin interrupción en la costura'
   ],
   forward: 'Module 7 is the <strong>barre-chord</strong> module — and every steady strum hand you just built is what carries you through it. The rhythm keeps going even while your fretting hand works on the hardest shapes in the course. The groove you can now play reliably is what makes a clamped, buzzy first barre still sound like music.',
   forward_es: 'El Módulo 7 es el módulo de <strong>acordes con cejilla</strong> — y cada mano de rasgueo estable que acabas de construir es lo que te lleva a través de él. El ritmo sigue adelante incluso mientras tu mano de trastear trabaja en las formas más difíciles del curso. El groove que ahora puedes tocar de forma confiable es lo que hace que una primera cejilla apretada y con zumbido siga sonando a música.',

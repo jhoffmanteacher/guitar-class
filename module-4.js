@@ -59,13 +59,11 @@ SETS.push(
           {
             // Reviewed by Jonathan 2026-07-11: fits Set 1; start at 1:45 (the link jumps there — the intro before is skippable).
             label: 'Watch: major pentatonic scale', label_es: 'Mira: pentatónica mayor',
-            text: 'Watch: <a href="https://youtu.be/m_IiyJu60-c?t=105" target="_blank">Major Pentatonic Scale – Marty Music</a> (the link jumps to 1:45, where the lesson starts — watch to about 4:00). As you watch:<ol><li>Find the root note on your own neck.</li><li>Play the shape up once before answering below.</li></ol>',
-            text_es: 'Mira: <a href="https://youtu.be/m_IiyJu60-c?t=105" target="_blank">Major Pentatonic Scale – Marty Music</a> (el enlace salta a 1:45, donde empieza la lección — mira hasta cerca de 4:00). Mientras miras:<ol><li>Encuentra la nota raíz en tu propio mástil.</li><li>Toca la forma una vez antes de responder abajo.</li></ol>',
+            text: 'Watch: <a href="https://youtu.be/m_IiyJu60-c?t=105" target="_blank">Major Pentatonic Scale – Marty Music</a> (the link jumps to 1:45, where the lesson starts — watch to about 4:00). As you watch:<ol><li>Find the root note on your own neck.</li><li>Play the shape up once, then again coming back down.</li></ol>You\'ve got it when: you have played the shape up and back twice, every note sounding.',
+            text_es: 'Mira: <a href="https://youtu.be/m_IiyJu60-c?t=105" target="_blank">Major Pentatonic Scale – Marty Music</a> (el enlace salta a 1:45, donde empieza la lección — mira hasta cerca de 4:00). Mientras miras:<ol><li>Encuentra la nota raíz en tu propio mástil.</li><li>Toca la forma una vez subiendo, y otra vez bajando.</li></ol>Lo tienes cuando: ya tocaste la forma subiendo y bajando dos veces, con todas las notas sonando.',
             hint: 'Focus on the Pattern 1 shape — how does it sit on the neck? Notice where the root note is.',
             hint_es: 'Concéntrate en la forma del Patrón 1 — ¿cómo se ubica en el mástil? Fíjate en dónde está la nota raíz.',
             skills: [1, 4],
-            response: { type: 'short', placeholder: 'Describe the Pattern 1 shape. Where is the root note?',
-              placeholder_es: 'Describe la forma del Patrón 1. ¿Dónde está la nota raíz?' }
           }
             ]
           },
@@ -146,8 +144,6 @@ SETS.push(
             label: 'Wrap-up: the finger or the sound?', label_es: 'Cierre: ¿el dedo o el sonido?',
             text: 'Checkpoint — pause and think: when you positioned Pattern 1 today, what told you whether you were set up for MAJOR or MINOR — the finger on the root, or the sound? Which felt more reliable?',
             text_es: 'Punto de control — pausa y piensa: cuando posicionaste el Patrón 1 hoy, ¿qué te decía si estabas listo para MAYOR o para MENOR — el dedo en la raíz, o el sonido? ¿Cuál se sintió más confiable?',
-            response: { type: 'short', placeholder: 'e.g. I trusted the finger (4th = major, 1st = minor) more than my ear so far',
-              placeholder_es: 'p. ej. confié más en el dedo (4º = mayor, 1º = menor) que en mi oído hasta ahora' }
           }
             ]
           }
@@ -178,8 +174,8 @@ SETS.push(
             steps: [
           {
             label: 'Challenge 1 — Pattern 1 Climb (skills-check warm-up)', label_es: 'Reto 1 — Subida del Patrón 1 (calentamiento de revisión de destrezas)',
-            text: '<ul><li>Play Pentatonic Pattern 1 ascending at 60 BPM, one note per beat, alternate picking (down-up-down-up).</li></ul>You\'ve got it when: every note rings clean with no missed picks. The box below shows where every finger goes; click "Play all" to hear it, and the next challenge maps the same climb note by note in TAB.<span class="step-figure"><img src="img/m4-pentatonic-box1-en.svg" alt="Fretboard diagram of A minor pentatonic Pattern 1, frets 5 to 8: finger 1 on fret 5 of every string, finger 4 on fret 8 of the low E, B, and high e strings, and finger 3 on fret 7 of the A, D, and G strings. The root note A is marked solid at fret 5 on the low E and high e strings and at fret 7 on the D string." width="640" height="244"></span>',
-            text_es: '<ul><li>Toca el Patrón pentatónico 1 subiendo a 60 BPM, una nota por tiempo, con púa alterna (abajo-arriba-abajo-arriba).</li></ul>Lo tienes cuando: cada nota suena limpia sin púas falladas. La caja de abajo muestra dónde va cada dedo; presiona "Tocar todo" para escucharlo, y el siguiente reto mapea la misma subida nota por nota en TAB.<span class="step-figure"><img src="img/m4-pentatonic-box1-es.svg" alt="Diagrama del diapasón del Patrón 1 de A menor pentatónica, trastes 5 a 8: el dedo 1 en el traste 5 de todas las cuerdas, el dedo 4 en el traste 8 de las cuerdas Mi grave, Si y mi aguda, y el dedo 3 en el traste 7 de las cuerdas La, Re y Sol. La nota raíz A está marcada en sólido en el traste 5 de la Mi grave y la mi aguda, y en el traste 7 de la cuerda Re." width="640" height="244"></span>',
+            text: '<ul><li>Play Pentatonic Pattern 1 ascending at 60 BPM, one note per beat, alternate picking (down-up-down-up).</li></ul>You\'ve got it when: two laps up and back with every note ringing clean and no missed picks. The box below shows where every finger goes; click "Play all" to hear it, and the next challenge maps the same climb note by note in TAB.<span class="step-figure"><img src="img/m4-pentatonic-box1-en.svg" alt="Fretboard diagram of A minor pentatonic Pattern 1, frets 5 to 8: finger 1 on fret 5 of every string, finger 4 on fret 8 of the low E, B, and high e strings, and finger 3 on fret 7 of the A, D, and G strings. The root note A is marked solid at fret 5 on the low E and high e strings and at fret 7 on the D string." width="640" height="244"></span>',
+            text_es: '<ul><li>Toca el Patrón pentatónico 1 subiendo a 60 BPM, una nota por tiempo, con púa alterna (abajo-arriba-abajo-arriba).</li></ul>Lo tienes cuando: dos vueltas subiendo y bajando con cada nota sonando limpia y sin púas falladas. La caja de abajo muestra dónde va cada dedo; presiona "Tocar todo" para escucharlo, y el siguiente reto mapea la misma subida nota por nota en TAB.<span class="step-figure"><img src="img/m4-pentatonic-box1-es.svg" alt="Diagrama del diapasón del Patrón 1 de A menor pentatónica, trastes 5 a 8: el dedo 1 en el traste 5 de todas las cuerdas, el dedo 4 en el traste 8 de las cuerdas Mi grave, Si y mi aguda, y el dedo 3 en el traste 7 de las cuerdas La, Re y Sol. La nota raíz A está marcada en sólido en el traste 5 de la Mi grave y la mi aguda, y en el traste 7 de la cuerda Re." width="640" height="244"></span>',
             hint: 'This is a warm-up drill — the module assessment is your own 4-bar solo, held to the backing track\'s pulse — but this climb is the benchmark lap (a lap = one full time through) for your Set 1 check-off. Go as slow as you need until every note rings cleanly, and set the ⏱ Timer for 2 minutes to loop it.',
             hint_es: 'Este es un ejercicio de calentamiento — la evaluación del módulo es tu propio solo de 4 compases, sostenido al pulso de la pista de acompañamiento — pero esta subida es la vuelta de referencia (una vuelta = un recorrido completo) para tu verificación de la Unidad 1. Ve tan despacio como necesites hasta que cada nota suene limpia, y pon el ⏱ Temporizador en 2 minutos para repetirlo.',
             stuck: 'Drop to the lowest two strings only (E and A) and climb just those until they\'re clean, then add the rest one string at a time.',
@@ -188,7 +184,6 @@ SETS.push(
             levelUp_es: 'Tócalo también bajando (de arriba a abajo), o sube el metrónomo a 80 BPM y mantén la púa estrictamente abajo-arriba.',
             skills: [1, 2, 5],
             playSeq: { label: 'Play all', label_es: 'Tocar todo', bpm: 60, notes: [45, 48, 50, 52, 55, 57, 60, 62, 64, 67, 69, 72] },
-            response: { type: 'short', prompt: 'Personal record: play it cleanly at 60 BPM, then raise the metronome +10 at a time. Your fastest CLEAN climb today (BPM)?', prompt_es: 'Récord personal: tócalo limpio a 60 BPM, y luego sube el metrónomo de 10 en 10. ¿Tu subida LIMPIA más rápida hoy (BPM)?', placeholder: 'e.g. 80 — try for a higher number next session', placeholder_es: 'p. ej. 80 — intenta superarlo la próxima sesión' }
           }
             ]
           },
@@ -295,7 +290,6 @@ SETS.push(
                     { string: 'A', fret: 0, note: 'A', midi: 45 }
                   ]
                 },
-                response: { type: 'short', prompt: 'Describe your best phrase in words — what made it feel finished?', prompt_es: 'Describe tu mejor frase con palabras — ¿qué la hizo sentir terminada?', placeholder: 'e.g. two quick notes then a long E', placeholder_es: 'p. ej. dos notas rápidas y luego una E larga' }
               },
               {
                 label: 'Challenge — Solo over "Watchtower"', label_es: 'Reto — Solo sobre "Watchtower"',
@@ -317,7 +311,6 @@ SETS.push(
                     { string: 'D', fret: 7, note: 'A', midi: 57 }
                   ]
                 },
-                response: { type: 'short', prompt: 'Which chord in the loop was easiest to solo over, and which fought you?', prompt_es: '¿Qué acorde de la vuelta fue el más fácil para improvisar, y cuál se te resistió?', placeholder: 'e.g. Am easy, F felt weird', placeholder_es: 'p. ej. Am fácil, F se sintió raro' }
               },
               {
                 label: 'Challenge — "Watchtower", the real rhythm', label_es: 'Reto — "Watchtower", el ritmo real',
@@ -330,7 +323,6 @@ SETS.push(
                 levelUp: 'Play it as power chords instead of single notes — same two-beat holds, fuller sound.',
                 levelUp_es: 'Tócalo como acordes de potencia en vez de notas sueltas — los mismos dos tiempos sostenidos, un sonido más lleno.',
                 playSeq: { label: 'Hear the verse rhythm — A held 3 beats, G on beat 4 (then F the same)', label_es: 'Escucha el ritmo de la estrofa — A sostenida 3 tiempos, G en el tiempo 4 (luego F igual)', bpm: 60, notes: [{ midi: 45, beats: 3 }, { midi: 43, beats: 1 }, { midi: 41, beats: 3 }, { midi: 43, beats: 1 }] },
-                response: { type: 'short', prompt: 'What did your ear catch first — the verse\'s late G on beat 4, or the chorus changing on beat 3?', prompt_es: '¿Qué captó primero tu oído — la G tardía de la estrofa en el tiempo 4, o el coro cambiando en el tiempo 3?', placeholder: 'e.g. the late G — it kicks the loop forward', placeholder_es: 'p. ej. la G tardía — empuja la vuelta hacia adelante' }
               },
               {
                 label: 'Challenge — "Seven Nation Army", the real rhythm (by ear)', label_es: 'Reto — "Seven Nation Army", el ritmo real (de oído)',
@@ -377,7 +369,6 @@ SETS.push(
                     ]
                   }
                 ],
-                response: { type: 'short', prompt: 'What\'s different about the riff\'s real rhythm compared to how you first learned it?', prompt_es: '¿Qué es diferente en el ritmo real del riff comparado con cómo lo aprendiste primero?', placeholder: 'e.g. the first two B\'s aren\'t evenly spaced', placeholder_es: 'p. ej. las primeras dos B no están parejas' }
               },
               {
                 label: 'Challenge — Solo over "Luna"', label_es: 'Reto — Solo sobre "Luna"',
@@ -399,7 +390,6 @@ SETS.push(
                     { string: 'A', fret: 10, note: 'G', midi: 55 }
                   ]
                 },
-                response: { type: 'short', prompt: 'Which note felt like "home" over the Dm track, and did your phrases land there?', prompt_es: '¿Qué nota se sintió como "nota base" sobre la pista de Dm, y tus frases aterrizaron ahí?', placeholder: 'e.g. D at fret 10 — landed there most times', placeholder_es: 'p. ej. D en el traste 10 — aterricé ahí la mayoría de las veces' }
               }
             ]
           },
@@ -414,8 +404,6 @@ SETS.push(
                 text_es: 'Planea tu práctica — esta parte es solo para ti, nunca se califica. Tómate dos minutos para actualizar tu rutina:<ol><li>Una cosa en la que quieres mejorar.</li><li>Cuándo y dónde vas a practicar esta semana.</li><li>Cómo te fue con el plan de la semana pasada.</li></ol>El mismo check-in que has mantenido desde el Módulo 1 — lo seguimos manteniendo durante todo el curso.',
                 hint: 'No wrong answers — even five minutes a day is better than one long rushed session. You\'re building a habit you\'ll actually keep.',
                 hint_es: 'No hay respuestas incorrectas — hasta cinco minutos al día es mejor que una sola sesión larga y apurada. Estás construyendo un hábito que de verdad vas a mantener.',
-                response: { type: 'short', placeholder: '1) One thing to improve   2) When & where I\'ll practice   3) How last week went',
-                  placeholder_es: '1) Algo que quiero mejorar   2) Cuándo y dónde voy a practicar   3) Cómo me fue la semana pasada' }
               }
             ]
           },
@@ -428,8 +416,6 @@ SETS.push(
                 label: 'Wrap-up: what felt harder?', label_es: 'Cierre: ¿qué fue más difícil?',
                 text: 'Which felt harder today — playing the pattern cleanly, or making music with only 3 notes? Write it below — that\'s your warm-up target next time.',
                 text_es: '¿Qué se sintió más difícil hoy — tocar el patrón limpio, o hacer música con solo 3 notas? Escríbelo abajo — ese es tu objetivo de calentamiento la próxima vez.',
-                response: { type: 'short', placeholder: 'e.g. the pattern is clean; making 3 notes sound intentional is the hard part',
-                  placeholder_es: 'p. ej. el patrón sale limpio; hacer que 3 notas suenen intencionadas es la parte difícil' }
               }
             ]
           }
@@ -515,13 +501,11 @@ SETS.push(
             steps: [
           {
             label: 'Watch: using the minor pentatonic', label_es: 'Mira: usar la pentatónica menor',
-            text: 'Watch: <a href="https://www.youtube.com/watch?v=1mT5nUE0o7M&t=31" target="_blank">How to USE the Minor Pentatonic Scale – Lauren Bateman (0:31–4:00)</a> to refresh the shape. Add the expression the video doesn\'t show:<ol><li>Pick one note from the pattern.</li><li>Play it loud, then soft.</li></ol>That difference in volume is dynamics.',
-            text_es: 'Mira: <a href="https://www.youtube.com/watch?v=1mT5nUE0o7M&t=31" target="_blank">How to USE the Minor Pentatonic Scale – Lauren Bateman (0:31–4:00)</a> para repasar la forma. Agrega la expresión que el video no muestra:<ol><li>Elige una nota del patrón.</li><li>Tócala fuerte, y luego suave.</li></ol>Esa diferencia de volumen es la dinámica.',
+            text: 'Watch: <a href="https://www.youtube.com/watch?v=1mT5nUE0o7M&t=31" target="_blank">How to USE the Minor Pentatonic Scale – Lauren Bateman (0:31–4:00)</a> to refresh the shape. Add the expression the video doesn\'t show:<ol><li>Pick one note from the pattern.</li><li>Play it loud, then soft.</li></ol>That difference in volume is dynamics.</p>You\'ve got it when: you have played the same note loud then soft four times in a row, and can hear the difference each time.',
+            text_es: 'Mira: <a href="https://www.youtube.com/watch?v=1mT5nUE0o7M&t=31" target="_blank">How to USE the Minor Pentatonic Scale – Lauren Bateman (0:31–4:00)</a> para repasar la forma. Agrega la expresión que el video no muestra:<ol><li>Elige una nota del patrón.</li><li>Tócala fuerte, y luego suave.</li></ol>Esa diferencia de volumen es la dinámica.</p>Lo tienes cuando: ya tocaste la misma nota fuerte y luego suave cuatro veces seguidas, y escuchas la diferencia cada vez.',
             hint: 'The video shows the notes; the dynamics are on you. Play one note loud, then whisper-soft, and listen for how much the FEEL changes even though the note doesn\'t.',
             hint_es: 'El video muestra las notas; la dinámica depende de ti. Toca una nota fuerte, y luego en un susurro suave, y escucha cuánto cambia la SENSACIÓN aunque la nota no cambie.',
             skills: [1, 2],
-            response: { type: 'short', placeholder: 'Describe your own loud-then-soft experiment: which note, and what changed in the sound?',
-              placeholder_es: 'Describe tu propio experimento fuerte-luego-suave: ¿qué nota, y qué cambió en el sonido?' }
           },
           {
             label: 'Watch: hammer-ons and pull-offs', label_es: 'Mira: hammer-ons y pull-offs',
@@ -617,8 +601,6 @@ SETS.push(
             label: 'Wrap-up: your expressive tool', label_es: 'Cierre: tu herramienta expresiva',
             text: 'Checkpoint — pause and think: which expressive tool felt most natural today — dynamics (loud/soft), timbre (bright/warm), or the hammer-on? Which one will you use most in your solos?',
             text_es: 'Punto de control — pausa y piensa: ¿qué herramienta expresiva se sintió más natural hoy — la dinámica (fuerte/suave), el timbre (brillante/cálido), o el hammer-on? ¿Cuál vas a usar más en tus solos?',
-            response: { type: 'short', placeholder: 'e.g. dynamics came easily; hammer-ons still feel unreliable',
-              placeholder_es: 'p. ej. la dinámica salió fácil; los hammer-ons todavía se sienten poco confiables' }
           }
             ]
           }
@@ -695,7 +677,6 @@ SETS.push(
             levelUp_es: 'Señala un traste al azar entre 0–10 sin contar desde el inicio y nombra la nota en menos de 3 segundos, o recorre la cuerda de arriba hacia abajo (de C de vuelta a D).',
             skills: [7],
             playSeq: { label: 'Play all', label_es: 'Tocar todo', bpm: 60, notes: [50, 52, 53, 55, 57, 59, 60] },
-            response: { type: 'short', prompt: 'Personal record: play it cleanly at 60 BPM, then raise the metronome +10 at a time. Your fastest CLEAN lap naming + playing the D string, without looking at the chart (BPM)?', prompt_es: 'Récord personal: tócalo limpio a 60 BPM, y luego sube el metrónomo de 10 en 10. ¿Tu vuelta LIMPIA más rápida nombrando y tocando la cuerda Re, sin mirar el diagrama (BPM)?', placeholder: 'e.g. 80 — try for a higher number next session', placeholder_es: 'p. ej. 80 — intenta superarlo la próxima sesión' }
           },
           {
             label: 'Challenge 4 — G String Map', label_es: 'Reto 4 — Mapa de la cuerda Sol',
@@ -739,7 +720,6 @@ SETS.push(
                     { string: 'E', fret: 15, note: 'G', midi: 55 }
                   ]
                 },
-                response: { type: 'short', prompt: 'Open position vs. 12th fret — which felt more like "your" sound?', prompt_es: 'Posición abierta vs. traste 12 — ¿cuál se sintió más como "tu" sonido?', placeholder: 'e.g. 12th fret — felt like a real solo', placeholder_es: 'p. ej. traste 12 — se sintió como un solo de verdad' }
               },
               {
                 label: 'Challenge — Solo over "the cure"', label_es: 'Reto — Solo sobre "the cure"',
@@ -752,7 +732,6 @@ SETS.push(
                 levelUp: 'Build one long crescendo across all eight bars — start as quietly as you can, end singing, never harsh.',
                 levelUp_es: 'Construye un solo crescendo largo a lo largo de los ocho compases — empieza lo más suave que puedas, termina cantando, nunca áspero.',
                 skills: [5, 6],
-                response: { type: 'short', prompt: 'Rate your quiet control 1–3, and name one note that buzzed when soft.', prompt_es: 'Califica tu control del volumen suave del 1 al 3, y nombra una nota que zumbó cuando tocaste suave.', placeholder: 'e.g. 2 — the G on the D string buzzes', placeholder_es: 'p. ej. 2 — el G en la cuerda Re zumba' }
               }
             ]
           },
@@ -765,8 +744,6 @@ SETS.push(
                 label: 'Wrap-up: phrasing or note names?', label_es: 'Cierre: ¿fraseo o nombres de nota?',
                 text: 'Which is more solid right now — your expressive phrasing (call-and-response, dynamics) or your note names on D and G? Write the weaker one below — that\'s your warm-up target next time.',
                 text_es: '¿Qué está más sólido ahora mismo — tu fraseo expresivo (llamada y respuesta, dinámica) o tus nombres de nota en Re y Sol? Escribe el más débil abajo — ese es tu objetivo de calentamiento la próxima vez.',
-                response: { type: 'short', placeholder: 'e.g. phrasing is coming along; G string note names still need counting',
-                  placeholder_es: 'p. ej. el fraseo va mejorando; los nombres de nota de la cuerda Sol todavía necesitan que cuente' }
               }
             ]
           },
@@ -883,13 +860,11 @@ SETS.push(
             steps: [
           {
             label: 'Re-watch: major/minor connection', label_es: 'Vuelve a mirar: conexión mayor/menor',
-            text: 'Re-watch the same video from Set 1 — <a href="https://youtu.be/m_IiyJu60-c?t=105" target="_blank">Major Pentatonic Scale – Marty Music</a> (the link skips the intro) — this time listening for the major/minor connection. Then prove it on your own neck:<ol><li>Play Pattern 1 and call the low E root (1st finger) "home" for minor.</li><li>Then treat the note three frets higher (4th finger, same string) as "home" and hear the same shape turn major.</li></ol>',
-            text_es: 'Vuelve a mirar el mismo video de la Unidad 1 — <a href="https://youtu.be/m_IiyJu60-c?t=105" target="_blank">Major Pentatonic Scale – Marty Music</a> (el enlace se salta la intro) — esta vez escuchando la conexión mayor/menor. Luego compruébalo en tu propio mástil:<ol><li>Toca el Patrón 1 y llama "nota base" a la raíz de la Mi grave (dedo 1º) para menor.</li><li>Luego trata la nota tres trastes más arriba (dedo 4º, misma cuerda) como "nota base" y escucha cómo la misma forma se vuelve mayor.</li></ol>',
+            text: 'Re-watch the same video from Set 1 — <a href="https://youtu.be/m_IiyJu60-c?t=105" target="_blank">Major Pentatonic Scale – Marty Music</a> (the link skips the intro) — this time listening for the major/minor connection. Then prove it on your own neck:<ol><li>Play Pattern 1 and call the low E root (1st finger) "home" for minor.</li><li>Then treat the note three frets higher (4th finger, same string) as "home" and hear the same shape turn major.</li></ol>You\'ve got it when: you have played the pattern twice each way, landing on the "home" note at the end of both.',
+            text_es: 'Vuelve a mirar el mismo video de la Unidad 1 — <a href="https://youtu.be/m_IiyJu60-c?t=105" target="_blank">Major Pentatonic Scale – Marty Music</a> (el enlace se salta la intro) — esta vez escuchando la conexión mayor/menor. Luego compruébalo en tu propio mástil:<ol><li>Toca el Patrón 1 y llama "nota base" a la raíz de la Mi grave (dedo 1º) para menor.</li><li>Luego trata la nota tres trastes más arriba (dedo 4º, misma cuerda) como "nota base" y escucha cómo la misma forma se vuelve mayor.</li></ol>Lo tienes cuando: ya tocaste el patrón dos veces de cada manera, cayendo en la "nota base" al final de las dos.',
             hint: 'Same five notes, two names: whichever note you treat as "home" (the root) decides whether it sounds major or minor. Watch for that connection, then prove it on your own neck. Your hand stays in one place — only which note you call "home" changes.',
             hint_es: 'Las mismas cinco notas, dos nombres: la nota que trates como "nota base" (la raíz) decide si suena mayor o menor. Fíjate en esa conexión, y luego compruébala en tu propio mástil. Tu mano se queda quieta en un lugar — solo cambia qué nota llamas "nota base."',
             skills: [1, 2],
-            response: { type: 'short', placeholder: 'Explain the relative major/minor connection in your own words.',
-              placeholder_es: 'Explica con tus propias palabras la conexión entre relativa mayor y menor.' }
           },
           {
             label: 'Watch: vibrato technique', label_es: 'Mira: técnica de vibrato',
@@ -959,8 +934,6 @@ SETS.push(
             label: 'Wrap-up: which theory clicked?', label_es: 'Cierre: ¿qué teoría tuvo sentido?',
             text: 'Checkpoint — pause and think: you can now explain how the pentatonic is built, add the blues note, and use vibrato. Which piece of theory finally made sense today, and which still feels fuzzy?',
             text_es: 'Punto de control — pausa y piensa: ahora puedes explicar cómo se construye la pentatónica, agregar la nota de blues, y usar vibrato. ¿Qué parte de la teoría finalmente tuvo sentido hoy, y cuál todavía se siente confusa?',
-            response: { type: 'short', placeholder: 'e.g. relative major/minor made sense; the ♭5 blue note still feels random to me',
-              placeholder_es: 'p. ej. la relativa mayor/menor tuvo sentido; la nota de blues ♭5 todavía se siente aleatoria para mí' }
           }
             ]
           }
@@ -991,8 +964,8 @@ SETS.push(
             steps: [
           {
             label: 'Challenge 1 — Relative Scales', label_es: 'Reto 1 — Escalas relativas',
-            text: 'Type these into the box below:<ol><li>C major pentatonic (1 C, 2 D, 3 E, 5 G, 6 A).</li><li>Then A minor pentatonic (1 A, ♭3 C, 4 D, 5 E, ♭7 G).</li></ol>You\'ve got it when: you spot that they share the same five notes — only which note is "home" changes.',
-            text_es: 'Escribe esto en el cuadro de abajo:<ol><li>C mayor pentatónica (1 C, 2 D, 3 E, 5 G, 6 A).</li><li>Y luego A menor pentatónica (1 A, ♭3 C, 4 D, 5 E, ♭7 G).</li></ol>Lo tienes cuando: notas que comparten las mismas cinco notas — solo cambia cuál nota es "nota base."',
+            text: 'Play these back to back, saying each note name out loud as you land it:<ol><li>C major pentatonic (1 C, 2 D, 3 E, 5 G, 6 A).</li><li>Then A minor pentatonic (1 A, ♭3 C, 4 D, 5 E, ♭7 G).</li></ol>You\'ve got it when: you have played both, twice each, and can point to the five notes they share — only which note is "home" changes.',
+            text_es: 'Toca estas dos seguidas, diciendo en voz alta el nombre de cada nota al caer en ella:<ol><li>C mayor pentatónica (1 C, 2 D, 3 E, 5 G, 6 A).</li><li>Y luego A menor pentatónica (1 A, ♭3 C, 4 D, 5 E, ♭7 G).</li></ol>Lo tienes cuando: ya tocaste las dos, dos veces cada una, y puedes señalar las cinco notas que comparten — solo cambia cuál nota es "nota base."',
             hint: 'C major pentatonic and A minor pentatonic share exactly the same five notes. Your hand position is the same — only which note you treat as "home" (the root) changes.',
             hint_es: 'C mayor pentatónica y A menor pentatónica comparten exactamente las mismas cinco notas. La posición de tu mano es la misma — solo cambia qué nota tratas como "nota base" (la raíz).',
             stuck: 'List the five notes once (A C D E G). Now circle A in your head and call it minor; circle C and call it major. Same notes, different home.',
@@ -1000,8 +973,6 @@ SETS.push(
             levelUp: 'Find another relative pair from memory — G major and its relative minor (E minor) — and prove they share five notes.',
             levelUp_es: 'Encuentra otro par relativo de memoria — G mayor y su relativa menor (E menor) — y comprueba que comparten cinco notas.',
             skills: [1, 2, 5],
-            response: { type: 'short', placeholder: 'C major pent: C D E G A · A minor pent: A C D E G — what do you notice?',
-              placeholder_es: 'C mayor pent: C D E G A · A menor pent: A C D E G — ¿qué notas?' }
           }
             ]
           },
@@ -1095,8 +1066,6 @@ SETS.push(
                 label: 'Wrap-up: reflect on your solo', label_es: 'Cierre: reflexiona sobre tu solo',
                 text: 'You composed and performed an original solo — what are you proudest of, and what would make the next one better? Write it below; this is the kind of reflection your end-of-module recorded performance builds on.',
                 text_es: 'Compusiste y tocaste un solo original — ¿de qué estás más orgulloso, y qué haría mejor el siguiente? Escríbelo abajo; este es el tipo de reflexión sobre el que se construye tu presentación grabada de fin de módulo.',
-                response: { type: 'short', placeholder: 'e.g. proud it resolved on the root; next time I\'ll leave more space between phrases',
-                  placeholder_es: 'p. ej. orgulloso de que resolvió en la raíz; la próxima vez voy a dejar más espacio entre frases' }
               }
             ]
           }
@@ -1267,7 +1236,7 @@ MODULE_REVIEWS[4] = {
     'Toca un solo original de 4 compases sobre la pista de acompañamiento de una canción del curso, sosteniendo su pulso sin reiniciar, usando la caja de pentatónica menor y al menos un hammer-on, pull-off, o vibrato, con notas limpias en todo momento (sin zumbido ni notas apagadas — cuerdas agudas incluidas), siguiendo una estrategia de fraseo nombrada (llamada y respuesta o cuatro frases)',
     'Lee un lick pentatónico corto de 4 compases del TAB y tócalo con precisión'
   ],
-  forward: 'Those single pentatonic notes you\'ve been soloing with don\'t disappear in <strong>Module 5</strong> — you stack them. The open chords you\'ll build there (Am, C, G, D…) are made of these same notes. And the clean fretting and finger independence you sharpened here are exactly what makes a chord ring without buzzing. You\'ll go from playing one note at a time to playing five at once.',
-  forward_es: 'Esas notas pentatónicas individuales con las que has estado improvisando no desaparecen en el <strong>Módulo 5</strong> — las apilas. Los acordes abiertos que vas a construir ahí (Am, C, G, D…) están hechos de estas mismas notas. Y el trasteo limpio y la independencia de dedos que perfeccionaste aquí son exactamente lo que hace que un acorde suene sin zumbido. Vas a pasar de tocar una nota a la vez a tocar cinco a la vez.',
+  forward: 'Those single pentatonic notes you\'ve been soloing with don\'t disappear in <strong>Module 5</strong> — you stack them. Two of the open chords you\'ll build there, Am and C, are made of nothing but notes from this scale. And the clean fretting and finger independence you sharpened here are exactly what makes a chord ring without buzzing. You\'ll go from playing one note at a time to playing five at once.',
+  forward_es: 'Esas notas pentatónicas individuales con las que has estado improvisando no desaparecen en el <strong>Módulo 5</strong> — las apilas. Dos de los acordes abiertos que vas a construir ahí, Am y C, están hechos solo de notas de esta escala. Y el trasteo limpio y la independencia de dedos que perfeccionaste aquí son exactamente lo que hace que un acorde suene sin zumbido. Vas a pasar de tocar una nota a la vez a tocar cinco a la vez.',
   standards: ['Cr.1a', 'Cr.2a', 'Pr.4a', 'Pr.5a', 'Pr.5b', 'Pr.6a']
 };

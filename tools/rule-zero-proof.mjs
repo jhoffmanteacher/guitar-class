@@ -125,22 +125,121 @@ function skeleton(sets) {
 }
 
 /* ── A. structure ─────────────────────────────────────────────────── */
-head(`A. Structure unchanged vs ${BASE}`);
-{
-  const a = JSON.stringify(skeleton(baseSets), null, 1);
-  const b = JSON.stringify(skeleton(headSets), null, 1);
-  if (a === b) {
-    const sets = headSets.length;
-    let steps = 0, secs = 0;
-    for (const s of headSets) for (const k of Object.keys(s.stations || {}))
-      sectionsOf(s.stations[k]).forEach(sec => { secs++; steps += (sec.steps || []).length; });
-    ok(`${sets} sets · ${secs} sections · ${steps} steps · same ids, order, titles, labels and choice counts — no progress key can have moved`);
-  } else {
-    const al = a.split('\n'), bl = b.split('\n');
-    fail('structure DIFFERS — a step or section was added, removed or moved');
-    for (let i = 0, shown = 0; i < Math.max(al.length, bl.length) && shown < 30; i++)
-      if (al[i] !== bl[i]) { console.log(`   ${C.dim}line ${i + 1}${C.reset}\n   - ${al[i]}\n   + ${bl[i]}`); shown++; }
+/* Three regimes, because what a student can LOSE differs by module
+   (Chromebook + review-fixes work order, push 2, 2026-09-20).
+
+   The thing being protected is always the same: a step's progress key is
+   `${setId}-${station}-sec${gi}-${i}`, so a step that changes INDEX takes
+   a student's tick with it, and a section that changes index takes every
+   step after it.
+
+     Modules 1..FROZEN_THROUGH  students are in here. Step labels must
+                                match BY INDEX; new steps only at the tail
+                                of a section. No renames — a rename here
+                                would hide an insertion from this check.
+     Modules 3..OPEN_THROUGH    nobody has reached Module 3 (Jonathan,
+                                2026-09-19), so a step may be INSERTED
+                                anywhere inside an existing section. Old
+                                labels must still appear in the same
+                                relative order; every added step prints.
+     Everything above           count and order identical; a rename is
+                                allowed and printed.
+
+   In every regime the SECTIONS themselves are fixed — same count, same
+   order, same kind — because that is what `gi` is built from. A section
+   TITLE may be reworded (it moves no key); the rename is printed. */
+const OPEN_THROUGH = 6;
+function lcs(a, b) {
+  const n = a.length, m = b.length;
+  const dp = Array.from({ length: n + 1 }, () => new Array(m + 1).fill(0));
+  for (let i = n - 1; i >= 0; i--) for (let j = m - 1; j >= 0; j--)
+    dp[i][j] = a[i] === b[j] ? dp[i + 1][j + 1] + 1 : Math.max(dp[i + 1][j], dp[i][j + 1]);
+  const keptA = new Set(), keptB = new Set();
+  let i = 0, j = 0;
+  while (i < n && j < m) {
+    if (a[i] === b[j]) { keptA.add(i); keptB.add(j); i++; j++; }
+    else if (dp[i + 1][j] >= dp[i][j + 1]) i++; else j++;
   }
+  return { keptA, keptB };
+}
+head(`A. Structure vs ${BASE}`);
+{
+  const notes = [];
+  const idx = sets => new Map(sets.map(s => [s.id, s]));
+  const baseById = idx(baseSets), headById = idx(headSets);
+  let sets = 0, secs = 0, steps = 0, added = 0, renamed = 0;
+
+  const baseIds = [...baseById.keys()], headIds = [...headById.keys()];
+  if (baseIds.join('|') !== headIds.join('|'))
+    fail(`the SET list changed — ${baseIds.length} → ${headIds.length}, and a set id is a progress key prefix`);
+
+  for (const [id, hs] of headById) {
+    const bs = baseById.get(id);
+    if (!bs) continue;
+    sets++;
+    const mod = Number(hs.moduleNum);
+    const regime = mod <= FROZEN_THROUGH ? 'frozen' : mod <= OPEN_THROUGH ? 'open' : 'stable';
+    const stIds = [...new Set([...Object.keys(bs.stations || {}), ...Object.keys(hs.stations || {})])].sort();
+    for (const stId of stIds) {
+      const bSecs = sectionsOf((bs.stations || {})[stId] || {});
+      const hSecs = sectionsOf((hs.stations || {})[stId] || {});
+      if (bSecs.length !== hSecs.length) {
+        fail(`${id}·${stId}: section COUNT changed ${bSecs.length} → ${hSecs.length} — every gi after the change moves`);
+        continue;
+      }
+      bSecs.forEach((bSec, si) => {
+        const hSec = hSecs[si];
+        secs++;
+        if ((bSec.kind || null) !== (hSec.kind || null))
+          fail(`${id}·${stId}·sec${si}: section kind changed ${bSec.kind || 'none'} → ${hSec.kind || 'none'}`);
+        if (bSec.title !== hSec.title) {
+          if (regime === 'frozen') fail(`${id}·${stId}·sec${si}: section retitled in a module students are in`);
+          else { renamed++; notes.push(`   ${C.bold}${id}·${stId}·sec${si}${C.reset} section retitled\n     ${C.red}-${C.reset} ${JSON.stringify(bSec.title)}\n     ${C.green}+${C.reset} ${JSON.stringify(hSec.title)}`); }
+        }
+        const bl = (bSec.steps || []).map(x => x.label ?? '');
+        const hl = (hSec.steps || []).map(x => x.label ?? '');
+        steps += hl.length;
+        if (regime === 'frozen') {
+          // by index, appends only
+          for (let i = 0; i < bl.length; i++) {
+            if (hl[i] !== bl[i])
+              fail(`${id}·${stId}·sec${si}·step${i}: step at this index changed in a module students are in — ${JSON.stringify(bl[i])} → ${JSON.stringify(hl[i] ?? '(gone)')}`);
+          }
+          for (let i = bl.length; i < hl.length; i++) {
+            added++;
+            notes.push(`   ${C.bold}${id}·${stId}·sec${si}${C.reset} step APPENDED at index ${i}: ${C.green}${JSON.stringify(hl[i])}${C.reset}`);
+          }
+        } else {
+          const { keptA, keptB } = lcs(bl, hl);
+          const lost = bl.filter((_, i) => !keptA.has(i));
+          const gained = hl.map((l, i) => [l, i]).filter(([, i]) => !keptB.has(i));
+          if (regime === 'stable' && (lost.length || gained.length || bl.length !== hl.length)) {
+            if (bl.length !== hl.length)
+              fail(`${id}·${stId}·sec${si}: step COUNT changed ${bl.length} → ${hl.length} above Module ${OPEN_THROUGH} — every later key in this section moves`);
+            lost.forEach((l, k) => { renamed++; notes.push(`   ${C.bold}${id}·${stId}·sec${si}${C.reset} step relabelled\n     ${C.red}-${C.reset} ${JSON.stringify(l)}\n     ${C.green}+${C.reset} ${JSON.stringify((gained[k] || [''])[0])}`); });
+          } else if (regime === 'open') {
+            if (hl.length < bl.length)
+              fail(`${id}·${stId}·sec${si}: step COUNT dropped ${bl.length} → ${hl.length} — steps may be added inside a section here, never removed`);
+            lost.forEach((l, k) => { renamed++; notes.push(`   ${C.bold}${id}·${stId}·sec${si}${C.reset} step relabelled\n     ${C.red}-${C.reset} ${JSON.stringify(l)}\n     ${C.green}+${C.reset} ${JSON.stringify((gained[k] || [''])[0])}`); });
+            gained.slice(lost.length).forEach(([l, i]) => {
+              added++;
+              notes.push(`   ${C.bold}${id}·${stId}·sec${si}${C.reset} step INSERTED at index ${i}: ${C.green}${JSON.stringify(l)}${C.reset}`);
+            });
+          }
+        }
+      });
+    }
+    // skills: ids and count are progress keys of their own
+    const bSk = (Array.isArray(bs.skills) ? bs.skills : []).map(k => k.id).join('|');
+    const hSk = (Array.isArray(hs.skills) ? hs.skills : []).map(k => k.id).join('|');
+    if (bSk !== hSk) fail(`${id}: the skill id list changed — skill progress is keyed by skill.id`);
+  }
+  if (!problems) {
+    ok(`${sets} sets · ${secs} sections · ${steps} steps · every section in place, every old step still present and in order — no progress key moved`);
+    if (added)   ok(`${added} step${added === 1 ? '' : 's'} added (Modules ${FROZEN_THROUGH + 1}–${OPEN_THROUGH} may gain steps inside a section; Modules 1–${FROZEN_THROUGH} only at the tail)`);
+    if (renamed) ok(`${renamed} title/label reworded — listed below, none of them moves a key`);
+  }
+  if (notes.length) { console.log(''); notes.forEach(n => console.log(n)); }
 }
 
 /* ── B/C/D. the MCs ───────────────────────────────────────────────── */

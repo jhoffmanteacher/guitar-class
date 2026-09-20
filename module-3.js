@@ -70,13 +70,11 @@ SETS.push(
             steps: [
           {
             label: 'Watch: what a power chord is', label_es: 'Mira: qué es un acorde de potencia',
-            text: 'Watch: <a href="https://www.youtube.com/watch?v=vtcdDira8eE" target="_blank">What Is A Power Chord? Easy Rock Guitar Chords – Lauren Bateman (0:00–4:00)</a>. While you watch, build each shape on your guitar as she plays it. You\'ve got it when: you can say which finger sits on the root and which finger adds the fifth, without looking back at the video.',
-            text_es: 'Mira: <a href="https://www.youtube.com/watch?v=vtcdDira8eE" target="_blank">What Is A Power Chord? Easy Rock Guitar Chords – Lauren Bateman (0:00–4:00)</a>. Mientras miras, arma cada forma en tu guitarra mientras ella la toca. Lo tienes cuando: puedes decir qué dedo va en la raíz y cuál agrega la quinta, sin volver a ver el video.',
+            text: 'Watch: <a href="https://www.youtube.com/watch?v=vtcdDira8eE" target="_blank">What Is A Power Chord? Easy Rock Guitar Chords – Lauren Bateman (0:00–4:00)</a>. While you watch, build each shape on your guitar as she plays it. You\'ve got it when: you have built the shape on the low E string and played it three times in a row with both notes sounding together, without looking back at the video.',
+            text_es: 'Mira: <a href="https://www.youtube.com/watch?v=vtcdDira8eE" target="_blank">What Is A Power Chord? Easy Rock Guitar Chords – Lauren Bateman (0:00–4:00)</a>. Mientras miras, arma cada forma en tu guitarra mientras ella la toca. Lo tienes cuando: ya formaste la forma en la cuerda Mi grave y la tocaste tres veces seguidas con las dos notas sonando juntas, sin volver a ver el video.',
             hint: 'Focus on the two-finger shape — which fingers go where, and how the note under your index finger names the chord. Try the shape on your guitar as she shows it.',
             hint_es: 'Fíjate en la forma con dos dedos — qué dedo va dónde, y cómo la nota bajo tu dedo índice le da nombre al acorde. Prueba la forma en tu guitarra mientras ella la muestra.',
             skills: [1, 3],
-            response: { type: 'short', placeholder: 'Describe the power chord shape in your own words — which fingers go where, and what names the chord?',
-              placeholder_es: 'Describe con tus propias palabras la forma del acorde de potencia — ¿qué dedo va dónde, y qué le da el nombre al acorde?' }
           },
           {
             label: 'Watch: playing power chords', label_es: 'Mira: tocar acordes de potencia',
@@ -114,8 +112,6 @@ SETS.push(
             label: 'Wrap-up: today\'s hardest part', label_es: 'Cierre: lo más difícil de hoy',
             text: 'Checkpoint — pause and think: which felt harder today — getting both notes to ring clean, or building the shape quickly from the diagram? What started to help?',
             text_es: 'Punto de control — pausa y piensa: ¿qué se sintió más difícil hoy — lograr que las dos notas suenen limpias, o armar la forma rápido a partir del diagrama? ¿Qué empezó a ayudarte?',
-            response: { type: 'short', placeholder: 'e.g. building the shape — my fingers kept landing one string off',
-              placeholder_es: 'p. ej. armar la forma — mis dedos seguían cayendo una cuerda al lado' }
           }
             ]
           }
@@ -314,7 +310,6 @@ SETS.push(
                 { frets: [['A', 5], ['E', 3]], note: 'G5', midi: [50, 43] }
               ]
             },
-            response: { type: 'short', prompt: 'Personal record: play it cleanly at 60, then raise the metronome +10 at a time. Your fastest CLEAN loop today (BPM)?', prompt_es: 'Récord personal: tócala limpia a 60, y luego sube el metrónomo de 10 en 10. ¿Tu vuelta LIMPIA más rápida hoy (BPM)?', placeholder: 'e.g. 80 — try for a higher number next session', placeholder_es: 'p. ej. 80 — intenta superarlo la próxima sesión' }
           }
             ]
           },
@@ -347,7 +342,6 @@ SETS.push(
                     { frets: [['D', 4],  ['A', 2]],  note: 'B5', midi: [54, 47] }
                   ]
                 },
-                response: { type: 'short', prompt: 'Which slide was hardest to land clean, and what fixed it?', prompt_es: '¿Qué deslizamiento fue el más difícil de hacer limpio, y qué lo arregló?', placeholder: 'e.g. E5 up to G5 — smaller jumps helped', placeholder_es: 'p. ej. de E5 a G5 — saltos más pequeños ayudaron' }
               }
             ]
           },
@@ -362,8 +356,6 @@ SETS.push(
                 text_es: 'Planea tu práctica — esta parte es solo para ti, nunca se califica. Tómate dos minutos para actualizar tu rutina:<ol><li>Una cosa en la que quieres mejorar.</li><li>Cuándo y dónde vas a practicar esta semana.</li><li>Cómo te fue con el plan de la semana pasada.</li></ol>El mismo check-in de los Módulos 1 y 2 — lo vas a mantener durante todo el curso.',
                 hint: 'No wrong answers — even five minutes a day is better than one long rushed session. You\'re building a habit you\'ll actually keep.',
                 hint_es: 'No hay respuestas incorrectas — hasta cinco minutos al día es mejor que una sola sesión larga y apurada. Estás construyendo un hábito que de verdad vas a mantener.',
-                response: { type: 'short', placeholder: '1) One thing to improve   2) When & where I\'ll practice   3) How last week went',
-                  placeholder_es: '1) Algo que quiero mejorar   2) Cuándo y dónde voy a practicar   3) Cómo me fue la semana pasada' }
               }
             ]
           },
@@ -376,8 +368,6 @@ SETS.push(
                 label: 'Wrap-up: your shaky spot', label_es: 'Cierre: tu punto inestable',
                 text: 'Which power chord change or muting move still feels shaky? Write it below — that\'s your warm-up target next time you practice.',
                 text_es: '¿Qué cambio de acorde de potencia o movimiento de silenciado todavía se siente inestable? Escríbelo abajo — ese es tu objetivo de calentamiento la próxima vez que practiques.',
-                response: { type: 'short', placeholder: 'e.g. the G5-to-F5 change drops a beat; high strings still ring sometimes',
-                  placeholder_es: 'p. ej. el cambio de G5 a F5 pierde un tiempo; las cuerdas agudas a veces todavía suenan' }
               }
             ]
           },
@@ -432,8 +422,8 @@ SETS.push(
           explain_es: 'El silenciado viene de la mano de trastear tocando — sin presionar — las cuerdas que no quieres. Apuntar perfecto no es confiable; los profesionales rasguean a través del silenciado.' } },
       { id: 'm3w1-s4', text: 'Move the power chord shape along the A string (A5, C5, D5)',
         text_es: 'Mover la forma del acorde de potencia por la cuerda La (A5, C5, D5)',
-        gotItWhen: 'you can shift the shape to the A-string root without your palm mute breaking — and the low E string stays silent.',
-        gotItWhen_es: 'puedes desplazar la forma a la raíz de la cuerda La sin que se rompa tu silenciado con la palma — y la cuerda Mi grave se queda en silencio.',
+        gotItWhen: 'you can shift the shape to the A-string root without the sound breaking up — and the low E string stays silent.',
+        gotItWhen_es: 'puedes desplazar la forma a la raíz de la cuerda La sin que se corte el sonido — y la cuerda Mi grave se queda en silencio.',
         practice: { type: 'mc', prompt: 'Your index finger is on the A string at fret 3. Which power chord are you playing?',
           prompt_es: 'Tu dedo índice está en la cuerda La, traste 3. ¿Qué acorde de potencia estás tocando?',
           choices: ['B5', 'C5', 'D5', 'A5'], choices_es: ['B5', 'C5', 'D5', 'A5'], answer: 1,
@@ -515,18 +505,14 @@ SETS.push(
             hint: 'Pick one song you recognize and try to play along as it plays. Match the strum timing to what you hear.',
             hint_es: 'Elige una canción que reconozcas e intenta tocarla junto con el video. Iguala el momento del rasgueo con lo que escuchas.',
             skills: [3, 4],
-            response: { type: 'short', placeholder: 'Which song did you try to play along with? What was hardest about it?',
-              placeholder_es: '¿Con qué canción intentaste tocar junto? ¿Qué fue lo más difícil de eso?' }
           },
           {
             label: 'Watch: alternate picking', label_es: 'Mira: púa alterna',
-            text: 'Watch: <a href="https://youtu.be/q8SHmo1-dac" target="_blank">3 Tips to NAIL Alternate Picking (build speed) – JustinGuitar</a> (0:00–3:00). Alternate picking means strict down-up-down-up — every downstroke is followed by an upstroke, so the pick never travels the same way twice in a row. Watch his tempo-step method for building speed.',
-            text_es: 'Mira: <a href="https://youtu.be/q8SHmo1-dac" target="_blank">3 Tips to NAIL Alternate Picking (build speed) – JustinGuitar</a> (0:00–3:00). Púa alterna significa abajo-arriba-abajo-arriba estricto — cada golpe hacia abajo va seguido de uno hacia arriba, así que la púa nunca viaja en la misma dirección dos veces seguidas. Mira su método de pasos de tempo para ganar velocidad.',
+            text: 'Watch: <a href="https://youtu.be/q8SHmo1-dac" target="_blank">3 Tips to NAIL Alternate Picking (build speed) – JustinGuitar</a> (0:00–3:00). Alternate picking means strict down-up-down-up — every downstroke is followed by an upstroke, so the pick never travels the same way twice in a row. Watch his tempo-step method for building speed.</p>You\'ve got it when: you have played eight notes on one string with strict down-up picking, three times in a row, with no two downstrokes in a row.',
+            text_es: 'Mira: <a href="https://youtu.be/q8SHmo1-dac" target="_blank">3 Tips to NAIL Alternate Picking (build speed) – JustinGuitar</a> (0:00–3:00). Púa alterna significa abajo-arriba-abajo-arriba estricto — cada golpe hacia abajo va seguido de uno hacia arriba, así que la púa nunca viaja en la misma dirección dos veces seguidas. Mira su método de pasos de tempo para ganar velocidad.</p>Lo tienes cuando: ya tocaste ocho notas en una cuerda con púa alterna estricta, tres veces seguidas, sin dos golpes hacia abajo seguidos.',
             hint: 'Notice his method for building tempo gradually. As he describes it, try it: play your "Watchtower" loop at 60 BPM, then bump to 65, then 70.',
             hint_es: 'Fíjate en su método para subir el tempo gradualmente. Mientras lo describe, pruébalo: toca tu vuelta de "Watchtower" a 60 BPM, y luego sube a 65 y a 70.',
             skills: [2, 3],
-            response: { type: 'short', placeholder: 'In one sentence, describe his method for building up tempo gradually.',
-              placeholder_es: 'En una oración, describe su método para subir el tempo gradualmente.' }
           }
             ]
           },
@@ -539,8 +525,6 @@ SETS.push(
             label: 'Wrap-up: where the loop breaks', label_es: 'Cierre: dónde se desarma la vuelta',
             text: 'Checkpoint — pause and think: at what tempo does your loop start to fall apart, and which part breaks down first — the change, the strum, or the muting?',
             text_es: 'Punto de control — pausa y piensa: ¿a qué tempo tu vuelta empieza a desarmarse, y qué parte falla primero — el cambio, el rasgueo, o el silenciado?',
-            response: { type: 'short', placeholder: 'e.g. around 75 BPM the F5 change gets late',
-              placeholder_es: 'p. ej. cerca de 75 BPM el cambio a F5 se atrasa' }
           }
             ]
           }
@@ -642,7 +626,6 @@ SETS.push(
               { name: 'F5', chord: [[6,1,'1'],[5,3,'3'],[4,'x'],[3,'x'],[2,'x'],[1,'x']], position: 1 }
             ],
             playSeq: { label: 'Hear it — A5·G5·F5·G5 (one chord per beat)', label_es: 'Escúchalo — A5·G5·F5·G5 (un acorde por tiempo)', bpm: 60, notes: [[45,52],[43,50],[41,48],[43,50],[45,52],[43,50],[41,48],[43,50]] },
-            response: { type: 'short', prompt: 'Your fastest CLEAN one-chord-per-beat "Watchtower" today (BPM)?', prompt_es: '¿Tu "Watchtower" a un-acorde-por-tiempo LIMPIO más rápido hoy (BPM)?', placeholder: 'e.g. 70 — 80 next session', placeholder_es: 'p. ej. 70 — 80 la próxima sesión' }
           }
             ]
           },
@@ -696,7 +679,6 @@ SETS.push(
             levelUp: 'Hold it clean at 80 BPM, or play it straight through a full song excerpt from the songs list.',
             levelUp_es: 'Mantenlo limpio a 80 BPM, o tócalo de corrido en un fragmento completo de canción de la lista.',
             skills: [3, 4],
-            response: { type: 'short', prompt: 'Personal record: once it\'s clean at 60, raise the metronome +5 at a time. Your fastest CLEAN tempo today (BPM)?', prompt_es: 'Récord personal: una vez que esté limpio a 60, sube el metrónomo de 5 en 5. ¿Tu tempo LIMPIO más rápido hoy (BPM)?', placeholder: 'e.g. 75 — try for a higher number next session', placeholder_es: 'p. ej. 75 — intenta superarlo la próxima sesión' }
           },
           {
             label: 'Challenge 3 — Split Strum ("boom-chick")', label_es: 'Reto 3 — Rasgueo dividido ("boom-chick")',
@@ -747,7 +729,6 @@ SETS.push(
               { name: 'A5', chord: [[6,5,'1'],[5,7,'3'],[4,'x'],[3,'x'],[2,'x'],[1,'x']], position: 5 }
             ],
             playSeq: { label: 'Hear F5 → A5 (roots F · A)', label_es: 'Escucha F5 → A5 (raíces F · A)', bpm: 60, notes: [41, 45] },
-            response: { type: 'short', prompt: 'Your fastest CLEAN F5↔A5 today (BPM)?', prompt_es: '¿Tu F5↔A5 LIMPIO más rápido hoy (BPM)?', placeholder: 'e.g. 70 — 80 next session', placeholder_es: 'p. ej. 70 — 80 la próxima sesión' }
           }
             ]
           },
@@ -771,7 +752,6 @@ SETS.push(
               { name: 'C5', chord: [[6,'x'],[5,3,'1'],[4,5,'3'],[3,'x'],[2,'x'],[1,'x']], position: 3 },
               { name: 'G5', chord: [[6,3,'1'],[5,5,'3'],[4,'x'],[3,'x'],[2,'x'],[1,'x']], position: 3 }
             ],
-            response: { type: 'short', prompt: 'Clean laps of D5–C5–G5 at 60 BPM?', prompt_es: '¿Vueltas limpias de D5–C5–G5 a 60 BPM?', placeholder: 'e.g. 3 — the G5 jump lags', placeholder_es: 'p. ej. 3 — el salto a G5 se atrasa' }
           }
             ]
           },
@@ -805,7 +785,6 @@ SETS.push(
                     { frets: [['A', 5], ['E', 3]], note: 'G5', midi: [50, 43] }
                   ]
                 },
-                response: { type: 'short', prompt: 'Clean laps in a row at 60 BPM — your count?', prompt_es: 'Vueltas limpias seguidas a 60 BPM — ¿tu cuenta?', placeholder: 'e.g. 3 — F5 keeps buzzing', placeholder_es: 'p. ej. 3 — F5 sigue zumbando' }
               },
               {
                 label: 'Challenge — "the cure" as power chords', label_es: 'Reto — "the cure" como acordes de potencia',
@@ -887,7 +866,6 @@ SETS.push(
                     { frets: [['A', 5], ['E', 3]], note: 'G5', midi: [50, 43] }
                   ]
                 },
-                response: { type: 'short', prompt: 'Loud vs. soft power chords — which was harder to keep clean?', prompt_es: 'Acordes de potencia fuertes vs. suaves — ¿cuál fue más difícil de mantener limpio?', placeholder: 'e.g. soft — I kept muting the D string', placeholder_es: 'p. ej. suave — seguía silenciando la cuerda Re' }
               },
               {
                 label: 'Challenge — "Luna", full vamp', label_es: 'Reto — "Luna", vamp completo',
@@ -897,8 +875,8 @@ SETS.push(
                 hint_es: 'Es el mismo deslizamiento F5↔A5 del ejercicio de arriba, donde cambiabas en cada tiempo fuerte. Aquí cada acorde se sostiene dos compases — cuatro tiempos fuertes — antes de que deslices, que es donde cambia la grabación.',
                 stuck: 'Loop the F5↔A5 slide with no song for a few rounds first, then drop in following the record.',
                 stuck_es: 'Repite el deslizamiento F5↔A5 sin la canción por unas cuantas rondas primero, y luego entra siguiendo la grabación.',
-                levelUp: 'Add a light palm mute for the verse, then let it ring open for the chorus — instant dynamics.',
-                levelUp_es: 'Agrega un silenciado ligero con la palma para la estrofa, y luego déjalo sonar abierto para el coro — dinámica instantánea.',
+                levelUp: 'Try a palm mute for the verse — rest the edge of your picking hand on the strings right where they cross the bridge, so the notes sound short and thick — then lift it off and let the chorus ring open.',
+                levelUp_es: 'Prueba un silenciado con la palma para la estrofa — apoya el canto de tu mano de rasgueo sobre las cuerdas justo donde cruzan el puente, para que las notas suenen cortas y gruesas — y luego levántala y deja que el coro suene abierto.',
                 skills: [3, 4],
                 tab: {
                   caption: '"Luna" — the vamp as power chords (teaching arrangement) · 2 strums per bar, change every 2 bars · 60 BPM',
@@ -914,7 +892,6 @@ SETS.push(
                     { frets: [['A', 7], ['E', 5]], note: 'A5', midi: [52, 45] }
                   ]
                 },
-                response: { type: 'short', prompt: 'Which song did you land power chords in today, and at what BPM?', prompt_es: '¿En qué canción lograste los acordes de potencia hoy, y a qué BPM?', placeholder: 'e.g. "Luna" at 60 — clean', placeholder_es: 'p. ej. "Luna" a 60 — limpio' }
               }
             ]
           },
@@ -927,8 +904,6 @@ SETS.push(
                 label: 'Wrap-up: your top clean tempo', label_es: 'Cierre: tu tempo limpio máximo',
                 text: 'What\'s your current top clean tempo on the loop, and what\'s the one thing holding you back from going faster — a specific change, the strum, or muting? Name it below.',
                 text_es: '¿Cuál es tu tempo limpio más alto en la vuelta ahora mismo, y cuál es la única cosa que te frena para ir más rápido — un cambio específico, el rasgueo, o el silenciado? Nómbralo abajo.',
-                response: { type: 'short', placeholder: 'e.g. 75 BPM — the eighth-note up-strums get sloppy',
-                  placeholder_es: 'p. ej. 75 BPM — los rasgueos hacia arriba de las corcheas se descuidan' }
               }
             ]
           }
@@ -958,14 +933,14 @@ SETS.push(
           notes: [45, 45, 45, 45, 45, 45, 45, 45] } },
       { id: 'm3w2-s4', text: 'Apply power chords on both E and A string roots in the same song',
         text_es: 'Aplicar acordes de potencia con raíces tanto en la cuerda Mi como en la La dentro de la misma canción',
-        gotItWhen: 'you can switch between an E-root and an A-root power chord mid-song without your palm mute breaking or the wrong strings ringing.',
-        gotItWhen_es: 'puedes cambiar entre un acorde de potencia con raíz en Mi y uno con raíz en La a mitad de la canción sin que se rompa tu silenciado con la palma o suenen las cuerdas equivocadas.',
+        gotItWhen: 'you can switch between an E-root and an A-root power chord mid-song without a gap in the sound and without the wrong strings ringing.',
+        gotItWhen_es: 'puedes cambiar entre un acorde de potencia con raíz en Mi y uno con raíz en La a mitad de la canción sin que se corte el sonido y sin que suenen las cuerdas equivocadas.',
         practice: { type: 'mc', prompt: 'A song calls for G5 then C5. Where does your index finger go for each?',
           prompt_es: 'Una canción pide G5 y luego C5. ¿Dónde va tu dedo índice para cada uno?',
           choices: ['Both on the low E string, frets 3 and 8', 'Both on the A string, frets 3 and 10', 'G5 on E (fret 3), C5 on A (fret 3)', 'G5 on A (fret 10), C5 on E (fret 8)'],
           choices_es: ['Ambos en la cuerda Mi grave, trastes 3 y 8', 'Ambos en la cuerda La, trastes 3 y 10', 'G5 en Mi grave (traste 3), C5 en La (traste 3)', 'G5 en La (traste 10), C5 en Mi grave (traste 8)'], answer: 2,
-          explain: 'G is at fret 3 of the low E string and C is at fret 3 of the A string — so the fret number never changes, only the string does. Drill that one-string hop and keep your palm mute from slipping as you move.',
-          explain_es: 'G está en el traste 3 de la cuerda Mi grave y C está en el traste 3 de la cuerda La — así que el número de traste nunca cambia, solo la cuerda. Practica ese salto de una cuerda y evita que se te resbale el silenciado con la palma al moverte.' } },
+          explain: 'G is at fret 3 of the low E string and C is at fret 3 of the A string — so the fret number never changes, only the string does. Drill that one-string hop and keep the unused strings quiet as you move.',
+          explain_es: 'G está en el traste 3 de la cuerda Mi grave y C está en el traste 3 de la cuerda La — así que el número de traste nunca cambia, solo la cuerda. Practica ese salto de una cuerda y mantén calladas las cuerdas que no usas al moverte.' } },
       { id: 'm3w2-s5', text: 'Optional: add pinky octave doubling to the power chord shape',
         text_es: 'Opcional: agregar duplicación de octava con el meñique a la forma del acorde de potencia',
         gotItWhen: 'your pinky lands on the next string at the same fret as your ring finger and all three notes ring cleanly — no buzz, no muffled string.',
