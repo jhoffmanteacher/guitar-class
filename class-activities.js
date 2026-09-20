@@ -303,14 +303,14 @@ window.CLASS_ACTIVITIES = [
         figure: 'img/ca-hb-fingers.svg',
         figureAlt: 'Diagram of the fretting hand on the low E string showing finger numbers 1 (index), 2 (middle), 3 (ring), and 4 (pinky), with the thumb behind the neck and landing-mark dots at frets 5 and 7.',
         figureAlt_es: 'Diagrama de la mano de trastear en la cuerda Mi grave mostrando los números de los dedos 1 (índice), 2 (medio), 3 (anular) y 4 (meñique), con el pulgar detrás del mástil y puntos de referencia en los trastes 5 y 7.',
-        text: 'The whole song lives on the low E string (the thickest one), and your fretting fingers have numbers — 1 = index, 2 = middle, 3 = ring, 4 = pinky. The thumb has none; it stays behind the neck. Home spot: finger 1 → fret 2, finger 3 → fret 4, finger 4 → fret 5. Today the map grows past the home spot — fret 7 first, then higher still. The dots at 5 and 7 are your landing marks.',
-        text_es: 'La canción completa vive en la cuerda Mi grave (la más gruesa), y los dedos de tu mano de trastear tienen números — 1 = índice, 2 = medio, 3 = anular, 4 = meñique. El pulgar no tiene; se queda detrás del mástil. Posición base: dedo 1 → traste 2, dedo 3 → traste 4, dedo 4 → traste 5. Hoy el mapa crece más allá de la posición base — primero el traste 7, y después más arriba. Los puntos en el 5 y el 7 son tus marcas de referencia.',
+        text: 'The whole song lives on the low E string, the thickest one. Your fretting fingers have numbers — 1 = index, 2 = middle, 3 = ring, 4 = pinky. The thumb has none; it stays behind the neck.<ul><li>Home spot: finger 1 → fret 2, finger 3 → fret 4, finger 4 → fret 5</li><li>Today the map grows past the home spot — fret 7 first, then higher still</li><li>The dots at 5 and 7 are your landing marks</li></ul>',
+        text_es: 'La canción completa vive en la cuerda Mi grave, la más gruesa. Los dedos de tu mano de trastear tienen números — 1 = índice, 2 = medio, 3 = anular, 4 = meñique. El pulgar no tiene; se queda detrás del mástil.<ul><li>Posición base: dedo 1 → traste 2, dedo 3 → traste 4, dedo 4 → traste 5</li><li>Hoy el mapa crece más allá de la posición base — primero el traste 7, y después más arriba</li><li>Los puntos del 5 y el 7 son tus marcas para caer</li></ul>',
       },
       {
         label:    'Phrases A and B',
         label_es: 'Frases A y B',
-        text: 'The first half of the song — phrase A is the line you learned last time, phrase B starts the same and ends higher.<ul><li>Phrase A, fingers: open, open, 1, open, 4, 3 — say each one as you play it</li><li>Phrase B: open, open, 1, open, then your hand moves up until finger 1 sits on fret 5: finger 3 → fret 7, finger 1 → fret 5. Eyes on fret 7 <em>before</em> your hand moves</li><li>Both notes of "Hap-py" go inside one click; "birth", "day" and "to" get a click each; the last note is held for two. Press &#x25B6; to hear it before you play it.</li><li>BPM 70. Loop each phrase alone until it\'s clean, then play them back to back</li></ul>You\'ve got it when: phrase A into phrase B, four times through, without stopping. Buzz twice? Drop the BPM by 10 and try again.',
-        text_es: 'La primera mitad de la canción — la frase A es la línea que aprendiste la vez pasada, la frase B empieza igual y termina más arriba.<ul><li>Frase A, dedos: al aire, al aire, 1, al aire, 4, 3 — di cada uno mientras lo tocas</li><li>Frase B: al aire, al aire, 1, al aire, y luego la mano sube hasta que el dedo 1 queda en el traste 5: dedo 3 → traste 7, dedo 1 → traste 5. Ojos en el traste 7 <em>antes</em> de mover la mano</li><li>Las dos notas de "Hap-py" caben en un clic; "birth", "day" y "to" llevan un clic cada una; la última se sostiene dos. Presiona &#x25B6; para escucharlo antes de tocarlo.</li><li>BPM 70. Repite cada frase sola hasta que salga limpia, y después tócalas seguidas</li></ul>Lo tienes cuando: de la frase A a la frase B, cuatro veces seguidas, sin detenerte. ¿Zumbó dos veces? Baja el BPM 10 puntos y vuelve a intentarlo.',
+        text: 'The first half of the song. Phrase A is the line you learned last time; phrase B starts the same and ends higher.<ul><li>Phrase A fingers: open, open, 1, open, 4, 3</li><li>Phrase B: your hand moves up until finger 1 sits on fret 5 — finger 3 → fret 7, finger 1 → fret 5. Eyes on fret 7 <em>before</em> your hand moves</li><li>BPM 70. Loop each phrase alone until it\'s clean, then play them back to back</li></ul>You\'ve got it when: phrase A into phrase B, four times through, without stopping.',
+        text_es: 'La primera mitad de la canción. La frase A es la línea que aprendiste la vez pasada; la frase B empieza igual y termina más arriba.<ul><li>Dedos de la frase A: al aire, al aire, 1, al aire, 4, 3</li><li>Frase B: la mano sube hasta que el dedo 1 queda en el traste 5 — dedo 3 → traste 7, dedo 1 → traste 5. Ojos en el traste 7 <em>antes</em> de mover la mano</li><li>BPM 70. Repite cada frase sola hasta que salga limpia, y después tócalas seguidas</li></ul>Lo tienes cuando: de la frase A a la frase B, cuatro veces seguidas, sin detenerte.',
         tab: {
           caption: 'First half · phrases A and B',
           caption_es: 'Primera mitad · frases A y B',
@@ -348,8 +348,8 @@ window.CLASS_ACTIVITIES = [
         figure: 'img/ca-hb-low-e-all.svg',
         figureAlt: 'Low E string fretboard diagram showing the double-dot landing mark at fret 12 and the single dot at fret 9, alongside the earlier marks at frets 2, 4, 5, and 7.',
         figureAlt_es: 'Diagrama del diapasón de la cuerda Mi grave mostrando el punto doble de referencia en el traste 12 y el punto sencillo en el traste 9, junto con las marcas anteriores en los trastes 2, 4, 5 y 7.',
-        text: 'The back half of the song lives further up the same string. Two new landing marks:<ul><li>The double dot at fret 12 — that note is an E, the same one you get open, an octave higher</li><li>The single dot at fret 9</li></ul>Play open, 12, 9, 5 — look at the dot before your hand moves, then try it without looking.<br>You\'ve got it when: you land on 12 and on 9 without hunting for them, three times out of three.',
-        text_es: 'La segunda mitad de la canción vive más arriba en la misma cuerda. Dos marcas de referencia nuevas:<ul><li>El punto doble del traste 12 — esa nota es un E, la misma que suena al aire, una octava más arriba</li><li>El punto sencillo del traste 9</li></ul>Toca al aire, 12, 9, 5 — mira el punto antes de mover la mano, y después inténtalo sin mirar.<br>Lo tienes cuando: caes en el 12 y en el 9 sin andarlos buscando, tres de tres veces.',
+        text: 'The back half of the song lives further up the same string. Two new landing marks: the double dot at fret 12 — that note is an E, the same one you get open, an octave higher — and the single dot at fret 9.<br>Play the notes below, looking at the dot before your hand moves. Then try it without looking.<br>You\'ve got it when: you land on 12 and on 9 without hunting for them, three times in a row.',
+        text_es: 'La segunda mitad de la canción vive más arriba en la misma cuerda. Dos marcas de referencia nuevas: el punto doble del traste 12 — esa nota es un E, la misma que suena al aire, una octava más arriba — y el punto sencillo del traste 9.<br>Toca las notas de abajo, mirando el punto antes de mover la mano. Después inténtalo sin mirar.<br>Lo tienes cuando: caes en el 12 y en el 9 sin andarlos buscando, tres veces seguidas.',
         tab: {
           caption: 'Find the dots · open, 12, 9, 5',
           caption_es: 'Encuentra los puntos · al aire, 12, 9, 5',
@@ -364,8 +364,8 @@ window.CLASS_ACTIVITIES = [
       {
         label:    'Phrase C',
         label_es: 'Frase C',
-        text: 'Phrase C is where you sing the name — it makes the biggest jump in the song.<ul><li>Two open notes, then your hand travels — finger 1 on fret 9, finger 4 reaching the double dot at fret 12</li><li>Walk down 12 → 9, then shift home: finger 4 → fret 5, finger 3 → fret 4, finger 1 → fret 2</li><li>Loop it alone, saying the words as you play, until it\'s clean</li></ul>You\'ve got it when: phrase C, four times through, without stopping. Buzz twice? Drop the BPM by 10 and try again.',
-        text_es: 'La frase C es donde cantas el nombre — da el salto más grande de la canción.<ul><li>Dos notas al aire, y luego tu mano viaja — dedo 1 en el traste 9, dedo 4 estirándose al punto doble del traste 12</li><li>Baja del 12 al 9, y después regresa a la posición base: dedo 4 → traste 5, dedo 3 → traste 4, dedo 1 → traste 2</li><li>Repítela sola hasta que salga limpia, diciendo las palabras mientras tocas</li></ul>Lo tienes cuando: la frase C, cuatro veces seguidas, sin detenerte. ¿Zumbó dos veces? Baja el BPM 10 puntos y vuelve a intentarlo.',
+        text: 'Phrase C makes the biggest jump in the song — it\'s where you sing the name.<ul><li>Two open notes, then your hand travels: finger 1 on fret 9, finger 4 reaching the double dot at fret 12</li><li>Walk down 12 → 9, then shift home: finger 4 → fret 5, finger 3 → fret 4, finger 1 → fret 2</li></ul>You\'ve got it when: phrase C, four times through, without stopping.',
+        text_es: 'La frase C da el salto más grande de la canción — es donde cantas el nombre.<ul><li>Dos notas al aire, y luego tu mano viaja: dedo 1 en el traste 9, dedo 4 estirándose al punto doble del traste 12</li><li>Baja del 12 al 9, y después regresa a la posición base: dedo 4 → traste 5, dedo 3 → traste 4, dedo 1 → traste 2</li></ul>Lo tienes cuando: la frase C, cuatro veces seguidas, sin detenerte.',
         tab: {
           caption: 'Phrase C · low E string only',
           caption_es: 'Frase C · solo la cuerda Mi grave',
@@ -383,8 +383,8 @@ window.CLASS_ACTIVITIES = [
       {
         label:    'Phrase D',
         label_es: 'Frase D',
-        text: 'Phrase D starts higher than any other phrase in the song, then walks home.<ul><li>Finger 2 on fret 10, finger 1 on fret 9</li><li>Shift down: finger 1 → fret 5, finger 3 → fret 7. The frets are narrow that high, so stay on your fingertips or they\'ll crowd each other</li><li>Loop it alone, saying the words as you play, until it\'s clean, then play phrase C into phrase D back to back</li></ul>You\'ve got it when: phrase C into phrase D, four times through, without stopping. Buzz twice? Drop the BPM by 10 and try again.',
-        text_es: 'La frase D empieza más arriba que cualquier otra frase de la canción, y después regresa caminando a casa.<ul><li>Dedo 2 en el traste 10, dedo 1 en el traste 9</li><li>Baja: dedo 1 → traste 5, dedo 3 → traste 7. Allá arriba los trastes son angostos, así que quédate sobre las puntas de los dedos o se van a chocar entre sí</li><li>Repítela sola hasta que salga limpia, diciendo las palabras mientras tocas, y después toca la frase C seguida de la D</li></ul>Lo tienes cuando: de la frase C a la frase D, cuatro veces seguidas, sin detenerte. ¿Zumbó dos veces? Baja el BPM 10 puntos y vuelve a intentarlo.',
+        text: 'Phrase D starts higher than any other phrase in the song, then walks home.<ul><li>Finger 2 on fret 10, finger 1 on fret 9</li><li>Shift down: finger 1 → fret 5, finger 3 → fret 7. The frets are narrow that high, so stay on your fingertips</li></ul>You\'ve got it when: phrase C into phrase D, four times through, without stopping.',
+        text_es: 'La frase D empieza más arriba que cualquier otra frase de la canción, y después regresa caminando a casa.<ul><li>Dedo 2 en el traste 10, dedo 1 en el traste 9</li><li>Baja: dedo 1 → traste 5, dedo 3 → traste 7. Allá arriba los trastes son angostos, así que quédate sobre las puntas de los dedos</li></ul>Lo tienes cuando: de la frase C a la frase D, cuatro veces seguidas, sin detenerte.',
         tab: {
           caption: 'Phrase D · low E string only',
           caption_es: 'Frase D · solo la cuerda Mi grave',
@@ -1045,8 +1045,8 @@ window.CLASS_ACTIVITIES = [
       {
         label:    'Land on fret 5',
         label_es: 'Cae en el traste 5',
-        text: '<ol><li>Put your fingertip just behind fret 5 — next to the metal strip, NOT on top of it. Thumb behind the neck.</li><li>Pluck it. A rattly, dead sound is a buzz — slide the fingertip closer to the fret and press again.</li><li>Pluck the open string, then land on fret 5 and pluck again. Let the dot catch your eye before your finger jumps.</li></ol>You\'ve got it when: three landings in a row on A ring clean, no buzz. Buzz twice? Slide the fingertip closer to the fret and press with the very tip.',
-        text_es: '<ol><li>Pon la punta del dedo justo detrás del traste 5 — pegada a la barrita de metal, NO encima de ella. El pulgar detrás del mástil.</li><li>Púlsala. Un sonido que traquetea o suena apagado es un zumbido — desliza la punta del dedo más cerca del traste y presiona otra vez.</li><li>Pulsa la cuerda al aire, luego cae en el traste 5 y pulsa otra vez. Deja que el punto te llame la atención antes de que salte el dedo.</li></ol>Lo tienes cuando: tres caídas seguidas en A suenan limpias, sin zumbido. ¿Zumbó dos veces? Desliza la punta del dedo más cerca del traste y presiona con la puntita.',
+        text: '<ol><li>Put your fingertip just behind fret 5 — next to the metal strip, NOT on top of it. Thumb behind the neck.</li><li>Pluck it. A rattly, dead sound is a buzz — slide the fingertip closer to the fret and press again.</li><li>Pluck the open string, then land on fret 5 and pluck again.</li></ol>You\'ve got it when: three landings in a row on A ring clean, no buzz.',
+        text_es: '<ol><li>Pon la punta del dedo justo detrás del traste 5 — pegada a la barrita de metal, NO encima de ella. El pulgar detrás del mástil.</li><li>Púlsala. Un sonido que traquetea o suena apagado es un zumbido — desliza la punta del dedo más cerca del traste y presiona otra vez.</li><li>Pulsa la cuerda al aire, luego cae en el traste 5 y pulsa otra vez.</li></ol>Lo tienes cuando: tres caídas seguidas en A suenan limpias, sin zumbido.',
         tab: {
           caption: 'Open E → fret 5 · land on the dot',
           caption_es: 'Mi al aire → traste 5 · cae en el punto',
@@ -1061,8 +1061,8 @@ window.CLASS_ACTIVITIES = [
       {
         label:    'The first four notes',
         label_es: 'Las primeras cuatro notas',
-        text: 'The first four notes: open, open, fret 2, open. Say the words while you play — "Hap-py birth-day."\nYou\'ve got it when: three clean reps in a row, no buzz. Buzz twice? Stop, fix the finger, then go again.',
-        text_es: 'Las primeras cuatro notas: al aire, al aire, traste 2, al aire. Di las palabras mientras tocas — "Hap-py birth-day."\nLo tienes cuando: tres repeticiones limpias seguidas, sin zumbido. ¿Zumbó dos veces? Detente, arregla el dedo y vuelve a intentarlo.',
+        text: 'Play the four notes below — open, open, fret 2, open. Say the words while you play: “Hap-py birth-day.”\nYou\'ve got it when: three clean reps in a row, no buzz.',
+        text_es: 'Toca las cuatro notas de abajo — al aire, al aire, traste 2, al aire. Di las palabras mientras tocas: “Hap-py birth-day.”\nLo tienes cuando: tres repeticiones limpias seguidas, sin zumbido.',
         tab: {
           caption: '"Hap-py birth-day" — the first four notes',
           caption_es: '"Hap-py birth-day" — las primeras cuatro notas',
@@ -1077,8 +1077,8 @@ window.CLASS_ACTIVITIES = [
       {
         label:    'The first line',
         label_es: 'La primera línea',
-        text: 'Put the first line together.<ul><li>Play the four notes you know — "Hap-py birth-day"</li><li>Add two for "to you": fret 5, then fret 4 right next door</li><li>Six notes — that\'s the first line of the song</li><li>The notes are not all the same length. "Hap-py" is quick — both notes inside one click. "Birth", "day" and "to" get one click each. "You" is held for two.</li></ul>You\'ve got it when: three clean runs without stopping, saying the words as you play, with "you" held the full two clicks.',
-        text_es: 'Arma la primera línea.<ul><li>Toca las cuatro notas que ya sabes — "Hap-py birth-day"</li><li>Agrega dos para "to you": traste 5 y luego traste 4, justo al lado</li><li>Seis notas — esa es la primera línea de la canción</li><li>Las notas no duran todas lo mismo. "Hap-py" es rápido — las dos notas caben en un clic. "Birth", "day" y "to" llevan un clic cada una. "You" se sostiene dos.</li></ul>Lo tienes cuando: tres pasadas limpias sin detenerte, diciendo las palabras mientras tocas, con "you" sostenido los dos clics completos.',
+        text: 'Put the first line together — the four notes you know, then two more for “to you”: fret 5, then fret 4 right next door.<ul><li>Six notes — that\'s the first line of the song</li><li>The notes are not all the same length. “Hap-py” is quick — both notes inside one click. “Birth”, “day” and “to” get one click each. “You” is held for two.</li></ul>You\'ve got it when: three clean runs in a row, saying the words as you play.',
+        text_es: 'Arma la primera línea — las cuatro notas que ya sabes, y dos más para “to you”: traste 5 y luego traste 4, justo al lado.<ul><li>Seis notas — esa es la primera línea de la canción</li><li>Las notas no duran todas lo mismo. “Hap-py” es rápido — las dos notas caben en un clic. “Birth”, “day” y “to” llevan un clic cada una. “You” se sostiene dos.</li></ul>Lo tienes cuando: tres pasadas limpias seguidas, diciendo las palabras mientras tocas.',
         tab: {
           caption: 'Phrase 1 · all on the low E string',
           caption_es: 'Frase 1 · todo en la cuerda Mi grave',
@@ -1203,14 +1203,14 @@ window.CLASS_ACTIVITIES = [
         figure: 'img/ca-lowe-naturals.svg',
         figureAlt: 'Low E string fretboard diagram with every natural note circled — E, F, G, A, B, C, D, E — from the open string up to the octave at fret 12.',
         figureAlt_es: 'Diagrama del diapasón de la cuerda Mi grave con cada nota natural marcada en círculo — E, F, G, A, B, C, D, E — desde la cuerda al aire hasta la octava en el traste 12.',
-        text: 'This is the low E string — the thick one — with its natural notes circled: the plain letter names, no sharps.<ul><li>E F G A B C D E: it starts on open E (0 = no finger) and lands on E again at fret 12 — same name, higher sound. That repeat is called an octave</li><li>The neck dots are your map: the dots at frets 3, 5 and 7 carry G, A and B, and the double dot at 12 is E again, an octave up</li></ul>',
-        text_es: 'Esta es la cuerda Mi grave — la más gruesa — con sus notas naturales en círculos: los nombres de letra simples, sin sostenidos.<ul><li>E F G A B C D E: empieza al aire (0 = sin dedo) con E y vuelve a caer en E en el traste 12 — mismo nombre, sonido más agudo. Esa repetición se llama octava</li><li>Los puntos del mástil son tu mapa: los puntos de los trastes 3, 5 y 7 llevan G, A y B, y el punto doble del 12 es E otra vez, una octava arriba</li></ul>',
+        text: 'This is the low E string — the thick one — with its natural notes circled: the plain letter names, no sharps.<ul><li>E F G A B C D E — open E (0 = no finger) up to E again at fret 12. Same name, higher sound: that repeat is called an octave</li><li>The neck dots are your map — the dots at frets 3, 5 and 7 carry G, A and B</li></ul>',
+        text_es: 'Esta es la cuerda Mi grave — la más gruesa — con sus notas naturales en círculos: los nombres de letra simples, sin sostenidos.<ul><li>E F G A B C D E — de E al aire (0 = sin dedo) hasta E otra vez en el traste 12. Mismo nombre, sonido más agudo: esa repetición se llama octava</li><li>Los puntos del mástil son tu mapa — los puntos de los trastes 3, 5 y 7 llevan G, A y B</li></ul>',
       },
       {
         label:    'The dot notes',
         label_es: 'Las notas de los puntos',
-        text: 'Start with the dot notes — the four easiest to find.<ol><li>Pluck the open string and say "E" out loud while it rings</li><li>Fingertip just behind fret 3 — the first dot — pluck and say "G"</li><li>Dot at fret 5: "A". Dot at fret 7: "B"</li></ol>Saying the name while the note rings is the memorizing — don\'t skip it.\nYou\'ve got it when: E–G–A–B in order, out loud, without looking at the diagram. Missed a name? Look once, then start again from open E.',
-        text_es: 'Empieza con las notas de los puntos — las cuatro más fáciles de encontrar.<ol><li>Pulsa la cuerda al aire y di "E" en voz alta mientras suena</li><li>La punta del dedo justo detrás del traste 3 — el primer punto — pulsa y di "G"</li><li>Punto del traste 5: "A". Punto del traste 7: "B"</li></ol>Decir el nombre mientras la nota suena es lo que la graba en la memoria — no te lo saltes.\nLo tienes cuando: E–G–A–B en orden, en voz alta, sin mirar el diagrama. ¿Fallaste un nombre? Mira una vez y empieza de nuevo desde la cuerda al aire.',
+        text: 'Play the four dot notes below — open E, then the dots at frets 3, 5 and 7. Say each name out loud while it rings; saying it is the memorizing.\nYou\'ve got it when: E–G–A–B in order, out loud, three times through without looking at the diagram.',
+        text_es: 'Toca abajo las cuatro notas de los puntos — E al aire, y después los puntos de los trastes 3, 5 y 7. Di cada nombre en voz alta mientras suena; decirlo es lo que lo graba en la memoria.\nLo tienes cuando: E–G–A–B en orden, en voz alta, tres veces seguidas sin mirar el diagrama.',
         tab: {
           caption: 'The dot notes · E G A B',
           caption_es: 'Las notas de los puntos · E G A B',
@@ -1225,8 +1225,8 @@ window.CLASS_ACTIVITIES = [
       {
         label:    'Fill in the row',
         label_es: 'Completa la fila',
-        text: 'Four more fill in the row.<ul><li>F at fret 1 — right next door to open E</li><li>C at fret 8 — one fret past the 7-dot</li><li>D at fret 10 — one past the 9-dot</li><li>E at fret 12 — the double dot, back where you started</li></ul>Walk the whole string up and back with the player, saying every name as you land it.\nYou\'ve got it when: up and down — E F G A B C D E and back — without stopping, every name out loud. Lost the thread? Find the nearest dot note and restart from there.',
-        text_es: 'Cuatro más completan la fila.<ul><li>F en el traste 1 — justo al lado de la cuerda al aire</li><li>C en el traste 8 — un traste después del punto del 7</li><li>D en el traste 10 — uno después del punto del 9</li><li>E en el traste 12 — el punto doble, de vuelta a donde empezaste</li></ul>Recorre toda la cuerda subiendo y bajando con el reproductor, diciendo el nombre de cada nota al caer en ella.\nLo tienes cuando: subes y bajas — E F G A B C D E y de regreso — sin detenerte, cada nombre en voz alta. ¿Perdiste el hilo? Busca la nota del punto más cercano y arranca de ahí otra vez.',
+        text: 'Fill in the rest of the row — F at fret 1, C at fret 8, D at fret 10, and E at the double dot at fret 12. Play the notes below, up and back, saying every name as you land it.\nYou\'ve got it when: E F G A B C D E and back, three times through, every name out loud.',
+        text_es: 'Completa el resto de la fila — F en el traste 1, C en el traste 8, D en el traste 10 y E en el punto doble del traste 12. Toca las notas de abajo, subiendo y bajando, diciendo el nombre de cada una al caer en ella.\nLo tienes cuando: E F G A B C D E y de regreso, tres veces seguidas, cada nombre en voz alta.',
         tab: {
           caption: 'The whole octave · up and back',
           caption_es: 'La octava completa · subir y bajar',
@@ -1265,22 +1265,22 @@ window.CLASS_ACTIVITIES = [
       {
         label:    'Name the fret',
         label_es: 'Di la nota',
-        text: 'Try naming the notes without looking at the diagram — the quiz deals you a fret and you name the note, eight seconds a card.<ol><li>Diagram covered, guitar in your lap</li><li>Say the note out loud, then press its button — saying it is the skill</li></ol>You\'ve got it when: 7 of 10 on your first pass. Once that\'s easy, push for 9 of 10. A couple of frets tripping you? The results screen lists exactly which — run it again watching for those.',
-        text_es: 'Prueba diciendo los nombres sin mirar el diagrama — el juego te reparte un traste y tú dices la nota, ocho segundos por carta.<ol><li>Diagrama tapado, guitarra en las piernas</li><li>Di la nota en voz alta y después presiona su botón — decirla es la habilidad</li></ol>Lo tienes cuando: 7 de 10 en tu primera pasada. Cuando eso te resulte fácil, ve por 9 de 10. ¿Hay un par de trastes que te traban? La pantalla de resultados te dice cuáles — repite el juego vigilando esos.',
+        text: 'Cover the diagram and put the guitar in your lap. The quiz deals you a fret — say the note out loud, then press its button.\nYou\'ve got it when: 7 of 10 on your first pass. Once that\'s easy, push for 9 of 10.',
+        text_es: 'Tapa el diagrama y pon la guitarra en las piernas. El juego te reparte un traste — di la nota en voz alta y después presiona su botón.\nLo tienes cuando: 7 de 10 en tu primera pasada. Cuando eso te resulte fácil, ve por 9 de 10.',
         drill: { type: 'shuffle', string: 'lowE', maxFret: 12, rounds: 10, seconds: 8, pile: 'naturals' },
       },
       {
         label:    'Find the note',
         label_es: 'Encuentra la nota',
-        text: 'Flip it around and put it in your hands — the deck deals you a note name, and you go find it on the string.<ol><li>Cover the diagram above, or scroll it off the screen</li><li>Deal a card, land on that note, pluck it. Next card once it rings clean</li><li>Lift your hand off the neck between cards, so every landing starts from nothing</li><li>E lives in two places — fret 0 and fret 12. Either one counts</li></ol>You\'ve got it when: five cards in a row, no peeking, no buzz. Had to peek? Deal that one again before you move on.',
-        text_es: 'Dale la vuelta y llévalo a las manos — el mazo te reparte el nombre de una nota, y tú la buscas en la cuerda.<ol><li>Tapa el diagrama de arriba, o desplázalo fuera de la pantalla</li><li>Reparte una carta, cae en esa nota y púlsala. Otra carta cuando suene limpia</li><li>Levanta la mano del mástil entre carta y carta, para que cada caída empiece desde cero</li><li>E vive en dos lugares — traste 0 y traste 12. Cualquiera de los dos cuenta</li></ol>Lo tienes cuando: cinco cartas seguidas, sin mirar, sin zumbido. ¿Tuviste que mirar? Reparte esa otra vez antes de seguir.',
+        text: 'Flip it around — the deck deals you a note name and you go find it on the string.<ul><li>Cover the diagram above</li><li>Land on the note and pluck it. Next card once it rings clean</li><li>Lift your hand off the neck between cards</li><li>E lives in two places, fret 0 and fret 12 — either one counts</li></ul>You\'ve got it when: five cards in a row, no peeking, no buzz.',
+        text_es: 'Dale la vuelta — el mazo te reparte el nombre de una nota y tú la buscas en la cuerda.<ul><li>Tapa el diagrama de arriba</li><li>Cae en la nota y púlsala. Otra carta cuando suene limpia</li><li>Levanta la mano del mástil entre carta y carta</li><li>E vive en dos lugares, traste 0 y traste 12 — cualquiera de los dos cuenta</li></ul>Lo tienes cuando: cinco cartas seguidas, sin mirar, sin zumbido.',
         drill: { type: 'deck', deck: 'naturals' },
       },
       {
         label:    'Keep going',
         label_es: 'Sigue',
-        text: 'Keep going — there is no set stopping point here.<ul><li>Set the player above to 60 BPM and land one note per beat, up and back</li><li>Every clean pass: raise the BPM by 10</li><li>Fast already? Say the names backwards — E D C B A G F E, from the double dot down</li><li>Then quiz a partner and catch their misses</li></ul>You\'ve got it when: you\'ve cleared a full pass at a faster BPM than you started — then keep climbing.',
-        text_es: 'Sigue — aquí no hay un punto de parada fijo.<ul><li>Pon el reproductor de arriba en 60 BPM y cae en una nota por tiempo, subiendo y bajando</li><li>Cada pasada limpia: sube el BPM 10 puntos</li><li>¿Ya vas rápido? Di los nombres al revés — E D C B A G F E, desde el punto doble hacia abajo</li><li>Después ponle una prueba a un compañero y atrapa sus fallos</li></ul>Lo tienes cuando: ya completaste una pasada entera a un BPM más alto que al empezar — y de ahí, sigue subiendo.',
+        text: 'Keep going — there is no set stopping point here.<ul><li>Set the player above to 60 BPM and land one note per beat, up and back</li><li>Every clean pass: raise the BPM by 10</li><li>Fast already? Say the names backwards — E D C B A G F E</li></ul>You\'ve got it when: a full pass at a faster BPM than you started — then keep climbing.',
+        text_es: 'Sigue — aquí no hay un punto de parada fijo.<ul><li>Pon el reproductor de arriba en 60 BPM y cae en una nota por tiempo, subiendo y bajando</li><li>Cada pasada limpia: sube el BPM 10 puntos</li><li>¿Ya vas rápido? Di los nombres al revés — E D C B A G F E</li></ul>Lo tienes cuando: una pasada entera a un BPM más alto que al empezar — y de ahí, sigue subiendo.',
       },
     ],
   },
@@ -1305,14 +1305,14 @@ window.CLASS_ACTIVITIES = [
         figure: 'img/ca-a-naturals.svg',
         figureAlt: 'A string fretboard diagram with every natural note circled — A, B, C, D, E, F, G, A — from the open string up to the octave at fret 12.',
         figureAlt_es: 'Diagrama del diapasón de la cuerda La con cada nota natural marcada en círculo — A, B, C, D, E, F, G, A — desde la cuerda al aire hasta la octava en el traste 12.',
-        text: 'This is the A string — one string down from the low E, the second-thickest — with its natural notes circled: the plain letter names, no sharps.<ul><li>A B C D E F G A: starts on open A and lands on A again at fret 12, an octave higher</li><li>The dots at frets 3, 5 and 7 carry C, D and E; the double dot at 12 is A again</li><li>Same seven letters as the low E string, just starting on a different one</li></ul>',
-        text_es: 'Esta es la cuerda La — la que está justo debajo de la cuerda Mi grave, la segunda más gruesa — con sus notas naturales en círculos: los nombres de letra simples, sin sostenidos.<ul><li>A B C D E F G A: empieza al aire y vuelve a caer en A en el traste 12, una octava más arriba</li><li>Los puntos de los trastes 3, 5 y 7 llevan C, D y E; el punto doble del 12 es A otra vez</li><li>Las mismas siete letras que en la cuerda Mi grave, esta cuerda solo empieza en otra</li></ul>',
+        text: 'This is the A string — one string down from the low E, the second-thickest. The circles are its natural notes: the plain letter names, no sharps.<ul><li>A B C D E F G A — open A up to A again at fret 12, an octave higher</li><li>The dots at frets 3, 5 and 7 carry C, D and E; the double dot at 12 is A again</li><li>Same seven letters as the low E string, starting on a different one</li></ul>',
+        text_es: 'Esta es la cuerda La — la que está justo debajo de la cuerda Mi grave, la segunda más gruesa. Los círculos son sus notas naturales: los nombres de letra simples, sin sostenidos.<ul><li>A B C D E F G A — de A al aire hasta A otra vez en el traste 12, una octava más arriba</li><li>Los puntos de los trastes 3, 5 y 7 llevan C, D y E; el punto doble del 12 es A otra vez</li><li>Las mismas siete letras que en la cuerda Mi grave, empezando en otra</li></ul>',
       },
       {
         label:    'Learn the notes',
         label_es: 'Aprende las notas',
-        text: 'Name every natural note on the A string — same seven letters as the low E string, starting on a different one.<ol><li>Dot notes first: open A, "C" at fret 3, "D" at fret 5, "E" at fret 7 — say each name while it rings</li><li>Fill in the rest: B at fret 2, F at fret 8, G at fret 10, A at fret 12</li><li>Walk the whole string up and back, naming every note as you land it</li></ol>You\'ve got it when: up and down — A B C D E F G A and back — without stopping, every name out loud.',
-        text_es: 'Nombra cada nota natural de la cuerda La — las mismas siete letras que en la cuerda Mi grave, empezando en otra.<ol><li>Primero las notas de los puntos: A al aire, "C" en el traste 3, "D" en el traste 5, "E" en el traste 7 — di cada nombre mientras suena</li><li>Completa el resto: B en el traste 2, F en el traste 8, G en el traste 10, A en el traste 12</li><li>Recorre toda la cuerda subiendo y bajando, diciendo el nombre de cada nota al caer en ella</li></ol>Lo tienes cuando: subes y bajas — A B C D E F G A y de regreso — sin detenerte, cada nombre en voz alta.',
+        text: 'Play the notes below and say each name out loud as you play it.\nYou\'ve got it when: three times through, every name out loud.',
+        text_es: 'Toca las notas de abajo y di cada nombre en voz alta mientras la tocas.\nLo tienes cuando: tres veces completas, cada nombre en voz alta.',
         tab: {
           caption: 'The dot notes, then the whole octave up and back',
           caption_es: 'Las notas de los puntos, y después la octava completa',
@@ -1361,25 +1361,22 @@ window.CLASS_ACTIVITIES = [
       {
         label:    'Name the fret',
         label_es: 'Di la nota',
-        text: 'Try naming the notes without looking — the quiz deals you a fret on the A string, eight seconds a card.<ol><li>Diagram covered, guitar in your lap</li><li>Say the note out loud, then press its button</li></ol>You\'ve got it when: 7 of 10 on your first pass. Once that\'s easy, push for 9 of 10.',
-        text_es: 'Prueba diciendo los nombres sin mirar — el juego te reparte un traste de la cuerda La, ocho segundos por carta.<ol><li>Diagrama tapado, guitarra en las piernas</li><li>Di la nota en voz alta y después presiona su botón</li></ol>Lo tienes cuando: 7 de 10 en tu primera pasada. Cuando eso te resulte fácil, ve por 9 de 10.',
+        text: 'Cover the diagram and put the guitar in your lap. The quiz deals you a fret on the A string — say the note out loud, then press its button.\nYou\'ve got it when: 7 of 10 on your first pass. Once that\'s easy, push for 9 of 10.',
+        text_es: 'Tapa el diagrama y pon la guitarra en las piernas. El juego te reparte un traste de la cuerda La — di la nota en voz alta y después presiona su botón.\nLo tienes cuando: 7 de 10 en tu primera pasada. Cuando eso te resulte fácil, ve por 9 de 10.',
         drill: { type: 'shuffle', string: 'A', maxFret: 12, rounds: 10, seconds: 8, pile: 'naturals' },
       },
       {
         label:    'Find the note',
         label_es: 'Encuentra la nota',
-        text: 'The deck deals you a note name — find it on the A string and pluck it.<ol><li>Cover the diagram above, or scroll it off the screen</li><li>Deal a card, land on that note, pluck it. Next card once it rings clean</li><li>Lift your hand off the neck between cards, so every landing starts from nothing</li><li>A lives in two places — fret 0 and fret 12. Either counts</li></ol>You\'ve got it when: five cards in a row, no peeking, no buzz. Had to peek? Deal that one again.',
-        text_es: 'El mazo te reparte el nombre de una nota — búscala en la cuerda La y púlsala.<ol><li>Tapa el diagrama de arriba, o desplázalo fuera de la pantalla</li><li>Reparte una carta, cae en esa nota, púlsala. Otra carta cuando suene limpia</li><li>Levanta la mano del mástil entre carta y carta, para que cada caída empiece desde cero</li><li>A vive en dos lugares — traste 0 y traste 12. Cualquiera cuenta</li></ol>Lo tienes cuando: cinco cartas seguidas, sin mirar, sin zumbido. ¿Tuviste que mirar? Reparte esa otra vez.',
+        text: 'The deck deals you a note name — find it on the A string and pluck it.<ul><li>Cover the diagram above</li><li>Land on the note and pluck it. Next card once it rings clean</li><li>Lift your hand off the neck between cards</li><li>A lives in two places, fret 0 and fret 12 — either one counts</li></ul>You\'ve got it when: five cards in a row, no peeking, no buzz.',
+        text_es: 'El mazo te reparte el nombre de una nota — búscala en la cuerda La y púlsala.<ul><li>Tapa el diagrama de arriba</li><li>Cae en la nota y púlsala. Otra carta cuando suene limpia</li><li>Levanta la mano del mástil entre carta y carta</li><li>A vive en dos lugares, traste 0 y traste 12 — cualquiera de los dos cuenta</li></ul>Lo tienes cuando: cinco cartas seguidas, sin mirar, sin zumbido.',
         drill: { type: 'deck', deck: 'naturals' },
       },
       {
         label:    'Cross the strings',
         label_es: 'Cruza las cuerdas',
-        figure: 'img/ca-hb-a.svg',
-        figureAlt: 'Fretboard diagram comparing the low E and A strings, showing the same landing frets — 2, 4, 5, and 7 — mirrored on the A string.',
-        figureAlt_es: 'Diagrama del diapasón comparando las cuerdas Mi grave y La, mostrando los mismos trastes de referencia — 2, 4, 5 y 7 — reflejados en la cuerda La.',
-        text: 'Take the A string into Happy Birthday — same frets as the low E version (2, 4, 5, 7), but no trip up to fret 12.<ul><li>Pluck the open low E, then the open A, back and forth — no fretting hand yet</li><li>Only one string should ring each pluck. Both sound? Slow down and watch the pick</li></ul>You\'ve got it when: low E, A, low E, A — three clean reps, one string per pluck.',
-        text_es: 'Lleva la cuerda La a Happy Birthday — los mismos trastes que en la versión de la Mi grave (2, 4, 5, 7), pero sin el viaje hasta el traste 12.<ul><li>Pulsa la cuerda Mi grave al aire, luego la cuerda La al aire, ida y vuelta — todavía sin la mano de trastear</li><li>Solo debe sonar una cuerda por pulsación. ¿Suenan las dos? Ve más despacio y mira la púa</li></ul>Lo tienes cuando: cuerda Mi grave, cuerda La, cuerda Mi grave, cuerda La — tres repeticiones limpias, una cuerda por pulsación.',
+        text: 'Pluck the open low E, then the open A, back and forth — no fretting hand yet. Only one string should ring each pluck.\nYou\'ve got it when: three clean reps in a row, one string per pluck.',
+        text_es: 'Pulsa la cuerda Mi grave al aire, luego la cuerda La al aire, ida y vuelta — todavía sin la mano de trastear. Solo debe sonar una cuerda por pulsación.\nLo tienes cuando: tres veces seguidas y limpias, una cuerda por pulsación.',
         tab: {
           caption: 'String crossing · open strings only',
           caption_es: 'Cruce de cuerdas · solo cuerdas al aire',
@@ -1397,8 +1394,8 @@ window.CLASS_ACTIVITIES = [
         figure: 'img/ca-hb-fingers-a.svg',
         figureAlt: 'Diagram of the fretting hand on the A string for phrases C and D, showing finger 4 at fret 7, finger 3 at fret 4, and the string crossing back to the low E string.',
         figureAlt_es: 'Diagrama de la mano de trastear en la cuerda La para las frases C y D, mostrando el dedo 4 en el traste 7, el dedo 3 en el traste 4 y el cruce de regreso a la cuerda Mi grave.',
-        text: 'Phrases C and D, now on the A string — every note stays inside the first seven frets.<ul><li>Phrase C: open low E twice, then up for finger 4 on fret 7 of the A, straight back down for finger 3 on fret 4, open A, then low E frets 4 and 2</li><li>Phrase D stays down in that position on the A string: frets 5, 5, 4, open, 2, open</li><li>C♯ ("C sharp"), fret 4, is the one new name</li></ul>You\'ve got it when: phrase C into phrase D, three clean runs, no hunting for the string.',
-        text_es: 'Frases C y D, ahora en la cuerda La — todas las notas se quedan dentro de los primeros siete trastes.<ul><li>Frase C: Mi grave al aire dos veces, luego arriba al dedo 4 en el traste 7 de la cuerda La, de inmediato abajo al dedo 3 en el traste 4, La al aire, y la Mi grave para el 4 y el 2</li><li>La frase D se queda en esa posición baja en la cuerda La: trastes 5, 5, 4, al aire, 2, al aire</li><li>C♯ ("C sostenido"), traste 4, es el único nombre nuevo</li></ul>Lo tienes cuando: de la frase C a la frase D, tres pasadas limpias, sin andar buscando la cuerda.',
+        text: 'Phrases C and D, now on the A string — every note stays inside the first seven frets.<ul><li>Phrase C: finger 4 reaches fret 7 on the A string, then finger 3 drops to fret 4</li><li>Phrase D stays down in that same spot on the A string</li><li>C♯ (“C sharp”), fret 4, is the one new name</li></ul>You\'ve got it when: phrase C into phrase D, three times through, without stopping.',
+        text_es: 'Frases C y D, ahora en la cuerda La — todas las notas se quedan dentro de los primeros siete trastes.<ul><li>Frase C: el dedo 4 alcanza el traste 7 de la cuerda La, y luego el dedo 3 baja al traste 4</li><li>La frase D se queda en ese mismo lugar de la cuerda La</li><li>C♯ (“C sostenido”), traste 4, es el único nombre nuevo</li></ul>Lo tienes cuando: de la frase C a la frase D, tres veces seguidas, sin detenerte.',
         tab: {
           caption: 'Second half · the A-string way',
           caption_es: 'Segunda mitad · la versión con la cuerda La',
@@ -1434,8 +1431,8 @@ window.CLASS_ACTIVITIES = [
       {
         label:    'The whole song',
         label_es: 'La canción completa',
-        text: 'The whole song the A-string way — phrases A and B stay on the low E, C and D cross to the A string. Start at BPM 70.<ul><li>Say each A-string note out loud as you land it: E, C♯, A in phrase C, then D, D, C♯, A, B, A in phrase D</li><li>Every clean pass, raise the BPM by 10 — then play it for the person next to you</li></ul>You\'ve got it when: the whole song without stopping, every A-string note named out loud — then keep climbing.',
-        text_es: 'La canción completa en la versión con la cuerda La — las frases A y B se quedan en la Mi grave, C y D cruzan a la cuerda La. Empieza en BPM 70.<ul><li>Di en voz alta cada nota de la cuerda La al caer en ella: E, C♯, A en la frase C, y luego D, D, C♯, A, B, A en la frase D</li><li>Cada pasada limpia, sube el BPM 10 puntos — y después tócala para la persona de al lado</li></ul>Lo tienes cuando: la canción completa sin detenerte, nombrando en voz alta cada nota de la cuerda La — y de ahí, sigue subiendo.',
+        text: 'The whole song the A-string way — phrases A and B stay on the low E, C and D cross to the A string. Start at BPM 70.<ul><li>Say each A-string note out loud as you land it</li><li>Every clean pass, raise the BPM by 10 — then play it for the person next to you</li></ul>You\'ve got it when: the whole song without stopping, every A-string note named out loud — then keep climbing.',
+        text_es: 'La canción completa en la versión con la cuerda La — las frases A y B se quedan en la Mi grave, C y D cruzan a la cuerda La. Empieza en BPM 70.<ul><li>Di en voz alta cada nota de la cuerda La al caer en ella</li><li>Cada pasada limpia, sube el BPM 10 puntos — y después tócala para la persona de al lado</li></ul>Lo tienes cuando: la canción completa sin detenerte, nombrando en voz alta cada nota de la cuerda La — y de ahí, sigue subiendo.',
         tab: {
           caption: 'Whole song · phrases A–D · low E and A strings',
           caption_es: 'Canción completa · frases A–D · cuerdas Mi grave y La',

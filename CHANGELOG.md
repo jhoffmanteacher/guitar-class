@@ -5,6 +5,21 @@ Notable changes to the Guitar Class site. Newest first.
 For the full session-by-session history (and the reasoning behind each change),
 see `WORKFLOW.md` and the git commit log.
 
+## 2026-09-20 — Shorter directions on the Happy Birthday activities
+
+### Changed
+
+- **The four Happy Birthday and note-naming activities now say what to do in a
+  line or two instead of a paragraph.** The frets were already printed in the
+  player right below the directions, so the directions were repeating them. A
+  step that used to spell out every fret twice now says "play the notes below
+  and say each name out loud as you play it," and tells you how many times
+  through counts as done. Nothing about the notes, the songs or the practice
+  games changed — only the wording above them.
+- **The string-crossing step on the A-string activity lost its diagram.** That
+  step is two open strings back and forth; the fretboard picture was showing
+  notes the step does not use.
+
 ## 2026-09-20 — The same quiz clean-up, across Modules 7–13
 
 ### Changed
