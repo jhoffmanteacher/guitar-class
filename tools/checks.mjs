@@ -4728,6 +4728,183 @@ function checkBareWatchSteps() {
   if (bad === 0) ok('no bare watch steps (video link with near-empty text and a non-empty hint)');
 }
 
+/* ════════════════════════════════════════════════════════════════════
+   1aw. UNBALANCED <p>/</p> IN STUDENT-FACING FIELDS — a second-pass
+   sweep (2026-09-20) found six `</p>` closing tags with no opening
+   `<p>` anywhere in the same field, left over from an earlier edit that
+   dropped the opener but not the closer. The stray tag renders
+   harmlessly (browsers just close whatever paragraph context already
+   exists) so nothing about it LOOKS broken, which is exactly why it
+   survived — this is a mechanical class, not a wording one, so it gets
+   a permanent detector rather than a one-time fix.
+   ════════════════════════════════════════════════════════════════════ */
+function checkUnbalancedInlineP() {
+  head('1aw. Unbalanced <p>/</p> in student-facing fields');
+  const FIELD_RE = new RegExp(
+    '\\b(?:text|hint|stuck|levelUp|explain)(?:_es)?:\\s*\'((?:\\\\.|[^\'\\\\])*)\'', 'g');
+  let checked = 0, bad = 0;
+  for (const file of [...MODULE_FILES, 'class-activities.js']) {
+    let lines;
+    try { lines = readFileSync(join(ROOT, file), 'utf8').split('\n'); } catch { continue; }
+    lines.forEach((line, li) => {
+      for (const f of line.matchAll(FIELD_RE)) {
+        checked++;
+        const val = f[1];
+        const opens = (val.match(/<p(?:\s[^>]*)?>/gi) || []).length;
+        const closes = (val.match(/<\/p>/gi) || []).length;
+        if (opens !== closes) {
+          err(`${file}:${li + 1}: ${opens} <p> vs ${closes} </p> in the same field — a stray tag with no match`);
+          problems++; bad++;
+        }
+      }
+    });
+  }
+  if (bad === 0) ok(`no unbalanced <p>/</p> across ${checked} student-facing fields`);
+}
+
+/* ════════════════════════════════════════════════════════════════════
+   1ax. STRUM-LINE GAP COUNT ↔ ITS OWN TEXT — a `.strum-line` renders a
+   `&middot;`/`·` token for a beat the hand swings through but doesn't
+   strike. Module 6's D-DU-UDU stepping stones (2026-09-20 work order)
+   shipped with the wrong number of those tokens twice over: a step
+   claiming "ONE strum left out" actually drew two gaps, and a step
+   meant to isolate a single hard gap drew three. Neither the strum-line
+   markup nor the prose is authoritative on its own, so this cross-checks
+   them against each other.
+
+   It also checks column alignment, but NOT by comparing token counts —
+   "Soft Feel" (module-6.js) legitimately renders only 4 tokens
+   ("D" on each numbered beat, nothing on the "+") against an 8-token
+   .su-count row, spaced twice as wide so the D's still land on 1 2 3 4.
+   The real invariant is CSS's: `.strum-line{white-space:pre}` renders
+   both rows in the same monospace grid, so every token — dense or
+   sparse — must start at a column index that is a multiple of the
+   su-count row's own cell width (`&middot;` is decoded to one glyph
+   first, since it is 8 raw characters for 1 rendered one). */
+function checkStrumLineGaps() {
+  head('1ax. Strum-line gap count and column alignment match their own text');
+  const FIELD_RE = new RegExp(
+    '\\b(?:text|hint|stuck|levelUp)(?:_es)?:\\s*\'((?:\\\\.|[^\'\\\\])*)\'', 'g');
+  const STRUM_RE = /<div class="strum-line">([^<]*)<span class="su-count">([^<]*)<\/span><\/div>/g;
+  const decode = s => s.replace(/&middot;/g, '·');
+  const GAP = s => s === '·';
+  // Each entry is checked against every strum-line row IN THE SAME FIELD —
+  // fine while a field never mixes two different gap-count claims, which
+  // is true of every field today (checked by hand, 2026-09-20).
+  const CLAIMS = [
+    { re: /\bONE\b(?:\s+\S+){0,4}\s+left out\b/i, n: 1 },       // "ONE strum left out"
+    { re: /\bUN\b(?:\s+\S+){0,3}\s+de menos\b/i, n: 1 },         // "UN rasgueo de menos"
+    { re: /\bone gap\b/i, n: 1 },
+    { re: /\bun hueco\b/i, n: 1 },
+    { re: /\b(?:both|two) gaps\b/i, n: 2 },
+    { re: /\b(?:los )?dos huecos\b/i, n: 2 },
+  ];
+  const EXPECTED_STRUM_LINES = 22;   // pinned — update on purpose if one is added or removed
+  let strumLines = 0, bad = 0;
+  for (const file of [...MODULE_FILES, 'class-activities.js']) {
+    let lines;
+    try { lines = readFileSync(join(ROOT, file), 'utf8').split('\n'); } catch { continue; }
+    lines.forEach((line, li) => {
+      for (const f of line.matchAll(FIELD_RE)) {
+        const val = f[1];
+        const rows = [...val.matchAll(STRUM_RE)];
+        if (!rows.length) continue;
+        const claimsHere = CLAIMS.filter(c => c.re.test(val));
+        for (const row of rows) {
+          strumLines++;
+          const strumStr = decode(row[1]);
+          const countStr = decode(row[2]);
+          const countTokens = [...countStr.matchAll(/\S+/g)];
+          const cellWidth = countTokens.length > 1 ? countTokens[1].index - countTokens[0].index : 4;
+          const tokens = [...strumStr.matchAll(/\S+/g)];
+          const misaligned = tokens.some(t => (t.index - countTokens[0].index) % cellWidth !== 0);
+          if (!cellWidth || misaligned || tokens.length > countTokens.length) {
+            err(`${file}:${li + 1}: strum-line tokens don't land on the su-count row's own beat columns`);
+            problems++; bad++;
+          }
+          const gaps = tokens.filter(t => GAP(t[0])).length;
+          for (const c of claimsHere) {
+            if (gaps !== c.n) {
+              err(`${file}:${li + 1}: text claims ${c.n} gap(s) ("${c.re}") but this strum-line has ${gaps}`);
+              problems++; bad++;
+            }
+          }
+        }
+      }
+    });
+  }
+  if (strumLines !== EXPECTED_STRUM_LINES) {
+    err(`found ${strumLines} .strum-line rows, expected ${EXPECTED_STRUM_LINES} — update EXPECTED_STRUM_LINES on purpose if one was added or removed`);
+    problems++; bad++;
+  }
+  if (bad === 0) ok(`${strumLines} strum-line rows checked, gap counts and column alignment agree with their own text`);
+}
+
+/* ════════════════════════════════════════════════════════════════════
+   1ay. "N BEATS EACH" CLAIMED BUT NO NOTE CARRIES IT — a tab note with
+   no `beats` defaults to one click (playSequence()/buildTab() in app.js),
+   so a step whose text or tab caption promises "N beats each" / "N beats
+   per note" is lying to the player unless the tab actually holds each
+   note for that long. "the cure" root-line tabs (ca-13/18/19) shipped
+   this way on 2026-09-20 — the band snippet ran four-beat bars while the
+   tab gave every note one click. Only class activities carry this claim
+   today; module tabs that hold a note do so without ever putting a
+   number in the prose.
+
+   A tab can spell "N beats" two ways — one note with `beats: N`, or N
+   separate same-pitch note entries in a row (ca-13/ca-18's own step 5,
+   "the in-order tabs," strike each note four times rather than holding
+   it) — so this merges a run of identical, beats-less notes into one
+   logical note before comparing, instead of demanding the `beats` field
+   literally be present.
+   ════════════════════════════════════════════════════════════════════ */
+function checkBeatsClaimMatchesTab() {
+  head('1ay. "N beats each" claim matches the tab\'s own durations');
+  let src;
+  try { src = readFileSync(join(ROOT, 'class-activities.js'), 'utf8'); }
+  catch { return; }                       // reported by 1d
+  const sandbox = { console };
+  sandbox.window = sandbox;
+  vm.createContext(sandbox);
+  try { vm.runInContext(src, sandbox, { filename: 'class-activities.js' }); }
+  catch { return; }                       // reported by 1d
+  const activities = sandbox.CLASS_ACTIVITIES || [];
+  const CLAIM_RE = /\b(\d+)\s+beats?\s+(?:each|per note)\b|\b(\d+)\s+tiempos?\s+(?:cada (?:una|uno)|por nota)\b/i;
+  const pitchKey = n => n.frets ? JSON.stringify(n.frets) : `${n.string}${n.fret}`;
+  // Merge a run of same-pitch, beats-less notes into one logical duration —
+  // the "strike it N times" way of spelling out N beats.
+  const logicalDurations = notes => {
+    const out = [];
+    for (const n of notes) {
+      const explicit = n && n.beats !== undefined;
+      const prev = out[out.length - 1];
+      if (!explicit && prev && !prev.explicit && prev.key === pitchKey(n)) prev.beats++;
+      else out.push({ key: pitchKey(n), beats: explicit ? n.beats : 1, explicit });
+    }
+    return out.map(o => o.beats);
+  };
+  let checked = 0, bad = 0;
+  for (const a of activities) {
+    if (!a || !Array.isArray(a.steps)) continue;
+    a.steps.forEach((st, si) => {
+      const tabs = Array.isArray(st.tabs) ? st.tabs : (st.tab ? [st.tab] : []);
+      const prose = [st.text, st.text_es, ...tabs.map(t => t.caption), ...tabs.map(t => t.caption_es)]
+        .filter(Boolean).join(' ');
+      const m = CLAIM_RE.exec(prose);
+      if (!m || !tabs.length) return;
+      const n = Number(m[1] || m[2]);
+      checked++;
+      const groups = tabs.flatMap(t => Array.isArray(t.phrases) ? t.phrases.map(ph => ph.notes || []) : [t.notes || []]);
+      const allMatch = groups.length > 0 && groups.every(notes => notes.length > 0 && logicalDurations(notes).every(d => d === n));
+      if (!allMatch) {
+        err(`${a.id} step ${si + 1}: text/caption claims "${n} beats each/per note" but not every note in its tab carries beats: ${n}`);
+        problems++; bad++;
+      }
+    });
+  }
+  if (bad === 0) ok(`${checked} step(s) claiming a per-note beat count all have matching tab durations`);
+}
+
 (async function main() {
   if (LIVE_ONLY) {
     console.log(`${C.bold}Guitar Class — post-push live check${C.reset}`);
@@ -4777,6 +4954,9 @@ function checkBareWatchSteps() {
   checkHappyBirthdayRhythm();
   checkShortResponseBudget();
   checkDaily5Switch();
+  checkUnbalancedInlineP();
+  checkStrumLineGaps();
+  checkBeatsClaimMatchesTab();
   if (!SKIP_LINKS) await checkLinks();
   else warn('skipping link check (--skip-links)');
   bumpServiceWorker();

@@ -5,6 +5,33 @@ Notable changes to the Guitar Class site. Newest first.
 For the full session-by-session history (and the reasoning behind each change),
 see `WORKFLOW.md` and the git commit log.
 
+## 2026-09-20 — Second-pass fixes across Modules 1–6 and the class activities
+
+### Changed
+
+- **"Take it to a song" no longer shows under every step while you're working
+  through a set.** It now appears once you've actually reached the end of the
+  practice half, instead of sitting there the whole time inviting you off to a
+  Journey page mid-lesson.
+- **Opening a class activity now scrolls it into view**, instead of leaving its
+  header wherever it already sat on the page.
+- **Two Module 6 strumming stepping stones had the wrong number of skipped
+  strums** — one said "one gap" and drew two, the other was supposed to isolate
+  a single hard gap and drew three. Both now match what they say.
+- **A misfingered A chord grid in Module 5** now matches the fingering the
+  lesson itself teaches.
+- **"the cure" root-line tabs and the Seven Nation Army riff** now hold each
+  note for as long as the text and the backing track say, instead of clicking
+  through evenly and drifting out of time with the band.
+- **The Happy Birthday activities now all call the song's four lines "Line 1"
+  through "Line 4,"** matching the exit check — they used to mix "Phrase A–D"
+  and "Phrase 1" depending on which activity you opened.
+- **A round of smaller wording fixes** across Modules 1–6 and several class
+  activities: a clearer picking-hand step for Module 1, a defined "palm-mute"
+  the first time it's used, a few reordered Module 4 steps that referenced
+  things before teaching them, and countable finish lines added to a handful of
+  cards that only said "get it right" with no way to tell when you had.
+
 ## 2026-09-20 — Shorter directions wherever a player was already showing them
 
 ### Changed

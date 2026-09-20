@@ -294,8 +294,8 @@ window.CLASS_ACTIVITIES = [
     number: 2,
     title:    'Playing Happy Birthday — The Whole Song',
     title_es: 'Tocando Happy Birthday — La canción completa',
-    intro:    'You played phrase A already. Today you play all four phrases without ever leaving the low E string — the melody climbs to the double dot at fret 12 and walks back home.',
-    intro_es: 'Ya tocaste la frase A. Hoy tocas las cuatro frases sin salirte nunca de la cuerda Mi grave — la melodía sube hasta el punto doble del traste 12 y regresa caminando.',
+    intro:    'You played Line 1 already. Today you play all four lines without ever leaving the low E string — the melody climbs to the double dot at fret 12 and walks back home.',
+    intro_es: 'Ya tocaste la Línea 1. Hoy tocas las cuatro líneas sin salirte nunca de la cuerda Mi grave — la melodía sube hasta el punto doble del traste 12 y regresa caminando.',
     steps: [
       {
         label:    'Fretting-hand basics',
@@ -307,17 +307,17 @@ window.CLASS_ACTIVITIES = [
         text_es: 'La canción completa vive en la cuerda Mi grave, la más gruesa. Los dedos de tu mano de trastear tienen números — 1 = índice, 2 = medio, 3 = anular, 4 = meñique. El pulgar no tiene; se queda detrás del mástil.<ul><li>Posición base: dedo 1 → traste 2, dedo 3 → traste 4, dedo 4 → traste 5</li><li>Hoy el mapa crece más allá de la posición base — primero el traste 7, y después más arriba</li><li>Los puntos del 5 y el 7 son tus marcas para caer</li></ul>',
       },
       {
-        label:    'Phrases A and B',
-        label_es: 'Frases A y B',
-        text: 'The first half of the song. Phrase A is the line you learned last time; phrase B starts the same and ends higher.<ul><li>Phrase A fingers: open, open, 1, open, 4, 3</li><li>Phrase B: your hand moves up until finger 1 sits on fret 5 — finger 3 → fret 7, finger 1 → fret 5. Eyes on fret 7 <em>before</em> your hand moves</li><li>BPM 70. Loop each phrase alone until it\'s clean, then play them back to back</li></ul>You\'ve got it when: phrase A into phrase B, four times through, without stopping.',
-        text_es: 'La primera mitad de la canción. La frase A es la línea que aprendiste la vez pasada; la frase B empieza igual y termina más arriba.<ul><li>Dedos de la frase A: al aire, al aire, 1, al aire, 4, 3</li><li>Frase B: la mano sube hasta que el dedo 1 queda en el traste 5 — dedo 3 → traste 7, dedo 1 → traste 5. Ojos en el traste 7 <em>antes</em> de mover la mano</li><li>BPM 70. Repite cada frase sola hasta que salga limpia, y después tócalas seguidas</li></ul>Lo tienes cuando: de la frase A a la frase B, cuatro veces seguidas, sin detenerte.',
+        label:    'Lines 1 and 2',
+        label_es: 'Líneas 1 y 2',
+        text: 'The first half of the song. Line 1 is the line you learned last time; Line 2 starts the same and ends higher.<ul><li>Line 1 fingers: open, open, 1, open, 4, 3</li><li>Line 2: your hand moves up until finger 1 sits on fret 5 — finger 3 → fret 7, finger 1 → fret 5. Eyes on fret 7 <em>before</em> your hand moves</li><li>BPM 70. Loop each line alone until it\'s clean, then play them back to back</li></ul>You\'ve got it when: Line 1 into Line 2, four times through, without stopping.',
+        text_es: 'La primera mitad de la canción. La Línea 1 es la que aprendiste la vez pasada; la Línea 2 empieza igual y termina más arriba.<ul><li>Dedos de la Línea 1: al aire, al aire, 1, al aire, 4, 3</li><li>Línea 2: la mano sube hasta que el dedo 1 queda en el traste 5 — dedo 3 → traste 7, dedo 1 → traste 5. Ojos en el traste 7 <em>antes</em> de mover la mano</li><li>BPM 70. Repite cada línea sola hasta que salga limpia, y después tócalas seguidas</li></ul>Lo tienes cuando: de la Línea 1 a la Línea 2, cuatro veces seguidas, sin detenerte.',
         tab: {
-          caption: 'First half · phrases A and B',
-          caption_es: 'Primera mitad · frases A y B',
+          caption: 'First half · Lines 1 and 2',
+          caption_es: 'Primera mitad · Líneas 1 y 2',
           phrases: [
             {
-              label: 'Phrase A — "Hap-py birth-day to you"',
-              label_es: 'Frase A — "Hap-py birth-day to you"',
+              label: 'Line 1 — "Hap-py birth-day to you"',
+              label_es: 'Línea 1 — "Hap-py birth-day to you"',
               notes: [
                 { string: 'E', fret: 0, note: 'E',  midi: 40, beats: 0.5 },
                 { string: 'E', fret: 0, note: 'E',  midi: 40, beats: 0.5 },
@@ -328,8 +328,8 @@ window.CLASS_ACTIVITIES = [
               ]
             },
             {
-              label: 'Phrase B — "Hap-py birth-day to you" (the ending climbs higher)',
-              label_es: 'Frase B — "Hap-py birth-day to you" (el final sube más alto)',
+              label: 'Line 2 — "Hap-py birth-day to you" (the ending climbs higher)',
+              label_es: 'Línea 2 — "Hap-py birth-day to you" (el final sube más alto)',
               notes: [
                 { string: 'E', fret: 0, note: 'E',  midi: 40, beats: 0.5 },
                 { string: 'E', fret: 0, note: 'E',  midi: 40, beats: 0.5 },
@@ -362,13 +362,13 @@ window.CLASS_ACTIVITIES = [
         },
       },
       {
-        label:    'Phrase C',
-        label_es: 'Frase C',
-        text: 'Phrase C makes the biggest jump in the song — it\'s where you sing the name.<ul><li>Two open notes, then your hand travels: finger 1 on fret 9, finger 4 reaching the double dot at fret 12</li><li>Walk down 12 → 9, then shift home: finger 4 → fret 5, finger 3 → fret 4, finger 1 → fret 2</li></ul>You\'ve got it when: phrase C, four times through, without stopping.',
-        text_es: 'La frase C da el salto más grande de la canción — es donde cantas el nombre.<ul><li>Dos notas al aire, y luego tu mano viaja: dedo 1 en el traste 9, dedo 4 estirándose al punto doble del traste 12</li><li>Baja del 12 al 9, y después regresa a la posición base: dedo 4 → traste 5, dedo 3 → traste 4, dedo 1 → traste 2</li></ul>Lo tienes cuando: la frase C, cuatro veces seguidas, sin detenerte.',
+        label:    'Line 3',
+        label_es: 'Línea 3',
+        text: 'Line 3 makes the biggest jump in the song — it\'s where you sing the name.<ul><li>Two open notes, then your hand travels: finger 1 on fret 9, finger 4 reaching the double dot at fret 12</li><li>Walk down 12 → 9, then shift home: finger 4 → fret 5, finger 3 → fret 4, finger 1 → fret 2</li></ul>You\'ve got it when: Line 3, four times through, without stopping.',
+        text_es: 'La Línea 3 da el salto más grande de la canción — es donde cantas el nombre.<ul><li>Dos notas al aire, y luego tu mano viaja: dedo 1 en el traste 9, dedo 4 estirándose al punto doble del traste 12</li><li>Baja del 12 al 9, y después regresa a la posición base: dedo 4 → traste 5, dedo 3 → traste 4, dedo 1 → traste 2</li></ul>Lo tienes cuando: la Línea 3, cuatro veces seguidas, sin detenerte.',
         tab: {
-          caption: 'Phrase C · low E string only',
-          caption_es: 'Frase C · solo la cuerda Mi grave',
+          caption: 'Line 3 · low E string only',
+          caption_es: 'Línea 3 · solo la cuerda Mi grave',
           notes: [
             { string: 'E', fret: 0,  note: 'E',  midi: 40, beats: 0.5 },
             { string: 'E', fret: 0,  note: 'E',  midi: 40, beats: 0.5 },
@@ -381,13 +381,13 @@ window.CLASS_ACTIVITIES = [
         },
       },
       {
-        label:    'Phrase D',
-        label_es: 'Frase D',
-        text: 'Phrase D starts higher than any other phrase in the song, then walks home.<ul><li>Finger 2 on fret 10, finger 1 on fret 9</li><li>Shift down: finger 1 → fret 5, finger 3 → fret 7. The frets are narrow that high, so stay on your fingertips</li></ul>You\'ve got it when: phrase C into phrase D, four times through, without stopping.',
-        text_es: 'La frase D empieza más arriba que cualquier otra frase de la canción, y después regresa caminando a casa.<ul><li>Dedo 2 en el traste 10, dedo 1 en el traste 9</li><li>Baja: dedo 1 → traste 5, dedo 3 → traste 7. Allá arriba los trastes son angostos, así que quédate sobre las puntas de los dedos</li></ul>Lo tienes cuando: de la frase C a la frase D, cuatro veces seguidas, sin detenerte.',
+        label:    'Line 4',
+        label_es: 'Línea 4',
+        text: 'Line 4 starts higher than any other line in the song, then walks home.<ul><li>Finger 2 on fret 10, finger 1 on fret 9</li><li>Shift down: finger 1 → fret 5, finger 3 → fret 7. The frets are narrow that high, so stay on your fingertips</li></ul>You\'ve got it when: Line 3 into Line 4, four times through, without stopping.',
+        text_es: 'La Línea 4 empieza más arriba que cualquier otra línea de la canción, y después regresa caminando a casa.<ul><li>Dedo 2 en el traste 10, dedo 1 en el traste 9</li><li>Baja: dedo 1 → traste 5, dedo 3 → traste 7. Allá arriba los trastes son angostos, así que quédate sobre las puntas de los dedos</li></ul>Lo tienes cuando: de la Línea 3 a la Línea 4, cuatro veces seguidas, sin detenerte.',
         tab: {
-          caption: 'Phrase D · low E string only',
-          caption_es: 'Frase D · solo la cuerda Mi grave',
+          caption: 'Line 4 · low E string only',
+          caption_es: 'Línea 4 · solo la cuerda Mi grave',
           notes: [
             { string: 'E', fret: 10, note: 'D',  midi: 50, beats: 0.5 },
             { string: 'E', fret: 10, note: 'D',  midi: 50, beats: 0.5 },
@@ -401,15 +401,15 @@ window.CLASS_ACTIVITIES = [
       {
         label:    'The whole song',
         label_es: 'La canción completa',
-        text: 'All four phrases, start to finish — the whole song on one string, no stopping in between. Then raise the tempo.<ul><li>Every clean pass: raise the BPM by 10</li><li>Fast already? Play it for the person next to you and have them sing along — someone in this room has a birthday coming</li></ul>You\'ve got it when: phrases A, B, C and D back to back without stopping, and the tempo raised at least three times without breaking down — then keep climbing.',
-        text_es: 'Las cuatro frases, de principio a fin — la canción completa en una sola cuerda, sin detenerte entre medio. Después sube el tempo.<ul><li>Cada pasada limpia: sube el BPM 10 puntos</li><li>¿Ya vas rápido? Tócala para la persona de al lado y que cante contigo — alguien en este salón cumple años pronto</li></ul>Lo tienes cuando: las frases A, B, C y D seguidas sin detenerte, y el tempo subido al menos tres veces sin perder el ritmo — y de ahí, sigue subiendo.',
+        text: 'All four lines, start to finish — the whole song on one string, no stopping in between. Then raise the tempo.<ul><li>Every clean pass: raise the BPM by 10</li><li>Fast already? Play it for the person next to you and have them sing along — someone in this room has a birthday coming</li></ul>You\'ve got it when: Lines 1, 2, 3 and 4 back to back without stopping, and the tempo raised at least three times without breaking down — then keep climbing.',
+        text_es: 'Las cuatro líneas, de principio a fin — la canción completa en una sola cuerda, sin detenerte entre medio. Después sube el tempo.<ul><li>Cada pasada limpia: sube el BPM 10 puntos</li><li>¿Ya vas rápido? Tócala para la persona de al lado y que cante contigo — alguien en este salón cumple años pronto</li></ul>Lo tienes cuando: las Líneas 1, 2, 3 y 4 seguidas sin detenerte, y el tempo subido al menos tres veces sin perder el ritmo — y de ahí, sigue subiendo.',
         tab: {
-          caption: 'Whole song · phrases A–D · low E string only',
-          caption_es: 'Canción completa · frases A–D · solo la cuerda Mi grave',
+          caption: 'Whole song · Lines 1–4 · low E string only',
+          caption_es: 'Canción completa · Líneas 1–4 · solo la cuerda Mi grave',
           phrases: [
             {
-              label: 'Phrase A — "Hap-py birth-day to you"',
-              label_es: 'Frase A — "Hap-py birth-day to you"',
+              label: 'Line 1 — "Hap-py birth-day to you"',
+              label_es: 'Línea 1 — "Hap-py birth-day to you"',
               notes: [
                 { string: 'E', fret: 0, note: 'E',  midi: 40, beats: 0.5 },
                 { string: 'E', fret: 0, note: 'E',  midi: 40, beats: 0.5 },
@@ -420,8 +420,8 @@ window.CLASS_ACTIVITIES = [
               ]
             },
             {
-              label: 'Phrase B — "Hap-py birth-day to you" (the ending climbs higher)',
-              label_es: 'Frase B — "Hap-py birth-day to you" (el final sube más alto)',
+              label: 'Line 2 — "Hap-py birth-day to you" (the ending climbs higher)',
+              label_es: 'Línea 2 — "Hap-py birth-day to you" (el final sube más alto)',
               notes: [
                 { string: 'E', fret: 0, note: 'E',  midi: 40, beats: 0.5 },
                 { string: 'E', fret: 0, note: 'E',  midi: 40, beats: 0.5 },
@@ -432,8 +432,8 @@ window.CLASS_ACTIVITIES = [
               ]
             },
             {
-              label: 'Phrase C — "Hap-py birth-day dear ______"',
-              label_es: 'Frase C — "Hap-py birth-day dear ______"',
+              label: 'Line 3 — "Hap-py birth-day dear ______"',
+              label_es: 'Línea 3 — "Hap-py birth-day dear ______"',
               notes: [
                 { string: 'E', fret: 0,  note: 'E',  midi: 40, beats: 0.5 },
                 { string: 'E', fret: 0,  note: 'E',  midi: 40, beats: 0.5 },
@@ -445,8 +445,8 @@ window.CLASS_ACTIVITIES = [
               ]
             },
             {
-              label: 'Phrase D — "Hap-py birth-day to you"',
-              label_es: 'Frase D — "Hap-py birth-day to you"',
+              label: 'Line 4 — "Hap-py birth-day to you"',
+              label_es: 'Línea 4 — "Hap-py birth-day to you"',
               notes: [
                 { string: 'E', fret: 10, note: 'D',  midi: 50, beats: 0.5 },
                 { string: 'E', fret: 10, note: 'D',  midi: 50, beats: 0.5 },
@@ -517,8 +517,8 @@ window.CLASS_ACTIVITIES = [
       {
         label:    'The Spider',
         label_es: 'La Araña',
-        text: 'Event 2 — the Spider. Same four fingers, alternating between two strings.<ul><li>Watch for this: finger 3 tends to follow finger 2 onto the A string — keep it on the low E</li><li>Shift up one fret and repeat</li></ul>You\'ve got it when: one full pass with every note on the right string, any speed.',
-        text_es: 'Evento 2 — la Araña. Los mismos cuatro dedos, alternando entre dos cuerdas.<ul><li>Ojo con esto: el dedo 3 tiende a seguir al dedo 2 hacia la cuerda La — mantenlo en el Mi grave</li><li>Sube un traste y repite</li></ul>Lo tienes cuando: una pasada completa con cada nota en la cuerda correcta, a cualquier velocidad.',
+        text: 'Event 2 — the Spider. Same four fingers, alternating between two strings.<ul><li>Watch for this: finger 3 tends to follow finger 2 onto the A string — keep it on the low E</li><li>The second half of the tab is the same shape one fret higher</li></ul>You\'ve got it when: one full pass with every note on the right string, any speed.',
+        text_es: 'Evento 2 — la Araña. Los mismos cuatro dedos, alternando entre dos cuerdas.<ul><li>Ojo con esto: el dedo 3 tiende a seguir al dedo 2 hacia la cuerda La — mantenlo en el Mi grave</li><li>La segunda mitad de la tablatura es la misma forma un traste más arriba</li></ul>Lo tienes cuando: una pasada completa con cada nota en la cuerda correcta, a cualquier velocidad.',
         tab: {
           caption: 'The Spider · cross the strings',
           caption_es: 'La Araña · cruza las cuerdas',
@@ -613,8 +613,8 @@ window.CLASS_ACTIVITIES = [
       {
         label:    'New strings',
         label_es: 'Cuerdas nuevas',
-        text: 'Move the same climb over to a new string.<ul><li>The A string first, then the D string</li><li>The shape never changes — only which string your fingers land on</li></ul>You\'ve got it when: no buzz on any of the four notes, on both strings.',
-        text_es: 'Mueve la misma subida a otra cuerda.<ul><li>Primero la cuerda La, después la cuerda Re</li><li>La forma nunca cambia — solo cambia en qué cuerda caen tus dedos</li></ul>Lo tienes cuando: sin zumbido en ninguna de las cuatro notas, en las dos cuerdas.',
+        text: 'Move the same climb over to a new string.<ul><li>The A string first, then the D string</li><li>The shape never changes — only which string your fingers land on</li></ul>You\'ve got it when: no buzz on any of the four notes, on both strings, three times in a row.',
+        text_es: 'Mueve la misma subida a otra cuerda.<ul><li>Primero la cuerda La, después la cuerda Re</li><li>La forma nunca cambia — solo cambia en qué cuerda caen tus dedos</li></ul>Lo tienes cuando: sin zumbido en ninguna de las cuatro notas, en las dos cuerdas, tres veces seguidas.',
         tab: {
           caption: 'A string, then D string',
           caption_es: 'Cuerda La, después cuerda Re',
@@ -733,8 +733,8 @@ window.CLASS_ACTIVITIES = [
       {
         label:    '9th position Ladder',
         label_es: 'Escalera en 9.ª posición',
-        text: 'The Ladder in 9th position, up to the double dot at fret 12.<ul><li>These are the narrowest frets on the neck, so your fingers are crowded</li><li>Keep them ON THEIR TIPS or they\'ll bump each other</li></ul>You\'ve got it when: no buzz on any of the four.',
-        text_es: 'La Escalera en la 9.ª posición, hasta el punto doble del traste 12.<ul><li>Estos son los trastes más angostos del mástil, así que tus dedos van apretados</li><li>Mantenlos SOBRE LAS PUNTAS o se van a chocar entre sí</li></ul>Lo tienes cuando: sin zumbido en ninguna de las cuatro.',
+        text: 'The Ladder in 9th position, up to the double dot at fret 12.<ul><li>These are the narrowest frets on the neck, so your fingers are crowded</li><li>Keep them ON THEIR TIPS or they\'ll bump each other</li></ul>You\'ve got it when: no buzz on any of the four, three times in a row.',
+        text_es: 'La Escalera en la 9.ª posición, hasta el punto doble del traste 12.<ul><li>Estos son los trastes más angostos del mástil, así que tus dedos van apretados</li><li>Mantenlos SOBRE LAS PUNTAS o se van a chocar entre sí</li></ul>Lo tienes cuando: sin zumbido en ninguna de las cuatro, tres veces seguidas.',
         tab: {
           caption: '9th position · narrowest frets',
           caption_es: '9.ª posición · los trastes más angostos',
@@ -790,8 +790,8 @@ window.CLASS_ACTIVITIES = [
       {
         label:    'Pair 1-3',
         label_es: 'Pareja 1-3',
-        text: 'Pair 1-3 — finger independence: one finger moves while the others don\'t.<ul><li>Alternate the two notes in the tab, back and forth</li><li>The two fingers not playing stay down on their frets</li></ul>You\'ve got it when: eight clean alternations in a row.',
-        text_es: 'Pareja 1-3 — independencia de dedos: un dedo se mueve mientras los otros no.<ul><li>Alterna las dos notas de la tablatura, ida y vuelta</li><li>Los dos dedos que no tocan se quedan abajo en sus trastes</li></ul>Lo tienes cuando: ocho alternancias limpias seguidas.',
+        text: 'Pair 1-3 — finger independence: one finger moves while the other doesn\'t.<ul><li>Alternate the two notes in the tab, back and forth</li><li>Only fingers on frets below the one you\'re sounding stay down; the others hover close above their frets</li></ul>You\'ve got it when: eight clean alternations in a row.',
+        text_es: 'Pareja 1-3 — independencia de dedos: un dedo se mueve mientras el otro no.<ul><li>Alterna las dos notas de la tablatura, ida y vuelta</li><li>Solo los dedos en trastes por debajo del que estás sonando se quedan abajo; los demás quedan suspendidos justo encima de su traste</li></ul>Lo tienes cuando: ocho alternancias limpias seguidas.',
         tab: {
           caption: 'Pair 1-3',
           caption_es: 'Pareja 1-3',
@@ -863,8 +863,8 @@ window.CLASS_ACTIVITIES = [
       {
         label:    'The skip',
         label_es: 'El salto',
-        text: 'The skip — the two notes in the tab sit on strings that aren\'t neighbours.<ul><li>Jump over the A string — it stays SILENT</li><li>Pick straight down onto the string you want</li></ul>You\'ve got it when: eight jumps in a row and the A string never rings. Hear it ring twice? Drop the BPM by 10 and try again.',
-        text_es: 'El salto — las dos notas de la tablatura están en cuerdas que no son vecinas.<ul><li>Salta por encima de la cuerda La — se queda EN SILENCIO</li><li>Pulsa directo hacia abajo sobre la cuerda que quieres</li></ul>Lo tienes cuando: ocho saltos seguidos y la cuerda La nunca suena. ¿La oyes sonar dos veces? Baja el BPM 10 puntos y vuelve a intentarlo.',
+        text: 'The skip — the two notes in the tab sit on strings that aren\'t neighbours.<ul><li>Set the BPM to 50</li><li>Jump over the A string — it stays SILENT</li><li>Pick straight down onto the string you want</li></ul>You\'ve got it when: eight jumps in a row and the A string never rings. Hear it ring twice? Drop the BPM by 10 and try again.',
+        text_es: 'El salto — las dos notas de la tablatura están en cuerdas que no son vecinas.<ul><li>Pon el BPM en 50</li><li>Salta por encima de la cuerda La — se queda EN SILENCIO</li><li>Pulsa directo hacia abajo sobre la cuerda que quieres</li></ul>Lo tienes cuando: ocho saltos seguidos y la cuerda La nunca suena. ¿La oyes sonar dos veces? Baja el BPM 10 puntos y vuelve a intentarlo.',
         tab: {
           caption: 'The skip · over the A string',
           caption_es: 'El salto · por encima de la cuerda La',
@@ -879,8 +879,8 @@ window.CLASS_ACTIVITIES = [
       {
         label:    'Spider with a skip',
         label_es: 'Araña con salto',
-        text: 'The Spider with a skip.<ul><li>Same alternating pattern as always, but between the low E and D strings instead of neighbours</li><li>Then shift up one fret and repeat</li></ul>You\'ve got it when: one full pass with every note on the right string, any speed.',
-        text_es: 'La Araña con salto.<ul><li>El mismo patrón alternado de siempre, pero entre la cuerda Mi grave y la cuerda Re, no entre vecinas</li><li>Después sube un traste y repite</li></ul>Lo tienes cuando: una pasada completa con cada nota en la cuerda correcta, a cualquier velocidad.',
+        text: 'The Spider with a skip.<ul><li>Same alternating pattern as always, but between the low E and D strings instead of neighbours</li><li>The second half of the tab is the same shape one fret higher</li></ul>You\'ve got it when: one full pass with every note on the right string, any speed.',
+        text_es: 'La Araña con salto.<ul><li>El mismo patrón alternado de siempre, pero entre la cuerda Mi grave y la cuerda Re, no entre vecinas</li><li>La segunda mitad de la tablatura es la misma forma un traste más arriba</li></ul>Lo tienes cuando: una pasada completa con cada nota en la cuerda correcta, a cualquier velocidad.',
         tab: {
           caption: 'Spider · low E to D, skipping A',
           caption_es: 'Araña · de Mi grave a Re, saltando La',
@@ -1030,8 +1030,8 @@ window.CLASS_ACTIVITIES = [
     number: 1,
     title:    'Happy Birthday — First Notes',
     title_es: 'Happy Birthday — Primeras notas',
-    intro:    'You can already pluck the open strings. Today you press one down: one string, one phrase, and the dots on the neck show you where to land.',
-    intro_es: 'Ya sabes tocar las cuerdas al aire. Hoy vas a pisar una: una cuerda, una frase y los puntos del mástil te muestran dónde caer.',
+    intro:    'You can already pluck the open strings. Today you press one down: one string, one line, and the dots on the neck show you where to land.',
+    intro_es: 'Ya sabes tocar las cuerdas al aire. Hoy vas a pisar una: una cuerda, una línea y los puntos del mástil te muestran dónde caer.',
     steps: [
       {
         label:    'The low E string',
@@ -1039,8 +1039,8 @@ window.CLASS_ACTIVITIES = [
         figure: 'img/ca-hb-low-e.svg',
         figureAlt: 'Low E string fretboard diagram showing open string, fret 2 (F#), fret 4 (G#), and fret 5 (A), with faint landing-mark dots at frets 3, 5, 7, 9, and 12.',
         figureAlt_es: 'Diagrama del diapasón de la cuerda Mi grave mostrando la cuerda al aire, el traste 2 (F#), el traste 4 (G#) y el traste 5 (A), con puntos tenues de referencia en los trastes 3, 5, 7, 9 y 12.',
-        text: 'This is the low E string — the thick one, closest to your face.<ul><li>The whole phrase lives here: open (0 = no finger) is E, fret 2 is F#, fret 4 is G#, fret 5 is A</li><li>The faint dots — frets 3, 5, 7, 9 and 12 — are a map; the dot at fret 5 is your landing mark</li></ul>',
-        text_es: 'Esta es la cuerda Mi grave — la más gruesa, la que queda más cerca de tu cara.<ul><li>Toda la frase vive aquí: al aire (0 = sin dedo) es E, el traste 2 es F#, el traste 4 es G# y el traste 5 es A</li><li>Los puntos tenues — trastes 3, 5, 7, 9 y 12 — son un mapa; el punto del traste 5 es tu marca para caer</li></ul>',
+        text: 'This is the low E string — the thick one, closest to your face.<ul><li>The whole line lives here: open (0 = no finger) is E, fret 2 is F#, fret 4 is G#, fret 5 is A</li><li>The faint dots — frets 3, 5, 7, 9 and 12 — are a map; the dot at fret 5 is your landing mark</li></ul>',
+        text_es: 'Esta es la cuerda Mi grave — la más gruesa, la que queda más cerca de tu cara.<ul><li>Toda la línea vive aquí: al aire (0 = sin dedo) es E, el traste 2 es F#, el traste 4 es G# y el traste 5 es A</li><li>Los puntos tenues — trastes 3, 5, 7, 9 y 12 — son un mapa; el punto del traste 5 es tu marca para caer</li></ul>',
       },
       {
         label:    'Land on fret 5',
@@ -1080,8 +1080,8 @@ window.CLASS_ACTIVITIES = [
         text: 'Put the first line together — the four notes you know, then two more for “to you”: fret 5, then fret 4 right next door.<ul><li>Six notes — that\'s the first line of the song</li><li>The notes are not all the same length. “Hap-py” is quick — both notes inside one click. “Birth”, “day” and “to” get one click each. “You” is held for two.</li></ul>You\'ve got it when: three clean runs in a row, saying the words as you play.',
         text_es: 'Arma la primera línea — las cuatro notas que ya sabes, y dos más para “to you”: traste 5 y luego traste 4, justo al lado.<ul><li>Seis notas — esa es la primera línea de la canción</li><li>Las notas no duran todas lo mismo. “Hap-py” es rápido — las dos notas caben en un clic. “Birth”, “day” y “to” llevan un clic cada una. “You” se sostiene dos.</li></ul>Lo tienes cuando: tres pasadas limpias seguidas, diciendo las palabras mientras tocas.',
         tab: {
-          caption: 'Phrase 1 · all on the low E string',
-          caption_es: 'Frase 1 · todo en la cuerda Mi grave',
+          caption: 'Line 1 · all on the low E string',
+          caption_es: 'Línea 1 · todo en la cuerda Mi grave',
           phrases: [
             {
               label: '"Hap-py birth-day to you"',
@@ -1168,13 +1168,13 @@ window.CLASS_ACTIVITIES = [
           caption: 'The whole riff · 7-7-10-7-5-3-2',
           caption_es: 'El riff completo · 7-7-10-7-5-3-2',
           notes: [
-            { string: 'A', fret: 7,  note: 'E', midi: 52 },
-            { string: 'A', fret: 7,  note: 'E', midi: 52 },
-            { string: 'A', fret: 10, note: 'G', midi: 55 },
-            { string: 'A', fret: 7,  note: 'E', midi: 52 },
-            { string: 'A', fret: 5,  note: 'D', midi: 50 },
-            { string: 'A', fret: 3,  note: 'C', midi: 48 },
-            { string: 'A', fret: 2,  note: 'B', midi: 47 }
+            { string: 'A', fret: 7,  note: 'E', midi: 52, beats: 1.5 },
+            { string: 'A', fret: 7,  note: 'E', midi: 52, beats: 0.5 },
+            { string: 'A', fret: 10, note: 'G', midi: 55, beats: 0.75 },
+            { string: 'A', fret: 7,  note: 'E', midi: 52, beats: 0.75 },
+            { string: 'A', fret: 5,  note: 'D', midi: 50, beats: 0.5 },
+            { string: 'A', fret: 3,  note: 'C', midi: 48, beats: 2 },
+            { string: 'A', fret: 2,  note: 'B', midi: 47, beats: 2 }
           ]
         },
       },
@@ -1184,8 +1184,8 @@ window.CLASS_ACTIVITIES = [
         snippet: { track: 'seven-nation-army', fromBar: 1, bars: 8,
                    label:    'Four laps with the band',
                    label_es: 'Cuatro vueltas con la banda' },
-        text: 'Raise the tempo.<ul><li>Every clean pass: raise the BPM by 10 and go again</li><li>Playing it fast already? Add the feel — hold the first E long, and the last two notes long.</li><li>Then open the Seven Nation Army Song Journey page and play it over the backing track</li></ul>You\'ve got it when: you\'ve raised the tempo at least three times without breaking down — then keep climbing.',
-        text_es: 'Sube el tempo.<ul><li>Cada pasada limpia: sube el BPM 10 puntos y vuelve a intentarlo</li><li>¿Ya lo tocas rápido? Dale la sensación — sostén más el primer E, y sostén más las últimas dos notas.</li><li>Después abre el Recorrido de la canción de Seven Nation Army y tócalo sobre la pista de acompañamiento</li></ul>Lo tienes cuando: subiste el tempo al menos tres veces sin perder el ritmo — y de ahí, sigue subiendo.',
+        text: 'Raise the tempo.<ul><li>Every clean pass: raise the BPM by 10 on the player in The whole riff</li><li>Playing it fast already? Add the feel — hold the first E long, and the last two notes long.</li><li>Then open the Seven Nation Army Song Journey page and play it over the backing track</li></ul>You\'ve got it when: you\'ve raised the tempo at least three times without breaking down — then keep climbing.',
+        text_es: 'Sube el tempo.<ul><li>Cada pasada limpia: sube el BPM 10 puntos en el reproductor de El riff completo</li><li>¿Ya lo tocas rápido? Dale la sensación — sostén más el primer E, y sostén más las últimas dos notas.</li><li>Después abre el Recorrido de la canción de Seven Nation Army y tócalo sobre la pista de acompañamiento</li></ul>Lo tienes cuando: subiste el tempo al menos tres veces sin perder el ritmo — y de ahí, sigue subiendo.',
       },
     ],
   },
@@ -1279,8 +1279,8 @@ window.CLASS_ACTIVITIES = [
       {
         label:    'Keep going',
         label_es: 'Sigue',
-        text: 'Keep going — there is no set stopping point here.<ul><li>Set the player above to 60 BPM and land one note per beat, up and back</li><li>Every clean pass: raise the BPM by 10</li><li>Fast already? Say the names backwards — E D C B A G F E</li></ul>You\'ve got it when: a full pass at a faster BPM than you started — then keep climbing.',
-        text_es: 'Sigue — aquí no hay un punto de parada fijo.<ul><li>Pon el reproductor de arriba en 60 BPM y cae en una nota por tiempo, subiendo y bajando</li><li>Cada pasada limpia: sube el BPM 10 puntos</li><li>¿Ya vas rápido? Di los nombres al revés — E D C B A G F E</li></ul>Lo tienes cuando: una pasada entera a un BPM más alto que al empezar — y de ahí, sigue subiendo.',
+        text: 'Keep going — there is no set stopping point here.<ul><li>Set the player in Fill in the row to 60 BPM and land one note per beat, up and back</li><li>Every clean pass: raise the BPM by 10</li><li>Fast already? Say the names backwards — E D C B A G F E</li></ul>You\'ve got it when: a full pass at a faster BPM than you started — then keep climbing.',
+        text_es: 'Sigue — aquí no hay un punto de parada fijo.<ul><li>Pon el reproductor de Completa la fila en 60 BPM y cae en una nota por tiempo, subiendo y bajando</li><li>Cada pasada limpia: sube el BPM 10 puntos</li><li>¿Ya vas rápido? Di los nombres al revés — E D C B A G F E</li></ul>Lo tienes cuando: una pasada entera a un BPM más alto que al empezar — y de ahí, sigue subiendo.',
       },
     ],
   },
@@ -1389,20 +1389,20 @@ window.CLASS_ACTIVITIES = [
         },
       },
       {
-        label:    'Phrases C and D',
-        label_es: 'Frases C y D',
+        label:    'Lines 3 and 4',
+        label_es: 'Líneas 3 y 4',
         figure: 'img/ca-hb-fingers-a.svg',
-        figureAlt: 'Diagram of the fretting hand on the A string for phrases C and D, showing finger 4 at fret 7, finger 3 at fret 4, and the string crossing back to the low E string.',
-        figureAlt_es: 'Diagrama de la mano de trastear en la cuerda La para las frases C y D, mostrando el dedo 4 en el traste 7, el dedo 3 en el traste 4 y el cruce de regreso a la cuerda Mi grave.',
-        text: 'Phrases C and D, now on the A string — every note stays inside the first seven frets.<ul><li>Phrase C: finger 4 reaches fret 7 on the A string, then finger 3 drops to fret 4</li><li>Phrase D stays down in that same spot on the A string</li><li>C♯ (“C sharp”), fret 4, is the one new name</li></ul>You\'ve got it when: phrase C into phrase D, three times through, without stopping.',
-        text_es: 'Frases C y D, ahora en la cuerda La — todas las notas se quedan dentro de los primeros siete trastes.<ul><li>Frase C: el dedo 4 alcanza el traste 7 de la cuerda La, y luego el dedo 3 baja al traste 4</li><li>La frase D se queda en ese mismo lugar de la cuerda La</li><li>C♯ (“C sostenido”), traste 4, es el único nombre nuevo</li></ul>Lo tienes cuando: de la frase C a la frase D, tres veces seguidas, sin detenerte.',
+        figureAlt: 'Diagram of the fretting hand on the A string for lines 3 and 4, showing finger 4 at fret 7, finger 3 at fret 4, and the string crossing back to the low E string.',
+        figureAlt_es: 'Diagrama de la mano de trastear en la cuerda La para las líneas 3 y 4, mostrando el dedo 4 en el traste 7, el dedo 3 en el traste 4 y el cruce de regreso a la cuerda Mi grave.',
+        text: 'Lines 3 and 4, now on the A string — every note stays inside the first seven frets.<ul><li>Line 3: finger 4 reaches fret 7 on the A string, then finger 3 drops to fret 4</li><li>Line 4 stays down in that same spot on the A string</li><li>C♯ (“C sharp”), fret 4, is the one new name</li></ul>You\'ve got it when: Line 3 into Line 4, three times through, without stopping.',
+        text_es: 'Líneas 3 y 4, ahora en la cuerda La — todas las notas se quedan dentro de los primeros siete trastes.<ul><li>Línea 3: el dedo 4 alcanza el traste 7 de la cuerda La, y luego el dedo 3 baja al traste 4</li><li>La Línea 4 se queda en ese mismo lugar de la cuerda La</li><li>C♯ (“C sostenido”), traste 4, es el único nombre nuevo</li></ul>Lo tienes cuando: de la Línea 3 a la Línea 4, tres veces seguidas, sin detenerte.',
         tab: {
           caption: 'Second half · the A-string way',
           caption_es: 'Segunda mitad · la versión con la cuerda La',
           phrases: [
             {
-              label: 'Phrase C — "Hap-py birth-day dear ______"',
-              label_es: 'Frase C — "Hap-py birth-day dear ______"',
+              label: 'Line 3 — "Hap-py birth-day dear ______"',
+              label_es: 'Línea 3 — "Hap-py birth-day dear ______"',
               notes: [
                 { string: 'E', fret: 0, note: 'E',  midi: 40, beats: 0.5 },
                 { string: 'E', fret: 0, note: 'E',  midi: 40, beats: 0.5 },
@@ -1414,8 +1414,8 @@ window.CLASS_ACTIVITIES = [
               ]
             },
             {
-              label: 'Phrase D — "Hap-py birth-day to you"',
-              label_es: 'Frase D — "Hap-py birth-day to you"',
+              label: 'Line 4 — "Hap-py birth-day to you"',
+              label_es: 'Línea 4 — "Hap-py birth-day to you"',
               notes: [
                 { string: 'A', fret: 5, note: 'D',  midi: 50, beats: 0.5 },
                 { string: 'A', fret: 5, note: 'D',  midi: 50, beats: 0.5 },
@@ -1431,15 +1431,15 @@ window.CLASS_ACTIVITIES = [
       {
         label:    'The whole song',
         label_es: 'La canción completa',
-        text: 'The whole song the A-string way — phrases A and B stay on the low E, C and D cross to the A string. Start at BPM 70.<ul><li>Say each A-string note out loud as you land it</li><li>Every clean pass, raise the BPM by 10 — then play it for the person next to you</li></ul>You\'ve got it when: the whole song without stopping, every A-string note named out loud — then keep climbing.',
-        text_es: 'La canción completa en la versión con la cuerda La — las frases A y B se quedan en la Mi grave, C y D cruzan a la cuerda La. Empieza en BPM 70.<ul><li>Di en voz alta cada nota de la cuerda La al caer en ella</li><li>Cada pasada limpia, sube el BPM 10 puntos — y después tócala para la persona de al lado</li></ul>Lo tienes cuando: la canción completa sin detenerte, nombrando en voz alta cada nota de la cuerda La — y de ahí, sigue subiendo.',
+        text: 'The whole song the A-string way — Lines 1 and 2 stay on the low E, 3 and 4 cross to the A string. Start at BPM 70.<ul><li>Say each A-string note out loud as you land it</li><li>Every clean pass, raise the BPM by 10 — then play it for the person next to you</li></ul>You\'ve got it when: the whole song without stopping, every A-string note named out loud — then keep climbing.',
+        text_es: 'La canción completa en la versión con la cuerda La — las Líneas 1 y 2 se quedan en la Mi grave, 3 y 4 cruzan a la cuerda La. Empieza en BPM 70.<ul><li>Di en voz alta cada nota de la cuerda La al caer en ella</li><li>Cada pasada limpia, sube el BPM 10 puntos — y después tócala para la persona de al lado</li></ul>Lo tienes cuando: la canción completa sin detenerte, nombrando en voz alta cada nota de la cuerda La — y de ahí, sigue subiendo.',
         tab: {
-          caption: 'Whole song · phrases A–D · low E and A strings',
-          caption_es: 'Canción completa · frases A–D · cuerdas Mi grave y La',
+          caption: 'Whole song · Lines 1–4 · low E and A strings',
+          caption_es: 'Canción completa · Líneas 1–4 · cuerdas Mi grave y La',
           phrases: [
             {
-              label: 'Phrase A — "Hap-py birth-day to you"',
-              label_es: 'Frase A — "Hap-py birth-day to you"',
+              label: 'Line 1 — "Hap-py birth-day to you"',
+              label_es: 'Línea 1 — "Hap-py birth-day to you"',
               notes: [
                 { string: 'E', fret: 0, note: 'E',  midi: 40, beats: 0.5 },
                 { string: 'E', fret: 0, note: 'E',  midi: 40, beats: 0.5 },
@@ -1450,8 +1450,8 @@ window.CLASS_ACTIVITIES = [
               ]
             },
             {
-              label: 'Phrase B — "Hap-py birth-day to you" (the ending climbs higher)',
-              label_es: 'Frase B — "Hap-py birth-day to you" (el final sube más alto)',
+              label: 'Line 2 — "Hap-py birth-day to you" (the ending climbs higher)',
+              label_es: 'Línea 2 — "Hap-py birth-day to you" (el final sube más alto)',
               notes: [
                 { string: 'E', fret: 0, note: 'E',  midi: 40, beats: 0.5 },
                 { string: 'E', fret: 0, note: 'E',  midi: 40, beats: 0.5 },
@@ -1462,8 +1462,8 @@ window.CLASS_ACTIVITIES = [
               ]
             },
             {
-              label: 'Phrase C — "Hap-py birth-day dear ______"',
-              label_es: 'Frase C — "Hap-py birth-day dear ______"',
+              label: 'Line 3 — "Hap-py birth-day dear ______"',
+              label_es: 'Línea 3 — "Hap-py birth-day dear ______"',
               notes: [
                 { string: 'E', fret: 0, note: 'E',  midi: 40, beats: 0.5 },
                 { string: 'E', fret: 0, note: 'E',  midi: 40, beats: 0.5 },
@@ -1475,8 +1475,8 @@ window.CLASS_ACTIVITIES = [
               ]
             },
             {
-              label: 'Phrase D — "Hap-py birth-day to you"',
-              label_es: 'Frase D — "Hap-py birth-day to you"',
+              label: 'Line 4 — "Hap-py birth-day to you"',
+              label_es: 'Línea 4 — "Hap-py birth-day to you"',
               notes: [
                 { string: 'A', fret: 5, note: 'D',  midi: 50, beats: 0.5 },
                 { string: 'A', fret: 5, note: 'D',  midi: 50, beats: 0.5 },
@@ -1531,15 +1531,15 @@ window.CLASS_ACTIVITIES = [
       {
         label:    'Play it from memory',
         label_es: 'Tócala de memoria',
-        text: 'Happy Birthday, all four phrases, low E string. Play it once with the tab below, then cover the screen and play it again from memory. The A-string version counts too.\nYou\'ve got it when: all four phrases from memory, any speed, without stopping. Stuck? Uncover that one phrase, then start over.',
-        text_es: 'Happy Birthday, las cuatro frases, cuerda Mi grave. Tócala una vez con la tablatura de abajo, después tapa la pantalla y tócala de memoria. La versión con la cuerda La también cuenta.\nLo tienes cuando: las cuatro frases de memoria, a cualquier velocidad, sin detenerte. ¿Te atoraste? Destapa solo esa frase y empieza otra vez.',
+        text: 'Happy Birthday, all four lines, low E string. Play it once with the tab below, then cover the screen and play it again from memory. The A-string version counts too.\nYou\'ve got it when: all four lines from memory, any speed, without stopping. Stuck? Uncover that one line, then start over.',
+        text_es: 'Happy Birthday, las cuatro líneas, cuerda Mi grave. Tócala una vez con la tablatura de abajo, después tapa la pantalla y tócala de memoria. La versión con la cuerda La también cuenta.\nLo tienes cuando: las cuatro líneas de memoria, a cualquier velocidad, sin detenerte. ¿Te atoraste? Destapa solo esa línea y empieza otra vez.',
         tab: {
-          caption: 'Whole song · phrases A–D · low E string only',
-          caption_es: 'Canción completa · frases A–D · solo la cuerda Mi grave',
+          caption: 'Whole song · Lines 1–4 · low E string only',
+          caption_es: 'Canción completa · Líneas 1–4 · solo la cuerda Mi grave',
           phrases: [
             {
-              label: 'Phrase A — "Hap-py birth-day to you"',
-              label_es: 'Frase A — "Hap-py birth-day to you"',
+              label: 'Line 1 — "Hap-py birth-day to you"',
+              label_es: 'Línea 1 — "Hap-py birth-day to you"',
               notes: [
                 { string: 'E', fret: 0, note: 'E',  midi: 40, beats: 0.5 },
                 { string: 'E', fret: 0, note: 'E',  midi: 40, beats: 0.5 },
@@ -1550,8 +1550,8 @@ window.CLASS_ACTIVITIES = [
               ]
             },
             {
-              label: 'Phrase B — "Hap-py birth-day to you" (the ending climbs higher)',
-              label_es: 'Frase B — "Hap-py birth-day to you" (el final sube más alto)',
+              label: 'Line 2 — "Hap-py birth-day to you" (the ending climbs higher)',
+              label_es: 'Línea 2 — "Hap-py birth-day to you" (el final sube más alto)',
               notes: [
                 { string: 'E', fret: 0, note: 'E',  midi: 40, beats: 0.5 },
                 { string: 'E', fret: 0, note: 'E',  midi: 40, beats: 0.5 },
@@ -1562,8 +1562,8 @@ window.CLASS_ACTIVITIES = [
               ]
             },
             {
-              label: 'Phrase C — "Hap-py birth-day dear ______"',
-              label_es: 'Frase C — "Hap-py birth-day dear ______"',
+              label: 'Line 3 — "Hap-py birth-day dear ______"',
+              label_es: 'Línea 3 — "Hap-py birth-day dear ______"',
               notes: [
                 { string: 'E', fret: 0,  note: 'E',  midi: 40, beats: 0.5 },
                 { string: 'E', fret: 0,  note: 'E',  midi: 40, beats: 0.5 },
@@ -1575,8 +1575,8 @@ window.CLASS_ACTIVITIES = [
               ]
             },
             {
-              label: 'Phrase D — "Hap-py birth-day to you"',
-              label_es: 'Frase D — "Hap-py birth-day to you"',
+              label: 'Line 4 — "Hap-py birth-day to you"',
+              label_es: 'Línea 4 — "Hap-py birth-day to you"',
               notes: [
                 { string: 'E', fret: 10, note: 'D',  midi: 50, beats: 0.5 },
                 { string: 'E', fret: 10, note: 'D',  midi: 50, beats: 0.5 },
@@ -1634,10 +1634,10 @@ window.CLASS_ACTIVITIES = [
           caption: 'Intro · A C A C · low E string · 4 beats each',
           caption_es: 'Intro · A C A C · cuerda Mi grave · 4 tiempos cada una',
           notes: [
-            { string: 'E', fret: 5, note: 'A', midi: 45 },
-            { string: 'E', fret: 8, note: 'C', midi: 48 },
-            { string: 'E', fret: 5, note: 'A', midi: 45 },
-            { string: 'E', fret: 8, note: 'C', midi: 48 }
+            { string: 'E', fret: 5, note: 'A', midi: 45, beats: 4 },
+            { string: 'E', fret: 8, note: 'C', midi: 48, beats: 4 },
+            { string: 'E', fret: 5, note: 'A', midi: 45, beats: 4 },
+            { string: 'E', fret: 8, note: 'C', midi: 48, beats: 4 }
           ]
         },
       },
@@ -1653,14 +1653,14 @@ window.CLASS_ACTIVITIES = [
           caption: 'Verse · A C, F C · low E string · 4 beats each',
           caption_es: 'Estrofa · A C, F C · cuerda Mi grave · 4 tiempos cada una',
           notes: [
-            { string: 'E', fret: 5, note: 'A', midi: 45 },
-            { string: 'E', fret: 8, note: 'C', midi: 48 },
-            { string: 'E', fret: 5, note: 'A', midi: 45 },
-            { string: 'E', fret: 8, note: 'C', midi: 48 },
-            { string: 'E', fret: 1, note: 'F', midi: 41 },
-            { string: 'E', fret: 8, note: 'C', midi: 48 },
-            { string: 'E', fret: 1, note: 'F', midi: 41 },
-            { string: 'E', fret: 8, note: 'C', midi: 48 }
+            { string: 'E', fret: 5, note: 'A', midi: 45, beats: 4 },
+            { string: 'E', fret: 8, note: 'C', midi: 48, beats: 4 },
+            { string: 'E', fret: 5, note: 'A', midi: 45, beats: 4 },
+            { string: 'E', fret: 8, note: 'C', midi: 48, beats: 4 },
+            { string: 'E', fret: 1, note: 'F', midi: 41, beats: 4 },
+            { string: 'E', fret: 8, note: 'C', midi: 48, beats: 4 },
+            { string: 'E', fret: 1, note: 'F', midi: 41, beats: 4 },
+            { string: 'E', fret: 8, note: 'C', midi: 48, beats: 4 }
           ]
         },
       },
@@ -1820,10 +1820,10 @@ window.CLASS_ACTIVITIES = [
           caption: 'A · C, twice · 4 beats each',
           caption_es: 'A · C, dos veces · 4 tiempos cada una',
           notes: [
-            { string: 'E', fret: 5, note: 'A', midi: 45 },
-            { string: 'A', fret: 3, note: 'C', midi: 48 },
-            { string: 'E', fret: 5, note: 'A', midi: 45 },
-            { string: 'A', fret: 3, note: 'C', midi: 48 }
+            { string: 'E', fret: 5, note: 'A', midi: 45, beats: 4 },
+            { string: 'A', fret: 3, note: 'C', midi: 48, beats: 4 },
+            { string: 'E', fret: 5, note: 'A', midi: 45, beats: 4 },
+            { string: 'A', fret: 3, note: 'C', midi: 48, beats: 4 }
           ]
         },
       },
@@ -1839,10 +1839,10 @@ window.CLASS_ACTIVITIES = [
           caption: 'F · C, twice · 4 beats each',
           caption_es: 'F · C, dos veces · 4 tiempos cada una',
           notes: [
-            { string: 'E', fret: 1, note: 'F', midi: 41 },
-            { string: 'A', fret: 3, note: 'C', midi: 48 },
-            { string: 'E', fret: 1, note: 'F', midi: 41 },
-            { string: 'A', fret: 3, note: 'C', midi: 48 }
+            { string: 'E', fret: 1, note: 'F', midi: 41, beats: 4 },
+            { string: 'A', fret: 3, note: 'C', midi: 48, beats: 4 },
+            { string: 'E', fret: 1, note: 'F', midi: 41, beats: 4 },
+            { string: 'A', fret: 3, note: 'C', midi: 48, beats: 4 }
           ]
         },
       },
@@ -1858,14 +1858,14 @@ window.CLASS_ACTIVITIES = [
           caption: 'Verse · A C A C, F C F C · 4 beats each',
           caption_es: 'Estrofa · A C A C, F C F C · 4 tiempos cada una',
           notes: [
-            { string: 'E', fret: 5, note: 'A', midi: 45 },
-            { string: 'A', fret: 3, note: 'C', midi: 48 },
-            { string: 'E', fret: 5, note: 'A', midi: 45 },
-            { string: 'A', fret: 3, note: 'C', midi: 48 },
-            { string: 'E', fret: 1, note: 'F', midi: 41 },
-            { string: 'A', fret: 3, note: 'C', midi: 48 },
-            { string: 'E', fret: 1, note: 'F', midi: 41 },
-            { string: 'A', fret: 3, note: 'C', midi: 48 }
+            { string: 'E', fret: 5, note: 'A', midi: 45, beats: 4 },
+            { string: 'A', fret: 3, note: 'C', midi: 48, beats: 4 },
+            { string: 'E', fret: 5, note: 'A', midi: 45, beats: 4 },
+            { string: 'A', fret: 3, note: 'C', midi: 48, beats: 4 },
+            { string: 'E', fret: 1, note: 'F', midi: 41, beats: 4 },
+            { string: 'A', fret: 3, note: 'C', midi: 48, beats: 4 },
+            { string: 'E', fret: 1, note: 'F', midi: 41, beats: 4 },
+            { string: 'A', fret: 3, note: 'C', midi: 48, beats: 4 }
           ]
         },
       },
@@ -1916,24 +1916,24 @@ window.CLASS_ACTIVITIES = [
               label: 'Intro — A C A C',
               label_es: 'Intro — A C A C',
               notes: [
-                { string: 'E', fret: 5, note: 'A', midi: 45 },
-                { string: 'A', fret: 3, note: 'C', midi: 48 },
-                { string: 'E', fret: 5, note: 'A', midi: 45 },
-                { string: 'A', fret: 3, note: 'C', midi: 48 }
+                { string: 'E', fret: 5, note: 'A', midi: 45, beats: 4 },
+                { string: 'A', fret: 3, note: 'C', midi: 48, beats: 4 },
+                { string: 'E', fret: 5, note: 'A', midi: 45, beats: 4 },
+                { string: 'A', fret: 3, note: 'C', midi: 48, beats: 4 }
               ]
             },
             {
               label: 'Verse — A C A C, F C F C',
               label_es: 'Estrofa — A C A C, F C F C',
               notes: [
-                { string: 'E', fret: 5, note: 'A', midi: 45 },
-                { string: 'A', fret: 3, note: 'C', midi: 48 },
-                { string: 'E', fret: 5, note: 'A', midi: 45 },
-                { string: 'A', fret: 3, note: 'C', midi: 48 },
-                { string: 'E', fret: 1, note: 'F', midi: 41 },
-                { string: 'A', fret: 3, note: 'C', midi: 48 },
-                { string: 'E', fret: 1, note: 'F', midi: 41 },
-                { string: 'A', fret: 3, note: 'C', midi: 48 }
+                { string: 'E', fret: 5, note: 'A', midi: 45, beats: 4 },
+                { string: 'A', fret: 3, note: 'C', midi: 48, beats: 4 },
+                { string: 'E', fret: 5, note: 'A', midi: 45, beats: 4 },
+                { string: 'A', fret: 3, note: 'C', midi: 48, beats: 4 },
+                { string: 'E', fret: 1, note: 'F', midi: 41, beats: 4 },
+                { string: 'A', fret: 3, note: 'C', midi: 48, beats: 4 },
+                { string: 'E', fret: 1, note: 'F', midi: 41, beats: 4 },
+                { string: 'A', fret: 3, note: 'C', midi: 48, beats: 4 }
               ]
             }
           ]
@@ -1956,14 +1956,14 @@ window.CLASS_ACTIVITIES = [
           caption: 'Chorus · D F, C G · 4 beats each',
           caption_es: 'Coro · D F, C G · 4 tiempos cada una',
           notes: [
-            { string: 'A', fret: 5, note: 'D', midi: 50 },
-            { string: 'E', fret: 1, note: 'F', midi: 41 },
-            { string: 'A', fret: 5, note: 'D', midi: 50 },
-            { string: 'E', fret: 1, note: 'F', midi: 41 },
-            { string: 'A', fret: 3, note: 'C', midi: 48 },
-            { string: 'E', fret: 3, note: 'G', midi: 43 },
-            { string: 'A', fret: 3, note: 'C', midi: 48 },
-            { string: 'E', fret: 3, note: 'G', midi: 43 }
+            { string: 'A', fret: 5, note: 'D', midi: 50, beats: 4 },
+            { string: 'E', fret: 1, note: 'F', midi: 41, beats: 4 },
+            { string: 'A', fret: 5, note: 'D', midi: 50, beats: 4 },
+            { string: 'E', fret: 1, note: 'F', midi: 41, beats: 4 },
+            { string: 'A', fret: 3, note: 'C', midi: 48, beats: 4 },
+            { string: 'E', fret: 3, note: 'G', midi: 43, beats: 4 },
+            { string: 'A', fret: 3, note: 'C', midi: 48, beats: 4 },
+            { string: 'E', fret: 3, note: 'G', midi: 43, beats: 4 }
           ]
         },
       },

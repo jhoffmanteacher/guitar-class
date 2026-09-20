@@ -326,8 +326,8 @@ SETS.push(
                 hint_es: 'Es una sola forma deslizándose — mantén el agarre y deja que tu brazo haga el movimiento.',
                 stuck: 'Play roots-only (your Module 2 line), then add the second string back one chord at a time.',
                 stuck_es: 'Toca solo las raíces (tu línea del Módulo 2), y luego agrega de vuelta la segunda cuerda un acorde a la vez.',
-                levelUp: 'Palm-mute the whole lap for the verse sound, then open up for a chorus lap.',
-                levelUp_es: 'Silencia con la palma toda la vuelta para el sonido de la estrofa, y luego abre el sonido para una vuelta de coro.',
+                levelUp: 'Palm-mute the whole lap for the verse sound, then open up for a chorus lap. To palm-mute, rest the side of your picking hand lightly on the strings right where they leave the bridge — the notes come out short and quiet.',
+                levelUp_es: 'Silencia con la palma toda la vuelta para el sonido de la estrofa, y luego abre el sonido para una vuelta de coro. Para silenciar con la palma, apoya el borde de tu mano de la púa suavemente sobre las cuerdas justo donde salen del puente — las notas suenan cortas y apagadas.',
                 skills: [2, 5, 6],
                 tab: {
                   caption: '"Seven Nation Army" — verse riff as power chords · 60 BPM',
@@ -508,8 +508,8 @@ SETS.push(
           },
           {
             label: 'Watch: alternate picking', label_es: 'Mira: púa alterna',
-            text: 'Watch: <a href="https://youtu.be/q8SHmo1-dac" target="_blank">3 Tips to NAIL Alternate Picking (build speed) – JustinGuitar</a> (0:00–3:00). Alternate picking means strict down-up-down-up — every downstroke is followed by an upstroke, so the pick never travels the same way twice in a row. Watch his tempo-step method for building speed.</p>You\'ve got it when: you have played eight notes on one string with strict down-up picking, three times in a row, with no two downstrokes in a row.',
-            text_es: 'Mira: <a href="https://youtu.be/q8SHmo1-dac" target="_blank">3 Tips to NAIL Alternate Picking (build speed) – JustinGuitar</a> (0:00–3:00). Púa alterna significa abajo-arriba-abajo-arriba estricto — cada golpe hacia abajo va seguido de uno hacia arriba, así que la púa nunca viaja en la misma dirección dos veces seguidas. Mira su método de pasos de tempo para ganar velocidad.</p>Lo tienes cuando: ya tocaste ocho notas en una cuerda con púa alterna estricta, tres veces seguidas, sin dos golpes hacia abajo seguidos.',
+            text: 'Watch: <a href="https://youtu.be/q8SHmo1-dac" target="_blank">3 Tips to NAIL Alternate Picking (build speed) – JustinGuitar</a> (0:00–3:00). Alternate picking means strict down-up-down-up — every downstroke is followed by an upstroke, so the pick never travels the same way twice in a row. Watch his tempo-step method for building speed. You\'ve got it when: you have played eight notes on one string with strict down-up picking, three times in a row, with no two downstrokes in a row.',
+            text_es: 'Mira: <a href="https://youtu.be/q8SHmo1-dac" target="_blank">3 Tips to NAIL Alternate Picking (build speed) – JustinGuitar</a> (0:00–3:00). Púa alterna significa abajo-arriba-abajo-arriba estricto — cada golpe hacia abajo va seguido de uno hacia arriba, así que la púa nunca viaja en la misma dirección dos veces seguidas. Mira su método de pasos de tempo para ganar velocidad. Lo tienes cuando: ya tocaste ocho notas en una cuerda con púa alterna estricta, tres veces seguidas, sin dos golpes hacia abajo seguidos.',
             hint: 'Notice his method for building tempo gradually. As he describes it, try it: play your "Watchtower" loop at 60 BPM, then bump to 65, then 70.',
             hint_es: 'Fíjate en su método para subir el tempo gradualmente. Mientras lo describe, pruébalo: toca tu vuelta de "Watchtower" a 60 BPM, y luego sube a 65 y a 70.',
             skills: [2, 3],
@@ -599,8 +599,8 @@ SETS.push(
             hint_es: 'La vuelta cruza las dos cuerdas de raíz: A5 en la cuerda La al aire, y luego G5 (traste 3) y F5 (traste 1) en la cuerda Mi grave. El A5 necesita un solo dedo — la cuerda Re, traste 2 — con la cuerda La al aire sonando debajo.',
             stuck: 'Play just the roots (skip the second string) for one lap to lock the walk, then add the fifth back in.',
             stuck_es: 'Toca solo las raíces (sáltate la segunda cuerda) por una vuelta para fijar el recorrido, y luego agrega de vuelta la quinta.',
-            levelUp: 'Palm-mute for a tighter chug (a chug = a short, muted, punchy strum), or move on to the every-beat version below.',
-            levelUp_es: 'Silencia con la palma para un chug más ajustado (un chug = un rasgueo corto, silenciado y contundente), o pasa a la versión de cada tiempo de abajo.',
+            levelUp: 'Palm-mute (from Set 1\'s level-up) for a tighter chug (a chug = a short, muted, punchy strum), or move on to the every-beat version below.',
+            levelUp_es: 'Silencia con la palma (del Sube de nivel del Set 1) para un chug más ajustado (un chug = un rasgueo corto, silenciado y contundente), o pasa a la versión de cada tiempo de abajo.',
             skills: [1, 2],
             chords: [
               { name: 'A5', chord: [[6,'x'],[5,0],[4,2,'3'],[3,'x'],[2,'x'],[1,'x']], position: 0 },
@@ -715,14 +715,14 @@ SETS.push(
             steps: [
           {
             label: 'Challenge — F5 ↔ A5 Two-Shape Drill ("Luna")', label_es: 'Reto — Ejercicio de dos formas F5 ↔ A5 ("Luna")',
-            text: '<ol><li>Slide the same two-finger shape four frets between F5 (root F, low E string, fret 1) and A5 (root A, fret 5).</li><li>Strum one per big beat: "Luna" is in 6/8, so strum just the downbeats, two per bar, nothing syncopated (syncopated = accents landing off the main beat).</li></ol>You\'ve got it when: you can switch F5 ↔ A5 landing every downbeat clean, speeding up in steps: 60 → 70 → 80 BPM. <a href="tabs/luna.html" target="_blank">&#x1F9F5; Song Journey: this is Layer 3 of 5</a>.',
+            text: '<ol><li>Slide the same two-finger shape four frets between F5 (root F, low E string, fret 1) and A5 (root A, fret 5).</li><li>Strum one per big beat: "Luna" is in 6/8, so strum just the two big beats per bar, nothing syncopated (syncopated = accents landing off the main beat).</li></ol>You\'ve got it when: you can switch F5 ↔ A5 landing every big beat clean, speeding up in steps: 60 → 70 → 80 BPM. <a href="tabs/luna.html" target="_blank">&#x1F9F5; Song Journey: this is Layer 3 of 5</a>.',
             text_es: '<ol><li>Desliza la misma forma de dos dedos cuatro trastes entre F5 (raíz F, cuerda Mi grave, traste 1) y A5 (raíz A, traste 5).</li><li>Rasguea uno por tiempo fuerte: "Luna" está en 6/8, así que rasguea solo los tiempos fuertes, dos por compás, nada sincopado (sincopado = acentos que caen fuera del tiempo principal).</li></ol>Lo tienes cuando: puedes cambiar F5 ↔ A5 cayendo limpio en cada tiempo fuerte, acelerando en pasos: 60 → 70 → 80 BPM. <a href="tabs/luna.html" target="_blank">&#x1F9F5; Recorrido de la canción: esto es la Capa 3 de 5</a>.',
             hint: '"Luna"\'s whole vamp is these two power chords (a vamp = a short chord pattern repeated over and over). A power chord has no major or minor — just root + 5th. Keep the two-finger shape locked and let your whole arm make the four-fret slide.',
             hint_es: 'Todo el vamp de "Luna" son estos dos acordes de potencia (un vamp = un patrón de acordes corto que se repite una y otra vez). Un acorde de potencia no tiene mayor ni menor — solo raíz + quinta. Mantén la forma de dos dedos fija y deja que todo tu brazo haga el deslizamiento de cuatro trastes.',
             stuck: 'Practice just the slide: fret 1, fret 5, fret 1, fret 5 with no rhythm until the jump is automatic — then add the metronome at 60.',
             stuck_es: 'Practica solo el deslizamiento: traste 1, traste 5, traste 1, traste 5 sin ritmo hasta que el salto sea automático — y luego agrega el metrónomo a 60.',
-            levelUp: 'Palm-mute for a tight sierreño chug (sierreño = a Mexican acoustic-guitar style; a chug = a short, muted, punchy strum) — then let it ring and hear why distortion isn\'t this song\'s home. That\'s what the ◐ means.',
-            levelUp_es: 'Silencia con la palma para un chug de sierreño ajustado (sierreño = un estilo de guitarra acústica mexicana; un chug = un rasgueo corto, silenciado y contundente) — y luego deja que suene abierto y escucha por qué la distorsión no es el hogar de esta canción. Eso es lo que significa el ◐.',
+            levelUp: 'Palm-mute (from Set 1\'s level-up) for a tight sierreño chug (sierreño = a Mexican acoustic-guitar style; a chug = a short, muted, punchy strum) — then let it ring and hear why distortion isn\'t this song\'s home. That\'s what the ◐ means.',
+            levelUp_es: 'Silencia con la palma (del Sube de nivel del Set 1) para un chug de sierreño ajustado (sierreño = un estilo de guitarra acústica mexicana; un chug = un rasgueo corto, silenciado y contundente) — y luego deja que suene abierto y escucha por qué la distorsión no es el hogar de esta canción. Eso es lo que significa el ◐.',
             skills: [1, 2],
             chords: [
               { name: 'F5', chord: [[6,1,'1'],[5,3,'3'],[4,'x'],[3,'x'],[2,'x'],[1,'x']], position: 1 },
@@ -869,9 +869,9 @@ SETS.push(
               },
               {
                 label: 'Challenge — "Luna", full vamp', label_es: 'Reto — "Luna", vamp completo',
-                text: 'The whole song rides F5 ↔ A5.<ul><li>Play along with the teaching arrangement — two downbeat strums per bar at 60 BPM, changing every two bars: F5, F5, A5, A5.</li></ul>You\'ve got it when: a full verse and chorus without losing a downbeat, F5 ringing as clean as A5. <a href="tabs/luna.html" target="_blank">&#x1F9F5; Song Journey: this is Layer 3 of 5</a>.',
+                text: 'The whole song rides F5 ↔ A5.<ul><li>Play along with the teaching arrangement — two big-beat strums per bar at 60 BPM, changing every two bars: F5, F5, A5, A5.</li></ul>You\'ve got it when: a full verse and chorus without losing a big beat, F5 ringing as clean as A5. <a href="tabs/luna.html" target="_blank">&#x1F9F5; Song Journey: this is Layer 3 of 5</a>.',
                 text_es: 'Toda la canción se apoya en F5 ↔ A5.<ul><li>Toca junto con el arreglo didáctico — dos rasgueos en el tiempo fuerte por compás a 60 BPM, cambiando cada dos compases: F5, F5, A5, A5.</li></ul>Lo tienes cuando: una estrofa y un coro completos sin perder un tiempo fuerte, con F5 sonando tan limpio como A5. <a href="tabs/luna.html" target="_blank">&#x1F9F5; Recorrido de la canción: esto es la Capa 3 de 5</a>.',
-                hint: 'This is the same F5↔A5 slide from the drill above, where you switched on every downbeat. Here each chord holds for two bars — four downbeats — before you slide, which is where the record changes.',
+                hint: 'This is the same F5↔A5 slide from the drill above, where you switched on every big beat. Here each chord holds for two bars — four big beats — before you slide, which is where the record changes.',
                 hint_es: 'Es el mismo deslizamiento F5↔A5 del ejercicio de arriba, donde cambiabas en cada tiempo fuerte. Aquí cada acorde se sostiene dos compases — cuatro tiempos fuertes — antes de que deslices, que es donde cambia la grabación.',
                 stuck: 'Loop the F5↔A5 slide with no song for a few rounds first, then drop in following the record.',
                 stuck_es: 'Repite el deslizamiento F5↔A5 sin la canción por unas cuantas rondas primero, y luego entra siguiendo la grabación.',

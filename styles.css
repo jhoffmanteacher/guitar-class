@@ -1647,6 +1647,14 @@ body.t-wide .t-main{max-width:none}
 .stp-partmark + .stp-sec > .stp-sec-label{border-top:0;padding-top:8px}
 .dp.focus .stp-partmark{display:none}
 .dp.focus .stp-partmark.part-cur{display:block}
+/* "Take it to a song" (2026-09-20): showing this under every step pushed
+   Next down and invited the student off mid-lesson. It appears only once
+   the last visible step of the set (or, in a parted set, of the part that
+   holds this section) is the open step or is done — .jl-ready is baked in
+   at build time and kept live by syncStationFocus(). All-steps view is
+   unaffected: it isn't gated on .dp.focus. */
+.dp.focus .jl-card{display:none}
+.dp.focus .stp-sec.jl-ready .jl-card{display:block}
 /* The Part 2 divider standing in as its own screen: pressing Next across
    the boundary shows the stopping point ALONE, once (stationStepNav). Its
    "Keep going" button exists only in that state — everywhere else the
@@ -1663,14 +1671,16 @@ body.t-wide .t-main{max-width:none}
 .dp.focus.pd-showing .jl-card,
 .dp.focus.pd-showing .daily5-inline,
 .dp.focus.pd-showing .dp-stepnav{display:none}
-/* These two are written long on purpose: the rules they have to beat are
+/* These are written long on purpose: the rules they have to beat are
    the focus-mode "show the current one" rules above (.stp-sec.sec-cur
-   .stp-sec-label and .stp-group.div-cur .stp-divider), which carry more
-   classes than a plain .dp.focus.pd-showing selector does. */
+   .stp-sec-label, .stp-group.div-cur .stp-divider and .stp-sec.jl-ready
+   .jl-card), which carry more classes than a plain .dp.focus.pd-showing
+   selector does. */
 .dp.focus.pd-showing .stp-sec.sec-cur .stp-sec-label,
 .dp.focus.pd-showing .stp-sec .stp-sec-label,
 .dp.focus.pd-showing .stp-group.div-cur .stp-divider,
-.dp.focus.pd-showing .stp-group .stp-divider{display:none}
+.dp.focus.pd-showing .stp-group .stp-divider,
+.dp.focus.pd-showing .stp-sec.jl-ready .jl-card{display:none}
 .dp.focus.pd-showing .stp-partmark{display:none}
 .dp.focus.pd-showing .stp-partmark.stp-partbreak{display:block;margin:34px 0 0}
 .dp.focus.pd-showing .stp-part-go{display:block;margin:18px auto 8px;
@@ -1773,6 +1783,7 @@ body.t-wide .t-main{max-width:none}
   /* Part marks print as plain headings, and the divider-as-a-screen state
      never suppresses the steps on paper. */
   .dp.focus .stp-partmark{display:block !important}
+  .dp.focus .jl-card{display:block !important}
   .dp.focus.pd-showing li.step{display:list-item !important}
   .stp-part-go{display:none !important}
   .dp.focus .step + .step{border-top:1px solid var(--border) !important}

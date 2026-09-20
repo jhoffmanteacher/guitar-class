@@ -152,8 +152,8 @@ SETS.push(
               },
               {
                 label: 'A string notes with your chart', label_es: 'Notas de la cuerda La con tu tabla',
-                text: 'Play the same idea on the A string, still with your chart: A · B · C · D · E · F · G · A (frets 0–12), up then back down, names aloud.',
-                text_es: 'Toca la misma idea en la cuerda La, todavía con tu tabla: A · B · C · D · E · F · G · A (trastes 0–12), hacia arriba y de regreso, nombres en voz alta.',
+                text: 'Play the same idea on the A string, still with your chart: on the A string, frets 0 · 2 · 3 · 5 · 7 · 8 · 10 · 12 are A · B · C · D · E · F · G · A, up then back down, names aloud.',
+                text_es: 'Toca la misma idea en la cuerda La, todavía con tu tabla: en la cuerda La, los trastes 0 · 2 · 3 · 5 · 7 · 8 · 10 · 12 son A · B · C · D · E · F · G · A, hacia arriba y de regreso, nombres en voz alta.',
                 hint: 'Notice fret 5 of the A string is the same note as the open D string — that connection helps later. The same half-step rule applies here: B–C and E–F are one fret apart, everything else is two, which is why C sits at fret 3 and F at fret 8.',
                 hint_es: 'Fíjate que el traste 5 de la cuerda La es la misma nota que la cuerda Re al aire — esa conexión ayuda más adelante. Aquí aplica la misma regla del semitono: B–C y E–F están a un traste, todo lo demás a dos, y por eso C queda en el traste 3 y F en el traste 8.',
                 skills: [3, 5],
@@ -273,6 +273,7 @@ SETS.push(
                 text_es: 'Adivina el riff (¡pruébalo!): saca de oído el riff principal de "Smoke on the Water" (un riff = una frase musical corta que se repite) en la cuerda Mi grave. Sin puntaje — solo pruébalo.',
                 hint: 'Use the low-E note map from the play-along step (frets 0 · 1 · 3 · 5 · 7 · 8 · 10 · 12). Don\'t worry about getting it perfect — the attempt trains your ear.',
                 hint_es: 'Usa el mapa de notas de la Mi grave del paso para tocar junto (trastes 0 · 1 · 3 · 5 · 7 · 8 · 10 · 12). No te preocupes por hacerlo perfecto — el intento entrena tu oído.',
+                playSeq: { label: 'Hear the riff', label_es: 'Escucha el riff', bpm: 60, notes: [40, 43, 45, 40, 43, 46, 45, 40, 43, 45, 43, 40] }
               }
             ]
           },
@@ -531,8 +532,8 @@ SETS.push(
               },
               {
                 label: 'Watch: avoiding fret buzz', label_es: 'Mira: evita el zumbido',
-                text: 'Watch: <a href="https://youtu.be/IscDj_-Nr0s" target="_blank">Body Posture and Finger Placement Exercise (BC-106) – JustinGuitar</a> (0:00–4:00). While you watch, pause after each cause he lists and test it on your own guitar to find your own buzz. You\'ve got it when: you can name two causes of fret buzz and fix one on your guitar.<span class="step-figure"><img src="img/m2-behind-the-fret-en.svg" alt="Side view of a string over the frets: a fingertip just behind the fret rings clean, a fingertip too far back buzzes, and a fingertip on top of the fret wire mutes the note." width="640" height="244"></span>',
-                text_es: 'Mira: <a href="https://youtu.be/IscDj_-Nr0s" target="_blank">Body Posture and Finger Placement Exercise (BC-106) – JustinGuitar</a> (0:00–4:00). Mientras miras, pausa después de cada causa que él enumera y pruébala en tu propia guitarra para encontrar tu propio zumbido. Lo tienes cuando: puedes nombrar dos causas del zumbido y arreglar una en tu guitarra.<span class="step-figure"><img src="img/m2-behind-the-fret-es.svg" alt="Vista lateral de una cuerda sobre los trastes: la yema justo detrás del traste suena limpia, muy atrás la nota zumba, y encima del traste la nota queda apagada." width="640" height="244"></span>',
+                text: 'Watch: <a href="https://youtu.be/IscDj_-Nr0s" target="_blank">Body Posture and Finger Placement Exercise (BC-106) – JustinGuitar</a> (0:00–4:00). "Behind the fret" means in the space just on the nut side of the metal strip, not the bridge side. While you watch, pause after each cause he lists and test it on your own guitar to find your own buzz. You\'ve got it when: you can name two causes of fret buzz and fix one on your guitar.<span class="step-figure"><img src="img/m2-behind-the-fret-en.svg" alt="Side view of a string over the frets: a fingertip just behind the fret rings clean, a fingertip too far back buzzes, and a fingertip on top of the fret wire mutes the note." width="640" height="244"></span>',
+                text_es: 'Mira: <a href="https://youtu.be/IscDj_-Nr0s" target="_blank">Body Posture and Finger Placement Exercise (BC-106) – JustinGuitar</a> (0:00–4:00). "Detrás del traste" significa en el espacio justo del lado de la cejuela del listón de metal, no del lado del puente. Mientras miras, pausa después de cada causa que él enumera y pruébala en tu propia guitarra para encontrar tu propio zumbido. Lo tienes cuando: puedes nombrar dos causas del zumbido y arreglar una en tu guitarra.<span class="step-figure"><img src="img/m2-behind-the-fret-es.svg" alt="Vista lateral de una cuerda sobre los trastes: la yema justo detrás del traste suena limpia, muy atrás la nota zumba, y encima del traste la nota queda apagada." width="640" height="244"></span>',
                 hint: 'As he lists each cause, pause and test it on your own guitar — find your buzz before he names the fix.',
                 hint_es: 'Mientras él enumera cada causa, pausa y pruébala en tu propia guitarra — encuentra tu zumbido antes de que él nombre la solución.',
                 skills: [1, 2],
@@ -747,8 +748,8 @@ SETS.push(
             steps: [
           {
             label: 'Warm-up TAB read', label_es: 'Lectura de calentamiento',
-            text: 'Warm-up read — play this melody straight from the TAB at 60 BPM, one note per beat. (A bar is four beats, counted 1 &middot; 2 &middot; 3 &middot; 4 — so a 4-bar melody is four of those counts.) Click any note name to hear how it should sound. You\'ve got it when: the full 7-note line, in time, no stops.',
-            text_es: 'Lectura de calentamiento — toca esta melodía directo del TAB a 60 BPM, una nota por pulso. (Un compás son cuatro pulsos, contados 1 &middot; 2 &middot; 3 &middot; 4 — así que una melodía de 4 compases son cuatro de esas cuentas.) Haz clic en cualquier nombre de nota para escuchar cómo debe sonar. Lo tienes cuando: la línea completa de 7 notas, a tiempo, sin detenerte.',
+            text: 'Warm-up read — play this melody straight from the TAB at 60 BPM, one note per beat unless the TAB says otherwise. (A bar is four beats, counted 1 &middot; 2 &middot; 3 &middot; 4.) Click any note name to hear how it should sound. You\'ve got it when: the full line, in time, no stops.',
+            text_es: 'Lectura de calentamiento — toca esta melodía directo del TAB a 60 BPM, una nota por pulso salvo que el TAB diga lo contrario. (Un compás son cuatro pulsos, contados 1 &middot; 2 &middot; 3 &middot; 4.) Haz clic en cualquier nombre de nota para escuchar cómo debe sonar. Lo tienes cuando: la línea completa, a tiempo, sin detenerte.',
             hint: 'Read left-to-right. The numbers are fret numbers on the A string. If you buzz, fix the finger before moving on.',
             hint_es: 'Lee de izquierda a derecha. Los números son números de traste en la cuerda La. Si zumbas, arregla el dedo antes de seguir.',
             skills: [4, 5],
@@ -762,7 +763,7 @@ SETS.push(
                 { string: 'A', fret: 5, note: 'D', midi: 50 },
                 { string: 'A', fret: 7, note: 'E', midi: 52 },
                 { string: 'A', fret: 7, note: 'E', midi: 52 },
-                { string: 'A', fret: 7, note: 'E', midi: 52 }
+                { string: 'A', fret: 7, note: 'E', midi: 52, beats: 2 }
               ]
             }
           },

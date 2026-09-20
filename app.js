@@ -4076,6 +4076,26 @@ function buildLesson(w){
     // moves) — the heading of the group you're actually in, nothing else.
     const noneLeft = focusMode && !flat.some(({sec,ns}) => visibleSteps(sec, w.moduleNum).some(p=>completed[`${w.id}-${ns}-${p.idx}`]!==true));
     let numOffset = 0, dispOffset = 0, foundCur = false, curNs = null, curPart = 1;
+    /* "Take it to a song" (2026-09-20): the card used to render under every
+       step in focus mode, pushing Next down and inviting the student off to a
+       Journey page mid-step. It should show only once the last visible step
+       of its part (the whole ladder, for a set with no parts) is the open
+       step or is done — computed once here, from the data, since openNum
+       below isn't final until this same loop finishes; syncStationFocus()
+       mirrors this from the DOM for live updates as the student navigates. */
+    const jlSteps = [];
+    flat.forEach((f, k) => visibleSteps(f.sec, w.moduleNum).forEach(p => jlSteps.push({ ns: f.ns, idx: p.idx, part: partOfIdx(k) })));
+    const jlOpenPos = (() => {
+      const i = jlSteps.findIndex(p => completed[`${w.id}-${p.ns}-${p.idx}`] !== true);
+      return i >= 0 ? i : (noneLeft && jlSteps.length ? 0 : -1);
+    })();
+    const jlLastIdxByPart = {};
+    jlSteps.forEach((p, i) => { jlLastIdxByPart[p.part] = i; });
+    const jlReadyByPart = {};
+    Object.keys(jlLastIdxByPart).forEach(part => {
+      const i = jlLastIdxByPart[part], p = jlSteps[i];
+      jlReadyByPart[part] = completed[`${w.id}-${p.ns}-${p.idx}`] === true || i === jlOpenPos;
+    });
     const rendered = new Map();
     flat.forEach(({sec,ns}, k)=>{
       // Part 2's circles start at 1 again — display only: numOffset (and
@@ -4096,13 +4116,14 @@ function buildLesson(w){
       // section's own heading is suppressed only when the card is what's
       // actually shown, rather than stacking two.
       const hasJourneyCard = isTakeToSongSection(sec) && journeySongsFor(w.moduleNum).length > 0;
+      const jlReady = hasJourneyCard && !!jlReadyByPart[partOfIdx(k)];
       const bodyHtml = hasJourneyCard
         ? journeyLinkCardHtml(w)
         : `<ul class="steps">${stepsHtml(pairs, ns, numOffset, allowCur, openIfNoCur, dispOffset)}</ul>`;
       // data-part goes AFTER data-ns on purpose: checks.mjs 1af reads the
       // rendered namespaces with a regex anchored on `class="stp-sec…"
       // data-ns="…"`, so anything new has to follow, never come between.
-      const html = `<div class="stp-sec${(hasCur || openIfNoCur) ? ' sec-cur' : ''}" data-ns="${escAttr(ns)}"${parts ? ` data-part="${partOfIdx(k)}"` : ''}>
+      const html = `<div class="stp-sec${(hasCur || openIfNoCur) ? ' sec-cur' : ''}${jlReady ? ' jl-ready' : ''}" data-ns="${escAttr(ns)}"${parts ? ` data-part="${partOfIdx(k)}"` : ''}>
       ${title && !hasJourneyCard ? `<div class="stp-sec-label">${isEarSparkSection(sec) ? ICO_BOLT + ' ' : isSpicyLevelUpSection(sec) ? ICO_CHILI + ' ' : ''}${title}</div>` : ''}
       ${bodyHtml}
     </div>`;
@@ -4348,6 +4369,16 @@ function syncStationFocus(dp){
     const first = g.querySelector('.stp-sec[data-part]');
     const on = !!open && g.contains(open) && (!parted || !first || first.dataset.part === part);
     g.classList.toggle('div-cur', on);
+  });
+  // "Take it to a song": shows only once the last visible step of its part
+  // (the whole ladder, for a set with no parts) is the open step or is done
+  // — same "don't show it early" rule as the seam and part marks above.
+  dp.querySelectorAll('.jl-card').forEach(card=>{
+    const jlSec = card.closest('.stp-sec');
+    if(!jlSec) return;
+    const jlScope = parted ? lessonPartSteps(dp, jlSec.dataset.part) : steps;
+    const last = jlScope[jlScope.length - 1];
+    jlSec.classList.toggle('jl-ready', !!last && (last.classList.contains('step-done') || last === open));
   });
   // The counter is per-part too; Back/Next below stay whole-ladder so Next
   // can still carry the student across the divider.
@@ -9074,7 +9105,7 @@ function caHeroCardHtml(a, isCurrent = true){
      than holding a 210px hole open. */
   const thumbHtml = caHeroThumbHtml(a);
   return `<details class="ca-card ca-card--hero${isCurrent ? '' : ' ca-card--hero-older'}" ${open ? 'open' : ''} data-id="${escAttr(a.id)}" ontoggle="caOnToggle(this)">
-    <summary class="ca-card-summary ca-hero-summary">
+    <summary class="ca-card-summary ca-hero-summary" onclick="caCardMarkOpening(this)">
       <div class="ca-hero-main">
         ${caStartHereTagHtml(a, isCurrent)}
         <div class="ca-hero-title">${titleHtml}</div>
@@ -9101,7 +9132,7 @@ function caHeroCheckHtml(a, isCurrent = true){
   const open = caOpenId === a.id;
   const blurb = caFirstSentence(tf(a, 'intro'));
   return `<details class="ca-card ec-card ca-card--hero ca-card--hero-check${isCurrent ? '' : ' ca-card--hero-older'}" ${open ? 'open' : ''} data-id="${escAttr(a.id)}" ontoggle="caOnToggle(this)">
-    <summary class="ca-card-summary ca-hero-summary">
+    <summary class="ca-card-summary ca-hero-summary" onclick="caCardMarkOpening(this)">
       <div class="ca-hero-main">
         ${caStartHereTagHtml(a, isCurrent)}
         <div class="ca-hero-title">${escHtml(caTitle(a))}</div>
@@ -9223,7 +9254,7 @@ function caActivityCardHtml(a){
   // dash, on the printed handout as much as on screen, so skip it entirely.
   const dateLabel = caFormatDate(caDate(a));
   return `<details class="ca-card" ${open ? 'open' : ''} data-id="${escAttr(a.id)}" ontoggle="caOnToggle(this)">
-    <summary class="ca-card-summary">
+    <summary class="ca-card-summary" onclick="caCardMarkOpening(this)">
       ${dateLabel ? `<span class="ca-chip">${escHtml(dateLabel)}</span>` : ''}
       <span class="ca-card-titlewrap"><span class="ca-card-title">${titleHtml}</span>${caChunkMetaHtml(a)}</span>
       ${done ? `<span class="ca-done-mark" aria-hidden="true">${TCK_CHECK_SVG_INLINE}</span>` : ''}
@@ -9420,7 +9451,7 @@ function caCheckCardHtml(a){
   const open = caOpenId === a.id;
   const dateLabel = caFormatDate(caDate(a));
   return `<details class="ca-card ec-card" ${open ? 'open' : ''} data-id="${escAttr(a.id)}" ontoggle="caOnToggle(this)">
-    <summary class="ca-card-summary">
+    <summary class="ca-card-summary" onclick="caCardMarkOpening(this)">
       ${dateLabel ? `<span class="ca-chip">${escHtml(dateLabel)}</span>` : ''}
       <span class="ca-card-titlewrap"><span class="ca-card-title"><span data-i18n="check.prefix">${escHtml(t('check.prefix'))}</span> &middot; ${escHtml(caTitle(a))}</span>${caCheckMetaHtml(a)}</span>
       ${done ? `<span class="ca-done-mark" aria-hidden="true">${TCK_CHECK_SVG_INLINE}</span>` : ''}
@@ -9562,6 +9593,24 @@ function caOnToggle(details){
   // ladder is a single-open accordion, so opening the next step would cut
   // off the loop the student just started.)
   if(!details.open && snipState && details.contains(snipState.card)) snipStop();
+  /* A card opened from "Still to do" left its header wherever it already sat
+     on the page — under the header, the page title and the Do-now card, as
+     low as y≈370 at 1366×657 (2026-09-20). Scroll only on a genuine click:
+     `caCardMarkOpening` stamps the flag right before the native toggle, so a
+     re-render that merely preserves an already-open card (or printActivity's
+     `card.open = true`) never triggers it. */
+  if(details.open && details.dataset.caOpening){
+    delete details.dataset.caOpening;
+    caScrollToActivity(details.dataset.id);
+  }
+}
+// Stamped on the summary's own click, before the native toggle runs, so
+// caOnToggle can tell a real click-to-open from a re-render or printActivity
+// forcing `.open = true` — see caOnToggle. Closing (details already open) is
+// left alone, matching "closing a card does not scroll."
+function caCardMarkOpening(summary){
+  const details = summary.closest('.ca-card');
+  if(details && !details.open) details.dataset.caOpening = '1';
 }
 // Steps within one activity are a single-open accordion, independent of the
 // module-station .dp builder's own step/focus-mode machinery (deliberately —

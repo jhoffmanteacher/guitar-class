@@ -210,10 +210,15 @@ in two parts (1ao), graded-MC choices frozen in the modules students have
 already reached (1ap),
 Happy Birthday's tab rhythm and the prose that describes it (1aq), the
 short-response budget for Modules 3–6 (1ar), the Daily 5's off switch
-still being a switch (1as), and three MC-giveaway detectors — the keyed
+still being a switch (1as), three MC-giveaway detectors — the keyed
 choice shouting a word no other choice shouts (1at), a never-correct
 catch-all distractor (1au), and the keyed answer already printed on its
-own card (1av).
+own card (1av) —, a stray `</p>` (or `<p>`) with no match in any
+student-facing field (1aw), a `.strum-line`'s gap count and column
+alignment against its own text (1ax), and a class-activity step's "N
+beats each" claim against what its tab notes actually hold, merging a
+run of identical struck notes into one logical duration so an "in
+order" tab spelled out by repetition doesn't false-positive (1ay).
 
 Not every class can be guarded by a banned-phrase list. 1w2 pins the Journey
 lick labels *positively* — every `Lick N — ...` card must use one of four
@@ -719,6 +724,23 @@ The same card's read-the-tuner twin (`w2·b·sec0·step4`) is in
 `MC_LEAK_ALLOW` for 1av: its keyed answer repeats the step's own text, which
 is fine while the card's job is to check that you read the card, but worth
 re-deciding when the rest is reworded.
+
+**Also for next summer: `m2w2·c`'s "Read TAB & play a 4-bar melody" section
+title.** The "Mary Had a Little Lamb" warm-up TAB it heads is seven one-beat
+notes — even with the last one now held two beats (2026-09-20, so the line at
+least fills whole bars) that's 2 bars, not 4. `rule-zero-proof.mjs` fails the
+push on ANY section retitle in Modules 1–2 (`section retitled in a module
+students are in`), so the title stays wrong until the reset; the skill
+checklist and Module Review line for it were reverted to match "4-bar" for
+the same reason, rather than say something the section heading doesn't.
+
+**Also flagged, also not this year: `ca-14` (the Happy Birthday exit check,
+frozen `items`).** Its stimuli play the tune in even notes although the
+activities that teach it now teach the real rhythm, and items 1 and 3 play
+the same four notes, differing only by their "Line 1" / "Line 2" label
+(2026-09-20 second-pass sweep). `items` is positional and frozen once
+students have taken the check — see the exit-check rules above — so nothing
+changes here until progress resets.
 
 ## Live quiz — the whole-class game
 

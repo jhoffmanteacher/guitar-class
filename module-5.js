@@ -57,8 +57,8 @@ SETS.push(
           },
           {
             label: 'Watch: first chords Am & Dm', label_es: 'Mira: primeros acordes Am y Dm',
-            text: 'Watch: <a href="https://www.youtube.com/watch?v=y5cAG2u6mTQ" target="_blank">How To Play the Am and Dm Chords – Lauren Bateman</a>. Am is today\'s chord — Dm comes later in the course.</p>You\'ve got it when: you have built Am and played it four times in a row with all five strings ringing.',
-            text_es: 'Mira: <a href="https://www.youtube.com/watch?v=y5cAG2u6mTQ" target="_blank">How To Play the Am and Dm Chords – Lauren Bateman</a>. Am es el acorde de hoy — Dm llega más adelante en el curso.</p>Lo tienes cuando: ya formaste Am y lo tocaste cuatro veces seguidas con las cinco cuerdas sonando.',
+            text: 'Watch: <a href="https://www.youtube.com/watch?v=y5cAG2u6mTQ" target="_blank">How To Play the Am and Dm Chords – Lauren Bateman</a>. Am is today\'s chord — Dm comes later in the course. You\'ve got it when: you have built Am and played it four times in a row with all five strings ringing.',
+            text_es: 'Mira: <a href="https://www.youtube.com/watch?v=y5cAG2u6mTQ" target="_blank">How To Play the Am and Dm Chords – Lauren Bateman</a>. Am es el acorde de hoy — Dm llega más adelante en el curso. Lo tienes cuando: ya formaste Am y lo tocaste cuatro veces seguidas con las cinco cuerdas sonando.',
             hint: 'Try placing your fingers as she shows Am, then strum the top five strings before watching more. Does every string ring? If not, check which finger is accidentally muting a string. Keep your fretting hand relaxed — a tense hand makes the notes sound bad.',
             hint_es: 'Prueba colocar tus dedos como ella muestra para Am, y luego rasguea las cinco cuerdas más agudas antes de seguir viendo. ¿Suenan todas las cuerdas? Si no, revisa qué dedo está silenciando una cuerda por accidente. Mantén tu mano de trastear relajada — una mano tensa hace que las notas suenen mal.',
             skills: [3],
@@ -172,8 +172,8 @@ SETS.push(
                 text_es: '<ol><li>Pon el ⏱ Temporizador en 60 segundos.</li><li>Cambia Am→Em→Am→Em tantas veces como puedas. Cada cambio LIMPIO cuenta; uno con zumbido o fallado no.</li></ol>Lo tienes cuando: 20 cambios limpios de Am&rarr;Em en el minuto. Siguiente meta: 30. Vuelve a probar este mismo par la próxima sesión.',
                 hint: 'This is the classic chord-change speed test. Quality first: a clean change you can count is better than a blurry one you can\'t.',
                 hint_es: 'Esta es la prueba clásica de velocidad de cambio de acorde. Calidad primero: un cambio limpio que puedas contar es mejor que uno confuso que no puedas.',
-                stuck: 'One spot barely moves between the two chords — something always lands on the D string, 2nd fret (middle finger for Am, ring finger for Em), even though the finger touching it swaps. Keep that spot steady and move only the other fingers. Slow down until every change rings.',
-                stuck_es: 'Un punto casi no se mueve entre los dos acordes — siempre cae algo en la cuerda Re, traste 2 (dedo medio para Am, anular para Em), aunque el dedo que lo toca cambia. Mantén ese punto firme y mueve solo los otros dedos. Baja la velocidad hasta que cada cambio suene limpio.',
+                stuck: 'No finger stays put between these two chords, but fingers 2 and 3 keep the same shape — same fret, one string apart. Keep them together and slide the pair one string over: Am\'s D and G strings become Em\'s A and D strings. Slow down until every change rings.',
+                stuck_es: 'Ningún dedo se queda quieto entre estos dos acordes, pero los dedos 2 y 3 mantienen la misma forma — mismo traste, a una cuerda de distancia. Mantenlos juntos y desliza el par una cuerda hacia el lado grave: las cuerdas Re y Sol de Am se vuelven las cuerdas La y Re de Em. Baja la velocidad hasta que cada cambio suene limpio.',
                 levelUp: 'Add one strum on each chord before you switch, or swap in Am→C instead.',
                 levelUp_es: 'Agrega un rasgueo en cada acorde antes de cambiar, o cambia a Am→C en su lugar.',
                 skills: [5, 6],
@@ -214,8 +214,8 @@ SETS.push(
                 label: 'Challenge — Mystery Chart', label_es: 'Reto — Diagrama misterioso',
                 text: 'The two diagrams below have NO names. This is exactly the assessment task — naming chords on an unlabelled chart.<ol><li>Look at the FIRST (left) one only — which string is muted, which are open, and where do the fretted fingers sit?</li><li>Read it, then answer which chord it is.</li></ol>',
                 text_es: 'Los dos diagramas de abajo NO tienen nombre. Esta es exactamente la tarea de evaluación — nombrar acordes en un diagrama sin etiquetar.<ol><li>Mira solo el PRIMERO (izquierda) — ¿qué cuerda está silenciada, cuáles están al aire, y dónde se colocan los dedos trasteados?</li><li>Léelo, y luego responde qué acorde es.</li></ol>',
-                hint: 'Decode it the way Set 1 taught, in this order: the low E string first — X or open? That one mark already rules out half the chords you know. Then count the fretted dots, note which string and which fret each one sits on, and match that against the shapes in your chord bank. Finish the left diagram before you even glance at the right one.',
-                hint_es: 'Descífralo como te enseñó la Unidad 1, en este orden: primero la cuerda Mi grave — ¿X o al aire? Esa sola marca ya descarta la mitad de los acordes que conoces. Luego cuenta los puntos trasteados, fíjate en qué cuerda y en qué traste está cada uno, y compáralos con las formas de tu banco de acordes. Termina el diagrama de la izquierda antes de siquiera mirar el de la derecha.',
+                hint: 'Decode it in this order: the low E string first — X or open? That one mark already rules out half the chords you know. Then count the fretted dots, note which string and which fret each one sits on, and match that against the shapes in your chord bank. Finish the left diagram before you even glance at the right one.',
+                hint_es: 'Descífralo en este orden: primero la cuerda Mi grave — ¿X o al aire? Esa sola marca ya descarta la mitad de los acordes que conoces. Luego cuenta los puntos trasteados, fíjate en qué cuerda y en qué traste está cada uno, y compáralos con las formas de tu banco de acordes. Termina el diagrama de la izquierda antes de siquiera mirar el de la derecha.',
                 stuck: 'Compare the two lowest strings. One diagram has an X on the low E — don\'t play it; the other plays the low E open. That single difference tells these two shapes apart.',
                 stuck_es: 'Compara las dos cuerdas más graves. Un diagrama tiene una X en la cuerda Mi grave — no la toques; el otro toca la cuerda Mi grave al aire. Esa única diferencia distingue estas dos formas.',
                 skills: [1, 6],
@@ -226,10 +226,10 @@ SETS.push(
                 response: { type: 'mc', prompt: 'The FIRST (left) unlabelled diagram is which chord?',
                   prompt_es: 'El PRIMER diagrama (izquierda), sin etiquetar, ¿qué acorde es?',
                   answer: 0,
-                  explain: 'It\'s Am. The giveaways: the low E string is muted (X), the A string is open (that open A is the root the chord is named after), and the fingers sit on the D and G strings at fret 2 plus the B string at fret 1. A major uses the same three fingers, but its B string finger sits at fret 2 instead of fret 1 — one fret is the whole difference between them. Dm mutes the A string as well as the low E. The second diagram is Em — it plays all six strings with its two fingers on the A and D strings.',
-                  explain_es: 'Es Am. Las pistas: la cuerda Mi grave está silenciada (X), la cuerda La está al aire (esa A al aire es la raíz que le da nombre al acorde), y los dedos van en las cuerdas Re y Sol en el traste 2 más la cuerda Si en el traste 1. A mayor usa los mismos tres dedos, pero su dedo de la cuerda Si va en el traste 2 en lugar del traste 1 — un traste es toda la diferencia entre los dos. Dm silencia la cuerda La además de la Mi grave. El segundo diagrama es Em — toca las seis cuerdas con sus dos dedos en las cuerdas La y Re.',
-                  choices: ['Am', 'Em', 'A major', 'Dm'],
-                  choices_es: ['Am', 'Em', 'A mayor', 'Dm'] }
+                  explain: 'It\'s Am. The giveaways: the low E string is muted (X), the A string is open (that open A is the root the chord is named after), and the fingers sit on the D and G strings at fret 2 plus the B string at fret 1. It can\'t be a power chord — those mute every string but two, and this shape uses five. It isn\'t all-open either — the low E is muted and three fingers are fretted. The second diagram is Em — it plays all six strings with its two fingers on the A and D strings.',
+                  explain_es: 'Es Am. Las pistas: la cuerda Mi grave está silenciada (X), la cuerda La está al aire (esa A al aire es la raíz que le da nombre al acorde), y los dedos van en las cuerdas Re y Sol en el traste 2 más la cuerda Si en el traste 1. No puede ser un acorde de potencia — esos silencian todas las cuerdas menos dos, y esta forma usa cinco. Tampoco es completamente al aire — la Mi grave está silenciada y hay tres dedos trasteados. El segundo diagrama es Em — toca las seis cuerdas con sus dos dedos en las cuerdas La y Re.',
+                  choices: ['Am', 'Em', 'A power chord (only two notes)', 'Every string rings open'],
+                  choices_es: ['Am', 'Em', 'Un acorde de potencia (solo dos notas)', 'Todas las cuerdas suenan al aire'] }
               }
             ]
           }
@@ -598,8 +598,8 @@ SETS.push(
                 text: '<ol><li>Run the Group 1 chord deck below.</li><li>Play whatever chord it deals you cleanly before moving to the next card.</li></ol>You\'ve got it when: you run the whole deck with no hesitation on any chord.',
                 text_es: '<ol><li>Corre la baraja de acordes del Grupo 1 de abajo.</li><li>Toca limpio el acorde que te reparta antes de pasar a la siguiente carta.</li></ol>Lo tienes cuando: corres toda la baraja sin dudar en ningún acorde.',
                 drill: { type: 'deck', deck: 'chords-group1', skill: 'm5w2-s6' },
-                hint: 'This is the same "point blind at the chart" drill, just shuffled for you.',
-                hint_es: 'Es el mismo ejercicio de "apuntar a ciegas al diagrama", solo que ya está barajado para ti.',
+                hint: 'The deck deals you a chord at random — play it clean before the next card, the same way you\'d name a chord you weren\'t expecting mid-song.',
+                hint_es: 'La baraja te reparte un acorde al azar — tócalo limpio antes de la siguiente carta, igual que tendrías que reconocer un acorde inesperado en medio de una canción.',
                 levelUp: 'Time yourself through the deck, or run it at 70 BPM with a metronome click on beat 1.',
                 levelUp_es: 'Cronométrate corriendo la baraja, o hazlo a 70 BPM con el metrónomo marcando el tiempo 1.',
                 skills: [6]
@@ -1132,8 +1132,8 @@ SETS.push(
             steps: [
           {
             label: 'Challenge 3 — Cross-Group Changes', label_es: 'Reto 3 — Cambios entre grupos',
-            text: 'At 60 BPM, 2 bars each:<ol><li>Switch G→D, Am→Em, and C→A.</li><li>Then drill the two within-group pairs your assessment checks — D→A and Em→Bm.</li></ol>You\'ve got it when: each change lands on beat 1, using fingers that stay close as you switch.',
-            text_es: 'A 60 BPM, 2 compases cada uno:<ol><li>Cambia G→D, Am→Em, y C→A.</li><li>Y luego ejercita los dos pares dentro del mismo grupo que revisa tu evaluación — D→A y Em→Bm.</li></ol>Lo tienes cuando: cada cambio cae en el tiempo 1, usando dedos que se quedan cerca al cambiar.',
+            text: 'At 60 BPM, 2 bars each:<ol><li>Switch G→D, Am→Em, and C→A.</li><li>Then drill the two within-group pairs your assessment checks — D→A and Em→Bm.</li></ol>You\'ve got it when: all five pairs, twice through, every change landing on beat 1 with fingers that stay close as you switch.',
+            text_es: 'A 60 BPM, 2 compases cada uno:<ol><li>Cambia G→D, Am→Em, y C→A.</li><li>Y luego ejercita los dos pares dentro del mismo grupo que revisa tu evaluación — D→A y Em→Bm.</li></ol>Lo tienes cuando: los cinco pares, dos veces seguidas, cada cambio cayendo en el tiempo 1 con dedos que se quedan cerca al cambiar.',
             hint: 'Look for fingers that stay close or in the same area as you switch. Planning your hand movement before you lift your fingers saves time. Set the ⏱ Timer for 3 minutes and run the pairs until it beeps.',
             hint_es: 'Busca dedos que se queden cerca o en la misma área al cambiar. Planear el movimiento de tu mano antes de levantar los dedos ahorra tiempo. Pon el ⏱ Temporizador en 3 minutos y corre los pares hasta que suene.',
             stuck: 'Take one pair at a time. For G→D, notice all your fingers shift toward the high strings together — move them as one unit, not finger by finger.',
@@ -1142,7 +1142,7 @@ SETS.push(
             levelUp_es: 'Corre todos los pares uno tras otro sin detenerte — incluyendo D↔A y Em↔Bm — o empuja cada par a 70 BPM.',
             skills: [2, 3, 5, 6],
             chords: [
-              { name: 'A',  chord: [[6,'x'],[5,0],[4,2,'1'],[3,2,'2'],[2,2,'3'],[1,0]], position: 0 },
+              { name: 'A',  chord: [[6,'x'],[5,0],[4,2,'2'],[3,2,'1'],[2,2,'3'],[1,0]], position: 0 },
               { name: 'Em', chord: [[6,0],[5,2,'2'],[4,2,'3'],[3,0],[2,0],[1,0]], position: 0 }
             ]
           }
@@ -1488,12 +1488,12 @@ SETS.push(
             steps: [
               {
                 label: 'Challenge 3 — One-Minute Changes (E ↔ B7)', label_es: 'Reto 3 — Cambios de un minuto (E ↔ B7)',
-                text: '<ol><li>Set the ⏱ Timer for 60 seconds.</li><li>Switch E→B7→E→B7 as many times as you can — only CLEAN changes count (all four B7 fingers down, the top five strings ringing).</li></ol>You\'ve got it when: 20 clean E&rarr;B7 changes in the minute. Next goal: 30. Retest this same pair next session.',
-                text_es: '<ol><li>Pon el ⏱ Temporizador en 60 segundos.</li><li>Cambia E→B7→E→B7 tantas veces como puedas — solo cuentan los cambios LIMPIOS (los cuatro dedos de B7 abajo, las cinco cuerdas más agudas sonando).</li></ol>Lo tienes cuando: 20 cambios limpios de E&rarr;B7 en el minuto. Siguiente meta: 30. Vuelve a probar este mismo par la próxima sesión.',
+                text: '<ol><li>Set the ⏱ Timer for 60 seconds.</li><li>Switch E→B7→E→B7 as many times as you can. Finger 2 stays anchored on the A string, fret 2, the whole time — only the other three fingers move. Only CLEAN changes count (all four fingers down, the top five strings ringing).</li></ol>You\'ve got it when: 20 clean E&rarr;B7 changes in the minute. Next goal: 30. Retest this same pair next session.',
+                text_es: '<ol><li>Pon el ⏱ Temporizador en 60 segundos.</li><li>Cambia E→B7→E→B7 tantas veces como puedas. El dedo 2 se queda anclado en el traste 2 de la cuerda La todo el tiempo — solo se mueven los otros tres dedos. Solo cuentan los cambios LIMPIOS (los cuatro dedos abajo, las cinco cuerdas más agudas sonando).</li></ol>Lo tienes cuando: 20 cambios limpios de E&rarr;B7 en el minuto. Siguiente meta: 30. Vuelve a probar este mismo par la próxima sesión.',
                 hint: 'These two share one finger — finger 2 on the A string, fret 2, is in both shapes. Leave it down as an anchor and move the others around it, and keep the B string open.',
                 hint_es: 'Estos dos comparten un dedo — el dedo 2 en el traste 2 de la cuerda La está en las dos formas. Déjalo puesto como ancla y mueve los demás a su alrededor, y mantén la cuerda Si al aire.',
-                stuck: 'Drill just dropping into B7 from E and back, slowly, until all four fingers land together. Speed comes after the landing is clean.',
-                stuck_es: 'Ejercita solo caer en B7 desde E y volver, despacio, hasta que los cuatro dedos aterricen juntos. La velocidad llega después de que el aterrizaje sea limpio.',
+                stuck: 'Drill just dropping into B7 from E and back, slowly — finger 2 stays anchored the whole time, so it\'s really only three fingers landing together around it. Speed comes after the landing is clean.',
+                stuck_es: 'Ejercita solo caer en B7 desde E y volver, despacio — el dedo 2 se queda anclado todo el tiempo, así que en realidad son solo tres dedos aterrizando juntos a su alrededor. La velocidad llega después de que el aterrizaje sea limpio.',
                 levelUp: 'Add a strum on each chord before switching, or run E→Am→B7.',
                 levelUp_es: 'Agrega un rasgueo en cada acorde antes de cambiar, o prueba E→Am→B7.',
                 skills: [1, 2],
@@ -1506,8 +1506,8 @@ SETS.push(
             steps: [
           {
             label: 'Challenge 4 — Full Run From Memory (your assessment piece)', label_es: 'Reto 4 — Pasada completa de memoria (tu pieza de evaluación)',
-            text: '<ol><li>Pick one of these three songs — <a href="tabs/let-it-be.html" target="_blank">"Let It Be"</a>, <a href="tabs/luna.html" target="_blank">"Luna"</a>, or <a href="tabs/the-cure.html" target="_blank">&ldquo;the cure&rdquo;</a> — and run it from memory with no chart. This is your assessment piece, Layer 5 of 5 of that song\'s &#x1F9F5; Song Journey.</li><li>Time yourself.</li></ol>No score — this trains your recovery, not perfection.',
-            text_es: '<ol><li>Elige una de estas tres canciones — <a href="tabs/let-it-be.html" target="_blank">"Let It Be"</a>, <a href="tabs/luna.html" target="_blank">"Luna"</a>, o <a href="tabs/the-cure.html" target="_blank">&ldquo;the cure&rdquo;</a> — y tócala de memoria sin diagrama. Esta es tu pieza de evaluación, la Capa 5 de 5 del &#x1F9F5; Recorrido de la canción de esa canción.</li><li>Cronométrate.</li></ol>Sin puntaje — esto entrena tu recuperación, no la perfección.',
+            text: '<ol><li>Pick one of these three songs — <a href="tabs/let-it-be.html" target="_blank">"Let It Be"</a>, <a href="tabs/luna.html" target="_blank">"Luna"</a>, or <a href="tabs/the-cure.html" target="_blank">&ldquo;the cure&rdquo;</a> — and run it from memory with no chart. This is your assessment piece, Layer 5 of 5 of that song\'s &#x1F9F5; Song Journey.</li><li>Time yourself.</li></ol>You\'ve got it when: one full run, start to finish, without stopping even after a mistake. No score — this trains your recovery, not perfection.',
+            text_es: '<ol><li>Elige una de estas tres canciones — <a href="tabs/let-it-be.html" target="_blank">"Let It Be"</a>, <a href="tabs/luna.html" target="_blank">"Luna"</a>, o <a href="tabs/the-cure.html" target="_blank">&ldquo;the cure&rdquo;</a> — y tócala de memoria sin diagrama. Esta es tu pieza de evaluación, la Capa 5 de 5 del &#x1F9F5; Recorrido de la canción de esa canción.</li><li>Cronométrate.</li></ol>Lo tienes cuando: una pasada completa, de principio a fin, sin detenerte aunque cometas un error. Sin puntaje — esto entrena tu recuperación, no la perfección.',
             hint: 'Don\'t stop when you make a mistake in a full run. The goal is to keep going. You can fix mistakes in slow practice — a full run trains your recovery.',
             hint_es: 'No te detengas cuando cometas un error en una pasada completa. El objetivo es seguir tocando. Puedes corregir errores en la práctica lenta — una pasada completa entrena tu recuperación.',
             skills: [5, 6]
@@ -1580,8 +1580,8 @@ SETS.push(
           notes: [40, 47, 52, 56, 59, 64] } },
       { id: 'm5w4-s2', text: 'Fret B7 open chord cleanly — 4 fingers, top five strings',
         text_es: 'Trastear el acorde B7 al aire limpio — 4 dedos, las cinco cuerdas más agudas',
-        gotItWhen: 'all four fingers land at once and the top five strings ring clearly — the low E stays silent (no extra ring underneath).',
-        gotItWhen_es: 'los cuatro dedos aterrizan a la vez y las cinco cuerdas más agudas suenan claras — la Mi grave se queda en silencio (sin sonido extra debajo).',
+        gotItWhen: 'finger 2 anchors the A string, fret 2, and the other three fingers land together around it — the top five strings ring clearly and the low E stays silent (no extra ring underneath).',
+        gotItWhen_es: 'el dedo 2 ancla el traste 2 de la cuerda La, y los otros tres dedos aterrizan juntos a su alrededor — las cinco cuerdas más agudas suenan claras y la Mi grave se queda en silencio (sin sonido extra debajo).',
         practice: { type: 'mc', prompt: 'B7 has one note in it that a plain B chord does not. What does that extra note do?',
           prompt_es: 'B7 tiene una nota que un acorde B normal no tiene. ¿Qué hace esa nota extra?',
           choices: ['It makes the chord sound sad, like a minor chord', 'It adds tension that wants to move to E', 'It makes the chord louder', 'Nothing — it is just a different fingering'],
