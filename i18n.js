@@ -268,6 +268,11 @@
                              es: '<strong>Modo de vista previa</strong> — los bloqueos de unidades están desactivados para ti. Los estudiantes todavía los ven.' },
     // Rail landmarks, tooltips and screen-reader-only labels (index.html)
     'nav.railAria':       { en: 'Course navigation', es: 'Navegación del curso' },
+    // Rail collapse control — the label says what pressing it DOES, and
+    // flips with the button (toggleRailCollapsed in app.js re-points the
+    // data-i18n-attr as well, so a later language switch still resolves).
+    'nav.railCollapse':   { en: 'Narrow the menu', es: 'Angostar el menú' },
+    'nav.railExpand':     { en: 'Widen the menu', es: 'Ensanchar el menú' },
     'nav.chooseModule':   { en: 'Choose module', es: 'Elige un módulo' },
     'nav.moduleGoalTitle':{ en: 'Finish all skills to complete this module',
                              es: 'Termina todas las destrezas para completar este módulo' },

@@ -5,6 +5,27 @@ Notable changes to the Guitar Class site. Newest first.
 For the full session-by-session history (and the reasoning behind each change),
 see `WORKFLOW.md` and the git commit log.
 
+## 2026-09-20 — More of each step fits on the screen
+
+### Changed
+
+- **More of each step fits on the screen.** On a Chromebook the step you are
+  working on used to start more than halfway down the page. The set name,
+  "Step n of m", your progress and the All steps button now share one thin
+  line at the top instead of stacking up, so the step itself starts near the
+  top and figures and tabs are bigger and easier to read.
+- **The left menu fits without scrolling.** Everything in it — your module,
+  your sets, The lesson, My skills checklist and the Part 1 / Part 2 links —
+  is visible at once now, and the tools at the bottom sit in one row.
+- **You can narrow the left menu.** The small arrow at the top of it shrinks
+  it to just icons when you want the widest possible view, and widens it
+  again. The site remembers which you picked.
+- **The tune-and-warm-up reminder is gone** — we do that together in class,
+  so the site no longer asks you to do it again on your own.
+- **Song Journey pages start with the music.** The Play along track is now
+  the first thing under the song title, above the song map, so you can start
+  it playing before you read anything.
+
 ## 2026-09-19 — Quiz questions where every choice is worth thinking about
 
 ### Changed

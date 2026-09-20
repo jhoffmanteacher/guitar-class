@@ -728,6 +728,87 @@ Two rules that are easy to break without noticing:
   invert**, not on CSS variables: its fretted-note circle is a hardcoded
   light green, so a variable-themed `?` would be light-on-light in dark mode.
 
+### ⚠️ The set band carries the lesson chrome, and the rail packs itself
+**2026-09-19, "Chromebook viewing area" work order, Phase 1.** Test viewport
+is **1366×657** — a Chromebook with browser chrome. Before this, 365px of a
+657px screen was spent before the first line of the step a student was
+meant to be reading; it is ~196px now.
+
+- **`.set-eyebrow` is the only sticky row.** The progress pill, "Step n of
+  m" and the All steps / One at a time toggle moved out of the card and
+  into the band, inside `<span class="se-chrome">`. `buildLesson()` still
+  builds them (same ids, keys and per-part `lessonParts()` logic) and hands
+  them up through **`_lessonChrome`**, which `buildSet()` reads right after
+  calling it — so **`buildSet()` must call `buildLesson()` before it
+  assembles the band**, not inside the same template literal.
+- **Nothing may look the chrome up with `dp.querySelector` any more** — it
+  is a sibling of `.dp`, not a descendant. `lessonChromeQ(dp, sel)` is the
+  one lookup, used by `applyStationView`, `syncStationFocus` and
+  `refreshLessonPill`. `.cf-focus` on the chrome mirrors `.dp.focus`
+  (`.dp:not(.focus) .fm-count` could no longer reach it), and
+  `.week-panel.on-checklist` hides the chrome over the checklist panel —
+  set by `switchTabById()` **and** by `rebuildModuleContentPanels()`, which
+  restores the open tab itself.
+- `.dp-head` is a **title row only** now; a single-flow set (Module 13) is
+  the only thing that still renders one.
+- **The content column is 1000px** (was 820). Running text does not widen
+  with it — `.st-text` and friends keep their own 70–72ch caps, which is
+  what keeps a line readable. Tab boards and snippet cards now fill to
+  ~880px; a `.step-figure` stops at **720px**, which is the widest raster
+  in `img/` — past that the browser invents pixels. It lives inside
+  `.st-text`, so above 1240px one rule lets it out of the text measure.
+- **The rail has two independent states.** `body.rail-open` is the mobile
+  drawer (unchanged); **`body.rail-collapsed`** is the new 62px icon strip,
+  remembered in `localStorage` under **`railCollapsed`** (try/catch,
+  defaults to expanded) and toggled by `toggleRailCollapsed()`. They never
+  both apply — the collapse button is `display:none` below the drawer
+  breakpoint, and the narrow-layout block unwinds the collapsed rules. Nav
+  labels are **clipped, never `display:none`**: they are each button's
+  accessible name, and `index.html` gives every nav item and every tool a
+  translated `title=`.
+- **The tool dock is 1×4, icons only, above 760px** (`.rail-tools`, 119px →
+  50px) and keeps the labelled 2×2 on the drawer. The labels do not fit in
+  a 252px row — "Metronome", "Temporizador", "Grabadora" all ellipsize — so
+  they are clipped and the tooltip carries the word.
+- **`@media(min-width:761px) and (max-height:800px)` is the short-screen
+  rail.** It packs gaps and padding, drops the two station subtitles, and
+  puts the page nav in **two columns while in Practice only**
+  (`body:not(.explore-open):not(.games-open):not(.rail-collapsed)`) —
+  Practice is the one page that must also show the module picker, the set
+  pills and "This set". It is two columns rather than shorter buttons
+  because `.nav-btn` / `.rail-station` / `.wpill` sit on `min-height:44px`
+  from the tap-target pass, and a Chromebook is exactly the touch device
+  that pass was written for. The two-column sizes (12px text, 16px icon,
+  5px gap, 4px padding) are measured against the longest **unbreakable**
+  label in either language — "Assessments" 75px, "Evaluaciones" 74px, in
+  79px of room. **Re-measure those two words before changing any of them.**
+  Worst case m5w2 (4 sets + Module review, two parts, no Preview notice):
+  707px of rail content in 490px → 527px in 527px.
+
+### ⚠️ The Daily 5 is retired — switched off, not deleted
+**2026-09-19** (Jonathan): tuning and the finger warm-up happen together as a
+class, so the site should not ask for them a second time. The "Tune and warm
+up first" banner at the top of every ladder was the **only** entry point to
+the Daily 5 overlay, so turning the banner off retires the Daily 5 with it —
+and it was 97px of a 657px Chromebook screen spent on work the room had
+already done.
+
+`const DAILY5_ENABLED = false;` in `app.js`, beside `buildDaily5()`, is the
+whole switch; `ladderHtml()` is its one reader. **Nothing was deleted** —
+`buildDaily5()`, `openDaily5Here()`, `moduleStepsFlat()`, the `.daily5-*`
+CSS (including the `.dp.focus.pd-showing .daily5-inline` rule) and every
+`daily5.*` i18n key are all still there, so flipping the constant back to
+`true` brings the banner back as it was. Two things that are NOT part of
+this: `WARMUP_BANK` in `config-main.js` (the Module Review's 10-Minute
+Routine reads it too) and `kind:'tuning-warmup'` sections, which stay hidden
+exactly as before — `storageSections()` depends on that and every `gi` in
+Firestore was written under it.
+
+One student-facing mention pointed at nothing afterwards and was reworded in
+the same push: `module-13.js`'s final check, "one lap of the Daily 5" / "una
+vuelta del Daily 5" → "a few bars of anything you know". A grep of every
+module file and `class-activities.js` found no others.
+
 ## In-Class Activities page & the activity gate
 Work order: "Today-first site simplification," Phase 1, shipped 2026-09-12.
 Renamed **In-Class Activities → Today** for that work order, then **back to

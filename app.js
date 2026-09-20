@@ -3460,7 +3460,15 @@ function buildSet(w){
       })()
     : '';
   const about = (skills || thread) ? `<details class="set-about"><summary>${t('set.about')}</summary><div class="set-about-panel">${skills}${thread}</div></details>` : '';
-  const eyebrow = `<div class="set-eyebrow">${setTag}${titleSpan}${about}${printBtn}</div>`;
+  /* buildLesson() runs BEFORE the band is assembled, on purpose: it leaves
+     the lesson chrome (progress pill, "Step n of m", the view toggle) in
+     _lessonChrome for the band to carry, instead of spending two more rows
+     on it at the top of the card. Template literals evaluate left to
+     right, so reading _lessonChrome in the same expression that calls
+     buildLesson() would read the PREVIOUS set's chrome — hence the local.
+     (Chromebook viewing-area work order, 2026-09-19.) */
+  const lessonHtml = buildLesson(w);
+  const eyebrow = `<div class="set-eyebrow">${setTag}${titleSpan}${about}${_lessonChrome}${printBtn}</div>`;
   // Always in the DOM (like mr-locked-banner), shown only when the panel
   // carries .set-peek — so it needs no rebuild to appear/disappear as the
   // gate state changes, only the class toggle renderPills/activateSet do.
@@ -3476,7 +3484,7 @@ function buildSet(w){
      only from that hidden bar, and the Songs hub (rail → Songs) already lists
      every song it did, Module 1's included, with the same play buttons. */
   return `${peekBanner}${eyebrow}
-  <div id="${w.id}-${LESSON_TAB}" class="tab-panel tp-station-b active">${buildLesson(w)}${panelFooter(w,LESSON_TAB)}</div>
+  <div id="${w.id}-${LESSON_TAB}" class="tab-panel tp-station-b active">${lessonHtml}${panelFooter(w,LESSON_TAB)}</div>
   <div id="${w.id}-checklist" class="tab-panel tp-checklist">${buildChecklist(w)}${panelFooter(w,'checklist')}</div>`;
 }
 
@@ -4037,7 +4045,17 @@ function buildLesson(w){
         : '')
     + `</div>`;
   const ladderHtml=()=>{
-    const reminder = groups.some(g => (g.s.sections||[]).some(isTuningWarmup))
+    /* The "Tune and warm up first" banner is switched off (2026-09-19,
+       Jonathan): tuning and the finger warm-up happen as a class now, so
+       the site asking for them again at the top of every ladder was 97px
+       of the screen spent on work the room has already done. It was also
+       the ONLY way into the Daily 5 overlay, so turning it off retires
+       the Daily 5 too — deliberately, and by switch rather than deletion:
+       buildDaily5() / openDaily5Here() / moduleStepsFlat() all stay, so
+       flipping this back to true brings the whole thing back with it.
+       (moduleStepsFlat() is also what checks.mjs 1ac watches for its
+       visibleSteps() call — another reason it stays put.) */
+    const reminder = DAILY5_ENABLED && groups.some(g => (g.s.sections||[]).some(isTuningWarmup))
       ? `<div class="daily5-inline">${t('daily5.tuneWarmupHtml',{btn:`<button type="button" class="daily5-inline-btn" onclick="openDaily5Here()">${ICO_BOLT} ${t('daily5.openToday')}</button>`})}</div>`
       : '';
     // Sections are plain group labels now, not their own accordion — every
@@ -4149,7 +4167,11 @@ function buildLesson(w){
     + `<span class="prog-mini"><i style="width:${Math.round(pillPct*100)}%"></i></span>`
     + `</span>` : '';
   const titleHtml = (single && w.stations.b && w.stations.b.title) ? `<h3 class="dp-title">${tf(w.stations.b,'title')}</h3>` : '';
-  const headHtml = (titleHtml || pillHtml) ? `<div class="dp-head">${titleHtml}${pillHtml}</div>` : '';
+  /* .dp-head is a TITLE row now and nothing else — the progress pill moved
+     up into the sticky set band (see _lessonChrome below), so the only set
+     that still renders one is a single-flow set carrying its own process
+     title (Module 13). Everywhere else it isn't emitted at all. */
+  const headHtml = titleHtml ? `<div class="dp-head">${titleHtml}</div>` : '';
   /* Stepper bar: where-am-I counter (focus mode only) + the view toggle,
      which stays visible in BOTH views — it's the only way back to focus. */
   // "Step n of m" counts within the current part for a set with parts;
@@ -4158,10 +4180,31 @@ function buildLesson(w){
     ? {n: Math.max(1, (openNum || 1) - (curPartNum === 2 ? pc[1].total : 0)), m: pc[curPartNum].total}
     : {n: openNum || 1, m: stepTotal};
   const toggleKey = focusMode ? 'fm.listView' : 'fm.focusView';
-  const stepperHtml = stepTotal > 0 ? `<div class="dp-stepper">`
-    + `<span class="fm-count" aria-live="polite" data-i18n="fm.stepOf" data-i18n-params="${escAttr(JSON.stringify(countParams))}">${t('fm.stepOf', countParams)}</span>`
-    + `<button type="button" class="fm-toggle" onclick="toggleStationView()" data-i18n="${toggleKey}">${t(toggleKey)}</button>`
-    + `</div>` : '';
+  /* ── The lesson chrome rides in the sticky set band, not the card ──
+     (Chromebook viewing-area work order, 2026-09-19.) The progress pill,
+     "Step n of m" and the All steps / One at a time toggle used to be two
+     more full-width rows at the top of the card; on a 657px-tall
+     Chromebook screen they were 65px of the 365px of chrome standing
+     between the student and the first line of the step they were meant to
+     be reading. They are the same elements with the same ids, keys and
+     params — only their DOM home moved, into .set-eyebrow, which is built
+     one function up in buildSet(). Handed over through _lessonChrome
+     because buildLesson() returns a string: buildSet() calls it FIRST and
+     reads this afterwards (see the comment there).
+     Everything that keeps them live — applyStationView, syncStationFocus,
+     refreshLessonPill — looks them up through lessonChromeQ(dp, …) rather
+     than dp.querySelector, for exactly this reason. */
+  const chromeInner = stepTotal > 0
+    ? `<span class="fm-count" aria-live="polite" data-i18n="fm.stepOf" data-i18n-params="${escAttr(JSON.stringify(countParams))}">${t('fm.stepOf', countParams)}</span>`
+      + pillHtml
+      + `<button type="button" class="fm-toggle" onclick="toggleStationView()" data-i18n="${toggleKey}">${t(toggleKey)}</button>`
+    : '';
+  /* .cf-focus mirrors the card's own .focus class onto the chrome, because
+     the chrome is no longer inside .dp for `.dp:not(.focus) .fm-count` to
+     reach. applyStationView() keeps it in sync when the view flips. */
+  _lessonChrome = chromeInner
+    ? `<span class="se-chrome${focusMode ? ' cf-focus' : ''}">${chromeInner}</span>`
+    : '';
   /* Back/Next lives once per card at the very end: in focus mode every other
      row is display:none, so it lands directly under the open step's detail
      (no per-step copies to keep in sync). Hidden entirely in list mode. */
@@ -4176,10 +4219,25 @@ function buildLesson(w){
   return `
     <div class="dp${focusMode ? ' focus' : ''}${atEnd ? ' at-end' : ''}${parts ? ' has-parts' : ''}" id="${w.id}-dp-b">
       ${headHtml}
-      ${stepperHtml}
       ${body}
       ${navHtml}
     </div>`;
+}
+/* buildLesson()'s side channel for the sticky-band chrome (see the comment
+   at its assignment). Written on every buildLesson() call and read once,
+   immediately, by buildSet() — never stored, never read anywhere else. */
+let _lessonChrome = '';
+/* The pill / counter / view toggle live in the set band, which is a SIBLING
+   of the .dp card, so `dp.querySelector` can't see them any more. One
+   lookup for all four call sites: search the card first (harmless, and it
+   keeps working if a panel ever renders its own copy inline), then the
+   band belonging to the same set. */
+function lessonChromeQ(dp, sel){
+  if(!dp) return null;
+  const inCard = dp.querySelector(sel);
+  if(inCard) return inCard;
+  const wrap = dp.closest('.week-panel');
+  return wrap ? wrap.querySelector(`.set-eyebrow ${sel}`) : null;
 }
 
 // "Mark done" ⇄ "✓ Done" — a state-and-language-dependent label, so the
@@ -4247,7 +4305,12 @@ function applyStationView(dp, focus){
       if(h) h.setAttribute('aria-expanded','true');
     }
   }
-  const toggle = dp.querySelector('.fm-toggle');
+  // The chrome sits in the set band now, not the card — mirror the view
+  // state onto it so `.se-chrome:not(.cf-focus) .fm-count` still hides the
+  // counter in list view (it used to ride on .dp's own .focus class).
+  const chrome = lessonChromeQ(dp, '.se-chrome');
+  if(chrome) chrome.classList.toggle('cf-focus', focus);
+  const toggle = lessonChromeQ(dp, '.fm-toggle');
   if(toggle){
     const key = focus ? 'fm.listView' : 'fm.focusView';
     toggle.setAttribute('data-i18n', key);
@@ -4289,7 +4352,7 @@ function syncStationFocus(dp){
   // The counter is per-part too; Back/Next below stay whole-ladder so Next
   // can still carry the student across the divider.
   const scope = parted ? lessonPartSteps(dp, part) : steps;
-  const count = dp.querySelector('.fm-count');
+  const count = lessonChromeQ(dp, '.fm-count');
   if(count){
     const sIdx = open ? scope.indexOf(open) : -1;
     const params = parted
@@ -4464,7 +4527,7 @@ function lessonCurrentPart(dp){
     || nums[nums.length-1] || '1';
 }
 function refreshLessonPill(dp){
-  const pill = dp && dp.querySelector('.prog-pill');
+  const pill = lessonChromeQ(dp, '.prog-pill');
   if(!pill) return;
   const parted = dp.classList.contains('has-parts');
   const part = parted ? lessonCurrentPart(dp) : null;
@@ -4476,7 +4539,7 @@ function refreshLessonPill(dp){
   pill.setAttribute('data-i18n', key);
   pill.setAttribute('data-i18n-params', JSON.stringify(params));
   pill.textContent = t(key, params);
-  const mini = dp.querySelector('.prog-mini i');
+  const mini = lessonChromeQ(dp, '.prog-mini i');
   if(mini) mini.style.width = `${Math.round(total ? done/total*100 : 0)}%`;
 }
 
@@ -4606,6 +4669,16 @@ function printRoutine(){
   window.addEventListener('afterprint', done);
   window.print();
 }
+/* ── Daily 5 — RETIRED 2026-09-19, switched off rather than deleted ──
+   Jonathan: tuning and the finger warm-up happen together as a class, so
+   the site shouldn't ask for them a second time. The ladder's "Tune and
+   warm up first" banner was the only entry point to this overlay, so
+   turning the banner off retires the Daily 5 with it.
+   Everything below still works — flip this to true and the banner comes
+   back exactly as it was (ladderHtml() in buildLesson() is the one reader,
+   and the daily5.* i18n keys are all still in place for it). WARMUP_BANK
+   is NOT part of this: the Module Review's 10-Minute Routine reads it too. */
+const DAILY5_ENABLED = false;
 /* Daily 5 — today's 5-minute warm-up for the current module. Same drill for
    everyone on the same date (rotated by day of year). Read-only. */
 function dayOfYear(){ const now=new Date(); return Math.floor((now-new Date(now.getFullYear(),0,0))/86400000); }
@@ -6918,6 +6991,11 @@ function rebuildModuleContentPanels(){
           targetPanel.classList.add('active');
         }
       }
+      // This path restores the open tab itself rather than going through
+      // switchTabById(), so it owns the band's on-checklist flag too —
+      // without it a language switch on the checklist would leave the
+      // lesson's pill and step counter showing over it.
+      panel.classList.toggle('on-checklist', activeSuffix === 'checklist');
     } else if(mr && wid===`mr${num}`){
       panel.innerHTML = buildModuleReview(mr);
     } else {
@@ -7389,6 +7467,55 @@ window.addEventListener('resize', () => {
     railEl.inert = true;
   }
 });
+/* ── Narrow rail (Chromebook viewing-area work order, 2026-09-19) ──
+   A second, independent rail state from the mobile drawer above: the
+   drawer is open-or-shut at narrow widths, this is wide-or-narrow at
+   desktop widths. They never both apply — the collapse button is
+   display:none below the drawer breakpoint — so `rail-open` and
+   `rail-collapsed` can't fight.
+   Collapsed, the rail is a ~62px icon strip: page icons keep their labels
+   as accessible names (clipped, not removed) and gain a translated
+   title=, the four tools stack, and the module/set block is hidden — the
+   sticky set band names the set now, so the rail is not the only place
+   that says where you are.
+   Remembered per browser. localStorage is wrapped because a student in a
+   locked-down profile (or a private window) throws on access, and the
+   right answer there is the ordinary wide rail, not a broken page. */
+const RAIL_COLLAPSE_KEY = 'railCollapsed';
+function railIsCollapsed(){ return document.body.classList.contains('rail-collapsed'); }
+function setRailCollapsed(on){
+  document.body.classList.toggle('rail-collapsed', on);
+  const btn = document.getElementById('rail-collapse-btn');
+  if(btn){
+    const key = on ? 'nav.railExpand' : 'nav.railCollapse';
+    // aria-expanded describes the rail, not the button's own menu: the
+    // button controls #nav-rail (aria-controls), which is expanded when
+    // the rail is wide.
+    btn.setAttribute('aria-expanded', String(!on));
+    btn.setAttribute('data-i18n-attr', `title:${key};aria-label:${key}`);
+    btn.setAttribute('title', t(key));
+    btn.setAttribute('aria-label', t(key));
+  }
+  /* A tool popup is positioned against the dock, so it is in the wrong
+     place the instant the rail changes width and nothing else would close
+     it. stopAudio=false on purpose — this is a dismissal, so a metronome
+     the student started keeps clicking (fab-tools.js draws the same line
+     for click-away and Escape). The tuner stops regardless; closePopup
+     always releases the mic. */
+  if(typeof closePopup === 'function'){
+    ['metro','timer','tuner','rec'].forEach(w=>{
+      const el = document.getElementById(w + '-popup');
+      if(el && el.classList.contains('open')) closePopup(w, false);
+    });
+  }
+  try{ localStorage.setItem(RAIL_COLLAPSE_KEY, on ? '1' : '0'); }catch(e){}
+}
+function toggleRailCollapsed(){ setRailCollapsed(!railIsCollapsed()); }
+(function restoreRailCollapsed(){
+  let saved = null;
+  try{ saved = localStorage.getItem(RAIL_COLLAPSE_KEY); }catch(e){}
+  if(saved === '1') setRailCollapsed(true);
+})();
 // Picking a station or an Explore item shows the main content — close the
 // drawer so students actually see it instead of the nav still covering it.
 document.getElementById('nav-rail')?.addEventListener('click', e => {
@@ -7630,6 +7757,11 @@ function switchTabById(wid, tab, keepScroll){
   }
   wrap.querySelectorAll('.tab-panel').forEach(p=>p.classList.remove('active'));
   panel.classList.add('active');
+  /* The set band carries the lesson's chrome now (pill, "Step n of m", the
+     view toggle), and the band sits above BOTH panels — so it has to know
+     which one is open. The checklist has its own progress bar and no
+     steps, so the lesson chrome hides while it's showing. */
+  wrap.classList.toggle('on-checklist', tab === 'checklist');
   if(typeof syncRailStations === 'function') syncRailStations();   // mirror onto the rail
   /* Scroll the panel we just opened to the top. This used to target the tab
      bar and fall back to the panel — but the bar was display:none, so

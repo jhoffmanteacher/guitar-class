@@ -288,8 +288,8 @@ SETS.push(
               },
               {
                 label: 'The hold test', label_es: 'La prueba final',
-                text: 'Run one last check before you raise your hand:<ol><li>Play something — a riff, a chord, one lap of the Daily 5.</li><li>Check the tuner again and touch up anything that drifted.</li></ol>This is the graded final check — a fresh set will still move after class, but that part isn\'t what\'s graded, only your reading right now. You\'ve got it when: you have played the guitar and re-checked every string once more.',
-                text_es: 'Haz una última revisión antes de levantar la mano:<ol><li>Toca algo — un riff, un acorde, una vuelta del Daily 5.</li><li>Revisa el afinador otra vez y corrige lo que se haya movido.</li></ol>Esta es la revisión final calificada — un juego nuevo seguirá moviéndose después de clase, pero eso no es lo que se califica, solo tu lectura en este momento. Lo tienes cuando: ya tocaste la guitarra y revisaste otra vez cada cuerda.',
+                text: 'Run one last check before you raise your hand:<ol><li>Play something — a riff, a chord, a few bars of anything you know.</li><li>Check the tuner again and touch up anything that drifted.</li></ol>This is the graded final check — a fresh set will still move after class, but that part isn\'t what\'s graded, only your reading right now. You\'ve got it when: you have played the guitar and re-checked every string once more.',
+                text_es: 'Haz una última revisión antes de levantar la mano:<ol><li>Toca algo — un riff, un acorde, unos compases de lo que sea que ya sepas.</li><li>Revisa el afinador otra vez y corrige lo que se haya movido.</li></ol>Esta es la revisión final calificada — un juego nuevo seguirá moviéndose después de clase, pero eso no es lo que se califica, solo tu lectura en este momento. Lo tienes cuando: ya tocaste la guitarra y revisaste otra vez cada cuerda.',
                 skills: [3]
               }
             ]
