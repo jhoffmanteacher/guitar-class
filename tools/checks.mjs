@@ -1698,6 +1698,25 @@ const SLANG_PHRASES = [
   'fight the', 'toolkit', 'payoff', 'pays off', 'backbone', 'slam your', 'slam a finger',
   'rock solid', 'like a pro', 'wants to be played', 'dialed down', 'the boss',
   'big finish', 'gets bigger every time', 'skinny',
+  /* Practice-chunks work order, 2026-09-19, item 3s — the nine sample
+     phrases named in the work order (added as permanent guards whether or
+     not this sweep's own content still has them) plus every additional
+     idiom/figurative phrase the five Phase 3 content agents actually found
+     and reworded in Modules 2–6 and class-activities.js. Deliberately NOT
+     banning "two homes" or "top of the ladder" — content agents reworded
+     one instance of each, but both turned out to be established,
+     deliberately-defined site-wide terms predating this sweep (module-4/7/
+     11's "Two Homes for F"; i18n.js's own tools.ladderMax metronome-ladder
+     string and its module-5/6 companions), the same innocent-twin situation
+     1w2's whitelist exists for. */
+  'nine times out of ten', 'a hair toward the wire', 'park on just g5', 'park on the slide',
+  'play it cold', 'read a lick cold', 'what will eat most of your practice time',
+  'line them up like soldiers', 'disappear into it', 'pass line 100 bpm', 'rung 4',
+  'read it cold', 'sight-read it cold', 'hearing it cold', 'park on just the f',
+  "that one's free", 'trip up the neck', 'driving riff',
+  'carries the whole job', 'holding the two bars out', 'the module bar', 'on call',
+  'cold read', 'feels like a punchline', 'parked in one place',
+  'rushed at first, then locked in', 'runs on autopilot', 'test the names cold',
 ];
 /* Hoisted to module scope so 1y can sweep exit-check item labels with the
    exact same list — 1w's own FIELD_RE has no `label`, and widening it would
@@ -4022,6 +4041,92 @@ function checkBackingSnippets() {
   if (bad === 0) ok(`${snippets} backing-track snippet${snippets === 1 ? '' : 's'} across ${trackNames.length} track${trackNames.length === 1 ? '' : 's'} (${withFull} with a full mix) — every window lands inside its file, both renderers build them`);
 }
 
+/* ════════════════════════════════════════════════════════════════════
+   1am. ACTIVITY SIZE — practice-chunks work order, 2026-09-19, Phase 4.
+   Warns (does not fail the push) when a non-check class activity has more
+   than 7 steps or more than 600 words of English step text — the same
+   ceiling item 3o trimmed ca-17 to (976 words / 9 steps down to 597 words
+   / 7 steps). A warning, not a hard fail: a future activity might
+   legitimately need more room once; the point is the same nudge 3o
+   answered, not a hard wall nobody can cross.
+   ════════════════════════════════════════════════════════════════════ */
+function checkActivitySize() {
+  head('1am. Activity size — steps and word count');
+  let src;
+  try { src = readFileSync(join(ROOT, 'class-activities.js'), 'utf8'); }
+  catch { return; }  // reported by 1d
+  const sandbox = { console };
+  sandbox.window = sandbox;
+  vm.createContext(sandbox);
+  try { vm.runInContext(src, sandbox, { filename: 'class-activities.js' }); }
+  catch { return; }  // reported by 1d
+  const activities = sandbox.CLASS_ACTIVITIES || [];
+  let flagged = 0;
+  for (const a of activities) {
+    if (!a || a.kind === 'check' || !Array.isArray(a.steps)) continue;
+    const stepCount = a.steps.length;
+    const words = a.steps.reduce((n, s) => {
+      const stripped = ((s && s.text) || '').replace(/<[^>]+>/g, ' ').trim();
+      return n + (stripped ? stripped.split(/\s+/).length : 0);
+    }, 0);
+    if (stepCount > 7 || words > 600) {
+      warn(`${a.id} ("${a.title}"): ${stepCount} steps, ${words} EN words of step text — over the 7-step/600-word guideline (item 3o's own trim target)`);
+      warnings++; flagged++;
+    }
+  }
+  if (flagged === 0) ok('every non-check class activity is within the 7-step/600-word guideline (ca-17 confirmed trimmed)');
+}
+
+/* ════════════════════════════════════════════════════════════════════
+   1an. BARE WATCH STEP — practice-chunks work order, 2026-09-19, Phase 4.
+   Fails the push when a lesson step's text, stripped of tags and the
+   link's own visible label, is under ~6 words while its hint is
+   non-empty and it links a YouTube video — item 3b's exact "bare Watch:"
+   shape (all the real content living in the hint, `text` just the link),
+   now guarded against a relapse.
+   ════════════════════════════════════════════════════════════════════ */
+function checkBareWatchSteps() {
+  head('1an. Bare watch steps (video link, near-empty text)');
+  const configSrc = readFileSync(join(ROOT, 'config-main.js'), 'utf8');
+  let bad = 0;
+  for (const file of MODULE_FILES) {
+    const sandbox = { console };
+    vm.createContext(sandbox);
+    let sets;
+    try {
+      vm.runInContext(configSrc, sandbox, { filename: 'config-main.js' });
+      vm.runInContext(readFileSync(join(ROOT, file), 'utf8'), sandbox, { filename: file });
+      sets = vm.runInContext('SETS', sandbox) || [];
+    } catch { continue; }  // reported by 1 (validateModules)
+    for (const s of sets) {
+      if (!s || typeof s.stations !== 'object') continue;
+      for (const stKey of Object.keys(s.stations)) {
+        // A station is { title, sections: [...] }, not a bare array — see
+        // storageSections() in app.js for the same shape.
+        const sections = (s.stations[stKey] && s.stations[stKey].sections) || [];
+        if (!Array.isArray(sections) || !sections.length) continue;
+        sections.forEach((sec, si) => {
+          (sec && sec.steps || []).forEach((step, ii) => {
+            const text = (step && step.text) || '';
+            if (!/(?:youtube\.com|youtu\.be)/i.test(text)) return;   // no video link at all
+            if (!step.hint) return;   // 3b's shape needs the real content living in hint
+            const stripped = text
+              .replace(/<a\b[^>]*>[\s\S]*?<\/a>/gi, ' ')   // drop the link AND its visible label
+              .replace(/<[^>]+>/g, ' ')
+              .trim();
+            const wc = stripped ? stripped.split(/\s+/).length : 0;
+            if (wc < 6) {
+              err(`${file} · set "${s.id}" · ${stKey} · section ${si} · step ${ii}: text is only ${wc} word${wc === 1 ? '' : 's'} once the video link is stripped, but hint carries real content — this is the bare-Watch-step shape item 3b fixed. Add an imperative "while you watch" sentence and a countable success line to text.`);
+              problems++; bad++;
+            }
+          });
+        });
+      }
+    }
+  }
+  if (bad === 0) ok('no bare watch steps (video link with near-empty text and a non-empty hint)');
+}
+
 (async function main() {
   if (LIVE_ONLY) {
     console.log(`${C.bold}Guitar Class — post-push live check${C.reset}`);
@@ -4066,6 +4171,8 @@ function checkBackingSnippets() {
   checkConfigWriteGuard();
   checkBoardModuleColours();
   checkBackingSnippets();
+  checkActivitySize();
+  checkBareWatchSteps();
   if (!SKIP_LINKS) await checkLinks();
   else warn('skipping link check (--skip-links)');
   bumpServiceWorker();

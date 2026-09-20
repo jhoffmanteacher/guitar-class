@@ -5,6 +5,81 @@ Notable changes to the Guitar Class site. Newest first.
 For the full session-by-session history (and the reasoning behind each change),
 see `WORKFLOW.md` and the git commit log.
 
+## 2026-09-19 — A "Start here" card, smaller bites, and the nav where you can reach it
+
+### Added
+
+- **In-Class Activities now opens on one card: Start here.** The activity you
+  should do next sits at the top, bigger than the rest, with a picture from
+  the work and a **Start →** button (it says **Keep going →** once you've
+  ticked a step). Everything else still pending folds into **Still to do**,
+  closed until you want it, so the page is one thing instead of a stack.
+- **Every card says how big a bite it is before you open it** — how many
+  steps, roughly how many minutes when the activity says, and how many steps
+  you've ticked off this session.
+- **Tap dots for reps.** When a step says "three clean reps in a row," three
+  dots now sit under that line. Tap one per rep; the last tap marks the step
+  done, so you don't have to count in your head.
+- **One check before you close out a card.** Marking an activity complete with
+  steps still unticked asks once — "You ticked 2 of 5 steps. Finish anyway?"
+  — with **Keep going** beside it. It's a nudge, never a lock.
+- **Five minutes of free play when you're caught up.** With nothing left
+  pending, the top card offers a 5-minute timer and a jump straight into Riff
+  Roulette.
+- **Module headings carry a progress bar** in Still to do and Earlier — how
+  many of that module's activities you've finished.
+
+### Changed
+
+- **The nav buttons come first in the sidebar.** In-Class Activities,
+  Practice, Songs, Games and My progress used to sit below the module and set
+  pickers, which pushed them off the bottom of a Chromebook screen. They're
+  at the top now, and the site header shrinks on a short screen to give the
+  page more room.
+- **In-Class Activities exits forward.** The button reads **Go to practice →**
+  instead of "← Back to practice" — it's the page you start on, so practice is
+  where you're going, not where you came from.
+- **The note-naming quizzes give you eight seconds a card, not five,** and
+  the goal is 7 of 10 on your first pass, then 9 of 10 once that's easy.
+- **When the gate is on, it tells you how many activities are holding it** —
+  "2 activities are blocking the rest of the site" instead of a flat "finish
+  these first."
+- **The tuner's mic message now says how to fix it** — which icon to click in
+  the address bar, what to set, and to reload after.
+
+### Fixed
+
+- **The Module 2 sight-reading challenge is on the page now, not hidden.** It
+  used to sit inside a card you'd only see as a Song Journey link — now it's
+  the last step of the visible TAB-reading section, with a fresh line so it's
+  not the same one twice.
+- **A handful of "Watch:" steps in Modules 2 and 3 now tell you what to do
+  while you watch**, with a way to check yourself when the video's done —
+  they used to be just a link.
+- **Module 3's Mute Check spells out the move** — index finger flat and light
+  across the D, G, B and high e strings — instead of assuming you already
+  knew it, and checks four strings before all six.
+- **A Module 3 challenge names the strings instead of numbering them**
+  ("the low E string or the A string"), and the power-chord TAB there now
+  explains what two stacked numbers mean.
+- **Module 4 gets a fretboard diagram for scale degrees** (1, ♭3, 4, 5, ♭7)
+  so "play the degrees" has a picture to go with it, and the blues-note step
+  adds the actual frets to play.
+- **A Module 5 video that taught the wrong chord has been swapped** for one
+  that actually teaches Am, and a few stale references to songs and chords
+  elsewhere in Module 5 now point at the right place.
+- **Four "Listen to…" steps that had no link now do** (Luna, Brown Eyed Girl,
+  I'm Yours, Three Little Birds/Bad Moon Rising).
+- **Sub Day Circuit's retuning step is safer with nobody in the room** — it
+  now loosens only the low E string, not all six.
+- **A few in-class activities got trimmed or split for length** — a long one
+  is shorter without losing anything, a step covering two guitar phrases is
+  now two steps, and every step in the older activities has a short name
+  instead of just "Step 3."
+- **A round of plain-language fixes across Modules 2–6 and the in-class
+  activities** — idioms and unclear phrases ("play it cold," "park on," "a
+  hair toward the wire," and others) reworded to say plainly what to do.
+
 ## 2026-09-19 — Your metronome keeps going while you work
 
 ### Fixed

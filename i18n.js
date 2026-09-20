@@ -326,22 +326,71 @@
     // three groups — Do now / Still to do / Earlier — rather than a stray
     // archive.
     'ca.finishedGroup':        { en: 'Earlier ({n})', es: 'Antes ({n})' },
-    'ca.allDone':              { en: 'Everything here is marked complete — see it under Earlier below.',
-                                 es: 'Todo aquí está marcado como completo — velo en Antes abajo.' },
-    // The divider label ahead of everything past the first pending card
-    // (renderClassActivities) — skipped when there's only one pending card,
-    // since there's nothing left to divide it from.
-    'ca.stillToDo':            { en: 'Still to do', es: 'Todavía por hacer' },
+    // The one fold wrapping every pending card except the Today hero
+    // (caTodoGroupHtml, item 2f) — closed by default, same as Earlier.
+    'ca.stillToDoGroup':       { en: 'Still to do ({n})', es: 'Todavía por hacer ({n})' },
+    // "N of M" beside a module heading's progress bar, inside either fold
+    // (caModuleHeadHtml, item 2f).
+    'ca.moduleProgress':       { en: '{done} of {total}', es: '{done} de {total}' },
+    // Tag on the Today hero card (caHeroCardHtml) — Chromebook rail work
+    // order, 2026-09-19; the " · today" variant is item 2f, for when it's
+    // also the thing blocking the gate.
+    'ca.startHere':            { en: 'Start here', es: 'Empieza aquí' },
+    'ca.startHereToday':       { en: 'Start here · today', es: 'Empieza aquí · hoy' },
+    // The Today hero's own call-to-action (caHeroCardHtml/caHeroCheckHtml)
+    // — the arrow is appended in app.js, matching "Go to practice →".
+    'ca.heroStart':            { en: 'Start', es: 'Empezar' },
+    'ca.heroKeepGoing':        { en: 'Keep going', es: 'Seguir' },
+    'ca.heroStartCheck':       { en: 'Start the check', es: 'Empezar la prueba' },
+    // ── Chunk-size meta line (practice-chunks work order, 2026-09-19) ──
+    // caChunkMetaHtml() joins whichever of these apply into one quiet line
+    // under the card title: step count, an optional authored `minutes`, and
+    // — once any step is ticked THIS SESSION (caStepDone is in-memory only,
+    // see app.js) — a running done count. n===1 gets its own key, same
+    // pattern as sr.daysAgo1, so English/Spanish don't read "1 steps".
+    'ca.stepCount1':           { en: '1 step', es: '1 paso' },
+    'ca.stepCount':            { en: '{n} steps', es: '{n} pasos' },
+    'ca.doneCount1':           { en: '1 done', es: '1 hecho' },
+    'ca.doneCount':            { en: '{n} done', es: '{n} hechos' },
+    'ca.aboutMin':             { en: 'about {n} min', es: 'unos {n} min' },
+    'ca.checkMeta1':           { en: '1 question · one try', es: '1 pregunta · un intento' },
+    'ca.checkMeta':            { en: '{n} questions · one try', es: '{n} preguntas · un intento' },
+    // ── Rep-counter tap dots (practice-chunks work order, 2026-09-19) —
+    // repDotsHtml() in app.js, shared by module lesson steps and class
+    // activities.
+    'rep.dotAria':             { en: 'Rep {n}', es: 'Repetición {n}' },
+    'rep.startOver':           { en: 'Start over', es: 'Empezar de nuevo' },
+    // Soft nudge on Mark complete (caMarkRowHtml, app.js) — never a lock,
+    // just one extra tap when the student is about to close out a card with
+    // steps still unticked this session.
+    'ca.nudgeText':            { en: 'You ticked {ticks} of {total} steps. Finish anyway?',
+                                 es: 'Marcaste {ticks} de {total} pasos. ¿Terminar de todos modos?' },
+    'ca.keepGoing':            { en: 'Keep going', es: 'Seguir' },
+    // Free play once nothing is left pending (caFreePlayHeroHtml, app.js) —
+    // the Today hero's own caught-up state, item 2f.
+    'ca.caughtUpTitle':        { en: 'You are caught up.', es: 'Estás al día.' },
+    'ca.freePlayText':         { en: 'Everything is marked complete. Want 5 minutes of free play?',
+                                 es: 'Todo está marcado como completo. ¿Quieres 5 minutos de juego libre?' },
+    'ca.freePlayTimer':        { en: 'Start a 5-minute timer', es: 'Iniciar un temporizador de 5 minutos' },
+    'ca.freePlayGames':        { en: 'Open Riff Roulette', es: 'Abrir Ruleta de riffs' },
     // Button under an activity's steps when it names a Song Journey page
     // (`journey` in class-activities.js) — opens that page in a new tab.
     // Quoted, not bare — SONG_JOURNEYS' name for "the cure" is lowercase with
     // no leading article, so the unquoted template read "Open the the cure
     // Song Journey page" (Jonathan/Claude, 2026-09-12, found live).
     'ca.openJourney':          { en: 'Open the "{song}" Song Journey page', es: 'Abrir la página Song Journey de "{song}"' },
-    // Shown above the Do-now group only while the activity gate (below) is
-    // on — it's the thing standing between the student and the rest of the
-    // site, so it needs to say that plainly.
-    'today.gateIntro':         { en: 'Finish these before anything else opens.',
+    // Shown above the Today hero only while the activity gate (below) is on
+    // — names how many things are actually blocking (item 2f), from
+    // caBlockers(), the same predicate the gate itself runs on. n===1 gets
+    // its own key, same pattern as sr.daysAgo1.
+    'today.gateIntro1':        { en: '1 activity is blocking the rest of the site. Finish it to open everything else.',
+                                 es: '1 actividad está bloqueando el resto del sitio. Termínala para abrir todo lo demás.' },
+    'today.gateIntro':         { en: '{n} activities are blocking the rest of the site. Finish them to open everything else.',
+                                 es: '{n} actividades están bloqueando el resto del sitio. Termínalas para abrir todo lo demás.' },
+    // window.__forceGate (localhost only) forces the gate on for a gate
+    // PREVIEWER, whose own caBlockers() always reads empty — a real student
+    // never reaches this branch (see the comment in renderClassActivities).
+    'today.gateIntroForced':   { en: 'Finish these before anything else opens.',
                                  es: 'Termina estas actividades antes de que se abra lo demás.' },
     'ca.watchVideo':           { en: 'Watch video', es: 'Ver video' },
     'ca.stepLabel':            { en: 'Step {n}', es: 'Paso {n}' },
@@ -460,7 +509,8 @@
     'tools.sharp':         { en: 'sharp', es: 'sostenido' },
     'tools.playAString':   { en: 'Play a string…', es: 'Toca una cuerda…' },
     'tools.listening':     { en: 'Listening…', es: 'Escuchando…' },
-    'tools.micDenied':     { en: 'Mic access denied — check browser permissions', es: 'Acceso al micrófono denegado — revisa los permisos del navegador' },
+    'tools.micDenied':     { en: 'Mic access denied. Click the lock icon to the left of the address bar, set Microphone to Allow, then reload.',
+                              es: 'Acceso al micrófono denegado. Haz clic en el ícono de candado a la izquierda de la barra de direcciones, pon el Micrófono en Permitir y luego recarga la página.' },
     'tools.inTuneStatus':  { en: 'In tune ✓', es: 'Afinado ✓' },
     'tools.tooHighSharp':  { en: 'Too high — loosen the peg (sharp)', es: 'Muy alta — afloja la clavija (sostenido)' },
     'tools.tooLowFlat':    { en: 'Too low — tighten the peg (flat)', es: 'Muy baja — aprieta la clavija (bemol)' },
@@ -489,6 +539,10 @@
     'btn.nextModuleReview':  { en: 'Next: Module Review', es: 'Siguiente: Repaso del módulo' },
     'btn.theNextSet':        { en: 'the next set', es: 'la siguiente unidad' },
     'btn.backToPractice':    { en: 'Back to practice', es: 'Volver a practicar' },
+    // In-Class Activities is the site's home page (see CLAUDE.md), so its
+    // exit button points forward into practice rather than "back" to it —
+    // Chromebook rail work order, 2026-09-19.
+    'btn.goToPractice':      { en: 'Go to practice', es: 'Ir a practicar' },
     'btn.backToTop':         { en: 'Back to top', es: 'Volver arriba' },
     'btn.top':               { en: 'Top', es: 'Arriba' },
     'btn.reportProblem':     { en: 'Report a problem', es: 'Reportar un problema' },

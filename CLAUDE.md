@@ -298,6 +298,18 @@ in the Claude project.
 
 ## Content rules
 
+**Student-facing text uses the simplest direct wording that is still
+accurate** — short sentences, plain verbs, one idea per sentence, no idioms
+or figures of speech, and every music term defined the first time it
+appears. checks.mjs 1w catches a relapse of specific retired phrases; it
+can't catch a new idiom on its own, so this rule is the standing instruction
+new content has to be written against. Not every figurative-sounding phrase
+is a violation — an established, deliberately-defined site term (Module
+4/7/11's "two homes" for a chord's two fretboard positions; the metronome
+ladder's "top of the ladder") is a real teaching device, not confusing
+prose; don't flag or "fix" those. Define "root" once, in the first visible
+Module 2 step that uses it: the note a chord is named after.
+
 **Multi-step directions get lists, not paragraphs.** `<ol>` for sequential steps,
 `<ul>` for parallel points, short lead-in before the list. Applies to step
 `text:` and practice `prompt`s. Mirror the structure in the `_es` twin. Roughly:

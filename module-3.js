@@ -70,8 +70,8 @@ SETS.push(
             steps: [
           {
             label: 'Watch: what a power chord is', label_es: 'Mira: qué es un acorde de potencia',
-            text: 'Watch: <a href="https://www.youtube.com/watch?v=vtcdDira8eE" target="_blank">What Is A Power Chord? Easy Rock Guitar Chords – Lauren Bateman (0:00–4:00)</a>.',
-            text_es: 'Mira: <a href="https://www.youtube.com/watch?v=vtcdDira8eE" target="_blank">What Is A Power Chord? Easy Rock Guitar Chords – Lauren Bateman (0:00–4:00)</a>.',
+            text: 'Watch: <a href="https://www.youtube.com/watch?v=vtcdDira8eE" target="_blank">What Is A Power Chord? Easy Rock Guitar Chords – Lauren Bateman (0:00–4:00)</a>. While you watch, build each shape on your guitar as she plays it. You\'ve got it when: you can say which finger sits on the root and which finger adds the fifth, without looking back at the video.',
+            text_es: 'Mira: <a href="https://www.youtube.com/watch?v=vtcdDira8eE" target="_blank">What Is A Power Chord? Easy Rock Guitar Chords – Lauren Bateman (0:00–4:00)</a>. Mientras miras, arma cada forma en tu guitarra mientras ella la toca. Lo tienes cuando: puedes decir qué dedo va en la raíz y cuál agrega la quinta, sin volver a ver el video.',
             hint: 'Focus on the two-finger shape — which fingers go where, and how the note under your index finger names the chord. Try the shape on your guitar as she shows it.',
             hint_es: 'Fíjate en la forma con dos dedos — qué dedo va dónde, y cómo la nota bajo tu dedo índice le da nombre al acorde. Prueba la forma en tu guitarra mientras ella la muestra.',
             skills: [1, 3],
@@ -80,8 +80,8 @@ SETS.push(
           },
           {
             label: 'Watch: playing power chords', label_es: 'Mira: tocar acordes de potencia',
-            text: 'Watch: <a href="https://youtu.be/DVveuwoVmmY" target="_blank">Your Very First Guitar Power Chord Lesson – Marty Music</a> (0:00–3:00).',
-            text_es: 'Mira: <a href="https://youtu.be/DVveuwoVmmY" target="_blank">Your Very First Guitar Power Chord Lesson – Marty Music</a> (0:00–3:00).',
+            text: 'Watch: <a href="https://youtu.be/DVveuwoVmmY" target="_blank">Your Very First Guitar Power Chord Lesson – Marty Music</a> (0:00–3:00). While you watch, slide your own shape along to A5 and G5 with him. You\'ve got it when: you can land both chords in time with the video, without pausing it.',
+            text_es: 'Mira: <a href="https://youtu.be/DVveuwoVmmY" target="_blank">Your Very First Guitar Power Chord Lesson – Marty Music</a> (0:00–3:00). Mientras miras, desliza tu propia forma hasta A5 y G5 junto con él. Lo tienes cuando: puedes llegar a los dos acordes a tiempo con el video, sin pausarlo.',
             hint: 'Notice how he moves the same shape to different positions. As he does, slide your own shape along to A5 and G5 with him.',
             hint_es: 'Fíjate en cómo él mueve la misma forma a distintas posiciones. Mientras lo hace, desliza tu propia forma hasta A5 y G5 junto con él.',
             skills: [2, 4],
@@ -161,9 +161,9 @@ SETS.push(
           },
           {
             label: 'Challenge 2 — Mute Check', label_es: 'Reto 2 — Revisión de silenciado',
-            text: '<ol><li>Fret your E5.</li><li>Strum hard across ALL six strings.</li></ol>You\'ve got it when: strum all six strings but only the two power-chord notes ring — the other four stay silent.',
-            text_es: '<ol><li>Trastea tu E5.</li><li>Rasguea fuerte las SEIS cuerdas.</li></ol>Lo tienes cuando: rasgueas las seis cuerdas pero solo suenan las dos notas del acorde de potencia — las otras cuatro quedan en silencio.',
-            hint: 'Two jobs, two hands. Let your fretting ring finger lean over so it lightly touches the THINNER strings and deadens them; rest the side of your strumming hand on any THICKER strings the chord doesn\'t use. On an E5 there are no thicker strings left, so the fretting hand carries the whole job. A hard strum should still sound like just two notes.',
+            text: '<ol><li>Fret your E5.</li><li>Lay your index finger flat and light across the D, G, B, and high e strings — touching them, not pressing.</li><li>Strum softly across all six strings and check that those four strings stay silent.</li><li>Strum hard across all six strings.</li></ol>You\'ve got it when: first, a soft strum where the four muted strings stay silent — then a hard strum across all six where only the two power-chord notes ring.',
+            text_es: '<ol><li>Trastea tu E5.</li><li>Coloca tu dedo índice plano y ligero sobre las cuerdas Re, Sol, Si y mi aguda — tocándolas, sin presionar.</li><li>Rasguea suave las seis cuerdas y comprueba que esas cuatro cuerdas queden en silencio.</li><li>Rasguea fuerte las seis cuerdas.</li></ol>Lo tienes cuando: primero, un rasgueo suave donde las cuatro cuerdas silenciadas quedan calladas — y luego un rasgueo fuerte de las seis cuerdas donde solo suenan las dos notas del acorde de potencia.',
+            hint: 'Two jobs, two hands. Let your fretting ring finger lean over so it lightly touches the THINNER strings and deadens them; rest the side of your strumming hand on any THICKER strings the chord doesn\'t use. On an E5 there are no thicker strings left, so the fretting hand does the whole job. A hard strum should still sound like just two notes.',
             hint_es: 'Dos trabajos, dos manos. Deja que tu dedo anular al trastear se incline para tocar suavemente las cuerdas más DELGADAS y apagarlas; apoya el borde de tu mano de rasgueo sobre las cuerdas más GRUESAS que el acorde no usa. En un E5 ya no queda ninguna más gruesa, así que la mano de trastear se encarga de todo. Un rasgueo fuerte debe seguir sonando como solo dos notas.',
             stuck: 'Mute with the fretting hand first — let a finger lightly touch the strings you\'re not playing — then add the side of your strumming hand.',
             stuck_es: 'Silencia primero con la mano de trastear — deja que un dedo toque suavemente las cuerdas que no estás tocando — y luego agrega el borde de tu mano de rasgueo.',
@@ -183,8 +183,8 @@ SETS.push(
             text_es: 'Desliza la misma forma a cada una de estas, diciendo cada nombre en voz alta:<ul><li>A5 (traste 5 de Mi).</li><li>G5 (traste 3 de Mi).</li><li>D5 (traste 5 de La).</li><li>C5 (traste 3 de La).</li></ul>Lo tienes cuando: tocas las cuatro limpias sin perder la forma.',
             hint: 'Keep the same finger shape and just move it along the neck. The gap between your two fingers never changes.',
             hint_es: 'Mantén la misma forma de dedos y solo muévela por el mástil. La distancia entre tus dos dedos nunca cambia.',
-            stuck: 'Park on just G5 and A5 (both E-string) and switch between them until it\'s smooth, then add the A-string chords.',
-            stuck_es: 'Quédate solo con G5 y A5 (ambos en la cuerda Mi) y alterna entre ellos hasta que salga fluido, y luego agrega los acordes de la cuerda La.',
+            stuck: 'Start with just G5 and A5 (both on the low E string) and switch between them until it\'s smooth, then add the A-string chords.',
+            stuck_es: 'Empieza solo con G5 y A5 (ambos en la cuerda Mi) y alterna entre ellos hasta que salga fluido, y luego agrega los acordes de la cuerda La.',
             levelUp: 'Run the deck below and find each chord within 3 seconds of flipping a card — no counting frets.',
             levelUp_es: 'Corre la baraja de abajo y encuentra cada acorde en menos de 3 segundos al voltear una carta — sin contar trastes.',
             skills: [2, 4],
@@ -256,8 +256,8 @@ SETS.push(
             steps: [
               {
                 label: 'Challenge 6 — Mystery Chart', label_es: 'Reto 6 — Diagrama misterioso',
-                text: 'The three diagrams below have NO names.<ol><li>Find the root: it\'s the LOWEST-SOUNDING fretted dot — the one nearest the thick strings, the one your index finger plays.</li><li>Ask which string it sits on (6 = E, 5 = A) and which fret.</li><li>Name that note, then add "5" — that\'s the chord.</li></ol>Say all three out loud, left to right, then check yourself with the question below.',
-                text_es: 'Los tres diagramas de abajo NO tienen nombre.<ol><li>Encuentra la raíz: es el punto trasteado MÁS GRAVE — el que toca tu dedo índice.</li><li>Pregunta en qué cuerda está (6 = Mi, 5 = La) y en qué traste.</li><li>Nombra esa nota y agrégale un "5" — ese es el acorde.</li></ol>Di los tres en voz alta, de izquierda a derecha, y luego compruébalo con la pregunta de abajo.',
+                text: 'The three diagrams below have NO names.<ol><li>Find the root: it\'s the LOWEST-SOUNDING fretted dot — the one nearest the thick strings, the one your index finger plays.</li><li>Ask which string it sits on — the low E string or the A string — and which fret.</li><li>Name that note, then add "5" — that\'s the chord.</li></ol>Say all three out loud, left to right, then check yourself with the question below.',
+                text_es: 'Los tres diagramas de abajo NO tienen nombre.<ol><li>Encuentra la raíz: es el punto trasteado MÁS GRAVE — el que toca tu dedo índice.</li><li>Pregunta en qué cuerda está — la cuerda Mi grave o la cuerda La — y en qué traste.</li><li>Nombra esa nota y agrégale un "5" — ese es el acorde.</li></ol>Di los tres en voz alta, de izquierda a derecha, y luego compruébalo con la pregunta de abajo.',
                 hint: 'This is exactly the assessment task — naming power chords on an unlabelled chart. You already know these notes from Module 2. Low E string: fret 3 = G, fret 5 = A. A string: fret 3 = C, fret 5 = D. The index finger names the chord — the ring finger is just the 5th riding along two frets up.',
                 hint_es: 'Esta es exactamente la tarea de evaluación — nombrar acordes de potencia en un diagrama sin etiquetar. Ya conoces estas notas del Módulo 2. Cuerda Mi grave: traste 3 = G, traste 5 = A. Cuerda La: traste 3 = C, traste 5 = D. El dedo índice le da nombre al acorde — el anular es solo la quinta que va dos trastes más arriba.',
                 stuck: 'Count up the string one fret at a time from the open string, saying the musical alphabet out loud (low E: E F F# G... · A string: A A# B C...). Where you land is the root — add "5" and you have the chord name.',
@@ -286,8 +286,8 @@ SETS.push(
             steps: [
           {
             label: 'Challenge 7 — "Watchtower" Loop (your assessment piece)', label_es: 'Reto 7 — Vuelta de "Watchtower" (tu pieza de evaluación)',
-            text: '<ul><li>Play A5–G5–F5–G5, two beats per chord at 60 BPM — one strum per beat, so each chord is struck twice before it changes. This is exactly how the record\'s chorus cycles.</li></ul>You\'ve got it when: four times through, changing on the beat every time, with no stops. <a href="tabs/all-along-the-watchtower.html" target="_blank">&#x1F9F5; Song Journey: this is Layer 3 of 5</a>.',
-            text_es: '<ul><li>Toca A5–G5–F5–G5, dos tiempos por acorde a 60 BPM — un rasgueo por tiempo, así que cada acorde suena dos veces antes de cambiar. Así es exactamente como cicla el coro de la grabación.</li></ul>Lo tienes cuando: cuatro veces seguidas, cambiando a tiempo cada vez, sin detenerte. <a href="tabs/all-along-the-watchtower.html" target="_blank">&#x1F9F5; Recorrido de la canción: esto es la Capa 3 de 5</a>.',
+            text: '<ul><li>Play A5–G5–F5–G5, two beats per chord at 60 BPM — one strum per beat, so each chord is struck twice before it changes. This is exactly how the record\'s chorus cycles.</li></ul>The TAB below shows this loop — two numbers stacked in a column mean play both strings together. You\'ve got it when: four times through, changing on the beat every time, with no stops. <a href="tabs/all-along-the-watchtower.html" target="_blank">&#x1F9F5; Song Journey: this is Layer 3 of 5</a>.',
+            text_es: '<ul><li>Toca A5–G5–F5–G5, dos tiempos por acorde a 60 BPM — un rasgueo por tiempo, así que cada acorde suena dos veces antes de cambiar. Así es exactamente como cicla el coro de la grabación.</li></ul>El TAB de abajo muestra esta vuelta — dos números apilados en una columna significa tocar las dos cuerdas juntas. Lo tienes cuando: cuatro veces seguidas, cambiando a tiempo cada vez, sin detenerte. <a href="tabs/all-along-the-watchtower.html" target="_blank">&#x1F9F5; Recorrido de la canción: esto es la Capa 3 de 5</a>.',
             hint: 'A5 takes its root on the open A string — one finger on the D string, 2nd fret. G5 = 3rd fret low E, F5 = 1st fret low E. Crossing between the two root strings is the move here — land the whole hand at once, exactly on beat 1. (The original song uses an Am chord, but as a power chord it\'s just A5 — no major or minor.) This is your Set 1 check-off loop — record a lap and listen back.',
             hint_es: 'El A5 lleva su raíz en la cuerda La al aire — un solo dedo en la cuerda Re, traste 2. G5 = traste 3 de la Mi grave, F5 = traste 1 de la Mi grave. Cruzar entre las dos cuerdas de raíz es el movimiento aquí — baja toda la mano de una vez, justo en el tiempo 1. (La canción original usa un acorde de Am, pero como acorde de potencia es solo A5 — sin mayor ni menor.) Esta es tu vuelta de verificación de la Unidad 1 — graba una vuelta y escúchala después.',
             stuck: 'Loop just A5–G5 (the open A string, then fret 3 on the low E) until that change is clean, then add F5.',
@@ -300,6 +300,20 @@ SETS.push(
               { name: 'G5',  chord: [[6,3,'1'],[5,5,'3'],[4,'x'],[3,'x'],[2,'x'],[1,'x']], position: 3 },
               { name: 'F5',  chord: [[6,1,'1'],[5,3,'3'],[4,'x'],[3,'x'],[2,'x'],[1,'x']], position: 1 }
             ],
+            tab: {
+              caption: '"Watchtower" loop — A5–G5–F5–G5, one strum per beat, each chord twice · 60 BPM',
+              caption_es: 'Vuelta de "Watchtower" — A5–G5–F5–G5, un rasgueo por tiempo, cada acorde dos veces · 60 BPM',
+              notes: [
+                { frets: [['D', 2], ['A', 0]], note: 'A5', midi: [52, 45] },
+                { frets: [['D', 2], ['A', 0]], note: 'A5', midi: [52, 45] },
+                { frets: [['A', 5], ['E', 3]], note: 'G5', midi: [50, 43] },
+                { frets: [['A', 5], ['E', 3]], note: 'G5', midi: [50, 43] },
+                { frets: [['A', 3], ['E', 1]], note: 'F5', midi: [48, 41] },
+                { frets: [['A', 3], ['E', 1]], note: 'F5', midi: [48, 41] },
+                { frets: [['A', 5], ['E', 3]], note: 'G5', midi: [50, 43] },
+                { frets: [['A', 5], ['E', 3]], note: 'G5', midi: [50, 43] }
+              ]
+            },
             response: { type: 'short', prompt: 'Personal record: play it cleanly at 60, then raise the metronome +10 at a time. Your fastest CLEAN loop today (BPM)?', prompt_es: 'Récord personal: tócala limpia a 60, y luego sube el metrónomo de 10 en 10. ¿Tu vuelta LIMPIA más rápida hoy (BPM)?', placeholder: 'e.g. 80 — try for a higher number next session', placeholder_es: 'p. ej. 80 — intenta superarlo la próxima sesión' }
           }
             ]
@@ -399,8 +413,8 @@ SETS.push(
           explain_es: 'Un acorde de potencia es solo la raíz y la 5ª. Deja fuera la 3ª — la nota que haría que un acorde sonara mayor o alegre, o menor o triste — y por eso mismo encaja sobre casi cualquier cosa.' } },
       { id: 'm3w1-s2', text: 'Move the power chord shape along the E string (E5, G5, A5, B5)',
         text_es: 'Mover la forma del acorde de potencia por la cuerda Mi (E5, G5, A5, B5)',
-        gotItWhen: 'you can move the same shape to any of those positions on call and name the chord without counting frets.',
-        gotItWhen_es: 'puedes mover la misma forma a cualquiera de esas posiciones a pedido y nombrar el acorde sin contar trastes.',
+        gotItWhen: 'you can move the same shape to any of those positions right away and name the chord without counting frets.',
+        gotItWhen_es: 'puedes mover la misma forma a cualquiera de esas posiciones de inmediato y nombrar el acorde sin contar trastes.',
         practice: { type: 'mc', prompt: 'Your index finger is on the low E string at fret 5. Which power chord are you playing?',
           prompt_es: 'Tu dedo índice está en la cuerda Mi grave, traste 5. ¿Qué acorde de potencia estás tocando?',
           choices: ['G5', 'A5', 'B5', 'D5'], choices_es: ['G5', 'A5', 'B5', 'D5'], answer: 1,
@@ -471,8 +485,8 @@ SETS.push(
             steps: [
           {
             label: 'Watch: using a metronome', label_es: 'Mira: usar el metrónomo',
-            text: 'Watch: <a href="https://youtu.be/sNa44EmrsDc" target="_blank">How & Why to Use a Metronome – JustinGuitar</a> (0:00–4:00).',
-            text_es: 'Mira: <a href="https://youtu.be/sNa44EmrsDc" target="_blank">How & Why to Use a Metronome – JustinGuitar</a> (0:00–4:00).',
+            text: 'Watch: <a href="https://youtu.be/sNa44EmrsDc" target="_blank">How & Why to Use a Metronome – JustinGuitar</a> (0:00–4:00). While you watch, set your own metronome and tap along with it. You\'ve got it when: you can name where to set the metronome for something new, and you\'ve tapped along at least once.',
+            text_es: 'Mira: <a href="https://youtu.be/sNa44EmrsDc" target="_blank">How & Why to Use a Metronome – JustinGuitar</a> (0:00–4:00). Mientras miras, pon tu propio metrónomo y sigue el ritmo con la mano. Lo tienes cuando: puedes decir dónde poner el metrónomo para algo nuevo, y ya lo seguiste al menos una vez.',
             hint: 'His tip about setting the metronome 10 BPM slower than you think you need is key. As he explains it, set your own metronome and tap along. Slow is smooth, smooth is fast — practice slowly and cleanly, and speed comes on its own.',
             hint_es: 'Su consejo de poner el metrónomo 10 BPM más lento de lo que crees que necesitas es clave. Mientras lo explica, pon tu propio metrónomo y sigue el ritmo con la mano. Despacio es suave, suave es rápido — practica despacio y limpio, y la velocidad llega sola.',
             skills: [1, 2],
@@ -496,8 +510,8 @@ SETS.push(
           },
           {
             label: 'Watch: easy rock songs to explore', label_es: 'Mira: canciones de rock fáciles para explorar',
-            text: 'Watch: <a href="https://youtu.be/m3dYOsXbWII?t=20" target="_blank">Easy Electric Guitar Songs Everyone Should Know – Marty Music</a> (0:20–3:00).',
-            text_es: 'Mira: <a href="https://youtu.be/m3dYOsXbWII?t=20" target="_blank">Easy Electric Guitar Songs Everyone Should Know – Marty Music</a> (0:20–3:00).',
+            text: 'Watch: <a href="https://youtu.be/m3dYOsXbWII?t=20" target="_blank">Easy Electric Guitar Songs Everyone Should Know – Marty Music</a> (0:20–3:00). While you watch, pick one song you recognize and try to play along with it. You\'ve got it when: you can match your strum timing to what you hear for one full pass.',
+            text_es: 'Mira: <a href="https://youtu.be/m3dYOsXbWII?t=20" target="_blank">Easy Electric Guitar Songs Everyone Should Know – Marty Music</a> (0:20–3:00). Mientras miras, elige una canción que reconozcas e intenta tocarla junto con el video. Lo tienes cuando: puedes igualar el ritmo de tu rasgueo con lo que escuchas durante una vuelta completa.',
             hint: 'Pick one song you recognize and try to play along as it plays. Match the strum timing to what you hear.',
             hint_es: 'Elige una canción que reconozcas e intenta tocarla junto con el video. Iguala el momento del rasgueo con lo que escuchas.',
             skills: [3, 4],
@@ -601,8 +615,8 @@ SETS.push(
             hint_es: 'La vuelta cruza las dos cuerdas de raíz: A5 en la cuerda La al aire, y luego G5 (traste 3) y F5 (traste 1) en la cuerda Mi grave. El A5 necesita un solo dedo — la cuerda Re, traste 2 — con la cuerda La al aire sonando debajo.',
             stuck: 'Play just the roots (skip the second string) for one lap to lock the walk, then add the fifth back in.',
             stuck_es: 'Toca solo las raíces (sáltate la segunda cuerda) por una vuelta para fijar el recorrido, y luego agrega de vuelta la quinta.',
-            levelUp: 'Palm-mute for a tighter chug, or move on to the every-beat version below.',
-            levelUp_es: 'Silencia con la palma para un chug más ajustado, o pasa a la versión de cada tiempo de abajo.',
+            levelUp: 'Palm-mute for a tighter chug (a chug = a short, muted, punchy strum), or move on to the every-beat version below.',
+            levelUp_es: 'Silencia con la palma para un chug más ajustado (un chug = un rasgueo corto, silenciado y contundente), o pasa a la versión de cada tiempo de abajo.',
             skills: [1, 2],
             chords: [
               { name: 'A5', chord: [[6,'x'],[5,0],[4,2,'3'],[3,'x'],[2,'x'],[1,'x']], position: 0 },
@@ -613,8 +627,8 @@ SETS.push(
           },
           {
             label: 'Challenge — One Chord Per Beat ("Watchtower", fast)', label_es: 'Reto — Un acorde por tiempo ("Watchtower", rápido)',
-            text: 'The top of the ladder — a new chord on every single beat.<ul><li>Play the same A5 · G5 · F5 · G5 loop, but one down-strum per beat at 60 BPM, no repeats.</li></ul>This is what a driving riff feels like: no time to think, the next shape has to be ready before you arrive. You\'ve got it when: four laps clean at 60, then climb 65 → 70.',
-            text_es: 'El escalón más alto — un acorde nuevo en cada tiempo.<ul><li>Toca la misma vuelta A5 · G5 · F5 · G5, pero un rasgueo hacia abajo por tiempo a 60 BPM, sin repetir.</li></ul>Así se siente un riff a toda marcha: sin tiempo para pensar, la siguiente forma tiene que estar lista antes de llegar. Lo tienes cuando: cuatro vueltas limpias a 60, y luego sube 65 → 70.',
+            text: 'The hardest version yet — a new chord on every single beat.<ul><li>Play the same A5 · G5 · F5 · G5 loop, but one down-strum per beat at 60 BPM, no repeats.</li></ul>This is what a fast riff feels like: no time to think, the next shape has to be ready before you arrive. You\'ve got it when: four laps clean at 60, then climb 65 → 70.',
+            text_es: 'La versión más difícil — un acorde nuevo en cada tiempo.<ul><li>Toca la misma vuelta A5 · G5 · F5 · G5, pero un rasgueo hacia abajo por tiempo a 60 BPM, sin repetir.</li></ul>Así se siente un riff rápido: sin tiempo para pensar, la siguiente forma tiene que estar lista antes de llegar. Lo tienes cuando: cuatro vueltas limpias a 60, y luego sube 65 → 70.',
             hint: 'The loop crosses strings once and then rocks: open-A A5, over to G5 (fret 3) and F5 (fret 1) on the low E, back to G5. Get the hop off the open A5 automatic and the rest is a two-fret rock. Feel the pattern in your arm, not your eyes.',
             hint_es: 'La vuelta cruza de cuerda una vez y después se mece: A5 en la La al aire, luego G5 (traste 3) y F5 (traste 1) en la Mi grave, y de regreso a G5. Haz automático el salto desde el A5 al aire y el resto es un vaivén de dos trastes. Siente el patrón en tu brazo, no con los ojos.',
             stuck: 'Cut it in half: loop just A5 · G5 — the string crossing — one per beat, until it\'s smooth, then add F5.',
@@ -673,7 +687,7 @@ SETS.push(
           },
           {
             label: 'Challenge 2 — Eighth-Note Strum (one of your assessment pieces)', label_es: 'Reto 2 — Rasgueo de corcheas (una de tus piezas de evaluación)',
-            text: '<ul><li>Play the A5–D5–E5 loop (two bars each) with straight eighths (down on each number, up on each "+"), counting "1 + 2 + 3 + 4 +".</li></ul>You\'ve got it when: six bars clean and steady at 60, then speed up in steps (65 → 70 → 75) and hold 80 BPM for at least 15 seconds — that\'s the module bar.',
+            text: '<ul><li>Play the A5–D5–E5 loop (two bars each) with straight eighths (down on each number, up on each "+"), counting "1 + 2 + 3 + 4 +".</li></ul>You\'ve got it when: six bars clean and steady at 60, then speed up in steps (65 → 70 → 75) and hold 80 BPM for at least 15 seconds — that\'s the module\'s target.',
             text_es: '<ul><li>Toca la vuelta A5–D5–E5 (dos compases cada uno) con corcheas rectas (abajo en cada número, arriba en cada "+"), contando "1 + 2 + 3 + 4 +".</li></ul>Lo tienes cuando: seis compases limpios y constantes a 60, y luego acelera en pasos (65 → 70 → 75) y sostén 80 BPM por al menos 15 segundos — esa es la meta del módulo.',
             hint: 'Start at 60 BPM. If it feels easy, bump up 5 BPM. The module-end self-check is a 6-bar progression changing on beat 1 at 60, then holding 80 BPM for 15 seconds with clean muting — this is that piece.',
             hint_es: 'Empieza a 60 BPM. Si se siente fácil, sube 5 BPM. El autochequeo de fin de módulo es una progresión de 6 compases que cambia en el tiempo 1 a 60, y luego sostiene 80 BPM por 15 segundos con silenciado limpio — esta es esa pieza.',
@@ -723,8 +737,8 @@ SETS.push(
             text_es: '<ol><li>Desliza la misma forma de dos dedos cuatro trastes entre F5 (raíz F, cuerda Mi grave, traste 1) y A5 (raíz A, traste 5).</li><li>Rasguea uno por tiempo fuerte: "Luna" está en 6/8, así que rasguea solo los tiempos fuertes, dos por compás, nada sincopado (sincopado = acentos que caen fuera del tiempo principal).</li></ol>Lo tienes cuando: puedes cambiar F5 ↔ A5 cayendo limpio en cada tiempo fuerte, acelerando en pasos: 60 → 70 → 80 BPM. <a href="tabs/luna.html" target="_blank">&#x1F9F5; Recorrido de la canción: esto es la Capa 3 de 5</a>.',
             hint: '"Luna"\'s whole vamp is these two power chords (a vamp = a short chord pattern repeated over and over). A power chord has no major or minor — just root + 5th. Keep the two-finger shape locked and let your whole arm make the four-fret slide.',
             hint_es: 'Todo el vamp de "Luna" son estos dos acordes de potencia (un vamp = un patrón de acordes corto que se repite una y otra vez). Un acorde de potencia no tiene mayor ni menor — solo raíz + quinta. Mantén la forma de dos dedos fija y deja que todo tu brazo haga el deslizamiento de cuatro trastes.',
-            stuck: 'Park on the slide: fret 1, fret 5, fret 1, fret 5 with no rhythm until the jump is automatic — then add the metronome at 60.',
-            stuck_es: 'Quédate en el deslizamiento: traste 1, traste 5, traste 1, traste 5 sin ritmo hasta que el salto sea automático — y luego agrega el metrónomo a 60.',
+            stuck: 'Practice just the slide: fret 1, fret 5, fret 1, fret 5 with no rhythm until the jump is automatic — then add the metronome at 60.',
+            stuck_es: 'Practica solo el deslizamiento: traste 1, traste 5, traste 1, traste 5 sin ritmo hasta que el salto sea automático — y luego agrega el metrónomo a 60.',
             levelUp: 'Palm-mute for a tight sierreño chug (sierreño = a Mexican acoustic-guitar style; a chug = a short, muted, punchy strum) — then let it ring and hear why distortion isn\'t this song\'s home. That\'s what the ◐ means.',
             levelUp_es: 'Silencia con la palma para un chug de sierreño ajustado (sierreño = un estilo de guitarra acústica mexicana; un chug = un rasgueo corto, silenciado y contundente) — y luego deja que suene abierto y escucha por qué la distorsión no es el hogar de esta canción. Eso es lo que significa el ◐.',
             skills: [1, 2],
@@ -745,7 +759,7 @@ SETS.push(
             label: 'Challenge — "Sweet Child" Intro/Verse/Chorus (assessment rehearsal)', label_es: 'Reto — Intro/estrofa/coro de "Sweet Child" (ensayo de evaluación)',
             text: '<ul><li>Play the Guns N\' Roses intro/verse/chorus as power chords — D5 · C5 · G5, two bars per chord at 60 BPM.</li></ul>You\'ve got it when: two clean laps, every change on beat 1, each chord ringing the full two bars, muting tight. <a href="tabs/sweet-child-o-mine.html" target="_blank">&#x1F9F5; Song Journey: this is Layer 3 of 5</a>.',
             text_es: '<ul><li>Toca el intro/estrofa/coro de Guns N\' Roses como acordes de potencia — D5 · C5 · G5, dos compases por acorde a 60 BPM.</li></ul>Lo tienes cuando: dos vueltas limpias, cada cambio en el tiempo 1, cada acorde sonando los dos compases completos, silenciado ajustado. <a href="tabs/sweet-child-o-mine.html" target="_blank">&#x1F9F5; Recorrido de la canción: esto es la Capa 3 de 5</a>.',
-            hint: 'This is one of the songs you can use for the module self-assessment, and it uses the same patient, two-bar spacing as your Module 2 bass roots — just power chords now. On this site we play "Sweet Child" in standard tuning. (The famous recording is tuned a half-step down, so your D5–C5–G5 sound one fret higher than the recording — that\'s expected; don\'t retune.) D5 and C5 are A-string roots; G5 drops to the low E string. It\'s a patience test — the temptation is to rush into the next chord instead of holding the two bars out.',
+            hint: 'This is one of the songs you can use for the module self-assessment, and it uses the same patient, two-bar spacing as your Module 2 bass roots — just power chords now. On this site we play "Sweet Child" in standard tuning. (The famous recording is tuned a half-step down, so your D5–C5–G5 sound one fret higher than the recording — that\'s expected; don\'t retune.) D5 and C5 are A-string roots; G5 drops to the low E string. It\'s a patience test — the temptation is to rush into the next chord instead of holding each chord for its full two bars.',
             hint_es: 'Esta es una de las canciones que puedes usar para la autoevaluación del módulo, y usa el mismo espaciado paciente, de dos compases, que tus raíces de bajo del Módulo 2 — ahora con acordes de potencia. En este sitio tocamos "Sweet Child" en afinación estándar. (La grabación famosa está afinada medio tono más abajo, así que tu D5–C5–G5 suena un traste más alto que la grabación — eso es esperado; no reafines.) D5 y C5 son raíces de la cuerda La; G5 baja a la cuerda Mi grave. Es una prueba de paciencia — la tentación es apurarte al siguiente acorde en vez de sostener los dos compases completos.',
             stuck: 'Loop D5 → C5 (both A-string, 2 frets apart) until smooth, then add the jump to G5 on the low E string. Count the full 8 beats out loud before each change so you don\'t rush it.',
             stuck_es: 'Repite D5 → C5 (ambas en la cuerda La, a 2 trastes de distancia) hasta que salga fluido, y luego agrega el salto a G5 en la cuerda Mi grave. Cuenta los 8 tiempos completos en voz alta antes de cada cambio para no apurarte.',

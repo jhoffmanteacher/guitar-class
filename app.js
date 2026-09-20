@@ -2843,6 +2843,15 @@ function resumeSongPick(){
 function renderResumeCard(){
   const host = document.getElementById('resume-card');
   if(!host || _resumeCardClosed) return;
+  // The single source of truth for "should this show at all" now lives
+  // HERE (item 2f), not just in renderClassActivities' own caller guard —
+  // a boot-time call (restoreLastSet) fires independently of that render
+  // pass and would otherwise show the card out from under a Today hero the
+  // very first time the page loads. caStartHereId is null exactly when
+  // there's nothing pending (see renderClassActivities).
+  if(document.body.classList.contains('ca-gated') || caStartHereId !== null){
+    host.hidden = true; host.innerHTML = ''; return;
+  }
   const song = resumeSongPick();
   // Day-one students (no step checked anywhere, no song touched) skip the
   // card entirely — "resume" would be noise on a first visit.
@@ -3728,7 +3737,10 @@ function buildLesson(w){
       }
       return `<button class="rp-trigger" onclick="loadPanel('youtube','${url}','${safe}','YouTube')">&#x25B6; ${label}</button>`;
     });
-    const text2 = wrapGotItWhen(text);
+    const text2 = wrapGotItWhen(text, {
+      key: `lesson:${w.id}-${ns}-${i}`, isDone: completed[`${w.id}-${ns}-${i}`] === true,
+      closestSel: '.step', btnSel: '.step-done-btn', id: `${w.id}-${ns}-${i}`,
+    });
     /* One-thing-per-screen: the challenge text and the DOER (play buttons,
        diagrams, TAB, responses) stay visible; supporting prose (hint, stuck,
        level-up) collapses behind a tap — never competing with the thing the
@@ -5782,7 +5794,74 @@ function sdCheckOff(key){
    link, a step-figure image — stays outside the rule, exactly where R4 puts
    it. Cards without the phrase are returned untouched. */
 const GOT_IT_RE = /(You&#39;ve got it when:|You've got it when:|You’ve got it when:|Lo tienes cuando:)/;
-function wrapGotItWhen(html){
+/* ── Rep counter (practice-chunks work order, 2026-09-19) ──
+   When the got-it-when BODY (not the whole step — a number earlier in the
+   directions shouldn't trigger this) names a small count — "three clean
+   reps in a row", "3 times", "four clean loops" — render N tap dots under
+   it. "9 of 10" is a drill score, not a rep count, and is excluded first.
+   Whatever it can't confidently parse renders with no dots, same as today. */
+const REP_NUM_WORDS = { two:2, three:3, four:4, five:5, dos:2, tres:3, cuatro:4, cinco:5 };
+const REP_COUNT_RE = new RegExp(
+  `\\b(\\d|${Object.keys(REP_NUM_WORDS).join('|')})\\b[^.]{0,25}?\\b(times|in a row|clean (?:reps|loops)|veces|seguidas|seguido)\\b`, 'i');
+function repCountFromGotIt(bodyHtml){
+  const txt = bodyHtml.replace(/<[^>]+>/g, ' ');
+  if(/\b\d+\s*(?:of|de)\s*\d+\b/i.test(txt)) return 0;
+  const m = REP_COUNT_RE.exec(txt);
+  if(!m) return 0;
+  const raw = m[1].toLowerCase();
+  const n = /^\d+$/.test(raw) ? Number(raw) : REP_NUM_WORDS[raw];
+  return (n >= 2 && n <= 5) ? n : 0;
+}
+/* Dot fill state, keyed the same way caStepDone is — in-memory only, resets
+   on reload. A lesson step re-derives full dots from `completed` instead of
+   this map (see rep.isDone below), so it never needs a session entry at all. */
+let repDotState = {};
+function repDotsHtml(rep, n){
+  if(rep.isDone){
+    const dots = Array.from({length:n}).map(() => '<span class="rep-dot on" aria-hidden="true">&#9679;</span>').join('');
+    return `<div class="rep-dots rep-dots-done">${dots}</div>`;
+  }
+  const filled = repDotState[rep.key] || 0;
+  const extraArg = rep.extra !== undefined ? `,${rep.extra}` : '';
+  const dots = Array.from({length:n}, (_, i) => {
+    const on = i < filled;
+    return `<button type="button" class="rep-dot${on ? ' on' : ''}" aria-pressed="${on}" aria-label="${escAttr(t('rep.dotAria', {n: i + 1}))}" onclick="repDotTap(this,'${escAttr(rep.key)}',${n},${i + 1});if(${i + 1}>=${n})repDotFinish(this,'${rep.closestSel}','${rep.btnSel}','${escAttr(rep.id)}'${extraArg})">${on ? '&#9679;' : '&#9675;'}</button>`;
+  }).join('');
+  const resetHtml = `<button type="button" class="rep-dot-reset"${filled ? '' : ' hidden'} onclick="repDotReset(this)">${escHtml(t('rep.startOver'))}</button>`;
+  return `<div class="rep-dots" data-rep-key="${escAttr(rep.key)}">${dots}${resetHtml}</div>`;
+}
+// Fills the tapped dot and every one before it, then — once every dot is
+// filled — drives the step's OWN Mark-done path (toggleStepDone /
+// caMarkStepDone), so nothing new is stored: the last tap is just a
+// same-effort stand-in for tapping the button that was already there.
+function repDotTap(btn, key, n, idx){
+  const wrap = btn.closest('.rep-dots');
+  if(!wrap) return;
+  repDotState[key] = Math.max(repDotState[key] || 0, idx);
+  const filled = repDotState[key];
+  wrap.querySelectorAll('.rep-dot').forEach((d, i) => {
+    const on = i < filled;
+    d.classList.toggle('on', on);
+    d.setAttribute('aria-pressed', String(on));
+    d.innerHTML = on ? '&#9679;' : '&#9675;';
+  });
+  const resetBtn = wrap.querySelector('.rep-dot-reset');
+  if(resetBtn) resetBtn.hidden = filled === 0;
+}
+function repDotReset(btn){
+  const wrap = btn.closest('.rep-dots');
+  if(!wrap) return;
+  repDotState[wrap.dataset.repKey] = 0;
+  wrap.querySelectorAll('.rep-dot').forEach(d => { d.classList.remove('on'); d.setAttribute('aria-pressed', 'false'); d.innerHTML = '&#9675;'; });
+  btn.hidden = true;
+}
+function repDotFinish(dotEl, closestSel, btnSel, id, extra){
+  const li = dotEl.closest(closestSel);
+  const btn = li && li.querySelector(btnSel);
+  if(!btn || btn.classList.contains('is-done')) return;
+  if(closestSel === '.step') toggleStepDone(btn, id); else caMarkStepDone(btn, id, extra);
+}
+function wrapGotItWhen(html, rep){
   if(typeof html !== 'string') return html;
   const m = GOT_IT_RE.exec(html);
   if(!m) return html;
@@ -5797,9 +5876,11 @@ function wrapGotItWhen(html){
   if(sentence) cut = sentence.index + 1;
   const body = rest.slice(0, cut);
   const tail = rest.slice(cut);
+  const n = rep ? repCountFromGotIt(body) : 0;
+  const dotsHtml = n ? repDotsHtml(rep, n) : '';
   return head +
     `<span class="got-it"><span class="got-it-lab">${m[0]}</span>${body}</span>` +
-    tail;
+    dotsHtml + tail;
 }
 
 /* ── Multiple-choice answer shuffle ──────────────────────────────────────
@@ -8404,6 +8485,14 @@ function caFocusActivity(id){
   const found = (window.CLASS_ACTIVITIES || []).find(a => a.id === id && caIsVisible(a));
   caLinkMissingId = found ? null : id;
   caOpenId = found ? id : caOpenId;
+  /* The card itself opening isn't enough any more (item 2f) — unless it's
+     the Today hero, it also lives inside a closed "Still to do" or
+     "Earlier" <details>, and scrollIntoView on something inside a closed
+     <details> is a silent no-op. Force whichever fold it's actually in;
+     forcing the wrong one (the hero needs neither) is harmless. */
+  if(found){
+    if(classActivities[id] === true) caFinishedOpen = true; else caTodoOpen = true;
+  }
   renderClassActivities();
   if(!found) return;
   caScrollToActivity(id);
@@ -8427,6 +8516,207 @@ function caScrollToActivity(id){
 // Which activity card is expanded, so a re-render (Mark complete, language
 // switch) doesn't collapse the one the student is looking at.
 let caOpenId = null;
+/* The id of the ONE card renderClassActivities() renders as the Today hero
+   — the first pending card in reading order, i.e. the NEWEST assigned one
+   still open, not the oldest (Chromebook rail work order, 2026-09-19, item
+   2f). Set fresh by renderClassActivities() each render. The hero has its
+   OWN renderer (caHeroCardHtml/caHeroCheckHtml below) — it is never run
+   through caActivityCardHtml/caCheckCardHtml, so this id is read only by
+   caChunkMetaHtml/caCheckMetaHtml (to decide whether to draw the progress
+   dots) and by renderClassActivities (to leave the hero card out of the
+   "Still to do" fold). The card stays COLLAPSED by default like every
+   other card (Jonathan, 2026-09-15) — nothing here forces it open. */
+let caStartHereId = null;
+// Non-interactive whole-activity progress dots, drawn only for the hero —
+// distinct from repDotsHtml (a TAPPABLE rep counter under one got-it-when
+// line): this is a summary of every step in caStepDone, drawn once, never
+// clicked. Checks are excluded (no per-step ticks to summarize).
+function caHeroDotsHtml(a){
+  if(a.id !== caStartHereId || a.kind === 'check') return '';
+  const steps = a.steps || [];
+  if(!steps.length) return '';
+  const dots = steps.map((s, si) => `<span class="ca-hero-dot${caStepDone[`${a.id}:${si}`] === true ? ' f' : ''}"></span>`).join('');
+  return `<span class="ca-hero-dots" aria-hidden="true">${dots}</span>`;
+}
+// Plain text, first sentence only — html is trusted content (module/activity
+// intros), so tags are stripped before hunting for the sentence break. Used
+// for the hero's collapsed blurb; the full intro still shows once opened.
+function caFirstSentence(html){
+  const txt = (html || '').replace(/<[^>]+>/g, '');
+  const m = /^(.*?[.!?])(\s|$)/.exec(txt);
+  return (m ? m[1] : txt).trim();
+}
+/* ── Soft nudge on Mark complete (practice-chunks work order, 2026-09-19) ──
+   Marking done with fewer than all steps ticked THIS SESSION shows an
+   inline confirm in place of the button — never a confirm() dialog, and
+   never a lock: "Keep going" just re-shows the plain button, "Mark
+   complete" finishes exactly like today. caStepDone is in-memory only (see
+   its declaration above), so there is no way to tell "reloaded mid-way"
+   from "hasn't started" — the rule is simply ticks < steps, always. */
+let caNudgeId = null;
+function caMarkClick(id){
+  const a = (window.CLASS_ACTIVITIES || []).find(x => x.id === id);
+  if(!a || classActivities[id] === true || !(a.steps || []).length){ caToggleComplete(id); return; }
+  const total = a.steps.length;
+  const ticks = a.steps.filter((s, si) => caStepDone[`${id}:${si}`] === true).length;
+  if(ticks >= total){ caToggleComplete(id); return; }
+  caNudgeId = id;
+  caOpenId = id;
+  renderClassActivities();
+}
+function caNudgeKeepGoing(){ caNudgeId = null; renderClassActivities(); }
+function caNudgeConfirm(id){ caNudgeId = null; caToggleComplete(id); }
+/* ── Free play, once there's nothing left pending (practice-chunks work
+   order, 2026-09-19, item 2f superseded the original one-time dismissible
+   strip) ── caFreePlayHeroHtml() replaces the hero card itself whenever
+   pendingCount is 0 and something has actually been finished — a steady
+   page state, not an event, so it needs no arm/dismiss bookkeeping: it
+   shows itself exactly when there's nothing else to show, and stops the
+   moment a new activity goes live and becomes the next hero. */
+function caFreePlayHeroHtml(){
+  return `<div class="ca-card ca-card--hero ca-freeplay-hero">
+    <h3 class="ca-freeplay-title">${escHtml(t('ca.caughtUpTitle'))}</h3>
+    <p class="ca-freeplay-text">${escHtml(t('ca.freePlayText'))}</p>
+    <div class="ca-freeplay-actions">
+      <button type="button" class="ca-mark-btn" onclick="caFreePlayTimer()">${escHtml(t('ca.freePlayTimer'))}</button>
+      <button type="button" class="btn-out" onclick="caFreePlayGames()">${escHtml(t('ca.freePlayGames'))}</button>
+    </div>
+  </div>`;
+}
+function caFreePlayTimer(){
+  if(typeof setTimerSecs === 'function') setTimerSecs(300);
+  const popup = document.getElementById('timer-popup');
+  if(popup && !popup.classList.contains('open') && typeof togglePopup === 'function') togglePopup('timer');
+  if(typeof timerRunning !== 'undefined' && !timerRunning && typeof toggleTimer === 'function') toggleTimer();
+}
+// Riff Roulette specifically (Jonathan's ask) — goExploreHash('games') and
+// this both call the SAME cached ensureCoachJs() promise (loadScriptOnce),
+// so their .then callbacks run in the order they were attached: the hash
+// router's openGamesScreen (which opens on 'hub') always resolves before
+// this one, so gamesShow('roulette') here reliably has the last word.
+function caFreePlayGames(){
+  goExploreHash('games');
+  ensureCoachJs().then(() => { if(typeof gamesShow === 'function') gamesShow('roulette'); }).catch(() => {});
+}
+function caMarkRowHtml(a, done, markLabel){
+  if(caNudgeId !== a.id){
+    return `<button type="button" class="ca-mark-btn ${done ? 'done' : ''}" onclick="caMarkClick('${escAttr(a.id)}')">${escHtml(markLabel)}</button>`;
+  }
+  const total = (a.steps || []).length;
+  const ticks = a.steps.filter((s, si) => caStepDone[`${a.id}:${si}`] === true).length;
+  return `<div class="ca-nudge">
+    <p class="ca-nudge-text">${escHtml(t('ca.nudgeText', {ticks, total}))}</p>
+    <div class="ca-nudge-actions">
+      <button type="button" class="btn-out" onclick="caNudgeKeepGoing()">${escHtml(t('ca.keepGoing'))}</button>
+      <button type="button" class="ca-mark-btn" onclick="caNudgeConfirm('${escAttr(a.id)}')">${escHtml(t('ca.markComplete'))}</button>
+    </div>
+  </div>`;
+}
+/* The chunk-size meta line under a collapsed card's title — how big a bite
+   this is before the student opens it (practice-chunks work order,
+   2026-09-19). Step count and the optional authored `minutes` are stable;
+   the done count is read from caStepDone, which is in-memory only (see the
+   declaration above), so it's honestly a THIS-SESSION count, not a saved
+   one — shown only once it's above zero so a fresh card doesn't claim
+   "0 done". */
+function caChunkMetaHtml(a){
+  const n = (a.steps || []).length;
+  if(!n) return '';
+  const head = [n === 1 ? t('ca.stepCount1') : t('ca.stepCount', {n})];
+  if(a.minutes) head.push(t('ca.aboutMin', {n: a.minutes}));
+  const doneN = (a.steps || []).filter((s, si) => caStepDone[`${a.id}:${si}`] === true).length;
+  const doneText = doneN > 0 ? (doneN === 1 ? t('ca.doneCount1') : t('ca.doneCount', {n: doneN})) : '';
+  // The Today hero also draws progress dots (caHeroDotsHtml) between the
+  // step count and the done text — every non-hero card just gets the two
+  // text pieces, same as before 2f.
+  const dotsHtml = caHeroDotsHtml(a);
+  const doneHtml = doneText ? `<span class="ca-chunk-done">${dotsHtml ? '' : '&middot; '}${escHtml(doneText)}</span>` : '';
+  return `<div class="ca-chunk-meta">${head.map(escHtml).join(' &middot; ')}${dotsHtml}${doneHtml}</div>`;
+}
+function caCheckMetaHtml(a){
+  const n = ecItems(a).length;
+  if(!n) return '';
+  return `<div class="ca-chunk-meta">${escHtml(n === 1 ? t('ca.checkMeta1') : t('ca.checkMeta', {n}))}</div>`;
+}
+/* ── The Today hero (Chromebook rail work order, item 2f) ──────────────
+   The ONE card renderClassActivities() singles out (caStartHereId) gets its
+   OWN summary markup — a two-column header (text left, a step-figure
+   thumbnail over a big "Start →"/"Keep going →" call-to-action right) —
+   built here rather than through caActivityCardHtml/caCheckCardHtml. The
+   BODY is identical to the plain card (same stepsHtml/caMarkRowHtml,
+   same caCheckBodyHtml for a check), so opening it is exactly the same
+   card everyone else eventually opens; only the collapsed header differs.
+   Collapsed by default (Jonathan, 2026-09-15) — the CTA span carries no
+   onclick of its own, so a click anywhere in the summary (thumbnail, CTA,
+   title) just triggers the native <summary> toggle, same as every other
+   card's collapsed row. */
+function caHeroThumbHtml(a){
+  const step = (a.steps || []).find(s => s.figure);
+  if(!step) return '';
+  // Decorative — the same image (with its real alt text) renders again once
+  // the card is open, inside the actual step; a duplicate caption here would
+  // just be announced twice.
+  return `<span class="ca-hero-thumb"><img src="${escAttr(step.figure)}" alt="" width="640" height="244" loading="lazy"></span>`;
+}
+function caHeroCardHtml(a){
+  if(a.kind === 'check') return caHeroCheckHtml(a);
+  const open = caOpenId === a.id;
+  const done = classActivities[a.id] === true;
+  const openStepIdx = caStepOpen[a.id] !== undefined ? caStepOpen[a.id] : caDefaultOpenStep(a);
+  const stepsHtml = (a.steps || []).map((s, si) => caStepHtml(a, s, si, si === openStepIdx, caStepDone[`${a.id}:${si}`] === true)).join('');
+  const markLabel = done ? t('ca.completed') : t('ca.markComplete');
+  const num = caNumber(a);
+  const titleHtml = (num ? `#${num} - ` : '') + escHtml(caTitle(a));
+  const dateLabel = caFormatDate(caDate(a));
+  const tagKey = document.body.classList.contains('ca-gated') ? 'ca.startHereToday' : 'ca.startHere';
+  const blurb = caFirstSentence(tf(a, 'intro'));
+  const doneAny = (a.steps || []).some((s, si) => caStepDone[`${a.id}:${si}`] === true);
+  const ctaKey = doneAny ? 'ca.heroKeepGoing' : 'ca.heroStart';
+  return `<details class="ca-card ca-card--hero" ${open ? 'open' : ''} data-id="${escAttr(a.id)}" ontoggle="caOnToggle(this)">
+    <summary class="ca-card-summary ca-hero-summary">
+      <div class="ca-hero-main">
+        ${dateLabel ? `<span class="ca-chip">${escHtml(dateLabel)}</span>` : ''}
+        <span class="ca-start-tag" data-i18n="${tagKey}">${escHtml(t(tagKey))}</span>
+        <div class="ca-hero-title">${titleHtml}</div>
+        ${blurb ? `<p class="ca-hero-blurb">${escHtml(blurb)}</p>` : ''}
+        ${caChunkMetaHtml(a)}
+      </div>
+      <div class="ca-hero-side">
+        ${caHeroThumbHtml(a)}
+        <span class="ca-hero-cta">${escHtml(t(ctaKey))} &rarr;</span>
+      </div>
+    </summary>
+    <div class="ca-card-body">
+      <p class="coach-tip">${escHtml(tf(a, 'intro'))}</p>
+      ${stepsHtml ? `<ol class="ca-steps">${stepsHtml}</ol>` : ''}
+      ${caJourneyLinkHtml(a)}
+      ${caMarkRowHtml(a, done, markLabel)}
+    </div>
+  </details>`;
+}
+// The check variant carries its own "Exit check" tag + blue band (item 2)
+// rather than caCheckCardHtml's "Exit check · Title" prefix — the pill
+// already says it, so the hero title is just the plain title.
+function caHeroCheckHtml(a){
+  const open = caOpenId === a.id;
+  const dateLabel = caFormatDate(caDate(a));
+  const blurb = caFirstSentence(tf(a, 'intro'));
+  return `<details class="ca-card ec-card ca-card--hero ca-card--hero-check" ${open ? 'open' : ''} data-id="${escAttr(a.id)}" ontoggle="caOnToggle(this)">
+    <summary class="ca-card-summary ca-hero-summary">
+      <div class="ca-hero-main">
+        ${dateLabel ? `<span class="ca-chip">${escHtml(dateLabel)}</span>` : ''}
+        <span class="ca-start-tag ca-start-tag--check" data-i18n="check.prefix">${escHtml(t('check.prefix'))}</span>
+        <div class="ca-hero-title">${escHtml(caTitle(a))}</div>
+        ${blurb ? `<p class="ca-hero-blurb">${escHtml(blurb)}</p>` : ''}
+        ${caCheckMetaHtml(a)}
+      </div>
+      <div class="ca-hero-side">
+        <span class="ca-hero-cta">${escHtml(t('ca.heroStartCheck'))} &rarr;</span>
+      </div>
+    </summary>
+    <div class="ca-card-body" id="ec-body-${escAttr(a.id)}">${caCheckBodyHtml(a, {})}</div>
+  </details>`;
+}
 // Per-step accordion state — session-only (no Firestore, no localStorage;
 // resets on reload by design, unlike the module-step checklist). caStepOpen
 // maps activity id -> open step index (-1 = none); caStepDone maps
@@ -8489,7 +8779,9 @@ function caStepHtml(a, step, si, isOpen, isDone){
   // Step text is first-party authored HTML, same trust level as module step
   // content — trusted (not escHtml'd) so <ol>/<ul> markup renders per the
   // house list rule, and wrapGotItWhen() can style the got-it-when sentence.
-  const detailHtml = `${wrapGotItWhen(tf(step,'text'))}${parts.join('')}`
+  const detailHtml = `${wrapGotItWhen(tf(step,'text'), {
+      key: `ca:${a.id}:${si}`, isDone, closestSel: '.ca-step', btnSel: '.ca-step-donebtn', id: a.id, extra: si,
+    })}${parts.join('')}`
     + `<div class="ca-step-done-row"><button type="button" class="ca-step-donebtn${isDone ? ' is-done' : ''}" onclick="caMarkStepDone(this,'${escAttr(a.id)}',${si})">${stepDoneHtml(isDone)}</button></div>`;
   return `<li class="ca-step${isDone ? ' ca-step-done' : ''}${isOpen ? '' : ' ca-step-collapsed'}" data-idx="${si}">`
     + `<button type="button" class="ca-step-head" aria-expanded="${isOpen}" onclick="caToggleStepOpen(this)">`
@@ -8535,7 +8827,7 @@ function caActivityCardHtml(a){
   return `<details class="ca-card" ${open ? 'open' : ''} data-id="${escAttr(a.id)}" ontoggle="caOnToggle(this)">
     <summary class="ca-card-summary">
       ${dateLabel ? `<span class="ca-chip">${escHtml(dateLabel)}</span>` : ''}
-      <span class="ca-card-title">${titleHtml}</span>
+      <span class="ca-card-titlewrap"><span class="ca-card-title">${titleHtml}</span>${caChunkMetaHtml(a)}</span>
       ${done ? `<span class="ca-done-mark" aria-hidden="true">${TCK_CHECK_SVG_INLINE}</span>` : ''}
       <button type="button" class="ca-print-btn" onclick="printActivity(event,'${escAttr(a.id)}')" title="${escAttr(t('ca.printTitle'))}" aria-label="${escAttr(t('ca.print'))}"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 9V3h12v6"/><path d="M6 18H4a2 2 0 0 1-2-2v-4a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v4a2 2 0 0 1-2 2h-2"/><rect x="6" y="14" width="12" height="7" rx="1"/></svg></button>
     </summary>
@@ -8543,7 +8835,7 @@ function caActivityCardHtml(a){
       <p class="coach-tip">${escHtml(tf(a,'intro'))}</p>
       ${stepsHtml ? `<ol class="ca-steps">${stepsHtml}</ol>` : ''}
       ${caJourneyLinkHtml(a)}
-      <button type="button" class="ca-mark-btn ${done ? 'done' : ''}" onclick="caToggleComplete('${escAttr(a.id)}')">${escHtml(markLabel)}</button>
+      ${caMarkRowHtml(a, done, markLabel)}
     </div>
   </details>`;
 }
@@ -8732,7 +9024,7 @@ function caCheckCardHtml(a){
   return `<details class="ca-card ec-card" ${open ? 'open' : ''} data-id="${escAttr(a.id)}" ontoggle="caOnToggle(this)">
     <summary class="ca-card-summary">
       ${dateLabel ? `<span class="ca-chip">${escHtml(dateLabel)}</span>` : ''}
-      <span class="ca-card-title"><span data-i18n="check.prefix">${escHtml(t('check.prefix'))}</span> &middot; ${escHtml(caTitle(a))}</span>
+      <span class="ca-card-titlewrap"><span class="ca-card-title"><span data-i18n="check.prefix">${escHtml(t('check.prefix'))}</span> &middot; ${escHtml(caTitle(a))}</span>${caCheckMetaHtml(a)}</span>
       ${done ? `<span class="ca-done-mark" aria-hidden="true">${TCK_CHECK_SVG_INLINE}</span>` : ''}
     </summary>
     <div class="ca-card-body" id="ec-body-${escAttr(a.id)}">${caCheckBodyHtml(a, {})}</div>
@@ -8839,7 +9131,11 @@ function printActivity(ev, id){
   const card = document.querySelector(`.ca-card[data-id="${CSS.escape(id)}"]`);
   if(!card) return;
   const wasOpen = card.open;
-  const group = card.closest('.ca-finished-group');
+  // A card no longer always sits straight in the page (item 2f) — it may be
+  // nested one level inside "Still to do" or "Earlier", either of which has
+  // to be open too, or a closed <details> renders none of its content for
+  // print. The Today hero has neither ancestor, so this is a no-op for it.
+  const group = card.closest('.ca-finished-group, .ca-todo-group');
   const groupWasOpen = group ? group.open : null;
   if(group) group.open = true;
   const collapsed = Array.from(card.querySelectorAll('.ca-step.ca-step-collapsed'));
@@ -9285,48 +9581,117 @@ function renderClassActivities(){
       .map(g => ({ sec: g.sec, cards: g.cards.filter(a => classActivities[a.id] !== true) }))
       .filter(g => g.cards.length);
     const pendingCount = pendingGroups.reduce((n, g) => n + g.cards.length, 0);
+    // The Today hero is whichever card actually renders first — simplest
+    // honest reading of "the first pending card" is the one at the top of
+    // the page, not a second notion of course order. It stays COLLAPSED by
+    // default like every other card (Jonathan, 2026-09-15) — caOpenId is
+    // never touched here.
+    caStartHereId = pendingCount ? pendingGroups[0].cards[0].id : null;
+    let pendingHtml;
+    if(!pendingCount){
+      // The Today hero's caught-up state (2f) — replaces the old plain
+      // ca.allDone line with the same free-play actions 1d already built.
+      pendingHtml = finished.length ? caFreePlayHeroHtml() : '';
+    } else {
+      const heroCard = pendingGroups[0].cards[0];
+      const heroHtml = caHeroCardHtml(heroCard);
+      // Everything else pending, minus the hero, wrapped in ONE "Still to
+      // do" fold (2f) — module headings (plain, no progress bar; that's an
+      // Earlier-only addition below) when anything has been placed in a
+      // module, otherwise the flat Unsorted list it always was.
+      const restGroups = pendingGroups
+        .map(g => ({ sec: g.sec, cards: g.cards.filter(a => a.id !== heroCard.id) }))
+        .filter(g => g.cards.length);
+      const restCount = pendingCount - 1;
+      let restHtml = '';
+      if(restCount > 0){
+        const restFlat = restGroups.reduce((acc, g) => acc.concat(g.cards), []);
+        const body = restGroups.some(g => g.sec.mod)
+          ? restGroups.map(g => headHtml(g.sec) + g.cards.map(caActivityCardHtml).join('')).join('')
+          : restFlat.map(caActivityCardHtml).join('');
+        const openInside = restFlat.some(a => a.id === caOpenId);
+        restHtml = caTodoGroupHtml(body, restCount, openInside);
+      }
+      pendingHtml = heroHtml + restHtml;
+    }
     /* Module headings, EN and ES, from the ONE place the site already keeps
        a module's display name — the MODULE_MANIFEST entry caBoardOrder hands
        back on the section. Unsorted (module 0) and a section whose module
        the manifest doesn't know get no heading: there is no honest name to
-       put there, and an invented one would be a second source of truth. */
-    const headHtml = sec => sec.mod
-      ? `<div class="ca-mod-head" data-i18n="ca.moduleHead" data-i18n-params="${escAttr(JSON.stringify({n: sec.mod.num, mod: tf(sec.mod, 'name')}))}">${escHtml(t('ca.moduleHead', {n: sec.mod.num, mod: tf(sec.mod, 'name')}))}</div>`
-      : '';
-    let pendingHtml;
-    if(!pendingCount){
-      pendingHtml = finished.length ? `<div class="coach-tip" data-i18n="ca.allDone">${escHtml(t('ca.allDone'))}</div>` : '';
-    } else if(pendingGroups.some(g => g.sec.mod)){
-      // Module headings are the structure here, so the flat "Still to do"
-      // divider below would only compete with them.
-      pendingHtml = pendingGroups.map(g => headHtml(g.sec) + g.cards.map(caActivityCardHtml).join('')).join('');
-    } else {
-      // Nothing placed in a module yet (everything still in the board's
-      // Unsorted pen) — no headings to group by, so the page keeps the flat
-      // first-card-then-the-rest shape it had before the board. EVERY
-      // group's cards, not just the first: with no heading to separate them
-      // they are one list, and taking only pendingGroups[0] would drop cards
-      // off the page that are still blocking the gate.
-      const flat = pendingGroups.reduce((acc, g) => acc.concat(g.cards), []);
-      const rest = flat.length > 1
-        ? `<div class="ca-stilltodo-divider" data-i18n="ca.stillToDo">${escHtml(t('ca.stillToDo'))}</div>`
-          + flat.slice(1).map(caActivityCardHtml).join('')
+       put there, and an invented one would be a second source of truth.
+       (Declared after pendingHtml only because that's where it's first
+       used above — hoisted, so the order here doesn't matter functionally.) */
+    function headHtml(sec){
+      return sec.mod
+        ? `<div class="ca-mod-head" data-i18n="ca.moduleHead" data-i18n-params="${escAttr(JSON.stringify({n: sec.mod.num, mod: tf(sec.mod, 'name')}))}">${escHtml(t('ca.moduleHead', {n: sec.mod.num, mod: tf(sec.mod, 'name')}))}</div>`
         : '';
-      pendingHtml = caActivityCardHtml(flat[0]) + rest;
     }
+    // Names how many things are actually blocking (2f) instead of the flat
+    // "finish these" line — caBlockers() is the same predicate the gate
+    // itself is built on, so the count can't disagree with body.ca-gated.
     const gateIntro = document.body.classList.contains('ca-gated')
-      ? `<p class="ca-gate-intro" data-i18n="today.gateIntro">${escHtml(t('today.gateIntro'))}</p>` : '';
-    bodyEl.innerHTML = missing + gateIntro + pendingHtml + (finished.length ? caFinishedGroupHtml(finished) : '');
+      ? (() => {
+          // caBlockers() bails to [] for a gate previewer (dev bypass, the
+          // teacher account) — so a REAL student is only ever gated with
+          // gn >= 1, but window.__forceGate (localhost only) can force the
+          // gate on for exactly that same previewer, producing a real gn===0
+          // this count would otherwise report dishonestly. Fall back to the
+          // old generic wording for that dev-tool-only case.
+          const gn = caBlockers().length;
+          if(gn === 0) return `<p class="ca-gate-intro" data-i18n="today.gateIntroForced">${escHtml(t('today.gateIntroForced'))}</p>`;
+          const key = gn === 1 ? 'today.gateIntro1' : 'today.gateIntro';
+          const params = gn === 1 ? null : {n: gn};
+          return `<p class="ca-gate-intro" data-i18n="${key}"${params ? ` data-i18n-params="${escAttr(JSON.stringify(params))}"` : ''}>${escHtml(t(key, params))}</p>`;
+        })()
+      : '';
+    // Earlier now groups by module too, with a progress bar per heading
+    // (2f) — a genuinely new capability (it used to be one flat list), so
+    // it needs the same grouping pass pendingGroups already gets.
+    const finishedGroups = groups
+      .map(g => ({ sec: g.sec, cards: g.cards.filter(a => classActivities[a.id] === true) }))
+      .filter(g => g.cards.length);
+    bodyEl.innerHTML = missing + gateIntro + pendingHtml + (finished.length ? caFinishedGroupHtml(finishedGroups, finished, byId) : '');
   }
   if(typeof applyI18n === 'function') applyI18n(bodyEl);
-  // The resume card only belongs on a finished In-Class Activities page — gated, there's
-  // nothing to resume to yet. renderResumeCard() itself still skips a
-  // day-one student with nothing to resume.
-  const resumeHost = document.getElementById('resume-card');
-  if(resumeHost){
-    if(document.body.classList.contains('ca-gated')){ resumeHost.hidden = true; resumeHost.innerHTML = ''; }
-    else if(typeof renderResumeCard === 'function') renderResumeCard();
-  }
+  // The resume card only belongs on a finished In-Class Activities page —
+  // gated, or a Today hero still pending (item 2f), skip it; both checks now
+  // live inside renderResumeCard() itself, since a boot-time caller
+  // (restoreLastSet) invokes it independently of this render pass.
+  if(document.getElementById('resume-card') && typeof renderResumeCard === 'function') renderResumeCard();
+}
+// Per-module progress for the Earlier fold's headings (item 2f) — "N of M"
+// and a thin bar, counted over every VISIBLE card ever assigned to that
+// module (done + still pending), not just the finished ones sitting in THIS
+// fold — so Earlier's "4 of 6" and however many are left in Still to do
+// always add up to the same total.
+function caModuleHeadHtml(sec, byId){
+  if(!sec.mod) return '';
+  const ids = sec.ids.filter(id => byId[id] && caIsVisible(byId[id]));
+  const total = ids.length;
+  const doneN = ids.filter(id => classActivities[id] === true).length;
+  const pct = total ? Math.round(doneN / total * 100) : 0;
+  const labelParams = {n: sec.mod.num, mod: tf(sec.mod, 'name')};
+  const countParams = {done: doneN, total};
+  return `<div class="ca-mod-head">
+    <span data-i18n="ca.moduleHead" data-i18n-params="${escAttr(JSON.stringify(labelParams))}">${escHtml(t('ca.moduleHead', labelParams))}</span>
+    <span class="ca-mod-bar" aria-hidden="true"><b style="width:${pct}%"></b></span>
+    <span class="ca-mod-count" data-i18n="ca.moduleProgress" data-i18n-params="${escAttr(JSON.stringify(countParams))}">${escHtml(t('ca.moduleProgress', countParams))}</span>
+  </div>`;
+}
+/* ── "Still to do" — every pending card except the Today hero, wrapped in
+   ONE fold (item 2f). Closed by default each render, same sticky-open
+   pattern as "Earlier" below. ── */
+let caTodoOpen = false;
+function caOnTodoToggle(details){
+  caTodoOpen = details.open;
+  if(!details.open && snipState && details.contains(snipState.card)) snipStop();
+}
+function caTodoGroupHtml(bodyHtml, count, openInside){
+  const open = caTodoOpen || openInside;
+  return `<details class="ca-todo-group" ${open ? 'open' : ''} ontoggle="caOnTodoToggle(this)">
+    <summary class="ca-todo-summary">${escHtml(t('ca.stillToDoGroup', {n: count}))}</summary>
+    <div class="ca-todo-body">${bodyHtml}</div>
+  </details>`;
 }
 // Closed by default each render — caFinishedOpen carries the student's choice
 // across re-renders the same way caOpenId does for a single card, so marking
@@ -9335,14 +9700,20 @@ function renderClassActivities(){
 // caFocusActivity's deep link and caToggleComplete's "keep it open" both
 // still land on a visible card instead of one hidden inside a closed group.
 let caFinishedOpen = false;
-function caFinishedGroupHtml(finished){
-  const open = caFinishedOpen || finished.some(a => a.id === caOpenId);
+function caFinishedGroupHtml(finishedGroups, finishedFlat, byId){
+  const open = caFinishedOpen || finishedFlat.some(a => a.id === caOpenId);
+  const body = finishedGroups.some(g => g.sec.mod)
+    ? finishedGroups.map(g => caModuleHeadHtml(g.sec, byId) + g.cards.map(caActivityCardHtml).join('')).join('')
+    : finishedFlat.map(caActivityCardHtml).join('');
   return `<details class="ca-finished-group" ${open ? 'open' : ''} ontoggle="caOnFinishedToggle(this)">
-    <summary class="ca-finished-summary">${escHtml(t('ca.finishedGroup', {n: finished.length}))}</summary>
-    <div class="ca-finished-body">${finished.map(caActivityCardHtml).join('')}</div>
+    <summary class="ca-finished-summary">${escHtml(t('ca.finishedGroup', {n: finishedFlat.length}))}</summary>
+    <div class="ca-finished-body">${body}</div>
   </details>`;
 }
-function caOnFinishedToggle(details){ caFinishedOpen = details.open; }
+function caOnFinishedToggle(details){
+  caFinishedOpen = details.open;
+  if(!details.open && snipState && details.contains(snipState.card)) snipStop();
+}
 
 /* The unfinished-activities reminder popup (maybeShowCaReminder) was retired
    2026-09-11 (Today-first work order, Phase 1) — landing on In-Class

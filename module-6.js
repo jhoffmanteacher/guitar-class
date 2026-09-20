@@ -74,8 +74,8 @@ SETS.push(
             steps: [
           {
             label: 'Feel the pulse: "Brown Eyed Girl"', label_es: 'Siente el pulso: "Brown Eyed Girl"',
-            text: 'Listen to "Brown Eyed Girl" by Van Morrison. Tap along on your leg — down with your hand on the numbers, up on the "ands". Can you feel the 8th-note pulse?',
-            text_es: 'Escucha "Brown Eyed Girl" de Van Morrison. Sigue el ritmo con la mano en tu pierna — hacia abajo en los números, hacia arriba en los "y". ¿Puedes sentir el pulso de corcheas?',
+            text: 'Listen to <a href="https://www.youtube.com/watch?v=UfmkgQRmmeE" target="_blank">"Brown Eyed Girl" by Van Morrison</a>. Tap along on your leg — down with your hand on the numbers, up on the "ands". Can you feel the 8th-note pulse?',
+            text_es: 'Escucha <a href="https://www.youtube.com/watch?v=UfmkgQRmmeE" target="_blank">"Brown Eyed Girl" de Van Morrison</a>. Sigue el ritmo con la mano en tu pierna — hacia abajo en los números, hacia arriba en los "y". ¿Puedes sentir el pulso de corcheas?',
             hint: 'You don\'t need a guitar yet. Just train your body to feel the steady pulse before you add the strings.',
             hint_es: 'Todavía no necesitas una guitarra. Solo entrena tu cuerpo para sentir el pulso constante antes de agregar las cuerdas.',
             skills: [2, 3],
@@ -471,8 +471,8 @@ SETS.push(
             steps: [
           {
             label: 'Tap along: I\'m Yours', label_es: 'Marca el patrón: I\'m Yours',
-            text: 'Listen to "I\'m Yours" by Jason Mraz. Tap the D-DU-UDU pattern on your leg along with the song. Where does the pattern repeat?',
-            text_es: 'Escucha "I\'m Yours" de Jason Mraz. Marca el patrón D-DU-UDU en tu pierna junto con la canción. ¿Dónde se repite el patrón?',
+            text: 'Listen to <a href="https://www.youtube.com/watch?v=EkHTsc9PU2A" target="_blank">"I\'m Yours" by Jason Mraz</a>. Tap the D-DU-UDU pattern on your leg along with the song. Where does the pattern repeat?',
+            text_es: 'Escucha <a href="https://www.youtube.com/watch?v=EkHTsc9PU2A" target="_blank">"I\'m Yours" de Jason Mraz</a>. Marca el patrón D-DU-UDU en tu pierna junto con la canción. ¿Dónde se repite el patrón?',
             hint: 'The pattern is one bar long and repeats throughout the whole song. Once you have it, you have most of his song.',
             hint_es: 'El patrón dura un compás y se repite durante toda la canción. Una vez que lo dominas, tienes la mayor parte de la canción.',
             skills: [1, 5],
@@ -575,8 +575,8 @@ SETS.push(
             text_es: '<ol><li>Trastea Em.</li><li>Toca D-DU-UDU a 60 BPM durante 8 compases, contando en voz alta y acentuando los tiempos 2 y 4.</li></ol>Lo tienes cuando: 8 compases limpios con una sensación clara de "golpe de tarola" en el 2 y el 4.',
             hint: 'Add accents on beats 2 and 4 — those downstrokes should be a little louder. Feel the "snare hit" on those beats.',
             hint_es: 'Agrega acentos en los tiempos 2 y 4 — esos golpes hacia abajo deben ser un poco más fuertes. Siente el "golpe de tarola" en esos tiempos.',
-            stuck: 'Drop the accents for now and just get the D-DU-UDU shape clean for 8 bars; add the louder 2-and-4 hits once the pattern runs on autopilot.',
-            stuck_es: 'Deja los acentos por ahora y solo logra que la forma D-DU-UDU salga limpia durante 8 compases; agrega los golpes más fuertes en 2 y 4 una vez que el patrón salga en piloto automático.',
+            stuck: 'Drop the accents for now and just get the D-DU-UDU shape clean for 8 bars; add the louder 2-and-4 hits once the pattern feels automatic.',
+            stuck_es: 'Deja los acentos por ahora y solo logra que la forma D-DU-UDU salga limpia durante 8 compases; agrega los golpes más fuertes en 2 y 4 una vez que el patrón se sienta automático.',
             levelUp: 'Move it to G or D, or push to 75 BPM with the backbeat still landing.',
             levelUp_es: 'Muévelo a G o D, o sube a 75 BPM manteniendo el contratiempo cayendo bien.',
             skills: [1, 3],
@@ -786,8 +786,8 @@ SETS.push(
             steps: [
           {
             label: 'Compare: reggae vs. rock', label_es: 'Compara: reggae vs. rock',
-            text: 'Compare two recordings: "Three Little Birds" (Bob Marley — reggae) and "Bad Moon Rising" (CCR — rock). Same speed-ish, very different feel. What makes the difference?',
-            text_es: 'Compara dos grabaciones: "Three Little Birds" (Bob Marley — reggae) y "Bad Moon Rising" (CCR — rock). Velocidad parecida, sensación muy distinta. ¿Qué hace la diferencia?',
+            text: 'Compare two recordings: <a href="https://www.youtube.com/watch?v=HNBCVM4KbUM" target="_blank">"Three Little Birds" (Bob Marley)</a> — reggae — and <a href="https://www.youtube.com/watch?v=5BmEGm-mraE" target="_blank">"Bad Moon Rising" (CCR)</a> — rock. Same speed-ish, very different feel. What makes the difference?',
+            text_es: 'Compara dos grabaciones: <a href="https://www.youtube.com/watch?v=HNBCVM4KbUM" target="_blank">"Three Little Birds" (Bob Marley)</a> — reggae — y <a href="https://www.youtube.com/watch?v=5BmEGm-mraE" target="_blank">"Bad Moon Rising" (CCR)</a> — rock. Velocidad parecida, sensación muy distinta. ¿Qué hace la diferencia?',
             hint: 'It\'s almost entirely the strum pattern. Reggae emphasizes the offbeats (the "+"); rock emphasizes the downbeats (the numbers).',
             hint_es: 'Es casi por completo el patrón de rasgueo. El reggae enfatiza los contratiempos (el "+"); el rock enfatiza los tiempos fuertes (los números).',
             skills: [2, 3],
@@ -955,8 +955,8 @@ SETS.push(
               },
               {
                 label: 'Challenge — "Three Little Birds", reggae chop', label_es: 'Reto — "Three Little Birds", picoteo reggae',
-                text: '<ul><li>Play A · D · E with up-strums only on the "+", one bar each at 70 BPM.</li></ul>You\'ve got it when: two laps where every hit is an offbeat — then play along with the record and disappear into it.',
-                text_es: '<ul><li>Toca A · D · E con golpes hacia arriba solo en el "+", un compás cada uno a 70 BPM.</li></ul>Lo tienes cuando: dos vueltas donde cada golpe es un contratiempo — y luego toca junto con la grabación y piérdete en ella.',
+                text: '<ul><li>Play A · D · E with up-strums only on the "+", one bar each at 70 BPM.</li></ul>You\'ve got it when: two laps where every hit is an offbeat — then play along with the record, keeping every offbeat locked to it.',
+                text_es: '<ul><li>Toca A · D · E con golpes hacia arriba solo en el "+", un compás cada uno a 70 BPM.</li></ul>Lo tienes cuando: dos vueltas donde cada golpe es un contratiempo — y luego toca junto con la grabación, manteniendo cada contratiempo alineado con ella.',
                 hint: 'Your hand still travels down on every number — the pick just misses on purpose. The record is your metronome here; Marley\'s band never rushes.',
                 hint_es: 'Tu mano sigue bajando en cada número — la púa solo falla a propósito. La grabación es tu metrónomo aquí; la banda de Marley nunca se apura.',
                 stuck: 'Mute the strings and chop the offbeat rhythm alone until it feels natural, then add the chords.',

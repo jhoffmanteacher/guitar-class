@@ -1594,13 +1594,14 @@ body.t-wide .t-main{max-width:none}
   body.print-activity .page-topbar,body.print-activity #week-panels,
   body.print-activity .resume-card{display:none !important}
   body.print-activity .ca-card:not(.ca-print-target){display:none !important}
-  body.print-activity .ca-finished-summary{display:none !important}
-  /* Module headings and the Still-to-do divider belong to the LIST; a
-     one-activity handout is a single card, so a stray "Module 2 — …" above
-     it would read as the heading of the page rather than of a group. */
-  body.print-activity .ca-mod-head,body.print-activity .ca-stilltodo-divider,
+  body.print-activity .ca-finished-summary,body.print-activity .ca-todo-summary{display:none !important}
+  /* Module headings belong to the LIST; a one-activity handout is a single
+     card, so a stray "Module 2 — …" above it would read as the heading of
+     the page rather than of a group. */
+  body.print-activity .ca-mod-head,
   body.print-activity .ca-gate-intro{display:none !important}
-  body.print-activity .ca-finished-group,body.print-activity .ca-finished-body{margin:0;opacity:1}
+  body.print-activity .ca-finished-group,body.print-activity .ca-finished-body,
+  body.print-activity .ca-todo-group,body.print-activity .ca-todo-body{margin:0;opacity:1}
   body.print-activity .ca-print-target{border:1px solid #000}
   body.print-activity .ca-card-summary{cursor:auto}
   body.print-activity .ca-card-summary::before{display:none !important}
@@ -1854,6 +1855,21 @@ li.step.step-flash{animation:stepFlash 2.6s ease-out}
   .header-mark{display:none}
 }
 
+/* ── Chromebook rail work order (2026-09-19): shorter header on short
+   screens ── A Chromebook's own browser chrome (tabs/URL bar/bookmarks bar)
+   leaves less vertical room than a phone or a full-height laptop window, so
+   the ~70px header cost more of the first screenful there than anywhere the
+   site had been tested. This is a viewport-HEIGHT query, not the
+   phone-WIDTH one above — a short wide window and a narrow tall one are
+   different problems. --hdr drives #app's height calc and every sticky
+   offset (rail, .t-board-built, scroll-margin-top), so redefining it here
+   keeps all of them in sync automatically. */
+@media (max-height:800px){
+  :root{--hdr:48px}
+  .header{padding:8px 20px}
+  .header-sub{display:none}
+}
+
 /* ── Design pass: tuner "in tune!" success moment ── */
 .tuner-note.in-tune{color:var(--green-text)}
 .tuner-note.in-tune-pop{animation:tunerPop .45s ease-out}
@@ -1989,7 +2005,11 @@ body.explore-open #week-panels{display:none}
 .ca-card-summary::-webkit-details-marker{display:none}
 .ca-card-summary::before{content:'';width:8px;height:8px;border-right:2px solid var(--text3);border-bottom:2px solid var(--text3);transform:rotate(-45deg);transition:transform .15s;flex-shrink:0}
 .ca-card[open] .ca-card-summary::before{transform:rotate(45deg)}
-.ca-card-title{font-weight:600;flex:1;min-width:0}
+.ca-card-titlewrap{display:flex;flex-direction:column;flex:1;min-width:0}
+.ca-card-title{font-weight:600}
+/* Chunk-size line under the title, visible collapsed — see caChunkMetaHtml
+   in app.js. Quiet on purpose: it's context, not another headline. */
+.ca-chunk-meta{font-size:0.75rem;font-weight:400;color:var(--text2);margin-top:1px}
 .ca-done-mark{color:var(--green-text);flex-shrink:0;display:flex}
 /* Sits inside the <summary>, so printActivity() has to swallow the click —
    see the note on that function in app.js. */
@@ -1998,10 +2018,19 @@ body.explore-open #week-panels{display:none}
 .ca-print-btn:hover{color:var(--text);border-color:var(--text2)}
 .ca-card-body{padding:0 14px 14px}
 .ca-chip{font-size:0.75rem;font-weight:600;padding:2px 8px;border-radius:10px;background:var(--ca-accent-bg);color:var(--ca-accent);white-space:nowrap;flex-shrink:0}
+/* Solid fill, not the soft .ca-chip badge — this is a "do this one" pointer,
+   not a date label, so it earns more contrast. */
+.ca-start-tag{font-size:0.75rem;font-weight:700;padding:2px 8px;border-radius:10px;background:var(--ca-accent);color:var(--bg);white-space:nowrap;flex-shrink:0}
 .ca-steps{list-style:none;margin:8px 0 12px;padding:0;font-size:0.9375rem;line-height:1.55}
 .ca-mark-btn{font-family:inherit;font-size:0.875rem;font-weight:600;padding:9px 16px;border-radius:20px;border:1px solid var(--ca-accent);background:var(--ca-accent);color:var(--bg);cursor:pointer}
 .ca-mark-btn:hover{opacity:0.88}
 .ca-mark-btn.done{background:var(--ca-accent-bg);color:var(--ca-accent);font-weight:500}
+/* ── Soft nudge on Mark complete (caMarkRowHtml, app.js) ── replaces the
+   button in place, same width column, so it never shifts the card taller
+   than a step ladder already made it. */
+.ca-nudge{background:var(--ca-accent-bg);border-radius:var(--radius-sm);padding:10px 12px}
+.ca-nudge-text{font-size:0.875rem;color:var(--text)}
+.ca-nudge-actions{display:flex;gap:8px;margin-top:8px}
 /* Per-step accordion — independent of the module-station .dp builder's
    .step/.step-head system (own CSS namespace, same visual language), and
    session-only: no persistence, so a reload always reopens at step 1. */
@@ -2041,18 +2070,86 @@ body.explore-open #week-panels{display:none}
    gate is on (body.ca-gated, below); the divider labels the start of
    "Still to do" ahead of everything past the first pending card. */
 .ca-gate-intro{background:var(--ca-accent-bg);border:1px solid var(--ca-accent);color:var(--text);
-  border-radius:var(--radius);padding:10px 14px;margin:0 0 12px;font-weight:600;font-size:0.9375rem}
-.ca-stilltodo-divider{font-weight:600;color:var(--text2);font-size:0.8125rem;
-  text-transform:uppercase;letter-spacing:.02em;margin:16px 4px 8px}
-/* The module heading over each block of activities on Today (console
-   activity board, 2026-09-16). Heavier than the "Still to do" divider it
-   replaces whenever any card has been placed in a module — it names the
-   part of the course the cards under it belong to, so it reads as a
-   heading rather than a label. First one loses its top margin: it opens
-   the page. */
-.ca-mod-head{font-family:var(--font-display);font-weight:600;color:var(--text);
-  font-size:1rem;margin:22px 4px 10px;padding-bottom:6px;border-bottom:1px solid var(--border2)}
+  border-radius:var(--radius);padding:7px 14px;margin:0 0 8px;font-weight:600;font-size:0.9375rem}
+/* ── Free play once nothing is left pending (caFreePlayHeroHtml, app.js,
+   item 2f) — the Today hero's own caught-up state, so it borrows .ca-card's
+   shape (border-left etc.) via ca-card--hero below rather than its own box. */
+.ca-freeplay-hero{border-left-color:var(--green-text);padding:20px 24px}
+.ca-freeplay-title{font:600 1.25rem var(--font-display);margin:0 0 4px}
+.ca-freeplay-text{color:var(--text2);margin:0}
+.ca-freeplay-actions{display:flex;flex-wrap:wrap;gap:8px;margin-top:14px}
+
+/* ── The Today hero (Chromebook rail work order, item 2f, 2026-09-19) ──
+   The ONE card that answers "what do I do now" — collapsed by default like
+   every other card (Jonathan, 2026-09-15), but its own custom summary:
+   text on the left, a step thumbnail over a big CTA on the right. Built by
+   caHeroCardHtml()/caHeroCheckHtml() in app.js, never through
+   caActivityCardHtml/caCheckCardHtml. */
+.ca-card--hero{border-left-width:6px;box-shadow:var(--shadow-card)}
+.ca-hero-summary{align-items:stretch;gap:20px}
+/* align-items:flex-start (2f fix, found comparing to the mockup) — without it
+   the flex column's default "stretch" cross-sizing stretches EVERY child to
+   the card's full width, including the ca-start-tag/ca-chip pills, which have
+   a background and no intrinsic width of their own: a "Start here" pill that
+   should be a small rounded label instead rendered as a full-width solid bar
+   across the card. The title/blurb/meta line still wrap at the full
+   available width same as before — fit-content sizing only shrinks an item
+   when its own content is narrower than that, which the pills' short text
+   is and the title/blurb's longer text isn't. */
+.ca-hero-main{display:flex;flex-direction:column;align-items:flex-start;gap:4px;flex:1;min-width:0}
+.ca-hero-title{font:600 1.25rem var(--font-display);color:var(--text)}
+.ca-hero-blurb{margin:0;color:var(--text2);font-size:0.9375rem}
+/* width is a CEILING, not a fixed size — every module/activity figure is
+   drawn on the same 640x244 board (checks.mjs 1v), so height follows width
+   at a fixed ratio; 210px keeps the 1366×657 Chromebook frame (item 2f's
+   own acceptance test) scrollbar-free with the rest of the hero's content
+   still on screen, well under the 280px ceiling. */
+.ca-hero-side{display:flex;flex-direction:column;align-items:stretch;gap:8px;
+  flex:0 0 auto;width:min(210px,32vw)}
+.ca-hero-thumb{display:block;border:1px solid var(--border);border-radius:var(--radius-sm);
+  overflow:hidden;background:var(--bg2)}
+.ca-hero-thumb img{display:block;width:100%;height:auto}
+.ca-hero-cta{display:block;text-align:center;font-weight:700;font-size:0.9375rem;
+  padding:11px 14px;border-radius:22px;background:var(--ca-accent);color:var(--bg)}
+.ca-card--hero-check .ca-hero-cta{background:var(--blue-text)}
+.ca-card--hero-check{border-left-color:var(--blue-text)}
+.ca-start-tag--check{background:var(--blue-bg);color:var(--blue-text)}
+/* The little disclosure triangle reads as redundant next to a full-width
+   CTA — the hero's affordance to expand is the button itself. */
+.ca-hero-summary::before{display:none}
+.ca-hero-dots{display:inline-flex;gap:5px;margin-left:10px;vertical-align:middle}
+.ca-hero-dot{width:10px;height:10px;border-radius:50%;border:2px solid var(--border2);display:inline-block}
+.ca-hero-dot.f{background:var(--ca-accent);border-color:var(--ca-accent)}
+.ca-chunk-done{margin-left:8px}
+@media(max-width:640px){
+  .ca-hero-summary{flex-direction:column}
+  .ca-hero-side{width:100%;flex-direction:row-reverse;align-items:center}
+  .ca-hero-thumb{flex:1;min-width:0}
+}
+
+/* ── "Still to do" — every pending card but the hero, in one fold
+   (caTodoGroupHtml, item 2f). Same quiet treatment as "Earlier" below,
+   mirrored on purpose: the two are siblings on the page. ── */
+.ca-todo-group{margin:12px 0 4px}
+.ca-todo-summary{display:flex;align-items:center;gap:8px;padding:10px 4px;font-weight:600;color:var(--text2);cursor:pointer;list-style:none}
+.ca-todo-summary::-webkit-details-marker{display:none}
+.ca-todo-summary::before{content:'';width:8px;height:8px;border-right:2px solid var(--text3);border-bottom:2px solid var(--text3);transform:rotate(-45deg);transition:transform .15s;flex-shrink:0}
+.ca-todo-group[open] .ca-todo-summary::before{transform:rotate(45deg)}
+
+/* The module heading over each block of activities, inside either fold
+   (console activity board, 2026-09-16; the progress bar + "N of M" is item
+   2f, 2026-09-19). It names the part of the course the cards under it
+   belong to, so it reads as a heading rather than a label. First one loses
+   its top margin: it opens the fold. */
+.ca-mod-head{display:flex;align-items:center;gap:10px;font-family:var(--font-display);
+  font-weight:600;color:var(--text);font-size:1rem;margin:22px 4px 10px;
+  padding-bottom:6px;border-bottom:1px solid var(--border2)}
 .ca-mod-head:first-child{margin-top:0}
+.ca-mod-head>span:first-child{flex-shrink:0}
+.ca-mod-bar{flex:1;height:6px;border-radius:3px;background:var(--bg3);overflow:hidden;min-width:40px}
+.ca-mod-bar b{display:block;height:100%;background:var(--green-text)}
+.ca-mod-count{flex-shrink:0;font-family:var(--font-display);font-weight:400;
+  font-size:0.8125rem;color:var(--text2)}
 
 /* ── The activity gate (Today-first work order, Phase 1) ──
    body.ca-gated is the one switch (app.js applyActivityGate) — a visible,
@@ -2072,6 +2169,20 @@ body.ca-gated #week-panels{display:none}
    always wins over a plain selector, so this one needs !important or the
    button would keep showing right through the gate. */
 body.ca-gated #search-btn{display:none!important}
+
+/* ── Chromebook rail (2026-09-19) ──
+   The module/set rail groups only belong on screen while the student is
+   actually in Practice — a set, a checklist, or a module review. Every
+   explore page (in-column: songs/my-progress/assessments/class-activities,
+   see body.explore-open in syncExploreNav) or overlay (games/live quiz, see
+   body.games-open) covers or replaces that view, so showing the module/set
+   picker above it just wasted the vertical space a Chromebook's browser
+   chrome doesn't spare. Same two groups body.ca-gated already hides above —
+   this is the same hide for the ungated case. */
+body.explore-open .g-module,
+body.explore-open .g-set,
+body.games-open .g-module,
+body.games-open .g-set{display:none}
 
 /* Module-review assessment pop-up — fires when the student opens the review
    panel; the full assessment box still lives at the bottom of that panel, so
@@ -2805,6 +2916,14 @@ a.jl-song-btn{display:inline-block;text-decoration:none}
   border-left:3px solid var(--green-text);color:var(--text2);font-style:italic}
 .got-it-lab{font-style:normal;font-weight:600;color:var(--green-text);margin-right:4px}
 .step-done .got-it{border-left-color:var(--border2)}
+/* ── Rep-counter tap dots (repDotsHtml, app.js) ── sits right under the
+   got-it-when rule it belongs to, same left offset so the two read as one
+   unit. */
+.rep-dots{display:flex;align-items:center;flex-wrap:wrap;gap:6px;margin-top:8px;padding-left:11px}
+.rep-dot{width:26px;height:26px;padding:0;border:none;background:none;color:var(--green-text);font-size:1.35rem;line-height:1;cursor:pointer;display:flex;align-items:center;justify-content:center}
+.rep-dot:not(.on){color:var(--border2)}
+.rep-dots-done .rep-dot{width:auto;height:auto;font-size:1rem}
+.rep-dot-reset{font-family:inherit;font-size:0.8125rem;color:var(--text2);background:none;border:none;text-decoration:underline;cursor:pointer;padding:0;margin-left:4px}
 
 /* ── "Pick up where you left off" resume card (renderResumeCard, app.js) ──
    One quiet purple-tinted card above the set panels: a title row, then one

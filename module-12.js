@@ -32,8 +32,8 @@ SETS.push(
             steps: [
               {
                 label: 'Watch: Travis picking basics (Lauren Bateman)', label_es: 'Mira: bases del Travis picking (Lauren Bateman)',
-                text: 'Watch: <a href="https://www.youtube.com/watch?v=JvtFd7vkea0" target="_blank">How To Travis Pick on Guitar - The ULTIMATE Fingerpicking Pattern – Lauren Bateman (0:00–9:00)</a>.',
-                text_es: 'Mira: <a href="https://www.youtube.com/watch?v=JvtFd7vkea0" target="_blank">How To Travis Pick on Guitar - The ULTIMATE Fingerpicking Pattern – Lauren Bateman (0:00–9:00)</a>.',
+                text: 'Watch: <a href="https://www.youtube.com/watch?v=JvtFd7vkea0" target="_blank">How To Travis Pick on Guitar - The ULTIMATE Fingerpicking Pattern – Lauren Bateman (0:00–9:00)</a>. While you watch: watch her thumb and notice it never stops, even while her fingers add notes on top. You\'ve got it when: you can describe what the thumb is doing while the fingers play.',
+                text_es: 'Mira: <a href="https://www.youtube.com/watch?v=JvtFd7vkea0" target="_blank">How To Travis Pick on Guitar - The ULTIMATE Fingerpicking Pattern – Lauren Bateman (0:00–9:00)</a>. Mientras miras: mira su pulgar y nota que nunca se detiene, incluso mientras sus dedos agregan notas encima. Lo tienes cuando: puedes describir qué está haciendo el pulgar mientras tocan los dedos.',
                 hint: 'In Travis-style picking, the thumb keeps everything moving — steady quarter notes on two bass strings while the fingers decorate on top.',
                 hint_es: 'En el picking estilo Travis, el pulgar mantiene todo en movimiento — negras constantes en dos cuerdas graves mientras los dedos decoran encima.',
                 skills: [1, 2],

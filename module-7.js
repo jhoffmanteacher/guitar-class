@@ -33,8 +33,8 @@ SETS.push(
             steps: [
           {
             label: 'Watch: how to read TAB', label_es: 'Mira: cómo leer TAB',
-            text: 'Watch: <a href="https://youtu.be/4-JTCASlh-w" target="_blank">How To Read TAB and Chord Boxes (BC-108) – JustinGuitar</a> (0:00–4:00).',
-            text_es: 'Mira: <a href="https://youtu.be/4-JTCASlh-w" target="_blank">How To Read TAB and Chord Boxes (BC-108) – JustinGuitar</a> (0:00–4:00).',
+            text: 'Watch: <a href="https://youtu.be/4-JTCASlh-w" target="_blank">How To Read TAB and Chord Boxes (BC-108) – JustinGuitar</a> (0:00–4:00). While you watch: find one stacked-number chord and one note-duration symbol he explains. You\'ve got it when: you can point to both on the screen without him telling you where.',
+            text_es: 'Mira: <a href="https://youtu.be/4-JTCASlh-w" target="_blank">How To Read TAB and Chord Boxes (BC-108) – JustinGuitar</a> (0:00–4:00). Mientras miras: encuentra un acorde de números apilados y un símbolo de duración de nota que él explique. Lo tienes cuando: puedes señalar ambos en la pantalla sin que él te diga dónde están.',
             hint: 'You\'ve read single-note TAB since Module 2. Watch for two new things now. First: numbers STACKED vertically mean play them together (a chord). Second: the symbols above the numbers tell you how long each note lasts — plain stems are quarter notes, flags and beams are 8th notes, and a hollow (open) note head with a stem is a half note, held for two beats.',
             hint_es: 'Has leído TAB de una sola nota desde el Módulo 2. Ahora fíjate en dos cosas nuevas. Primero: los números APILADOS verticalmente significan que se tocan juntos (un acorde). Segundo: los símbolos arriba de los números indican cuánto dura cada nota — las plicas simples son negras (un tiempo), las banderas y barras son corcheas, y una cabeza de nota hueca (abierta) con plica es una blanca, sostenida por dos tiempos.',
             skills: [1, 2, 3],
@@ -351,8 +351,8 @@ SETS.push(
             steps: [
           {
             label: 'Watch: a pain-free F chord', label_es: 'Mira: el acorde F sin dolor',
-            text: 'Watch: <a href="https://www.youtube.com/watch?v=vUNxt5EvXv8" target="_blank">Pain Free F Chord for Beginners – Lauren Bateman (0:00–5:03)</a>.',
-            text_es: 'Mira: <a href="https://www.youtube.com/watch?v=vUNxt5EvXv8" target="_blank">Pain Free F Chord for Beginners – Lauren Bateman (0:00–5:03)</a>.',
+            text: 'Watch: <a href="https://www.youtube.com/watch?v=vUNxt5EvXv8" target="_blank">Pain Free F Chord for Beginners – Lauren Bateman (0:00–5:03)</a>. While you watch: watch her thumb and notice it stays on the back of the neck, behind your index finger. You\'ve got it when: you can say where the thumb goes and why.',
+            text_es: 'Mira: <a href="https://www.youtube.com/watch?v=vUNxt5EvXv8" target="_blank">Pain Free F Chord for Beginners – Lauren Bateman (0:00–5:03)</a>. Mientras miras: mira su pulgar y nota que se queda en la parte de atrás del mástil, detrás de tu índice. Lo tienes cuando: puedes decir dónde va el pulgar y por qué.',
             hint: 'The F barre — one finger pressed flat across several strings — is famously hard. It\'s the lowest barre, where the strings are tightest, so it\'s the toughest spot — G and A higher up are easier. Watch her THUMB: keep it on the BACK of the neck, behind your index. That\'s where the squeezing power comes from.',
             hint_es: 'La cejilla de F — un dedo presionado plano sobre varias cuerdas — es famosa por ser difícil. Es la cejilla más baja, donde las cuerdas están más tensas, así que es el punto más duro — G y A más arriba son más fáciles. Fíjate en su PULGAR: mantenlo en la PARTE TRASERA del mástil, detrás de tu índice. Ahí es de donde viene la fuerza de apriete.',
             skills: [1, 2],
@@ -376,8 +376,8 @@ SETS.push(
           },
           {
             label: 'Watch: the E-shape barre', label_es: 'Mira: la cejilla en forma de E',
-            text: 'Watch: <a href="https://youtu.be/MpMhueVEz2g?t=30" target="_blank">Basic Barre Chords #1 — the E shape (CH-006) – JustinGuitar</a> (0:30–4:00).',
-            text_es: 'Mira: <a href="https://youtu.be/MpMhueVEz2g?t=30" target="_blank">Basic Barre Chords #1 — the E shape (CH-006) – JustinGuitar</a> (0:30–4:00).',
+            text: 'Watch: <a href="https://youtu.be/MpMhueVEz2g?t=30" target="_blank">Basic Barre Chords #1 — the E shape (CH-006) – JustinGuitar</a> (0:30–4:00). While you watch: watch how his index finger becomes the nut for the sliding shape. You\'ve got it when: you can explain what "be the nut" means in your own words.',
+            text_es: 'Mira: <a href="https://youtu.be/MpMhueVEz2g?t=30" target="_blank">Basic Barre Chords #1 — the E shape (CH-006) – JustinGuitar</a> (0:30–4:00). Mientras miras: mira cómo su dedo índice se convierte en la cejuela para la forma que se desliza. Lo tienes cuando: puedes explicar con tus propias palabras qué significa "ser la cejuela".',
             hint: 'The "E shape" is literally the E major open chord, but you slide your fingers up the neck and use your INDEX finger to "be the nut" (the thin strip at the top of the neck that the strings cross) — your finger becomes the bar.',
             hint_es: 'La "forma de E" es literalmente el acorde abierto de E mayor, pero deslizas tus dedos por el mástil y usas tu dedo ÍNDICE para "ser la cejuela" (la tira delgada en la parte superior del mástil por donde cruzan las cuerdas) — tu dedo se convierte en la cejilla.',
             skills: [2, 3],
@@ -648,8 +648,8 @@ SETS.push(
             steps: [
           {
             label: 'Watch: the A-shape barre', label_es: 'Mira: la cejilla en forma de A',
-            text: 'Watch: <a href="https://youtu.be/C7k0CWgI-xI" target="_blank">A Shape Major Barre Chords on Guitar – JustinGuitar</a> (0:00–4:00).',
-            text_es: 'Mira: <a href="https://youtu.be/C7k0CWgI-xI" target="_blank">A Shape Major Barre Chords on Guitar – JustinGuitar</a> (0:00–4:00).',
+            text: 'Watch: <a href="https://youtu.be/C7k0CWgI-xI" target="_blank">A Shape Major Barre Chords on Guitar – JustinGuitar</a> (0:00–4:00). While you watch: compare a flattened-ring-finger version to a one-finger-per-string version. You\'ve got it when: you can say which version keeps the high e string free to ring.',
+            text_es: 'Mira: <a href="https://youtu.be/C7k0CWgI-xI" target="_blank">A Shape Major Barre Chords on Guitar – JustinGuitar</a> (0:00–4:00). Mientras miras: compara una versión con el dedo anular aplanado con una versión de un dedo por cuerda. Lo tienes cuando: puedes decir qué versión deja la cuerda mi aguda libre para sonar.',
             hint: 'The A-shape uses the open A major chord, moved up the neck. You may see players flatten their RING finger alone across the D, G and B strings — in this module we use one finger per string instead (middle, ring, pinky), because that keeps the high e string free to ring.',
             hint_es: 'La forma de A usa el acorde abierto de A mayor, movido por el mástil. Puede que veas guitarristas que aplanan solo su dedo ANULAR sobre las cuerdas Re, Sol y Si — en este módulo usamos un dedo por cuerda (medio, anular y meñique), porque así la cuerda mi aguda queda libre para sonar.',
             skills: [1, 2],

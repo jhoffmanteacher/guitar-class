@@ -78,8 +78,8 @@ SETS.push(
                   placeholder_es: 'Sólida / insegura / perdida — ¿todavía puedes nombrarlos rápido mientras tocas?' }
               },
               {
-                label: 'Re-test 5: TAB cold read', label_es: 'Repaso 5: TAB a primera vista',
-                text: 'Re-test 5 — TAB reading (Module 2):<ol><li>Open any Song Journey page and find a section you\'ve never played.</li><li>Read 4 bars cold (cold = playing it the very first time you see it, no practice) — right strings, right frets, left to right.</li></ol>',
+                label: 'Re-test 5: TAB at first sight', label_es: 'Repaso 5: TAB a primera vista',
+                text: 'Re-test 5 — TAB reading (Module 2):<ol><li>Open any Song Journey page and find a section you\'ve never played.</li><li>Read 4 bars at first sight (at first sight = playing it the very first time you see it, no practice) — right strings, right frets, left to right.</li></ol>',
                 text_es: 'Repaso 5 — Lectura de TAB (Módulo 2):<ol><li>Abre cualquier página de Recorrido de la canción y busca una sección que nunca hayas tocado.</li><li>Lee 4 compases a primera vista (a primera vista = tocarlo la primera vez que lo ves, sin práctica) — cuerdas correctas, trastes correctos, de izquierda a derecha.</li></ol>',
                 hint: 'It must be TAB you haven\'t drilled — reading from memory isn\'t reading.',
                 hint_es: 'Debe ser TAB que no hayas practicado — leer de memoria no es leer.',
@@ -181,8 +181,8 @@ SETS.push(
                 skills: [4]
               },
               {
-                label: 'Re-test 5: TAB cold read', label_es: 'Repaso 5: TAB a primera vista',
-                text: 'Re-test 5 — TAB cold read: 4 bars of TAB you\'ve never played, from any Song Journey page, right strings and frets in order. Where to practice it: Module 2, Set 2.',
+                label: 'Re-test 5: TAB at first sight', label_es: 'Repaso 5: TAB a primera vista',
+                text: 'Re-test 5 — TAB at first sight: 4 bars of TAB you\'ve never played, from any Song Journey page, right strings and frets in order. Where to practice it: Module 2, Set 2.',
                 text_es: 'Repaso 5 — Lectura a primera vista de TAB: 4 compases de TAB que nunca hayas tocado, de cualquier página de Recorrido de la canción, cuerdas y trastes correctos en orden. Dónde practicarlo: Módulo 2, Unidad 2.',
                 hint: 'Slow is fine — sight-reading is decoding, not speed.',
                 hint_es: 'Ir despacio está bien — la lectura a primera vista es descifrar, no velocidad.',
