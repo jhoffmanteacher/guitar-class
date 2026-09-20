@@ -309,8 +309,8 @@ window.CLASS_ACTIVITIES = [
       {
         label:    'Phrases A and B',
         label_es: 'Frases A y B',
-        text: 'The first half of the song — phrase A is the line you learned last time, phrase B starts the same and ends higher.<ul><li>Phrase A, fingers: open, open, 1, open, 4, 3 — say each one as you play it</li><li>Phrase B: open, open, 1, open, then your hand moves up until finger 1 sits on fret 5: finger 3 → fret 7, finger 1 → fret 5. Eyes on fret 7 <em>before</em> your hand moves</li><li>BPM 70. Loop each phrase alone until it\'s clean, then play them back to back</li></ul>You\'ve got it when: phrase A into phrase B, four times through, without stopping. Buzz twice? Drop the BPM by 10 and try again.',
-        text_es: 'La primera mitad de la canción — la frase A es la línea que aprendiste la vez pasada, la frase B empieza igual y termina más arriba.<ul><li>Frase A, dedos: al aire, al aire, 1, al aire, 4, 3 — di cada uno mientras lo tocas</li><li>Frase B: al aire, al aire, 1, al aire, y luego la mano sube hasta que el dedo 1 queda en el traste 5: dedo 3 → traste 7, dedo 1 → traste 5. Ojos en el traste 7 <em>antes</em> de mover la mano</li><li>BPM 70. Repite cada frase sola hasta que salga limpia, y después tócalas seguidas</li></ul>Lo tienes cuando: de la frase A a la frase B, cuatro veces seguidas, sin detenerte. ¿Zumbó dos veces? Baja el BPM 10 puntos y vuelve a intentarlo.',
+        text: 'The first half of the song — phrase A is the line you learned last time, phrase B starts the same and ends higher.<ul><li>Phrase A, fingers: open, open, 1, open, 4, 3 — say each one as you play it</li><li>Phrase B: open, open, 1, open, then your hand moves up until finger 1 sits on fret 5: finger 3 → fret 7, finger 1 → fret 5. Eyes on fret 7 <em>before</em> your hand moves</li><li>Both notes of "Hap-py" go inside one click; "birth", "day" and "to" get a click each; the last note is held for two. Press &#x25B6; to hear it before you play it.</li><li>BPM 70. Loop each phrase alone until it\'s clean, then play them back to back</li></ul>You\'ve got it when: phrase A into phrase B, four times through, without stopping. Buzz twice? Drop the BPM by 10 and try again.',
+        text_es: 'La primera mitad de la canción — la frase A es la línea que aprendiste la vez pasada, la frase B empieza igual y termina más arriba.<ul><li>Frase A, dedos: al aire, al aire, 1, al aire, 4, 3 — di cada uno mientras lo tocas</li><li>Frase B: al aire, al aire, 1, al aire, y luego la mano sube hasta que el dedo 1 queda en el traste 5: dedo 3 → traste 7, dedo 1 → traste 5. Ojos en el traste 7 <em>antes</em> de mover la mano</li><li>Las dos notas de "Hap-py" caben en un clic; "birth", "day" y "to" llevan un clic cada una; la última se sostiene dos. Presiona &#x25B6; para escucharlo antes de tocarlo.</li><li>BPM 70. Repite cada frase sola hasta que salga limpia, y después tócalas seguidas</li></ul>Lo tienes cuando: de la frase A a la frase B, cuatro veces seguidas, sin detenerte. ¿Zumbó dos veces? Baja el BPM 10 puntos y vuelve a intentarlo.',
         tab: {
           caption: 'First half · phrases A and B',
           caption_es: 'Primera mitad · frases A y B',
@@ -319,24 +319,24 @@ window.CLASS_ACTIVITIES = [
               label: 'Phrase A — "Hap-py birth-day to you"',
               label_es: 'Frase A — "Hap-py birth-day to you"',
               notes: [
-                { string: 'E', fret: 0, note: 'E',  midi: 40 },
-                { string: 'E', fret: 0, note: 'E',  midi: 40 },
+                { string: 'E', fret: 0, note: 'E',  midi: 40, beats: 0.5 },
+                { string: 'E', fret: 0, note: 'E',  midi: 40, beats: 0.5 },
                 { string: 'E', fret: 2, note: 'F#', midi: 42 },
                 { string: 'E', fret: 0, note: 'E',  midi: 40 },
                 { string: 'E', fret: 5, note: 'A',  midi: 45 },
-                { string: 'E', fret: 4, note: 'G#', midi: 44 }
+                { string: 'E', fret: 4, note: 'G#', midi: 44, beats: 2 }
               ]
             },
             {
               label: 'Phrase B — "Hap-py birth-day to you" (the ending climbs higher)',
               label_es: 'Frase B — "Hap-py birth-day to you" (el final sube más alto)',
               notes: [
-                { string: 'E', fret: 0, note: 'E',  midi: 40 },
-                { string: 'E', fret: 0, note: 'E',  midi: 40 },
+                { string: 'E', fret: 0, note: 'E',  midi: 40, beats: 0.5 },
+                { string: 'E', fret: 0, note: 'E',  midi: 40, beats: 0.5 },
                 { string: 'E', fret: 2, note: 'F#', midi: 42 },
                 { string: 'E', fret: 0, note: 'E',  midi: 40 },
                 { string: 'E', fret: 7, note: 'B',  midi: 47 },
-                { string: 'E', fret: 5, note: 'A',  midi: 45 }
+                { string: 'E', fret: 5, note: 'A',  midi: 45, beats: 2 }
               ]
             }
           ]
@@ -370,13 +370,13 @@ window.CLASS_ACTIVITIES = [
           caption: 'Phrase C · low E string only',
           caption_es: 'Frase C · solo la cuerda Mi grave',
           notes: [
-            { string: 'E', fret: 0,  note: 'E',  midi: 40 },
-            { string: 'E', fret: 0,  note: 'E',  midi: 40 },
+            { string: 'E', fret: 0,  note: 'E',  midi: 40, beats: 0.5 },
+            { string: 'E', fret: 0,  note: 'E',  midi: 40, beats: 0.5 },
             { string: 'E', fret: 12, note: 'E',  midi: 52 },
             { string: 'E', fret: 9,  note: 'C#', midi: 49 },
             { string: 'E', fret: 5,  note: 'A',  midi: 45 },
             { string: 'E', fret: 4,  note: 'G#', midi: 44 },
-            { string: 'E', fret: 2,  note: 'F#', midi: 42 }
+            { string: 'E', fret: 2,  note: 'F#', midi: 42, beats: 2 }
           ]
         },
       },
@@ -389,12 +389,12 @@ window.CLASS_ACTIVITIES = [
           caption: 'Phrase D · low E string only',
           caption_es: 'Frase D · solo la cuerda Mi grave',
           notes: [
-            { string: 'E', fret: 10, note: 'D',  midi: 50 },
-            { string: 'E', fret: 10, note: 'D',  midi: 50 },
+            { string: 'E', fret: 10, note: 'D',  midi: 50, beats: 0.5 },
+            { string: 'E', fret: 10, note: 'D',  midi: 50, beats: 0.5 },
             { string: 'E', fret: 9,  note: 'C#', midi: 49 },
             { string: 'E', fret: 5,  note: 'A',  midi: 45 },
             { string: 'E', fret: 7,  note: 'B',  midi: 47 },
-            { string: 'E', fret: 5,  note: 'A',  midi: 45 }
+            { string: 'E', fret: 5,  note: 'A',  midi: 45, beats: 2 }
           ]
         },
       },
@@ -411,49 +411,49 @@ window.CLASS_ACTIVITIES = [
               label: 'Phrase A — "Hap-py birth-day to you"',
               label_es: 'Frase A — "Hap-py birth-day to you"',
               notes: [
-                { string: 'E', fret: 0, note: 'E',  midi: 40 },
-                { string: 'E', fret: 0, note: 'E',  midi: 40 },
+                { string: 'E', fret: 0, note: 'E',  midi: 40, beats: 0.5 },
+                { string: 'E', fret: 0, note: 'E',  midi: 40, beats: 0.5 },
                 { string: 'E', fret: 2, note: 'F#', midi: 42 },
                 { string: 'E', fret: 0, note: 'E',  midi: 40 },
                 { string: 'E', fret: 5, note: 'A',  midi: 45 },
-                { string: 'E', fret: 4, note: 'G#', midi: 44 }
+                { string: 'E', fret: 4, note: 'G#', midi: 44, beats: 2 }
               ]
             },
             {
               label: 'Phrase B — "Hap-py birth-day to you" (the ending climbs higher)',
               label_es: 'Frase B — "Hap-py birth-day to you" (el final sube más alto)',
               notes: [
-                { string: 'E', fret: 0, note: 'E',  midi: 40 },
-                { string: 'E', fret: 0, note: 'E',  midi: 40 },
+                { string: 'E', fret: 0, note: 'E',  midi: 40, beats: 0.5 },
+                { string: 'E', fret: 0, note: 'E',  midi: 40, beats: 0.5 },
                 { string: 'E', fret: 2, note: 'F#', midi: 42 },
                 { string: 'E', fret: 0, note: 'E',  midi: 40 },
                 { string: 'E', fret: 7, note: 'B',  midi: 47 },
-                { string: 'E', fret: 5, note: 'A',  midi: 45 }
+                { string: 'E', fret: 5, note: 'A',  midi: 45, beats: 2 }
               ]
             },
             {
               label: 'Phrase C — "Hap-py birth-day dear ______"',
               label_es: 'Frase C — "Hap-py birth-day dear ______"',
               notes: [
-                { string: 'E', fret: 0,  note: 'E',  midi: 40 },
-                { string: 'E', fret: 0,  note: 'E',  midi: 40 },
+                { string: 'E', fret: 0,  note: 'E',  midi: 40, beats: 0.5 },
+                { string: 'E', fret: 0,  note: 'E',  midi: 40, beats: 0.5 },
                 { string: 'E', fret: 12, note: 'E',  midi: 52 },
                 { string: 'E', fret: 9,  note: 'C#', midi: 49 },
                 { string: 'E', fret: 5,  note: 'A',  midi: 45 },
                 { string: 'E', fret: 4,  note: 'G#', midi: 44 },
-                { string: 'E', fret: 2,  note: 'F#', midi: 42 }
+                { string: 'E', fret: 2,  note: 'F#', midi: 42, beats: 2 }
               ]
             },
             {
               label: 'Phrase D — "Hap-py birth-day to you"',
               label_es: 'Frase D — "Hap-py birth-day to you"',
               notes: [
-                { string: 'E', fret: 10, note: 'D',  midi: 50 },
-                { string: 'E', fret: 10, note: 'D',  midi: 50 },
+                { string: 'E', fret: 10, note: 'D',  midi: 50, beats: 0.5 },
+                { string: 'E', fret: 10, note: 'D',  midi: 50, beats: 0.5 },
                 { string: 'E', fret: 9,  note: 'C#', midi: 49 },
                 { string: 'E', fret: 5,  note: 'A',  midi: 45 },
                 { string: 'E', fret: 7,  note: 'B',  midi: 47 },
-                { string: 'E', fret: 5,  note: 'A',  midi: 45 }
+                { string: 'E', fret: 5,  note: 'A',  midi: 45, beats: 2 }
               ]
             }
           ]
@@ -1067,8 +1067,8 @@ window.CLASS_ACTIVITIES = [
           caption: '"Hap-py birth-day" — the first four notes',
           caption_es: '"Hap-py birth-day" — las primeras cuatro notas',
           notes: [
-            { string: 'E', fret: 0, note: 'E',  midi: 40 },
-            { string: 'E', fret: 0, note: 'E',  midi: 40 },
+            { string: 'E', fret: 0, note: 'E',  midi: 40, beats: 0.5 },
+            { string: 'E', fret: 0, note: 'E',  midi: 40, beats: 0.5 },
             { string: 'E', fret: 2, note: 'F#', midi: 42 },
             { string: 'E', fret: 0, note: 'E',  midi: 40 }
           ]
@@ -1077,8 +1077,8 @@ window.CLASS_ACTIVITIES = [
       {
         label:    'The first line',
         label_es: 'La primera línea',
-        text: 'Put the first line together.<ul><li>Play the four notes you know — "Hap-py birth-day"</li><li>Add two for "to you": fret 5, then fret 4 right next door</li><li>Six notes — that\'s the first line of the song</li></ul>You\'ve got it when: three clean runs without stopping, saying the words as you play.',
-        text_es: 'Arma la primera línea.<ul><li>Toca las cuatro notas que ya sabes — "Hap-py birth-day"</li><li>Agrega dos para "to you": traste 5 y luego traste 4, justo al lado</li><li>Seis notas — esa es la primera línea de la canción</li></ul>Lo tienes cuando: tres pasadas limpias sin detenerte, diciendo las palabras mientras tocas.',
+        text: 'Put the first line together.<ul><li>Play the four notes you know — "Hap-py birth-day"</li><li>Add two for "to you": fret 5, then fret 4 right next door</li><li>Six notes — that\'s the first line of the song</li><li>The notes are not all the same length. "Hap-py" is quick — both notes inside one click. "Birth", "day" and "to" get one click each. "You" is held for two.</li></ul>You\'ve got it when: three clean runs without stopping, saying the words as you play, with "you" held the full two clicks.',
+        text_es: 'Arma la primera línea.<ul><li>Toca las cuatro notas que ya sabes — "Hap-py birth-day"</li><li>Agrega dos para "to you": traste 5 y luego traste 4, justo al lado</li><li>Seis notas — esa es la primera línea de la canción</li><li>Las notas no duran todas lo mismo. "Hap-py" es rápido — las dos notas caben en un clic. "Birth", "day" y "to" llevan un clic cada una. "You" se sostiene dos.</li></ul>Lo tienes cuando: tres pasadas limpias sin detenerte, diciendo las palabras mientras tocas, con "you" sostenido los dos clics completos.',
         tab: {
           caption: 'Phrase 1 · all on the low E string',
           caption_es: 'Frase 1 · todo en la cuerda Mi grave',
@@ -1087,12 +1087,12 @@ window.CLASS_ACTIVITIES = [
               label: '"Hap-py birth-day to you"',
               label_es: '"Hap-py birth-day to you"',
               notes: [
-                { string: 'E', fret: 0, note: 'E',  midi: 40 },
-                { string: 'E', fret: 0, note: 'E',  midi: 40 },
+                { string: 'E', fret: 0, note: 'E',  midi: 40, beats: 0.5 },
+                { string: 'E', fret: 0, note: 'E',  midi: 40, beats: 0.5 },
                 { string: 'E', fret: 2, note: 'F#', midi: 42 },
                 { string: 'E', fret: 0, note: 'E',  midi: 40 },
                 { string: 'E', fret: 5, note: 'A',  midi: 45 },
-                { string: 'E', fret: 4, note: 'G#', midi: 44 }
+                { string: 'E', fret: 4, note: 'G#', midi: 44, beats: 2 }
               ]
             }
           ]
@@ -1407,25 +1407,25 @@ window.CLASS_ACTIVITIES = [
               label: 'Phrase C — "Hap-py birth-day dear ______"',
               label_es: 'Frase C — "Hap-py birth-day dear ______"',
               notes: [
-                { string: 'E', fret: 0, note: 'E',  midi: 40 },
-                { string: 'E', fret: 0, note: 'E',  midi: 40 },
+                { string: 'E', fret: 0, note: 'E',  midi: 40, beats: 0.5 },
+                { string: 'E', fret: 0, note: 'E',  midi: 40, beats: 0.5 },
                 { string: 'A', fret: 7, note: 'E',  midi: 52 },
                 { string: 'A', fret: 4, note: 'C#', midi: 49 },
                 { string: 'A', fret: 0, note: 'A',  midi: 45 },
                 { string: 'E', fret: 4, note: 'G#', midi: 44 },
-                { string: 'E', fret: 2, note: 'F#', midi: 42 }
+                { string: 'E', fret: 2, note: 'F#', midi: 42, beats: 2 }
               ]
             },
             {
               label: 'Phrase D — "Hap-py birth-day to you"',
               label_es: 'Frase D — "Hap-py birth-day to you"',
               notes: [
-                { string: 'A', fret: 5, note: 'D',  midi: 50 },
-                { string: 'A', fret: 5, note: 'D',  midi: 50 },
+                { string: 'A', fret: 5, note: 'D',  midi: 50, beats: 0.5 },
+                { string: 'A', fret: 5, note: 'D',  midi: 50, beats: 0.5 },
                 { string: 'A', fret: 4, note: 'C#', midi: 49 },
                 { string: 'A', fret: 0, note: 'A',  midi: 45 },
                 { string: 'A', fret: 2, note: 'B',  midi: 47 },
-                { string: 'A', fret: 0, note: 'A',  midi: 45 }
+                { string: 'A', fret: 0, note: 'A',  midi: 45, beats: 2 }
               ]
             }
           ]
@@ -1444,49 +1444,49 @@ window.CLASS_ACTIVITIES = [
               label: 'Phrase A — "Hap-py birth-day to you"',
               label_es: 'Frase A — "Hap-py birth-day to you"',
               notes: [
-                { string: 'E', fret: 0, note: 'E',  midi: 40 },
-                { string: 'E', fret: 0, note: 'E',  midi: 40 },
+                { string: 'E', fret: 0, note: 'E',  midi: 40, beats: 0.5 },
+                { string: 'E', fret: 0, note: 'E',  midi: 40, beats: 0.5 },
                 { string: 'E', fret: 2, note: 'F#', midi: 42 },
                 { string: 'E', fret: 0, note: 'E',  midi: 40 },
                 { string: 'E', fret: 5, note: 'A',  midi: 45 },
-                { string: 'E', fret: 4, note: 'G#', midi: 44 }
+                { string: 'E', fret: 4, note: 'G#', midi: 44, beats: 2 }
               ]
             },
             {
               label: 'Phrase B — "Hap-py birth-day to you" (the ending climbs higher)',
               label_es: 'Frase B — "Hap-py birth-day to you" (el final sube más alto)',
               notes: [
-                { string: 'E', fret: 0, note: 'E',  midi: 40 },
-                { string: 'E', fret: 0, note: 'E',  midi: 40 },
+                { string: 'E', fret: 0, note: 'E',  midi: 40, beats: 0.5 },
+                { string: 'E', fret: 0, note: 'E',  midi: 40, beats: 0.5 },
                 { string: 'E', fret: 2, note: 'F#', midi: 42 },
                 { string: 'E', fret: 0, note: 'E',  midi: 40 },
                 { string: 'E', fret: 7, note: 'B',  midi: 47 },
-                { string: 'E', fret: 5, note: 'A',  midi: 45 }
+                { string: 'E', fret: 5, note: 'A',  midi: 45, beats: 2 }
               ]
             },
             {
               label: 'Phrase C — "Hap-py birth-day dear ______"',
               label_es: 'Frase C — "Hap-py birth-day dear ______"',
               notes: [
-                { string: 'E', fret: 0, note: 'E',  midi: 40 },
-                { string: 'E', fret: 0, note: 'E',  midi: 40 },
+                { string: 'E', fret: 0, note: 'E',  midi: 40, beats: 0.5 },
+                { string: 'E', fret: 0, note: 'E',  midi: 40, beats: 0.5 },
                 { string: 'A', fret: 7, note: 'E',  midi: 52 },
                 { string: 'A', fret: 4, note: 'C#', midi: 49 },
                 { string: 'A', fret: 0, note: 'A',  midi: 45 },
                 { string: 'E', fret: 4, note: 'G#', midi: 44 },
-                { string: 'E', fret: 2, note: 'F#', midi: 42 }
+                { string: 'E', fret: 2, note: 'F#', midi: 42, beats: 2 }
               ]
             },
             {
               label: 'Phrase D — "Hap-py birth-day to you"',
               label_es: 'Frase D — "Hap-py birth-day to you"',
               notes: [
-                { string: 'A', fret: 5, note: 'D',  midi: 50 },
-                { string: 'A', fret: 5, note: 'D',  midi: 50 },
+                { string: 'A', fret: 5, note: 'D',  midi: 50, beats: 0.5 },
+                { string: 'A', fret: 5, note: 'D',  midi: 50, beats: 0.5 },
                 { string: 'A', fret: 4, note: 'C#', midi: 49 },
                 { string: 'A', fret: 0, note: 'A',  midi: 45 },
                 { string: 'A', fret: 2, note: 'B',  midi: 47 },
-                { string: 'A', fret: 0, note: 'A',  midi: 45 }
+                { string: 'A', fret: 0, note: 'A',  midi: 45, beats: 2 }
               ]
             }
           ]
@@ -1544,49 +1544,49 @@ window.CLASS_ACTIVITIES = [
               label: 'Phrase A — "Hap-py birth-day to you"',
               label_es: 'Frase A — "Hap-py birth-day to you"',
               notes: [
-                { string: 'E', fret: 0, note: 'E',  midi: 40 },
-                { string: 'E', fret: 0, note: 'E',  midi: 40 },
+                { string: 'E', fret: 0, note: 'E',  midi: 40, beats: 0.5 },
+                { string: 'E', fret: 0, note: 'E',  midi: 40, beats: 0.5 },
                 { string: 'E', fret: 2, note: 'F#', midi: 42 },
                 { string: 'E', fret: 0, note: 'E',  midi: 40 },
                 { string: 'E', fret: 5, note: 'A',  midi: 45 },
-                { string: 'E', fret: 4, note: 'G#', midi: 44 }
+                { string: 'E', fret: 4, note: 'G#', midi: 44, beats: 2 }
               ]
             },
             {
               label: 'Phrase B — "Hap-py birth-day to you" (the ending climbs higher)',
               label_es: 'Frase B — "Hap-py birth-day to you" (el final sube más alto)',
               notes: [
-                { string: 'E', fret: 0, note: 'E',  midi: 40 },
-                { string: 'E', fret: 0, note: 'E',  midi: 40 },
+                { string: 'E', fret: 0, note: 'E',  midi: 40, beats: 0.5 },
+                { string: 'E', fret: 0, note: 'E',  midi: 40, beats: 0.5 },
                 { string: 'E', fret: 2, note: 'F#', midi: 42 },
                 { string: 'E', fret: 0, note: 'E',  midi: 40 },
                 { string: 'E', fret: 7, note: 'B',  midi: 47 },
-                { string: 'E', fret: 5, note: 'A',  midi: 45 }
+                { string: 'E', fret: 5, note: 'A',  midi: 45, beats: 2 }
               ]
             },
             {
               label: 'Phrase C — "Hap-py birth-day dear ______"',
               label_es: 'Frase C — "Hap-py birth-day dear ______"',
               notes: [
-                { string: 'E', fret: 0,  note: 'E',  midi: 40 },
-                { string: 'E', fret: 0,  note: 'E',  midi: 40 },
+                { string: 'E', fret: 0,  note: 'E',  midi: 40, beats: 0.5 },
+                { string: 'E', fret: 0,  note: 'E',  midi: 40, beats: 0.5 },
                 { string: 'E', fret: 12, note: 'E',  midi: 52 },
                 { string: 'E', fret: 9,  note: 'C#', midi: 49 },
                 { string: 'E', fret: 5,  note: 'A',  midi: 45 },
                 { string: 'E', fret: 4,  note: 'G#', midi: 44 },
-                { string: 'E', fret: 2,  note: 'F#', midi: 42 }
+                { string: 'E', fret: 2,  note: 'F#', midi: 42, beats: 2 }
               ]
             },
             {
               label: 'Phrase D — "Hap-py birth-day to you"',
               label_es: 'Frase D — "Hap-py birth-day to you"',
               notes: [
-                { string: 'E', fret: 10, note: 'D',  midi: 50 },
-                { string: 'E', fret: 10, note: 'D',  midi: 50 },
+                { string: 'E', fret: 10, note: 'D',  midi: 50, beats: 0.5 },
+                { string: 'E', fret: 10, note: 'D',  midi: 50, beats: 0.5 },
                 { string: 'E', fret: 9,  note: 'C#', midi: 49 },
                 { string: 'E', fret: 5,  note: 'A',  midi: 45 },
                 { string: 'E', fret: 7,  note: 'B',  midi: 47 },
-                { string: 'E', fret: 5,  note: 'A',  midi: 45 }
+                { string: 'E', fret: 5,  note: 'A',  midi: 45, beats: 2 }
               ]
             }
           ]
@@ -1601,8 +1601,8 @@ window.CLASS_ACTIVITIES = [
       {
         label:    'Keep going',
         label_es: 'Sigue',
-        text: 'There is no set stopping point here. Pick one and keep working:<ul><li>Happy Birthday at 60 BPM, one note per beat. Every clean pass, add 10</li><li>An activity you never finished</li><li>The next section of your module</li><li>Teach the note names to someone at your table and quiz them</li></ul>You\'ve got it when: you\'ve cleared a pass at a faster BPM than you started — then keep climbing.',
-        text_es: 'Aquí no hay un punto de parada fijo. Escoge uno y sigue trabajando:<ul><li>Happy Birthday a 60 BPM, una nota por tiempo. Cada pasada limpia, súbele 10</li><li>Una actividad que nunca terminaste</li><li>La sección que sigue de tu módulo</li><li>Enséñale los nombres de las notas a alguien de tu mesa y ponle una prueba</li></ul>Lo tienes cuando: completaste una pasada a un BPM más alto que al empezar — y de ahí, sigue subiendo.',
+        text: 'There is no set stopping point here. Pick one and keep working:<ul><li>Happy Birthday at 60 BPM — "Hap-py" inside one click, the last note of each line held for two. Every clean pass, add 10</li><li>An activity you never finished</li><li>The next section of your module</li><li>Teach the note names to someone at your table and quiz them</li></ul>You\'ve got it when: you\'ve cleared a pass at a faster BPM than you started — then keep climbing.',
+        text_es: 'Aquí no hay un punto de parada fijo. Escoge uno y sigue trabajando:<ul><li>Happy Birthday a 60 BPM — "Hap-py" dentro de un clic, y la última nota de cada línea sostenida dos. Cada pasada limpia, súbele 10</li><li>Una actividad que nunca terminaste</li><li>La sección que sigue de tu módulo</li><li>Enséñale los nombres de las notas a alguien de tu mesa y ponle una prueba</li></ul>Lo tienes cuando: completaste una pasada a un BPM más alto que al empezar — y de ahí, sigue subiendo.',
       },
     ],
   },

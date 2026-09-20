@@ -287,9 +287,9 @@ SETS.push(
             ] }
           },
           {
-            label: 'Challenge — One Chord Per Beat (fastest)', label_es: 'Reto — Un acorde por tiempo (el más rápido)',
-            text: '<ul><li>Switch Em ↔ Am on every single beat — one down-strum per beat, a new chord each time, at 60 BPM, the strum still non-stop — the top of the ladder.</li></ul>You\'ve got it when: four laps clean at 60 where the change happens the instant your hand lifts for the next strum.',
-            text_es: '<ul><li>Cambia entre Em ↔ Am en cada tiempo — un golpe hacia abajo por tiempo, un acorde nuevo cada vez, a 60 BPM, el rasgueo sigue sin detenerse — la cima de la escalera.</li></ul>Lo tienes cuando: cuatro vueltas limpias a 60 donde el cambio ocurre en el instante en que tu mano se levanta para el siguiente rasgueo.',
+            label: 'Bonus — One Chord Per Beat (fastest)', label_es: 'Bono — Un acorde por tiempo (el más rápido)',
+            text: 'This one is a bonus. The set is complete without it — you climbed this same ladder in Module 5.<ul><li>Switch Em ↔ Am on every single beat — one down-strum per beat, a new chord each time, at 60 BPM, the strum still non-stop — the top of the ladder.</li></ul>You\'ve got it when: four laps clean at 60 where the change happens the instant your hand lifts for the next strum.',
+            text_es: 'Esto es un bono. La unidad está completa sin él — ya subiste esta misma escalera en el Módulo 5.<ul><li>Cambia entre Em ↔ Am en cada tiempo — un golpe hacia abajo por tiempo, un acorde nuevo cada vez, a 60 BPM, el rasgueo sigue sin detenerse — la cima de la escalera.</li></ul>Lo tienes cuando: cuatro vueltas limpias a 60 donde el cambio ocurre en el instante en que tu mano se levanta para el siguiente rasgueo.',
             hint: 'Em and Am share two fingers, so this is the easiest pair to change every beat — perfect for training raw speed. Trust the shared fingers and move only what has to move.',
             hint_es: 'Em y Am comparten dos dedos, así que es el par más fácil para cambiar en cada tiempo — perfecto para entrenar velocidad pura. Confía en los dedos compartidos y mueve solo lo que tiene que moverse.',
             stuck: 'Slow to 50 BPM and let some changes be a little buzzy — here the goal is the timing of the switch, not perfect tone. Clean it up as the speed settles.',
@@ -540,6 +540,28 @@ SETS.push(
             title: 'Learn the D-DU-UDU pattern',
             title_es: 'Aprende el patrón D-DU-UDU',
             steps: [
+          /* Two stepping stones between straight eighths and the full
+             pattern (2026-09-20). Inserted, not appended: nobody has
+             reached Module 3, so Modules 3-6 may gain a step inside a
+             section. Deliberately NOT numbered "Challenge N" — the set's
+             numbered run stays 1-3, and m6w2's take-to-song hint points
+             at "Challenge 3" by name. */
+          {
+            label: 'Stepping stone 1 — one gap', label_es: 'Escalón 1 — un hueco',
+            text: 'Straight eighths, with ONE strum left out — the up after beat 1. Your hand still swings up there; the pick just misses.<ol><li>Mute the strings and play it at 60 BPM, counting aloud.</li><li>Four bars without the hand stopping.</li></ol><div class="strum-line">D   &middot;   D   U   D   &middot;   D   U\n<span class="su-count">1   +   2   +   3   +   4   +</span></div>You\'ve got it when: four bars where the only sound missing is that one up, and your hand never pauses.',
+            text_es: 'Corcheas derechas, con UN rasgueo de menos — el de arriba después del tiempo 1. Tu mano sigue subiendo ahí; la púa solo falla.<ol><li>Silencia las cuerdas y tócalo a 60 BPM, contando en voz alta.</li><li>Cuatro compases sin que la mano se detenga.</li></ol><div class="strum-line">D   &middot;   D   U   D   &middot;   D   U\n<span class="su-count">1   +   2   +   3   +   4   +</span></div>Lo tienes cuando: cuatro compases donde lo único que falta es ese golpe hacia arriba, y tu mano nunca se detiene.',
+            hint: 'Count "1 and 2 and 3 and 4 and" out loud and simply do not hit on the first "and". Everything else is unchanged.',
+            hint_es: 'Cuenta "1 y 2 y 3 y 4 y" en voz alta y simplemente no toques en el primer "y". Todo lo demás queda igual.',
+            skills: [1, 2]
+          },
+          {
+            label: 'Stepping stone 2 — the hard gap', label_es: 'Escalón 2 — el hueco difícil',
+            text: 'Leave out the DOWN on beat 3 as well. Skipping a down is harder than skipping an up, because your hand is travelling toward the strings when it happens.<ol><li>Mute the strings and play it at 60 BPM.</li><li>Four bars, hand still swinging through both gaps.</li></ol><div class="strum-line">D   &middot;   D   U   &middot;   U   D   &middot;\n<span class="su-count">1   +   2   +   3   +   4   +</span></div>You\'ve got it when: four bars with both gaps silent and the swing unbroken.',
+            text_es: 'Deja fuera también el golpe hacia ABAJO del tiempo 3. Saltarse uno hacia abajo es más difícil que uno hacia arriba, porque tu mano va viajando hacia las cuerdas cuando pasa.<ol><li>Silencia las cuerdas y tócalo a 60 BPM.</li><li>Cuatro compases, con la mano todavía balanceándose en los dos huecos.</li></ol><div class="strum-line">D   &middot;   D   U   &middot;   U   D   &middot;\n<span class="su-count">1   +   2   +   3   +   4   +</span></div>Lo tienes cuando: cuatro compases con los dos huecos en silencio y el balanceo sin romperse.',
+            hint: 'This is the full pattern with its last strum removed. Add that last up back and you have D-DU-UDU.',
+            hint_es: 'Este es el patrón completo sin su último rasgueo. Vuelve a agregar ese último golpe hacia arriba y ya tienes D-DU-UDU.',
+            skills: [1, 2]
+          },
           {
             label: 'Challenge 1 — D-DU-UDU, Muted Strings', label_es: 'Reto 1 — D-DU-UDU con cuerdas silenciadas',
             text: '<ol><li>Mute the strings.</li><li>At 60 BPM, strum the pattern "Down, Down-Up, Up-Down-Up" (D-DU-UDU).</li></ol>You\'ve got it when: the wrist keeps moving on the skipped downstroke — the pick just misses on purpose.<div class="strum-line">D   ·   D   U   ·   U   D   U\n<span class="su-count">1   +   2   +   3   +   4   +</span></div>',

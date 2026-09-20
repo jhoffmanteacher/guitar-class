@@ -579,6 +579,23 @@ SETS.push(
             levelUp: 'Do the same on frets 1, 2 and 5 one at a time, every note clean — then try it without looking at your hand.',
             levelUp_es: 'Haz lo mismo en los trastes 1, 2 y 5 uno por uno, cada nota limpia — y luego inténtalo sin mirarte la mano.',
             playSeq: { label: 'Hear the target note (low E, fret 3)', label_es: 'Escucha la nota objetivo (Mi grave, traste 3)', bpm: 60, notes: [43] }
+          },
+          /* APPENDED as the last step of this section (2026-09-20). Module 1
+             is a module students are already in, so a step may only be added
+             at the TAIL — never inserted — or every later progress key in the
+             section moves. Tagged to the skills that already exist (w2-s3 the
+             pick, w2-s6 clean steady notes); no new skill. */
+          {
+            label: 'Challenge 3 — The Picking Hand', label_es: 'Reto 3 — La mano de la púa',
+            text: 'Your fretting hand has been doing all the work. Now look at the other one.<ol><li>Rest the heel of your picking hand lightly on the bridge — the metal piece where the strings end at the body. That is its home.</li><li>Move the pick with your wrist, not your whole arm. Small downstrokes, about the width of the string.</li><li>Pick just past the string and stop. Travelling further is what makes you hit the neighbour by accident.</li><li>To stop a string that is still ringing, touch it with the side of your picking hand.</li></ol>You\'ve got it when: eight even downstrokes on one string with no neighbouring string sounding, three times in a row.',
+            text_es: 'Tu mano de trastear ha hecho todo el trabajo. Ahora mira la otra.<ol><li>Apoya la base de tu mano de la púa ligeramente sobre el puente — la pieza de metal donde las cuerdas terminan en el cuerpo. Ese es su lugar.</li><li>Mueve la púa con la muñeca, no con todo el brazo. Golpes hacia abajo pequeños, más o menos del ancho de la cuerda.</li><li>Pasa la púa apenas más allá de la cuerda y detente. Ir más lejos es lo que hace que le pegues a la vecina sin querer.</li><li>Para callar una cuerda que sigue sonando, tócala con el canto de tu mano de la púa.</li></ol>Lo tienes cuando: ocho golpes hacia abajo parejos en una sola cuerda sin que suene ninguna cuerda vecina, tres veces seguidas.',
+            hint: 'Watch the pick, not your fretting hand. If you hear two strings, you went too far past the first one.',
+            hint_es: 'Mira la púa, no tu mano de trastear. Si escuchas dos cuerdas, te pasaste de largo de la primera.',
+            stuck: 'Do it on the low E string alone, as slowly as you like, until eight in a row are even. Speed is not the point yet.',
+            stuck_es: 'Hazlo solo en la cuerda Mi grave, tan despacio como quieras, hasta que ocho seguidos salgan parejos. La velocidad todavía no importa.',
+            levelUp: 'Eight even downstrokes on each of the six strings in turn, without stopping between them.',
+            levelUp_es: 'Ocho golpes hacia abajo parejos en cada una de las seis cuerdas por turno, sin parar entre ellas.',
+            skills: [3, 6]
           }
             ]
           }
