@@ -30,6 +30,10 @@ see `WORKFLOW.md` and the git commit log.
   Part 2 is complete without it.
 - **The Start → button on the Start here card gets out of the way** once you
   open the card. It comes back, reading **Keep going →**, when you close it.
+- **An older activity at the top of the page says so.** When you've finished
+  this week's work but something from a while back is still undone, that card
+  rises to the top — it now reads **Not finished** with its date beside it
+  ("From Wed, 8/26") and a quieter stripe, instead of **Start here**.
 
 ## 2026-09-19 — A "Start here" card, smaller bites, and the nav where you can reach it
 

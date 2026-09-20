@@ -8895,8 +8895,36 @@ function caHeroThumbHtml(a){
   // just be announced twice.
   return `<span class="ca-hero-thumb"><img src="${escAttr(step.figure)}" alt="" width="640" height="244" loading="lazy"></span>`;
 }
-function caHeroCardHtml(a){
-  if(a.kind === 'check') return caHeroCheckHtml(a);
+/* ── The hero's tag line, and the date that rides with it ────────────
+   The hero is the newest PENDING card, which is not always the newest card
+   there is: finish this week's work and leave one August activity undone
+   and that August card rises to the top, tagged "Start here", reading like
+   today's job (2026-09-20). So the hero is CURRENT only when it is also the
+   newest visible activity overall — the first card of the newest-first list,
+   done or not — and OLDER otherwise.
+
+   CURRENT is exactly what shipped: the small date chip on its own row, then
+   the tag. OLDER says "Not finished" instead, and pulls the date up ONTO the
+   tag's row at full weight ("From Wed, 8/26"), because on that card the date
+   is the point. No date set → nothing is shown; there is no honest date to
+   invent. The date text itself carries no data-i18n, same as the .ca-chip it
+   replaces: it is built by caFormatDate() in the current language and a
+   language switch re-renders this whole page anyway (gc-langchange). */
+function caStartHereTagHtml(a, isCurrent){
+  const isCheck = a.kind === 'check';
+  const tagKey = isCheck
+    ? (isCurrent ? 'check.prefix' : 'ca.checkNotFinished')
+    : (isCurrent ? (document.body.classList.contains('ca-gated') ? 'ca.startHereToday' : 'ca.startHere')
+                 : 'ca.notFinished');
+  const tag = `<span class="ca-start-tag${isCheck ? ' ca-start-tag--check' : ''}" data-i18n="${tagKey}">${escHtml(t(tagKey))}</span>`;
+  const dateLabel = caFormatDate(caDate(a));
+  if(isCurrent) return (dateLabel ? `<span class="ca-chip">${escHtml(dateLabel)}</span>` : '') + tag;
+  return `<span class="ca-hero-tagrow">${tag}`
+    + (dateLabel ? `<span class="ca-hero-from">${escHtml(t('ca.heroFromDate', {date: dateLabel}))}</span>` : '')
+    + `</span>`;
+}
+function caHeroCardHtml(a, isCurrent = true){
+  if(a.kind === 'check') return caHeroCheckHtml(a, isCurrent);
   const open = caOpenId === a.id;
   const done = classActivities[a.id] === true;
   const openStepIdx = caStepOpen[a.id] !== undefined ? caStepOpen[a.id] : caDefaultOpenStep(a);
@@ -8904,8 +8932,6 @@ function caHeroCardHtml(a){
   const markLabel = done ? t('ca.completed') : t('ca.markComplete');
   const num = caNumber(a);
   const titleHtml = (num ? `#${num} - ` : '') + escHtml(caTitle(a));
-  const dateLabel = caFormatDate(caDate(a));
-  const tagKey = document.body.classList.contains('ca-gated') ? 'ca.startHereToday' : 'ca.startHere';
   const blurb = caFirstSentence(tf(a, 'intro'));
   const doneAny = (a.steps || []).some((s, si) => caStepDone[`${a.id}:${si}`] === true);
   const ctaKey = doneAny ? 'ca.heroKeepGoing' : 'ca.heroStart';
@@ -8915,11 +8941,10 @@ function caHeroCardHtml(a){
      nothing left in the right-hand column, so the column goes too rather
      than holding a 210px hole open. */
   const thumbHtml = caHeroThumbHtml(a);
-  return `<details class="ca-card ca-card--hero" ${open ? 'open' : ''} data-id="${escAttr(a.id)}" ontoggle="caOnToggle(this)">
+  return `<details class="ca-card ca-card--hero${isCurrent ? '' : ' ca-card--hero-older'}" ${open ? 'open' : ''} data-id="${escAttr(a.id)}" ontoggle="caOnToggle(this)">
     <summary class="ca-card-summary ca-hero-summary">
       <div class="ca-hero-main">
-        ${dateLabel ? `<span class="ca-chip">${escHtml(dateLabel)}</span>` : ''}
-        <span class="ca-start-tag" data-i18n="${tagKey}">${escHtml(t(tagKey))}</span>
+        ${caStartHereTagHtml(a, isCurrent)}
         <div class="ca-hero-title">${titleHtml}</div>
         ${blurb ? `<p class="ca-hero-blurb">${escHtml(blurb)}</p>` : ''}
         ${caChunkMetaHtml(a)}
@@ -8940,15 +8965,13 @@ function caHeroCardHtml(a){
 // The check variant carries its own "Exit check" tag + blue band (item 2)
 // rather than caCheckCardHtml's "Exit check · Title" prefix — the pill
 // already says it, so the hero title is just the plain title.
-function caHeroCheckHtml(a){
+function caHeroCheckHtml(a, isCurrent = true){
   const open = caOpenId === a.id;
-  const dateLabel = caFormatDate(caDate(a));
   const blurb = caFirstSentence(tf(a, 'intro'));
-  return `<details class="ca-card ec-card ca-card--hero ca-card--hero-check" ${open ? 'open' : ''} data-id="${escAttr(a.id)}" ontoggle="caOnToggle(this)">
+  return `<details class="ca-card ec-card ca-card--hero ca-card--hero-check${isCurrent ? '' : ' ca-card--hero-older'}" ${open ? 'open' : ''} data-id="${escAttr(a.id)}" ontoggle="caOnToggle(this)">
     <summary class="ca-card-summary ca-hero-summary">
       <div class="ca-hero-main">
-        ${dateLabel ? `<span class="ca-chip">${escHtml(dateLabel)}</span>` : ''}
-        <span class="ca-start-tag ca-start-tag--check" data-i18n="check.prefix">${escHtml(t('check.prefix'))}</span>
+        ${caStartHereTagHtml(a, isCurrent)}
         <div class="ca-hero-title">${escHtml(caTitle(a))}</div>
         ${blurb ? `<p class="ca-hero-blurb">${escHtml(blurb)}</p>` : ''}
         ${caCheckMetaHtml(a)}
@@ -9837,7 +9860,12 @@ function renderClassActivities(){
       pendingHtml = finished.length ? caFreePlayHeroHtml() : '';
     } else {
       const heroCard = pendingGroups[0].cards[0];
-      const heroHtml = caHeroCardHtml(heroCard);
+      /* `list` is every visible card, newest first, done or not — so the
+         hero is today's work only when it is also the first of those. With
+         the newest few finished and an old one still undone, the hero is
+         that old card, and it says so rather than wearing "Start here". */
+      const heroIsCurrent = heroCard.id === list[0].id;
+      const heroHtml = caHeroCardHtml(heroCard, heroIsCurrent);
       // Everything else pending, minus the hero, wrapped in ONE "Still to
       // do" fold (2f) — module headings (plain, no progress bar; that's an
       // Earlier-only addition below) when anything has been placed in a

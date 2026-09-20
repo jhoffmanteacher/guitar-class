@@ -337,6 +337,13 @@
     // also the thing blocking the gate.
     'ca.startHere':            { en: 'Start here', es: 'Empieza aquí' },
     'ca.startHereToday':       { en: 'Start here · today', es: 'Empieza aquí · hoy' },
+    /* The same slot when the hero ISN'T today's work — the newest few are
+       finished and an older activity is still undone, so it rises to the
+       top (caStartHereTagHtml, 2026-09-20). It says what it is instead of
+       "Start here", and carries its date at full weight beside it. */
+    'ca.notFinished':          { en: 'Not finished', es: 'Sin terminar' },
+    'ca.checkNotFinished':     { en: 'Exit check · not finished', es: 'Boleto de salida · sin terminar' },
+    'ca.heroFromDate':         { en: 'From {date}', es: 'Del {date}' },
     // The Today hero's own call-to-action (caHeroCardHtml/caHeroCheckHtml)
     // — the arrow is appended in app.js, matching "Go to practice →".
     'ca.heroStart':            { en: 'Start', es: 'Empezar' },
