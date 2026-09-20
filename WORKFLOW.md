@@ -654,6 +654,41 @@
 
 ## Recently shipped (post-archive)
 
+- [x] **2026-09-20 — Left rail navigation cleanup (work order, pasted in
+      chat — no saved file).** Pushed `4f497cd`. Renamed "Practice"→"Modules"
+      and, rail-only, "In-Class Activities"→"In class" (new
+      `nav.classActivitiesNav` key; the fuller phrase stays everywhere else
+      it was already used). Added a divider + `.rail-panel` wrapper marking
+      the five nav rows off from the active item's own section panel below.
+      Moved Module review off its dashed `.wpill` under the set buttons onto
+      a plain `.rail-station.st-review` row at the end of "This set",
+      carrying the 🏆 module-complete trophy down with it (same id, same
+      `renderProgressStrip()` earned/celebrate handling — see CLAUDE.md's
+      new section for the full mechanics). Dropped the header's
+      "Independent Practice and Skills Tracker" subtitle everywhere
+      (Jonathan, mid-session: "this text isn't necessary… save space") and
+      resynced `--hdr` (70px→60px default; the short-screen 48px override
+      needed no change, since the subtitle was already hidden there).
+      **The work order's literal ask was single-column, full-width nav
+      rows** — shipped that first, then measured it against the exact
+      1366×657 Chromebook viewport the *previous day's* short-screen rail
+      work order was built around: 106-132px of rail overflow, for
+      essentially every module, not just the worst case (m5w2), because
+      losing the old two-column nav grid cost back the two 44px-floor rows
+      of height that work had bought. Reported the real numbers and named
+      the prior decision the change would reverse; Jonathan's call was to
+      keep the two-column grid, permanently and at every screen size (not
+      conditional on short height), with the short labels so nothing wraps,
+      uniform row sizing, an active state that changes background/color
+      only, and `#my-progress-btn` spanning both columns so five items
+      never strand one alone in column 1. Confirmed by direct child-rect
+      measurement (not `scrollHeight`/`clientHeight`, which read identical
+      whether content fits with room to spare or exactly at the wire) —
+      ~19px of rail slack at 1366×657 with Modules active on m5w2 for the
+      teacher/dev-bypass view (Preview-mode banner showing), ~66px for a
+      real student. `node tools/checks.mjs` (full, 180-link check
+      included) clean.
+
 - [x] **2026-08-04 — Cross-module gate: Set 1 locked until prior module +
       review done (work order, pasted in chat — no saved file).** Pushed
       `937ff9a`. Executed end to end, single session/commit. New
