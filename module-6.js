@@ -747,25 +747,25 @@ SETS.push(
             label: 'Watch: any-pattern exercise (JustinGuitar)', label_es: 'Mira: ejercicio de patrones (JustinGuitar)',
             text: 'Watch: <a href="https://youtu.be/CjM5fyXoV8w" target="_blank">Learn ANY Strumming Pattern with this Exercise – JustinGuitar</a> (0:00–4:00). Your task while you watch: pick ONE pattern he shows and tap it on your leg until you can keep it going without looking.',
             text_es: 'Mira: <a href="https://youtu.be/CjM5fyXoV8w" target="_blank">Learn ANY Strumming Pattern with this Exercise – JustinGuitar</a> (0:00–4:00). Tu tarea mientras miras: elige UN patrón de los que muestra y márcalo en tu pierna hasta que puedas mantenerlo sin mirar.',
-            hint: 'Notice how each pattern Justin demonstrates has a different feel — folk feels gentle, rock feels driving, reggae feels bouncy. The pattern is the GENRE in many cases.',
-            hint_es: 'Fíjate en cómo cada patrón que Justin demuestra tiene una sensación distinta — el folk se siente suave, el rock se siente impulsor, el reggae se siente rebotante. El patrón ES el género en muchos casos.',
+            hint: 'Watch his strumming hand, not the chord. Counting "1 and 2 and 3 and 4 and" gives eight possible strums in a bar, and his hand keeps swinging down-up through all eight even when it misses the strings. Tap it on your leg the same way.',
+            hint_es: 'Fíjate en su mano de rasgueo, no en el acorde. Contar "1 y 2 y 3 y 4 y" da ocho rasgueos posibles en un compás, y su mano sigue bajando y subiendo en los ocho aunque no toque las cuerdas. Márcalo en tu pierna de la misma forma.',
             skills: [1, 2, 3],
-            response: { type: 'mc', prompt: 'Which strum-pattern feature most defines REGGAE rhythm?',
-              prompt_es: '¿Qué característica del patrón de rasgueo define más al ritmo de REGGAE?',
-              answer: 1,
-              explain: 'Reggae lives on the offbeat — crisp upstrokes on the "+" of each beat while the downbeats stay empty. That offbeat chop — reggae players call it the "skank" — is what makes reggae sound like reggae.',
-              explain_es: 'El reggae vive en el contratiempo — golpes hacia arriba nítidos en el "+" de cada tiempo mientras los tiempos fuertes quedan vacíos. Ese "picoteo" en el contratiempo — los músicos de reggae lo llaman "skank" — es lo que hace que el reggae suene a reggae.',
+            response: { type: 'mc', prompt: 'You are playing a pattern that leaves out some of the eight possible strums in a bar. What does your strumming hand do on the ones you leave out?',
+              prompt_es: 'Estás tocando un patrón que deja fuera algunos de los ocho rasgueos posibles de un compás. ¿Qué hace tu mano de rasgueo en los que deja fuera?',
+              answer: 0,
+              explain: 'The hand never stops. It swings down on every number and up on every "and," straight through the bar — a pattern is simply which of those swings touch the strings. Stopping the hand between strums is the common mistake: the count falls apart and the next strum comes in late.',
+              explain_es: 'La mano nunca se detiene. Baja en cada número y sube en cada "y", durante todo el compás — un patrón es simplemente cuáles de esos movimientos tocan las cuerdas. Detener la mano entre rasgueos es el error común: la cuenta se desarma y el siguiente rasgueo entra tarde.',
               choices: [
-              'Loud downstrokes on beat 1',
-              'Upstrokes on the "+" (and) of each beat',
-              'Strumming only on beat 4',
-              'Fast, constant 16th-note strumming throughout'
+              'Keeps moving in time, but misses the strings',
+              'Stops, and starts moving again for the next strum',
+              'Moves twice as fast to catch up',
+              'Presses the strings without strumming'
             ],
               choices_es: [
-              'Golpes fuertes hacia abajo en el tiempo 1',
-              'Golpes hacia arriba en el "+" (y) de cada tiempo',
-              'Rasguear solo en el tiempo 4',
-              'Rasgueo rápido y constante de semicorcheas todo el tiempo'
+              'Sigue moviéndose a tiempo, pero no toca las cuerdas',
+              'Se detiene y vuelve a moverse para el siguiente rasgueo',
+              'Se mueve al doble de velocidad para alcanzar el ritmo',
+              'Presiona las cuerdas sin rasguear'
             ] }
           },
           {

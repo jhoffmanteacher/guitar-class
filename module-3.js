@@ -44,22 +44,22 @@ SETS.push(
               { name: 'A5', chord: [[6,5,'1'],[5,7,'3'],[4,'x'],[3,'x'],[2,'x'],[1,'x']], position: 5 }
             ],
             playSeq: { label: 'Hear the roots climb (E · G · A)', label_es: 'Escucha subir las raíces (E · G · A)', bpm: 60, notes: [40, 43, 45] },
-            response: { type: 'mc', prompt: 'E5, G5, and A5 are played with…',
-              prompt_es: 'E5, G5 y A5 se tocan con…',
-              answer: 1,
-              explain: 'A power chord is one movable shape — slide the same two-finger grip to a new fret and the root note (and the chord name) changes.',
-              explain_es: 'Un acorde de potencia es una sola forma movible — desliza el mismo agarre de dos dedos a un traste nuevo y la nota raíz (y el nombre del acorde) cambia.',
+            response: { type: 'mc', prompt: 'You can play E5: low E string open, A string fret 2. What changes to play G5?',
+              prompt_es: 'Puedes tocar E5: cuerda Mi grave al aire, cuerda La en el traste 2. ¿Qué cambia para tocar G5?',
+              answer: 0,
+              explain: 'A power chord is one movable shape. Slide the same two-finger grip up so the index finger sits on fret 3 of the low E string and you have G5 — the root note under the index finger is what names the chord. Move that same shape to fret 3 of the A string instead and you get C5, because fret 3 of the A string is a C.',
+              explain_es: 'Un acorde de potencia es una sola forma movible. Desliza el mismo agarre de dos dedos para que el índice quede en el traste 3 de la cuerda Mi grave y tienes G5 — la nota raíz bajo el índice es la que le da el nombre al acorde. Mueve esa misma forma al traste 3 de la cuerda La y obtienes C5, porque el traste 3 de la cuerda La es un C.',
               choices: [
-              'Three completely different shapes',
-              'The same shape moved to different frets',
-              'All your fingers on different strings',
-              'Only open strings'
+              'The same shape, starting at fret 3 on the low E string',
+              'The same shape, starting at fret 3 on the A string',
+              'A new shape that adds a third finger',
+              'The same frets, strummed harder'
             ],
               choices_es: [
-              'Tres formas completamente distintas',
-              'La misma forma movida a distintos trastes',
-              'Todos tus dedos en cuerdas diferentes',
-              'Solo cuerdas al aire'
+              'La misma forma, empezando en el traste 3 de la cuerda Mi grave',
+              'La misma forma, empezando en el traste 3 de la cuerda La',
+              'Una forma nueva que agrega un tercer dedo',
+              'Los mismos trastes, rasgueados más fuerte'
             ] }
           }
             ]
@@ -485,27 +485,27 @@ SETS.push(
             steps: [
           {
             label: 'Watch: using a metronome', label_es: 'Mira: usar el metrónomo',
-            text: 'Watch: <a href="https://youtu.be/sNa44EmrsDc" target="_blank">How & Why to Use a Metronome – JustinGuitar</a> (0:00–4:00). While you watch, set your own metronome and tap along with it. You\'ve got it when: you can name where to set the metronome for something new, and you\'ve tapped along at least once.',
-            text_es: 'Mira: <a href="https://youtu.be/sNa44EmrsDc" target="_blank">How & Why to Use a Metronome – JustinGuitar</a> (0:00–4:00). Mientras miras, pon tu propio metrónomo y sigue el ritmo con la mano. Lo tienes cuando: puedes decir dónde poner el metrónomo para algo nuevo, y ya lo seguiste al menos una vez.',
-            hint: 'His tip about setting the metronome 10 BPM slower than you think you need is key. As he explains it, set your own metronome and tap along. Slow is smooth, smooth is fast — practice slowly and cleanly, and speed comes on its own.',
-            hint_es: 'Su consejo de poner el metrónomo 10 BPM más lento de lo que crees que necesitas es clave. Mientras lo explica, pon tu propio metrónomo y sigue el ritmo con la mano. Despacio es suave, suave es rápido — practica despacio y limpio, y la velocidad llega sola.',
+            text: 'Watch: <a href="https://youtu.be/sNa44EmrsDc" target="_blank">How & Why to Use a Metronome – JustinGuitar</a> (0:00–4:00). While you watch, set your own metronome and tap along with it. You\'ve got it when: you can play one down strum on every click, right with the click, and you\'ve tapped along at least once.',
+            text_es: 'Mira: <a href="https://youtu.be/sNa44EmrsDc" target="_blank">How & Why to Use a Metronome – JustinGuitar</a> (0:00–4:00). Mientras miras, pon tu propio metrónomo y sigue el ritmo con la mano. Lo tienes cuando: puedes tocar un rasgueo hacia abajo en cada clic, justo con el clic, y ya lo seguiste al menos una vez.',
+            hint: 'He sets his app to 80 BPM and does one thing with it: a single down strum on every click. Do that with him. Most beginners rush — aim to land right on the click, not a little before it. Slow and clean first, and speed comes on its own.',
+            hint_es: 'Él pone su aplicación en 80 BPM y hace una sola cosa con ella: un rasgueo hacia abajo en cada clic. Hazlo junto con él. La mayoría de los principiantes se apuran — busca caer justo en el clic, no un poco antes. Despacio y limpio primero, y la velocidad llega sola.',
             skills: [1, 2],
-            response: { type: 'mc', prompt: 'According to the video, where should you set the metronome when learning something new?',
-              prompt_es: 'Según el video, ¿dónde deberías poner el metrónomo cuando estás aprendiendo algo nuevo?',
+            response: { type: 'mc', prompt: 'According to the video, what is the first thing to practice with a metronome?',
+              prompt_es: 'Según el video, ¿qué es lo primero que hay que practicar con el metrónomo?',
               answer: 0,
-              explain: 'Start a touch slower than feels comfortable — clean and in time first, then speed up. Practicing fast and sloppy just makes the mistakes permanent.',
-              explain_es: 'Empieza un poco más despacio de lo que se siente cómodo — limpio y a tiempo primero, y luego acelera. Practicar rápido y descuidado solo hace permanentes los errores.',
+              explain: 'Justin starts as simply as it gets: one down strum on each click, sitting right on the beat — not a little early, not a little late. Most beginners rush. Chasing the fastest tempo you can reach, or playing a whole song at full speed, comes much later; the exercise here is landing with the click every time.',
+              explain_es: 'Justin empieza de la forma más simple posible: un rasgueo hacia abajo en cada clic, justo sobre el pulso — ni un poco antes, ni un poco después. La mayoría de los principiantes se apuran. Buscar el tempo más rápido que puedas alcanzar, o tocar una canción entera a toda velocidad, viene mucho después; el ejercicio aquí es caer con el clic cada vez.',
               choices: [
-              'About 10 BPM slower than you think you need',
-              'As fast as you can possibly play',
-              'It doesn\'t matter — pick any tempo',
-              'Always 120 BPM'
+              'One down strum on every click, right with it',
+              'A different strum pattern on every click',
+              'The fastest tempo you can reach without stopping',
+              'A full song at its real speed, all the way through'
             ],
               choices_es: [
-              'Unos 10 BPM más lento de lo que crees necesitar',
-              'Lo más rápido que puedas llegar a tocar',
-              'No importa — elige cualquier tempo',
-              'Siempre 120 BPM'
+              'Un rasgueo hacia abajo en cada clic, justo con él',
+              'Un patrón de rasgueo distinto en cada clic',
+              'El tempo más rápido que puedas alcanzar sin parar',
+              'Una canción completa a su velocidad real, de principio a fin'
             ] }
           },
           {

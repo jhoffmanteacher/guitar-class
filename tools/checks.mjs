@@ -244,6 +244,7 @@ function validateModules() {
   checkI18nCompleteness(manifest, allSets, reviewsByModule, moduleSongsByModule);
   validateNoteBeats(allSets);
   checkMcAnswerTells(allSets);
+  checkFrozenGradedMcs(allSets);
   checkPlaySeqStrings(allSets);
   checkTuningWarmupTag(allSets);
   checkSectionKindTitle(allSets);
@@ -524,6 +525,98 @@ function checkMcAnswerTells(allSets) {
       walk(sk && sk.practice, `set "${w.id}" · skill "${sk && sk.id}" · practice`));
   }
   if (bad === 0) ok(`no answer-length tells across ${total} MCs (checked in both languages)`);
+}
+
+/* ════════════════════════════════════════════════════════════════════
+   1ap. FROZEN GRADED MCs — a GRADED multiple-choice (a `response:
+   { type:'mc' }` on a lesson step) persists the chosen choice's TEXT,
+   not its index. Reword a choice after a student has picked it and
+   their stored answer matches nothing on the card any more: it renders
+   as "answered, nothing selected", and there is no way to tell from
+   the data that it was ever right.
+
+   So every graded MC in Modules 1..FROZEN_MC_THROUGH_MODULE is pinned
+   by a fingerprint of its `choices` + `choices_es` + `answer`. Change
+   one character and this check goes red with the reason, rather than
+   the damage showing up weeks later in a student's progress page.
+
+   The practice-panel MC on a skill is NOT covered here — it stores the
+   index, so its wording is free to change and its ORDER is what must
+   not. That one is a review-time rule, not a mechanical one.
+
+   ── RAISE THE CONSTANT AS THE CLASS ADVANCES ──
+   FROZEN_MC_THROUGH_MODULE is "the furthest module a student has
+   reached". Ask Jonathan which module the class is in and raise it —
+   then re-run with --check and paste the printed fingerprints in, in
+   the same commit. Lowering it is almost never right: a module the
+   class has already passed keeps its stored answers forever.
+
+   Modules 3–6 were reworded on 2026-09-19 (the quiz-giveaways work
+   order) precisely because nobody had reached them yet.
+   ════════════════════════════════════════════════════════════════════ */
+const FROZEN_MC_THROUGH_MODULE = 2;   // students are in Module 2 (Jonathan, 2026-09-19)
+const FROZEN_MC_FINGERPRINTS = {
+  'w1·b·sec0·step2': '668fc32b5e8cc516',
+  'w1·b·sec1·step0': '81a193a1701dd036',
+  'w1·b·sec2·step0': 'be803497cbcb926f',
+  'w2·b·sec0·step0': '07296b3215c43902',
+  'w2·b·sec0·step1': '4a352ae8bc9b434e',
+  'w2·b·sec0·step2': '6fec4f7b9d504ef1',
+  'w2·b·sec0·step3': '80edeb91da013eb5',
+  'w2·b·sec0·step4': 'aa2ba845ff4a35ac',
+  'w2·b·sec0·step5': '7618d4b79e83cf67',
+  'w2·b·sec1·step2': '68d619ef15c36c30',
+  'm2w1·b·sec0·step0': '0f4f02095d20caf3',
+  'm2w1·b·sec2·step0': '5ae4ee8377ad36f1',
+  'm2w1·c·sec1·step1': '8035342978401bd1',
+  'm2w1·c·sec2·step1': '81880d91285378b8',
+  'm2w2·b·sec0·step1': '2b8df432062bf537',
+  'm2w2·b·sec0·step2': '69a47fa1e26ece32',
+  'm2w2·b·sec1·step1': '1ab25779aa2ef868',
+  'm2w2·c·sec0·step3': '77eba66498d9971c',
+  'm2w2·c·sec1·step4': '4c1583f324c81209',
+};
+function gradedMcFingerprint(mc) {
+  return createHash('sha256')
+    .update(JSON.stringify({ choices: mc.choices, choices_es: mc.choices_es, answer: mc.answer }))
+    .digest('hex').slice(0, 16);
+}
+function checkFrozenGradedMcs(allSets) {
+  head(`1ap. Graded MC choices frozen through Module ${FROZEN_MC_THROUGH_MODULE}`);
+  let bad = 0;
+  const seen = {};
+  for (const w of allSets) {
+    if (!(Number(w.moduleNum) <= FROZEN_MC_THROUGH_MODULE)) continue;
+    for (const stId of Object.keys(w.stations || {})) {
+      const st = w.stations[stId];
+      const sections = st.sections || (st.steps ? [{ steps: st.steps }] : []);
+      sections.forEach((sec, si) => (sec.steps || []).forEach((step, i) => {
+        const r = step.response;
+        if (!r || r.type !== 'mc' || !Array.isArray(r.choices)) return;
+        // Keyed on WHERE the MC lives, never on what it says — the wording is
+        // the thing under guard, so it can't also be the identity.
+        const key = `${w.id}·${stId}·sec${si}·step${i}`;
+        const fp = gradedMcFingerprint(r);
+        seen[key] = fp;
+        const pinned = FROZEN_MC_FINGERPRINTS[key];
+        if (pinned === undefined) {
+          err(`${key} — "${step.label}": graded MC in Module ${w.moduleNum} is not pinned. Students may already have answered it; add its fingerprint to FROZEN_MC_FINGERPRINTS in checks.mjs.`);
+          problems++; bad++;
+        } else if (pinned !== fp) {
+          err(`${key} — "${step.label}": FROZEN graded MC changed (${pinned} → ${fp}). Students store their pick as the choice TEXT, so every answer already given to this card is orphaned — it renders as "answered, nothing selected". Reword only with an old→new map in the renderer, or wait until progress resets for the new school year.`);
+          problems++; bad++;
+        }
+      }));
+    }
+  }
+  for (const key of Object.keys(FROZEN_MC_FINGERPRINTS)) {
+    if (!(key in seen)) {
+      err(`${key}: pinned graded MC no longer exists — a frozen card was removed or moved, which orphans its stored answers too.`);
+      problems++; bad++;
+    }
+  }
+  if (bad === 0) ok(`${Object.keys(seen).length} graded MCs in Modules 1–${FROZEN_MC_THROUGH_MODULE} match their pinned choices`);
+  else console.log(`  ${C.dim}current fingerprints:\n${Object.entries(seen).map(([k, v]) => `    '${k}': '${v}',`).join('\n')}${C.reset}`);
 }
 
 /* ════════════════════════════════════════════════════════════════════

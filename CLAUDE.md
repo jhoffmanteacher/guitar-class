@@ -180,7 +180,8 @@ config/class write going through the stale-write guard (1ai), the activity
 board's per-module heading washes (1aj), backing-track snippet windows
 and both of their renderers (1ak), untranslated English prose inside a
 Journey tab-ascii block (1al), the `partOne`/`partBreak` pair on a set shown
-in two parts (1ao).
+in two parts (1ao), graded-MC choices frozen in the modules students have
+already reached (1ap).
 
 Not every class can be guarded by a banned-phrase list. 1w2 pins the Journey
 lick labels *positively* — every `Lick N — ...` card must use one of four
@@ -593,6 +594,37 @@ away. Write `answer: 0` freely — students never see it that way.
   renders as "answered, nothing selected". Reword before they get there, or
   map old→new in the renderer. The 2026-09-05 m8w1 reword was safe only
   because the live roster's furthest student was in Module 1.
+
+**That rule is now a ratchet — `FROZEN_MC_THROUGH_MODULE` in checks.mjs**
+(2026-09-19). Every graded MC in Modules 1..N is pinned by a fingerprint of
+its `choices` + `choices_es` + `answer`, and **1ap** fails the push when one
+of them changes by a single character — including a graded MC that goes
+missing. N is *the furthest module a student has reached*; it is **2** today
+(Jonathan, 2026-09-19). **Raise it as the class advances** — ask which module
+they're in, bump the constant, re-run and paste the printed fingerprints back
+in, same commit. Lowering it is almost never right: a module the class has
+passed keeps its stored answers forever. The practice-panel MC on a skill is
+deliberately NOT pinned — it stores the index, so its wording is free and its
+ORDER is the thing to hold.
+
+Modules 3–6's giveaway quiz items were **reworded on 2026-09-19** precisely
+because nobody had reached them: `m3w1` "One shape, three chords", `m3w2`
+"Watch: using a metronome", `m4w1` "Listen: major vs. minor moods", `m5w1`
+"Challenge — Mystery Chart", `m6w3` "Watch: any-pattern exercise", plus three
+practice MCs (`w1-s1`, `m5w4-s2`, `m5w4-s4`) whose order and keyed index were
+held. Two of those videos turned out not to teach what the card asked — the
+JustinGuitar metronome video never says "10 BPM slower than you think you
+need" (it teaches one down strum per click at 80 BPM), and the any-pattern
+video never mentions reggae in its 0:00–4:00 range — so those two questions
+were rewritten to match what the student actually watches. **Check the watch
+range before writing a question about a video**, not just the title.
+
+**Reword next summer, when progress resets for the new year.** These three
+graded Module 1 Set 2 cards are frozen mid-year only because students have
+already answered them; each has a throwaway distractor worth replacing:
+- "Which of these is NOT a part of the guitar?" → "Hinge"
+- "If a string's pitch is too LOW…" → "Take the string off and put it back on"
+- "The needle is to the RIGHT of center…" → "The tuner is broken — restart it"
 
 ## Live quiz — the whole-class game
 

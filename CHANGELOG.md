@@ -5,6 +5,18 @@ Notable changes to the Guitar Class site. Newest first.
 For the full session-by-session history (and the reasoning behind each change),
 see `WORKFLOW.md` and the git commit log.
 
+## 2026-09-19 — Quiz questions where every choice is worth thinking about
+
+### Changed
+
+- **Some quiz questions in Modules 3–6 were rewritten so no answer gives
+  itself away.** A few had a joke option you could cross out without knowing
+  anything, or named the answer inside the question. The questions now ask
+  what the card actually taught, and every wrong choice is something you
+  could genuinely believe. The two questions about videos were also rewritten
+  to match what those videos really show. Nothing you have already answered
+  was touched.
+
 ## 2026-09-19 — Module 5 Set 2 now comes in two parts
 
 ### Changed

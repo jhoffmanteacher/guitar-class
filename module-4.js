@@ -107,24 +107,24 @@ SETS.push(
             steps: [
           {
             label: 'Listen: major vs. minor moods', label_es: 'Escucha: ánimo mayor vs. menor',
-            text: 'Match the mood — scale choice changes the feel. Listen to two short solos:<ul><li><a href="https://www.youtube.com/watch?v=BycLmWI97Nc" target="_blank" data-ext="1">Clip 1 — "La Bamba"</a> (major pentatonic).</li><li><a href="https://www.youtube.com/watch?v=kpC69qIe02E" target="_blank" data-ext="1">Clip 2 — "The Thrill Is Gone"</a> (minor / blues).</li></ul>Notice how the major-pentatonic solo sounds brighter and happier, while the minor / blues solo sounds darker and moodier.',
-            text_es: 'Iguala el estado de ánimo — la elección de escala cambia la sensación. Escucha dos solos cortos:<ul><li><a href="https://www.youtube.com/watch?v=BycLmWI97Nc" target="_blank" data-ext="1">Clip 1 — "La Bamba"</a> (pentatónica mayor).</li><li><a href="https://www.youtube.com/watch?v=kpC69qIe02E" target="_blank" data-ext="1">Clip 2 — "The Thrill Is Gone"</a> (menor / blues).</li></ul>Fíjate en cómo el solo con pentatónica mayor suena más brillante y alegre, mientras que el solo menor / blues suena más oscuro y melancólico.',
-            hint: 'Major pentatonic = brighter, sunnier. Minor / blues = darker, sadder, more "bluesy." Same instrument — the scale choice sets the mood.',
-            hint_es: 'Pentatónica mayor = más brillante, más soleada. Menor / blues = más oscura, más triste, más "bluesera." Mismo instrumento — la escala elegida define el ánimo.',
+            text: 'Match the mood — the scale a player picks changes how a solo feels. Listen to two short solos:<ul><li><a href="https://www.youtube.com/watch?v=BycLmWI97Nc" target="_blank" data-ext="1">Clip 1 — "La Bamba"</a></li><li><a href="https://www.youtube.com/watch?v=kpC69qIe02E" target="_blank" data-ext="1">Clip 2 — "The Thrill Is Gone"</a></li></ul>Listen to both all the way through before you answer.',
+            text_es: 'Iguala el estado de ánimo — la escala que elige quien toca cambia cómo se siente un solo. Escucha dos solos cortos:<ul><li><a href="https://www.youtube.com/watch?v=BycLmWI97Nc" target="_blank" data-ext="1">Clip 1 — "La Bamba"</a></li><li><a href="https://www.youtube.com/watch?v=kpC69qIe02E" target="_blank" data-ext="1">Clip 2 — "The Thrill Is Gone"</a></li></ul>Escucha los dos completos antes de responder.',
+            hint: 'Listen for the mood first. Bright and sunny, or dark and heavy?',
+            hint_es: 'Escucha primero el ánimo. ¿Brillante y soleado, u oscuro y pesado?',
             response: { type: 'mc', prompt: 'Which solo sounds darker / more "blues"?',
               prompt_es: '¿Qué solo suena más oscuro / más "blues"?',
               answer: 1,
-              explain: 'Clip 2 ("The Thrill Is Gone") uses the minor / blues scale — darker and moodier. Clip 1 ("La Bamba") is major pentatonic — brighter and sunnier.',
-              explain_es: 'El Clip 2 ("The Thrill Is Gone") usa la escala menor / blues — más oscura y melancólica. El Clip 1 ("La Bamba") es pentatónica mayor — más brillante y alegre.',
+              explain: 'Clip 2 is the darker one. It is built on the minor / blues scale, and minor scales sound dark and moody. Clip 1 uses the major pentatonic scale, which sounds brighter and sunnier. Same instrument both times — the scale is what sets the mood. If the two sounded the same to you, play them back one right after the other and listen for the mood, not the speed.',
+              explain_es: 'El Clip 2 es el más oscuro. Está construido sobre la escala menor / blues, y las escalas menores suenan oscuras y melancólicas. El Clip 1 usa la escala pentatónica mayor, que suena más brillante y alegre. El mismo instrumento en los dos casos — la escala es lo que define el ánimo. Si te sonaron iguales, escúchalos uno justo después del otro y fíjate en el ánimo, no en la velocidad.',
               choices: [
-              'Clip 1 (major pentatonic)',
-              'Clip 2 (minor / blues)',
-              'No difference'
+              'Clip 1',
+              'Clip 2',
+              'They sound the same'
             ],
               choices_es: [
-              'Clip 1 (pentatónica mayor)',
-              'Clip 2 (menor / blues)',
-              'Sin diferencia'
+              'Clip 1',
+              'Clip 2',
+              'Suenan igual'
             ] }
           },
           {
