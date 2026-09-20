@@ -160,6 +160,32 @@ Before pushing, always `git fetch` and check
 `git log --oneline HEAD..origin/main` — another session may have moved things
 since the turn began.
 
+### ⚠️ Three regimes decide what may change in a module
+**2026-09-20.** A step's progress key is
+`${setId}-${station}-sec${gi}-${i}`, so a step that changes INDEX takes a
+student's tick with it and a section that moves takes every step after it.
+What that permits depends on how far the class has got, and
+`tools/rule-zero-proof.mjs` enforces exactly three regimes:
+
+- **Modules 1–`FROZEN_THROUGH` (2 today)** — students are in here. Step
+  labels must match BY INDEX; a new step may only be **appended** to the
+  tail of a section. No renames: a rename here would hide an insertion
+  from the check. Graded-MC choices are frozen too (checks.mjs 1ap).
+- **Modules 3–`OPEN_THROUGH` (6 today)** — **nobody has reached Module 3**
+  (Jonathan, 2026-09-19, re-confirmed 2026-09-20). A step may be
+  **inserted anywhere inside** an existing section, and a step's
+  `response` may be removed or changed. Old labels must still appear in
+  the same relative order; every added step prints. **Raise
+  `FROZEN_THROUGH` as the class advances** — it is the same number
+  checks.mjs pins as `FROZEN_MC_THROUGH_MODULE`.
+- **Above that** — step count and order are fixed; a rename prints.
+
+In every regime the SECTIONS are fixed: same count, same order, same
+kind. A section TITLE may be reworded (it moves no key) and the rename
+prints rather than failing. Run it as
+`node tools/rule-zero-proof.mjs <base-ref>` and paste the output into the
+report before any content push.
+
 ### ⚠️ Sweep findings ratchet into checks.mjs
 Any sweep or audit that finds **3+ instances of a mechanically-detectable error
 class** must add a permanent detector for that class to `checks.mjs` in the same
@@ -181,7 +207,10 @@ board's per-module heading washes (1aj), backing-track snippet windows
 and both of their renderers (1ak), untranslated English prose inside a
 Journey tab-ascii block (1al), the `partOne`/`partBreak` pair on a set shown
 in two parts (1ao), graded-MC choices frozen in the modules students have
-already reached (1ap).
+already reached (1ap),
+Happy Birthday's tab rhythm and the prose that describes it (1aq), the
+short-response budget for Modules 3–6 (1ar), the Daily 5's off switch
+still being a switch (1as).
 
 Not every class can be guarded by a banned-phrase list. 1w2 pins the Journey
 lick labels *positively* — every `Lick N — ...` card must use one of four
@@ -330,6 +359,20 @@ is a violation — an established, deliberately-defined site term (Module
 ladder's "top of the ladder") is a real teaching device, not confusing
 prose; don't flag or "fix" those. Define "root" once, in the first visible
 Module 2 step that uses it: the note a chord is named after.
+
+**A typed answer is for when writing IS the task.** Goal-setting,
+composing, and describing what you heard in a listening step keep their
+box; everything else asks the student to play something and tells them
+exactly when they have got it — a countable line ("two laps up and back
+with every note ringing clean"), not a feeling ("feels intentional").
+Modules 3–6 went from 82 typed answers to 8 on 2026-09-20; checks.mjs
+**1ar** pins the per-module budget and only fails UPWARD, so removing one
+more is always fine and adding one back is a decision you make in the
+same edit. Note that **41 of those 82 were already unreachable** — sitting
+in reflection / routine / ear-spark sections and in take-to-song sections
+that render a Journey card — so a raw count of `response:{type:'short'}`
+overstates the typing by about double. Count what `visibleSteps()` would
+render.
 
 **Multi-step directions get lists, not paragraphs.** `<ol>` for sequential steps,
 `<ul>` for parallel points, short lead-in before the list. Applies to step

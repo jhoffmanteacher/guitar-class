@@ -4276,6 +4276,170 @@ function checkActivitySize() {
 }
 
 /* ════════════════════════════════════════════════════════════════════
+   1aq. A RHYTHM TAB THAT CLAIMS EVEN NOTES — Happy Birthday is a 3/4
+   tune with a two-note pickup, and until 2026-09-20 every one of its 20
+   tab phrases carried no `beats` at all, so buildTab()'s player and the
+   step text's "one note per beat" together taught it as six equal
+   notes. Fails the push when a step whose tab is a Happy Birthday
+   phrase has no note carrying `beats`, or when such a step's own text
+   still claims one note per beat.
+   `kind:'check'` activities are exempt on purpose: an exit check's
+   `items` are frozen (stored picks are positional), and ca-14's
+   nextNote stimuli are Happy Birthday fragments.
+   ════════════════════════════════════════════════════════════════════ */
+function checkHappyBirthdayRhythm() {
+  head('1aq. Happy Birthday tabs carry their rhythm');
+  let src;
+  try { src = readFileSync(join(ROOT, 'class-activities.js'), 'utf8'); }
+  catch { return; }                       // reported by 1d
+  const sandbox = { console };
+  sandbox.window = sandbox;
+  vm.createContext(sandbox);
+  try { vm.runInContext(src, sandbox, { filename: 'class-activities.js' }); }
+  catch { return; }                       // reported by 1d
+  const activities = sandbox.CLASS_ACTIVITIES || [];
+  /* Identify a phrase by the NOTES, not by the words around it: two of
+     ca-1's tabs are captioned "Phrase C · low E string only" and never
+     say the song's name, while two others inside the same activities
+     ("Find the dots", "land on the dot") are fretboard drills that a
+     title-based match would sweep in. A signature is exact. */
+  /* 3/4 with a two-note pickup: "Hap-py" is two half-beats, "birth",
+     "day" and "to" are a beat each, and the note the line lands on is
+     held. A missing `beats` reads as 1. */
+  const HB_RHYTHM = new Map([
+    ['E0 E0 E2 E0 E5 E4',     [0.5, 0.5, 1, 1, 1, 2]],     // Phrase A
+    ['E0 E0 E2 E0 E7 E5',     [0.5, 0.5, 1, 1, 1, 2]],     // Phrase B
+    ['E0 E0 E12 E9 E5 E4 E2', [0.5, 0.5, 1, 1, 1, 1, 2]],  // Phrase C, low E
+    ['E0 E0 A7 A4 A0 E4 E2',  [0.5, 0.5, 1, 1, 1, 1, 2]],  // Phrase C, crossing to the A string
+    ['E10 E10 E9 E5 E7 E5',   [0.5, 0.5, 1, 1, 1, 2]],     // Phrase D, low E
+    ['A5 A5 A4 A0 A2 A0',     [0.5, 0.5, 1, 1, 1, 2]],     // Phrase D, A string
+    ['E0 E0 E2 E0',           [0.5, 0.5, 1, 1]],           // "Hap-py birth-day" — the first four notes
+  ]);
+  const HB_PHRASES = 20;            // pinned: every Happy Birthday tab phrase outside an exit check
+  const HB = /hap-?py\s*birth-?day/i;
+  const EVEN = /one note per beat|una nota por (?:pulso|tiempo)/i;
+  let phrases = 0, withBeats = 0, bad = 0;
+  const flag = m => { err(m); problems++; bad++; };
+
+  for (const a of activities) {
+    if (!a || a.kind === 'check' || !Array.isArray(a.steps)) continue;
+    a.steps.forEach((st, si) => {
+      const t = st && st.tab;
+      const tabs = Array.isArray(st && st.tabs) ? st.tabs : (t ? [t] : []);
+      for (const tab of tabs) {
+        const groups = Array.isArray(tab.phrases)
+          ? tab.phrases.map(ph => ({ label: ph.label || '', notes: ph.notes || [] }))
+          : [{ label: tab.caption || '', notes: tab.notes || [] }];
+        for (const g of groups) {
+          if (!g.notes.length) continue;
+          const sig = g.notes.map(n => `${n.string}${n.fret}`).join(' ');
+          const want = HB_RHYTHM.get(sig);
+          if (!want) continue;
+          phrases++;
+          const have = g.notes.map(n => (n && n.beats !== undefined) ? n.beats : 1);
+          if (have.join(' ') === want.join(' ')) withBeats++;
+          else flag(`${a.id} step ${si + 1}: the Happy Birthday phrase "${(g.label || tab.caption || '').slice(0, 46)}" is timed ${have.join(' ')} — it should be ${want.join(' ')}. Without that the player spaces the notes evenly, which is not how the tune goes.`);
+        }
+      }
+      // …and the step's own prose must not still promise even notes.
+      const prose = `${(st && st.text) || ''} ${(st && st.text_es) || ''}`;
+      if (HB.test(`${prose} ${(st && st.label) || ''}`) && EVEN.test(prose))
+        flag(`${a.id} step ${si + 1}: text still says "one note per beat" about Happy Birthday — name the long notes instead`);
+    });
+  }
+  if (phrases !== HB_PHRASES)
+    flag(`found ${phrases} Happy Birthday tab phrases, expected ${HB_PHRASES} — if a phrase was added or removed, update HB_PHRASES (and HB_RHYTHM if the notes are new) on purpose`);
+  if (bad === 0) ok(`${phrases} Happy Birthday tab phrases, all ${withBeats} carrying their rhythm; no step still claims even notes`);
+}
+
+/* ════════════════════════════════════════════════════════════════════
+   1ar. SHORT-RESPONSE BUDGET — "less typing, more playing" (Jonathan,
+   2026-09-19). Modules 3-6 went from 82 typed answers to 8 on
+   2026-09-20: 41 of the 82 sat in sections that no longer render, and
+   33 of the 41 a student could actually see became a playing task with
+   a countable success line. The 8 that remain are the ones where
+   writing IS the task — two Listen steps, the mood clips, the
+   four-phrase plan, compose-in-scale-degrees, map your chords, revisit
+   your goal, reggae vs. rock.
+   The budget only fails UPWARD. Removing one more is always fine;
+   adding one back is the thing that needs a decision, so raise the
+   number here on purpose when you mean to.
+   ════════════════════════════════════════════════════════════════════ */
+const SHORT_RESPONSE_BUDGET = { 3: 0, 4: 3, 5: 4, 6: 1 };
+function checkShortResponseBudget() {
+  head('1ar. Short-response budget (Modules 3-6)');
+  const configSrc = readFileSync(join(ROOT, 'config-main.js'), 'utf8');
+  const counts = {};
+  let seenAny = false;
+  for (const file of MODULE_FILES) {
+    const sandbox = { console };
+    vm.createContext(sandbox);
+    let sets;
+    try {
+      vm.runInContext(configSrc, sandbox, { filename: 'config-main.js' });
+      vm.runInContext(readFileSync(join(ROOT, file), 'utf8'), sandbox, { filename: file });
+      sets = vm.runInContext('SETS', sandbox) || [];
+    } catch { continue; }                 // reported by 1
+    for (const s of sets) {
+      const m = Number(s && s.moduleNum);
+      if (!(m in SHORT_RESPONSE_BUDGET)) continue;
+      seenAny = true;
+      counts[m] = counts[m] || 0;
+      for (const stId of Object.keys((s && s.stations) || {})) {
+        const stn = s.stations[stId];
+        const secs = stn.sections || (stn.steps ? [{ steps: stn.steps }] : []);
+        for (const sec of secs)
+          for (const step of (sec.steps || []))
+            if (step && step.response && step.response.type === 'short') counts[m]++;
+      }
+    }
+  }
+  if (!seenAny) { err('1ar found no Modules 3-6 at all — it cannot see what it is supposed to guard'); problems++; return; }
+  let bad = 0;
+  for (const m of Object.keys(SHORT_RESPONSE_BUDGET).map(Number).sort((a, b) => a - b)) {
+    const have = counts[m] || 0, cap = SHORT_RESPONSE_BUDGET[m];
+    if (have > cap) {
+      err(`Module ${m}: ${have} short responses, budget is ${cap} — a typed answer was added back. If that is deliberate (writing IS the task there: goal-setting, composing, describing what you heard), raise SHORT_RESPONSE_BUDGET in checks.mjs in the same edit.`);
+      problems++; bad++;
+    }
+  }
+  const total = Object.values(counts).reduce((a, b) => a + b, 0);
+  if (!bad) ok(`${total} short responses across Modules 3-6, all within budget (${Object.entries(SHORT_RESPONSE_BUDGET).map(([m, c]) => `M${m}≤${c}`).join(' ')})`);
+}
+
+/* ════════════════════════════════════════════════════════════════════
+   1as. THE DAILY 5 SWITCH — the "Tune and warm up first" banner was
+   retired on 2026-09-19 by setting DAILY5_ENABLED = false rather than
+   deleting buildDaily5() / openDaily5Here(), so flipping the constant
+   brings it back. That only holds while the constant is a real boolean
+   literal AND the render path it gates is still there; if someone
+   deletes the banner's render branch, flipping it back to true would
+   silently do nothing, which is the worst of both worlds.
+   ════════════════════════════════════════════════════════════════════ */
+function checkDaily5Switch() {
+  head('1as. Daily 5 is switched off, not broken');
+  let src;
+  try { src = readFileSync(join(ROOT, 'app.js'), 'utf8'); }
+  catch { err('app.js unreadable — 1as cannot check this'); problems++; return; }
+  const m = src.match(/\bconst\s+DAILY5_ENABLED\s*=\s*([^;]+);/);
+  if (!m) { err('DAILY5_ENABLED is gone from app.js — the Daily 5 is meant to be switched off, not deleted'); problems++; return; }
+  const value = m[1].trim();
+  if (value !== 'true' && value !== 'false') {
+    err(`DAILY5_ENABLED is \`${value}\`, not a boolean literal — a switch you cannot read at a glance is not a switch`);
+    problems++; return;
+  }
+  // The branch it gates has to still exist, in either state.
+  const gated = /DAILY5_ENABLED\s*&&/.test(src);
+  const banner = /daily5-inline/.test(src) && /daily5\.tuneWarmupHtml/.test(src) && /openDaily5Here\(\)/.test(src);
+  if (!gated) { err('nothing in app.js reads DAILY5_ENABLED — the constant no longer switches anything'); problems++; return; }
+  if (!banner) {
+    err('the banner render path is gone (.daily5-inline / daily5.tuneWarmupHtml / openDaily5Here) — flipping DAILY5_ENABLED back to true would do nothing');
+    problems++; return;
+  }
+  ok(`DAILY5_ENABLED = ${value}; the banner it gates is still wired, so the switch still works both ways`);
+}
+
+/* ════════════════════════════════════════════════════════════════════
    1an. BARE WATCH STEP — practice-chunks work order, 2026-09-19, Phase 4.
    Fails the push when a lesson step's text, stripped of tags and the
    link's own visible label, is under ~6 words while its hint is
@@ -4371,6 +4535,9 @@ function checkBareWatchSteps() {
   checkBackingSnippets();
   checkActivitySize();
   checkBareWatchSteps();
+  checkHappyBirthdayRhythm();
+  checkShortResponseBudget();
+  checkDaily5Switch();
   if (!SKIP_LINKS) await checkLinks();
   else warn('skipping link check (--skip-links)');
   bumpServiceWorker();

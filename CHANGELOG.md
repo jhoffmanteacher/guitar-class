@@ -5,6 +5,35 @@ Notable changes to the Guitar Class site. Newest first.
 For the full session-by-session history (and the reasoning behind each change),
 see `WORKFLOW.md` and the git commit log.
 
+## 2026-09-20 — Happy Birthday in its real rhythm, and gentler on-ramps
+
+### Changed
+
+- **Happy Birthday now plays the way it actually goes.** Press ▶ on any of
+  its tabs and "Hap-py" is quick, "birth", "day" and "to" get a beat each,
+  and the note at the end of each line is held — instead of six notes of
+  the same length. The steps say which notes are long.
+- **Pattern 1 starts at the open strings.** Module 4 now meets the shape
+  down at the nut, where it is E minor pentatonic and four of the five
+  notes of the "Seven Nation Army" riff live, before moving the same shape
+  up to fret 5 where it becomes A minor.
+- **Hammer-ons and pull-offs have their own step**, with a count to hit —
+  ten of each in a row. Until now only a video showed them.
+- **The major pentatonic shape gets something to play over** — the "Let It
+  Be" backing track, four bars on and four bars off.
+- **Two stepping stones before the D-DU-UDU strum**, so the hardest part
+  (the missing downstroke on beat 3) arrives on its own instead of with
+  everything else at once.
+- **A new step on the picking hand** at the end of Module 1 Set 2 — where
+  the hand rests, how far the pick travels, and how to stop a string that
+  is still ringing.
+- **The A chord is fingered 2-1-3 now**, so your index lands on an A — the
+  note the chord is named after — in the same spot it uses for D. On an
+  A–D change that finger never moves.
+- **Vibrato is taught on the G string**, with the ring finger, as a small
+  even bend up and down — easier to feel than on the thinnest string.
+- **"Read and clap the rhythm" has a rhythm to read.**
+
 ## 2026-09-20 — Less typing, more playing
 
 ### Changed

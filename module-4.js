@@ -172,6 +172,31 @@ SETS.push(
             title: 'Play Pattern 1 with alternate picking',
             title_es: 'Toca el Patrón 1 con púa alterna',
             steps: [
+          /* Two steps INSERTED ahead of the fret-5 climb (2026-09-20): the
+             same shape is much easier to meet at the open strings first,
+             where the nut does the work of the index finger. Nobody has
+             reached Module 3 yet, so Modules 3-6 may gain a step inside an
+             existing section. Unnumbered on purpose — the section's
+             "Challenge 1" keeps its number. */
+          {
+            label: 'The shape at the open strings', label_es: 'La forma en las cuerdas al aire',
+            text: 'Meet Pattern 1 where it is easiest — down at the open strings, with the nut doing the work your index finger will do later.<ol><li>Play it one string at a time, low to high: open and fret 3 · open and fret 2 · open and fret 2 · open and fret 2 · open and fret 3 · open and fret 3.</li><li>Play it back down again.</li></ol>Down here the shape is <strong>E minor pentatonic</strong>. Four of the five notes in the "Seven Nation Army" riff — E, G, D and B — are in it. You\'ve got it when: two laps up and back, every note ringing, without looking at the diagram.<span class="step-figure"><img src="img/m4-em-pentatonic-open.svg" alt="A six-string fretboard diagram with the open-position E minor pentatonic scale circled: low E open and fret 3, A open and fret 2, D open and fret 2, G open and fret 2, B open and fret 3, high e open and fret 3." width="640" height="244"></span>',
+            text_es: 'Conoce el Patrón 1 donde es más fácil — abajo en las cuerdas al aire, con la cejuela haciendo el trabajo que más adelante hará tu dedo índice.<ol><li>Tócalo una cuerda a la vez, de grave a aguda: al aire y traste 3 · al aire y traste 2 · al aire y traste 2 · al aire y traste 2 · al aire y traste 3 · al aire y traste 3.</li><li>Tócalo de regreso hacia abajo.</li></ol>Aquí abajo la forma es <strong>E menor pentatónica</strong>. Cuatro de las cinco notas del riff de "Seven Nation Army" — E, G, D y B — están en ella. Lo tienes cuando: dos vueltas subiendo y bajando, con cada nota sonando, sin mirar el diagrama.<span class="step-figure"><img src="img/m4-em-pentatonic-open.svg" alt="Un diagrama del diapasón de seis cuerdas con la escala pentatónica de E menor en posición abierta marcada: Mi grave al aire y traste 3, La al aire y traste 2, Re al aire y traste 2, Sol al aire y traste 2, Si al aire y traste 3, mi aguda al aire y traste 3." width="640" height="244"></span>',
+            hint: 'An open string counts as part of the shape. Only six of the twelve notes need a finger at all.',
+            hint_es: 'Una cuerda al aire cuenta como parte de la forma. Solo seis de las doce notas necesitan un dedo.',
+            skills: [1],
+            playSeq: { label: 'Hear it', label_es: 'Escúchalo', bpm: 60, notes: [40, 43, 45, 47, 50, 52, 55, 57, 59, 62, 64, 67] }
+          },
+          {
+            label: 'The same shape at fret 5', label_es: 'La misma forma en el traste 5',
+            text: 'Move the whole shape up five frets. Your index finger now does what the nut was doing.<ol><li>Put your index finger across fret 5 and your ring or little finger where the fret-2 and fret-3 notes were — every open string becomes fret 5.</li><li>Play it up and back, one string at a time.</li></ol>It is the same shape and the same sound, five frets higher — and up here it is <strong>A minor pentatonic</strong>, which is what the rest of this set uses. You\'ve got it when: two laps up and back at fret 5 with no open strings ringing by accident.',
+            text_es: 'Mueve toda la forma cinco trastes hacia arriba. Tu dedo índice hace ahora lo que hacía la cejuela.<ol><li>Pon el índice cruzando el traste 5 y el anular o el meñique donde estaban las notas de los trastes 2 y 3 — cada cuerda al aire se vuelve el traste 5.</li><li>Tócalo subiendo y bajando, una cuerda a la vez.</li></ol>Es la misma forma y el mismo sonido, cinco trastes más arriba — y aquí arriba es <strong>A menor pentatónica</strong>, que es la que usa el resto de esta unidad. Lo tienes cuando: dos vueltas subiendo y bajando en el traste 5 sin que suene ninguna cuerda al aire por accidente.',
+            hint: 'Same distances between the dots, same order. Only the starting fret changed, so the scale is named after a different note.',
+            hint_es: 'Las mismas distancias entre los puntos, el mismo orden. Solo cambió el traste de inicio, así que la escala lleva el nombre de otra nota.',
+            stuck: 'Play the open version once, then the fret-5 version once, back to back. They should sound like the same tune at two different heights.',
+            stuck_es: 'Toca la versión al aire una vez, y luego la del traste 5 una vez, seguidas. Deben sonar como la misma melodía a dos alturas distintas.',
+            skills: [1, 3]
+          },
           {
             label: 'Challenge 1 — Pattern 1 Climb (skills-check warm-up)', label_es: 'Reto 1 — Subida del Patrón 1 (calentamiento de revisión de destrezas)',
             text: '<ul><li>Play Pentatonic Pattern 1 ascending at 60 BPM, one note per beat, alternate picking (down-up-down-up).</li></ul>You\'ve got it when: two laps up and back with every note ringing clean and no missed picks. The box below shows where every finger goes; click "Play all" to hear it, and the next challenge maps the same climb note by note in TAB.<span class="step-figure"><img src="img/m4-pentatonic-box1-en.svg" alt="Fretboard diagram of A minor pentatonic Pattern 1, frets 5 to 8: finger 1 on fret 5 of every string, finger 4 on fret 8 of the low E, B, and high e strings, and finger 3 on fret 7 of the A, D, and G strings. The root note A is marked solid at fret 5 on the low E and high e strings and at fret 7 on the D string." width="640" height="244"></span>',
@@ -231,6 +256,21 @@ SETS.push(
             stuck_es: 'Di los grados solo en la cuerda Mi grave primero — 1 (traste 5), y luego ♭3 (traste 8) — antes de agregar el resto de las cuerdas.',
             levelUp: 'Say the degrees going both up and down the box, or call them out at 80 BPM.',
             levelUp_es: 'Di los grados subiendo y bajando por la caja, o dilos a 80 BPM.'
+          },
+          /* INSERTED 2026-09-20 — the set teaches how to POSITION the major
+             pentatonic and then never plays it over anything. This uses the
+             "Let It Be" backing track that is already in this module's song
+             list (C-G-Am-F, so C major pentatonic fits it); no new URL. */
+          {
+            label: 'Play the major shape over a track', label_es: 'Toca la forma mayor sobre una pista',
+            text: 'Positioning the shape is not the same as using it. Play it over something.<ol><li>Put your little finger on fret 8 of the low E string — the note C — so the shape is C major pentatonic.</li><li>Start <a href="https://www.youtube.com/watch?v=bCl8YuqHURE" target="_blank">&#x25B6; &#x1F3B5; the "Let It Be" backing track</a>. It goes C &middot; G &middot; Am &middot; F, and this shape fits all four.</li><li>Play four bars using any notes from the box, then four bars of rest, and repeat.</li></ol>You\'ve got it when: four rounds of four-bars-on and four-bars-off without losing the track\'s pulse, ending each of your four bars on the C.',
+            text_es: 'Posicionar la forma no es lo mismo que usarla. Tócala sobre algo.<ol><li>Pon el meñique en el traste 8 de la cuerda Mi grave — la nota C — para que la forma sea C mayor pentatónica.</li><li>Pon <a href="https://www.youtube.com/watch?v=bCl8YuqHURE" target="_blank">&#x25B6; &#x1F3B5; la pista de acompañamiento de "Let It Be"</a>. Va C &middot; G &middot; Am &middot; F, y esta forma encaja con los cuatro.</li><li>Toca cuatro compases usando cualquier nota de la caja, y luego cuatro compases de descanso, y repite.</li></ol>Lo tienes cuando: cuatro rondas de cuatro compases tocando y cuatro descansando sin perder el pulso de la pista, terminando cada uno de tus cuatro compases en la C.',
+            hint: 'The rest bars are not wasted — they are where you hear the track and decide what to play next.',
+            hint_es: 'Los compases de descanso no se desperdician — ahí es donde escuchas la pista y decides qué vas a tocar después.',
+            stuck: 'Use two notes only, C and the one above it, for the whole four bars. Two notes played in time beat five played late.',
+            stuck_es: 'Usa solo dos notas, C y la que le sigue hacia arriba, durante los cuatro compases. Dos notas a tiempo valen más que cinco tarde.',
+            skills: [4, 5],
+            playSeq: { label: 'Hear C major pentatonic', label_es: 'Escucha C mayor pentatónica', bpm: 60, notes: [48, 50, 52, 55, 57, 60] }
           }
             ]
           },
@@ -463,8 +503,8 @@ SETS.push(
           unit: 'BPM', placeholder: 'e.g. 70 — try for a higher number next session', placeholder_es: 'p. ej. 70 — intenta superarlo la próxima sesión' } },
       { id: 'm4w1-s6', text: 'Improvise a short 2-bar musical idea using 2–3 notes from the pattern',
         text_es: 'Improvisar una idea musical corta de 2 compases usando 2–3 notas del patrón',
-        gotItWhen: 'you can play a 2-bar phrase that feels intentional — not random — using just 2 or 3 notes from the pattern.',
-        gotItWhen_es: 'puedes tocar una frase de 2 compases que se sienta intencionada — no aleatoria — usando solo 2 o 3 notas del patrón.',
+        gotItWhen: 'you can play the same 2-bar phrase three times in a row, note for note, using just 2 or 3 notes from the pattern — repeating it is what proves you meant it.',
+        gotItWhen_es: 'puedes tocar la misma frase de 2 compases tres veces seguidas, nota por nota, usando solo 2 o 3 notas del patrón — poder repetirla es lo que prueba que fue a propósito.',
         practice: { type: 'mc', prompt: 'What makes a short improvised phrase sound intentional instead of random?',
           prompt_es: '¿Qué hace que una frase improvisada corta suene intencionada en vez de aleatoria?',
           choices: ['Using as many different notes as possible', 'Playing it as fast as you can', 'Never repeating anything', 'Repeating an idea, varying it, and leaving space'],
@@ -631,14 +671,14 @@ SETS.push(
             steps: [
           {
             label: 'Challenge 1 — The One-Note Solo', label_es: 'Reto 1 — El solo de una nota',
-            text: '<ol><li>Choose one note in the Am pentatonic pattern.</li><li>Play only that note for 8 bars, varying rhythm, dynamics, and tone.</li></ol>You\'ve got it when: make one note stay interesting for all 8 bars — record it and listen back.',
-            text_es: '<ol><li>Elige una nota del patrón pentatónico de Am.</li><li>Toca solo esa nota durante 8 compases, variando el ritmo, la dinámica y el tono.</li></ol>Lo tienes cuando: logras que una nota se mantenga interesante durante los 8 compases — grábalo y escúchalo después.',
+            text: '<ol><li>Choose one note in the Am pentatonic pattern.</li><li>Play only that note for 8 bars, varying rhythm, dynamics, and tone.</li></ol>You\'ve got it when: eight bars on that one note where you changed one thing in each bar — record it and listen back, and you should be able to name the eight changes.',
+            text_es: '<ol><li>Elige una nota del patrón pentatónico de Am.</li><li>Toca solo esa nota durante 8 compases, variando el ritmo, la dinámica y el tono.</li></ol>Lo tienes cuando: ocho compases con esa sola nota donde cambiaste una cosa en cada compás — grábalo y escúchalo después, y deberías poder nombrar los ocho cambios.',
             hint: 'This sounds easy but isn\'t. Can you make one note interesting for 8 whole bars? The way you play it matters more than how many notes you play.',
             hint_es: 'Esto suena fácil pero no lo es. ¿Puedes hacer que una nota sea interesante durante 8 compases completos? La forma en que la tocas importa más que cuántas notas toques.',
             stuck: 'Just change ONE thing per bar — louder, then softer, then short, then long. That\'s already a one-note solo.',
             stuck_es: 'Cambia SOLO una cosa por compás — más fuerte, y luego más suave, y luego corta, y luego larga. Eso ya es un solo de una nota.',
-            levelUp: 'Add a hammer-on or a slide into the note, or move your picking hand bridge-to-neck mid-phrase to change the tone live.',
-            levelUp_es: 'Agrega un hammer-on o un deslizamiento hacia la nota, o mueve tu mano de pulsar de puente a mástil a mitad de la frase para cambiar el tono en vivo.',
+            levelUp: 'Add a hammer-on into the note, or move your picking hand bridge-to-neck mid-phrase to change the tone live.',
+            levelUp_es: 'Agrega un hammer-on hacia la nota, o mueve tu mano de pulsar de puente a mástil a mitad de la frase para cambiar el tono en vivo.',
             skills: [1, 2, 5]
           }
             ]
@@ -647,6 +687,21 @@ SETS.push(
             title: 'Improvise a call-and-response phrase',
             title_es: 'Improvisa una frase de llamada y respuesta',
             steps: [
+          /* INSERTED 2026-09-20 — a hammer-on and pull-off drill. Both are
+             used by the expressive-phrasing work above and by the level-up
+             on the one-note solo, and until now only a video taught them.
+             Unnumbered, so "Challenge 2" below keeps its number. */
+          {
+            label: 'Hammer-ons and pull-offs', label_es: 'Hammer-ons y pull-offs',
+            text: 'Two ways to sound a note without picking it. Both live inside the box you already know.<ol><li><strong>Hammer-on:</strong> pick fret 5 on the D string, then drop your ring finger hard onto fret 7 of the same string. The second note sounds from the drop, not from the pick.</li><li>Ten clean hammer-ons in a row — the fret-7 note as loud as the picked one.</li><li><strong>Pull-off:</strong> hold both fingers down, pick fret 7, then pull your ring finger sideways off the string so fret 5 rings.</li><li>Ten clean pull-offs in a row.</li></ol>You\'ve got it when: ten hammer-ons and ten pull-offs in a row, each second note clearly sounding, with only the first note of each pair picked.',
+            text_es: 'Dos maneras de hacer sonar una nota sin tocarla con la púa. Las dos viven dentro de la caja que ya conoces.<ol><li><strong>Hammer-on:</strong> toca el traste 5 de la cuerda Re con la púa, y luego deja caer con fuerza el dedo anular sobre el traste 7 de esa misma cuerda. La segunda nota suena por la caída, no por la púa.</li><li>Diez hammer-ons limpios seguidos — la nota del traste 7 tan fuerte como la que tocaste con la púa.</li><li><strong>Pull-off:</strong> mantén los dos dedos puestos, toca el traste 7 con la púa, y luego jala el anular de lado para sacarlo de la cuerda y que suene el traste 5.</li><li>Diez pull-offs limpios seguidos.</li></ol>Lo tienes cuando: diez hammer-ons y diez pull-offs seguidos, con la segunda nota sonando claramente en cada par, y solo la primera nota de cada par tocada con la púa.',
+            hint: 'A hammer-on needs speed, not force. Land on your fingertip just behind the fret, the same place you would press normally.',
+            hint_es: 'Un hammer-on necesita velocidad, no fuerza. Cae sobre la punta del dedo justo detrás del traste, en el mismo lugar donde presionarías normalmente.',
+            stuck: 'Leave the index finger on fret 5 the whole time — it never lifts. Only the ring finger moves.',
+            stuck_es: 'Deja el dedo índice en el traste 5 todo el tiempo — nunca se levanta. Solo se mueve el anular.',
+            skills: [5],
+            playSeq: { label: 'Hear the pair', label_es: 'Escucha el par', bpm: 60, notes: [55, 57, 55, 57] }
+          },
           {
             label: 'Challenge 2 — Call & Response (your assessment piece)', label_es: 'Reto 2 — Llamada y respuesta (tu pieza de evaluación)',
             text: 'Over the Am backing track (<a href="https://www.youtube.com/watch?v=Vq8cApzOdy8" target="_blank">▶ &#x1F3B5; Am jam track</a>):<ol><li>Play a 2-bar idea (call).</li><li>Pause 1 bar.</li><li>Answer with a 2-bar idea (response).</li></ol>You\'ve got it when: the call ends on a non-root note (unresolved) and the response lands on the root (arrives home). This — call-and-response — is one of the two phrasing strategies you\'ll name at your Set 3 assessment.',
@@ -655,8 +710,8 @@ SETS.push(
             hint_es: 'Piénsalo como una pregunta y respuesta musical. La llamada se siente sin resolver; la respuesta se siente como si llegara a algún lugar.',
             stuck: 'Use just 2–3 notes for both call and response — end the response on A (the root) every time so the "answer" always lands home.',
             stuck_es: 'Usa solo 2–3 notas tanto para la llamada como para la respuesta — termina la respuesta en A (la raíz) cada vez para que la "respuesta" siempre llegue a la nota base.',
-            levelUp: 'Record a 2-bar call and answer it live over the playback, or make the call longer than the response so the short answer feels sudden.',
-            levelUp_es: 'Graba una llamada de 2 compases y respóndela en vivo sobre la grabación, o haz que la llamada sea más larga que la respuesta para que la respuesta corta se sienta repentina.',
+            levelUp: 'Trade with the person next to you — two bars each, back and forth, four times. You pass when every one of your answers ends on the root. Or record a 2-bar call and answer it live over the playback.',
+            levelUp_es: 'Alterna con la persona de al lado — dos compases cada quien, de ida y vuelta, cuatro veces. Pasas cuando todas tus respuestas terminan en la raíz. O graba una llamada de 2 compases y respóndela en vivo sobre la grabación.',
             skills: [5, 6]
           }
             ]
@@ -868,10 +923,10 @@ SETS.push(
           },
           {
             label: 'Watch: vibrato technique', label_es: 'Mira: técnica de vibrato',
-            text: 'Watch: <a href="https://youtu.be/WNWqobkgdBA" target="_blank">Vibrato Technique (Hand Movement, TE-103) – JustinGuitar</a> (0:00–3:00). As you watch, try it yourself on the 5th fret of the high e string (the thinnest one) — rock the finger back and forth gently and listen for the pitch to wobble.',
-            text_es: 'Mira: <a href="https://youtu.be/WNWqobkgdBA" target="_blank">Vibrato Technique (Hand Movement, TE-103) – JustinGuitar</a> (0:00–3:00). Mientras miras, pruébalo tú mismo en el traste 5 de la cuerda mi aguda (la más delgada) — mece el dedo hacia adelante y atrás suavemente y escucha cómo la nota oscila.',
-            hint: 'Keep the fingertip planted — the motion comes from the wrist, not from sliding along the string. Listen closely to what happens to the note while your finger rocks, and how it differs from a bend. It takes weeks to develop — just start!',
-            hint_es: 'Mantén la yema plantada — el movimiento viene de la muñeca, no de deslizarte por la cuerda. Escucha con atención qué le pasa a la nota mientras tu dedo se mece, y en qué se diferencia de un bend. Toma semanas desarrollarlo — ¡solo empieza!',
+            text: 'Watch: <a href="https://youtu.be/WNWqobkgdBA" target="_blank">Vibrato Technique (Hand Movement, TE-103) – JustinGuitar</a> (0:00–3:00). As you watch, try it yourself on the 7th fret of the G string, using your ring finger — bend the string up and down a tiny amount, evenly, and listen for the pitch to wobble. Support the ring finger with the two fingers behind it.',
+            text_es: 'Mira: <a href="https://youtu.be/WNWqobkgdBA" target="_blank">Vibrato Technique (Hand Movement, TE-103) – JustinGuitar</a> (0:00–3:00). Mientras miras, pruébalo tú mismo en el traste 7 de la cuerda Sol, con el dedo anular — dobla la cuerda hacia arriba y hacia abajo una cantidad pequeñita, pareja, y escucha cómo la nota oscila. Apoya el anular con los dos dedos que van detrás.',
+            hint: 'Keep the fingertip planted on the string and push it across the fret, not along it — the motion comes from the wrist. Listen closely to what happens to the note while your finger rocks, and how it differs from a bend. It takes weeks to develop — just start!',
+            hint_es: 'Mantén la yema plantada sobre la cuerda y empújala a lo ancho del traste, no a lo largo — el movimiento viene de la muñeca. Escucha con atención qué le pasa a la nota mientras tu dedo se mece, y en qué se diferencia de un bend. Toma semanas desarrollarlo — ¡solo empieza!',
             skills: [3],
             response: { type: 'mc', prompt: 'Vibrato is best described as:',
               prompt_es: 'El vibrato se describe mejor como:',
@@ -1094,8 +1149,8 @@ SETS.push(
           explain_es: 'La pentatónica menor es 1 ♭3 4 5 ♭7, y es la 3ª bemol la que la hace sonar menor. Agregar una ♭5 encima de esas te da la escala de blues — seis notas, así que no puede ser la pentatónica.' } },
       { id: 'm4w3-s3', text: 'Add vibrato on at least one sustained note',
         text_es: 'Agregar vibrato en al menos una nota sostenida',
-        gotItWhen: 'your finger rocks back and forth on a sustained note and the pitch wobbles intentionally — not from shaking nerves.',
-        gotItWhen_es: 'tu dedo se mece hacia adelante y atrás en una nota sostenida y la altura oscila intencionalmente — no por nervios que hacen temblar la mano.',
+        gotItWhen: 'you can hold one note and bend it up and down a tiny amount, evenly, four times in a row, and hear the pitch move each time — on purpose, not from a shaking hand.',
+        gotItWhen_es: 'puedes sostener una nota y doblarla hacia arriba y hacia abajo una cantidad pequeñita, pareja, cuatro veces seguidas, y escuchar cómo se mueve la altura cada vez — a propósito, no por una mano temblorosa.',
         practice: { type: 'mc', prompt: 'Your vibrato sounds like nervous shaking instead of music. What\'s the fix?',
           prompt_es: 'Tu vibrato suena como un temblor nervioso en vez de música. ¿Cuál es el arreglo?',
           choices: ['Shake your whole hand faster', 'Slide your finger along the string to a new fret', 'Press harder so the note can\'t move at all', 'Slow down — rock the finger in an even, repeating rhythm'],

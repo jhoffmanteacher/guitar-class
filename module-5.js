@@ -1111,17 +1111,17 @@ SETS.push(
             steps: [
           {
             label: 'Challenge — Clean A', label_es: 'Reto — A limpio',
-            text: '<ol><li>Fret A major (index finger on the D string, fret 2 · middle finger on the G string, fret 2 · ring finger on the B string, fret 2).</li><li>Strum from the A string down (skip the low E).</li></ol>You\'ve got it when: all three fingers fit on the 2nd fret without colliding, and everything from the A string down rings cleanly.',
-            text_es: '<ol><li>Trastea A mayor (dedo índice en la cuerda Re, traste 2 · dedo medio en la cuerda Sol, traste 2 · dedo anular en la cuerda Si, traste 2).</li><li>Rasguea desde la cuerda La hacia abajo (sin la Mi grave).</li></ol>Lo tienes cuando: tus tres dedos caben en el traste 2 sin chocar, y todo desde la cuerda La hacia abajo suena limpio.',
+            text: '<ol><li>Fret A major (middle finger on the D string, fret 2 · index finger on the G string, fret 2 · ring finger on the B string, fret 2).</li><li>That index finger is sitting on an A — the note the chord is named after — and it is the same spot your index uses for D, so on an A&rarr;D change it never has to move.</li><li>Strum from the A string down (skip the low E).</li></ol>You\'ve got it when: all three fingers fit on the 2nd fret without colliding, and everything from the A string down rings cleanly.',
+            text_es: '<ol><li>Trastea A mayor (dedo medio en la cuerda Re, traste 2 · dedo índice en la cuerda Sol, traste 2 · dedo anular en la cuerda Si, traste 2).</li><li>Ese dedo índice está sobre un A — la nota que le da nombre al acorde — y es el mismo lugar que usa tu índice para D, así que en un cambio A&rarr;D no tiene que moverse.</li><li>Rasguea desde la cuerda La hacia abajo (sin la Mi grave).</li></ol>Lo tienes cuando: tus tres dedos caben en el traste 2 sin chocar, y todo desde la cuerda La hacia abajo suena limpio.',
             hint: 'A is tight because all three fingers land on the same fret. Line them up close together, each one on its own tip, rather than spreading them out.',
             hint_es: 'A es apretado porque los tres dedos caen en el mismo traste. Alinéalos bien juntos, cada uno en su propia punta, en vez de separarlos.',
             stuck: 'Squeeze your index, middle, and ring fingers close together before you place them — arriving already tight avoids a mid-air scramble to fit all three on one fret.',
             stuck_es: 'Junta tu dedo índice, medio y anular antes de colocarlos — llegar ya apretados evita un forcejeo en el aire para que quepan los tres en un traste.',
-            levelUp: 'Switch A→D→A without looking — both shapes live around the 2nd fret, so it\'s a short trip.',
-            levelUp_es: 'Cambia A→D→A sin mirar — ambas formas viven cerca del traste 2, así que es un viaje corto.',
+            levelUp: 'Switch A→D→A without looking, leaving your index finger planted on the G string the whole time — both shapes live around the 2nd fret, so it\'s a short trip.',
+            levelUp_es: 'Cambia A→D→A sin mirar, dejando tu dedo índice plantado en la cuerda Sol todo el tiempo — ambas formas viven cerca del traste 2, así que es un viaje corto.',
             skills: [2],
             chords: [
-              { name: 'A', chord: [[6,'x'],[5,0],[4,2,'1'],[3,2,'2'],[2,2,'3'],[1,0]], position: 0 }
+              { name: 'A', chord: [[6,'x'],[5,0],[4,2,'2'],[3,2,'1'],[2,2,'3'],[1,0]], position: 0 }
             ]
           }
             ]

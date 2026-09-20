@@ -845,7 +845,7 @@ SETS.push(
                 skills: [6],
                 chords: [
                   { name: 'Bm (A-shape barre)', name_es: 'Bm (cejilla en forma de A)', chord: [[6,'x'],[5,2,'1'],[4,4,'3'],[3,4,'4'],[2,3,'2'],[1,2,'1']], position: 2 },
-                  { name: 'A', chord: [[6,'x'],[5,0],[4,2,'1'],[3,2,'2'],[2,2,'3'],[1,0]], position: 0 }
+                  { name: 'A', chord: [[6,'x'],[5,0],[4,2,'2'],[3,2,'1'],[2,2,'3'],[1,0]], position: 0 }
                 ]
               }
             ]
