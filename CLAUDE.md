@@ -895,11 +895,15 @@ meant to be reading; it is ~196px now.
   because `.nav-btn` / `.rail-station` / `.wpill` sit on `min-height:44px`
   from the tap-target pass, and a Chromebook is exactly the touch device
   that pass was written for. The two-column sizes (12px text, 16px icon,
-  5px gap, 4px padding) are measured against the longest **unbreakable**
-  label in either language — "Assessments" 75px, "Evaluaciones" 74px, in
-  79px of room. **Re-measure those two words before changing any of them.**
-  Worst case m5w2 (4 sets + Module review, two parts, no Preview notice):
-  707px of rail content in 490px → 527px in 527px.
+  5px gap, 4px padding) were measured against the longest **unbreakable**
+  label in either language — "Assessments" 75px / "Evaluaciones" 74px, in
+  79px of room — back when that button existed; it retired 2026-09-20 and
+  the remaining labels are shorter, so this is now a safe upper bound, not
+  a tight fit. **Re-measure the current longest word before tightening any
+  of the four numbers.** Worst case m5w2 (4 sets + Module review, two
+  parts, no Preview notice): 707px of rail content in 490px → 527px in
+  527px — unaffected by the Assessments removal: the two-column grid is
+  `ceil(n/2)` rows, and that's 3 either way at 5 or 6 nav items.
 
 ### ⚠️ The Daily 5 is retired — switched off, not deleted
 **2026-09-19** (Jonathan): tuning and the finger warm-up happen together as a
@@ -1062,25 +1066,22 @@ hid the rail; an open
 screen stayed open.
 
 **What a gated student can still open is one list — `GATE_OPEN_HASHES`**
-(`#class-activities`, `#live-quiz`, `#assessments`) — read by
+(`#class-activities`, `#live-quiz`) — read by
 `routeExploreHash`'s guard and the flip redirect; it mirrors the
 `data-gate="keep"` buttons in the rail (1aa). Add to both or neither.
 
-**Assessments page (2026-09-12, Jonathan's ask):** `#assessments`, rail
-button after My progress, `data-gate="keep"` — a student can always read
-what each module's in-person assessment asks for. `renderAssessments()`
-builds one `<details>` per `MODULE_MANIFEST` entry, the current module
-(`assessCurrentModuleNum()`, from `lastSetId`) open and tagged, each body
-the module's `assessItems` from `MODULE_REVIEWS` — the same list the Module
-Review's heads-up pop shows, read-only, plus the `review.assessSignupBody`
-line. Module data is lazy, so an accordion fetches its `module-N.js` on
-open (`assessEnsureModule`). Its Back goes to In-Class Activities while gated
-(`closeAssessmentsScreen`), to practice otherwise. Same page plumbing as My
-progress (EXPLORE_PAGES row, closeTopPanels, leaveTopPanelForSet,
-gc-langchange re-render).
+**There was an Assessments page (2026-09-12–2026-09-20).** A rail button
+and standalone `#assessments` screen listed every module's in-person
+assessment items in one accordion, read-only. Removed 2026-09-20 (Jonathan:
+redundant with the Module Review's own assessment box, and he posts
+rubrics/assignments on Canvas) — rail button, `#assessments`
+screen/route/i18n/CSS all deleted. **The Module Review's per-module
+assessment box is a separate, still-live feature** — `.mr-assess-box` at
+the bottom of `buildModuleReview()`, and its heads-up pop
+(`buildMrAssessPop`) — reading the same `MODULE_REVIEWS[n].assessItems`;
+don't confuse the two if this comes up again.
 
-**Phase 2 (nav collapse), shipped 2026-09-12:** the rail is five items (six
-since the Assessments page above) —
+**Phase 2 (nav collapse), shipped 2026-09-12:** the rail is five items —
 In-Class Activities · Practice · Songs · Games · My progress, no "Explore" heading (the
 `nav.explore` i18n key stays: it's still the rail `<nav>`'s aria-label, just
 not a visible span any more). Keep practicing and Daily Review are sections

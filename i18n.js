@@ -240,15 +240,7 @@
     // 2026-09-12 (Today-first work order, Phase 2, nav collapse).
     'nav.keepPracticing': { en: 'Keep practicing', es: 'Sigue practicando' },
     'nav.myProgress':     { en: 'My progress', es: 'Mi progreso' },
-    // Assessments page (2026-09-12) — every module's in-person assessment
-    // list, reachable behind the activity gate.
-    'nav.assessments':    { en: 'Assessments', es: 'Evaluaciones' },
     'btn.back':           { en: 'Back', es: 'Volver' },
-    'assess.intro':       { en: 'Each module ends with an assessment you play for your teacher, in person. This is what each one asks for.',
-                            es: 'Cada módulo termina con una evaluación que tocas para tu maestro, en persona. Esto es lo que pide cada una.' },
-    'assess.current':     { en: 'Your module', es: 'Tu módulo' },
-    'assess.loading':     { en: 'Loading…', es: 'Cargando…' },
-    'assess.none':        { en: 'This module has no in-person assessment list.', es: 'Este módulo no tiene lista de evaluación en persona.' },
     // Renamed to "Today" 2026-09-11 (Today-first work order, Phase 1), then
     // back to "In-Class Activities" 2026-09-17 (Jonathan's call) — the key
     // stays the same both times, so the hash/deep-link/console-link wiring

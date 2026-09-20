@@ -5,6 +5,17 @@ Notable changes to the Guitar Class site. Newest first.
 For the full session-by-session history (and the reasoning behind each change),
 see `WORKFLOW.md` and the git commit log.
 
+## 2026-09-20 — Removed the practice routine card and the Assessments page
+
+### Changed
+
+- **The "Your 10-minute practice routine" card no longer shows at the top of
+  Module Review.**
+- **The Assessments nav button and page are gone.** What each module's
+  in-person assessment asks for is still right there in Module Review, at
+  the bottom of the page — nothing to click through to see it separately
+  any more.
+
 ## 2026-09-20 — Second-pass fixes across Modules 1–6 and the class activities
 
 ### Changed
