@@ -4811,7 +4811,6 @@ function buildModuleReview(mr){
     ? `<div class="ablock mr-forward" style="margin-top:12px"><div class="albl"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" style="width:1em;height:1em;vertical-align:-0.15em"><path d="M9 15l6-6"/><path d="M8 12l-1.5 1.5a3.5 3.5 0 0 0 5 5L13 17"/><path d="M16 12l1.5-1.5a3.5 3.5 0 0 0-5-5L11 7"/></svg> ${t('review.whyMatters')}</div><div class="atxt">${tf(mr,'forward')}</div></div>`
     : '';
   return `
-    ${buildModuleRoutine(mr.moduleNum)}
     <div class="mr-locked-banner">
       <span class="mr-locked-banner-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" style="width:1em;height:1em;vertical-align:-0.15em"><rect x="5" y="11" width="14" height="9" rx="2"/><path d="M8 11V7a4 4 0 0 1 8 0v4"/></svg></span>
       <div><strong>${t('review.previewOnly')}</strong> ${t('review.previewBodyHtml')}</div>
