@@ -5,6 +5,19 @@ Notable changes to the Guitar Class site. Newest first.
 For the full session-by-session history (and the reasoning behind each change),
 see `WORKFLOW.md` and the git commit log.
 
+## 2026-09-20 — Left rail cleanup
+
+### Changed
+
+- **"Practice" is now "Modules," and "In-Class Activities" reads "In class"
+  in the left menu** — shorter labels so nothing wraps to a second line.
+- **Module review** now shows as a plain row at the bottom of "This set,"
+  next to "The lesson" and "My skills checklist," instead of a dashed button
+  under the set buttons above.
+- **The header no longer repeats "Independent Practice and Skills Tracker"**
+  under the site title — one less line taking up room at the top of every
+  page.
+
 ## 2026-09-20 — Removed the practice routine card and the Assessments page
 
 ### Changed

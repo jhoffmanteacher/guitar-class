@@ -160,7 +160,6 @@
   const I18N = {
     // ── Header ──
     'header.title':    { en: 'Sequoia High School – Beginning Guitar', es: 'Sequoia High School – Guitarra para principiantes' },
-    'header.subtitle': { en: 'Independent Practice and Skills Tracker', es: 'Práctica independiente y seguimiento de destrezas' },
     'header.find':     { en: 'Find', es: 'Buscar' },
     'header.signIn':   { en: 'Sign in with Google', es: 'Iniciar sesión con Google' },
     'header.signOut':  { en: 'Sign out', es: 'Cerrar sesión' },
@@ -232,7 +231,11 @@
     'module.loadFailed':  { en: 'Couldn\'t load that module — check your connection and try again.',
       es: 'No se pudo cargar ese módulo — revisa tu conexión e inténtalo de nuevo.' },
     'nav.explore':        { en: 'Explore', es: 'Explorar' },
-    'nav.practice':       { en: 'Practice', es: 'Practicar' },
+    // Renamed from "Practice" 2026-09-20 (left rail nav cleanup) — the label
+    // wasn't saying what pressing it does (open the module picker, headed
+    // "MODULE" right below). Only used here, so the value change is the
+    // whole rename: id, onclick, routing all untouched.
+    'nav.practice':       { en: 'Modules', es: 'Módulos' },
     'nav.games':          { en: 'Games', es: 'Juegos' },
     'nav.songs':          { en: 'Songs', es: 'Canciones' },
     // Kept: still the section heading atop My progress's Keep practicing
@@ -246,6 +249,13 @@
     // stays the same both times, so the hash/deep-link/console-link wiring
     // built on it never moves.
     'nav.classActivities':{ en: 'In-Class Activities', es: 'Actividades de clase' },
+    // Nav-row-only short label (2026-09-20, left rail nav cleanup) — the
+    // rail button's text and title, so a 5-row single-column nav never
+    // wraps. nav.classActivities above is unchanged everywhere else (the
+    // page's own heading/aria-label, the console, the video-panel
+    // breadcrumb) — this is deliberately a second key, not a value change
+    // to the first, so those keep the fuller phrase.
+    'nav.classActivitiesNav': { en: 'In class', es: 'En clase' },
     'nav.moduleReview':   { en: 'Module review', es: 'Repaso del módulo' },
     'nav.setN':           { en: 'Set {n}', es: 'Unidad {n}' },
     // The room's B/C station rotation retired in 2026-08: one group is with the

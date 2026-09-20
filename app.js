@@ -2974,22 +2974,26 @@ function renderPills(moduleNum){
     c.appendChild(btn);
   });
 
-  // Module Review pill — wraps to its own full-width row below the set buttons
-  if(MODULE_REVIEWS[moduleNum]){
-    const locked = isModuleReviewLocked(moduleNum);
-    const rbtn = document.createElement('button');
-    rbtn.className='wpill review-pill'+(locked?' locked':'')+(!locked&&isMrComplete(moduleNum)?' complete':'');
-    rbtn.dataset.id=`mr${moduleNum}`;
-    rbtn.textContent=t('nav.moduleReview');
-    rbtn.setAttribute('data-i18n','nav.moduleReview');
-    rbtn.setAttribute('translate','no'); rbtn.classList.add('notranslate');
-    rbtn.title = locked ? t('gate.reviewPreviewTitle') : '';
-    rbtn.onclick=()=>{ leaveTopPanelForSet(); lastSetId=`mr${moduleNum}`; activateSet(`mr${moduleNum}`); saveProgress(); };
-    rbtn.classList.toggle('active', rbtn.dataset.id===lastSetId);
-    c.appendChild(rbtn);
-    // Sync preview/locked state onto the review's panel so its inputs disable themselves
-    const panel = document.querySelector(`.week-panel[data-id="mr${moduleNum}"]`);
-    if(panel) panel.classList.toggle('mr-locked', locked);
+  // Module Review row — a static button in the rail's "This set" list (see
+  // index.html), not one of the pills rebuilt above. railModuleReview()
+  // reads dataset.moduleNum back off it to know where to navigate.
+  const reviewBtn = document.getElementById('rail-review-btn');
+  if(reviewBtn){
+    const has = !!MODULE_REVIEWS[moduleNum];
+    reviewBtn.hidden = !has;
+    if(has){
+      const locked = isModuleReviewLocked(moduleNum);
+      reviewBtn.dataset.moduleNum = String(moduleNum);
+      reviewBtn.classList.toggle('locked', locked);
+      reviewBtn.classList.toggle('complete', !locked && isMrComplete(moduleNum));
+      reviewBtn.title = locked ? t('gate.reviewPreviewTitle') : '';
+      const on = `mr${moduleNum}` === lastSetId;
+      reviewBtn.classList.toggle('active', on);
+      if(on) reviewBtn.setAttribute('aria-current','true'); else reviewBtn.removeAttribute('aria-current');
+      // Sync preview/locked state onto the review's panel so its inputs disable themselves
+      const panel = document.querySelector(`.week-panel[data-id="mr${moduleNum}"]`);
+      if(panel) panel.classList.toggle('mr-locked', locked);
+    }
   }
 }
 
@@ -3032,6 +3036,14 @@ function activateSet(id, opts){
     Object.keys(shuffleDrills).forEach(k=>sdStop(k));
   }
   document.querySelectorAll('.wpill').forEach(b=>b.classList.toggle('active',b.dataset.id===id));
+  // Module Review row lives outside .wpill now (see renderPills) — keep its
+  // active/aria-current in step with every other set-switch, same as the loop above.
+  const reviewBtn = document.getElementById('rail-review-btn');
+  if(reviewBtn){
+    const on = !!reviewBtn.dataset.moduleNum && `mr${reviewBtn.dataset.moduleNum}` === id;
+    reviewBtn.classList.toggle('active', on);
+    if(on) reviewBtn.setAttribute('aria-current','true'); else reviewBtn.removeAttribute('aria-current');
+  }
   document.querySelectorAll('.week-panel').forEach(p=>{
     const isTarget = p.dataset.id===id;
     p.classList.toggle('active', isTarget);
@@ -3089,6 +3101,19 @@ function railStation(tab){
   leaveTopPanelForSet();
   switchTabById(panel.dataset.id, tab);   // switchTab() calls syncRailStations() to reflect it
 }
+/* The Module Review row at the end of the rail's "This set" list — not a
+   station of the currently open set, so it doesn't go through railStation();
+   it opens its own week-panel the same way a Set 1/2/3 pill does. Reads
+   moduleNum back off the row's own dataset (written by renderPills). */
+function railModuleReview(){
+  const btn = document.getElementById('rail-review-btn');
+  const moduleNum = btn && btn.dataset.moduleNum;
+  if(!moduleNum) return;
+  leaveTopPanelForSet();
+  lastSetId = `mr${moduleNum}`;
+  activateSet(`mr${moduleNum}`);
+  saveProgress();
+}
 /* A rail Part link: open the lesson ladder and land on that part's first
    step. Same addressing as jumpToStep() — the section's storage namespace,
    which is the only stable handle a section has. */
@@ -3114,10 +3139,28 @@ function syncRailStations(){
   if(!group || !list) return;   // teacher view / pre-init: nothing to do
   const panel = activeWeekPanel();
   // Module-review and coming-soon panels carry no .tab-panel, so there is
-  // nothing for the rail's "This set" group to switch between.
-  const hasPanels = panel && panel.querySelector('.tab-panel');
-  if(!hasPanels){ group.hidden = true; return; }
+  // nothing to switch between — but the Module Review row (if this module
+  // has one) still lives at the end of this same list (see renderPills), so
+  // the group only disappears when NEITHER applies.
+  const hasPanels = !!(panel && panel.querySelector('.tab-panel'));
+  const reviewBtn = document.getElementById('rail-review-btn');
+  const hasReview = !!(reviewBtn && !reviewBtn.hidden);
+  if(!hasPanels && !hasReview){ group.hidden = true; return; }
   group.hidden = false;
+  const bBtn = list.querySelector('.rail-station.st-b');
+  const chkBtn = list.querySelector('.rail-station.st-chk');
+  const partsEl = document.getElementById('rail-parts');
+  if(bBtn) bBtn.hidden = !hasPanels;
+  if(chkBtn) chkBtn.hidden = !hasPanels;
+  if(!hasPanels){
+    // Viewing the review (or a coming-soon set) with no tabs to switch —
+    // the row's own active/title state was already set by renderPills()/
+    // activateSet(), so there's nothing else to sync here.
+    if(partsEl) partsEl.hidden = true;
+    const label = document.getElementById('rail-set-label');
+    if(label) label.textContent = t('nav.thisSet');
+    return;
+  }
   const wid = panel.dataset.id;
   const w = (typeof SETS !== 'undefined') ? SETS.find(s=>s.id===wid) : null;
   const label = document.getElementById('rail-set-label');
@@ -3138,7 +3181,6 @@ function syncRailStations(){
      never by DOM position — the ladder runs both stations through one
      panel and render-time hides move rows around, so position identifies
      nothing. Hidden for every other set, which is every set but m5w2. */
-  const partsEl = document.getElementById('rail-parts');
   if(partsEl){
     const lp = (w && !w.comingSoon) ? lessonParts(w) : null;
     partsEl.hidden = !lp;
@@ -4901,7 +4943,7 @@ function finishModuleReview(moduleNum){
   progress[`mr${moduleNum}-complete`]='gotit';
   saveProgress();
   syncMrDone(moduleNum);
-  renderPills(moduleNum);              // the review pill goes green
+  renderPills(moduleNum);              // the review row goes green
   gateToast(t('review.doneToast',{n:moduleNum}));
   goToNextModule(moduleNum);
 }

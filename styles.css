@@ -39,7 +39,11 @@
   --shadow-card:0 1px 5px rgba(30,27,70,0.07);
   --shadow-raised:0 10px 36px rgba(30,27,70,0.28);
   --radius:10px;--radius-sm:6px;
-  --hdr:70px;
+  /* 60px, not 70 — the header lost its subtitle line ("Independent Practice
+     and Skills Tracker", 2026-09-20 nav cleanup follow-up) and is one line
+     tall everywhere now, so the short-screen override below is the same
+     header at tighter padding, not a second one. */
+  --hdr:60px;
   /* height of the sticky .set-eyebrow band — the only thing that overlaps a
      scroll target inside the .main scrollport (see scroll-margin-top below) */
   --eyebrow:56px;
@@ -76,7 +80,6 @@
 body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,"Helvetica Neue",Arial,sans-serif;background:var(--bg2);color:var(--text);min-height:100dvh;-webkit-font-smoothing:antialiased;text-rendering:optimizeLegibility}
 .header{background:var(--brand);color:#fff;border-bottom:1px solid rgba(255,255,255,0.10);padding:14px 20px;display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;z-index:20;box-shadow:0 1px 2px rgba(0,0,0,0.08)}
 .header-title{font-size:1.375rem;font-weight:600;color:#fff;line-height:1.2;letter-spacing:-0.01em;font-family:var(--font-display)}
-.header-sub{font-size:0.875rem;color:rgba(255,255,255,0.82);margin-top:2px;line-height:1.25}
 .header .btn-sign,.header .btn-out,.header .btn-translate{color:#fff;border-color:rgba(255,255,255,0.45);background:transparent}
 .header .btn-sign:hover,.header .btn-out:hover,.header .btn-translate:hover{background:rgba(255,255,255,0.12)}
 .header .btn-translate.active{background:rgba(255,255,255,0.18);color:#fff;border-color:#fff}
@@ -149,20 +152,12 @@ body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,"Helvetica N
 .wpill.locked{color:var(--text3);cursor:pointer}
 /* Sequential-gate lock: a stroke padlock before a set that isn't unlocked
    yet, matching the site's other stroke icons (mask-image so it inherits
-   currentColor instead of shipping a fixed-color emoji). The review pill
-   has its own lock rule below, so exclude it here to avoid two padlocks. */
-.wpill.locked:not(.review-pill)::before{content:'';display:inline-block;width:11px;height:11px;margin-right:5px;vertical-align:-1px;opacity:.85;background-color:currentColor;-webkit-mask-image:var(--icon-lock);mask-image:var(--icon-lock);-webkit-mask-size:contain;mask-size:contain;-webkit-mask-repeat:no-repeat;mask-repeat:no-repeat;-webkit-mask-position:center;mask-position:center}
+   currentColor instead of shipping a fixed-color emoji). */
+.wpill.locked::before{content:'';display:inline-block;width:11px;height:11px;margin-right:5px;vertical-align:-1px;opacity:.85;background-color:currentColor;-webkit-mask-image:var(--icon-lock);mask-image:var(--icon-lock);-webkit-mask-size:contain;mask-size:contain;-webkit-mask-repeat:no-repeat;mask-repeat:no-repeat;-webkit-mask-position:center;mask-position:center}
 .wpill.complete:not(.active){background:var(--green-bg);color:var(--green-text);border-color:var(--green-text)}
 .wpill-check{font-weight:700;margin-right:5px}
 .wpill-frac{font-size:0.75rem;margin-left:1px;font-variant-numeric:tabular-nums;color:var(--amber-text)}
 .wpill.active .wpill-frac{color:inherit;opacity:.85}
-/* Dashed means "locked / provisional / dev-only" — nothing else. An ordinary
-   content link is never dashed (see .song-thread-link, a solid underline). */
-.wpill.review-pill{border-style:dashed;border-color:var(--purple-accent);color:var(--purple-text);background:var(--purple-bg2)}
-.wpill.review-pill:hover{background:var(--purple-bg);border-color:var(--purple-text);color:var(--purple-text)}
-.wpill.review-pill.active{background:var(--purple-text);color:var(--bg);border-color:var(--purple-text);border-style:solid}
-.wpill.review-pill.locked{color:var(--purple-accent)}
-.wpill.review-pill.locked::before{content:'';display:inline-block;width:11px;height:11px;margin-right:5px;vertical-align:-1px;opacity:.85;background-color:currentColor;-webkit-mask-image:var(--icon-lock);mask-image:var(--icon-lock);-webkit-mask-size:contain;mask-size:contain;-webkit-mask-repeat:no-repeat;mask-repeat:no-repeat;-webkit-mask-position:center;mask-position:center}
 .week-panel.mr-locked .mr-rb,
 .week-panel.mr-locked .reflection-ta,
 .week-panel.mr-locked .mr-play-song,
@@ -740,19 +735,21 @@ body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,"Helvetica N
 .rail-group{padding:0 2px}
 .rail-sec-label{font-size:0.75rem;text-transform:uppercase;letter-spacing:0.09em;
   color:var(--text3);font-weight:600;margin-bottom:6px;display:flex;align-items:center;gap:7px}
-/* module-complete reward badge: greyed until the CURRENT module is fully done */
+/* module-complete reward badge: greyed until the CURRENT module is fully done.
+   Lives on the Module review row now (2026-09-20) — .rail-station .sec-goal
+   below overrides the auto-margin that used to push it to the right of the
+   MODULE heading, so it sits as a plain leading .rs-num badge instead. */
 .sec-goal{margin-left:auto;display:inline-flex;color:var(--text3)}
 .sec-goal svg{width:15px;height:15px}
 .sec-goal.earned{color:var(--purple-accent)}
+.rail-station .sec-goal{margin-left:0}
+.rail-station .sec-goal svg{width:14px;height:14px}
 /* module dropdown fills the rail width */
 .rail .module-select{width:100%;max-width:none;flex:none}
-/* Set switcher: the wpills sit side by side as buttons under the module
-   dropdown; the Module review pill drops to its own full-width row below */
+/* Set switcher: the wpills sit side by side as buttons under the module dropdown */
 .rail .week-pills{margin:10px 0 0}
 .rail .wpill{flex:1 1 0;text-align:center;padding:7px 8px;font-size:0.875rem;border-radius:8px;white-space:nowrap}
 .rail .wpill.active{background:var(--purple-bg);border-color:var(--purple-accent);color:var(--purple-text);font-weight:600}
-.rail .wpill.review-pill{flex-basis:100%}
-.rail .wpill.review-pill.active{background:var(--purple-bg);color:var(--purple-text);border-style:solid;border-color:var(--purple-accent);font-weight:600}
 /* 4+ sets in a module: tighter buttons so one rail row still fits them all
    (the "· 2/6" started-set fraction is hidden at this size — the green
    complete state and the aria-labels still carry the progress info) */
@@ -787,20 +784,43 @@ body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,"Helvetica N
    purple wash (below), same selection metaphor as sets and Explore. */
 .rail-station.st-b .rs-num{background:var(--blue-bg);color:var(--blue-text)}
 .rail-station.st-chk .rs-num{background:var(--amber-bg);color:var(--amber-text)}
+/* Module review row (2026-09-20) — a plain row like the two above, not the
+   dashed pill it used to be. Its badge is the sec-goal trophy (colored via
+   .earned, above); .complete/.locked are about the REVIEW's own state
+   (isMrComplete/isModuleReviewLocked), independent of the trophy's module-
+   skills-done state, so both can show at once. */
+.rail-station.st-review.complete:not(.active) .rs-title{color:var(--green-text)}
+.rail-station.st-review.locked{opacity:.75}
 /* Active station = the same purple wash as sets and Explore — one selection
    metaphor for the whole rail. The .rs-num badge keeps its own station
    color (see above); no white-on-color inversion. */
 .rail-station.active{background:var(--purple-bg)}
 .rail-station.active .rs-title{color:var(--purple-text)}
-/* Explore nav */
-.nav-list{display:flex;flex-direction:column;gap:3px}
-.nav-btn{display:flex;align-items:center;gap:11px;width:100%;text-align:left;
-  padding:7px 12px;border-radius:8px;border:1px solid transparent;background:transparent;
-  color:var(--text);font-size:0.9375rem;font-family:inherit;cursor:pointer;transition:background .13s}
-.nav-btn .ico{width:20px;height:20px;flex:0 0 20px;display:flex;align-items:center;justify-content:center;color:var(--text2)}
-.nav-btn .ico svg{width:18px;height:18px}
+/* Divider between the five main nav rows and the active item's own section
+   panel below (left rail nav cleanup, 2026-09-20). */
+.rail-divider{height:1px;background:var(--border);margin:2px 2px 0;flex:0 0 auto}
+.rail-panel{display:flex;flex-direction:column;gap:14px}
+/* Explore nav — two columns, every screen size (2026-09-20: reverted from a
+   single full-width column after that version measured 106-132px of rail
+   overflow on the 1366×657 Chromebook viewport CLAUDE.md's short-screen rail
+   work order was written against — see WORKFLOW.md. Every row is the same
+   size regardless of content or state (icon + short label, both languages),
+   so nothing here wraps or grows — that's what makes the grid safe: the
+   short "In class"/"Modules" labels (below the rename) fit a ~108px column
+   without it. My progress spans both columns on its own row so five items
+   never leave a lone cell stranded in column 1 (the original bug). */
+.nav-list{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:4px 6px}
+.nav-btn{display:flex;align-items:center;gap:6px;width:100%;text-align:left;
+  padding:8px 6px;border-radius:8px;border:1px solid transparent;background:transparent;
+  color:var(--text);font-size:0.8125rem;line-height:1.2;font-family:inherit;cursor:pointer;transition:background .13s}
+.nav-btn .ico{width:17px;height:17px;flex:0 0 17px;display:flex;align-items:center;justify-content:center;color:var(--text2)}
+.nav-btn .ico svg{width:16px;height:16px}
+#my-progress-btn{grid-column:1/-1}
 .nav-btn:hover{background:rgba(0,0,0,0.05)}
-.nav-btn.active{background:var(--purple-bg);color:var(--purple-text);font-weight:600}
+/* Background + text color only (left rail nav cleanup, 2026-09-20) — no
+   font-weight or size change, so picking an item never reflows its row or
+   makes it read as a bigger pill than its neighbors. */
+.nav-btn.active{background:var(--purple-bg);color:var(--purple-text)}
 .nav-btn.active .ico{color:var(--purple-accent)}
 /* ca-nav keeps its amber icon even when active — the point is that this
    item never blends into the purple "you're here" treatment shared by
@@ -851,61 +871,37 @@ body.rail-collapsed .rail-tools .fab-buttons{grid-template-columns:1fr}
    either rail state. */
 body.rail-collapsed .rail-tools .tool-popup{
   left:calc(100% + 6px);right:auto;width:250px;bottom:8px}
-/* ── Short-screen rail (2026-09-19) ──────────────────────────────────
+/* ── Short-screen rail (2026-09-19; nav grid made permanent 2026-09-20) ──
    A Chromebook with browser chrome is 657px tall, which leaves the rail
-   559px to show 656px of content — so "This set" (the lesson / checklist
-   switcher and, on a set shown in two parts, its Part 1 / Part 2 jump
-   links) sat below the fold on the one page it belongs to. Everything
-   here is packing, not pruning: every rail item is still present and in
-   the same order, and a screen tall enough not to need this keeps the
-   roomier spacing. The one thing that is actually dropped is the two
-   station subtitles — "Watch · Listen · Practice" and "Track what you
-   can do" — which restate their own titles.
-   Gated below the drawer breakpoint too: on a phone the rail is a
-   full-height overlay that scrolls, so it was never the problem.
-   Measured worst case, m5w2 (4 sets + Module review, two parts), with
-   no Preview-mode notice: 656px → 543px in 559px. */
+   559px to show packed content — so "This set" (the lesson / checklist /
+   Module review switcher and, on a set shown in two parts, its Part 1 /
+   Part 2 jump links) sat below the fold on the one page it belongs to.
+   The two-column nav (above) used to be scoped to this query alone; the
+   left rail nav cleanup (2026-09-20) tried going single-column everywhere
+   instead, measured 106-132px of overflow here as a result (every module,
+   not just the worst case), and put the grid back — permanently this time,
+   not conditionally, so this block is packing spacing only, not nav layout.
+   Confirmed zero overflow again at 1366×657 with Modules active. Gated
+   below the drawer breakpoint too: on a phone the rail is a full-height
+   overlay that scrolls, so it was never the problem. */
 @media(min-width:761px) and (max-height:800px){
-  .rail-scroll{gap:10px}
-  .rail-sec-label{margin-bottom:3px}
-  .nav-list{gap:2px}
-  .nav-btn{padding:4px 12px}
-  .rail .module-select{padding-top:4px;padding-bottom:4px}
-  .rail .week-pills{margin-top:6px}
+  .rail-scroll{gap:6px}
+  .rail-panel{gap:8px}
+  .rail-divider{margin-top:0}
+  .rail-sec-label{margin-bottom:2px}
+  .nav-list{gap:2px 6px}
+  /* Specificity, not just source order: .preview-note's own base rule
+     (0,0,1,0) sits much later in this file, so a same-weight override up
+     here would lose the cascade regardless of the media query matching. */
+  .rail-scroll .preview-note{padding:4px 8px;line-height:1.3}
+  .rail .module-select{padding-top:3px;padding-bottom:3px}
+  .rail .week-pills{margin-top:4px}
   .rail .wpill{padding-top:5px;padding-bottom:5px}
-  .rail-station-list{gap:4px}
+  .rail-station-list{gap:2px}
   .rail-station{padding:6px 11px}
+  .rail-parts{margin:-2px 0 0 44px}
+  .rail-part{padding:2px 10px}
   .rs-sub{display:none}
-  /* Packing alone does not close the gap, because the rail's buttons sit
-     on a floor: .nav-btn / .rail-station / .wpill all carry min-height:44px
-     from the tap-target pass near the bottom of this file, and a
-     Chromebook is exactly the touch device that pass was written for. So
-     the page nav goes to TWO columns instead of getting shorter — six
-     44px rows become three — and only on the page that needs the room.
-     Practice is the one page that also has to show the module picker, the
-     set pills and the "This set" switcher underneath; every other page
-     has rail to spare, so it keeps the full-width list.
-     Labels wrap to a second line rather than ellipsizing: "In-Class
-     Activities" and "Mi progreso" both need it, and a cut-off nav item
-     with no cue as to what was cut is the thing this is avoiding. */
-  /* minmax(0,1fr), not 1fr: a plain 1fr floors at the item's own content
-     width, so "In-Class Activities" made its column wider than the other
-     and the two halves came out 98px / 123px. */
-  body:not(.explore-open):not(.games-open):not(.rail-collapsed) .nav-list{
-    display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:2px}
-  /* Sized against the longest UNBREAKABLE label in either language —
-     was "Assessments" (75px at this size) / "Evaluaciones" (74px), the
-     Assessments button retired 2026-09-20. What's left — "Activities"
-     (from "In-Class Activities") / "Actividades" — is shorter, so this
-     sizing is now a safe upper bound rather than a tight fit; nothing to
-     shrink unless someone wants to. 12px text, a 16px icon and 4px side
-     padding: 79px of room. 0.75rem is already the rail's own label size,
-     so it is not a new smallest-text-on-the-page. Re-measure the current
-     longest word before tightening any of the four numbers. */
-  body:not(.explore-open):not(.games-open):not(.rail-collapsed) .nav-btn{
-    gap:5px;padding:4px;font-size:0.75rem;line-height:1.2}
-  body:not(.explore-open):not(.games-open):not(.rail-collapsed) .nav-btn .ico{width:16px;height:16px;flex:0 0 16px}
-  body:not(.explore-open):not(.games-open):not(.rail-collapsed) .nav-btn .ico svg{width:16px;height:16px}
 }
 /* the per-set tab switcher now lives in the rail — hide the in-panel one on screen
    (its buttons + tab-panels stay in the DOM so all existing tab logic keeps working) */
@@ -2117,16 +2113,15 @@ li.step.step-flash{animation:stepFlash 2.6s ease-out}
    The right-hand button row (Find · Español · avatar · name · Sign out) is
    ~300px wide and can't wrap, so on a 390px phone the title was left ~60px
    and wrapped one word per line, stacking the header several lines tall
-   under the buttons. Reclaim the space: drop the subtitle and the user's
-   display name (avatar + Sign out remain), clamp the title to two lines,
-   and tighten the gaps. */
+   under the buttons. Reclaim the space: drop the user's display name
+   (avatar + Sign out remain), clamp the title to two lines, and tighten
+   the gaps. */
 @media (max-width:480px){
   .header{padding:10px 12px;gap:8px}
   .header>div{gap:6px !important;min-width:0}
   .header>div:first-child{flex:1 1 auto}
   .header>div:last-child{flex:0 0 auto}
   .header-title{font-size:1rem;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
-  .header-sub{display:none}
   .header .user-name{display:none}
   .user-area{gap:6px}
   .btn-translate{padding:4px 9px;font-size:0.8125rem}
@@ -2137,16 +2132,15 @@ li.step.step-flash{animation:stepFlash 2.6s ease-out}
 /* ── Chromebook rail work order (2026-09-19): shorter header on short
    screens ── A Chromebook's own browser chrome (tabs/URL bar/bookmarks bar)
    leaves less vertical room than a phone or a full-height laptop window, so
-   the ~70px header cost more of the first screenful there than anywhere the
-   site had been tested. This is a viewport-HEIGHT query, not the
-   phone-WIDTH one above — a short wide window and a narrow tall one are
-   different problems. --hdr drives #app's height calc and every sticky
-   offset (rail, .t-board-built, scroll-margin-top), so redefining it here
-   keeps all of them in sync automatically. */
+   the header cost more of the first screenful there than anywhere the site
+   had been tested. This is a viewport-HEIGHT query, not the phone-WIDTH one
+   above — a short wide window and a narrow tall one are different problems.
+   --hdr drives #app's height calc and every sticky offset (rail,
+   .t-board-built, scroll-margin-top), so redefining it here keeps all of
+   them in sync automatically. */
 @media (max-height:800px){
   :root{--hdr:48px}
   .header{padding:8px 20px}
-  .header-sub{display:none}
 }
 
 /* ── Design pass: tuner "in tune!" success moment ── */
