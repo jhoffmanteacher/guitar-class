@@ -481,8 +481,8 @@ window.CLASS_ACTIVITIES = [
       {
         label:    'The Ladder',
         label_es: 'La Escalera',
-        text: 'Event 1 — the Ladder. One finger per fret.<ul><li>Index → fret 1, middle → 2, ring → 3, pinky → 4</li><li>Set the BPM to 50 — one note per click</li><li>Fingertips on their tips, thumb BEHIND the neck</li></ul>You\'ve got it when: all four notes ring clean — no buzz — three times in a row. Buzz twice? Drop the BPM by 10 and try again.',
-        text_es: 'Evento 1 — la Escalera. Un dedo por traste.<ul><li>Índice → traste 1, medio → 2, anular → 3, meñique → 4</li><li>Pon el BPM en 50 — una nota por clic</li><li>Puntas de los dedos, pulgar DETRÁS del mástil</li></ul>Lo tienes cuando: las cuatro notas suenan limpias — sin zumbido — tres veces seguidas. ¿Zumbó dos veces? Baja el BPM 10 puntos y vuelve a intentarlo.',
+        text: 'Event 1 — the Ladder. Play the tab below, one finger per fret — the circled number under each note is the finger it wants.<ul><li>Set the BPM to 50 — one note per click</li><li>Fingertips on their tips, thumb BEHIND the neck</li></ul>You\'ve got it when: all four notes ring clean — no buzz — three times in a row. Buzz twice? Drop the BPM by 10 and try again.',
+        text_es: 'Evento 1 — la Escalera. Toca la tablatura de abajo, un dedo por traste — el número en el círculo debajo de cada nota es el dedo que va ahí.<ul><li>Pon el BPM en 50 — una nota por clic</li><li>Puntas de los dedos, pulgar DETRÁS del mástil</li></ul>Lo tienes cuando: las cuatro notas suenan limpias — sin zumbido — tres veces seguidas. ¿Zumbó dos veces? Baja el BPM 10 puntos y vuelve a intentarlo.',
         tab: {
           caption: 'The Ladder · position 1',
           caption_es: 'La Escalera · posición 1',
@@ -497,8 +497,8 @@ window.CLASS_ACTIVITIES = [
       {
         label:    'The Ladder shift',
         label_es: 'El cambio de la Escalera',
-        text: 'Add the shift.<ul><li>Climb 1-2-3-4</li><li>Slide the whole hand up one fret — fingers keep their spacing</li><li>Climb 2-3-4-5</li></ul>You\'ve got it when: two full climbs back to back and your thumb stays behind the neck the whole way.',
-        text_es: 'Agrega el cambio.<ul><li>Sube 1-2-3-4</li><li>Desliza toda la mano un traste hacia arriba — los dedos mantienen su separación</li><li>Sube 2-3-4-5</li></ul>Lo tienes cuando: dos subidas completas seguidas y tu pulgar se queda detrás del mástil todo el tiempo.',
+        text: 'Add the shift: climb, slide the whole hand up one fret — fingers keeping their spacing — then climb again from there.\nYou\'ve got it when: two full climbs back to back and your thumb stays behind the neck the whole way.',
+        text_es: 'Agrega el cambio: sube, desliza toda la mano un traste hacia arriba — los dedos mantienen su separación — y sube otra vez desde ahí.\nLo tienes cuando: dos subidas completas seguidas y tu pulgar se queda detrás del mástil todo el tiempo.',
         tab: {
           caption: 'The Ladder · with the shift',
           caption_es: 'La Escalera · con el cambio',
@@ -517,8 +517,8 @@ window.CLASS_ACTIVITIES = [
       {
         label:    'The Spider',
         label_es: 'La Araña',
-        text: 'Event 2 — the Spider. Same four fingers, two strings.<ul><li>Alternate: low E, A, low E, A</li><li>Watch for this: finger 3 tends to follow finger 2 onto the A string — keep it on the low E</li><li>Shift up one fret and repeat</li></ul>You\'ve got it when: one full pass with every note on the right string, any speed.',
-        text_es: 'Evento 2 — la Araña. Los mismos cuatro dedos, dos cuerdas.<ul><li>Alterna: Mi grave, La, Mi grave, La</li><li>Ojo con esto: el dedo 3 tiende a seguir al dedo 2 hacia la cuerda La — mantenlo en el Mi grave</li><li>Sube un traste y repite</li></ul>Lo tienes cuando: una pasada completa con cada nota en la cuerda correcta, a cualquier velocidad.',
+        text: 'Event 2 — the Spider. Same four fingers, alternating between two strings.<ul><li>Watch for this: finger 3 tends to follow finger 2 onto the A string — keep it on the low E</li><li>Shift up one fret and repeat</li></ul>You\'ve got it when: one full pass with every note on the right string, any speed.',
+        text_es: 'Evento 2 — la Araña. Los mismos cuatro dedos, alternando entre dos cuerdas.<ul><li>Ojo con esto: el dedo 3 tiende a seguir al dedo 2 hacia la cuerda La — mantenlo en el Mi grave</li><li>Sube un traste y repite</li></ul>Lo tienes cuando: una pasada completa con cada nota en la cuerda correcta, a cualquier velocidad.',
         tab: {
           caption: 'The Spider · cross the strings',
           caption_es: 'La Araña · cruza las cuerdas',
@@ -537,8 +537,8 @@ window.CLASS_ACTIVITIES = [
       {
         label:    'The Reach',
         label_es: 'El Estiramiento',
-        text: 'Event 3 — the Reach.<ul><li>Plant finger 1 on fret 1 — it stays there</li><li>Reach your pinky to fret 5, then bring it back (fret 4 counts too)</li><li>Stretch, never pain — if it hurts, stop</li></ul>You\'ve got it when: four reaches in a row and finger 1 never lifts.',
-        text_es: 'Evento 3 — el Estiramiento.<ul><li>Planta el dedo 1 en el traste 1 — se queda ahí</li><li>Estira el meñique hasta el traste 5 y regrésalo (el traste 4 también cuenta)</li><li>Estira sin dolor — si duele, detente</li></ul>Lo tienes cuando: cuatro estiramientos seguidos y el dedo 1 nunca se levanta.',
+        text: 'Event 3 — the Reach. Finger 1 plants on the low fret and stays there while the pinky reaches out and comes back.<ul><li>One fret short still counts if the full reach is too far today</li><li>Stretch, never pain — if it hurts, stop</li></ul>You\'ve got it when: four reaches in a row and finger 1 never lifts.',
+        text_es: 'Evento 3 — el Estiramiento. El dedo 1 se planta en el traste bajo y se queda ahí mientras el meñique se estira y regresa.<ul><li>Un traste menos también cuenta si hoy el estiramiento completo te queda lejos</li><li>Estira sin dolor — si duele, detente</li></ul>Lo tienes cuando: cuatro estiramientos seguidos y el dedo 1 nunca se levanta.',
         tab: {
           caption: 'The Reach · finger 1 stays down',
           caption_es: 'El Estiramiento · el dedo 1 no se levanta',
@@ -578,8 +578,8 @@ window.CLASS_ACTIVITIES = [
       {
         label:    'Down the Ladder',
         label_es: 'Bajando la Escalera',
-        text: 'The Ladder backwards. Your pinky is the weakest finger, so it goes FIRST.<ul><li>Set the BPM to 50</li><li>Pinky → fret 4, ring → 3, middle → 2, index → 1</li></ul>You\'ve got it when: all four notes ring clean — no buzz — three times in a row. Buzz twice? Drop the BPM by 10 and try again.',
-        text_es: 'La Escalera al revés. Tu meñique es el dedo más débil, por eso va PRIMERO.<ul><li>Pon el BPM en 50</li><li>Meñique → traste 4, anular → 3, medio → 2, índice → 1</li></ul>Lo tienes cuando: las cuatro notas suenan limpias — sin zumbido — tres veces seguidas. ¿Zumbó dos veces? Baja el BPM 10 puntos y vuelve a intentarlo.',
+        text: 'Play the tab below — the Ladder backwards. It starts with your pinky, because that is the weakest finger. Set the BPM to 50.\nYou\'ve got it when: all four notes ring clean — no buzz — three times in a row. Buzz twice? Drop the BPM by 10 and try again.',
+        text_es: 'Toca la tablatura de abajo — la Escalera al revés. Empieza con el meñique, porque es el dedo más débil. Pon el BPM en 50.\nLo tienes cuando: las cuatro notas suenan limpias — sin zumbido — tres veces seguidas. ¿Zumbó dos veces? Baja el BPM 10 puntos y vuelve a intentarlo.',
         tab: {
           caption: 'Down the Ladder · pinky leads',
           caption_es: 'Bajando la Escalera · el meñique va primero',
@@ -594,8 +594,8 @@ window.CLASS_ACTIVITIES = [
       {
         label:    'Up and back',
         label_es: 'Subir y bajar',
-        text: 'Climb up, then come straight back down — no pause at the top.<ul><li>Frets 1 → 2 → 3 → 4, then 3 → 2 → 1</li><li>Fret 4 gets played once, not twice</li></ul>You\'ve got it when: four times through without stopping.',
-        text_es: 'Sube y después baja de inmediato — sin pausa arriba.<ul><li>Trastes 1 → 2 → 3 → 4, y después 3 → 2 → 1</li><li>El traste 4 se toca una sola vez, no dos</li></ul>Lo tienes cuando: cuatro veces seguidas sin detenerte.',
+        text: 'Climb up, then come straight back down — no pause at the top. The top note gets played once, not twice.\nYou\'ve got it when: four times through without stopping.',
+        text_es: 'Sube y después baja de inmediato — sin pausa arriba. La nota de arriba se toca una sola vez, no dos.\nLo tienes cuando: cuatro veces seguidas sin detenerte.',
         tab: {
           caption: 'Up and back · one turnaround',
           caption_es: 'Subir y bajar · una vuelta',
@@ -682,8 +682,8 @@ window.CLASS_ACTIVITIES = [
       {
         label:    '5th position Ladder',
         label_es: 'Escalera en 5.ª posición',
-        text: 'The Ladder in 5th position.<ul><li>Index on fret 5 — it sits on a dot, that\'s how you know you\'re home</li><li>Set the BPM to 50</li><li>One finger per fret, up to 8</li></ul>You\'ve got it when: all four notes clean, no buzz, three times in a row. Buzz twice? Drop the BPM by 10 and try again.',
-        text_es: 'La Escalera en la 5.ª posición.<ul><li>Índice en el traste 5 — queda sobre un punto, así sabes que estás en tu lugar</li><li>Pon el BPM en 50</li><li>Un dedo por traste, hasta el 8</li></ul>Lo tienes cuando: las cuatro notas limpias, sin zumbido, tres veces seguidas. ¿Zumbó dos veces? Baja el BPM 10 puntos y vuelve a intentarlo.',
+        text: 'The Ladder in 5th position, one finger per fret.<ul><li>Index on fret 5 — it sits on a dot, that\'s how you know you\'re home</li><li>Set the BPM to 50</li></ul>You\'ve got it when: all four notes clean, no buzz, three times in a row. Buzz twice? Drop the BPM by 10 and try again.',
+        text_es: 'La Escalera en la 5.ª posición, un dedo por traste.<ul><li>Índice en el traste 5 — queda sobre un punto, así sabes que estás en tu lugar</li><li>Pon el BPM en 50</li></ul>Lo tienes cuando: las cuatro notas limpias, sin zumbido, tres veces seguidas. ¿Zumbó dos veces? Baja el BPM 10 puntos y vuelve a intentarlo.',
         tab: {
           caption: '5th position · index on the dot',
           caption_es: '5.ª posición · el índice sobre el punto',
@@ -698,8 +698,8 @@ window.CLASS_ACTIVITIES = [
       {
         label:    'The shift up',
         label_es: 'El cambio hacia arriba',
-        text: 'Add the shift, two frets up this time.<ul><li>Climb 5-6-7-8</li><li>Slide the whole hand to 7 — it travels as one piece</li><li>Climb 7-8-9-10</li></ul>You\'ve got it when: two full climbs back to back and your thumb stays behind the neck the whole way.',
-        text_es: 'Agrega el cambio, esta vez dos trastes.<ul><li>Sube 5-6-7-8</li><li>Desliza toda la mano al 7 — viaja como una sola pieza</li><li>Sube 7-8-9-10</li></ul>Lo tienes cuando: dos subidas completas seguidas y tu pulgar se queda detrás del mástil todo el tiempo.',
+        text: 'Add the shift, two frets up this time: climb, slide the whole hand up — it travels as one piece — then climb again from there.\nYou\'ve got it when: two full climbs back to back and your thumb stays behind the neck the whole way.',
+        text_es: 'Agrega el cambio, esta vez dos trastes: sube, desliza toda la mano hacia arriba — viaja como una sola pieza — y sube otra vez desde ahí.\nLo tienes cuando: dos subidas completas seguidas y tu pulgar se queda detrás del mástil todo el tiempo.',
         tab: {
           caption: '5th position into 7th',
           caption_es: 'De la 5.ª posición a la 7.ª',
@@ -718,8 +718,8 @@ window.CLASS_ACTIVITIES = [
       {
         label:    'The jump',
         label_es: 'El salto',
-        text: 'Play the jump — one note each, no walking up.<ul><li>Index: fret 1 → fret 5 → fret 9</li><li>Look at the dot, then move</li><li>After three tries: look away and let your hand find it</li></ul>You\'ve got it when: you can look away and land all three, three times out of three.',
-        text_es: 'Toca el salto — una nota en cada uno, sin caminar.<ul><li>Índice: traste 1 → traste 5 → traste 9</li><li>Mira el punto y muévete</li><li>Después de tres intentos: voltea la mirada y deja que tu mano lo encuentre</li></ul>Lo tienes cuando: puedes voltear la mirada y caer en los tres, tres de tres veces.',
+        text: 'Play the jump — three notes, one index finger, no walking up in between.<ul><li>Look at the dot, then move</li><li>After three tries: look away and let your hand find it</li></ul>You\'ve got it when: you can look away and land all three, three times out of three.',
+        text_es: 'Toca el salto — tres notas, un solo dedo índice, sin caminar entre ellas.<ul><li>Mira el punto y muévete</li><li>Después de tres intentos: voltea la mirada y deja que tu mano lo encuentre</li></ul>Lo tienes cuando: puedes voltear la mirada y caer en los tres, tres de tres veces.',
         tab: {
           caption: 'Jump · fret 1 to 5 to 9',
           caption_es: 'Salto · del traste 1 al 5 al 9',
@@ -774,8 +774,8 @@ window.CLASS_ACTIVITIES = [
       {
         label:    'Plant as you go',
         label_es: 'Planta y sigue',
-        text: 'Plant as you go.<ul><li>Set the BPM to 50</li><li>Climb 1-2-3-4 — each finger STAYS where it lands</li><li>By the last note, all four fingers are on the string at once</li></ul>You\'ve got it when: at fret 4 all four fingers are still touching, three times in a row. Buzz twice? Drop the BPM by 10 and try again.',
-        text_es: 'Planta y sigue.<ul><li>Pon el BPM en 50</li><li>Sube 1-2-3-4 — cada dedo SE QUEDA donde cayó</li><li>En la última nota, los cuatro dedos están sobre la cuerda a la vez</li></ul>Lo tienes cuando: al llegar al traste 4 los cuatro dedos siguen apoyados, tres veces seguidas. ¿Zumbó dos veces? Baja el BPM 10 puntos y vuelve a intentarlo.',
+        text: 'Plant as you go — climb the tab below, and each finger STAYS where it lands.<ul><li>Set the BPM to 50</li><li>By the last note, all four fingers are on the string at once</li></ul>You\'ve got it when: at the last note all four fingers are still touching, three times in a row. Buzz twice? Drop the BPM by 10 and try again.',
+        text_es: 'Planta y sigue — sube la tablatura de abajo, y cada dedo SE QUEDA donde cayó.<ul><li>Pon el BPM en 50</li><li>En la última nota, los cuatro dedos están sobre la cuerda a la vez</li></ul>Lo tienes cuando: en la última nota los cuatro dedos siguen apoyados, tres veces seguidas. ¿Zumbó dos veces? Baja el BPM 10 puntos y vuelve a intentarlo.',
         tab: {
           caption: 'Plant as you go · nothing lifts',
           caption_es: 'Planta y sigue · nada se levanta',
@@ -790,8 +790,8 @@ window.CLASS_ACTIVITIES = [
       {
         label:    'Pair 1-3',
         label_es: 'Pareja 1-3',
-        text: 'Pair 1-3 — finger independence: one finger moves while the others don\'t.<ul><li>Alternate: finger 1 on fret 1, finger 3 on fret 3, back and forth</li><li>The two fingers not playing stay down on their frets</li></ul>You\'ve got it when: eight clean alternations in a row.',
-        text_es: 'Pareja 1-3 — independencia de dedos: un dedo se mueve mientras los otros no.<ul><li>Alterna: dedo 1 en el traste 1, dedo 3 en el traste 3, ida y vuelta</li><li>Los dos dedos que no tocan se quedan abajo en sus trastes</li></ul>Lo tienes cuando: ocho alternancias limpias seguidas.',
+        text: 'Pair 1-3 — finger independence: one finger moves while the others don\'t.<ul><li>Alternate the two notes in the tab, back and forth</li><li>The two fingers not playing stay down on their frets</li></ul>You\'ve got it when: eight clean alternations in a row.',
+        text_es: 'Pareja 1-3 — independencia de dedos: un dedo se mueve mientras los otros no.<ul><li>Alterna las dos notas de la tablatura, ida y vuelta</li><li>Los dos dedos que no tocan se quedan abajo en sus trastes</li></ul>Lo tienes cuando: ocho alternancias limpias seguidas.',
         tab: {
           caption: 'Pair 1-3',
           caption_es: 'Pareja 1-3',
@@ -863,8 +863,8 @@ window.CLASS_ACTIVITIES = [
       {
         label:    'The skip',
         label_es: 'El salto',
-        text: 'The skip.<ul><li>Index → low E string, fret 1; ring → D string, fret 3</li><li>Jump over the A string — it stays SILENT</li><li>Pick straight down onto the string you want</li></ul>You\'ve got it when: eight jumps in a row and the A string never rings. Hear it ring twice? Drop the BPM by 10 and try again.',
-        text_es: 'El salto.<ul><li>Índice → cuerda Mi grave, traste 1; anular → cuerda Re, traste 3</li><li>Salta por encima de la cuerda La — se queda EN SILENCIO</li><li>Pulsa directo hacia abajo sobre la cuerda que quieres</li></ul>Lo tienes cuando: ocho saltos seguidos y la cuerda La nunca suena. ¿La oyes sonar dos veces? Baja el BPM 10 puntos y vuelve a intentarlo.',
+        text: 'The skip — the two notes in the tab sit on strings that aren\'t neighbours.<ul><li>Jump over the A string — it stays SILENT</li><li>Pick straight down onto the string you want</li></ul>You\'ve got it when: eight jumps in a row and the A string never rings. Hear it ring twice? Drop the BPM by 10 and try again.',
+        text_es: 'El salto — las dos notas de la tablatura están en cuerdas que no son vecinas.<ul><li>Salta por encima de la cuerda La — se queda EN SILENCIO</li><li>Pulsa directo hacia abajo sobre la cuerda que quieres</li></ul>Lo tienes cuando: ocho saltos seguidos y la cuerda La nunca suena. ¿La oyes sonar dos veces? Baja el BPM 10 puntos y vuelve a intentarlo.',
         tab: {
           caption: 'The skip · over the A string',
           caption_es: 'El salto · por encima de la cuerda La',
@@ -899,8 +899,8 @@ window.CLASS_ACTIVITIES = [
       {
         label:    'The wide Reach',
         label_es: 'El Estiramiento ancho',
-        text: 'The wide Reach.<ul><li>Index plants on fret 1 — it stays</li><li>Pinky goes to fret 6, one farther than last time (fret 5 still counts)</li><li>Stretch, never pain — if the wrist hurts, stop</li></ul>You\'ve got it when: four reaches in a row and finger 1 never lifts.',
-        text_es: 'El Estiramiento ancho.<ul><li>El índice se planta en el traste 1 — se queda</li><li>El meñique va al traste 6, uno más que la vez pasada (el traste 5 sigue contando)</li><li>Estira sin dolor — si te duele la muñeca, detente</li></ul>Lo tienes cuando: cuatro estiramientos seguidos y el dedo 1 nunca se levanta.',
+        text: 'The wide Reach — same shape as last time, but the pinky goes one fret farther.<ul><li>The index plants and stays; one fret short still counts if the full reach is too far today</li><li>Stretch, never pain — if the wrist hurts, stop</li></ul>You\'ve got it when: four reaches in a row and finger 1 never lifts.',
+        text_es: 'El Estiramiento ancho — la misma forma que la vez pasada, pero el meñique va un traste más lejos.<ul><li>El índice se planta y se queda; un traste menos también cuenta si hoy el estiramiento completo te queda lejos</li><li>Estira sin dolor — si te duele la muñeca, detente</li></ul>Lo tienes cuando: cuatro estiramientos seguidos y el dedo 1 nunca se levanta.',
         tab: {
           caption: 'Wide Reach · fret 1 to fret 6',
           caption_es: 'Estiramiento ancho · del traste 1 al 6',
@@ -915,8 +915,8 @@ window.CLASS_ACTIVITIES = [
       {
         label:    'Reach across strings',
         label_es: 'Estiramiento entre cuerdas',
-        text: 'Reach across strings.<ul><li>Index → low E, fret 2; pinky → A string, fret 5</li><li>Hold the shape so both notes ring together</li><li>This builds the reach you\'ll need for power chords (Module 3 teaches their real shape)</li></ul>You\'ve got it when: both notes ring at the same time, four times in a row.',
-        text_es: 'Estiramiento entre cuerdas.<ul><li>Índice → Mi grave, traste 2; meñique → cuerda La, traste 5</li><li>Sostén la forma para que las dos notas suenen juntas</li><li>Esto construye el alcance que vas a necesitar para los acordes de potencia (el Módulo 3 enseña su forma real)</li></ul>Lo tienes cuando: las dos notas suenan al mismo tiempo, cuatro veces seguidas.',
+        text: 'Reach across strings — the two notes in the tab are on different strings, three frets apart.<ul><li>Hold the shape so both notes ring together</li><li>This builds the reach you\'ll need for power chords (Module 3 teaches their real shape)</li></ul>You\'ve got it when: both notes ring at the same time, four times in a row.',
+        text_es: 'Estiramiento entre cuerdas — las dos notas de la tablatura están en cuerdas distintas, a tres trastes de distancia.<ul><li>Sostén la forma para que las dos notas suenen juntas</li><li>Esto construye el alcance que vas a necesitar para los acordes de potencia (el Módulo 3 enseña su forma real)</li></ul>Lo tienes cuando: las dos notas suenan al mismo tiempo, cuatro veces seguidas.',
         tab: {
           caption: 'Across the strings · both notes ringing',
           caption_es: 'Entre cuerdas · las dos notas suenan',
@@ -1127,8 +1127,8 @@ window.CLASS_ACTIVITIES = [
       {
         label:    'The opening call',
         label_es: 'La llamada inicial',
-        text: 'The opening call: 7 – 7 – 10 – 7.<ul><li>finger 1 → fret 7 (the third dot) — play it twice</li><li>finger 1 stays planted; reach the pinky → fret 10, one fret past the 9-dot — this is the Reach from Finger Gym</li><li>back to fret 7</li></ul>The hard part: the pinky wants to drag finger 1 with it — finger 1 NEVER lifts.\nYou\'ve got it when: 7-7-10-7 three times in a row, no buzz.',
-        text_es: 'La llamada inicial: 7 – 7 – 10 – 7.<ul><li>dedo 1 → traste 7 (el tercer punto) — tócalo dos veces</li><li>el dedo 1 se queda plantado; estira el meñique → traste 10, un traste después del punto del 9 — este es el Estiramiento del Gimnasio de Dedos</li><li>de vuelta al traste 7</li></ul>La parte difícil: el meñique quiere arrastrar al dedo 1 — el dedo 1 NUNCA se levanta.\nLo tienes cuando: 7-7-10-7 tres veces seguidas, sin zumbido.',
+        text: 'The opening call — play the tab below.<ul><li>Finger 1 sits on fret 7, the third dot, and never lifts</li><li>The pinky reaches one fret past the 9-dot and comes back — this is the Reach from Finger Gym</li></ul>The hard part: the pinky wants to drag finger 1 with it.\nYou\'ve got it when: the opening call three times in a row, no buzz.',
+        text_es: 'La llamada inicial — toca la tablatura de abajo.<ul><li>El dedo 1 se queda en el traste 7, el tercer punto, y nunca se levanta</li><li>El meñique se estira un traste después del punto del 9 y regresa — este es el Estiramiento del Gimnasio de Dedos</li></ul>La parte difícil: el meñique quiere arrastrar al dedo 1.\nLo tienes cuando: la llamada inicial tres veces seguidas, sin zumbido.',
         tab: {
           caption: 'The call · finger 1 planted, pinky to 10',
           caption_es: 'La llamada · dedo 1 plantado, meñique al 10',
@@ -1143,8 +1143,8 @@ window.CLASS_ACTIVITIES = [
       {
         label:    'The walk-down',
         label_es: 'El descenso',
-        text: 'The walk-down: 7 – 5 – 3 – 2. Finger 1 does all of it, sliding down the string.<ul><li>finger 1 → fret 7, then → fret 5, then → fret 3 — dot to dot to dot</li><li>finger 1 → fret 2 — the only landing without a dot</li></ul>You\'ve got it when: 7-5-3-2 three clean passes in a row, no buzz.',
-        text_es: 'El descenso: 7 – 5 – 3 – 2. El dedo 1 lo hace todo, deslizándose por la cuerda.<ul><li>dedo 1 → traste 7, después → traste 5, después → traste 3 — de punto en punto</li><li>dedo 1 → traste 2 — la única parada sin punto</li></ul>Lo tienes cuando: 7-5-3-2, tres pasadas limpias seguidas, sin zumbido.',
+        text: 'The walk-down — finger 1 does all of it, sliding down the string.<ul><li>The first three landings go dot to dot to dot</li><li>The last one is the only landing without a dot</li></ul>You\'ve got it when: the walk-down three clean passes in a row, no buzz.',
+        text_es: 'El descenso — el dedo 1 lo hace todo, deslizándose por la cuerda.<ul><li>Las tres primeras paradas van de punto en punto</li><li>La última es la única parada sin punto</li></ul>Lo tienes cuando: el descenso, tres pasadas limpias seguidas, sin zumbido.',
         tab: {
           caption: 'The walk-down · dot to dot',
           caption_es: 'El descenso · de punto en punto',
@@ -1159,8 +1159,8 @@ window.CLASS_ACTIVITIES = [
       {
         label:    'The whole riff',
         label_es: 'El riff completo',
-        text: 'Put it together — the whole riff, straight through without stopping: 7 – 7 – 10 – 7 – 5 – 3 – 2.\nYou\'ve got it when: four times through without stopping, any speed.',
-        text_es: 'Júntalo todo — el riff completo, seguido sin parar: 7 – 7 – 10 – 7 – 5 – 3 – 2.\nLo tienes cuando: cuatro veces seguidas sin detenerte, a cualquier velocidad.',
+        text: 'Put it together — the whole riff, straight through without stopping.\nYou\'ve got it when: four times through without stopping, any speed.',
+        text_es: 'Júntalo todo — el riff completo, seguido sin parar.\nLo tienes cuando: cuatro veces seguidas sin detenerte, a cualquier velocidad.',
         snippet: { track: 'seven-nation-army', fromBar: 1, bars: 4,
                    label:    'The riff, with the band',
                    label_es: 'El riff, con la banda' },
@@ -1531,8 +1531,8 @@ window.CLASS_ACTIVITIES = [
       {
         label:    'Play it from memory',
         label_es: 'Tócala de memoria',
-        text: 'Happy Birthday, all four phrases, low E string. Play it once with the tab, then cover the screen and play it again from memory.<ul><li>A: open, open, 2, open, 5, 4</li><li>B: open, open, 2, open, 7, 5</li><li>C: open, open, 12, 9, 5, 4, 2</li><li>D: 10, 10, 9, 5, 7, 5</li></ul>The A-string version counts too.\nYou\'ve got it when: all four phrases from memory, any speed, without stopping. Stuck? Uncover that one phrase, then start over.',
-        text_es: 'Happy Birthday, las cuatro frases, cuerda Mi grave. Tócala una vez con la tablatura, después tapa la pantalla y tócala de memoria.<ul><li>A: al aire, al aire, 2, al aire, 5, 4</li><li>B: al aire, al aire, 2, al aire, 7, 5</li><li>C: al aire, al aire, 12, 9, 5, 4, 2</li><li>D: 10, 10, 9, 5, 7, 5</li></ul>La versión con la cuerda La también cuenta.\nLo tienes cuando: las cuatro frases de memoria, a cualquier velocidad, sin detenerte. ¿Te atoraste? Destapa solo esa frase y empieza otra vez.',
+        text: 'Happy Birthday, all four phrases, low E string. Play it once with the tab below, then cover the screen and play it again from memory. The A-string version counts too.\nYou\'ve got it when: all four phrases from memory, any speed, without stopping. Stuck? Uncover that one phrase, then start over.',
+        text_es: 'Happy Birthday, las cuatro frases, cuerda Mi grave. Tócala una vez con la tablatura de abajo, después tapa la pantalla y tócala de memoria. La versión con la cuerda La también cuenta.\nLo tienes cuando: las cuatro frases de memoria, a cualquier velocidad, sin detenerte. ¿Te atoraste? Destapa solo esa frase y empieza otra vez.',
         tab: {
           caption: 'Whole song · phrases A–D · low E string only',
           caption_es: 'Canción completa · frases A–D · solo la cuerda Mi grave',

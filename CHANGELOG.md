@@ -5,7 +5,7 @@ Notable changes to the Guitar Class site. Newest first.
 For the full session-by-session history (and the reasoning behind each change),
 see `WORKFLOW.md` and the git commit log.
 
-## 2026-09-20 — Shorter directions on the Happy Birthday activities
+## 2026-09-20 — Shorter directions wherever a player was already showing them
 
 ### Changed
 
@@ -19,6 +19,16 @@ see `WORKFLOW.md` and the git commit log.
 - **The string-crossing step on the A-string activity lost its diagram.** That
   step is two open strings back and forth; the fretboard picture was showing
   notes the step does not use.
+- **The same trim ran across the rest of the site.** The six Finger Gym
+  activities no longer spell out which finger goes on which fret — the player
+  already prints the finger in a circle under every note. The Seven Nation Army
+  riff card no longer lists the frets twice, the Sub Day Circuit's
+  play-from-memory step no longer prints all four phrases you are meant to be
+  recalling, and three module cards ("Smoke on the Water" in Module 7, "the
+  cure" root line in Module 2, the D-string naming steps in Module 4) stopped
+  repeating what their tab or diagram shows — in the naming steps, the answer
+  was printed in the directions. Every note, fret and finger is still on screen;
+  it is just on screen once.
 
 ## 2026-09-20 — The same quiz clean-up, across Modules 7–13
 

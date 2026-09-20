@@ -124,8 +124,8 @@ SETS.push(
             steps: [
           {
             label: 'Challenge 1 — "Smoke on the Water"', label_es: 'Reto 1 — "Smoke on the Water"',
-            text: '<ul><li>Play the main riff with index on the root note and ring finger two frets higher, on the low E + A strings — 3/5 — 6/8 — 8/10 — 3/5 — 6/8 — 9/11 — 8/10.</li></ul>You\'ve got it when: both notes ring at the same volume, clean through the whole riff. Use the TAB below.',
-            text_es: '<ul><li>Toca el riff principal con el índice en la nota raíz y el anular dos trastes más arriba, en las cuerdas Mi grave + La — 3/5 — 6/8 — 8/10 — 3/5 — 6/8 — 9/11 — 8/10.</li></ul>Lo tienes cuando: ambas notas suenan al mismo volumen, limpias durante todo el riff. Usa el TAB de abajo.',
+            text: '<ul><li>Play the main riff from the TAB below, on the low E and A strings together — index on the root note, ring finger two frets higher.</li></ul>You\'ve got it when: both notes ring at the same volume, clean through the whole riff.',
+            text_es: '<ul><li>Toca el riff principal del TAB de abajo, en las cuerdas Mi grave y La juntas — el índice en la nota raíz, el anular dos trastes más arriba.</li></ul>Lo tienes cuando: ambas notas suenan al mismo volumen, limpias durante todo el riff.',
             hint: 'Use your index and ring finger together — keep them locked in shape and slide as a unit. Both notes should ring at the same volume.',
             hint_es: 'Usa tu dedo índice y tu dedo anular juntos — mantenlos trabados en forma y deslízalos como una unidad. Ambas notas deben sonar al mismo volumen.',
             stuck: 'Lock the two fingers into one shape and move them as a block — don\'t re-place them each time. Get the 3/5 → 6/8 slide clean before adding the rest.',
