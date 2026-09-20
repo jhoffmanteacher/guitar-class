@@ -5,6 +5,37 @@ Notable changes to the Guitar Class site. Newest first.
 For the full session-by-session history (and the reasoning behind each change),
 see `WORKFLOW.md` and the git commit log.
 
+## 2026-09-20 — Less typing, more playing
+
+### Changed
+
+- **Most of the "write your answer" boxes in Modules 3–6 are gone.** Where a
+  step used to ask you to type what you did, it now asks you to play
+  something and tells you exactly when you've got it — "two laps up and
+  back with every note ringing clean", "four laps with the strum hand
+  never stopping". The boxes that are left are the ones where writing is
+  the point: describing what you heard, planning a solo, and setting your
+  own goal.
+- **One-Minute Changes now has a target instead of a scoreboard.** Every
+  pair asks for 20 clean changes in the minute, then 30 — and you retest
+  the same pair next time, rather than trying to beat a number you wrote
+  down weeks ago.
+- **A beat and a bar are explained before you first need them.** Module 2
+  now says what a beat is, how to count 1-2-3-4 out loud, and that four
+  beats make one bar — before the first step that asks you to play with a
+  metronome.
+- **Several instructions that were wrong or unclear are fixed**, in both
+  languages: Happy Birthday's second half now gives you fret numbers
+  instead of finger numbers, the E and B7 chords are taught around the
+  finger they share, Module 2's note drill says frets 1–4 (which is what
+  it actually is), and the strumming feel Module 6 called "folk" is now
+  called "soft", so it doesn't collide with the folk strum you learned in
+  Module 5.
+- **Two chords have an easier stand-in.** If F or Bm is fighting you, the
+  Stuck note now gives you Fmaj7 or Bm7 to keep the song moving.
+- **The note-naming card deck gives you five seconds instead of three** —
+  three seconds is the level-up now.
+
 ## 2026-09-20 — More of each step fits on the screen
 
 ### Changed
