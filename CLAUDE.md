@@ -284,7 +284,7 @@ is the safe default** — a writer that forgets gets strict, not nothing.
 Failures report through `teacherConfigSaveFailed(e, msg)`, which tells a
 stale rejection ("nothing was saved, reloading") apart from a dropped
 connection. checks.mjs **1ai** bans a bare `.set()` on the doc, pins the
-writer count at 15, and requires the transaction — add a writer and it fails
+writer count at 16, and requires the transaction — add a writer and it fails
 until you bump `CONFIG_WRITERS` on purpose. `firestore.rules` deliberately
 does NOT enforce the counter (it would lock the Firebase console out of the
 one doc you'd repair by hand); that edit was comments only, nothing to paste.
@@ -1050,6 +1050,22 @@ finishes it or is cleared per student. No blocking window, no
 activity-level "stop blocking everyone" toggle — don't propose one again;
 the per-student Clear (and Hide, which also removes it from Earlier) are
 the tools. One release date serves both periods, also by choice.
+
+**Optional activities (2026-09-22, Jonathan's ask):** a Required / Optional
+switch on every assigned card on the console board writes
+`config/class.optionalActivities` (`{ id: true }`, cell-checked, same shape
+as `hiddenActivities`; `teacherSetActivityOptional`). An optional card is
+still VISIBLE — `caIsVisible()` does not read the map — and renders an
+"Optional" tag (`caOptionalTagHtml()`, inside both meta-line builders so hero,
+plain card and check all get it), but it is never a blocker. The rule lives
+in three places that must agree: `caBlockers()` (app.js, via
+`caIsOptional()`), `teacherBlockersFor()` (teacher.js) and `journeyBlockers()`
+(tabs/journey.js). The Today hero prefers the first REQUIRED pending card and
+falls back to an optional one only when nothing required is left. Cached in
+`localStorage` (`caOptional`) with the same fail-to-cache rule as `caHidden`
+— a flaky read must not turn every optional card back into a lock. Delete
+clears the flag with everything else; Archive keeps it. No
+`firestore.rules` change (comment only).
 
 **Per-student clears:** `config/class.activityClears` (`{ uid: { id: true } }`)
 lets a teacher let one student past a specific blocker without them finishing

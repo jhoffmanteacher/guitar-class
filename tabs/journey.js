@@ -457,8 +457,10 @@ function journeyIsVisible(a, cfg){
 }
 function journeyBlockers(cfg, classActivities, uid){
   var clears = ((cfg && cfg.activityClears) || {})[uid] || {};
+  // Optional activities (console switch) never block — mirrors caBlockers.
+  var optional = (cfg && cfg.optionalActivities) || {};
   return (window.CLASS_ACTIVITIES || []).filter(function(a){
-    return journeyIsVisible(a, cfg) && (classActivities || {})[a.id] !== true && clears[a.id] !== true;
+    return journeyIsVisible(a, cfg) && optional[a.id] !== true && (classActivities || {})[a.id] !== true && clears[a.id] !== true;
   });
 }
 /* Replaces the whole page — header, layers, tools dock, everything — with

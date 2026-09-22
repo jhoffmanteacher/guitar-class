@@ -206,6 +206,8 @@ async function showTeacherApp(user){
       if(period){ teacherSetStudentPeriod(period.dataset.uid, period.dataset.value); return; }
       const actHidden=e.target.closest('[data-set-activity-hidden]');
       if(actHidden){ teacherSetActivityHidden(actHidden.dataset.id, actHidden.dataset.state); return; }
+      const actOpt=e.target.closest('[data-set-activity-optional]');
+      if(actOpt){ teacherSetActivityOptional(actOpt.dataset.id, actOpt.dataset.state); return; }
       const actArch=e.target.closest('[data-set-activity-archived]');
       if(actArch){ teacherSetActivityArchived(actArch.dataset.id, actArch.dataset.state); return; }
       const actDel=e.target.closest('[data-delete-activity]');
@@ -999,6 +1001,7 @@ function renderTeacherActivities(opts){
       }
     }
     const hidden=cfg.hiddenActivities||{};
+    const optional=cfg.optionalActivities||{};
     const dates=cfg.activityDates||{};
     const today=dayStr(new Date());
     const view=teacherBoardView(cfg);
@@ -1097,6 +1100,15 @@ function renderTeacherActivities(opts){
         +`<button class="tg-seg-btn ${!isHidden?'on':''}" data-set-activity-hidden data-id="${escAttr(a.id)}" data-state="show">Visible</button>`
         +`<button class="tg-seg-btn ${isHidden?'on':''}" data-set-activity-hidden data-id="${escAttr(a.id)}" data-state="hide">Hidden</button></div>`;
     };
+    // Required blocks the site until it's done (the activity gate);
+    // Optional still shows, tagged "Optional", but never blocks. Independent
+    // of Visible/Hidden — see teacherSetActivityOptional.
+    const optSeg=a=>{
+      const isOpt=optional[a.id]===true;
+      return `<div class="tg-seg">`
+        +`<button class="tg-seg-btn ${!isOpt?'on':''}" data-set-activity-optional data-id="${escAttr(a.id)}" data-state="required" title="Students must finish this before the rest of the site opens">Required</button>`
+        +`<button class="tg-seg-btn ${isOpt?'on':''}" data-set-activity-optional data-id="${escAttr(a.id)}" data-state="optional" title="Students see it, tagged Optional, but it never locks the rest of the site">Optional</button></div>`;
+    };
     // Where a card can be sent without a drag. Used as "Assign to" in Built
     // and "Move to" in Assigned; both append at the end of the section they
     // name, which is what a drag onto empty space does too.
@@ -1117,6 +1129,7 @@ function renderTeacherActivities(opts){
       const strays=[];
       if(dates[a.id]) strays.push(`release date ${escHtml(dates[a.id])}`);
       if(hidden[a.id]===true) strays.push('Hidden');
+      if(optional[a.id]===true) strays.push('Optional');
       return `<div class="t-board-card${isRetired?' t-board-retired':''}"${isRetired?'':' draggable="true"'} data-board-card data-id="${escAttr(a.id)}">`
         +`<div class="t-board-row">${isRetired?'':'<span class="t-board-grip" aria-hidden="true">&#x2630;</span>'}${titleBlock(a)}</div>`
         // A leftover date or Hidden flag on an unplaced card decides nothing
@@ -1182,7 +1195,7 @@ function renderTeacherActivities(opts){
         +`<div class="t-board-row">${isRetired?'':'<span class="t-board-grip" aria-hidden="true">&#x2630;</span>'}${numBox}${titleBlock(a)}</div>`
         +(isRetired
           ? `<div class="t-board-stray">${teacherActivityDeleted(a.id,cfg)?'Deleted':'Archived'} — students don't see it and it holds no number. Restore puts it back here.</div>`
-          : publishBlock(a)+`<div class="t-board-ctl">${visSeg(a)}${moveSelect(a,'Move to…',curModule)}${moveBtns}</div>`)
+          : publishBlock(a)+`<div class="t-board-ctl">${visSeg(a)}${optSeg(a)}${moveSelect(a,'Move to…',curModule)}${moveBtns}</div>`)
         /* Footer: what this card IS (how many have done it) and the actions
            that take it out of the run, behind a hairline — so the row above,
            which is what gets used every day, reads as the card's controls
@@ -1276,6 +1289,7 @@ function renderTeacherActivities(opts){
     box.innerHTML=`<div class="tg-note">Drag a built activity into a module to assign it. It goes live for students on its release date.</div>`
       +`<details class="tg-help"><summary>How this page works</summary>`
       +`<div class="tg-note">A card shows to students only when all four are true: it is <strong>assigned</strong> to a module here, its <strong>release date</strong> has arrived, it is not <strong>Hidden</strong>, and it is not <strong>Archived</strong>. Publish now dates it today; scheduling a later day holds it until then; Unpublish clears the date. A card's date stays editable once it's live, so you can move it to another day without unpublishing first — type a future day and it goes back to Scheduled. Use Hidden to pull back something already live, then un-hide any time — the date and the Hidden switch are independent, either one hides.<br><br>`
+      +`<strong>Required / Optional</strong> decides whether a live card locks the site. A Required card (the default) blocks everything but In-Class Activities and Live quiz until the student finishes it. An Optional card still shows, tagged “Optional”, and students can still do it and mark it done, but it never locks anything. Switch it either way at any time.<br><br>`
       +`<strong>Archive</strong> takes a card off students' In-Class Activities page for good but keeps its place in its module, its date and its name, so Restore puts it back exactly where it was. Archived cards hold no #number, so the ones after them count down by one. <strong>Delete</strong> also clears the date, rename and per-student gate clears, and takes the card off the board entirely — it comes back in Built, blank, to be placed and published from scratch. Neither one removes the activity from the site's code (only an update does) and neither touches what students have already finished, so the Done counts survive both.<br><br>`
       +`<strong>Un-assign</strong> sends a card back to Built without clearing anything. The &#x270E; renames an activity for everyone, in both languages, until the Spanish twin ships. Copy link gives you a URL that opens the site straight to that one activity, card already open — paste it into Classroom. Type over a <strong>#number</strong> to move a card to that position; a number inside a title, like Finger Gym 2, is part of the name and stays put.</div></details>`
       +`<div class="t-board">${builtHtml}${assignedHtml}</div>`;
@@ -1679,6 +1693,7 @@ function renderTeacherActivityDetail(id){
     <div class="stu-section-head" style="margin-top:0">${escHtml(teacherActivityTitle(a,teacherClassConfig))} <span style="opacity:.55;font-size:.72em">(${escHtml(a.id)})</span></div>
     <div class="tg-note">${escHtml(place)}</div>
     ${teacherRetiredBanner(a.id)}
+    ${teacherOptionalBanner(a.id)}
     ${linkRow(a)}
     ${a.intro?`<div class="coach-tip" style="margin:0 2px 16px">${escHtml(a.intro)}</div>`:''}
     <div class="stu-section-head">Students</div>
@@ -1751,6 +1766,7 @@ function renderTeacherCheckDetail(a, back){
   box.innerHTML=`${back}
     <div class="stu-section-head" style="margin-top:0">Exit check &middot; ${escHtml(teacherActivityTitle(a,teacherClassConfig))} <span style="opacity:.55;font-size:.72em">(${escHtml(a.id)})</span></div>
     ${teacherRetiredBanner(a.id)}
+    ${teacherOptionalBanner(a.id)}
     <div class="tg-note">${escHtml(teacherActivityPlace(a.id))} ${dateNote}. ${withRes.length} of ${allStudents.length} turned in. Checks take no #number — they never enter the course's numbered run.</div>
     ${linkRow(a)}
     ${a.intro?`<div class="coach-tip" style="margin:0 2px 16px">${escHtml(a.intro)}</div>`:''}
@@ -1776,6 +1792,28 @@ async function teacherSetActivityHidden(id, state){
     // Save failed — undo the optimistic local mutation so the re-render
     // below reflects what Firestore actually holds, not what we hoped for.
     if(had) teacherClassConfig.hiddenActivities[id]=prev; else delete teacherClassConfig.hiddenActivities[id];
+    teacherConfigSaveFailed(e, 'Could not save that change — check your connection and Firestore rules.');
+  }
+  if(teacherView==='activities') renderTeacherActivities();
+}
+/* Required / Optional — config/class.optionalActivities (id -> true). An
+   optional activity is still visible to students (caIsVisible ignores this
+   map) but never blocks the site (caBlockers, teacherBlockersFor,
+   journeyBlockers). Same write shape as teacherSetActivityHidden:
+   cell-checked, flag cleared rather than written false. */
+async function teacherSetActivityOptional(id, state){
+  const on = state==='optional';
+  if(!teacherClassConfig.optionalActivities) teacherClassConfig.optionalActivities={};
+  const had = Object.prototype.hasOwnProperty.call(teacherClassConfig.optionalActivities, id);
+  const prev = teacherClassConfig.optionalActivities[id];
+  if(on) teacherClassConfig.optionalActivities[id]=true; else delete teacherClassConfig.optionalActivities[id];
+  try{
+    await ensureDb();
+    const fv=firebase.firestore.FieldValue;
+    const patch = on ? {optionalActivities:{[id]:true}} : {optionalActivities:{[id]:fv.delete()}};
+    await teacherWriteConfig(patch, {['optionalActivities.'+id]: had?prev:undefined});
+  }catch(e){
+    if(had) teacherClassConfig.optionalActivities[id]=prev; else delete teacherClassConfig.optionalActivities[id];
     teacherConfigSaveFailed(e, 'Could not save that change — check your connection and Firestore rules.');
   }
   if(teacherView==='activities') renderTeacherActivities();
@@ -1863,7 +1901,7 @@ async function teacherDeleteActivity(id){
   // from scratch. Archive deliberately does NOT touch it — that's the whole
   // difference between the two, and why Restore-from-archive puts the card
   // back in its own module at its own position.
-  const MAPS=['archivedActivities','deletedActivities','hiddenActivities','activityDates','activityTitles','activityNumbers','activityBoard'];
+  const MAPS=['archivedActivities','deletedActivities','hiddenActivities','optionalActivities','activityDates','activityTitles','activityNumbers','activityBoard'];
   MAPS.forEach(m=>{ if(!cfg[m]) cfg[m]={}; });
   if(!cfg.activityClears) cfg.activityClears={};
   const clears=cfg.activityClears;
@@ -1957,11 +1995,20 @@ function teacherRetiredBanner(id){
   const del=teacherActivityDeleted(id,cfg);
   return `<div class="tg-note"><strong>${del?'Deleted':'Archived'}.</strong> Students don't see this activity and it doesn't gate the site${del?' — and its date, rename, place on the board and gate clears have been cleared':''}. Restore it from the Class activities board${del?' — it\'s in Built, under “Archived / deleted”':' — it\'s under “Archived” inside its module'}.</div>`;
 }
+function teacherActivityOptional(id, cfg){ return ((cfg&&cfg.optionalActivities)||{})[id]===true; }
 function teacherBlockersFor(stu, cfg){
   const today=dayStr(new Date());
   const clears=((cfg&&cfg.activityClears)||{})[stu.uid]||{};
+  // Optional activities never block — mirrors caBlockers() in app.js.
   return (window.CLASS_ACTIVITIES||[]).filter(a=>
-    teacherActivityVisible(a,cfg,today) && (stu.classActivities||{})[a.id]!==true && clears[a.id]!==true);
+    teacherActivityVisible(a,cfg,today) && !teacherActivityOptional(a.id,cfg) && (stu.classActivities||{})[a.id]!==true && clears[a.id]!==true);
+}
+/* The detail pages' Gate column reads as if the activity blocks. When it's
+   Optional it doesn't, so say so above the grid rather than leave a column
+   of Clear buttons that do nothing students can see. */
+function teacherOptionalBanner(id){
+  if(!teacherActivityOptional(id, teacherClassConfig)) return '';
+  return `<div class="tg-note"><strong>Optional.</strong> Students see this one, tagged “Optional”, but it doesn't lock the site, so the Clear buttons below change nothing for now. Switch it back to Required on the Class activities board.</div>`;
 }
 async function teacherSetActivityClear(uid, id, state){
   const on=state==='clear';

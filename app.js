@@ -184,6 +184,14 @@ let activityClears = {}; // Per-student activity-gate clears, teacher-set in the
    MERGED into one id -> true set here; the console keeps them apart because
    that is where "can I get it back the way it was?" is answered. */
 let retiredActivityIds = {};
+/* Activities the teacher has marked Optional from the console —
+   config/class.optionalActivities, id -> true. An optional card shows on
+   In-Class Activities like any other (same date, board and Hidden rules —
+   caIsVisible doesn't read this), wears an "Optional" tag, and never blocks
+   the site: caBlockers() skips it. Cached like the hidden map, for the same
+   "must not fail open" reason — a flaky read that reset this to {} would
+   turn every optional card back into a lock. */
+let optionalActivityIds = {};
 let saveTimer   = null;
 
 /* ── Lazy module loading ──
@@ -612,7 +620,7 @@ if(auth) auth.onAuthStateChanged(async user=>{
     }
   } else {
     window.__authBootPending = false;
-    currentUser = null; progress = {}; responses = {}; completed = {}; completedDeletes = new Set(); classActivities = {}; classActivitiesDeletes = new Set(); exitChecks = {}; games = {}; streak = { count:0, lastDay:null }; gamesAccessOn = true; studentPeriod = ''; periodOverride = ''; hiddenActivityIds = {}; activityDates = {}; activityTitles = {}; activityNumbers = {}; activityBoard = {}; activityBoardOn = false; activityClears = {}; retiredActivityIds = {}; progressLoadFailed = false;
+    currentUser = null; progress = {}; responses = {}; completed = {}; completedDeletes = new Set(); classActivities = {}; classActivitiesDeletes = new Set(); exitChecks = {}; games = {}; streak = { count:0, lastDay:null }; gamesAccessOn = true; studentPeriod = ''; periodOverride = ''; hiddenActivityIds = {}; activityDates = {}; activityTitles = {}; activityNumbers = {}; activityBoard = {}; activityBoardOn = false; activityClears = {}; retiredActivityIds = {}; optionalActivityIds = {}; progressLoadFailed = false;
     document.body.classList.remove('ca-gated');   // next sign-in recomputes it fresh — don't leave a stale gate showing over the sign-in wall
     if(typeof gamesResetForUser === 'function') gamesResetForUser();   // Note Runner's module caches must not leak into the next signed-in user
     if(typeof lqStopListening === 'function') lqStopListening();       // and the live-quiz listener must not keep firing under the next student
@@ -749,6 +757,7 @@ async function loadClassConfig(){
   activityBoardOn = false;
   activityClears = {};
   retiredActivityIds = {};
+  optionalActivityIds = {};
   try{
     await ensureDb();
     if(!db){ restoreClassConfigFromCache(); applyActivityGate(); return; }
@@ -813,6 +822,9 @@ async function loadClassConfig(){
        blocking the site again on a flaky connection. */
     retiredActivityIds = Object.assign({}, d.archivedActivities || {}, d.deletedActivities || {});
     try{ localStorage.setItem('caRetired', JSON.stringify(retiredActivityIds)); }catch(e){}
+    // Optional activities (teacher.js board) — see optionalActivityIds.
+    optionalActivityIds = d.optionalActivities || {};
+    try{ localStorage.setItem('caOptional', JSON.stringify(optionalActivityIds)); }catch(e){}
     /* The activity board (teacher.js) — which activities are placed in the
        course, in which module, in what order. Cached, and for the same
        "must not fail open" reason as the dates: an empty board reads as
@@ -848,6 +860,10 @@ function restoreClassConfigFromCache(){
     const raw = localStorage.getItem('caHidden');
     if(raw) hiddenActivityIds = JSON.parse(raw) || {};
   }catch(e){ /* ignore — hiddenActivityIds stays {} */ }
+  try{
+    const raw = localStorage.getItem('caOptional');
+    if(raw) optionalActivityIds = JSON.parse(raw) || {};
+  }catch(e){ /* ignore — optionalActivityIds stays {} */ }
   try{
     const raw = localStorage.getItem('caBoard');
     const cached = raw ? JSON.parse(raw) : null;
@@ -8967,12 +8983,20 @@ function caChunkMetaHtml(a){
   // text pieces, same as before 2f.
   const dotsHtml = caHeroDotsHtml(a);
   const doneHtml = doneText ? `<span class="ca-chunk-done">${dotsHtml ? '' : '&middot; '}${escHtml(doneText)}</span>` : '';
-  return `<div class="ca-chunk-meta">${head.map(escHtml).join(' &middot; ')}${dotsHtml}${doneHtml}</div>`;
+  return `<div class="ca-chunk-meta">${caOptionalTagHtml(a)}${head.map(escHtml).join(' &middot; ')}${dotsHtml}${doneHtml}</div>`;
 }
 function caCheckMetaHtml(a){
   const n = ecItems(a).length;
-  if(!n) return '';
-  return `<div class="ca-chunk-meta">${escHtml(n === 1 ? t('ca.checkMeta1') : t('ca.checkMeta', {n}))}</div>`;
+  if(!n) return caOptionalTagHtml(a) ? `<div class="ca-chunk-meta">${caOptionalTagHtml(a)}</div>` : '';
+  return `<div class="ca-chunk-meta">${caOptionalTagHtml(a)}${escHtml(n === 1 ? t('ca.checkMeta1') : t('ca.checkMeta', {n}))}</div>`;
+}
+/* The "Optional" tag at the head of a card's meta line — the student-side
+   half of the console's Optional switch (optionalActivityIds). Both meta
+   builders above carry it, so the hero and the plain card, activity and
+   check, all get it from one place. */
+function caOptionalTagHtml(a){
+  if(!caIsOptional(a)) return '';
+  return `<span class="ca-optional-tag" data-i18n="ca.optional" title="${escAttr(t('ca.optionalTitle'))}" data-i18n-attr="title:ca.optionalTitle">${escHtml(t('ca.optional'))}</span>`;
 }
 /* ── The Today hero (Chromebook rail work order, item 2f) ──────────────
    The ONE card renderClassActivities() singles out (caStartHereId) gets its
@@ -9840,12 +9864,16 @@ function caIsVisible(a){
    CSS it drives (styles.css) hides everything but In-Class Activities and
    Live quiz. Never
    lock on a guess, same rule as the sequential set gate: a teacher/dev
-   preview and a failed progress load both read as "nothing blocking". */
+   preview and a failed progress load both read as "nothing blocking".
+   An activity the teacher marked Optional (optionalActivityIds) is visible
+   but never a blocker — mirrored in teacherBlockersFor (teacher.js) and
+   journeyBlockers (tabs/journey.js). */
+function caIsOptional(a){ return optionalActivityIds[a.id] === true; }
 function caBlockers(){
   if(isGatePreviewer() || progressLoadFailed) return [];
   const clears = (activityClears || {})[currentUser && currentUser.uid] || {};
   return (window.CLASS_ACTIVITIES || []).filter(a =>
-    caIsVisible(a) && classActivities[a.id] !== true && clears[a.id] !== true);
+    caIsVisible(a) && !caIsOptional(a) && classActivities[a.id] !== true && clears[a.id] !== true);
 }
 /* Manual test hook, localhost only: dev bypass IS a gate previewer
    (isGatePreviewer), so it's the one account that can never see its own
@@ -9969,14 +9997,20 @@ function renderClassActivities(){
     // the page, not a second notion of course order. It stays COLLAPSED by
     // default like every other card (Jonathan, 2026-09-15) — caOpenId is
     // never touched here.
-    caStartHereId = pendingCount ? pendingGroups[0].cards[0].id : null;
+    // One exception (optional activities): a card that doesn't block the
+    // site shouldn't be the one "Start here" points at while one that does
+    // is still pending, so the hero is the first REQUIRED pending card, and
+    // only falls back to an optional one when nothing required is left.
+    const pendingFlat = pendingGroups.reduce((acc, g) => acc.concat(g.cards), []);
+    const heroPick = pendingFlat.find(a => !caIsOptional(a)) || pendingFlat[0] || null;
+    caStartHereId = heroPick ? heroPick.id : null;
     let pendingHtml;
     if(!pendingCount){
       // The Today hero's caught-up state (2f) — replaces the old plain
       // ca.allDone line with the same free-play actions 1d already built.
       pendingHtml = finished.length ? caFreePlayHeroHtml() : '';
     } else {
-      const heroCard = pendingGroups[0].cards[0];
+      const heroCard = heroPick;
       /* `list` is every visible card, newest first, done or not — so the
          hero is today's work only when it is also the first of those. With
          the newest few finished and an old one still undone, the hero is

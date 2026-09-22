@@ -350,6 +350,10 @@
        top (caStartHereTagHtml, 2026-09-20). It says what it is instead of
        "Start here", and carries its date at full weight beside it. */
     'ca.notFinished':          { en: 'Not finished', es: 'Sin terminar' },
+    // A card the teacher marked Optional in the console (caOptionalTagHtml)
+    // — it shows like any other but never locks the rest of the site.
+    'ca.optional':             { en: 'Optional', es: 'Opcional' },
+    'ca.optionalTitle':        { en: 'You can skip this one. It does not lock the rest of the site.', es: 'Puedes saltarte esta. No bloquea el resto del sitio.' },
     'ca.checkNotFinished':     { en: 'Exit check · not finished', es: 'Boleto de salida · sin terminar' },
     'ca.heroFromDate':         { en: 'From {date}', es: 'Del {date}' },
     // The Today hero's own call-to-action (caHeroCardHtml/caHeroCheckHtml)

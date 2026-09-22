@@ -2284,6 +2284,10 @@ body.explore-open #week-panels{display:none}
    in app.js. Quiet on purpose: it's context, not another headline. */
 .ca-chunk-meta{font-size:0.75rem;font-weight:400;color:var(--text2);margin-top:1px}
 .ca-done-mark{color:var(--green-text);flex-shrink:0;display:flex}
+/* "Optional" at the head of the meta line (caOptionalTagHtml) — the teacher
+   marked this card as not blocking the site. Outlined and quiet, so it reads
+   as a label, not as another thing to do. */
+.ca-optional-tag{display:inline-block;font-size:0.6875rem;font-weight:600;padding:0 7px;margin-right:6px;border:1px solid var(--border2);border-radius:10px;color:var(--text2);vertical-align:1px;white-space:nowrap}
 /* Sits inside the <summary>, so printActivity() has to swallow the click —
    see the note on that function in app.js. */
 .ca-print-btn{flex-shrink:0;display:flex;align-items:center;justify-content:center;width:30px;height:30px;padding:0;border:1px solid var(--border2);border-radius:8px;background:var(--bg2);color:var(--text3);cursor:pointer}

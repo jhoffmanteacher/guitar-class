@@ -5,6 +5,16 @@ Notable changes to the Guitar Class site. Newest first.
 For the full session-by-session history (and the reasoning behind each change),
 see `WORKFLOW.md` and the git commit log.
 
+## 2026-09-22 — Optional class activities
+
+### Changed
+
+- **Some In-Class Activities can now be marked Optional.** An optional
+  activity still shows on your In-Class Activities page with an "Optional"
+  tag, and you can still do it and mark it done, but it never locks the
+  rest of the site. "Start here" always points at an activity you have to
+  finish first.
+
 ## 2026-09-22 — CAS as a class period
 
 ### Changed

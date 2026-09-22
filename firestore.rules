@@ -23,7 +23,8 @@ rules_version = '2';
                       paused, archived, periodOverrides, hiddenActivities,
                       activityDates, activityTitles, activityNumbers,
                       activityClears, archivedActivities, deletedActivities,
-                      activityBoard, activityBoardSeeded, configVersion
+                      optionalActivities, activityBoard, activityBoardSeeded,
+                      configVersion
                       (teacher writes, students read)
      liveQuiz/current the whole-class live quiz's state (teacher writes,
                       students read) + an answers/{uid} subcollection each
