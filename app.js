@@ -2546,6 +2546,12 @@ async function periodPick(value){
     return;
   }
   closePeriodPicker();
+  /* A CAS pick turns every activity optional (caIsOptional), so a gate that
+     went up at sign-in has to come down now, not on the next reload. For a
+     4/7 pick this re-runs the same gate it already had — harmless. */
+  applyActivityGate();
+  const caScreen = document.getElementById('class-activities-screen');
+  if(caScreen && !caScreen.hidden) renderClassActivities();
 }
 function closePeriodPicker(){
   const ov=document.getElementById('period-overlay');
@@ -9867,8 +9873,16 @@ function caIsVisible(a){
    preview and a failed progress load both read as "nothing blocking".
    An activity the teacher marked Optional (optionalActivityIds) is visible
    but never a blocker — mirrored in teacherBlockersFor (teacher.js) and
-   journeyBlockers (tabs/journey.js). */
-function caIsOptional(a){ return optionalActivityIds[a.id] === true; }
+   journeyBlockers (tabs/journey.js).
+
+   CAS students: EVERY activity is optional (Jonathan, 2026-09-22). They
+   still see every card, tagged Optional, but nothing on In-Class Activities
+   ever locks them out of the modules. Effective period = the teacher's
+   correction || the student's own answer, the same rule as everywhere else
+   (see studentPeriod). Same three places must agree: caIsOptional here,
+   teacherBlockersFor, journeyBlockers. */
+function caStudentIsCAS(){ return (periodOverride || studentPeriod) === 'CAS'; }
+function caIsOptional(a){ return caStudentIsCAS() || optionalActivityIds[a.id] === true; }
 function caBlockers(){
   if(isGatePreviewer() || progressLoadFailed) return [];
   const clears = (activityClears || {})[currentUser && currentUser.uid] || {};

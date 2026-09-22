@@ -1684,7 +1684,7 @@ function renderTeacherActivityDetail(id){
     const cleared=!!((clearsMap[s.uid]||{})[a.id]);
     return `<tr><td class="nc">${escHtml(s.name||s.email||'(no name)')}</td>
       <td>${done?'Done ✓':'Not yet'}</td>
-      <td><button class="tg-seg-btn ${cleared?'on':''}" data-set-activity-clear data-uid="${escAttr(s.uid)}" data-id="${escAttr(a.id)}" data-state="${cleared?'unclear':'clear'}" title="Lets this student past the gate without finishing.">${cleared?'Cleared':'Clear'}</button></td></tr>`;
+      ${teacherStudentPeriod(s)==='CAS'?TEACHER_CAS_GATE_CELL:`<td><button class="tg-seg-btn ${cleared?'on':''}" data-set-activity-clear data-uid="${escAttr(s.uid)}" data-id="${escAttr(a.id)}" data-state="${cleared?'unclear':'clear'}" title="Lets this student past the gate without finishing.">${cleared?'Cleared':'Clear'}</button></td>`}</tr>`;
   }).join('');
   const studentTable=sortedStudents.length
     ? `<div class="t-grid-wrap"><table><thead><tr><th class="nc">Student</th><th>Status</th><th>Gate</th></tr></thead><tbody>${studentRows}</tbody></table></div>`
@@ -1746,6 +1746,7 @@ function renderTeacherCheckDetail(a, back){
   // its own column rather than folded into the score cells.
   const clearsMap=teacherClassConfig.activityClears||{};
   const clearCell=uid=>{
+    if(teacherStudentPeriod({uid, period:(allStudents.find(x=>x.uid===uid)||{}).period})==='CAS') return TEACHER_CAS_GATE_CELL;
     const cleared=!!((clearsMap[uid]||{})[a.id]);
     return `<td><button class="tg-seg-btn ${cleared?'on':''}" data-set-activity-clear data-uid="${escAttr(uid)}" data-id="${escAttr(a.id)}" data-state="${cleared?'unclear':'clear'}" title="Lets this student past the gate without finishing.">${cleared?'Cleared':'Clear'}</button></td>`;
   };
@@ -1995,10 +1996,17 @@ function teacherRetiredBanner(id){
   const del=teacherActivityDeleted(id,cfg);
   return `<div class="tg-note"><strong>${del?'Deleted':'Archived'}.</strong> Students don't see this activity and it doesn't gate the site${del?' — and its date, rename, place on the board and gate clears have been cleared':''}. Restore it from the Class activities board${del?' — it\'s in Built, under “Archived / deleted”':' — it\'s under “Archived” inside its module'}.</div>`;
 }
+// The Gate column for a CAS student on the activity/check detail grids:
+// every activity is optional for CAS (teacherBlockersFor), so a Clear
+// button there would do nothing.
+const TEACHER_CAS_GATE_CELL='<td><span style="opacity:.65" title="CAS students never get locked out — every activity is optional for them.">CAS · optional</span></td>';
 function teacherActivityOptional(id, cfg){ return ((cfg&&cfg.optionalActivities)||{})[id]===true; }
 function teacherBlockersFor(stu, cfg){
   const today=dayStr(new Date());
   const clears=((cfg&&cfg.activityClears)||{})[stu.uid]||{};
+  // CAS students: every activity is optional, so nothing blocks — mirrors
+  // caStudentIsCAS() in app.js. Effective period = override || own answer.
+  if((((cfg&&cfg.periodOverrides)||{})[stu.uid] || stu.period || '')==='CAS') return [];
   // Optional activities never block — mirrors caBlockers() in app.js.
   return (window.CLASS_ACTIVITIES||[]).filter(a=>
     teacherActivityVisible(a,cfg,today) && !teacherActivityOptional(a.id,cfg) && (stu.classActivities||{})[a.id]!==true && clears[a.id]!==true);

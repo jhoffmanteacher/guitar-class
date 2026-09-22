@@ -5,6 +5,14 @@ Notable changes to the Guitar Class site. Newest first.
 For the full session-by-session history (and the reasoning behind each change),
 see `WORKFLOW.md` and the git commit log.
 
+## 2026-09-22 — CAS: class activities are optional
+
+### Changed
+
+- **CAS students are never locked out.** If you picked CAS, every
+  in-class activity is marked Optional. You can still do them, but the
+  modules, songs and games stay open either way.
+
 ## 2026-09-22 — "the cure" chorus fixed
 
 ### Changed

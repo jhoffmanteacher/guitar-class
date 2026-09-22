@@ -455,8 +455,11 @@ function journeyIsVisible(a, cfg){
   var d = ((cfg && cfg.activityDates) || {})[a.id];
   return d ? d <= journeyDayStr(new Date()) : false;
 }
-function journeyBlockers(cfg, classActivities, uid){
+function journeyBlockers(cfg, classActivities, uid, ownPeriod){
   var clears = ((cfg && cfg.activityClears) || {})[uid] || {};
+  // CAS students: every activity is optional, so nothing blocks — mirrors
+  // caStudentIsCAS() in app.js. Effective period = override || own answer.
+  if((((cfg && cfg.periodOverrides) || {})[uid] || ownPeriod || '') === 'CAS') return [];
   // Optional activities (console switch) never block — mirrors caBlockers.
   var optional = (cfg && cfg.optionalActivities) || {};
   return (window.CLASS_ACTIVITIES || []).filter(function(a){
@@ -554,7 +557,7 @@ window.addEventListener('load', function(){
       var classActivities = (data && data.classActivities) || {};
       return fbDb.collection('config').doc('class').get().then(function(cfgDoc){
         var cfg = cfgDoc && cfgDoc.exists ? cfgDoc.data() : {};
-        var blockers = journeyBlockers(cfg, classActivities, user.uid);
+        var blockers = journeyBlockers(cfg, classActivities, user.uid, data && data.period);
         // The one exemption: a pending activity that NAMES this page
         // (`journey: '<slug>'` in class-activities.js) is sending the
         // student here as part of the work — gating it would block the

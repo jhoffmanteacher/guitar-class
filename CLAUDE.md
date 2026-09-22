@@ -1067,6 +1067,19 @@ falls back to an optional one only when nothing required is left. Cached in
 clears the flag with everything else; Archive keeps it. No
 `firestore.rules` change (comment only).
 
+**CAS students: every activity is optional** (2026-09-22, Jonathan's ask —
+they must never be locked out of the modules). Keyed off the EFFECTIVE
+period (`periodOverrides[uid] || progress.period`, same rule as the console's
+`teacherStudentPeriod`). `caIsOptional()` returns true for every card when
+`caStudentIsCAS()`, so a CAS student sees every card tagged Optional and
+nothing ever blocks; `teacherBlockersFor()` and `journeyBlockers()` return
+`[]` for a CAS student (journey.js reads `data.period` off the progress doc
+it already fetches). Picking CAS in the period picker re-runs
+`applyActivityGate()` so the gate comes down without a reload. The console's
+per-student Gate column shows "CAS · optional" instead of a Clear button for
+those students. A student who hasn't picked a period yet is gated like
+anyone else until they do.
+
 **Per-student clears:** `config/class.activityClears` (`{ uid: { id: true } }`)
 lets a teacher let one student past a specific blocker without them finishing
 it — a sub day, a connectivity problem, work done on paper. Written by
