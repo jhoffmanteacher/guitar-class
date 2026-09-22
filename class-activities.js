@@ -1940,10 +1940,10 @@ window.CLASS_ACTIVITIES = [
         },
       },
       {
-        label:    'The chorus — D · F, C · G',
-        label_es: 'El coro — D · F, C · G',
-        text: 'Read the tab — this part is new. Four beats per note.<ol><li>Play each note once, slowly, and say its name</li><li>Play the first half (D F D F) until it feels easy, then the second half (C G C G)</li><li>Play the whole tab at 60 BPM</li></ol>You\'ve got it when: two clean choruses in a row at 60 BPM.',
-        text_es: 'Lee la tablatura — esta parte es nueva. Cuatro tiempos por nota.<ol><li>Toca cada nota una vez, despacio, y di su nombre</li><li>Toca la primera mitad (D F D F) hasta que se sienta fácil, y luego la segunda mitad (C G C G)</li><li>Toca la tablatura entera a 60 BPM</li></ol>Lo tienes cuando: dos coros limpios seguidos a 60 BPM.',
+        label:    'The chorus — D · F · C · G',
+        label_es: 'El coro — D · F · C · G',
+        text: 'Read the tab — this part is new. Four beats per note.<ol><li>Play each note once, slowly, and say its name</li><li>Play D F C G until it feels easy, then play it twice through</li><li>Play the whole tab at 60 BPM</li></ol>You\'ve got it when: two clean choruses in a row at 60 BPM.',
+        text_es: 'Lee la tablatura — esta parte es nueva. Cuatro tiempos por nota.<ol><li>Toca cada nota una vez, despacio, y di su nombre</li><li>Toca D F C G hasta que se sienta fácil, y luego tócalo dos veces seguidas</li><li>Toca la tablatura entera a 60 BPM</li></ol>Lo tienes cuando: dos coros limpios seguidos a 60 BPM.',
         // The chorus is at bar 21, not 13: the verse's eight bars play TWICE
         // (5-12 and 13-20) before it. Measured off the mix — bars 13-20 are
         // harmonically the verse again, and the chorus is the louder section
@@ -1953,15 +1953,15 @@ window.CLASS_ACTIVITIES = [
                    label:    'The chorus, with the band',
                    label_es: 'El coro, con la banda' },
         tab: {
-          caption: 'Chorus · D F, C G · 4 beats each',
-          caption_es: 'Coro · D F, C G · 4 tiempos cada una',
+          caption: 'Chorus · D F C G, twice · 4 beats each',
+          caption_es: 'Coro · D F C G, dos veces · 4 tiempos cada una',
           notes: [
-            { string: 'A', fret: 5, note: 'D', midi: 50, beats: 4 },
-            { string: 'E', fret: 1, note: 'F', midi: 41, beats: 4 },
             { string: 'A', fret: 5, note: 'D', midi: 50, beats: 4 },
             { string: 'E', fret: 1, note: 'F', midi: 41, beats: 4 },
             { string: 'A', fret: 3, note: 'C', midi: 48, beats: 4 },
             { string: 'E', fret: 3, note: 'G', midi: 43, beats: 4 },
+            { string: 'A', fret: 5, note: 'D', midi: 50, beats: 4 },
+            { string: 'E', fret: 1, note: 'F', midi: 41, beats: 4 },
             { string: 'A', fret: 3, note: 'C', midi: 48, beats: 4 },
             { string: 'E', fret: 3, note: 'G', midi: 43, beats: 4 }
           ]
@@ -2119,8 +2119,8 @@ window.CLASS_ACTIVITIES = [
               ]
             },
             {
-              label: 'Chorus — D F D F, C G C G',
-              label_es: 'Coro — D F D F, C G C G',
+              label: 'Chorus — D F C G, D F C G',
+              label_es: 'Coro — D F C G, D F C G',
               notes: [
                 { string: 'A', fret: 5, note: 'D', midi: 50 },
                 { string: 'A', fret: 5, note: 'D', midi: 50 },
@@ -2130,14 +2130,6 @@ window.CLASS_ACTIVITIES = [
                 { string: 'E', fret: 1, note: 'F', midi: 41 },
                 { string: 'E', fret: 1, note: 'F', midi: 41 },
                 { string: 'E', fret: 1, note: 'F', midi: 41 },
-                { string: 'A', fret: 5, note: 'D', midi: 50 },
-                { string: 'A', fret: 5, note: 'D', midi: 50 },
-                { string: 'A', fret: 5, note: 'D', midi: 50 },
-                { string: 'A', fret: 5, note: 'D', midi: 50 },
-                { string: 'E', fret: 1, note: 'F', midi: 41 },
-                { string: 'E', fret: 1, note: 'F', midi: 41 },
-                { string: 'E', fret: 1, note: 'F', midi: 41 },
-                { string: 'E', fret: 1, note: 'F', midi: 41 },
                 { string: 'A', fret: 3, note: 'C', midi: 48 },
                 { string: 'A', fret: 3, note: 'C', midi: 48 },
                 { string: 'A', fret: 3, note: 'C', midi: 48 },
@@ -2146,6 +2138,14 @@ window.CLASS_ACTIVITIES = [
                 { string: 'E', fret: 3, note: 'G', midi: 43 },
                 { string: 'E', fret: 3, note: 'G', midi: 43 },
                 { string: 'E', fret: 3, note: 'G', midi: 43 },
+                { string: 'A', fret: 5, note: 'D', midi: 50 },
+                { string: 'A', fret: 5, note: 'D', midi: 50 },
+                { string: 'A', fret: 5, note: 'D', midi: 50 },
+                { string: 'A', fret: 5, note: 'D', midi: 50 },
+                { string: 'E', fret: 1, note: 'F', midi: 41 },
+                { string: 'E', fret: 1, note: 'F', midi: 41 },
+                { string: 'E', fret: 1, note: 'F', midi: 41 },
+                { string: 'E', fret: 1, note: 'F', midi: 41 },
                 { string: 'A', fret: 3, note: 'C', midi: 48 },
                 { string: 'A', fret: 3, note: 'C', midi: 48 },
                 { string: 'A', fret: 3, note: 'C', midi: 48 },

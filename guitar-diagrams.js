@@ -214,6 +214,10 @@ var CHORD_DIAGRAMS = {
   'G'  : { position:0, chord:[[6,3,2],[5,2,1],[4,0,0],[3,0,0],[2,0,0],[1,3,3]] },
   'C'  : { position:0, chord:[[6,'x',''],[5,3,3],[4,2,2],[3,0,0],[2,1,1],[1,0,0]] },
   'F'  : { position:0, chord:[[6,'x',''],[5,'x',''],[4,3,3],[3,2,2],[2,1,1],[1,1,1]] },
+  /* "the cure"'s color chords — one-finger changes from Am/C/Dm/F/G (2026-09-22) */
+  'Cmaj7' : { position:0, chord:[[6,'x',''],[5,3,3],[4,2,2],[3,0,0],[2,0,0],[1,0,0]] },
+  'Fmaj7' : { position:0, chord:[[6,'x',''],[5,'x',''],[4,3,3],[3,2,2],[2,1,1],[1,0,0]] },
+  'Dm7'   : { position:0, chord:[[6,'x',''],[5,'x',''],[4,0,0],[3,2,2],[2,1,1],[1,1,1]] },
   /* Bm / F#m / C#m: partial-barre (beginner) shapes — these are what Modules 5–6
      teach. Module 7 (barre chords) skips these auto-link pop-ups entirely (see
      wrapChordLinksIn) and renders full-barre shapes inline instead. */

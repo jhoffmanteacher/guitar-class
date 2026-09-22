@@ -621,11 +621,12 @@ SETS.push(
             hint_es: 'Dm es un pequeño triángulo en las tres cuerdas agudas — índice, medio y anular presionan cada uno su propia cuerda, todo dentro de los primeros tres trastes, con la punta del triángulo en la mi aguda. Mantén tus dedos arqueados y tu pulgar detrás del mástil para que la cuerda mi aguda no se silencie.',
             stuck: 'Get the high e and B strings ringing first (index + ring), then add the middle finger on the G string. Most buzz comes from a finger lying too flat — sit up on the very tip.',
             stuck_es: 'Haz sonar primero las cuerdas mi aguda y Si (índice + anular), y luego agrega el dedo medio en la cuerda Sol. La mayoría del zumbido viene de un dedo demasiado plano — apóyate justo en la punta.',
-            levelUp: 'Switch Am → Dm without looking — your index finger barely has to move. Then move on to the G/B turnaround below.',
-            levelUp_es: 'Cambia Am → Dm sin mirar — tu dedo índice casi no tiene que moverse. Luego pasa al giro G/B de abajo.',
+            levelUp: 'Switch Am → Dm without looking — your index finger barely has to move. Then move on to the G/B turnaround below. Then try Dm7 — same shape, index finger flat across both top strings.',
+            levelUp_es: 'Cambia Am → Dm sin mirar — tu dedo índice casi no tiene que moverse. Luego pasa al giro G/B de abajo. Después prueba Dm7 — la misma forma, con el dedo índice acostado sobre las dos cuerdas agudas.',
             skills: [7],
             chords: [
-              { name: 'Dm', chord: [[6,'x'],[5,'x'],[4,0],[3,2,'2'],[2,3,'3'],[1,1,'1']], position: 0 }
+              { name: 'Dm', chord: [[6,'x'],[5,'x'],[4,0],[3,2,'2'],[2,3,'3'],[1,1,'1']], position: 0 },
+              { name: 'Dm7', chord: [[6,'x'],[5,'x'],[4,0],[3,2,'2'],[2,1,'1'],[1,1,'1']], position: 0 }
             ]
           }
             ]
@@ -642,8 +643,8 @@ SETS.push(
             hint_es: 'La barra en "G/B" se lee "acorde de G, con B en el bajo." No es una forma nueva — ya conoces cada posición de dedo desde G. Lo único que cambia es en qué cuerda empieza tu rasgueo.',
             stuck: 'If the low E slips into your strum, rest the side of your strumming hand lightly against it, or angle your pick to start from the A string.',
             stuck_es: 'Si la Mi grave se cuela en tu rasgueo, apoya ligeramente el borde de tu mano de rasgueo sobre ella, o inclina tu púa para empezar desde la cuerda La.',
-            levelUp: 'Drop it into the "the cure" chorus — Dm · F, then C · G/B — open its Song Journey card to play along.',
-            levelUp_es: 'Insértalo en el coro de "the cure" — Dm · F, y luego C · G/B — abre su tarjeta del Recorrido de la canción para tocar junto.',
+            levelUp: 'Play the chorus — Dm · F · C · G — with G/B in place of G: the record\'s bass walks B under that chord. Open its Song Journey card to play along.',
+            levelUp_es: 'Toca el coro — Dm · F · C · G — con G/B en lugar de G: el bajo de la grabación camina hacia B bajo ese acorde. Abre su tarjeta del Recorrido de la canción para tocar junto.',
             skills: [8],
             chords: [
               { name: 'G/B', chord: [[6,'x'],[5,2,'1'],[4,0],[3,0],[2,0],[1,3,'3']], position: 0 }
@@ -691,23 +692,26 @@ SETS.push(
               },
               {
                 label: 'Challenge — "the cure" play-along', label_es: 'Reto — "the cure" tocando junto',
-                text: '<ol><li>Loop Olivia\'s chords with a down-strum, one full bar (four beats) each — the verse is Am · C, then F · C; the chorus is Dm · F, then C · G/B.</li><li>Speed up in steps: 60 → 65 → 70 BPM.</li></ol>Open chords, no capo. Shapes are pre-loaded below. You\'ve got it when: two clean loops of each — verse and chorus — at 70 BPM, one full bar per chord, every change on beat 1, every string ringing clear. <a href="tabs/the-cure.html" target="_blank">&#x1F9F5; Song Journey: this is Layer 5 of 5 — Open Chords</a>.',
-                text_es: '<ol><li>Repite los acordes de Olivia con un rasgueo hacia abajo, un compás completo (cuatro tiempos) cada uno — la estrofa es Am · C, y luego F · C; el coro es Dm · F, y luego C · G/B.</li><li>Acelera en pasos: 60 → 65 → 70 BPM.</li></ol>Acordes al aire, sin capo. Las formas están precargadas abajo. Lo tienes cuando: dos vueltas limpias de cada una — estrofa y coro — a 70 BPM, un compás completo por acorde, cada cambio en el tiempo 1, cada cuerda sonando clara. <a href="tabs/the-cure.html" target="_blank">&#x1F9F5; Recorrido de la canción: esto es la Capa 5 de 5 — Acordes al aire</a>.',
+                text: '<ol><li>Loop Olivia\'s chords with a down-strum, one full bar (four beats) each — the verse is Am · C, then F · C; the chorus is Dm · F · C · G, twice.</li><li>Speed up in steps: 60 → 65 → 70 BPM.</li></ol>Open chords, no capo. Shapes are pre-loaded below. You\'ve got it when: two clean loops of each — verse and chorus — at 70 BPM, one full bar per chord, every change on beat 1, every string ringing clear. <a href="tabs/the-cure.html" target="_blank">&#x1F9F5; Song Journey: this is Layer 5 of 5 — Open Chords</a>.',
+                text_es: '<ol><li>Repite los acordes de Olivia con un rasgueo hacia abajo, un compás completo (cuatro tiempos) cada uno — la estrofa es Am · C, y luego F · C; el coro es Dm · F · C · G, dos veces.</li><li>Acelera en pasos: 60 → 65 → 70 BPM.</li></ol>Acordes al aire, sin capo. Las formas están precargadas abajo. Lo tienes cuando: dos vueltas limpias de cada una — estrofa y coro — a 70 BPM, un compás completo por acorde, cada cambio en el tiempo 1, cada cuerda sonando clara. <a href="tabs/the-cure.html" target="_blank">&#x1F9F5; Recorrido de la canción: esto es la Capa 5 de 5 — Acordes al aire</a>.',
                 hint: 'The backing track\'s metronome reads 144, but it feels half that fast — so 70 BPM here already puts you close to the record\'s real pace. You just learned Dm and the G/B turnaround above — Am, C, and F are all Group 1 chords you already know.',
                 hint_es: 'El metrónomo de la pista base marca 144, pero se siente a la mitad de esa velocidad — así que 70 BPM aquí ya te acerca bastante al ritmo real de la grabación. Acabas de aprender Dm y el giro G/B arriba — Am, C y F son todos acordes del Grupo 1 que ya conoces.',
-                stuck: 'Get the verse — Am · C · Am · C, then F · C · F · C — clean in open position first, then add the chorus — Dm · F · Dm · F, then C · G/B · C · G/B. If the bass-string skip on G/B trips you up, drop back to a plain G until the loop is steady.',
-                stuck_es: 'Deja la estrofa — Am · C · Am · C, y luego F · C · F · C — limpia en posición abierta primero, y luego agrega el coro — Dm · F · Dm · F, y luego C · G/B · C · G/B. Si saltarte la cuerda grave en G/B te complica, vuelve a un G normal hasta que la vuelta esté firme.',
-                levelUp: 'Switch to a down-up strum. Ready for the full-tempo version? Press &#x25B6; on the Song Journey page and play along with the actual 144 BPM backing track.',
-                levelUp_es: 'Cambia a un rasgueo abajo-arriba. ¿Listo para la versión a tempo completo? Presiona &#x25B6; en la página de Recorrido de la canción y toca junto con la pista base real a 144 BPM.',
+                stuck: 'Get the verse — Am · C · Am · C, then F · C · F · C — clean in open position first, then add the chorus — Dm · F · C · G, twice through. If the bass-string skip on G/B trips you up, drop back to a plain G until the loop is steady.',
+                stuck_es: 'Deja la estrofa — Am · C · Am · C, y luego F · C · F · C — limpia en posición abierta primero, y luego agrega el coro — Dm · F · C · G, dos veces seguidas. Si saltarte la cuerda grave en G/B te complica, vuelve a un G normal hasta que la vuelta esté firme.',
+                levelUp: 'Second time through the chorus, play Dm7 instead of Dm — lift nothing, just lay your index finger across B and high e at fret 1. On the verse, swap C for Cmaj7 (lift your index finger off the B string) and F for Fmaj7 (let the high e ring). That\'s the record.',
+                levelUp_es: 'La segunda vez que llegues al coro, toca Dm7 en lugar de Dm — no levantes nada, solo acuesta tu dedo índice sobre Si y mi aguda en el traste 1. En la estrofa, cambia C por Cmaj7 (levanta el dedo índice de la cuerda Si) y F por Fmaj7 (deja sonar la mi aguda al aire). Así lo toca el disco.',
                 skills: [6, 7, 8],
                 chords: [
                   { name: 'Am', chord: [[6,'x'],[5,0],[4,2,'2'],[3,2,'3'],[2,1,'1'],[1,0]], position: 0 },
                   { name: 'C',  chord: [[6,'x'],[5,3,'3'],[4,2,'2'],[3,0],[2,1,'1'],[1,0]], position: 0 },
                   { name: 'Dm', chord: [[6,'x'],[5,'x'],[4,0],[3,2,'2'],[2,3,'3'],[1,1,'1']], position: 0 },
                   { name: 'F',  chord: [[6,'x'],[5,'x'],[4,3,'3'],[3,2,'2'],[2,1,'1'],[1,1,'1']], position: 0 },
-                  { name: 'G/B', chord: [[6,'x'],[5,2,'1'],[4,0],[3,0],[2,0],[1,3,'3']], position: 0 }
+                  { name: 'G', chord: [[6,3,'2'],[5,2,'1'],[4,0],[3,0],[2,0],[1,3,'3']], position: 0 },
+                  { name: 'Cmaj7', chord: [[6,'x'],[5,3,'3'],[4,2,'2'],[3,0],[2,0],[1,0]], position: 0 },
+                  { name: 'Fmaj7', chord: [[6,'x'],[5,'x'],[4,3,'3'],[3,2,'2'],[2,1,'1'],[1,0]], position: 0 },
+                  { name: 'Dm7', chord: [[6,'x'],[5,'x'],[4,0],[3,2,'2'],[2,1,'1'],[1,1,'1']], position: 0 }
                 ],
-                playSeq: { label: 'Hear it — verse: Am · C · Am · C, then F · C · F · C; chorus: Dm · F · Dm · F, then C · G/B · C · G/B — one full bar (four beats) each, eight bars a section', label_es: 'Escúchalo — estrofa: Am · C · Am · C, y luego F · C · F · C; coro: Dm · F · Dm · F, y luego C · G/B · C · G/B — un compás completo (cuatro tiempos) cada uno, ocho compases por sección', bpm: 60, notes: [
+                playSeq: { label: 'Hear it — verse: Am · C · Am · C, then F · C · F · C; chorus: Dm · F · C · G, twice — one full bar (four beats) each, eight bars a section', label_es: 'Escúchalo — estrofa: Am · C · Am · C, y luego F · C · F · C; coro: Dm · F · C · G, dos veces — un compás completo (cuatro tiempos) cada uno, ocho compases por sección', bpm: 60, notes: [
                   { midi: [45,52,57,60,64], beats: 4 },
                   { midi: [48,52,55,60,64], beats: 4 },
                   { midi: [45,52,57,60,64], beats: 4 },
@@ -718,12 +722,12 @@ SETS.push(
                   { midi: [48,52,55,60,64], beats: 4 },
                   { midi: [50,57,62,65], beats: 4 },
                   { midi: [53,57,60,65], beats: 4 },
+                  { midi: [48,52,55,60,64], beats: 4 },
+                  { midi: [43,47,50,55,59,67], beats: 4 },
                   { midi: [50,57,62,65], beats: 4 },
                   { midi: [53,57,60,65], beats: 4 },
                   { midi: [48,52,55,60,64], beats: 4 },
-                  { midi: [47,50,55,59,67], beats: 4 },
-                  { midi: [48,52,55,60,64], beats: 4 },
-                  { midi: [47,50,55,59,67], beats: 4 }
+                  { midi: [43,47,50,55,59,67], beats: 4 }
                 ] },
               }
             ]

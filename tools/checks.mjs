@@ -4905,6 +4905,122 @@ function checkBeatsClaimMatchesTab() {
   if (bad === 0) ok(`${checked} step(s) claiming a per-note beat count all have matching tab durations`);
 }
 
+/* ════════════════════════════════════════════════════════════════════
+   1az. "THE CURE" CHORUS STAYS D · F · C · G, TWICE — corrected
+   2026-09-22 from an initial (wrong) 2026-09-18 reading of
+   `Dm · F · Dm · F, then C · G/B · C · G/B`. The chorus is the same
+   four-chord loop played through twice, not two different two-chord
+   pairs each repeated — see CLAUDE.md's settled-song-facts entry. Every
+   place that plays or prints the chorus's root order has to agree:
+   ca-19's `snippet.fromBar === 21` chorus tab in class-activities.js,
+   module-5.js's "the cure" play-along `playSeq`, and the Journey page's
+   Layer 2 (root line) and Layer 3 (power chords) chorus ASCII tabs.
+   ════════════════════════════════════════════════════════════════════ */
+function checkCureChorusOrder() {
+  head('1az. "the cure" chorus stays in root order D F C G, twice');
+  let checked = 0, bad = 0;
+  const EXPECTED = ['D', 'F', 'C', 'G', 'D', 'F', 'C', 'G'];
+
+  // 1) class-activities.js — the fromBar:21 chorus tab (ca-19's "The chorus" step)
+  try {
+    const src = readFileSync(join(ROOT, 'class-activities.js'), 'utf8');
+    const sandbox = { console };
+    sandbox.window = sandbox;
+    vm.createContext(sandbox);
+    vm.runInContext(src, sandbox, { filename: 'class-activities.js' });
+    const activities = sandbox.CLASS_ACTIVITIES || [];
+    for (const a of activities) {
+      if (!a || !Array.isArray(a.steps)) continue;
+      a.steps.forEach((st, si) => {
+        if (!st || !st.snippet || st.snippet.track !== 'the-cure' || st.snippet.fromBar !== 21) return;
+        const notes = st.tab && Array.isArray(st.tab.notes) ? st.tab.notes : null;
+        if (!notes) return;
+        checked++;
+        const roots = notes.map(n => n.note);
+        if (JSON.stringify(roots) !== JSON.stringify(EXPECTED)) {
+          err(`${a.id} step ${si + 1}: chorus tab roots are ${roots.join(' ')}, expected ${EXPECTED.join(' ')}`);
+          problems++; bad++;
+        }
+      });
+    }
+  } catch { /* reported by 1 */ }
+
+  // 2) module-5.js — the "the cure" play-along playSeq (last 8 of 16 entries)
+  try {
+    const configSrc = readFileSync(join(ROOT, 'config-main.js'), 'utf8');
+    const sandbox = { console };
+    vm.createContext(sandbox);
+    vm.runInContext(configSrc, sandbox, { filename: 'config-main.js' });
+    vm.runInContext(readFileSync(join(ROOT, 'module-5.js'), 'utf8'), sandbox, { filename: 'module-5.js' });
+    const sets = vm.runInContext('typeof SETS !== "undefined" ? SETS : []', sandbox) || [];
+    const CHORD_SIG = {
+      D: JSON.stringify([50, 57, 62, 65]),
+      F: JSON.stringify([53, 57, 60, 65]),
+      C: JSON.stringify([48, 52, 55, 60, 64]),
+      G: JSON.stringify([43, 47, 50, 55, 59, 67]),
+    };
+    const walk = node => {
+      if (!node || typeof node !== 'object') return;
+      if (node.playSeq && Array.isArray(node.playSeq.notes) && /the cure/i.test(node.label || '')) {
+        checked++;
+        const chorus = node.playSeq.notes.slice(-8);
+        const got = chorus.map(n => {
+          const key = JSON.stringify(n.midi);
+          return Object.keys(CHORD_SIG).find(k => CHORD_SIG[k] === key) || `?(${key})`;
+        });
+        if (JSON.stringify(got) !== JSON.stringify(EXPECTED)) {
+          err(`module-5.js "the cure" playSeq: chorus half is ${got.join(' ')}, expected ${EXPECTED.join(' ')}`);
+          problems++; bad++;
+        }
+      }
+      for (const k of Object.keys(node)) walk(node[k]);
+    };
+    walk(sets);
+  } catch { /* reported by 1 */ }
+
+  // 3) tabs/the-cure.html — Journey Layer 2 (root line) and Layer 3 (power chords)
+  try {
+    const html = readFileSync(join(ROOT, 'tabs/the-cure.html'), 'utf8');
+    const grabPre = title => {
+      const idx = html.indexOf(title);
+      if (idx === -1) return null;
+      const preOpen = '<pre class="tab-ascii">';
+      const preStart = html.indexOf(preOpen, idx);
+      const preEnd = html.indexOf('</pre>', preStart);
+      if (preStart === -1 || preEnd === -1) return null;
+      return html.slice(preStart + preOpen.length, preEnd);
+    };
+    const headerRows = block => block.split('\n')
+      .filter(line => !line.includes('|') && line.trim())
+      .map(line => line.match(/\b[A-G]m?5?\b/g) || []);
+
+    const layer2 = grabPre('Chorus root line');
+    if (layer2 != null) {
+      checked++;
+      const rows = headerRows(layer2).flat();
+      if (JSON.stringify(rows) !== JSON.stringify(EXPECTED)) {
+        err(`tabs/the-cure.html Layer 2 "Chorus root line" tab reads ${rows.join(' ')}, expected ${EXPECTED.join(' ')}`);
+        problems++; bad++;
+      }
+    } else { err('tabs/the-cure.html: could not find the Layer 2 "Chorus root line" tab'); problems++; bad++; }
+
+    const layer3 = grabPre('Verse and chorus power chords');
+    if (layer3 != null) {
+      checked++;
+      const chorusRows = headerRows(layer3).filter(tokens => tokens.includes('D5'));
+      const got = chorusRows.flat();
+      const expected5 = EXPECTED.map(r => r + '5');
+      if (JSON.stringify(got) !== JSON.stringify(expected5)) {
+        err(`tabs/the-cure.html Layer 3 power-chord chorus reads ${got.join(' ')}, expected ${expected5.join(' ')}`);
+        problems++; bad++;
+      }
+    } else { err('tabs/the-cure.html: could not find the Layer 3 power-chord tab'); problems++; bad++; }
+  } catch { /* reported by 1 */ }
+
+  if (checked === 0) { err('1az found none of "the cure" chorus tabs/playSeq — it cannot see what it is supposed to guard'); problems++; return; }
+  if (bad === 0) ok(`${checked} "the cure" chorus tab(s)/playSeq checked — all read D F C G, twice`);
+}
+
 (async function main() {
   if (LIVE_ONLY) {
     console.log(`${C.bold}Guitar Class — post-push live check${C.reset}`);
@@ -4957,6 +5073,7 @@ function checkBeatsClaimMatchesTab() {
   checkUnbalancedInlineP();
   checkStrumLineGaps();
   checkBeatsClaimMatchesTab();
+  checkCureChorusOrder();
   if (!SKIP_LINKS) await checkLinks();
   else warn('skipping link check (--skip-links)');
   bumpServiceWorker();

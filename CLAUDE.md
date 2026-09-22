@@ -1396,10 +1396,16 @@ other and the site's tempo numbers are close enough for teaching.
   would be 1.67 s and every snippet window would be half the length it is.
   Tell students "big slow beats, about 72."
   **The verse and the chorus are EIGHT bars each** (Jonathan, 2026-09-18) —
-  verse `Am · C · Am · C`, then `F · C · F · C`; chorus `Dm · F · Dm · F`,
-  then `C · G/B · C · G/B`. Each pair plays twice before the next; it is NOT
-  the four-chord loop played through twice. Layers 3, 5 and 6 of the Journey
-  page showed the four-bar shorthand until that date, while Layer 2 and
+  verse `Am · C · Am · C`, then `F · C · F · C`; chorus `Dm · F · C · G`,
+  played twice. **The chorus IS the four-chord loop played through
+  twice** — corrected 2026-09-22 from Jonathan's two Moises chord charts
+  (key Bb minor as recorded; the site's no-capo arrangement stays), which
+  read Dm F C G straight through, twice. The 2026-09-18 reading here —
+  `Dm · F · Dm · F`, then `C · G/B · C · G/B`, each pair playing twice
+  before the next — was wrong. The last chord is a plain G; G/B survives
+  only as a Module 5 Level up (the record's bass walks B under that
+  chord), never the main line. Layers 3, 5 and 6 of the Journey page
+  showed the four-bar shorthand until 2026-09-18, while Layer 2 and
   ca-13 / ca-18 / ca-19 had it right — a student following the backing-track
   loop would have heard the disagreement. **Modules 3, 5 and 8 still carried
   the four-bar verse in playable data until 2026-09-18** (module-3's

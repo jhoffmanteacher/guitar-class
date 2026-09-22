@@ -5,6 +5,17 @@ Notable changes to the Guitar Class site. Newest first.
 For the full session-by-session history (and the reasoning behind each change),
 see `WORKFLOW.md` and the git commit log.
 
+## 2026-09-22 — "the cure" chorus fixed
+
+### Changed
+
+- **"the cure" chorus fixed.** The chorus is D · F · C · G played twice —
+  not D · F · D · F then C · G · C · G — and the last chord is a plain G.
+  Every tab, chord chart and play-along now follows the record.
+- **"the cure" Level ups sound like the record.** Module 5 and the Song
+  Journey page now show Cmaj7, Fmaj7 and Dm7 — the chords Olivia's
+  guitarist actually plays — as the Level up on the open-chord version.
+
 ## 2026-09-22 — Optional class activities
 
 ### Changed
