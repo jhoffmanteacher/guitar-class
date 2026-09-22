@@ -5,6 +5,15 @@ Notable changes to the Guitar Class site. Newest first.
 For the full session-by-session history (and the reasoning behind each change),
 see `WORKFLOW.md` and the git commit log.
 
+## 2026-09-22 — CAS as a class period
+
+### Changed
+
+- **"Which class are you in?" now offers CAS alongside Period 4 and Period
+  7** — students in that class can pick it themselves, and the teacher can
+  correct a wrong tap to it from the console the same way as any other
+  period.
+
 ## 2026-09-20 — Left rail cleanup
 
 ### Changed

@@ -20,7 +20,7 @@ let teacherSetId=null, allStudents=[];
    already reads, so archiving needs no changes in those views. Flip
    teacherShowArchived (Manage view) to fold them back in. */
 let allStudentsRaw=[], teacherShowArchived=false;
-/* ── Class period (4 or 7) ───────────────────────────────────────────────
+/* ── Class period (4, 7, or CAS) ──────────────────────────────────────────
    A student's effective period is the teacher's override if there is one,
    else the student's own answer, else nothing. The two halves are stored
    apart on purpose: the student's answer is a field on their own progress
@@ -49,7 +49,8 @@ function teacherPeriodIsOverride(stu){
 // and the Unassigned filter is where you go looking for those.
 function teacherPeriodPillHtml(stu){
   const p=teacherStudentPeriod(stu);
-  return p?` <span class="stu-period" title="Class period ${escAttr(p)}">P${escHtml(p)}</span>`:'';
+  const label=p==='CAS'?'CAS':p?'P'+p:'';
+  return p?` <span class="stu-period" title="Class period ${escAttr(p)}">${escHtml(label)}</span>`:'';
 }
 // "Blocked by N" tag beside a student's name in the Students list — how many
 // of today's activities/checks are currently holding them out of the rest of
@@ -62,12 +63,12 @@ function teacherBlockedBadgeHtml(stu){
   const n=teacherBlockersFor(stu, teacherClassConfig).length;
   return n?` <span class="stu-period stu-blocked" title="${n} today's activit${n===1?'y':'ies'} not yet done or cleared">Blocked by ${n}</span>`:'';
 }
-/* 'all' | '4' | '7' | 'none'. Persisted per-device so a mid-period reload
-   comes back to the class the teacher was actually looking at. */
+/* 'all' | '4' | '7' | 'CAS' | 'none'. Persisted per-device so a mid-period
+   reload comes back to the class the teacher was actually looking at. */
 let teacherPeriodFilter=(function(){
   let v=null;
   try{ v=localStorage.getItem('gc-teacher-period'); }catch(e){}
-  return (v==='4'||v==='7'||v==='none') ? v : 'all';
+  return (v==='4'||v==='7'||v==='CAS'||v==='none') ? v : 'all';
 })();
 /* Every dashboard view renders from allStudents, so both roster filters
    are applied in this one place and the whole console — skills grid,
@@ -96,11 +97,11 @@ function renderTeacherPeriodFilter(onRoster){
   const seg=(val,label)=>`<button class="tg-seg-btn ${teacherPeriodFilter===val?'on':''}" data-set-period-filter data-period="${val}">${label}</button>`;
   // The Unassigned segment disappears at zero rather than sitting there as a
   // dead "(0)" — once everyone is tagged it is a filter onto an empty room.
-  box.innerHTML=seg('all','All')+seg('4','P4')+seg('7','P7')
+  box.innerHTML=seg('all','All')+seg('4','P4')+seg('7','P7')+seg('CAS','CAS')
     +(unassigned?seg('none',`Unassigned (${unassigned})`):'');
 }
 function teacherSetPeriodFilter(v){
-  if(v!=='all'&&v!=='4'&&v!=='7'&&v!=='none') return;
+  if(v!=='all'&&v!=='4'&&v!=='7'&&v!=='CAS'&&v!=='none') return;
   teacherPeriodFilter=v;
   try{ localStorage.setItem('gc-teacher-period', v); }catch(e){}
   teacherApplyRosterFilter();
@@ -1008,8 +1009,8 @@ function renderTeacherActivities(opts){
     /* ── Shared card parts ──────────────────────────────────────────── */
     // How many students have finished this one, and who hasn't — broken out
     // by period so the number can't be misread as the whole class when the
-    // dashboard's period filter (t-period-filter) is narrowed to P4, P7, or
-    // Unassigned. Deliberately reads the FULL roster (allStudentsRaw, minus
+    // dashboard's period filter (t-period-filter) is narrowed to P4, P7,
+    // CAS, or Unassigned. Deliberately reads the FULL roster (allStudentsRaw, minus
     // archived) rather than `allStudents`, which follows that filter — this
     // card is meant to answer "who's done" for the whole class regardless of
     // whatever the teacher is currently looking at elsewhere on the page.
@@ -1018,7 +1019,7 @@ function renderTeacherActivities(opts){
     const doneSummaryRoster=(teacherShowArchived?allStudentsRaw:allStudentsRaw.filter(s=>!((cfg.archived||{})[s.uid])));
     const doneSummary=a=>{
       const isCheck=a.kind==='check';
-      const groups=[['4','P4'],['7','P7'],['','Unassigned']]
+      const groups=[['4','P4'],['7','P7'],['CAS','CAS'],['','Unassigned']]
         .map(([val,label])=>({label, students:doneSummaryRoster.filter(s=>teacherStudentPeriod(s)===val)}))
         .filter(g=>g.students.length);
       const rows=groups.map(g=>{
@@ -2272,7 +2273,7 @@ function renderTeacherManage(){
           <button class="tg-seg-btn ${teacherShowArchived?'on':''}" data-toggle-archived>${teacherShowArchived?'Hiding nothing':'Show archived'}${archCount?` (${archCount})`:''}</button>
         </div>
       </div>
-      <div class="tg-note"><strong>Paused</strong> students can sign in but see a "your access is paused" message instead of the site — use it for a temporary hold, then un-pause. <strong>Archived</strong> students are hidden from every dashboard view; their work is kept and comes back if you restore them. Pausing takes effect the next time that student loads the site. <strong>Period</strong> is whatever the student picked when they first signed in — set 4 or 7 here to correct a wrong tap, or Auto to go back to their own answer. This list always shows everyone, whatever the period filter above is set to.</div>`;
+      <div class="tg-note"><strong>Paused</strong> students can sign in but see a "your access is paused" message instead of the site — use it for a temporary hold, then un-pause. <strong>Archived</strong> students are hidden from every dashboard view; their work is kept and comes back if you restore them. Pausing takes effect the next time that student loads the site. <strong>Period</strong> is whatever the student picked when they first signed in — set 4, 7, or CAS here to correct a wrong tap, or Auto to go back to their own answer. This list always shows everyone, whatever the period filter above is set to.</div>`;
     if(allStudentsRaw.length===0){ box.innerHTML=head+'<div class="t-loading">No students yet — they’ll appear here once they sign in.</div>'; return; }
     const nameOf=s=>(s.name||s.email||s.uid);
     // Period first, then name — this is the table you scan when a student
@@ -2280,7 +2281,7 @@ function renderTeacherManage(){
     // Ranked numerically rather than by localeCompare: untagged students sort
     // LAST, and a sentinel string wouldn't get that (ICU collation puts
     // punctuation ahead of digits, so '~' landed them first).
-    const perRank=s=>{ const p=teacherStudentPeriod(s); return p?Number(p):Infinity; };
+    const perRank=s=>{ const p=teacherStudentPeriod(s); return !p?Infinity : p==='CAS'?8 : Number(p); };
     const list=(teacherShowArchived?allStudentsRaw:allStudentsRaw.filter(s=>!arch[s.uid]))
       .sort((a,b)=>(perRank(a)-perRank(b))||nameOf(a).localeCompare(nameOf(b)));
     if(list.length===0){ box.innerHTML=head+'<div class="t-loading">Every student is archived. Use “Show archived” to bring them back.</div>'; return; }
@@ -2293,14 +2294,15 @@ function renderTeacherManage(){
         `<button class="tg-seg-btn ${!isPaused?'on':''}" data-set-paused data-uid="${escAttr(stu.uid)}" data-state="active">Active</button>`+
         `<button class="tg-seg-btn ${isPaused?'on':''}" data-set-paused data-uid="${escAttr(stu.uid)}" data-state="paused">Paused</button>`;
       const archBtn=`<button class="tg-seg-btn ${isArch?'on':''}" data-set-archived data-uid="${escAttr(stu.uid)}" data-state="${isArch?'restore':'archive'}">${isArch?'Restore':'Archive'}</button>`;
-      /* Period: 4 · 7 · Auto. "Auto" clears the override and falls back to
-         whatever the student answered for themselves — which is why the
-         highlighted button is the EFFECTIVE period either way, and the
-         "set" marker beside it is what tells you the value is yours rather
-         than theirs. Same data-uid + delegated listener as its neighbours. */
+      /* Period: 4 · 7 · CAS · Auto. "Auto" clears the override and falls
+         back to whatever the student answered for themselves — which is
+         why the highlighted button is the EFFECTIVE period either way, and
+         the "set" marker beside it is what tells you the value is yours
+         rather than theirs. Same data-uid + delegated listener as its
+         neighbours. */
       const per=teacherStudentPeriod(stu), perSet=teacherPeriodIsOverride(stu);
       const perBtn=(v,label)=>`<button class="tg-seg-btn ${per===v?'on':''}" data-set-period data-uid="${escAttr(stu.uid)}" data-value="${v}">${label}</button>`;
-      const periodCell=`<div class="tg-seg">${perBtn('4','4')}${perBtn('7','7')}`+
+      const periodCell=`<div class="tg-seg">${perBtn('4','4')}${perBtn('7','7')}${perBtn('CAS','CAS')}`+
         `<button class="tg-seg-btn ${perSet?'':'on'}" data-set-period data-uid="${escAttr(stu.uid)}" data-value="auto" title="Use the student's own answer">Auto</button></div>`+
         (perSet?`<span class="tg-set-mark" title="You set this period — the student answered ${escAttr(stu.period||'nothing')}">set</span>`:'');
       const archIco='<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" style="width:1em;height:1em;vertical-align:-0.15em"><rect x="3" y="6" width="18" height="4" rx="1"/><path d="M4 10v9a1 1 0 0 0 1 1h14a1 1 0 0 0 1-1v-9"/><path d="M10 14h4"/></svg>';
@@ -2365,7 +2367,7 @@ async function teacherSetStudentArchived(uid, state){
    sentinel it would also have to know about). */
 async function teacherSetStudentPeriod(uid, value){
   const clear = value==='auto';
-  if(!clear && value!=='4' && value!=='7') return;
+  if(!clear && value!=='4' && value!=='7' && value!=='CAS') return;
   if(!teacherClassConfig.periodOverrides) teacherClassConfig.periodOverrides={};
   const had = Object.prototype.hasOwnProperty.call(teacherClassConfig.periodOverrides, uid);
   const prev = teacherClassConfig.periodOverrides[uid];

@@ -185,6 +185,7 @@
                              es: 'Elige tu periodo de clase. Tu maestro puede corregirlo después si tocas el que no es.' },
     'period.p4':           { en: 'Period 4', es: 'Periodo 4' },
     'period.p7':           { en: 'Period 7', es: 'Periodo 7' },
+    'period.pCAS':         { en: 'CAS', es: 'CAS' },
     'period.wrongAccount': { en: 'Not you? Sign out', es: '¿No eres tú? Cierra sesión' },
     'period.failed':       { en: 'Could not save that. Check your connection and try again.',
                              es: 'No se pudo guardar. Revisa tu conexión e intenta de nuevo.' },

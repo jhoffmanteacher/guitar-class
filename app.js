@@ -141,15 +141,15 @@ let games       = {};   // per-game bests from the games arcade (coach.js) — i
 let streak      = { count:0, lastDay:null };   // site-wide practice streak, independent of any one game
 let gamesAccessOn = true; // whether the Games arcade is available to THIS student (teacher-controlled; see loadClassConfig)
 let accountPaused = false; // teacher put this student on hold (see loadClassConfig / showPausedScreen)
-/* Which class period this student is in — 4 or 7, nothing else. Two halves,
-   deliberately: `studentPeriod` is the student's own answer, living on their
-   progress doc (which only they can write); `periodOverride` is the teacher's
-   correction, read from config/class. They are split because firestore.rules
-   gives the teacher READ-only access to progress/{uid} on purpose (see the
-   comment block in that file), so the console has no way to fix a wrong tap
-   in place. Effective period = override || own answer. See
-   maybeShowPeriodPicker(). */
-let studentPeriod = '';    // progress/{uid}.period — '4' | '7' | '' (not answered yet)
+/* Which class period this student is in — 4, 7, or CAS, nothing else. Two
+   halves, deliberately: `studentPeriod` is the student's own answer, living
+   on their progress doc (which only they can write); `periodOverride` is
+   the teacher's correction, read from config/class. They are split because
+   firestore.rules gives the teacher READ-only access to progress/{uid} on
+   purpose (see the comment block in that file), so the console has no way
+   to fix a wrong tap in place. Effective period = override || own answer.
+   See maybeShowPeriodPicker(). */
+let studentPeriod = '';    // progress/{uid}.period — '4' | '7' | 'CAS' | '' (not answered yet)
 let periodOverride = '';   // config/class.periodOverrides[uid] — teacher's correction, read-only here
 let hiddenActivityIds = {}; // In-Class Activities the teacher has temporarily hidden (see loadClassConfig) — id -> true
 let activityDates = {}; // In-Class Activities release dates, teacher-set in the console (see loadClassConfig) — id -> 'YYYY-MM-DD'
@@ -2467,8 +2467,9 @@ async function submitIssueReport(){
 }
 
 /* ══════════ "Which class are you in?" ══════════
-   Every student is tagged Period 4 or Period 7 so the teacher dashboard can
-   be filtered by period. The student answers for themselves, once, into
+   Every student is tagged Period 4, Period 7, or CAS so the teacher
+   dashboard can be filtered by period. The student answers for themselves,
+   once, into
    progress/{uid}.period; the teacher fixes a wrong tap from the console,
    but that correction lands in config/class.periodOverrides instead, because
    firestore.rules gives the teacher read-only access to a student's progress
@@ -2496,6 +2497,7 @@ function maybeShowPeriodPicker(){
       <div class="period-choices">
         <button type="button" class="panel-next-btn period-btn" id="period-btn-4" onclick="periodPick('4')" data-i18n="period.p4">${escHtml(t('period.p4'))}</button>
         <button type="button" class="panel-next-btn period-btn" onclick="periodPick('7')" data-i18n="period.p7">${escHtml(t('period.p7'))}</button>
+        <button type="button" class="panel-next-btn period-btn" onclick="periodPick('CAS')" data-i18n="period.pCAS">${escHtml(t('period.pCAS'))}</button>
       </div>
       <div class="issue-status" id="period-status" aria-live="polite"></div>
       <div class="period-out"><button type="button" class="period-signout" onclick="signOut()" data-i18n="period.wrongAccount">${escHtml(t('period.wrongAccount'))}</button></div>
@@ -2506,7 +2508,7 @@ function maybeShowPeriodPicker(){
   return true;
 }
 async function periodPick(value){
-  if(value!=='4' && value!=='7') return;
+  if(value!=='4' && value!=='7' && value!=='CAS') return;
   const ov=document.getElementById('period-overlay'); if(!ov) return;
   const status=document.getElementById('period-status');
   const btns=[...ov.querySelectorAll('.period-btn')];
