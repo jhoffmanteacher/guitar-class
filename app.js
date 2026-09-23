@@ -768,10 +768,12 @@ async function loadClassConfig(){
     // security — the real boundary is the Firestore rules, which already
     // stop a student reading or writing anyone else's doc.
     accountPaused = (d.paused||{})[currentUser.uid] === true;
-    // Teacher's period correction (teacher.js Manage view). Same fail-open
-    // convention as everything else in here: a failed read leaves it '', which
-    // just means the student's own answer stands.
+    // Teacher's period correction (teacher.js Manage view). A CAS override
+    // must not fail open to '' — that would drop a CAS student's exemption
+    // and let caBlockers() gate them — so it's cached like the dates and
+    // the clears, not left to fail open like a cosmetic field.
     periodOverride = (d.periodOverrides||{})[currentUser.uid] || '';
+    try{ localStorage.setItem('caPeriodOverride', periodOverride); }catch(e){}
     const ov = (d.gameOverrides||{})[currentUser.uid];
     if(ov===true)       gamesAccessOn = true;
     else if(ov===false) gamesAccessOn = false;
@@ -844,6 +846,10 @@ async function loadClassConfig(){
 // on. A student who has NEVER loaded config sees no activities — acceptable,
 // since they also have no progress connection yet.
 function restoreClassConfigFromCache(){
+  try{
+    const raw = localStorage.getItem('caPeriodOverride');
+    if(raw) periodOverride = raw;
+  }catch(e){ /* ignore — periodOverride stays '' */ }
   try{
     const raw = localStorage.getItem('caDates');
     if(raw) activityDates = JSON.parse(raw) || {};
