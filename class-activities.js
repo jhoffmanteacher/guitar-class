@@ -1749,9 +1749,6 @@ window.CLASS_ACTIVITIES = [
         label_es: 'Practica — La estrofa completa',
         text: 'Play the whole verse with the tab at 60 BPM: A C A C, then F C F C. Made a mistake? Keep going. You\'ve got it when: two verses in a row at 60 BPM without stopping. Stuck at the C to F move? Play just C then F five times, then try again.',
         text_es: 'Toca la estrofa completa con la tablatura a 60 BPM: A C A C, y luego F C F C. ¿Te equivocaste? Sigue. Lo tienes cuando: dos estrofas seguidas a 60 BPM sin detenerte. ¿Te trabas en el cambio de C a F? Toca solo C y luego F cinco veces, y vuelve a intentarlo.',
-        snippet: { track: 'the-cure', fromBar: 5, bars: 8,
-                   label:    'The whole verse, with the band',
-                   label_es: 'La estrofa completa, con la banda' },
         tab: {
           caption: 'Verse · A C A C, F C F C · 4 beats each',
           caption_es: 'Estrofa · A C A C, F C F C · 4 tiempos cada una',
@@ -2013,14 +2010,6 @@ window.CLASS_ACTIVITIES = [
         label_es: 'Practica — La canción en orden',
         text: 'Play the tab straight through at 60 BPM: intro, verse, verse, chorus. Made a mistake? Keep going. You\'ve got it when: intro, verse, verse, chorus at 60 BPM without stopping. Stuck where the verse meets the chorus? Go back to step 5 for one minute.',
         text_es: 'Toca la tablatura de principio a fin a 60 BPM: intro, estrofa, estrofa, coro. ¿Te equivocaste? Sigue. Lo tienes cuando: intro, estrofa, estrofa, coro a 60 BPM sin detenerte. ¿Te trabas donde la estrofa se junta con el coro? Vuelve al paso 5 por un minuto.',
-        /* 28 bars, not 20: the record is intro (4), verse (8), verse AGAIN
-           (8), then the chorus (8). A 20-bar window stopped in the middle of
-           the second verse and never reached the chorus the tab teaches, so
-           the tab carries the repeated verse and the window runs to the end
-           of the first chorus. */
-        snippet: { track: 'the-cure', fromBar: 1, bars: 28,
-                   label:    'The song in order, with the band',
-                   label_es: 'La canción en orden, con la banda' },
         tab: {
           caption: 'Intro, verse, verse, chorus · 4 beats per note',
           caption_es: 'Intro, estrofa, estrofa, coro · 4 tiempos por nota',
@@ -2169,6 +2158,11 @@ window.CLASS_ACTIVITIES = [
         label_es: 'Practica — Con la banda',
         text: 'Press Play on the band and play the song along with it. When it works, open the Song Journey page, Layer 2, and play with the full track. Then add 10 BPM to the tab after every two clean runs, up to 100. You\'ve got it when: a full verse and chorus with the band without dropping out.',
         text_es: 'Pulsa Play en la banda y toca la canción con ella. Cuando te salga, abre la página de Recorrido de la canción, Capa 2, y toca con la pista completa. Después súbele 10 BPM a la tablatura cada dos vueltas limpias, hasta 100. Lo tienes cuando: una estrofa y un coro completos con la banda, sin salirte.',
+        /* 28 bars, not 20: the record is intro (4), verse (8), verse AGAIN
+           (8), then the chorus (8). A 20-bar window stopped in the middle of
+           the second verse and never reached the chorus the tab teaches, so
+           the window carries the repeated verse and runs to the end of the
+           first chorus. */
         snippet: { track: 'the-cure', fromBar: 1, bars: 28,
                    label:    'The song in order, with the band',
                    label_es: 'La canción en orden, con la banda' },
