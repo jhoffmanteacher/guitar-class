@@ -771,9 +771,11 @@ async function loadClassConfig(){
     // Teacher's period correction (teacher.js Manage view). A CAS override
     // must not fail open to '' — that would drop a CAS student's exemption
     // and let caBlockers() gate them — so it's cached like the dates and
-    // the clears, not left to fail open like a cosmetic field.
+    // the clears, not left to fail open like a cosmetic field. Unlike those,
+    // it's one student's value, so the cache carries the uid: on a shared
+    // Chromebook the next student must not inherit the last one's CAS.
     periodOverride = (d.periodOverrides||{})[currentUser.uid] || '';
-    try{ localStorage.setItem('caPeriodOverride', periodOverride); }catch(e){}
+    try{ localStorage.setItem('caPeriodOverride', JSON.stringify({uid: currentUser.uid, v: periodOverride})); }catch(e){}
     const ov = (d.gameOverrides||{})[currentUser.uid];
     if(ov===true)       gamesAccessOn = true;
     else if(ov===false) gamesAccessOn = false;
@@ -847,8 +849,8 @@ async function loadClassConfig(){
 // since they also have no progress connection yet.
 function restoreClassConfigFromCache(){
   try{
-    const raw = localStorage.getItem('caPeriodOverride');
-    if(raw) periodOverride = raw;
+    const cached = JSON.parse(localStorage.getItem('caPeriodOverride') || 'null');
+    if(cached && currentUser && cached.uid === currentUser.uid) periodOverride = cached.v || '';
   }catch(e){ /* ignore — periodOverride stays '' */ }
   try{
     const raw = localStorage.getItem('caDates');
