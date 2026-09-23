@@ -1518,6 +1518,46 @@ const SNIPPET_TRACKS = {
     anchor: 1.135,
     anchorVerified: true,
   },
+  /* "Luna" is 6/8 and the room counts the two BIG beats per bar (Journey
+     Layers 2-3: one pluck per bar, two bars per chord). The file's 128 BPM
+     is the EIGHTH note — Moises clicks all six eighths of every bar — so the
+     big beat is 128 / 3 = 42.7 and a bar is six clicks, 2.81 s. Measured
+     2026-09-23 off the rhythm-down-metronome file (clicks isolated by
+     subtracting the plain mix, 344 of them): the bass reads F F A A in
+     six-click bars all the way through, one chord per two bars.
+
+     The first four bars are an intro at 120 BPM (F F Dm Dm, the passing Dm)
+     before the song settles at 127.99 for the rest of the file. The bar
+     arithmetic here is one tempo, so `anchor` is NOT the file's first click
+     (0.659 s) — it is the first downbeat at the steady tempo, the start of
+     the F-Am vamp, and bar 1 below means the first F bar of the vamp. The
+     intro is simply never inside a window. Anchor is the fitted grid through
+     clicks 24-344 (residual 17 ms rms), not a by-ear reading.
+
+     Audio, 2026-09-23. One Moises export set at both tiers, 128 and 100:
+     full, full-metronome and rhythm-down-metronome. The 128 rhythm-down-
+     metronome file was REPLACED with this set's export (same name, same
+     163.16 s, sample-aligned): the earlier one had a click about half as
+     loud, so pressing 🎸 with Metronome on made the click jump in volume.
+     The plain rhythm-down at 128 is the original; its music matches this
+     set's to within the click. All four 100 BPM files are Moises exports,
+     208.80 s each and sample-aligned with one another. */
+  'luna': {
+    src:              'audio/peso-pluma-junior-h-luna-backing-Am-128bpm-440hz-rhythm-down.mp3',
+    srcMetronome:     'audio/peso-pluma-junior-h-luna-backing-Am-128bpm-440hz-rhythm-down-metronome.mp3',
+    srcSlow:          'audio/peso-pluma-junior-h-luna-backing-Am-100bpm-440hz-rhythm-down.mp3',
+    srcSlowMetronome: 'audio/peso-pluma-junior-h-luna-backing-Am-100bpm-440hz-rhythm-down-metronome.mp3',
+    srcFull:              'audio/peso-pluma-junior-h-luna-backing-Am-128bpm-440hz-full.mp3',
+    srcFullSlow:          'audio/peso-pluma-junior-h-luna-backing-Am-100bpm-440hz-full.mp3',
+    srcFullMetronome:     'audio/peso-pluma-junior-h-luna-backing-Am-128bpm-440hz-full-metronome.mp3',
+    srcFullSlowMetronome: 'audio/peso-pluma-junior-h-luna-backing-Am-100bpm-440hz-full-metronome.mp3',
+    trackBpm: 128, trackBpmSlow: 100,
+    feltBpm: 128 / 3,                   // big beats: 3 eighth-note clicks each
+    beatsPerBar: 2,                     // two big beats per 6/8 bar
+    durationSec: 163,
+    anchor: 12.658,
+    anchorVerified: true,
+  },
 };
 /* Does this track have a full mix at all? Both tiers or neither — the toggle
    has to survive the Slow button. */
