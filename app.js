@@ -1041,6 +1041,15 @@ async function flushSave(){
     if(sentCaDeletes) sentCaDeletes.forEach(k=>classActivitiesDeletes.delete(k));
     setSaveMsg('save.saved', 2000);
     _saveFailCount = 0;
+    /* A period save landing closes the picker and refreshes the gate — win
+       here rather than only in periodPick's own synchronous await, so a
+       DELAYED auto-retry (this function, called again by its own catch
+       branch below) also clears a modal that periodPick already gave up on
+       and left showing "answer didn't save, try again". */
+    if(keys.has('period') && document.getElementById('period-overlay')){
+      closePeriodPicker();
+      refreshOpenClassActivitiesScreen();
+    }
   } catch(e){
     keys.forEach(k=>_dirtyKeys.add(k));   // keep dirty so the next save retries
     _saveFailCount++;
@@ -2545,19 +2554,14 @@ async function periodPick(value){
      rather than a try/catch — which keeps this on the one shared save path
      instead of opening a second writer for a single field. studentPeriod is
      NOT rolled back on failure: it is the student's answer either way, and
-     the queued retry needs the real value, not an empty one. */
+     the queued retry needs the real value, not an empty one.
+     A successful save — here, or via flushSave's own later auto-retry —
+     closes the picker and refreshes the gate itself (see flushSave); this
+     only has to handle the failure UI. */
   if(_dirtyKeys.has('period')){
     btns.forEach(b=>{ b.disabled=false; });
     if(status){ status.textContent=t('period.failed'); status.className='issue-status err'; }
-    return;
   }
-  closePeriodPicker();
-  /* A CAS pick turns every activity optional (caIsOptional), so a gate that
-     went up at sign-in has to come down now, not on the next reload. For a
-     4/7 pick this re-runs the same gate it already had — harmless. */
-  applyActivityGate();
-  const caScreen = document.getElementById('class-activities-screen');
-  if(caScreen && !caScreen.hidden) renderClassActivities();
 }
 function closePeriodPicker(){
   const ov=document.getElementById('period-overlay');
@@ -7131,8 +7135,7 @@ window.addEventListener('gc-langchange', function(){
     if(typeof renderKeepPracticing === 'function') renderKeepPracticing();
     if(typeof renderMyProgress === 'function') renderMyProgress();
   }
-  const caScreen = document.getElementById('class-activities-screen');
-  if(caScreen && !caScreen.hidden && typeof renderClassActivities === 'function') renderClassActivities();
+  refreshOpenClassActivitiesScreen();
   // A live Daily 5 overlay just rebuilds its modal body in place.
   const d5 = document.querySelector('#daily5-overlay .daily5-modal');
   if(d5 && typeof buildDaily5 === 'function'){
@@ -9888,6 +9891,10 @@ function caIsVisible(a){
    (see studentPeriod). Same three places must agree: caIsOptional here,
    teacherBlockersFor, journeyBlockers. */
 function caStudentIsCAS(){ return (periodOverride || studentPeriod) === 'CAS'; }
+// Despite the name and its single per-activity argument, this is NOT just
+// "did the teacher mark this one Optional" — it also folds in the CURRENT
+// student's CAS status (ambient, via caStudentIsCAS()). A caller that wants
+// only the teacher's per-activity flag needs optionalActivityIds[a.id] directly.
 function caIsOptional(a){ return caStudentIsCAS() || optionalActivityIds[a.id] === true; }
 function caBlockers(){
   if(isGatePreviewer() || progressLoadFailed) return [];
@@ -9939,13 +9946,17 @@ document.addEventListener('visibilitychange', () => {
      band when the tab goes away; the student presses Play again. */
   if(document.hidden){ snipStop(); return; }
   if(!currentUser || IS_TEACHER_MODE) return;
-  loadClassConfig().then(() => {
-    if(typeof renderClassActivities === 'function'){
-      const screen = document.getElementById('class-activities-screen');
-      if(screen && !screen.hasAttribute('hidden')) renderClassActivities();
-    }
-  });
+  loadClassConfig().then(refreshOpenClassActivitiesScreen);
 });
+// Shared "is In-Class Activities open, and if so re-render it" check — every
+// place that changes something the screen might already be showing (a period
+// pick, a language switch, a gate-clearing config reload) goes through this
+// one, rather than three near-identical copies of the same idiom drifting apart.
+function refreshOpenClassActivitiesScreen(){
+  if(typeof renderClassActivities !== 'function') return;
+  const screen = document.getElementById('class-activities-screen');
+  if(screen && !screen.hidden) renderClassActivities();
+}
 /* In-Class Activities — three groups, in this order (Today-first work order, Phase 1):
      1. Do now      — the first pending card. Collapsed like every other
                        card (Jonathan, 2026-09-15): the whole point of the

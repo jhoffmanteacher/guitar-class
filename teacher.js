@@ -33,8 +33,8 @@ let allStudentsRaw=[], teacherShowArchived=false;
    `let studentPeriod` at script scope, and both files share one global
    scope — a top-level `function studentPeriod(){}` here would collide with
    that lexical binding and throw before a single line of this file ran. */
-function teacherStudentPeriod(stu){
-  const ov=(teacherClassConfig&&teacherClassConfig.periodOverrides)||{};
+function teacherStudentPeriod(stu, cfg){
+  const ov=((cfg||teacherClassConfig)&&(cfg||teacherClassConfig).periodOverrides)||{};
   return ov[stu.uid] || stu.period || '';
 }
 // Is the shown period the teacher's correction rather than the student's
@@ -1745,21 +1745,21 @@ function renderTeacherCheckDetail(a, back){
   // yet can still be cleared — a sub day, a connectivity problem — so it's
   // its own column rather than folded into the score cells.
   const clearsMap=teacherClassConfig.activityClears||{};
-  const clearCell=uid=>{
-    if(teacherStudentPeriod({uid, period:(allStudents.find(x=>x.uid===uid)||{}).period})==='CAS') return TEACHER_CAS_GATE_CELL;
-    const cleared=!!((clearsMap[uid]||{})[a.id]);
-    return `<td><button class="tg-seg-btn ${cleared?'on':''}" data-set-activity-clear data-uid="${escAttr(uid)}" data-id="${escAttr(a.id)}" data-state="${cleared?'unclear':'clear'}" title="Lets this student past the gate without finishing.">${cleared?'Cleared':'Clear'}</button></td>`;
+  const clearCell=s=>{
+    if(teacherStudentPeriod(s)==='CAS') return TEACHER_CAS_GATE_CELL;
+    const cleared=!!((clearsMap[s.uid]||{})[a.id]);
+    return `<td><button class="tg-seg-btn ${cleared?'on':''}" data-set-activity-clear data-uid="${escAttr(s.uid)}" data-id="${escAttr(a.id)}" data-state="${cleared?'unclear':'clear'}" title="Lets this student past the gate without finishing.">${cleared?'Cleared':'Clear'}</button></td>`;
   };
   const bodyRows=withRes.map(({s,r})=>{
     const g=ecGrade(a,r.picks);
     const cells=g.rows.map(row=>`<td style="text-align:center">${cell(row.ok)}<div style="font-size:.72em;opacity:.7">${escHtml(row.pick||'—')}</div></td>`).join('');
-    return `<tr><td class="nc">${escHtml(s.name||s.email||'(no name)')}</td><td>${r.score}/${r.total}</td><td>${escHtml(r.at||'')}</td>${cells}${clearCell(s.uid)}</tr>`;
+    return `<tr><td class="nc">${escHtml(s.name||s.email||'(no name)')}</td><td>${r.score}/${r.total}</td><td>${escHtml(r.at||'')}</td>${cells}${clearCell(s)}</tr>`;
   }).join('');
   const missRow=withRes.length
     ? `<tr><td class="nc" style="font-style:italic">Missed by</td><td colspan="2"></td>`
       +missed.map(m=>`<td style="text-align:center">${m}</td>`).join('')+`<td></td></tr>`
     : '';
-  const noneRows=without.map(s=>`<tr style="opacity:.55"><td class="nc">${escHtml(s.name||s.email||'(no name)')}</td><td colspan="${2+items.length}">not turned in</td>${clearCell(s.uid)}</tr>`).join('');
+  const noneRows=without.map(s=>`<tr style="opacity:.55"><td class="nc">${escHtml(s.name||s.email||'(no name)')}</td><td colspan="${2+items.length}">not turned in</td>${clearCell(s)}</tr>`).join('');
   const table=allStudents.length
     ? `<div class="t-grid-wrap"><table><thead><tr><th class="nc">Student</th><th>Score</th><th>Date</th>${heads.map(h=>`<th>${h}</th>`).join('')}<th>Gate</th></tr></thead>`
       +`<tbody>${bodyRows}${missRow}${noneRows}</tbody></table></div>`
@@ -1999,14 +1999,15 @@ function teacherRetiredBanner(id){
 // The Gate column for a CAS student on the activity/check detail grids:
 // every activity is optional for CAS (teacherBlockersFor), so a Clear
 // button there would do nothing.
-const TEACHER_CAS_GATE_CELL='<td><span style="opacity:.65" title="CAS students never get locked out — every activity is optional for them.">CAS · optional</span></td>';
+const TEACHER_CAS_GATE_CELL='<td><span class="stu-period" title="CAS students never get locked out — every activity is optional for them.">CAS · optional</span></td>';
 function teacherActivityOptional(id, cfg){ return ((cfg&&cfg.optionalActivities)||{})[id]===true; }
 function teacherBlockersFor(stu, cfg){
   const today=dayStr(new Date());
   const clears=((cfg&&cfg.activityClears)||{})[stu.uid]||{};
   // CAS students: every activity is optional, so nothing blocks — mirrors
-  // caStudentIsCAS() in app.js. Effective period = override || own answer.
-  if((((cfg&&cfg.periodOverrides)||{})[stu.uid] || stu.period || '')==='CAS') return [];
+  // caStudentIsCAS() in app.js. Effective period via the shared helper, same
+  // formula teacherStudentPeriod() uses at every other call site.
+  if(teacherStudentPeriod(stu, cfg)==='CAS') return [];
   // Optional activities never block — mirrors caBlockers() in app.js.
   return (window.CLASS_ACTIVITIES||[]).filter(a=>
     teacherActivityVisible(a,cfg,today) && !teacherActivityOptional(a.id,cfg) && (stu.classActivities||{})[a.id]!==true && clears[a.id]!==true);
