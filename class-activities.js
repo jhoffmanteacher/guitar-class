@@ -1917,6 +1917,124 @@ window.CLASS_ACTIVITIES = [
       },
     ],
   },
+  {
+    id:    'ca-20',
+    journey: 'luna',
+    journeyLayer: 2,
+    title:    '"Luna" — The Bassline',
+    title_es: '"Luna" — La línea de bajo',
+    intro:    'You already play F at fret 1 on the low E string. "Luna" needs that note and one more — the open A string. Two notes, two bars each, and that loop is the whole song.',
+    intro_es: 'Ya tocas el F en el traste 1 de la cuerda Mi grave. "Luna" necesita esa nota y una más — la cuerda La al aire. Dos notas, dos compases cada una, y ese bucle es toda la canción.',
+    steps: [
+      {
+        label:    'Learn — The map',
+        label_es: 'Aprende — El mapa',
+        figure: 'img/ca-luna-roots.svg',
+        figureAlt: 'Fretboard diagram marking two notes: F at fret 1 on the low E string, and A as the open A string.',
+        figureAlt_es: 'Diagrama del diapasón marcando dos notas: F en el traste 1 de la cuerda Mi grave, y A como la cuerda La al aire.',
+        text: '"Luna" rides two chords, F and Am, so its bassline is two notes. <b>F</b>: low E string, fret 1, index finger. <b>A</b>: the open A string — no finger at all. Two bars of F, then two bars of A, over and over.',
+        text_es: '"Luna" se apoya en dos acordes, F y Am, así que su línea de bajo es dos notas. <b>F</b>: cuerda Mi grave, traste 1, dedo índice. <b>A</b>: la cuerda La al aire — sin ningún dedo. Dos compases de F, luego dos compases de A, una y otra vez.',
+      },
+      {
+        label:    'Learn — Feel the two',
+        label_es: 'Aprende — Siente los dos',
+        text: 'Open the Song Journey page (button below the steps) and press Play on the backing track. "Luna" is in 6/8: six quick counts fit each bar, but the song leans on two big beats. Tap only those two — 1 and 4 — and let the guitar on the record play the rest.',
+        text_es: 'Abre la página de Recorrido de la canción (botón debajo de los pasos) y pulsa Play en la pista de acompañamiento. "Luna" está en 6/8: seis cuentas rápidas caben en cada compás, pero la canción se apoya en dos tiempos grandes. Marca solo esos dos — 1 y 4 — y deja que la guitarra del disco toque el resto.',
+      },
+      {
+        label:    'Learn — F',
+        label_es: 'Aprende — F',
+        text: 'Press Play on the tab and watch the cursor. Index finger on fret 1, fingertip right behind the fret. One pluck per bar, and the note rings through both big beats.',
+        text_es: 'Pulsa Play en la tablatura y mira el cursor. Índice en el traste 1, la punta del dedo justo detrás del traste. Una pulsación por compás, y la nota suena durante los dos tiempos grandes.',
+        tab: {
+          caption: 'F · four bars · one pluck per bar, 2 beats each',
+          caption_es: 'F · cuatro compases · una pulsación por compás, 2 tiempos cada una',
+          notes: [
+            { string: 'E', fret: 1, note: 'F', midi: 41, beats: 2 },
+            { string: 'E', fret: 1, note: 'F', midi: 41, beats: 2 },
+            { string: 'E', fret: 1, note: 'F', midi: 41, beats: 2 },
+            { string: 'E', fret: 1, note: 'F', midi: 41, beats: 2 }
+          ]
+        },
+      },
+      {
+        label:    'Practice — F',
+        label_es: 'Practica — F',
+        text: 'Play F with the tab at 60 BPM, one pluck every two beats, and let it ring the whole time. You\'ve got it when: four F\'s in a row at 60 BPM, no buzz. Buzz? Slide the fingertip closer to the fret and press with the tip, not the pad.',
+        text_es: 'Toca F con la tablatura a 60 BPM, una pulsación cada dos tiempos, y déjala sonar todo el tiempo. Lo tienes cuando: cuatro F seguidas a 60 BPM, sin zumbido. ¿Zumba? Desliza la punta del dedo más cerca del traste y presiona con la punta, no con la yema.',
+        tab: {
+          caption: 'F · four bars · one pluck per bar, 2 beats each',
+          caption_es: 'F · cuatro compases · una pulsación por compás, 2 tiempos cada una',
+          notes: [
+            { string: 'E', fret: 1, note: 'F', midi: 41, beats: 2 },
+            { string: 'E', fret: 1, note: 'F', midi: 41, beats: 2 },
+            { string: 'E', fret: 1, note: 'F', midi: 41, beats: 2 },
+            { string: 'E', fret: 1, note: 'F', midi: 41, beats: 2 }
+          ]
+        },
+      },
+      {
+        label:    'Practice — A',
+        label_es: 'Practica — A',
+        text: 'Lift your finger off. Play the open A string with the tab at 60 BPM, one pluck every two beats. You\'ve got it when: four A\'s in a row with only one string ringing. Low E ringing too? Rest the pick on the A string before each pluck, then push through it.',
+        text_es: 'Levanta el dedo. Toca la cuerda La al aire con la tablatura a 60 BPM, una pulsación cada dos tiempos. Lo tienes cuando: cuatro A seguidas con una sola cuerda sonando. ¿Suena también la Mi grave? Apoya la púa en la cuerda La antes de cada pulsación, y luego empújala a través.',
+        tab: {
+          caption: 'A · four bars · one pluck per bar, 2 beats each',
+          caption_es: 'A · cuatro compases · una pulsación por compás, 2 tiempos cada una',
+          notes: [
+            { string: 'A', fret: 0, note: 'A', midi: 45, beats: 2 },
+            { string: 'A', fret: 0, note: 'A', midi: 45, beats: 2 },
+            { string: 'A', fret: 0, note: 'A', midi: 45, beats: 2 },
+            { string: 'A', fret: 0, note: 'A', midi: 45, beats: 2 }
+          ]
+        },
+      },
+      {
+        label:    'Practice — The loop',
+        label_es: 'Practica — El bucle',
+        text: 'Play F F A A with the tab at 60 BPM. The index finger comes down for F and lifts for A; the pick keeps the same steady speed. You\'ve got it when: four laps (a lap is one time through the loop) at 60 BPM without stopping. Late on the change? Play just the second F and the first A, ten times, then try again.',
+        text_es: 'Toca F F A A con la tablatura a 60 BPM. El índice baja para F y se levanta para A; la púa mantiene la misma velocidad constante. Lo tienes cuando: cuatro vueltas (una vuelta es una pasada completa del bucle) a 60 BPM sin detenerte. ¿Llegas tarde al cambio? Toca solo la segunda F y la primera A, diez veces, y vuelve a intentarlo.',
+        tab: {
+          caption: 'The loop · F F A A · one pluck per bar, 2 beats each',
+          caption_es: 'El bucle · F F A A · una pulsación por compás, 2 tiempos cada una',
+          notes: [
+            { string: 'E', fret: 1, note: 'F', midi: 41, beats: 2 },
+            { string: 'E', fret: 1, note: 'F', midi: 41, beats: 2 },
+            { string: 'A', fret: 0, note: 'A', midi: 45, beats: 2 },
+            { string: 'A', fret: 0, note: 'A', midi: 45, beats: 2 }
+          ]
+        },
+      },
+      {
+        label:    'Practice — Faster',
+        label_es: 'Practica — Más rápido',
+        text: 'Same loop. Set the tab to 70 BPM, then 80. You\'ve got it when: four laps at 80 BPM, no stops, no buzz. Buzz comes back? Drop to 70 for four laps, then try 80 again.',
+        text_es: 'El mismo bucle. Pon la tablatura a 70 BPM, y luego a 80. Lo tienes cuando: cuatro vueltas a 80 BPM, sin paradas, sin zumbido. ¿Vuelve el zumbido? Baja a 70 durante cuatro vueltas, y vuelve a intentar a 80.',
+        tab: {
+          caption: 'The loop · F F A A · one pluck per bar, 2 beats each',
+          caption_es: 'El bucle · F F A A · una pulsación por compás, 2 tiempos cada una',
+          notes: [
+            { string: 'E', fret: 1, note: 'F', midi: 41, beats: 2 },
+            { string: 'E', fret: 1, note: 'F', midi: 41, beats: 2 },
+            { string: 'A', fret: 0, note: 'A', midi: 45, beats: 2 },
+            { string: 'A', fret: 0, note: 'A', midi: 45, beats: 2 }
+          ]
+        },
+      },
+      {
+        label:    'Practice — With the record',
+        label_es: 'Practica — Con el disco',
+        text: 'Open the Song Journey page and press Play on the backing track. It runs at record speed, 128 BPM felt in two — still one pluck per bar, just faster. Come in on F when the singing starts. You\'ve got it when: the first verse with the track without dropping out. Then keep going — the loop never changes, all the way to the end.',
+        text_es: 'Abre la página de Recorrido de la canción y pulsa Play en la pista de acompañamiento. Corre a la velocidad del disco, 128 BPM sentidos en dos — sigue siendo una pulsación por compás, solo que más rápido. Entra con F cuando empieza el canto. Lo tienes cuando: la primera estrofa con la pista sin salirte. Después sigue — el bucle nunca cambia, hasta el final.',
+      },
+    ],
+  },
+  /* "Luna" bass roots, the Song Journey's Layer 2 line as a class day: F on the
+     low E at fret 1 and the open A string, two bars each, one pluck per bar in
+     the 6/8 felt-in-2 pulse. Built from Jonathan's Moises chord chart
+     (2026-09-23), which agrees with the Journey page — F · Am vamp, Dm once in
+     the opening lines. The passing D is left to Layer 3 (D5), where it already
+     lives; this card keeps the loop that carries the whole song. */
   /* Day 18's card, the day after ca-13. ca-13 teaches the intro and the verse
      on the low E string ALONE — A at fret 5, C at fret 8, F at fret 1, the hand
      travelling the length of the string. This card moves that same line onto two
