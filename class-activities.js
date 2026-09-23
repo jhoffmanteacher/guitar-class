@@ -1033,19 +1033,20 @@ window.CLASS_ACTIVITIES = [
     id:    'ca-10',
     number: 10,
     journey: 'seven-nation-army',   // the last step sends them to this Song Journey page — see JOURNEY below
+    journeyLayer: 2,
     title:    'Seven Nation Army — The Riff',
     title_es: 'Seven Nation Army — El riff',
-    intro:    'Your fingers trained for this. One riff, one string, seven notes — and five of them sit right on the neck dots you already know.',
-    intro_es: 'Tus dedos entrenaron para esto. Un riff, una cuerda, siete notas — y cinco de ellas caen justo sobre los puntos del mástil que ya conoces.',
+    intro:    'The Seven Nation Army riff is seven notes on the A string, the string just below the low E. It uses the Reach from Finger Gym: finger 1 stays on fret 7 while the pinky reaches fret 10.',
+    intro_es: 'El riff de Seven Nation Army son siete notas en la cuerda La, la cuerda justo debajo de la Mi grave. Usa el Estiramiento del Gimnasio de Dedos: el dedo 1 se queda en el traste 7 mientras el meñique llega al traste 10.',
     steps: [
       {
-        label:    'The opening call',
-        label_es: 'La llamada inicial',
-        text: 'The opening call — play the tab below.<ul><li>Finger 1 sits on fret 7, the third dot, and never lifts</li><li>The pinky reaches one fret past the 9-dot and comes back — this is the Reach from Finger Gym</li></ul>The hard part: the pinky wants to drag finger 1 with it.\nYou\'ve got it when: the opening call three times in a row, no buzz.',
-        text_es: 'La llamada inicial — toca la tablatura de abajo.<ul><li>El dedo 1 se queda en el traste 7, el tercer punto, y nunca se levanta</li><li>El meñique se estira un traste después del punto del 9 y regresa — este es el Estiramiento del Gimnasio de Dedos</li></ul>La parte difícil: el meñique quiere arrastrar al dedo 1.\nLo tienes cuando: la llamada inicial tres veces seguidas, sin zumbido.',
+        label:    'Practice — E E G E',
+        label_es: 'Practica — E E G E',
+        text: 'Play E E G E with the tab at 60 BPM. Finger 1 stays on fret 7 the whole time. The pinky (finger 4) reaches fret 10 for the G and comes back. You\'ve got it when: E E G E three times in a row, no buzz. Finger 1 lifts when the pinky reaches? Play just fret 7 to fret 10 five times, pressing fret 7 the whole time, then try again.',
+        text_es: 'Toca E E G E con la tablatura a 60 BPM. El dedo 1 se queda en el traste 7 todo el tiempo. El meñique (dedo 4) llega al traste 10 para el G y regresa. Lo tienes cuando: E E G E tres veces seguidas, sin zumbido. ¿Se levanta el dedo 1 cuando el meñique se estira? Toca solo del traste 7 al traste 10 cinco veces, presionando el traste 7 todo el tiempo, y vuelve a intentarlo.',
         tab: {
-          caption: 'The call · finger 1 planted, pinky to 10',
-          caption_es: 'La llamada · dedo 1 plantado, meñique al 10',
+          caption: 'E E G E · A string · frets 7 7 10 7',
+          caption_es: 'E E G E · cuerda La · trastes 7 7 10 7',
           notes: [
             { string: 'A', fret: 7,  note: 'E', midi: 52 },
             { string: 'A', fret: 7,  note: 'E', midi: 52 },
@@ -1055,13 +1056,13 @@ window.CLASS_ACTIVITIES = [
         },
       },
       {
-        label:    'The walk-down',
-        label_es: 'El descenso',
-        text: 'The walk-down — finger 1 does all of it, sliding down the string.<ul><li>The first three landings go dot to dot to dot</li><li>The last one is the only landing without a dot</li></ul>You\'ve got it when: the walk-down three clean passes in a row, no buzz.',
-        text_es: 'El descenso — el dedo 1 lo hace todo, deslizándose por la cuerda.<ul><li>Las tres primeras paradas van de punto en punto</li><li>La última es la única parada sin punto</li></ul>Lo tienes cuando: el descenso, tres pasadas limpias seguidas, sin zumbido.',
+        label:    'Practice — E D C B',
+        label_es: 'Practica — E D C B',
+        text: 'Play E D C B with the tab at 60 BPM. Finger 1 plays every note: fret 7, fret 5, fret 3, then fret 2. You\'ve got it when: E D C B three times in a row, no buzz. Landing on the wrong fret? Look at the fret before you move — 7, 5 and 3 have dots, and 2 is one fret below the 3 dot.',
+        text_es: 'Toca E D C B con la tablatura a 60 BPM. El dedo 1 toca todas las notas: traste 7, traste 5, traste 3 y luego traste 2. Lo tienes cuando: E D C B tres veces seguidas, sin zumbido. ¿Caes en el traste equivocado? Mira el traste antes de moverte — el 7, el 5 y el 3 tienen punto, y el 2 está un traste abajo del punto del 3.',
         tab: {
-          caption: 'The walk-down · dot to dot',
-          caption_es: 'El descenso · de punto en punto',
+          caption: 'E D C B · A string · frets 7 5 3 2',
+          caption_es: 'E D C B · cuerda La · trastes 7 5 3 2',
           notes: [
             { string: 'A', fret: 7, note: 'E', midi: 52 },
             { string: 'A', fret: 5, note: 'D', midi: 50 },
@@ -1071,16 +1072,13 @@ window.CLASS_ACTIVITIES = [
         },
       },
       {
-        label:    'The whole riff',
-        label_es: 'El riff completo',
-        text: 'Put it together — the whole riff, straight through without stopping.\nYou\'ve got it when: four times through without stopping, any speed.',
-        text_es: 'Júntalo todo — el riff completo, seguido sin parar.\nLo tienes cuando: cuatro veces seguidas sin detenerte, a cualquier velocidad.',
-        snippet: { track: 'seven-nation-army', fromBar: 1, bars: 4,
-                   label:    'The riff, with the band',
-                   label_es: 'El riff, con la banda' },
+        label:    'Learn — The rhythm',
+        label_es: 'Aprende — El ritmo',
+        text: 'Press Play on the tab and watch the cursor. The notes are not all the same length. The first E is long and the second is short. C and B at the end ring for two beats each.',
+        text_es: 'Pulsa Play en la tablatura y mira el cursor. Las notas no duran lo mismo. El primer E es largo y el segundo es corto. C y B al final suenan dos tiempos cada una.',
         tab: {
-          caption: 'The whole riff · 7-7-10-7-5-3-2',
-          caption_es: 'El riff completo · 7-7-10-7-5-3-2',
+          caption: 'The whole riff · E E G E D C B · 2 bars',
+          caption_es: 'El riff completo · E E G E D C B · 2 compases',
           notes: [
             { string: 'A', fret: 7,  note: 'E', midi: 52, beats: 1.5 },
             { string: 'A', fret: 7,  note: 'E', midi: 52, beats: 0.5 },
@@ -1093,13 +1091,51 @@ window.CLASS_ACTIVITIES = [
         },
       },
       {
-        label:    'Raise the tempo',
-        label_es: 'Sube el tempo',
+        label:    'Practice — The whole riff',
+        label_es: 'Practica — El riff completo',
+        text: 'Play the whole riff with the tab at 60 BPM, in that rhythm. Made a mistake? Keep going. You\'ve got it when: four laps in a row without stopping (a lap is once through the riff). Stopping at the D? Play just E D C B three times, then try again.',
+        text_es: 'Toca el riff completo con la tablatura a 60 BPM, con ese ritmo. ¿Te equivocaste? Sigue. Lo tienes cuando: cuatro vueltas seguidas sin detenerte (una vuelta es tocar el riff una vez completo). ¿Te detienes en el D? Toca solo E D C B tres veces, y vuelve a intentarlo.',
+        tab: {
+          caption: 'The whole riff · E E G E D C B · 2 bars',
+          caption_es: 'El riff completo · E E G E D C B · 2 compases',
+          notes: [
+            { string: 'A', fret: 7,  note: 'E', midi: 52, beats: 1.5 },
+            { string: 'A', fret: 7,  note: 'E', midi: 52, beats: 0.5 },
+            { string: 'A', fret: 10, note: 'G', midi: 55, beats: 0.75 },
+            { string: 'A', fret: 7,  note: 'E', midi: 52, beats: 0.75 },
+            { string: 'A', fret: 5,  note: 'D', midi: 50, beats: 0.5 },
+            { string: 'A', fret: 3,  note: 'C', midi: 48, beats: 2 },
+            { string: 'A', fret: 2,  note: 'B', midi: 47, beats: 2 }
+          ]
+        },
+      },
+      {
+        label:    'Practice — Faster',
+        label_es: 'Practica — Más rápido',
+        text: 'Set the tab to 80 BPM and play the whole riff. You\'ve got it when: four laps in a row at 80 BPM without stopping. Losing the beat? Play two laps at 70 BPM, then go back to 80.',
+        text_es: 'Pon la tablatura a 80 BPM y toca el riff completo. Lo tienes cuando: cuatro vueltas seguidas a 80 BPM sin detenerte. ¿Pierdes el ritmo? Toca dos vueltas a 70 BPM, y luego regresa a 80.',
+        tab: {
+          caption: 'The whole riff · E E G E D C B · 2 bars',
+          caption_es: 'El riff completo · E E G E D C B · 2 compases',
+          notes: [
+            { string: 'A', fret: 7,  note: 'E', midi: 52, beats: 1.5 },
+            { string: 'A', fret: 7,  note: 'E', midi: 52, beats: 0.5 },
+            { string: 'A', fret: 10, note: 'G', midi: 55, beats: 0.75 },
+            { string: 'A', fret: 7,  note: 'E', midi: 52, beats: 0.75 },
+            { string: 'A', fret: 5,  note: 'D', midi: 50, beats: 0.5 },
+            { string: 'A', fret: 3,  note: 'C', midi: 48, beats: 2 },
+            { string: 'A', fret: 2,  note: 'B', midi: 47, beats: 2 }
+          ]
+        },
+      },
+      {
+        label:    'Practice — With the band',
+        label_es: 'Practica — Con la banda',
+        text: 'Press Play on the band with Slow on (100 BPM) and play the riff along with it. You\'ve got it when: four laps with the band without dropping out. Dropping out? Turn on Metronome and count 1 2 3 4 out loud for one lap, then come back in. Then turn Slow off and play at record speed, or open the Song Journey page and play with the full track.',
+        text_es: 'Pulsa Play en la banda con Lento activado (100 BPM) y toca el riff con ella. Lo tienes cuando: cuatro vueltas con la banda sin salirte. ¿Te sales? Activa el Metrónomo y cuenta 1 2 3 4 en voz alta durante una vuelta, y luego vuelve a entrar. Después apaga Lento y toca a la velocidad del disco, o abre la página de Recorrido de la canción y toca con la pista completa.',
         snippet: { track: 'seven-nation-army', fromBar: 1, bars: 8,
                    label:    'Four laps with the band',
                    label_es: 'Cuatro vueltas con la banda' },
-        text: 'Raise the tempo.<ul><li>Every clean pass: raise the BPM by 10 on the player in The whole riff</li><li>Playing it fast already? Add the feel — hold the first E long, and the last two notes long.</li><li>Then open the Seven Nation Army Song Journey page and play it over the backing track</li></ul>You\'ve got it when: you\'ve raised the tempo at least three times without breaking down — then keep climbing.',
-        text_es: 'Sube el tempo.<ul><li>Cada pasada limpia: sube el BPM 10 puntos en el reproductor de El riff completo</li><li>¿Ya lo tocas rápido? Dale la sensación — sostén más el primer E, y sostén más las últimas dos notas.</li><li>Después abre el Recorrido de la canción de Seven Nation Army y tócalo sobre la pista de acompañamiento</li></ul>Lo tienes cuando: subiste el tempo al menos tres veces sin perder el ritmo — y de ahí, sigue subiendo.',
       },
     ],
   },
@@ -1114,8 +1150,8 @@ window.CLASS_ACTIVITIES = [
       {
         label:    'The dot notes',
         label_es: 'Las notas de los puntos',
-        text: 'Play the four dot notes below — open E, then the dots at frets 3, 5 and 7. Say each name out loud while it rings; saying it is the memorizing.\nYou\'ve got it when: E–G–A–B in order, out loud, three times through, saying each name out loud.',
-        text_es: 'Toca abajo las cuatro notas de los puntos — E al aire, y después los puntos de los trastes 3, 5 y 7. Di cada nombre en voz alta mientras suena; decirlo es lo que lo graba en la memoria.\nLo tienes cuando: E–G–A–B en orden, en voz alta, tres veces seguidas, diciendo cada nombre en voz alta.',
+        text: 'Play the four dot notes below — open E, then the dots at frets 3, 5 and 7. Say each name out loud while it rings; saying it is the memorizing.\nYou\'ve got it when: E–G–A–B in order, three times through, saying each name out loud.',
+        text_es: 'Toca abajo las cuatro notas de los puntos — E al aire, y después los puntos de los trastes 3, 5 y 7. Di cada nombre en voz alta mientras suena; decirlo es lo que lo graba en la memoria.\nLo tienes cuando: E–G–A–B en orden, tres veces seguidas, diciendo cada nombre en voz alta.',
         tab: {
           caption: 'The dot notes · E G A B',
           caption_es: 'Las notas de los puntos · E G A B',
