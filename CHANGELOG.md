@@ -5,6 +5,20 @@ Notable changes to the Guitar Class site. Newest first.
 For the full session-by-session history (and the reasoning behind each change),
 see `WORKFLOW.md` and the git commit log.
 
+## 2026-09-23 — "Luna" plays with the band
+
+### Added
+
+- **The "Luna" bassline activity ends with the band.** The last step now loops two
+  laps of the record with Slow, Metronome, and the 🎸 button, the same player
+  "the cure" and Seven Nation Army have.
+
+### Fixed
+
+- **The "Luna" page had the record's speed wrong.** It said the backing track
+  was faster than the 60 BPM practice tempo. It is slower: the metronome clicks
+  six times per bar, and the two big beats land on clicks 1 and 4.
+
 ## 2026-09-23 — "the cure" activities rebuilt as Learn/Practice pairs
 
 ### Changed
