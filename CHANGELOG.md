@@ -5,6 +5,13 @@ Notable changes to the Guitar Class site. Newest first.
 For the full session-by-session history (and the reasoning behind each change),
 see `WORKFLOW.md` and the git commit log.
 
+## 2026-09-23 — Smaller TAB
+
+### Changed
+
+- **TAB is more compact.** On a Chromebook you can now see a whole four-line
+  song at once without scrolling.
+
 ## 2026-09-23 — "Luna" plays with the band
 
 ### Added

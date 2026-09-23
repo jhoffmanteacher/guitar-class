@@ -1093,7 +1093,16 @@ function checkTabNoScroll() {
   else if (+max[1] < 2 || +max[1] > 12)
     flag(`app.js: TAB_MAX_COLS is ${max[1]} — outside the 2..12 range a staff stays readable in`);
 
-  if (bad === 0) ok('inline TAB cannot scroll sideways (board, grid, columns, note-button width, wrap constant)');
+  // 6. --tab-cell-h (desktop) must stay small enough for a four-line tab to
+  //    fit an 1366x657 Chromebook screen without scrolling (WO 2026-09-23).
+  if (grid !== null) {
+    const cellH = grid.match(/--tab-cell-h\s*:\s*(\d+(?:\.\d+)?)px/);
+    if (!cellH) flag('styles.css: .tab-grid has no --tab-cell-h — the TAB row height is unset');
+    else if (+cellH[1] > 14)
+      flag(`styles.css: .tab-grid --tab-cell-h is ${cellH[1]}px — over 14px, a four-line tab no longer fits a 1366×657 Chromebook (2026-09-23)`);
+  }
+
+  if (bad === 0) ok('inline TAB cannot scroll sideways (board, grid, columns, note-button width, wrap constant, row height)');
 }
 
 /* ════════════════════════════════════════════════════════════════════

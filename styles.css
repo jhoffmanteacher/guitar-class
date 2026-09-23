@@ -1453,25 +1453,27 @@ body.t-wide .t-main{max-width:none}
 .strum-line{font-family:'Courier New',ui-monospace,monospace;white-space:pre;display:inline-block;background:var(--bg2);border:1px solid var(--border);border-radius:var(--radius-sm);padding:7px 11px;margin:8px 0 2px;font-size:0.875rem;font-weight:700;line-height:1.5;letter-spacing:1px;color:var(--text);overflow-x:auto;max-width:100%}
 .strum-line .su-count{font-weight:600;color:var(--text2)}
 .strum-line .su-skip{color:var(--text3)}
-.tab-phrase{margin-top:8px}
+.tab-phrase{margin-top:6px}
 .tab-phrase:first-of-type{margin-top:0}
-.tab-phrase-label{font-size:0.8125rem;color:var(--text2);font-style:italic;margin-bottom:2px;padding-left:2px}
+.tab-phrase-label{font-size:0.8125rem;color:var(--text2);font-style:italic;margin-bottom:2px;padding-left:2px;line-height:1.25}
 /* The TAB board never scrolls sideways: it fills the card and a long phrase
    wraps into stacked systems (renderTabBlock, TAB_MAX_COLS). --tab-cell-h is
    the string-row height; the staff box reads it too, so one override resizes
-   the whole system. */
-.tab-board{background:var(--bg);border:1px solid var(--border);border-radius:6px;padding:5px 5px;overflow:visible;display:block;width:100%;max-width:100%}
-.tab-grid{display:grid;align-items:center;gap:0;position:relative;width:100%;--tab-cell-h:23px}
-.tab-grid + .tab-grid{margin-top:18px}
+   the whole system. Sized so a four-line tab fits the 1366×657 Chromebook
+   screen (2026-09-23) — four lines measured 555px. Don't grow it back
+   without re-measuring. */
+.tab-board{background:var(--bg);border:1px solid var(--border);border-radius:6px;padding:3px 5px;overflow:visible;display:block;width:100%;max-width:100%}
+.tab-grid{display:grid;align-items:center;gap:0;position:relative;width:100%;--tab-cell-h:14px}
+.tab-grid + .tab-grid{margin-top:10px}
 /* Staff box: absolutely positioned, so it defines its rectangle from its grid
    area (fret columns, string rows only) without occupying a cell — padded
    columns and chord cells can't leave a gap in it. Inset half a row top and
    bottom so the verticals meet the top and bottom string lines exactly. */
 .tab-box{position:absolute;top:calc(var(--tab-cell-h) / 2);bottom:calc(var(--tab-cell-h) / 2);left:0;right:0;border-left:1.5px solid var(--text);border-right:1.5px solid var(--text);pointer-events:none;z-index:1}
-.tab-str-label{font-family:inherit;font-size:0.8125rem;font-weight:700;color:var(--text2);text-align:right;padding-right:6px;line-height:1}
+.tab-str-label{font-family:inherit;font-size:0.75rem;font-weight:700;color:var(--text2);text-align:right;padding-right:6px;line-height:1}
 .tab-cell{position:relative;height:var(--tab-cell-h);display:flex;align-items:center;justify-content:center}
 .tab-cell::before{content:'';position:absolute;top:50%;left:0;right:0;height:1.5px;background:var(--text);z-index:0}
-.tab-cell .tab-fret{position:relative;z-index:1;background:var(--bg);padding:0 5px;color:var(--text);font-weight:600;font-size:1.25rem;font-family:inherit;line-height:1}
+.tab-cell .tab-fret{position:relative;z-index:1;background:var(--bg);padding:0 4px;color:var(--text);font-weight:600;font-size:1rem;font-family:inherit;line-height:1}
 /* The label is a whole sentence on many cards ("▶ Hear one p-i-m-a lap on Am,
    then C — loop it 2 bars each"), so it MUST be allowed to wrap: with
    white-space:nowrap this button measured 446px inside a 240px step body on a
@@ -1550,7 +1552,7 @@ body.t-wide .t-main{max-width:none}
 .snip-cal-find:disabled{opacity:0.5;cursor:progress}
 .snip-cal-out{font-weight:600}
 .snip-cal-sub{display:block;font-size:0.75rem;font-weight:500;color:var(--text2)}
-.tab-note-btn{font-family:inherit;font-size:1rem;font-weight:700;padding:4px 6px;margin:14px 0 0;background:transparent;border:1px solid transparent;border-radius:6px;color:var(--blue-text);cursor:pointer;display:inline-flex;align-items:center;justify-content:center;gap:2px;white-space:nowrap;line-height:1}
+.tab-note-btn{font-family:inherit;font-size:0.875rem;font-weight:700;padding:2px 5px;margin:4px 0 0;background:transparent;border:1px solid transparent;border-radius:6px;color:var(--blue-text);cursor:pointer;display:inline-flex;align-items:center;justify-content:center;gap:2px;white-space:nowrap;line-height:1}
 .tab-note-btn:hover,.tab-note-btn:focus-visible{background:var(--blue-bg);border-color:var(--blue-text)}
 .tab-note-btn:active{transform:scale(0.94)}
 .tab-spkr{font-size:0.75rem;color:var(--blue-text);opacity:0.85}
@@ -1583,21 +1585,23 @@ body.t-wide .t-main{max-width:none}
    1.25x the fret's type size to 1.5x, so the circle is now 26px with a
    0.9375rem numeral — the same pairing the phone override below has always
    used against a 1.25rem fret, which is why the two values now agree. Shrink
-   or grow .tab-fret again and this has to move with it. */
-.tab-note-btn.has-finger{justify-self:center;padding:0;margin-top:12px;width:100%;max-width:26px;aspect-ratio:1/1;height:auto;box-sizing:border-box;border-radius:50%;background:var(--purple-bg);border:1.5px solid var(--text);color:var(--text);font-size:0.9375rem}
+   or grow .tab-fret again and this has to move with it.
+   2026-09-23 — fret went to 1rem to fit four lines on a Chromebook; circle
+   20px with a 0.75rem numeral, the same ~1.25x ratio. */
+.tab-note-btn.has-finger{justify-self:center;padding:0;margin-top:4px;width:100%;max-width:20px;aspect-ratio:1/1;height:auto;box-sizing:border-box;border-radius:50%;background:var(--purple-bg);border:1.5px solid var(--text);color:var(--text);font-size:0.75rem}
 .tab-note-btn.has-finger:hover,.tab-note-btn.has-finger:focus-visible{background:var(--purple-border);border-color:var(--text)}
 .tab-note-btn.has-finger.beat-now,.tab-note-btn.has-finger.beat-now:hover{background:var(--blue-text);border-color:var(--blue-text);color:var(--bg)}
 .tab-finger{line-height:1}
 @media (max-width:600px){
-  .tab-grid{--tab-cell-h:22px}
-  .tab-str-label{font-size:0.75rem;padding-right:5px}
-  .tab-cell .tab-fret{font-size:1.25rem;padding:0 4px}
-  .tab-note-btn{font-size:0.9375rem;padding:2px 2px}
+  .tab-grid{--tab-cell-h:14px}
+  .tab-str-label{font-size:0.6875rem;padding-right:5px}
+  .tab-cell .tab-fret{font-size:1rem;padding:0 3px}
+  .tab-note-btn{font-size:0.8125rem;padding:2px 2px}
   /* 8 columns in a 390px card leave ~22px each — the circle shrinks with the
      column (width:100%) rather than forcing the grid wider. max-width and
      font-size match the desktop rule today (see the note there); they stay
      spelled out so a future desktop change can't drag the phone with it. */
-  .tab-note-btn.has-finger{max-width:26px;font-size:0.9375rem;padding:0;margin-top:10px}
+  .tab-note-btn.has-finger{max-width:20px;font-size:0.75rem;padding:0;margin-top:4px}
   .tab-spkr{font-size:0.75rem}
 }
 /* Expandable TAB choice (used when a step offers multiple TABs) */
