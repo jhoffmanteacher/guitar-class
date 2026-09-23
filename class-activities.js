@@ -151,8 +151,13 @@
          label:    'Tune it back',
          label_es: 'Vuelve a afinar',
          // text renders as TRUSTED HTML (same trust level as module step
-         // content — first-party authored files, not escaped). Multi-step
-         // directions are an <ol>/<ul>, same house rule as module content.
+         // content — first-party authored files, not escaped). A step is a
+         // Learn step or a Practice step and asks for ONE thing (Jonathan,
+         // 2026-09-23). Learn: look, listen, say — no standard. Practice:
+         // play one thing — exactly one "You've got it when:" line with one
+         // recovery move inside it. No <ol>/<ul> inside a step; if you need
+         // a list, you need more steps. Label prefixes: "Learn — " /
+         // "Aprende — ", "Practice — " / "Practica — ".
          // A trailing "You've got it when: …" / "Lo tienes cuando: …"
          // sentence (exact strings — matched by the render-time GOT_IT_RE)
          // gets the established green-rule/italic treatment for free; write
@@ -1800,19 +1805,35 @@ window.CLASS_ACTIVITIES = [
     intro_es: 'Ya tocas la estrofa de "the cure" en la cuerda Mi grave, con el viaje hasta el traste 8 para el C. Hoy el C se pasa a la cuerda La, traste 3. Las mismas tres notas, sin viaje — la mano se queda dentro de los primeros cinco trastes.',
     steps: [
       {
-        label:    'The map — three roots, two strings',
-        label_es: 'El mapa — tres raíces, dos cuerdas',
+        label:    'Learn — The map',
+        label_es: 'Aprende — El mapa',
         figure: 'img/ca-cure-roots-both.svg',
         figureAlt: 'Fretboard diagram marking five root notes on two strings: F at fret 1, G at fret 3, and A at fret 5 on the low E string; C at fret 3 and D at fret 5 on the A string.',
         figureAlt_es: 'Diagrama del diapasón marcando cinco notas raíz en dos cuerdas: F en el traste 1, G en el traste 3 y A en el traste 5 en la cuerda Mi grave; C en el traste 3 y D en el traste 5 en la cuerda La.',
-        text: 'The verse uses three of the five marked notes. Low E string: <b>F</b> at fret 1, <b>A</b> at fret 5. A string: <b>C</b> at fret 3. One finger per fret — index on fret 1, ring on fret 3, pinky on fret 5 — so the hand never moves. G and D wait for the chorus.',
-        text_es: 'La estrofa usa tres de las cinco notas marcadas. Cuerda Mi grave: <b>F</b> en el traste 1, <b>A</b> en el traste 5. Cuerda La: <b>C</b> en el traste 3. Un dedo por traste — índice en el traste 1, anular en el traste 3, meñique en el traste 5 — así la mano nunca se mueve. G y D esperan al coro.',
+        text: 'The verse uses three notes. Low E string: <b>F</b> at fret 1 and <b>A</b> at fret 5. A string: <b>C</b> at fret 3. Index on fret 1, ring on fret 3, pinky on fret 5. The hand never moves.',
+        text_es: 'La estrofa usa tres notas. Cuerda Mi grave: <b>F</b> en el traste 1 y <b>A</b> en el traste 5. Cuerda La: <b>C</b> en el traste 3. Índice en el traste 1, anular en el traste 3, meñique en el traste 5. La mano nunca se mueve.',
       },
       {
-        label:    'A · C — cross the string',
-        label_es: 'A · C — cruza la cuerda',
-        text: 'Read the tab. Four beats per note.<ol><li>Play each note once, slowly, and say its name</li><li>Play the tab, counting 1 2 3 4 out loud</li><li>Turn on the metronome at 60 BPM and play it again</li></ol>You\'ve got it when: A, C, A, C at 60 BPM, one string ringing at a time.',
-        text_es: 'Lee la tablatura. Cuatro tiempos por nota.<ol><li>Toca cada nota una vez, despacio, y di su nombre</li><li>Toca la tablatura contando 1 2 3 4 en voz alta</li><li>Pon el metrónomo a 60 BPM y tócala otra vez</li></ol>Lo tienes cuando: A, C, A, C a 60 BPM, una sola cuerda sonando a la vez.',
+        label:    'Learn — A and C',
+        label_es: 'Aprende — A y C',
+        text: 'Press Play on the tab and watch the cursor. Then play each note once, slowly, and say its name: A, C, A, C.',
+        text_es: 'Pulsa Play en la tablatura y mira el cursor. Después toca cada nota una vez, despacio, y di su nombre: A, C, A, C.',
+        tab: {
+          caption: 'A · C, twice · 4 beats each',
+          caption_es: 'A · C, dos veces · 4 tiempos cada una',
+          notes: [
+            { string: 'E', fret: 5, note: 'A', midi: 45, beats: 4 },
+            { string: 'A', fret: 3, note: 'C', midi: 48, beats: 4 },
+            { string: 'E', fret: 5, note: 'A', midi: 45, beats: 4 },
+            { string: 'A', fret: 3, note: 'C', midi: 48, beats: 4 }
+          ]
+        },
+      },
+      {
+        label:    'Practice — A and C',
+        label_es: 'Practica — A y C',
+        text: 'Play A C A C with the tab at 60 BPM. Four beats on each note. You\'ve got it when: A C A C at 60 BPM, three times in a row, one string ringing at a time. Two strings ringing? Drop the tab to 40 BPM and try again.',
+        text_es: 'Toca A C A C con la tablatura a 60 BPM. Cuatro tiempos en cada nota. Lo tienes cuando: A C A C a 60 BPM, tres veces seguidas, una sola cuerda sonando a la vez. ¿Suenan dos cuerdas? Baja la tablatura a 40 BPM e inténtalo otra vez.',
         snippet: { track: 'the-cure', fromBar: 5, bars: 4,
                    label:    'The first half of the verse, with the band',
                    label_es: 'La primera mitad de la estrofa, con la banda' },
@@ -1828,10 +1849,26 @@ window.CLASS_ACTIVITIES = [
         },
       },
       {
-        label:    'F · C — the answer',
-        label_es: 'F · C — la respuesta',
-        text: 'Read the tab. Four beats per note.<ol><li>Put both fingers down and leave them there — only the pick moves</li><li>Play the tab slowly, counting out loud</li><li>Then play it at 60 BPM</li></ol>You\'ve got it when: F, C, F, C at 60 BPM, four clean notes in a row.',
-        text_es: 'Lee la tablatura. Cuatro tiempos por nota.<ol><li>Pon los dos dedos y déjalos ahí — solo se mueve la púa</li><li>Toca la tablatura despacio, contando en voz alta</li><li>Después tócala a 60 BPM</li></ol>Lo tienes cuando: F, C, F, C a 60 BPM, cuatro notas limpias seguidas.',
+        label:    'Learn — F and C',
+        label_es: 'Aprende — F y C',
+        text: 'Put your index on F and your ring finger on C. Leave both fingers down. Press Play and pick along — only the pick moves.',
+        text_es: 'Pon el índice en F y el anular en C. Deja los dos dedos puestos. Pulsa Play y toca con la púa — solo se mueve la púa.',
+        tab: {
+          caption: 'F · C, twice · 4 beats each',
+          caption_es: 'F · C, dos veces · 4 tiempos cada una',
+          notes: [
+            { string: 'E', fret: 1, note: 'F', midi: 41, beats: 4 },
+            { string: 'A', fret: 3, note: 'C', midi: 48, beats: 4 },
+            { string: 'E', fret: 1, note: 'F', midi: 41, beats: 4 },
+            { string: 'A', fret: 3, note: 'C', midi: 48, beats: 4 }
+          ]
+        },
+      },
+      {
+        label:    'Practice — F and C',
+        label_es: 'Practica — F y C',
+        text: 'Play F C F C with the tab at 60 BPM. You\'ve got it when: F C F C at 60 BPM, three times in a row, no buzz. Buzz? Slide the fingertip closer to the fret and try again.',
+        text_es: 'Toca F C F C con la tablatura a 60 BPM. Lo tienes cuando: F C F C a 60 BPM, tres veces seguidas, sin zumbido. ¿Zumba? Desliza la punta del dedo más cerca del traste e inténtalo otra vez.',
         snippet: { track: 'the-cure', fromBar: 9, bars: 4,
                    label:    'The second half of the verse, with the band',
                    label_es: 'La segunda mitad de la estrofa, con la banda' },
@@ -1847,10 +1884,10 @@ window.CLASS_ACTIVITIES = [
         },
       },
       {
-        label:    'The whole verse',
-        label_es: 'La estrofa completa',
-        text: 'Read the tab — it joins the two pairs.<ol><li>Play just the C → F move, five times</li><li>Play the whole tab slowly, counting out loud</li><li>Then play it at 60 BPM. Made a mistake? Keep going — don\'t restart</li></ol>You\'ve got it when: two clean verses in a row at 60 BPM. Then add 10 BPM each time, or play along with the backing track on the Song Journey page.',
-        text_es: 'Lee la tablatura — une los dos pares.<ol><li>Toca solo el movimiento de C → F, cinco veces</li><li>Toca la tablatura entera despacio, contando en voz alta</li><li>Después tócala a 60 BPM. ¿Te equivocaste? Sigue — no vuelvas a empezar</li></ol>Lo tienes cuando: dos estrofas limpias seguidas a 60 BPM. Después súbele 10 BPM cada vez, o toca con la pista de acompañamiento en la página de Recorrido de la canción.',
+        label:    'Practice — The whole verse',
+        label_es: 'Practica — La estrofa completa',
+        text: 'Play the whole verse with the tab at 60 BPM: A C A C, then F C F C. Made a mistake? Keep going. You\'ve got it when: two verses in a row at 60 BPM without stopping. Stuck at the C to F move? Play just C then F five times, then try again.',
+        text_es: 'Toca la estrofa completa con la tablatura a 60 BPM: A C A C, y luego F C F C. ¿Te equivocaste? Sigue. Lo tienes cuando: dos estrofas seguidas a 60 BPM sin detenerte. ¿Te trabas en el cambio de C a F? Toca solo C y luego F cinco veces, y vuelve a intentarlo.',
         snippet: { track: 'the-cure', fromBar: 5, bars: 8,
                    label:    'The whole verse, with the band',
                    label_es: 'La estrofa completa, con la banda' },
@@ -1868,6 +1905,15 @@ window.CLASS_ACTIVITIES = [
             { string: 'A', fret: 3, note: 'C', midi: 48, beats: 4 }
           ]
         },
+      },
+      {
+        label:    'Practice — With the band',
+        label_es: 'Practica — Con la banda',
+        text: 'Press Play on the band and play the verse along with it. When it works, open the Song Journey page and play the verse with the full track. You\'ve got it when: the verse with the band, twice, without dropping out.',
+        text_es: 'Pulsa Play en la banda y toca la estrofa con ella. Cuando te salga, abre la página de Recorrido de la canción y toca la estrofa con la pista completa. Lo tienes cuando: la estrofa con la banda, dos veces, sin salirte.',
+        snippet: { track: 'the-cure', fromBar: 5, bars: 8,
+                   label:    'The whole verse, with the band',
+                   label_es: 'La estrofa completa, con la banda' },
       },
     ],
   },
@@ -1892,19 +1938,19 @@ window.CLASS_ACTIVITIES = [
     intro_es: 'Ya moviste la estrofa de "the cure" a dos cuerdas. Hoy agregas el coro — las mismas dos cuerdas, nada más allá del traste 5, y la mano se queda quieta.',
     steps: [
       {
-        label:    'The map — five roots, two strings',
-        label_es: 'El mapa — cinco raíces, dos cuerdas',
+        label:    'Learn — The map',
+        label_es: 'Aprende — El mapa',
         figure: 'img/ca-cure-roots-both.svg',
         figureAlt: 'Fretboard diagram marking five root notes on two strings: F at fret 1, G at fret 3, and A at fret 5 on the low E string; C at fret 3 and D at fret 5 on the A string.',
         figureAlt_es: 'Diagrama del diapasón marcando cinco notas raíz en dos cuerdas: F en el traste 1, G en el traste 3 y A en el traste 5 en la cuerda Mi grave; C en el traste 3 y D en el traste 5 en la cuerda La.',
-        text: 'All five roots sit inside the first five frets. Low E string: <b>F</b> at fret 1, <b>G</b> at fret 3, <b>A</b> at fret 5. A string: <b>C</b> at fret 3, <b>D</b> at fret 5. One finger per fret — index on fret 1, ring on fret 3, pinky on fret 5 — so the hand never moves.',
-        text_es: 'Las cinco raíces están dentro de los primeros cinco trastes. Cuerda Mi grave: <b>F</b> en el traste 1, <b>G</b> en el traste 3, <b>A</b> en el traste 5. Cuerda La: <b>C</b> en el traste 3, <b>D</b> en el traste 5. Un dedo por traste — índice en el traste 1, anular en el traste 3, meñique en el traste 5 — así la mano nunca se mueve.',
+        text: 'All five notes sit inside the first five frets. Low E string: <b>F</b> at fret 1, <b>G</b> at fret 3, <b>A</b> at fret 5. A string: <b>C</b> at fret 3, <b>D</b> at fret 5. Index on fret 1, ring on fret 3, pinky on fret 5. The hand never moves.',
+        text_es: 'Las cinco notas están dentro de los primeros cinco trastes. Cuerda Mi grave: <b>F</b> en el traste 1, <b>G</b> en el traste 3, <b>A</b> en el traste 5. Cuerda La: <b>C</b> en el traste 3, <b>D</b> en el traste 5. Índice en el traste 1, anular en el traste 3, meñique en el traste 5. La mano nunca se mueve.',
       },
       {
-        label:    'Review — intro and verse',
-        label_es: 'Repaso — intro y estrofa',
-        text: 'Quick review — you already play this. Intro (A · C, twice), then verse (A · C, F · C). Four beats per note.<ol><li>Play the tab once slowly, saying each note</li><li>Turn on the metronome at 60 BPM and play the whole thing through</li></ol>You\'ve got it when: intro into verse, twice in a row at 60 BPM, no stops.',
-        text_es: 'Repaso rápido — ya tocas esto. Intro (A · C, dos veces), y luego estrofa (A · C, F · C). Cuatro tiempos por nota.<ol><li>Toca la tablatura una vez despacio, diciendo cada nota</li><li>Pon el metrónomo a 60 BPM y tócala completa</li></ol>Lo tienes cuando: de la intro a la estrofa, dos veces seguidas a 60 BPM, sin detenerte.',
+        label:    'Practice — Intro and verse',
+        label_es: 'Practica — Intro y estrofa',
+        text: 'You already play this. Play the intro and the verse with the tab at 60 BPM. You\'ve got it when: intro into verse, twice in a row at 60 BPM, without stopping. Stopped twice? Play A C A C by itself for one minute, then try again.',
+        text_es: 'Esto ya lo tocas. Toca la intro y la estrofa con la tablatura a 60 BPM. Lo tienes cuando: de la intro a la estrofa, dos veces seguidas a 60 BPM, sin detenerte. ¿Te detuviste dos veces? Toca solo A C A C durante un minuto, y vuelve a intentarlo.',
         snippet: { track: 'the-cure', fromBar: 1, bars: 12,
                    label:    'Intro and verse, with the band',
                    label_es: 'La intro y la estrofa, con la banda' },
@@ -1940,10 +1986,30 @@ window.CLASS_ACTIVITIES = [
         },
       },
       {
-        label:    'The chorus — D · F · C · G',
-        label_es: 'El coro — D · F · C · G',
-        text: 'Read the tab — this part is new. Four beats per note.<ol><li>Play each note once, slowly, and say its name</li><li>Play D F C G until it feels easy, then play it twice through</li><li>Play the whole tab at 60 BPM</li></ol>You\'ve got it when: two clean choruses in a row at 60 BPM.',
-        text_es: 'Lee la tablatura — esta parte es nueva. Cuatro tiempos por nota.<ol><li>Toca cada nota una vez, despacio, y di su nombre</li><li>Toca D F C G hasta que se sienta fácil, y luego tócalo dos veces seguidas</li><li>Toca la tablatura entera a 60 BPM</li></ol>Lo tienes cuando: dos coros limpios seguidos a 60 BPM.',
+        label:    'Learn — The chorus',
+        label_es: 'Aprende — El coro',
+        text: 'This part is new. Press Play on the tab and watch the cursor. Then play each note once, slowly, and say its name: D, F, C, G.',
+        text_es: 'Esta parte es nueva. Pulsa Play en la tablatura y mira el cursor. Después toca cada nota una vez, despacio, y di su nombre: D, F, C, G.',
+        tab: {
+          caption: 'Chorus · D F C G, twice · 4 beats each',
+          caption_es: 'Coro · D F C G, dos veces · 4 tiempos cada una',
+          notes: [
+            { string: 'A', fret: 5, note: 'D', midi: 50, beats: 4 },
+            { string: 'E', fret: 1, note: 'F', midi: 41, beats: 4 },
+            { string: 'A', fret: 3, note: 'C', midi: 48, beats: 4 },
+            { string: 'E', fret: 3, note: 'G', midi: 43, beats: 4 },
+            { string: 'A', fret: 5, note: 'D', midi: 50, beats: 4 },
+            { string: 'E', fret: 1, note: 'F', midi: 41, beats: 4 },
+            { string: 'A', fret: 3, note: 'C', midi: 48, beats: 4 },
+            { string: 'E', fret: 3, note: 'G', midi: 43, beats: 4 }
+          ]
+        },
+      },
+      {
+        label:    'Practice — The chorus',
+        label_es: 'Practica — El coro',
+        text: 'Play D F C G twice with the tab at 60 BPM. You\'ve got it when: two choruses in a row at 60 BPM, no stops. Missing the D? Your pinky lands on fret 5 of the A string — keep your index over fret 1 the whole time.',
+        text_es: 'Toca D F C G dos veces con la tablatura a 60 BPM. Lo tienes cuando: dos coros seguidos a 60 BPM, sin detenerte. ¿Se te escapa el D? El meñique cae en el traste 5 de la cuerda La — mantén el índice sobre el traste 1 todo el tiempo.',
         // The chorus is at bar 21, not 13: the verse's eight bars play TWICE
         // (5-12 and 13-20) before it. Measured off the mix — bars 13-20 are
         // harmonically the verse again, and the chorus is the louder section
@@ -1968,46 +2034,24 @@ window.CLASS_ACTIVITIES = [
         },
       },
       {
-        label:    'The handoffs',
-        label_es: 'Los enlaces',
-        text: 'Each pair in the tab is where one section meets the next.<ol><li>Play a pair, stop, play it again — five times each</li><li>Then try each pair without looking at the pick</li></ol>You\'ve got it when: eight clean handoffs in a row.',
-        text_es: 'Cada par de la tablatura es donde una sección se junta con la siguiente.<ol><li>Toca un par, para, tócalo otra vez — cinco veces cada uno</li><li>Después prueba cada par sin mirar la púa</li></ol>Lo tienes cuando: ocho enlaces limpios seguidos.',
+        label:    'Practice — Verse into chorus',
+        label_es: 'Practica — De la estrofa al coro',
+        text: 'The verse ends on C. The chorus starts on D. Play C, then D. Stop. Play it again. You\'ve got it when: eight C-to-D moves in a row, both notes clean.',
+        text_es: 'La estrofa termina en C. El coro empieza en D. Toca C, y luego D. Para. Tócalo otra vez. Lo tienes cuando: ocho cambios de C a D seguidos, las dos notas limpias.',
         tab: {
-          caption: 'The handoffs · three two-note pairs',
-          caption_es: 'Los enlaces · tres pares de dos notas',
-          phrases: [
-            {
-              label: 'Intro into verse — C → A',
-              label_es: 'De la intro a la estrofa — C → A',
-              notes: [
-                { string: 'A', fret: 3, note: 'C', midi: 48 },
-                { string: 'E', fret: 5, note: 'A', midi: 45 }
-              ]
-            },
-            {
-              label: 'Verse into chorus — C → D',
-              label_es: 'De la estrofa al coro — C → D',
-              notes: [
-                { string: 'A', fret: 3, note: 'C', midi: 48 },
-                { string: 'A', fret: 5, note: 'D', midi: 50 }
-              ]
-            },
-            {
-              label: 'Chorus into verse — G → A',
-              label_es: 'Del coro a la estrofa — G → A',
-              notes: [
-                { string: 'E', fret: 3, note: 'G', midi: 43 },
-                { string: 'E', fret: 5, note: 'A', midi: 45 }
-              ]
-            }
+          caption: 'C then D · where the verse meets the chorus',
+          caption_es: 'C y luego D · donde la estrofa se junta con el coro',
+          notes: [
+            { string: 'A', fret: 3, note: 'C', midi: 48 },
+            { string: 'A', fret: 5, note: 'D', midi: 50 }
           ]
         },
       },
       {
-        label:    'The song in order',
-        label_es: 'La canción en orden',
-        text: 'Play the tab straight through: intro, verse, the verse again, then the chorus — the order the record goes in.<ol><li>60 BPM, counting out loud</li><li>Made a mistake? Keep going — don\'t restart</li><li>After a clean run, try 100 BPM</li></ol>You\'ve got it when: intro, verse, verse, chorus at 60 BPM with no stops, then once at 100 BPM. Stuck where two sections meet? Go back to the handoffs for one minute.',
-        text_es: 'Toca la tablatura de principio a fin: intro, estrofa, la estrofa otra vez, y luego el coro — el orden del disco.<ol><li>60 BPM, contando en voz alta</li><li>¿Te equivocaste? Sigue — no vuelvas a empezar</li><li>Después de una vuelta limpia, prueba a 100 BPM</li></ol>Lo tienes cuando: intro, estrofa, estrofa, coro a 60 BPM sin detenerte, y luego una vez a 100 BPM. ¿Te trabas donde se juntan dos secciones? Vuelve a los enlaces por un minuto.',
+        label:    'Practice — The song in order',
+        label_es: 'Practica — La canción en orden',
+        text: 'Play the tab straight through at 60 BPM: intro, verse, verse, chorus. Made a mistake? Keep going. You\'ve got it when: intro, verse, verse, chorus at 60 BPM without stopping. Stuck where the verse meets the chorus? Go back to step 5 for one minute.',
+        text_es: 'Toca la tablatura de principio a fin a 60 BPM: intro, estrofa, estrofa, coro. ¿Te equivocaste? Sigue. Lo tienes cuando: intro, estrofa, estrofa, coro a 60 BPM sin detenerte. ¿Te trabas donde la estrofa se junta con el coro? Vuelve al paso 5 por un minuto.',
         /* 28 bars, not 20: the record is intro (4), verse (8), verse AGAIN
            (8), then the chorus (8). A 20-bar window stopped in the middle of
            the second verse and never reached the chorus the tab teaches, so
@@ -2160,10 +2204,13 @@ window.CLASS_ACTIVITIES = [
         },
       },
       {
-        label:    'Keep going',
-        label_es: 'Sigue adelante',
-        text: 'Pick one:<ul><li>+10 BPM every two clean runs, up to 100</li><li>Play along with the backing track on the Song Journey page, Layer 2</li><li>Level up: play the intro and the verse on the low E only — A at fret 5, C at fret 8, F at fret 1, index finger on every note</li></ul>You\'ve got it when: a full verse and chorus with the track without dropping out.',
-        text_es: 'Escoge una:<ul><li>+10 BPM cada dos vueltas limpias, hasta 100</li><li>Toca con la pista de acompañamiento en la página de Recorrido de la canción, Capa 2</li><li>Sube de nivel: toca la intro y la estrofa solo en la cuerda Mi grave — A en el traste 5, C en el traste 8, F en el traste 1, índice en cada nota</li></ul>Lo tienes cuando: una estrofa y un coro completos con la pista sin salirte.',
+        label:    'Practice — With the band',
+        label_es: 'Practica — Con la banda',
+        text: 'Press Play on the band and play the song along with it. When it works, open the Song Journey page, Layer 2, and play with the full track. Then add 10 BPM to the tab after every two clean runs, up to 100. You\'ve got it when: a full verse and chorus with the band without dropping out.',
+        text_es: 'Pulsa Play en la banda y toca la canción con ella. Cuando te salga, abre la página de Recorrido de la canción, Capa 2, y toca con la pista completa. Después súbele 10 BPM a la tablatura cada dos vueltas limpias, hasta 100. Lo tienes cuando: una estrofa y un coro completos con la banda, sin salirte.',
+        snippet: { track: 'the-cure', fromBar: 1, bars: 28,
+                   label:    'The song in order, with the band',
+                   label_es: 'La canción en orden, con la banda' },
       },
     ],
   },

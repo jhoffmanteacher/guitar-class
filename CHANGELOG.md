@@ -5,6 +5,16 @@ Notable changes to the Guitar Class site. Newest first.
 For the full session-by-session history (and the reasoning behind each change),
 see `WORKFLOW.md` and the git commit log.
 
+## 2026-09-23 — "the cure" activities rebuilt as Learn/Practice pairs
+
+### Changed
+
+- **The two "the cure" in-class activities rebuilt.** "The Verse on Two
+  Strings" and "Intro, Verse and Chorus" — each step now asks for one
+  thing, either learn it (look, listen, say) or practice it (play it,
+  with one "You've got it when" line to check yourself against). No more
+  multi-item checklists packed into a single step.
+
 ## 2026-09-22 — CAS: class activities are optional
 
 ### Changed
