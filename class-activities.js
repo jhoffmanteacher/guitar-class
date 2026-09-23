@@ -1823,8 +1823,8 @@ window.CLASS_ACTIVITIES = [
       {
         label:    'Learn — Feel the two',
         label_es: 'Aprende — Siente los dos',
-        text: 'Open the Song Journey page (button below the steps) and press Play on the backing track. "Luna" is in 6/8: six quick counts fit each bar, but the song leans on two big beats. Tap only those two — 1 and 4 — and let the guitar on the record play the rest.',
-        text_es: 'Abre la página de Recorrido de la canción (botón debajo de los pasos) y pulsa Play en la pista de acompañamiento. "Luna" está en 6/8: seis cuentas rápidas caben en cada compás, pero la canción se apoya en dos tiempos grandes. Marca solo esos dos — 1 y 4 — y deja que la guitarra del disco toque el resto.',
+        text: 'Open the Song Journey page (button just below) and press Play on the backing track. "Luna" is in 6/8: six quick counts fit each bar, but the song leans on two big beats. Tap only those two — 1 and 4 — and let the guitar on the record play the rest.',
+        text_es: 'Abre la página de Recorrido de la canción (botón justo abajo) y pulsa Play en la pista de acompañamiento. "Luna" está en 6/8: seis cuentas rápidas caben en cada compás, pero la canción se apoya en dos tiempos grandes. Marca solo esos dos — 1 y 4 — y deja que la guitarra del disco toque el resto.',
       },
       {
         label:    'Learn — F',

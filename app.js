@@ -3849,7 +3849,7 @@ function journeyLinkCardHtml(w){
   const songs = journeySongsFor(w.moduleNum);
   const buttons = songs.map(sg => {
     const layer = JOURNEY_LAYERS[sg.id][w.moduleNum];
-    return `<button type="button" class="jl-song-btn" onclick="window.open('${sg.url}#layer-${layer}','_blank','noopener')">${escHtml(sg.name)}</button>`;
+    return `<button type="button" class="jl-song-btn" onclick="window.open('${escAttr(journeyHref(sg.url, layer, ''))}','_blank','noopener')">${escHtml(sg.name)}</button>`;
   }).join('');
   if(!buttons) return '';
   return `<div class="jl-card">
@@ -4714,7 +4714,7 @@ function songTypeLabel(type, core){
    routes through this so the kind dispatch and subtitles can't drift. */
 function openSongVid(s, kind){
   if(!s) return;
-  if(kind==='journey'){ if(s.journeyUrl) window.open(s.journeyUrl, '_blank', 'noopener'); return; }
+  if(kind==='journey'){ if(s.journeyUrl) window.open(journeyHref(s.journeyUrl, 0, location.hash === '#songs' ? 'songs' : ''), '_blank', 'noopener'); return; }
   if(kind==='original'){ if(s.originalUrl) window.open(s.originalUrl, '_blank', 'noopener'); return; }
   if(kind==='backing'){ if(s.backingUrl) loadPanel(/\.(mp3|m4a|ogg|wav)(\?|$)/i.test(s.backingUrl)?'audio':'youtube', s.backingUrl, s.name, t('songs.backingTrackHint')); return; }
   if(s.tutorialUrl) loadPanel('youtube', s.tutorialUrl, s.name, t('songs.tutorial'));
@@ -8243,7 +8243,9 @@ function searchEntry(e){
   const modName = mod ? bothLangs(mod, 'name') : '';
   e.title = e.title || '';
   e.fTitle = searchFold(e.title);
-  e.hay = searchFold([e.text, e.hayExtra, e.title, e.label, e.secTitle, modName, 'module ' + e.moduleNum, 'módulo ' + e.moduleNum].filter(Boolean).join(' '));
+  // Activities carry no module (moduleNum 0) — don't index a phantom "module 0".
+  const modWords = e.moduleNum ? ['module ' + e.moduleNum, 'módulo ' + e.moduleNum] : [];
+  e.hay = searchFold([e.text, e.hayExtra, e.title, e.label, e.secTitle, modName, ...modWords].filter(Boolean).join(' '));
   return e;
 }
 
@@ -8326,7 +8328,36 @@ async function buildSearchIndex(){
   SETS.forEach(w => { if(w.moduleNum === 1 && w.songs) w.songs.forEach(sg => indexSong(sg, 1, w.id)); });
   const MS2 = globalThis.MODULE_SONGS || {};
   Object.keys(MS2).forEach(m => (MS2[m] || []).forEach(sg => indexSong(sg, Number(m), null)));
+  /* In-Class Activities (navigability work order 2026-09-23, item 3) — the
+     section students use most was the one Find never looked at: "Happy
+     Birthday" found module steps and Songs-hub rows, never #1, #2 or #13.
+     One entry per VISIBLE card (same caIsVisible gate the page uses, so a
+     search can't leak an unposted activity): the "#N - Title", the intro's
+     first sentence and every step label, both languages in the haystack.
+     A hit opens the card by its deep link (searchGoActivity). */
+  (window.CLASS_ACTIVITIES || []).filter(caIsVisible).forEach(a => {
+    const num = caNumber(a);
+    const title = (a.kind === 'check' ? t('check.prefix') + ' · ' : num ? `#${num} - ` : '') + caTitle(a);
+    const stepLabels = (a.steps || []).map(st => stripTags(tf(st, 'label') || '')).filter(Boolean);
+    const text = [caFirstSentence(tf(a, 'intro')), ...stepLabels].filter(Boolean).join(' · ');
+    const hayExtra = [bothLangs(a, 'title'), bothLangs(a, 'intro') && stripTags(bothLangs(a, 'intro')),
+      ...(a.steps || []).map(st => stripTags(st.label_es || ''))].filter(Boolean).join(' ');
+    ix.push(searchEntry({ kind: 'activity', moduleNum: 0, activityId: a.id, title, text: title + (text ? ' — ' + text : ''), hayExtra }));
+  });
   return ix;
+}
+function searchGoActivity(id){
+  const target = '#class-activities/' + id;
+  // Already on that exact hash (a second search for the same card): the
+  // router would no-op, so move the page to the card directly.
+  if(location.hash === target){ searchClosePanel(); caFocusActivity(id); return; }
+  /* Not closeTopPanels('') + goExploreHash: that pair races — the search
+     panel's close is an async history.go() back to the practice view, which
+     then re-routes on top of the push. Swap the #search entry for the
+     card's instead (replaceState, then route by hand — pushState/replaceState
+     fire no event), so Back from the card also skips the empty search box. */
+  history.replaceState(history.state, '', location.pathname + location.search + target);
+  routeExploreHash();
 }
 /* The search panel is routed like the explore pages (#search), so the phone's
    Back gesture closes it instead of leaving the site. toggleSearch stays the
@@ -8438,7 +8469,7 @@ function runSearch(q){
        as soon as it had 400 hits, so a common word like "chord" never reached
        the later modules at all. The index is a few thousand short strings —
        scanning all of it costs under a millisecond. */
-    const KIND_BONUS = { song: 3, skill: 2, set: 2, step: 0 };
+    const KIND_BONUS = { activity: 3, song: 3, skill: 2, set: 2, step: 0 };
     const rank = (e, needAll) => {
       const hay = e.hay, ttl = e.fTitle;
       const hits = terms.filter(t => hay.includes(t)).length;
@@ -8494,11 +8525,15 @@ function runSearch(q){
     ? `<div class="search-count search-loose">${escHtml(t('search.loose',{q:rawQ}))}</div>`
     : `<div class="search-count">${escHtml(total > LIMIT ? t('search.countCapped',{shown:LIMIT, n:total}) : t('search.count',{n:total}))}</div>`;
   res.innerHTML = head + top.map(({e}) => {
-    const where = e.kind === 'song'
+    const where = e.kind === 'activity'
+      ? t('search.whereActivity')
+      : e.kind === 'song'
       ? t('search.whereSong', {n:e.moduleNum})
       : t('search.whereSet', {n:e.moduleNum, label:escHtml(e.label || '')}) +
         (e.kind === 'step' && e.secLabel ? t('search.whereSection', {section:escHtml(e.secLabel)}) : e.kind === 'skill' ? t('search.whereSkill') : '');
-    const onclick = e.kind === 'step'
+    const onclick = e.kind === 'activity'
+      ? `searchGoActivity('${escAttr(e.activityId)}')`
+      : e.kind === 'step'
       ? `searchGo(${e.moduleNum},'${e.wid}','${e.station}',${e.secIdx},${e.stepIdx})`
       : e.kind === 'skill' && e.skillNum != null
         ? `searchGoSkill(${e.moduleNum},'${e.wid}',${e.skillNum})`
@@ -9145,8 +9180,8 @@ function caHeroCardHtml(a, isCurrent = true){
     </summary>
     <div class="ca-card-body">
       <p class="coach-tip">${escHtml(tf(a, 'intro'))}</p>
-      ${stepsHtml ? `<ol class="ca-steps">${stepsHtml}</ol>` : ''}
       ${caJourneyLinkHtml(a)}
+      ${stepsHtml ? `<ol class="ca-steps">${stepsHtml}</ol>` : ''}
       ${caMarkRowHtml(a, done, markLabel)}
     </div>
   </details>`;
@@ -9231,6 +9266,8 @@ function caStepHtml(a, step, si, isOpen, isDone){
      and for the skill check-off, which activity drills don't offer since
      `drill.skill` is a module skill id and activities have none. */
   if(step.drill) parts.push(renderShuffleDrill(step.drill, `${a.id}-s${si}`, null));
+  // The Journey door, right where the step names it (see caStepMentionsJourney).
+  if(caStepMentionsJourney(step)) parts.push(caJourneyLinkHtml(a));
   // Step text is first-party authored HTML, same trust level as module step
   // content — trusted (not escHtml'd) so <ol>/<ul> markup renders per the
   // house list rule, and wrapGotItWhen() can style the got-it-when sentence.
@@ -9258,13 +9295,39 @@ function caStepHtml(a, step, si, isOpen, isDone){
 function caJourneyUrl(a){
   const sg = a.journey && SONG_JOURNEYS.find(s => s.id === a.journey);
   if(!sg) return '';
-  return sg.url + (a.journeyLayer ? `#layer-${Number(a.journeyLayer)}` : '');
+  /* The return address rides in the hash after the layer (navigability
+     work order 2026-09-23, item 1): journey.js reads `from=` for its
+     "Back to class site" link, so a student sent from this card lands
+     back ON this card (the #class-activities/<id> deep link) rather than
+     on a second copy of the home page. Hash, not a query string — sw.js
+     matches precache entries by full URL, so `?from=` would miss the
+     cache and, offline, fall back to the app shell. */
+  return journeyHref(sg.url, a.journeyLayer ? Number(a.journeyLayer) : 0, `class-activities/${a.id}`);
+}
+/* One builder for every Journey-page link the site opens: tabs/<slug>.html
+   + '#layer-N' (when a layer is named) + '&from=<hash without #>' (when
+   there is somewhere specific to come back to). journey.js splits the
+   hash on '&' — see openFromHash / journeyReturn there. */
+function journeyHref(url, layer, from){
+  const parts = [];
+  if(layer) parts.push(`layer-${layer}`);
+  if(from) parts.push(`from=${encodeURIComponent(from)}`);
+  return url + (parts.length ? '#' + parts.join('&') : '');
 }
 function caJourneyLinkHtml(a){
   const url = caJourneyUrl(a);
   if(!url) return '';
   const sg = SONG_JOURNEYS.find(s => s.id === a.journey);
   return `<div class="ca-journey-row"><button type="button" class="jl-song-btn" onclick="window.open('${escAttr(url)}','_blank','noopener')">${escHtml(t('ca.openJourney', { song: sg.name }))} &#x2197;</button></div>`;
+}
+/* Item 2 of the same work order: the Journey button used to sit ONLY under
+   the last step, ~600px below a Step 1 that said "button below the steps".
+   Now it renders at the top of the card body (right after the intro) and
+   again inside any step whose text actually mentions the Song Journey page,
+   so the door is next to the sentence that names it. The English text is
+   the one tested — the Spanish twin always mirrors it. */
+function caStepMentionsJourney(step){
+  return /song journey/i.test(stripTags(step && step.text || ''));
 }
 function caActivityCardHtml(a){
   if(a.kind === 'check') return caCheckCardHtml(a);
@@ -9288,8 +9351,8 @@ function caActivityCardHtml(a){
     </summary>
     <div class="ca-card-body">
       <p class="coach-tip">${escHtml(tf(a,'intro'))}</p>
-      ${stepsHtml ? `<ol class="ca-steps">${stepsHtml}</ol>` : ''}
       ${caJourneyLinkHtml(a)}
+      ${stepsHtml ? `<ol class="ca-steps">${stepsHtml}</ol>` : ''}
       ${caMarkRowHtml(a, done, markLabel)}
     </div>
   </details>`;

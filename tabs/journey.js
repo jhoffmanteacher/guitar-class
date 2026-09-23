@@ -112,8 +112,56 @@ function firstUnreadyLayer(){
   })[0];
 }
 
+/* The hash carries up to two things, '&'-separated (journeyHref in app.js):
+   'layer-N' (which layer to open) and 'from=<hash without #>' (where on
+   the class site the student came from — e.g. class-activities/ca-20).
+   hashLayerId() is the first; journeyFrom() the second. Only ever read,
+   never rewritten, so the site's own links keep working unchanged. */
+function hashParts(){
+  return (location.hash || '').replace('#', '').split('&');
+}
+function hashLayerId(){
+  var first = hashParts()[0] || '';
+  return first.indexOf('=') === -1 ? first : '';
+}
+function journeyFrom(){
+  var hit = hashParts().filter(function(p){ return p.indexOf('from=') === 0; })[0];
+  if(!hit) return '';
+  try { return decodeURIComponent(hit.slice(5)); } catch(e){ return ''; }
+}
+/* Where "Back to class site" goes — the sending card when the site said
+   which, otherwise the home page. */
+function journeyReturnHref(){
+  var from = journeyFrom();
+  return '../index.html' + (from ? '#' + from : '');
+}
+/* Navigability work order 2026-09-23, item 1. The class site opens every
+   Journey page in a NEW tab (so the student's place on the site, and the
+   5-15 s school-Wi-Fi sign-in, are never thrown away). Before this, the
+   crumb link then loaded a second copy of the site into THAT tab — two
+   site tabs, the first one still parked on the activity. Now: when this
+   tab holds nothing but this page (history.length 1 — the way the site's
+   window.open lands here), going back IS closing the tab, which drops the
+   student straight onto the tab they came from. If the browser refuses
+   (the student typed the URL, or has navigated within the tab), the link
+   falls through to a normal load of the return address 300 ms later. */
+function wireReturnLink(){
+  var a = document.querySelector('.crumb-left a');
+  if(!a) return;
+  var href = journeyReturnHref();
+  a.href = href;
+  a.addEventListener('click', function(e){
+    if(history.length > 1) return;   // a real page history — let the link navigate
+    e.preventDefault();
+    window.close();
+    setTimeout(function(){ location.href = href; }, 300);
+  });
+}
+if(document.readyState === 'loading') document.addEventListener('DOMContentLoaded', wireReturnLink);
+else wireReturnLink();
+
 function openFromHash(scroll){
-  var id = (location.hash || '').replace('#', '');
+  var id = hashLayerId();
   if(!id) return false;
   var section = document.getElementById(id);
   if(!section || !section.classList.contains('layer')) return false;
@@ -374,7 +422,7 @@ function applyReady(saved){
     paintChip(g.closest('.layer'), box.checked);
   });
   updateProgressPill();
-  if(!userInteracted && !location.hash){
+  if(!userInteracted && !hashLayerId()){
     var target = firstUnreadyLayer();
     if(target) openLayer(target, false);
   }
@@ -485,7 +533,7 @@ function showJourneyGate(){
   p.textContent = t('journey.gatedBody');
   var btn = document.createElement('a');
   btn.className = 'ca-gate-btn';
-  btn.href = '../index.html#class-activities';
+  btn.href = journeyFrom() ? journeyReturnHref() : '../index.html#class-activities';
   btn.setAttribute('data-i18n', 'journey.gatedBtn');
   btn.textContent = t('journey.gatedBtn');
   card.appendChild(h); card.appendChild(p); card.appendChild(btn);
