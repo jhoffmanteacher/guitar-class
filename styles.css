@@ -349,8 +349,15 @@ body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,"Helvetica N
 /* .dp-stepper is gone — its two controls live in the set band now
    (.se-chrome, near the top of this file). */
 .fm-count{font-weight:600;color:var(--text);white-space:nowrap}
-.fm-toggle{font-family:inherit;font-size:0.75rem;font-weight:600;color:var(--text2);background:var(--bg2);border:1px solid var(--border);border-radius:12px;padding:3px 10px;cursor:pointer;white-space:nowrap}
-.fm-toggle:hover{color:var(--text);border-color:var(--text2)}
+/* Two-segment view switch (navigability work order 2026-09-23, item 9):
+   the lit half is the CURRENT view. Replaces .fm-toggle, whose label named
+   the other view and read as a status. */
+.fm-seg{display:inline-flex;border:1px solid var(--border);border-radius:12px;background:var(--bg2);overflow:hidden;white-space:nowrap}
+.fm-seg-btn{font-family:inherit;font-size:0.75rem;font-weight:600;color:var(--text2);background:transparent;border:0;padding:3px 10px;cursor:pointer;white-space:nowrap}
+.fm-seg-btn + .fm-seg-btn{border-left:1px solid var(--border)}
+.fm-seg-btn:hover{color:var(--text)}
+.fm-seg-btn.on{background:var(--purple-bg);color:var(--purple-text)}
+.fm-seg-btn:focus-visible{outline:2px solid var(--purple-accent);outline-offset:-2px}
 .dp.focus li.step.collapsed{display:none}
 .dp.focus .step + .step{border-top:0}
 .dp.focus .step-chev{display:none}
@@ -863,8 +870,12 @@ body.rail-collapsed .nav-list{display:flex;flex-direction:column;gap:4px}
 body.rail-collapsed .nav-btn{justify-content:center;padding:10px 0;gap:0}
 body.rail-collapsed .nav-btn > span:not(.ico){position:absolute;width:1px;height:1px;
   padding:0;margin:-1px;overflow:hidden;clip:rect(0,0,0,0);white-space:nowrap;border:0}
-/* Four tools stacked, same icon-only treatment as the wide dock. */
+/* Four tools stacked. The collapsed rail is the one place the dock stays
+   icon-only (the wide dock got its labels back 2026-09-23) — a 48px strip
+   has no room for a word, and narrowing the rail was the student's choice. */
 body.rail-collapsed .rail-tools .fab-buttons{grid-template-columns:1fr}
+body.rail-collapsed .rail-tools .fab span{position:absolute;width:1px;height:1px;padding:0;margin:-1px;
+  overflow:hidden;clip:rect(0,0,0,0);white-space:nowrap;border:0}
 /* The dock popups are sized and placed against the dock's own width, which
    is now 48px. Swing them out to the RIGHT of the rail instead, at the
    width they were designed for, so the tuner and metronome are usable in
@@ -1042,14 +1053,19 @@ body.rail-collapsed .rail-tools .tool-popup{
    and a translated title= (index.html, data-i18n-attr) gives the same
    words on hover. Icons go up to 19px, and each already carries its own
    colour. Mobile keeps the labelled 2×2. */
+/* Labels back under the icons (navigability work order 2026-09-23, item 8):
+   a metronome triangle is not obvious to a 9th grader. The words are the
+   SHORT dock keys (tools.dock*, i18n.js — "Metro", "Grabar"), picked to fit
+   the ~55px a 4-across dock gives each button at this size, so nothing
+   ellipsizes; the full names stay on the popup titles and the title=
+   tooltip. Costs ~12px of rail height — measured 7px+ of slack left at
+   1366×657 on the tallest rail (Modules · m5w2 with its Part links). */
 @media(min-width:761px){
   .rail-tools .fab-buttons{grid-template-columns:repeat(4,1fr);gap:2px}
-  .rail-tools{padding:6px}
-  .rail-tools .fab{padding:8px 2px;gap:0}
-  /* Clipped, not display:none — a hidden label is not an accessible name. */
-  .rail-tools .fab span{position:absolute;width:1px;height:1px;padding:0;margin:-1px;
-    overflow:hidden;clip:rect(0,0,0,0);white-space:nowrap;border:0}
-  .rail-tools .fab svg{width:19px;height:19px}
+  .rail-tools{padding:4px 6px 6px}
+  .rail-tools .fab{padding:5px 1px 4px;gap:2px}
+  .rail-tools .fab span{font-size:0.625rem;line-height:1.1;font-weight:600;letter-spacing:0}
+  .rail-tools .fab svg{width:18px;height:18px}
 }
 /* Popups open upward above the dock, filling the rail's width */
 .rail-tools .tool-popup{position:absolute;left:8px;right:8px;bottom:calc(100% + 6px);width:auto;z-index:70;box-shadow:var(--shadow-raised)}
@@ -2921,8 +2937,8 @@ body.games-open{overflow:hidden}
 /* Back/Next take a real target; the stepper toggle stays a light pill and
    gets the invisible overlay instead, so the bar keeps its slim height. */
 .fm-nav{min-height:44px}
-.fm-toggle{position:relative}
-.fm-toggle::after{content:'';position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);
+.fm-seg-btn{position:relative}
+.fm-seg-btn::after{content:'';position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);
   width:max(100%,44px);height:max(100%,44px)}
 .bpm-slider{height:28px}
 /* Overlay hit area, full 44px — isolated controls with clear space around them */

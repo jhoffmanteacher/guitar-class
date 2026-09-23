@@ -504,7 +504,8 @@
     'fm.back':                 { en: '← Back', es: '← Atrás' },
     'fm.next':                 { en: 'Next →', es: 'Siguiente →' },
     'fm.listView':             { en: 'All steps', es: 'Todos los pasos' },
-    'fm.focusView':            { en: 'One at a time', es: 'De uno en uno' },
+    'fm.focusView':            { en: 'One step', es: 'Un paso' },
+    'fm.viewAria':             { en: 'How many steps to show', es: 'Cuántos pasos mostrar' },
 
     // ── Tools: Metronome / Timer / Tuner ──
     'tools.metronome':     { en: 'Metronome', es: 'Metrónomo' },
@@ -525,6 +526,12 @@
     'tools.timerLengthAria':{ en: 'Timer length', es: 'Duración del temporizador' },
     'tools.tunerStringAria':{ en: 'Which string to tune', es: 'Qué cuerda afinar' },
     'tools.tuner':         { en: 'Tuner', es: 'Afinador' },
+    // Dock labels (navigability work order 2026-09-23, item 8): short words
+    // that fit a 4-across dock at ~55px each. The popup titles above stay full.
+    'tools.dockTuner':         { en: 'Tuner', es: 'Afinar' },
+    'tools.dockTimer':         { en: 'Timer', es: 'Tiempo' },
+    'tools.dockMetro':         { en: 'Metro', es: 'Metro' },
+    'tools.dockRec':           { en: 'Record', es: 'Grabar' },
     'tools.auto':          { en: 'Auto', es: 'Auto' },
     'tools.flat':          { en: 'flat', es: 'bemol' },
     'tools.inTune':        { en: 'in tune', es: 'afinado' },
@@ -560,11 +567,10 @@
     'btn.next':              { en: 'Next:', es: 'Siguiente:' },
     'btn.nextModuleReview':  { en: 'Next: Module Review', es: 'Siguiente: Repaso del módulo' },
     'btn.theNextSet':        { en: 'the next set', es: 'la siguiente unidad' },
-    'btn.backToPractice':    { en: 'Back to practice', es: 'Volver a practicar' },
+    'btn.backToPractice':    { en: 'Back', es: 'Volver' },   // Games / Live quiz overlays only (2026-09-23)
     // In-Class Activities is the site's home page (see CLAUDE.md), so its
     // exit button points forward into practice rather than "back" to it —
     // Chromebook rail work order, 2026-09-19.
-    'btn.goToPractice':      { en: 'Go to practice', es: 'Ir a practicar' },
     'btn.backToTop':         { en: 'Back to top', es: 'Volver arriba' },
     'btn.top':               { en: 'Top', es: 'Arriba' },
     'btn.reportProblem':     { en: 'Report a problem', es: 'Reportar un problema' },

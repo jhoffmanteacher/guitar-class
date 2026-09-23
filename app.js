@@ -4323,7 +4323,6 @@ function buildLesson(w){
   const countParams = parts
     ? {n: Math.max(1, (openNum || 1) - (curPartNum === 2 ? pc[1].total : 0)), m: pc[curPartNum].total}
     : {n: openNum || 1, m: stepTotal};
-  const toggleKey = focusMode ? 'fm.listView' : 'fm.focusView';
   /* ── The lesson chrome rides in the sticky set band, not the card ──
      (Chromebook viewing-area work order, 2026-09-19.) The progress pill,
      "Step n of m" and the All steps / One at a time toggle used to be two
@@ -4341,7 +4340,7 @@ function buildLesson(w){
   const chromeInner = stepTotal > 0
     ? `<span class="fm-count" aria-live="polite" data-i18n="fm.stepOf" data-i18n-params="${escAttr(JSON.stringify(countParams))}">${t('fm.stepOf', countParams)}</span>`
       + pillHtml
-      + `<button type="button" class="fm-toggle" onclick="toggleStationView()" data-i18n="${toggleKey}">${t(toggleKey)}</button>`
+      + stationViewSegHtml(focusMode)
     : '';
   /* .cf-focus mirrors the card's own .focus class onto the chrome, because
      the chrome is no longer inside .dp for `.dp:not(.focus) .fm-count` to
@@ -4420,6 +4419,22 @@ function stationViewMode(){
   catch(e){ return 'focus'; }
 }
 function stationViewIsFocus(){ return stationViewMode() === 'focus'; }
+/* The view switch is a two-segment control (navigability work order
+   2026-09-23, item 9) — "One step | All steps" with the CURRENT view lit —
+   instead of one button whose label named the OTHER view, which read as a
+   status line ("All steps" while showing one at a time). Same two keys,
+   same toggleStationView() underneath; setStationView() is the click
+   target so pressing the segment already lit is a no-op. */
+function stationViewSegHtml(focus){
+  return `<span class="fm-seg" role="group" aria-label="${escAttr(t('fm.viewAria'))}" data-i18n-attr="aria-label:fm.viewAria">`
+    + `<button type="button" class="fm-seg-btn${focus ? ' on' : ''}" aria-pressed="${focus}" onclick="setStationView(true)" data-i18n="fm.focusView">${t('fm.focusView')}</button>`
+    + `<button type="button" class="fm-seg-btn${focus ? '' : ' on'}" aria-pressed="${!focus}" onclick="setStationView(false)" data-i18n="fm.listView">${t('fm.listView')}</button>`
+    + `</span>`;
+}
+function setStationView(focus){
+  if(stationViewIsFocus() === !!focus) return;
+  toggleStationView();
+}
 
 /* Flip the pref and re-skin every card already on the page — the open step,
    the responses typed into it and any running drill all survive, so this
@@ -4454,11 +4469,13 @@ function applyStationView(dp, focus){
   // counter in list view (it used to ride on .dp's own .focus class).
   const chrome = lessonChromeQ(dp, '.se-chrome');
   if(chrome) chrome.classList.toggle('cf-focus', focus);
-  const toggle = lessonChromeQ(dp, '.fm-toggle');
-  if(toggle){
-    const key = focus ? 'fm.listView' : 'fm.focusView';
-    toggle.setAttribute('data-i18n', key);
-    toggle.textContent = t(key);
+  const seg = lessonChromeQ(dp, '.fm-seg');
+  if(seg){
+    seg.querySelectorAll('.fm-seg-btn').forEach((b, i) => {
+      const on = (i === 0) === !!focus;   // first segment = One step
+      b.classList.toggle('on', on);
+      b.setAttribute('aria-pressed', String(on));
+    });
   }
   syncStationFocus(dp);
 }
@@ -8093,7 +8110,7 @@ function openSongsScreen(){
   closeTopPanels('songs-hub');
   screen.removeAttribute('hidden');
   syncExploreNav();
-  const exit = screen.querySelector('.page-exit');
+  const exit = screen.querySelector('.page-exit, .page-title');
   if(exit) exit.focus();
   renderSongsHub();
 }
@@ -8821,7 +8838,7 @@ function openMyProgressScreen(){
   closeTopPanels('my-progress');
   screen.removeAttribute('hidden');
   syncExploreNav();
-  const exit = screen.querySelector('.page-exit');
+  const exit = screen.querySelector('.page-exit, .page-title');
   if(exit) exit.focus();
   // Three sections, three render calls — Daily Review first (it carries the
   // once-a-day bonus, so it shouldn't be buried), then Keep practicing, then
@@ -8918,7 +8935,7 @@ function openClassActivitiesScreen(focusId){
     closeTopPanels('class-activities');
     screen.removeAttribute('hidden');
     syncExploreNav();
-    const exit = screen.querySelector('.page-exit');
+    const exit = screen.querySelector('.page-exit, .page-title');
     if(exit) exit.focus();
   }
   /* Already open is not "nothing to do": a second deep link (a student

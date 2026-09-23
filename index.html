@@ -352,19 +352,19 @@
           <div class="fab-buttons" id="fab-buttons">
             <button type="button" class="fab fab-tune" id="fab-tuner" onclick="togglePopup('tuner')" aria-controls="tuner-popup" aria-expanded="false" title="Tuner" data-i18n-attr="title:tools.tuner">
               <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 18V5l12-2v13"/><circle cx="6" cy="18" r="3"/><circle cx="18" cy="16" r="3"/></svg>
-              <span data-i18n="tools.tuner">Tuner</span>
+              <span data-i18n="tools.dockTuner">Tuner</span>
             </button>
             <button type="button" class="fab fab-timer" id="fab-timer" onclick="togglePopup('timer')" aria-controls="timer-popup" aria-expanded="false" title="Timer" data-i18n-attr="title:tools.timer">
               <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="13" r="8"/><path d="M12 9v4l3 3"/><path d="M9 3h6M12 3v2"/></svg>
-              <span data-i18n="tools.timer">Timer</span>
+              <span data-i18n="tools.dockTimer">Timer</span>
             </button>
             <button type="button" class="fab fab-metro" id="fab-metro" onclick="togglePopup('metro')" aria-controls="metro-popup" aria-expanded="false" title="Metronome" data-i18n-attr="title:tools.metronome">
               <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polygon points="12 3 19 21 12 17 5 21 12 3"/><line x1="12" y1="10" x2="12" y2="17"/></svg>
-              <span data-i18n="tools.metronome">Metronome</span>
+              <span data-i18n="tools.dockMetro">Metro</span>
             </button>
             <button type="button" class="fab fab-rec" id="fab-rec" onclick="togglePopup('rec')" aria-controls="rec-popup" aria-expanded="false" title="Recorder" data-i18n-attr="title:tools.recorder">
               <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="9" y="2" width="6" height="12" rx="3"/><path d="M5 10a7 7 0 0 0 14 0"/><path d="M12 17v4M9 21h6"/></svg>
-              <span data-i18n="tools.recorder">Recorder</span>
+              <span data-i18n="tools.dockRec">Record</span>
             </button>
           </div>
         </div>
@@ -386,7 +386,7 @@
       <div class="games-screen" id="games-screen" role="dialog" aria-modal="true" aria-label="Guitar games" data-i18n-attr="aria-label:nav.gamesScreenAria" hidden>
         <div class="games-shell">
           <div class="games-topbar">
-            <button type="button" class="games-exit" onclick="closeGamesScreen()">&larr; <span data-i18n="btn.backToPractice">Back to practice</span></button>
+            <button type="button" class="games-exit" onclick="closeGamesScreen()">&larr; <span data-i18n="btn.backToPractice">Back</span></button>
             <div class="games-logo">Guitar Games</div>
             <span class="games-topbar-spacer"></span>
           </div>
@@ -402,7 +402,7 @@
       <div class="games-screen lq-screen" id="live-quiz-screen" role="dialog" aria-modal="true" aria-label="Live quiz" data-i18n-attr="aria-label:lq.screenAria" hidden>
         <div class="games-shell">
           <div class="games-topbar">
-            <button type="button" class="games-exit" onclick="closeLiveQuizScreen()">&larr; <span data-i18n="btn.backToPractice">Back to practice</span></button>
+            <button type="button" class="games-exit" onclick="closeLiveQuizScreen()">&larr; <span data-i18n="btn.backToPractice">Back</span></button>
             <div class="games-logo" data-i18n="lq.navTitle">Live quiz</div>
             <span class="games-topbar-spacer"></span>
           </div>
@@ -419,8 +419,15 @@
       <div class="page-screen" id="songs-screen" role="region" aria-label="All songs" data-i18n-attr="aria-label:hub.allSongs" hidden>
         <div class="page-shell">
           <div class="page-topbar">
-            <button type="button" class="page-exit" onclick="returnToPractice()">&larr; <span data-i18n="btn.backToPractice">Back to practice</span></button>
-            <div class="page-title"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 18V5l12-2v13"/><circle cx="6" cy="18" r="3"/><circle cx="18" cy="16" r="3"/></svg> <span data-i18n="hub.allSongs">All songs</span></div>
+            <!-- No "Back to practice" button here (navigability work order
+                 2026-09-23, item 4): the rail is always on screen at
+                 Chromebook width and is the one place a page is named, so
+                 the button was a second name for the same place ("practice"
+                 vs the rail's "Modules"). tabindex="-1" lets open*Screen()
+                 move focus to the title the way it used to move it to the
+                 button. Games and Live quiz keep their Back — they cover the
+                 rail. -->
+            <div class="page-title" tabindex="-1"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 18V5l12-2v13"/><circle cx="6" cy="18" r="3"/><circle cx="18" cy="16" r="3"/></svg> <span data-i18n="hub.allSongs">All songs</span></div>
             <span class="page-topbar-spacer"></span>
           </div>
           <div class="page-body" id="songs-screen-body"></div>
@@ -436,8 +443,7 @@
       <div class="page-screen" id="my-progress-screen" role="region" aria-label="My progress" data-i18n-attr="aria-label:nav.myProgress" hidden>
         <div class="page-shell">
           <div class="page-topbar">
-            <button type="button" class="page-exit" onclick="closeMyProgressScreen()">&larr; <span data-i18n="btn.backToPractice">Back to practice</span></button>
-            <div class="page-title"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 20V10"/><path d="M12 20V4"/><path d="M20 20v-7"/></svg> <span data-i18n="nav.myProgress">My progress</span></div>
+            <div class="page-title" tabindex="-1"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 20V10"/><path d="M12 20V4"/><path d="M20 20v-7"/></svg> <span data-i18n="nav.myProgress">My progress</span></div>
             <span class="page-topbar-spacer"></span>
           </div>
           <div class="page-body">
@@ -453,8 +459,14 @@
       <div class="page-screen ca-screen" id="class-activities-screen" role="region" aria-label="In-Class Activities" data-i18n-attr="aria-label:nav.classActivities" hidden>
         <div class="page-shell">
           <div class="page-topbar">
-            <button type="button" class="page-exit" onclick="closeClassActivitiesScreen()"><span data-i18n="btn.goToPractice">Go to practice</span> &rarr;</button>
-            <div class="page-title"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="5" y="3" width="14" height="18" rx="2"/><path d="M9 3h6v2a1 1 0 0 1-1 1h-4a1 1 0 0 1-1-1z"/><path d="m9 13 2 2 4-4"/></svg> <span data-i18n="nav.classActivities">In-Class Activities</span></div>
+            <!-- Titled "In class", same as its rail row (item 4) — one name per
+                 place. nav.classActivities ("In-Class Activities") stays the
+                 landmark/aria name. The bar is sticky (item 6, styles.css) and
+                 caSyncTopbar() swaps this title for the open card's own title
+                 and "n of m done" while a card is open, so a student three
+                 steps down still sees where they are. -->
+            <div class="page-title" tabindex="-1" id="ca-page-title"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="5" y="3" width="14" height="18" rx="2"/><path d="M9 3h6v2a1 1 0 0 1-1 1h-4a1 1 0 0 1-1-1z"/><path d="m9 13 2 2 4-4"/></svg> <span data-i18n="nav.classActivitiesNav">In class</span></div>
+            <div class="ca-bar-open" id="ca-bar-open" hidden></div>
             <span class="page-topbar-spacer"></span>
           </div>
           <div class="page-body" id="class-activities-body"></div>
