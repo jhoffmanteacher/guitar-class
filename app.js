@@ -2556,11 +2556,20 @@ async function periodPick(value){
      NOT rolled back on failure: it is the student's answer either way, and
      the queued retry needs the real value, not an empty one.
      A successful save — here, or via flushSave's own later auto-retry —
-     closes the picker and refreshes the gate itself (see flushSave); this
-     only has to handle the failure UI. */
+     closes the picker and refreshes the gate itself (see flushSave). */
   if(_dirtyKeys.has('period')){
     btns.forEach(b=>{ b.disabled=false; });
     if(status){ status.textContent=t('period.failed'); status.className='issue-status err'; }
+    return;
+  }
+  /* Dev bypass never queues a real write (queueSave() clears the dirty set
+     itself, see there), so flushSave() returns before its own hook ever
+     runs and the overlay is still up — close it here so the picker isn't
+     stuck open under dev bypass. A no-op when flushSave's hook already
+     handled it. */
+  if(document.getElementById('period-overlay')){
+    closePeriodPicker();
+    refreshOpenClassActivitiesScreen();
   }
 }
 function closePeriodPicker(){
