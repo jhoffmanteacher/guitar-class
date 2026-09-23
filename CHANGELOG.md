@@ -5,6 +5,35 @@ Notable changes to the Guitar Class site. Newest first.
 For the full session-by-session history (and the reasoning behind each change),
 see `WORKFLOW.md` and the git commit log.
 
+## 2026-09-23 — Easier to find your way around
+
+### Changed
+
+- **Song Journey pages take you back where you were.** "← Back to class site"
+  now closes the Journey tab and drops you on the class site tab you came
+  from — no more second copy of the site. If the browser won't close the
+  tab, the link goes straight to the activity that sent you.
+- **The "Open the Song Journey page" button is at the top of the activity,**
+  and again inside any step that tells you to open it.
+- **Find searches In class activities too.** Type "Happy Birthday" and the
+  class activities come up first.
+- **One name per place.** The rail says "In class" and "Modules"; the pages
+  say the same. The "Back to practice" / "Go to practice" buttons are gone
+  from Songs, My progress and In class — the rail is always there.
+- **The tools have names again** — Tuner · Timer · Metro · Record under the
+  icons at the bottom of the rail.
+- **"One step | All steps"** is a two-way switch with the current view lit.
+- **Still to do shows the last few activities;** everything older is folded
+  under "Older (n)".
+- **An open activity keeps its name at the top of the screen** with "n of m
+  done" while you scroll — tap the name to jump back to its top.
+- **The module list shows ✓ and 🔒 at the front** of a module's name, where
+  you can see them; hover a Set button to read what the set covers, and
+  "About this set" opens with that line.
+- **Before today's activity is done, the other pages are greyed out with a
+  lock** instead of disappearing. Tapping one still says "Finish today's
+  activity first."
+
 ## 2026-09-23 — Smaller TAB
 
 ### Changed

@@ -337,6 +337,11 @@
     // The one fold wrapping every pending card except the Today hero
     // (caTodoGroupHtml, item 2f) — closed by default, same as Earlier.
     'ca.stillToDoGroup':       { en: 'Still to do ({n})', es: 'Todavía por hacer ({n})' },
+    // Nested inside Still to do (navigability work order 2026-09-23, item 5).
+    'ca.olderGroup':           { en: 'Older ({n})', es: 'Anteriores ({n})' },
+    // The sticky bar while a card is open (item 6).
+    'ca.barProgress':          { en: '{done} of {total} done', es: '{done} de {total} hechos' },
+    'ca.barTop':               { en: 'Back to the top of this activity', es: 'Volver al inicio de esta actividad' },
     // "N of M" beside a module heading's progress bar, inside either fold
     // (caModuleHeadHtml, item 2f).
     'ca.moduleProgress':       { en: '{done} of {total}', es: '{done} de {total}' },

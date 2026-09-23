@@ -2312,11 +2312,18 @@ function populateModuleDropdown(){
     const opt = document.createElement('option');
     opt.value = m.num;
     const { done, total, state } = moduleCompletion(m);
+    /* State goes in FRONT of the name (navigability work order 2026-09-23,
+       item 7): the select is ~200px wide, so a ✓ or 🔒 riding at the END of
+       "Module 4 — Major / Minor / Blues Pentatonic Scales" was cut off and
+       invisible in the closed control. "3/9" stays a tail — it only ever
+       matters once the list is open. */
+    let head = '';
     let tail = '';
-    if(state==='complete') tail = ` · ${total}/${total} ✓`;
-    else if(state==='partial') tail = ` · ${done}/${total}`;
-    if(isModuleGateLocked(m.num)) tail += ' · 🔒';
-    opt.textContent = `${t('nav.module')} ${m.num} — ${tf(m,'name')}${tail}`;
+    if(isModuleGateLocked(m.num)) head = '🔒 ';
+    else if(state==='complete') head = '✓ ';
+    if(state==='partial') tail = ` · ${done}/${total}`;
+    else if(state==='complete') tail = ` · ${total}/${total}`;
+    opt.textContent = `${head}${t('nav.module')} ${m.num} — ${tf(m,'name')}${tail}`;
     sel.appendChild(opt);
   });
   if(keep) sel.value = keep;
@@ -3054,6 +3061,10 @@ function renderPills(moduleNum){
       }
     } else {
       btn.onclick=()=>{ leaveTopPanelForSet(); lastSetId=w.id; activateSet(w.id); saveProgress(); };
+      // "Set 2" says nothing about what's in it — the set's own subtitle
+      // ("Reading chord diagrams · Am and Em · First strumming") as the
+      // hover tooltip (item 7). Locked pills keep their unlock hint above.
+      if(w.subtitle) btn.title = tf(w, 'subtitle');
     }
     btn.classList.toggle('active', btn.dataset.id===(peekedId || lastSetId));
     c.appendChild(btn);
@@ -3582,7 +3593,13 @@ function buildSet(w){
         return `<div class="song-thread"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" style="width:1em;height:1em;vertical-align:-0.15em"><path d="M9 18V5l12-2v13"/><circle cx="6" cy="18" r="3"/><circle cx="18" cy="16" r="3"/></svg> ${lede} ${names}</div>`;
       })()
     : '';
-  const about = (skills || thread) ? `<details class="set-about"><summary>${t('set.about')}</summary><div class="set-about-panel">${skills}${thread}</div></details>` : '';
+  /* The set's subtitle ("Reading chord diagrams · Am and Em · First
+     strumming") opens the About panel (navigability work order 2026-09-23,
+     item 7) — the same line the rail's set pills now carry as a tooltip.
+     It was tried in the sticky band first and ellipsized to a fragment at
+     1366px once the lesson chrome was in; here it has the width. */
+  const subLine = w.subtitle ? `<p class="set-about-sub">${tf(w,'subtitle')}</p>` : '';
+  const about = (skills || thread || subLine) ? `<details class="set-about"><summary>${t('set.about')}</summary><div class="set-about-panel">${subLine}${skills}${thread}</div></details>` : '';
   /* buildLesson() runs BEFORE the band is assembled, on purpose: it leaves
      the lesson chrome (progress pill, "Step n of m", the view toggle) in
      _lessonChrome for the band to carry, instead of spending two more rows
@@ -8961,7 +8978,7 @@ function caFocusActivity(id){
      <details> is a silent no-op. Force whichever fold it's actually in;
      forcing the wrong one (the hero needs neither) is harmless. */
   if(found){
-    if(classActivities[id] === true) caFinishedOpen = true; else caTodoOpen = true;
+    if(classActivities[id] === true) caFinishedOpen = true; else { caTodoOpen = true; caOlderOpen = true; }   // Older is nested in Still to do (item 5)
   }
   renderClassActivities();
   if(!found) return;
@@ -9693,6 +9710,7 @@ function printActivity(ev, id){
 const TCK_CHECK_SVG_INLINE = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" style="width:14px;height:14px"><path d="M5 12l5 5L19 7"/></svg>';
 function caOnToggle(details){
   caOpenId = details.open ? details.dataset.id : (caOpenId === details.dataset.id ? null : caOpenId);
+  caSyncTopbar();
   // Closing the card hides a playing snippet's Stop button without stopping
   // the sound — an <audio> element keeps going whether or not anything on
   // screen can reach it. (A step COLLAPSE deliberately doesn't do this: the
@@ -9709,6 +9727,31 @@ function caOnToggle(details){
     delete details.dataset.caOpening;
     caScrollToActivity(details.dataset.id);
   }
+}
+/* The In class page's sticky bar (navigability work order 2026-09-23,
+   item 6). The Modules view has had one since 9/19 — module name, "Step n
+   of m", the view switch — but an open activity card scrolled its own
+   title and progress dots off the top by Step 2. While a card is open the
+   bar swaps its "In class" title for that card's name (a button: tap it to
+   get back to the card's top) and "n of m done"; closed, the title comes
+   back. Net zero height — index.html's #ca-page-title / #ca-bar-open are
+   the two halves, styles.css .ca-screen .page-topbar pins the bar. */
+function caSyncTopbar(){
+  const bar = document.getElementById('ca-bar-open');
+  const title = document.getElementById('ca-page-title');
+  if(!bar || !title) return;
+  const card = caOpenId ? document.querySelector(`.ca-card[open][data-id="${CSS.escape(caOpenId)}"]`) : null;
+  const a = card ? (window.CLASS_ACTIVITIES || []).find(x => x.id === caOpenId) : null;
+  if(!a){ bar.hidden = true; bar.innerHTML = ''; title.hidden = false; return; }
+  const num = caNumber(a);
+  const name = (a.kind === 'check' ? t('check.prefix') + ' · ' : num ? `#${num} - ` : '') + caTitle(a);
+  const steps = a.steps || [];
+  const doneN = steps.filter((st, si) => caStepDone[`${a.id}:${si}`] === true).length;
+  const prog = steps.length ? t('ca.barProgress', {done: doneN, total: steps.length}) : '';
+  bar.innerHTML = `<button type="button" class="ca-bar-name" onclick="caScrollToActivity('${escAttr(a.id)}')" title="${escAttr(t('ca.barTop'))}" data-i18n-attr="title:ca.barTop">${escHtml(name)}</button>`
+    + (prog ? `<span class="ca-bar-prog">${escHtml(prog)}</span>` : '');
+  bar.hidden = false;
+  title.hidden = true;
 }
 // Stamped on the summary's own click, before the native toggle runs, so
 // caOnToggle can tell a real click-to-open from a re-render or printActivity
@@ -9756,6 +9799,7 @@ function caMarkStepDone(btn, id, si){
   btn.innerHTML = stepDoneHtml(nowDone);
   const status = li.querySelector('.ca-step-status');
   if(status) status.innerHTML = caStepStatusHtml(si + 1, nowDone);
+  caSyncTopbar();   // "n of m done" in the sticky bar (item 6)
   if(!nowDone) return;   // unmarking just restores the number/label above
   /* Marking a step done collapses it, so anything still playing would be
      coming out of a step nobody can see — and this path re-renders nothing,
@@ -10190,9 +10234,33 @@ function renderClassActivities(){
       let restHtml = '';
       if(restCount > 0){
         const restFlat = restGroups.reduce((acc, g) => acc.concat(g.cards), []);
-        const body = restGroups.some(g => g.sec.mod)
-          ? restGroups.map(g => headHtml(g.sec) + g.cards.map(caActivityCardHtml).join('')).join('')
-          : restFlat.map(caActivityCardHtml).join('');
+        /* "Still to do" was one flat pile of everything pending — 17 cards
+           deep by late September, exit checks on top (navigability work
+           order 2026-09-23, item 5). Now the fold shows the RECENT ones —
+           the first CA_RECENT_N numbered activities in reading order, plus
+           any exit check that falls among them — and the rest sit inside
+           a second, closed "Older (n)" fold under them. Module headings
+           (when any card is placed in a module) apply inside Older only;
+           the recent few are a short list and read better without them. */
+        let cut = restFlat.length;
+        let seen = 0;
+        for(let i = 0; i < restFlat.length; i++){
+          if(restFlat[i].kind !== 'check') seen++;
+          if(seen === CA_RECENT_N){ cut = i + 1; break; }
+        }
+        const recent = restFlat.slice(0, cut);
+        const older = restFlat.slice(cut);
+        let body = recent.map(caActivityCardHtml).join('');
+        if(older.length){
+          const olderIds = new Set(older.map(a => a.id));
+          const olderGroups = restGroups
+            .map(g => ({ sec: g.sec, cards: g.cards.filter(a => olderIds.has(a.id)) }))
+            .filter(g => g.cards.length);
+          const olderBody = olderGroups.some(g => g.sec.mod)
+            ? olderGroups.map(g => headHtml(g.sec) + g.cards.map(caActivityCardHtml).join('')).join('')
+            : older.map(caActivityCardHtml).join('');
+          body += caOlderGroupHtml(olderBody, older.length, older.some(a => a.id === caOpenId));
+        }
         const openInside = restFlat.some(a => a.id === caOpenId);
         restHtml = caTodoGroupHtml(body, restCount, openInside);
       }
@@ -10237,6 +10305,7 @@ function renderClassActivities(){
     bodyEl.innerHTML = missing + gateIntro + pendingHtml + (finished.length ? caFinishedGroupHtml(finishedGroups, finished, byId) : '');
   }
   if(typeof applyI18n === 'function') applyI18n(bodyEl);
+  caSyncTopbar();
   // The resume card only belongs on a finished In-Class Activities page —
   // gated, or a Today hero still pending (item 2f), skip it; both checks now
   // live inside renderResumeCard() itself, since a boot-time caller
@@ -10266,6 +10335,22 @@ function caModuleHeadHtml(sec, byId){
    ONE fold (item 2f). Closed by default each render, same sticky-open
    pattern as "Earlier" below. ── */
 let caTodoOpen = false;
+// How many pending activities "Still to do" shows before the Older fold
+// (item 5). Counted over numbered activities; exit checks ride along.
+const CA_RECENT_N = 3;
+// Same carry-across-renders idea as caTodoOpen, for the inner Older fold.
+let caOlderOpen = false;
+function caOnOlderToggle(details){
+  caOlderOpen = details.open;
+  if(!details.open && snipState && details.contains(snipState.card)) snipStop();
+}
+function caOlderGroupHtml(bodyHtml, count, openInside){
+  const open = caOlderOpen || openInside;
+  return `<details class="ca-older-group" ${open ? 'open' : ''} ontoggle="caOnOlderToggle(this)">
+    <summary class="ca-todo-summary ca-older-summary">${escHtml(t('ca.olderGroup', {n: count}))}</summary>
+    <div class="ca-todo-body">${bodyHtml}</div>
+  </details>`;
+}
 function caOnTodoToggle(details){
   caTodoOpen = details.open;
   if(!details.open && snipState && details.contains(snipState.card)) snipStop();

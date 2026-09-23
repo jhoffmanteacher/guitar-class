@@ -285,6 +285,8 @@ body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,"Helvetica N
   position:sticky;top:0;z-index:50;background:var(--bg);
   margin:0 0 12px;padding:8px 0;border-bottom:1px solid var(--border)}
 .set-eyebrow-title{font-size:0.9375rem;font-weight:600;color:var(--text)}
+/* The set's subtitle, first line of the About panel (item 7). */
+.set-about-sub{margin:0 0 8px;font-size:0.9375rem;font-weight:600;color:var(--text)}
 .set-eyebrow .print-set-btn{margin-left:auto}
 /* ── The lesson's chrome, carried by the band (2026-09-19) ──
    "Step n of m", the progress pill and the All steps / One at a time
@@ -2291,7 +2293,23 @@ body.explore-open #week-panels{display:none}
 /* ── In-Class Activities — amber accent family (--ca-accent/-soft/-bg) ──
    Same .page-screen shell as Songs/Keep practicing/My progress; only the
    accent differs, on purpose — this is class work, not module work. */
-.ca-screen .page-topbar{border-bottom:2px solid var(--ca-accent);padding-bottom:12px}
+/* Sticky (navigability work order 2026-09-23, item 6) — same idea as the
+   Modules band (.set-eyebrow): pinned inside .main's own scrollport, so
+   top:0. The shell's 24px top padding moves onto the bar itself, because
+   padding on the scroll container's child would let 24px of card scroll
+   past ABOVE the pinned bar (see the .set-eyebrow note near the top). */
+.ca-screen .page-shell{padding-top:0}
+.ca-screen .page-topbar{position:sticky;top:0;z-index:50;background:var(--bg);
+  border-bottom:2px solid var(--ca-accent);padding:24px 0 12px;min-height:0}
+.ca-screen .page-title:focus{outline:none}
+/* The open card's name + "n of m done", swapped in for the page title. */
+.ca-bar-open{display:flex;align-items:baseline;gap:12px;min-width:0;flex:1}
+.ca-bar-open[hidden]{display:none}
+.ca-bar-name{font-family:var(--font-display);font-size:1.125rem;font-weight:600;color:var(--text);
+  background:transparent;border:0;padding:0;cursor:pointer;text-align:left;min-width:0;
+  overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.ca-bar-name:hover{color:var(--ca-accent)}
+.ca-bar-prog{flex-shrink:0;font-size:0.8125rem;font-weight:600;color:var(--text3);white-space:nowrap}
 .ca-screen .page-title svg{color:var(--ca-accent)}
 .ca-card{background:var(--bg);border:1px solid var(--border);border-left:3px solid var(--ca-accent);border-radius:var(--radius);margin-bottom:12px;overflow:hidden}
 .ca-card-summary{display:flex;align-items:center;gap:10px;padding:12px 14px;cursor:pointer;list-style:none}
@@ -2454,6 +2472,11 @@ body.explore-open #week-panels{display:none}
 .ca-todo-summary::-webkit-details-marker{display:none}
 .ca-todo-summary::before{content:'';width:8px;height:8px;border-right:2px solid var(--text3);border-bottom:2px solid var(--text3);transform:rotate(-45deg);transition:transform .15s;flex-shrink:0}
 .ca-todo-group[open] .ca-todo-summary::before{transform:rotate(45deg)}
+/* Older (n) — nested inside Still to do (item 5); a quieter version of the
+   same fold, indented by its own left rule so the two can't be confused. */
+.ca-older-group{margin:6px 0 0 4px;padding-left:12px;border-left:2px solid var(--border)}
+.ca-older-summary{font-size:0.9375rem;color:var(--text3)}
+.ca-older-group[open] .ca-older-summary::before{transform:rotate(45deg)}
 
 /* The module heading over each block of activities, inside either fold
    (console activity board, 2026-09-16; the progress bar + "N of M" is item
@@ -2480,9 +2503,24 @@ body.explore-open #week-panels{display:none}
    tuner/metronome/timer/recorder to work an activity step. */
 body.ca-gated .g-module,
 body.ca-gated .g-set,
-body.ca-gated [data-gate="hide"],
 body.ca-gated #resume-card,
 body.ca-gated #week-panels{display:none}
+/* Gated nav rows are DIMMED and locked, not gone (navigability work order
+   2026-09-23, item 10): a row that vanishes leaves "where did Songs go?"
+   with no answer, while a greyed row with a lock says it. They stay
+   clickable on purpose — every handler behind them already answers a
+   gated tap with the "Finish today's activity first" toast
+   (routeExploreHash / returnToPractice). data-gate="hide" keeps its name:
+   checks.mjs 1aa pins the keep|hide vocabulary, and it still means "not
+   reachable while gated". The lock is a currentColor mask so it follows
+   both themes; the collapsed rail (icon-only rows) drops it. */
+body.ca-gated .nav-btn[data-gate="hide"]{opacity:.45}
+body.ca-gated .nav-btn[data-gate="hide"]:hover{background:transparent}
+body.ca-gated .nav-btn[data-gate="hide"]::after{content:'';flex:0 0 11px;width:11px;height:11px;margin-left:auto;
+  background:currentColor;
+  -webkit-mask:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23000' stroke-width='2.4' stroke-linecap='round' stroke-linejoin='round'%3E%3Crect x='4' y='11' width='16' height='10' rx='2'/%3E%3Cpath d='M8 11V7a4 4 0 0 1 8 0v4'/%3E%3C/svg%3E") center/contain no-repeat;
+  mask:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23000' stroke-width='2.4' stroke-linecap='round' stroke-linejoin='round'%3E%3Crect x='4' y='11' width='16' height='10' rx='2'/%3E%3Cpath d='M8 11V7a4 4 0 0 1 8 0v4'/%3E%3C/svg%3E") center/contain no-repeat}
+body.rail-collapsed.ca-gated .nav-btn[data-gate="hide"]::after{display:none}
 /* #search-btn carries its own inline style="display:flex" (showApp/sign-out
    in app.js toggle it directly, same as #fab-group) — an inline style
    always wins over a plain selector, so this one needs !important or the
