@@ -166,7 +166,7 @@
          text:    'What the student reads and does. Multi-step directions
                     are an <ol>/<ul>, same house rule as module content.',
          text_es: '…',
-         // Optional — a step can carry video, figure, and/or tab together:
+         // Optional — a step can carry video and/or tab together:
          video:  { id: 'YOUTUBE_ID', start: 45,       // oEmbed-verified at
                    label: 'Fingerstyle guitar',         // authoring time, NEVER
                    label_es: 'Guitarra fingerstyle' },  // from memory (see
@@ -176,17 +176,10 @@
                                                          // back to the
                                                          // generic "Watch"
                                                          // button text.
-         figure: 'img/ca-0915-powerchords.svg',      // renders as the
-                                                      // existing .step-figure
-                                                      // span idiom; any img/
-                                                      // asset also goes in
-                                                      // sw.js ASSETS
-         figureAlt:    'What the diagram shows, in words — a screen-reader
-                         student gets this instead of the image. Required
-                         alongside `figure`; rendered via tf(step,
-                         'figureAlt') in both caStepHtml() (app.js) and
-                         renderTeacherActivityDetail() (teacher.js).',
-         figureAlt_es: '…',
+         // Activities carry no figures (Jonathan, 2026-09-23). No "map" /
+         // orientation step of any kind — a step is a Learn step (look,
+         // listen, say) or a Practice step (one thing, one standard). The
+         // tab is the picture. checks.mjs 1d errors on any `figure` key.
          tab: {                                      // optional — same spec
            caption: '…', caption_es: '…',             // shape as module step
            // either notes: [...] directly, or phrases: [{ label, label_es,
@@ -303,15 +296,6 @@ window.CLASS_ACTIVITIES = [
     intro_es: 'Ya tocaste la Línea 1. Hoy tocas las cuatro líneas sin salirte nunca de la cuerda Mi grave — la melodía sube hasta el punto doble del traste 12 y regresa caminando.',
     steps: [
       {
-        label:    'Fretting-hand basics',
-        label_es: 'Bases de la mano de trastear',
-        figure: 'img/ca-hb-fingers.svg',
-        figureAlt: 'Diagram of the fretting hand on the low E string showing finger numbers 1 (index), 2 (middle), 3 (ring), and 4 (pinky), with the thumb behind the neck and landing-mark dots at frets 5 and 7.',
-        figureAlt_es: 'Diagrama de la mano de trastear en la cuerda Mi grave mostrando los números de los dedos 1 (índice), 2 (medio), 3 (anular) y 4 (meñique), con el pulgar detrás del mástil y puntos de referencia en los trastes 5 y 7.',
-        text: 'The whole song lives on the low E string, the thickest one. Your fretting fingers have numbers — 1 = index, 2 = middle, 3 = ring, 4 = pinky. The thumb has none; it stays behind the neck.<ul><li>Home spot: finger 1 → fret 2, finger 3 → fret 4, finger 4 → fret 5</li><li>Today the map grows past the home spot — fret 7 first, then higher still</li><li>The dots at 5 and 7 are your landing marks</li></ul>',
-        text_es: 'La canción completa vive en la cuerda Mi grave, la más gruesa. Los dedos de tu mano de trastear tienen números — 1 = índice, 2 = medio, 3 = anular, 4 = meñique. El pulgar no tiene; se queda detrás del mástil.<ul><li>Posición base: dedo 1 → traste 2, dedo 3 → traste 4, dedo 4 → traste 5</li><li>Hoy el mapa crece más allá de la posición base — primero el traste 7, y después más arriba</li><li>Los puntos del 5 y el 7 son tus marcas para caer</li></ul>',
-      },
-      {
         label:    'Lines 1 and 2',
         label_es: 'Líneas 1 y 2',
         text: 'The first half of the song. Line 1 is the line you learned last time; Line 2 starts the same and ends higher.<ul><li>Line 1 fingers: open, open, 1, open, 4, 3</li><li>Line 2: your hand moves up until finger 1 sits on fret 5 — finger 3 → fret 7, finger 1 → fret 5. Eyes on fret 7 <em>before</em> your hand moves</li><li>BPM 70. Loop each line alone until it\'s clean, then play them back to back</li></ul>You\'ve got it when: Line 1 into Line 2, four times through, without stopping.',
@@ -350,9 +334,6 @@ window.CLASS_ACTIVITIES = [
       {
         label:    'Higher landing marks',
         label_es: 'Marcas más altas',
-        figure: 'img/ca-hb-low-e-all.svg',
-        figureAlt: 'Low E string fretboard diagram showing the double-dot landing mark at fret 12 and the single dot at fret 9, alongside the earlier marks at frets 2, 4, 5, and 7.',
-        figureAlt_es: 'Diagrama del diapasón de la cuerda Mi grave mostrando el punto doble de referencia en el traste 12 y el punto sencillo en el traste 9, junto con las marcas anteriores en los trastes 2, 4, 5 y 7.',
         text: 'The back half of the song lives further up the same string. Two new landing marks: the double dot at fret 12 — that note is an E, the same one you get open, an octave higher — and the single dot at fret 9.<br>Play the notes below, looking at the dot before your hand moves. Then try it without looking.<br>You\'ve got it when: you land on 12 and on 9 without hunting for them, three times in a row.',
         text_es: 'La segunda mitad de la canción vive más arriba en la misma cuerda. Dos marcas de referencia nuevas: el punto doble del traste 12 — esa nota es un E, la misma que suena al aire, una octava más arriba — y el punto sencillo del traste 9.<br>Toca las notas de abajo, mirando el punto antes de mover la mano. Después inténtalo sin mirar.<br>Lo tienes cuando: caes en el 12 y en el 9 sin andarlos buscando, tres veces seguidas.',
         tab: {
@@ -475,15 +456,6 @@ window.CLASS_ACTIVITIES = [
     intro_es: 'Hoy no es día de canciones — es día de entrenamiento. Tres eventos en los primeros cinco trastes: la Escalera, la Araña y el Estiramiento. Vas por un récord personal, no por una calificación.',
     steps: [
       {
-        label:    'The gym zone',
-        label_es: 'La zona del gimnasio',
-        figure: 'img/ca-fg-gym-zone.svg',
-        figureAlt: 'Diagram of the first five frets of the low E string, the training zone for today\'s Finger Gym.',
-        figureAlt_es: 'Diagrama de los primeros cinco trastes de la cuerda Mi grave, la zona de entrenamiento del Gimnasio de Dedos de hoy.',
-        text: 'This is the gym: the first five frets of the low E string (the thickest one). A fret is the space between two metal strips — fret 1 is closest to the tuning pegs.',
-        text_es: 'Este es el gimnasio: los primeros cinco trastes de la cuerda Mi grave (la más gruesa). Un traste es el espacio entre dos barras de metal — el traste 1 es el más cercano a las clavijas.',
-      },
-      {
         label:    'The Ladder',
         label_es: 'La Escalera',
         text: 'Event 1 — the Ladder. Play the tab below, one finger per fret — the circled number under each note is the finger it wants.<ul><li>Set the BPM to 50 — one note per click</li><li>Fingertips on their tips, thumb BEHIND the neck</li></ul>You\'ve got it when: all four notes ring clean — no buzz — three times in a row. Buzz twice? Drop the BPM by 10 and try again.',
@@ -571,15 +543,6 @@ window.CLASS_ACTIVITIES = [
     intro:    'Last Gym went up. Today you come back down, then take the Ladder onto all six strings. Going down is harder than going up — the pinky has to lead.',
     intro_es: 'El Gimnasio pasado subiste. Hoy vas a bajar, y después vas a llevar la Escalera a las seis cuerdas. Bajar es más difícil que subir — el meñique tiene que ir primero.',
     steps: [
-      {
-        label:    'The gym zone',
-        label_es: 'La zona del gimnasio',
-        figure: 'img/ca-fg-gym-zone.svg',
-        figureAlt: 'Diagram of the first five frets of the low E string, the training zone for today\'s Finger Gym.',
-        figureAlt_es: 'Diagrama de los primeros cinco trastes de la cuerda Mi grave, la zona de entrenamiento del Gimnasio de Dedos de hoy.',
-        text: 'This is the same gym as last time: the first five frets. Two things change today — the direction you travel, and how many strings you use.',
-        text_es: 'Este es el mismo gimnasio que la vez pasada: los primeros cinco trastes. Hoy cambian dos cosas — la dirección en la que te mueves, y cuántas cuerdas usas.',
-      },
       {
         label:    'Down the Ladder',
         label_es: 'Bajando la Escalera',
@@ -676,15 +639,6 @@ window.CLASS_ACTIVITIES = [
     intro_es: 'Hasta ahora el gimnasio ha vivido en los primeros cinco trastes. Hoy lo mueves hacia arriba del mástil. Los trastes se hacen más angostos mientras subes, así que la misma forma se siente distinta en cada posición.',
     steps: [
       {
-        label:    'Landing marks',
-        label_es: 'Marcas de referencia',
-        figure: 'img/ca-fg-dots.svg',
-        figureAlt: 'Neck diagram highlighting the landing-mark dots at frets 5, 7, 9, and the double dot at fret 12.',
-        figureAlt_es: 'Diagrama del mástil resaltando los puntos de referencia en los trastes 5, 7, 9 y el punto doble en el traste 12.',
-        text: 'The dots on the neck are your landing marks: frets 5, 7, 9, and the double dot at 12. Learn to find them with your eyes before your hand goes there.',
-        text_es: 'Los puntos en el mástil son tus marcas de referencia: los trastes 5, 7, 9 y el punto doble en el 12. Aprende a encontrarlos con la vista antes de que llegue tu mano.',
-      },
-      {
         label:    '5th position Ladder',
         label_es: 'Escalera en 5.ª posición',
         text: 'The Ladder in 5th position, one finger per fret.<ul><li>Index on fret 5 — it sits on a dot, that\'s how you know you\'re home</li><li>Set the BPM to 50</li></ul>You\'ve got it when: all four notes clean, no buzz, three times in a row. Buzz twice? Drop the BPM by 10 and try again.',
@@ -768,15 +722,6 @@ window.CLASS_ACTIVITIES = [
     intro_es: 'Hasta ahora tus dedos se tomaban turnos. Hoy se quedan abajo. Cada dedo que ya tocó sigue apoyado en la cuerda — eso es lo que hace posibles los acordes más adelante.',
     steps: [
       {
-        label:    'The gym zone',
-        label_es: 'La zona del gimnasio',
-        figure: 'img/ca-fg-gym-zone.svg',
-        figureAlt: 'Diagram of the first five frets of the low E string, the training zone for today\'s Finger Gym.',
-        figureAlt_es: 'Diagrama de los primeros cinco trastes de la cuerda Mi grave, la zona de entrenamiento del Gimnasio de Dedos de hoy.',
-        text: 'You\'re back in the first five frets. The notes are the same as Gym 1 — what changes is that nothing lifts.',
-        text_es: 'Estás de vuelta en los primeros cinco trastes. Las notas son las mismas del Gimnasio 1 — lo que cambia es que nada se levanta.',
-      },
-      {
         label:    'Plant as you go',
         label_es: 'Planta y sigue',
         text: 'Plant as you go — climb the tab below, and each finger STAYS where it lands.<ul><li>Set the BPM to 50</li><li>By the last note, all four fingers are on the string at once</li></ul>You\'ve got it when: at the last note all four fingers are still touching, three times in a row. Buzz twice? Drop the BPM by 10 and try again.',
@@ -856,15 +801,6 @@ window.CLASS_ACTIVITIES = [
     intro:    'Two new demands today: skipping over a string without hitting it, and reaching one fret farther than is comfortable.',
     intro_es: 'Hoy hay dos exigencias nuevas: saltar sobre una cuerda sin tocarla, y estirar un traste más allá de lo cómodo.',
     steps: [
-      {
-        label:    'The gym zone',
-        label_es: 'La zona del gimnasio',
-        figure: 'img/ca-fg-gym-zone-skip.svg',
-        figureAlt: 'Diagram of three strings — low E, A, and D — out to fret 6, showing the wider, deeper training zone for today\'s Finger Gym.',
-        figureAlt_es: 'Diagrama de tres cuerdas — Mi grave, La y Re — hasta el traste 6, mostrando la zona de entrenamiento más ancha y profunda del Gimnasio de Dedos de hoy.',
-        text: 'The gym grows today: three strings deep — low E, A, and D — and one fret wider, out to fret 6. The distance is sideways now as well as along the neck.',
-        text_es: 'Hoy el gimnasio crece: tres cuerdas de profundidad — Mi grave, La y Re — y un traste más de ancho, hasta el traste 6. Ahora la distancia también es de lado, además de a lo largo del mástil.',
-      },
       {
         label:    'The skip',
         label_es: 'El salto',
@@ -948,15 +884,6 @@ window.CLASS_ACTIVITIES = [
     intro_es: 'Día de competencia. No hay nada nuevo que aprender — todo lo que has construido, seguido y sin parar, al tempo más rápido que puedas mantener limpio. Trae tu récord del Gimnasio pasado.',
     steps: [
       {
-        label:    'The gym zone',
-        label_es: 'La zona del gimnasio',
-        figure: 'img/ca-fg-gym-zone.svg',
-        figureAlt: 'Diagram of the first five frets of the low E string, the training zone for today\'s Finger Gym.',
-        figureAlt_es: 'Diagrama de los primeros cinco trastes de la cuerda Mi grave, la zona de entrenamiento del Gimnasio de Dedos de hoy.',
-        text: 'Three events, same as always: the Ladder, the Spider, the Reach. Today they get run for time and tempo instead of learned.',
-        text_es: 'Tres eventos, como siempre: la Escalera, la Araña y el Estiramiento. Hoy se corren por tiempo y tempo, no se aprenden.',
-      },
-      {
         label:    'Warm-up',
         label_es: 'Calentamiento',
         text: 'Warm up the Ladder with its shift. Start 10 BPM below your record — you\'re loosening the hand, not competing yet.\nYou\'ve got it when: two clean climbs in a row with no buzz.',
@@ -1039,15 +966,6 @@ window.CLASS_ACTIVITIES = [
     intro_es: 'Ya sabes tocar las cuerdas al aire. Hoy vas a pisar una: una cuerda, una línea y los puntos del mástil te muestran dónde caer.',
     steps: [
       {
-        label:    'The low E string',
-        label_es: 'La cuerda Mi grave',
-        figure: 'img/ca-hb-low-e.svg',
-        figureAlt: 'Low E string fretboard diagram showing open string, fret 2 (F#), fret 4 (G#), and fret 5 (A), with faint landing-mark dots at frets 3, 5, 7, 9, and 12.',
-        figureAlt_es: 'Diagrama del diapasón de la cuerda Mi grave mostrando la cuerda al aire, el traste 2 (F#), el traste 4 (G#) y el traste 5 (A), con puntos tenues de referencia en los trastes 3, 5, 7, 9 y 12.',
-        text: 'This is the low E string — the thick one, closest to your face.<ul><li>The whole line lives here: open (0 = no finger) is E, fret 2 is F#, fret 4 is G#, fret 5 is A</li><li>The faint dots — frets 3, 5, 7, 9 and 12 — are a map; the dot at fret 5 is your landing mark</li></ul>',
-        text_es: 'Esta es la cuerda Mi grave — la más gruesa, la que queda más cerca de tu cara.<ul><li>Toda la línea vive aquí: al aire (0 = sin dedo) es E, el traste 2 es F#, el traste 4 es G# y el traste 5 es A</li><li>Los puntos tenues — trastes 3, 5, 7, 9 y 12 — son un mapa; el punto del traste 5 es tu marca para caer</li></ul>',
-      },
-      {
         label:    'Land on fret 5',
         label_es: 'Cae en el traste 5',
         text: '<ol><li>Put your fingertip just behind fret 5 — next to the metal strip, NOT on top of it. Thumb behind the neck.</li><li>Pluck it. A rattly, dead sound is a buzz — slide the fingertip closer to the fret and press again.</li><li>Pluck the open string, then land on fret 5 and pluck again.</li></ol>You\'ve got it when: three landings in a row on A ring clean, no buzz.',
@@ -1120,15 +1038,6 @@ window.CLASS_ACTIVITIES = [
     intro:    'Your fingers trained for this. One riff, one string, seven notes — and five of them sit right on the neck dots you already know.',
     intro_es: 'Tus dedos entrenaron para esto. Un riff, una cuerda, siete notas — y cinco de ellas caen justo sobre los puntos del mástil que ya conoces.',
     steps: [
-      {
-        label:    'The riff map',
-        label_es: 'El mapa del riff',
-        figure: 'img/ca-sna-riff-map.svg',
-        figureAlt: 'Diagram of the A string with the riff\'s notes circled at frets 2, 3, 5, 7, and 10, alongside the neck\'s landmark dots at frets 3, 5, 7, and 9.',
-        figureAlt_es: 'Diagrama de la cuerda La con las notas del riff marcadas en círculo en los trastes 2, 3, 5, 7 y 10, junto con los puntos de referencia del mástil en los trastes 3, 5, 7 y 9.',
-        text: 'This is where the riff lives: the A string — the one just below the thickest string. The circled letters are the riff\'s notes; the small gray dots between them are the neck\'s own landmark dots at frets 3, 5, 7, and 9.',
-        text_es: 'Aquí vive el riff: la cuerda La — la que está justo debajo de la cuerda Mi grave. Las letras en círculo son las notas del riff; los puntos grises pequeños son las marcas del mástil en los trastes 3, 5, 7 y 9.',
-      },
       {
         label:    'The opening call',
         label_es: 'La llamada inicial',
@@ -1203,19 +1112,10 @@ window.CLASS_ACTIVITIES = [
     intro_es: 'Ya has estado cayendo en trastes para Happy Birthday. Hoy esas caídas reciben nombres — todas las notas naturales de la cuerda Mi grave, desde E al aire hasta E en el traste 12.',
     steps: [
       {
-        label:    'The note map',
-        label_es: 'El mapa de notas',
-        figure: 'img/ca-lowe-naturals.svg',
-        figureAlt: 'Low E string fretboard diagram with every natural note circled — E, F, G, A, B, C, D, E — from the open string up to the octave at fret 12.',
-        figureAlt_es: 'Diagrama del diapasón de la cuerda Mi grave con cada nota natural marcada en círculo — E, F, G, A, B, C, D, E — desde la cuerda al aire hasta la octava en el traste 12.',
-        text: 'This is the low E string — the thick one — with its natural notes circled: the plain letter names, no sharps.<ul><li>E F G A B C D E — open E (0 = no finger) up to E again at fret 12. Same name, higher sound: that repeat is called an octave</li><li>The neck dots are your map — the dots at frets 3, 5 and 7 carry G, A and B</li></ul>',
-        text_es: 'Esta es la cuerda Mi grave — la más gruesa — con sus notas naturales en círculos: los nombres de letra simples, sin sostenidos.<ul><li>E F G A B C D E — de E al aire (0 = sin dedo) hasta E otra vez en el traste 12. Mismo nombre, sonido más agudo: esa repetición se llama octava</li><li>Los puntos del mástil son tu mapa — los puntos de los trastes 3, 5 y 7 llevan G, A y B</li></ul>',
-      },
-      {
         label:    'The dot notes',
         label_es: 'Las notas de los puntos',
-        text: 'Play the four dot notes below — open E, then the dots at frets 3, 5 and 7. Say each name out loud while it rings; saying it is the memorizing.\nYou\'ve got it when: E–G–A–B in order, out loud, three times through without looking at the diagram.',
-        text_es: 'Toca abajo las cuatro notas de los puntos — E al aire, y después los puntos de los trastes 3, 5 y 7. Di cada nombre en voz alta mientras suena; decirlo es lo que lo graba en la memoria.\nLo tienes cuando: E–G–A–B en orden, en voz alta, tres veces seguidas sin mirar el diagrama.',
+        text: 'Play the four dot notes below — open E, then the dots at frets 3, 5 and 7. Say each name out loud while it rings; saying it is the memorizing.\nYou\'ve got it when: E–G–A–B in order, out loud, three times through, saying each name out loud.',
+        text_es: 'Toca abajo las cuatro notas de los puntos — E al aire, y después los puntos de los trastes 3, 5 y 7. Di cada nombre en voz alta mientras suena; decirlo es lo que lo graba en la memoria.\nLo tienes cuando: E–G–A–B en orden, en voz alta, tres veces seguidas, diciendo cada nombre en voz alta.',
         tab: {
           caption: 'The dot notes · E G A B',
           caption_es: 'Las notas de los puntos · E G A B',
@@ -1270,15 +1170,15 @@ window.CLASS_ACTIVITIES = [
       {
         label:    'Name the fret',
         label_es: 'Di la nota',
-        text: 'Cover the diagram and put the guitar in your lap. The quiz deals you a fret — say the note out loud, then press its button.\nYou\'ve got it when: 7 of 10 on your first pass. Once that\'s easy, push for 9 of 10.',
-        text_es: 'Tapa el diagrama y pon la guitarra en las piernas. El juego te reparte un traste — di la nota en voz alta y después presiona su botón.\nLo tienes cuando: 7 de 10 en tu primera pasada. Cuando eso te resulte fácil, ve por 9 de 10.',
+        text: 'Put the guitar in your lap. The quiz deals you a fret — say the note out loud, then press its button.\nYou\'ve got it when: 7 of 10 on your first pass. Once that\'s easy, push for 9 of 10.',
+        text_es: 'Pon la guitarra en las piernas. El juego te reparte un traste — di la nota en voz alta y después presiona su botón.\nLo tienes cuando: 7 de 10 en tu primera pasada. Cuando eso te resulte fácil, ve por 9 de 10.',
         drill: { type: 'shuffle', string: 'lowE', maxFret: 12, rounds: 10, seconds: 8, pile: 'naturals' },
       },
       {
         label:    'Find the note',
         label_es: 'Encuentra la nota',
-        text: 'Flip it around — the deck deals you a note name and you go find it on the string.<ul><li>Cover the diagram above</li><li>Land on the note and pluck it. Next card once it rings clean</li><li>Lift your hand off the neck between cards</li><li>E lives in two places, fret 0 and fret 12 — either one counts</li></ul>You\'ve got it when: five cards in a row, no peeking, no buzz.',
-        text_es: 'Dale la vuelta — el mazo te reparte el nombre de una nota y tú la buscas en la cuerda.<ul><li>Tapa el diagrama de arriba</li><li>Cae en la nota y púlsala. Otra carta cuando suene limpia</li><li>Levanta la mano del mástil entre carta y carta</li><li>E vive en dos lugares, traste 0 y traste 12 — cualquiera de los dos cuenta</li></ul>Lo tienes cuando: cinco cartas seguidas, sin mirar, sin zumbido.',
+        text: 'Flip it around — the deck deals you a note name and you go find it on the string.<ul><li>Land on the note and pluck it. Next card once it rings clean</li><li>Lift your hand off the neck between cards</li><li>E lives in two places, fret 0 and fret 12 — either one counts</li></ul>You\'ve got it when: five cards in a row, no peeking, no buzz.',
+        text_es: 'Dale la vuelta — el mazo te reparte el nombre de una nota y tú la buscas en la cuerda.<ul><li>Cae en la nota y púlsala. Otra carta cuando suene limpia</li><li>Levanta la mano del mástil entre carta y carta</li><li>E vive en dos lugares, traste 0 y traste 12 — cualquiera de los dos cuenta</li></ul>Lo tienes cuando: cinco cartas seguidas, sin mirar, sin zumbido.',
         drill: { type: 'deck', deck: 'naturals' },
       },
       {
@@ -1304,15 +1204,6 @@ window.CLASS_ACTIVITIES = [
     intro:    'You already know the names on the low E string, and you play Happy Birthday start to finish on it. Today the A string gets names too — every natural note from open A to the A at fret 12. Then you put those names to work: a second way to play Happy Birthday that crosses to the A string and never leaves the first seven frets.',
     intro_es: 'Ya conoces los nombres de la cuerda Mi grave, y tocas Happy Birthday de principio a fin en ella. Hoy la cuerda La también recibe nombres — todas las notas naturales desde A al aire hasta A en el traste 12. Después pones esos nombres a trabajar: una segunda forma de tocar Happy Birthday que cruza a la cuerda La y nunca se sale de los primeros siete trastes.',
     steps: [
-      {
-        label:    'Read the map',
-        label_es: 'Lee el mapa',
-        figure: 'img/ca-a-naturals.svg',
-        figureAlt: 'A string fretboard diagram with every natural note circled — A, B, C, D, E, F, G, A — from the open string up to the octave at fret 12.',
-        figureAlt_es: 'Diagrama del diapasón de la cuerda La con cada nota natural marcada en círculo — A, B, C, D, E, F, G, A — desde la cuerda al aire hasta la octava en el traste 12.',
-        text: 'This is the A string — one string down from the low E, the second-thickest. The circles are its natural notes: the plain letter names, no sharps.<ul><li>A B C D E F G A — open A up to A again at fret 12, an octave higher</li><li>The dots at frets 3, 5 and 7 carry C, D and E; the double dot at 12 is A again</li><li>Same seven letters as the low E string, starting on a different one</li></ul>',
-        text_es: 'Esta es la cuerda La — la que está justo debajo de la cuerda Mi grave, la segunda más gruesa. Los círculos son sus notas naturales: los nombres de letra simples, sin sostenidos.<ul><li>A B C D E F G A — de A al aire hasta A otra vez en el traste 12, una octava más arriba</li><li>Los puntos de los trastes 3, 5 y 7 llevan C, D y E; el punto doble del 12 es A otra vez</li><li>Las mismas siete letras que en la cuerda Mi grave, empezando en otra</li></ul>',
-      },
       {
         label:    'Learn the notes',
         label_es: 'Aprende las notas',
@@ -1366,15 +1257,15 @@ window.CLASS_ACTIVITIES = [
       {
         label:    'Name the fret',
         label_es: 'Di la nota',
-        text: 'Cover the diagram and put the guitar in your lap. The quiz deals you a fret on the A string — say the note out loud, then press its button.\nYou\'ve got it when: 7 of 10 on your first pass. Once that\'s easy, push for 9 of 10.',
-        text_es: 'Tapa el diagrama y pon la guitarra en las piernas. El juego te reparte un traste de la cuerda La — di la nota en voz alta y después presiona su botón.\nLo tienes cuando: 7 de 10 en tu primera pasada. Cuando eso te resulte fácil, ve por 9 de 10.',
+        text: 'Put the guitar in your lap. The quiz deals you a fret on the A string — say the note out loud, then press its button.\nYou\'ve got it when: 7 of 10 on your first pass. Once that\'s easy, push for 9 of 10.',
+        text_es: 'Pon la guitarra en las piernas. El juego te reparte un traste de la cuerda La — di la nota en voz alta y después presiona su botón.\nLo tienes cuando: 7 de 10 en tu primera pasada. Cuando eso te resulte fácil, ve por 9 de 10.',
         drill: { type: 'shuffle', string: 'A', maxFret: 12, rounds: 10, seconds: 8, pile: 'naturals' },
       },
       {
         label:    'Find the note',
         label_es: 'Encuentra la nota',
-        text: 'The deck deals you a note name — find it on the A string and pluck it.<ul><li>Cover the diagram above</li><li>Land on the note and pluck it. Next card once it rings clean</li><li>Lift your hand off the neck between cards</li><li>A lives in two places, fret 0 and fret 12 — either one counts</li></ul>You\'ve got it when: five cards in a row, no peeking, no buzz.',
-        text_es: 'El mazo te reparte el nombre de una nota — búscala en la cuerda La y púlsala.<ul><li>Tapa el diagrama de arriba</li><li>Cae en la nota y púlsala. Otra carta cuando suene limpia</li><li>Levanta la mano del mástil entre carta y carta</li><li>A vive en dos lugares, traste 0 y traste 12 — cualquiera de los dos cuenta</li></ul>Lo tienes cuando: cinco cartas seguidas, sin mirar, sin zumbido.',
+        text: 'The deck deals you a note name — find it on the A string and pluck it.<ul><li>Land on the note and pluck it. Next card once it rings clean</li><li>Lift your hand off the neck between cards</li><li>A lives in two places, fret 0 and fret 12 — either one counts</li></ul>You\'ve got it when: five cards in a row, no peeking, no buzz.',
+        text_es: 'El mazo te reparte el nombre de una nota — búscala en la cuerda La y púlsala.<ul><li>Cae en la nota y púlsala. Otra carta cuando suene limpia</li><li>Levanta la mano del mástil entre carta y carta</li><li>A vive en dos lugares, traste 0 y traste 12 — cualquiera de los dos cuenta</li></ul>Lo tienes cuando: cinco cartas seguidas, sin mirar, sin zumbido.',
         drill: { type: 'deck', deck: 'naturals' },
       },
       {
@@ -1396,9 +1287,6 @@ window.CLASS_ACTIVITIES = [
       {
         label:    'Lines 3 and 4',
         label_es: 'Líneas 3 y 4',
-        figure: 'img/ca-hb-fingers-a.svg',
-        figureAlt: 'Diagram of the fretting hand on the A string for lines 3 and 4, showing finger 4 at fret 7, finger 3 at fret 4, and the string crossing back to the low E string.',
-        figureAlt_es: 'Diagrama de la mano de trastear en la cuerda La para las líneas 3 y 4, mostrando el dedo 4 en el traste 7, el dedo 3 en el traste 4 y el cruce de regreso a la cuerda Mi grave.',
         text: 'Lines 3 and 4, now on the A string — every note stays inside the first seven frets.<ul><li>Line 3: finger 4 reaches fret 7 on the A string, then finger 3 drops to fret 4</li><li>Line 4 stays down in that same spot on the A string</li><li>C♯ (“C sharp”), fret 4, is the one new name</li></ul>You\'ve got it when: Line 3 into Line 4, three times through, without stopping.',
         text_es: 'Líneas 3 y 4, ahora en la cuerda La — todas las notas se quedan dentro de los primeros siete trastes.<ul><li>Línea 3: el dedo 4 alcanza el traste 7 de la cuerda La, y luego el dedo 3 baja al traste 4</li><li>La Línea 4 se queda en ese mismo lugar de la cuerda La</li><li>C♯ (“C sostenido”), traste 4, es el único nombre nuevo</li></ul>Lo tienes cuando: de la Línea 3 a la Línea 4, tres veces seguidas, sin detenerte.',
         tab: {
@@ -1505,19 +1393,10 @@ window.CLASS_ACTIVITIES = [
     intro_es: 'Hoy tu maestro no está, así que este circuito se maneja solo: siete paradas, en orden. Todo lo de aquí ya lo conociste — hoy lo haces por tu cuenta.',
     steps: [
       {
-        label:    'Read the map',
-        label_es: 'Lee el mapa',
-        figure: 'img/ca-lowe-naturals.svg',
-        figureAlt: 'Low E string fretboard diagram with every natural note circled — E, F, G, A, B, C, D, E — from the open string up to the octave at fret 12.',
-        figureAlt_es: 'Diagrama del diapasón de la cuerda Mi grave con cada nota natural marcada en círculo — E, F, G, A, B, C, D, E — desde la cuerda al aire hasta la octava en el traste 12.',
-        text: 'The low E string, with its natural notes circled — no sharps.<ul><li>E F G A B C D E, open string up to fret 12</li><li>The dots at 3, 5 and 7 are G, A and B. The double dot at 12 is E again</li></ul>Read it once, then cover it. The next two stops test it.',
-        text_es: 'La cuerda Mi grave, con sus notas naturales en círculos — sin sostenidos.<ul><li>E F G A B C D E, de la cuerda al aire al traste 12</li><li>Los puntos del 3, el 5 y el 7 son G, A y B. El punto doble del 12 es E otra vez</li></ul>Léelo una vez y después tápalo. Las dos paradas que siguen lo prueban.',
-      },
-      {
         label:    'Name the fret',
         label_es: 'Di la nota',
-        text: 'The quiz gives you a fret. You name the note, eight seconds a card.<ul><li>Diagram covered</li><li>Say the note out loud, then press its button</li></ul>You\'ve got it when: 7 of 10 on your first pass. Once that\'s easy, push for 9 of 10. Missing some? The results screen names them — run it again.',
-        text_es: 'El juego te da un traste. Tú dices la nota, ocho segundos por carta.<ul><li>Diagrama tapado</li><li>Di la nota en voz alta, y después presiona su botón</li></ul>Lo tienes cuando: 7 de 10 en tu primera pasada. Cuando eso te resulte fácil, ve por 9 de 10. ¿Fallas algunas? La pantalla de resultados te dice cuáles — repítelo.',
+        text: 'The quiz gives you a fret. You name the note, eight seconds a card.<ul><li>Say the note out loud, then press its button</li></ul>You\'ve got it when: 7 of 10 on your first pass. Once that\'s easy, push for 9 of 10. Missing some? The results screen names them — run it again.',
+        text_es: 'El juego te da un traste. Tú dices la nota, ocho segundos por carta.<ul><li>Di la nota en voz alta, y después presiona su botón</li></ul>Lo tienes cuando: 7 de 10 en tu primera pasada. Cuando eso te resulte fácil, ve por 9 de 10. ¿Fallas algunas? La pantalla de resultados te dice cuáles — repítelo.',
         drill: { type: 'shuffle', string: 'lowE', maxFret: 12, rounds: 10, seconds: 8, pile: 'naturals' },
       },
       {
@@ -1618,15 +1497,6 @@ window.CLASS_ACTIVITIES = [
     intro:    'Watchtower lives on the low E string, and so does this. Every chord in "the cure" has a root note; play the roots and you\'re playing the song\'s bassline. Three notes, one string, and one finger plays them all.',
     intro_es: 'Watchtower vive en la cuerda Mi grave, y esta también. Cada acorde de "the cure" tiene una nota raíz; toca las raíces y estás tocando la línea de bajo de la canción. Tres notas, una cuerda, y un solo dedo las toca todas.',
     steps: [
-      {
-        label:    'The map — one string, three notes',
-        label_es: 'El mapa — una cuerda, tres notas',
-        figure: 'img/ca-cure-roots-verse.svg',
-        figureAlt: 'Low E string fretboard diagram marking the three root notes: F at fret 1, A at fret 5, and C at fret 8.',
-        figureAlt_es: 'Diagrama del diapasón de la cuerda Mi grave marcando las tres notas raíz: F en el traste 1, A en el traste 5 y C en el traste 8.',
-        text: 'Everything is on the low E string: <b>F</b> at fret 1, <b>A</b> at fret 5, <b>C</b> at fret 8. Play every note with your index finger — the hand moves, the finger stays the same.',
-        text_es: 'Todo está en la cuerda Mi grave: <b>F</b> en el traste 1, <b>A</b> en el traste 5, <b>C</b> en el traste 8. Toca cada nota con el índice — la mano se mueve, el dedo es siempre el mismo.',
-      },
       {
         label:    'The intro — A · C, twice',
         label_es: 'La intro — A · C, dos veces',
@@ -1805,15 +1675,6 @@ window.CLASS_ACTIVITIES = [
     intro_es: 'Ya tocas la estrofa de "the cure" en la cuerda Mi grave, con el viaje hasta el traste 8 para el C. Hoy el C se pasa a la cuerda La, traste 3. Las mismas tres notas, sin viaje — la mano se queda dentro de los primeros cinco trastes.',
     steps: [
       {
-        label:    'Learn — The map',
-        label_es: 'Aprende — El mapa',
-        figure: 'img/ca-cure-roots-both.svg',
-        figureAlt: 'Fretboard diagram marking five root notes on two strings: F at fret 1, G at fret 3, and A at fret 5 on the low E string; C at fret 3 and D at fret 5 on the A string.',
-        figureAlt_es: 'Diagrama del diapasón marcando cinco notas raíz en dos cuerdas: F en el traste 1, G en el traste 3 y A en el traste 5 en la cuerda Mi grave; C en el traste 3 y D en el traste 5 en la cuerda La.',
-        text: 'The verse uses three notes. Low E string: <b>F</b> at fret 1 and <b>A</b> at fret 5. A string: <b>C</b> at fret 3. Index on fret 1, ring on fret 3, pinky on fret 5. The hand never moves.',
-        text_es: 'La estrofa usa tres notas. Cuerda Mi grave: <b>F</b> en el traste 1 y <b>A</b> en el traste 5. Cuerda La: <b>C</b> en el traste 3. Índice en el traste 1, anular en el traste 3, meñique en el traste 5. La mano nunca se mueve.',
-      },
-      {
         label:    'Learn — A and C',
         label_es: 'Aprende — A y C',
         text: 'Press Play on the tab and watch the cursor. Then play each note once, slowly, and say its name: A, C, A, C.',
@@ -1926,15 +1787,6 @@ window.CLASS_ACTIVITIES = [
     intro:    'You already play F at fret 1 on the low E string. "Luna" needs that note and one more — the open A string. Two notes, two bars each, and that loop is the whole song.',
     intro_es: 'Ya tocas el F en el traste 1 de la cuerda Mi grave. "Luna" necesita esa nota y una más — la cuerda La al aire. Dos notas, dos compases cada una, y ese bucle es toda la canción.',
     steps: [
-      {
-        label:    'Learn — The map',
-        label_es: 'Aprende — El mapa',
-        figure: 'img/ca-luna-roots.svg',
-        figureAlt: 'Fretboard diagram marking two notes: F at fret 1 on the low E string, and A as the open A string.',
-        figureAlt_es: 'Diagrama del diapasón marcando dos notas: F en el traste 1 de la cuerda Mi grave, y A como la cuerda La al aire.',
-        text: '"Luna" rides two chords, F and Am, so its bassline is two notes. <b>F</b>: low E string, fret 1, index finger. <b>A</b>: the open A string — no finger at all. Two bars of F, then two bars of A, over and over.',
-        text_es: '"Luna" se apoya en dos acordes, F y Am, así que su línea de bajo es dos notas. <b>F</b>: cuerda Mi grave, traste 1, dedo índice. <b>A</b>: la cuerda La al aire — sin ningún dedo. Dos compases de F, luego dos compases de A, una y otra vez.',
-      },
       {
         label:    'Learn — Feel the two',
         label_es: 'Aprende — Siente los dos',
@@ -2055,15 +1907,6 @@ window.CLASS_ACTIVITIES = [
     intro:    'You moved the verse of "the cure" onto two strings. Today you add the chorus — same two strings, nothing past fret 5, and the hand stays put.',
     intro_es: 'Ya moviste la estrofa de "the cure" a dos cuerdas. Hoy agregas el coro — las mismas dos cuerdas, nada más allá del traste 5, y la mano se queda quieta.',
     steps: [
-      {
-        label:    'Learn — The map',
-        label_es: 'Aprende — El mapa',
-        figure: 'img/ca-cure-roots-both.svg',
-        figureAlt: 'Fretboard diagram marking five root notes on two strings: F at fret 1, G at fret 3, and A at fret 5 on the low E string; C at fret 3 and D at fret 5 on the A string.',
-        figureAlt_es: 'Diagrama del diapasón marcando cinco notas raíz en dos cuerdas: F en el traste 1, G en el traste 3 y A en el traste 5 en la cuerda Mi grave; C en el traste 3 y D en el traste 5 en la cuerda La.',
-        text: 'All five notes sit inside the first five frets. Low E string: <b>F</b> at fret 1, <b>G</b> at fret 3, <b>A</b> at fret 5. A string: <b>C</b> at fret 3, <b>D</b> at fret 5. Index on fret 1, ring on fret 3, pinky on fret 5. The hand never moves.',
-        text_es: 'Las cinco notas están dentro de los primeros cinco trastes. Cuerda Mi grave: <b>F</b> en el traste 1, <b>G</b> en el traste 3, <b>A</b> en el traste 5. Cuerda La: <b>C</b> en el traste 3, <b>D</b> en el traste 5. Índice en el traste 1, anular en el traste 3, meñique en el traste 5. La mano nunca se mueve.',
-      },
       {
         label:    'Practice — Intro and verse',
         label_es: 'Practica — Intro y estrofa',

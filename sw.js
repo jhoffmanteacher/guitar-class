@@ -14,7 +14,7 @@
    progress-saving behave exactly as before.
    ════════════════════════════════════════════════════════════════ */
 
-const CACHE_VERSION = 'guitar-class-2026-09-23-a6eff708ac';
+const CACHE_VERSION = 'guitar-class-2026-09-23-54f791b3f9';
 
 // Backing-track audio lives in its OWN cache, versioned independently of the
 // shell (see tools/checks.mjs, which fingerprints audio/ separately and
@@ -74,19 +74,6 @@ const ASSETS = [
   './icon-512-maskable.png',
   './img/posture-check.jpg',
   './img/m6-strum-pendulum.jpg',
-  './img/ca-hb-low-e.svg',
-  './img/ca-hb-low-e-all.svg',
-  './img/ca-hb-fingers.svg',
-  './img/ca-hb-fingers-a.svg',
-  './img/ca-fg-gym-zone.svg',
-  './img/ca-fg-gym-zone-skip.svg',
-  './img/ca-fg-dots.svg',
-  './img/ca-sna-riff-map.svg',
-  './img/ca-lowe-naturals.svg',
-  './img/ca-a-naturals.svg',
-  './img/ca-cure-roots-verse.svg',
-  './img/ca-cure-roots-both.svg',
-  './img/ca-luna-roots.svg',
   './img/m1-string-names-en.svg',
   './img/m1-string-names-es.svg',
   './img/m1-note-circle-en.svg',

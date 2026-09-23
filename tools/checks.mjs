@@ -2332,8 +2332,10 @@ function checkI18nCompleteness(manifest, allSets, reviewsByModule, moduleSongsBy
    id (an authoring counter, and the only permanent handle — student
    progress is keyed to it), NO `date` field (release dates live in
    Firestore config/class.activityDates, set from the teacher console — see
-   app.js/teacher.js), an _es twin on every required string, and any
-   figure/video referenced actually exists / isn't a placeholder.
+   app.js/teacher.js), an _es twin on every required string, any video
+   referenced actually exists / isn't a placeholder, and no step carries a
+   `figure`/`figureAlt`/`figureAlt_es` key — activities carry no figures
+   (Jonathan, 2026-09-23).
 
    `number` is NO LONGER CHECKED for a 1..N run, and is optional on a new
    entry (2026-09-16): order and module placement moved to the teacher
@@ -2418,9 +2420,8 @@ function validateClassActivities() {
         if (!s || typeof s !== 'object') { err(`${sWhere}: not an object`); problems++; return; }
         reqEs(sWhere, s, 'text');
         reqEs(sWhere, s, 'label');   // optional step head ("Step 4: Tune it back")
-        if (s.figure) {
-          try { readFileSync(join(ROOT, s.figure)); }
-          catch { err(`${sWhere}: figure "${s.figure}" does not exist`); problems++; }
+        if ('figure' in s || 'figureAlt' in s || 'figureAlt_es' in s) {
+          err(`${a.id} step ${si + 1}: activities carry no figures (2026-09-23) — delete the step or the key`); problems++;
         }
         if (s.video) {
           if (!s.video.id || /placeholder/i.test(s.video.id)) { err(`${sWhere}: video.id is missing or a placeholder — verify via oEmbed before shipping (see CLAUDE.md "Videos")`); problems++; }
