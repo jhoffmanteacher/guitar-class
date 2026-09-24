@@ -1484,10 +1484,13 @@ ear. This is chord *timing*, not BPM:
   verse is C–G–F–C, not the four-chord loop again.
 - **Luna** (128 BPM track, clicks are eighth notes, ~43 big beats) — **F for
   two bars of 6/8, then Am for two bars, confirmed.** The chord is Am, not A.
-- **All Along the Watchtower** (115 BPM track) — **close to two beats per
-  chord, not exact.** Most laps are Am 2 · G 2 · **F 3 · G 1**, with each
-  change pushed an eighth note early. The site's "each chord twice" matches
-  7 of 8 beats; kept as the teaching version.
+- **All Along the Watchtower** (115 BPM track) — **Am 2 · G 2 · F 3 · G 1**
+  on most laps, with the A and the F pushed an eighth note early. As of
+  2026-09-24 (Jonathan: "fix watchtower beats to match the backing track")
+  every teaching layer uses it — `A A G G F F F G`, one note or strum per
+  beat — in Modules 2, 3, 5 and 7, the Journey page and Riff Runner. Module
+  4's "the real rhythm" card teaches the two pushes by ear. The old "each
+  chord twice" and "verses: A holds beats 1–3" readings are retired.
 - **Seven Nation Army** (123 BPM track) — the riff is NOT one note per beat:
   bar 1 is E (long) · E (short) · G · E, with D as a pickup on the "and" of 4;
   bar 2 is **C for two beats, B for two beats** — what ca-10 teaches. The
@@ -1495,10 +1498,9 @@ ear. This is chord *timing*, not BPM:
   teaching loop that does not line up with the record; the page says so.
 
 - **All Along the Watchtower** — `Am–G–F–G` loop (power chords `A5–G5–F5–G5`).
-  **Chorus: two beats per chord** (change on beat 3) — the version every teaching
-  layer through Module 3 and the Journey page uses. **Verses: the root holds
-  beats 1–3 and each G lands on beat 4** (Jonathan, 2026-08-06); Module 4's
-  "real rhythm" step teaches that distinction by ear. The map's "Am–G–F" is
+  **Timing: Am 2 · G 2 · F 3 · G 1** — measured off the backing track
+  2026-09-24; see "Chord timing measured" above. (Replaces the 2026-08-06
+  verse/chorus reading.) The map's "Am–G–F" is
   shorthand. **The `neil-young-…` audio slug is CORRECT** — the play-along
   loop is built from Neil Young's 1992 Dylan-30th-anniversary performance,
   which the Journey page's history paragraph states outright. The slug names

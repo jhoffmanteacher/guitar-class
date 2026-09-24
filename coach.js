@@ -5711,7 +5711,7 @@ const RN_SONGS = [
     subKey: 'games.riff.song.watchtower.sub',
     hintKey: 'games.riff.song.watchtower.hint',
     bpm: 80, bpb: 4, loopBeats: 8, laps: 4,
-    notes: [[6,5,0,'A5'],[6,3,2,'G5'],[6,1,4,'F5'],[6,3,6,'G5']] },
+    notes: [[6,5,0,'A5'],[6,3,2,'G5'],[6,1,4,'F5'],[6,3,7,'G5']] },
   { id: 'luna', title: '"Luna"',
     subKey: 'games.riff.song.luna.sub',
     hintKey: 'games.riff.song.luna.hint',

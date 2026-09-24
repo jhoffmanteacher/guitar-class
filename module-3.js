@@ -298,8 +298,8 @@ SETS.push(
             steps: [
           {
             label: 'Challenge 7 — "Watchtower" Loop (assessment preparation)', label_es: 'Reto 7 — Vuelta de "Watchtower" (preparación para la evaluación)',
-            text: '<ul><li>Play A5–G5–F5–G5, two beats per chord at 60 BPM — one strum per beat, so each chord is struck twice before it changes. This is exactly how the record\'s chorus cycles.</li></ul>The TAB below shows this loop — two numbers stacked in a column mean play both strings together. You\'ve got it when: four times through, changing on the beat every time, with no stops. <a href="tabs/all-along-the-watchtower.html" target="_blank">&#x1F9F5; Song Journey: this is Layer 3 of 5</a>.',
-            text_es: '<ul><li>Toca A5–G5–F5–G5, dos tiempos por acorde a 60 BPM — un rasgueo por tiempo, así que cada acorde suena dos veces antes de cambiar. Así es exactamente como cicla el coro de la grabación.</li></ul>El TAB de abajo muestra esta vuelta — dos números apilados en una columna significa tocar las dos cuerdas juntas. Lo tienes cuando: cuatro veces seguidas, cambiando a tiempo cada vez, sin detenerte. <a href="tabs/all-along-the-watchtower.html" target="_blank">&#x1F9F5; Recorrido de la canción: esto es la Capa 3 de 5</a>.',
+            text: '<ul><li>Play A5–G5–F5–G5 at 60 BPM, one strum per beat: A5 twice, G5 twice, F5 three times, then the last G5 once. That is how the play-along track cycles.</li></ul>The TAB below shows this loop — two numbers stacked in a column mean play both strings together. You\'ve got it when: four times through, changing on the beat every time, with no stops. <a href="tabs/all-along-the-watchtower.html" target="_blank">&#x1F9F5; Song Journey: this is Layer 3 of 5</a>.',
+            text_es: '<ul><li>Toca A5–G5–F5–G5 a 60 BPM, un rasgueo por tiempo: A5 dos veces, G5 dos veces, F5 tres veces y el último G5 una vez. Así cicla la pista para tocar encima.</li></ul>El TAB de abajo muestra esta vuelta — dos números apilados en una columna significa tocar las dos cuerdas juntas. Lo tienes cuando: cuatro veces seguidas, cambiando a tiempo cada vez, sin detenerte. <a href="tabs/all-along-the-watchtower.html" target="_blank">&#x1F9F5; Recorrido de la canción: esto es la Capa 3 de 5</a>.',
             hint: 'A5 takes its root on the open A string — one finger on the D string, 2nd fret. G5 = 3rd fret low E, F5 = 1st fret low E. Crossing between the two root strings is the move here — land the whole hand at once, exactly on beat 1. (The original song uses an Am chord, but as a power chord it\'s just A5 — no major or minor.) This is your Set 1 check-off loop — record a lap and listen back.',
             hint_es: 'El A5 lleva su raíz en la cuerda La al aire — un solo dedo en la cuerda Re, traste 2. G5 = traste 3 de la Mi grave, F5 = traste 1 de la Mi grave. Cruzar entre las dos cuerdas de raíz es el movimiento aquí — baja toda la mano de una vez, justo en el tiempo 1. (La canción original usa un acorde de Am, pero como acorde de potencia es solo A5 — sin mayor ni menor.) Esta es tu vuelta de verificación de la Unidad 1 — graba una vuelta y escúchala después.',
             stuck: 'Loop just A5–G5 (the open A string, then fret 3 on the low E) until that change is clean, then add F5.',
@@ -313,8 +313,8 @@ SETS.push(
               { name: 'F5',  chord: [[6,1,'1'],[5,3,'3'],[4,'x'],[3,'x'],[2,'x'],[1,'x']], position: 1 }
             ],
             tab: {
-              caption: '"Watchtower" loop — A5–G5–F5–G5, one strum per beat, each chord twice · 60 BPM',
-              caption_es: 'Vuelta de "Watchtower" — A5–G5–F5–G5, un rasgueo por tiempo, cada acorde dos veces · 60 BPM',
+              caption: '"Watchtower" loop — A5 A5 G5 G5 F5 F5 F5 G5, one strum per beat · 60 BPM',
+              caption_es: 'Vuelta de "Watchtower" — A5 A5 G5 G5 F5 F5 F5 G5, un rasgueo por tiempo · 60 BPM',
               notes: [
                 { frets: [['D', 2], ['A', 0]], note: 'A5', midi: [52, 45] },
                 { frets: [['D', 2], ['A', 0]], note: 'A5', midi: [52, 45] },
@@ -322,7 +322,7 @@ SETS.push(
                 { frets: [['A', 5], ['E', 3]], note: 'G5', midi: [50, 43] },
                 { frets: [['A', 3], ['E', 1]], note: 'F5', midi: [48, 41] },
                 { frets: [['A', 3], ['E', 1]], note: 'F5', midi: [48, 41] },
-                { frets: [['A', 5], ['E', 3]], note: 'G5', midi: [50, 43] },
+                { frets: [['A', 3], ['E', 1]], note: 'F5', midi: [48, 41] },
                 { frets: [['A', 5], ['E', 3]], note: 'G5', midi: [50, 43] }
               ]
             },
@@ -609,8 +609,8 @@ SETS.push(
           },
           {
             label: 'Challenge — Four-Chord Half-Bar ("Watchtower")', label_es: 'Reto — Medio compás con cuatro acordes ("Watchtower")',
-            text: '<ul><li>Play the full "All Along the Watchtower" loop — A5 · G5 · F5 · G5 — two beats each, looping. The A5 takes its root on the open A string; G5 and F5 take theirs on the low E.</li></ul>You played this at 60 BPM in Set 1. Now play it at 70. You\'ve got it when: four clean laps at 70 BPM, every change landing on the beat.',
-            text_es: '<ul><li>Toca la vuelta completa de "All Along the Watchtower" — A5 · G5 · F5 · G5 — dos tiempos cada uno, repitiendo. El A5 lleva su raíz en la cuerda La al aire; el G5 y el F5 la llevan en la cuerda Mi grave.</li></ul>Ya lo tocaste a 60 BPM en el Set 1. Ahora tócalo a 70. Lo tienes cuando: cuatro vueltas limpias a 70 BPM, cada cambio cayendo a tiempo.',
+            text: '<ul><li>Play the full "All Along the Watchtower" loop — A5 · G5 · F5 · G5 — with the track\'s timing: two beats on A5, two on G5, three on F5, one on the last G5, looping. The A5 takes its root on the open A string; G5 and F5 take theirs on the low E.</li></ul>You played this at 60 BPM in Set 1. Now play it at 70. You\'ve got it when: four clean laps at 70 BPM, every change landing on the beat.',
+            text_es: '<ul><li>Toca la vuelta completa de "All Along the Watchtower" — A5 · G5 · F5 · G5 — con el ritmo de la pista: dos tiempos en A5, dos en G5, tres en F5 y uno en el último G5, repitiendo. El A5 lleva su raíz en la cuerda La al aire; el G5 y el F5 la llevan en la cuerda Mi grave.</li></ul>Ya lo tocaste a 60 BPM en el Set 1. Ahora tócalo a 70. Lo tienes cuando: cuatro vueltas limpias a 70 BPM, cada cambio cayendo a tiempo.',
             hint: 'The loop crosses both root strings: A5 on the open A string, then G5 (fret 3) and F5 (fret 1) on the low E. The A5 needs one finger — the D string, 2nd fret — with the open A ringing under it.',
             hint_es: 'La vuelta cruza las dos cuerdas de raíz: A5 en la cuerda La al aire, y luego G5 (traste 3) y F5 (traste 1) en la cuerda Mi grave. El A5 necesita un solo dedo — la cuerda Re, traste 2 — con la cuerda La al aire sonando debajo.',
             stuck: 'Play just the roots (skip the second string) for one lap to lock the walk, then add the fifth back in.',
@@ -623,7 +623,7 @@ SETS.push(
               { name: 'G5', chord: [[6,3,'1'],[5,5,'3'],[4,'x'],[3,'x'],[2,'x'],[1,'x']], position: 3 },
               { name: 'F5', chord: [[6,1,'1'],[5,3,'3'],[4,'x'],[3,'x'],[2,'x'],[1,'x']], position: 1 }
             ],
-            playSeq: { label: 'Hear it — A5·G5·F5·G5 (every 2 beats)', label_es: 'Escúchalo — A5·G5·F5·G5 (cada 2 tiempos)', bpm: 60, notes: [[45,52],[45,52],[43,50],[43,50],[41,48],[41,48],[43,50],[43,50]] }
+            playSeq: { label: 'Hear it — A5·A5 · G5·G5 · F5·F5·F5 · G5', label_es: 'Escúchalo — A5·A5 · G5·G5 · F5·F5·F5 · G5', bpm: 60, notes: [[45,52],[45,52],[43,50],[43,50],[41,48],[41,48],[41,48],[43,50]] }
           },
           {
             label: 'Challenge — One Chord Per Beat ("Watchtower", fast)', label_es: 'Reto — Un acorde por tiempo ("Watchtower", rápido)',
@@ -778,8 +778,8 @@ SETS.push(
             steps: [
               {
                 label: 'Challenge — "Watchtower", verse', label_es: 'Reto — "Watchtower", estrofa',
-                text: '<ul><li>Play the "All Along the Watchtower" loop as power chords — A5 rooted on the open A string, G5 and F5 on the low E — A5 · G5 · F5 · G5 — two beats per chord at 60 BPM, one strum per beat, so each chord is struck twice.</li></ul>You\'ve got it when: four clean laps, every change landing on the beat. <a href="tabs/all-along-the-watchtower.html" target="_blank">&#x1F9F5; Song Journey: this is Layer 3 of 5</a>.',
-                text_es: '<ul><li>Toca la vuelta de "All Along the Watchtower" como acordes de potencia — el A5 con raíz en la cuerda La al aire, y el G5 y el F5 en la cuerda Mi grave — A5 · G5 · F5 · G5 — dos tiempos por acorde a 60 BPM, un rasgueo por tiempo, así que cada acorde suena dos veces.</li></ul>Lo tienes cuando: cuatro vueltas limpias, cada cambio cayendo a tiempo. <a href="tabs/all-along-the-watchtower.html" target="_blank">&#x1F9F5; Recorrido de la canción: esto es la Capa 3 de 5</a>.',
+                text: '<ul><li>Play the "All Along the Watchtower" loop as power chords — A5 rooted on the open A string, G5 and F5 on the low E — A5 · G5 · F5 · G5 at 60 BPM, one strum per beat: A5 twice, G5 twice, F5 three times, then the last G5 once.</li></ul>You\'ve got it when: four clean laps, every change landing on the beat. <a href="tabs/all-along-the-watchtower.html" target="_blank">&#x1F9F5; Song Journey: this is Layer 3 of 5</a>.',
+                text_es: '<ul><li>Toca la vuelta de "All Along the Watchtower" como acordes de potencia — el A5 con raíz en la cuerda La al aire, y el G5 y el F5 en la cuerda Mi grave — A5 · G5 · F5 · G5 a 60 BPM, un rasgueo por tiempo: A5 dos veces, G5 dos veces, F5 tres veces y el último G5 una vez.</li></ul>Lo tienes cuando: cuatro vueltas limpias, cada cambio cayendo a tiempo. <a href="tabs/all-along-the-watchtower.html" target="_blank">&#x1F9F5; Recorrido de la canción: esto es la Capa 3 de 5</a>.',
                 hint: 'Same three roots you played in Module 2 — now each root note also sounds its fifth, and the A moves to its other home on the open A string.',
                 hint_es: 'Las mismas tres raíces que tocaste en el Módulo 2 — ahora cada nota raíz también suena su quinta, y el A se pasa a su otra casa en la cuerda La al aire.',
                 stuck: 'Drop to roots-only for a lap, then add the second string back on just the G5.',
@@ -788,8 +788,8 @@ SETS.push(
                 levelUp_es: 'Un tiempo por acorde en vez de dos — el mismo 60 BPM, el doble de cambios.',
                 skills: [3, 4],
                 tab: {
-                  caption: '"All Along the Watchtower" — verse loop as power chords · one strum per beat, each chord twice · 60 BPM',
-                  caption_es: '"All Along the Watchtower" — vuelta de la estrofa como acordes de potencia · un rasgueo por tiempo, cada acorde dos veces · 60 BPM',
+                  caption: '"All Along the Watchtower" — verse loop as power chords · A5 A5 G5 G5 F5 F5 F5 G5, one strum per beat · 60 BPM',
+                  caption_es: '"All Along the Watchtower" — vuelta de la estrofa como acordes de potencia · A5 A5 G5 G5 F5 F5 F5 G5, un rasgueo por tiempo · 60 BPM',
                   notes: [
                     { frets: [['D', 2], ['A', 0]], note: 'A5', midi: [52, 45] },
                     { frets: [['D', 2], ['A', 0]], note: 'A5', midi: [52, 45] },
@@ -797,7 +797,7 @@ SETS.push(
                     { frets: [['A', 5], ['E', 3]], note: 'G5', midi: [50, 43] },
                     { frets: [['A', 3], ['E', 1]], note: 'F5', midi: [48, 41] },
                     { frets: [['A', 3], ['E', 1]], note: 'F5', midi: [48, 41] },
-                    { frets: [['A', 5], ['E', 3]], note: 'G5', midi: [50, 43] },
+                    { frets: [['A', 3], ['E', 1]], note: 'F5', midi: [48, 41] },
                     { frets: [['A', 5], ['E', 3]], note: 'G5', midi: [50, 43] }
                   ]
                 },
@@ -939,8 +939,8 @@ SETS.push(
         text_es: 'Tocar una progresión completa de 6 compases de acordes de potencia a tiempo',
         gotItWhen: 'you can play through 6 bars without stopping, even if a chord change is rough — you keep going to the next downbeat.',
         gotItWhen_es: 'puedes tocar los 6 compases sin detenerte, aunque un cambio de acorde salga imperfecto — sigues hasta el siguiente tiempo fuerte.',
-        practice: { type: 'playSeq', label: '"Watchtower" roots (A · G · F · G) — two beats each', label_es: 'Raíces de "Watchtower" (A · G · F · G) — dos tiempos cada una', bpm: 60,
-          notes: [45, 45, 43, 43, 41, 41, 43, 43] } },
+        practice: { type: 'playSeq', label: '"Watchtower" roots — A A G G F F F G', label_es: 'Raíces de "Watchtower" — A A G G F F F G', bpm: 60,
+          notes: [45, 45, 43, 43, 41, 41, 41, 43] } },
       { id: 'm3w2-s3', text: 'Play a straight-eighths strumming pattern with power chords',
         text_es: 'Tocar un patrón de rasgueo de corcheas rectas con acordes de potencia',
         gotItWhen: 'you can strum down on each number and up on each "+" across a bar and count "1 + 2 + 3 + 4 +" aloud without losing the strum.',
