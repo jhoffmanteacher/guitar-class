@@ -552,7 +552,10 @@ function checkMcAnswerTells(allSets) {
    reached". Ask Jonathan which module the class is in and raise it —
    then re-run with --check and paste the printed fingerprints in, in
    the same commit. Lowering it is almost never right: a module the
-   class has already passed keeps its stored answers forever.
+   class has already passed keeps its stored answers forever. The one
+   exception is the summer reset, which sets it to 0 (and empties
+   FROZEN_MC_FINGERPRINTS) on purpose — see CLAUDE.md's "Summer reset
+   list".
 
    Modules 3–6 were reworded on 2026-09-19 (the quiz-giveaways work
    order) precisely because nobody had reached them yet.
@@ -729,12 +732,12 @@ function checkMcShoutedAnswer(allSets) {
    Entries below in Modules 1–6 are pre-existing and were reviewed, not
    fixed: Module 1–2 graded MCs are frozen (see 1ap), and the rest were
    out of that sweep's scope. `w2·b·sec0·step0|2` is a genuine defect
-   deferred to next summer — see CLAUDE.md "Reword next summer".
+   deferred to the reset — see CLAUDE.md's "Summer reset list".
    ════════════════════════════════════════════════════════════════════ */
 const MC_CATCHALL_EN = /it doesn'?t matter|either [^.]{0,12}works|equally well|any [^.]{0,20}you like|whichever [^.]{0,20}(?:you like|happens)|as long as you|at random|wherever it|\bnever\b|\balways\b|can'?t be|you can'?t|it isn'?t|it can'?t|exactly the same|nothing at all|only ever|automatically|just pick one|your choice|doesn'?t play at all|can'?t tell/i;
 const MC_CATCHALL_ES = /no importa|da igual|cualquier [^.]{0,25}quieras|al azar|donde sea|\bnunca\b|\bsiempre\b|jamás|no se puede|exactamente lo mismo|funciona igual/i;
 const MC_CATCHALL_ALLOW = new Set([
-  'w2·b·sec0·step0|2|en',        // "It doesn't matter which way" — FROZEN graded (1ap); reword next summer
+  'w2·b·sec0·step0|2|en',        // "It doesn't matter which way" — FROZEN graded (1ap); on the Summer reset list
   'w2·b·sec0·step0|2|es',        //   same card, Spanish twin
   'skill m3w1-s3|1|en',          // "only ever hit the two strings you want" — a real beginner belief about aim
   'm4w1·b·sec1·step0|3|es',      // "No importa qué dedo" — pre-existing Module 4 debt, outside the 7–13 sweep
@@ -2169,14 +2172,15 @@ const TEACHER_RE = new RegExp(
   'gi');
 /* 'trust the' guards the "trust the process" reassurance maxim, but it has
    real innocent twins — pointing a student at a tuner needle or a printed
-   fret number is a literal instruction, not a pep-talk aside, and a frozen
-   graded-MC distractor about vetting video sources by star rating isn't
-   reassurance to the reader at all (rewording it would violate Rule Zero
-   even if it were). Same shape as MC_CATCHALL_ALLOW / MC_LEAK_ALLOW: an
-   allowlist entry excuses one verified-innocent occurrence, not the phrase
-   everywhere else. Matched by exact position (`lower.startsWith(phrase,
-   m.index)`), not "the value merely contains it somewhere", so a second,
-   genuinely bad "trust the" later in the same field still fails the push. */
+   fret number is a literal instruction, not a pep-talk aside, and module-7's
+   "Trust the one with the highest star rating" is a practice-MC DISTRACTOR
+   about vetting TABs online, not reassurance to the reader at all (it's the
+   wrong answer, being rejected by the card's own `explain`). Same shape as
+   MC_CATCHALL_ALLOW / MC_LEAK_ALLOW: an allowlist entry excuses one
+   verified-innocent occurrence, not the phrase everywhere else. Matched by
+   exact position (`lower.startsWith(phrase, m.index)`), not "the value
+   merely contains it somewhere", so a second, genuinely bad "trust the"
+   later in the same field still fails the push. */
 const TEACHER_PHRASE_ALLOW = [
   { file: 'module-1.js', phrase: 'trust the needle' },
   { file: 'module-2.js', phrase: 'trust the fret numbers' },
@@ -2185,8 +2189,9 @@ const TEACHER_PHRASE_ALLOW = [
      Module 2 is in rule-zero-proof.mjs's FROZEN_THROUGH regime, where a step
      LABEL must match the base commit BYTE-FOR-BYTE by index (a rename would
      hide an insertion from that proof). Decision 1's "(assessment
-     preparation)" retitle can't ship here until the class moves past Module
-     2 and FROZEN_THROUGH is raised — see CLAUDE.md's Challenge-card note. */
+     preparation)" retitle can't ship here until progress resets: raising
+     FROZEN_THROUGH only freezes MORE modules, it never unlocks Module 2 —
+     see CLAUDE.md's "Summer reset list". */
   { file: 'module-2.js', phrase: 'assessment piece' },
 ];
 
