@@ -1027,6 +1027,21 @@ it), and the "#N" a card carries never moves — only `renderClassActivities()`
 reverses `view.sections` and each section's ids for display. The "Completed activities"
 group's order falls out of the same reversal now, not a second `.reverse()`.
 
+**Where the student is survives a reload** (navigability round 2,
+2026-09-23). The open card rides in the address — `caSyncHash()` (called
+from `caSyncTopbar()`) `replaceState`s `#class-activities/<id>` while a card
+is open and plain `#class-activities` when none is, so a reload or a Back
+from another page reopens it through `caFocusActivity()`. Step ticks
+(`caStepDone`) are kept **for the day** in `localStorage`
+(`_uidKey('caStepsToday')`, `{day, done}`; a new local date starts empty) —
+`caLoadStepDone()` runs first thing in `renderClassActivities()`,
+`caSaveStepDone()` on every tick. Never Firestore: they're a place-keeper,
+not a record. **Mark complete** closes the card, scrolls to the top (where
+Today's activity already shows the next one) and toasts
+`ca.doneNextToast` / `ca.doneAllToast`; un-marking keeps the card open.
+A second tap on the rail row of the page you're on scrolls to the top — it
+no longer closes the page (In class, Songs, My progress).
+
 **The gate:** `caBlockers()` — a visible (`caIsVisible`), undone
 (`classActivities[id]!==true`), uncleared activity or check — drives
 `body.ca-gated` via `applyActivityGate()`. Teacher/dev bypass are gate

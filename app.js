@@ -9046,9 +9046,9 @@ function caFirstSentence(html){
    Marking done with fewer than all steps ticked THIS SESSION shows an
    inline confirm in place of the button — never a confirm() dialog, and
    never a lock: "Keep going" just re-shows the plain button, "Mark
-   complete" finishes exactly like today. caStepDone is in-memory only (see
-   its declaration above), so there is no way to tell "reloaded mid-way"
-   from "hasn't started" — the rule is simply ticks < steps, always. */
+   complete" finishes exactly like today. caStepDone is kept for the day
+   on this device (see its declaration), so a reload no longer wipes the
+   ticks — the rule is still simply ticks < steps, always. */
 let caNudgeId = null;
 function caMarkClick(id){
   const a = (window.CLASS_ACTIVITIES || []).find(x => x.id === id);
@@ -9111,10 +9111,10 @@ function caMarkRowHtml(a, done, markLabel){
 /* The chunk-size meta line under a collapsed card's title — how big a bite
    this is before the student opens it (practice-chunks work order,
    2026-09-19). Step count and the optional authored `minutes` are stable;
-   the done count is read from caStepDone, which is in-memory only (see the
-   declaration above), so it's honestly a THIS-SESSION count, not a saved
-   one — shown only once it's above zero so a fresh card doesn't claim
-   "0 done". */
+   the done count is read from caStepDone, which is kept for the day on
+   this device (see the declaration), so it's honestly a TODAY count, not a
+   saved record — shown only once it's above zero so a fresh card doesn't
+   claim "0 done". */
 function caChunkMetaHtml(a){
   const n = (a.steps || []).length;
   if(!n) return '';
@@ -9249,15 +9249,43 @@ function caHeroCheckHtml(a, isCurrent = true){
     <div class="ca-card-body" id="ec-body-${escAttr(a.id)}">${caCheckBodyHtml(a, {})}</div>
   </details>`;
 }
-// Per-step accordion state — session-only (no Firestore, no localStorage;
-// resets on reload by design, unlike the module-step checklist). caStepOpen
-// maps activity id -> open step index (-1 = none); caStepDone maps
-// "activityId:stepIndex" -> true. Read at render time by caActivityCardHtml,
+// Per-step accordion state. caStepOpen maps activity id -> open step index
+// (-1 = none) and is session-only. caStepDone maps "activityId:stepIndex" ->
+// true and is KEPT FOR THE DAY on this device (navigability round 2,
+// 2026-09-23): a Chromebook waking from sleep, or the service worker's
+// post-deploy reload, used to put "3 of 7 done" back to 0 mid-class.
+// localStorage only, scoped to the student (_uidKey) and stamped with the
+// local date — tomorrow it starts empty. Never Firestore: these ticks are a
+// place-keeper, not a record. Read at render time by caActivityCardHtml,
 // then kept in sync by direct DOM edits in caToggleStepOpen/caMarkStepDone so
 // marking a step done doesn't force a full re-render of the card (which would
 // cut off any playing TAB audio in other steps).
 let caStepOpen = {};
 let caStepDone = {};
+const CA_STEPS_KEY = 'caStepsToday';
+let caStepsLoadedFor = null;   // whose ticks are in caStepDone right now
+function caLocalDay(){
+  const d = new Date();
+  return `${d.getFullYear()}-${d.getMonth() + 1}-${d.getDate()}`;
+}
+/* Read once per signed-in student (renderClassActivities calls this first
+   thing; a sign-out/sign-in on a shared Chromebook swaps the set). Only
+   `true` entries are kept, matching every `=== true` reader. */
+function caLoadStepDone(){
+  const who = (currentUser && currentUser.uid) || '';
+  if(caStepsLoadedFor === who) return;
+  caStepsLoadedFor = who;
+  caStepDone = {};
+  try{
+    const saved = JSON.parse(localStorage.getItem(_uidKey(CA_STEPS_KEY)) || 'null');
+    if(saved && saved.day === caLocalDay() && saved.done && typeof saved.done === 'object'){
+      Object.keys(saved.done).forEach(k => { if(saved.done[k] === true) caStepDone[k] = true; });
+    }
+  }catch(e){ /* storage unavailable or bad JSON — start empty, like before */ }
+}
+function caSaveStepDone(){
+  try{ localStorage.setItem(_uidKey(CA_STEPS_KEY), JSON.stringify({day: caLocalDay(), done: caStepDone})); }catch(e){}
+}
 function caDefaultOpenStep(a){
   const steps = a.steps || [];
   for(let i=0;i<steps.length;i++) if(caStepDone[`${a.id}:${i}`] !== true) return i;
@@ -9418,8 +9446,8 @@ function caActivityCardHtml(a){
    IS_TEACHER_MODE bail sdSaveBest/dkSaveBest make — previewing isn't
    turning in).
 
-   Run state is in-memory only, like caStepDone: a reload mid-check starts
-   it over. That is the honest behaviour for a one-try assessment — a
+   Run state is in-memory only (unlike caStepDone, which is kept for the
+   day): a reload mid-check starts it over. That is the honest behaviour for a one-try assessment — a
    half-finished run is not a score, and persisting one would mean deciding
    what a resumed attempt counts as. */
 let ecRuns = {};          // id -> { i, picks } while a check is being taken
@@ -9750,6 +9778,7 @@ function caSyncTopbar(){
   if(!bar || !title) return;
   const card = caOpenId ? document.querySelector(`.ca-card[open][data-id="${CSS.escape(caOpenId)}"]`) : null;
   const a = card ? (window.CLASS_ACTIVITIES || []).find(x => x.id === caOpenId) : null;
+  caSyncHash(a);
   if(!a){ bar.hidden = true; bar.innerHTML = ''; title.hidden = false; return; }
   const num = caNumber(a);
   const name = (a.kind === 'check' ? t('check.prefix') + ' · ' : num ? `#${num} - ` : '') + caTitle(a);
@@ -9760,6 +9789,23 @@ function caSyncTopbar(){
     + (prog ? `<span class="ca-bar-prog">${escHtml(prog)}</span>` : '');
   bar.hidden = false;
   title.hidden = true;
+}
+/* The open card is in the address (navigability round 2, 2026-09-23):
+   '#class-activities/ca-20' while a card is open, '#class-activities' when
+   none is — the same deep-link shape caFocusActivity already reads, so a
+   reload (or Back from another page) reopens the card instead of dropping
+   the student on the list. replaceState, keeping history.state (the
+   explore depth): opening a card is not a navigation and costs no Back tap.
+   lastRoutedHash follows along so the router's repeat guard stays true.
+   Only while this page owns the hash — never from a teardown elsewhere. */
+function caSyncHash(a){
+  if(exploreHashBase(location.hash) !== '#class-activities') return;
+  const screen = document.getElementById('class-activities-screen');
+  if(!screen || screen.hasAttribute('hidden')) return;
+  const want = a ? '#class-activities/' + encodeURIComponent(a.id) : '#class-activities';
+  if(location.hash === want) return;
+  history.replaceState(history.state, '', location.pathname + location.search + want);
+  lastRoutedHash = want;
 }
 // Stamped on the summary's own click, before the native toggle runs, so
 // caOnToggle can tell a real click-to-open from a re-render or printActivity
@@ -9800,7 +9846,8 @@ function caToggleStepOpen(btn){
 function caMarkStepDone(btn, id, si){
   const key = `${id}:${si}`;
   const nowDone = caStepDone[key] !== true;
-  caStepDone[key] = nowDone;
+  if(nowDone) caStepDone[key] = true; else delete caStepDone[key];
+  caSaveStepDone();
   const li = btn.closest('.ca-step');
   li.classList.toggle('ca-step-done', nowDone);
   btn.classList.toggle('is-done', nowDone);
@@ -9846,8 +9893,21 @@ function caToggleComplete(id){
   stopCardAudio();
   const isDone = classActivities[id] === true;
   onClassActivityChange(id, !isDone);
-  caOpenId = id;   // keep the card open through the re-render
+  if(isDone){
+    caOpenId = id;   // un-marking: keep the card open through the re-render
+    renderClassActivities();
+    return;
+  }
+  /* Marking complete (navigability round 2, 2026-09-23): the card used to
+     stay open and drop into the Completed fold, with the sticky bar still
+     reading "0 of 7 done" and nothing saying what came next. Now it
+     closes, the page goes to the top — where Today's activity already
+     shows the next thing, or the caught-up card — and a toast says so.
+     caOpenId = null also clears the sticky bar and the card's hash. */
+  caOpenId = null;
   renderClassActivities();
+  scrollPaneTop(true);
+  gateToast(t(caStartHereId ? 'ca.doneNextToast' : 'ca.doneAllToast'));
 }
 // The teacher-console release date for this activity, or null if unset —
 // see activityDates in loadClassConfig(). class-activities.js entries carry
@@ -10155,6 +10215,7 @@ function refreshOpenClassActivitiesScreen(){
 function renderClassActivities(){
   const bodyEl = document.getElementById('class-activities-body');
   if(!bodyEl) return;
+  caLoadStepDone();   // today's step ticks, before anything below reads them
   // This rebuilds every card, so a snippet playing in one of them is about to
   // be detached — and a detached <audio> keeps playing with nothing left on
   // screen to stop it. (snipTick's own isConnected guard is the backstop for

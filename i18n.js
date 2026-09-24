@@ -326,6 +326,10 @@
        no heading at all rather than an invented one. */
     'ca.moduleHead':           { en: 'Module {n} — {mod}', es: 'Módulo {n} — {mod}' },
     'ca.markComplete':         { en: 'Mark complete', es: 'Marcar como completado' },
+    // Toast after Mark complete — the card closes and the page goes to the
+    // top (caToggleComplete, navigability round 2).
+    'ca.doneNextToast':        { en: 'Marked complete. Your next activity is at the top.', es: 'Marcada como completada. Tu siguiente actividad está arriba.' },
+    'ca.doneAllToast':         { en: 'Marked complete. All activities are done.', es: 'Marcada como completada. Todas las actividades están hechas.' },
     'ca.completed':            { en: 'Completed ✓ — tap to un-mark', es: 'Completado ✓ — toca para desmarcar' },
     /* The page's three groups, named by Jonathan 2026-09-23 (navigability
        round 2): "Today's activity" (the hero tag, ca.startHere), "Unfinished

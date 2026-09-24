@@ -5,6 +5,23 @@ Notable changes to the Guitar Class site. Newest first.
 For the full session-by-session history (and the reasoning behind each change),
 see `WORKFLOW.md` and the git commit log.
 
+## 2026-09-23 — Easier to find your way around, round 2
+
+### Changed
+
+- **In class has three groups with plain names:** Today's activity,
+  Unfinished activities and Completed activities. They replace "Start
+  here", "Still to do", "Older" and "Earlier".
+- **Tapping the rail button for the page you're on keeps you there** and
+  scrolls to the top. It used to close the page and send you to Modules.
+- **After Mark complete, the activity closes and the page goes to the top,**
+  where your next activity is waiting. A short message says so.
+- **My progress: tap a module's name to open that module.**
+- **Your step checkmarks stay for the rest of the day,** even if the
+  Chromebook sleeps or the site reloads.
+- **An open activity stays open after a reload** — its link is in the
+  address bar.
+
 ## 2026-09-23 — Easier to find your way around
 
 ### Changed
