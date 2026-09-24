@@ -47,8 +47,8 @@ SETS.push(
               },
               {
                 label: 'Watch: how chords are built', label_es: 'Mira: cómo se construyen los acordes',
-                text: 'Watch: <a href="https://youtu.be/BIWEcDGB5lA" target="_blank">Understanding CHORDS (Ep. 3 Music Theory) – Paul Davids</a>. Every chord you\'ve ever strummed is built from the same three notes — root, 3rd, 5th — and Paul shows where they come from. A different teacher than the first video on purpose: notice which explanation makes the most sense to you.',
-                text_es: 'Mira: <a href="https://youtu.be/BIWEcDGB5lA" target="_blank">Understanding CHORDS (Ep. 3 Music Theory) – Paul Davids</a>. Cada acorde que has rasgueado alguna vez se construye con las mismas tres notas — raíz, 3ª, 5ª — y Paul muestra de dónde vienen. Un maestro distinto al del primer video a propósito: fíjate cuál explicación tiene más sentido para ti.',
+                text: 'Watch: <a href="https://youtu.be/BIWEcDGB5lA" target="_blank">Understanding CHORDS (Ep. 3 Music Theory) – Paul Davids</a>. Every chord you\'ve ever strummed is built from the same three notes — root, 3rd, 5th — and Paul shows where they come from.',
+                text_es: 'Mira: <a href="https://youtu.be/BIWEcDGB5lA" target="_blank">Understanding CHORDS (Ep. 3 Music Theory) – Paul Davids</a>. Cada acorde que has rasgueado alguna vez se construye con las mismas tres notas — raíz, 3ª, 5ª — y Paul muestra de dónde vienen.',
                 hint: 'Notice the pattern: three of the seven chords in a key come out major, and three come out minor — no exceptions, in any key.',
                 hint_es: 'Fíjate en el patrón: tres de los siete acordes de una tonalidad salen mayores, y tres salen menores — sin excepciones, en cualquier tonalidad.',
                 skills: [2],
@@ -360,8 +360,8 @@ SETS.push(
                 label: 'Find I–IV–V in A', label_es: 'Encuentra I–IV–V en A',
                 text: 'Count up the A major scale to find its I, IV, and V chords before checking your answer.',
                 text_es: 'Cuenta hacia arriba en la escala de A mayor para encontrar sus acordes I, IV y V antes de revisar tu respuesta.',
-                hint: 'I–IV–V is the foundation progression behind blues, rock, and a lot of cumbia — worth having on instant recall in any key.',
-                hint_es: 'I–IV–V es la progresión fundamental detrás del blues, el rock y buena parte de la cumbia — vale la pena tenerla lista al instante en cualquier tonalidad.',
+                hint: 'Blues, rock and a lot of cumbia use I–IV–V. Learn it in every key.',
+                hint_es: 'El blues, el rock y buena parte de la cumbia usan I–IV–V. Apréndela en cada tonalidad.',
                 skills: [2],
                 response: { type: 'mc', prompt: 'I–IV–V in the key of A is:',
                   prompt_es: 'El I–IV–V en la tonalidad de A es:',
@@ -473,8 +473,8 @@ SETS.push(
                 hint_es: 'Toca el loop unas cuantas veces primero — la base solo se revela una vez que puedes escuchar la forma completa de la progresión.',
                 stuck: 'Play just Am, then G, then F in isolation and rate each one 1-10 for "does this feel finished."',
                 stuck_es: 'Toca solo Am, luego G, luego F por separado y califica cada uno del 1 al 10 según "¿se siente terminado?"',
-                levelUp: 'Try the same drill on a progression you haven\'t analyzed yet.',
-                levelUp_es: 'Prueba el mismo ejercicio con una progresión que no hayas analizado todavía.',
+                levelUp: 'Try the same drill on a progression you haven\'t played yet.',
+                levelUp_es: 'Prueba el mismo ejercicio con una progresión que no hayas tocado todavía.',
                 skills: [4],
                 response: { type: 'short', placeholder: 'e.g. Am — the loop only feels finished when it lands there',
                   placeholder_es: 'p. ej. Am — el loop solo se siente terminado cuando cae ahí' },
@@ -552,8 +552,8 @@ SETS.push(
     },
 
     skills: [
-      { id: 'm11w2-s1', text: 'Identify a song\'s key from its chord inventory',
-        text_es: 'Identificar la tonalidad de una canción a partir de su inventario de acordes',
+      { id: 'm11w2-s1', text: 'Name a song\'s key from its list of chords',
+        text_es: 'Nombrar la tonalidad de una canción a partir de su lista de acordes',
         gotItWhen: 'you can look at an unfamiliar chord list (like G, C, D, Em) and name the one family that contains all of them before checking.',
         gotItWhen_es: 'puedes ver una lista de acordes desconocida (como G, C, D, Em) y nombrar la única familia que los contiene a todos antes de revisar.',
         practice: { type: 'mc', prompt: 'A song uses C, F, G, and Am. Its key:', prompt_es: 'Una canción usa C, F, G y Am. Su tonalidad:', choices: ['F major', 'C major', 'A major', 'G major'], choices_es: ['F mayor', 'C mayor', 'A mayor', 'G mayor'], answer: 1,
@@ -634,14 +634,14 @@ SETS.push(
                 label: 'Watch: E-shape barre chords', label_es: 'Mira: cejillas en forma de E',
                 text: 'Watch: <a href="https://youtu.be/MpMhueVEz2g" target="_blank">Basic Barré Chords #1 — the E shape (CH-006) – JustinGuitar</a>. As you watch, find the fret he is barring for each root he names.',
                 text_es: 'Mira: <a href="https://youtu.be/MpMhueVEz2g" target="_blank">Basic Barré Chords #1 — the E shape (CH-006) – JustinGuitar</a>. Mientras miras, encuentra el traste que él está cejillando para cada raíz que nombra.',
-                hint: 'Module 9\'s fretboard knowledge becomes useful here — naming a barre chord turns out to be naming one note you already know.',
-                hint_es: 'La raíz en la Mi grave nombra un acorde con cejilla en forma de E — el conocimiento del diapasón del Módulo 9 se vuelve útil aquí.',
+                hint: 'Your Module 9 skills already do this: name the fretted note, and you\'ve named the chord.',
+                hint_es: 'Tus destrezas del Módulo 9 ya hacen esto: nombra la nota pisada, y ya nombraste el acorde.',
                 skills: [1],
                 response: { type: 'mc', prompt: 'The E-shape barre chord takes its NAME from:',
                   prompt_es: 'El acorde con cejilla en forma de E toma su NOMBRE de:',
                   answer: 1,
-                  explain: 'The low-E root names it — barre fret 3 and the low E says G, so it\'s G major. Module 9 becomes useful here.',
-                  explain_es: 'La raíz en la Mi grave lo nombra — cejilla en el traste 3 y la Mi grave da G, así que es G mayor. Aquí el Módulo 9 se vuelve útil.',
+                  explain: 'The low-E root names it — barre fret 3 and the low E says G, so it\'s G major.',
+                  explain_es: 'La raíz en la Mi grave lo nombra — cejilla en el traste 3 y la Mi grave da G, así que es G mayor.',
                   choices: ['The fret your pinky is holding down', 'The note under your barre on the low E string', 'The key the song is written in', 'The A string, whatever fret you barre'],
                   choices_es: ['El traste donde tu meñique está pisando', 'La nota debajo de tu cejilla en la cuerda Mi grave', 'La tonalidad en que está escrita la canción', 'La cuerda La, sea cual sea el traste de la cejilla'] }
               },
@@ -734,15 +734,15 @@ SETS.push(
             ]
           },
           {
-            title: 'The 12-bar blues — the form your I–IV–V was waiting for',
-            title_es: 'El blues de 12 compases — la forma que tu I–IV–V estaba esperando',
+            title: 'The 12-bar blues',
+            title_es: 'El blues de 12 compases',
             steps: [
               {
                 label: 'Watch: 12-bar blues in E', label_es: 'Mira: blues de 12 compases en E',
                 text: 'Watch: <a href="https://www.youtube.com/watch?v=kurgOIcTCIE" target="_blank">How To Play Old School 12 Bar Blues Guitar No.1 EASY Beginners - Chords Key E – EricBlackmonGuitar (0:00–4:41)</a>. The 12-bar blues is I–IV–V — the exact chords you\'ve been building this set — used to build the most-played song form in American music. Watch for two things:<ul><li>The ORDER the chords arrive in.</li><li>The long-short "shuffle" bounce in the strumming hand.</li></ul>',
                 text_es: 'Mira: <a href="https://www.youtube.com/watch?v=kurgOIcTCIE" target="_blank">How To Play Old School 12 Bar Blues Guitar No.1 EASY Beginners - Chords Key E – EricBlackmonGuitar (0:00–4:41)</a>. El blues de 12 compases es I–IV–V — los mismos acordes que has estado construyendo en esta unidad — usado para armar la forma de canción más tocada en la música estadounidense. Fíjate en dos cosas:<ul><li>El ORDEN en que llegan los acordes.</li><li>El rebote largo-corto de "shuffle" en la mano que rasguea.</li></ul>',
-                hint: 'Thousands of songs are this one form. Learn it once and you can jam (play along freely and make up your own part) with people you\'ve just met for the rest of your life.',
-                hint_es: 'Miles de canciones usan esta única forma. Apréndela una vez y podrás improvisar (jam: tocar libremente junto con otros e inventar tu propia parte) con gente que acabas de conocer por el resto de tu vida.',
+                hint: 'Thousands of songs use this form. Learn it and you can jam (play along freely and make up your own part) with other players.',
+                hint_es: 'Miles de canciones usan esta forma. Apréndela y podrás improvisar (jam: tocar libremente junto con otros e inventar tu propia parte) con otros músicos.',
                 skills: [7]
               },
               {
@@ -774,8 +774,8 @@ SETS.push(
         ]
       },
       c: {
-        title: 'Practice station — barre chords as harmony tools',
-        title_es: 'Estación de práctica — acordes con cejilla como herramientas de armonía',
+        title: 'Practice station — barre chords in songs',
+        title_es: 'Estación de práctica — acordes con cejilla en canciones',
         sections: [
           {
             kind: 'tuning-warmup',
@@ -953,8 +953,8 @@ SETS.push(
           prompt_es: '¿Cuándo es el acorde con cejilla la mejor opción para una progresión?',
           choices: ['When the roots have no open shape, like Bb or F#', 'When you want the progression to sound more advanced', 'When you want ringing open strings in the sound', 'When the song has more than four chords'],
           choices_es: ['Cuando las raíces no tienen forma abierta, como Bb o F#', 'Cuando quieres que la progresión suene más avanzada', 'Cuando quieres cuerdas al aire sonando en el sonido', 'Cuando la canción tiene más de cuatro acordes'], answer: 0,
-          explain: 'It is a sound-and-logistics choice, not a skill ranking. Some roots have no open shape at all, and one movable grip covers every one of them; open shapes ring bigger when the roots allow it. Barre chords are not better for being harder, and neither chord count nor speed has anything to do with the choice.',
-          explain_es: 'Es una decisión de sonido y logística, no un ranking de destreza: las cejillas alcanzan cualquier raíz y se silencian limpio; las formas abiertas suenan más grandes. Elige según la progresión, no por dificultad.' } },
+          explain: 'Pick by sound and by which roots have open shapes. Some roots have no open shape at all, and one movable grip covers every one of them; open shapes ring bigger when the roots allow it. Barre chords are not better for being harder, and neither chord count nor speed has anything to do with the choice.',
+          explain_es: 'Elige según el sonido y qué raíces tienen forma abierta. Algunas raíces no tienen ninguna forma abierta, y una sola forma movible las cubre todas; las formas abiertas suenan más grandes cuando la raíz lo permite. Las cejillas no son mejores por ser más difíciles, y ni la cantidad de acordes ni la velocidad tienen que ver con la elección.' } },
       { id: 'm11w3-s7', text: 'Comp a 12-bar blues in A with shuffle feel (A7–D7–E7)',
         text_es: 'Acompañar un blues de 12 compases en A con sensación de shuffle (A7–D7–E7)',
         gotItWhen: 'you can play all 12 bars from memory at 60 BPM with a long-short shuffle strum, without losing your place in the form.',

@@ -2059,6 +2059,21 @@ const SLANG_PHRASES = [
 const SLANG_RE = new RegExp(
   '\\b(?:' + SLANG_PHRASES.map(p => p.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')).join('|') + ')\\b',
   'gi');
+/* Hoisted so 1w-t (below) can share the exact same field/choices/i18n
+   regexes instead of a second copy that could drift from 1w's. */
+const STUDENT_FIELD_RE =
+  /\b(text|hint|stuck|levelUp|gotItWhen|explain|forward|subtitle|meta|intro|note|prompt|placeholder):\s*'((?:\\.|[^'\\])*)'/g;
+/* `choices` is an ARRAY, so the field regex above cannot see inside it — and
+   until 2026-09-20 neither could 1w, which is how a banned phrase in an
+   answer choice shipped while the identical phrase in its `explain` failed
+   the push. Sweep every quoted string on a choices line separately. */
+const STUDENT_CHOICES_RE = /\bchoices(?:_es)?:\s*\[((?:[^\]\\]|\\.)*)\]/g;
+const STUDENT_I18N_EN_RE = /\ben:\s*(?:'((?:\\.|[^'\\])*)'|"((?:\\.|[^"\\])*)")/g;
+/* label: is deliberately NOT in STUDENT_FIELD_RE (see the 1w comment above —
+   1w skips it on purpose, 1y sweeps exit-check item labels separately). But
+   the Challenge-card assessment tag ("(assessment preparation)") and most
+   Challenge titles live in `label`, so 1w-t alone also sweeps it. */
+const STUDENT_LABEL_RE = /\blabel:\s*'((?:\\.|[^'\\])*)'/g;
 function checkSlangPhrasing() {
   head('1w. Slang and figurative phrasing in student-facing text');
   const RE = SLANG_RE;
@@ -2081,34 +2096,196 @@ function checkSlangPhrasing() {
   }
 
   /* Module content + class activities — the EN authoring fields only. */
-  const FIELD_RE =
-    /\b(text|hint|stuck|levelUp|gotItWhen|explain|forward|subtitle|meta|intro|note|prompt|placeholder):\s*'((?:\\.|[^'\\])*)'/g;
-  /* `choices` is an ARRAY, so the field regex above cannot see inside it — and
-     until 2026-09-20 neither could 1w, which is how a banned phrase in an
-     answer choice shipped while the identical phrase in its `explain` failed
-     the push. Sweep every quoted string on a choices line separately. */
-  const CHOICES_RE = /\bchoices(?:_es)?:\s*\[((?:[^\]\\]|\\.)*)\]/g;
   for (const file of [...MODULE_FILES, 'class-activities.js']) {
     let lines;
     try { lines = readFileSync(join(ROOT, file), 'utf8').split('\n'); } catch { continue; }
     lines.forEach((line, li) => {
-      for (const f of line.matchAll(FIELD_RE))
+      for (const f of line.matchAll(STUDENT_FIELD_RE))
         for (const m of f[2].matchAll(RE)) flag(file, li, m[0]);
-      for (const c of line.matchAll(CHOICES_RE))
+      for (const c of line.matchAll(STUDENT_CHOICES_RE))
         for (const m of c[1].matchAll(RE)) flag(file, li, m[0]);
     });
   }
 
   /* i18n.js — the en: side of each key. */
-  const EN_RE = /\ben:\s*(?:'((?:\\.|[^'\\])*)'|"((?:\\.|[^"\\])*)")/g;
   try {
     readFileSync(join(ROOT, 'i18n.js'), 'utf8').split('\n').forEach((line, li) => {
-      for (const e of line.matchAll(EN_RE))
+      for (const e of line.matchAll(STUDENT_I18N_EN_RE))
         for (const m of (e[1] ?? e[2] ?? '').matchAll(RE)) flag('i18n.js', li, m[0]);
     });
   } catch { /* checked elsewhere */ }
 
   if (bad === 0) ok('no banned slang phrases in student-facing text');
+}
+
+/* ════════════════════════════════════════════════════════════════════
+   1w-t. TEACHER SPEAK IN STUDENT-FACING TEXT — the jargon-cut work order
+   (2026-09-23) rewrote 433 hits of lesson-plan language across the site:
+   edu-words (self-assessment, benchmark lap, Identify/Demonstrate/Apply),
+   poster talk ("slow and clean is better than fast and buzzy, every
+   time", "That's completely fine:", "Don't worry"), why-this-matters
+   asides, abstract nouns (a deliberate musical decision, phrasing
+   strategy, confident level) and vague prompts (How did it go?). This
+   guards a relapse of the exact phrases that sweep retired.
+
+   Shares 1w's own field/choices/i18n regexes (STUDENT_FIELD_RE /
+   STUDENT_CHOICES_RE / STUDENT_I18N_EN_RE) rather than a second copy.
+
+   Hidden sections are exempt, the same way the audit itself excluded
+   them: kind:tuning-warmup / routine / ear-spark / reflection, a
+   take-to-song section that resolves to the Journey link card (modules
+   1–5), and any individual step with hidden:true. This walks the REAL
+   parsed SETS objects (the same ones 1af/1ao already load in
+   renderCheck) rather than raw text, so it can tell a hidden step's
+   field value from a visible one — collectHiddenStrings() builds the
+   set of every hidden step's field values, and a text-sweep match is
+   skipped when its captured field value is one of them.
+
+   The word "assessment" itself is not banned — Decision 1 kept it,
+   framed as preparation ("(assessment preparation)"), so only the
+   specific retired phrases below are guarded, not the word.
+   ════════════════════════════════════════════════════════════════════ */
+const TEACHER_PHRASES = [
+  'self-assessment', 'assessment piece', 'benchmark lap', 'next layer of learning',
+  'answer in a frame', 'better than fast and', "that's completely fine", 'totally normal',
+  "that's normal!", "you've got this", 'it will feel easy', 'confident level',
+  'confident volume', 'confident pluck', 'nafme', "don't worry", "it's okay if",
+  'trust the', 'quality first', 'quality over speed', 'make them your own',
+  'a stepping stone', "that's the point", 'phrasing strateg', 'tone parameters',
+  'deliberate musical', 'expressive tool', 'i can demonstrate', 'in your own words',
+  'pause and think',
+];
+/* "every time." after a comparison — the "slow and X is better than fast and
+   Y, every time." maxim family. Matched as its own pattern since it needs the
+   trailing period, not folded into the plain-substring list above. */
+const TEACHER_MAXIM_RE = /\bbetter than fast and \w+,?\s*every time\./gi;
+/* Anchored to the START of a field's own value (not the line) — a field that
+   OPENS with a standards-verb, not one that merely contains the word
+   somewhere (a step can legitimately use "identify" mid-sentence as an
+   ordinary verb; it's the checklist-style opening that's the tell). */
+const TEACHER_PREFIXES = [/^Demonstrate /, /^Apply /, /^Identify /];
+const TEACHER_RE = new RegExp(
+  '\\b(?:' + TEACHER_PHRASES.map(p => p.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')).join('|') + ')',
+  'gi');
+/* 'trust the' guards the "trust the process" reassurance maxim, but it has
+   real innocent twins — pointing a student at a tuner needle or a printed
+   fret number is a literal instruction, not a pep-talk aside, and a frozen
+   graded-MC distractor about vetting video sources by star rating isn't
+   reassurance to the reader at all (rewording it would violate Rule Zero
+   even if it were). Same shape as MC_CATCHALL_ALLOW / MC_LEAK_ALLOW: an
+   allowlist entry excuses one verified-innocent occurrence, not the phrase
+   everywhere else. Matched by exact position (`lower.startsWith(phrase,
+   m.index)`), not "the value merely contains it somewhere", so a second,
+   genuinely bad "trust the" later in the same field still fails the push. */
+const TEACHER_PHRASE_ALLOW = [
+  { file: 'module-1.js', phrase: 'trust the needle' },
+  { file: 'module-2.js', phrase: 'trust the fret numbers' },
+  { file: 'module-7.js', phrase: 'trust the one with the highest star rating' },
+  /* m2w2 Challenge 3's "(your low-E assessment piece)" label is frozen —
+     Module 2 is in rule-zero-proof.mjs's FROZEN_THROUGH regime, where a step
+     LABEL must match the base commit BYTE-FOR-BYTE by index (a rename would
+     hide an insertion from that proof). Decision 1's "(assessment
+     preparation)" retitle can't ship here until the class moves past Module
+     2 and FROZEN_THROUGH is raised — see CLAUDE.md's Challenge-card note. */
+  { file: 'module-2.js', phrase: 'assessment piece' },
+];
+
+const HIDDEN_SECTION_KINDS = new Set(['routine', 'ear-spark', 'reflection']);
+const HIDDEN_STEP_FIELDS = [
+  'text', 'hint', 'stuck', 'levelUp', 'gotItWhen', 'explain', 'label',
+  'prompt', 'placeholder', 'meta', 'note', 'forward', 'subtitle', 'intro',
+];
+function collectHiddenStrings(sets, journeySongsFor) {
+  const out = new Set();
+  const addObj = (obj) => {
+    if (!obj || typeof obj !== 'object') return;
+    for (const f of HIDDEN_STEP_FIELDS) {
+      if (typeof obj[f] === 'string') out.add(obj[f]);
+      if (typeof obj[f + '_es'] === 'string') out.add(obj[f + '_es']);
+    }
+    for (const sub of [obj.response, obj.practice]) {
+      if (!sub || typeof sub !== 'object') continue;
+      for (const f of ['prompt', 'explain', 'placeholder']) {
+        if (typeof sub[f] === 'string') out.add(sub[f]);
+        if (typeof sub[f + '_es'] === 'string') out.add(sub[f + '_es']);
+      }
+      for (const f of ['choices', 'choices_es']) {
+        if (Array.isArray(sub[f])) sub[f].forEach(c => { if (typeof c === 'string') out.add(c); });
+      }
+    }
+  };
+  const isTuning = (sec, moduleNum) => moduleNum !== 1 && sec.kind === 'tuning-warmup';
+  for (const w of sets) {
+    for (const stId of ['b', 'c']) {
+      const stn = w.stations && w.stations[stId];
+      if (!stn || !(stn.sections && stn.sections.length)) continue;   // single-flow stations hide nothing
+      for (const sec of stn.sections) {
+        if (isTuning(sec, w.moduleNum) || HIDDEN_SECTION_KINDS.has(sec.kind)) {
+          (sec.steps || []).forEach(addObj);
+          continue;
+        }
+        if (sec.kind === 'take-to-song' && journeySongsFor(w.moduleNum).length > 0) {
+          (sec.steps || []).forEach(addObj);   // the Journey card renders instead — steps invisible
+          continue;
+        }
+        (sec.steps || []).forEach(st => { if (st.hidden) addObj(st); });
+      }
+    }
+  }
+  return out;
+}
+/* The naive unescape 1w-t needs to compare a regex-captured field value
+   (raw source text, backslash-escapes intact) against the same string as
+   parsed by the vm sandbox (real characters) — these files only ever use
+   \' \" \\ \n inside single-quoted strings, so a generic \X → X pass plus
+   the \n special case covers every field this check reads. */
+const unescapeJs = s => s.replace(/\\n/g, '\n').replace(/\\(.)/g, '$1');
+
+function checkTeacherSpeak(sets, journeySongsFor) {
+  head('1w-t. Teacher speak in student-facing text');
+  const hidden = sets && journeySongsFor ? collectHiddenStrings(sets, journeySongsFor) : new Set();
+  if (!sets || !journeySongsFor) warn('1w-t: no parsed SETS available — hidden-section exemption skipped this run');
+  let bad = 0;
+  const flag = (file, li, phrase) => { err(`${file}:${li + 1} — "${phrase}"`); problems++; bad++; };
+  const sweepValue = (file, li, value) => {
+    if (hidden.has(unescapeJs(value))) return;
+    const lower = value.toLowerCase();
+    for (const m of value.matchAll(TEACHER_RE)) {
+      if (TEACHER_PHRASE_ALLOW.some(a => a.file === file && lower.startsWith(a.phrase, m.index))) continue;
+      flag(file, li, m[0]);
+    }
+    for (const m of value.matchAll(TEACHER_MAXIM_RE)) flag(file, li, m[0]);
+    for (const re of TEACHER_PREFIXES) if (re.test(value)) flag(file, li, value.slice(0, 20) + '…');
+  };
+
+  for (const file of TAB_PAGES.filter(f => f.endsWith('.html'))) {
+    let raw;
+    try { raw = readFileSync(join(ROOT, file), 'utf8'); } catch { continue; }
+    const en = raw.replace(/data-es="[^"]*"/g, m => m.replace(/[^\n]/g, ' '));
+    en.split('\n').forEach((line, li) => {
+      if (/^\s*<!--/.test(line)) return;
+      for (const m of line.matchAll(TEACHER_RE)) flag(file, li, m[0]);
+      for (const m of line.matchAll(TEACHER_MAXIM_RE)) flag(file, li, m[0]);
+    });
+  }
+
+  for (const file of [...MODULE_FILES, 'class-activities.js']) {
+    let lines;
+    try { lines = readFileSync(join(ROOT, file), 'utf8').split('\n'); } catch { continue; }
+    lines.forEach((line, li) => {
+      for (const f of line.matchAll(STUDENT_FIELD_RE)) sweepValue(file, li, f[2]);
+      for (const c of line.matchAll(STUDENT_CHOICES_RE)) sweepValue(file, li, c[1]);
+      for (const l of line.matchAll(STUDENT_LABEL_RE)) sweepValue(file, li, l[1]);
+    });
+  }
+
+  try {
+    readFileSync(join(ROOT, 'i18n.js'), 'utf8').split('\n').forEach((line, li) => {
+      for (const e of line.matchAll(STUDENT_I18N_EN_RE)) sweepValue('i18n.js', li, e[1] ?? e[2] ?? '');
+    });
+  } catch { /* checked elsewhere */ }
+
+  if (bad === 0) ok('no banned teacher-speak phrases in student-facing text');
 }
 
 /* ════════════════════════════════════════════════════════════════════
@@ -3732,6 +3909,7 @@ function renderCheck() {
   if (!bad) ok(`all ${sets.length} sets render`);
   checkStorageNamespaces(sets, buildSet, ctx);
   checkSetParts(sets, buildSet, ctx);
+  return { sets, ctx };
 }
 
 /* ════════════════════════════════════════════════════════════════════
@@ -5044,7 +5222,7 @@ function checkCureChorusOrder() {
   }
   console.log(`${C.bold}Guitar Class — pre-push checks${C.reset}${CHECK_ONLY ? `  ${C.dim}(check-only)${C.reset}` : ''}`);
   syntaxCheck();
-  renderCheck();
+  const { sets: rcSets, ctx: rcCtx } = renderCheck() || {};
   validateModules();
   validateClassActivities();
   const i18nTable = checkI18nParity();
@@ -5056,6 +5234,7 @@ function checkCureChorusOrder() {
   checkBlockedTabSites();
   checkNarrativeLeadIns();
   checkSlangPhrasing();
+  checkTeacherSpeak(rcSets, rcCtx ? vm.runInContext('typeof journeySongsFor === "function" ? journeySongsFor : null', rcCtx) : null);
   checkJourneyLickLabels();
   checkRetiredStationWording();
   checkStationNames();

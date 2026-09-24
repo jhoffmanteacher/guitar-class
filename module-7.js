@@ -160,8 +160,8 @@ SETS.push(
             text_es: '<ul><li>Lee el ritmo primero: las notas 2 y 3 son un par de corcheas unidas por barra (dos metidas en un solo tiempo), las notas 1 y 4–7 son negras (un tiempo cada una), y la última nota es una blanca (sostenida dos tiempos completos).</li><li>Luego toca el riff en las cuerdas Mi grave y La con púa alternada estricta — un golpe de púa por nota, alternando abajo-arriba.</li></ul>Lo tienes cuando: sale limpio y parejo a 60 BPM antes de acelerarlo, con el par de corcheas y la última nota sostenida claramente distintas de las negras.',
             hint: 'Use alternate picking (down-up-down-up). Tap ▶ on the TAB to hear the rhythm — the two 8th notes go by twice as fast as the quarters, and the last note rings for two beats. Start at 60 BPM and only speed up when it\'s clean. Set the ⏱ Timer for 2 minutes and loop it.',
             hint_es: 'Usa púa alternada (abajo-arriba-abajo-arriba). Toca ▶ en el TAB para escuchar el ritmo — las dos corcheas pasan al doble de velocidad que las negras, y la última nota suena dos tiempos. Empieza a 60 BPM y solo acelera cuando salga limpio. Pon el ⏱ Temporizador en 2 minutos y repítelo.',
-            stuck: 'Drop to 50 BPM and keep strict down-up-down-up picking — even and slow is better than fast and sloppy. Loop just the first 4 notes until they\'re automatic.',
-            stuck_es: 'Baja a 50 BPM y mantén la púa estricta abajo-arriba-abajo-arriba — parejo y lento es mejor que rápido y descuidado. Repite solo las primeras 4 notas hasta que salgan automáticas.',
+            stuck: 'Drop to 50 BPM and keep strict down-up-down-up picking. Loop just the first 4 notes until they\'re automatic.',
+            stuck_es: 'Baja a 50 BPM y mantén la púa estricta abajo-arriba-abajo-arriba. Repite solo las primeras 4 notas hasta que salgan automáticas.',
             levelUp: 'Push to 80 BPM, or play it twice through with no stumble.',
             levelUp_es: 'Sube a 80 BPM, o tócalo dos veces seguidas sin tropiezos.',
             skills: [2],
@@ -244,7 +244,7 @@ SETS.push(
                 levelUp: 'Run the whole lick as one smooth phrase in a single breath, or move it up to the B string and read the new frets.',
                 levelUp_es: 'Toca todo el lick como una sola frase fluida de un solo aliento, o muévelo a la cuerda Si y lee los nuevos trastes.',
                 skills: [3],
-                response: { type: 'short', prompt: 'Which of the three — hammer, pull, or slide — needs the most work? Name it for next session.', prompt_es: '¿Cuál de los tres — hammer-on, pull-off o deslizamiento — necesita más trabajo? Nómbralo para la próxima sesión.', placeholder: 'e.g. the pull-off — my note comes out too quiet', placeholder_es: 'p. ej. el pull-off — mi nota sale demasiado suave' },
+                response: { type: 'short', prompt: 'Which one is quietest: hammer, pull, or slide?', prompt_es: '¿Cuál es más silencioso: el hammer-on, el pull-off o el deslizamiento?', placeholder: 'e.g. the pull-off — my note comes out too quiet', placeholder_es: 'p. ej. el pull-off — mi nota sale demasiado suave' },
                 tab: {
                   noCoach: true,   // 2 picks + 3 slurred notes — a mic check expecting 5 picked onsets would fail correct technique
                   caption: '2-bar articulation lick · G string · h = hammer-on, p = pull-off, / = slide up',
@@ -275,8 +275,8 @@ SETS.push(
           choices_es: ['Diez — uno por cada número de la página', 'Dos — solo se pulsan los números que van solos', 'Seis — un golpe por cada columna', 'Cuatro — solo se pulsan las columnas apiladas'], answer: 2,
           explain: 'Stacked numbers share one moment in time, so a single stroke across both strings covers the whole column. Counting ten — one stroke for every number on the page — is the common slip: there are ten numbers, but only six moments.',
           explain_es: 'Los números apilados comparten un solo momento, así que un golpe a través de las dos cuerdas cubre toda la columna. Contar diez — un golpe por cada número de la página — es el error común: hay diez números, pero solo seis momentos.' } },
-      { id: 'm7w1-s2', text: 'Identify quarter notes, 8th notes, and half notes in TAB rhythm symbols',
-        text_es: 'Identificar negras, corcheas y blancas en los símbolos de ritmo del TAB',
+      { id: 'm7w1-s2', text: 'Tell quarter, 8th and half notes apart in TAB rhythm symbols',
+        text_es: 'Distinguir negras, corcheas y blancas en los símbolos de ritmo del TAB',
         gotItWhen: 'you can look at the stems and flags above a TAB and call out the rhythm before you play — without having to listen to the original recording.',
         gotItWhen_es: 'puedes mirar las plicas y banderas arriba de un TAB y decir el ritmo en voz alta antes de tocar — sin tener que escuchar la grabación original.',
         practice: { type: 'mc', prompt: 'Two TAB notes with their stems JOINED by a single beam (like ♫) are what kind of notes?',
@@ -376,8 +376,8 @@ SETS.push(
           },
           {
             label: 'Watch: the E-shape barre', label_es: 'Mira: la cejilla en forma de E',
-            text: 'Watch: <a href="https://youtu.be/MpMhueVEz2g?t=30" target="_blank">Basic Barre Chords #1 — the E shape (CH-006) – JustinGuitar</a> (0:30–4:00). While you watch: watch how his index finger becomes the nut for the sliding shape. You\'ve got it when: you can explain what "be the nut" means in your own words.',
-            text_es: 'Mira: <a href="https://youtu.be/MpMhueVEz2g?t=30" target="_blank">Basic Barre Chords #1 — the E shape (CH-006) – JustinGuitar</a> (0:30–4:00). Mientras miras: mira cómo su dedo índice se convierte en la cejuela para la forma que se desliza. Lo tienes cuando: puedes explicar con tus propias palabras qué significa "ser la cejuela".',
+            text: 'Watch: <a href="https://youtu.be/MpMhueVEz2g?t=30" target="_blank">Basic Barre Chords #1 — the E shape (CH-006) – JustinGuitar</a> (0:30–4:00). While you watch: watch how his index finger becomes the nut for the sliding shape. You\'ve got it when: you can say what your index finger does in place of the nut.',
+            text_es: 'Mira: <a href="https://youtu.be/MpMhueVEz2g?t=30" target="_blank">Basic Barre Chords #1 — the E shape (CH-006) – JustinGuitar</a> (0:30–4:00). Mientras miras: mira cómo su dedo índice se convierte en la cejuela para la forma que se desliza. Lo tienes cuando: puedes decir qué hace tu dedo índice en lugar de la cejuela.',
             hint: 'The "E shape" is literally the E major open chord, but you slide your fingers up the neck and use your INDEX finger to "be the nut" (the thin strip at the top of the neck that the strings cross) — your finger becomes the bar.',
             hint_es: 'La "forma de E" es literalmente el acorde abierto de E mayor, pero deslizas tus dedos por el mástil y usas tu dedo ÍNDICE para "ser la cejuela" (la tira delgada en la parte superior del mástil por donde cruzan las cuerdas) — tu dedo se convierte en la cejilla.',
             skills: [2, 3],
@@ -432,8 +432,8 @@ SETS.push(
             steps: [
           {
             label: 'Challenge 2 — E-Shape Barre', label_es: 'Reto 2 — Cejilla en forma de E',
-            text: '<ol><li>Add the E-shape on top of the bar at the 5th fret for A major (ring finger on the A string, fret 7 · pinky on the D string, fret 7 · middle finger on the G string, fret 6).</li><li>Strum all 6.</li></ol>You\'ve got it when: a full, clean A major barre — master it here before tackling F.<span class="step-figure"><img src="img/m7-barre-hand-front.jpg" alt="Pencil sketch of a fretting hand seen from the front: the index finger lies flat across all six strings to form the bar, while the middle, ring and pinky fingers press the E shape on the frets above it." width="700" height="700"></span>',
-            text_es: '<ol><li>Agrega la forma de E encima de la cejilla en el traste 5 para A mayor (dedo anular en la cuerda La, traste 7 · meñique en la cuerda Re, traste 7 · dedo medio en la cuerda Sol, traste 6).</li><li>Rasguea las 6 cuerdas.</li></ol>Lo tienes cuando: una cejilla de A mayor completa y limpia — domínala aquí antes de atacar F.<span class="step-figure"><img src="img/m7-barre-hand-front.jpg" alt="Dibujo a lápiz de una mano trasteando vista de frente: el dedo índice está plano sobre las seis cuerdas formando la cejilla, mientras los dedos medio, anular y meñique pisan la forma de E en los trastes de arriba." width="700" height="700"></span>',
+            text: '<ol><li>Add the E-shape on top of the bar at the 5th fret for A major (ring finger on the A string, fret 7 · pinky on the D string, fret 7 · middle finger on the G string, fret 6).</li><li>Strum all 6.</li></ol>You\'ve got it when: a full, clean A major barre — get it clean here before you try F.<span class="step-figure"><img src="img/m7-barre-hand-front.jpg" alt="Pencil sketch of a fretting hand seen from the front: the index finger lies flat across all six strings to form the bar, while the middle, ring and pinky fingers press the E shape on the frets above it." width="700" height="700"></span>',
+            text_es: '<ol><li>Agrega la forma de E encima de la cejilla en el traste 5 para A mayor (dedo anular en la cuerda La, traste 7 · meñique en la cuerda Re, traste 7 · dedo medio en la cuerda Sol, traste 6).</li><li>Rasguea las 6 cuerdas.</li></ol>Lo tienes cuando: una cejilla de A mayor completa y limpia — lógrala limpia aquí antes de intentar F.<span class="step-figure"><img src="img/m7-barre-hand-front.jpg" alt="Dibujo a lápiz de una mano trasteando vista de frente: el dedo índice está plano sobre las seis cuerdas formando la cejilla, mientras los dedos medio, anular y meñique pisan la forma de E en los trastes de arriba." width="700" height="700"></span>',
             hint: 'It\'s the open E major shape moved up — index finger replaces the "nut". Practice this at the 5th fret BEFORE attempting F at fret 1. If your hand cramps, that\'s normal — shake your hand loose and come back.',
             hint_es: 'Es la forma abierta de E mayor movida hacia arriba — el dedo índice reemplaza a la "cejuela". Practica esto en el traste 5 ANTES de intentar F en el traste 1. Si tu mano se acalambra, eso es normal — sacúdela para relajarla y vuelve a intentarlo.',
             stuck: 'Stage it: (1) get the bar across fret 5 clean, (2) add ring + pinky on the A and D strings, (3) add the middle on the G string last — pluck each string to find the muffled one before moving on. Short tries are better than one long tiring session.',
@@ -455,8 +455,8 @@ SETS.push(
             label: 'Challenge — Spot the Power Chord', label_es: 'Reto — Encuentra el acorde de potencia',
             text: '<ol><li>Form your F major barre (the one you\'re about to build in the next challenge) — it has the F5 power chord you learned in Module 3 hiding inside it.</li><li>Look at just the low E and A strings — low E (fret 1) + A (fret 3). That\'s F5. The barre just stacks the rest of the chord on top.</li></ol>You\'ve got it when: play F5 alone, then add the barre fingers to make full F — and hear the power chord living inside it.',
             text_es: '<ol><li>Forma tu cejilla de F mayor (la que estás por construir en el siguiente reto) — tiene escondido dentro el acorde de potencia F5 que aprendiste en el Módulo 3.</li><li>Mira solo las cuerdas Mi grave y La — Mi grave (traste 1) + La (traste 3). Eso es F5. La cejilla solo apila el resto del acorde encima.</li></ol>Lo tienes cuando: toca F5 solo, y luego agrega los dedos de la cejilla para formar el F completo — y escucha el acorde de potencia viviendo dentro de él.',
-            hint: 'Barre chords feel less scary once you see them as a power chord you already know, plus a few extra notes. And just like a power chord, you name the barre by its root on the low E string — that\'s your Module 2 + Module 3 skills combining.',
-            hint_es: 'Los acordes con cejilla dan menos miedo una vez que los ves como un acorde de potencia que ya conoces, más algunas notas extra. Y al igual que un acorde de potencia, nombras la cejilla por su raíz en la cuerda Mi grave — eso es tus destrezas del Módulo 2 y el Módulo 3 combinándose.',
+            hint: 'A barre is a power chord plus a few more notes. Name it by its root on the low E string.',
+            hint_es: 'Una cejilla es un acorde de potencia más algunas notas. Nómbrala por su raíz en la cuerda Mi grave.',
             stuck: 'If full F won\'t ring yet, fall back to just the F5 power chord (the low E and A strings) and add one string at a time upward — the full bar comes last.',
             stuck_es: 'Si el F completo todavía no suena, vuelve solo al acorde de potencia F5 (las cuerdas Mi grave y La) y agrega una cuerda a la vez hacia arriba — la cejilla completa llega al final.',
             levelUp: 'Do the same reveal at G (fret 3): play G5, then stack the full G barre on top and hear the power chord inside it.',
@@ -474,11 +474,11 @@ SETS.push(
             title_es: 'Desliza la forma de E: F, G, A',
             steps: [
           {
-            label: 'Challenge 3 — F, G, A Slide (your assessment piece)', label_es: 'Reto 3 — Deslizamiento F, G, A (tu pieza de evaluación)',
+            label: 'Challenge 3 — F, G, A Slide (assessment preparation)', label_es: 'Reto 3 — Deslizamiento F, G, A (preparación para la evaluación)',
             text: 'Slide the same shape through three chords:<ul><li>Fret 1 (F).</li><li>Fret 3 (G).</li><li>Fret 5 (A).</li></ul>You\'ve got it when: G and A ringing clean, then F — the hardest — without buzzing.',
             text_es: 'Desliza la misma forma por tres acordes:<ul><li>Traste 1 (F).</li><li>Traste 3 (G).</li><li>Traste 5 (A).</li></ul>Lo tienes cuando: G y A suenan limpio, y luego F — el más difícil — sin zumbido.',
-            hint: 'F is the hardest position — don\'t panic if it buzzes. Barre chords are a hand-strength skill. If your hand cramps, shake your hand loose and rest. Short, frequent tries are better than one long, tiring session, and the strength comes within a couple of weeks.',
-            hint_es: 'F es la posición más difícil — no te asustes si zumba. Los acordes con cejilla son una destreza de fuerza de mano. Si tu mano se acalambra, sacúdela para relajarla y descansa. Intentos cortos y frecuentes son mejores que una sola sesión larga y agotadora, y la fuerza llega en un par de semanas.',
+            hint: 'F is the hardest spot. If it buzzes, rest and try again. Barre chords are a hand-strength skill. If your hand cramps, shake your hand loose and rest. Short, frequent tries are better than one long, tiring session, and the strength comes within a couple of weeks.',
+            hint_es: 'F es el punto más difícil. Si zumba, descansa e inténtalo de nuevo. Los acordes con cejilla son una destreza de fuerza de mano. Si tu mano se acalambra, sacúdela para relajarla y descansa. Intentos cortos y frecuentes son mejores que una sola sesión larga y agotadora, y la fuerza llega en un par de semanas.',
             stuck: 'Build the barre in stages: (1) bar + just the low-E root, (2) add the A and D strings, (3) add the B and high E last — get each stage clean before stacking the next. Start at G or A (frets 3–5) where the strings are looser, then bring the shape down to F.',
             stuck_es: 'Construye la cejilla por etapas: (1) cejilla + solo la raíz en Mi grave, (2) agrega las cuerdas La y Re, (3) agrega la Si y la mi aguda al final — logra que cada etapa suene limpia antes de apilar la siguiente. Empieza en G o A (trastes 3–5) donde las cuerdas están más sueltas, y luego baja la forma a F.',
             levelUp: 'Add B at the 7th fret as a 4th chord, or switch F→G→A in time at 70 BPM.',
@@ -498,10 +498,10 @@ SETS.push(
             steps: [
               {
                 label: 'Challenge 4 — One-Minute Barre Changes (F ↔ G)', label_es: 'Reto 4 — Cambios de cejilla en un minuto (F ↔ G)',
-                text: '<ol><li>Set the ⏱ Timer for 60 seconds.</li><li>Slide your E-shape barre between F (fret 1) and G (fret 3) as many times as you can — only changes where all 6 strings ring count.</li></ol>You\'ve got it when: type your count below and try for a higher number next time. (Even 6–8 clean ones is a real success for barres.)',
-                text_es: '<ol><li>Pon el ⏱ Temporizador en 60 segundos.</li><li>Desliza tu cejilla en forma de E entre F (traste 1) y G (traste 3) tantas veces como puedas — solo cuentan los cambios donde suenan las 6 cuerdas.</li></ol>Lo tienes cuando: escribe tu cuenta abajo e intenta superarla la próxima vez. (Incluso 6–8 limpios es un verdadero éxito para las cejillas.)',
-                hint: 'It\'s the same shape sliding two frets — keep the bar pressed and glide, don\'t lift and re-place. Quality over speed.',
-                hint_es: 'Es la misma forma deslizándose dos trastes — mantén la cejilla presionada y deslízala, no la levantes y la vuelvas a colocar. Calidad sobre velocidad.',
+                text: '<ol><li>Set the ⏱ Timer for 60 seconds.</li><li>Slide your E-shape barre between F (fret 1) and G (fret 3) as many times as you can — only changes where all 6 strings ring count.</li></ol>You\'ve got it when: type your count below and try for a higher number next time. (6 to 8 clean changes is a good first count.)',
+                text_es: '<ol><li>Pon el ⏱ Temporizador en 60 segundos.</li><li>Desliza tu cejilla en forma de E entre F (traste 1) y G (traste 3) tantas veces como puedas — solo cuentan los cambios donde suenan las 6 cuerdas.</li></ol>Lo tienes cuando: escribe tu cuenta abajo e intenta superarla la próxima vez. (6 a 8 cambios limpios es un buen primer número.)',
+                hint: 'It\'s the same shape sliding two frets — keep the bar pressed and glide, don\'t lift and re-place. Only count changes where all 6 strings ring.',
+                hint_es: 'Es la misma forma deslizándose dos trastes — mantén la cejilla presionada y deslízala, no la levantes y la vuelvas a colocar. Cuenta solo los cambios donde suenan las 6 cuerdas.',
                 stuck: 'Keep the bar lightly down the whole time so you never fully reset the shape — just shift two frets. Slow down until both chords ring.',
                 stuck_es: 'Mantén la cejilla ligeramente abajo todo el tiempo para que nunca reinicies del todo la forma — solo cambia dos trastes. Baja la velocidad hasta que ambos acordes suenen.',
                 levelUp: 'Add A (fret 5) and cycle F→G→A, or run it with a down-up strum.',
@@ -731,8 +731,8 @@ SETS.push(
             label: 'Challenge 2 — A-Shape Slide', label_es: 'Reto 2 — Deslizamiento en forma de A',
             text: 'Slide the A-shape through three chords, strumming from the A string down only:<ul><li>C (3rd fret).</li><li>D (5th fret).</li><li>E (7th fret).</li></ul>You\'ve got it when: name each by its root on the A string and play all three clean.',
             text_es: 'Desliza la forma de A por tres acordes, rasgueando solo desde la cuerda La hacia abajo:<ul><li>C (traste 3).</li><li>D (traste 5).</li><li>E (traste 7).</li></ul>Lo tienes cuando: nombras cada uno por su raíz en la cuerda La y tocas los tres limpios.',
-            hint: 'The A-shape is named by the root note on the A string. Apply your Module 2 A-string note knowledge: fret 3 of A = C, fret 5 of A = D, fret 7 of A = E.',
-            hint_es: 'La forma de A se nombra por la nota raíz en la cuerda La. Aplica tu conocimiento de las notas de la cuerda La del Módulo 2: traste 3 de La = C, traste 5 de La = D, traste 7 de La = E.',
+            hint: 'The A-shape is named by the root note on the A string. Use the A-string notes from Module 2: fret 3 of A = C, fret 5 of A = D, fret 7 of A = E.',
+            hint_es: 'La forma de A se nombra por la nota raíz en la cuerda La. Usa las notas de la cuerda La del Módulo 2: traste 3 de La = C, traste 5 de La = D, traste 7 de La = E.',
             stuck: 'Higher frets (D, E) are easier — the strings are looser, so get those clean first, then bring the shape down to C. Keep the bar pressed and slide rather than lifting between chords.',
             stuck_es: 'Los trastes más altos (D, E) son más fáciles — las cuerdas están más sueltas, así que logra que esos suenen limpio primero, y luego baja la forma a C. Mantén la cejilla presionada y deslízala en lugar de levantarla entre acordes.',
             levelUp: 'Run C→D→E in time at 70 BPM, or add F at the 8th fret.',
@@ -754,8 +754,8 @@ SETS.push(
             label: 'Challenge 3 — Two Homes for F', label_es: 'Reto 3 — Dos hogares para F',
             text: 'Play F in two places on the neck — same note name, different position:<ol><li>Play F as an E-shape barre (index on the low E string, fret 1).</li><li>Play the SAME chord as an A-shape barre (index on the A string, fret 8).</li><li>Pluck both and listen — same chord, slightly different colour.</li></ol>You\'ve got it when: find and play both Fs, and say WHY they are both F (read the root: low E + 1 fret = F; A string + 8 frets = F).',
             text_es: 'Toca F en dos lugares del mástil — mismo nombre de nota, posición distinta:<ol><li>Toca F como cejilla en forma de E (índice en la cuerda Mi grave, traste 1).</li><li>Toca el MISMO acorde como cejilla en forma de A (índice en la cuerda La, traste 8).</li><li>Puntea ambos y escucha — mismo acorde, un color ligeramente distinto.</li></ol>Lo tienes cuando: encuentras y tocas ambos F, y dices POR QUÉ los dos son F (lee la raíz: Mi grave + traste 1 = F; cuerda La + traste 8 = F).',
-            hint: 'This is your Module 2 fretboard map paying off: the root note names the chord, so wherever an F lives on the low E string or the A string, an F barre lives there too. Knowing both homes means you are never far from any chord.',
-            hint_es: 'Este es tu mapa del diapasón del Módulo 2 dando frutos: la nota raíz nombra el acorde, así que donde sea que un F viva en la cuerda Mi grave o la cuerda La, una cejilla de F también vive ahí. Conocer ambos hogares significa que nunca estás lejos de ningún acorde.',
+            hint: 'The root note names the chord. Find F on the low E or the A string, and build the barre there.',
+            hint_es: 'La nota raíz nombra el acorde. Encuentra F en la cuerda Mi grave o en la cuerda La, y construye la cejilla ahí.',
             stuck: 'Find the root note first, then build the shape around it. Low E + 1 fret = F (E-shape home); A string + 8 frets = F (A-shape home). The shape follows the root.',
             stuck_es: 'Encuentra la nota raíz primero, y luego construye la forma alrededor de ella. Mi grave + traste 1 = F (hogar de la forma de E); cuerda La + traste 8 = F (hogar de la forma de A). La forma sigue a la raíz.',
             levelUp: 'Find both homes for G (E-shape fret 3, A-shape fret 10) and for C (A-shape fret 3, E-shape fret 8).',
@@ -773,11 +773,11 @@ SETS.push(
             title_es: 'Combina las cejillas en forma de E y de A',
             steps: [
           {
-            label: 'Challenge 4 — Shape Combo: F–C–G–D (your assessment piece)', label_es: 'Reto 4 — Combo de formas: F–C–G–D (tu pieza de evaluación)',
+            label: 'Challenge 4 — Shape Combo: F–C–G–D (assessment preparation)', label_es: 'Reto 4 — Combo de formas: F–C–G–D (preparación para la evaluación)',
             text: 'Alternate E-shape and A-shape, 2 bars each at 60 BPM:<ul><li>F (E-shape, 1st fret).</li><li>C (A-shape, 3rd fret).</li><li>G (E-shape, 3rd fret).</li><li>D (A-shape, 5th fret).</li></ul>You\'ve got it when: smooth switches between the two shapes, landing each change on beat 1.',
             text_es: 'Alterna forma de E y forma de A, 2 compases cada uno a 60 BPM:<ul><li>F (forma de E, traste 1).</li><li>C (forma de A, traste 3).</li><li>G (forma de E, traste 3).</li><li>D (forma de A, traste 5).</li></ul>Lo tienes cuando: cambios fluidos entre las dos formas, cayendo cada cambio en el tiempo 1.',
-            hint: 'You\'re alternating between E-shape and A-shape with each chord change. This is what real songs ask for. Notice that some chord changes are tiny hand moves — barely shift positions.',
-            hint_es: 'Estás alternando entre la forma de E y la forma de A con cada cambio de acorde. Esto es lo que las canciones reales piden. Fíjate que algunos cambios de acorde son movimientos pequeños de mano — apenas cambian de posición.',
+            hint: 'You\'re alternating between E-shape and A-shape with each chord change. Notice that some chord changes are tiny hand moves — barely shift positions.',
+            hint_es: 'Estás alternando entre la forma de E y la forma de A con cada cambio de acorde. Fíjate que algunos cambios de acorde son movimientos pequeños de mano — apenas cambian de posición.',
             stuck: 'Drill one pair at a time — F→C, then G→D — before running all four. Some moves are tiny (G E-shape fret 3 → D A-shape fret 5 is a short hop). Drop to 50 BPM if the changes fall apart.',
             stuck_es: 'Ejercita un par a la vez — F→C, y luego G→D — antes de correr los cuatro. Algunos movimientos son pequeños (G en forma de E traste 3 → D en forma de A traste 5 es un salto corto). Baja a 50 BPM si los cambios se desarman.',
             levelUp: 'Run it with the D-DU-UDU strum, or push to 75 BPM.',
@@ -870,8 +870,8 @@ SETS.push(
             steps: [
           {
             label: 'Level-up: "Sweet Child O\' Mine" intro', label_es: 'Sube de nivel: intro de "Sweet Child O\' Mine"',
-            text: 'Learn the most famous riff in the course:<ol><li>Watch <a href="https://www.youtube.com/watch?v=EBNlYH4P5r8" target="_blank">Sweet Child O\' Mine Intro in Standard Tuning – Jbf Music &amp; Guitar</a> (played slow and full speed, with the TAB on screen).</li><li>Learn just the first bar.</li><li>Play it slowly.</li></ol>No score, no rush — this is a late-course optional challenge you can keep practicing a little at a time.',
-            text_es: 'Aprende el riff más famoso del curso:<ol><li>Mira <a href="https://www.youtube.com/watch?v=EBNlYH4P5r8" target="_blank">Sweet Child O\' Mine Intro in Standard Tuning – Jbf Music &amp; Guitar</a> (tocado lento y a velocidad completa, con el TAB en pantalla).</li><li>Aprende solo el primer compás.</li><li>Tócalo despacio.</li></ol>Sin puntaje, sin apuro — este es un reto opcional de fin de curso que puedes seguir practicando poco a poco.',
+            text: 'Learn the most famous riff in the course:<ol><li>Watch <a href="https://www.youtube.com/watch?v=EBNlYH4P5r8" target="_blank">Sweet Child O\' Mine Intro in Standard Tuning – Jbf Music &amp; Guitar</a> (played slow and full speed, with the TAB on screen).</li><li>Learn just the first bar.</li><li>Play it slowly.</li></ol>Optional. No score. Practice a little each day.',
+            text_es: 'Aprende el riff más famoso del curso:<ol><li>Mira <a href="https://www.youtube.com/watch?v=EBNlYH4P5r8" target="_blank">Sweet Child O\' Mine Intro in Standard Tuning – Jbf Music &amp; Guitar</a> (tocado lento y a velocidad completa, con el TAB en pantalla).</li><li>Aprende solo el primer compás.</li><li>Tócalo despacio.</li></ol>Opcional. Sin puntaje. Practica un poco cada día.',
             hint: 'The "Sweet Child O\' Mine" intro lives up high on the D, G, and B strings around the 12th–15th frets, picked one note at a time. The lesson is in standard tuning — the same tuning your guitar is already in — so you can play along directly. (The original record is tuned a half-step lower, so you\'ll sound slightly higher than the album; that\'s normal.) Loop just the first bar until it\'s clean before adding more.',
             hint_es: 'La intro de "Sweet Child O\' Mine" vive arriba en las cuerdas Re, Sol y Si, alrededor de los trastes 12–15, pulsada una nota a la vez. La lección está en afinación estándar — la misma afinación en la que ya está tu guitarra — así que puedes tocar junto directamente. (La grabación original está afinada medio tono más abajo, así que vas a sonar ligeramente más agudo que el álbum; eso es normal.) Repite solo el primer compás hasta que salga limpio antes de agregar más.'
           }
@@ -966,8 +966,8 @@ SETS.push(
           unit: 'count', placeholder: 'e.g. 10 changes — try for a higher number', placeholder_es: 'p. ej. 10 cambios — intenta superarlo' } },
       { id: 'm7w3-s6', text: 'Play a full song using only barre chords (no open chords)',
         text_es: 'Tocar una canción completa usando solo acordes con cejilla (sin acordes abiertos)',
-        gotItWhen: 'you can play "All Along the Watchtower" or another simple song from start to finish using ONLY barre chords — proving you no longer need the open shapes.',
-        gotItWhen_es: 'puedes tocar "All Along the Watchtower" u otra canción sencilla de principio a fin usando SOLO acordes con cejilla — probando que ya no necesitas las formas abiertas.',
+        gotItWhen: 'you can play "All Along the Watchtower" or another simple song from start to finish using ONLY barre chords.',
+        gotItWhen_es: 'puedes tocar "All Along the Watchtower" u otra canción sencilla de principio a fin usando SOLO acordes con cejilla.',
         practice: { type: 'playSeq', label: 'F · C · G · D barre progression (roots)', label_es: 'Progresión de cejillas F · C · G · D (raíces)', bpm: 60,
           notes: [41, 48, 43, 50] } }
     ]
@@ -986,7 +986,7 @@ MODULE_SONGS[7] = [
       { name: '"Seven Nation Army" — The White Stripes', meta: 'Single-note riff with rhythm variations', meta_es: 'Riff de una sola nota con variaciones rítmicas', type: 'Core', core: true, journeyUrl: 'tabs/seven-nation-army.html',
         originalUrl: 'https://www.youtube.com/watch?v=0J2QdDbelmY',
         tutorialUrl: 'https://www.youtube.com/watch?v=YaR6mzdNjOw' },
-      { name: '"Hey Jude" — The Beatles', meta: 'F major in the chorus · perfect E-shape barre application', meta_es: 'F mayor en el coro · aplicación perfecta de la cejilla en forma de E', type: 'Focus', core: true,
+      { name: '"Hey Jude" — The Beatles', meta: 'F major in the chorus · uses the E-shape F barre', meta_es: 'F mayor en el coro · usa la cejilla de F en forma de E', type: 'Focus', core: true,
         originalUrl: 'https://www.youtube.com/watch?v=A_MjCqQoLLA',
         tutorialUrl: 'https://www.youtube.com/watch?v=VyleoeWxbIQ&start=80&end=203' },
       { name: '"Luna" — Peso Pluma, Junior H', meta: 'Full barre F in the vamp (instead of the little F)', meta_es: 'Cejilla completa de F en el vamp (en lugar del F pequeño)', type: 'Core', core: true, journeyUrl: 'tabs/luna.html',
@@ -1046,7 +1046,7 @@ MODULE_REVIEWS[7] = {
     'Toca la cejilla de F → deslízala a G → deslízala a A, un rasgueo cada una (forma de E, raíz en la cuerda Mi grave). G y A suenan en las 6 cuerdas; el F cuenta cuando al menos 5 de las 6 suenan. Si el F todavía no habla, muestra G y A limpios más una cejilla de seis cuerdas en el traste 5 solo con el dedo índice — es la misma fuerza, un paso atrás',
     'Toca una progresión de 4 acordes mezclando cejillas en forma de E y de A (p. ej. F–C–G–D), 2 compases cada uno, a 60 BPM'
   ],
-  forward: 'Module 8 shifts the focus to your <strong>picking hand</strong>. Every barre and open shape you can now hold becomes a chord frame that fingerpicking decorates one string at a time — the fretting work you just did is exactly what makes those patterns sound full.',
-  forward_es: 'El Módulo 8 cambia el enfoque a tu <strong>mano de pulsar</strong>. Cada cejilla y forma abierta que ahora puedes sostener se convierte en un marco de acorde que el fingerpicking decora una cuerda a la vez — el trabajo de trastear que acabas de hacer es exactamente lo que hace que esos patrones suenen completos.',
+  forward: 'Module 8 shifts the focus to your <strong>picking hand</strong> — fingerpicking. You hold the chords you know and pluck one string at a time.',
+  forward_es: 'El Módulo 8 cambia el enfoque a tu <strong>mano de pulsar</strong> — el fingerpicking. Sostienes los acordes que ya conoces y punteas una cuerda a la vez.',
   standards: ['Pr.4a', 'Pr.5a', 'Re.7a']
 };

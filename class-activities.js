@@ -452,8 +452,8 @@ window.CLASS_ACTIVITIES = [
     number: 3,
     title:    'Finger Gym 1',
     title_es: 'Gimnasio de Dedos 1',
-    intro:    'Today isn\'t a song day — it\'s a training day. Three events in the first five frets: the Ladder, the Spider, the Reach. You\'re chasing a personal record, not a grade.',
-    intro_es: 'Hoy no es día de canciones — es día de entrenamiento. Tres eventos en los primeros cinco trastes: la Escalera, la Araña y el Estiramiento. Vas por un récord personal, no por una calificación.',
+    intro:    'Today isn\'t a song day — it\'s a training day. Three events in the first five frets: the Ladder, the Spider, the Reach. Try to beat your best BPM.',
+    intro_es: 'Hoy no es día de canciones — es día de entrenamiento. Tres eventos en los primeros cinco trastes: la Escalera, la Araña y el Estiramiento. Intenta superar tu mejor BPM.',
     steps: [
       {
         label:    'The Ladder',
@@ -718,8 +718,8 @@ window.CLASS_ACTIVITIES = [
     number: 7,
     title:    'Finger Gym 4 — Fingers Down',
     title_es: 'Gimnasio de Dedos 4 — Dedos abajo',
-    intro:    'Until now your fingers took turns. Today they stay down. Every finger that has already played keeps touching the string — that\'s what makes chords possible later.',
-    intro_es: 'Hasta ahora tus dedos se tomaban turnos. Hoy se quedan abajo. Cada dedo que ya tocó sigue apoyado en la cuerda — eso es lo que hace posibles los acordes más adelante.',
+    intro:    'Until now your fingers took turns. Today they stay down. Every finger that has already played keeps touching the string.',
+    intro_es: 'Hasta ahora tus dedos se tomaban turnos. Hoy se quedan abajo. Cada dedo que ya tocó sigue apoyado en la cuerda.',
     steps: [
       {
         label:    'Plant as you go',
@@ -798,8 +798,8 @@ window.CLASS_ACTIVITIES = [
     number: 8,
     title:    'Finger Gym 5 — The Skip',
     title_es: 'Gimnasio de Dedos 5 — El salto',
-    intro:    'Two new demands today: skipping over a string without hitting it, and reaching one fret farther than is comfortable.',
-    intro_es: 'Hoy hay dos exigencias nuevas: saltar sobre una cuerda sin tocarla, y estirar un traste más allá de lo cómodo.',
+    intro:    'Two new moves today: skipping over a string without hitting it, and reaching one fret farther than is comfortable.',
+    intro_es: 'Hoy hay dos movimientos nuevos: saltar sobre una cuerda sin tocarla, y estirar un traste más allá de lo cómodo.',
     steps: [
       {
         label:    'The skip',
@@ -856,8 +856,8 @@ window.CLASS_ACTIVITIES = [
       {
         label:    'Reach across strings',
         label_es: 'Estiramiento entre cuerdas',
-        text: 'Reach across strings — the two notes in the tab are on different strings, three frets apart.<ul><li>Hold the shape so both notes ring together</li><li>This builds the reach you\'ll need for power chords (Module 3 teaches their real shape)</li></ul>You\'ve got it when: both notes ring at the same time, four times in a row.',
-        text_es: 'Estiramiento entre cuerdas — las dos notas de la tablatura están en cuerdas distintas, a tres trastes de distancia.<ul><li>Sostén la forma para que las dos notas suenen juntas</li><li>Esto construye el alcance que vas a necesitar para los acordes de potencia (el Módulo 3 enseña su forma real)</li></ul>Lo tienes cuando: las dos notas suenan al mismo tiempo, cuatro veces seguidas.',
+        text: 'Reach across strings — the two notes in the tab are on different strings, three frets apart.<ul><li>Hold the shape so both notes ring together</li></ul>You\'ve got it when: both notes ring at the same time, four times in a row.',
+        text_es: 'Estiramiento entre cuerdas — las dos notas de la tablatura están en cuerdas distintas, a tres trastes de distancia.<ul><li>Sostén la forma para que las dos notas suenen juntas</li></ul>Lo tienes cuando: las dos notas suenan al mismo tiempo, cuatro veces seguidas.',
         tab: {
           caption: 'Across the strings · both notes ringing',
           caption_es: 'Entre cuerdas · las dos notas suenan',
@@ -926,8 +926,8 @@ window.CLASS_ACTIVITIES = [
       {
         label:    'Reach endurance',
         label_es: 'Resistencia en el Estiramiento',
-        text: 'Reach endurance — eight reaches without stopping, twice the usual.<ul><li>The hand starts to tire around six — that\'s the part that builds strength</li><li>Pain is different from work: if it hurts, STOP</li></ul>You\'ve got it when: eight reaches without stopping and finger 1 never lifts.',
-        text_es: 'Resistencia en el Estiramiento — ocho estiramientos sin detenerte, el doble de lo normal.<ul><li>La mano empieza a cansarse cerca del sexto — esa es la parte que construye fuerza</li><li>El dolor es distinto del esfuerzo: si duele, DETENTE</li></ul>Lo tienes cuando: ocho estiramientos sin detenerte y el dedo 1 nunca se levanta.',
+        text: 'Reach endurance — eight reaches without stopping, twice the usual.<ul><li>The hand starts to tire around six</li><li>Pain is different from work: if it hurts, STOP</li></ul>You\'ve got it when: eight reaches without stopping and finger 1 never lifts.',
+        text_es: 'Resistencia en el Estiramiento — ocho estiramientos sin detenerte, el doble de lo normal.<ul><li>La mano empieza a cansarse cerca del sexto</li><li>El dolor es distinto del esfuerzo: si duele, DETENTE</li></ul>Lo tienes cuando: ocho estiramientos sin detenerte y el dedo 1 nunca se levanta.',
         tab: {
           caption: 'Reach endurance · eight in a row',
           caption_es: 'Resistencia · ocho seguidos',
@@ -1150,8 +1150,8 @@ window.CLASS_ACTIVITIES = [
       {
         label:    'The dot notes',
         label_es: 'Las notas de los puntos',
-        text: 'Play the four dot notes below — open E, then the dots at frets 3, 5 and 7. Say each name out loud while it rings; saying it is the memorizing.\nYou\'ve got it when: E–G–A–B in order, three times through, saying each name out loud.',
-        text_es: 'Toca abajo las cuatro notas de los puntos — E al aire, y después los puntos de los trastes 3, 5 y 7. Di cada nombre en voz alta mientras suena; decirlo es lo que lo graba en la memoria.\nLo tienes cuando: E–G–A–B en orden, tres veces seguidas, diciendo cada nombre en voz alta.',
+        text: 'Play the four dot notes below — open E, then the dots at frets 3, 5 and 7. Say each name out loud while it rings.\nYou\'ve got it when: E–G–A–B in order, three times through, saying each name out loud.',
+        text_es: 'Toca abajo las cuatro notas de los puntos — E al aire, y después los puntos de los trastes 3, 5 y 7. Di cada nombre en voz alta mientras suena.\nLo tienes cuando: E–G–A–B en orden, tres veces seguidas, diciendo cada nombre en voz alta.',
         tab: {
           caption: 'The dot notes · E G A B',
           caption_es: 'Las notas de los puntos · E G A B',
@@ -1425,8 +1425,8 @@ window.CLASS_ACTIVITIES = [
     number: 11,
     title:    'Sub Day Circuit',
     title_es: 'Circuito para el día con suplente',
-    intro:    'Your teacher is out today, so this one runs itself: seven stops, in order. Everything on it you have already met — today you do it on your own.',
-    intro_es: 'Hoy tu maestro no está, así que este circuito se maneja solo: siete paradas, en orden. Todo lo de aquí ya lo conociste — hoy lo haces por tu cuenta.',
+    intro:    'Your teacher is out today, so this one runs itself: seven stops, in order. You have done all of these before.',
+    intro_es: 'Hoy tu maestro no está, así que este circuito se maneja solo: siete paradas, en orden. Ya has hecho todo esto antes.',
     steps: [
       {
         label:    'Name the fret',

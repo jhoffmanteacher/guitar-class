@@ -5,6 +5,13 @@ Notable changes to the Guitar Class site. Newest first.
 For the full session-by-session history (and the reasoning behind each change),
 see `WORKFLOW.md` and the git commit log.
 
+## 2026-09-23 — Cleaner directions across the site
+
+### Changed
+
+- Cleaner directions across the site: removed school jargon and filler from
+  lessons, Journey pages, Coach and games.
+
 ## 2026-09-23 — Easier to find your way around, round 2
 
 ### Changed

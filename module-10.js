@@ -89,8 +89,8 @@ SETS.push(
             steps: [
               {
                 label: 'Build C major with the recipe', label_es: 'Construye C mayor con la receta',
-                text: 'Run the same W-W-H-W-W-W-H recipe starting from C first — your baseline — and notice you never need a sharp or flat. That clean run is what makes the odd note stand out when you try G next.',
-                text_es: 'Corre la misma receta T-T-S-T-T-T-S empezando primero desde C — tu punto de referencia — y fíjate que nunca necesitas un sostenido ni un bemol. Ese recorrido limpio es lo que hace que la nota rara resalte cuando pruebes G a continuación.',
+                text: 'Run the same W-W-H-W-W-W-H recipe starting from C first, and notice you never need a sharp or flat.',
+                text_es: 'Corre la misma receta T-T-S-T-T-T-S empezando primero desde C, y fíjate que nunca necesitas un sostenido ni un bemol.',
                 hint: 'C major is the recipe\'s starting-point example — every other major key is the same shape, just starting somewhere else.',
                 hint_es: 'C mayor es el ejemplo de punto de partida de la receta — cada otra tonalidad mayor es la misma forma, solo que empieza en otro lugar.',
                 skills: [6],
@@ -189,7 +189,7 @@ SETS.push(
             title_es: 'Di la receta mientras tocas',
             steps: [
               {
-                label: 'Challenge 3 — Recipe by Heart (your assessment piece)', label_es: 'Reto 3 — La Receta de Memoria (tu pieza de evaluación)',
+                label: 'Challenge 3 — Recipe by Heart (assessment preparation)', label_es: 'Reto 3 — La Receta de Memoria (preparación para la evaluación)',
                 text: '<ul><li>Play the C major scale while saying "whole, whole, half, whole, whole, whole, half" out loud, no chart, no hesitating.</li></ul>You\'ve got it when: you can say the whole recipe from memory before you even touch the guitar.',
                 text_es: '<ul><li>Toca la escala de C mayor mientras dices "tono, tono, semitono, tono, tono, tono, semitono" en voz alta, sin diagrama, sin dudar.</li></ul>Lo tienes cuando: puedes decir toda la receta de memoria antes incluso de tocar la guitarra.',
                 hint: 'If you can say the recipe from memory, you can build ANY major scale on the spot — that\'s the reason for memorizing it as words, not just frets.',
@@ -262,8 +262,8 @@ SETS.push(
         practice: { type: 'playSeq', label: 'G major on the G string', label_es: 'G mayor en la cuerda Sol', bpm: 60, notes: [55, 57, 59, 60, 62, 64, 66, 67] } },
       { id: 'm10w1-s4', text: 'Explain what a key is — the scale a song\'s notes and chords come from',
         text_es: 'Explicar qué es una tonalidad — la escala de la que vienen las notas y acordes de una canción',
-        gotItWhen: 'you can finish the sentence "this song is in G" by explaining, in your own words, that its notes and chords come from the G major scale and G feels like home.',
-        gotItWhen_es: 'puedes completar la frase "esta canción está en G" explicando, con tus propias palabras, que sus notas y acordes vienen de la escala de G mayor y G se siente como el hogar.',
+        gotItWhen: 'you can finish the sentence "this song is in G" by saying that its notes and chords come from the G major scale and G feels like home.',
+        gotItWhen_es: 'puedes completar la frase "esta canción está en G" diciendo que sus notas y acordes vienen de la escala de G mayor y G se siente como el hogar.',
         practice: { type: 'mc', prompt: '"This song is in A" most nearly means:',
           prompt_es: '"Esta canción está en A" quiere decir principalmente que:',
           choices: ['It starts loud and stays loud all the way through', 'Its chords are built from one scale, and A feels like home', 'It uses only notes played on the A string', 'It\'s at a tempo of 100 beats per minute'],
@@ -320,8 +320,8 @@ SETS.push(
                 label: 'Watch: minor pentatonic refresher', label_es: 'Mira: repaso de pentatónica menor',
                 text: 'Watch: <a href="https://www.youtube.com/watch?v=l6ayje1ug_0" target="_blank">The MINOR PENTATONIC scale on Guitar Explained – Lauren Bateman (0:00–5:30)</a> as a refresher on the box-1 shape you\'ll build the blues scale from today.',
                 text_es: 'Mira: <a href="https://www.youtube.com/watch?v=l6ayje1ug_0" target="_blank">The MINOR PENTATONIC scale on Guitar Explained – Lauren Bateman (0:00–5:30)</a> como repaso de la forma de la caja 1 sobre la que vas a construir la escala de blues hoy.',
-                hint: 'Everything today builds on top of the minor pentatonic box you already know from Module 4 — nothing new to fret, just one note added.',
-                hint_es: 'Todo lo de hoy se construye encima de la caja de pentatónica menor que ya conoces del Módulo 4 — nada nuevo que trastear, solo se agrega una nota.',
+                hint: 'Start from the minor pentatonic box you learned in Module 4.',
+                hint_es: 'Empieza desde la caja de pentatónica menor que aprendiste en el Módulo 4.',
                 skills: [1],
                 response: { type: 'mc', prompt: 'Minor pentatonic box 1 with its root at low-E fret 5 is which key?',
                   prompt_es: '¿La caja 1 de la pentatónica menor con su raíz en el traste 5 de la Mi grave es qué tonalidad?',
@@ -462,7 +462,7 @@ SETS.push(
             title_es: 'Construye y toca la escala de blues',
             steps: [
               {
-                label: 'Challenge 2 — Blues Scale (your assessment piece)', label_es: 'Reto 2 — Escala de Blues (tu pieza de evaluación)',
+                label: 'Challenge 2 — Blues Scale (assessment preparation)', label_es: 'Reto 2 — Escala de Blues (preparación para la evaluación)',
                 text: '<ol><li>Add the b5 to A minor pentatonic box 1 and play it ascending and descending at 60 BPM.</li><li>The play button checks the ascending run — match it.</li><li>Then play the descent on your own after.</li></ol>You\'ve got it when: the added note matches what you hear from the play button, every time.',
                 text_es: '<ol><li>Agrega la b5 a la caja 1 de la pentatónica menor de A y tócala subiendo y bajando a 60 BPM.</li><li>El botón de reproducir comprueba el recorrido ascendente — iguálalo.</li><li>Luego toca el descenso por tu cuenta después.</li></ol>Lo tienes cuando: la nota agregada coincide con lo que escuchas del botón de reproducir, cada vez.',
                 hint: 'The b5 sits between two notes you already know in the box — it\'s one extra finger placement, not a new shape to learn from scratch.',
@@ -634,10 +634,10 @@ SETS.push(
               },
               {
                 label: 'Watch: find melodies by ear', label_es: 'Mira: encuentra melodías de oído',
-                text: 'Watch: <a href="https://youtu.be/bd8M2fhK6Z8" target="_blank">5\' Guitar Exercise: Find Melodies You Know – JustinGuitar</a>. This five-minute exercise is the one the drill later in this set is built around — watch the ORDER he does things in.',
-                text_es: 'Mira: <a href="https://youtu.be/bd8M2fhK6Z8" target="_blank">5\' Guitar Exercise: Find Melodies You Know – JustinGuitar</a>. Este ejercicio de cinco minutos es alrededor del cual está construida la práctica de más adelante en esta unidad — fíjate en el ORDEN en que hace las cosas.',
-                hint: 'This is the single most useful guitar habit you can build, and it costs five minutes a day. Notice what he does before his hands touch the fretboard at all.',
-                hint_es: 'Este es el hábito más útil que puedes construir en la guitarra, y cuesta cinco minutos al día. Fíjate en lo que hace antes de que sus manos toquen el diapasón siquiera.',
+                text: 'Watch: <a href="https://youtu.be/bd8M2fhK6Z8" target="_blank">5\' Guitar Exercise: Find Melodies You Know – JustinGuitar</a>. You will use this exercise in a drill later in this set — watch the ORDER he does things in.',
+                text_es: 'Mira: <a href="https://youtu.be/bd8M2fhK6Z8" target="_blank">5\' Guitar Exercise: Find Melodies You Know – JustinGuitar</a>. Vas a usar este ejercicio en una práctica de más adelante en esta unidad — fíjate en el ORDEN en que hace las cosas.',
+                hint: 'Do it for five minutes a day. Notice what he does before his hands touch the fretboard at all.',
+                hint_es: 'Hazlo cinco minutos al día. Fíjate en lo que hace antes de que sus manos toquen el diapasón siquiera.',
                 skills: [3],
                 response: { type: 'mc', prompt: 'The best FIRST step to playing a melody by ear is:',
                   prompt_es: 'El mejor PRIMER paso para tocar una melodía de oído es:',
@@ -649,10 +649,10 @@ SETS.push(
               },
               {
                 label: 'Optional watch: building your ear', label_es: 'Opcional: desarrolla tu oído',
-                text: 'Optional bonus watch: <a href="https://youtu.be/rPSRH3tf5B8" target="_blank">How To Develop The World\'s Greatest Ear – Rick Beato</a> — a producer\'s view of the exact skill this set trains. You don\'t need the advanced parts: the opening idea (ears are built by a little practice every day, not talent) is the main point — then go do the echo drills later in this set.',
-                text_es: 'Video extra opcional: <a href="https://youtu.be/rPSRH3tf5B8" target="_blank">How To Develop The World\'s Greatest Ear – Rick Beato</a> — la visión de un productor sobre exactamente la destreza que entrena esta unidad. No necesitas las partes avanzadas: la idea inicial (el oído se construye con un poco de práctica cada día, no con talento) es el punto principal — y luego ve a hacer los ejercicios de eco de más adelante en esta unidad.',
-                response: { type: 'short', placeholder: 'One idea from this video worth borrowing for your own practice: …',
-                  placeholder_es: 'Una idea de este video que vale la pena tomar prestada para tu propia práctica: …' }
+                text: 'Optional bonus watch: <a href="https://youtu.be/rPSRH3tf5B8" target="_blank">How To Develop The World\'s Greatest Ear – Rick Beato</a> — a producer talks about training your ear. You don\'t need the advanced parts: the opening idea (ears are built by a little practice every day, not talent) is the main point — then go do the echo drills later in this set.',
+                text_es: 'Video extra opcional: <a href="https://youtu.be/rPSRH3tf5B8" target="_blank">How To Develop The World\'s Greatest Ear – Rick Beato</a> — un productor habla sobre cómo entrenar el oído. No necesitas las partes avanzadas: la idea inicial (el oído se construye con un poco de práctica cada día, no con talento) es el punto principal — y luego ve a hacer los ejercicios de eco de más adelante en esta unidad.',
+                response: { type: 'short', placeholder: 'One thing he says to do every day: …',
+                  placeholder_es: 'Una cosa que dice que hagas todos los días: …' }
               }
             ]
           },
@@ -662,10 +662,10 @@ SETS.push(
             steps: [
               {
                 label: 'Ear training: bright vs. dark', label_es: 'Oído: brillante vs. oscuro',
-                text: 'Play a major chord, then its parallel minor, back and forth. Notice which one sounds "bright" and which sounds "dark" — this is the ear-training foundation for everything else today.',
-                text_es: 'Toca un acorde mayor, luego su paralela menor, alternando. Fíjate cuál suena "brillante" y cuál suena "oscuro" — esta es la base de entrenamiento auditivo para todo lo demás de hoy.',
-                hint: 'You\'ve been hearing this distinction since Module 4 — today you\'re naming it and using it deliberately.',
-                hint_es: 'Has estado escuchando esta distinción desde el Módulo 4 — hoy la estás nombrando y usando a propósito.',
+                text: 'Play a major chord, then its parallel minor, back and forth. Notice which one sounds "bright" and which sounds "dark".',
+                text_es: 'Toca un acorde mayor, luego su paralela menor, alternando. Fíjate cuál suena "brillante" y cuál suena "oscuro".',
+                hint: 'You\'ve been hearing this distinction since Module 4. Major sounds bright. Minor sounds dark.',
+                hint_es: 'Has estado escuchando esta distinción desde el Módulo 4. El mayor suena brillante. El menor suena oscuro.',
                 skills: [4],
                 response: { type: 'mc', prompt: 'To most ears, major sounds ___ and minor sounds ___:',
                   prompt_es: 'Para la mayoría de los oídos, el mayor suena ___ y el menor suena ___:',
@@ -788,11 +788,11 @@ SETS.push(
             title_es: 'Repite un patrón de oído',
             steps: [
               {
-                label: 'Challenge 3 — Echo Drill (your assessment piece)', label_es: 'Reto 3 — Ejercicio de Eco (tu pieza de evaluación)',
+                label: 'Challenge 3 — Echo Drill (assessment preparation)', label_es: 'Reto 3 — Ejercicio de Eco (preparación para la evaluación)',
                 text: '<ol><li>For round 1, listen to the 3-note pattern once using the play button below, sing it back, then play it on the E or A string.</li><li>For rounds 2–4, record yourself playing 3 random notes (eyes off your hand) and echo those back the same way.</li></ol>You\'ve got it when: 3 out of 4 patterns matched correctly, by ear alone.',
                 text_es: '<ol><li>Para la ronda 1, escucha el patrón de 3 notas una vez usando el botón de reproducir de abajo, cántalo de vuelta, y luego tócalo en la cuerda Mi o La.</li><li>Para las rondas 2–4, grábate tocando 3 notas al azar (sin mirar tu mano) y repítelas de la misma manera.</li></ol>Lo tienes cuando: 3 de 4 patrones coincidan correctamente, solo de oído.',
-                hint: 'Resist the urge to search fret by fret at random before you\'ve sung the pattern — singing first fixes the pitch in your ear, and that\'s what your hands need to find.',
-                hint_es: 'Resiste el impulso de buscar traste por traste al azar antes de haber cantado el patrón — cantar primero fija el tono en tu oído, y eso es lo que tus manos necesitan encontrar.',
+                hint: 'Sing the pattern before you look for the frets.',
+                hint_es: 'Canta el patrón antes de buscar los trastes.',
                 stuck: 'Slow the pattern down and repeat just the first two notes until they\'re solid, then add the third.',
                 stuck_es: 'Baja la velocidad del patrón y repite solo las primeras dos notas hasta que estén sólidas, y luego agrega la tercera.',
                 levelUp: 'Extend the echo to 4 or 5 notes, or echo a short lick (a lick is a short solo phrase) from a tutorial video you haven\'t learned yet — a pattern you\'ve truly never heard.',
@@ -885,8 +885,8 @@ SETS.push(
         gotItWhen: 'you match 3 out of 4 echoed patterns correctly, by ear alone — singing each pattern back before you ever touch the fretboard.',
         gotItWhen_es: 'igualas correctamente 3 de 4 patrones repetidos, solo de oído — cantando cada patrón de vuelta antes de tocar siquiera el diapasón.',
         practice: { type: 'playSeq', label: 'Echo pattern — E · G · A', label_es: 'Patrón de eco — E · G · A', bpm: 60, notes: [40, 43, 45] } },
-      { id: 'm10w3-s6', text: 'Identify whether a core-song chord sounds major or minor ("Luna"\'s F = bright, Am = dark)',
-        text_es: 'Identificar si un acorde de una canción principal suena mayor o menor (la F de "Luna" = brillante, Am = oscuro)',
+      { id: 'm10w3-s6', text: 'Tell whether a core-song chord sounds major or minor ("Luna"\'s F = bright, Am = dark)',
+        text_es: 'Distinguir si un acorde de una canción principal suena mayor o menor (la F de "Luna" = brillante, Am = oscuro)',
         gotItWhen: 'you can hear "Luna"\'s F (bright) and Am (dark) and explain that the difference comes down to a single note inside the chord.',
         gotItWhen_es: 'puedes escuchar la F de "Luna" (brillante) y su Am (oscuro) y explicar que la diferencia se reduce a una sola nota dentro del acorde.',
         practice: { type: 'mc', prompt: '"Luna"\'s F sounds bright and its Am sounds dark. What single ingredient makes a chord minor?',
@@ -950,7 +950,7 @@ MODULE_REVIEWS[10] = {
     'Nombrar la relativa menor de una tonalidad mayor dada',
     'Identificar mayor vs. menor — y repetir un patrón corto — de oído'
   ],
-  forward: 'You can build scales, name keys, and trust your ear. <strong>Module 11 does the same for chords:</strong> you\'ll see why "Let It Be"\'s four chords work, number any progression confidently, and unlock twelve chords from one barre shape.',
-  forward_es: 'Puedes construir escalas, nombrar tonalidades, y confiar en tu oído. <strong>El Módulo 11 hace lo mismo con los acordes:</strong> verás por qué funcionan los cuatro acordes de "Let It Be", numerarás cualquier progresión con confianza, y desbloquearás doce acordes a partir de una sola forma de cejilla.',
+  forward: 'You can build scales, name keys, and trust your ear. <strong>Module 11 does the same for chords:</strong> you\'ll see why "Let It Be"\'s four chords work, number any progression, and play twelve chords with one barre shape.',
+  forward_es: 'Puedes construir escalas, nombrar tonalidades, y confiar en tu oído. <strong>El Módulo 11 hace lo mismo con los acordes:</strong> verás por qué funcionan los cuatro acordes de "Let It Be", numerarás cualquier progresión, y tocarás doce acordes con una sola forma de cejilla.',
   standards: ['Pr.4a', 'Pr.6a', 'Cn.10a']
 };

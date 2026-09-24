@@ -62,14 +62,14 @@ const MODULE_MANIFEST = [
 const WARMUP_BANK = [
   { label: 'Spider walk — 1-2-3-4 up two strings', label_es: 'Caminata de araña — 1-2-3-4 subiendo dos cuerdas', bpm: 60,
     notes: [41, 42, 43, 44, 46, 47, 48, 49],
-    text: 'One finger per fret — index, middle, ring, pinky up the low E (frets 1–4), then the same on the A string. Slow and even is better than fast and sloppy.',
-    text_es: 'Un dedo por traste — índice, medio, anular y meñique subiendo por la Mi grave (trastes 1–4), y luego lo mismo en la cuerda La. Lento y parejo es mejor que rápido y descuidado.' },
+    text: 'One finger per fret — index, middle, ring, pinky up the low E (frets 1–4), then the same on the A string. Play slowly. Keep every note even.',
+    text_es: 'Un dedo por traste — índice, medio, anular y meñique subiendo por la Mi grave (trastes 1–4), y luego lo mismo en la cuerda La. Toca despacio. Mantén cada nota pareja.' },
   { label: 'Stretch walk — 1-3-2-4 on the low E', label_es: 'Caminata de estiramiento — 1-3-2-4 en la Mi grave', bpm: 60,
     notes: [41, 43, 42, 44],
     text: 'Frets 1-3-2-4 with fingers 1-3-2-4, all on the low E. A reach-and-control drill — slow, no rushing.',
     text_es: 'Trastes 1-3-2-4 con los dedos 1-3-2-4, todo en la cuerda Mi grave. Un ejercicio de estiramiento y control — despacio, sin apurarte.' },
   { label: 'Open-string skip picking', label_es: 'Pulsado salteado en cuerdas al aire', bpm: 60,
     notes: [40, 50, 45, 55, 50, 59, 55, 64],
-    text: 'Picking hand only: E then D, A then G, D then B, G then e — skip a string on every jump, alternate picking. Slow and even is better than fast and sloppy.',
-    text_es: 'Solo la mano que puntea: Mi grave y luego Re, La y luego Sol, Re y luego Si, Sol y luego mi aguda — salta una cuerda en cada salto, alternando la púa. Lento y parejo es mejor que rápido y descuidado.' }
+    text: 'Picking hand only: E then D, A then G, D then B, G then e — skip a string on every jump, alternate picking. Play slowly. Keep every note even.',
+    text_es: 'Solo la mano que puntea: Mi grave y luego Re, La y luego Sol, Re y luego Si, Sol y luego mi aguda — salta una cuerda en cada salto, alternando la púa. Toca despacio. Mantén cada nota pareja.' }
 ];

@@ -368,6 +368,15 @@ ladder's "top of the ladder") is a real teaching device, not confusing
 prose; don't flag or "fix" those. Define "root" once, in the first visible
 Module 2 step that uses it: the note a chord is named after.
 
+**No teacher speak.** No lesson-plan words (self-assessment, reflect,
+benchmark, objective, demonstrate/apply/identify), no poster lines ("slow and
+clean is better than…", "don't worry", "trust the…"), no reassurance or
+praise padding in feedback, and no sentence about why a step matters. Say the
+action and the standard. The word "assessment" names the test and appears as
+"(assessment preparation)" in Challenge titles. checks.mjs 1w-t guards the
+retired phrases (2026-09-23 jargon-cut work order, 433 findings across the
+site).
+
 **A typed answer is for when writing IS the task.** Goal-setting,
 composing, and describing what you heard in a listening step keep their
 box; everything else asks the student to play something and tells them
@@ -398,9 +407,9 @@ dead last).
 lives in `label`, verbatim, escaped plain text, under ~70 chars; the `text` opens
 straight into directions; **the body is always a list** — the one place the
 "single actions stay prose" carve-out does not apply. A defining parenthetical
-(*a fill is…*) moves into the text; an identifying one (*(your assessment
-piece)*) stays in the title. **A card that already had a list keeps it
-byte-for-byte.**
+(*a fill is…*) moves into the text; an identifying one (*(assessment
+preparation)*, 2026-09-23 — was *(your assessment piece)*) stays in the title.
+**A card that already had a list keeps it byte-for-byte.**
 
 **Presentation belongs at render time, not in content.** MC answer order and
 got-it-when styling are both render-time, so new cards inherit them and neither

@@ -16,16 +16,16 @@ SETS.push(
     unit: 'Module 1 · Introductions: You and The Guitar',
     unit_es: 'Módulo 1 · Presentaciones: tú y la guitarra',
     title: 'Set 1',
-    subtitle: 'My Guitar Adventure · Goal-setting · Your music',
-    subtitle_es: 'Mi aventura con la guitarra · Metas · Tu música',
+    subtitle: 'Why guitar · Your goal · Your music',
+    subtitle_es: 'Por qué la guitarra · Tu meta · Tu música',
     skillFocus: 'Setting your guitar goals · Listening closely to music you love',
     skillFocus_es: 'Definir tus metas con la guitarra · Escuchar con atención la música que amas',
     comingSoon: false,
 
     stations: {
       b: {
-        title: 'Computer station — Watch · Listen · Reflect',
-        title_es: 'Estación de computadora — Mira · Escucha · Reflexiona',
+        title: 'Computer station — Watch · Listen · Write',
+        title_es: 'Estación de computadora — Mira · Escucha · Escribe',
         sections: [
           {
             title: 'Watch the lesson videos',
@@ -33,8 +33,8 @@ SETS.push(
             steps: [
           {
             label: 'Sound setup', label_es: 'Configura el sonido',
-            text: 'Get headphones if people are around you, or set a comfortable speaker volume if you\'re on your own — do this every lesson-video day. You\'ll switch between watching videos and playing all course long, so make it easy to hear both.',
-            text_es: 'Consigue audífonos si hay gente cerca de ti, o pon el volumen de las bocinas a un nivel cómodo si estás solo — hazlo cada día de videos de lección. Vas a alternar entre ver videos y tocar durante todo el curso, así que facilita escuchar bien ambas cosas.',
+            text: 'Get headphones if people are around you, or set a comfortable speaker volume if you\'re on your own — do this every lesson-video day.',
+            text_es: 'Consigue audífonos si hay gente cerca de ti, o pon el volumen de las bocinas a un nivel cómodo si estás solo — hazlo cada día de videos de lección.',
             hint: 'Loud enough that you catch every detail, quiet enough that you can still hear your own guitar.',
             hint_es: 'Lo bastante fuerte para captar cada detalle, lo bastante bajo para que también puedas escuchar tu propia guitarra.'
           },
@@ -42,15 +42,15 @@ SETS.push(
             label: 'Watch: smart practice tips', label_es: 'Mira: consejos de práctica',
             text: 'Watch: <a href="https://www.youtube.com/watch?v=4_CWBgLMPCI" target="_blank">Only Got 15 Min? No Problem! Guitar Practice Tips – Lauren Bateman (0:00–5:00)</a>. While you watch, write down the ONE practice habit she says matters most — you\'ll try it out this session. You\'ve got it when: you can name that one habit without looking back at your notes.',
             text_es: 'Mira: <a href="https://www.youtube.com/watch?v=4_CWBgLMPCI" target="_blank">Only Got 15 Min? No Problem! Guitar Practice Tips – Lauren Bateman (0:00–5:00)</a>. Mientras miras, anota el ÚNICO hábito de práctica que ella dice que más importa — lo vas a probar en esta sesión. Lo tienes cuando: puedes nombrar ese hábito sin volver a ver tus notas.',
-            hint: 'As you watch, think about: what is one practice habit she says makes the biggest difference? Does it match what you thought?',
-            hint_es: 'Mientras miras, piensa: ¿cuál es el hábito de práctica que ella dice que hace la mayor diferencia? ¿Coincide con lo que pensabas?',
-            response: { type: 'short', placeholder: 'In one sentence: what practice habit did she say matters most, and did it match what you thought?',
-              placeholder_es: 'En una oración: ¿qué hábito de práctica dijo que es el más importante, y coincidió con lo que pensabas?' }
+            hint: 'Listen for the one habit she says helps most.',
+            hint_es: 'Escucha el único hábito que dice que más ayuda.',
+            response: { type: 'short', placeholder: 'In one sentence: what practice habit did she say matters most?',
+              placeholder_es: 'En una oración: ¿qué hábito de práctica dijo que es el más importante?' }
           },
           {
             label: 'Watch: caring for your guitar', label_es: 'Mira: cuidado de la guitarra',
-            text: 'Watch: <a href="https://youtu.be/PyWZYHy17As?t=26" target="_blank">Caring for Your Acoustic Guitar – Marty Music</a> (you only need the first ~3 minutes — cleaning, humidity, and basic care; after that it\'s a string-changing demo you won\'t need yet). While you watch, note two things that can damage a guitar and how to avoid each — good habits now keep your guitar playable for years. You\'ve got it when: you can name two ways to keep a guitar safe.',
-            text_es: 'Mira: <a href="https://youtu.be/PyWZYHy17As?t=26" target="_blank">Caring for Your Acoustic Guitar – Marty Music</a> (solo necesitas los primeros ~3 minutos — limpieza, humedad y cuidados básicos; después de eso es una demostración de cambio de cuerdas que todavía no necesitas). Mientras miras, anota dos cosas que pueden dañar una guitarra y cómo evitar cada una — los buenos hábitos desde ahora mantienen tu guitarra tocable por años. Lo tienes cuando: puedes nombrar dos maneras de mantener segura una guitarra.',
+            text: 'Watch: <a href="https://youtu.be/PyWZYHy17As?t=26" target="_blank">Caring for Your Acoustic Guitar – Marty Music</a> (you only need the first ~3 minutes — cleaning, humidity, and basic care; after that it\'s a string-changing demo you won\'t need yet). While you watch, note two things that can damage a guitar and how to avoid each. You\'ve got it when: you can name two ways to keep a guitar safe.',
+            text_es: 'Mira: <a href="https://youtu.be/PyWZYHy17As?t=26" target="_blank">Caring for Your Acoustic Guitar – Marty Music</a> (solo necesitas los primeros ~3 minutos — limpieza, humedad y cuidados básicos; después de eso es una demostración de cambio de cuerdas que todavía no necesitas). Mientras miras, anota dos cosas que pueden dañar una guitarra y cómo evitar cada una. Lo tienes cuando: puedes nombrar dos maneras de mantener segura una guitarra.',
             hint: 'Notice how he handles and stores the guitar. You\'ll practice the safe set-down further down this set.',
             hint_es: 'Fíjate en cómo él manipula y guarda la guitarra. Vas a practicar cómo dejarla con cuidado más adelante en esta unidad.',
             response: { type: 'mc', prompt: 'Three of these are safe — one can actually damage an acoustic guitar. Which one?',
@@ -171,10 +171,10 @@ SETS.push(
           },
           {
             label: 'Explore the guitar\'s sounds', label_es: 'Explora los sonidos de la guitarra',
-            text: 'Try:<ul><li>Tapping the body.</li><li>Plucking one string at a time.</li><li>Strumming.</li></ul>What differences do you notice? You\'ve got it when: you can make at least three different sounds and say how they differ.',
-            text_es: 'Prueba:<ul><li>Golpear suavemente el cuerpo.</li><li>Pulsar una cuerda a la vez.</li><li>Rasguear.</li></ul>¿Qué diferencias notas? Lo tienes cuando: puedes hacer al menos tres sonidos distintos y decir en qué se diferencian.',
-            hint: 'Curiosity is your best tool right now.',
-            hint_es: 'La curiosidad es tu mejor herramienta ahora mismo.',
+            text: 'Try:<ul><li>Tapping the body.</li><li>Plucking one string at a time.</li><li>Strumming.</li></ul>Say how each sound is different. You\'ve got it when: you can make at least three different sounds and say how they differ.',
+            text_es: 'Prueba:<ul><li>Golpear suavemente el cuerpo.</li><li>Pulsar una cuerda a la vez.</li><li>Rasguear.</li></ul>Di en qué se diferencia cada sonido. Lo tienes cuando: puedes hacer al menos tres sonidos distintos y decir en qué se diferencian.',
+            hint: 'Try each sound. Gentle taps won\'t hurt the guitar.',
+            hint_es: 'Prueba cada sonido. Golpecitos suaves no dañan la guitarra.',
             stuck: 'Start with just two sounds: tap the body once, then pluck one string. Say out loud how they\'re different before you add a third.',
             stuck_es: 'Empieza con solo dos sonidos: golpea el cuerpo una vez, luego pulsa una cuerda. Di en voz alta en qué se diferencian antes de agregar un tercero.',
             levelUp: 'Find a fourth sound nobody near you has tried yet — tap near the bridge, mute a string, slide a finger up a string — and describe it.',
@@ -188,10 +188,10 @@ SETS.push(
             steps: [
           {
             label: 'Write your guitar goal', label_es: 'Escribe tu meta con la guitarra',
-            text: 'Type your guitar goal in the box below — we\'ll revisit it at the end of the course. You\'ve got it when: you wrote a goal you can explain in one sentence.',
-            text_es: 'Escribe tu meta con la guitarra en el cuadro de abajo — la vamos a repasar al final del curso. Lo tienes cuando: escribiste una meta que puedes explicar en una oración.',
-            hint: 'It can be a song you want to play, a skill you want to build, or just a feeling.',
-            hint_es: 'Puede ser una canción que quieras tocar, una destreza que quieras desarrollar, o solo un sentimiento.',
+            text: 'Type your guitar goal in the box below. You\'ve got it when: you wrote a goal you can explain in one sentence.',
+            text_es: 'Escribe tu meta con la guitarra en el cuadro de abajo. Lo tienes cuando: escribiste una meta que puedes explicar en una oración.',
+            hint: 'It can be a song you want to play or a thing you want to learn to do.',
+            hint_es: 'Puede ser una canción que quieras tocar o algo que quieras aprender a hacer.',
             skills: [1],
             response: { type: 'short', placeholder: 'My guitar goal (one sentence): I want to…',
               placeholder_es: 'Mi meta con la guitarra (una oración): Quiero…' }
@@ -242,8 +242,8 @@ SETS.push(
     skills: [
       { id: 'w1-s1', text: 'I can describe why I want to learn guitar',
         text_es: 'Puedo describir por qué quiero aprender guitarra',
-        gotItWhen: 'you can answer "why guitar?" in one or two sentences without hesitating — and the answer is yours, not someone else\'s.',
-        gotItWhen_es: 'puedes responder "¿por qué guitarra?" en una o dos oraciones sin dudar — y la respuesta es tuya, no de alguien más.',
+        gotItWhen: 'you can answer "why guitar?" in one or two sentences without hesitating.',
+        gotItWhen_es: 'puedes responder "¿por qué guitarra?" en una o dos oraciones sin dudar.',
         practice: { type: 'mc', prompt: 'Which of these makes the STRONGEST guitar goal to write down?',
           prompt_es: '¿Cuál de estas es la meta de guitarra MÁS SÓLIDA para escribir?',
           choices: ['Learn the riff from a song I love', 'Get good at guitar', 'Learn the song my friend picked', 'Play for one hour every day'],
@@ -258,8 +258,8 @@ SETS.push(
           prompt_es: 'Estás eligiendo la canción que es importante para ti en este curso. ¿Cuál es la mejor prueba de que es la elección correcta?',
           choices: ['It\'s simple enough that you could play it in your first week', 'It\'s high on the charts right now', 'You love it and can point to what the guitar is doing in it', 'Your friends would all pick the same song'],
           choices_es: ['Es lo bastante simple como para poder tocarla en tu primera semana', 'Está alta en las listas de popularidad ahora mismo', 'La amas y puedes señalar qué está haciendo la guitarra en ella', 'Todos tus amigos elegirían la misma canción'], answer: 2,
-          explain: 'The song\'s job is to keep you motivated, so it has to matter to YOU — how hard it is doesn\'t matter yet. You\'ll grow toward it all course long.',
-          explain_es: 'El trabajo de la canción es mantenerte motivado, así que tiene que importarte a TI — lo difícil que sea todavía no importa. Vas a crecer hacia ella durante todo el curso.' } },
+          explain: 'Pick a song you love. It\'s fine if it\'s hard to play now.',
+          explain_es: 'Elige una canción que ames. Está bien si todavía es difícil de tocar.' } },
       { id: 'w1-s3', text: 'I can describe what the guitar is doing in a song I love',
         text_es: 'Puedo describir qué está haciendo la guitarra en una canción que amo',
         gotItWhen: 'you can name the song and describe the guitar\'s job in it in one sentence — strumming chords, playing a melody, or both.',
@@ -356,8 +356,8 @@ SETS.push(
             text_es: 'Mira: <a href="https://www.youtube.com/watch?v=eyrgiiONULE&t=20" target="_blank">How to Hold Your Guitar Comfortably – Lauren Bateman (0:20–4:00)</a>. Mientras miras, acomódate en tu silla y copia su posición paso a paso:<ul><li>Pies.</li><li>Guitarra sobre la pierna.</li><li>Espalda.</li><li>Brazo de rasgueo.</li></ul>Lo tienes cuando: puedes dejar de mirar la pantalla y tu guitarra se queda en su lugar sin que tu mano de trastear la sostenga.',
             hint: 'Notice where the guitar rests and how the back stays straight.',
             hint_es: 'Fíjate en dónde descansa la guitarra y en cómo la espalda se mantiene derecha.',
-            stuck: 'Pause at each position checkpoint and match one thing at a time: feet flat first, then guitar on the right leg, then straighten the back. Prop up your phone and film a few seconds, then compare yourself to the freeze-frame.',
-            stuck_es: 'Pausa en cada punto de la postura y ajusta una cosa a la vez: primero los pies planos, luego la guitarra sobre la pierna derecha, luego endereza la espalda. Apoya tu teléfono y grábate unos segundos, luego compárate con la imagen congelada.',
+            stuck: 'Pause each time she changes one thing and match it: feet flat first, then guitar on the right leg, then straighten the back. Prop up your phone and film a few seconds, then compare yourself to the freeze-frame.',
+            stuck_es: 'Pausa cada vez que ella cambia algo y hazlo igual: primero los pies planos, luego la guitarra sobre la pierna derecha, luego endereza la espalda. Apoya tu teléfono y grábate unos segundos, luego compárate con la imagen congelada.',
             levelUp: 'Close your eyes for 10 seconds and keep the position. Or film 10 seconds of yourself playing and name one posture fix.',
             levelUp_es: 'Cierra los ojos por 10 segundos y mantén la posición. O grábate tocando por 10 segundos y nombra un ajuste de postura.',
             skills: [2],
@@ -501,8 +501,6 @@ SETS.push(
             label: 'Quick try: play and name each string', label_es: 'Prueba rápida: toca y nombra cada cuerda',
             text: 'Play each open string once, low E to high e, saying the name out loud as you pluck — just a quick preview; you\'ll drill these properly further down this set. You\'ve got it when: you can name each string out loud the instant you pluck it.',
             text_es: 'Toca cada cuerda al aire una vez, de Mi grave a mi aguda, diciendo el nombre en voz alta al pulsarla — es solo un adelanto rápido; las vas a practicar bien más adelante en esta unidad. Lo tienes cuando: puedes nombrar cada cuerda en voz alta al instante de pulsarla.',
-            hint: 'Hearing + saying + playing helps you memorize it faster than just watching.',
-            hint_es: 'Escuchar + decir + tocar te ayuda a memorizar más rápido que solo mirar.',
             stuck: 'Go low to high slowly, checking the mnemonic after each one: E, A, D, G, B, e. Do it twice before you speed up.',
             stuck_es: 'Ve de grave a aguda despacio, revisando la regla mnemotécnica después de cada una: E, A, D, G, B, e. Hazlo dos veces antes de ir más rápido.',
             levelUp: 'Look away, pluck a string at random, and name it from pitch and thickness alone before you peek.',
@@ -570,8 +568,8 @@ SETS.push(
           },
           {
             label: 'Your first fretted note', label_es: 'Tu primera nota trasteada',
-            text: 'Every open string you just played rang without a finger on it. Now add one — pressing a string down onto a fret is called fretting, and it is worth slowing down to get right:<ol><li>Set the very tip of your index finger on the low E string just BEHIND the 3rd fret — the metal wire — not on top of it and not back in the middle of the gap.</li><li>Arch that finger so it comes down onto the string from above and its pad doesn\'t flop onto the string next door.</li><li>Rest your thumb flat on the BACK of the neck, roughly behind that finger — not hooked over the top.</li><li>Press only hard enough to stop the buzz, then pluck. Too little and it rattles; more than that just tires your hand out.</li></ol>You\'ve got it when: the note rings clear five times in a row and your hand still feels relaxed.',
-            text_es: 'Cada cuerda al aire que acabas de tocar sonó sin ningún dedo encima. Ahora agrega uno — presionar una cuerda contra un traste se llama trastear, y vale la pena ir despacio para hacerlo bien:<ol><li>Coloca la punta de tu dedo índice en la cuerda Mi grave justo DETRÁS del traste 3 — el metal — no encima de él ni atrás, a media distancia.</li><li>Arquea ese dedo para que baje sobre la cuerda desde arriba y su yema no se recueste sobre la cuerda de al lado.</li><li>Apoya el pulgar plano en la parte de ATRÁS del mástil, más o menos detrás de ese dedo — no enganchado por encima.</li><li>Presiona solo lo suficiente para que deje de zumbar, y luego pulsa. Menos de eso y traquetea; más que eso solo te cansa la mano.</li></ol>Lo tienes cuando: la nota suena clara cinco veces seguidas y tu mano sigue relajada.',
+            text: 'Every open string you just played rang without a finger on it. Now add one — pressing a string down onto a fret is called fretting. Go slowly:<ol><li>Set the very tip of your index finger on the low E string just BEHIND the 3rd fret — the metal wire — not on top of it and not back in the middle of the gap.</li><li>Arch that finger so it comes down onto the string from above and its pad doesn\'t flop onto the string next door.</li><li>Rest your thumb flat on the BACK of the neck, roughly behind that finger — not hooked over the top.</li><li>Press only hard enough to stop the buzz, then pluck. Too little and it rattles; more than that just tires your hand out.</li></ol>You\'ve got it when: the note rings clear five times in a row and your hand still feels relaxed.',
+            text_es: 'Cada cuerda al aire que acabas de tocar sonó sin ningún dedo encima. Ahora agrega uno — presionar una cuerda contra un traste se llama trastear. Ve despacio:<ol><li>Coloca la punta de tu dedo índice en la cuerda Mi grave justo DETRÁS del traste 3 — el metal — no encima de él ni atrás, a media distancia.</li><li>Arquea ese dedo para que baje sobre la cuerda desde arriba y su yema no se recueste sobre la cuerda de al lado.</li><li>Apoya el pulgar plano en la parte de ATRÁS del mástil, más o menos detrás de ese dedo — no enganchado por encima.</li><li>Presiona solo lo suficiente para que deje de zumbar, y luego pulsa. Menos de eso y traquetea; más que eso solo te cansa la mano.</li></ol>Lo tienes cuando: la nota suena clara cinco veces seguidas y tu mano sigue relajada.',
             hint: 'Getting closer to the fret wire always beats pressing harder. If the note buzzes, slide your fingertip slightly toward the wire before you add any pressure.',
             hint_es: 'Acercarte al metal del traste siempre funciona mejor que presionar más fuerte. Si la nota zumba, desliza la punta del dedo un poquito hacia el traste antes de agregar presión.',
             stuck: 'Go back and forth: open low E, then fret 3, open, fret 3. If the fretted one sounds dead or rattly, look at where your fingertip actually is — almost always it\'s too far back from the wire.',
@@ -702,7 +700,7 @@ MODULE_REVIEWS[1] = {
     'Nombrar las 6 cuerdas de memoria',
     'Tocar "Happy Birthday" en la cuerda Mi grave a un pulso constante de principio a fin'
   ],
-  forward: 'You\'ve got a guitar that\'s in tune, a goal, and your first clean notes — <strong>Module 2 puts names on the frets</strong> so riffs and TAB start making sense.',
-  forward_es: 'Ya tienes una guitarra afinada, una meta, y tus primeras notas limpias — <strong>el Módulo 2 les pone nombre a los trastes</strong> para que los riffs y el TAB empiecen a tener sentido.',
+  forward: 'You\'ve got a guitar that\'s in tune, a goal, and your first clean notes — <strong>Module 2 puts names on the frets</strong>.',
+  forward_es: 'Ya tienes una guitarra afinada, una meta, y tus primeras notas limpias — <strong>el Módulo 2 les pone nombre a los trastes</strong>.',
   standards: ['Pr.1a', 'Pr.4a', 'Pr.5a', 'Cn.11a']
 };

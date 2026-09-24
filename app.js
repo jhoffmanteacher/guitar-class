@@ -4994,10 +4994,6 @@ function buildModuleReview(mr){
     ${playHtml}
     ${performanceHtml}
     ${forwardHtml}
-    <div class="ablock" style="margin-top:12px">
-      <div class="albl">${t('assess.standards')}</div>
-      <div>${mr.standards.map(s=>`<span class="spill">${s}</span>`).join('')}</div>
-    </div>
     <div class="mr-done${isMrComplete(mr.moduleNum)?' is-done':''}" id="${mrId}-done">${buildMrDoneInner(mr.moduleNum)}</div>
     <div class="save-ind" id="${mrId}-save-ind" style="margin-top:10px" aria-live="polite"></div>`;
 }
