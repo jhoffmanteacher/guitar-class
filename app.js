@@ -8103,11 +8103,15 @@ function ensureAllModuleData(){
 /* ── ♪ Songs hub: every song on the site, deduped, core six first ──
    An explore page in the main column (#songs), like its three rail
    neighbours — see EXPLORE_PAGES. */
+/* Tapping the rail row for the page you're already on used to CLOSE it
+   (these were close buttons too, back when the pages had a Back button) —
+   which sent the student to Modules. Now a second tap keeps the page and
+   scrolls it to the top (navigability round 2, 2026-09-23). */
 function toggleSongsHub(){
   const screen = document.getElementById('songs-screen');
   if(!screen) return;
   if(screen.hasAttribute('hidden')) goExploreHash('songs');
-  else closeSongsScreen();
+  else scrollPaneTop(true);
 }
 function closeSongsScreen(){
   if(location.hash === '#songs'){ exitExploreHash(); return; }  // the router finishes the job
@@ -8843,11 +8847,12 @@ async function renderDailyReview(){
    openDailyReviewScreen/closeDailyReviewScreen/srClosePanel and
    toggleKeepPracticing/openKeepPracticingScreen/closeKeepPracticingScreen/
    kpClosePanel in git history. ── */
+// Second tap scrolls to the top — see toggleSongsHub.
 function toggleMyProgress(){
   const screen = document.getElementById('my-progress-screen');
   if(!screen) return;
   if(screen.hasAttribute('hidden')) goExploreHash('my-progress');
-  else closeMyProgressScreen();
+  else scrollPaneTop(true);
 }
 function openMyProgressScreen(){
   const screen = document.getElementById('my-progress-screen');
@@ -8884,8 +8889,11 @@ function renderMyProgress(){
     const { done, total } = moduleCompletion(m);
     totalDone += done; totalAll += total;
     const pct = total ? Math.round(done / total * 100) : 0;
+    /* The module name opens that module (navigability round 2, 2026-09-23)
+       — same path as the Songs hub's module links (songHubGoModule). A
+       locked module opens the same way the picker would open it. */
     return `<div style="padding:10px 0;border-bottom:1px solid var(--border)">
-      <div style="font-size:0.875rem;font-weight:600">${t('nav.module')} ${m.num} — ${escHtml(tf(m,'name'))}</div>
+      <button type="button" class="mp-mod-link" onclick="songHubGoModule(${m.num})" title="${escAttr(t('progress.openModule', {n: m.num}))}">${t('nav.module')} ${m.num} — ${escHtml(tf(m,'name'))} <span aria-hidden="true">&rarr;</span></button>
       <div class="prog-wrap"><div class="prog-row"><div class="prog-bg"><div class="prog-fill" style="width:${pct}%"></div></div><div class="prog-lbl">${done} / ${total}</div></div></div>
     </div>`;
   }).join('');
@@ -8908,11 +8916,12 @@ function renderMyProgress(){
    station-card builder — see the work order this shipped from): activities
    are simple enough that reusing the station machinery would drag in focus
    mode, the footer gate and stepper logic for no benefit. */
+// Second tap scrolls to the top — see toggleSongsHub. An open card stays open.
 function toggleClassActivities(){
   const screen = document.getElementById('class-activities-screen');
   if(!screen) return;
   if(screen.hasAttribute('hidden')) goExploreHash('class-activities');
-  else closeClassActivitiesScreen();
+  else scrollPaneTop(true);
 }
 function closeClassActivitiesScreen(){
   // Base compare: a deep link ('#class-activities/ca-15') is the same page.

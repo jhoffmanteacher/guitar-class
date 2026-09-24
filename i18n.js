@@ -504,6 +504,8 @@
     'resume.dismiss':       { en: 'Hide this', es: 'Ocultar esto' },
     'progress.skillsMastered': { en: '{done} of {total} skills mastered across all {modules} modules.',
                                  es: '{done} de {total} destrezas dominadas en los {modules} módulos.' },
+    // Tooltip on a My progress module name — the name opens that module.
+    'progress.openModule':     { en: 'Open Module {n}', es: 'Abrir el módulo {n}' },
     'progress.overall':        { en: 'Overall', es: 'En total' },
 
     // ── Focus mode (station cards: one step at a time vs. the full list) ──
