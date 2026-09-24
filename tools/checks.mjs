@@ -740,7 +740,6 @@ const MC_CATCHALL_ALLOW = new Set([
   'w2·b·sec0·step0|2|en',        // "It doesn't matter which way" — FROZEN graded (1ap); on the Summer reset list
   'w2·b·sec0·step0|2|es',        //   same card, Spanish twin
   'skill m3w1-s3|1|en',          // "only ever hit the two strings you want" — a real beginner belief about aim
-  'm4w1·b·sec1·step0|3|es',      // "No importa qué dedo" — pre-existing Module 4 debt, outside the 7–13 sweep
   'skill m4w1-s6|2|en',          // "Never repeating anything" — the plausible opposite of the keyed answer
   'skill m4w1-s6|2|es',          //   same card, Spanish twin
   'm4w2·b·sec1·step0|3|en',      // "They sound exactly the same" — a genuine hammer-on misconception
@@ -814,12 +813,7 @@ const MC_LEAK_ALLOW = new Set([
   'skill w2-s3|3 4 mm',                     // a string gauge; the skill label has to state it
   'skill m2w2-s6|behind middle finger',     // pre-existing Module 2 debt, outside the 7–13 sweep
   'skill m2w2-s6|menos detras dedo',        //   same card, Spanish twin
-  'm4w3·b·sec1·step0|5 quinta bemol',       // pre-existing Module 4 debt
-  'skill m4w3-s1|3 5 6',                    //   scale degrees; both languages produce this same n-gram
-  'skill m6w3-s2|golpes hacia abajo',       // pre-existing Module 6 debt
   'skill m4w2-s1|p mf f',                   // the skill label has to define p / mf / f to be teachable at all
-  'm4w3·b·sec1·step0|5 flat 5',             // pre-existing Module 4 debt
-  'm5w4·b·sec0·step1|practice makes permanent', // the step exists to teach that one phrase
 ]);
 function checkMcAnswerOnCard(allSets) {
   head('1av. Keyed MC answer already printed on the same card');
@@ -4992,7 +4986,7 @@ function checkStrumLineGaps() {
     { re: /\b(?:both|two) gaps\b/i, n: 2 },
     { re: /\b(?:los )?dos huecos\b/i, n: 2 },
   ];
-  const EXPECTED_STRUM_LINES = 22;   // pinned — update on purpose if one is added or removed
+  const EXPECTED_STRUM_LINES = 24;   // pinned — update on purpose if one is added or removed
   let strumLines = 0, bad = 0;
   for (const file of [...MODULE_FILES, 'class-activities.js']) {
     let lines;
