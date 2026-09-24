@@ -104,6 +104,16 @@ patch-pair handoff it doesn't need.
   --check --skip-links` → `git push` → `checks.mjs --live`). Afterwards,
   hard-reset the cloud clone to origin — never re-merge.
 
+  **Applying a patch: a conflict on `sw.js`'s `CACHE_VERSION` line is
+  expected, not a problem.** That line is a fingerprint of every cached
+  file, so every patch touches it, and it conflicts whenever `main` moved
+  between cutting the patch and applying it (Windows line endings make it
+  likelier). Keep either side of that one line, finish the `git am`, then
+  run the FULL `node tools/checks.mjs` once (not `--check`) to recompute it
+  and commit the one-line change before pushing. Don't stop to ask. Any
+  conflict in another file is a real conflict — stop and report it.
+  (2026-09-24: the Watchtower/Modules 4–6 pair landed this way, `69ac805`.)
+
 (Full rationale: `WORKFLOW.md`.)
 
 ### ⚠️ Run the pre-push checks before EVERY code push
