@@ -1234,7 +1234,8 @@ function strumChord(chordName, btnEl){
    note-name buttons below that play the corresponding pitch. A note may
    also carry `finger` (1-4, the fretting finger): then the button under
    that column shows the finger in a circle INSTEAD of the note name —
-   the Finger Gym convention (see renderTabSystem). */
+   the Finger Gym convention (see renderTabSystem). `hideNames: true` on the
+   spec drops that row entirely — fret numbers only, for sight-reading. */
 const TAB_STRINGS = ['e','B','G','D','A','E'];
 /* Notes per system before the TAB wraps onto a new staff. The board never
    scrolls sideways: a phrase longer than this breaks into stacked systems the
@@ -1248,7 +1249,7 @@ const TAB_MAX_COLS = 8;
    padded column or a chord cell). `cols` is the column count every system in
    this tab shares; a short final chunk pads with empty cells that carry no
    data-seq, so the beat cursor never lands on one. */
-function renderTabSystem(chunk, off, cols){
+function renderTabSystem(chunk, off, cols, hideNames){
   const rows = TAB_STRINGS.map(strLabel => {
     const cells = [`<div class="tab-str-label">${strLabel}</div>`];
     chunk.forEach((n, ci) => {
@@ -1287,6 +1288,12 @@ function renderTabSystem(chunk, off, cols){
     noteBtns.push(`<button type="button" class="tab-note-btn${hasFinger ? ' has-finger' : ''}" data-seq="${off + ci}" data-midis="${midisAttr}" onclick="playBeat(this)" title="${escAttr(tip)}" aria-label="${escAttr(tip)}">${label}</button>`);
   });
   for (let pi = chunk.length; pi < cols; pi++) noteBtns.push('<div></div>');
+  /* hideNames (a tab spec's `hideNames: true`): no row under the staff at all —
+     fret numbers only. Sight-reading practice (ca-21) needs the student to
+     work out each note from the fret, not read the letter or tap it to hear
+     it first. The beat cursor still lands on the fret cells (they carry
+     data-seq too), and ▶ Play tab stays as the answer key. */
+  if (hideNames) noteBtns.length = 0;
   return `
       <div class="tab-grid" style="grid-template-columns:28px repeat(${cols},1fr)">
         <div class="tab-box" style="grid-column:2/${cols + 2};grid-row:1/7"></div>
@@ -1294,7 +1301,7 @@ function renderTabSystem(chunk, off, cols){
         ${noteBtns.join('')}
       </div>`;
 }
-function renderTabBlock(notes, seqOffset, padTo){
+function renderTabBlock(notes, seqOffset, padTo, hideNames){
   if (!notes || !notes.length) return '';
   const off = seqOffset || 0;   // sequential index across phrases and systems — the beat cursor's address
   /* padTo: the note count of the longest phrase in this tab. Every phrase in a
@@ -1307,7 +1314,7 @@ function renderTabBlock(notes, seqOffset, padTo){
   const perRow = Math.ceil(widest / Math.ceil(widest / TAB_MAX_COLS));
   const grids = [];
   for (let s = 0; s < notes.length; s += perRow) {
-    grids.push(renderTabSystem(notes.slice(s, s + perRow), off + s, perRow));
+    grids.push(renderTabSystem(notes.slice(s, s + perRow), off + s, perRow, hideNames));
   }
   return `
     <div class="tab-board">${grids.join('')}
@@ -1372,14 +1379,14 @@ function buildTab(spec, opts){
       const block = `
       <div class="tab-phrase">
         ${p.label ? `<div class="tab-phrase-label">${escHtml(tf(p,'label'))}</div>` : ''}
-        ${renderTabBlock(p.notes, seqOff, widest)}
+        ${renderTabBlock(p.notes, seqOff, widest, !!spec.hideNames)}
       </div>`;
       seqOff += (p.notes || []).length;
       return block;
     }).join('');
     return `<div class="tab">${headHtml}<div class="tab-body">${captionHtml}${controlsHtml}${blocks}</div></div>`;
   }
-  const body = renderTabBlock(spec.notes);
+  const body = renderTabBlock(spec.notes, 0, 0, !!spec.hideNames);
   if (!body) return '';
   return `<div class="tab">${headHtml}<div class="tab-body">${captionHtml}${controlsHtml}${body}</div></div>`;
 }

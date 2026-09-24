@@ -5,6 +5,15 @@ Notable changes to the Guitar Class site. Newest first.
 For the full session-by-session history (and the reasoning behind each change),
 see `WORKFLOW.md` and the git commit log.
 
+## 2026-09-24 — Sight-reading practice for the Unit 2 assessment
+
+### Added
+
+- **A new class activity: Sight-Reading TAB — Low E and A Strings.** Five
+  2-bar lines to read and play before you hear them — practice for reading
+  a TAB line on the Unit 2 assessment. The tabs show fret numbers only, no
+  note letters. Play the line yourself first, then press Play to check.
+
 ## 2026-09-23 — Cleaner directions across the site
 
 ### Changed
