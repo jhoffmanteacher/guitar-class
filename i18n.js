@@ -327,18 +327,18 @@
     'ca.moduleHead':           { en: 'Module {n} — {mod}', es: 'Módulo {n} — {mod}' },
     'ca.markComplete':         { en: 'Mark complete', es: 'Marcar como completado' },
     'ca.completed':            { en: 'Completed ✓ — tap to un-mark', es: 'Completado ✓ — toca para desmarcar' },
-    // The group every finished card collapses into (renderClassActivities) —
-    // closed by default, so the list a student still has to act on isn't
-    // buried under everything already turned in. Relabeled "Earlier" from
-    // "Finished" 2026-09-11 (Today-first work order) to read as the third of
-    // three groups — Do now / Still to do / Earlier — rather than a stray
-    // archive.
-    'ca.finishedGroup':        { en: 'Earlier ({n})', es: 'Antes ({n})' },
+    /* The page's three groups, named by Jonathan 2026-09-23 (navigability
+       round 2): "Today's activity" (the hero tag, ca.startHere), "Unfinished
+       activities" and "Completed activities". They replaced Still to do /
+       Older / Earlier — near-synonyms (EN "Older" vs "Earlier", ES
+       "Anteriores" vs "Antes") that didn't say which one held finished work.
+       The group every finished card collapses into (renderClassActivities)
+       — closed by default, so the list a student still has to act on isn't
+       buried under everything already turned in. */
+    'ca.finishedGroup':        { en: 'Completed activities ({n})', es: 'Actividades completadas ({n})' },
     // The one fold wrapping every pending card except the Today hero
-    // (caTodoGroupHtml, item 2f) — closed by default, same as Earlier.
-    'ca.stillToDoGroup':       { en: 'Still to do ({n})', es: 'Todavía por hacer ({n})' },
-    // Nested inside Still to do (navigability work order 2026-09-23, item 5).
-    'ca.olderGroup':           { en: 'Older ({n})', es: 'Anteriores ({n})' },
+    // (caTodoGroupHtml, item 2f) — closed by default, same as Completed.
+    'ca.stillToDoGroup':       { en: 'Unfinished activities ({n})', es: 'Actividades sin terminar ({n})' },
     // The sticky bar while a card is open (item 6).
     'ca.barProgress':          { en: '{done} of {total} done', es: '{done} de {total} hechos' },
     'ca.barTop':               { en: 'Back to the top of this activity', es: 'Volver al inicio de esta actividad' },
@@ -346,20 +346,22 @@
     // (caModuleHeadHtml, item 2f).
     'ca.moduleProgress':       { en: '{done} of {total}', es: '{done} de {total}' },
     // Tag on the Today hero card (caHeroCardHtml) — Chromebook rail work
-    // order, 2026-09-19; the " · today" variant is item 2f, for when it's
-    // also the thing blocking the gate.
-    'ca.startHere':            { en: 'Start here', es: 'Empieza aquí' },
-    'ca.startHereToday':       { en: 'Start here · today', es: 'Empieza aquí · hoy' },
+    // order, 2026-09-19. Was "Start here" (+ a " · today" variant while
+    // gated) until 2026-09-23; now the first of the page's three group
+    // names, gated or not.
+    'ca.startHere':            { en: "Today's activity", es: 'Actividad de hoy' },
     /* The same slot when the hero ISN'T today's work — the newest few are
        finished and an older activity is still undone, so it rises to the
        top (caStartHereTagHtml, 2026-09-20). It says what it is instead of
-       "Start here", and carries its date at full weight beside it. */
-    'ca.notFinished':          { en: 'Not finished', es: 'Sin terminar' },
+       "Today's activity", and carries its date at full weight beside it.
+       "Unfinished" (was "Not finished") so it matches the Unfinished
+       activities group it came from. */
+    'ca.notFinished':          { en: 'Unfinished', es: 'Sin terminar' },
     // A card the teacher marked Optional in the console (caOptionalTagHtml)
     // — it shows like any other but never locks the rest of the site.
     'ca.optional':             { en: 'Optional', es: 'Opcional' },
     'ca.optionalTitle':        { en: 'You can skip this one. It does not lock the rest of the site.', es: 'Puedes saltarte esta. No bloquea el resto del sitio.' },
-    'ca.checkNotFinished':     { en: 'Exit check · not finished', es: 'Boleto de salida · sin terminar' },
+    'ca.checkNotFinished':     { en: 'Exit check · unfinished', es: 'Boleto de salida · sin terminar' },
     'ca.heroFromDate':         { en: 'From {date}', es: 'Del {date}' },
     // The Today hero's own call-to-action (caHeroCardHtml/caHeroCheckHtml)
     // — the arrow is appended in app.js, matching "Go to practice →".

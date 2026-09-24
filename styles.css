@@ -2472,11 +2472,6 @@ body.explore-open #week-panels{display:none}
 .ca-todo-summary::-webkit-details-marker{display:none}
 .ca-todo-summary::before{content:'';width:8px;height:8px;border-right:2px solid var(--text3);border-bottom:2px solid var(--text3);transform:rotate(-45deg);transition:transform .15s;flex-shrink:0}
 .ca-todo-group[open] .ca-todo-summary::before{transform:rotate(45deg)}
-/* Older (n) — nested inside Still to do (item 5); a quieter version of the
-   same fold, indented by its own left rule so the two can't be confused. */
-.ca-older-group{margin:6px 0 0 4px;padding-left:12px;border-left:2px solid var(--border)}
-.ca-older-summary{font-size:0.9375rem;color:var(--text3)}
-.ca-older-group[open] .ca-older-summary::before{transform:rotate(45deg)}
 
 /* The module heading over each block of activities, inside either fold
    (console activity board, 2026-09-16; the progress bar + "N of M" is item

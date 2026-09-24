@@ -8973,12 +8973,12 @@ function caFocusActivity(id){
   caLinkMissingId = found ? null : id;
   caOpenId = found ? id : caOpenId;
   /* The card itself opening isn't enough any more (item 2f) — unless it's
-     the Today hero, it also lives inside a closed "Still to do" or
-     "Earlier" <details>, and scrollIntoView on something inside a closed
+     the Today hero, it also lives inside a closed "Unfinished activities"
+     or "Completed activities" <details>, and scrollIntoView on something inside a closed
      <details> is a silent no-op. Force whichever fold it's actually in;
      forcing the wrong one (the hero needs neither) is harmless. */
   if(found){
-    if(classActivities[id] === true) caFinishedOpen = true; else { caTodoOpen = true; caOlderOpen = true; }   // Older is nested in Still to do (item 5)
+    if(classActivities[id] === true) caFinishedOpen = true; else caTodoOpen = true;
   }
   renderClassActivities();
   if(!found) return;
@@ -9172,8 +9172,7 @@ function caStartHereTagHtml(a, isCurrent){
   const isCheck = a.kind === 'check';
   const tagKey = isCheck
     ? (isCurrent ? 'check.prefix' : 'ca.checkNotFinished')
-    : (isCurrent ? (document.body.classList.contains('ca-gated') ? 'ca.startHereToday' : 'ca.startHere')
-                 : 'ca.notFinished');
+    : (isCurrent ? 'ca.startHere' : 'ca.notFinished');
   const tag = `<span class="ca-start-tag${isCheck ? ' ca-start-tag--check' : ''}" data-i18n="${tagKey}">${escHtml(t(tagKey))}</span>`;
   const dateLabel = caFormatDate(caDate(a));
   if(isCurrent) return (dateLabel ? `<span class="ca-chip">${escHtml(dateLabel)}</span>` : '') + tag;
@@ -10234,33 +10233,14 @@ function renderClassActivities(){
       let restHtml = '';
       if(restCount > 0){
         const restFlat = restGroups.reduce((acc, g) => acc.concat(g.cards), []);
-        /* "Still to do" was one flat pile of everything pending — 17 cards
-           deep by late September, exit checks on top (navigability work
-           order 2026-09-23, item 5). Now the fold shows the RECENT ones —
-           the first CA_RECENT_N numbered activities in reading order, plus
-           any exit check that falls among them — and the rest sit inside
-           a second, closed "Older (n)" fold under them. Module headings
-           (when any card is placed in a module) apply inside Older only;
-           the recent few are a short list and read better without them. */
-        let cut = restFlat.length;
-        let seen = 0;
-        for(let i = 0; i < restFlat.length; i++){
-          if(restFlat[i].kind !== 'check') seen++;
-          if(seen === CA_RECENT_N){ cut = i + 1; break; }
-        }
-        const recent = restFlat.slice(0, cut);
-        const older = restFlat.slice(cut);
-        let body = recent.map(caActivityCardHtml).join('');
-        if(older.length){
-          const olderIds = new Set(older.map(a => a.id));
-          const olderGroups = restGroups
-            .map(g => ({ sec: g.sec, cards: g.cards.filter(a => olderIds.has(a.id)) }))
-            .filter(g => g.cards.length);
-          const olderBody = olderGroups.some(g => g.sec.mod)
-            ? olderGroups.map(g => headHtml(g.sec) + g.cards.map(caActivityCardHtml).join('')).join('')
-            : older.map(caActivityCardHtml).join('');
-          body += caOlderGroupHtml(olderBody, older.length, older.some(a => a.id === caOpenId));
-        }
+        /* One fold, newest first — the page's three groups are Today's
+           activity / Unfinished activities / Completed activities (Jonathan,
+           2026-09-23, round 2). The nested "Older (n)" fold from round 1
+           (item 5) is gone with its name; module headings, when any card
+           is placed in a module, do the grouping instead. */
+        const body = restGroups.some(g => g.sec.mod)
+          ? restGroups.map(g => headHtml(g.sec) + g.cards.map(caActivityCardHtml).join('')).join('')
+          : restFlat.map(caActivityCardHtml).join('');
         const openInside = restFlat.some(a => a.id === caOpenId);
         restHtml = caTodoGroupHtml(body, restCount, openInside);
       }
@@ -10331,26 +10311,10 @@ function caModuleHeadHtml(sec, byId){
     <span class="ca-mod-count" data-i18n="ca.moduleProgress" data-i18n-params="${escAttr(JSON.stringify(countParams))}">${escHtml(t('ca.moduleProgress', countParams))}</span>
   </div>`;
 }
-/* ── "Still to do" — every pending card except the Today hero, wrapped in
-   ONE fold (item 2f). Closed by default each render, same sticky-open
-   pattern as "Earlier" below. ── */
+/* ── "Unfinished activities" — every pending card except the Today hero,
+   wrapped in ONE fold (item 2f). Closed by default each render, same
+   sticky-open pattern as "Completed activities" below. ── */
 let caTodoOpen = false;
-// How many pending activities "Still to do" shows before the Older fold
-// (item 5). Counted over numbered activities; exit checks ride along.
-const CA_RECENT_N = 3;
-// Same carry-across-renders idea as caTodoOpen, for the inner Older fold.
-let caOlderOpen = false;
-function caOnOlderToggle(details){
-  caOlderOpen = details.open;
-  if(!details.open && snipState && details.contains(snipState.card)) snipStop();
-}
-function caOlderGroupHtml(bodyHtml, count, openInside){
-  const open = caOlderOpen || openInside;
-  return `<details class="ca-older-group" ${open ? 'open' : ''} ontoggle="caOnOlderToggle(this)">
-    <summary class="ca-todo-summary ca-older-summary">${escHtml(t('ca.olderGroup', {n: count}))}</summary>
-    <div class="ca-todo-body">${bodyHtml}</div>
-  </details>`;
-}
 function caOnTodoToggle(details){
   caTodoOpen = details.open;
   if(!details.open && snipState && details.contains(snipState.card)) snipStop();

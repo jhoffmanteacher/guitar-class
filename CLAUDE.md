@@ -1005,11 +1005,14 @@ In-Class Activities** 2026-09-17 (Jonathan's call) — `nav.classActivities` is
 the same i18n key both times, so the hash `#class-activities`, every deep
 link, and the console's Copy-link URLs never moved. It is the site's home
 page: `showApp()` opens it whenever the URL carries no explore hash at all,
-gated or not. `renderClassActivities()` (app.js) builds three groups —
-**Do now** (the first pending card; collapsed like every other card, not
-forced open — Jonathan, 2026-09-15), **Still to do** (a divider, skipped when
-there's only one card left), **Earlier** (`ca.finishedGroup`, now "Earlier"
-not "Finished") — and appends the resume card (`renderResumeCard()`) at the
+gated or not. `renderClassActivities()` (app.js) builds three groups, named by Jonathan
+2026-09-23 — **Today's activity** (the hero card's tag, `ca.startHere`; the
+first pending card, collapsed like every other card, not forced open —
+Jonathan, 2026-09-15; an older undone hero is tagged **Unfinished** instead),
+**Unfinished activities** (`ca.stillToDoGroup`, one closed fold, newest first,
+module headings when cards are placed — no nested "Older" fold any more),
+**Completed activities** (`ca.finishedGroup`; was "Earlier", before that
+"Finished") — and appends the resume card (`renderResumeCard()`) at the
 end when nothing is blocking. The `#resume-card` element itself moved in
 `index.html` from a sibling of `#week-panels` into this page's own body; it
 no longer renders in the module/set view at all.
@@ -1021,7 +1024,7 @@ first — so a student lands on current work without scrolling past everything
 behind them. `caBoardOrder()`/`caNumber()` still compute the true ascending
 course order underneath (teacher console, gating, and deep links all key off
 it), and the "#N" a card carries never moves — only `renderClassActivities()`
-reverses `view.sections` and each section's ids for display. The "Earlier"
+reverses `view.sections` and each section's ids for display. The "Completed activities"
 group's order falls out of the same reversal now, not a second `.reverse()`.
 
 **The gate:** `caBlockers()` — a visible (`caIsVisible`), undone
