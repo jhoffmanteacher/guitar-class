@@ -9222,6 +9222,7 @@ function caHeroCardHtml(a, isCurrent = true){
         ${thumbHtml}
         <span class="ca-hero-cta">${escHtml(t(ctaKey))} &rarr;</span>
       </div>
+      ${caPrintBtnHtml(a)}
     </summary>
     <div class="ca-card-body">
       <p class="coach-tip">${escHtml(tf(a, 'intro'))}</p>
@@ -9402,6 +9403,12 @@ function caJourneyLinkHtml(a){
 function caStepMentionsJourney(step){
   return /song journey/i.test(stripTags(step && step.text || ''));
 }
+/* The 🖨 button, shared by the plain card and the Today hero so the two
+   can't drift — the hero shipped without one (7606590) because it builds its
+   own summary. Exit checks carry none on purpose (see caCheckCardHtml). */
+function caPrintBtnHtml(a){
+  return `<button type="button" class="ca-print-btn" onclick="printActivity(event,'${escAttr(a.id)}')" title="${escAttr(t('ca.printTitle'))}" aria-label="${escAttr(t('ca.print'))}"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 9V3h12v6"/><path d="M6 18H4a2 2 0 0 1-2-2v-4a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v4a2 2 0 0 1-2 2h-2"/><rect x="6" y="14" width="12" height="7" rx="1"/></svg></button>`;
+}
 function caActivityCardHtml(a){
   if(a.kind === 'check') return caCheckCardHtml(a);
   const done = classActivities[a.id] === true;
@@ -9420,7 +9427,7 @@ function caActivityCardHtml(a){
       ${dateLabel ? `<span class="ca-chip">${escHtml(dateLabel)}</span>` : ''}
       <span class="ca-card-titlewrap"><span class="ca-card-title">${titleHtml}</span>${caChunkMetaHtml(a)}</span>
       ${done ? `<span class="ca-done-mark" aria-hidden="true">${TCK_CHECK_SVG_INLINE}</span>` : ''}
-      <button type="button" class="ca-print-btn" onclick="printActivity(event,'${escAttr(a.id)}')" title="${escAttr(t('ca.printTitle'))}" aria-label="${escAttr(t('ca.print'))}"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 9V3h12v6"/><path d="M6 18H4a2 2 0 0 1-2-2v-4a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v4a2 2 0 0 1-2 2h-2"/><rect x="6" y="14" width="12" height="7" rx="1"/></svg></button>
+      ${caPrintBtnHtml(a)}
     </summary>
     <div class="ca-card-body">
       <p class="coach-tip">${escHtml(tf(a,'intro'))}</p>

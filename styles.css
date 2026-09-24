@@ -1906,7 +1906,12 @@ body.t-wide .t-main{max-width:none}
   body.print-activity .ca-gate-intro{display:none !important}
   body.print-activity .ca-finished-group,body.print-activity .ca-finished-body,
   body.print-activity .ca-todo-group,body.print-activity .ca-todo-body{margin:0;opacity:1}
-  body.print-activity .ca-print-target{border:1px solid #000}
+  body.print-activity .ca-print-target{border:1px solid #000;box-shadow:none}
+  /* The Today hero on paper: "Start here" / "Not finished" and the one-line
+     blurb are screen prompts (the blurb repeats the intro printed right
+     under it), so the handout header reads like any other card's. */
+  body.print-activity .ca-start-tag,body.print-activity .ca-hero-blurb,
+  body.print-activity .ca-hero-side{display:none !important}
   body.print-activity .ca-card-summary{cursor:auto}
   body.print-activity .ca-card-summary::before{display:none !important}
   /* Every step's body, not just the one the accordion had open on screen. */
@@ -2456,6 +2461,11 @@ body.explore-open #week-panels{display:none}
    gap open beside the body. */
 .ca-card--hero[open] .ca-hero-cta{display:none}
 .ca-card--hero[open] .ca-hero-side--cta-only{display:none}
+/* The hero's 🖨 (caPrintBtnHtml) is the summary's last flex child, like the
+   plain card's — pinned to the top so the stretch row doesn't make it a
+   tall bar beside the CTA, and it stays put when the open card drops the
+   right-hand column. */
+.ca-hero-summary > .ca-print-btn{align-self:flex-start}
 .ca-card--hero-check{border-left-color:var(--blue-text)}
 .ca-start-tag--check{background:var(--blue-bg);color:var(--blue-text)}
 /* The little disclosure triangle reads as redundant next to a full-width
@@ -2466,7 +2476,11 @@ body.explore-open #week-panels{display:none}
 .ca-hero-dot.f{background:var(--ca-accent);border-color:var(--ca-accent)}
 .ca-chunk-done{margin-left:8px}
 @media(max-width:640px){
-  .ca-hero-summary{flex-direction:column}
+  /* Column layout would drop the 🖨 to its own row under the CTA — pin it
+     top-right instead, beside the tag pills, and keep the tag row clear. */
+  .ca-hero-summary{flex-direction:column;position:relative}
+  .ca-hero-summary > .ca-print-btn{position:absolute;top:12px;right:14px}
+  .ca-hero-main{padding-right:40px}
   .ca-hero-side{width:100%;flex-direction:row-reverse;align-items:center}
   .ca-hero-thumb{flex:1;min-width:0}
 }
