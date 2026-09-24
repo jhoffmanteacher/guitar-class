@@ -1531,8 +1531,8 @@ SETS.push(
                 hint_es: 'Conociste este vamp en la Unidad 3 — ahora déjalo limpio para la evaluación. F es la forma más complicada; mantén tus dedos arqueados y el pulgar detrás del mástil para que las cuatro cuerdas que rasgueas suenen.',
                 stuck: 'F is the tough one — loop Am → F on its own until the shape lands clean, then run the full F–Am (with the passing Dm in the song\'s opening lines).',
                 stuck_es: 'F es el difícil — repite solo Am → F hasta que la forma caiga limpia, y luego corre el F–Am completo (con el Dm de paso en las primeras líneas de la canción).',
-                levelUp: 'Try the down-down-up split strum on each chord, or push to 70 BPM.',
-                levelUp_es: 'Prueba el rasgueo dividido abajo-abajo-arriba en cada acorde, o empuja a 70 BPM.',
+                levelUp: 'Try a down · down-up strum on each chord, or push to 70 BPM.',
+                levelUp_es: 'Prueba un rasgueo abajo · abajo-arriba en cada acorde, o empuja a 70 BPM.',
                 skills: [5, 6],
                 chords: [
                   { name: 'F',  chord: [[6,'x'],[5,'x'],[4,3,'3'],[3,2,'2'],[2,1,'1'],[1,1,'1']], position: 0 },

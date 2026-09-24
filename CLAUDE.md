@@ -1476,6 +1476,24 @@ rhythm-down set is 320k except "the cure" at 120bpm, which is 192k.)
 check chords, keys, and capo claims only. BPM databases disagree with each
 other and the site's tempo numbers are close enough for teaching.
 
+**Chord timing measured against the local backing tracks (2026-09-24)** — the
+click-stem method (`metronome − clean` → beat grid → per-beat chroma), not by
+ear. This is chord *timing*, not BPM:
+- **Let It Be** (71 BPM track) — **two beats per chord, confirmed.** The verse
+  runs `C C G G Am Am F F | C C G G F F C C`, so the second line of each
+  verse is C–G–F–C, not the four-chord loop again.
+- **Luna** (128 BPM track, clicks are eighth notes, ~43 big beats) — **F for
+  two bars of 6/8, then Am for two bars, confirmed.** The chord is Am, not A.
+- **All Along the Watchtower** (115 BPM track) — **close to two beats per
+  chord, not exact.** Most laps are Am 2 · G 2 · **F 3 · G 1**, with each
+  change pushed an eighth note early. The site's "each chord twice" matches
+  7 of 8 beats; kept as the teaching version.
+- **Seven Nation Army** (123 BPM track) — the riff is NOT one note per beat:
+  bar 1 is E (long) · E (short) · G · E, with D as a pickup on the "and" of 4;
+  bar 2 is **C for two beats, B for two beats** — what ca-10 teaches. The
+  Journey page's Layer 5 singalong loop (`Em Em G Em | D C C –`) is a
+  teaching loop that does not line up with the record; the page says so.
+
 - **All Along the Watchtower** — `Am–G–F–G` loop (power chords `A5–G5–F5–G5`).
   **Chorus: two beats per chord** (change on beat 3) — the version every teaching
   layer through Module 3 and the Journey page uses. **Verses: the root holds
