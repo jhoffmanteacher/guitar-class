@@ -40,8 +40,7 @@
       "Edit(index.html)",
       "Edit(sw.js)",
       "Edit(CHANGELOG.md)",
-      "Edit(WORKFLOW.md)",
-      "Write(module-*.js)"
+      "Edit(WORKFLOW.md)"
     ]
   }
 }
