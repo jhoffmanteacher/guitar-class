@@ -12,6 +12,9 @@ see `WORKFLOW.md` and the git commit log.
 - **The "Open the Song Journey page" button on a class activity is at the
   end now, not the top.** It shows up in the step that sends you to the
   song page, after you have done the steps before it.
+- **"Luna" — The Bassline: the first step plays the band right on the card.**
+  You listen for the two big beats there, and the Song Journey page waits
+  for the last step.
 
 ## 2026-09-25 — One activity at a time
 

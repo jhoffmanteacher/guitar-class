@@ -1837,8 +1837,14 @@ window.CLASS_ACTIVITIES = [
       {
         label:    'Learn — Feel the two',
         label_es: 'Aprende — Siente los dos',
-        text: 'Open the Song Journey page (button just below) and press Play on the backing track. "Luna" is in 6/8: six quick counts fit each bar, but the song leans on two big beats. Tap only those two — 1 and 4 — and let the guitar on the record play the rest.',
-        text_es: 'Abre la página de Recorrido de la canción (botón justo abajo) y pulsa Play en la pista de acompañamiento. "Luna" está en 6/8: seis cuentas rápidas caben en cada compás, pero la canción se apoya en dos tiempos grandes. Marca solo esos dos — 1 y 4 — y deja que la guitarra del disco toque el resto.',
+        text: 'Press Play on the band below. "Luna" is in 6/8: six quick counts fit each bar, but the song leans on two big beats. Tap only those two — 1 and 4 — and let the guitar on the record play the rest.',
+        text_es: 'Pulsa Play en la banda, abajo. "Luna" está en 6/8: seis cuentas rápidas caben en cada compás, pero la canción se apoya en dos tiempos grandes. Marca solo esos dos — 1 y 4 — y deja que la guitarra del disco toque el resto.',
+        // Was "Open the Song Journey page (button just below)" — the Journey
+        // button now renders only in the last step (Jonathan, 2026-09-25), so
+        // the listening happens on the band snippet right here instead.
+        snippet: { track: 'luna', fromBar: 1, bars: 4,
+                   label:    'Listen for the two big beats',
+                   label_es: 'Escucha los dos tiempos grandes' },
       },
       {
         label:    'Learn — F',
