@@ -1344,6 +1344,17 @@ function buildTab(spec, opts){
   } else if (spec.notes && spec.notes.length) {
     allMidis = spec.notes.map(toSeqEntry);
   }
+  /* revealDelay (ca-18, 2026-09-25 "the cure" rebuild, Jonathan: read the
+     directions before the board distracts you): the tab stays hidden while
+     the student reads the step text, then fades in on its own — see
+     wrapTabReveal/caArmTabReveals. A reveal-delayed tab has no Play tab
+     button either: there's no "watch it get played" demo any more, just the
+     board and its per-note buttons, so there's nothing for Play to drive.
+     opts.noRevealDelay (teacher.js's activity preview) keeps the button
+     suppressed for parity but skips the hide-then-fade wrapper — the
+     preview has no arming pass and Jonathan wants to see the board
+     immediately when checking an activity, not wait out the same delay. */
+  const hasRevealDelay = !!spec.revealDelay;
   let controlsHtml = '';
   if (allMidis.length && keyPrefix) {
     const defBpm = spec.bpm || 60;
@@ -1362,19 +1373,25 @@ function buildTab(spec, opts){
     // Held notes ({midi,beats}, from toSeqEntry) aren't one-pick-per-beat
     // either — same rationale as noCoach below.
     const hasHolds = allMidis.some(n => n && typeof n === 'object' && !Array.isArray(n));
-    controlsHtml = `<div class="tab-controls"><span class="bpm-control-group">` +
-      `<button type="button" class="play-seq-btn" data-midis="${escAttr(midisAttr)}" onclick="playSequenceFromGroup(this)" title="${escAttr(t('tab.playTabTitle'))}">&#x25B6; ${t('tab.playTab')}</button>` +
-      renderBpmControl(keyPrefix, bpm, minBpm, maxBpm) +
-      // noCoach: tabs with slurred notes (hammer-ons/pull-offs) aren't
-      // one-pick-per-note, so a mic check would fail correct technique.
-      // suppressCoach: this step already has a chord-check Coach button —
-      // don't show a second one for the tab's note sequence.
-      (spec.noCoach || hasHolds || (opts && opts.suppressCoach) ? '' : coachBtnHtml(midisAttr, tabNotesJson)) +
-      `</span></div>`;
+    const showPlayAll = !hasRevealDelay;
+    // noCoach: tabs with slurred notes (hammer-ons/pull-offs) aren't
+    // one-pick-per-note, so a mic check would fail correct technique.
+    // suppressCoach: this step already has a chord-check Coach button —
+    // don't show a second one for the tab's note sequence.
+    const showCoach = !(spec.noCoach || hasHolds || (opts && opts.suppressCoach));
+    if (showPlayAll || showCoach) {
+      controlsHtml = `<div class="tab-controls"><span class="bpm-control-group">` +
+        (showPlayAll ? `<button type="button" class="play-seq-btn" data-midis="${escAttr(midisAttr)}" onclick="playSequenceFromGroup(this)" title="${escAttr(t('tab.playTabTitle'))}">&#x25B6; ${t('tab.playTab')}</button>` : '') +
+        renderBpmControl(keyPrefix, bpm, minBpm, maxBpm) +
+        (showCoach ? coachBtnHtml(midisAttr, tabNotesJson) : '') +
+        `</span></div>`;
+    }
   }
   const paged = buildPagedTabBody(spec);
-  if (paged) return `<div class="tab tab--paged">${headHtml}<div class="tab-body">${captionHtml}${controlsHtml}${paged}</div></div>`;
-  if (spec.phrases && spec.phrases.length) {
+  let html;
+  if (paged) {
+    html = `<div class="tab tab--paged">${headHtml}<div class="tab-body">${captionHtml}${controlsHtml}${paged}</div></div>`;
+  } else if (spec.phrases && spec.phrases.length) {
     let seqOff = 0;
     const widest = spec.phrases.reduce((m, p) => Math.max(m, (p.notes || []).length), 0);
     const blocks = spec.phrases.map(p => {
@@ -1386,11 +1403,36 @@ function buildTab(spec, opts){
       seqOff += (p.notes || []).length;
       return block;
     }).join('');
-    return `<div class="tab">${headHtml}<div class="tab-body">${captionHtml}${controlsHtml}${blocks}</div></div>`;
+    html = `<div class="tab">${headHtml}<div class="tab-body">${captionHtml}${controlsHtml}${blocks}</div></div>`;
+  } else {
+    const body = renderTabBlock(spec.notes, 0, 0, !!spec.hideNames);
+    if (!body) return '';
+    html = `<div class="tab">${headHtml}<div class="tab-body">${captionHtml}${controlsHtml}${body}</div></div>`;
   }
-  const body = renderTabBlock(spec.notes, 0, 0, !!spec.hideNames);
-  if (!body) return '';
-  return `<div class="tab">${headHtml}<div class="tab-body">${captionHtml}${controlsHtml}${body}</div></div>`;
+  return (hasRevealDelay && !(opts && opts.noRevealDelay)) ? wrapTabReveal(html, spec.revealDelay) : html;
+}
+/* Hides a just-built tab (`wrapTabReveal`) until caArmTabReveals() has let
+   its `revealDelay` seconds pass, then fades it in. `hidden` short-circuits
+   the animation while it's off-screen; body.print-activity overrides it
+   (styles.css) the same way a paged tab's other pages do, so printing shows
+   the board immediately rather than a blank box. */
+function wrapTabReveal(html, sec){
+  const ms = Math.max(0, Number(sec) || 0);
+  return `<div class="tab-reveal" data-reveal-delay="${ms}" hidden>${html}</div>`;
+}
+/* Arms every not-yet-revealed tab under root — called once at the end of
+   renderClassActivities(), which is the one place that writes this markup
+   into the DOM. Focus-view step navigation re-renders the whole page, so
+   returning to a step re-arms its tab and restarts its own countdown. */
+function caArmTabReveals(root){
+  if (!root) return;
+  root.querySelectorAll('.tab-reveal[hidden]').forEach(el => {
+    const ms = Number(el.dataset.revealDelay) || 0;
+    setTimeout(() => {
+      el.removeAttribute('hidden');
+      requestAnimationFrame(() => requestAnimationFrame(() => el.classList.add('tab-revealed')));
+    }, ms);
+  });
 }
 /* ── Paged tab: `linesPerPage: N` on a tab spec (Jonathan, 2026-09-25,
    ca-18: "too much on this page … show a couple lines at a time and
@@ -10603,6 +10645,7 @@ function renderClassActivities(){
     bodyEl.innerHTML = missing + gateIntro + pendingHtml + (finished.length ? caFinishedGroupHtml(finishedGroups, finished, byId) : '');
   }
   if(typeof applyI18n === 'function') applyI18n(bodyEl);
+  caArmTabReveals(bodyEl);
   caSyncTopbar();
   // The resume card only belongs on a finished In-Class Activities page —
   // gated, or a Today hero still pending (item 2f), skip it; both checks now

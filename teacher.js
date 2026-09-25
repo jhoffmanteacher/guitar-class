@@ -1650,7 +1650,11 @@ function renderTeacherActivityDetail(id){
     }
     // suppressCoach: the Listening Coach mic-check button opens a panel
     // that's also inside #app — pointless (and confusing) to show here.
-    if(s.tab) media.push(buildTab(s.tab,{keyPrefix:`bpm:ca-preview:${a.id}:${si}:tab`,suppressCoach:true}));
+    // noRevealDelay: the preview has no arming pass (caArmTabReveals runs
+    // off renderClassActivities, which this screen never calls) and
+    // Jonathan wants to see the board immediately when checking an
+    // activity, not wait out the same delay a student would.
+    if(s.tab) media.push(buildTab(s.tab,{keyPrefix:`bpm:ca-preview:${a.id}:${si}:tab`,suppressCoach:true,noRevealDelay:true}));
     /* The backing-track snippet, from the SAME builder the student card uses
        (buildSnippet in app.js, loaded before this file) — a step field with
        one renderer can't go invisible on one side of it, which is the whole

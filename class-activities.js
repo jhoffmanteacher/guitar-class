@@ -1964,8 +1964,13 @@ window.CLASS_ACTIVITIES = [
      joins the song-in-order step. Every Practice tab is spelled out one pluck
      per beat (four per bar, the Journey page's Layer 2 reading) and shows two
      rows at a time (`linesPerPage: 2` — buildPagedTabBody in app.js): a row is
-     two bars, so a page is four bars, and Play tab lights each pluck and turns
-     the page itself. */
+     two bars, so a page is four bars; Previous/Next turn the page.
+     revealDelay:10 (same day, Jonathan: read the directions before the tab
+     distracts you) hides each tab for its first 10 seconds and drops its
+     Play tab button — see wrapTabReveal/caArmTabReveals in app.js. Every
+     step's directions were reworded off "Press Play tab"/"watch it light
+     up" accordingly; only ca-18 has this today (ca-10/19/20 still use Play
+     tab to demonstrate uneven rhythm, which the per-note buttons can't). */
   {
     id:    'ca-18',
     view:  'focus',   // one step at a time — see VIEW above
@@ -1980,9 +1985,10 @@ window.CLASS_ACTIVITIES = [
       {
         label:    'Practice — Intro and verse',
         label_es: 'Practica — Intro y estrofa',
-        text: 'You already play this part. Press Play tab and watch each note light up. Then play along at 60 BPM, one pluck on every beat. The tab shows two lines at a time and turns the page by itself.\nYou\'ve got it when: intro into verse, twice in a row at 60 BPM, without stopping. Stopped twice? Play A C A C by itself for one minute, then try again.',
-        text_es: 'Esta parte ya la tocas. Pulsa Tocar el tab y mira cómo se ilumina cada nota. Después toca junto con él a 60 BPM, una pulsación en cada tiempo. El tab muestra dos líneas a la vez y pasa la página solo.\nLo tienes cuando: de la intro a la estrofa, dos veces seguidas a 60 BPM, sin detenerte. ¿Te detuviste dos veces? Toca solo A C A C durante un minuto, y vuelve a intentarlo.',
+        text: 'You already play this part. Play along with the tab at 60 BPM, one pluck on every beat. The tab shows two lines at a time — use Next to see the rest.\nYou\'ve got it when: intro into verse, twice in a row at 60 BPM, without stopping. Stopped twice? Play A C A C by itself for one minute, then try again.',
+        text_es: 'Esta parte ya la tocas. Toca junto con el tab a 60 BPM, una pulsación en cada tiempo. El tab muestra dos líneas a la vez — usa Siguiente para ver el resto.\nLo tienes cuando: de la intro a la estrofa, dos veces seguidas a 60 BPM, sin detenerte. ¿Te detuviste dos veces? Toca solo A C A C durante un minuto, y vuelve a intentarlo.',
         tab: {
+          revealDelay: 10,
           caption: 'Intro and verse · 4 plucks per note',
           caption_es: 'Intro y estrofa · 4 pulsaciones por nota',
           linesPerPage: 2,
@@ -2053,9 +2059,10 @@ window.CLASS_ACTIVITIES = [
       {
         label:    'Learn — The chorus notes',
         label_es: 'Aprende — Las notas del coro',
-        text: 'This part is new: D, F, C, G. D is the one new spot — fret 5 on the A string, played with your pinky. Press Play tab and listen. Then play each note once, slowly, and say its name out loud.',
-        text_es: 'Esta parte es nueva: D, F, C, G. D es el único lugar nuevo — el traste 5 de la cuerda La, con el meñique. Pulsa Tocar el tab y escucha. Después toca cada nota una vez, despacio, y di su nombre en voz alta.',
+        text: 'This part is new: D, F, C, G. D is the one new spot — fret 5 on the A string, played with your pinky. Play each note once, slowly, and say its name out loud.',
+        text_es: 'Esta parte es nueva: D, F, C, G. D es el único lugar nuevo — el traste 5 de la cuerda La, con el meñique. Toca cada nota una vez, despacio, y di su nombre en voz alta.',
         tab: {
+          revealDelay: 10,
           caption: 'Chorus notes · D F C G',
           caption_es: 'Notas del coro · D F C G',
           notes: [
@@ -2069,8 +2076,8 @@ window.CLASS_ACTIVITIES = [
       {
         label:    'Practice — The chorus',
         label_es: 'Practica — El coro',
-        text: 'Play D F C G twice at 60 BPM, one pluck on every beat. Press Play tab first and follow the lit-up notes. The verse ends on C and the chorus starts on D, so keep your index finger over fret 1 and your pinky ready for fret 5.\nYou\'ve got it when: two choruses in a row at 60 BPM, no stops. Missing the D? Play C, then D, eight times in a row, then try the chorus again.',
-        text_es: 'Toca D F C G dos veces a 60 BPM, una pulsación en cada tiempo. Primero pulsa Tocar el tab y sigue las notas iluminadas. La estrofa termina en C y el coro empieza en D, así que mantén el índice sobre el traste 1 y el meñique listo para el traste 5.\nLo tienes cuando: dos coros seguidos a 60 BPM, sin detenerte. ¿Se te escapa el D? Toca C y luego D, ocho veces seguidas, y vuelve a intentar el coro.',
+        text: 'Play D F C G twice at 60 BPM, one pluck on every beat. The verse ends on C and the chorus starts on D, so keep your index finger over fret 1 and your pinky ready for fret 5.\nYou\'ve got it when: two choruses in a row at 60 BPM, no stops. Missing the D? Play C, then D, eight times in a row, then try the chorus again.',
+        text_es: 'Toca D F C G dos veces a 60 BPM, una pulsación en cada tiempo. La estrofa termina en C y el coro empieza en D, así que mantén el índice sobre el traste 1 y el meñique listo para el traste 5.\nLo tienes cuando: dos coros seguidos a 60 BPM, sin detenerte. ¿Se te escapa el D? Toca C y luego D, ocho veces seguidas, y vuelve a intentar el coro.',
         // The chorus is at bar 21, not 13: the verse's eight bars play TWICE
         // (5-12 and 13-20) before it. Measured off the mix — bars 13-20 are
         // harmonically the verse again, and the chorus is the louder section
@@ -2080,6 +2087,7 @@ window.CLASS_ACTIVITIES = [
                    label:    'The chorus, with the band',
                    label_es: 'El coro, con la banda' },
         tab: {
+          revealDelay: 10,
           caption: 'Chorus · 4 plucks per note',
           caption_es: 'Coro · 4 pulsaciones por nota',
           linesPerPage: 2,
@@ -2128,8 +2136,8 @@ window.CLASS_ACTIVITIES = [
       {
         label:    'Practice — The song with the band',
         label_es: 'Practica — La canción con la banda',
-        text: 'The song in order: intro, verse, verse again, chorus. Press Play tab once and follow the lit-up notes. Then press Play on the band and play the whole song along with it.\nYou\'ve got it when: intro to the end of the chorus with the band, without stopping. Lost your place? Stop playing, count to the next bar, and come back in on beat 1. After that, open the Song Journey page, Layer 2, and play with the full track.',
-        text_es: 'La canción en orden: intro, estrofa, la estrofa otra vez, coro. Pulsa Tocar el tab una vez y sigue las notas iluminadas. Después pulsa Play en la banda y toca la canción completa con ella.\nLo tienes cuando: de la intro al final del coro con la banda, sin detenerte. ¿Te perdiste? Deja de tocar, cuenta hasta el siguiente compás y vuelve a entrar en el tiempo 1. Después, abre la página de Recorrido de la canción, Capa 2, y toca con la pista completa.',
+        text: 'The song in order: intro, verse, verse again, chorus. Read through it on the tab, then press Play on the band and play the whole song along with it.\nYou\'ve got it when: intro to the end of the chorus with the band, without stopping. Lost your place? Stop playing, count to the next bar, and come back in on beat 1. After that, open the Song Journey page, Layer 2, and play with the full track.',
+        text_es: 'La canción en orden: intro, estrofa, la estrofa otra vez, coro. Léela en el tab y después pulsa Play en la banda y toca la canción completa con ella.\nLo tienes cuando: de la intro al final del coro con la banda, sin detenerte. ¿Te perdiste? Deja de tocar, cuenta hasta el siguiente compás y vuelve a entrar en el tiempo 1. Después, abre la página de Recorrido de la canción, Capa 2, y toca con la pista completa.',
         /* 28 bars, not 20: the record is intro (4), verse (8), verse AGAIN
            (8), then the chorus (8). A 20-bar window stopped in the middle of
            the second verse and never reached the chorus the tab teaches, so
@@ -2139,6 +2147,7 @@ window.CLASS_ACTIVITIES = [
                    label:    'The song in order, with the band',
                    label_es: 'La canción en orden, con la banda' },
         tab: {
+          revealDelay: 10,
           caption: 'Intro, verse, verse, chorus · 4 plucks per note',
           caption_es: 'Intro, estrofa, estrofa, coro · 4 pulsaciones por nota',
           linesPerPage: 2,

@@ -1533,6 +1533,12 @@ body.t-wide .t-main{max-width:none}
 .tab-pager-btn:hover:not(:disabled){background:var(--blue-bg);color:var(--blue-text);border-color:var(--blue-text)}
 .tab-pager-btn:disabled{opacity:0.4;cursor:default}
 .tab-page[hidden]{display:none}
+/* revealDelay (ca-18 — buildTab/wrapTabReveal in app.js): the board fades
+   and slides up into place once caArmTabReveals() un-hides it. Starts at
+   opacity:0 the instant [hidden] lifts so there's a frame to transition
+   from before .tab-revealed is added (the double-rAF in caArmTabReveals). */
+.tab-reveal{opacity:0;transform:translateY(6px);transition:opacity 0.4s ease,transform 0.4s ease}
+.tab-reveal.tab-revealed{opacity:1;transform:none}
 @media (max-width:600px){
   .bpm-slider{width:96px}
   .bpm-readout{font-size:0.75rem;min-width:48px}
@@ -1940,6 +1946,9 @@ body.t-wide .t-main{max-width:none}
   /* A paged tab prints every page; the pager is screen-only. */
   body.print-activity .tab-page[hidden]{display:block !important}
   body.print-activity .tab-pager{display:none !important}
+  /* A reveal-delayed tab (ca-18) prints immediately, not blank. */
+  body.print-activity .tab-reveal[hidden]{display:block !important}
+  body.print-activity .tab-reveal{opacity:1 !important;transform:none !important}
   body.print-activity #class-activities-body::before{
     content:'Guitar Class — Sequoia HS';
     display:block;font-size:11pt;color:#555;margin-bottom:6px
