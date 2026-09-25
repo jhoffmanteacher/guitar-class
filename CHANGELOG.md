@@ -19,6 +19,9 @@ see `WORKFLOW.md` and the git commit log.
 - **The tab stays hidden for the first 10 seconds of each step**, so you
   read the directions before it shows up, and there's no Play tab button —
   tap any note to hear it, or just play along from the tab.
+- **On the chorus and whole-song steps, the tab now turns its own pages
+  along with "Play with the band"** — press Play on the band and the tab
+  follows the recording, instead of needing Next/Previous by hand.
 
 ## 2026-09-25 — Song Journey button moved to the end
 

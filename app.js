@@ -1390,7 +1390,10 @@ function buildTab(spec, opts){
   const paged = buildPagedTabBody(spec);
   let html;
   if (paged) {
-    html = `<div class="tab tab--paged">${headHtml}<div class="tab-body">${captionHtml}${controlsHtml}${paged}</div></div>`;
+    // data-total-notes: how many plucks this tab has in all, so a sibling
+    // snippet (snipSyncTabPage) can work out notes-per-bar against its own
+    // spec.bars without re-deriving it from the DOM's data-seq attributes.
+    html = `<div class="tab tab--paged" data-total-notes="${allMidis.length}">${headHtml}<div class="tab-body">${captionHtml}${controlsHtml}${paged}</div></div>`;
   } else if (spec.phrases && spec.phrases.length) {
     let seqOff = 0;
     const widest = spec.phrases.reduce((m, p) => Math.max(m, (p.notes || []).length), 0);
@@ -1966,6 +1969,36 @@ function snipLatency(){
   // once switched the compensation off for the very URL used to test it.
   return typeof window.__snipLat === 'number' ? window.__snipLat : SNIP_OUTPUT_LATENCY;
 }
+/* A step that pairs a paged tab with a snippet of the SAME bars (ca-18
+   steps 3-4, 2026-09-25: Jonathan, "I want the tab to scroll with the
+   backing track") — the tab has no Play tab button any more (revealDelay,
+   same day) to drive its own page-turning, so the snippet drives it
+   instead while it plays. notesPerBar comes from the tab's own note count
+   (data-total-notes — see buildTab) divided by the snippet's own
+   spec.bars: both were written over the same window, so nothing here is a
+   second measurement of the song, just arithmetic on numbers the content
+   already commits to elsewhere. Silently does nothing when the sibling
+   isn't a paged tab, or when the counts don't divide the window evenly (no
+   current content does that, but a future one could and this just no-ops
+   rather than mis-paging).
+
+   The tab and the snippet are always siblings under one step body (never
+   nested — caStepHtml/renderTeacherActivityDetail build them as adjacent
+   pieces of `parts`), so the sibling search only has to look inside the
+   snippet card's own parent. */
+function snipSyncTabPage(card, spec, win, heard){
+  const tabEl = card.parentElement && card.parentElement.querySelector('.tab[data-total-notes]');
+  if(!tabEl) return;
+  const total = Number(tabEl.dataset.totalNotes) || 0;
+  if(!total || !spec.bars) return;
+  const notesPerBar = total / spec.bars;
+  const barsElapsed = (heard - win.start) / win.bar;
+  const idx = Math.max(0, Math.min(total - 1, Math.floor(barsElapsed * notesPerBar)));
+  const page = tabPageOf(tabEl, idx);
+  if(page < 0 || tabEl.dataset.snipPage === String(page)) return;
+  tabEl.dataset.snipPage = String(page);
+  tabShowPage(tabEl, page);
+}
 /* The loop itself. rAF rather than `timeupdate`, which fires about four
    times a second — at that granularity the window would overrun by up to a
    quarter of a beat and the seam would swing audibly from lap to lap. At
@@ -1985,6 +2018,7 @@ function snipTick(){
   const heard = now - snipLatency();
   const bar = Math.max(0, Math.min(spec.bars - 1, Math.floor((heard - win.start) / win.bar)));
   card.querySelectorAll('.snip-bar').forEach((d, i) => d.classList.toggle('bar-now', i === bar));
+  snipSyncTabPage(card, spec, win, heard);
   if(cal){ const tEl = cal.querySelector('.snip-cal-time'); if(tEl) tEl.textContent = now.toFixed(2) + ' s'; }
   snipState.raf = requestAnimationFrame(snipTick);
 }
