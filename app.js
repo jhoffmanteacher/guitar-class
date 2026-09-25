@@ -9232,9 +9232,9 @@ function caHeroCardHtml(a, isCurrent = true){
     </summary>
     <div class="ca-card-body">
       <p class="coach-tip">${escHtml(tf(a, 'intro'))}</p>
-      ${caJourneyLinkHtml(a)}
       ${stepsHtml && focus ? caFocusDotsHtml(a, openStepIdx) : ''}
       ${stepsHtml ? `<ol class="ca-steps">${stepsHtml}</ol>` : ''}
+      ${caJourneyEndHtml(a)}
       ${caMarkRowHtml(a, done, markLabel)}
     </div>
   </details>`;
@@ -9490,14 +9490,20 @@ function caJourneyLinkHtml(a){
   const sg = SONG_JOURNEYS.find(s => s.id === a.journey);
   return `<div class="ca-journey-row"><button type="button" class="jl-song-btn" onclick="window.open('${escAttr(url)}','_blank','noopener')">${escHtml(t('ca.openJourney', { song: sg.name }))} &#x2197;</button></div>`;
 }
-/* Item 2 of the same work order: the Journey button used to sit ONLY under
-   the last step, ~600px below a Step 1 that said "button below the steps".
-   Now it renders at the top of the card body (right after the intro) and
-   again inside any step whose text actually mentions the Song Journey page,
-   so the door is next to the sentence that names it. The English text is
-   the one tested — the Spanish twin always mirrors it. */
+/* The Journey button renders inside any step whose text mentions the Song
+   Journey page, so the door is next to the sentence that names it. It does
+   NOT render at the top of the card any more (Jonathan, 2026-09-25): a
+   button above Step 1 sent students to the song page before they had done
+   the work the page is the last step of. The English text is the one
+   tested — the Spanish twin always mirrors it. */
 function caStepMentionsJourney(step){
   return /song journey/i.test(stripTags(step && step.text || ''));
+}
+/* End-of-card fallback: an activity with a `journey` whose steps never name
+   the page still gets its button, after the last step. When a step does
+   name it, that step already carries the button, so this adds nothing. */
+function caJourneyEndHtml(a){
+  return (a.steps || []).some(caStepMentionsJourney) ? '' : caJourneyLinkHtml(a);
 }
 /* The 🖨 button, shared by the plain card and the Today hero so the two
    can't drift — the hero shipped without one (7606590) because it builds its
@@ -9531,9 +9537,9 @@ function caActivityCardHtml(a){
     </summary>
     <div class="ca-card-body">
       <p class="coach-tip">${escHtml(tf(a,'intro'))}</p>
-      ${caJourneyLinkHtml(a)}
       ${stepsHtml && focus ? caFocusDotsHtml(a, openStepIdx) : ''}
       ${stepsHtml ? `<ol class="ca-steps">${stepsHtml}</ol>` : ''}
+      ${caJourneyEndHtml(a)}
       ${caMarkRowHtml(a, done, markLabel)}
     </div>
   </details>`;

@@ -5,6 +5,14 @@ Notable changes to the Guitar Class site. Newest first.
 For the full session-by-session history (and the reasoning behind each change),
 see `WORKFLOW.md` and the git commit log.
 
+## 2026-09-25 — Song Journey button moved to the end
+
+### Changed
+
+- **The "Open the Song Journey page" button on a class activity is at the
+  end now, not the top.** It shows up in the step that sends you to the
+  song page, after you have done the steps before it.
+
 ## 2026-09-25 — One activity at a time
 
 ### Changed
