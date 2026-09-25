@@ -5,6 +5,20 @@ Notable changes to the Guitar Class site. Newest first.
 For the full session-by-session history (and the reasoning behind each change),
 see `WORKFLOW.md` and the git commit log.
 
+## 2026-09-25 — Shorter class activities, two lines of tab at a time
+
+### Changed
+
+- **"Luna" — The Bassline is four steps now.** Feel the two big beats, learn
+  F and A, play the loop with the metronome, then play with the band.
+- **Sight-Reading TAB is four steps now.** How to read TAB, then three lines
+  to sight-read: one on the low E string, one that moves to the A string, and
+  one that goes up to fret 8.
+- **Every long tab in a class activity shows two lines at a time.** **◀
+  Previous** and **Next ▶** move through the lines, and the tab turns the page
+  by itself when you press Play tab or play with the band. A printed activity
+  still shows every line.
+
 ## 2026-09-25 — "the cure" — Intro, Verse and Chorus, in four steps
 
 ### Changed

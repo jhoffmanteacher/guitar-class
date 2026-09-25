@@ -234,7 +234,8 @@ beats each" claim against what its tab notes actually hold, merging a
 run of identical struck notes into one logical duration so an "in
 order" tab spelled out by repetition doesn't false-positive (1ay), and
 the Song Journey page named only in a class activity's last step, with the
-renderer's last-step gate pinned beside it (1ba).
+renderer's last-step gate pinned beside it (1ba), and class activities at four steps or fewer with
+both renderers paging long tabs two lines at a time (1bb).
 
 Not every class can be guarded by a banned-phrase list. 1w2 pins the Journey
 lick labels *positively* — every `Lick N — ...` card must use one of four
@@ -1261,6 +1262,17 @@ console preview in `renderTeacherActivityDetail` shows the same link after
 its steps — two renderers, patched together). checks.mjs 1d validates the
 slug against `tabs/<slug>.html` and the layer against that page's
 `layer-num` spans.
+
+**Four steps, two lines a page** (Jonathan, 2026-09-25). A class activity
+has at most four steps; checks.mjs **1bb** fails a fifth, with the cards
+taught before the rule pinned in `FOUR_STEP_LEGACY` (the list only shrinks —
+cut one to four and it has to leave the list). Every class-activity tab
+longer than two rendered rows pages two rows at a time with Previous / Next
+by default — `CA_TAB_LINES_PER_PAGE`, passed as `defaultLinesPerPage` by
+`caStepHtml()` and `renderTeacherActivityDetail()` (1bb pins both). Play tab
+and a sibling band snippet both turn the page as they play. `revealDelay` is
+per tab and drops the Play tab button, so it stays off any tab whose Play is
+the answer key (ca-21) or the one demo of a held note's length.
 
 **The Journey button is in the LAST step only — every class activity, now
 and in future** (Jonathan, 2026-09-25). `caStepHtml()` adds it to the last

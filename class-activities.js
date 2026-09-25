@@ -58,6 +58,23 @@
    checks.mjs 1d rejects any other value. (Jonathan, 2026-09-25: ca-10,
    ca-18, ca-20, ca-21.)
 
+   FOUR STEPS AT MOST (Jonathan, 2026-09-25): a class activity teaches in
+   four steps or fewer — usually Learn / Practice pairs ending on an
+   open-ended Practice rung. checks.mjs 1bb fails the push on a fifth step;
+   the activities already taught before the rule are pinned there as
+   FOUR_STEP_LEGACY, and that list only shrinks.
+
+   LONG TABS PAGE TWO LINES AT A TIME, by default (same day). Every
+   class-activity tab longer than two rendered rows shows two rows with
+   Previous / Next, and Play tab (or a sibling band snippet) turns the page
+   as it plays — CA_TAB_LINES_PER_PAGE / buildPagedTabBody in app.js,
+   passed by BOTH renderers. Nothing to write in the data: a tab's own
+   `linesPerPage` overrides it, and `linesPerPage: 0` opts one tab out.
+   `revealDelay: <seconds>` on a tab is separate and per tab: it hides the
+   board while the student reads the step, and drops the Play tab button —
+   so leave it OFF any tab whose Play tab is the answer key (ca-21) or the
+   only demo of how long a note rings (a Learn step with held notes).
+
    ids are PERMANENT — never renumber or reuse one. Student completion is
    keyed to the id in Firestore (classActivities: { [id]: true }), same rule
    as skill ids in the module files. An id is `ca-<n>` where n is simply the
@@ -1829,6 +1846,14 @@ window.CLASS_ACTIVITIES = [
       },
     ],
   },
+  /* REBUILT 2026-09-25 to four steps (Jonathan: "apply this to upcoming class
+     activities as well" — the ca-18 rebuild). Was seven: feel the two, learn
+     F, practice F, practice A, the loop, faster, with the band. F and A are
+     now learned together on the loop tab (the one place Play tab still
+     demonstrates how long each note rings — per-note buttons can't), the
+     loop is practised to the metronome with the tab revealed after the
+     directions (revealDelay, same as ca-18), and the 70/80 BPM step is gone:
+     the band is the last rung. */
   {
     id:    'ca-20',
     view:  'focus',   // one step at a time — see VIEW above
@@ -1852,58 +1877,10 @@ window.CLASS_ACTIVITIES = [
                    label_es: 'Escucha los dos tiempos grandes' },
       },
       {
-        label:    'Learn — F',
-        label_es: 'Aprende — F',
-        text: 'Press Play on the tab and watch the cursor. Index finger on fret 1, fingertip right behind the fret. One pluck per bar, and the note rings through both big beats.',
-        text_es: 'Pulsa Play en la tablatura y mira el cursor. Índice en el traste 1, la punta del dedo justo detrás del traste. Una pulsación por compás, y la nota suena durante los dos tiempos grandes.',
-        tab: {
-          caption: 'F · four bars · one pluck per bar, 2 beats each',
-          caption_es: 'F · cuatro compases · una pulsación por compás, 2 tiempos cada una',
-          notes: [
-            { string: 'E', fret: 1, note: 'F', midi: 41, beats: 2 },
-            { string: 'E', fret: 1, note: 'F', midi: 41, beats: 2 },
-            { string: 'E', fret: 1, note: 'F', midi: 41, beats: 2 },
-            { string: 'E', fret: 1, note: 'F', midi: 41, beats: 2 }
-          ]
-        },
-      },
-      {
-        label:    'Practice — F',
-        label_es: 'Practica — F',
-        text: 'Play F with the tab at 60 BPM, one pluck every two beats, and let it ring the whole time. You\'ve got it when: four F\'s in a row at 60 BPM, no buzz. Buzz? Slide the fingertip closer to the fret and press with the tip, not the pad.',
-        text_es: 'Toca F con la tablatura a 60 BPM, una pulsación cada dos tiempos, y déjala sonar todo el tiempo. Lo tienes cuando: cuatro F seguidas a 60 BPM, sin zumbido. ¿Zumba? Desliza la punta del dedo más cerca del traste y presiona con la punta, no con la yema.',
-        tab: {
-          caption: 'F · four bars · one pluck per bar, 2 beats each',
-          caption_es: 'F · cuatro compases · una pulsación por compás, 2 tiempos cada una',
-          notes: [
-            { string: 'E', fret: 1, note: 'F', midi: 41, beats: 2 },
-            { string: 'E', fret: 1, note: 'F', midi: 41, beats: 2 },
-            { string: 'E', fret: 1, note: 'F', midi: 41, beats: 2 },
-            { string: 'E', fret: 1, note: 'F', midi: 41, beats: 2 }
-          ]
-        },
-      },
-      {
-        label:    'Practice — A',
-        label_es: 'Practica — A',
-        text: 'Lift your finger off. Play the open A string with the tab at 60 BPM, one pluck every two beats. You\'ve got it when: four A\'s in a row with only one string ringing. Low E ringing too? Rest the pick on the A string before each pluck, then push through it.',
-        text_es: 'Levanta el dedo. Toca la cuerda La al aire con la tablatura a 60 BPM, una pulsación cada dos tiempos. Lo tienes cuando: cuatro A seguidas con una sola cuerda sonando. ¿Suena también la Mi grave? Apoya la púa en la cuerda La antes de cada pulsación, y luego empújala a través.',
-        tab: {
-          caption: 'A · four bars · one pluck per bar, 2 beats each',
-          caption_es: 'A · cuatro compases · una pulsación por compás, 2 tiempos cada una',
-          notes: [
-            { string: 'A', fret: 0, note: 'A', midi: 45, beats: 2 },
-            { string: 'A', fret: 0, note: 'A', midi: 45, beats: 2 },
-            { string: 'A', fret: 0, note: 'A', midi: 45, beats: 2 },
-            { string: 'A', fret: 0, note: 'A', midi: 45, beats: 2 }
-          ]
-        },
-      },
-      {
-        label:    'Practice — The loop',
-        label_es: 'Practica — El bucle',
-        text: 'Play F F A A with the tab at 60 BPM. The index finger comes down for F and lifts for A; the pick keeps the same steady speed. You\'ve got it when: four laps (a lap is one time through the loop) at 60 BPM without stopping. Late on the change? Play just the second F and the first A, ten times, then try again.',
-        text_es: 'Toca F F A A con la tablatura a 60 BPM. El índice baja para F y se levanta para A; la púa mantiene la misma velocidad constante. Lo tienes cuando: cuatro vueltas (una vuelta es una pasada completa del bucle) a 60 BPM sin detenerte. ¿Llegas tarde al cambio? Toca solo la segunda F y la primera A, diez veces, y vuelve a intentarlo.',
+        label:    'Learn — F and A',
+        label_es: 'Aprende — F y A',
+        text: 'Press Play on the tab and watch the cursor. F is fret 1 on the low E string: index fingertip right behind the fret. A is the open A string: lift the finger off. One pluck per bar, and each note rings through both big beats.',
+        text_es: 'Pulsa Play en la tablatura y mira el cursor. F es el traste 1 de la cuerda Mi grave: la punta del índice justo detrás del traste. A es la cuerda La al aire: levanta el dedo. Una pulsación por compás, y cada nota suena durante los dos tiempos grandes.',
         tab: {
           caption: 'The loop · F F A A · one pluck per bar, 2 beats each',
           caption_es: 'El bucle · F F A A · una pulsación por compás, 2 tiempos cada una',
@@ -1916,11 +1893,12 @@ window.CLASS_ACTIVITIES = [
         },
       },
       {
-        label:    'Practice — Faster',
-        label_es: 'Practica — Más rápido',
-        text: 'Same loop. Set the tab to 70 BPM, then 80. You\'ve got it when: four laps at 80 BPM, no stops, no buzz. Buzz comes back? Drop to 70 for four laps, then try 80 again.',
-        text_es: 'El mismo bucle. Pon la tablatura a 70 BPM, y luego a 80. Lo tienes cuando: cuatro vueltas a 80 BPM, sin paradas, sin zumbido. ¿Vuelve el zumbido? Baja a 70 durante cuatro vueltas, y vuelve a intentar a 80.',
+        label:    'Practice — The loop',
+        label_es: 'Practica — El bucle',
+        text: 'Open the Metro tool and start it at 60 BPM. Play F F A A, one pluck on every second click, and let each note ring. The index finger comes down for F and lifts for A.\nYou\'ve got it when: four laps (a lap is one time through the loop) at 60 BPM without stopping, no buzz. Late on the change? Play just the second F and the first A, ten times, then try again.',
+        text_es: 'Abre la herramienta Metro y arráncala a 60 BPM. Toca F F A A, una pulsación cada dos clics, y deja sonar cada nota. El índice baja para F y se levanta para A.\nLo tienes cuando: cuatro vueltas (una vuelta es una pasada completa del bucle) a 60 BPM sin detenerte, sin zumbido. ¿Llegas tarde al cambio? Toca solo la segunda F y la primera A, diez veces, y vuelve a intentarlo.',
         tab: {
+          revealDelay: 10,
           caption: 'The loop · F F A A · one pluck per bar, 2 beats each',
           caption_es: 'El bucle · F F A A · una pulsación por compás, 2 tiempos cada una',
           notes: [
@@ -1934,8 +1912,8 @@ window.CLASS_ACTIVITIES = [
       {
         label:    'Practice — With the band',
         label_es: 'Practica — Con la banda',
-        text: 'Press Play on the band and turn on the Metronome. The click ticks six times in each bar. Pluck on click 1 and let the note ring through clicks 2 to 6: two bars of F, then two bars of A. The band is slower than the tab, so count and wait. When it works, turn the Metronome off and open the Song Journey page to play the whole song. You\'ve got it when: two laps with the band, every pluck on click 1. Early or late? Count the clicks out loud, 1 to 6, and pluck only on 1.',
-        text_es: 'Pulsa Play en la banda y activa el Metrónomo. El clic suena seis veces en cada compás. Pulsa la cuerda en el clic 1 y deja sonar la nota durante los clics 2 a 6: dos compases de F, luego dos compases de A. La banda va más lenta que la tablatura, así que cuenta y espera. Cuando te salga, apaga el Metrónomo y abre la página de Recorrido de la canción para tocar la canción completa. Lo tienes cuando: dos vueltas con la banda, cada pulsación en el clic 1. ¿Llegas antes o tarde? Cuenta los clics en voz alta, del 1 al 6, y pulsa solo en el 1.',
+        text: 'Stop the Metro tool. Press Play on the band and turn on the band\'s Metronome button. The click ticks six times in each bar. Pluck on click 1 and let the note ring through clicks 2 to 6: two bars of F, then two bars of A. The band is slower than your 60 BPM loop, so count and wait. When it works, turn the Metronome off and open the Song Journey page to play the whole song. You\'ve got it when: two laps with the band, every pluck on click 1. Early or late? Count the clicks out loud, 1 to 6, and pluck only on 1.',
+        text_es: 'Detén la herramienta Metro. Pulsa Play en la banda y activa el botón Metrónomo de la banda. El clic suena seis veces en cada compás. Pulsa la cuerda en el clic 1 y deja sonar la nota durante los clics 2 a 6: dos compases de F, luego dos compases de A. La banda va más lenta que tu bucle a 60 BPM, así que cuenta y espera. Cuando te salga, apaga el Metrónomo y abre la página de Recorrido de la canción para tocar la canción completa. Lo tienes cuando: dos vueltas con la banda, cada pulsación en el clic 1. ¿Llegas antes o tarde? Cuenta los clics en voz alta, del 1 al 6, y pulsa solo en el 1.',
         snippet: { track: 'luna', fromBar: 1, bars: 8,
                    label:    'Two laps with the band',
                    label_es: 'Dos vueltas con la banda' },
@@ -2377,15 +2355,21 @@ window.CLASS_ACTIVITIES = [
      a short 2-bar bass line from TAB"). Every tab here is hideNames: fret
      numbers only, no note letters, no tap-to-hear row — the student has to
      work each note out from the fret, and ▶ Play tab is the answer key AFTER
-     they play. Lines 1–5 are deliberately NOT the two assessment lines,
-     which live only on the printed Unit 2 handout (Jonathan, 2026-09-24). */
+     they play. Lines 1–3 are deliberately NOT the two assessment lines,
+     which live only on the printed Unit 2 handout (Jonathan, 2026-09-24).
+     REBUILT 2026-09-25 to four steps (Jonathan: "apply this to upcoming
+     class activities as well" — the ca-18 rebuild): five practice lines
+     became three — one string (old Line 1), one string change (old Line 3),
+     both strings up to fret 8 (old Line 5, still the last, open-ended rung).
+     Old Line 2 (A string alone) and old Line 4 (a string change on every
+     note) are gone. No revealDelay here: ▶ Play tab is the answer key. */
   {
     id:    'ca-21',
     view:  'focus',   // one step at a time — see VIEW above
     title:    'Sight-Reading TAB — Low E and A Strings',
     title_es: 'Lectura a primera vista de TAB — Cuerdas Mi grave y La',
-    intro:    'Sight-reading means playing a line from the TAB the first time you see it. The Unit 2 assessment has you read a 2-bar line you have never heard and play it. These five lines are practice for that.',
-    intro_es: 'Leer a primera vista significa tocar una línea de la TAB la primera vez que la ves. La evaluación de la Unidad 2 te pide leer una línea de 2 compases que nunca has escuchado y tocarla. Estas cinco líneas son práctica para eso.',
+    intro:    'Sight-reading means playing a line from the TAB the first time you see it. The Unit 2 assessment has you read a 2-bar line you have never heard and play it. These three lines are practice for that.',
+    intro_es: 'Leer a primera vista significa tocar una línea de la TAB la primera vez que la ves. La evaluación de la Unidad 2 te pide leer una línea de 2 compases que nunca has escuchado y tocarla. Estas tres líneas son práctica para eso.',
     steps: [
       {
         label:    'Learn — How to read TAB',
@@ -2417,33 +2401,12 @@ window.CLASS_ACTIVITIES = [
       {
         label:    'Practice — Line 2',
         label_es: 'Practica — Línea 2',
-        text: 'Line 2 is all on the A string, the second line from the bottom. Play it one note per beat, then press Play to check. You\'ve got it when: you play Line 2 once through without stopping and it matches the tab. Played it on the low E string? Find the second line from the bottom and start again.',
-        text_es: 'La Línea 2 está toda en la cuerda La, la segunda línea desde abajo. Tócala una nota por tiempo, y luego pulsa Play para revisar. Lo tienes cuando: tocas la Línea 2 completa sin detenerte y coincide con la tablatura. ¿La tocaste en la cuerda Mi grave? Busca la segunda línea desde abajo y empieza otra vez.',
+        text: 'Line 2 starts on the low E string and moves up to the A string once, in bar 2. Play it one note per beat, then press Play to check. You\'ve got it when: you play Line 2 once through without stopping and it matches the tab. Missed the move to the A string? Say the string and the fret out loud for each note, and try again.',
+        text_es: 'La Línea 2 empieza en la cuerda Mi grave y sube a la cuerda La una vez, en el compás 2. Tócala una nota por tiempo, y luego pulsa Play para revisar. Lo tienes cuando: tocas la Línea 2 completa sin detenerte y coincide con la tablatura. ¿Te saltaste el paso a la cuerda La? Di en voz alta la cuerda y el traste de cada nota, e inténtalo otra vez.',
         tab: {
           hideNames: true,
-          caption: 'Line 2 · A string · 2 bars, one note per beat',
-          caption_es: 'Línea 2 · cuerda La · 2 compases, una nota por tiempo',
-          notes: [
-            { string: 'A', fret: 0, note: 'A', midi: 45 },
-            { string: 'A', fret: 2, note: 'B', midi: 47 },
-            { string: 'A', fret: 3, note: 'C', midi: 48 },
-            { string: 'A', fret: 0, note: 'A', midi: 45 },
-            { string: 'A', fret: 2, note: 'B', midi: 47 },
-            { string: 'A', fret: 3, note: 'C', midi: 48 },
-            { string: 'A', fret: 5, note: 'D', midi: 50 },
-            { string: 'A', fret: 2, note: 'B', midi: 47 }
-          ]
-        },
-      },
-      {
-        label:    'Practice — Line 3',
-        label_es: 'Practica — Línea 3',
-        text: 'Line 3 starts on the low E string and moves up to the A string once, in bar 2. Play it one note per beat, then press Play to check. You\'ve got it when: you play Line 3 once through without stopping and it matches the tab. Missed the move to the A string? Say the string and the fret out loud for each note, and try again.',
-        text_es: 'La Línea 3 empieza en la cuerda Mi grave y sube a la cuerda La una vez, en el compás 2. Tócala una nota por tiempo, y luego pulsa Play para revisar. Lo tienes cuando: tocas la Línea 3 completa sin detenerte y coincide con la tablatura. ¿Te saltaste el paso a la cuerda La? Di en voz alta la cuerda y el traste de cada nota, e inténtalo otra vez.',
-        tab: {
-          hideNames: true,
-          caption: 'Line 3 · low E and A strings · 2 bars, one note per beat',
-          caption_es: 'Línea 3 · cuerdas Mi grave y La · 2 compases, una nota por tiempo',
+          caption: 'Line 2 · low E and A strings · 2 bars, one note per beat',
+          caption_es: 'Línea 2 · cuerdas Mi grave y La · 2 compases, una nota por tiempo',
           notes: [
             { string: 'E', fret: 3, note: 'G', midi: 43 },
             { string: 'E', fret: 1, note: 'F', midi: 41 },
@@ -2457,35 +2420,14 @@ window.CLASS_ACTIVITIES = [
         },
       },
       {
-        label:    'Practice — Line 4',
-        label_es: 'Practica — Línea 4',
-        text: 'Line 4 switches between the A string and the low E string on every note. Play it one note per beat, then press Play to check. You\'ve got it when: you play Line 4 once through without stopping and it matches the tab. Losing your place? Point to each number with your finger before you play it.',
-        text_es: 'La Línea 4 cambia entre la cuerda La y la cuerda Mi grave en cada nota. Tócala una nota por tiempo, y luego pulsa Play para revisar. Lo tienes cuando: tocas la Línea 4 completa sin detenerte y coincide con la tablatura. ¿Te pierdes? Señala cada número con el dedo antes de tocarlo.',
+        label:    'Practice — Line 3',
+        label_es: 'Practica — Línea 3',
+        text: 'Line 3 goes up to fret 8. Play it one note per beat, then press Play to check. You\'ve got it when: Line 3 matches the tab. Then turn on the metronome at 60 BPM and play it with the click. Raise the metronome 10 BPM each time it stays clean.',
+        text_es: 'La Línea 3 sube hasta el traste 8. Tócala una nota por tiempo, y luego pulsa Play para revisar. Lo tienes cuando: la Línea 3 coincide con la tablatura. Después enciende el metrónomo a 60 BPM y tócala con el clic. Sube el metrónomo 10 BPM cada vez que te salga limpia.',
         tab: {
           hideNames: true,
-          caption: 'Line 4 · low E and A strings · 2 bars, one note per beat',
-          caption_es: 'Línea 4 · cuerdas Mi grave y La · 2 compases, una nota por tiempo',
-          notes: [
-            { string: 'A', fret: 0, note: 'A', midi: 45 },
-            { string: 'E', fret: 3, note: 'G', midi: 43 },
-            { string: 'A', fret: 2, note: 'B', midi: 47 },
-            { string: 'E', fret: 5, note: 'A', midi: 45 },
-            { string: 'A', fret: 3, note: 'C', midi: 48 },
-            { string: 'E', fret: 3, note: 'G', midi: 43 },
-            { string: 'A', fret: 0, note: 'A', midi: 45 },
-            { string: 'E', fret: 0, note: 'E', midi: 40 }
-          ]
-        },
-      },
-      {
-        label:    'Practice — Line 5',
-        label_es: 'Practica — Línea 5',
-        text: 'Line 5 goes up to fret 8. Play it one note per beat, then press Play to check. You\'ve got it when: Line 5 matches the tab. Then turn on the metronome at 60 BPM and play it with the click. Raise the metronome 10 BPM each time it stays clean.',
-        text_es: 'La Línea 5 sube hasta el traste 8. Tócala una nota por tiempo, y luego pulsa Play para revisar. Lo tienes cuando: la Línea 5 coincide con la tablatura. Después enciende el metrónomo a 60 BPM y tócala con el clic. Sube el metrónomo 10 BPM cada vez que te salga limpia.',
-        tab: {
-          hideNames: true,
-          caption: 'Line 5 · low E and A strings · frets 5–8 · 2 bars, one note per beat',
-          caption_es: 'Línea 5 · cuerdas Mi grave y La · trastes 5–8 · 2 compases, una nota por tiempo',
+          caption: 'Line 3 · low E and A strings · frets 5–8 · 2 bars, one note per beat',
+          caption_es: 'Línea 3 · cuerdas Mi grave y La · trastes 5–8 · 2 compases, una nota por tiempo',
           notes: [
             { string: 'E', fret: 5, note: 'A', midi: 45 },
             { string: 'E', fret: 7, note: 'B', midi: 47 },

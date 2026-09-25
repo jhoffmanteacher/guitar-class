@@ -1387,7 +1387,7 @@ function buildTab(spec, opts){
         `</span></div>`;
     }
   }
-  const paged = buildPagedTabBody(spec);
+  const paged = buildPagedTabBody(spec, opts);
   let html;
   if (paged) {
     // data-total-notes: how many plucks this tab has in all, so a sibling
@@ -1456,8 +1456,18 @@ function caArmTabReveals(root){
    same as the unpaged tab, so the cursor, the Coach and the BPM key are
    untouched. Returns '' when the tab fits on one page — the caller then
    renders it the usual way. Print shows every page (styles.css). */
-function buildPagedTabBody(spec){
-  const per = Math.floor(Number(spec && spec.linesPerPage) || 0);
+/* The class-activity default (Jonathan, 2026-09-25: "apply this to upcoming
+   class activities as well"). Every class-activity tab longer than this many
+   rows pages at this many — caStepHtml() and teacher.js's
+   renderTeacherActivityDetail() both pass it as opts.defaultLinesPerPage, so
+   a new activity inherits it without saying anything. A tab that sets its own
+   `linesPerPage` wins; `linesPerPage: 0` opts one tab out. Module lessons and
+   exit checks don't pass it and render as before. checks.mjs 1bb pins both
+   renderers passing it. */
+const CA_TAB_LINES_PER_PAGE = 2;
+function buildPagedTabBody(spec, opts){
+  const own = spec && spec.linesPerPage;
+  const per = Math.floor(Number(own !== undefined && own !== null ? own : ((opts && opts.defaultLinesPerPage) || 0)) || 0);
   if (per <= 0) return '';
   const phrases = (spec.phrases && spec.phrases.length) ? spec.phrases
     : (spec.notes && spec.notes.length ? [{ notes: spec.notes }] : []);
@@ -9516,7 +9526,8 @@ function caStepHtml(a, step, si, isOpen, isDone){
     const vLabel = step.video.label ? escHtml(tf(step.video, 'label')) : escHtml(t('ca.watchVideo'));
     parts.push(`<button type="button" class="rp-trigger" onclick="loadPanel('youtube','${escAttr(url)}','${escAttr(t('nav.classActivities'))}','YouTube')">&#x25B6; ${vLabel}</button>`);
   }
-  if(step.tab) parts.push(buildTab(step.tab, { keyPrefix: `bpm:ca:${a.id}:${si}:tab` }));
+  // defaultLinesPerPage: a long tab shows two rows at a time (buildPagedTabBody).
+  if(step.tab) parts.push(buildTab(step.tab, { keyPrefix: `bpm:ca:${a.id}:${si}:tab`, defaultLinesPerPage: CA_TAB_LINES_PER_PAGE }));
   /* Right under the tab on purpose: the snippet is those same bars played by
      the band, so the two read as one pair. ONE builder, shared with
      teacher.js's renderTeacherActivityDetail() — see buildSnippet(). */

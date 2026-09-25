@@ -5267,6 +5267,60 @@ function checkJourneyButtonLastStep() {
   if (bad === 0) ok(`${withJourney} Journey-linked activit${withJourney === 1 ? 'y' : 'ies'} — the page is named only in the last step, and the button renders only there`);
 }
 
+/* ════════════════════════════════════════════════════════════════════
+   1bb. FOUR STEPS, TWO LINES A PAGE — Jonathan, 2026-09-25 ("cut down to
+   4 steps to teach the song", then "apply this to upcoming class
+   activities as well"). Two halves:
+   (a) Every non-check class activity has AT MOST FOUR steps, except the
+       ids in FOUR_STEP_LEGACY — the ones already taught before the rule,
+       pinned here so a new activity can't join them quietly. A legacy
+       card that gets cut to four must leave the list in the same edit,
+       so the list only ever shrinks.
+   (b) Both step renderers pass the class-activity paging default
+       (CA_TAB_LINES_PER_PAGE, buildPagedTabBody in app.js) to buildTab —
+       caStepHtml for students, renderTeacherActivityDetail for the
+       console preview. Comments stripped, so a mention can't pass for a
+       call (the 1ak lesson).
+   ════════════════════════════════════════════════════════════════════ */
+const FOUR_STEP_LEGACY = new Set([
+  'ca-1', 'ca-2', 'ca-3', 'ca-4', 'ca-5', 'ca-6', 'ca-7',
+  'ca-10', 'ca-11', 'ca-12', 'ca-13', 'ca-17', 'ca-19',
+]);
+function checkFourStepsAndPaging() {
+  head('1bb. Class activities: four steps, long tabs two lines a page');
+  let bad = 0, checked = 0;
+  let activities = [];
+  try {
+    const src = readFileSync(join(ROOT, 'class-activities.js'), 'utf8');
+    const sandbox = { console };
+    sandbox.window = sandbox;
+    vm.createContext(sandbox);
+    vm.runInContext(src, sandbox, { filename: 'class-activities.js' });
+    activities = sandbox.CLASS_ACTIVITIES || [];
+  } catch { return; /* reported by 1d */ }
+  const ids = new Set(activities.map(a => a && a.id));
+  for (const a of activities) {
+    if (!a || a.kind === 'check' || !Array.isArray(a.steps)) continue;
+    checked++;
+    const n = a.steps.length;
+    if (FOUR_STEP_LEGACY.has(a.id)) {
+      if (n <= 4) { err(`${a.id} is down to ${n} steps — take it out of FOUR_STEP_LEGACY in checks.mjs (1bb)`); problems++; bad++; }
+    } else if (n > 4) {
+      err(`${a.id} ("${a.title}") has ${n} steps — class activities are four steps at most (Jonathan, 2026-09-25). Merge or cut steps; don't add it to FOUR_STEP_LEGACY.`);
+      problems++; bad++;
+    }
+  }
+  for (const id of FOUR_STEP_LEGACY) if (!ids.has(id)) { err(`FOUR_STEP_LEGACY names ${id}, which is not in class-activities.js`); problems++; bad++; }
+  const strip = f => { try { return readFileSync(join(ROOT, f), 'utf8').replace(/\/\*[\s\S]*?\*\//g, '').replace(/\/\/[^\n]*/g, ''); } catch { return ''; } };
+  const app = strip('app.js'), teacher = strip('teacher.js');
+  if (!/const\s+CA_TAB_LINES_PER_PAGE\s*=\s*[1-9]/.test(app)) { err('app.js: CA_TAB_LINES_PER_PAGE is missing or not a positive number'); problems++; bad++; }
+  if (!/buildTab\(\s*step\.tab\s*,\s*\{[^\n]*defaultLinesPerPage\s*:\s*CA_TAB_LINES_PER_PAGE/.test(app)) { err('app.js: caStepHtml no longer passes defaultLinesPerPage: CA_TAB_LINES_PER_PAGE to buildTab — long class-activity tabs would stop paging for students'); problems++; bad++; }
+  if (!/buildTab\(\s*s\.tab\s*,\s*\{[^\n]*defaultLinesPerPage\s*:\s*CA_TAB_LINES_PER_PAGE/.test(teacher)) { err('teacher.js: renderTeacherActivityDetail no longer passes defaultLinesPerPage: CA_TAB_LINES_PER_PAGE to buildTab — the console preview would stop matching the student card'); problems++; bad++; }
+  if (!/function buildPagedTabBody\(spec,\s*opts\)/.test(app) || !/buildPagedTabBody\(spec,\s*opts\)/.test(app.replace(/function buildPagedTabBody\(spec,\s*opts\)/, ''))) { err('app.js: buildTab must hand its opts to buildPagedTabBody(spec, opts), or the default never reaches it'); problems++; bad++; }
+  if (checked === 0) { err('1bb found no class activities — it cannot see what it is supposed to guard'); problems++; return; }
+  if (bad === 0) ok(`${checked} class activities — ${checked - FOUR_STEP_LEGACY.size} at four steps or fewer, ${FOUR_STEP_LEGACY.size} legacy; both renderers page long tabs two lines at a time`);
+}
+
 (async function main() {
   if (LIVE_ONLY) {
     console.log(`${C.bold}Guitar Class — post-push live check${C.reset}`);
@@ -5322,6 +5376,7 @@ function checkJourneyButtonLastStep() {
   checkBeatsClaimMatchesTab();
   checkCureChorusOrder();
   checkJourneyButtonLastStep();
+  checkFourStepsAndPaging();
   if (!SKIP_LINKS) await checkLinks();
   else warn('skipping link check (--skip-links)');
   bumpServiceWorker();
