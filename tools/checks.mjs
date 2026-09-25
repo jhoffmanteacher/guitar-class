@@ -2597,6 +2597,10 @@ function validateClassActivities() {
         }
       }
     } else if ('journeyLayer' in a) { err(`${where}: journeyLayer without journey`); problems++; }
+    /* `view: 'focus'` — Focus view, one step at a time (VIEW note atop
+       class-activities.js; caIsFocus in app.js). Anything else is a typo
+       that would silently render the accordion. */
+    if ('view' in a && a.view !== 'focus') { err(`${where}: view "${a.view}" — the only value is 'focus' (or leave it off)`); problems++; }
     if (isCheck) { /* no steps — see 1y */ }
     else if (!Array.isArray(a.steps) || !a.steps.length) { err(`${where}: "steps" should be a non-empty array`); problems++; }
     else {

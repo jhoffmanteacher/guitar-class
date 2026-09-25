@@ -654,6 +654,27 @@
 
 ## Recently shipped (post-archive)
 
+- [x] **2026-09-25 — Focus view for class activities (Cowork patch).**
+      Jonathan picked "Focus view" from three design options (one step at a
+      time) and turned it on for ca-10, ca-18, ca-20 and ca-21 via a new
+      activity-level `view: 'focus'` flag (VIEW note atop
+      class-activities.js). `caIsFocus()` in app.js switches both card
+      builders (plain + Today hero) to: numbered step buttons above the
+      ladder (`caFocusDotsHtml` — done = green ✓, current = filled, later
+      steps disabled until the step before is ticked), only the current
+      step shown (`.ca-card--focus .ca-step-collapsed{display:none}`), a
+      non-toggling "Step n of m" head, and `caFocusNavHtml` — "◀ Step n-1"
+      + "Got it — next step ▶" in place of Mark done. Moves go through
+      `caFocusGo` → `caFocusActivity` (re-render, keep open, scroll to the
+      card top) after `stopCardAudio()`. Ticks are the same day-scoped
+      `caStepDone`; rep dots drive `caFocusGotIt` via `repDotFinish`. Print
+      is unchanged (dots/nav print:none; printActivity uncollapses steps).
+      Teacher preview keeps every step plus a one-line Focus-view note.
+      checks.mjs 1d rejects any `view` value other than 'focus'. Seven new
+      `ca.focus*` i18n keys. Browser-verified at 1366×657 (dev bypass): EN
+      and ES, back/next, lock state, rep-dot auto-advance on all four,
+      accordion activities unchanged, print emulation shows all steps.
+
 - [x] **2026-09-20 — Left rail navigation cleanup (work order, pasted in
       chat — no saved file).** Pushed `4f497cd`. Renamed "Practice"→"Modules"
       and, rail-only, "In-Class Activities"→"In class" (new

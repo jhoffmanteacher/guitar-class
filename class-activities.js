@@ -41,6 +41,18 @@
    page is part of the work. Every other Journey page stays gated as usual.
    checks.mjs 1d validates the slug (and the layer against JOURNEY_LAYERS).
 
+   VIEW — `view: 'focus'` (optional; the only value). Shows the steps one at
+   a time instead of as the accordion: numbered step buttons across the top
+   of the card (done ones green with a check, later ones locked until the
+   step before is marked done), only the current step on screen, and a
+   "Got it — next step" button under it where Mark done used to be. Pure
+   presentation (caIsFocus in app.js) — the same steps, ticks and Mark
+   complete — so it can be added to or taken off any activity at any time
+   without touching saved progress. Leave it off and the card is the usual
+   accordion. The console preview still lists every step, with a note.
+   checks.mjs 1d rejects any other value. (Jonathan, 2026-09-25: ca-10,
+   ca-18, ca-20, ca-21.)
+
    ids are PERMANENT — never renumber or reuse one. Student completion is
    keyed to the id in Firestore (classActivities: { [id]: true }), same rule
    as skill ids in the module files. An id is `ca-<n>` where n is simply the
@@ -1031,6 +1043,7 @@ window.CLASS_ACTIVITIES = [
   },
   {
     id:    'ca-10',
+    view:  'focus',   // one step at a time — see VIEW above
     number: 10,
     journey: 'seven-nation-army',   // the last step sends them to this Song Journey page — see JOURNEY below
     journeyLayer: 2,
@@ -1813,6 +1826,7 @@ window.CLASS_ACTIVITIES = [
   },
   {
     id:    'ca-20',
+    view:  'focus',   // one step at a time — see VIEW above
     journey: 'luna',
     journeyLayer: 2,
     title:    '"Luna" — The Bassline',
@@ -1935,6 +1949,7 @@ window.CLASS_ACTIVITIES = [
      (ca-19, the two-string verse alone, sits between them — 2026-09-16) */
   {
     id:    'ca-18',
+    view:  'focus',   // one step at a time — see VIEW above
     number: 15,
     journey: 'the-cure',   // the last step sends them to this Song Journey page — see JOURNEY above
     journeyLayer: 2,
@@ -2296,6 +2311,7 @@ window.CLASS_ACTIVITIES = [
      which live only on the printed Unit 2 handout (Jonathan, 2026-09-24). */
   {
     id:    'ca-21',
+    view:  'focus',   // one step at a time — see VIEW above
     title:    'Sight-Reading TAB — Low E and A Strings',
     title_es: 'Lectura a primera vista de TAB — Cuerdas Mi grave y La',
     intro:    'Sight-reading means playing a line from the TAB the first time you see it. The Unit 2 assessment has you read a 2-bar line you have never heard and play it. These five lines are practice for that.',

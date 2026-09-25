@@ -5,6 +5,16 @@ Notable changes to the Guitar Class site. Newest first.
 For the full session-by-session history (and the reasoning behind each change),
 see `WORKFLOW.md` and the git commit log.
 
+## 2026-09-25 — One step at a time
+
+### Changed
+
+- **Four class activities now show one step at a time:** Seven Nation Army
+  — The Riff, "the cure" — Intro, Verse and Chorus, "Luna" — The Bassline,
+  and Sight-Reading TAB. Numbered buttons across the top show where you are.
+  Press **Got it — next step** when you meet the step's goal. A step opens
+  after you finish the one before it.
+
 ## 2026-09-24 — Sight-reading practice for the Unit 2 assessment
 
 ### Added

@@ -555,6 +555,13 @@ best-score write (`sdSaveBest`/`dkSaveBest` bail on `IS_TEACHER_MODE`, so
 previewing isn't practising). Keep new exceptions to that shape, and comment
 them.
 
+**Focus view (`view: 'focus'`, 2026-09-25) is activity-level, not a step
+field** — it changes how `caActivityCardHtml`/`caHeroCardHtml` lay the steps
+out (via `caIsFocus`), and the teacher preview deliberately keeps listing
+every step with a one-line note instead. A new STEP field still goes in both
+renderers; `caStepHtml` has a focus branch for the head and the nav row, so
+anything added there must land in both of its branches too.
+
 checks.mjs 1v now enforces this for the one field it can see mechanically —
 the class-activity figure's `width`/`height` — and fails the push if only one
 renderer has them. Everything else is still grep-both-by-hand.

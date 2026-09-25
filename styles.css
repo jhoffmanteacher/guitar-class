@@ -1926,6 +1926,7 @@ body.t-wide .t-main{max-width:none}
      its directions still do). */
   body.print-activity .ca-print-btn,body.print-activity .ca-mark-btn,
   body.print-activity .ca-step-chev,body.print-activity .ca-step-done-row,
+  body.print-activity .ca-focus-dots,body.print-activity .ca-focus-nav,
   body.print-activity .sdr{display:none !important}
   body.print-activity #class-activities-body::before{
     content:'Guitar Class — Sequoia HS';
@@ -2382,6 +2383,25 @@ body.explore-open #week-panels{display:none}
 .ca-step-donebtn{font-family:inherit;font-size:0.8438rem;font-weight:600;padding:7px 14px;border-radius:16px;border:1px solid var(--ca-accent);background:transparent;color:var(--ca-accent);cursor:pointer}
 .ca-step-donebtn:hover{background:var(--ca-accent-bg)}
 .ca-step-donebtn.is-done{background:var(--ca-accent-bg)}
+/* Focus view (`view: 'focus'`, caIsFocus in app.js) — one step on screen.
+   The collapsed steps are still in the DOM (printActivity uncollapses them
+   for the handout), just not shown; the head is a label, not a toggle. */
+.ca-card--focus .ca-step.ca-step-collapsed{display:none}
+.ca-card--focus .ca-step + .ca-step{border-top:0}
+.ca-step-head--focus{cursor:default;font-weight:600}
+.ca-step-head--focus:hover{background:transparent}
+.ca-focus-dots{display:flex;flex-wrap:wrap;gap:6px;margin:12px 0 4px}
+.ca-focus-dot{min-width:48px;min-height:36px;padding:0 12px;border-radius:8px;border:1px solid var(--border);background:var(--bg3);color:var(--text2);font-family:inherit;font-size:0.875rem;font-weight:600;cursor:pointer}
+.ca-focus-dot:hover:not(:disabled){border-color:var(--brand)}
+.ca-focus-dot.is-done{background:var(--green-bg);color:var(--green-text);border-color:transparent}
+.ca-focus-dot.is-now{background:var(--brand);color:var(--brand-text);border-color:var(--brand)}
+.ca-focus-dot:disabled{cursor:default;opacity:.5}
+.ca-focus-dot:focus-visible,.ca-focus-next:focus-visible,.ca-focus-back:focus-visible{outline:2px solid var(--blue-text);outline-offset:2px}
+.ca-focus-nav{display:flex;align-items:center;gap:12px;margin-top:16px}
+.ca-focus-back{font-family:inherit;font-size:0.9375rem;padding:8px 10px;border:0;border-radius:8px;background:transparent;color:var(--text2);cursor:pointer}
+.ca-focus-back:hover{background:var(--bg2)}
+.ca-focus-next{margin-left:auto;font-family:inherit;font-size:1rem;font-weight:700;min-height:44px;padding:10px 22px;border:0;border-radius:12px;background:var(--green-text);color:var(--bg);cursor:pointer}
+.ca-focus-next.is-done{background:var(--green-bg);color:var(--green-text)}
 /* Finished-activities group (renderClassActivities/caFinishedGroupHtml) —
    a plain <details>, closed by default, holding the same .ca-card markup
    as the main list. Deliberately quieter than .ca-card: no left accent, so

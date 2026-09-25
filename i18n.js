@@ -424,6 +424,15 @@
                                  es: 'Termina estas actividades antes de que se abra lo demás.' },
     'ca.watchVideo':           { en: 'Watch video', es: 'Ver video' },
     'ca.stepLabel':            { en: 'Step {n}', es: 'Paso {n}' },
+    // Focus view (`view: 'focus'` — see caIsFocus in app.js): one step on
+    // screen, numbered step buttons above it, "Got it" under it.
+    'ca.focusStepOf':          { en: 'Step {n} of {total}', es: 'Paso {n} de {total}' },
+    'ca.focusNext':            { en: 'Got it — next step', es: 'Lo tengo — siguiente paso' },
+    'ca.focusLast':            { en: 'Got it', es: 'Lo tengo' },
+    'ca.focusGoNext':          { en: 'Next step', es: 'Siguiente paso' },
+    'ca.focusDone':            { en: 'Done', es: 'Hecho' },
+    'ca.focusDotsAria':        { en: 'Steps', es: 'Pasos' },
+    'ca.focusLocked':          { en: 'Finish the step before this one first.', es: 'Primero termina el paso anterior.' },
     'ca.print':                { en: 'Print this activity', es: 'Imprimir esta actividad' },
     'ca.printTitle':           { en: 'Print this activity as a handout', es: 'Imprimir esta actividad como hoja de trabajo' },
 

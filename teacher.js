@@ -1696,6 +1696,10 @@ function renderTeacherActivityDetail(id){
     ${teacherOptionalBanner(a.id)}
     ${linkRow(a)}
     ${a.intro?`<div class="coach-tip" style="margin:0 2px 16px">${escHtml(a.intro)}</div>`:''}
+    ${/* Focus view is activity-level presentation, not a step field — the
+         preview keeps showing every step (that's what a pre-class check
+         wants), so it just says how students will see them. See caIsFocus
+         in app.js. */ a.view==='focus'?`<div class="tg-note">Focus view: students see one step at a time, with numbered step buttons above it and a "Got it — next step" button under it. A step opens only after the one before it is marked done. The preview below shows every step.</div>`:''}
     <div class="stu-section-head">Students</div>
     <div class="tg-note">Gate: today's activities block the rest of the site until they're done (see the Today-first work order). Clear lets one student past this one without finishing it — a sub day, a connectivity problem, work done on paper.</div>
     ${studentTable}

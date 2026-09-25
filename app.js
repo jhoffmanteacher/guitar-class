@@ -6359,7 +6359,9 @@ function repDotFinish(dotEl, closestSel, btnSel, id, extra){
   const li = dotEl.closest(closestSel);
   const btn = li && li.querySelector(btnSel);
   if(!btn || btn.classList.contains('is-done')) return;
-  if(closestSel === '.step') toggleStepDone(btn, id); else caMarkStepDone(btn, id, extra);
+  if(closestSel === '.step') toggleStepDone(btn, id);
+  else if(btn.classList.contains('ca-focus-next')) caFocusGotIt(id, extra);   // Focus view (caIsFocus)
+  else caMarkStepDone(btn, id, extra);
 }
 function wrapGotItWhen(html, rep){
   if(typeof html !== 'string') return html;
@@ -9196,7 +9198,11 @@ function caHeroCardHtml(a, isCurrent = true){
   if(a.kind === 'check') return caHeroCheckHtml(a, isCurrent);
   const open = caOpenId === a.id;
   const done = classActivities[a.id] === true;
-  const openStepIdx = caStepOpen[a.id] !== undefined ? caStepOpen[a.id] : caDefaultOpenStep(a);
+  // Focus view always has exactly one step open (caFocusIdx); the accordion
+  // can have none (-1).
+  const focus = caIsFocus(a);
+  const openStepIdx = focus ? caFocusIdx(a)
+    : caStepOpen[a.id] !== undefined ? caStepOpen[a.id] : caDefaultOpenStep(a);
   const stepsHtml = (a.steps || []).map((s, si) => caStepHtml(a, s, si, si === openStepIdx, caStepDone[`${a.id}:${si}`] === true)).join('');
   const markLabel = done ? t('ca.completed') : t('ca.markComplete');
   const num = caNumber(a);
@@ -9210,7 +9216,7 @@ function caHeroCardHtml(a, isCurrent = true){
      nothing left in the right-hand column, so the column goes too rather
      than holding a 210px hole open. */
   const thumbHtml = caHeroThumbHtml(a);
-  return `<details class="ca-card ca-card--hero${isCurrent ? '' : ' ca-card--hero-older'}" ${open ? 'open' : ''} data-id="${escAttr(a.id)}" ontoggle="caOnToggle(this)">
+  return `<details class="ca-card ca-card--hero${isCurrent ? '' : ' ca-card--hero-older'}${focus ? ' ca-card--focus' : ''}" ${open ? 'open' : ''} data-id="${escAttr(a.id)}" ontoggle="caOnToggle(this)">
     <summary class="ca-card-summary ca-hero-summary" onclick="caCardMarkOpening(this)">
       <div class="ca-hero-main">
         ${caStartHereTagHtml(a, isCurrent)}
@@ -9227,6 +9233,7 @@ function caHeroCardHtml(a, isCurrent = true){
     <div class="ca-card-body">
       <p class="coach-tip">${escHtml(tf(a, 'intro'))}</p>
       ${caJourneyLinkHtml(a)}
+      ${stepsHtml && focus ? caFocusDotsHtml(a, openStepIdx) : ''}
       ${stepsHtml ? `<ol class="ca-steps">${stepsHtml}</ol>` : ''}
       ${caMarkRowHtml(a, done, markLabel)}
     </div>
@@ -9308,13 +9315,16 @@ function caFormatDate(iso){
    scannable — a student looking for the tuning stop shouldn't have to open
    four steps to find it. Plain text, escaped, no markup. Mirrored in
    teacher.js's renderTeacherActivityDetail() (two renderers, see CLAUDE.md). */
-function caStepHeadText(step, si){
-  const n = t('ca.stepLabel', {n: si + 1});
+function caStepHeadText(step, si, total){
+  // `total` only in Focus view (caIsFocus) — "Step 3 of 6", since the other
+  // five steps are off screen there and the count is the only map left.
+  const n = total ? t('ca.focusStepOf', {n: si + 1, total}) : t('ca.stepLabel', {n: si + 1});
   const label = step && step.label ? tf(step, 'label') : '';
   return label ? `${n}: ${label}` : n;
 }
 function caStepHtml(a, step, si, isOpen, isDone){
   const parts = [];
+  const focus = caIsFocus(a);
   /* width/height reserve the figure's box before the SVG arrives — without
      them the card jumps as each one loads. Every img/ca-*.svg is drawn on the
      same 640x244 board; checks.mjs (1v) fails the push if one isn't, and if
@@ -9346,9 +9356,22 @@ function caStepHtml(a, step, si, isOpen, isDone){
   // content — trusted (not escHtml'd) so <ol>/<ul> markup renders per the
   // house list rule, and wrapGotItWhen() can style the got-it-when sentence.
   const detailHtml = `${wrapGotItWhen(tf(step,'text'), {
-      key: `ca:${a.id}:${si}`, isDone, closestSel: '.ca-step', btnSel: '.ca-step-donebtn', id: a.id, extra: si,
+      key: `ca:${a.id}:${si}`, isDone, closestSel: '.ca-step', btnSel: focus ? '.ca-focus-next' : '.ca-step-donebtn', id: a.id, extra: si,
     })}${parts.join('')}`
-    + `<div class="ca-step-done-row"><button type="button" class="ca-step-donebtn${isDone ? ' is-done' : ''}" onclick="caMarkStepDone(this,'${escAttr(a.id)}',${si})">${stepDoneHtml(isDone)}</button></div>`;
+    + (focus ? caFocusNavHtml(a, si, isDone)
+      : `<div class="ca-step-done-row"><button type="button" class="ca-step-donebtn${isDone ? ' is-done' : ''}" onclick="caMarkStepDone(this,'${escAttr(a.id)}',${si})">${stepDoneHtml(isDone)}</button></div>`);
+  /* Focus view: the head is a plain label, not the accordion toggle — there
+     is nothing to collapse into, the dots and the nav buttons move between
+     steps. Same classes, so the print sheet reads the same either way. */
+  if(focus){
+    return `<li class="ca-step${isDone ? ' ca-step-done' : ''}${isOpen ? '' : ' ca-step-collapsed'}" data-idx="${si}">`
+      + `<div class="ca-step-head ca-step-head--focus">`
+      + `<span class="ca-step-status" aria-hidden="true">${caStepStatusHtml(si + 1, isDone)}</span>`
+      + `<span class="ca-step-label">${escHtml(caStepHeadText(step, si, (a.steps || []).length))}</span>`
+      + `</div>`
+      + `<div class="ca-step-detail">${detailHtml}</div>`
+      + `</li>`;
+  }
   return `<li class="ca-step${isDone ? ' ca-step-done' : ''}${isOpen ? '' : ' ca-step-collapsed'}" data-idx="${si}">`
     + `<button type="button" class="ca-step-head" aria-expanded="${isOpen}" onclick="caToggleStepOpen(this)">`
     + `<span class="ca-step-status" aria-hidden="true">${caStepStatusHtml(si + 1, isDone)}</span>`
@@ -9357,6 +9380,79 @@ function caStepHtml(a, step, si, isOpen, isDone){
     + `</button>`
     + `<div class="ca-step-detail">${detailHtml}</div>`
     + `</li>`;
+}
+/* ── Focus view (`view: 'focus'` on an activity — Jonathan, 2026-09-25) ──
+   The same step ladder, shown one step at a time: a row of numbered step
+   buttons over the card (done = green ✓, current = filled), only the current
+   step on screen, and a "Got it — next step" button under it in place of
+   Mark done. Presentation only — the steps, the ids, the day-scoped ticks in
+   caStepDone and the Mark complete row are exactly what the accordion uses,
+   so an activity can be switched in or out of Focus view at any time
+   without touching anyone's progress.
+
+   Moving forward is gated on the ticks: a step button is live up to the
+   first step not yet marked done, so a student can go back to anything
+   they've done but can't open the full song before the verse. Every move
+   re-renders through caFocusActivity (the deep-link path), which keeps the
+   card open, opens whichever fold it sits in and scrolls its top into view
+   — and stopCardAudio() first, because the step that was playing is about
+   to leave the screen. Print is unaffected: printActivity() uncollapses
+   every step, and the dots and nav are print:none. */
+function caIsFocus(a){ return !!(a && a.view === 'focus'); }
+// The step on screen: the one the student last moved to, else the first
+// not-done step, else (all done) the last step.
+function caFocusIdx(a){
+  const n = (a.steps || []).length;
+  const cur = caStepOpen[a.id];
+  if(cur !== undefined && cur >= 0 && cur < n) return cur;
+  const next = caDefaultOpenStep(a);
+  return next >= 0 ? next : n - 1;
+}
+function caFocusDotsHtml(a, cur){
+  const steps = a.steps || [];
+  const reach = caDefaultOpenStep(a);   // first not-done step; -1 = all done
+  const dots = steps.map((st, si) => {
+    const done = caStepDone[`${a.id}:${si}`] === true;
+    const locked = reach >= 0 && si > reach;
+    const cls = `ca-focus-dot${done ? ' is-done' : ''}${si === cur ? ' is-now' : ''}`;
+    const label = escAttr(caStepHeadText(st, si, steps.length));
+    return `<button type="button" class="${cls}" onclick="caFocusGo('${escAttr(a.id)}',${si})"`
+      + `${si === cur ? ' aria-current="step"' : ''}${locked ? ` disabled title="${escAttr(t('ca.focusLocked'))}"` : ` title="${label}"`}`
+      + ` aria-label="${label}">${done ? '&#x2713; ' : ''}${si + 1}</button>`;
+  }).join('');
+  return `<div class="ca-focus-dots" role="group" aria-label="${escAttr(t('ca.focusDotsAria'))}">${dots}</div>`;
+}
+function caFocusNavHtml(a, si, isDone){
+  const id = escAttr(a.id);
+  const last = si >= (a.steps || []).length - 1;
+  const back = si > 0
+    ? `<button type="button" class="ca-focus-back" onclick="caFocusGo('${id}',${si - 1})">&#x25C0; ${escHtml(t('ca.stepLabel', {n: si}))}</button>`
+    : '';
+  const label = isDone ? (last ? `&#x2713; ${escHtml(t('ca.focusDone'))}` : `${escHtml(t('ca.focusGoNext'))} &#x25B6;`)
+    : (last ? escHtml(t('ca.focusLast')) : `${escHtml(t('ca.focusNext'))} &#x25B6;`);
+  return `<div class="ca-focus-nav">${back}<button type="button" class="ca-focus-next${isDone ? ' is-done' : ''}" onclick="caFocusGotIt('${id}',${si})">${label}</button></div>`;
+}
+function caFocusGo(id, si){
+  stopCardAudio();
+  caStepOpen[id] = si;
+  caFocusActivity(id);
+}
+// "Got it": tick the step (the same caStepDone the accordion's Mark done
+// writes) and move to the next one. On an already-done step it just moves
+// on; on the LAST step it toggles, so a mistaken tap can be taken back.
+function caFocusGotIt(id, si){
+  const a = (window.CLASS_ACTIVITIES || []).find(x => x.id === id);
+  if(!a) return;
+  const key = `${id}:${si}`;
+  const last = si >= (a.steps || []).length - 1;
+  if(caStepDone[key] === true){
+    if(last){ delete caStepDone[key]; caSaveStepDone(); }
+    caFocusGo(id, last ? si : si + 1);
+    return;
+  }
+  caStepDone[key] = true;
+  caSaveStepDone();
+  caFocusGo(id, last ? si : si + 1);
 }
 /* An activity that names a Song Journey page (`journey: '<slug>'`, see the
    JOURNEY note atop class-activities.js) gets a link button under its steps
@@ -9413,7 +9509,11 @@ function caActivityCardHtml(a){
   if(a.kind === 'check') return caCheckCardHtml(a);
   const done = classActivities[a.id] === true;
   const open = caOpenId === a.id;
-  const openStepIdx = caStepOpen[a.id] !== undefined ? caStepOpen[a.id] : caDefaultOpenStep(a);
+  // Focus view always has exactly one step open (caFocusIdx); the accordion
+  // can have none (-1).
+  const focus = caIsFocus(a);
+  const openStepIdx = focus ? caFocusIdx(a)
+    : caStepOpen[a.id] !== undefined ? caStepOpen[a.id] : caDefaultOpenStep(a);
   const stepsHtml = (a.steps || []).map((s, si) => caStepHtml(a, s, si, si === openStepIdx, caStepDone[`${a.id}:${si}`] === true)).join('');
   const markLabel = done ? t('ca.completed') : t('ca.markComplete');
   const num = caNumber(a);
@@ -9422,7 +9522,7 @@ function caActivityCardHtml(a){
   // gates students on the date) — but an empty chip renders as a stray amber
   // dash, on the printed handout as much as on screen, so skip it entirely.
   const dateLabel = caFormatDate(caDate(a));
-  return `<details class="ca-card" ${open ? 'open' : ''} data-id="${escAttr(a.id)}" ontoggle="caOnToggle(this)">
+  return `<details class="ca-card${focus ? ' ca-card--focus' : ''}" ${open ? 'open' : ''} data-id="${escAttr(a.id)}" ontoggle="caOnToggle(this)">
     <summary class="ca-card-summary" onclick="caCardMarkOpening(this)">
       ${dateLabel ? `<span class="ca-chip">${escHtml(dateLabel)}</span>` : ''}
       <span class="ca-card-titlewrap"><span class="ca-card-title">${titleHtml}</span>${caChunkMetaHtml(a)}</span>
@@ -9432,6 +9532,7 @@ function caActivityCardHtml(a){
     <div class="ca-card-body">
       <p class="coach-tip">${escHtml(tf(a,'intro'))}</p>
       ${caJourneyLinkHtml(a)}
+      ${stepsHtml && focus ? caFocusDotsHtml(a, openStepIdx) : ''}
       ${stepsHtml ? `<ol class="ca-steps">${stepsHtml}</ol>` : ''}
       ${caMarkRowHtml(a, done, markLabel)}
     </div>
