@@ -9234,7 +9234,6 @@ function caHeroCardHtml(a, isCurrent = true){
       <p class="coach-tip">${escHtml(tf(a, 'intro'))}</p>
       ${stepsHtml && focus ? caFocusDotsHtml(a, openStepIdx) : ''}
       ${stepsHtml ? `<ol class="ca-steps">${stepsHtml}</ol>` : ''}
-      ${caJourneyEndHtml(a)}
       ${caMarkRowHtml(a, done, markLabel)}
     </div>
   </details>`;
@@ -9350,8 +9349,8 @@ function caStepHtml(a, step, si, isOpen, isDone){
      and for the skill check-off, which activity drills don't offer since
      `drill.skill` is a module skill id and activities have none. */
   if(step.drill) parts.push(renderShuffleDrill(step.drill, `${a.id}-s${si}`, null));
-  // The Journey door, right where the step names it (see caStepMentionsJourney).
-  if(caStepMentionsJourney(step)) parts.push(caJourneyLinkHtml(a));
+  // The Journey door lives in the LAST step and nowhere else (see caJourneyLinkHtml).
+  if(si === (a.steps || []).length - 1) parts.push(caJourneyLinkHtml(a));
   // Step text is first-party authored HTML, same trust level as module step
   // content — trusted (not escHtml'd) so <ol>/<ul> markup renders per the
   // house list rule, and wrapGotItWhen() can style the got-it-when sentence.
@@ -9490,21 +9489,14 @@ function caJourneyLinkHtml(a){
   const sg = SONG_JOURNEYS.find(s => s.id === a.journey);
   return `<div class="ca-journey-row"><button type="button" class="jl-song-btn" onclick="window.open('${escAttr(url)}','_blank','noopener')">${escHtml(t('ca.openJourney', { song: sg.name }))} &#x2197;</button></div>`;
 }
-/* The Journey button renders inside any step whose text mentions the Song
-   Journey page, so the door is next to the sentence that names it. It does
-   NOT render at the top of the card any more (Jonathan, 2026-09-25): a
-   button above Step 1 sent students to the song page before they had done
-   the work the page is the last step of. The English text is the one
-   tested — the Spanish twin always mirrors it. */
-function caStepMentionsJourney(step){
-  return /song journey/i.test(stripTags(step && step.text || ''));
-}
-/* End-of-card fallback: an activity with a `journey` whose steps never name
-   the page still gets its button, after the last step. When a step does
-   name it, that step already carries the button, so this adds nothing. */
-function caJourneyEndHtml(a){
-  return (a.steps || []).some(caStepMentionsJourney) ? '' : caJourneyLinkHtml(a);
-}
+/* The Journey button renders in an activity's LAST step only — every
+   activity, current and future (Jonathan, 2026-09-25). caStepHtml() adds it
+   to the last step's body whatever that step's text says; there is no copy
+   at the top of the card and none in earlier steps. A button above Step 1
+   sent students to the song page before they had done the work it caps.
+   The step text has to agree: checks.mjs 1ba fails the push when an
+   earlier step names the Song Journey page, since that step would be
+   pointing at a button it doesn't have. */
 /* The 🖨 button, shared by the plain card and the Today hero so the two
    can't drift — the hero shipped without one (7606590) because it builds its
    own summary. Exit checks carry none on purpose (see caCheckCardHtml). */
@@ -9539,7 +9531,6 @@ function caActivityCardHtml(a){
       <p class="coach-tip">${escHtml(tf(a,'intro'))}</p>
       ${stepsHtml && focus ? caFocusDotsHtml(a, openStepIdx) : ''}
       ${stepsHtml ? `<ol class="ca-steps">${stepsHtml}</ol>` : ''}
-      ${caJourneyEndHtml(a)}
       ${caMarkRowHtml(a, done, markLabel)}
     </div>
   </details>`;

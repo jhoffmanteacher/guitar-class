@@ -232,7 +232,9 @@ student-facing field (1aw), a `.strum-line`'s gap count and column
 alignment against its own text (1ax), and a class-activity step's "N
 beats each" claim against what its tab notes actually hold, merging a
 run of identical struck notes into one logical duration so an "in
-order" tab spelled out by repetition doesn't false-positive (1ay).
+order" tab spelled out by repetition doesn't false-positive (1ay), and
+the Song Journey page named only in a class activity's last step, with the
+renderer's last-step gate pinned beside it (1ba).
 
 Not every class can be guarded by a banned-phrase list. 1w2 pins the Journey
 lick labels *positively* — every `Lick N — ...` card must use one of four
@@ -1254,11 +1256,23 @@ Journey page — `journey: '<slug>'` in `class-activities.js` (ca-10 →
 seven-nation-army, ca-13 → the-cure), optional `journeyLayer` — is sending
 the student there as part of the work, so `journey.js` leaves THAT page open
 while the activity blocks; every other Journey page stays gated. The card
-renders an "Open the … Song Journey page" button under its steps
-(`caJourneyLinkHtml()`; the console preview in `renderTeacherActivityDetail`
-shows the same link — two renderers, patched together). checks.mjs 1d
-validates the slug against `tabs/<slug>.html` and the layer against that
-page's `layer-num` spans.
+renders an "Open the … Song Journey page" button (`caJourneyLinkHtml()`; the
+console preview in `renderTeacherActivityDetail` shows the same link after
+its steps — two renderers, patched together). checks.mjs 1d validates the
+slug against `tabs/<slug>.html` and the layer against that page's
+`layer-num` spans.
+
+**The Journey button is in the LAST step only — every class activity, now
+and in future** (Jonathan, 2026-09-25). `caStepHtml()` adds it to the last
+step's body and nowhere else: not above Step 1 (where it sat until that
+day, sending students to the song page before the work), not in an earlier
+step that mentions the page. So **write a new activity with the Song
+Journey page named in its last step only** — an earlier listen-along goes
+on a `snippet` of the same backing track instead (ca-20 step 1 is the
+model). checks.mjs **1ba** fails the push on an earlier step naming the
+page (EN "Song Journey", ES "Recorrido de la canción", text or label), on a
+step naming it in an activity with no `journey:`, and on any
+`caJourneyLinkHtml(a)` call other than the one last-step-gated one.
 
 **Gate flips on mid-session → In-Class Activities.** `applyActivityGate()`
 detects the off→on transition (a new activity going live under an open

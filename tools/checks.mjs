@@ -5212,6 +5212,61 @@ function checkCureChorusOrder() {
   if (bad === 0) ok(`${checked} "the cure" chorus tab(s)/playSeq checked — all read D F C G, twice`);
 }
 
+/* ════════════════════════════════════════════════════════════════════
+   1ba. THE SONG JOURNEY BUTTON IS IN THE LAST STEP, SO ONLY THE LAST STEP
+   MAY NAME THE PAGE (Jonathan, 2026-09-25: "only at the end … for all
+   class activities, even moving forward"). caStepHtml() in app.js puts an
+   activity's Journey button in its last step and nowhere else, so an
+   earlier step that says "open the Song Journey page (button below)"
+   points at a button it doesn't have — ca-20 step 1 did exactly that
+   until the same day. Scans every class activity, EN and ES, text and
+   label. Also fails a step naming the page on an activity with no
+   `journey:` (no button anywhere), and pins the renderer's last-step rule
+   so the check can't pass against a renderer that moved the button.
+   ════════════════════════════════════════════════════════════════════ */
+function checkJourneyButtonLastStep() {
+  head('1ba. Song Journey button only in the last step of a class activity');
+  let bad = 0, withJourney = 0;
+  const NAMES = /song journey|recorrido de la canci[oó]n/i;
+  const strip = h => String(h || '').replace(/<[^>]+>/g, ' ');
+  let activities = [];
+  try {
+    const src = readFileSync(join(ROOT, 'class-activities.js'), 'utf8');
+    const sandbox = { console };
+    sandbox.window = sandbox;
+    vm.createContext(sandbox);
+    vm.runInContext(src, sandbox, { filename: 'class-activities.js' });
+    activities = sandbox.CLASS_ACTIVITIES || [];
+  } catch { return; /* reported by 1d */ }
+  for (const a of activities) {
+    if (!a || !Array.isArray(a.steps)) continue;
+    if (a.journey) withJourney++;
+    const last = a.steps.length - 1;
+    a.steps.forEach((st, si) => {
+      if (!st) return;
+      const named = ['text', 'text_es', 'label', 'label_es'].some(f => NAMES.test(strip(st[f])));
+      if (!named) return;
+      if (!a.journey) {
+        err(`${a.id} step ${si + 1}: names the Song Journey page, but the activity has no journey: — no button renders anywhere`);
+        problems++; bad++;
+      } else if (si !== last) {
+        err(`${a.id} step ${si + 1} of ${last + 1}: names the Song Journey page, but its button renders only in the LAST step — move the mention to the last step (CLAUDE.md)`);
+        problems++; bad++;
+      }
+    });
+  }
+  // The renderer half: the button's one call site must be gated on the last step.
+  let app = '';
+  try { app = readFileSync(join(ROOT, 'app.js'), 'utf8').replace(/\/\*[\s\S]*?\*\//g, '').replace(/\/\/[^\n]*/g, ''); } catch {}
+  const calls = app.match(/(?<!function )caJourneyLinkHtml\(a\)/g) || [];
+  if (calls.length !== 1 || !/if\(\s*si\s*===\s*\(a\.steps\s*\|\|\s*\[\]\)\.length\s*-\s*1\s*\)\s*parts\.push\(caJourneyLinkHtml\(a\)\)/.test(app)) {
+    err(`app.js: caJourneyLinkHtml(a) must be called exactly once, inside caStepHtml gated on the last step (found ${calls.length} call(s)) — the Journey button renders only in the last step`);
+    problems++; bad++;
+  }
+  if (withJourney === 0) { err('1ba found no class activity with journey: — it cannot see what it is supposed to guard'); problems++; return; }
+  if (bad === 0) ok(`${withJourney} Journey-linked activit${withJourney === 1 ? 'y' : 'ies'} — the page is named only in the last step, and the button renders only there`);
+}
+
 (async function main() {
   if (LIVE_ONLY) {
     console.log(`${C.bold}Guitar Class — post-push live check${C.reset}`);
@@ -5266,6 +5321,7 @@ function checkCureChorusOrder() {
   checkStrumLineGaps();
   checkBeatsClaimMatchesTab();
   checkCureChorusOrder();
+  checkJourneyButtonLastStep();
   if (!SKIP_LINKS) await checkLinks();
   else warn('skipping link check (--skip-links)');
   bumpServiceWorker();

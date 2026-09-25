@@ -35,11 +35,16 @@
    luna, let-it-be, the-cure; optional `journeyLayer: <n>` to land on a
    specific layer). Set it on an activity whose steps send the student to
    that Song Journey page. Two things happen: the card renders an "Open the
-   Song Journey page" button under its steps (both renderers), and that one
+   Song Journey page" button in its LAST step, and only there (both
+   renderers), and that one
    Journey page stays OPEN behind the activity gate while this activity is
    pending — journey.js exempts a page any pending activity names, since the
    page is part of the work. Every other Journey page stays gated as usual.
    checks.mjs 1d validates the slug (and the layer against JOURNEY_LAYERS).
+   Write the steps to match: only the LAST step may name the Song Journey
+   page (EN "Song Journey", ES "Recorrido de la canción") — an earlier step
+   that says "open the Song Journey page" points at a button it doesn't
+   have. checks.mjs 1ba fails the push on one (Jonathan, 2026-09-25).
 
    VIEW — `view: 'focus'` (optional; the only value). Shows the steps one at
    a time instead of as the accordion: numbered step buttons across the top
