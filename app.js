@@ -1383,7 +1383,7 @@ function buildTab(spec, opts){
       controlsHtml = `<div class="tab-controls"><span class="bpm-control-group">` +
         (showPlayAll ? `<button type="button" class="play-seq-btn" data-midis="${escAttr(midisAttr)}" onclick="playSequenceFromGroup(this)" title="${escAttr(t('tab.playTabTitle'))}">&#x25B6; ${t('tab.playTab')}</button>` : '') +
         renderBpmControl(keyPrefix, bpm, minBpm, maxBpm) +
-        (showCoach ? coachBtnHtml(midisAttr, tabNotesJson) : '') +
+        (showCoach ? coachBtnHtml(midisAttr, tabNotesJson, undefined, !!spec.hideNames) : '') +
         `</span></div>`;
     }
   }
@@ -1423,13 +1423,27 @@ function wrapTabReveal(html, sec){
   const ms = Math.max(0, Number(sec) || 0);
   return `<div class="tab-reveal" data-reveal-delay="${ms}" hidden>${html}</div>`;
 }
-/* Arms every not-yet-revealed tab under root — called once at the end of
-   renderClassActivities(), which is the one place that writes this markup
-   into the DOM. Focus-view step navigation re-renders the whole page, so
-   returning to a step re-arms its tab and restarts its own countdown. */
+/* Arms every not-yet-revealed tab under root that's actually visible — called
+   at the end of renderClassActivities() AND from caOnToggle() when a card
+   opens. Focus-view step navigation re-renders the whole page while the card
+   is open, so returning to a step re-arms its tab and restarts its own
+   countdown, same as before.
+
+   A tab inside a CLOSED accordion card is skipped here on purpose (found
+   2026-09-25): the render pass writes every card's markup regardless of
+   which are open, so arming unconditionally started the countdown the
+   moment the page rendered, not when the student actually opened the card.
+   A student who opened a card more than revealDelay seconds after landing
+   on the page found its tab already revealed — the "read the directions
+   first" delay had silently expired while the card sat closed. caOnToggle()
+   re-arms the card's own tabs at the moment it actually opens instead. */
 function caArmTabReveals(root){
   if (!root) return;
   root.querySelectorAll('.tab-reveal[hidden]').forEach(el => {
+    const details = el.closest('details');
+    if (details && !details.open) return;
+    if (el.dataset.revealArmed) return;
+    el.dataset.revealArmed = '1';
     const ms = Number(el.dataset.revealDelay) || 0;
     setTimeout(() => {
       el.removeAttribute('hidden');
@@ -1802,7 +1816,7 @@ function buildSnippet(spec, opts){
     + guitarBtn
     + `</div>`
     + `<div class="snip-bars" aria-hidden="true">${dots}</div>`
-    + `<div class="snip-note">${escHtml(t('ca.snipLoopNote', { n: bars }))}</div>`
+    + `<div class="snip-note">${escHtml(t((opts && opts.hasTab) ? 'ca.snipLoopNote' : 'ca.snipLoopNoteNoTab', { n: bars }))}</div>`
     + cal
     + `</div></div>`;
 }
@@ -7782,9 +7796,13 @@ function stepSkillIds(w, step){
   if(!w || !step || !step.skills) return [];
   return step.skills.map(n => `${w.id}-s${n}`);
 }
-function coachBtnHtml(midisJson, tabNotesJson, skillIds){
+function coachBtnHtml(midisJson, tabNotesJson, skillIds, hideNames){
   const tabAttr = tabNotesJson ? ` data-tabnotes="${escAttr(tabNotesJson)}"` : '';
-  return `<button type="button" class="coach-btn" data-midis="${escAttr(midisJson)}"${tabAttr}${coachSkillsAttr(skillIds)} onclick="coachOpenLazy(this)" title="${escAttr(t('coach.btnTitle'))}"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" style="width:1em;height:1em;vertical-align:-0.15em"><rect x="9" y="2" width="6" height="12" rx="3"/><path d="M5 10a7 7 0 0 0 14 0"/><path d="M12 17v4M9 21h6"/></svg> <span data-i18n="coach.btn">${t('coach.btn')}</span></button>`;
+  // hideNames (sight-reading tabs like ca-21, where the Play-tab check is the
+  // answer key): the Coach's own board must hide the note-name row too, or it
+  // leaks the answer through a second path — see coachTabHtml() in coach.js.
+  const hideAttr = hideNames ? ' data-hide-names="1"' : '';
+  return `<button type="button" class="coach-btn" data-midis="${escAttr(midisJson)}"${tabAttr}${hideAttr}${coachSkillsAttr(skillIds)} onclick="coachOpenLazy(this)" title="${escAttr(t('coach.btnTitle'))}"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" style="width:1em;height:1em;vertical-align:-0.15em"><rect x="9" y="2" width="6" height="12" rx="3"/><path d="M5 10a7 7 0 0 0 14 0"/><path d="M12 17v4M9 21h6"/></svg> <span data-i18n="coach.btn">${t('coach.btn')}</span></button>`;
 }
 /* Chord steps: build [{n:name, m:[midis]}] from the step's own diagram
    specs (same fret math as chordMidis — frets are absolute). */
@@ -9531,7 +9549,7 @@ function caStepHtml(a, step, si, isOpen, isDone){
   /* Right under the tab on purpose: the snippet is those same bars played by
      the band, so the two read as one pair. ONE builder, shared with
      teacher.js's renderTeacherActivityDetail() — see buildSnippet(). */
-  if(step.snippet) parts.push(buildSnippet(step.snippet));
+  if(step.snippet) parts.push(buildSnippet(step.snippet, { hasTab: !!step.tab }));
   /* Same step-level drill widgets the module sets get (shuffle/deck/ear) —
      activities replace paper self-quizzes the same way module steps do. The
      key namespace is `<activityId>-s<i>`, which can't collide with the
@@ -10046,6 +10064,9 @@ function printActivity(ev, id){
 const TCK_CHECK_SVG_INLINE = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" style="width:14px;height:14px"><path d="M5 12l5 5L19 7"/></svg>';
 function caOnToggle(details){
   caOpenId = details.open ? details.dataset.id : (caOpenId === details.dataset.id ? null : caOpenId);
+  // A closed card's reveal-delay tabs aren't armed at render time (see
+  // caArmTabReveals) — start their countdown now that the card is actually open.
+  if(details.open) caArmTabReveals(details);
   caSyncTopbar();
   // Closing the card hides a playing snippet's Stop button without stopping
   // the sound — an <audio> element keeps going whether or not anything on

@@ -424,6 +424,10 @@ window.CLASS_ACTIVITIES = [
         text: 'All four lines, start to finish — the whole song on one string, no stopping in between. Then raise the tempo.<ul><li>Every clean pass: raise the BPM by 10</li><li>Fast already? Play it for the person next to you and have them sing along — someone in this room has a birthday coming</li></ul>You\'ve got it when: Lines 1, 2, 3 and 4 back to back without stopping, and the tempo raised at least three times without breaking down — then keep climbing.',
         text_es: 'Las cuatro líneas, de principio a fin — la canción completa en una sola cuerda, sin detenerte entre medio. Después sube el tempo.<ul><li>Cada pasada limpia: sube el BPM 10 puntos</li><li>¿Ya vas rápido? Tócala para la persona de al lado y que cante contigo — alguien en este salón cumple años pronto</li></ul>Lo tienes cuando: las Líneas 1, 2, 3 y 4 seguidas sin detenerte, y el tempo subido al menos tres veces sin perder el ritmo — y de ahí, sigue subiendo.',
         tab: {
+          // Off the site-wide paging default: the directions say "no stopping
+          // in between," so a Next click hidden behind a paged-away Line 3/4
+          // would contradict the step's own instruction (2026-09-25 audit).
+          linesPerPage: 0,
           caption: 'Whole song · Lines 1–4 · low E string only',
           caption_es: 'Canción completa · Líneas 1–4 · solo la cuerda Mi grave',
           phrases: [
@@ -1281,6 +1285,11 @@ window.CLASS_ACTIVITIES = [
         text: 'Play the notes below and say each name out loud as you play it.\nYou\'ve got it when: three times through, every name out loud.',
         text_es: 'Toca las notas de abajo y di cada nombre en voz alta mientras la tocas.\nLo tienes cuando: tres veces completas, cada nombre en voz alta.',
         tab: {
+          // Off the site-wide paging default: "three times through" means all
+          // three phrases, and there's no Play tab/snippet syncing a page turn
+          // — paging would hide "Coming down" behind an unmentioned Next
+          // (2026-09-25 audit).
+          linesPerPage: 0,
           caption: 'The dot notes, then the whole octave up and back',
           caption_es: 'Las notas de los puntos, y después la octava completa',
           phrases: [
@@ -1616,6 +1625,11 @@ window.CLASS_ACTIVITIES = [
         text: 'Each pair in the tab is one move of the hand.<ol><li>Play a pair, stop, play it again — five times each</li><li>Keep the index finger lightly touching the string while the hand moves</li><li>Then try each pair without looking</li></ol>You\'ve got it when: eight clean moves in a row without looking at your fretting hand.',
         text_es: 'Cada par de la tablatura es un movimiento de la mano.<ol><li>Toca un par, para, tócalo otra vez — cinco veces cada uno</li><li>Deja el índice tocando la cuerda suavemente mientras la mano se mueve</li><li>Después prueba cada par sin mirar</li></ol>Lo tienes cuando: ocho movimientos limpios seguidos sin mirarte la mano del mástil.',
         tab: {
+          // Off the site-wide paging default: "Each pair in the tab" means all
+          // three, and there's no Play tab/snippet here to sync a page turn to
+          // — paging would hide the third pair behind an unmentioned Next
+          // (2026-09-25 audit).
+          linesPerPage: 0,
           caption: 'The hand shift · three two-note pairs · low E string',
           caption_es: 'El cambio de mano · tres pares de dos notas · cuerda Mi grave',
           phrases: [
@@ -1649,8 +1663,8 @@ window.CLASS_ACTIVITIES = [
       {
         label:    'Intro into verse',
         label_es: 'De la intro a la estrofa',
-        text: 'Play the tab straight through: intro, then verse.<ol><li>60 BPM, counting out loud</li><li>Made a mistake? Keep going — don\'t restart</li><li>After a clean run, try 100 BPM</li></ol>You\'ve got it when: intro into verse at 60 BPM with no stops, then once at 100 BPM. Stuck on a move? Go back to Step 4 for one minute.',
-        text_es: 'Toca la tablatura de principio a fin: intro, y luego estrofa.<ol><li>60 BPM, contando en voz alta</li><li>¿Te equivocaste? Sigue — no vuelvas a empezar</li><li>Después de una vuelta limpia, prueba a 100 BPM</li></ol>Lo tienes cuando: de la intro a la estrofa a 60 BPM sin detenerte, y luego una vez a 100 BPM. ¿Te trabas en un movimiento? Vuelve al Paso 4 por un minuto.',
+        text: 'Play the tab straight through: intro, then verse.<ol><li>60 BPM, counting out loud</li><li>Made a mistake? Keep going — don\'t restart</li><li>After a clean run, try 100 BPM</li></ol>You\'ve got it when: intro into verse at 60 BPM with no stops, then once at 100 BPM. Stuck on a move? Go back to Step 3 for one minute.',
+        text_es: 'Toca la tablatura de principio a fin: intro, y luego estrofa.<ol><li>60 BPM, contando en voz alta</li><li>¿Te equivocaste? Sigue — no vuelvas a empezar</li><li>Después de una vuelta limpia, prueba a 100 BPM</li></ol>Lo tienes cuando: de la intro a la estrofa a 60 BPM sin detenerte, y luego una vez a 100 BPM. ¿Te trabas en un movimiento? Vuelve al Paso 3 por un minuto.',
         snippet: { track: 'the-cure', fromBar: 1, bars: 12,
                    label:    'Intro into verse, with the band',
                    label_es: 'De la intro a la estrofa, con la banda' },
@@ -1912,8 +1926,8 @@ window.CLASS_ACTIVITIES = [
       {
         label:    'Practice — With the band',
         label_es: 'Practica — Con la banda',
-        text: 'Stop the Metro tool. Press Play on the band and turn on the band\'s Metronome button. The click ticks six times in each bar. Pluck on click 1 and let the note ring through clicks 2 to 6: two bars of F, then two bars of A. The band is slower than your 60 BPM loop, so count and wait. When it works, turn the Metronome off and open the Song Journey page to play the whole song. You\'ve got it when: two laps with the band, every pluck on click 1. Early or late? Count the clicks out loud, 1 to 6, and pluck only on 1.',
-        text_es: 'Detén la herramienta Metro. Pulsa Play en la banda y activa el botón Metrónomo de la banda. El clic suena seis veces en cada compás. Pulsa la cuerda en el clic 1 y deja sonar la nota durante los clics 2 a 6: dos compases de F, luego dos compases de A. La banda va más lenta que tu bucle a 60 BPM, así que cuenta y espera. Cuando te salga, apaga el Metrónomo y abre la página de Recorrido de la canción para tocar la canción completa. Lo tienes cuando: dos vueltas con la banda, cada pulsación en el clic 1. ¿Llegas antes o tarde? Cuenta los clics en voz alta, del 1 al 6, y pulsa solo en el 1.',
+        text: 'Stop the Metro tool. Press Play on the band and turn on the band\'s Metronome button. The click ticks six times in each bar. Pluck on click 1 and let the note ring through clicks 2 to 6: two bars of F, then two bars of A. The band is slower than your 60 BPM loop, so count and wait. You\'ve got it when: two laps with the band, every pluck on click 1. Early or late? Count the clicks out loud, 1 to 6, and pluck only on 1. Then turn the Metronome off and open the Song Journey page to play the whole song.',
+        text_es: 'Detén la herramienta Metro. Pulsa Play en la banda y activa el botón Metrónomo de la banda. El clic suena seis veces en cada compás. Pulsa la cuerda en el clic 1 y deja sonar la nota durante los clics 2 a 6: dos compases de F, luego dos compases de A. La banda va más lenta que tu bucle a 60 BPM, así que cuenta y espera. Lo tienes cuando: dos vueltas con la banda, cada pulsación en el clic 1. ¿Llegas antes o tarde? Cuenta los clics en voz alta, del 1 al 6, y pulsa solo en el 1. Después apaga el Metrónomo y abre la página de Recorrido de la canción para tocar la canción completa.',
         snippet: { track: 'luna', fromBar: 1, bars: 8,
                    label:    'Two laps with the band',
                    label_es: 'Dos vueltas con la banda' },
@@ -1947,8 +1961,9 @@ window.CLASS_ACTIVITIES = [
      distracts you) hides each tab for its first 10 seconds and drops its
      Play tab button — see wrapTabReveal/caArmTabReveals in app.js. Every
      step's directions were reworded off "Press Play tab"/"watch it light
-     up" accordingly; only ca-18 has this today (ca-10/19/20 still use Play
-     tab to demonstrate uneven rhythm, which the per-note buttons can't). */
+     up" accordingly; ca-18 (all four steps) and ca-20 step 3 have it today
+     (ca-10/19 and ca-20's other steps still use Play tab to demonstrate
+     uneven rhythm, which the per-note buttons can't). */
   {
     id:    'ca-18',
     view:  'focus',   // one step at a time — see VIEW above
@@ -1963,8 +1978,8 @@ window.CLASS_ACTIVITIES = [
       {
         label:    'Practice — Intro and verse',
         label_es: 'Practica — Intro y estrofa',
-        text: 'You already play this part. Play along with the tab at 60 BPM, one pluck on every beat. The tab shows two lines at a time — use Next to see the rest.\nYou\'ve got it when: intro into verse, twice in a row at 60 BPM, without stopping. Stopped twice? Play A C A C by itself for one minute, then try again.',
-        text_es: 'Esta parte ya la tocas. Toca junto con el tab a 60 BPM, una pulsación en cada tiempo. El tab muestra dos líneas a la vez — usa Siguiente para ver el resto.\nLo tienes cuando: de la intro a la estrofa, dos veces seguidas a 60 BPM, sin detenerte. ¿Te detuviste dos veces? Toca solo A C A C durante un minuto, y vuelve a intentarlo.',
+        text: 'You already play this part. Counting out loud, play the tab at 60 BPM, one pluck on every beat. The tab shows two lines at a time — use Next to see the rest.\nYou\'ve got it when: intro into verse, twice in a row at 60 BPM, without stopping. Stopped twice? Play A C A C by itself for one minute, then try again.',
+        text_es: 'Esta parte ya la tocas. Contando en voz alta, toca el tab a 60 BPM, una pulsación en cada tiempo. El tab muestra dos líneas a la vez — usa Siguiente para ver el resto.\nLo tienes cuando: de la intro a la estrofa, dos veces seguidas a 60 BPM, sin detenerte. ¿Te detuviste dos veces? Toca solo A C A C durante un minuto, y vuelve a intentarlo.',
         tab: {
           revealDelay: 10,
           caption: 'Intro and verse · 4 plucks per note',

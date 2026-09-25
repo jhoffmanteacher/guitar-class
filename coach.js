@@ -150,7 +150,7 @@ function coachOpen(btn){
                                       // cleanly (its UI resets) before coachClose()
                                       // tears the stream down
   coachClose();                       // one card at a time
-  let slots, mode, desc, tabNotes = null, tabDerived = false;
+  let slots, mode, desc, tabNotes = null, tabDerived = false, hideNames = false;
   if (btn.dataset.chords){
     let chords;
     try { chords = JSON.parse(btn.dataset.chords); } catch(e){ return; }
@@ -173,6 +173,7 @@ function coachOpen(btn){
        (data-tabnotes); bare midi drills get a derived fingering. */
     if (btn.dataset.tabnotes){
       try { tabNotes = JSON.parse(btn.dataset.tabnotes).slice(0, COACH_MAX_SLOTS); } catch(e){ tabNotes = null; }
+      hideNames = btn.dataset.hideNames === '1';
     }
     if (!tabNotes){
       tabNotes = coachDeriveTabNotes(midis.slice(0, COACH_MAX_SLOTS));
@@ -234,7 +235,7 @@ function coachOpen(btn){
   }
 
   coach = {
-    phase: 'ready', mode, slots, desc, bpm, tabNotes, tabDerived, hiddenTabs,
+    phase: 'ready', mode, slots, desc, bpm, tabNotes, tabDerived, hideNames, hiddenTabs,
     beatMs: 60000 / bpm,
     card, streakKey: 'coachStreak:' + (btn.dataset.chords || btn.dataset.midis),
     drillId: btn.dataset.chords || btn.dataset.midis,
@@ -327,7 +328,7 @@ function coachDeriveTabNotes(midis){
    same board students read everywhere else, speaker buttons included). */
 function coachTabHtml(){
   if (!coach || !coach.tabNotes || coach.mode !== 'melody' || typeof renderTabBlock !== 'function') return '';
-  return `<div class="coach-tab">${renderTabBlock(coach.tabNotes)}` +
+  return `<div class="coach-tab">${renderTabBlock(coach.tabNotes, 0, 0, coach.hideNames)}` +
     (coach.tabDerived ? `<div class="coach-tab-hint">${t('coach.tabHint')}</div>` : '') +
     `</div>`;
 }

@@ -1662,7 +1662,7 @@ function renderTeacherActivityDetail(id){
        point of the two-renderers rule. Nothing here needs #app: it is an
        <audio> element, unlike the YouTube panel above. It plays for real, so
        Jonathan can hear the day's loop before class. */
-    if(s.snippet && typeof buildSnippet==='function') media.push(buildSnippet(s.snippet));
+    if(s.snippet && typeof buildSnippet==='function') media.push(buildSnippet(s.snippet, { hasTab: !!s.tab }));
     // Drills are playable in the preview — this is where the day's activity
     // gets checked before class, and a quiz you can't try isn't previewed.
     // Own key namespace (`ca-preview-…`) so a drill open here and the same

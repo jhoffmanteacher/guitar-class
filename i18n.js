@@ -452,6 +452,8 @@
     'ca.snipDefaultTitle':     { en: 'Play with the band', es: 'Toca con la banda' },
     'ca.snipLoopNote':         { en: '{n} bars of the record, looping — the same bars as the tab. Stop it when you want.',
                                  es: '{n} compases del disco, en bucle — los mismos compases que la tablatura. Detenlo cuando quieras.' },
+    'ca.snipLoopNoteNoTab':    { en: '{n} bars of the record, looping. Stop it when you want.',
+                                 es: '{n} compases del disco, en bucle. Detenlo cuando quieras.' },
     // The Guitar toggle only appears where a full mix has been exported (see
     // SNIPPET_TRACKS in app.js). On = the record plays the part the student
     // is learning, so they can hear whether they've got it; off = the
