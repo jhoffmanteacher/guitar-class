@@ -345,6 +345,9 @@
     'ca.stillToDoGroup':       { en: 'Unfinished activities ({n})', es: 'Actividades sin terminar ({n})' },
     // The sticky bar while a card is open (item 6).
     'ca.barProgress':          { en: '{done} of {total} done', es: '{done} de {total} hechos' },
+    // Sticky-bar button that closes the open card and shows the list again
+    // (caCloseOpen / caSyncSolo in app.js).
+    'ca.allActivities':        { en: 'All activities', es: 'Todas las actividades' },
     'ca.barTop':               { en: 'Back to the top of this activity', es: 'Volver al inicio de esta actividad' },
     // "N of M" beside a module heading's progress bar, inside either fold
     // (caModuleHeadHtml, item 2f).

@@ -9890,16 +9890,51 @@ function caSyncTopbar(){
   const card = caOpenId ? document.querySelector(`.ca-card[open][data-id="${CSS.escape(caOpenId)}"]`) : null;
   const a = card ? (window.CLASS_ACTIVITIES || []).find(x => x.id === caOpenId) : null;
   caSyncHash(a);
+  caSyncSolo(a ? card : null);
   if(!a){ bar.hidden = true; bar.innerHTML = ''; title.hidden = false; return; }
   const num = caNumber(a);
   const name = (a.kind === 'check' ? t('check.prefix') + ' · ' : num ? `#${num} - ` : '') + caTitle(a);
   const steps = a.steps || [];
   const doneN = steps.filter((st, si) => caStepDone[`${a.id}:${si}`] === true).length;
   const prog = steps.length ? t('ca.barProgress', {done: doneN, total: steps.length}) : '';
-  bar.innerHTML = `<button type="button" class="ca-bar-name" onclick="caScrollToActivity('${escAttr(a.id)}')" title="${escAttr(t('ca.barTop'))}" data-i18n-attr="title:ca.barTop">${escHtml(name)}</button>`
+  bar.innerHTML = `<button type="button" class="ca-bar-back" onclick="caCloseOpen()">&#x25C0; ${escHtml(t('ca.allActivities'))}</button>`
+    + `<button type="button" class="ca-bar-name" onclick="caScrollToActivity('${escAttr(a.id)}')" title="${escAttr(t('ca.barTop'))}" data-i18n-attr="title:ca.barTop">${escHtml(name)}</button>`
     + (prog ? `<span class="ca-bar-prog">${escHtml(prog)}</span>` : '');
   bar.hidden = false;
   title.hidden = true;
+}
+/* One activity on the page at a time (Jonathan, 2026-09-25). With a card
+   open, the Unfinished / Completed groups, module headings, the other cards
+   and the resume card used to sit right under it, and students opened them
+   by mistake mid-activity. Now an open card is the only thing on the In
+   class page: the screen gets .ca-solo, the open card .ca-solo-card and
+   every element between it and #class-activities-body .ca-solo-path, and
+   styles.css hides everything else (the groups' own summaries included).
+   Pure CSS classes on the rendered page — nothing re-renders, no audio is
+   touched. "◀ All activities" in the sticky bar (caCloseOpen) or closing
+   the card by its title brings the list back. Called from caSyncTopbar,
+   which already runs on every card toggle and after every render. */
+function caSyncSolo(card){
+  const screen = document.getElementById('class-activities-screen');
+  const body = document.getElementById('class-activities-body');
+  if(!screen || !body) return;
+  body.querySelectorAll('.ca-solo-card, .ca-solo-path').forEach(el => el.classList.remove('ca-solo-card', 'ca-solo-path'));
+  const on = !!(card && body.contains(card));
+  screen.classList.toggle('ca-solo', on);
+  if(!on) return;
+  card.classList.add('ca-solo-card');
+  for(let el = card.parentElement; el && el !== body; el = el.parentElement) el.classList.add('ca-solo-path');
+}
+// "◀ All activities": close the open card (caOnToggle clears caOpenId and
+// the solo view, and stops a playing snippet) and go back to the top of
+// the list. stopCardAudio() for the TAB player, which caOnToggle can't see.
+function caCloseOpen(){
+  stopCardAudio();
+  const card = caOpenId ? document.querySelector(`.ca-card[open][data-id="${CSS.escape(caOpenId)}"]`) : null;
+  if(card) card.open = false;
+  caOpenId = null;
+  caSyncTopbar();
+  scrollPaneTop(false);
 }
 /* The open card is in the address (navigability round 2, 2026-09-23):
    '#class-activities/ca-20' while a card is open, '#class-activities' when

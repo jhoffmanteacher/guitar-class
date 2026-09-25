@@ -2323,6 +2323,15 @@ body.explore-open #week-panels{display:none}
   overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 .ca-bar-name:hover{color:var(--ca-accent)}
 .ca-bar-prog{flex-shrink:0;font-size:0.8125rem;font-weight:600;color:var(--text3);white-space:nowrap}
+.ca-bar-back{flex-shrink:0;align-self:center;font-family:inherit;font-size:0.875rem;font-weight:600;padding:6px 12px;border-radius:16px;
+  border:1px solid var(--ca-accent);background:transparent;color:var(--ca-accent);cursor:pointer;white-space:nowrap}
+.ca-bar-back:hover{background:var(--ca-accent-bg)}
+.ca-bar-back:focus-visible{outline:2px solid var(--blue-text);outline-offset:2px}
+/* One activity at a time (caSyncSolo in app.js): with a card open, only
+   that card and the elements that contain it stay on the In class page. */
+.ca-screen.ca-solo #class-activities-body > :not(.ca-solo-card):not(.ca-solo-path),
+.ca-screen.ca-solo .ca-solo-path > :not(.ca-solo-card):not(.ca-solo-path),
+.ca-screen.ca-solo #resume-card{display:none !important}
 .ca-screen .page-title svg{color:var(--ca-accent)}
 .ca-card{background:var(--bg);border:1px solid var(--border);border-left:3px solid var(--ca-accent);border-radius:var(--radius);margin-bottom:12px;overflow:hidden}
 .ca-card-summary{display:flex;align-items:center;gap:10px;padding:12px 14px;cursor:pointer;list-style:none}

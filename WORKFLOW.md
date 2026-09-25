@@ -654,6 +654,22 @@
 
 ## Recently shipped (post-archive)
 
+- [x] **2026-09-25 — One activity on the In class page at a time (Cowork
+      patch 0002, on top of Focus view).** Jonathan: with a card open, the
+      Unfinished / Completed groups and other cards sat right under it and
+      students opened them by mistake. Picked "hide them, every activity"
+      over dim-and-lock. `caSyncSolo()` (called from `caSyncTopbar`, so it
+      runs on every card toggle and render) puts `.ca-solo` on
+      #class-activities-screen, `.ca-solo-card` on the open card and
+      `.ca-solo-path` on its ancestors up to #class-activities-body; one CSS
+      rule hides every other child (group summaries, module heads, gate
+      intro, other cards) plus #resume-card. No re-render, no audio touched.
+      New "◀ All activities" button in the sticky bar (`caCloseOpen`, i18n
+      `ca.allActivities`) closes the card, stops card audio and scrolls to
+      the top; closing the card by its title works too. Browser-verified:
+      opening from inside Unfinished, the Today hero, a deep link, Got it in
+      Focus view, and back to the list.
+
 - [x] **2026-09-25 — Focus view for class activities (Cowork patch).**
       Jonathan picked "Focus view" from three design options (one step at a
       time) and turned it on for ca-10, ca-18, ca-20 and ca-21 via a new

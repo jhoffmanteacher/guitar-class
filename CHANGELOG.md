@@ -5,6 +5,14 @@ Notable changes to the Guitar Class site. Newest first.
 For the full session-by-session history (and the reasoning behind each change),
 see `WORKFLOW.md` and the git commit log.
 
+## 2026-09-25 — One activity at a time
+
+### Changed
+
+- **When you open an activity, it is the only thing on the In class page.**
+  The other activities come back when you press **◀ All activities** at the
+  top, or close the activity.
+
 ## 2026-09-25 — One step at a time
 
 ### Changed
