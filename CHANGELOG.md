@@ -5,6 +5,20 @@ Notable changes to the Guitar Class site. Newest first.
 For the full session-by-session history (and the reasoning behind each change),
 see `WORKFLOW.md` and the git commit log.
 
+## 2026-09-25 — "the cure" — Intro, Verse and Chorus, in four steps
+
+### Changed
+
+- **The "the cure" intro, verse and chorus activity is four steps now.**
+  Intro and verse, the chorus notes, the chorus, then the song with the
+  band.
+- **The tab shows two lines at a time.** Press Play tab and each note lights
+  up as it plays; the tab turns to the next two lines by itself. **◀ Previous**
+  and **Next ▶** move through the lines by hand. A printed activity still
+  shows every line.
+- **The tab shows one pluck on every beat** — four per note — the same way
+  the Song Journey page shows it.
+
 ## 2026-09-25 — Song Journey button moved to the end
 
 ### Changed

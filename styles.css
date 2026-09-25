@@ -1524,6 +1524,15 @@ body.t-wide .t-main{max-width:none}
 .bpm-slider:hover::-moz-range-thumb,.bpm-slider:focus::-moz-range-thumb{background:var(--text)}
 .bpm-readout{font-size:0.75rem;color:var(--text2);font-weight:500;min-width:52px;white-space:nowrap;font-variant-numeric:tabular-nums}
 .tab-controls{margin:4px 0 6px}
+/* Paged tab (`linesPerPage` — buildPagedTabBody/tabShowPage in app.js): a
+   couple of rows at a time, Previous / Next above them, and Play tab turns
+   the page itself. */
+.tab-pager{display:flex;align-items:center;gap:8px;margin:2px 0 6px;flex-wrap:wrap}
+.tab-pager-label{font-size:0.875rem;font-weight:600;color:var(--text);min-width:6.5em;text-align:center}
+.tab-pager-btn{font-family:inherit;font-size:0.8125rem;font-weight:600;padding:3px 10px;background:transparent;border:1px solid var(--border);border-radius:14px;color:var(--text2);cursor:pointer}
+.tab-pager-btn:hover:not(:disabled){background:var(--blue-bg);color:var(--blue-text);border-color:var(--blue-text)}
+.tab-pager-btn:disabled{opacity:0.4;cursor:default}
+.tab-page[hidden]{display:none}
 @media (max-width:600px){
   .bpm-slider{width:96px}
   .bpm-readout{font-size:0.75rem;min-width:48px}
@@ -1928,6 +1937,9 @@ body.t-wide .t-main{max-width:none}
   body.print-activity .ca-step-chev,body.print-activity .ca-step-done-row,
   body.print-activity .ca-focus-dots,body.print-activity .ca-focus-nav,
   body.print-activity .sdr{display:none !important}
+  /* A paged tab prints every page; the pager is screen-only. */
+  body.print-activity .tab-page[hidden]{display:block !important}
+  body.print-activity .tab-pager{display:none !important}
   body.print-activity #class-activities-body::before{
     content:'Guitar Class — Sequoia HS';
     display:block;font-size:11pt;color:#555;margin-bottom:6px

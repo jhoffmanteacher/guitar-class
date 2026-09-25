@@ -782,6 +782,10 @@
     'tab.playFinger':        { en: 'Finger {n} · play {note}', es: 'Dedo {n} · tocar {note}' },
     'tab.defaultTitle':      { en: 'Tab', es: 'Tab' },
     'tab.showTabLabel':      { en: 'Show TAB:', es: 'Mostrar TAB:' },
+    // Paged tab (a tab spec's `linesPerPage`) — buildPagedTabBody()/tabShowPage() in app.js
+    'tab.pageOf':            { en: 'Page {a} of {n}', es: 'Página {a} de {n}' },
+    'tab.pagePrev':          { en: 'Previous', es: 'Anterior' },
+    'tab.pageNext':          { en: 'Next', es: 'Siguiente' },
 
     // ── Song-thread lede (Set header — which Song Journey layer this set builds) ──
     'thread.bonusLayer':     { en: 'This set adds a bonus layer for:', es: 'Esta unidad agrega una capa extra para:' },

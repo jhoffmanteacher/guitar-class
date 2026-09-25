@@ -1372,6 +1372,8 @@ function buildTab(spec, opts){
       (spec.noCoach || hasHolds || (opts && opts.suppressCoach) ? '' : coachBtnHtml(midisAttr, tabNotesJson)) +
       `</span></div>`;
   }
+  const paged = buildPagedTabBody(spec);
+  if (paged) return `<div class="tab tab--paged">${headHtml}<div class="tab-body">${captionHtml}${controlsHtml}${paged}</div></div>`;
   if (spec.phrases && spec.phrases.length) {
     let seqOff = 0;
     const widest = spec.phrases.reduce((m, p) => Math.max(m, (p.notes || []).length), 0);
@@ -1389,6 +1391,98 @@ function buildTab(spec, opts){
   const body = renderTabBlock(spec.notes, 0, 0, !!spec.hideNames);
   if (!body) return '';
   return `<div class="tab">${headHtml}<div class="tab-body">${captionHtml}${controlsHtml}${body}</div></div>`;
+}
+/* ── Paged tab: `linesPerPage: N` on a tab spec (Jonathan, 2026-09-25,
+   ca-18: "too much on this page … show a couple lines at a time and
+   highlight the notes that students should play").
+
+   A "line" is one rendered row of tab — one renderTabSystem() grid, the
+   thing a student reads left to right — not a phrase: a 32-note verse is
+   one phrase but four rows. The rows are cut exactly the way
+   renderTabBlock() cuts them (same widest-phrase column count), then dealt
+   N to a page. Only one page shows, with Previous / Next above it; a
+   phrase label repeats at the top of any page its rows are on, so a
+   student never lands on a row with no name over it.
+
+   Play tab follows along: playSequence() lights the sounding note as
+   always (the beat cursor) and turns to the page that holds it — half a
+   note early at a page's last note, so the next line is up before its
+   first note is due (tabPageOf/tabShowPage). data-seq numbering is the
+   same as the unpaged tab, so the cursor, the Coach and the BPM key are
+   untouched. Returns '' when the tab fits on one page — the caller then
+   renders it the usual way. Print shows every page (styles.css). */
+function buildPagedTabBody(spec){
+  const per = Math.floor(Number(spec && spec.linesPerPage) || 0);
+  if (per <= 0) return '';
+  const phrases = (spec.phrases && spec.phrases.length) ? spec.phrases
+    : (spec.notes && spec.notes.length ? [{ notes: spec.notes }] : []);
+  if (!phrases.length) return '';
+  const widest = phrases.reduce((m, p) => Math.max(m, (p.notes || []).length), 0);
+  const perRow = Math.ceil(widest / Math.ceil(widest / TAB_MAX_COLS));
+  const rows = [];   // { pi, grid }
+  let seqOff = 0;
+  phrases.forEach((p, pi) => {
+    const notes = p.notes || [];
+    for (let s = 0; s < notes.length; s += perRow) {
+      rows.push({ pi, grid: renderTabSystem(notes.slice(s, s + perRow), seqOff + s, perRow, !!spec.hideNames) });
+    }
+    seqOff += notes.length;
+  });
+  if (rows.length <= per) return '';
+  const pages = [];
+  for (let s = 0, k = 0; s < rows.length; s += per, k++) {
+    const slice = rows.slice(s, s + per);
+    const groups = [];
+    slice.forEach(row => {
+      const g = groups[groups.length - 1];
+      if (g && g.pi === row.pi) g.grids.push(row.grid);
+      else groups.push({ pi: row.pi, grids: [row.grid] });
+    });
+    const inner = groups.map(g => {
+      const p = phrases[g.pi];
+      return `
+      <div class="tab-phrase">
+        ${p.label ? `<div class="tab-phrase-label">${escHtml(tf(p,'label'))}</div>` : ''}
+        <div class="tab-board">${g.grids.join('')}
+        </div>
+      </div>`;
+    }).join('');
+    pages.push(`<div class="tab-page" data-page="${k}"${k ? ' hidden' : ''}>${inner}</div>`);
+  }
+  const pagerHtml = `<div class="tab-pager" data-total="${pages.length}">`
+    + `<button type="button" class="tab-pager-btn" onclick="tabPageStep(this,-1)" disabled>&#x25C0; ${escHtml(t('tab.pagePrev'))}</button>`
+    + `<span class="tab-pager-label" aria-live="polite">${escHtml(t('tab.pageOf', {a: 1, n: pages.length}))}</span>`
+    + `<button type="button" class="tab-pager-btn" onclick="tabPageStep(this,1)">${escHtml(t('tab.pageNext'))} &#x25B6;</button>`
+    + `</div>`;
+  return pagerHtml + pages.join('');
+}
+/* Show page k of a paged tab (clamped) and keep the pager in step. */
+function tabShowPage(tabEl, k){
+  if(!tabEl) return;
+  const pages = tabEl.querySelectorAll('.tab-page');
+  if(!pages.length) return;
+  k = Math.max(0, Math.min(pages.length - 1, k));
+  pages.forEach((p, i) => { p.hidden = i !== k; });
+  const pager = tabEl.querySelector('.tab-pager');
+  if(!pager) return;
+  const label = pager.querySelector('.tab-pager-label');
+  if(label) label.textContent = t('tab.pageOf', {a: k + 1, n: pages.length});
+  const btns = pager.querySelectorAll('.tab-pager-btn');
+  if(btns[0]) btns[0].disabled = k === 0;
+  if(btns[1]) btns[1].disabled = k === pages.length - 1;
+}
+function tabPageStep(btn, dir){
+  const tabEl = btn.closest('.tab');
+  if(!tabEl) return;
+  const pages = Array.from(tabEl.querySelectorAll('.tab-page'));
+  const cur = pages.findIndex(p => !p.hidden);
+  tabShowPage(tabEl, (cur < 0 ? 0 : cur) + dir);
+}
+/* The page holding beat `seq`, or -1 when the tab isn't paged. */
+function tabPageOf(tabEl, seq){
+  const hit = tabEl && tabEl.querySelector(`.tab-page [data-seq="${seq}"]`);
+  const page = hit && hit.closest('.tab-page');
+  return page ? Number(page.dataset.page) : -1;
 }
 
 /* ── Backing-track snippets (a step's `snippet`) ───────────────────────
@@ -7516,6 +7610,17 @@ function playSequence(midis, bpm, btnEl){
       if(tabRoot){
         tabRoot.querySelectorAll('.beat-now').forEach(el=>el.classList.remove('beat-now'));
         tabRoot.querySelectorAll(`[data-seq="${i}"]`).forEach(el=>el.classList.add('beat-now'));
+        /* Paged tab (linesPerPage — buildPagedTabBody): the sounding note is
+           always on screen, and at the last note of a page the next page
+           comes up halfway through it, before its first note is due. */
+        const pg = tabPageOf(tabRoot, i);
+        if(pg >= 0){
+          tabShowPage(tabRoot, pg);
+          if(i + 1 < midis.length){
+            const nextPg = tabPageOf(tabRoot, i + 1);
+            if(nextPg >= 0 && nextPg !== pg) timeouts.push(setTimeout(() => tabShowPage(tabRoot, nextPg), beats * interval / 2));
+          }
+        }
       }
     }, at);
   });
