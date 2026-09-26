@@ -235,7 +235,18 @@ run of identical struck notes into one logical duration so an "in
 order" tab spelled out by repetition doesn't false-positive (1ay), and
 the Song Journey page named only in a class activity's last step, with the
 renderer's last-step gate pinned beside it (1ba), and class activities at four steps or fewer with
-both renderers paging long tabs two lines at a time (1bb).
+both renderers paging long tabs two lines at a time (1bb), Spanish
+directions naming the Spanish button («Tocar el tab», «Toca con la banda»)
+rather than "Play" (1bc), and no pen or paper in a class activity (1bd —
+scoped to `class-activities.js`, because module steps have typed boxes and
+Module 13 really needs scissors).
+
+**A phrase detector must match the UNESCAPED string.** Until 2026-09-25 1w
+and 1w-t matched the raw source capture, which keeps `\'`, so every banned
+phrase with an apostrophe ("don't worry", "that's the point", "that one's
+free") was invisible in a single-quoted field — a live "Don't worry about
+pressing any frets yet" sat in Module 1 with both green. Run captures
+through `unescapeJs()` before matching.
 
 Not every class can be guarded by a banned-phrase list. 1w2 pins the Journey
 lick labels *positively* — every `Lick N — ...` card must use one of four
@@ -399,6 +410,12 @@ remove the `module-2.js` / `'assessment piece'` entry from
 `TEACHER_PHRASE_ALLOW` in checks.mjs, and reword the hidden twin at
 `module-2.js`'s Seven Nation Army Challenge — "(your A-string assessment
 piece)" — so the phrase is gone from the file, not just unflagged.
+
+**Two graded-MC choice wordings found by the 2026-09-25 sweep.** Module 2's
+"the TOP line represents which string?" keys "The high E (thinnest) string" —
+the site's convention is "high e". Module 1's "which comes right after G?"
+mixes note letters and "mi aguda" in its `choices_es`. Both are graded
+choices in frozen modules (1ap), so they wait for the reset.
 
 **Module 1 Set 2 reorder: string names and guitar parts before tuning.** The
 tuning video (step 1) depends on string names (step 7) and tuning pegs (step
@@ -1271,7 +1288,12 @@ longer than two rendered rows pages two rows at a time with Previous / Next
 by default — `CA_TAB_LINES_PER_PAGE`, passed as `defaultLinesPerPage` by
 `caStepHtml()` and `renderTeacherActivityDetail()` (1bb pins both). Play tab
 and a sibling band snippet both turn the page as they play. `revealDelay` is
-per tab and drops the Play tab button, so it stays off any tab whose Play is
+**seconds** (`wrapTabReveal()` converts to ms — until 2026-09-25 it didn't,
+and every delayed tab appeared after 10 ms). A tab the student has waited
+out stays revealed across re-renders that aren't navigation (language
+switch, coming back to the browser tab, Done on the last step) via
+`caRevealedTabs`; a Focus step move, a new student or a new day clears it.
+It is per tab and drops the Play tab button, so it stays off any tab whose Play is
 the answer key (ca-21) or the one demo of a held note's length.
 
 **The Journey button is in the LAST step only — every class activity, now

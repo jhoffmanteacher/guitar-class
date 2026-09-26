@@ -5,6 +5,29 @@ Notable changes to the Guitar Class site. Newest first.
 For the full session-by-session history (and the reasoning behind each change),
 see `WORKFLOW.md` and the git commit log.
 
+## 2026-09-25 — Error sweep: clearer directions, fixed Spanish buttons
+
+### Fixed
+
+- **The tab now waits 10 seconds before it appears** in "the cure" and
+  "Luna" activities, so you read the directions first. Once it shows, it
+  stays shown when you switch language or come back to the page.
+- **Spanish directions name the real buttons** — «Tocar el tab» and «Toca
+  con la banda» — instead of "Play".
+- **Songs has a Backing track button for all six core songs** again.
+- **A finished activity in one-step-at-a-time view stays open** the next day.
+  You no longer have to tap through every step to reach the last one.
+- **"the cure" on the low E:** index finger on fret 5 for A, pinky on fret 8
+  for C, the same as the Song Journey page.
+- **Finger Gym:** no more writing down your BPM. Each Gym asks for two clean
+  sets in a row, the second 10 BPM faster.
+- **"the cure" Song Journey, Layer 3 and 5:** the verse is eight bars, the
+  same as the rest of the site.
+- Many small wording fixes in Modules 1–6 and the class activities: terms
+  like *root*, *5th*, *key*, *6/8*, *BPM* and *natural note* are explained
+  where you first need them, and a few directions that pointed at buttons
+  or lists that are not there now point at the right place.
+
 ## 2026-09-25 — Shorter class activities, two lines of tab at a time
 
 ### Changed

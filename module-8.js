@@ -1022,7 +1022,7 @@ SETS.push(
 
 globalThis.MODULE_SONGS = globalThis.MODULE_SONGS || {};
 MODULE_SONGS[8] = [
-      { name: '"the cure" — Olivia Rodrigo', meta: 'Fingerpick the verse for a soft feel · Am–C–F–C', meta_es: 'Toca la estrofa con fingerpicking para una sensación suave · Am–C–F–C', type: 'Core', core: true, journeyUrl: 'tabs/the-cure.html',
+      { name: '"the cure" — Olivia Rodrigo', meta: 'Fingerpick the verse for a soft feel · Am–C–Am–C, F–C–F–C', meta_es: 'Toca la estrofa con fingerpicking para una sensación suave · Am–C–Am–C, F–C–F–C', type: 'Core', core: true, journeyUrl: 'tabs/the-cure.html',
         originalUrl: 'https://www.youtube.com/watch?v=B402rKl4bUg',
         tutorialUrl: 'https://www.youtube.com/watch?v=adW_zSkClaY' },
       { name: '"Let It Be" — The Beatles', meta: 'Fingerpick the verse · C–G–Am–F', meta_es: 'Toca la estrofa con fingerpicking · C–G–Am–F', type: 'Core', core: true, journeyUrl: 'tabs/let-it-be.html',

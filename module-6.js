@@ -276,8 +276,8 @@ SETS.push(
           },
           {
             label: 'Hear it: full-chord loop', label_es: 'Escúchalo: loop de acordes completos',
-            text: 'Hear it — the record\'s verse as full chords, two beats per chord: C · G · Am · F, then C · G · F · C. The second line ends on F · C, not Am · F.<ol><li>First time through: just listen for the changes.</li><li>Second time: strum along on muted strings, changing with it.</li></ol>You\'ve got it when: your muted strum matches all eight chords on the second time through without falling behind.',
-            text_es: 'Escúchalo — la estrofa de la grabación como acordes completos, dos tiempos por acorde: C · G · Am · F, y luego C · G · F · C. La segunda línea termina en F · C, no en Am · F.<ol><li>Primera vez: solo escucha los cambios.</li><li>Segunda vez: rasguea con cuerdas silenciadas, cambiando junto con ella.</li></ol>Lo tienes cuando: tu rasgueo silenciado coincide con los ocho acordes en la segunda vez sin quedarte atrás.',
+            text: 'Hear it — the record\'s verse as full chords, two beats per chord: C · G · Am · F, then C · G · F · C. The second line ends on F · C, not Am · F.<ol><li>First time through: just listen for the changes.</li><li>Second time: play along, one down-strum on the first beat of each chord.</li></ol>You\'ve got it when: on the second time through, you strum all eight chords with the playback and every change lands with it.',
+            text_es: 'Escúchalo — la estrofa de la grabación como acordes completos, dos tiempos por acorde: C · G · Am · F, y luego C · G · F · C. La segunda línea termina en F · C, no en Am · F.<ol><li>Primera vez: solo escucha los cambios.</li><li>Segunda vez: toca junto con ella, un rasgueo hacia abajo en el primer tiempo de cada acorde.</li></ol>Lo tienes cuando: en la segunda vez, rasgueas los ocho acordes junto con la grabación y cada cambio cae con ella.',
             playSeq: { label: 'Hear it — C · G · Am · F, then C · G · F · C, two beats per chord', label_es: 'Escúchalo — C · G · Am · F, y luego C · G · F · C, dos tiempos por acorde', bpm: 60, notes: [
               { midi: [48,52,55,60,64], beats: 2 },
               { midi: [43,47,50,55,59,67], beats: 2 },
@@ -536,7 +536,7 @@ SETS.push(
                 label: 'Warm-up: down-up', label_es: 'Calentamiento: abajo-arriba',
                 text: 'Warm the strum hand: 4 bars of steady down-up on Em at 60 BPM, the same strum as Set 1. You\'ve got it when: you have played 4 bars with the hand never stopping.',
                 text_es: 'Calienta la mano de rasgueo: 4 compases de abajo-arriba constante en Em a 60 BPM, el mismo rasgueo de la Unidad 1. Lo tienes cuando: tocaste 4 compases sin que la mano se detenga nunca.',
-                hint: 'Look back: D-DU-UDU is just the down-up you already own with two strums left out — the same six strums you met in Module 5 as the folk strum. Get the even swing going first.',
+                hint: 'Look back: D-DU-UDU is just the down-up you already know with two strums left out — the same six strums you met in Module 5 as the folk strum. Get the even swing going first.',
                 hint_es: 'Recuerda: D-DU-UDU es solo el abajo-arriba que ya dominas con dos rasgueos omitidos — los mismos seis rasgueos que conociste en el Módulo 5 como el rasgueo folk. Primero logra que el balanceo parejo funcione.',
                 playSeq: { label: 'Hear the 8th-note pulse', label_es: 'Escucha el pulso de corcheas', bpm: 60, notes: [
                   {midi:64,beats:0.5},{midi:64,beats:0.5},{midi:64,beats:0.5},{midi:64,beats:0.5},
@@ -636,8 +636,8 @@ SETS.push(
             label: 'Challenge 3 — G → D, Pattern Locked (assessment preparation)', label_es: 'Reto 3 — G → D, patrón asegurado (preparación para la evaluación)',
             text: '<ol><li>Loop G → D every 2 bars playing D-DU-UDU.</li><li>Change the chord on the LAST upstroke of the bar, while your hand is already moving up — that is the free moment to jump from G to D.</li><li>Set the ⏱ Timer for 3 minutes to keep going.</li></ol>You\'ve got it when: two bars of G into two bars of D, four times through, with all six strums in every bar and the pattern identical on both chords (drop to 50 BPM if it falls apart).',
             text_es: '<ol><li>Repite G → D cada 2 compases tocando D-DU-UDU.</li><li>Cambia el acorde en el ÚLTIMO golpe hacia arriba del compás, mientras tu mano ya está subiendo — ese es el momento libre para saltar de G a D.</li><li>Pon el ⏱ Temporizador en 3 minutos para seguir.</li></ol>Lo tienes cuando: dos compases de G y dos de D, cuatro veces seguidas, con los seis rasgueos en cada compás y el patrón idéntico en los dos acordes (baja a 50 BPM si se desarma).',
-            hint: 'If the pattern falls apart during the chord change, slow to 50 BPM. The pattern is the GROOVE — losing it is worse than missing a note in the chord.',
-            hint_es: 'Si el patrón se desarma durante el cambio de acorde, baja a 50 BPM. El patrón ES el groove — perderlo es peor que fallar una nota en el acorde.',
+            hint: 'If the pattern falls apart during the chord change, slow to 50 BPM. Keep the pattern going through the change, even if a note in the chord is missed.',
+            hint_es: 'Si el patrón se desarma durante el cambio de acorde, baja a 50 BPM. Mantén el patrón durante el cambio, aunque falle una nota del acorde.',
             stuck: 'Loop just 2 bars until the join between them (the seam) is smooth, keeping the chord change on that last upstroke.',
             stuck_es: 'Repite solo 2 compases hasta que la unión entre ambos (la costura) salga fluida, manteniendo el cambio de acorde en ese último golpe hacia arriba.',
             levelUp: 'Add a third chord (G → D → Em), or run it at 75 BPM with no break at the change.',
@@ -668,8 +668,8 @@ SETS.push(
                 label: 'Challenge — "Oye Mi Amor", verse', label_es: 'Reto — "Oye Mi Amor", estrofa',
                 text: '<ol><li>The verse uses two chords, Bm and A (A is from Module 5). Play the small Bm on just four strings (D, G, B, high e), no barre.</li><li>Play one bar of each with D-DU-UDU at 60 BPM.</li></ol>You\'ve got it when: four laps with the pattern unbroken and beats 2 and 4 accented so it pushes like the record.',
                 text_es: '<ol><li>La estrofa usa dos acordes, Bm y A (A es del Módulo 5). Toca el Bm pequeño en solo cuatro cuerdas (Re, Sol, Si, mi aguda), sin cejilla.</li><li>Toca un compás de cada uno con D-DU-UDU a 60 BPM.</li></ol>Lo tienes cuando: cuatro vueltas con el patrón sin interrupciones y los tiempos 2 y 4 acentuados para que empuje como la grabación.',
-                hint: 'The small Bm is the easier beginner version — the full-barre Bm (one finger pressed flat across several strings) arrives in Module 7. For now the pattern matters more than the shape.',
-                hint_es: 'El Bm pequeño es la versión más fácil para principiantes — el Bm con cejilla completa (un dedo presionado plano sobre varias cuerdas) llega en el Módulo 7. Por ahora el patrón importa más que la forma.',
+                hint: 'The small Bm is the easier beginner version — the full-barre Bm (one finger pressed flat across several strings) arrives in Module 7.',
+                hint_es: 'El Bm pequeño es la versión más fácil para principiantes — el Bm con cejilla completa (un dedo presionado plano sobre varias cuerdas) llega en el Módulo 7.',
                 stuck: 'Loop just the A → Bm change with one strum per bar until the landing is clean, then add the pattern.',
                 stuck_es: 'Repite solo el cambio A → Bm con un rasgueo por compás hasta que la llegada salga limpia, y luego agrega el patrón.',
                 levelUp: 'Play the up-strums a little stronger — that extra offbeat push is the Latin feel.',
@@ -699,8 +699,8 @@ SETS.push(
             steps: [
               {
                 label: 'Play-along at 0.75×', label_es: 'Toca junto a 0.75×',
-                text: '<ol><li>Open the D-DU-UDU lesson video you watched earlier in this set.</li><li>Set YouTube\'s speed to 0.75×.</li><li>Strum along for the ENTIRE demo section without stopping.</li></ol>You\'ve got it when: you finish a full pass with the video — flubbed changes and all, don\'t stop.',
-                text_es: '<ol><li>Abre el video de la lección D-DU-UDU que viste antes en esta unidad.</li><li>Pon la velocidad de YouTube en 0.75×.</li><li>Rasguea junto con él durante TODA la sección de demostración sin detenerte.</li></ol>Lo tienes cuando: terminas un pase completo con el video — con cambios fallidos y todo, no te detengas.',
+                text: '<ol><li>Open the D-DU-UDU lesson video you watched earlier in this set.</li><li>Set YouTube\'s speed to 0.75×.</li><li>Strum along for the ENTIRE demo section without stopping.</li></ol>You\'ve got it when: you play along to the end of the demo section without stopping, even if some changes go wrong.',
+                text_es: '<ol><li>Abre el video de la lección D-DU-UDU que viste antes en esta unidad.</li><li>Pon la velocidad de YouTube en 0.75×.</li><li>Rasguea junto con él durante TODA la sección de demostración sin detenerte.</li></ol>Lo tienes cuando: tocas junto con el video hasta el final de la demostración sin detenerte, aunque algunos cambios salgan mal.',
                 hint: 'If you make a mistake, keep strumming. Don\'t start over.',
                 hint_es: 'Si cometes un error, sigue rasgueando. No vuelvas a empezar.'
               }
@@ -826,7 +826,7 @@ SETS.push(
             steps: [
           {
             label: 'Compare: reggae vs. rock', label_es: 'Compara: reggae vs. rock',
-            text: 'Compare two recordings: <a href="https://www.youtube.com/watch?v=HNBCVM4KbUM" target="_blank">"Three Little Birds" (Bob Marley)</a> — reggae — and <a href="https://www.youtube.com/watch?v=5BmEGm-mraE" target="_blank">"Bad Moon Rising" (CCR)</a> — rock. Same speed-ish, very different feel. What makes the difference?',
+            text: 'Compare two recordings: <a href="https://www.youtube.com/watch?v=HNBCVM4KbUM" target="_blank">"Three Little Birds" (Bob Marley)</a> — reggae — and <a href="https://www.youtube.com/watch?v=5BmEGm-mraE" target="_blank">"Bad Moon Rising" (CCR)</a> — rock. About the same speed, very different feel. What makes the difference?',
             text_es: 'Compara dos grabaciones: <a href="https://www.youtube.com/watch?v=HNBCVM4KbUM" target="_blank">"Three Little Birds" (Bob Marley)</a> — reggae — y <a href="https://www.youtube.com/watch?v=5BmEGm-mraE" target="_blank">"Bad Moon Rising" (CCR)</a> — rock. Velocidad parecida, sensación muy distinta. ¿Qué hace la diferencia?',
             hint: 'It\'s almost entirely the strum pattern. Reggae emphasizes the offbeats (the "+"); rock emphasizes the numbered beats.',
             hint_es: 'Es casi por completo el patrón de rasgueo. El reggae enfatiza los contratiempos (el "+"); el rock enfatiza los tiempos fuertes (los números).',
@@ -976,11 +976,11 @@ SETS.push(
             steps: [
           {
             label: 'Challenge 5 — Trade Off: Strum, Then Solo', label_es: 'Reto 5 — Túrnate: rasgueo y solo',
-            text: '<ol><li>Loop the backing roots below — or record yourself strumming 8 bars of a progression (try Am–G–C or G–D–Em–C) with any pattern from this module.</li><li>Solo over it using A minor pentatonic Pattern 1 from Module 4, with your 1st finger at fret 5 of the low E string. It fits both progressions.</li><li>Take turns with yourself every 8 bars: strum one pass, then solo over the next.</li></ol>No score. Play a few notes, then rest.',
-            text_es: '<ol><li>Repite las raíces de fondo de abajo — o grábate rasgueando 8 compases de una progresión (prueba Am–G–C o G–D–Em–C) con cualquier patrón de este módulo.</li><li>Improvisa sobre ella usando el Patrón 1 de la pentatónica menor de A del Módulo 4, con tu dedo 1 en el traste 5 de la cuerda Mi grave. Encaja con las dos progresiones.</li><li>Túrnate contigo mismo cada 8 compases: rasguea un pase, y luego improvisa en el siguiente.</li></ol>Sin puntaje. Toca algunas notas, y luego descansa.',
+            text: '<ol><li>Press ▶ Hear the roots to hear the root notes of Am–G–C.</li><li>Record yourself strumming 8 bars of a progression (try Am–G–C or G–D–Em–C) with any pattern from this module — or play <a href="https://www.youtube.com/watch?v=Vq8cApzOdy8" target="_blank">▶ &#x1F3B5; the Am jam track</a>.</li><li>Solo over it using A minor pentatonic Pattern 1 from Module 4, with your 1st finger at fret 5 of the low E string. It fits both progressions.</li><li>Take turns with yourself every 8 bars: strum one pass, then solo over the next.</li></ol>No score. Play a few notes, then rest.',
+            text_es: '<ol><li>Pulsa ▶ Escucha las raíces para oír las notas raíz de Am–G–C.</li><li>Grábate rasgueando 8 compases de una progresión (prueba Am–G–C o G–D–Em–C) con cualquier patrón de este módulo — o pon <a href="https://www.youtube.com/watch?v=Vq8cApzOdy8" target="_blank">▶ &#x1F3B5; la pista de jam en Am</a>.</li><li>Improvisa sobre ella usando el Patrón 1 de la pentatónica menor de A del Módulo 4, con tu dedo 1 en el traste 5 de la cuerda Mi grave. Encaja con las dos progresiones.</li><li>Túrnate contigo mismo cada 8 compases: rasguea un pase, y luego improvisa en el siguiente.</li></ol>Sin puntaje. Toca algunas notas, y luego descansa.',
             hint: 'Leave space between your phrases — silence is part of a solo. Got another guitarist around? One strums, one solos, swap after 8 bars.',
             hint_es: 'Deja espacio entre tus frases — el silencio es parte de un solo. ¿Tienes a otro guitarrista cerca? Uno rasguea, uno improvisa, cambien después de 8 compases.',
-            playSeq: { label: 'Backing roots — Am · G · C', label_es: 'Raíces de fondo — Am · G · C', bpm: 70, notes: [45, 43, 48] }
+            playSeq: { label: 'Hear the roots — Am · G · C', label_es: 'Escucha las raíces — Am · G · C', bpm: 70, notes: [45, 43, 48] }
           }
             ]
           },
@@ -997,8 +997,8 @@ SETS.push(
                 hint_es: 'Escuchaste exactamente esto en el Módulo 1 — Dylan acústico vs. Hendrix eléctrico. Mismos acordes, mismo tempo; SOLO tu mano de rasgueo cambia.',
                 stuck: 'Make the switch on beat 1 of a new bar and drill just the 2-bar seam where soft becomes rock.',
                 stuck_es: 'Haz el cambio en el tiempo 1 de un compás nuevo y practica solo la costura de 2 compases donde lo suave se vuelve rock.',
-                levelUp: 'Add the reggae chop as a third 8-bar section — three eras of the same song.',
-                levelUp_es: 'Agrega el picoteo reggae como una tercera sección de 8 compases — tres épocas de la misma canción.',
+                levelUp: 'Add the reggae chop as a third 8-bar section.',
+                levelUp_es: 'Agrega el picoteo reggae como una tercera sección de 8 compases.',
                 skills: [5, 6],
               },
               {

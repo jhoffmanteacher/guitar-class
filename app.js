@@ -1412,16 +1412,28 @@ function buildTab(spec, opts){
     if (!body) return '';
     html = `<div class="tab">${headHtml}<div class="tab-body">${captionHtml}${controlsHtml}${body}</div></div>`;
   }
-  return (hasRevealDelay && !(opts && opts.noRevealDelay)) ? wrapTabReveal(html, spec.revealDelay) : html;
+  return (hasRevealDelay && !(opts && opts.noRevealDelay)) ? wrapTabReveal(html, spec.revealDelay, keyPrefix) : html;
 }
 /* Hides a just-built tab (`wrapTabReveal`) until caArmTabReveals() has let
    its `revealDelay` seconds pass, then fades it in. `hidden` short-circuits
    the animation while it's off-screen; body.print-activity overrides it
    (styles.css) the same way a paged tab's other pages do, so printing shows
    the board immediately rather than a blank box. */
-function wrapTabReveal(html, sec){
-  const ms = Math.max(0, Number(sec) || 0);
-  return `<div class="tab-reveal" data-reveal-delay="${ms}" hidden>${html}</div>`;
+/* `revealDelay` is SECONDS in the content (`revealDelay: 10`); setTimeout
+   wants ms. Until 2026-09-25 the value went through unconverted, so every
+   reveal-delayed tab appeared after 10 milliseconds and the feature did
+   nothing.
+
+   `key` (the tab's keyPrefix) lets a tab the student has already waited out
+   stay revealed across the re-renders that aren't navigation — a language
+   switch, coming back to the browser tab (visibilitychange), Mark done —
+   instead of blanking for another countdown. caRevealedTabs is cleared on a
+   Focus-view step move, so going back to a step still restarts its own
+   countdown, as described below. */
+const caRevealedTabs = new Set();
+function wrapTabReveal(html, sec, key){
+  const ms = Math.max(0, Number(sec) || 0) * 1000;
+  return `<div class="tab-reveal" data-reveal-delay="${ms}" data-reveal-key="${escAttr(key || '')}" hidden>${html}</div>`;
 }
 /* Arms every not-yet-revealed tab under root that's actually visible — called
    at the end of renderClassActivities() AND from caOnToggle() when a card
@@ -1444,8 +1456,26 @@ function caArmTabReveals(root){
     if (details && !details.open) return;
     if (el.dataset.revealArmed) return;
     el.dataset.revealArmed = '1';
+    const key = el.dataset.revealKey;
+    if (key && caRevealedTabs.has(key)) {
+      el.removeAttribute('hidden');
+      el.classList.add('tab-revealed');
+      return;
+    }
     const ms = Number(el.dataset.revealDelay) || 0;
     setTimeout(() => {
+      if (key) {
+        caRevealedTabs.add(key);
+        /* A re-render mid-countdown (language switch at 5 s) replaced `el`
+           with a new node that started its own full wait; reveal that one
+           now too, so the tab still appears on the original schedule. */
+        document.querySelectorAll('.tab-reveal[hidden]').forEach(o => {
+          if (o !== el && o.dataset.revealKey === key) {
+            o.removeAttribute('hidden');
+            o.classList.add('tab-revealed');
+          }
+        });
+      }
       el.removeAttribute('hidden');
       requestAnimationFrame(() => requestAnimationFrame(() => el.classList.add('tab-revealed')));
     }, ms);
@@ -1915,6 +1945,11 @@ function snipStop(){
     const btn = card.querySelector('.snip-play');
     if(btn){ btn.innerHTML = snipPlayBtnHtml(false); btn.classList.remove('playing'); }
     card.querySelectorAll('.snip-bar').forEach(d => d.classList.remove('bar-now'));
+    // Forget the last page the band turned to: a student who stops the band,
+    // pages ahead with Next, and restarts would otherwise stay on that page
+    // for a whole page of music, because the band's first page "matches".
+    const tabEl = card.parentElement && card.parentElement.querySelector('.tab[data-total-notes]');
+    if(tabEl) delete tabEl.dataset.snipPage;
   }
 }
 function snipToggle(btn){
@@ -2016,6 +2051,7 @@ function snipSyncTabPage(card, spec, win, heard){
   const total = Number(tabEl.dataset.totalNotes) || 0;
   if(!total || !spec.bars) return;
   const notesPerBar = total / spec.bars;
+  if(!Number.isInteger(notesPerBar)) return;   // the no-op the comment above promises
   const barsElapsed = (heard - win.start) / win.bar;
   const idx = Math.max(0, Math.min(total - 1, Math.floor(barsElapsed * notesPerBar)));
   const page = tabPageOf(tabEl, idx);
@@ -8358,7 +8394,14 @@ async function renderSongsHub(){
   const noteSong = (song, moduleNum) => {
     const e = byName.get(song.name) || { song, modules: new Set() };
     e.modules.add(moduleNum);
-    if(song.journeyUrl && !e.song.journeyUrl) e.song = song;
+    if(song.journeyUrl && !e.song.journeyUrl) e.song = { ...song, backingUrl: song.backingUrl || e.song.backingUrl, backingKey: song.backingKey || e.song.backingKey };
+    /* The kept entry is the FIRST one met (Module 1/2), and for the six core
+       songs only MODULE_SONGS[4] carries a backingUrl — so keeping the first
+       entry whole dropped every core song's backing track from the hub, the
+       only place Module 4's "pick a core song's track" card (and Module 5's
+       Call & Response hint) can send a student. Carry it forward onto a
+       copy; never mutate the module data. Found 2026-09-25. */
+    else if(song.backingUrl && !e.song.backingUrl) e.song = { ...e.song, backingUrl: song.backingUrl, backingKey: song.backingKey };
     byName.set(song.name, e);
   };
   SETS.filter(w => w.moduleNum === 1 && w.songs).forEach(w => w.songs.forEach(sg => noteSong(sg, 1)));
@@ -9491,10 +9534,15 @@ function caLocalDay(){
    thing; a sign-out/sign-in on a shared Chromebook swaps the set). Only
    `true` entries are kept, matching every `=== true` reader. */
 function caLoadStepDone(){
-  const who = (currentUser && currentUser.uid) || '';
+  // The day is part of the key: a Chromebook that sleeps overnight with the
+  // tab open must still start the new day empty (the visibilitychange
+  // re-render on wake lands here and reloads).
+  const who = ((currentUser && currentUser.uid) || '') + '|' + caLocalDay();
   if(caStepsLoadedFor === who) return;
   caStepsLoadedFor = who;
   caStepDone = {};
+  // New student or new day: a tab the last one waited out starts hidden again.
+  if(typeof caRevealedTabs !== 'undefined') caRevealedTabs.clear();
   try{
     const saved = JSON.parse(localStorage.getItem(_uidKey(CA_STEPS_KEY)) || 'null');
     if(saved && saved.day === caLocalDay() && saved.done && typeof saved.done === 'object'){
@@ -9622,7 +9670,9 @@ function caFocusDotsHtml(a, cur){
   const reach = caDefaultOpenStep(a);   // first not-done step; -1 = all done
   const dots = steps.map((st, si) => {
     const done = caStepDone[`${a.id}:${si}`] === true;
-    const locked = reach >= 0 && si > reach;
+    // A finished activity never re-locks: its ticks are day-scoped, so the
+    // next day would otherwise make the student re-tick to reach step 4.
+    const locked = classActivities[a.id] !== true && reach >= 0 && si > reach;
     const cls = `ca-focus-dot${done ? ' is-done' : ''}${si === cur ? ' is-now' : ''}`;
     const label = escAttr(caStepHeadText(st, si, steps.length));
     return `<button type="button" class="${cls}" onclick="caFocusGo('${escAttr(a.id)}',${si})"`
@@ -9643,8 +9693,19 @@ function caFocusNavHtml(a, si, isDone){
 }
 function caFocusGo(id, si){
   stopCardAudio();
+  // A real step move restarts that step's reveal countdown. "Done" on the
+  // LAST step re-renders the same step, and must not blank its tab again.
+  const fa = (window.CLASS_ACTIVITIES || []).find(x => x.id === id);
+  if(!fa || caFocusIdx(fa) !== si) caRevealedTabs.clear();
   caStepOpen[id] = si;
-  caFocusActivity(id);
+  /* Not caFocusActivity(): that also forces the Unfinished/Completed fold
+     open for good (caTodoOpen = true), which is right for a deep link but
+     wrong here — stepping through the Today hero left the Unfinished fold
+     open after "All activities". The card is already open and on screen;
+     renderClassActivities() keeps its fold open while it's inside one. */
+  caOpenId = id;
+  renderClassActivities();
+  caScrollToActivity(id);
 }
 // "Got it": tick the step (the same caStepDone the accordion's Mark done
 // writes) and move to the next one. On an already-done step it just moves

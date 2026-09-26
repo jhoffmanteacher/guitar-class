@@ -2097,10 +2097,13 @@ function checkSlangPhrasing() {
     let lines;
     try { lines = readFileSync(join(ROOT, file), 'utf8').split('\n'); } catch { continue; }
     lines.forEach((line, li) => {
+      /* unescapeJs: the raw capture keeps `\'`, so a phrase with an
+         apostrophe ("that one's free") could never match a single-quoted
+         field — see the 1w-t note on the same fix (2026-09-25). */
       for (const f of line.matchAll(STUDENT_FIELD_RE))
-        for (const m of f[2].matchAll(RE)) flag(file, li, m[0]);
+        for (const m of unescapeJs(f[2]).matchAll(RE)) flag(file, li, m[0]);
       for (const c of line.matchAll(STUDENT_CHOICES_RE))
-        for (const m of c[1].matchAll(RE)) flag(file, li, m[0]);
+        for (const m of unescapeJs(c[1]).matchAll(RE)) flag(file, li, m[0]);
     });
   }
 
@@ -2108,7 +2111,7 @@ function checkSlangPhrasing() {
   try {
     readFileSync(join(ROOT, 'i18n.js'), 'utf8').split('\n').forEach((line, li) => {
       for (const e of line.matchAll(STUDENT_I18N_EN_RE))
-        for (const m of (e[1] ?? e[2] ?? '').matchAll(RE)) flag('i18n.js', li, m[0]);
+        for (const m of unescapeJs(e[1] ?? e[2] ?? '').matchAll(RE)) flag('i18n.js', li, m[0]);
     });
   } catch { /* checked elsewhere */ }
 
@@ -2246,8 +2249,14 @@ function checkTeacherSpeak(sets, journeySongsFor) {
   if (!sets || !journeySongsFor) warn('1w-t: no parsed SETS available — hidden-section exemption skipped this run');
   let bad = 0;
   const flag = (file, li, phrase) => { err(`${file}:${li + 1} — "${phrase}"`); problems++; bad++; };
-  const sweepValue = (file, li, value) => {
-    if (hidden.has(unescapeJs(value))) return;
+  /* Match the UNESCAPED value (2026-09-25). The raw capture keeps `\'`,
+     so every banned phrase with an apostrophe — "don't worry", "it's okay
+     if", "that's the point", "you've got this" — could never match a
+     single-quoted field, and a live "Don't worry about pressing any frets
+     yet" sat in Module 1's first strum card with this check green. */
+  const sweepValue = (file, li, raw) => {
+    const value = unescapeJs(raw);
+    if (hidden.has(value)) return;
     const lower = value.toLowerCase();
     for (const m of value.matchAll(TEACHER_RE)) {
       if (TEACHER_PHRASE_ALLOW.some(a => a.file === file && lower.startsWith(a.phrase, m.index))) continue;
@@ -5321,6 +5330,57 @@ function checkFourStepsAndPaging() {
   if (bad === 0) ok(`${checked} class activities — ${checked - FOUR_STEP_LEGACY.size} at four steps or fewer, ${FOUR_STEP_LEGACY.size} legacy; both renderers page long tabs two lines at a time`);
 }
 
+/* ════════════════════════════════════════════════════════════════════
+   1bc. SPANISH DIRECTIONS NAME THE SPANISH BUTTON — 2026-09-25 sweep
+   found 12 class-activity steps whose text_es said "Pulsa Play", while
+   the Spanish buttons read «Tocar el tab» (tab.playTab) and «Toca con la
+   banda» (ca.snipPlay). A Spanish reader has no "Play" on screen. Any
+   `_es` student field in the module files or class-activities.js that
+   still says Play outside a link (video titles stay English) fails.
+
+   1bd. NO PEN OR PAPER IN A CLASS ACTIVITY — the same sweep found the
+   Finger Gym series (ca-2…ca-7) asking students to write their best BPM
+   down and bring it to the next Gym, 7 times, against the standing
+   "nothing student-facing asks for scissors, index cards or a pen" rule.
+   Scoped to class-activities.js on purpose: module steps have typed
+   answer boxes and notation lessons where "write" is the task, and
+   module 13 really does need wire cutters or scissors — those are the
+   innocent twins a site-wide list would trip on.
+   ════════════════════════════════════════════════════════════════════ */
+const ES_FIELD_RE = /\b(?:text|hint|stuck|levelUp|gotItWhen|explain|forward|subtitle|meta|intro|note|label|prompt|placeholder|caption|title)_es:\s*'((?:\\.|[^'\\])*)'/g;
+const ES_PLAY_RE = /\bPlay\b/;
+const CA_PAPER_RE = /\bwrite\b(?:\s+\w+){0,3}\s+down\b|\b(?:written down|wrote down|pencil|pen and paper|piece of paper|index cards?|scissors)\b|\ban[oó]t(?:a|as|e|en|ar|aste|ado|ada|alo|ala|alos|alas)\b|\b(?:escr[ií]bel[oa]s?|l[aá]piz|papel|tijeras|fichas)\b/i;
+function checkCaButtonNamesAndPaper() {
+  head('1bc/1bd. Spanish button names; no pen or paper in class activities');
+  let bad = 0, esSeen = 0, caSeen = 0;
+  const stripLinks = v => v.replace(/<a\b[^>]*>[\s\S]*?<\/a>/gi, ' ');
+  for (const file of [...MODULE_FILES, 'class-activities.js']) {
+    let lines;
+    try { lines = readFileSync(join(ROOT, file), 'utf8').split('\n'); } catch { continue; }
+    lines.forEach((line, li) => {
+      if (/^\s*(?:\/\/|\/?\*)/.test(line)) return;
+      for (const f of line.matchAll(ES_FIELD_RE)) {
+        esSeen++;
+        if (ES_PLAY_RE.test(stripLinks(unescapeJs(f[1])))) {
+          err(`${file}:${li + 1} — Spanish text says "Play"; name the Spanish button («Tocar el tab», «Toca con la banda») (1bc)`);
+          problems++; bad++;
+        }
+      }
+      if (file !== 'class-activities.js') return;
+      for (const re of [STUDENT_FIELD_RE, STUDENT_LABEL_RE, ES_FIELD_RE]) {
+        for (const f of line.matchAll(re)) {
+          caSeen++;
+          const v = unescapeJs(f[f.length - 1]);
+          const m = v.match(CA_PAPER_RE);
+          if (m) { err(`class-activities.js:${li + 1} — asks for pen or paper: "${m[0]}" — give it a digital deck or drop the record (1bd)`); problems++; bad++; }
+        }
+      }
+    });
+  }
+  if (esSeen === 0 || caSeen === 0) { err('1bc/1bd saw no fields — the field regexes no longer match the content'); problems++; return; }
+  if (bad === 0) ok(`${esSeen} Spanish fields name no "Play" button; ${caSeen} class-activity fields ask for no pen or paper`);
+}
+
 (async function main() {
   if (LIVE_ONLY) {
     console.log(`${C.bold}Guitar Class — post-push live check${C.reset}`);
@@ -5377,6 +5437,7 @@ function checkFourStepsAndPaging() {
   checkCureChorusOrder();
   checkJourneyButtonLastStep();
   checkFourStepsAndPaging();
+  checkCaButtonNamesAndPaper();
   if (!SKIP_LINKS) await checkLinks();
   else warn('skipping link check (--skip-links)');
   bumpServiceWorker();
