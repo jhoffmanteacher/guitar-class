@@ -623,7 +623,21 @@ and **one measured number per song — `anchor`, the track's first downbeat**.
 Everything else is derived: the slow tier is the same master time-stretched
 (297.1 s at 144 against 356.5 s at 120, exactly 144/120), so its grid is the
 fast file's scaled by `trackBpm/trackBpmSlow`. **Never measure a second
-anchor.** Add `?snipcal=1` to the URL and the card grows a calibration panel:
+anchor.**
+
+**Live-band tracks carry a beat map — `barTimes`** (2026-09-27). The grid
+above only holds for a track made to a click ("the cure", Seven Nation Army,
+Luna). Sweet Child, Let It Be and the Hendrix Watchtower were played by a
+band with no click, and the Moises metronome follows the band — a straight
+grid is off by up to half a beat by mid-song. Those entries list every bar's
+downbeat (fast file, seconds) in `barTimes`, `barTimes[0]` = `anchor`, and
+`snippetWindow()` reads windows off the list; the slow tier is still the
+fast times scaled by the tempo ratio. Measure with
+`python3 tools/beat-map.py <rhythm-down.mp3> <rhythm-down-metronome.mp3> <bpm> <downbeat-click>`
+(needs ffmpeg, numpy, scipy). Moises clicks every beat alike, so WHICH click
+is beat 1 is a musical call — pick it from the song's chord changes, never
+assume the first click. 1ak checks the list against `anchor`, the nominal
+bar and `durationSec`, and refuses a window past the last measured bar. Add `?snipcal=1` to the URL and the card grows a calibration panel:
 a live timecode plus a **Find the first click** button that decodes the
 track's rhythm-down-metronome file and reports the first click to the
 millisecond, with the gaps after it to sanity-check against 60/BPM. Paste
@@ -753,8 +767,9 @@ broken, not as a choice. The original objection was really about doing it
 SILENTLY — releasing the other toggle where the student watches it pop out
 is just how a pair of mutually exclusive controls behaves.
 
-**All three snippet songs have their full mix** — Seven Nation Army, "the
-cure", and Luna — so the Guitar toggle renders on all 11 snippets. A new
+**Four of the five snippet tracks have their full mix** — Seven Nation Army,
+"the cure", Luna and the Hendrix Watchtower; Sweet Child's `full` pair is not
+exported yet, so its cards show no Guitar toggle and 1ak warns. A new
 snippet song needs two files, at both tempos, mix `full`, and a `srcFull`/
 `srcFullSlow` pair in its `SNIPPET_TRACKS` entry; 1ak warns the count of
 tracks still without one.
@@ -1495,7 +1510,7 @@ kebab-case; the artist stays out of the app's display metadata.
 
 **What ships is `rhythm-down`, `rhythm-down-metronome` and — since
 2026-09-18 — `full` and `full-metronome`, for the three snippet songs and
-(since 2026-09-27, Journey toggle only) Watchtower** (the old list here also
+(since 2026-09-27) Watchtower** (the old list here also
 named `no-gtr`, `drums-only` and `slow-<bpm>` as "in use", and none of those
 has ever existed in `audio/`). That is 38 files: six songs, some at two
 tempos, plus four mixes each for Seven Nation Army, "the cure", Luna and

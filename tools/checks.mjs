@@ -4749,6 +4749,30 @@ function checkBackingSnippets() {
     if (realDur !== null && Math.abs(realDur - Number(tr.durationSec)) > 1.5)
       flag(`SNIPPET_TRACKS['${name}'].durationSec says ${tr.durationSec} but ${tr.src} is ${realDur.toFixed(1)}s — fix the number, it is what stops a window running past the end`);
     if (!(Number(tr.anchor) >= 0)) flag(`SNIPPET_TRACKS['${name}'].anchor: "${tr.anchor}" is not a number ≥ 0`);
+    /* barTimes (optional) — a live-band track's beat map, one downbeat per
+       bar on the fast file. It replaces the grid, so it has to agree with
+       the fields the rest of 1ak still reads: bar 1 IS the anchor, every bar
+       is within reach of the nominal length (a missed click makes a double
+       bar, a doubled click a half one), and the list ends inside the file. */
+    if (tr.barTimes !== undefined) {
+      const bt = tr.barTimes;
+      if (!Array.isArray(bt) || bt.length < 2 || bt.some(v => !(Number(v) >= 0)))
+        flag(`SNIPPET_TRACKS['${name}'].barTimes: not a list of at least two times in seconds`);
+      else {
+        if (Math.abs(bt[0] - Number(tr.anchor)) > 0.002)
+          flag(`SNIPPET_TRACKS['${name}']: barTimes[0] is ${bt[0]} but anchor is ${tr.anchor} — bar 1 is the anchor, they must agree`);
+        const nominal = Number(tr.beatsPerBar) * 60 / Number(tr.feltBpm);
+        for (let i = 0; i < bt.length - 1; i++) {
+          const g = bt[i + 1] - bt[i];
+          if (!(g > nominal * 0.7 && g < nominal * 1.4)) {
+            flag(`SNIPPET_TRACKS['${name}'].barTimes: bar ${i + 1} is ${g.toFixed(3)}s against a nominal ${nominal.toFixed(3)}s — a missed or doubled click, or a list out of order; re-run tools/beat-map.py`);
+            break;
+          }
+        }
+        if (bt[bt.length - 1] > Number(tr.durationSec) + 1.5)
+          flag(`SNIPPET_TRACKS['${name}'].barTimes: last downbeat ${bt[bt.length - 1]}s is past durationSec ${tr.durationSec}`);
+      }
+    }
     // The slow tier is DERIVED from these two, never measured separately —
     // a slow file that is not a straight time-stretch would put every
     // window on that song out by a growing amount as it plays.
@@ -4789,6 +4813,12 @@ function checkBackingSnippets() {
       if (!Number.isInteger(sn.fromBar) || !Number.isInteger(sn.bars)) continue;
       // The fast file is the one anchor/durationSec are measured against;
       // the slow tier is the same music, so checking one covers both.
+      if (Array.isArray(tr.barTimes) && tr.barTimes.length > 1) {
+        const lastBar = tr.barTimes.length - 1;   // bars that have both edges measured
+        if (sn.fromBar - 1 + sn.bars > lastBar)
+          flag(`${where}: bars ${sn.fromBar}–${sn.fromBar + sn.bars - 1} run past the last measured bar of ${sn.track} (bar ${lastBar}) — the loop would end on a guessed bar line`);
+        continue;
+      }
       const barSec = tr.beatsPerBar * 60 / tr.feltBpm;
       const end = Number(tr.anchor) + (sn.fromBar - 1 + sn.bars) * barSec;
       if (end > Number(tr.durationSec))

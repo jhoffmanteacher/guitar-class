@@ -5,6 +5,21 @@ Notable changes to the Guitar Class site. Newest first.
 For the full session-by-session history (and the reasoning behind each change),
 see `WORKFLOW.md` and the git commit log.
 
+## 2026-09-27 — Sweet Child and Watchtower ready for in-class loops
+
+### Added
+
+- **Sweet Child O' Mine and All Along the Watchtower can now be looped bar
+  by bar in a class activity**, the same way "the cure", Seven Nation Army
+  and Luna already can. No activity uses them yet — they are ready for
+  future lessons.
+
+### Changed
+
+- These two songs were recorded by a band with no click track, so their
+  tempo drifts a little. On songs like these the loop now follows the real
+  beat of the record, so it starts on beat 1 even in the middle of the song.
+
 ## 2026-09-27 — "All Along the Watchtower" plays along with Hendrix, two beats per chord
 
 ### Changed

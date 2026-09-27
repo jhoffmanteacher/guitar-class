@@ -1767,6 +1767,95 @@ const SNIPPET_TRACKS = {
     anchor: 12.658,
     anchorVerified: true,
   },
+  /* ── LIVE-BAND TRACKS: a beat map instead of a steady grid (2026-09-27) ──
+     "the cure", Seven Nation Army and Luna sit on a steady grid, so one
+     anchor plus bar arithmetic finds every bar. The next two were recorded
+     by a band with no click, and the Moises metronome FOLLOWS the band: a
+     straight grid through Sweet Child's clicks is off by up to 0.26 s (half
+     a beat) by mid-song, Hendrix's by 0.23 s. So these tracks carry
+     `barTimes` — the downbeat of every bar, in seconds on the FAST file,
+     measured by tools/beat-map.py from the rhythm-down-metronome file (the
+     plain mix subtracted to isolate the click). barTimes[0] is bar 1 and
+     equals `anchor`. snippetWindow() reads windows straight off the list;
+     the slow tier is still derived — every click in the slow files lands
+     within ~10 ms of the fast click times scaled by trackBpm/trackBpmSlow
+     (checked on all 733 Sweet Child and 454 Watchtower clicks).
+     Which click is beat 1 is not in the file (Moises clicks every beat the
+     same); it was chosen from the chord changes (bass chroma per click)
+     and checked for a consistent phase through the whole song. */
+
+  /* Sweet Child O' Mine counts at record speed, 4 to the bar; bar 1 is the
+     first click, the top of the intro riff over D. No full mix yet, so the
+     card has no Guitar toggle until full + full-metronome are exported at
+     125 and 100 from the same Moises project. */
+  'sweet-child-o-mine': {
+    src:              'audio/guns-n-roses-sweet-child-o-mine-backing-G-125bpm-440hz-rhythm-down.mp3',
+    srcMetronome:     'audio/guns-n-roses-sweet-child-o-mine-backing-G-125bpm-440hz-rhythm-down-metronome.mp3',
+    srcSlow:          'audio/guns-n-roses-sweet-child-o-mine-backing-G-100bpm-440hz-rhythm-down.mp3',
+    srcSlowMetronome: 'audio/guns-n-roses-sweet-child-o-mine-backing-G-100bpm-440hz-rhythm-down-metronome.mp3',
+    trackBpm: 125, trackBpmSlow: 100,
+    feltBpm: 125,                       // counted at record speed
+    beatsPerBar: 4,
+    durationSec: 356,
+    anchor: 0.498,
+    anchorVerified: true,
+    barTimes: [
+      0.498, 2.379, 4.263, 6.139, 8.022, 9.919, 11.822, 13.739, 15.622, 17.518,
+      19.401, 21.309, 23.201, 25.110, 27.001, 28.928, 30.822, 32.739, 34.643, 36.559,
+      38.478, 40.422, 42.339, 44.259, 46.179, 48.099, 50.001, 51.929, 53.801, 55.679,
+      57.580, 59.479, 61.380, 63.298, 65.201, 67.098, 69.001, 70.878, 72.760, 74.639,
+      76.542, 78.439, 80.340, 82.311, 84.223, 86.140, 88.044, 90.001, 91.920, 93.879,
+      95.822, 97.781, 99.709, 101.643, 103.560, 105.499, 107.422, 109.359, 111.279, 113.220,
+      115.159, 117.063, 118.961, 120.885, 122.782, 124.719, 126.642, 128.559, 130.463, 132.360,
+      134.242, 136.139, 138.043, 139.960, 141.899, 143.863, 145.780, 147.739, 149.642, 151.580,
+      153.500, 155.462, 157.402, 159.339, 161.283, 163.241, 165.171, 167.082, 168.991, 170.940,
+      172.882, 174.820, 176.739, 178.703, 180.621, 182.544, 184.442, 186.360, 188.281, 190.242,
+      192.145, 194.102, 196.033, 197.979, 199.923, 201.862, 203.799, 205.743, 207.682, 209.629,
+      211.564, 213.502, 215.420, 217.363, 219.301, 221.219, 223.142, 225.070, 227.000, 228.941,
+      230.870, 232.805, 234.720, 236.660, 238.605, 240.522, 242.440, 244.362, 246.260, 248.205,
+      250.141, 252.090, 254.026, 255.943, 257.860, 259.804, 261.714, 263.625, 265.521, 267.460,
+      269.361, 271.260, 273.182, 275.101, 277.025, 278.922, 280.804, 282.660, 284.522, 286.384,
+      288.240, 290.104, 291.964, 293.820, 295.701, 297.585, 299.453, 301.322, 303.186, 305.061,
+      306.966, 308.852, 310.723, 312.633, 314.502, 316.400, 318.282, 320.166, 322.041, 323.904,
+      325.780, 327.643, 329.504, 331.422, 333.325, 335.211, 337.125, 339.431, 341.742, 344.101,
+      346.541, 348.442, 350.361, 352.326,
+    ],
+  },
+  /* All Along the Watchtower — the Jimi Hendrix recording, the same files
+     the Journey page plays. 4 to the bar at record speed; the chords run
+     A A G G | F F G G (CLAUDE.md, settled song facts), a two-bar cycle, so
+     bar 1 is the first A — the SECOND click (the first is a G pickup). Odd
+     bars start on A, even bars on F, all the way through. */
+  'all-along-the-watchtower': {
+    src:              'audio/jimi-hendrix-all-along-the-watchtower-backing-Am-115bpm-440hz-rhythm-down.mp3',
+    srcMetronome:     'audio/jimi-hendrix-all-along-the-watchtower-backing-Am-115bpm-440hz-rhythm-down-metronome.mp3',
+    srcSlow:          'audio/jimi-hendrix-all-along-the-watchtower-backing-Am-105bpm-440hz-rhythm-down.mp3',
+    srcSlowMetronome: 'audio/jimi-hendrix-all-along-the-watchtower-backing-Am-105bpm-440hz-rhythm-down-metronome.mp3',
+    srcFull:              'audio/jimi-hendrix-all-along-the-watchtower-backing-Am-115bpm-440hz-full.mp3',
+    srcFullSlow:          'audio/jimi-hendrix-all-along-the-watchtower-backing-Am-105bpm-440hz-full.mp3',
+    srcFullMetronome:     'audio/jimi-hendrix-all-along-the-watchtower-backing-Am-115bpm-440hz-full-metronome.mp3',
+    srcFullSlowMetronome: 'audio/jimi-hendrix-all-along-the-watchtower-backing-Am-105bpm-440hz-full-metronome.mp3',
+    trackBpm: 115, trackBpmSlow: 105,
+    feltBpm: 115,
+    beatsPerBar: 4,
+    durationSec: 245,
+    anchor: 1.289,
+    anchorVerified: true,
+    barTimes: [
+      1.289, 3.572, 5.812, 8.052, 10.210, 12.351, 14.513, 16.630, 18.794, 20.971,
+      23.133, 25.311, 27.453, 29.610, 31.769, 33.913, 36.011, 38.148, 40.292, 42.411,
+      44.493, 46.628, 48.728, 50.828, 52.867, 54.932, 56.989, 59.052, 61.113, 63.167,
+      65.233, 67.308, 69.389, 71.568, 73.691, 75.812, 77.931, 80.030, 82.131, 84.248,
+      86.333, 88.469, 90.569, 92.671, 94.768, 96.869, 98.908, 100.989, 103.010, 105.049,
+      107.088, 109.129, 111.190, 113.290, 115.367, 117.431, 119.488, 121.691, 123.828, 125.970,
+      128.070, 130.192, 132.307, 134.428, 136.528, 138.609, 140.709, 142.827, 144.910, 147.027,
+      149.112, 151.190, 153.266, 155.368, 157.467, 159.531, 161.571, 163.627, 165.649, 167.708,
+      169.772, 171.889, 174.030, 176.152, 178.252, 180.388, 182.488, 184.586, 186.710, 188.832,
+      190.948, 193.048, 195.166, 197.271, 199.366, 201.466, 203.507, 205.526, 207.531, 209.550,
+      211.566, 213.587, 215.590, 217.632, 219.669, 221.727, 223.746, 225.768, 227.770, 229.788,
+      231.829, 233.889, 235.911, 237.966,
+    ],
+  },
 };
 /* Does this track have a full mix at all? Both tiers or neither — the toggle
    has to survive the Slow button. */
@@ -1779,9 +1868,41 @@ function snippetHasFullMetronome(tr){ return !!(tr && tr.srcFullMetronome && tr.
    window from here so there is one copy of the bar arithmetic. */
 function snippetWindow(tr, spec, slow){
   const scale = slow ? (tr.trackBpm / tr.trackBpmSlow) : 1;
-  const bar = (tr.beatsPerBar * 60 / tr.feltBpm) * scale;
-  const start = (tr.anchor * scale) + (Math.max(1, spec.fromBar) - 1) * bar;
-  return { start, end: start + Math.max(1, spec.bars) * bar, bar };
+  const from = Math.max(1, spec.fromBar), n = Math.max(1, spec.bars);
+  /* `edges` holds the n+1 bar lines of the window. A steady-grid track
+     spaces them evenly; a live-band track (barTimes) reads each one off its
+     beat map, so the bars inside one window can differ in length. Past the
+     last measured downbeat it extends at the average bar — 1ak refuses a
+     window that gets there, so that is only a guard. */
+  let edges;
+  if(Array.isArray(tr.barTimes) && tr.barTimes.length > 1){
+    const bt = tr.barTimes, last = bt.length - 1;
+    const avg = (bt[last] - bt[0]) / last;
+    const at = i => (i <= last ? bt[i] : bt[last] + (i - last) * avg) * scale;
+    edges = Array.from({ length: n + 1 }, (_, k) => at(from - 1 + k));
+  } else {
+    const bar = (tr.beatsPerBar * 60 / tr.feltBpm) * scale;
+    const start = (tr.anchor * scale) + (from - 1) * bar;
+    edges = Array.from({ length: n + 1 }, (_, k) => start + k * bar);
+  }
+  const start = edges[0], end = edges[n];
+  return { start, end, bar: (end - start) / n, edges };
+}
+/* Position inside a window in BARS (fractional), and back again. Every
+   reader of the window goes through these two, so uneven bars on a
+   beat-mapped track light the right dot and survive a tier switch. */
+function snipBarsAt(win, t){
+  const e = win.edges, n = e.length - 1;
+  if(t <= e[0]) return (t - e[0]) / (e[1] - e[0]);
+  for(let i = 0; i < n; i++) if(t < e[i + 1]) return i + (t - e[i]) / (e[i + 1] - e[i]);
+  return n + (t - e[n]) / (e[n] - e[n - 1]);
+}
+function snipTimeAtBars(win, b){
+  const e = win.edges, n = e.length - 1;
+  if(!(b > 0)) return e[0];
+  if(b >= n) return e[n];
+  const i = Math.floor(b);
+  return e[i] + (b - i) * (e[i + 1] - e[i]);
 }
 function snippetSrc(tr, slow, metro, guitar){
   // Guitar on is only ever honoured when the full mix is actually there; a
@@ -2061,7 +2182,7 @@ function snipSyncTabPage(card, spec, win, heard){
   if(!total || !spec.bars) return;
   const notesPerBar = total / spec.bars;
   if(!Number.isInteger(notesPerBar)) return;   // the no-op the comment above promises
-  const barsElapsed = (heard - win.start) / win.bar;
+  const barsElapsed = snipBarsAt(win, heard);
   const idx = Math.max(0, Math.min(total - 1, Math.floor(barsElapsed * notesPerBar)));
   const page = tabPageOf(tabEl, idx);
   if(page < 0 || tabEl.dataset.snipPage === String(page)) return;
@@ -2085,7 +2206,7 @@ function snipTick(){
   // `heard` is roughly where the music is by the time it reaches the room —
   // see SNIP_OUTPUT_LATENCY. The dots follow the ears, not the decoder.
   const heard = now - snipLatency();
-  const bar = Math.max(0, Math.min(spec.bars - 1, Math.floor((heard - win.start) / win.bar)));
+  const bar = Math.max(0, Math.min(spec.bars - 1, Math.floor(snipBarsAt(win, heard))));
   card.querySelectorAll('.snip-bar').forEach((d, i) => d.classList.toggle('bar-now', i === bar));
   snipSyncTabPage(card, spec, win, heard);
   if(cal){ const tEl = cal.querySelector('.snip-cal-time'); if(tEl) tEl.textContent = now.toFixed(2) + ' s'; }
@@ -2127,10 +2248,10 @@ function snipSetTier(btn, which){
   const { audio, spec, tr } = snipState;
   const slow = card.dataset.slow === '1', metro = card.dataset.metro === '1';
   const guitar = card.dataset.guitar === '1';
-  const barsIn = (audio.currentTime - snipState.win.start) / snipState.win.bar;
+  const barsIn = snipBarsAt(snipState.win, audio.currentTime);
   const win = snippetWindow(tr, spec, slow);
   snipState.win = win;
-  const at = win.start + (isFinite(barsIn) && barsIn > 0 ? barsIn : 0) * win.bar;
+  const at = snipTimeAtBars(win, isFinite(barsIn) && barsIn > 0 ? barsIn : 0);
   const src = snippetSrc(tr, slow, metro, guitar);
   if(audio.getAttribute('src') === src || audio.src.endsWith(src)){
     try { audio.currentTime = at; } catch(e) {}
