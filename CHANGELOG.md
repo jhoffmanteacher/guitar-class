@@ -5,6 +5,16 @@ Notable changes to the Guitar Class site. Newest first.
 For the full session-by-session history (and the reasoning behind each change),
 see `WORKFLOW.md` and the git commit log.
 
+## 2026-09-27 — Two more small fixes: Happy Birthday's note order, a Module 11 overstatement
+
+### Fixed
+
+- **Happy Birthday's "say each note's name" card** listed the last two
+  notes backwards (G#, A instead of A, G#) — it now matches the tab.
+- **Module 11's "every chord is a triad" claim** now says "most full
+  chords," since power chords (which the site teaches from Module 3 on)
+  deliberately drop the 3rd.
+
 ## 2026-09-27 — Small fixes: rail-collapsed rail, CAS gate, teacher board moves
 
 ### Fixed
