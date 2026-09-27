@@ -859,25 +859,43 @@ function checkMcAnswerOnCard(allSets) {
    shorthand like xx4432 carries no "string/cuerda" word and never
    matches. Fix by naming the string, not by adding an anchor.
    ════════════════════════════════════════════════════════════════════ */
+/* Anchored teaching exceptions are PINNED (2026-09-28 double-check): the
+   reversed "(6th string)" anchor used to accept any parenthesised ordinal
+   with no string name in front of it, and a count that only prints can
+   grow without anyone noticing. Bump on purpose when a card legitimately
+   adds one. */
+const NUMBERED_STRING_ANCHORS = 17;
 function checkNumberedStrings() {
   head('1j. Numbered strings in student-facing text');
-  const RE = /\b(?:string|strings|cuerda|cuerdas) [0-6]\b|\b[0-6](?:st|nd|rd|th)\s+strings?\b|\b[0-6]\.[ºª]\s+cuerdas?\b/gi;
+  const RE = /\b(?:string|strings|cuerda|cuerdas) [0-6]\b|\b[0-6](?:st|nd|rd|th)[\s-]+strings?\b|\b[0-6]\.?[ºª]\s+cuerdas?\b/gi;
   let bad = 0, anchored = 0;
-  for (const file of [...MODULE_FILES, 'class-activities.js', 'i18n.js']) {
+  const files = [...MODULE_FILES, 'class-activities.js', 'i18n.js', 'config-main.js', ...TAB_PAGES.filter(f => f.endsWith('.html'))];
+  for (const file of files) {
     const lines = readFileSync(join(ROOT, file), 'utf8').split('\n');
     lines.forEach((line, li) => {
       for (const m of line.matchAll(RE)) {
         const after = line.slice(m.index + m[0].length);
         const before = line.slice(Math.max(0, m.index - 12), m.index);
+        const oldForm = /^(?:string|cuerda)/i.test(m[0]);   // "string 6" — the ordinal form starts with the digit
         if (/^ \((?:the|la|el) /.test(after)) { anchored++; continue; }   // "string 6 (the low E)" teaching anchor
-        if (/\($/.test(before) && /^\)/.test(after)) { anchored++; continue; }   // "Low E (6th string)" — same anchor, reversed order
-        if (/(?:\b[ADGBEadgbe]|aguda|grave)\s$/.test(before)) continue;   // "the A string 4 times" — named string + a count, not a numbered string
+        // "Low E (6th string)" — same anchor, reversed order. The string NAME
+        // has to be right before the paren, or "the thin one (1st string)"
+        // would count as anchored too.
+        if (/(?:\b[ADGBE]|\be|\b(?:Mi|La|Re|Sol|Si)|aguda|grave)\s?\($/.test(before) && /^\)/.test(after)) { anchored++; continue; }
+        // "the A string 4 times" — a named string followed by a count, not a
+        // numbered string. Only for the old form: before an ordinal, a lone
+        // "a" is the article ("Find a 5th string root"), not the A string.
+        if (oldForm && /(?:\b[ADGBE]|\be|aguda|grave)\s$/.test(before)) continue;
         err(`${file}:${li + 1}: numbered string in student-facing text — "${line.slice(Math.max(0, m.index - 20), m.index + m[0].length + 20).trim()}" (use the string's name)`);
         problems++; bad++;
       }
     });
   }
-  if (bad === 0) ok(`no numbered strings in student-facing text (${anchored} anchored teaching exception${anchored === 1 ? '' : 's'} allowed)`);
+  if (anchored !== NUMBERED_STRING_ANCHORS) {
+    err(`1j: ${anchored} anchored numbered-string exception${anchored === 1 ? '' : 's'} found, but NUMBERED_STRING_ANCHORS pins ${NUMBERED_STRING_ANCHORS} — a new "(the low E)"-style anchor needs a deliberate bump (or is a numbered string hiding behind a paren)`);
+    problems++; bad++;
+  }
+  if (bad === 0) ok(`no numbered strings in student-facing text (${anchored} anchored teaching exception${anchored === 1 ? '' : 's'} allowed, pinned)`);
 }
 
 /* ════════════════════════════════════════════════════════════════════
@@ -5769,12 +5787,19 @@ function checkPracticeCards() {
    the "cut the sentence out of the field" step is duplicated, which is
    simple enough that a regex-literal apostrophe can't desync it the way
    topLevelFunctionDecls's own comment warns about elsewhere in this file. */
+/* Pinned (2026-09-28 double-check): a "You've got it when:" label reworded
+   in ONE language used to drop the field out of the check silently — and a
+   one-sided label is itself the bug (dots in one language, none in the
+   other), so it fails outright now rather than being skipped. Bump when a
+   card genuinely adds or removes a got-it sentence in both languages. */
+const REP_COUNT_FIELDS = 393;
 function checkRepCountParity(sets, ctx) {
   head('1bg. Rep-count dots agree between English and Spanish');
-  if (!ctx) { warn('1bg skipped — render context unavailable'); return; }
+  if (!ctx) { err('1bg cannot run — render context unavailable'); problems++; return; }
   const gotItRe = vm.runInContext('typeof GOT_IT_RE !== "undefined" ? GOT_IT_RE : null', ctx);
   const repCountFromGotIt = vm.runInContext('typeof repCountFromGotIt === "function" ? repCountFromGotIt : null', ctx);
-  if (!gotItRe || !repCountFromGotIt) { warn('1bg skipped — GOT_IT_RE / repCountFromGotIt not found in app.js'); return; }
+  // A rename in app.js must fail here, not turn the check off (0b's rule).
+  if (!gotItRe || !repCountFromGotIt) { err('1bg cannot run — GOT_IT_RE / repCountFromGotIt not found in app.js (renamed? update this check with it)'); problems++; return; }
   const extractBody = html => {
     if (typeof html !== 'string') return null;
     const m = gotItRe.exec(html);
@@ -5805,6 +5830,9 @@ function checkRepCountParity(sets, ctx) {
           checked++;
           const enN = repCountFromGotIt(enBody), esN = repCountFromGotIt(esBody);
           if (enN !== esN) flag(`${where}.${k}`, enN, esN);
+        } else if (enBody !== null || esBody !== null) {
+          err(`${where}.${k}: "You've got it when:" / "Lo tienes cuando:" appears in ${enBody !== null ? 'English' : 'Spanish'} only — the other language renders no got-it sentence and no dots`);
+          problems++; bad++;
         }
       } else if (v && typeof v === 'object') {
         visit(v, `${where}.${k}`);
@@ -5814,7 +5842,11 @@ function checkRepCountParity(sets, ctx) {
   for (const w of (sets || [])) visit(w, w.id);
   const activities = vm.runInContext('typeof CLASS_ACTIVITIES !== "undefined" ? CLASS_ACTIVITIES : []', ctx) || [];
   for (const a of activities) visit(a, a.id);
-  if (bad === 0) ok(`${checked} "You've got it when" field${checked === 1 ? '' : 's'} checked — English and Spanish always agree on the rep-count dots`);
+  if (checked !== REP_COUNT_FIELDS) {
+    err(`1bg: ${checked} got-it fields checked, but REP_COUNT_FIELDS pins ${REP_COUNT_FIELDS} — a got-it sentence was added, removed or reworded past GOT_IT_RE; bump the pin on purpose`);
+    problems++; bad++;
+  }
+  if (bad === 0) ok(`${checked} "You've got it when" field${checked === 1 ? '' : 's'} checked (pinned) — English and Spanish always agree on the rep-count dots`);
 }
 
 /* 1bh. JOURNEY "SLOW (N BPM)" LABELS ↔ data-bpm-slow (2026-09-28 sweep). A
@@ -5824,6 +5856,10 @@ function checkRepCountParity(sets, ctx) {
    updated the frame and the page's own top note but missed a second mention
    lower down (Watchtower's Hendrix swap, "the cure"'s felt-beat click) —
    both shipped live with the wrong number until this sweep caught them. */
+/* Pinned (2026-09-28 double-check): a frame that loses data-bpm-slow used
+   to drop its whole page out of this check silently. Bump when a page
+   gains or loses a Slow tier on purpose. */
+const JOURNEY_SLOW_PAGES = 4;
 function checkJourneySlowBpmLabels() {
   head('1bh. Journey "Slow (N BPM)" labels match data-bpm-slow');
   let bad = 0, pages = 0;
@@ -5836,14 +5872,28 @@ function checkJourneySlowBpmLabels() {
     if (!m) continue;
     const want = m[1];
     pages++;
-    const re = /(?:Slow|Lento)\s*\(\s*(\d+)\s*BPM\s*\)/g;
-    let mm;
-    while ((mm = re.exec(src))) {
-      if (mm[1] !== want) flag(`${f}: says "${mm[0]}" but this page's Slow tier is ${want} BPM per its own data-bpm-slow`);
+    // Two spellings the pages use: "Slow (60 BPM)" in any case, with a
+    // plain or non-breaking space, and "Press 🐢 Slow for 100 BPM" /
+    // "Lento para 100 BPM" — the latter only with the button's own capital,
+    // so "play it slow at 60 BPM" prose about practice speed isn't read as
+    // the tier.
+    const SP = '(?:\\s|&nbsp;)';
+    const res = [
+      new RegExp(`(?:Slow|Lento)${SP}*\\(${SP}*(\\d+)${SP}*BPM${SP}*\\)`, 'gi'),
+      new RegExp(`(?:Slow|Lento)${SP}+(?:for|para|at|a)${SP}+(\\d+)${SP}*BPM`, 'g'),
+    ];
+    for (const re of res) {
+      let mm;
+      while ((mm = re.exec(src))) {
+        if (mm[1] !== want) flag(`${f}: says "${mm[0]}" but this page's Slow tier is ${want} BPM per its own data-bpm-slow`);
+      }
     }
   }
-  if (pages === 0) { warn('1bh found no Journey page with a Slow tier — it cannot see what it is supposed to guard'); return; }
-  if (bad === 0) ok(`${pages} Journey page${pages === 1 ? '' : 's'} with a Slow tier — every "Slow (N BPM)" mention matches data-bpm-slow`);
+  if (pages !== JOURNEY_SLOW_PAGES) {
+    err(`1bh: ${pages} Journey page${pages === 1 ? '' : 's'} carry data-bpm-slow, but JOURNEY_SLOW_PAGES pins ${JOURNEY_SLOW_PAGES} — a page gained or lost its Slow tier; bump the pin on purpose`);
+    problems++; bad++;
+  }
+  if (bad === 0) ok(`${pages} Journey page${pages === 1 ? '' : 's'} with a Slow tier (pinned) — every "Slow (N BPM)" mention matches data-bpm-slow`);
 }
 
 (async function main() {

@@ -126,8 +126,8 @@ SETS.push(
             steps: [
               {
                 label: 'Low E notes with the note map', label_es: 'Notas de la Mi grave con el mapa de notas',
-                text: 'Play-along preview:<ol><li>Keep this note map in view — on the low E string, frets 0 · 1 · 3 · 5 · 7 · 8 · 10 · 12 are E · F · G · A · B · C · D · E.</li><li>Play up the low E string slowly with the audio, saying each name aloud.</li></ol>Lean on the map here; you\'ll do it from memory further down this set.<span class="step-figure"><img src="img/m2-alphabet-loop-en.svg" alt="Diagram of the musical alphabet A to G arranged in a loop, with an arrow showing that after G it starts over at A." width="640" height="244"></span>',
-                text_es: 'Adelanto para tocar junto:<ol><li>Mantén este mapa de notas a la vista — en la cuerda Mi grave, los trastes 0 · 1 · 3 · 5 · 7 · 8 · 10 · 12 son E · F · G · A · B · C · D · E.</li><li>Toca despacio hacia arriba en la cuerda Mi grave junto con el audio, diciendo cada nombre en voz alta.</li></ol>Apóyate en el mapa aquí; lo harás de memoria más adelante en esta unidad.<span class="step-figure"><img src="img/m2-alphabet-loop-es.svg" alt="Diagrama del alfabeto musical de A a G en un círculo, con una flecha que muestra que después de G se empieza de nuevo en A." width="640" height="244"></span>',
+                text: 'Play-along preview:<ol><li>Use this note map: on the low E string, frets 0 · 1 · 3 · 5 · 7 · 8 · 10 · 12 are E · F · G · A · B · C · D · E.</li><li>Play up the low E string slowly with the audio, saying each name aloud.</li></ol>Use the map here; you\'ll do it from memory further down this set.<span class="step-figure"><img src="img/m2-alphabet-loop-en.svg" alt="Diagram of the musical alphabet A to G arranged in a loop, with an arrow showing that after G it starts over at A." width="640" height="244"></span>',
+                text_es: 'Adelanto para tocar junto:<ol><li>Usa este mapa de notas: en la cuerda Mi grave, los trastes 0 · 1 · 3 · 5 · 7 · 8 · 10 · 12 son E · F · G · A · B · C · D · E.</li><li>Toca despacio hacia arriba en la cuerda Mi grave junto con el audio, diciendo cada nombre en voz alta.</li></ol>Usa el mapa aquí; lo harás de memoria más adelante en esta unidad.<span class="step-figure"><img src="img/m2-alphabet-loop-es.svg" alt="Diagrama del alfabeto musical de A a G en un círculo, con una flecha que muestra que después de G se empieza de nuevo en A." width="640" height="244"></span>',
                 hint: 'A natural note is a plain letter with no sharp (#): A B C D E F G. Slow is fine. Say each name as you play its fret — use the map freely. Why the names land where they do: twelve frets take you through twelve notes, one fret at a time, and one fret up from a note is that note SHARP (F to F#). But E–F and B–C have nothing in between them — the gap there is one fret (a half step), while every other gap is two frets (a whole step). That\'s exactly why the naturals bunch up at frets 0–1 (E to F) and again at frets 7–8 (B to C).',
                 hint_es: 'Una nota natural es una letra sola, sin sostenido (#): A B C D E F G. Ir despacio está bien. Di cada nombre mientras tocas su traste — usa el mapa libremente. Por qué los nombres caen donde caen: doce trastes te llevan por doce notas, un traste a la vez, y un traste arriba de una nota es esa nota SOSTENIDA (de F a F#). Pero entre E–F y entre B–C no hay nada — ahí la distancia es de un traste (un semitono), mientras que cualquier otra distancia es de dos trastes (un tono). Por eso mismo las notas naturales se juntan en los trastes 0–1 (de E a F) y otra vez en los trastes 7–8 (de B a C).',
                 skills: [2, 5],
@@ -152,8 +152,8 @@ SETS.push(
               },
               {
                 label: 'A string notes with your chart', label_es: 'Notas de la cuerda La con tu tabla',
-                text: 'Play the same idea on the A string, still with your chart: on the A string, frets 0 · 2 · 3 · 5 · 7 · 8 · 10 · 12 are A · B · C · D · E · F · G · A, up then back down, names aloud.',
-                text_es: 'Toca la misma idea en la cuerda La, todavía con tu tabla: en la cuerda La, los trastes 0 · 2 · 3 · 5 · 7 · 8 · 10 · 12 son A · B · C · D · E · F · G · A, hacia arriba y de regreso, nombres en voz alta.',
+                text: 'Play the same idea on the A string, using this map: on the A string, frets 0 · 2 · 3 · 5 · 7 · 8 · 10 · 12 are A · B · C · D · E · F · G · A, up then back down, names aloud.',
+                text_es: 'Toca la misma idea en la cuerda La, usando este mapa: en la cuerda La, los trastes 0 · 2 · 3 · 5 · 7 · 8 · 10 · 12 son A · B · C · D · E · F · G · A, hacia arriba y de regreso, nombres en voz alta.',
                 hint: 'Notice fret 5 of the A string is the same note as the open D string. The same half-step rule applies here: B–C and E–F are one fret apart, everything else is two, which is why C sits at fret 3 and F at fret 8.',
                 hint_es: 'Fíjate que el traste 5 de la cuerda La es la misma nota que la cuerda Re al aire. Aquí aplica la misma regla del semitono: B–C y E–F están a un traste, todo lo demás a dos, y por eso C queda en el traste 3 y F en el traste 8.',
                 skills: [3, 5],
@@ -315,8 +315,8 @@ SETS.push(
                 drill: { type: 'shuffle', string: 'A', maxFret: 12, rounds: 10, seconds: 5, pile: 'naturals', skill: 'm2w1-s3' },
                 hint: 'No chart. If you stall on a note, loop just that part of the string until it\'s automatic.',
                 hint_es: 'Sin tabla. Si te trabas en una nota, repite solo esa parte de la cuerda hasta que sea automática.',
-                levelUp: 'Beat the clock: get the same score with only three seconds a card. Or switch to the sharps pile — all 13 frets, sharps included.',
-                levelUp_es: 'Gánale al reloj: logra el mismo resultado con solo tres segundos por carta. O cambia al montón con sostenidos — los 13 trastes, sostenidos incluidos.',
+                levelUp: 'Faster round: get the same score with only three seconds a card. Or switch to the sharps pile — all 13 frets, sharps included.',
+                levelUp_es: 'Ronda más rápida: logra el mismo resultado con solo tres segundos por carta. O cambia al montón con sostenidos — los 13 trastes, sostenidos incluidos.',
                 skills: [3, 4]
               },
               {
@@ -326,8 +326,8 @@ SETS.push(
                 drill: { type: 'shuffle', string: 'lowE', maxFret: 12, rounds: 10, seconds: 5, pile: 'naturals', skill: 'm2w1-s2' },
                 stuck: 'Stay on the naturals pile — it deals only the eight natural frets. Add the sharps pile once you hit 9 of 10.',
                 stuck_es: 'Quédate en el montón de solo naturales — reparte únicamente los ocho trastes naturales. Agrega el montón con sostenidos cuando logres 9 de 10.',
-                levelUp: 'Beat the clock: get the same 9 of 10 with only three seconds a card. Or run the deck on the A string too, or name a full lap going down the string (12 → 0) without counting.',
-                levelUp_es: 'Gánale al reloj: logra el mismo 9 de 10 con solo tres segundos por carta. O haz la baraja en la cuerda La también, o nombra una vuelta completa bajando por la cuerda (12 → 0) sin contar.',
+                levelUp: 'Faster round: get the same 9 of 10 with only three seconds a card. Or run the deck on the A string too, or name a full lap going down the string (12 → 0) without counting.',
+                levelUp_es: 'Ronda más rápida: logra el mismo 9 de 10 con solo tres segundos por carta. O haz la baraja en la cuerda La también, o nombra una vuelta completa bajando por la cuerda (12 → 0) sin contar.',
                 skills: [2, 4]
               },
               {
@@ -461,8 +461,8 @@ SETS.push(
         practice: { type: 'mc', prompt: 'In the musical alphabet, what note (letter) comes after G?',
           prompt_es: 'En el alfabeto musical, ¿qué nota (letra) viene después de G?',
           choices: ['G#', 'A', 'A#', 'C'], choices_es: ['G#', 'A', 'A#', 'C'], answer: 1,
-          explain: 'The musical alphabet only runs A through G, then loops straight back to A. G# is a real note, but it sits between G and A — it isn\'t the next letter. C is where the alphabet you already know starts over; the musical one starts over at A.',
-          explain_es: 'El alfabeto musical solo va de A a G, y luego vuelve directo a A. G# sí es una nota real, pero está entre G y A — no es la siguiente letra. C es donde vuelve a empezar el alfabeto que ya conoces; el musical vuelve a empezar en A.' } },
+          explain: 'The musical alphabet only runs A through G, then loops straight back to A. G# is a real note, but it sits between G and A — it isn\'t the next letter. C is a real note too, but it comes three letters after G, not right after it.',
+          explain_es: 'El alfabeto musical solo va de A a G, y luego vuelve directo a A. G# sí es una nota real, pero está entre G y A — no es la siguiente letra. C también es una nota real, pero viene tres letras después de G, no justo después.' } },
       { id: 'm2w1-s2', text: 'Name all natural notes on the E string (frets 0–12)',
         text_es: 'Nombrar todas las notas naturales en la cuerda Mi (trastes 0–12)',
         gotItWhen: 'the shuffle deck can deal you any NATURAL fret 0–12 at random and you say the low-E note name instantly, before the ring runs out, without counting up from E — 9 of 10. (The sharps pile is the level-up.)',
@@ -588,8 +588,8 @@ SETS.push(
                 label: 'Read TAB: "Smoke on the Water"', label_es: 'Lee el TAB: "Smoke on the Water"',
                 text: 'Read this TAB: the "Smoke on the Water" riff written out on the low E string — no tempo yet, just find each note:<ol><li>Look at the fret numbers on the bottom line and try to play it.</li><li>Click any note name below the TAB to hear how it should sound.</li></ol>You\'ve got it when: you can find and play all twelve notes, even slowly.',
                 text_es: 'Lee este TAB: el riff de "Smoke on the Water" escrito en la cuerda Mi grave — todavía sin tempo, solo encuentra cada nota:<ol><li>Mira los números de traste en la línea de abajo e intenta tocarlo.</li><li>Haz clic en cualquier nombre de nota debajo del TAB para escuchar cómo debe sonar.</li></ol>Lo tienes cuando: puedes encontrar y tocar las doce notas, aunque sea despacio.',
-                hint: 'Read left-to-right, one note per beat. The numbers tell you which fret to press on the low E string. See a # (sharp)? You met those in Set 1 — a sharp is just one fret higher than the plain note, so F# is one fret above F. (Flats, which go the other way, come later.) For now, just trust the fret numbers.',
-                hint_es: 'Lee de izquierda a derecha, una nota por pulso. Los números te dicen qué traste presionar en la cuerda Mi grave. ¿Ves un # (sostenido)? Ya los viste en la Unidad 1 — un sostenido es simplemente un traste más arriba que la nota simple, así que F# es un traste arriba de F. (Los bemoles, que van en la dirección contraria, vienen más adelante.) Por ahora, solo confía en los números de traste.',
+                hint: 'Read left-to-right, one note per beat. The numbers tell you which fret to press on the low E string. See a # (sharp)? You met those in Set 1 — a sharp is just one fret higher than the plain note, so F# is one fret above F. (Flats, which go the other way, come later.) For now, just play the fret numbers as written.',
+                hint_es: 'Lee de izquierda a derecha, una nota por pulso. Los números te dicen qué traste presionar en la cuerda Mi grave. ¿Ves un # (sostenido)? Ya los viste en la Unidad 1 — un sostenido es simplemente un traste más arriba que la nota simple, así que F# es un traste arriba de F. (Los bemoles, que van en la dirección contraria, vienen más adelante.) Por ahora, solo toca los números de traste tal como están.',
                 skills: [4, 5],
                 tab: {
                   caption: '"Smoke on the Water" — main riff · Low E string',
@@ -797,8 +797,8 @@ SETS.push(
           },
           {
             label: 'Challenge 3 — "Watchtower" Bass Riff (your low-E assessment piece)', label_es: 'Reto 3 — Riff de bajo de "Watchtower" (tu pieza de evaluación en la cuerda Mi grave)',
-            text: 'Using the TAB:<ul><li>Play the "All Along the Watchtower" bass line on the low E string only — A · G · F · G, looping — one note per beat — start at 60 BPM, your goal is 100 BPM, then the Am backing track. Each root is the note a chord is named after. Play A twice, G twice, F twice, G twice — the same timing as the backing track.</li></ul>You\'ve got it when: the riff from memory at 100 BPM, in time, clean tone, correct fingering. Click any note name to hear how it should sound. <a href="tabs/all-along-the-watchtower.html" target="_blank">&#x1F9F5; Song Journey: this is Layer 2 of 5</a>.',
-            text_es: 'Usando el TAB:<ul><li>Toca la línea de bajo de "All Along the Watchtower" solo en la cuerda Mi grave — A · G · F · G, en bucle — una nota por pulso — empieza a 60 BPM, tu meta es 100 BPM, y luego la pista de acompañamiento en Am. Cada raíz es la nota que le da nombre al acorde. Toca A dos veces, G dos veces, F dos veces y G dos veces — el mismo ritmo que la pista de acompañamiento.</li></ul>Lo tienes cuando: el riff de memoria a 100 BPM, a tiempo, tono limpio, digitación correcta. Haz clic en cualquier nombre de nota para escuchar cómo debe sonar. <a href="tabs/all-along-the-watchtower.html" target="_blank">&#x1F9F5; Recorrido de la canción: esto es la Capa 2 de 5</a>.',
+            text: 'Using the TAB:<ul><li>Play the "All Along the Watchtower" bass line on the low E string only — A · G · F · G, looping — one note per beat — start at 60 BPM, your goal is 100 BPM, then the backing track. Each root is the note a chord is named after. Play A twice, G twice, F twice, G twice — the same timing as the backing track.</li></ul>You\'ve got it when: the riff from memory at 100 BPM, in time, clean tone, correct fingering. Click any note name to hear how it should sound. <a href="tabs/all-along-the-watchtower.html" target="_blank">&#x1F9F5; Song Journey: this is Layer 2 of 5</a>.',
+            text_es: 'Usando el TAB:<ul><li>Toca la línea de bajo de "All Along the Watchtower" solo en la cuerda Mi grave — A · G · F · G, en bucle — una nota por pulso — empieza a 60 BPM, tu meta es 100 BPM, y luego la pista de acompañamiento. Cada raíz es la nota que le da nombre al acorde. Toca A dos veces, G dos veces, F dos veces y G dos veces — el mismo ritmo que la pista de acompañamiento.</li></ul>Lo tienes cuando: el riff de memoria a 100 BPM, a tiempo, tono limpio, digitación correcta. Haz clic en cualquier nombre de nota para escuchar cómo debe sonar. <a href="tabs/all-along-the-watchtower.html" target="_blank">&#x1F9F5; Recorrido de la canción: esto es la Capa 2 de 5</a>.',
             hint: 'Fingering: index on fret 1 (F), ring on fret 3 (G), pinky on fret 5 (A) — a one-fret stretch past your usual index=1/middle=2/ring=3/pinky=4 hand position, since this riff climbs past fret 4. Keep your thumb behind the neck. Let each note ring fully before the next. Drill it until you can run it with your eyes closed — then play it for the &#x1F3A4; Listening Coach below the TAB.',
             hint_es: 'Digitación: índice en el traste 1 (F), anular en el traste 3 (G), meñique en el traste 5 (A) — un estiramiento de un traste más allá de tu posición habitual índice=1/medio=2/anular=3/meñique=4, porque este riff sube más allá del traste 4. Mantén el pulgar detrás del mástil. Deja que cada nota suene por completo antes de la siguiente. Practícalo hasta que puedas tocarlo con los ojos cerrados — luego tócalo para el &#x1F3A4; Entrenador de Escucha debajo del TAB.',
             stuck: 'Loop just F–G (frets 1–3) until the finger change is clean, then add the A on fret 5.',
@@ -1095,18 +1095,18 @@ SETS.push(
                   caption: '"Luna" — bass roots (F &rarr; A) · 60 BPM',
                   caption_es: '"Luna" — raíces de bajo (F &rarr; A) · 60 BPM',
                   notes: [
-                    { string: 'E', fret: 1, note: 'F', midi: 41 },
-                    { string: 'E', fret: 1, note: 'F', midi: 41 },
-                    { string: 'A', fret: 0, note: 'A', midi: 45 },
-                    { string: 'A', fret: 0, note: 'A', midi: 45 }
+                    { string: 'E', fret: 1, note: 'F', midi: 41, beats: 2 },
+                    { string: 'E', fret: 1, note: 'F', midi: 41, beats: 2 },
+                    { string: 'A', fret: 0, note: 'A', midi: 45, beats: 2 },
+                    { string: 'A', fret: 0, note: 'A', midi: 45, beats: 2 }
                   ]
                 },
                 response: { type: 'short', prompt: 'How many clean laps of F → A did you land in a row?', prompt_es: '¿Cuántas vueltas limpias de F → A lograste seguidas?', placeholder: 'e.g. 4 — try for a higher number next session', placeholder_es: 'ej. 4 — intenta superarlo la próxima sesión' }
               },
               {
                 label: 'Challenge — "Let It Be," bass line', label_es: 'Reto — "Let It Be," línea de bajo',
-                text: '<ul><li>Play the roots of "Let It Be" (Beatles) on the low E & A strings — C · G · A · F, two beats each at 60 BPM.</li></ul>These four notes are the simple bass outline of the whole song, so learn where its roots live now. You\'ve got it when: two clean laps of C–G–A–F, every note ringing, each landing on the beat. <a href="tabs/let-it-be.html" target="_blank">&#x1F9F5; Song Journey: this is Layer 2 of 5</a>.',
-                text_es: '<ul><li>Toca las raíces de "Let It Be" (Beatles) en las cuerdas Mi y La — C · G · A · F, dos pulsos cada una a 60 BPM.</li></ul>Estas cuatro notas son el esquema simple de bajo de toda la canción, así que aprende dónde viven sus raíces desde ahora. Lo tienes cuando: dos vueltas limpias de C–G–A–F, cada nota sonando, cada una cayendo en el pulso. <a href="tabs/let-it-be.html" target="_blank">&#x1F9F5; Recorrido de la canción: esto es la Capa 2 de 5</a>.',
+                text: '<ul><li>Play the roots of "Let It Be" (Beatles) on the low E & A strings — C · G · A · F, two beats each at 60 BPM.</li></ul>These four notes are the simple bass outline of the verse, so learn where its roots live now. You\'ve got it when: two clean laps of C–G–A–F, every note ringing, each landing on the beat. <a href="tabs/let-it-be.html" target="_blank">&#x1F9F5; Song Journey: this is Layer 2 of 5</a>.',
+                text_es: '<ul><li>Toca las raíces de "Let It Be" (Beatles) en las cuerdas Mi y La — C · G · A · F, dos pulsos cada una a 60 BPM.</li></ul>Estas cuatro notas son el esquema simple de bajo de la estrofa, así que aprende dónde viven sus raíces desde ahora. Lo tienes cuando: dos vueltas limpias de C–G–A–F, cada nota sonando, cada una cayendo en el pulso. <a href="tabs/let-it-be.html" target="_blank">&#x1F9F5; Recorrido de la canción: esto es la Capa 2 de 5</a>.',
                 hint: 'C is A-string fret 3 (ring finger), G is low-E fret 3 (ring finger), A is the open A string, F is low-E fret 1 (index). Watch the crossings between the two strings and keep your thumb behind the neck. Click any note name to hear how it should sound.',
                 hint_es: 'C es el traste 3 de la cuerda La (dedo anular), G es el traste 3 de la Mi grave (dedo anular), A es la cuerda La al aire, F es el traste 1 de la Mi grave (índice). Fíjate en los cruces entre las dos cuerdas y mantén el pulgar detrás del mástil. Haz clic en cualquier nombre de nota para escuchar cómo debe sonar.',
                 stuck: 'Split it by string: play C then A (both on the A string), then G then F (both on the low E), then join all four in order.',
@@ -1251,7 +1251,7 @@ MODULE_SONGS[2] = [
       { name: '"Sweet Child O\' Mine" — Guns N\' Roses', meta: 'Play verse bass roots on E & A strings', meta_es: 'Toca las notas graves del verso en las cuerdas Mi y La', type: 'Core', core: true, journeyUrl: 'tabs/sweet-child-o-mine.html',
         originalUrl: 'https://www.youtube.com/watch?v=1w7OgIMMRc4',
         tutorialUrl: 'https://www.youtube.com/watch?v=0ASVeXINKYM&start=282&end=938' },
-      { name: '"the cure" — Olivia Rodrigo', meta: 'Root line — the low E first, then both strings — the other way to pass Unit 2', meta_es: 'Línea de raíces — primero la cuerda Mi grave, luego las dos — la otra forma de aprobar la Unidad 2', type: 'Core', core: true, journeyUrl: 'tabs/the-cure.html',
+      { name: '"the cure" — Olivia Rodrigo', meta: 'Root line — the low E first, then both strings — the other way to pass Module 2', meta_es: 'Línea de raíces — primero la cuerda Mi grave, luego las dos — la otra forma de aprobar el Módulo 2', type: 'Core', core: true, journeyUrl: 'tabs/the-cure.html',
         originalUrl: 'https://www.youtube.com/watch?v=B402rKl4bUg',
         tutorialUrl: 'https://www.youtube.com/watch?v=adW_zSkClaY' },
       { name: '"Let It Be" — The Beatles', meta: 'Play the bassline as single-note roots (C G A F)', meta_es: 'Toca la línea de bajo como notas individuales (C G A F)', type: 'Core', core: true, journeyUrl: 'tabs/let-it-be.html',

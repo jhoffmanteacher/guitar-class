@@ -1617,7 +1617,7 @@ function fretSaveRound(g){
   const old = (games.fret && games.fret.best) || 0;
   const isNewBest = score > old;
   if (isNewBest) games.fret = { best: score, level: g.level, at: new Date().toISOString().slice(0, 10) };
-  awardArcadeXp(isNewBest);
+  if (score > 0) awardArcadeXp(isNewBest);   // ten Skips in a row is not a round played
 }
 
 /* Round over → save, release the mic, render the done screen. The mic-off is
@@ -2437,21 +2437,38 @@ function ccResolvePend(ch){
   /* Chord-tone vote (same rule as the Coach's chord checks): a strum is
      polyphonic, so readings hop between chord tones — any single-pitch
      consensus fails real strums. 'off' only on strong contrary evidence.
-     Voted against the tones the new chord does NOT share with the one
-     just held, not its whole tone set — simulated against every real
-     progression here, "is it any tone of the new chord" let a strum that
-     never left the old chord pass 49 of 61 changes (many diatonic pairs
-     share 2 of 3 tones, e.g. Am/C, Em/C, Am/F). A held chord can't
-     produce a tone that isn't in it, so this closes that without
-     tightening real strums — the worst-case distinguishing-tone share
-     across every progression is still 33%, well clear of the threshold. */
+
+     Two rules, both needed (2026-09-28, re-simulated against the real
+     voicings in CHORD_DIAGRAMS, bass-weighted readings plus noise):
+     1. Some tone of the NEW chord has to be heard at all (>15%) — a strum
+        of something else entirely is 'off'.
+     2. The OLD chord's exclusive tones must not outnumber the new chord's
+        exclusive tones. A held chord keeps sounding what only it has (Am
+        held into C keeps its A, the bass note the detector locks onto),
+        while a real change loses it — so "old-only hits beat new-only
+        hits, and are more than noise" is the held-chord signature.
+     The one-day rule before this — "the new chord's EXCLUSIVE tones must
+     be >15% of readings" — read well on pitch classes (1 of 3) but not on
+     strings: Am→C's only new tone is G, one open string of five, which
+     five readings of a strummed C miss most of the time. Simulated, it
+     failed a genuine Am→C 60% of the time and one random-4 pair 90%.
+     This rule passes real changes 99.6% (worst pair 98%) and still fails
+     a held chord far more than "any new tone" did (22% vs 51%). The
+     pairs it stays lenient on are the parallel/relative ones whose bass
+     note is shared and whose only difference is one string (E/Em, A/Am,
+     C/Am, G/Em) — five readings cannot tell those apart either way, and
+     marking a correct change wrong is the worse error in a room. */
   if (p.readings.length >= 3){
     const want = cc.classes[ch.to];
     const from = cc.classes[ch.from] || [];
-    const distinguishing = want.filter(c => from.indexOf(c) < 0);
-    const target = distinguishing.length ? distinguishing : want;
-    const share = p.readings.filter(r => target.indexOf(((Math.round(r) % 12) + 12) % 12) >= 0).length / p.readings.length;
-    toneOk = share > 0.15;
+    const pcOf = r => ((Math.round(r) % 12) + 12) % 12;
+    const n = p.readings.length;
+    const newOnly = want.filter(c => from.indexOf(c) < 0);
+    const oldOnly = from.filter(c => want.indexOf(c) < 0);
+    const anyNew = p.readings.filter(r => want.indexOf(pcOf(r)) >= 0).length / n;
+    const newHits = p.readings.filter(r => newOnly.indexOf(pcOf(r)) >= 0).length;
+    const oldHits = p.readings.filter(r => oldOnly.indexOf(pcOf(r)) >= 0).length;
+    toneOk = anyNew > 0.15 && !(oldHits > newHits && oldHits / n > 0.15);
   }
   ch.result = toneOk === false ? 'off' : 'ok';    // percussive/unclear counts on timing alone
   ccChipRefresh(cc.changes.indexOf(ch));
@@ -2628,8 +2645,10 @@ function ccAgain(d){
    shapes, then Dm and the movable power shapes, then Group 3 (E, B7, Bm).
 
    F#m and C#m were dropped from both games' decks 2026-09-28 (Jonathan)
-   — checked against every module file and neither is actually taught
-   anywhere; only Bm (Group 3) is. The former "barre" deck existed only to
+   — no module teaches either shape; only Bm (Group 3) is taught. (The
+   names do appear: a Module 6 reggae progression, a Module 7 Choice-song
+   line that says to barre C#m, Module 10's relative-minor list — mentions,
+   not lessons.) The former "barre" deck existed only to
    drill Bm/F#m/C#m against each other by ear/eye, which stops making
    sense with two of the three not yet part of the course, so the deck
    itself is gone too — Bm still practices via the "all" deck. Re-add a
@@ -3761,7 +3780,9 @@ function psFinish(){
     const old = (games.ps && games.ps.best) || 0;
     const isNewBest = s.round > old;
     if (isNewBest) games.ps = { best: s.round, at: new Date().toISOString().slice(0, 10) };
-    awardArcadeXp(isNewBest);
+    // No XP for a round that cleared nothing — Start, one wrong tap and
+    // Done was a one-second XP farm (same class 8bae635 closed elsewhere).
+    if (s.round > 0) awardArcadeXp(isNewBest);
   }
   psRenderDone();
 }
@@ -4081,7 +4102,7 @@ function psgFinish(){
     const old = (games.psg && games.psg.best) || 0;
     const isNewBest = s.round > old;
     if (isNewBest) games.psg = { best: s.round, at: new Date().toISOString().slice(0, 10) };
-    awardArcadeXp(isNewBest);
+    if (s.round > 0) awardArcadeXp(isNewBest);   // same no-XP-for-nothing rule as psFinish
   }
   psgRenderDone();
 }
@@ -5839,7 +5860,7 @@ const RN_SONGS = [
     subKey: 'games.riff.song.sweetchild.sub',
     hintKey: 'games.riff.song.sweetchild.hint',
     bpm: 60, bpb: 4, loopBeats: 32, laps: 1,
-    notes: [[5,5,0,'D'],[5,3,8,'C'],[6,3,16,'G'],[5,5,24,'D']] }
+    notes: [[5,5,0,'D'],[5,5,4,'D'],[5,3,8,'C'],[5,3,12,'C'],[6,3,16,'G'],[6,3,20,'G'],[5,5,24,'D'],[5,5,28,'D']] }
 ];
 
 let rn = null, rnRaf = null;

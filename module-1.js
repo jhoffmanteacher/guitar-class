@@ -235,7 +235,7 @@ SETS.push(
       { name: '"Luna" — Peso Pluma, Junior H', meta: 'Listen — our Latin core song, back all course long', meta_es: 'Escucha — nuestra canción principal en español, presente durante todo el curso', type: 'Core', core: true, journeyUrl: 'tabs/luna.html',
         originalUrl: 'https://www.youtube.com/watch?v=LExSwglVFIw',
         tutorialUrl: 'https://www.youtube.com/watch?v=jtbqYAWMfok' },
-      { name: '"Happy Birthday"', meta: 'First real song — you learn it in class (Class Activities #1–#2) and play it for your Module 1 assessment', meta_es: 'Tu primera canción real — la aprendes en clase (Actividades de clase #1–#2) y la tocas en tu evaluación del Módulo 1', type: 'Supp', core: false,
+      { name: '"Happy Birthday"', meta: 'First real song — you learn it in class (the Happy Birthday class activities) and play it for your Module 1 assessment', meta_es: 'Tu primera canción real — la aprendes en clase (las actividades de clase de Happy Birthday) y la tocas en tu evaluación del Módulo 1', type: 'Supp', core: false,
         tutorialUrl: 'https://www.youtube.com/watch?v=wwiLAOjj16w&start=46' }
     ],
 
@@ -310,7 +310,7 @@ SETS.push(
             response: { type: 'mc', prompt: 'If a string\'s pitch is too LOW, which way do you turn the tuning peg?',
               prompt_es: 'Si el tono de una cuerda está muy BAJO, ¿hacia qué lado giras la clavija?',
               answer: 0,
-              explain: 'Too low means you need more tension, so tighten the string — the pitch rises up to the target. Loosening would make it even flatter.',
+              explain: 'Too low means you need more tension, so tighten the string — the pitch rises up to the target. Loosening would make it even lower.',
               explain_es: 'Muy bajo significa que necesitas más tensión, así que aprieta la cuerda — el tono sube hasta el objetivo. Aflojarla lo dejaría todavía más bajo.',
               choices: [
               'Tighten it so the pitch rises',
@@ -422,8 +422,8 @@ SETS.push(
             response: { type: 'mc', prompt: 'The needle is to the RIGHT of center. What does that mean, and what do you do?',
               prompt_es: 'La aguja está a la DERECHA del centro. ¿Qué significa y qué haces?',
               answer: 0,
-              explain: 'Right of center means the note is too high (sharp). Loosen the peg a little so the string relaxes and the pitch drops back to the middle.',
-              explain_es: 'A la derecha del centro significa que la nota está muy alta (sostenida). Afloja un poco la clavija para que la cuerda se relaje y el tono baje hasta el centro.',
+              explain: 'Right of center means the note is too high. Loosen the peg a little so the string relaxes and the pitch drops back to the middle.',
+              explain_es: 'A la derecha del centro significa que la nota está muy alta. Afloja un poco la clavija para que la cuerda se relaje y el tono baje hasta el centro.',
               choices: [
               'Too high — loosen the peg a little',
               'Too low — tighten the peg a little',
@@ -602,7 +602,7 @@ SETS.push(
     },
 
     songs: [
-      { name: '"Happy Birthday"', meta: 'Your Module 1 assessment song — all four phrases on the low E string, learned in Class Activities #1–#2', meta_es: 'Tu canción de la evaluación del Módulo 1 — las cuatro frases en la cuerda Mi grave, aprendida en las Actividades de clase #1–#2', type: 'Supp', core: false,
+      { name: '"Happy Birthday"', meta: 'Your Module 1 assessment song — all four phrases on the low E string, learned in the Happy Birthday class activities', meta_es: 'Tu canción de la evaluación del Módulo 1 — las cuatro frases en la cuerda Mi grave, aprendida en las actividades de clase de Happy Birthday', type: 'Supp', core: false,
         tutorialUrl: 'https://www.youtube.com/watch?v=wwiLAOjj16w&start=46' },
       { name: '"Sailor Song" — Gigi Perez', meta: 'Listen — fingerpicked vs. strummed guitar', meta_es: 'Escucha — guitarra punteada con los dedos vs. rasgueada', type: 'Choice', core: false, level: 3,
         originalUrl: 'https://www.youtube.com/watch?v=1lrFsXkT_rM',
@@ -640,8 +640,8 @@ SETS.push(
           prompt_es: 'A los diez minutos de práctica te duele la espalda y tus hombros están junto a tus orejas. ¿Cuál es la causa más probable?',
           choices: ['You\'re pressing the frets too hard', 'You\'ve practiced too long without a break', 'You\'re hunching over the guitar to watch your hands', 'The guitar is resting on the wrong leg'],
           choices_es: ['Estás presionando los trastes demasiado fuerte', 'Has practicado demasiado tiempo sin descanso', 'Estás encorvándote sobre la guitarra para mirar tus manos', 'La guitarra está apoyada en la pierna equivocada'], answer: 2,
-          explain: 'Curling over to see your fingers is the classic posture trap — sit tall and tilt the guitar\'s neck up slightly instead of bending down to it.',
-          explain_es: 'Encorvarse para ver los dedos es la trampa clásica de postura — siéntate derecho e inclina un poco el mástil hacia arriba en vez de agacharte hacia él.' } },
+          explain: 'Curling over to see your fingers is the most common posture mistake — sit tall and tilt the guitar\'s neck up slightly instead of bending down to it.',
+          explain_es: 'Encorvarse para ver los dedos es el error de postura más común — siéntate derecho e inclina un poco el mástil hacia arriba en vez de agacharte hacia él.' } },
       { id: 'w2-s3', text: 'Hold the pick correctly — 3–4mm of tip showing',
         text_es: 'Sostener la púa correctamente — con 3–4 mm de punta asomando',
         gotItWhen: 'your pick stays put when you strum, only a small tip pokes past your thumb, and your wrist stays relaxed.',
@@ -650,7 +650,7 @@ SETS.push(
           prompt_es: 'Tu púa se sigue girando de lado entre tus dedos a mitad del rasgueo. ¿Cuál es la solución más probable?',
           choices: ['Pull it back so only about 3–4 mm of tip shows', 'Squeeze the pick as hard as you can', 'Strum faster so the pick has less time to move around', 'Switch to a much thinner pick'],
           choices_es: ['Métela más para que solo asomen unos 3–4 mm de punta', 'Aprieta la púa lo más fuerte que puedas', 'Rasguea más rápido para que la púa tenga menos tiempo de moverse de lugar', 'Cámbiate a una púa mucho más delgada'], answer: 0,
-          explain: 'A pick that twists is almost always sticking out too far — the strings catch the extra tip and lever it around. Back it off to the 3–4 mm target and hold it firm but relaxed. Squeezing harder just tires your hand out, and a thinner pick bends and flops more, not less.',
+          explain: 'A pick that twists is almost always sticking out too far — the strings catch the extra tip and lever it around. Pull it back to the 3–4 mm target and hold it firm but relaxed. Squeezing harder just tires your hand out, and a thinner pick bends and flops more, not less.',
           explain_es: 'Una púa que se gira casi siempre es una púa que asoma demasiado — las cuerdas atrapan esa punta de más y la hacen girar. Vuelve al objetivo de 3–4 mm y sostenla firme pero relajada. Apretar más fuerte solo te cansa la mano, y una púa más delgada se dobla más, no menos.' } },
       { id: 'w2-s4', text: 'Name all 6 strings from memory (E A D G B e)',
         text_es: 'Nombrar las 6 cuerdas de memoria (E A D G B e)',
@@ -669,8 +669,8 @@ SETS.push(
           notes: [40, 45, 50, 55, 59, 64] } },
       { id: 'w2-s6', text: 'Play "Happy Birthday" on the low E string with clean, steady notes',
         text_es: 'Tocar "Happy Birthday" en la cuerda Mi grave con notas limpias y constantes',
-        gotItWhen: 'you can play all four phrases of "Happy Birthday" on the low E string — the way you learned it in Class Activities #1 and #2 — start to finish at a steady pulse, every note clean, no stops. The warm-up line below is a good way to loosen up first.',
-        gotItWhen_es: 'puedes tocar las cuatro frases de "Happy Birthday" en la cuerda Mi grave — como la aprendiste en las Actividades de clase #1 y #2 — de principio a fin a un pulso constante, cada nota limpia, sin detenerte. La línea de calentamiento de abajo es una buena forma de soltar la mano primero.',
+        gotItWhen: 'you can play all four phrases of "Happy Birthday" on the low E string — the way you learned it in the Happy Birthday class activities — start to finish at a steady pulse, every note clean, no stops. Play the warm-up line below first.',
+        gotItWhen_es: 'puedes tocar las cuatro frases de "Happy Birthday" en la cuerda Mi grave — como la aprendiste en las actividades de clase de Happy Birthday — de principio a fin a un pulso constante, cada nota limpia, sin detenerte. Toca primero la línea de calentamiento de abajo.',
         practice: { type: 'playSeq', label: 'E string warm-up melody', label_es: 'Melodía de calentamiento en la cuerda Mi', bpm: 60,
           notes: [40, 41, 43, 45, 43, 41, 40] } }
     ]

@@ -5,6 +5,45 @@ Notable changes to the Guitar Class site. Newest first.
 For the full session-by-session history (and the reasoning behind each change),
 see `WORKFLOW.md` and the git commit log.
 
+## 2026-09-28 — Second look at the error sweep: a few of its fixes corrected, plus new finds
+
+### Fixed
+
+- **Module 4's blues-scale cards name the blue note as E♭ again** (and B♭ in
+  E minor). The sweep had renamed it D♯, which is the wrong spelling for a
+  note the card itself describes as "E lowered one fret".
+- **Let It Be's Song Journey map says what the record does again**: the
+  verse's second line is C · G · F · C, and the chorus turns around with
+  Am · G · F · C. Module 5's from-memory run asks for the four-chord loop
+  eight times, not an "8-chord loop with a turnaround" it never taught.
+- **Watchtower's "tension and release" tip was backwards** on the Journey
+  page and in Module 4 — play your tension over the F, and land on A when
+  the loop comes back to Am.
+- **Change Up stopped marking real chord changes wrong.** The previous
+  fix for held chords was too strict for changes like Am → C, where the
+  only new note is one open string. The new rule still catches a held
+  chord most of the time and passes a genuine change almost always.
+- **Riff Runner's "Sweet Child" round plucks every bar again** — one root
+  on beat 1 of each bar, two bars per chord, like the Journey page.
+- **Tap-dot counts under "You've got it when"** were wrong on nine cards
+  where the sentence names two numbers ("Line 3, four times through" showed
+  three dots). Every card now counts the number next to "times" / "in a row".
+- **Finishing a practice card no longer keeps its Song Journey page
+  unlocked forever** — once a later activity is what's blocking, that page
+  locks like the other five.
+- **Finger Gym's "Out of order" drill says when to lift finger 3**, so fret
+  2 actually sounds instead of fret 3 ringing on.
+- **"the cure" root-line activity**: the with-the-track finish line now asks
+  for the intro and both verses, which is what the record plays.
+- No more XP for a Pentatonic Simon, Guitar Hero or Note Hunt round that
+  cleared nothing.
+- Modules 1–2 and the Journey pages: a dozen small wording fixes — a false
+  line about the alphabet restarting at C, "sharp"/"flat" used before they
+  are taught, Luna's "highest note of the year" (the next note is higher),
+  three "E string" mentions that didn't say low E, "beats 1 and 3" on a 6/8
+  Luna card (it's the two big beats, counts 1 and 4), and Sweet Child's
+  power-chord shape descriptions.
+
 ## 2026-09-28 — Error sweep: four games, song instructions, and a navigation bug fixed
 
 ### Fixed

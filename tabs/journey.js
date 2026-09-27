@@ -610,6 +610,19 @@ function journeyIsVisible(a, cfg){
   var d = ((cfg && cfg.activityDates) || {})[a.id];
   return d ? d <= journeyDayStr(new Date()) : false;
 }
+/* True when activity b sits LATER on the console board than activity a
+   (a higher module, or the same module and a higher pos) — the same order
+   caBoardOrder() in app.js reads. An unseeded board, or either card
+   unplaced, reads as "not later": never lock on a guess. */
+function journeyBoardAfter(b, a, cfg){
+  if(!cfg || cfg.activityBoardSeeded !== true) return false;
+  var board = cfg.activityBoard || {};
+  var pb = board[b.id], pa = board[a.id];
+  if(!pb || !pa) return false;
+  var mb = Number(pb.module) || 0, ma = Number(pa.module) || 0;
+  if(mb !== ma) return mb > ma;
+  return (Number(pb.pos) || 0) > (Number(pa.pos) || 0);
+}
 function journeyBlockers(cfg, classActivities, uid, ownPeriod){
   var clears = ((cfg && cfg.activityClears) || {})[uid] || {};
   // CAS students: every activity is optional, so nothing blocks — mirrors
@@ -724,9 +737,15 @@ window.addEventListener('load', function(){
           // has clicked Level up. So a completed card naming this song stays
           // exempt too, or an unrelated pending activity elsewhere locks the
           // very page the student was just sent to for their extra practice.
+          // Only while that card is still the newest thing on the board,
+          // though: once a LATER activity is what blocks, the student is past
+          // the card and this page gates like the other five (2026-09-28 —
+          // the first cut had no end, so finishing ca-18 once opened "the
+          // cure" for good).
           (window.CLASS_ACTIVITIES || []).some(function(a){
             return a.view === 'card' && a.journey === SONG_ID &&
-              journeyIsVisible(a, cfg) && classActivities[a.id] === true;
+              journeyIsVisible(a, cfg) && classActivities[a.id] === true &&
+              !blockers.some(function(b){ return journeyBoardAfter(b, a, cfg); });
           });
         if(blockers.length && !sentHere) showJourneyGate();
       }).catch(function(){

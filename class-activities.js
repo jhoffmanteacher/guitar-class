@@ -452,7 +452,7 @@ window.CLASS_ACTIVITIES = [
       {
         label:    'The whole song',
         label_es: 'La canción completa',
-        text: 'All four lines, start to finish — the whole song on one string, no stopping in between. Then raise the tempo.<ul><li>Every clean pass: raise the BPM by 10</li><li>Fast already? Play it for the person next to you and have them sing along</li></ul>You\'ve got it when: the whole song back to back without stopping, and the tempo raised at least three times without stopping — then keep climbing.',
+        text: 'All four lines, start to finish — the whole song on one string, no stopping in between. Then raise the tempo.<ul><li>Every clean pass: raise the BPM by 10</li><li>Fast already? Play it for the person next to you and have them sing along</li></ul>You\'ve got it when: the whole song start to finish without stopping, and the tempo raised at least three times without stopping — then keep climbing.',
         text_es: 'Las cuatro líneas, de principio a fin — la canción completa en una sola cuerda, sin detenerte entre medio. Después sube el tempo.<ul><li>Cada pasada limpia: sube el BPM 10 puntos</li><li>¿Ya vas rápido? Tócala para la persona de al lado y que cante contigo</li></ul>Lo tienes cuando: las cuatro líneas, una tras otra sin detenerte, y el tempo subido al menos tres veces sin detenerte — y de ahí, sigue subiendo.',
         tab: {
           // Off the site-wide paging default: the directions say "no stopping
@@ -841,8 +841,8 @@ window.CLASS_ACTIVITIES = [
       {
         label:    'Out of order',
         label_es: 'Fuera de orden',
-        text: 'Out of order: 1-3-2-4.<ul><li>Fingers keep landing and staying, but not in a line</li><li>Finger 2 has to land between two fingers that are already down</li></ul>You\'ve got it when: four times through without stopping.',
-        text_es: 'Fuera de orden: 1-3-2-4.<ul><li>Los dedos siguen cayendo y quedándose, pero no en fila</li><li>El dedo 2 tiene que caer entre dos dedos que ya están abajo</li></ul>Lo tienes cuando: cuatro veces seguidas sin detenerte.',
+        text: 'Out of order: 1-3-2-4.<ul><li>Fingers land in this order, but not in a line</li><li>Finger 2 lands between finger 1 (still down) and fret 3 — lift finger 3 as finger 2 lands, or fret 3 keeps sounding</li></ul>You\'ve got it when: four times through without stopping.',
+        text_es: 'Fuera de orden: 1-3-2-4.<ul><li>Los dedos caen en este orden, pero no en fila</li><li>El dedo 2 cae entre el dedo 1 (que sigue abajo) y el traste 3 — levanta el dedo 3 justo cuando cae el dedo 2, o el traste 3 sigue sonando</li></ul>Lo tienes cuando: cuatro veces seguidas sin detenerte.',
         tab: {
           caption: 'Out of order · 1-3-2-4',
           caption_es: 'Fuera de orden · 1-3-2-4',
@@ -857,8 +857,8 @@ window.CLASS_ACTIVITIES = [
       {
         label:    'The circuit',
         label_es: 'El circuito',
-        text: 'The circuit:<ol><li>Play 1-3-2-4 on the low E string, then the A string, then the D string, fingers staying down the whole way. That\'s one set.</li><li>Start the Metro tool at 50 BPM. Every clean set, raise it by 10 BPM.</li></ol>You\'ve got it when: two full sets in a row are clean, the second one 10 BPM faster than the first.',
-        text_es: 'El circuito:<ol><li>Toca 1-3-2-4 en la cuerda Mi grave, después en la cuerda La, después en la cuerda Re, con los dedos abajo todo el tiempo. Esa es una serie.</li><li>Arranca la herramienta Metro a 50 BPM. Cada serie limpia, súbela 10 BPM.</li></ol>Lo tienes cuando: dos series completas seguidas y limpias, la segunda 10 BPM más rápida que la primera.',
+        text: 'The circuit:<ol><li>Play 1-3-2-4 on the low E string, then the A string, then the D string, fingers below the sounding fret staying down. That\'s one set.</li><li>Start the Metro tool at 50 BPM. Every clean set, raise it by 10 BPM.</li></ol>You\'ve got it when: two full sets in a row are clean, the second one 10 BPM faster than the first.',
+        text_es: 'El circuito:<ol><li>Toca 1-3-2-4 en la cuerda Mi grave, después en la cuerda La, después en la cuerda Re, con los dedos por debajo del traste que suena abajo. Esa es una serie.</li><li>Arranca la herramienta Metro a 50 BPM. Cada serie limpia, súbela 10 BPM.</li></ol>Lo tienes cuando: dos series completas seguidas y limpias, la segunda 10 BPM más rápida que la primera.',
       },
     ],
   },
@@ -1504,8 +1504,8 @@ window.CLASS_ACTIVITIES = [
      the player, out of order in time. ca-17 is untouched. */
   {
     id:    'ca-22',
-    title:    'A String Notes – Cards and Play-Along',
-    title_es: 'Notas de la cuerda La – Cartas y tocar a la par',
+    title:    'A String Notes — Cards and Play-Along',
+    title_es: 'Notas de la cuerda La — Cartas y tocar a la par',
     intro:    'You already named every natural note on the A string (a natural note has no ♯). Today you practice them until you know each one without looking: a short review, a deck of note cards, then playing along with the tab.',
     intro_es: 'Ya nombraste todas las notas naturales de la cuerda La (una nota natural no lleva ♯). Hoy las practicas hasta saber cada una sin mirar: un repaso corto, una baraja de cartas de notas y después tocas a la par de la tablatura.',
     steps: [
@@ -1651,8 +1651,8 @@ window.CLASS_ACTIVITIES = [
       {
         label:    'Tune it back',
         label_es: 'Vuelve a afinar',
-        text: 'Loosen the low E string only, about half a turn, then bring it back up to pitch. Just the one string — nobody is in the room to help if all six strings go out of tune at once.<ol><li>Clip the tuner on. Start a timer at 1:00</li><li>Pluck the low E string, loosen the peg a little, pluck again</li><li>Once it sounds lower, tune it back up. Went too high? Loosen it below the note and come back up — never keep tightening past it</li></ol>You\'ve got it when: the tuner shows E in green, inside 1:00. Out of time? Reset and go again.',
-        text_es: 'Afloja solo la cuerda Mi grave, más o menos media vuelta, y después vuelve a subirla a su nota. Solo esa cuerda — no hay nadie en el salón para ayudarte si las seis cuerdas se desafinan a la vez.<ol><li>Pon el afinador de pinza. Arranca un temporizador en 1:00</li><li>Pulsa la cuerda Mi grave, afloja la clavija un poco, pulsa otra vez</li><li>Cuando suene más grave, vuelve a subirla. ¿Se pasó de aguda al subir? Afloja por debajo de la nota y sube de nuevo hasta ella — nunca sigas apretando de más</li></ol>Lo tienes cuando: el afinador marca E en verde, dentro de 1:00. ¿Se acabó el tiempo? Reinicia y hazlo otra vez.',
+        text: 'Loosen the low E string only, about half a turn, then bring it back up to pitch. Just the one string.<ol><li>Clip the tuner on. Start a timer at 1:00</li><li>Pluck the low E string, loosen the peg a little, pluck again</li><li>Once it sounds lower, tune it back up. Went too high? Loosen it below the note and come back up — never keep tightening past it</li></ol>You\'ve got it when: the tuner shows E in green, inside 1:00. Out of time? Reset and go again.',
+        text_es: 'Afloja solo la cuerda Mi grave, más o menos media vuelta, y después vuelve a subirla a su nota. Solo esa cuerda.<ol><li>Pon el afinador de pinza. Arranca un temporizador en 1:00</li><li>Pulsa la cuerda Mi grave, afloja la clavija un poco, pulsa otra vez</li><li>Cuando suene más grave, vuelve a subirla. ¿Se pasó de aguda al subir? Afloja por debajo de la nota y sube de nuevo hasta ella — nunca sigas apretando de más</li></ol>Lo tienes cuando: el afinador marca E en verde, dentro de 1:00. ¿Se acabó el tiempo? Reinicia y hazlo otra vez.',
       },
       {
         label:    'Play it from memory',
@@ -1901,8 +1901,8 @@ window.CLASS_ACTIVITIES = [
       {
         label:    'Keep going',
         label_es: 'Sigue adelante',
-        text: 'Pick one:<ul><li>Two clean runs at 100 BPM in a row</li><li>Play along with the backing track on the Song Journey page, Layer 2</li></ul>You\'ve got it when: intro into verse twice without stopping, at 100 BPM or with the track.',
-        text_es: 'Escoge una:<ul><li>Dos vueltas limpias seguidas a 100 BPM</li><li>Toca con la pista de acompañamiento en la página de Recorrido de la canción, Capa 2</li></ul>Lo tienes cuando: de la intro a la estrofa dos veces sin detenerte, a 100 BPM o con la pista.',
+        text: 'Pick one:<ul><li>Two clean runs at 100 BPM in a row</li><li>Play along with the backing track on the Song Journey page, Layer 2</li></ul>You\'ve got it when: two clean runs at 100 BPM, or the intro and both verses with the track without stopping.',
+        text_es: 'Escoge una:<ul><li>Dos vueltas limpias seguidas a 100 BPM</li><li>Toca con la pista de acompañamiento en la página de Recorrido de la canción, Capa 2</li></ul>Lo tienes cuando: dos vueltas limpias a 100 BPM, o la intro y las dos estrofas con la pista sin detenerte.',
       },
     ],
   },
@@ -2028,7 +2028,7 @@ window.CLASS_ACTIVITIES = [
      now learned together on the loop tab (the one place Play tab still
      demonstrates how long each note rings — per-note buttons can't), the
      loop is practised to the metronome with the tab revealed after the
-     directions (revealDelay, same as ca-18), and the 70/80 BPM step is gone:
+     directions (revealDelay), and the 70/80 BPM step is gone:
      the band is the last rung. */
   {
     id:    'ca-20',
@@ -2101,7 +2101,7 @@ window.CLASS_ACTIVITIES = [
      the 6/8 felt-in-2 pulse. Built from Jonathan's Moises chord chart
      (2026-09-23), which agrees with the Journey page — F · Am vamp, Dm once in
      the opening lines. The passing D is left to Layer 3 (D5), where it already
-     lives; this card keeps the loop that carries the whole song. */
+     lives; ca-20 (above) keeps the loop that carries the whole song. */
   /* "the cure" bass roots across the two-string position, as one class day:
      intro and verse (already learned in ca-13/ca-19), then the chorus, then the
      song in order with the band.
@@ -2316,9 +2316,9 @@ window.CLASS_ACTIVITIES = [
      schema above. Every note here is lifted verbatim from ca-1's whole-song
      tab (line A `0 0 2 0 5 4`, B `0 0 2 0 7 5`, C `0 0 12 9 5 4 2`,
      D `10 10 9 5 7 5`), so the check can't drift away from the activity that
-     taught it. Items 1 and 3 deliberately play the SAME four notes and differ
-     only in which line they are: the question is whether the student knows
-     the song, not whether they can extend a pattern. */
+     taught it. Items 1 and 3 play the SAME four notes and differ only in
+     which line they are — flagged on the Summer reset list in CLAUDE.md;
+     `items` is positional and frozen now that students have taken it. */
   {
     id:    'ca-14',
     kind:  'check',
@@ -2463,8 +2463,8 @@ window.CLASS_ACTIVITIES = [
       {
         label:    'Practice — Line 3',
         label_es: 'Practica — Línea 3',
-        text: 'Line 3 goes up to fret 8. Play it one note per beat, then press Play to check. You\'ve got it when: Line 3 matches the tab. Then turn on the metronome at 60 BPM and play it with the click. Raise the metronome 10 BPM each time it stays clean.',
-        text_es: 'La Línea 3 sube hasta el traste 8. Tócala una nota por tiempo, y luego pulsa «Tocar el tab» para revisar. Lo tienes cuando: la Línea 3 coincide con la tablatura. Después enciende el metrónomo a 60 BPM y tócala con el clic. Sube el metrónomo 10 BPM cada vez que te salga limpia.',
+        text: 'Line 3 goes up to fret 8. Play it one note per beat, then press Play to check. You\'ve got it when: Line 3 matches the tab. Then start the Metro tool at 60 BPM and play it with the click. Raise it 10 BPM each time it stays clean.',
+        text_es: 'La Línea 3 sube hasta el traste 8. Tócala una nota por tiempo, y luego pulsa «Tocar el tab» para revisar. Lo tienes cuando: la Línea 3 coincide con la tablatura. Después arranca la herramienta Metro a 60 BPM y tócala con el clic. Súbela 10 BPM cada vez que te salga limpia.',
         tab: {
           hideNames: true,
           caption: 'Line 3 · low E and A strings · frets 5–8 · 2 bars, one note per beat',

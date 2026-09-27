@@ -220,9 +220,10 @@ var CHORD_DIAGRAMS = {
   'Dm7'   : { position:0, chord:[[6,'x',''],[5,'x',''],[4,0,0],[3,2,2],[2,1,1],[1,1,1]] },
   /* Bm / F#m / C#m: partial-barre (beginner) shapes. Only Bm is actually
      taught anywhere in the course today (Module 5's Group 3) — F#m/C#m
-     have shapes here but no lesson yet (checked every module file
-     2026-09-28, neither name appears), so nothing currently links to
-     them. Kept rather than deleted for whenever a lesson adds them; the
+     have shapes here but no lesson yet (2026-09-28: the names show up in
+     a Module 6 progression, a Module 7 Choice-song line and Module 10's
+     relative-minor list, but no step teaches the shape), so only the
+     CHORD_NAMES auto-link ever reaches them. Kept rather than deleted for whenever a lesson adds them; the
      arcade games' former "barre" deck drilled all three against each
      other and was removed the same day for the same reason (see
      coach.js's CHORD_RANK). Module 7 (barre chords) skips these auto-link

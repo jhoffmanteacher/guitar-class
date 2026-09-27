@@ -6682,8 +6682,16 @@ const GOT_IT_RE = /(You&#39;ve got it when:|You've got it when:|You’ve got it 
    it. "9 of 10" is a drill score, not a rep count, and is excluded first.
    Whatever it can't confidently parse renders with no dots, same as today. */
 const REP_NUM_WORDS = { two:2, three:3, four:4, five:5, dos:2, tres:3, cuatro:4, cinco:5 };
-const REP_COUNT_RE = new RegExp(
-  `\\b(\\d|${Object.keys(REP_NUM_WORDS).join('|')})\\b[^.]{0,25}?\\b(times|in a row|back to back|clean (?:reps|loops)|veces|seguidas|seguidos|seguido)\\b`, 'i');
+const REP_KEY_RE = /\b(times|in a row|back to back|clean (?:reps|loops)|veces|seguidas|seguidos|seguido)\b/i;
+const REP_NUM_RE = new RegExp(`\\b(\\d|${Object.keys(REP_NUM_WORDS).join('|')})\\b`, 'gi');
+/* The count is the LAST small number before the first rep keyword, within
+   25 characters and the same sentence — not the first number in the
+   sentence. Until 2026-09-28 the regex took the first number that had a
+   keyword anywhere in the next 25 characters, so "Line 3, four times
+   through" showed 3 dots, "the five pentatonic notes, two times each" showed
+   5, and "no buzz on any of the four, three times in a row" showed 4 — nine
+   cards, all wrong the same way in both languages, which is why 1bg's
+   parity check never saw them. */
 function repCountFromGotIt(bodyHtml){
   const txt = bodyHtml.replace(/<[^>]+>/g, ' ');
   if(/\b\d+\s*(?:of|de)\s*\d+\b/i.test(txt)) return 0;
@@ -6691,9 +6699,14 @@ function repCountFromGotIt(bodyHtml){
   // anchor on — unlike "three times", saying "times" after it would read
   // oddly, so it needs its own check rather than joining REP_NUM_WORDS.
   if(/\btwice\b/i.test(txt)) return 2;
-  const m = REP_COUNT_RE.exec(txt);
-  if(!m) return 0;
-  const raw = m[1].toLowerCase();
+  const k = REP_KEY_RE.exec(txt);
+  if(!k) return 0;
+  let last = null;
+  for(const m of txt.slice(0, k.index).matchAll(REP_NUM_RE)) last = m;
+  if(!last) return 0;
+  const gap = txt.slice(last.index + last[0].length, k.index);
+  if(gap.length > 25 || gap.includes('.')) return 0;
+  const raw = last[1].toLowerCase();
   const n = /^\d+$/.test(raw) ? Number(raw) : REP_NUM_WORDS[raw];
   return (n >= 2 && n <= 5) ? n : 0;
 }
