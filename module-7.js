@@ -133,7 +133,6 @@ SETS.push(
             levelUp: 'Play it at 90 BPM, or add the closing phrase that answers the riff and completes the full version: 3/5 — 6/8 — 8/10, then 6/8 — 3/5.',
             levelUp_es: 'Tócalo a 90 BPM, o agrega la frase de cierre que responde al riff y completa la versión completa: 3/5 — 6/8 — 8/10, y luego 6/8 — 3/5.',
             skills: [1, 4, 5],
-            response: { type: 'short', prompt: 'Personal record — play it cleanly at 70 BPM, then go +10 at a time. Your fastest CLEAN "Smoke" lap (one full time through the riff) today (BPM)?', prompt_es: 'Récord personal — tócalo limpio a 70 BPM, y luego sube de 10 en 10. ¿Tu vuelta LIMPIA más rápida de "Smoke" (una vuelta = un recorrido completo del riff) hoy (BPM)?', placeholder: 'e.g. 100 — try for a higher number next time', placeholder_es: 'p. ej. 100 — intenta superarlo la próxima vez' },
             tab: {
               caption: '"Smoke on the Water" — main riff · low E + A strings together',
               caption_es: '"Smoke on the Water" — riff principal · cuerdas Mi grave + La juntas',
@@ -244,7 +243,6 @@ SETS.push(
                 levelUp: 'Run the whole lick as one smooth phrase in a single breath, or move it up to the B string and read the new frets.',
                 levelUp_es: 'Toca todo el lick como una sola frase fluida de un solo aliento, o muévelo a la cuerda Si y lee los nuevos trastes.',
                 skills: [3],
-                response: { type: 'short', prompt: 'Which one is quietest: hammer, pull, or slide?', prompt_es: '¿Cuál es más silencioso: el hammer-on, el pull-off o el deslizamiento?', placeholder: 'e.g. the pull-off — my note comes out too quiet', placeholder_es: 'p. ej. el pull-off — mi nota sale demasiado suave' },
                 tab: {
                   noCoach: true,   // 2 picks + 3 slurred notes — a mic check expecting 5 picked onsets would fail correct technique
                   caption: '2-bar articulation lick · G string · h = hammer-on, p = pull-off, / = slide up',
@@ -498,8 +496,8 @@ SETS.push(
             steps: [
               {
                 label: 'Challenge 4 — One-Minute Barre Changes (F ↔ G)', label_es: 'Reto 4 — Cambios de cejilla en un minuto (F ↔ G)',
-                text: '<ol><li>Set the ⏱ Timer for 60 seconds.</li><li>Slide your E-shape barre between F (fret 1) and G (fret 3) as many times as you can — only changes where all 6 strings ring count.</li></ol>You\'ve got it when: type your count below and try for a higher number next time. (6 to 8 clean changes is a good first count.)',
-                text_es: '<ol><li>Pon el ⏱ Temporizador en 60 segundos.</li><li>Desliza tu cejilla en forma de E entre F (traste 1) y G (traste 3) tantas veces como puedas — solo cuentan los cambios donde suenan las 6 cuerdas.</li></ol>Lo tienes cuando: escribe tu cuenta abajo e intenta superarla la próxima vez. (6 a 8 cambios limpios es un buen primer número.)',
+                text: '<ol><li>Set the ⏱ Timer for 60 seconds.</li><li>Slide your E-shape barre between F (fret 1) and G (fret 3) as many times as you can — only changes where all 6 strings ring count.</li></ol>You\'ve got it when: 6 to 8 clean changes in 60 seconds — beat that number next time.',
+                text_es: '<ol><li>Pon el ⏱ Temporizador en 60 segundos.</li><li>Desliza tu cejilla en forma de E entre F (traste 1) y G (traste 3) tantas veces como puedas — solo cuentan los cambios donde suenan las 6 cuerdas.</li></ol>Lo tienes cuando: 6 a 8 cambios limpios en 60 segundos — supera esa cifra la próxima vez.',
                 hint: 'It\'s the same shape sliding two frets — keep the bar pressed and glide, don\'t lift and re-place. Only count changes where all 6 strings ring.',
                 hint_es: 'Es la misma forma deslizándose dos trastes — mantén la cejilla presionada y deslízala, no la levantes y la vuelvas a colocar. Cuenta solo los cambios donde suenan las 6 cuerdas.',
                 stuck: 'Keep the bar lightly down the whole time so you never fully reset the shape — just shift two frets. Slow down until both chords ring.',
@@ -507,7 +505,6 @@ SETS.push(
                 levelUp: 'Add A (fret 5) and cycle F→G→A, or run it with a down-up strum.',
                 levelUp_es: 'Agrega A (traste 5) y cicla F→G→A, o tócalo con un rasgueo abajo-arriba.',
                 skills: [4, 6],
-                response: { type: 'short', prompt: 'Personal record — clean F↔G barre changes in 60 seconds. Your count today?', prompt_es: 'Récord personal — cambios de cejilla F↔G limpios en 60 segundos. ¿Tu cuenta de hoy?', placeholder: 'e.g. 8 — try for a higher number next time', placeholder_es: 'p. ej. 8 — intenta superarlo la próxima vez' }
               }
             ]
           },
@@ -783,7 +780,6 @@ SETS.push(
             levelUp: 'Run it with the D-DU-UDU strum, or push to 75 BPM.',
             levelUp_es: 'Tócalo con el rasgueo D-DU-UDU, o sube a 75 BPM.',
             skills: [5, 6],
-            response: { type: 'short', prompt: 'Personal record — play the F–C–G–D switch cleanly at 60 BPM, then go +5 at a time. Your fastest CLEAN loop today (BPM)?', prompt_es: 'Récord personal — toca el cambio F–C–G–D limpio a 60 BPM, y luego sube de 5 en 5. ¿Tu vuelta LIMPIA más rápida hoy (BPM)?', placeholder: 'e.g. 70 — try for a higher number next time', placeholder_es: 'p. ej. 70 — intenta superarlo la próxima vez' },
             chords: [
               { name: 'F', chord: [[6,1,'1'],[5,3,'3'],[4,3,'4'],[3,2,'2'],[2,1,'1'],[1,1,'1']], position: 0 },
               { name: 'C', chord: [[6,'x'],[5,3,'1'],[4,5,'2'],[3,5,'3'],[2,5,'4'],[1,3,'1']], position: 3 },
@@ -845,7 +841,6 @@ SETS.push(
                 chords: [
                   { name: 'Am (E-shape)', name_es: 'Am (forma de E)', chord: [[6,5,'1'],[5,7,'3'],[4,7,'4'],[3,5,'1'],[2,5,'1'],[1,5,'1']], position: 5 }
                 ],
-                response: { type: 'short', prompt: 'Personal record — clean all-barre "Watchtower" laps in a row. Your count today?', prompt_es: 'Récord personal — vueltas seguidas de "Watchtower" solo con cejillas y limpias. ¿Tu cuenta de hoy?', placeholder: 'e.g. 2 — the F still buzzes', placeholder_es: 'p. ej. 2 — el F todavía zumba' }
               },
               {
                 label: 'Challenge — "Luna", full barre F', label_es: 'Reto — "Luna", cejilla completa de F',

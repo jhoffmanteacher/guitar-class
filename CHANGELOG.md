@@ -5,6 +5,20 @@ Notable changes to the Guitar Class site. Newest first.
 For the full session-by-session history (and the reasoning behind each change),
 see `WORKFLOW.md` and the git commit log.
 
+## 2026-09-27 — Fewer typed boxes, clearer targets in Modules 7–9
+
+### Changed
+
+- **Seven Challenge cards in Modules 7–8** no longer ask you to type your BPM
+  or lap count — the card already tells you the target ("You've got it
+  when..."), so play it and check yourself instead of filling in a box.
+  One of these ("One-Minute Barre Changes") had accidentally told you to
+  "type your count below" as the actual pass mark — it now states the real
+  target: 6 to 8 clean changes in 60 seconds.
+- **Module 9's six "Welcome back" re-tests** now use a Solid / Shaky / Gone
+  button instead of a typed box, matching what the card already asks you to
+  do.
+
 ## 2026-09-27 — Plainer wording across Modules 2, 4–12
 
 ### Changed

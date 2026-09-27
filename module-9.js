@@ -42,8 +42,7 @@ SETS.push(
                 hint: 'If one change drags, name it — that exact change is your first One-Minute Changes drill (a drill is a short exercise you repeat to build a skill).',
                 hint_es: 'Si un cambio se atrasa, identifícalo — ese cambio exacto es tu primer ejercicio de Cambios de Un Minuto (un ejercicio es una actividad corta que repites para desarrollar una destreza).',
                 skills: [1],
-                response: { type: 'short', placeholder: 'Solid / shaky / gone — which change gives you trouble?',
-                  placeholder_es: 'Sólida / insegura / perdida — ¿cuál cambio te cuesta trabajo?' }
+                response: { type: 'mc', choices: ['Solid', 'Shaky', 'Gone'], choices_es: ['Sólida', 'Insegura', 'Perdida'] }
               },
               {
                 label: 'Re-test 2: strumming', label_es: 'Repaso 2: rasgueo',
@@ -52,8 +51,7 @@ SETS.push(
                 hint: 'Watch your strum hand, not your fret hand — the pattern should not care which chord is underneath.',
                 hint_es: 'Observa tu mano de rasgueo, no tu mano de trastear — al patrón no le debería importar cuál acorde hay debajo.',
                 skills: [2],
-                response: { type: 'short', placeholder: 'Solid / shaky / gone — does the pattern break at the change?',
-                  placeholder_es: 'Sólida / insegura / perdida — ¿el patrón se rompe en el cambio?' }
+                response: { type: 'mc', choices: ['Solid', 'Shaky', 'Gone'], choices_es: ['Sólida', 'Insegura', 'Perdida'] }
               },
               {
                 label: 'Re-test 3: pentatonic Pattern 1', label_es: 'Repaso 3: Patrón pentatónico 1',
@@ -62,8 +60,7 @@ SETS.push(
                 hint: 'Hesitations count as "shaky" — you should know the pattern by feel, not by reading it.',
                 hint_es: 'Las dudas cuentan como "insegura" — deberías saber el patrón por sensación, no por leerlo.',
                 skills: [3],
-                response: { type: 'short', placeholder: 'Solid / shaky / gone — where do you hesitate?',
-                  placeholder_es: 'Sólida / insegura / perdida — ¿dónde dudas?' }
+                response: { type: 'mc', choices: ['Solid', 'Shaky', 'Gone'], choices_es: ['Sólida', 'Insegura', 'Perdida'] }
               },
               {
                 label: 'Re-test 4: power chords', label_es: 'Repaso 4: acordes de potencia',
@@ -72,8 +69,7 @@ SETS.push(
                 hint: 'Frets 0 → 3 → 5 on the low E root. If you\'re counting frets to find G5, that\'s a "shaky."',
                 hint_es: 'Trastes 0 → 3 → 5 con raíz en la Mi grave. Si estás contando trastes para encontrar G5, eso es "insegura."',
                 skills: [4],
-                response: { type: 'short', placeholder: 'Solid / shaky / gone — can you still name them quickly while playing?',
-                  placeholder_es: 'Sólida / insegura / perdida — ¿todavía puedes nombrarlos rápido mientras tocas?' }
+                response: { type: 'mc', choices: ['Solid', 'Shaky', 'Gone'], choices_es: ['Sólida', 'Insegura', 'Perdida'] }
               },
               {
                 label: 'Re-test 5: TAB at first sight', label_es: 'Repaso 5: TAB a primera vista',
@@ -82,8 +78,7 @@ SETS.push(
                 hint: 'It must be TAB you haven\'t drilled — reading from memory isn\'t reading.',
                 hint_es: 'Debe ser TAB que no hayas practicado — leer de memoria no es leer.',
                 skills: [5],
-                response: { type: 'short', placeholder: 'Solid / shaky / gone — what did you read, and how did it go?',
-                  placeholder_es: 'Sólida / insegura / perdida — ¿qué leíste, y cómo te fue?' }
+                response: { type: 'mc', choices: ['Solid', 'Shaky', 'Gone'], choices_es: ['Sólida', 'Insegura', 'Perdida'] }
               },
               {
                 label: 'Re-test 6: fingerpicking', label_es: 'Repaso 6: fingerpicking',
@@ -92,8 +87,7 @@ SETS.push(
                 hint: 'The fingers keep their strings for the whole test — only the thumb travels.',
                 hint_es: 'Los dedos mantienen sus cuerdas durante toda la prueba — solo el pulgar viaja.',
                 skills: [6],
-                response: { type: 'short', placeholder: 'Solid / shaky / gone — did the thumb switch make you mess up?',
-                  placeholder_es: 'Sólida / insegura / perdida — ¿el cambio del pulgar te hizo equivocarte?' }
+                response: { type: 'mc', choices: ['Solid', 'Shaky', 'Gone'], choices_es: ['Sólida', 'Insegura', 'Perdida'] }
               }
             ]
           },
