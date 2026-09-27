@@ -5,6 +5,15 @@ Notable changes to the Guitar Class site. Newest first.
 For the full session-by-session history (and the reasoning behind each change),
 see `WORKFLOW.md` and the git commit log.
 
+## 2026-09-27 — Sweet Child gets the 🎸 Record plays it button
+
+### Added
+
+- **Sweet Child O' Mine now has the full recording with the guitar in**, at
+  both speeds. The Song Journey play-along and any Sweet Child loop show the
+  🎸 Record plays it / You play it button: hear the record play the part,
+  then turn it off and play it yourself.
+
 ## 2026-09-27 — Sweet Child and Watchtower ready for in-class loops
 
 ### Added

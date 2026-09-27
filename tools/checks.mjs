@@ -5521,7 +5521,7 @@ function checkFourStepsAndPaging() {
    song). Pinned: the number of pages with the toggle, so one cannot drop
    off without this saying so.
    ════════════════════════════════════════════════════════════════════ */
-const JOURNEY_GUITAR_PAGES = 4;   // seven-nation-army, the-cure, luna, all-along-the-watchtower
+const JOURNEY_GUITAR_PAGES = 5;   // seven-nation-army, the-cure, luna, all-along-the-watchtower, sweet-child-o-mine
 function checkJourneyGuitarToggle() {
   head('1be. Song Journey Guitar toggle');
   let bad = 0, withToggle = 0;

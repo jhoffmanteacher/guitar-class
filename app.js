@@ -1785,14 +1785,23 @@ const SNIPPET_TRACKS = {
      and checked for a consistent phase through the whole song. */
 
   /* Sweet Child O' Mine counts at record speed, 4 to the bar; bar 1 is the
-     first click, the top of the intro riff over D. No full mix yet, so the
-     card has no Guitar toggle until full + full-metronome are exported at
-     125 and 100 from the same Moises project. */
+     first click, the top of the intro riff over D.
+     Full mixes added 2026-09-27 from a newer Moises export: sample-aligned
+     with the rhythm-down files (0.0 ms at 125, -0.9 ms at 100; 445.65 s
+     against 445.57 s at 100, inside 1ak's 0.25 s). Their click is about
+     1.7x louder than the rhythm-down-metronome files' click, and the 100
+     rhythm-down mix is quieter overall (an older 192k export), so pressing
+     the Guitar toggle with Metronome on changes the volume. The fix is
+     re-exporting the rhythm-down pair from this same set, as Luna's was. */
   'sweet-child-o-mine': {
     src:              'audio/guns-n-roses-sweet-child-o-mine-backing-G-125bpm-440hz-rhythm-down.mp3',
     srcMetronome:     'audio/guns-n-roses-sweet-child-o-mine-backing-G-125bpm-440hz-rhythm-down-metronome.mp3',
     srcSlow:          'audio/guns-n-roses-sweet-child-o-mine-backing-G-100bpm-440hz-rhythm-down.mp3',
     srcSlowMetronome: 'audio/guns-n-roses-sweet-child-o-mine-backing-G-100bpm-440hz-rhythm-down-metronome.mp3',
+    srcFull:              'audio/guns-n-roses-sweet-child-o-mine-backing-G-125bpm-440hz-full.mp3',
+    srcFullSlow:          'audio/guns-n-roses-sweet-child-o-mine-backing-G-100bpm-440hz-full.mp3',
+    srcFullMetronome:     'audio/guns-n-roses-sweet-child-o-mine-backing-G-125bpm-440hz-full-metronome.mp3',
+    srcFullSlowMetronome: 'audio/guns-n-roses-sweet-child-o-mine-backing-G-100bpm-440hz-full-metronome.mp3',
     trackBpm: 125, trackBpmSlow: 100,
     feltBpm: 125,                       // counted at record speed
     beatsPerBar: 4,

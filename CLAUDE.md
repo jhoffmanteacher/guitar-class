@@ -767,9 +767,8 @@ broken, not as a choice. The original objection was really about doing it
 SILENTLY — releasing the other toggle where the student watches it pop out
 is just how a pair of mutually exclusive controls behaves.
 
-**Four of the five snippet tracks have their full mix** — Seven Nation Army,
-"the cure", Luna and the Hendrix Watchtower; Sweet Child's `full` pair is not
-exported yet, so its cards show no Guitar toggle and 1ak warns. A new
+**All five snippet tracks have their full mix** — Seven Nation Army,
+"the cure", Luna, the Hendrix Watchtower and (2026-09-27) Sweet Child. A new
 snippet song needs two files, at both tempos, mix `full`, and a `srcFull`/
 `srcFullSlow` pair in its `SNIPPET_TRACKS` entry; 1ak warns the count of
 tracks still without one.
@@ -1512,9 +1511,9 @@ kebab-case; the artist stays out of the app's display metadata.
 2026-09-18 — `full` and `full-metronome`, for the three snippet songs and
 (since 2026-09-27) Watchtower** (the old list here also
 named `no-gtr`, `drums-only` and `slow-<bpm>` as "in use", and none of those
-has ever existed in `audio/`). That is 38 files: six songs, some at two
-tempos, plus four mixes each for Seven Nation Army, "the cure", Luna and
-Watchtower. A snippet song wants all four: `full` alone gives the Guitar toggle,
+has ever existed in `audio/`). That is 42 files: six songs, some at two
+tempos, plus four mixes each for Seven Nation Army, "the cure", Luna,
+Watchtower and Sweet Child. A snippet song wants all four: `full` alone gives the Guitar toggle,
 and `full-metronome` is what stops it fighting the Metronome toggle. Every slow tier is the same master time-stretched, so its grid is
 the fast one's scaled by the tempo ratio — checked on two songs to three
 decimal places. The other four names stay reserved for when something is
