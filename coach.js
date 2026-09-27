@@ -3873,7 +3873,7 @@ async function psgStart(){
   window.coachMicLive = true;      // stream may already be open from a prior owner
   psg = { phase: 'play', timeouts: [], seq: [], round: 0, inputIdx: 0, showing: true,
           readings: [], attackT: 0, lastPitchT: 0, needSilence: true, armAt: 0,
-          heard: '', missPad: -1, prevBest: 0 };
+          heard: '', missPad: -1, heardOctaveOff: '', prevBest: 0 };
   psgBody().innerHTML =
     `<div class="cb-hud"><span class="cb-score" id="psg-round">${t('games.ps.round', { n: 0 })}</span></div>
      <div class="psg-dots" id="psg-dots"></div>
@@ -3998,6 +3998,12 @@ function psgJudge(midi){
   const octOk = PS_NOTES.indexOf(oct) < 0 && midi === oct;
   if (midi !== PS_NOTES[padIdx] && !octOk){
     s.heard = coachNoteName(midi);
+    // Pad 0 is the one pad where the octave-up harmonic is deliberately NOT
+    // forgiven (see above) — so this is the one place that miss can still
+    // happen, and "I heard A, the next note was A" (coachNoteName drops the
+    // octave) reads as nonsense. Flag it (and which way) so the done screen
+    // can say what actually happened instead of repeating the same letter.
+    s.heardOctaveOff = (midi - PS_NOTES[padIdx]) % 12 === 0 ? (midi > PS_NOTES[padIdx] ? 'high' : 'low') : '';
     s.missPad = padIdx;
     psgMark(padIdx, 'bad');
     psgFinish();
@@ -4061,7 +4067,9 @@ function psgRenderDone(){
   let missLine = '';
   if (s.missPad >= 0){
     const p = PSG_POS[s.missPad];
-    missLine = `<div class="coach-note">${escHtml(t('games.psg.wrongNote', {
+    const key = s.heardOctaveOff === 'high' ? 'games.psg.wrongOctaveHigh'
+      : s.heardOctaveOff === 'low' ? 'games.psg.wrongOctaveLow' : 'games.psg.wrongNote';
+    missLine = `<div class="coach-note">${escHtml(t(key, {
       heard: s.heard,
       want: coachNoteName(PS_NOTES[s.missPad]),
       string: fretStringName(p.string),
