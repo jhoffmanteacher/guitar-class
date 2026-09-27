@@ -861,7 +861,7 @@ function checkMcAnswerOnCard(allSets) {
    ════════════════════════════════════════════════════════════════════ */
 function checkNumberedStrings() {
   head('1j. Numbered strings in student-facing text');
-  const RE = /\b(?:string|strings|cuerda|cuerdas) [0-6]\b/gi;
+  const RE = /\b(?:string|strings|cuerda|cuerdas) [0-6]\b|\b[0-6](?:st|nd|rd|th)\s+strings?\b|\b[0-6]\.[ºª]\s+cuerdas?\b/gi;
   let bad = 0, anchored = 0;
   for (const file of [...MODULE_FILES, 'class-activities.js', 'i18n.js']) {
     const lines = readFileSync(join(ROOT, file), 'utf8').split('\n');
@@ -870,6 +870,7 @@ function checkNumberedStrings() {
         const after = line.slice(m.index + m[0].length);
         const before = line.slice(Math.max(0, m.index - 12), m.index);
         if (/^ \((?:the|la|el) /.test(after)) { anchored++; continue; }   // "string 6 (the low E)" teaching anchor
+        if (/\($/.test(before) && /^\)/.test(after)) { anchored++; continue; }   // "Low E (6th string)" — same anchor, reversed order
         if (/(?:\b[ADGBEadgbe]|aguda|grave)\s$/.test(before)) continue;   // "the A string 4 times" — named string + a count, not a numbered string
         err(`${file}:${li + 1}: numbered string in student-facing text — "${line.slice(Math.max(0, m.index - 20), m.index + m[0].length + 20).trim()}" (use the string's name)`);
         problems++; bad++;

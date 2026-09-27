@@ -2515,12 +2515,12 @@ function ccLoop(){
     const cur = Math.floor((now - cc.listenStart - cc.gridOffset) / cc.beatMs);
     if (cur !== cc.lastBeat && cur >= 0){ cc.lastBeat = cur; ccBeatTick(cur); }
 
-    if (now > cc.listenStart + (cc.slots * cc.bpc + 1) * cc.beatMs){ ccFinish(); return; }
+    if (now > cc.listenStart + (cc.slots * cc.bpc + 1) * cc.beatMs){ ccFinish(true); return; }
   }
   ccRaf = requestAnimationFrame(ccLoop);
 }
 
-function ccFinish(){
+function ccFinish(complete){
   if (!cc || (cc.phase !== 'play' && cc.phase !== 'countin')) return;
   cc.timeouts.forEach(clearTimeout);
   cc.timeouts = [];
@@ -2537,7 +2537,9 @@ function ccFinish(){
   // high BPM would otherwise re-collect the +5 bonus on every attempt.
   const ccOk = cc.changes.filter(c => c.result === 'ok').length;
   cc.isNewBest = cc.changes.length > 0 && ccOk / cc.changes.length >= 0.85 && cc.bpm > oldBest;
-  awardArcadeXp(cc.isNewBest);
+  // XP is participation credit for an actual round — an immediate Start →
+  // Stop is not one.
+  if (complete) awardArcadeXp(cc.isNewBest);
   ccRenderDone();
 }
 
@@ -4700,12 +4702,12 @@ function shLoop(){
       document.querySelectorAll('#sh-beats .cc-pip').forEach((el, i) => el.classList.toggle('on', i === beat % 4));
     }
 
-    if (now > s.t0 + SH_BARS * 4 * s.spb + 0.4){ shFinish(); return; }
+    if (now > s.t0 + SH_BARS * 4 * s.spb + 0.4){ shFinish(true); return; }
   }
   shRaf = requestAnimationFrame(shLoop);
 }
 
-function shFinish(){
+function shFinish(complete){
   if (!sh || (sh.phase !== 'play' && sh.phase !== 'countin')) return;
   const s = sh;
   if (s.sched){ clearInterval(s.sched); s.sched = null; }
@@ -4729,7 +4731,9 @@ function shFinish(){
     const old = (games.sh && games.sh[pat.id] && games.sh[pat.id].best) || 0;
     const isNewBest = s.score > old;
     if (isNewBest) games.sh = Object.assign({}, games.sh, { [pat.id]: { best: s.score, bpm: s.bpm, at: new Date().toISOString().slice(0, 10) } });
-    awardArcadeXp(isNewBest);
+    // XP is participation credit for an actual round — an immediate Start →
+    // Stop is not one.
+    if (complete) awardArcadeXp(isNewBest);
   }
   shRenderDone();
 }
@@ -4954,11 +4958,31 @@ function rrStreakAlive(g, min){
 
 function rrPool(){
   const m = (typeof lastModuleNum !== 'undefined' && lastModuleNum) || 1;
-  const pool = [];
+  const benched = rrBenchedRead();
+  const all = [], unbenched = [];
   RR_CARDS.forEach((c, i) => {
-    if (c.minModule <= m && (!c.maxModule || m <= c.maxModule)) pool.push(i);
+    if (!(c.minModule <= m && (!c.maxModule || m <= c.maxModule))) return;
+    all.push(i);
+    if (benched.indexOf(i) < 0) unbenched.push(i);
   });
-  return pool;
+  // Never let benching empty the pool — a student who benches every
+  // eligible card in one sitting still needs somewhere to draw from.
+  return unbenched.length ? unbenched : all;
+}
+
+/* "Not yet" cards for today — rrScore's 'not' branch benches them here so
+   they don't come back up in the same session, matching the card's own
+   promise ("try this card another day"). Day-scoped like rrDone/rrPts,
+   cleared in rrDayReset. */
+function rrBenchedRead(){
+  try {
+    const b = JSON.parse(sessionStorage.getItem('rrBenched'));
+    if (Array.isArray(b)) return b.filter(i => Number.isInteger(i) && RR_CARDS[i]);
+  } catch(e){}
+  return [];
+}
+function rrBenchedWrite(b){
+  try { sessionStorage.setItem('rrBenched', JSON.stringify(b)); } catch(e){}
 }
 
 function rrQueueRead(){
@@ -5012,6 +5036,7 @@ function rrDayReset(){
       sessionStorage.removeItem('rrSkips');
       sessionStorage.removeItem('rrQueue');
       sessionStorage.removeItem('rrLast');
+      sessionStorage.removeItem('rrBenched');
     } catch(e){}
   }
 }
@@ -5269,6 +5294,10 @@ function rrScore(kind){
     const q = rrQueueRead();
     q.push({ idx: s.cardIdx, due: 2 + Math.floor(Math.random() * 3) });
     rrQueueWrite(q);
+  } else if (kind === 'not'){
+    /* Benched for the rest of today, matching the card's own promise. */
+    const b = rrBenchedRead();
+    if (b.indexOf(s.cardIdx) < 0){ b.push(s.cardIdx); rrBenchedWrite(b); }
   }
   const total = rrNum('rrPts') + pts;
   const done = rrNum('rrDone') + 1;
@@ -5595,12 +5624,12 @@ function srLoop(){
     const cur = Math.floor((now - s.listenStart - s.gridOffset) / s.slotMs);
     if (cur !== s.lastSlot && cur >= 0){ s.lastSlot = cur; srSlotTick(cur); }
 
-    if (now > s.listenStart + (SR_BARS * 4 + 1) * s.beatMs){ srFinish(); return; }
+    if (now > s.listenStart + (SR_BARS * 4 + 1) * s.beatMs){ srFinish(true); return; }
   }
   srRaf = requestAnimationFrame(srLoop);
 }
 
-function srFinish(){
+function srFinish(complete){
   if (!sr || (sr.phase !== 'play' && sr.phase !== 'countin')) return;
   const s = sr;
   if (srRaf){ cancelAnimationFrame(srRaf); srRaf = null; }
@@ -5625,7 +5654,9 @@ function srFinish(){
     const old = (games.sr && games.sr[pat.id] && games.sr[pat.id].best) || 0;
     const isNewBest = s.acc > old;
     if (isNewBest) games.sr = Object.assign({}, games.sr, { [pat.id]: { best: s.acc, bpm: s.bpm, at: new Date().toISOString().slice(0, 10) } });
-    awardArcadeXp(isNewBest);
+    // XP is participation credit for an actual round — an immediate Start →
+    // Stop is not one.
+    if (complete) awardArcadeXp(isNewBest);
   }
   srRenderDone();
 }
@@ -6306,12 +6337,12 @@ function rnLoop(){
       document.querySelectorAll('#rn-beats .cc-pip').forEach((el, i) => el.classList.toggle('on', i === beat % s.bpb));
     }
 
-    if (now > s.t0 + s.totalBeats * s.spb + 0.4){ rnFinish(); return; }
+    if (now > s.t0 + s.totalBeats * s.spb + 0.4){ rnFinish(true); return; }
   }
   rnRaf = requestAnimationFrame(rnLoop);
 }
 
-function rnFinish(){
+function rnFinish(complete){
   if (!rn || (rn.phase !== 'play' && rn.phase !== 'countin')) return;
   const s = rn;
   if (s.sched){ clearInterval(s.sched); s.sched = null; }
@@ -6349,7 +6380,9 @@ function rnFinish(){
       games.rn.songs[song.id] = { acc: Math.max(g.acc, s.acc), tier: Math.max(g.tier, cleared) };
       games.rn.at = new Date().toISOString().slice(0, 10);
     }
-    awardArcadeXp(isNewBest);
+    // XP is participation credit for an actual round — an immediate Start →
+    // Stop is not one.
+    if (complete) awardArcadeXp(isNewBest);
   }
   rnRenderDone();
 }
@@ -6863,12 +6896,18 @@ function nrWeak(){
 function nrWeakKey(n){ return (n.chord ? 'c:' : '') + n.string + ':' + n.fret; }
 
 function nrStagePos(){
+  // games.nr.stage (Firestore-synced) is preferred over the sessionStorage
+  // cache: within one tab's session they're always written together (see
+  // nrFinish), so this loses nothing there, but a tab left open across
+  // days/devices would otherwise keep replaying its own stale cached
+  // position forever instead of picking up progress made elsewhere.
+  // sessionStorage is the fallback for when Firestore data isn't in yet
+  // (dev bypass, signed-out, or the very first paint of a fresh load).
+  if (typeof games !== 'undefined' && games && games.nr && typeof games.nr.stage === 'number'){
+    return Math.max(0, Math.min(NR_ADAPT_ORDER.length - 1, games.nr.stage));
+  }
   let p = -1;
   try { p = parseInt(sessionStorage.getItem('nrStagePos'), 10); } catch(e){}
-  if (!(p >= 0) && typeof games !== 'undefined' && games && games.nr &&
-      typeof games.nr.stage === 'number'){
-    p = games.nr.stage;
-  }
   return Math.max(0, Math.min(NR_ADAPT_ORDER.length - 1, p >= 0 ? p : 0));
 }
 function nrSetStagePos(p){
@@ -7763,7 +7802,9 @@ function nrFinish(complete){
     if (s.adaptive && games.nr.stage !== s.stagePos){ games.nr.stage = s.stagePos; dirty = true; }
     if (wkChanged){ games.nr.weak = wk; dirty = true; }
     if (dirty) games.nr.at = new Date().toISOString().slice(0, 10);
-    awardArcadeXp(isNewBest);
+    // XP is participation credit for an actual round — an immediate Start →
+    // Stop is not one, same reasoning as the weak-map skip just above.
+    if (complete) awardArcadeXp(isNewBest);
   }
   nrRenderDone(nPerfect, nGood, nPitch, total);
 }
@@ -8300,9 +8341,9 @@ function bcGridHtml(){
     /* Header circle matches the site's diagram notation: O above an OPEN
        string, × above a muted one, nothing above a fretted one — showing
        O over a placed finger would teach the wrong reading. */
-    const head = `<button type="button" class="bc-head${v === 'x' ? ' muted' : ''}" onclick="bcHead(${st})" aria-label="${t('games.bc.headLabel', { string: st })}">${v === 'x' ? '&times;' : (v === 0 ? 'O' : '&nbsp;')}</button>`;
+    const head = `<button type="button" class="bc-head${v === 'x' ? ' muted' : ''}" onclick="bcHead(${st})" aria-label="${t('games.bc.headLabel', { string: fretStringName(st) })}">${v === 'x' ? '&times;' : (v === 0 ? 'O' : '&nbsp;')}</button>`;
     const cells = [1, 2, 3, 4].map(f =>
-      `<button type="button" class="bc-cell${v === f ? ' on' : ''}" onclick="bcTap(${st},${f})" aria-label="${t('games.bc.cellLabel', { string: st, fret: f })}"${v === f ? ' aria-pressed="true"' : ''}></button>`
+      `<button type="button" class="bc-cell${v === f ? ' on' : ''}" onclick="bcTap(${st},${f})" aria-label="${t('games.bc.cellLabel', { string: fretStringName(st), fret: f })}"${v === f ? ' aria-pressed="true"' : ''}></button>`
     ).join('');
     return `<div class="bc-col" id="bc-col-${st}">${head}${cells}</div>`;
   }).join('');
