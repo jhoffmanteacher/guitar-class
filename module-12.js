@@ -223,8 +223,8 @@ SETS.push(
             steps: [
               {
                 label: 'Challenge — "House of the Rising Sun", bass + roll in 6/8', label_es: 'Reto — "House of the Rising Sun", bajo + floreo en 6/8',
-                text: '<ul><li>Play the verse with a bass note on the downbeat (the first, strongest beat of the bar).</li><li>Roll your fingers up through each chord, following the progression.</li></ul>You\'ve got it when: the verse survives every chord change with the roll staying smooth.',
-                text_es: '<ul><li>Toca la estrofa con una nota grave en el tiempo fuerte (el primer tiempo, el más fuerte del compás).</li><li>Haz un floreo ascendente con tus dedos a través de cada acorde, siguiendo la progresión.</li></ul>Lo tienes cuando: la estrofa sobrevive cada cambio de acorde con el floreo manteniéndose suave.',
+                text: '<ul><li>Play the verse with a bass note on the downbeat (the first, strongest beat of the bar).</li><li>Roll your fingers up through each chord, following the progression.</li></ul>You\'ve got it when: the verse survives every chord change without the roll stopping.',
+                text_es: '<ul><li>Toca la estrofa con una nota grave en el tiempo fuerte (el primer tiempo, el más fuerte del compás).</li><li>Haz un floreo ascendente con tus dedos a través de cada acorde, siguiendo la progresión.</li></ul>Lo tienes cuando: la estrofa sobrevive cada cambio de acorde sin que el floreo se detenga.',
                 hint: '"House of the Rising Sun" is in 6/8: six eighth notes in a bar, grouped into two big beats of three — count "ONE-two-three TWO-two-three". It is the waltz\'s cousin, not the same thing. A waltz (3/4, coming up in Set 2) has THREE main beats a bar; 6/8 has TWO, each one filled with three quick notes. The thumb plays the bass on the downbeat; the fingers roll up through the chord between beats.',
                 hint_es: '"House of the Rising Sun" está en 6/8: seis corcheas en un compás, agrupadas en dos tiempos grandes de tres — cuenta "UNO-dos-tres DOS-dos-tres". Es primo del vals, no lo mismo. Un vals (3/4, que viene en la Unidad 2) tiene TRES tiempos principales por compás; el 6/8 tiene DOS, cada uno lleno de tres notas rápidas. El pulgar toca el bajo en el tiempo fuerte; los dedos hacen un floreo ascendente a través del acorde entre los tiempos.',
                 stuck: 'Loop just the first two chords of the verse until the pattern is completely steady before adding the rest.',
@@ -270,8 +270,8 @@ SETS.push(
                 label: 'Challenge — Claw Check', label_es: 'Reto — Revisión de la garra',
                 text: 'Plant all four picking fingers at once:<ul><li>Thumb (p) resting on the bass strings (low E, A, D).</li><li>Index (i) on the G string.</li><li>Middle (m) on the B string.</li><li>Ring (a) on the high e.</li><li>Then pluck p–i–m–a on the open strings, twice through at 60 BPM.</li></ul>You\'ve got it when: each finger plays in order, one string each, with no two fingers grabbing the same string.',
                 text_es: 'Planta los cuatro dedos de pulsar a la vez:<ul><li>Pulgar (p) apoyado en las cuerdas graves (Mi grave, La, Re).</li><li>Índice (i) en la cuerda Sol.</li><li>Medio (m) en la cuerda Si.</li><li>Anular (a) en la mi aguda.</li><li>Luego pulsa p–i–m–a en las cuerdas al aire, dos veces seguidas a 60 BPM.</li></ul>Lo tienes cuando: cada dedo toca en orden, una cuerda cada uno, sin que dos dedos agarren la misma cuerda.',
-                hint: 'Spend 60 seconds on this Module 8 warm-up. Do it again any time your picking hand feels rusty. p owns the three bass strings (low E, A, D); i-G, m-B, a-high-e never trade places. Set the assignment once and your hand stops hunting for strings.',
-                hint_es: 'Dedica 60 segundos a este calentamiento del Módulo 8. Hazlo de nuevo cuando tu mano de pulsar se sienta oxidada. p es dueño de las tres cuerdas graves (Mi grave, La, Re); i-Sol, m-Si, a-mi aguda nunca intercambian lugares. Fija la asignación una vez y tu mano deja de buscar cuerdas a tientas.',
+                hint: 'Spend 60 seconds on this Module 8 warm-up. Do it again any time your picking hand feels rusty. p handles the three bass strings (low E, A, D); i-G, m-B, a-high-e never trade places. Set the assignment once and your hand stops hunting for strings.',
+                hint_es: 'Dedica 60 segundos a este calentamiento del Módulo 8. Hazlo de nuevo cuando tu mano de pulsar se sienta oxidada. p se encarga de las tres cuerdas graves (Mi grave, La, Re); i-Sol, m-Si, a-mi aguda nunca intercambian lugares. Fija la asignación una vez y tu mano deja de buscar cuerdas a tientas.',
                 stuck: 'Plant all four fingers silently first and feel each one touching its string, then pluck slowly — p, then i, then m, then a — before you add the metronome.',
                 stuck_es: 'Planta los cuatro dedos en silencio primero y siente cada uno tocando su cuerda, y luego pulsa despacio — p, luego i, luego m, luego a — antes de agregar el metrónomo.',
                 levelUp: 'Run the staircase up and back down (p-i-m-a-m-i) without looking at your picking hand.',
@@ -340,8 +340,8 @@ SETS.push(
           unit: 'count', placeholder: 'e.g. 8 changes — try for a higher number', placeholder_es: 'p. ej. 8 cambios — intenta superarlo' } },
       { id: 'm12w1-s6', text: 'Play a bass-note + roll verse of "House of the Rising Sun" (thumb bass, then fingers rolling up through the chord)',
         text_es: 'Tocar una estrofa de nota grave + floreo de "House of the Rising Sun" (bajo del pulgar, y luego dedos en floreo ascendente a través del acorde)',
-        gotItWhen: 'the verse survives every chord change with the roll staying smooth and the thumb never stopping.',
-        gotItWhen_es: 'la estrofa sobrevive cada cambio de acorde con el floreo manteniéndose suave y el pulgar sin detenerse nunca.',
+        gotItWhen: 'the verse survives every chord change with neither the roll nor the thumb stopping.',
+        gotItWhen_es: 'la estrofa sobrevive cada cambio de acorde sin que se detengan ni el floreo ni el pulgar.',
         practice: { type: 'playSeq', label: 'Am bass + roll — "House of the Rising Sun" feel (6/8)', label_es: 'Bajo de Am + floreo — sensación de "House of the Rising Sun" (6/8)', bpm: 80,
           notes: [45, 52, 57, 60, 64, 60] } }
     ]
@@ -615,8 +615,8 @@ SETS.push(
           prompt_es: 'Happy Birthday está en 3/4. ¿Cómo se alinea tu patrón bajo–pulsación–pulsación con el conteo?',
           choices: ['Thumb bass on 1, finger plucks on 2 and 3', 'Bass on every one of the three beats', 'Plucks on beats 1 and 2, bass on beat 3', 'Same as 4/4 — just play it a bit faster'],
           choices_es: ['Bajo del pulgar en el 1, pulsaciones en el 2 y el 3', 'Bajo en cada uno de los tres tiempos', 'Pulsaciones en los tiempos 1 y 2, bajo en el 3', 'Igual que en 4/4 — solo tócalo un poco más rápido'], answer: 0,
-          explain: 'The waltz\'s "ONE-two-three" lives in the thumb: bass anchors beat 1, the plucks float on 2 and 3. Treating it like fast 4/4 is what erases the waltz feel.',
-          explain_es: 'El "UN-dos-tres" del vals vive en el pulgar: el bajo ancla el tiempo 1, las pulsaciones flotan en el 2 y el 3. Tratarlo como un 4/4 rápido es lo que borra la sensación de vals.' } }
+          explain: 'The waltz\'s "ONE-two-three" comes from the thumb: bass anchors beat 1, the plucks float on 2 and 3. Treating it like fast 4/4 is what erases the waltz feel.',
+          explain_es: 'El "UN-dos-tres" del vals viene del pulgar: el bajo ancla el tiempo 1, las pulsaciones flotan en el 2 y el 3. Tratarlo como un 4/4 rápido es lo que borra la sensación de vals.' } }
     ]
   },
 

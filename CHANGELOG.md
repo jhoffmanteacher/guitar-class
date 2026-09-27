@@ -5,6 +5,19 @@ Notable changes to the Guitar Class site. Newest first.
 For the full session-by-session history (and the reasoning behind each change),
 see `WORKFLOW.md` and the git commit log.
 
+## 2026-09-27 — Plainer wording across Modules 2, 4–12
+
+### Changed
+
+- Many small wording fixes: phrases like "lives on the low E string" or "the
+  thumb owns the bass" now say it directly — "is on the low E string," "the
+  thumb handles the bass." Same change on the Song Journey pages for Seven
+  Nation Army, Luna, Sweet Child O' Mine, Let It Be, and "the cure."
+- A few informal phrases ("rock-steady," "stay parked," "still fighting it,"
+  "rattle off") were replaced with plainer wording in Modules 5, 8, and 10–11.
+- Two Module 6 step labels renamed from "Stepping stone 1/2" to "Rhythm step
+  1/2."
+
 ## 2026-09-25 — Error sweep: clearer directions, fixed Spanish buttons
 
 ### Fixed

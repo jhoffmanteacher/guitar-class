@@ -522,8 +522,8 @@ SETS.push(
                 text_es: 'Toca la estrofa D · C · G con tu cejilla en forma de E — eso es UNA forma deslizándose. Un rasgueo limpio por acorde, y luego dos compases cada uno a 60 BPM:<ul><li>D en el traste 10.</li><li>C en el traste 8.</li><li>G en el traste 3.</li></ul>Lo tienes cuando: los tres suenan limpios — y los trastes altos prueban el punto: las cejillas se vuelven MÁS FÁCILES conforme subes por el mástil. <a href="tabs/sweet-child-o-mine.html" target="_blank">&#x1F9F5; Recorrido de la canción: este es el final del Módulo 7</a>.',
                 hint: 'Start at the top — get D clean at fret 10 where the strings are loosest, then walk the same shape down. Name each chord by its root on the low E string: fret 10 = D, fret 8 = C, fret 3 = G.',
                 hint_es: 'Empieza por arriba — logra que D suene limpio en el traste 10 donde las cuerdas están más sueltas, y luego camina la misma forma hacia abajo. Nombra cada acorde por su raíz en la cuerda Mi grave: traste 10 = D, traste 8 = C, traste 3 = G.',
-                stuck: 'Play just the roots on the low E string first (10 → 8 → 3) so the slide distances live in your arm, then add the barre on top.',
-                stuck_es: 'Toca solo las raíces en la cuerda Mi grave primero (10 → 8 → 3) para que las distancias del deslizamiento vivan en tu brazo, y luego agrega la cejilla encima.',
+                stuck: 'Play just the roots on the low E string first (10 → 8 → 3) so your arm learns the slide distances, then add the barre on top.',
+                stuck_es: 'Toca solo las raíces en la cuerda Mi grave primero (10 → 8 → 3) para que tu brazo aprenda las distancias del deslizamiento, y luego agrega la cejilla encima.',
                 levelUp: 'Run the loop with a down-up strum, or hum the verse melody over your own chords.',
                 levelUp_es: 'Toca el loop con un rasgueo abajo-arriba, o tararea la melodía de la estrofa sobre tus propios acordes.',
                 skills: [5, 6],
@@ -675,8 +675,8 @@ SETS.push(
             label: 'Watch: the series continues — A-shape', label_es: 'Mira: la serie continúa — forma de A',
             text: 'Watch: <a href="https://youtu.be/ioU_ItTzm90" target="_blank">Basic Barré Chords #3 — the A shape (CH-006) – JustinGuitar</a> (0:00–4:00). Same series as the E-shape video you watched earlier — this installment is the A-shape.',
             text_es: 'Mira: <a href="https://youtu.be/ioU_ItTzm90" target="_blank">Basic Barré Chords #3 — the A shape (CH-006) – JustinGuitar</a> (0:00–4:00). La misma serie que el video de la forma de E que viste antes — esta entrega es la forma de A.',
-            hint: 'B major is a great A-shape practice chord — it lives at the 2nd fret with the root on the A string. You may hear a muted high E in some videos — many players let the ring finger mute it, and that\'s a real technique. In this module, though, we arch the fingers so the high e string rings.',
-            hint_es: 'B mayor es un gran acorde de práctica para la forma de A — vive en el traste 2 con la raíz en la cuerda La. Puede que escuches una mi aguda silenciada en algunos videos — muchos guitarristas dejan que el dedo anular la silencie, y esa es una técnica real. En este módulo, sin embargo, arqueamos los dedos para que la mi aguda suene.',
+            hint: 'B major is a great A-shape practice chord — its root is at the 2nd fret on the A string. You may hear a muted high E in some videos — many players let the ring finger mute it, and that\'s a real technique. In this module, though, we arch the fingers so the high e string rings.',
+            hint_es: 'B mayor es un gran acorde de práctica para la forma de A — su raíz está en el traste 2 de la cuerda La. Puede que escuches una mi aguda silenciada en algunos videos — muchos guitarristas dejan que el dedo anular la silencie, y esa es una técnica real. En este módulo, sin embargo, arqueamos los dedos para que la mi aguda suene.',
             skills: [3, 4],
             response: { type: 'short', placeholder: 'In this module, should the high e string ring or stay muted in your A-shape barre? What do you do with your fingers to make it ring?',
               placeholder_es: 'En este módulo, ¿la cuerda mi aguda debe sonar o quedarse silenciada en tu cejilla en forma de A? ¿Qué haces con tus dedos para que suene?' }
@@ -774,8 +774,8 @@ SETS.push(
             steps: [
           {
             label: 'Challenge 4 — Shape Combo: F–C–G–D (assessment preparation)', label_es: 'Reto 4 — Combo de formas: F–C–G–D (preparación para la evaluación)',
-            text: 'Alternate E-shape and A-shape, 2 bars each at 60 BPM:<ul><li>F (E-shape, 1st fret).</li><li>C (A-shape, 3rd fret).</li><li>G (E-shape, 3rd fret).</li><li>D (A-shape, 5th fret).</li></ul>You\'ve got it when: smooth switches between the two shapes, landing each change on beat 1.',
-            text_es: 'Alterna forma de E y forma de A, 2 compases cada uno a 60 BPM:<ul><li>F (forma de E, traste 1).</li><li>C (forma de A, traste 3).</li><li>G (forma de E, traste 3).</li><li>D (forma de A, traste 5).</li></ul>Lo tienes cuando: cambios fluidos entre las dos formas, cayendo cada cambio en el tiempo 1.',
+            text: 'Alternate E-shape and A-shape, 2 bars each at 60 BPM:<ul><li>F (E-shape, 1st fret).</li><li>C (A-shape, 3rd fret).</li><li>G (E-shape, 3rd fret).</li><li>D (A-shape, 5th fret).</li></ul>You\'ve got it when: every change lands cleanly on beat 1.',
+            text_es: 'Alterna forma de E y forma de A, 2 compases cada uno a 60 BPM:<ul><li>F (forma de E, traste 1).</li><li>C (forma de A, traste 3).</li><li>G (forma de E, traste 3).</li><li>D (forma de A, traste 5).</li></ul>Lo tienes cuando: cada cambio cae limpio en el tiempo 1.',
             hint: 'You\'re alternating between E-shape and A-shape with each chord change. Notice that some chord changes are tiny hand moves — barely shift positions.',
             hint_es: 'Estás alternando entre la forma de E y la forma de A con cada cambio de acorde. Fíjate que algunos cambios de acorde son movimientos pequeños de mano — apenas cambian de posición.',
             stuck: 'Drill one pair at a time — F→C, then G→D — before running all four. Some moves are tiny (G E-shape fret 3 → D A-shape fret 5 is a short hop). Drop to 50 BPM if the changes fall apart.',

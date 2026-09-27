@@ -517,7 +517,7 @@ SETS.push(
             steps: [
           {
             label: 'Checkpoint', label_es: 'Punto de control',
-            text: 'Checkpoint — pause and think: in the D-DU-UDU pattern, what trips you up more right now — skipping a strum while the wrist keeps moving, or landing the accents on beats 2 and 4? What helped today?',
+            text: 'Checkpoint — pause and think: in the D-DU-UDU pattern, what is harder for you right now — skipping a strum while the wrist keeps moving, or landing the accents on beats 2 and 4? What helped today?',
             text_es: 'Punto de control — pausa y piensa: en el patrón D-DU-UDU, ¿qué te confunde más ahora mismo — saltarte un rasgueo mientras la muñeca sigue en movimiento, o hacer caer los acentos en los tiempos 2 y 4? ¿Qué te ayudó hoy?',
           }
             ]
@@ -556,7 +556,7 @@ SETS.push(
              numbered run stays 1-3, and m6w2's take-to-song hint points
              at "Challenge 3" by name. */
           {
-            label: 'Stepping stone 1 — one gap', label_es: 'Escalón 1 — un hueco',
+            label: 'Rhythm step 1 — one gap', label_es: 'Paso de ritmo 1 — un hueco',
             text: 'Straight eighths, with ONE strum left out — the up after beat 1. Your hand still swings up there; the pick just misses.<ol><li>Mute the strings and play it at 60 BPM, counting aloud.</li><li>Four bars without the hand stopping.</li></ol><div class="strum-line">D   &middot;   D   U   D   U   D   U\n<span class="su-count">1   +   2   +   3   +   4   +</span></div>You\'ve got it when: four bars where the only sound missing is that one up, and your hand never pauses.',
             text_es: 'Corcheas derechas, con UN rasgueo de menos — el de arriba después del tiempo 1. Tu mano sigue subiendo ahí; la púa solo falla.<ol><li>Silencia las cuerdas y tócalo a 60 BPM, contando en voz alta.</li><li>Cuatro compases sin que la mano se detenga.</li></ol><div class="strum-line">D   &middot;   D   U   D   U   D   U\n<span class="su-count">1   +   2   +   3   +   4   +</span></div>Lo tienes cuando: cuatro compases donde lo único que falta es ese golpe hacia arriba, y tu mano nunca se detiene.',
             hint: 'Count "1 and 2 and 3 and 4 and" out loud and simply do not hit on the first "and". Everything else is unchanged.',
@@ -564,7 +564,7 @@ SETS.push(
             skills: [1, 2]
           },
           {
-            label: 'Stepping stone 2 — the hard gap', label_es: 'Escalón 2 — el hueco difícil',
+            label: 'Rhythm step 2 — the hard gap', label_es: 'Paso de ritmo 2 — el hueco difícil',
             text: 'Straight eighths, with only the DOWN on beat 3 left out. Skipping a down is harder than skipping an up, because your hand is travelling toward the strings when it happens.<ol><li>Mute the strings and play it at 60 BPM.</li><li>Four bars, hand still swinging through the gap.</li></ol><div class="strum-line">D   U   D   U   &middot;   U   D   U\n<span class="su-count">1   +   2   +   3   +   4   +</span></div>You\'ve got it when: four bars with that one down silent and the swing unbroken.',
             text_es: 'Corcheas derechas, dejando fuera solo el golpe hacia ABAJO del tiempo 3. Saltarse uno hacia abajo es más difícil que uno hacia arriba, porque tu mano va viajando hacia las cuerdas cuando pasa.<ol><li>Silencia las cuerdas y tócalo a 60 BPM.</li><li>Cuatro compases, con la mano todavía balanceándose en el hueco.</li></ol><div class="strum-line">D   U   D   U   &middot;   U   D   U\n<span class="su-count">1   +   2   +   3   +   4   +</span></div>Lo tienes cuando: cuatro compases con ese golpe hacia abajo en silencio y el balanceo sin romperse.',
             hint: 'Put this gap together with the one from the last step and you have D-DU-UDU.',

@@ -501,7 +501,7 @@ SETS.push(
             text_es: '<ol><li>Trastea el F simplificado (xx3211): dedo índice plano sobre las cuerdas mi aguda y Si, traste 1 · dedo medio en la cuerda Sol, traste 2 · dedo anular en la cuerda Re, traste 3.</li><li>Rasguea solo desde la cuerda Re hacia abajo — sáltate la Mi grave y la La.</li></ol>Lo tienes cuando: las cuatro cuerdas suenan sin zumbido — revisa que tu dedo índice no se colapse y silencie una de las dos cuerdas que tiene debajo.',
             hint: 'This simplified shape trades the full 6-string barre for a small 2-string mini-barre under your index finger — much easier on beginner hands. Keep that finger flat and straight across both strings — unlike your other fingers, this one can\'t arch up onto the tip, or it\'ll only touch one of the two strings instead of both.',
             hint_es: 'Esta forma simplificada cambia la cejilla completa de 6 cuerdas por una mini-cejilla de solo 2 cuerdas bajo tu dedo índice — mucho más fácil para manos principiantes. Mantén ese dedo plano y recto sobre las dos cuerdas — a diferencia de tus otros dedos, este no puede arquearse en la punta, o solo tocará una de las dos cuerdas en vez de ambas.',
-            stuck: 'Get the high e and B strings ringing first under your index finger alone, then add the middle finger on the G string, then the ring finger on the D string last. Still fighting it? Play <strong>Fmaj7</strong> instead — <code>xx3210</code>, no finger covering two strings — it sounds close enough to keep the song going while your F catches up.',
+            stuck: 'Get the high e and B strings ringing first under your index finger alone, then add the middle finger on the G string, then the ring finger on the D string last. Not clean yet? Play <strong>Fmaj7</strong> instead — <code>xx3210</code>, no finger covering two strings — it sounds close enough to keep the song going while your F catches up.',
             stuck_es: 'Haz sonar primero las cuerdas mi aguda y Si solo con tu dedo índice, y luego agrega el dedo medio en la cuerda Sol, y el anular en la cuerda Re al final. ¿Sigue costándote? Toca <strong>Fmaj7</strong> en su lugar — <code>xx3210</code>, sin ningún dedo cubriendo dos cuerdas — suena lo bastante parecido para que la canción siga mientras tu F se pone al día.',
             levelUp: 'Switch Am → F without looking. Your index finger barely moves. Then lay your index flat across the high e, B and G strings at fret 1 and pick each one — all three ringing. The full 6-string barre F comes in Module 7.',
             levelUp_es: 'Cambia Am → F sin mirar. Tu dedo índice casi no se mueve. Luego apoya el índice plano sobre las cuerdas mi aguda, Si y Sol en el traste 1 y pulsa cada una — las tres sonando. El F con cejilla completa de 6 cuerdas llega en el Módulo 7.',
@@ -775,8 +775,8 @@ SETS.push(
             text_es: '<ul><li>Toca ahora tres formas, todavía dos tiempos cada una — G · C · Am, y de vuelta a G, repitiendo a 60 BPM.</li></ul>Tres acordes a esta velocidad es la velocidad de coro para muchas canciones. Lo tienes cuando: dos vueltas limpias, cada cambio a tiempo.',
             hint: 'G → C: every finger moves, so move your hand as one shape. C → Am: fingers 1 and 2 stay planted; only finger 3 moves.',
             hint_es: 'G → C: se mueven todos los dedos, así que mueve tu mano como una sola forma. C → Am: los dedos 1 y 2 se quedan plantados; solo se mueve el dedo 3.',
-            stuck: 'Loop just the change that trips you (usually G → C, where every finger travels) on its own before running all three.',
-            stuck_es: 'Repite solo el cambio que te hace tropezar (usualmente G → C, donde cada dedo viaja) antes de correr los tres.',
+            stuck: 'Loop just the change that is hardest for you (usually G → C, where every finger travels) on its own before running all three.',
+            stuck_es: 'Repite solo el cambio que más te cuesta (usualmente G → C, donde cada dedo viaja) antes de correr los tres.',
             levelUp: 'Speed up to 70 BPM, or reorder as C · G · Am and keep every change on the beat.',
             levelUp_es: 'Acelera a 70 BPM, o reordénalo como C · G · Am y mantén cada cambio a tiempo.',
             skills: [6],
@@ -857,8 +857,8 @@ SETS.push(
             steps: [
               {
                 label: 'Bonus — The Folk Strum', label_es: 'Bono — El rasgueo folk',
-                text: 'This one is a bonus. Part 2 is complete without it.<ol><li>Over one bar, strum down, down-up, up-down-up — written D · D U · U D U.</li><li>Count all eight slots out loud — "1 and 2 and 3 and 4 and" — and skip two of them: the "and" of beat 1, and the down on beat 3.</li><li>Start on one chord (G is a great one).</li></ol>You\'ve got it when: it loops smoothly 4 times in a row on one chord without stopping.',
-                text_es: 'Esto es un bono. La Parte 2 está completa sin él.<ol><li>En un compás, rasguea abajo, abajo-arriba, arriba-abajo-arriba — escrito D · D U · U D U.</li><li>Cuenta los ocho espacios en voz alta — "1 y 2 y 3 y 4 y" — y sáltate dos: el "y" del tiempo 1, y el "abajo" del tiempo 3.</li><li>Empieza con un solo acorde (G es excelente).</li></ol>Lo tienes cuando: se repite suavemente 4 veces seguidas en un solo acorde sin detenerte.',
+                text: 'This one is a bonus. Part 2 is complete without it.<ol><li>Over one bar, strum down, down-up, up-down-up — written D · D U · U D U.</li><li>Count all eight slots out loud — "1 and 2 and 3 and 4 and" — and skip two of them: the "and" of beat 1, and the down on beat 3.</li><li>Start on one chord (G is a great one).</li></ol>You\'ve got it when: it loops 4 times in a row on one chord without stopping.',
+                text_es: 'Esto es un bono. La Parte 2 está completa sin él.<ol><li>En un compás, rasguea abajo, abajo-arriba, arriba-abajo-arriba — escrito D · D U · U D U.</li><li>Cuenta los ocho espacios en voz alta — "1 y 2 y 3 y 4 y" — y sáltate dos: el "y" del tiempo 1, y el "abajo" del tiempo 3.</li><li>Empieza con un solo acorde (G es excelente).</li></ol>Lo tienes cuando: se repite 4 veces seguidas en un solo acorde sin detenerte.',
                 hint: 'Say the full count "1 and 2 and 3 and 4 and" while your hand swings nonstop. You strum six of the eight slots: 1, 2, the "and" of 2, the "and" of 3, 4, and the "and" of 4. Upstrokes stay lighter than downstrokes.',
                 hint_es: 'Di la cuenta completa "1 y 2 y 3 y 4 y" mientras tu mano se balancea sin parar. Rasgueas seis de los ocho espacios: el 1, el 2, el "y" del 2, el "y" del 3, el 4, y el "y" del 4. Los rasgueos hacia arriba se mantienen más ligeros que los de abajo.',
                 stuck: 'Keep your strumming hand moving down-up-down-up the entire bar — never stop the swing. On the two slots you don\'t want (the up on the "and" of 1, and the down on 3), just let the hand pass and MISS the strings. The motion is constant; only the contact changes.',
@@ -1057,8 +1057,8 @@ SETS.push(
             steps: [
           {
             label: 'Wrap-up: your Group 2 weak spot', label_es: 'Cierre: tu punto débil del Grupo 2',
-            text: 'Checkpoint — pause and think: you now know two whole chord groups. Which Group 2 chord (D, A, Em, Bm) feels furthest from automatic, and what specifically trips it up?',
-            text_es: 'Punto de control — pausa y piensa: ahora conoces dos grupos completos de acordes. ¿Qué acorde del Grupo 2 (D, A, Em, Bm) se siente más lejos de ser automático, y qué específicamente lo hace tropezar?',
+            text: 'Checkpoint — pause and think: you now know two whole chord groups. Which Group 2 chord (D, A, Em, Bm) feels furthest from automatic, and what specifically makes it hard?',
+            text_es: 'Punto de control — pausa y piensa: ahora conoces dos grupos completos de acordes. ¿Qué acorde del Grupo 2 (D, A, Em, Bm) se siente más lejos de ser automático, y qué específicamente lo hace difícil?',
           }
             ]
           }
@@ -1095,8 +1095,8 @@ SETS.push(
             hint_es: 'El acorde D es complicado porque es fácil silenciar la cuerda mi aguda por accidente. Curva tus dedos y asegúrate de que las puntas se arqueen lejos de esa cuerda.',
             stuck: 'Get the high e and B strings ringing first, then add the G string. Arch the ring finger up high so it clears the high e.',
             stuck_es: 'Haz sonar primero las cuerdas mi aguda y Si, y luego agrega la cuerda Sol. Arquea bien alto el dedo anular para que despeje la mi aguda.',
-            levelUp: 'Switch D→A→D without looking — both shapes live around the 2nd fret.',
-            levelUp_es: 'Cambia D→A→D sin mirar — ambas formas viven cerca del traste 2.',
+            levelUp: 'Switch D→A→D without looking — both shapes sit near the 2nd fret.',
+            levelUp_es: 'Cambia D→A→D sin mirar — ambas formas están cerca del traste 2.',
             skills: [1],
             chords: [
               { name: 'D', chord: [[6,'x'],[5,'x'],[4,0],[3,2,'1'],[2,3,'3'],[1,2,'2']], position: 0 }
@@ -1114,7 +1114,7 @@ SETS.push(
             text_es: '<ol><li>Trastea la forma de Bm de cuatro dedos (xx4432 — índice en la cuerda mi aguda, traste 2 · medio en la cuerda Si, traste 3 · anular en la cuerda Sol, traste 4 · meñique en la cuerda Re, traste 4).</li><li>Rasguea solo desde la cuerda Re hacia abajo.</li></ol>Lo tienes cuando: las cuatro cuerdas trasteadas suenan claras — el meñique en la cuerda Re es el que más se apaga.',
             hint: 'No barre here at all — one finger per string, fingers 1 through 4 climbing like stairs across the top four strings. Curl each one so it presses straight down on its own string, not brushing the neighbor. (Your first flat-finger mini-barre was the simplified F last set, where the index lies across the high e and B strings. Full barres arrive in Module 7.)',
             hint_es: 'Aquí no hay ninguna cejilla — un dedo por cuerda, los dedos 1 al 4 subiendo como escalera por las cuatro cuerdas más agudas. Curva cada uno para que presione derecho hacia abajo en su propia cuerda, sin rozar al vecino. (Tu primera mini-cejilla con el dedo plano fue el F simplificado de la unidad pasada, donde el índice se apoya sobre las cuerdas mi aguda y Si. Las cejillas completas llegan en el Módulo 7.)',
-            stuck: 'Build it one finger at a time: index on the high e string, then middle, then ring, then pinky last — check each string rings before adding the next finger. Still fighting it? Play <strong>Bm7</strong> instead — <code>x20202</code>, two fingers — it sounds close enough to keep the song going while your Bm catches up.',
+            stuck: 'Build it one finger at a time: index on the high e string, then middle, then ring, then pinky last — check each string rings before adding the next finger. Not clean yet? Play <strong>Bm7</strong> instead — <code>x20202</code>, two fingers — it sounds close enough to keep the song going while your Bm catches up.',
             stuck_es: 'Constrúyelo un dedo a la vez: índice en la cuerda mi aguda, luego medio, luego anular, y meñique al final — revisa que cada cuerda suene antes de agregar el siguiente dedo. ¿Sigue costándote? Toca <strong>Bm7</strong> en su lugar — <code>x20202</code>, dos dedos — suena lo bastante parecido para que la canción siga mientras tu Bm se pone al día.',
             levelUp: 'Switch Em→Bm→Em without looking. These two don\'t share a finger position, so it\'s a full hand relocation each time — lift all your Em fingers together and drop straight into the Bm shape.',
             levelUp_es: 'Cambia Em→Bm→Em sin mirar. Estos dos no comparten ninguna posición de dedo, así que es una reubicación completa de la mano cada vez — levanta todos los dedos de Em juntos y colócalos directo en la forma de Bm.',
@@ -1137,8 +1137,8 @@ SETS.push(
             hint_es: 'A es apretado porque los tres dedos caen en el mismo traste. Alinéalos bien juntos, cada uno en su propia punta, en vez de separarlos.',
             stuck: 'Squeeze your index, middle, and ring fingers close together before you place them — arriving already tight avoids a mid-air scramble to fit all three on one fret.',
             stuck_es: 'Junta tu dedo índice, medio y anular antes de colocarlos — llegar ya apretados evita un forcejeo en el aire para que quepan los tres en un traste.',
-            levelUp: 'Switch A→D→A without looking, leaving your index finger planted on the G string the whole time — both shapes live around the 2nd fret, so it\'s a short trip.',
-            levelUp_es: 'Cambia A→D→A sin mirar, dejando tu dedo índice plantado en la cuerda Sol todo el tiempo — ambas formas viven cerca del traste 2, así que es un viaje corto.',
+            levelUp: 'Switch A→D→A without looking, leaving your index finger planted on the G string the whole time — both shapes sit near the 2nd fret, so it\'s a short move.',
+            levelUp_es: 'Cambia A→D→A sin mirar, dejando tu dedo índice plantado en la cuerda Sol todo el tiempo — ambas formas están cerca del traste 2, así que es un cambio corto.',
             skills: [2],
             chords: [
               { name: 'A', chord: [[6,'x'],[5,0],[4,2,'2'],[3,2,'1'],[2,2,'3'],[1,0]], position: 0 }
@@ -1400,8 +1400,8 @@ SETS.push(
             response: { type: 'mc', prompt: 'What is the KEY idea from this video about practice?',
               prompt_es: '¿Cuál es la idea CLAVE de este video sobre la práctica?',
               answer: 0,
-              explain: 'Practice makes PERMANENT — repeating a mistake just locks it in. Slow down and repeat the correct version so that\'s what becomes automatic.',
-              explain_es: 'La práctica hace PERMANENTE — repetir un error solo lo fija. Baja la velocidad y repite la versión correcta para que eso sea lo que se vuelva automático.',
+              explain: 'Practice makes PERMANENT — repeating a mistake just makes it permanent too. Slow down and repeat the correct version so that\'s what becomes automatic.',
+              explain_es: 'La práctica hace PERMANENTE — repetir un error solo lo hace permanente a él también. Baja la velocidad y repite la versión correcta para que eso sea lo que se vuelva automático.',
               choices: [
               'Practice makes permanent — so practice the solution, not the mistake',
               'Practice makes perfect — repetition is all that matters',

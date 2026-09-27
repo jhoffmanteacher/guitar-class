@@ -2102,6 +2102,24 @@ const SLANG_PHRASES = [
   'carries the whole job', 'holding the two bars out', 'the module bar', 'on call',
   'cold read', 'cold-read', 'feels like a punchline', 'parked in one place',
   'rushed at first, then locked in', 'runs on autopilot', 'test the names cold',
+  /* Content-style backlog, 2026-09-26/27 follow-up sweep. "lives in/on/at/
+     around/inside" and "live in/on/at/around" describe which string, key,
+     fret or box a note/chord/riff belongs to using a figurative verb where
+     the site's own convention elsewhere is the literal "is on/in" — ~45
+     instances reworded across Modules 2, 4–12, class-activities.js and the
+     Journey pages. Deliberately NOT banning "home"/"feels like home"/"home
+     to <chord>" — that's a separate, established teaching device for the
+     TONIC (module-11's "home chord" unit, mirrored by "back home to Am" in
+     module-9/11 and the Watchtower Journey page), not this pattern; banning
+     it would also hit "two homes", which 1w already carves out. "owns
+     the"/"own the" is the matching verb for finger/string responsibility
+     ("which finger owns the root note"); "rock-steady", "stay parked",
+     "still fighting" and "rattle off" are single-family idioms found the
+     same sweep. */
+  'lives in', 'lives on', 'lives at', 'lives around', 'lives inside',
+  'live in', 'live on', 'live at', 'live around',
+  'owns the', 'own the',
+  'rock-steady', 'stay parked', 'still fighting', 'rattle off',
 ];
 /* Hoisted to module scope so 1y can sweep exit-check item labels with the
    exact same list — 1w's own FIELD_RE has no `label`, and widening it would
@@ -2219,7 +2237,12 @@ const TEACHER_PHRASES = [
   "that's normal!", "you've got this", 'it will feel easy', 'confident level',
   'confident volume', 'confident pluck', 'nafme', "don't worry", "it's okay if",
   'trust the', 'quality first', 'quality over speed', 'make them your own',
-  'a stepping stone', "that's the point", 'phrasing strateg', 'tone parameters',
+  /* Widened from 'a stepping stone' 2026-09-27: the article-only match let
+     module-6.js's bare step labels "Stepping stone 1 — one gap" / "...2 —
+     the hard gap" ship invisibly (found in the content-style backlog
+     follow-up sweep; those labels were reworded to "Rhythm step N" in the
+     same sweep). Matches with or without the article now. */
+  'stepping stone', "that's the point", 'phrasing strateg', 'tone parameters',
   'deliberate musical', 'expressive tool', 'i can demonstrate', 'in your own words',
   'pause and think',
 ];
