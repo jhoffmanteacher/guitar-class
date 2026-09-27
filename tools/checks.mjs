@@ -1497,9 +1497,13 @@ function checkJourneyThemeDrift() {
    Journey pages float them over the page corner (a column, pinned), so
    position/inset/z-index/flex-direction/align-items/gap are meant to
    differ there. Every OTHER shared selector (.fab, .tool-popup, .tuner-*,
-   .ts-btn, .tp-*, .bpm-*) is compared with no exemptions.
+   .ts-btn, .tp-*, .bpm-*, .ladder-*, #ladder-*) is compared with no
+   exemptions. `.ladder-*`/`#ladder-*` added 2026-09-27 after the Tempo
+   ladder markup shipped to the six Journey pages (1t3) with no matching
+   CSS at all in tabs/fab-tools.css — 1t2 couldn't see the gap because
+   nothing told it this family was shared.
    ════════════════════════════════════════════════════════════════════ */
-const FAB_SHARED_PREFIXES = [/^\.fab\b/, /^\.tool-popup/, /^\.tuner-/, /^\.ts-btn/, /^\.tp-/, /^\.bpm-/];
+const FAB_SHARED_PREFIXES = [/^\.fab\b/, /^\.tool-popup/, /^\.tuner-/, /^\.ts-btn/, /^\.tp-/, /^\.bpm-/, /^\.ladder-/, /^#ladder-/];
 const FAB_ALLOWED_DIFFS = new Map([
   ['.fab-group', new Set(['position', 'top', 'bottom', 'left', 'right', 'align-items', 'gap', 'z-index'])],
   ['.fab-buttons', new Set(['flex-direction', 'align-items', 'gap'])],
@@ -1550,7 +1554,11 @@ function checkFabToolsThemeDrift() {
    whole time. This was a pure markup gap, not a missing feature: fixing
    it needed no JS changes at all.
    ════════════════════════════════════════════════════════════════════ */
-const POPUP_EMOJI_RE = /<span class="tp-title">\s*(?:&#x1F3B5;|&#x23F1;|&#x1F3B8;)/;
+/* Matches both the HTML-entity form these files actually use and the raw
+   glyph, so a future hand-edit that pastes the literal character instead
+   of the entity still trips this — found as a gap in the first cut,
+   2026-09-27 review. */
+const POPUP_EMOJI_RE = /<span class="tp-title">\s*(?:&#x1F3B5;|&#x23F1;|&#x1F3B8;|\u{1F3B5}|\u{23F1}️?|\u{1F3B8})/u;
 function checkJourneyPopupMarkup() {
   head('1t3. Journey popup markup (tool-popup HTML) matches the app');
   let bad = 0, pages = 0;

@@ -924,6 +924,12 @@ async function teacherMigrateActivityBoard(cfg){
   (window.CLASS_ACTIVITIES||[]).filter(a=>dates[a.id])
     .sort((x,y)=>(legacyN(x)-legacyN(y))||(shipped(x)-shipped(y))||(teacherActivityIdNum(x)-teacherActivityIdNum(y)))
     .forEach((a,i)=>{ board[a.id]={module:0, pos:i+1}; });
+  // Same queue as Move/Unassign/Delete — this is a fourth board writer, and
+  // nothing structurally rules out it racing one of the other three (found
+  // in the 2026-09-27 review of that fix: the migration is only PRACTICALLY
+  // safe because no board rows exist to click Move/Unassign/Delete on yet,
+  // not because anything enforces it).
+  const release=await waitBoardWriteTurn();
   try{
     // Strict (no base): this replaces the board wholesale, so any other
     // write since this tab's read is a reason to stop and look.
@@ -932,6 +938,8 @@ async function teacherMigrateActivityBoard(cfg){
     boardMigrating=false;
     teacherConfigSaveFailed(e, 'Could not set up the activity board — check your connection and Firestore rules.');
     return false;
+  }finally{
+    release();
   }
   cfg.activityBoard=board;
   cfg.activityBoardSeeded=true;
