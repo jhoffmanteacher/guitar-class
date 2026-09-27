@@ -2835,12 +2835,21 @@ function cbOptionPool(){
 }
 
 function cbOptions(correct){
-  let pool = cbOptionPool().filter(n => n !== correct);
-  if (pool.length < 3){   // tiny deck: borrow distractors from the full library
+  /* Deck-native chords always fill the distractor slots first — see the
+     identical fix in cdOptions() (Chord Detective) for the simulated
+     numbers: a random shuffle-then-slice over (native + borrowed) let the
+     barre deck's two other barre shapes lose out to easy open-chord
+     decoys the large majority of rounds, so "spot the Bm/F#m/C#m shape"
+     rarely actually tested that 3-way discrimination. Borrowing only
+     tops up whatever's still missing after every native option is in. */
+  let opts = cbOptionPool().filter(n => n !== correct);
+  if (opts.length < 3){   // tiny deck: borrow distractors from the full library
     const all = CB_DECKS[CB_DECKS.length - 1].chords;
-    pool = pool.concat(all.filter(n => n !== correct && pool.indexOf(n) < 0));
+    const borrowed = cbShuffle(all.filter(n => n !== correct && opts.indexOf(n) < 0));
+    opts = opts.concat(borrowed).slice(0, 3);
+  } else {
+    opts = cbShuffle(opts).slice(0, 3);
   }
-  const opts = cbShuffle(pool.slice()).slice(0, 3);
   opts.push(correct);
   return cbShuffle(opts);
 }
@@ -3196,12 +3205,20 @@ function cdOptionPool(){
 }
 
 function cdOptions(correct){
-  let pool = cdOptionPool().filter(n => n !== correct);
-  if (pool.length < 3){   // tiny deck: borrow distractors from the full library
+  /* Deck-native chords always fill the distractor slots first — a random
+     shuffle-then-slice over (native + borrowed) let the barre deck's two
+     other barre chords lose out to easy open-chord decoys 95% of the
+     time (simulated: only 4.5% of rounds tested the actual 3-way Bm/F#m/
+     C#m discrimination this deck exists to teach). Borrowing only tops up
+     whatever's still missing after every native option is already in. */
+  let opts = cdOptionPool().filter(n => n !== correct);
+  if (opts.length < 3){   // tiny deck: borrow distractors from the full library
     const all = CD_DECKS[CD_DECKS.length - 1].chords;
-    pool = pool.concat(all.filter(n => n !== correct && pool.indexOf(n) < 0));
+    const borrowed = cbShuffle(all.filter(n => n !== correct && opts.indexOf(n) < 0));
+    opts = opts.concat(borrowed).slice(0, 3);
+  } else {
+    opts = cbShuffle(opts).slice(0, 3);
   }
-  const opts = cbShuffle(pool.slice()).slice(0, 3);
   opts.push(correct);
   return cbShuffle(opts);
 }
