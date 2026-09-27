@@ -190,8 +190,14 @@ function coachOpen(btn){
         state: 'pending', hit: null
       };
     });
-    const preview = slots.slice(0, 10).map(s => s.label).join('–');
-    desc = t('coach.desc.melody', { count: slots.length, list: preview + (slots.length > 10 ? '…' : '') });
+    /* hideNames (sight-reading, e.g. ca-21): the Ready screen's "You'll
+       play:" line used to spell out every note name here regardless — the
+       one place `1ce8d7a`'s Coach-answer-leak fix (2026-09-25) missed, since
+       it only closed the leak in the tab board itself. Found 2026-09-26. */
+    desc = hideNames
+      ? t('coach.desc.melodyHidden', { count: slots.length })
+      : t('coach.desc.melody', { count: slots.length,
+          list: slots.slice(0, 10).map(s => s.label).join('–') + (slots.length > 10 ? '…' : '') });
   }
 
   /* BPM: start from the sibling ▶ Play slider when there is one (shared
@@ -417,14 +423,15 @@ async function coachStartCheck(){
      exact spot the note readout will appear — so the eye is already in the
      right place on beat 1 instead of hunting for what moved. */
   const firstLabel = coach.mode === 'chords'
-    ? (coach.slots[0].chordName || coach.slots[0].label) : coach.slots[0].label;
+    ? (coach.slots[0].chordName || coach.slots[0].label)
+    : (coach.hideNames ? '' : coach.slots[0].label);
   coachBody().innerHTML =
     coachChordsHtml(coach.slots[0] && coach.slots[0].chordName) +
     `<div class="coach-lane" id="coach-lane">
        <div class="coach-lane-head">
          <span class="coach-lane-now" id="coach-count">&nbsp;</span>
          <span class="coach-lane-lbl">${t('coach.lane.countIn')}</span>
-         <span class="coach-lane-next">${t('games.common.next')} ${escHtml(firstLabel)}</span>
+         <span class="coach-lane-next">${firstLabel ? t('games.common.next') + ' ' + escHtml(firstLabel) : ''}</span>
        </div>
        ${coach.mode === 'melody' ? (coachTabHtml() || coachStripHtml()) : coachStripHtml()}
      </div>`;
@@ -676,8 +683,9 @@ function coachChordsHtml(curName){
    visual cue you only see the instant it's due makes every hit late. */
 function coachLaneHeadHtml(){
   const first = coach.slots[0];
-  const cur = coach.mode === 'chords' ? (first.chordName || first.label) : first.label;
-  const nxt = coach.mode === 'chords' ? coachNextChord(0) : (coach.slots[1] ? coach.slots[1].label : null);
+  const hide = coach.mode === 'melody' && coach.hideNames;
+  const cur = coach.mode === 'chords' ? (first.chordName || first.label) : (hide ? '' : first.label);
+  const nxt = coach.mode === 'chords' ? coachNextChord(0) : (hide ? null : (coach.slots[1] ? coach.slots[1].label : null));
   return `<div class="coach-lane-head">
             <span class="coach-lane-now" id="coach-chord">${escHtml(cur)}</span>
             <span class="coach-lane-lbl">${t(coach.mode === 'chords' ? 'coach.lane.strumNow' : 'coach.lane.playNow')}</span>
@@ -849,7 +857,13 @@ function coachLoop(){
       coachBeatRefresh(cur);
       const chordEl = document.getElementById('coach-chord');
       if (chordEl){
-        const name = coach.mode === 'chords' ? coach.slots[cur].chordName : coach.slots[cur].label;
+        /* hideNames (sight-reading, e.g. ca-21): this per-beat DOM update is
+           the third and biggest leak `1ce8d7a` (2026-09-25) missed — it
+           printed every upcoming note name live as the piece played, on top
+           of the Ready-screen and count-in leaks fixed above. Found
+           2026-09-26. */
+        const hide = coach.mode === 'melody' && coach.hideNames;
+        const name = hide ? '' : (coach.mode === 'chords' ? coach.slots[cur].chordName : coach.slots[cur].label);
         if (chordEl.textContent !== name){
           chordEl.textContent = name;
           if (coach.mode === 'chords'){
@@ -860,9 +874,9 @@ function coachLoop(){
         }
         const nextEl = document.getElementById('coach-next');
         if (nextEl){
-          const nx = coach.mode === 'chords' ? coachNextChord(cur) : (coach.slots[cur + 1] ? coach.slots[cur + 1].label : null);
+          const nx = hide ? null : (coach.mode === 'chords' ? coachNextChord(cur) : (coach.slots[cur + 1] ? coach.slots[cur + 1].label : null));
           nextEl.textContent = nx ? t('games.common.next') + ' ' + nx
-            : (coach.mode === 'chords' ? t('coach.lastChord') : t('coach.lastNote'));
+            : (hide ? '' : (coach.mode === 'chords' ? t('coach.lastChord') : t('coach.lastNote')));
         }
       }
     }

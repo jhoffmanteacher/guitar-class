@@ -746,18 +746,17 @@ async function loadProgress(){
    student reads it. Reads that fail (offline / rules) leave games ON so a
    connection hiccup never locks a student out of the arcade. */
 async function loadClassConfig(){
-  gamesAccessOn = true;
-  accountPaused = false;
-  periodOverride = '';
-  hiddenActivityIds = {};
-  activityDates = {};
-  activityTitles = {};
-  activityNumbers = {};
-  activityBoard = {};
-  activityBoardOn = false;
-  activityClears = {};
-  retiredActivityIds = {};
-  optionalActivityIds = {};
+  /* Deliberately no upfront reset of the gate/visibility globals here — every
+     one of them already carries its safe default at declaration, and this
+     function reruns on every tab-visibility return (see the
+     `visibilitychange` handler). Resetting them synchronously before the
+     `await`s below used to open a real window, on every such call, where a
+     render saw an empty board/date/hidden/retired/clears set and read the
+     student as gated-with-nothing-posted or ungated-with-nothing-blocking —
+     found 2026-09-26. Each field is overwritten in place once its real value
+     is known, whether that's a fresh read below or the cache restore in the
+     early-return/catch paths, so it now just keeps showing the last known
+     good value for the length of the read instead of blanking first. */
   try{
     await ensureDb();
     if(!db){ restoreClassConfigFromCache(); applyActivityGate(); return; }
@@ -1575,7 +1574,16 @@ function tabPageStep(btn, dir){
   if(!tabEl) return;
   const pages = Array.from(tabEl.querySelectorAll('.tab-page'));
   const cur = pages.findIndex(p => !p.hidden);
-  tabShowPage(tabEl, (cur < 0 ? 0 : cur) + dir);
+  const k = Math.max(0, Math.min(pages.length - 1, (cur < 0 ? 0 : cur) + dir));
+  tabShowPage(tabEl, k);
+  /* Keep the snippet's page-sync cache (snipSyncTabPage) in step with a
+     manual Prev/Next — it used to only ever get written by the snippet loop
+     itself, so a manual page-turn left it stale: the loop's next computed
+     page could coincidentally match the STALE cached value and skip turning
+     the page back, silently freezing the tab on the wrong two lines while
+     the band kept playing. Found 2026-09-26. Harmless no-op on a tab with no
+     snippet sibling — nothing ever reads the attribute in that case. */
+  tabEl.dataset.snipPage = String(k);
 }
 /* The page holding beat `seq`, or -1 when the tab isn't paged. */
 function tabPageOf(tabEl, seq){
@@ -3700,7 +3708,15 @@ function routeExploreHash(){
      not a real navigation, and shouldn't cost a Back tap of its own. */
   if(document.body.classList.contains('ca-gated') && !GATE_OPEN_HASHES.includes(h)){
     gateToast(t('gate.activityFirst'));
-    history.replaceState(null, '', location.pathname + location.search + '#class-activities');
+    /* Land back on whatever gate-open hash was already showing (an open
+       activity's own #class-activities/ca-N, tail included) rather than
+       always the bare page — tapping a greyed-out (but still clickable) rail
+       button used to reset to bare #class-activities every time, which stops
+       the band, collapses a revealDelay tab and resets a paged tab even when
+       the student never left the activity they were reading. Found
+       2026-09-26. */
+    const back = GATE_OPEN_HASHES.includes(exploreHashBase(lastRoutedHash)) ? lastRoutedHash : '#class-activities';
+    history.replaceState(null, '', location.pathname + location.search + back);
     routeExploreHash();
     return;
   }
@@ -10598,6 +10614,18 @@ function appIsOnScreen(){
    visibilitychange re-check live-quiz.js's invite uses, and the same reason:
    nobody is staring at the site when the teacher clears someone, so the
    first chance to notice is the tab coming back to the foreground. */
+/* A cheap snapshot of the fields loadClassConfig() can change, so the
+   visibilitychange handler below can tell "nothing moved" from "something
+   moved" and only pay for a full re-render in the second case. Before this
+   (2026-09-26), every tab return rebuilt the whole open In-Class Activities
+   screen unconditionally — resetting any revealDelay tab to blank, any paged
+   tab to page 1, and any paused tab-player position, even when the config
+   read came back byte-identical to what was already showing. */
+function classConfigSignature(){
+  return JSON.stringify([activityDates, activityBoard, activityBoardOn, hiddenActivityIds,
+    retiredActivityIds, activityClears, optionalActivityIds, activityTitles, activityNumbers,
+    periodOverride]);
+}
 document.addEventListener('visibilitychange', () => {
   /* The snippet loop is closed by rAF (snipTick), and rAF stops firing in a
      hidden tab while an <audio> element keeps playing — so a backgrounded tab
@@ -10606,7 +10634,8 @@ document.addEventListener('visibilitychange', () => {
      band when the tab goes away; the student presses Play again. */
   if(document.hidden){ snipStop(); return; }
   if(!currentUser || IS_TEACHER_MODE) return;
-  loadClassConfig().then(refreshOpenClassActivitiesScreen);
+  const before = classConfigSignature();
+  loadClassConfig().then(() => { if(classConfigSignature() !== before) refreshOpenClassActivitiesScreen(); });
 });
 // Shared "is In-Class Activities open, and if so re-render it" check — every
 // place that changes something the screen might already be showing (a period

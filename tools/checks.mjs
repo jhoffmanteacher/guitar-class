@@ -1484,6 +1484,60 @@ function checkJourneyThemeDrift() {
   if (!bad) ok(`${shared} shared tab/live-quiz rules identical across both stylesheets (${exempt} documented per-property exceptions)`);
 }
 
+/* ════════════════════════════════════════════════════════════════════
+   1t2. FLOATING TOOLS THEME ↔ APP THEME — tabs/fab-tools.css says right in
+   its own header comment that it's "ported verbatim from the main app's
+   styles.css", but nothing checked that claim: found drifted 2026-09-26
+   (.tp-title's icon layout, .tp-ctrl's stacked-row spacing), the same
+   one-sided-copy bug class 1t already guards for journey-theme.css, one
+   level over. Same per-property comparison, same shared cssRuleMap/cssDecls.
+
+   .fab-group/.fab-buttons are exempted by property, not by rule: the app
+   docks the tools in the rail (a row, no fixed position needed) and the
+   Journey pages float them over the page corner (a column, pinned), so
+   position/inset/z-index/flex-direction/align-items/gap are meant to
+   differ there. Every OTHER shared selector (.fab, .tool-popup, .tuner-*,
+   .ts-btn, .tp-*, .bpm-*) is compared with no exemptions.
+   ════════════════════════════════════════════════════════════════════ */
+const FAB_SHARED_PREFIXES = [/^\.fab\b/, /^\.tool-popup/, /^\.tuner-/, /^\.ts-btn/, /^\.tp-/, /^\.bpm-/];
+const FAB_ALLOWED_DIFFS = new Map([
+  ['.fab-group', new Set(['position', 'top', 'bottom', 'left', 'right', 'align-items', 'gap', 'z-index'])],
+  ['.fab-buttons', new Set(['flex-direction', 'align-items', 'gap'])],
+]);
+function checkFabToolsThemeDrift() {
+  head('1t2. Floating tools (fab-tools.css) match the app theme');
+  let appCss, fCss;
+  try {
+    appCss = readFileSync(join(ROOT, 'styles.css'), 'utf8');
+    fCss = readFileSync(join(ROOT, 'tabs/fab-tools.css'), 'utf8');
+  } catch { warn('stylesheets unreadable — drift NOT checked'); warnings++; return; }
+  const app = cssRuleMap(appCss), fab = cssRuleMap(fCss);
+  const label = m => m ? `${m} { ` : '';
+  let shared = 0, bad = 0;
+  const flag = m => { err(m); problems++; bad++; };
+  for (const [sel, appByMedia] of app) {
+    if (!FAB_SHARED_PREFIXES.some(re => re.test(sel))) continue;
+    const fabByMedia = fab.get(sel);
+    if (!fabByMedia) continue;         // selector one-sided by design
+    const allow = FAB_ALLOWED_DIFFS.get(sel) || new Set();
+    for (const media of new Set([...appByMedia.keys(), ...fabByMedia.keys()])) {
+      const a = appByMedia.get(media), f = fabByMedia.get(media);
+      if (!a || !f) {
+        flag(`"${label(media)}${sel}" exists only in ${a ? 'styles.css' : 'tabs/fab-tools.css'} — a one-sided rule is drift too (CLAUDE.md: restyle both or neither).`);
+        continue;
+      }
+      shared++;
+      for (const prop of new Set([...a.keys(), ...f.keys()])) {
+        if (allow.has(prop)) continue;
+        if (a.get(prop) === f.get(prop)) continue;
+        flag(`"${label(media)}${sel}" — "${prop}" has drifted between styles.css and tabs/fab-tools.css — restyle both or neither (CLAUDE.md).\n      styles.css   : ${a.has(prop) ? a.get(prop) : '(absent)'}\n      fab-tools.css: ${f.has(prop) ? f.get(prop) : '(absent)'}`);
+      }
+    }
+  }
+  const exempt = [...FAB_ALLOWED_DIFFS].reduce((n, [, ps]) => n + ps.size, 0);
+  if (!bad) ok(`${shared} shared floating-tools rules identical across both stylesheets (${exempt} documented per-property exceptions)`);
+}
+
 /* Per-page tab-card counts, pinned. See the note where they're compared. */
 const JOURNEY_TAB_COUNTS = {
   'all-along-the-watchtower.html': 10,
@@ -2046,7 +2100,7 @@ const SLANG_PHRASES = [
   'read it cold', 'sight-read it cold', 'hearing it cold', 'park on just the f',
   "that one's free", 'trip up the neck', 'driving riff',
   'carries the whole job', 'holding the two bars out', 'the module bar', 'on call',
-  'cold read', 'feels like a punchline', 'parked in one place',
+  'cold read', 'cold-read', 'feels like a punchline', 'parked in one place',
   'rushed at first, then locked in', 'runs on autopilot', 'test the names cold',
 ];
 /* Hoisted to module scope so 1y can sweep exit-check item labels with the
@@ -2071,6 +2125,10 @@ const STUDENT_I18N_EN_RE = /\ben:\s*(?:'((?:\\.|[^'\\])*)'|"((?:\\.|[^"\\])*)")/
    the Challenge-card assessment tag ("(assessment preparation)") and most
    Challenge titles live in `label`, so 1w-t alone also sweeps it. */
 const STUDENT_LABEL_RE = /\blabel:\s*'((?:\\.|[^'\\])*)'/g;
+/* `caption` (a tab's own heading) is student-facing but was never scanned by
+   either check — found 2026-09-26 alongside the `label:` gap below, both from
+   the same "cold-read" instances in module-9.js's TAB cards. */
+const STUDENT_CAPTION_RE = /\bcaption:\s*'((?:\\.|[^'\\])*)'/g;
 function checkSlangPhrasing() {
   head('1w. Slang and figurative phrasing in student-facing text');
   const RE = SLANG_RE;
@@ -2092,7 +2150,13 @@ function checkSlangPhrasing() {
     });
   }
 
-  /* Module content + class activities — the EN authoring fields only. */
+  /* Module content + class activities — the EN authoring fields only.
+     Matched against the UNESCAPED value: a regex-captured field is still raw
+     source text (e.g. "that one\'s free"), and a banned phrase containing an
+     apostrophe can never match that raw form. Also scans `caption` and
+     nested `label` (a tab/playSeq heading, not a step/Challenge title) —
+     found missing 2026-09-26 when module-9.js's TAB cards shipped "cold-read"
+     and "read it cold" invisibly in both. */
   for (const file of [...MODULE_FILES, 'class-activities.js']) {
     let lines;
     try { lines = readFileSync(join(ROOT, file), 'utf8').split('\n'); } catch { continue; }
@@ -2104,6 +2168,10 @@ function checkSlangPhrasing() {
         for (const m of unescapeJs(f[2]).matchAll(RE)) flag(file, li, m[0]);
       for (const c of line.matchAll(STUDENT_CHOICES_RE))
         for (const m of unescapeJs(c[1]).matchAll(RE)) flag(file, li, m[0]);
+      for (const c of line.matchAll(STUDENT_CAPTION_RE))
+        for (const m of unescapeJs(c[1]).matchAll(RE)) flag(file, li, m[0]);
+      for (const l of line.matchAll(STUDENT_LABEL_RE))
+        for (const m of unescapeJs(l[1]).matchAll(RE)) flag(file, li, m[0]);
     });
   }
 
@@ -5413,6 +5481,7 @@ function checkCaButtonNamesAndPaper() {
   checkTabNoScroll();
   checkContrast();
   checkJourneyThemeDrift();
+  checkFabToolsThemeDrift();
   checkJourneyTabCards();
   checkTabAsciiAlignment();
   checkTabAsciiEnglish();

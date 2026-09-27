@@ -1237,6 +1237,8 @@
       es: '{names} — un rasgueo en cada tiempo' },
     'coach.desc.melody': { en: '{count} notes: {list} — one note per beat',
       es: '{count} notas: {list} — una nota por tiempo' },
+    'coach.desc.melodyHidden': { en: '{count} notes, one per beat — read them from the TAB',
+      es: '{count} notas, una por tiempo — léelas del TAB' },
     'coach.done.button': { en: 'I’m done',
       es: 'Ya terminé' },
     'coach.foot': { en: 'Listening happens right on this device — nothing is recorded or uploaded.',

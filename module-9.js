@@ -952,7 +952,7 @@ SETS.push(
         ]
       },
       c: {
-        title: 'Practice station — reading, writing, and cold-reading TAB',
+        title: 'Practice station — reading, writing, and reading TAB at first sight',
         title_es: 'Estación de práctica — leer, escribir y leer TAB a primera vista',
         sections: [
           {
@@ -980,13 +980,13 @@ SETS.push(
                 hint_es: 'Leer TAB arriba del mástil se siente más difícil sobre todo porque los números son menos familiares, no porque sea realmente distinto a leerlo abajo.',
                 stuck: 'Fret the little F shape and strum it once to hear the target chord before reading the roll note by note.',
                 stuck_es: 'Trastea la forma de F pequeña y ráscala una vez para escuchar el acorde objetivo antes de leer el roll nota por nota.',
-                levelUp: 'Read a second higher-position TAB you haven\'t seen before today, cold.',
+                levelUp: 'Read a second higher-position TAB you haven\'t seen before today, at first sight.',
                 levelUp_es: 'Lee a primera vista un segundo TAB en posición alta que no hayas visto antes de hoy.',
                 skills: [1]
               },
               {
                 label: 'Challenge — Higher Still (the real up-high read)', label_es: 'Reto — Todavía más alto (la verdadera lectura arriba)',
-                text: '<ul><li>Cold-read the 8-note line below — the up-high follow-up to the "Luna" warm-up above (frets 0–3). It lives entirely at frets 5–10, anchored around 5th position with a stretch up to fret 10, crossing the D, G, and B strings.</li></ul>You\'ve got it when: you play all eight notes in order, in tune, reading only the TAB.',
+                text: '<ul><li>Read the 8-note line below at first sight — the up-high follow-up to the "Luna" warm-up above (frets 0–3). It lives entirely at frets 5–10, anchored around 5th position with a stretch up to fret 10, crossing the D, G, and B strings.</li></ul>You\'ve got it when: you play all eight notes in order, in tune, reading only the TAB.',
                 text_es: '<ul><li>Lee a primera vista la línea de 8 notas de abajo — la continuación en posición alta de la lectura de calentamiento de "Luna" de arriba (trastes 0–3). Vive completamente en los trastes 5–10, anclada alrededor de la 5ª posición con un estiramiento hasta el traste 10, cruzando las cuerdas Re, Sol y Si.</li></ul>Lo tienes cuando: tocas las ocho notas en orden, afinado, leyendo solo el TAB.',
                 hint: 'The shapes feel unfamiliar this high up, but the rule never changes: top line = thinnest string, numbers = frets. Find fret 5 (two frets past the fret-3 dot) and anchor your hand there.',
                 hint_es: 'Las formas se sienten poco familiares tan arriba, pero la regla nunca cambia: línea superior = cuerda más delgada, números = trastes. Encuentra el traste 5 (dos trastes después del punto del traste 3) y ancla tu mano ahí.',
@@ -995,7 +995,7 @@ SETS.push(
                 levelUp: 'Play the line backwards, from the last note to the first, still reading only the page.',
                 levelUp_es: 'Toca la línea al revés, de la última nota a la primera, todavía leyendo solo la página.',
                 skills: [1],
-                tab: { caption: 'Cold-read: a 5th-position line with a stretch to fret 10, across the D, G & B strings (frets 5–10)',
+                tab: { caption: 'At first sight: a 5th-position line with a stretch to fret 10, across the D, G & B strings (frets 5–10)',
                   caption_es: 'Lectura a primera vista: una línea en 5ª posición con un estiramiento hasta el traste 10, a través de las cuerdas Re, Sol y Si (trastes 5–10)', notes: [
                   { string: 'G', fret: 5, note: 'C', midi: 60 },
                   { string: 'G', fret: 7, note: 'D', midi: 62 },
@@ -1006,7 +1006,7 @@ SETS.push(
                   { string: 'G', fret: 7, note: 'D', midi: 62 },
                   { string: 'D', fret: 7, note: 'A', midi: 57 }
                 ] },
-                playSeq: { label: 'Hear the line (check yourself only AFTER you\'ve read it cold)', label_es: 'Escucha la línea (compruébate solo DESPUÉS de haberla leído a primera vista)', bpm: 70, notes: [60, 62, 64, 67, 69, 67, 62, 57] }
+                playSeq: { label: 'Hear the line (check yourself only AFTER you\'ve read it at first sight)', label_es: 'Escucha la línea (compruébate solo DESPUÉS de haberla leído a primera vista)', bpm: 70, notes: [60, 62, 64, 67, 69, 67, 62, 57] }
               }
             ]
           },
@@ -1076,18 +1076,18 @@ SETS.push(
             ]
           },
           {
-            title: 'The TAB cold-read test',
+            title: 'The TAB at-first-sight test',
             title_es: 'La prueba de lectura a primera vista de TAB',
             steps: [
               {
-                label: 'Challenge 4 — Cold-Read Your "Seven Nation Army" TAB', label_es: 'Reto 4 — Lee a primera vista tu TAB de "Seven Nation Army"',
+                label: 'Challenge 4 — Read Your "Seven Nation Army" TAB at First Sight', label_es: 'Reto 4 — Lee a primera vista tu TAB de "Seven Nation Army"',
                 text: 'At least a day after writing your Challenge 2 TAB:<ul><li>Open Challenge 2 above, look at what you typed, and play it back exactly as written — trust only what you typed, no memory allowed.</li></ul>You\'ve got it when: the riff comes out right on the first try, purely from what you typed.',
                 text_es: 'Al menos un día después de escribir tu TAB del Reto 2:<ul><li>Abre el Reto 2 de arriba, mira lo que escribiste, y tócalo exactamente como está — confía solo en lo que escribiste, no se permite memoria.</li></ul>Lo tienes cuando: el riff sale bien al primer intento, únicamente a partir de lo que escribiste.',
                 hint: 'This is the real test of whether your spacing and fret numbers were actually readable — not just correct to you.',
                 hint_es: 'Esta es la verdadera prueba de si tu espaciado y tus números de traste realmente eran legibles — no solo correctos para ti.',
                 stuck: 'If your own TAB stumps you, say the fret numbers out loud in rhythm while following what you typed, then add the guitar.',
                 stuck_es: 'Si tu propio TAB te confunde, di los números de traste en voz alta con el ritmo mientras sigues lo que escribiste, y luego agrega la guitarra.',
-                levelUp: 'Write and cold-read a second riff.',
+                levelUp: 'Write a second riff and read it at first sight.',
                 levelUp_es: 'Escribe y lee a primera vista un segundo riff.',
                 skills: [6]
               }
@@ -1114,7 +1114,7 @@ SETS.push(
     skills: [
       { id: 'm9w3-s1', text: 'Read and play a TAB phrase written above fret 5',
         text_es: 'Leer y tocar una frase de TAB escrita arriba del traste 5',
-        gotItWhen: 'you can cold-read an 8-note line living entirely at fret 5 and above, in tune, using only the TAB.',
+        gotItWhen: 'you can read an 8-note line at first sight living entirely at fret 5 and above, in tune, using only the TAB.',
         gotItWhen_es: 'puedes leer a primera vista una línea de 8 notas que vive completamente en el traste 5 y más arriba, afinada, usando solo el TAB.',
         practice: { type: 'mc', prompt: 'A high-position TAB shows "10" on the B-string line. What is it?',
           prompt_es: 'Un TAB en posición alta muestra "10" en la línea de la cuerda Si. ¿Qué es?',
@@ -1208,7 +1208,7 @@ MODULE_REVIEWS[9] = {
   assessItems: [
     'Name every string at the fret-5 dot and the fret-7 dot, no chart, within 5 seconds each',
     'Play a thread-song melody from TAB in a higher position',
-    'Finish a 4-bar TAB you wrote yourself that passes the cold-read test — a day later, the page alone reproduces the riff',
+    'Finish a 4-bar TAB you wrote yourself that passes the at-first-sight test — a day later, the page alone reproduces the riff',
     'Play a melody that crosses three or more strings cleanly, every note ringing in order',
     'Read a partial-shape or slash chord chart and name which strings actually ring'
   ],

@@ -1095,7 +1095,7 @@ SETS.push(
             levelUp_es: 'Léelo al revés (de derecha a izquierda), o mueve la misma forma a la caja de E menor (raíz en cuerda al aire) y léelo ahí.',
             skills: [8],
             tab: {
-              caption: 'Cold-read lick · A minor pentatonic box · four bars',
+              caption: 'At-first-sight lick · A minor pentatonic box · four bars',
               caption_es: 'Lick a primera vista · caja de A menor pentatónica · cuatro compases',
               notes: [
                 // Bar 1 — start on the middle A and step down (not the

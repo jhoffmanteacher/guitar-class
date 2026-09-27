@@ -34,7 +34,8 @@
 .ts-btn:hover{background:var(--bg3)}
 .ts-btn.active{background:var(--purple-bg);border-color:var(--purple-accent);color:var(--purple-text);font-weight:500}
 .tp-head{display:flex;align-items:center;justify-content:space-between;margin-bottom:14px}
-.tp-title{font-size:0.9375rem;font-weight:500}
+.tp-title{font-size:0.9375rem;font-weight:500;display:inline-flex;align-items:center;gap:6px}
+.tp-title svg{width:16px;height:16px;flex:0 0 16px}
 .tp-close{background:none;border:none;cursor:pointer;font-size:1.25rem;color:var(--text3);line-height:1;padding:0 2px;font-family:inherit;position:relative}
 .tp-close::after{content:'';position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);
   width:max(100%,44px);height:max(100%,44px)}
@@ -44,6 +45,7 @@
 .bpm-lbl{font-size:0.8125rem;color:var(--text2)}
 .bpm-row .bpm-slider{flex:1}
 .tp-ctrl{display:flex;gap:5px}
+.tp-ctrl+.tp-ctrl{margin-top:8px;margin-bottom:12px}
 .tp-btn{flex:1;padding:10px 0;border-radius:var(--radius-sm);border:1px solid var(--border2);background:var(--bg2);font-size:0.875rem;cursor:pointer;color:var(--text);font-family:inherit}
 .tp-btn:hover{background:var(--bg3)}
 .tp-btn.primary{background:var(--blue-bg);border-color:var(--blue-text);color:var(--blue-text);font-weight:500}
@@ -71,3 +73,5 @@
 .bpm-slider:hover::-moz-range-thumb,.bpm-slider:focus::-moz-range-thumb{background:var(--text)}
 /* ≥44px tap targets, matching the main app's tap-target pass */
 .tp-btn,.ts-btn,.timer-presets button{min-height:44px}
+@media print{.fab-group{display:none !important}}
+@media (max-width:600px){.bpm-slider{width:96px}}
