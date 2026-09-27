@@ -361,8 +361,8 @@ SETS.push(
             hint: 'Tap the finger order until you can do it without thinking. Then speed up.',
             hint_es: 'Marca el orden de los dedos hasta que puedas hacerlo sin pensar. Luego acelera.',
             skills: [3, 4],
-            response: { type: 'short', placeholder: 'When the chord changes, does the picking pattern change too? And what did Lauren show that Set 1\'s videos didn\'t?',
-              placeholder_es: 'Cuando el acorde cambia, ¿el patrón de punteo también cambia? ¿Y qué mostró Lauren que los videos de la Unidad 1 no mostraron?' }
+            response: { type: 'short', placeholder: 'What did Lauren show or explain that Set 1\'s videos didn\'t?',
+              placeholder_es: '¿Qué mostró o explicó Lauren que los videos de la Unidad 1 no mostraron?' }
           }
             ]
           },
@@ -724,8 +724,23 @@ SETS.push(
             hint: 'The hardest part: keeping the picking pattern PERFECTLY STEADY through a chord change. Anticipate the next chord — start moving your fretting hand on the LAST note of the current bar.',
             hint_es: 'La parte más difícil: mantener el patrón de punteo PERFECTAMENTE CONSTANTE a través de un cambio de acorde. Anticipa el siguiente acorde — empieza a mover tu mano de trastear en la ÚLTIMA nota del compás actual.',
             skills: [3, 4],
-            response: { type: 'short', placeholder: 'When you fingerpick from Am to C, when (which note in the bar) does your fretting hand start preparing for the next chord?',
-              placeholder_es: 'Cuando tocas con fingerpicking de Am a C, ¿cuándo (en cuál nota del compás) empieza tu mano de trastear a prepararse para el siguiente acorde?' }
+            response: { type: 'mc', prompt: 'When you fingerpick from Am to C, when does your fretting hand start moving to the next chord?',
+              prompt_es: 'Cuando tocas con fingerpicking de Am a C, ¿cuándo empieza tu mano de trastear a moverse hacia el siguiente acorde?',
+              answer: 0,
+              choices: [
+                'Right at the end of the bar, one beat before the new chord starts',
+                'Right after the new bar begins, not before',
+                'Only once you can already hear the new chord\'s bass note',
+                'Whenever there\'s a natural pause in the picking pattern'
+              ],
+              choices_es: [
+                'Justo al final del compás, antes de que empiece el acorde nuevo',
+                'Justo después de que empiece el compás nuevo, no antes',
+                'Solo cuando ya puedes oír la nota grave del acorde nuevo',
+                'Cuando haya una pausa natural en el patrón de punteo'
+              ],
+              explain: 'Waiting for the new bar to arrive means your hand starts moving too late — the change should already be under way before the bar ends, so the new shape is ready right when the downbeat lands.',
+              explain_es: 'Esperar a que llegue el compás nuevo significa que tu mano empieza a moverse demasiado tarde — el cambio ya debería estar en marcha antes de que termine el compás, así que la forma nueva está lista justo cuando cae el tiempo fuerte.' }
           }
             ]
           },

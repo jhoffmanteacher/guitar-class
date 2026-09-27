@@ -5,6 +5,18 @@ Notable changes to the Guitar Class site. Newest first.
 For the full session-by-session history (and the reasoning behind each change),
 see `WORKFLOW.md` and the git commit log.
 
+## 2026-09-27 — Three video-question cards are quick-pick now
+
+### Changed
+
+- **Two "Watch" cards in Module 7** (the E-shape and A-shape barre videos)
+  and **one in Module 8** (fingerpicking chord changes) now give you four
+  quick choices instead of a typed box, since the card already told you
+  the answer — pick it instead of retyping it.
+- A fourth card (Module 8's Lauren Bateman video) keeps its typed box,
+  since it asks what you noticed that's genuinely new — that's worth
+  writing, not picking from a list.
+
 ## 2026-09-27 — Fewer typed boxes, clearer targets in Modules 7–9
 
 ### Changed

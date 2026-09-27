@@ -379,8 +379,23 @@ SETS.push(
             hint: 'The "E shape" is literally the E major open chord, but you slide your fingers up the neck and use your INDEX finger to "be the nut" (the thin strip at the top of the neck that the strings cross) — your finger becomes the bar.',
             hint_es: 'La "forma de E" es literalmente el acorde abierto de E mayor, pero deslizas tus dedos por el mástil y usas tu dedo ÍNDICE para "ser la cejuela" (la tira delgada en la parte superior del mástil por donde cruzan las cuerdas) — tu dedo se convierte en la cejilla.',
             skills: [2, 3],
-            response: { type: 'short', placeholder: 'Why is it called an "E-shape" barre chord? What does the shape have in common with the open E major chord?',
-              placeholder_es: '¿Por qué se llama acorde con cejilla "en forma de E"? ¿Qué tiene en común la forma con el acorde abierto de E mayor?' }
+            response: { type: 'mc', prompt: 'Why is it called an "E-shape" barre chord?',
+              prompt_es: '¿Por qué se llama acorde con cejilla "en forma de E"?',
+              answer: 0,
+              choices: [
+                'You keep the same finger shape as open E, just moved higher',
+                'You strum an open E chord, then carry it up while it rings',
+                'It only works if you play it at the guitar\'s open position',
+                'The shape\'s fingers change every time you move it up a fret'
+              ],
+              choices_es: [
+                'Mantienes la misma forma de dedos del E abierto, solo más arriba',
+                'Rasgueas el E abierto y luego lo subes mientras sigue sonando',
+                'Solo funciona si lo tocas en la posición abierta de la guitarra',
+                'Los dedos de la forma cambian cada vez que subes un traste'
+              ],
+              explain: 'The E-shape keeps the exact same finger pattern as open E — you\'ve just moved your INDEX finger up to act as the nut, so the whole shape (and its root note) slides with it.',
+              explain_es: 'La forma de E mantiene exactamente el mismo patrón de dedos que el E abierto — solo moviste tu dedo ÍNDICE hacia arriba para que actúe como la cejuela, así que toda la forma (y su nota raíz) se desliza con él.' }
           }
             ]
           },
@@ -675,8 +690,23 @@ SETS.push(
             hint: 'B major is a great A-shape practice chord — its root is at the 2nd fret on the A string. You may hear a muted high E in some videos — many players let the ring finger mute it, and that\'s a real technique. In this module, though, we arch the fingers so the high e string rings.',
             hint_es: 'B mayor es un gran acorde de práctica para la forma de A — su raíz está en el traste 2 de la cuerda La. Puede que escuches una mi aguda silenciada en algunos videos — muchos guitarristas dejan que el dedo anular la silencie, y esa es una técnica real. En este módulo, sin embargo, arqueamos los dedos para que la mi aguda suene.',
             skills: [3, 4],
-            response: { type: 'short', placeholder: 'In this module, should the high e string ring or stay muted in your A-shape barre? What do you do with your fingers to make it ring?',
-              placeholder_es: 'En este módulo, ¿la cuerda mi aguda debe sonar o quedarse silenciada en tu cejilla en forma de A? ¿Qué haces con tus dedos para que suene?' }
+            response: { type: 'mc', prompt: 'In this module, what should the high e string do in your A-shape barre?',
+              prompt_es: 'En este módulo, ¿qué debe hacer la cuerda mi aguda en tu cejilla en forma de A?',
+              answer: 0,
+              choices: [
+                'Ring cleanly, left open by how you angle your fingers',
+                'Stay muted by the ring finger, the way some players do it',
+                'Stay muted by the barre finger itself',
+                'Buzz a little — that\'s normal for this shape'
+              ],
+              choices_es: [
+                'Sonar limpia, dejada libre por cómo angulas los dedos',
+                'Quedarse silenciada por el dedo anular, como hacen algunos guitarristas',
+                'Quedarse silenciada por el propio dedo de la cejilla',
+                'Zumbar un poco — eso es normal en esta forma'
+              ],
+              explain: 'This module angles the fingers so the high e string rings — some players let the ring finger mute it instead, which is a real technique, but not the one this module teaches.',
+              explain_es: 'Este módulo angula los dedos para que la cuerda mi aguda suene — algunos guitarristas dejan que el dedo anular la silencie en su lugar, que es una técnica real, pero no la que enseña este módulo.' }
           }
             ]
           },
