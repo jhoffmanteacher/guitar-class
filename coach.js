@@ -1532,7 +1532,7 @@ function fretSetLevel(i){
 function fretNewRound(levelIdx){
   fretGame = { level: levelIdx, tries: 0, results: [], phase: 'play',
                prompt: null, readings: [], cooldownUntil: 0, needSilence: false,
-               hint: '', flash: null, lastPitchT: 0 };
+               hint: '', flash: null, lastPitchT: 0, advancing: false };
   fretNextPrompt();
 }
 
@@ -1551,6 +1551,7 @@ function fretNextPrompt(){
   p.note = coachNoteName(p.m);
   g.prompt = p;
   g.tries = 0; g.hint = ''; g.flash = null; g.readings = []; g.attackT = 0;
+  g.advancing = false;
   fretRender();
 }
 
@@ -1649,6 +1650,7 @@ function fretJudge(midi){
     g.hint = '';
     g.flash = { text: '&#x2713; ' + t(first ? 'games.fret.firstTry' : 'games.fret.gotThere', { note: escHtml(p.note) }) };
     if (g.results.length >= FRET_ROUND){ fretFinish(g); return; }
+    g.advancing = true;   // blocks a Skip press during this reveal, same guard as fretSkip's own
     fretRender();
     setTimeout(() => { if (fretGame === g && g.phase === 'play') fretNextPrompt(); }, 900);
     return;
@@ -1671,12 +1673,17 @@ function fretJudge(midi){
 
 function fretSkip(){
   const g = fretGame;
-  if (!g || g.phase !== 'play' || !g.prompt) return;
+  // advancing: a correct-answer flash or an earlier Skip is already
+  // counting down to the next prompt — a second press here would push a
+  // phantom miss for an already-answered prompt and schedule a duplicate
+  // fretNextPrompt.
+  if (!g || g.phase !== 'play' || !g.prompt || g.advancing) return;
   const p = g.prompt;
   g.results.push(false);
   g.hint = t('games.fret.skipReveal', { fret: p.f, note: p.note, string: fretStringName(p.s) });
   g.cooldownUntil = performance.now() + 1600;
   g.attackT = 0;
+  g.advancing = true;
   if (g.results.length >= FRET_ROUND){ fretFinish(g); return; }
   fretRender();
   setTimeout(() => { if (fretGame === g && g.phase === 'play') fretNextPrompt(); }, 1600);
@@ -2003,18 +2010,24 @@ function gamesRenderHub(p){
     }
   } catch(e){}
   const fzChip = gamesBestChip(saved.fz && saved.fz.best, fzBest);
-  let shBest = 0;
+  let shBest = 0, shAllTime = 0;
   for (const pat of SH_PATTERNS){
     const b = shBestRead(pat.id);
     if (b) shBest = Math.max(shBest, b.score);
+    // games.sh is keyed by pattern id (shFinish saves games.sh[pat.id].best),
+    // not a single top-level .best — read the same shape it's written in.
+    const sb = saved.sh && saved.sh[pat.id] && saved.sh[pat.id].best;
+    if (sb) shAllTime = Math.max(shAllTime, sb);
   }
-  const shChip = gamesBestChip(saved.sh && saved.sh.best, shBest);
-  let srBest = 0;
+  const shChip = gamesBestChip(shAllTime, shBest);
+  let srBest = 0, srAllTime = 0;
   for (const pat of SH_PATTERNS){
     const b = srBestRead(pat.id);
     if (b) srBest = Math.max(srBest, b.acc);
+    const sb = saved.sr && saved.sr[pat.id] && saved.sr[pat.id].best;
+    if (sb) srAllTime = Math.max(srAllTime, sb);
   }
-  const srChip = gamesBestChip(saved.sr && saved.sr.best, srBest, '%');
+  const srChip = gamesBestChip(srAllTime, srBest, '%');
   const fretChip = saved.fret && saved.fret.best
     ? `<span class="games-card-best">&#x1F3C6; ${t('games.fret.bestChip', { best: saved.fret.best, total: FRET_ROUND })}</span>` : '';
   let rrChip = '';
@@ -3394,6 +3407,14 @@ function ntrStart(){
   ntrNext();
 }
 
+/* Shared m:ss countdown formatter — Chord Blitz stopped needing it when it
+   moved to a per-card seconds-only display (2026-09-16), but Name That Riff,
+   Fret Zap, Pattern Detective and Build-a-Chord still run a 60–90s round
+   timer and render this. Keep it as long as any of those four call it. */
+function cbFmtTime(ms){
+  const t = Math.max(0, Math.ceil(ms / 1000));
+  return Math.floor(t / 60) + ':' + String(t % 60).padStart(2, '0');
+}
 function ntrTimerTick(){
   if (!ntr || ntr.phase !== 'play'){
     if (ntrTick){ clearInterval(ntrTick); ntrTick = null; }
@@ -5730,13 +5751,13 @@ const RN_SONGS = [
   { id: 'luna', title: '"Luna"',
     subKey: 'games.riff.song.luna.sub',
     hintKey: 'games.riff.song.luna.hint',
-    bpm: 80, bpb: 2, loopBeats: 8, laps: 4,
-    notes: [[6,1,0,'F'],[6,1,1,'F'],[5,0,2,'Am'],[5,0,3,'Am'],[6,10,4,'D'],[6,13,5,'F'],[5,10,6,'G']] },
+    bpm: 80, bpb: 2, loopBeats: 12, laps: 4,
+    notes: [[6,1,0,'F'],[6,1,1,'F'],[6,1,2,'F'],[6,1,3,'F'],[5,0,4,'Am'],[5,0,5,'Am'],[5,0,6,'Am'],[5,0,7,'Am'],[6,10,8,'D'],[6,13,9,'F'],[5,10,10,'G']] },
   { id: 'sweetchild', title: '"Sweet Child O’ Mine"',
     subKey: 'games.riff.song.sweetchild.sub',
     hintKey: 'games.riff.song.sweetchild.hint',
-    bpm: 60, bpb: 4, loopBeats: 16, laps: 2,
-    notes: [[5,5,0,'D'],[5,3,4,'C'],[6,3,8,'G'],[5,5,12,'D']] }
+    bpm: 60, bpb: 4, loopBeats: 32, laps: 1,
+    notes: [[5,5,0,'D'],[5,3,8,'C'],[6,3,16,'G'],[5,5,24,'D']] }
 ];
 
 let rn = null, rnRaf = null;
@@ -6854,13 +6875,33 @@ function nrSetStagePos(p){
   try { sessionStorage.setItem('nrStagePos', String(p)); } catch(e){}
 }
 /* A non-button sign-out (token revoked, remote sign-out) skips app.js's normal
-   reload, so Note Runner's module-level caches would otherwise survive into
-   the next signed-in user's session and leak student A's weak-spot map into
-   student B's Firestore doc. Call this from the auth-null branch — but NEVER
-   reload there, since that branch also fires on every cold signed-out load. */
+   reload, so every game's sessionStorage-cached "today's best" / in-progress
+   picks would otherwise survive into the next signed-in user's session on a
+   shared Chromebook — not just Note Runner's weak-spot map (which is also
+   in-memory and leaks the same way), but the *Best:<id> caches, Riff
+   Roulette's rrDone/rrPts/rrQueue daily counters, and every game's
+   remembered deck/pattern/tempo choice. The ordinary signOut() path in
+   app.js already runs a full sessionStorage.clear(); this is the one other
+   path auth can resolve to null from, so it needs the same result without
+   also reloading (see the comment on the caller). Prefix-matched rather
+   than one sessionStorage.clear() call so a cold signed-out load — this
+   branch's OTHER, far more common trigger — never wipes something outside
+   the games arcade that happens to be sitting in sessionStorage at boot. */
+const GAMES_SESSION_KEY_PREFIXES = [
+  'bcDeck', 'bcBest:', 'cbDeck', 'cbDir', 'cbBest2:', 'ccBpm', 'ccProg', 'ccRate', 'ccBest:',
+  'cdDeck', 'cdBest2:', 'fretLevel', 'fzDeck', 'fzBest:', 'nrStagePos', 'nrBest:',
+  'ntrBest', 'pdBest', 'psBest', 'psgBest', 'rnMode', 'rnSong', 'rnBest:',
+  'rrDay', 'rrDone', 'rrLast', 'rrPts', 'rrQueue', 'rrSkips',
+  'shBpm', 'shPat', 'shBest:', 'srBpm', 'srPat', 'srBest:'
+];
 function gamesResetForUser(){
   nrWeakMap = null;
-  try { sessionStorage.removeItem('nrStagePos'); } catch(e){}
+  try {
+    for (let i = sessionStorage.length - 1; i >= 0; i--){
+      const k = sessionStorage.key(i);
+      if (k && GAMES_SESSION_KEY_PREFIXES.some(p => k === p || k.indexOf(p) === 0)) sessionStorage.removeItem(k);
+    }
+  } catch(e){}
 }
 
 function nrBody(){ return document.getElementById('nr-body'); }

@@ -5756,6 +5756,95 @@ function checkPracticeCards() {
   if (bad === 0) ok(`${cards} practice card${cards === 1 ? '' : 's'} — sections add up to their bars and land inside the track, one Level up each, both renderers and every silencer wired`);
 }
 
+/* 1bg. REP-COUNT DOTS, EN/ES PARITY (2026-09-28 sweep). repCountFromGotIt()
+   in app.js turns a "You've got it when: N ... in a row" sentence into N tap
+   dots — but its regex named the phrase, not the grammar, and Spanish
+   "compases SEGUIDOS" (masculine plural, the noun this site actually counts)
+   wasn't one of the forms it matched, only "seguidas"/"seguido". English got
+   dots, Spanish silently got none, on 14+ cards across Modules 3–6, 8 and 12
+   before this was caught. Reuses the REAL regex and function straight out of
+   the render context (rcCtx) rather than a second copy here, so a future
+   change to the wording it accepts can't drift the two apart again — only
+   the "cut the sentence out of the field" step is duplicated, which is
+   simple enough that a regex-literal apostrophe can't desync it the way
+   topLevelFunctionDecls's own comment warns about elsewhere in this file. */
+function checkRepCountParity(sets, ctx) {
+  head('1bg. Rep-count dots agree between English and Spanish');
+  if (!ctx) { warn('1bg skipped — render context unavailable'); return; }
+  const gotItRe = vm.runInContext('typeof GOT_IT_RE !== "undefined" ? GOT_IT_RE : null', ctx);
+  const repCountFromGotIt = vm.runInContext('typeof repCountFromGotIt === "function" ? repCountFromGotIt : null', ctx);
+  if (!gotItRe || !repCountFromGotIt) { warn('1bg skipped — GOT_IT_RE / repCountFromGotIt not found in app.js'); return; }
+  const extractBody = html => {
+    if (typeof html !== 'string') return null;
+    const m = gotItRe.exec(html);
+    if (!m) return null;
+    const rest = html.slice(m.index + m[0].length);
+    const tagAt = rest.search(/<(?:span|a|div|img)\b/i);
+    let cut = tagAt >= 0 ? tagAt : rest.length;
+    const sentence = /\.(?=\s|$)/.exec(rest.slice(0, cut));
+    if (sentence) cut = sentence.index + 1;
+    return rest.slice(0, cut);
+  };
+  let bad = 0, checked = 0;
+  const flag = (where, enN, esN) => {
+    err(`${where}: "You've got it when" gives ${enN} tap dot${enN === 1 ? '' : 's'} in English but ${esN} in Spanish — one language names a rep count the other doesn't`);
+    problems++; bad++;
+  };
+  const seen = new Set();
+  const visit = (obj, where) => {
+    if (!obj || typeof obj !== 'object' || seen.has(obj)) return;
+    if (typeof obj === 'object') seen.add(obj);
+    if (Array.isArray(obj)) { obj.forEach((v, i) => visit(v, `${where}[${i}]`)); return; }
+    for (const k of Object.keys(obj)) {
+      if (k.endsWith('_es')) continue;
+      const v = obj[k];
+      if (typeof v === 'string' && typeof obj[k + '_es'] === 'string') {
+        const enBody = extractBody(v), esBody = extractBody(obj[k + '_es']);
+        if (enBody !== null && esBody !== null) {
+          checked++;
+          const enN = repCountFromGotIt(enBody), esN = repCountFromGotIt(esBody);
+          if (enN !== esN) flag(`${where}.${k}`, enN, esN);
+        }
+      } else if (v && typeof v === 'object') {
+        visit(v, `${where}.${k}`);
+      }
+    }
+  };
+  for (const w of (sets || [])) visit(w, w.id);
+  const activities = vm.runInContext('typeof CLASS_ACTIVITIES !== "undefined" ? CLASS_ACTIVITIES : []', ctx) || [];
+  for (const a of activities) visit(a, a.id);
+  if (bad === 0) ok(`${checked} "You've got it when" field${checked === 1 ? '' : 's'} checked — English and Spanish always agree on the rep-count dots`);
+}
+
+/* 1bh. JOURNEY "SLOW (N BPM)" LABELS ↔ data-bpm-slow (2026-09-28 sweep). A
+   Journey page's own #playalong-frame carries the ground truth for what its
+   🐢 Slow button actually plays (data-bpm-slow); prose elsewhere on the same
+   page names that same number by hand, and a track-tempo swap has twice now
+   updated the frame and the page's own top note but missed a second mention
+   lower down (Watchtower's Hendrix swap, "the cure"'s felt-beat click) —
+   both shipped live with the wrong number until this sweep caught them. */
+function checkJourneySlowBpmLabels() {
+  head('1bh. Journey "Slow (N BPM)" labels match data-bpm-slow');
+  let bad = 0, pages = 0;
+  const flag = m => { err(m); problems++; bad++; };
+  for (const f of TAB_PAGES) {
+    if (!f.endsWith('.html')) continue;
+    let src;
+    try { src = readFileSync(join(ROOT, f), 'utf8'); } catch { continue; }
+    const m = /data-bpm-slow="(\d+)"/.exec(src);
+    if (!m) continue;
+    const want = m[1];
+    pages++;
+    const re = /(?:Slow|Lento)\s*\(\s*(\d+)\s*BPM\s*\)/g;
+    let mm;
+    while ((mm = re.exec(src))) {
+      if (mm[1] !== want) flag(`${f}: says "${mm[0]}" but this page's Slow tier is ${want} BPM per its own data-bpm-slow`);
+    }
+  }
+  if (pages === 0) { warn('1bh found no Journey page with a Slow tier — it cannot see what it is supposed to guard'); return; }
+  if (bad === 0) ok(`${pages} Journey page${pages === 1 ? '' : 's'} with a Slow tier — every "Slow (N BPM)" mention matches data-bpm-slow`);
+}
+
 (async function main() {
   if (LIVE_ONLY) {
     console.log(`${C.bold}Guitar Class — post-push live check${C.reset}`);
@@ -5817,6 +5906,8 @@ function checkPracticeCards() {
   checkCaButtonNamesAndPaper();
   checkJourneyGuitarToggle();
   checkPracticeCards();
+  checkRepCountParity(rcSets, rcCtx);
+  checkJourneySlowBpmLabels();
   if (!SKIP_LINKS) await checkLinks();
   else warn('skipping link check (--skip-links)');
   bumpServiceWorker();

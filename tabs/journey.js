@@ -717,7 +717,17 @@ window.addEventListener('load', function(){
         // (`journey: '<slug>'` in class-activities.js) is sending the
         // student here as part of the work — gating it would block the
         // very step they're on. Any other page stays gated.
-        var sentHere = blockers.some(function(a){ return a.journey === SONG_ID; });
+        var sentHere = blockers.some(function(a){ return a.journey === SONG_ID; }) ||
+          // A practice card's Level up (view:'card') points at this page only
+          // AFTER the card is marked complete — pcCheck() in app.js completes
+          // it as soon as the required checks are ticked, before the student
+          // has clicked Level up. So a completed card naming this song stays
+          // exempt too, or an unrelated pending activity elsewhere locks the
+          // very page the student was just sent to for their extra practice.
+          (window.CLASS_ACTIVITIES || []).some(function(a){
+            return a.view === 'card' && a.journey === SONG_ID &&
+              journeyIsVisible(a, cfg) && classActivities[a.id] === true;
+          });
         if(blockers.length && !sentHere) showJourneyGate();
       }).catch(function(){
         /* Never lock on a guess: a failed config read leaves the page open,

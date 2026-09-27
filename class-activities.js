@@ -452,8 +452,8 @@ window.CLASS_ACTIVITIES = [
       {
         label:    'The whole song',
         label_es: 'La canción completa',
-        text: 'All four lines, start to finish — the whole song on one string, no stopping in between. Then raise the tempo.<ul><li>Every clean pass: raise the BPM by 10</li><li>Fast already? Play it for the person next to you and have them sing along</li></ul>You\'ve got it when: Lines 1, 2, 3 and 4 back to back without stopping, and the tempo raised at least three times without stopping — then keep climbing.',
-        text_es: 'Las cuatro líneas, de principio a fin — la canción completa en una sola cuerda, sin detenerte entre medio. Después sube el tempo.<ul><li>Cada pasada limpia: sube el BPM 10 puntos</li><li>¿Ya vas rápido? Tócala para la persona de al lado y que cante contigo</li></ul>Lo tienes cuando: las Líneas 1, 2, 3 y 4 seguidas sin detenerte, y el tempo subido al menos tres veces sin detenerte — y de ahí, sigue subiendo.',
+        text: 'All four lines, start to finish — the whole song on one string, no stopping in between. Then raise the tempo.<ul><li>Every clean pass: raise the BPM by 10</li><li>Fast already? Play it for the person next to you and have them sing along</li></ul>You\'ve got it when: the whole song back to back without stopping, and the tempo raised at least three times without stopping — then keep climbing.',
+        text_es: 'Las cuatro líneas, de principio a fin — la canción completa en una sola cuerda, sin detenerte entre medio. Después sube el tempo.<ul><li>Cada pasada limpia: sube el BPM 10 puntos</li><li>¿Ya vas rápido? Tócala para la persona de al lado y que cante contigo</li></ul>Lo tienes cuando: las cuatro líneas, una tras otra sin detenerte, y el tempo subido al menos tres veces sin detenerte — y de ahí, sigue subiendo.',
         tab: {
           // Off the site-wide paging default: the directions say "no stopping
           // in between," so a Next click hidden behind a paged-away Line 3/4
@@ -651,7 +651,7 @@ window.CLASS_ACTIVITIES = [
         label:    'New strings',
         label_es: 'Cuerdas nuevas',
         text: 'Move the same climb over to a new string.<ul><li>The A string first, then the D string</li><li>The shape never changes — only which string your fingers land on</li></ul>You\'ve got it when: no buzz on any of the four notes, on both strings, three times in a row.',
-        text_es: 'Mueve la misma subida a otra cuerda.<ul><li>Primero la cuerda La, después la cuerda Re</li><li>La forma nunca cambia — solo cambia en qué cuerda caen tus dedos</li></ul>Lo tienes cuando: sin zumbido en ninguna de las cuatro notas, en las dos cuerdas, tres veces seguidas.',
+        text_es: 'Mueve la misma subida a otra cuerda.<ul><li>Primero la cuerda La, después la cuerda Re</li><li>La forma nunca cambia — solo cambia en qué cuerda caen tus dedos</li></ul>Lo tienes cuando: tres veces seguidas, sin zumbido en ninguna de las cuatro notas, en las dos cuerdas.',
         tab: {
           caption: 'A string, then D string',
           caption_es: 'Cuerda La, después cuerda Re',
@@ -1662,6 +1662,7 @@ window.CLASS_ACTIVITIES = [
         tab: {
           caption: 'Whole song · Lines 1–4 · low E string only',
           caption_es: 'Canción completa · Líneas 1–4 · solo la cuerda Mi grave',
+          linesPerPage: 0,
           phrases: [
             {
               label: 'Line 1 — "Hap-py birth-day to you"',

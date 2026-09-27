@@ -5,6 +5,31 @@ Notable changes to the Guitar Class site. Newest first.
 For the full session-by-session history (and the reasoning behind each change),
 see `WORKFLOW.md` and the git commit log.
 
+## 2026-09-28 — Error sweep: four games, song instructions, and a navigation bug fixed
+
+### Fixed
+
+- **Name That Riff, Fret Zap, Pattern Detective and Build-a-Chord were broken** —
+  pressing Start did nothing, because of a leftover call to a function that
+  no longer existed. All four work again.
+- **Riff Runner's "Luna" and "Sweet Child O' Mine" rounds now play the real
+  chord timing** — both used to change chords twice as fast as the songs
+  actually do.
+- A completed practice card's **Level up button could send you to a locked
+  Song Journey page** if something else on the site still needed your
+  attention. It now stays open.
+- The **"the cure" and Watchtower Song Journey pages** had a couple of
+  leftover instructions naming the wrong 🐢 Slow tempo, left over from
+  earlier track changes. Both now match the Slow button.
+- Watchtower's rhythm-listening card on the Journey page was teaching the
+  song's old (retired) rhythm story — it now matches what Module 4 teaches.
+- A few Spanish "You've got it when" lines weren't giving credit for reps the
+  English version counted (and vice versa) — checked and fixed across
+  Modules 3–6 and several in-class activities.
+- Small corrections to a couple of module hints (the G-string note map, an
+  E5 power-chord card) and to some outdated song-instruction text on the
+  Seven Nation Army and Sweet Child O' Mine and Let It Be Song Journey pages.
+
 ## 2026-09-27 — Sweet Child gets the 🎸 Record plays it button
 
 ### Added
