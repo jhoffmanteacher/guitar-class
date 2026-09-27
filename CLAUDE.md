@@ -1494,11 +1494,12 @@ walk," since there's no Playwright harness to run one for real.
 kebab-case; the artist stays out of the app's display metadata.
 
 **What ships is `rhythm-down`, `rhythm-down-metronome` and — since
-2026-09-18 — `full` and `full-metronome`, for the three snippet songs** (the
-old list here also named `no-gtr`, `drums-only` and `slow-<bpm>` as "in use",
-and none of those has ever existed in `audio/`). That is 34 files: six songs,
-some at two tempos, plus four mixes each for Seven Nation Army, "the
-cure", and Luna. A snippet song wants all four: `full` alone gives the Guitar toggle,
+2026-09-18 — `full` and `full-metronome`, for the three snippet songs and
+(since 2026-09-27, Journey toggle only) Watchtower** (the old list here also
+named `no-gtr`, `drums-only` and `slow-<bpm>` as "in use", and none of those
+has ever existed in `audio/`). That is 38 files: six songs, some at two
+tempos, plus four mixes each for Seven Nation Army, "the cure", Luna and
+Watchtower. A snippet song wants all four: `full` alone gives the Guitar toggle,
 and `full-metronome` is what stops it fighting the Metronome toggle. Every slow tier is the same master time-stretched, so its grid is
 the fast one's scaled by the tempo ratio — checked on two songs to three
 decimal places. The other four names stay reserved for when something is
@@ -1569,13 +1570,21 @@ ear. This is chord *timing*, not BPM:
   verse is C–G–F–C, not the four-chord loop again.
 - **Luna** (128 BPM track, clicks are eighth notes, ~43 big beats) — **F for
   two bars of 6/8, then Am for two bars, confirmed.** The chord is Am, not A.
-- **All Along the Watchtower** (115 BPM track) — **Am 2 · G 2 · F 3 · G 1**
-  on most laps, with the A and the F pushed an eighth note early. As of
-  2026-09-24 (Jonathan: "fix watchtower beats to match the backing track")
-  every teaching layer uses it — `A A G G F F F G`, one note or strum per
-  beat — in Modules 2, 3, 5 and 7, the Journey page and Riff Runner. Module
-  4's "the real rhythm" card teaches the two pushes by ear. The old "each
-  chord twice" and "verses: A holds beats 1–3" readings are retired.
+- **All Along the Watchtower** (Hendrix track, 115 BPM, slow tier 105) —
+  **two beats per chord: `A A G G F F G G`** (Jonathan, 2026-09-27). The
+  play-along is now Jimi Hendrix's recording, moved down to Am in Moises; the
+  Neil Young track and its "Am 2 · G 2 · F 3 · G 1" reading are retired.
+  Measured off the click stem, loop by loop: bar 1 is A on 1–2, G on 3–4
+  everywhere. The bar-2 G is on **beat 4 in the intro** (the first ~18 s)
+  and **about beat 3 once the singing starts** — Jonathan heard the same.
+  Later in the song it is loose (anywhere from 3 to 4½, some laps with no
+  clear G). The site teaches the verse: G on beat 3 in Modules 2, 3, 5, 6
+  and 7, the Journey page and Riff Runner. Module 4's "the real rhythm" card
+  teaches the intro/verse difference by ear. The track's tempo drifts
+  (≈110 in the intro, ≈115 through the verses, ≈120 at the end), so it is
+  NOT a SNIPPET_TRACKS candidate — bar arithmetic would slide by up to a
+  second. Its full and full-metronome mixes ship for the Song Journey
+  page's Guitar toggle (1be), which loops the whole file and doesn't care.
 - **Seven Nation Army** (123 BPM track) — the riff is NOT one note per beat:
   bar 1 is E (long) · E (short) · G · E, with D as a pickup on the "and" of 4;
   bar 2 is **C for two beats, B for two beats** — what ca-10 teaches. The
@@ -1583,13 +1592,13 @@ ear. This is chord *timing*, not BPM:
   teaching loop that does not line up with the record; the page says so.
 
 - **All Along the Watchtower** — `Am–G–F–G` loop (power chords `A5–G5–F5–G5`).
-  **Timing: Am 2 · G 2 · F 3 · G 1** — measured off the backing track
-  2026-09-24; see "Chord timing measured" above. (Replaces the 2026-08-06
-  verse/chorus reading.) The map's "Am–G–F" is
-  shorthand. **The `neil-young-…` audio slug is CORRECT** — the play-along
-  loop is built from Neil Young's 1992 Dylan-30th-anniversary performance,
-  which the Journey page's history paragraph states outright. The slug names
-  the source recording, not the song's credited writer. Don't "fix" it.
+  **Timing: two beats per chord, `A A G G F F G G`** — see "Chord timing
+  measured" above (2026-09-27, replaces the 2026-09-24 "F 3 · G 1" reading
+  and the 2026-08-06 verse/chorus one). The map's "Am–G–F" is shorthand.
+  **The `jimi-hendrix-…` audio slug is CORRECT** — the play-along is
+  Hendrix's recording transposed to Am, which the Journey page's history
+  paragraph states outright. The slug names the source recording, not the
+  song's credited writer (Dylan). Don't "fix" it.
 - **Sweet Child O' Mine** — verse `D–C–G`, **two bars each**, ~123–125 BPM. (Corrected
   2026-09-12 — content across module-2/3/5/7 and the Journey page is
   consistently "two bars each"; the old "full bar each" here was the outlier.)

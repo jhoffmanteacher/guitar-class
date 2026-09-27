@@ -14,7 +14,7 @@
    progress-saving behave exactly as before.
    ════════════════════════════════════════════════════════════════ */
 
-const CACHE_VERSION = 'guitar-class-2026-09-27-574c66e3b3';
+const CACHE_VERSION = 'guitar-class-2026-09-27-7cb00cf2f7';
 
 // Backing-track audio lives in its OWN cache, versioned independently of the
 // shell (see tools/checks.mjs, which fingerprints audio/ separately and
@@ -25,7 +25,7 @@ const CACHE_VERSION = 'guitar-class-2026-09-27-574c66e3b3';
 // re-download over school Wi-Fi. Splitting the version keeps a routine JS/
 // content push from touching cached audio, while a real re-exported track
 // still invalidates it (both versions are swept the same way at activate).
-const AUDIO_CACHE_VERSION = 'guitar-class-audio-2026-09-27-73e4386662';
+const AUDIO_CACHE_VERSION = 'guitar-class-audio-2026-09-27-300f1b2594';
 const AUDIO_RE = /\.(mp3|m4a|wav|ogg)$/i;
 
 /* The subset of ASSETS whose absence means the app cannot render at all.

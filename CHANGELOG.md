@@ -5,6 +5,23 @@ Notable changes to the Guitar Class site. Newest first.
 For the full session-by-session history (and the reasoning behind each change),
 see `WORKFLOW.md` and the git commit log.
 
+## 2026-09-27 — "All Along the Watchtower" plays along with Hendrix, two beats per chord
+
+### Changed
+
+- **The Watchtower play-along track is now Jimi Hendrix's recording**, moved
+  down to A minor (115 BPM, with a 🐢 slow version at 105). It replaces the
+  Neil Young track. The page's history paragraph says so.
+- **Every chord now gets two beats: A A G G F F G G.** The last G comes on
+  beat 3 of the second bar, which is where it falls once the singing starts.
+  Updated in the Journey page (Layers 2, 3, 5 and the Layer 6 chord labels),
+  Modules 2, 3, 5, 6 and 7, and the Riff Runner game.
+- **Module 4's "Watchtower, the real rhythm" card** now teaches what the band
+  actually does: in the intro the last G waits until beat 4, and when the
+  singing starts it moves back to beat 3. Its "Hear it" button plays both.
+- **The Watchtower play-along has the 🎸 Record plays it / You play it
+  button** too.
+
 ## 2026-09-27 — Song Journey play-along: hear the record play your part
 
 ### New
