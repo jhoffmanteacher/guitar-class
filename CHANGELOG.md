@@ -5,6 +5,17 @@ Notable changes to the Guitar Class site. Newest first.
 For the full session-by-session history (and the reasoning behind each change),
 see `WORKFLOW.md` and the git commit log.
 
+## 2026-09-27 — Song Journey play-along: hear the record play your part
+
+### New
+
+- **The play-along track on the Seven Nation Army, "the cure" and Luna
+  Song Journey pages has a 🎸 button**, the same one the class-activity
+  loops have. It starts on **Record plays it**, so you hear the part you
+  are learning. Press it and it changes to **You play it**: the record's
+  guitar gets quieter and you play the part. It works with Slow and
+  Metronome, and the song keeps playing from the same spot.
+
 ## 2026-09-27 — Fixed a broken video time range in Module 5
 
 ### Fixed

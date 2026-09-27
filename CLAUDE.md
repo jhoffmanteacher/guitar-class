@@ -240,7 +240,9 @@ both renderers paging long tabs two lines at a time (1bb), Spanish
 directions naming the Spanish button («Tocar el tab», «Toca con la banda»)
 rather than "Play" (1bc), and no pen or paper in a class activity (1bd —
 scoped to `class-activities.js`, because module steps have typed boxes and
-Module 13 really needs scissors).
+Module 13 really needs scissors), and every Song Journey page's full-mix set for
+the Guitar toggle — complete, present, same length as its rhythm-down twin,
+page count pinned (1be).
 
 **A phrase detector must match the UNESCAPED string.** Until 2026-09-25 1w
 and 1w-t matched the raw source capture, which keeps `\'`, so every banned
@@ -1501,6 +1503,22 @@ and `full-metronome` is what stops it fighting the Metronome toggle. Every slow 
 the fast one's scaled by the tempo ratio — checked on two songs to three
 decimal places. The other four names stay reserved for when something is
 really exported; don't cite one as available without listing `audio/` first.
+
+**The Song Journey play-along has the Guitar toggle too** (Jonathan,
+2026-09-27). A `tabs/*.html` page's `#playalong-frame` may declare the full
+twin of every file it has — `data-audio-full`, plus `-full-metronome`,
+`-slow-full`, `-slow-full-metronome` for each of `data-audio-metronome`,
+`-slow`, `-slow-metronome` the page declares — and `ensurePlayer()` in
+`tabs/journey.js` grows a third toggle beside Slow and Metronome: same
+🎸 button, same `ca.snipGuitarOn`/`ca.snipGuitarOff`/`ca.snipGuitarTitle`
+keys as the snippet card, **on by default**, label flips with the press.
+The two mixes are one take, so switching keeps `currentTime` (only Slow
+rescales). A half-declared set renders NO toggle, silently — checks.mjs
+**1be** fails that, a missing file, a full twin whose length differs from
+its rhythm-down file by more than 0.25 s, and a change in the pinned count
+of pages with the toggle (`JOURNEY_GUITAR_PAGES`). Journey and snippet are
+independent: a page can have the toggle without the song being a
+`SNIPPET_TRACKS` entry, and vice versa.
 
 **`rhythm-down` means the part the student is learning is turned down**, so
 they supply it — deliberate and course-wide. The cost is that a student has

@@ -196,7 +196,21 @@ window.addEventListener('beforeprint', function(){
    Slow toggle mid-song rescales currentTime by the tempo ratio so playback
    resumes at the same musical position instead of the same second.
 
-   ensurePlayer() builds the <audio> element (and its Slow/Metronome
+   A page whose song has a full mix exported may ALSO supply the full twin
+   of every file it declares — data-audio-full, plus data-audio-full-metronome
+   / data-audio-slow-full / data-audio-slow-full-metronome for each of the
+   other three it has. The player then grows a third toggle, the same Guitar
+   toggle a class-activity snippet card has (app.js buildSnippet) and with
+   the same i18n keys: ON by default ("Record plays it"), press it and the
+   rhythm-down mix plays ("You play it") — the part turned down, not muted,
+   which is why the label names who plays it rather than saying "Guitar".
+   The two mixes are one take at one tempo, so switching keeps currentTime
+   as-is (no rescale). A half-declared set renders no toggle at all rather
+   than a toggle that dies on Slow or Metronome; checks.mjs 1be fails the
+   push on one, and on a full twin whose length differs from its
+   rhythm-down file.
+
+   ensurePlayer() builds the <audio> element (and its Slow/Metronome/Guitar
    toggles) exactly once, however it's first reached — the top play-along
    box (togglePlayalong) and the floating backing-track pill (toggleTrackFab)
    both call it, so there's only ever one player on the page. */
@@ -211,11 +225,20 @@ function ensurePlayer(){
   a.preload = 'none';
   a.title = t('journey.playalongTitle');
 
-  var metroOn = false, slowOn = false;
+  var d = box.dataset;
+  var fullReady = !!d.audioFull
+    && (!d.audioMetronome     || !!d.audioFullMetronome)
+    && (!d.audioSlow          || !!d.audioSlowFull)
+    && (!d.audioSlowMetronome || !!d.audioSlowFullMetronome);
+  var metroOn = false, slowOn = false, guitarOn = fullReady;
 
   var currentSrc = function(){
-    if(slowOn) return metroOn ? box.dataset.audioSlowMetronome : box.dataset.audioSlow;
-    return metroOn ? box.dataset.audioMetronome : box.dataset.audio;
+    if(guitarOn){
+      if(slowOn) return metroOn ? d.audioSlowFullMetronome : d.audioSlowFull;
+      return metroOn ? d.audioFullMetronome : d.audioFull;
+    }
+    if(slowOn) return metroOn ? d.audioSlowMetronome : d.audioSlow;
+    return metroOn ? d.audioMetronome : d.audio;
   };
 
   var switchSrc = function(rescale){
@@ -266,6 +289,28 @@ function ensurePlayer(){
       switchSrc(false);
     };
     box.appendChild(metroBtn);
+  }
+
+  if(fullReady){
+    var gtrBtn = document.createElement('button');
+    gtrBtn.type = 'button';
+    gtrBtn.className = 'metronome-toggle on';
+    gtrBtn.setAttribute('aria-pressed', 'true');
+    gtrBtn.setAttribute('data-i18n-attr', 'title:ca.snipGuitarTitle');
+    gtrBtn.innerHTML = '&#x1F3B8; <span data-i18n="ca.snipGuitarOn"></span>';
+    gtrBtn.onclick = function(){
+      guitarOn = !guitarOn;
+      gtrBtn.classList.toggle('on', guitarOn);
+      gtrBtn.setAttribute('aria-pressed', guitarOn ? 'true' : 'false');
+      /* The label names who is playing, so it flips with the button. Swap
+         the KEY, not just the text, so a later language switch re-renders
+         the current state instead of the one the button was built with. */
+      var lab = gtrBtn.querySelector('span');
+      lab.setAttribute('data-i18n', guitarOn ? 'ca.snipGuitarOn' : 'ca.snipGuitarOff');
+      lab.textContent = t(guitarOn ? 'ca.snipGuitarOn' : 'ca.snipGuitarOff');
+      switchSrc(false);
+    };
+    box.appendChild(gtrBtn);
   }
 
   box.appendChild(a);

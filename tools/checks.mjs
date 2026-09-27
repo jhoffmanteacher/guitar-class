@@ -5477,6 +5477,60 @@ function checkFourStepsAndPaging() {
    module 13 really does need wire cutters or scissors — those are the
    innocent twins a site-wide list would trip on.
    ════════════════════════════════════════════════════════════════════ */
+/* ════════════════════════════════════════════════════════════════════
+   1be. SONG JOURNEY GUITAR TOGGLE — the play-along box on a tabs/*.html
+   page grows a "Record plays it / You play it" toggle when it declares
+   the FULL twin of every rhythm-down file it has (tabs/journey.js
+   ensurePlayer): data-audio-full, plus -full-metronome / -slow-full /
+   -slow-full-metronome for each of data-audio-metronome / -slow /
+   -slow-metronome the page declares. journey.js renders NO toggle for a
+   half-declared set, so a typo there is silent — the button just never
+   appears. That is what this catches, plus a declared file that is not
+   in audio/, plus a full twin whose length differs from its rhythm-down
+   file (the toggle keeps currentTime, so a re-trimmed twin jumps the
+   song). Pinned: the number of pages with the toggle, so one cannot drop
+   off without this saying so.
+   ════════════════════════════════════════════════════════════════════ */
+const JOURNEY_GUITAR_PAGES = 3;   // seven-nation-army, the-cure, luna
+function checkJourneyGuitarToggle() {
+  head('1be. Song Journey Guitar toggle');
+  let bad = 0, withToggle = 0;
+  const flag = m => { err(m); problems++; bad++; };
+  const TWINS = [['audioFull', 'audio'], ['audioFullMetronome', 'audioMetronome'],
+                 ['audioSlowFull', 'audioSlow'], ['audioSlowFullMetronome', 'audioSlowMetronome']];
+  const attr = k => 'data-' + k.replace(/[A-Z]/g, c => '-' + c.toLowerCase());
+  for (const page of TAB_PAGES.filter(p => p.endsWith('.html'))) {
+    let src;
+    try { src = readFileSync(join(ROOT, page), 'utf8'); } catch { continue; }
+    const box = src.match(/<div\b[^>]*\bid="playalong-frame"[^>]*>/);
+    if (!box) continue;
+    const d = {};
+    for (const m of box[0].matchAll(/\bdata-(audio[a-z-]*)="([^"]*)"/g))
+      d[m[1].replace(/-([a-z])/g, (_, c) => c.toUpperCase())] = m[2];
+    const declared = TWINS.filter(([full]) => d[full] !== undefined);
+    if (!declared.length) continue;
+    withToggle++;
+    for (const [full, plain] of TWINS) {
+      if (d[plain] !== undefined && d[full] === undefined)
+        flag(`${page}: declares ${attr(full).replace('-full', '')}… but not ${attr(full)} — journey.js renders no Guitar toggle for a half-declared set`);
+      if (d[full] !== undefined && d[plain] === undefined)
+        flag(`${page}: declares ${attr(full)} with no ${attr(plain)} to be its rhythm-down twin`);
+    }
+    for (const [full, plain] of declared) {
+      const fp = join(ROOT, 'tabs', d[full]);
+      if (!existsSync(fp)) { flag(`${page}: ${attr(full)} → ${d[full]} does not exist`); continue; }
+      if (d[plain] === undefined || !existsSync(join(ROOT, 'tabs', d[plain]))) continue;
+      const a = mp3DurationSec(fp), b = mp3DurationSec(join(ROOT, 'tabs', d[plain]));
+      if (a === null || b === null) { flag(`${page}: could not read the length of ${a === null ? d[full] : d[plain]}`); continue; }
+      if (Math.abs(a - b) > 0.25)
+        flag(`${page}: ${attr(full)} is ${a.toFixed(2)}s but ${attr(plain)} is ${b.toFixed(2)}s — the two mixes must be one take, or the Guitar toggle jumps the song`);
+    }
+  }
+  if (withToggle !== JOURNEY_GUITAR_PAGES)
+    flag(`${withToggle} Song Journey page(s) declare a full mix, expected ${JOURNEY_GUITAR_PAGES} — if that change is on purpose, update JOURNEY_GUITAR_PAGES`);
+  if (bad === 0) ok(`${withToggle} Song Journey pages carry a complete full-mix set for the Guitar toggle, every twin the same length as its rhythm-down file`);
+}
+
 const ES_FIELD_RE = /\b(?:text|hint|stuck|levelUp|gotItWhen|explain|forward|subtitle|meta|intro|note|label|prompt|placeholder|caption|title)_es:\s*'((?:\\.|[^'\\])*)'/g;
 const ES_PLAY_RE = /\bPlay\b/;
 const CA_PAPER_RE = /\bwrite\b(?:\s+\w+){0,3}\s+down\b|\b(?:written down|wrote down|pencil|pen and paper|piece of paper|index cards?|scissors)\b|\ban[oó]t(?:a|as|e|en|ar|aste|ado|ada|alo|ala|alos|alas)\b|\b(?:escr[ií]bel[oa]s?|l[aá]piz|papel|tijeras|fichas)\b/i;
@@ -5570,6 +5624,7 @@ function checkCaButtonNamesAndPaper() {
   checkJourneyButtonLastStep();
   checkFourStepsAndPaging();
   checkCaButtonNamesAndPaper();
+  checkJourneyGuitarToggle();
   if (!SKIP_LINKS) await checkLinks();
   else warn('skipping link check (--skip-links)');
   bumpServiceWorker();
