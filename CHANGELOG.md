@@ -5,6 +5,14 @@ Notable changes to the Guitar Class site. Newest first.
 For the full session-by-session history (and the reasoning behind each change),
 see `WORKFLOW.md` and the git commit log.
 
+## 2026-09-27 — Fixed a broken video time range in Module 5
+
+### Fixed
+
+- Module 5's "Watch: the C chord" card asked you to watch to 4:00 in a
+  video that's only 1:49 long — it now points at the real end of the
+  video.
+
 ## 2026-09-27 — Two more small fixes: Happy Birthday's note order, a Module 11 overstatement
 
 ### Fixed

@@ -339,8 +339,8 @@ SETS.push(
             steps: [
           {
             label: 'Watch: the C chord', label_es: 'Mira: el acorde de C',
-            text: 'Watch: <a href="https://youtu.be/RBYqdBqogo4?t=58" target="_blank">The C Chord (BC-132) – JustinGuitar</a> (0:58–4:00). While you watch: listen for the habit he calls the secret to a clean chord change, then rewatch his fretting hand. You\'ve got it when: you can name that habit and point to the moment he uses it.',
-            text_es: 'Mira: <a href="https://youtu.be/RBYqdBqogo4?t=58" target="_blank">The C Chord (BC-132) – JustinGuitar</a> (0:58–4:00). Mientras miras: escucha el hábito que él llama el secreto para un cambio de acorde limpio, y luego vuelve a mirar su mano de trastear. Lo tienes cuando: puedes nombrar ese hábito y señalar el momento en que lo usa.',
+            text: 'Watch: <a href="https://youtu.be/RBYqdBqogo4?t=58" target="_blank">The C Chord (BC-132) – JustinGuitar</a> (0:58–1:49, the end of the video). While you watch: listen for the habit he calls the secret to a clean chord change, then rewatch his fretting hand. You\'ve got it when: you can name that habit and point to the moment he uses it.',
+            text_es: 'Mira: <a href="https://youtu.be/RBYqdBqogo4?t=58" target="_blank">The C Chord (BC-132) – JustinGuitar</a> (0:58–1:49, el final del video). Mientras miras: escucha el hábito que él llama el secreto para un cambio de acorde limpio, y luego vuelve a mirar su mano de trastear. Lo tienes cuando: puedes nombrar ese hábito y señalar el momento en que lo usa.',
             hint: 'He names one habit as the "secret" to a perfect chord change. Listen for the moment he says it, then rewatch his fretting hand and work out exactly when that habit happens relative to the strum.',
             hint_es: 'Él nombra un hábito como el "secreto" para un cambio de acorde perfecto. Escucha el momento en que lo dice, y luego vuelve a mirar su mano de trastes y descubre exactamente cuándo ocurre ese hábito en relación con el rasgueo.',
             skills: [1, 2, 3, 4],
