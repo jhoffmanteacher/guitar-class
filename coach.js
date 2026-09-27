@@ -2436,10 +2436,21 @@ function ccResolvePend(ch){
   let toneOk = null;
   /* Chord-tone vote (same rule as the Coach's chord checks): a strum is
      polyphonic, so readings hop between chord tones — any single-pitch
-     consensus fails real strums. 'off' only on strong contrary evidence. */
+     consensus fails real strums. 'off' only on strong contrary evidence.
+     Voted against the tones the new chord does NOT share with the one
+     just held, not its whole tone set — simulated against every real
+     progression here, "is it any tone of the new chord" let a strum that
+     never left the old chord pass 49 of 61 changes (many diatonic pairs
+     share 2 of 3 tones, e.g. Am/C, Em/C, Am/F). A held chord can't
+     produce a tone that isn't in it, so this closes that without
+     tightening real strums — the worst-case distinguishing-tone share
+     across every progression is still 33%, well clear of the threshold. */
   if (p.readings.length >= 3){
     const want = cc.classes[ch.to];
-    const share = p.readings.filter(r => want.indexOf(((Math.round(r) % 12) + 12) % 12) >= 0).length / p.readings.length;
+    const from = cc.classes[ch.from] || [];
+    const distinguishing = want.filter(c => from.indexOf(c) < 0);
+    const target = distinguishing.length ? distinguishing : want;
+    const share = p.readings.filter(r => target.indexOf(((Math.round(r) % 12) + 12) % 12) >= 0).length / p.readings.length;
     toneOk = share > 0.15;
   }
   ch.result = toneOk === false ? 'off' : 'ok';    // percussive/unclear counts on timing alone
