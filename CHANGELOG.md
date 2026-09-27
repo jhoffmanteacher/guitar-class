@@ -5,6 +5,15 @@ Notable changes to the Guitar Class site. Newest first.
 For the full session-by-session history (and the reasoning behind each change),
 see `WORKFLOW.md` and the git commit log.
 
+## 2026-09-27 — Watchtower's "pushed rhythm" demo now actually sounds pushed
+
+### Fixed
+
+- Module 4's "Hear the pushed rhythm — F and A come in half a beat early"
+  demo previously played F and the following G right on the beat instead
+  of early — the timing math didn't compensate for the shortened note
+  before them. Both now land where the card says they do.
+
 ## 2026-09-27 — Two song-fact corrections
 
 ### Fixed

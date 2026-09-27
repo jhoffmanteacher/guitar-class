@@ -361,7 +361,7 @@ SETS.push(
                 stuck_es: 'Primero aplaude el ritmo de la grabación, sin guitarra — un aplauso por raíz, sosteniendo durante el silencio — y luego vuelve a agregar los trastes una vez que tus manos conozcan la forma del tiempo.',
                 levelUp: 'Play it as power chords instead of single notes — same pushed timing, fuller sound.',
                 levelUp_es: 'Tócalo como acordes de potencia en vez de notas sueltas — el mismo ritmo adelantado, un sonido más lleno.',
-                playSeq: { label: 'Hear the pushed rhythm — F and A come in half a beat early', label_es: 'Escucha el ritmo adelantado — la F y la A entran medio tiempo antes', bpm: 60, notes: [{ midi: 45, beats: 2 }, { midi: 43, beats: 1.5 }, { midi: 41, beats: 3 }, { midi: 43, beats: 1 }, { midi: 45, beats: 0.5 }] },
+                playSeq: { label: 'Hear the pushed rhythm — F and A come in half a beat early', label_es: 'Escucha el ritmo adelantado — la F y la A entran medio tiempo antes', bpm: 60, notes: [{ midi: 45, beats: 2 }, { midi: 43, beats: 1.5 }, { midi: 41, beats: 3.5 }, { midi: 43, beats: 0.5 }, { midi: 45, beats: 0.5 }] },
               },
               {
                 label: 'Challenge — "Seven Nation Army", the real rhythm (by ear)', label_es: 'Reto — "Seven Nation Army", el ritmo real (de oído)',
