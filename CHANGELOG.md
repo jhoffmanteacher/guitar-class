@@ -5,6 +5,16 @@ Notable changes to the Guitar Class site. Newest first.
 For the full session-by-session history (and the reasoning behind each change),
 see `WORKFLOW.md` and the git commit log.
 
+## 2026-09-27 — Song Journey pages get the Tempo ladder and matching icons
+
+### Fixed
+
+- **The six Song Journey pages' Metronome tool now has the Tempo ladder**
+  (play a lap, tap Clean or Had mistakes, and it raises or lowers the
+  tempo for you) — it was already on the main site, just missing here.
+- The Metronome, Timer, and Tuner tool popups on those pages now use the
+  same icons as the main site instead of emoji.
+
 ## 2026-09-27 — Watchtower's "pushed rhythm" demo now actually sounds pushed
 
 ### Fixed

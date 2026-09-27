@@ -1538,6 +1538,37 @@ function checkFabToolsThemeDrift() {
   if (!bad) ok(`${shared} shared floating-tools rules identical across both stylesheets (${exempt} documented per-property exceptions)`);
 }
 
+/* ════════════════════════════════════════════════════════════════════
+   1t3. JOURNEY POPUP MARKUP ↔ APP MARKUP — 1t/1t2 cover the CSS these
+   floating tools share with the main app; nothing covered the HTML
+   itself. Found 2026-09-27: the six Journey pages' tool popups still
+   used emoji (🎵⏱🎸) for the metronome/timer/tuner titles where
+   index.html switched to inline SVG, and were missing the July "Tempo
+   ladder" feature entirely (the toggle button + its ladder-box), even
+   though the JS that drives it (toggleLadder/ladderClean/ladderMiss) has
+   lived in fab-tools.js — already loaded on every Journey page — the
+   whole time. This was a pure markup gap, not a missing feature: fixing
+   it needed no JS changes at all.
+   ════════════════════════════════════════════════════════════════════ */
+const POPUP_EMOJI_RE = /<span class="tp-title">\s*(?:&#x1F3B5;|&#x23F1;|&#x1F3B8;)/;
+function checkJourneyPopupMarkup() {
+  head('1t3. Journey popup markup (tool-popup HTML) matches the app');
+  let bad = 0, pages = 0;
+  const flag = m => { err(m); problems++; bad++; };
+  for (const file of TAB_PAGES.filter(f => f.endsWith('.html'))) {
+    let raw;
+    try { raw = readFileSync(join(ROOT, file), 'utf8'); } catch { continue; }
+    pages++;
+    if (POPUP_EMOJI_RE.test(raw))
+      flag(`${file}: a tool-popup title still uses an emoji icon — the app uses inline SVG for tools.metronome/timerTitle/tuner (CLAUDE.md: restyle both or neither applies to markup here too).`);
+    const metroPopup = raw.match(/<div class="tool-popup" id="metro-popup"[\s\S]*?<div class="tool-popup" id="timer-popup"/);
+    if (!metroPopup) { flag(`${file}: no metro-popup found — can't check for the Tempo ladder.`); continue; }
+    if (!/class="ladder-toggle"/.test(metroPopup[0]) || !/class="ladder-box"/.test(metroPopup[0]))
+      flag(`${file}: metro-popup is missing the Tempo ladder toggle/box that index.html's metronome popup has.`);
+  }
+  if (!bad) ok(`${pages} Journey pages — no emoji tool-popup icons, all carry the Tempo ladder`);
+}
+
 /* Per-page tab-card counts, pinned. See the note where they're compared. */
 const JOURNEY_TAB_COUNTS = {
   'all-along-the-watchtower.html': 10,
@@ -5505,6 +5536,7 @@ function checkCaButtonNamesAndPaper() {
   checkContrast();
   checkJourneyThemeDrift();
   checkFabToolsThemeDrift();
+  checkJourneyPopupMarkup();
   checkJourneyTabCards();
   checkTabAsciiAlignment();
   checkTabAsciiEnglish();

@@ -208,7 +208,8 @@ MC-tell audit died that way and the class recurred in the next sweep. Ratchets
 so far: MC answer-length tells (1h), watch-range labels ↔ `t=` params (1i),
 activity title series numbering (1l), Journey tab-card markup (1q), text
 contrast in both palettes across all four stylesheets (1s), Journey↔app CSS
-drift (1t), figure intrinsic sizes and the two class-activity renderers (1v),
+drift (1t), Journey tool-popup markup ↔ the app's own markup — emoji vs. SVG
+icons and the Tempo ladder toggle/box (1t3), figure intrinsic sizes and the two class-activity renderers (1v),
 video-title drift (inside the link check), slang and figurative phrasing in
 student-facing text (1w), Journey lick labels naming the shape (1w2),
 orphaned `img/`/`audio/` files and unused `DECKS`/`EAR_POOLS` ids (1x), Journey
@@ -750,8 +751,8 @@ broken, not as a choice. The original objection was really about doing it
 SILENTLY — releasing the other toggle where the student watches it pop out
 is just how a pair of mutually exclusive controls behaves.
 
-**Both snippet songs have their full mix as of 2026-09-18** — Seven Nation
-Army and "the cure" — so the Guitar toggle renders on all 12 snippets. A new
+**All three snippet songs have their full mix** — Seven Nation Army, "the
+cure", and Luna — so the Guitar toggle renders on all 11 snippets. A new
 snippet song needs two files, at both tempos, mix `full`, and a `srcFull`/
 `srcFullSlow` pair in its `SNIPPET_TRACKS` entry; 1ak warns the count of
 tracks still without one.
@@ -1271,7 +1272,8 @@ for the teacher's own account by email; a failed config read fails open (no
 gate), never on a guess. `mood-chart.html` is not one of the six and is never
 gated. **The one exemption (2026-09-12):** a pending activity that names a
 Journey page — `journey: '<slug>'` in `class-activities.js` (ca-10 →
-seven-nation-army, ca-13 → the-cure), optional `journeyLayer` — is sending
+seven-nation-army; ca-13, ca-18, ca-19 → the-cure; ca-20 → luna), optional
+`journeyLayer` — is sending
 the student there as part of the work, so `journey.js` leaves THAT page open
 while the activity blocks; every other Journey page stays gated. The card
 renders an "Open the … Song Journey page" button (`caJourneyLinkHtml()`; the
@@ -1490,11 +1492,11 @@ walk," since there's no Playwright harness to run one for real.
 kebab-case; the artist stays out of the app's display metadata.
 
 **What ships is `rhythm-down`, `rhythm-down-metronome` and — since
-2026-09-18 — `full` and `full-metronome`, for the two snippet songs** (the
+2026-09-18 — `full` and `full-metronome`, for the three snippet songs** (the
 old list here also named `no-gtr`, `drums-only` and `slow-<bpm>` as "in use",
-and none of those has ever existed in `audio/`). That is 28 files: six songs,
-some at two tempos, plus four mixes each for Seven Nation Army and "the
-cure". A snippet song wants all four: `full` alone gives the Guitar toggle,
+and none of those has ever existed in `audio/`). That is 34 files: six songs,
+some at two tempos, plus four mixes each for Seven Nation Army, "the
+cure", and Luna. A snippet song wants all four: `full` alone gives the Guitar toggle,
 and `full-metronome` is what stops it fighting the Metronome toggle. Every slow tier is the same master time-stretched, so its grid is
 the fast one's scaled by the tempo ratio — checked on two songs to three
 decimal places. The other four names stay reserved for when something is
