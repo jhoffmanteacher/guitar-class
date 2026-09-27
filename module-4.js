@@ -413,8 +413,8 @@ SETS.push(
                 label: 'Challenge — Solo over "Luna"', label_es: 'Reto — Solo sobre "Luna"',
                 text: 'Your box is D minor pentatonic Pattern 1 — root D, low E fret 10. Jam over <a href="https://www.youtube.com/watch?v=wBxFnX_V9mQ&t=84" target="_blank">▶ &#x1F3B5; a slow Dm practice jam (Luna\'s solo key)</a>:<ol><li>Improvise four bars using only the three notes marked below.</li><li>Improvise four more, adding a fourth note from the box.</li></ol>You\'ve got it when: eight bars where every phrase starts or ends on D. <a href="tabs/luna.html" target="_blank">&#x1F9F5; Song Journey: this is Layer 4 of 5</a>.',
                 text_es: 'Tu caja es el Patrón pentatónico 1 de D menor — raíz D, cuerda Mi grave traste 10. Toca sobre <a href="https://www.youtube.com/watch?v=wBxFnX_V9mQ&t=84" target="_blank">▶ &#x1F3B5; una pista de jam lenta en D menor (la tonalidad del solo de Luna)</a>:<ol><li>Improvisa cuatro compases usando solo las tres notas marcadas abajo.</li><li>Improvisa cuatro más, agregando una cuarta nota de la caja.</li></ol>Lo tienes cuando: ocho compases donde cada frase empieza o termina en D. <a href="tabs/luna.html" target="_blank">&#x1F9F5; Recorrido de la canción: esto es la Capa 4 de 5</a>.',
-                hint: '"Luna" is in F major, and F\'s relative minor is D — that\'s why D minor pentatonic is your box here. Same Pattern 1 shape you\'ve been drilling — just at fret 10, the highest position you\'ve played so far. This high up, the frets sit closer together, so the stretch is easier than it looks.',
-                hint_es: '"Luna" está en F mayor, y la relativa menor de F es D — por eso la pentatónica de D menor es tu caja aquí. La misma forma del Patrón 1 que has estado ejercitando — solo que en el traste 10, la posición más alta que has tocado hasta ahora. Tan arriba, los trastes están más juntos, así que el estiramiento es más fácil de lo que parece.',
+                hint: '"Luna" is in F major, but this solo uses D minor pentatonic — the same five notes, just centered on D instead of F. Same Pattern 1 shape you\'ve been drilling — just at fret 10. This high up, the frets sit closer together, so the stretch is easier than it looks.',
+                hint_es: '"Luna" está en F mayor, pero este solo usa la pentatónica de D menor — las mismas cinco notas, solo centradas en D en vez de F. La misma forma del Patrón 1 que has estado ejercitando — solo que en el traste 10. Tan arriba, los trastes están más juntos, así que el estiramiento es más fácil de lo que parece.',
                 stuck: 'Trade just D and F (frets 10 and 13 on the low E) back and forth, changing only the rhythm, until an idea appears.',
                 stuck_es: 'Intercambia solo D y F (trastes 10 y 13 en la Mi grave), cambiando solo el ritmo, hasta que aparezca una idea.',
                 levelUp: 'End every phrase on D so each idea arrives home — or hold the F (fret 13) a little longer for a sadder, longing feel.',
@@ -711,7 +711,7 @@ SETS.push(
             stuck_es: 'Usa solo 2–3 notas tanto para la llamada como para la respuesta — termina la respuesta en A (la raíz) cada vez para que la "respuesta" siempre llegue a la nota base.',
             levelUp: 'Trade with the person next to you — two bars each, back and forth, four times. You pass when every one of your answers ends on the root. Or record a 2-bar call and answer it live over the playback.',
             levelUp_es: 'Alterna con la persona de al lado — dos compases cada quien, de ida y vuelta, cuatro veces. Pasas cuando todas tus respuestas terminan en la raíz. O graba una llamada de 2 compases y respóndela en vivo sobre la grabación.',
-            skills: [5, 6]
+            skills: [6]
           }
             ]
           },
@@ -953,8 +953,8 @@ SETS.push(
             steps: [
           {
             label: 'The blues note: ♭5', label_es: 'La nota de blues: ♭5',
-            text: 'Theory check: the blues scale adds one note to the minor pentatonic — the ♭5 (flat 5). In A minor, that\'s the note Eb.<ol><li>Click "Hear the A blues scale" below and listen for the extra note that wasn\'t in the plain minor pentatonic — that\'s the blue note.</li><li>Then play it yourself in your Pattern 1 box: the low E string frets 5 · 8, the A string frets 5 · 6 · 7, then the D string frets 5 · 7. Fret 6 on the A string is the blues note.</li></ol>You\'ve got it when: you play these seven notes up and back three times, and say "blue note" each time you land on A-string fret 6.',
-            text_es: 'Revisión de teoría: la escala de blues agrega una nota a la pentatónica menor — la ♭5 (quinta bemol). En A menor, esa nota es Eb.<ol><li>Presiona "Escucha la escala de blues de A" abajo y escucha la nota extra que no estaba en la pentatónica menor simple — esa es la nota de blues.</li><li>Luego tócala tú mismo en tu caja del Patrón 1: la cuerda Mi grave trastes 5 · 8, la cuerda La trastes 5 · 6 · 7, y luego la cuerda Re trastes 5 · 7. El traste 6 de la cuerda La es la nota de blues.</li></ol>Lo tienes cuando: tocas estas siete notas subiendo y bajando tres veces, y dices "nota de blues" cada vez que caes en el traste 6 de la cuerda La.',
+            text: 'Theory check: the blues scale adds one note to the minor pentatonic — the ♭5 (flat 5). In A minor, that\'s the note D#.<ol><li>Click "Hear the A blues scale" below and listen for the extra note that wasn\'t in the plain minor pentatonic — that\'s the blue note.</li><li>Then play it yourself in your Pattern 1 box: the low E string frets 5 · 8, the A string frets 5 · 6 · 7, then the D string frets 5 · 7. Fret 6 on the A string is the blues note.</li></ol>You\'ve got it when: you play these seven notes up and back three times, and say "blue note" each time you land on A-string fret 6.',
+            text_es: 'Revisión de teoría: la escala de blues agrega una nota a la pentatónica menor — la ♭5 (quinta bemol). En A menor, esa nota es D#.<ol><li>Presiona "Escucha la escala de blues de A" abajo y escucha la nota extra que no estaba en la pentatónica menor simple — esa es la nota de blues.</li><li>Luego tócala tú mismo en tu caja del Patrón 1: la cuerda Mi grave trastes 5 · 8, la cuerda La trastes 5 · 6 · 7, y luego la cuerda Re trastes 5 · 7. El traste 6 de la cuerda La es la nota de blues.</li></ol>Lo tienes cuando: tocas estas siete notas subiendo y bajando tres veces, y dices "nota de blues" cada vez que caes en el traste 6 de la cuerda La.',
             hint: 'In Pattern 1 for A minor, the ♭5 sits between the 4 and 5 on the A string — fret 6, right between the 4 at fret 5 and the 5 at fret 7. It\'s a passing tone: a note you play on the way to the next note, not one you stop on. Move from it to the 4 or the 5.',
             hint_es: 'En el Patrón 1 de A menor, la ♭5 se ubica entre el 4 y el 5 en la cuerda La — traste 6, justo entre el 4 en el traste 5 y el 5 en el traste 7. Es una nota de paso: una nota que tocas de camino a la siguiente, no una en la que te detienes. Pasa de ella al 4 o al 5.',
             skills: [4],
@@ -962,8 +962,8 @@ SETS.push(
             response: { type: 'mc', prompt: 'Now play E minor pentatonic at the open strings. On the A string, which fret is the blue note (♭5)?',
               prompt_es: 'Ahora toca E menor pentatónica en las cuerdas al aire. En la cuerda La, ¿qué traste es la nota de blues (♭5)?',
               answer: 0,
-              explain: 'In E minor at the open strings, the A string plays the 4 (open) and the 5 (fret 2). The blue note sits between them, at fret 1 (the note B♭). It is the same move as fret 6 in A minor: one fret below the 5.',
-              explain_es: 'En E menor en las cuerdas al aire, la cuerda La toca el 4 (al aire) y el 5 (traste 2). La nota de blues queda entre ellos, en el traste 1 (la nota B♭). Es el mismo paso que el traste 6 en A menor: un traste debajo del 5.',
+              explain: 'In E minor at the open strings, the A string plays the 4 (open) and the 5 (fret 2). The blue note sits between them, at fret 1 (the note A#). It is the same move as fret 6 in A minor: one fret below the 5.',
+              explain_es: 'En E menor en las cuerdas al aire, la cuerda La toca el 4 (al aire) y el 5 (traste 2). La nota de blues queda entre ellos, en el traste 1 (la nota A#). Es el mismo paso que el traste 6 en A menor: un traste debajo del 5.',
               choices: [
               'Fret 1',
               'Fret 2',
@@ -1130,8 +1130,8 @@ SETS.push(
             steps: [
           {
             label: 'Challenge 3 — Record Over the Am Jam Track (assessment preparation)', label_es: 'Reto 3 — Graba sobre la pista de jam en Am (preparación para la evaluación)',
-            text: 'Play your 4-bar solo over a backing track. Start with <a href="https://www.youtube.com/watch?v=Vq8cApzOdy8" target="_blank">▶ &#x1F3B5; the Am jam track</a>, or open &#x1F3B5; Songs in the left menu and pick a core song\'s backing track. Use at least one hammer-on, pull-off, or vibrato:<ol><li>Record your take.</li><li>Say "call-and-response" or "four phrases" on the recording.</li><li>Listen back.</li></ol>You\'ve got it when: you hold the backing track\'s pulse start to finish with no restarts.',
-            text_es: 'Toca tu solo de 4 compases sobre una pista de acompañamiento. Empieza con <a href="https://www.youtube.com/watch?v=Vq8cApzOdy8" target="_blank">▶ &#x1F3B5; la pista de jam en Am</a>, o abre &#x1F3B5; Canciones en el menú de la izquierda y elige la pista de acompañamiento de una canción principal. Usa al menos un hammer-on, pull-off, o vibrato:<ol><li>Graba tu toma.</li><li>Di "llamada y respuesta" o "cuatro frases" en la grabación.</li><li>Escúchala después.</li></ol>Lo tienes cuando: sostienes el pulso de la pista de principio a fin sin reiniciar.',
+            text: 'Play your 4-bar solo over a backing track. Start with <a href="https://www.youtube.com/watch?v=Vq8cApzOdy8" target="_blank">▶ &#x1F3B5; the Am jam track</a>, or open &#x1F3B5; Songs in the left menu and pick a core song\'s backing track in A minor — "the cure" or Watchtower both work. Use at least one hammer-on, pull-off, or vibrato:<ol><li>Record your take.</li><li>Say "call-and-response" or "four phrases" on the recording.</li><li>Listen back.</li></ol>You\'ve got it when: from memory, you hold the backing track\'s pulse start to finish with no restarts.',
+            text_es: 'Toca tu solo de 4 compases sobre una pista de acompañamiento. Empieza con <a href="https://www.youtube.com/watch?v=Vq8cApzOdy8" target="_blank">▶ &#x1F3B5; la pista de jam en Am</a>, o abre &#x1F3B5; Canciones en el menú de la izquierda y elige la pista de acompañamiento de una canción principal en La menor — "the cure" o Watchtower funcionan bien. Usa al menos un hammer-on, pull-off, o vibrato:<ol><li>Graba tu toma.</li><li>Di "llamada y respuesta" o "cuatro frases" en la grabación.</li><li>Escúchala después.</li></ol>Lo tienes cuando: de memoria, sostienes el pulso de la pista de principio a fin sin reiniciar.',
             hint: 'Don\'t just run up and down the scale. Play short ideas with rests.',
             hint_es: 'No solo subas y bajes la escala. Toca ideas cortas con silencios.',
             stuck: 'Drop the backing track and play your written 4 bars alone, slowly, until they\'re solid — then add the track back and just one technique.',
@@ -1193,9 +1193,9 @@ SETS.push(
         gotItWhen_es: 'puedes encontrar la ♭5 en el Patrón 1 y tocarla entre dos notas de la escala, de camino a la siguiente — nunca como la nota en la que te detienes.',
         practice: { type: 'mc', prompt: 'In A minor pentatonic, what is the ♭5 "blues note"?',
           prompt_es: 'En A menor pentatónica, ¿cuál es la "nota de blues" ♭5?',
-          choices: ['D♭', 'D', 'E♭', 'E'], choices_es: ['D♭', 'D', 'E♭', 'E'], answer: 2,
-          explain: 'Counting up from A, the 5th degree is E, so the ♭5 is E lowered a half step (one fret) to E♭. D is tempting because it\'s right next door in the scale, but D is degree 4.',
-          explain_es: 'Contando desde A, el grado 5 es E, así que la ♭5 es E bajado un semitono (un traste) hasta E♭. D es tentador porque está justo al lado en la escala, pero D es el grado 4.' } },
+          choices: ['C♯', 'D', 'D♯', 'E'], choices_es: ['C♯', 'D', 'D♯', 'E'], answer: 2,
+          explain: 'Counting up from A, the 5th degree is E, so the ♭5 is E lowered a half step (one fret) to D♯. D is tempting because it\'s right next door in the scale, but D is degree 4.',
+          explain_es: 'Contando desde A, el grado 5 es E, así que la ♭5 es E bajado un semitono (un traste) hasta D♯. D es tentador porque está justo al lado en la escala, pero D es el grado 4.' } },
       { id: 'm4w3-s5', text: 'Explain how C major pentatonic and A minor pentatonic are relative scales',
         text_es: 'Explicar cómo C mayor pentatónica y A menor pentatónica son escalas relativas',
         gotItWhen: 'you can explain that they share the same 5 notes — only the root changes — and prove it on the fretboard.',

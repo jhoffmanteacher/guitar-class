@@ -623,7 +623,7 @@ SETS.push(
               { name: 'G5', chord: [[6,3,'1'],[5,5,'3'],[4,'x'],[3,'x'],[2,'x'],[1,'x']], position: 3 },
               { name: 'F5', chord: [[6,1,'1'],[5,3,'3'],[4,'x'],[3,'x'],[2,'x'],[1,'x']], position: 1 }
             ],
-            playSeq: { label: 'Hear it — A5·A5 · G5·G5 · F5·F5 · G5·G5', label_es: 'Escúchalo — A5·A5 · G5·G5 · F5·F5 · G5·G5', bpm: 60, notes: [[45,52],[45,52],[43,50],[43,50],[41,48],[41,48],[43,50],[43,50]] }
+            playSeq: { label: 'Hear it — A5·A5 · G5·G5 · F5·F5 · G5·G5', label_es: 'Escúchalo — A5·A5 · G5·G5 · F5·F5 · G5·G5', bpm: 70, notes: [[45,52],[45,52],[43,50],[43,50],[41,48],[41,48],[43,50],[43,50]] }
           },
           {
             label: 'Challenge — One Chord Per Beat ("Watchtower", fast)', label_es: 'Reto — Un acorde por tiempo ("Watchtower", rápido)',
@@ -744,7 +744,7 @@ SETS.push(
               { name: 'F5', chord: [[6,1,'1'],[5,3,'3'],[4,'x'],[3,'x'],[2,'x'],[1,'x']], position: 1 },
               { name: 'A5', chord: [[6,5,'1'],[5,7,'3'],[4,'x'],[3,'x'],[2,'x'],[1,'x']], position: 5 }
             ],
-            playSeq: { label: 'Hear F5 → A5 (roots F · A)', label_es: 'Escucha F5 → A5 (raíces F · A)', bpm: 60, notes: [41, 45] },
+            playSeq: { label: 'Hear F5 → A5 (roots F · A)', label_es: 'Escucha F5 → A5 (raíces F · A)', bpm: 60, notes: [{ midi: 41, beats: 4 }, { midi: 45, beats: 4 }] },
           }
             ]
           },
@@ -806,12 +806,12 @@ SETS.push(
                 label: 'Challenge — "the cure" as power chords', label_es: 'Reto — "the cure" como acordes de potencia',
                 text: 'This gentle acoustic song isn\'t usually played with power chords. Here you play it that way on purpose. It\'s marked ◐, our flag for a song played against its natural style.<ul><li>Play the whole song as power chords — verse: A5 · C5 · A5 · C5, then F5 · C5 · F5 · C5 — eight bars; chorus: D5 · F5 · C5 · G5, twice — eight more — four beats per chord at 60 BPM, one strum per beat, quietly.</li></ul>You\'ve got it when: two laps clean AND soft — power chords don\'t have to be loud. No score — just try it. <a href="tabs/the-cure.html" target="_blank">&#x1F9F5; Song Journey: this is Layer 3 of 5</a>.',
                 text_es: 'Esta canción acústica y suave normalmente no se toca con acordes de potencia. Aquí la tocas así a propósito. Lleva la marca ◐, nuestra señal para una canción tocada en contra de su estilo natural.<ul><li>Toca la canción entera como acordes de potencia — estrofa: A5 · C5 · A5 · C5, y luego F5 · C5 · F5 · C5 — ocho compases; coro: D5 · F5 · C5 · G5, dos veces — ocho más — cuatro tiempos por acorde a 60 BPM, un rasgueo por tiempo, suavemente.</li></ul>Lo tienes cuando: dos vueltas limpias Y suaves — los acordes de potencia no tienen que ser fuertes. Sin puntaje — solo pruébalo. <a href="tabs/the-cure.html" target="_blank">&#x1F9F5; Recorrido de la canción: esto es la Capa 3 de 5</a>.',
-                hint: 'The verse roots — A, C, F — you already know from Module 2. D and G are new: they\'re this song\'s chorus. Use both root strings: A5, F5 and G5 root on the low E, C5 and D5 on the A string, which keeps every root inside the first five frets. The challenge here is touch: light pick, both strings ringing, no harsh sound.',
-                hint_es: 'Las raíces de la estrofa — A, C, F — ya las conoces del Módulo 2. D y G son nuevas: son el coro de esta canción. Usa las dos cuerdas de raíz: A5, F5 y G5 tienen su raíz en la cuerda Mi grave, y C5 y D5 en la cuerda La, lo que mantiene todas las raíces dentro de los primeros cinco trastes. El reto aquí es el toque: púa ligera, ambas cuerdas sonando, sin sonido áspero.',
+                hint: 'The verse roots — A, C, F — you already know from Module 2, and so do D and G, this song\'s chorus roots, from other songs\' roots there. Use both root strings: A5, F5 and G5 root on the low E, C5 and D5 on the A string, which keeps every root inside the first five frets. The challenge here is touch: light pick, both strings ringing, no harsh sound.',
+                hint_es: 'Las raíces de la estrofa — A, C, F — ya las conoces del Módulo 2, y también D y G, las raíces del coro de esta canción, de las raíces de otras canciones ahí. Usa las dos cuerdas de raíz: A5, F5 y G5 tienen su raíz en la cuerda Mi grave, y C5 y D5 en la cuerda La, lo que mantiene todas las raíces dentro de los primeros cinco trastes. El reto aquí es el toque: púa ligera, ambas cuerdas sonando, sin sonido áspero.',
                 stuck: 'Roots-only as quietly as you can first — get the dynamics, then add the fifths.',
                 stuck_es: 'Solo raíces lo más suave que puedas primero — consigue la dinámica, y luego agrega las quintas.',
-                levelUp: 'Play one lap loud and one lap soft and hear the difference. Then swap the last chord\'s root for the record\'s real bass note — B on the A string, fret 2 — instead of G5.',
-                levelUp_es: 'Toca una vuelta fuerte y una vuelta suave y escucha la diferencia. Después cambia la raíz del último acorde por la nota de bajo real del disco — B en la cuerda La, traste 2 — en vez de G5.',
+                levelUp: 'Play one lap loud and one lap soft and hear the difference.',
+                levelUp_es: 'Toca una vuelta fuerte y una vuelta suave y escucha la diferencia.',
                 tab: {
                   caption: '"the cure" — verse and chorus as power chords (teaching arrangement) · one strum per beat, four beats per chord · 60 BPM',
                   caption_es: '"the cure" — estrofa y coro como acordes de potencia (arreglo didáctico) · un rasgueo por tiempo, cuatro tiempos por acorde · 60 BPM',
