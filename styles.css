@@ -966,6 +966,19 @@ body.rail-collapsed .rail-tools .tool-popup{
     margin:0;overflow:visible;clip:auto}
   body.rail-collapsed .rail-tools .fab-buttons{grid-template-columns:1fr 1fr}
   body.rail-collapsed .rail-tools .tool-popup{left:8px;right:8px;width:auto;bottom:calc(100% + 6px)}
+  /* Four more .rail-collapsed overrides that were never unwound here — found
+     2026-09-27. Worst: .nav-list's flex-column stayed active in the drawer,
+     silently undoing the two-column nav grid CLAUDE.md says is permanent at
+     every screen size, if the rail had been collapsed on a wider screen
+     first. The others: .rail-scroll's tighter 62px-rail padding/gap leaked
+     into the drawer, .preview-note stayed force-hidden, and the tool dock's
+     labels stayed visually clipped even though the drawer unwinds
+     .fab-buttons back to a labelled 2x2 above. */
+  body.rail-collapsed .rail-scroll{padding:12px 14px;gap:14px;overflow-x:visible}
+  body.rail-collapsed .preview-note{display:block}
+  body.rail-collapsed .nav-list{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:4px 6px}
+  body.rail-collapsed .rail-tools .fab span{position:static;width:auto;height:auto;padding:0;margin:0;
+    overflow:hidden;text-overflow:ellipsis;white-space:nowrap;max-width:100%;clip:auto;border:0}
   .rail{width:82vw;max-width:300px;flex:none;position:fixed;top:var(--hdr);left:0;
     height:calc(100vh - var(--hdr));
     height:calc(100dvh - var(--hdr));border-right:1px solid var(--border);border-bottom:none;

@@ -1050,6 +1050,7 @@ async function flushSave(){
     if(keys.has('period') && document.getElementById('period-overlay')){
       closePeriodPicker();
       refreshOpenClassActivitiesScreen();
+      applyActivityGate();   // picking CAS lifts the gate even off this screen
     }
   } catch(e){
     keys.forEach(k=>_dirtyKeys.add(k));   // keep dirty so the next save retries
@@ -2864,6 +2865,7 @@ async function periodPick(value){
   if(document.getElementById('period-overlay')){
     closePeriodPicker();
     refreshOpenClassActivitiesScreen();
+    applyActivityGate();   // picking CAS lifts the gate even off this screen
   }
 }
 function closePeriodPicker(){

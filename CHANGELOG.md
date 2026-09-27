@@ -5,6 +5,22 @@ Notable changes to the Guitar Class site. Newest first.
 For the full session-by-session history (and the reasoning behind each change),
 see `WORKFLOW.md` and the git commit log.
 
+## 2026-09-27 — Small fixes: rail-collapsed rail, CAS gate, teacher board moves
+
+### Fixed
+
+- **Collapsing the left rail on a wide screen, then narrowing the window**
+  no longer leaves the mobile drawer stuck in the icon-only layout — the
+  two-column navigation, the tool dock's labels, and a couple of other rows
+  now un-collapse properly at narrow widths.
+- **Picking the CAS period now lifts the activity gate immediately**, even
+  if you weren't on the In-Class Activities page when you picked it.
+- **Moving activities quickly on the teacher console's board** (a fast
+  drag, a double-tap on ▲/▼, or overlapping a Delete) no longer
+  occasionally shows "Nothing was saved — the class settings changed"
+  when nothing actually changed except your own last click — rapid moves
+  now land one at a time instead of racing each other.
+
 ## 2026-09-27 — Song Journey pages get the Tempo ladder and matching icons
 
 ### Fixed

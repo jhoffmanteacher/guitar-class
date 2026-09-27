@@ -1329,6 +1329,34 @@ function teacherBoardArchToggle(key, open){ boardArchOpen[key]=!!open; }
    and the one it joins are re-packed 1..N, and only rows whose entry
    actually changed are sent — a move inside Module 3 never rewrites
    Module 7. */
+/* Serializes the three board writers that re-pack a module (Move, Unassign,
+   Delete) — found 2026-09-27. Each computes its patch from teacherClassConfig
+   synchronously, then awaits a STRICT teacherWriteConfig() write, so two
+   rapid clicks (a fast drag, a double-tap on ▲, or a Move overlapping a
+   Delete's confirm landing) can both finish their synchronous half before
+   either write resolves and bumps teacherConfigVersion. The second write
+   then reads the still-stale version, and the transaction refuses it as a
+   conflict — the tab's OWN prior move, not another session, tripping the
+   stale-write guard on itself. Chaining every board write through one queue
+   (whether it succeeds or fails) makes write B wait for write A to actually
+   land first, so B computes and sends against the version A left behind
+   instead of the one that was already true when both started. This does not
+   touch teacherWriteConfig()'s own strict-vs-cell-checked contract — it only
+   stops the caller from creating the race in the first place. */
+/* Synchronous on purpose, up to its first await: reading the current gate
+   and installing this call's own replacement have to happen before any
+   other queued caller's turn can run, or two calls issued back to back
+   would both capture the same "previous" gate and still race. Resolves
+   (never rejects) once it's this call's turn, handing back the function
+   that releases the NEXT caller once this write has fully settled —
+   success or failure, so one failed write can't wedge the queue shut. */
+let _boardWriteGate = Promise.resolve();
+function waitBoardWriteTurn(){
+  const mine = _boardWriteGate;
+  let release;
+  _boardWriteGate = new Promise(r => { release = r; });
+  return mine.catch(() => {}).then(() => release);
+}
 async function teacherMoveActivity(id, module, pos){
   const cfg=teacherClassConfig;
   const a=(window.CLASS_ACTIVITIES||[]).find(x=>x.id===id);
@@ -1353,6 +1381,7 @@ async function teacherMoveActivity(id, module, pos){
   });
   if(!Object.keys(patch).length){ renderTeacherActivities({cached:true}); return; }
   cfg.activityBoard=next;
+  const release=await waitBoardWriteTurn();
   try{
     /* Strict (no base): `pos` is re-packed 1..N from the copy of the board
        this tab holds, so a base one move out of date writes a run with a
@@ -1361,6 +1390,8 @@ async function teacherMoveActivity(id, module, pos){
   }catch(e){
     cfg.activityBoard=prev;
     teacherConfigSaveFailed(e, 'Could not save that move — check your connection and Firestore rules.');
+  }finally{
+    release();
   }
   if(teacherView==='activities') renderTeacherActivities();
 }
@@ -1382,6 +1413,7 @@ async function teacherUnassignActivity(id){
     if(!p || Number(p.module)!==from || Number(p.pos)!==i+1) patch[x]=next[x];
   });
   cfg.activityBoard=next;
+  const release=await waitBoardWriteTurn();
   try{
     await ensureDb();   // for FieldValue — teacherWriteConfig calls it again, cached
     const fv=firebase.firestore.FieldValue;
@@ -1391,6 +1423,8 @@ async function teacherUnassignActivity(id){
   }catch(e){
     cfg.activityBoard=prev;
     teacherConfigSaveFailed(e, 'Could not un-assign that activity — check your connection and Firestore rules.');
+  }finally{
+    release();
   }
   if(teacherView==='activities') renderTeacherActivities();
 }
@@ -1940,6 +1974,7 @@ async function teacherDeleteActivity(id){
   MAPS.filter(m=>m!=='deletedActivities').forEach(m=>{ delete cfg[m][id]; });
   Object.keys(repack).forEach(k=>{ cfg.activityBoard[k]=repack[k]; });
   clearUids.forEach(uid=>{ delete clears[uid][id]; });
+  const release=await waitBoardWriteTurn();
   try{
     await ensureDb();
     const fv=firebase.firestore.FieldValue;
@@ -1958,6 +1993,8 @@ async function teacherDeleteActivity(id){
     Object.keys(beforeRepack).forEach(k=>{ if(beforeRepack[k]===undefined) delete cfg.activityBoard[k]; else cfg.activityBoard[k]=beforeRepack[k]; });
     clearUids.forEach(uid=>{ clears[uid][id]=beforeClears[uid]; });
     teacherConfigSaveFailed(e, 'Could not delete that activity — check your connection and Firestore rules.');
+  }finally{
+    release();
   }
   // A deleted row leaves the table, so an open rename box on it would be
   // editing something that is no longer there.
