@@ -1788,11 +1788,14 @@ const SNIPPET_TRACKS = {
      first click, the top of the intro riff over D.
      Full mixes added 2026-09-27 from a newer Moises export: sample-aligned
      with the rhythm-down files (0.0 ms at 125, -0.9 ms at 100; 445.65 s
-     against 445.57 s at 100, inside 1ak's 0.25 s). Their click is about
-     1.7x louder than the rhythm-down-metronome files' click, and the 100
-     rhythm-down mix is quieter overall (an older 192k export), so pressing
-     the Guitar toggle with Metronome on changes the volume. The fix is
-     re-exporting the rhythm-down pair from this same set, as Luna's was. */
+     against the old 445.57 s at 100). The first cut had a louder click
+     than the rhythm-down-metronome files and a quieter old 192k 100 BPM
+     rhythm-down, so pressing Guitar with Metronome on jumped in volume.
+     Fixed the same day the way Luna's was: rhythm-down-metronome at 125
+     and both rhythm-down files at 100 re-exported from this same Moises
+     set — sample-aligned with the full mixes, clicks within 15% of each
+     other, music at the same level. The 125 plain rhythm-down is the
+     original; its music matches this set's. */
   'sweet-child-o-mine': {
     src:              'audio/guns-n-roses-sweet-child-o-mine-backing-G-125bpm-440hz-rhythm-down.mp3',
     srcMetronome:     'audio/guns-n-roses-sweet-child-o-mine-backing-G-125bpm-440hz-rhythm-down-metronome.mp3',

@@ -13,6 +13,8 @@ see `WORKFLOW.md` and the git commit log.
   both speeds. The Song Journey play-along and any Sweet Child loop show the
   🎸 Record plays it / You play it button: hear the record play the part,
   then turn it off and play it yourself.
+- Turning the 🎸 button on or off with the metronome running no longer
+  changes the volume.
 
 ## 2026-09-27 — Sweet Child and Watchtower ready for in-class loops
 
