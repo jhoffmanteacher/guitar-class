@@ -470,6 +470,36 @@
     'ca.snipMetroOffTitle':    { en: 'Drops the record\u2019s guitar back — this track has no full mix with a click on it.',
                                  es: 'Baja la guitarra del disco — esta pista no tiene mezcla completa con clic.' },
 
+    // ── Practice card (`view: 'card'` — see caCardBodyHtml in app.js). One
+    // Play song button drives the tab; a Slower / Normal switch picks the
+    // slow or full-speed file. "Meta" for one checkbox goal: "Paso" is
+    // already the step of a ladder, and a card's help ladder sits right
+    // under the checks. Button names in the Spanish directions are quoted
+    // with «» like every other button name on the site (checks.mjs 1bc).
+    'ca.cardPlay':             { en: 'Play song', es: 'Tocar la canción' },
+    'ca.cardSlower':           { en: 'Slower', es: 'Más lento' },
+    'ca.cardNormal':           { en: 'Normal', es: 'Normal' },
+    'ca.cardSpeedAria':        { en: 'Speed: slower or normal', es: 'Velocidad: más lenta o normal' },
+    'ca.cardDirections':       { en: 'Press Play song and play along. Check a box when you can do it.',
+                                 es: 'Pulsa «Tocar la canción» y toca con ella. Marca una casilla cuando lo logres.' },
+    'ca.cardSectionHint':      { en: 'Tap a section to start the song there.',
+                                 es: 'Pulsa una sección para empezar la canción ahí.' },
+    'ca.cardSectionOf':        { en: 'Section {a} of {n}', es: 'Sección {a} de {n}' },
+    'ca.cardCountIn':          { en: 'Count in: {n}', es: 'Cuenta: {n}' },
+    'ca.cardPlayingFrom':      { en: 'Playing from: {section}', es: 'Tocando desde: {section}' },
+    'ca.cardRepOf':            { en: '{what} {n} of {total}', es: '{what} {n} de {total}' },
+    'ca.cardCheckN':           { en: 'Check {n}', es: 'Meta {n}' },
+    'ca.cardLevelUp':          { en: 'Level up', es: 'Sube de nivel' },
+    'ca.cardProgress':         { en: '{done} of {total} checked', es: '{done} de {total} marcadas' },
+    'ca.cardCheckCount1':      { en: '1 check', es: '1 meta' },
+    'ca.cardCheckCount':       { en: '{n} checks', es: '{n} metas' },
+    'ca.cardHelp':             { en: 'More practice help', es: 'Más ayuda para practicar' },
+    'ca.cardHelpNote':         { en: 'The step-by-step help. Open any step.', es: 'La ayuda paso a paso. Abre cualquier paso.' },
+    'ca.cardNudgeText':        { en: 'You checked {ticks} of {total} boxes. Finish anyway?',
+                                 es: 'Marcaste {ticks} de {total} casillas. ¿Terminar de todos modos?' },
+    'ca.cardDoneToast':        { en: 'Activity complete. Level up is extra practice.',
+                                 es: 'Actividad completada. «Sube de nivel» es práctica extra.' },
+
     // ── Exit checks (kind:'check' class activities — see class-activities.js) ──
     // "Boleto de salida" is the everyday classroom term; "comprobación de
     // salida" reads like a technical manual. Song titles stay English in both

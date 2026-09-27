@@ -2739,7 +2739,11 @@ function validateClassActivities() {
     /* `view: 'focus'` — Focus view, one step at a time (VIEW note atop
        class-activities.js; caIsFocus in app.js). Anything else is a typo
        that would silently render the accordion. */
-    if ('view' in a && a.view !== 'focus') { err(`${where}: view "${a.view}" — the only value is 'focus' (or leave it off)`); problems++; }
+    if ('view' in a && a.view !== 'focus' && a.view !== 'card') { err(`${where}: view "${a.view}" — the values are 'focus' and 'card' (or leave it off)`); problems++; }
+    /* A practice card needs its card object and nothing else does — the
+       card's own shape is checked by 1bf. */
+    if (a.view === 'card' && (!a.card || typeof a.card !== 'object')) { err(`${where}: view 'card' needs a "card" object (see CARD atop class-activities.js)`); problems++; }
+    if ('card' in a && a.view !== 'card') { err(`${where}: has a "card" object but view is not 'card' — it would never render`); problems++; }
     if (isCheck) { /* no steps — see 1y */ }
     else if (!Array.isArray(a.steps) || !a.steps.length) { err(`${where}: "steps" should be a non-empty array`); problems++; }
     else {
@@ -5303,6 +5307,21 @@ function checkCureChorusOrder() {
         }
       });
     }
+    // …and a practice card's chorus section (bar 21 of "the cure"), whose
+    // tab is one pluck per beat — so compare the roots with repeats folded.
+    for (const a of activities) {
+      const c = a && a.view === 'card' && a.card;
+      if (!c || c.track !== 'the-cure') continue;
+      (c.sections || []).forEach((sec, si) => {
+        if (!sec || sec.fromBar !== 21 || !Array.isArray(sec.notes)) return;
+        checked++;
+        const roots = sec.notes.map(n => n.note).filter((n, i, arr) => i % 4 === 0);
+        if (JSON.stringify(roots) !== JSON.stringify(EXPECTED)) {
+          err(`${a.id} card section ${si + 1}: chorus roots are ${roots.join(' ')}, expected ${EXPECTED.join(' ')}`);
+          problems++; bad++;
+        }
+      });
+    }
   } catch { /* reported by 1 */ }
 
   // 2) module-5.js — the "the cure" play-along playSeq (last 8 of 16 entries)
@@ -5411,10 +5430,29 @@ function checkJourneyButtonLastStep() {
     if (!a || !Array.isArray(a.steps)) continue;
     if (a.journey) withJourney++;
     const last = a.steps.length - 1;
+    /* A practice card (view:'card') puts its Journey button on its LAST
+       check, the Level up — so that check is the only place the page may be
+       named, and none of its help steps may. */
+    const isCard = a.view === 'card' && a.card;
+    if (isCard) {
+      const checks = Array.isArray(a.card.checks) ? a.card.checks : [];
+      checks.forEach((c, ci) => {
+        if (!c) return;
+        const named = ['text', 'text_es', 'label', 'label_es'].some(f => NAMES.test(strip(c[f])));
+        if (!named) return;
+        if (!a.journey) { err(`${a.id} check ${ci + 1}: names the Song Journey page, but the activity has no journey: — no button renders anywhere`); problems++; bad++; }
+        else if (ci !== checks.length - 1 || !c.levelUp) { err(`${a.id} check ${ci + 1}: names the Song Journey page, but a card's button renders only on its last check, the Level up`); problems++; bad++; }
+      });
+    }
     a.steps.forEach((st, si) => {
       if (!st) return;
       const named = ['text', 'text_es', 'label', 'label_es'].some(f => NAMES.test(strip(st[f])));
       if (!named) return;
+      if (isCard) {
+        err(`${a.id} help step ${si + 1}: names the Song Journey page — on a practice card the button is on the Level up check, not in the help steps`);
+        problems++; bad++;
+        return;
+      }
       if (!a.journey) {
         err(`${a.id} step ${si + 1}: names the Song Journey page, but the activity has no journey: — no button renders anywhere`);
         problems++; bad++;
@@ -5427,9 +5465,13 @@ function checkJourneyButtonLastStep() {
   // The renderer half: the button's one call site must be gated on the last step.
   let app = '';
   try { app = readFileSync(join(ROOT, 'app.js'), 'utf8').replace(/\/\*[\s\S]*?\*\//g, '').replace(/\/\/[^\n]*/g, ''); } catch {}
+  /* Two call sites, each gated: caStepHtml's last step, and a practice
+     card's last check when it is the Level up (pcChecksHtml). */
   const calls = app.match(/(?<!function )caJourneyLinkHtml\(a\)/g) || [];
-  if (calls.length !== 1 || !/if\(\s*si\s*===\s*\(a\.steps\s*\|\|\s*\[\]\)\.length\s*-\s*1\s*\)\s*parts\.push\(caJourneyLinkHtml\(a\)\)/.test(app)) {
-    err(`app.js: caJourneyLinkHtml(a) must be called exactly once, inside caStepHtml gated on the last step (found ${calls.length} call(s)) — the Journey button renders only in the last step`);
+  const stepGate = /if\(\s*si\s*===\s*\(a\.steps\s*\|\|\s*\[\]\)\.length\s*-\s*1\s*\)\s*parts\.push\(caJourneyLinkHtml\(a\)\)/.test(app);
+  const cardGate = /if\(\s*ci\s*===\s*checks\.length\s*-\s*1\s*&&\s*c\.levelUp\s*&&\s*!preview\s*\)\s*jl\s*=\s*caJourneyLinkHtml\(a\)/.test(app);
+  if (calls.length !== 2 || !stepGate || !cardGate) {
+    err(`app.js: caJourneyLinkHtml(a) must be called exactly twice — in caStepHtml gated on the last step, and in pcChecksHtml gated on a card's last (Level up) check (found ${calls.length} call(s)) — the Journey button renders only at the end of an activity`);
     problems++; bad++;
   }
   if (withJourney === 0) { err('1ba found no class activity with journey: — it cannot see what it is supposed to guard'); problems++; return; }
@@ -5453,7 +5495,7 @@ function checkJourneyButtonLastStep() {
    ════════════════════════════════════════════════════════════════════ */
 const FOUR_STEP_LEGACY = new Set([
   'ca-1', 'ca-2', 'ca-3', 'ca-4', 'ca-5', 'ca-6', 'ca-7',
-  'ca-10', 'ca-11', 'ca-12', 'ca-13', 'ca-17', 'ca-19',
+  'ca-11', 'ca-12', 'ca-13', 'ca-17', 'ca-19',
 ]);
 function checkFourStepsAndPaging() {
   head('1bb. Class activities: four steps, long tabs two lines a page');
@@ -5595,6 +5637,125 @@ function checkCaButtonNamesAndPaper() {
   if (bad === 0) ok(`${esSeen} Spanish fields name no "Play" button; ${caSeen} class-activity fields ask for no pen or paper`);
 }
 
+/* ════════════════════════════════════════════════════════════════════
+   1bf. PRACTICE CARDS (view:'card' — Jonathan, 2026-09-27). The card's
+   player follows the tab note by note over the real record, so a tab that
+   doesn't add up to its bars puts the highlight on the wrong note, and a
+   window past the end of the file plays silence. Checked here:
+   - `card.track` is a SNIPPET_TRACKS key.
+   - Sections: label/caption with _es twins; fromBar/bars (and optional
+     reps) whole numbers; repLabel + _es when reps > 1; back to back with
+     no gap or overlap (the loop runs from a tapped section to the end);
+     each note's midi is what its string + fret sound and its name matches;
+     each section's beats add up to bars x the track's beatsPerBar; the
+     whole window lands inside the file (or its measured bars).
+   - Checks: 2–6 of them, exactly one `levelUp` and it is the last; every
+     numbered check has label + text with _es twins, the Level up text.
+   - Help steps carry no snippet, drill or video (the card renders their
+     text and tab only), and the renderer pins: both card builders call
+     caCardBodyHtml, the console preview calls it with preview:true, and
+     every silencer that stops a snippet also stops a card (pcStop).
+   ════════════════════════════════════════════════════════════════════ */
+function checkPracticeCards() {
+  head('1bf. Practice cards');
+  let bad = 0, cards = 0;
+  const flag = m => { err(m); problems++; bad++; };
+  let appSrc = '', teacherSrc = '', TRACKS = {};
+  try { appSrc = readFileSync(join(ROOT, 'app.js'), 'utf8'); } catch { flag('app.js unreadable — 1bf cannot check this'); return; }
+  try { teacherSrc = readFileSync(join(ROOT, 'teacher.js'), 'utf8'); } catch { flag('teacher.js unreadable — 1bf cannot check this'); return; }
+  try { TRACKS = loadConstObject(appSrc, 'SNIPPET_TRACKS'); } catch (e) { flag(`app.js: could not load SNIPPET_TRACKS — ${e.message}`); return; }
+  let activities = [];
+  try {
+    const src = readFileSync(join(ROOT, 'class-activities.js'), 'utf8');
+    const sandbox = { console };
+    sandbox.window = sandbox;
+    vm.createContext(sandbox);
+    vm.runInContext(src, sandbox, { filename: 'class-activities.js' });
+    activities = sandbox.CLASS_ACTIVITIES || [];
+  } catch { return; /* reported by 1d */ }
+  const has = v => v !== undefined && v !== null && v !== '';
+  const twin = (where, o, f) => {
+    if (!has(o && o[f])) flag(`${where}: missing "${f}"`);
+    else if (!has(o[f + '_es'])) flag(`${where}: missing "${f}_es"`);
+  };
+  for (const a of activities) {
+    if (!a || a.view !== 'card' || !a.card) continue;
+    cards++;
+    const c = a.card, w = a.id;
+    const tr = TRACKS[c.track];
+    if (!tr) { flag(`${w}: card.track "${c.track}" is not in SNIPPET_TRACKS (have: ${Object.keys(TRACKS).join(', ')})`); continue; }
+    if (has(c.caption) && !has(c.caption_es)) flag(`${w}: card.caption has no caption_es`);
+    const secs = Array.isArray(c.sections) ? c.sections : [];
+    if (!secs.length) flag(`${w}: card.sections should be a non-empty array`);
+    let nextBar = null, endBar = 0;
+    secs.forEach((sec, si) => {
+      const sw = `${w} · card.sections[${si}]`;
+      if (!sec || typeof sec !== 'object') { flag(`${sw}: not an object`); return; }
+      twin(sw, sec, 'label');
+      twin(sw, sec, 'caption');
+      const reps = sec.reps === undefined ? 1 : sec.reps;
+      if (!Number.isInteger(sec.fromBar) || sec.fromBar < 1) { flag(`${sw}: fromBar "${sec.fromBar}" is not a bar number — bars count from 1`); return; }
+      if (!Number.isInteger(sec.bars) || sec.bars < 1) { flag(`${sw}: bars "${sec.bars}" is not a positive whole number`); return; }
+      if (!Number.isInteger(reps) || reps < 1) { flag(`${sw}: reps "${sec.reps}" is not a positive whole number`); return; }
+      if (reps > 1) twin(sw, sec, 'repLabel');
+      if (nextBar !== null && sec.fromBar !== nextBar) flag(`${sw}: starts at bar ${sec.fromBar}, but the section before it ends at bar ${nextBar - 1} — sections run back to back`);
+      nextBar = sec.fromBar + sec.bars * reps;
+      endBar = nextBar - 1;
+      const notes = Array.isArray(sec.notes) ? sec.notes : [];
+      if (!notes.length) { flag(`${sw}: notes should be a non-empty array`); return; }
+      let beats = 0;
+      notes.forEach((n, ni) => {
+        const nw = `${sw} · notes[${ni}]`;
+        if (!n || !/^[eBGDAE]$/.test(n.string || '') || !Number.isInteger(n.fret) || n.fret < 0) { flag(`${nw}: needs a string (e/B/G/D/A/E) and a whole-number fret`); return; }
+        const want = EC_OPEN_MIDI[n.string] + n.fret;
+        if (n.midi !== want) flag(`${nw}: midi ${n.midi} is not ${n.string}-string fret ${n.fret} (${want})`);
+        if (ecNorm(n.note) !== EC_NOTE_NAMES[want % 12]) flag(`${nw}: note "${n.note}" is not ${n.string}-string fret ${n.fret} (${EC_NOTE_NAMES[want % 12]})`);
+        if ('beats' in n && !(n.beats > 0)) flag(`${nw}: beats "${n.beats}" is not a positive number`);
+        beats += n.beats > 0 ? n.beats : 1;
+      });
+      const wantBeats = sec.bars * tr.beatsPerBar;
+      if (Math.abs(beats - wantBeats) > 1e-6) flag(`${sw}: notes add up to ${beats} beats, but ${sec.bars} bar${sec.bars === 1 ? '' : 's'} of ${c.track} is ${wantBeats} — the highlight would drift off the music`);
+    });
+    if (secs.length && endBar) {
+      if (Array.isArray(tr.barTimes) && tr.barTimes.length > 1) {
+        if (endBar > tr.barTimes.length - 1) flag(`${w}: the card runs to bar ${endBar}, past the last measured bar of ${c.track} (${tr.barTimes.length - 1})`);
+      } else {
+        const end = Number(tr.anchor) + endBar * tr.beatsPerBar * 60 / tr.feltBpm;
+        if (end > Number(tr.durationSec)) flag(`${w}: the card runs to bar ${endBar}, ${end.toFixed(1)}s — past the end of ${c.track} (${tr.durationSec}s)`);
+      }
+    }
+    const checks = Array.isArray(c.checks) ? c.checks : [];
+    if (checks.length < 2 || checks.length > 6) flag(`${w}: card.checks has ${checks.length} — a card has 2–6 checks`);
+    const lvl = checks.map((x, i) => (x && x.levelUp) ? i : -1).filter(i => i >= 0);
+    if (lvl.length !== 1 || lvl[0] !== checks.length - 1) flag(`${w}: card.checks needs exactly one levelUp check, and it goes last`);
+    checks.forEach((x, ci) => {
+      const cw = `${w} · card.checks[${ci}]`;
+      if (!x || typeof x !== 'object') { flag(`${cw}: not an object`); return; }
+      twin(cw, x, 'text');
+      if (!x.levelUp) twin(cw, x, 'label');
+      if ('levelUp' in x && x.levelUp !== true) flag(`${cw}: levelUp should be true or left off`);
+    });
+    (a.steps || []).forEach((st, si) => {
+      if (st && (st.snippet || st.drill || st.video)) flag(`${w} help step ${si + 1}: a practice card's help steps render their text and tab only — move the ${st.snippet ? 'snippet' : st.drill ? 'drill' : 'video'} or drop it`);
+    });
+  }
+  // Renderer pins, comments stripped (the 1ak lesson).
+  const body = (src, fn) => { const b = jsFunctionBody(src, fn); return b === null ? null : stripJsComments(b); };
+  for (const fn of ['caActivityCardHtml', 'caHeroCardHtml']) {
+    const b = body(appSrc, fn);
+    if (b === null) flag(`app.js: no ${fn}() found — 1bf cannot tell whether students get the practice card`);
+    else if (!/caCardBodyHtml\(\s*a\s*\)/.test(b)) flag(`app.js: ${fn}() never calls caCardBodyHtml(a) — a practice card would render empty there`);
+  }
+  const tb = body(teacherSrc, 'renderTeacherActivityDetail');
+  if (tb === null || !/caCardBodyHtml\(\s*a\s*,\s*\{\s*preview\s*:\s*true\s*\}\s*\)/.test(tb)) flag('teacher.js: renderTeacherActivityDetail() must call caCardBodyHtml(a,{preview:true}) — the console preview would not show the practice card');
+  for (const fn of ['stopCardAudio', 'playSequence', 'renderClassActivities']) {
+    const b = body(appSrc, fn);
+    if (b === null || !/\bpcStop\(\)/.test(b)) flag(`app.js: ${fn}() must call pcStop() beside snipStop() — a practice card's song would keep playing under other sound`);
+  }
+  if (cards === 0) { flag('1bf found no practice card — it cannot see what it is supposed to guard'); return; }
+  if (bad === 0) ok(`${cards} practice card${cards === 1 ? '' : 's'} — sections add up to their bars and land inside the track, one Level up each, both renderers and every silencer wired`);
+}
+
 (async function main() {
   if (LIVE_ONLY) {
     console.log(`${C.bold}Guitar Class — post-push live check${C.reset}`);
@@ -5655,6 +5816,7 @@ function checkCaButtonNamesAndPaper() {
   checkFourStepsAndPaging();
   checkCaButtonNamesAndPaper();
   checkJourneyGuitarToggle();
+  checkPracticeCards();
   if (!SKIP_LINKS) await checkLinks();
   else warn('skipping link check (--skip-links)');
   bumpServiceWorker();

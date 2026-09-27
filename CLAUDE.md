@@ -585,6 +585,12 @@ every step with a one-line note instead. A new STEP field still goes in both
 renderers; `caStepHtml` has a focus branch for the head and the nav row, so
 anything added there must land in both of its branches too.
 
+**Practice card (`view: 'card'`, 2026-09-27) is a whole card body, not a step
+field** — same shape as an exit check: ONE renderer, `caCardBodyHtml(a, opts)`
+in app.js, called by `caActivityCardHtml`/`caHeroCardHtml` for students and by
+`renderTeacherActivityDetail` with `{preview:true}` (1bf pins all three). See
+"Practice cards" under In-Class Activities.
+
 checks.mjs 1v now enforces this for the one field it can see mechanically —
 the class-activity figure's `width`/`height` — and fails the push if only one
 renderer has them. Everything else is still grep-both-by-hand.
@@ -766,6 +772,14 @@ measurement, which needs the click). And a greyed-out control reads as
 broken, not as a choice. The original objection was really about doing it
 SILENTLY — releasing the other toggle where the student watches it pop out
 is just how a pair of mutually exclusive controls behaves.
+
+**"the cure" Song Journey page makes its own click** (2026-09-27). Its
+`#playalong-frame` declares `data-click-anchor="0.565"` (the snippet
+`anchor`) and the COUNTED tempos `data-bpm="72" data-bpm-slow="60"`, and no
+metronome files at all; `ensurePlayer()` in `tabs/journey.js` then schedules
+one click per counted beat on an AudioContext instead of swapping files.
+Step snippets (`buildSnippet`) still use the metronome files — on "the cure"
+that is still the 144 click; practice cards don't.
 
 **All five snippet tracks have their full mix** — Seven Nation Army,
 "the cure", Luna, the Hendrix Watchtower and (2026-09-27) Sweet Child. A new
@@ -1325,6 +1339,35 @@ model). checks.mjs **1ba** fails the push on an earlier step naming the
 page (EN "Song Journey", ES "Recorrido de la canción", text or label), on a
 step naming it in an activity with no `journey:`, and on any
 `caJourneyLinkHtml(a)` call other than the one last-step-gated one.
+
+**Practice cards — `view: 'card'` (Jonathan, 2026-09-27; ca-18, ca-10).**
+Students did what was taught directly and stopped there, so the slides now
+teach the rungs and the activity is ONE screen: the song's tab, one "Play
+song" button that plays the real backing track and moves the tab note by
+note (`.beat-now`, honouring each note's `beats`), one page per section with
+tap-a-section-to-start (four-click count-in, then the loop returns to that
+section), a Slower / Normal switch (the slow / fast files, starting on
+Slower), the Guitar toggle where a full mix exists, and a Metronome that is
+a click the SITE makes on every counted beat — never the track's metronome
+file, because "the cure"'s files click at 144, twice the 72 the room counts.
+Then three or four checkboxes. The activity's `steps` are the help ladder
+under "More practice help" — read-only (no Mark done), four at most, and
+none may name the Song Journey page: the card's Journey button is on its
+last check, the Level up (1ba pins both call sites). Data shape: CARD note
+atop class-activities.js. Engine: `pc*` in app.js (`pcLayout` sections →
+tab offsets and beat totals; `pcLocate` position → note; the snippet
+window arithmetic, one `anchor` per song). **Complete = every numbered check
+ticked; Level up is extra** — written in place by `pcCheck()` (NOT
+`caToggleComplete`, which closes the card and re-renders, stopping the song
+and hiding Level up). Check ticks live in `caStepDone` as `<id>:c<n>`;
+`caTickKeys`/`caRequiredTickKeys` are what every "n of m" reader counts
+(meta line, hero dots, sticky bar, the Mark-complete nudge). One sound at a
+time: `pcStop()` sits beside every `snipStop()` in `stopCardAudio`,
+`playSequence` and `renderClassActivities` (1bf pins them), and starting a
+card calls `stopAllDemoAudio()`. **1bf** checks the data: track exists,
+sections back to back, each section's beats = bars × beatsPerBar, notes'
+midi/name from string + fret, window inside the file, exactly one Level up
+and it's last, help steps carry no snippet/drill/video.
 
 **Gate flips on mid-session → In-Class Activities.** `applyActivityGate()`
 detects the off→on transition (a new activity going live under an open

@@ -55,8 +55,41 @@
    complete — so it can be added to or taken off any activity at any time
    without touching saved progress. Leave it off and the card is the usual
    accordion. The console preview still lists every step, with a note.
-   checks.mjs 1d rejects any other value. (Jonathan, 2026-09-25: ca-10,
-   ca-18, ca-20, ca-21.)
+   checks.mjs 1d rejects any value but 'focus' and 'card'. (Jonathan,
+   2026-09-25: ca-20, ca-21; ca-10 and ca-18 were Focus view until they
+   became practice cards, below.)
+
+   CARD — `view: 'card'` plus a `card` object: the PRACTICE CARD (Jonathan,
+   2026-09-27; ca-18 and ca-10). One screen instead of a ladder: the song's
+   tab, one "Play song" button that plays the real backing track and moves
+   the tab note by note, a Slower / Normal switch, the Metronome (a click on
+   every counted beat, made by the site), and three or four checkboxes. The
+   slides teach the rungs; the card is what students practise with. The
+   activity's `steps` stay, as the HELP ladder folded under "More practice
+   help" — read-only, still four at most, and none of them may name the
+   Song Journey page. Complete = every numbered check ticked; Level up is
+   extra. Shape (caCardBodyHtml / ccLayout in app.js; checks.mjs 1bf):
+     card: {
+       track: 'the-cure',                  // a SNIPPET_TRACKS key
+       caption, caption_es,                // the tab's heading
+       sections: [{                        // back to back, in song order
+         label, label_es,                  // the tap-to-start button ("Chorus")
+         caption, caption_es,              // the heading over its tab page
+         fromBar: 21, bars: 8,             // bars of the RECORD, felt pulse,
+                                           // like a snippet window
+         reps: 2, repLabel, repLabel_es,   // optional: the band plays these
+                                           // notes `reps` times; the tab shows
+                                           // them once, with "Verse 1 of 2"
+         notes: [ { string, fret, note, midi, beats? } ],  // one pass;
+                                           // beats must add up to bars x the
+                                           // track's beatsPerBar
+       }],
+       checks: [
+         { label, label_es, text, text_es },            // numbered checks
+         { levelUp: true, text, text_es },               // last, exactly one;
+       ],                                  // the only place the Song Journey
+     }                                     // page may be named (its button
+                                           // renders there)
 
    FOUR STEPS AT MOST (Jonathan, 2026-09-25): a class activity teaches in
    four steps or fewer — usually Learn / Practice pairs ending on an
@@ -1065,16 +1098,60 @@ window.CLASS_ACTIVITIES = [
       },
     ],
   },
+  /* Seven Nation Army riff, the Song Journey's Layer 2 line as a class day.
+     REBUILT 2026-09-27 as a PRACTICE CARD (view:'card' — see CARD above),
+     the second one after ca-18: one screen with the riff's tab, driven note
+     by note by one Play song button over the band, two checks (four laps on
+     Slower, four on Normal) and a Level up. The band's first 8 bars are four
+     laps of the 2-bar riff, so the card shows the riff once with a
+     "Lap 1 of 4" badge; its uneven rhythm (beats) is followed as written.
+     The first three old steps stay as the help ladder — the two halves and
+     the rhythm demo, unchanged; the 80 BPM step and the band step became the
+     checks. */
   {
     id:    'ca-10',
-    view:  'focus',   // one step at a time — see VIEW above
+    view:  'card',    // one screen: Play song + tab + checks — see CARD above
     number: 10,
-    journey: 'seven-nation-army',   // the last step sends them to this Song Journey page — see JOURNEY below
+    journey: 'seven-nation-army',   // the Level up check sends them to this Song Journey page — see JOURNEY above
     journeyLayer: 2,
     title:    'Seven Nation Army — The Riff',
     title_es: 'Seven Nation Army — El riff',
-    intro:    'The Seven Nation Army riff is seven notes on the A string, the string just below the low E. It uses the Reach from Finger Gym: finger 1 stays on fret 7 while the pinky reaches fret 10.',
-    intro_es: 'El riff de Seven Nation Army son siete notas en la cuerda La, la cuerda justo debajo de la Mi grave. Usa el Estiramiento del Gimnasio de Dedos: el dedo 1 se queda en el traste 7 mientras el meñique llega al traste 10.',
+    intro:    'The Seven Nation Army riff is seven notes on the A string. Play it with the song, first on Slower, then at normal speed.',
+    intro_es: 'El riff de Seven Nation Army son siete notas en la cuerda La. Tócalo con la canción, primero en Más lento y después a velocidad normal.',
+    card: {
+      track: 'seven-nation-army',
+      caption:    'The riff · A string · 2 bars',
+      caption_es: 'El riff · cuerda La · 2 compases',
+      sections: [
+        {
+          label: 'The riff', label_es: 'El riff',
+          caption: 'The riff — E E G E D C B', caption_es: 'El riff — E E G E D C B',
+          fromBar: 1, bars: 2, reps: 4,
+          repLabel: 'Lap', repLabel_es: 'Vuelta',
+          notes: [
+            { string: 'A', fret: 7,  note: 'E', midi: 52, beats: 1.5 },
+            { string: 'A', fret: 7,  note: 'E', midi: 52, beats: 0.5 },
+            { string: 'A', fret: 10, note: 'G', midi: 55, beats: 0.75 },
+            { string: 'A', fret: 7,  note: 'E', midi: 52, beats: 0.75 },
+            { string: 'A', fret: 5,  note: 'D', midi: 50, beats: 0.5 },
+            { string: 'A', fret: 3,  note: 'C', midi: 48, beats: 2 },
+            { string: 'A', fret: 2,  note: 'B', midi: 47, beats: 2 }
+          ]
+        }
+      ],
+      checks: [
+        { label: 'The riff on Slower', label_es: 'El riff en Más lento',
+          text:    'Four laps of the riff with the song on Slower, without stopping. A lap is once through the riff.',
+          text_es: 'Cuatro vueltas del riff con la canción en Más lento, sin detenerte. Una vuelta es tocar el riff una vez completo.' },
+        { label: 'The riff on Normal', label_es: 'El riff en Normal',
+          text:    'Slide the switch to Normal. Four laps of the riff with the song, without stopping.',
+          text_es: 'Desliza el interruptor a Normal. Cuatro vueltas del riff con la canción, sin detenerte.' },
+        { levelUp: true,
+          text:    'Play along with the whole song on the Song Journey page, Layer 2.',
+          text_es: 'Toca con la canción completa en la página de Recorrido de la canción, Capa 2.' }
+      ]
+    },
+    // The help ladder (read-only, under "More practice help").
     steps: [
       {
         label:    'Practice — E E G E',
@@ -1126,53 +1203,6 @@ window.CLASS_ACTIVITIES = [
             { string: 'A', fret: 2,  note: 'B', midi: 47, beats: 2 }
           ]
         },
-      },
-      {
-        label:    'Practice — The whole riff',
-        label_es: 'Practica — El riff completo',
-        text: 'Play the whole riff with the tab at 60 BPM, in that rhythm. Made a mistake? Keep going. You\'ve got it when: four laps in a row without stopping (a lap is once through the riff). Stopping at the D? Play just E D C B three times, then try again.',
-        text_es: 'Toca el riff completo con la tablatura a 60 BPM, con ese ritmo. ¿Te equivocaste? Sigue. Lo tienes cuando: cuatro vueltas seguidas sin detenerte (una vuelta es tocar el riff una vez completo). ¿Te detienes en el D? Toca solo E D C B tres veces, y vuelve a intentarlo.',
-        tab: {
-          caption: 'The whole riff · E E G E D C B · 2 bars',
-          caption_es: 'El riff completo · E E G E D C B · 2 compases',
-          notes: [
-            { string: 'A', fret: 7,  note: 'E', midi: 52, beats: 1.5 },
-            { string: 'A', fret: 7,  note: 'E', midi: 52, beats: 0.5 },
-            { string: 'A', fret: 10, note: 'G', midi: 55, beats: 0.75 },
-            { string: 'A', fret: 7,  note: 'E', midi: 52, beats: 0.75 },
-            { string: 'A', fret: 5,  note: 'D', midi: 50, beats: 0.5 },
-            { string: 'A', fret: 3,  note: 'C', midi: 48, beats: 2 },
-            { string: 'A', fret: 2,  note: 'B', midi: 47, beats: 2 }
-          ]
-        },
-      },
-      {
-        label:    'Practice — Faster',
-        label_es: 'Practica — Más rápido',
-        text: 'Set the tab to 80 BPM and play the whole riff. You\'ve got it when: four laps in a row at 80 BPM without stopping. Losing the beat? Play two laps at 70 BPM, then go back to 80.',
-        text_es: 'Pon la tablatura a 80 BPM y toca el riff completo. Lo tienes cuando: cuatro vueltas seguidas a 80 BPM sin detenerte. ¿Pierdes el ritmo? Toca dos vueltas a 70 BPM, y luego regresa a 80.',
-        tab: {
-          caption: 'The whole riff · E E G E D C B · 2 bars',
-          caption_es: 'El riff completo · E E G E D C B · 2 compases',
-          notes: [
-            { string: 'A', fret: 7,  note: 'E', midi: 52, beats: 1.5 },
-            { string: 'A', fret: 7,  note: 'E', midi: 52, beats: 0.5 },
-            { string: 'A', fret: 10, note: 'G', midi: 55, beats: 0.75 },
-            { string: 'A', fret: 7,  note: 'E', midi: 52, beats: 0.75 },
-            { string: 'A', fret: 5,  note: 'D', midi: 50, beats: 0.5 },
-            { string: 'A', fret: 3,  note: 'C', midi: 48, beats: 2 },
-            { string: 'A', fret: 2,  note: 'B', midi: 47, beats: 2 }
-          ]
-        },
-      },
-      {
-        label:    'Practice — With the band',
-        label_es: 'Practica — Con la banda',
-        text: 'Press Play on the band with Slow on (100 BPM) and play the riff along with it. You\'ve got it when: four laps with the band without stopping. Lost your place? Turn on Metronome and count 1 2 3 4 out loud for one lap, then start playing again. Then turn Slow off and play at the speed of the real song, or open the Song Journey page and play along with the whole song.',
-        text_es: 'Pulsa «Toca con la banda» con Lento activado (100 BPM) y toca el riff con ella. Lo tienes cuando: cuatro vueltas con la banda sin detenerte. ¿Te perdiste? Activa el Metrónomo y cuenta 1 2 3 4 en voz alta durante una vuelta, y luego vuelve a tocar. Después apaga Lento y toca a la velocidad de la canción real, o abre la página de Recorrido de la canción y toca con la canción completa.',
-        snippet: { track: 'seven-nation-army', fromBar: 1, bars: 8,
-                   label:    'Four laps with the band',
-                   label_es: 'Cuatro vueltas con la banda' },
       },
     ],
   },
@@ -1950,338 +1980,202 @@ window.CLASS_ACTIVITIES = [
      adds the chorus — D on the A string and G on the low E. The two cards are
      consecutive class days, not a replacement (Jonathan, 2026-09-16).
      (ca-19, the two-string verse alone, sits between them — 2026-09-16)
-     REBUILT 2026-09-25 (Jonathan: "too much on this page … show a couple lines
-     at a time and highlight the notes that students should play … cut down to
-     4 steps to teach the song"): six steps became four — the stand-alone C-to-D
-     drill and the separate "song in order" tab step are gone, and the band
-     joins the song-in-order step. Every Practice tab is spelled out one pluck
-     per beat (four per bar, the Journey page's Layer 2 reading) and shows two
-     rows at a time (`linesPerPage: 2` — buildPagedTabBody in app.js): a row is
-     two bars, so a page is four bars; Previous/Next turn the page.
-     revealDelay:10 (same day, Jonathan: read the directions before the tab
-     distracts you) hides each tab for its first 10 seconds and drops its
-     Play tab button — see wrapTabReveal/caArmTabReveals in app.js. Every
-     step's directions were reworded off "Press Play tab"/"watch it light
-     up" accordingly; ca-18 (all four steps) and ca-20 step 3 have it today
-     (ca-10/19 and ca-20's other steps still use Play tab to demonstrate
-     uneven rhythm, which the per-note buttons can't). */
+     REBUILT 2026-09-25 as four Focus-view steps, then REBUILT AGAIN
+     2026-09-27 as the first PRACTICE CARD (view:'card' — see CARD above):
+     students were doing what was taught directly and stopping there, so the
+     slides now teach the rungs and this card is one screen — the song's tab
+     driven by one Play song button, three checks and a Level up. Bars are the
+     record's: intro 1–4, verse 5–12 played twice (5–20, shown once with a
+     "Verse 1 of 2" badge), chorus 21–28 — the same 28 bars the old step 4
+     looped. The 2026-09-25 steps' ticks were day-scoped and completion is
+     keyed to the id, so nobody's saved progress moves.
+     The steps are now the HELP ladder under "More practice help", trimmed
+     (Jonathan's call) to what the card doesn't already cover: the chorus
+     notes, and the two drills the old recovery lines pointed at. */
   {
     id:    'ca-18',
-    view:  'focus',   // one step at a time — see VIEW above
+    view:  'card',    // one screen: Play song + tab + checks — see CARD above
     number: 15,
-    journey: 'the-cure',   // the last step sends them to this Song Journey page — see JOURNEY above
+    journey: 'the-cure',   // the Level up check sends them to this Song Journey page — see JOURNEY above
     journeyLayer: 2,
     title:    '"the cure" — Intro, Verse and Chorus',
     title_es: '"the cure" — Intro, estrofa y coro',
-    intro:    'You moved the verse of "the cure" onto two strings. Today you add the chorus — same two strings, nothing past fret 5, and your hand stays in one place.',
-    intro_es: 'Ya moviste la estrofa de "the cure" a dos cuerdas. Hoy agregas el coro — las mismas dos cuerdas, nada más allá del traste 5, y la mano se queda quieta.',
-    steps: [
-      {
-        label:    'Practice — Intro and verse',
-        label_es: 'Practica — Intro y estrofa',
-        text: 'You already play this part. Start the Metro tool at 60 BPM. Counting out loud, play the tab, one pluck on every beat. The tab shows two lines at a time — use Next to see the rest.\nYou\'ve got it when: intro into verse, twice in a row at 60 BPM, without stopping. Stopped twice? Play A C A C by itself for one minute, then try again.',
-        text_es: 'Esta parte ya la tocas. Arranca la herramienta Metro a 60 BPM. Contando en voz alta, toca el tab, una pulsación en cada tiempo. El tab muestra dos líneas a la vez — usa Siguiente para ver el resto.\nLo tienes cuando: de la intro a la estrofa, dos veces seguidas a 60 BPM, sin detenerte. ¿Te detuviste dos veces? Toca solo A C A C durante un minuto, y vuelve a intentarlo.',
-        tab: {
-          revealDelay: 10,
-          caption: 'Intro and verse · 4 plucks per note',
-          caption_es: 'Intro y estrofa · 4 pulsaciones por nota',
-          linesPerPage: 2,
-          phrases: [
-            {
-              label: 'Intro — A C A C',
-              label_es: 'Intro — A C A C',
-              notes: [
-                { string: 'E', fret: 5, note: 'A', midi: 45 },
-                { string: 'E', fret: 5, note: 'A', midi: 45 },
-                { string: 'E', fret: 5, note: 'A', midi: 45 },
-                { string: 'E', fret: 5, note: 'A', midi: 45 },
-                { string: 'A', fret: 3, note: 'C', midi: 48 },
-                { string: 'A', fret: 3, note: 'C', midi: 48 },
-                { string: 'A', fret: 3, note: 'C', midi: 48 },
-                { string: 'A', fret: 3, note: 'C', midi: 48 },
-                { string: 'E', fret: 5, note: 'A', midi: 45 },
-                { string: 'E', fret: 5, note: 'A', midi: 45 },
-                { string: 'E', fret: 5, note: 'A', midi: 45 },
-                { string: 'E', fret: 5, note: 'A', midi: 45 },
-                { string: 'A', fret: 3, note: 'C', midi: 48 },
-                { string: 'A', fret: 3, note: 'C', midi: 48 },
-                { string: 'A', fret: 3, note: 'C', midi: 48 },
-                { string: 'A', fret: 3, note: 'C', midi: 48 }
-              ]
-            },
-            {
-              label: 'Verse — A C A C, F C F C',
-              label_es: 'Estrofa — A C A C, F C F C',
-              notes: [
-                { string: 'E', fret: 5, note: 'A', midi: 45 },
-                { string: 'E', fret: 5, note: 'A', midi: 45 },
-                { string: 'E', fret: 5, note: 'A', midi: 45 },
-                { string: 'E', fret: 5, note: 'A', midi: 45 },
-                { string: 'A', fret: 3, note: 'C', midi: 48 },
-                { string: 'A', fret: 3, note: 'C', midi: 48 },
-                { string: 'A', fret: 3, note: 'C', midi: 48 },
-                { string: 'A', fret: 3, note: 'C', midi: 48 },
-                { string: 'E', fret: 5, note: 'A', midi: 45 },
-                { string: 'E', fret: 5, note: 'A', midi: 45 },
-                { string: 'E', fret: 5, note: 'A', midi: 45 },
-                { string: 'E', fret: 5, note: 'A', midi: 45 },
-                { string: 'A', fret: 3, note: 'C', midi: 48 },
-                { string: 'A', fret: 3, note: 'C', midi: 48 },
-                { string: 'A', fret: 3, note: 'C', midi: 48 },
-                { string: 'A', fret: 3, note: 'C', midi: 48 },
-                { string: 'E', fret: 1, note: 'F', midi: 41 },
-                { string: 'E', fret: 1, note: 'F', midi: 41 },
-                { string: 'E', fret: 1, note: 'F', midi: 41 },
-                { string: 'E', fret: 1, note: 'F', midi: 41 },
-                { string: 'A', fret: 3, note: 'C', midi: 48 },
-                { string: 'A', fret: 3, note: 'C', midi: 48 },
-                { string: 'A', fret: 3, note: 'C', midi: 48 },
-                { string: 'A', fret: 3, note: 'C', midi: 48 },
-                { string: 'E', fret: 1, note: 'F', midi: 41 },
-                { string: 'E', fret: 1, note: 'F', midi: 41 },
-                { string: 'E', fret: 1, note: 'F', midi: 41 },
-                { string: 'E', fret: 1, note: 'F', midi: 41 },
-                { string: 'A', fret: 3, note: 'C', midi: 48 },
-                { string: 'A', fret: 3, note: 'C', midi: 48 },
-                { string: 'A', fret: 3, note: 'C', midi: 48 },
-                { string: 'A', fret: 3, note: 'C', midi: 48 }
-              ]
-            }
+    intro:    'You moved the verse of "the cure" onto two strings. Today you add the chorus and play the whole song with the band.',
+    intro_es: 'Ya moviste la estrofa de "the cure" a dos cuerdas. Hoy agregas el coro y tocas la canción completa con la banda.',
+    card: {
+      track: 'the-cure',
+      caption:    'The song in order · 4 plucks per note',
+      caption_es: 'La canción en orden · 4 pulsaciones por nota',
+      sections: [
+        {
+          label: 'Intro', label_es: 'Intro',
+          caption: 'Intro — A C A C', caption_es: 'Intro — A C A C',
+          fromBar: 1, bars: 4,
+          notes: [
+            { string: 'E', fret: 5,  note: 'A', midi: 45 },
+            { string: 'E', fret: 5,  note: 'A', midi: 45 },
+            { string: 'E', fret: 5,  note: 'A', midi: 45 },
+            { string: 'E', fret: 5,  note: 'A', midi: 45 },
+            { string: 'A', fret: 3,  note: 'C', midi: 48 },
+            { string: 'A', fret: 3,  note: 'C', midi: 48 },
+            { string: 'A', fret: 3,  note: 'C', midi: 48 },
+            { string: 'A', fret: 3,  note: 'C', midi: 48 },
+            { string: 'E', fret: 5,  note: 'A', midi: 45 },
+            { string: 'E', fret: 5,  note: 'A', midi: 45 },
+            { string: 'E', fret: 5,  note: 'A', midi: 45 },
+            { string: 'E', fret: 5,  note: 'A', midi: 45 },
+            { string: 'A', fret: 3,  note: 'C', midi: 48 },
+            { string: 'A', fret: 3,  note: 'C', midi: 48 },
+            { string: 'A', fret: 3,  note: 'C', midi: 48 },
+            { string: 'A', fret: 3,  note: 'C', midi: 48 }
           ]
         },
-      },
+        {
+          label: '2 Verses', label_es: '2 estrofas',
+          caption: '2 Verses — A C A C, F C F C', caption_es: '2 estrofas — A C A C, F C F C',
+          fromBar: 5, bars: 8, reps: 2,
+          repLabel: 'Verse', repLabel_es: 'Estrofa',
+          notes: [
+            { string: 'E', fret: 5,  note: 'A', midi: 45 },
+            { string: 'E', fret: 5,  note: 'A', midi: 45 },
+            { string: 'E', fret: 5,  note: 'A', midi: 45 },
+            { string: 'E', fret: 5,  note: 'A', midi: 45 },
+            { string: 'A', fret: 3,  note: 'C', midi: 48 },
+            { string: 'A', fret: 3,  note: 'C', midi: 48 },
+            { string: 'A', fret: 3,  note: 'C', midi: 48 },
+            { string: 'A', fret: 3,  note: 'C', midi: 48 },
+            { string: 'E', fret: 5,  note: 'A', midi: 45 },
+            { string: 'E', fret: 5,  note: 'A', midi: 45 },
+            { string: 'E', fret: 5,  note: 'A', midi: 45 },
+            { string: 'E', fret: 5,  note: 'A', midi: 45 },
+            { string: 'A', fret: 3,  note: 'C', midi: 48 },
+            { string: 'A', fret: 3,  note: 'C', midi: 48 },
+            { string: 'A', fret: 3,  note: 'C', midi: 48 },
+            { string: 'A', fret: 3,  note: 'C', midi: 48 },
+            { string: 'E', fret: 1,  note: 'F', midi: 41 },
+            { string: 'E', fret: 1,  note: 'F', midi: 41 },
+            { string: 'E', fret: 1,  note: 'F', midi: 41 },
+            { string: 'E', fret: 1,  note: 'F', midi: 41 },
+            { string: 'A', fret: 3,  note: 'C', midi: 48 },
+            { string: 'A', fret: 3,  note: 'C', midi: 48 },
+            { string: 'A', fret: 3,  note: 'C', midi: 48 },
+            { string: 'A', fret: 3,  note: 'C', midi: 48 },
+            { string: 'E', fret: 1,  note: 'F', midi: 41 },
+            { string: 'E', fret: 1,  note: 'F', midi: 41 },
+            { string: 'E', fret: 1,  note: 'F', midi: 41 },
+            { string: 'E', fret: 1,  note: 'F', midi: 41 },
+            { string: 'A', fret: 3,  note: 'C', midi: 48 },
+            { string: 'A', fret: 3,  note: 'C', midi: 48 },
+            { string: 'A', fret: 3,  note: 'C', midi: 48 },
+            { string: 'A', fret: 3,  note: 'C', midi: 48 }
+          ]
+        },
+        {
+          label: 'Chorus', label_es: 'Coro',
+          caption: 'Chorus — D F C G, D F C G', caption_es: 'Coro — D F C G, D F C G',
+          fromBar: 21, bars: 8,
+          notes: [
+            { string: 'A', fret: 5,  note: 'D', midi: 50 },
+            { string: 'A', fret: 5,  note: 'D', midi: 50 },
+            { string: 'A', fret: 5,  note: 'D', midi: 50 },
+            { string: 'A', fret: 5,  note: 'D', midi: 50 },
+            { string: 'E', fret: 1,  note: 'F', midi: 41 },
+            { string: 'E', fret: 1,  note: 'F', midi: 41 },
+            { string: 'E', fret: 1,  note: 'F', midi: 41 },
+            { string: 'E', fret: 1,  note: 'F', midi: 41 },
+            { string: 'A', fret: 3,  note: 'C', midi: 48 },
+            { string: 'A', fret: 3,  note: 'C', midi: 48 },
+            { string: 'A', fret: 3,  note: 'C', midi: 48 },
+            { string: 'A', fret: 3,  note: 'C', midi: 48 },
+            { string: 'E', fret: 3,  note: 'G', midi: 43 },
+            { string: 'E', fret: 3,  note: 'G', midi: 43 },
+            { string: 'E', fret: 3,  note: 'G', midi: 43 },
+            { string: 'E', fret: 3,  note: 'G', midi: 43 },
+            { string: 'A', fret: 5,  note: 'D', midi: 50 },
+            { string: 'A', fret: 5,  note: 'D', midi: 50 },
+            { string: 'A', fret: 5,  note: 'D', midi: 50 },
+            { string: 'A', fret: 5,  note: 'D', midi: 50 },
+            { string: 'E', fret: 1,  note: 'F', midi: 41 },
+            { string: 'E', fret: 1,  note: 'F', midi: 41 },
+            { string: 'E', fret: 1,  note: 'F', midi: 41 },
+            { string: 'E', fret: 1,  note: 'F', midi: 41 },
+            { string: 'A', fret: 3,  note: 'C', midi: 48 },
+            { string: 'A', fret: 3,  note: 'C', midi: 48 },
+            { string: 'A', fret: 3,  note: 'C', midi: 48 },
+            { string: 'A', fret: 3,  note: 'C', midi: 48 },
+            { string: 'E', fret: 3,  note: 'G', midi: 43 },
+            { string: 'E', fret: 3,  note: 'G', midi: 43 },
+            { string: 'E', fret: 3,  note: 'G', midi: 43 },
+            { string: 'E', fret: 3,  note: 'G', midi: 43 }
+          ]
+        }
+      ],
+      checks: [
+        { label: 'Intro and 2 verses', label_es: 'Intro y 2 estrofas',
+          text:    'Intro and 2 verses with the song on Slower, without stopping.',
+          text_es: 'La intro y las 2 estrofas con la canción en Más lento, sin detenerte.' },
+        { label: 'Chorus', label_es: 'Coro',
+          text:    'Two choruses in a row with the song on Slower, without stopping. Tap Chorus to start there.',
+          text_es: 'Dos coros seguidos con la canción en Más lento, sin detenerte. Pulsa «Coro» para empezar ahí.' },
+        { label: 'The whole song', label_es: 'La canción completa',
+          text:    'Intro to the end of the chorus with the song on Slower, without stopping.',
+          text_es: 'De la intro al final del coro con la canción en Más lento, sin detenerte.' },
+        { levelUp: true,
+          text:    'Slide the switch to Normal and play the whole song. Then play along with the full recording on the Song Journey page, Layer 2.',
+          text_es: 'Desliza el interruptor a Normal y toca la canción completa. Después toca con la grabación completa en la página de Recorrido de la canción, Capa 2.' }
+      ]
+    },
+    // The help ladder (read-only, under "More practice help").
+    steps: [
       {
         label:    'Learn — The chorus notes',
         label_es: 'Aprende — Las notas del coro',
         text: 'This part is new: D, F, C, G. D and G are the new spots. D is fret 5 on the A string, played with your pinky. G is fret 3 on the low E string, played with your ring finger. Play each note once, slowly, and say its name out loud.',
         text_es: 'Esta parte es nueva: D, F, C, G. D y G son los lugares nuevos. D es el traste 5 de la cuerda La, con el meñique. G es el traste 3 de la cuerda Mi grave, con el anular. Toca cada nota una vez, despacio, y di su nombre en voz alta.',
         tab: {
-          revealDelay: 10,
           caption: 'Chorus notes · D F C G',
           caption_es: 'Notas del coro · D F C G',
           notes: [
-            { string: 'A', fret: 5, note: 'D', midi: 50, beats: 4 },
-            { string: 'E', fret: 1, note: 'F', midi: 41, beats: 4 },
-            { string: 'A', fret: 3, note: 'C', midi: 48, beats: 4 },
-            { string: 'E', fret: 3, note: 'G', midi: 43, beats: 4 }
+            { string: 'A', fret: 5,  note: 'D', midi: 50, beats: 4 },
+            { string: 'E', fret: 1,  note: 'F', midi: 41, beats: 4 },
+            { string: 'A', fret: 3,  note: 'C', midi: 48, beats: 4 },
+            { string: 'E', fret: 3,  note: 'G', midi: 43, beats: 4 }
           ]
         },
       },
       {
-        label:    'Practice — The chorus',
-        label_es: 'Practica — El coro',
-        text: 'Play D F C G twice at 60 BPM, one pluck on every beat. The verse ends on C and the chorus starts on D, so keep your index finger over fret 1 and your pinky ready for fret 5.\nYou\'ve got it when: two choruses in a row at 60 BPM, no stops. Missing the D? Play C, then D, eight times in a row, then try the chorus again.',
-        text_es: 'Toca D F C G dos veces a 60 BPM, una pulsación en cada tiempo. La estrofa termina en C y el coro empieza en D, así que mantén el índice sobre el traste 1 y el meñique listo para el traste 5.\nLo tienes cuando: dos coros seguidos a 60 BPM, sin detenerte. ¿Se te escapa el D? Toca C y luego D, ocho veces seguidas, y vuelve a intentar el coro.',
-        // The chorus is at bar 21, not 13: the verse's eight bars play TWICE
-        // (5-12 and 13-20) before it. Measured off the mix — bars 13-20 are
-        // harmonically the verse again, and the chorus is the louder section
-        // that follows. A window at 13 had the band playing Am-C-F-C under a
-        // student reading D-F-C-G.
-        snippet: { track: 'the-cure', fromBar: 21, bars: 8,
-                   label:    'The chorus, with the band',
-                   label_es: 'El coro, con la banda' },
+        label:    'Practice — A and C',
+        label_es: 'Practica — A y C',
+        text: 'Play A C A C with the tab at 60 BPM. Four beats on each note. You\'ve got it when: A C A C at 60 BPM, three times in a row, one string ringing at a time. Two strings ringing? Drop the tab to 40 BPM and try again.',
+        text_es: 'Toca A C A C con la tablatura a 60 BPM. Cuatro tiempos en cada nota. Lo tienes cuando: A C A C a 60 BPM, tres veces seguidas, una sola cuerda sonando a la vez. ¿Suenan dos cuerdas? Baja la tablatura a 40 BPM e inténtalo otra vez.',
         tab: {
-          revealDelay: 10,
-          caption: 'Chorus · 4 plucks per note',
-          caption_es: 'Coro · 4 pulsaciones por nota',
-          linesPerPage: 2,
-          phrases: [
-            {
-              label: 'Chorus — D F C G, D F C G',
-              label_es: 'Coro — D F C G, D F C G',
-              notes: [
-                { string: 'A', fret: 5, note: 'D', midi: 50 },
-                { string: 'A', fret: 5, note: 'D', midi: 50 },
-                { string: 'A', fret: 5, note: 'D', midi: 50 },
-                { string: 'A', fret: 5, note: 'D', midi: 50 },
-                { string: 'E', fret: 1, note: 'F', midi: 41 },
-                { string: 'E', fret: 1, note: 'F', midi: 41 },
-                { string: 'E', fret: 1, note: 'F', midi: 41 },
-                { string: 'E', fret: 1, note: 'F', midi: 41 },
-                { string: 'A', fret: 3, note: 'C', midi: 48 },
-                { string: 'A', fret: 3, note: 'C', midi: 48 },
-                { string: 'A', fret: 3, note: 'C', midi: 48 },
-                { string: 'A', fret: 3, note: 'C', midi: 48 },
-                { string: 'E', fret: 3, note: 'G', midi: 43 },
-                { string: 'E', fret: 3, note: 'G', midi: 43 },
-                { string: 'E', fret: 3, note: 'G', midi: 43 },
-                { string: 'E', fret: 3, note: 'G', midi: 43 },
-                { string: 'A', fret: 5, note: 'D', midi: 50 },
-                { string: 'A', fret: 5, note: 'D', midi: 50 },
-                { string: 'A', fret: 5, note: 'D', midi: 50 },
-                { string: 'A', fret: 5, note: 'D', midi: 50 },
-                { string: 'E', fret: 1, note: 'F', midi: 41 },
-                { string: 'E', fret: 1, note: 'F', midi: 41 },
-                { string: 'E', fret: 1, note: 'F', midi: 41 },
-                { string: 'E', fret: 1, note: 'F', midi: 41 },
-                { string: 'A', fret: 3, note: 'C', midi: 48 },
-                { string: 'A', fret: 3, note: 'C', midi: 48 },
-                { string: 'A', fret: 3, note: 'C', midi: 48 },
-                { string: 'A', fret: 3, note: 'C', midi: 48 },
-                { string: 'E', fret: 3, note: 'G', midi: 43 },
-                { string: 'E', fret: 3, note: 'G', midi: 43 },
-                { string: 'E', fret: 3, note: 'G', midi: 43 },
-                { string: 'E', fret: 3, note: 'G', midi: 43 }
-              ]
-            }
+          caption: 'A · C, twice · 4 beats each',
+          caption_es: 'A · C, dos veces · 4 tiempos cada una',
+          notes: [
+            { string: 'E', fret: 5,  note: 'A', midi: 45, beats: 4 },
+            { string: 'A', fret: 3,  note: 'C', midi: 48, beats: 4 },
+            { string: 'E', fret: 5,  note: 'A', midi: 45, beats: 4 },
+            { string: 'A', fret: 3,  note: 'C', midi: 48, beats: 4 }
           ]
         },
       },
       {
-        label:    'Practice — The song with the band',
-        label_es: 'Practica — La canción con la banda',
-        text: 'The song in order: intro, verse, verse again, chorus. Read through it on the tab, then press Play on the band and play the whole song along with it.\nYou\'ve got it when: intro to the end of the chorus with the band, without stopping. Lost your place? Stop playing, count to the next bar, and come back in on beat 1. After that, open the Song Journey page, Layer 2, and play along with the whole song.',
-        text_es: 'La canción en orden: intro, estrofa, la estrofa otra vez, coro. Léela en el tab y después pulsa «Toca con la banda» y toca la canción completa con ella.\nLo tienes cuando: de la intro al final del coro con la banda, sin detenerte. ¿Te perdiste? Deja de tocar, cuenta hasta el siguiente compás y vuelve a entrar en el tiempo 1. Después, abre la página de Recorrido de la canción, Capa 2, y toca con la canción completa.',
-        /* 28 bars, not 20: the record is intro (4), verse (8), verse AGAIN
-           (8), then the chorus (8). A 20-bar window stopped in the middle of
-           the second verse and never reached the chorus the tab teaches, so
-           the window carries the repeated verse and runs to the end of the
-           first chorus. The tab below is the same 28 bars, one pluck a beat. */
-        snippet: { track: 'the-cure', fromBar: 1, bars: 28,
-                   label:    'The song in order, with the band',
-                   label_es: 'La canción en orden, con la banda' },
+        label:    'Practice — C to D',
+        label_es: 'Practica — De C a D',
+        text: 'The verse ends on C and the chorus starts on D. Both are on the A string: C is fret 3 with your ring finger, D is fret 5 with your pinky. Play C D C D C D C D with the tab at 60 BPM. You\'ve got it when: C D C D C D C D twice in a row, no buzz. Buzz on the D? Press the pinky just behind the fret, then try again.',
+        text_es: 'La estrofa termina en C y el coro empieza en D. Los dos están en la cuerda La: C es el traste 3 con el anular, D es el traste 5 con el meñique. Toca C D C D C D C D con la tablatura a 60 BPM. Lo tienes cuando: C D C D C D C D dos veces seguidas, sin zumbido. ¿Zumba el D? Presiona con el meñique justo detrás del traste, y vuelve a intentarlo.',
         tab: {
-          revealDelay: 10,
-          caption: 'Intro, verse, verse, chorus · 4 plucks per note',
-          caption_es: 'Intro, estrofa, estrofa, coro · 4 pulsaciones por nota',
-          linesPerPage: 2,
-          phrases: [
-            {
-              label: 'Intro — A C A C',
-              label_es: 'Intro — A C A C',
-              notes: [
-                { string: 'E', fret: 5, note: 'A', midi: 45 },
-                { string: 'E', fret: 5, note: 'A', midi: 45 },
-                { string: 'E', fret: 5, note: 'A', midi: 45 },
-                { string: 'E', fret: 5, note: 'A', midi: 45 },
-                { string: 'A', fret: 3, note: 'C', midi: 48 },
-                { string: 'A', fret: 3, note: 'C', midi: 48 },
-                { string: 'A', fret: 3, note: 'C', midi: 48 },
-                { string: 'A', fret: 3, note: 'C', midi: 48 },
-                { string: 'E', fret: 5, note: 'A', midi: 45 },
-                { string: 'E', fret: 5, note: 'A', midi: 45 },
-                { string: 'E', fret: 5, note: 'A', midi: 45 },
-                { string: 'E', fret: 5, note: 'A', midi: 45 },
-                { string: 'A', fret: 3, note: 'C', midi: 48 },
-                { string: 'A', fret: 3, note: 'C', midi: 48 },
-                { string: 'A', fret: 3, note: 'C', midi: 48 },
-                { string: 'A', fret: 3, note: 'C', midi: 48 }
-              ]
-            },
-            {
-              label: 'Verse — A C A C, F C F C',
-              label_es: 'Estrofa — A C A C, F C F C',
-              notes: [
-                { string: 'E', fret: 5, note: 'A', midi: 45 },
-                { string: 'E', fret: 5, note: 'A', midi: 45 },
-                { string: 'E', fret: 5, note: 'A', midi: 45 },
-                { string: 'E', fret: 5, note: 'A', midi: 45 },
-                { string: 'A', fret: 3, note: 'C', midi: 48 },
-                { string: 'A', fret: 3, note: 'C', midi: 48 },
-                { string: 'A', fret: 3, note: 'C', midi: 48 },
-                { string: 'A', fret: 3, note: 'C', midi: 48 },
-                { string: 'E', fret: 5, note: 'A', midi: 45 },
-                { string: 'E', fret: 5, note: 'A', midi: 45 },
-                { string: 'E', fret: 5, note: 'A', midi: 45 },
-                { string: 'E', fret: 5, note: 'A', midi: 45 },
-                { string: 'A', fret: 3, note: 'C', midi: 48 },
-                { string: 'A', fret: 3, note: 'C', midi: 48 },
-                { string: 'A', fret: 3, note: 'C', midi: 48 },
-                { string: 'A', fret: 3, note: 'C', midi: 48 },
-                { string: 'E', fret: 1, note: 'F', midi: 41 },
-                { string: 'E', fret: 1, note: 'F', midi: 41 },
-                { string: 'E', fret: 1, note: 'F', midi: 41 },
-                { string: 'E', fret: 1, note: 'F', midi: 41 },
-                { string: 'A', fret: 3, note: 'C', midi: 48 },
-                { string: 'A', fret: 3, note: 'C', midi: 48 },
-                { string: 'A', fret: 3, note: 'C', midi: 48 },
-                { string: 'A', fret: 3, note: 'C', midi: 48 },
-                { string: 'E', fret: 1, note: 'F', midi: 41 },
-                { string: 'E', fret: 1, note: 'F', midi: 41 },
-                { string: 'E', fret: 1, note: 'F', midi: 41 },
-                { string: 'E', fret: 1, note: 'F', midi: 41 },
-                { string: 'A', fret: 3, note: 'C', midi: 48 },
-                { string: 'A', fret: 3, note: 'C', midi: 48 },
-                { string: 'A', fret: 3, note: 'C', midi: 48 },
-                { string: 'A', fret: 3, note: 'C', midi: 48 }
-              ]
-            },
-            {
-              label: 'Verse again — A C A C, F C F C',
-              label_es: 'La estrofa otra vez — A C A C, F C F C',
-              notes: [
-                { string: 'E', fret: 5, note: 'A', midi: 45 },
-                { string: 'E', fret: 5, note: 'A', midi: 45 },
-                { string: 'E', fret: 5, note: 'A', midi: 45 },
-                { string: 'E', fret: 5, note: 'A', midi: 45 },
-                { string: 'A', fret: 3, note: 'C', midi: 48 },
-                { string: 'A', fret: 3, note: 'C', midi: 48 },
-                { string: 'A', fret: 3, note: 'C', midi: 48 },
-                { string: 'A', fret: 3, note: 'C', midi: 48 },
-                { string: 'E', fret: 5, note: 'A', midi: 45 },
-                { string: 'E', fret: 5, note: 'A', midi: 45 },
-                { string: 'E', fret: 5, note: 'A', midi: 45 },
-                { string: 'E', fret: 5, note: 'A', midi: 45 },
-                { string: 'A', fret: 3, note: 'C', midi: 48 },
-                { string: 'A', fret: 3, note: 'C', midi: 48 },
-                { string: 'A', fret: 3, note: 'C', midi: 48 },
-                { string: 'A', fret: 3, note: 'C', midi: 48 },
-                { string: 'E', fret: 1, note: 'F', midi: 41 },
-                { string: 'E', fret: 1, note: 'F', midi: 41 },
-                { string: 'E', fret: 1, note: 'F', midi: 41 },
-                { string: 'E', fret: 1, note: 'F', midi: 41 },
-                { string: 'A', fret: 3, note: 'C', midi: 48 },
-                { string: 'A', fret: 3, note: 'C', midi: 48 },
-                { string: 'A', fret: 3, note: 'C', midi: 48 },
-                { string: 'A', fret: 3, note: 'C', midi: 48 },
-                { string: 'E', fret: 1, note: 'F', midi: 41 },
-                { string: 'E', fret: 1, note: 'F', midi: 41 },
-                { string: 'E', fret: 1, note: 'F', midi: 41 },
-                { string: 'E', fret: 1, note: 'F', midi: 41 },
-                { string: 'A', fret: 3, note: 'C', midi: 48 },
-                { string: 'A', fret: 3, note: 'C', midi: 48 },
-                { string: 'A', fret: 3, note: 'C', midi: 48 },
-                { string: 'A', fret: 3, note: 'C', midi: 48 }
-              ]
-            },
-            {
-              label: 'Chorus — D F C G, D F C G',
-              label_es: 'Coro — D F C G, D F C G',
-              notes: [
-                { string: 'A', fret: 5, note: 'D', midi: 50 },
-                { string: 'A', fret: 5, note: 'D', midi: 50 },
-                { string: 'A', fret: 5, note: 'D', midi: 50 },
-                { string: 'A', fret: 5, note: 'D', midi: 50 },
-                { string: 'E', fret: 1, note: 'F', midi: 41 },
-                { string: 'E', fret: 1, note: 'F', midi: 41 },
-                { string: 'E', fret: 1, note: 'F', midi: 41 },
-                { string: 'E', fret: 1, note: 'F', midi: 41 },
-                { string: 'A', fret: 3, note: 'C', midi: 48 },
-                { string: 'A', fret: 3, note: 'C', midi: 48 },
-                { string: 'A', fret: 3, note: 'C', midi: 48 },
-                { string: 'A', fret: 3, note: 'C', midi: 48 },
-                { string: 'E', fret: 3, note: 'G', midi: 43 },
-                { string: 'E', fret: 3, note: 'G', midi: 43 },
-                { string: 'E', fret: 3, note: 'G', midi: 43 },
-                { string: 'E', fret: 3, note: 'G', midi: 43 },
-                { string: 'A', fret: 5, note: 'D', midi: 50 },
-                { string: 'A', fret: 5, note: 'D', midi: 50 },
-                { string: 'A', fret: 5, note: 'D', midi: 50 },
-                { string: 'A', fret: 5, note: 'D', midi: 50 },
-                { string: 'E', fret: 1, note: 'F', midi: 41 },
-                { string: 'E', fret: 1, note: 'F', midi: 41 },
-                { string: 'E', fret: 1, note: 'F', midi: 41 },
-                { string: 'E', fret: 1, note: 'F', midi: 41 },
-                { string: 'A', fret: 3, note: 'C', midi: 48 },
-                { string: 'A', fret: 3, note: 'C', midi: 48 },
-                { string: 'A', fret: 3, note: 'C', midi: 48 },
-                { string: 'A', fret: 3, note: 'C', midi: 48 },
-                { string: 'E', fret: 3, note: 'G', midi: 43 },
-                { string: 'E', fret: 3, note: 'G', midi: 43 },
-                { string: 'E', fret: 3, note: 'G', midi: 43 },
-                { string: 'E', fret: 3, note: 'G', midi: 43 }
-              ]
-            }
+          caption: 'C · D, four times · A string',
+          caption_es: 'C · D, cuatro veces · cuerda La',
+          notes: [
+            { string: 'A', fret: 3,  note: 'C', midi: 48 },
+            { string: 'A', fret: 5,  note: 'D', midi: 50 },
+            { string: 'A', fret: 3,  note: 'C', midi: 48 },
+            { string: 'A', fret: 5,  note: 'D', midi: 50 },
+            { string: 'A', fret: 3,  note: 'C', midi: 48 },
+            { string: 'A', fret: 5,  note: 'D', midi: 50 },
+            { string: 'A', fret: 3,  note: 'C', midi: 48 },
+            { string: 'A', fret: 5,  note: 'D', midi: 50 }
           ]
         },
       },

@@ -210,6 +210,19 @@ window.addEventListener('beforeprint', function(){
    push on one, and on a full twin whose length differs from its
    rhythm-down file.
 
+   A page may ALSO ask for the Metronome to be a click the PAGE makes, on the
+   beat the room counts, instead of switching to the track's metronome file
+   (2026-09-27, "the cure"): data-click-anchor — the fast file's first
+   downbeat in seconds, the same number as SNIPPET_TRACKS[...].anchor in
+   app.js — with data-bpm / data-bpm-slow holding the COUNTED tempos (72 /
+   60 there, where the files are 144 / 120; the ratio is the same, so the
+   Slow rescale doesn't move) and optional data-click-beats (default 4) for
+   the loud click on beat 1. "the cure"'s metronome files click at the
+   file's 144 BPM, twice the pulse the room counts, so the page declares no
+   metronome files at all. The click is scheduled on an AudioContext a few
+   ms ahead of each beat, offset by the same 80 ms output latency app.js
+   uses (SNIP_OUTPUT_LATENCY), and follows Slow, Guitar and the loop.
+
    ensurePlayer() builds the <audio> element (and its Slow/Metronome/Guitar
    toggles) exactly once, however it's first reached — the top play-along
    box (togglePlayalong) and the floating backing-track pill (toggleTrackFab)
@@ -231,8 +244,11 @@ function ensurePlayer(){
     && (!d.audioSlow          || !!d.audioSlowFull)
     && (!d.audioSlowMetronome || !!d.audioSlowFullMetronome);
   var metroOn = false, slowOn = false, guitarOn = fullReady;
+  var clickAnchor = parseFloat(d.clickAnchor);
+  var synthClick = isFinite(clickAnchor) && parseFloat(d.bpm) > 0 && parseFloat(d.bpmSlow) > 0;
 
   var currentSrc = function(){
+    if(synthClick) return guitarOn ? (slowOn ? d.audioSlowFull : d.audioFull) : (slowOn ? d.audioSlow : d.audio);
     if(guitarOn){
       if(slowOn) return metroOn ? d.audioSlowFullMetronome : d.audioSlowFull;
       return metroOn ? d.audioFullMetronome : d.audioFull;
@@ -261,6 +277,51 @@ function ensurePlayer(){
 
   a.src = currentSrc();
 
+  /* The page-made click (data-click-anchor, above). One click per counted
+     beat, the next one scheduled once it is under 100 ms away; a jump back
+     (the loop, a seek, a Slow switch) resets lastBeat so no beat is lost. */
+  var clickCtx = null, clickRaf = 0, lastBeat = -1;
+  var clickBeats = parseInt(d.clickBeats, 10) || 4;
+  var clickAt = function(at, accent){
+    var o = clickCtx.createOscillator(), g = clickCtx.createGain();
+    o.frequency.value = accent ? 1500 : 1000;
+    g.gain.setValueAtTime(0.0001, at);
+    g.gain.exponentialRampToValueAtTime(accent ? 0.2 : 0.13, at + 0.005);
+    g.gain.exponentialRampToValueAtTime(0.0001, at + 0.08);
+    o.connect(g); g.connect(clickCtx.destination);
+    o.start(at); o.stop(at + 0.1);
+  };
+  var clickTick = function(){
+    clickRaf = 0;
+    if(!metroOn || a.paused) return;
+    var ratio = parseFloat(d.bpm) / parseFloat(d.bpmSlow);
+    var beat = 60 / parseFloat(slowOn ? d.bpmSlow : d.bpm);
+    var anchor = slowOn ? clickAnchor * ratio : clickAnchor;
+    var now = a.currentTime;
+    var nb = Math.ceil((now - anchor) / beat - 1e-6);
+    if(nb < lastBeat) lastBeat = nb - 1;
+    if(nb > lastBeat && nb >= 0){
+      var ahead = anchor + nb * beat - now;
+      if(ahead <= 0.1){
+        var lat = 0.08 - (clickCtx.outputLatency || clickCtx.baseLatency || 0);
+        clickAt(clickCtx.currentTime + Math.max(0, ahead + lat), nb % clickBeats === 0);
+        lastBeat = nb;
+      }
+    }
+    clickRaf = requestAnimationFrame(clickTick);
+  };
+  var startClicks = function(){
+    if(!synthClick || !metroOn || a.paused || clickRaf) return;
+    if(!clickCtx) clickCtx = new (window.AudioContext || window.webkitAudioContext)();
+    if(clickCtx.resume) clickCtx.resume();
+    lastBeat = -1;
+    clickRaf = requestAnimationFrame(clickTick);
+  };
+  if(synthClick){
+    a.addEventListener('play', startClicks);
+    a.addEventListener('seeked', function(){ lastBeat = -1; });
+  }
+
   if(box.dataset.audioSlow){
     var slowBtn = document.createElement('button');
     slowBtn.type = 'button';
@@ -276,7 +337,7 @@ function ensurePlayer(){
     box.appendChild(slowBtn);
   }
 
-  if(box.dataset.audioMetronome){
+  if(box.dataset.audioMetronome || synthClick){
     var metroBtn = document.createElement('button');
     metroBtn.type = 'button';
     metroBtn.className = 'metronome-toggle';
@@ -286,6 +347,7 @@ function ensurePlayer(){
       metroOn = !metroOn;
       metroBtn.classList.toggle('on', metroOn);
       metroBtn.setAttribute('aria-pressed', metroOn ? 'true' : 'false');
+      if(synthClick){ if(metroOn) startClicks(); return; }   // our click — no file to swap
       switchSrc(false);
     };
     box.appendChild(metroBtn);

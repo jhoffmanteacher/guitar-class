@@ -1747,11 +1747,15 @@ function renderTeacherActivityDetail(id){
          preview keeps showing every step (that's what a pre-class check
          wants), so it just says how students will see them. See caIsFocus
          in app.js. */ a.view==='focus'?`<div class="tg-note">Focus view: students see one step at a time, with numbered step buttons above it and a "Got it — next step" button under it. A step opens only after the one before it is marked done. The preview below shows every step.</div>`:''}
+    ${/* Practice card (view:'card'): the preview IS the student card —
+         caCardBodyHtml() in app.js, the one body renderer both sides call
+         (same shape as an exit check's caCheckBodyHtml), so it can't drift.
+         The song plays for real; ticks here save nothing. */ typeof caIsCard==='function'&&caIsCard(a)?`<div class="tg-note">Practice card: students see this one screen — Play song, the tab, and the checks. The card counts as done once every numbered check is ticked; Level up is extra. The steps sit under "More practice help". Ticks in this preview are not saved.</div>`:''}
     <div class="stu-section-head">Students</div>
     <div class="tg-note">Gate: today's activities block the rest of the site until they're done (see the Today-first work order). Clear lets one student past this one without finishing it — a sub day, a connectivity problem, work done on paper.</div>
     ${studentTable}
     <div class="stu-section-head">Preview</div>
-    ${stepsHtml || '<div class="stu-empty">No steps on this activity yet.</div>'}
+    ${typeof caIsCard==='function'&&caIsCard(a) ? caCardBodyHtml(a,{preview:true}) : (stepsHtml || '<div class="stu-empty">No steps on this activity yet.</div>')}
     ${caJourneyUrl(a)?`<div class="ca-journey-row"><a class="jl-song-btn" href="${escAttr(caJourneyUrl(a))}" target="_blank" rel="noopener">${escHtml(t('ca.openJourney',{song:(SONG_JOURNEYS.find(s=>s.id===a.journey)||{}).name||''}))} &#x2197;</a> <span class="tg-note" style="display:inline">— this page stays open behind the gate while the activity is pending.</span></div>`:''}`;
 }
 /* An exit check's detail page: who turned it in, what they picked, and

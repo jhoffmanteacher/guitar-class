@@ -2445,6 +2445,46 @@ body.explore-open #week-panels{display:none}
 .ca-focus-back:hover{background:var(--bg2)}
 .ca-focus-next{margin-left:auto;font-family:inherit;font-size:1rem;font-weight:700;min-height:44px;padding:10px 22px;border:0;border-radius:12px;background:var(--green-text);color:var(--bg);cursor:pointer}
 .ca-focus-next.is-done{background:var(--green-bg);color:var(--green-text)}
+/* Practice card (`view: 'card'` — caCardBodyHtml in app.js, 2026-09-27).
+   One Play song button, a Slower / Normal switch, the song's tab with one
+   page per section, the checks, and the help ladder folded underneath.
+   The tab reuses .tab / .tab-page / .tab-board / .beat-now as they are. */
+.pc-dir{margin:4px 0 10px;font-weight:600;color:var(--text)}
+.pc-player{display:flex;flex-wrap:wrap;align-items:center;gap:10px}
+.pc-play{font-family:inherit;font-size:1rem;font-weight:700;min-height:44px;min-width:11em;padding:8px 18px;border:0;border-radius:12px;background:var(--brand);color:var(--brand-text);cursor:pointer;text-align:left}
+.pc-play:hover{background:var(--brand-hover)}
+.pc-play.playing{background:var(--text);color:var(--bg)}
+.pc-speed{display:inline-flex;align-items:center;gap:8px;min-height:36px;padding:0 4px;font:inherit;font-size:0.875rem;color:var(--text2);background:none;border:0;cursor:pointer}
+.pc-speed-lab.on{color:var(--purple-text);font-weight:700}
+.pc-speed-track{position:relative;flex:0 0 44px;width:44px;height:24px;border-radius:999px;background:var(--purple-accent)}
+.pc-speed-knob{position:absolute;top:3px;left:3px;width:18px;height:18px;border-radius:50%;background:var(--bg);box-shadow:0 1px 3px rgba(0,0,0,0.3);transition:left .15s}
+.pc-speed[aria-checked="true"] .pc-speed-knob{left:23px}
+.pc-play:focus-visible,.pc-speed:focus-visible,.pc-sec:focus-visible,.pc-check-btn:focus-visible,.pc-help-btn:focus-visible{outline:2px solid var(--blue-text);outline-offset:2px}
+.pc-status{min-height:1.4em;margin:6px 0 2px;font-size:0.875rem;font-weight:600;color:var(--purple-text)}
+.pc-hint{margin:0 0 6px;font-size:0.8125rem;color:var(--text2)}
+.pc-secs{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:8px}
+.pc-sec{font-family:inherit;font-size:0.875rem;font-weight:600;min-height:36px;padding:0 14px;border:1px solid var(--border2);border-radius:999px;background:var(--bg);color:var(--text);cursor:pointer}
+.pc-sec:hover{border-color:var(--purple-accent)}
+.pc-sec.cur{background:var(--purple-bg);border-color:var(--purple-accent);color:var(--purple-text)}
+.pc-sec-play{font-size:0.625rem;margin-right:6px;color:var(--purple-accent)}
+.pc-rep{margin-left:8px;padding:1px 9px;border-radius:999px;background:var(--purple-accent);color:var(--bg);font-size:0.75rem;font-weight:700}
+.pc-progress{margin:12px 0 6px;font-size:0.8125rem;color:var(--text2)}
+.pc-checks{list-style:none;margin:0 0 12px;padding:0}
+.pc-check{margin-bottom:8px;border:1px solid var(--border);border-radius:10px;background:var(--bg)}
+.pc-check.is-done{background:var(--green-bg);border-color:transparent}
+.pc-check-btn{display:flex;gap:12px;align-items:flex-start;width:100%;padding:12px;border:0;background:none;font:inherit;color:var(--text);text-align:left;cursor:pointer}
+.pc-box{flex:0 0 24px;height:24px;border:2px solid var(--border2);border-radius:6px;display:inline-flex;align-items:center;justify-content:center;font-size:0.875rem;font-weight:700;color:var(--bg)}
+.pc-check.is-done .pc-box{background:var(--green-text);border-color:var(--green-text)}
+.pc-check-head{display:block;font-size:0.75rem;font-weight:700;letter-spacing:0.02em;color:var(--text2)}
+.pc-check--lvl .pc-check-head{color:var(--ca-accent)}
+.pc-check .ca-journey-row{margin:-4px 12px 12px 48px}
+.pc-help-btn{width:100%;text-align:left;font-family:inherit;font-size:0.9375rem;font-weight:600;padding:10px 12px;border:1px solid var(--border2);border-radius:10px;background:var(--bg2);color:var(--text);cursor:pointer}
+.pc-help-btn:hover{background:var(--bg3)}
+.pc-help{margin-top:10px;padding-top:10px;border-top:1px dashed var(--border2)}
+.pc-help-note{margin:0 0 8px;font-size:0.8125rem;color:var(--text2)}
+.pc-help-step{margin-bottom:6px;border:1px solid var(--border);border-radius:8px;background:var(--bg)}
+.pc-help-step>summary{padding:9px 12px;font-weight:600;cursor:pointer}
+.pc-help-body{padding:0 12px 12px}
 /* Finished-activities group (renderClassActivities/caFinishedGroupHtml) —
    a plain <details>, closed by default, holding the same .ca-card markup
    as the main list. Deliberately quieter than .ca-card: no left accent, so

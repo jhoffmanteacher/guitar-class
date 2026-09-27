@@ -7847,6 +7847,7 @@ function stopPlaySeq(){
 function stopCardAudio(){
   stopPlaySeq();
   snipStop();   // a looping backing-track snippet is site-generated sound as well
+  pcStop();     // …and so is a practice card's song (view:'card')
   chordStrumTimeouts.forEach(clearTimeout);
   chordStrumTimeouts = [];
   erStopAll();
@@ -7874,6 +7875,7 @@ function playSequence(midis, bpm, btnEl){
   }
   if(window.coachMicLive) return;  // but no NEW demo audio while the Coach listens
   snipStop();                      // one sound at a time — the band yields to the tab
+  pcStop();                        // …and so does a practice card's song
   const interval = 60000 / (bpm || 60);
   /* Beat cursor: when the button lives inside a TAB, highlight the sounding
      column — the moving thing is the thing making noise (Ableton's rule). */
@@ -9437,9 +9439,10 @@ let caStartHereId = null;
 // clicked. Checks are excluded (no per-step ticks to summarize).
 function caHeroDotsHtml(a){
   if(a.id !== caStartHereId || a.kind === 'check') return '';
-  const steps = a.steps || [];
-  if(!steps.length) return '';
-  const dots = steps.map((s, si) => `<span class="ca-hero-dot${caStepDone[`${a.id}:${si}`] === true ? ' f' : ''}"></span>`).join('');
+  // A practice card's dots are its checks (caTickKeys), a ladder's its steps.
+  const keys = caTickKeys(a);
+  if(!keys.length) return '';
+  const dots = keys.map(k => `<span class="ca-hero-dot${caStepDone[k] === true ? ' f' : ''}"></span>`).join('');
   return `<span class="ca-hero-dots" aria-hidden="true">${dots}</span>`;
 }
 // Plain text, first sentence only — html is trusted content (module/activity
@@ -9460,10 +9463,11 @@ function caFirstSentence(html){
 let caNudgeId = null;
 function caMarkClick(id){
   const a = (window.CLASS_ACTIVITIES || []).find(x => x.id === id);
-  if(!a || classActivities[id] === true || !(a.steps || []).length){ caToggleComplete(id); return; }
-  const total = a.steps.length;
-  const ticks = a.steps.filter((s, si) => caStepDone[`${id}:${si}`] === true).length;
-  if(ticks >= total){ caToggleComplete(id); return; }
+  // A practice card counts its numbered checks — Level up is extra
+  // (caRequiredTickKeys); a ladder counts every step.
+  const req = a ? caRequiredTickKeys(a) : [];
+  if(!a || classActivities[id] === true || !req.length){ caToggleComplete(id); return; }
+  if(caTickCount(req) >= req.length){ caToggleComplete(id); return; }
   caNudgeId = id;
   caOpenId = id;
   renderClassActivities();
@@ -9506,10 +9510,11 @@ function caMarkRowHtml(a, done, markLabel){
   if(caNudgeId !== a.id){
     return `<button type="button" class="ca-mark-btn ${done ? 'done' : ''}" onclick="caMarkClick('${escAttr(a.id)}')">${escHtml(markLabel)}</button>`;
   }
-  const total = (a.steps || []).length;
-  const ticks = a.steps.filter((s, si) => caStepDone[`${a.id}:${si}`] === true).length;
+  const req = caRequiredTickKeys(a);
+  const total = req.length;
+  const ticks = caTickCount(req);
   return `<div class="ca-nudge">
-    <p class="ca-nudge-text">${escHtml(t('ca.nudgeText', {ticks, total}))}</p>
+    <p class="ca-nudge-text">${escHtml(caIsCard(a) ? t('ca.cardNudgeText', {ticks, total}) : t('ca.nudgeText', {ticks, total}))}</p>
     <div class="ca-nudge-actions">
       <button type="button" class="btn-out" onclick="caNudgeKeepGoing()">${escHtml(t('ca.keepGoing'))}</button>
       <button type="button" class="ca-mark-btn" onclick="caNudgeConfirm('${escAttr(a.id)}')">${escHtml(t('ca.markComplete'))}</button>
@@ -9524,11 +9529,14 @@ function caMarkRowHtml(a, done, markLabel){
    saved record — shown only once it's above zero so a fresh card doesn't
    claim "0 done". */
 function caChunkMetaHtml(a){
-  const n = (a.steps || []).length;
+  // A practice card is sized by its checks ("4 checks"), a ladder by its steps.
+  const card = caIsCard(a);
+  const n = caTickKeys(a).length;
   if(!n) return '';
-  const head = [n === 1 ? t('ca.stepCount1') : t('ca.stepCount', {n})];
+  const head = [card ? (n === 1 ? t('ca.cardCheckCount1') : t('ca.cardCheckCount', {n}))
+                     : (n === 1 ? t('ca.stepCount1') : t('ca.stepCount', {n}))];
   if(a.minutes) head.push(t('ca.aboutMin', {n: a.minutes}));
-  const doneN = (a.steps || []).filter((s, si) => caStepDone[`${a.id}:${si}`] === true).length;
+  const doneN = caTickCount(caTickKeys(a));
   const doneText = doneN > 0 ? (doneN === 1 ? t('ca.doneCount1') : t('ca.doneCount', {n: doneN})) : '';
   // The Today hero also draws progress dots (caHeroDotsHtml) between the
   // step count and the done text — every non-hero card just gets the two
@@ -9604,14 +9612,17 @@ function caHeroCardHtml(a, isCurrent = true){
   // Focus view always has exactly one step open (caFocusIdx); the accordion
   // can have none (-1).
   const focus = caIsFocus(a);
+  // A practice card (view:'card') draws its own body — caCardBodyHtml — and
+  // keeps its steps as the help ladder inside it.
+  const card = caIsCard(a);
   const openStepIdx = focus ? caFocusIdx(a)
     : caStepOpen[a.id] !== undefined ? caStepOpen[a.id] : caDefaultOpenStep(a);
-  const stepsHtml = (a.steps || []).map((s, si) => caStepHtml(a, s, si, si === openStepIdx, caStepDone[`${a.id}:${si}`] === true)).join('');
+  const stepsHtml = card ? '' : (a.steps || []).map((s, si) => caStepHtml(a, s, si, si === openStepIdx, caStepDone[`${a.id}:${si}`] === true)).join('');
   const markLabel = done ? t('ca.completed') : t('ca.markComplete');
   const num = caNumber(a);
   const titleHtml = (num ? `#${num} - ` : '') + escHtml(caTitle(a));
   const blurb = caFirstSentence(tf(a, 'intro'));
-  const doneAny = (a.steps || []).some((s, si) => caStepDone[`${a.id}:${si}`] === true);
+  const doneAny = caTickCount(caTickKeys(a)) > 0;
   const ctaKey = doneAny ? 'ca.heroKeepGoing' : 'ca.heroStart';
   /* The CTA hides itself once the card is open (CSS, .ca-card--hero[open]) —
      "Start →" over an already-open step ladder reads as a second, unstarted
@@ -9619,7 +9630,7 @@ function caHeroCardHtml(a, isCurrent = true){
      nothing left in the right-hand column, so the column goes too rather
      than holding a 210px hole open. */
   const thumbHtml = caHeroThumbHtml(a);
-  return `<details class="ca-card ca-card--hero${isCurrent ? '' : ' ca-card--hero-older'}${focus ? ' ca-card--focus' : ''}" ${open ? 'open' : ''} data-id="${escAttr(a.id)}" ontoggle="caOnToggle(this)">
+  return `<details class="ca-card ca-card--hero${isCurrent ? '' : ' ca-card--hero-older'}${focus ? ' ca-card--focus' : ''}${card ? ' ca-card--practice' : ''}" ${open ? 'open' : ''} data-id="${escAttr(a.id)}" ontoggle="caOnToggle(this)">
     <summary class="ca-card-summary ca-hero-summary" onclick="caCardMarkOpening(this)">
       <div class="ca-hero-main">
         ${caStartHereTagHtml(a, isCurrent)}
@@ -9634,7 +9645,7 @@ function caHeroCardHtml(a, isCurrent = true){
       ${caPrintBtnHtml(a)}
     </summary>
     <div class="ca-card-body">
-      <p class="coach-tip">${escHtml(tf(a, 'intro'))}</p>
+      ${card ? caCardBodyHtml(a) : `<p class="coach-tip">${escHtml(tf(a, 'intro'))}</p>`}
       ${stepsHtml && focus ? caFocusDotsHtml(a, openStepIdx) : ''}
       ${stepsHtml ? `<ol class="ca-steps">${stepsHtml}</ol>` : ''}
       ${caMarkRowHtml(a, done, markLabel)}
@@ -9919,6 +9930,459 @@ function caJourneyLinkHtml(a){
    The step text has to agree: checks.mjs 1ba fails the push when an
    earlier step names the Song Journey page, since that step would be
    pointing at a button it doesn't have. */
+/* ── Practice card (`view: 'card'` — Jonathan, 2026-09-27) ─────────────
+   The activity as ONE screen instead of a step ladder: the song's tab with
+   one "Play song" button that drives it, three or four checkboxes, and the
+   step ladder folded away under "More practice help". Built after students
+   were doing the directly-taught part of a lesson and stopping there — the
+   slides now teach the rungs, and the card is what they practise with.
+
+   Data (see the CARD note atop class-activities.js):
+     card: { track, caption, sections: [{ label, caption, fromBar, bars,
+             reps?, repLabel?, notes }], checks: [{ label, text } …,
+             { levelUp: true, text }] }
+   `steps` stay on the activity as the help ladder — ordinary steps,
+   rendered read-only (no Mark done) under the help button.
+
+   ONE body renderer, like an exit check: caCardBodyHtml() draws the card
+   for the student AND for the console preview (renderTeacherActivityDetail
+   passes { preview:true }), so the two-renderers rule has nothing to fall
+   into. Preview ticks are DOM-only and never complete anything.
+
+   The player is the snippet engine's arithmetic (snippetWindow /
+   snipBarsAt / snipTimeAtBars, one `anchor` per song) over a window that
+   runs from the first section to the end of the last. Three differences
+   from a step snippet, all Jonathan's calls from the mockup rounds:
+   - Tapping a section starts the song THERE, after a four-click count-in,
+     and the loop comes back to that section — tapping Chorus loops the
+     chorus.
+   - The tab follows the song note by note (`.beat-now`, the TAB player's
+     own cursor), one page per section, honouring each note's `beats`, so
+     an uneven riff (Seven Nation Army) is followed as written. A section
+     with `reps` shows its notes once and a "Verse 1 of 2" badge.
+   - The Metronome is a click the SITE makes on every counted beat, not the
+     track's metronome file. "the cure"'s metronome files click at the
+     file's 144 BPM, twice the 72 the room counts; this click is always the
+     counted beat (feltBpm / beatsPerBar in SNIPPET_TRACKS), on both tiers.
+     It is scheduled on the AudioContext a few ms ahead, offset by
+     snipLatency() so it lands where the music is HEARD, not decoded.
+   The speed control is a Slower / Normal switch (the slow and fast files),
+   starting on Slower because every card's first checks are on Slower.
+
+   A card is COMPLETE when every numbered check is ticked — Level up is
+   extra (Jonathan, 2026-09-27). That write happens in place (pcCheck), not
+   through caToggleComplete, which closes the card and re-renders the page:
+   that would stop the song mid-play and hide Level up. Ticks live in
+   caStepDone under `<id>:c<n>` — kept for the day, like step ticks. */
+function caIsCard(a){ return !!(a && a.view === 'card' && a.card); }
+function caCardChecks(a){ return (a && a.card && Array.isArray(a.card.checks)) ? a.card.checks : []; }
+/* The ticks an activity counts: a card's checks, or a ladder's steps. Every
+   "n of m done" reader goes through these two so a card and a ladder can't
+   disagree about what finishing means. */
+function caTickKeys(a){
+  if(caIsCard(a)) return caCardChecks(a).map((c, ci) => `${a.id}:c${ci}`);
+  return ((a && a.steps) || []).map((s, si) => `${a.id}:${si}`);
+}
+function caRequiredTickKeys(a){
+  if(caIsCard(a)) return caCardChecks(a).map((c, ci) => (c && c.levelUp) ? null : `${a.id}:c${ci}`).filter(Boolean);
+  return caTickKeys(a);
+}
+function caTickCount(keys){ return keys.filter(k => caStepDone[k] === true).length; }
+/* Sections with their tab offsets and running beat totals, plus the window
+   the player loops over (bars from the first section to the end of the
+   last). null when the track is unknown — the card then renders nothing
+   rather than a player with no song (checks.mjs 1bf fails that push). */
+function pcLayout(a){
+  const c = a && a.card;
+  const tr = c && SNIPPET_TRACKS[c.track];
+  if(!tr) return null;
+  let seq = 0;
+  const sections = (c.sections || []).map(s => {
+    const notes = s.notes || [];
+    const out = { s, notes, fromBar: Math.max(1, s.fromBar || 1), bars: Math.max(1, s.bars || 1),
+                  reps: Math.max(1, s.reps || 1), seqOff: seq, beatEnds: [] };
+    let acc = 0;
+    notes.forEach(n => { acc += n.beats > 0 ? n.beats : 1; out.beatEnds.push(acc); });
+    seq += notes.length;
+    return out;
+  });
+  if(!sections.length) return null;
+  const firstBar = sections[0].fromBar;
+  const last = sections[sections.length - 1];
+  return { tr, sections, firstBar, totalBars: last.fromBar + last.bars * last.reps - firstBar };
+}
+/* Where `barsIn` (fractional bars from the window start) falls: which
+   section, which repeat of it, which note on its page, and that note's
+   data-seq in the tab. */
+function pcLocate(L, barsIn){
+  if(!(barsIn >= 0)) return null;
+  const songBar = L.firstBar + barsIn;
+  for(let si = L.sections.length - 1; si >= 0; si--){
+    const S = L.sections[si];
+    if(songBar < S.fromBar) continue;
+    const beatIn = (songBar - S.fromBar) * L.tr.beatsPerBar;
+    const repBeats = S.bars * L.tr.beatsPerBar;
+    const rep = Math.min(S.reps - 1, Math.floor(beatIn / repBeats));
+    const local = beatIn - rep * repBeats;
+    let ni = S.beatEnds.findIndex(e => local < e - 1e-6);
+    if(ni < 0) ni = S.notes.length - 1;
+    return { si, rep, ni, seq: S.seqOff + ni };
+  }
+  return null;
+}
+const PC_TAB_ICON = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" style="width:1em;height:1em;vertical-align:-0.15em"><path d="M9 18V5l12-2v13"/><circle cx="6" cy="18" r="3"/><circle cx="18" cy="16" r="3"/></svg>';
+function pcPlayBtnHtml(playing){
+  return (playing ? '&#x25A0; ' : '&#x25B6; ')
+    + `<span class="pc-play-label">${escHtml(t(playing ? 'ca.snipStop' : 'ca.cardPlay'))}</span>`;
+}
+function pcPlayerHtml(a, L){
+  const hasFull = snippetHasFull(L.tr);
+  return `<div class="pc-player">`
+    + `<button type="button" class="pc-play" onclick="pcToggle(this)">${pcPlayBtnHtml(false)}</button>`
+    + `<button type="button" class="snip-toggle pc-metro" aria-pressed="false" onclick="pcSetMetro(this)">&#x1F3B5; ${escHtml(t('tools.metronome'))}</button>`
+    + `<button type="button" class="pc-speed" role="switch" aria-checked="false" aria-label="${escAttr(t('ca.cardSpeedAria'))}" onclick="pcSetSpeed(this)">`
+    +   `<span class="pc-speed-lab on">${escHtml(t('ca.cardSlower'))}</span>`
+    +   `<span class="pc-speed-track" aria-hidden="true"><span class="pc-speed-knob"></span></span>`
+    +   `<span class="pc-speed-lab">${escHtml(t('ca.cardNormal'))}</span></button>`
+    /* The Guitar toggle, same as a step snippet's (buildSnippet): only where
+       a full mix exists, ON by default, label names who plays the part. */
+    + (hasFull ? `<button type="button" class="snip-toggle snip-guitar pc-guitar on" aria-pressed="true" onclick="pcSetGuitar(this)" title="${escAttr(t('ca.snipGuitarTitle'))}">&#x1F3B8; <span class="snip-guitar-label">${escHtml(t('ca.snipGuitarOn'))}</span></button>` : '')
+    + `</div><p class="pc-status" aria-live="polite">&nbsp;</p>`;
+}
+function pcTabHtml(a, L){
+  const c = a.card;
+  const many = L.sections.length > 1;
+  const chips = many
+    ? `<p class="pc-hint">${escHtml(t('ca.cardSectionHint'))}</p><div class="pc-secs">`
+      + L.sections.map((S, si) => `<button type="button" class="pc-sec${si === 0 ? ' cur' : ''}" data-sec="${si}" onclick="pcFromSection(this,${si})"><span class="pc-sec-play" aria-hidden="true">&#x25B6;</span>${escHtml(tf(S.s, 'label'))}</button>`).join('')
+      + `</div>`
+    : '';
+  const pages = L.sections.map((S, si) => {
+    const widest = S.notes.length || 1;
+    const perRow = Math.ceil(widest / Math.ceil(widest / TAB_MAX_COLS));
+    const grids = [];
+    for(let k = 0; k < S.notes.length; k += perRow) grids.push(renderTabSystem(S.notes.slice(k, k + perRow), S.seqOff + k, perRow, false));
+    return `<div class="tab-page pc-page" data-page="${si}"${si ? ' hidden' : ''}><div class="tab-phrase">`
+      + `<div class="tab-phrase-label">${escHtml(tf(S.s, 'caption'))}<span class="pc-rep" hidden></span></div>`
+      + `<div class="tab-board">${grids.join('')}</div></div></div>`;
+  }).join('');
+  const pager = many
+    ? `<div class="tab-pager pc-pager">`
+      + `<button type="button" class="tab-pager-btn" onclick="pcPage(this,-1)" disabled>&#x25C0; ${escHtml(t('tab.pagePrev'))}</button>`
+      + `<span class="tab-pager-label" aria-live="polite">${escHtml(t('ca.cardSectionOf', {a: 1, n: L.sections.length}))}</span>`
+      + `<button type="button" class="tab-pager-btn" onclick="pcPage(this,1)">${escHtml(t('tab.pageNext'))} &#x25B6;</button></div>`
+    : '';
+  const title = (c.caption && tf(c, 'caption')) || t('tab.defaultTitle');
+  return `<div class="tab pc-tab"><div class="tab-head"><span class="tab-icon">${PC_TAB_ICON}</span><span class="tab-title">${escHtml(title)}</span><span class="tab-kind">${t('tab.label')}</span></div>`
+    + `<div class="tab-body">${chips}${pages}${pager}</div></div>`;
+}
+function pcChecksHtml(a, preview){
+  const checks = caCardChecks(a);
+  let n = 0;
+  const items = checks.map((c, ci) => {
+    const done = !preview && caStepDone[`${a.id}:c${ci}`] === true;
+    const head = c.levelUp ? t('ca.cardLevelUp') : t('ca.cardCheckN', {n: ++n}) + (c.label ? ' · ' + tf(c, 'label') : '');
+    /* The Song Journey button lives on the LAST check and only there — the
+       card's equivalent of caStepHtml's last-step rule (checks.mjs 1ba pins
+       this call). The console preview shows its own link row instead. */
+    let jl = '';
+    if(ci === checks.length - 1 && c.levelUp && !preview) jl = caJourneyLinkHtml(a);
+    return `<li class="pc-check${done ? ' is-done' : ''}${c.levelUp ? ' pc-check--lvl' : ''}">`
+      + `<button type="button" class="pc-check-btn" role="checkbox" aria-checked="${done ? 'true' : 'false'}" onclick="pcCheck(this,'${escAttr(a.id)}',${ci})">`
+      + `<span class="pc-box" aria-hidden="true">${done ? '&#x2713;' : ''}</span>`
+      + `<span class="pc-check-body"><span class="pc-check-head">${escHtml(head)}</span><span class="pc-check-text">${tf(c, 'text')}</span></span>`
+      + `</button>${jl}</li>`;
+  }).join('');
+  const doneN = preview ? 0 : caTickCount(caTickKeys(a));
+  return `<p class="pc-progress">${escHtml(t('ca.cardProgress', {done: doneN, total: checks.length}))}</p><ul class="pc-checks">${items}</ul>`;
+}
+/* The step ladder, read-only: each step a fold with its text and tab. No
+   Mark done — the checks above are what a student ticks. */
+function pcHelpHtml(a, preview){
+  const steps = a.steps || [];
+  if(!steps.length) return '';
+  const pfx = preview ? 'ca-preview' : 'ca';
+  const body = steps.map((st, si) => {
+    const tab = st.tab ? buildTab(st.tab, { keyPrefix: `bpm:${pfx}:${a.id}:h${si}:tab`, defaultLinesPerPage: CA_TAB_LINES_PER_PAGE, suppressCoach: preview, noRevealDelay: true }) : '';
+    return `<details class="pc-help-step"><summary>${escHtml(caStepHeadText(st, si))}</summary><div class="pc-help-body">${wrapGotItWhen(tf(st, 'text'))}${tab}</div></details>`;
+  }).join('');
+  return `<button type="button" class="pc-help-btn" aria-expanded="false" onclick="pcToggleHelp(this)">${escHtml(t('ca.cardHelp'))} <span class="pc-help-arrow" aria-hidden="true">&#x25B8;</span></button>`
+    + `<div class="pc-help" hidden><p class="pc-help-note">${escHtml(t('ca.cardHelpNote'))}</p>${body}</div>`;
+}
+function caCardBodyHtml(a, opts){
+  const L = pcLayout(a);
+  if(!L) return '';
+  const preview = !!(opts && opts.preview);
+  return `<div class="pc" data-id="${escAttr(a.id)}" data-slow="1"${snippetHasFull(L.tr) ? ' data-guitar="1"' : ''}${preview ? ' data-preview="1"' : ''}>`
+    + `<p class="pc-dir">${escHtml(t('ca.cardDirections'))}</p>`
+    + pcPlayerHtml(a, L) + pcTabHtml(a, L) + pcChecksHtml(a, preview) + pcHelpHtml(a, preview)
+    + `</div>`;
+}
+
+/* The player. One card plays at a time, and it shares the site's
+   one-sound-at-a-time rule: starting it calls stopAllDemoAudio() (it is
+   "about to play" — see the two silencers in CLAUDE.md), and
+   stopCardAudio(), playSequence() and renderClassActivities() all call
+   pcStop(), exactly where they call snipStop(). */
+let pcState = null;
+function pcActivity(root){
+  const id = root && root.dataset.id;
+  return (window.CLASS_ACTIVITIES || []).find(x => x.id === id);
+}
+function pcWindow(L, slow){ return snippetWindow(L.tr, { fromBar: L.firstBar, bars: L.totalBars }, slow); }
+function pcStatus(root, html){ const el = root.querySelector('.pc-status'); if(el) el.innerHTML = html || '&nbsp;'; }
+function pcStop(){
+  if(!pcState) return;
+  const st = pcState;
+  pcState = null;                      // first, so the frame loop's guard bails
+  if(st.raf) cancelAnimationFrame(st.raf);
+  st.timers.forEach(clearTimeout);
+  try { st.audio.pause(); st.audio.src = ''; } catch(e) {}
+  const root = st.root;
+  if(root && root.isConnected){
+    const btn = root.querySelector('.pc-play');
+    if(btn){ btn.innerHTML = pcPlayBtnHtml(false); btn.classList.remove('playing'); }
+    root.querySelectorAll('.beat-now').forEach(el => el.classList.remove('beat-now'));
+    root.querySelectorAll('.pc-rep').forEach(el => { el.hidden = true; el.textContent = ''; });
+    pcStatus(root, '');
+  }
+}
+function pcToggle(btn){
+  const root = btn.closest('.pc');
+  if(!root) return;
+  if(pcState && pcState.root === root){ pcStop(); return; }
+  pcStart(root, 0, false);
+}
+function pcFromSection(btn, si){
+  const root = btn.closest('.pc');
+  if(root) pcStart(root, si, si > 0);
+}
+function pcStart(root, si, countIn){
+  if(window.coachMicLive) return;      // same guard as snipToggle: never play into a live mic
+  if(typeof stopAllDemoAudio === 'function') stopAllDemoAudio();   // includes pcStop()
+  const a = pcActivity(root);
+  const L = a && pcLayout(a);
+  if(!L || !L.sections[si]) return;
+  const slow = root.dataset.slow === '1', guitar = root.dataset.guitar === '1';
+  const audio = new Audio();
+  audio.preload = 'auto';
+  audio.loop = false;                  // the window is looped by hand, in pcFrame
+  audio.src = snippetSrc(L.tr, slow, false, guitar);
+  const st = { root, L, audio, win: pcWindow(L, slow), loopFrom: si, raf: 0, timers: [], lastBeat: -1, counting: !!countIn, si: -1, seq: -1, rep: -1 };
+  pcState = st;
+  const btn = root.querySelector('.pc-play');
+  if(btn){ btn.innerHTML = pcPlayBtnHtml(true); btn.classList.add('playing'); }
+  pcShowSection(root, L, si);
+  audio.addEventListener('error', () => {
+    if(pcState !== st) return;
+    pcStop();
+    if(typeof gateToast === 'function') gateToast(t('ca.snipLoadFailed'));
+  }, { once: true });
+  const begin = () => {
+    if(pcState !== st) return;
+    try { audio.currentTime = snipTimeAtBars(st.win, L.sections[si].fromBar - L.firstBar); } catch(e) {}
+    if(countIn) pcCountIn(st, si); else pcGo(st, si);
+  };
+  if(audio.readyState >= 1) begin();
+  else audio.addEventListener('loadedmetadata', begin, { once: true });
+}
+function pcGo(st, si){
+  st.counting = false;
+  st.lastBeat = -1;
+  pcStatus(st.root, escHtml(t('ca.cardPlayingFrom', {section: tf(st.L.sections[si].s, 'label')})));
+  st.audio.play().catch(() => {});
+  st.raf = requestAnimationFrame(pcFrame);
+}
+/* Four clicks (one bar of the counted beat) before the song comes in at a
+   tapped section — otherwise a student tapping Chorus gets dropped in
+   mid-bar with no way to find beat 1. */
+function pcCountIn(st, si){
+  const ctx = getAudioCtx();
+  try { ctx.resume(); } catch(e) {}
+  const n = st.L.tr.beatsPerBar;
+  const beat = st.win.bar / n;
+  const t0 = ctx.currentTime + 0.1;
+  for(let k = 0; k < n; k++){
+    pcClick(t0 + k * beat, k === 0);
+    st.timers.push(setTimeout(() => { if(pcState === st) pcStatus(st.root, escHtml(t('ca.cardCountIn', {n: k + 1}))); }, (0.1 + k * beat) * 1000));
+  }
+  st.timers.push(setTimeout(() => { if(pcState === st) pcGo(st, si); }, (0.1 + n * beat) * 1000));
+}
+function pcClick(at, accent){
+  const ctx = getAudioCtx();
+  const o = ctx.createOscillator(), g = ctx.createGain();
+  o.frequency.value = accent ? 1500 : 1000;
+  // Quiet on purpose (Jonathan, 2026-09-27: the first cut was "very loud").
+  g.gain.setValueAtTime(0.0001, at);
+  g.gain.exponentialRampToValueAtTime(accent ? 0.2 : 0.13, at + 0.005);
+  g.gain.exponentialRampToValueAtTime(0.0001, at + 0.08);
+  o.connect(g); g.connect(ctx.destination);
+  o.start(at); o.stop(at + 0.1);
+}
+/* The next counted beat, scheduled once it is under 100 ms away. `lastBeat`
+   is reset on a loop or a track switch, so a jump back never skips beats. */
+function pcScheduleClick(st, now){
+  const bpb = st.L.tr.beatsPerBar;
+  const beatPos = snipBarsAt(st.win, now) * bpb;
+  const nb = Math.ceil(beatPos - 1e-6);
+  if(nb < st.lastBeat) st.lastBeat = nb - 1;
+  if(nb <= st.lastBeat || nb < 0 || nb >= st.L.totalBars * bpb) return;
+  const ahead = snipTimeAtBars(st.win, nb / bpb) - now;
+  if(ahead > 0.1) return;
+  const ctx = getAudioCtx();
+  const lat = snipLatency() - (ctx.outputLatency || ctx.baseLatency || 0);
+  pcClick(ctx.currentTime + Math.max(0, ahead + lat), nb % bpb === 0);
+  st.lastBeat = nb;
+}
+function pcFrame(){
+  const st = pcState;
+  if(!st) return;
+  if(!st.root.isConnected){ pcStop(); return; }   // a re-render pulled the card out
+  const { audio, L } = st;
+  const now = audio.currentTime;
+  if(now >= st.win.end - 0.02 || audio.ended){
+    try { audio.currentTime = snipTimeAtBars(st.win, L.sections[st.loopFrom].fromBar - L.firstBar); } catch(e) {}
+    if(audio.paused) audio.play().catch(() => {});
+    st.lastBeat = -1;
+  }
+  if(st.root.dataset.metro === '1') pcScheduleClick(st, audio.currentTime);
+  const loc = pcLocate(L, snipBarsAt(st.win, audio.currentTime - snipLatency()));
+  if(loc && (loc.seq !== st.seq || loc.rep !== st.rep || loc.si !== st.si)) pcPaint(st, loc);
+  st.raf = requestAnimationFrame(pcFrame);
+}
+function pcPaint(st, loc){
+  const root = st.root;
+  root.querySelectorAll('.pc-tab .beat-now').forEach(el => el.classList.remove('beat-now'));
+  root.querySelectorAll(`.pc-tab [data-seq="${loc.seq}"]`).forEach(el => el.classList.add('beat-now'));
+  if(loc.si !== st.si) pcShowSection(root, st.L, loc.si);
+  const S = st.L.sections[loc.si];
+  const rep = root.querySelector(`.pc-page[data-page="${loc.si}"] .pc-rep`);
+  if(rep && S.reps > 1){
+    rep.hidden = false;
+    rep.textContent = t('ca.cardRepOf', {what: tf(S.s, 'repLabel'), n: loc.rep + 1, total: S.reps});
+  }
+  st.si = loc.si; st.seq = loc.seq; st.rep = loc.rep;
+}
+function pcShowSection(root, L, si){
+  root.querySelectorAll('.pc-page').forEach(p => { p.hidden = Number(p.dataset.page) !== si; });
+  root.querySelectorAll('.pc-sec').forEach(b => b.classList.toggle('cur', Number(b.dataset.sec) === si));
+  const pager = root.querySelector('.pc-pager');
+  if(!pager) return;
+  const label = pager.querySelector('.tab-pager-label');
+  if(label) label.textContent = t('ca.cardSectionOf', {a: si + 1, n: L.sections.length});
+  const btns = pager.querySelectorAll('.tab-pager-btn');
+  if(btns[0]) btns[0].disabled = si === 0;
+  if(btns[1]) btns[1].disabled = si === L.sections.length - 1;
+}
+// Previous / Next while stopped; while the song plays the song turns the pages.
+function pcPage(btn, dir){
+  const root = btn.closest('.pc');
+  if(!root || (pcState && pcState.root === root)) return;
+  const a = pcActivity(root);
+  const L = a && pcLayout(a);
+  if(!L) return;
+  const cur = Array.from(root.querySelectorAll('.pc-page')).findIndex(p => !p.hidden);
+  pcShowSection(root, L, Math.max(0, Math.min(L.sections.length - 1, cur + dir)));
+}
+function pcSetMetro(btn){
+  const root = btn.closest('.pc');
+  if(!root) return;
+  const on = root.dataset.metro !== '1';
+  root.dataset.metro = on ? '1' : '';
+  btn.classList.toggle('on', on);
+  btn.setAttribute('aria-pressed', on ? 'true' : 'false');
+  if(on){ try { getAudioCtx().resume(); } catch(e) {} }
+  if(pcState && pcState.root === root) pcState.lastBeat = -1;   // no file swap — the click is ours
+}
+function pcSetSpeed(sw){
+  const root = sw.closest('.pc');
+  if(!root) return;
+  const slow = root.dataset.slow !== '1';
+  root.dataset.slow = slow ? '1' : '';
+  sw.setAttribute('aria-checked', slow ? 'false' : 'true');   // checked = Normal
+  const labs = sw.querySelectorAll('.pc-speed-lab');
+  if(labs[0]) labs[0].classList.toggle('on', slow);
+  if(labs[1]) labs[1].classList.toggle('on', !slow);
+  pcRetrack(root);
+}
+function pcSetGuitar(btn){
+  const root = btn.closest('.pc');
+  if(!root) return;
+  const on = root.dataset.guitar !== '1';
+  root.dataset.guitar = on ? '1' : '';
+  btn.classList.toggle('on', on);
+  btn.setAttribute('aria-pressed', on ? 'true' : 'false');
+  snipGuitarLabel(btn, on);
+  pcRetrack(root);
+}
+/* Switch files mid-song at the same MUSICAL position — bars into the
+   window, not seconds, because the two tiers run on different clocks (the
+   same rule snipSetTier follows). Mid count-in, the count restarts at the
+   new tempo. */
+function pcRetrack(root){
+  const st = pcState;
+  if(!st || st.root !== root) return;
+  if(st.counting){ pcStart(root, st.loopFrom, true); return; }
+  const slow = root.dataset.slow === '1', guitar = root.dataset.guitar === '1';
+  const barsIn = snipBarsAt(st.win, st.audio.currentTime);
+  st.win = pcWindow(st.L, slow);
+  st.lastBeat = -1;
+  const at = snipTimeAtBars(st.win, isFinite(barsIn) && barsIn > 0 ? barsIn : 0);
+  const src = snippetSrc(st.L.tr, slow, false, guitar);
+  if(st.audio.src.endsWith(src)){ try { st.audio.currentTime = at; } catch(e) {} return; }
+  const wasPlaying = !st.audio.paused;
+  st.audio.addEventListener('loadedmetadata', () => {
+    if(pcState !== st) return;
+    try { st.audio.currentTime = at; } catch(e) {}
+    if(wasPlaying) st.audio.play().catch(() => {});
+  }, { once: true });
+  st.audio.src = src;
+  st.audio.load();
+}
+function pcCheck(btn, id, ci){
+  const root = btn.closest('.pc');
+  const li = btn.closest('.pc-check');
+  const a = (window.CLASS_ACTIVITIES || []).find(x => x.id === id);
+  if(!root || !li || !a) return;
+  const preview = root.dataset.preview === '1';
+  const key = `${id}:c${ci}`;
+  let nowDone;
+  if(preview){
+    nowDone = !li.classList.contains('is-done');   // the console preview saves nothing
+  } else {
+    nowDone = caStepDone[key] !== true;
+    if(nowDone) caStepDone[key] = true; else delete caStepDone[key];
+    caSaveStepDone();
+  }
+  li.classList.toggle('is-done', nowDone);
+  btn.setAttribute('aria-checked', nowDone ? 'true' : 'false');
+  const box = btn.querySelector('.pc-box');
+  if(box) box.innerHTML = nowDone ? '&#x2713;' : '';
+  const total = caCardChecks(a).length;
+  const doneN = preview ? root.querySelectorAll('.pc-check.is-done').length : caTickCount(caTickKeys(a));
+  const prog = root.querySelector('.pc-progress');
+  if(prog) prog.textContent = t('ca.cardProgress', {done: doneN, total});
+  if(preview) return;
+  caSyncTopbar();
+  const req = caRequiredTickKeys(a);
+  if(nowDone && classActivities[id] !== true && req.length && caTickCount(req) === req.length){
+    onClassActivityChange(id, true);
+    applyActivityGate();
+    const card = root.closest('.ca-card');
+    const mark = card && card.querySelector('.ca-mark-btn');
+    if(mark){ mark.classList.add('done'); mark.textContent = t('ca.completed'); }
+    gateToast(t('ca.cardDoneToast'));
+  }
+}
+function pcToggleHelp(btn){
+  const box = btn.nextElementSibling;
+  if(!box) return;
+  const open = box.hidden;
+  box.hidden = !open;
+  btn.setAttribute('aria-expanded', open ? 'true' : 'false');
+  const arrow = btn.querySelector('.pc-help-arrow');
+  if(arrow) arrow.innerHTML = open ? '&#x25BE;' : '&#x25B8;';
+}
 /* The 🖨 button, shared by the plain card and the Today hero so the two
    can't drift — the hero shipped without one (7606590) because it builds its
    own summary. Exit checks carry none on purpose (see caCheckCardHtml). */
@@ -9932,9 +10396,10 @@ function caActivityCardHtml(a){
   // Focus view always has exactly one step open (caFocusIdx); the accordion
   // can have none (-1).
   const focus = caIsFocus(a);
+  const card = caIsCard(a);   // practice card — see caCardBodyHtml
   const openStepIdx = focus ? caFocusIdx(a)
     : caStepOpen[a.id] !== undefined ? caStepOpen[a.id] : caDefaultOpenStep(a);
-  const stepsHtml = (a.steps || []).map((s, si) => caStepHtml(a, s, si, si === openStepIdx, caStepDone[`${a.id}:${si}`] === true)).join('');
+  const stepsHtml = card ? '' : (a.steps || []).map((s, si) => caStepHtml(a, s, si, si === openStepIdx, caStepDone[`${a.id}:${si}`] === true)).join('');
   const markLabel = done ? t('ca.completed') : t('ca.markComplete');
   const num = caNumber(a);
   const titleHtml = (num ? `#${num} - ` : '') + escHtml(caTitle(a));
@@ -9942,7 +10407,7 @@ function caActivityCardHtml(a){
   // gates students on the date) — but an empty chip renders as a stray amber
   // dash, on the printed handout as much as on screen, so skip it entirely.
   const dateLabel = caFormatDate(caDate(a));
-  return `<details class="ca-card${focus ? ' ca-card--focus' : ''}" ${open ? 'open' : ''} data-id="${escAttr(a.id)}" ontoggle="caOnToggle(this)">
+  return `<details class="ca-card${focus ? ' ca-card--focus' : ''}${card ? ' ca-card--practice' : ''}" ${open ? 'open' : ''} data-id="${escAttr(a.id)}" ontoggle="caOnToggle(this)">
     <summary class="ca-card-summary" onclick="caCardMarkOpening(this)">
       ${dateLabel ? `<span class="ca-chip">${escHtml(dateLabel)}</span>` : ''}
       <span class="ca-card-titlewrap"><span class="ca-card-title">${titleHtml}</span>${caChunkMetaHtml(a)}</span>
@@ -9950,7 +10415,7 @@ function caActivityCardHtml(a){
       ${caPrintBtnHtml(a)}
     </summary>
     <div class="ca-card-body">
-      <p class="coach-tip">${escHtml(tf(a,'intro'))}</p>
+      ${card ? caCardBodyHtml(a) : `<p class="coach-tip">${escHtml(tf(a,'intro'))}</p>`}
       ${stepsHtml && focus ? caFocusDotsHtml(a, openStepIdx) : ''}
       ${stepsHtml ? `<ol class="ca-steps">${stepsHtml}</ol>` : ''}
       ${caMarkRowHtml(a, done, markLabel)}
@@ -10286,6 +10751,7 @@ function caOnToggle(details){
   // ladder is a single-open accordion, so opening the next step would cut
   // off the loop the student just started.)
   if(!details.open && snipState && details.contains(snipState.card)) snipStop();
+  if(!details.open && pcState && details.contains(pcState.root)) pcStop();
   /* A card opened from "Still to do" left its header wherever it already sat
      on the page — under the header, the page title and the Do-now card, as
      low as y≈370 at 1366×657 (2026-09-20). Scroll only on a genuine click:
@@ -10316,9 +10782,9 @@ function caSyncTopbar(){
   if(!a){ bar.hidden = true; bar.innerHTML = ''; title.hidden = false; return; }
   const num = caNumber(a);
   const name = (a.kind === 'check' ? t('check.prefix') + ' · ' : num ? `#${num} - ` : '') + caTitle(a);
-  const steps = a.steps || [];
-  const doneN = steps.filter((st, si) => caStepDone[`${a.id}:${si}`] === true).length;
-  const prog = steps.length ? t('ca.barProgress', {done: doneN, total: steps.length}) : '';
+  const keys = caTickKeys(a);   // a practice card's checks, or a ladder's steps
+  const doneN = caTickCount(keys);
+  const prog = keys.length ? t('ca.barProgress', {done: doneN, total: keys.length}) : '';
   bar.innerHTML = `<button type="button" class="ca-bar-back" onclick="caCloseOpen()">&#x25C0; ${escHtml(t('ca.allActivities'))}</button>`
     + `<button type="button" class="ca-bar-name" onclick="caScrollToActivity('${escAttr(a.id)}')" title="${escAttr(t('ca.barTop'))}" data-i18n-attr="title:ca.barTop">${escHtml(name)}</button>`
     + (prog ? `<span class="ca-bar-prog">${escHtml(prog)}</span>` : '');
@@ -10802,6 +11268,7 @@ function renderClassActivities(){
   // screen to stop it. (snipTick's own isConnected guard is the backstop for
   // a card pulled out some other way; this is the one path we know about.)
   snipStop();
+  pcStop();   // a practice card's song, same reason (pcFrame has the same backstop)
   // Recomputed up front — the gate intro line and the resume card below both
   // read body.ca-gated, and a completion just made in THIS render pass
   // (caToggleComplete/ecSubmit, both call this) has to be reflected before
@@ -10970,6 +11437,7 @@ let caTodoOpen = false;
 function caOnTodoToggle(details){
   caTodoOpen = details.open;
   if(!details.open && snipState && details.contains(snipState.card)) snipStop();
+  if(!details.open && pcState && details.contains(pcState.root)) pcStop();
 }
 function caTodoGroupHtml(bodyHtml, count, openInside){
   const open = caTodoOpen || openInside;
@@ -10998,6 +11466,7 @@ function caFinishedGroupHtml(finishedGroups, finishedFlat, byId){
 function caOnFinishedToggle(details){
   caFinishedOpen = details.open;
   if(!details.open && snipState && details.contains(snipState.card)) snipStop();
+  if(!details.open && pcState && details.contains(pcState.root)) pcStop();
 }
 
 /* The unfinished-activities reminder popup (maybeShowCaReminder) was retired
