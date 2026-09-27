@@ -5,6 +5,18 @@ Notable changes to the Guitar Class site. Newest first.
 For the full session-by-session history (and the reasoning behind each change),
 see `WORKFLOW.md` and the git commit log.
 
+## 2026-09-27 — Two song-fact corrections
+
+### Fixed
+
+- **"Let It Be"'s C-G-Am-F drills in Modules 5 and 8** no longer call
+  themselves "the verse" or "a full verse" — they're the verse's opening
+  four chords; the real verse has a second line that ends differently
+  (taught correctly already in Module 6).
+- **Module 9's "the cure" G/B hint** no longer states a specific chord
+  position ("right after F, back to Am") that isn't established at that
+  point in the course — it now just names the technique.
+
 ## 2026-09-27 — Three video-question cards are quick-pick now
 
 ### Changed

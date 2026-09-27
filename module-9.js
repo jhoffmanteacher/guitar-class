@@ -1037,8 +1037,8 @@ SETS.push(
                 hint_es: 'La forma del acorde casi no cambia — es la nota MÁS GRAVE que rasgueas lo que lo convierte en un acorde con barra diagonal.',
                 stuck: 'Play the open G first, then lift your finger off the low E string and start your strum on the A string — the B (A string, fret 2) is already under your finger.',
                 stuck_es: 'Toca el G abierto primero, luego levanta el dedo de la cuerda Mi grave y empieza tu rasgueo en la cuerda La — la B (cuerda La, traste 2) ya está bajo tu dedo.',
-                levelUp: 'Walk C → G/B → Am as a smooth bass-line move — then listen for the same G/B glide in "the cure", where it pulls the loop from F back home to Am.',
-                levelUp_es: 'Camina C → G/B → Am como un movimiento suave de línea de bajo — luego busca el mismo deslizamiento con G/B en "the cure", donde lleva el ciclo de F de vuelta a la base en Am.',
+                levelUp: 'Walk C → G/B → Am as a smooth bass-line move — "the cure" uses this same kind of G/B walking bass to link its chords smoothly.',
+                levelUp_es: 'Camina C → G/B → Am como un movimiento suave de línea de bajo — "the cure" usa este mismo tipo de bajo caminante con G/B para conectar sus acordes suavemente.',
                 skills: [4],
                 chords: [
                   { name: 'G/B', chord: [[6,'x'],[5,2,'1'],[4,0],[3,0],[2,0],[1,3,'3']], position: 0 },
