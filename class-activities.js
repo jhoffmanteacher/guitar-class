@@ -615,8 +615,8 @@ window.CLASS_ACTIVITIES = [
       {
         label:    'Down the Ladder',
         label_es: 'Bajando la Escalera',
-        text: 'Play the tab below — the Ladder backwards. It starts with your pinky, because that is the weakest finger. Set the BPM to 50.\nYou\'ve got it when: all four notes ring clean — no buzz — three times in a row. Buzz twice? Drop the BPM by 10 and try again.',
-        text_es: 'Toca la tablatura de abajo — la Escalera al revés. Empieza con el meñique, porque es el dedo más débil. Pon el BPM en 50.\nLo tienes cuando: las cuatro notas suenan limpias — sin zumbido — tres veces seguidas. ¿Zumbó dos veces? Baja el BPM 10 puntos y vuelve a intentarlo.',
+        text: 'Play the tab below — the Ladder backwards. Set the BPM to 50.\nYou\'ve got it when: all four notes ring clean — no buzz — three times in a row. Buzz twice? Drop the BPM by 10 and try again.',
+        text_es: 'Toca la tablatura de abajo — la Escalera al revés. Pon el BPM en 50.\nLo tienes cuando: las cuatro notas suenan limpias — sin zumbido — tres veces seguidas. ¿Zumbó dos veces? Baja el BPM 10 puntos y vuelve a intentarlo.',
         tab: {
           caption: 'Down the Ladder · pinky leads',
           caption_es: 'Bajando la Escalera · el meñique va primero',
@@ -761,8 +761,8 @@ window.CLASS_ACTIVITIES = [
       {
         label:    '9th position Ladder',
         label_es: 'Escalera en 9.ª posición',
-        text: 'The Ladder in 9th position, up to the double dot at fret 12.<ul><li>These are the narrowest frets you have played so far, so your fingers are crowded</li><li>Keep them ON THEIR TIPS or they\'ll bump each other</li></ul>You\'ve got it when: no buzz on any of the four, three times in a row.',
-        text_es: 'La Escalera en la 9.ª posición, hasta el punto doble del traste 12.<ul><li>Estos son los trastes más angostos que has tocado hasta ahora, así que tus dedos van apretados</li><li>Mantenlos SOBRE LAS PUNTAS o se van a chocar entre sí</li></ul>Lo tienes cuando: sin zumbido en ninguna de las cuatro, tres veces seguidas.',
+        text: 'The Ladder in 9th position, up to the double dot at fret 12.<ul><li>The frets are narrow up here, so your fingers are crowded</li><li>Keep them ON THEIR TIPS or they\'ll bump each other</li></ul>You\'ve got it when: no buzz on any of the four, three times in a row.',
+        text_es: 'La Escalera en la 9.ª posición, hasta el punto doble del traste 12.<ul><li>Los trastes están angostos aquí arriba, así que tus dedos van apretados</li><li>Mantenlos SOBRE LAS PUNTAS o se van a chocar entre sí</li></ul>Lo tienes cuando: sin zumbido en ninguna de las cuatro, tres veces seguidas.',
         tab: {
           caption: '9th position · narrowest frets',
           caption_es: '9.ª posición · los trastes más angostos',
@@ -1116,8 +1116,8 @@ window.CLASS_ACTIVITIES = [
     journeyLayer: 2,
     title:    'Seven Nation Army — The Riff',
     title_es: 'Seven Nation Army — El riff',
-    intro:    'The Seven Nation Army riff is seven notes on the A string. Play it with the song, first on Slower, then at normal speed.',
-    intro_es: 'El riff de Seven Nation Army son siete notas en la cuerda La. Tócalo con la canción, primero en Más lento y después a velocidad normal.',
+    intro:    'The Seven Nation Army riff is seven notes on the A string — play it with the song, first on Slower, then at normal speed.',
+    intro_es: 'El riff de Seven Nation Army son siete notas en la cuerda La — tócalo con la canción, primero en Más lento y después a velocidad normal.',
     card: {
       track: 'seven-nation-army',
       caption:    'The riff · A string · 2 bars',
@@ -1743,8 +1743,8 @@ window.CLASS_ACTIVITIES = [
       {
         label:    'The intro — A · C, twice',
         label_es: 'La intro — A · C, dos veces',
-        text: 'Read the tab. Index finger on fret 5 for A. Pinky on fret 8 for C, with the index finger still on fret 5. Each note rings for four beats.<ol><li>Play each note once, slowly, and say its name</li><li>Play the tab, counting 1 2 3 4 out loud</li><li>Turn on the metronome at 60 BPM and play it again</li></ol>You\'ve got it when: the intro twice in a row at 60 BPM, no stops.',
-        text_es: 'Lee la tablatura. Índice en el traste 5 para el A. Meñique en el traste 8 para el C, con el índice todavía en el traste 5. Cada nota suena cuatro tiempos.<ol><li>Toca cada nota una vez, despacio, y di su nombre</li><li>Toca la tablatura contando 1 2 3 4 en voz alta</li><li>Pon el metrónomo a 60 BPM y tócala otra vez</li></ol>Lo tienes cuando: la intro dos veces seguidas a 60 BPM, sin detenerte.',
+        text: 'Read the tab. Index finger on fret 5 for A. Pinky on fret 8 for C, with the index finger still on fret 5. Each note rings for four beats.<ol><li>Play each note once, slowly, and say its name</li><li>Play the tab, counting 1 2 3 4 out loud</li><li>Open the Metro tool, start it at 60 BPM, and play it again</li></ol>You\'ve got it when: the intro twice in a row at 60 BPM, no stops.',
+        text_es: 'Lee la tablatura. Índice en el traste 5 para el A. Meñique en el traste 8 para el C, con el índice todavía en el traste 5. Cada nota suena cuatro tiempos.<ol><li>Toca cada nota una vez, despacio, y di su nombre</li><li>Toca la tablatura contando 1 2 3 4 en voz alta</li><li>Abre la herramienta Metro, arráncala a 60 BPM, y tócala otra vez</li></ol>Lo tienes cuando: la intro dos veces seguidas a 60 BPM, sin detenerte.',
         snippet: { track: 'the-cure', fromBar: 1, bars: 4,
                    label:    'The intro, with the band',
                    label_es: 'La intro, con la banda' },
@@ -1901,14 +1901,14 @@ window.CLASS_ACTIVITIES = [
       {
         label:    'Keep going',
         label_es: 'Sigue adelante',
-        text: 'Pick one:<ul><li>+10 BPM every two clean runs, up to 100</li><li>Play along with the backing track on the Song Journey page, Layer 2</li></ul>You\'ve got it when: intro into verse twice without stopping, either at a faster BPM than before or with the track.',
-        text_es: 'Escoge una:<ul><li>+10 BPM cada dos vueltas limpias, hasta 100</li><li>Toca con la pista de acompañamiento en la página de Recorrido de la canción, Capa 2</li></ul>Lo tienes cuando: de la intro a la estrofa dos veces sin detenerte, a un BPM más alto que antes o con la pista.',
+        text: 'Pick one:<ul><li>Two clean runs at 100 BPM in a row</li><li>Play along with the backing track on the Song Journey page, Layer 2</li></ul>You\'ve got it when: intro into verse twice without stopping, at 100 BPM or with the track.',
+        text_es: 'Escoge una:<ul><li>Dos vueltas limpias seguidas a 100 BPM</li><li>Toca con la pista de acompañamiento en la página de Recorrido de la canción, Capa 2</li></ul>Lo tienes cuando: de la intro a la estrofa dos veces sin detenerte, a 100 BPM o con la pista.',
       },
     ],
   },
   /* Day 17 mini-card: "the cure" verse alone, moved from the low E (ca-13's
      A · C · F on frets 5 · 8 · 1) onto two strings with the hand parked in
-     frets 1–5. Four rungs on purpose — it shares a day with ca-17 (Notes on
+     frets 1–5. Six rungs on purpose — it shares a day with ca-17 (Notes on
      the A String). ca-18, the next class day, re-teaches this verse and adds
      the chorus; the overlap is intended (Jonathan, 2026-09-16). */
   {
@@ -2037,8 +2037,8 @@ window.CLASS_ACTIVITIES = [
     journeyLayer: 2,
     title:    '"Luna" — The Bassline',
     title_es: '"Luna" — La línea de bajo',
-    intro:    'You already play F at fret 1 on the low E string. "Luna" needs that note and one more — the open A string. Two notes, two bars each, and that loop is the whole song.',
-    intro_es: 'Ya tocas el F en el traste 1 de la cuerda Mi grave. "Luna" necesita esa nota y una más — la cuerda La al aire. Dos notas, dos compases cada una, y ese bucle es toda la canción.',
+    intro:    'You already play F at fret 1 on the low E string. "Luna" needs that note and one more — the open A string. Two notes, two bars each, and that loop carries almost the whole song.',
+    intro_es: 'Ya tocas el F en el traste 1 de la cuerda Mi grave. "Luna" necesita esa nota y una más — la cuerda La al aire. Dos notas, dos compases cada una, y ese bucle lleva casi toda la canción.',
     steps: [
       {
         label:    'Learn — Feel the two',
@@ -2131,8 +2131,8 @@ window.CLASS_ACTIVITIES = [
     journeyLayer: 2,
     title:    '"the cure" — Intro, Verse and Chorus',
     title_es: '"the cure" — Intro, estrofa y coro',
-    intro:    'You moved the verse of "the cure" onto two strings. Today you add the chorus and play the whole song with the band.',
-    intro_es: 'Ya moviste la estrofa de "the cure" a dos cuerdas. Hoy agregas el coro y tocas la canción completa con la banda.',
+    intro:    'You moved the verse of "the cure" onto two strings — today you add the chorus and play the whole song with the band.',
+    intro_es: 'Ya moviste la estrofa de "the cure" a dos cuerdas — hoy agregas el coro y tocas la canción completa con la banda.',
     card: {
       track: 'the-cure',
       caption:    'The song in order · 4 plucks per note',
