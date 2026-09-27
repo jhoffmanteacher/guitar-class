@@ -1496,6 +1496,136 @@ window.CLASS_ACTIVITIES = [
       },
     ],
   },
+  /* A-string memory practice (Jonathan, 2026-09-27): the follow-up to ca-17,
+     which introduces the A-string names. Four steps — a short review with
+     the tab player, the natural-note deck, a play-along up and back at 60
+     BPM, then an open-ended skip-a-note play-along that climbs in tempo.
+     Technique ladder: one pass in order, recall with no tab, in time with
+     the player, out of order in time. ca-17 is untouched. */
+  {
+    id:    'ca-22',
+    title:    'A String Notes – Cards and Play-Along',
+    title_es: 'Notas de la cuerda La – Cartas y tocar a la par',
+    intro:    'You already named every natural note on the A string (a natural note has no ♯). Today you practice them until you know each one without looking: a short review, a deck of note cards, then playing along with the tab.',
+    intro_es: 'Ya nombraste todas las notas naturales de la cuerda La (una nota natural no lleva ♯). Hoy las practicas hasta saber cada una sin mirar: un repaso corto, una baraja de cartas de notas y después tocas a la par de la tablatura.',
+    steps: [
+      {
+        label:    'Learn — Review the names',
+        label_es: 'Aprende — Repasa los nombres',
+        text: 'Press Play tab and watch the cursor. Say each name out loud as the cursor lands on it. B to C and E to F are one fret apart. Every other pair of neighbors is two frets apart.',
+        text_es: 'Presiona Tocar el tab y mira el cursor. Di cada nombre en voz alta cuando el cursor llegue a él. De B a C y de E a F hay un solo traste. Entre todas las demás notas vecinas hay dos trastes.',
+        tab: {
+          caption: 'A to A · going up',
+          caption_es: 'De A a A · subiendo',
+          notes: [
+            { string: 'A', fret: 0,  note: 'A', midi: 45 },
+            { string: 'A', fret: 2,  note: 'B', midi: 47 },
+            { string: 'A', fret: 3,  note: 'C', midi: 48 },
+            { string: 'A', fret: 5,  note: 'D', midi: 50 },
+            { string: 'A', fret: 7,  note: 'E', midi: 52 },
+            { string: 'A', fret: 8,  note: 'F', midi: 53 },
+            { string: 'A', fret: 10, note: 'G', midi: 55 },
+            { string: 'A', fret: 12, note: 'A', midi: 57 }
+          ]
+        },
+      },
+      {
+        label:    'Practice — Deal a card',
+        label_es: 'Practica — Reparte una carta',
+        text: 'Press Shuffle and deal. Each card names a note. Find it on the A string and pluck it, then take your hand off the neck before the next card. A is at fret 0 and fret 12, and either one counts.\nYou\'ve got it when: 7 of 7 right on the first deal, without looking at a tab, no buzz. Missed one? Press Shuffle again and run the whole deck.',
+        text_es: 'Presiona Barajar y repartir. Cada carta nombra una nota. Búscala en la cuerda La y púlsala, y después levanta la mano del mástil antes de la siguiente carta. A está en el traste 0 y en el traste 12, y cualquiera de los dos cuenta.\nLo tienes cuando: 7 de 7 correctas al primer reparto, sin mirar la tablatura, sin zumbido. ¿Fallaste una? Presiona Barajar de nuevo y haz toda la baraja otra vez.',
+        drill: { type: 'deck', deck: 'naturals' },
+      },
+      {
+        label:    'Practice — Play along',
+        label_es: 'Practica — Toca a la par',
+        text: 'Set the tab to 60 BPM (beats per minute) and press Play tab. Play each note with the player, one note per beat, up to fret 12 and back down. Say each name out loud as you play it.\nYou\'ve got it when: up and back twice with the player, no missed notes, every name out loud. Falling behind? Set it to 50 BPM and try again.',
+        text_es: 'Pon el tab en 60 BPM (tiempos por minuto) y presiona Tocar el tab. Toca cada nota junto con el reproductor, una nota por tiempo, hasta el traste 12 y de regreso. Di cada nombre en voz alta mientras lo tocas.\nLo tienes cuando: subes y bajas dos veces con el reproductor, sin notas perdidas, cada nombre en voz alta. ¿Te quedas atrás? Ponlo en 50 BPM e inténtalo otra vez.',
+        tab: {
+          caption: 'A to A · up and back',
+          caption_es: 'De A a A · subiendo y bajando',
+          phrases: [
+            {
+              label: 'Going up',
+              label_es: 'Subiendo',
+              notes: [
+                { string: 'A', fret: 0,  note: 'A', midi: 45 },
+                { string: 'A', fret: 2,  note: 'B', midi: 47 },
+                { string: 'A', fret: 3,  note: 'C', midi: 48 },
+                { string: 'A', fret: 5,  note: 'D', midi: 50 },
+                { string: 'A', fret: 7,  note: 'E', midi: 52 },
+                { string: 'A', fret: 8,  note: 'F', midi: 53 },
+                { string: 'A', fret: 10, note: 'G', midi: 55 },
+                { string: 'A', fret: 12, note: 'A', midi: 57 }
+              ]
+            },
+            {
+              label: 'Coming down',
+              label_es: 'Bajando',
+              notes: [
+                { string: 'A', fret: 12, note: 'A', midi: 57 },
+                { string: 'A', fret: 10, note: 'G', midi: 55 },
+                { string: 'A', fret: 8,  note: 'F', midi: 53 },
+                { string: 'A', fret: 7,  note: 'E', midi: 52 },
+                { string: 'A', fret: 5,  note: 'D', midi: 50 },
+                { string: 'A', fret: 3,  note: 'C', midi: 48 },
+                { string: 'A', fret: 2,  note: 'B', midi: 47 },
+                { string: 'A', fret: 0,  note: 'A', midi: 45 }
+              ]
+            }
+          ]
+        },
+      },
+      {
+        label:    'Practice — Skip a note',
+        label_es: 'Practica — Salta una nota',
+        text: 'This line skips a note each time: A to C, B to D, C to E, all the way up and back down. The jumps are the hard part, so say the next name before your hand moves. Start at 60 BPM, press Play tab, and play along.\nYou\'ve got it when: one pass at 60 BPM with no missed notes. Then raise it 10 BPM after every clean pass and keep going. Missed a jump? Play just those two notes five times, then start the line again.',
+        text_es: 'Esta línea salta una nota cada vez: de A a C, de B a D, de C a E, hasta arriba y de regreso. Los saltos son la parte difícil, así que di el siguiente nombre antes de mover la mano. Empieza en 60 BPM, presiona Tocar el tab y toca a la par.\nLo tienes cuando: una pasada en 60 BPM sin notas perdidas. Después sube 10 BPM tras cada pasada limpia y sigue. ¿Fallaste un salto? Toca solo esas dos notas cinco veces y empieza la línea otra vez.',
+        tab: {
+          caption: 'Skip a note · A to A, up and back',
+          caption_es: 'Salta una nota · de A a A, subiendo y bajando',
+          phrases: [
+            {
+              label: 'Skipping up',
+              label_es: 'Saltando hacia arriba',
+              notes: [
+                { string: 'A', fret: 0,  note: 'A', midi: 45 },
+                { string: 'A', fret: 3,  note: 'C', midi: 48 },
+                { string: 'A', fret: 2,  note: 'B', midi: 47 },
+                { string: 'A', fret: 5,  note: 'D', midi: 50 },
+                { string: 'A', fret: 3,  note: 'C', midi: 48 },
+                { string: 'A', fret: 7,  note: 'E', midi: 52 },
+                { string: 'A', fret: 5,  note: 'D', midi: 50 },
+                { string: 'A', fret: 8,  note: 'F', midi: 53 },
+                { string: 'A', fret: 7,  note: 'E', midi: 52 },
+                { string: 'A', fret: 10, note: 'G', midi: 55 },
+                { string: 'A', fret: 8,  note: 'F', midi: 53 },
+                { string: 'A', fret: 12, note: 'A', midi: 57 }
+              ]
+            },
+            {
+              label: 'Skipping down',
+              label_es: 'Saltando hacia abajo',
+              notes: [
+                { string: 'A', fret: 12, note: 'A', midi: 57 },
+                { string: 'A', fret: 8,  note: 'F', midi: 53 },
+                { string: 'A', fret: 10, note: 'G', midi: 55 },
+                { string: 'A', fret: 7,  note: 'E', midi: 52 },
+                { string: 'A', fret: 8,  note: 'F', midi: 53 },
+                { string: 'A', fret: 5,  note: 'D', midi: 50 },
+                { string: 'A', fret: 7,  note: 'E', midi: 52 },
+                { string: 'A', fret: 3,  note: 'C', midi: 48 },
+                { string: 'A', fret: 5,  note: 'D', midi: 50 },
+                { string: 'A', fret: 2,  note: 'B', midi: 47 },
+                { string: 'A', fret: 3,  note: 'C', midi: 48 },
+                { string: 'A', fret: 0,  note: 'A', midi: 45 }
+              ]
+            }
+          ]
+        },
+      },
+    ],
+  },
   {
     id:    'ca-12',
     number: 11,
