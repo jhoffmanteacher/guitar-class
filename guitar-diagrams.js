@@ -218,9 +218,16 @@ var CHORD_DIAGRAMS = {
   'Cmaj7' : { position:0, chord:[[6,'x',''],[5,3,3],[4,2,2],[3,0,0],[2,0,0],[1,0,0]] },
   'Fmaj7' : { position:0, chord:[[6,'x',''],[5,'x',''],[4,3,3],[3,2,2],[2,1,1],[1,0,0]] },
   'Dm7'   : { position:0, chord:[[6,'x',''],[5,'x',''],[4,0,0],[3,2,2],[2,1,1],[1,1,1]] },
-  /* Bm / F#m / C#m: partial-barre (beginner) shapes — these are what Modules 5–6
-     teach. Module 7 (barre chords) skips these auto-link pop-ups entirely (see
-     wrapChordLinksIn) and renders full-barre shapes inline instead. */
+  /* Bm / F#m / C#m: partial-barre (beginner) shapes. Only Bm is actually
+     taught anywhere in the course today (Module 5's Group 3) — F#m/C#m
+     have shapes here but no lesson yet (checked every module file
+     2026-09-28, neither name appears), so nothing currently links to
+     them. Kept rather than deleted for whenever a lesson adds them; the
+     arcade games' former "barre" deck drilled all three against each
+     other and was removed the same day for the same reason (see
+     coach.js's CHORD_RANK). Module 7 (barre chords) skips these auto-link
+     pop-ups entirely (see wrapChordLinksIn) and renders full-barre shapes
+     inline instead. */
   'Bm' : { position:2, chord:[[6,'x',''],[5,'x',''],[4,4,4],[3,4,3],[2,3,2],[1,2,1]] },
   'B7' : { position:0, chord:[[6,'x',''],[5,2,2],[4,1,1],[3,2,3],[2,0,0],[1,2,4]] },
   'F#m': { position:2, chord:[[6,'x',''],[5,'x',''],[4,4,3],[3,2,1],[2,2,1],[1,2,1]] },

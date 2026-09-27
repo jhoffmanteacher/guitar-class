@@ -2625,8 +2625,19 @@ function ccAgain(d){
    Blitz (shapes, by eye) and Chord Detective (the same chords, by ear).
    One rank per chord, in the order the COURSE teaches them: Module 5's
    Group 1 (C F Am G), then Group 2 (D A Em) alongside the open power
-   shapes, then Dm and the movable power shapes, then Group 3 (E, B7) and
-   the partial barres.
+   shapes, then Dm and the movable power shapes, then Group 3 (E, B7, Bm).
+
+   F#m and C#m were dropped from both games' decks 2026-09-28 (Jonathan)
+   — checked against every module file and neither is actually taught
+   anywhere; only Bm (Group 3) is. The former "barre" deck existed only to
+   drill Bm/F#m/C#m against each other by ear/eye, which stops making
+   sense with two of the three not yet part of the course, so the deck
+   itself is gone too — Bm still practices via the "all" deck. Re-add a
+   barre deck once F#m/C#m have an actual lesson to build on, and give the
+   three DIFFERENT ranks then (not all the same one) so the deck gets a
+   real build-up instead of a flat 3-way cold open — see the games
+   open-items memory for why a flat single-level "hardest case immediately"
+   deck was the wrong call even for a chord that IS taught.
 
    Every deck in both games DERIVES its levels from this one table
    (cbDeckLevels / cdDeckLevels), so no deck carries its own tier list that
@@ -2639,7 +2650,7 @@ const CHORD_RANK = {
   C: 1, F: 1, Am: 1, G: 1,
   D: 2, A: 2, Em: 2, E5: 2, A5: 2, D5: 2,
   Dm: 3, G5: 3, C5: 3,
-  E: 4, B7: 4, Bm: 4, 'F#m': 4, 'C#m': 4
+  E: 4, B7: 4, Bm: 4
 };
 function chordRankOf(n){ return CHORD_RANK[n] || 1; }
 
@@ -2680,8 +2691,7 @@ const CB_PROMOTE_EVERY = 2;   // right answers per level
 const CB_DECKS = [
   { id: 'open',  labelKey: 'games.cb.deck.open',  chords: ['E','Em','A','Am','D','Dm','G','C','F','B7'] },
   { id: 'power', labelKey: 'games.cb.deck.power', chords: ['E5','G5','A5','C5','D5'] },
-  { id: 'barre', labelKey: 'games.cb.deck.barre', chords: ['Bm','F#m','C#m'] },
-  { id: 'all',   labelKey: 'games.cb.deck.all',   chords: ['E','Em','A','Am','D','Dm','G','C','F','E5','G5','A5','C5','D5','Bm','B7','F#m','C#m'] }
+  { id: 'all',   labelKey: 'games.cb.deck.all',   chords: ['E','Em','A','Am','D','Dm','G','C','F','E5','G5','A5','C5','D5','Bm','B7'] }
 ];
 
 let cb = null, cbTick = null;
@@ -2838,9 +2848,12 @@ function cbOptions(correct){
   /* Deck-native chords always fill the distractor slots first — see the
      identical fix in cdOptions() (Chord Detective) for the simulated
      numbers: a random shuffle-then-slice over (native + borrowed) let the
-     barre deck's two other barre shapes lose out to easy open-chord
-     decoys the large majority of rounds, so "spot the Bm/F#m/C#m shape"
-     rarely actually tested that 3-way discrimination. Borrowing only
+     former barre deck's two other barre shapes lose out to easy open-
+     chord decoys the large majority of rounds, so "spot the Bm/F#m/C#m
+     shape" rarely actually tested that 3-way discrimination (that deck is
+     gone now — see CHORD_RANK's note — but no current deck is small
+     enough to hit the borrow branch below, so this is dormant, not dead:
+     the next small deck gets it right from the start). Borrowing only
      tops up whatever's still missing after every native option is in. */
   let opts = cbOptionPool().filter(n => n !== correct);
   if (opts.length < 3){   // tiny deck: borrow distractors from the full library
@@ -3048,8 +3061,7 @@ const CD_SOUND_MS = 1600;
 
 const CD_DECKS = [
   { id: 'open',  labelKey: 'games.cd.deck.open',  chords: ['E','Em','A','Am','D','Dm','G','C','F'] },
-  { id: 'barre', labelKey: 'games.cd.deck.barre', chords: ['Bm','F#m','C#m'] },
-  { id: 'all',   labelKey: 'games.cd.deck.all',   chords: ['E','Em','A','Am','D','Dm','G','C','F','Bm','B7','F#m','C#m'] }
+  { id: 'all',   labelKey: 'games.cd.deck.all',   chords: ['E','Em','A','Am','D','Dm','G','C','F','Bm','B7'] }
 ];
 
 let cd = null, cdTick = null;
@@ -3206,11 +3218,14 @@ function cdOptionPool(){
 
 function cdOptions(correct){
   /* Deck-native chords always fill the distractor slots first — a random
-     shuffle-then-slice over (native + borrowed) let the barre deck's two
-     other barre chords lose out to easy open-chord decoys 95% of the
-     time (simulated: only 4.5% of rounds tested the actual 3-way Bm/F#m/
-     C#m discrimination this deck exists to teach). Borrowing only tops up
-     whatever's still missing after every native option is already in. */
+     shuffle-then-slice over (native + borrowed) let the former barre
+     deck's two other barre chords lose out to easy open-chord decoys 95%
+     of the time (simulated: only 4.5% of rounds tested the actual 3-way
+     Bm/F#m/C#m discrimination that deck existed to teach — see CHORD_RANK
+     for why it's gone now). No current deck is small enough to hit the
+     borrow branch below, so this stays dormant, not dead: the next small
+     deck gets it right from the start. Borrowing only tops up whatever's
+     still missing after every native option is already in. */
   let opts = cdOptionPool().filter(n => n !== correct);
   if (opts.length < 3){   // tiny deck: borrow distractors from the full library
     const all = CD_DECKS[CD_DECKS.length - 1].chords;
