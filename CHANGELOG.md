@@ -15,8 +15,8 @@ see `WORKFLOW.md` and the git commit log.
   beats after the name, and every 8 notes it gets a little faster. Turn it
   off for five scored levels. Get 8 of 10 right to unlock the next one.
   The notes you miss come back a few notes later.
-- Play the notes on your guitar with the Listening Coach on, or tap the
-  fret on the board.
+- Press **Play it on the guitar** and the mic listens for each note.
+  Leave it off and you tap the fret on the board instead.
 
 ## 2026-09-28 — Second look at the error sweep: a few of its fixes corrected, plus new finds
 

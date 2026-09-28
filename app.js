@@ -7311,7 +7311,7 @@ function ncSetupHtml(key){
   if(!st) return '';
   const toggles = `<div class="nc-toggles">` +
       ncToggleHtml(key, 'answer', t('nc.answer'), st.answer) +
-      ncToggleHtml(key, 'coach', t('nc.coach'), st.coach) +
+      `<button type="button" class="sdr-pill nc-guitar${st.coach ? ' active' : ''}" aria-pressed="${st.coach}" onclick="ncSet('${key}','coach',${!st.coach})">&#x1F3B8; ${escHtml(t('nc.playGuitar'))}</button>` +
     `</div>`;
   const msg = st.msg ? `<div class="coach-note nc-msg">${escHtml(st.msg)}</div>` : '';
   if(st.answer){
