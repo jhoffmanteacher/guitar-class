@@ -52,7 +52,8 @@
    step before is marked done), only the current step on screen, and a
    "Got it — next step" button under it where Mark done used to be. Pure
    presentation (caIsFocus in app.js) — the same steps, ticks and Mark
-   complete — so it can be added to or taken off any activity at any time
+   complete, which shows only on the last step until the card is complete
+   (2026-09-27) — so it can be added to or taken off any activity at any time
    without touching saved progress. Leave it off and the card is the usual
    accordion. The console preview still lists every step, with a note.
    checks.mjs 1d rejects any value but 'focus' and 'card'. (Jonathan,

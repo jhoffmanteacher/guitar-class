@@ -10178,6 +10178,9 @@ function caFreePlayGames(){
   ensureCoachJs().then(() => { if(typeof gamesShow === 'function') gamesShow('roulette'); }).catch(() => {});
 }
 function caMarkRowHtml(a, done, markLabel){
+  // Focus view: Mark complete waits for the last step (Jonathan, 2026-09-27).
+  // An already-complete card keeps it on every step, so it can be un-marked.
+  if(caIsFocus(a) && !done && caFocusIdx(a) < (a.steps || []).length - 1) return '';
   if(caNudgeId !== a.id){
     return `<button type="button" class="ca-mark-btn ${done ? 'done' : ''}" onclick="caMarkClick('${escAttr(a.id)}')">${escHtml(markLabel)}</button>`;
   }
