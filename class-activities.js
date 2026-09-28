@@ -2521,6 +2521,7 @@ window.CLASS_ACTIVITIES = [
      / ca-17 / ca-22, which teach the names. */
   {
     id:    'ca-23',
+    view:  'focus',   // one step at a time — see VIEW above
     title:    'Low E and A Notes in Time',
     title_es: 'Notas de las cuerdas Mi grave y La a tiempo',
     intro:    'You already know the note names on the low E and A strings. Now you find them in time: a name comes up on the beat, and you play it. You start at frets 0 to 5 and move up the neck one chunk at a time.',

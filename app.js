@@ -8517,6 +8517,8 @@ function stopCardAudio(){
   stopPlaySeq();
   snipStop();   // a looping backing-track snippet is site-generated sound as well
   pcStop();     // …and so is a practice card's song (view:'card')
+  ncStopAll();  // …and a Note Call round's clicks (and its mic, if the Coach is on) —
+                // a focus-view Next re-renders the card, which would orphan its loop
   chordStrumTimeouts.forEach(clearTimeout);
   chordStrumTimeouts = [];
   erStopAll();
