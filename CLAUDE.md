@@ -605,7 +605,14 @@ fails the push.
 **Paper drills get a digital deck.** Nothing student-facing should ask for
 scissors, index cards or a pen. Three `step.drill` types share one dispatcher:
 `shuffle` (frets on one string, timed), `deck` (any card pile, optional back),
-`ear` (hidden note sequence, played aloud). Wiring one is content, not code:
+`ear` (hidden note sequence, played aloud) — plus `notecall` (2026-09-27, ca-23),
+which isn't a paper drill: a note name on the beat, played on the guitar. It opens
+in "Show answer" (a play-along: the fret lights up 2 beats after the name, speeds up
+every 8 notes, Slower backs it off, nothing scored); turned off, it runs five scored
+levels answered by the Listening Coach mic (off by default) or by tapping the fret
+(`drill: { type:'notecall',
+strings:['lowE','A'], minFret:5, maxFret:8 }`; engine `renderNoteCall` in
+`app.js`, progress in `games.nc`, and `gamesStopMic()` stops it). Wiring one is content, not code:
 `drill: { type:'deck', deck:'numerals-C', skill:'m11w1-s3' }`. Decks live in
 `DECKS` in `app.js`; ear pools in `EAR_POOLS`. Drop the "Got someone around?"
 partner line from any card that gets a deck; no paper-fallback line.

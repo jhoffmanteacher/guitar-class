@@ -2508,4 +2508,52 @@ window.CLASS_ACTIVITIES = [
       ]
     }
   },
+  /* Note Call on the low E and A strings (Jonathan, 2026-09-27): a note
+     name comes up on the beat and the student plays it. One Practice step
+     per chunk of the neck — 0–5, 5–8, 8–12, then 0–12. Each step starts in
+     Show answer (the play-along: the fret lights up 2 beats after the name,
+     it speeds up every 8 notes, Slower backs it off, nothing is scored),
+     then the student turns Show answer off for the five scored levels
+     (naturals 60 → 80 BPM → half the beats, then the ♯ notes). Listening
+     Coach starts off. Technique ladder: one position slow → the same move
+     across the neck → the whole neck at tempo, no ceiling (Level 5 speeds
+     up 10 BPM every pass). Engine: renderNoteCall in app.js. Follows ca-11
+     / ca-17 / ca-22, which teach the names. */
+  {
+    id:    'ca-23',
+    title:    'Low E and A Notes in Time',
+    title_es: 'Notas de las cuerdas Mi grave y La a tiempo',
+    intro:    'You already know the note names on the low E and A strings. Now you find them in time: a name comes up on the beat, and you play it. You start at frets 0 to 5 and move up the neck one chunk at a time.',
+    intro_es: 'Ya sabes los nombres de las notas de las cuerdas Mi grave y La. Ahora las encuentras a tiempo: un nombre aparece con el tiempo, y lo tocas. Empiezas en los trastes 0 a 5 y subes por el mástil un tramo a la vez.',
+    steps: [
+      {
+        label:    'Practice — Frets 0 to 5',
+        label_es: 'Practica — Trastes 0 a 5',
+        text: 'Press Start with Show answer on. A note name comes up, you play it, and then its fret lights up so you can check. It gets faster every 8 notes. Press Slower when it gets ahead of you. When you are playing each note before its fret lights up, turn Show answer off and press Start Level 1.\nYou\'ve got it when: 8 of 10 on Level 3 with Show answer off. Missing the same note twice? Turn Show answer on for a few notes, then turn it off and go again.',
+        text_es: 'Presiona «Empezar» con «Mostrar la respuesta» encendido. Aparece el nombre de una nota, la tocas, y después se ilumina su traste para que revises. Va más rápido cada 8 notas. Presiona «Más lento» cuando se te adelante. Cuando toques cada nota antes de que se ilumine su traste, apaga «Mostrar la respuesta» y presiona «Empezar el Nivel 1».\nLo tienes cuando: 8 de 10 en el Nivel 3 con «Mostrar la respuesta» apagado. ¿Fallas la misma nota dos veces? Enciende «Mostrar la respuesta» por unas notas, luego apágalo e inténtalo de nuevo.',
+        drill: { type: 'notecall', strings: ['lowE', 'A'], minFret: 0, maxFret: 5 },
+      },
+      {
+        label:    'Practice — Frets 5 to 8',
+        label_es: 'Practica — Trastes 5 a 8',
+        text: 'Play the same drill higher up the neck. Fret 5 is your landmark: A on the low E string, D on the A string. Start with Show answer on, then turn it off for the levels. This chunk has its own levels, so it starts at Level 1.\nYou\'ve got it when: 8 of 10 on Level 3 with Show answer off. Falling behind? Play Level 2 until you get 10 of 10, then go back to Level 3.',
+        text_es: 'Toca el mismo ejercicio más arriba en el mástil. El traste 5 es tu punto de referencia: A en la cuerda Mi grave, D en la cuerda La. Empieza con «Mostrar la respuesta» encendido y luego apágalo para los niveles. Este tramo tiene sus propios niveles, así que empieza en el Nivel 1.\nLo tienes cuando: 8 de 10 en el Nivel 3 con «Mostrar la respuesta» apagado. ¿Te quedas atrás? Toca el Nivel 2 hasta sacar 10 de 10 y luego vuelve al Nivel 3.',
+        drill: { type: 'notecall', strings: ['lowE', 'A'], minFret: 5, maxFret: 8 },
+      },
+      {
+        label:    'Practice — Frets 8 to 12',
+        label_es: 'Practica — Trastes 8 a 12',
+        text: 'Fret 12 is the double dot. It has the same names as the open strings: E on the low E string, A on the A string. Two frets down from it, at fret 10, are D and G. Start with Show answer on, then turn it off for the levels.\nYou\'ve got it when: 8 of 10 on Level 3 with Show answer off. Falling behind? Play Level 2 until you get 10 of 10, then go back to Level 3.',
+        text_es: 'El traste 12 es el punto doble. Tiene los mismos nombres que las cuerdas al aire: E en la cuerda Mi grave, A en la cuerda La. Dos trastes más abajo, en el traste 10, están D y G. Empieza con «Mostrar la respuesta» encendido y luego apágalo para los niveles.\nLo tienes cuando: 8 de 10 en el Nivel 3 con «Mostrar la respuesta» apagado. ¿Te quedas atrás? Toca el Nivel 2 hasta sacar 10 de 10 y luego vuelve al Nivel 3.',
+        drill: { type: 'notecall', strings: ['lowE', 'A'], minFret: 8, maxFret: 12 },
+      },
+      {
+        label:    'Practice — The whole neck',
+        label_es: 'Practica — Todo el mástil',
+        text: 'Find notes anywhere from fret 0 to 12. Levels 4 and 5 add the ♯ (sharp) notes — a ♯ is one fret higher than the note it names, so F♯ is one fret above F. Every time you pass Level 5, it gets 10 BPM faster.\nYou\'ve got it when: 8 of 10 on Level 5, then again at each new speed. Stuck on a ♯ note? Turn Show answer on, pick With ♯ notes, and play along for a while.',
+        text_es: 'Busca notas en cualquier traste del 0 al 12. Los Niveles 4 y 5 agregan las notas con ♯ (sostenido) — un ♯ está un traste más arriba que la nota que nombra, así que F♯ está un traste arriba de F. Cada vez que pasas el Nivel 5, sube 10 BPM.\nLo tienes cuando: 8 de 10 en el Nivel 5, y otra vez en cada velocidad nueva. ¿Te atoras con una nota con ♯? Enciende «Mostrar la respuesta», elige «Con notas ♯» y toca a la par un rato.',
+        drill: { type: 'notecall', strings: ['lowE', 'A'], minFret: 0, maxFret: 12 },
+      },
+    ],
+  },
 ];

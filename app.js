@@ -6174,7 +6174,12 @@ const fretGames = {};
    null); `clickFn` names the global the hit zones call instead of `fgClick`
    (the live quiz points them at `lqTap`); `hit:false` skips the hit-zone
    layer entirely for a static, unclickable board (the projector's reveal
-   board). Marker ids stay `fgm-${sid}-${k}-${f}` regardless of caller. */
+   board). Marker ids stay `fgm-${sid}-${k}-${f}` regardless of caller.
+   Two more for Note Call (step.drill 'notecall'): `noteAt(kind, fret)`
+   labels every marker, sharps included (FG_NATURALS only knows the
+   naturals, so a sharp fret would otherwise read ✕); `shade: [lo, hi]`
+   greys out every column outside that fret range and drops its hit zone,
+   so a drill on frets 5–8 shows the whole neck but only takes taps there. */
 function fgBoardSvg(sid, kind, opts){
   opts = opts || {};
   const clickFn = opts.clickFn || 'fgClick';
@@ -6218,13 +6223,17 @@ function fgBoardSvg(sid, kind, opts){
   for(let f = 0; f <= maxF; f++){
     s += `<text x="${cx(f)}" y="${numY}" text-anchor="middle" font-size="9" fill="var(--text2)">${f}</text>`;
   }
+  const shaded = f => !!opts.shade && (f < opts.shade[0] || f > opts.shade[1]);
+  if(opts.shade) for(let f = 0; f <= maxF; f++){
+    if(shaded(f)) s += `<rect class="fg-shade" x="${colX(f)}" y="0" width="${colW(f)}" height="${H}"/>`;
+  }
   /* Feedback markers (hidden until a click) + hit zones on top */
   strs.forEach((k, i) => {
     const y = stringYs[i], map = FG_NATURALS[k];
     for(let f = 0; f <= maxF; f++){
       s += `<g class="fg-marker" id="fgm-${sid}-${k}-${f}">` +
         `<circle cx="${cx(f)}" cy="${y}" r="${mR}"/>` +
-        `<text x="${cx(f)}" y="${y}" text-anchor="middle" dominant-baseline="central" font-size="${mFont}" font-weight="700">${map[f] || '&#x2715;'}</text>` +
+        `<text x="${cx(f)}" y="${y}" text-anchor="middle" dominant-baseline="central" font-size="${mFont}" font-weight="700">${opts.noteAt ? escHtml(opts.noteAt(k, f)) : (map[f] || '&#x2715;')}</text>` +
       `</g>`;
     }
   });
@@ -6232,6 +6241,7 @@ function fgBoardSvg(sid, kind, opts){
     const bandTop = multi ? stringYs[i] - rowGap / 2 : wireTop - 8;
     const bandH   = multi ? rowGap : (wireBot - wireTop) + 16;
     for(let f = 0; f <= maxF; f++){
+      if(shaded(f)) continue;
       s += `<rect class="fg-hit" x="${colX(f)}" y="${bandTop}" width="${colW(f)}" height="${bandH}" rx="6" onclick="${clickFn}('${sid}','${k}',${f})" aria-label="${escAttr(t(FRET_STRING_KEY[k]))} — ${escAttr(t('fret.fretN',{n:f}))}"><title>${escHtml(t('fret.fretN',{n:f}))}</title></rect>`;
     }
   });
@@ -6400,6 +6410,7 @@ function renderShuffleDrill(drill, key, wid){
      hidden sequence and plays it. All three replaced a paper drill. */
   if(drill && drill.type === 'deck') return renderDeckDrill(drill, key, wid);
   if(drill && drill.type === 'ear')  return renderEarDrill(drill, key, wid);
+  if(drill && drill.type === 'notecall') return renderNoteCall(drill, key, wid);
   if(!drill || drill.type !== 'shuffle') return '';
   const prev = shuffleDrills[key];
   if(prev && prev.tick) clearInterval(prev.tick);
@@ -7148,6 +7159,647 @@ function erCheckOff(key){
     btn.disabled = true;
   }
 }
+
+/* ── Note Call (step.drill, type 'notecall') ─────────────────────────────
+   The class-activity cousin of Note Runner (coach.js). A note NAME comes up
+   on the beat — "G · low E string" — the student finds it and plays it.
+   (Jonathan, 2026-09-27: "tempo based … gets progressively more difficult
+   … start it in chunks".)
+
+   Module-data schema:
+     drill: { type:'notecall', strings:['lowE','A'], minFret:0, maxFret:5 }
+   One chunk of the neck per step (0–5, 5–8, 8–12, then 0–12). The board
+   always shows frets 0–12; outside the chunk is greyed and takes no taps.
+
+   Two modes, picked with the "Show answer" switch (ON by default):
+
+   SHOW ANSWER ON — the play-along (Jonathan, same day: "name appears,
+   student plays, fret lights up … nothing is scored"). Each note gets four
+   beats: the name lands on beat 1, the right fret lights up on beat 3 and
+   stays lit to the end of beat 4, then the next name. It runs until Stop.
+   Every NC_ANS_EVERY notes it steps up NC_ANS_BPM (40 BPM = the answer
+   after 3 s … 120 BPM = after 1 s); "Slower" steps back one right away and
+   restarts the count. No score, no levels, no unlocks. The speed a student
+   reached is remembered per chunk. Notes: natural, or "With ♯ notes".
+
+   SHOW ANSWER OFF — the scored levels (NC_LEVELS): naturals 60 → 80 BPM →
+   half the beats, then the ♯ notes join at 80 BPM, then half the beats
+   again. 10 notes a round, 8 unlocks the next level; clearing Level 5 adds
+   10 BPM to Level 5 — no ceiling. A miss shows where the note lives, comes
+   back 3 notes later, and is listed at the end.
+
+   Answering, either mode:
+   - LISTENING COACH (OFF by default; the choice is remembered per browser):
+     the mic hears the note. Exact pitch — string + fret → one midi, any
+     fret on that string with that name counts (E on low E in 0–12 is fret
+     0 OR 12). Same three-reading YIN consensus Note Hunt uses. After the
+     count-in the click goes SILENT and the beat dots carry the tempo —
+     speaker clicks would bleed into the mic, the call Note Runner made.
+   - TAPPING the fret on the board. In the scored levels the first tap is
+     the answer; in the play-along a tap just flashes green or red.
+   Progress (highest unlocked level, the Level 5 tempo, the play-along
+   speed) persists per chunk in games.nc['lowE+A:0-5'] for signed-in
+   students, sessionStorage for everyone else. Teacher preview never saves
+   (same rule as sdSaveBest). */
+const NC_ROUND = 10;
+const NC_PASS = 8;
+const NC_COUNT_IN = 4;
+const NC_FASTER = 10, NC_MAX_BPM = 160;
+const NC_LEVELS = [
+  { pile: 'naturals', bpm: 60, beats: 4 },
+  { pile: 'naturals', bpm: 80, beats: 4 },
+  { pile: 'naturals', bpm: 80, beats: 2 },
+  { pile: 'all',      bpm: 80, beats: 4 },
+  { pile: 'all',      bpm: 80, beats: 2 }
+];
+/* Play-along ladder. Each note is 4 beats and the answer lights on beat 3,
+   so the wait before the answer is 2 beats: 3 s at 40 BPM, 1 s at 120. */
+const NC_ANS_BPM = [40, 50, 60, 70, 80, 90, 100, 120];
+const NC_ANS_BEATS = 4, NC_ANS_REVEAL = 2, NC_ANS_EVERY = 8;
+const noteCalls = {};
+let ncLive = null;   // key of the drill whose round is running — one at a time
+
+function ncBox(key){ return document.getElementById('ncr-' + key); }
+function ncProgKey(c){ return c.strings.join('+') + ':' + c.minFret + '-' + c.maxFret; }
+function ncLoadProg(c){
+  let s = null;
+  try { s = JSON.parse(sessionStorage.getItem('nc:' + ncProgKey(c)) || 'null'); } catch(e){}
+  const g = ((typeof games !== 'undefined' && games && games.nc) || {})[ncProgKey(c)] || null;
+  const pick = (f, d) => Math.max((s && s[f] != null ? s[f] : d), (g && g[f] != null ? g[f] : d));
+  return {
+    lv:  Math.min(pick('lv', 1), NC_LEVELS.length),
+    bpm: Math.min(pick('bpm', NC_LEVELS[4].bpm), NC_MAX_BPM),
+    ans: Math.min(pick('ans', 0), NC_ANS_BPM.length - 1)
+  };
+}
+function ncSaveProg(c, prog){
+  try { sessionStorage.setItem('nc:' + ncProgKey(c), JSON.stringify(prog)); } catch(e){}
+  if(!currentUser || (typeof isDevBypassUser === 'function' && isDevBypassUser())) return;
+  if(IS_TEACHER_MODE) return;   // previewing isn't practising
+  if(!games.nc) games.nc = {};
+  games.nc[ncProgKey(c)] = { lv: prog.lv, bpm: prog.bpm, ans: prog.ans, at: dayStr(new Date()) };
+  saveGames();
+}
+function ncPref(name, dflt){
+  try { const v = localStorage.getItem(name); return v == null ? dflt : v === 'on'; } catch(e){ return dflt; }
+}
+function ncSetPref(name, on){ try { localStorage.setItem(name, on ? 'on' : 'off'); } catch(e){} }
+const NC_PREFS = { coach: ['ncCoach', false], answer: ['ncAnswer', true], sharps: ['ncSharps', false] };
+
+/* Every (string, note name) the chunk holds, with each fret it sits on. */
+function ncPool(c, pile){
+  const out = [];
+  c.strings.forEach(k => {
+    const by = {};
+    for(let f = c.minFret; f <= c.maxFret; f++){
+      const n = sdNoteAt(k, f);
+      if(pile === 'naturals' && n.indexOf('♯') >= 0) continue;
+      (by[n] = by[n] || []).push(f);
+    }
+    Object.keys(by).forEach(n => out.push({ str: k, note: n, frets: by[n], midis: by[n].map(f => SD_OPEN_MIDI[k] + f) }));
+  });
+  return out;
+}
+function ncStrName(k){ return t(FRET_STRING_KEY[k] || 'fret.stringLowE'); }
+function ncFretList(p){ return p.frets.join(' / '); }
+function ncLevel(st, i){
+  const L = Object.assign({}, NC_LEVELS[i]);
+  if(i === NC_LEVELS.length - 1) L.bpm = st.prog.bpm;
+  return L;
+}
+function ncAnsWait(bpm){ return (NC_ANS_REVEAL * 60 / bpm).toFixed(1); }
+
+function renderNoteCall(drill, key, wid){
+  if(noteCalls[key]) ncStop(key);
+  const strings = (drill.strings && drill.strings.length ? drill.strings : ['lowE', 'A'])
+    .filter(k => SD_OPEN_MIDI[k] != null);
+  const cfg = {
+    strings,
+    minFret: drill.minFret != null ? drill.minFret : 0,
+    maxFret: drill.maxFret != null ? drill.maxFret : 5,
+    wid
+  };
+  const prog = ncLoadProg(cfg);
+  const st = { key, cfg, prog, phase: 'setup', level: prog.lv - 1, msg: '' };
+  Object.keys(NC_PREFS).forEach(k => { st[k] = ncPref(NC_PREFS[k][0], NC_PREFS[k][1]); });
+  noteCalls[key] = st;
+  return `<div class="sdr ncr" id="ncr-${escAttr(key)}">${ncSetupHtml(key)}</div>`;
+}
+
+function ncHeadHtml(st, right){
+  const c = st.cfg;
+  const strs = c.strings.map(ncStrName).join(' + ');
+  return `<div class="sdr-head"><span>${escHtml(t('nc.head', { strings: strs, min: c.minFret, max: c.maxFret }))}</span>` +
+    `<span class="sdr-meta">${escHtml(right)}</span></div>`;
+}
+function ncLevelDesc(L){
+  return t(L.pile === 'naturals' ? 'nc.descNaturals' : 'nc.descAll', { bpm: L.bpm, beats: L.beats });
+}
+function ncAnsMeta(bpm){ return t('nc.metaAnswer', { bpm, s: ncAnsWait(bpm) }); }
+function ncSetupMeta(st){
+  return st.answer ? ncAnsMeta(NC_ANS_BPM[st.prog.ans])
+                   : t('nc.metaLevel', { n: st.level + 1, bpm: ncLevel(st, st.level).bpm });
+}
+function ncToggleHtml(key, which, label, on){
+  return `<div class="nc-toggle"><span class="nc-toggle-label">${escHtml(label)}</span>` +
+    `<button type="button" class="sdr-pill${on ? ' active' : ''}" aria-pressed="${on}" onclick="ncSet('${key}','${which}',true)">${escHtml(t('nc.on'))}</button>` +
+    `<button type="button" class="sdr-pill${!on ? ' active' : ''}" aria-pressed="${!on}" onclick="ncSet('${key}','${which}',false)">${escHtml(t('nc.off'))}</button></div>`;
+}
+
+function ncSetupHtml(key){
+  const st = noteCalls[key];
+  if(!st) return '';
+  const toggles = `<div class="nc-toggles">` +
+      ncToggleHtml(key, 'answer', t('nc.answer'), st.answer) +
+      ncToggleHtml(key, 'coach', t('nc.coach'), st.coach) +
+    `</div>`;
+  const msg = st.msg ? `<div class="coach-note nc-msg">${escHtml(st.msg)}</div>` : '';
+  if(st.answer){
+    const pill = (on, label) =>
+      `<button type="button" class="sdr-pill${st.sharps === on ? ' active' : ''}" aria-pressed="${st.sharps === on}" onclick="ncSet('${key}','sharps',${on})">${escHtml(label)}</button>`;
+    return ncHeadHtml(st, ncSetupMeta(st)) +
+      `<div class="sdr-body">` +
+        `<div class="sdr-intro">${escHtml(t('nc.introAnswer'))}</div>` +
+        toggles +
+        `<div class="sdr-pills nc-pile">${pill(false, t('nc.pileNaturals'))}${pill(true, t('nc.pileAll'))}</div>` +
+        `<div class="nc-how">${escHtml(t('nc.descAnswer', { n: NC_ANS_EVERY }))}` +
+          (st.coach ? ' ' + escHtml(t('nc.howCoachAnswer')) : '') + `</div>` +
+        msg +
+        `<button type="button" class="sdr-start" onclick="ncStart('${key}')">&#x25B6; ${escHtml(t('nc.startPlain'))}</button>` +
+      `</div>`;
+  }
+  const L = ncLevel(st, st.level);
+  const pills = NC_LEVELS.map((_, i) => {
+    const locked = i >= st.prog.lv;
+    return `<button type="button" class="sdr-pill nc-lv${i === st.level ? ' active' : ''}${locked ? ' locked' : ''}"` +
+      `${locked ? ' disabled' : ''} onclick="ncPickLevel('${key}',${i})"` +
+      ` aria-label="${escAttr(t('nc.levelN', { n: i + 1 }) + (locked ? ' — ' + t('nc.locked') : ''))}">` +
+      `${locked ? '<span aria-hidden="true">&#x1F512;</span> ' : ''}${escHtml(t('nc.levelN', { n: i + 1 }))}</button>`;
+  }).join('');
+  return ncHeadHtml(st, ncSetupMeta(st)) +
+    `<div class="sdr-body">` +
+      `<div class="sdr-intro">${escHtml(t('nc.intro'))}</div>` +
+      toggles +
+      `<div class="sdr-pills nc-levels">${pills}</div>` +
+      `<div class="nc-desc">${escHtml(ncLevelDesc(L))}</div>` +
+      `<div class="nc-how">${escHtml(t(st.coach ? 'nc.howCoach' : 'nc.howTap'))}</div>` +
+      msg +
+      `<button type="button" class="sdr-start" onclick="ncStart('${key}')">&#x25B6; ${escHtml(t('nc.start', { n: st.level + 1 }))}</button>` +
+      `<div class="sdr-best">${escHtml(t('nc.passLine', { pass: NC_PASS, total: NC_ROUND }))}</div>` +
+    `</div>`;
+}
+
+function ncRepaint(key, html){ const b = ncBox(key); if(b) b.innerHTML = html; }
+function ncPickLevel(key, i){
+  const st = noteCalls[key];
+  if(!st || st.phase === 'play' || i >= st.prog.lv) return;
+  st.level = i; st.phase = 'setup'; st.msg = '';
+  ncRepaint(key, ncSetupHtml(key));
+}
+function ncSet(key, which, on){
+  const st = noteCalls[key];
+  if(!st || st.phase === 'play' || !NC_PREFS[which]) return;
+  st[which] = on;
+  ncSetPref(NC_PREFS[which][0], on);
+  st.msg = '';
+  ncRepaint(key, ncSetupHtml(key));
+}
+
+async function ncStart(key){
+  const st = noteCalls[key];
+  if(!st || st.phase === 'play' || st.starting) return;
+  ncStopAll();                      // one Note Call at a time, anywhere on the page
+  stopAllDemoAudio();               // tab player, snippets, practice card, metronome
+  try { getAudioCtx().resume(); } catch(e){}
+  st.msg = '';
+  st.micOn = false;
+  if(st.coach){
+    st.starting = true;
+    ncRepaint(key, ncHeadHtml(st, '') + `<div class="sdr-body"><div class="coach-tip">${escHtml(t('nc.startingMic'))}</div></div>`);
+    let ok = false;
+    try {
+      await ensureCoachJs();
+      coachClose();                 // one mic owner at a time
+      if(typeof gamesStopMic === 'function') gamesStopMic();
+      coachEvictTuner();
+      ok = !!(coachStream || await coachAcquireMic());
+      if(ok) await coachEnsureRunning();
+    } catch(e){ ok = false; }
+    st.starting = false;
+    if(noteCalls[key] !== st || !ncBox(key)){ if(ok) coachReleaseMicIfIdle(); return; }
+    if(!ok){
+      st.coach = false;             // fall back to tapping for this card
+      st.msg = t('nc.micDenied');
+      ncRepaint(key, ncSetupHtml(key));
+      return;
+    }
+    window.coachMicLive = true;
+    st.micOn = true;
+  }
+  const ans = st.answer;
+  const L = ans ? { pile: st.sharps ? 'all' : 'naturals', bpm: NC_ANS_BPM[st.prog.ans], beats: NC_ANS_BEATS }
+                : ncLevel(st, st.level);
+  Object.assign(st, {
+    phase: 'play', mode: ans ? 'answer' : 'levels', L, lvIdx: ans ? null : st.level,
+    beatMs: 60000 / L.bpm, seq: [], bag: [], requeue: [], idx: -1,
+    readings: [], lastPitchT: 0, attackT: 0, heard: '', beatShown: -1,
+    raf: null, revealed: false, sinceUp: 0, pendingStep: null
+  });
+  ncDeal(st);                       // the first note shows during the count-in
+  ncRepaint(key, ncPlayHtml(key));
+  ncPaint(st);
+  const t0 = performance.now() + 150;
+  st.segStart = t0;                 // the count-in is segment -1
+  st.segBeats = NC_COUNT_IN;
+  st.ck = { seg: -1, beat: 0, at: t0 };
+  ncLive = key;
+  st.raf = requestAnimationFrame(ncFrame);
+}
+
+/* Deal the next note: a missed one that's due comes back first; otherwise
+   off a shuffled bag. Never the same name-on-string twice in a row, and never
+   a pitch still ringing from either of the last two notes (it would count
+   before the student moved). The play-along never stops dealing. */
+function ncDeal(st){
+  if(st.mode !== 'answer' && st.seq.length >= NC_ROUND) return;
+  const j = st.seq.length;
+  const last = st.seq.slice(-2);
+  const clash = p => {
+    const q1 = last[last.length - 1];
+    if(q1 && q1.str === p.str && q1.note === p.note) return true;
+    return last.some(q => q.midis.some(m => p.midis.indexOf(m) >= 0));
+  };
+  let p = null;
+  const due = st.requeue.findIndex(q => q.due <= j && !clash(q.p));
+  if(due >= 0) p = st.requeue.splice(due, 1)[0].p;
+  else {
+    for(let tries = 0; tries < 2 && !p; tries++){
+      if(!st.bag.length || tries) st.bag = sdShuffle(ncPool(st.cfg, st.L.pile));
+      const i = st.bag.findIndex(q => !clash(q));
+      if(i >= 0) p = st.bag.splice(i, 1)[0];
+    }
+    if(!p) p = st.bag.pop() || ncPool(st.cfg, st.L.pile)[0];
+  }
+  st.seq.push(Object.assign({}, p, { res: null }));
+}
+
+function ncPromptHtml(p){
+  return `<span class="nc-note">${escHtml(p.note)}</span>` +
+    `<span class="nc-str">${escHtml(t('nc.onString', { string: ncStrName(p.str) }))}</span>`;
+}
+function ncPlayHtml(key){
+  const st = noteCalls[key], c = st.cfg;
+  const board = fgBoardSvg(key, null, {
+    strings: c.strings.slice().sort((a, b) => SD_OPEN_MIDI[b] - SD_OPEN_MIDI[a]),   // high string on top
+    clickFn: 'ncTap',
+    noteAt: (k, f) => sdNoteAt(k, f),
+    shade: [c.minFret, c.maxFret]
+  });
+  const ans = st.mode === 'answer';
+  const foot = ans
+    ? `<span class="nc-speed" id="nc-speed-${key}">${escHtml(ncAnsMeta(st.L.bpm))}</span>` +
+      `<button type="button" class="sdr-btn2" onclick="ncSlower('${key}')">${escHtml(t('nc.slower'))}</button>`
+    : `<div class="fret-dots nc-dots" id="nc-dots-${key}"></div>`;
+  return ncHeadHtml(st, ans ? t('nc.metaPlayAlong') : t('nc.metaLevel', { n: st.lvIdx + 1, bpm: st.L.bpm })) +
+    `<div class="sdr-body nc-play">` +
+      `<div class="nc-stage">` +
+        `<div class="nc-card" id="nc-card-${key}"></div>` +
+        `<div class="nc-side">` +
+          `<div class="nc-pips" id="nc-pips-${key}"></div>` +
+          `<div class="nc-next" id="nc-next-${key}"></div>` +
+          (st.micOn ? `<div class="nc-heard" id="nc-heard-${key}"><span class="coach-live-dot"></span>${escHtml(t('nc.listening'))}</div>` : '') +
+        `</div>` +
+      `</div>` +
+      `<div class="sdr-fb nc-fb" id="nc-fb-${key}" aria-live="polite"></div>` +
+      `<div class="nc-board" id="nc-board-${key}">${board}</div>` +
+      `<div class="nc-foot">${foot}` +
+      `<button type="button" class="sdr-btn2" onclick="ncQuit('${key}')">${escHtml(t('nc.stop'))}</button></div>` +
+    `</div>`;
+}
+
+function ncPaint(st){
+  const key = st.key;
+  const card = document.getElementById('nc-card-' + key);
+  const next = document.getElementById('nc-next-' + key);
+  if(!card) return;
+  if(st.idx < 0){
+    card.innerHTML = `<span class="nc-kicker">${escHtml(t('nc.getReady'))}</span><span class="nc-note nc-count" id="nc-count-${key}"></span>`;
+    card.className = 'nc-card';
+    next.innerHTML = `<span class="nc-next-k">${escHtml(t('nc.first'))}</span> ${escHtml(st.seq[0].note)} · ${escHtml(ncStrName(st.seq[0].str))}`;
+  } else {
+    const p = st.seq[st.idx];
+    card.innerHTML = ncPromptHtml(p);
+    card.className = 'nc-card';
+    void card.offsetWidth; card.classList.add('nc-deal');
+    const n = st.seq[st.idx + 1];
+    next.innerHTML = n ? `<span class="nc-next-k">${escHtml(t('nc.next'))}</span> ${escHtml(n.note)} · ${escHtml(ncStrName(n.str))}` : '';
+  }
+  if(st.mode === 'answer'){
+    // The last note's answer goes dark and its line clears as the new name lands.
+    const board = document.getElementById('nc-board-' + key);
+    if(board) board.querySelectorAll('.fg-marker.nc-lit').forEach(m => m.classList.remove('nc-lit'));
+    const fb = document.getElementById('nc-fb-' + key);
+    if(fb){ fb.className = 'sdr-fb nc-fb'; fb.textContent = ''; }
+  }
+  ncPaintDots(st);
+}
+function ncPaintDots(st){
+  const el = document.getElementById('nc-dots-' + st.key);
+  if(!el) return;
+  el.innerHTML = Array.from({ length: NC_ROUND }, (_, i) => {
+    const p = st.seq[i];
+    let cls = 'fret-dot';
+    if(p && p.res === 'hit') cls += ' hit';
+    else if(p && p.res === 'miss') cls += ' miss';
+    else if(i === st.idx) cls += ' cur';
+    return `<span class="${cls}"></span>`;
+  }).join('');
+}
+function ncPaintPips(st, beatInSeg, total, counting){
+  const el = document.getElementById('nc-pips-' + st.key);
+  if(!el) return;
+  el.innerHTML = Array.from({ length: total }, (_, i) =>
+    `<span class="nc-pip${i === beatInSeg ? ' on' : ''}${i === 0 ? ' one' : ''}"></span>`).join('');
+  if(counting){
+    const c = document.getElementById('nc-count-' + st.key);
+    if(c) c.textContent = String(beatInSeg + 1);
+  }
+}
+
+/* Timeline: a run is a chain of segments — the count-in (segment -1), then
+   one per note — each `segBeats` long at the segment's own tempo. The
+   play-along can change tempo, and does so only at a segment boundary, so
+   a note never stretches under the student mid-way. */
+function ncSegLen(st){ return st.segBeats * st.beatMs; }
+function ncNoteBeats(st){ return st.mode === 'answer' ? NC_ANS_BEATS : st.L.beats; }
+function ncNextBeatMs(st){ return st.pendingStep != null ? 60000 / NC_ANS_BPM[st.pendingStep] : st.beatMs; }
+
+function ncFrame(){
+  const st = ncLive && noteCalls[ncLive];
+  if(!st || st.phase !== 'play') return;
+  const box = ncBox(st.key);
+  if(!box || !box.isConnected){ ncStop(st.key); return; }
+  if(st.micOn && typeof coachAnalyser !== 'undefined' && !coachAnalyser){
+    ncStop(st.key);
+    st.phase = 'setup'; st.msg = t('nc.micLost');
+    ncRepaint(st.key, ncSetupHtml(st.key));
+    return;
+  }
+  const now = performance.now();
+  ncClicks(st, now);
+  // Segment boundary: the next note lands.
+  while(now >= st.segStart + ncSegLen(st)){
+    st.segStart += ncSegLen(st);
+    if(st.idx >= 0 && st.mode !== 'answer' && st.seq[st.idx].res == null) ncResolve(st, st.idx, 'miss', null);
+    st.idx++;
+    if(st.mode !== 'answer' && st.idx >= NC_ROUND){ ncFinish(st.key); return; }
+    if(st.mode === 'answer') ncAnsBoundary(st);
+    st.segBeats = ncNoteBeats(st);
+    st.beatShown = -1; st.revealed = false;
+    while(st.seq.length < st.idx + 2 && (st.mode === 'answer' || st.seq.length < NC_ROUND)) ncDeal(st);
+    st.readings = []; st.attackT = 0; st.locked = false; st.heard = '';
+    ncPaint(st);
+  }
+  const beat = now < st.segStart ? -1 : Math.floor((now - st.segStart) / st.beatMs);
+  if(beat >= 0 && beat !== st.beatShown){
+    st.beatShown = beat;
+    ncPaintPips(st, beat, st.segBeats, st.idx < 0);
+    if(st.mode === 'answer' && st.idx >= 0 && beat >= NC_ANS_REVEAL && !st.revealed) ncReveal(st);
+  }
+  if(st.micOn && st.idx >= 0 && st.seq[st.idx].res == null) ncListen(st, now);
+  st.raf = requestAnimationFrame(ncFrame);
+}
+
+/* Play-along only, at each note boundary: apply a waiting tempo step (from
+   the count or from Slower), then count this note. The step-up is QUEUED one
+   note early so the click scheduler, which books the next note's clicks
+   ~120 ms ahead, already sees the new tempo when that note arrives. */
+function ncAnsBoundary(st){
+  if(st.pendingStep != null){
+    st.prog.ans = st.pendingStep;
+    st.pendingStep = null;
+    st.sinceUp = 0;
+    st.L.bpm = NC_ANS_BPM[st.prog.ans];
+    st.beatMs = 60000 / st.L.bpm;
+    ncSaveProg(st.cfg, st.prog);
+    const sp = document.getElementById('nc-speed-' + st.key);
+    if(sp) sp.textContent = ncAnsMeta(st.L.bpm);
+  }
+  st.sinceUp++;
+  if(st.sinceUp >= NC_ANS_EVERY && st.prog.ans < NC_ANS_BPM.length - 1) st.pendingStep = st.prog.ans + 1;
+}
+/* Slower: one step down, taking effect as the next name lands; the count to
+   the next speed-up starts over from there. */
+function ncSlower(key){
+  const st = noteCalls[key];
+  if(!st || st.phase !== 'play' || st.mode !== 'answer') return;
+  const from = st.pendingStep != null ? st.pendingStep : st.prog.ans;
+  st.pendingStep = Math.max(0, from - 1);
+  st.sinceUp = 0;               // ncAnsBoundary resets it again when the step lands
+  const sp = document.getElementById('nc-speed-' + key);
+  if(sp) sp.textContent = ncAnsMeta(NC_ANS_BPM[st.pendingStep]);
+}
+function ncReveal(st){
+  st.revealed = true;
+  const p = st.seq[st.idx];
+  p.frets.forEach(f => {
+    const m = document.getElementById(`fgm-${st.key}-${p.str}-${f}`);
+    if(m) m.classList.add('nc-lit');
+  });
+  const fb = document.getElementById('nc-fb-' + st.key);
+  if(fb && p.res !== 'hit'){
+    fb.className = 'sdr-fb nc-fb';
+    fb.textContent = t('nc.fbAnswer', { note: p.note, string: ncStrName(p.str), fret: ncFretList(p) });
+  }
+}
+
+/* The click, scheduled ~120 ms ahead. Coach on: count-in only (a speaker
+   click would reach the mic). Coach off: every beat, beat 1 of each note
+   accented so the student hears the new name land. `st.ck` walks the same
+   segments the frame loop does; a click at the start of the NEXT note uses
+   the boundary time, which a pending tempo change never moves. */
+function ncClicks(st, now){
+  const ctx = getAudioCtx();
+  let guard = 0;
+  while(st.ck.at - now <= 120 && guard++ < 8){
+    const ck = st.ck;
+    if(st.mode !== 'answer' && ck.seg >= NC_ROUND) return;
+    if(!(st.micOn && ck.seg >= 0) && ck.at >= now - 30){
+      pcClick(ctx.currentTime + Math.max(0, (ck.at - now) / 1000), ck.beat === 0);
+    }
+    const inCur = ck.seg === st.idx;
+    const bMs = inCur ? st.beatMs : ncNextBeatMs(st);
+    const segBeats = ck.seg < 0 ? NC_COUNT_IN : ncNoteBeats(st);
+    if(ck.beat + 1 < segBeats){ ck.beat++; ck.at += bMs; }
+    else { ck.seg++; ck.beat = 0; ck.at = inCur ? st.segStart + ncSegLen(st) : ck.at + bMs; }
+  }
+}
+
+/* Mic: same shape as Note Hunt's loop — readings start COACH_ATTACK_SKIP
+   after the signal crosses the gate, spaced >=40 ms, and three in a row
+   within 0.6 semitone make a note. The right pitch answers the card; a
+   steady wrong one just shows up as "Heard F" (the last note can still be
+   ringing, so it is never a miss by itself). */
+function ncListen(st, now){
+  const rms = coachReadFrame();
+  if(rms > COACH_PITCH_GATE){
+    if(!st.attackT) st.attackT = now;
+    if(now - st.attackT < COACH_ATTACK_SKIP || now - st.lastPitchT < 40) return;
+    st.lastPitchT = now;
+    const f = coachDetectPitch(coachFrameBuf, coachCtx.sampleRate);
+    if(!(f > 0)) return;
+    st.readings.push(69 + 12 * Math.log2(f / 440));
+    if(st.readings.length > 3) st.readings.shift();
+    if(st.readings.length < 3) return;
+    const r = st.readings;
+    if(Math.max.apply(null, r) - Math.min.apply(null, r) >= 0.6) return;
+    const m = Math.round(tunerMedian(r));
+    const p = st.seq[st.idx];
+    const at = p.midis.indexOf(m);
+    if(at >= 0){ ncResolve(st, st.idx, 'hit', { fret: p.frets[at] }); return; }
+    if(m >= 36 && m <= 76){
+      const name = sdNoteAt('lowE', m - SD_OPEN_MIDI.lowE);
+      if(name !== st.heard){
+        st.heard = name;
+        const el = document.getElementById('nc-heard-' + st.key);
+        if(el) el.innerHTML = `<span class="coach-live-dot"></span>${escHtml(t('nc.heard', { note: name }))}`;
+      }
+    }
+  } else if(rms < COACH_PITCH_GATE * 0.5){
+    st.readings = []; st.attackT = 0;
+  }
+}
+
+function ncTap(sid, k, f){
+  const st = noteCalls[sid];
+  if(!st || st.phase !== 'play' || st.idx < 0) return;
+  const p = st.seq[st.idx];
+  const right = k === p.str && p.frets.indexOf(f) >= 0;
+  if(st.mode === 'answer'){
+    // Play-along: a tap is a self-check, never a score.
+    ncMark(st.key, k, f, right ? 'fg-good' : 'fg-bad');
+    if(right && p.res == null) ncResolve(st, st.idx, 'hit', { fret: f });
+    return;
+  }
+  if(p.res != null || st.locked) return;
+  st.locked = true;               // first tap decides
+  if(right) ncResolve(st, st.idx, 'hit', { fret: f });
+  else ncResolve(st, st.idx, 'miss', { tap: { k, f } });
+}
+
+function ncMark(key, k, f, cls){
+  const m = document.getElementById(`fgm-${key}-${k}-${f}`);
+  if(m) flashClass(m, cls, 1100);
+}
+function ncResolve(st, i, res, info){
+  const p = st.seq[i];
+  if(!p || p.res != null) return;
+  p.res = res;
+  const key = st.key, fb = document.getElementById('nc-fb-' + key);
+  const vars = { note: p.note, string: ncStrName(p.str), fret: ncFretList(p) };
+  const card = document.getElementById('nc-card-' + key);
+  if(res === 'hit'){
+    ncMark(key, p.str, info.fret, 'fg-good');
+    if(fb){ fb.className = 'sdr-fb nc-fb hit'; fb.textContent = t('nc.fbHit', Object.assign(vars, { fret: info.fret })); }
+    if(card && i === st.idx) card.classList.add('hit');
+  } else {
+    if(info && info.tap){
+      ncMark(key, info.tap.k, info.tap.f, 'fg-bad');
+      if(fb){ fb.className = 'sdr-fb nc-fb miss'; fb.textContent = t('nc.fbWrong', Object.assign(vars, { pick: sdNoteAt(info.tap.k, info.tap.f) })); }
+    } else if(fb){ fb.className = 'sdr-fb nc-fb miss'; fb.textContent = t('nc.fbMiss', vars); }
+    p.frets.forEach(f => ncMark(key, p.str, f, 'fg-good'));
+    if(card && i === st.idx) card.classList.add('miss');
+    st.requeue.push({ p: { str: p.str, note: p.note, frets: p.frets, midis: p.midis }, due: i + 3 });
+  }
+  ncPaintDots(st);
+}
+
+function ncFinish(key){
+  const st = noteCalls[key];
+  if(!st) return;
+  if(st.idx >= 0 && st.seq[st.idx] && st.seq[st.idx].res == null) ncResolve(st, st.idx, 'miss', null);
+  ncStop(key);
+  const score = st.seq.filter(p => p.res === 'hit').length;
+  const passed = score >= NC_PASS;
+  const last = st.lvIdx === NC_LEVELS.length - 1;
+  let verdict, cls = 'mid', nextBtn = '';
+  if(passed && last){
+    const was = st.prog.bpm;
+    st.prog.bpm = Math.min(NC_MAX_BPM, was + NC_FASTER);
+    ncSaveProg(st.cfg, st.prog);
+    cls = 'good';
+    verdict = st.prog.bpm > was ? t('nc.verdictFaster', { bpm: st.prog.bpm }) : t('nc.verdictTop');
+    st.level = st.lvIdx;
+    nextBtn = `<button type="button" class="sdr-start" onclick="ncStart('${key}')">&#x25B6; ${escHtml(t('nc.playAt', { bpm: st.prog.bpm }))}</button>`;
+  } else if(passed){
+    if(st.prog.lv < st.lvIdx + 2){ st.prog.lv = st.lvIdx + 2; ncSaveProg(st.cfg, st.prog); }
+    cls = 'good';
+    verdict = t('nc.verdictUnlocked', { n: st.lvIdx + 2 });
+    st.level = st.lvIdx + 1;
+    nextBtn = `<button type="button" class="sdr-start" onclick="ncStart('${key}')">&#x25B6; ${escHtml(t('nc.start', { n: st.lvIdx + 2 }))}</button>`;
+  } else {
+    verdict = t('nc.verdictAgain', { pass: NC_PASS, total: NC_ROUND });
+    st.level = st.lvIdx;
+  }
+  st.phase = 'done';
+  // Notes to practise: every miss, once each, in the order they came up.
+  const seen = {}, misses = [];
+  st.seq.forEach(p => {
+    const id = p.str + ':' + p.note;
+    if(p.res === 'miss' && !seen[id]){ seen[id] = 1; misses.push(p); }
+  });
+  const rows = misses.length
+    ? misses.map(p => `<div class="sdr-drill-row"><b>${escHtml(p.note)} · ${escHtml(ncStrName(p.str))}</b><span>${escHtml(t('nc.rowFret', { fret: ncFretList(p) }))}</span></div>`).join('')
+    : `<div class="sdr-drill-row"><b>${escHtml(t('nc.clean'))}</b></div>`;
+  ncRepaint(key,
+    ncHeadHtml(st, t('nc.metaLevel', { n: st.lvIdx + 1, bpm: st.L.bpm })) +
+    `<div class="sdr-body">` +
+      `<div class="sdr-score">${escHtml(t('nc.score', { n: score, total: NC_ROUND }))}</div>` +
+      `<div class="sdr-score-sub">${escHtml(ncLevelDesc(st.L))}</div>` +
+      `<div class="sdr-verdict ${cls}">${escHtml(verdict)}</div>` +
+      `<div class="sdr-drill"><div class="sdr-drill-title">${escHtml(t('nc.practiceThese'))}</div>${rows}</div>` +
+      `<div class="sdr-actions">${nextBtn}` +
+        `<button type="button" class="sdr-btn2" onclick="ncAgain('${key}',${st.lvIdx})">${escHtml(t('nc.again'))}</button>` +
+        `<button type="button" class="sdr-btn2" onclick="ncToSetup('${key}')">${escHtml(t('nc.levels'))}</button>` +
+      `</div>` +
+    `</div>`);
+}
+function ncAgain(key, lv){ const st = noteCalls[key]; if(!st) return; st.level = lv; ncStart(key); }
+function ncToSetup(key){
+  const st = noteCalls[key];
+  if(!st) return;
+  st.phase = 'setup'; st.msg = '';
+  ncRepaint(key, ncSetupHtml(key));
+}
+function ncQuit(key){
+  const st = noteCalls[key];
+  if(!st) return;
+  ncStop(key);
+  st.phase = 'setup';
+  if(st.lvIdx != null) st.level = st.lvIdx;
+  ncRepaint(key, ncSetupHtml(key));
+}
+function ncStop(key){
+  const st = noteCalls[key];
+  if(!st) return;
+  if(st.raf){ cancelAnimationFrame(st.raf); st.raf = null; }
+  if(st.micOn){ st.micOn = false; if(typeof coachMicOff === 'function') coachMicOff(); }
+  if(ncLive === key) ncLive = null;
+}
+/* Stops any running round and puts its card back on the setup screen.
+   Called by ncStart, and by coach.js's gamesStopMic() — the umbrella every
+   "someone else needs the mic / the tab went to the background" path runs. */
+function ncStopAll(){
+  Object.keys(noteCalls).forEach(k => {
+    const st = noteCalls[k];
+    if(st.phase !== 'play') return;
+    ncStop(k);
+    st.phase = 'setup';
+    if(st.lvIdx != null) st.level = st.lvIdx;
+    ncRepaint(k, ncSetupHtml(k));
+  });
+}
+function ncMicActive(){ return !!(ncLive && noteCalls[ncLive] && noteCalls[ncLive].micOn); }
 
 /* ── "Keep it sharp" spaced-review card ──
    Up to 3 skills marked "I've got it!" (that have a practice panel), oldest

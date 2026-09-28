@@ -540,7 +540,8 @@ function coachReleaseMicIfIdle(){
   setTimeout(() => {
     const active = (coach && (coach.phase === 'countin' || coach.phase === 'listening')) ||
                    fretRunning || (cc && cc.micOn) || (sr && sr.micOn) || (rn && rn.micOn) ||
-                   (nr && nr.micOn) || psgRunning;
+                   (nr && nr.micOn) || psgRunning ||
+                   (typeof ncMicActive === 'function' && ncMicActive());   // Note Call (app.js)
     if (!active) coachMicOff();
   }, 0);
 }
@@ -1799,6 +1800,10 @@ function gamesClosePanel(){
    dead UI (it says "listening" but the mic is gone), so the panel falls
    back to the hub. */
 function gamesStopMic(){
+  /* Note Call (a class-activity drill, app.js) isn't a game, but it shares
+     the mic and the same "someone else needs it / tab went to the
+     background" exits, so it stops here too. */
+  if (typeof ncStopAll === 'function') ncStopAll();
   fretStop();
   ccStop();
   cbStop();
