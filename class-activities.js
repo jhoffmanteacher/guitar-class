@@ -2525,8 +2525,6 @@ window.CLASS_ACTIVITIES = [
     view:  'focus',   // one step at a time — see VIEW above
     title:    'Low E and A Notes in Time',
     title_es: 'Notas de las cuerdas Mi grave y La a tiempo',
-    intro:    'You already know the note names on the low E and A strings. Now you find them in time: a name comes up on the beat, and you play it. You start at frets 0 to 5 and move up the neck one chunk at a time.',
-    intro_es: 'Ya sabes los nombres de las notas de las cuerdas Mi grave y La. Ahora las encuentras a tiempo: un nombre aparece con el tiempo, y lo tocas. Empiezas en los trastes 0 a 5 y subes por el mástil un tramo a la vez.',
     steps: [
       {
         label:    'Practice — Frets 0 to 5',

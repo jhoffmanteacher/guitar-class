@@ -10319,7 +10319,7 @@ function caHeroCardHtml(a, isCurrent = true){
       ${caPrintBtnHtml(a)}
     </summary>
     <div class="ca-card-body">
-      ${card ? caCardBodyHtml(a) : `<p class="coach-tip">${escHtml(tf(a, 'intro'))}</p>`}
+      ${card ? caCardBodyHtml(a) : (tf(a, 'intro') ? `<p class="coach-tip">${escHtml(tf(a, 'intro'))}</p>` : '')}
       ${stepsHtml && focus ? caFocusDotsHtml(a, openStepIdx) : ''}
       ${stepsHtml ? `<ol class="ca-steps">${stepsHtml}</ol>` : ''}
       ${caMarkRowHtml(a, done, markLabel)}
@@ -11089,7 +11089,7 @@ function caActivityCardHtml(a){
       ${caPrintBtnHtml(a)}
     </summary>
     <div class="ca-card-body">
-      ${card ? caCardBodyHtml(a) : `<p class="coach-tip">${escHtml(tf(a,'intro'))}</p>`}
+      ${card ? caCardBodyHtml(a) : (tf(a, 'intro') ? `<p class="coach-tip">${escHtml(tf(a, 'intro'))}</p>` : '')}
       ${stepsHtml && focus ? caFocusDotsHtml(a, openStepIdx) : ''}
       ${stepsHtml ? `<ol class="ca-steps">${stepsHtml}</ol>` : ''}
       ${caMarkRowHtml(a, done, markLabel)}
