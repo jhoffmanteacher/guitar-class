@@ -5,6 +5,19 @@ Notable changes to the Guitar Class site. Newest first.
 For the full session-by-session history (and the reasoning behind each change),
 see `WORKFLOW.md` and the git commit log.
 
+## 2026-09-27 — New class activity: Low E and A Notes in Time
+
+### Added
+
+- **Note Call**, a new drill in the class activity "Low E and A Notes in
+  Time". A note name comes up on the beat, and you play it on the low E or
+  A string. Start with **Show answer** on: the right fret lights up two
+  beats after the name, and every 8 notes it gets a little faster. Turn it
+  off for five scored levels. Get 8 of 10 right to unlock the next one.
+  The notes you miss come back a few notes later.
+- Play the notes on your guitar with the Listening Coach on, or tap the
+  fret on the board.
+
 ## 2026-09-28 — Second look at the error sweep: a few of its fixes corrected, plus new finds
 
 ### Fixed
