@@ -3615,6 +3615,9 @@ a.jl-song-btn{display:inline-block;text-decoration:none}
   border-radius:50%;border:5px solid var(--blue-text);color:var(--blue-text);
   display:flex;align-items:center;justify-content:center;
   font-size:clamp(1.75rem,4vw,3.25rem);font-weight:700;font-variant-numeric:tabular-nums}
+/* "Time!" is wider than two digits — without this it spilled out of the
+   circle. Short answer times hit it every question, so it matters now. */
+.lq-st-timer.out{border-color:var(--red-text);color:var(--red-text);font-size:clamp(1rem,2.2vw,1.75rem)}
 .lq-st-idle-title{font-family:var(--font-display);font-size:1.75rem;font-weight:600}
 .lq-st-idle-sub{color:var(--text2);margin-top:6px}
 /* The Spanish half of every bilingual stage line (lqBilingual appends
@@ -3662,6 +3665,8 @@ a.jl-song-btn{display:inline-block;text-decoration:none}
 .lq-ctl-lbl select{font-family:inherit;font-size:0.875rem;padding:6px 8px;
   border-radius:8px;border:1px solid var(--border2);background:var(--bg);color:var(--text)}
 .lq-ctl-hint{flex-basis:100%;font-size:0.8125rem;color:var(--text3)}
+.lq-ctl-lbl .lq-limit{font-family:inherit;font-size:0.875rem;width:4.5em;padding:6px 8px;
+  border-radius:8px;border:1px solid var(--border2);background:var(--bg);color:var(--text);font-variant-numeric:tabular-nums}
 /* ── Live quiz invite dialog (live-quiz.js lqSyncInvite) ──
    Replaced a silent auto-open that skipped any backgrounded tab and never
    retried. Sits above the join banner (130) because it supersedes it. */

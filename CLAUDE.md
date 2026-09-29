@@ -924,6 +924,14 @@ a time, in `liveQuiz/current` (+ an `answers/{uid}` subcollection).
 - **`speedBonus` stays off** for any quiz where the teacher makes the sound
   after the question opens — scoring by reaction time there just punishes
   whoever waited to hear it properly.
+- **The teacher sets the time to answer** (2026-09-29): a "Time to answer
+  … sec" box in the control strip, before Start and again between
+  questions (half-second steps, blank/0 = no limit). Each question writes
+  the box's value into `limitSec`, so it can change mid-game. Remembered
+  per quiz in `localStorage` (`gc-lq-limits`) — a device convenience, not
+  game state. Under 10 s the countdown shows tenths (2.5, 2.4 …) and ticks
+  every 100 ms; `lqSecsLeft` returns exact seconds, not a ceiling, so a
+  2.5 s limit really closes at 2.5 s.
 - **`live-quiz.js` also ships on the six `tabs/*.html` Journey pages**, where
   it shows the "a game is running" banner and nothing else (`lqCanPlayHere()`
   gates the rest). Those pages have no `app.js`, so nothing in that file may

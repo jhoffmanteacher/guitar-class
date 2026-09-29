@@ -805,15 +805,23 @@ function lqScoreLineHtml(s){
 
 function lqTimerHtml(s){
   if(!Number(s.limitSec)) return '';
-  return `<div class="lq-timer" id="lq-timer" aria-live="off">${escHtml(String(s.limitSec))}</div>`;
+  return `<div class="lq-timer" id="lq-timer" aria-live="off">${escHtml(lqFmtLeft(Number(s.limitSec), Number(s.limitSec)))}</div>`;
 }
+/* Seconds left as shown on screen. Under 10 s (e.g. a 2.5 s Fretboard tap)
+   whole seconds would read "3, 2, 1" for a 2.5 s round, so short limits
+   count down in tenths; longer ones keep whole seconds. */
+function lqFmtLeft(left, limit){
+  if(Number(limit) < 10) return (Math.ceil(left * 10) / 10).toFixed(1);
+  return String(Math.ceil(left));
+}
+function lqTickMs(limit){ return Number(limit) < 10 ? 100 : 250; }
 
 /* One shared 250ms tick, running only while a countdown is actually on
    screen — nothing ticks during the (default) untimed quiz. */
 function lqSyncTick(){
   const s = lqSessionIsLive(lqSession) ? lqSession : null;
   const need = !!(s && s.state === 'question' && Number(s.limitSec) && document.getElementById('lq-timer'));
-  if(need && !lqTick) lqTick = setInterval(lqUpdateTimer, 250);
+  if(need && !lqTick) lqTick = setInterval(lqUpdateTimer, lqTickMs(s.limitSec));
   if(!need) lqStopTick();
   if(need) lqUpdateTimer();
 }
@@ -822,14 +830,14 @@ function lqSecsLeft(s){
   const limit = Number(s.limitSec) || 0;
   if(!limit) return null;
   const gone = (performance.now() - lqQOpenedAt) / 1000;
-  return Math.max(0, Math.ceil(limit - gone));
+  return Math.max(0, limit - gone);                      // exact, so a 2.5 s limit is 2.5 s
 }
 function lqUpdateTimer(){
   const el = document.getElementById('lq-timer');
   const s = lqSessionIsLive(lqSession) ? lqSession : null;
   if(!el || !s){ lqStopTick(); return; }
   const left = lqSecsLeft(s);
-  el.textContent = left === 0 ? t('lq.timeUp') : String(left);
+  el.textContent = left === 0 ? t('lq.timeUp') : lqFmtLeft(left, s.limitSec);
   el.classList.toggle('out', left === 0);
   if(left === 0){
     document.querySelectorAll('#live-quiz-body .lq-choice').forEach(b=>{ b.disabled = true; });
@@ -888,6 +896,32 @@ let lqTQOpenedAt = 0;       // performance.now() when THIS round opened, on the 
 let lqTTick = null;         // stage countdown interval, only while a timed question is on screen
 let lqTScoring = lqDefaultScoring(LQ_DEFAULT_QUIZ);   // 'flat' | 'speed' — picked before Start
 let lqTPickedQuizId = LQ_DEFAULT_QUIZ;                 // whichever quiz is chosen in the pre-start picker
+/* Time to answer, in seconds (0 = no limit) — the teacher types it in the
+   control strip before Start and again between questions. Remembered per
+   quiz on this device only (a teacher convenience, never game state), so a
+   short limit set for Fretboard tap doesn't leak into "Which string am I
+   playing?", where the teacher plays the note after the question opens.
+   Default when nothing is remembered: the old behaviour — 20 s for a
+   speed-scored quiz, the bank's own limitSec (0) for a flat one. */
+const LQ_LIMIT_MAX = 120;
+let lqTLimits = {};
+try { lqTLimits = JSON.parse(localStorage.getItem('gc-lq-limits') || '{}') || {}; } catch(e){ lqTLimits = {}; }
+function lqCleanLimit(v){
+  const n = Math.round(Number(v) * 10) / 10;            // tenths are plenty
+  return Number.isFinite(n) && n > 0 ? Math.min(n, LQ_LIMIT_MAX) : 0;
+}
+function lqTLimitFor(quizId){
+  if(Object.prototype.hasOwnProperty.call(lqTLimits, quizId)) return lqCleanLimit(lqTLimits[quizId]);
+  return lqDefaultScoring(quizId) === 'speed' ? 20 : (lqQuiz(quizId).limitSec || 0);
+}
+function lqTSetLimit(quizId, v){
+  lqTLimits[quizId] = lqCleanLimit(v);
+  try { localStorage.setItem('gc-lq-limits', JSON.stringify(lqTLimits)); } catch(e){}
+}
+function lqLimitInputHtml(quizId){
+  const v = lqTLimitFor(quizId);
+  return `<label class="lq-ctl-lbl">Time to answer <input type="number" id="lq-limit" class="lq-limit" min="0" max="${LQ_LIMIT_MAX}" step="0.5" inputmode="decimal" value="${v ? escAttr(String(v)) : ''}" placeholder="none" onchange="lqTSetLimit('${escAttr(quizId)}',this.value);this.value=lqTLimitFor('${escAttr(quizId)}')||''"> sec</label>`;
+}
 let lqTBusy = false;        // one write at a time; the buttons gate on it
 let lqTFretString = null;   // fret quiz only — the string picked in the strip; defaults to quiz.strings[0]
 
@@ -917,7 +951,7 @@ function lqStageSyncTick(){
   // is currently unreachable-undefined here — but this file also ships on the six
   // Journey pages, which have no teacher.js and thus no teacherView global at all.
   const need = !!(s && s.state === 'question' && Number(s.limitSec) && typeof teacherView !== 'undefined' && teacherView === 'livequiz' && document.getElementById('lq-st-timer'));
-  if(need && !lqTTick) lqTTick = setInterval(lqStageUpdateTimer, 250);
+  if(need && !lqTTick) lqTTick = setInterval(lqStageUpdateTimer, lqTickMs(s.limitSec));
   if(!need) lqStageStopTick();
   if(need) lqStageUpdateTimer();
 }
@@ -928,8 +962,8 @@ function lqStageUpdateTimer(){
   if(!el || !s){ lqStageStopTick(); return; }
   const limit = Number(s.limitSec) || 0;
   const gone = (performance.now() - lqTQOpenedAt) / 1000;
-  const left = Math.max(0, Math.ceil(limit - gone));
-  el.textContent = left === 0 ? t('lq.timeUp') : String(left);
+  const left = Math.max(0, limit - gone);
+  el.textContent = left === 0 ? t('lq.timeUp') : lqFmtLeft(left, limit);
   el.classList.toggle('out', left === 0);
   if(left === 0) lqStageStopTick();
 }
@@ -1021,7 +1055,7 @@ function lqStageQuestionHtml(s, quiz){
   const inCount = lqRoundAnswers(s, s.qIndex).length;
   const roster = lqRoster(s).length;
   const timer = Number(s.limitSec)
-    ? `<div class="lq-st-timer" id="lq-st-timer">${escHtml(String(s.limitSec))}</div>` : '';
+    ? `<div class="lq-st-timer" id="lq-st-timer">${escHtml(lqFmtLeft(Number(s.limitSec), Number(s.limitSec)))}</div>` : '';
   return lqBilingualParams('lq.qLabel', 'lq-st-qnum', {n}, {n})
     + lqBilingual(quiz.promptKey, 'lq-st-prompt')
     + timer
@@ -1036,7 +1070,7 @@ function lqStageFretQuestionHtml(s, quiz){
   const inCount = lqRoundAnswers(s, s.qIndex).length;
   const roster = lqRoster(s).length;
   const timer = Number(s.limitSec)
-    ? `<div class="lq-st-timer" id="lq-st-timer">${escHtml(String(s.limitSec))}</div>` : '';
+    ? `<div class="lq-st-timer" id="lq-st-timer">${escHtml(lqFmtLeft(Number(s.limitSec), Number(s.limitSec)))}</div>` : '';
   const prompt = s.target
     ? lqBilingualParams(quiz.promptKey, 'lq-st-prompt', lqTargetParams(s.target, 'en'), lqTargetParams(s.target, 'es'))
     : lqBilingual('lq.noTapYet', 'lq-st-prompt');
@@ -1121,6 +1155,9 @@ function lqFretPickerHtml(quiz, busy){
 function lqPaintControls(){
   const el = document.getElementById('lq-controls');
   if(!el) return;
+  // A snapshot landing mid-typing would wipe the half-typed number; the
+  // input's own onchange (blur / Enter) saves it and the next paint catches up.
+  if(document.activeElement && document.activeElement.id === 'lq-limit' && !lqTBusy) return;
   const s = lqTSession;
   const busy = lqTBusy ? ' disabled' : '';
   const full = `<button type="button" class="lq-ctl ghost" onclick="lqToggleFullscreen()">Full screen</button>`;
@@ -1130,13 +1167,14 @@ function lqPaintControls(){
     const scoring = `<label class="lq-ctl-lbl">Scoring
       <select id="lq-scoring" onchange="lqTScoring=this.value">
         <option value="flat"${lqTScoring === 'flat' ? ' selected' : ''}>Every correct answer = 1000</option>
-        <option value="speed"${lqTScoring === 'speed' ? ' selected' : ''}>Faster = more points (20s)</option>
-      </select></label>`;
+        <option value="speed"${lqTScoring === 'speed' ? ' selected' : ''}>Faster = more points</option>
+      </select></label>`
+      + lqLimitInputHtml(lqTPickedQuizId);
     const closeBtn = (s && s.state === 'ended')
       ? `<button type="button" class="lq-ctl ghost" onclick="lqTeacherClose()"${busy}>Clear the board</button>` : '';
     el.innerHTML = `<label class="lq-ctl-lbl">Quiz <select id="lq-quiz-pick" onchange="lqTPickedQuizId=this.value;lqTScoring=lqDefaultScoring(this.value);lqPaintControls()">${opts}</select></label>${scoring}`
       + `<button type="button" class="lq-ctl go" onclick="lqTeacherStart()"${busy}>Start game</button>${closeBtn}${full}`
-      + `<div class="lq-ctl-hint">${escHtml(lqQuiz(lqTPickedQuizId).teacherHint)}</div>`;
+      + `<div class="lq-ctl-hint">${escHtml(lqQuiz(lqTPickedQuizId).teacherHint)} Time to answer: blank or 0 = no limit.</div>`;
     return;
   }
   const quiz = lqQuiz(s.quizId);
@@ -1166,7 +1204,7 @@ function lqPaintControls(){
   }
   const opener = fret ? lqFretPickerHtml(quiz, busy)
     : `<button type="button" class="lq-ctl go" onclick="lqTeacherNext()"${busy}>Next question</button>`;
-  el.innerHTML = opener
+  el.innerHTML = opener + lqLimitInputHtml(s.quizId)
     + `<button type="button" class="lq-ctl ghost" onclick="lqTeacherEnd()"${busy}>End game</button>${full}`;
 }
 
@@ -1211,7 +1249,7 @@ async function lqTeacherStart(){
   await lqWrite({
     sessionId, quizId, state: 'lobby', qIndex: -1,
     correct: null, correctIds: null, tally: null, scores: {}, target: null,
-    speedBonus: speed, limitSec: speed ? 20 : (quiz.limitSec || 0),
+    speedBonus: speed, limitSec: lqTLimitFor(quizId),
     startedAt: firebase.firestore.FieldValue.serverTimestamp(),
     askedAt: null, endedAt: null
   }, true);
@@ -1224,8 +1262,11 @@ async function lqTeacherNext(target){
   const s = lqTSession;
   if(!s) return;
   const next = s.state === 'lobby' ? 0 : Number(s.qIndex) + 1;
+  // The time box between questions can change the limit mid-game; each new
+  // question carries whatever it says now.
   await lqWrite({
     state: 'question', qIndex: next, correct: null, correctIds: null, tally: null,
+    limitSec: lqTLimitFor(s.quizId),
     target: target || null,
     askedAt: firebase.firestore.FieldValue.serverTimestamp()
   });
