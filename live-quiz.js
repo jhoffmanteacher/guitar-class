@@ -289,7 +289,7 @@ function lqStopListening(){
   if(lqUnsub){ try{ lqUnsub(); }catch(e){} lqUnsub = null; }
   lqSession = null; lqMyAnswer = null; lqJoinedId = null; lqInviteAnsweredId = null;
   lqStopTick();
-  lqSyncNav(); lqSyncBanner(); lqSyncInvite();
+  lqSyncBanner(); lqSyncInvite();
 }
 
 function lqOnSession(data){
@@ -306,7 +306,6 @@ function lqOnSession(data){
   if(live && live.state === 'question' && (!prev || prev.sessionId !== live.sessionId || prev.qIndex !== live.qIndex)){
     lqMyAnswer = null; lqSendError = false; lqQOpenedAt = performance.now();
   }
-  lqSyncNav();
   lqSyncBanner();
   lqSyncInvite();
   lqRenderStudent();
@@ -462,13 +461,10 @@ function lqSyncInvite(){
    re-trigger the check. */
 document.addEventListener('visibilitychange', ()=>{ if(!document.hidden) lqSyncInvite(); });
 
-/* ── The rail item and the "join" banner ──
-   Both exist only while a game is on. The banner is how a student who
-   closed the screen (or arrived late) gets back in with one tap. */
-function lqSyncNav(){
-  const btn = document.getElementById('live-quiz-btn');
-  if(btn) btn.style.display = lqSessionIsLive(lqSession) ? '' : 'none';
-}
+/* ── The "join" banner ──
+   Exists only while a game is on. With the invite, it is the way in — there
+   is no rail button (removed 2026-09-29) — so a student who closed the
+   screen (or arrived late) gets back in with one tap. */
 function lqSyncBanner(){
   const live = lqSessionIsLive(lqSession) ? lqSession : null;
   const screen = document.getElementById('live-quiz-screen');
@@ -536,10 +532,9 @@ function closeLiveQuizScreen(){
 }
 function lqClosePanel(){
   const screen = document.getElementById('live-quiz-screen');
-  const wasOpen = screen && !screen.hasAttribute('hidden');
   if(screen) screen.setAttribute('hidden', '');
-  const btn = document.getElementById('live-quiz-btn');
-  if(btn && wasOpen && btn.style.display !== 'none') btn.focus();
+  // No rail button to hand focus back to (removed 2026-09-29) — the router
+  // lands the student on In-Class Activities.
   syncExploreNav();
   lqSyncBanner();
   lqSyncInvite();

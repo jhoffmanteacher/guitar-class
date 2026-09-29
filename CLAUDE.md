@@ -1082,6 +1082,17 @@ Review row apply does the group disappear; otherwise the lesson/checklist
 rows hide and the review row (if this module has one) stays, so it keeps its
 "you are here" highlight while you're actually looking at it.
 
+**Layout changed 2026-09-29 (Jonathan): In class and Modules each take a
+full row, Songs | Games share the next, My progress the last** —
+`#class-activities-btn,#practice-nav-btn,#my-progress-btn{grid-column:1/-1}`,
+and the **Live quiz rail button is gone** (students reach the game from the
+invite and the banner; `EXPLORE_PAGES`' live-quiz entry has `btn: null`).
+It is one row taller than the grid below describes, and measured the same
+way at 1366×657 on m5w2 Set 2: **student 17px slack (was 63), teacher /
+dev-bypass −30px (was +16)** — the Preview-mode note is what tips it, so
+the preview rail scrolls a little in the worst case. The grid itself and the
+sizing numbers below still hold.
+
 **The nav rows are a two-column grid, permanently, at every screen size —
 not a single full-width column, and not conditional on screen height.** The
 work order's first draft asked for single-column ("In-Class Activities"
@@ -1415,8 +1426,14 @@ screen stayed open.
 
 **What a gated student can still open is one list — `GATE_OPEN_HASHES`**
 (`#class-activities`, `#live-quiz`) — read by
-`routeExploreHash`'s guard and the flip redirect; it mirrors the
-`data-gate="keep"` buttons in the rail (1aa). Add to both or neither.
+`routeExploreHash`'s guard and the flip redirect. In class is the rail's one
+`data-gate="keep"` button (1aa); Live quiz has had no rail button since
+2026-09-29. **The guard's redirect only ever lands on `#class-activities`**
+(an open activity's `#class-activities/ca-N` included), never back on
+`#live-quiz`: closing the quiz routes to `''`, which the gate refuses, and
+returning to "the last gate-open hash" reopened the quiz — a gated student
+who had joined a game could not get back to their activities at all, game
+over or not (2026-09-29).
 
 **There was an Assessments page (2026-09-12–2026-09-20).** A rail button
 and standalone `#assessments` screen listed every module's in-person

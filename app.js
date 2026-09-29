@@ -3734,7 +3734,9 @@ const EXPLORE_PAGES = [
   /* The second overlay, and the one place the choice isn't about browsing
      comfort: a student answering a live question must not be able to
      half-see (or mis-tap into) the set panels underneath. */
-  { hash: '#live-quiz',       screen: 'live-quiz-screen',       btn: 'live-quiz-btn', overlay: true },
+  // No rail button (removed 2026-09-29): students reach it from the invite
+  // and the banner live-quiz.js puts up while a game is on.
+  { hash: '#live-quiz',       screen: 'live-quiz-screen',       btn: null, overlay: true },
 ];
 // Whether any explore page (in-column or overlay) is covering the practice
 // view right now — the one check activateSet() needs before popping the
@@ -3823,8 +3825,9 @@ function exitExploreHash(){
 }
 
 /* The pages a gated student may still open — In-Class Activities and Live
-   quiz. Mirrors data-gate="keep" on the rail buttons (checks.mjs 1aa) — add
-   to both or neither. */
+   quiz. In class is the rail's one data-gate="keep" button (checks.mjs 1aa);
+   Live quiz has no rail button (2026-09-29) and is reached from its invite
+   and banner. A new gate-open page needs its rail button tagged keep. */
 const GATE_OPEN_HASHES = ['#class-activities', '#live-quiz'];
 
 /* Hash router for all the pages. Closes the others FIRST (through their
@@ -3872,15 +3875,25 @@ function routeExploreHash(){
      straight past the gate. replaceState, not push — this is a correction,
      not a real navigation, and shouldn't cost a Back tap of its own. */
   if(document.body.classList.contains('ca-gated') && !GATE_OPEN_HASHES.includes(h)){
-    gateToast(t('gate.activityFirst'));
+    /* Leaving the live quiz (its ✕, or Back) lands on '' — the practice
+       view — which the gate refuses. That is the quiz closing, not the
+       student trying to get past the gate, so no toast. */
+    const leavingQuiz = h === '' && exploreHashBase(lastRoutedHash) === '#live-quiz';
+    if(!leavingQuiz) gateToast(t('gate.activityFirst'));
     /* Land back on whatever gate-open hash was already showing (an open
        activity's own #class-activities/ca-N, tail included) rather than
        always the bare page — tapping a greyed-out (but still clickable) rail
        button used to reset to bare #class-activities every time, which stops
        the band, collapses a revealDelay tab and resets a paged tab even when
        the student never left the activity they were reading. Found
-       2026-09-26. */
-    const back = GATE_OPEN_HASHES.includes(exploreHashBase(lastRoutedHash)) ? lastRoutedHash : '#class-activities';
+       2026-09-26.
+       Only ever back to In-Class Activities, NEVER to #live-quiz: closing
+       the quiz routes here, so returning to the last gate-open hash
+       reopened the quiz, and a gated student who had joined a game could
+       not get back to their activities at all — game over or not
+       (Jonathan, 2026-09-29, "the live quiz locks people out of
+       activities even when there is no quiz going on"). */
+    const back = exploreHashBase(lastRoutedHash) === '#class-activities' ? lastRoutedHash : '#class-activities';
     history.replaceState(null, '', location.pathname + location.search + back);
     routeExploreHash();
     return;

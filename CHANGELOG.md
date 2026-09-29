@@ -5,6 +5,22 @@ Notable changes to the Guitar Class site. Newest first.
 For the full session-by-session history (and the reasoning behind each change),
 see `WORKFLOW.md` and the git commit log.
 
+## 2026-09-29 — Live quiz no longer traps you; a simpler menu
+
+### Fixed
+
+- **Closing the live quiz takes you back to In-Class Activities.** Before,
+  if you still had an activity to finish, closing the quiz opened it again,
+  even after the game was over, and you couldn't get back to your
+  activities.
+
+### Changed
+
+- **The menu on the left:** In class and Modules each have a full row,
+  Songs and Games share the row below, and My progress is last. The Live
+  quiz button is gone. When your teacher starts a game, a pop-up and a
+  banner at the bottom of the screen let you join.
+
 ## 2026-09-29 — A Slowest speed, two activities a day, note cards with answers
 
 ### Added

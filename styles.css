@@ -831,7 +831,9 @@ body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,"Helvetica N
   color:var(--text);font-size:0.8125rem;line-height:1.2;font-family:inherit;cursor:pointer;transition:background .13s}
 .nav-btn .ico{width:17px;height:17px;flex:0 0 17px;display:flex;align-items:center;justify-content:center;color:var(--text2)}
 .nav-btn .ico svg{width:16px;height:16px}
-#my-progress-btn{grid-column:1/-1}
+/* In class and Modules each take a full row, Songs and Games share the
+   next, My progress gets the last (Jonathan, 2026-09-29). */
+#class-activities-btn,#practice-nav-btn,#my-progress-btn{grid-column:1/-1}
 .nav-btn:hover{background:rgba(0,0,0,0.05)}
 /* Background + text color only (left rail nav cleanup, 2026-09-20) — no
    font-weight or size change, so picking an item never reflows its row or
@@ -3594,7 +3596,6 @@ a.jl-song-btn{display:inline-block;text-decoration:none}
 .lq-banner-btn:hover{background:#e9e6f7}
 /* The rail item only appears while a game is on (live-quiz.js lqSyncNav),
    so it gets the one accent nothing else in the list uses. */
-.nav-btn.lq-nav .ico{color:var(--purple-accent)}
 
 /* ── Teacher stage (projector) ── */
 .lq-shell{display:flex;flex-direction:column;gap:14px}

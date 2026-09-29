@@ -1984,8 +1984,8 @@ function checkVisibleHelperUsage() {
 
 /* ════════════════════════════════════════════════════════════════════
    1aa. GATE-SAFE NAV — the activity gate (app.js applyActivityGate,
-   Today-first work order, Phase 1) hides every rail .nav-btn except Today
-   and Live quiz while it's on. The CSS that does it keys off
+   Today-first work order, Phase 1) hides every rail .nav-btn except In class
+   while it's on (Live quiz lost its rail button 2026-09-29). The CSS that does it keys off
    data-gate="hide" (styles.css body.ca-gated [data-gate="hide"]), not a
    hand-kept id list — so a new nav item with no data-gate attribute at all
    would silently leak past the gate, reachable while the rest of the site
