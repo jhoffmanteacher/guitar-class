@@ -1505,6 +1505,7 @@ window.CLASS_ACTIVITIES = [
      the player, out of order in time. ca-17 is untouched. */
   {
     id:    'ca-22',
+    view:  'focus',   // one step at a time — see VIEW above
     title:    'A String Notes — Cards and Play-Along',
     title_es: 'Notas de la cuerda La — Cartas y tocar a la par',
     intro:    'You already named every natural note on the A string (a natural note has no ♯). Today you practice them until you know each one without looking: a short review, a deck of note cards, then playing along with the tab.',
@@ -1513,8 +1514,8 @@ window.CLASS_ACTIVITIES = [
       {
         label:    'Learn — Review the names',
         label_es: 'Aprende — Repasa los nombres',
-        text: 'Press Play tab and watch the cursor. Say each name out loud as the cursor lands on it. B to C and E to F are one fret apart. Every other pair of neighbors is two frets apart.',
-        text_es: 'Presiona Tocar el tab y mira el cursor. Di cada nombre en voz alta cuando el cursor llegue a él. De B a C y de E a F hay un solo traste. Entre todas las demás notas vecinas hay dos trastes.',
+        text: 'Press Play tab and say each name out loud as it plays.',
+        text_es: 'Presiona Tocar el tab y di cada nombre en voz alta mientras suena.',
         tab: {
           caption: 'A to A · going up',
           caption_es: 'De A a A · subiendo',
@@ -1533,15 +1534,15 @@ window.CLASS_ACTIVITIES = [
       {
         label:    'Practice — Deal a card',
         label_es: 'Practica — Reparte una carta',
-        text: 'Press Shuffle and deal. Each card names a note. Find it on the A string and pluck it, then take your hand off the neck before the next card. A is at fret 0 and fret 12, and either one counts.\nYou\'ve got it when: 7 of 7 right on the first deal, without looking at a tab, no buzz. Missed one? Press Shuffle again and run the whole deck.',
-        text_es: 'Presiona Barajar y repartir. Cada carta nombra una nota. Búscala en la cuerda La y púlsala, y después levanta la mano del mástil antes de la siguiente carta. A está en el traste 0 y en el traste 12, y cualquiera de los dos cuenta.\nLo tienes cuando: 7 de 7 correctas al primer reparto, sin mirar la tablatura, sin zumbido. ¿Fallaste una? Presiona Barajar de nuevo y haz toda la baraja otra vez.',
+        text: 'A is at fret 0 and fret 12 — either one counts.\nYou\'ve got it when: 7 of 7 on the first deal, no buzz. Missed one? Shuffle again.',
+        text_es: 'A está en el traste 0 y en el traste 12 — cualquiera de los dos cuenta.\nLo tienes cuando: 7 de 7 en el primer reparto, sin zumbido. ¿Fallaste una? Baraja de nuevo.',
         drill: { type: 'deck', deck: 'naturals' },
       },
       {
         label:    'Practice — Play along',
         label_es: 'Practica — Toca a la par',
-        text: 'Set the tab to 60 BPM (beats per minute) and press Play tab. Play each note with the player, one note per beat, up to fret 12 and back down. Say each name out loud as you play it.\nYou\'ve got it when: up and back twice with the player, no missed notes, every name out loud. Falling behind? Set it to 50 BPM and try again.',
-        text_es: 'Pon el tab en 60 BPM (tiempos por minuto) y presiona Tocar el tab. Toca cada nota junto con el reproductor, una nota por tiempo, hasta el traste 12 y de regreso. Di cada nombre en voz alta mientras lo tocas.\nLo tienes cuando: subes y bajas dos veces con el reproductor, sin notas perdidas, cada nombre en voz alta. ¿Te quedas atrás? Ponlo en 50 BPM e inténtalo otra vez.',
+        text: 'Play along with the tab and say each name out loud.\nYou\'ve got it when: up and back twice with the player, no missed notes. Falling behind? Drop to 50 BPM.',
+        text_es: 'Toca a la par de la tablatura y di cada nombre en voz alta.\nLo tienes cuando: subes y bajas dos veces con el reproductor, sin notas perdidas. ¿Te quedas atrás? Baja a 50 BPM.',
         tab: {
           caption: 'A to A · up and back',
           caption_es: 'De A a A · subiendo y bajando',
@@ -1580,8 +1581,8 @@ window.CLASS_ACTIVITIES = [
       {
         label:    'Practice — Skip a note',
         label_es: 'Practica — Salta una nota',
-        text: 'This line skips a note each time: A to C, B to D, C to E, all the way up and back down. The jumps are the hard part, so say the next name before your hand moves. Start at 60 BPM, press Play tab, and play along.\nYou\'ve got it when: one pass at 60 BPM with no missed notes. Then raise it 10 BPM after every clean pass and keep going. Missed a jump? Play just those two notes five times, then start the line again.',
-        text_es: 'Esta línea salta una nota cada vez: de A a C, de B a D, de C a E, hasta arriba y de regreso. Los saltos son la parte difícil, así que di el siguiente nombre antes de mover la mano. Empieza en 60 BPM, presiona Tocar el tab y toca a la par.\nLo tienes cuando: una pasada en 60 BPM sin notas perdidas. Después sube 10 BPM tras cada pasada limpia y sigue. ¿Fallaste un salto? Toca solo esas dos notas cinco veces y empieza la línea otra vez.',
+        text: 'The jumps are the hard part — say the next name before your hand moves.\nYou\'ve got it when: one pass at 60 BPM, no missed notes. Then raise it 10 BPM each clean pass. Missed a jump? Drill just those two notes, then restart the line.',
+        text_es: 'Los saltos son la parte difícil — di el siguiente nombre antes de mover la mano.\nLo tienes cuando: una pasada en 60 BPM, sin notas perdidas. Después sube 10 BPM en cada pasada limpia. ¿Fallaste un salto? Practica solo esas dos notas y empieza la línea otra vez.',
         tab: {
           caption: 'Skip a note · A to A, up and back',
           caption_es: 'Salta una nota · de A a A, subiendo y bajando',
