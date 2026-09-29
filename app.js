@@ -10880,18 +10880,21 @@ function pcCountIn(st, si){
   const beat = st.win.bar / n;
   const t0 = ctx.currentTime + 0.1;
   for(let k = 0; k < n; k++){
-    pcClick(t0 + k * beat, k === 0);
+    pcClick(t0 + k * beat, k === 0, true);
     st.timers.push(setTimeout(() => { if(pcState === st) pcStatus(st.root, escHtml(t('ca.cardCountIn', {n: k + 1}))); }, (0.1 + k * beat) * 1000));
   }
   st.timers.push(setTimeout(() => { if(pcState === st) pcGo(st, si); }, (0.1 + n * beat) * 1000));
 }
-function pcClick(at, accent){
+function pcClick(at, accent, countIn){
   const ctx = getAudioCtx();
   const o = ctx.createOscillator(), g = ctx.createGain();
   o.frequency.value = accent ? 1500 : 1000;
   // Quiet on purpose (Jonathan, 2026-09-27: the first cut was "very loud").
+  // The count-in is a little louder (2026-09-29) — it plays over silence
+  // and has to be caught first time; the in-song click stays quiet.
+  const peak = (accent ? 0.2 : 0.13) * (countIn ? 1.6 : 1);
   g.gain.setValueAtTime(0.0001, at);
-  g.gain.exponentialRampToValueAtTime(accent ? 0.2 : 0.13, at + 0.005);
+  g.gain.exponentialRampToValueAtTime(peak, at + 0.005);
   g.gain.exponentialRampToValueAtTime(0.0001, at + 0.08);
   o.connect(g); g.connect(ctx.destination);
   o.start(at); o.stop(at + 0.1);

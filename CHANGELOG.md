@@ -12,7 +12,8 @@ see `WORKFLOW.md` and the git commit log.
 - **Play song now starts with four clicks**, on the practice cards
   ("the cure" and Seven Nation Army). Before, only tapping a section
   counted you in; Play song started the music right away. The four clicks
-  play even when Metronome is off.
+  play even when Metronome is off, and they are a little louder than the
+  Metronome clicks during the song.
 
 ## 2026-09-27 — New class activity: Low E and A Notes in Time
 
