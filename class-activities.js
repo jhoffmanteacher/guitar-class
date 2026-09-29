@@ -73,6 +73,9 @@
      card: {
        track: 'the-cure',                  // a SNIPPET_TRACKS key
        caption, caption_es,                // the tab's heading
+       slowest: true,                      // optional: a Slowest option beside
+                                           // Slower / Normal — the slow file at
+                                           // 0.8x, pitch held (ca-18 only)
        sections: [{                        // back to back, in song order
          label, label_es,                  // the tap-to-start button ("Chorus")
          caption, caption_es,              // the heading over its tab page
@@ -2137,6 +2140,7 @@ window.CLASS_ACTIVITIES = [
     intro_es: 'Ya moviste la estrofa de "the cure" a dos cuerdas — hoy agregas el coro y tocas la canción completa con la banda.',
     card: {
       track: 'the-cure',
+      slowest: true,    // three-way speed control: Slowest (48) / Slower (60) / Normal (72) — Jonathan, 2026-09-29
       caption:    'The song in order · 4 plucks per note',
       caption_es: 'La canción en orden · 4 pulsaciones por nota',
       sections: [

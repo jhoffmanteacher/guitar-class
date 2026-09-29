@@ -479,6 +479,8 @@
     'ca.cardPlay':             { en: 'Play song', es: 'Tocar la canción' },
     'ca.cardSlower':           { en: 'Slower', es: 'Más lento' },
     'ca.cardNormal':           { en: 'Normal', es: 'Normal' },
+    'ca.cardSlowest':          { en: 'Slowest', es: 'Muy lento' },
+    'ca.cardSpeed3Aria':       { en: 'Speed: slowest, slower or normal', es: 'Velocidad: muy lenta, más lenta o normal' },
     'ca.cardSpeedAria':        { en: 'Speed: slower or normal', es: 'Velocidad: más lenta o normal' },
     'ca.cardDirections':       { en: 'Press Play song and play along. Check a box when you can do it.',
                                  es: 'Pulsa «Tocar la canción» y toca con ella. Marca una casilla cuando lo logres.' },

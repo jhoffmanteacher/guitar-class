@@ -5,6 +5,15 @@ Notable changes to the Guitar Class site. Newest first.
 For the full session-by-session history (and the reasoning behind each change),
 see `WORKFLOW.md` and the git commit log.
 
+## 2026-09-29 — A Slowest speed on "the cure" practice card
+
+### Added
+
+- **"the cure" — Intro, Verse and Chorus now has three speeds: Slowest,
+  Slower and Normal.** Slowest plays the song at 48 beats per minute
+  (Slower is 60, Normal is 72). The notes stay in tune, so the tuner still
+  agrees with the band. The card still starts on Slower.
+
 ## 2026-09-29 — Play song counts you in
 
 ### Changed

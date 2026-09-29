@@ -10712,15 +10712,45 @@ function pcPlayBtnHtml(playing){
   return (playing ? '&#x25A0; ' : '&#x25B6; ')
     + `<span class="pc-play-label">${escHtml(t(playing ? 'ca.snipStop' : 'ca.cardPlay'))}</span>`;
 }
+/* The speed control. Every card gets the Slower / Normal switch (the slow
+   and fast files). A card with `slowest: true` gets a three-way control
+   instead — Slowest / Slower / Normal — where Slowest is the SLOW file
+   played at PC_SLOWEST_RATE, pitch held (preservesPitch), so the tuner
+   still agrees with it. ca-18 only, for now (Jonathan, 2026-09-29: a
+   student needed it that day); "the cure" goes 60 -> 48 felt BPM. There is
+   no third file: every timing below reads the file's own clock
+   (currentTime), so only the real-time pieces — the count-in, the click
+   lookahead and the output latency — divide by the rate. */
+const PC_SLOWEST_RATE = 0.8;
+function pcSpeedSwitchHtml(){
+  return `<button type="button" class="pc-speed" role="switch" aria-checked="false" aria-label="${escAttr(t('ca.cardSpeedAria'))}" onclick="pcSetSpeed(this)">`
+    +   `<span class="pc-speed-lab on">${escHtml(t('ca.cardSlower'))}</span>`
+    +   `<span class="pc-speed-track" aria-hidden="true"><span class="pc-speed-knob"></span></span>`
+    +   `<span class="pc-speed-lab">${escHtml(t('ca.cardNormal'))}</span></button>`;
+}
+function pcSpeed3Html(){
+  const opt = (speed, key, on) =>
+    `<button type="button" class="pc-speed-opt${on ? ' on' : ''}" data-speed="${speed}" aria-pressed="${on ? 'true' : 'false'}" onclick="pcSetSpeedTo(this)">${escHtml(t(key))}</button>`;
+  return `<span class="pc-speed3" role="group" aria-label="${escAttr(t('ca.cardSpeed3Aria'))}">`
+    + opt('slowest', 'ca.cardSlowest', false)
+    + opt('slower', 'ca.cardSlower', true)
+    + opt('normal', 'ca.cardNormal', false)
+    + `</span>`;
+}
+function pcRate(root){ return root && root.dataset.slowest === '1' ? PC_SLOWEST_RATE : 1; }
+function pcApplyRate(audio, rate){
+  audio.preservesPitch = true;
+  audio.mozPreservesPitch = true;
+  audio.webkitPreservesPitch = true;
+  audio.defaultPlaybackRate = rate;    // a load() resets playbackRate to this
+  audio.playbackRate = rate;
+}
 function pcPlayerHtml(a, L){
   const hasFull = snippetHasFull(L.tr);
   return `<div class="pc-player">`
     + `<button type="button" class="pc-play" onclick="pcToggle(this)">${pcPlayBtnHtml(false)}</button>`
     + `<button type="button" class="snip-toggle pc-metro" aria-pressed="false" onclick="pcSetMetro(this)">&#x1F3B5; ${escHtml(t('tools.metronome'))}</button>`
-    + `<button type="button" class="pc-speed" role="switch" aria-checked="false" aria-label="${escAttr(t('ca.cardSpeedAria'))}" onclick="pcSetSpeed(this)">`
-    +   `<span class="pc-speed-lab on">${escHtml(t('ca.cardSlower'))}</span>`
-    +   `<span class="pc-speed-track" aria-hidden="true"><span class="pc-speed-knob"></span></span>`
-    +   `<span class="pc-speed-lab">${escHtml(t('ca.cardNormal'))}</span></button>`
+    + (a.card.slowest ? pcSpeed3Html() : pcSpeedSwitchHtml())
     /* The Guitar toggle, same as a step snippet's (buildSnippet): only where
        a full mix exists, ON by default, label names who plays the part. */
     + (hasFull ? `<button type="button" class="snip-toggle snip-guitar pc-guitar on" aria-pressed="true" onclick="pcSetGuitar(this)" title="${escAttr(t('ca.snipGuitarTitle'))}">&#x1F3B8; <span class="snip-guitar-label">${escHtml(t('ca.snipGuitarOn'))}</span></button>` : '')
@@ -10845,6 +10875,7 @@ function pcStart(root, si){
   audio.preload = 'auto';
   audio.loop = false;                  // the window is looped by hand, in pcFrame
   audio.src = snippetSrc(L.tr, slow, false, guitar);
+  pcApplyRate(audio, pcRate(root));
   const st = { root, L, audio, win: pcWindow(L, slow), loopFrom: si, raf: 0, timers: [], lastBeat: -1, counting: true, si: -1, seq: -1, rep: -1 };
   pcState = st;
   const btn = root.querySelector('.pc-play');
@@ -10877,7 +10908,7 @@ function pcCountIn(st, si){
   const ctx = getAudioCtx();
   try { ctx.resume(); } catch(e) {}
   const n = st.L.tr.beatsPerBar;
-  const beat = st.win.bar / n;
+  const beat = st.win.bar / n / pcRate(st.root);   // real seconds, not file seconds
   const t0 = ctx.currentTime + 0.1;
   for(let k = 0; k < n; k++){
     pcClick(t0 + k * beat, k === 0, true);
@@ -10907,7 +10938,7 @@ function pcScheduleClick(st, now){
   const nb = Math.ceil(beatPos - 1e-6);
   if(nb < st.lastBeat) st.lastBeat = nb - 1;
   if(nb <= st.lastBeat || nb < 0 || nb >= st.L.totalBars * bpb) return;
-  const ahead = snipTimeAtBars(st.win, nb / bpb) - now;
+  const ahead = (snipTimeAtBars(st.win, nb / bpb) - now) / pcRate(st.root);   // real seconds
   if(ahead > 0.1) return;
   const ctx = getAudioCtx();
   const lat = snipLatency() - (ctx.outputLatency || ctx.baseLatency || 0);
@@ -10926,7 +10957,7 @@ function pcFrame(){
     st.lastBeat = -1;
   }
   if(st.root.dataset.metro === '1') pcScheduleClick(st, audio.currentTime);
-  const loc = pcLocate(L, snipBarsAt(st.win, audio.currentTime - snipLatency()));
+  const loc = pcLocate(L, snipBarsAt(st.win, audio.currentTime - snipLatency() * pcRate(st.root)));
   if(loc && (loc.seq !== st.seq || loc.rep !== st.rep || loc.si !== st.si)) pcPaint(st, loc);
   st.raf = requestAnimationFrame(pcFrame);
 }
@@ -10985,6 +11016,22 @@ function pcSetSpeed(sw){
   if(labs[1]) labs[1].classList.toggle('on', !slow);
   pcRetrack(root);
 }
+// The three-way control (a card with `slowest: true`): Slowest and Slower
+// both set data-slow, so every slow-file reader above is unchanged.
+function pcSetSpeedTo(btn){
+  const root = btn.closest('.pc');
+  if(!root) return;
+  const speed = btn.dataset.speed;
+  if(btn.classList.contains('on')) return;
+  root.dataset.slow = speed === 'normal' ? '' : '1';
+  root.dataset.slowest = speed === 'slowest' ? '1' : '';
+  btn.parentNode.querySelectorAll('.pc-speed-opt').forEach(b => {
+    const on = b === btn;
+    b.classList.toggle('on', on);
+    b.setAttribute('aria-pressed', on ? 'true' : 'false');
+  });
+  pcRetrack(root);
+}
 function pcSetGuitar(btn){
   const root = btn.closest('.pc');
   if(!root) return;
@@ -11009,6 +11056,7 @@ function pcRetrack(root){
   st.lastBeat = -1;
   const at = snipTimeAtBars(st.win, isFinite(barsIn) && barsIn > 0 ? barsIn : 0);
   const src = snippetSrc(st.L.tr, slow, false, guitar);
+  pcApplyRate(st.audio, pcRate(root));   // Slowest <-> Slower is the same file, just the rate
   if(st.audio.src.endsWith(src)){ try { st.audio.currentTime = at; } catch(e) {} return; }
   const wasPlaying = !st.audio.paused;
   st.audio.addEventListener('loadedmetadata', () => {

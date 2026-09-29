@@ -2459,7 +2459,11 @@ body.explore-open #week-panels{display:none}
 .pc-speed-track{position:relative;flex:0 0 44px;width:44px;height:24px;border-radius:999px;background:var(--purple-accent)}
 .pc-speed-knob{position:absolute;top:3px;left:3px;width:18px;height:18px;border-radius:50%;background:var(--bg);box-shadow:0 1px 3px rgba(0,0,0,0.3);transition:left .15s}
 .pc-speed[aria-checked="true"] .pc-speed-knob{left:23px}
-.pc-play:focus-visible,.pc-speed:focus-visible,.pc-sec:focus-visible,.pc-check-btn:focus-visible,.pc-help-btn:focus-visible{outline:2px solid var(--blue-text);outline-offset:2px}
+.pc-speed3{display:inline-flex;gap:2px;padding:3px;border-radius:999px;background:var(--bg2);border:1px solid var(--border2)}
+.pc-speed-opt{min-height:34px;padding:0 12px;font:inherit;font-size:0.875rem;color:var(--text2);background:none;border:0;border-radius:999px;cursor:pointer}
+.pc-speed-opt:hover{background:var(--bg3)}
+.pc-speed-opt.on{background:var(--text);color:var(--bg);font-weight:700}
+.pc-play:focus-visible,.pc-speed:focus-visible,.pc-speed-opt:focus-visible,.pc-sec:focus-visible,.pc-check-btn:focus-visible,.pc-help-btn:focus-visible{outline:2px solid var(--blue-text);outline-offset:2px}
 .pc-status{min-height:1.4em;margin:6px 0 2px;font-size:0.875rem;font-weight:600;color:var(--purple-text)}
 .pc-hint{margin:0 0 6px;font-size:0.8125rem;color:var(--text2)}
 .pc-secs{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:8px}
