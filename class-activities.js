@@ -75,7 +75,7 @@
        caption, caption_es,                // the tab's heading
        slowest: true,                      // optional: a Slowest option beside
                                            // Slower / Normal — the slow file at
-                                           // 0.8x, pitch held (ca-18 only)
+                                           // 0.8x, pitch held (ca-18, ca-10)
        sections: [{                        // back to back, in song order
          label, label_es,                  // the tap-to-start button ("Chorus")
          caption, caption_es,              // the heading over its tab page
@@ -1124,6 +1124,7 @@ window.CLASS_ACTIVITIES = [
     intro_es: 'El riff de Seven Nation Army son siete notas en la cuerda La — tócalo con la canción, primero en Más lento y después a velocidad normal.',
     card: {
       track: 'seven-nation-army',
+      slowest: true,    // three-way speed control: Slowest (80) / Slower (100) / Normal (123) — Jonathan, 2026-09-29
       caption:    'The riff · A string · 2 bars',
       caption_es: 'El riff · cuerda La · 2 compases',
       sections: [
@@ -1286,7 +1287,7 @@ window.CLASS_ACTIVITIES = [
         label_es: 'Encuentra la nota',
         text: 'Find each note on the string. The deck deals you a note name, and you find it.<ul><li>Land on the note and pluck it. Next card once it rings clean</li><li>Lift your hand off the neck between cards</li><li>E is in two places, fret 0 and fret 12 — either one counts</li></ul>You\'ve got it when: five cards in a row without looking at a tab, no buzz.',
         text_es: 'Encuentra cada nota en la cuerda. El mazo te reparte el nombre de una nota, y tú la buscas.<ul><li>Cae en la nota y púlsala. Otra carta cuando suene limpia</li><li>Levanta la mano del mástil entre carta y carta</li><li>E está en dos lugares, traste 0 y traste 12 — cualquiera de los dos cuenta</li></ul>Lo tienes cuando: cinco cartas seguidas, sin mirar la tablatura, sin zumbido.',
-        drill: { type: 'deck', deck: 'naturals' },
+        drill: { type: 'deck', deck: 'naturals-lowE' },
       },
       {
         label:    'Keep going',
@@ -1378,7 +1379,7 @@ window.CLASS_ACTIVITIES = [
         label_es: 'Encuentra la nota',
         text: 'The deck deals you a note name — find it on the A string and pluck it.<ul><li>Land on the note and pluck it. Next card once it rings clean</li><li>Lift your hand off the neck between cards</li><li>A is in two places, fret 0 and fret 12 — either one counts</li></ul>You\'ve got it when: five cards in a row without looking at a tab, no buzz.',
         text_es: 'El mazo te reparte el nombre de una nota — búscala en la cuerda La y púlsala.<ul><li>Cae en la nota y púlsala. Otra carta cuando suene limpia</li><li>Levanta la mano del mástil entre carta y carta</li><li>A está en dos lugares, traste 0 y traste 12 — cualquiera de los dos cuenta</li></ul>Lo tienes cuando: cinco cartas seguidas, sin mirar la tablatura, sin zumbido.',
-        drill: { type: 'deck', deck: 'naturals' },
+        drill: { type: 'deck', deck: 'naturals-A' },
       },
       {
         label:    'Cross the strings',
@@ -1539,7 +1540,7 @@ window.CLASS_ACTIVITIES = [
         label_es: 'Practica — Reparte una carta',
         text: 'A is at fret 0 and fret 12 — either one counts.\nYou\'ve got it when: 7 of 7 on the first deal, no buzz. Missed one? Shuffle again.',
         text_es: 'A está en el traste 0 y en el traste 12 — cualquiera de los dos cuenta.\nLo tienes cuando: 7 de 7 en el primer reparto, sin zumbido. ¿Fallaste una? Baraja de nuevo.',
-        drill: { type: 'deck', deck: 'naturals' },
+        drill: { type: 'deck', deck: 'naturals-A' },
       },
       {
         label:    'Practice — Play along',
@@ -1651,7 +1652,7 @@ window.CLASS_ACTIVITIES = [
         label_es: 'Encuentra la nota',
         text: 'Backwards this time: the deck gives you a note name, you find it on the string.<ul><li>Deal a card, land on that note, pluck it</li><li>Hand off the neck between cards</li><li>E works at fret 0 or fret 12</li></ul>You\'ve got it when: five in a row without looking at a tab, no buzz. Looked? Deal that one again.',
         text_es: 'Al revés esta vez: el mazo te da el nombre de una nota, y tú la encuentras en la cuerda.<ul><li>Reparte una carta, cae en esa nota y púlsala</li><li>Mano fuera del mástil entre carta y carta</li><li>E sirve en el traste 0 o en el 12</li></ul>Lo tienes cuando: cinco seguidas, sin mirar la tablatura, sin zumbido. ¿Miraste la tablatura? Reparte esa otra vez.',
-        drill: { type: 'deck', deck: 'naturals' },
+        drill: { type: 'deck', deck: 'naturals-lowE' },
       },
       {
         label:    'Tune it back',

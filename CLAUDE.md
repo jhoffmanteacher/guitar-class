@@ -234,6 +234,10 @@ alignment against its own text (1ax), and a class-activity step's "N
 beats each" claim against what its tab notes actually hold, merging a
 run of identical struck notes into one logical duration so an "in
 order" tab spelled out by repetition doesn't false-positive (1ay), and
+a class-activity deck drill with no answer side, plus every
+`naturals-<string>` deck's frets recomputed from the fretboard (1bi — ca-11,
+ca-12, ca-17 and ca-22 all dealt the one-sided `naturals` deck under a
+"7 of 7" standard nobody could score), and
 the Song Journey page named only in a class activity's last step, with the
 renderer's last-step gate pinned beside it (1ba), and class activities at four steps or fewer with
 both renderers paging long tabs two lines at a time (1bb), Spanish
@@ -1170,6 +1174,13 @@ end when nothing is blocking. The `#resume-card` element itself moved in
 `index.html` from a sibling of `#week-panels` into this page's own body; it
 no longer renders in the module/set view at all.
 
+**Today's activity holds up to two cards** (Jonathan, 2026-09-29):
+the hero plus another pending card released the SAME day
+(`CA_TODAY_MAX`, required ones first), both rendered with
+`caHeroCardHtml`. `caStartHereId` is still the first of them;
+`caTodayIds` is the whole group. Both are tagged Today's activity when they
+share the newest visible card's date; an undated hero pairs with nothing.
+
 **Reading order is newest-first, not the teaching order** (Jonathan,
 2026-09-17): the newest module's section renders at the top, and within a
 module the most recently assigned card (highest board position) renders
@@ -1383,6 +1394,16 @@ card calls `stopAllDemoAudio()`. **1bf** checks the data: track exists,
 sections back to back, each section's beats = bars × beatsPerBar, notes'
 midi/name from string + fret, window inside the file, exactly one Level up
 and it's last, help steps carry no snippet/drill/video.
+
+**Slowest (2026-09-29).** A practice card with `card.slowest: true` (ca-18,
+ca-10) gets a Slowest / Slower / Normal control in place of the switch, and
+every step snippet gets a Slowest button beside the turtle (the two release
+each other). Slowest is the SLOW file at `SLOWEST_RATE` (0.8) with
+`preservesPitch` — no third export, and the tuner still agrees. Anything
+reading the file's own clock is unchanged; only real-time amounts (count-in
+spacing, click lookahead, output latency) scale by the rate. A `load()`
+resets `playbackRate` to `defaultPlaybackRate`, which is why
+`slowestApplyRate()` sets both.
 
 **Gate flips on mid-session → In-Class Activities.** `applyActivityGate()`
 detects the off→on transition (a new activity going live under an open

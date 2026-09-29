@@ -2817,6 +2817,62 @@ function validateClassActivities() {
   if (problems === 0) ok(`${activities.length} class activit${activities.length === 1 ? 'y' : 'ies'} (${checks} exit check${checks === 1 ? '' : 's'}) — all valid; order lives on the console board`);
   checkExitChecks(activities);
   checkActivityTitleNumbers(activities);
+  checkActivityDeckAnswers(activities);
+}
+
+/* ════════════════════════════════════════════════════════════════════
+   1bi. A CLASS-ACTIVITY DECK SHOWS ITS ANSWER (2026-09-29). ca-11, ca-12,
+   ca-17 and ca-22 all dealt the one-sided `naturals` deck — a note name and
+   a "Done" button, nothing to check against — under a "7 of 7" or "five in
+   a row" standard the student had no way to score. Jonathan found it on
+   ca-22 step 2. Two rules:
+   - every `drill: { type:'deck' }` in class-activities.js names a deck with
+     a `back`, so the card can be flipped to the answer;
+   - every `naturals-<string>` deck's backs are recomputed from the
+     fretboard (natural notes, frets 0–12, the open note at "0 / 12"), the
+     way 1y recomputes exit-check keys — a wrong fret doesn't look broken,
+     it just tells a student who was right that they were wrong.
+   ════════════════════════════════════════════════════════════════════ */
+function checkActivityDeckAnswers(activities) {
+  head('1bi. Class-activity decks show the answer');
+  let DECKS;
+  try { DECKS = loadConstObject(readFileSync(join(ROOT, 'app.js'), 'utf8'), 'DECKS'); }
+  catch (e) { err(`could not load DECKS from app.js — 1bi cannot check this: ${e.message}`); problems++; return; }
+  let bad = 0, used = 0;
+  activities.forEach(a => (a && a.steps || []).forEach((st, si) => {
+    const d = st && st.drill;
+    if (!d || d.type !== 'deck') return;
+    used++;
+    const def = DECKS[d.deck];
+    if (!def) return;   // an unknown id is 1f's to report
+    if (!def.back) { err(`${a.id} step ${si + 1}: deck '${d.deck}' has no back — the student can't check the answer (use a two-sided deck, e.g. naturals-lowE / naturals-A)`); problems++; bad++; }
+  }));
+  const OPEN = { lowE: 'E', A: 'A', D: 'D', G: 'G', B: 'B', e: 'E' };
+  const NAMES = ['C', 'C#', 'D', 'D#', 'E', 'F', 'F#', 'G', 'G#', 'A', 'A#', 'B'];
+  let decks = 0;
+  for (const [id, def] of Object.entries(DECKS)) {
+    const m = /^naturals-(lowE|A|D|G|B|e)$/.exec(id);
+    if (!m) continue;
+    decks++;
+    const open = NAMES.indexOf(OPEN[m[1]]);
+    const frets = {};
+    for (let f = 0; f <= 12; f++) {
+      const n = NAMES[(open + f) % 12];
+      if (n.includes('#')) continue;
+      (frets[n] = frets[n] || []).push(f);
+    }
+    const want = Object.fromEntries(Object.entries(frets).map(([n, fs]) => [n, fs.join(' / ')]));
+    const seen = new Set();
+    for (const c of def.cards || []) {
+      seen.add(c.f);
+      if (want[c.f] === undefined) { err(`DECKS['${id}']: card '${c.f}' is not a natural note on that string`); problems++; bad++; }
+      else if (c.b !== want[c.f]) { err(`DECKS['${id}']: '${c.f}' says fret "${c.b}", the fretboard says "${want[c.f]}"`); problems++; bad++; }
+    }
+    for (const n of Object.keys(want)) if (!seen.has(n)) { err(`DECKS['${id}']: no card for ${n}`); problems++; bad++; }
+  }
+  if (used === 0) { err('1bi found no deck drill in class-activities.js — it cannot see what it is supposed to guard'); problems++; return; }
+  if (decks === 0) { err('1bi found no naturals-<string> deck in app.js — it cannot see what it is supposed to guard'); problems++; return; }
+  if (bad === 0) ok(`${used} class-activity deck drills all show their answer; ${decks} per-string note decks match the fretboard`);
 }
 
 /* ════════════════════════════════════════════════════════════════════

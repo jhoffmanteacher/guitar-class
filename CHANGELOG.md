@@ -5,7 +5,7 @@ Notable changes to the Guitar Class site. Newest first.
 For the full session-by-session history (and the reasoning behind each change),
 see `WORKFLOW.md` and the git commit log.
 
-## 2026-09-29 — A Slowest speed on "the cure" practice card
+## 2026-09-29 — A Slowest speed, two activities a day, note cards with answers
 
 ### Added
 
@@ -13,6 +13,18 @@ see `WORKFLOW.md` and the git commit log.
   Slower and Normal.** Slowest plays the song at 48 beats per minute
   (Slower is 60, Normal is 72). The notes stay in tune, so the tuner still
   agrees with the band. The card still starts on Slower.
+- **Seven Nation Army's practice card has Slowest too** (80 beats per
+  minute).
+- **Every "Play with the band" player in the class activities has a
+  Slowest button** beside Slow. Pressing one turns the other off.
+- **In-Class Activities can show two activities for one day.** When your
+  teacher posts two on the same day, both show under Today's activity.
+
+### Fixed
+
+- **The note cards in the low E and A string activities now show the
+  answer.** Tap Check the back and the card shows the fret for that note.
+  Before, the card only said Done, so there was no way to check yourself.
 
 ## 2026-09-29 — Play song counts you in
 

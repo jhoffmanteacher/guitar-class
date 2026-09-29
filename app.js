@@ -1916,6 +1916,21 @@ function snipTimeAtBars(win, b){
   const i = Math.floor(b);
   return e[i] + (b - i) * (e[i + 1] - e[i]);
 }
+/* The Slowest tier (Jonathan, 2026-09-29), on practice cards (a card with
+   `slowest: true`) and on every step snippet: the SLOW file played at
+   SLOWEST_RATE with the pitch held, so no extra export and the tuner still
+   agrees with the band. Anything that reads the file's own clock
+   (currentTime, the bar windows) is unchanged; only real-time amounts —
+   output latency, a scheduled click — are scaled by the rate. */
+const SLOWEST_RATE = 0.8;
+function slowestApplyRate(audio, rate){
+  audio.preservesPitch = true;
+  audio.mozPreservesPitch = true;
+  audio.webkitPreservesPitch = true;
+  audio.defaultPlaybackRate = rate;    // a load() resets playbackRate to this
+  audio.playbackRate = rate;
+}
+function snipRate(card){ return card && card.dataset.slowest === '1' ? SLOWEST_RATE : 1; }
 function snippetSrc(tr, slow, metro, guitar){
   // Guitar on is only ever honoured when the full mix is actually there; a
   // missing export falls back to rhythm-down rather than a 404 on press.
@@ -1983,6 +1998,7 @@ function buildSnippet(spec, opts){
     + `<div class="snip-body">`
     + `<div class="snip-controls">`
     + `<button type="button" class="snip-play" onclick="snipToggle(this)">${snipPlayBtnHtml(false)}</button>`
+    + `<button type="button" class="snip-toggle snip-slowest" aria-pressed="false" onclick="snipSetTier(this,'slowest')">${escHtml(t('ca.snipSlowest', { bpm: Math.round(slowFelt * SLOWEST_RATE) }))}</button>`
     + `<button type="button" class="snip-toggle snip-slow${startSlow ? ' on' : ''}" aria-pressed="${startSlow ? 'true' : 'false'}" onclick="snipSetTier(this,'slow')">&#x1F422; ${escHtml(t('journey.slow', { bpm: slowFelt }))}</button>`
     + `<button type="button" class="snip-toggle snip-metro"${metroDisabled} aria-pressed="false" onclick="snipSetTier(this,'metro')"${metroTitle}>&#x1F3B5; ${escHtml(t('tools.metronome'))}</button>`
     + guitarBtn
@@ -2119,6 +2135,7 @@ function snipToggle(btn){
   audio.preload = 'auto';
   audio.loop = false;                  // the window is looped by hand, below
   audio.src = snippetSrc(tr, slow, metro, guitar);
+  slowestApplyRate(audio, snipRate(card));
   snipState = { card, audio, spec, tr, win, raf: 0, cal: card.querySelector('.snip-cal') };
   btn.innerHTML = snipPlayBtnHtml(true);
   btn.classList.add('playing');
@@ -2217,7 +2234,7 @@ function snipTick(){
   }
   // `heard` is roughly where the music is by the time it reaches the room —
   // see SNIP_OUTPUT_LATENCY. The dots follow the ears, not the decoder.
-  const heard = now - snipLatency();
+  const heard = now - snipLatency() * snipRate(card);   // latency is real seconds; this is file time
   const bar = Math.max(0, Math.min(spec.bars - 1, Math.floor(snipBarsAt(win, heard))));
   card.querySelectorAll('.snip-bar').forEach((d, i) => d.classList.toggle('bar-now', i === bar));
   snipSyncTabPage(card, spec, win, heard);
@@ -2238,6 +2255,18 @@ function snipSetTier(btn, which){
   // 'guitar' under 'metro' when the third toggle arrived.
   card.dataset[which] = on ? '1' : '';
   if(which === 'guitar') snipGuitarLabel(btn, on);
+  /* Slowest is the slow FILE at SLOWEST_RATE, so it sets data-slow too; the
+     two buttons are one choice of speed, and pressing either visibly
+     releases the other. Slowest off goes back to normal speed. */
+  if(which === 'slowest' || which === 'slow'){
+    const otherBtn = card.querySelector(which === 'slowest' ? '.snip-slow' : '.snip-slowest');
+    if(on && otherBtn){
+      otherBtn.setAttribute('aria-pressed', 'false');
+      otherBtn.classList.remove('on');
+    }
+    if(which === 'slowest'){ card.dataset.slow = on ? '1' : ''; }
+    else if(on) card.dataset.slowest = '';
+  }
   /* Metronome and Guitar are mutually exclusive unless the track ships a
      full mix WITH a click on it — there is simply no file that has both.
      Release the other one visibly rather than leaving a button lit that
@@ -2265,6 +2294,7 @@ function snipSetTier(btn, which){
   snipState.win = win;
   const at = snipTimeAtBars(win, isFinite(barsIn) && barsIn > 0 ? barsIn : 0);
   const src = snippetSrc(tr, slow, metro, guitar);
+  slowestApplyRate(audio, snipRate(card));   // Slowest <-> Slow is the same file, just the rate
   if(audio.getAttribute('src') === src || audio.src.endsWith(src)){
     try { audio.currentTime = at; } catch(e) {}
     return;
@@ -6892,6 +6922,14 @@ const DECKS = {
     cards:[{f:'Am',b:'5'},{f:'Gm',b:'3'},{f:'Bm',b:'7'},{f:'Dm',b:'10'}] },
   'naturals': { kicker:'deck.kNote', hint:'deck.hFindNote',
     cards:[{f:'A'},{f:'B'},{f:'C'},{f:'D'},{f:'E'},{f:'F'},{f:'G'}] },
+  /* One string's natural notes, with the fret on the back so the student
+     can check where they landed (2026-09-29: the class activities dealt the
+     one-sided `naturals` deck, which never shows an answer — checks.mjs 1bi).
+     The open note is at fret 0 and fret 12, and either counts. */
+  'naturals-lowE': { kicker:'deck.kNote', back:'deck.kFretLowE', hint:'deck.hFindNote',
+    cards:[{f:'E',b:'0 / 12'},{f:'F',b:'1'},{f:'G',b:'3'},{f:'A',b:'5'},{f:'B',b:'7'},{f:'C',b:'8'},{f:'D',b:'10'}] },
+  'naturals-A': { kicker:'deck.kNote', back:'deck.kFretA', hint:'deck.hFindNote',
+    cards:[{f:'A',b:'0 / 12'},{f:'B',b:'2'},{f:'C',b:'3'},{f:'D',b:'5'},{f:'E',b:'7'},{f:'F',b:'8'},{f:'G',b:'10'}] },
   'naturals-plus': { kicker:'deck.kNote', hint:'deck.hFindNote',
     cards:[{f:'A'},{f:'B'},{f:'C'},{f:'D'},{f:'E'},{f:'F'},{f:'G'},{f:'F#'},{f:'Bb'}] },
   'keys-IIVV': { kicker:'deck.kKey', hint:'deck.hPlayIIVV',
@@ -10104,12 +10142,19 @@ let caOpenId = null;
    "Still to do" fold). The card stays COLLAPSED by default like every
    other card (Jonathan, 2026-09-15) — nothing here forces it open. */
 let caStartHereId = null;
+/* Today's group can hold more than one card (Jonathan, 2026-09-29: "in
+   case there are multiple ones"): the hero plus any other pending card
+   released the SAME day, up to CA_TODAY_MAX in all. caStartHereId stays the
+   first of them, which is all its other readers (the resume card, the
+   "next up" toast) ask about; caTodayIds is every card in the group. */
+const CA_TODAY_MAX = 2;
+let caTodayIds = [];
 // Non-interactive whole-activity progress dots, drawn only for the hero —
 // distinct from repDotsHtml (a TAPPABLE rep counter under one got-it-when
 // line): this is a summary of every step in caStepDone, drawn once, never
 // clicked. Checks are excluded (no per-step ticks to summarize).
 function caHeroDotsHtml(a){
-  if(a.id !== caStartHereId || a.kind === 'check') return '';
+  if(!caTodayIds.includes(a.id) || a.kind === 'check') return '';
   // A practice card's dots are its checks (caTickKeys), a ladder's its steps.
   const keys = caTickKeys(a);
   if(!keys.length) return '';
@@ -10715,13 +10760,14 @@ function pcPlayBtnHtml(playing){
 /* The speed control. Every card gets the Slower / Normal switch (the slow
    and fast files). A card with `slowest: true` gets a three-way control
    instead — Slowest / Slower / Normal — where Slowest is the SLOW file
-   played at PC_SLOWEST_RATE, pitch held (preservesPitch), so the tuner
+   played at SLOWEST_RATE, pitch held (preservesPitch), so the tuner
    still agrees with it. ca-18 only, for now (Jonathan, 2026-09-29: a
-   student needed it that day); "the cure" goes 60 -> 48 felt BPM. There is
-   no third file: every timing below reads the file's own clock
-   (currentTime), so only the real-time pieces — the count-in, the click
-   lookahead and the output latency — divide by the rate. */
-const PC_SLOWEST_RATE = 0.8;
+   student needed it that day); ca-10 got it the same day. "the cure" goes
+   60 -> 48 felt BPM. There is no third file: every timing below reads the
+   file's own clock (currentTime), so only the real-time pieces — the
+   count-in, the click lookahead and the output latency — divide by the
+   rate. SLOWEST_RATE and slowestApplyRate() live with the snippet player,
+   which has the same Slowest tier. */
 function pcSpeedSwitchHtml(){
   return `<button type="button" class="pc-speed" role="switch" aria-checked="false" aria-label="${escAttr(t('ca.cardSpeedAria'))}" onclick="pcSetSpeed(this)">`
     +   `<span class="pc-speed-lab on">${escHtml(t('ca.cardSlower'))}</span>`
@@ -10737,14 +10783,7 @@ function pcSpeed3Html(){
     + opt('normal', 'ca.cardNormal', false)
     + `</span>`;
 }
-function pcRate(root){ return root && root.dataset.slowest === '1' ? PC_SLOWEST_RATE : 1; }
-function pcApplyRate(audio, rate){
-  audio.preservesPitch = true;
-  audio.mozPreservesPitch = true;
-  audio.webkitPreservesPitch = true;
-  audio.defaultPlaybackRate = rate;    // a load() resets playbackRate to this
-  audio.playbackRate = rate;
-}
+function pcRate(root){ return root && root.dataset.slowest === '1' ? SLOWEST_RATE : 1; }
 function pcPlayerHtml(a, L){
   const hasFull = snippetHasFull(L.tr);
   return `<div class="pc-player">`
@@ -10875,7 +10914,7 @@ function pcStart(root, si){
   audio.preload = 'auto';
   audio.loop = false;                  // the window is looped by hand, in pcFrame
   audio.src = snippetSrc(L.tr, slow, false, guitar);
-  pcApplyRate(audio, pcRate(root));
+  slowestApplyRate(audio, pcRate(root));
   const st = { root, L, audio, win: pcWindow(L, slow), loopFrom: si, raf: 0, timers: [], lastBeat: -1, counting: true, si: -1, seq: -1, rep: -1 };
   pcState = st;
   const btn = root.querySelector('.pc-play');
@@ -11056,7 +11095,7 @@ function pcRetrack(root){
   st.lastBeat = -1;
   const at = snipTimeAtBars(st.win, isFinite(barsIn) && barsIn > 0 ? barsIn : 0);
   const src = snippetSrc(st.L.tr, slow, false, guitar);
-  pcApplyRate(st.audio, pcRate(root));   // Slowest <-> Slower is the same file, just the rate
+  slowestApplyRate(st.audio, pcRate(root));   // Slowest <-> Slower is the same file, just the rate
   if(st.audio.src.endsWith(src)){ try { st.audio.currentTime = at; } catch(e) {} return; }
   const wasPlaying = !st.audio.paused;
   st.audio.addEventListener('loadedmetadata', () => {
@@ -12055,27 +12094,41 @@ function renderClassActivities(){
     const pendingFlat = pendingGroups.reduce((acc, g) => acc.concat(g.cards), []);
     const heroPick = pendingFlat.find(a => !caIsOptional(a)) || pendingFlat[0] || null;
     caStartHereId = heroPick ? heroPick.id : null;
+    /* A second card for the same day: another pending card with the hero's
+       release date, required ones first. An undated hero pairs with
+       nothing — there is no day to match. */
+    const heroDay = heroPick && caDate(heroPick);
+    const sameDay = heroDay
+      ? pendingFlat.filter(a => a !== heroPick && caDate(a) === heroDay)
+          .sort((x, y) => Number(caIsOptional(x)) - Number(caIsOptional(y)))
+      : [];
+    const todayCards = heroPick ? [heroPick].concat(sameDay.slice(0, CA_TODAY_MAX - 1)) : [];
+    caTodayIds = todayCards.map(a => a.id);
     let pendingHtml;
     if(!pendingCount){
+      caTodayIds = [];
       // The Today hero's caught-up state (2f) — replaces the old plain
       // ca.allDone line with the same free-play actions 1d already built.
       pendingHtml = finished.length ? caFreePlayHeroHtml() : '';
     } else {
-      const heroCard = heroPick;
       /* `list` is every visible card, newest first, done or not — so the
          hero is today's work only when it is also the first of those. With
          the newest few finished and an old one still undone, the hero is
          that old card, and it says so rather than wearing "Start here". */
-      const heroIsCurrent = heroCard.id === list[0].id;
-      const heroHtml = caHeroCardHtml(heroCard, heroIsCurrent);
+      /* With two cards for a day, "current" is the DAY, not one card: both
+         are today's work when they share the newest card's date, even if
+         the student has already finished the newest of them. */
+      const newestDay = caDate(list[0]);
+      const isCurrent = a => a.id === list[0].id || (!!newestDay && caDate(a) === newestDay);
+      const heroHtml = todayCards.map(a => caHeroCardHtml(a, isCurrent(a))).join('');
       // Everything else pending, minus the hero, wrapped in ONE "Still to
       // do" fold (2f) — module headings (plain, no progress bar; that's an
       // Earlier-only addition below) when anything has been placed in a
       // module, otherwise the flat Unsorted list it always was.
       const restGroups = pendingGroups
-        .map(g => ({ sec: g.sec, cards: g.cards.filter(a => a.id !== heroCard.id) }))
+        .map(g => ({ sec: g.sec, cards: g.cards.filter(a => !caTodayIds.includes(a.id)) }))
         .filter(g => g.cards.length);
-      const restCount = pendingCount - 1;
+      const restCount = pendingCount - todayCards.length;
       let restHtml = '';
       if(restCount > 0){
         const restFlat = restGroups.reduce((acc, g) => acc.concat(g.cards), []);
