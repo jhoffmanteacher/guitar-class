@@ -5,6 +5,15 @@ Notable changes to the Guitar Class site. Newest first.
 For the full session-by-session history (and the reasoning behind each change),
 see `WORKFLOW.md` and the git commit log.
 
+## 2026-09-29 — Play song counts you in
+
+### Changed
+
+- **Play song now starts with four clicks**, on the practice cards
+  ("the cure" and Seven Nation Army). Before, only tapping a section
+  counted you in; Play song started the music right away. The four clicks
+  play even when Metronome is off.
+
 ## 2026-09-27 — New class activity: Low E and A Notes in Time
 
 ### Added

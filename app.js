@@ -10627,9 +10627,12 @@ function caJourneyLinkHtml(a){
    snipBarsAt / snipTimeAtBars, one `anchor` per song) over a window that
    runs from the first section to the end of the last. Three differences
    from a step snippet, all Jonathan's calls from the mockup rounds:
-   - Tapping a section starts the song THERE, after a four-click count-in,
-     and the loop comes back to that section — tapping Chorus loops the
-     chorus.
+   - Every start gets a four-click count-in — Play song as well as a
+     tapped section (Jonathan, 2026-09-29: Play song used to drop straight
+     into the track with nothing to lead in on). Tapping a section starts
+     the song THERE, and the loop comes back to that section — tapping
+     Chorus loops the chorus. The count-in plays whether or not Metronome
+     is on; a lap of the loop does not count in again.
    - The tab follows the song note by note (`.beat-now`, the TAB player's
      own cursor), one page per section, honouring each note's `beats`, so
      an uneven riff (Seven Nation Army) is followed as written. A section
@@ -10825,13 +10828,13 @@ function pcToggle(btn){
   const root = btn.closest('.pc');
   if(!root) return;
   if(pcState && pcState.root === root){ pcStop(); return; }
-  pcStart(root, 0, false);
+  pcStart(root, 0);
 }
 function pcFromSection(btn, si){
   const root = btn.closest('.pc');
-  if(root) pcStart(root, si, si > 0);
+  if(root) pcStart(root, si);
 }
-function pcStart(root, si, countIn){
+function pcStart(root, si){
   if(window.coachMicLive) return;      // same guard as snipToggle: never play into a live mic
   if(typeof stopAllDemoAudio === 'function') stopAllDemoAudio();   // includes pcStop()
   const a = pcActivity(root);
@@ -10842,7 +10845,7 @@ function pcStart(root, si, countIn){
   audio.preload = 'auto';
   audio.loop = false;                  // the window is looped by hand, in pcFrame
   audio.src = snippetSrc(L.tr, slow, false, guitar);
-  const st = { root, L, audio, win: pcWindow(L, slow), loopFrom: si, raf: 0, timers: [], lastBeat: -1, counting: !!countIn, si: -1, seq: -1, rep: -1 };
+  const st = { root, L, audio, win: pcWindow(L, slow), loopFrom: si, raf: 0, timers: [], lastBeat: -1, counting: true, si: -1, seq: -1, rep: -1 };
   pcState = st;
   const btn = root.querySelector('.pc-play');
   if(btn){ btn.innerHTML = pcPlayBtnHtml(true); btn.classList.add('playing'); }
@@ -10855,7 +10858,7 @@ function pcStart(root, si, countIn){
   const begin = () => {
     if(pcState !== st) return;
     try { audio.currentTime = snipTimeAtBars(st.win, L.sections[si].fromBar - L.firstBar); } catch(e) {}
-    if(countIn) pcCountIn(st, si); else pcGo(st, si);
+    pcCountIn(st, si);
   };
   if(audio.readyState >= 1) begin();
   else audio.addEventListener('loadedmetadata', begin, { once: true });
@@ -10867,9 +10870,9 @@ function pcGo(st, si){
   st.audio.play().catch(() => {});
   st.raf = requestAnimationFrame(pcFrame);
 }
-/* Four clicks (one bar of the counted beat) before the song comes in at a
-   tapped section — otherwise a student tapping Chorus gets dropped in
-   mid-bar with no way to find beat 1. */
+/* Four clicks (one bar of the counted beat) before the song comes in, on
+   every start — otherwise the student is dropped in with no way to find
+   beat 1. */
 function pcCountIn(st, si){
   const ctx = getAudioCtx();
   try { ctx.resume(); } catch(e) {}
@@ -10996,7 +10999,7 @@ function pcSetGuitar(btn){
 function pcRetrack(root){
   const st = pcState;
   if(!st || st.root !== root) return;
-  if(st.counting){ pcStart(root, st.loopFrom, true); return; }
+  if(st.counting){ pcStart(root, st.loopFrom); return; }
   const slow = root.dataset.slow === '1', guitar = root.dataset.guitar === '1';
   const barsIn = snipBarsAt(st.win, st.audio.currentTime);
   st.win = pcWindow(st.L, slow);
