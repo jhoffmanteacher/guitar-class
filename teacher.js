@@ -214,6 +214,10 @@ async function showTeacherApp(user){
       if(actDel){ teacherDeleteActivity(actDel.dataset.id); return; }
       const actClear=e.target.closest('[data-set-activity-clear]');
       if(actClear){ teacherSetActivityClear(actClear.dataset.uid, actClear.dataset.id, actClear.dataset.state); return; }
+      const focusToggle=e.target.closest('[data-ta-focus-toggle]');
+      if(focusToggle){ taFocusPreviewOn[focusToggle.dataset.id]=!taFocusPreviewOn[focusToggle.dataset.id]; renderTeacherActivityDetail(focusToggle.dataset.id); return; }
+      const focusGo=e.target.closest('[data-ta-focus-go]');
+      if(focusGo){ taFocusPreviewIdx[focusGo.dataset.id]=Number(focusGo.dataset.idx); renderTeacherActivityDetail(focusGo.dataset.id); return; }
       const clearAll=e.target.closest('[data-clear-all-blockers]');
       if(clearAll){ teacherClearAllBlockers(clearAll.dataset.uid); return; }
       // ── The activity board (renderTeacherActivities) ──
@@ -578,6 +582,15 @@ let activityDetailId=null;
 // Which row (if any) currently has its rename box open. Purely local view
 // state, cleared on every save/cancel and whenever the tab is re-entered.
 let activityEditId=null;
+/* Focus-view activities (view:'focus') default their preview to a full step
+   list — a fast pre-class read of everything at once. "Preview as student"
+   switches THIS SAME detail page to the real one-step-at-a-time shape
+   instead: numbered step buttons, one step on screen, a Next button. Purely
+   local view state (id -> on/off, id -> current step index), never
+   persisted and never touching caStepDone/classActivities — a teacher
+   stepping through a preview marks nothing done for real. */
+let taFocusPreviewOn={};
+let taFocusPreviewIdx={};
 /* ── Archive / Delete (Class activities view) ──────────────────────────
    Two console-only ways to take an activity out of circulation, both stored
    on config/class like every other knob in this view:
@@ -1678,7 +1691,9 @@ function renderTeacherActivityDetail(id){
   // · #7", or the reason it has no number. Same view students' #N comes
   // from (caBoardOrder), so the two can't disagree.
   const place=teacherActivityPlace(a.id);
-  const stepsHtml=(a.steps||[]).map((s,si)=>{
+  /* One step's inner content — shared by the full-list preview and the
+     "Preview as student" single-step view below, so the two can't drift. */
+  const stepInnerHtml=(s,si)=>{
     const media=[];
     /* width/height: see caStepHtml() in app.js — same 640x244 board, and
        checks.mjs (1v) fails the push if the two renderers disagree. */
@@ -1717,8 +1732,29 @@ function renderTeacherActivityDetail(id){
     // or "Step 4: Tune it back" when the step carries an optional label.
     // English only, like the rest of this preview.
     const head=`Step ${si+1}${s.label?`: ${escHtml(s.label)}`:''}`;
-    return `<div class="tr-card ca-prev-step" style="margin-bottom:12px"><div class="tr-name">${head}</div>${wrapGotItWhen(s.text||'')}${media.join('')}</div>`;
-  }).join('');
+    return `<div class="tr-name">${head}</div>${wrapGotItWhen(s.text||'')}${media.join('')}`;
+  };
+  const stepsHtml=(a.steps||[]).map((s,si)=>
+    `<div class="tr-card ca-prev-step" style="margin-bottom:12px">${stepInnerHtml(s,si)}</div>`
+  ).join('');
+  /* "Preview as student" (2026-09-29): the same steps, shown the real way a
+     focus-view activity shows them — one on screen, numbered step buttons
+     above it, Previous/Next below. Local-only index (taFocusPreviewIdx), no
+     locking on earlier steps being "done" — there's no real progress here to
+     gate on, and a teacher checking step 3 shouldn't have to fake-complete
+     1 and 2 first. */
+  const focusPreviewHtml=()=>{
+    const steps=a.steps||[];
+    const n=steps.length;
+    const cur=Math.min(Math.max(taFocusPreviewIdx[a.id]||0,0),Math.max(n-1,0));
+    const pips=steps.map((s,si)=>`<button type="button" class="ca-focus-dot${si===cur?' is-now':''}" data-ta-focus-go data-id="${escAttr(a.id)}" data-idx="${si}" title="Step ${si+1}${s.label?`: ${escAttr(s.label)}`:''}">${si+1}</button>`).join('');
+    const last=cur>=n-1;
+    const back=cur>0?`<button type="button" class="ca-focus-back" data-ta-focus-go data-id="${escAttr(a.id)}" data-idx="${cur-1}">&#x25C0; Previous</button>`:'';
+    const next=`<button type="button" class="ca-focus-next" data-ta-focus-go data-id="${escAttr(a.id)}" data-idx="${last?cur:cur+1}">${last?'Last step':'Next step &#x25B6;'}</button>`;
+    return `<div class="ca-focus-dots" role="group" aria-label="Steps" style="margin-bottom:10px">${pips}</div>`
+      + `<div class="tr-card ca-prev-step">${n?stepInnerHtml(steps[cur],cur):'No steps on this activity yet.'}</div>`
+      + `<div class="ca-focus-nav">${back}${next}</div>`;
+  };
   // Per-student status + gate clear (Today-first work order, Phase 1) — same
   // uid -> { activityId -> true } map, and the same Clear toggle, as the
   // exit-check grid below (renderTeacherCheckDetail). Sorted by name, not by
@@ -1744,9 +1780,12 @@ function renderTeacherActivityDetail(id){
     ${linkRow(a)}
     ${a.intro?`<div class="coach-tip" style="margin:0 2px 16px">${escHtml(a.intro)}</div>`:''}
     ${/* Focus view is activity-level presentation, not a step field — the
-         preview keeps showing every step (that's what a pre-class check
-         wants), so it just says how students will see them. See caIsFocus
-         in app.js. */ a.view==='focus'?`<div class="tg-note">Focus view: students see one step at a time, with numbered step buttons above it and a "Got it — next step" button under it. A step opens only after the one before it is marked done. The preview below shows every step.</div>`:''}
+         preview DEFAULTS to showing every step (that's what a fast pre-class
+         check wants), so the note says how students actually see them, and
+         "Preview as student" switches this same page to the real
+         one-step-at-a-time shape (focusPreviewHtml, above) — a local-only
+         toggle, nothing saved. See caIsFocus in app.js. */
+       a.view==='focus'?`<div class="tg-note">Focus view: students see one step at a time, with numbered step buttons above it and a "Got it — next step" button under it. A step opens only after the one before it is marked done. ${taFocusPreviewOn[a.id]?'Previewing one step at a time below.':'The preview below shows every step.'} <button type="button" class="tg-seg-btn" data-ta-focus-toggle data-id="${escAttr(a.id)}">${taFocusPreviewOn[a.id]?'Show full list':'Preview as student'}</button></div>`:''}
     ${/* Practice card (view:'card'): the preview IS the student card —
          caCardBodyHtml() in app.js, the one body renderer both sides call
          (same shape as an exit check's caCheckBodyHtml), so it can't drift.
@@ -1755,7 +1794,9 @@ function renderTeacherActivityDetail(id){
     <div class="tg-note">Gate: today's activities block the rest of the site until they're done (see the Today-first work order). Clear lets one student past this one without finishing it — a sub day, a connectivity problem, work done on paper.</div>
     ${studentTable}
     <div class="stu-section-head">Preview</div>
-    ${typeof caIsCard==='function'&&caIsCard(a) ? caCardBodyHtml(a,{preview:true}) : (stepsHtml || '<div class="stu-empty">No steps on this activity yet.</div>')}
+    ${typeof caIsCard==='function'&&caIsCard(a) ? caCardBodyHtml(a,{preview:true})
+      : (a.view==='focus' && taFocusPreviewOn[a.id]) ? focusPreviewHtml()
+      : (stepsHtml || '<div class="stu-empty">No steps on this activity yet.</div>')}
     ${caJourneyUrl(a)?`<div class="ca-journey-row"><a class="jl-song-btn" href="${escAttr(caJourneyUrl(a))}" target="_blank" rel="noopener">${escHtml(t('ca.openJourney',{song:(SONG_JOURNEYS.find(s=>s.id===a.journey)||{}).name||''}))} &#x2197;</a> <span class="tg-note" style="display:inline">— this page stays open behind the gate while the activity is pending.</span></div>`:''}`;
 }
 /* An exit check's detail page: who turned it in, what they picked, and
