@@ -5,6 +5,24 @@ Notable changes to the Guitar Class site. Newest first.
 For the full session-by-session history (and the reasoning behind each change),
 see `WORKFLOW.md` and the git commit log.
 
+## 2026-09-29 — Live quiz projector drops the Spanish line
+
+### Changed
+
+- **The live quiz projector screen now shows English only.** Before, it
+  showed English and Spanish stacked together, which read as clutter on
+  the classroom screen. Your own device still shows the quiz in whichever
+  language you've picked for the rest of the site.
+
+## 2026-09-29 — Live quiz: teacher sets the time to answer
+
+### Added
+
+- **Your teacher can now set how many seconds you have to answer** a live
+  quiz question, including half-second times like 2.5. Under 10 seconds,
+  the countdown counts in tenths (2.5 → 2.4 → … → Time!) instead of jumping
+  straight from 2 to 1.
+
 ## 2026-09-29 — Live quiz no longer traps you; a simpler menu
 
 ### Fixed

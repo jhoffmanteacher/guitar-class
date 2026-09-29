@@ -1018,20 +1018,22 @@ function lqPaintStage(){
   lqPaintMarkers(stage, s, quiz, 'lqst');
 }
 
-// Both languages side by side on the projector: every student reads the
-// prompt on their own device in their own language, but the room reads it
-// off the wall together.
+// English only on the projector for now (2026-09-29, Jonathan's ask — English
+// and Spanish stacked on the same display read as clutter on the classroom
+// screen). Each student's OWN device still follows their own language toggle
+// through the ordinary t() path elsewhere in this file — untouched. The
+// Spanish lookup here is skipped rather than deleted, so restoring the
+// stacked line later is a two-line change (see the git history of this
+// function for the exact shape).
 function lqBilingual(key, cls){
-  const en = tIn(key, 'en'), es = tIn(key, 'es');
-  return `<div class="${cls}">${escHtml(en)}</div>`
-    + (es && es !== en ? `<div class="${cls}-es" lang="es">${escHtml(es)}</div>` : '');
+  const en = tIn(key, 'en');
+  return `<div class="${cls}">${escHtml(en)}</div>`;
 }
 // Same as lqBilingual, but for a parameterised string — the fret prompt and
 // answer line are the first ones on the stage that need per-language params.
 function lqBilingualParams(key, cls, paramsEn, paramsEs){
-  const en = tIn(key, 'en', paramsEn), es = tIn(key, 'es', paramsEs);
-  return `<div class="${cls}">${escHtml(en)}</div>`
-    + (es && es !== en ? `<div class="${cls}-es" lang="es">${escHtml(es)}</div>` : '');
+  const en = tIn(key, 'en', paramsEn);
+  return `<div class="${cls}">${escHtml(en)}</div>`;
 }
 
 function lqStageLobbyHtml(s, quiz){
