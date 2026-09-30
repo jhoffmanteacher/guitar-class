@@ -5,6 +5,15 @@ Notable changes to the Guitar Class site. Newest first.
 For the full session-by-session history (and the reasoning behind each change),
 see `WORKFLOW.md` and the git commit log.
 
+## 2026-09-30 — "the cure": play the whole song
+
+### Added
+
+- **A new practice card plays all of "the cure" with the band** — intro,
+  verses, three choruses, both refrains, the bridge and the outro. There is one thing to
+  check off: play the whole song without stopping, at the speed you pick
+  (Slowest, Slower or Normal). Tap any section to practise just that part.
+
 ## 2026-09-30 — Note-card button says "Check the answer"
 
 ### Changed

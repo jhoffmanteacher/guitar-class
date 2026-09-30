@@ -5384,6 +5384,9 @@ function checkCureChorusOrder() {
     }
     // …and a practice card's chorus section (bar 21 of "the cure"), whose
     // tab is one pluck per beat — so compare the roots with repeats folded.
+    // A section that writes ONE lap of the loop and sets `reps` (ca-24,
+    // 2026-09-30: the record plays the loop three times from bar 21) is
+    // checked as that loop: D F C G, whole laps, same order.
     for (const a of activities) {
       const c = a && a.view === 'card' && a.card;
       if (!c || c.track !== 'the-cure') continue;
@@ -5391,7 +5394,9 @@ function checkCureChorusOrder() {
         if (!sec || sec.fromBar !== 21 || !Array.isArray(sec.notes)) return;
         checked++;
         const roots = sec.notes.map(n => n.note).filter((n, i, arr) => i % 4 === 0);
-        if (JSON.stringify(roots) !== JSON.stringify(EXPECTED)) {
+        const loop = sec.reps > 1 && roots.length > 0 && roots.length % 4 === 0
+          && roots.every((r, i) => r === EXPECTED[i % 4]);
+        if (!loop && JSON.stringify(roots) !== JSON.stringify(EXPECTED)) {
           err(`${a.id} card section ${si + 1}: chorus roots are ${roots.join(' ')}, expected ${EXPECTED.join(' ')}`);
           problems++; bad++;
         }
@@ -5848,7 +5853,7 @@ function checkPracticeCards() {
    one-sided label is itself the bug (dots in one language, none in the
    other), so it fails outright now rather than being skipped. Bump when a
    card genuinely adds or removes a got-it sentence in both languages. */
-const REP_COUNT_FIELDS = 393;   // ca-23 Note Call steps carry no text (2026-09-27)
+const REP_COUNT_FIELDS = 394;   // + ca-24's one help step (2026-09-30)
 function checkRepCountParity(sets, ctx) {
   head('1bg. Rep-count dots agree between English and Spanish');
   if (!ctx) { err('1bg cannot run — render context unavailable'); problems++; return; }

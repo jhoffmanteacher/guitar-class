@@ -1747,6 +1747,15 @@ ear. This is chord *timing*, not BPM:
   repeat; it is a section list, not a bar grid. Anything placing a window by
   section has to be measured, not inferred — checks.mjs 1ak deliberately
   does not guess at `fromBar` (see its comment).
+  **The rest of the record, bars 29-88** (2026-09-30, for ca-24 —
+  Jonathan's chord chart placed on the click grid with bass/chroma
+  readings of the mp3): the chorus is **12** bars, `Dm F C G` three laps
+  (21-32; the third lap is the "It'll never be the cure" tag); verse 3,
+  33-40; refrain `F | C G | F | C G`, 41-44 (C and G share a bar);
+  chorus 2, 45-56; refrain 2, 57-60; bridge `F | C G | F | C G | Dm F C G`,
+  61-68; chorus 3, 69-80; outro `Dm F C G` x2, quieter, 81-88. The file
+  ends early in bar 89, so bar 88 is the last whole bar. The chart writes
+  G/B throughout; the site plays plain G.
   No capo, by design. **Module 12's fingerpicking-as-native-style framing stays**
   (Jonathan's call, 2026-07-31): the record's guitar is rapidly strummed, but
   the fingerstyle arrangement and its ◐-comes-off lesson are a deliberate
