@@ -2334,8 +2334,7 @@ window.CLASS_ACTIVITIES = [
   {
     id:    'ca-24',
     view:  'card',    // one screen: Play song + tab + checks — see CARD above
-    journey: 'the-cure',   // the Level up check sends them to this Song Journey page — see JOURNEY above
-    journeyLayer: 2,
+    // No `journey:` on purpose — Jonathan, 2026-09-30: this card stays on the site's own band track.
     title:    '"the cure" — The Whole Song',
     title_es: '"the cure" — La canción completa',
     intro:    'You know every part of "the cure" — today you play the whole song with the band, start to finish.',
@@ -2631,12 +2630,12 @@ window.CLASS_ACTIVITIES = [
         }
       ],
       checks: [
-        { label: 'The whole song', label_es: 'La canción completa',
-          text:    'Pick a speed and play the whole song with the band, intro to the end, without stopping.',
-          text_es: 'Elige una velocidad y toca la canción completa con la banda, de la intro al final, sin detenerte.' },
+        { label: 'The whole song, slower', label_es: 'La canción completa, más lenta',
+          text:    'Press Slowest or Slower. Play the whole song with the band, intro to the end, without stopping.',
+          text_es: 'Pulsa «Muy lento» o «Más lento». Toca la canción completa con la banda, de la intro al final, sin detenerte.' },
         { levelUp: true,
-          text:    'Press Normal and play the whole song. Then play along with the full recording on the Song Journey page, Layer 2.',
-          text_es: 'Pulsa «Normal» y toca la canción completa. Después toca con la grabación completa en la página de Recorrido de la canción, Capa 2.' }
+          text:    'Press Normal. Play the whole song with the band at normal speed, intro to the end, without stopping.',
+          text_es: 'Pulsa «Normal». Toca la canción completa con la banda a velocidad normal, de la intro al final, sin detenerte.' }
       ]
     },
     // The help ladder (read-only, under "More practice help").
