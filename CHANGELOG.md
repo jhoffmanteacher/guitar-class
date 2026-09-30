@@ -5,6 +5,15 @@ Notable changes to the Guitar Class site. Newest first.
 For the full session-by-session history (and the reasoning behind each change),
 see `WORKFLOW.md` and the git commit log.
 
+## 2026-09-30 — Note-card button says "Check the answer"
+
+### Changed
+
+- **The button under a note card now reads "Check the answer"** (Spanish:
+  "Ver la respuesta") instead of "Check the back". It shows the answer on
+  every two-sided card deck, including the A-string deck in the A String
+  Notes activity.
+
 ## 2026-09-29 — Live quiz projector drops the Spanish line
 
 ### Changed

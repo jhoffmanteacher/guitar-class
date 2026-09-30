@@ -997,7 +997,7 @@
     'deck.introTwo':         { en: 'The answer is on the back. Say it out loud BEFORE you tap the card.',
                                es: 'La respuesta está al reverso. Dila en voz alta ANTES de tocar la carta.' },
     'deck.start':            { en: 'Shuffle and deal', es: 'Barajar y repartir' },
-    'deck.check':            { en: 'Check the back', es: 'Ver el reverso' },
+    'deck.check':            { en: 'Check the answer', es: 'Ver la respuesta' },
     'deck.done':             { en: 'Done', es: 'Listo' },
     'deck.hadIt':            { en: 'Had it', es: 'La tenía' },
     'deck.putBack':          { en: 'Put it back', es: 'Devolverla al montón' },
