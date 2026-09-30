@@ -10506,7 +10506,10 @@ function caStepHtml(a, step, si, isOpen, isDone){
   // Step text is first-party authored HTML, same trust level as module step
   // content — trusted (not escHtml'd) so <ol>/<ul> markup renders per the
   // house list rule, and wrapGotItWhen() can style the got-it-when sentence.
-  const detailHtml = `${wrapGotItWhen(tf(step,'text'), {
+  /* `|| ''`: a label + drill step (ca-23) has no text at all, and
+     wrapGotItWhen passes a non-string straight through — so the template
+     printed the word "undefined" under every step label (2026-09-30). */
+  const detailHtml = `${wrapGotItWhen(tf(step,'text') || '', {
       key: `ca:${a.id}:${si}`, isDone, closestSel: '.ca-step', btnSel: focus ? '.ca-focus-next' : '.ca-step-donebtn', id: a.id, extra: si,
     })}${parts.join('')}`
     + (focus ? caFocusNavHtml(a, si, isDone)
@@ -10863,7 +10866,7 @@ function pcHelpHtml(a, preview){
   const pfx = preview ? 'ca-preview' : 'ca';
   const body = steps.map((st, si) => {
     const tab = st.tab ? buildTab(st.tab, { keyPrefix: `bpm:${pfx}:${a.id}:h${si}:tab`, defaultLinesPerPage: CA_TAB_LINES_PER_PAGE, suppressCoach: preview, noRevealDelay: true }) : '';
-    return `<details class="pc-help-step"><summary>${escHtml(caStepHeadText(st, si))}</summary><div class="pc-help-body">${wrapGotItWhen(tf(st, 'text'))}${tab}</div></details>`;
+    return `<details class="pc-help-step"><summary>${escHtml(caStepHeadText(st, si))}</summary><div class="pc-help-body">${wrapGotItWhen(tf(st, 'text') || '')}${tab}</div></details>`;
   }).join('');
   return `<button type="button" class="pc-help-btn" aria-expanded="false" onclick="pcToggleHelp(this)">${escHtml(t('ca.cardHelp'))} <span class="pc-help-arrow" aria-hidden="true">&#x25B8;</span></button>`
     + `<div class="pc-help" hidden><p class="pc-help-note">${escHtml(t('ca.cardHelpNote'))}</p>${body}</div>`;
