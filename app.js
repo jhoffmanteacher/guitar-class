@@ -7517,7 +7517,6 @@ function ncPlayHtml(key){
         `<div class="nc-card" id="nc-card-${key}"></div>` +
         `<div class="nc-side">` +
           `<div class="nc-pips" id="nc-pips-${key}"></div>` +
-          `<div class="nc-next" id="nc-next-${key}"></div>` +
           (st.micOn ? `<div class="nc-heard" id="nc-heard-${key}"><span class="coach-live-dot"></span>${escHtml(t('nc.listening'))}</div>` : '') +
         `</div>` +
       `</div>` +
@@ -7531,19 +7530,16 @@ function ncPlayHtml(key){
 function ncPaint(st){
   const key = st.key;
   const card = document.getElementById('nc-card-' + key);
-  const next = document.getElementById('nc-next-' + key);
   if(!card) return;
+  // No "Next:" preview (Jonathan, 2026-09-30): the student reads one name at a time.
   if(st.idx < 0){
     card.innerHTML = `<span class="nc-kicker">${escHtml(t('nc.getReady'))}</span><span class="nc-note nc-count" id="nc-count-${key}"></span>`;
     card.className = 'nc-card';
-    next.innerHTML = `<span class="nc-next-k">${escHtml(t('nc.first'))}</span> ${escHtml(st.seq[0].note)} · ${escHtml(ncStrName(st.seq[0].str))}`;
   } else {
     const p = st.seq[st.idx];
     card.innerHTML = ncPromptHtml(p);
     card.className = 'nc-card';
     void card.offsetWidth; card.classList.add('nc-deal');
-    const n = st.seq[st.idx + 1];
-    next.innerHTML = n ? `<span class="nc-next-k">${escHtml(t('nc.next'))}</span> ${escHtml(n.note)} · ${escHtml(ncStrName(n.str))}` : '';
   }
   if(st.mode === 'answer'){
     // The last note's answer goes dark and its line clears as the new name lands.

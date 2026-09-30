@@ -3303,8 +3303,6 @@ body.games-open{overflow:hidden}
 .nc-pip{width:16px;height:16px;border-radius:50%;background:var(--bg3);border:1.5px solid var(--border2);transition:transform .06s}
 .nc-pip.one{border-color:var(--purple-accent)}
 .nc-pip.on{background:var(--purple-accent);border-color:var(--purple-accent);transform:scale(1.15)}
-.nc-next{font-size:0.9375rem;font-weight:600;color:var(--text2);min-height:1.3em}
-.nc-next-k{font-weight:500;font-size:0.8125rem;text-transform:uppercase;letter-spacing:.06em}
 .nc-heard{display:flex;align-items:center;gap:7px;font-size:0.8125rem;color:var(--text2)}
 .nc-fb{margin-bottom:4px}
 .nc-board{max-width:700px;margin:0 auto 6px}

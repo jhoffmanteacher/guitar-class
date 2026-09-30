@@ -932,8 +932,6 @@
                          es: 'El micrófono no está disponible. Toca los trastes en el diagrama.' },
     'nc.micLost':      { en: 'The mic stopped. Press Start to go again.', es: 'El micrófono se detuvo. Presiona Empezar para intentarlo de nuevo.' },
     'nc.getReady':     { en: 'Count in', es: 'Cuenta' },
-    'nc.first':        { en: 'First:', es: 'Primera:' },
-    'nc.next':         { en: 'Next:', es: 'Sigue:' },
     'nc.onString':     { en: '{string} string', es: 'cuerda {string}' },
     'nc.listening':    { en: 'Listening', es: 'Escuchando' },
     'nc.heard':        { en: 'Heard {note}', es: 'Se oyó {note}' },
