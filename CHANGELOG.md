@@ -5,6 +5,15 @@ Notable changes to the Guitar Class site. Newest first.
 For the full session-by-session history (and the reasoning behind each change),
 see `WORKFLOW.md` and the git commit log.
 
+## 2026-09-30 — The tab follows the song down the page
+
+### Changed
+
+- **When you press Play song on a practice card, the page now scrolls with
+  the music.** Each time the song moves to a new line of tab, the page
+  moves just enough to show that line and the next one. If you scroll away
+  from the tab while the song plays, the page stays where you put it.
+
 ## 2026-09-30 — "the cure": play the whole song
 
 ### Added

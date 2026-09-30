@@ -10927,11 +10927,12 @@ function pcStart(root, si){
   audio.loop = false;                  // the window is looped by hand, in pcFrame
   audio.src = snippetSrc(L.tr, slow, false, guitar);
   slowestApplyRate(audio, pcRate(root));
-  const st = { root, L, audio, win: pcWindow(L, slow), loopFrom: si, raf: 0, timers: [], lastBeat: -1, counting: true, si: -1, seq: -1, rep: -1 };
+  const st = { root, L, audio, win: pcWindow(L, slow), loopFrom: si, raf: 0, timers: [], lastBeat: -1, counting: true, si: -1, seq: -1, rep: -1, row: null };
   pcState = st;
   const btn = root.querySelector('.pc-play');
   if(btn){ btn.innerHTML = pcPlayBtnHtml(true); btn.classList.add('playing'); }
   pcShowSection(root, L, si);
+  pcFollow(root.querySelector('.pc-tab .pc-page:not([hidden]) .tab-grid'), true);
   audio.addEventListener('error', () => {
     if(pcState !== st) return;
     pcStop();
@@ -11017,6 +11018,9 @@ function pcPaint(st, loc){
   root.querySelectorAll('.pc-tab .beat-now').forEach(el => el.classList.remove('beat-now'));
   root.querySelectorAll(`.pc-tab [data-seq="${loc.seq}"]`).forEach(el => el.classList.add('beat-now'));
   if(loc.si !== st.si) pcShowSection(root, st.L, loc.si);
+  const cell = root.querySelector(`.pc-tab .pc-page:not([hidden]) [data-seq="${loc.seq}"]`);
+  const row = cell && cell.closest('.tab-grid');
+  if(row && row !== st.row){ st.row = row; pcFollow(row, false); }
   const S = st.L.sections[loc.si];
   const rep = root.querySelector(`.pc-page[data-page="${loc.si}"] .pc-rep`);
   if(rep && S.reps > 1){
@@ -11024,6 +11028,53 @@ function pcPaint(st, loc){
     rep.textContent = t('ca.cardRepOf', {what: tf(S.s, 'repLabel'), n: loc.rep + 1, total: S.reps});
   }
   st.si = loc.si; st.seq = loc.seq; st.rep = loc.rep;
+}
+/* Keep the line being played on screen (Jonathan, 2026-09-30: a long
+   section runs off the bottom of a Chromebook, and the student's hands are
+   on the guitar, not the trackpad). Each time the cursor moves to a new tab
+   row, scroll just far enough that this row AND the one after it are both
+   in view — never further than putting this row right under the sticky
+   bar, so Play/Stop above the tab stays on screen as long as it can. A
+   student who scrolled the whole tab out of view (to the checks, say) is
+   left there; Play itself (`force`) always brings the tab back. Scrolls
+   whatever is actually scrolling — .main on a laptop, the page on a phone. */
+function pcFollow(row, force){
+  if(!row) return;
+  let box = row.parentElement;
+  while(box && box !== document.body){
+    const oy = getComputedStyle(box).overflowY;
+    if((oy === 'auto' || oy === 'scroll') && box.scrollHeight > box.clientHeight) break;
+    box = box.parentElement;
+  }
+  if(!box || box === document.body) box = document.scrollingElement || document.documentElement;
+  const isDoc = box === document.scrollingElement || box === document.documentElement;
+  let top = isDoc ? 0 : box.getBoundingClientRect().top;
+  const bottom = isDoc ? window.innerHeight : box.getBoundingClientRect().bottom;
+  // Whatever sticks over the top of the scrollport: the site header on a
+  // phone, the In class page's sticky bar everywhere.
+  ['.header', '.ca-screen .page-topbar'].forEach(sel => {
+    const el = document.querySelector(sel);
+    if(!el || !el.offsetHeight) return;
+    const pos = getComputedStyle(el).position;
+    if(pos !== 'sticky' && pos !== 'fixed') return;
+    const r = el.getBoundingClientRect();
+    if(r.top <= top + 1 && r.bottom > top) top = r.bottom;
+  });
+  const tab = row.closest('.pc-tab');
+  if(!force && tab){
+    const tr = tab.getBoundingClientRect();
+    if(tr.bottom < top || tr.top > bottom) return;
+  }
+  const next = row.nextElementSibling && row.nextElementSibling.classList.contains('tab-grid') ? row.nextElementSibling : null;
+  const rr = row.getBoundingClientRect();
+  const need = (next || row).getBoundingClientRect().bottom;
+  const pad = 12;
+  let delta = 0;
+  if(need > bottom - pad) delta = need - (bottom - pad);              // reveal the next row
+  delta = Math.min(delta, rr.top - (top + pad));                     // …but keep this one below the bar
+  if(rr.top < top + pad) delta = rr.top - (top + pad);               // this row is hidden above: bring it down
+  if(Math.abs(delta) < 2) return;
+  box.scrollBy({ top: delta, behavior: scrollBehavior() });
 }
 function pcShowSection(root, L, si){
   root.querySelectorAll('.pc-page').forEach(p => { p.hidden = Number(p.dataset.page) !== si; });
