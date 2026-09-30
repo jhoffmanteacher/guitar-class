@@ -10904,6 +10904,16 @@ function pcStop(){
     root.querySelectorAll('.pc-rep').forEach(el => { el.hidden = true; el.textContent = ''; });
     pcStatus(root, '');
   }
+  pcSyncBarStop();
+}
+/* Stop in the sticky bar while a practice card's song plays (Jonathan,
+   2026-09-30). pcFollow scrolls the card's own Play/Stop off the top of a
+   Chromebook screen by the second line of tab, and the bar is the one thing
+   that stays put. caSyncTopbar writes the button (hidden) for a card;
+   pcStart and pcStop show and hide it. */
+function pcSyncBarStop(){
+  const b = document.querySelector('#ca-bar-open .ca-bar-stop');
+  if(b) b.hidden = !(pcState && pcState.root && pcState.root.isConnected && pcState.root.closest('.ca-card[open]'));
 }
 function pcToggle(btn){
   const root = btn.closest('.pc');
@@ -10932,6 +10942,7 @@ function pcStart(root, si){
   const btn = root.querySelector('.pc-play');
   if(btn){ btn.innerHTML = pcPlayBtnHtml(true); btn.classList.add('playing'); }
   pcShowSection(root, L, si);
+  pcSyncBarStop();
   pcFollow(root.querySelector('.pc-tab .pc-page:not([hidden]) .tab-grid'), true);
   audio.addEventListener('error', () => {
     if(pcState !== st) return;
@@ -11617,9 +11628,11 @@ function caSyncTopbar(){
   const prog = keys.length ? t('ca.barProgress', {done: doneN, total: keys.length}) : '';
   bar.innerHTML = `<button type="button" class="ca-bar-back" onclick="caCloseOpen()">&#x25C0; ${escHtml(t('ca.allActivities'))}</button>`
     + `<button type="button" class="ca-bar-name" onclick="caScrollToActivity('${escAttr(a.id)}')" title="${escAttr(t('ca.barTop'))}" data-i18n-attr="title:ca.barTop">${escHtml(name)}</button>`
-    + (prog ? `<span class="ca-bar-prog">${escHtml(prog)}</span>` : '');
+    + (prog ? `<span class="ca-bar-prog">${escHtml(prog)}</span>` : '')
+    + (caIsCard(a) ? `<button type="button" class="ca-bar-stop" onclick="pcStop()" hidden>&#x25A0; ${escHtml(t('ca.snipStop'))}</button>` : '');
   bar.hidden = false;
   title.hidden = true;
+  pcSyncBarStop();
 }
 /* One activity on the page at a time (Jonathan, 2026-09-25). With a card
    open, the Unfinished / Completed groups, module headings, the other cards

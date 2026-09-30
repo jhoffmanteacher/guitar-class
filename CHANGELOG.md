@@ -13,6 +13,8 @@ see `WORKFLOW.md` and the git commit log.
   the music.** Each time the song moves to a new line of tab, the page
   moves just enough to show that line and the next one. If you scroll away
   from the tab while the song plays, the page stays where you put it.
+- **A Stop button sits in the bar at the top of the page while the song
+  plays**, so you can stop it without scrolling back up.
 
 ## 2026-09-30 — "the cure": play the whole song
 

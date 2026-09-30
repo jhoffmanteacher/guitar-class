@@ -2363,6 +2363,12 @@ body.explore-open #week-panels{display:none}
   border:1px solid var(--ca-accent);background:transparent;color:var(--ca-accent);cursor:pointer;white-space:nowrap}
 .ca-bar-back:hover{background:var(--ca-accent-bg)}
 .ca-bar-back:focus-visible{outline:2px solid var(--blue-text);outline-offset:2px}
+/* Stop for a practice card's song (pcSyncBarStop) — same colours as the
+   card's own playing .pc-play, which has scrolled out of view by then. */
+.ca-bar-stop{flex-shrink:0;align-self:center;margin-left:auto;font-family:inherit;font-size:0.875rem;font-weight:700;
+  min-height:36px;padding:6px 16px;border:0;border-radius:12px;background:var(--text);color:var(--bg);cursor:pointer;white-space:nowrap}
+.ca-bar-stop[hidden]{display:none}
+.ca-bar-stop:focus-visible{outline:2px solid var(--blue-text);outline-offset:2px}
 /* One activity at a time (caSyncSolo in app.js): with a card open, only
    that card and the elements that contain it stay on the In class page. */
 .ca-screen.ca-solo #class-activities-body > :not(.ca-solo-card):not(.ca-solo-path),
