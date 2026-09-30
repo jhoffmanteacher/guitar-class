@@ -2334,7 +2334,8 @@ window.CLASS_ACTIVITIES = [
   {
     id:    'ca-24',
     view:  'card',    // one screen: Play song + tab + checks — see CARD above
-    // No `journey:` on purpose — Jonathan, 2026-09-30: this card stays on the site's own band track.
+    journey: 'the-cure',   // the button renders under the Level up check — see JOURNEY above
+    journeyLayer: 2,
     title:    '"the cure" — The Whole Song',
     title_es: '"the cure" — La canción completa',
     intro:    'You know every part of "the cure" — today you play the whole song with the band, start to finish.',
