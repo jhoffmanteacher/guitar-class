@@ -609,7 +609,7 @@ if(auth) auth.onAuthStateChanged(async user=>{
     try{
       if(IS_TEACHER_MODE){ await ensureTeacherJs(); showTeacherApp(user); clearAuthStallTimer(); }
       else {
-        await loadProgress(); await loadClassConfig();
+        await loadProgress(); caAdoptLocalTicks(); await loadClassConfig();
         clearAuthStallTimer();   // cleared here, not inside showApp/showPausedScreen, so every exit from the wait is covered
         if(accountPaused) showPausedScreen(user); else showApp(user);
       }
@@ -620,7 +620,7 @@ if(auth) auth.onAuthStateChanged(async user=>{
     }
   } else {
     window.__authBootPending = false;
-    currentUser = null; progress = {}; responses = {}; completed = {}; completedDeletes = new Set(); classActivities = {}; classActivitiesDeletes = new Set(); exitChecks = {}; games = {}; streak = { count:0, lastDay:null }; gamesAccessOn = true; studentPeriod = ''; periodOverride = ''; hiddenActivityIds = {}; activityDates = {}; activityTitles = {}; activityNumbers = {}; activityBoard = {}; activityBoardOn = false; activityClears = {}; retiredActivityIds = {}; optionalActivityIds = {}; progressLoadFailed = false;
+    currentUser = null; progress = {}; responses = {}; completed = {}; completedDeletes = new Set(); classActivities = {}; classActivitiesDeletes = new Set(); caStepDone = {}; caStepDeletes = new Set(); exitChecks = {}; games = {}; streak = { count:0, lastDay:null }; gamesAccessOn = true; studentPeriod = ''; periodOverride = ''; hiddenActivityIds = {}; activityDates = {}; activityTitles = {}; activityNumbers = {}; activityBoard = {}; activityBoardOn = false; activityClears = {}; retiredActivityIds = {}; optionalActivityIds = {}; progressLoadFailed = false;
     document.body.classList.remove('ca-gated');   // next sign-in recomputes it fresh — don't leave a stale gate showing over the sign-in wall
     if(typeof gamesResetForUser === 'function') gamesResetForUser();   // Note Runner's module caches must not leak into the next signed-in user
     if(typeof lqStopListening === 'function') lqStopListening();       // and the live-quiz listener must not keep firing under the next student
@@ -723,6 +723,7 @@ async function loadProgress(){
       responses     = doc.data().responses || {};
       completed     = doc.data().completed || {};
       classActivities = doc.data().classActivities || {};
+      caStepDone    = caCleanTicks(doc.data().caSteps);
       exitChecks    = doc.data().exitChecks || {};
       games         = doc.data().games || {};
       streak        = doc.data().streak || { count:0, lastDay:null };
@@ -734,8 +735,8 @@ async function loadProgress(){
       songReady     = doc.data().songReady || {};
       songReadyAt   = doc.data().songReadyAt || {};
       studentPeriod = doc.data().period || '';
-    } else { progress={}; lastModuleNum=1; lastSetId=null; responses={}; completed={}; classActivities={}; exitChecks={}; games={}; streak={ count:0, lastDay:null }; practiceLog=loadLocalPracticeLog(); songReady={}; songReadyAt={}; studentPeriod=''; restoreLocalPlace(); }
-  } catch(e){ progressLoadFailed=true; console.warn('[guitar-class] progress load failed — running read-only on derived data', e); progress={}; lastModuleNum=1; lastSetId=null; responses={}; completed={}; classActivities={}; exitChecks={}; games={}; streak={ count:0, lastDay:null }; practiceLog=loadLocalPracticeLog(); songReady={}; songReadyAt={}; studentPeriod=''; restoreLocalPlace(); }
+    } else { progress={}; lastModuleNum=1; lastSetId=null; responses={}; completed={}; classActivities={}; caStepDone={}; exitChecks={}; games={}; streak={ count:0, lastDay:null }; practiceLog=loadLocalPracticeLog(); songReady={}; songReadyAt={}; studentPeriod=''; restoreLocalPlace(); }
+  } catch(e){ progressLoadFailed=true; console.warn('[guitar-class] progress load failed — running read-only on derived data', e); progress={}; lastModuleNum=1; lastSetId=null; responses={}; completed={}; classActivities={}; caStepDone={}; exitChecks={}; games={}; streak={ count:0, lastDay:null }; practiceLog=loadLocalPracticeLog(); songReady={}; songReadyAt={}; studentPeriod=''; restoreLocalPlace(); }
 }
 
 /* ── Games access (teacher-controlled) ──
@@ -1008,10 +1009,12 @@ async function flushSave(){
   if(keys.has('responses')) payload.responses = responses;
   let sentDeletes = null;
   let sentCaDeletes = null;
+  let sentStepDeletes = null;
   // Copies, so the FieldValue.delete() sentinels stamped in below never leak
   // into local state.
   if(keys.has('completed'))       payload.completed       = Object.assign({}, completed);
   if(keys.has('classActivities')) payload.classActivities = Object.assign({}, classActivities);
+  if(keys.has('caSteps'))         payload.caSteps         = Object.assign({}, caStepDone);
   // Whole map, {merge:true} as everywhere else. No delete path: a student
   // never removes an exit-check result, only adds or (on a retake) replaces one.
   if(keys.has('exitChecks')) payload.exitChecks = exitChecks;
@@ -1036,11 +1039,16 @@ async function flushSave(){
       sentCaDeletes = [...classActivitiesDeletes];
       sentCaDeletes.forEach(k=>{ payload.classActivities[k] = firebase.firestore.FieldValue.delete(); });
     }
+    if(payload.caSteps && caStepDeletes.size){
+      sentStepDeletes = [...caStepDeletes];
+      sentStepDeletes.forEach(k=>{ payload.caSteps[k] = firebase.firestore.FieldValue.delete(); });
+    }
     await db.collection('progress').doc(currentUser.uid).set(payload,{merge:true});
     // Only now that the write landed: retire the deletes it carried. Keys
     // un-marked DURING the write stay queued for the next flush.
     if(sentDeletes) sentDeletes.forEach(k=>completedDeletes.delete(k));
     if(sentCaDeletes) sentCaDeletes.forEach(k=>classActivitiesDeletes.delete(k));
+    if(sentStepDeletes) sentStepDeletes.forEach(k=>caStepDeletes.delete(k));
     setSaveMsg('save.saved', 2000);
     _saveFailCount = 0;
     /* A period save landing closes the picker and refreshes the gate — win
@@ -1094,6 +1102,16 @@ function onClassActivityChange(id, isDone){
   saveClassActivities();
 }
 function saveClassActivities(){ queueSave('classActivities'); }
+/* Class-activity step and practice-card check ticks ("ca-18:0", "ca-18:c2"):
+   the student's own top-level `caSteps` field, same set/delete shape as
+   classActivities above. Kept in Firestore, not on the Chromebook, so they
+   follow the student to any device and never reset (Jonathan, 2026-10-01). */
+let caStepDeletes = new Set();
+function onCaStepChange(key, isDone){
+  if(isDone){ caStepDone[key] = true; caStepDeletes.delete(key); }
+  else { delete caStepDone[key]; caStepDeletes.add(key); }
+  queueSave('caSteps');
+}
 function saveExitChecks(){ queueSave('exitChecks'); }
 function saveGames(){ queueSave('games'); }   // per-game bests (games arcade, coach.js)
 function saveStreak(){ queueSave('streak'); }
@@ -10525,8 +10543,8 @@ function caFirstSentence(html){
    Marking done with fewer than all steps ticked THIS SESSION shows an
    inline confirm in place of the button — never a confirm() dialog, and
    never a lock: "Keep going" just re-shows the plain button, "Mark
-   complete" finishes exactly like today. caStepDone is kept for the day
-   on this device (see its declaration), so a reload no longer wipes the
+   complete" finishes exactly like today. caStepDone is saved to the
+   student's progress (see its declaration), so a reload never wipes the
    ticks — the rule is still simply ticks < steps, always. */
 let caNudgeId = null;
 function caMarkClick(id){
@@ -10595,9 +10613,8 @@ function caMarkRowHtml(a, done, markLabel){
 /* The chunk-size meta line under a collapsed card's title — how big a bite
    this is before the student opens it (practice-chunks work order,
    2026-09-19). Step count and the optional authored `minutes` are stable;
-   the done count is read from caStepDone, which is kept for the day on
-   this device (see the declaration), so it's honestly a TODAY count, not a
-   saved record — shown only once it's above zero so a fresh card doesn't
+   the done count is read from caStepDone, which is saved to the
+   student's progress (see the declaration) — shown only once it's above zero so a fresh card doesn't
    claim "0 done". */
 function caChunkMetaHtml(a){
   // A practice card is sized by its checks ("4 checks"), a ladder by its steps.
@@ -10745,46 +10762,52 @@ function caHeroCheckHtml(a, isCurrent = true){
   </details>`;
 }
 // Per-step accordion state. caStepOpen maps activity id -> open step index
-// (-1 = none) and is session-only. caStepDone maps "activityId:stepIndex" ->
-// true and is KEPT FOR THE DAY on this device (navigability round 2,
-// 2026-09-23): a Chromebook waking from sleep, or the service worker's
-// post-deploy reload, used to put "3 of 7 done" back to 0 mid-class.
-// localStorage only, scoped to the student (_uidKey) and stamped with the
-// local date — tomorrow it starts empty. Never Firestore: these ticks are a
-// place-keeper, not a record. Read at render time by caActivityCardHtml,
-// then kept in sync by direct DOM edits in caToggleStepOpen/caMarkStepDone so
-// marking a step done doesn't force a full re-render of the card (which would
-// cut off any playing TAB audio in other steps).
+// (-1 = none) and is session-only. caStepDone maps "activityId:stepIndex"
+// (and "activityId:c<n>" for a practice card's checks) -> true and is SAVED
+// TO THE STUDENT'S PROGRESS DOC as `caSteps` (Jonathan, 2026-10-01: ticks
+// must not reset each day or live on the Chromebook). loadProgress() reads
+// it; every tick goes through onCaStepChange(). Read at render time by
+// caActivityCardHtml, then kept in sync by direct DOM edits in
+// caToggleStepOpen/caMarkStepDone so marking a step done doesn't force a full
+// re-render of the card (which would cut off any playing TAB audio in other
+// steps).
 let caStepOpen = {};
 let caStepDone = {};
-const CA_STEPS_KEY = 'caStepsToday';
-let caStepsLoadedFor = null;   // whose ticks are in caStepDone right now
+function caCleanTicks(raw){
+  const out = {};
+  if(raw && typeof raw === 'object') Object.keys(raw).forEach(k => { if(raw[k] === true) out[k] = true; });
+  return out;
+}
+/* Until 2026-10-01 the ticks lived in localStorage for the day
+   (`caStepsToday`). Fold any still on this Chromebook into the student's
+   progress once, then drop the local copy, so nobody loses today's ticks to
+   the switch. */
+const CA_STEPS_LEGACY_KEY = 'caStepsToday';
+function caAdoptLocalTicks(){
+  if(!currentUser || progressLoadFailed || isDevBypassUser()) return;
+  try{
+    const k = _uidKey(CA_STEPS_LEGACY_KEY);
+    const saved = JSON.parse(localStorage.getItem(k) || 'null');
+    localStorage.removeItem(k);
+    const done = saved && saved.done && typeof saved.done === 'object' ? saved.done : {};
+    const add = Object.keys(done).filter(key => done[key] === true && caStepDone[key] !== true);
+    add.forEach(key => { caStepDone[key] = true; });
+    if(add.length) queueSave('caSteps');
+  }catch(e){ /* storage unavailable or bad JSON — nothing to adopt */ }
+}
+let caRevealsDay = null;   // whose day the revealed-tab set belongs to
 function caLocalDay(){
   const d = new Date();
   return `${d.getFullYear()}-${d.getMonth() + 1}-${d.getDate()}`;
 }
-/* Read once per signed-in student (renderClassActivities calls this first
-   thing; a sign-out/sign-in on a shared Chromebook swaps the set). Only
-   `true` entries are kept, matching every `=== true` reader. */
-function caLoadStepDone(){
-  // The day is part of the key: a Chromebook that sleeps overnight with the
-  // tab open must still start the new day empty (the visibilitychange
-  // re-render on wake lands here and reloads).
+/* Called first thing by renderClassActivities. The ticks themselves no
+   longer reset; only a tab the last student (or yesterday) waited out starts
+   hidden again. */
+function caResetRevealsIfNewDay(){
   const who = ((currentUser && currentUser.uid) || '') + '|' + caLocalDay();
-  if(caStepsLoadedFor === who) return;
-  caStepsLoadedFor = who;
-  caStepDone = {};
-  // New student or new day: a tab the last one waited out starts hidden again.
+  if(caRevealsDay === who) return;
+  caRevealsDay = who;
   if(typeof caRevealedTabs !== 'undefined') caRevealedTabs.clear();
-  try{
-    const saved = JSON.parse(localStorage.getItem(_uidKey(CA_STEPS_KEY)) || 'null');
-    if(saved && saved.day === caLocalDay() && saved.done && typeof saved.done === 'object'){
-      Object.keys(saved.done).forEach(k => { if(saved.done[k] === true) caStepDone[k] = true; });
-    }
-  }catch(e){ /* storage unavailable or bad JSON — start empty, like before */ }
-}
-function caSaveStepDone(){
-  try{ localStorage.setItem(_uidKey(CA_STEPS_KEY), JSON.stringify({day: caLocalDay(), done: caStepDone})); }catch(e){}
 }
 function caDefaultOpenStep(a){
   const steps = a.steps || [];
@@ -10952,12 +10975,11 @@ function caFocusGotIt(id, si){
   const key = `${id}:${si}`;
   const last = si >= (a.steps || []).length - 1;
   if(caStepDone[key] === true){
-    if(last){ delete caStepDone[key]; caSaveStepDone(); }
+    if(last) onCaStepChange(key, false);
     caFocusGo(id, last ? si : si + 1);
     return;
   }
-  caStepDone[key] = true;
-  caSaveStepDone();
+  onCaStepChange(key, true);
   caFocusGo(id, last ? si : si + 1);
 }
 /* An activity that names a Song Journey page (`journey: '<slug>'`, see the
@@ -11050,7 +11072,7 @@ function caJourneyLinkHtml(a){
    extra (Jonathan, 2026-09-27). That write happens in place (pcCheck), not
    through caToggleComplete, which closes the card and re-renders the page:
    that would stop the song mid-play and hide Level up. Ticks live in
-   caStepDone under `<id>:c<n>` — kept for the day, like step ticks. */
+   caStepDone under `<id>:c<n>` — saved to progress, like step ticks. */
 function caIsCard(a){ return !!(a && a.view === 'card' && a.card); }
 function caCardChecks(a){ return (a && a.card && Array.isArray(a.card.checks)) ? a.card.checks : []; }
 /* The ticks an activity counts: a card's checks, or a ladder's steps. Every
@@ -11535,8 +11557,7 @@ function pcCheck(btn, id, ci){
     nowDone = !li.classList.contains('is-done');   // the console preview saves nothing
   } else {
     nowDone = caStepDone[key] !== true;
-    if(nowDone) caStepDone[key] = true; else delete caStepDone[key];
-    caSaveStepDone();
+    onCaStepChange(key, nowDone);
   }
   li.classList.toggle('is-done', nowDone);
   btn.setAttribute('aria-checked', nowDone ? 'true' : 'false');
@@ -11625,8 +11646,8 @@ function caActivityCardHtml(a){
    IS_TEACHER_MODE bail sdSaveBest/dkSaveBest make — previewing isn't
    turning in).
 
-   Run state is in-memory only (unlike caStepDone, which is kept for the
-   day): a reload mid-check starts it over. That is the honest behaviour for a one-try assessment — a
+   Run state is in-memory only (unlike caStepDone, which is saved to
+   progress): a reload mid-check starts it over. That is the honest behaviour for a one-try assessment — a
    half-finished run is not a score, and persisting one would mean deciding
    what a resumed attempt counts as. */
 let ecRuns = {};          // id -> { i, picks } while a check is being taken
@@ -12062,12 +12083,11 @@ function caToggleStepOpen(btn){
 }
 // Mark this step done, then collapse it and open the next not-done step —
 // same "collapse and advance" feel as the module-step checklist, but
-// scoped to one flat step list (no sections/focus-mode) and never saved.
+// scoped to one flat step list (no sections/focus-mode).
 function caMarkStepDone(btn, id, si){
   const key = `${id}:${si}`;
   const nowDone = caStepDone[key] !== true;
-  if(nowDone) caStepDone[key] = true; else delete caStepDone[key];
-  caSaveStepDone();
+  onCaStepChange(key, nowDone);
   const li = btn.closest('.ca-step');
   li.classList.toggle('ca-step-done', nowDone);
   btn.classList.toggle('is-done', nowDone);
@@ -12448,7 +12468,7 @@ function refreshOpenClassActivitiesScreen(){
 function renderClassActivities(){
   const bodyEl = document.getElementById('class-activities-body');
   if(!bodyEl) return;
-  caLoadStepDone();   // today's step ticks, before anything below reads them
+  caResetRevealsIfNewDay();
   // This rebuilds every card, so a snippet playing in one of them is about to
   // be detached — and a detached <audio> keeps playing with nothing left on
   // screen to stop it. (snipTick's own isConnected guard is the backstop for

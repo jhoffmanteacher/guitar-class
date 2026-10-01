@@ -5,6 +5,14 @@ Notable changes to the Guitar Class site. Newest first.
 For the full session-by-session history (and the reasoning behind each change),
 see `WORKFLOW.md` and the git commit log.
 
+## 2026-10-01 — Activity check marks are saved
+
+### Changed
+
+- **Check marks on In-Class Activity steps and practice-card checklists
+  no longer clear each day.** They save with the rest of your progress, so
+  they are still there tomorrow and on any Chromebook you sign in on.
+
 ## 2026-10-01 — Notes in time: a Faster button
 
 ### Added

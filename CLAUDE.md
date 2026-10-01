@@ -1211,11 +1211,14 @@ group's order falls out of the same reversal now, not a second `.reverse()`.
 from `caSyncTopbar()`) `replaceState`s `#class-activities/<id>` while a card
 is open and plain `#class-activities` when none is, so a reload or a Back
 from another page reopens it through `caFocusActivity()`. Step ticks
-(`caStepDone`) are kept **for the day** in `localStorage`
-(`_uidKey('caStepsToday')`, `{day, done}`; a new local date starts empty) —
-`caLoadStepDone()` runs first thing in `renderClassActivities()`,
-`caSaveStepDone()` on every tick. Never Firestore: they're a place-keeper,
-not a record. **Mark complete** closes the card, scrolls to the top (where
+and practice-card checks (`caStepDone`, keys `<id>:<n>` / `<id>:c<n>`) are
+**saved to the student's progress doc as `caSteps`** (Jonathan, 2026-10-01:
+they must not reset each day or live on the Chromebook) — read by
+`loadProgress()`, written through `onCaStepChange()` with the same
+set/`FieldValue.delete()` shape as `classActivities`. The old per-day
+`localStorage` copy (`caStepsToday`) is folded in once by
+`caAdoptLocalTicks()` and removed. Only the revealed-tab set still resets
+per student/day (`caResetRevealsIfNewDay()`). **Mark complete** closes the card, scrolls to the top (where
 Today's activity already shows the next one) and toasts
 `ca.doneNextToast` / `ca.doneAllToast`; un-marking keeps the card open.
 A second tap on the rail row of the page you're on scrolls to the top — it
