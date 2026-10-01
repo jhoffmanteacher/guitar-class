@@ -7263,7 +7263,7 @@ function erCheckOff(key){
    stays lit to the end of beat 4, then the next name. It runs until Stop.
    Every NC_ANS_EVERY notes it steps up NC_ANS_BPM (40 BPM = the answer
    after 3 s … 120 BPM = after 1 s); "Slower" steps back one right away and
-   restarts the count. No score, no levels, no unlocks. The speed a student
+   restarts the count, "Faster" steps up one the same way. No score, no levels, no unlocks. The speed a student
    reached is remembered per chunk. Notes: natural, or "With ♯ notes".
 
    SHOW ANSWER OFF — the scored levels (NC_LEVELS): naturals 60 → 80 BPM →
@@ -7542,7 +7542,8 @@ function ncPlayHtml(key){
   const ans = st.mode === 'answer';
   const foot = ans
     ? `<span class="nc-speed" id="nc-speed-${key}">${escHtml(ncAnsMeta(st.L.bpm))}</span>` +
-      `<button type="button" class="sdr-btn2" onclick="ncSlower('${key}')">${escHtml(t('nc.slower'))}</button>`
+      `<button type="button" class="sdr-btn2" onclick="ncSlower('${key}')">${escHtml(t('nc.slower'))}</button>` +
+      `<button type="button" class="sdr-btn2" onclick="ncFaster('${key}')">${escHtml(t('nc.faster'))}</button>`
     : `<div class="fret-dots nc-dots" id="nc-dots-${key}"></div>`;
   return ncHeadHtml(st, ans ? t('nc.metaPlayAlong') : t('nc.metaLevel', { n: st.lvIdx + 1, bpm: st.L.bpm })) +
     `<div class="sdr-body nc-play">` +
@@ -7651,7 +7652,7 @@ function ncFrame(){
 }
 
 /* Play-along only, at each note boundary: apply a waiting tempo step (from
-   the count or from Slower), then count this note. The step-up is QUEUED one
+   the count, Slower or Faster), then count this note. The step-up is QUEUED one
    note early so the click scheduler, which books the next note's clicks
    ~120 ms ahead, already sees the new tempo when that note arrives. */
 function ncAnsBoundary(st){
@@ -7676,6 +7677,18 @@ function ncSlower(key){
   const from = st.pendingStep != null ? st.pendingStep : st.prog.ans;
   st.pendingStep = Math.max(0, from - 1);
   st.sinceUp = 0;               // ncAnsBoundary resets it again when the step lands
+  const sp = document.getElementById('nc-speed-' + key);
+  if(sp) sp.textContent = ncAnsMeta(NC_ANS_BPM[st.pendingStep]);
+}
+/* Faster: Slower's mirror — one step up (stops at the top of NC_ANS_BPM),
+   landing with the next name; the count to the next automatic step-up
+   starts over from there. */
+function ncFaster(key){
+  const st = noteCalls[key];
+  if(!st || st.phase !== 'play' || st.mode !== 'answer') return;
+  const from = st.pendingStep != null ? st.pendingStep : st.prog.ans;
+  st.pendingStep = Math.min(NC_ANS_BPM.length - 1, from + 1);
+  st.sinceUp = 0;
   const sp = document.getElementById('nc-speed-' + key);
   if(sp) sp.textContent = ncAnsMeta(NC_ANS_BPM[st.pendingStep]);
 }

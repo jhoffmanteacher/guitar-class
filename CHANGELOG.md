@@ -5,6 +5,13 @@ Notable changes to the Guitar Class site. Newest first.
 For the full session-by-session history (and the reasoning behind each change),
 see `WORKFLOW.md` and the git commit log.
 
+## 2026-10-01 — Notes in time: a Faster button
+
+### Added
+
+- **Low E and A Notes in Time has a Faster button** next to Slower. With
+  Show answer on, press it to go up one speed without waiting 8 notes.
+
 ## 2026-10-01 — Songs page: play along with your practice cards
 
 ### Added

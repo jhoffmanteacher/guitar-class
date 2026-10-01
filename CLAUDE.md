@@ -615,7 +615,7 @@ scissors, index cards or a pen. Three `step.drill` types share one dispatcher:
 `ear` (hidden note sequence, played aloud) — plus `notecall` (2026-09-27, ca-23),
 which isn't a paper drill: a note name on the beat, played on the guitar. It opens
 in "Show answer" (a play-along: the fret lights up 2 beats after the name, speeds up
-every 8 notes, Slower backs it off, nothing scored); turned off, it runs five scored
+every 8 notes, Slower backs it off and Faster steps it up, nothing scored); turned off, it runs five scored
 levels answered by the mic (the "Play it on the guitar" button, off by default) or by tapping the fret
 (`drill: { type:'notecall',
 strings:['lowE','A'], minFret:5, maxFret:8 }`; engine `renderNoteCall` in
