@@ -5853,7 +5853,7 @@ function checkPracticeCards() {
    one-sided label is itself the bug (dots in one language, none in the
    other), so it fails outright now rather than being skipped. Bump when a
    card genuinely adds or removes a got-it sentence in both languages. */
-const REP_COUNT_FIELDS = 387;   // ca-13 / ca-19 / ca-20 rebuilt as practice cards: 11 got-it steps -> 4 help steps (2026-10-01)
+const REP_COUNT_FIELDS = 389;   // ca-25 (Seven Nation Army, the whole song): 2 got-it help steps (2026-10-01)
 function checkRepCountParity(sets, ctx) {
   head('1bg. Rep-count dots agree between English and Spanish');
   if (!ctx) { err('1bg cannot run — render context unavailable'); problems++; return; }

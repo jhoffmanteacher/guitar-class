@@ -643,8 +643,9 @@ fast file's scaled by `trackBpm/trackBpmSlow`. **Never measure a second
 anchor.**
 
 **Live-band tracks carry a beat map — `barTimes`** (2026-09-27). The grid
-above only holds for a track made to a click ("the cure", Seven Nation Army,
-Luna). Sweet Child, Let It Be and the Hendrix Watchtower were played by a
+above only holds for a track made to a click ("the cure", Luna). Sweet
+Child, Let It Be, the Hendrix Watchtower and (since 2026-10-01, for the
+whole-song card ca-25) Seven Nation Army were played by a
 band with no click, and the Moises metronome follows the band — a straight
 grid is off by up to half a beat by mid-song. Those entries list every bar's
 downbeat (fast file, seconds) in `barTimes`, `barTimes[0]` = `anchor`, and

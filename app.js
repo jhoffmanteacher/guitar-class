@@ -1722,10 +1722,34 @@ const SNIPPET_TRACKS = {
     feltBpm: 123,                       // counted at record speed, not halved
     beatsPerBar: 4,
     durationSec: 239,
-    // Measured 2026-09-18 with ?snipcal=1 -> Find the first click, off the
-    // rhythm-down-metronome file's own first click.
-    anchor: 1.135,
+    /* BEAT MAP (2026-10-01, for ca-25, the whole song). The record is a live
+       drummer: a straight 123 grid is fine for the first 8 bars (ca-10) but
+       drifts half a beat by bar 20, and the G-A breaks before each chorus run
+       long, so by the solo the grid sits two beats off the riff. barTimes
+       below is tools/beat-map.py on the rhythm-down pair, downbeat click 0
+       (468 clicks, none missed or doubled; bars 1.897-2.099 s). Checked
+       against the bass chroma per half-beat: every riff lap lands E on beat
+       1 and C on the next bar's beat 1, bars 1-114. The old steady anchor
+       was 1.135 (measured 2026-09-18 with ?snipcal=1); bar 1 is now the
+       first measured click. Song map on this list: riff 1-24, G-A 25-26,
+       riff 27-34, G-A 35-36, riff 37-60, G-A 61-62, riff 63-78, G-A 79-80,
+       riff 81-104, G-A 105-106, riff 107-114, final E 115-116. */
+    anchor: 1.128,
     anchorVerified: true,
+    barTimes: [
+      1.128, 3.172, 5.169, 7.169, 9.170, 11.151, 13.089, 15.052, 16.968, 18.909,
+      20.831, 22.729, 24.632, 26.529, 28.450, 30.372, 32.268, 34.228, 36.154, 38.092,
+      39.991, 41.929, 43.852, 45.790, 47.771, 49.789, 51.810, 53.769, 55.689, 57.669,
+      59.630, 61.569, 63.514, 65.490, 67.469, 69.450, 71.493, 73.550, 75.574, 77.611,
+      79.650, 81.649, 83.609, 85.569, 87.509, 89.470, 91.413, 93.351, 95.311, 97.251,
+      99.202, 101.129, 103.053, 105.013, 106.951, 108.891, 110.809, 112.711, 114.631, 116.550,
+      118.494, 120.490, 122.511, 124.470, 126.430, 128.411, 130.414, 132.352, 134.311, 136.292,
+      138.231, 140.190, 142.150, 144.113, 146.091, 148.010, 149.970, 151.930, 153.911, 155.911,
+      157.970, 160.070, 162.114, 164.170, 166.173, 168.155, 170.093, 172.030, 173.950, 175.890,
+      177.834, 179.773, 181.711, 183.652, 185.611, 187.572, 189.510, 191.470, 193.416, 195.331,
+      197.253, 199.190, 201.114, 203.032, 204.971, 206.972, 208.953, 210.913, 212.851, 214.812,
+      216.773, 218.711, 220.651, 222.611, 224.591, 226.551, 228.532,
+    ],
   },
   /* "Luna" is 6/8 and the room counts the two BIG beats per bar (Journey
      Layers 2-3: one pluck per bar, two bars per chord). The file's 128 BPM
@@ -1768,7 +1792,7 @@ const SNIPPET_TRACKS = {
     anchorVerified: true,
   },
   /* ── LIVE-BAND TRACKS: a beat map instead of a steady grid (2026-09-27) ──
-     "the cure", Seven Nation Army and Luna sit on a steady grid, so one
+     "the cure" and Luna sit on a steady grid, so one
      anchor plus bar arithmetic finds every bar. The next two were recorded
      by a band with no click, and the Moises metronome FOLLOWS the band: a
      straight grid through Sweet Child's clicks is off by up to 0.26 s (half
