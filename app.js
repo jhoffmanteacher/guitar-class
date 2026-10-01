@@ -922,6 +922,7 @@ function prLatestValue(raw){
 }
 const _prEditingKeys = new Set();
 function onResponseChange(key, value, isPR){
+  if(isPeekedResponseKey(key)) return;   // read-only preview of a locked set
   if(isPR){
     const arr = Array.isArray(responses[key]) ? responses[key].slice()
       : (responses[key] != null && responses[key] !== '' ? [{value:responses[key], date:null}] : []);
@@ -942,6 +943,7 @@ function onResponsePRBlur(key){ _prEditingKeys.delete(key); }
 /* Graded in-step MC (factual, has answer:). Stores the choice TEXT (so the
    teacher dashboard reads it unchanged); recolors and reveals the explanation. */
 function onStepMcSelect(key, btn){
+  if(isPeekedResponseKey(key)) return;   // read-only preview of a locked set
   const choice = btn.dataset.choice;
   responses[key] = choice;
   saveResponses();
@@ -3219,6 +3221,23 @@ function prevModuleGateParams(w){
 function isSetPeeking(wid){
   const p = document.querySelector(`.week-panel[data-id="${CSS.escape(wid)}"]`);
   return !!(p && p.classList.contains('set-peek'));
+}
+/* The same question for a saved ANSWER, which is keyed rather than handed a
+   set id: `${setId}-${station}-sec…` for a step's response and
+   `practice-${skillId}` for a checklist practice quiz, and a skill id opens
+   with its set id — so a peeked panel's id is a prefix of every key written
+   from inside it. Until 2026-10-01 the three response writers
+   (onResponseChange, onStepMcSelect, onPracticeMcSelect) had no guard at
+   all, despite the comment above: a student locked out of Module 3 could
+   open its read-only preview, tap a graded quiz choice, and the answer was
+   saved to their progress under a Module 3 key. It unlocked nothing
+   (hasProgressIn reads skills and completed steps, both guarded), but it
+   left response keys in a module "nobody had reached", which is the
+   assumption every mid-year content edit rests on. */
+function isPeekedResponseKey(key){
+  const k = String(key || '').replace(/^practice-/, '');
+  return Array.from(document.querySelectorAll('.week-panel.set-peek'))
+    .some(p => p.dataset.id && k.startsWith(p.dataset.id + '-'));
 }
 
 // Tiny transient toast for gate hints — makes its own element and self-dismisses.
@@ -6060,6 +6079,7 @@ function togglePracticePanel(sid, btn){
 }
 function onPracticeMcSelect(skillId, idx, ansIdx, btnEl){
   const key = `practice-${skillId}`;
+  if(isPeekedResponseKey(key)) return;   // read-only preview of a locked set
   responses[key] = String(idx);
   saveResponses();
   const group = document.getElementById('pp-mc-'+skillId);

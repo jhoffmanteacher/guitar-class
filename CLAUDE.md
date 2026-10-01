@@ -177,17 +177,23 @@ student's tick with it and a section that moves takes every step after it.
 What that permits depends on how far the class has got, and
 `tools/rule-zero-proof.mjs` enforces exactly three regimes:
 
-- **Modules 1–`FROZEN_THROUGH` (2 today)** — students are in here. Step
+- **Modules 1–`FROZEN_THROUGH` (3 today — raised from 2 on 2026-10-01,
+  Jonathan: "nobody is in Module 3 yet, but students are about to")** —
+  students are in here. Step
   labels must match BY INDEX; a new step may only be **appended** to the
   tail of a section. No renames: a rename here would hide an insertion
   from the check. Graded-MC choices are frozen too (checks.mjs 1ap).
-- **Modules 3–`OPEN_THROUGH` (6 today)** — **nobody has reached Module 3**
-  (Jonathan, 2026-09-19, re-confirmed 2026-09-20). A step may be
+- **Modules `FROZEN_THROUGH`+1–`OPEN_THROUGH` (4–6 today)** — **nobody has
+  reached Module 4.** A step may be
   **inserted anywhere inside** an existing section, and a step's
   `response` may be removed or changed. Old labels must still appear in
   the same relative order; every added step prints. **Raise
   `FROZEN_THROUGH` as the class advances** — it is the same number
-  checks.mjs pins as `FROZEN_MC_THROUGH_MODULE`.
+  checks.mjs pins as `FROZEN_MC_THROUGH_MODULE`. **Raise both a module
+  AHEAD of the class, when students are about to reach it, not after**:
+  the first student through the gate is the moment a structural edit
+  starts costing someone their ticks, and nobody tells Claude when that
+  happens.
 - **Above that** — step count and order are fixed; a rename prints.
 
 In every regime the SECTIONS are fixed: same count, same order, same
@@ -199,6 +205,19 @@ report before any content push.
 A fix that these regimes block goes on the **Summer reset list** below —
 never worked around, never shipped as a rename that "prints rather than
 failing."
+
+**"Nobody has reached Module N" was not strictly true before 2026-10-01.**
+A locked set opens as a read-only preview (`set-peek`), and until that day
+the preview refused skill ticks and Done buttons but still SAVED ANSWERS:
+`onResponseChange`, `onStepMcSelect` and `onPracticeMcSelect` had no peek
+guard, so a student locked out of Module 3 could tap a graded quiz choice
+there and it was written to their progress under a Module 3 key. It
+unlocked nothing (`hasProgressIn()` reads skills and completed steps, both
+guarded) but it means a few `responses` keys may already exist in the
+module above the class. `isPeekedResponseKey()` closes it and checks.mjs
+**1bl** pins the guard on every writer. Practical consequence: treat the
+module the class is ABOUT to enter as frozen — which is why the numbers
+above were raised a day early.
 
 ### ⚠️ Sweep findings ratchet into checks.mjs
 Any sweep or audit that finds **3+ instances of a mechanically-detectable error
@@ -249,7 +268,9 @@ Module 13 really needs scissors), and every Song Journey page's full-mix set for
 the Guitar toggle — complete, present, same length as its rhythm-down twin,
 page count pinned (1be), and the recorded guitar notes — one file per
 semitone 40–74, each present and named for its pitch, count pinned, and no
-second way to a synth buffer (1bj).
+second way to a synth buffer (1bj), and a read-only set preview saving no
+answers — every function that writes `responses[...]` checks
+`isPeekedResponseKey()` first, writer count pinned (1bl).
 
 **A phrase detector must match the UNESCAPED string.** Until 2026-09-25 1w
 and 1w-t matched the raw source capture, which keeps `\'`, so every banned
@@ -834,8 +855,8 @@ away. Write `answer: 0` freely — students never see it that way.
 (2026-09-19). Every graded MC in Modules 1..N is pinned by a fingerprint of
 its `choices` + `choices_es` + `answer`, and **1ap** fails the push when one
 of them changes by a single character — including a graded MC that goes
-missing. N is *the furthest module a student has reached*; it is **2** today
-(Jonathan, 2026-09-19). **Raise it as the class advances** — ask which module
+missing. N is *the furthest module a student has reached or is about to*; it
+is **3** today (Jonathan, 2026-10-01; 2 from 2026-09-19). **Raise it as the class advances** — ask which module
 they're in, bump the constant, re-run and paste the printed fingerprints back
 in, same commit. Lowering it is almost never right: a module the class has
 passed keeps its stored answers forever. The practice-panel MC on a skill is

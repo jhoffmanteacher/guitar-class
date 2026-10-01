@@ -558,9 +558,14 @@ function checkMcAnswerTells(allSets) {
    list".
 
    Modules 3–6 were reworded on 2026-09-19 (the quiz-giveaways work
-   order) precisely because nobody had reached them yet.
+   order) precisely because nobody had reached them yet. Module 3 was
+   pinned on 2026-10-01, a day AHEAD of the class: until that day a
+   locked-out student could tap a quiz choice in a set's read-only
+   preview and have it saved (app.js, isPeekedResponseKey), so "nobody
+   has answered these" could not be taken on trust for the next module
+   up. Pin a module when the class is about to reach it, not after.
    ════════════════════════════════════════════════════════════════════ */
-const FROZEN_MC_THROUGH_MODULE = 2;   // students are in Module 2 (Jonathan, 2026-09-19)
+const FROZEN_MC_THROUGH_MODULE = 3;   // students are about to enter Module 3 (Jonathan, 2026-10-01); was 2 (2026-09-19)
 const FROZEN_MC_FINGERPRINTS = {
   'w1·b·sec0·step2': '668fc32b5e8cc516',
   'w1·b·sec1·step0': '81a193a1701dd036',
@@ -581,6 +586,11 @@ const FROZEN_MC_FINGERPRINTS = {
   'm2w2·b·sec1·step1': '1ab25779aa2ef868',
   'm2w2·c·sec0·step3': '77eba66498d9971c',
   'm2w2·c·sec1·step4': '4c1583f324c81209',
+  // Module 3 — pinned 2026-10-01, the day before the class reached it.
+  'm3w1·b·sec0·step0': '951967a7639f7ff5',
+  'm3w1·b·sec1·step1': '56086620b6ae5dc1',
+  'm3w1·c·sec4·step0': '982ff1050e4ee042',
+  'm3w2·b·sec0·step0': '1a402410b40720f2',
 };
 function gradedMcFingerprint(mc) {
   return createHash('sha256')
@@ -5960,6 +5970,42 @@ function checkJourneySlowBpmLabels() {
    name (so a file can't be wired to the wrong key), and the count is
    pinned. 1x covers the other direction (a guitar-note file on disk that
    nothing references). */
+/* ════════════════════════════════════════════════════════════════════
+   1bl. A PEEKED SET SAVES NOTHING — a locked set can be opened read-only
+   (the "set-peek" preview). toggleSkill, the step Done button and the
+   drill check-offs always refused to write from inside one; the three
+   functions that save an ANSWER did not, until 2026-10-01: a student
+   locked out of Module 3 could tap a graded quiz choice in the preview
+   and it was stored under a Module 3 key. The module regimes
+   (rule-zero-proof.mjs) and the graded-MC freeze (1ap) both rest on
+   "nobody has written anything in the module above the class", so this
+   pins the guard: every function that assigns into `responses[...]`
+   must call isPeekedResponseKey() first, and the count of such
+   functions is pinned so a new writer cannot arrive unguarded.
+   ════════════════════════════════════════════════════════════════════ */
+const RESPONSE_WRITERS = ['onResponseChange', 'onStepMcSelect', 'onPracticeMcSelect'];
+function checkPeekSavesNothing() {
+  head('1bl. A read-only set preview saves no answers');
+  let bad = 0;
+  const flag = m => { err(m); problems++; bad++; };
+  let src;
+  try { src = stripJsComments(readFileSync(join(ROOT, 'app.js'), 'utf8')); }
+  catch { flag('app.js unreadable — 1bl cannot check this'); return; }
+  if (!/function isPeekedResponseKey\s*\(/.test(src)) flag('app.js: isPeekedResponseKey() is gone — the read-only preview of a locked set can save answers again');
+  for (const fn of RESPONSE_WRITERS) {
+    const body = jsFunctionBody(src, fn);
+    if (body === null) { flag(`app.js: no ${fn}() found — 1bl cannot tell whether it is guarded; update RESPONSE_WRITERS if it was renamed`); continue; }
+    const guard = body.search(/isPeekedResponseKey\s*\(/), write = body.search(/\bresponses\s*\[[^\]]*\]\s*=[^=]/);
+    if (write < 0) flag(`app.js: ${fn}() no longer writes responses[...] — drop it from RESPONSE_WRITERS`);
+    else if (guard < 0 || guard > write) flag(`app.js: ${fn}() writes responses[...] without checking isPeekedResponseKey() first — a locked-out student could save an answer from the read-only preview`);
+  }
+  const writes = [...src.matchAll(/\bresponses\s*\[[^\]]*\]\s*=[^=]/g)].length;
+  const inWriters = RESPONSE_WRITERS.reduce((n, fn) => n + [...(jsFunctionBody(src, fn) || '').matchAll(/\bresponses\s*\[[^\]]*\]\s*=[^=]/g)].length, 0);
+  if (writes !== inWriters)
+    flag(`app.js: ${writes} assignment(s) into responses[...] but only ${inWriters} inside the guarded writers (${RESPONSE_WRITERS.join(', ')}) — a new writer needs the isPeekedResponseKey() guard and a place on RESPONSE_WRITERS`);
+  if (bad === 0) ok(`${RESPONSE_WRITERS.length} response writers, ${writes} writes — every one checks isPeekedResponseKey() first`);
+}
+
 const GUITAR_NOTE_COUNT = 35;
 function checkGuitarNotes() {
   head('1bj. Recorded guitar notes');
@@ -6062,6 +6108,7 @@ function checkGuitarNotes() {
   checkRepCountParity(rcSets, rcCtx);
   checkJourneySlowBpmLabels();
   checkGuitarNotes();
+  checkPeekSavesNothing();
   if (!SKIP_LINKS) await checkLinks();
   else warn('skipping link check (--skip-links)');
   bumpServiceWorker();

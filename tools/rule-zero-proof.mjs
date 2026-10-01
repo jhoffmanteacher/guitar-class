@@ -40,7 +40,7 @@ import vm from 'node:vm';
 
 const ROOT = join(dirname(fileURLToPath(import.meta.url)), '..');
 const BASE = process.argv[2] || 'origin/main';
-const FROZEN_THROUGH = 2;   // graded MCs in Modules 1..2 are frozen this school year
+const FROZEN_THROUGH = 3;   // students are in Modules 1..3 this school year (raised 2→3 on 2026-10-01, as the class reached Module 3)
 
 const C = { red:'\x1b[31m', green:'\x1b[32m', yellow:'\x1b[33m', dim:'\x1b[2m', bold:'\x1b[1m', reset:'\x1b[0m' };
 const ok   = m => console.log(`${C.green}✓${C.reset} ${m}`);
@@ -137,8 +137,10 @@ function skeleton(sets) {
                                 match BY INDEX; new steps only at the tail
                                 of a section. No renames — a rename here
                                 would hide an insertion from this check.
-     Modules 3..OPEN_THROUGH    nobody has reached Module 3 (Jonathan,
-                                2026-09-19), so a step may be INSERTED
+     FROZEN_THROUGH+1..OPEN_THROUGH   (Modules 4..6 since 2026-10-01, when
+                                the class reached Module 3 and
+                                FROZEN_THROUGH went 2 -> 3.) Nobody has
+                                reached these, so a step may be INSERTED
                                 anywhere inside an existing section. Old
                                 labels must still appear in the same
                                 relative order; every added step prints.

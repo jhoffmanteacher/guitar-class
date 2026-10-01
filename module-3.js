@@ -520,7 +520,11 @@ SETS.push(
             text_es: 'Mira: <a href="https://youtu.be/m3dYOsXbWII?t=20" target="_blank">Easy Electric Guitar Songs Everyone Should Know – Marty Music</a> (0:20–3:00). Esto es un bono. La unidad está completa sin él. Mientras miras, elige una canción que reconozcas e intenta tocarla junto con el video. Lo tienes cuando: ya tocaste junto con una canción durante ocho compases seguidos sin perder el pulso.',
             hint: 'Pick one song you recognize and try to play along as it plays. Match the strum timing to what you hear.',
             hint_es: 'Elige una canción que reconozcas e intenta tocarla junto con el video. Iguala el momento del rasgueo con lo que escuchas.',
-            skills: [3, 4],
+            // No `skills:` tag on purpose (2026-10-01). This is the bonus
+            // video — "the set is complete without it" — and tagged [3, 4]
+            // it was the FIRST step carrying those skills, so "Show me where"
+            // on the Eighth-Note Strum and E-root/A-root skills opened a
+            // bonus video instead of the step that teaches them.
           },
           {
             label: 'Watch: alternate picking', label_es: 'Mira: púa alterna',

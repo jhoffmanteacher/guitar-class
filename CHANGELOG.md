@@ -5,6 +5,19 @@ Notable changes to the Guitar Class site. Newest first.
 For the full session-by-session history (and the reasoning behind each change),
 see `WORKFLOW.md` and the git commit log.
 
+## 2026-10-01 — Module 3 is ready
+
+### Fixed
+
+- **Chord boxes high on the neck show their fret.** "10fr" and "12fr" were
+  cut off at the edge of the box. They show in full now.
+- **Module 3, Set 2: "Show me where" opens the right step.** For the
+  eighth-note strum skill and the two-root power chord skill it opened a
+  bonus video. It opens the step that teaches the skill now.
+- **A locked set's preview is read-only everywhere.** You could tap a quiz
+  answer or type in a box while looking at a set you had not unlocked yet.
+  Those are switched off until the set opens.
+
 ## 2026-10-01 — Activity check marks are saved
 
 ### Changed

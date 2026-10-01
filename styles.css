@@ -184,7 +184,12 @@ body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,"Helvetica N
 /* Set peek — read-only preview of a locked set, same idiom as mr-locked above. */
 .week-panel.set-peek .skchk-cell,
 .week-panel.set-peek .step-done-btn,
-.week-panel.set-peek .sdr-checkoff{pointer-events:none;opacity:.55}
+.week-panel.set-peek .sdr-checkoff,
+.week-panel.set-peek .step-mc-opt,
+.week-panel.set-peek .step-resp-mc-opt,
+.week-panel.set-peek .step-resp-input,
+.week-panel.set-peek .pr-input,
+.week-panel.set-peek .sk-practice-mc-opt{pointer-events:none;opacity:.55}
 .set-peek-banner{display:none}
 .week-panel.set-peek .set-peek-banner{display:flex;align-items:flex-start;gap:10px;padding:12px 14px;border:1px solid var(--red-text-bright);background:var(--red-bg-bright);border-radius:var(--radius);color:var(--red-text-bright);font-size:0.9375rem;line-height:1.5;margin-bottom:14px}
 .set-peek-banner-icon{font-size:1.125rem;line-height:1.4;flex-shrink:0}

@@ -175,8 +175,15 @@ function chordDiagramSVG(cfg, opts){
   if (isOpen) {
     s += '<rect x="' + (padL - 1) + '" y="' + (padT - 2.5) + '" width="' + (boxW + 2) + '" height="3" fill="' + t.text + '" rx="1"/>';
   } else {
+    /* "10fr" and "12fr" are four characters in a gutter cut for three: at
+       the one-digit size they ran off the left edge of the box and read
+       ".0fr" / ".2fr" (Module 3's D5 and high E5, found 2026-10-01). A
+       two-digit position is set a size down and held to the gutter's width
+       with textLength, so it fits whatever font the page hands the SVG. */
+    var wide = pos >= 10;
     s += '<text x="' + (padL - 5) + '" y="' + (padT + fretGap * 0.55) + '" text-anchor="end" dominant-baseline="middle" font-size="'
-      +  t.b(9) + '" fill="' + t.text2 + '"' + gdFF(t, 'sans-serif') + '>' + pos + 'fr</text>';
+      +  t.b(wide ? 8 : 9) + '"' + (wide ? ' textLength="' + (padL - 6) + '" lengthAdjust="spacingAndGlyphs"' : '')
+      +  ' fill="' + t.text2 + '"' + gdFF(t, 'sans-serif') + '>' + pos + 'fr</text>';
   }
 
   for (var f = 1; f <= NUM_FRETS; f++) {
