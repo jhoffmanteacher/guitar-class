@@ -1380,20 +1380,28 @@ function buildTab(spec, opts){
     // don't show a second one for the tab's note sequence.
     const showCoach = !(spec.noCoach || hasHolds || (opts && opts.suppressCoach));
     if (showPlayAll || showCoach) {
-      controlsHtml = `<div class="tab-controls"><span class="bpm-control-group">` +
+      controlsHtml = `<div class="tab-controls${spec.controlsBelow ? ' tab-controls--below' : ''}"><span class="bpm-control-group">` +
         (showPlayAll ? `<button type="button" class="play-seq-btn" data-midis="${escAttr(midisAttr)}" onclick="playSequenceFromGroup(this)" title="${escAttr(t('tab.playTabTitle'))}">&#x25B6; ${t('tab.playTab')}</button>` : '') +
         renderBpmControl(keyPrefix, bpm, minBpm, maxBpm) +
         (showCoach ? coachBtnHtml(midisAttr, tabNotesJson, undefined, !!spec.hideNames) : '') +
         `</span></div>`;
     }
   }
+  /* controlsBelow (ca-21, Jonathan 2026-10-01): a sight-reading tab is read
+     and played FIRST, and ▶ Play tab is the answer key afterwards — so the
+     Play / BPM / Coach row sits under the board instead of above it, where
+     it was the first thing a student pressed. Per tab, opt-in; every other
+     tab keeps its controls on top. One builder, so both step renderers
+     (caStepHtml, renderTeacherActivityDetail) get it. */
+  const ctrlTop = spec.controlsBelow ? '' : controlsHtml;
+  const ctrlBottom = spec.controlsBelow ? controlsHtml : '';
   const paged = buildPagedTabBody(spec, opts);
   let html;
   if (paged) {
     // data-total-notes: how many plucks this tab has in all, so a sibling
     // snippet (snipSyncTabPage) can work out notes-per-bar against its own
     // spec.bars without re-deriving it from the DOM's data-seq attributes.
-    html = `<div class="tab tab--paged" data-total-notes="${allMidis.length}">${headHtml}<div class="tab-body">${captionHtml}${controlsHtml}${paged}</div></div>`;
+    html = `<div class="tab tab--paged" data-total-notes="${allMidis.length}">${headHtml}<div class="tab-body">${captionHtml}${ctrlTop}${paged}${ctrlBottom}</div></div>`;
   } else if (spec.phrases && spec.phrases.length) {
     let seqOff = 0;
     const widest = spec.phrases.reduce((m, p) => Math.max(m, (p.notes || []).length), 0);
@@ -1406,11 +1414,11 @@ function buildTab(spec, opts){
       seqOff += (p.notes || []).length;
       return block;
     }).join('');
-    html = `<div class="tab">${headHtml}<div class="tab-body">${captionHtml}${controlsHtml}${blocks}</div></div>`;
+    html = `<div class="tab">${headHtml}<div class="tab-body">${captionHtml}${ctrlTop}${blocks}${ctrlBottom}</div></div>`;
   } else {
     const body = renderTabBlock(spec.notes, 0, 0, !!spec.hideNames);
     if (!body) return '';
-    html = `<div class="tab">${headHtml}<div class="tab-body">${captionHtml}${controlsHtml}${body}</div></div>`;
+    html = `<div class="tab">${headHtml}<div class="tab-body">${captionHtml}${ctrlTop}${body}${ctrlBottom}</div></div>`;
   }
   return (hasRevealDelay && !(opts && opts.noRevealDelay)) ? wrapTabReveal(html, spec.revealDelay, keyPrefix) : html;
 }

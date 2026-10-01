@@ -239,8 +239,9 @@ a class-activity deck drill with no answer side, plus every
 ca-12, ca-17 and ca-22 all dealt the one-sided `naturals` deck under a
 "7 of 7" standard nobody could score), and
 the Song Journey page named only in a class activity's last step, with the
-renderer's last-step gate pinned beside it (1ba), and class activities at four steps or fewer with
-both renderers paging long tabs two lines at a time (1bb), Spanish
+renderer's last-step gate pinned beside it (1ba), and both class-activity
+renderers paging long tabs two lines at a time (1bb — its four-step half is
+a reminder only, a soft rule since 2026-10-01), Spanish
 directions naming the Spanish button («Tocar el tab», «Toca con la banda»)
 rather than "Play" (1bc), and no pen or paper in a class activity (1bd —
 scoped to `class-activities.js`, because module steps have typed boxes and
@@ -1350,10 +1351,11 @@ its steps — two renderers, patched together). checks.mjs 1d validates the
 slug against `tabs/<slug>.html` and the layer against that page's
 `layer-num` spans.
 
-**Four steps, two lines a page** (Jonathan, 2026-09-25). A class activity
-has at most four steps; checks.mjs **1bb** fails a fifth, with the cards
-taught before the rule pinned in `FOUR_STEP_LEGACY` (the list only shrinks —
-cut one to four and it has to leave the list). Every class-activity tab
+**Four steps, two lines a page** (Jonathan, 2026-09-25). **Four steps is a
+SOFT rule** (Jonathan, 2026-10-01): aim for four or fewer, but go past it
+when Jonathan asks — ca-21 has six. checks.mjs **1bb** prints one reminder
+line naming every card over four and never fails the push on it (the old
+`FOUR_STEP_LEGACY` pin list is gone). Every class-activity tab
 longer than two rendered rows pages two rows at a time with Previous / Next
 by default — `CA_TAB_LINES_PER_PAGE`, passed as `defaultLinesPerPage` by
 `caStepHtml()` and `renderTeacherActivityDetail()` (1bb pins both). Play tab

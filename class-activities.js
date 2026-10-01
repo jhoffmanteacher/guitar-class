@@ -99,11 +99,11 @@
      }                                     // page may be named (its button
                                            // renders there)
 
-   FOUR STEPS AT MOST (Jonathan, 2026-09-25): a class activity teaches in
-   four steps or fewer — usually Learn / Practice pairs ending on an
-   open-ended Practice rung. checks.mjs 1bb fails the push on a fifth step;
-   the activities already taught before the rule are pinned there as
-   FOUR_STEP_LEGACY, and that list only shrinks.
+   FOUR STEPS — A SOFT RULE (Jonathan, 2026-09-25; made soft 2026-10-01):
+   aim for four steps or fewer — usually Learn / Practice pairs ending on an
+   open-ended Practice rung. It is a default, not a limit: go past four when
+   Jonathan asks for it (ca-21 has six). checks.mjs 1bb prints a reminder
+   for every card over four and never fails the push on it.
 
    LONG TABS PAGE TWO LINES AT A TIME, by default (same day). Every
    class-activity tab longer than two rendered rows shows two rows with
@@ -2769,14 +2769,19 @@ window.CLASS_ACTIVITIES = [
      became three — one string (old Line 1), one string change (old Line 3),
      both strings up to fret 8 (old Line 5, still the last, open-ended rung).
      Old Line 2 (A string alone) and old Line 4 (a string change on every
-     note) are gone. No revealDelay here: ▶ Play tab is the answer key. */
+     note) are gone. No revealDelay here: ▶ Play tab is the answer key.
+     2026-10-01 (Jonathan: "add two more lines of practice"): old Lines 2 and
+     4 are BACK, in their original places, so it is the original five lines
+     again (Learn + 5 = six steps — the four-step rule is soft).
+     Every tab carries `controlsBelow: true`, so ▶ Play tab sits UNDER the
+     board — read and play first, then check. */
   {
     id:    'ca-21',
     view:  'focus',   // one step at a time — see VIEW above
     title:    'Sight-Reading TAB — Low E and A Strings',
     title_es: 'Lectura a primera vista de TAB — Cuerdas Mi grave y La',
-    intro:    'Sight-reading means playing a line from the TAB the first time you see it. The Unit 2 assessment has you read a 2-bar line you have never heard and play it. These three lines are practice for that.',
-    intro_es: 'Leer a primera vista significa tocar una línea de la TAB la primera vez que la ves. La evaluación de la Unidad 2 te pide leer una línea de 2 compases que nunca has escuchado y tocarla. Estas tres líneas son práctica para eso.',
+    intro:    'Sight-reading means playing a line from the TAB the first time you see it. The Unit 2 assessment has you read a 2-bar line you have never heard and play it. These five lines are practice for that.',
+    intro_es: 'Leer a primera vista significa tocar una línea de la TAB la primera vez que la ves. La evaluación de la Unidad 2 te pide leer una línea de 2 compases que nunca has escuchado y tocarla. Estas cinco líneas son práctica para eso.',
     steps: [
       {
         label:    'Learn — How to read TAB',
@@ -2791,6 +2796,7 @@ window.CLASS_ACTIVITIES = [
         text_es: 'Di en voz alta los trastes de la Línea 1, de izquierda a derecha. Después toca la Línea 1 en tu guitarra, una nota por tiempo, despacio y parejo. Después pulsa «Tocar el tab» para revisar, SOLO DESPUÉS de tocarla. Lo tienes cuando: tocas la Línea 1 completa sin detenerte y coincide con la tablatura. ¿Una nota equivocada? Di cada número de traste en voz alta mientras lo tocas, e inténtalo otra vez.',
         tab: {
           hideNames: true,
+          controlsBelow: true,   // Play tab is the answer key — under the board
           caption: 'Line 1 · low E string · 2 bars, one note per beat',
           caption_es: 'Línea 1 · cuerda Mi grave · 2 compases, una nota por tiempo',
           notes: [
@@ -2808,12 +2814,35 @@ window.CLASS_ACTIVITIES = [
       {
         label:    'Practice — Line 2',
         label_es: 'Practica — Línea 2',
-        text: 'Line 2 starts on the low E string and moves up to the A string once, in bar 2. Play it one note per beat, then press Play to check. You\'ve got it when: you play Line 2 once through without stopping and it matches the tab. Missed the move to the A string? Say the string and the fret out loud for each note, and try again.',
-        text_es: 'La Línea 2 empieza en la cuerda Mi grave y sube a la cuerda La una vez, en el compás 2. Tócala una nota por tiempo, y luego pulsa «Tocar el tab» para revisar. Lo tienes cuando: tocas la Línea 2 completa sin detenerte y coincide con la tablatura. ¿Te saltaste el paso a la cuerda La? Di en voz alta la cuerda y el traste de cada nota, e inténtalo otra vez.',
+        text: 'Line 2 is all on the A string, the second line from the bottom. Play it one note per beat, then press Play to check. You\'ve got it when: you play Line 2 once through without stopping and it matches the tab. Played it on the low E string? Find the second line from the bottom and start again.',
+        text_es: 'La Línea 2 está toda en la cuerda La, la segunda línea desde abajo. Tócala una nota por tiempo, y luego pulsa «Tocar el tab» para revisar. Lo tienes cuando: tocas la Línea 2 completa sin detenerte y coincide con la tablatura. ¿La tocaste en la cuerda Mi grave? Busca la segunda línea desde abajo y empieza otra vez.',
         tab: {
           hideNames: true,
-          caption: 'Line 2 · low E and A strings · 2 bars, one note per beat',
-          caption_es: 'Línea 2 · cuerdas Mi grave y La · 2 compases, una nota por tiempo',
+          controlsBelow: true,   // Play tab is the answer key — under the board
+          caption: 'Line 2 · A string · 2 bars, one note per beat',
+          caption_es: 'Línea 2 · cuerda La · 2 compases, una nota por tiempo',
+          notes: [
+            { string: 'A', fret: 0, note: 'A', midi: 45 },
+            { string: 'A', fret: 2, note: 'B', midi: 47 },
+            { string: 'A', fret: 3, note: 'C', midi: 48 },
+            { string: 'A', fret: 0, note: 'A', midi: 45 },
+            { string: 'A', fret: 2, note: 'B', midi: 47 },
+            { string: 'A', fret: 3, note: 'C', midi: 48 },
+            { string: 'A', fret: 5, note: 'D', midi: 50 },
+            { string: 'A', fret: 2, note: 'B', midi: 47 }
+          ]
+        },
+      },
+      {
+        label:    'Practice — Line 3',
+        label_es: 'Practica — Línea 3',
+        text: 'Line 3 starts on the low E string and moves up to the A string once, in bar 2. Play it one note per beat, then press Play to check. You\'ve got it when: you play Line 3 once through without stopping and it matches the tab. Missed the move to the A string? Say the string and the fret out loud for each note, and try again.',
+        text_es: 'La Línea 3 empieza en la cuerda Mi grave y sube a la cuerda La una vez, en el compás 2. Tócala una nota por tiempo, y luego pulsa «Tocar el tab» para revisar. Lo tienes cuando: tocas la Línea 3 completa sin detenerte y coincide con la tablatura. ¿Te saltaste el paso a la cuerda La? Di en voz alta la cuerda y el traste de cada nota, e inténtalo otra vez.',
+        tab: {
+          hideNames: true,
+          controlsBelow: true,   // Play tab is the answer key — under the board
+          caption: 'Line 3 · low E and A strings · 2 bars, one note per beat',
+          caption_es: 'Línea 3 · cuerdas Mi grave y La · 2 compases, una nota por tiempo',
           notes: [
             { string: 'E', fret: 3, note: 'G', midi: 43 },
             { string: 'E', fret: 1, note: 'F', midi: 41 },
@@ -2827,14 +2856,37 @@ window.CLASS_ACTIVITIES = [
         },
       },
       {
-        label:    'Practice — Line 3',
-        label_es: 'Practica — Línea 3',
-        text: 'Line 3 goes up to fret 8. Play it one note per beat, then press Play to check. You\'ve got it when: Line 3 matches the tab. Then start the Metro tool at 60 BPM and play it with the click. Raise it 10 BPM each time it stays clean.',
-        text_es: 'La Línea 3 sube hasta el traste 8. Tócala una nota por tiempo, y luego pulsa «Tocar el tab» para revisar. Lo tienes cuando: la Línea 3 coincide con la tablatura. Después arranca la herramienta Metro a 60 BPM y tócala con el clic. Súbela 10 BPM cada vez que te salga limpia.',
+        label:    'Practice — Line 4',
+        label_es: 'Practica — Línea 4',
+        text: 'Line 4 switches between the A string and the low E string on every note. Play it one note per beat, then press Play to check. You\'ve got it when: you play Line 4 once through without stopping and it matches the tab. Losing your place? Point to each number with your finger before you play it.',
+        text_es: 'La Línea 4 cambia entre la cuerda La y la cuerda Mi grave en cada nota. Tócala una nota por tiempo, y luego pulsa «Tocar el tab» para revisar. Lo tienes cuando: tocas la Línea 4 completa sin detenerte y coincide con la tablatura. ¿Te pierdes? Señala cada número con el dedo antes de tocarlo.',
         tab: {
           hideNames: true,
-          caption: 'Line 3 · low E and A strings · frets 5–8 · 2 bars, one note per beat',
-          caption_es: 'Línea 3 · cuerdas Mi grave y La · trastes 5–8 · 2 compases, una nota por tiempo',
+          controlsBelow: true,   // Play tab is the answer key — under the board
+          caption: 'Line 4 · low E and A strings · 2 bars, one note per beat',
+          caption_es: 'Línea 4 · cuerdas Mi grave y La · 2 compases, una nota por tiempo',
+          notes: [
+            { string: 'A', fret: 0, note: 'A', midi: 45 },
+            { string: 'E', fret: 3, note: 'G', midi: 43 },
+            { string: 'A', fret: 2, note: 'B', midi: 47 },
+            { string: 'E', fret: 5, note: 'A', midi: 45 },
+            { string: 'A', fret: 3, note: 'C', midi: 48 },
+            { string: 'E', fret: 3, note: 'G', midi: 43 },
+            { string: 'A', fret: 0, note: 'A', midi: 45 },
+            { string: 'E', fret: 0, note: 'E', midi: 40 }
+          ]
+        },
+      },
+      {
+        label:    'Practice — Line 5',
+        label_es: 'Practica — Línea 5',
+        text: 'Line 5 goes up to fret 8. Play it one note per beat, then press Play to check. You\'ve got it when: Line 5 matches the tab. Then start the Metro tool at 60 BPM and play it with the click. Raise it 10 BPM each time it stays clean.',
+        text_es: 'La Línea 5 sube hasta el traste 8. Tócala una nota por tiempo, y luego pulsa «Tocar el tab» para revisar. Lo tienes cuando: la Línea 5 coincide con la tablatura. Después arranca la herramienta Metro a 60 BPM y tócala con el clic. Súbela 10 BPM cada vez que te salga limpia.',
+        tab: {
+          hideNames: true,
+          controlsBelow: true,   // Play tab is the answer key — under the board
+          caption: 'Line 5 · low E and A strings · frets 5–8 · 2 bars, one note per beat',
+          caption_es: 'Línea 5 · cuerdas Mi grave y La · trastes 5–8 · 2 compases, una nota por tiempo',
           notes: [
             { string: 'E', fret: 5, note: 'A', midi: 45 },
             { string: 'E', fret: 7, note: 'B', midi: 47 },

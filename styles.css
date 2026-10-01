@@ -1539,6 +1539,7 @@ body.t-wide .t-main{max-width:none}
 .bpm-slider:hover::-moz-range-thumb,.bpm-slider:focus::-moz-range-thumb{background:var(--text)}
 .bpm-readout{font-size:0.75rem;color:var(--text2);font-weight:500;min-width:52px;white-space:nowrap;font-variant-numeric:tabular-nums}
 .tab-controls{margin:4px 0 6px}
+.tab-controls--below{margin:10px 0 2px}   /* controlsBelow: Play tab under the board (ca-21) */
 /* Paged tab (`linesPerPage` — buildPagedTabBody/tabShowPage in app.js): a
    couple of rows at a time, Previous / Next above them, and Play tab turns
    the page itself. */

@@ -5562,23 +5562,19 @@ function checkJourneyButtonLastStep() {
    1bb. FOUR STEPS, TWO LINES A PAGE — Jonathan, 2026-09-25 ("cut down to
    4 steps to teach the song", then "apply this to upcoming class
    activities as well"). Two halves:
-   (a) Every non-check class activity has AT MOST FOUR steps, except the
-       ids in FOUR_STEP_LEGACY — the ones already taught before the rule,
-       pinned here so a new activity can't join them quietly. A legacy
-       card that gets cut to four must leave the list in the same edit,
-       so the list only ever shrinks.
+   (a) Four steps is a SOFT rule (Jonathan, 2026-10-01: "the 4 step rule
+       is a soft rule"). Every non-check class activity over four steps is
+       named on one reminder line — a nudge to keep new cards short — and
+       never fails the push. FOUR_STEP_LEGACY (the hard-rule pin list) is
+       retired with it.
    (b) Both step renderers pass the class-activity paging default
        (CA_TAB_LINES_PER_PAGE, buildPagedTabBody in app.js) to buildTab —
        caStepHtml for students, renderTeacherActivityDetail for the
        console preview. Comments stripped, so a mention can't pass for a
        call (the 1ak lesson).
    ════════════════════════════════════════════════════════════════════ */
-const FOUR_STEP_LEGACY = new Set([
-  'ca-1', 'ca-2', 'ca-3', 'ca-4', 'ca-5', 'ca-6', 'ca-7',
-  'ca-11', 'ca-12', 'ca-17',   // ca-13, ca-19 left 2026-10-01 (practice cards)
-]);
 function checkFourStepsAndPaging() {
-  head('1bb. Class activities: four steps, long tabs two lines a page');
+  head('1bb. Class activities: long tabs two lines a page (four steps: soft)');
   let bad = 0, checked = 0;
   let activities = [];
   try {
@@ -5589,19 +5585,14 @@ function checkFourStepsAndPaging() {
     vm.runInContext(src, sandbox, { filename: 'class-activities.js' });
     activities = sandbox.CLASS_ACTIVITIES || [];
   } catch { return; /* reported by 1d */ }
-  const ids = new Set(activities.map(a => a && a.id));
+  const over = [];
   for (const a of activities) {
     if (!a || a.kind === 'check' || !Array.isArray(a.steps)) continue;
     checked++;
-    const n = a.steps.length;
-    if (FOUR_STEP_LEGACY.has(a.id)) {
-      if (n <= 4) { err(`${a.id} is down to ${n} steps — take it out of FOUR_STEP_LEGACY in checks.mjs (1bb)`); problems++; bad++; }
-    } else if (n > 4) {
-      err(`${a.id} ("${a.title}") has ${n} steps — class activities are four steps at most (Jonathan, 2026-09-25). Merge or cut steps; don't add it to FOUR_STEP_LEGACY.`);
-      problems++; bad++;
-    }
+    // A practice card's steps are its help ladder — counted the same way.
+    if (a.steps.length > 4) over.push(`${a.id} (${a.steps.length})`);
   }
-  for (const id of FOUR_STEP_LEGACY) if (!ids.has(id)) { err(`FOUR_STEP_LEGACY names ${id}, which is not in class-activities.js`); problems++; bad++; }
+  if (over.length) warn(`1bb (soft rule): ${over.length} class activit${over.length === 1 ? 'y has' : 'ies have'} more than four steps — ${over.join(', ')}. Fine when Jonathan asked for it; keep new cards to four where you can.`);
   const strip = f => { try { return readFileSync(join(ROOT, f), 'utf8').replace(/\/\*[\s\S]*?\*\//g, '').replace(/\/\/[^\n]*/g, ''); } catch { return ''; } };
   const app = strip('app.js'), teacher = strip('teacher.js');
   if (!/const\s+CA_TAB_LINES_PER_PAGE\s*=\s*[1-9]/.test(app)) { err('app.js: CA_TAB_LINES_PER_PAGE is missing or not a positive number'); problems++; bad++; }
@@ -5609,7 +5600,7 @@ function checkFourStepsAndPaging() {
   if (!/buildTab\(\s*s\.tab\s*,\s*\{[^\n]*defaultLinesPerPage\s*:\s*CA_TAB_LINES_PER_PAGE/.test(teacher)) { err('teacher.js: renderTeacherActivityDetail no longer passes defaultLinesPerPage: CA_TAB_LINES_PER_PAGE to buildTab — the console preview would stop matching the student card'); problems++; bad++; }
   if (!/function buildPagedTabBody\(spec,\s*opts\)/.test(app) || !/buildPagedTabBody\(spec,\s*opts\)/.test(app.replace(/function buildPagedTabBody\(spec,\s*opts\)/, ''))) { err('app.js: buildTab must hand its opts to buildPagedTabBody(spec, opts), or the default never reaches it'); problems++; bad++; }
   if (checked === 0) { err('1bb found no class activities — it cannot see what it is supposed to guard'); problems++; return; }
-  if (bad === 0) ok(`${checked} class activities — ${checked - FOUR_STEP_LEGACY.size} at four steps or fewer, ${FOUR_STEP_LEGACY.size} legacy; both renderers page long tabs two lines at a time`);
+  if (bad === 0) ok(`${checked} class activities — ${checked - over.length} at four steps or fewer; both renderers page long tabs two lines at a time`);
 }
 
 /* ════════════════════════════════════════════════════════════════════
@@ -5853,7 +5844,7 @@ function checkPracticeCards() {
    one-sided label is itself the bug (dots in one language, none in the
    other), so it fails outright now rather than being skipped. Bump when a
    card genuinely adds or removes a got-it sentence in both languages. */
-const REP_COUNT_FIELDS = 389;   // ca-25 (Seven Nation Army, the whole song): 2 got-it help steps (2026-10-01)
+const REP_COUNT_FIELDS = 391;   // 2026-10-01: ca-13/ca-19/ca-20 as practice cards (-7), ca-25 Seven Nation Army whole song (+2), ca-21 Lines 2 and 4 restored (+2)
 function checkRepCountParity(sets, ctx) {
   head('1bg. Rep-count dots agree between English and Spanish');
   if (!ctx) { err('1bg cannot run — render context unavailable'); problems++; return; }
