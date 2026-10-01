@@ -5,6 +5,19 @@ Notable changes to the Guitar Class site. Newest first.
 For the full session-by-session history (and the reasoning behind each change),
 see `WORKFLOW.md` and the git commit log.
 
+## 2026-10-01 — Play buttons sound like a real guitar
+
+### Changed
+
+- **Every Play tab button now plays a recording of a real acoustic
+  guitar**, one recorded note for each fret, instead of a computer-made
+  sound. Chord buttons, note drills and the games use the same guitar.
+- **When Play tab moves to the next note, the note before it stops**, the
+  way it does when you play a line on your guitar. The last note still
+  rings out.
+- The first time you press Play on a new Chromebook, it can take a moment
+  to start while the notes download.
+
 ## 2026-09-30 — The tab follows the song down the page
 
 ### Changed

@@ -5948,6 +5948,56 @@ function checkJourneySlowBpmLabels() {
   if (bad === 0) ok(`${pages} Journey page${pages === 1 ? '' : 's'} with a Slow tier (pinned) — every "Slow (N BPM)" mention matches data-bpm-slow`);
 }
 
+/* ── 1bj. Recorded guitar notes ────────────────────────────────────────
+   app.js plays every pluck from GUITAR_NOTE_FILES (2026-10-01) and falls
+   back to the Karplus-Strong synth for any note whose file doesn't load.
+   That fallback is the point — a student offline before the first download
+   still hears something — but it also means a missing or misnamed file
+   fails SILENTLY: that one note just sounds synthetic, on every device,
+   and nobody files a bug about a note sounding slightly worse. So: every
+   semitone from GUITAR_NOTE_LOW to GUITAR_NOTE_HIGH has an entry, every
+   entry's file exists, its name carries its own midi number and note
+   name (so a file can't be wired to the wrong key), and the count is
+   pinned. 1x covers the other direction (a guitar-note file on disk that
+   nothing references). */
+const GUITAR_NOTE_COUNT = 35;
+function checkGuitarNotes() {
+  head('1bj. Recorded guitar notes');
+  let bad = 0;
+  const flag = m => { err(m); problems++; bad++; };
+  let src, files;
+  try {
+    src = readFileSync(join(ROOT, 'app.js'), 'utf8');
+    files = loadConstObject(src, 'GUITAR_NOTE_FILES');
+  } catch (e) { flag(`could not read GUITAR_NOTE_FILES from app.js: ${e.message}`); return; }
+  const range = /const GUITAR_NOTE_LOW = (\d+), GUITAR_NOTE_HIGH = (\d+);/.exec(src);
+  if (!range) { flag('app.js: could not find "const GUITAR_NOTE_LOW = N, GUITAR_NOTE_HIGH = N;"'); return; }
+  const lo = Number(range[1]), hi = Number(range[2]);
+  const NAMES = ['c', 'cs', 'd', 'ds', 'e', 'f', 'fs', 'g', 'gs', 'a', 'as', 'b'];
+  for (let m = lo; m <= hi; m++) {
+    if (!files[m]) flag(`GUITAR_NOTE_FILES has no file for midi ${m} — that note plays the synth on every device`);
+  }
+  for (const [k, path] of Object.entries(files)) {
+    const m = Number(k);
+    if (m < lo || m > hi) flag(`GUITAR_NOTE_FILES[${k}] is outside GUITAR_NOTE_LOW..HIGH (${lo}–${hi}) — playNote() never reaches it`);
+    const want = `audio/guitar-note-${m}-${NAMES[((m % 12) + 12) % 12]}${Math.floor(m / 12) - 1}.mp3`;
+    if (path !== want) flag(`GUITAR_NOTE_FILES[${k}] is '${path}' — a note's file is named for its own pitch, want '${want}'`);
+    if (!existsSync(join(ROOT, path))) flag(`GUITAR_NOTE_FILES[${k}]: ${path} does not exist — that note falls back to the synth on every device`);
+  }
+  const n = Object.keys(files).length;
+  if (n !== GUITAR_NOTE_COUNT) flag(`GUITAR_NOTE_FILES has ${n} notes, pinned at ${GUITAR_NOTE_COUNT} — bump GUITAR_NOTE_COUNT in the same edit if the range changed on purpose`);
+  /* Both callers of the voice must stay on it: Riff Runner built its own
+     synth buffer until this change, which is exactly how one corner of the
+     site would quietly keep the old sound. */
+  let coach = '';
+  try { coach = stripJsComments(readFileSync(join(ROOT, 'coach.js'), 'utf8')); } catch { /* covered by 0 */ }
+  if (/ksPluck(?:Cached|Buffer)\s*\(/.test(coach)) flag('coach.js builds its own synth buffer (ksPluckCached/ksPluckBuffer) — play notes through playNote() so they get the recorded guitar');
+  const appCode = stripJsComments(src);
+  const ksCalls = [...appCode.matchAll(/ksPluckCached\s*\(/g)].length;
+  if (ksCalls !== 2) flag(`app.js has ${ksCalls} "ksPluckCached(" sites, want 2 — the definition and playNote()'s fallback. Any other caller gets the synth even when the recorded note is loaded`);
+  if (bad === 0) ok(`${n} recorded guitar notes (pinned), midi ${lo}–${hi} with no gaps, every file present and named for its pitch; playNote() is the only way to a synth buffer`);
+}
+
 (async function main() {
   if (LIVE_ONLY) {
     console.log(`${C.bold}Guitar Class — post-push live check${C.reset}`);
@@ -6011,6 +6061,7 @@ function checkJourneySlowBpmLabels() {
   checkPracticeCards();
   checkRepCountParity(rcSets, rcCtx);
   checkJourneySlowBpmLabels();
+  checkGuitarNotes();
   if (!SKIP_LINKS) await checkLinks();
   else warn('skipping link check (--skip-links)');
   bumpServiceWorker();

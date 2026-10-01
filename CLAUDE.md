@@ -247,7 +247,9 @@ rather than "Play" (1bc), and no pen or paper in a class activity (1bd —
 scoped to `class-activities.js`, because module steps have typed boxes and
 Module 13 really needs scissors), and every Song Journey page's full-mix set for
 the Guitar toggle — complete, present, same length as its rhythm-down twin,
-page count pinned (1be).
+page count pinned (1be), and the recorded guitar notes — one file per
+semitone 40–74, each present and named for its pitch, count pinned, and no
+second way to a synth buffer (1bj).
 
 **A phrase detector must match the UNESCAPED string.** Until 2026-09-25 1w
 and 1w-t matched the raw source capture, which keeps `\'`, so every banned
@@ -1605,6 +1607,40 @@ walk," since there's no Playwright harness to run one for real.
   site: Lauren Bateman, Nikhil D'Souza, guitarraviva, David Casas. Lesson
   quality still wins.
 
+## Guitar notes — every Play button is a recording
+**2026-10-01** (Jonathan: the synth "doesn't sound like a guitar"). Every
+pluck the site makes — TAB Play buttons, chord strums, the ear and shuffle
+drills, game rewards, Riff Runner's "Hear it" — goes through `playNote()`
+in `app.js`, and `playNote()` now plays a RECORDED steel-string acoustic
+note: `audio/guitar-note-<midi>-<note>.mp3`, one per semitone from 40 (low
+E) to 74 (D5), listed in `GUITAR_NOTE_FILES`. Outside that range it
+re-pitches the nearest file (only Module 9's top E5 today). Steel acoustic
+on purpose: it's what the class set (ADM starters) sounds like.
+
+- **Source:** University of Iowa Electronic Music Studios guitar samples
+  (free to use without restriction), via tonejs-instruments (MIT), re-cut
+  2026-10-01: mono 96 kbps, trimmed to the pick, loudness-matched to -21
+  LUFS over the first 0.8 s, ≤ 3 s with a fade. Pitch measured within ±5
+  cents of A=440 on every file. **Re-cut any replacement the same way** —
+  an un-matched file is a note that jumps out of every line it's in.
+- **Karplus-Strong (`ksPluckBuffer`) is the fallback, not dead code.** A
+  note whose file hasn't downloaded plays the synth. The first tap anywhere
+  starts all 35 downloads (`warmGuitarNotes()`); `playSequence()` waits up
+  to `GUITAR_NOTE_WAIT_MS` (1.5 s) for its own line's notes and, if they
+  still aren't there, plays the whole line on the synth — it never switches
+  voice mid-line. A failed download isn't retried for 30 s.
+- **`playNote()` is the only door.** Riff Runner had its own synth buffer
+  (`rnPluckAt` in coach.js) and now calls `playNote()`; checks.mjs **1bj**
+  fails a second `ksPluckCached(` call in app.js or any in coach.js.
+- **`playSequence()` damps the previous note** when the next one sounds
+  (25 ms time constant) — three-second recorded notes all ringing turned a
+  line into a wash. A held `{ midi, beats }` note still rings its full
+  length, the last note rings out, and a Stop press damps everything.
+- These files are in `audio/`, so they share the audio cache and its
+  fingerprint: adding them bumped `AUDIO_CACHE_VERSION` once. Changing one
+  will bump it again — every student re-downloads backing tracks as they
+  next play them — so batch any re-cut into one push.
+
 ## Backing tracks
 
 `<artist-slug>-<song-slug>-backing-<key>-<bpm>bpm-<tuning>hz-<mix>.mp3`, lowercase
@@ -1616,7 +1652,9 @@ kebab-case; the artist stays out of the app's display metadata.
 named `no-gtr`, `drums-only` and `slow-<bpm>` as "in use", and none of those
 has ever existed in `audio/`). That is 42 files: six songs, some at two
 tempos, plus four mixes each for Seven Nation Army, "the cure", Luna,
-Watchtower and Sweet Child. A snippet song wants all four: `full` alone gives the Guitar toggle,
+Watchtower and Sweet Child. (The 35 `guitar-note-*` files beside them are
+one-shot notes, not backing tracks — see "Guitar notes" above; this naming
+pattern doesn't apply to them.) A snippet song wants all four: `full` alone gives the Guitar toggle,
 and `full-metronome` is what stops it fighting the Metronome toggle. Every slow tier is the same master time-stretched, so its grid is
 the fast one's scaled by the tempo ratio — checked on two songs to three
 decimal places. The other four names stay reserved for when something is

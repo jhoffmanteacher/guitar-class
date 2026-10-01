@@ -3078,7 +3078,8 @@ const CD_CARDS = 10;          // cards in a round
 const CD_CARD_MS = 5000;      // 5 seconds a card, then it counts as missed
 const CD_PROMOTE_EVERY = 2;   // right answers per level
 /* How long a play parks the clock. strumChord() strums 6 notes 35ms apart
-   and each pluck buffer rings up to 2.0s (app.js ksPluckBuffer), so this
+   and each note rings up to 3s (app.js GUITAR_NOTE_FILES; 2.0s for the
+   synth fallback, ksPluckBuffer), so this
    covers the strum-out plus the part of the decay you can actually name a
    chord from, without parking so long that the card stalls. */
 const CD_SOUND_MS = 1600;
@@ -6044,18 +6045,14 @@ function rnSetMode(guitar){
   rnRenderReady();
 }
 
-/* playNote's Karplus-Strong pluck, parameterized with a future audio-clock
-   start time so "Hear it" can schedule the whole riff ahead. Returns the
-   source so an early Stop can silence notes that haven't sounded yet. */
+/* playNote's guitar note, at a future audio-clock start time so "Hear it"
+   can schedule the whole riff ahead. Returns the source so an early Stop can
+   silence notes that haven't sounded yet. Goes through playNote() (app.js
+   loads first on index.html) so Riff Runner gets the same recorded guitar
+   as every TAB Play button, and the synth fallback when a note isn't
+   downloaded yet — it used to build its own synth buffer here. */
 function rnPluckAt(midi, t){
-  const ctx = getAudioCtx();
-  const src = ctx.createBufferSource();
-  src.buffer = ksPluckCached(ctx, midi);   // shared with playNote — app.js loads first on index.html
-  const g = ctx.createGain();
-  g.gain.value = PLUCK_VOICE_GAIN;
-  src.connect(g); g.connect(getPluckBus());
-  src.start(t);
-  return src;
+  return playNote(midi, PLUCK_VOICE_GAIN, t).src;
 }
 
 /* "Hear it" — the teaching moment: play one lap of the riff through the

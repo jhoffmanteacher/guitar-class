@@ -7103,7 +7103,7 @@ function dkCheckOff(key){
 /* ── Ear Spark drill (step.drill, type 'ear') ────────────────────────────
    Replaces the "shuffle six paper slips, record yourself, play it back a
    few minutes later" Ear Sparks. The deck draws a hidden sequence and
-   plays it through the same Karplus-Strong playNote() the TAB players use,
+   plays it through the same playNote() guitar voice the TAB players use,
    so there is nothing to write down, nothing to record, and no waiting.
 
    Module-data schema:
@@ -8541,18 +8541,188 @@ function ksPluckCached(ctx, midi){
   while (pluckCache.size > PLUCK_CACHE_MAX) pluckCache.delete(pluckCache.keys().next().value);
   return buf;
 }
+/* ── Recorded guitar notes (2026-10-01) ─────────────────────────────────
+   Every pluck the site plays — TAB Play buttons, chord strums, note drills,
+   game rewards, Riff Runner's "Hear it" — sounds a RECORDED steel-string
+   acoustic note, one file per semitone from the low E (E2, midi 40) to D5
+   (midi 74). Jonathan's call: the synth above sounded fake, and the class
+   plays steel-string acoustics, so that is what the site plays back.
+
+   Source: University of Iowa Electronic Music Studios guitar samples
+   (theremin.music.uiowa.edu — free to use without restriction), as trimmed
+   and volume-matched by the tonejs-instruments project (MIT). Re-cut for the
+   site 2026-10-01: mono, 96 kbps, trimmed to 5 ms before the pick, loudness
+   matched (-21 LUFS over the first 0.8 s), cut at 3 s or once the note has
+   decayed 50 dB, with a fade. Pitch measured within ±5 cents of A=440 on
+   every file, so the tuner agrees with them (tuner.js is A4=440).
+
+   The files live in audio/, so the service worker keeps them in the audio
+   cache (fetched once per device, then offline). Notes outside 40–74 play
+   the nearest file re-pitched. Today that is one note on the whole site:
+   the E5 (76) at the top of Module 9's C-major scale, two semitones above
+   the top file — not enough to hear the stretch.
+
+   Karplus-Strong above stays as the FALLBACK, never removed: a note whose
+   file hasn't arrived yet (first seconds on a new device, or offline before
+   the first download) plays the synth instead of nothing. warmGuitarNotes()
+   starts all 35 downloads on the student's first tap anywhere, so by the
+   time they press a Play button the notes are normally ready; playSequence()
+   additionally waits (up to GUITAR_NOTE_WAIT_MS) for the notes of its own
+   line, and never mixes the two voices inside one line. */
+const GUITAR_NOTE_FILES = {
+  40: 'audio/guitar-note-40-e2.mp3',
+  41: 'audio/guitar-note-41-f2.mp3',
+  42: 'audio/guitar-note-42-fs2.mp3',
+  43: 'audio/guitar-note-43-g2.mp3',
+  44: 'audio/guitar-note-44-gs2.mp3',
+  45: 'audio/guitar-note-45-a2.mp3',
+  46: 'audio/guitar-note-46-as2.mp3',
+  47: 'audio/guitar-note-47-b2.mp3',
+  48: 'audio/guitar-note-48-c3.mp3',
+  49: 'audio/guitar-note-49-cs3.mp3',
+  50: 'audio/guitar-note-50-d3.mp3',
+  51: 'audio/guitar-note-51-ds3.mp3',
+  52: 'audio/guitar-note-52-e3.mp3',
+  53: 'audio/guitar-note-53-f3.mp3',
+  54: 'audio/guitar-note-54-fs3.mp3',
+  55: 'audio/guitar-note-55-g3.mp3',
+  56: 'audio/guitar-note-56-gs3.mp3',
+  57: 'audio/guitar-note-57-a3.mp3',
+  58: 'audio/guitar-note-58-as3.mp3',
+  59: 'audio/guitar-note-59-b3.mp3',
+  60: 'audio/guitar-note-60-c4.mp3',
+  61: 'audio/guitar-note-61-cs4.mp3',
+  62: 'audio/guitar-note-62-d4.mp3',
+  63: 'audio/guitar-note-63-ds4.mp3',
+  64: 'audio/guitar-note-64-e4.mp3',
+  65: 'audio/guitar-note-65-f4.mp3',
+  66: 'audio/guitar-note-66-fs4.mp3',
+  67: 'audio/guitar-note-67-g4.mp3',
+  68: 'audio/guitar-note-68-gs4.mp3',
+  69: 'audio/guitar-note-69-a4.mp3',
+  70: 'audio/guitar-note-70-as4.mp3',
+  71: 'audio/guitar-note-71-b4.mp3',
+  72: 'audio/guitar-note-72-c5.mp3',
+  73: 'audio/guitar-note-73-cs5.mp3',
+  74: 'audio/guitar-note-74-d5.mp3'
+};
+const GUITAR_NOTE_LOW = 40, GUITAR_NOTE_HIGH = 74;
+/* The files sit at a fixed loudness, louder than a synth buffer at the same
+   gain. Callers still pass gains worked out against PLUCK_VOICE_GAIN
+   (chordGain, Riff Runner), so the recorded voice scales them by one
+   constant rather than every caller learning a second number. At 1.55 a
+   single note measures -24.6 LUFS, inside the old synth's -23 (low E) to
+   -28 (top strings) — about as loud, and now even from string to string. */
+const GUITAR_NOTE_GAIN_SCALE = 1.55;
+const GUITAR_NOTE_WAIT_MS = 1500;      // longest a TAB Play waits for its notes before using the synth
+const GUITAR_NOTE_RETRY_MS = 30000;    // after a failed download, don't refetch on every note
+const guitarNotes = new Map();         // file midi -> { buffer, offset }
+const guitarNoteLoads = new Map();     // file midi -> Promise (in flight or settled)
+const guitarNoteFailedAt = new Map();  // file midi -> time of the last failed load
+function guitarNoteFileMidi(midi){
+  return Math.max(GUITAR_NOTE_LOW, Math.min(GUITAR_NOTE_HIGH, Math.round(midi)));
+}
+function loadGuitarNote(fileMidi){
+  if (guitarNotes.has(fileMidi)) return Promise.resolve(true);
+  if (guitarNoteLoads.has(fileMidi)) return guitarNoteLoads.get(fileMidi);
+  const failed = guitarNoteFailedAt.get(fileMidi);
+  if (failed && Date.now() - failed < GUITAR_NOTE_RETRY_MS) return Promise.resolve(false);
+  const url = GUITAR_NOTE_FILES[fileMidi];
+  if (!url || typeof fetch !== 'function') return Promise.resolve(false);
+  const ctx = getAudioCtx();
+  const p = fetch(url)
+    .then(r => { if (!r.ok) throw new Error('HTTP ' + r.status); return r.arrayBuffer(); })
+    /* Callback form as well as the promise: older Safari only has the callback. */
+    .then(ab => new Promise((res, rej) => ctx.decodeAudioData(ab, res, rej)))
+    .then(buffer => {
+      /* Start each note at its pick, not at the top of the file. The files
+         are trimmed, but a decoder can still put the mp3's encoder delay in
+         front — and a TAB cursor that lights 25 ms before the sound reads as
+         early. 4 ms of lead-in keeps the attack's own front edge. */
+      const d = buffer.getChannelData(0);
+      let peak = 0;
+      for (let i = 0; i < d.length; i++){ const a = Math.abs(d[i]); if (a > peak) peak = a; }
+      let on = 0;
+      while (on < d.length && Math.abs(d[on]) < peak * 0.05) on++;
+      const offset = Math.max(0, on / buffer.sampleRate - 0.004);
+      guitarNotes.set(fileMidi, { buffer, offset });
+      guitarNoteLoads.delete(fileMidi);
+      return true;
+    })
+    .catch(() => {
+      guitarNoteLoads.delete(fileMidi);
+      guitarNoteFailedAt.set(fileMidi, Date.now());
+      return false;
+    });
+  guitarNoteLoads.set(fileMidi, p);
+  return p;
+}
+/* Resolves once every note in the list is ready (or has failed), never
+   rejects. midis may hold nested arrays and { midi, beats } entries — the
+   same shapes playSequence() takes. */
+function loadGuitarNotesFor(midis){
+  const want = new Set();
+  const walk = m => {
+    if (Array.isArray(m)) m.forEach(walk);
+    else if (m && typeof m === 'object') walk(m.midi);
+    else if (m != null && !isNaN(Number(m))) want.add(guitarNoteFileMidi(Number(m)));
+  };
+  walk(midis);
+  return Promise.all([...want].map(loadGuitarNote));
+}
+function guitarNotesReadyFor(midis){
+  let ready = true;
+  const walk = m => {
+    if (!ready) return;
+    if (Array.isArray(m)) m.forEach(walk);
+    else if (m && typeof m === 'object') walk(m.midi);
+    else if (m != null && !isNaN(Number(m)) && !guitarNotes.has(guitarNoteFileMidi(Number(m)))) ready = false;
+  };
+  walk(midis);
+  return ready;
+}
+let guitarNotesWarmed = false;
+function warmGuitarNotes(){
+  if (guitarNotesWarmed) return;
+  guitarNotesWarmed = true;
+  /* Low strings first: that is where the course lives, so those land first
+     on a slow connection. */
+  for (let m = GUITAR_NOTE_LOW; m <= GUITAR_NOTE_HIGH; m++) loadGuitarNote(m);
+}
+/* The first tap anywhere starts the downloads. Not at page load: a student
+   who only opens a backing track shouldn't pay for 35 notes before doing
+   anything, and an AudioContext made before any gesture logs a warning. */
+['pointerdown', 'keydown'].forEach(ev =>
+  document.addEventListener(ev, warmGuitarNotes, { once: true, capture: true, passive: true }));
+
 /* Reusable single-note player. gain defaults to a single note's level; callers
-   sounding several notes at once pass it down so the sum stays in headroom. */
-function playNote(midi, gain, when){
+   sounding several notes at once pass it down so the sum stays in headroom.
+   Returns { src, gain } so a caller can stop or damp the note it started
+   (Riff Runner's early Stop, playSequence's damping of the previous note).
+   synthOnly: play the synth even if the recording is here — playSequence()
+   uses it to finish a line in the voice it started in. */
+function playNote(midi, gain, when, synthOnly){
   const ctx = getAudioCtx();
   if (ctx.state === 'suspended') ctx.resume();
   const src = ctx.createBufferSource();
-  src.buffer = ksPluckCached(ctx, midi);
   const g = ctx.createGain();
-  g.gain.value = (gain == null) ? PLUCK_VOICE_GAIN : gain;
+  const level = (gain == null) ? PLUCK_VOICE_GAIN : gain;
+  const fileMidi = guitarNoteFileMidi(midi);
+  const rec = synthOnly ? null : guitarNotes.get(fileMidi);
   src.connect(g);
   g.connect(getPluckBus());
-  src.start(when || 0);   // optional audio-clock start time; 0 = now
+  if (rec){
+    src.buffer = rec.buffer;
+    if (fileMidi !== midi) src.playbackRate.value = Math.pow(2, (midi - fileMidi) / 12);
+    g.gain.value = level * GUITAR_NOTE_GAIN_SCALE;
+    src.start(when || 0, rec.offset);   // optional audio-clock start time; 0 = now
+  } else {
+    loadGuitarNote(fileMidi);           // the recorded note next time; the synth this time
+    src.buffer = ksPluckCached(ctx, midi);
+    g.gain.value = level;
+    src.start(when || 0);
+  }
+  return { src, gain: g };
 }
 /* Six notes struck together at full level peaked around 1.5 and clipped on the
    attack. Struck at once their peaks pile up, so split by √n; spread across a
@@ -8571,9 +8741,13 @@ function playBeat(btnEl){
   midis.forEach(m => playNote(Number(m), g));
 }
 let playSeqState = null;
-function stopPlaySeq(){
+/* letRing: the line reached its end, so its last note rings out the way a
+   player leaves it. Any other stop (the Stop press, a card closing) damps
+   it — a recorded note would otherwise ring on for up to three seconds. */
+function stopPlaySeq(letRing){
   if(!playSeqState) return;
   playSeqState.timeouts.forEach(clearTimeout);
+  if(letRing !== true) playSeqDamp(playSeqState.voices);
   if(playSeqState.btn){
     playSeqState.btn.innerHTML = playSeqState.idleHtml || ('&#x25B6; ' + escHtml(t('step.playAll')));
     playSeqState.btn.classList.remove('playing');
@@ -8626,6 +8800,54 @@ function playSequence(midis, bpm, btnEl){
   if(window.coachMicLive) return;  // but no NEW demo audio while the Coach listens
   snipStop();                      // one sound at a time — the band yields to the tab
   pcStop();                        // …and so does a practice card's song
+  /* Recorded notes not all here yet (a first press on a new device): show
+     the Stop state straight away, wait for THIS line's notes, then play — so
+     a line never starts on the synth and switches voice halfway. A second
+     press during the wait is a Stop, same as during playback. A wait that
+     runs out (a very slow connection) plays the WHOLE line on the synth
+     rather than nothing — and rather than switching voice mid-line as the
+     files land; the next press gets the recording. */
+  if(!guitarNotesReadyFor(midis)){
+    const waiting = {};
+    const idle = btnEl ? btnEl.innerHTML : null;
+    playSeqState = { timeouts: [], btn: btnEl, idleHtml: idle, tabRoot: null, waiting };
+    if(btnEl) playSeqShowStop(btnEl);
+    let go = () => {
+      go = () => {};
+      if(!playSeqState || playSeqState.waiting !== waiting) return;   // stopped, or another Play took over
+      playSeqState = null;
+      if(btnEl) btnEl.innerHTML = idle;   // restore before startPlaySequence reads it as the idle label
+      startPlaySequence(midis, bpm, btnEl, !guitarNotesReadyFor(midis));
+    };
+    loadGuitarNotesFor(midis).then(() => go());
+    setTimeout(() => go(), GUITAR_NOTE_WAIT_MS);
+    return;
+  }
+  startPlaySequence(midis, bpm, btnEl);
+}
+function playSeqShowStop(btnEl){
+  btnEl.innerHTML = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" style="width:1em;height:1em;vertical-align:-0.15em"><path d="M9 5v14M15 5v14"/></svg> ' + escHtml(t('tools.stop'));
+  btnEl.classList.add('playing');
+}
+/* A guitarist reading a line lifts the last note as the next one sounds;
+   letting every recorded note ring its full three seconds turned a line
+   into a wash. So each beat fades out the beat before it (a 25 ms time
+   constant — a damp, not a click). Held notes ({ midi, beats }) still ring
+   for their whole length, because the damp only comes with the next note. */
+const PLAY_SEQ_DAMP_TC = 0.025;
+function playSeqDamp(voices){
+  if(!voices || !voices.length) return;
+  const ctx = getAudioCtx(), now = ctx.currentTime;
+  voices.forEach(v => {
+    try {
+      v.gain.gain.cancelScheduledValues(now);
+      v.gain.gain.setValueAtTime(v.gain.gain.value, now);
+      v.gain.gain.setTargetAtTime(0, now, PLAY_SEQ_DAMP_TC);
+      v.src.stop(now + PLAY_SEQ_DAMP_TC * 8);
+    } catch(e){ /* already stopped */ }
+  });
+}
+function startPlaySequence(midis, bpm, btnEl, synthOnly){
   const interval = 60000 / (bpm || 60);
   /* Beat cursor: when the button lives inside a TAB, highlight the sounding
      column — the moving thing is the thing making noise (Ableton's rule). */
@@ -8645,7 +8867,12 @@ function playSequence(midis, bpm, btnEl){
     return setTimeout(() => {
       const list = Array.isArray(pitches) ? pitches : [pitches];
       const vg = chordGain(list.length);
-      list.forEach(x => playNote(Number(x), vg));
+      if(playSeqState){
+        playSeqDamp(playSeqState.voices);
+        playSeqState.voices = list.map(x => playNote(Number(x), vg, 0, synthOnly));
+      } else {
+        list.forEach(x => playNote(Number(x), vg, 0, synthOnly));
+      }
       if(tabRoot){
         tabRoot.querySelectorAll('.beat-now').forEach(el=>el.classList.remove('beat-now'));
         tabRoot.querySelectorAll(`[data-seq="${i}"]`).forEach(el=>el.classList.add('beat-now'));
@@ -8663,13 +8890,10 @@ function playSequence(midis, bpm, btnEl){
       }
     }, at);
   });
-  timeouts.push(setTimeout(stopPlaySeq, cursor));
+  timeouts.push(setTimeout(() => stopPlaySeq(true), cursor));
   const idleHtml = btnEl ? btnEl.innerHTML : null;
-  playSeqState = { timeouts, btn: btnEl, idleHtml, tabRoot };
-  if(btnEl){
-    btnEl.innerHTML = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" style="width:1em;height:1em;vertical-align:-0.15em"><path d="M9 5v14M15 5v14"/></svg> ' + escHtml(t('tools.stop'));
-    btnEl.classList.add('playing');
-  }
+  playSeqState = { timeouts, btn: btnEl, idleHtml, tabRoot, voices: [] };
+  if(btnEl) playSeqShowStop(btnEl);
 }
 /* ── BPM slider helpers ── */
 function readStoredBpm(key, defBpm){
