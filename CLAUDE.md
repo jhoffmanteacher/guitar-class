@@ -650,7 +650,10 @@ above only holds for a track made to a click ("the cure", Luna). Sweet
 Child, Let It Be, the Hendrix Watchtower and (since 2026-10-01, for the
 whole-song card ca-25) Seven Nation Army were played by a
 band with no click, and the Moises metronome follows the band — a straight
-grid is off by up to half a beat by mid-song. Those entries list every bar's
+grid is off by up to half a beat by mid-song. (Let It Be has no
+`SNIPPET_TRACKS` entry at all yet — no slow tier, no full mix, no beat map —
+so it cannot carry a snippet or a practice card; Jonathan, 2026-10-01: leave
+it for now, he may not use the song.) The three that are entries list every bar's
 downbeat (fast file, seconds) in `barTimes`, `barTimes[0]` = `anchor`, and
 `snippetWindow()` reads windows off the list; the slow tier is still the
 fast times scaled by the tempo ratio. Measure with
@@ -1345,8 +1348,10 @@ page rather than a full-page swap) linking back to
 for the teacher's own account by email; a failed config read fails open (no
 gate), never on a guess. `mood-chart.html` is not one of the six and is never
 gated. **The one exemption (2026-09-12):** a pending activity that names a
-Journey page — `journey: '<slug>'` in `class-activities.js` (ca-10 →
-seven-nation-army; ca-13, ca-18, ca-19 → the-cure; ca-20 → luna), optional
+Journey page — `journey: '<slug>'` in `class-activities.js` (ca-10, ca-25 →
+seven-nation-army; ca-13, ca-18, ca-19, ca-24 → the-cure; ca-20 → luna;
+ca-26 → all-along-the-watchtower — the list is whatever carries the field,
+so read the file rather than trusting this line), optional
 `journeyLayer` — is sending
 the student there as part of the work, so `journey.js` leaves THAT page open
 while the activity blocks; every other Journey page stays gated. The card
@@ -1762,10 +1767,18 @@ ear. This is chord *timing*, not BPM:
   clear G). The site teaches the verse: G on beat 3 in Modules 2, 3, 5, 6
   and 7, the Journey page and Riff Runner. Module 4's "the real rhythm" card
   teaches the intro/verse difference by ear. The track's tempo drifts
-  (≈110 in the intro, ≈115 through the verses, ≈120 at the end), so it is
-  NOT a SNIPPET_TRACKS candidate — bar arithmetic would slide by up to a
-  second. Its full and full-metronome mixes ship for the Song Journey
-  page's Guitar toggle (1be), which loops the whole file and doesn't care.
+  (≈110 in the intro, ≈115 through the verses, ≈120 at the end), so a
+  steady grid would slide by up to a second — which is why its
+  `SNIPPET_TRACKS` entry carries a beat map (`barTimes`, 2026-09-27)
+  rather than one anchor. **With the beat map it IS a snippet and
+  practice-card track**: ca-26 (the whole song, 2026-10-01) plays the low-E
+  bass loop over it, seven sections on the record's bars. (This line said
+  "NOT a SNIPPET_TRACKS candidate" until 2026-10-01 — true of a steady
+  grid, stale the day the beat map landed.) One loop everywhere on the
+  card, the intro included, so for the first ~18 s the card's G sits a
+  beat ahead of the record's — the settled reading above, not a bug. Its
+  full and full-metronome mixes ship for the Guitar toggle, on the card
+  and on the Song Journey page (1be).
 - **Seven Nation Army** (123 BPM track) — the riff is NOT one note per beat:
   bar 1 is E (long) · E (short) · G · E, with D as a pickup on the "and" of 4;
   bar 2 is **C for two beats, B for two beats** — what ca-10 teaches. The
