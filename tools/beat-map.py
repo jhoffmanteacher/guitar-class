@@ -13,6 +13,14 @@ SNIPPET_TRACKS (app.js). See CLAUDE.md, "Live-band tracks carry a beat map".
 Needs ffmpeg on PATH plus numpy and scipy. Measure the FAST file only — the
 slow tier is derived by scaling (see snippetWindow in app.js).
 
+The metronome file is a MEASURING INPUT, not a site file (2026-10-01): one
+Moises export of the fast rhythm-down mix with the click on. Keep it in Drive
+or a scratch folder and never commit it — the site makes its own click, and
+checks.mjs 1bk fails a metronome mix in audio/. For a steady (click-tracked)
+song, the printed `anchor` is all you need; for a live band, paste barTimes
+into SNIPPET_TRACKS and copy the same list into the song's Journey page as
+data-click-bars (1bk compares the two).
+
 How: the two mixes are one Moises export with and without the click, so
 subtracting them leaves the click alone. A band-pass around the click
 (900-2000 Hz) removes what little music survives the subtraction, and each

@@ -5,6 +5,18 @@ Notable changes to the Guitar Class site. Newest first.
 For the full session-by-session history (and the reasoning behind each change),
 see `WORKFLOW.md` and the git commit log.
 
+## 2026-10-01 — The Metronome button is the site's own click
+
+### Changed
+
+- **Song Journey pages: the Metronome is a click the site makes.** On Seven
+  Nation Army, Sweet Child O' Mine, All Along the Watchtower and Luna it
+  used to switch to a second copy of the track with a click recorded on it.
+  Now the track keeps playing and the site clicks along with it, with a
+  louder click on beat 1. Turning the Metronome on or off no longer
+  restarts or reloads the song. ("the cure" already worked this way.)
+- The site is about 200 MB smaller, so there is less to download.
+
 ## 2026-10-01 — Module 3 is ready
 
 ### Fixed

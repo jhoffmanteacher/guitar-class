@@ -270,7 +270,10 @@ page count pinned (1be), and the recorded guitar notes — one file per
 semitone 40–74, each present and named for its pitch, count pinned, and no
 second way to a synth buffer (1bj), and a read-only set preview saving no
 answers — every function that writes `responses[...]` checks
-`isPeekedResponseKey()` first, writer count pinned (1bl).
+`isPeekedResponseKey()` first, writer count pinned (1bl), and the site-made
+click — each Song Journey page's beat map against `SNIPPET_TRACKS`, no
+metronome mix in `audio/` but the allow-listed one, no metronome field on a
+track, and `snippetSrc()` called with three arguments (1bk).
 
 **A phrase detector must match the UNESCAPED string.** Until 2026-09-25 1w
 and 1w-t matched the raw source capture, which keeps `\'`, so every banned
@@ -682,12 +685,15 @@ fast times scaled by the tempo ratio. Measure with
 (needs ffmpeg, numpy, scipy). Moises clicks every beat alike, so WHICH click
 is beat 1 is a musical call — pick it from the song's chord changes, never
 assume the first click. 1ak checks the list against `anchor`, the nominal
-bar and `durationSec`, and refuses a window past the last measured bar. Add `?snipcal=1` to the URL and the card grows a calibration panel:
-a live timecode plus a **Find the first click** button that decodes the
-track's rhythm-down-metronome file and reports the first click to the
-millisecond, with the gaps after it to sanity-check against 60/BPM. Paste
-that number into `anchor` and flip `anchorVerified` — checks.mjs 1ak warns on
-every push until it's true.
+bar and `durationSec`, and refuses a window past the last measured bar.
+The same tool gives a steady track its `anchor` (it prints it); paste that
+in and flip `anchorVerified` — checks.mjs 1ak warns on every push until
+it's true. **The metronome file it reads is a measuring input, not a site
+file** (2026-10-01): one Moises export of the fast rhythm-down mix with the
+click on, kept in Drive or a scratch folder, never committed — checks.mjs
+1bk fails any metronome mix in `audio/` but Let It Be's. `?snipcal=1` on
+the URL still gives a snippet card a live timecode for checking a number by
+ear; its "Find the first click" button went with the files it decoded.
 
 **The param is matched anywhere in `location.href`**, not parsed out of
 `location.search`, because on 2026-09-18 every way of typing it onto a real
@@ -784,41 +790,65 @@ which turns the part DOWN rather than removing it, so a button called
 "Guitar" promises a mute it cannot deliver: pressed on "the cure", where the
 part is a strummed acoustic under vocals, bass and drums, it sounds like
 nothing happened and the site reads as broken (Jonathan, 2026-09-18, from the
-room). `snipGuitarLabel()` is the one relabeller, called by the press AND by
-the Metronome exclusivity release so the label can't go stale. Optional per track and both tiers or neither, so a song whose
+room). `snipGuitarLabel()` is the one relabeller. Optional per track and both tiers or neither, so a song whose
 full mix isn't exported is a card with one fewer button, never a broken one
 (checks.mjs 1ak fails a half-declared pair, and a declared path whose file
-isn't there). The metronome pair on top (`srcFullMetronome`/`srcFullSlowMetronome`) is
-what lets Metronome and Guitar both be on at once. **Both current tracks
-have it as of 2026-09-18**, so the two toggles are fully independent and the
-fallback below never fires today.
+isn't there).
 
-Without that pair there is no file carrying the record's guitar AND a click,
-so **Metronome and Guitar become mutually exclusive — pressing one visibly
-releases the other**, both directions, in `snipSetTier()`. That is the
-fallback for a future track exported without the click, not a design choice:
-Jonathan reported the coupling as a bug the day it shipped, and he was right
-— nothing about the two controls should be linked, they were just competing
-for a file that didn't exist. If a new song's toggles start interacting, the
-missing export is the fix, not the code.
+**Metronome and Guitar are independent on every track, because the
+Metronome is not a file** (2026-10-01). It used to be: a second copy of
+each mix with a Moises click baked in, so "guitar in AND click on" needed
+a third and fourth copy (`srcFullMetronome`/`srcFullSlowMetronome`), and a
+track exported without them made the two buttons take turns — reported as
+a bug the day it shipped (2026-09-18), and it was one. All four metronome
+fields are gone from `SNIPPET_TRACKS` now (1ak fails one that comes back):
+`snipScheduleClick()` clicks the counted beats of the snippet's own window,
+the same way a practice card's `pcScheduleClick()` does, so it follows the
+beat map on a live-band track. `snippetSrc(track, slow, guitar)` lost its
+`metro` argument with them — checks.mjs 1bk fails a caller still passing
+four, which would shift `guitar` out and play the rhythm-down mix with the
+Guitar button lit.
 
-The first cut DISABLED the Metronome button in that case instead, reasoning
-that a button undoing another button is what nobody debugs in a room of 30.
-That was wrong twice over and shipped: Guitar starts ON, so the moment both
-songs had a full mix the click was dead on every card by default (found in
-the room, 2026-09-18, and it also blocked the `?snipcal=1` anchor
-measurement, which needs the click). And a greyed-out control reads as
-broken, not as a choice. The original objection was really about doing it
-SILENTLY — releasing the other toggle where the student watches it pop out
-is just how a pair of mutually exclusive controls behaves.
+**Every Song Journey page but Let It Be makes its own click** — "the cure"
+since 2026-09-27, Seven Nation Army, Sweet Child, Watchtower and Luna since
+2026-10-01 (Jonathan: "can I erase some metronome tracks from the git? if
+so, go ahead and delete them"). Two ways to declare it on
+`#playalong-frame`, and `ensurePlayer()` in `tabs/journey.js` schedules the
+click on an AudioContext instead of swapping files:
 
-**"the cure" Song Journey page makes its own click** (2026-09-27). Its
-`#playalong-frame` declares `data-click-anchor="0.565"` (the snippet
-`anchor`) and the COUNTED tempos `data-bpm="72" data-bpm-slow="60"`, and no
-metronome files at all; `ensurePlayer()` in `tabs/journey.js` then schedules
-one click per counted beat on an AudioContext instead of swapping files.
-Step snippets (`buildSnippet`) still use the metronome files — on "the cure"
-that is still the 144 click; practice cards don't.
+- **A steady track** ("the cure"): `data-click-anchor="0.565"` (the snippet
+  `anchor`) with the COUNTED tempos in `data-bpm="72" data-bpm-slow="60"`.
+- **A band that drifts, or a track with an intro at another tempo**:
+  `data-click-bars` — every bar's downbeat on the fast file, the same
+  numbers as `SNIPPET_TRACKS[<slug>].barTimes` — plus `data-click-beats`
+  (clicks per bar, the loud one on the downbeat). The slow tier is the list
+  scaled by `data-bpm / data-bpm-slow`. Nothing clicks before the first
+  listed downbeat or after the last. Luna is a steady track that uses this
+  form anyway: four intro bars at 120 BPM, then the vamp from `anchor`, six
+  clicks a bar — what its page note already tells the student to expect.
+
+The page lists are hand-kept copies (those pages have no `app.js`), so
+checks.mjs **1bk** compares them to `SNIPPET_TRACKS` number for number,
+pins the count of pages making their own click, refuses a page that does
+both, and fails any metronome mix in `audio/` except the one on
+`METRONOME_MIXES_ALLOWED`. **Re-measure a track's beat map and you must
+re-copy its page's `data-click-bars` in the same edit.**
+
+How close is it? Measured 2026-10-01 against the click Moises had baked
+into each file, before deleting them: on the fast files about 6 ms off on
+average for the three band tracks (Seven Nation Army 468 clicks, Sweet
+Child 733, Watchtower 454) and 14 ms for Luna (344, where Moises's own
+click wobbles around a steady tempo), 53 ms at worst; 8–18 ms average on
+the slow tiers. The page's
+click is evenly spaced inside each measured bar where Moises followed the
+band beat by beat, which is the whole difference. Practice cards have run
+on the same arithmetic since 2026-09-27.
+
+**Let It Be is the one page still swapping to a metronome FILE**
+(`data-audio-metronome`, one mp3) — Jonathan, 2026-10-01: leave the song for
+now, he may not use it. It has no beat map to make a click from. If it
+stays in the course, measure it, give it `data-click-bars`, delete the file
+and empty `METRONOME_MIXES_ALLOWED`.
 
 **All five snippet tracks have their full mix** — Seven Nation Army,
 "the cure", Luna, the Hendrix Watchtower and (2026-09-27) Sweet Child. A new
@@ -1423,8 +1453,8 @@ note (`.beat-now`, honouring each note's `beats`), one page per section with
 tap-a-section-to-start (four-click count-in, then the loop returns to that
 section), a Slower / Normal switch (the slow / fast files, starting on
 Slower), the Guitar toggle where a full mix exists, and a Metronome that is
-a click the SITE makes on every counted beat — never the track's metronome
-file, because "the cure"'s files click at 144, twice the 72 the room counts.
+a click the SITE makes on every counted beat — there are no metronome
+files; Moises clicked "the cure" at 144, twice the 72 the room counts.
 Then three or four checkboxes. The activity's `steps` are the help ladder
 under "More practice help" — read-only (no Mark done), four at most, and
 none may name the Song Journey page: the card's Journey button is on its
@@ -1698,25 +1728,44 @@ on purpose: it's what the class set (ADM starters) sounds like.
 `<artist-slug>-<song-slug>-backing-<key>-<bpm>bpm-<tuning>hz-<mix>.mp3`, lowercase
 kebab-case; the artist stays out of the app's display metadata.
 
-**What ships is `rhythm-down`, `rhythm-down-metronome` and — since
-2026-09-18 — `full` and `full-metronome`, for the three snippet songs and
-(since 2026-09-27) Watchtower** (the old list here also
-named `no-gtr`, `drums-only` and `slow-<bpm>` as "in use", and none of those
-has ever existed in `audio/`). That is 42 files: six songs, some at two
-tempos, plus four mixes each for Seven Nation Army, "the cure", Luna,
-Watchtower and Sweet Child. (The 35 `guitar-note-*` files beside them are
-one-shot notes, not backing tracks — see "Guitar notes" above; this naming
-pattern doesn't apply to them.) A snippet song wants all four: `full` alone gives the Guitar toggle,
-and `full-metronome` is what stops it fighting the Metronome toggle. Every slow tier is the same master time-stretched, so its grid is
-the fast one's scaled by the tempo ratio — checked on two songs to three
-decimal places. The other four names stay reserved for when something is
-really exported; don't cite one as available without listing `audio/` first.
+**What ships is `rhythm-down` and `full`, at each tempo a song has — and
+no metronome mix** (2026-10-01). That is 22 files: four each for Seven
+Nation Army, "the cure", Luna, Watchtower and Sweet Child (`rhythm-down`
+and `full`, at two tempos), and two for Let It Be (`rhythm-down` at 71, and
+its one leftover `rhythm-down-metronome` — see "Every Song Journey page but
+Let It Be makes its own click"). The 20 other metronome
+mixes — 209 MB, nearly half of `audio/` — were deleted that day; the site
+makes the click itself everywhere they were used. (The 35 `guitar-note-*`
+files beside them are one-shot notes, not backing tracks — see "Guitar
+notes" above; this naming pattern doesn't apply to them.) Every slow tier is
+the same master time-stretched, so its grid is the fast one's scaled by the
+tempo ratio — checked on two songs to three decimal places. `no-gtr`,
+`drums-only` and `slow-<bpm>` have never existed in `audio/`; don't cite a
+mix as available without listing the folder first.
+
+**For a NEW song Jonathan exports four files, not eight** (his note,
+2026-10-01: "I don't need to download the metronome versions"):
+`rhythm-down` and `full`, each at the record tempo and at the slow tempo,
+same Moises project, no count-in, no re-trim. The site needs nothing else.
+**One exception, and it never goes on the site:** to place the bars, Claude
+needs ONE extra export — the record-tempo `rhythm-down` with the click on —
+as the measuring input for `tools/beat-map.py`. Ask for it when a new song
+is being wired up, measure, and leave it out of the commit. Don't ask for
+the other three metronome variants, and don't tell him a song is "missing"
+its metronome files.
+
+**The deleted files are still in git history**, so the repo's `.git` did
+not get smaller (about 580 MB) — what shrank is the published site, which
+is what GitHub Pages' 1 GB limit counts: `audio/` went from 439 MB to
+230 MB. Shrinking the history would mean rewriting it and force-pushing
+`main` under two machines and several worktrees; don't, unless Jonathan
+asks for that specifically.
 
 **The Song Journey play-along has the Guitar toggle too** (Jonathan,
 2026-09-27). A `tabs/*.html` page's `#playalong-frame` may declare the full
-twin of every file it has — `data-audio-full`, plus `-full-metronome`,
-`-slow-full`, `-slow-full-metronome` for each of `data-audio-metronome`,
-`-slow`, `-slow-metronome` the page declares — and `ensurePlayer()` in
+twin of every file it has — `data-audio-full`, plus `data-audio-slow-full`
+when it has `data-audio-slow` (the `-metronome` twins went with the
+metronome files, 2026-10-01) — and `ensurePlayer()` in
 `tabs/journey.js` grows a third toggle beside Slow and Metronome: same
 🎸 button, same `ca.snipGuitarOn`/`ca.snipGuitarOff`/`ca.snipGuitarTitle`
 keys as the snippet card, **on by default**, label flips with the press.
@@ -1798,8 +1847,8 @@ ear. This is chord *timing*, not BPM:
   grid, stale the day the beat map landed.) One loop everywhere on the
   card, the intro included, so for the first ~18 s the card's G sits a
   beat ahead of the record's — the settled reading above, not a bug. Its
-  full and full-metronome mixes ship for the Guitar toggle, on the card
-  and on the Song Journey page (1be).
+  full mixes ship for the Guitar toggle, on the card and on the Song
+  Journey page (1be).
 - **Seven Nation Army** (123 BPM track) — the riff is NOT one note per beat:
   bar 1 is E (long) · E (short) · G · E, with D as a pickup on the "and" of 4;
   bar 2 is **C for two beats, B for two beats** — what ca-10 teaches. The

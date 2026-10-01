@@ -4740,8 +4740,12 @@ function jsFunctionBody(src, name) {
   }
   return null;
 }
-const SNIPPET_TRACK_FIELDS = ['src', 'srcMetronome', 'srcSlow', 'srcSlowMetronome',
+const SNIPPET_TRACK_FIELDS = ['src', 'srcSlow',
                               'trackBpm', 'trackBpmSlow', 'feltBpm', 'beatsPerBar', 'durationSec'];
+/* Gone since 2026-10-01: the site makes its own click on snippets, practice
+   cards and Song Journey pages, so no track names a metronome mix. A field
+   that comes back would point at a file 1bk refuses to have in audio/. */
+const SNIPPET_METRONOME_FIELDS = ['srcMetronome', 'srcSlowMetronome', 'srcFullMetronome', 'srcFullSlowMetronome'];
 function checkBackingSnippets() {
   head('1ak. Backing-track snippets');
   let bad = 0;
@@ -4788,19 +4792,20 @@ function checkBackingSnippets() {
         flag(`SNIPPET_TRACKS['${name}'].${f}: "${tr[f]}" is not a positive number`);
       }
     }
+    for (const f of SNIPPET_METRONOME_FIELDS) {
+      if (tr[f] !== undefined)
+        flag(`SNIPPET_TRACKS['${name}'].${f}: metronome mixes are retired — the site makes the click (snipScheduleClick / pcScheduleClick), so nothing reads this path. Delete the field; a Moises metronome export is only a measuring input for tools/beat-map.py and stays out of audio/`);
+    }
     /* The OPTIONAL full mix (the Guitar toggle). Both tempo tiers or neither:
        a toggle that dies the moment Slow is pressed is worse than no toggle.
-       Same for the metronome pair on top of it. Any path declared has to
-       point at a file that is actually there — a typo'd full-mix name is a
-       Play button that 404s, and only in the one mode a student reaches by
-       pressing the button that is on by default. */
-    const FULL_PAIRS = [['srcFull', 'srcFullSlow'], ['srcFullMetronome', 'srcFullSlowMetronome']];
+       Any path declared has to point at a file that is actually there — a
+       typo'd full-mix name is a Play button that 404s, and only in the one
+       mode a student reaches by pressing the button that is on by default. */
+    const FULL_PAIRS = [['srcFull', 'srcFullSlow']];
     for (const [fast, slow] of FULL_PAIRS) {
       if (!!tr[fast] !== !!tr[slow])
         flag(`SNIPPET_TRACKS['${name}']: has ${tr[fast] ? fast : slow} but not ${tr[fast] ? slow : fast} — a full mix needs both tempo tiers or neither, or the toggle breaks on Slow`);
     }
-    if (tr.srcFullMetronome && !tr.srcFull)
-      flag(`SNIPPET_TRACKS['${name}']: declares a full+metronome mix but no plain full mix — nothing can reach it`);
     /* defaultSlow (optional) opens the card on the slow tier — buildSnippet
        writes data-slow AND the turtle's aria-pressed from it, so a non-boolean
        here would light the button without moving the engine, or the reverse.
@@ -4823,8 +4828,7 @@ function checkBackingSnippets() {
        alone, and the Guitar toggle simply jumps the loop somewhere else in
        the song. 0.25 s of slack absorbs mp3 encoder padding (~50 ms) while
        still catching a real re-trim. */
-    const TWINS = [['srcFull', 'src'], ['srcFullSlow', 'srcSlow'],
-                   ['srcFullMetronome', 'srcMetronome'], ['srcFullSlowMetronome', 'srcSlowMetronome']];
+    const TWINS = [['srcFull', 'src'], ['srcFullSlow', 'srcSlow']];
     for (const [full, plain] of TWINS) {
       if (!tr[full] || !existsSync(join(ROOT, tr[full])) || !existsSync(join(ROOT, tr[plain]))) continue;
       const a = mp3DurationSec(join(ROOT, tr[full])), b = mp3DurationSec(join(ROOT, tr[plain]));
@@ -5634,9 +5638,9 @@ function checkFourStepsAndPaging() {
    1be. SONG JOURNEY GUITAR TOGGLE — the play-along box on a tabs/*.html
    page grows a "Record plays it / You play it" toggle when it declares
    the FULL twin of every rhythm-down file it has (tabs/journey.js
-   ensurePlayer): data-audio-full, plus -full-metronome / -slow-full /
-   -slow-full-metronome for each of data-audio-metronome / -slow /
-   -slow-metronome the page declares. journey.js renders NO toggle for a
+   ensurePlayer): data-audio-full, plus -slow-full when it has -slow.
+   (The -metronome twins are still checked below for a page that declares
+   them, but none does since 2026-10-01 — see 1bk.) journey.js renders NO toggle for a
    half-declared set, so a typo there is silent — the button just never
    appears. That is what this catches, plus a declared file that is not
    in audio/, plus a full twin whose length differs from its rhythm-down
@@ -6006,6 +6010,128 @@ function checkPeekSavesNothing() {
   if (bad === 0) ok(`${RESPONSE_WRITERS.length} response writers, ${writes} writes — every one checks isPeekedResponseKey() first`);
 }
 
+/* ════════════════════════════════════════════════════════════════════
+   1bk. THE SITE MAKES ITS OWN CLICK — no metronome mixes (2026-10-01).
+   Every Metronome button used to swap to a second copy of the track with a
+   Moises click baked in: 21 files, 219 MB, half of audio/. Practice cards
+   never used them, "the cure"'s Song Journey page stopped on 2026-09-27,
+   and from 2026-10-01 the other Song Journey pages and the step snippet
+   make the click too, so the files are gone (Let It Be's one is all that is
+   left — that page still swaps files, by Jonathan's call to leave the song
+   alone for now).
+
+   A Song Journey page gets its click one of two ways (tabs/journey.js):
+   data-click-anchor + counted data-bpm / data-bpm-slow for a steady track,
+   or data-click-bars — every bar's downbeat on the fast file — for a band
+   that drifts. Those numbers are a hand-kept copy of SNIPPET_TRACKS in
+   app.js (the pages have no app.js), which is the drift this guards:
+     - a page with either may not ALSO name a metronome file;
+     - data-click-bars rises, ends inside the file, and comes with a whole
+       data-click-beats;
+     - against SNIPPET_TRACKS[<page slug>]: the list IS barTimes, number
+       for number — or, on a steady track, holds `anchor` and runs on at
+       the track's bar length from there; data-click-anchor IS `anchor`;
+       and a page with a slow tier scales by trackBpm / trackBpmSlow;
+     - the number of pages making their own click is pinned;
+     - audio/ holds no metronome mix but the allow-listed one. A Moises
+       metronome export is a measuring input for tools/beat-map.py and
+       stays out of the repo.
+   ════════════════════════════════════════════════════════════════════ */
+const JOURNEY_CLICK_PAGES = 5;   // the-cure (anchor), seven-nation-army, sweet-child-o-mine, all-along-the-watchtower, luna (bars)
+const METRONOME_MIXES_ALLOWED = ['the-beatles-let-it-be-backing-C-71bpm-440hz-rhythm-down-metronome.mp3'];
+function checkSiteMadeClick() {
+  head('1bk. The site makes its own click');
+  let bad = 0, clickPages = 0;
+  const flag = m => { err(m); problems++; bad++; };
+  let TRACKS = {};
+  try { TRACKS = loadConstObject(readFileSync(join(ROOT, 'app.js'), 'utf8'), 'SNIPPET_TRACKS'); }
+  catch (e) { flag(`app.js: could not load SNIPPET_TRACKS — ${e.message}`); return; }
+  const near = (a, b, tol) => Math.abs(a - b) <= tol;
+  for (const page of TAB_PAGES.filter(p => p.endsWith('.html'))) {
+    let src;
+    try { src = readFileSync(join(ROOT, page), 'utf8'); } catch { continue; }
+    const box = src.match(/<div\b[^>]*\bid="playalong-frame"[^>]*>/);
+    if (!box) continue;
+    const d = {};
+    for (const m of box[0].matchAll(/\bdata-([a-z-]+)="([^"]*)"/g)) d[m[1]] = m[2];
+    const hasBars = d['click-bars'] !== undefined, hasAnchor = d['click-anchor'] !== undefined;
+    if (!hasBars && !hasAnchor) continue;
+    clickPages++;
+    const slug = page.replace(/^.*\//, '').replace(/\.html$/, '');
+    const tr = TRACKS[slug];
+    for (const k of Object.keys(d)) {
+      if (/^audio.*metronome$/.test(k))
+        flag(`${page}: makes its own click (data-click-${hasBars ? 'bars' : 'anchor'}) but still names data-${k} — journey.js would never play that file; delete the attribute`);
+    }
+    if (hasBars && hasAnchor)
+      flag(`${page}: declares both data-click-bars and data-click-anchor — journey.js uses the bar list and ignores the anchor; keep one`);
+    if (d['audio-slow'] !== undefined) {
+      const bpm = Number(d.bpm), slow = Number(d['bpm-slow']);
+      if (!(bpm > 0) || !(slow > 0)) flag(`${page}: has a Slow tier but no data-bpm / data-bpm-slow — the click cannot be rescaled onto the slow file`);
+      else if (tr && !near(bpm / slow, tr.trackBpm / tr.trackBpmSlow, 1e-6))
+        flag(`${page}: data-bpm / data-bpm-slow is ${bpm}/${slow} but SNIPPET_TRACKS['${slug}'] stretches by ${tr.trackBpm}/${tr.trackBpmSlow} — the click would slide off the slow file`);
+    }
+    if (hasAnchor && !hasBars) {
+      if (!tr) flag(`${page}: data-click-anchor with no SNIPPET_TRACKS['${slug}'] to check it against`);
+      else if (!near(Number(d['click-anchor']), tr.anchor, 0.0005))
+        flag(`${page}: data-click-anchor is ${d['click-anchor']} but SNIPPET_TRACKS['${slug}'].anchor is ${tr.anchor} — one measured number, two copies`);
+    }
+    if (!hasBars) continue;
+    const raw = d['click-bars'].split(',');
+    const bars = raw.map(Number);
+    if (bars.length < 2 || bars.some(v => !Number.isFinite(v))) { flag(`${page}: data-click-bars is not a list of numbers`); continue; }
+    if (!/^[1-9]\d*$/.test(d['click-beats'] || ''))
+      flag(`${page}: data-click-bars needs data-click-beats (clicks per bar, a whole number) — got "${d['click-beats']}"`);
+    const dip = bars.findIndex((v, i) => i > 0 && v <= bars[i - 1]);
+    if (dip > 0) flag(`${page}: data-click-bars goes backwards at entry ${dip + 1} (${bars[dip - 1]} → ${bars[dip]})`);
+    const audio = d.audio && join(ROOT, 'tabs', d.audio);
+    const dur = audio && existsSync(audio) ? mp3DurationSec(audio) : null;
+    if (dur !== null && bars[bars.length - 1] > dur)
+      flag(`${page}: data-click-bars runs to ${bars[bars.length - 1]}s but ${d.audio} is ${dur.toFixed(1)}s long`);
+    if (!tr) { flag(`${page}: data-click-bars with no SNIPPET_TRACKS['${slug}'] to check it against`); continue; }
+    if (Array.isArray(tr.barTimes) && tr.barTimes.length > 1) {
+      if (bars.length !== tr.barTimes.length)
+        flag(`${page}: data-click-bars has ${bars.length} downbeats but SNIPPET_TRACKS['${slug}'].barTimes has ${tr.barTimes.length} — the page's list is a copy of that one; re-copy it`);
+      else {
+        const off = bars.findIndex((v, i) => !near(v, tr.barTimes[i], 0.0005));
+        if (off >= 0) flag(`${page}: data-click-bars entry ${off + 1} is ${bars[off]} but barTimes has ${tr.barTimes[off]} — the page's list is a copy of SNIPPET_TRACKS['${slug}'].barTimes; re-copy it`);
+      }
+    } else {
+      const at = bars.findIndex(v => near(v, tr.anchor, 0.0015));
+      const bar = tr.beatsPerBar * 60 / tr.feltBpm;
+      if (at < 0) flag(`${page}: data-click-bars never lands on SNIPPET_TRACKS['${slug}'].anchor (${tr.anchor}) — a steady track's list must pass through its one measured downbeat`);
+      else {
+        const off = bars.findIndex((v, i) => i > at && !near(v - bars[i - 1], bar, 0.002));
+        if (off >= 0) flag(`${page}: data-click-bars entry ${off + 1} is ${(bars[off] - bars[off - 1]).toFixed(3)}s after the one before, but a bar of this steady track is ${bar.toFixed(3)}s`);
+      }
+    }
+  }
+  if (clickPages !== JOURNEY_CLICK_PAGES)
+    flag(`${clickPages} Song Journey page(s) make their own click, expected ${JOURNEY_CLICK_PAGES} — if that change is on purpose, update JOURNEY_CLICK_PAGES`);
+  /* snippetSrc(track, slow, guitar) lost its `metro` argument with the files.
+     A caller still passing four would hand `false` to `guitar` and silently
+     play the rhythm-down mix with the Guitar button lit — which is exactly
+     what the two practice-card callers did in the working copy on
+     2026-10-01, caught by a browser test before it was committed. */
+  const appSrc = stripJsComments(readFileSync(join(ROOT, 'app.js'), 'utf8'));
+  const calls = [...appSrc.matchAll(/\bsnippetSrc\(([^()]*)\)/g)];
+  if (!calls.length) flag('app.js: no snippetSrc() call found — 1bk cannot check its callers');
+  for (const m of calls) {
+    if (m[1].split(',').length !== 3)
+      flag(`app.js: snippetSrc(${m[1].trim()}) — it takes (track, slow, guitar); a fourth argument is the retired \`metro\` flag and shifts \`guitar\` out`);
+  }
+  let mixes = [];
+  try { mixes = readdirSync(join(ROOT, 'audio')).filter(f => /metronome\.(mp3|m4a|wav|ogg)$/i.test(f)); } catch { /* no audio/ */ }
+  for (const f of mixes) {
+    if (!METRONOME_MIXES_ALLOWED.includes(f))
+      flag(`audio/${f}: a metronome mix — the site makes its own click, so nothing plays this file. A Moises metronome export is only a measuring input for tools/beat-map.py; keep it out of the repo`);
+  }
+  for (const f of METRONOME_MIXES_ALLOWED) {
+    if (!mixes.includes(f)) flag(`audio/${f} is on METRONOME_MIXES_ALLOWED but is not in audio/ — if its page now makes its own click, drop it from the list`);
+  }
+  if (bad === 0) ok(`${clickPages} Song Journey pages make their own click (pinned), every beat map agrees with SNIPPET_TRACKS; audio/ holds ${mixes.length} metronome mix (allow-listed)`);
+}
+
 const GUITAR_NOTE_COUNT = 35;
 function checkGuitarNotes() {
   head('1bj. Recorded guitar notes');
@@ -6109,6 +6235,7 @@ function checkGuitarNotes() {
   checkJourneySlowBpmLabels();
   checkGuitarNotes();
   checkPeekSavesNothing();
+  checkSiteMadeClick();
   if (!SKIP_LINKS) await checkLinks();
   else warn('skipping link check (--skip-links)');
   bumpServiceWorker();

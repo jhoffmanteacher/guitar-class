@@ -1657,14 +1657,24 @@ function tabPageOf(tabEl, seq){
    loop is half or double the length the tab is.
 
    ⚠️ `anchor` IS THE FIRST DOWNBEAT, IN SECONDS, AND IT HAS TO BE MEASURED
-   BY EAR — it is the one number nothing here can compute. Until it is,
-   `anchorVerified: false` keeps checks.mjs (1ak) warning on every push. To
-   measure it: open the activity on localhost with ?snipcal=1 on the URL and
-   press play — the card grows a live timecode. Note the reading on the first
-   beat of bar 1, put it in `anchor`, flip `anchorVerified` to true. A wrong
-   anchor puts every snippet on that song out by the SAME amount, so there is
-   exactly one number to fix, not one per step. */
-/* THE GUITAR TOGGLE and the four OPTIONAL `full*` paths below.
+   — it is the one number nothing here can compute. Until it is,
+   `anchorVerified: false` keeps checks.mjs (1ak) warning on every push.
+   Measure it with tools/beat-map.py, which takes the rhythm-down mix and ONE
+   Moises export of it with the click on and prints the anchor (and, for a
+   live band, the whole barTimes list). That metronome export is a measuring
+   input only: it never goes in audio/ (2026-10-01 — the site makes its own
+   click everywhere, and checks.mjs 1bk fails a metronome mix that comes
+   back). ?snipcal=1 on the URL still gives a snippet card a live timecode to
+   check the number by ear. A wrong anchor puts every snippet on that song
+   out by the SAME amount, so there is exactly one number to fix, not one per
+   step.
+
+   THE METRONOME IS A CLICK THE SITE MAKES (2026-10-01), on a snippet as on a
+   practice card and a Song Journey page: one click per counted beat, read
+   off the same window the bar dots use (snipScheduleClick), so it follows
+   the beat map on a live-band track and needs no file. Metronome and Guitar
+   are therefore fully independent on every track. */
+/* THE GUITAR TOGGLE and the two OPTIONAL `full*` paths below.
    Every shipped mp3 is a `rhythm-down` mix — the part the student is learning
    is turned down so they supply it. That is deliberate and course-wide, and
    it is also why a student cannot tell a right note from a wrong one: there
@@ -1680,18 +1690,15 @@ function tabPageOf(tabEl, seq){
    declare `srcFullSlow` too (checks.mjs 1ak): a Guitar toggle that silently
    dies the moment Slow is pressed is worse than no toggle.
 
-   The METRONOME pair (`srcFullMetronome`/`srcFullSlowMetronome`) is optional
-   on top of that, because a full mix has the record's own drums in it and the
-   click is mostly redundant there. Without them the Metronome toggle disables
-   itself while the guitar is on, rather than quietly dropping the guitar to
-   get its click — a button that undoes another button is the kind of thing
-   nobody ever debugs in a room of 30. */
+   There is no metronome mix of either (2026-10-01): the click is made by the
+   site, so Metronome works the same whether the guitar is in or out. The
+   comments on the tracks below still say which numbers were measured off a
+   Moises metronome export — those files were measuring inputs and are no
+   longer in audio/. */
 const SNIPPET_TRACKS = {
   'the-cure': {
     src:              'audio/olivia-rodrigo-the-cure-backing-Am-144bpm-440hz-rhythm-down.mp3',
-    srcMetronome:     'audio/olivia-rodrigo-the-cure-backing-Am-144bpm-440hz-rhythm-down-metronome.mp3',
     srcSlow:          'audio/olivia-rodrigo-the-cure-backing-Am-120bpm-440hz-rhythm-down.mp3',
-    srcSlowMetronome: 'audio/olivia-rodrigo-the-cure-backing-Am-120bpm-440hz-rhythm-down-metronome.mp3',
     /* The full mix — 297.038 s against the rhythm-down twin's 297.064 s, and
        356.441 s against 356.545 s, both inside 1ak's 0.25 s. Note the slow
        twin is a 192k encode where this is 320k; that asymmetry predates the
@@ -1699,11 +1706,6 @@ const SNIPPET_TRACKS = {
        two files differ in size far more than in length. */
     srcFull:     'audio/olivia-rodrigo-the-cure-backing-Am-144bpm-440hz-full.mp3',
     srcFullSlow: 'audio/olivia-rodrigo-the-cure-backing-Am-120bpm-440hz-full.mp3',
-    // …and the same two with the click on, which is what lets Metronome and
-    // Guitar both be on at once. Without this pair there is no file carrying
-    // the record's guitar AND a click, so the two toggles have to take turns.
-    srcFullMetronome:     'audio/olivia-rodrigo-the-cure-backing-Am-144bpm-440hz-full-metronome.mp3',
-    srcFullSlowMetronome: 'audio/olivia-rodrigo-the-cure-backing-Am-120bpm-440hz-full-metronome.mp3',
     trackBpm: 144, trackBpmSlow: 120,   // what the FILES are, for the slow-tier rescale
     feltBpm: 72,                        // what the ROOM counts — 144 felt in half
     beatsPerBar: 4,                     // felt beats per chord; one chord = one bar
@@ -1731,9 +1733,7 @@ const SNIPPET_TRACKS = {
      294.2 s at 100, exactly 123/100), same as every other track here. */
   'seven-nation-army': {
     src:              'audio/the-white-stripes-seven-nation-army-backing-Em-123bpm-440hz-rhythm-down.mp3',
-    srcMetronome:     'audio/the-white-stripes-seven-nation-army-backing-Em-123bpm-440hz-rhythm-down-metronome.mp3',
     srcSlow:          'audio/the-white-stripes-seven-nation-army-backing-Em-100bpm-440hz-rhythm-down.mp3',
-    srcSlowMetronome: 'audio/the-white-stripes-seven-nation-army-backing-Em-100bpm-440hz-rhythm-down-metronome.mp3',
     /* The full mix, and this is the song that needed it most: the rhythm-down
        mix turns the RIFF down (the Journey page says so outright), which is
        the whole of what ca-10 teaches — so until these landed a student had
@@ -1742,11 +1742,6 @@ const SNIPPET_TRACKS = {
        against 294.217 s. 1ak re-checks that on every push. */
     srcFull:     'audio/the-white-stripes-seven-nation-army-backing-Em-123bpm-440hz-full.mp3',
     srcFullSlow: 'audio/the-white-stripes-seven-nation-army-backing-Em-100bpm-440hz-full.mp3',
-    // …and the same two with the click on, which is what lets Metronome and
-    // Guitar both be on at once. Without this pair there is no file carrying
-    // the record's guitar AND a click, so the two toggles have to take turns.
-    srcFullMetronome:     'audio/the-white-stripes-seven-nation-army-backing-Em-123bpm-440hz-full-metronome.mp3',
-    srcFullSlowMetronome: 'audio/the-white-stripes-seven-nation-army-backing-Em-100bpm-440hz-full-metronome.mp3',
     trackBpm: 123, trackBpmSlow: 100,
     feltBpm: 123,                       // counted at record speed, not halved
     beatsPerBar: 4,
@@ -1806,13 +1801,9 @@ const SNIPPET_TRACKS = {
      208.80 s each and sample-aligned with one another. */
   'luna': {
     src:              'audio/peso-pluma-junior-h-luna-backing-Am-128bpm-440hz-rhythm-down.mp3',
-    srcMetronome:     'audio/peso-pluma-junior-h-luna-backing-Am-128bpm-440hz-rhythm-down-metronome.mp3',
     srcSlow:          'audio/peso-pluma-junior-h-luna-backing-Am-100bpm-440hz-rhythm-down.mp3',
-    srcSlowMetronome: 'audio/peso-pluma-junior-h-luna-backing-Am-100bpm-440hz-rhythm-down-metronome.mp3',
     srcFull:              'audio/peso-pluma-junior-h-luna-backing-Am-128bpm-440hz-full.mp3',
     srcFullSlow:          'audio/peso-pluma-junior-h-luna-backing-Am-100bpm-440hz-full.mp3',
-    srcFullMetronome:     'audio/peso-pluma-junior-h-luna-backing-Am-128bpm-440hz-full-metronome.mp3',
-    srcFullSlowMetronome: 'audio/peso-pluma-junior-h-luna-backing-Am-100bpm-440hz-full-metronome.mp3',
     trackBpm: 128, trackBpmSlow: 100,
     feltBpm: 128 / 3,                   // big beats: 3 eighth-note clicks each
     beatsPerBar: 2,                     // two big beats per 6/8 bar
@@ -1851,13 +1842,9 @@ const SNIPPET_TRACKS = {
      original; its music matches this set's. */
   'sweet-child-o-mine': {
     src:              'audio/guns-n-roses-sweet-child-o-mine-backing-G-125bpm-440hz-rhythm-down.mp3',
-    srcMetronome:     'audio/guns-n-roses-sweet-child-o-mine-backing-G-125bpm-440hz-rhythm-down-metronome.mp3',
     srcSlow:          'audio/guns-n-roses-sweet-child-o-mine-backing-G-100bpm-440hz-rhythm-down.mp3',
-    srcSlowMetronome: 'audio/guns-n-roses-sweet-child-o-mine-backing-G-100bpm-440hz-rhythm-down-metronome.mp3',
     srcFull:              'audio/guns-n-roses-sweet-child-o-mine-backing-G-125bpm-440hz-full.mp3',
     srcFullSlow:          'audio/guns-n-roses-sweet-child-o-mine-backing-G-100bpm-440hz-full.mp3',
-    srcFullMetronome:     'audio/guns-n-roses-sweet-child-o-mine-backing-G-125bpm-440hz-full-metronome.mp3',
-    srcFullSlowMetronome: 'audio/guns-n-roses-sweet-child-o-mine-backing-G-100bpm-440hz-full-metronome.mp3',
     trackBpm: 125, trackBpmSlow: 100,
     feltBpm: 125,                       // counted at record speed
     beatsPerBar: 4,
@@ -1893,13 +1880,9 @@ const SNIPPET_TRACKS = {
      bars start on A, even bars on F, all the way through. */
   'all-along-the-watchtower': {
     src:              'audio/jimi-hendrix-all-along-the-watchtower-backing-Am-115bpm-440hz-rhythm-down.mp3',
-    srcMetronome:     'audio/jimi-hendrix-all-along-the-watchtower-backing-Am-115bpm-440hz-rhythm-down-metronome.mp3',
     srcSlow:          'audio/jimi-hendrix-all-along-the-watchtower-backing-Am-105bpm-440hz-rhythm-down.mp3',
-    srcSlowMetronome: 'audio/jimi-hendrix-all-along-the-watchtower-backing-Am-105bpm-440hz-rhythm-down-metronome.mp3',
     srcFull:              'audio/jimi-hendrix-all-along-the-watchtower-backing-Am-115bpm-440hz-full.mp3',
     srcFullSlow:          'audio/jimi-hendrix-all-along-the-watchtower-backing-Am-105bpm-440hz-full.mp3',
-    srcFullMetronome:     'audio/jimi-hendrix-all-along-the-watchtower-backing-Am-115bpm-440hz-full-metronome.mp3',
-    srcFullSlowMetronome: 'audio/jimi-hendrix-all-along-the-watchtower-backing-Am-105bpm-440hz-full-metronome.mp3',
     trackBpm: 115, trackBpmSlow: 105,
     feltBpm: 115,
     beatsPerBar: 4,
@@ -1925,9 +1908,6 @@ const SNIPPET_TRACKS = {
 /* Does this track have a full mix at all? Both tiers or neither — the toggle
    has to survive the Slow button. */
 function snippetHasFull(tr){ return !!(tr && tr.srcFull && tr.srcFullSlow); }
-/* …and a click to go with it, which decides whether Metronome stays usable
-   while the guitar is in. */
-function snippetHasFullMetronome(tr){ return !!(tr && tr.srcFullMetronome && tr.srcFullSlowMetronome); }
 /* Where a snippet's window falls in whichever tempo tier is playing.
    Everything downstream (the loop, the bar dots, the tier switch) reads the
    window from here so there is one copy of the bar arithmetic. */
@@ -1984,15 +1964,12 @@ function slowestApplyRate(audio, rate){
   audio.playbackRate = rate;
 }
 function snipRate(card){ return card && card.dataset.slowest === '1' ? SLOWEST_RATE : 1; }
-function snippetSrc(tr, slow, metro, guitar){
+function snippetSrc(tr, slow, guitar){
   // Guitar on is only ever honoured when the full mix is actually there; a
   // missing export falls back to rhythm-down rather than a 404 on press.
-  if(guitar && snippetHasFull(tr)){
-    if(!metro || !snippetHasFullMetronome(tr)) return slow ? tr.srcFullSlow : tr.srcFull;
-    return slow ? tr.srcFullSlowMetronome : tr.srcFullMetronome;
-  }
-  if(slow) return metro ? tr.srcSlowMetronome : tr.srcSlow;
-  return metro ? tr.srcMetronome : tr.src;
+  // Metronome is not a file — the site makes the click (snipScheduleClick).
+  if(guitar && snippetHasFull(tr)) return slow ? tr.srcFullSlow : tr.srcFull;
+  return slow ? tr.srcSlow : tr.src;
 }
 /* ONE builder, called by caStepHtml() in app.js AND
    renderTeacherActivityDetail() in teacher.js — the same shape buildTab()
@@ -2020,9 +1997,7 @@ function buildSnippet(spec, opts){
   const dots = Array.from({ length: bars }, (_, i) =>
     `<span class="snip-bar"><span class="snip-bar-n">${i + 1}</span></span>`).join('');
   const cal = window.__snipCal
-    ? `<div class="snip-cal"><span class="snip-cal-time">0.00 s</span>`
-      + `<button type="button" class="snip-cal-find" onclick="snipFindAnchor(this)">Find the first click</button>`
-      + `<span class="snip-cal-out"></span></div>` : '';
+    ? `<div class="snip-cal"><span class="snip-cal-time">0.00 s</span></div>` : '';
   /* The Guitar toggle exists only where the full mix does, and starts ON: the
      point of it is that the student hears the part played correctly before
      they are asked to supply it. data-guitar carries that initial state so
@@ -2031,20 +2006,6 @@ function buildSnippet(spec, opts){
   const guitarBtn = hasFull
     ? `<button type="button" class="snip-toggle snip-guitar on" aria-pressed="true" onclick="snipSetTier(this,'guitar')" title="${escAttr(t('ca.snipGuitarTitle'))}">&#x1F3B8; <span class="snip-guitar-label">${escHtml(t('ca.snipGuitarOn'))}</span></button>`
     : '';
-  /* With the guitar in and no full+click export, the click and the guitar
-     cannot both sound — there is no file with both on it. The first cut
-     DISABLED the Metronome button for that case, which was wrong twice over:
-     the Guitar toggle starts on, so once both songs had a full mix the click
-     was dead on every card by default (found in the room, 2026-09-18), and a
-     greyed-out button reads as broken rather than as a choice. They are
-     mutually exclusive instead — pressing one visibly releases the other, in
-     both directions, handled in snipSetTier(). The old objection to "a button
-     that undoes another button" was about doing it SILENTLY; doing it where
-     the student can watch the other button pop out is just how a pair of
-     mutually exclusive controls behaves. */
-  const metroExclusive = hasFull && !snippetHasFullMetronome(tr);
-  const metroDisabled = '';
-  const metroTitle = metroExclusive ? ` title="${escAttr(t('ca.snipMetroOffTitle'))}"` : '';
   return `<div class="snip" data-snip="${escAttr(data)}"${hasFull ? ' data-guitar="1"' : ''}${startSlow ? ' data-slow="1"' : ''}>`
     + `<div class="snip-head"><span class="snip-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" style="width:1em;height:1em;vertical-align:-0.15em"><path d="M3 12h2l2-6 3 14 3-11 2 5h6"/></svg></span>`
     + `<span class="snip-title">${escHtml(title)}</span><span class="snip-kind">${escHtml(t('ca.snipKind'))}</span></div>`
@@ -2053,7 +2014,7 @@ function buildSnippet(spec, opts){
     + `<button type="button" class="snip-play" onclick="snipToggle(this)">${snipPlayBtnHtml(false)}</button>`
     + `<button type="button" class="snip-toggle snip-slowest" aria-pressed="false" onclick="snipSetTier(this,'slowest')">${escHtml(t('ca.snipSlowest', { bpm: Math.round(slowFelt * SLOWEST_RATE) }))}</button>`
     + `<button type="button" class="snip-toggle snip-slow${startSlow ? ' on' : ''}" aria-pressed="${startSlow ? 'true' : 'false'}" onclick="snipSetTier(this,'slow')">&#x1F422; ${escHtml(t('journey.slow', { bpm: slowFelt }))}</button>`
-    + `<button type="button" class="snip-toggle snip-metro"${metroDisabled} aria-pressed="false" onclick="snipSetTier(this,'metro')"${metroTitle}>&#x1F3B5; ${escHtml(t('tools.metronome'))}</button>`
+    + `<button type="button" class="snip-toggle snip-metro" aria-pressed="false" onclick="snipSetTier(this,'metro')">&#x1F3B5; ${escHtml(t('tools.metronome'))}</button>`
     + guitarBtn
     + `</div>`
     + `<div class="snip-bars" aria-hidden="true">${dots}</div>`
@@ -2061,76 +2022,10 @@ function buildSnippet(spec, opts){
     + cal
     + `</div></div>`;
 }
-/* ── ?snipcal=1 : measuring a track's `anchor` ──────────────────────────
-   The anchor is the first downbeat of the file in seconds, and it is the one
-   number in SNIPPET_TRACKS that cannot be derived (see the block comment
-   there). Reading it off a moving timecode by ear costs whatever your
-   reaction time is — a fifth of a second, which is a fifth of a beat at this
-   tempo — so this finds it instead.
-
-   It decodes the track's rhythm-down-METRONOME file, where every beat has a
-   click on it, and reports the first one. The click is the loudest thing in
-   the first seconds of that mix by a wide margin, so a peak threshold
-   relative to the file's own maximum is enough; no onset-detection
-   cleverness, and nothing to tune per song. It prints the gaps between the
-   first few clicks too, which is the sanity check: they should be even, and
-   they should match 60/BPM for whatever the file's printed tempo is.
-
-   Authoring instrument, reachable only by typing the query param, so the
-   strings here are deliberately English-only — a student never sees it.
-   Deliberately NOT localhost-gated: it hands out a number, not access, and
-   gating it meant it was unreachable from the deployed site. */
-function snipFindAnchor(btn){
-  const card = btn.closest('.snip');
-  const out = card && card.querySelector('.snip-cal-out');
-  if(!card || !out) return;
-  let spec; try { spec = JSON.parse(card.dataset.snip); } catch(e) { return; }
-  const tr = spec && SNIPPET_TRACKS[spec.track];
-  if(!tr || !tr.srcMetronome){ out.textContent = ' — no metronome file for this track'; return; }
-  btn.disabled = true;
-  out.textContent = ' — decoding…';
-  fetch(tr.srcMetronome)
-    .then(r => { if(!r.ok) throw new Error('HTTP ' + r.status); return r.arrayBuffer(); })
-    .then(buf => getAudioCtx().decodeAudioData(buf))
-    .then(audioBuf => {
-      const data = audioBuf.getChannelData(0);
-      const rate = audioBuf.sampleRate;
-      const span = Math.min(data.length, Math.floor(rate * 40));   // first 40 s is plenty
-      const hop = Math.floor(rate * 0.005);                        // 5 ms resolution
-      // Peak per hop, and the loudest hop in the span — the threshold is
-      // relative to the file's own level so it needs no per-song tuning.
-      const peaks = [];
-      for(let i = 0; i + hop <= span; i += hop){
-        let p = 0;
-        for(let j = i; j < i + hop; j++){ const v = Math.abs(data[j]); if(v > p) p = v; }
-        peaks.push(p);
-      }
-      const max = peaks.reduce((m, v) => Math.max(m, v), 0);
-      if(!max){ out.textContent = ' — that file decodes to silence'; return; }
-      const thr = max * 0.4;
-      const hits = [];
-      for(let k = 0; k < peaks.length && hits.length < 6; k++){
-        if(peaks[k] < thr) continue;
-        // Refine to the rising edge inside the hop, then skip 100 ms so one
-        // click cannot register as several.
-        let i = k * hop;
-        while(i < (k + 1) * hop && Math.abs(data[i]) < thr * 0.5) i++;
-        hits.push(i / rate);
-        k += Math.ceil(0.1 / 0.005);
-      }
-      if(!hits.length){ out.textContent = ' — found no click above threshold'; return; }
-      const gaps = hits.slice(1).map((t, i) => (t - hits[i]).toFixed(3)).join(', ');
-      out.innerHTML = ` &rarr; <b>anchor: ${hits[0].toFixed(3)}</b>`
-        + `<span class="snip-cal-sub">gaps after it: ${gaps || '(only one click found)'} s`
-        + ` &middot; expect ${(60 / tr.trackBpm).toFixed(3)} s at ${tr.trackBpm} BPM</span>`;
-    })
-    .catch(e => { out.textContent = ' — could not read that file (' + e.message + ')'; })
-    .finally(() => { btn.disabled = false; });
-}
 /* The Guitar button's label names WHO PLAYS THE PART rather than claiming an
    on/off, because "off" is the rhythm-down mix and that only turns the part
    DOWN. Called from both paths that can change the state — the press itself
-   and the Metronome exclusivity release — so it cannot go stale. */
+   and nothing else — so it cannot go stale. */
 function snipGuitarLabel(btn, on){
   if(!btn) return;
   const lab = btn.querySelector('.snip-guitar-label');
@@ -2181,15 +2076,15 @@ function snipToggle(btn){
   let spec; try { spec = JSON.parse(card.dataset.snip); } catch(e) { return; }
   const tr = spec && SNIPPET_TRACKS[spec.track];
   if(!tr) return;
-  const slow = card.dataset.slow === '1', metro = card.dataset.metro === '1';
+  const slow = card.dataset.slow === '1';
   const guitar = card.dataset.guitar === '1';
   const win = snippetWindow(tr, spec, slow);
   const audio = new Audio();
   audio.preload = 'auto';
   audio.loop = false;                  // the window is looped by hand, below
-  audio.src = snippetSrc(tr, slow, metro, guitar);
+  audio.src = snippetSrc(tr, slow, guitar);
   slowestApplyRate(audio, snipRate(card));
-  snipState = { card, audio, spec, tr, win, raf: 0, cal: card.querySelector('.snip-cal') };
+  snipState = { card, audio, spec, tr, win, raf: 0, lastBeat: -1, cal: card.querySelector('.snip-cal') };
   btn.innerHTML = snipPlayBtnHtml(true);
   btn.classList.add('playing');
   // preload='none' would leave currentTime unsettable until metadata lands;
@@ -2277,14 +2172,32 @@ function snipSyncTabPage(card, spec, win, heard){
    frame rate the overshoot is one frame, and the seek back is the only
    artefact left (a short stumble; an mp3 cannot be looped gaplessly by
    seeking). */
+/* The snippet's Metronome: the next counted beat of the window, scheduled
+   once it is under 100 ms away — the practice card's pcScheduleClick, on the
+   snippet's own window. `lastBeat` drops back by itself when the loop comes
+   round, so a lap never loses its first click. */
+function snipScheduleClick(st, now){
+  const bpb = st.tr.beatsPerBar;
+  const nb = Math.ceil(snipBarsAt(st.win, now) * bpb - 1e-6);
+  if(nb < st.lastBeat) st.lastBeat = nb - 1;
+  if(nb <= st.lastBeat || nb < 0 || nb >= st.spec.bars * bpb) return;
+  const ahead = (snipTimeAtBars(st.win, nb / bpb) - now) / snipRate(st.card);   // real seconds
+  if(ahead > 0.1) return;
+  const ctx = getAudioCtx();
+  const lat = snipLatency() - (ctx.outputLatency || ctx.baseLatency || 0);
+  pcClick(ctx.currentTime + Math.max(0, ahead + lat), nb % bpb === 0);
+  st.lastBeat = nb;
+}
 function snipTick(){
   if(!snipState) return;
   const { audio, win, card, spec, cal } = snipState;
   if(!card.isConnected){ snipStop(); return; }   // a re-render pulled the card out
-  const now = audio.currentTime;
+  let now = audio.currentTime;
   if(now >= win.end - 0.02 || now < win.start - 0.5){
     try { audio.currentTime = win.start; } catch(e) {}
+    now = audio.currentTime;
   }
+  if(card.dataset.metro === '1' && !audio.paused) snipScheduleClick(snipState, now);
   // `heard` is roughly where the music is by the time it reaches the room —
   // see SNIP_OUTPUT_LATENCY. The dots follow the ears, not the decoder.
   const heard = now - snipLatency() * snipRate(card);   // latency is real seconds; this is file time
@@ -2294,9 +2207,9 @@ function snipTick(){
   if(cal){ const tEl = cal.querySelector('.snip-cal-time'); if(tEl) tEl.textContent = now.toFixed(2) + ' s'; }
   snipState.raf = requestAnimationFrame(snipTick);
 }
-/* Slow and Metronome are independent, exactly as on the Journey page, and
-   either can be set before playing or flipped mid-loop. Flipping mid-loop
-   keeps the MUSICAL position — how far into the window we are, in bars —
+/* Slow, Metronome and Guitar are independent, exactly as on the Journey
+   page, and any of them can be set before playing or flipped mid-loop.
+   Flipping a file (Slow, Guitar) mid-loop keeps the MUSICAL position — how far into the window we are, in bars —
    rather than the second, because the two files run on different clocks. */
 function snipSetTier(btn, which){
   const card = btn.closest('.snip');
@@ -2320,34 +2233,20 @@ function snipSetTier(btn, which){
     if(which === 'slowest'){ card.dataset.slow = on ? '1' : ''; }
     else if(on) card.dataset.slowest = '';
   }
-  /* Metronome and Guitar are mutually exclusive unless the track ships a
-     full mix WITH a click on it — there is simply no file that has both.
-     Release the other one visibly rather than leaving a button lit that
-     isn't doing anything. */
-  if(on && (which === 'metro' || which === 'guitar')){
-    let spec; try { spec = JSON.parse(card.dataset.snip); } catch(e) { spec = null; }
-    const track = spec && SNIPPET_TRACKS[spec.track];
-    if(track && snippetHasFull(track) && !snippetHasFullMetronome(track)){
-      const otherKey = which === 'metro' ? 'guitar' : 'metro';
-      const otherBtn = card.querySelector(otherKey === 'metro' ? '.snip-metro' : '.snip-guitar');
-      if(otherBtn && card.dataset[otherKey] === '1'){
-        card.dataset[otherKey] = '';
-        otherBtn.setAttribute('aria-pressed', 'false');
-        otherBtn.classList.remove('on');
-        if(otherKey === 'guitar') snipGuitarLabel(otherBtn, false);
-      }
-    }
-  }
+  // Metronome is the site's own click — the tick reads data-metro on its
+  // next frame, so there is no file to swap and nothing to re-seek.
+  if(which === 'metro') return;
   if(!snipState || snipState.card !== card) return;
   const { audio, spec, tr } = snipState;
-  const slow = card.dataset.slow === '1', metro = card.dataset.metro === '1';
+  const slow = card.dataset.slow === '1';
   const guitar = card.dataset.guitar === '1';
   const barsIn = snipBarsAt(snipState.win, audio.currentTime);
   const win = snippetWindow(tr, spec, slow);
   snipState.win = win;
   const at = snipTimeAtBars(win, isFinite(barsIn) && barsIn > 0 ? barsIn : 0);
-  const src = snippetSrc(tr, slow, metro, guitar);
+  const src = snippetSrc(tr, slow, guitar);
   slowestApplyRate(audio, snipRate(card));   // Slowest <-> Slow is the same file, just the rate
+  snipState.lastBeat = -1;
   if(audio.getAttribute('src') === src || audio.src.endsWith(src)){
     try { audio.currentTime = at; } catch(e) {}
     return;
@@ -11079,8 +10978,8 @@ function caJourneyLinkHtml(a){
      own cursor), one page per section, honouring each note's `beats`, so
      an uneven riff (Seven Nation Army) is followed as written. A section
      with `reps` shows its notes once and a "Verse 1 of 2" badge.
-   - The Metronome is a click the SITE makes on every counted beat, not the
-     track's metronome file. "the cure"'s metronome files click at the
+   - The Metronome is a click the SITE makes on every counted beat — there
+     are no metronome mixes in audio/. Moises clicked "the cure" at the
      file's 144 BPM, twice the 72 the room counts; this click is always the
      counted beat (feltBpm / beatsPerBar in SNIPPET_TRACKS), on both tiers.
      It is scheduled on the AudioContext a few ms ahead, offset by
@@ -11320,7 +11219,7 @@ function pcStart(root, si){
   const audio = new Audio();
   audio.preload = 'auto';
   audio.loop = false;                  // the window is looped by hand, in pcFrame
-  audio.src = snippetSrc(L.tr, slow, false, guitar);
+  audio.src = snippetSrc(L.tr, slow, guitar);
   slowestApplyRate(audio, pcRate(root));
   const st = { root, L, audio, win: pcWindow(L, slow), loopFrom: si, raf: 0, timers: [], lastBeat: -1, counting: true, si: -1, seq: -1, rep: -1, row: null };
   pcState = st;
@@ -11553,7 +11452,7 @@ function pcRetrack(root){
   st.win = pcWindow(st.L, slow);
   st.lastBeat = -1;
   const at = snipTimeAtBars(st.win, isFinite(barsIn) && barsIn > 0 ? barsIn : 0);
-  const src = snippetSrc(st.L.tr, slow, false, guitar);
+  const src = snippetSrc(st.L.tr, slow, guitar);
   slowestApplyRate(st.audio, pcRate(root));   // Slowest <-> Slower is the same file, just the rate
   if(st.audio.src.endsWith(src)){ try { st.audio.currentTime = at; } catch(e) {} return; }
   const wasPlaying = !st.audio.paused;

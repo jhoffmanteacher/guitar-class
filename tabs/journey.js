@@ -223,6 +223,17 @@ window.addEventListener('beforeprint', function(){
    ms ahead of each beat, offset by the same 80 ms output latency app.js
    uses (SNIP_OUTPUT_LATENCY), and follows Slow, Guitar and the loop.
 
+   A song played by a band with no click cannot use one anchor and a steady
+   tempo — the grid drifts off the record by mid-song — so its page lists
+   every bar's downbeat instead (2026-10-01): data-click-bars, seconds on the
+   FAST file, comma-separated, the same numbers as SNIPPET_TRACKS[...].barTimes
+   in app.js (checks.mjs 1bk compares them), with data-click-beats clicks
+   spread evenly inside each bar and the loud one on the downbeat. The slow
+   tier is the same list scaled by data-bpm / data-bpm-slow. Nothing clicks
+   before the first listed downbeat or after the last. Seven Nation Army,
+   Sweet Child, Watchtower and Luna work this way, so no page but Let It Be
+   declares a metronome file any more, and those files are gone from audio/.
+
    ensurePlayer() builds the <audio> element (and its Slow/Metronome/Guitar
    toggles) exactly once, however it's first reached — the top play-along
    box (togglePlayalong) and the floating backing-track pill (toggleTrackFab)
@@ -245,7 +256,10 @@ function ensurePlayer(){
     && (!d.audioSlowMetronome || !!d.audioSlowFullMetronome);
   var metroOn = false, slowOn = false, guitarOn = fullReady;
   var clickAnchor = parseFloat(d.clickAnchor);
-  var synthClick = isFinite(clickAnchor) && parseFloat(d.bpm) > 0 && parseFloat(d.bpmSlow) > 0;
+  var gridClick = isFinite(clickAnchor) && parseFloat(d.bpm) > 0 && parseFloat(d.bpmSlow) > 0;
+  var clickBars = (d.clickBars || '').split(',').map(parseFloat).filter(isFinite);
+  var barClick = clickBars.length > 1;
+  var synthClick = barClick || gridClick;
 
   var currentSrc = function(){
     if(synthClick) return guitarOn ? (slowOn ? d.audioSlowFull : d.audioFull) : (slowOn ? d.audioSlow : d.audio);
@@ -277,11 +291,33 @@ function ensurePlayer(){
 
   a.src = currentSrc();
 
-  /* The page-made click (data-click-anchor, above). One click per counted
-     beat, the next one scheduled once it is under 100 ms away; a jump back
-     (the loop, a seek, a Slow switch) resets lastBeat so no beat is lost. */
+  /* The page-made click (data-click-anchor or data-click-bars, above). One
+     click per counted beat, the next one scheduled once it is under 100 ms
+     away; a jump back (the loop, a seek, a Slow switch) resets lastBeat so no
+     beat is lost. */
   var clickCtx = null, clickRaf = 0, lastBeat = -1;
   var clickBeats = parseInt(d.clickBeats, 10) || 4;
+  /* The beat map (data-click-bars). Beat n is click n counted from the first
+     listed downbeat; both helpers work in FAST-file seconds.
+     barBeatTime: when beat n sounds, or null off either end of the list.
+     barNextBeat: the first beat at or after time t, or -1 past the last. */
+  var barBeatTime = function(n){
+    var i = Math.floor(n / clickBeats), k = n - i * clickBeats, last = clickBars.length - 1;
+    if(n < 0 || i > last) return null;
+    if(i === last) return k === 0 ? clickBars[last] : null;
+    return clickBars[i] + k * (clickBars[i + 1] - clickBars[i]) / clickBeats;
+  };
+  var barNextBeat = function(t){
+    var lo = 0, hi = clickBars.length - 1;
+    if(t <= clickBars[0]) return 0;
+    if(t > clickBars[hi]) return -1;
+    while(hi - lo > 1){
+      var mid = (lo + hi) >> 1;
+      if(clickBars[mid] <= t) lo = mid; else hi = mid;
+    }
+    var step = (clickBars[lo + 1] - clickBars[lo]) / clickBeats;
+    return lo * clickBeats + Math.ceil((t - clickBars[lo]) / step - 1e-6);
+  };
   var clickAt = function(at, accent){
     var o = clickCtx.createOscillator(), g = clickCtx.createGain();
     o.frequency.value = accent ? 1500 : 1000;
@@ -295,13 +331,23 @@ function ensurePlayer(){
     clickRaf = 0;
     if(!metroOn || a.paused) return;
     var ratio = parseFloat(d.bpm) / parseFloat(d.bpmSlow);
-    var beat = 60 / parseFloat(slowOn ? d.bpmSlow : d.bpm);
-    var anchor = slowOn ? clickAnchor * ratio : clickAnchor;
     var now = a.currentTime;
-    var nb = Math.ceil((now - anchor) / beat - 1e-6);
+    var nb, due;                       // the next beat, and its time on the file now playing
+    if(barClick){
+      var scale = slowOn ? ratio : 1;  // slow-file seconds per fast-file second
+      nb = barNextBeat(now / scale);
+      due = nb < 0 ? null : barBeatTime(nb);
+      if(due === null){ clickRaf = requestAnimationFrame(clickTick); return; }   // past the last downbeat
+      due *= scale;
+    } else {
+      var beat = 60 / parseFloat(slowOn ? d.bpmSlow : d.bpm);
+      var anchor = slowOn ? clickAnchor * ratio : clickAnchor;
+      nb = Math.ceil((now - anchor) / beat - 1e-6);
+      due = anchor + nb * beat;
+    }
     if(nb < lastBeat) lastBeat = nb - 1;
     if(nb > lastBeat && nb >= 0){
-      var ahead = anchor + nb * beat - now;
+      var ahead = due - now;
       if(ahead <= 0.1){
         var lat = 0.08 - (clickCtx.outputLatency || clickCtx.baseLatency || 0);
         clickAt(clickCtx.currentTime + Math.max(0, ahead + lat), nb % clickBeats === 0);

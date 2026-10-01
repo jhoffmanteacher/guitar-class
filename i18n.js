@@ -467,8 +467,6 @@
     'ca.snipGuitarOff':        { en: 'You play it',     es: 'Lo tocas tú' },
     'ca.snipGuitarTitle':      { en: 'Who plays the part. Press it and the record\u2019s guitar drops back so you lead — it gets quieter, not silent.',
                                  es: 'Quién toca la parte. Presiónalo y la guitarra del disco baja para que tú lleves la melodía — se hace más suave, no desaparece.' },
-    'ca.snipMetroOffTitle':    { en: 'Drops the record\u2019s guitar back — this track has no full mix with a click on it.',
-                                 es: 'Baja la guitarra del disco — esta pista no tiene mezcla completa con clic.' },
 
     // ── Practice card (`view: 'card'` — see caCardBodyHtml in app.js). One
     // Play song button drives the tab; a Slower / Normal switch picks the
