@@ -1377,7 +1377,11 @@ page (EN "Song Journey", ES "Recorrido de la canción", text or label), on a
 step naming it in an activity with no `journey:`, and on any
 `caJourneyLinkHtml(a)` call other than the one last-step-gated one.
 
-**Practice cards — `view: 'card'` (Jonathan, 2026-09-27; ca-18, ca-10).**
+**Practice cards — `view: 'card'` (Jonathan, 2026-09-27; ca-18, ca-10; ca-13,
+ca-19, ca-20 rebuilt to it 2026-10-01). The default for every song activity
+with a backing track — ca-18 is the model (Jonathan, 2026-10-01: the format
+"works much better for students"). Activities with no backing track stay
+Focus-view step ladders.**
 Students did what was taught directly and stopped there, so the slides now
 teach the rungs and the activity is ONE screen: the song's tab, one "Play
 song" button that plays the real backing track and moves the tab note by
@@ -1406,8 +1410,8 @@ sections back to back, each section's beats = bars × beatsPerBar, notes'
 midi/name from string + fret, window inside the file, exactly one Level up
 and it's last, help steps carry no snippet/drill/video.
 
-**Slowest (2026-09-29).** A practice card with `card.slowest: true` (ca-18,
-ca-10) gets a Slowest / Slower / Normal control in place of the switch, and
+**Slowest (2026-09-29).** A practice card with `card.slowest: true` (every
+card today) gets a Slowest / Slower / Normal control in place of the switch, and
 every step snippet gets a Slowest button beside the turtle (the two release
 each other). Slowest is the SLOW file at `SLOWEST_RATE` (0.8) with
 `preservesPitch` — no third export, and the tuner still agrees. Anything

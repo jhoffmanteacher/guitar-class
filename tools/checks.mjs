@@ -5575,7 +5575,7 @@ function checkJourneyButtonLastStep() {
    ════════════════════════════════════════════════════════════════════ */
 const FOUR_STEP_LEGACY = new Set([
   'ca-1', 'ca-2', 'ca-3', 'ca-4', 'ca-5', 'ca-6', 'ca-7',
-  'ca-11', 'ca-12', 'ca-13', 'ca-17', 'ca-19',
+  'ca-11', 'ca-12', 'ca-17',   // ca-13, ca-19 left 2026-10-01 (practice cards)
 ]);
 function checkFourStepsAndPaging() {
   head('1bb. Class activities: four steps, long tabs two lines a page');
@@ -5853,7 +5853,7 @@ function checkPracticeCards() {
    one-sided label is itself the bug (dots in one language, none in the
    other), so it fails outright now rather than being skipped. Bump when a
    card genuinely adds or removes a got-it sentence in both languages. */
-const REP_COUNT_FIELDS = 394;   // + ca-24's one help step (2026-09-30)
+const REP_COUNT_FIELDS = 387;   // ca-13 / ca-19 / ca-20 rebuilt as practice cards: 11 got-it steps -> 4 help steps (2026-10-01)
 function checkRepCountParity(sets, ctx) {
   head('1bg. Rep-count dots agree between English and Spanish');
   if (!ctx) { err('1bg cannot run — render context unavailable'); problems++; return; }
