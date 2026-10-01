@@ -840,6 +840,7 @@ async function loadClassConfig(){
     try{ localStorage.setItem('caBoard', JSON.stringify({on: activityBoardOn, map: activityBoard})); }catch(e){}
   }catch(e){ restoreClassConfigFromCache(); /* leave games on, nothing hidden */ }
   applyActivityGate();
+  refreshSongsPlayAlong();   // the Songs page's Play along list reads the same board and dates
 }
 // A student who has loaded config at least once keeps seeing that last-known
 // set of release dates (and gate clears) through a later offline/blocked
@@ -9587,7 +9588,8 @@ async function renderSongsHub(){
     <span data-i18n="hub.moodChart">${escHtml(t('hub.moodChart'))}</span>
     <span class="sh-mood-arrow" aria-hidden="true">&#x2197;</span>
   </button></div>`;
-  p.innerHTML = `${moodChartHtml}
+  songsHubCore = coreEntries;
+  p.innerHTML = `${songsPlayAlongHtml()}${moodChartHtml}
     <div class="legend"><div class="leg"><div class="dot dc" style="margin-top:0"></div>${t('hub.legendCore')}</div><div class="leg"><div class="dot dch" style="margin-top:0"></div>${t('hub.legendChoice')}</div></div>
     ${coreHtml}${groupsHtml}${requestHtml}`;
 }
@@ -9598,6 +9600,78 @@ function toggleHubGroup(btn){
   if(!g) return;
   const open = g.classList.toggle('open');
   btn.setAttribute('aria-expanded', String(open));
+}
+/* ── Play along (2026-10-01, Jonathan) ──
+   Students like the practice cards (view:'card') more than anything else on
+   the site, but met them only on In-Class Activities, on the day one was
+   assigned. The Songs page now lists every practice card that has been
+   RELEASED — caIsVisible(): placed on the board, its date arrived, not
+   hidden or retired (Jonathan: released ones only, so the list grows as the
+   class does and nobody gets ahead) — grouped under its song.
+
+   A tap opens the card WHERE IT LIVES, #class-activities/<id>, through the
+   same deep link the console's Copy link hands out. One copy of the card,
+   one set of check ticks: finishing it from here is finishing it for class,
+   and nothing here can drift from what In-Class Activities shows. Back
+   returns to Songs (goExploreHash pushes a history entry).
+
+   Songs follow the Core songs order below; inside a song the newest card
+   comes first, the same reading order as In-Class Activities — in practice
+   the whole-song card, since it is taught last. A card's button shows the
+   part of its title after " — " (the song is the row's name). */
+let songsHubCore = [];
+function songsPlayAlongHtml(){
+  const cards = (window.CLASS_ACTIVITIES || []).filter(a => a.view === 'card' && caIsVisible(a));
+  if(!cards.length) return '';
+  const bySlug = new Map();
+  cards.forEach(a => {
+    const k = a.journey || a.id;
+    if(!bySlug.has(k)) bySlug.set(k, []);
+    bySlug.get(k).push(a);
+  });
+  const coreIdx = slug => {
+    const i = songsHubCore.findIndex(e => (e.song.journeyUrl || '').includes('tabs/' + slug + '.html'));
+    return i < 0 ? 999 : i;
+  };
+  const splitTitle = a => {
+    const full = caTitle(a), cut = full.indexOf(' — ');
+    return cut < 0 ? { song: full, part: full } : { song: full.slice(0, cut), part: full.slice(cut + 3) };
+  };
+  const rows = [...bySlug.entries()]
+    .sort((x, y) => coreIdx(x[0]) - coreIdx(y[0]))
+    .map(([slug, list]) => {
+      const i = coreIdx(slug);
+      const name = i < 999 ? songsHubCore[i].song.name : splitTitle(list[0]).song;
+      const btns = list
+        .slice().sort((x, y) => (caNumber(y) || 0) - (caNumber(x) || 0))
+        .map(a => {
+          const done = classActivities[a.id] === true;
+          return `<button type="button" class="song-vid-btn sh-play-btn${done ? ' done' : ''}" onclick="songsHubOpenCard('${escAttr(a.id)}')"><span class="svb-play">&#x25B6;</span>${escHtml(splitTitle(a).part)}${done ? ` <svg class="sh-play-check" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" role="img" aria-label="${escAttr(t('hub.playAlongDone'))}"><path d="M5 12.5l4.5 4.5L19 7"/></svg>` : ''}</button>`;
+        }).join('');
+      return `<div class="song-row"><div class="dot dc"></div><div class="song-name-col"><div class="sname">${escHtml(name)}</div></div><div class="song-vids">${btns}</div></div>`;
+    }).join('');
+  return `<div id="sh-play"><div class="sh-sec-title">${t('hub.playAlongTitle')}</div><div class="sh-play-sub">${t('hub.playAlongSub')}</div><div class="card">${rows}</div></div>`;
+}
+function songsHubOpenCard(id){
+  goExploreHash('class-activities/' + id);
+}
+/* The class config (board, dates) can land after the Songs page is already
+   open — a cold load straight onto #songs. Swap just this block, and only
+   when it changed: loadClassConfig() runs again on every return to the
+   browser tab, and re-rendering the whole page would close the student's
+   open song groups each time. */
+function refreshSongsPlayAlong(){
+  const screen = document.getElementById('songs-screen');
+  const cur = document.getElementById('sh-play');
+  if(!screen || screen.hidden || !songsHubCore.length) return;
+  const html = songsPlayAlongHtml();
+  if(cur){
+    if(cur.outerHTML === html) return;
+    if(html) cur.outerHTML = html; else cur.remove();
+  } else if(html){
+    const body = document.getElementById('songs-screen-body');
+    if(body) body.insertAdjacentHTML('afterbegin', html);
+  }
 }
 let songsHubList = [];
 function songsHubVid(idx, kind){

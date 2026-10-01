@@ -1444,6 +1444,29 @@ returning to "the last gate-open hash" reopened the quiz — a gated student
 who had joined a game could not get back to their activities at all, game
 over or not (2026-09-29).
 
+**The Songs page lists the released practice cards** (Jonathan,
+2026-10-01). "Play Along with the TAB/Chords" (`hub.playAlongTitle`) sits at
+the top of the Songs page: every `view: 'card'` activity that passes
+`caIsVisible()`, grouped by its `journey:` slug under the Core songs' names
+and in their order, newest card first inside a song (`caNumber`
+descending), a check on the ones `classActivities[id]` marks done.
+**Released only** is Jonathan's call — the list grows as the class does,
+and a teacher or dev-bypass preview sees every assigned card the same way
+In-Class Activities does. **A tap opens the card where it lives**
+(`songsHubOpenCard()` → `goExploreHash('class-activities/<id>')`), so
+there is one copy of each card and one set of ticks; Back returns to
+Songs. Don't render the card a second time on the Songs page: the
+practice-card engine (`pc*`) and the open-card state (`caOpenId`,
+`caSyncHash`, the sticky bar) all belong to In-Class Activities, and two
+copies of one card in the DOM would split them. The button label is the
+part of the card's title after " — ", so **keep practice-card titles in
+the `Song — Part` shape**. `refreshSongsPlayAlong()` (end of
+`loadClassConfig()`) swaps just this block when the board or dates land
+after the page is already open, and only when it changed — the config
+re-loads on every return to the tab. Songs stays a gated page, so a
+student with unfinished activities sees this list only after finishing
+them.
+
 **There was an Assessments page (2026-09-12–2026-09-20).** A rail button
 and standalone `#assessments` screen listed every module's in-person
 assessment items in one accordion, read-only. Removed 2026-09-20 (Jonathan:

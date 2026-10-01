@@ -5,6 +5,17 @@ Notable changes to the Guitar Class site. Newest first.
 For the full session-by-session history (and the reasoning behind each change),
 see `WORKFLOW.md` and the git commit log.
 
+## 2026-10-01 — Songs page: play along with your practice cards
+
+### Added
+
+- **The Songs page has a new section at the top: Play Along with the
+  TAB/Chords.** It lists every practice card from class, grouped by song.
+  Tap a card to open it and play along with the band. A check mark shows
+  the cards you have finished. A card you finish from here is also finished
+  on In-Class Activities.
+- New cards show up here after your teacher gives them out in class.
+
 ## 2026-10-01 — Play buttons sound like a real guitar
 
 ### Changed
