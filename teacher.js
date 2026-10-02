@@ -1686,6 +1686,30 @@ async function teacherSetActivityTitle(id, value){
    the detail page so it can be read (and pasted by hand) as well as copied. */
 const linkRow=a=>`<div class="tg-note">Student link: <code>${escHtml(activityStudentLink(a.id))}</code> `
   +`<button class="tg-seg-btn t-act-link" data-copy-activity-link data-id="${escAttr(a.id)}">Copy link</button></div>`;
+/* Done | Not done, side by side, for one activity or exit check (Jonathan,
+   2026-10-02: "a list of who is done and who is not done for each
+   activity … two columns"). Same done test as the table under it —
+   classActivities[id], or for an exit check a turned-in result — and it
+   follows the console's period filter like every other view. A cleared
+   student is still not done; the tag says why they aren't blocked. The
+   period tag shows only on All, where the classes are mixed. */
+function teacherDoneRollHtml(a, students, isDone){
+  if(!students.length) return '';
+  isDone=isDone||(s=>(s.classActivities||{})[a.id]===true);
+  const clears=teacherClassConfig.activityClears||{};
+  const showPer=teacherPeriodFilter==='all';
+  const name=(s,cleared)=>{
+    const p=teacherStudentPeriod(s);
+    const per=showPer&&p?` <span class="ta-roll-tag">${p==='CAS'?'CAS':'P'+escHtml(p)}</span>`:'';
+    const cl=cleared?' <span class="ta-roll-tag">cleared</span>':'';
+    return `<li>${escHtml(s.name||s.email||'(no name)')}${per}${cl}</li>`;
+  };
+  const done=students.filter(isDone);
+  const not=students.filter(s=>!isDone(s));
+  const col=(cls,head,list,empty,cleared)=>`<div class="ta-roll-col ${cls}"><div class="ta-roll-head">${head} (${list.length})</div>`
+    +(list.length?`<ul>${list.map(s=>name(s,cleared&&!!((clears[s.uid]||{})[a.id]))).join('')}</ul>`:`<div class="ta-roll-empty">${empty}</div>`)+'</div>';
+  return `<div class="ta-roll">${col('ta-roll-done','Done',done,'Nobody yet.',false)}${col('ta-roll-not','Not done',not,'Everyone is done.',true)}</div>`;
+}
 function renderTeacherActivityDetail(id){
   setBoardWide(false);
   const box=document.getElementById('t-grid-container');
@@ -1776,6 +1800,7 @@ function renderTeacherActivityDetail(id){
       <td>${done?'Done ✓':'Not yet'}</td>
       ${teacherStudentPeriod(s)==='CAS'?TEACHER_CAS_GATE_CELL:`<td><button class="tg-seg-btn ${cleared?'on':''}" data-set-activity-clear data-uid="${escAttr(s.uid)}" data-id="${escAttr(a.id)}" data-state="${cleared?'unclear':'clear'}" title="Lets this student past the gate without finishing.">${cleared?'Cleared':'Clear'}</button></td>`}</tr>`;
   }).join('');
+  const rollHtml=teacherDoneRollHtml(a, sortedStudents);
   const studentTable=sortedStudents.length
     ? `<div class="t-grid-wrap"><table><thead><tr><th class="nc">Student</th><th>Status</th><th>Gate</th></tr></thead><tbody>${studentRows}</tbody></table></div>`
     : '<div class="t-loading">No student data yet — students need to sign in first.</div>';
@@ -1798,6 +1823,7 @@ function renderTeacherActivityDetail(id){
          (same shape as an exit check's caCheckBodyHtml), so it can't drift.
          The song plays for real; ticks here save nothing. */ typeof caIsCard==='function'&&caIsCard(a)?`<div class="tg-note">Practice card: students see this one screen — Play song, the tab, and the checks. The card counts as done once every numbered check is ticked; Level up is extra. The steps sit under "More practice help". Ticks in this preview are not saved.</div>`:''}
     <div class="stu-section-head">Students</div>
+    ${rollHtml}
     <div class="tg-note">Gate: today's activities block the rest of the site until they're done (see the Today-first work order). Clear lets one student past this one without finishing it — a sub day, a connectivity problem, work done on paper.</div>
     ${studentTable}
     <div class="stu-section-head">Preview</div>
@@ -1874,6 +1900,7 @@ function renderTeacherCheckDetail(a, back){
     <div class="tg-note">${escHtml(teacherActivityPlace(a.id))} ${dateNote}. ${withRes.length} of ${allStudents.length} turned in. Checks take no #number — they never enter the course's numbered run.</div>
     ${linkRow(a)}
     ${a.intro?`<div class="coach-tip" style="margin:0 2px 16px">${escHtml(a.intro)}</div>`:''}
+    ${teacherDoneRollHtml(a, [...allStudents].sort((x,y)=>String(x.name||x.email||'').localeCompare(String(y.name||y.email||''))), s=>!!(s.exitChecks||{})[a.id])}
     ${table}
     <div class="stu-section-head">Preview</div>
     <div class="tg-note">Try the check yourself — nothing you pick here is saved.</div>

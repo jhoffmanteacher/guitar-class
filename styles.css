@@ -1193,6 +1193,17 @@ body.t-wide .t-main{max-width:none}
 .tg-class{display:flex;align-items:center;justify-content:space-between;gap:16px;flex-wrap:wrap;padding:14px 16px;border:1px solid var(--border2);border-radius:var(--radius);background:var(--bg2);margin-bottom:8px}
 .tg-class-lbl{font-weight:600;font-size:0.9375rem}
 .tg-note{font-size:0.8125rem;color:var(--text2);line-height:1.5;margin:0 2px 16px}
+/* Done | Not done roll on an activity's console page (teacherDoneRollHtml). */
+.ta-roll{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin:0 0 16px}
+.ta-roll-col{border:1px solid var(--border);border-radius:10px;padding:10px 12px;background:var(--bg)}
+.ta-roll-done{border-top:3px solid var(--green-text)}
+.ta-roll-not{border-top:3px solid var(--amber-text)}
+.ta-roll-head{font-weight:700;margin-bottom:6px}
+.ta-roll-col ul{list-style:none;margin:0;padding:0;columns:2 10em;column-gap:16px}
+.ta-roll-col li{padding:2px 0;break-inside:avoid}
+.ta-roll-tag{font-size:0.75rem;color:var(--text3);margin-left:4px}
+.ta-roll-empty{font-size:0.875rem;color:var(--text2)}
+@media(max-width:600px){.ta-roll{grid-template-columns:1fr}}
 .tg-seg{display:inline-flex;border:1px solid var(--border2);border-radius:16px;overflow:hidden}
 .tg-seg-btn{font-size:0.8125rem;padding:4px 13px;border:0;background:transparent;color:var(--text2);cursor:pointer;font-family:inherit}
 .tg-seg-btn.on{background:var(--text);color:var(--bg)}
