@@ -61,6 +61,12 @@
    became practice cards, below. 2026-10-01: every remaining step ladder —
    ca-1 to ca-8, ca-11, ca-12, ca-17 — got Focus view too.)
 
+   METRONOME — `metronome: <bpm>` (optional; whole number, 40–220). Tapping
+   the card open starts the Metro tool at that tempo, so every step is
+   played to a click. The student can stop it or change the tempo like any
+   other time; Play tab still silences it while the answer plays. (Jonathan,
+   2026-10-02: ca-21.) checks.mjs 1d checks the range.
+
    CARD — `view: 'card'` plus a `card` object: the PRACTICE CARD (Jonathan,
    2026-09-27; ca-18 and ca-10). THE DEFAULT FOR EVERY SONG ACTIVITY with a
    backing track (Jonathan, 2026-10-01: ca-18's format "works much better
@@ -2783,10 +2789,11 @@ window.CLASS_ACTIVITIES = [
   {
     id:    'ca-21',
     view:  'focus',   // one step at a time — see VIEW above
+    metronome: 60,    // opening the card starts the Metro tool at 60 BPM — see METRONOME above
     title:    'Sight-Reading TAB — Low E and A Strings',
     title_es: 'Lectura a primera vista de TAB — Cuerdas Mi grave y La',
-    intro:    'Sight-reading means playing a line from the TAB the first time you see it. The Unit 2 assessment has you read a 2-bar line you have never heard and play it. These five lines are practice for that.',
-    intro_es: 'Leer a primera vista significa tocar una línea de la TAB la primera vez que la ves. La evaluación de la Unidad 2 te pide leer una línea de 2 compases que nunca has escuchado y tocarla. Estas cinco líneas son práctica para eso.',
+    intro:    'Sight-reading means playing a line from the TAB the first time you see it. The Unit 2 assessment has you read a 2-bar line you have never heard and play it. These five lines are practice for that. The metronome starts at 60 BPM when you open this activity. Play one note on each click.',
+    intro_es: 'Leer a primera vista significa tocar una línea de la TAB la primera vez que la ves. La evaluación de la Unidad 2 te pide leer una línea de 2 compases que nunca has escuchado y tocarla. Estas cinco líneas son práctica para eso. El metrónomo empieza a 60 BPM cuando abres esta actividad. Toca una nota en cada clic.',
     steps: [
       {
         label:    'Learn — How to read TAB',
@@ -2885,8 +2892,8 @@ window.CLASS_ACTIVITIES = [
       {
         label:    'Practice — Line 5',
         label_es: 'Practica — Línea 5',
-        text: 'Line 5 goes up to fret 8. Play it one note per beat, then press Play to check. You\'ve got it when: Line 5 matches the tab. Then start the Metro tool at 60 BPM and play it with the click. Raise it 10 BPM each time it stays clean.',
-        text_es: 'La Línea 5 sube hasta el traste 8. Tócala una nota por tiempo, y luego pulsa «Tocar el tab» para revisar. Lo tienes cuando: la Línea 5 coincide con la tablatura. Después arranca la herramienta Metro a 60 BPM y tócala con el clic. Súbela 10 BPM cada vez que te salga limpia.',
+        text: 'Line 5 goes up to fret 8. Play it one note per beat, then press Play to check. You\'ve got it when: Line 5 matches the tab. Then play it with the click. If the Metro tool stopped, press Start in it. Raise it 10 BPM each time it stays clean.',
+        text_es: 'La Línea 5 sube hasta el traste 8. Tócala una nota por tiempo, y luego pulsa «Tocar el tab» para revisar. Lo tienes cuando: la Línea 5 coincide con la tablatura. Después tócala con el clic. Si la herramienta Metro se detuvo, pulsa Iniciar en ella. Súbela 10 BPM cada vez que te salga limpia.',
         tab: {
           hideNames: true,
           controlsBelow: true,   // Play tab is the answer key — under the board

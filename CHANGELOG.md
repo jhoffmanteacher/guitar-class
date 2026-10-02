@@ -5,6 +5,14 @@ Notable changes to the Guitar Class site. Newest first.
 For the full session-by-session history (and the reasoning behind each change),
 see `WORKFLOW.md` and the git commit log.
 
+## 2026-10-02 — Sight-Reading TAB starts the metronome
+
+### Changed
+
+- **Opening the Sight-Reading TAB activity starts the metronome at 60
+  BPM.** Play one note on each click. You can stop it or change the tempo
+  in the Metro tool.
+
 ## 2026-10-02 — Songs page: Play Along can list a song early, and no Mood chart row
 
 ### Changed

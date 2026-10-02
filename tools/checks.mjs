@@ -2772,6 +2772,8 @@ function validateClassActivities() {
     /* A practice card needs its card object and nothing else does — the
        card's own shape is checked by 1bf. */
     if (a.view === 'card' && (!a.card || typeof a.card !== 'object')) { err(`${where}: view 'card' needs a "card" object (see CARD atop class-activities.js)`); problems++; }
+    // metronome: BPM the Metro tool starts at when the card is opened (caAutoStartMetro in app.js). Same 40–220 range as the slider.
+    if ('metronome' in a && !(Number.isInteger(a.metronome) && a.metronome >= 40 && a.metronome <= 220)) { err(`${where}: metronome ${JSON.stringify(a.metronome)} — a whole-number BPM from 40 to 220 (or leave it off)`); problems++; }
     if ('card' in a && a.view !== 'card') { err(`${where}: has a "card" object but view is not 'card' — it would never render`); problems++; }
     if (isCheck) { /* no steps — see 1y */ }
     else if (!Array.isArray(a.steps) || !a.steps.length) { err(`${where}: "steps" should be a non-empty array`); problems++; }

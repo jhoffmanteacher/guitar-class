@@ -11947,6 +11947,7 @@ function caOnToggle(details){
      `card.open = true`) never triggers it. */
   if(details.open && details.dataset.caOpening){
     delete details.dataset.caOpening;
+    caAutoStartMetro((window.CLASS_ACTIVITIES || []).find(x => x.id === details.dataset.id));
     caScrollToActivity(details.dataset.id);
   }
 }
@@ -12029,6 +12030,20 @@ function caSyncHash(a){
   if(location.hash === want) return;
   history.replaceState(history.state, '', location.pathname + location.search + want);
   lastRoutedHash = want;
+}
+/* `metronome: <bpm>` on an activity (ca-21): opening the card by a tap
+   starts the FAB Metro tool at that tempo — only on a genuine click (the
+   caOpening flag), never on a re-render or a cold deep link, which has no
+   user gesture to start audio with. It is the student's tool from then on:
+   their own Start/Stop and slider, and nothing here stops it on close (see
+   "Two silencers" in CLAUDE.md). The console preview never calls this. */
+function caAutoStartMetro(a){
+  const bpm = a && a.metronome;
+  const slider = document.getElementById('bpm-slider');
+  if(!bpm || !slider || typeof startMetro !== 'function') return;
+  slider.value = bpm;
+  onBpmSlider(String(bpm));
+  if(!metroRunning) startMetro();
 }
 // Stamped on the summary's own click, before the native toggle runs, so
 // caOnToggle can tell a real click-to-open from a re-render or printActivity
