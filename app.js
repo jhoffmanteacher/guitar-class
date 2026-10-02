@@ -12570,9 +12570,10 @@ function caModuleHeadHtml(sec, byId){
   </div>`;
 }
 /* ── "Unfinished activities" — every pending card except the Today hero,
-   wrapped in ONE fold (item 2f). Closed by default each render, same
-   sticky-open pattern as "Completed activities" below. ── */
-let caTodoOpen = false;
+   wrapped in ONE fold (item 2f). OPEN by default (Jonathan, 2026-10-02);
+   a student who closes it keeps it closed across re-renders, same sticky
+   pattern as "Completed activities" below. ── */
+let caTodoOpen = true;
 function caOnTodoToggle(details){
   caTodoOpen = details.open;
   if(!details.open && snipState && details.contains(snipState.card)) snipStop();

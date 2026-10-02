@@ -1235,7 +1235,7 @@ gated or not. `renderClassActivities()` (app.js) builds three groups, named by J
 2026-09-23 — **Today's activity** (the hero card's tag, `ca.startHere`; the
 first pending card, collapsed like every other card, not forced open —
 Jonathan, 2026-09-15; an older undone hero is tagged **Unfinished** instead),
-**Unfinished activities** (`ca.stillToDoGroup`, one closed fold, newest first,
+**Unfinished activities** (`ca.stillToDoGroup`, one fold, open by default since 2026-10-02, newest first,
 module headings when cards are placed — no nested "Older" fold any more),
 **Completed activities** (`ca.finishedGroup`; was "Earlier", before that
 "Finished") — and appends the resume card (`renderResumeCard()`) at the

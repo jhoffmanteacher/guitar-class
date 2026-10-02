@@ -5,6 +5,14 @@ Notable changes to the Guitar Class site. Newest first.
 For the full session-by-session history (and the reasoning behind each change),
 see `WORKFLOW.md` and the git commit log.
 
+## 2026-10-02 — Unfinished activities start open
+
+### Changed
+
+- **In-Class Activities: the "Unfinished activities" list is open when you
+  arrive.** You no longer have to tap it to see what you still owe. Close it
+  and it stays closed until you reload.
+
 ## 2026-10-01 — The Metronome button is the site's own click
 
 ### Changed

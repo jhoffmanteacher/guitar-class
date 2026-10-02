@@ -1004,7 +1004,13 @@ function renderTeacherActivities(opts){
     box.innerHTML='<div class="t-loading">No student data yet — students need to sign in first.</div>';
     return;
   }
-  if(!cached) box.innerHTML='<div class="t-loading">Loading…</div>';
+  // A re-render over a board that's already on screen (every toggle on it —
+  // Optional, Hidden, a date, Archive — ends in one) keeps the old board up
+  // while the config re-reads, and lands back at the same scroll position.
+  // Swapping in the one-line "Loading…" box first collapsed the page, so the
+  // browser clamped the scroll to the top on every click.
+  const keepY = box.querySelector('.t-board') ? window.scrollY : null;
+  if(!cached && keepY===null) box.innerHTML='<div class="t-loading">Loading…</div>';
   (cached ? Promise.resolve(teacherClassConfig) : loadTeacherClassConfig()).then(async cfg=>{
     if(teacherView!=='activities') return;   // switched views mid-flight
     if(!cfg) return;                         // superseded by a newer toggle
@@ -1326,6 +1332,7 @@ function renderTeacherActivities(opts){
     // scrolling before it resolves would only hit the one-line "Loading…"
     // box, which has nowhere to scroll to.
     if(restoreActivityScroll){ restoreActivityScroll=false; window.scrollTo({top:activityListScrollY}); }
+    else if(keepY!==null) window.scrollTo({top:keepY});
   });
 }
 function teacherBoardFold(module){
