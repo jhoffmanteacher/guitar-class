@@ -5,6 +5,17 @@ Notable changes to the Guitar Class site. Newest first.
 For the full session-by-session history (and the reasoning behind each change),
 see `WORKFLOW.md` and the git commit log.
 
+## 2026-10-02 — Whole-song cards: the song ends, and more room for the tab
+
+### Changed
+
+- **The whole-song practice cards stop when the song ends.** They used to
+  start again from the top. Press Play song to play it again. The short
+  cards, like the Seven Nation Army riff, still repeat.
+- **The tab starts higher on the screen.** The title bar is thinner, and
+  the section buttons are smaller, so they fit on one row. More of the tab
+  fits on a Chromebook screen.
+
 ## 2026-10-02 — Unfinished activities start open
 
 ### Changed

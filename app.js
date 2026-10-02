@@ -10973,7 +10973,8 @@ function caJourneyLinkHtml(a){
      into the track with nothing to lead in on). Tapping a section starts
      the song THERE, and the loop comes back to that section — tapping
      Chorus loops the chorus. The count-in plays whether or not Metronome
-     is on; a lap of the loop does not count in again.
+     is on; a lap of the loop does not count in again. A `wholeSong` card
+     does not loop: it stops at the end of the song (Jonathan, 2026-10-02).
    - The tab follows the song note by note (`.beat-now`, the TAB player's
      own cursor), one page per section, honouring each note's `beats`, so
      an uneven riff (Seven Nation Army) is followed as written. A section
@@ -11089,7 +11090,7 @@ function pcPlayerHtml(a, L){
     /* The Guitar toggle, same as a step snippet's (buildSnippet): only where
        a full mix exists, ON by default, label names who plays the part. */
     + (hasFull ? `<button type="button" class="snip-toggle snip-guitar pc-guitar on" aria-pressed="true" onclick="pcSetGuitar(this)" title="${escAttr(t('ca.snipGuitarTitle'))}">&#x1F3B8; <span class="snip-guitar-label">${escHtml(t('ca.snipGuitarOn'))}</span></button>` : '')
-    + `</div><p class="pc-status" aria-live="polite">&nbsp;</p>`;
+    + `<p class="pc-status" aria-live="polite">&nbsp;</p></div>`;   // inside the row: a line of its own cost the tab ~26px
 }
 function pcTabHtml(a, L){
   const c = a.card;
@@ -11218,10 +11219,10 @@ function pcStart(root, si){
   const slow = root.dataset.slow === '1', guitar = root.dataset.guitar === '1';
   const audio = new Audio();
   audio.preload = 'auto';
-  audio.loop = false;                  // the window is looped by hand, in pcFrame
+  audio.loop = false;                  // the window is looped (or stopped) by hand, in pcFrame
   audio.src = snippetSrc(L.tr, slow, guitar);
   slowestApplyRate(audio, pcRate(root));
-  const st = { root, L, audio, win: pcWindow(L, slow), loopFrom: si, raf: 0, timers: [], lastBeat: -1, counting: true, si: -1, seq: -1, rep: -1, row: null };
+  const st = { root, L, audio, win: pcWindow(L, slow), loopFrom: si, wholeSong: !!a.card.wholeSong, raf: 0, timers: [], lastBeat: -1, counting: true, si: -1, seq: -1, rep: -1, row: null };
   pcState = st;
   const btn = root.querySelector('.pc-play');
   if(btn){ btn.innerHTML = pcPlayBtnHtml(true); btn.classList.add('playing'); }
@@ -11299,6 +11300,15 @@ function pcFrame(){
   const { audio, L } = st;
   const now = audio.currentTime;
   if(now >= st.win.end - 0.02 || audio.ended){
+    // A whole-song card stops at the end of the song (Jonathan, 2026-10-02:
+    // it used to loop back to where it started). A card that is a few bars
+    // of the song (ca-10's two-bar riff, ca-20's four-bar loop) still loops.
+    if(st.wholeSong){
+      const root = st.root;
+      pcStop();
+      pcStatus(root, escHtml(t('ca.cardSongEnd')));
+      return;
+    }
     try { audio.currentTime = snipTimeAtBars(st.win, L.sections[st.loopFrom].fromBar - L.firstBar); } catch(e) {}
     if(audio.paused) audio.play().catch(() => {});
     st.lastBeat = -1;

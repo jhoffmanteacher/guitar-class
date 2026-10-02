@@ -2352,6 +2352,14 @@ body.explore-open #week-panels{display:none}
 .ca-screen .page-shell{padding-top:0}
 .ca-screen .page-topbar{position:sticky;top:0;z-index:50;background:var(--bg);
   border-bottom:2px solid var(--ca-accent);padding:24px 0 12px;min-height:0}
+/* With a card open the bar is just the card's name, Back and its count —
+   it stays on screen the whole time the student plays, so it gives back the
+   page's 24px top gap to the activity (Jonathan, 2026-10-02). */
+.ca-screen .page-topbar:has(.ca-bar-open:not([hidden])){padding:8px 0 6px}
+/* …and the open card's name gets the whole row. The empty spacer after it
+   is flex:1 too, so it used to take half the bar and cut the name off at
+   "#20 - "the cure" — The Wh…" with the right half of the bar blank. */
+.ca-bar-open:not([hidden]) ~ .page-topbar-spacer{display:none}
 .ca-screen .page-title:focus{outline:none}
 /* The open card's name + "n of m done", swapped in for the page title. */
 .ca-bar-open{display:flex;align-items:baseline;gap:12px;min-width:0;flex:1}
@@ -2499,6 +2507,28 @@ body.explore-open #week-panels{display:none}
 .pc-help-step{margin-bottom:6px;border:1px solid var(--border);border-radius:8px;background:var(--bg)}
 .pc-help-step>summary{padding:9px 12px;font-weight:600;cursor:pointer}
 .pc-help-body{padding:0 12px 12px}
+/* Room for the tab (Jonathan, 2026-10-02: "can the activity take up more
+   space on the screen?"). On a 1366x657 Chromebook the tab started ~300px
+   down; these give back ~90px, all of it above the first tab row:
+   - the status line sits in the player row, not on a line of its own;
+   - the open card's own title row drops its "n checks" line and padding
+     (the sticky bar already names the card and counts the checks);
+   - the TAB head bar, the hint and the section buttons are tighter, so
+     ten sections fit on one row instead of two. */
+.pc-dir{margin:0 0 8px}
+.pc-player .pc-status{flex:1 1 12em;margin:0;min-height:0}
+.ca-card--practice[open] > .ca-card-summary{padding-top:6px;padding-bottom:6px}
+.ca-card--practice[open] > .ca-card-summary .ca-chunk-meta,
+.ca-card--practice[open] > .ca-card-summary .ca-hero-blurb,
+.ca-card--practice[open] > .ca-card-summary .ca-start-tag{display:none}
+.ca-card--practice[open] > .ca-hero-summary .ca-hero-title{font-size:1.0625rem}
+.pc-tab{margin-top:10px}
+.pc-tab .tab-head{padding-top:4px;padding-bottom:4px}
+.pc-tab .tab-body{padding-top:6px}
+.pc-hint{margin-bottom:4px}
+.pc-secs{gap:4px;margin-bottom:4px}
+.pc-sec{font-size:0.8125rem;min-height:30px;padding:0 10px}
+.pc-sec-play{margin-right:4px}
 /* Finished-activities group (renderClassActivities/caFinishedGroupHtml) —
    a plain <details>, closed by default, holding the same .ca-card markup
    as the main list. Deliberately quieter than .ca-card: no left accent, so

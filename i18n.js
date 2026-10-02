@@ -487,6 +487,7 @@
                                  es: 'Pulsa una sección para empezar la canción ahí.' },
     'ca.cardSectionOf':        { en: 'Section {a} of {n}', es: 'Sección {a} de {n}' },
     'ca.cardCountIn':          { en: 'Count in: {n}', es: 'Cuenta: {n}' },
+    'ca.cardSongEnd':           { en: 'End of the song. Press Play song to go again.', es: 'Fin de la canción. Presiona «Tocar la canción» para empezar otra vez.' },
     'ca.cardPlayingFrom':      { en: 'Playing from: {section}', es: 'Tocando desde: {section}' },
     'ca.cardRepOf':            { en: '{what} {n} of {total}', es: '{what} {n} de {total}' },
     'ca.cardCheckN':           { en: 'Check {n}', es: 'Meta {n}' },

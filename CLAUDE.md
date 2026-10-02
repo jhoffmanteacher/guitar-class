@@ -1451,7 +1451,8 @@ teach the rungs and the activity is ONE screen: the song's tab, one "Play
 song" button that plays the real backing track and moves the tab note by
 note (`.beat-now`, honouring each note's `beats`), one page per section with
 tap-a-section-to-start (four-click count-in, then the loop returns to that
-section), a Slower / Normal switch (the slow / fast files, starting on
+section — except on a `card.wholeSong` card (ca-24, ca-25, ca-26), which
+stops at the end of the song, Jonathan 2026-10-02), a Slower / Normal switch (the slow / fast files, starting on
 Slower), the Guitar toggle where a full mix exists, and a Metronome that is
 a click the SITE makes on every counted beat — there are no metronome
 files; Moises clicked "the cure" at 144, twice the 72 the room counts.

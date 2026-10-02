@@ -80,6 +80,10 @@
        slowest: true,                      // optional: a Slowest option beside
                                            // Slower / Normal — the slow file at
                                            // 0.8x, pitch held (ca-18, ca-10)
+       wholeSong: true,                    // optional: stop at the end of the
+                                           // song instead of looping — for a
+                                           // card that IS the whole record
+                                           // (ca-24, ca-25, ca-26)
        sections: [{                        // back to back, in song order
          label, label_es,                  // the tap-to-start button ("Chorus")
          caption, caption_es,              // the heading over its tab page
@@ -2372,6 +2376,7 @@ window.CLASS_ACTIVITIES = [
     card: {
       track: 'the-cure',
       slowest: true,    // three-way speed control: Slowest (48) / Slower (60) / Normal (72) — the student picks
+      wholeSong: true,  // stops at the end of the song instead of looping — Jonathan, 2026-10-02
       caption:    'The whole song in order · 4 plucks per note',
       caption_es: 'La canción completa en orden · 4 pulsaciones por nota',
       sections: [
@@ -2986,6 +2991,7 @@ window.CLASS_ACTIVITIES = [
     intro_es: 'Ya tocas el riff con la banda — hoy añades el G y el A antes de cada coro y tocas la canción completa.',
     card: {
       track: 'seven-nation-army',
+      wholeSong: true,  // stops at the end of the song instead of looping — Jonathan, 2026-10-02
       slowest: true,    // Slowest (80) / Slower (100) / Normal (123)
       caption:    'The whole song in order · the riff and G – A',
       caption_es: 'La canción completa en orden · el riff y G – A',
@@ -3268,6 +3274,7 @@ window.CLASS_ACTIVITIES = [
     intro:    'You know the Watchtower bass line — today you play it with the band for the whole song, start to finish.',
     intro_es: 'Ya sabes la línea de bajo de Watchtower — hoy la tocas con la banda durante toda la canción, de principio a fin.',
     card: {
+      wholeSong: true,  // stops at the end of the song instead of looping — Jonathan, 2026-10-02
       track: 'all-along-the-watchtower',
       slowest: true,    // three-way speed control: Slowest (84) / Slower (105) / Normal (115) — the student picks
       caption:    'The whole song in order · 2 plucks per note',
