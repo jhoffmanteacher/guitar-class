@@ -208,6 +208,8 @@ async function showTeacherApp(user){
       if(actHidden){ teacherSetActivityHidden(actHidden.dataset.id, actHidden.dataset.state); return; }
       const actOpt=e.target.closest('[data-set-activity-optional]');
       if(actOpt){ teacherSetActivityOptional(actOpt.dataset.id, actOpt.dataset.state); return; }
+      const actPlay=e.target.closest('[data-set-activity-playalong]');
+      if(actPlay){ teacherSetActivityPlayAlong(actPlay.dataset.id, actPlay.dataset.state); return; }
       const actArch=e.target.closest('[data-set-activity-archived]');
       if(actArch){ teacherSetActivityArchived(actArch.dataset.id, actArch.dataset.state); return; }
       const actDel=e.target.closest('[data-delete-activity]');
@@ -1029,6 +1031,7 @@ function renderTeacherActivities(opts){
     }
     const hidden=cfg.hiddenActivities||{};
     const optional=cfg.optionalActivities||{};
+    const playAlong=cfg.playAlongActivities||{};
     const dates=cfg.activityDates||{};
     const today=dayStr(new Date());
     const view=teacherBoardView(cfg);
@@ -1136,6 +1139,18 @@ function renderTeacherActivities(opts){
         +`<button class="tg-seg-btn ${!isOpt?'on':''}" data-set-activity-optional data-id="${escAttr(a.id)}" data-state="required" title="Students must finish this before the rest of the site opens">Required</button>`
         +`<button class="tg-seg-btn ${isOpt?'on':''}" data-set-activity-optional data-id="${escAttr(a.id)}" data-state="optional" title="Students see it, tagged Optional, but it never locks the rest of the site">Optional</button></div>`;
     };
+    // Practice cards only (view:'card'): when the Songs page's Play Along
+    // list shows this card. "By date" is the rule every card follows — listed
+    // once its release date arrives. "Now" lists it there today, dated or
+    // not, and changes nothing else: it stays off In-Class Activities and
+    // never blocks. See teacherSetActivityPlayAlong.
+    const playSeg=a=>{
+      if(a.view!=='card') return '';
+      const isOn=playAlong[a.id]===true;
+      return `<div class="tg-seg">`
+        +`<button class="tg-seg-btn ${!isOn?'on':''}" data-set-activity-playalong data-id="${escAttr(a.id)}" data-state="date" title="Songs page lists this card under Play Along once its release date arrives">Play Along by date</button>`
+        +`<button class="tg-seg-btn ${isOn?'on':''}" data-set-activity-playalong data-id="${escAttr(a.id)}" data-state="now" title="Songs page lists this card under Play Along now, with or without a release date. It stays off In-Class Activities and never blocks.">Play Along now</button></div>`;
+    };
     // Where a card can be sent without a drag. Used as "Assign to" in Built
     // and "Move to" in Assigned; both append at the end of the section they
     // name, which is what a drag onto empty space does too.
@@ -1222,7 +1237,7 @@ function renderTeacherActivities(opts){
         +`<div class="t-board-row">${isRetired?'':'<span class="t-board-grip" aria-hidden="true">&#x2630;</span>'}${numBox}${titleBlock(a)}</div>`
         +(isRetired
           ? `<div class="t-board-stray">${teacherActivityDeleted(a.id,cfg)?'Deleted':'Archived'} — students don't see it and it holds no number. Restore puts it back here.</div>`
-          : publishBlock(a)+`<div class="t-board-ctl">${visSeg(a)}${optSeg(a)}${moveSelect(a,'Move to…',curModule)}${moveBtns}</div>`)
+          : publishBlock(a)+`<div class="t-board-ctl">${visSeg(a)}${optSeg(a)}${playSeg(a)}${moveSelect(a,'Move to…',curModule)}${moveBtns}</div>`)
         /* Footer: what this card IS (how many have done it) and the actions
            that take it out of the run, behind a hairline — so the row above,
            which is what gets used every day, reads as the card's controls
@@ -1949,6 +1964,30 @@ async function teacherSetActivityOptional(id, state){
   }
   if(teacherView==='activities') renderTeacherActivities();
 }
+/* Play Along by date / now — config/class.playAlongActivities (id -> true),
+   practice cards only. "Now" puts the card in the Songs page's Play Along
+   list without a release date (app.js caIsPlayAlongOnly); it does not make
+   the card visible on In-Class Activities and it is not read by any of the
+   three blocker rules, so it can never gate anyone. Hidden, Archive and
+   Delete still win. Same write shape as teacherSetActivityOptional:
+   cell-checked, flag cleared rather than written false. */
+async function teacherSetActivityPlayAlong(id, state){
+  const on = state==='now';
+  if(!teacherClassConfig.playAlongActivities) teacherClassConfig.playAlongActivities={};
+  const had = Object.prototype.hasOwnProperty.call(teacherClassConfig.playAlongActivities, id);
+  const prev = teacherClassConfig.playAlongActivities[id];
+  if(on) teacherClassConfig.playAlongActivities[id]=true; else delete teacherClassConfig.playAlongActivities[id];
+  try{
+    await ensureDb();
+    const fv=firebase.firestore.FieldValue;
+    const patch = on ? {playAlongActivities:{[id]:true}} : {playAlongActivities:{[id]:fv.delete()}};
+    await teacherWriteConfig(patch, {['playAlongActivities.'+id]: had?prev:undefined});
+  }catch(e){
+    if(had) teacherClassConfig.playAlongActivities[id]=prev; else delete teacherClassConfig.playAlongActivities[id];
+    teacherConfigSaveFailed(e, 'Could not save that change — check your connection and Firestore rules.');
+  }
+  if(teacherView==='activities') renderTeacherActivities();
+}
 // The actual publish switch for an activity — see the schema note at the top
 // of renderTeacherActivities. Mirrors teacherSetActivityHidden's write shape
 // exactly, just against a different map on the same doc.
@@ -2032,7 +2071,7 @@ async function teacherDeleteActivity(id){
   // from scratch. Archive deliberately does NOT touch it — that's the whole
   // difference between the two, and why Restore-from-archive puts the card
   // back in its own module at its own position.
-  const MAPS=['archivedActivities','deletedActivities','hiddenActivities','optionalActivities','activityDates','activityTitles','activityNumbers','activityBoard'];
+  const MAPS=['archivedActivities','deletedActivities','hiddenActivities','optionalActivities','playAlongActivities','activityDates','activityTitles','activityNumbers','activityBoard'];
   MAPS.forEach(m=>{ if(!cfg[m]) cfg[m]={}; });
   if(!cfg.activityClears) cfg.activityClears={};
   const clears=cfg.activityClears;

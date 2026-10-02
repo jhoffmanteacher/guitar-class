@@ -594,15 +594,6 @@ body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,"Helvetica N
 .sh-play-sub{font-size:0.8125rem;color:var(--text2);margin:-4px 2px 8px}
 .song-vid-btn.sh-play-btn{border-color:var(--border2);color:var(--text)}
 .sh-play-check{width:1em;height:1em;color:var(--green-text)}
-/* Mood Chart row atop the Songs hub — same card/row shell as a difficulty
-   group (.sh-group/.sh-group-head), minus the expand caret: this one opens
-   mood-chart.html in a new tab rather than disclosing anything in place.
-   Replaces the rail button retired 2026-09-12 (Today-first work order,
-   Phase 2, nav collapse). */
-.sh-mood{margin-bottom:14px}
-.sh-mood-head::before{content:none}
-.sh-mood-head .ico{width:1.1em;height:1.1em;flex-shrink:0;color:var(--text2)}
-.sh-mood-arrow{margin-left:auto;font-size:0.8125rem;color:var(--text2)}
 .legend{display:flex;gap:14px;margin-bottom:8px}
 .leg{display:flex;align-items:center;gap:5px;font-size:0.875rem;color:var(--text2)}
 .ablock{background:var(--bg3);border-radius:var(--radius-sm);padding:12px 14px;margin-bottom:8px}

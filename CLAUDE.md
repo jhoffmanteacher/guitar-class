@@ -1527,6 +1527,28 @@ re-loads on every return to the tab. Songs stays a gated page, so a
 student with unfinished activities sees this list only after finishing
 them.
 
+**One way round the date: "Play Along now"** (Jonathan, 2026-10-02 — "can
+we set some visible even if they don't have a release date?"). Every
+assigned practice card on the console board has a **Play Along by date /
+Play Along now** switch (`teacherSetActivityPlayAlong`, cell-checked write
+to `config/class.playAlongActivities`, `{ id: true }`). "Now" lists the
+card on the Songs page without a release date and changes **nothing
+else**: `caIsVisible()` does not read the map, so the card stays off
+In-Class Activities and can never be a blocker (none of the three blocker
+rules reads it either). `caIsPlayAlongOnly()` in `app.js` is the one
+predicate — practice card, flag on, assigned, not Hidden, not retired, and
+NOT already visible. It has three readers: `songsPlayAlongHtml()` (the
+list), `caFocusActivity()` (so the tap opens it instead of "not posted"),
+and `renderClassActivities()`, which renders that ONE card under the
+Songs section's own title **only while it is the open card** — close it
+and the next render drops it. Don't fold the flag into `caIsVisible()`:
+that would put the card on In-Class Activities and behind the gate, which
+is exactly what Jonathan chose against (he was offered "date it and mark
+it Optional" and "list every assigned card" and picked this). Cached in
+`localStorage` (`caPlayAlong`); Delete clears the flag, Archive keeps it.
+No `firestore.rules` change (comment only). checks.mjs 1ai's writer count
+went 16 → 17.
+
 **There was an Assessments page (2026-09-12–2026-09-20).** A rail button
 and standalone `#assessments` screen listed every module's in-person
 assessment items in one accordion, read-only. Removed 2026-09-20 (Jonathan:
@@ -1549,9 +1571,10 @@ Review first, then Keep practicing, then the module tally). `#keep-practicing`
 and `#daily-review` stay in `EXPLORE_HASHES`, but `routeExploreHash()`
 canonicalizes both to `#my-progress` before anything else runs (the gate
 check, the dedup guard, the scroll stash) — so an old bookmark or Journey
-link still resolves, onto the merged page. Mood Chart lost its rail button;
-`renderSongsHub()` opens it from a row at the top of the Songs page instead,
-same `window.open(...,'_blank','noopener')` as a Journey link.
+link still resolves, onto the merged page. Mood Chart lost its rail button, and
+its row at the top of the Songs page was removed 2026-10-02 (Jonathan) —
+`mood-chart.html` still ships and is still precached, but nothing on the
+site links to it; don't add a link back without asking.
 
 **Phase 3 (render-time hiding), shipped 2026-09-12 — Module 2 piloted first
 (step 1), then the section-kind tagging rolled out to every other module

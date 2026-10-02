@@ -192,6 +192,15 @@ let retiredActivityIds = {};
    "must not fail open" reason — a flaky read that reset this to {} would
    turn every optional card back into a lock. */
 let optionalActivityIds = {};
+/* Practice cards the teacher switched to "Play Along now" on the console
+   board — config/class.playAlongActivities, id -> true (2026-10-02,
+   Jonathan: "can we set some visible even if they don't have a release
+   date?"). The Songs page's Play Along list shows such a card whether or
+   not its date has arrived; nothing else changes — it stays off In-Class
+   Activities and it never blocks (caIsVisible and caBlockers don't read
+   this). See caIsPlayAlongOnly(). Cached like the other maps so a flaky
+   read doesn't empty the list a student was just using. */
+let playAlongActivityIds = {};
 let saveTimer   = null;
 
 /* ── Lazy module loading ──
@@ -829,6 +838,9 @@ async function loadClassConfig(){
     // Optional activities (teacher.js board) — see optionalActivityIds.
     optionalActivityIds = d.optionalActivities || {};
     try{ localStorage.setItem('caOptional', JSON.stringify(optionalActivityIds)); }catch(e){}
+    // "Play Along now" practice cards (teacher.js board) — see playAlongActivityIds.
+    playAlongActivityIds = d.playAlongActivities || {};
+    try{ localStorage.setItem('caPlayAlong', JSON.stringify(playAlongActivityIds)); }catch(e){}
     /* The activity board (teacher.js) — which activities are placed in the
        course, in which module, in what order. Cached, and for the same
        "must not fail open" reason as the dates: an empty board reads as
@@ -873,6 +885,10 @@ function restoreClassConfigFromCache(){
     const raw = localStorage.getItem('caOptional');
     if(raw) optionalActivityIds = JSON.parse(raw) || {};
   }catch(e){ /* ignore — optionalActivityIds stays {} */ }
+  try{
+    const raw = localStorage.getItem('caPlayAlong');
+    if(raw) playAlongActivityIds = JSON.parse(raw) || {};
+  }catch(e){ /* ignore — playAlongActivityIds stays {} */ }
   try{
     const raw = localStorage.getItem('caBoard');
     const cached = raw ? JSON.parse(raw) : null;
@@ -9530,16 +9546,10 @@ async function renderSongsHub(){
   const groupsHtml = `<div class="sh-sec-title">${t('hub.choiceTitle')}</div>` + groups.map((g, gi) =>
     `<div class="sh-group${gi === 0 ? ' open' : ''}"><button type="button" class="sh-group-head" aria-expanded="${gi === 0}" onclick="toggleHubGroup(this)"><span>${g.title}</span><span class="sh-group-sub">${g.sub}</span><span class="sh-group-count">${t('hub.groupCount', {n: g.entries.length})}</span></button><div class="sh-group-body">${renderRows(g.entries)}</div></div>`).join('');
   const requestHtml = requestEntries.length ? `<div class="card">${renderRows(requestEntries)}</div>` : '';
-  // Mood Chart's own rail button retired 2026-09-12 (Today-first work order,
-  // Phase 2, nav collapse) — same "opens in a new tab" pattern as a Song
-  // Journey link, now living here instead.
-  const moodChartHtml = `<div class="sh-group sh-mood"><button type="button" class="sh-group-head sh-mood-head" onclick="window.open('mood-chart.html','_blank','noopener')">
-    <span class="ico" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M3 9h18M3 15h18M9 3v18M15 3v18"/></svg></span>
-    <span data-i18n="hub.moodChart">${escHtml(t('hub.moodChart'))}</span>
-    <span class="sh-mood-arrow" aria-hidden="true">&#x2197;</span>
-  </button></div>`;
+  // The Mood Chart row that sat here was removed 2026-10-02 (Jonathan). The
+  // page itself, mood-chart.html, still ships — nothing on the site links it.
   songsHubCore = coreEntries;
-  p.innerHTML = `${songsPlayAlongHtml()}${moodChartHtml}
+  p.innerHTML = `${songsPlayAlongHtml()}
     <div class="legend"><div class="leg"><div class="dot dc" style="margin-top:0"></div>${t('hub.legendCore')}</div><div class="leg"><div class="dot dch" style="margin-top:0"></div>${t('hub.legendChoice')}</div></div>
     ${coreHtml}${groupsHtml}${requestHtml}`;
 }
@@ -9559,6 +9569,11 @@ function toggleHubGroup(btn){
    hidden or retired (Jonathan: released ones only, so the list grows as the
    class does and nobody gets ahead) — grouped under its song.
 
+   One addition (2026-10-02): a card the console switched to "Play Along
+   now" is listed without a release date — caIsPlayAlongOnly(). It opens the
+   same way; In-Class Activities renders it as a single card under this
+   section's own title while it is the open card, and never lists it.
+
    A tap opens the card WHERE IT LIVES, #class-activities/<id>, through the
    same deep link the console's Copy link hands out. One copy of the card,
    one set of check ticks: finishing it from here is finishing it for class,
@@ -9571,7 +9586,7 @@ function toggleHubGroup(btn){
    part of its title after " — " (the song is the row's name). */
 let songsHubCore = [];
 function songsPlayAlongHtml(){
-  const cards = (window.CLASS_ACTIVITIES || []).filter(a => a.view === 'card' && caIsVisible(a));
+  const cards = (window.CLASS_ACTIVITIES || []).filter(a => a.view === 'card' && (caIsVisible(a) || caIsPlayAlongOnly(a)));
   if(!cards.length) return '';
   const bySlug = new Map();
   cards.forEach(a => {
@@ -10386,7 +10401,8 @@ function openClassActivitiesScreen(focusId){
    the teacher console's Class activities table ("Copy link"). */
 let caLinkMissingId = null;   // an id from the URL that isn't on the page
 function caFocusActivity(id){
-  const found = (window.CLASS_ACTIVITIES || []).find(a => a.id === id && caIsVisible(a));
+  // A "Play Along now" card opens here too, from the Songs page — see caIsPlayAlongOnly.
+  const found = (window.CLASS_ACTIVITIES || []).find(a => a.id === id && (caIsVisible(a) || caIsPlayAlongOnly(a)));
   caLinkMissingId = found ? null : id;
   caOpenId = found ? id : caOpenId;
   /* The card itself opening isn't enough any more (item 2f) — unless it's
@@ -12284,6 +12300,22 @@ function caIsVisible(a){
   const d = caDate(a);
   return d ? d <= dayStr(new Date()) : false;
 }
+/* A practice card the Songs page lists although caIsVisible() says no —
+   the console's "Play Along now" switch (playAlongActivityIds). The switch
+   stands in for the RELEASE DATE and nothing else: the card must still be
+   a practice card, placed on the board, not Hidden, not archived or
+   deleted. False for a card that is already visible — that one is listed
+   anyway and belongs to In-Class Activities as usual — so this answers
+   exactly one question: "is this card reachable from Songs ONLY?"
+   Deliberately NOT folded into caIsVisible(): that predicate is also the
+   gate's (caBlockers) and the In-Class Activities list's, and a Play Along
+   card must appear on neither. */
+function caIsPlayAlongOnly(a){
+  if(!a || a.view !== 'card' || playAlongActivityIds[a.id] !== true) return false;
+  if(retiredActivityIds[a.id] === true || hiddenActivityIds[a.id] === true) return false;
+  if(!caBoardView().assigned[a.id]) return false;
+  return !caIsVisible(a);
+}
 /* ── The activity gate (Today-first work order, Phase 1, approved by
    Jonathan 2026-09-11) ──
    A visible, undone, uncleared activity — any kind, checks included — blocks
@@ -12359,8 +12391,8 @@ function appIsOnScreen(){
    read came back byte-identical to what was already showing. */
 function classConfigSignature(){
   return JSON.stringify([activityDates, activityBoard, activityBoardOn, hiddenActivityIds,
-    retiredActivityIds, activityClears, optionalActivityIds, activityTitles, activityNumbers,
-    periodOverride]);
+    retiredActivityIds, activityClears, optionalActivityIds, playAlongActivityIds, activityTitles,
+    activityNumbers, periodOverride]);
 }
 document.addEventListener('visibilitychange', () => {
   /* The snippet loop is closed by rAF (snipTick), and rAF stops firing in a
@@ -12427,13 +12459,22 @@ function renderClassActivities(){
     cards: sec.ids.slice().reverse().map(id => byId[id]).filter(a => a && caIsVisible(a)),
   })).filter(g => g.cards.length);
   const list = groups.reduce((acc, g) => acc.concat(g.cards), []);
+  /* The one card this page shows that is NOT in `list`: a "Play Along now"
+     practice card the student opened from the Songs page (caIsPlayAlongOnly).
+     It renders only while it is the open card — close it and the next render
+     drops it — under the Songs section's own title, so it reads as where it
+     came from. It is never the hero, never in a fold, never counted. */
+  const playOnly = caOpenId && byId[caOpenId] && caIsPlayAlongOnly(byId[caOpenId]) ? byId[caOpenId] : null;
+  const playOnlyHtml = playOnly
+    ? `<div class="ca-mod-head" data-i18n="hub.playAlongTitle">${escHtml(t('hub.playAlongTitle'))}</div>${caActivityCardHtml(playOnly)}`
+    : '';
   // A deep link whose id isn't published (or is mistyped) says so, above the
   // archive it did open — see caFocusActivity.
   const missing = caLinkMissingId
     ? `<div class="coach-tip" data-i18n="ca.linkMissing">${escHtml(t('ca.linkMissing'))}</div>`
     : '';
   if(!list.length){
-    bodyEl.innerHTML = missing + `<div class="coach-tip" data-i18n="ca.empty">${escHtml(t('ca.empty'))}</div>`;
+    bodyEl.innerHTML = missing + (playOnlyHtml || `<div class="coach-tip" data-i18n="ca.empty">${escHtml(t('ca.empty'))}</div>`);
   } else {
     // Done work collapses into its own group (caFinishedGroupHtml) so the
     // list a student actually needs to act on isn't buried under everything
@@ -12549,7 +12590,7 @@ function renderClassActivities(){
     const finishedGroups = groups
       .map(g => ({ sec: g.sec, cards: g.cards.filter(a => classActivities[a.id] === true) }))
       .filter(g => g.cards.length);
-    bodyEl.innerHTML = missing + gateIntro + pendingHtml + (finished.length ? caFinishedGroupHtml(finishedGroups, finished, byId) : '');
+    bodyEl.innerHTML = missing + gateIntro + playOnlyHtml + pendingHtml + (finished.length ? caFinishedGroupHtml(finishedGroups, finished, byId) : '');
   }
   if(typeof applyI18n === 'function') applyI18n(bodyEl);
   caArmTabReveals(bodyEl);

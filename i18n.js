@@ -1129,11 +1129,6 @@
     // ── ♪ Songs hub panel ──
     'hub.allSongs':          { en: 'All the songs', es: 'Todas las canciones' },
     'hub.loading':           { en: 'Loading the song list…', es: 'Cargando la lista de canciones…' },
-    // Mood Chart's rail button retired 2026-09-12 (Today-first work order,
-    // Phase 2, nav collapse) — this row at the top of the Songs hub replaces
-    // it, opening mood-chart.html in a new tab same as a Journey link.
-    'hub.moodChart':         { en: 'Mood chart — every mood word, tap to hear it',
-                               es: 'Tabla de estados de ánimo — toca cada palabra para escucharla' },
     'hub.legendCore':        { en: 'Core — everyone learns these', es: 'Básicas — todos las aprenden' },
     'hub.legendChoice':      { en: 'Choice menu', es: 'Menú a elección' },
     'hub.backing':           { en: 'Backing', es: 'Pista' },

@@ -5,6 +5,16 @@ Notable changes to the Guitar Class site. Newest first.
 For the full session-by-session history (and the reasoning behind each change),
 see `WORKFLOW.md` and the git commit log.
 
+## 2026-10-02 — Songs page: Play Along can list a song early, and no Mood chart row
+
+### Changed
+
+- **Play Along with the TAB/Chords can show a practice card before its
+  class day.** When your teacher turns one on, it is in the list on the
+  Songs page. Tap it to open it. It is not in your In-Class Activities
+  list.
+- **The Mood chart row is gone from the Songs page.**
+
 ## 2026-10-02 — Whole-song cards: the song ends, and more room for the tab
 
 ### Changed
