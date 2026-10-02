@@ -654,6 +654,26 @@
 
 ## Recently shipped (post-archive)
 
+- [x] **2026-10-02 — "Open through Module N" (per-student module skip).**
+      Work order "Open through Module N". New `config/class.moduleOpenThrough`
+      (`uid → 2..12`), set from a new "Open through" select in the console's
+      Manage table (`teacherSetStudentOpenThrough`, a copy of the period
+      writer; Auto deletes the key). Student side: `moduleOpenThrough` in
+      app.js, read in `loadClassConfig()`, cached per uid as `caOpenThrough`
+      and restored by `restoreClassConfigFromCache()`.
+      `isModuleGateLocked` opens modules `<= N`; `isSetLocked` opens every
+      set of modules `< N` (module N keeps its set order). A change under an
+      open app repaints the pills, dropdown and strip (`repaintModuleGate`,
+      from a `finally` so the cache paths are covered too); `renderPills`
+      strips a now-open set's `.set-peek`. Console: "Open → M4" pill in the
+      Students list, a line on the detail page, and `teacherReviewIsBlocking`
+      stays quiet when the next module is opened. No progress writes, no
+      student-facing text, no rules change (no key allowlist on
+      `config/class`; header comment only). checks.mjs 1ai writer count
+      17 → 18. Deferred: a whole-class setting, a bulk control, a student
+      notice; the skipped modules' Module Review stays preview-only (it is
+      locked on the module's skills, not on the gate).
+
 - [x] **2026-09-25 — One activity on the In class page at a time (Cowork
       patch 0002, on top of Focus view).** Jonathan: with a card open, the
       Unfinished / Completed groups and other cards sat right under it and

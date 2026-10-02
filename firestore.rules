@@ -24,7 +24,7 @@ rules_version = '2';
                       activityDates, activityTitles, activityNumbers,
                       activityClears, archivedActivities, deletedActivities,
                       optionalActivities, playAlongActivities, activityBoard,
-                      activityBoardSeeded,
+                      activityBoardSeeded, moduleOpenThrough,
                       configVersion
                       (teacher writes, students read)
      liveQuiz/current the whole-class live quiz's state (teacher writes,

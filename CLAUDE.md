@@ -1305,6 +1305,21 @@ activity-level "stop blocking everyone" toggle — don't propose one again;
 the per-student Clear (and Hide, which also removes it from Earlier) are
 the tools. One release date serves both periods, also by choice.
 
+**"Open through Module N" — a per-student module skip (2026-10-02).**
+`config/class.moduleOpenThrough` (`{ uid: N }`, N = 2..12) is set from the
+"Open through" select in the console's Manage table
+(`teacherSetStudentOpenThrough`; Auto deletes the key). The student app
+reads it into `moduleOpenThrough`; **`isModuleGateLocked` opens modules
+`<= N`, `isSetLocked` opens every set in modules `< N`** — module N keeps
+its set-to-set order, Set 1 open. Static `locked`/`comingSoon` sets stay
+shut, Module 13 is untouched, and the activity gate is a separate system.
+**It never writes progress** — nothing is marked done; lowering or clearing
+it can't re-lock anything the student has worked in (`hasProgressIn` still
+runs first). **It fails open from cache**: cached per uid as
+`caOpenThrough`, restored by `restoreClassConfigFromCache()`, never reset to
+0 on a failed read. A change under an open app repaints the rail
+(`repaintModuleGate`), which also drops a now-open set's peek.
+
 **Optional activities (2026-09-22, Jonathan's ask):** a Required / Optional
 switch on every assigned card on the console board writes
 `config/class.optionalActivities` (`{ id: true }`, cell-checked, same shape

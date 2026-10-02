@@ -151,6 +151,14 @@ let accountPaused = false; // teacher put this student on hold (see loadClassCon
    See maybeShowPeriodPicker(). */
 let studentPeriod = '';    // progress/{uid}.period — '4' | '7' | 'CAS' | '' (not answered yet)
 let periodOverride = '';   // config/class.periodOverrides[uid] — teacher's correction, read-only here
+/* config/class.moduleOpenThrough[uid] — teacher's "Open through Module N"
+   (teacher.js Manage view), 2..12, or 0 for no override. Opens modules
+   2..N's cross-module gate (isModuleGateLocked, <= N) and every set of the
+   SKIPPED modules 1..N-1 (isSetLocked, < N) — module N itself keeps its
+   set-to-set order. Read-only here: nothing about it is ever written to the
+   student's progress doc. Cached per uid like periodOverride, so a blocked
+   read keeps the last known value instead of snapping modules shut. */
+let moduleOpenThrough = 0;
 let hiddenActivityIds = {}; // In-Class Activities the teacher has temporarily hidden (see loadClassConfig) — id -> true
 let activityDates = {}; // In-Class Activities release dates, teacher-set in the console (see loadClassConfig) — id -> 'YYYY-MM-DD'
 let activityTitles = {}; // In-Class Activity renames, teacher-set in the console (see loadClassConfig / caTitle) — id -> { en, base }
@@ -629,7 +637,7 @@ if(auth) auth.onAuthStateChanged(async user=>{
     }
   } else {
     window.__authBootPending = false;
-    currentUser = null; progress = {}; responses = {}; completed = {}; completedDeletes = new Set(); classActivities = {}; classActivitiesDeletes = new Set(); caStepDone = {}; caStepDeletes = new Set(); exitChecks = {}; games = {}; streak = { count:0, lastDay:null }; gamesAccessOn = true; studentPeriod = ''; periodOverride = ''; hiddenActivityIds = {}; activityDates = {}; activityTitles = {}; activityNumbers = {}; activityBoard = {}; activityBoardOn = false; activityClears = {}; retiredActivityIds = {}; optionalActivityIds = {}; progressLoadFailed = false;
+    currentUser = null; progress = {}; responses = {}; completed = {}; completedDeletes = new Set(); classActivities = {}; classActivitiesDeletes = new Set(); caStepDone = {}; caStepDeletes = new Set(); exitChecks = {}; games = {}; streak = { count:0, lastDay:null }; gamesAccessOn = true; studentPeriod = ''; periodOverride = ''; moduleOpenThrough = 0; hiddenActivityIds = {}; activityDates = {}; activityTitles = {}; activityNumbers = {}; activityBoard = {}; activityBoardOn = false; activityClears = {}; retiredActivityIds = {}; optionalActivityIds = {}; progressLoadFailed = false;
     document.body.classList.remove('ca-gated');   // next sign-in recomputes it fresh — don't leave a stale gate showing over the sign-in wall
     if(typeof gamesResetForUser === 'function') gamesResetForUser();   // Note Runner's module caches must not leak into the next signed-in user
     if(typeof lqStopListening === 'function') lqStopListening();       // and the live-quiz listener must not keep firing under the next student
@@ -767,6 +775,7 @@ async function loadClassConfig(){
      is known, whether that's a fresh read below or the cache restore in the
      early-return/catch paths, so it now just keeps showing the last known
      good value for the length of the read instead of blanking first. */
+  const openBefore = moduleOpenThrough;
   try{
     await ensureDb();
     if(!db){ restoreClassConfigFromCache(); applyActivityGate(); return; }
@@ -785,6 +794,11 @@ async function loadClassConfig(){
     // Chromebook the next student must not inherit the last one's CAS.
     periodOverride = (d.periodOverrides||{})[currentUser.uid] || '';
     try{ localStorage.setItem('caPeriodOverride', JSON.stringify({uid: currentUser.uid, v: periodOverride})); }catch(e){}
+    // Teacher's "Open through Module N" — see moduleOpenThrough. Only a whole
+    // number 2..12 counts; anything else is no override.
+    const openN = Number((d.moduleOpenThrough||{})[currentUser.uid]);
+    moduleOpenThrough = (Number.isInteger(openN) && openN >= 2 && openN <= 12) ? openN : 0;
+    try{ localStorage.setItem('caOpenThrough', JSON.stringify({uid: currentUser.uid, v: moduleOpenThrough})); }catch(e){}
     const ov = (d.gameOverrides||{})[currentUser.uid];
     if(ov===true)       gamesAccessOn = true;
     else if(ov===false) gamesAccessOn = false;
@@ -852,8 +866,25 @@ async function loadClassConfig(){
     activityBoardOn = d.activityBoardSeeded === true;
     try{ localStorage.setItem('caBoard', JSON.stringify({on: activityBoardOn, map: activityBoard})); }catch(e){}
   }catch(e){ restoreClassConfigFromCache(); /* leave games on, nothing hidden */ }
+  finally{
+    // Every exit, early returns included: the teacher's "Open through" may
+    // have changed under a rail that's already drawn (see repaintModuleGate).
+    if(moduleOpenThrough !== openBefore) repaintModuleGate();
+  }
   applyActivityGate();
   refreshSongsPlayAlong();   // the Songs page's Play along list reads the same board and dates
+}
+/* moduleOpenThrough changed under an app that may already be on screen (the
+   visibilitychange re-read — the teacher set it mid-class). Redraw the two
+   places the gate is drawn: renderPills() also strips .set-peek from any set
+   that is now open, so a set the student was peeking at becomes writable
+   without a reload. No-op before showApp() has built the rail. */
+function repaintModuleGate(){
+  if(!document.getElementById('week-pills') || typeof lastModuleNum === 'undefined') return;
+  if(!SETS.some(w=>w.moduleNum===lastModuleNum)) return;
+  renderPills(lastModuleNum);
+  populateModuleDropdown();
+  renderProgressStrip();
 }
 // A student who has loaded config at least once keeps seeing that last-known
 // set of release dates (and gate clears) through a later offline/blocked
@@ -865,6 +896,10 @@ function restoreClassConfigFromCache(){
     const cached = JSON.parse(localStorage.getItem('caPeriodOverride') || 'null');
     if(cached && currentUser && cached.uid === currentUser.uid) periodOverride = cached.v || '';
   }catch(e){ /* ignore — periodOverride stays '' */ }
+  try{
+    const cached = JSON.parse(localStorage.getItem('caOpenThrough') || 'null');
+    if(cached && currentUser && cached.uid === currentUser.uid) moduleOpenThrough = Number(cached.v) || 0;
+  }catch(e){ /* ignore — moduleOpenThrough keeps its last value */ }
   try{
     const raw = localStorage.getItem('caDates');
     if(raw) activityDates = JSON.parse(raw) || {};
@@ -3057,6 +3092,7 @@ function isModuleGateLocked(moduleNum){
   if(moduleNum === 13) return false;               // String Changing: outside the chain, always open
   if(isGatePreviewer()) return false;
   if(progressLoadFailed) return false;             // never re-lock on a guess
+  if(moduleOpenThrough && moduleNum <= moduleOpenThrough) return false;   // teacher's "Open through Module N"
   // Existing progress anywhere in THIS module keeps it open (never re-lock)
   const mySets = SETS.filter(w=>w.moduleNum===moduleNum);
   if(mySets.some(w=>hasProgressIn(w))) return false;
@@ -3096,6 +3132,7 @@ function isSetLocked(w){
   if(w.locked || w.comingSoon) return true;          // static/unbuilt stays locked for everyone
   if(isGatePreviewer()) return false;                // teacher/dev: skip the sequential gate
   if(progressLoadFailed) return false;               // we don't know what they've done — never re-lock on a guess
+  if(moduleOpenThrough && w.moduleNum < moduleOpenThrough) return false;   // a module the teacher let them skip: every set open
   const moduleSets = SETS.filter(x=>x.moduleNum===w.moduleNum);
   const idx = moduleSets.indexOf(w);
   if(hasProgressIn(w)) return false;                 // already been here — never lock them back out
@@ -12392,7 +12429,7 @@ function appIsOnScreen(){
 function classConfigSignature(){
   return JSON.stringify([activityDates, activityBoard, activityBoardOn, hiddenActivityIds,
     retiredActivityIds, activityClears, optionalActivityIds, playAlongActivityIds, activityTitles,
-    activityNumbers, periodOverride]);
+    activityNumbers, periodOverride, moduleOpenThrough]);
 }
 document.addEventListener('visibilitychange', () => {
   /* The snippet loop is closed by rAF (snipTick), and rAF stops firing in a

@@ -52,6 +52,23 @@ function teacherPeriodPillHtml(stu){
   const label=p==='CAS'?'CAS':p?'P'+p:'';
   return p?` <span class="stu-period" title="Class period ${escAttr(p)}">${escHtml(label)}</span>`:'';
 }
+/* The teacher's "Open through Module N" for one student — config/class
+   .moduleOpenThrough[uid], set in the Manage view. Returns the validated
+   module number (2..12) or 0 for none, the same rule app.js applies when it
+   reads the value into its own `moduleOpenThrough`. Named with the teacher
+   prefix because both files share one global scope and app.js owns the
+   unprefixed name. */
+function teacherStudentOpenThrough(stu, cfg){
+  const map=((cfg||teacherClassConfig)&&(cfg||teacherClassConfig).moduleOpenThrough)||{};
+  const n=Number(map[stu.uid]);
+  return (Number.isInteger(n) && n>=2 && n<=12) ? n : 0;
+}
+// "Open → M4" tag beside a student's name in the Students list. Silent when
+// unset, same as the period pill.
+function teacherOpenThroughPillHtml(stu){
+  const n=teacherStudentOpenThrough(stu);
+  return n?` <span class="stu-period" title="Modules up to ${n} opened in Manage">Open &#x2192; M${n}</span>`:'';
+}
 // "Blocked by N" tag beside a student's name in the Students list — how many
 // of today's activities/checks are currently holding them out of the rest of
 // the site (see the activity gate, app.js caBlockers). Silent when there's
@@ -276,6 +293,8 @@ async function showTeacherApp(user){
       if(moveSel && moveSel.value!==''){ teacherMoveActivity(moveSel.dataset.id, Number(moveSel.value), null); return; }
       const sortSel=e.target.closest('[data-board-sort]');
       if(sortSel){ teacherBoardSetSort(sortSel.value); return; }
+      const openSel=e.target.closest('[data-set-open-through]');
+      if(openSel){ teacherSetStudentOpenThrough(openSel.dataset.uid, openSel.value); return; }
     });
     /* An <details> in the board remembers whether it was open across the
        next re-render — the board repaints on every write, and an Archived
@@ -2501,7 +2520,7 @@ function renderTeacherManage(){
           <button class="tg-seg-btn ${teacherShowArchived?'on':''}" data-toggle-archived>${teacherShowArchived?'Hiding nothing':'Show archived'}${archCount?` (${archCount})`:''}</button>
         </div>
       </div>
-      <div class="tg-note"><strong>Paused</strong> students can sign in but see a "your access is paused" message instead of the site — use it for a temporary hold, then un-pause. <strong>Archived</strong> students are hidden from every dashboard view; their work is kept and comes back if you restore them. Pausing takes effect the next time that student loads the site. <strong>Period</strong> is whatever the student picked when they first signed in — set 4, 7, or CAS here to correct a wrong tap, or Auto to go back to their own answer. This list always shows everyone, whatever the period filter above is set to.</div>`;
+      <div class="tg-note"><strong>Paused</strong> students can sign in but see a "your access is paused" message instead of the site — use it for a temporary hold, then un-pause. <strong>Archived</strong> students are hidden from every dashboard view; their work is kept and comes back if you restore them. Pausing takes effect the next time that student loads the site. <strong>Period</strong> is whatever the student picked when they first signed in — set 4, 7, or CAS here to correct a wrong tap, or Auto to go back to their own answer. <strong>Open through</strong> lets one student skip ahead: every module up to the one you pick opens (all sets in the modules before it, Set 1 of the one you pick), without marking anything done. Auto removes it. Modules they've already worked in stay open either way. This list always shows everyone, whatever the period filter above is set to.</div>`;
     if(allStudentsRaw.length===0){ box.innerHTML=head+'<div class="t-loading">No students yet — they’ll appear here once they sign in.</div>'; return; }
     const nameOf=s=>(s.name||s.email||s.uid);
     // Period first, then name — this is the table you scan when a student
@@ -2533,11 +2552,19 @@ function renderTeacherManage(){
       const periodCell=`<div class="tg-seg">${perBtn('4','4')}${perBtn('7','7')}${perBtn('CAS','CAS')}`+
         `<button class="tg-seg-btn ${perSet?'':'on'}" data-set-period data-uid="${escAttr(stu.uid)}" data-value="auto" title="Use the student's own answer">Auto</button></div>`+
         (perSet?`<span class="tg-set-mark" title="You set this period — the student answered ${escAttr(stu.period||'nothing')}">set</span>`:'');
+      /* Open through: Auto · Module 2 … Module 12. Module 1 is always open
+         and Module 13 sits outside the chain, so neither is offered. Same
+         data-uid + delegated listener as its neighbours, on 'change'. */
+      const openN=teacherStudentOpenThrough(stu);
+      const openOpts=MODULE_MANIFEST.filter(m=>m.num>=2 && m.num<=12)
+        .map(m=>`<option value="${m.num}"${openN===m.num?' selected':''}>Module ${m.num} — ${escHtml(m.name)}</option>`).join('');
+      const openCell=`<select class="tg-open-through" data-set-open-through data-uid="${escAttr(stu.uid)}" style="max-width:220px"><option value="auto"${openN?'':' selected'}>Auto</option>${openOpts}</select>`;
       const archIco='<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" style="width:1em;height:1em;vertical-align:-0.15em"><rect x="3" y="6" width="18" height="4" rx="1"/><path d="M4 10v9a1 1 0 0 0 1 1h14a1 1 0 0 0 1-1v-9"/><path d="M10 14h4"/></svg>';
       const pauseIco='<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" style="width:1em;height:1em;vertical-align:-0.15em"><rect x="6" y="4" width="4" height="16" rx="1"/><rect x="14" y="4" width="4" height="16" rx="1"/></svg>';
       const status=isArch?`${archIco} archived`:isPaused?`${pauseIco} paused`:'&#x2713; active';
       return `<tr${isArch?' style="opacity:.55"':''}><td class="tg-name" title="${escAttr(name)}">${escHtml(name)}</td>`+
         `<td class="tg-period">${periodCell}</td>`+
+        `<td>${openCell}</td>`+
         `<td><div class="tg-seg">${pauseBtns}</div></td>`+
         `<td><div class="tg-seg">${archBtn}</div></td>`+
         `<td class="tg-eff">${status}</td></tr>`;
@@ -2545,7 +2572,7 @@ function renderTeacherManage(){
     const summary=(pausedCount||archCount)
       ? `<div class="tg-note">${pausedCount} paused · ${archCount} archived</div>` : '';
     box.innerHTML=head+
-      `<div class="tg-grid-wrap"><table class="tg-table"><thead><tr><th>Student</th><th>Period</th><th>Access</th><th>Roster</th><th>Right now</th></tr></thead><tbody>${rows}</tbody></table></div>`+summary;
+      `<div class="tg-grid-wrap"><table class="tg-table"><thead><tr><th>Student</th><th>Period</th><th>Open through</th><th>Access</th><th>Roster</th><th>Right now</th></tr></thead><tbody>${rows}</tbody></table></div>`+summary;
   });
 }
 async function teacherSetStudentPaused(uid, state){
@@ -2613,6 +2640,31 @@ async function teacherSetStudentPeriod(uid, value){
   teacherApplyRosterFilter();
   if(teacherView==='manage') renderTeacherManage();
   else renderTeacherBody();   // roster changed under whichever view is showing
+}
+/* Copy of teacherSetStudentPeriod above, for config/class.moduleOpenThrough.
+   'auto' deletes the key (FieldValue.delete(), never null or ''), so the
+   student side reads "no override" by absence. Never touches progress/{uid}
+   — the teacher can't write it, and the override marks nothing done. */
+async function teacherSetStudentOpenThrough(uid, value){
+  const clear = value==='auto';
+  const n = Number(value);
+  if(!clear && !(Number.isInteger(n) && n>=2 && n<=12)) return;
+  if(!teacherClassConfig.moduleOpenThrough) teacherClassConfig.moduleOpenThrough={};
+  const had = Object.prototype.hasOwnProperty.call(teacherClassConfig.moduleOpenThrough, uid);
+  const prev = teacherClassConfig.moduleOpenThrough[uid];
+  if(clear) delete teacherClassConfig.moduleOpenThrough[uid];
+  else teacherClassConfig.moduleOpenThrough[uid]=n;
+  try{
+    await ensureDb();
+    const fv=firebase.firestore.FieldValue;
+    const patch = clear ? {moduleOpenThrough:{[uid]:fv.delete()}} : {moduleOpenThrough:{[uid]:n}};
+    await teacherWriteConfig(patch, {['moduleOpenThrough.'+uid]: had?prev:undefined});
+  }catch(e){
+    if(had) teacherClassConfig.moduleOpenThrough[uid]=prev; else delete teacherClassConfig.moduleOpenThrough[uid];
+    teacherConfigSaveFailed(e, 'Could not save that change — check your connection and Firestore rules.');
+  }
+  if(teacherView==='manage') renderTeacherManage();
+  else renderTeacherBody();
 }
 function teacherToggleShowArchived(){
   teacherShowArchived=!teacherShowArchived;
@@ -2851,6 +2903,7 @@ function teacherReviewIsBlocking(stu, moduleNum, tally){
   if(tally.rated>=tally.total) return false;
   const nextNum=moduleNum+1;
   if(nextNum>12) return false;                       // Module 13 sits outside the chain
+  if(teacherStudentOpenThrough(stu)>=nextNum) return false;   // the teacher opened the next module in Manage
   const mySets=SETS.filter(w=>w.moduleNum===moduleNum && !w.locked && !w.comingSoon);
   if(!mySets.length) return false;
   const allDone=mySets.every(w=>(w.skills||[]).every(sk=>stu.skills[sk.id]==='gotit'));
@@ -2914,7 +2967,7 @@ function renderTeacherStudents(){
       ? `<span class="stu-mod">&mdash;</span><span class="stu-count">0 / ${universe.total}</span>`
       : `<span class="stu-mod">M${tally.furthest}</span><span class="stu-count">${tally.got} / ${universe.total}</span>`;
     return `<button type="button" class="stu-row" data-open-student data-uid="${escAttr(stu.uid)}">
-        <div class="stu-name" title="${escAttr(displayName)}">${escHtml(displayName)}${teacherPeriodPillHtml(stu)}${teacherBlockedBadgeHtml(stu)}</div>
+        <div class="stu-name" title="${escAttr(displayName)}">${escHtml(displayName)}${teacherPeriodPillHtml(stu)}${teacherOpenThroughPillHtml(stu)}${teacherBlockedBadgeHtml(stu)}</div>
         ${teacherBarFillHtml(tally.got,tally.working,universe.total)}
         <div class="stu-right">${rightLbl}</div>
       </button>`;
@@ -2944,6 +2997,7 @@ function renderTeacherStudentDetail(uid){
   const tally=teacherStudentTally(stu, universe);
   const displayName=stu.name||stu.email||stu.uid.slice(0,8)+'…';
   const email=stu.email||'(no email on file)';
+  const openThrough=teacherStudentOpenThrough(stu);
 
   // Written responses — every response across every set, grouped by module then set.
   let responsesHtml=''; let anyResponse=false;
@@ -3092,6 +3146,7 @@ function renderTeacherStudentDetail(uid){
     ${back}
     <div class="stu-detail-name">${escHtml(displayName)}${teacherPeriodPillHtml(stu)}${teacherBlockedBadgeHtml(stu)}</div>
     <div class="stu-detail-email">${escHtml(email)}</div>
+    ${openThrough?`<div class="tg-note" style="margin:6px 0 12px">Open through Module ${openThrough} (set in Manage).</div>`:''}
     ${gateHtml}
     <div class="stu-chart" style="margin-bottom:22px">
       ${teacherAxisHeaderHtml(universe)}
