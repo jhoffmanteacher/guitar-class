@@ -16,6 +16,7 @@ see `WORKFLOW.md` and the git commit log.
   songs list is the one place to find them. The practice cards for single
   parts of a song are on In-Class Activities.
 - **The Tutorial and Original links are off the Core songs.**
+- **Watchtower, "the cure" and Seven Nation Army are listed first.**
 
 ## 2026-10-05 — No assessment pop-up on the Songs page
 

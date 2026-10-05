@@ -9553,7 +9553,11 @@ async function renderSongsHub(){
      keep their tag; the student-request row (request:true) renders last. */
   const isCoreSix = e => e.song.core === true && e.song.type !== 'Focus';
   const firstMod = e => Math.min(...e.modules);
-  const coreEntries = entries.filter(isCoreSix);
+  /* Core order (Jonathan, 2026-10-05): the three songs with a whole-song
+     Play Along card lead, in this order; the rest follow alphabetically. */
+  const CORE_FIRST = ['all-along-the-watchtower', 'the-cure', 'seven-nation-army'];
+  const coreRank = e => { const i = CORE_FIRST.indexOf(songJourneySlug(e.song)); return i < 0 ? CORE_FIRST.length : i; };
+  const coreEntries = entries.filter(isCoreSix).sort((a, b) => coreRank(a) - coreRank(b));
   const requestEntries = entries.filter(e => !isCoreSix(e) && e.song.request === true);
   const rest = entries.filter(e => !isCoreSix(e) && e.song.request !== true);
   const groups = [

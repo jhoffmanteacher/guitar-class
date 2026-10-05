@@ -1525,7 +1525,8 @@ section that listed every part card at the top of the Songs page — "too
 much going on"; the Core list is now the only place). A Core row shows
 exactly three links, in this order: **Play Along · Backing track for
 solos · Song Journey** — no Tutorial or Original on Core rows (Choice rows
-keep theirs). Play Along opens the song's `view: 'card'` activity with
+keep theirs). Watchtower, "the cure", Seven Nation Army lead the list
+(`CORE_FIRST`), the rest alphabetical. Play Along opens the song's `view: 'card'` activity with
 `card.wholeSong` whose `journey:` matches the row's Journey slug, newest
 first if there are ever two, once it passes `caIsVisible()` or
 `caIsPlayAlongOnly()`; a song with no such card shows **no** Play Along
