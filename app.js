@@ -3780,7 +3780,12 @@ function syncExploreNav(){
   // the last one has closed — but only if the review is still what's
   // actually on screen; a student who navigated straight to a different set
   // in the meantime shouldn't get surprised by it.
-  if(!open && pendingMrAssessModule !== null){
+  // The hash check matters: routeExploreHash() closes the old page BEFORE
+  // opening the new one, so going In class → Songs passes through a moment
+  // with nothing open and used to pop the reminder over Songs (2026-10-05).
+  // The hash is already the destination by then, so only fire when it is
+  // the practice view itself.
+  if(!open && pendingMrAssessModule !== null && exploreHashBase(location.hash) === ''){
     const num = pendingMrAssessModule;
     pendingMrAssessModule = null;
     if(lastSetId === `mr${num}`) maybeShowMrAssess(num);

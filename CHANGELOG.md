@@ -5,6 +5,13 @@ Notable changes to the Guitar Class site. Newest first.
 For the full session-by-session history (and the reasoning behind each change),
 see `WORKFLOW.md` and the git commit log.
 
+## 2026-10-05 — No assessment pop-up on the Songs page
+
+### Fixed
+
+- **The Module assessment pop-up no longer opens when you go to Songs.**
+  It shows only when you open the Module Review.
+
 ## 2026-10-02 — Sight-Reading TAB starts the metronome
 
 ### Changed
