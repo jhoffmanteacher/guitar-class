@@ -2982,8 +2982,11 @@ window.CLASS_ACTIVITIES = [
   },
   /* Seven Nation Army — The Whole Song (2026-10-01). A practice card like
      ca-18: the riff from ca-10 (already learned) plus ONE new part, the G – A
-     break before each chorus (G = low E fret 3, A = open A, four plucks
-     each), then the whole record in order. Needs the track's beat map
+     break before each chorus (G = low E fret 3, A = low E fret 5 — Jonathan,
+     2026-10-05, was the open A — four plucks each), then the whole record in
+     order. Each chorus is the riff then the riff with the C D C B ending
+     (laps 2 and 4 on the record: C 1 beat, D and C half a beat each, B 2),
+     so a chorus section is that 4-bar pair played twice (same day). Needs the track's beat map
      (SNIPPET_TRACKS['seven-nation-army'].barTimes, added the same day): the
      band drifts off a straight 123 grid and the breaks run long. Section map
      from the bass chroma on that map — riff 1-24, G-A 25-26, riff 27-34,
@@ -3045,17 +3048,17 @@ window.CLASS_ACTIVITIES = [
             { string: 'E', fret: 3, note: 'G', midi: 43 },
             { string: 'E', fret: 3, note: 'G', midi: 43 },
             { string: 'E', fret: 3, note: 'G', midi: 43 },
-            { string: 'A', fret: 0, note: 'A', midi: 45 },
-            { string: 'A', fret: 0, note: 'A', midi: 45 },
-            { string: 'A', fret: 0, note: 'A', midi: 45 },
-            { string: 'A', fret: 0, note: 'A', midi: 45 }
+            { string: 'E', fret: 5, note: 'A', midi: 45 },
+            { string: 'E', fret: 5, note: 'A', midi: 45 },
+            { string: 'E', fret: 5, note: 'A', midi: 45 },
+            { string: 'E', fret: 5, note: 'A', midi: 45 }
           ]
         },
         {
           label: 'Chorus 1', label_es: 'Coro 1',
-          caption: 'Chorus 1 — the riff, 4 laps', caption_es: 'Coro 1 — el riff, 4 vueltas',
-          fromBar: 27, bars: 2, reps: 4,
-          repLabel: 'Lap', repLabel_es: 'Vuelta',
+          caption: 'Chorus 1 — 2 times · the second lap ends C D C B', caption_es: 'Coro 1 — 2 veces · la segunda vuelta termina C D C B',
+          fromBar: 27, bars: 4, reps: 2,
+          repLabel: 'Time', repLabel_es: 'Vez',
           notes: [
             { string: 'A', fret: 7,  note: 'E', midi: 52, beats: 1.5 },
             { string: 'A', fret: 7,  note: 'E', midi: 52, beats: 0.5 },
@@ -3063,6 +3066,15 @@ window.CLASS_ACTIVITIES = [
             { string: 'A', fret: 7,  note: 'E', midi: 52, beats: 0.75 },
             { string: 'A', fret: 5,  note: 'D', midi: 50, beats: 0.5 },
             { string: 'A', fret: 3,  note: 'C', midi: 48, beats: 2 },
+            { string: 'A', fret: 2,  note: 'B', midi: 47, beats: 2 },
+            { string: 'A', fret: 7,  note: 'E', midi: 52, beats: 1.5 },
+            { string: 'A', fret: 7,  note: 'E', midi: 52, beats: 0.5 },
+            { string: 'A', fret: 10, note: 'G', midi: 55, beats: 0.75 },
+            { string: 'A', fret: 7,  note: 'E', midi: 52, beats: 0.75 },
+            { string: 'A', fret: 5,  note: 'D', midi: 50, beats: 0.5 },
+            { string: 'A', fret: 3,  note: 'C', midi: 48, beats: 1 },
+            { string: 'A', fret: 5,  note: 'D', midi: 50, beats: 0.5 },
+            { string: 'A', fret: 3,  note: 'C', midi: 48, beats: 0.5 },
             { string: 'A', fret: 2,  note: 'B', midi: 47, beats: 2 }
           ]
         },
@@ -3075,10 +3087,10 @@ window.CLASS_ACTIVITIES = [
             { string: 'E', fret: 3, note: 'G', midi: 43 },
             { string: 'E', fret: 3, note: 'G', midi: 43 },
             { string: 'E', fret: 3, note: 'G', midi: 43 },
-            { string: 'A', fret: 0, note: 'A', midi: 45 },
-            { string: 'A', fret: 0, note: 'A', midi: 45 },
-            { string: 'A', fret: 0, note: 'A', midi: 45 },
-            { string: 'A', fret: 0, note: 'A', midi: 45 }
+            { string: 'E', fret: 5, note: 'A', midi: 45 },
+            { string: 'E', fret: 5, note: 'A', midi: 45 },
+            { string: 'E', fret: 5, note: 'A', midi: 45 },
+            { string: 'E', fret: 5, note: 'A', midi: 45 }
           ]
         },
         {
@@ -3105,10 +3117,10 @@ window.CLASS_ACTIVITIES = [
             { string: 'E', fret: 3, note: 'G', midi: 43 },
             { string: 'E', fret: 3, note: 'G', midi: 43 },
             { string: 'E', fret: 3, note: 'G', midi: 43 },
-            { string: 'A', fret: 0, note: 'A', midi: 45 },
-            { string: 'A', fret: 0, note: 'A', midi: 45 },
-            { string: 'A', fret: 0, note: 'A', midi: 45 },
-            { string: 'A', fret: 0, note: 'A', midi: 45 }
+            { string: 'E', fret: 5, note: 'A', midi: 45 },
+            { string: 'E', fret: 5, note: 'A', midi: 45 },
+            { string: 'E', fret: 5, note: 'A', midi: 45 },
+            { string: 'E', fret: 5, note: 'A', midi: 45 }
           ]
         },
         {
@@ -3135,10 +3147,10 @@ window.CLASS_ACTIVITIES = [
             { string: 'E', fret: 3, note: 'G', midi: 43 },
             { string: 'E', fret: 3, note: 'G', midi: 43 },
             { string: 'E', fret: 3, note: 'G', midi: 43 },
-            { string: 'A', fret: 0, note: 'A', midi: 45 },
-            { string: 'A', fret: 0, note: 'A', midi: 45 },
-            { string: 'A', fret: 0, note: 'A', midi: 45 },
-            { string: 'A', fret: 0, note: 'A', midi: 45 }
+            { string: 'E', fret: 5, note: 'A', midi: 45 },
+            { string: 'E', fret: 5, note: 'A', midi: 45 },
+            { string: 'E', fret: 5, note: 'A', midi: 45 },
+            { string: 'E', fret: 5, note: 'A', midi: 45 }
           ]
         },
         {
@@ -3165,17 +3177,17 @@ window.CLASS_ACTIVITIES = [
             { string: 'E', fret: 3, note: 'G', midi: 43 },
             { string: 'E', fret: 3, note: 'G', midi: 43 },
             { string: 'E', fret: 3, note: 'G', midi: 43 },
-            { string: 'A', fret: 0, note: 'A', midi: 45 },
-            { string: 'A', fret: 0, note: 'A', midi: 45 },
-            { string: 'A', fret: 0, note: 'A', midi: 45 },
-            { string: 'A', fret: 0, note: 'A', midi: 45 }
+            { string: 'E', fret: 5, note: 'A', midi: 45 },
+            { string: 'E', fret: 5, note: 'A', midi: 45 },
+            { string: 'E', fret: 5, note: 'A', midi: 45 },
+            { string: 'E', fret: 5, note: 'A', midi: 45 }
           ]
         },
         {
           label: 'Chorus 2', label_es: 'Coro 2',
-          caption: 'Chorus 2 — the riff, 4 laps', caption_es: 'Coro 2 — el riff, 4 vueltas',
-          fromBar: 107, bars: 2, reps: 4,
-          repLabel: 'Lap', repLabel_es: 'Vuelta',
+          caption: 'Chorus 2 — 2 times · the second lap ends C D C B', caption_es: 'Coro 2 — 2 veces · la segunda vuelta termina C D C B',
+          fromBar: 107, bars: 4, reps: 2,
+          repLabel: 'Time', repLabel_es: 'Vez',
           notes: [
             { string: 'A', fret: 7,  note: 'E', midi: 52, beats: 1.5 },
             { string: 'A', fret: 7,  note: 'E', midi: 52, beats: 0.5 },
@@ -3183,6 +3195,15 @@ window.CLASS_ACTIVITIES = [
             { string: 'A', fret: 7,  note: 'E', midi: 52, beats: 0.75 },
             { string: 'A', fret: 5,  note: 'D', midi: 50, beats: 0.5 },
             { string: 'A', fret: 3,  note: 'C', midi: 48, beats: 2 },
+            { string: 'A', fret: 2,  note: 'B', midi: 47, beats: 2 },
+            { string: 'A', fret: 7,  note: 'E', midi: 52, beats: 1.5 },
+            { string: 'A', fret: 7,  note: 'E', midi: 52, beats: 0.5 },
+            { string: 'A', fret: 10, note: 'G', midi: 55, beats: 0.75 },
+            { string: 'A', fret: 7,  note: 'E', midi: 52, beats: 0.75 },
+            { string: 'A', fret: 5,  note: 'D', midi: 50, beats: 0.5 },
+            { string: 'A', fret: 3,  note: 'C', midi: 48, beats: 1 },
+            { string: 'A', fret: 5,  note: 'D', midi: 50, beats: 0.5 },
+            { string: 'A', fret: 3,  note: 'C', midi: 48, beats: 0.5 },
             { string: 'A', fret: 2,  note: 'B', midi: 47, beats: 2 }
           ]
         },
@@ -3215,8 +3236,8 @@ window.CLASS_ACTIVITIES = [
       {
         label:    'Learn — G and A',
         label_es: 'Aprende — G y A',
-        text:    'G is fret 3 on the low E string, finger 2. A is the open A string. Each one gets 4 plucks, one per beat.',
-        text_es: 'G es el traste 3 de la cuerda Mi grave, dedo 2. A es la cuerda La al aire. Cada una lleva 4 pulsaciones, una por tiempo.',
+        text:    'G is fret 3 on the low E string, finger 2. A is fret 5 on the same string, finger 4. Each one gets 4 plucks, one per beat.',
+        text_es: 'G es el traste 3 de la cuerda Mi grave, dedo 2. A es el traste 5 de la misma cuerda, dedo 4. Cada una lleva 4 pulsaciones, una por tiempo.',
         tab: {
           caption: 'G – A · 4 plucks each', caption_es: 'G – A · 4 pulsaciones cada una',
             notes: [
@@ -3224,10 +3245,10 @@ window.CLASS_ACTIVITIES = [
               { string: 'E', fret: 3, note: 'G', midi: 43 },
               { string: 'E', fret: 3, note: 'G', midi: 43 },
               { string: 'E', fret: 3, note: 'G', midi: 43 },
-              { string: 'A', fret: 0, note: 'A', midi: 45 },
-              { string: 'A', fret: 0, note: 'A', midi: 45 },
-              { string: 'A', fret: 0, note: 'A', midi: 45 },
-              { string: 'A', fret: 0, note: 'A', midi: 45 }
+              { string: 'E', fret: 5, note: 'A', midi: 45 },
+              { string: 'E', fret: 5, note: 'A', midi: 45 },
+              { string: 'E', fret: 5, note: 'A', midi: 45 },
+              { string: 'E', fret: 5, note: 'A', midi: 45 }
             ]
         },
       },
@@ -3244,10 +3265,10 @@ window.CLASS_ACTIVITIES = [
             { string: 'E', fret: 3, note: 'G', midi: 43 },
             { string: 'E', fret: 3, note: 'G', midi: 43 },
             { string: 'E', fret: 3, note: 'G', midi: 43 },
-            { string: 'A', fret: 0, note: 'A', midi: 45 },
-            { string: 'A', fret: 0, note: 'A', midi: 45 },
-            { string: 'A', fret: 0, note: 'A', midi: 45 },
-            { string: 'A', fret: 0, note: 'A', midi: 45 },
+            { string: 'E', fret: 5, note: 'A', midi: 45 },
+            { string: 'E', fret: 5, note: 'A', midi: 45 },
+            { string: 'E', fret: 5, note: 'A', midi: 45 },
+            { string: 'E', fret: 5, note: 'A', midi: 45 },
             { string: 'A', fret: 7, note: 'E', midi: 52 }
           ]
         },
@@ -4321,8 +4342,9 @@ window.CLASS_ACTIVITIES = [
      ca-25's sections and bars, every riff note turned into the A-string power
      chord Journey Layer 3 teaches (E5 at fret 7, G5 at 10, D5 at 5, C5 at 3,
      B5 at 2 — "one chord per riff note", same beats as ca-25). Layer 3 has no
-     G-A break; it uses ca-25's roots: G5 on low E fret 3, A5 on the open A
-     string. */
+     G-A break; it uses ca-25's roots: G5 on low E fret 3, A5 on low E fret 5
+     (the same shape two frets up — 2026-10-05, was the open A). The choruses
+     carry ca-25's C D C B ending as C5 D5 C5 B5. */
   {
     id:    'ca-31',
     view:  'card',    // one screen: Play song + tab + checks — see CARD above
@@ -4378,17 +4400,17 @@ window.CLASS_ACTIVITIES = [
             { frets: [['A', 5], ['E', 3]], note: 'G5', midi: [50, 43] },
             { frets: [['A', 5], ['E', 3]], note: 'G5', midi: [50, 43] },
             { frets: [['A', 5], ['E', 3]], note: 'G5', midi: [50, 43] },
-            { frets: [['D', 2], ['A', 0]], note: 'A5', midi: [52, 45] },
-            { frets: [['D', 2], ['A', 0]], note: 'A5', midi: [52, 45] },
-            { frets: [['D', 2], ['A', 0]], note: 'A5', midi: [52, 45] },
-            { frets: [['D', 2], ['A', 0]], note: 'A5', midi: [52, 45] }
+            { frets: [['A', 7], ['E', 5]], note: 'A5', midi: [52, 45] },
+            { frets: [['A', 7], ['E', 5]], note: 'A5', midi: [52, 45] },
+            { frets: [['A', 7], ['E', 5]], note: 'A5', midi: [52, 45] },
+            { frets: [['A', 7], ['E', 5]], note: 'A5', midi: [52, 45] }
           ]
         },
         {
           label: 'Chorus 1', label_es: 'Coro 1',
-          caption: 'Chorus 1 — the riff, 4 laps', caption_es: 'Coro 1 — el riff, 4 vueltas',
-          fromBar: 27, bars: 2, reps: 4,
-          repLabel: 'Lap', repLabel_es: 'Vuelta',
+          caption: 'Chorus 1 — 2 times · the second lap ends C5 D5 C5 B5', caption_es: 'Coro 1 — 2 veces · la segunda vuelta termina C5 D5 C5 B5',
+          fromBar: 27, bars: 4, reps: 2,
+          repLabel: 'Time', repLabel_es: 'Vez',
           notes: [
             { frets: [['D', 9], ['A', 7]], note: 'E5', midi: [59, 52], beats: 1.5 },
             { frets: [['D', 9], ['A', 7]], note: 'E5', midi: [59, 52], beats: 0.5 },
@@ -4396,6 +4418,15 @@ window.CLASS_ACTIVITIES = [
             { frets: [['D', 9], ['A', 7]], note: 'E5', midi: [59, 52], beats: 0.75 },
             { frets: [['D', 7], ['A', 5]], note: 'D5', midi: [57, 50], beats: 0.5 },
             { frets: [['D', 5], ['A', 3]], note: 'C5', midi: [55, 48], beats: 2 },
+            { frets: [['D', 4], ['A', 2]], note: 'B5', midi: [54, 47], beats: 2 },
+            { frets: [['D', 9], ['A', 7]], note: 'E5', midi: [59, 52], beats: 1.5 },
+            { frets: [['D', 9], ['A', 7]], note: 'E5', midi: [59, 52], beats: 0.5 },
+            { frets: [['D', 12], ['A', 10]], note: 'G5', midi: [62, 55], beats: 0.75 },
+            { frets: [['D', 9], ['A', 7]], note: 'E5', midi: [59, 52], beats: 0.75 },
+            { frets: [['D', 7], ['A', 5]], note: 'D5', midi: [57, 50], beats: 0.5 },
+            { frets: [['D', 5], ['A', 3]], note: 'C5', midi: [55, 48], beats: 1 },
+            { frets: [['D', 7], ['A', 5]], note: 'D5', midi: [57, 50], beats: 0.5 },
+            { frets: [['D', 5], ['A', 3]], note: 'C5', midi: [55, 48], beats: 0.5 },
             { frets: [['D', 4], ['A', 2]], note: 'B5', midi: [54, 47], beats: 2 }
           ]
         },
@@ -4408,10 +4439,10 @@ window.CLASS_ACTIVITIES = [
             { frets: [['A', 5], ['E', 3]], note: 'G5', midi: [50, 43] },
             { frets: [['A', 5], ['E', 3]], note: 'G5', midi: [50, 43] },
             { frets: [['A', 5], ['E', 3]], note: 'G5', midi: [50, 43] },
-            { frets: [['D', 2], ['A', 0]], note: 'A5', midi: [52, 45] },
-            { frets: [['D', 2], ['A', 0]], note: 'A5', midi: [52, 45] },
-            { frets: [['D', 2], ['A', 0]], note: 'A5', midi: [52, 45] },
-            { frets: [['D', 2], ['A', 0]], note: 'A5', midi: [52, 45] }
+            { frets: [['A', 7], ['E', 5]], note: 'A5', midi: [52, 45] },
+            { frets: [['A', 7], ['E', 5]], note: 'A5', midi: [52, 45] },
+            { frets: [['A', 7], ['E', 5]], note: 'A5', midi: [52, 45] },
+            { frets: [['A', 7], ['E', 5]], note: 'A5', midi: [52, 45] }
           ]
         },
         {
@@ -4438,10 +4469,10 @@ window.CLASS_ACTIVITIES = [
             { frets: [['A', 5], ['E', 3]], note: 'G5', midi: [50, 43] },
             { frets: [['A', 5], ['E', 3]], note: 'G5', midi: [50, 43] },
             { frets: [['A', 5], ['E', 3]], note: 'G5', midi: [50, 43] },
-            { frets: [['D', 2], ['A', 0]], note: 'A5', midi: [52, 45] },
-            { frets: [['D', 2], ['A', 0]], note: 'A5', midi: [52, 45] },
-            { frets: [['D', 2], ['A', 0]], note: 'A5', midi: [52, 45] },
-            { frets: [['D', 2], ['A', 0]], note: 'A5', midi: [52, 45] }
+            { frets: [['A', 7], ['E', 5]], note: 'A5', midi: [52, 45] },
+            { frets: [['A', 7], ['E', 5]], note: 'A5', midi: [52, 45] },
+            { frets: [['A', 7], ['E', 5]], note: 'A5', midi: [52, 45] },
+            { frets: [['A', 7], ['E', 5]], note: 'A5', midi: [52, 45] }
           ]
         },
         {
@@ -4468,10 +4499,10 @@ window.CLASS_ACTIVITIES = [
             { frets: [['A', 5], ['E', 3]], note: 'G5', midi: [50, 43] },
             { frets: [['A', 5], ['E', 3]], note: 'G5', midi: [50, 43] },
             { frets: [['A', 5], ['E', 3]], note: 'G5', midi: [50, 43] },
-            { frets: [['D', 2], ['A', 0]], note: 'A5', midi: [52, 45] },
-            { frets: [['D', 2], ['A', 0]], note: 'A5', midi: [52, 45] },
-            { frets: [['D', 2], ['A', 0]], note: 'A5', midi: [52, 45] },
-            { frets: [['D', 2], ['A', 0]], note: 'A5', midi: [52, 45] }
+            { frets: [['A', 7], ['E', 5]], note: 'A5', midi: [52, 45] },
+            { frets: [['A', 7], ['E', 5]], note: 'A5', midi: [52, 45] },
+            { frets: [['A', 7], ['E', 5]], note: 'A5', midi: [52, 45] },
+            { frets: [['A', 7], ['E', 5]], note: 'A5', midi: [52, 45] }
           ]
         },
         {
@@ -4498,17 +4529,17 @@ window.CLASS_ACTIVITIES = [
             { frets: [['A', 5], ['E', 3]], note: 'G5', midi: [50, 43] },
             { frets: [['A', 5], ['E', 3]], note: 'G5', midi: [50, 43] },
             { frets: [['A', 5], ['E', 3]], note: 'G5', midi: [50, 43] },
-            { frets: [['D', 2], ['A', 0]], note: 'A5', midi: [52, 45] },
-            { frets: [['D', 2], ['A', 0]], note: 'A5', midi: [52, 45] },
-            { frets: [['D', 2], ['A', 0]], note: 'A5', midi: [52, 45] },
-            { frets: [['D', 2], ['A', 0]], note: 'A5', midi: [52, 45] }
+            { frets: [['A', 7], ['E', 5]], note: 'A5', midi: [52, 45] },
+            { frets: [['A', 7], ['E', 5]], note: 'A5', midi: [52, 45] },
+            { frets: [['A', 7], ['E', 5]], note: 'A5', midi: [52, 45] },
+            { frets: [['A', 7], ['E', 5]], note: 'A5', midi: [52, 45] }
           ]
         },
         {
           label: 'Chorus 2', label_es: 'Coro 2',
-          caption: 'Chorus 2 — the riff, 4 laps', caption_es: 'Coro 2 — el riff, 4 vueltas',
-          fromBar: 107, bars: 2, reps: 4,
-          repLabel: 'Lap', repLabel_es: 'Vuelta',
+          caption: 'Chorus 2 — 2 times · the second lap ends C5 D5 C5 B5', caption_es: 'Coro 2 — 2 veces · la segunda vuelta termina C5 D5 C5 B5',
+          fromBar: 107, bars: 4, reps: 2,
+          repLabel: 'Time', repLabel_es: 'Vez',
           notes: [
             { frets: [['D', 9], ['A', 7]], note: 'E5', midi: [59, 52], beats: 1.5 },
             { frets: [['D', 9], ['A', 7]], note: 'E5', midi: [59, 52], beats: 0.5 },
@@ -4516,6 +4547,15 @@ window.CLASS_ACTIVITIES = [
             { frets: [['D', 9], ['A', 7]], note: 'E5', midi: [59, 52], beats: 0.75 },
             { frets: [['D', 7], ['A', 5]], note: 'D5', midi: [57, 50], beats: 0.5 },
             { frets: [['D', 5], ['A', 3]], note: 'C5', midi: [55, 48], beats: 2 },
+            { frets: [['D', 4], ['A', 2]], note: 'B5', midi: [54, 47], beats: 2 },
+            { frets: [['D', 9], ['A', 7]], note: 'E5', midi: [59, 52], beats: 1.5 },
+            { frets: [['D', 9], ['A', 7]], note: 'E5', midi: [59, 52], beats: 0.5 },
+            { frets: [['D', 12], ['A', 10]], note: 'G5', midi: [62, 55], beats: 0.75 },
+            { frets: [['D', 9], ['A', 7]], note: 'E5', midi: [59, 52], beats: 0.75 },
+            { frets: [['D', 7], ['A', 5]], note: 'D5', midi: [57, 50], beats: 0.5 },
+            { frets: [['D', 5], ['A', 3]], note: 'C5', midi: [55, 48], beats: 1 },
+            { frets: [['D', 7], ['A', 5]], note: 'D5', midi: [57, 50], beats: 0.5 },
+            { frets: [['D', 5], ['A', 3]], note: 'C5', midi: [55, 48], beats: 0.5 },
             { frets: [['D', 4], ['A', 2]], note: 'B5', midi: [54, 47], beats: 2 }
           ]
         },
@@ -4542,8 +4582,8 @@ window.CLASS_ACTIVITIES = [
       {
         label:    'Learn — The shapes',
         label_es: 'Aprende — Las formas',
-        text:    'Press Play on the tab. The riff chords have their root on the A string: index finger on the root, ring finger two frets higher on the D string. Before each chorus, G5 sits on low E fret 3, and A5 is the open A string plus D string fret 2.',
-        text_es: 'Pulsa «Tocar el tab». Los acordes del riff tienen la raíz en la cuerda La: el índice en la raíz, el anular dos trastes más arriba en la cuerda Re. Antes de cada coro, G5 está en el traste 3 de la cuerda Mi grave, y A5 es la cuerda La al aire más el traste 2 de la cuerda Re.',
+        text:    'Press Play on the tab. The riff chords have their root on the A string: index finger on the root, ring finger two frets higher on the D string. Before each chorus, G5 sits on low E fret 3, and A5 is the same shape two frets higher, on fret 5.',
+        text_es: 'Pulsa «Tocar el tab». Los acordes del riff tienen la raíz en la cuerda La: el índice en la raíz, el anular dos trastes más arriba en la cuerda Re. Antes de cada coro, G5 está en el traste 3 de la cuerda Mi grave, y A5 es la misma forma dos trastes más arriba, en el traste 5.',
         tab: {
           caption: 'E5 · G5 · D5 · C5 · B5 · A5 · 4 beats each',
           caption_es: 'E5 · G5 · D5 · C5 · B5 · A5 · 4 tiempos cada uno',
