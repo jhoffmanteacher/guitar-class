@@ -2797,6 +2797,14 @@ function validateClassActivities() {
           const strRe = /^[eBGDAE]$/;
           const checkNote = (n, where) => {
             if (!n || typeof n !== 'object') { err(`${where}: not an object`); problems++; return; }
+            // A chord on one beat (a power chord — ca-29..ca-33, 2026-10-05):
+            // `frets: [[string, fret], ...]` with `midi` the matching array,
+            // the same shape Module 3's tabs use. Checked by caChordProblems.
+            if (Array.isArray(n.frets)) {
+              caChordProblems(n).forEach(p => { err(`${where}: ${p}`); problems++; });
+              if (!hasVal(n.note)) { err(`${where}: missing "note"`); problems++; }
+              return;
+            }
             if (!strRe.test(n.string || '')) { err(`${where}: string "${n.string}" is not one of e/B/G/D/A/E`); problems++; }
             if (!Number.isInteger(n.fret) || n.fret < 0) { err(`${where}: fret "${n.fret}" is not an integer >= 0`); problems++; }
             if (!hasVal(n.note)) { err(`${where}: missing "note"`); problems++; }
@@ -2915,6 +2923,39 @@ const EC_STRING_KINDS = { lowE: 40, A: 45, D: 50, G: 55, B: 59, highE: 64 };
 const EC_NOTE_NAMES = ['C', 'C♯', 'D', 'D♯', 'E', 'F', 'F♯', 'G', 'G♯', 'A', 'A♯', 'B'];
 const EC_NATURALS = new Set(['A', 'B', 'C', 'D', 'E', 'F', 'G']);
 const ecNorm = n => String(n == null ? '' : n).replace(/#/g, '♯').trim();
+
+/* A chord note in a class-activity tab or practice card (2026-10-05, the
+   power-chord whole songs ca-29..ca-33): `frets: [[string, fret], ...]`
+   and `midi` the matching array, in the same order. Every pitch is
+   recomputed from the fretboard — a wrong midi plays a chord the tab
+   doesn't show — and a two-note chord a 5th apart must be named for its
+   root ("A5"). A function declaration, so the step-tab check (which runs
+   before the consts above are reached) can call it; it reads no consts. */
+function caChordProblems(n) {
+  const OPEN = { E: 40, A: 45, D: 50, G: 55, B: 59, e: 64 };
+  const NAMES = ['C', 'C♯', 'D', 'D♯', 'E', 'F', 'F♯', 'G', 'G♯', 'A', 'A♯', 'B'];
+  const out = [];
+  const fr = n.frets;
+  if (fr.length < 2) out.push(`frets has ${fr.length} entr${fr.length === 1 ? 'y' : 'ies'} — use string/fret for one note`);
+  if (!Array.isArray(n.midi) || n.midi.length !== fr.length) { out.push(`midi must be an array with one pitch per frets entry`); return out; }
+  const seen = new Set();
+  fr.forEach((p, i) => {
+    const [s, f] = Array.isArray(p) ? p : [];
+    if (!(s in OPEN)) { out.push(`frets[${i}]: string "${s}" is not one of e/B/G/D/A/E`); return; }
+    if (!Number.isInteger(f) || f < 0) { out.push(`frets[${i}]: fret "${f}" is not an integer >= 0`); return; }
+    if (seen.has(s)) out.push(`frets[${i}]: string ${s} appears twice`);
+    seen.add(s);
+    if (n.midi[i] !== OPEN[s] + f) out.push(`midi[${i}] ${n.midi[i]} is not ${s}-string fret ${f} (${OPEN[s] + f})`);
+  });
+  if (!out.length && fr.length === 2) {
+    const lo = Math.min(...n.midi), hi = Math.max(...n.midi);
+    if (hi - lo === 7) {
+      const want = NAMES[lo % 12] + '5';
+      if (ecNorm(n.note) !== want) out.push(`note "${n.note}" — a root and the 5th above it is ${want}`);
+    }
+  }
+  return out;
+}
 
 function checkExitChecks(activities) {
   head('1y. Exit-check data (answers recomputed from the fretboard)');
@@ -5409,7 +5450,8 @@ function checkCureChorusOrder() {
       (c.sections || []).forEach((sec, si) => {
         if (!sec || sec.fromBar !== 21 || !Array.isArray(sec.notes)) return;
         checked++;
-        const roots = sec.notes.map(n => n.note).filter((n, i, arr) => i % 4 === 0);
+        // A power chord (ca-30) names its root and a 5: "D5" is root D.
+        const roots = sec.notes.map(n => Array.isArray(n.frets) ? String(n.note).replace(/5$/, '') : n.note).filter((n, i, arr) => i % 4 === 0);
         const loop = sec.reps > 1 && roots.length > 0 && roots.length % 4 === 0
           && roots.every((r, i) => r === EXPECTED[i % 4]);
         if (!loop && JSON.stringify(roots) !== JSON.stringify(EXPECTED)) {
@@ -5793,6 +5835,13 @@ function checkPracticeCards() {
       let beats = 0;
       notes.forEach((n, ni) => {
         const nw = `${sw} · notes[${ni}]`;
+        if (n && Array.isArray(n.frets)) {
+          // A power chord on the card (ca-29..ca-33): same checks as a step tab's chord.
+          caChordProblems(n).forEach(p => flag(`${nw}: ${p}`));
+          if ('beats' in n && !(n.beats > 0)) flag(`${nw}: beats "${n.beats}" is not a positive number`);
+          beats += n.beats > 0 ? n.beats : 1;
+          return;
+        }
         if (!n || !/^[eBGDAE]$/.test(n.string || '') || !Number.isInteger(n.fret) || n.fret < 0) { flag(`${nw}: needs a string (e/B/G/D/A/E) and a whole-number fret`); return; }
         const want = EC_OPEN_MIDI[n.string] + n.fret;
         if (n.midi !== want) flag(`${nw}: midi ${n.midi} is not ${n.string}-string fret ${n.fret} (${want})`);
@@ -5860,7 +5909,7 @@ function checkPracticeCards() {
    one-sided label is itself the bug (dots in one language, none in the
    other), so it fails outright now rather than being skipped. Bump when a
    card genuinely adds or removes a got-it sentence in both languages. */
-const REP_COUNT_FIELDS = 395;   // 2026-10-05: ca-27 Luna (+1) and ca-28 Sweet Child (+2) whole songs. 2026-10-01: ca-13/ca-19/ca-20 as practice cards (-7), ca-25 Seven Nation Army whole song (+2), ca-21 Lines 2 and 4 restored (+2), ca-26 Watchtower whole song (+1)
+const REP_COUNT_FIELDS = 401;   // 2026-10-05: ca-27 Luna (+1) and ca-28 Sweet Child (+2) whole songs; ca-29..ca-33 power-chord whole songs (+6). 2026-10-01: ca-13/ca-19/ca-20 as practice cards (-7), ca-25 Seven Nation Army whole song (+2), ca-21 Lines 2 and 4 restored (+2), ca-26 Watchtower whole song (+1)
 function checkRepCountParity(sets, ctx) {
   head('1bg. Rep-count dots agree between English and Spanish');
   if (!ctx) { err('1bg cannot run — render context unavailable'); problems++; return; }

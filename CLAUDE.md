@@ -1415,8 +1415,8 @@ for the teacher's own account by email; a failed config read fails open (no
 gate), never on a guess. `mood-chart.html` is not one of the six and is never
 gated. **The one exemption (2026-09-12):** a pending activity that names a
 Journey page — `journey: '<slug>'` in `class-activities.js` (ca-10, ca-25 →
-seven-nation-army; ca-13, ca-18, ca-19, ca-24 → the-cure; ca-20, ca-27 → luna;
-ca-26 → all-along-the-watchtower; ca-28 → sweet-child-o-mine — the list is whatever carries the field,
+seven-nation-army; ca-13, ca-18, ca-19, ca-24, ca-30 → the-cure; ca-20, ca-27, ca-32 → luna;
+ca-26, ca-29 → all-along-the-watchtower; ca-28, ca-33 → sweet-child-o-mine; ca-31 → seven-nation-army — the list is whatever carries the field,
 so read the file rather than trusting this line), optional
 `journeyLayer` — is sending
 the student there as part of the work, so `journey.js` leaves THAT page open
@@ -1466,7 +1466,7 @@ teach the rungs and the activity is ONE screen: the song's tab, one "Play
 song" button that plays the real backing track and moves the tab note by
 note (`.beat-now`, honouring each note's `beats`), one page per section with
 tap-a-section-to-start (four-click count-in, then the loop returns to that
-section — except on a `card.wholeSong` card (ca-24 to ca-28), which
+section — except on a `card.wholeSong` card (ca-24 to ca-33), which
 stops at the end of the song, Jonathan 2026-10-02), a Slower / Normal switch (the slow / fast files, starting on
 Slower), the Guitar toggle where a full mix exists, and a Metronome that is
 a click the SITE makes on every counted beat — there are no metronome
@@ -1489,6 +1489,16 @@ card calls `stopAllDemoAudio()`. **1bf** checks the data: track exists,
 sections back to back, each section's beats = bars × beatsPerBar, notes'
 midi/name from string + fret, window inside the file, exactly one Level up
 and it's last, help steps carry no snippet/drill/video.
+
+**A card note may be a chord** (2026-10-05, the power-chord whole songs
+ca-29–ca-33): `{ frets: [[string, fret], ...], note: 'A5', midi: [...] }`,
+the same shape Module 3's tabs use, in a card section or a help step's
+tab. `caChordProblems()` in checks.mjs recomputes every pitch from the
+fretboard and requires a root-plus-5th pair to be named for its root.
+Nothing in the card engine needed changing — `renderTabSystem()` already
+draws a `frets` note. Each power-chord card is its roots card (ca-24–ca-28)
+with the same sections and bars, every root turned into the Journey Layer
+3 shape; Luna's is two strums per bar where its roots card is one.
 
 **Slowest (2026-09-29).** A practice card with `card.slowest: true` (every
 card today) gets a Slowest / Slower / Normal control in place of the switch, and
@@ -1528,7 +1538,8 @@ solos · Song Journey** — no Tutorial or Original on Core rows (Choice rows
 keep theirs). Watchtower, "the cure", Seven Nation Army lead the list
 (`CORE_FIRST`), the rest alphabetical. Play Along opens the song's `view: 'card'` activity with
 `card.wholeSong` whose `journey:` matches the row's Journey slug, newest
-first if there are ever two, once it passes `caIsVisible()` or
+first (highest board `#N`) when a song has two — the roots card and the
+power-chord one — once it passes `caIsVisible()` or
 `caIsPlayAlongOnly()`; a song with no such card shows **no** Play Along
 link (Jonathan's call — no greyed placeholder). Part cards (The Riff,
 Intro and Verse…) are not on the Songs page at all. **A tap opens the

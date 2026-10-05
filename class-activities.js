@@ -89,7 +89,7 @@
        wholeSong: true,                    // optional: stop at the end of the
                                            // song instead of looping — for a
                                            // card that IS the whole record
-                                           // (ca-24 to ca-28)
+                                           // (ca-24 to ca-33)
        sections: [{                        // back to back, in song order
          label, label_es,                  // the tap-to-start button ("Chorus")
          caption, caption_es,              // the heading over its tab page
@@ -99,6 +99,9 @@
                                            // notes `reps` times; the tab shows
                                            // them once, with "Verse 1 of 2"
          notes: [ { string, fret, note, midi, beats? } ],  // one pass;
+                                           // a power chord is { frets:
+                                           // [['D', 2], ['A', 0]], note: 'A5',
+                                           // midi: [52, 45], beats? } (ca-29..33);
                                            // beats must add up to bars x the
                                            // track's beatsPerBar
        }],
@@ -3802,6 +3805,1171 @@ window.CLASS_ACTIVITIES = [
         label_es: 'Practica — Una sección a la vez',
         text:    'Lost in one part? Tap that section to repeat it. You\'ve got it when: that section twice in a row, without stopping.',
         text_es: '¿Te pierdes en una parte? Pulsa esa sección para repetirla. Lo tienes cuando: esa sección dos veces seguidas, sin detenerte.',
+      },
+    ],
+  },
+  /* All Along the Watchtower — The Whole Song in Power Chords (2026-10-05).
+     ca-26's sections and bars, every root turned into the power chord Journey
+     Layer 3 teaches: A5 on the open A string (D string fret 2 on top), G5 and
+     F5 rooted on the low E string at frets 3 and 1. Same rhythm as ca-26 and
+     as Layer 3 — one strum per beat, two per chord. */
+  {
+    id:    'ca-29',
+    view:  'card',    // one screen: Play song + tab + checks — see CARD above
+    journey: 'all-along-the-watchtower',   // the button renders under the Level up check — see JOURNEY above
+    journeyLayer: 3,
+    title:    'All Along the Watchtower — The Whole Song in Power Chords',
+    title_es: 'All Along the Watchtower — La canción completa con acordes de potencia',
+    intro:    'You play the whole song as single notes — today you play it in power chords: the same roots, with a second string added.',
+    intro_es: 'Ya tocas la canción completa con notas sueltas — hoy la tocas con acordes de potencia: las mismas raíces, con una segunda cuerda.',
+    card: {
+      wholeSong: true,  // stops at the end of the song instead of looping
+      track: 'all-along-the-watchtower',
+      slowest: true,    // three-way speed control: Slowest / Slower / Normal — the student picks
+      caption:    'The whole song in power chords · 2 strums per chord',
+      caption_es: 'La canción completa con acordes de potencia · 2 rasgueos por acorde',
+      sections: [
+        {
+          label: 'Intro', label_es: 'Intro',
+          caption: 'Intro — A5 G5 F5 G5, 4 laps', caption_es: 'Intro — A5 G5 F5 G5, 4 vueltas',
+          fromBar: 1, bars: 2, reps: 4,
+          repLabel: 'Lap', repLabel_es: 'Vuelta',
+          notes: [
+            { frets: [['D', 2], ['A', 0]], note: 'A5', midi: [52, 45] },
+            { frets: [['D', 2], ['A', 0]], note: 'A5', midi: [52, 45] },
+            { frets: [['A', 5], ['E', 3]], note: 'G5', midi: [50, 43] },
+            { frets: [['A', 5], ['E', 3]], note: 'G5', midi: [50, 43] },
+            { frets: [['A', 3], ['E', 1]], note: 'F5', midi: [48, 41] },
+            { frets: [['A', 3], ['E', 1]], note: 'F5', midi: [48, 41] },
+            { frets: [['A', 5], ['E', 3]], note: 'G5', midi: [50, 43] },
+            { frets: [['A', 5], ['E', 3]], note: 'G5', midi: [50, 43] }
+          ]
+        },
+        {
+          label: 'Verse 1', label_es: 'Estrofa 1',
+          caption: 'Verse 1 — A5 G5 F5 G5, 8 laps', caption_es: 'Estrofa 1 — A5 G5 F5 G5, 8 vueltas',
+          fromBar: 9, bars: 2, reps: 8,
+          repLabel: 'Lap', repLabel_es: 'Vuelta',
+          notes: [
+            { frets: [['D', 2], ['A', 0]], note: 'A5', midi: [52, 45] },
+            { frets: [['D', 2], ['A', 0]], note: 'A5', midi: [52, 45] },
+            { frets: [['A', 5], ['E', 3]], note: 'G5', midi: [50, 43] },
+            { frets: [['A', 5], ['E', 3]], note: 'G5', midi: [50, 43] },
+            { frets: [['A', 3], ['E', 1]], note: 'F5', midi: [48, 41] },
+            { frets: [['A', 3], ['E', 1]], note: 'F5', midi: [48, 41] },
+            { frets: [['A', 5], ['E', 3]], note: 'G5', midi: [50, 43] },
+            { frets: [['A', 5], ['E', 3]], note: 'G5', midi: [50, 43] }
+          ]
+        },
+        {
+          label: 'Solo 1', label_es: 'Solo 1',
+          caption: 'Solo 1 — A5 G5 F5 G5, 4 laps', caption_es: 'Solo 1 — A5 G5 F5 G5, 4 vueltas',
+          fromBar: 25, bars: 2, reps: 4,
+          repLabel: 'Lap', repLabel_es: 'Vuelta',
+          notes: [
+            { frets: [['D', 2], ['A', 0]], note: 'A5', midi: [52, 45] },
+            { frets: [['D', 2], ['A', 0]], note: 'A5', midi: [52, 45] },
+            { frets: [['A', 5], ['E', 3]], note: 'G5', midi: [50, 43] },
+            { frets: [['A', 5], ['E', 3]], note: 'G5', midi: [50, 43] },
+            { frets: [['A', 3], ['E', 1]], note: 'F5', midi: [48, 41] },
+            { frets: [['A', 3], ['E', 1]], note: 'F5', midi: [48, 41] },
+            { frets: [['A', 5], ['E', 3]], note: 'G5', midi: [50, 43] },
+            { frets: [['A', 5], ['E', 3]], note: 'G5', midi: [50, 43] }
+          ]
+        },
+        {
+          label: 'Verse 2', label_es: 'Estrofa 2',
+          caption: 'Verse 2 — A5 G5 F5 G5, 9 laps', caption_es: 'Estrofa 2 — A5 G5 F5 G5, 9 vueltas',
+          fromBar: 33, bars: 2, reps: 9,
+          repLabel: 'Lap', repLabel_es: 'Vuelta',
+          notes: [
+            { frets: [['D', 2], ['A', 0]], note: 'A5', midi: [52, 45] },
+            { frets: [['D', 2], ['A', 0]], note: 'A5', midi: [52, 45] },
+            { frets: [['A', 5], ['E', 3]], note: 'G5', midi: [50, 43] },
+            { frets: [['A', 5], ['E', 3]], note: 'G5', midi: [50, 43] },
+            { frets: [['A', 3], ['E', 1]], note: 'F5', midi: [48, 41] },
+            { frets: [['A', 3], ['E', 1]], note: 'F5', midi: [48, 41] },
+            { frets: [['A', 5], ['E', 3]], note: 'G5', midi: [50, 43] },
+            { frets: [['A', 5], ['E', 3]], note: 'G5', midi: [50, 43] }
+          ]
+        },
+        {
+          label: 'Solo 2', label_es: 'Solo 2',
+          caption: 'Solo 2 — A5 G5 F5 G5, 15 laps', caption_es: 'Solo 2 — A5 G5 F5 G5, 15 vueltas',
+          fromBar: 51, bars: 2, reps: 15,
+          repLabel: 'Lap', repLabel_es: 'Vuelta',
+          notes: [
+            { frets: [['D', 2], ['A', 0]], note: 'A5', midi: [52, 45] },
+            { frets: [['D', 2], ['A', 0]], note: 'A5', midi: [52, 45] },
+            { frets: [['A', 5], ['E', 3]], note: 'G5', midi: [50, 43] },
+            { frets: [['A', 5], ['E', 3]], note: 'G5', midi: [50, 43] },
+            { frets: [['A', 3], ['E', 1]], note: 'F5', midi: [48, 41] },
+            { frets: [['A', 3], ['E', 1]], note: 'F5', midi: [48, 41] },
+            { frets: [['A', 5], ['E', 3]], note: 'G5', midi: [50, 43] },
+            { frets: [['A', 5], ['E', 3]], note: 'G5', midi: [50, 43] }
+          ]
+        },
+        {
+          label: 'Verse 3', label_es: 'Estrofa 3',
+          caption: 'Verse 3 — A5 G5 F5 G5, 12 laps', caption_es: 'Estrofa 3 — A5 G5 F5 G5, 12 vueltas',
+          fromBar: 81, bars: 2, reps: 12,
+          repLabel: 'Lap', repLabel_es: 'Vuelta',
+          notes: [
+            { frets: [['D', 2], ['A', 0]], note: 'A5', midi: [52, 45] },
+            { frets: [['D', 2], ['A', 0]], note: 'A5', midi: [52, 45] },
+            { frets: [['A', 5], ['E', 3]], note: 'G5', midi: [50, 43] },
+            { frets: [['A', 5], ['E', 3]], note: 'G5', midi: [50, 43] },
+            { frets: [['A', 3], ['E', 1]], note: 'F5', midi: [48, 41] },
+            { frets: [['A', 3], ['E', 1]], note: 'F5', midi: [48, 41] },
+            { frets: [['A', 5], ['E', 3]], note: 'G5', midi: [50, 43] },
+            { frets: [['A', 5], ['E', 3]], note: 'G5', midi: [50, 43] }
+          ]
+        },
+        {
+          label: 'Outro', label_es: 'Final',
+          caption: 'Outro — A5 G5 F5 G5, 4 laps', caption_es: 'Final — A5 G5 F5 G5, 4 vueltas',
+          fromBar: 105, bars: 2, reps: 4,
+          repLabel: 'Lap', repLabel_es: 'Vuelta',
+          notes: [
+            { frets: [['D', 2], ['A', 0]], note: 'A5', midi: [52, 45] },
+            { frets: [['D', 2], ['A', 0]], note: 'A5', midi: [52, 45] },
+            { frets: [['A', 5], ['E', 3]], note: 'G5', midi: [50, 43] },
+            { frets: [['A', 5], ['E', 3]], note: 'G5', midi: [50, 43] },
+            { frets: [['A', 3], ['E', 1]], note: 'F5', midi: [48, 41] },
+            { frets: [['A', 3], ['E', 1]], note: 'F5', midi: [48, 41] },
+            { frets: [['A', 5], ['E', 3]], note: 'G5', midi: [50, 43] },
+            { frets: [['A', 5], ['E', 3]], note: 'G5', midi: [50, 43] }
+          ]
+        }
+      ],
+      checks: [
+        { label: 'The whole song, slower', label_es: 'La canción completa, más lenta',
+          text:    'Press Slowest or Slower. Play the whole song with the band, intro to the end, without stopping.',
+          text_es: 'Pulsa «Muy lento» o «Más lento». Toca la canción completa con la banda, de la intro al final, sin detenerte.' },
+        { levelUp: true,
+          text:    'Press Normal. Play the whole song with the band at normal speed, intro to the end, without stopping.',
+          text_es: 'Pulsa «Normal». Toca la canción completa con la banda a velocidad normal, de la intro al final, sin detenerte.' }
+      ]
+    },
+    // The help ladder (read-only, under "More practice help").
+    steps: [
+      {
+        label:    'Learn — The shapes',
+        label_es: 'Aprende — Las formas',
+        text:    'Press Play on the tab. G5 and F5: index finger on the low E string, ring finger two frets higher on the A string. A5 is the open A string plus one finger on fret 2 of the D string.',
+        text_es: 'Pulsa «Tocar el tab». G5 y F5: el índice en la cuerda Mi grave, el anular dos trastes más arriba en la cuerda La. A5 es la cuerda La al aire más un dedo en el traste 2 de la cuerda Re.',
+        tab: {
+          caption: 'A5 · G5 · F5 · 4 beats each',
+          caption_es: 'A5 · G5 · F5 · 4 tiempos cada uno',
+          notes: [
+            { frets: [['D', 2], ['A', 0]], note: 'A5', midi: [52, 45], beats: 4 },
+            { frets: [['A', 5], ['E', 3]], note: 'G5', midi: [50, 43], beats: 4 },
+            { frets: [['A', 3], ['E', 1]], note: 'F5', midi: [48, 41], beats: 4 }
+          ]
+        },
+      },
+      {
+        label:    'Practice — One section at a time',
+        label_es: 'Practica — Una sección a la vez',
+        text:    'Lost in one part? Tap that section to repeat it. Play only the roots for one lap if the shape slows you down. You\'ve got it when: that section twice in a row with both strings ringing, without stopping.',
+        text_es: '¿Te pierdes en una parte? Pulsa esa sección para repetirla. Toca solo las raíces una vuelta si la forma te frena. Lo tienes cuando: esa sección dos veces seguidas con las dos cuerdas sonando, sin detenerte.',
+      },
+    ],
+  },
+  /* "the cure" — The Whole Song in Power Chords (2026-10-05). ca-24's
+     sections and bars, every root turned into the power chord Journey Layer 3
+     teaches: A5, F5, G5 rooted on the low E string (frets 5, 1, 3), C5 and D5
+     on the A string (frets 3, 5). Same rhythm as ca-24 and Layer 3 — one
+     strum per beat, four per chord (two where C and G share a bar). */
+  {
+    id:    'ca-30',
+    view:  'card',    // one screen: Play song + tab + checks — see CARD above
+    journey: 'the-cure',   // the button renders under the Level up check — see JOURNEY above
+    journeyLayer: 3,
+    title:    '"the cure" — The Whole Song in Power Chords',
+    title_es: '"the cure" — La canción completa con acordes de potencia',
+    intro:    'You play the whole song as single notes — today you play it in power chords: the same roots, with a second string added.',
+    intro_es: 'Ya tocas la canción completa con notas sueltas — hoy la tocas con acordes de potencia: las mismas raíces, con una segunda cuerda.',
+    card: {
+      wholeSong: true,  // stops at the end of the song instead of looping
+      track: 'the-cure',
+      slowest: true,    // three-way speed control: Slowest / Slower / Normal — the student picks
+      caption:    'The whole song in power chords · 4 strums per chord',
+      caption_es: 'La canción completa con acordes de potencia · 4 rasgueos por acorde',
+      sections: [
+        {
+          label: 'Intro', label_es: 'Intro',
+          caption: 'Intro — A5 C5 A5 C5', caption_es: 'Intro — A5 C5 A5 C5',
+          fromBar: 1, bars: 4,
+          notes: [
+            { frets: [['A', 7], ['E', 5]], note: 'A5', midi: [52, 45] },
+            { frets: [['A', 7], ['E', 5]], note: 'A5', midi: [52, 45] },
+            { frets: [['A', 7], ['E', 5]], note: 'A5', midi: [52, 45] },
+            { frets: [['A', 7], ['E', 5]], note: 'A5', midi: [52, 45] },
+            { frets: [['D', 5], ['A', 3]], note: 'C5', midi: [55, 48] },
+            { frets: [['D', 5], ['A', 3]], note: 'C5', midi: [55, 48] },
+            { frets: [['D', 5], ['A', 3]], note: 'C5', midi: [55, 48] },
+            { frets: [['D', 5], ['A', 3]], note: 'C5', midi: [55, 48] },
+            { frets: [['A', 7], ['E', 5]], note: 'A5', midi: [52, 45] },
+            { frets: [['A', 7], ['E', 5]], note: 'A5', midi: [52, 45] },
+            { frets: [['A', 7], ['E', 5]], note: 'A5', midi: [52, 45] },
+            { frets: [['A', 7], ['E', 5]], note: 'A5', midi: [52, 45] },
+            { frets: [['D', 5], ['A', 3]], note: 'C5', midi: [55, 48] },
+            { frets: [['D', 5], ['A', 3]], note: 'C5', midi: [55, 48] },
+            { frets: [['D', 5], ['A', 3]], note: 'C5', midi: [55, 48] },
+            { frets: [['D', 5], ['A', 3]], note: 'C5', midi: [55, 48] }
+          ]
+        },
+        {
+          label: '2 Verses', label_es: '2 estrofas',
+          caption: '2 Verses — A5 C5 A5 C5, F5 C5 F5 C5', caption_es: '2 estrofas — A5 C5 A5 C5, F5 C5 F5 C5',
+          fromBar: 5, bars: 8, reps: 2,
+          repLabel: 'Verse', repLabel_es: 'Estrofa',
+          notes: [
+            { frets: [['A', 7], ['E', 5]], note: 'A5', midi: [52, 45] },
+            { frets: [['A', 7], ['E', 5]], note: 'A5', midi: [52, 45] },
+            { frets: [['A', 7], ['E', 5]], note: 'A5', midi: [52, 45] },
+            { frets: [['A', 7], ['E', 5]], note: 'A5', midi: [52, 45] },
+            { frets: [['D', 5], ['A', 3]], note: 'C5', midi: [55, 48] },
+            { frets: [['D', 5], ['A', 3]], note: 'C5', midi: [55, 48] },
+            { frets: [['D', 5], ['A', 3]], note: 'C5', midi: [55, 48] },
+            { frets: [['D', 5], ['A', 3]], note: 'C5', midi: [55, 48] },
+            { frets: [['A', 7], ['E', 5]], note: 'A5', midi: [52, 45] },
+            { frets: [['A', 7], ['E', 5]], note: 'A5', midi: [52, 45] },
+            { frets: [['A', 7], ['E', 5]], note: 'A5', midi: [52, 45] },
+            { frets: [['A', 7], ['E', 5]], note: 'A5', midi: [52, 45] },
+            { frets: [['D', 5], ['A', 3]], note: 'C5', midi: [55, 48] },
+            { frets: [['D', 5], ['A', 3]], note: 'C5', midi: [55, 48] },
+            { frets: [['D', 5], ['A', 3]], note: 'C5', midi: [55, 48] },
+            { frets: [['D', 5], ['A', 3]], note: 'C5', midi: [55, 48] },
+            { frets: [['A', 3], ['E', 1]], note: 'F5', midi: [48, 41] },
+            { frets: [['A', 3], ['E', 1]], note: 'F5', midi: [48, 41] },
+            { frets: [['A', 3], ['E', 1]], note: 'F5', midi: [48, 41] },
+            { frets: [['A', 3], ['E', 1]], note: 'F5', midi: [48, 41] },
+            { frets: [['D', 5], ['A', 3]], note: 'C5', midi: [55, 48] },
+            { frets: [['D', 5], ['A', 3]], note: 'C5', midi: [55, 48] },
+            { frets: [['D', 5], ['A', 3]], note: 'C5', midi: [55, 48] },
+            { frets: [['D', 5], ['A', 3]], note: 'C5', midi: [55, 48] },
+            { frets: [['A', 3], ['E', 1]], note: 'F5', midi: [48, 41] },
+            { frets: [['A', 3], ['E', 1]], note: 'F5', midi: [48, 41] },
+            { frets: [['A', 3], ['E', 1]], note: 'F5', midi: [48, 41] },
+            { frets: [['A', 3], ['E', 1]], note: 'F5', midi: [48, 41] },
+            { frets: [['D', 5], ['A', 3]], note: 'C5', midi: [55, 48] },
+            { frets: [['D', 5], ['A', 3]], note: 'C5', midi: [55, 48] },
+            { frets: [['D', 5], ['A', 3]], note: 'C5', midi: [55, 48] },
+            { frets: [['D', 5], ['A', 3]], note: 'C5', midi: [55, 48] }
+          ]
+        },
+        {
+          label: 'Chorus 1', label_es: 'Coro 1',
+          caption: 'Chorus 1 — D5 F5 C5 G5, 3 times', caption_es: 'Coro 1 — D5 F5 C5 G5, 3 veces',
+          fromBar: 21, bars: 4, reps: 3,
+          repLabel: 'Lap', repLabel_es: 'Vuelta',
+          notes: [
+            { frets: [['D', 7], ['A', 5]], note: 'D5', midi: [57, 50] },
+            { frets: [['D', 7], ['A', 5]], note: 'D5', midi: [57, 50] },
+            { frets: [['D', 7], ['A', 5]], note: 'D5', midi: [57, 50] },
+            { frets: [['D', 7], ['A', 5]], note: 'D5', midi: [57, 50] },
+            { frets: [['A', 3], ['E', 1]], note: 'F5', midi: [48, 41] },
+            { frets: [['A', 3], ['E', 1]], note: 'F5', midi: [48, 41] },
+            { frets: [['A', 3], ['E', 1]], note: 'F5', midi: [48, 41] },
+            { frets: [['A', 3], ['E', 1]], note: 'F5', midi: [48, 41] },
+            { frets: [['D', 5], ['A', 3]], note: 'C5', midi: [55, 48] },
+            { frets: [['D', 5], ['A', 3]], note: 'C5', midi: [55, 48] },
+            { frets: [['D', 5], ['A', 3]], note: 'C5', midi: [55, 48] },
+            { frets: [['D', 5], ['A', 3]], note: 'C5', midi: [55, 48] },
+            { frets: [['A', 5], ['E', 3]], note: 'G5', midi: [50, 43] },
+            { frets: [['A', 5], ['E', 3]], note: 'G5', midi: [50, 43] },
+            { frets: [['A', 5], ['E', 3]], note: 'G5', midi: [50, 43] },
+            { frets: [['A', 5], ['E', 3]], note: 'G5', midi: [50, 43] }
+          ]
+        },
+        {
+          label: 'Verse 3', label_es: 'Estrofa 3',
+          caption: 'Verse 3 — A5 C5 A5 C5, F5 C5 F5 C5', caption_es: 'Estrofa 3 — A5 C5 A5 C5, F5 C5 F5 C5',
+          fromBar: 33, bars: 8,
+          notes: [
+            { frets: [['A', 7], ['E', 5]], note: 'A5', midi: [52, 45] },
+            { frets: [['A', 7], ['E', 5]], note: 'A5', midi: [52, 45] },
+            { frets: [['A', 7], ['E', 5]], note: 'A5', midi: [52, 45] },
+            { frets: [['A', 7], ['E', 5]], note: 'A5', midi: [52, 45] },
+            { frets: [['D', 5], ['A', 3]], note: 'C5', midi: [55, 48] },
+            { frets: [['D', 5], ['A', 3]], note: 'C5', midi: [55, 48] },
+            { frets: [['D', 5], ['A', 3]], note: 'C5', midi: [55, 48] },
+            { frets: [['D', 5], ['A', 3]], note: 'C5', midi: [55, 48] },
+            { frets: [['A', 7], ['E', 5]], note: 'A5', midi: [52, 45] },
+            { frets: [['A', 7], ['E', 5]], note: 'A5', midi: [52, 45] },
+            { frets: [['A', 7], ['E', 5]], note: 'A5', midi: [52, 45] },
+            { frets: [['A', 7], ['E', 5]], note: 'A5', midi: [52, 45] },
+            { frets: [['D', 5], ['A', 3]], note: 'C5', midi: [55, 48] },
+            { frets: [['D', 5], ['A', 3]], note: 'C5', midi: [55, 48] },
+            { frets: [['D', 5], ['A', 3]], note: 'C5', midi: [55, 48] },
+            { frets: [['D', 5], ['A', 3]], note: 'C5', midi: [55, 48] },
+            { frets: [['A', 3], ['E', 1]], note: 'F5', midi: [48, 41] },
+            { frets: [['A', 3], ['E', 1]], note: 'F5', midi: [48, 41] },
+            { frets: [['A', 3], ['E', 1]], note: 'F5', midi: [48, 41] },
+            { frets: [['A', 3], ['E', 1]], note: 'F5', midi: [48, 41] },
+            { frets: [['D', 5], ['A', 3]], note: 'C5', midi: [55, 48] },
+            { frets: [['D', 5], ['A', 3]], note: 'C5', midi: [55, 48] },
+            { frets: [['D', 5], ['A', 3]], note: 'C5', midi: [55, 48] },
+            { frets: [['D', 5], ['A', 3]], note: 'C5', midi: [55, 48] },
+            { frets: [['A', 3], ['E', 1]], note: 'F5', midi: [48, 41] },
+            { frets: [['A', 3], ['E', 1]], note: 'F5', midi: [48, 41] },
+            { frets: [['A', 3], ['E', 1]], note: 'F5', midi: [48, 41] },
+            { frets: [['A', 3], ['E', 1]], note: 'F5', midi: [48, 41] },
+            { frets: [['D', 5], ['A', 3]], note: 'C5', midi: [55, 48] },
+            { frets: [['D', 5], ['A', 3]], note: 'C5', midi: [55, 48] },
+            { frets: [['D', 5], ['A', 3]], note: 'C5', midi: [55, 48] },
+            { frets: [['D', 5], ['A', 3]], note: 'C5', midi: [55, 48] }
+          ]
+        },
+        {
+          label: 'Refrain 1', label_es: 'Estribillo 1',
+          caption: 'Refrain 1 — F5, C5 G5, F5, C5 G5 · C5 and G5 share a bar', caption_es: 'Estribillo 1 — F5, C5 G5, F5, C5 G5 · C5 y G5 comparten un compás',
+          fromBar: 41, bars: 4,
+          notes: [
+            { frets: [['A', 3], ['E', 1]], note: 'F5', midi: [48, 41] },
+            { frets: [['A', 3], ['E', 1]], note: 'F5', midi: [48, 41] },
+            { frets: [['A', 3], ['E', 1]], note: 'F5', midi: [48, 41] },
+            { frets: [['A', 3], ['E', 1]], note: 'F5', midi: [48, 41] },
+            { frets: [['D', 5], ['A', 3]], note: 'C5', midi: [55, 48] },
+            { frets: [['D', 5], ['A', 3]], note: 'C5', midi: [55, 48] },
+            { frets: [['A', 5], ['E', 3]], note: 'G5', midi: [50, 43] },
+            { frets: [['A', 5], ['E', 3]], note: 'G5', midi: [50, 43] },
+            { frets: [['A', 3], ['E', 1]], note: 'F5', midi: [48, 41] },
+            { frets: [['A', 3], ['E', 1]], note: 'F5', midi: [48, 41] },
+            { frets: [['A', 3], ['E', 1]], note: 'F5', midi: [48, 41] },
+            { frets: [['A', 3], ['E', 1]], note: 'F5', midi: [48, 41] },
+            { frets: [['D', 5], ['A', 3]], note: 'C5', midi: [55, 48] },
+            { frets: [['D', 5], ['A', 3]], note: 'C5', midi: [55, 48] },
+            { frets: [['A', 5], ['E', 3]], note: 'G5', midi: [50, 43] },
+            { frets: [['A', 5], ['E', 3]], note: 'G5', midi: [50, 43] }
+          ]
+        },
+        {
+          label: 'Chorus 2', label_es: 'Coro 2',
+          caption: 'Chorus 2 — D5 F5 C5 G5, 3 times', caption_es: 'Coro 2 — D5 F5 C5 G5, 3 veces',
+          fromBar: 45, bars: 4, reps: 3,
+          repLabel: 'Lap', repLabel_es: 'Vuelta',
+          notes: [
+            { frets: [['D', 7], ['A', 5]], note: 'D5', midi: [57, 50] },
+            { frets: [['D', 7], ['A', 5]], note: 'D5', midi: [57, 50] },
+            { frets: [['D', 7], ['A', 5]], note: 'D5', midi: [57, 50] },
+            { frets: [['D', 7], ['A', 5]], note: 'D5', midi: [57, 50] },
+            { frets: [['A', 3], ['E', 1]], note: 'F5', midi: [48, 41] },
+            { frets: [['A', 3], ['E', 1]], note: 'F5', midi: [48, 41] },
+            { frets: [['A', 3], ['E', 1]], note: 'F5', midi: [48, 41] },
+            { frets: [['A', 3], ['E', 1]], note: 'F5', midi: [48, 41] },
+            { frets: [['D', 5], ['A', 3]], note: 'C5', midi: [55, 48] },
+            { frets: [['D', 5], ['A', 3]], note: 'C5', midi: [55, 48] },
+            { frets: [['D', 5], ['A', 3]], note: 'C5', midi: [55, 48] },
+            { frets: [['D', 5], ['A', 3]], note: 'C5', midi: [55, 48] },
+            { frets: [['A', 5], ['E', 3]], note: 'G5', midi: [50, 43] },
+            { frets: [['A', 5], ['E', 3]], note: 'G5', midi: [50, 43] },
+            { frets: [['A', 5], ['E', 3]], note: 'G5', midi: [50, 43] },
+            { frets: [['A', 5], ['E', 3]], note: 'G5', midi: [50, 43] }
+          ]
+        },
+        {
+          label: 'Refrain 2', label_es: 'Estribillo 2',
+          caption: 'Refrain 2 — F5, C5 G5, F5, C5 G5 · C5 and G5 share a bar', caption_es: 'Estribillo 2 — F5, C5 G5, F5, C5 G5 · C5 y G5 comparten un compás',
+          fromBar: 57, bars: 4,
+          notes: [
+            { frets: [['A', 3], ['E', 1]], note: 'F5', midi: [48, 41] },
+            { frets: [['A', 3], ['E', 1]], note: 'F5', midi: [48, 41] },
+            { frets: [['A', 3], ['E', 1]], note: 'F5', midi: [48, 41] },
+            { frets: [['A', 3], ['E', 1]], note: 'F5', midi: [48, 41] },
+            { frets: [['D', 5], ['A', 3]], note: 'C5', midi: [55, 48] },
+            { frets: [['D', 5], ['A', 3]], note: 'C5', midi: [55, 48] },
+            { frets: [['A', 5], ['E', 3]], note: 'G5', midi: [50, 43] },
+            { frets: [['A', 5], ['E', 3]], note: 'G5', midi: [50, 43] },
+            { frets: [['A', 3], ['E', 1]], note: 'F5', midi: [48, 41] },
+            { frets: [['A', 3], ['E', 1]], note: 'F5', midi: [48, 41] },
+            { frets: [['A', 3], ['E', 1]], note: 'F5', midi: [48, 41] },
+            { frets: [['A', 3], ['E', 1]], note: 'F5', midi: [48, 41] },
+            { frets: [['D', 5], ['A', 3]], note: 'C5', midi: [55, 48] },
+            { frets: [['D', 5], ['A', 3]], note: 'C5', midi: [55, 48] },
+            { frets: [['A', 5], ['E', 3]], note: 'G5', midi: [50, 43] },
+            { frets: [['A', 5], ['E', 3]], note: 'G5', midi: [50, 43] }
+          ]
+        },
+        {
+          label: 'Bridge', label_es: 'Puente',
+          caption: 'Bridge — F5, C5 G5, F5, C5 G5, D5 F5 C5 G5', caption_es: 'Puente — F5, C5 G5, F5, C5 G5, D5 F5 C5 G5',
+          fromBar: 61, bars: 8,
+          notes: [
+            { frets: [['A', 3], ['E', 1]], note: 'F5', midi: [48, 41] },
+            { frets: [['A', 3], ['E', 1]], note: 'F5', midi: [48, 41] },
+            { frets: [['A', 3], ['E', 1]], note: 'F5', midi: [48, 41] },
+            { frets: [['A', 3], ['E', 1]], note: 'F5', midi: [48, 41] },
+            { frets: [['D', 5], ['A', 3]], note: 'C5', midi: [55, 48] },
+            { frets: [['D', 5], ['A', 3]], note: 'C5', midi: [55, 48] },
+            { frets: [['A', 5], ['E', 3]], note: 'G5', midi: [50, 43] },
+            { frets: [['A', 5], ['E', 3]], note: 'G5', midi: [50, 43] },
+            { frets: [['A', 3], ['E', 1]], note: 'F5', midi: [48, 41] },
+            { frets: [['A', 3], ['E', 1]], note: 'F5', midi: [48, 41] },
+            { frets: [['A', 3], ['E', 1]], note: 'F5', midi: [48, 41] },
+            { frets: [['A', 3], ['E', 1]], note: 'F5', midi: [48, 41] },
+            { frets: [['D', 5], ['A', 3]], note: 'C5', midi: [55, 48] },
+            { frets: [['D', 5], ['A', 3]], note: 'C5', midi: [55, 48] },
+            { frets: [['A', 5], ['E', 3]], note: 'G5', midi: [50, 43] },
+            { frets: [['A', 5], ['E', 3]], note: 'G5', midi: [50, 43] },
+            { frets: [['D', 7], ['A', 5]], note: 'D5', midi: [57, 50] },
+            { frets: [['D', 7], ['A', 5]], note: 'D5', midi: [57, 50] },
+            { frets: [['D', 7], ['A', 5]], note: 'D5', midi: [57, 50] },
+            { frets: [['D', 7], ['A', 5]], note: 'D5', midi: [57, 50] },
+            { frets: [['A', 3], ['E', 1]], note: 'F5', midi: [48, 41] },
+            { frets: [['A', 3], ['E', 1]], note: 'F5', midi: [48, 41] },
+            { frets: [['A', 3], ['E', 1]], note: 'F5', midi: [48, 41] },
+            { frets: [['A', 3], ['E', 1]], note: 'F5', midi: [48, 41] },
+            { frets: [['D', 5], ['A', 3]], note: 'C5', midi: [55, 48] },
+            { frets: [['D', 5], ['A', 3]], note: 'C5', midi: [55, 48] },
+            { frets: [['D', 5], ['A', 3]], note: 'C5', midi: [55, 48] },
+            { frets: [['D', 5], ['A', 3]], note: 'C5', midi: [55, 48] },
+            { frets: [['A', 5], ['E', 3]], note: 'G5', midi: [50, 43] },
+            { frets: [['A', 5], ['E', 3]], note: 'G5', midi: [50, 43] },
+            { frets: [['A', 5], ['E', 3]], note: 'G5', midi: [50, 43] },
+            { frets: [['A', 5], ['E', 3]], note: 'G5', midi: [50, 43] }
+          ]
+        },
+        {
+          label: 'Chorus 3', label_es: 'Coro 3',
+          caption: 'Chorus 3 — D5 F5 C5 G5, 3 times', caption_es: 'Coro 3 — D5 F5 C5 G5, 3 veces',
+          fromBar: 69, bars: 4, reps: 3,
+          repLabel: 'Lap', repLabel_es: 'Vuelta',
+          notes: [
+            { frets: [['D', 7], ['A', 5]], note: 'D5', midi: [57, 50] },
+            { frets: [['D', 7], ['A', 5]], note: 'D5', midi: [57, 50] },
+            { frets: [['D', 7], ['A', 5]], note: 'D5', midi: [57, 50] },
+            { frets: [['D', 7], ['A', 5]], note: 'D5', midi: [57, 50] },
+            { frets: [['A', 3], ['E', 1]], note: 'F5', midi: [48, 41] },
+            { frets: [['A', 3], ['E', 1]], note: 'F5', midi: [48, 41] },
+            { frets: [['A', 3], ['E', 1]], note: 'F5', midi: [48, 41] },
+            { frets: [['A', 3], ['E', 1]], note: 'F5', midi: [48, 41] },
+            { frets: [['D', 5], ['A', 3]], note: 'C5', midi: [55, 48] },
+            { frets: [['D', 5], ['A', 3]], note: 'C5', midi: [55, 48] },
+            { frets: [['D', 5], ['A', 3]], note: 'C5', midi: [55, 48] },
+            { frets: [['D', 5], ['A', 3]], note: 'C5', midi: [55, 48] },
+            { frets: [['A', 5], ['E', 3]], note: 'G5', midi: [50, 43] },
+            { frets: [['A', 5], ['E', 3]], note: 'G5', midi: [50, 43] },
+            { frets: [['A', 5], ['E', 3]], note: 'G5', midi: [50, 43] },
+            { frets: [['A', 5], ['E', 3]], note: 'G5', midi: [50, 43] }
+          ]
+        },
+        {
+          label: 'Outro', label_es: 'Final',
+          caption: 'Outro — D5 F5 C5 G5, 2 times', caption_es: 'Final — D5 F5 C5 G5, 2 veces',
+          fromBar: 81, bars: 4, reps: 2,
+          repLabel: 'Lap', repLabel_es: 'Vuelta',
+          notes: [
+            { frets: [['D', 7], ['A', 5]], note: 'D5', midi: [57, 50] },
+            { frets: [['D', 7], ['A', 5]], note: 'D5', midi: [57, 50] },
+            { frets: [['D', 7], ['A', 5]], note: 'D5', midi: [57, 50] },
+            { frets: [['D', 7], ['A', 5]], note: 'D5', midi: [57, 50] },
+            { frets: [['A', 3], ['E', 1]], note: 'F5', midi: [48, 41] },
+            { frets: [['A', 3], ['E', 1]], note: 'F5', midi: [48, 41] },
+            { frets: [['A', 3], ['E', 1]], note: 'F5', midi: [48, 41] },
+            { frets: [['A', 3], ['E', 1]], note: 'F5', midi: [48, 41] },
+            { frets: [['D', 5], ['A', 3]], note: 'C5', midi: [55, 48] },
+            { frets: [['D', 5], ['A', 3]], note: 'C5', midi: [55, 48] },
+            { frets: [['D', 5], ['A', 3]], note: 'C5', midi: [55, 48] },
+            { frets: [['D', 5], ['A', 3]], note: 'C5', midi: [55, 48] },
+            { frets: [['A', 5], ['E', 3]], note: 'G5', midi: [50, 43] },
+            { frets: [['A', 5], ['E', 3]], note: 'G5', midi: [50, 43] },
+            { frets: [['A', 5], ['E', 3]], note: 'G5', midi: [50, 43] },
+            { frets: [['A', 5], ['E', 3]], note: 'G5', midi: [50, 43] }
+          ]
+        }
+      ],
+      checks: [
+        { label: 'The whole song, slower', label_es: 'La canción completa, más lenta',
+          text:    'Press Slowest or Slower. Play the whole song with the band, intro to the end, without stopping.',
+          text_es: 'Pulsa «Muy lento» o «Más lento». Toca la canción completa con la banda, de la intro al final, sin detenerte.' },
+        { levelUp: true,
+          text:    'Press Normal. Play the whole song with the band at normal speed, intro to the end, without stopping.',
+          text_es: 'Pulsa «Normal». Toca la canción completa con la banda a velocidad normal, de la intro al final, sin detenerte.' }
+      ]
+    },
+    // The help ladder (read-only, under "More practice help").
+    steps: [
+      {
+        label:    'Learn — The shapes',
+        label_es: 'Aprende — Las formas',
+        text:    'Press Play on the tab. Every chord is one shape: index finger on the root, ring finger two frets higher on the next thinner string. A5, F5 and G5 have their root on the low E string; C5 and D5 on the A string.',
+        text_es: 'Pulsa «Tocar el tab». Cada acorde es la misma forma: el índice en la raíz, el anular dos trastes más arriba en la cuerda siguiente, más delgada. A5, F5 y G5 tienen la raíz en la cuerda Mi grave; C5 y D5, en la cuerda La.',
+        tab: {
+          caption: 'A5 · C5 · F5 · D5 · G5 · 4 beats each',
+          caption_es: 'A5 · C5 · F5 · D5 · G5 · 4 tiempos cada uno',
+          notes: [
+            { frets: [['A', 7], ['E', 5]], note: 'A5', midi: [52, 45], beats: 4 },
+            { frets: [['D', 5], ['A', 3]], note: 'C5', midi: [55, 48], beats: 4 },
+            { frets: [['A', 3], ['E', 1]], note: 'F5', midi: [48, 41], beats: 4 },
+            { frets: [['D', 7], ['A', 5]], note: 'D5', midi: [57, 50], beats: 4 },
+            { frets: [['A', 5], ['E', 3]], note: 'G5', midi: [50, 43], beats: 4 }
+          ]
+        },
+      },
+      {
+        label:    'Practice — One section at a time',
+        label_es: 'Practica — Una sección a la vez',
+        text:    'Lost in one part? Tap that section to repeat it. Play only the roots for one lap if the shape slows you down. You\'ve got it when: that section twice in a row with both strings ringing, without stopping.',
+        text_es: '¿Te pierdes en una parte? Pulsa esa sección para repetirla. Toca solo las raíces una vuelta si la forma te frena. Lo tienes cuando: esa sección dos veces seguidas con las dos cuerdas sonando, sin detenerte.',
+      },
+    ],
+  },
+  /* Seven Nation Army — The Whole Song in Power Chords (2026-10-05).
+     ca-25's sections and bars, every riff note turned into the A-string power
+     chord Journey Layer 3 teaches (E5 at fret 7, G5 at 10, D5 at 5, C5 at 3,
+     B5 at 2 — "one chord per riff note", same beats as ca-25). Layer 3 has no
+     G-A break; it uses ca-25's roots: G5 on low E fret 3, A5 on the open A
+     string. */
+  {
+    id:    'ca-31',
+    view:  'card',    // one screen: Play song + tab + checks — see CARD above
+    journey: 'seven-nation-army',   // the button renders under the Level up check — see JOURNEY above
+    journeyLayer: 3,
+    title:    'Seven Nation Army — The Whole Song in Power Chords',
+    title_es: 'Seven Nation Army — La canción completa con acordes de potencia',
+    intro:    'You play the whole song as single notes — today you play it in power chords: the same roots, with a second string added.',
+    intro_es: 'Ya tocas la canción completa con notas sueltas — hoy la tocas con acordes de potencia: las mismas raíces, con una segunda cuerda.',
+    card: {
+      wholeSong: true,  // stops at the end of the song instead of looping
+      track: 'seven-nation-army',
+      slowest: true,    // three-way speed control: Slowest / Slower / Normal — the student picks
+      caption:    'The whole song in power chords · the riff and G5 – A5',
+      caption_es: 'La canción completa con acordes de potencia · el riff y G5 – A5',
+      sections: [
+        {
+          label: 'Intro', label_es: 'Intro',
+          caption: 'Intro — the riff, 4 laps', caption_es: 'Intro — el riff, 4 vueltas',
+          fromBar: 1, bars: 2, reps: 4,
+          repLabel: 'Lap', repLabel_es: 'Vuelta',
+          notes: [
+            { frets: [['D', 9], ['A', 7]], note: 'E5', midi: [59, 52], beats: 1.5 },
+            { frets: [['D', 9], ['A', 7]], note: 'E5', midi: [59, 52], beats: 0.5 },
+            { frets: [['D', 12], ['A', 10]], note: 'G5', midi: [62, 55], beats: 0.75 },
+            { frets: [['D', 9], ['A', 7]], note: 'E5', midi: [59, 52], beats: 0.75 },
+            { frets: [['D', 7], ['A', 5]], note: 'D5', midi: [57, 50], beats: 0.5 },
+            { frets: [['D', 5], ['A', 3]], note: 'C5', midi: [55, 48], beats: 2 },
+            { frets: [['D', 4], ['A', 2]], note: 'B5', midi: [54, 47], beats: 2 }
+          ]
+        },
+        {
+          label: 'Verse 1', label_es: 'Estrofa 1',
+          caption: 'Verse 1 — the riff, 8 laps', caption_es: 'Estrofa 1 — el riff, 8 vueltas',
+          fromBar: 9, bars: 2, reps: 8,
+          repLabel: 'Lap', repLabel_es: 'Vuelta',
+          notes: [
+            { frets: [['D', 9], ['A', 7]], note: 'E5', midi: [59, 52], beats: 1.5 },
+            { frets: [['D', 9], ['A', 7]], note: 'E5', midi: [59, 52], beats: 0.5 },
+            { frets: [['D', 12], ['A', 10]], note: 'G5', midi: [62, 55], beats: 0.75 },
+            { frets: [['D', 9], ['A', 7]], note: 'E5', midi: [59, 52], beats: 0.75 },
+            { frets: [['D', 7], ['A', 5]], note: 'D5', midi: [57, 50], beats: 0.5 },
+            { frets: [['D', 5], ['A', 3]], note: 'C5', midi: [55, 48], beats: 2 },
+            { frets: [['D', 4], ['A', 2]], note: 'B5', midi: [54, 47], beats: 2 }
+          ]
+        },
+        {
+          label: 'G5 – A5', label_es: 'G5 – A5',
+          caption: 'G5 – A5 · 4 strums each', caption_es: 'G5 – A5 · 4 rasgueos cada uno',
+          fromBar: 25, bars: 2,
+          notes: [
+            { frets: [['A', 5], ['E', 3]], note: 'G5', midi: [50, 43] },
+            { frets: [['A', 5], ['E', 3]], note: 'G5', midi: [50, 43] },
+            { frets: [['A', 5], ['E', 3]], note: 'G5', midi: [50, 43] },
+            { frets: [['A', 5], ['E', 3]], note: 'G5', midi: [50, 43] },
+            { frets: [['D', 2], ['A', 0]], note: 'A5', midi: [52, 45] },
+            { frets: [['D', 2], ['A', 0]], note: 'A5', midi: [52, 45] },
+            { frets: [['D', 2], ['A', 0]], note: 'A5', midi: [52, 45] },
+            { frets: [['D', 2], ['A', 0]], note: 'A5', midi: [52, 45] }
+          ]
+        },
+        {
+          label: 'Chorus 1', label_es: 'Coro 1',
+          caption: 'Chorus 1 — the riff, 4 laps', caption_es: 'Coro 1 — el riff, 4 vueltas',
+          fromBar: 27, bars: 2, reps: 4,
+          repLabel: 'Lap', repLabel_es: 'Vuelta',
+          notes: [
+            { frets: [['D', 9], ['A', 7]], note: 'E5', midi: [59, 52], beats: 1.5 },
+            { frets: [['D', 9], ['A', 7]], note: 'E5', midi: [59, 52], beats: 0.5 },
+            { frets: [['D', 12], ['A', 10]], note: 'G5', midi: [62, 55], beats: 0.75 },
+            { frets: [['D', 9], ['A', 7]], note: 'E5', midi: [59, 52], beats: 0.75 },
+            { frets: [['D', 7], ['A', 5]], note: 'D5', midi: [57, 50], beats: 0.5 },
+            { frets: [['D', 5], ['A', 3]], note: 'C5', midi: [55, 48], beats: 2 },
+            { frets: [['D', 4], ['A', 2]], note: 'B5', midi: [54, 47], beats: 2 }
+          ]
+        },
+        {
+          label: 'G5 – A5', label_es: 'G5 – A5',
+          caption: 'G5 – A5 · 4 strums each', caption_es: 'G5 – A5 · 4 rasgueos cada uno',
+          fromBar: 35, bars: 2,
+          notes: [
+            { frets: [['A', 5], ['E', 3]], note: 'G5', midi: [50, 43] },
+            { frets: [['A', 5], ['E', 3]], note: 'G5', midi: [50, 43] },
+            { frets: [['A', 5], ['E', 3]], note: 'G5', midi: [50, 43] },
+            { frets: [['A', 5], ['E', 3]], note: 'G5', midi: [50, 43] },
+            { frets: [['D', 2], ['A', 0]], note: 'A5', midi: [52, 45] },
+            { frets: [['D', 2], ['A', 0]], note: 'A5', midi: [52, 45] },
+            { frets: [['D', 2], ['A', 0]], note: 'A5', midi: [52, 45] },
+            { frets: [['D', 2], ['A', 0]], note: 'A5', midi: [52, 45] }
+          ]
+        },
+        {
+          label: 'Verse 2', label_es: 'Estrofa 2',
+          caption: 'Verse 2 — the riff, 12 laps', caption_es: 'Estrofa 2 — el riff, 12 vueltas',
+          fromBar: 37, bars: 2, reps: 12,
+          repLabel: 'Lap', repLabel_es: 'Vuelta',
+          notes: [
+            { frets: [['D', 9], ['A', 7]], note: 'E5', midi: [59, 52], beats: 1.5 },
+            { frets: [['D', 9], ['A', 7]], note: 'E5', midi: [59, 52], beats: 0.5 },
+            { frets: [['D', 12], ['A', 10]], note: 'G5', midi: [62, 55], beats: 0.75 },
+            { frets: [['D', 9], ['A', 7]], note: 'E5', midi: [59, 52], beats: 0.75 },
+            { frets: [['D', 7], ['A', 5]], note: 'D5', midi: [57, 50], beats: 0.5 },
+            { frets: [['D', 5], ['A', 3]], note: 'C5', midi: [55, 48], beats: 2 },
+            { frets: [['D', 4], ['A', 2]], note: 'B5', midi: [54, 47], beats: 2 }
+          ]
+        },
+        {
+          label: 'G5 – A5', label_es: 'G5 – A5',
+          caption: 'G5 – A5 · 4 strums each', caption_es: 'G5 – A5 · 4 rasgueos cada uno',
+          fromBar: 61, bars: 2,
+          notes: [
+            { frets: [['A', 5], ['E', 3]], note: 'G5', midi: [50, 43] },
+            { frets: [['A', 5], ['E', 3]], note: 'G5', midi: [50, 43] },
+            { frets: [['A', 5], ['E', 3]], note: 'G5', midi: [50, 43] },
+            { frets: [['A', 5], ['E', 3]], note: 'G5', midi: [50, 43] },
+            { frets: [['D', 2], ['A', 0]], note: 'A5', midi: [52, 45] },
+            { frets: [['D', 2], ['A', 0]], note: 'A5', midi: [52, 45] },
+            { frets: [['D', 2], ['A', 0]], note: 'A5', midi: [52, 45] },
+            { frets: [['D', 2], ['A', 0]], note: 'A5', midi: [52, 45] }
+          ]
+        },
+        {
+          label: 'Solo', label_es: 'Solo',
+          caption: 'Solo — the riff, 8 laps', caption_es: 'Solo — el riff, 8 vueltas',
+          fromBar: 63, bars: 2, reps: 8,
+          repLabel: 'Lap', repLabel_es: 'Vuelta',
+          notes: [
+            { frets: [['D', 9], ['A', 7]], note: 'E5', midi: [59, 52], beats: 1.5 },
+            { frets: [['D', 9], ['A', 7]], note: 'E5', midi: [59, 52], beats: 0.5 },
+            { frets: [['D', 12], ['A', 10]], note: 'G5', midi: [62, 55], beats: 0.75 },
+            { frets: [['D', 9], ['A', 7]], note: 'E5', midi: [59, 52], beats: 0.75 },
+            { frets: [['D', 7], ['A', 5]], note: 'D5', midi: [57, 50], beats: 0.5 },
+            { frets: [['D', 5], ['A', 3]], note: 'C5', midi: [55, 48], beats: 2 },
+            { frets: [['D', 4], ['A', 2]], note: 'B5', midi: [54, 47], beats: 2 }
+          ]
+        },
+        {
+          label: 'G5 – A5', label_es: 'G5 – A5',
+          caption: 'G5 – A5 · 4 strums each', caption_es: 'G5 – A5 · 4 rasgueos cada uno',
+          fromBar: 79, bars: 2,
+          notes: [
+            { frets: [['A', 5], ['E', 3]], note: 'G5', midi: [50, 43] },
+            { frets: [['A', 5], ['E', 3]], note: 'G5', midi: [50, 43] },
+            { frets: [['A', 5], ['E', 3]], note: 'G5', midi: [50, 43] },
+            { frets: [['A', 5], ['E', 3]], note: 'G5', midi: [50, 43] },
+            { frets: [['D', 2], ['A', 0]], note: 'A5', midi: [52, 45] },
+            { frets: [['D', 2], ['A', 0]], note: 'A5', midi: [52, 45] },
+            { frets: [['D', 2], ['A', 0]], note: 'A5', midi: [52, 45] },
+            { frets: [['D', 2], ['A', 0]], note: 'A5', midi: [52, 45] }
+          ]
+        },
+        {
+          label: 'Verse 3', label_es: 'Estrofa 3',
+          caption: 'Verse 3 — the riff, 12 laps', caption_es: 'Estrofa 3 — el riff, 12 vueltas',
+          fromBar: 81, bars: 2, reps: 12,
+          repLabel: 'Lap', repLabel_es: 'Vuelta',
+          notes: [
+            { frets: [['D', 9], ['A', 7]], note: 'E5', midi: [59, 52], beats: 1.5 },
+            { frets: [['D', 9], ['A', 7]], note: 'E5', midi: [59, 52], beats: 0.5 },
+            { frets: [['D', 12], ['A', 10]], note: 'G5', midi: [62, 55], beats: 0.75 },
+            { frets: [['D', 9], ['A', 7]], note: 'E5', midi: [59, 52], beats: 0.75 },
+            { frets: [['D', 7], ['A', 5]], note: 'D5', midi: [57, 50], beats: 0.5 },
+            { frets: [['D', 5], ['A', 3]], note: 'C5', midi: [55, 48], beats: 2 },
+            { frets: [['D', 4], ['A', 2]], note: 'B5', midi: [54, 47], beats: 2 }
+          ]
+        },
+        {
+          label: 'G5 – A5', label_es: 'G5 – A5',
+          caption: 'G5 – A5 · 4 strums each', caption_es: 'G5 – A5 · 4 rasgueos cada uno',
+          fromBar: 105, bars: 2,
+          notes: [
+            { frets: [['A', 5], ['E', 3]], note: 'G5', midi: [50, 43] },
+            { frets: [['A', 5], ['E', 3]], note: 'G5', midi: [50, 43] },
+            { frets: [['A', 5], ['E', 3]], note: 'G5', midi: [50, 43] },
+            { frets: [['A', 5], ['E', 3]], note: 'G5', midi: [50, 43] },
+            { frets: [['D', 2], ['A', 0]], note: 'A5', midi: [52, 45] },
+            { frets: [['D', 2], ['A', 0]], note: 'A5', midi: [52, 45] },
+            { frets: [['D', 2], ['A', 0]], note: 'A5', midi: [52, 45] },
+            { frets: [['D', 2], ['A', 0]], note: 'A5', midi: [52, 45] }
+          ]
+        },
+        {
+          label: 'Chorus 2', label_es: 'Coro 2',
+          caption: 'Chorus 2 — the riff, 4 laps', caption_es: 'Coro 2 — el riff, 4 vueltas',
+          fromBar: 107, bars: 2, reps: 4,
+          repLabel: 'Lap', repLabel_es: 'Vuelta',
+          notes: [
+            { frets: [['D', 9], ['A', 7]], note: 'E5', midi: [59, 52], beats: 1.5 },
+            { frets: [['D', 9], ['A', 7]], note: 'E5', midi: [59, 52], beats: 0.5 },
+            { frets: [['D', 12], ['A', 10]], note: 'G5', midi: [62, 55], beats: 0.75 },
+            { frets: [['D', 9], ['A', 7]], note: 'E5', midi: [59, 52], beats: 0.75 },
+            { frets: [['D', 7], ['A', 5]], note: 'D5', midi: [57, 50], beats: 0.5 },
+            { frets: [['D', 5], ['A', 3]], note: 'C5', midi: [55, 48], beats: 2 },
+            { frets: [['D', 4], ['A', 2]], note: 'B5', midi: [54, 47], beats: 2 }
+          ]
+        },
+        {
+          label: 'Ending', label_es: 'Final',
+          caption: 'Ending — one E5, let it ring', caption_es: 'Final — un E5, déjalo sonar',
+          fromBar: 115, bars: 2,
+          notes: [
+            { frets: [['D', 9], ['A', 7]], note: 'E5', midi: [59, 52], beats: 8 }
+          ]
+        }
+      ],
+      checks: [
+        { label: 'The whole song, slower', label_es: 'La canción completa, más lenta',
+          text:    'Press Slowest or Slower. Play the whole song with the band, intro to the end, without stopping.',
+          text_es: 'Pulsa «Muy lento» o «Más lento». Toca la canción completa con la banda, de la intro al final, sin detenerte.' },
+        { levelUp: true,
+          text:    'Press Normal. Play the whole song with the band at normal speed, intro to the end, without stopping.',
+          text_es: 'Pulsa «Normal». Toca la canción completa con la banda a velocidad normal, de la intro al final, sin detenerte.' }
+      ]
+    },
+    // The help ladder (read-only, under "More practice help").
+    steps: [
+      {
+        label:    'Learn — The shapes',
+        label_es: 'Aprende — Las formas',
+        text:    'Press Play on the tab. The riff chords have their root on the A string: index finger on the root, ring finger two frets higher on the D string. Before each chorus, G5 sits on low E fret 3, and A5 is the open A string plus D string fret 2.',
+        text_es: 'Pulsa «Tocar el tab». Los acordes del riff tienen la raíz en la cuerda La: el índice en la raíz, el anular dos trastes más arriba en la cuerda Re. Antes de cada coro, G5 está en el traste 3 de la cuerda Mi grave, y A5 es la cuerda La al aire más el traste 2 de la cuerda Re.',
+        tab: {
+          caption: 'E5 · G5 · D5 · C5 · B5 · A5 · 4 beats each',
+          caption_es: 'E5 · G5 · D5 · C5 · B5 · A5 · 4 tiempos cada uno',
+          notes: [
+            { frets: [['D', 9], ['A', 7]], note: 'E5', midi: [59, 52], beats: 4 },
+            { frets: [['D', 12], ['A', 10]], note: 'G5', midi: [62, 55], beats: 4 },
+            { frets: [['D', 7], ['A', 5]], note: 'D5', midi: [57, 50], beats: 4 },
+            { frets: [['D', 5], ['A', 3]], note: 'C5', midi: [55, 48], beats: 4 },
+            { frets: [['D', 4], ['A', 2]], note: 'B5', midi: [54, 47], beats: 4 },
+            { frets: [['D', 2], ['A', 0]], note: 'A5', midi: [52, 45], beats: 4 }
+          ]
+        },
+      },
+      {
+        label:    'Practice — One section at a time',
+        label_es: 'Practica — Una sección a la vez',
+        text:    'Lost in one part? Tap that section to repeat it. Play only the roots for one lap if the shape slows you down. You\'ve got it when: that section twice in a row with both strings ringing, without stopping.',
+        text_es: '¿Te pierdes en una parte? Pulsa esa sección para repetirla. Toca solo las raíces una vuelta si la forma te frena. Lo tienes cuando: esa sección dos veces seguidas con las dos cuerdas sonando, sin detenerte.',
+      },
+    ],
+  },
+  /* "Luna" — The Whole Song in Power Chords (2026-10-05). ca-27's
+     sections and bars with Journey Layer 3's loop: F5 (low E fret 1) and A5
+     (low E fret 5 — the same shape slid four frets), two strums per bar, one
+     on each big beat. The last F5 is one strum, left ringing. Layer 3's D5
+     belongs to the record's 120 BPM opening, which is before bar 1 and not on
+     this card. */
+  {
+    id:    'ca-32',
+    view:  'card',    // one screen: Play song + tab + checks — see CARD above
+    journey: 'luna',   // the button renders under the Level up check — see JOURNEY above
+    journeyLayer: 3,
+    title:    '"Luna" — The Whole Song in Power Chords',
+    title_es: '"Luna" — La canción completa con acordes de potencia',
+    intro:    'You play the whole song as single notes — today you play it in power chords: the same roots, with a second string added.',
+    intro_es: 'Ya tocas la canción completa con notas sueltas — hoy la tocas con acordes de potencia: las mismas raíces, con una segunda cuerda.',
+    card: {
+      wholeSong: true,  // stops at the end of the song instead of looping
+      track: 'luna',
+      slowest: true,    // three-way speed control: Slowest / Slower / Normal — the student picks
+      caption:    'The whole song in power chords · 2 strums per bar',
+      caption_es: 'La canción completa con acordes de potencia · 2 rasgueos por compás',
+      sections: [
+        {
+          label: 'Intro', label_es: 'Intro',
+          caption: 'Intro — F5 F5 A5 A5, 2 laps', caption_es: 'Intro — F5 F5 A5 A5, 2 vueltas',
+          fromBar: 1, bars: 4, reps: 2,
+          repLabel: 'Lap', repLabel_es: 'Vuelta',
+          notes: [
+            { frets: [['A', 3], ['E', 1]], note: 'F5', midi: [48, 41] },
+            { frets: [['A', 3], ['E', 1]], note: 'F5', midi: [48, 41] },
+            { frets: [['A', 3], ['E', 1]], note: 'F5', midi: [48, 41] },
+            { frets: [['A', 3], ['E', 1]], note: 'F5', midi: [48, 41] },
+            { frets: [['A', 7], ['E', 5]], note: 'A5', midi: [52, 45] },
+            { frets: [['A', 7], ['E', 5]], note: 'A5', midi: [52, 45] },
+            { frets: [['A', 7], ['E', 5]], note: 'A5', midi: [52, 45] },
+            { frets: [['A', 7], ['E', 5]], note: 'A5', midi: [52, 45] }
+          ]
+        },
+        {
+          label: 'Verse 1', label_es: 'Estrofa 1',
+          caption: 'Verse 1 — F5 F5 A5 A5, 4 laps', caption_es: 'Estrofa 1 — F5 F5 A5 A5, 4 vueltas',
+          fromBar: 9, bars: 4, reps: 4,
+          repLabel: 'Lap', repLabel_es: 'Vuelta',
+          notes: [
+            { frets: [['A', 3], ['E', 1]], note: 'F5', midi: [48, 41] },
+            { frets: [['A', 3], ['E', 1]], note: 'F5', midi: [48, 41] },
+            { frets: [['A', 3], ['E', 1]], note: 'F5', midi: [48, 41] },
+            { frets: [['A', 3], ['E', 1]], note: 'F5', midi: [48, 41] },
+            { frets: [['A', 7], ['E', 5]], note: 'A5', midi: [52, 45] },
+            { frets: [['A', 7], ['E', 5]], note: 'A5', midi: [52, 45] },
+            { frets: [['A', 7], ['E', 5]], note: 'A5', midi: [52, 45] },
+            { frets: [['A', 7], ['E', 5]], note: 'A5', midi: [52, 45] }
+          ]
+        },
+        {
+          label: 'Requinto', label_es: 'Requinto',
+          caption: 'Requinto — F5 F5 A5 A5, no singing', caption_es: 'Requinto — F5 F5 A5 A5, sin canto',
+          fromBar: 25, bars: 4,
+          notes: [
+            { frets: [['A', 3], ['E', 1]], note: 'F5', midi: [48, 41] },
+            { frets: [['A', 3], ['E', 1]], note: 'F5', midi: [48, 41] },
+            { frets: [['A', 3], ['E', 1]], note: 'F5', midi: [48, 41] },
+            { frets: [['A', 3], ['E', 1]], note: 'F5', midi: [48, 41] },
+            { frets: [['A', 7], ['E', 5]], note: 'A5', midi: [52, 45] },
+            { frets: [['A', 7], ['E', 5]], note: 'A5', midi: [52, 45] },
+            { frets: [['A', 7], ['E', 5]], note: 'A5', midi: [52, 45] },
+            { frets: [['A', 7], ['E', 5]], note: 'A5', midi: [52, 45] }
+          ]
+        },
+        {
+          label: 'Verse 2', label_es: 'Estrofa 2',
+          caption: 'Verse 2 — F5 F5 A5 A5, 4 laps', caption_es: 'Estrofa 2 — F5 F5 A5 A5, 4 vueltas',
+          fromBar: 29, bars: 4, reps: 4,
+          repLabel: 'Lap', repLabel_es: 'Vuelta',
+          notes: [
+            { frets: [['A', 3], ['E', 1]], note: 'F5', midi: [48, 41] },
+            { frets: [['A', 3], ['E', 1]], note: 'F5', midi: [48, 41] },
+            { frets: [['A', 3], ['E', 1]], note: 'F5', midi: [48, 41] },
+            { frets: [['A', 3], ['E', 1]], note: 'F5', midi: [48, 41] },
+            { frets: [['A', 7], ['E', 5]], note: 'A5', midi: [52, 45] },
+            { frets: [['A', 7], ['E', 5]], note: 'A5', midi: [52, 45] },
+            { frets: [['A', 7], ['E', 5]], note: 'A5', midi: [52, 45] },
+            { frets: [['A', 7], ['E', 5]], note: 'A5', midi: [52, 45] }
+          ]
+        },
+        {
+          label: 'Outro', label_es: 'Final',
+          caption: 'Outro — F5 F5 A5 A5 twice, then the last F5', caption_es: 'Final — F5 F5 A5 A5 dos veces, y el último F5',
+          fromBar: 45, bars: 9,
+          notes: [
+            { frets: [['A', 3], ['E', 1]], note: 'F5', midi: [48, 41] },
+            { frets: [['A', 3], ['E', 1]], note: 'F5', midi: [48, 41] },
+            { frets: [['A', 3], ['E', 1]], note: 'F5', midi: [48, 41] },
+            { frets: [['A', 3], ['E', 1]], note: 'F5', midi: [48, 41] },
+            { frets: [['A', 7], ['E', 5]], note: 'A5', midi: [52, 45] },
+            { frets: [['A', 7], ['E', 5]], note: 'A5', midi: [52, 45] },
+            { frets: [['A', 7], ['E', 5]], note: 'A5', midi: [52, 45] },
+            { frets: [['A', 7], ['E', 5]], note: 'A5', midi: [52, 45] },
+            { frets: [['A', 3], ['E', 1]], note: 'F5', midi: [48, 41] },
+            { frets: [['A', 3], ['E', 1]], note: 'F5', midi: [48, 41] },
+            { frets: [['A', 3], ['E', 1]], note: 'F5', midi: [48, 41] },
+            { frets: [['A', 3], ['E', 1]], note: 'F5', midi: [48, 41] },
+            { frets: [['A', 7], ['E', 5]], note: 'A5', midi: [52, 45] },
+            { frets: [['A', 7], ['E', 5]], note: 'A5', midi: [52, 45] },
+            { frets: [['A', 7], ['E', 5]], note: 'A5', midi: [52, 45] },
+            { frets: [['A', 7], ['E', 5]], note: 'A5', midi: [52, 45] },
+            { frets: [['A', 3], ['E', 1]], note: 'F5', midi: [48, 41], beats: 2 }
+          ]
+        }
+      ],
+      checks: [
+        { label: 'The whole song, slower', label_es: 'La canción completa, más lenta',
+          text:    'Press Slowest or Slower. Play the whole song with the band, intro to the end, without stopping.',
+          text_es: 'Pulsa «Muy lento» o «Más lento». Toca la canción completa con la banda, de la intro al final, sin detenerte.' },
+        { levelUp: true,
+          text:    'Press Normal. Play the whole song with the band at normal speed, intro to the end, without stopping.',
+          text_es: 'Pulsa «Normal». Toca la canción completa con la banda a velocidad normal, de la intro al final, sin detenerte.' }
+      ]
+    },
+    // The help ladder (read-only, under "More practice help").
+    steps: [
+      {
+        label:    'Learn — The shapes',
+        label_es: 'Aprende — Las formas',
+        text:    'Press Play on the tab. F5 and A5 are one shape: index finger on the low E string, ring finger two frets higher on the A string. Slide it from fret 1 to fret 5 and back.',
+        text_es: 'Pulsa «Tocar el tab». F5 y A5 son la misma forma: el índice en la cuerda Mi grave, el anular dos trastes más arriba en la cuerda La. Deslízala del traste 1 al traste 5 y de vuelta.',
+        tab: {
+          caption: 'F5 · A5 · 4 beats each',
+          caption_es: 'F5 · A5 · 4 tiempos cada uno',
+          notes: [
+            { frets: [['A', 3], ['E', 1]], note: 'F5', midi: [48, 41], beats: 4 },
+            { frets: [['A', 7], ['E', 5]], note: 'A5', midi: [52, 45], beats: 4 }
+          ]
+        },
+      },
+      {
+        label:    'Practice — One section at a time',
+        label_es: 'Practica — Una sección a la vez',
+        text:    'Lost in one part? Tap that section to repeat it. Play only the roots for one lap if the shape slows you down. You\'ve got it when: that section twice in a row with both strings ringing, without stopping.',
+        text_es: '¿Te pierdes en una parte? Pulsa esa sección para repetirla. Toca solo las raíces una vuelta si la forma te frena. Lo tienes cuando: esa sección dos veces seguidas con las dos cuerdas sonando, sin detenerte.',
+      },
+    ],
+  },
+  /* Sweet Child O' Mine — The Whole Song in Power Chords (2026-10-05).
+     ca-28's sections and bars, every root turned into a power chord on the
+     same string and fret: D5, C5 and B5 rooted on the A string, G5 on the low
+     E string, A5 and E5 on the open strings — Journey Layer 3's verse and
+     chorus shapes. Layer 3's outro slides up the low E string (C5 at 8, D5
+     at 10); this card keeps C5 and D5 on the A string instead, because the
+     record puts C-D-G inside one bar and a slide from fret 10 back to G5 at
+     fret 3 in one beat is not a Module 3 move. Same rhythm as ca-28 and
+     Layer 3 — one strum per chord, left ringing. */
+  {
+    id:    'ca-33',
+    view:  'card',    // one screen: Play song + tab + checks — see CARD above
+    journey: 'sweet-child-o-mine',   // the button renders under the Level up check — see JOURNEY above
+    journeyLayer: 3,
+    title:    'Sweet Child O\' Mine — The Whole Song in Power Chords',
+    title_es: 'Sweet Child O\' Mine — La canción completa con acordes de potencia',
+    intro:    'You play the whole song as single notes — today you play it in power chords: the same roots, with a second string added.',
+    intro_es: 'Ya tocas la canción completa con notas sueltas — hoy la tocas con acordes de potencia: las mismas raíces, con una segunda cuerda.',
+    card: {
+      wholeSong: true,  // stops at the end of the song instead of looping
+      track: 'sweet-child-o-mine',
+      slowest: true,    // three-way speed control: Slowest / Slower / Normal — the student picks
+      caption:    'The whole song in power chords · 1 strum per chord, let it ring',
+      caption_es: 'La canción completa con acordes de potencia · 1 rasgueo por acorde, déjalo sonar',
+      sections: [
+        {
+          label: 'Intro', label_es: 'Intro',
+          caption: 'Intro — D5 D5 C5 C5 G5 G5 D5 D5, 3 laps', caption_es: 'Intro — D5 D5 C5 C5 G5 G5 D5 D5, 3 vueltas',
+          fromBar: 1, bars: 8, reps: 3,
+          repLabel: 'Lap', repLabel_es: 'Vuelta',
+          notes: [
+            { frets: [['D', 7], ['A', 5]], note: 'D5', midi: [57, 50], beats: 4 },
+            { frets: [['D', 7], ['A', 5]], note: 'D5', midi: [57, 50], beats: 4 },
+            { frets: [['D', 5], ['A', 3]], note: 'C5', midi: [55, 48], beats: 4 },
+            { frets: [['D', 5], ['A', 3]], note: 'C5', midi: [55, 48], beats: 4 },
+            { frets: [['A', 5], ['E', 3]], note: 'G5', midi: [50, 43], beats: 4 },
+            { frets: [['A', 5], ['E', 3]], note: 'G5', midi: [50, 43], beats: 4 },
+            { frets: [['D', 7], ['A', 5]], note: 'D5', midi: [57, 50], beats: 4 },
+            { frets: [['D', 7], ['A', 5]], note: 'D5', midi: [57, 50], beats: 4 }
+          ]
+        },
+        {
+          label: 'Verse 1', label_es: 'Estrofa 1',
+          caption: 'Verse 1 — D5 D5 C5 C5 G5 G5 D5 D5, 2 laps', caption_es: 'Estrofa 1 — D5 D5 C5 C5 G5 G5 D5 D5, 2 vueltas',
+          fromBar: 25, bars: 8, reps: 2,
+          repLabel: 'Lap', repLabel_es: 'Vuelta',
+          notes: [
+            { frets: [['D', 7], ['A', 5]], note: 'D5', midi: [57, 50], beats: 4 },
+            { frets: [['D', 7], ['A', 5]], note: 'D5', midi: [57, 50], beats: 4 },
+            { frets: [['D', 5], ['A', 3]], note: 'C5', midi: [55, 48], beats: 4 },
+            { frets: [['D', 5], ['A', 3]], note: 'C5', midi: [55, 48], beats: 4 },
+            { frets: [['A', 5], ['E', 3]], note: 'G5', midi: [50, 43], beats: 4 },
+            { frets: [['A', 5], ['E', 3]], note: 'G5', midi: [50, 43], beats: 4 },
+            { frets: [['D', 7], ['A', 5]], note: 'D5', midi: [57, 50], beats: 4 },
+            { frets: [['D', 7], ['A', 5]], note: 'D5', midi: [57, 50], beats: 4 }
+          ]
+        },
+        {
+          label: 'Chorus 1', label_es: 'Coro 1',
+          caption: 'Chorus 1 — A5 C5 D5 D5, 2 laps', caption_es: 'Coro 1 — A5 C5 D5 D5, 2 vueltas',
+          fromBar: 41, bars: 4, reps: 2,
+          repLabel: 'Lap', repLabel_es: 'Vuelta',
+          notes: [
+            { frets: [['D', 2], ['A', 0]], note: 'A5', midi: [52, 45], beats: 4 },
+            { frets: [['D', 5], ['A', 3]], note: 'C5', midi: [55, 48], beats: 4 },
+            { frets: [['D', 7], ['A', 5]], note: 'D5', midi: [57, 50], beats: 4 },
+            { frets: [['D', 7], ['A', 5]], note: 'D5', midi: [57, 50], beats: 4 }
+          ]
+        },
+        {
+          label: 'Riff 1', label_es: 'Riff 1',
+          caption: 'Riff 1 — D5 D5 C5 C5 G5 G5 D5 D5, no singing', caption_es: 'Riff 1 — D5 D5 C5 C5 G5 G5 D5 D5, sin canto',
+          fromBar: 49, bars: 8,
+          notes: [
+            { frets: [['D', 7], ['A', 5]], note: 'D5', midi: [57, 50], beats: 4 },
+            { frets: [['D', 7], ['A', 5]], note: 'D5', midi: [57, 50], beats: 4 },
+            { frets: [['D', 5], ['A', 3]], note: 'C5', midi: [55, 48], beats: 4 },
+            { frets: [['D', 5], ['A', 3]], note: 'C5', midi: [55, 48], beats: 4 },
+            { frets: [['A', 5], ['E', 3]], note: 'G5', midi: [50, 43], beats: 4 },
+            { frets: [['A', 5], ['E', 3]], note: 'G5', midi: [50, 43], beats: 4 },
+            { frets: [['D', 7], ['A', 5]], note: 'D5', midi: [57, 50], beats: 4 },
+            { frets: [['D', 7], ['A', 5]], note: 'D5', midi: [57, 50], beats: 4 }
+          ]
+        },
+        {
+          label: 'Verse 2', label_es: 'Estrofa 2',
+          caption: 'Verse 2 — D5 D5 C5 C5 G5 G5 D5 D5, 2 laps', caption_es: 'Estrofa 2 — D5 D5 C5 C5 G5 G5 D5 D5, 2 vueltas',
+          fromBar: 57, bars: 8, reps: 2,
+          repLabel: 'Lap', repLabel_es: 'Vuelta',
+          notes: [
+            { frets: [['D', 7], ['A', 5]], note: 'D5', midi: [57, 50], beats: 4 },
+            { frets: [['D', 7], ['A', 5]], note: 'D5', midi: [57, 50], beats: 4 },
+            { frets: [['D', 5], ['A', 3]], note: 'C5', midi: [55, 48], beats: 4 },
+            { frets: [['D', 5], ['A', 3]], note: 'C5', midi: [55, 48], beats: 4 },
+            { frets: [['A', 5], ['E', 3]], note: 'G5', midi: [50, 43], beats: 4 },
+            { frets: [['A', 5], ['E', 3]], note: 'G5', midi: [50, 43], beats: 4 },
+            { frets: [['D', 7], ['A', 5]], note: 'D5', midi: [57, 50], beats: 4 },
+            { frets: [['D', 7], ['A', 5]], note: 'D5', midi: [57, 50], beats: 4 }
+          ]
+        },
+        {
+          label: 'Chorus 2', label_es: 'Coro 2',
+          caption: 'Chorus 2 — A5 C5 D5 D5, 2 laps', caption_es: 'Coro 2 — A5 C5 D5 D5, 2 vueltas',
+          fromBar: 73, bars: 4, reps: 2,
+          repLabel: 'Lap', repLabel_es: 'Vuelta',
+          notes: [
+            { frets: [['D', 2], ['A', 0]], note: 'A5', midi: [52, 45], beats: 4 },
+            { frets: [['D', 5], ['A', 3]], note: 'C5', midi: [55, 48], beats: 4 },
+            { frets: [['D', 7], ['A', 5]], note: 'D5', midi: [57, 50], beats: 4 },
+            { frets: [['D', 7], ['A', 5]], note: 'D5', midi: [57, 50], beats: 4 }
+          ]
+        },
+        {
+          label: 'Riff 2', label_es: 'Riff 2',
+          caption: 'Riff 2 — D5 D5 C5 C5 G5 G5 D5 D5, 2 laps, no singing', caption_es: 'Riff 2 — D5 D5 C5 C5 G5 G5 D5 D5, 2 vueltas, sin canto',
+          fromBar: 81, bars: 8, reps: 2,
+          repLabel: 'Lap', repLabel_es: 'Vuelta',
+          notes: [
+            { frets: [['D', 7], ['A', 5]], note: 'D5', midi: [57, 50], beats: 4 },
+            { frets: [['D', 7], ['A', 5]], note: 'D5', midi: [57, 50], beats: 4 },
+            { frets: [['D', 5], ['A', 3]], note: 'C5', midi: [55, 48], beats: 4 },
+            { frets: [['D', 5], ['A', 3]], note: 'C5', midi: [55, 48], beats: 4 },
+            { frets: [['A', 5], ['E', 3]], note: 'G5', midi: [50, 43], beats: 4 },
+            { frets: [['A', 5], ['E', 3]], note: 'G5', midi: [50, 43], beats: 4 },
+            { frets: [['D', 7], ['A', 5]], note: 'D5', midi: [57, 50], beats: 4 },
+            { frets: [['D', 7], ['A', 5]], note: 'D5', midi: [57, 50], beats: 4 }
+          ]
+        },
+        {
+          label: 'Chorus 3', label_es: 'Coro 3',
+          caption: 'Chorus 3 — A5 C5 D5 D5, 4 laps', caption_es: 'Coro 3 — A5 C5 D5 D5, 4 vueltas',
+          fromBar: 97, bars: 4, reps: 4,
+          repLabel: 'Lap', repLabel_es: 'Vuelta',
+          notes: [
+            { frets: [['D', 2], ['A', 0]], note: 'A5', midi: [52, 45], beats: 4 },
+            { frets: [['D', 5], ['A', 3]], note: 'C5', midi: [55, 48], beats: 4 },
+            { frets: [['D', 7], ['A', 5]], note: 'D5', midi: [57, 50], beats: 4 },
+            { frets: [['D', 7], ['A', 5]], note: 'D5', midi: [57, 50], beats: 4 }
+          ]
+        },
+        {
+          label: 'Solo 1', label_es: 'Solo 1',
+          caption: 'Solo 1 — E5 C5 B5 A5, 4 laps, then one more A5', caption_es: 'Solo 1 — E5 C5 B5 A5, 4 vueltas, y un A5 más',
+          fromBar: 113, bars: 17,
+          notes: [
+            { frets: [['A', 2], ['E', 0]], note: 'E5', midi: [47, 40], beats: 4 },
+            { frets: [['D', 5], ['A', 3]], note: 'C5', midi: [55, 48], beats: 4 },
+            { frets: [['D', 4], ['A', 2]], note: 'B5', midi: [54, 47], beats: 4 },
+            { frets: [['D', 2], ['A', 0]], note: 'A5', midi: [52, 45], beats: 4 },
+            { frets: [['A', 2], ['E', 0]], note: 'E5', midi: [47, 40], beats: 4 },
+            { frets: [['D', 5], ['A', 3]], note: 'C5', midi: [55, 48], beats: 4 },
+            { frets: [['D', 4], ['A', 2]], note: 'B5', midi: [54, 47], beats: 4 },
+            { frets: [['D', 2], ['A', 0]], note: 'A5', midi: [52, 45], beats: 4 },
+            { frets: [['A', 2], ['E', 0]], note: 'E5', midi: [47, 40], beats: 4 },
+            { frets: [['D', 5], ['A', 3]], note: 'C5', midi: [55, 48], beats: 4 },
+            { frets: [['D', 4], ['A', 2]], note: 'B5', midi: [54, 47], beats: 4 },
+            { frets: [['D', 2], ['A', 0]], note: 'A5', midi: [52, 45], beats: 4 },
+            { frets: [['A', 2], ['E', 0]], note: 'E5', midi: [47, 40], beats: 4 },
+            { frets: [['D', 5], ['A', 3]], note: 'C5', midi: [55, 48], beats: 4 },
+            { frets: [['D', 4], ['A', 2]], note: 'B5', midi: [54, 47], beats: 4 },
+            { frets: [['D', 2], ['A', 0]], note: 'A5', midi: [52, 45], beats: 4 },
+            { frets: [['D', 2], ['A', 0]], note: 'A5', midi: [52, 45], beats: 4 }
+          ]
+        },
+        {
+          label: 'Solo 2', label_es: 'Solo 2',
+          caption: 'Solo 2 — E5 G5 A5, then C5 D5 G5 in one bar, 4 laps', caption_es: 'Solo 2 — E5 G5 A5, y C5 D5 G5 en un compás, 4 vueltas',
+          fromBar: 130, bars: 4, reps: 4,
+          repLabel: 'Lap', repLabel_es: 'Vuelta',
+          notes: [
+            { frets: [['A', 2], ['E', 0]], note: 'E5', midi: [47, 40], beats: 4 },
+            { frets: [['A', 5], ['E', 3]], note: 'G5', midi: [50, 43], beats: 4 },
+            { frets: [['D', 2], ['A', 0]], note: 'A5', midi: [52, 45], beats: 4 },
+            { frets: [['D', 5], ['A', 3]], note: 'C5', midi: [55, 48], beats: 2 },
+            { frets: [['D', 7], ['A', 5]], note: 'D5', midi: [57, 50] },
+            { frets: [['A', 5], ['E', 3]], note: 'G5', midi: [50, 43] }
+          ]
+        },
+        {
+          label: 'Outro', label_es: 'Final',
+          caption: 'Outro — E5 G5 A5, then C5 D5 G5 in one bar, 7 laps', caption_es: 'Final — E5 G5 A5, y C5 D5 G5 en un compás, 7 vueltas',
+          fromBar: 146, bars: 4, reps: 7,
+          repLabel: 'Lap', repLabel_es: 'Vuelta',
+          notes: [
+            { frets: [['A', 2], ['E', 0]], note: 'E5', midi: [47, 40], beats: 4 },
+            { frets: [['A', 5], ['E', 3]], note: 'G5', midi: [50, 43], beats: 4 },
+            { frets: [['D', 2], ['A', 0]], note: 'A5', midi: [52, 45], beats: 4 },
+            { frets: [['D', 5], ['A', 3]], note: 'C5', midi: [55, 48], beats: 2 },
+            { frets: [['D', 7], ['A', 5]], note: 'D5', midi: [57, 50] },
+            { frets: [['A', 5], ['E', 3]], note: 'G5', midi: [50, 43] }
+          ]
+        },
+        {
+          label: 'Ending', label_es: 'Cierre',
+          caption: 'Ending — E5 G5 A5, then E5 to the end', caption_es: 'Cierre — E5 G5 A5, y E5 hasta el final',
+          fromBar: 174, bars: 10,
+          notes: [
+            { frets: [['A', 2], ['E', 0]], note: 'E5', midi: [47, 40], beats: 4 },
+            { frets: [['A', 5], ['E', 3]], note: 'G5', midi: [50, 43], beats: 4 },
+            { frets: [['D', 2], ['A', 0]], note: 'A5', midi: [52, 45], beats: 4 },
+            { frets: [['A', 2], ['E', 0]], note: 'E5', midi: [47, 40], beats: 4 },
+            { frets: [['A', 2], ['E', 0]], note: 'E5', midi: [47, 40], beats: 4 },
+            { frets: [['A', 2], ['E', 0]], note: 'E5', midi: [47, 40], beats: 4 },
+            { frets: [['A', 2], ['E', 0]], note: 'E5', midi: [47, 40], beats: 4 },
+            { frets: [['A', 2], ['E', 0]], note: 'E5', midi: [47, 40], beats: 4 },
+            { frets: [['A', 2], ['E', 0]], note: 'E5', midi: [47, 40], beats: 4 },
+            { frets: [['A', 2], ['E', 0]], note: 'E5', midi: [47, 40], beats: 4 }
+          ]
+        }
+      ],
+      checks: [
+        { label: 'The whole song, slower', label_es: 'La canción completa, más lenta',
+          text:    'Press Slowest or Slower. Play the whole song with the band, intro to the end, without stopping.',
+          text_es: 'Pulsa «Muy lento» o «Más lento». Toca la canción completa con la banda, de la intro al final, sin detenerte.' },
+        { levelUp: true,
+          text:    'Press Normal. Play the whole song with the band at normal speed, intro to the end, without stopping.',
+          text_es: 'Pulsa «Normal». Toca la canción completa con la banda a velocidad normal, de la intro al final, sin detenerte.' }
+      ]
+    },
+    // The help ladder (read-only, under "More practice help").
+    steps: [
+      {
+        label:    'Learn — The shapes',
+        label_es: 'Aprende — Las formas',
+        text:    'Press Play on the tab. D5, C5 and B5 have their root on the A string, G5 on the low E string. A5 and E5 use an open string as the root, so one finger presses fret 2 on the next thinner string.',
+        text_es: 'Pulsa «Tocar el tab». D5, C5 y B5 tienen la raíz en la cuerda La, G5 en la cuerda Mi grave. A5 y E5 usan una cuerda al aire como raíz, así que un solo dedo pisa el traste 2 de la cuerda siguiente.',
+        tab: {
+          caption: 'D5 · C5 · G5 · A5 · E5 · B5 · 4 beats each',
+          caption_es: 'D5 · C5 · G5 · A5 · E5 · B5 · 4 tiempos cada uno',
+          notes: [
+            { frets: [['D', 7], ['A', 5]], note: 'D5', midi: [57, 50], beats: 4 },
+            { frets: [['D', 5], ['A', 3]], note: 'C5', midi: [55, 48], beats: 4 },
+            { frets: [['A', 5], ['E', 3]], note: 'G5', midi: [50, 43], beats: 4 },
+            { frets: [['D', 2], ['A', 0]], note: 'A5', midi: [52, 45], beats: 4 },
+            { frets: [['A', 2], ['E', 0]], note: 'E5', midi: [47, 40], beats: 4 },
+            { frets: [['D', 4], ['A', 2]], note: 'B5', midi: [54, 47], beats: 4 }
+          ]
+        },
+      },
+      {
+        label:    'Practice — The quick bar',
+        label_es: 'Practica — El compás rápido',
+        text:    'In the solos and the outro, one bar has C5 for 2 beats, then a quick D5 and a quick G5. You\'ve got it when: E5 G5 A5, C5 D5 G5 four times in a row with the tab, no stops. Late on the G5? Turn the tab\'s BPM down.',
+        text_es: 'En los solos y el final, un compás tiene C5 por 2 tiempos, y luego un D5 rápido y un G5 rápido. Lo tienes cuando: E5 G5 A5, C5 D5 G5 cuatro veces seguidas con el tab, sin detenerte. ¿Llegas tarde al G5? Baja los BPM del tab.',
+        tab: {
+          caption: 'E5 G5 A5, then C5 D5 G5 in one bar',
+          caption_es: 'E5 G5 A5, y C5 D5 G5 en un compás',
+          notes: [
+            { frets: [['A', 2], ['E', 0]], note: 'E5', midi: [47, 40], beats: 4 },
+            { frets: [['A', 5], ['E', 3]], note: 'G5', midi: [50, 43], beats: 4 },
+            { frets: [['D', 2], ['A', 0]], note: 'A5', midi: [52, 45], beats: 4 },
+            { frets: [['D', 5], ['A', 3]], note: 'C5', midi: [55, 48], beats: 2 },
+            { frets: [['D', 7], ['A', 5]], note: 'D5', midi: [57, 50] },
+            { frets: [['A', 5], ['E', 3]], note: 'G5', midi: [50, 43] }
+          ]
+        },
+      },
+      {
+        label:    'Practice — One section at a time',
+        label_es: 'Practica — Una sección a la vez',
+        text:    'Lost in one part? Tap that section to repeat it. Play only the roots for one lap if the shape slows you down. You\'ve got it when: that section twice in a row with both strings ringing, without stopping.',
+        text_es: '¿Te pierdes en una parte? Pulsa esa sección para repetirla. Toca solo las raíces una vuelta si la forma te frena. Lo tienes cuando: esa sección dos veces seguidas con las dos cuerdas sonando, sin detenerte.',
       },
     ],
   },
