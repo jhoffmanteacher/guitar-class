@@ -5,6 +5,14 @@ Notable changes to the Guitar Class site. Newest first.
 For the full session-by-session history (and the reasoning behind each change),
 see `WORKFLOW.md` and the git commit log.
 
+## 2026-10-05 — Sweet Child O' Mine: outro power chords
+
+### Changed
+
+- **The Sweet Child O' Mine Song Journey page, Layer 3: C5 and D5 in the
+  outro are on the A string now, at frets 3 and 5.** They are the same
+  shapes as the verse and chorus. E5, G5 and A5 stay on the low E string.
+
 ## 2026-10-05 — Songs page: three links per Core song
 
 ### Changed

@@ -4712,10 +4712,11 @@ window.CLASS_ACTIVITIES = [
      ca-28's sections and bars, every root turned into a power chord on the
      same string and fret: D5, C5 and B5 rooted on the A string, G5 on the low
      E string, A5 and E5 on the open strings — Journey Layer 3's verse and
-     chorus shapes. Layer 3's outro slides up the low E string (C5 at 8, D5
-     at 10); this card keeps C5 and D5 on the A string instead, because the
-     record puts C-D-G inside one bar and a slide from fret 10 back to G5 at
-     fret 3 in one beat is not a Module 3 move. Same rhythm as ca-28 and
+     chorus shapes. C5 and D5 stay on the A string (frets 3 and 5) in the
+     outro too, because the record puts C-D-G inside one bar; Layer 3's
+     outro tab was moved to the same shapes the same day (Jonathan,
+     2026-10-05 — it used to slide them up the low E string to frets 8 and
+     10). Same rhythm as ca-28 and
      Layer 3 — one strum per chord, left ringing. */
   {
     id:    'ca-33',
