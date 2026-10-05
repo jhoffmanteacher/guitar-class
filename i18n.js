@@ -1139,11 +1139,13 @@
        badge on the page, so check the song rows if this text ever changes. */
     'hub.tagFocus':          { en: 'Focus', es: 'Destacada' },
     'hub.tagSupp':           { en: 'Supp', es: 'Complementaria' },
-    // Play along (2026-10-01): the released practice cards, by song, at the
-    // top of the Songs page. Heading wording is Jonathan's.
+    // Play along (2026-10-01): heading wording is Jonathan's. Since 2026-10-05
+    // the Songs page has no Play Along section — each Core song row carries a
+    // "Play Along" link to its whole-song card — but In-Class Activities still
+    // heads an undated "Play Along now" card with this title.
     'hub.playAlongTitle':    { en: 'Play Along with the TAB/Chords', es: 'Toca con la TAB y los acordes' },
-    'hub.playAlongSub':      { en: 'The practice cards from class, by song. Tap one to open it.',
-                               es: 'Las tarjetas de práctica de la clase, por canción. Pulsa una para abrirla.' },
+    'hub.playAlong':         { en: 'Play Along', es: 'Toca con la canción' },
+    'hub.backingSolos':      { en: 'Backing track for solos', es: 'Pista para solos' },
     'hub.playAlongDone':     { en: 'Done', es: 'Terminada' },
     'hub.coreTitle':         { en: 'Core songs', es: 'Canciones básicas' },
     'hub.choiceTitle':       { en: 'Choice menu', es: 'Menú a elección' },

@@ -586,12 +586,12 @@ body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,"Helvetica N
 .song-vid-btn{display:inline-flex;align-items:center;gap:5px;font-size:0.8125rem;padding:3px 9px;border-radius:14px;background:transparent;color:var(--text2);border:1px solid transparent;cursor:pointer;font-family:inherit;white-space:nowrap;transition:background 0.1s,border-color 0.1s,color 0.1s}
 .song-vid-btn:hover{background:var(--bg2);border-color:var(--text2);color:var(--text)}
 .song-vid-btn .svb-play{color:var(--green-text);font-size:0.75rem;line-height:1}
-/* Song Journey is the course's own deep content — the leading affordance
-   among the four a row can show. */
+/* Song Journey is the course's own deep content — blue on every row. */
 .song-vid-btn.journey{color:var(--blue-text)}
-/* Play along (Songs page): the same pill as the song links, outlined so it
-   reads as the thing to press, with a check once the card is done. */
-.sh-play-sub{font-size:0.8125rem;color:var(--text2);margin:-4px 2px 8px}
+/* Play Along (a Core song row's first link): the same pill as the song links,
+   outlined so it reads as the thing to press, with a check once the card is
+   done. Its slot is refreshed in place, so it must not be a flex item itself. */
+.sh-play-slot{display:contents}
 .song-vid-btn.sh-play-btn{border-color:var(--border2);color:var(--text)}
 .sh-play-check{width:1em;height:1em;color:var(--green-text)}
 .legend{display:flex;gap:14px;margin-bottom:8px}

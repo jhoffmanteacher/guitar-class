@@ -1519,41 +1519,43 @@ returning to "the last gate-open hash" reopened the quiz — a gated student
 who had joined a game could not get back to their activities at all, game
 over or not (2026-09-29).
 
-**The Songs page lists the released practice cards** (Jonathan,
-2026-10-01). "Play Along with the TAB/Chords" (`hub.playAlongTitle`) sits at
-the top of the Songs page: every `view: 'card'` activity that passes
-`caIsVisible()`, grouped by its `journey:` slug under the Core songs' names
-and in their order, newest card first inside a song (`caNumber`
-descending), a check on the ones `classActivities[id]` marks done.
-**Released only** is Jonathan's call — the list grows as the class does,
-and a teacher or dev-bypass preview sees every assigned card the same way
-In-Class Activities does. **A tap opens the card where it lives**
-(`songsHubOpenCard()` → `goExploreHash('class-activities/<id>')`), so
-there is one copy of each card and one set of ticks; Back returns to
-Songs. Don't render the card a second time on the Songs page: the
-practice-card engine (`pc*`) and the open-card state (`caOpenId`,
-`caSyncHash`, the sticky bar) all belong to In-Class Activities, and two
-copies of one card in the DOM would split them. The button label is the
-part of the card's title after " — ", so **keep practice-card titles in
-the `Song — Part` shape**. `refreshSongsPlayAlong()` (end of
-`loadClassConfig()`) swaps just this block when the board or dates land
-after the page is already open, and only when it changed — the config
-re-loads on every return to the tab. Songs stays a gated page, so a
-student with unfinished activities sees this list only after finishing
-them.
+**Each Core song row links its whole-song practice card** (Jonathan,
+2026-10-05, replacing the 2026-10-01 "Play Along with the TAB/Chords"
+section that listed every part card at the top of the Songs page — "too
+much going on"; the Core list is now the only place). A Core row shows
+exactly three links, in this order: **Play Along · Backing track for
+solos · Song Journey** — no Tutorial or Original on Core rows (Choice rows
+keep theirs). Play Along opens the song's `view: 'card'` activity with
+`card.wholeSong` whose `journey:` matches the row's Journey slug, newest
+first if there are ever two, once it passes `caIsVisible()` or
+`caIsPlayAlongOnly()`; a song with no such card shows **no** Play Along
+link (Jonathan's call — no greyed placeholder). Part cards (The Riff,
+Intro and Verse…) are not on the Songs page at all. **A tap opens the
+card where it lives** (`songsHubOpenCard()` →
+`goExploreHash('class-activities/<id>')`), so there is one copy of each
+card and one set of ticks; Back returns to Songs. Don't render the card a
+second time on the Songs page: the practice-card engine (`pc*`) and the
+open-card state (`caOpenId`, `caSyncHash`, the sticky bar) all belong to
+In-Class Activities. `songsPlayAlongBtn(slug)` builds the link inside a
+`.sh-play-slot` (`display:contents`); `refreshSongsPlayAlong()` (end of
+`loadClassConfig()`) refills just the slots that changed when the board
+or dates land after the page is open. Songs stays a gated page.
 
 **One way round the date: "Play Along now"** (Jonathan, 2026-10-02 — "can
 we set some visible even if they don't have a release date?"). Every
 assigned practice card on the console board has a **Play Along by date /
 Play Along now** switch (`teacherSetActivityPlayAlong`, cell-checked write
-to `config/class.playAlongActivities`, `{ id: true }`). "Now" lists the
-card on the Songs page without a release date and changes **nothing
+to `config/class.playAlongActivities`, `{ id: true }`). "Now" lets the
+card be opened from the Songs page without a release date — **only a
+whole-song card has a Songs link since 2026-10-05**, so the switch on a
+part card does nothing a student can reach — and changes **nothing
 else**: `caIsVisible()` does not read the map, so the card stays off
 In-Class Activities and can never be a blocker (none of the three blocker
 rules reads it either). `caIsPlayAlongOnly()` in `app.js` is the one
 predicate — practice card, flag on, assigned, not Hidden, not retired, and
-NOT already visible. It has three readers: `songsPlayAlongHtml()` (the
-list), `caFocusActivity()` (so the tap opens it instead of "not posted"),
+NOT already visible. It has three readers: `songsPlayAlongCard()` (the
+Core row link), `caFocusActivity()` (so the tap opens it instead of "not
+posted"),
 and `renderClassActivities()`, which renders that ONE card under the
 Songs section's own title **only while it is the open card** — close it
 and the next render drops it. Don't fold the flag into `caIsVisible()`:

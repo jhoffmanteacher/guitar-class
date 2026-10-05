@@ -5,6 +5,18 @@ Notable changes to the Guitar Class site. Newest first.
 For the full session-by-session history (and the reasoning behind each change),
 see `WORKFLOW.md` and the git commit log.
 
+## 2026-10-05 — Songs page: three links per Core song
+
+### Changed
+
+- **Each Core song now has three links: Play Along, Backing track for
+  solos, and Song Journey.** Play Along opens the whole-song practice card
+  from class. A song shows it once that card is out.
+- **The Play Along list at the top of the Songs page is gone.** The Core
+  songs list is the one place to find them. The practice cards for single
+  parts of a song are on In-Class Activities.
+- **The Tutorial and Original links are off the Core songs.**
+
 ## 2026-10-05 — No assessment pop-up on the Songs page
 
 ### Fixed
