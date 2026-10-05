@@ -5,6 +5,14 @@ Notable changes to the Guitar Class site. Newest first.
 For the full session-by-session history (and the reasoning behind each change),
 see `WORKFLOW.md` and the git commit log.
 
+## 2026-10-05 — Seven Nation Army: G5 – A5 and the chorus ending
+
+### Added
+
+- **The Seven Nation Army Song Journey page, Layer 3, has two new tabs.**
+  One is G5 then A5, the part before each chorus. The other is the chorus
+  ending C5 D5 C5 B5.
+
 ## 2026-10-05 — Sweet Child O' Mine: outro power chords
 
 ### Changed

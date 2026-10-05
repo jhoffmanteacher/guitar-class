@@ -4341,10 +4341,10 @@ window.CLASS_ACTIVITIES = [
   /* Seven Nation Army — The Whole Song in Power Chords (2026-10-05).
      ca-25's sections and bars, every riff note turned into the A-string power
      chord Journey Layer 3 teaches (E5 at fret 7, G5 at 10, D5 at 5, C5 at 3,
-     B5 at 2 — "one chord per riff note", same beats as ca-25). Layer 3 has no
-     G-A break; it uses ca-25's roots: G5 on low E fret 3, A5 on low E fret 5
-     (the same shape two frets up — 2026-10-05, was the open A). The choruses
-     carry ca-25's C D C B ending as C5 D5 C5 B5. */
+     B5 at 2 — "one chord per riff note", same beats as ca-25). G5 on low E
+     fret 3, A5 on low E fret 5 (the same shape two frets up — 2026-10-05, was
+     the open A). The choruses carry ca-25's C D C B ending as C5 D5 C5 B5.
+     Layer 3 shows both as their own tabs since the same day. */
   {
     id:    'ca-31',
     view:  'card',    // one screen: Play song + tab + checks — see CARD above
