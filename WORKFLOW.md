@@ -654,6 +654,14 @@
 
 ## Recently shipped (post-archive)
 
+- [x] **2026-10-05 — Seven Nation Army chorus captions: "second lap" →
+      "second time."** Both whole-song power-chord practice cards (ca-25
+      and ca-31) had a Chorus 1 and Chorus 2 section whose caption mixed
+      two counting words — "2 times · the second lap ends …" — while the
+      section's own badge reads "Time 1 of 2" (`repLabel: 'Time'`). Reworded
+      all four captions, EN and ES, to use "time"/"vez" throughout. "Lap"
+      stays the site's word everywhere else; this was not a rename.
+
 - [x] **2026-10-02 — "Open through Module N" (per-student module skip).**
       Work order "Open through Module N". New `config/class.moduleOpenThrough`
       (`uid → 2..12`), set from a new "Open through" select in the console's

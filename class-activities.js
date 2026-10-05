@@ -3056,7 +3056,7 @@ window.CLASS_ACTIVITIES = [
         },
         {
           label: 'Chorus 1', label_es: 'Coro 1',
-          caption: 'Chorus 1 — 2 times · the second lap ends C D C B', caption_es: 'Coro 1 — 2 veces · la segunda vuelta termina C D C B',
+          caption: 'Chorus 1 — 2 times · the second time ends C D C B', caption_es: 'Coro 1 — 2 veces · la segunda vez termina C D C B',
           fromBar: 27, bars: 4, reps: 2,
           repLabel: 'Time', repLabel_es: 'Vez',
           notes: [
@@ -3185,7 +3185,7 @@ window.CLASS_ACTIVITIES = [
         },
         {
           label: 'Chorus 2', label_es: 'Coro 2',
-          caption: 'Chorus 2 — 2 times · the second lap ends C D C B', caption_es: 'Coro 2 — 2 veces · la segunda vuelta termina C D C B',
+          caption: 'Chorus 2 — 2 times · the second time ends C D C B', caption_es: 'Coro 2 — 2 veces · la segunda vez termina C D C B',
           fromBar: 107, bars: 4, reps: 2,
           repLabel: 'Time', repLabel_es: 'Vez',
           notes: [
@@ -4408,7 +4408,7 @@ window.CLASS_ACTIVITIES = [
         },
         {
           label: 'Chorus 1', label_es: 'Coro 1',
-          caption: 'Chorus 1 — 2 times · the second lap ends C5 D5 C5 B5', caption_es: 'Coro 1 — 2 veces · la segunda vuelta termina C5 D5 C5 B5',
+          caption: 'Chorus 1 — 2 times · the second time ends C5 D5 C5 B5', caption_es: 'Coro 1 — 2 veces · la segunda vez termina C5 D5 C5 B5',
           fromBar: 27, bars: 4, reps: 2,
           repLabel: 'Time', repLabel_es: 'Vez',
           notes: [
@@ -4537,7 +4537,7 @@ window.CLASS_ACTIVITIES = [
         },
         {
           label: 'Chorus 2', label_es: 'Coro 2',
-          caption: 'Chorus 2 — 2 times · the second lap ends C5 D5 C5 B5', caption_es: 'Coro 2 — 2 veces · la segunda vuelta termina C5 D5 C5 B5',
+          caption: 'Chorus 2 — 2 times · the second time ends C5 D5 C5 B5', caption_es: 'Coro 2 — 2 veces · la segunda vez termina C5 D5 C5 B5',
           fromBar: 107, bars: 4, reps: 2,
           repLabel: 'Time', repLabel_es: 'Vez',
           notes: [
