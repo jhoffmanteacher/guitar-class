@@ -5849,6 +5849,12 @@ function checkPracticeCards() {
         if ('beats' in n && !(n.beats > 0)) flag(`${nw}: beats "${n.beats}" is not a positive number`);
         beats += n.beats > 0 ? n.beats : 1;
       });
+      if ('rows' in sec) {
+        // Notes per tab row (pcTabHtml): must account for every note, or the renderer ignores it silently.
+        const okRows = Array.isArray(sec.rows) && sec.rows.length > 0 && sec.rows.every(r => Number.isInteger(r) && r > 0 && r <= 12);
+        if (!okRows) flag(`${sw}: rows must be a list of whole numbers from 1 to 12 (notes per tab row)`);
+        else if (sec.rows.reduce((x, y) => x + y, 0) !== (sec.notes || []).length) flag(`${sw}: rows add up to ${sec.rows.reduce((x, y) => x + y, 0)}, but the section has ${(sec.notes || []).length} notes — the tab would fall back to even rows`);
+      }
       const wantBeats = sec.bars * tr.beatsPerBar;
       if (Math.abs(beats - wantBeats) > 1e-6) flag(`${sw}: notes add up to ${beats} beats, but ${sec.bars} bar${sec.bars === 1 ? '' : 's'} of ${c.track} is ${wantBeats} — the highlight would drift off the music`);
     });

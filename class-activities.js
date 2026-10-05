@@ -95,6 +95,9 @@
          caption, caption_es,              // the heading over its tab page
          fromBar: 21, bars: 8,             // bars of the RECORD, felt pulse,
                                            // like a snippet window
+         rows: [7, 9],                     // optional: notes per tab row, to
+                                           // end a row where the phrase ends
+                                           // (must add up to notes.length)
          reps: 2, repLabel, repLabel_es,   // optional: the band plays these
                                            // notes `reps` times; the tab shows
                                            // them once, with "Verse 1 of 2"
@@ -3058,6 +3061,7 @@ window.CLASS_ACTIVITIES = [
           label: 'Chorus 1', label_es: 'Coro 1',
           caption: 'Chorus 1 — 2 times · the second time ends C D C B', caption_es: 'Coro 1 — 2 veces · la segunda vez termina C D C B',
           fromBar: 27, bars: 4, reps: 2,
+          rows: [7, 9],     // one riff lap per tab row
           repLabel: 'Time', repLabel_es: 'Vez',
           notes: [
             { string: 'A', fret: 7,  note: 'E', midi: 52, beats: 1.5 },
@@ -3187,6 +3191,7 @@ window.CLASS_ACTIVITIES = [
           label: 'Chorus 2', label_es: 'Coro 2',
           caption: 'Chorus 2 — 2 times · the second time ends C D C B', caption_es: 'Coro 2 — 2 veces · la segunda vez termina C D C B',
           fromBar: 107, bars: 4, reps: 2,
+          rows: [7, 9],     // one riff lap per tab row
           repLabel: 'Time', repLabel_es: 'Vez',
           notes: [
             { string: 'A', fret: 7,  note: 'E', midi: 52, beats: 1.5 },
@@ -4410,6 +4415,7 @@ window.CLASS_ACTIVITIES = [
           label: 'Chorus 1', label_es: 'Coro 1',
           caption: 'Chorus 1 — 2 times · the second time ends C5 D5 C5 B5', caption_es: 'Coro 1 — 2 veces · la segunda vez termina C5 D5 C5 B5',
           fromBar: 27, bars: 4, reps: 2,
+          rows: [7, 9],     // one riff lap per tab row
           repLabel: 'Time', repLabel_es: 'Vez',
           notes: [
             { frets: [['D', 9], ['A', 7]], note: 'E5', midi: [59, 52], beats: 1.5 },
@@ -4539,6 +4545,7 @@ window.CLASS_ACTIVITIES = [
           label: 'Chorus 2', label_es: 'Coro 2',
           caption: 'Chorus 2 — 2 times · the second time ends C5 D5 C5 B5', caption_es: 'Coro 2 — 2 veces · la segunda vez termina C5 D5 C5 B5',
           fromBar: 107, bars: 4, reps: 2,
+          rows: [7, 9],     // one riff lap per tab row
           repLabel: 'Time', repLabel_es: 'Vez',
           notes: [
             { frets: [['D', 9], ['A', 7]], note: 'E5', midi: [59, 52], beats: 1.5 },

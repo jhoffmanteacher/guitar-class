@@ -11141,9 +11141,22 @@ function pcTabHtml(a, L){
     : '';
   const pages = L.sections.map((S, si) => {
     const widest = S.notes.length || 1;
-    const perRow = Math.ceil(widest / Math.ceil(widest / TAB_MAX_COLS));
     const grids = [];
-    for(let k = 0; k < S.notes.length; k += perRow) grids.push(renderTabSystem(S.notes.slice(k, k + perRow), S.seqOff + k, perRow, false));
+    /* `rows` on a section — notes per tab row, e.g. [7, 9] — ends each row
+       where the music does instead of balancing them (ca-25 / ca-31 chorus:
+       one riff lap per row; balanced, lap 2's first E sat at the end of row
+       1 — Jonathan, 2026-10-05). Every row shares the widest row's columns.
+       Ignored unless it accounts for every note (checks.mjs 1bf fails that). */
+    const rowsSpec = Array.isArray(S.s.rows) && S.s.rows.every(r => Number.isInteger(r) && r > 0)
+      && S.s.rows.reduce((x, y) => x + y, 0) === S.notes.length ? S.s.rows : null;
+    if(rowsSpec){
+      const cols = Math.max(...rowsSpec);
+      let k = 0;
+      rowsSpec.forEach(r => { grids.push(renderTabSystem(S.notes.slice(k, k + r), S.seqOff + k, cols, false)); k += r; });
+    } else {
+      const perRow = Math.ceil(widest / Math.ceil(widest / TAB_MAX_COLS));
+      for(let k = 0; k < S.notes.length; k += perRow) grids.push(renderTabSystem(S.notes.slice(k, k + perRow), S.seqOff + k, perRow, false));
+    }
     return `<div class="tab-page pc-page" data-page="${si}"${si ? ' hidden' : ''}><div class="tab-phrase">`
       + `<div class="tab-phrase-label">${escHtml(tf(S.s, 'caption'))}<span class="pc-rep" hidden></span></div>`
       + `<div class="tab-board">${grids.join('')}</div></div></div>`;
