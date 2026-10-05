@@ -89,7 +89,7 @@
        wholeSong: true,                    // optional: stop at the end of the
                                            // song instead of looping — for a
                                            // card that IS the whole record
-                                           // (ca-24, ca-25, ca-26)
+                                           // (ca-24 to ca-28)
        sections: [{                        // back to back, in song order
          label, label_es,                  // the tap-to-start button ("Chorus")
          caption, caption_es,              // the heading over its tab page
@@ -3411,6 +3411,392 @@ window.CLASS_ACTIVITIES = [
     },
     // The help ladder (read-only, under "More practice help").
     steps: [
+      {
+        label:    'Practice — One section at a time',
+        label_es: 'Practica — Una sección a la vez',
+        text:    'Lost in one part? Tap that section to repeat it. You\'ve got it when: that section twice in a row, without stopping.',
+        text_es: '¿Te pierdes en una parte? Pulsa esa sección para repetirla. Lo tienes cuando: esa sección dos veces seguidas, sin detenerte.',
+      },
+    ],
+  },
+  /* "Luna" — The Whole Song (2026-10-05). A whole-song card like ca-26:
+     the F F A A bass loop from ca-20 (low E fret 1, open A string, one
+     pluck per bar) played with the record from the top of the vamp to the
+     last chord. No new part.
+     Bars are the track's steady grid (SNIPPET_TRACKS 'luna': bar 1 = the
+     first F of the vamp at 12.658 s, 2.8125 s a bar). The 120 BPM intro
+     before it (F F Dm Dm) is not on the grid, so the card starts at the
+     vamp. Section map, measured 2026-10-05 off the full mix: chords per bar
+     (chroma) read F F Am Am from bar 1 to the end; the singing (mid/side
+     energy in the vocal band — the voice is centred, the guitars are not)
+     comes in at bars 9 and 29 and drops out at 25-28 and from 45. So:
+     intro 1-8, verse 1 9-24, requinto 25-28, verse 2 29-44, outro 45-52,
+     and bar 53 is the last F ringing out (the file ends 1.3 s after it).
+     Matches Jonathan's chord chart: F / Am per line, a requinto between
+     the two sung parts. */
+  {
+    id:    'ca-27',
+    view:  'card',    // one screen: Play song + tab + checks — see CARD above
+    journey: 'luna',   // the button renders under the Level up check — see JOURNEY above
+    journeyLayer: 2,
+    title:    '"Luna" — The Whole Song',
+    title_es: '"Luna" — La canción completa',
+    intro:    'You know the "Luna" loop, F F A A — today you play it with the band for the whole song, start to finish.',
+    intro_es: 'Ya sabes el bucle de "Luna", F F A A — hoy lo tocas con la banda durante toda la canción, de principio a fin.',
+    card: {
+      wholeSong: true,  // stops at the end of the song instead of looping
+      track: 'luna',
+      slowest: true,    // three-way speed control: Slowest / Slower / Normal — the student picks
+      caption:    'The whole song in order · 1 pluck per bar, let it ring',
+      caption_es: 'La canción completa en orden · 1 pulsación por compás, déjala sonar',
+      sections: [
+        {
+          label: 'Intro', label_es: 'Intro',
+          caption: 'Intro — F F A A, 2 laps', caption_es: 'Intro — F F A A, 2 vueltas',
+          fromBar: 1, bars: 4, reps: 2,
+          repLabel: 'Lap', repLabel_es: 'Vuelta',
+          notes: [
+            { string: 'E', fret: 1, note: 'F', midi: 41, beats: 2 },
+            { string: 'E', fret: 1, note: 'F', midi: 41, beats: 2 },
+            { string: 'A', fret: 0, note: 'A', midi: 45, beats: 2 },
+            { string: 'A', fret: 0, note: 'A', midi: 45, beats: 2 }
+          ]
+        },
+        {
+          label: 'Verse 1', label_es: 'Estrofa 1',
+          caption: 'Verse 1 — F F A A, 4 laps', caption_es: 'Estrofa 1 — F F A A, 4 vueltas',
+          fromBar: 9, bars: 4, reps: 4,
+          repLabel: 'Lap', repLabel_es: 'Vuelta',
+          notes: [
+            { string: 'E', fret: 1, note: 'F', midi: 41, beats: 2 },
+            { string: 'E', fret: 1, note: 'F', midi: 41, beats: 2 },
+            { string: 'A', fret: 0, note: 'A', midi: 45, beats: 2 },
+            { string: 'A', fret: 0, note: 'A', midi: 45, beats: 2 }
+          ]
+        },
+        {
+          label: 'Requinto', label_es: 'Requinto',
+          caption: 'Requinto — F F A A, no singing', caption_es: 'Requinto — F F A A, sin canto',
+          fromBar: 25, bars: 4,
+          notes: [
+            { string: 'E', fret: 1, note: 'F', midi: 41, beats: 2 },
+            { string: 'E', fret: 1, note: 'F', midi: 41, beats: 2 },
+            { string: 'A', fret: 0, note: 'A', midi: 45, beats: 2 },
+            { string: 'A', fret: 0, note: 'A', midi: 45, beats: 2 }
+          ]
+        },
+        {
+          label: 'Verse 2', label_es: 'Estrofa 2',
+          caption: 'Verse 2 — F F A A, 4 laps', caption_es: 'Estrofa 2 — F F A A, 4 vueltas',
+          fromBar: 29, bars: 4, reps: 4,
+          repLabel: 'Lap', repLabel_es: 'Vuelta',
+          notes: [
+            { string: 'E', fret: 1, note: 'F', midi: 41, beats: 2 },
+            { string: 'E', fret: 1, note: 'F', midi: 41, beats: 2 },
+            { string: 'A', fret: 0, note: 'A', midi: 45, beats: 2 },
+            { string: 'A', fret: 0, note: 'A', midi: 45, beats: 2 }
+          ]
+        },
+        {
+          label: 'Outro', label_es: 'Final',
+          caption: 'Outro — F F A A twice, then the last F', caption_es: 'Final — F F A A dos veces, y el último F',
+          fromBar: 45, bars: 9,
+          notes: [
+            { string: 'E', fret: 1, note: 'F', midi: 41, beats: 2 },
+            { string: 'E', fret: 1, note: 'F', midi: 41, beats: 2 },
+            { string: 'A', fret: 0, note: 'A', midi: 45, beats: 2 },
+            { string: 'A', fret: 0, note: 'A', midi: 45, beats: 2 },
+            { string: 'E', fret: 1, note: 'F', midi: 41, beats: 2 },
+            { string: 'E', fret: 1, note: 'F', midi: 41, beats: 2 },
+            { string: 'A', fret: 0, note: 'A', midi: 45, beats: 2 },
+            { string: 'A', fret: 0, note: 'A', midi: 45, beats: 2 },
+            { string: 'E', fret: 1, note: 'F', midi: 41, beats: 2 }
+          ]
+        }
+      ],
+      checks: [
+        { label: 'The whole song, slower', label_es: 'La canción completa, más lenta',
+          text:    'Press Slowest or Slower. Play the whole song with the band, intro to the end, without stopping.',
+          text_es: 'Pulsa «Muy lento» o «Más lento». Toca la canción completa con la banda, de la intro al final, sin detenerte.' },
+        { levelUp: true,
+          text:    'Press Normal. Play the whole song with the band at normal speed, intro to the end, without stopping.',
+          text_es: 'Pulsa «Normal». Toca la canción completa con la banda a velocidad normal, de la intro al final, sin detenerte.' }
+      ]
+    },
+    // The help ladder (read-only, under "More practice help").
+    steps: [
+      {
+        label:    'Practice — One section at a time',
+        label_es: 'Practica — Una sección a la vez',
+        text:    'Lost in one part? Tap that section to repeat it. You\'ve got it when: that section twice in a row, without stopping.',
+        text_es: '¿Te pierdes en una parte? Pulsa esa sección para repetirla. Lo tienes cuando: esa sección dos veces seguidas, sin detenerte.',
+      },
+    ],
+  },
+  /* Sweet Child O' Mine — The Whole Song (2026-10-05). A whole-song card:
+     the root of every chord on the low E and A strings, one pluck per
+     chord, from the first bar of the intro riff to the last E. The verse
+     roots (D D C C G G D D — A string 5 and 3, low E 3) are Journey Layer
+     2; the chorus (A C D D), the two solos and the outro add three notes —
+     A (open A string), E (open low E) and B (A string fret 2) — so nothing
+     sits past fret 5 and the hand never moves.
+     Section map on the track's beat map (SNIPPET_TRACKS barTimes), measured
+     2026-10-05 by chord templates per beat on the full mix and checked
+     against Jonathan's chord chart: intro 1-24 (D D C C G G D D x3; bars
+     1-8 are the riff alone), verse 1 25-40, chorus 1 41-48 (A C D D x2),
+     riff 49-56, verse 2 57-72, chorus 2 73-80, riff 81-96 (x2), chorus 3
+     97-112 (x4), solo 1 113-129 (Em C B7 Am x4, then one more Am), solo 2
+     130-145 (Em G A, then C-C-D-G in one bar, x4), outro 146-173 (the same
+     loop x7), ending 174-183 (Em G A, then E through the slow-down). Bar
+     183 is the last whole measured bar, so the card stops there. This
+     track is in D at A=440 (a pitch-class count over two minutes reads D
+     major) — the original record's half-step-down tuning is not in these
+     files. */
+  {
+    id:    'ca-28',
+    view:  'card',    // one screen: Play song + tab + checks — see CARD above
+    journey: 'sweet-child-o-mine',   // the button renders under the Level up check — see JOURNEY above
+    journeyLayer: 2,
+    title:    'Sweet Child O\' Mine — The Whole Song',
+    title_es: 'Sweet Child O\' Mine — La canción completa',
+    intro:    'You know the verse roots D, C and G — today you play the root of every chord with the band, start to finish.',
+    intro_es: 'Ya sabes las raíces de la estrofa, D, C y G — hoy tocas la raíz de cada acorde con la banda, de principio a fin.',
+    card: {
+      wholeSong: true,  // stops at the end of the song instead of looping
+      track: 'sweet-child-o-mine',
+      slowest: true,    // three-way speed control: Slowest (80) / Slower (100) / Normal (125) — the student picks
+      caption:    'The whole song in order · 1 pluck per chord, let it ring',
+      caption_es: 'La canción completa en orden · 1 pulsación por acorde, déjala sonar',
+      sections: [
+        {
+          label: 'Intro', label_es: 'Intro',
+          caption: 'Intro — D D C C G G D D, 3 laps', caption_es: 'Intro — D D C C G G D D, 3 vueltas',
+          fromBar: 1, bars: 8, reps: 3,
+          repLabel: 'Lap', repLabel_es: 'Vuelta',
+          notes: [
+            { string: 'A', fret: 5, note: 'D', midi: 50, beats: 4 },
+            { string: 'A', fret: 5, note: 'D', midi: 50, beats: 4 },
+            { string: 'A', fret: 3, note: 'C', midi: 48, beats: 4 },
+            { string: 'A', fret: 3, note: 'C', midi: 48, beats: 4 },
+            { string: 'E', fret: 3, note: 'G', midi: 43, beats: 4 },
+            { string: 'E', fret: 3, note: 'G', midi: 43, beats: 4 },
+            { string: 'A', fret: 5, note: 'D', midi: 50, beats: 4 },
+            { string: 'A', fret: 5, note: 'D', midi: 50, beats: 4 }
+          ]
+        },
+        {
+          label: 'Verse 1', label_es: 'Estrofa 1',
+          caption: 'Verse 1 — D D C C G G D D, 2 laps', caption_es: 'Estrofa 1 — D D C C G G D D, 2 vueltas',
+          fromBar: 25, bars: 8, reps: 2,
+          repLabel: 'Lap', repLabel_es: 'Vuelta',
+          notes: [
+            { string: 'A', fret: 5, note: 'D', midi: 50, beats: 4 },
+            { string: 'A', fret: 5, note: 'D', midi: 50, beats: 4 },
+            { string: 'A', fret: 3, note: 'C', midi: 48, beats: 4 },
+            { string: 'A', fret: 3, note: 'C', midi: 48, beats: 4 },
+            { string: 'E', fret: 3, note: 'G', midi: 43, beats: 4 },
+            { string: 'E', fret: 3, note: 'G', midi: 43, beats: 4 },
+            { string: 'A', fret: 5, note: 'D', midi: 50, beats: 4 },
+            { string: 'A', fret: 5, note: 'D', midi: 50, beats: 4 }
+          ]
+        },
+        {
+          label: 'Chorus 1', label_es: 'Coro 1',
+          caption: 'Chorus 1 — A C D D, 2 laps', caption_es: 'Coro 1 — A C D D, 2 vueltas',
+          fromBar: 41, bars: 4, reps: 2,
+          repLabel: 'Lap', repLabel_es: 'Vuelta',
+          notes: [
+            { string: 'A', fret: 0, note: 'A', midi: 45, beats: 4 },
+            { string: 'A', fret: 3, note: 'C', midi: 48, beats: 4 },
+            { string: 'A', fret: 5, note: 'D', midi: 50, beats: 4 },
+            { string: 'A', fret: 5, note: 'D', midi: 50, beats: 4 }
+          ]
+        },
+        {
+          label: 'Riff 1', label_es: 'Riff 1',
+          caption: 'Riff 1 — D D C C G G D D, no singing', caption_es: 'Riff 1 — D D C C G G D D, sin canto',
+          fromBar: 49, bars: 8,
+          notes: [
+            { string: 'A', fret: 5, note: 'D', midi: 50, beats: 4 },
+            { string: 'A', fret: 5, note: 'D', midi: 50, beats: 4 },
+            { string: 'A', fret: 3, note: 'C', midi: 48, beats: 4 },
+            { string: 'A', fret: 3, note: 'C', midi: 48, beats: 4 },
+            { string: 'E', fret: 3, note: 'G', midi: 43, beats: 4 },
+            { string: 'E', fret: 3, note: 'G', midi: 43, beats: 4 },
+            { string: 'A', fret: 5, note: 'D', midi: 50, beats: 4 },
+            { string: 'A', fret: 5, note: 'D', midi: 50, beats: 4 }
+          ]
+        },
+        {
+          label: 'Verse 2', label_es: 'Estrofa 2',
+          caption: 'Verse 2 — D D C C G G D D, 2 laps', caption_es: 'Estrofa 2 — D D C C G G D D, 2 vueltas',
+          fromBar: 57, bars: 8, reps: 2,
+          repLabel: 'Lap', repLabel_es: 'Vuelta',
+          notes: [
+            { string: 'A', fret: 5, note: 'D', midi: 50, beats: 4 },
+            { string: 'A', fret: 5, note: 'D', midi: 50, beats: 4 },
+            { string: 'A', fret: 3, note: 'C', midi: 48, beats: 4 },
+            { string: 'A', fret: 3, note: 'C', midi: 48, beats: 4 },
+            { string: 'E', fret: 3, note: 'G', midi: 43, beats: 4 },
+            { string: 'E', fret: 3, note: 'G', midi: 43, beats: 4 },
+            { string: 'A', fret: 5, note: 'D', midi: 50, beats: 4 },
+            { string: 'A', fret: 5, note: 'D', midi: 50, beats: 4 }
+          ]
+        },
+        {
+          label: 'Chorus 2', label_es: 'Coro 2',
+          caption: 'Chorus 2 — A C D D, 2 laps', caption_es: 'Coro 2 — A C D D, 2 vueltas',
+          fromBar: 73, bars: 4, reps: 2,
+          repLabel: 'Lap', repLabel_es: 'Vuelta',
+          notes: [
+            { string: 'A', fret: 0, note: 'A', midi: 45, beats: 4 },
+            { string: 'A', fret: 3, note: 'C', midi: 48, beats: 4 },
+            { string: 'A', fret: 5, note: 'D', midi: 50, beats: 4 },
+            { string: 'A', fret: 5, note: 'D', midi: 50, beats: 4 }
+          ]
+        },
+        {
+          label: 'Riff 2', label_es: 'Riff 2',
+          caption: 'Riff 2 — D D C C G G D D, 2 laps, no singing', caption_es: 'Riff 2 — D D C C G G D D, 2 vueltas, sin canto',
+          fromBar: 81, bars: 8, reps: 2,
+          repLabel: 'Lap', repLabel_es: 'Vuelta',
+          notes: [
+            { string: 'A', fret: 5, note: 'D', midi: 50, beats: 4 },
+            { string: 'A', fret: 5, note: 'D', midi: 50, beats: 4 },
+            { string: 'A', fret: 3, note: 'C', midi: 48, beats: 4 },
+            { string: 'A', fret: 3, note: 'C', midi: 48, beats: 4 },
+            { string: 'E', fret: 3, note: 'G', midi: 43, beats: 4 },
+            { string: 'E', fret: 3, note: 'G', midi: 43, beats: 4 },
+            { string: 'A', fret: 5, note: 'D', midi: 50, beats: 4 },
+            { string: 'A', fret: 5, note: 'D', midi: 50, beats: 4 }
+          ]
+        },
+        {
+          label: 'Chorus 3', label_es: 'Coro 3',
+          caption: 'Chorus 3 — A C D D, 4 laps', caption_es: 'Coro 3 — A C D D, 4 vueltas',
+          fromBar: 97, bars: 4, reps: 4,
+          repLabel: 'Lap', repLabel_es: 'Vuelta',
+          notes: [
+            { string: 'A', fret: 0, note: 'A', midi: 45, beats: 4 },
+            { string: 'A', fret: 3, note: 'C', midi: 48, beats: 4 },
+            { string: 'A', fret: 5, note: 'D', midi: 50, beats: 4 },
+            { string: 'A', fret: 5, note: 'D', midi: 50, beats: 4 }
+          ]
+        },
+        {
+          label: 'Solo 1', label_es: 'Solo 1',
+          caption: 'Solo 1 — E C B A, 4 laps, then one more A', caption_es: 'Solo 1 — E C B A, 4 vueltas, y un A más',
+          fromBar: 113, bars: 17,
+          notes: [
+            { string: 'E', fret: 0, note: 'E', midi: 40, beats: 4 },
+            { string: 'A', fret: 3, note: 'C', midi: 48, beats: 4 },
+            { string: 'A', fret: 2, note: 'B', midi: 47, beats: 4 },
+            { string: 'A', fret: 0, note: 'A', midi: 45, beats: 4 },
+            { string: 'E', fret: 0, note: 'E', midi: 40, beats: 4 },
+            { string: 'A', fret: 3, note: 'C', midi: 48, beats: 4 },
+            { string: 'A', fret: 2, note: 'B', midi: 47, beats: 4 },
+            { string: 'A', fret: 0, note: 'A', midi: 45, beats: 4 },
+            { string: 'E', fret: 0, note: 'E', midi: 40, beats: 4 },
+            { string: 'A', fret: 3, note: 'C', midi: 48, beats: 4 },
+            { string: 'A', fret: 2, note: 'B', midi: 47, beats: 4 },
+            { string: 'A', fret: 0, note: 'A', midi: 45, beats: 4 },
+            { string: 'E', fret: 0, note: 'E', midi: 40, beats: 4 },
+            { string: 'A', fret: 3, note: 'C', midi: 48, beats: 4 },
+            { string: 'A', fret: 2, note: 'B', midi: 47, beats: 4 },
+            { string: 'A', fret: 0, note: 'A', midi: 45, beats: 4 },
+            { string: 'A', fret: 0, note: 'A', midi: 45, beats: 4 }
+          ]
+        },
+        {
+          label: 'Solo 2', label_es: 'Solo 2',
+          caption: 'Solo 2 — E G A, then C D G in one bar, 4 laps', caption_es: 'Solo 2 — E G A, y C D G en un compás, 4 vueltas',
+          fromBar: 130, bars: 4, reps: 4,
+          repLabel: 'Lap', repLabel_es: 'Vuelta',
+          notes: [
+            { string: 'E', fret: 0, note: 'E', midi: 40, beats: 4 },
+            { string: 'E', fret: 3, note: 'G', midi: 43, beats: 4 },
+            { string: 'A', fret: 0, note: 'A', midi: 45, beats: 4 },
+            { string: 'A', fret: 3, note: 'C', midi: 48, beats: 2 },
+            { string: 'A', fret: 5, note: 'D', midi: 50, beats: 1 },
+            { string: 'E', fret: 3, note: 'G', midi: 43, beats: 1 }
+          ]
+        },
+        {
+          label: 'Outro', label_es: 'Final',
+          caption: 'Outro — E G A, then C D G in one bar, 7 laps', caption_es: 'Final — E G A, y C D G en un compás, 7 vueltas',
+          fromBar: 146, bars: 4, reps: 7,
+          repLabel: 'Lap', repLabel_es: 'Vuelta',
+          notes: [
+            { string: 'E', fret: 0, note: 'E', midi: 40, beats: 4 },
+            { string: 'E', fret: 3, note: 'G', midi: 43, beats: 4 },
+            { string: 'A', fret: 0, note: 'A', midi: 45, beats: 4 },
+            { string: 'A', fret: 3, note: 'C', midi: 48, beats: 2 },
+            { string: 'A', fret: 5, note: 'D', midi: 50, beats: 1 },
+            { string: 'E', fret: 3, note: 'G', midi: 43, beats: 1 }
+          ]
+        },
+        {
+          label: 'Ending', label_es: 'Cierre',
+          caption: 'Ending — E G A, then E to the end', caption_es: 'Cierre — E G A, y E hasta el final',
+          fromBar: 174, bars: 10,
+          notes: [
+            { string: 'E', fret: 0, note: 'E', midi: 40, beats: 4 },
+            { string: 'E', fret: 3, note: 'G', midi: 43, beats: 4 },
+            { string: 'A', fret: 0, note: 'A', midi: 45, beats: 4 },
+            { string: 'E', fret: 0, note: 'E', midi: 40, beats: 4 },
+            { string: 'E', fret: 0, note: 'E', midi: 40, beats: 4 },
+            { string: 'E', fret: 0, note: 'E', midi: 40, beats: 4 },
+            { string: 'E', fret: 0, note: 'E', midi: 40, beats: 4 },
+            { string: 'E', fret: 0, note: 'E', midi: 40, beats: 4 },
+            { string: 'E', fret: 0, note: 'E', midi: 40, beats: 4 },
+            { string: 'E', fret: 0, note: 'E', midi: 40, beats: 4 }
+          ]
+        }
+      ],
+      checks: [
+        { label: 'The whole song, slower', label_es: 'La canción completa, más lenta',
+          text:    'Press Slowest or Slower. Play the whole song with the band, intro to the end, without stopping.',
+          text_es: 'Pulsa «Muy lento» o «Más lento». Toca la canción completa con la banda, de la intro al final, sin detenerte.' },
+        { levelUp: true,
+          text:    'Press Normal. Play the whole song with the band at normal speed, intro to the end, without stopping.',
+          text_es: 'Pulsa «Normal». Toca la canción completa con la banda a velocidad normal, de la intro al final, sin detenerte.' }
+      ]
+    },
+    // The help ladder (read-only, under "More practice help").
+    steps: [
+      {
+        label:    'Learn — Three new notes',
+        label_es: 'Aprende — Tres notas nuevas',
+        text:    'Press Play on the tab. A is the open A string. E is the open low E string. B is fret 2 on the A string, with your index finger.',
+        text_es: 'Pulsa «Tocar el tab». A es la cuerda La al aire. E es la cuerda Mi grave al aire. B es el traste 2 de la cuerda La, con el índice.',
+        tab: {
+          caption: 'A · E · B · 4 beats each',
+          caption_es: 'A · E · B · 4 tiempos cada una',
+          notes: [
+            { string: 'A', fret: 0, note: 'A', midi: 45, beats: 4 },
+            { string: 'E', fret: 0, note: 'E', midi: 40, beats: 4 },
+            { string: 'A', fret: 2, note: 'B', midi: 47, beats: 4 }
+          ]
+        },
+      },
+      {
+        label:    'Practice — The quick bar',
+        label_es: 'Practica — El compás rápido',
+        text:    'In the solos and the outro, one bar has C for 2 beats, then a quick D and a quick G. You\'ve got it when: E G A, C D G four times in a row with the tab, no stops. Late on the G? Turn the tab\'s BPM down.',
+        text_es: 'En los solos y el final, un compás tiene C por 2 tiempos, y luego un D rápido y un G rápido. Lo tienes cuando: E G A, C D G cuatro veces seguidas con el tab, sin detenerte. ¿Llegas tarde al G? Baja los BPM del tab.',
+        tab: {
+          caption: 'E G A, then C D G in one bar',
+          caption_es: 'E G A, y C D G en un compás',
+          notes: [
+            { string: 'E', fret: 0, note: 'E', midi: 40, beats: 4 },
+            { string: 'E', fret: 3, note: 'G', midi: 43, beats: 4 },
+            { string: 'A', fret: 0, note: 'A', midi: 45, beats: 4 },
+            { string: 'A', fret: 3, note: 'C', midi: 48, beats: 2 },
+            { string: 'A', fret: 5, note: 'D', midi: 50, beats: 1 },
+            { string: 'E', fret: 3, note: 'G', midi: 43, beats: 1 }
+          ]
+        },
+      },
       {
         label:    'Practice — One section at a time',
         label_es: 'Practica — Una sección a la vez',

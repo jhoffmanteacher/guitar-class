@@ -1415,8 +1415,8 @@ for the teacher's own account by email; a failed config read fails open (no
 gate), never on a guess. `mood-chart.html` is not one of the six and is never
 gated. **The one exemption (2026-09-12):** a pending activity that names a
 Journey page — `journey: '<slug>'` in `class-activities.js` (ca-10, ca-25 →
-seven-nation-army; ca-13, ca-18, ca-19, ca-24 → the-cure; ca-20 → luna;
-ca-26 → all-along-the-watchtower — the list is whatever carries the field,
+seven-nation-army; ca-13, ca-18, ca-19, ca-24 → the-cure; ca-20, ca-27 → luna;
+ca-26 → all-along-the-watchtower; ca-28 → sweet-child-o-mine — the list is whatever carries the field,
 so read the file rather than trusting this line), optional
 `journeyLayer` — is sending
 the student there as part of the work, so `journey.js` leaves THAT page open
@@ -1466,7 +1466,7 @@ teach the rungs and the activity is ONE screen: the song's tab, one "Play
 song" button that plays the real backing track and moves the tab note by
 note (`.beat-now`, honouring each note's `beats`), one page per section with
 tap-a-section-to-start (four-click count-in, then the loop returns to that
-section — except on a `card.wholeSong` card (ca-24, ca-25, ca-26), which
+section — except on a `card.wholeSong` card (ca-24 to ca-28), which
 stops at the end of the song, Jonathan 2026-10-02), a Slower / Normal switch (the slow / fast files, starting on
 Slower), the Guitar toggle where a full mix exists, and a Metronome that is
 a click the SITE makes on every counted beat — there are no metronome
