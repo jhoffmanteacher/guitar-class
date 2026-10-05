@@ -104,6 +104,13 @@ patch-pair handoff it doesn't need.
   --check --skip-links` → `git push` → `checks.mjs --live`). Afterwards,
   hard-reset the cloud clone to origin — never re-merge.
 
+  **Deliver the pair as ONE zip** (Jonathan, 2026-10-05: "package multiple
+  files as zips in the future"). Any handoff of two or more files — a patch
+  and its `APPLY-<name>.md`, several patches, any other set — goes out as a
+  single `<name>.zip`, never as separate attachments. A single file is sent
+  as it is. The one exception is the phone workflow, which stays one plain
+  `CHANGES.md`.
+
   **Applying a patch: a conflict on `sw.js`'s `CACHE_VERSION` line is
   expected, not a problem.** That line is a fingerprint of every cached
   file, so every patch touches it, and it conflicts whenever `main` moved
