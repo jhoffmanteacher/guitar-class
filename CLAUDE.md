@@ -1981,7 +1981,11 @@ ear. This is chord *timing*, not BPM:
   chorus 2, 45-56; refrain 2, 57-60; bridge `F | C G | F | C G | Dm F C G`,
   61-68; chorus 3, 69-80; outro `Dm F C G` x2, quieter, 81-88. The file
   ends early in bar 89, so bar 88 is the last whole bar. The chart writes
-  G/B throughout; the site plays plain G.
+  G/B throughout; the site plays plain G. The Journey page and ca-18 teach
+  the chorus as eight bars, twice through the loop, on purpose (Jonathan,
+  2026-10-06); the page's third play-along note tells students the record
+  plays it three times. Don't rewrite the page's "twice — eight bars" lines
+  to twelve.
   No capo, by design. **Module 12's fingerpicking-as-native-style framing stays**
   (Jonathan's call, 2026-07-31): the record's guitar is rapidly strummed, but
   the fingerstyle arrangement and its ◐-comes-off lesson are a deliberate

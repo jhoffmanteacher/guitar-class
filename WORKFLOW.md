@@ -654,6 +654,13 @@
 
 ## Recently shipped (post-archive)
 
+- [x] **2026-10-06 — "the cure" Journey page: the record plays each chorus
+      three times.** The page (and ca-18) teach the chorus as eight bars,
+      twice through the loop; the record plays Dm · F · C · G three times
+      (12 bars). Per Jonathan, the eight-bar teaching stays and the page now
+      carries one more play-along note, under the Metronome note, saying so
+      (EN + `data-es`). No "twice — eight bars" line was changed.
+
 - [x] **2026-10-06 — "the cure" whole-song captions: "3 times" → "3 laps,"
       plus ratchet 1bm.** Eight sections on ca-24 and ca-30 (Chorus 1–3 and
       the Outro on each) counted in "times"/"veces" in the caption while

@@ -5,6 +5,11 @@ Notable changes to the Guitar Class site. Newest first.
 For the full session-by-session history (and the reasoning behind each change),
 see `WORKFLOW.md` and the git commit log.
 
+## 2026-10-06 — "the cure" Song Journey: the chorus plays three times
+
+- The "the cure" Song Journey page now says the record plays each chorus
+  three times, so you are not surprised when it keeps going after two.
+
 ## 2026-10-06 — "the cure" chorus headings say "laps"
 
 - The chorus and outro headings on the two "the cure" whole-song cards now say
