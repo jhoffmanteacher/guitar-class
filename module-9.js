@@ -924,8 +924,8 @@ SETS.push(
                   answer: 1,
                   explain: 'Spacing IS the rhythm in TAB — cramped numbers make your riff unplayable for anyone else.',
                   explain_es: 'El espaciado ES el ritmo en el TAB — los números amontonados hacen que tu riff sea imposible de tocar para cualquier otra persona.',
-                  choices: ['Neat, decorative handwriting', 'Even spacing that shows the rhythm', 'Using pen instead of pencil', 'Writing the song title at the top'],
-                  choices_es: ['Una letra ordenada y decorativa', 'Un espaciado parejo que muestre el ritmo', 'Usar pluma en vez de lápiz', 'Escribir el título de la canción arriba'] }
+                  choices: ['Writing every fret number extra large', 'Even spacing that shows the rhythm', 'Putting each bar on its own page', 'Leaving a blank line between strings'],
+                  choices_es: ['Escribir cada número de traste extra grande', 'Un espaciado parejo que muestre el ritmo', 'Poner cada compás en su propia página', 'Dejar una línea en blanco entre cuerdas'] }
               }
             ]
           },
