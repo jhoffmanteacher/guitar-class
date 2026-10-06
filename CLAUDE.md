@@ -280,7 +280,9 @@ answers — every function that writes `responses[...]` checks
 `isPeekedResponseKey()` first, writer count pinned (1bl), and the site-made
 click — each Song Journey page's beat map against `SNIPPET_TRACKS`, no
 metronome mix in `audio/` but the allow-listed one, no metronome field on a
-track, and `snippetSrc()` called with three arguments (1bk).
+track, and `snippetSrc()` called with three arguments (1bk), and a
+practice-card section's caption counting with a different word from its
+badge — `repLabel` whitelist, both languages (1bm).
 
 **A phrase detector must match the UNESCAPED string.** Until 2026-09-25 1w
 and 1w-t matched the raw source capture, which keeps `\'`, so every banned
@@ -1503,7 +1505,9 @@ time: `pcStop()` sits beside every `snipStop()` in `stopCardAudio`,
 card calls `stopAllDemoAudio()`. **1bf** checks the data: track exists,
 sections back to back, each section's beats = bars × beatsPerBar, notes'
 midi/name from string + fret, window inside the file, exactly one Level up
-and it's last, help steps carry no snippet/drill/video.
+and it's last, help steps carry no snippet/drill/video. A section with a
+`repLabel` counts in that word in its caption — "3 laps" under a Lap badge,
+"2 times" under a Time badge — and 1bm fails the push on a mix.
 
 **A card note may be a chord** (2026-10-05, the power-chord whole songs
 ca-29–ca-33): `{ frets: [[string, fret], ...], note: 'A5', midi: [...] }`,

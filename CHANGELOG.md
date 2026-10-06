@@ -5,6 +5,11 @@ Notable changes to the Guitar Class site. Newest first.
 For the full session-by-session history (and the reasoning behind each change),
 see `WORKFLOW.md` and the git commit log.
 
+## 2026-10-06 — "the cure" chorus headings say "laps"
+
+- The chorus and outro headings on the two "the cure" whole-song cards now say
+  "3 laps" and "2 laps", the same word as the "Lap 1 of 3" badge beside them.
+
 ## 2026-10-06 — Fixes from a full site check
 
 ### Fixed

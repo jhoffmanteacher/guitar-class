@@ -2457,7 +2457,7 @@ window.CLASS_ACTIVITIES = [
         },
         {
           label: 'Chorus 1', label_es: 'Coro 1',
-          caption: 'Chorus 1 — D F C G, 3 times', caption_es: 'Coro 1 — D F C G, 3 veces',
+          caption: 'Chorus 1 — D F C G, 3 laps', caption_es: 'Coro 1 — D F C G, 3 vueltas',
           fromBar: 21, bars: 4, reps: 3,
           repLabel: 'Lap', repLabel_es: 'Vuelta',
           notes: [
@@ -2543,7 +2543,7 @@ window.CLASS_ACTIVITIES = [
         },
         {
           label: 'Chorus 2', label_es: 'Coro 2',
-          caption: 'Chorus 2 — D F C G, 3 times', caption_es: 'Coro 2 — D F C G, 3 veces',
+          caption: 'Chorus 2 — D F C G, 3 laps', caption_es: 'Coro 2 — D F C G, 3 vueltas',
           fromBar: 45, bars: 4, reps: 3,
           repLabel: 'Lap', repLabel_es: 'Vuelta',
           notes: [
@@ -2629,7 +2629,7 @@ window.CLASS_ACTIVITIES = [
         },
         {
           label: 'Chorus 3', label_es: 'Coro 3',
-          caption: 'Chorus 3 — D F C G, 3 times', caption_es: 'Coro 3 — D F C G, 3 veces',
+          caption: 'Chorus 3 — D F C G, 3 laps', caption_es: 'Coro 3 — D F C G, 3 vueltas',
           fromBar: 69, bars: 4, reps: 3,
           repLabel: 'Lap', repLabel_es: 'Vuelta',
           notes: [
@@ -2653,7 +2653,7 @@ window.CLASS_ACTIVITIES = [
         },
         {
           label: 'Outro', label_es: 'Final',
-          caption: 'Outro — D F C G, 2 times', caption_es: 'Final — D F C G, 2 veces',
+          caption: 'Outro — D F C G, 2 laps', caption_es: 'Final — D F C G, 2 vueltas',
           fromBar: 81, bars: 4, reps: 2,
           repLabel: 'Lap', repLabel_es: 'Vuelta',
           notes: [
@@ -4088,7 +4088,7 @@ window.CLASS_ACTIVITIES = [
         },
         {
           label: 'Chorus 1', label_es: 'Coro 1',
-          caption: 'Chorus 1 — D5 F5 C5 G5, 3 times', caption_es: 'Coro 1 — D5 F5 C5 G5, 3 veces',
+          caption: 'Chorus 1 — D5 F5 C5 G5, 3 laps', caption_es: 'Coro 1 — D5 F5 C5 G5, 3 vueltas',
           fromBar: 21, bars: 4, reps: 3,
           repLabel: 'Lap', repLabel_es: 'Vuelta',
           notes: [
@@ -4174,7 +4174,7 @@ window.CLASS_ACTIVITIES = [
         },
         {
           label: 'Chorus 2', label_es: 'Coro 2',
-          caption: 'Chorus 2 — D5 F5 C5 G5, 3 times', caption_es: 'Coro 2 — D5 F5 C5 G5, 3 veces',
+          caption: 'Chorus 2 — D5 F5 C5 G5, 3 laps', caption_es: 'Coro 2 — D5 F5 C5 G5, 3 vueltas',
           fromBar: 45, bars: 4, reps: 3,
           repLabel: 'Lap', repLabel_es: 'Vuelta',
           notes: [
@@ -4260,7 +4260,7 @@ window.CLASS_ACTIVITIES = [
         },
         {
           label: 'Chorus 3', label_es: 'Coro 3',
-          caption: 'Chorus 3 — D5 F5 C5 G5, 3 times', caption_es: 'Coro 3 — D5 F5 C5 G5, 3 veces',
+          caption: 'Chorus 3 — D5 F5 C5 G5, 3 laps', caption_es: 'Coro 3 — D5 F5 C5 G5, 3 vueltas',
           fromBar: 69, bars: 4, reps: 3,
           repLabel: 'Lap', repLabel_es: 'Vuelta',
           notes: [
@@ -4284,7 +4284,7 @@ window.CLASS_ACTIVITIES = [
         },
         {
           label: 'Outro', label_es: 'Final',
-          caption: 'Outro — D5 F5 C5 G5, 2 times', caption_es: 'Final — D5 F5 C5 G5, 2 veces',
+          caption: 'Outro — D5 F5 C5 G5, 2 laps', caption_es: 'Final — D5 F5 C5 G5, 2 vueltas',
           fromBar: 81, bars: 4, reps: 2,
           repLabel: 'Lap', repLabel_es: 'Vuelta',
           notes: [

@@ -5898,6 +5898,52 @@ function checkPracticeCards() {
   if (bad === 0) ok(`${cards} practice card${cards === 1 ? '' : 's'} — sections add up to their bars and land inside the track, one Level up each, both renderers and every silencer wired`);
 }
 
+/* 1bm. A CARD SECTION'S CAPTION COUNTS WITH ITS BADGE'S WORD (2026-10-06).
+   A section with a `repLabel` shows a badge ("Lap 1 of 3"); its caption must
+   count in the same word — "3 laps" under a Lap badge, "2 times" under a Time
+   badge — never one word in the caption and another in the badge. Found twice
+   (4 sections 2026-10-05, 8 on 2026-10-06), so it is a detector now. The badge
+   words are a whitelist: a new pair has to be added here on purpose. */
+const REP_BADGE_WORDS = {
+  'Lap|Vuelta':    { en: 'laps?|times?', es: 'vueltas?|vez|veces', allowEn: 'laps?',  allowEs: 'vueltas?' },
+  'Time|Vez':      { en: 'laps?|times?', es: 'vueltas?|vez|veces', allowEn: 'times?', allowEs: 'vez|veces' },
+  'Verse|Estrofa': { en: 'laps?|times?', es: 'vueltas?|vez|veces', allowEn: null,     allowEs: null }
+};
+function checkCardCaptionWords() {
+  head('1bm. A card section\'s caption counts with its badge\'s word');
+  let activities = [];
+  try {
+    const src = readFileSync(join(ROOT, 'class-activities.js'), 'utf8');
+    const sandbox = { console };
+    sandbox.window = sandbox;
+    vm.createContext(sandbox);
+    vm.runInContext(src, sandbox, { filename: 'class-activities.js' });
+    activities = sandbox.CLASS_ACTIVITIES || [];
+  } catch { return; /* reported by 1d */ }
+  let bad = 0, checked = 0;
+  const flag = m => { err(m); problems++; bad++; };
+  for (const a of activities) {
+    if (!a || a.view !== 'card' || !a.card || !Array.isArray(a.card.sections)) continue;
+    a.card.sections.forEach((sec, si) => {
+      if (!sec || !sec.repLabel) return;
+      checked++;
+      const where = `${a.id} · card.sections[${si}]`;
+      const rule = REP_BADGE_WORDS[`${sec.repLabel}|${sec.repLabel_es}`];
+      if (!rule) { flag(`${where}: badge pair "${sec.repLabel}" / "${sec.repLabel_es}" is not in REP_BADGE_WORDS — add it to the table on purpose`); return; }
+      const scan = (text, bannedRe, allowRe, lang) => {
+        for (const m of String(text || '').matchAll(new RegExp(`\\b(${bannedRe})\\b`, 'gi'))) {
+          if (allowRe && new RegExp(`^(${allowRe})$`, 'i').test(m[1])) continue;
+          flag(`${where}: ${lang} caption says "${m[1]}" but the badge reads "${lang === 'English' ? sec.repLabel : sec.repLabel_es} 1 of ${sec.reps}" — one counting word per section ("${String(text).trim()}")`);
+        }
+      };
+      scan(sec.caption, rule.en, rule.allowEn, 'English');
+      scan(sec.caption_es, rule.es, rule.allowEs, 'Spanish');
+    });
+  }
+  if (checked === 0) { err('1bm checked no card section with a repLabel — it cannot see what it is supposed to guard'); problems++; return; }
+  if (bad === 0) ok(`${checked} card sections with a repeat badge — every caption counts in its badge's word, both languages`);
+}
+
 /* 1bg. REP-COUNT DOTS, EN/ES PARITY (2026-09-28 sweep). repCountFromGotIt()
    in app.js turns a "You've got it when: N ... in a row" sentence into N tap
    dots — but its regex named the phrase, not the grammar, and Spanish
@@ -6288,6 +6334,7 @@ function checkGuitarNotes() {
   checkCaButtonNamesAndPaper();
   checkJourneyGuitarToggle();
   checkPracticeCards();
+  checkCardCaptionWords();
   checkRepCountParity(rcSets, rcCtx);
   checkJourneySlowBpmLabels();
   checkGuitarNotes();

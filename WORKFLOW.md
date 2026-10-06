@@ -654,6 +654,17 @@
 
 ## Recently shipped (post-archive)
 
+- [x] **2026-10-06 — "the cure" whole-song captions: "3 times" → "3 laps,"
+      plus ratchet 1bm.** Eight sections on ca-24 and ca-30 (Chorus 1–3 and
+      the Outro on each) counted in "times"/"veces" in the caption while
+      their badge reads "Lap 1 of 3" (`repLabel: 'Lap'`). Reworded all
+      sixteen strings to "laps"/"vueltas". Second occurrence of the class
+      (four sections 2026-10-05), so checks.mjs 1bm now fails the push on a
+      caption whose counting word differs from its badge's, against a
+      `repLabel` whitelist (Lap/Vuelta, Time/Vez, Verse/Estrofa), in both
+      languages; 67 sections checked today. Proved by breaking it three ways.
+      Chorus length untouched (12 bars: 4 × 3 laps).
+
 - [x] **2026-10-05 — Seven Nation Army chorus captions: "second lap" →
       "second time."** Both whole-song power-chord practice cards (ca-25
       and ca-31) had a Chorus 1 and Chorus 2 section whose caption mixed
