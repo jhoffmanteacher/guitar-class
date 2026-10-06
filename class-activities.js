@@ -41,6 +41,8 @@
    pending — journey.js exempts a page any pending activity names, since the
    page is part of the work. Every other Journey page stays gated as usual.
    checks.mjs 1d validates the slug (and the layer against JOURNEY_LAYERS).
+   For a slug in JOURNEY_RETIRED (below) the button does not render and the page
+   is closed to students; `journey:` still ties the card to its song on the Songs page.
    Write the steps to match: only the LAST step may name the Song Journey
    page (EN "Song Journey", ES "Recorrido de la canción") — an earlier step
    that says "open the Song Journey page" points at a button it doesn't
@@ -375,6 +377,16 @@
 
    The schema above is documentation, not a template to copy live.
    ════════════════════════════════════════════════════════════════════ */
+/* JOURNEY_RETIRED — Song Journey pages students are no longer sent to
+   (Jonathan, 2026-10-06). The whole-song practice card is where a song is
+   practised now; a retired song's Journey page stays in the repo as source
+   material and shows students a "moved" card (tabs/journey.js). Lives in
+   THIS file because it is the one data file both index.html and the six
+   Journey pages already load. Add a slug only once that song has a
+   whole-song card (card.wholeSong) — checks.mjs 1bn fails the push
+   otherwise. `journey:` stays on the cards: it is also what places a
+   whole-song card on its Songs-page row. */
+window.JOURNEY_RETIRED = ['the-cure', 'seven-nation-army'];
 window.CLASS_ACTIVITIES = [
   {
     id:    'ca-1',
@@ -3227,8 +3239,8 @@ window.CLASS_ACTIVITIES = [
           text:    'Press Slowest or Slower. Play the whole song with the band, intro to the end, without stopping.',
           text_es: 'Pulsa «Muy lento» o «Más lento». Toca la canción completa con la banda, de la intro al final, sin detenerte.' },
         { levelUp: true,
-          text:    'Press Normal and play the whole song. Then play along with the full recording on the Song Journey page, Layer 2.',
-          text_es: 'Pulsa «Normal» y toca la canción completa. Después toca con la grabación completa en la página de Recorrido de la canción, Capa 2.' }
+          text:    'Press Normal. Play the whole song with the band at normal speed, intro to the end, without stopping.',
+          text_es: 'Pulsa «Normal». Toca la canción completa con la banda a velocidad normal, de la intro al final, sin detenerte.' }
       ]
     },
     // The help ladder (read-only, under "More practice help").

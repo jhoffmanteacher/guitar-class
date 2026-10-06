@@ -3306,6 +3306,15 @@ const SONG_JOURNEYS = [
   { id:'let-it-be',                name:'Let It Be',                url:'tabs/let-it-be.html' },
   { id:'the-cure',                 name:'the cure',                 url:'tabs/the-cure.html' },
 ];
+/* A retired Journey page (JOURNEY_RETIRED, class-activities.js): no link on
+   the site opens it. One helper so the six doors below cannot disagree. */
+function journeyRetired(slug){
+  return !!slug && (window.JOURNEY_RETIRED || []).includes(slug);
+}
+function journeyRetiredUrl(url){
+  const m = /tabs\/([^/.#?]+)\.html/.exec(url || '');
+  return !!m && journeyRetired(m[1]);
+}
 let _resumeCardBuilt = false;    // build once per page load…
 let _resumeCardClosed = false;   // …and never resurrect after dismiss/use
 
@@ -3351,7 +3360,7 @@ function resumeModuleTarget(){
    layers. Docs from before the songReadyAt stamp existed sort as 0 and fall
    back to canonical song order — still a sensible pick, just not recency. */
 function resumeSongPick(){
-  const c = SONG_JOURNEYS.map(sj=>{
+  const c = SONG_JOURNEYS.filter(sj=>!journeyRetired(sj.id)).map(sj=>{
     const map = songReady && songReady[sj.id];
     if(!map) return null;
     const keys = Object.keys(map);
@@ -4037,7 +4046,7 @@ function buildSet(w){
         /* NB: don't name this callback param `t` — it would shadow the global
            i18n t() that the title string below needs. */
         const names = entries.map(song => {
-          const url = song.journey ? (song.layer ? `${song.journey}#layer-${song.layer}` : song.journey) : null;
+          const url = (song.journey && !journeyRetiredUrl(song.journey)) ? (song.layer ? `${song.journey}#layer-${song.layer}` : song.journey) : null;
           return url
             ? `<a class="song-thread-link" href="${escAttr(url)}" target="_blank" rel="noopener" title="${escAttr(t('songs.openLayerTitle'))}">${escHtml(song.name)}</a>`
             : `<span class="song-thread-name">${escHtml(song.name)}</span>`;
@@ -4322,11 +4331,10 @@ function journeySongsFor(moduleNum){
 }
 function journeyLinkCardHtml(w){
   const songs = journeySongsFor(w.moduleNum);
-  const buttons = songs.map(sg => {
-    const layer = JOURNEY_LAYERS[sg.id][w.moduleNum];
-    return `<button type="button" class="jl-song-btn" onclick="window.open('${escAttr(journeyHref(sg.url, layer, ''))}','_blank','noopener')">${escHtml(sg.name)}</button>`;
-  }).join('');
-  if(!buttons) return '';
+  if(!songs.length) return '';
+  /* One button to the Songs page, not one per song (2026-10-06, Journey
+     phase-out): the whole-song practice card is where a song is played. */
+  const buttons = `<button type="button" class="jl-song-btn" onclick="goExploreHash('songs')">${escHtml(t('journey.takeItBtn'))}</button>`;
   return `<div class="jl-card">
     <div class="jl-title">${escHtml(t('journey.takeItTitle'))}</div>
     <p class="jl-sub">${escHtml(t('journey.takeItSub'))}</p>
@@ -9583,9 +9591,9 @@ async function renderSongsHub(){
       const slug = songJourneySlug(sg);
       vids.push(`<span class="sh-play-slot" data-slug="${escAttr(slug)}">${songsPlayAlongBtn(slug)}</span>`);
       if(sg.backingUrl) vids.push(`<button class="song-vid-btn" onclick="songsHubVid(${idx},'backing')"><span class="svb-play">&#x25B6;</span><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" style="width:1em;height:1em;vertical-align:-0.15em"><path d="M9 18V5l12-2v13"/><circle cx="6" cy="18" r="3"/><circle cx="18" cy="16" r="3"/></svg> ${t('hub.backingSolos')}${sg.backingKey ? ` (${escHtml(sg.backingKey)})` : ''}</button>`);
-      if(sg.journeyUrl) vids.push(`<button class="song-vid-btn journey" onclick="songsHubVid(${idx},'journey')" title="${escAttr(t('songs.oneSongLayers'))}"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" style="width:1em;height:1em;vertical-align:-0.15em"><circle cx="5" cy="6" r="2"/><circle cx="19" cy="18" r="2"/><path d="M5 8c0 6 14 2 14 8"/></svg> ${t('songs.songJourney')}</button>`);
+      if(sg.journeyUrl && !journeyRetiredUrl(sg.journeyUrl)) vids.push(`<button class="song-vid-btn journey" onclick="songsHubVid(${idx},'journey')" title="${escAttr(t('songs.oneSongLayers'))}"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" style="width:1em;height:1em;vertical-align:-0.15em"><circle cx="5" cy="6" r="2"/><circle cx="19" cy="18" r="2"/><path d="M5 8c0 6 14 2 14 8"/></svg> ${t('songs.songJourney')}</button>`);
     } else {
-    if(sg.journeyUrl) vids.push(`<button class="song-vid-btn journey" onclick="songsHubVid(${idx},'journey')" title="${escAttr(t('songs.oneSongLayers'))}"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" style="width:1em;height:1em;vertical-align:-0.15em"><circle cx="5" cy="6" r="2"/><circle cx="19" cy="18" r="2"/><path d="M5 8c0 6 14 2 14 8"/></svg> ${t('songs.songJourney')}</button>`);
+    if(sg.journeyUrl && !journeyRetiredUrl(sg.journeyUrl)) vids.push(`<button class="song-vid-btn journey" onclick="songsHubVid(${idx},'journey')" title="${escAttr(t('songs.oneSongLayers'))}"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" style="width:1em;height:1em;vertical-align:-0.15em"><circle cx="5" cy="6" r="2"/><circle cx="19" cy="18" r="2"/><path d="M5 8c0 6 14 2 14 8"/></svg> ${t('songs.songJourney')}</button>`);
     if(sg.tutorialUrl) vids.push(`<button class="song-vid-btn tut" onclick="songsHubVid(${idx},'tutorial')"><span class="svb-play">&#x25B6;</span>${t('songs.tutorial')}</button>`);
     if(sg.backingUrl) vids.push(`<button class="song-vid-btn" onclick="songsHubVid(${idx},'backing')"><span class="svb-play">&#x25B6;</span><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" style="width:1em;height:1em;vertical-align:-0.15em"><path d="M9 18V5l12-2v13"/><circle cx="6" cy="18" r="3"/><circle cx="18" cy="16" r="3"/></svg> ${t('hub.backing')}${sg.backingKey ? ` (${escHtml(sg.backingKey)})` : ''}</button>`);
     if(sg.originalUrl) vids.push(`<button class="song-vid-btn" onclick="songsHubVid(${idx},'original')" title="${escAttr(t('songs.opensYoutube'))}"><span class="svb-play">&#x25B6;</span>${t('songs.original')} <span style="font-size:0.6875rem;opacity:0.6">&#x2197;</span></button>`);
@@ -10951,6 +10959,7 @@ function caFocusGotIt(id, si){
    renderTeacherActivityDetail() shows the same button in the console
    preview (as a plain link there, since the preview lives outside #app). */
 function caJourneyUrl(a){
+  if(journeyRetired(a.journey)) return '';
   const sg = a.journey && SONG_JOURNEYS.find(s => s.id === a.journey);
   if(!sg) return '';
   /* The return address rides in the hash after the layer (navigability

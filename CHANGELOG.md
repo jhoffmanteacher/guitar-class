@@ -5,6 +5,13 @@ Notable changes to the Guitar Class site. Newest first.
 For the full session-by-session history (and the reasoning behind each change),
 see `WORKFLOW.md` and the git commit log.
 
+## 2026-10-06 — "the cure" and Seven Nation Army move to the Songs page
+
+- "the cure" and Seven Nation Army are played from their practice cards now.
+  Their Song Journey pages have moved: the Songs page is where to find both
+  songs. The "Take it to a song" box in Modules 1–5 is one button to the
+  Songs page.
+
 ## 2026-10-06 — Level ups open the Whole Song cards
 
 - The Level up on "the cure" (Intro and Verse on the Low E, The Verse on Two

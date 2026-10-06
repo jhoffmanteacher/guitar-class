@@ -5906,6 +5906,60 @@ function checkPracticeCards() {
   if (bad === 0) ok(`${cards} practice card${cards === 1 ? '' : 's'} — sections add up to their bars and land inside the track, one Level up each, both renderers and every silencer wired`);
 }
 
+/* 1bn. A RETIRED JOURNEY PAGE HAS A WHOLE-SONG CARD AND NO DOOR (2026-10-06).
+   JOURNEY_RETIRED (class-activities.js) closes every link to a song's Journey
+   page, so each retired song must have a whole-song practice card to send the
+   student to, and no card for that song may still name the page in student
+   text (the button no longer renders, so the words would point at nothing). */
+function checkJourneyRetired() {
+  head('1bn. A retired Journey page has a whole-song card and no door');
+  let activities = [], retired;
+  try {
+    const src = readFileSync(join(ROOT, 'class-activities.js'), 'utf8');
+    const sandbox = { console };
+    sandbox.window = sandbox;
+    vm.createContext(sandbox);
+    vm.runInContext(src, sandbox, { filename: 'class-activities.js' });
+    activities = sandbox.CLASS_ACTIVITIES || [];
+    retired = sandbox.JOURNEY_RETIRED;
+  } catch { return; /* reported by 1d */ }
+  let bad = 0;
+  const flag = m => { err(m); problems++; bad++; };
+  if (!Array.isArray(retired)) { flag('JOURNEY_RETIRED is missing or not an array in class-activities.js'); return; }
+  const appSrc = readFileSync(join(ROOT, 'app.js'), 'utf8');
+  const block = /const SONG_JOURNEYS = \[([\s\S]*?)\n\];/.exec(appSrc);
+  const ids = block ? [...block[1].matchAll(/\bid:\s*'([^']+)'/g)].map(m => m[1]) : [];
+  if (!ids.length) { flag('1bn cannot read the SONG_JOURNEYS ids from app.js'); return; }
+  const seen = new Set();
+  for (const slug of retired) {
+    if (seen.has(slug)) flag(`JOURNEY_RETIRED lists "${slug}" twice`);
+    seen.add(slug);
+    if (!ids.includes(slug)) { flag(`JOURNEY_RETIRED: "${slug}" is not a SONG_JOURNEYS id`); continue; }
+    const has = activities.some(a => a && a.view === 'card' && a.card && a.card.wholeSong === true && a.journey === slug);
+    if (!has) flag(`JOURNEY_RETIRED: "${slug}" has no whole-song card — students would have nowhere to play it`);
+  }
+  const NAMES_PAGE = /song journey|recorrido de la canci[oó]n/i;
+  let scanned = 0;
+  const walk = (v, path, a) => {
+    if (typeof v === 'string') { if (NAMES_PAGE.test(v)) flag(`${a.id} · ${path}: names the Song Journey page of a retired song ("${v.slice(0, 70)}")`); return; }
+    if (Array.isArray(v)) { v.forEach((x, i) => walk(x, `${path}[${i}]`, a)); return; }
+    if (v && typeof v === 'object') for (const k of Object.keys(v)) walk(v[k], path ? `${path}.${k}` : k, a);
+  };
+  for (const a of activities) {
+    if (!a || !(retired.includes(a.journey) || (a.card && retired.includes(a.card.track)))) continue;
+    scanned++;
+    walk(a, '', a);
+  }
+  const journeyJs = readFileSync(join(ROOT, 'tabs', 'journey.js'), 'utf8');
+  const wiring = [
+    [/function journeyRetired\(/.test(appSrc), 'app.js has no function journeyRetired('],
+    [/function caJourneyUrl\(a\)\{[^}]*journeyRetired\(/.test(appSrc), 'caJourneyUrl() does not call journeyRetired('],
+    [/function showJourneyRetired\(/.test(journeyJs), 'tabs/journey.js has no function showJourneyRetired(']
+  ];
+  for (const [good, msg] of wiring) if (!good) flag(msg);
+  if (bad === 0) ok(`${retired.length} retired Journey slug${retired.length === 1 ? '' : 's'}, ${scanned} activities scanned — each has a whole-song card, none names the page, doors wired`);
+}
+
 /* 1bm. A CARD SECTION'S CAPTION COUNTS WITH ITS BADGE'S WORD (2026-10-06).
    A section with a `repLabel` shows a badge ("Lap 1 of 3"); its caption must
    count in the same word — "3 laps" under a Lap badge, "2 times" under a Time
@@ -6343,6 +6397,7 @@ function checkGuitarNotes() {
   checkJourneyGuitarToggle();
   checkPracticeCards();
   checkCardCaptionWords();
+  checkJourneyRetired();
   checkRepCountParity(rcSets, rcCtx);
   checkJourneySlowBpmLabels();
   checkGuitarNotes();

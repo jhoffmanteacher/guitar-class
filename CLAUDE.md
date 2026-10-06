@@ -282,7 +282,9 @@ click — each Song Journey page's beat map against `SNIPPET_TRACKS`, no
 metronome mix in `audio/` but the allow-listed one, no metronome field on a
 track, and `snippetSrc()` called with three arguments (1bk), and a
 practice-card section's caption counting with a different word from its
-badge — `repLabel` whitelist, both languages (1bm).
+badge — `repLabel` whitelist, both languages (1bm), and a retired Song
+Journey page — every `JOURNEY_RETIRED` slug a real song with a whole-song
+card, no card of that song naming the page in text, the doors wired (1bn).
 
 **A phrase detector must match the UNESCAPED string.** Until 2026-09-25 1w
 and 1w-t matched the raw source capture, which keeps `\'`, so every banned
@@ -966,6 +968,41 @@ The three Module 1 Set 2 graded-MC rewords, the `m2w2·c` 4-bar melody section
 title, and `ca-14`'s Happy Birthday exit check are all frozen mid-year fixes —
 see the **Summer reset list** near "Three regimes," above.
 
+## Song Journey pages are being phased out (2026-10-06)
+Jonathan's teaching has changed: students do what is taught directly and stop,
+and the whole-song practice cards do the Journey pages' job better. A song also
+lived in two places that drifted apart (both "the cure" work orders of
+2026-10-06 came from the page disagreeing with the cards). So the Journey pages
+are retired song by song. **`window.JOURNEY_RETIRED`** (top of
+`class-activities.js`, the one data file the app and the Journey pages both
+load) lists the retired slugs — `the-cure` and `seven-nation-army` today.
+For a retired slug:
+
+- the card's "Open the … Song Journey page" button and the console preview's
+  link are gone (`caJourneyUrl()` returns `''` — the two `caJourneyLinkHtml`
+  calls 1ba pins are untouched);
+- the Songs page Core row drops the Song Journey link (Play Along and Backing
+  stay);
+- "About this set" shows the song's name as plain text;
+- the resume card's song row never picks it (`resumeSongPick()`);
+- **"Take it to a song" (Modules 1–5 only, via `journeySongsFor`) is one button to
+  the Songs page for every song**, retired or not (`journey.takeItBtn`);
+- the page itself shows students a "moved" card with a button to
+  `index.html#songs` — before the activity gate, with no Firestore read, and
+  hidden (`journey-retired-wait`) until the teacher is confirmed or 4 s pass.
+  The teacher account still sees the full page. `showJourneyRetired()` in
+  `tabs/journey.js`.
+
+`journey:` and `journeyLayer:` **stay on every card** — `journey:` is also what
+puts a whole-song card on its Songs-page row. **To retire the next song, add its
+slug to `JOURNEY_RETIRED` once its whole-song card is released — nothing else to
+edit**; checks.mjs **1bn** fails the push if the song has no whole-song card, if a
+card of that song still names the page in text, or if a slug isn't a
+`SONG_JOURNEYS` id. The six `tabs/*.html` pages are not deleted and **not kept in
+step with the cards any more — do not open work to sync a retired page's text
+with a card.** Watchtower, Luna and Sweet Child are next (their cards exist);
+Let It Be has no card and may leave the course.
+
 ## Live quiz — the whole-class game
 
 All of it is in `live-quiz.js`: the quiz bank, the student overlay, and the
@@ -1488,7 +1525,9 @@ stops at the end of the song, Jonathan 2026-10-02), a Slower / Normal switch (th
 Slower), the Guitar toggle where a full mix exists, and a Metronome that is
 a click the SITE makes on every counted beat — there are no metronome
 files; Moises clicked "the cure" at 144, twice the 72 the room counts.
-Then three or four checkboxes. A Level up may carry `card: '<id>'` to
+Then three or four checkboxes. **A whole-song card's Level up names no other
+page; a part card's Level up hands off to the whole-song card (`card: 'ca-N'`)**
+(2026-10-06, 1bn). A Level up may carry `card: '<id>'` to
 open another practice card instead of the Journey page — every part card
 opens its song's whole-song card (ca-10 → ca-25; ca-13, ca-18, ca-19 →
 ca-24; ca-20 → ca-27) — never to a power-chord version (Jonathan, same
@@ -1684,9 +1723,11 @@ sections by title.
 layerNum}}`) is authored from the six pages' real `.layer-unit` spans —
 today uniformly Module 1→Layer 1 … 5→5, anything past 5 an unnumbered
 "Extra". checks.mjs **1ab** rebuilds the map from those spans and fails on
-drift. The button opens `tabs/<slug>.html#layer-<n>`; **journey.js needed no
-changes** — `openFromHash()` already opens `#layer-N` on load and on
-`hashchange`.
+drift. **Since 2026-10-06 the box is ONE button to the Songs page**
+(`goExploreHash('songs')`, `journey.takeItBtn`) for every song; the render rule
+(Modules 1–5 only, via `journeySongsFor`) is unchanged, and `JOURNEY_LAYERS`
+is still what 1ab and 1af read. (It used to open `tabs/<slug>.html#layer-<n>`
+per song; `openFromHash()` still opens `#layer-N` on those pages.)
 
 ### ⚠️ No Journey layer → the take-to-song section renders its OWN STEPS
 **Correction, 2026-09-12 (same day as Phase 3, found by an error sweep).**

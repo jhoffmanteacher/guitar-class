@@ -356,3 +356,6 @@ body.lq-invite-open{overflow:hidden}
      same fix as .fab-track above: use the purple chip palette instead. */
   .ca-gate-btn{color:var(--purple-text);background:var(--purple-bg);border-color:var(--purple-border)}
 }
+
+/* Retired Song Journey page: hidden until the teacher is confirmed (journey.js). */
+.journey-retired-wait .wrap, .journey-retired-wait .fab-group { visibility: hidden }

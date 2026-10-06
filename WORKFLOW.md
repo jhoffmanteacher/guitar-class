@@ -654,6 +654,20 @@
 
 ## Recently shipped (post-archive)
 
+- [x] **2026-10-06 — Song Journey phase-out, part 1: a per-song retire switch.**
+      `JOURNEY_RETIRED` in `class-activities.js` (starting with `the-cure`
+      and `seven-nation-army`) closes every door into a song's Journey page:
+      the card's Journey button and the console preview (`caJourneyUrl`), the
+      Songs-page Song Journey link, the set header's song-thread link, the
+      resume card's song row, and the page itself (students see a "moved"
+      card; the teacher still gets the page). "Take it to a song" in Modules
+      1–5 is one button to the Songs page for every song. ca-25's Level up
+      lost its last Journey mention. checks.mjs 1bn pins it. Nothing deleted;
+      `journey:` stays on every card (it places a whole-song card on its
+      Songs row). Open: **Journey phase-out part 2** — module step text that
+      still names a Song Journey page; retire Watchtower, Luna and Sweet Child
+      as their whole-song cards are released.
+
 - [x] **2026-10-06 — "the cure" Journey page: the record plays each chorus
       three times.** The page (and ca-18) teach the chorus as eight bars,
       twice through the loop; the record plays Dm · F · C · G three times
