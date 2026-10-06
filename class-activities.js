@@ -1144,8 +1144,6 @@ window.CLASS_ACTIVITIES = [
     id:    'ca-10',
     view:  'card',    // one screen: Play song + tab + checks — see CARD above
     number: 10,
-    journey: 'seven-nation-army',   // the Level up check sends them to this Song Journey page — see JOURNEY above
-    journeyLayer: 2,
     title:    'Seven Nation Army — The Riff',
     title_es: 'Seven Nation Army — El riff',
     intro:    'The Seven Nation Army riff is seven notes on the A string — play it with the song, first on Slower, then at normal speed.',
@@ -1180,8 +1178,9 @@ window.CLASS_ACTIVITIES = [
           text:    'Press Normal. Four laps of the riff with the song, without stopping.',
           text_es: 'Pulsa «Normal». Cuatro vueltas del riff con la canción, sin detenerte.' },
         { levelUp: true,
-          text:    'Play along with the whole song on the Song Journey page, Layer 2.',
-          text_es: 'Toca con la canción completa en la página de Recorrido de la canción, Capa 2.' }
+          card: 'ca-25',    // its button opens the whole-song card, not the Song Journey page (Jonathan, 2026-10-06)
+          text:    'Play along with the whole song on the Whole Song card.',
+          text_es: 'Toca con la canción completa en la tarjeta de La canción completa.' }
       ]
     },
     // The help ladder (read-only, under "More practice help").

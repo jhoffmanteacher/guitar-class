@@ -5,6 +5,11 @@ Notable changes to the Guitar Class site. Newest first.
 For the full session-by-session history (and the reasoning behind each change),
 see `WORKFLOW.md` and the git commit log.
 
+## 2026-10-06 — Seven Nation Army riff card: Level up opens the whole song
+
+- The Level up on "Seven Nation Army — The Riff" now opens the
+  "Seven Nation Army — The Whole Song" card, instead of the Song Journey page.
+
 ## 2026-10-06 — "the cure" Song Journey: the chorus plays three times
 
 - The "the cure" Song Journey page now says the record plays each chorus

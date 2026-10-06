@@ -411,6 +411,7 @@
     // Quoted, not bare — SONG_JOURNEYS' name for "the cure" is lowercase with
     // no leading article, so the unquoted template read "Open the the cure
     // Song Journey page" (Jonathan/Claude, 2026-09-12, found live).
+    'ca.openCard':             { en: 'Open "{title}"', es: 'Abrir «{title}»' },
     'ca.openJourney':          { en: 'Open the "{song}" Song Journey page', es: 'Abrir la página de Recorrido de la canción de "{song}"' },
     // Shown above the Today hero only while the activity gate (below) is on
     // — names how many things are actually blocking (item 2f), from

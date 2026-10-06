@@ -10977,6 +10977,15 @@ function caJourneyLinkHtml(a){
   const sg = SONG_JOURNEYS.find(s => s.id === a.journey);
   return `<div class="ca-journey-row"><button type="button" class="jl-song-btn" onclick="window.open('${escAttr(url)}','_blank','noopener')">${escHtml(t('ca.openJourney', { song: sg.name }))} &#x2197;</button></div>`;
 }
+/* A button that opens another class activity's card in place — the same
+   route the Songs page's Play Along takes (songsHubOpenCard). Nothing
+   renders until the target is visible or set to Play Along now, so it never
+   leads to "not posted yet". */
+function caCardLinkHtml(id){
+  const b = (window.CLASS_ACTIVITIES || []).find(x => x.id === id);
+  if(!b || !(caIsVisible(b) || caIsPlayAlongOnly(b))) return '';
+  return `<div class="ca-journey-row"><button type="button" class="jl-song-btn" onclick="songsHubOpenCard('${escAttr(id)}')">${escHtml(t('ca.openCard', { title: tf(b, 'title') }))} &#x2192;</button></div>`;
+}
 /* The Journey button renders in an activity's LAST step only — every
    activity, current and future (Jonathan, 2026-09-25). caStepHtml() adds it
    to the last step's body whatever that step's text says; there is no copy
@@ -11183,6 +11192,10 @@ function pcChecksHtml(a, preview){
        this call). The console preview shows its own link row instead. */
     let jl = '';
     if(ci === checks.length - 1 && c.levelUp && !preview) jl = caJourneyLinkHtml(a);
+    /* A Level up may send the student to another practice card instead
+       (`card: 'ca-25'` on the check — ca-10's riff card hands off to the
+       whole-song card). Shown only once that card can be opened. */
+    if(ci === checks.length - 1 && c.levelUp && c.card && !preview) jl = caCardLinkHtml(c.card);
     return `<li class="pc-check${done ? ' is-done' : ''}${c.levelUp ? ' pc-check--lvl' : ''}">`
       + `<button type="button" class="pc-check-btn" role="checkbox" aria-checked="${done ? 'true' : 'false'}" onclick="pcCheck(this,'${escAttr(a.id)}',${ci})">`
       + `<span class="pc-box" aria-hidden="true">${done ? '&#x2713;' : ''}</span>`

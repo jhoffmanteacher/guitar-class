@@ -5876,6 +5876,14 @@ function checkPracticeCards() {
       twin(cw, x, 'text');
       if (!x.levelUp) twin(cw, x, 'label');
       if ('levelUp' in x && x.levelUp !== true) flag(`${cw}: levelUp should be true or left off`);
+      /* `card: '<id>'` — the Level up opens another practice card instead
+         of the Song Journey page (caCardLinkHtml in app.js). */
+      if ('card' in x) {
+        const to = activities.find(b => b && b.id === x.card);
+        if (!x.levelUp) flag(`${cw}: card: only renders on the Level up check`);
+        else if (!to || to.view !== 'card' || !to.card) flag(`${cw}: card: '${x.card}' is not a practice card in class-activities.js — the button would never render`);
+        else if (x.card === a.id) flag(`${cw}: card: points at its own activity`);
+      }
     });
     (a.steps || []).forEach((st, si) => {
       if (st && (st.snippet || st.drill || st.video)) flag(`${w} help step ${si + 1}: a practice card's help steps render their text and tab only — move the ${st.snippet ? 'snippet' : st.drill ? 'drill' : 'video'} or drop it`);
