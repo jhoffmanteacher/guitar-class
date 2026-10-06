@@ -9,7 +9,8 @@ see `WORKFLOW.md` and the git commit log.
 
 - The Level up on "Seven Nation Army — The Riff" now opens the
   "Seven Nation Army — The Whole Song" card, instead of the Song Journey page.
-  The button appears once the Whole Song card is released.
+  Before the Whole Song card's release date, it opens in place of the Riff
+  card, and closing it brings the Riff card back.
 
 ## 2026-10-06 — "the cure" Song Journey: the chorus plays three times
 

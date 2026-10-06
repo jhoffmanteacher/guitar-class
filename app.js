@@ -9647,6 +9647,7 @@ function songsPlayAlongBtn(slug){
   return `<button type="button" class="song-vid-btn sh-play-btn${done ? ' done' : ''}" onclick="songsHubOpenCard('${escAttr(a.id)}')"><span class="svb-play">&#x25B6;</span>${t('hub.playAlong')}${done ? ` <svg class="sh-play-check" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" role="img" aria-label="${escAttr(t('hub.playAlongDone'))}"><path d="M5 12.5l4.5 4.5L19 7"/></svg>` : ''}</button>`;
 }
 function songsHubOpenCard(id){
+  caSwap = null;   // from the Songs page it opens under the Songs heading, not in a card's slot
   goExploreHash('class-activities/' + id);
 }
 /* The class config (board, dates) can land after the Songs page is already
@@ -10977,16 +10978,24 @@ function caJourneyLinkHtml(a){
   const sg = SONG_JOURNEYS.find(s => s.id === a.journey);
   return `<div class="ca-journey-row"><button type="button" class="jl-song-btn" onclick="window.open('${escAttr(url)}','_blank','noopener')">${escHtml(t('ca.openJourney', { song: sg.name }))} &#x2197;</button></div>`;
 }
-/* A button that opens another class activity's card in place — the same
-   route the Songs page's Play Along takes (songsHubOpenCard). Nothing
-   renders until the target is RELEASED (caIsVisible) — "Play Along now"
-   does not count here (Jonathan, 2026-10-06): that switch is for the Songs
-   page, and this button would put the unreleased card on In-Class
-   Activities early. */
-function caCardLinkHtml(id){
+/* A button on card `from` that opens another class activity's card — a
+   Level up's `card: '<id>'`. Shown once the target is released or set to
+   Play Along now; nothing renders before that, so it never leads to "not
+   posted yet". A released target opens where it sits in the list. One that
+   is only Play Along now SWAPS INTO THE SLOT of the card the button is on
+   (caSwap, read by renderClassActivities): no Songs heading, nothing added
+   to the list, and closing it puts `from` back (Jonathan, 2026-10-06 — the
+   card isn't assigned yet, so it mustn't show up as an entry on the page). */
+let caSwap = null;   // { from, to } while a Level up's target is open in `from`'s slot
+function caCardLinkHtml(from, id){
   const b = (window.CLASS_ACTIVITIES || []).find(x => x.id === id);
-  if(!b || !caIsVisible(b)) return '';
-  return `<div class="ca-journey-row"><button type="button" class="jl-song-btn" onclick="songsHubOpenCard('${escAttr(id)}')">${escHtml(t('ca.openCard', { title: tf(b, 'title') }))} &#x2192;</button></div>`;
+  if(!b || !(caIsVisible(b) || caIsPlayAlongOnly(b))) return '';
+  return `<div class="ca-journey-row"><button type="button" class="jl-song-btn" onclick="caOpenLinkedCard('${escAttr(from)}','${escAttr(id)}')">${escHtml(t('ca.openCard', { title: tf(b, 'title') }))} &#x2192;</button></div>`;
+}
+function caOpenLinkedCard(from, id){
+  const b = (window.CLASS_ACTIVITIES || []).find(x => x.id === id);
+  caSwap = b && !caIsVisible(b) ? { from, to: id } : null;
+  goExploreHash('class-activities/' + id);
 }
 /* The Journey button renders in an activity's LAST step only — every
    activity, current and future (Jonathan, 2026-09-25). caStepHtml() adds it
@@ -11197,7 +11206,7 @@ function pcChecksHtml(a, preview){
     /* A Level up may send the student to another practice card instead
        (`card: 'ca-25'` on the check — ca-10's riff card hands off to the
        whole-song card). Shown only once that card can be opened. */
-    if(ci === checks.length - 1 && c.levelUp && c.card && !preview) jl = caCardLinkHtml(c.card);
+    if(ci === checks.length - 1 && c.levelUp && c.card && !preview) jl = caCardLinkHtml(a.id, c.card);
     return `<li class="pc-check${done ? ' is-done' : ''}${c.levelUp ? ' pc-check--lvl' : ''}">`
       + `<button type="button" class="pc-check-btn" role="checkbox" aria-checked="${done ? 'true' : 'false'}" onclick="pcCheck(this,'${escAttr(a.id)}',${ci})">`
       + `<span class="pc-box" aria-hidden="true">${done ? '&#x2713;' : ''}</span>`
@@ -11942,6 +11951,18 @@ function printActivity(ev, id){
 // renderer doesn't have to pull in station-card CSS classes for one icon.
 const TCK_CHECK_SVG_INLINE = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" style="width:14px;height:14px"><path d="M5 12l5 5L19 7"/></svg>';
 function caOnToggle(details){
+  /* Closing a Level up's target that sits in its card's slot puts that card
+     back, open, where the student left it (caCardLinkHtml). */
+  if(!details.open && caSwap && details.dataset.id === caSwap.to && caOpenId === caSwap.to){
+    if(pcState && details.contains(pcState.root)) pcStop();
+    if(snipState && details.contains(snipState.card)) snipStop();
+    const from = caSwap.from;
+    caSwap = null;
+    caOpenId = from;
+    renderClassActivities();
+    caScrollToActivity(from);
+    return;
+  }
   caOpenId = details.open ? details.dataset.id : (caOpenId === details.dataset.id ? null : caOpenId);
   // A closed card's reveal-delay tabs aren't armed at render time (see
   // caArmTabReveals) — start their countdown now that the card is actually open.
@@ -12532,7 +12553,12 @@ function renderClassActivities(){
      drops it — under the Songs section's own title, so it reads as where it
      came from. It is never the hero, never in a fold, never counted. */
   const playOnly = caOpenId && byId[caOpenId] && caIsPlayAlongOnly(byId[caOpenId]) ? byId[caOpenId] : null;
-  const playOnlyHtml = playOnly
+  /* Opened from another card's Level up (caOpenLinkedCard): it takes THAT
+     card's slot instead of a Songs heading. Only while the `from` card is on
+     the page — otherwise it falls back to the heading. */
+  const swap = playOnly && caSwap && caSwap.to === playOnly.id && list.some(a => a.id === caSwap.from) ? caSwap : null;
+  const swapIn = a => (swap && a.id === swap.from) ? playOnly : a;
+  const playOnlyHtml = playOnly && !swap
     ? `<div class="ca-mod-head" data-i18n="hub.playAlongTitle">${escHtml(t('hub.playAlongTitle'))}</div>${caActivityCardHtml(playOnly)}`
     : '';
   // A deep link whose id isn't published (or is mistyped) says so, above the
@@ -12596,7 +12622,7 @@ function renderClassActivities(){
          the student has already finished the newest of them. */
       const newestDay = caDate(list[0]);
       const isCurrent = a => a.id === list[0].id || (!!newestDay && caDate(a) === newestDay);
-      const heroHtml = todayCards.map(a => caHeroCardHtml(a, isCurrent(a))).join('');
+      const heroHtml = todayCards.map(a => caHeroCardHtml(swapIn(a), isCurrent(a))).join('');
       // Everything else pending, minus the hero, wrapped in ONE "Still to
       // do" fold (2f) — module headings (plain, no progress bar; that's an
       // Earlier-only addition below) when anything has been placed in a
@@ -12614,9 +12640,9 @@ function renderClassActivities(){
            (item 5) is gone with its name; module headings, when any card
            is placed in a module, do the grouping instead. */
         const body = restGroups.some(g => g.sec.mod)
-          ? restGroups.map(g => headHtml(g.sec) + g.cards.map(caActivityCardHtml).join('')).join('')
-          : restFlat.map(caActivityCardHtml).join('');
-        const openInside = restFlat.some(a => a.id === caOpenId);
+          ? restGroups.map(g => headHtml(g.sec) + g.cards.map(a => caActivityCardHtml(swapIn(a))).join('')).join('')
+          : restFlat.map(a => caActivityCardHtml(swapIn(a))).join('');
+        const openInside = restFlat.some(a => a.id === caOpenId || (swap && a.id === swap.from));
         restHtml = caTodoGroupHtml(body, restCount, openInside);
       }
       pendingHtml = heroHtml + restHtml;
@@ -12657,7 +12683,7 @@ function renderClassActivities(){
     const finishedGroups = groups
       .map(g => ({ sec: g.sec, cards: g.cards.filter(a => classActivities[a.id] === true) }))
       .filter(g => g.cards.length);
-    bodyEl.innerHTML = missing + gateIntro + playOnlyHtml + pendingHtml + (finished.length ? caFinishedGroupHtml(finishedGroups, finished, byId) : '');
+    bodyEl.innerHTML = missing + gateIntro + playOnlyHtml + pendingHtml + (finished.length ? caFinishedGroupHtml(finishedGroups, finished, byId, swap) : '');
   }
   if(typeof applyI18n === 'function') applyI18n(bodyEl);
   caArmTabReveals(bodyEl);
@@ -12711,11 +12737,13 @@ function caTodoGroupHtml(bodyHtml, count, openInside){
 // caFocusActivity's deep link and caToggleComplete's "keep it open" both
 // still land on a visible card instead of one hidden inside a closed group.
 let caFinishedOpen = false;
-function caFinishedGroupHtml(finishedGroups, finishedFlat, byId){
-  const open = caFinishedOpen || finishedFlat.some(a => a.id === caOpenId);
+function caFinishedGroupHtml(finishedGroups, finishedFlat, byId, swap){
+  // `swap`: a Level up's target showing in its card's slot — see caCardLinkHtml.
+  const swapIn = a => (swap && a.id === swap.from) ? byId[swap.to] : a;
+  const open = caFinishedOpen || finishedFlat.some(a => a.id === caOpenId || (swap && a.id === swap.from));
   const body = finishedGroups.some(g => g.sec.mod)
-    ? finishedGroups.map(g => caModuleHeadHtml(g.sec, byId) + g.cards.map(caActivityCardHtml).join('')).join('')
-    : finishedFlat.map(caActivityCardHtml).join('');
+    ? finishedGroups.map(g => caModuleHeadHtml(g.sec, byId) + g.cards.map(a => caActivityCardHtml(swapIn(a))).join('')).join('')
+    : finishedFlat.map(a => caActivityCardHtml(swapIn(a))).join('');
   return `<details class="ca-finished-group" ${open ? 'open' : ''} ontoggle="caOnFinishedToggle(this)">
     <summary class="ca-finished-summary">${escHtml(t('ca.finishedGroup', {n: finishedFlat.length}))}</summary>
     <div class="ca-finished-body">${body}</div>
