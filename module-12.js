@@ -704,18 +704,11 @@ SETS.push(
             steps: [
               {
                 label: 'Try melody on top over C', label_es: 'Prueba la melodía arriba sobre C',
-                text: 'Over a C chord, keep the thumb on steady quarters and pick a 3-note melody on the high e and B strings on top.',
-                text_es: 'Sobre un acorde de C, mantén el pulgar en negras constantes y puntea una melodía de 3 notas en las cuerdas mi aguda y Si encima.',
-                hint: 'Listen to the records: are the guitars strummed or picked? Acoustic or electric?',
-                hint_es: 'Escucha las grabaciones: ¿las guitarras se rasguean o se puntean? ¿Acústica o eléctrica?',
-                skills: [4, 5],
-                response: { type: 'mc', prompt: 'Why does fingerstyle make our regional-Mexican songs sound MORE authentic than power chords did?',
-                  prompt_es: '¿Por qué el fingerstyle hace que nuestras canciones de música regional mexicana suenen MÁS auténticas de lo que sonaban con acordes de potencia?',
-                  answer: 1,
-                  explain: 'Sierreño is an acoustic, fingerpicked tradition — this is its real tone.',
-                  explain_es: 'El sierreño es una tradición acústica de fingerpicking — este es su verdadero sonido.',
-                  choices: ['It\'s louder than power chords ever were', 'Sierreño is an acoustic, fingerpicked tradition', 'Power chords only work on electric guitar', 'Fingerstyle is harder, so it sounds better'],
-                  choices_es: ['Es más fuerte de lo que fueron los acordes de potencia', 'El sierreño es una tradición acústica de fingerpicking', 'Los acordes de potencia solo funcionan en guitarra eléctrica', 'El fingerstyle es más difícil, así que suena mejor'] }
+                text: 'Over a C chord, keep the thumb on steady quarters and pick a 3-note melody on the high e and B strings on top. You\'ve got it when: the thumb plays four steady beats in every bar while the melody notes ring clean on top, for two bars.',
+                text_es: 'Sobre un acorde de C, mantén el pulgar en negras constantes y puntea una melodía de 3 notas en las cuerdas mi aguda y Si encima. Lo tienes cuando: el pulgar toca cuatro tiempos constantes en cada compás mientras las notas de la melodía suenan limpias arriba, durante dos compases.',
+                hint: 'Keep the thumb going on every beat first. Add one melody note at a time on top of it.',
+                hint_es: 'Primero mantén el pulgar en cada tiempo. Agrega una nota de la melodía a la vez encima.',
+                skills: [4, 5]
               }
             ]
           },

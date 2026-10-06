@@ -458,6 +458,14 @@ the site's convention is "high e". Module 1's "which comes right after G?"
 mixes note letters and "mi aguda" in its `choices_es`. Both are graded
 choices in frozen modules (1ap), so they wait for the reset.
 
+**Found by the 2026-10-06 audit, all in frozen modules.** Module 3 `m3w2-s4`
+practice MC prompt says "SAME fret", which gives away the one choice that
+repeats a fret number. Module 3 Module Review assess item says "Sweet Child's
+D5-C5-G5 … switches between E- and A-string roots on the same fret" — only
+C5→G5 does (D5 is A-string fret 5). Module 2 `m2w2-s5` "4-bar melody" gotItWhen
+also accepts "Smoke on the Water", which is 3 bars at one note per beat
+(Mary Had a Little Lamb is already listed above).
+
 **Module 1 Set 2 reorder: string names and guitar parts before tuning.** The
 tuning video (step 1) depends on string names (step 7) and tuning pegs (step
 2), the two tuning cards sit apart at steps 5–6, and the set opens with

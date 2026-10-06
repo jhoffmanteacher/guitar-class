@@ -6117,6 +6117,7 @@ function lastPracticedLabel(sid){
   return { key:'rep.lastDays', params:{n:d} };
 }
 function logPracticeRep(sid, opts){
+  if(isPeekedResponseKey(sid)) return;   // read-only preview of a locked set
   const today = dayStr(new Date());
   const e = practiceLog[sid] || (practiceLog[sid] = { reps:0 });
   if(e.lastDay !== today){ e.lastDay = today; e.todayCount = 0; }
@@ -12451,7 +12452,7 @@ document.addEventListener('visibilitychange', () => {
      abandons the 4-bar window and plays the whole 4-minute track. On a
      Chromebook that is just switching tabs to look something up. Stop the
      band when the tab goes away; the student presses Play again. */
-  if(document.hidden){ snipStop(); return; }
+  if(document.hidden){ snipStop(); pcStop(); return; }
   if(!currentUser || IS_TEACHER_MODE) return;
   const before = classConfigSignature();
   loadClassConfig().then(() => { if(classConfigSignature() !== before) refreshOpenClassActivitiesScreen(); });

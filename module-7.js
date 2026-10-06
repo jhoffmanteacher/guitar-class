@@ -492,7 +492,7 @@ SETS.push(
             text_es: 'Desliza la misma forma por tres acordes:<ul><li>Traste 1 (F).</li><li>Traste 3 (G).</li><li>Traste 5 (A).</li></ul>Lo tienes cuando: G y A suenan limpio, y luego F — el más difícil — sin zumbido.',
             hint: 'F is the hardest spot. If it buzzes, rest and try again. Barre chords are a hand-strength skill. If your hand cramps, shake your hand loose and rest. Short, frequent tries are better than one long, tiring session, and the strength comes within a couple of weeks.',
             hint_es: 'F es el punto más difícil. Si zumba, descansa e inténtalo de nuevo. Los acordes con cejilla son una destreza de fuerza de mano. Si tu mano se acalambra, sacúdela para relajarla y descansa. Intentos cortos y frecuentes son mejores que una sola sesión larga y agotadora, y la fuerza llega en un par de semanas.',
-            stuck: 'Build the barre in stages: (1) bar + just the low-E root, (2) add the A and D strings, (3) add the B and high E last — get each stage clean before stacking the next. Start at G or A (frets 3–5) where the strings are looser, then bring the shape down to F.',
+            stuck: 'Build the barre in stages: (1) bar + just the low-E root, (2) add the A and D strings, (3) add the B and high e last — get each stage clean before stacking the next. Start at G or A (frets 3–5) where the strings are looser, then bring the shape down to F.',
             stuck_es: 'Construye la cejilla por etapas: (1) cejilla + solo la raíz en Mi grave, (2) agrega las cuerdas La y Re, (3) agrega la Si y la mi aguda al final — logra que cada etapa suene limpia antes de apilar la siguiente. Empieza en G o A (trastes 3–5) donde las cuerdas están más sueltas, y luego baja la forma a F.',
             levelUp: 'Add B at the 7th fret as a 4th chord, or switch F→G→A in time at 70 BPM.',
             levelUp_es: 'Agrega B en el traste 7 como un 4to acorde, o cambia F→G→A a tiempo a 70 BPM.',
@@ -554,7 +554,7 @@ SETS.push(
             steps: [
               {
                 label: 'Wrap-up: find your buzzing string', label_es: 'Cierre: tu cuerda que zumba',
-                text: 'Which string in your barre is most likely to buzz right now — the B string, the high E, or the G? Name it; isolating that one string is your first job next session.',
+                text: 'Which string in your barre is most likely to buzz right now — the B string, the high e, or the G? Name it; isolating that one string is your first job next session.',
                 text_es: '¿Qué cuerda de tu cejilla es más probable que zumbe ahora mismo — la Si, la mi aguda, o la Sol? Nómbrala; aislar esa cuerda es tu primer trabajo la próxima sesión.',
                 response: { type: 'short', placeholder: 'e.g. the B string — it sits in my finger crease', placeholder_es: 'p. ej. la cuerda Si — cae en un pliegue de mi dedo' }
               }
@@ -687,7 +687,7 @@ SETS.push(
             label: 'Watch: the series continues — A-shape', label_es: 'Mira: la serie continúa — forma de A',
             text: 'Watch: <a href="https://youtu.be/ioU_ItTzm90" target="_blank">Basic Barré Chords #3 — the A shape (CH-006) – JustinGuitar</a> (0:00–4:00). Same series as the E-shape video you watched earlier — this installment is the A-shape.',
             text_es: 'Mira: <a href="https://youtu.be/ioU_ItTzm90" target="_blank">Basic Barré Chords #3 — the A shape (CH-006) – JustinGuitar</a> (0:00–4:00). La misma serie que el video de la forma de E que viste antes — esta entrega es la forma de A.',
-            hint: 'B major is a great A-shape practice chord — its root is at the 2nd fret on the A string. You may hear a muted high E in some videos — many players let the ring finger mute it, and that\'s a real technique. In this module, though, we arch the fingers so the high e string rings.',
+            hint: 'B major is a great A-shape practice chord — its root is at the 2nd fret on the A string. You may hear a muted high e in some videos — many players let the ring finger mute it, and that\'s a real technique. In this module, though, we arch the fingers so the high e string rings.',
             hint_es: 'B mayor es un gran acorde de práctica para la forma de A — su raíz está en el traste 2 de la cuerda La. Puede que escuches una mi aguda silenciada en algunos videos — muchos guitarristas dejan que el dedo anular la silencie, y esa es una técnica real. En este módulo, sin embargo, arqueamos los dedos para que la mi aguda suene.',
             skills: [3, 4],
             response: { type: 'mc', prompt: 'In this module, what should the high e string do in your A-shape barre?',

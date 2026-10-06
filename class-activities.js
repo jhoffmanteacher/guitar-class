@@ -4596,11 +4596,11 @@ window.CLASS_ACTIVITIES = [
           caption_es: 'E5 · G5 · D5 · C5 · B5 · A5 · 4 tiempos cada uno',
           notes: [
             { frets: [['D', 9], ['A', 7]], note: 'E5', midi: [59, 52], beats: 4 },
-            { frets: [['D', 12], ['A', 10]], note: 'G5', midi: [62, 55], beats: 4 },
+            { frets: [['A', 5], ['E', 3]], note: 'G5', midi: [50, 43], beats: 4 },
             { frets: [['D', 7], ['A', 5]], note: 'D5', midi: [57, 50], beats: 4 },
             { frets: [['D', 5], ['A', 3]], note: 'C5', midi: [55, 48], beats: 4 },
             { frets: [['D', 4], ['A', 2]], note: 'B5', midi: [54, 47], beats: 4 },
-            { frets: [['D', 2], ['A', 0]], note: 'A5', midi: [52, 45], beats: 4 }
+            { frets: [['A', 7], ['E', 5]], note: 'A5', midi: [52, 45], beats: 4 }
           ]
         },
       },

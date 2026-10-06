@@ -5,6 +5,26 @@ Notable changes to the Guitar Class site. Newest first.
 For the full session-by-session history (and the reasoning behind each change),
 see `WORKFLOW.md` and the git commit log.
 
+## 2026-10-06 — Fixes from a full site check
+
+### Fixed
+
+- **Seven Nation Army power chords, "Learn — The shapes":** the tab now plays
+  G5 on the low E string, fret 3, and A5 on the low E string, fret 5, the same
+  shapes the text describes.
+- **Sweet Child O' Mine Song Journey, Layer 3:** the chorus tab is now A5 C5 D5
+  D5 (four bars), and the outro tab puts C5, D5 and G5 in one bar. Both match
+  the whole-song activity.
+- **Module 12, "Try melody on top over C":** the hint and quiz belonged to a
+  different step. The step now has a hint about the thumb and a clear standard.
+- **Module 5:** the Bm7 shortcut `x20202` takes three fingers, not two.
+- **Module 9:** a quiz explanation said letters move one step per fret. It now
+  says E is two frets above D.
+- **Module 4:** removed a hint that said the B and high e names wait for Module 9.
+- **The tuner and practice cards:** a practice card stops when you switch tabs,
+  and reopening the tuner quickly no longer cuts off its audio.
+- **Spanish:** "dentro del Patrón 1" on three Song Journey pages.
+
 ## 2026-10-05 — Seven Nation Army: G5 – A5 and the chorus ending
 
 ### Added

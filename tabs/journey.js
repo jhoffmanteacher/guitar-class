@@ -585,6 +585,7 @@ function applyReady(saved){
    with data-i18n so a language switch re-translates whatever is showing. */
 function setSaveMsg(key){
   var el = document.getElementById('save-msg');
+  if(!el) return;   // the gate card can replace the page body while a save is in flight
   if(!key){ el.textContent = ''; el.removeAttribute('data-i18n'); return; }
   el.setAttribute('data-i18n', key);
   el.textContent = t(key);

@@ -381,6 +381,7 @@ async function startTuner() {
     }
     tunerStream = stream;
     tunerCtx = new (window.AudioContext || window.webkitAudioContext)();
+    const myCtx = tunerCtx;   // the stale branch below must close THIS start's context, not whatever the global holds by then
     const src = tunerCtx.createMediaStreamSource(tunerStream);
 
     // Bandpass via highpass (kills sub-bass rumble / AC hum) into lowpass
@@ -420,7 +421,7 @@ async function startTuner() {
       // now orphaned. Tear this stale context down instead of wiring it up
       // (setting onstatechange on it would throw on the already-null global).
       stream.getTracks().forEach(t => t.stop());
-      try { tunerCtx.close(); } catch(e){}
+      try { myCtx.close(); } catch(e){}
       return;
     }
     // Belt-and-suspenders: Safari can also suspend a live context on an audio
