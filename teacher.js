@@ -1867,7 +1867,7 @@ function renderTeacherActivityDetail(id){
     ${(()=>{ /* A Level up that opens another card (caCardLinkHtml in app.js) — name it here, since the preview card renders no link. */
       const lu=typeof caIsCard==='function'&&caIsCard(a)?((a.card.checks||[]).slice(-1)[0]||{}):{};
       const to=lu.levelUp&&lu.card?(window.CLASS_ACTIVITIES||[]).find(x=>x.id===lu.card):null;
-      return to?`<div class="tg-note">Level up button opens ${escHtml(to.id)} · ${escHtml(to.title||'')} — shown to students once that card is visible or set to Play Along now.</div>`:'';
+      return to?`<div class="tg-note">Level up button opens ${escHtml(to.id)} · ${escHtml(to.title||'')} — shown to students once that card's release date arrives (Play Along now doesn't count).</div>`:'';
     })()}
     ${caJourneyUrl(a)?`<div class="ca-journey-row"><a class="jl-song-btn" href="${escAttr(caJourneyUrl(a))}" target="_blank" rel="noopener">${escHtml(t('ca.openJourney',{song:(SONG_JOURNEYS.find(s=>s.id===a.journey)||{}).name||''}))} &#x2197;</a> <span class="tg-note" style="display:inline">— this page stays open behind the gate while the activity is pending.</span></div>`:''}`;
 }

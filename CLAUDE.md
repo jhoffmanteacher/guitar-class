@@ -1491,8 +1491,9 @@ files; Moises clicked "the cure" at 144, twice the 72 the room counts.
 Then three or four checkboxes. A Level up may carry `card: '<id>'` to
 open another practice card instead of the Journey page — ca-10's riff card
 opens ca-25, the whole song (Jonathan, 2026-10-06; `caCardLinkHtml()`,
-shown only once the target is visible or Play Along now; 1bf checks the
-id). The activity's `steps` are the help ladder
+shown only once the target is RELEASED — Play Along now doesn't count,
+since the button would put an unreleased card on In-Class Activities;
+1bf checks the id). The activity's `steps` are the help ladder
 under "More practice help" — read-only (no Mark done), four at most, and
 none may name the Song Journey page: the card's Journey button is on its
 last check, the Level up (1ba pins both call sites). Data shape: CARD note

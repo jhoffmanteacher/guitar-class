@@ -10979,11 +10979,13 @@ function caJourneyLinkHtml(a){
 }
 /* A button that opens another class activity's card in place — the same
    route the Songs page's Play Along takes (songsHubOpenCard). Nothing
-   renders until the target is visible or set to Play Along now, so it never
-   leads to "not posted yet". */
+   renders until the target is RELEASED (caIsVisible) — "Play Along now"
+   does not count here (Jonathan, 2026-10-06): that switch is for the Songs
+   page, and this button would put the unreleased card on In-Class
+   Activities early. */
 function caCardLinkHtml(id){
   const b = (window.CLASS_ACTIVITIES || []).find(x => x.id === id);
-  if(!b || !(caIsVisible(b) || caIsPlayAlongOnly(b))) return '';
+  if(!b || !caIsVisible(b)) return '';
   return `<div class="ca-journey-row"><button type="button" class="jl-song-btn" onclick="songsHubOpenCard('${escAttr(id)}')">${escHtml(t('ca.openCard', { title: tf(b, 'title') }))} &#x2192;</button></div>`;
 }
 /* The Journey button renders in an activity's LAST step only — every
