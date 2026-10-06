@@ -10,8 +10,6 @@ see `WORKFLOW.md` and the git commit log.
 - The Level up on "the cure" (Intro and Verse on the Low E, The Verse on Two
   Strings, and Intro, Verse and Chorus) and on "Luna" — The Bassline now
   opens that song's Whole Song card, instead of the Song Journey page.
-- The Level up on "Seven Nation Army — The Whole Song" now opens the Whole
-  Song in Power Chords card.
 
 ## 2026-10-06 — Seven Nation Army riff card: Level up opens the whole song
 

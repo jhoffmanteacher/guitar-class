@@ -2994,7 +2994,8 @@ window.CLASS_ACTIVITIES = [
   {
     id:    'ca-25',
     view:  'card',    // one screen: Play song + tab + checks — see CARD above
-    journey: 'seven-nation-army',   // the Songs page's Play Along link finds this card by it — see JOURNEY above
+    journey: 'seven-nation-army',   // the button renders under the Level up check — see JOURNEY above
+    journeyLayer: 2,
     title:    'Seven Nation Army — The Whole Song',
     title_es: 'Seven Nation Army — La canción completa',
     intro:    'You play the riff with the band — today you add the G and A before each chorus and play the whole song.',
@@ -3226,9 +3227,8 @@ window.CLASS_ACTIVITIES = [
           text:    'Press Slowest or Slower. Play the whole song with the band, intro to the end, without stopping.',
           text_es: 'Pulsa «Muy lento» o «Más lento». Toca la canción completa con la banda, de la intro al final, sin detenerte.' },
         { levelUp: true,
-          card: 'ca-31',    // its button opens the power-chord whole song, not the Song Journey page (Jonathan, 2026-10-06)
-          text:    'Press Normal and play the whole song. Then play it in power chords on the Whole Song in Power Chords card.',
-          text_es: 'Pulsa «Normal» y toca la canción completa. Después tócala con acordes de potencia en la tarjeta de La canción completa con acordes de potencia.' }
+          text:    'Press Normal and play the whole song. Then play along with the full recording on the Song Journey page, Layer 2.',
+          text_es: 'Pulsa «Normal» y toca la canción completa. Después toca con la grabación completa en la página de Recorrido de la canción, Capa 2.' }
       ]
     },
     // The help ladder (read-only, under "More practice help").

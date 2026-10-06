@@ -1491,7 +1491,8 @@ files; Moises clicked "the cure" at 144, twice the 72 the room counts.
 Then three or four checkboxes. A Level up may carry `card: '<id>'` to
 open another practice card instead of the Journey page — every part card
 opens its song's whole-song card (ca-10 → ca-25; ca-13, ca-18, ca-19 →
-ca-24; ca-20 → ca-27) and ca-25 opens ca-31, its power-chord version
+ca-24; ca-20 → ca-27) — never to a power-chord version (Jonathan, same
+day: ca-25 keeps its Journey Level up)
 (Jonathan, 2026-10-06: the whole-song cards are more useful than the Song
 Journey page right now; `caCardLinkHtml()`,
 shown once the target is released or Play Along now; 1bf checks the id).
