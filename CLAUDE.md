@@ -1432,7 +1432,7 @@ for the teacher's own account by email; a failed config read fails open (no
 gate), never on a guess. `mood-chart.html` is not one of the six and is never
 gated. **The one exemption (2026-09-12):** a pending activity that names a
 Journey page — `journey: '<slug>'` in `class-activities.js` (ca-25 →
-seven-nation-army; ca-13, ca-18, ca-19, ca-24, ca-30 → the-cure; ca-20, ca-27, ca-32 → luna;
+seven-nation-army; ca-24, ca-30 → the-cure; ca-27, ca-32 → luna;
 ca-26, ca-29 → all-along-the-watchtower; ca-28, ca-33 → sweet-child-o-mine; ca-31 → seven-nation-army — the list is whatever carries the field,
 so read the file rather than trusting this line), optional
 `journeyLayer` — is sending
@@ -1489,8 +1489,11 @@ Slower), the Guitar toggle where a full mix exists, and a Metronome that is
 a click the SITE makes on every counted beat — there are no metronome
 files; Moises clicked "the cure" at 144, twice the 72 the room counts.
 Then three or four checkboxes. A Level up may carry `card: '<id>'` to
-open another practice card instead of the Journey page — ca-10's riff card
-opens ca-25, the whole song (Jonathan, 2026-10-06; `caCardLinkHtml()`,
+open another practice card instead of the Journey page — every part card
+opens its song's whole-song card (ca-10 → ca-25; ca-13, ca-18, ca-19 →
+ca-24; ca-20 → ca-27) and ca-25 opens ca-31, its power-chord version
+(Jonathan, 2026-10-06: the whole-song cards are more useful than the Song
+Journey page right now; `caCardLinkHtml()`,
 shown once the target is released or Play Along now; 1bf checks the id).
 Before its date the target SWAPS INTO the linking card's slot (`caSwap`,
 `caOpenLinkedCard()`) — no Songs heading, no list entry — and closing it

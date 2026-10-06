@@ -5,6 +5,14 @@ Notable changes to the Guitar Class site. Newest first.
 For the full session-by-session history (and the reasoning behind each change),
 see `WORKFLOW.md` and the git commit log.
 
+## 2026-10-06 — Level ups open the Whole Song cards
+
+- The Level up on "the cure" (Intro and Verse on the Low E, The Verse on Two
+  Strings, and Intro, Verse and Chorus) and on "Luna" — The Bassline now
+  opens that song's Whole Song card, instead of the Song Journey page.
+- The Level up on "Seven Nation Army — The Whole Song" now opens the Whole
+  Song in Power Chords card.
+
 ## 2026-10-06 — Seven Nation Army riff card: Level up opens the whole song
 
 - The Level up on "Seven Nation Army — The Riff" now opens the

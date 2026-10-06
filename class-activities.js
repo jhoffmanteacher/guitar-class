@@ -1781,8 +1781,6 @@ window.CLASS_ACTIVITIES = [
     id:    'ca-13',
     view:  'card',    // one screen: Play song + tab + checks — see CARD above
     number: 12,
-    journey: 'the-cure',   // the Level up check sends them to this Song Journey page — see JOURNEY above
-    journeyLayer: 2,
     title:    '"the cure" — Intro and Verse on the Low E',
     title_es: '"the cure" — Intro y estrofa en la cuerda Mi grave',
     intro:    'Like Watchtower, this is played on the low E string — today you play the intro and verse of "the cure" with the band.',
@@ -1868,8 +1866,9 @@ window.CLASS_ACTIVITIES = [
           text:    'Intro and 2 verses with the song on Slower, without stopping.',
           text_es: 'La intro y las 2 estrofas con la canción en Más lento, sin detenerte.' },
         { levelUp: true,
-          text:    'Press Normal and play the intro and 2 verses. Then play along with the full recording on the Song Journey page, Layer 2.',
-          text_es: 'Pulsa «Normal» y toca la intro y las 2 estrofas. Después toca con la grabación completa en la página de Recorrido de la canción, Capa 2.' }
+          card: 'ca-24',    // its button opens the whole-song card, not the Song Journey page (Jonathan, 2026-10-06)
+          text:    'Press Normal and play the intro and 2 verses. Then play along with the whole song on the Whole Song card.',
+          text_es: 'Pulsa «Normal» y toca la intro y las 2 estrofas. Después toca con la canción completa en la tarjeta de La canción completa.' }
       ]
     },
     // The help ladder (read-only, under "More practice help").
@@ -1922,8 +1921,6 @@ window.CLASS_ACTIVITIES = [
     id:    'ca-19',
     view:  'card',    // one screen: Play song + tab + checks — see CARD above
     number: 14,
-    journey: 'the-cure',   // the Level up check sends them to this Song Journey page — see JOURNEY above
-    journeyLayer: 2,
     title:    '"the cure" — The Verse on Two Strings',
     title_es: '"the cure" — La estrofa en dos cuerdas',
     intro:    'You played the verse of "the cure" on the low E string — today C moves to the A string, fret 3, so the hand stays inside the first five frets.',
@@ -2009,8 +2006,9 @@ window.CLASS_ACTIVITIES = [
           text:    'Intro and 2 verses with the song on Slower, without stopping.',
           text_es: 'La intro y las 2 estrofas con la canción en Más lento, sin detenerte.' },
         { levelUp: true,
-          text:    'Press Normal and play the intro and 2 verses. Then play along with the full recording on the Song Journey page, Layer 2.',
-          text_es: 'Pulsa «Normal» y toca la intro y las 2 estrofas. Después toca con la grabación completa en la página de Recorrido de la canción, Capa 2.' }
+          card: 'ca-24',    // its button opens the whole-song card, not the Song Journey page (Jonathan, 2026-10-06)
+          text:    'Press Normal and play the intro and 2 verses. Then play along with the whole song on the Whole Song card.',
+          text_es: 'Pulsa «Normal» y toca la intro y las 2 estrofas. Después toca con la canción completa en la tarjeta de La canción completa.' }
       ]
     },
     // The help ladder (read-only, under "More practice help").
@@ -2079,8 +2077,6 @@ window.CLASS_ACTIVITIES = [
   {
     id:    'ca-20',
     view:  'card',    // one screen: Play song + tab + checks — see CARD above
-    journey: 'luna',   // the Level up check sends them to this Song Journey page — see JOURNEY above
-    journeyLayer: 2,
     title:    '"Luna" — The Bassline',
     title_es: '"Luna" — La línea de bajo',
     intro:    'You already play F at fret 1 on the low E string — today you add the open A string and play the "Luna" loop with the band.',
@@ -2112,8 +2108,9 @@ window.CLASS_ACTIVITIES = [
           text:    'Four laps with the song on Slower, without stopping.',
           text_es: 'Cuatro vueltas con la canción en Más lento, sin detenerte.' },
         { levelUp: true,
-          text:    'Press Normal and play four laps. Then play along with the whole song on the Song Journey page, Layer 2.',
-          text_es: 'Pulsa «Normal» y toca cuatro vueltas. Después toca con la canción completa en la página de Recorrido de la canción, Capa 2.' }
+          card: 'ca-27',    // its button opens the whole-song card, not the Song Journey page (Jonathan, 2026-10-06)
+          text:    'Press Normal and play four laps. Then play along with the whole song on the Whole Song card.',
+          text_es: 'Pulsa «Normal» y toca cuatro vueltas. Después toca con la canción completa en la tarjeta de La canción completa.' }
       ]
     },
     // The help ladder (read-only, under "More practice help").
@@ -2177,8 +2174,6 @@ window.CLASS_ACTIVITIES = [
     id:    'ca-18',
     view:  'card',    // one screen: Play song + tab + checks — see CARD above
     number: 15,
-    journey: 'the-cure',   // the Level up check sends them to this Song Journey page — see JOURNEY above
-    journeyLayer: 2,
     title:    '"the cure" — Intro, Verse and Chorus',
     title_es: '"the cure" — Intro, estrofa y coro',
     intro:    'You moved the verse of "the cure" onto two strings — today you add the chorus and play the whole song with the band.',
@@ -2303,8 +2298,9 @@ window.CLASS_ACTIVITIES = [
           text:    'Intro to the end of the chorus with the song on Slower, without stopping.',
           text_es: 'De la intro al final del coro con la canción en Más lento, sin detenerte.' },
         { levelUp: true,
-          text:    'Press Normal and play the whole song. Then play along with the full recording on the Song Journey page, Layer 2.',
-          text_es: 'Pulsa «Normal» y toca la canción completa. Después toca con la grabación completa en la página de Recorrido de la canción, Capa 2.' }
+          card: 'ca-24',    // its button opens the whole-song card, not the Song Journey page (Jonathan, 2026-10-06)
+          text:    'Press Normal and play the whole song. Then play the whole record, intro to the end, on the Whole Song card.',
+          text_es: 'Pulsa «Normal» y toca la canción completa. Después toca toda la grabación, de la intro al final, en la tarjeta de La canción completa.' }
       ]
     },
     // The help ladder (read-only, under "More practice help").
@@ -2998,8 +2994,7 @@ window.CLASS_ACTIVITIES = [
   {
     id:    'ca-25',
     view:  'card',    // one screen: Play song + tab + checks — see CARD above
-    journey: 'seven-nation-army',   // the button renders under the Level up check — see JOURNEY above
-    journeyLayer: 2,
+    journey: 'seven-nation-army',   // the Songs page's Play Along link finds this card by it — see JOURNEY above
     title:    'Seven Nation Army — The Whole Song',
     title_es: 'Seven Nation Army — La canción completa',
     intro:    'You play the riff with the band — today you add the G and A before each chorus and play the whole song.',
@@ -3231,8 +3226,9 @@ window.CLASS_ACTIVITIES = [
           text:    'Press Slowest or Slower. Play the whole song with the band, intro to the end, without stopping.',
           text_es: 'Pulsa «Muy lento» o «Más lento». Toca la canción completa con la banda, de la intro al final, sin detenerte.' },
         { levelUp: true,
-          text:    'Press Normal and play the whole song. Then play along with the full recording on the Song Journey page, Layer 2.',
-          text_es: 'Pulsa «Normal» y toca la canción completa. Después toca con la grabación completa en la página de Recorrido de la canción, Capa 2.' }
+          card: 'ca-31',    // its button opens the power-chord whole song, not the Song Journey page (Jonathan, 2026-10-06)
+          text:    'Press Normal and play the whole song. Then play it in power chords on the Whole Song in Power Chords card.',
+          text_es: 'Pulsa «Normal» y toca la canción completa. Después tócala con acordes de potencia en la tarjeta de La canción completa con acordes de potencia.' }
       ]
     },
     // The help ladder (read-only, under "More practice help").
