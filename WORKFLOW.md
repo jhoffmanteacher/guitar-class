@@ -654,6 +654,21 @@
 
 ## Recently shipped (post-archive)
 
+- [x] **2026-10-06 — Play-along first: Song Journey pages stay open as the
+      back door.** Reverses part 1's per-song retire switch and "moved" card
+      (shipped as `fc7e878`, reversed the same day). One rule for every link
+      to a song: if students can open a whole-song card for it (and for that
+      layer), the link opens the card; otherwise the Song Journey page.
+      `openSongLink(slug, layer)` in app.js decides at the click; the "Take it
+      to a song" box is one button per song again, the set-header names are
+      links again, the Songs row has its Song Journey link on every Core row,
+      and the resume card sees all six songs. `caJourneyUrl()` returns '' on
+      a whole-song card and on any activity whose song has an openable card.
+      `tabs/journey.js` / `journey-theme.css` match `dbf1dc2` again. checks.mjs
+      1bn rewritten: every whole-song card names its song + layer, no two
+      share a pair, none names the page, and the retire switch cannot come
+      back. Nothing deleted; no `tabs/*.html` or module file touched.
+
 - [x] **2026-10-06 — Song Journey phase-out, part 1: a per-song retire switch.**
       `JOURNEY_RETIRED` in `class-activities.js` (starting with `the-cure`
       and `seven-nation-army`) closes every door into a song's Journey page:
@@ -664,9 +679,8 @@
       1–5 is one button to the Songs page for every song. ca-25's Level up
       lost its last Journey mention. checks.mjs 1bn pins it. Nothing deleted;
       `journey:` stays on every card (it places a whole-song card on its
-      Songs row). Open: **Journey phase-out part 2** — module step text that
-      still names a Song Journey page; retire Watchtower, Luna and Sweet Child
-      as their whole-song cards are released.
+      Songs row). ~~Open: Journey phase-out part 2~~ — cancelled, superseded
+      by the play-along-first order below (the same day).
 
 - [x] **2026-10-06 — "the cure" Journey page: the record plays each chorus
       three times.** The page (and ca-18) teach the chorus as eight bars,

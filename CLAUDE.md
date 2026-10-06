@@ -282,9 +282,10 @@ click — each Song Journey page's beat map against `SNIPPET_TRACKS`, no
 metronome mix in `audio/` but the allow-listed one, no metronome field on a
 track, and `snippetSrc()` called with three arguments (1bk), and a
 practice-card section's caption counting with a different word from its
-badge — `repLabel` whitelist, both languages (1bm), and a retired Song
-Journey page — every `JOURNEY_RETIRED` slug a real song with a whole-song
-card, no card of that song naming the page in text, the doors wired (1bn).
+badge — `repLabel` whitelist, both languages (1bm), and play-along first —
+every whole-song card names its song and layer, no two share a pair, none
+names the Journey page, the 2026-10-06 retire switch stays gone, and
+`openSongLink` stays wired (1bn).
 
 **A phrase detector must match the UNESCAPED string.** Until 2026-09-25 1w
 and 1w-t matched the raw source capture, which keeps `\'`, so every banned
@@ -968,40 +969,40 @@ The three Module 1 Set 2 graded-MC rewords, the `m2w2·c` 4-bar melody section
 title, and `ca-14`'s Happy Birthday exit check are all frozen mid-year fixes —
 see the **Summer reset list** near "Three regimes," above.
 
-## Song Journey pages are being phased out (2026-10-06)
-Jonathan's teaching has changed: students do what is taught directly and stop,
-and the whole-song practice cards do the Journey pages' job better. A song also
-lived in two places that drifted apart (both "the cure" work orders of
-2026-10-06 came from the page disagreeing with the cards). So the Journey pages
-are retired song by song. **`window.JOURNEY_RETIRED`** (top of
-`class-activities.js`, the one data file the app and the Journey pages both
-load) lists the retired slugs — `the-cure` and `seven-nation-army` today.
-For a retired slug:
+## Play-along first; Song Journey pages are the back door (2026-10-06)
+**One rule for every link to a song: if students can open a play-along
+(whole-song) card for it, the link opens that card; if not, it opens the Song
+Journey page.** The site works that out from what Jonathan has released or set
+to "Play Along now" (`songsPlayAlongCard()`) — there is no list to maintain.
+Why: the play-along cards cover Layer 2 (single notes) and Layer 3 (power
+chords) only; the Journey pages also hold Layers 4–5 and the bonus layers, and
+Modules 4 and 5 send students there.
 
-- the card's "Open the … Song Journey page" button and the console preview's
-  link are gone (`caJourneyUrl()` returns `''` — the two `caJourneyLinkHtml`
-  calls 1ba pins are untouched);
-- the Songs page Core row drops the Song Journey link (Play Along and Backing
-  stay);
-- "About this set" shows the song's name as plain text;
-- the resume card's song row never picks it (`resumeSongPick()`);
-- **"Take it to a song" (Modules 1–5 only, via `journeySongsFor`) is one button to
-  the Songs page for every song**, retired or not (`journey.takeItBtn`);
-- the page itself shows students a "moved" card with a button to
-  `index.html#songs` — before the activity gate, with no Firestore read, and
-  hidden (`journey-retired-wait`) until the teacher is confirmed or 4 s pass.
-  The teacher account still sees the full page. `showJourneyRetired()` in
-  `tabs/journey.js`.
+| Door | Behaviour |
+|---|---|
+| "Take it to a song" box, Modules 1–5 | one button per song; `openSongLink(slug, layer)` |
+| "About this set" song names | links; same `openSongLink` |
+| Songs page Core row | Play Along (only with an openable card) · Backing · Song Journey, every row |
+| Journey button on a card | never on a whole-song card; on another activity only while its song has no openable whole-song card (`caJourneyUrl()`) |
+| Resume card song row | all six songs |
+| The Journey page itself | open for every student, behind the activity gate as ever |
 
-`journey:` and `journeyLayer:` **stay on every card** — `journey:` is also what
-puts a whole-song card on its Songs-page row. **To retire the next song, add its
-slug to `JOURNEY_RETIRED` once its whole-song card is released — nothing else to
-edit**; checks.mjs **1bn** fails the push if the song has no whole-song card, if a
-card of that song still names the page in text, or if a slug isn't a
-`SONG_JOURNEYS` id. The six `tabs/*.html` pages are not deleted and **not kept in
-step with the cards any more — do not open work to sync a retired page's text
-with a card.** Watchtower, Luna and Sweet Child are next (their cards exist);
-Let It Be has no card and may leave the course.
+**Layer matching:** a whole-song card carries `journey` + `journeyLayer` (2 on
+ca-24–ca-28, 3 on ca-29–ca-33), so a Module 2 link finds the Layer 2 card and a
+Module 3 link the Layer 3 card. Modules 1, 4 and 5 have no card for their
+layer, so their links open the Journey page at `#layer-N`.
+**The decision is made at the click**, not at render time — the class config
+(dates, Play Along now) can land after the page holding the link was built.
+Don't fold "Play Along now" into `caIsVisible()`.
+
+**No Journey page is blocked and none is deleted.** Part 1 of this work
+(`fc7e878`: a per-song `JOURNEY_RETIRED` list and a "moved" card on the page)
+shipped and was reversed the same day, on Jonathan's second thought — **do not
+bring back a per-song list or a "moved" card**; checks.mjs **1bn** fails the push
+if either name reappears. The Journey pages are **not kept in step with the
+cards**: they can disagree (the "the cure" chorus is two laps on the page and
+three on the card) and that is accepted — **do not open work to sync a Journey
+page's text with a card.**
 
 ## Live quiz — the whole-class game
 
@@ -1475,7 +1476,11 @@ so read the file rather than trusting this line), optional
 `journeyLayer` — is sending
 the student there as part of the work, so `journey.js` leaves THAT page open
 while the activity blocks; every other Journey page stays gated. The card
-renders an "Open the … Song Journey page" button (`caJourneyLinkHtml()`; the
+renders an "Open the … Song Journey page" button (`caJourneyLinkHtml()` — never
+on a whole-song card, and not on another activity while its song has an
+openable whole-song card; `journey:` on a whole-song card still exempts that
+page from the gate while the card is pending and places the card on its Songs
+row; the
 console preview in `renderTeacherActivityDetail` shows the same link after
 its steps — two renderers, patched together). checks.mjs 1d validates the
 slug against `tabs/<slug>.html` and the layer against that page's
@@ -1526,8 +1531,8 @@ Slower), the Guitar toggle where a full mix exists, and a Metronome that is
 a click the SITE makes on every counted beat — there are no metronome
 files; Moises clicked "the cure" at 144, twice the 72 the room counts.
 Then three or four checkboxes. **A whole-song card's Level up names no other
-page; a part card's Level up hands off to the whole-song card (`card: 'ca-N'`)**
-(2026-10-06, 1bn). A Level up may carry `card: '<id>'` to
+page and renders no Journey button (it IS the play-along); a part card's Level
+up hands off to the whole-song card (`card: 'ca-N'`)** (2026-10-06, 1bn). A Level up may carry `card: '<id>'` to
 open another practice card instead of the Journey page — every part card
 opens its song's whole-song card (ca-10 → ca-25; ca-13, ca-18, ca-19 →
 ca-24; ca-20 → ca-27) — never to a power-chord version (Jonathan, same
@@ -1723,11 +1728,12 @@ sections by title.
 layerNum}}`) is authored from the six pages' real `.layer-unit` spans —
 today uniformly Module 1→Layer 1 … 5→5, anything past 5 an unnumbered
 "Extra". checks.mjs **1ab** rebuilds the map from those spans and fails on
-drift. **Since 2026-10-06 the box is ONE button to the Songs page**
-(`goExploreHash('songs')`, `journey.takeItBtn`) for every song; the render rule
-(Modules 1–5 only, via `journeySongsFor`) is unchanged, and `JOURNEY_LAYERS`
-is still what 1ab and 1af read. (It used to open `tabs/<slug>.html#layer-<n>`
-per song; `openFromHash()` still opens `#layer-N` on those pages.)
+drift. **The box is one button per song** that calls `openSongLink(slug,
+layer)` (2026-10-06, play-along first — see that section): the song's
+whole-song card for this module's layer if students can open it, else
+`tabs/<slug>.html#layer-<n>`. The render rule (Modules 1–5 only, via
+`journeySongsFor`) is unchanged, and `JOURNEY_LAYERS` is still what 1ab and 1af
+read.
 
 ### ⚠️ No Journey layer → the take-to-song section renders its OWN STEPS
 **Correction, 2026-09-12 (same day as Phase 3, found by an error sweep).**

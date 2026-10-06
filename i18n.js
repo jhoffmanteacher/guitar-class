@@ -1206,16 +1206,11 @@
     'journey.gatedBtn':      { en: 'Go to In-Class Activities', es: 'Ir a Actividades de clase' },
     // "Take It to a Song" link card (Today-first work order, Phase 3b) — the
     // module ladder's own Take It to a Song steps are replaced by this card,
-    // one button to the Songs page (was one per core song until 2026-10-06).
+    // one button per core song that has a Journey layer for that module; a tap
+    // opens the song's play-along card when there is one (play-along first).
     'journey.takeItTitle':   { en: 'Take it to a song', es: 'Llévalo a una canción' },
-    'journey.takeItSub':     { en: 'Play this skill with a song. Open the Songs page and press Play Along.',
-                               es: 'Toca esta destreza con una canción. Abre la página de Canciones y pulsa «Toca con la canción».' },
-    'journey.takeItBtn':     { en: 'Open the Songs page', es: 'Abrir la página de Canciones' },
-    // Retired Song Journey page (JOURNEY_RETIRED) — the "moved" card students see.
-    'journey.retiredTitle':  { en: 'This song page has moved', es: 'Esta página de la canción se movió' },
-    'journey.retiredBody':   { en: 'Open the Songs page and press Play Along next to the song.',
-                               es: 'Abre la página de Canciones y pulsa «Toca con la canción» junto a la canción.' },
-    'journey.retiredBtn':    { en: 'Go to the Songs page', es: 'Ir a la página de Canciones' },
+    'journey.takeItSub':     { en: 'Same skill, six songs — pick one.',
+                               es: 'Misma destreza, seis canciones — elige una.' },
 
 
     // ── 🎧 Listening Coach + 🎮 Games arcade (coach.js — every

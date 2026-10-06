@@ -707,35 +707,6 @@ function showJourneyGate(){
   document.body.appendChild(card);
 }
 
-/* Retired page (JOURNEY_RETIRED, class-activities.js, 2026-10-06): students see
-   one "moved" card pointing at the Songs page; the teacher still gets the page. */
-function journeyIsRetired(){
-  return (window.JOURNEY_RETIRED || []).indexOf(SONG_ID) !== -1;
-}
-function showJourneyRetired(){
-  document.documentElement.classList.remove('journey-retired-wait');
-  document.body.innerHTML = '';
-  var card = document.createElement('div');
-  card.className = 'ca-gate-card';
-  var h = document.createElement('h1');
-  h.className = 'ca-gate-title';
-  h.setAttribute('data-i18n', 'journey.retiredTitle');
-  h.textContent = t('journey.retiredTitle');
-  var p = document.createElement('p');
-  p.className = 'ca-gate-body';
-  p.setAttribute('data-i18n', 'journey.retiredBody');
-  p.textContent = t('journey.retiredBody');
-  var btn = document.createElement('a');
-  btn.className = 'ca-gate-btn';
-  btn.href = '../index.html#songs';
-  btn.setAttribute('data-i18n', 'journey.retiredBtn');
-  btn.textContent = t('journey.retiredBtn');
-  card.appendChild(h); card.appendChild(p); card.appendChild(btn);
-  document.body.appendChild(card);
-}
-// No flash of the old page: hidden until the teacher is confirmed (or 4 s pass).
-if(journeyIsRetired()) document.documentElement.classList.add('journey-retired-wait');
-
 function loadFirestoreSdk(){
   return new Promise(function(resolve, reject){
     if(firebase.firestore){ resolve(); return; }
@@ -748,23 +719,9 @@ function loadFirestoreSdk(){
 }
 
 window.addEventListener('load', function(){
-  if(typeof firebase === 'undefined' || typeof firebaseConfig === 'undefined'){
-    if(journeyIsRetired()) showJourneyRetired();
-    return;
-  }
-  var retiredTimer = null;
-  if(journeyIsRetired()) retiredTimer = setTimeout(showJourneyRetired, 4000);
+  if(typeof firebase === 'undefined' || typeof firebaseConfig === 'undefined') return;
   firebase.initializeApp(firebaseConfig);
   firebase.auth().onAuthStateChanged(function(user){
-    if(journeyIsRetired()){
-      if(retiredTimer){ clearTimeout(retiredTimer); retiredTimer = null; }
-      if(!user || typeof TEACHER_EMAIL === 'undefined' || user.email !== TEACHER_EMAIL){
-        if(typeof lqStopListening === 'function') lqStopListening();
-        showJourneyRetired();
-        return;
-      }
-      document.documentElement.classList.remove('journey-retired-wait');
-    }
     // A signed-out resolution still settles the boot race: anything rated
     // before this point belongs to nobody we can write for, and must NOT be
     // held for whoever signs in next.

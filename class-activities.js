@@ -41,8 +41,11 @@
    pending — journey.js exempts a page any pending activity names, since the
    page is part of the work. Every other Journey page stays gated as usual.
    checks.mjs 1d validates the slug (and the layer against JOURNEY_LAYERS).
-   For a slug in JOURNEY_RETIRED (below) the button does not render and the page
-   is closed to students; `journey:` still ties the card to its song on the Songs page.
+   A whole-song card (`card.wholeSong`) never renders the Journey button — it IS
+   the play-along; its `journey` + `journeyLayer` are how links to that song and
+   layer find it (the Songs page row, "Take it to a song", "About this set"). On
+   any other activity the button renders only while the song has no whole-song
+   card students can open.
    Write the steps to match: only the LAST step may name the Song Journey
    page (EN "Song Journey", ES "Recorrido de la canción") — an earlier step
    that says "open the Song Journey page" points at a button it doesn't
@@ -377,16 +380,6 @@
 
    The schema above is documentation, not a template to copy live.
    ════════════════════════════════════════════════════════════════════ */
-/* JOURNEY_RETIRED — Song Journey pages students are no longer sent to
-   (Jonathan, 2026-10-06). The whole-song practice card is where a song is
-   practised now; a retired song's Journey page stays in the repo as source
-   material and shows students a "moved" card (tabs/journey.js). Lives in
-   THIS file because it is the one data file both index.html and the six
-   Journey pages already load. Add a slug only once that song has a
-   whole-song card (card.wholeSong) — checks.mjs 1bn fails the push
-   otherwise. `journey:` stays on the cards: it is also what places a
-   whole-song card on its Songs-page row. */
-window.JOURNEY_RETIRED = ['the-cure', 'seven-nation-army'];
 window.CLASS_ACTIVITIES = [
   {
     id:    'ca-1',

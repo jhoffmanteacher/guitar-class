@@ -5,6 +5,13 @@ Notable changes to the Guitar Class site. Newest first.
 For the full session-by-session history (and the reasoning behind each change),
 see `WORKFLOW.md` and the git commit log.
 
+## 2026-10-06 — Song links open the play-along first
+
+- A link to a song now opens its play-along card when there is one for that
+  part of the course, and its Song Journey page when there is not. Every Song
+  Journey page is open again. The "Take it to a song" box has one button per
+  song, as before.
+
 ## 2026-10-06 — "the cure" and Seven Nation Army move to the Songs page
 
 - "the cure" and Seven Nation Army are played from their practice cards now.
