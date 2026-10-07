@@ -206,6 +206,17 @@ h1{font-family:var(--font-display);font-size:1.875rem;font-weight:650;margin:4px
      so use the purple chip palette instead */
   .fab-track{color:var(--purple-text);background:var(--purple-bg);border-color:var(--purple-border);box-shadow:0 4px 14px rgba(0,0,0,0.5)}
 }
+/* Icon-only floating tools (Jonathan, 2026-10-07: "keep the floating
+   buttons but make them small icons"), so they cover less of the
+   full-width whole-song tab. Journey-only, and kept out of fab-tools.css on
+   purpose: checks.mjs 1t2 holds that file's .fab rules equal to the main
+   app's, where the tools live in the rail. The label <span> stays in the
+   markup, clipped rather than hidden, so it is still the button's
+   accessible name; title= (data-i18n-attr, both languages) is the tooltip. */
+#fab-buttons .fab{width:44px;height:44px;padding:0;justify-content:center;gap:0}
+#fab-buttons .fab svg{width:18px;height:18px}
+#fab-buttons .fab>span{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);clip-path:inset(50%);white-space:nowrap}
+#fab-buttons .fab-track{width:44px;padding:0;justify-content:center;border-radius:50%;font-size:1rem}
 /* No visual playing state by design — the pill always shows ▶ and keeps the
    same look; aria-pressed is maintained for assistive tech only. */
 footer{margin-top:36px;font-size:0.7813rem;color:var(--text3);border-top:1px solid var(--border);padding-top:14px}

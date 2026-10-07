@@ -1007,6 +1007,14 @@ static HTML). When open it spans the window, not the 760px column
 `wsReflow()` measures the column and a monospace character, sizes the card,
 re-draws the rows to fit, and drops `.layer`'s clip (`.ws-wide`) while open.
 
+**Journey pages have no Stuck? / Level up folds** (Jonathan, 2026-10-07:
+"they are no longer needed" — all 66 removed, every layer of all six pages;
+"More about this song" and "The whole song tab" are the only folds left).
+Don't add them back to a layer. **The floating tools there are icons only**
+— `#fab-buttons` rules in `journey-theme.css`, not `fab-tools.css` (1t2 keeps
+that file equal to the app's), label `<span>` clipped as the accessible
+name, `title=` via `data-i18n-attr` as the tooltip.
+
 **No Journey page is blocked and none is deleted.** Part 1 of this work
 (`fc7e878`: a per-song `JOURNEY_RETIRED` list and a "moved" card on the page)
 shipped and was reversed the same day, on Jonathan's second thought — **do not

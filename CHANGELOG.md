@@ -5,6 +5,13 @@ Notable changes to the Guitar Class site. Newest first.
 For the full session-by-session history (and the reasoning behind each change),
 see `WORKFLOW.md` and the git commit log.
 
+## 2026-10-07 — Song Journey pages: simpler and less crowded
+
+- The "Stuck?" and "Level up" buttons are gone from every layer of every
+  Song Journey page.
+- The floating Backing track, Tuner, Timer and Metronome buttons are now
+  small round icons. Point at one to see its name.
+
 ## 2026-10-07 — Whole-song tabs on the Song Journey pages
 
 - Seven Nation Army, All Along the Watchtower, Luna, Sweet Child O' Mine and
