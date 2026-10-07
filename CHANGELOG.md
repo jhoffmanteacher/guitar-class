@@ -5,6 +5,13 @@ Notable changes to the Guitar Class site. Newest first.
 For the full session-by-session history (and the reasoning behind each change),
 see `WORKFLOW.md` and the git commit log.
 
+## 2026-10-07 — Song Journey pages: wider, and short sections share a line
+
+- Song Journey pages now use more of the screen, and the note under the
+  Play along button runs the full width instead of a narrow strip.
+- In the whole-song tab, short sections (like the intro and verse 1) now sit
+  side by side on one line when the screen is wide enough.
+
 ## 2026-10-07 — Song Journey pages: simpler and less crowded
 
 - The "Stuck?" and "Level up" buttons are gone from every layer of every

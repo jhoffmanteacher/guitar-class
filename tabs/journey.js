@@ -650,9 +650,55 @@ function wsPreHtml(a){
     var bpb = total / Math.max(1, sec.bars || 1);
     var head = '<span class="ws-sec" data-es="' + wsEsc(wsEsc(sec.caption_es || sec.caption)) + '">' + wsEsc(sec.caption) + '</span>';
     var rows = wsSectionRows(sec).map(function(r){ return wsRowText(r, bpb); });
-    return head + '\n' + rows.join('\n\n');
+    return { head: head, rows: rows, one: rows.length === 1 };
   });
-  return blocks.join('\n\n\n');
+  /* Sections that each fit on one row sit side by side while the pair (or
+     trio) still fits the row width — the intro and verse 1 of a riff song
+     share a line, the way two bars of a chart would. A section that needs
+     several rows keeps the full width to itself. */
+  var out = [], i = 0;
+  while(i < blocks.length){
+    var b = blocks[i];
+    if(!b.one){ out.push(b.head + '\n' + b.rows.join('\n\n')); i++; continue; }
+    var group = [wsBlockLines(b)], used = group[0].w;
+    var j = i + 1;
+    while(j < blocks.length && blocks[j].one){
+      var nx = wsBlockLines(blocks[j]);
+      if(used + WS_GAP + nx.w > WS_ROW_CHARS) break;
+      group.push(nx); used += WS_GAP + nx.w; j++;
+    }
+    out.push(wsJoinSideBySide(group));
+    i = j;
+  }
+  return out.join('\n\n\n');
+}
+var WS_GAP = 4;
+function wsPlainLen(s){
+  return s.replace(/<[^>]*>/g, '').replace(/&[a-z]+;/g, '.').length;
+}
+function wsBlockLines(b){
+  var lines = [b.head].concat(b.rows[0].split('\n'));
+  var w = 0;
+  lines.forEach(function(l){ w = Math.max(w, wsPlainLen(l)); });
+  return { lines: lines, w: w };
+}
+function wsJoinSideBySide(group){
+  if(group.length === 1) return group[0].lines.join('\n');
+  var n = 0;
+  group.forEach(function(g){ n = Math.max(n, g.lines.length); });
+  var res = [];
+  for(var r = 0; r < n; r++){
+    var line = '';
+    group.forEach(function(g, k){
+      var cell = g.lines[r] || '';
+      if(k < group.length - 1){
+        cell += new Array(g.w - wsPlainLen(cell) + WS_GAP + 1).join(' ');
+      }
+      line += cell;
+    });
+    res.push(line.replace(/\s+$/, ''));
+  }
+  return res.join('\n');
 }
 function wsTabHtml(a){
   var c = a.card;
