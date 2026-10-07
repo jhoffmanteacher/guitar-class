@@ -649,7 +649,20 @@ function wsPreHtml(a){
     var total = notes.reduce(function(t, n){ return t + (n.beats > 0 ? n.beats : 1); }, 0);
     var bpb = total / Math.max(1, sec.bars || 1);
     var head = '<span class="ws-sec" data-es="' + wsEsc(wsEsc(sec.caption_es || sec.caption)) + '">' + wsEsc(sec.caption) + '</span>';
-    var rows = wsSectionRows(sec).map(function(r){ return wsRowText(r, bpb); });
+    /* A section's own rows pack side by side first (the two chorus laps of
+       a song, each a few bars long, share a line when the width holds). */
+    var rowObjs = wsSectionRows(sec).map(function(r){
+      var lines = wsRowText(r, bpb).split('\n'), w = 0;
+      lines.forEach(function(l){ w = Math.max(w, wsPlainLen(l)); });
+      return { lines: lines, w: w };
+    });
+    var packed = [], cur = [], used = 0;
+    rowObjs.forEach(function(r){
+      if(cur.length && used + WS_GAP + r.w > WS_ROW_CHARS){ packed.push(cur); cur = []; used = 0; }
+      used += (cur.length ? WS_GAP : 0) + r.w; cur.push(r);
+    });
+    if(cur.length) packed.push(cur);
+    var rows = packed.map(function(g){ return wsJoinSideBySide(g); });
     return { head: head, rows: rows, one: rows.length === 1 };
   });
   /* Sections that each fit on one row sit side by side while the pair (or
