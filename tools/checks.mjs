@@ -5870,12 +5870,16 @@ function checkPracticeCards() {
     if (checks.length < 2 || checks.length > 6) flag(`${w}: card.checks has ${checks.length} — a card has 2–6 checks`);
     const lvl = checks.map((x, i) => (x && x.levelUp) ? i : -1).filter(i => i >= 0);
     if (lvl.length !== 1 || lvl[0] !== checks.length - 1) flag(`${w}: card.checks needs exactly one levelUp check, and it goes last`);
+    // `slot` pins a check's tick key (caCheckKey in app.js); two checks on one key would share a tick.
+    const tickSlots = checks.map((x, ci) => (x && Number.isInteger(x.slot)) ? x.slot : ci);
+    if (new Set(tickSlots).size !== tickSlots.length) flag(`${w}: two checks share a tick key — fix the slot numbers`);
     checks.forEach((x, ci) => {
       const cw = `${w} · card.checks[${ci}]`;
       if (!x || typeof x !== 'object') { flag(`${cw}: not an object`); return; }
       twin(cw, x, 'text');
       if (!x.levelUp) twin(cw, x, 'label');
       if ('levelUp' in x && x.levelUp !== true) flag(`${cw}: levelUp should be true or left off`);
+      if ('slot' in x && !(Number.isInteger(x.slot) && x.slot >= 0)) flag(`${cw}: slot must be a whole number, 0 or more`);
       /* `card: '<id>'` — the Level up opens another practice card instead
          of the Song Journey page (caCardLinkHtml in app.js). */
       if ('card' in x) {

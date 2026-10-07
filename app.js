@@ -11070,15 +11070,19 @@ function caOpenLinkedCard(from, id){
    caStepDone under `<id>:c<n>` — saved to progress, like step ticks. */
 function caIsCard(a){ return !!(a && a.view === 'card' && a.card); }
 function caCardChecks(a){ return (a && a.card && Array.isArray(a.card.checks)) ? a.card.checks : []; }
+/* A check's tick key. Positional by default; `slot: n` pins it to the key it
+   had before earlier checks were removed, so a saved tick stays on its own
+   box (ca-25 lost its first two checks, 2026-10-07). */
+function caCheckKey(a, c, ci){ return `${a.id}:c${(c && Number.isInteger(c.slot)) ? c.slot : ci}`; }
 /* The ticks an activity counts: a card's checks, or a ladder's steps. Every
    "n of m done" reader goes through these two so a card and a ladder can't
    disagree about what finishing means. */
 function caTickKeys(a){
-  if(caIsCard(a)) return caCardChecks(a).map((c, ci) => `${a.id}:c${ci}`);
+  if(caIsCard(a)) return caCardChecks(a).map((c, ci) => caCheckKey(a, c, ci));
   return ((a && a.steps) || []).map((s, si) => `${a.id}:${si}`);
 }
 function caRequiredTickKeys(a){
-  if(caIsCard(a)) return caCardChecks(a).map((c, ci) => (c && c.levelUp) ? null : `${a.id}:c${ci}`).filter(Boolean);
+  if(caIsCard(a)) return caCardChecks(a).map((c, ci) => (c && c.levelUp) ? null : caCheckKey(a, c, ci)).filter(Boolean);
   return caTickKeys(a);
 }
 function caTickCount(keys){ return keys.filter(k => caStepDone[k] === true).length; }
@@ -11211,7 +11215,7 @@ function pcChecksHtml(a, preview){
   const checks = caCardChecks(a);
   let n = 0;
   const items = checks.map((c, ci) => {
-    const done = !preview && caStepDone[`${a.id}:c${ci}`] === true;
+    const done = !preview && caStepDone[caCheckKey(a, c, ci)] === true;
     const head = c.levelUp ? t('ca.cardLevelUp') : t('ca.cardCheckN', {n: ++n}) + (c.label ? ' · ' + tf(c, 'label') : '');
     /* The Song Journey button lives on the LAST check and only there — the
        card's equivalent of caStepHtml's last-step rule (checks.mjs 1ba pins
@@ -11657,7 +11661,7 @@ function pcCheck(btn, id, ci){
   const a = (window.CLASS_ACTIVITIES || []).find(x => x.id === id);
   if(!root || !li || !a) return;
   const preview = root.dataset.preview === '1';
-  const key = `${id}:c${ci}`;
+  const key = caCheckKey(a, caCardChecks(a)[ci], ci);
   let nowDone;
   if(preview){
     nowDone = !li.classList.contains('is-done');   // the console preview saves nothing

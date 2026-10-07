@@ -116,6 +116,8 @@
        checks: [
          { label, label_es, text, text_es },            // numbered checks
          { levelUp: true, text, text_es },               // last, exactly one;
+         // slot: n (optional) keeps the tick key `<id>:c<n>` a check had
+         // before earlier checks were removed (ca-25)
        ],                                  // the only place the Song Journey
      }                                     // page may be named (its button
                                            // renders there)
@@ -3226,16 +3228,12 @@ window.CLASS_ACTIVITIES = [
         }
       ],
       checks: [
-        { label: 'Intro and Verse 1', label_es: 'Intro y Estrofa 1',
-          text:    'Intro and Verse 1 with the song on Slower, without stopping.',
-          text_es: 'Intro y Estrofa 1 con la canción en «Más lento», sin detenerte.' },
-        { label: 'Into the chorus', label_es: 'Hacia el coro',
-          text:    'Tap Verse 1 to start there. Play to the end of Chorus 1 with the song on Slower, without stopping.',
-          text_es: 'Pulsa «Estrofa 1» para empezar ahí. Toca hasta el final del Coro 1 con la canción en «Más lento», sin detenerte.' },
-        { label: 'The whole song', label_es: 'La canción completa',
+        // Two checks only, like every whole-song card (Jonathan, 2026-10-07).
+        // `slot` keeps the tick keys these two had as checks 3 and 4.
+        { slot: 2, label: 'The whole song, slower', label_es: 'La canción completa, más lenta',
           text:    'Press Slowest or Slower. Play the whole song with the band, intro to the end, without stopping.',
           text_es: 'Pulsa «Muy lento» o «Más lento». Toca la canción completa con la banda, de la intro al final, sin detenerte.' },
-        { levelUp: true,
+        { slot: 3, levelUp: true,
           text:    'Press Normal. Play the whole song with the band at normal speed, intro to the end, without stopping.',
           text_es: 'Pulsa «Normal». Toca la canción completa con la banda a velocidad normal, de la intro al final, sin detenerte.' }
       ]
