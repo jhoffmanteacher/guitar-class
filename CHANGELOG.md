@@ -5,6 +5,12 @@ Notable changes to the Guitar Class site. Newest first.
 For the full session-by-session history (and the reasoning behind each change),
 see `WORKFLOW.md` and the git commit log.
 
+## 2026-10-07 — No "More practice help" on any practice card
+
+- The part cards (the riff, the verse, the intro and so on) no longer have a
+  "More practice help" section either. Each card is the song, its tab and
+  its checks.
+
 ## 2026-10-07 — Whole-song cards: two checks, no extra help
 
 - Every whole-song play-along card now has two checks: the whole song at a

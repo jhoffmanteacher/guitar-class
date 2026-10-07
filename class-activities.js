@@ -1150,7 +1150,7 @@ window.CLASS_ACTIVITIES = [
      four laps.
      The first three old steps stay as the help ladder — the two halves and
      the rhythm demo, unchanged; the 80 BPM step and the band step became the
-     checks. */
+     checks. The help ladder itself was removed 2026-10-07. */
   {
     id:    'ca-10',
     view:  'card',    // one screen: Play song + tab + checks — see CARD above
@@ -1194,60 +1194,8 @@ window.CLASS_ACTIVITIES = [
           text_es: 'Toca con la canción completa en la tarjeta de La canción completa.' }
       ]
     },
-    // The help ladder (read-only, under "More practice help").
-    steps: [
-      {
-        label:    'Practice — E E G E',
-        label_es: 'Practica — E E G E',
-        text: 'Play E E G E with the tab at 60 BPM. Finger 1 stays on fret 7 the whole time. The pinky (finger 4) reaches fret 10 for the G and comes back. You\'ve got it when: E E G E three times in a row, no buzz. Finger 1 lifts when the pinky reaches? Play just fret 7 to fret 10 five times, pressing fret 7 the whole time, then try again.',
-        text_es: 'Toca E E G E con la tablatura a 60 BPM. El dedo 1 se queda en el traste 7 todo el tiempo. El meñique (dedo 4) llega al traste 10 para el G y regresa. Lo tienes cuando: E E G E tres veces seguidas, sin zumbido. ¿Se levanta el dedo 1 cuando el meñique se estira? Toca solo del traste 7 al traste 10 cinco veces, presionando el traste 7 todo el tiempo, y vuelve a intentarlo.',
-        tab: {
-          caption: 'E E G E · A string · frets 7 7 10 7',
-          caption_es: 'E E G E · cuerda La · trastes 7 7 10 7',
-          notes: [
-            { string: 'A', fret: 7,  note: 'E', midi: 52 },
-            { string: 'A', fret: 7,  note: 'E', midi: 52 },
-            { string: 'A', fret: 10, note: 'G', midi: 55 },
-            { string: 'A', fret: 7,  note: 'E', midi: 52 }
-          ]
-        },
-      },
-      {
-        label:    'Practice — E D C B',
-        label_es: 'Practica — E D C B',
-        text: 'Play E D C B with the tab at 60 BPM. Finger 1 plays every note: fret 7, fret 5, fret 3, then fret 2. You\'ve got it when: E D C B three times in a row, no buzz. Landing on the wrong fret? Look at the fret before you move — 7, 5 and 3 have dots, and 2 is one fret below the 3 dot.',
-        text_es: 'Toca E D C B con la tablatura a 60 BPM. El dedo 1 toca todas las notas: traste 7, traste 5, traste 3 y luego traste 2. Lo tienes cuando: E D C B tres veces seguidas, sin zumbido. ¿Caes en el traste equivocado? Mira el traste antes de moverte — el 7, el 5 y el 3 tienen punto, y el 2 está un traste abajo del punto del 3.',
-        tab: {
-          caption: 'E D C B · A string · frets 7 5 3 2',
-          caption_es: 'E D C B · cuerda La · trastes 7 5 3 2',
-          notes: [
-            { string: 'A', fret: 7, note: 'E', midi: 52 },
-            { string: 'A', fret: 5, note: 'D', midi: 50 },
-            { string: 'A', fret: 3, note: 'C', midi: 48 },
-            { string: 'A', fret: 2, note: 'B', midi: 47 }
-          ]
-        },
-      },
-      {
-        label:    'Learn — The rhythm',
-        label_es: 'Aprende — El ritmo',
-        text: 'Press Play on the tab and watch the cursor. The notes are not all the same length. The first E is long and the second is short. C and B at the end ring for two beats each.',
-        text_es: 'Pulsa «Tocar el tab» y mira el cursor. Las notas no duran lo mismo. El primer E es largo y el segundo es corto. C y B al final suenan dos tiempos cada una.',
-        tab: {
-          caption: 'The whole riff · E E G E D C B · 2 bars',
-          caption_es: 'El riff completo · E E G E D C B · 2 compases',
-          notes: [
-            { string: 'A', fret: 7,  note: 'E', midi: 52, beats: 1.5 },
-            { string: 'A', fret: 7,  note: 'E', midi: 52, beats: 0.5 },
-            { string: 'A', fret: 10, note: 'G', midi: 55, beats: 0.75 },
-            { string: 'A', fret: 7,  note: 'E', midi: 52, beats: 0.75 },
-            { string: 'A', fret: 5,  note: 'D', midi: 50, beats: 0.5 },
-            { string: 'A', fret: 3,  note: 'C', midi: 48, beats: 2 },
-            { string: 'A', fret: 2,  note: 'B', midi: 47, beats: 2 }
-          ]
-        },
-      },
-    ],
+    // No help ladder: a practice card is its checks and nothing else (Jonathan, 2026-10-07).
+    steps: [],
   },
   {
     id:    'ca-11',
@@ -1882,40 +1830,8 @@ window.CLASS_ACTIVITIES = [
           text_es: 'Pulsa «Normal» y toca la intro y las 2 estrofas. Después toca con la canción completa en la tarjeta de La canción completa.' }
       ]
     },
-    // The help ladder (read-only, under "More practice help").
-    steps: [
-      {
-        label:    'Learn — The three notes',
-        label_es: 'Aprende — Las tres notas',
-        text: 'A is fret 5 with your index finger. C is fret 8 with your pinky, and the index finger stays on fret 5. F is fret 1 with your index finger. Play each note once, slowly, and say its name.',
-        text_es: 'A es el traste 5 con el índice. C es el traste 8 con el meñique, y el índice se queda en el traste 5. F es el traste 1 con el índice. Toca cada nota una vez, despacio, y di su nombre.',
-        tab: {
-          caption: 'A · C · F · low E string',
-          caption_es: 'A · C · F · cuerda Mi grave',
-          notes: [
-            { string: 'E', fret: 5, note: 'A', midi: 45, beats: 4 },
-            { string: 'E', fret: 8, note: 'C', midi: 48, beats: 4 },
-            { string: 'E', fret: 1, note: 'F', midi: 41, beats: 4 }
-          ]
-        },
-      },
-      {
-        label:    'Practice — The hand shift',
-        label_es: 'Practica — El cambio de mano',
-        text: 'Play C F C F with the tab. The whole hand moves between fret 8 and fret 1. You\'ve got it when: C F C F three times in a row without looking at your fretting hand. Late on the F? Start moving the hand on beat 4.',
-        text_es: 'Toca C F C F con la tablatura. Toda la mano se mueve entre el traste 8 y el traste 1. Lo tienes cuando: C F C F tres veces seguidas sin mirarte la mano del mástil. ¿Llegas tarde al F? Empieza a mover la mano en el tiempo 4.',
-        tab: {
-          caption: 'C · F, twice · 4 beats each',
-          caption_es: 'C · F, dos veces · 4 tiempos cada una',
-          notes: [
-            { string: 'E', fret: 8, note: 'C', midi: 48, beats: 4 },
-            { string: 'E', fret: 1, note: 'F', midi: 41, beats: 4 },
-            { string: 'E', fret: 8, note: 'C', midi: 48, beats: 4 },
-            { string: 'E', fret: 1, note: 'F', midi: 41, beats: 4 }
-          ]
-        },
-      },
-    ],
+    // No help ladder: a practice card is its checks and nothing else (Jonathan, 2026-10-07).
+    steps: [],
   },
   /* Day 17: "the cure" verse moved from the low E (ca-13's A · C · F on
      frets 5 · 8 · 1) onto two strings, the hand parked in frets 1–5. It
@@ -2022,57 +1938,8 @@ window.CLASS_ACTIVITIES = [
           text_es: 'Pulsa «Normal» y toca la intro y las 2 estrofas. Después toca con la canción completa en la tarjeta de La canción completa.' }
       ]
     },
-    // The help ladder (read-only, under "More practice help").
-    steps: [
-      {
-        label:    'Learn — A and C',
-        label_es: 'Aprende — A y C',
-        text: 'Press Play on the tab and watch the cursor. Then put your fingers in place: pinky on fret 5 of the low E string for A, ring finger on fret 3 of the A string for C, and index finger over fret 1. Play each note once, slowly, and say its name: A, C, A, C.',
-        text_es: 'Pulsa «Tocar el tab» y mira el cursor. Después pon los dedos en su lugar: meñique en el traste 5 de la cuerda Mi grave para el A, anular en el traste 3 de la cuerda La para el C, e índice sobre el traste 1. Toca cada nota una vez, despacio, y di su nombre: A, C, A, C.',
-        tab: {
-          caption: 'A · C, twice · 4 beats each',
-          caption_es: 'A · C, dos veces · 4 tiempos cada una',
-          notes: [
-            { string: 'E', fret: 5, note: 'A', midi: 45, beats: 4 },
-            { string: 'A', fret: 3, note: 'C', midi: 48, beats: 4 },
-            { string: 'E', fret: 5, note: 'A', midi: 45, beats: 4 },
-            { string: 'A', fret: 3, note: 'C', midi: 48, beats: 4 }
-          ]
-        },
-      },
-      {
-        label:    'Practice — A and C',
-        label_es: 'Practica — A y C',
-        text: 'Play A C A C with the tab at 60 BPM. Four beats on each note. You\'ve got it when: A C A C at 60 BPM, three times in a row, one string ringing at a time. Two strings ringing? Drop the tab to 40 BPM and try again.',
-        text_es: 'Toca A C A C con la tablatura a 60 BPM. Cuatro tiempos en cada nota. Lo tienes cuando: A C A C a 60 BPM, tres veces seguidas, una sola cuerda sonando a la vez. ¿Suenan dos cuerdas? Baja la tablatura a 40 BPM e inténtalo otra vez.',
-        tab: {
-          caption: 'A · C, twice · 4 beats each',
-          caption_es: 'A · C, dos veces · 4 tiempos cada una',
-          notes: [
-            { string: 'E', fret: 5, note: 'A', midi: 45, beats: 4 },
-            { string: 'A', fret: 3, note: 'C', midi: 48, beats: 4 },
-            { string: 'E', fret: 5, note: 'A', midi: 45, beats: 4 },
-            { string: 'A', fret: 3, note: 'C', midi: 48, beats: 4 }
-          ]
-        },
-      },
-      {
-        label:    'Practice — F and C',
-        label_es: 'Practica — F y C',
-        text: 'Put your index on F and your ring finger on C, and leave both down — only the pick moves. Play F C F C with the tab at 60 BPM. You\'ve got it when: F C F C at 60 BPM, three times in a row, no buzz. Buzz? Slide the fingertip closer to the fret and try again.',
-        text_es: 'Pon el índice en F y el anular en C, y deja los dos puestos — solo se mueve la púa. Toca F C F C con la tablatura a 60 BPM. Lo tienes cuando: F C F C a 60 BPM, tres veces seguidas, sin zumbido. ¿Zumba? Desliza la punta del dedo más cerca del traste e inténtalo otra vez.',
-        tab: {
-          caption: 'F · C, twice · 4 beats each',
-          caption_es: 'F · C, dos veces · 4 tiempos cada una',
-          notes: [
-            { string: 'E', fret: 1, note: 'F', midi: 41, beats: 4 },
-            { string: 'A', fret: 3, note: 'C', midi: 48, beats: 4 },
-            { string: 'E', fret: 1, note: 'F', midi: 41, beats: 4 },
-            { string: 'A', fret: 3, note: 'C', midi: 48, beats: 4 }
-          ]
-        },
-      },
-    ],
+    // No help ladder: a practice card is its checks and nothing else (Jonathan, 2026-10-07).
+    steps: [],
   },
   /* "Luna" bass roots, the Song Journey's Layer 2 line as a class day: F on
      the low E at fret 1 and the open A string, two bars each, one pluck per
@@ -2124,41 +1991,8 @@ window.CLASS_ACTIVITIES = [
           text_es: 'Pulsa «Normal» y toca cuatro vueltas. Después toca con la canción completa en la tarjeta de La canción completa.' }
       ]
     },
-    // The help ladder (read-only, under "More practice help").
-    steps: [
-      {
-        label:    'Learn — F and A',
-        label_es: 'Aprende — F y A',
-        text: 'Press Play on the tab and watch the cursor. F is fret 1 on the low E string: index fingertip right behind the fret. A is the open A string: lift the finger off. One pluck per bar, and each note rings through both big beats.',
-        text_es: 'Pulsa «Tocar el tab» y mira el cursor. F es el traste 1 de la cuerda Mi grave: la punta del índice justo detrás del traste. A es la cuerda La al aire: levanta el dedo. Una pulsación por compás, y cada nota suena durante los dos tiempos grandes.',
-        tab: {
-          caption: 'The loop · F F A A · one pluck per bar, 2 beats each',
-          caption_es: 'El bucle · F F A A · una pulsación por compás, 2 tiempos cada una',
-          notes: [
-            { string: 'E', fret: 1, note: 'F', midi: 41, beats: 2 },
-            { string: 'E', fret: 1, note: 'F', midi: 41, beats: 2 },
-            { string: 'A', fret: 0, note: 'A', midi: 45, beats: 2 },
-            { string: 'A', fret: 0, note: 'A', midi: 45, beats: 2 }
-          ]
-        },
-      },
-      {
-        label:    'Practice — F to A',
-        label_es: 'Practica — De F a A',
-        text: 'Play F A F A with the tab. The index finger comes down for F and lifts for A. You\'ve got it when: F A F A three times in a row, no buzz on the F. Buzz? Put the fingertip right behind the fret and try again.',
-        text_es: 'Toca F A F A con la tablatura. El índice baja para F y se levanta para A. Lo tienes cuando: F A F A tres veces seguidas, sin zumbido en el F. ¿Zumba? Pon la punta del dedo justo detrás del traste e inténtalo otra vez.',
-        tab: {
-          caption: 'F · A, twice · 2 beats each',
-          caption_es: 'F · A, dos veces · 2 tiempos cada una',
-          notes: [
-            { string: 'E', fret: 1, note: 'F', midi: 41, beats: 2 },
-            { string: 'A', fret: 0, note: 'A', midi: 45, beats: 2 },
-            { string: 'E', fret: 1, note: 'F', midi: 41, beats: 2 },
-            { string: 'A', fret: 0, note: 'A', midi: 45, beats: 2 }
-          ]
-        },
-      },
-    ],
+    // No help ladder: a practice card is its checks and nothing else (Jonathan, 2026-10-07).
+    steps: [],
   },
   /* "the cure" bass roots across the two-string position, as one class day:
      intro and verse (already learned in ca-13/ca-19), then the chorus, then the
@@ -2180,7 +2014,8 @@ window.CLASS_ACTIVITIES = [
      keyed to the id, so nobody's saved progress moves.
      The steps are now the HELP ladder under "More practice help", trimmed
      (Jonathan's call) to what the card doesn't already cover: the chorus
-     notes, and the two drills the old recovery lines pointed at. */
+     notes, and the two drills the old recovery lines pointed at. Removed
+     2026-10-07 with every other help ladder. */
   {
     id:    'ca-18',
     view:  'card',    // one screen: Play song + tab + checks — see CARD above
@@ -2314,61 +2149,8 @@ window.CLASS_ACTIVITIES = [
           text_es: 'Pulsa «Normal» y toca la canción completa. Después toca toda la grabación, de la intro al final, en la tarjeta de La canción completa.' }
       ]
     },
-    // The help ladder (read-only, under "More practice help").
-    steps: [
-      {
-        label:    'Learn — The chorus notes',
-        label_es: 'Aprende — Las notas del coro',
-        text: 'This part is new: D, F, C, G. D and G are the new spots. D is fret 5 on the A string, played with your pinky. G is fret 3 on the low E string, played with your ring finger. Play each note once, slowly, and say its name out loud.',
-        text_es: 'Esta parte es nueva: D, F, C, G. D y G son los lugares nuevos. D es el traste 5 de la cuerda La, con el meñique. G es el traste 3 de la cuerda Mi grave, con el anular. Toca cada nota una vez, despacio, y di su nombre en voz alta.',
-        tab: {
-          caption: 'Chorus notes · D F C G',
-          caption_es: 'Notas del coro · D F C G',
-          notes: [
-            { string: 'A', fret: 5,  note: 'D', midi: 50, beats: 4 },
-            { string: 'E', fret: 1,  note: 'F', midi: 41, beats: 4 },
-            { string: 'A', fret: 3,  note: 'C', midi: 48, beats: 4 },
-            { string: 'E', fret: 3,  note: 'G', midi: 43, beats: 4 }
-          ]
-        },
-      },
-      {
-        label:    'Practice — A and C',
-        label_es: 'Practica — A y C',
-        text: 'Play A C A C with the tab at 60 BPM. Four beats on each note. You\'ve got it when: A C A C at 60 BPM, three times in a row, one string ringing at a time. Two strings ringing? Drop the tab to 40 BPM and try again.',
-        text_es: 'Toca A C A C con la tablatura a 60 BPM. Cuatro tiempos en cada nota. Lo tienes cuando: A C A C a 60 BPM, tres veces seguidas, una sola cuerda sonando a la vez. ¿Suenan dos cuerdas? Baja la tablatura a 40 BPM e inténtalo otra vez.',
-        tab: {
-          caption: 'A · C, twice · 4 beats each',
-          caption_es: 'A · C, dos veces · 4 tiempos cada una',
-          notes: [
-            { string: 'E', fret: 5,  note: 'A', midi: 45, beats: 4 },
-            { string: 'A', fret: 3,  note: 'C', midi: 48, beats: 4 },
-            { string: 'E', fret: 5,  note: 'A', midi: 45, beats: 4 },
-            { string: 'A', fret: 3,  note: 'C', midi: 48, beats: 4 }
-          ]
-        },
-      },
-      {
-        label:    'Practice — C to D',
-        label_es: 'Practica — De C a D',
-        text: 'The verse ends on C and the chorus starts on D. Both are on the A string: C is fret 3 with your ring finger, D is fret 5 with your pinky. Play C D C D C D C D with the tab at 60 BPM. You\'ve got it when: C D C D C D C D twice in a row, no buzz. Buzz on the D? Press the pinky just behind the fret, then try again.',
-        text_es: 'La estrofa termina en C y el coro empieza en D. Los dos están en la cuerda La: C es el traste 3 con el anular, D es el traste 5 con el meñique. Toca C D C D C D C D con la tablatura a 60 BPM. Lo tienes cuando: C D C D C D C D dos veces seguidas, sin zumbido. ¿Zumba el D? Presiona con el meñique justo detrás del traste, y vuelve a intentarlo.',
-        tab: {
-          caption: 'C · D, four times · A string',
-          caption_es: 'C · D, cuatro veces · cuerda La',
-          notes: [
-            { string: 'A', fret: 3,  note: 'C', midi: 48 },
-            { string: 'A', fret: 5,  note: 'D', midi: 50 },
-            { string: 'A', fret: 3,  note: 'C', midi: 48 },
-            { string: 'A', fret: 5,  note: 'D', midi: 50 },
-            { string: 'A', fret: 3,  note: 'C', midi: 48 },
-            { string: 'A', fret: 5,  note: 'D', midi: 50 },
-            { string: 'A', fret: 3,  note: 'C', midi: 48 },
-            { string: 'A', fret: 5,  note: 'D', midi: 50 }
-          ]
-        },
-      },
-    ],
+    // No help ladder: a practice card is its checks and nothing else (Jonathan, 2026-10-07).
+    steps: [],
   },
   /* "the cure" — The Whole Song (2026-09-30). A practice card like ca-18,
      but the whole record, bars 1–88, and ONE numbered check: play it start
@@ -2691,7 +2473,7 @@ window.CLASS_ACTIVITIES = [
           text_es: 'Pulsa «Normal». Toca la canción completa con la banda a velocidad normal, de la intro al final, sin detenerte.' }
       ]
     },
-    // No help ladder: a whole-song card is the two checks and nothing else (Jonathan, 2026-10-07).
+    // No help ladder: a practice card is its checks and nothing else (Jonathan, 2026-10-07).
     steps: [],
   },
   /* An EXIT CHECK, not a step ladder — see the kind:'check' block in the
@@ -3231,7 +3013,7 @@ window.CLASS_ACTIVITIES = [
           text_es: 'Pulsa «Normal». Toca la canción completa con la banda a velocidad normal, de la intro al final, sin detenerte.' }
       ]
     },
-    // No help ladder: a whole-song card is the two checks and nothing else (Jonathan, 2026-10-07).
+    // No help ladder: a practice card is its checks and nothing else (Jonathan, 2026-10-07).
     steps: [],
   },
   /* All Along the Watchtower — The Whole Song (2026-10-01). A whole-song
@@ -3386,7 +3168,7 @@ window.CLASS_ACTIVITIES = [
           text_es: 'Pulsa «Normal». Toca la canción completa con la banda a velocidad normal, de la intro al final, sin detenerte.' }
       ]
     },
-    // No help ladder: a whole-song card is the two checks and nothing else (Jonathan, 2026-10-07).
+    // No help ladder: a practice card is its checks and nothing else (Jonathan, 2026-10-07).
     steps: [],
   },
   /* "Luna" — The Whole Song (2026-10-05). A whole-song card like ca-26:
@@ -3493,7 +3275,7 @@ window.CLASS_ACTIVITIES = [
           text_es: 'Pulsa «Normal». Toca la canción completa con la banda a velocidad normal, de la intro al final, sin detenerte.' }
       ]
     },
-    // No help ladder: a whole-song card is the two checks and nothing else (Jonathan, 2026-10-07).
+    // No help ladder: a practice card is its checks and nothing else (Jonathan, 2026-10-07).
     steps: [],
   },
   /* Sweet Child O' Mine — The Whole Song (2026-10-05). A whole-song card:
@@ -3725,7 +3507,7 @@ window.CLASS_ACTIVITIES = [
           text_es: 'Pulsa «Normal». Toca la canción completa con la banda a velocidad normal, de la intro al final, sin detenerte.' }
       ]
     },
-    // No help ladder: a whole-song card is the two checks and nothing else (Jonathan, 2026-10-07).
+    // No help ladder: a practice card is its checks and nothing else (Jonathan, 2026-10-07).
     steps: [],
   },
   /* All Along the Watchtower — The Whole Song in Power Chords (2026-10-05).
@@ -3871,7 +3653,7 @@ window.CLASS_ACTIVITIES = [
           text_es: 'Pulsa «Normal». Toca la canción completa con la banda a velocidad normal, de la intro al final, sin detenerte.' }
       ]
     },
-    // No help ladder: a whole-song card is the two checks and nothing else (Jonathan, 2026-10-07).
+    // No help ladder: a practice card is its checks and nothing else (Jonathan, 2026-10-07).
     steps: [],
   },
   /* "the cure" — The Whole Song in Power Chords (2026-10-05). ca-24's
@@ -4188,7 +3970,7 @@ window.CLASS_ACTIVITIES = [
           text_es: 'Pulsa «Normal». Toca la canción completa con la banda a velocidad normal, de la intro al final, sin detenerte.' }
       ]
     },
-    // No help ladder: a whole-song card is the two checks and nothing else (Jonathan, 2026-10-07).
+    // No help ladder: a practice card is its checks and nothing else (Jonathan, 2026-10-07).
     steps: [],
   },
   /* Seven Nation Army — The Whole Song in Power Chords (2026-10-05).
@@ -4432,7 +4214,7 @@ window.CLASS_ACTIVITIES = [
           text_es: 'Pulsa «Normal». Toca la canción completa con la banda a velocidad normal, de la intro al final, sin detenerte.' }
       ]
     },
-    // No help ladder: a whole-song card is the two checks and nothing else (Jonathan, 2026-10-07).
+    // No help ladder: a practice card is its checks and nothing else (Jonathan, 2026-10-07).
     steps: [],
   },
   /* "Luna" — The Whole Song in Power Chords (2026-10-05). ca-27's
@@ -4554,7 +4336,7 @@ window.CLASS_ACTIVITIES = [
           text_es: 'Pulsa «Normal». Toca la canción completa con la banda a velocidad normal, de la intro al final, sin detenerte.' }
       ]
     },
-    // No help ladder: a whole-song card is the two checks and nothing else (Jonathan, 2026-10-07).
+    // No help ladder: a practice card is its checks and nothing else (Jonathan, 2026-10-07).
     steps: [],
   },
   /* Sweet Child O' Mine — The Whole Song in Power Chords (2026-10-05).
@@ -4777,7 +4559,7 @@ window.CLASS_ACTIVITIES = [
           text_es: 'Pulsa «Normal». Toca la canción completa con la banda a velocidad normal, de la intro al final, sin detenerte.' }
       ]
     },
-    // No help ladder: a whole-song card is the two checks and nothing else (Jonathan, 2026-10-07).
+    // No help ladder: a practice card is its checks and nothing else (Jonathan, 2026-10-07).
     steps: [],
   },
 ];

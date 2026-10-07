@@ -2776,9 +2776,9 @@ function validateClassActivities() {
     if ('metronome' in a && !(Number.isInteger(a.metronome) && a.metronome >= 40 && a.metronome <= 220)) { err(`${where}: metronome ${JSON.stringify(a.metronome)} — a whole-number BPM from 40 to 220 (or leave it off)`); problems++; }
     if ('card' in a && a.view !== 'card') { err(`${where}: has a "card" object but view is not 'card' — it would never render`); problems++; }
     if (isCheck) { /* no steps — see 1y */ }
-    /* A whole-song practice card has no help ladder: `steps: []` (Jonathan,
+    /* A practice card has no help ladder: `steps: []` (Jonathan,
        2026-10-07). Every other activity needs its steps. */
-    else if (!Array.isArray(a.steps) || (!a.steps.length && !(a.view === 'card' && a.card && a.card.wholeSong))) { err(`${where}: "steps" should be a non-empty array`); problems++; }
+    else if (!Array.isArray(a.steps) || (!a.steps.length && !(a.view === 'card' && a.card))) { err(`${where}: "steps" should be a non-empty array`); problems++; }
     else {
       a.steps.forEach((s, si) => {
         const sWhere = `${where} · steps[${si}]`;
@@ -6041,7 +6041,7 @@ function checkCardCaptionWords() {
    one-sided label is itself the bug (dots in one language, none in the
    other), so it fails outright now rather than being skipped. Bump when a
    card genuinely adds or removes a got-it sentence in both languages. */
-const REP_COUNT_FIELDS = 389;   // 2026-10-07: whole-song cards lose their help ladders (-13). 2026-10-06: m12w3 melody-on-top gets a countable got-it (+1). 2026-10-05: ca-27 Luna (+1) and ca-28 Sweet Child (+2) whole songs; ca-29..ca-33 power-chord whole songs (+6). 2026-10-01: ca-13/ca-19/ca-20 as practice cards (-7), ca-25 Seven Nation Army whole song (+2), ca-21 Lines 2 and 4 restored (+2), ca-26 Watchtower whole song (+1)
+const REP_COUNT_FIELDS = 381;   // 2026-10-07: part cards lose their help ladders too (-8). 2026-10-07: whole-song cards lose their help ladders (-13). 2026-10-06: m12w3 melody-on-top gets a countable got-it (+1). 2026-10-05: ca-27 Luna (+1) and ca-28 Sweet Child (+2) whole songs; ca-29..ca-33 power-chord whole songs (+6). 2026-10-01: ca-13/ca-19/ca-20 as practice cards (-7), ca-25 Seven Nation Army whole song (+2), ca-21 Lines 2 and 4 restored (+2), ca-26 Watchtower whole song (+1)
 function checkRepCountParity(sets, ctx) {
   head('1bg. Rep-count dots agree between English and Spanish');
   if (!ctx) { err('1bg cannot run — render context unavailable'); problems++; return; }

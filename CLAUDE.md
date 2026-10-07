@@ -1547,14 +1547,13 @@ Journey page right now; `caCardLinkHtml()`,
 shown once the target is released or Play Along now; 1bf checks the id).
 Before its date the target SWAPS INTO the linking card's slot (`caSwap`,
 `caOpenLinkedCard()`) — no Songs heading, no list entry — and closing it
-puts the linking card back, open. The activity's `steps` are the help ladder
-under "More practice help" — read-only (no Mark done), four at most, and
-none may name the Song Journey page: the card's Journey button is on its
-last check, the Level up (1ba pins both call sites). **A whole-song card has
-no help ladder and exactly two checks** — the whole song slower without
-stopping, then the Level up (Jonathan, 2026-10-07): `steps: []`, which
-1d allows only on a `card.wholeSong`. A check may carry `slot: n` to keep
-the tick key it had before earlier checks were removed (ca-25). Data shape: CARD note
+puts the linking card back, open. **No practice card has a help ladder any more** (Jonathan, 2026-10-07: "it's not needed"): `steps: []`, which 1d allows only on a
+`view: 'card'` activity, so "More practice help" never renders
+(`pcHelpHtml` returns nothing for an empty list). The card's Journey button
+is on its last check, the Level up (1ba pins both call sites). **A
+whole-song card has exactly two checks** — the whole song slower without
+stopping, then the Level up. A check may carry `slot: n` to keep the tick
+key it had before earlier checks were removed (ca-25). Data shape: CARD note
 atop class-activities.js. Engine: `pc*` in app.js (`pcLayout` sections →
 tab offsets and beat totals; `pcLocate` position → note; the snippet
 window arithmetic, one `anchor` per song). **Complete = every numbered check
