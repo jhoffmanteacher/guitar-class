@@ -98,6 +98,7 @@
        sections: [{                        // back to back, in song order
          label, label_es,                  // the tap-to-start button ("Chorus")
          caption, caption_es,              // the heading over its tab page
+         lineEnd: true, // optional: on the Song Journey page's whole-song tab the next section starts a new line
          fromBar: 21, bars: 8,             // bars of the RECORD, felt pulse,
                                            // like a snippet window
          rows: [7, 9],                     // optional: notes per tab row, to
@@ -2826,6 +2827,7 @@ window.CLASS_ACTIVITIES = [
         {
           label: 'G – A', label_es: 'G – A',
           caption: 'G – A · 4 plucks each', caption_es: 'G – A · 4 pulsaciones cada una',
+          lineEnd: true,  // Song Journey whole-song tab: this section ends its line
           fromBar: 25, bars: 2,
           notes: [
             { string: 'E', fret: 3, note: 'G', midi: 43 },
@@ -2866,6 +2868,7 @@ window.CLASS_ACTIVITIES = [
         {
           label: 'G – A', label_es: 'G – A',
           caption: 'G – A · 4 plucks each', caption_es: 'G – A · 4 pulsaciones cada una',
+          lineEnd: true,  // Song Journey whole-song tab: this section ends its line
           fromBar: 35, bars: 2,
           notes: [
             { string: 'E', fret: 3, note: 'G', midi: 43 },
@@ -2896,6 +2899,7 @@ window.CLASS_ACTIVITIES = [
         {
           label: 'G – A', label_es: 'G – A',
           caption: 'G – A · 4 plucks each', caption_es: 'G – A · 4 pulsaciones cada una',
+          lineEnd: true,  // Song Journey whole-song tab: this section ends its line
           fromBar: 61, bars: 2,
           notes: [
             { string: 'E', fret: 3, note: 'G', midi: 43 },
@@ -2926,6 +2930,7 @@ window.CLASS_ACTIVITIES = [
         {
           label: 'G – A', label_es: 'G – A',
           caption: 'G – A · 4 plucks each', caption_es: 'G – A · 4 pulsaciones cada una',
+          lineEnd: true,  // Song Journey whole-song tab: this section ends its line
           fromBar: 79, bars: 2,
           notes: [
             { string: 'E', fret: 3, note: 'G', midi: 43 },
@@ -2956,6 +2961,7 @@ window.CLASS_ACTIVITIES = [
         {
           label: 'G – A', label_es: 'G – A',
           caption: 'G – A · 4 plucks each', caption_es: 'G – A · 4 pulsaciones cada una',
+          lineEnd: true,  // Song Journey whole-song tab: this section ends its line
           fromBar: 105, bars: 2,
           notes: [
             { string: 'E', fret: 3, note: 'G', midi: 43 },
@@ -4029,6 +4035,7 @@ window.CLASS_ACTIVITIES = [
         {
           label: 'G5 – A5', label_es: 'G5 – A5',
           caption: 'G5 – A5 · 4 strums each', caption_es: 'G5 – A5 · 4 rasgueos cada uno',
+          lineEnd: true,  // Song Journey whole-song tab: this section ends its line
           fromBar: 25, bars: 2,
           notes: [
             { frets: [['A', 5], ['E', 3]], note: 'G5', midi: [50, 43] },
@@ -4069,6 +4076,7 @@ window.CLASS_ACTIVITIES = [
         {
           label: 'G5 – A5', label_es: 'G5 – A5',
           caption: 'G5 – A5 · 4 strums each', caption_es: 'G5 – A5 · 4 rasgueos cada uno',
+          lineEnd: true,  // Song Journey whole-song tab: this section ends its line
           fromBar: 35, bars: 2,
           notes: [
             { frets: [['A', 5], ['E', 3]], note: 'G5', midi: [50, 43] },
@@ -4099,6 +4107,7 @@ window.CLASS_ACTIVITIES = [
         {
           label: 'G5 – A5', label_es: 'G5 – A5',
           caption: 'G5 – A5 · 4 strums each', caption_es: 'G5 – A5 · 4 rasgueos cada uno',
+          lineEnd: true,  // Song Journey whole-song tab: this section ends its line
           fromBar: 61, bars: 2,
           notes: [
             { frets: [['A', 5], ['E', 3]], note: 'G5', midi: [50, 43] },
@@ -4129,6 +4138,7 @@ window.CLASS_ACTIVITIES = [
         {
           label: 'G5 – A5', label_es: 'G5 – A5',
           caption: 'G5 – A5 · 4 strums each', caption_es: 'G5 – A5 · 4 rasgueos cada uno',
+          lineEnd: true,  // Song Journey whole-song tab: this section ends its line
           fromBar: 79, bars: 2,
           notes: [
             { frets: [['A', 5], ['E', 3]], note: 'G5', midi: [50, 43] },
@@ -4159,6 +4169,7 @@ window.CLASS_ACTIVITIES = [
         {
           label: 'G5 – A5', label_es: 'G5 – A5',
           caption: 'G5 – A5 · 4 strums each', caption_es: 'G5 – A5 · 4 rasgueos cada uno',
+          lineEnd: true,  // Song Journey whole-song tab: this section ends its line
           fromBar: 105, bars: 2,
           notes: [
             { frets: [['A', 5], ['E', 3]], note: 'G5', midi: [50, 43] },

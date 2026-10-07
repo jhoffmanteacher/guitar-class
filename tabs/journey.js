@@ -663,19 +663,21 @@ function wsPreHtml(a){
     });
     if(cur.length) packed.push(cur);
     var rows = packed.map(function(g){ return wsJoinSideBySide(g); });
-    return { head: head, rows: rows, one: rows.length === 1 };
+    return { head: head, rows: rows, one: rows.length === 1, end: !!sec.lineEnd };
   });
   /* Sections that each fit on one row sit side by side while the pair (or
      trio) still fits the row width — the intro and verse 1 of a riff song
      share a line, the way two bars of a chart would. A section that needs
-     several rows keeps the full width to itself. */
+     several rows keeps the full width to itself. A section marked lineEnd
+     (the G – A parts of Seven Nation Army) closes its line, so the song
+     reads Intro, Verse 1, G – A / Chorus 1, G – A / Verse 2, G – A … */
   var out = [], i = 0;
   while(i < blocks.length){
     var b = blocks[i];
     if(!b.one){ out.push(b.head + '\n' + b.rows.join('\n\n')); i++; continue; }
     var group = [wsBlockLines(b)], used = group[0].w;
     var j = i + 1;
-    while(j < blocks.length && blocks[j].one){
+    while(j < blocks.length && blocks[j].one && !blocks[j - 1].end){
       var nx = wsBlockLines(blocks[j]);
       if(used + WS_GAP + nx.w > WS_ROW_CHARS) break;
       group.push(nx); used += WS_GAP + nx.w; j++;
