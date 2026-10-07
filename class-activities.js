@@ -2247,6 +2247,7 @@ window.CLASS_ACTIVITIES = [
         {
           label: 'Chorus 1', label_es: 'Coro 1',
           caption: 'Chorus 1 — D F C G, 3 laps', caption_es: 'Coro 1 — D F C G, 3 vueltas',
+          lineEnd: true,  // Song Journey whole-song tab: this section ends its line
           fromBar: 21, bars: 4, reps: 3,
           repLabel: 'Lap', repLabel_es: 'Vuelta',
           notes: [
@@ -2333,6 +2334,7 @@ window.CLASS_ACTIVITIES = [
         {
           label: 'Chorus 2', label_es: 'Coro 2',
           caption: 'Chorus 2 — D F C G, 3 laps', caption_es: 'Coro 2 — D F C G, 3 vueltas',
+          lineEnd: true,  // Song Journey whole-song tab: this section ends its line
           fromBar: 45, bars: 4, reps: 3,
           repLabel: 'Lap', repLabel_es: 'Vuelta',
           notes: [
@@ -2419,6 +2421,7 @@ window.CLASS_ACTIVITIES = [
         {
           label: 'Chorus 3', label_es: 'Coro 3',
           caption: 'Chorus 3 — D F C G, 3 laps', caption_es: 'Coro 3 — D F C G, 3 vueltas',
+          lineEnd: true,  // Song Journey whole-song tab: this section ends its line
           fromBar: 69, bars: 4, reps: 3,
           repLabel: 'Lap', repLabel_es: 'Vuelta',
           notes: [
@@ -2977,6 +2980,7 @@ window.CLASS_ACTIVITIES = [
         {
           label: 'Chorus 2', label_es: 'Coro 2',
           caption: 'Chorus 2 — 2 times · the second time ends C D C B', caption_es: 'Coro 2 — 2 veces · la segunda vez termina C D C B',
+          lineEnd: true,  // Song Journey whole-song tab: this section ends its line
           fromBar: 107, bars: 4, reps: 2,
           rows: [7, 9],     // one riff lap per tab row
           repLabel: 'Time', repLabel_es: 'Vez',
@@ -3354,6 +3358,7 @@ window.CLASS_ACTIVITIES = [
         {
           label: 'Chorus 1', label_es: 'Coro 1',
           caption: 'Chorus 1 — A C D D, 2 laps', caption_es: 'Coro 1 — A C D D, 2 vueltas',
+          lineEnd: true,  // Song Journey whole-song tab: this section ends its line
           fromBar: 41, bars: 4, reps: 2,
           repLabel: 'Lap', repLabel_es: 'Vuelta',
           notes: [
@@ -3397,6 +3402,7 @@ window.CLASS_ACTIVITIES = [
         {
           label: 'Chorus 2', label_es: 'Coro 2',
           caption: 'Chorus 2 — A C D D, 2 laps', caption_es: 'Coro 2 — A C D D, 2 vueltas',
+          lineEnd: true,  // Song Journey whole-song tab: this section ends its line
           fromBar: 73, bars: 4, reps: 2,
           repLabel: 'Lap', repLabel_es: 'Vuelta',
           notes: [
@@ -3425,6 +3431,7 @@ window.CLASS_ACTIVITIES = [
         {
           label: 'Chorus 3', label_es: 'Coro 3',
           caption: 'Chorus 3 — A C D D, 4 laps', caption_es: 'Coro 3 — A C D D, 4 vueltas',
+          lineEnd: true,  // Song Journey whole-song tab: this section ends its line
           fromBar: 97, bars: 4, reps: 4,
           repLabel: 'Lap', repLabel_es: 'Vuelta',
           notes: [
@@ -3749,6 +3756,7 @@ window.CLASS_ACTIVITIES = [
         {
           label: 'Chorus 1', label_es: 'Coro 1',
           caption: 'Chorus 1 — D5 F5 C5 G5, 3 laps', caption_es: 'Coro 1 — D5 F5 C5 G5, 3 vueltas',
+          lineEnd: true,  // Song Journey whole-song tab: this section ends its line
           fromBar: 21, bars: 4, reps: 3,
           repLabel: 'Lap', repLabel_es: 'Vuelta',
           notes: [
@@ -3835,6 +3843,7 @@ window.CLASS_ACTIVITIES = [
         {
           label: 'Chorus 2', label_es: 'Coro 2',
           caption: 'Chorus 2 — D5 F5 C5 G5, 3 laps', caption_es: 'Coro 2 — D5 F5 C5 G5, 3 vueltas',
+          lineEnd: true,  // Song Journey whole-song tab: this section ends its line
           fromBar: 45, bars: 4, reps: 3,
           repLabel: 'Lap', repLabel_es: 'Vuelta',
           notes: [
@@ -3921,6 +3930,7 @@ window.CLASS_ACTIVITIES = [
         {
           label: 'Chorus 3', label_es: 'Coro 3',
           caption: 'Chorus 3 — D5 F5 C5 G5, 3 laps', caption_es: 'Coro 3 — D5 F5 C5 G5, 3 vueltas',
+          lineEnd: true,  // Song Journey whole-song tab: this section ends its line
           fromBar: 69, bars: 4, reps: 3,
           repLabel: 'Lap', repLabel_es: 'Vuelta',
           notes: [
@@ -4185,6 +4195,7 @@ window.CLASS_ACTIVITIES = [
         {
           label: 'Chorus 2', label_es: 'Coro 2',
           caption: 'Chorus 2 — 2 times · the second time ends C5 D5 C5 B5', caption_es: 'Coro 2 — 2 veces · la segunda vez termina C5 D5 C5 B5',
+          lineEnd: true,  // Song Journey whole-song tab: this section ends its line
           fromBar: 107, bars: 4, reps: 2,
           rows: [7, 9],     // one riff lap per tab row
           repLabel: 'Time', repLabel_es: 'Vez',
@@ -4411,6 +4422,7 @@ window.CLASS_ACTIVITIES = [
         {
           label: 'Chorus 1', label_es: 'Coro 1',
           caption: 'Chorus 1 — A5 C5 D5 D5, 2 laps', caption_es: 'Coro 1 — A5 C5 D5 D5, 2 vueltas',
+          lineEnd: true,  // Song Journey whole-song tab: this section ends its line
           fromBar: 41, bars: 4, reps: 2,
           repLabel: 'Lap', repLabel_es: 'Vuelta',
           notes: [
@@ -4454,6 +4466,7 @@ window.CLASS_ACTIVITIES = [
         {
           label: 'Chorus 2', label_es: 'Coro 2',
           caption: 'Chorus 2 — A5 C5 D5 D5, 2 laps', caption_es: 'Coro 2 — A5 C5 D5 D5, 2 vueltas',
+          lineEnd: true,  // Song Journey whole-song tab: this section ends its line
           fromBar: 73, bars: 4, reps: 2,
           repLabel: 'Lap', repLabel_es: 'Vuelta',
           notes: [
@@ -4482,6 +4495,7 @@ window.CLASS_ACTIVITIES = [
         {
           label: 'Chorus 3', label_es: 'Coro 3',
           caption: 'Chorus 3 — A5 C5 D5 D5, 4 laps', caption_es: 'Coro 3 — A5 C5 D5 D5, 4 vueltas',
+          lineEnd: true,  // Song Journey whole-song tab: this section ends its line
           fromBar: 97, bars: 4, reps: 4,
           repLabel: 'Lap', repLabel_es: 'Vuelta',
           notes: [
