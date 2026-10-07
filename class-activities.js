@@ -2691,15 +2691,8 @@ window.CLASS_ACTIVITIES = [
           text_es: 'Pulsa «Normal». Toca la canción completa con la banda a velocidad normal, de la intro al final, sin detenerte.' }
       ]
     },
-    // The help ladder (read-only, under "More practice help").
-    steps: [
-      {
-        label:    'Practice — One section at a time',
-        label_es: 'Practica — Una sección a la vez',
-        text:    'Lost in one part? Tap that section to repeat it. You\'ve got it when: that section twice in a row, without stopping.',
-        text_es: '¿Te pierdes en una parte? Pulsa esa sección para repetirla. Lo tienes cuando: esa sección dos veces seguidas, sin detenerte.',
-      },
-    ],
+    // No help ladder: a whole-song card is the two checks and nothing else (Jonathan, 2026-10-07).
+    steps: [],
   },
   /* An EXIT CHECK, not a step ladder — see the kind:'check' block in the
      schema above. Every note here is lifted verbatim from ca-1's whole-song
@@ -3238,55 +3231,8 @@ window.CLASS_ACTIVITIES = [
           text_es: 'Pulsa «Normal». Toca la canción completa con la banda a velocidad normal, de la intro al final, sin detenerte.' }
       ]
     },
-    // The help ladder (read-only, under "More practice help").
-    steps: [
-      {
-        label:    'Learn — G and A',
-        label_es: 'Aprende — G y A',
-        text:    'G is fret 3 on the low E string, finger 2. A is fret 5 on the same string, finger 4. Each one gets 4 plucks, one per beat.',
-        text_es: 'G es el traste 3 de la cuerda Mi grave, dedo 2. A es el traste 5 de la misma cuerda, dedo 4. Cada una lleva 4 pulsaciones, una por tiempo.',
-        tab: {
-          caption: 'G – A · 4 plucks each', caption_es: 'G – A · 4 pulsaciones cada una',
-            notes: [
-              { string: 'E', fret: 3, note: 'G', midi: 43 },
-              { string: 'E', fret: 3, note: 'G', midi: 43 },
-              { string: 'E', fret: 3, note: 'G', midi: 43 },
-              { string: 'E', fret: 3, note: 'G', midi: 43 },
-              { string: 'E', fret: 5, note: 'A', midi: 45 },
-              { string: 'E', fret: 5, note: 'A', midi: 45 },
-              { string: 'E', fret: 5, note: 'A', midi: 45 },
-              { string: 'E', fret: 5, note: 'A', midi: 45 }
-            ]
-        },
-      },
-      {
-        label:    'Practice — B to G to A, back to E',
-        label_es: 'Practica — De B a G a A, y de vuelta a E',
-        text:    'Play the end of the riff into G and A, then jump back to fret 7 for the E. You\'ve got it when: three times in a row, without stopping. Late on the G? Put finger 2 on fret 3 while the B rings.',
-        text_es: 'Toca el final del riff hacia G y A, y luego salta de vuelta al traste 7 para la E. Lo tienes cuando: tres veces seguidas, sin detenerte. ¿Llegas tarde al G? Pon el dedo 2 en el traste 3 mientras suena la B.',
-        tab: {
-          caption: 'B · G – A · E', caption_es: 'B · G – A · E',
-          notes: [
-            { string: 'A', fret: 2, note: 'B', midi: 47 },
-            { string: 'E', fret: 3, note: 'G', midi: 43 },
-            { string: 'E', fret: 3, note: 'G', midi: 43 },
-            { string: 'E', fret: 3, note: 'G', midi: 43 },
-            { string: 'E', fret: 3, note: 'G', midi: 43 },
-            { string: 'E', fret: 5, note: 'A', midi: 45 },
-            { string: 'E', fret: 5, note: 'A', midi: 45 },
-            { string: 'E', fret: 5, note: 'A', midi: 45 },
-            { string: 'E', fret: 5, note: 'A', midi: 45 },
-            { string: 'A', fret: 7, note: 'E', midi: 52 }
-          ]
-        },
-      },
-      {
-        label:    'Practice — One section at a time',
-        label_es: 'Practica — Una sección a la vez',
-        text:    'Lost in one part? Tap that section to repeat it. You\'ve got it when: that section twice in a row, without stopping.',
-        text_es: '¿Te pierdes en una parte? Pulsa esa sección para repetirla. Lo tienes cuando: esa sección dos veces seguidas, sin detenerte.',
-      },
-    ],
+    // No help ladder: a whole-song card is the two checks and nothing else (Jonathan, 2026-10-07).
+    steps: [],
   },
   /* All Along the Watchtower — The Whole Song (2026-10-01). A whole-song
      card like ca-24: the low-E bass loop students already know (Module 2,
@@ -3440,15 +3386,8 @@ window.CLASS_ACTIVITIES = [
           text_es: 'Pulsa «Normal». Toca la canción completa con la banda a velocidad normal, de la intro al final, sin detenerte.' }
       ]
     },
-    // The help ladder (read-only, under "More practice help").
-    steps: [
-      {
-        label:    'Practice — One section at a time',
-        label_es: 'Practica — Una sección a la vez',
-        text:    'Lost in one part? Tap that section to repeat it. You\'ve got it when: that section twice in a row, without stopping.',
-        text_es: '¿Te pierdes en una parte? Pulsa esa sección para repetirla. Lo tienes cuando: esa sección dos veces seguidas, sin detenerte.',
-      },
-    ],
+    // No help ladder: a whole-song card is the two checks and nothing else (Jonathan, 2026-10-07).
+    steps: [],
   },
   /* "Luna" — The Whole Song (2026-10-05). A whole-song card like ca-26:
      the F F A A bass loop from ca-20 (low E fret 1, open A string, one
@@ -3554,15 +3493,8 @@ window.CLASS_ACTIVITIES = [
           text_es: 'Pulsa «Normal». Toca la canción completa con la banda a velocidad normal, de la intro al final, sin detenerte.' }
       ]
     },
-    // The help ladder (read-only, under "More practice help").
-    steps: [
-      {
-        label:    'Practice — One section at a time',
-        label_es: 'Practica — Una sección a la vez',
-        text:    'Lost in one part? Tap that section to repeat it. You\'ve got it when: that section twice in a row, without stopping.',
-        text_es: '¿Te pierdes en una parte? Pulsa esa sección para repetirla. Lo tienes cuando: esa sección dos veces seguidas, sin detenerte.',
-      },
-    ],
+    // No help ladder: a whole-song card is the two checks and nothing else (Jonathan, 2026-10-07).
+    steps: [],
   },
   /* Sweet Child O' Mine — The Whole Song (2026-10-05). A whole-song card:
      the root of every chord on the low E and A strings, one pluck per
@@ -3793,48 +3725,8 @@ window.CLASS_ACTIVITIES = [
           text_es: 'Pulsa «Normal». Toca la canción completa con la banda a velocidad normal, de la intro al final, sin detenerte.' }
       ]
     },
-    // The help ladder (read-only, under "More practice help").
-    steps: [
-      {
-        label:    'Learn — Three new notes',
-        label_es: 'Aprende — Tres notas nuevas',
-        text:    'Press Play on the tab. A is the open A string. E is the open low E string. B is fret 2 on the A string, with your index finger.',
-        text_es: 'Pulsa «Tocar el tab». A es la cuerda La al aire. E es la cuerda Mi grave al aire. B es el traste 2 de la cuerda La, con el índice.',
-        tab: {
-          caption: 'A · E · B · 4 beats each',
-          caption_es: 'A · E · B · 4 tiempos cada una',
-          notes: [
-            { string: 'A', fret: 0, note: 'A', midi: 45, beats: 4 },
-            { string: 'E', fret: 0, note: 'E', midi: 40, beats: 4 },
-            { string: 'A', fret: 2, note: 'B', midi: 47, beats: 4 }
-          ]
-        },
-      },
-      {
-        label:    'Practice — The quick bar',
-        label_es: 'Practica — El compás rápido',
-        text:    'In the solos and the outro, one bar has C for 2 beats, then a quick D and a quick G. You\'ve got it when: E G A, C D G four times in a row with the tab, no stops. Late on the G? Turn the tab\'s BPM down.',
-        text_es: 'En los solos y el final, un compás tiene C por 2 tiempos, y luego un D rápido y un G rápido. Lo tienes cuando: E G A, C D G cuatro veces seguidas con el tab, sin detenerte. ¿Llegas tarde al G? Baja los BPM del tab.',
-        tab: {
-          caption: 'E G A, then C D G in one bar',
-          caption_es: 'E G A, y C D G en un compás',
-          notes: [
-            { string: 'E', fret: 0, note: 'E', midi: 40, beats: 4 },
-            { string: 'E', fret: 3, note: 'G', midi: 43, beats: 4 },
-            { string: 'A', fret: 0, note: 'A', midi: 45, beats: 4 },
-            { string: 'A', fret: 3, note: 'C', midi: 48, beats: 2 },
-            { string: 'A', fret: 5, note: 'D', midi: 50, beats: 1 },
-            { string: 'E', fret: 3, note: 'G', midi: 43, beats: 1 }
-          ]
-        },
-      },
-      {
-        label:    'Practice — One section at a time',
-        label_es: 'Practica — Una sección a la vez',
-        text:    'Lost in one part? Tap that section to repeat it. You\'ve got it when: that section twice in a row, without stopping.',
-        text_es: '¿Te pierdes en una parte? Pulsa esa sección para repetirla. Lo tienes cuando: esa sección dos veces seguidas, sin detenerte.',
-      },
-    ],
+    // No help ladder: a whole-song card is the two checks and nothing else (Jonathan, 2026-10-07).
+    steps: [],
   },
   /* All Along the Watchtower — The Whole Song in Power Chords (2026-10-05).
      ca-26's sections and bars, every root turned into the power chord Journey
@@ -3979,30 +3871,8 @@ window.CLASS_ACTIVITIES = [
           text_es: 'Pulsa «Normal». Toca la canción completa con la banda a velocidad normal, de la intro al final, sin detenerte.' }
       ]
     },
-    // The help ladder (read-only, under "More practice help").
-    steps: [
-      {
-        label:    'Learn — The shapes',
-        label_es: 'Aprende — Las formas',
-        text:    'Press Play on the tab. G5 and F5: index finger on the low E string, ring finger two frets higher on the A string. A5 is the open A string plus one finger on fret 2 of the D string.',
-        text_es: 'Pulsa «Tocar el tab». G5 y F5: el índice en la cuerda Mi grave, el anular dos trastes más arriba en la cuerda La. A5 es la cuerda La al aire más un dedo en el traste 2 de la cuerda Re.',
-        tab: {
-          caption: 'A5 · G5 · F5 · 4 beats each',
-          caption_es: 'A5 · G5 · F5 · 4 tiempos cada uno',
-          notes: [
-            { frets: [['D', 2], ['A', 0]], note: 'A5', midi: [52, 45], beats: 4 },
-            { frets: [['A', 5], ['E', 3]], note: 'G5', midi: [50, 43], beats: 4 },
-            { frets: [['A', 3], ['E', 1]], note: 'F5', midi: [48, 41], beats: 4 }
-          ]
-        },
-      },
-      {
-        label:    'Practice — One section at a time',
-        label_es: 'Practica — Una sección a la vez',
-        text:    'Lost in one part? Tap that section to repeat it. Play only the roots for one lap if the shape slows you down. You\'ve got it when: that section twice in a row with both strings ringing, without stopping.',
-        text_es: '¿Te pierdes en una parte? Pulsa esa sección para repetirla. Toca solo las raíces una vuelta si la forma te frena. Lo tienes cuando: esa sección dos veces seguidas con las dos cuerdas sonando, sin detenerte.',
-      },
-    ],
+    // No help ladder: a whole-song card is the two checks and nothing else (Jonathan, 2026-10-07).
+    steps: [],
   },
   /* "the cure" — The Whole Song in Power Chords (2026-10-05). ca-24's
      sections and bars, every root turned into the power chord Journey Layer 3
@@ -4318,32 +4188,8 @@ window.CLASS_ACTIVITIES = [
           text_es: 'Pulsa «Normal». Toca la canción completa con la banda a velocidad normal, de la intro al final, sin detenerte.' }
       ]
     },
-    // The help ladder (read-only, under "More practice help").
-    steps: [
-      {
-        label:    'Learn — The shapes',
-        label_es: 'Aprende — Las formas',
-        text:    'Press Play on the tab. Every chord is one shape: index finger on the root, ring finger two frets higher on the next thinner string. A5, F5 and G5 have their root on the low E string; C5 and D5 on the A string.',
-        text_es: 'Pulsa «Tocar el tab». Cada acorde es la misma forma: el índice en la raíz, el anular dos trastes más arriba en la cuerda siguiente, más delgada. A5, F5 y G5 tienen la raíz en la cuerda Mi grave; C5 y D5, en la cuerda La.',
-        tab: {
-          caption: 'A5 · C5 · F5 · D5 · G5 · 4 beats each',
-          caption_es: 'A5 · C5 · F5 · D5 · G5 · 4 tiempos cada uno',
-          notes: [
-            { frets: [['A', 7], ['E', 5]], note: 'A5', midi: [52, 45], beats: 4 },
-            { frets: [['D', 5], ['A', 3]], note: 'C5', midi: [55, 48], beats: 4 },
-            { frets: [['A', 3], ['E', 1]], note: 'F5', midi: [48, 41], beats: 4 },
-            { frets: [['D', 7], ['A', 5]], note: 'D5', midi: [57, 50], beats: 4 },
-            { frets: [['A', 5], ['E', 3]], note: 'G5', midi: [50, 43], beats: 4 }
-          ]
-        },
-      },
-      {
-        label:    'Practice — One section at a time',
-        label_es: 'Practica — Una sección a la vez',
-        text:    'Lost in one part? Tap that section to repeat it. Play only the roots for one lap if the shape slows you down. You\'ve got it when: that section twice in a row with both strings ringing, without stopping.',
-        text_es: '¿Te pierdes en una parte? Pulsa esa sección para repetirla. Toca solo las raíces una vuelta si la forma te frena. Lo tienes cuando: esa sección dos veces seguidas con las dos cuerdas sonando, sin detenerte.',
-      },
-    ],
+    // No help ladder: a whole-song card is the two checks and nothing else (Jonathan, 2026-10-07).
+    steps: [],
   },
   /* Seven Nation Army — The Whole Song in Power Chords (2026-10-05).
      ca-25's sections and bars, every riff note turned into the A-string power
@@ -4586,33 +4432,8 @@ window.CLASS_ACTIVITIES = [
           text_es: 'Pulsa «Normal». Toca la canción completa con la banda a velocidad normal, de la intro al final, sin detenerte.' }
       ]
     },
-    // The help ladder (read-only, under "More practice help").
-    steps: [
-      {
-        label:    'Learn — The shapes',
-        label_es: 'Aprende — Las formas',
-        text:    'Press Play on the tab. The riff chords have their root on the A string: index finger on the root, ring finger two frets higher on the D string. Before each chorus, G5 sits on low E fret 3, and A5 is the same shape two frets higher, on fret 5.',
-        text_es: 'Pulsa «Tocar el tab». Los acordes del riff tienen la raíz en la cuerda La: el índice en la raíz, el anular dos trastes más arriba en la cuerda Re. Antes de cada coro, G5 está en el traste 3 de la cuerda Mi grave, y A5 es la misma forma dos trastes más arriba, en el traste 5.',
-        tab: {
-          caption: 'E5 · G5 · D5 · C5 · B5 · A5 · 4 beats each',
-          caption_es: 'E5 · G5 · D5 · C5 · B5 · A5 · 4 tiempos cada uno',
-          notes: [
-            { frets: [['D', 9], ['A', 7]], note: 'E5', midi: [59, 52], beats: 4 },
-            { frets: [['A', 5], ['E', 3]], note: 'G5', midi: [50, 43], beats: 4 },
-            { frets: [['D', 7], ['A', 5]], note: 'D5', midi: [57, 50], beats: 4 },
-            { frets: [['D', 5], ['A', 3]], note: 'C5', midi: [55, 48], beats: 4 },
-            { frets: [['D', 4], ['A', 2]], note: 'B5', midi: [54, 47], beats: 4 },
-            { frets: [['A', 7], ['E', 5]], note: 'A5', midi: [52, 45], beats: 4 }
-          ]
-        },
-      },
-      {
-        label:    'Practice — One section at a time',
-        label_es: 'Practica — Una sección a la vez',
-        text:    'Lost in one part? Tap that section to repeat it. Play only the roots for one lap if the shape slows you down. You\'ve got it when: that section twice in a row with both strings ringing, without stopping.',
-        text_es: '¿Te pierdes en una parte? Pulsa esa sección para repetirla. Toca solo las raíces una vuelta si la forma te frena. Lo tienes cuando: esa sección dos veces seguidas con las dos cuerdas sonando, sin detenerte.',
-      },
-    ],
+    // No help ladder: a whole-song card is the two checks and nothing else (Jonathan, 2026-10-07).
+    steps: [],
   },
   /* "Luna" — The Whole Song in Power Chords (2026-10-05). ca-27's
      sections and bars with Journey Layer 3's loop: F5 (low E fret 1) and A5
@@ -4733,29 +4554,8 @@ window.CLASS_ACTIVITIES = [
           text_es: 'Pulsa «Normal». Toca la canción completa con la banda a velocidad normal, de la intro al final, sin detenerte.' }
       ]
     },
-    // The help ladder (read-only, under "More practice help").
-    steps: [
-      {
-        label:    'Learn — The shapes',
-        label_es: 'Aprende — Las formas',
-        text:    'Press Play on the tab. F5 and A5 are one shape: index finger on the low E string, ring finger two frets higher on the A string. Slide it from fret 1 to fret 5 and back.',
-        text_es: 'Pulsa «Tocar el tab». F5 y A5 son la misma forma: el índice en la cuerda Mi grave, el anular dos trastes más arriba en la cuerda La. Deslízala del traste 1 al traste 5 y de vuelta.',
-        tab: {
-          caption: 'F5 · A5 · 4 beats each',
-          caption_es: 'F5 · A5 · 4 tiempos cada uno',
-          notes: [
-            { frets: [['A', 3], ['E', 1]], note: 'F5', midi: [48, 41], beats: 4 },
-            { frets: [['A', 7], ['E', 5]], note: 'A5', midi: [52, 45], beats: 4 }
-          ]
-        },
-      },
-      {
-        label:    'Practice — One section at a time',
-        label_es: 'Practica — Una sección a la vez',
-        text:    'Lost in one part? Tap that section to repeat it. Play only the roots for one lap if the shape slows you down. You\'ve got it when: that section twice in a row with both strings ringing, without stopping.',
-        text_es: '¿Te pierdes en una parte? Pulsa esa sección para repetirla. Toca solo las raíces una vuelta si la forma te frena. Lo tienes cuando: esa sección dos veces seguidas con las dos cuerdas sonando, sin detenerte.',
-      },
-    ],
+    // No help ladder: a whole-song card is the two checks and nothing else (Jonathan, 2026-10-07).
+    steps: [],
   },
   /* Sweet Child O' Mine — The Whole Song in Power Chords (2026-10-05).
      ca-28's sections and bars, every root turned into a power chord on the
@@ -4977,50 +4777,7 @@ window.CLASS_ACTIVITIES = [
           text_es: 'Pulsa «Normal». Toca la canción completa con la banda a velocidad normal, de la intro al final, sin detenerte.' }
       ]
     },
-    // The help ladder (read-only, under "More practice help").
-    steps: [
-      {
-        label:    'Learn — The shapes',
-        label_es: 'Aprende — Las formas',
-        text:    'Press Play on the tab. D5, C5 and B5 have their root on the A string, G5 on the low E string. A5 and E5 use an open string as the root, so one finger presses fret 2 on the next thinner string.',
-        text_es: 'Pulsa «Tocar el tab». D5, C5 y B5 tienen la raíz en la cuerda La, G5 en la cuerda Mi grave. A5 y E5 usan una cuerda al aire como raíz, así que un solo dedo pisa el traste 2 de la cuerda siguiente.',
-        tab: {
-          caption: 'D5 · C5 · G5 · A5 · E5 · B5 · 4 beats each',
-          caption_es: 'D5 · C5 · G5 · A5 · E5 · B5 · 4 tiempos cada uno',
-          notes: [
-            { frets: [['D', 7], ['A', 5]], note: 'D5', midi: [57, 50], beats: 4 },
-            { frets: [['D', 5], ['A', 3]], note: 'C5', midi: [55, 48], beats: 4 },
-            { frets: [['A', 5], ['E', 3]], note: 'G5', midi: [50, 43], beats: 4 },
-            { frets: [['D', 2], ['A', 0]], note: 'A5', midi: [52, 45], beats: 4 },
-            { frets: [['A', 2], ['E', 0]], note: 'E5', midi: [47, 40], beats: 4 },
-            { frets: [['D', 4], ['A', 2]], note: 'B5', midi: [54, 47], beats: 4 }
-          ]
-        },
-      },
-      {
-        label:    'Practice — The quick bar',
-        label_es: 'Practica — El compás rápido',
-        text:    'In the solos and the outro, one bar has C5 for 2 beats, then a quick D5 and a quick G5. You\'ve got it when: E5 G5 A5, C5 D5 G5 four times in a row with the tab, no stops. Late on the G5? Turn the tab\'s BPM down.',
-        text_es: 'En los solos y el final, un compás tiene C5 por 2 tiempos, y luego un D5 rápido y un G5 rápido. Lo tienes cuando: E5 G5 A5, C5 D5 G5 cuatro veces seguidas con el tab, sin detenerte. ¿Llegas tarde al G5? Baja los BPM del tab.',
-        tab: {
-          caption: 'E5 G5 A5, then C5 D5 G5 in one bar',
-          caption_es: 'E5 G5 A5, y C5 D5 G5 en un compás',
-          notes: [
-            { frets: [['A', 2], ['E', 0]], note: 'E5', midi: [47, 40], beats: 4 },
-            { frets: [['A', 5], ['E', 3]], note: 'G5', midi: [50, 43], beats: 4 },
-            { frets: [['D', 2], ['A', 0]], note: 'A5', midi: [52, 45], beats: 4 },
-            { frets: [['D', 5], ['A', 3]], note: 'C5', midi: [55, 48], beats: 2 },
-            { frets: [['D', 7], ['A', 5]], note: 'D5', midi: [57, 50] },
-            { frets: [['A', 5], ['E', 3]], note: 'G5', midi: [50, 43] }
-          ]
-        },
-      },
-      {
-        label:    'Practice — One section at a time',
-        label_es: 'Practica — Una sección a la vez',
-        text:    'Lost in one part? Tap that section to repeat it. Play only the roots for one lap if the shape slows you down. You\'ve got it when: that section twice in a row with both strings ringing, without stopping.',
-        text_es: '¿Te pierdes en una parte? Pulsa esa sección para repetirla. Toca solo las raíces una vuelta si la forma te frena. Lo tienes cuando: esa sección dos veces seguidas con las dos cuerdas sonando, sin detenerte.',
-      },
-    ],
+    // No help ladder: a whole-song card is the two checks and nothing else (Jonathan, 2026-10-07).
+    steps: [],
   },
 ];

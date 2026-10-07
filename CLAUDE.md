@@ -1550,7 +1550,11 @@ Before its date the target SWAPS INTO the linking card's slot (`caSwap`,
 puts the linking card back, open. The activity's `steps` are the help ladder
 under "More practice help" — read-only (no Mark done), four at most, and
 none may name the Song Journey page: the card's Journey button is on its
-last check, the Level up (1ba pins both call sites). Data shape: CARD note
+last check, the Level up (1ba pins both call sites). **A whole-song card has
+no help ladder and exactly two checks** — the whole song slower without
+stopping, then the Level up (Jonathan, 2026-10-07): `steps: []`, which
+1d allows only on a `card.wholeSong`. A check may carry `slot: n` to keep
+the tick key it had before earlier checks were removed (ca-25). Data shape: CARD note
 atop class-activities.js. Engine: `pc*` in app.js (`pcLayout` sections →
 tab offsets and beat totals; `pcLocate` position → note; the snippet
 window arithmetic, one `anchor` per song). **Complete = every numbered check
@@ -1613,7 +1617,7 @@ section that listed every part card at the top of the Songs page — "too
 much going on"; the Core list is now the only place). A Core row shows
 exactly three links, in this order: **Play Along · Backing track for
 solos · Song Journey** — no Tutorial or Original on Core rows (Choice rows
-keep theirs). Watchtower, "the cure", Seven Nation Army lead the list
+keep theirs). Seven Nation Army, Watchtower, "the cure" lead the list
 (`CORE_FIRST`), the rest alphabetical. Play Along opens the song's `view: 'card'` activity with
 `card.wholeSong` whose `journey:` matches the row's Journey slug, newest
 first (highest board `#N`) when a song has two — the roots card and the

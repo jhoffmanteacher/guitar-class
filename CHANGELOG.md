@@ -5,11 +5,14 @@ Notable changes to the Guitar Class site. Newest first.
 For the full session-by-session history (and the reasoning behind each change),
 see `WORKFLOW.md` and the git commit log.
 
-## 2026-10-07 — Seven Nation Army whole song: two checks
+## 2026-10-07 — Whole-song cards: two checks, no extra help
 
-- "Seven Nation Army — The Whole Song" now has the same two checks as every
-  other whole-song card: the whole song at a slower speed without stopping,
-  then the Level up. A tick you already gave either of those stays.
+- Every whole-song play-along card now has two checks: the whole song at a
+  slower speed without stopping, then the Level up. "Seven Nation Army — The
+  Whole Song" had four; a tick you already gave either of the two that stay
+  is kept.
+- The "More practice help" section is gone from the whole-song cards.
+- Seven Nation Army is now first in the Core songs list on the Songs page.
 
 ## 2026-10-07 — Seven Nation Army riff card: a longer loop, and no gap when it repeats
 

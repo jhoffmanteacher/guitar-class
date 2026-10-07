@@ -9556,8 +9556,9 @@ async function renderSongsHub(){
   const isCoreSix = e => e.song.core === true && e.song.type !== 'Focus';
   const firstMod = e => Math.min(...e.modules);
   /* Core order (Jonathan, 2026-10-05): the three songs with a whole-song
-     Play Along card lead, in this order; the rest follow alphabetically. */
-  const CORE_FIRST = ['all-along-the-watchtower', 'the-cure', 'seven-nation-army'];
+     Play Along card lead, in this order; the rest follow alphabetically.
+     Seven Nation Army moved to the top 2026-10-07 (Jonathan). */
+  const CORE_FIRST = ['seven-nation-army', 'all-along-the-watchtower', 'the-cure'];
   const coreRank = e => { const i = CORE_FIRST.indexOf(songJourneySlug(e.song)); return i < 0 ? CORE_FIRST.length : i; };
   const coreEntries = entries.filter(isCoreSix).sort((a, b) => coreRank(a) - coreRank(b));
   const requestEntries = entries.filter(e => !isCoreSix(e) && e.song.request === true);
