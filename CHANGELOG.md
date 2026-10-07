@@ -12,6 +12,9 @@ see `WORKFLOW.md` and the git commit log.
   Layer 3. Tap it to see every section of the song in order, written as a
   regular tab. It is the same tab as the song's Play Along card, so you can
   read the whole song on one page if that is easier for you.
+- When you open it, the tab uses the full width of the screen. On a
+  Chromebook that fits about ten bars on each line, so there is less
+  scrolling.
 
 ## 2026-10-07 — Unfinished class activities no longer lock the site
 

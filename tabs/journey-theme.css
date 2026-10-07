@@ -157,6 +157,11 @@ h1{font-family:var(--font-display);font-size:1.875rem;font-weight:650;margin:4px
 /* Section headings inside the whole-song tab journey.js draws from the Play
    Along card (addWholeSongTabs) — Journey-only, no styles.css twin. */
 .tab-ascii .ws-sec{font-weight:700}
+/* An open whole-song tab is wider than the column (journey.js wsReflow), so
+   its layer stops clipping while it is open; the header keeps the corners
+   the clip used to give it. */
+.layer.ws-wide{overflow:visible}
+.layer.ws-wide .layer-head{border-radius:11px 11px 0 0}
 .playline{font-size:0.9063rem;background:var(--bg2);border-left:3px solid var(--border2);padding:8px 12px;border-radius:0 8px 8px 0;margin-bottom:12px}
 .branch{font-size:0.8438rem;color:var(--text2);margin-bottom:6px}
 .branch b{color:var(--text)}

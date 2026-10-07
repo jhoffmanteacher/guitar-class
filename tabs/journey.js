@@ -642,7 +642,7 @@ function wsRowText(notes, bpb){
   if(acc > 0) WS_STRINGS.forEach(function(s){ lines[s] += '---|'; });
   return [wsEsc(label).replace(/\s+$/, '')].concat(WS_STRINGS.map(function(s){ return lines[s]; })).join('\n');
 }
-function wsTabHtml(a){
+function wsPreHtml(a){
   var c = a.card;
   var blocks = (c.sections || []).map(function(sec){
     var notes = sec.notes || [];
@@ -652,6 +652,10 @@ function wsTabHtml(a){
     var rows = wsSectionRows(sec).map(function(r){ return wsRowText(r, bpb); });
     return head + '\n' + rows.join('\n\n');
   });
+  return blocks.join('\n\n\n');
+}
+function wsTabHtml(a){
+  var c = a.card;
   var icon = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" style="width:1em;height:1em;vertical-align:-0.15em"><path d="M9 18V5l12-2v13"/><circle cx="6" cy="18" r="3"/><circle cx="18" cy="16" r="3"/></svg>';
   return '<details class="fold ws-fold">' +
       '<summary data-es="El tab de la canción completa">The whole song tab</summary>' +
@@ -660,7 +664,7 @@ function wsTabHtml(a){
         '<div class="tab-head"><span class="tab-icon">' + icon + '</span>' +
           '<span class="tab-title" data-es="' + wsEsc(wsEsc(c.caption_es || c.caption)) + '">' + wsEsc(c.caption) + '</span>' +
           '<span class="tab-kind">Tab</span></div>' +
-        '<div class="tab-body"><pre class="tab-ascii">' + blocks.join('\n\n\n') + '</pre></div>' +
+        '<div class="tab-body"><pre class="tab-ascii">' + wsPreHtml(a) + '</pre></div>' +
       '</div>' +
     '</details>';
 }
@@ -673,10 +677,82 @@ function addWholeSongTabs(){
     var ready = body.querySelector('.ready-row');
     var holder = document.createElement('div');
     holder.innerHTML = wsTabHtml(a);
-    body.insertBefore(holder.firstChild, ready || null);
+    var fold = holder.firstChild;
+    fold._wsActivity = a;
+    fold.addEventListener('toggle', function(){ wsReflow(fold); });
+    body.insertBefore(fold, ready || null);
   });
 }
 addWholeSongTabs();
+
+/* Full width (Jonathan, 2026-10-07: "use the entire width of a chromebook
+   screen"). An open whole-song tab leaves the page's 760px reading column
+   and spans the window less a 24px margin each side, and its rows are
+   re-drawn to as many bars as that width holds — about ten bars of "the
+   cure" a row at 1366px, against four in the column. Measured, not set in
+   CSS: the column's own left edge decides how far out the card has to
+   move, and a monospace character's real width decides the bar count.
+   Redone when the fold opens and when the window is resized; a closed
+   fold is left alone. Printing puts it back in the column at the default
+   row length (the beforeprint handler above opens every fold). */
+var WS_ROW_DEFAULT = WS_ROW_CHARS;
+var WS_SIDE_GAP = 24;
+function wsSetPre(fold, rowChars){
+  var pre = fold.querySelector('.tab-ascii');
+  if(!pre || fold._wsRowChars === rowChars) return;
+  fold._wsRowChars = rowChars;
+  WS_ROW_CHARS = rowChars;
+  pre.innerHTML = wsPreHtml(fold._wsActivity);
+  WS_ROW_CHARS = WS_ROW_DEFAULT;
+  if(getLang() === 'es'){
+    pre.querySelectorAll('[data-es]').forEach(function(el){
+      el.dataset.enHtml = el.innerHTML;
+      el.innerHTML = el.dataset.es;
+    });
+  }
+}
+function wsReflow(fold){
+  /* .layer clips its children to its rounded corners; an open wide tab
+     needs out of that, so its layer drops the clip while it is open. */
+  var layer = fold.closest('.layer');
+  if(layer) layer.classList.toggle('ws-wide', !!fold.open);
+  if(!fold.open || !fold._wsActivity) return;
+  var tab = fold.querySelector('.tab');
+  var pre = fold.querySelector('.tab-ascii');
+  if(!tab || !pre) return;
+  var col = fold.getBoundingClientRect();
+  var vw = document.documentElement.clientWidth;
+  var width = Math.max(col.width, vw - 2 * WS_SIDE_GAP);
+  tab.style.width = width + 'px';
+  tab.style.maxWidth = 'none';
+  tab.style.marginLeft = Math.min(0, WS_SIDE_GAP - col.left) + 'px';
+  var probe = document.createElement('span');
+  probe.textContent = '----------';
+  pre.appendChild(probe);
+  var charW = probe.getBoundingClientRect().width / 10;
+  pre.removeChild(probe);
+  var cs = getComputedStyle(pre);
+  var inner = pre.clientWidth - parseFloat(cs.paddingLeft) - parseFloat(cs.paddingRight);
+  if(!(charW > 0) || !(inner > 0)) return;
+  /* 3 characters of string name and first bar line, 1 to spare */
+  wsSetPre(fold, Math.max(WS_ROW_DEFAULT, Math.floor(inner / charW) - 4));
+}
+function wsReflowAll(){
+  document.querySelectorAll('.ws-fold').forEach(wsReflow);
+}
+var wsResizeTimer = null;
+window.addEventListener('resize', function(){
+  clearTimeout(wsResizeTimer);
+  wsResizeTimer = setTimeout(wsReflowAll, 150);
+});
+window.addEventListener('beforeprint', function(){
+  document.querySelectorAll('.ws-fold').forEach(function(fold){
+    var tab = fold.querySelector('.tab');
+    if(tab){ tab.style.width = ''; tab.style.maxWidth = ''; tab.style.marginLeft = ''; }
+    wsSetPre(fold, WS_ROW_DEFAULT);
+  });
+});
+window.addEventListener('afterprint', wsReflowAll);
 
 /* A returning student who chose Spanish shouldn't see a flash of English —
    i18n.js (loaded just above) already restored gc-lang, so swap now. */

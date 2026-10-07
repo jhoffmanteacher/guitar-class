@@ -1002,7 +1002,10 @@ Jonathan: for students who prefer that visual). `addWholeSongTabs()` in
 (Layers 2 and 3 on five pages; Let It Be has none). Drawn at load from
 `class-activities.js`, never hand-typed, so it cannot drift from the card —
 edit the card and the page follows. Not counted by 1q/1z (they read the
-static HTML).
+static HTML). When open it spans the window, not the 760px column
+(Jonathan, same day: "use the entire width of a chromebook screen") —
+`wsReflow()` measures the column and a monospace character, sizes the card,
+re-draws the rows to fit, and drops `.layer`'s clip (`.ws-wide`) while open.
 
 **No Journey page is blocked and none is deleted.** Part 1 of this work
 (`fc7e878`: a per-song `JOURNEY_RETIRED` list and a "moved" card on the page)
