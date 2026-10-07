@@ -995,6 +995,15 @@ layer, so their links open the Journey page at `#layer-N`.
 (dates, Play Along now) can land after the page holding the link was built.
 Don't fold "Play Along now" into `caIsVisible()`.
 
+**Each Journey page draws its whole-song cards' tabs** (2026-10-07,
+Jonathan: for students who prefer that visual). `addWholeSongTabs()` in
+`tabs/journey.js` turns every `card.wholeSong` activity's notes into an ASCII
+`.tab` folded under "The whole song tab" at the foot of its `journeyLayer`
+(Layers 2 and 3 on five pages; Let It Be has none). Drawn at load from
+`class-activities.js`, never hand-typed, so it cannot drift from the card —
+edit the card and the page follows. Not counted by 1q/1z (they read the
+static HTML).
+
 **No Journey page is blocked and none is deleted.** Part 1 of this work
 (`fc7e878`: a per-song `JOURNEY_RETIRED` list and a "moved" card on the page)
 shipped and was reversed the same day, on Jonathan's second thought — **do not

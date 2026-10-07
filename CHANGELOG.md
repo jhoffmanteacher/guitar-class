@@ -5,6 +5,14 @@ Notable changes to the Guitar Class site. Newest first.
 For the full session-by-session history (and the reasoning behind each change),
 see `WORKFLOW.md` and the git commit log.
 
+## 2026-10-07 — Whole-song tabs on the Song Journey pages
+
+- Seven Nation Army, All Along the Watchtower, Luna, Sweet Child O' Mine and
+  "the cure" now have "The whole song tab" at the end of Layer 2 and
+  Layer 3. Tap it to see every section of the song in order, written as a
+  regular tab. It is the same tab as the song's Play Along card, so you can
+  read the whole song on one page if that is easier for you.
+
 ## 2026-10-07 — Unfinished class activities no longer lock the site
 
 - If a class activity is still unfinished, the site still opens on In-Class

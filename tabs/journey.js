@@ -521,6 +521,163 @@ updateProgressPill();
   var frame = document.getElementById('playalong-frame');
   if(fabBtn && (!frame || !frame.dataset.audio)) fabBtn.hidden = true;
 })();
+/* ── Whole-song tab, drawn from the Play Along card (2026-10-07) ──
+   Jonathan: "add whole song tabs from the play along activity to the song
+   journey pages for students who prefer that type of visual." Each
+   whole-song practice card in class-activities.js (card.wholeSong, with
+   `journey` + `journeyLayer`) gets an ASCII copy of its tab at the foot of
+   that layer, folded under "The whole song tab", just above the ready row.
+
+   Drawn at load from the card's own notes, never hand-typed: the card is
+   the source and this is a different picture of it, so there is nothing to
+   keep in step by hand (the hand-typed tabs on the page are a separate
+   thing and may still differ from the card — CLAUDE.md, play-along first).
+   Shown whatever the card's release date — like every other tab on the
+   page, it is something to read, not the activity. Built before the
+   language swap below, so its data-es attributes are swapped with the rest.
+
+   Layout: one block per section, its caption on top (which already says
+   "4 laps"), the notes once. A note's slot is 3 characters plus 3 per extra
+   beat it rings, so a held note looks held; a bar line falls every
+   beatsPerBar beats (bars x beatsPerBar = the section's beats, checks.mjs
+   1bf); a row holds about 70 characters of bars, split evenly, unless the
+   section names its own `rows`. The chord or note name sits over the fret
+   at the start of every bar and wherever it changes. In a power chord the upper note is highlighted, like the
+   page's own Layer 3 tabs. */
+var WS_STRINGS = ['e', 'B', 'G', 'D', 'A', 'E'];
+var WS_ROW_CHARS = 70;
+function wsEsc(s){
+  return String(s == null ? '' : s).replace(/&/g, '&amp;').replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;').replace(/"/g, '&quot;');
+}
+/* One note → { label, frets: { string: fret }, hl: { string: true } } */
+function wsNoteCells(n){
+  var frets = {}, hl = {};
+  if(n.frets && n.frets.length){
+    var lowest = null;
+    n.frets.forEach(function(f, i){
+      frets[f[0]] = String(f[1]);
+      var m = n.midi && n.midi[i];
+      if(lowest === null || (m != null && m < lowest.m)) lowest = { s: f[0], m: m == null ? Infinity : m };
+    });
+    Object.keys(frets).forEach(function(s){ if(!lowest || s !== lowest.s) hl[s] = true; });
+  } else if(n.string){
+    frets[n.string] = String(n.fret);
+  }
+  return { label: n.note || '', frets: frets, hl: hl };
+}
+/* A section's notes → rows of { notes: [...] }, each row ending on a bar line. */
+function wsSectionRows(sec){
+  var notes = sec.notes || [];
+  if(sec.rows && sec.rows.length){
+    var out = [], at = 0;
+    sec.rows.forEach(function(k){ out.push(notes.slice(at, at + k)); at += k; });
+    if(at < notes.length) out.push(notes.slice(at));
+    return out;
+  }
+  var total = notes.reduce(function(t, n){ return t + (n.beats > 0 ? n.beats : 1); }, 0);
+  var bpb = total / Math.max(1, sec.bars || 1);
+  var bars = [], cur = [], acc = 0;
+  notes.forEach(function(n){
+    cur.push(n); acc += n.beats > 0 ? n.beats : 1;
+    if(acc >= bpb - 1e-6){ bars.push(cur); cur = []; acc = 0; }
+  });
+  if(cur.length) bars.push(cur);
+  /* As many bars as fit in WS_ROW_CHARS, then spread evenly over the rows
+     that takes, so a section never ends on one stray bar. */
+  var widths = bars.map(function(b){
+    return b.reduce(function(t, n){ return t + wsSlotWidth(n); }, 0) + 4;
+  });
+  var widest = Math.max.apply(null, widths.concat([1]));
+  var fit = Math.max(1, Math.floor(WS_ROW_CHARS / widest));
+  var per = Math.ceil(bars.length / Math.ceil(bars.length / fit));
+  var rows = [];
+  for(var i = 0; i < bars.length; i += per){
+    rows.push([].concat.apply([], bars.slice(i, i + per)));
+  }
+  return rows;
+}
+function wsSlotWidth(n){
+  var beats = n.beats > 0 ? n.beats : 1;
+  return 3 + Math.max(0, Math.round((beats - 1) * 3));
+}
+/* One row of notes → the label line + six string lines, with a bar line
+   every beatsPerBar beats (counted from the row's own first note, which
+   always starts a bar). */
+function wsRowText(notes, bpb){
+  var label = '', lines = {};
+  WS_STRINGS.forEach(function(s){ lines[s] = s + ' |'; });
+  var col = 3, labelEnd = 0, prevLabel = null, acc = 0;
+  notes.forEach(function(n){
+    var c = wsNoteCells(n);
+    var digits = 0;
+    Object.keys(c.frets).forEach(function(s){ digits = Math.max(digits, c.frets[s].length); });
+    var showLabel = c.label && (c.label !== prevLabel || acc === 0);
+    var lead = 2;
+    if(showLabel && col + lead < labelEnd + 1) lead = labelEnd + 1 - col;
+    var slot = lead + digits + (wsSlotWidth(n) - 3);
+    WS_STRINGS.forEach(function(s){
+      var f = c.frets[s];
+      var cell;
+      if(f == null){ cell = new Array(slot + 1).join('-'); lines[s] += cell; }
+      else {
+        var pre = new Array(lead + digits - f.length + 1).join('-');
+        var post = new Array(slot - lead - digits + 1).join('-');
+        lines[s] += pre + (c.hl[s] ? '<span class="hl">' + f + '</span>' : f) + post;
+      }
+    });
+    if(showLabel){
+      var at = col + lead;
+      label += new Array(Math.max(0, at - label.length) + 1).join(' ') + c.label;
+      labelEnd = label.length;
+      prevLabel = c.label;
+    }
+    col += slot;
+    acc += n.beats > 0 ? n.beats : 1;
+    if(acc >= bpb - 1e-6){
+      WS_STRINGS.forEach(function(s){ lines[s] += '---|'; });
+      col += 4; acc = 0;
+    }
+  });
+  if(acc > 0) WS_STRINGS.forEach(function(s){ lines[s] += '---|'; });
+  return [wsEsc(label).replace(/\s+$/, '')].concat(WS_STRINGS.map(function(s){ return lines[s]; })).join('\n');
+}
+function wsTabHtml(a){
+  var c = a.card;
+  var blocks = (c.sections || []).map(function(sec){
+    var notes = sec.notes || [];
+    var total = notes.reduce(function(t, n){ return t + (n.beats > 0 ? n.beats : 1); }, 0);
+    var bpb = total / Math.max(1, sec.bars || 1);
+    var head = '<span class="ws-sec" data-es="' + wsEsc(wsEsc(sec.caption_es || sec.caption)) + '">' + wsEsc(sec.caption) + '</span>';
+    var rows = wsSectionRows(sec).map(function(r){ return wsRowText(r, bpb); });
+    return head + '\n' + rows.join('\n\n');
+  });
+  var icon = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" style="width:1em;height:1em;vertical-align:-0.15em"><path d="M9 18V5l12-2v13"/><circle cx="6" cy="18" r="3"/><circle cx="18" cy="16" r="3"/></svg>';
+  return '<details class="fold ws-fold">' +
+      '<summary data-es="El tab de la canción completa">The whole song tab</summary>' +
+      '<div class="branch" data-es="Cada sección de la canción, en orden. Es el mismo tab de la tarjeta «Toca con la canción». «4 vueltas» quiere decir: toca esa línea 4 veces y luego pasa a la siguiente sección.">Every section of the song, in order. This is the same tab as the Play Along card. &ldquo;4 laps&rdquo; means: play that line 4 times, then go to the next section.</div>' +
+      '<div class="tab">' +
+        '<div class="tab-head"><span class="tab-icon">' + icon + '</span>' +
+          '<span class="tab-title" data-es="' + wsEsc(wsEsc(c.caption_es || c.caption)) + '">' + wsEsc(c.caption) + '</span>' +
+          '<span class="tab-kind">Tab</span></div>' +
+        '<div class="tab-body"><pre class="tab-ascii">' + blocks.join('\n\n\n') + '</pre></div>' +
+      '</div>' +
+    '</details>';
+}
+function addWholeSongTabs(){
+  if(typeof SONG_ID === 'undefined') return;
+  (window.CLASS_ACTIVITIES || []).forEach(function(a){
+    if(a.journey !== SONG_ID || !a.journeyLayer || !a.card || !a.card.wholeSong) return;
+    var body = document.getElementById('layer-' + a.journeyLayer + '-body');
+    if(!body || body.querySelector('.ws-fold')) return;
+    var ready = body.querySelector('.ready-row');
+    var holder = document.createElement('div');
+    holder.innerHTML = wsTabHtml(a);
+    body.insertBefore(holder.firstChild, ready || null);
+  });
+}
+addWholeSongTabs();
+
 /* A returning student who chose Spanish shouldn't see a flash of English —
    i18n.js (loaded just above) already restored gc-lang, so swap now. */
 applyJourneyLang(getLang());
