@@ -1333,6 +1333,19 @@ Today's activity already shows the next one) and toasts
 A second tap on the rail row of the page you're on scrolls to the top — it
 no longer closes the page (In class, Songs, My progress).
 
+**⚠️ The LOCK is switched off (Jonathan, 2026-10-07: "stop locking the
+other parts of site if class activities aren't cleared… CA should still pop
+up as normal on login").** `const CA_GATE_LOCKS = false;` beside
+`applyActivityGate()` in app.js and `var JOURNEY_GATE_LOCKS = false;` in
+`tabs/journey.js` are the whole switch — nothing was deleted, so `true`
+restores everything below exactly as it was. What stays live: `caBlockers()`
+still computes, and `showApp()` lands a student with any blocker on
+In-Class Activities at sign-in **whatever the hash** (a gate-open hash such
+as a `#class-activities/ca-N` deep link is left alone). No mid-session
+redirect, no hidden rail, no Journey gate card. The console's Clear /
+"Blocked by N" tools still work but now only decide who gets the sign-in
+landing. The description below is the lock as it runs when switched on.
+
 **The gate:** `caBlockers()` — a visible (`caIsVisible`), undone
 (`classActivities[id]!==true`), uncleared activity or check — drives
 `body.ca-gated` via `applyActivityGate()`. Teacher/dev bypass are gate

@@ -670,6 +670,9 @@ function journeyBoardAfter(b, a, cfg){
   if(mb !== ma) return mb > ma;
   return (Number(pb.pos) || 0) > (Number(pa.pos) || 0);
 }
+/* The activity gate no longer locks Journey pages (Jonathan, 2026-10-07).
+   Kept as a switch, like CA_GATE_LOCKS in app.js — true restores it. */
+var JOURNEY_GATE_LOCKS = false;
 function journeyBlockers(cfg, classActivities, uid, ownPeriod){
   var clears = ((cfg && cfg.activityClears) || {})[uid] || {};
   // CAS students: every activity is optional, so nothing blocks — mirrors
@@ -769,6 +772,8 @@ window.addEventListener('load', function(){
       // is undefined only if that tag is ever removed, which journeyBlockers
       // treats as "nothing to block on" ([] default).
       if(typeof TEACHER_EMAIL !== 'undefined' && user.email === TEACHER_EMAIL) return;
+      // Switched off 2026-10-07 — mirrors CA_GATE_LOCKS in app.js.
+      if(!JOURNEY_GATE_LOCKS) return;
       var classActivities = (data && data.classActivities) || {};
       return fbDb.collection('config').doc('class').get().then(function(cfgDoc){
         var cfg = cfgDoc && cfgDoc.exists ? cfgDoc.data() : {};

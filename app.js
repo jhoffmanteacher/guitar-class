@@ -700,7 +700,13 @@ function showApp(user){
   // bookmarked-bare visit lands there. A hash that's already present — an
   // explore page, or one this router doesn't own — is left for
   // routeExploreHash to resolve, same as always.
-  if(!location.hash) goExploreHash('class-activities');
+  // A student with a pending activity lands there whatever the hash says —
+  // the "pops up on login" half of the activity gate, kept when the lock
+  // itself was switched off (CA_GATE_LOCKS, 2026-10-07).
+  if(!location.hash ||
+     (caBlockers().length > 0 && !GATE_OPEN_HASHES.includes(exploreHashBase(location.hash)))){
+    goExploreHash('class-activities');
+  }
   routeExploreHash();
   // The period question blocks the whole app, so it still gets first crack
   // at the screen on sign-in.
@@ -12543,10 +12549,18 @@ function caBlockers(){
    (isGatePreviewer), so it's the one account that can never see its own
    gate — window.__forceGate lets a local session (or a driving script)
    force it on anyway to walk the gated UI. Never honored off localhost. */
+/* The lock is switched off, not deleted (Jonathan, 2026-10-07: "stop
+   locking the other parts of site if class activities aren't cleared").
+   Pending activities no longer hide the rail, Songs, Games or the modules;
+   a student with one pending still LANDS on In-Class Activities at sign-in
+   (showApp). Flip this back to true to restore the lock exactly as it was —
+   caBlockers(), the CSS and the redirects below are all still here. Mirrored
+   by JOURNEY_GATE_LOCKS in tabs/journey.js. */
+const CA_GATE_LOCKS = false;
 function applyActivityGate(){
   const forced = IS_LOCALHOST && window.__forceGate;
   const wasOn = document.body.classList.contains('ca-gated');
-  const on = forced || caBlockers().length > 0;
+  const on = forced || (CA_GATE_LOCKS && caBlockers().length > 0);
   document.body.classList.toggle('ca-gated', on);
   /* Off → on while the student is somewhere else (a new activity went live
      under an open Games/Songs/My progress screen — the visibilitychange
