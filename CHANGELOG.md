@@ -5,6 +5,13 @@ Notable changes to the Guitar Class site. Newest first.
 For the full session-by-session history (and the reasoning behind each change),
 see `WORKFLOW.md` and the git commit log.
 
+## 2026-10-07 — Seven Nation Army riff card: a longer loop, and no gap when it repeats
+
+- "Seven Nation Army — The Riff" now plays the intro and the first verse
+  before it comes back around — twelve laps of the riff instead of four.
+- On every practice card that loops, the song used to pause for a moment each
+  time it started over. It now runs straight on.
+
 ## 2026-10-06 — Song links open the play-along first
 
 - A link to a song now opens its play-along card when there is one for that

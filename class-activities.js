@@ -1139,9 +1139,13 @@ window.CLASS_ACTIVITIES = [
      REBUILT 2026-09-27 as a PRACTICE CARD (view:'card' — see CARD above),
      the second one after ca-18: one screen with the riff's tab, driven note
      by note by one Play song button over the band, two checks (four laps on
-     Slower, four on Normal) and a Level up. The band's first 8 bars are four
-     laps of the 2-bar riff, so the card shows the riff once with a
-     "Lap 1 of 4" badge; its uneven rhythm (beats) is followed as written.
+     Slower, four on Normal) and a Level up. The loop is the band's first 24
+     bars — the intro and verse 1, twelve laps of the 2-bar riff, stopping
+     where the first G – A comes in at bar 25 (Jonathan, 2026-10-07: it was
+     the 8-bar intro alone, four laps, and came round too soon to practise
+     with). The card shows the riff once with a "Lap 1 of 12" badge; its
+     uneven rhythm (beats) is followed as written. The checks still ask for
+     four laps.
      The first three old steps stay as the help ladder — the two halves and
      the rhythm demo, unchanged; the 80 BPM step and the band step became the
      checks. */
@@ -1162,7 +1166,7 @@ window.CLASS_ACTIVITIES = [
         {
           label: 'The riff', label_es: 'El riff',
           caption: 'The riff — E E G E D C B', caption_es: 'El riff — E E G E D C B',
-          fromBar: 1, bars: 2, reps: 4,
+          fromBar: 1, bars: 2, reps: 12,   // intro + verse 1, up to the first G – A (bar 25) — Jonathan, 2026-10-07
           repLabel: 'Lap', repLabel_es: 'Vuelta',
           notes: [
             { string: 'A', fret: 7,  note: 'E', midi: 52, beats: 1.5 },

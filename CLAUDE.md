@@ -1530,6 +1530,11 @@ stops at the end of the song, Jonathan 2026-10-02), a Slower / Normal switch (th
 Slower), the Guitar toggle where a full mix exists, and a Metronome that is
 a click the SITE makes on every counted beat — there are no metronome
 files; Moises clicked "the cure" at 144, twice the 72 the room counts.
+A looping card repeats with no seek: the player keeps a second `<audio>` on
+the same file parked at the loop start and hands off to it at the end of the
+window ("THE SPARE" in app.js, Jonathan 2026-10-07 — a seek left an audible
+hole on every lap). Anything new that touches a card's audio must handle
+`st.spare` and `st.leaving` as well as `st.audio`.
 Then three or four checkboxes. **A whole-song card's Level up names no other
 page and renders no Journey button (it IS the play-along); a part card's Level
 up hands off to the whole-song card (`card: 'ca-N'`)** (2026-10-06, 1bn). A Level up may carry `card: '<id>'` to

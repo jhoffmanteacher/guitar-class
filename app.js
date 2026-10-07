@@ -11273,6 +11273,8 @@ function pcStop(){
   if(st.raf) cancelAnimationFrame(st.raf);
   st.timers.forEach(clearTimeout);
   try { st.audio.pause(); st.audio.src = ''; } catch(e) {}
+  [st.spare, st.leaving].forEach(el => { if(el){ try { el.pause(); el.src = ''; } catch(e) {} } });
+  st.spare = st.leaving = null;
   const root = st.root;
   if(root && root.isConnected){
     const btn = root.querySelector('.pc-play');
@@ -11291,6 +11293,59 @@ function pcStop(){
 function pcSyncBarStop(){
   const b = document.querySelector('#ca-bar-open .ca-bar-stop');
   if(b) b.hidden = !(pcState && pcState.root && pcState.root.isConnected && pcState.root.closest('.ca-card[open]'));
+}
+/* THE SPARE — a lap that comes round with no gap (Jonathan, 2026-10-07: "a
+   slight delay when it starts to repeat"). The loop used to be one <audio>
+   element seeking itself back to the start of the window, and a seek in a
+   big MP3 is not instant: the element goes quiet while it finds and decodes
+   the new spot, a beat-sized hole on a Chromebook, on every lap. So a card
+   that loops keeps a SECOND element on the same file, paused and already
+   sitting on the loop's first downbeat. Nothing has to seek at the lap.
+
+   The handoff OVERLAPS, which one element cannot do. Even a paused, ready
+   element takes 15-20 ms from play() to its first sound (measured, desktop
+   Chrome), so starting it AT the end still leaves a hole that size. So
+   pcFrame only SPOTS the end coming, PC_LAP_LEAD ahead, and sets two timers
+   — a frame is 16 ms apart, too coarse to place a downbeat with:
+     - the spare starts PC_SPARE_START before the end of the window, so its
+       first sound lands on the end, and it becomes the playing element;
+     - the one that was playing is paused at the end of the window (it
+       cannot run on into the bar after), is sent back to the loop start in
+       its own time, and is the spare for the next lap.
+   Both constants are REAL seconds; pcFrame scales the file clock by the
+   playback rate. `st.leaving` is the element on its way out, set from the
+   moment the lap is spotted until it is parked.
+
+   pcRetrack re-parks the spare after a speed or Guitar switch. If it is not
+   ready when the lap ends (slow Wi-Fi, a file that failed, a switch in the
+   last tenth of a second), pcFrame falls back to the old seek, so the worst
+   case is what the card did before. A whole-song card never loops and never
+   makes one. */
+const PC_LAP_LEAD = 0.1, PC_SPARE_START = 0.02;
+function pcLoopStart(st){ return snipTimeAtBars(st.win, st.L.sections[st.loopFrom].fromBar - st.L.firstBar); }
+function pcSparePark(st){
+  if(st.wholeSong || pcState !== st || st.leaving) return;   // mid-handoff: the timer parks it
+  let sp = st.spare;
+  if(!sp){
+    sp = st.spare = new Audio();
+    sp.preload = 'auto';
+    sp.loop = false;
+    // A spare that cannot load is just dropped: the lap falls back to a seek.
+    sp.addEventListener('error', () => { if(st.spare === sp) st.spare = null; });
+  }
+  slowestApplyRate(sp, pcRate(st.root));
+  // Reads the window when it runs, not when it was queued — a speed switch
+  // while the file is still loading must not park it on the old tier's clock.
+  const seek = () => { if(pcState === st && st.spare === sp){ try { sp.currentTime = pcLoopStart(st); } catch(e) {} } };
+  if(sp.src !== st.audio.src){
+    sp.addEventListener('loadedmetadata', seek, { once: true });
+    sp.src = st.audio.src;
+    sp.load();
+  } else if(sp.readyState >= 1) seek();
+}
+function pcSpareReady(st){
+  const sp = st.spare;
+  return !!(sp && sp.src === st.audio.src && sp.readyState >= 3 && !sp.seeking && Math.abs(sp.currentTime - pcLoopStart(st)) < 0.05);
 }
 function pcToggle(btn){
   const root = btn.closest('.pc');
@@ -11323,12 +11378,16 @@ function pcStart(root, si){
   pcFollow(root.querySelector('.pc-tab .pc-page:not([hidden]) .tab-grid'), true);
   audio.addEventListener('error', () => {
     if(pcState !== st) return;
+    // After a lap this element may be the spare (see THE SPARE): losing the
+    // spare is not losing the song.
+    if(st.audio !== audio){ if(st.spare === audio) st.spare = null; if(st.leaving === audio) st.leaving = null; return; }
     pcStop();
     if(typeof gateToast === 'function') gateToast(t('ca.snipLoadFailed'));
   }, { once: true });
   const begin = () => {
     if(pcState !== st) return;
     try { audio.currentTime = snipTimeAtBars(st.win, L.sections[si].fromBar - L.firstBar); } catch(e) {}
+    pcSparePark(st);                   // loads and parks during the count-in
     pcCountIn(st, si);
   };
   if(audio.readyState >= 1) begin();
@@ -11389,20 +11448,45 @@ function pcFrame(){
   const st = pcState;
   if(!st) return;
   if(!st.root.isConnected){ pcStop(); return; }   // a re-render pulled the card out
-  const { audio, L } = st;
+  const { L } = st;
+  let audio = st.audio;
   const now = audio.currentTime;
-  if(now >= st.win.end - 0.02 || audio.ended){
+  const left = (st.win.end - now) / (audio.playbackRate || 1);   // real seconds to the end of the window
+  if(left <= PC_LAP_LEAD && !st.leaving && !audio.ended && pcSpareReady(st)){
+    // The lap, with no seek and no hole — see THE SPARE.
+    const sp = st.spare, old = audio;
+    st.leaving = old;
+    st.timers.push(setTimeout(() => {
+      if(pcState !== st || st.leaving !== old) return;
+      if(st.audio !== old || !pcSpareReady(st)){ st.leaving = null; return; }   // switched under us: seek instead
+      sp.play().catch(() => {});
+      st.audio = sp; st.spare = null;
+      st.lastBeat = -1;
+    }, Math.max(0, (left - PC_SPARE_START) * 1000)));
+    st.timers.push(setTimeout(() => {
+      if(pcState !== st || st.leaving !== old) return;
+      st.leaving = null;
+      if(st.audio === old) return;       // the spare never started; pcFrame seeks
+      try { old.pause(); } catch(e) {}
+      st.spare = old;
+      pcSparePark(st);
+      if(st.audio.paused) st.audio.play().catch(() => {});
+    }, Math.max(0, left * 1000 - 4)));
+  } else if(!st.leaving && (now >= st.win.end - 0.02 || audio.ended)){
     // A whole-song card stops at the end of the song (Jonathan, 2026-10-02:
     // it used to loop back to where it started). A card that is a few bars
-    // of the song (ca-10's two-bar riff, ca-20's four-bar loop) still loops.
+    // of the song (ca-10's twelve laps of the riff, ca-20's four-bar loop)
+    // still loops.
     if(st.wholeSong){
       const root = st.root;
       pcStop();
       pcStatus(root, escHtml(t('ca.cardSongEnd')));
       return;
     }
-    try { audio.currentTime = snipTimeAtBars(st.win, L.sections[st.loopFrom].fromBar - L.firstBar); } catch(e) {}
+    // The spare was not ready (or this card has none yet): the old seek.
+    try { audio.currentTime = pcLoopStart(st); } catch(e) {}
     if(audio.paused) audio.play().catch(() => {});
+    pcSparePark(st);                   // try to be ready for the next lap
     st.lastBeat = -1;
   }
   if(st.root.dataset.metro === '1') pcScheduleClick(st, audio.currentTime);
@@ -11556,7 +11640,7 @@ function pcRetrack(root){
   const at = snipTimeAtBars(st.win, isFinite(barsIn) && barsIn > 0 ? barsIn : 0);
   const src = snippetSrc(st.L.tr, slow, guitar);
   slowestApplyRate(st.audio, pcRate(root));   // Slowest <-> Slower is the same file, just the rate
-  if(st.audio.src.endsWith(src)){ try { st.audio.currentTime = at; } catch(e) {} return; }
+  if(st.audio.src.endsWith(src)){ try { st.audio.currentTime = at; } catch(e) {} pcSparePark(st); return; }
   const wasPlaying = !st.audio.paused;
   st.audio.addEventListener('loadedmetadata', () => {
     if(pcState !== st) return;
@@ -11565,6 +11649,7 @@ function pcRetrack(root){
   }, { once: true });
   st.audio.src = src;
   st.audio.load();
+  pcSparePark(st);                     // the spare follows the file
 }
 function pcCheck(btn, id, ci){
   const root = btn.closest('.pc');
