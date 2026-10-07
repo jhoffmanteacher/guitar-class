@@ -10491,7 +10491,7 @@ let caStartHereId = null;
    released the SAME day, up to CA_TODAY_MAX in all. caStartHereId stays the
    first of them, which is all its other readers (the resume card, the
    "next up" toast) ask about; caTodayIds is every card in the group. */
-const CA_TODAY_MAX = 2;
+const CA_TODAY_MAX = 3;   // was 2 until Jonathan, 2026-10-07
 let caTodayIds = [];
 // Non-interactive whole-activity progress dots, drawn only for the hero —
 // distinct from repDotsHtml (a TAPPABLE rep counter under one got-it-when
@@ -12722,7 +12722,7 @@ function renderClassActivities(){
          hero is today's work only when it is also the first of those. With
          the newest few finished and an old one still undone, the hero is
          that old card, and it says so rather than wearing "Start here". */
-      /* With two cards for a day, "current" is the DAY, not one card: both
+      /* With several cards for a day, "current" is the DAY, not one card: all
          are today's work when they share the newest card's date, even if
          the student has already finished the newest of them. */
       const newestDay = caDate(list[0]);

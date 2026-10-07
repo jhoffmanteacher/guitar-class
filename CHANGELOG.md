@@ -20,6 +20,12 @@ see `WORKFLOW.md` and the git commit log.
 - The "More practice help" section is gone from the whole-song cards.
 - Seven Nation Army is now first in the Core songs list on the Songs page.
 
+## 2026-10-07 — Up to three activities under "Today's activity"
+
+- When three activities are released on the same day, all three now show at
+  the top of In-Class Activities. Before, the third one was listed under
+  "Unfinished activities".
+
 ## 2026-10-07 — Seven Nation Army riff card: a longer loop, and no gap when it repeats
 
 - "Seven Nation Army — The Riff" now plays the intro and the first verse

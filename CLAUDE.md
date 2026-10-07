@@ -1298,11 +1298,11 @@ end when nothing is blocking. The `#resume-card` element itself moved in
 `index.html` from a sibling of `#week-panels` into this page's own body; it
 no longer renders in the module/set view at all.
 
-**Today's activity holds up to two cards** (Jonathan, 2026-09-29):
-the hero plus another pending card released the SAME day
-(`CA_TODAY_MAX`, required ones first), both rendered with
-`caHeroCardHtml`. `caStartHereId` is still the first of them;
-`caTodayIds` is the whole group. Both are tagged Today's activity when they
+**Today's activity holds up to three cards** (Jonathan, 2026-09-29;
+raised from two 2026-10-07): the hero plus up to two other pending cards
+released the SAME day (`CA_TODAY_MAX`, required ones first), all rendered
+with `caHeroCardHtml`. `caStartHereId` is still the first of them;
+`caTodayIds` is the whole group. All are tagged Today's activity when they
 share the newest visible card's date; an undated hero pairs with nothing.
 
 **Reading order is newest-first, not the teaching order** (Jonathan,
