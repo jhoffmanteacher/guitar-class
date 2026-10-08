@@ -216,6 +216,7 @@ async function showTeacherApp(user){
       const games=e.target.closest('[data-set-games]');
       if(games){ teacherSetStudentGames(games.dataset.uid, games.dataset.state); return; }
       if(e.target.closest('[data-toggle-archived]')){ teacherToggleShowArchived(); return; }
+      if(e.target.closest('[data-open-all-through]')){ teacherOpenAllThrough(); return; }
       const paused=e.target.closest('[data-set-paused]');
       if(paused){ teacherSetStudentPaused(paused.dataset.uid, paused.dataset.state); return; }
       const archived=e.target.closest('[data-set-archived]');
@@ -2529,6 +2530,13 @@ function renderTeacherManage(){
           <button class="tg-seg-btn ${teacherShowArchived?'on':''}" data-toggle-archived>${teacherShowArchived?'Hiding nothing':'Show archived'}${archCount?` (${archCount})`:''}</button>
         </div>
       </div>
+      <div class="tg-class">
+        <div class="tg-class-lbl">Open everyone through</div>
+        <div class="tg-seg">
+          <select id="t-open-all-select" style="max-width:220px">${MODULE_MANIFEST.filter(m=>m.num>=2 && m.num<=12).map(m=>`<option value="${m.num}"${m.num===3?' selected':''}>Module ${m.num} — ${escHtml(m.name)}</option>`).join('')}</select>
+          <button class="tg-seg-btn" data-open-all-through>Open for all</button>
+        </div>
+      </div>
       <div class="tg-note"><strong>Paused</strong> students can sign in but see a "your access is paused" message instead of the site — use it for a temporary hold, then un-pause. <strong>Archived</strong> students are hidden from every dashboard view; their work is kept and comes back if you restore them. Pausing takes effect the next time that student loads the site. <strong>Period</strong> is whatever the student picked when they first signed in — set 4, 7, or CAS here to correct a wrong tap, or Auto to go back to their own answer. <strong>Open through</strong> lets one student skip ahead: every module up to the one you pick opens (all sets in the modules before it, Set 1 of the one you pick), without marking anything done. Auto removes it. Modules they've already worked in stay open either way. This list always shows everyone, whatever the period filter above is set to.</div>`;
     if(allStudentsRaw.length===0){ box.innerHTML=head+'<div class="t-loading">No students yet — they’ll appear here once they sign in.</div>'; return; }
     const nameOf=s=>(s.name||s.email||s.uid);
@@ -2670,6 +2678,31 @@ async function teacherSetStudentOpenThrough(uid, value){
     await teacherWriteConfig(patch, {['moduleOpenThrough.'+uid]: had?prev:undefined});
   }catch(e){
     if(had) teacherClassConfig.moduleOpenThrough[uid]=prev; else delete teacherClassConfig.moduleOpenThrough[uid];
+    teacherConfigSaveFailed(e, 'Could not save that change — check your connection and Firestore rules.');
+  }
+  if(teacherView==='manage') renderTeacherManage();
+  else renderTeacherBody();
+}
+/* "Open everyone through Module N" — the per-student moduleOpenThrough write
+   applied to every non-archived student in one patch. A student already
+   opened further keeps their higher value (this never lowers anyone).
+   Strict write (no base): it is derived from the whole roster. */
+async function teacherOpenAllThrough(){
+  const sel=document.getElementById('t-open-all-select');
+  const n=Number(sel&&sel.value);
+  if(!(Number.isInteger(n) && n>=2 && n<=12)) return;
+  const arch=(teacherClassConfig&&teacherClassConfig.archived)||{};
+  const targets=allStudentsRaw.filter(s=>!arch[s.uid] && teacherStudentOpenThrough(s)<n);
+  if(!targets.length){ alert('Everyone is already open through Module '+n+' or further.'); return; }
+  if(!confirm('Open Modules 1–'+n+' for '+targets.length+' student'+(targets.length===1?'':'s')+'? Nothing is marked done; you can set any student back to Auto.')) return;
+  const prev=Object.assign({}, teacherClassConfig.moduleOpenThrough||{});
+  const map={}; targets.forEach(s=>{ map[s.uid]=n; });
+  teacherClassConfig.moduleOpenThrough=Object.assign({}, prev, map);
+  try{
+    await ensureDb();
+    await teacherWriteConfig({moduleOpenThrough:map});
+  }catch(e){
+    teacherClassConfig.moduleOpenThrough=prev;
     teacherConfigSaveFailed(e, 'Could not save that change — check your connection and Firestore rules.');
   }
   if(teacherView==='manage') renderTeacherManage();
