@@ -1144,9 +1144,9 @@ body.rail-collapsed .rail-tools .tool-popup{
 .timer-presets button{flex:1;min-width:44px;padding:5px 4px;border-radius:var(--radius-sm);border:1px solid var(--border2);background:var(--bg2);font-size:0.8125rem;cursor:pointer;color:var(--text);font-family:inherit;white-space:nowrap}
 .timer-presets button:hover{background:var(--bg3)}
 .timer-presets button.sel{background:var(--green-bg);border-color:var(--green-text);color:var(--green-text)}
-/* Metronome meter row: four signatures share one line, so these run smaller than the timer presets. */
+/* Metronome meter row: four signatures share one line, so these run narrower than the timer presets (still 44px tall). */
 .meter-presets{gap:4px;flex-wrap:nowrap}
-.timer-presets.meter-presets button{min-width:0;min-height:36px;padding:3px 2px;font-size:0.75rem}
+.timer-presets.meter-presets button{min-width:0;padding:3px 2px;font-size:0.75rem}
 /* ── Tempo ladder (Metronome popup) ── */
 .ladder-toggle{display:block;width:100%;min-height:44px;padding:8px 6px;margin:10px 0 0;border-radius:var(--radius-sm);border:1px solid var(--border2);background:var(--bg2);font-size:0.8125rem;font-weight:600;letter-spacing:0.01em;cursor:pointer;color:var(--text);font-family:inherit;text-align:center}
 .ladder-toggle:hover{background:var(--bg3)}
