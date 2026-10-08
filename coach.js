@@ -624,8 +624,10 @@ function coachReadFrame(){
 
 /* The mic hears a note after it is played — the device's input path, plus
    the speaker delay on the count-in click the student is playing along to.
-   Classroom Chromebooks measured 40–120 ms (default 70, confirmed at school
-   2026-07-28). One number per MACHINE: Note Runner's slider sets it
+   Classroom Chromebooks measured 40–120 ms. Default 50 (2026-10-07): the
+   70 confirmed at school on 2026-07-28 also covered the frame lag the old
+   once-per-frame reader added (~15–35 ms at Chromebook frame rates, by
+   simulation), which coachReadFrame's catch-up no longer has. One number per MACHINE: Note Runner's slider sets it
    (nrMicOffset, localStorage) and every beat-graded flow reads it here. */
 function coachMicLatencyMs(){ return nrOffset(); }
 
@@ -6953,7 +6955,8 @@ function rnGoReady(){
    property of the MACHINE, so it outlives the session) shifts every
    onset earlier before grading: classroom Chromebooks hear a pick
    ~40–120ms after it happens, which would grade honest playing as
-   "late" forever. Default 70ms; the ready screen has the slider.
+   "late" forever. Default 50ms (was 70 — see coachMicLatencyMs); the ready
+   screen has the slider.
    ════════════════════════════════════════════════════════════════════ */
 
 const NR_PASS = 80;   // % accuracy that clears a level and unlocks the next
@@ -7112,7 +7115,7 @@ function nrOffset(){
   if (nrOffsetMs === null){
     let v = NaN;
     try { v = parseInt(localStorage.getItem('nrMicOffset'), 10); } catch(e){}
-    nrOffsetMs = (v >= 0 && v <= 250) ? v : 70;
+    nrOffsetMs = (v >= 0 && v <= 250) ? v : 50;
   }
   return nrOffsetMs;
 }
