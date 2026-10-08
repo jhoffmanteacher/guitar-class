@@ -184,6 +184,7 @@ function coachOpen(btn){
       const root = Math.min.apply(null, arr);   // tab midi arrays aren't root-first
       return {
         midi: root,
+        midis: arr,                                  // coachMelodyVote's targets
         classes: arr.map(x => ((x % 12) + 12) % 12),
         label: coachNoteName(root),
         isChange: false, chordName: null,
@@ -248,7 +249,7 @@ function coachOpen(btn){
     /* Checklist skills this drill vouches for (app.js coachSkillsAttr). The
        report writes its level to each, and the "I've got it!" gate reads it. */
     skillIds: (btn.dataset.coachskills || '').split(',').filter(Boolean),
-    events: [], pending: null,
+    events: [], pendings: [],
     gridOffset: 0, listenStart: 0, timeouts: [],
     smoothRms: 0, smoothHf: 0, lastOnsetT: -1e9, lastPitchT: 0, lastMatchT: 0,
     pulseStreak: 0, pulseMuted: false   // visual beat-pulse fade state
@@ -411,7 +412,7 @@ async function coachStartCheck(){
 
   /* Fresh attempt state */
   coach.slots.forEach(s => { s.state = 'pending'; s.hit = null; s.loose = false; });
-  coach.events = []; coach.pending = null;
+  coach.events = []; coach.pendings = [];
   coach.gridOffset = 0; coach.smoothRms = 0; coach.smoothHf = 0; coach.lastOnsetT = -1e9;
   coach.lastPulse = -1; coach.frameNo = 0; coach.lastPitchT = 0; coach.lastMatchT = 0;
   coach.pulseStreak = 0; coach.pulseMuted = false;
@@ -653,22 +654,67 @@ function coachPitchReadings(sinceT, minEndT, clarity){
   return out;
 }
 
+/* LOUD ROOMS (2026-10-07). With twenty guitars going, YIN locks onto
+   whichever note is loudest in each window, so a student's readings come
+   back as their own note mixed with their neighbours'. Asking "do the
+   readings agree on ONE note?" then fails a student who played the right
+   thing. But every listener here already knows the note it is waiting
+   for, so it can also ask "is THAT note a big share of what was heard?" —
+   the same vote the chord checks have used since July.
+
+   The vote counts the EXACT note or the octave above it (the 2nd harmonic
+   a Chromebook mic hears on low strings) — never the pitch class. Swept in
+   simulation with other guitars 40% / 70% as loud as the student, 160
+   notes each: right notes 148 -> 154 and 92 -> 106; a note a half step off
+   passed 3 and 6 more times than before (of 160); a note a fifth or a
+   fourth off, no more than before. Counting the pitch class instead
+   passed far more wrong notes a fifth off (YIN reads those an octave
+   below the target), and a lower bar than half passed more half-steps.
+   A wrong verdict still needs the readings to agree on the wrong note.
+
+   coachTargetShare: fraction of `readings` (fractional midis) within 0.6
+   semitone of any of the exact midis in `targets`. */
+const COACH_VOTE_SHARE = 0.5;
+function coachTargetShare(readings, targets){
+  if (!readings.length || !targets || !targets.length) return 0;
+  let hit = 0;
+  for (let k = 0; k < readings.length; k++){
+    const r = readings[k];
+    if (targets.some(m => Math.abs(r - m) <= 0.6)) hit++;
+  }
+  return hit / readings.length;
+}
+
 /* The one-pluck-one-answer listeners (Note Hunt, Pentatonic Simon Guitar
    Hero, Riff Runner's Wait Mode, Note Call in app.js) all settle a note the
    same way: readings from COACH_ATTACK_SKIP after st.attackT, >= 40 ms
-   apart, the last `keep` of them kept, and three in a row inside 0.6
-   semitone make the note. Returns that midi, or null while it's unsettled.
-   st carries { attackT, lastPitchT, readings }. */
-function coachSettlePitch(st, keep){
+   apart, the last five kept. The note is settled when
+     · 3 of those 5 sit on one of `targets` (exact midis — the octave still
+       matters to every judge) — the loud-room vote above; or
+     · the LATEST FOUR agree within 0.6 semitone — the note, right or
+       wrong. One more than the vote needs on purpose: in a loud room a
+       neighbour's note can hold for three readings, and a wrong verdict
+       costs the student a try (and ends a Simon run). Simulated with a
+       moderately loud room, right notes 50-59 of 80 -> 70-73, every
+       deliberately wrong note still caught, ~50 ms slower to say "wrong".
+       Before 2026-10-07 EVERY kept reading had to agree, so one stray
+       reading blocked the answer until five clean ones had followed it.
+   Returns that midi, or null while it's unsettled. st carries
+   { attackT, lastPitchT, readings }. */
+function coachSettlePitch(st, targets){
   const rs = coachPitchReadings(st.lastPitchT, st.attackT + COACH_ATTACK_SKIP);
   for (let k = 0; k < rs.length; k++){
     st.lastPitchT = rs[k].t;
     if (rs[k].midi == null) continue;
     st.readings.push(rs[k].midi);
-    if (st.readings.length > keep) st.readings.shift();
-    if (st.readings.length >= 3){
-      const r = st.readings;
-      if (Math.max.apply(null, r) - Math.min.apply(null, r) < 0.6) return Math.round(tunerMedian(r));
+    if (st.readings.length > 5) st.readings.shift();
+    const r = st.readings;
+    if (targets) for (let j = 0; j < targets.length; j++){
+      if (r.filter(x => Math.abs(x - targets[j]) <= 0.6).length >= 3) return targets[j];
+    }
+    if (r.length >= 4){
+      const l4 = r.slice(-4);
+      if (Math.max.apply(null, l4) - Math.min.apply(null, l4) < 0.6) return Math.round(tunerMedian(l4));
     }
   }
   return null;
@@ -927,8 +973,13 @@ function coachLoop(){
         ((rms > CHK_ONSET_FLOOR && rms > coach.smoothRms * CHK_ONSET_RATIO) ||
          (hf > CHK_HF_FLOOR && hf > coach.smoothHf * CHK_HF_RATIO))){
       coach.lastOnsetT = at;
-      if (coach.pending) coachFinalizeEvent();
-      coach.pending = { t: at - coachMicLatencyMs(), at, readings: [] };
+      /* Events OVERLAP (2026-10-07): a new onset no longer closes the one
+         before it. In a loud room a neighbour's pluck lands a moment after
+         the student's and used to cut the student's note off after one or
+         two readings — "couldn't hear it" for a note played well. Each
+         event keeps its own COACH_EVENT_TAIL; the readings feed every event
+         still open. */
+      coach.pendings.push({ t: at - coachMicLatencyMs(), at, readings: [] });
     }
     coach.smoothRms = coach.smoothRms * 0.82 + rms * 0.18;
     coach.smoothHf = coach.smoothHf * 0.82 + hf * 0.18;
@@ -940,20 +991,22 @@ function coachLoop(){
     /* Half the usual gate here: readings start after the attack, and a
        palm-muted or lightly-plucked note has already decayed by then — the
        consensus filter below keeps low-level junk from becoming a verdict. */
-    if (coach.pending && rms > COACH_PITCH_GATE * 0.5){
+    if (coach.pendings.length && rms > COACH_PITCH_GATE * 0.5){
       /* Chords aren't cleanly periodic, so YIN's strict single-note clarity
          gate rejects most chord frames (they logged 0 pitch reads). A looser
          gate for chord mode lets it lock onto the dominant chord tone — which
          real data showed is reliably one of the chord's notes. Melody stays
          strict (accuracy matters when the exact note is the answer). */
-      const p = coach.pending;
-      coachPitchReadings(coach.lastPitchT, p.at + COACH_ATTACK_SKIP,
+      const ps = coach.pendings;
+      coachPitchReadings(coach.lastPitchT, ps[0].at + COACH_ATTACK_SKIP,
                          coach.mode === 'chords' ? 0.55 : 0.22).forEach(r => {
         coach.lastPitchT = r.t;
-        if (r.midi != null && r.t - p.at <= COACH_EVENT_TAIL) p.readings.push(r.midi);
+        if (r.midi != null) ps.forEach(p => {
+          if (r.t >= p.at + COACH_ATTACK_SKIP && r.t - p.at <= COACH_EVENT_TAIL) p.readings.push(r.midi);
+        });
       });
     }
-    if (coach.pending && now - coach.pending.at > COACH_EVENT_TAIL) coachFinalizeEvent();
+    while (coach.pendings.length && now - coach.pendings[0].at > COACH_EVENT_TAIL) coachFinalizeEvent();
 
     /* Beat pulse on the current slot — on the ADAPTED grid (listenStart +
        gridOffset), the same grid the scoring reads. On the rigid grid the
@@ -996,7 +1049,7 @@ function coachLoop(){
        COACH_EVENT_TAIL before the take is graded, so the last note of a
        drill isn't scored off half a window. */
     const allHit = coach.slots.every(s => s.state !== 'pending');
-    const pendingEvent = coach.pending && now - coach.pending.at <= COACH_EVENT_TAIL;
+    const pendingEvent = coach.pendings.length > 0;
     if (allHit || (now > coachListenDeadline() && !pendingEvent)){
       coachFinish();
       return;
@@ -1054,8 +1107,7 @@ function coachDetectPitch(buf, sampleRate, clarity, end){
 }
 
 function coachFinalizeEvent(){
-  const p = coach.pending;
-  coach.pending = null;
+  const p = coach.pendings.shift();   // oldest first — events finalize in onset order
   if (!p) return;
   /* Consensus median: readings must agree (within ±0.6 semitone of the
      median) to be trusted. One harmonic slip or scrape reading can't drag
@@ -1073,12 +1125,24 @@ function coachFinalizeEvent(){
      between chord tones, so single-pitch consensus is the WRONG test there
      — real strums were failing it and scoring "unclear". Keep the raw
      pitch classes; the matcher scores them as a chord-tone vote. */
-  const ev = { t: p.t, midi, devMs: null, slot: -1 };
+  const ev = { t: p.t, midi, devMs: null, slot: -1, readings: p.readings };
   if (coach.mode === 'chords'){
     ev.classes = p.readings.map(r => ((Math.round(r) % 12) + 12) % 12);
   }
   coach.events.push(ev);
   coachMatchEvent(ev);
+}
+
+/* Melody: the readings didn't agree on one note, but the slot's note (or
+   the octave above) is half or more of them — a neighbour's guitar was
+   mixed in. See coachTargetShare for the loud-room numbers; two readings
+   minimum, the same floor the consensus has. */
+function coachMelodyVote(ev, slot){
+  const rd = ev.readings || [];
+  if (rd.length < 2 || !slot.midis) return false;
+  const want = [];
+  slot.midis.forEach(m => want.push(m, m + 12));
+  return coachTargetShare(rd, want) >= COACH_VOTE_SHARE;
 }
 
 /* Fraction of an event's pitch readings that are tones of the slot's chord. */
@@ -1105,7 +1169,7 @@ function coachMatchEvent(ev){
     if (Math.abs(dev) > coachMatchWinMs()) continue;
     const classOk = coach.mode === 'chords'
       ? coachToneShare(ev, s) >= 0.20
-      : ev.midi != null && s.classes.indexOf(((ev.midi % 12) + 12) % 12) >= 0;
+      : (ev.midi != null && s.classes.indexOf(((ev.midi % 12) + 12) % 12) >= 0) || coachMelodyVote(ev, s);
     const score = Math.abs(dev) + (classOk ? 0 : coach.beatMs * 0.6);
     if (score < bestScore){ bestScore = score; best = i; }
   }
@@ -1126,11 +1190,13 @@ function coachMatchEvent(ev){
     else if (share <= 0.10 && n >= 3) s.state = 'wrong';
     else s.state = 'dim';
   }
-  else if (ev.midi == null) s.state = 'dim';            // heard it, pitch unclear
-  else if (ev.midi === s.midi || s.classes.indexOf(((ev.midi % 12) + 12) % 12) >= 0){
+  else if (ev.midi != null && (ev.midi === s.midi || s.classes.indexOf(((ev.midi % 12) + 12) % 12) >= 0)){
     s.state = (coach.mode === 'melody' && ev.midi !== s.midi &&
                Math.abs(ev.midi - s.midi) % 12 === 0) ? 'oct' : 'ok';
-  } else s.state = 'wrong';
+  }
+  else if (coachMelodyVote(ev, s)) s.state = 'ok';       // loud room: the note was there
+  else if (ev.midi == null) s.state = 'dim';            // heard it, pitch unclear
+  else s.state = 'wrong';
   s.hit = ev;
   /* Counted, but not on the pulse: the slot keeps its pitch verdict (ok /
      oct / wrong — timing never turns a right note into a wrong one), and
@@ -1159,7 +1225,7 @@ function coachFinish(){
   if (!coach || (coach.phase !== 'listening' && coach.phase !== 'countin')) return;
   coach.timeouts.forEach(clearTimeout);
   coach.timeouts = [];
-  if (coach.pending) coachFinalizeEvent();
+  while (coach.pendings.length) coachFinalizeEvent();
   if (coachRaf){ cancelAnimationFrame(coachRaf); coachRaf = null; }
   coachMicOff();
   coach.slots.forEach((s, i) => { if (s.state === 'pending'){ s.state = 'miss'; coachChipRefresh(i); } });
@@ -1702,7 +1768,7 @@ function fretLoop(){
          silence IS the pluck. Readings wait out COACH_ATTACK_SKIP from there,
          same guard the Coach and Note Runner use from their onset timestamp. */
       if (!g.attackT) g.attackT = Math.max(coachOnsetAt, g.cooldownUntil);
-      const m = coachSettlePitch(g, 5);
+      const m = coachSettlePitch(g, [g.prompt.m]);
       if (m != null) fretJudge(m);
     } else if (rms < COACH_PITCH_GATE * 0.5){
       g.readings = [];
@@ -4132,7 +4198,9 @@ function psgLoop(){
       // Never date the pluck before armAt — the catch-up can see audio from
       // before the pads were armed (the game's own last reference note).
       if (!s.attackT) s.attackT = Math.max(coachOnsetAt, s.armAt);
-      const m = coachSettlePitch(s, 5);
+      const want = PS_NOTES[s.seq[s.inputIdx]];
+      // psgJudge's own rule for the octave above, so the vote can't pass what it would fail
+      const m = coachSettlePitch(s, PS_NOTES.indexOf(want + 12) < 0 ? [want, want + 12] : [want]);
       if (m != null) psgJudge(m);
     } else if (rms < COACH_PITCH_GATE * 0.5){
       s.readings = [];
@@ -6803,7 +6871,7 @@ function rnwLoop(){
        silence IS the pluck. Readings wait out COACH_ATTACK_SKIP from there,
        same guard the Coach and Note Runner use from their onset timestamp. */
     if (!w.attackT) w.attackT = Math.max(coachOnsetAt, w.cooldownUntil);
-    const m = coachSettlePitch(w, 5);
+    const m = coachSettlePitch(w, w.notes[w.cur] ? [w.notes[w.cur].midi] : null);
     if (m != null) rnwJudge(m);
   } else if (rms < COACH_PITCH_GATE * 0.5){
     w.readings = [];
@@ -7450,7 +7518,7 @@ async function nrStart(){
   s.errs = [];
   s.sweepIdx = 0; s.lastBeat = -1;
   s.countCleared = false;   // else round 2+ never wipes the count-in "4" off the track
-  s.smoothRms = 0; s.smoothHf = 0; s.lastOnsetT = -1e9; s.lastPitchT = 0; s.pending = null;
+  s.smoothRms = 0; s.smoothHf = 0; s.lastOnsetT = -1e9; s.lastPitchT = 0; s.pendings = [];
 
   nrRenderPlay();
   s.els = s.notes.map((_, i) => document.getElementById('nr-n-' + i));
@@ -7528,22 +7596,25 @@ function nrLoop(){
         ((rms > CHK_ONSET_FLOOR && rms > s.smoothRms * CHK_ONSET_RATIO) ||
          (hf > CHK_HF_FLOOR && hf > s.smoothHf * CHK_HF_RATIO))){
       s.lastOnsetT = at;
-      if (s.pending) nrFinalizeEvent();
-      s.pending = { t: at, readings: [] };
+      // Events overlap, as in coachLoop: a neighbour's pluck no longer cuts
+      // the student's note off before it has been read.
+      s.pendings.push({ t: at, readings: [] });
     }
     s.smoothRms = s.smoothRms * 0.82 + rms * 0.18;
     s.smoothHf = s.smoothHf * 0.82 + hf * 0.18;
-    if (s.pending && rms > COACH_PITCH_GATE * 0.5){
+    if (s.pendings.length && rms > COACH_PITCH_GATE * 0.5){
       /* Chord levels loosen YIN's clarity gate the way the Coach's chord
          mode does — a strum isn't cleanly periodic, and the tone vote
          below is what keeps loose readings from becoming wrong verdicts. */
-      const p = s.pending;
-      coachPitchReadings(s.lastPitchT, p.t + COACH_ATTACK_SKIP, s.chordMode ? 0.55 : 0.22).forEach(r => {
+      const ps = s.pendings;
+      coachPitchReadings(s.lastPitchT, ps[0].t + COACH_ATTACK_SKIP, s.chordMode ? 0.55 : 0.22).forEach(r => {
         s.lastPitchT = r.t;
-        if (r.midi != null && r.t - p.t <= COACH_EVENT_TAIL) p.readings.push(r.midi);
+        if (r.midi != null) ps.forEach(p => {
+          if (r.t >= p.t + COACH_ATTACK_SKIP && r.t - p.t <= COACH_EVENT_TAIL) p.readings.push(r.midi);
+        });
       });
     }
-    if (s.pending && now - s.pending.t > COACH_EVENT_TAIL) nrFinalizeEvent();
+    while (nr && s.pendings.length && now - s.pendings[0].t > COACH_EVENT_TAIL) nrFinalizeEvent();
   }
 
   nrRaceFrame(now);   // the race lane above the track — see NR_RUNNER_SVG
@@ -7807,8 +7878,7 @@ function nrRaceFrame(now){
 function nrFinalizeEvent(){
   const s = nr;
   if (!s) return;
-  const p = s.pending;
-  s.pending = null;
+  const p = s.pendings.shift();   // oldest first
   if (!p || (s.phase !== 'play' && s.phase !== 'countin')) return;
   let midi = null;
   if (p.readings.length >= 2){
@@ -7847,8 +7917,10 @@ function nrFinalizeEvent(){
       cls.filter(c => want.indexOf(c) >= 0).length / cls.length >= 0.20;
     unclear = cls.length < 2;          // heard a strum, no usable pitch reads
   } else {
-    pitchOk = midi !== null && (midi === n.midi || midi === n.midi + 12);
-    unclear = midi === null;           // heard a pluck, consensus failed
+    pitchOk = (midi !== null && (midi === n.midi || midi === n.midi + 12)) ||
+      // loud room: the note is a big share of the readings (see coachTargetShare)
+      (p.readings.length >= 2 && coachTargetShare(p.readings, [n.midi, n.midi + 12]) >= COACH_VOTE_SHARE);
+    unclear = !pitchOk && midi === null;   // heard a pluck, consensus failed
   }
   s.errs.push((tEv - n.t) / 1000);
   if (pitchOk){
@@ -7905,7 +7977,7 @@ function nrFinish(complete){
   if (nrRaf){ cancelAnimationFrame(nrRaf); nrRaf = null; }
   (s.timeouts || []).forEach(clearTimeout);
   s.timeouts = [];
-  if (s.pending) nrFinalizeEvent();
+  while (s.pendings.length) nrFinalizeEvent();
   if (s.micOn){ s.micOn = false; coachMicOff(); }
   s.playable.forEach(n => { if (!n.result) n.result = 'miss'; });   // early Stop
   s.phase = 'done';

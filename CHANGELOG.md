@@ -5,6 +5,20 @@ Notable changes to the Guitar Class site. Newest first.
 For the full session-by-session history (and the reasoning behind each change),
 see `WORKFLOW.md` and the git commit log.
 
+## 2026-10-07 — The mic works better in a loud room
+
+- **The Listening Coach and Note Runner hear your note even when the room
+  is loud.** The mic now checks if the note you were asked to play is
+  there, even when other guitars are playing too. Before, it needed one
+  clear note, so a correct note mixed with your neighbours' notes often
+  came back as "couldn't hear" or wrong.
+- **A neighbour's pick no longer cuts your note short.** The mic keeps
+  listening to your note for its full length, even if someone near you
+  plays right after you.
+- **Note Hunt, Note Call, Riff Runner's Wait Mode and Pentatonic Simon
+  Guitar Hero** count your note sooner in a noisy room, and are less likely
+  to mark you wrong because of a note from someone else's guitar.
+
 ## 2026-10-07 — The mic hears you better on a Chromebook
 
 - **Fewer missed notes.** The site listens to all of the sound now. Before,

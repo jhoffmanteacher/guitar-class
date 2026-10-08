@@ -7780,7 +7780,10 @@ function ncListen(st, now){
   const rms = coachReadFrame();
   if(rms > COACH_PITCH_GATE){
     if(!st.attackT) st.attackT = coachOnsetAt;   // when it arrived, not this frame
-    const m = coachSettlePitch(st, 3);
+    // Waiting for: this card's note, and the card still in its mic grace.
+    const want = (st.seq[st.idx] ? st.seq[st.idx].midis : [])
+      .concat(st.graceIdx != null ? st.seq[st.graceIdx].midis : []);
+    const m = coachSettlePitch(st, want);
     if(m == null) return;
     // A pluck played before the last boundary answers the card in grace.
     if(st.graceIdx != null && st.attackT - coachMicLatencyMs() < st.graceFrom){
