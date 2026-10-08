@@ -5,6 +5,21 @@ Notable changes to the Guitar Class site. Newest first.
 For the full session-by-session history (and the reasoning behind each change),
 see `WORKFLOW.md` and the git commit log.
 
+## 2026-10-07 — The mic hears you better on a Chromebook
+
+- **Fewer missed notes.** The site listens to all of the sound now. Before,
+  a slow Chromebook could skip short bits of sound between screen updates,
+  and a note picked in one of those gaps did not count.
+- **"Late" means late.** The Listening Coach and Change Up now allow for the
+  short delay a Chromebook mic adds. A note played on the click is no longer
+  marked late because of the mic.
+- **Faster answers.** Note Hunt, Note Call, Riff Runner's Wait Mode and
+  Pentatonic Simon Guitar Hero recognise a note sooner after you play it.
+- **Note Call:** a note played at the very end of its card still counts,
+  instead of being checked against the next card.
+- Some Chromebooks run a speech filter on the built-in mic that can remove
+  a held guitar note. The site now asks for that filter to be off.
+
 ## 2026-10-07 — Song Journey pages: wider, and short sections share a line
 
 - Song Journey pages now use more of the screen, and the note under the

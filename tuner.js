@@ -369,8 +369,11 @@ async function startTuner() {
   if (typeof stopAnyRec === 'function') stopAnyRec();
   try {
     // Disable browser audio processing that distorts low-frequency guitar signals
+    // (voiceIsolation: the speech-only filter ChromeOS can run on a built-in
+    // mic — see coachAcquireMicInner; ignored where the browser doesn't know it)
     const stream = await navigator.mediaDevices.getUserMedia({
-      audio: { echoCancellation: false, noiseSuppression: false, autoGainControl: false },
+      audio: { echoCancellation: false, noiseSuppression: false, autoGainControl: false,
+               voiceIsolation: false },
       video: false
     });
     if (myStartToken !== tunerStartToken) {

@@ -7490,7 +7490,8 @@ async function ncStart(key){
     phase: 'play', mode: ans ? 'answer' : 'levels', L, lvIdx: ans ? null : st.level,
     beatMs: 60000 / L.bpm, seq: [], bag: [], requeue: [], idx: -1,
     readings: [], lastPitchT: 0, attackT: 0, heard: '', beatShown: -1,
-    raf: null, revealed: false, sinceUp: 0, pendingStep: null
+    raf: null, revealed: false, sinceUp: 0, pendingStep: null,
+    graceIdx: null, graceFrom: 0, graceUntil: 0, ending: false
   });
   ncDeal(st);                       // the first note shows during the count-in
   ncRepaint(key, ncPlayHtml(key));
@@ -7630,28 +7631,67 @@ function ncFrame(){
     return;
   }
   const now = performance.now();
+  // The round is over but the last note is still in its mic grace.
+  if(st.ending){
+    if(st.micOn) ncListen(st, now);
+    ncGraceTick(st, now);
+    if(st.graceIdx == null){ ncFinish(st.key); return; }
+    st.raf = requestAnimationFrame(ncFrame);
+    return;
+  }
   ncClicks(st, now);
   // Segment boundary: the next note lands.
   while(now >= st.segStart + ncSegLen(st)){
     st.segStart += ncSegLen(st);
-    if(st.idx >= 0 && st.mode !== 'answer' && st.seq[st.idx].res == null) ncResolve(st, st.idx, 'miss', null);
+    ncGraceTick(st, Infinity);      // a grace still open from the note before last ends now
+    const prev = st.idx;
+    if(prev >= 0 && st.seq[prev].res == null){
+      /* Mic grace: the mic hears a note a beat-fraction after it is played
+         and needs ~150 ms more to be sure of the pitch, so a note played in
+         the last moments of its card used to settle after the card had
+         moved on — and was checked against the NEW note. With the mic on,
+         the card stays answerable for NC_MIC_GRACE_MS; ncListen credits it
+         only with a pluck that was played before this boundary. A tap
+         round has no delay to cover and misses at once, as before. */
+      if(st.micOn){ st.graceIdx = prev; st.graceFrom = st.segStart; st.graceUntil = st.segStart + NC_MIC_GRACE_MS; }
+      else if(st.mode !== 'answer') ncResolve(st, prev, 'miss', null);
+    }
     st.idx++;
-    if(st.mode !== 'answer' && st.idx >= NC_ROUND){ ncFinish(st.key); return; }
+    if(st.mode !== 'answer' && st.idx >= NC_ROUND){
+      if(st.graceIdx != null){ st.ending = true; st.raf = requestAnimationFrame(ncFrame); return; }
+      ncFinish(st.key); return;
+    }
     if(st.mode === 'answer') ncAnsBoundary(st);
     st.segBeats = ncNoteBeats(st);
     st.beatShown = -1; st.revealed = false;
     while(st.seq.length < st.idx + 2 && (st.mode === 'answer' || st.seq.length < NC_ROUND)) ncDeal(st);
-    st.readings = []; st.attackT = 0; st.locked = false; st.heard = '';
+    // A pluck from before the boundary keeps settling for the grace card.
+    if(st.graceIdx == null){ st.readings = []; st.attackT = 0; }
+    st.locked = false; st.heard = '';
     ncPaint(st);
   }
+  ncGraceTick(st, now);
   const beat = now < st.segStart ? -1 : Math.floor((now - st.segStart) / st.beatMs);
   if(beat >= 0 && beat !== st.beatShown){
     st.beatShown = beat;
     ncPaintPips(st, beat, st.segBeats, st.idx < 0);
     if(st.mode === 'answer' && st.idx >= 0 && beat >= NC_ANS_REVEAL && !st.revealed) ncReveal(st);
   }
-  if(st.micOn && st.idx >= 0 && st.seq[st.idx].res == null) ncListen(st, now);
+  if(st.micOn && st.idx >= 0 && (st.seq[st.idx].res == null || st.graceIdx != null)) ncListen(st, now);
   st.raf = requestAnimationFrame(ncFrame);
+}
+
+/* Close the mic grace (see the boundary in ncFrame) once `now` passes it:
+   an unanswered note is a miss then — in the scored levels; the play-along
+   never marks misses — and the next pluck starts fresh for the new card. */
+const NC_MIC_GRACE_MS = 400;
+function ncGraceTick(st, now){
+  if(st.graceIdx == null || now <= st.graceUntil) return;
+  const i = st.graceIdx;
+  st.graceIdx = null;
+  if(st.mode !== 'answer' && st.seq[i] && st.seq[i].res == null) ncResolve(st, i, 'miss', null);
+  // Drop a pluck that belonged to the old card; one played since keeps settling.
+  if(st.attackT && (!st.micOn || st.attackT - coachMicLatencyMs() < st.graceFrom)){ st.readings = []; st.attackT = 0; }
 }
 
 /* Play-along only, at each note boundary: apply a waiting tempo step (from
@@ -7739,18 +7779,21 @@ function ncClicks(st, now){
 function ncListen(st, now){
   const rms = coachReadFrame();
   if(rms > COACH_PITCH_GATE){
-    if(!st.attackT) st.attackT = now;
-    if(now - st.attackT < COACH_ATTACK_SKIP || now - st.lastPitchT < 40) return;
-    st.lastPitchT = now;
-    const f = coachDetectPitch(coachFrameBuf, coachCtx.sampleRate);
-    if(!(f > 0)) return;
-    st.readings.push(69 + 12 * Math.log2(f / 440));
-    if(st.readings.length > 3) st.readings.shift();
-    if(st.readings.length < 3) return;
-    const r = st.readings;
-    if(Math.max.apply(null, r) - Math.min.apply(null, r) >= 0.6) return;
-    const m = Math.round(tunerMedian(r));
+    if(!st.attackT) st.attackT = coachOnsetAt;   // when it arrived, not this frame
+    const m = coachSettlePitch(st, 3);
+    if(m == null) return;
+    // A pluck played before the last boundary answers the card in grace.
+    if(st.graceIdx != null && st.attackT - coachMicLatencyMs() < st.graceFrom){
+      const g = st.seq[st.graceIdx], gi = st.graceIdx, ga = g.midis.indexOf(m);
+      if(ga >= 0){
+        st.graceIdx = null;
+        st.readings = []; st.attackT = 0;
+        if(g.res == null) ncResolve(st, gi, 'hit', { fret: g.frets[ga] });
+        return;
+      }
+    }
     const p = st.seq[st.idx];
+    if(!p || p.res != null) return;   // the round's over, or this card is already answered
     const at = p.midis.indexOf(m);
     if(at >= 0){ ncResolve(st, st.idx, 'hit', { fret: p.frets[at] }); return; }
     if(m >= 36 && m <= 76){

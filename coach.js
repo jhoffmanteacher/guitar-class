@@ -472,8 +472,13 @@ async function coachAcquireMicInner(){
   // coachOpen's own stopAnyRec.
   if (typeof stopAnyRec === 'function') stopAnyRec();
   try {
+    /* voiceIsolation: ChromeOS (and Chrome on newer platforms) can run a
+       speech-only filter on the built-in mic, which treats a held guitar
+       note as noise to remove. Asked off by name; a browser that doesn't
+       know the constraint ignores it. */
     coachStream = await navigator.mediaDevices.getUserMedia({
-      audio: { echoCancellation: false, noiseSuppression: false, autoGainControl: false },
+      audio: { echoCancellation: false, noiseSuppression: false, autoGainControl: false,
+               voiceIsolation: false },
       video: false
     });
   } catch(e) {
@@ -554,22 +559,117 @@ function coachReleaseMicIfIdle(){
    attack is broadband, so it jumps in this channel even while the PREVIOUS
    string is still ringing — where the full-band RMS barely moves. That
    ringing bed is exactly a scale climb, so the coach's onset detector
-   checks both channels. */
+   checks both channels.
+
+   CATCH-UP (2026-10-07, Chromebooks). The levels used to come from the
+   newest 1024 samples only. At 60 fps that is every sample; on a busy
+   classroom Chromebook frames arrive 30–80 ms apart, so most of the audio
+   between two frames was never looked at — a short pick attack that fell
+   in the gap left no onset at all, and one that was caught was stamped
+   with the frame's time, up to a whole frame late. Now every 1024-sample
+   window that ENDS inside the audio that arrived since the last read is
+   measured (hop 512), the frame reports the loudest of them, and
+   coachOnsetAt is the moment the jump arrived rather than the moment the
+   frame ran. At 60 fps there is one window and nothing changes. A gap
+   longer than COACH_CATCHUP_MAX_MS means the caller wasn't reading (a
+   game's listen-to-me phase, a paused loop) — that old audio is not
+   scanned, or a game's own reference tone would read as a pluck. */
+const COACH_LVL_WIN = 1024, COACH_LVL_HOP = 512;
+const COACH_CATCHUP_MAX_MS = 150;
 let coachHfRms = 0;
+let coachOnsetAt = 0;          // performance.now() time the frame's jump arrived
+let coachReadCtx = null, coachReadCtxT = 0;
 function coachReadFrame(){
   coachAnalyser.getFloatTimeDomainData(coachFrameBuf);
-  const N = 1024;
-  let sum = 0, dsum = 0;
-  for (let i = coachFrameBuf.length - N; i < coachFrameBuf.length; i++){
-    const v = coachFrameBuf[i];
-    sum += v * v;
-    const d = v - coachFrameBuf[i - 1];
-    dsum += d * d;
+  const buf = coachFrameBuf, L = buf.length, N = COACH_LVL_WIN;
+  const sr = coachCtx.sampleRate, ct = coachCtx.currentTime;
+  const nowT = performance.now();
+  let fresh = 0;
+  if (coachReadCtx === coachCtx){
+    const gapMs = (ct - coachReadCtxT) * 1000;
+    if (gapMs > 0 && gapMs <= COACH_CATCHUP_MAX_MS) fresh = Math.round(gapMs / 1000 * sr);
   }
-  coachHfRms = Math.sqrt(dsum / N);
-  const rms = Math.sqrt(sum / N);
+  coachReadCtx = coachCtx; coachReadCtxT = ct;
+  // Window ends, newest first: always the newest; older ones only while
+  // they still end a hop past the previous read's newest window (so a
+  // 60 fps frame, whose fresh audio the newest window already covers,
+  // reads exactly one) and start inside the buffer.
+  let rms = 0, hf = 0;
+  const wins = [];
+  for (let end = L; end === L || (end > L - fresh + COACH_LVL_HOP && end - N >= 1); end -= COACH_LVL_HOP){
+    let sum = 0, dsum = 0;
+    for (let i = end - N; i < end; i++){
+      const v = buf[i];
+      sum += v * v;
+      const d = v - buf[i - 1];
+      dsum += d * d;
+    }
+    const w = { end, rms: Math.sqrt(sum / N), hf: Math.sqrt(dsum / N) };
+    wins.push(w);
+    if (w.rms > rms) rms = w.rms;
+    if (w.hf > hf) hf = w.hf;
+  }
+  // Arrival = the OLDEST window already near the frame's peak — where the
+  // jump began, not where it topped out.
+  let arrive = wins[0];
+  for (let k = wins.length - 1; k >= 0; k--){
+    const w = wins[k];
+    if (w.rms >= rms * 0.8 || w.hf >= hf * 0.8){ arrive = w; break; }
+  }
+  coachOnsetAt = nowT - (L - arrive.end) / sr * 1000;
+  coachHfRms = hf;
   coachUpdateMicLevel(rms);
   return rms;
+}
+
+/* The mic hears a note after it is played — the device's input path, plus
+   the speaker delay on the count-in click the student is playing along to.
+   Classroom Chromebooks measured 40–120 ms (default 70, confirmed at school
+   2026-07-28). One number per MACHINE: Note Runner's slider sets it
+   (nrMicOffset, localStorage) and every beat-graded flow reads it here. */
+function coachMicLatencyMs(){ return nrOffset(); }
+
+/* YIN readings for every analyser window that ends after `sinceT` + 40 ms
+   and no earlier than `minEndT` (both performance.now() times), oldest
+   first. A 60 fps frame yields at most one — the old one-reading-per-frame
+   behaviour; a slow Chromebook frame holds two unread windows (48 kHz) and
+   gets both, so a 3-reading consensus doesn't take 3 slow frames. Each
+   entry is { t: window end, midi: number|null } — callers advance their
+   spacing clock to t whether or not a pitch was found, as before. */
+function coachPitchReadings(sinceT, minEndT, clarity){
+  const out = [];
+  const buf = coachFrameBuf, L = buf.length, sr = coachCtx.sampleRate;
+  const W = Math.min(L, sr > 60000 ? 4096 : 2048);
+  const step = Math.ceil(0.040 * sr);
+  const nowT = performance.now();
+  for (let end = L; end - W >= 0; end -= step){
+    const endT = nowT - (L - end) / sr * 1000;
+    if (endT < minEndT || endT - (sinceT || 0) < 40) break;
+    const f = coachDetectPitch(buf, sr, clarity, end);
+    out.unshift({ t: endT, midi: f > 0 ? 69 + 12 * Math.log2(f / 440) : null });
+  }
+  return out;
+}
+
+/* The one-pluck-one-answer listeners (Note Hunt, Pentatonic Simon Guitar
+   Hero, Riff Runner's Wait Mode, Note Call in app.js) all settle a note the
+   same way: readings from COACH_ATTACK_SKIP after st.attackT, >= 40 ms
+   apart, the last `keep` of them kept, and three in a row inside 0.6
+   semitone make the note. Returns that midi, or null while it's unsettled.
+   st carries { attackT, lastPitchT, readings }. */
+function coachSettlePitch(st, keep){
+  const rs = coachPitchReadings(st.lastPitchT, st.attackT + COACH_ATTACK_SKIP);
+  for (let k = 0; k < rs.length; k++){
+    st.lastPitchT = rs[k].t;
+    if (rs[k].midi == null) continue;
+    st.readings.push(rs[k].midi);
+    if (st.readings.length > keep) st.readings.shift();
+    if (st.readings.length >= 3){
+      const r = st.readings;
+      if (Math.max.apply(null, r) - Math.min.apply(null, r) < 0.6) return Math.round(tunerMedian(r));
+    }
+  }
+  return null;
 }
 
 /* Peripheral 3-bar level chip next to the mic indicator, driven off the RMS
@@ -807,21 +907,26 @@ function coachLoop(){
   }
   const now = performance.now();
   const rms = coachReadFrame();
-  const buf = coachFrameBuf;
+  const at = coachOnsetAt;
 
   {
     /* Onset: a fast jump over the smoothed level, past an absolute floor,
        outside the refractory window. Two channels: full-band RMS (clean,
        separated notes) OR the HF pick-attack channel (a new pluck over a
        still-ringing string — a scale climb — barely moves the full-band
-       level, but the attack is loud and broadband in the difference signal). */
+       level, but the attack is loud and broadband in the difference signal).
+       Two times per event: `at`, when the sound reached the analyser (the
+       clock the attack skip and the tail run on), and `t`, when the student
+       played it — `at` minus the device's mic delay — which is what the
+       beat grid scores. Before 2026-10-07 the Coach scored arrival time, so
+       a Chromebook player who was dead on the click read as late. */
     const hf = coachHfRms;
-    if (now - coach.lastOnsetT > COACH_ONSET_REFRACT &&
+    if (at - coach.lastOnsetT > COACH_ONSET_REFRACT &&
         ((rms > CHK_ONSET_FLOOR && rms > coach.smoothRms * CHK_ONSET_RATIO) ||
          (hf > CHK_HF_FLOOR && hf > coach.smoothHf * CHK_HF_RATIO))){
-      coach.lastOnsetT = now;
+      coach.lastOnsetT = at;
       if (coach.pending) coachFinalizeEvent();
-      coach.pending = { t: now, readings: [] };
+      coach.pending = { t: at - coachMicLatencyMs(), at, readings: [] };
     }
     coach.smoothRms = coach.smoothRms * 0.82 + rms * 0.18;
     coach.smoothHf = coach.smoothHf * 0.82 + hf * 0.18;
@@ -833,19 +938,20 @@ function coachLoop(){
     /* Half the usual gate here: readings start after the attack, and a
        palm-muted or lightly-plucked note has already decayed by then — the
        consensus filter below keeps low-level junk from becoming a verdict. */
-    if (coach.pending && rms > COACH_PITCH_GATE * 0.5 &&
-        now - coach.pending.t >= COACH_ATTACK_SKIP &&
-        now - (coach.lastPitchT || 0) >= 40){
-      coach.lastPitchT = now;
+    if (coach.pending && rms > COACH_PITCH_GATE * 0.5){
       /* Chords aren't cleanly periodic, so YIN's strict single-note clarity
          gate rejects most chord frames (they logged 0 pitch reads). A looser
          gate for chord mode lets it lock onto the dominant chord tone — which
          real data showed is reliably one of the chord's notes. Melody stays
          strict (accuracy matters when the exact note is the answer). */
-      const f = coachDetectPitch(buf, coachCtx.sampleRate, coach.mode === 'chords' ? 0.55 : 0.22);
-      if (f > 0) coach.pending.readings.push(69 + 12 * Math.log2(f / 440));
+      const p = coach.pending;
+      coachPitchReadings(coach.lastPitchT, p.at + COACH_ATTACK_SKIP,
+                         coach.mode === 'chords' ? 0.55 : 0.22).forEach(r => {
+        coach.lastPitchT = r.t;
+        if (r.midi != null && r.t - p.at <= COACH_EVENT_TAIL) p.readings.push(r.midi);
+      });
     }
-    if (coach.pending && now - coach.pending.t > COACH_EVENT_TAIL) coachFinalizeEvent();
+    if (coach.pending && now - coach.pending.at > COACH_EVENT_TAIL) coachFinalizeEvent();
 
     /* Beat pulse on the current slot — on the ADAPTED grid (listenStart +
        gridOffset), the same grid the scoring reads. On the rigid grid the
@@ -888,7 +994,7 @@ function coachLoop(){
        COACH_EVENT_TAIL before the take is graded, so the last note of a
        drill isn't scored off half a window. */
     const allHit = coach.slots.every(s => s.state !== 'pending');
-    const pendingEvent = coach.pending && now - coach.pending.t <= COACH_EVENT_TAIL;
+    const pendingEvent = coach.pending && now - coach.pending.at <= COACH_EVENT_TAIL;
     if (allHit || (now > coachListenDeadline() && !pendingEvent)){
       coachFinish();
       return;
@@ -898,18 +1004,31 @@ function coachLoop(){
 }
 
 /* YIN, trimmed to the guitar's range: tau only up to ~sr/60Hz, so it's a
-   fraction of the tuner's full scan — cheap enough for a Chromebook at 20Hz. */
-function coachDetectPitch(buf, sampleRate, clarity){
+   fraction of the tuner's full scan — cheap enough for a Chromebook at 20Hz.
+   `end` (default: the whole buffer) picks an older window for
+   coachPitchReadings' catch-up.
+
+   It stops as soon as the answer is known (2026-10-07): YIN takes the FIRST
+   dip under `clarity` and walks down it, so every tau past the bottom of
+   that dip was computed and never read. The result is identical; the cost
+   falls with the pitch — a note on the B string needs about a fifth of the
+   work it used to — which is frame time a Chromebook gets back for
+   listening. Only a frame with no pitch at all still scans the whole range. */
+let coachYinD = null;
+function coachDetectPitch(buf, sampleRate, clarity, end){
   clarity = clarity || 0.22;   // YIN accept threshold; higher = more permissive (chords)
+  if (end == null) end = buf.length;
   // Window scales with sample rate: at 88.2/96kHz a fixed 2048 caps maxTau
   // below low E's 82Hz period — the whole 6th string became undetectable.
-  const W = Math.min(buf.length, sampleRate > 60000 ? 4096 : 2048);
-  const start = buf.length - W;
+  const W = Math.min(end, sampleRate > 60000 ? 4096 : 2048);
+  const start = end - W;
   const half = Math.floor(W / 2);
   const maxTau = Math.min(half - 1, Math.ceil(sampleRate / 60));
-  const d = new Float32Array(maxTau + 1);
+  if (!coachYinD || coachYinD.length < maxTau + 1) coachYinD = new Float32Array(maxTau + 1);
+  const d = coachYinD;
   d[0] = 1;
-  let runSum = 0;
+  const tauMin = Math.max(2, Math.floor(sampleRate / 1400));
+  let runSum = 0, cur = -1;    // cur: bottom-so-far of the first dip under clarity
   for (let tau = 1; tau <= maxTau; tau++){
     let s = 0;
     for (let i = 0; i < half; i++){
@@ -918,18 +1037,18 @@ function coachDetectPitch(buf, sampleRate, clarity){
     }
     runSum += s;
     d[tau] = runSum ? s * tau / runSum : 1;
-  }
-  for (let tau = Math.max(2, Math.floor(sampleRate / 1400)); tau <= maxTau; tau++){
-    if (d[tau] < clarity){
-      while (tau + 1 <= maxTau && d[tau + 1] < d[tau]) tau++;
-      const x0 = d[tau - 1], x2 = tau < maxTau ? d[tau + 1] : d[tau];
-      const denom = 2 * (2 * d[tau] - x0 - x2);
-      const refined = denom ? tau + (x2 - x0) / denom : tau;
-      const freq = sampleRate / refined;
-      return (freq >= 60 && freq <= 1400) ? freq : -1;
+    if (cur >= 0){
+      if (d[tau] < d[cur]){ cur = tau; continue; }   // still descending
+      break;                                          // d[cur + 1] is known: done
     }
+    if (tau >= tauMin && d[tau] < clarity) cur = tau;
   }
-  return -1;
+  if (cur < 0) return -1;
+  const x0 = d[cur - 1], x2 = cur < maxTau ? d[cur + 1] : d[cur];
+  const denom = 2 * (2 * d[cur] - x0 - x2);
+  const refined = denom ? cur + (x2 - x0) / denom : cur;
+  const freq = sampleRate / refined;
+  return (freq >= 60 && freq <= 1400) ? freq : -1;
 }
 
 function coachFinalizeEvent(){
@@ -1565,7 +1684,6 @@ function fretLoop(){
   const now = performance.now();
   if (g && g.phase === 'play' && g.prompt){
     const rms = coachReadFrame();
-    const buf = coachFrameBuf;
 
     /* One pluck = one answer: after judging, wait for the note to decay
        below the gate (or 1.8s, whichever first) before listening again. */
@@ -1581,22 +1699,9 @@ function fretLoop(){
       /* No onset detector in this loop — the first frame over the gate after
          silence IS the pluck. Readings wait out COACH_ATTACK_SKIP from there,
          same guard the Coach and Note Runner use from their onset timestamp. */
-      if (!g.attackT) g.attackT = now;
-      if (now - g.attackT >= COACH_ATTACK_SKIP &&
-          now - (g.lastPitchT || 0) >= 40){
-        g.lastPitchT = now;
-        const f = coachDetectPitch(buf, coachCtx.sampleRate);
-        if (f > 0){
-          g.readings.push(69 + 12 * Math.log2(f / 440));
-          if (g.readings.length > 5) g.readings.shift();
-          if (g.readings.length >= 3){
-            const r = g.readings;
-            if (Math.max.apply(null, r) - Math.min.apply(null, r) < 0.6){
-              fretJudge(Math.round(tunerMedian(r)));
-            }
-          }
-        }
-      }
+      if (!g.attackT) g.attackT = Math.max(coachOnsetAt, g.cooldownUntil);
+      const m = coachSettlePitch(g, 5);
+      if (m != null) fretJudge(m);
     } else if (rms < COACH_PITCH_GATE * 0.5){
       g.readings = [];
       g.attackT = 0;    // note died — next gate crossing is a new pluck
@@ -2386,7 +2491,7 @@ async function ccStart(){
     cc.changes.push({ beat: s * cc.bpc, from: cc.seq[s - 1], to: cc.seq[s], result: null, pend: null });
   }
   cc.beatMs = 60000 / cc.bpm;
-  cc.smoothRms = 0; cc.smoothHf = 0; cc.lastOnsetT = -1e9; cc.gridOffset = 0; cc.lastBeat = -1; cc.frameNo = 0;
+  cc.smoothRms = 0; cc.smoothHf = 0; cc.lastOnsetT = -1e9; cc.lastPitchT = 0; cc.gridOffset = 0; cc.lastBeat = -1;
   cc.phase = 'countin';
   ccBody().innerHTML = `<div class="coach-count" id="cc-count">&nbsp;</div>` +
     ccDiagramsHtml(prog, prog[0]);
@@ -2492,19 +2597,21 @@ function ccLoop(){
   }
   if (cc.phase === 'play'){
     const rms = coachReadFrame();
-    const buf = coachFrameBuf;
+    const at = coachOnsetAt;
+    const lat = coachMicLatencyMs();
 
     /* Onset = strum (same dual-channel detector as the Coach: full-band
        jump for clean separated strums, HF pick-attack channel for a strum
        over the still-ringing previous chord — which is exactly what the
-       graded beat-1-of-a-new-bar strum sounds like). */
+       graded beat-1-of-a-new-bar strum sounds like). Scored at `at - lat`,
+       when it was played — see coachLoop and coachMicLatencyMs. */
     if ((rms > CHK_ONSET_FLOOR &&
          rms > cc.smoothRms * CHK_ONSET_RATIO ||
          coachHfRms > CHK_HF_FLOOR &&
          coachHfRms > cc.smoothHf * CHK_HF_RATIO) &&
-        now - cc.lastOnsetT > COACH_ONSET_REFRACT){
-      cc.lastOnsetT = now;
-      const rel = now - cc.listenStart - cc.gridOffset;
+        at - cc.lastOnsetT > COACH_ONSET_REFRACT){
+      cc.lastOnsetT = at;
+      const rel = at - lat - cc.listenStart - cc.gridOffset;
       const beatIdx = Math.round(rel / cc.beatMs);
       const dev = rel - beatIdx * cc.beatMs;
       if (Math.abs(dev) < cc.beatMs * 0.5) cc.gridOffset += dev * 0.25;
@@ -2513,7 +2620,7 @@ function ccLoop(){
       const win = Math.min(cc.beatMs * cc.bpc * 0.5, Math.max(220, cc.beatMs * 0.5));
       const ch = cc.changes.find(c => c.result === null && !c.pend &&
         Math.abs(c.beat * cc.beatMs - rel) <= win);
-      if (ch) ch.pend = { t: now, readings: [] };
+      if (ch) ch.pend = { t: at, readings: [] };
     }
     cc.smoothRms = cc.smoothRms * 0.82 + rms * 0.18;
     cc.smoothHf = cc.smoothHf * 0.82 + coachHfRms * 0.18;
@@ -2523,19 +2630,23 @@ function ccLoop(){
        the old chord still ringing, not the new chord's tones. */
     const open = cc.changes.find(c => c.pend);
     if (open){
-      if (rms > COACH_PITCH_GATE * 0.5 &&
-          now - open.pend.t >= COACH_ATTACK_SKIP &&
-          (cc.frameNo = (cc.frameNo || 0) + 1) % 3 === 0){
+      if (rms > COACH_PITCH_GATE * 0.5){
         // Change Up always grades chords — use the same looser YIN gate as the
         // Listening Coach's chord mode so full strums actually register.
-        const f = coachDetectPitch(buf, coachCtx.sampleRate, 0.55);
-        if (f > 0) open.pend.readings.push(69 + 12 * Math.log2(f / 440));
+        // Spaced 40 ms like the Coach's (it was every 3rd frame — ~50 ms at
+        // 60 fps, but 150 ms on a Chromebook drawing at 20).
+        const p = open.pend;
+        coachPitchReadings(cc.lastPitchT, p.t + COACH_ATTACK_SKIP, 0.55).forEach(r => {
+          cc.lastPitchT = r.t;
+          if (r.midi != null && r.t - p.t <= COACH_EVENT_TAIL) p.readings.push(r.midi);
+        });
       }
       if (now - open.pend.t > COACH_EVENT_TAIL) ccResolvePend(open);
     }
 
-    /* Overdue changes are misses. */
-    const relNow = now - cc.listenStart - cc.gridOffset;
+    /* Overdue changes are misses — on the played-time clock, so a strum
+       still on its way through the mic isn't swept before it arrives. */
+    const relNow = now - lat - cc.listenStart - cc.gridOffset;
     cc.changes.forEach((c, i) => {
       if (c.result === null && !c.pend && relNow > (c.beat + 0.85) * cc.beatMs){
         c.result = 'miss';
@@ -4012,24 +4123,15 @@ function psgLoop(){
   const now = performance.now();
   if (s && s.phase === 'play' && !s.showing){
     const rms = coachReadFrame();
-    const buf = coachFrameBuf;
     /* One pluck = one answer: after judging, wait for the note to decay
        below the gate (or 1.8s, whichever comes first) before listening again. */
     if (s.needSilence && (rms < COACH_PITCH_GATE * 0.7 || now > s.armAt + 1800)) s.needSilence = false;
     if (!s.needSilence && now >= s.armAt && rms > COACH_PITCH_GATE){
-      if (!s.attackT) s.attackT = now;
-      if (now - s.attackT >= COACH_ATTACK_SKIP && now - (s.lastPitchT || 0) >= 40){
-        s.lastPitchT = now;
-        const f = coachDetectPitch(buf, coachCtx.sampleRate);
-        if (f > 0){
-          s.readings.push(69 + 12 * Math.log2(f / 440));
-          if (s.readings.length > 5) s.readings.shift();
-          if (s.readings.length >= 3){
-            const r = s.readings;
-            if (Math.max.apply(null, r) - Math.min.apply(null, r) < 0.6) psgJudge(Math.round(tunerMedian(r)));
-          }
-        }
-      }
+      // Never date the pluck before armAt — the catch-up can see audio from
+      // before the pads were armed (the game's own last reference note).
+      if (!s.attackT) s.attackT = Math.max(coachOnsetAt, s.armAt);
+      const m = coachSettlePitch(s, 5);
+      if (m != null) psgJudge(m);
     } else if (rms < COACH_PITCH_GATE * 0.5){
       s.readings = [];
       s.attackT = 0;    // note died — the next gate crossing is a new pluck
@@ -5651,9 +5753,9 @@ function srLoop(){
          rms > s.smoothRms * CHK_ONSET_RATIO ||
          hf > CHK_HF_FLOOR &&
          hf > s.smoothHf * CHK_HF_RATIO) &&
-        now - s.lastOnsetT > COACH_ONSET_REFRACT){
-      s.lastOnsetT = now;
-      const rel = now - s.listenStart - s.gridOffset - s.lat;
+        coachOnsetAt - s.lastOnsetT > COACH_ONSET_REFRACT){
+      s.lastOnsetT = coachOnsetAt;   // when it arrived, not when this frame ran
+      const rel = coachOnsetAt - s.listenStart - s.gridOffset - s.lat;
       /* No audible reference during play, so the grid eases toward the
          player — Change Up's EMA, on the eighth grid. */
       const slotIdx = Math.round(rel / s.slotMs);
@@ -6684,7 +6786,6 @@ function rnwLoop(){
   const now = performance.now();
 
   const rms = coachReadFrame();
-  const buf = coachFrameBuf;
   /* One pluck = one answer: after a reading, wait for the note to decay
      (or 1.8s) before listening again — same gate Note Hunt uses. */
   if (w.needSilence && (rms < COACH_PITCH_GATE * 0.7 || now > w.cooldownUntil + 1800)){
@@ -6699,22 +6800,9 @@ function rnwLoop(){
     /* No onset detector in this loop — the first frame over the gate after
        silence IS the pluck. Readings wait out COACH_ATTACK_SKIP from there,
        same guard the Coach and Note Runner use from their onset timestamp. */
-    if (!w.attackT) w.attackT = now;
-    if (now - w.attackT >= COACH_ATTACK_SKIP &&
-        now - (w.lastPitchT || 0) >= 40){
-      w.lastPitchT = now;
-      const f = coachDetectPitch(buf, coachCtx.sampleRate);
-      if (f > 0){
-        w.readings.push(69 + 12 * Math.log2(f / 440));
-        if (w.readings.length > 5) w.readings.shift();
-        if (w.readings.length >= 3){
-          const r = w.readings;
-          if (Math.max.apply(null, r) - Math.min.apply(null, r) < 0.6){
-            rnwJudge(Math.round(tunerMedian(r)));
-          }
-        }
-      }
-    }
+    if (!w.attackT) w.attackT = Math.max(coachOnsetAt, w.cooldownUntil);
+    const m = coachSettlePitch(w, 5);
+    if (m != null) rnwJudge(m);
   } else if (rms < COACH_PITCH_GATE * 0.5){
     w.readings = [];
     w.attackT = 0;    // note died — next gate crossing is a new pluck
@@ -7432,24 +7520,25 @@ function nrLoop(){
   if (coachAnalyser){
     const rms = coachReadFrame();
     const hf = coachHfRms;
-    if (now - s.lastOnsetT > COACH_ONSET_REFRACT &&
+    const at = coachOnsetAt;   // when the pluck arrived, not when this frame ran
+    if (at - s.lastOnsetT > COACH_ONSET_REFRACT &&
         ((rms > CHK_ONSET_FLOOR && rms > s.smoothRms * CHK_ONSET_RATIO) ||
          (hf > CHK_HF_FLOOR && hf > s.smoothHf * CHK_HF_RATIO))){
-      s.lastOnsetT = now;
+      s.lastOnsetT = at;
       if (s.pending) nrFinalizeEvent();
-      s.pending = { t: now, readings: [] };
+      s.pending = { t: at, readings: [] };
     }
     s.smoothRms = s.smoothRms * 0.82 + rms * 0.18;
     s.smoothHf = s.smoothHf * 0.82 + hf * 0.18;
-    if (s.pending && rms > COACH_PITCH_GATE * 0.5 &&
-        now - s.pending.t >= COACH_ATTACK_SKIP &&
-        now - s.lastPitchT >= 40){
-      s.lastPitchT = now;
+    if (s.pending && rms > COACH_PITCH_GATE * 0.5){
       /* Chord levels loosen YIN's clarity gate the way the Coach's chord
          mode does — a strum isn't cleanly periodic, and the tone vote
          below is what keeps loose readings from becoming wrong verdicts. */
-      const f = coachDetectPitch(coachFrameBuf, coachCtx.sampleRate, s.chordMode ? 0.55 : 0.22);
-      if (f > 0) s.pending.readings.push(69 + 12 * Math.log2(f / 440));
+      const p = s.pending;
+      coachPitchReadings(s.lastPitchT, p.t + COACH_ATTACK_SKIP, s.chordMode ? 0.55 : 0.22).forEach(r => {
+        s.lastPitchT = r.t;
+        if (r.midi != null && r.t - p.t <= COACH_EVENT_TAIL) p.readings.push(r.midi);
+      });
     }
     if (s.pending && now - s.pending.t > COACH_EVENT_TAIL) nrFinalizeEvent();
   }
