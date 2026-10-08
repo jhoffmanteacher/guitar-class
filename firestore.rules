@@ -25,12 +25,17 @@ rules_version = '2';
                       activityClears, archivedActivities, deletedActivities,
                       optionalActivities, playAlongActivities, activityBoard,
                       activityBoardSeeded, moduleOpenThrough,
-                      configVersion
+                      micSampling, configVersion
                       (teacher writes, students read)
      liveQuiz/current the whole-class live quiz's state (teacher writes,
                       students read) + an answers/{uid} subcollection each
                       student writes their own row of
      issueReports/*   student-filed problem reports
+     micTakes/*       consented mic recordings of one Listening Coach /
+                      Note Runner take (+ a chunks/{i} subcollection of
+                      the audio) — student creates their own, teacher
+                      reads and deletes
+     micTakesMeta/count  the public "how many takes so far" counter
 
    Anything not matched below is denied by default. Do not add a catch-all.
    ══════════════════════════════════════════════════════════════════════ */
@@ -220,6 +225,56 @@ service cloud.firestore {
                     && (request.resource.data.setId == null
                         || (request.resource.data.setId is string && request.resource.data.setId.size() <= 100));
       allow read:   if isTeacher();
+    }
+
+    /* ── Mic recordings (coach.js micRec*, teacher.js "Mic recordings") ──
+       Real classroom audio to tune the mic listening on, collected ONLY
+       from students who said yes to "Save this take as a recording…".
+       Off unless the teacher turns it on (config/class.micSampling).
+
+       One doc per student per game, id "<uid>-<mode>" (mode is "coach" or
+       "nr"), overwritten by that student's next consented take. The doc
+       holds the take's metadata (expected notes and their times, the
+       verdicts, the mic's delay, the device); the audio itself — 24 kHz
+       16-bit mono, at most 30 s — is split into chunks/{i} docs, because a
+       Firestore doc tops out at 1 MB.
+
+       The id must START with the writer's uid, and `uid` must be theirs, so
+       a student can only ever write their own. They cannot read the pile
+       back: a take is a recording of a classroom, and only the teacher
+       listens to it. Students may delete nothing; the teacher deletes. */
+    match /micTakes/{takeId} {
+      allow create, update: if isSignedIn()
+                            && takeId.matches(request.auth.uid + '-(coach|nr)')
+                            && request.resource.data.uid == request.auth.uid;
+      allow read, delete:   if isTeacher();
+
+      match /chunks/{chunkId} {
+        allow create, update: if isSignedIn()
+                              && takeId.matches(request.auth.uid + '-(coach|nr)')
+                              && request.resource.data.keys().hasOnly(['i','pcm'])
+                              && request.resource.data.pcm is bytes
+                              && request.resource.data.pcm.size() <= 750000;
+        allow read, delete:   if isTeacher();
+      }
+    }
+
+    /* How many takes have been collected, so the prompt stops once the
+       teacher's "how many" is reached. Every signed-in student reads it. A
+       student may only create it at 1 or add exactly 1, and only to `n`;
+       the teacher may set it to anything (Reset counter). A student could
+       still add 1 without saving a take — the worst that does is end the
+       collection early, which only stops recording. */
+    match /micTakesMeta/count {
+      allow read:   if isSignedIn();
+      allow create: if isTeacher()
+                    || (isSignedIn()
+                        && request.resource.data.keys().hasOnly(['n'])
+                        && request.resource.data.n == 1);
+      allow update: if isTeacher()
+                    || (isSignedIn()
+                        && request.resource.data.keys().hasOnly(['n'])
+                        && request.resource.data.n == resource.data.n + 1);
     }
   }
 }

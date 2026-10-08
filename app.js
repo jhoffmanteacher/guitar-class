@@ -140,6 +140,11 @@ let exitChecks  = {};   // Exit-check results: id -> { score, total, picks, at, 
 let games       = {};   // per-game bests from the games arcade (coach.js) — its own save category
 let streak      = { count:0, lastDay:null };   // site-wide practice streak, independent of any one game
 let gamesAccessOn = true; // whether the Games arcade is available to THIS student (teacher-controlled; see loadClassConfig)
+/* Consented mic recordings (coach.js micRec*): the teacher's switch and
+   how many takes are saved so far. Fail CLOSED — anything short of a
+   successful read of both leaves collection off, so nobody is asked. */
+let micSampling = { on: false, max: 0 };
+let micTakesCount = Infinity;
 let accountPaused = false; // teacher put this student on hold (see loadClassConfig / showPausedScreen)
 /* Which class period this student is in — 4, 7, or CAS, nothing else. Two
    halves, deliberately: `studentPeriod` is the student's own answer, living
@@ -637,7 +642,7 @@ if(auth) auth.onAuthStateChanged(async user=>{
     }
   } else {
     window.__authBootPending = false;
-    currentUser = null; progress = {}; responses = {}; completed = {}; completedDeletes = new Set(); classActivities = {}; classActivitiesDeletes = new Set(); caStepDone = {}; caStepDeletes = new Set(); exitChecks = {}; games = {}; streak = { count:0, lastDay:null }; gamesAccessOn = true; studentPeriod = ''; periodOverride = ''; moduleOpenThrough = 0; hiddenActivityIds = {}; activityDates = {}; activityTitles = {}; activityNumbers = {}; activityBoard = {}; activityBoardOn = false; activityClears = {}; retiredActivityIds = {}; optionalActivityIds = {}; progressLoadFailed = false;
+    currentUser = null; progress = {}; responses = {}; completed = {}; completedDeletes = new Set(); classActivities = {}; classActivitiesDeletes = new Set(); caStepDone = {}; caStepDeletes = new Set(); exitChecks = {}; games = {}; streak = { count:0, lastDay:null }; gamesAccessOn = true; micSampling = { on: false, max: 0 }; micTakesCount = Infinity; studentPeriod = ''; periodOverride = ''; moduleOpenThrough = 0; hiddenActivityIds = {}; activityDates = {}; activityTitles = {}; activityNumbers = {}; activityBoard = {}; activityBoardOn = false; activityClears = {}; retiredActivityIds = {}; optionalActivityIds = {}; progressLoadFailed = false;
     document.body.classList.remove('ca-gated');   // next sign-in recomputes it fresh — don't leave a stale gate showing over the sign-in wall
     if(typeof gamesResetForUser === 'function') gamesResetForUser();   // Note Runner's module caches must not leak into the next signed-in user
     if(typeof lqStopListening === 'function') lqStopListening();       // and the live-quiz listener must not keep firing under the next student
@@ -805,6 +810,14 @@ async function loadClassConfig(){
     const openN = Number((d.moduleOpenThrough||{})[currentUser.uid]);
     moduleOpenThrough = (Number.isInteger(openN) && openN >= 2 && openN <= 12) ? openN : 0;
     try{ localStorage.setItem('caOpenThrough', JSON.stringify({uid: currentUser.uid, v: moduleOpenThrough})); }catch(e){}
+    const ms = d.micSampling || {};
+    const msMax = Number(ms.max);
+    micSampling = { on: ms.on === true && msMax > 0, max: msMax > 0 ? msMax : 0 };
+    if(micSampling.on){
+      db.collection('micTakesMeta').doc('count').get()
+        .then(c => { micTakesCount = c.exists ? (Number(c.data().n) || 0) : 0; })
+        .catch(() => { micTakesCount = Infinity; });
+    } else micTakesCount = Infinity;
     const ov = (d.gameOverrides||{})[currentUser.uid];
     if(ov===true)       gamesAccessOn = true;
     else if(ov===false) gamesAccessOn = false;
@@ -7491,7 +7504,8 @@ async function ncStart(key){
     beatMs: 60000 / L.bpm, seq: [], bag: [], requeue: [], idx: -1,
     readings: [], lastPitchT: 0, attackT: 0, heard: '', beatShown: -1,
     raf: null, revealed: false, sinceUp: 0, pendingStep: null,
-    graceIdx: null, graceFrom: 0, graceUntil: 0, ending: false
+    graceIdx: null, graceFrom: 0, graceUntil: 0, ending: false,
+    smoothRms: null, seenAttackT: null
   });
   ncDeal(st);                       // the first note shows during the count-in
   ncRepaint(key, ncPlayHtml(key));
@@ -7677,7 +7691,11 @@ function ncFrame(){
     ncPaintPips(st, beat, st.segBeats, st.idx < 0);
     if(st.mode === 'answer' && st.idx >= 0 && beat >= NC_ANS_REVEAL && !st.revealed) ncReveal(st);
   }
-  if(st.micOn && st.idx >= 0 && (st.seq[st.idx].res == null || st.graceIdx != null)) ncListen(st, now);
+  if(st.micOn && st.idx >= 0){
+    if(st.seq[st.idx].res == null || st.graceIdx != null) ncListen(st, now);
+    // Answered: keep the onset detector's levels current for the next card.
+    else if(typeof coachOnsetTick === 'function') coachOnsetTick(st, coachReadFrame(), 0, false);
+  }
   st.raf = requestAnimationFrame(ncFrame);
 }
 
@@ -7783,17 +7801,19 @@ function ncListen(st, now){
     // Waiting for: this card's note, and the card still in its mic grace.
     const want = (st.seq[st.idx] ? st.seq[st.idx].midis : [])
       .concat(st.graceIdx != null ? st.seq[st.graceIdx].midis : []);
-    const m = coachSettlePitch(st, want);
+    const m = coachSettlePitch(st, want, rms);
     if(m == null) return;
     // A pluck played before the last boundary answers the card in grace.
     if(st.graceIdx != null && st.attackT - coachMicLatencyMs() < st.graceFrom){
       const g = st.seq[st.graceIdx], gi = st.graceIdx, ga = g.midis.indexOf(m);
+      st.readings = []; st.attackT = 0;
       if(ga >= 0){
         st.graceIdx = null;
-        st.readings = []; st.attackT = 0;
         if(g.res == null) ncResolve(st, gi, 'hit', { fret: g.frets[ga] });
-        return;
       }
+      // An old pluck only ever answers the old card — the new card's name
+      // wasn't up yet, so even its note can't be an answer to it.
+      return;
     }
     const p = st.seq[st.idx];
     if(!p || p.res != null) return;   // the round's over, or this card is already answered

@@ -372,6 +372,8 @@ function coachNudgeBpm(d){
 
 async function coachStartCheck(){
   if (!coach || (coach.phase !== 'ready' && coach.phase !== 'report')) return;
+  // Collection is on and this device hasn't answered yet: ask first.
+  if (micRecShouldAsk() && coachBody()){ coachBody().innerHTML = micRecAskHtml('coach'); return; }
 
   /* One mic owner at a time — the tuner hands over. */
   coachEvictTuner();
@@ -436,6 +438,11 @@ async function coachStartCheck(){
        </div>
        ${coach.mode === 'melody' ? (coachTabHtml() || coachStripHtml()) : coachStripHtml()}
      </div>`;
+  // A consented recording runs from here to the end of the take.
+  if (micRecStart('coach')){
+    if (micEl) micEl.insertAdjacentHTML('beforeend', micRecBadgeHtml());
+    else coachBody().insertAdjacentHTML('afterbegin', micRecBadgeHtml());
+  }
   coachCountIn(coach, 'coach-count', () => {
     if (!coach || !coachBody()) return;   // card panel may have been replaced in the DOM during the count-in (e.g. a language switch rebuilt the module panel)
     coach.phase = 'listening';
@@ -578,6 +585,7 @@ function coachReleaseMicIfIdle(){
 const COACH_LVL_WIN = 1024, COACH_LVL_HOP = 512;
 const COACH_CATCHUP_MAX_MS = 150;
 let coachHfRms = 0;
+let coachBgRms = 0, coachBgPrev = 0;
 let coachOnsetAt = 0;          // performance.now() time the frame's jump arrived
 let coachReadCtx = null, coachReadCtxT = 0;
 function coachReadFrame(){
@@ -585,12 +593,22 @@ function coachReadFrame(){
   const buf = coachFrameBuf, L = buf.length, N = COACH_LVL_WIN;
   const sr = coachCtx.sampleRate, ct = coachCtx.currentTime;
   const nowT = performance.now();
-  let fresh = 0;
+  let fresh = 0, cold = true, gapMs = 16.667;
   if (coachReadCtx === coachCtx){
-    const gapMs = (ct - coachReadCtxT) * 1000;
+    gapMs = (ct - coachReadCtxT) * 1000;
     if (gapMs > 0 && gapMs <= COACH_CATCHUP_MAX_MS) fresh = Math.round(gapMs / 1000 * sr);
+    cold = gapMs > 1000;
   }
   coachReadCtx = coachCtx; coachReadCtxT = ct;
+  /* The easings follow the audio that actually went by, capped at 1 s —
+     separately from the catch-up scan's 150 ms limit. Until 2026-10-08 a
+     gap over 150 ms fell back to the 60 fps step (18%), so a 160 ms stall
+     just after a pluck left the smoothed level at a third of the note and
+     the next frame fired the phantom second onset again; and a frame with
+     no new audio (gap 0) eased as if 16.7 ms had passed. */
+  const dt = Math.max(0, Math.min(gapMs, 1000));
+  coachSmoothA = 1 - Math.pow(0.82, dt / 16.667);
+  const bgA = 1 - Math.pow(0.5, dt / 400);
   // Window ends, newest first: always the newest; older ones only while
   // they still end a hop past the previous read's newest window (so a
   // 60 fps frame, whose fresh audio the newest window already covers,
@@ -619,8 +637,35 @@ function coachReadFrame(){
   }
   coachOnsetAt = nowT - (L - arrive.end) / sr * 1000;
   coachHfRms = hf;
+  // The room's level, slow (half-life 400 ms) — coachSettlePitch compares a
+  // pluck against the value from BEFORE the pluck's own frame.
+  /* A cold start (first read on this mic, or after a second or more of
+     not reading) seeds the room level from this frame: starting from 0 —
+     or from an old session's level — made the first pluck in a loud room
+     "stand out" against nothing, so a neighbour's note could settle as the
+     student's wrong note and end a Simon run. */
+  if (cold) coachBgRms = rms;
+  coachBgPrev = coachBgRms;
+  coachBgRms += (rms - coachBgRms) * bgA;
   coachUpdateMicLevel(rms);
+  if (micRec && micRec.live) micRecFrame(nowT);
   return rms;
+}
+
+/* The onset detectors' smoothed levels (smoothRms / smoothHf on each
+   loop's state) ease toward the frame's level. That easing was 18% PER
+   FRAME — tuned at 60 fps, where the level has settled ~140 ms after a
+   pluck. At a Chromebook's 20 fps it was still under half the note's level
+   when the refractory window ran out, so the same ringing note fired a
+   SECOND onset ~200 ms later — and in the Listening Coach that phantom took
+   the next note's slot, so every note after it was graded against the
+   wrong answer (found 2026-10-07 by running the real Coach at 20 fps).
+   Now the easing is per unit of TIME: 18% per 16.7 ms, whatever the frame
+   rate — identical at 60 fps. */
+let coachSmoothA = 0.18;
+function coachSmooth(st, rms, hf){
+  st.smoothRms += (rms - st.smoothRms) * coachSmoothA;
+  st.smoothHf += (hf - st.smoothHf) * coachSmoothA;
 }
 
 /* The mic hears a note after it is played — the device's input path, plus
@@ -675,12 +720,19 @@ function coachPitchReadings(sinceT, minEndT, clarity){
    coachTargetShare: fraction of `readings` (fractional midis) within 0.6
    semitone of any of the exact midis in `targets`. */
 const COACH_VOTE_SHARE = 0.5;
+/* How far off a reading may sit and still count for the target. A loud
+   room pulls a student's note sharp or flat (it beats against a
+   neighbour's nearby note), and some right notes still fail on readings
+   0.6–0.8 semitone off. 0.75 was tried in the in-page Note Runner test
+   and made no measurable difference, so it stays at the safer 0.6 until
+   real classroom recordings say otherwise. */
+const COACH_VOTE_TOL = 0.6;
 function coachTargetShare(readings, targets){
   if (!readings.length || !targets || !targets.length) return 0;
   let hit = 0;
   for (let k = 0; k < readings.length; k++){
     const r = readings[k];
-    if (targets.some(m => Math.abs(r - m) <= 0.6)) hit++;
+    if (targets.some(m => Math.abs(r - m) <= COACH_VOTE_TOL)) hit++;
   }
   return hit / readings.length;
 }
@@ -694,14 +746,97 @@ function coachTargetShare(readings, targets){
      · the LATEST FOUR agree within 0.6 semitone — the note, right or
        wrong. One more than the vote needs on purpose: in a loud room a
        neighbour's note can hold for three readings, and a wrong verdict
-       costs the student a try (and ends a Simon run). Simulated with a
-       moderately loud room, right notes 50-59 of 80 -> 70-73, every
-       deliberately wrong note still caught, ~50 ms slower to say "wrong".
-       Before 2026-10-07 EVERY kept reading had to agree, so one stray
-       reading blocked the answer until five clean ones had followed it.
+       costs the student a try (and ends a Simon run). Before 2026-10-07
+       EVERY kept reading had to agree, so one stray reading blocked the
+       answer until five clean ones had followed it.
+
+   LOUD ROOMS, part 2. These loops have no onset detector of their own:
+   the first frame over the gate after silence was the pluck. In a loud
+   room the level never falls back under the gate, so the "pluck" was
+   whatever the room was doing when listening began, and the readings
+   that settled were a neighbour's note — a "wrong note" hint for a
+   student who hadn't played yet. So, in here:
+     · a new onset (coachOnsetTick, the same detector as the Coach)
+       restarts the readings at that pluck — and the callers run it on the
+       frames they aren't listening too (coachIdleTick), so a new pluck
+       also ends their wait for silence;
+     · a NON-target note is only reported when its pluck stood out — at
+       least COACH_STANDOUT x the room's level just before it
+       (coachBgPrev). The student's guitar, nearest the mic, does; a
+       neighbour's mostly doesn't. A quiet room clears it by miles;
+     · the target vote has a lower bar of its own, COACH_STANDOUT_TARGET:
+       without one, a neighbour who happened to play the target note
+       answered for a student who had played a wrong one.
+   Tuned 2026-10-08 with tools/mic-sim/tune.mjs (synthetic guitars, not
+   real ones — 240 prompts per cell at 20 fps; a quiet room, one neighbour
+   at half the student's level plucking every 150–550 ms, and a classroom
+   of 6–10 neighbours at 0.08–0.35 of the student's level over a din).
+   Columns: right notes counted first time / false "wrong note" hints on
+   right notes / wrong notes counted right:
+                          quiet          one neighbour   classroom
+     no gating            100 / 0 / 0    13 / 86 / 17    69 / 18 / 5
+     2026-10-07 code       93 / 0 / 0    50 / 13 / 15    67 /  5 / 2
+     now (3x and 2x)      100 / 0 / 0    42 /  3 / 0     76 /  0 / 0
+     now, at 60 fps       100 / 0 / 0    41 /  1 / 0     76 /  1 / 0
+   (The quiet-room and classroom gains are mostly coachIdleTick; the
+   bars below are what took wrong-counted-right to 0.) The cost: next to
+   one loud neighbour a few right notes wait for a clearer pluck, and a
+   wrong note there usually gets no "wrong note" hint at all (5% caught,
+   against 36% before) — the game just keeps listening. At 2.5x / 1.75x
+   the classroom read 81 / 2 / 1. Removed in the same pass: a learned "how
+   loud are this student's right notes" level (COACH_MY_FRAC, a 30 s fade,
+   a pull-down), which with these bars changed nothing in any room except
+   costing a student who played softer after a loud note a few percent —
+   the lockout a review had traced to it.
+   `rms` is this frame's level; `floorT` (optional) is the earliest time a
+   pluck may be dated, for a game that has just played its own note.
    Returns that midi, or null while it's unsettled. st carries
-   { attackT, lastPitchT, readings }. */
-function coachSettlePitch(st, targets){
+   { attackT, lastPitchT, readings }; this adds its own fields. */
+const COACH_STANDOUT = 3;
+const COACH_STANDOUT_TARGET = 2;
+/* The onset detector the one-note listeners share. Returns true when this
+   frame holds a new pluck (dated st.onsetT). `detect` false = only keep
+   the smoothed levels current — callers run this on every frame they read,
+   listening or not, so the level a new pluck is compared against is the
+   room's level NOW, not whatever it was the last time they listened. */
+function coachOnsetTick(st, rms, floorT, detect){
+  if (st.smoothRms == null){ st.smoothRms = rms; st.smoothHf = coachHfRms; st.onsetT = -1e9; }
+  const at = Math.max(coachOnsetAt, floorT || 0);
+  let hit = false;
+  if (detect !== false && at - st.onsetT > COACH_ONSET_REFRACT &&
+      ((rms > CHK_ONSET_FLOOR && rms > st.smoothRms * CHK_ONSET_RATIO) ||
+       (coachHfRms > CHK_HF_FLOOR && coachHfRms > st.smoothHf * CHK_HF_RATIO))){
+    st.onsetT = at;
+    hit = true;
+  }
+  coachSmooth(st, rms, coachHfRms);
+  return hit;
+}
+/* The frames a one-note listener is NOT settling a pluck (waiting for the
+   last note to die, a cooldown, under the gate): keep the onset detector
+   current, and let a NEW pluck end the wait for silence. In a loud room the
+   level never falls under the gate, so "wait for silence" used to mean
+   "wait the full 2.5 s" — and a right note played in that time had died
+   down by the time listening came back. */
+function coachIdleTick(st, rms, floorT){
+  const now = performance.now();
+  if (coachOnsetTick(st, rms, floorT, now >= (floorT || 0)) && st.needSilence){
+    st.needSilence = false;
+    st.attackT = st.onsetT; st.readings = [];
+    st.seenAttackT = null;
+  }
+}
+function coachSettlePitch(st, targets, rms, floorT){
+  if (coachOnsetTick(st, rms, floorT)){
+    st.attackT = st.onsetT; st.readings = [];
+    st.seenAttackT = null;               // a new pluck: measure it below
+  }
+  if (st.seenAttackT !== st.attackT){    // first frame of this pluck (ours or the caller's)
+    st.seenAttackT = st.attackT;
+    st.attackLvl = rms; st.preBg = coachBgPrev;
+  } else if (rms > st.attackLvl) st.attackLvl = rms;
+  const standsOut = st.attackLvl >= COACH_STANDOUT * st.preBg;
+  const targetStandsOut = st.attackLvl >= COACH_STANDOUT_TARGET * st.preBg;
   const rs = coachPitchReadings(st.lastPitchT, st.attackT + COACH_ATTACK_SKIP);
   for (let k = 0; k < rs.length; k++){
     st.lastPitchT = rs[k].t;
@@ -709,10 +844,10 @@ function coachSettlePitch(st, targets){
     st.readings.push(rs[k].midi);
     if (st.readings.length > 5) st.readings.shift();
     const r = st.readings;
-    if (targets) for (let j = 0; j < targets.length; j++){
+    if (targets && targetStandsOut) for (let j = 0; j < targets.length; j++){
       if (r.filter(x => Math.abs(x - targets[j]) <= 0.6).length >= 3) return targets[j];
     }
-    if (r.length >= 4){
+    if (standsOut && r.length >= 4){
       const l4 = r.slice(-4);
       if (Math.max.apply(null, l4) - Math.min.apply(null, l4) < 0.6) return Math.round(tunerMedian(l4));
     }
@@ -947,8 +1082,7 @@ function coachLoop(){
   if (coach.phase !== 'listening'){
     if (coach.phase === 'countin'){
       const r = coachReadFrame();
-      coach.smoothRms = coach.smoothRms * 0.82 + r * 0.18;
-      coach.smoothHf = coach.smoothHf * 0.82 + coachHfRms * 0.18;
+      coachSmooth(coach, r, coachHfRms);
     }
     coachRaf = requestAnimationFrame(coachLoop);
     return;
@@ -981,8 +1115,7 @@ function coachLoop(){
          still open. */
       coach.pendings.push({ t: at - coachMicLatencyMs(), at, readings: [] });
     }
-    coach.smoothRms = coach.smoothRms * 0.82 + rms * 0.18;
-    coach.smoothHf = coach.smoothHf * 0.82 + hf * 0.18;
+    coachSmooth(coach, rms, hf);
 
     /* Pitch readings (trimmed YIN, ~every 40ms) feed the pending event —
        but not until the pick attack has left the analysis window: early
@@ -1048,9 +1181,19 @@ function coachLoop(){
        whose pitch readings are still being collected gets its full
        COACH_EVENT_TAIL before the take is graded, so the last note of a
        drill isn't scored off half a window. */
-    const allHit = coach.slots.every(s => s.state !== 'pending');
-    const pendingEvent = coach.pendings.length > 0;
-    if (allHit || (now > coachListenDeadline() && !pendingEvent)){
+    /* A full board ends the take only once the last slot's window has
+       passed: since a nearer event can take a slot over (coachMatchEvent),
+       a neighbour's pluck that fills the last slot early must not end the
+       take before the student's own last note arrives. Half a beat (where
+       an event stops landing on the last slot) or half the window,
+       whichever is longer, plus a frame for the onset to be seen. */
+    const lastBeatT = coach.listenStart + coach.gridOffset + (coach.slots.length - 1) * coach.beatMs;
+    const allHit = coach.slots.every(s => s.state !== 'pending') &&
+      now - coachMicLatencyMs() > lastBeatT + Math.max(coachMatchWinMs(), coach.beatMs) * 0.5 + 60;
+    // Only an event that could still land on a slot holds the take open —
+    // in a loud room there is nearly always SOME neighbour's pluck pending.
+    const pendingEvent = coach.pendings.some(p => p.t <= lastBeatT + coachMatchWinMs());
+    if ((allHit || now > coachListenDeadline()) && !pendingEvent){
       coachFinish();
       return;
     }
@@ -1164,18 +1307,51 @@ function coachMatchEvent(ev){
   let best = -1, bestScore = Infinity;
   for (let i = Math.max(0, guess - 1); i <= Math.min(coach.slots.length - 1, guess + 1); i++){
     const s = coach.slots[i];
-    if (s.state !== 'pending') continue;
-    const dev = rel - i * coach.beatMs;
-    if (Math.abs(dev) > coachMatchWinMs()) continue;
+    let dev = rel - i * coach.beatMs;
+    /* NEAREST WINS, not first (2026-10-07). The window is nearly a beat
+       wide, so in a loud room a neighbour's pluck often lands in it before
+       the student's — and the first event used to keep the slot. Run as
+       the real Coach at 20 fps with other guitars at half the student's
+       level, that marked 10 of 40 right notes right and 18 of 40 WRONG
+       notes right. A later event closer to this slot's beat now takes it
+       over, and the earlier one becomes an extra. Only the nearest beat:
+       a filled neighbouring slot is never reopened.
+       The distance is measured on the grid as it was BEFORE the incumbent
+       nudged it (its gridDelta comes off first, as it will if this event
+       wins — 2026-10-08 review).
+       Pitch plays no part, on purpose. A review asked for "a wrong-sounding
+       event never takes a slot from a right one" (so a neighbour's wrong
+       note nearer the beat can't turn the student's right note "wrong");
+       in the in-page loud-room test that let a neighbour's RIGHT note,
+       landing first, keep the slot against the student's own nearer
+       WRONG note — wrong notes counted right went 0/96 -> 38/96. A wrong
+       note counted right is the worse mistake, so the nearest event wins. */
     const classOk = coach.mode === 'chords'
       ? coachToneShare(ev, s) >= 0.20
       : (ev.midi != null && s.classes.indexOf(((ev.midi % 12) + 12) % 12) >= 0) || coachMelodyVote(ev, s);
+    if (s.state !== 'pending'){
+      if (i !== guess || !s.hit) continue;
+      dev += s.hit.gridDelta || 0;
+      if (!(Math.abs(dev) < Math.abs(s.hit.devMs))) continue;
+    }
+    if (Math.abs(dev) > coachMatchWinMs()) continue;
+    /* A slot that isn't the nearest beat only takes an event that IS its
+       note. The window is nearly a beat wide, so an extra onset just after
+       a matched note — a neighbour's pluck in a loud room, a phantom
+       re-trigger — used to land on the NEXT slot as "wrong" and push every
+       later note one slot along. A real early note still matches. */
+    if (i !== guess && !classOk && coach.slots[guess] && coach.slots[guess].state !== 'pending') continue;
     const score = Math.abs(dev) + (classOk ? 0 : coach.beatMs * 0.6);
     if (score < bestScore){ bestScore = score; best = i; }
   }
   if (best < 0) return;   // unmatched onset — an extra strum between beats
   const s = coach.slots[best];
-  const dev = rel - best * coach.beatMs;
+  if (s.hit){                       // taking over from a farther event
+    coach.gridOffset -= s.hit.gridDelta || 0;
+    s.hit.slot = -1; s.hit.devMs = null;
+    s.hit = null;
+  }
+  const dev = ev.t - coach.listenStart - coach.gridOffset - best * coach.beatMs;
   ev.devMs = dev; ev.slot = best;
   if (coach.mode === 'chords'){
     /* Chord-tone vote: ok when ≥20% of the readings land on chord tones — a
@@ -1204,7 +1380,8 @@ function coachMatchEvent(ev){
      ones. Scored by coachScoreTiming, never by coachScorePitch. */
   s.loose = Math.abs(dev) > coachOnBeatMs();
   coach.lastMatchT = ev.t;      // feeds coachListenDeadline's stall clock
-  coach.gridOffset += dev * 0.15;
+  ev.gridDelta = dev * 0.15;    // kept so a nearer event can take the slot back
+  coach.gridOffset += ev.gridDelta;
   coachChipRefresh(best);
 
   /* Visual beat-pulse fade: a correct AND tight-timing hit extends the
@@ -1227,19 +1404,259 @@ function coachFinish(){
   coach.timeouts = [];
   while (coach.pendings.length) coachFinalizeEvent();
   if (coachRaf){ cancelAnimationFrame(coachRaf); coachRaf = null; }
+  const rec = micRecStop();
   coachMicOff();
   coach.slots.forEach((s, i) => { if (s.state === 'pending'){ s.state = 'miss'; coachChipRefresh(i); } });
   coach.phase = 'report';
   coachRenderReport();
+  if (rec) micRecSave(rec, coachRecMeta());
+}
+
+/* What a saved Coach recording needs beside the audio (see micRecSave):
+   every slot's scheduled time and verdict, every detected event. Event
+   times are when the note was PLAYED (arrival minus micLatencyMs). */
+function coachRecMeta(){
+  const r2 = x => Math.round(x * 100) / 100;
+  return {
+    fields: { game: 'coach', coachMode: coach.mode, bpm: coach.bpm, beatMs: r2(coach.beatMs),
+              gridOffsetMs: r2(coach.gridOffset || 0), eventTimes: 'played (arrival - micLatencyMs)' },
+    expected: coach.slots.map((s, i) => ({ i, t: coach.listenStart + i * coach.beatMs,
+      midi: s.midi == null ? null : s.midi, midis: s.midis || null, chord: s.chordName || null,
+      label: s.label || '', verdict: s.state, loose: !!s.loose,
+      devMs: s.hit && s.hit.devMs != null ? r2(s.hit.devMs) : null })),
+    events: coach.events.map(ev => ({ t: ev.t, midi: ev.midi == null ? null : ev.midi, slot: ev.slot,
+      readings: (ev.readings || []).map(r2) }))
+  };
 }
 
 function coachMicOff(){
+  micRecAbort();                // a capture still running here was never finished: drop it
   window.coachMicLive = false;
   if (coachStream) coachStream.getTracks().forEach(t => t.stop());
   if (coachCtx) coachCtx.close();
   coachStream = null; coachCtx = null; coachAnalyser = null;
   const micEl = document.getElementById('coach-mic');
   if (micEl) micEl.hidden = true;
+}
+
+/* ══════════ Consented mic recordings (2026-10-08) ══════════
+   Real classroom audio to tune the listening on. The Coach footer promises
+   nothing is recorded or uploaded, and for anyone who doesn't say yes that
+   stays exactly true: nothing here runs unless
+     · the teacher has turned collection on (config/class.micSampling —
+       app.js reads it into micSampling) and fewer than its `max` takes
+       have been saved (micTakesMeta/count, read into micTakesCount);
+     · and this student, on this device, has answered "Yes, save it" to the
+       one-time question (localStorage, keyed by uid so the next student on
+       a shared Chromebook is asked for themselves — "No thanks" is never
+       asked again).
+   Then a Listening Coach take or a Note Runner round records the RAW mic
+   (before COACH_MIC_GAIN and the filters) from the count-in to the end, at
+   most MICREC_MAX_SEC, with a visible "Recording this take for your
+   teacher" label the whole time, and saves it to micTakes/<uid>-<mode>
+   (one per student per game, the next take overwrites it). Teacher preview
+   and the dev bypass never upload. Every way out of a take ends up in
+   coachMicOff(), which tears the capture down. */
+const MICREC_MAX_SEC = 30;
+const MICREC_RATE = 24000;            // saved sample rate: 16-bit mono
+const MICREC_CHUNK = 600000;          // bytes per chunks/{i} doc (Firestore's cap is 1 MB)
+const MICREC_ASK_KEY = 'micRecConsent';
+let micRec = null;                    // the capture in progress, or a stopped one awaiting save
+
+function micRecAskKey(){ return MICREC_ASK_KEY + ':' + (currentUser ? currentUser.uid : ''); }
+function micRecAnswer(){
+  try { return localStorage.getItem(micRecAskKey()) || ''; }
+  catch(e){ return 'no'; }            // can't remember an answer: never ask, never record
+}
+function micRecOpen(){
+  return typeof micSampling !== 'undefined' && micSampling && micSampling.on === true &&
+    typeof micTakesCount === 'number' && micTakesCount < (micSampling.max || 0) &&
+    !IS_TEACHER_MODE && typeof currentUser !== 'undefined' && !!currentUser &&
+    !(typeof isGatePreviewer === 'function' && isGatePreviewer());   // the teacher's own account, previewing
+}
+function micRecShouldAsk(){ return micRecOpen() && micRecAnswer() === ''; }
+function micRecWanted(){ return micRecOpen() && micRecAnswer() === 'yes'; }
+
+function micRecAskHtml(game){
+  return `<div class="micrec-ask" role="group" aria-label="${escHtml(t('micrec.ask'))}">
+       <p class="micrec-q">&#x1F399;&#xFE0F; ${escHtml(t('micrec.ask'))}</p>
+       <div class="micrec-btns">
+         <button type="button" class="coach-start" onclick="micRecConsent(true,'${game}')">${escHtml(t('micrec.yes'))}</button>
+         <button type="button" class="tp-btn" onclick="micRecConsent(false,'${game}')">${escHtml(t('micrec.no'))}</button>
+       </div>
+     </div>`;
+}
+/* The answer is remembered, then the take the student pressed Start for
+   goes ahead (still inside their click, so the mic prompt can open). */
+function micRecConsent(yes, game){
+  try { localStorage.setItem(micRecAskKey(), yes ? 'yes' : 'no'); } catch(e){}
+  if (game === 'nr') nrStart(); else coachStartCheck();
+}
+function micRecBadgeHtml(){
+  return `<div class="micrec-on" id="micrec-on"><span class="micrec-dot"></span>${escHtml(t('micrec.recording'))}</div>`;
+}
+
+/* Start capturing. A separate source node off the raw stream, into a
+   ScriptProcessor whose output goes to a zero gain — so nothing is heard
+   and the listening chain is untouched. */
+function micRecStart(mode){
+  micRecAbort();
+  if (!micRecWanted() || !coachCtx || !coachStream) return false;
+  try {
+    const ctx = coachCtx, srcRate = ctx.sampleRate;
+    const src = ctx.createMediaStreamSource(coachStream);
+    const proc = ctx.createScriptProcessor(4096, 1, 1);
+    const mute = ctx.createGain();
+    mute.gain.value = 0;
+    const rec = { mode, ctx, src, proc, mute, srcRate, bufs: [], n: 0,
+      cap: Math.ceil(MICREC_MAX_SEC * srcRate), live: true,
+      perf0: performance.now(), ctx0: ctx.currentTime, firstPlay: null,
+      frames: 0, frameSum: 0, frameMax: 0, lastFrameT: 0,
+      track: (coachStream.getAudioTracks()[0] || {}).label || '' };
+    proc.onaudioprocess = e => {
+      if (micRec !== rec || !rec.live) return;
+      if (rec.firstPlay == null) rec.firstPlay = e.playbackTime;
+      const x = e.inputBuffer.getChannelData(0);
+      const take = Math.min(x.length, rec.cap - rec.n);
+      if (take > 0){ rec.bufs.push(x.slice(0, take)); rec.n += take; }
+      if (rec.n >= rec.cap) micRecTeardown(rec);   // 30 s: stop listening, keep what we have
+    };
+    src.connect(proc); proc.connect(mute); mute.connect(ctx.destination);
+    // Belt and braces: whatever happens, the capture stops a minute after
+    // its 30 s cap (what it holds is still saved if the take finishes).
+    rec.timer = setTimeout(() => micRecTeardown(rec), (MICREC_MAX_SEC + 60) * 1000);
+    micRec = rec;
+    return true;
+  } catch(e){ micRecAbort(); return false; }
+}
+// Called by coachReadFrame on every detection frame while capturing.
+function micRecFrame(nowT){
+  const r = micRec;
+  if (r.lastFrameT){
+    const d = nowT - r.lastFrameT;
+    r.frames++; r.frameSum += d; if (d > r.frameMax) r.frameMax = d;
+  }
+  r.lastFrameT = nowT;
+}
+function micRecTeardown(rec){
+  if (!rec || !rec.live) return;
+  rec.live = false;
+  try { rec.proc.onaudioprocess = null; } catch(e){}
+  try { rec.src.disconnect(); } catch(e){}
+  try { rec.proc.disconnect(); } catch(e){}
+  try { rec.mute.disconnect(); } catch(e){}
+}
+/* Stop and hand back the capture for micRecSave (the take's own finish
+   calls this BEFORE coachMicOff). Null when nothing was recording. */
+function micRecStop(){
+  const rec = micRec;
+  if (!rec) return null;
+  micRecTeardown(rec);
+  clearTimeout(rec.timer);
+  micRec = null;
+  return rec.n ? rec : null;
+}
+// Every other exit: tear down and throw the audio away.
+function micRecAbort(){
+  const rec = micRec;
+  if (!rec) return;
+  micRecTeardown(rec);
+  clearTimeout(rec.timer);
+  micRec = null;
+  const el = document.getElementById('micrec-on');
+  if (el) el.remove();
+}
+/* The recording's start on the performance.now() clock: the first buffer's
+   audio ended at its playbackTime, which maps onto performance.now()
+   through the (perf0, ctx0) pair taken at the start. Good to a few ms. */
+function micRecStartPerf(rec){
+  const firstEnd = rec.firstPlay != null ? rec.firstPlay : rec.ctx0;
+  return rec.perf0 + (firstEnd - rec.ctx0) * 1000 - 4096 / rec.srcRate * 1000;
+}
+// Box-filtered resample to MICREC_RATE, as 16-bit little-endian PCM.
+function micRecPcm16(rec){
+  const all = new Float32Array(rec.n);
+  let o = 0;
+  rec.bufs.forEach(b => { all.set(b, o); o += b.length; });
+  const ratio = rec.srcRate / MICREC_RATE;
+  const outN = Math.floor(rec.n / ratio);
+  const out = new Int16Array(outN);
+  for (let i = 0; i < outN; i++){
+    const a = Math.floor(i * ratio), b = Math.max(a + 1, Math.floor((i + 1) * ratio));
+    let s = 0;
+    for (let k = a; k < b && k < all.length; k++) s += all[k];
+    const v = Math.max(-1, Math.min(1, s / (b - a)));
+    out[i] = v < 0 ? v * 32768 : v * 32767;
+  }
+  return out;
+}
+/* Save a stopped capture with the take's metadata. Times in `meta` are
+   performance.now() values; they are made relative to the recording's
+   start here. Quiet on failure — a lost recording costs the student
+   nothing. */
+/* Saves run one after another: two takes in quick succession write the
+   same chunk docs, and overlapping writes could splice them together. */
+let micRecSaving = Promise.resolve();
+function micRecSave(rec, meta){
+  micRecSaving = micRecSaving.then(() => micRecSaveNow(rec, meta)).catch(() => {});
+  return micRecSaving;
+}
+async function micRecSaveNow(rec, meta){
+  if (!rec || !rec.n || IS_TEACHER_MODE || !currentUser) return;
+  const t0 = micRecStartPerf(rec);
+  const rel = x => x == null ? null : Math.round((x - t0) * 10) / 10;
+  const doc = Object.assign({}, meta.fields);
+  doc.expected = (meta.expected || []).map(e => Object.assign({}, e, { t: rel(e.t) }));
+  doc.events = (meta.events || []).map(e => Object.assign({}, e, { t: rel(e.t) }));
+  Object.assign(doc, {
+    uid: currentUser.uid,
+    name: currentUser.displayName || '',
+    period: (typeof periodOverride !== 'undefined' && periodOverride) || (typeof studentPeriod !== 'undefined' && studentPeriod) || '',
+    mode: rec.mode,
+    micLatencyMs: coachMicLatencyMs(),
+    sampleRate: MICREC_RATE,
+    srcSampleRate: rec.srcRate,
+    durationSec: Math.round(rec.n / rec.srcRate * 100) / 100,
+    micLabel: rec.track,
+    userAgent: (navigator.userAgent || '').slice(0, 300),
+    frameMeanMs: rec.frames ? Math.round(rec.frameSum / rec.frames * 10) / 10 : null,
+    frameMaxMs: Math.round(rec.frameMax * 10) / 10,
+    lang: typeof getLang === 'function' ? getLang() : ''
+  });
+  const pcm = micRecPcm16(rec);
+  if (isDevBypassUser()){ console.info('[micRec] dev bypass — not uploading', doc, pcm.length + ' samples'); return; }
+  try {
+    if (typeof ensureDb === 'function') await ensureDb();
+    if (!db) return;
+    const id = currentUser.uid + '-' + rec.mode;
+    const ref = db.collection('micTakes').doc(id);
+    const bytes = new Uint8Array(pcm.buffer);
+    const nChunks = Math.ceil(bytes.length / MICREC_CHUNK);
+    for (let i = 0; i < nChunks; i++){
+      await ref.collection('chunks').doc(String(i)).set({ i,
+        pcm: firebase.firestore.Blob.fromUint8Array(bytes.subarray(i * MICREC_CHUNK, (i + 1) * MICREC_CHUNK)) });
+    }
+    doc.chunks = nChunks;
+    doc.bytes = bytes.length;
+    doc.savedAt = firebase.firestore.FieldValue.serverTimestamp();
+    await ref.set(doc);
+    // Count it once per take id (an overwrite of the same student's game
+    // is not a new take). Remembered on this device, so a second device
+    // can over-count by one — the quota only decides when asking stops.
+    let saved = [];
+    try { saved = JSON.parse(localStorage.getItem('micRecSaved') || '[]'); } catch(e){}
+    if (saved.indexOf(id) < 0){
+      const cRef = db.collection('micTakesMeta').doc('count');
+      await db.runTransaction(async tx => {
+        const c = await tx.get(cRef);
+        if (c.exists) tx.update(cRef, { n: (c.data().n || 0) + 1 });
+        else tx.set(cRef, { n: 1 });
+      });
+      micTakesCount++;
+      saved.push(id);
+      try { localStorage.setItem('micRecSaved', JSON.stringify(saved)); } catch(e){}
+    }
+  } catch(e){ console.warn('[micRec] save failed', e); }
 }
 
 /* How many matched slots a take needs before we trust it enough to score.
@@ -1768,11 +2185,14 @@ function fretLoop(){
          silence IS the pluck. Readings wait out COACH_ATTACK_SKIP from there,
          same guard the Coach and Note Runner use from their onset timestamp. */
       if (!g.attackT) g.attackT = Math.max(coachOnsetAt, g.cooldownUntil);
-      const m = coachSettlePitch(g, [g.prompt.m]);
+      const m = coachSettlePitch(g, [g.prompt.m], rms, g.cooldownUntil);
       if (m != null) fretJudge(m);
-    } else if (rms < COACH_PITCH_GATE * 0.5){
-      g.readings = [];
-      g.attackT = 0;    // note died — next gate crossing is a new pluck
+    } else {
+      if (rms < COACH_PITCH_GATE * 0.5){
+        g.readings = [];
+        g.attackT = 0;    // note died — next gate crossing is a new pluck
+      }
+      coachIdleTick(g, rms, g.cooldownUntil);   // a new pluck ends the wait for silence
     }
   }
   // Re-arm only while the round is live: fretJudge/fretSkip can end it
@@ -2660,8 +3080,7 @@ function ccLoop(){
     /* Warm the level trackers on room noise during the count-in — same
        cold-start guard as the Coach loop. */
     const r = coachReadFrame();
-    cc.smoothRms = cc.smoothRms * 0.82 + r * 0.18;
-    cc.smoothHf = cc.smoothHf * 0.82 + coachHfRms * 0.18;
+    coachSmooth(cc, r, coachHfRms);
   }
   if (cc.phase === 'play'){
     const rms = coachReadFrame();
@@ -2690,8 +3109,7 @@ function ccLoop(){
         Math.abs(c.beat * cc.beatMs - rel) <= win);
       if (ch) ch.pend = { t: at, readings: [] };
     }
-    cc.smoothRms = cc.smoothRms * 0.82 + rms * 0.18;
-    cc.smoothHf = cc.smoothHf * 0.82 + coachHfRms * 0.18;
+    coachSmooth(cc, rms, coachHfRms);
 
     /* Feed pitch readings to an open change-check, then resolve it. Same
        attack skip as the Coach: the first ~70ms of a strum is scrape plus
@@ -4200,11 +4618,14 @@ function psgLoop(){
       if (!s.attackT) s.attackT = Math.max(coachOnsetAt, s.armAt);
       const want = PS_NOTES[s.seq[s.inputIdx]];
       // psgJudge's own rule for the octave above, so the vote can't pass what it would fail
-      const m = coachSettlePitch(s, PS_NOTES.indexOf(want + 12) < 0 ? [want, want + 12] : [want]);
+      const m = coachSettlePitch(s, PS_NOTES.indexOf(want + 12) < 0 ? [want, want + 12] : [want], rms, s.armAt);
       if (m != null) psgJudge(m);
-    } else if (rms < COACH_PITCH_GATE * 0.5){
-      s.readings = [];
-      s.attackT = 0;    // note died — the next gate crossing is a new pluck
+    } else {
+      if (rms < COACH_PITCH_GATE * 0.5){
+        s.readings = [];
+        s.attackT = 0;    // note died — the next gate crossing is a new pluck
+      }
+      coachIdleTick(s, rms, s.armAt);           // a new pluck ends the wait for silence
     }
   }
   // Re-arm only while the run is live: psgJudge can end it mid-frame, and
@@ -5807,8 +6228,7 @@ function srLoop(){
     /* Warm the level trackers on room noise during the count-in — same
        cold-start guard as the Coach loop. */
     const r = coachReadFrame();
-    s.smoothRms = s.smoothRms * 0.82 + r * 0.18;
-    s.smoothHf = s.smoothHf * 0.82 + coachHfRms * 0.18;
+    coachSmooth(s, r, coachHfRms);
   }
   if (s.phase === 'play' || srEarly){
     const rms = coachReadFrame();
@@ -5850,8 +6270,7 @@ function srLoop(){
         s.extras++;                     // pre-roll noise before bar 1 stays free
       }
     }
-    s.smoothRms = s.smoothRms * 0.82 + rms * 0.18;
-    s.smoothHf = s.smoothHf * 0.82 + hf * 0.18;
+    coachSmooth(s, rms, hf);
 
     /* Overdue strums are misses. */
     const relNow = now - s.listenStart - s.gridOffset - s.lat;
@@ -6871,11 +7290,14 @@ function rnwLoop(){
        silence IS the pluck. Readings wait out COACH_ATTACK_SKIP from there,
        same guard the Coach and Note Runner use from their onset timestamp. */
     if (!w.attackT) w.attackT = Math.max(coachOnsetAt, w.cooldownUntil);
-    const m = coachSettlePitch(w, w.notes[w.cur] ? [w.notes[w.cur].midi] : null);
+    const m = coachSettlePitch(w, w.notes[w.cur] ? [w.notes[w.cur].midi] : null, rms, w.cooldownUntil);
     if (m != null) rnwJudge(m);
-  } else if (rms < COACH_PITCH_GATE * 0.5){
-    w.readings = [];
-    w.attackT = 0;    // note died — next gate crossing is a new pluck
+  } else {
+    if (rms < COACH_PITCH_GATE * 0.5){
+      w.readings = [];
+      w.attackT = 0;    // note died — next gate crossing is a new pluck
+    }
+    coachIdleTick(w, rms, w.cooldownUntil);     // a new pluck ends the wait for silence
   }
   rnRaf = requestAnimationFrame(rnwLoop);
 }
@@ -7476,6 +7898,8 @@ async function nrStart(){
   const s = nr;
   const body = nrBody();
   if (!body) return;
+  // Collection is on and this device hasn't answered yet: ask first.
+  if (micRecShouldAsk()){ body.innerHTML = micRecAskHtml('nr'); return; }
   coachClose();
   coachEvictTuner();
   nrHearStop();
@@ -7519,9 +7943,12 @@ async function nrStart(){
   s.sweepIdx = 0; s.lastBeat = -1;
   s.countCleared = false;   // else round 2+ never wipes the count-in "4" off the track
   s.smoothRms = 0; s.smoothHf = 0; s.lastOnsetT = -1e9; s.lastPitchT = 0; s.pendings = [];
+  s.evLog = [];
 
   nrRenderPlay();
   s.els = s.notes.map((_, i) => document.getElementById('nr-n-' + i));
+  // A consented recording runs from here to the end of the round.
+  if (micRecStart('nr')){ const b = nrBody(); if (b) b.insertAdjacentHTML('afterbegin', micRecBadgeHtml()); }
   /* coachCountIn beeps 4 clicks and sets s.listenStart = beat 1. The
      clicks stop there — see the header comment. */
   coachCountIn(s, 'nr-count', () => {
@@ -7600,8 +8027,7 @@ function nrLoop(){
       // the student's note off before it has been read.
       s.pendings.push({ t: at, readings: [] });
     }
-    s.smoothRms = s.smoothRms * 0.82 + rms * 0.18;
-    s.smoothHf = s.smoothHf * 0.82 + hf * 0.18;
+    coachSmooth(s, rms, hf);
     if (s.pendings.length && rms > COACH_PITCH_GATE * 0.5){
       /* Chord levels loosen YIN's clarity gate the way the Coach's chord
          mode does — a strum isn't cleanly periodic, and the tone vote
@@ -7665,6 +8091,9 @@ function nrLoop(){
         if (s.missStreak >= 2) nrRaceSlip();
         nrMark(n, 'miss');
         nrHud();
+        // A later note already graded can no longer be taken over: its
+        // snapshot is from before this miss, and restoring it would erase it.
+        for (let j = i + 1; j < s.playable.length && s.playable[j].result; j++) s.playable[j].snap = null;
       }
     }
     const beat = Math.floor((now - s.listenStart) / s.beatMs);
@@ -7890,18 +8319,8 @@ function nrFinalizeEvent(){
   }
   /* Onset time, minus the device's mic latency. */
   const tEv = p.t - nrOffset();
+  if (s.evLog && s.evLog.length < 400) s.evLog.push({ t: tEv, midi, readings: p.readings.map(r => Math.round(r * 100) / 100) });
   if (tEv < s.listenStart - s.goodMs) return;   // count-in: free
-  let best = -1, bestAbs = Infinity;
-  for (let i = 0; i < s.playable.length; i++){
-    const n = s.playable[i];
-    if (n.result) continue;
-    if (n.t - tEv > s.goodMs) break;            // time-sorted — rest are ahead
-    const a = Math.abs(n.t - tEv);
-    if (a <= s.goodMs && a < bestAbs){ bestAbs = a; best = i; }
-  }
-  if (best < 0) return;   // stray onset with no note nearby: ignored, the
-                          // same bargain the check flows strike (see CHK_*)
-  const n = s.playable[best];
   /* Right note? Melody: exact midi — or the octave above, because a
      Chromebook mic often hears the low strings' 2nd harmonic louder than
      the fundamental (the same physics behind tuner.js's octave guard).
@@ -7909,19 +8328,47 @@ function nrFinalizeEvent(){
      raw pitch readings are tones of the chord (root or fifth; the
      detector legitimately hops between them, so single-pitch consensus
      would fail honest strums — see coachFinalizeEvent). */
-  let pitchOk, unclear;
-  if (n.chord){
-    const want = [((n.midi % 12) + 12) % 12, ((n.midi + 7) % 12) % 12];
-    const cls = p.readings.map(r => ((Math.round(r) % 12) + 12) % 12);
-    pitchOk = cls.length >= 2 &&
-      cls.filter(c => want.indexOf(c) >= 0).length / cls.length >= 0.20;
-    unclear = cls.length < 2;          // heard a strum, no usable pitch reads
-  } else {
-    pitchOk = (midi !== null && (midi === n.midi || midi === n.midi + 12)) ||
+  const pitchFor = n => {
+    if (n.chord){
+      const want = [((n.midi % 12) + 12) % 12, ((n.midi + 7) % 12) % 12];
+      const cls = p.readings.map(r => ((Math.round(r) % 12) + 12) % 12);
+      return { ok: cls.length >= 2 && cls.filter(c => want.indexOf(c) >= 0).length / cls.length >= 0.20,
+               unclear: cls.length < 2 };          // heard a strum, no usable pitch reads
+    }
+    const ok = (midi !== null && (midi === n.midi || midi === n.midi + 12)) ||
       // loud room: the note is a big share of the readings (see coachTargetShare)
       (p.readings.length >= 2 && coachTargetShare(p.readings, [n.midi, n.midi + 12]) >= COACH_VOTE_SHARE);
-    unclear = !pitchOk && midi === null;   // heard a pluck, consensus failed
+    return { ok, unclear: !ok && midi === null };  // heard a pluck, consensus failed
+  };
+  let best = -1, bestAbs = Infinity;
+  for (let i = 0; i < s.playable.length; i++){
+    const n = s.playable[i];
+    if (n.t - tEv > s.goodMs) break;            // time-sorted — rest are ahead
+    const a = Math.abs(n.t - tEv);
+    /* NEAREST WINS (2026-10-07, same rule as coachMatchEvent): a note an
+       event already graded can be re-graded by a later event that landed
+       closer to it — in a loud room a neighbour's pluck often arrives
+       inside the window before the student's own. A swept miss is final.
+       Pitch plays no part — see coachMatchEvent for why. */
+    if (n.result && !(n.snap && a < n.hitAbs)) continue;
+    if (a <= s.goodMs && a < bestAbs){ bestAbs = a; best = i; }
   }
+  if (best < 0) return;   // stray onset with no note nearby: ignored, the
+                          // same bargain the check flows strike (see CHK_*)
+  const n = s.playable[best];
+  if (n.snap){
+    /* Undo the farther event's grade. Events finalize in onset order and
+       the next note is at least two windows away, so nothing after this
+       note has been graded since — restoring the snapshot is exact. */
+    Object.assign(s, n.snap.state);
+    s.errs.length = n.snap.errsLen;
+    const el = s.els[s.notes.indexOf(n)];
+    if (el) el.classList.remove('hit-perfect', 'hit-good', 'nr-hit-pitch');
+    n.result = null; n.unclear = false;
+  }
+  n.snap = { state: { score: s.score, combo: s.combo, missStreak: s.missStreak, maxCombo: s.maxCombo }, errsLen: s.errs.length };
+  n.hitAbs = bestAbs;
+  const pv = pitchFor(n), pitchOk = pv.ok, unclear = pv.unclear;
   s.errs.push((tEv - n.t) / 1000);
   if (pitchOk){
     const prevMult = Math.min(4, 1 + Math.floor(s.combo / 8));
@@ -7978,9 +8425,22 @@ function nrFinish(complete){
   (s.timeouts || []).forEach(clearTimeout);
   s.timeouts = [];
   while (s.pendings.length) nrFinalizeEvent();
+  const rec = micRecStop();
   if (s.micOn){ s.micOn = false; coachMicOff(); }
   s.playable.forEach(n => { if (!n.result) n.result = 'miss'; });   // early Stop
   s.phase = 'done';
+  // A round played to the end is saved; a Stopped one is thrown away.
+  if (rec && complete){
+    const lv = NR_LEVELS[s.level] || {};
+    micRecSave(rec, {
+      fields: { game: 'nr', level: s.level, bpm: lv.bpm || null, chords: !!s.chordMode,
+                beatMs: Math.round(s.beatMs * 100) / 100, goodMs: s.goodMs, perfectMs: s.perfectMs,
+                score: s.score, eventTimes: 'played (arrival - micLatencyMs)' },
+      expected: s.playable.map(n => ({ t: n.t, midi: n.midi, string: n.string, fret: n.fret,
+        chord: n.chord ? n.name : null, verdict: n.result, unclear: !!n.unclear })),
+      events: s.evLog || []
+    });
+  }
 
   const total = s.playable.length;
   const nPerfect = s.playable.filter(n => n.result === 'perfect').length;

@@ -4562,7 +4562,7 @@ function checkChordBlitzRanks() {
    deliberately, after a look at whether it can pass a `base` or needs the
    strict default.
    ═════════════════════════════════════════════════════════════════ */
-const CONFIG_WRITERS = 18;   // teacherWriteConfig() call sites in teacher.js
+const CONFIG_WRITERS = 19;   // teacherWriteConfig() call sites in teacher.js
 function checkConfigWriteGuard() {
   head('1ai. Every config/class write goes through the stale-write guard');
   let bad = 0;

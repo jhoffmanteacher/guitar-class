@@ -172,6 +172,9 @@ async function showTeacherApp(user){
   if(toggle && !toggle.querySelector('[data-view="livequiz"]')){
     toggle.insertAdjacentHTML('beforeend', `<button class="t-vt" data-view="livequiz" onclick="setTeacherView('livequiz')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M13 2 4 14h6l-1 8 9-12h-6z"/></svg> Live quiz</button>`);
   }
+  if(toggle && !toggle.querySelector('[data-view="mic"]')){
+    toggle.insertAdjacentHTML('beforeend', `<button class="t-vt" data-view="mic" onclick="setTeacherView('mic')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="9" y="3" width="6" height="11" rx="3"/><path d="M5 11a7 7 0 0 0 14 0M12 18v3"/></svg> Mic recordings</button>`);
+  }
   if(toggle && !toggle.querySelector('[data-view="reports"]')){
     toggle.insertAdjacentHTML('beforeend', `<button class="t-vt" data-view="reports" onclick="setTeacherView('reports')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 3 2 20h20L12 3z"/><path d="M12 10v4"/><circle cx="12" cy="17" r="0.6" fill="currentColor" stroke="none"/></svg> Reports</button>`);
   }
@@ -657,7 +660,7 @@ function applyTeacherViewChrome(v){
   const legend=document.getElementById('t-legend'); if(legend) legend.style.display = v==='skills' ? '' : 'none';
   // Games, Trouble-spots and Students are all class-wide, not per-week —
   // hide the week tabs and the skill summary while any of them is showing.
-  const classWide = v==='games'||v==='trouble'||v==='students'||v==='manage'||v==='activities'||v==='reports'||v==='livequiz';
+  const classWide = v==='games'||v==='trouble'||v==='students'||v==='manage'||v==='activities'||v==='reports'||v==='livequiz'||v==='mic';
   const tabs=document.getElementById('t-week-tabs'); if(tabs) tabs.style.display = classWide ? 'none' : '';
   const summ=document.getElementById('t-summary'); if(summ) summ.style.display = classWide ? 'none' : '';
 }
@@ -721,6 +724,7 @@ function renderTeacherBody(){
   else if(teacherView==='manage') renderTeacherManage();
   else if(teacherView==='activities') renderTeacherActivities();
   else if(teacherView==='reports') renderTeacherReports();
+  else if(teacherView==='mic') renderTeacherMic();
   else if(teacherView==='livequiz'){ if(typeof renderTeacherLiveQuiz==='function') renderTeacherLiveQuiz(); }
   else renderTeacherGrid();
 }
@@ -2825,6 +2829,158 @@ async function renderTeacherReports(){
     return `<tr><td class="nc" title="${escAttr(who)}">${escHtml(who)}</td><td>${escHtml(when)}</td><td>${escHtml(d.location||'')}</td><td>${escHtml(d.message||'')}</td></tr>`;
   }).join('');
   box.innerHTML=`<div class="t-grid-wrap"><table><thead><tr><th class="nc">Student</th><th>When</th><th>Where</th><th>Message</th></tr></thead><tbody>${rows}</tbody></table></div>`;
+}
+
+/* ── Mic recordings view ────────────────────────────────────────────────
+   Real classroom audio for tuning the mic listening (coach.js micRec*).
+   Off until switched on here. While on, a student starting a Listening
+   Coach check or a Note Runner round is asked ONCE per device "Save this
+   take as a recording to help your teacher make this feature better?" —
+   only a "Yes, save it" device records, with a red "Recording this take
+   for your teacher" label showing the whole time. It stops asking once
+   `max` takes are saved (micTakesMeta/count).
+
+   Each take is micTakes/<uid>-<coach|nr>: the metadata on the doc, the
+   audio (24 kHz 16-bit mono, at most 30 s) in chunks/{i}. Download WAV
+   puts the chunks back together into a .wav right here in the browser;
+   Download data is the doc as JSON (what was expected and when, what the
+   mic heard, the verdicts, the device). Needs the micTakes rules pasted
+   into the Firebase console — see firestore.rules. */
+let teacherMicTakes = [];
+async function renderTeacherMic(){
+  const box=document.getElementById('t-grid-container');
+  box.innerHTML='<div class="t-loading">Loading mic recordings…</div>';
+  const cfg = await loadTeacherClassConfig();
+  if(teacherView!=='mic' || !cfg) return;
+  if(!teacherClassConfigReadOk){
+    box.innerHTML='<div class="t-loading">Could not read the class settings — check your connection and reload.</div>';
+    return;
+  }
+  let count = 0, takes = [], readErr = '';
+  try{
+    await ensureDb();
+    const c = await db.collection('micTakesMeta').doc('count').get();
+    count = c.exists ? (Number(c.data().n) || 0) : 0;
+    const snap = await db.collection('micTakes').get();
+    takes = snap.docs.map(d => Object.assign({ id: d.id }, d.data()));
+    takes.sort((a,b) => ((b.savedAt && b.savedAt.toMillis && b.savedAt.toMillis()) || 0) - ((a.savedAt && a.savedAt.toMillis && a.savedAt.toMillis()) || 0));
+  }catch(e){
+    readErr = 'Could not load the recordings. If you have not yet pasted the new firestore.rules into the Firebase console (Firestore Database → Rules → Publish), do that first.';
+  }
+  if(teacherView!=='mic') return;
+  teacherMicTakes = takes;
+  const ms = cfg.micSampling || {};
+  const on = ms.on === true;
+  const max = Number(ms.max) > 0 ? Number(ms.max) : 40;
+  const ctl = `
+    <div class="tg-class">
+      <div class="tg-class-lbl">&#x1F399;&#xFE0F; Collect mic recordings</div>
+      <div class="tg-seg">
+        <button class="tg-seg-btn ${on?'on':''}" onclick="teacherSetMicSampling(true)">On</button>
+        <button class="tg-seg-btn ${!on?'on':''}" onclick="teacherSetMicSampling(false)">Off</button>
+      </div>
+    </div>
+    <div class="tg-note">
+      Stop after <input type="number" id="t-mic-max" min="1" max="500" value="${max}" style="width:5em"> takes
+      <button class="tg-seg-btn" onclick="teacherSetMicSampling(${on})">Save</button>
+      · Collected so far: <b>${count}</b>
+      <button class="tg-seg-btn" onclick="teacherResetMicCount()">Reset counter</button>
+    </div>
+    <div class="tg-note">When this is on, each student is asked once per device before a Listening Coach check or a Note Runner round. Only students who say “Yes, save it” are recorded, with a red label on screen while it records. Each student keeps one take per game; a newer take replaces it. Students load the setting when they open the site.</div>`;
+  if(readErr){ box.innerHTML = ctl + `<div class="t-loading">${escHtml(readErr)}</div>`; return; }
+  if(!takes.length){ box.innerHTML = ctl + '<div class="t-loading">No recordings yet.</div>'; return; }
+  const rows = takes.map((d, i) => {
+    const when = d.savedAt && d.savedAt.toDate ? d.savedAt.toDate().toLocaleString() : '—';
+    const game = d.mode === 'nr' ? 'Note Runner' + (d.level != null ? ' · level ' + (Number(d.level) + 1) : '')
+                                 : 'Listening Coach' + (d.coachMode ? ' · ' + d.coachMode : '');
+    const right = (d.expected || []).filter(e => ['ok','oct','perfect','good'].indexOf(e.verdict) >= 0).length;
+    return `<tr><td class="nc" title="${escAttr(d.name || d.uid || '')}">${escHtml(d.name || (d.uid || '').slice(0,8))}</td>`+
+      `<td>${escHtml(d.period || '')}</td><td>${escHtml(game)}</td><td>${escHtml(String(d.bpm || ''))}</td>`+
+      `<td>${escHtml(String(d.durationSec || ''))} s</td><td>${right} / ${(d.expected || []).length}</td><td>${escHtml(when)}</td>`+
+      `<td><button class="tg-seg-btn" onclick="teacherMicDownloadWav(${i})">Download WAV</button> `+
+      `<button class="tg-seg-btn" onclick="teacherMicDownloadJson(${i})">Download data</button> `+
+      `<button class="tg-seg-btn" onclick="teacherMicDelete(${i})">Delete</button></td></tr>`;
+  }).join('');
+  box.innerHTML = ctl + `<div class="t-grid-wrap"><table><thead><tr><th class="nc">Student</th><th>Period</th><th>Game</th><th>BPM</th><th>Length</th><th>Counted right</th><th>Saved</th><th></th></tr></thead><tbody>${rows}</tbody></table></div>`;
+}
+async function teacherSetMicSampling(on){
+  const el = document.getElementById('t-mic-max');
+  const max = Math.max(1, Math.min(500, Math.round(Number(el && el.value) || 40)));
+  const prev = (teacherClassConfig || {}).micSampling;
+  try{
+    await teacherWriteConfig({ micSampling: { on: !!on, max } },
+      { 'micSampling.on': prev ? prev.on : undefined, 'micSampling.max': prev ? prev.max : undefined });
+    if(teacherClassConfig) teacherClassConfig.micSampling = { on: !!on, max };
+  }catch(e){
+    teacherConfigSaveFailed(e, 'Could not save that change — check your connection and Firestore rules.');
+  }
+  if(teacherView==='mic') renderTeacherMic();
+}
+async function teacherResetMicCount(){
+  if(!confirm('Set the count of collected takes back to 0? The recordings themselves are kept. Students will be asked again only on devices that have not answered yet.')) return;
+  try{
+    await ensureDb();
+    await db.collection('micTakesMeta').doc('count').set({ n: 0 });
+  }catch(e){ alert('Could not reset the counter — check your connection and Firestore rules.'); }
+  if(teacherView==='mic') renderTeacherMic();
+}
+function teacherMicSaveFile(name, blob){
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(blob);
+  a.download = name;
+  document.body.appendChild(a); a.click(); a.remove();
+  setTimeout(() => URL.revokeObjectURL(a.href), 4000);
+}
+function teacherMicFileBase(d){
+  const who = String(d.name || d.uid || 'student').replace(/[^A-Za-z0-9]+/g, '-').replace(/^-|-$/g, '');
+  const when = d.savedAt && d.savedAt.toDate ? d.savedAt.toDate().toISOString().slice(0, 16).replace(/[:T]/g, '-') : 'take';
+  return `mic-${d.mode || 'take'}-${who}-${when}`;
+}
+function teacherMicJsonable(v){
+  if(v && typeof v.toDate === 'function') return v.toDate().toISOString();
+  if(Array.isArray(v)) return v.map(teacherMicJsonable);
+  if(v && typeof v === 'object'){ const o = {}; Object.keys(v).forEach(k => o[k] = teacherMicJsonable(v[k])); return o; }
+  return v;
+}
+function teacherMicDownloadJson(i){
+  const d = teacherMicTakes[i]; if(!d) return;
+  teacherMicSaveFile(teacherMicFileBase(d) + '.json',
+    new Blob([JSON.stringify(teacherMicJsonable(d), null, 2)], { type: 'application/json' }));
+}
+// The chunks back together, behind a 44-byte WAV header (16-bit mono PCM).
+async function teacherMicDownloadWav(i){
+  const d = teacherMicTakes[i]; if(!d) return;
+  try{
+    await ensureDb();
+    const ref = db.collection('micTakes').doc(d.id).collection('chunks');
+    const parts = [];
+    for(let k = 0; k < (d.chunks || 0); k++){
+      const c = await ref.doc(String(k)).get();
+      if(!c.exists) throw new Error('chunk ' + k + ' missing');
+      parts.push(c.data().pcm.toUint8Array());
+    }
+    const len = parts.reduce((a, p) => a + p.length, 0);
+    const rate = d.sampleRate || 24000;
+    const h = new DataView(new ArrayBuffer(44));
+    const str = (o, s) => { for(let k = 0; k < s.length; k++) h.setUint8(o + k, s.charCodeAt(k)); };
+    str(0, 'RIFF'); h.setUint32(4, 36 + len, true); str(8, 'WAVE');
+    str(12, 'fmt '); h.setUint32(16, 16, true); h.setUint16(20, 1, true); h.setUint16(22, 1, true);
+    h.setUint32(24, rate, true); h.setUint32(28, rate * 2, true); h.setUint16(32, 2, true); h.setUint16(34, 16, true);
+    str(36, 'data'); h.setUint32(40, len, true);
+    teacherMicSaveFile(teacherMicFileBase(d) + '.wav', new Blob([h.buffer].concat(parts), { type: 'audio/wav' }));
+  }catch(e){ alert('Could not download that recording — ' + (e && e.message ? e.message : 'check your connection.')); }
+}
+async function teacherMicDelete(i){
+  const d = teacherMicTakes[i]; if(!d) return;
+  if(!confirm(`Delete ${d.name || 'this student'}’s ${d.mode === 'nr' ? 'Note Runner' : 'Listening Coach'} recording? This cannot be undone.`)) return;
+  try{
+    await ensureDb();
+    const ref = db.collection('micTakes').doc(d.id);
+    const chunks = await ref.collection('chunks').get();
+    for(const c of chunks.docs) await c.ref.delete();
+    await ref.delete();
+  }catch(e){ alert('Could not delete that recording — check your connection and Firestore rules.'); }
+  if(teacherView==='mic') renderTeacherMic();
 }
 
 /* ── Students view (roster bar chart + per-student detail) ───────────────

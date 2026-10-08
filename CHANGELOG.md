@@ -5,6 +5,32 @@ Notable changes to the Guitar Class site. Newest first.
 For the full session-by-session history (and the reasoning behind each change),
 see `WORKFLOW.md` and the git commit log.
 
+## 2026-10-08 — The mic keeps up in a loud room, and you can help improve it
+
+- **Your next note counts sooner.** In Note Hunt, Riff Runner's Wait Mode
+  and Pentatonic Simon Guitar Hero, the mic starts listening again as soon
+  as you pick the next note. Before, in a loud room it waited about two
+  and a half seconds after every answer, and a note played in that time
+  could be missed.
+- **Fewer "wrong note" messages from other people's guitars.** A note only
+  counts as yours if it is clearly louder than the room around you.
+- **One note counts once on a slow Chromebook.** In the Listening Coach, a
+  ringing note could count a second time, and then every note after it was
+  checked against the wrong beat.
+- **The note nearest the beat counts.** In the Listening Coach and Note
+  Runner, if another guitar sounds just before your note, your note now
+  takes the beat instead of the earlier sound.
+- **Note Call:** a note played on the old card only answers the old card.
+- **The Listening Coach waits for your last note.** If another guitar
+  filled the last beat a moment early, your own last note can still take
+  its place.
+- **New: help your teacher make the mic better.** When your teacher turns
+  this on, the Listening Coach and Note Runner ask you once: "Save this
+  take as a recording to help your teacher make this feature better?" Only
+  if you choose "Yes, save it" is the take recorded, and the screen says
+  "Recording this take for your teacher" the whole time. If you choose "No
+  thanks", nothing is recorded, and you are not asked again.
+
 ## 2026-10-07 — The mic works better in a loud room
 
 - **The Listening Coach and Note Runner hear your note even when the room

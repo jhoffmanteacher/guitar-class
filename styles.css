@@ -2003,6 +2003,13 @@ body.t-wide .t-main{max-width:none}
 .coach-x{margin-left:auto;background:none;border:none;cursor:pointer;font-size:1.125rem;color:var(--text3);line-height:1;padding:0 2px;font-family:inherit}
 .coach-x:hover{color:var(--text)}
 .coach-foot{font-size:0.75rem;color:var(--text3);margin-top:10px}
+/* Consented mic recordings (coach.js micRec*): the one-time question and
+   the label that shows the whole time a take is being recorded. */
+.micrec-ask{padding:12px 14px;border:1px solid var(--border2);border-radius:var(--radius);margin:6px 0}
+.micrec-q{margin:0 0 10px;font-size:0.9375rem;line-height:1.5;color:var(--text)}
+.micrec-btns{display:flex;flex-wrap:wrap;gap:8px}
+.micrec-on{display:inline-flex;align-items:center;gap:6px;margin:0 0 6px 8px;padding:2px 8px;border-radius:999px;font-size:0.75rem;font-weight:600;background:var(--red-bg);color:var(--red-text)}
+.micrec-dot{width:8px;height:8px;border-radius:50%;background:currentColor}
 .coach-target{font-size:0.875rem;color:var(--text);margin-bottom:6px;line-height:1.45}
 .coach-tip{font-size:0.8125rem;color:var(--text2);margin:8px 0;line-height:1.45}
 .coach-note{font-size:0.8438rem;color:var(--amber-text);background:var(--amber-bg);border-radius:8px;padding:8px 10px;margin-bottom:8px;line-height:1.45}

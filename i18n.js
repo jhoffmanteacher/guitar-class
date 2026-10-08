@@ -1345,6 +1345,12 @@
       es: 'Ya terminé' },
     'coach.foot': { en: 'Listening happens right on this device — nothing is recorded or uploaded.',
       es: 'La escucha ocurre aquí mismo en este dispositivo — no se graba ni se sube nada.' },
+    // Consented mic recordings (coach.js micRec*): asked once per device, only while the teacher has collection on
+    'micrec.ask': { en: 'Save this take as a recording to help your teacher make this feature better?',
+      es: '¿Guardar esta toma como grabación para ayudar a tu maestro a mejorar esta función?' },
+    'micrec.yes': { en: 'Yes, save it', es: 'Sí, guárdala' },
+    'micrec.no': { en: 'No thanks', es: 'No, gracias' },
+    'micrec.recording': { en: 'Recording this take for your teacher', es: 'Grabando esta toma para tu maestro' },
     'coach.interrupt.tunerTook': { en: 'The tuner took over the mic — tune up, then start the check again.',
       es: 'El afinador tomó el micrófono — afina, y luego empieza el chequeo de nuevo.' },
     'coach.interrupt.micLost': { en: 'The mic switched off before your check finished — start it again when you’re ready.',
