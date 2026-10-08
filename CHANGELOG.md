@@ -5,6 +5,13 @@ Notable changes to the Guitar Class site. Newest first.
 For the full session-by-session history (and the reasoning behind each change),
 see `WORKFLOW.md` and the git commit log.
 
+## 2026-10-08 — The metronome counts 6/8
+
+- **A 6/8 button on the metronome.** It clicks six times per bar. Click 1
+  is the loudest, and click 4 is a little louder than the rest, so you can
+  feel the two big beats. The BPM number is the speed of the six clicks.
+- The time-signature buttons are smaller so all four fit on one line.
+
 ## 2026-10-08 — The mic keeps up in a loud room, and you can help improve it
 
 - **Your next note counts sooner.** In Note Hunt, Riff Runner's Wait Mode

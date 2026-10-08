@@ -48,14 +48,14 @@ function setMetroMeter(n){
   });
   if(metroRunning){ stopMetro(); startMetro(); }
 }
-/* Arrow-key navigation for the 2/4-4/4-3/4 radiogroup (WAI-ARIA roving-tabindex
+/* Arrow-key navigation for the 2/4-4/4-3/4-6/8 radiogroup (WAI-ARIA roving-tabindex
    pattern): only the selected meter button is tabbable; arrows move selection
    and focus among the other options. */
 function meterKeydown(e){
   const nav = ['ArrowLeft','ArrowRight','ArrowUp','ArrowDown','Home','End'];
   if(!nav.includes(e.key)) return;
   e.preventDefault();
-  const order = [2,4,3];
+  const order = [2,4,3,6];
   const idx = order.indexOf(metroMeter);
   let next;
   if(e.key==='Home') next = order[0];
@@ -120,11 +120,14 @@ function syncPressedGroup(groupSel, itemSel, onClass){
 }
 
 /* Beat 1 of the bar rings out louder and higher — the downbeat you count "1" on
-   — everything else in the bar is the plain click. */
+   — everything else in the bar is the plain click. In 6/8 the BPM is the
+   eighth-note click (six per bar), and click 4 — the second big beat — gets a
+   middle accent so the bar is felt in two. */
 function tick(){
   if(!window.coachMicLive){
     const accent = metroBeatIdx === 0;
-    toolsBeep(accent ? 1320 : 880, accent ? 0.08 : 0.06, accent ? 0.55 : 0.4);
+    const mid = !accent && getMetroMeter() === 6 && metroBeatIdx === 3;
+    toolsBeep(accent ? 1320 : mid ? 1100 : 880, accent ? 0.08 : 0.06, accent ? 0.55 : mid ? 0.47 : 0.4);
   }
   syncMetroMutedNote();
   const dot=document.getElementById('metro-dot'); if(dot){ dot.classList.add('flash'); setTimeout(()=>dot.classList.remove('flash'),80); }
