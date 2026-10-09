@@ -11,4 +11,4 @@ Source-of-truth documents that live outside the repo. Update them in place; Clau
 
 ## Design prototypes (archived)
 
-- `archive/fretboard-demo.html` — side-by-side comparison of the old chord-diagram-style single-note view vs. three horizontal-fretboard alternatives (A: minimal, B: highlighted string, C: full string with naturals labeled). The chosen style is now live in `index.html` (`localStringFretboardSvg`), so this is kept only as an archive of the alternatives. Open with Live Server to revisit them.
+- `fretboard-demo.html` (deleted 2026-10-09; `git show c751db8:"Relevant reference docs/archive/fretboard-demo.html"`) — side-by-side comparison of the old chord-diagram-style single-note view vs. three horizontal-fretboard alternatives (A: minimal, B: highlighted string, C: full string with naturals labeled). The chosen style is now live in `index.html` (`localStringFretboardSvg`), so this is kept only as an archive of the alternatives. Restore it from git to revisit them.
