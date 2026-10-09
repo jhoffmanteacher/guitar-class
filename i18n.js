@@ -485,6 +485,8 @@
     'ca.cardSpeedLabel':       { en: 'Speed', es: 'Velocidad' },
     'ca.cardGuitarAria':       { en: 'Guitar', es: 'Guitarra' },
     'ca.cardGuitarOn':         { en: 'Guitar on', es: 'Con guitarra' },
+    'ca.cardGuitarTitle':      { en: 'Guitar off makes the record\u2019s guitar quieter, not silent, so you can play the part.',
+                                 es: 'Sin guitarra baja la guitarra del disco, pero no la quita, para que tú toques la parte.' },
     'ca.cardGuitarOff':        { en: 'Guitar off', es: 'Sin guitarra' },
     'ca.cardSpeedAria':        { en: 'Speed: slower or normal', es: 'Velocidad: más lenta o normal' },
     'ca.cardDirections':       { en: 'Press Play song and play along. Check a box when you can do it.',
