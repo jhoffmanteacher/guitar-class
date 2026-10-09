@@ -23,7 +23,7 @@ window.__installFakes = () => { const SR = 48000;
       for (const a of act) { const dt = (tMs - a.p.t) / 1000; if (dt < 0) continue;
         const env = Math.exp(-dt / 0.6) * a.p.amp, x = a.w * dt;
         v += env * (Math.sin(x) + 0.5*Math.sin(2*x) + 0.25*Math.sin(3*x));
-        if (dt < 0.006) v += (Math.random() - 0.5) * 3 * a.p.amp * (1 - dt/0.006); }
+        if (dt < 0.006) v += (Math.random() - 0.5) * 3 * a.p.amp * (a.p.scrape == null ? 1 : a.p.scrape) * (1 - dt/0.006); }
       b[i] = v; } } };
   coachFrameBuf = new Float32Array(4096); window.coachMicLive = true; };
 Object.defineProperty(document, 'hidden', { get: () => false, configurable: true });
@@ -31,11 +31,11 @@ gamesStopMic = function(){};
 coachEvictTuner = () => __installFakes();
 window.__room = (from, to, room) => { if (room) for (let t = from; t < to; t += 150 + Math.random() * 400)
     __plucks.push({ t, midi: 40 + Math.floor(Math.random() * 30), amp: 0.15 * room * (0.4 + Math.random() * 0.6) }); };
-window.__runCoach = async (btn, { frameMs = 40, wrongBy = 0, room = 0, timingMs = 0, jitter = 0 } = {}) => {
+window.__runCoach = async (btn, { frameMs = 40, wrongBy = 0, room = 0, timingMs = 0, jitter = 0, amp = 0.15, scrape = 1 } = {}) => {
   __plucks.length = 0; __errs.length = 0;
   coachOpen(btn); __installFakes(); await coachStartCheck(); __step(frameMs, 50);
   if (!coach || !coach.listenStart) return { err: 'no countin', phase: coach && coach.phase };
-  coach.slots.forEach((s, i) => (s.midis || [s.midi]).forEach(m => __plucks.push({ t: coach.listenStart + i * coach.beatMs + timingMs + (Math.random()-0.5)*2*jitter, midi: m + wrongBy, amp: 0.15 })));
+  coach.slots.forEach((s, i) => (s.midis || [s.midi]).forEach(m => __plucks.push({ t: coach.listenStart + i * coach.beatMs + timingMs + (Math.random()-0.5)*2*jitter, midi: m + wrongBy, amp, scrape })));
   __room(coach.listenStart - 2000, coach.listenStart + coach.slots.length * coach.beatMs + 3000, room);
   let g = 0; while (coach && coach.phase !== 'report' && g++ < 160) __step(frameMs, 250);
   return { phase: coach && coach.phase, states: coach && coach.slots.map(s => s.state + (s.loose ? '~' : '')).join(' '), errs: __errs.slice() };

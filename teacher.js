@@ -3220,6 +3220,21 @@ function micEvalTake(pcm, R, d, deps){
     }
     return out;
   }
+  /* The Coach's own reading schedule: one 2048-sample window ending every
+     `step` ms from `fromEnd` to `toEnd` (recording ms), gated at half
+     COACH_PITCH_GATE the way coachLoop gates its readings. */
+  function siteReadings(fromEnd, toEnd, step){
+    const out = [];
+    for (let t = fromEnd; t <= toEnd; t += step){
+      const end = Math.round(t / 1000 * R2);
+      if (end > y.length || end - FW < 0) continue;
+      let s = 0; for (let i = end - 1024; i < end; i++) s += y[i] * y[i];
+      if (Math.sqrt(s / 1024) <= deps.GATE * 0.5) continue;
+      const f = deps.detectPitch(y, R2, 0.22, end);
+      if (f > 0) out.push(69 + 12 * Math.log2(f / 440));
+    }
+    return out;
+  }
   const VERD = { ok: 'right', oct: 'right', perfect: 'right', good: 'right', wrong: 'wrong', pitch: 'wrong', dim: 'unclear', miss: 'miss' };
   // where an on-the-click note lands in the recording
   const offs = clicks.lagMs != null ? clicks.lagMs : (mapMs != null ? lat - mapMs : lat);
@@ -3237,7 +3252,7 @@ function micEvalTake(pcm, R, d, deps){
     let site = VERD[e.verdict] || e.verdict || '?';
     if (site === 'wrong' && e.unclear) site = 'unclear';
     const chord = !!(e.chord || (e.midis && e.midis.length > 1 && d.coachMode === 'chords'));
-    const rec = { i, site, played: !!o, onsetMs: o ? r1(o.ms - want) : null, snrDb: r1(dB(pk) - floorDb), n: rd.length,
+    const rec = { i, site, played: !!o, secondLook: !!e.secondLook, onsetMs: o ? r1(o.ms - want) : null, snrDb: r1(dB(pk) - floorDb), n: rd.length,
       heard: rd.length ? r1(med(rd)) : null };
     // what the site itself had for this note: the event it matched here
     const sev = d.mode === 'nr'
@@ -3260,6 +3275,20 @@ function micEvalTake(pcm, R, d, deps){
       const near = ex.map(r => r - T).concat(oc.map(r => r - T - 12));
       rec.cents = near.length ? Math.round(100 * med(near)) : null;
       rec.replay = rd.length < 2 ? 'none' : rec.exact + rec.oct >= 0.5 ? 'present' : rec.exact + rec.oct >= 0.2 ? 'mixed' : 'other';
+      /* What the Coach's SECOND LOOK (coach.js coachSecondLook, on trial)
+         would do with a note it called unclear: the same window — from
+         the matched event's attack + 70 ms to 3/4 of a beat (at most
+         600 ms) past the beat, or the event's own 340 ms if later — read
+         on the Coach's 40 ms schedule; right when the note or its octave
+         is at least half of at least 3 readings. */
+      if (d.mode !== 'nr' && site === 'unclear'){
+        const m0 = mapMs != null ? mapMs : 0;
+        const beatA = e.t + (Number(d.gridOffsetMs) || 0) + lat - m0;
+        const hitA = sev && sev.t != null ? sev.t + lat - m0 : beatA;
+        const lk = siteReadings(hitA + 70, Math.max(beatA + Math.min((beat || 600) * 0.75, 600), hitA + 340), 40);
+        const share = lk.length ? lk.filter(r => Math.abs(r - T) <= 0.6 || Math.abs(r - T - 12) <= 0.6).length / lk.length : 0;
+        rec.look = { n: lk.length, share: Math.round(share * 100) / 100, pass: lk.length >= 3 && share >= 0.5 };
+      }
       // low strings: fundamental vs 2nd harmonic, straight off the raw mic
       if (T < 52 && o && rd.length >= 2){
         const f0 = 440 * Math.pow(2, (T - 69) / 12), c = ms2s(at + 90);
@@ -3296,7 +3325,13 @@ function micEvalTake(pcm, R, d, deps){
     unclearSiteReadings: med(notes.filter(n => n.site === 'unclear').map(n => n.siteN)),
     presentSiteReadings: med(notes.filter(n => n.site === 'unclear' && n.replay === 'present').map(n => n.siteN)),
     // no new pick attack anywhere near the note: nothing was played there
-    silentMiss: cnt(n => (n.site === 'miss' || n.site === 'unclear') && !n.played),
+    silentMiss: cnt(n => (n.site === 'miss' || n.site === 'unclear') && !n.played && n.replay !== 'present'),
+    // counted right by the Coach's second look (coach.js coachSecondLook)
+    secondLook: cnt(n => n.secondLook),
+    // what the second look WOULD do with this take's unclear notes:
+    // count right (and of those, how many the replay also finds clearly)
+    lookWould: cnt(n => n.look && n.look.pass),
+    lookWouldPresent: cnt(n => n.look && n.look.pass && n.replay === 'present'),
     octDominant: cnt(n => n.oct > n.exact && n.oct >= 0.3),
     medianSnrDb: r1(med(notes.filter(n => n.snrDb != null).map(n => n.snrDb))),
     medianCents: (() => { const c = notes.filter(n => n.cents != null).map(n => n.cents); return c.length ? med(c) : null; })(),
@@ -3352,7 +3387,7 @@ skew        what the site did to an on-the-click note with the student's actual 
 right       notes the site counted right / notes expected
 inAud       notes the replay (site's own filters + YIN) finds clearly in the audio
 detMiss     site said not-right, but the note is loud and clearly in the audio
-silent      site said miss/unclear and there is no pick attack near the note either (not played)
+silent      site said miss/unclear, no pick attack near the note and the note isn't ringing (not played)
 oct         notes where the octave above outvoted the real note
 snr         median note level above the room floor (dB)
 cents       median tuning of the notes heard (cents off the written note)
@@ -3413,6 +3448,11 @@ function teacherMicEvalHtml(){
       : 'Mic delay: the count-in beeps were not heard in any recording (speaker muted or headphones), so the delay could not be measured.',
     `Loudest notes: ${v(med(rows.map(r => r.level.loudDb)))} dB (0 is the maximum). ${clipped ? `<b>${clipped}</b> recordings were too loud and clipped.` : 'None clipped.'}`
   ];
+  const unclearCoach = sum(r => r.game.indexOf('Coach') === 0 ? r.notes.siteUnclear : 0);
+  if(unclearCoach){
+    const would = sum(r => r.notes.lookWould), good = sum(r => r.notes.lookWouldPresent);
+    lines.push(`Being tested, not live yet: a "second look" in the Listening Coach would count <b>${would}</b> of its ${unclearCoach} unclear notes right — ${good} of them clearly the right note in the recording, ${would - good} not clearly.`);
+  }
   const tr = rows.map((r, i) => {
     const nb = r.notes, L = r.latency;
     return `<tr><td class="nc" title="${escAttr(teacherMicEvalNames[i] || '')}">${escHtml(r.take + ' · ' + (teacherMicEvalNames[i] || ''))}</td>`+
