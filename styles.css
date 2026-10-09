@@ -2490,6 +2490,15 @@ body.explore-open #week-panels{display:none}
 .pc-speed-track{position:relative;flex:0 0 44px;width:44px;height:24px;border-radius:999px;background:var(--purple-accent)}
 .pc-speed-knob{position:absolute;top:3px;left:3px;width:18px;height:18px;border-radius:50%;background:var(--bg);box-shadow:0 1px 3px rgba(0,0,0,0.3);transition:left .15s}
 .pc-speed[aria-checked="true"] .pc-speed-knob{left:23px}
+/* The Guitar switch: a chip like .snip-toggle, a green/grey track and
+   plain-text labels, so it is told apart from the purple speed control. */
+.pc-guitar{gap:6px;min-height:36px;padding:0 12px 0 10px;font-size:0.8125rem;font-weight:600;background:var(--bg2);border:1px solid var(--border2);border-radius:18px}
+.pc-guitar:hover{background:var(--bg3)}
+.pc-guitar .pc-speed-track{flex-basis:40px;width:40px;height:22px;background:var(--text3)}
+.pc-guitar .pc-speed-knob{width:16px;height:16px}
+.pc-guitar[aria-checked="true"] .pc-speed-track{background:var(--green-text)}
+.pc-guitar[aria-checked="true"] .pc-speed-knob{left:21px}
+.pc-guitar .pc-speed-lab.on{color:var(--text);font-weight:700}
 /* The four-stop speed slider (pcSpeed3Html). --t is the thumb width: a
    native range puts stop i at t/2 + i*(100% - t)/3, so the ticks and the
    line use the same sum and sit exactly under the knob's stops. The

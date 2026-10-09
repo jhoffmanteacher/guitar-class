@@ -11235,9 +11235,12 @@ function pcSpeedSwitchHtml(){
    pcSpeedSwitchHtml, Off on the left and On on the right, knob under the
    bold label. "Off" is the rhythm-down mix, so the record's guitar gets
    quieter, not silent; the tooltip (ca.snipGuitarTitle) says so. Step
-   snippets and the Journey pages keep their who-plays-it button. */
+   snippets and the Journey pages keep their who-plays-it button. It sits
+   in a chip like the Metronome button, with a green track, so it never
+   reads as part of the purple speed control beside it. */
 function pcGuitarSwitchHtml(){
   return `<button type="button" class="pc-speed pc-guitar" role="switch" aria-checked="true" aria-label="${escAttr(t('ca.cardGuitarAria'))}" title="${escAttr(t('ca.snipGuitarTitle'))}" onclick="pcSetGuitar(this)">`
+    +   `<span class="pc-guitar-ico" aria-hidden="true">&#x1F3B8;</span>`
     +   `<span class="pc-speed-lab">${escHtml(t('ca.cardGuitarOff'))}</span>`
     +   `<span class="pc-speed-track" aria-hidden="true"><span class="pc-speed-knob"></span></span>`
     +   `<span class="pc-speed-lab on">${escHtml(t('ca.cardGuitarOn'))}</span></button>`;
