@@ -11231,18 +11231,28 @@ function pcSpeedSwitchHtml(){
     +   `<span class="pc-speed-lab">${escHtml(t('ca.cardNormal'))}</span></button>`;
 }
 function pcSpeed3Html(tr){
-  /* Only the two ends are named (Jonathan, 2026-10-09: "slowest and normal
-     on each end and two settings in the middle"). The middle two show a dot;
-     their words stay as the accessible name and the tooltip. */
-  const opt = (speed, key, rate, on, named) =>
-    `<button type="button" class="pc-speed-opt${named ? '' : ' pc-speed-mid'}${on ? ' on' : ''}" data-speed="${speed}" data-rate="${rate}" aria-pressed="${on ? 'true' : 'false'}"`
-    + (named ? '' : ` aria-label="${escAttr(t(key))}" title="${escAttr(t(key))}"`)
-    + ` onclick="pcSetSpeedTo(this)">${named ? escHtml(t(key)) : '<span class="pc-speed-dot" aria-hidden="true"></span>'}</button>`;
-  return `<span class="pc-speed3" role="group" aria-label="${escAttr(t('ca.cardSpeed4Aria'))}">`
-    + opt('slowest', 'ca.cardSlowest', SLOWEST_RATE, false, true)
-    + opt('slower', 'ca.cardSlower', 1, true, false)
-    + opt('slow', 'ca.cardSlow', pcSlowRate(tr).toFixed(4), false, false)
-    + opt('normal', 'ca.cardNormal', 1, false, true)
+  /* A stepped slider (2026-10-08): the dot-row version left students unsure
+     the middle dots were options at all. Only the two ends are named on the
+     rail ("slowest and normal on each end", 2026-10-09); the readout after
+     them names the stop the knob is on. The native range does drag, keyboard and
+     the accessible value; the ticks sit exactly under its four stops, so a
+     tap on a tick lands on that stop. Each tick still carries data-speed /
+     data-rate — pcSetSpeedTo() reads the one the range points at. */
+  const stops = [
+    ['slowest', 'ca.cardSlowest', SLOWEST_RATE],
+    ['slower',  'ca.cardSlower',  1],
+    ['slow',    'ca.cardSlow',    pcSlowRate(tr).toFixed(4)],
+    ['normal',  'ca.cardNormal',  1],
+  ];
+  const START = 1;   // Slower — the card opens with data-slow="1"
+  const ticks = stops.map(([speed, key, rate], i) =>
+    `<span class="pc-speed-tick${i === START ? ' on' : ''}" style="--i:${i}" data-speed="${speed}" data-rate="${rate}" data-label="${escAttr(t(key))}"></span>`).join('');
+  return `<span class="pc-speed4" role="group" aria-label="${escAttr(t('ca.cardSpeed4Aria'))}">`
+    + `<span class="pc-speed-end" data-end="slowest" aria-hidden="true">${escHtml(t('ca.cardSlowest'))}</span>`
+    + `<span class="pc-speed-rail"><span class="pc-speed-line" aria-hidden="true"></span>${ticks}`
+    +   `<input type="range" class="pc-speed-range" min="0" max="3" step="1" value="${START}" aria-label="${escAttr(t('ca.cardSpeedLabel'))}" aria-valuetext="${escAttr(t(stops[START][1]))}" oninput="pcSpeedShow(this)" onchange="pcSetSpeedTo(this)"></span>`
+    + `<span class="pc-speed-end" data-end="normal" aria-hidden="true">${escHtml(t('ca.cardNormal'))}</span>`
+    + `<span class="pc-speed-now" aria-hidden="true">${escHtml(t('ca.cardSpeedNow', { speed: t(stops[START][1]) }))}</span>`
     + `</span>`;
 }
 function pcRate(root){ const r = root && parseFloat(root.dataset.rate); return r > 0 ? r : 1; }
@@ -11689,21 +11699,32 @@ function pcSetSpeed(sw){
   if(labs[1]) labs[1].classList.toggle('on', !slow);
   pcRetrack(root);
 }
-// The four-way control (a card with `slowest: true`): Slowest and Slower
+// The four-stop slider (a card with `slowest: true`): Slowest and Slower
 // both set data-slow, so every slow-file reader above is unchanged; Slow and
-// Normal play the fast file, and each option's data-rate becomes the card's.
-function pcSetSpeedTo(btn){
-  const root = btn.closest('.pc');
+// Normal play the fast file, and the stop's data-rate becomes the card's.
+// While dragging, `input` only repaints; `change` (release, a tap, an arrow
+// key) applies, so a drag across the rail swaps the file once, not per stop.
+function pcSpeedShow(range){
+  const wrap = range.closest('.pc-speed4');
+  const ticks = wrap.querySelectorAll('.pc-speed-tick');
+  const tick = ticks[+range.value] || ticks[1];
+  ticks.forEach(tk => tk.classList.toggle('on', tk === tick));
+  wrap.querySelectorAll('.pc-speed-end').forEach(e => e.classList.toggle('on', e.dataset.end === tick.dataset.speed));
+  const label = tick.dataset.label;
+  range.setAttribute('aria-valuetext', label);
+  const now = wrap.querySelector('.pc-speed-now');
+  if(now) now.textContent = t('ca.cardSpeedNow', { speed: label });
+  return tick;
+}
+function pcSetSpeedTo(range){
+  const root = range.closest('.pc');
   if(!root) return;
-  const speed = btn.dataset.speed;
-  if(btn.classList.contains('on')) return;
-  root.dataset.slow = (speed === 'slowest' || speed === 'slower') ? '1' : '';
-  root.dataset.rate = btn.dataset.rate || '1';
-  btn.parentNode.querySelectorAll('.pc-speed-opt').forEach(b => {
-    const on = b === btn;
-    b.classList.toggle('on', on);
-    b.setAttribute('aria-pressed', on ? 'true' : 'false');
-  });
+  const tick = pcSpeedShow(range);
+  const speed = tick.dataset.speed, rate = tick.dataset.rate || '1';
+  const slow = (speed === 'slowest' || speed === 'slower') ? '1' : '';
+  if(root.dataset.slow === slow && pcRate(root) === parseFloat(rate)) return;
+  root.dataset.slow = slow;
+  root.dataset.rate = rate;
   pcRetrack(root);
 }
 function pcSetGuitar(btn){

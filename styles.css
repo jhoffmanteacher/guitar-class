@@ -2489,13 +2489,24 @@ body.explore-open #week-panels{display:none}
 .pc-speed-track{position:relative;flex:0 0 44px;width:44px;height:24px;border-radius:999px;background:var(--purple-accent)}
 .pc-speed-knob{position:absolute;top:3px;left:3px;width:18px;height:18px;border-radius:50%;background:var(--bg);box-shadow:0 1px 3px rgba(0,0,0,0.3);transition:left .15s}
 .pc-speed[aria-checked="true"] .pc-speed-knob{left:23px}
-.pc-speed3{display:inline-flex;gap:2px;padding:3px;border-radius:999px;background:var(--bg2);border:1px solid var(--border2)}
-.pc-speed-opt{min-height:34px;padding:0 12px;font:inherit;font-size:0.875rem;color:var(--text2);background:none;border:0;border-radius:999px;cursor:pointer}
-.pc-speed-opt:hover{background:var(--bg3)}
-.pc-speed-opt.on{background:var(--text);color:var(--bg);font-weight:700}
-.pc-speed-mid{min-width:34px;padding:0 10px;display:inline-flex;align-items:center;justify-content:center}
-.pc-speed-dot{width:8px;height:8px;border-radius:50%;background:currentColor}
-.pc-play:focus-visible,.pc-speed:focus-visible,.pc-speed-opt:focus-visible,.pc-sec:focus-visible,.pc-check-btn:focus-visible,.pc-help-btn:focus-visible{outline:2px solid var(--blue-text);outline-offset:2px}
+/* The four-stop speed slider (pcSpeed3Html). --t is the thumb width: a
+   native range puts stop i at t/2 + i*(100% - t)/3, so the ticks and the
+   line use the same sum and sit exactly under the knob's stops. */
+.pc-speed4{display:inline-flex;align-items:center;flex-wrap:wrap;gap:4px 8px;font-size:0.875rem;color:var(--text2)}
+.pc-speed-now{min-width:9.5em;margin-left:8px;font-weight:700;color:var(--purple-text)}
+.pc-speed-end.on{color:var(--purple-text);font-weight:700}
+.pc-speed-rail{--t:22px;position:relative;display:inline-block;width:150px;height:36px;flex:0 0 150px}
+.pc-speed-line{position:absolute;left:calc(var(--t) / 2);right:calc(var(--t) / 2);top:50%;height:4px;margin-top:-2px;border-radius:2px;background:var(--border2)}
+.pc-speed-tick{position:absolute;top:50%;left:calc(var(--t) / 2 + var(--i) * (100% - var(--t)) / 3);width:12px;height:12px;margin:-6px 0 0 -6px;border-radius:50%;background:var(--bg);border:2px solid var(--text2);box-sizing:border-box;pointer-events:none}
+.pc-speed-range{position:absolute;inset:0;width:100%;height:100%;margin:0;background:transparent;-webkit-appearance:none;appearance:none;cursor:pointer}
+.pc-speed-range::-webkit-slider-runnable-track{height:36px;background:transparent;border:0}
+.pc-speed-range::-webkit-slider-thumb{-webkit-appearance:none;appearance:none;box-sizing:border-box;width:22px;height:22px;margin-top:7px;border-radius:50%;background:var(--purple-text);border:3px solid var(--bg);box-shadow:0 1px 3px rgba(0,0,0,0.35);cursor:grab}
+.pc-speed-range::-moz-range-track{height:36px;background:transparent;border:0}
+.pc-speed-range::-moz-range-thumb{box-sizing:border-box;width:22px;height:22px;border-radius:50%;background:var(--purple-text);border:3px solid var(--bg);box-shadow:0 1px 3px rgba(0,0,0,0.35);cursor:grab}
+.pc-speed-range:active::-webkit-slider-thumb{cursor:grabbing}
+.pc-speed-range:focus{outline:none}
+.pc-speed-range:focus-visible{outline:2px solid var(--blue-text);outline-offset:2px;border-radius:999px}
+.pc-play:focus-visible,.pc-speed:focus-visible,.pc-sec:focus-visible,.pc-check-btn:focus-visible,.pc-help-btn:focus-visible{outline:2px solid var(--blue-text);outline-offset:2px}
 .pc-status{min-height:1.4em;margin:6px 0 2px;font-size:0.875rem;font-weight:600;color:var(--purple-text)}
 .pc-hint{margin:0 0 6px;font-size:0.8125rem;color:var(--text2)}
 .pc-secs{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:8px}

@@ -5,6 +5,13 @@ Notable changes to the Guitar Class site. Newest first.
 For the full session-by-session history (and the reasoning behind each change),
 see `WORKFLOW.md` and the git commit log.
 
+## 2026-10-09 — The speed control is a slider
+
+- **Easier to see all four speeds.** The speed control on the play-along
+  cards is now a slider with four stops. Drag the knob, or tap a stop.
+  The words next to it say which speed you are on, for example
+  "Speed: Slower". The card still starts on Slower.
+
 ## 2026-10-09 — A fourth speed on the play-along cards
 
 - **One more speed.** The speed control on every play-along card now has
