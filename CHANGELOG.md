@@ -9,8 +9,9 @@ see `WORKFLOW.md` and the git commit log.
 
 - **Easier to see all four speeds.** The speed control on the play-along
   cards is now a slider with four stops. Drag the knob, or tap a stop.
-  The words next to it say which speed you are on, for example
-  "Speed: Slower". The card still starts on Slower.
+  Each stop shows how fast it plays compared with the real song. For
+  example, 0.85× is a little slower than the song, and 1× is the real
+  speed. The card still starts on the second stop.
 
 ## 2026-10-09 — A fourth speed on the play-along cards
 

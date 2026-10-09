@@ -11232,29 +11232,36 @@ function pcSpeedSwitchHtml(){
 }
 function pcSpeed3Html(tr){
   /* A stepped slider (2026-10-08): the dot-row version left students unsure
-     the middle dots were options at all. Only the two ends are named on the
-     rail ("slowest and normal on each end", 2026-10-09); the readout after
-     them names the stop the knob is on. The native range does drag, keyboard and
-     the accessible value; the ticks sit exactly under its four stops, so a
-     tap on a tick lands on that stop. Each tick still carries data-speed /
-     data-rate — pcSetSpeedTo() reads the one the range points at. */
+     the middle dots were options at all. The ends read "Slower" and
+     "Normal" (Jonathan, 2026-10-09) as directions, not stop names; every
+     stop shows how fast it plays against the record (pcSpeedFactor), worked
+     out from this song's files, and the knob's stop is the bold one. The
+     native range does drag, keyboard and the accessible value; the ticks sit
+     exactly under its four stops, so a tap on a tick lands on that stop.
+     Each tick still carries data-speed / data-rate — pcSetSpeedTo() reads
+     the one the range points at. */
+  const ratio = tr.trackBpmSlow / tr.trackBpm;   // the slow file against the record
   const stops = [
-    ['slowest', 'ca.cardSlowest', SLOWEST_RATE],
-    ['slower',  'ca.cardSlower',  1],
-    ['slow',    'ca.cardSlow',    pcSlowRate(tr).toFixed(4)],
-    ['normal',  'ca.cardNormal',  1],
+    ['slowest', 'ca.cardSlowest', SLOWEST_RATE,                ratio * SLOWEST_RATE],
+    ['slower',  'ca.cardSlower',  1,                           ratio],
+    ['slow',    'ca.cardSlow',    pcSlowRate(tr).toFixed(4),   pcSlowRate(tr)],
+    ['normal',  'ca.cardNormal',  1,                           1],
   ];
   const START = 1;   // Slower — the card opens with data-slow="1"
-  const ticks = stops.map(([speed, key, rate], i) =>
-    `<span class="pc-speed-tick${i === START ? ' on' : ''}" style="--i:${i}" data-speed="${speed}" data-rate="${rate}" data-label="${escAttr(t(key))}"></span>`).join('');
+  const ticks = stops.map(([speed, key, rate, factor], i) => {
+    const x = pcSpeedFactor(factor);
+    return `<span class="pc-speed-tick${i === START ? ' on' : ''}" style="--i:${i}" data-speed="${speed}" data-rate="${rate}" data-label="${escAttr(t(key) + ', ' + x)}"></span>`
+      + `<span class="pc-speed-x${i === START ? ' on' : ''}" style="--i:${i}" aria-hidden="true">${x}</span>`;
+  }).join('');
   return `<span class="pc-speed4" role="group" aria-label="${escAttr(t('ca.cardSpeed4Aria'))}">`
-    + `<span class="pc-speed-end" data-end="slowest" aria-hidden="true">${escHtml(t('ca.cardSlowest'))}</span>`
+    + `<span class="pc-speed-end" aria-hidden="true">${escHtml(t('ca.cardSlower'))}</span>`
     + `<span class="pc-speed-rail"><span class="pc-speed-line" aria-hidden="true"></span>${ticks}`
-    +   `<input type="range" class="pc-speed-range" min="0" max="3" step="1" value="${START}" aria-label="${escAttr(t('ca.cardSpeedLabel'))}" aria-valuetext="${escAttr(t(stops[START][1]))}" oninput="pcSpeedShow(this)" onchange="pcSetSpeedTo(this)"></span>`
-    + `<span class="pc-speed-end" data-end="normal" aria-hidden="true">${escHtml(t('ca.cardNormal'))}</span>`
-    + `<span class="pc-speed-now" aria-hidden="true">${escHtml(t('ca.cardSpeedNow', { speed: t(stops[START][1]) }))}</span>`
+    +   `<input type="range" class="pc-speed-range" min="0" max="3" step="1" value="${START}" aria-label="${escAttr(t('ca.cardSpeedLabel'))}" aria-valuetext="${escAttr(t(stops[START][1]) + ', ' + pcSpeedFactor(stops[START][3]))}" oninput="pcSpeedShow(this)" onchange="pcSetSpeedTo(this)"></span>`
+    + `<span class="pc-speed-end" aria-hidden="true">${escHtml(t('ca.cardNormal'))}</span>`
     + `</span>`;
 }
+// 0.833 -> "0.85×": the nearest 0.05, YouTube's playback-speed style.
+function pcSpeedFactor(f){ return (Math.round(f * 20) / 20).toString() + '\u00d7'; }
 function pcRate(root){ const r = root && parseFloat(root.dataset.rate); return r > 0 ? r : 1; }
 function pcPlayerHtml(a, L){
   const hasFull = snippetHasFull(L.tr);
@@ -11707,13 +11714,10 @@ function pcSetSpeed(sw){
 function pcSpeedShow(range){
   const wrap = range.closest('.pc-speed4');
   const ticks = wrap.querySelectorAll('.pc-speed-tick');
-  const tick = ticks[+range.value] || ticks[1];
+  const i = ticks[+range.value] ? +range.value : 1, tick = ticks[i];
   ticks.forEach(tk => tk.classList.toggle('on', tk === tick));
-  wrap.querySelectorAll('.pc-speed-end').forEach(e => e.classList.toggle('on', e.dataset.end === tick.dataset.speed));
-  const label = tick.dataset.label;
-  range.setAttribute('aria-valuetext', label);
-  const now = wrap.querySelector('.pc-speed-now');
-  if(now) now.textContent = t('ca.cardSpeedNow', { speed: label });
+  wrap.querySelectorAll('.pc-speed-x').forEach((x, j) => x.classList.toggle('on', j === i));
+  range.setAttribute('aria-valuetext', tick.dataset.label);
   return tick;
 }
 function pcSetSpeedTo(range){
