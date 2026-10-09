@@ -1618,7 +1618,14 @@ with the same sections and bars, every root turned into the Journey Layer
 card today) gets a Slowest / Slower / Normal control in place of the switch, and
 every step snippet gets a Slowest button beside the turtle (the two release
 each other). Slowest is the SLOW file at `SLOWEST_RATE` (0.8) with
-`preservesPitch` — no third export, and the tuner still agrees. Anything
+`preservesPitch` — no third export, and the tuner still agrees.
+**Since 2026-10-09 the card control has four stops** — Slowest / Slower /
+**Slow** / Normal (Jonathan: "just below the normal speed of each song").
+Slow is the FAST file at `pcSlowRate(tr)`, halfway between the slow tier and
+normal for that song (the cure 66, Seven Nation Army ~112, Watchtower 110),
+so it always sits above Slower. Each option carries its rate in `data-rate`;
+`pcRate()` reads the card's `data-rate`. Step snippets keep their own
+Slowest/turtle buttons, unchanged. Anything
 reading the file's own clock is unchanged; only real-time amounts (count-in
 spacing, click lookahead, output latency) scale by the rate. A `load()`
 resets `playbackRate` to `defaultPlaybackRate`, which is why

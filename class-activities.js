@@ -89,7 +89,7 @@
        track: 'the-cure',                  // a SNIPPET_TRACKS key
        caption, caption_es,                // the tab's heading
        slowest: true,                      // optional: a Slowest option beside
-                                           // Slower / Normal — the slow file at
+                                           // Slower / Slow / Normal — the slow file at
                                            // 0.8x, pitch held (ca-18, ca-10)
        wholeSong: true,                    // optional: stop at the end of the
                                            // song instead of looping — for a
@@ -1162,7 +1162,7 @@ window.CLASS_ACTIVITIES = [
     intro_es: 'El riff de Seven Nation Army son siete notas en la cuerda La — tócalo con la canción, primero en Más lento y después a velocidad normal.',
     card: {
       track: 'seven-nation-army',
-      slowest: true,    // three-way speed control: Slowest (80) / Slower (100) / Normal (123) — Jonathan, 2026-09-29
+      slowest: true,    // four-way speed control (Slow added 2026-10-09): Slowest (80) / Slower (100) / Slow (~112) / Normal (123) — Jonathan, 2026-09-29
       caption:    'The riff · A string · 2 bars',
       caption_es: 'El riff · cuerda La · 2 compases',
       sections: [
@@ -1747,7 +1747,7 @@ window.CLASS_ACTIVITIES = [
     intro_es: 'Como Watchtower, esto se toca en la cuerda Mi grave — hoy tocas la intro y la estrofa de "the cure" con la banda.',
     card: {
       track: 'the-cure',
-      slowest: true,    // Slowest / Slower / Normal — like ca-18 and ca-10
+      slowest: true,    // Slowest / Slower / Slow / Normal — like ca-18 and ca-10
       caption:    'Intro and verse · low E string · 4 plucks per note',
       caption_es: 'Intro y estrofa · cuerda Mi grave · 4 pulsaciones por nota',
       sections: [
@@ -1855,7 +1855,7 @@ window.CLASS_ACTIVITIES = [
     intro_es: 'Ya tocaste la estrofa de "the cure" en la cuerda Mi grave — hoy el C se pasa a la cuerda La, traste 3, así la mano se queda dentro de los primeros cinco trastes.',
     card: {
       track: 'the-cure',
-      slowest: true,    // Slowest / Slower / Normal — like ca-18 and ca-10
+      slowest: true,    // Slowest / Slower / Slow / Normal — like ca-18 and ca-10
       caption:    'Intro and verse · two strings · 4 plucks per note',
       caption_es: 'Intro y estrofa · dos cuerdas · 4 pulsaciones por nota',
       sections: [
@@ -1962,7 +1962,7 @@ window.CLASS_ACTIVITIES = [
     intro_es: 'Ya tocas el F en el traste 1 de la cuerda Mi grave — hoy agregas la cuerda La al aire y tocas el bucle de "Luna" con la banda.',
     card: {
       track: 'luna',
-      slowest: true,    // Slowest / Slower / Normal — like ca-18 and ca-10
+      slowest: true,    // Slowest / Slower / Slow / Normal — like ca-18 and ca-10
       caption:    'The loop · F F A A · 1 pluck per bar, let it ring',
       caption_es: 'El bucle · F F A A · 1 pulsación por compás, déjala sonar',
       sections: [
@@ -2027,7 +2027,7 @@ window.CLASS_ACTIVITIES = [
     intro_es: 'Ya moviste la estrofa de "the cure" a dos cuerdas — hoy agregas el coro y tocas la canción completa con la banda.',
     card: {
       track: 'the-cure',
-      slowest: true,    // three-way speed control: Slowest (48) / Slower (60) / Normal (72) — Jonathan, 2026-09-29
+      slowest: true,    // four-way speed control (Slow added 2026-10-09): Slowest (48) / Slower (60) / Slow (66) / Normal (72) — Jonathan, 2026-09-29
       caption:    'The song in order · 4 plucks per note',
       caption_es: 'La canción en orden · 4 pulsaciones por nota',
       sections: [
@@ -2155,7 +2155,7 @@ window.CLASS_ACTIVITIES = [
   },
   /* "the cure" — The Whole Song (2026-09-30). A practice card like ca-18,
      but the whole record, bars 1–88, and ONE numbered check: play it start
-     to finish at the speed the student picks (Slowest / Slower / Normal).
+     to finish at the speed the student picks (Slowest / Slower / Slow / Normal).
      Normal is the Level up. Same two-string root line as ca-18 (A = low E 5,
      C = A 3, F = low E 1, D = A 5, G = low E 3), four plucks per bar; in
      the refrains and bridge C and G share a bar, two plucks each.
@@ -2176,7 +2176,7 @@ window.CLASS_ACTIVITIES = [
     intro_es: 'Ya sabes cada parte de "the cure" — hoy tocas la canción completa con la banda, de principio a fin.',
     card: {
       track: 'the-cure',
-      slowest: true,    // three-way speed control: Slowest (48) / Slower (60) / Normal (72) — the student picks
+      slowest: true,    // four-way speed control (Slow added 2026-10-09): Slowest (48) / Slower (60) / Slow (66) / Normal (72) — the student picks
       wholeSong: true,  // stops at the end of the song instead of looping — Jonathan, 2026-10-02
       caption:    'The whole song in order · 4 plucks per note',
       caption_es: 'La canción completa en orden · 4 pulsaciones por nota',
@@ -2793,7 +2793,7 @@ window.CLASS_ACTIVITIES = [
     card: {
       track: 'seven-nation-army',
       wholeSong: true,  // stops at the end of the song instead of looping — Jonathan, 2026-10-02
-      slowest: true,    // Slowest (80) / Slower (100) / Normal (123)
+      slowest: true,    // Slowest (80) / Slower (100) / Slow (~112) / Normal (123)
       caption:    'The whole song in order · the riff and G – A',
       caption_es: 'La canción completa en orden · el riff y G – A',
       sections: [
@@ -3052,7 +3052,7 @@ window.CLASS_ACTIVITIES = [
     card: {
       wholeSong: true,  // stops at the end of the song instead of looping — Jonathan, 2026-10-02
       track: 'all-along-the-watchtower',
-      slowest: true,    // three-way speed control: Slowest (84) / Slower (105) / Normal (115) — the student picks
+      slowest: true,    // four-way speed control (Slow added 2026-10-09): Slowest (84) / Slower (105) / Slow (110) / Normal (115) — the student picks
       caption:    'The whole song in order · 2 plucks per note',
       caption_es: 'La canción completa en orden · 2 pulsaciones por nota',
       sections: [
@@ -3208,7 +3208,7 @@ window.CLASS_ACTIVITIES = [
     card: {
       wholeSong: true,  // stops at the end of the song instead of looping
       track: 'luna',
-      slowest: true,    // three-way speed control: Slowest / Slower / Normal — the student picks
+      slowest: true,    // four-way speed control (Slow added 2026-10-09): Slowest / Slower / Slow / Normal — the student picks
       caption:    'The whole song in order · 1 pluck per bar, let it ring',
       caption_es: 'La canción completa en orden · 1 pulsación por compás, déjala sonar',
       sections: [
@@ -3319,7 +3319,7 @@ window.CLASS_ACTIVITIES = [
     card: {
       wholeSong: true,  // stops at the end of the song instead of looping
       track: 'sweet-child-o-mine',
-      slowest: true,    // three-way speed control: Slowest (80) / Slower (100) / Normal (125) — the student picks
+      slowest: true,    // four-way speed control (Slow added 2026-10-09): Slowest (80) / Slower (100) / Normal (125) — the student picks
       caption:    'The whole song in order · 1 pluck per chord, let it ring',
       caption_es: 'La canción completa en orden · 1 pulsación por acorde, déjala sonar',
       sections: [
@@ -3540,7 +3540,7 @@ window.CLASS_ACTIVITIES = [
     card: {
       wholeSong: true,  // stops at the end of the song instead of looping
       track: 'all-along-the-watchtower',
-      slowest: true,    // three-way speed control: Slowest / Slower / Normal — the student picks
+      slowest: true,    // four-way speed control (Slow added 2026-10-09): Slowest / Slower / Slow / Normal — the student picks
       caption:    'The whole song in power chords · 2 strums per chord',
       caption_es: 'La canción completa con acordes de potencia · 2 rasgueos por acorde',
       sections: [
@@ -3686,7 +3686,7 @@ window.CLASS_ACTIVITIES = [
     card: {
       wholeSong: true,  // stops at the end of the song instead of looping
       track: 'the-cure',
-      slowest: true,    // three-way speed control: Slowest / Slower / Normal — the student picks
+      slowest: true,    // four-way speed control (Slow added 2026-10-09): Slowest / Slower / Slow / Normal — the student picks
       caption:    'The whole song in power chords · 4 strums per chord',
       caption_es: 'La canción completa con acordes de potencia · 4 rasgueos por acorde',
       sections: [
@@ -4008,7 +4008,7 @@ window.CLASS_ACTIVITIES = [
     card: {
       wholeSong: true,  // stops at the end of the song instead of looping
       track: 'seven-nation-army',
-      slowest: true,    // three-way speed control: Slowest / Slower / Normal — the student picks
+      slowest: true,    // four-way speed control (Slow added 2026-10-09): Slowest / Slower / Slow / Normal — the student picks
       caption:    'The whole song in power chords · the riff and G5 – A5',
       caption_es: 'La canción completa con acordes de potencia · el riff y G5 – A5',
       sections: [
@@ -4257,7 +4257,7 @@ window.CLASS_ACTIVITIES = [
     card: {
       wholeSong: true,  // stops at the end of the song instead of looping
       track: 'luna',
-      slowest: true,    // three-way speed control: Slowest / Slower / Normal — the student picks
+      slowest: true,    // four-way speed control (Slow added 2026-10-09): Slowest / Slower / Slow / Normal — the student picks
       caption:    'The whole song in power chords · 2 strums per bar',
       caption_es: 'La canción completa con acordes de potencia · 2 rasgueos por compás',
       sections: [
@@ -4383,7 +4383,7 @@ window.CLASS_ACTIVITIES = [
     card: {
       wholeSong: true,  // stops at the end of the song instead of looping
       track: 'sweet-child-o-mine',
-      slowest: true,    // three-way speed control: Slowest / Slower / Normal — the student picks
+      slowest: true,    // four-way speed control (Slow added 2026-10-09): Slowest / Slower / Slow / Normal — the student picks
       caption:    'The whole song in power chords · 1 strum per chord, let it ring',
       caption_es: 'La canción completa con acordes de potencia · 1 rasgueo por acorde, déjalo sonar',
       sections: [

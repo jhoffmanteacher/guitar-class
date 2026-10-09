@@ -11207,8 +11207,8 @@ function pcPlayBtnHtml(playing){
     + `<span class="pc-play-label">${escHtml(t(playing ? 'ca.snipStop' : 'ca.cardPlay'))}</span>`;
 }
 /* The speed control. Every card gets the Slower / Normal switch (the slow
-   and fast files). A card with `slowest: true` gets a three-way control
-   instead — Slowest / Slower / Normal — where Slowest is the SLOW file
+   and fast files). A card with `slowest: true` gets a four-way control
+   instead — Slowest / Slower / Slow / Normal — where Slowest is the SLOW file
    played at SLOWEST_RATE, pitch held (preservesPitch), so the tuner
    still agrees with it. ca-18 only, for now (Jonathan, 2026-09-29: a
    student needed it that day); ca-10 got it the same day. "the cure" goes
@@ -11216,29 +11216,37 @@ function pcPlayBtnHtml(playing){
    file's own clock (currentTime), so only the real-time pieces — the
    count-in, the click lookahead and the output latency — divide by the
    rate. SLOWEST_RATE and slowestApplyRate() live with the snippet player,
-   which has the same Slowest tier. */
+   which has the same Slowest tier.
+   A fourth stop, Slow (Jonathan, 2026-10-09: "just below the normal speed
+   of each song"), sits between Slower and Normal: the FAST file at
+   pcSlowRate(tr), halfway between the slow tier and normal for that song —
+   so it is always above Slower, even on Watchtower where the slow file is
+   already 105 against 115. Each option carries its own playback rate in
+   data-rate; the card's data-rate is what pcRate() reads. */
+function pcSlowRate(tr){ return (1 + tr.trackBpmSlow / tr.trackBpm) / 2; }
 function pcSpeedSwitchHtml(){
   return `<button type="button" class="pc-speed" role="switch" aria-checked="false" aria-label="${escAttr(t('ca.cardSpeedAria'))}" onclick="pcSetSpeed(this)">`
     +   `<span class="pc-speed-lab on">${escHtml(t('ca.cardSlower'))}</span>`
     +   `<span class="pc-speed-track" aria-hidden="true"><span class="pc-speed-knob"></span></span>`
     +   `<span class="pc-speed-lab">${escHtml(t('ca.cardNormal'))}</span></button>`;
 }
-function pcSpeed3Html(){
-  const opt = (speed, key, on) =>
-    `<button type="button" class="pc-speed-opt${on ? ' on' : ''}" data-speed="${speed}" aria-pressed="${on ? 'true' : 'false'}" onclick="pcSetSpeedTo(this)">${escHtml(t(key))}</button>`;
-  return `<span class="pc-speed3" role="group" aria-label="${escAttr(t('ca.cardSpeed3Aria'))}">`
-    + opt('slowest', 'ca.cardSlowest', false)
-    + opt('slower', 'ca.cardSlower', true)
-    + opt('normal', 'ca.cardNormal', false)
+function pcSpeed3Html(tr){
+  const opt = (speed, key, rate, on) =>
+    `<button type="button" class="pc-speed-opt${on ? ' on' : ''}" data-speed="${speed}" data-rate="${rate}" aria-pressed="${on ? 'true' : 'false'}" onclick="pcSetSpeedTo(this)">${escHtml(t(key))}</button>`;
+  return `<span class="pc-speed3" role="group" aria-label="${escAttr(t('ca.cardSpeed4Aria'))}">`
+    + opt('slowest', 'ca.cardSlowest', SLOWEST_RATE, false)
+    + opt('slower', 'ca.cardSlower', 1, true)
+    + opt('slow', 'ca.cardSlow', pcSlowRate(tr).toFixed(4), false)
+    + opt('normal', 'ca.cardNormal', 1, false)
     + `</span>`;
 }
-function pcRate(root){ return root && root.dataset.slowest === '1' ? SLOWEST_RATE : 1; }
+function pcRate(root){ const r = root && parseFloat(root.dataset.rate); return r > 0 ? r : 1; }
 function pcPlayerHtml(a, L){
   const hasFull = snippetHasFull(L.tr);
   return `<div class="pc-player">`
     + `<button type="button" class="pc-play" onclick="pcToggle(this)">${pcPlayBtnHtml(false)}</button>`
     + `<button type="button" class="snip-toggle pc-metro" aria-pressed="false" onclick="pcSetMetro(this)">&#x1F3B5; ${escHtml(t('tools.metronome'))}</button>`
-    + (a.card.slowest ? pcSpeed3Html() : pcSpeedSwitchHtml())
+    + (a.card.slowest ? pcSpeed3Html(L.tr) : pcSpeedSwitchHtml())
     /* The Guitar toggle, same as a step snippet's (buildSnippet): only where
        a full mix exists, ON by default, label names who plays the part. */
     + (hasFull ? `<button type="button" class="snip-toggle snip-guitar pc-guitar on" aria-pressed="true" onclick="pcSetGuitar(this)" title="${escAttr(t('ca.snipGuitarTitle'))}">&#x1F3B8; <span class="snip-guitar-label">${escHtml(t('ca.snipGuitarOn'))}</span></button>` : '')
@@ -11676,15 +11684,16 @@ function pcSetSpeed(sw){
   if(labs[1]) labs[1].classList.toggle('on', !slow);
   pcRetrack(root);
 }
-// The three-way control (a card with `slowest: true`): Slowest and Slower
-// both set data-slow, so every slow-file reader above is unchanged.
+// The four-way control (a card with `slowest: true`): Slowest and Slower
+// both set data-slow, so every slow-file reader above is unchanged; Slow and
+// Normal play the fast file, and each option's data-rate becomes the card's.
 function pcSetSpeedTo(btn){
   const root = btn.closest('.pc');
   if(!root) return;
   const speed = btn.dataset.speed;
   if(btn.classList.contains('on')) return;
-  root.dataset.slow = speed === 'normal' ? '' : '1';
-  root.dataset.slowest = speed === 'slowest' ? '1' : '';
+  root.dataset.slow = (speed === 'slowest' || speed === 'slower') ? '1' : '';
+  root.dataset.rate = btn.dataset.rate || '1';
   btn.parentNode.querySelectorAll('.pc-speed-opt').forEach(b => {
     const on = b === btn;
     b.classList.toggle('on', on);
@@ -11716,7 +11725,7 @@ function pcRetrack(root){
   st.lastBeat = -1;
   const at = snipTimeAtBars(st.win, isFinite(barsIn) && barsIn > 0 ? barsIn : 0);
   const src = snippetSrc(st.L.tr, slow, guitar);
-  slowestApplyRate(st.audio, pcRate(root));   // Slowest <-> Slower is the same file, just the rate
+  slowestApplyRate(st.audio, pcRate(root));   // Slowest <-> Slower and Slow <-> Normal are the same file, just the rate
   if(st.audio.src.endsWith(src)){ try { st.audio.currentTime = at; } catch(e) {} pcSparePark(st); return; }
   const wasPlaying = !st.audio.paused;
   st.audio.addEventListener('loadedmetadata', () => {
