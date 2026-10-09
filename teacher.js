@@ -3237,7 +3237,15 @@ function micEvalTake(pcm, R, d, deps){
     let site = VERD[e.verdict] || e.verdict || '?';
     if (site === 'wrong' && e.unclear) site = 'unclear';
     const chord = !!(e.chord || (e.midis && e.midis.length > 1 && d.coachMode === 'chords'));
-    const rec = { i, site, played: !!o, onsetMs: o ? r1(o.ms - want) : null, snrDb: r1(dB(pk) - floorDb), n: rd.length };
+    const rec = { i, site, played: !!o, onsetMs: o ? r1(o.ms - want) : null, snrDb: r1(dB(pk) - floorDb), n: rd.length,
+      heard: rd.length ? r1(med(rd)) : null };
+    // what the site itself had for this note: the event it matched here
+    const sev = d.mode === 'nr'
+      ? events.filter(ev => ev.t != null && Math.abs(ev.t - e.t) < (beat || 600) / 2).sort((a, b) => Math.abs(a.t - e.t) - Math.abs(b.t - e.t))[0]
+      : events.find(ev => ev.slot === i);
+    const srd = sev && Array.isArray(sev.readings) ? sev.readings : [];
+    rec.siteN = srd.length;
+    rec.siteHeard = srd.length ? r1(med(srd)) : null;
     if (chord){
       const cls = (e.midis && e.midis.length ? e.midis : [e.midi, e.midi + 7]).filter(m => m != null).map(m => ((m % 12) + 12) % 12);
       const share = rd.length ? rd.filter(r => cls.indexOf(((Math.round(r) % 12) + 12) % 12) >= 0).length / rd.length : 0;
@@ -3277,6 +3285,16 @@ function micEvalTake(pcm, R, d, deps){
     detectorMissed: cnt(n => n.site !== 'right' && n.replay === 'present' && strong(n)),
     // the site said right, the replay can't find it
     siteRightReplayNot: cnt(n => n.site === 'right' && n.replay !== 'present'),
+    // a steady pitch, but not the written one: how far off, in semitones
+    // (one offset over and over = an out-of-tune guitar or a wrong string;
+    // scattered = wrong frets, or a neighbour's guitar)
+    offPitch: (() => {
+      const h = {};
+      notes.forEach(n => { if (n.midi != null && n.replay === 'other' && n.heard != null && n.n >= 3){ const k = Math.round(n.heard - n.midi); h[k] = (h[k] || 0) + 1; } });
+      return h;
+    })(),
+    unclearSiteReadings: med(notes.filter(n => n.site === 'unclear').map(n => n.siteN)),
+    presentSiteReadings: med(notes.filter(n => n.site === 'unclear' && n.replay === 'present').map(n => n.siteN)),
     // no new pick attack anywhere near the note: nothing was played there
     silentMiss: cnt(n => (n.site === 'miss' || n.site === 'unclear') && !n.played),
     octDominant: cnt(n => n.oct > n.exact && n.oct >= 0.3),
@@ -3402,13 +3420,18 @@ function teacherMicEvalHtml(){
       `<td>${v(r.level.loudDb)} / ${v(r.level.floorDb)}${r.level.clipPct > 0.01 ? ' <b>clipped</b>' : ''}</td>`+
       `<td>${L.clickFound ? v(L.settingMs) + ' → ' + v(L.idealMs) : v(L.settingMs) + ' → ?'}</td>`+
       `<td>${nb.siteRight} / ${nb.n}</td><td>${nb.replayPresent} / ${nb.n}</td><td>${nb.detectorMissed}</td><td>${nb.silentMiss}</td>`+
-      `<td>${v(nb.lowH1H2Db)}</td></tr>`;
+      `<td>${teacherMicOffText(nb.offPitch)}</td><td>${v(nb.lowH1H2Db)}</td></tr>`;
   }).join('');
   return `<div class="tg-note" style="margin-top:8px">${lines.join('<br>')}</div>
-    <div class="t-grid-wrap"><table><thead><tr><th class="nc">Take</th><th>Game</th><th>Device</th><th>Loud / room (dB)</th><th>Delay set → should be (ms)</th><th>Site counted right</th><th>In the recording</th><th>Played, not counted</th><th>Not played</th><th>Low strings (dB)</th></tr></thead><tbody>${tr}</tbody></table></div>
+    <div class="t-grid-wrap"><table><thead><tr><th class="nc">Take</th><th>Game</th><th>Device</th><th>Loud / room (dB)</th><th>Delay set → should be (ms)</th><th>Site counted right</th><th>In the recording</th><th>Played, not counted</th><th>Not played</th><th>Heard instead</th><th>Low strings (dB)</th></tr></thead><tbody>${tr}</tbody></table></div>
     <div class="tg-note"><button class="tp-btn primary" style="flex:none;padding:8px 16px;margin-right:10px" onclick="teacherMicEvalDownload()">Download results</button>
       The file has the measurements only — no audio and no names. <br>
-      <i>In the recording</i>: the site's own pitch detection, run again on the saved audio, finds the note clearly. <i>Played, not counted</i>: a loud, clear note the site did not count right. <i>Not played</i>: the site said missed and there is no note there. <i>Delay</i>: "?" means the count-in beeps were not in the recording (speaker muted or headphones). <i>Low strings</i>: the low note's own pitch against the octave above it — very negative means this mic loses the low end.</div>`;
+      <i>In the recording</i>: the site's own pitch detection, run again on the saved audio, finds the note clearly. <i>Played, not counted</i>: a loud, clear note the site did not count right. <i>Not played</i>: the site said missed and there is no note there. <i>Heard instead</i>: notes that rang clearly but at a different pitch — "−1 ×6" means six notes came out one semitone low (the same number again and again usually means the guitar is out of tune). <i>Delay</i>: "?" means the count-in beeps were not in the recording (speaker muted or headphones). <i>Low strings</i>: the low note's own pitch against the octave above it — very negative means this mic loses the low end.</div>`;
+}
+function teacherMicOffText(h){
+  const ks = Object.keys(h || {}).sort((a, b) => h[b] - h[a]);
+  if(!ks.length) return '—';
+  return ks.slice(0, 2).map(k => (k > 0 ? '+' : k < 0 ? '−' : '') + Math.abs(k) + ' ×' + h[k]).join(', ');
 }
 function teacherMicEvalDownload(){
   if(!teacherMicEvalRows.length) return;
