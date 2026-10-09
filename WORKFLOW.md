@@ -1,6 +1,7 @@
 # WORKFLOW.md — Guitar Class
 
-> Build history lives in `archive/`:
+> Build history lived in `archive/` (deleted 2026-10-09; recover any file with
+> `git show c751db8:archive/<file>` — the `archive/...` paths below resolve there):
 > **`WORKFLOW-2026-buildout.md`** (original site build-out),
 > **`WORKFLOW-2026-july-fixits.md`** (July 2026 fix-it era), and
 > **`WORKFLOW-2026-research-upgrades-era.md`** (the entire 2026-07-11
