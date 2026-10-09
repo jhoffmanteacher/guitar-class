@@ -2481,6 +2481,7 @@ body.explore-open #week-panels{display:none}
    The tab reuses .tab / .tab-page / .tab-board / .beat-now as they are. */
 .pc-dir{margin:4px 0 10px;font-weight:600;color:var(--text)}
 .pc-player{display:flex;flex-wrap:wrap;align-items:center;gap:10px}
+.pc-player:has(.pc-speed4){row-gap:20px;padding-bottom:8px}
 .pc-play{font-family:inherit;font-size:1rem;font-weight:700;min-height:44px;min-width:11em;padding:8px 18px;border:0;border-radius:12px;background:var(--brand);color:var(--brand-text);cursor:pointer;text-align:left}
 .pc-play:hover{background:var(--brand-hover)}
 .pc-play.playing{background:var(--text);color:var(--bg)}
@@ -2493,8 +2494,11 @@ body.explore-open #week-panels{display:none}
    native range puts stop i at t/2 + i*(100% - t)/3, so the ticks and the
    line use the same sum and sit exactly under the knob's stops. The
    numbers sit under the ticks; the webkit track runs the full 54px so a
-   tap on a number still lands on its stop. */
-.pc-speed4{display:inline-flex;align-items:flex-start;flex-wrap:wrap;gap:4px 8px;font-size:0.875rem;color:var(--text2)}
+   tap on a number still lands on its stop. The -18px bottom margin takes
+   the numbers out of the row's height, so the row centres the buttons on
+   the slider's line, not on line + numbers; the row-gap on .pc-player
+   leaves them room. */
+.pc-speed4{display:inline-flex;align-items:flex-start;flex-wrap:wrap;gap:4px 8px;margin-bottom:-18px;font-size:0.875rem;color:var(--text2)}
 .pc-speed-end{line-height:36px}
 .pc-speed-rail{--t:22px;position:relative;display:inline-block;width:180px;height:54px;flex:0 0 180px}
 .pc-speed-line{position:absolute;left:calc(var(--t) / 2);right:calc(var(--t) / 2);top:18px;height:4px;margin-top:-2px;border-radius:2px;background:var(--border2)}
