@@ -413,8 +413,8 @@ async function coachStartCheck(){
   }
 
   /* Fresh attempt state */
-  coach.slots.forEach(s => { s.state = 'pending'; s.hit = null; s.loose = false; });
-  coach.events = []; coach.pendings = [];
+  coach.slots.forEach(s => { s.state = 'pending'; s.hit = null; s.loose = false; s.secondLook = false; });
+  coach.events = []; coach.pendings = []; coach.readLog = []; coach.lastLogT = 0;
   coach.gridOffset = 0; coach.smoothRms = 0; coach.smoothHf = 0; coach.lastOnsetT = -1e9;
   coach.lastPulse = -1; coach.frameNo = 0; coach.lastPitchT = 0; coach.lastMatchT = 0;
   coach.pulseStreak = 0; coach.pulseMuted = false;
@@ -1124,6 +1124,12 @@ function coachLoop(){
     /* Half the usual gate here: readings start after the attack, and a
        palm-muted or lightly-plucked note has already decayed by then — the
        consensus filter below keeps low-level junk from becoming a verdict. */
+    /* Every reading also goes into coach.readLog for the second look
+       (coachSecondLook). While an event is open the events' readings ARE
+       the log's; between events the log takes its own, on its own clock
+       (lastLogT), so the events see exactly the readings they always did. */
+    const clarity = coach.mode === 'chords' ? 0.55 : 0.22;
+    const logIt = r => { coach.lastLogT = r.t; if (r.midi != null && coach.readLog.length < COACH_READLOG_MAX) coach.readLog.push(r); };
     if (coach.pendings.length && rms > COACH_PITCH_GATE * 0.5){
       /* Chords aren't cleanly periodic, so YIN's strict single-note clarity
          gate rejects most chord frames (they logged 0 pitch reads). A looser
@@ -1131,13 +1137,15 @@ function coachLoop(){
          real data showed is reliably one of the chord's notes. Melody stays
          strict (accuracy matters when the exact note is the answer). */
       const ps = coach.pendings;
-      coachPitchReadings(coach.lastPitchT, ps[0].at + COACH_ATTACK_SKIP,
-                         coach.mode === 'chords' ? 0.55 : 0.22).forEach(r => {
+      coachPitchReadings(coach.lastPitchT, ps[0].at + COACH_ATTACK_SKIP, clarity).forEach(r => {
         coach.lastPitchT = r.t;
+        logIt(r);
         if (r.midi != null) ps.forEach(p => {
           if (r.t >= p.at + COACH_ATTACK_SKIP && r.t - p.at <= COACH_EVENT_TAIL) p.readings.push(r.midi);
         });
       });
+    } else if (coach.mode === 'melody' && rms > COACH_PITCH_GATE * 0.5){
+      coachPitchReadings(Math.max(coach.lastLogT, coach.lastPitchT), 0, clarity).forEach(logIt);
     }
     while (coach.pendings.length && now - coach.pendings[0].at > COACH_EVENT_TAIL) coachFinalizeEvent();
 
@@ -1268,7 +1276,7 @@ function coachFinalizeEvent(){
      between chord tones, so single-pitch consensus is the WRONG test there
      — real strums were failing it and scoring "unclear". Keep the raw
      pitch classes; the matcher scores them as a chord-tone vote. */
-  const ev = { t: p.t, midi, devMs: null, slot: -1, readings: p.readings };
+  const ev = { t: p.t, at: p.at, midi, devMs: null, slot: -1, readings: p.readings };
   if (coach.mode === 'chords'){
     ev.classes = p.readings.map(r => ((Math.round(r) % 12) + 12) % 12);
   }
@@ -1404,12 +1412,52 @@ function coachFinish(){
   coach.timeouts = [];
   while (coach.pendings.length) coachFinalizeEvent();
   if (coachRaf){ cancelAnimationFrame(coachRaf); coachRaf = null; }
+  coachSecondLook();
   const rec = micRecStop();
   coachMicOff();
   coach.slots.forEach((s, i) => { if (s.state === 'pending'){ s.state = 'miss'; coachChipRefresh(i); } });
   coach.phase = 'report';
   coachRenderReport();
   if (rec) micRecSave(rec, coachRecMeta());
+}
+
+/* SECOND LOOK (2026-10-09, from the period 4 classroom recordings). A
+   melody note the Coach heard but could not name ("dim", shown as
+   unclear) usually had 0 or 1 pitch readings in its event — it takes 2 to
+   decide. Replaying the recordings through the same YIN found the right
+   note clearly ringing under 12 of 40 of those. Two ways it happens in a
+   loud room: the slot is taken by a neighbour's pick a moment before the
+   student's, whose event closes (COACH_EVENT_TAIL) before the student's
+   note has rung; or the student's own attack doesn't clear the onset
+   ratio over a room that is already loud.
+   So before a dim slot is reported, look again at every reading taken from
+   its event's attack to most of the way to the next beat, and count it
+   right when the slot's note (or the octave above, as coachMelodyVote)
+   is at least half of at least COACH_SECOND_LOOK_MIN of them. Only dim
+   slots: something was heard there. Never a "wrong" one (the readings
+   agreed on a different note) and never a "miss" (nothing was played). */
+const COACH_READLOG_MAX = 3000;          // ~2 min of readings at one per 40 ms
+const COACH_SECOND_LOOK_MS = 600;        // longest look past the beat
+const COACH_SECOND_LOOK_MIN = 3;         // readings it needs
+function coachSecondLook(){
+  if (!coach || coach.mode !== 'melody' || !coach.readLog || !coach.readLog.length) return;
+  const lat = coachMicLatencyMs();
+  coach.slots.forEach((s, i) => {
+    if (s.state !== 'dim' || !s.midis) return;
+    // arrival-clock times: the beat as the mic hears it, and the event's attack
+    const beatA = coach.listenStart + coach.gridOffset + i * coach.beatMs + lat;
+    const hitA = s.hit && s.hit.at != null ? s.hit.at : beatA;
+    const from = hitA + COACH_ATTACK_SKIP;
+    const to = Math.max(beatA + Math.min(coach.beatMs * 0.75, COACH_SECOND_LOOK_MS), hitA + COACH_EVENT_TAIL);
+    const rd = coach.readLog.filter(r => r.t >= from && r.t <= to).map(r => r.midi);
+    if (rd.length < COACH_SECOND_LOOK_MIN) return;
+    const want = [];
+    s.midis.forEach(m => want.push(m, m + 12));
+    if (coachTargetShare(rd, want) >= COACH_VOTE_SHARE){
+      s.state = 'ok'; s.secondLook = true;
+      coachChipRefresh(i);
+    }
+  });
 }
 
 /* What a saved Coach recording needs beside the audio (see micRecSave):
@@ -1422,7 +1470,7 @@ function coachRecMeta(){
               gridOffsetMs: r2(coach.gridOffset || 0), eventTimes: 'played (arrival - micLatencyMs)' },
     expected: coach.slots.map((s, i) => ({ i, t: coach.listenStart + i * coach.beatMs,
       midi: s.midi == null ? null : s.midi, midis: s.midis || null, chord: s.chordName || null,
-      label: s.label || '', verdict: s.state, loose: !!s.loose,
+      label: s.label || '', verdict: s.state, loose: !!s.loose, secondLook: !!s.secondLook,
       devMs: s.hit && s.hit.devMs != null ? r2(s.hit.devMs) : null })),
     events: coach.events.map(ev => ({ t: ev.t, midi: ev.midi == null ? null : ev.midi, slot: ev.slot,
       readings: (ev.readings || []).map(r2) }))
