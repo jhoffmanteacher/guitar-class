@@ -2493,6 +2493,8 @@ body.explore-open #week-panels{display:none}
 .pc-speed-opt{min-height:34px;padding:0 12px;font:inherit;font-size:0.875rem;color:var(--text2);background:none;border:0;border-radius:999px;cursor:pointer}
 .pc-speed-opt:hover{background:var(--bg3)}
 .pc-speed-opt.on{background:var(--text);color:var(--bg);font-weight:700}
+.pc-speed-mid{min-width:34px;padding:0 10px;display:inline-flex;align-items:center;justify-content:center}
+.pc-speed-dot{width:8px;height:8px;border-radius:50%;background:currentColor}
 .pc-play:focus-visible,.pc-speed:focus-visible,.pc-speed-opt:focus-visible,.pc-sec:focus-visible,.pc-check-btn:focus-visible,.pc-help-btn:focus-visible{outline:2px solid var(--blue-text);outline-offset:2px}
 .pc-status{min-height:1.4em;margin:6px 0 2px;font-size:0.875rem;font-weight:600;color:var(--purple-text)}
 .pc-hint{margin:0 0 6px;font-size:0.8125rem;color:var(--text2)}

@@ -1623,7 +1623,9 @@ each other). Slowest is the SLOW file at `SLOWEST_RATE` (0.8) with
 **Slow** / Normal (Jonathan: "just below the normal speed of each song").
 Slow is the FAST file at `pcSlowRate(tr)`, halfway between the slow tier and
 normal for that song (the cure 66, Seven Nation Army ~112, Watchtower 110),
-so it always sits above Slower. Each option carries its rate in `data-rate`;
+so it always sits above Slower. Only the two ends are labelled (Slowest, Normal); the middle
+two are dots, with Slower/Slow as their aria-label and tooltip (Jonathan,
+same day). Each option carries its rate in `data-rate`;
 `pcRate()` reads the card's `data-rate`. Step snippets keep their own
 Slowest/turtle buttons, unchanged. Anything
 reading the file's own clock is unchanged; only real-time amounts (count-in

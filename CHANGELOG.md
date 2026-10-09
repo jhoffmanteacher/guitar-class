@@ -7,11 +7,11 @@ see `WORKFLOW.md` and the git commit log.
 
 ## 2026-10-09 — A fourth speed on the play-along cards
 
-- **New "Slow" speed.** The speed control on every play-along card now has
-  four steps: Slowest, Slower, Slow and Normal. Slow is a little below the
-  real speed of the song — for example, "the cure" plays at about 66 big
-  beats a minute instead of 72. Use it when Slower feels easy but Normal is
-  still too fast.
+- **One more speed.** The speed control on every play-along card now has
+  four steps: Slowest on the left, Normal on the right, and two in between.
+  The step next to Normal is a little below the real speed of the song —
+  for example, "the cure" plays at about 66 big beats a minute instead of
+  72. The card still starts on the second step.
 
 ## 2026-10-08 — The metronome counts 6/8
 

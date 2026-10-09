@@ -11231,13 +11231,18 @@ function pcSpeedSwitchHtml(){
     +   `<span class="pc-speed-lab">${escHtml(t('ca.cardNormal'))}</span></button>`;
 }
 function pcSpeed3Html(tr){
-  const opt = (speed, key, rate, on) =>
-    `<button type="button" class="pc-speed-opt${on ? ' on' : ''}" data-speed="${speed}" data-rate="${rate}" aria-pressed="${on ? 'true' : 'false'}" onclick="pcSetSpeedTo(this)">${escHtml(t(key))}</button>`;
+  /* Only the two ends are named (Jonathan, 2026-10-09: "slowest and normal
+     on each end and two settings in the middle"). The middle two show a dot;
+     their words stay as the accessible name and the tooltip. */
+  const opt = (speed, key, rate, on, named) =>
+    `<button type="button" class="pc-speed-opt${named ? '' : ' pc-speed-mid'}${on ? ' on' : ''}" data-speed="${speed}" data-rate="${rate}" aria-pressed="${on ? 'true' : 'false'}"`
+    + (named ? '' : ` aria-label="${escAttr(t(key))}" title="${escAttr(t(key))}"`)
+    + ` onclick="pcSetSpeedTo(this)">${named ? escHtml(t(key)) : '<span class="pc-speed-dot" aria-hidden="true"></span>'}</button>`;
   return `<span class="pc-speed3" role="group" aria-label="${escAttr(t('ca.cardSpeed4Aria'))}">`
-    + opt('slowest', 'ca.cardSlowest', SLOWEST_RATE, false)
-    + opt('slower', 'ca.cardSlower', 1, true)
-    + opt('slow', 'ca.cardSlow', pcSlowRate(tr).toFixed(4), false)
-    + opt('normal', 'ca.cardNormal', 1, false)
+    + opt('slowest', 'ca.cardSlowest', SLOWEST_RATE, false, true)
+    + opt('slower', 'ca.cardSlower', 1, true, false)
+    + opt('slow', 'ca.cardSlow', pcSlowRate(tr).toFixed(4), false, false)
+    + opt('normal', 'ca.cardNormal', 1, false, true)
     + `</span>`;
 }
 function pcRate(root){ const r = root && parseFloat(root.dataset.rate); return r > 0 ? r : 1; }
