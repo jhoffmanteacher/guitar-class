@@ -11231,16 +11231,16 @@ function pcSpeedSwitchHtml(){
     +   `<span class="pc-speed-lab">${escHtml(t('ca.cardNormal'))}</span></button>`;
 }
 /* The Guitar switch (2026-10-09, Jonathan: "a switch like the old tempo
-   switch"): the same track-and-knob as pcSpeedSwitchHtml, with the two
-   who-plays-the-part labels at its ends. They stay who-plays rather than
-   on/off for the reason snipGuitarLabel gives — "off" only turns the
-   record's guitar down. aria-checked = the record's guitar is up; the
-   knob sits under the bold label. */
+   switch" that says "guitar on / guitar off"): the same track-and-knob as
+   pcSpeedSwitchHtml, Off on the left and On on the right, knob under the
+   bold label. "Off" is the rhythm-down mix, so the record's guitar gets
+   quieter, not silent; the tooltip (ca.snipGuitarTitle) says so. Step
+   snippets and the Journey pages keep their who-plays-it button. */
 function pcGuitarSwitchHtml(){
   return `<button type="button" class="pc-speed pc-guitar" role="switch" aria-checked="true" aria-label="${escAttr(t('ca.cardGuitarAria'))}" title="${escAttr(t('ca.snipGuitarTitle'))}" onclick="pcSetGuitar(this)">`
-    +   `<span class="pc-speed-lab on">${escHtml(t('ca.snipGuitarOn'))}</span>`
+    +   `<span class="pc-speed-lab">${escHtml(t('ca.cardGuitarOff'))}</span>`
     +   `<span class="pc-speed-track" aria-hidden="true"><span class="pc-speed-knob"></span></span>`
-    +   `<span class="pc-speed-lab">${escHtml(t('ca.snipGuitarOff'))}</span></button>`;
+    +   `<span class="pc-speed-lab on">${escHtml(t('ca.cardGuitarOn'))}</span></button>`;
 }
 function pcSpeed3Html(tr){
   /* A stepped slider (2026-10-08): the dot-row version left students unsure
@@ -11749,8 +11749,8 @@ function pcSetGuitar(btn){
   root.dataset.guitar = on ? '1' : '';
   btn.setAttribute('aria-checked', on ? 'true' : 'false');
   const labs = btn.querySelectorAll('.pc-speed-lab');
-  if(labs[0]) labs[0].classList.toggle('on', on);
-  if(labs[1]) labs[1].classList.toggle('on', !on);
+  if(labs[0]) labs[0].classList.toggle('on', !on);
+  if(labs[1]) labs[1].classList.toggle('on', on);
   pcRetrack(root);
 }
 /* Switch files mid-song at the same MUSICAL position — bars into the

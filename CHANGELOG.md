@@ -14,8 +14,9 @@ see `WORKFLOW.md` and the git commit log.
   speed. The card still starts on the second stop from the left, one up from
   the slowest.
 - **The guitar button is a switch.** On the play-along cards, flip it
-  between "Record plays it" and "You play it". The word in bold is the
-  one that is on.
+  between "Guitar on" and "Guitar off". Guitar off makes the recording's
+  guitar quieter so you can play the part. The bold words show which one
+  is on.
 
 ## 2026-10-09 — A fourth speed on the play-along cards
 
