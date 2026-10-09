@@ -26,20 +26,18 @@ tuning pass — ideally on the real classroom recordings the teacher console's
   opts)`, `__tally`, `__runNr(level, opts)`, `__tallyNr`, `__fretRun(room,
   gapMs, wrongBy)`. Chrome throttles timers in background tabs — never
   `await` a real setTimeout in the harness calls.
-- `eval-takes.mjs` + `eval-core.js` — evaluate the REAL classroom
-  recordings (micTakes). Per take: raw mic level and clipping, where the
-  count-in beeps landed (so the true mic + speaker delay per device, and
-  the `micLatencyMs` that would have scored an on-the-click note on the
-  beat), and each expected note replayed through the site's own gain,
-  filters, gate and `coachDetectPitch` — so a note the site missed splits
-  into "clearly in the audio" (detector) vs "no pick attack there" (not
-  played). Two runners, identical numbers (proved on `fake-take.mjs`
-  takes, browser vs Node):
-  - `node tools/mic-sim/eval-takes.mjs --snippet > mic-eval-snippet.js`,
-    paste into DevTools on `?teacher=true`: reads micTakes from Firestore
-    (teacher-only), prints the table, downloads `mic-eval-<date>.json` —
-    analysis only, no audio, no names.
-  - `node tools/mic-sim/eval-takes.mjs <folder of WAV+JSON pairs> [--json out.json]`.
+- **The real recordings: teacher console → Mic recordings → "Evaluate all
+  recordings"** (teacher.js `micEvalTake` and friends). Per take: raw mic
+  level and clipping, where the count-in beeps landed (the true mic +
+  speaker delay per device, and the `micLatencyMs` that would have scored
+  an on-the-click note on the beat), and each expected note replayed
+  through the site's own gain, filters, gate and `coachDetectPitch` — so a
+  note the site missed splits into "clearly in the audio" (detector) vs "no
+  pick attack there" (not played). "Download results" saves the numbers
+  only (no audio, no names) — that file is what to hand Claude.
+- `eval-takes.mjs <folder of WAV+JSON pairs> [--json out.json]` — the same
+  functions, pulled out of teacher.js, on the console's Download WAV /
+  Download data files.
 - `fake-take.mjs <out> [lag] [map] [coach|nr] [quiet|class] [clicks]` — a
   synthetic take with planted answers (the header lists them) to prove the
   evaluator.

@@ -1,4 +1,4 @@
-/* A synthetic micTakes recording with KNOWN answers, to prove eval-core.js
+/* A synthetic micTakes recording with KNOWN answers, to prove the evaluator (teacher.js micEvalTake)
    measures what it says. Writes <out>.wav + <out>.json like the console's
    Download WAV / Download data buttons.
      node tools/mic-sim/fake-take.mjs <out-base> [lagMs=140] [mapMs=25] [mode=coach|nr] [room=quiet|class] [clicks=1]
