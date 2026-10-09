@@ -13,6 +13,9 @@ see `WORKFLOW.md` and the git commit log.
   example, 0.85× is a little slower than the song, and 1× is the real
   speed. The card still starts on the second stop from the left, one up from
   the slowest.
+- **The guitar button is a switch.** On the play-along cards, flip it
+  between "Record plays it" and "You play it". The word in bold is the
+  one that is on.
 
 ## 2026-10-09 — A fourth speed on the play-along cards
 

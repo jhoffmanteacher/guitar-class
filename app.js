@@ -11230,6 +11230,18 @@ function pcSpeedSwitchHtml(){
     +   `<span class="pc-speed-track" aria-hidden="true"><span class="pc-speed-knob"></span></span>`
     +   `<span class="pc-speed-lab">${escHtml(t('ca.cardNormal'))}</span></button>`;
 }
+/* The Guitar switch (2026-10-09, Jonathan: "a switch like the old tempo
+   switch"): the same track-and-knob as pcSpeedSwitchHtml, with the two
+   who-plays-the-part labels at its ends. They stay who-plays rather than
+   on/off for the reason snipGuitarLabel gives — "off" only turns the
+   record's guitar down. aria-checked = the record's guitar is up; the
+   knob sits under the bold label. */
+function pcGuitarSwitchHtml(){
+  return `<button type="button" class="pc-speed pc-guitar" role="switch" aria-checked="true" aria-label="${escAttr(t('ca.cardGuitarAria'))}" title="${escAttr(t('ca.snipGuitarTitle'))}" onclick="pcSetGuitar(this)">`
+    +   `<span class="pc-speed-lab on">${escHtml(t('ca.snipGuitarOn'))}</span>`
+    +   `<span class="pc-speed-track" aria-hidden="true"><span class="pc-speed-knob"></span></span>`
+    +   `<span class="pc-speed-lab">${escHtml(t('ca.snipGuitarOff'))}</span></button>`;
+}
 function pcSpeed3Html(tr){
   /* A stepped slider (2026-10-08): the dot-row version left students unsure
      the middle dots were options at all. The ends read "Slower" and
@@ -11269,9 +11281,8 @@ function pcPlayerHtml(a, L){
     + `<button type="button" class="pc-play" onclick="pcToggle(this)">${pcPlayBtnHtml(false)}</button>`
     + `<button type="button" class="snip-toggle pc-metro" aria-pressed="false" onclick="pcSetMetro(this)">&#x1F3B5; ${escHtml(t('tools.metronome'))}</button>`
     + (a.card.slowest ? pcSpeed3Html(L.tr) : pcSpeedSwitchHtml())
-    /* The Guitar toggle, same as a step snippet's (buildSnippet): only where
-       a full mix exists, ON by default, label names who plays the part. */
-    + (hasFull ? `<button type="button" class="snip-toggle snip-guitar pc-guitar on" aria-pressed="true" onclick="pcSetGuitar(this)" title="${escAttr(t('ca.snipGuitarTitle'))}">&#x1F3B8; <span class="snip-guitar-label">${escHtml(t('ca.snipGuitarOn'))}</span></button>` : '')
+    /* The Guitar switch: only where a full mix exists, ON by default. */
+    + (hasFull ? pcGuitarSwitchHtml() : '')
     + `<p class="pc-status" aria-live="polite">&nbsp;</p></div>`;   // inside the row: a line of its own cost the tab ~26px
 }
 function pcTabHtml(a, L){
@@ -11736,9 +11747,10 @@ function pcSetGuitar(btn){
   if(!root) return;
   const on = root.dataset.guitar !== '1';
   root.dataset.guitar = on ? '1' : '';
-  btn.classList.toggle('on', on);
-  btn.setAttribute('aria-pressed', on ? 'true' : 'false');
-  snipGuitarLabel(btn, on);
+  btn.setAttribute('aria-checked', on ? 'true' : 'false');
+  const labs = btn.querySelectorAll('.pc-speed-lab');
+  if(labs[0]) labs[0].classList.toggle('on', on);
+  if(labs[1]) labs[1].classList.toggle('on', !on);
   pcRetrack(root);
 }
 /* Switch files mid-song at the same MUSICAL position — bars into the
