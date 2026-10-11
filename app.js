@@ -1779,6 +1779,7 @@ const SNIPPET_TRACKS = {
     trackBpm: 144, trackBpmSlow: 120,   // what the FILES are, for the slow-tier rescale
     feltBpm: 72,                        // what the ROOM counts — 144 felt in half
     beatsPerBar: 4,                     // felt beats per chord; one chord = one bar
+    clickGain: 1.5,                     // in-song click 1.5x louder on this track (Jonathan, 2026-10-10: "a little louder")
     durationSec: 297,                   // the fast file, so 1ak can catch a window past the end
     // Measured 2026-09-18 with ?snipcal=1 -> Find the first click, off the
     // rhythm-down-metronome file's own first click.
@@ -2255,7 +2256,7 @@ function snipScheduleClick(st, now){
   if(ahead > 0.1) return;
   const ctx = getAudioCtx();
   const lat = snipLatency() - (ctx.outputLatency || ctx.baseLatency || 0);
-  pcClick(ctx.currentTime + Math.max(0, ahead + lat), nb % bpb === 0);
+  pcClick(ctx.currentTime + Math.max(0, ahead + lat), nb % bpb === 0, false, st.tr.clickGain);
   st.lastBeat = nb;
 }
 function snipTick(){
@@ -9723,7 +9724,11 @@ function songsPlayAlongCard(slug, layer){
    time — the class config (dates, Play Along now) can land after the page
    that holds the link was built. */
 function openSongLink(slug, layer){
-  const a = songsPlayAlongCard(slug, layer);
+  // No layer (an "About this set" song past Module 5, e.g. Module 7's
+  // "Watchtower — every chord as a barre"): no card is that part, so the
+  // Journey page opens — songsPlayAlongCard(slug, 0) would match ANY layer
+  // and send it to the newest power-chord card.
+  const a = layer ? songsPlayAlongCard(slug, layer) : null;
   if(a){ songsHubOpenCard(a.id); return; }
   const sg = SONG_JOURNEYS.find(s => s.id === slug);
   if(sg) window.open(journeyHref(sg.url, layer ? Number(layer) : 0, ''), '_blank', 'noopener');
@@ -11538,14 +11543,15 @@ function pcCountIn(st, si){
   }
   st.timers.push(setTimeout(() => { if(pcState === st) pcGo(st, si); }, (0.1 + n * beat) * 1000));
 }
-function pcClick(at, accent, countIn){
+function pcClick(at, accent, countIn, gain){
   const ctx = getAudioCtx();
   const o = ctx.createOscillator(), g = ctx.createGain();
   o.frequency.value = accent ? 1500 : 1000;
   // Quiet on purpose (Jonathan, 2026-09-27: the first cut was "very loud").
   // The count-in is a little louder (2026-09-29) — it plays over silence
   // and has to be caught first time; the in-song click stays quiet.
-  const peak = (accent ? 0.2 : 0.13) * (countIn ? 1.6 : 1);
+  // A track's clickGain lifts its in-song click where the mix buries it.
+  const peak = (accent ? 0.2 : 0.13) * (countIn ? 1.6 : 1) * (gain || 1);
   g.gain.setValueAtTime(0.0001, at);
   g.gain.exponentialRampToValueAtTime(peak, at + 0.005);
   g.gain.exponentialRampToValueAtTime(0.0001, at + 0.08);
@@ -11564,7 +11570,7 @@ function pcScheduleClick(st, now){
   if(ahead > 0.1) return;
   const ctx = getAudioCtx();
   const lat = snipLatency() - (ctx.outputLatency || ctx.baseLatency || 0);
-  pcClick(ctx.currentTime + Math.max(0, ahead + lat), nb % bpb === 0);
+  pcClick(ctx.currentTime + Math.max(0, ahead + lat), nb % bpb === 0, false, st.L.tr.clickGain);
   st.lastBeat = nb;
 }
 function pcFrame(){
