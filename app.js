@@ -711,8 +711,14 @@ function showApp(user){
   // Except a student coming BACK from a Song Journey page ("Back to class
   // site" when the tab can't just close): that link names the card they came
   // from, and sending them somewhere else is the opposite of "back".
+  // Honoured ONCE per page load: document.referrer never changes, so on a
+  // shared Chromebook a sign-out and the next student's sign-in in the same
+  // tab (showApp runs per sign-in) would otherwise inherit the exemption.
   let fromJourney = false;
-  try { const r = new URL(document.referrer); fromJourney = r.origin === location.origin && /\/tabs\/[^/]+\.html$/.test(r.pathname); } catch(e) {}
+  if(!journeyReturnSeen){
+    journeyReturnSeen = true;
+    try { const r = new URL(document.referrer); fromJourney = r.origin === location.origin && /\/tabs\/[^/]+\.html$/.test(r.pathname); } catch(e) {}
+  }
   if(!location.hash ||
      (caBlockers().length > 0 && !fromJourney && !GATE_OPEN_HASHES.includes(exploreHashBase(location.hash)))){
     goExploreHash('class-activities');
@@ -726,6 +732,9 @@ function showApp(user){
   // along. Guarded: live-quiz.js is a separate deferred script.
   if(typeof lqStartListening === 'function') lqStartListening();
 }
+
+/* Set by showApp the first time it looks at document.referrer — see fromJourney. */
+let journeyReturnSeen = false;
 
 /* ── Firestore ── */
 /* Did we actually read this student's doc? A failed read leaves every local
@@ -823,6 +832,9 @@ async function loadClassConfig(){
         .then(c => { micTakesCount = c.exists ? (Number(c.data().n) || 0) : 0; })
         .catch(() => { micTakesCount = Infinity; });
     } else micTakesCount = Infinity;
+    // An already-drawn "each take is saved" footer (coach.js) follows an
+    // On/Off flip. coach.js loads lazily, so it may not be here yet.
+    if(typeof micRecFootSync === 'function') micRecFootSync();
     const ov = (d.gameOverrides||{})[currentUser.uid];
     if(ov===true)       gamesAccessOn = true;
     else if(ov===false) gamesAccessOn = false;
@@ -1045,10 +1057,21 @@ let _saveFailCount = 0;
    1; a 10/10 arcade best → 4; 47 reps → 1). The other categories are safe to
    keep writing: skills, responses and completed are statements the student
    makes outright this session, and merge leaves every key they didn't touch
-   alone. So we hold back only these three, and only until a load succeeds —
-   skipping a save costs one session's streak bump; letting it through costs
-   the record itself. */
+   alone — PROVIDED the map has at least one key in it. An EMPTY map is the
+   exception: Firestore puts the bare field in the update mask and REPLACES
+   the stored map with {} (every "I've got it", every rating, gone). After a
+   failed load an empty map means "unknown", not "nothing", so flushSave drops
+   it from the payload — see LOAD_FAILED_EMPTY_MAPS. So we hold back only
+   these four whole categories, and only until a load succeeds — skipping a
+   save costs one session's streak bump; letting it through costs the record
+   itself. */
 const LOAD_DEPENDENT_SAVE_KEYS = new Set(['streak','games','practiceLog','exitChecks']);
+/* The whole-map categories flushSave sends that a failed load leaves EMPTY
+   (loadProgress's catch). Each is dropped from the payload while empty after a
+   failed load — see the comment at the drop in flushSave. Pinned by checks.mjs
+   1bo: a new whole-map payload field must be added here or to its list of
+   fields that can't wipe a map. */
+const LOAD_FAILED_EMPTY_MAPS = ['skills','responses','completed','classActivities','caSteps'];
 function queueSave(...keys){
   if(!currentUser) return;
   keys.forEach(k=>{ if(!(progressLoadFailed && LOAD_DEPENDENT_SAVE_KEYS.has(k))) _dirtyKeys.add(k); });
@@ -1119,6 +1142,21 @@ async function flushSave(){
     if(payload.caSteps && caStepDeletes.size){
       sentStepDeletes = [...caStepDeletes];
       sentStepDeletes.forEach(k=>{ payload.caSteps[k] = firebase.firestore.FieldValue.delete(); });
+    }
+    /* A failed load left these maps empty, and an empty map sent with
+       {merge:true} REPLACES the server's map instead of merging into it (the
+       bare field lands in the update mask). So after a failed load, an empty
+       whole-map category is dropped here — last, after the delete sentinels
+       are stamped, so a map holding only sentinels (a step ticked and
+       un-ticked this session) still goes, and a re-tick that emptied the
+       delete set during the await above can't slip an empty map through.
+       A NON-empty map is the student's own new work, and merge keeps the
+       rest. checks.mjs 1bo pins this list against every whole-map payload
+       field in this function. */
+    if(progressLoadFailed){
+      LOAD_FAILED_EMPTY_MAPS.forEach(f=>{
+        if(payload[f] && !Object.keys(payload[f]).length) delete payload[f];
+      });
     }
     await db.collection('progress').doc(currentUser.uid).set(payload,{merge:true});
     // Only now that the write landed: retire the deletes it carried. Keys
@@ -6457,7 +6495,16 @@ const shuffleDrills = {};
 function sdNoteAt(kind, fret){ return SD_NOTE_NAMES[(SD_OPEN_MIDI[kind] + fret) % 12]; }
 function sdStringName(kind){ return t(FRET_STRING_KEY[kind] || 'fret.stringLowE'); }
 function sdBox(key){ return document.getElementById('sdr-' + key); }
-function sdPileKey(c){ return c.string + ':' + c.pile; }
+/* The best is keyed per string + pile, and Module 2 (5 s) and Module 3 (3 s)
+   share one key on purpose — a 3-second best counts toward the 5-second
+   check-off. But the class activities' warm-up decks give 8 seconds
+   (class-activities.js, `seconds: 8`), and drillGateBest() reads this same
+   key, so a 10/10 at 8 seconds used to open the "I've got it" gate on a
+   3-second skill. A limit above SD_SHARED_MAX_SECONDS saves under its own
+   key ('lowE:naturals@8'), which the gate never reads; the drill's own
+   "Best" line reads it back through the same function. */
+const SD_SHARED_MAX_SECONDS = 5;
+function sdPileKey(c){ return c.string + ':' + c.pile + (c.seconds > SD_SHARED_MAX_SECONDS ? '@' + c.seconds : ''); }
 function sdSessionKey(c){ return 'sdBest:' + sdPileKey(c); }
 /* Best = the higher of this browser session and the persisted all-time best,
    same rule the arcade cards use (a returning student sees their record, and
@@ -7069,7 +7116,7 @@ function dkRunHtml(key){
    the same job, so this is about the card being the obvious big target. */
       `<div class="dkr-card${st.shown ? ' flipped' : ''}"${st.shown ? '' : ` role="button" tabindex="0" onclick="dkFlip('${key}')"`}>` +
         `<div class="sdr-card-kicker">${escHtml(t(kicker))}</div>` +
-        `<div class="dkr-face">${escHtml(front)}</div>` +
+        `<div class="dkr-face${dkFaceClass(front)}">${escHtml(dkFaceText(front))}</div>` +
         (sub ? `<div class="dkr-sub">${escHtml(sub)}</div>` : '') +
       `</div>` +
       (st.shown
@@ -7081,6 +7128,14 @@ function dkRunHtml(key){
           `<button type="button" class="sdr-start" onclick="dkFlip('${key}')">${escHtml(t(def.back ? 'deck.check' : 'deck.done'))}</button>`) +
     `</div>`;
 }
+/* A card face is one big word at 2.6rem — but a fret-pair back like
+   "0 / 12 · 7" is ~165px there, wider than the 162px face, and it wrapped
+   as "5 · 0 /" over "12". Faces past 6 characters drop to a smaller size
+   and stay on one line; past 11 (a four-chord progression) they may wrap,
+   but only between items: " / " is glued with no-break spaces so "0 / 12"
+   (one fret, two names) is never split. */
+function dkFaceText(s){ return String(s).replace(/ \/ /g, '\u00a0/\u00a0'); }
+function dkFaceClass(s){ const n = String(s).length; return n > 11 ? ' long wrap' : n > 6 ? ' long' : ''; }
 function dkFlip(key){
   const st = deckDrills[key]; if(!st || st.shown) return;
   st.shown = true; dkBox(key).innerHTML = dkRunHtml(key);
@@ -8427,6 +8482,10 @@ window.addEventListener('gc-langchange', function(){
   // switching to Spanish would keep matching only the stale English index.
   if(typeof searchIndex !== 'undefined') searchIndex = null;
   if(typeof lastModuleNum !== 'undefined' && document.getElementById('week-pills')) renderPills(lastModuleNum);
+  // The rail's trophy title and module-progress aria-valuetext are set in JS
+  // (t() at render time), so they stay in the old language until redrawn;
+  // the redraw keeps the "earned" state since it recomputes it.
+  if(currentUser && document.getElementById('rail-module-goal')) renderProgressStrip();
   // Rebuild the resume card in the new language (no-op if dismissed/unused).
   if(_resumeCardBuilt && !_resumeCardClosed) renderResumeCard();
   if(typeof syncRailStations === 'function') syncRailStations();
@@ -9093,6 +9152,7 @@ if(document.fonts && document.fonts.ready) document.fonts.ready.then(syncHeaderH
    of stacking in the page flow (see styles.css @media(max-width:760px)). ── */
 function isNarrowLayout(){ return window.matchMedia('(max-width:760px)').matches; }
 function setRailOpen(open){
+  const wasOpen = document.body.classList.contains('rail-open');
   document.body.classList.toggle('rail-open', open);
   const btn = document.getElementById('rail-toggle-btn');
   if(btn) btn.setAttribute('aria-expanded', open ? 'true' : 'false');
@@ -9100,6 +9160,21 @@ function setRailOpen(open){
   // tabbable and in the a11y tree at narrow widths without this.
   const railEl = document.getElementById('nav-rail');
   if(railEl && isNarrowLayout()) railEl.inert = !open;
+  /* Keyboard focus follows the drawer (narrow layout only — at desktop
+     widths the rail is always on screen). Opening puts focus on its first
+     control; closing (the button, the backdrop, Escape, a pick) hands it
+     back to the toggle — but only when focus was in the drawer or nowhere,
+     so a pick that already moved focus into the page keeps it, and the
+     load-time setRailOpen(false) never steals it. */
+  if(!railEl || !isNarrowLayout() || open === wasOpen) return;
+  if(open){
+    const first = [...railEl.querySelectorAll('button:not([disabled]), a[href], input:not([disabled]), select, [tabindex]:not([tabindex="-1"])')]
+      .find(el => el.getClientRects().length);   // skip anything display:none / hidden
+    if(first) first.focus();
+  } else if(btn){
+    const ae = document.activeElement;
+    if(!ae || ae === document.body || railEl.contains(ae)) btn.focus();
+  }
 }
 function toggleRail(){ setRailOpen(!document.body.classList.contains('rail-open')); }
 function closeRail(){ setRailOpen(false); }
@@ -9844,7 +9919,7 @@ async function buildSearchIndex(){
     // search only ever matched English-only indexed text. hayExtra carries
     // the OTHER language's raw text so a query matches either language
     // regardless of which one tf() is currently displaying.
-    if(w.unit) ix.push(searchEntry({ kind: 'set', moduleNum: w.moduleNum, wid: w.id, label: w.label, title: [w.label, tf(w, 'unit')].filter(Boolean).join(' '), text: tf(w, 'unit'), hayExtra: bothLangs(w, 'unit') }));
+    if(w.unit) ix.push(searchEntry({ kind: 'set', moduleNum: w.moduleNum, wid: w.id, label: w.label, title: [tSetLabel(w.label), tf(w, 'unit')].filter(Boolean).join(' '), text: tf(w, 'unit'), hayExtra: bothLangs(w, 'unit') }));
     (w.skills || []).forEach(sk => {
       const num = (sk.id.match(/-s(\d+)$/) || [])[1];
       ix.push(searchEntry({ kind: 'skill', moduleNum: w.moduleNum, wid: w.id, label: w.label, title: tf(sk, 'text'), text: tf(sk, 'text'), skillNum: num ? Number(num) : null, hayExtra: bothLangs(sk, 'text') }));
@@ -10113,7 +10188,7 @@ function runSearch(q){
       ? t('search.whereActivity')
       : e.kind === 'song'
       ? t('search.whereSong', {n:e.moduleNum})
-      : t('search.whereSet', {n:e.moduleNum, label:escHtml(e.label || '')}) +
+      : t('search.whereSet', {n:e.moduleNum, label:escHtml(tSetLabel(e.label || ''))}) +
         (e.kind === 'step' && e.secLabel ? t('search.whereSection', {section:escHtml(e.secLabel)}) : e.kind === 'skill' ? t('search.whereSkill') : '');
     const onclick = e.kind === 'activity'
       ? `searchGoActivity('${escAttr(e.activityId)}')`
@@ -11115,7 +11190,9 @@ function caJourneyLinkHtml(a){
    to the list, and closing it puts `from` back (Jonathan, 2026-10-06 — the
    card isn't assigned yet, so it mustn't show up as an entry on the page). */
 let caSwap = null;   // { from, to } while a Level up's target is open in `from`'s slot
-function caIsSwapIn(a){ return !!(caSwap && a && caSwap.to === a.id); }
+// Live only while the swapped-in card is the one open: a caSwap left over
+// after the card closed (or another card opened) must not keep marking it.
+function caIsSwapIn(a){ return !!(caSwap && a && caSwap.to === a.id && caOpenId === a.id); }
 function caCardLinkHtml(from, id){
   const b = (window.CLASS_ACTIVITIES || []).find(x => x.id === id);
   if(!b || !(caIsVisible(b) || caIsPlayAlongOnly(b))) return '';
@@ -12437,6 +12514,12 @@ function caAutoStartMetro(a){
   if(!bpm || !slider || typeof startMetro !== 'function') return;
   slider.value = bpm;
   onBpmSlider(String(bpm));
+  // Every metronome card so far (ca-21) is one note per beat in 4/4. The
+  // meter is a sticky Metro setting, and 6/8 counts the BIG beats (60 BPM →
+  // 180 clicks a minute), so a student who last used 6/8 would get three
+  // clicks per note. Put it back to 4/4 first; add a `meter` field if a card
+  // ever needs another.
+  if(typeof setMetroMeter === 'function' && typeof getMetroMeter === 'function' && getMetroMeter() !== 4) setMetroMeter(4);
   if(!metroRunning) startMetro();
 }
 // Stamped on the summary's own click, before the native toggle runs, so
@@ -12853,8 +12936,13 @@ document.addEventListener('visibilitychange', () => {
      hidden tab while an <audio> element keeps playing — so a backgrounded tab
      abandons the 4-bar window and plays the whole 4-minute track. On a
      Chromebook that is just switching tabs to look something up. Stop the
-     band when the tab goes away; the student presses Play again. */
-  if(document.hidden){ snipStop(); pcStop(); return; }
+     band when the tab goes away; the student presses Play again.
+     A Note Call round too: its clock keeps running while the tab is hidden,
+     and on return it plays every missed note at once (a play-along steps
+     its tempo up 8 notes at a time; a scored level marks each one a miss).
+     coach.js's own handler stops it only when coach.js has loaded, and the
+     default tap mode never loads it. */
+  if(document.hidden){ snipStop(); pcStop(); if(typeof ncStopAll === 'function') ncStopAll(); return; }
   if(!currentUser || IS_TEACHER_MODE) return;
   const before = classConfigSignature();
   loadClassConfig().then(() => { if(classConfigSignature() !== before) refreshOpenClassActivitiesScreen(); });
@@ -13175,6 +13263,14 @@ if ('serviceWorker' in navigator && location.protocol.startsWith('http')) {
         if (anyValue(shuffleDrills, s => s.phase === 'play')) return 'drill';
         if (anyValue(deckDrills,    s => s.phase === 'run'))  return 'drill';
         if (anyValue(earDrills,     s => s.phase === 'run'))  return 'drill';
+        // An exit check part-way through: its picks are in memory only until
+        // the last question, and a one-try check restarted by a reload would
+        // hand the student a second go (or lose the first). Still bounded by
+        // SW_RELOAD_MAX_WAIT, like the drills, if one is abandoned open.
+        if (Object.keys(ecRuns).length) return 'check';
+        // A Note Call round in progress (ncLive): its score is only written
+        // when the round ends, and a reload drops it mid-level.
+        if (ncLive) return 'drill';
         return null;
       };
       const reload = async () => {

@@ -644,8 +644,8 @@ window.CLASS_ACTIVITIES = [
     number: 5,
     title:    'Finger Gym 2 — Down the Ladder',
     title_es: 'Gimnasio de Dedos 2 — Bajando la Escalera',
-    intro:    'Last Gym went up. Today you come back down, then take the Ladder onto all six strings. Going down is harder than going up — the pinky has to lead.',
-    intro_es: 'El Gimnasio pasado subiste. Hoy vas a bajar, y después vas a llevar la Escalera a las seis cuerdas. Bajar es más difícil que subir — el meñique tiene que ir primero.',
+    intro:    'Last Gym went up. Today you come back down, then take the Ladder onto all six strings. The pinky leads on the way down.',
+    intro_es: 'El Gimnasio pasado subiste. Hoy vas a bajar, y después vas a llevar la Escalera a las seis cuerdas. Al bajar, el meñique va primero.',
     steps: [
       {
         label:    'Down the Ladder',
@@ -862,8 +862,8 @@ window.CLASS_ACTIVITIES = [
       {
         label:    'Pair 3-4',
         label_es: 'Pareja 3-4',
-        text: 'Pair 3-4 — ring and pinky, the hardest pair on the hand.<ul><li>Put fingers 1 and 2 on frets 1 and 2 first, and leave them there</li><li>Fingers 3 and 4 share a tendon, so they want to move together</li><li>Go slow enough that only one moves at a time</li></ul>You\'ve got it when: eight in a row, no buzz, and the other fingers never leave the string.',
-        text_es: 'Pareja 3-4 — anular y meñique, la pareja más difícil de la mano.<ul><li>Primero pon los dedos 1 y 2 en los trastes 1 y 2, y déjalos ahí</li><li>Los dedos 3 y 4 comparten un tendón, así que quieren moverse juntos</li><li>Ve lo suficientemente lento para que solo uno se mueva a la vez</li></ul>Lo tienes cuando: ocho seguidas, sin zumbido, y los otros dedos nunca dejan la cuerda.',
+        text: 'Pair 3-4 — ring and pinky, the hardest pair on the hand.<ul><li>Put fingers 1 and 2 on frets 1 and 2 first, and leave them there</li><li>Go slow enough that only one moves at a time</li></ul>You\'ve got it when: eight in a row, no buzz, and the other fingers never leave the string.',
+        text_es: 'Pareja 3-4 — anular y meñique, la pareja más difícil de la mano.<ul><li>Primero pon los dedos 1 y 2 en los trastes 1 y 2, y déjalos ahí</li><li>Ve lo suficientemente lento para que solo uno se mueva a la vez</li></ul>Lo tienes cuando: ocho seguidas, sin zumbido, y los otros dedos nunca dejan la cuerda.',
         tab: {
           caption: 'Pair 3-4 · the hard one',
           caption_es: 'Pareja 3-4 · la difícil',
@@ -988,8 +988,8 @@ window.CLASS_ACTIVITIES = [
     number: 9,
     title:    'Finger Gym 6 — The Meet',
     title_es: 'Gimnasio de Dedos 6 — La competencia',
-    intro:    'Meet day: a contest against your own tempo. Nothing new to learn. Today you play every Finger Gym move back to back, at the fastest tempo you can keep clean.',
-    intro_es: 'Día de competencia: compites contra tu propio tempo. No hay nada nuevo que aprender. Hoy tocas todos los movimientos del Gimnasio de Dedos seguidos, al tempo más rápido que puedas mantener limpio.',
+    intro:    'Meet day: a contest against your own tempo. Nothing new to learn. Today you play the Ladder, the Spider and the Reach back to back, at the fastest tempo you can keep clean.',
+    intro_es: 'Día de competencia: compites contra tu propio tempo. No hay nada nuevo que aprender. Hoy tocas la Escalera, la Araña y el Estiramiento seguidos, al tempo más rápido que puedas mantener limpio.',
     steps: [
       {
         label:    'Warm-up',
@@ -1014,8 +1014,8 @@ window.CLASS_ACTIVITIES = [
       {
         label:    'Spider, faster each time',
         label_es: 'Araña, más rápido cada vez',
-        text: 'Event 2 — the Spider, faster each time:<ol><li>Start the Metro tool at 50 BPM and play the Spider once.</li><li>Every clean pass, raise the Metro tool by 10 BPM.</li></ol>You\'ve got it when: one clean pass 10 BPM faster than where you started, every note on the right string. Buzz twice? Drop the BPM by 10 and try again.',
-        text_es: 'Evento 2 — la Araña, más rápido cada vez:<ol><li>Arranca la herramienta Metro a 50 BPM y toca la Araña una vez.</li><li>Cada pasada limpia, sube la herramienta Metro 10 BPM.</li></ol>Lo tienes cuando: una pasada limpia 10 BPM más rápida que donde empezaste, con cada nota en la cuerda correcta. ¿Zumbó dos veces? Baja el BPM 10 puntos y vuelve a intentarlo.',
+        text: 'The Spider, faster each time:<ol><li>Start the Metro tool at 50 BPM and play the Spider once.</li><li>Every clean pass, raise the Metro tool by 10 BPM.</li></ol>You\'ve got it when: one clean pass 10 BPM faster than where you started, every note on the right string. Buzz twice? Drop the BPM by 10 and try again.',
+        text_es: 'La Araña, más rápido cada vez:<ol><li>Arranca la herramienta Metro a 50 BPM y toca la Araña una vez.</li><li>Cada pasada limpia, sube la herramienta Metro 10 BPM.</li></ol>Lo tienes cuando: una pasada limpia 10 BPM más rápida que donde empezaste, con cada nota en la cuerda correcta. ¿Zumbó dos veces? Baja el BPM 10 puntos y vuelve a intentarlo.',
         tab: {
           caption: 'Spider · faster each clean pass',
           caption_es: 'Araña · más rápido con cada pasada limpia',
@@ -1133,8 +1133,8 @@ window.CLASS_ACTIVITIES = [
       {
         label:    'Keep going',
         label_es: 'Sigue',
-        text: 'Keep going — there\'s no set stopping point on this one.<ul><li>Set the player above to 60 BPM and play with the beat</li><li>Every clean pass: raise the BPM by 10</li><li>Fast already? Say each note\'s name as you land it — E, F#, A, G#</li></ul>You\'ve got it when: you\'ve raised the BPM twice without stopping — then keep climbing.',
-        text_es: 'Sigue — aquí no hay un punto de parada fijo.<ul><li>Pon el reproductor de arriba en 60 BPM y toca con el pulso</li><li>Cada pasada limpia: sube el BPM 10 puntos</li><li>¿Ya vas rápido? Di el nombre de cada nota al caer en ella — E, F#, A, G#</li></ul>Lo tienes cuando: ya subiste el BPM dos veces sin detenerte — y de ahí, sigue subiendo.',
+        text: 'Keep going — there\'s no set stopping point on this one.<ul><li>Set the Metro tool to 60 BPM and play with the beat</li><li>Every clean pass: raise the BPM by 10</li><li>Fast already? Say each note\'s name as you land it — E, F#, A, G#</li></ul>You\'ve got it when: you\'ve raised the BPM twice without stopping — then keep climbing.',
+        text_es: 'Sigue — aquí no hay un punto de parada fijo.<ul><li>Pon la herramienta Metro en 60 BPM y toca con el pulso</li><li>Cada pasada limpia: sube el BPM 10 puntos</li><li>¿Ya vas rápido? Di el nombre de cada nota al caer en ella — E, F#, A, G#</li></ul>Lo tienes cuando: ya subiste el BPM dos veces sin detenerte — y de ahí, sigue subiendo.',
       },
     ],
   },
@@ -1280,8 +1280,8 @@ window.CLASS_ACTIVITIES = [
       {
         label:    'Keep going',
         label_es: 'Sigue',
-        text: 'Keep going — there is no set stopping point here.<ul><li>Set the player in Fill in the row to 60 BPM and land one note per beat, up and back</li><li>Every clean pass: raise the BPM by 10</li><li>Fast already? Say the names backwards — E D C B A G F E</li></ul>You\'ve got it when: a full pass at a faster BPM than you started — then keep climbing.',
-        text_es: 'Sigue — aquí no hay un punto de parada fijo.<ul><li>Pon el reproductor de Completa la fila en 60 BPM y cae en una nota por tiempo, subiendo y bajando</li><li>Cada pasada limpia: sube el BPM 10 puntos</li><li>¿Ya vas rápido? Di los nombres al revés — E D C B A G F E</li></ul>Lo tienes cuando: una pasada entera a un BPM más alto que al empezar — y de ahí, sigue subiendo.',
+        text: 'Keep going — there is no set stopping point here.<ul><li>Set the Metro tool to 60 BPM and land one note per beat, up and back</li><li>Every clean pass: raise the BPM by 10</li><li>Fast already? Say the names backwards — E D C B A G F E</li></ul>You\'ve got it when: a full pass at a faster BPM than you started — then keep climbing.',
+        text_es: 'Sigue — aquí no hay un punto de parada fijo.<ul><li>Pon la herramienta Metro en 60 BPM y cae en una nota por tiempo, subiendo y bajando</li><li>Cada pasada limpia: sube el BPM 10 puntos</li><li>¿Ya vas rápido? Di los nombres al revés — E D C B A G F E</li></ul>Lo tienes cuando: una pasada entera a un BPM más alto que al empezar — y de ahí, sigue subiendo.',
       },
     ],
   },
@@ -2023,8 +2023,8 @@ window.CLASS_ACTIVITIES = [
     number: 15,
     title:    '"the cure" — Intro, Verse and Chorus',
     title_es: '"the cure" — Intro, estrofa y coro',
-    intro:    'You moved the verse of "the cure" onto two strings — today you add the chorus and play the whole song with the band.',
-    intro_es: 'Ya moviste la estrofa de "the cure" a dos cuerdas — hoy agregas el coro y tocas la canción completa con la banda.',
+    intro:    'You moved the verse of "the cure" onto two strings — today you add the chorus and play it from the intro to the end of the chorus with the band.',
+    intro_es: 'Ya moviste la estrofa de "the cure" a dos cuerdas — hoy agregas el coro y la tocas desde la intro hasta el final del coro con la banda.',
     card: {
       track: 'the-cure',
       slowest: true,    // four-way speed control (Slow added 2026-10-09): Slowest (48) / Slower (60) / Slow (66) / Normal (72) — Jonathan, 2026-09-29
@@ -2583,8 +2583,8 @@ window.CLASS_ACTIVITIES = [
     metronome: 60,    // opening the card starts the Metro tool at 60 BPM — see METRONOME above
     title:    'Sight-Reading TAB — Low E and A Strings',
     title_es: 'Lectura a primera vista de TAB — Cuerdas Mi grave y La',
-    intro:    'Sight-reading means playing a line from the TAB the first time you see it. The Unit 2 assessment has you read a 2-bar line you have never heard and play it. These five lines are practice for that. The metronome starts at 60 BPM when you open this activity. Play one note on each click.',
-    intro_es: 'Leer a primera vista significa tocar una línea de la TAB la primera vez que la ves. La evaluación de la Unidad 2 te pide leer una línea de 2 compases que nunca has escuchado y tocarla. Estas cinco líneas son práctica para eso. El metrónomo empieza a 60 BPM cuando abres esta actividad. Toca una nota en cada clic.',
+    intro:    'Sight-reading means playing a line from the TAB the first time you see it. The Unit 2 assessment has you read a 2-bar line you have never heard and play it. The metronome starts at 60 BPM when you open this activity. Play one note on each click.',
+    intro_es: 'Leer a primera vista significa tocar una línea de la TAB la primera vez que la ves. La evaluación de la Unidad 2 te pide leer una línea de 2 compases que nunca has escuchado y tocarla. El metrónomo empieza a 60 BPM cuando abres esta actividad. Toca una nota en cada clic.',
     steps: [
       {
         label:    'Learn — How to read TAB',
@@ -2770,7 +2770,7 @@ window.CLASS_ACTIVITIES = [
   },
   /* Seven Nation Army — The Whole Song (2026-10-01). A practice card like
      ca-18: the riff from ca-10 (already learned) plus ONE new part, the G – A
-     break before each chorus (G = low E fret 3, A = low E fret 5 — Jonathan,
+     break between the sections (G = low E fret 3, A = low E fret 5 — Jonathan,
      2026-10-05, was the open A — four plucks each), then the whole record in
      order. Each chorus is the riff then the riff with the C D C B ending
      (laps 2 and 4 on the record: C 1 beat, D and C half a beat each, B 2),
@@ -2788,8 +2788,8 @@ window.CLASS_ACTIVITIES = [
     journeyLayer: 2,
     title:    'Seven Nation Army — The Whole Song',
     title_es: 'Seven Nation Army — La canción completa',
-    intro:    'You play the riff with the band — today you add the G and A before each chorus and play the whole song.',
-    intro_es: 'Ya tocas el riff con la banda — hoy añades el G y el A antes de cada coro y tocas la canción completa.',
+    intro:    'You play the riff with the band — today you add the G and A between the sections and play the whole song.',
+    intro_es: 'Ya tocas el riff con la banda — hoy añades el G y el A entre las secciones y tocas la canción completa.',
     card: {
       track: 'seven-nation-army',
       wholeSong: true,  // stops at the end of the song instead of looping — Jonathan, 2026-10-02
@@ -2845,7 +2845,7 @@ window.CLASS_ACTIVITIES = [
         },
         {
           label: 'Chorus 1', label_es: 'Coro 1',
-          caption: 'Chorus 1 — 2 times · the second time ends C D C B', caption_es: 'Coro 1 — 2 veces · la segunda vez termina C D C B',
+          caption: 'Chorus 1 — 2 times · riff, then the riff ending C D C B', caption_es: 'Coro 1 — 2 veces · riff, luego el riff que termina C D C B',
           fromBar: 27, bars: 4, reps: 2,
           rows: [7, 9],     // one riff lap per tab row
           repLabel: 'Time', repLabel_es: 'Vez',
@@ -2979,7 +2979,7 @@ window.CLASS_ACTIVITIES = [
         },
         {
           label: 'Chorus 2', label_es: 'Coro 2',
-          caption: 'Chorus 2 — 2 times · the second time ends C D C B', caption_es: 'Coro 2 — 2 veces · la segunda vez termina C D C B',
+          caption: 'Chorus 2 — 2 times · riff, then the riff ending C D C B', caption_es: 'Coro 2 — 2 veces · riff, luego el riff que termina C D C B',
           lineEnd: true,  // Song Journey whole-song tab: this section ends its line
           fromBar: 107, bars: 4, reps: 2,
           rows: [7, 9],     // one riff lap per tab row
@@ -4060,7 +4060,7 @@ window.CLASS_ACTIVITIES = [
         },
         {
           label: 'Chorus 1', label_es: 'Coro 1',
-          caption: 'Chorus 1 — 2 times · the second time ends C5 D5 C5 B5', caption_es: 'Coro 1 — 2 veces · la segunda vez termina C5 D5 C5 B5',
+          caption: 'Chorus 1 — 2 times · riff, then the riff ending C5 D5 C5 B5', caption_es: 'Coro 1 — 2 veces · riff, luego el riff que termina C5 D5 C5 B5',
           fromBar: 27, bars: 4, reps: 2,
           rows: [7, 9],     // one riff lap per tab row
           repLabel: 'Time', repLabel_es: 'Vez',
@@ -4194,7 +4194,7 @@ window.CLASS_ACTIVITIES = [
         },
         {
           label: 'Chorus 2', label_es: 'Coro 2',
-          caption: 'Chorus 2 — 2 times · the second time ends C5 D5 C5 B5', caption_es: 'Coro 2 — 2 veces · la segunda vez termina C5 D5 C5 B5',
+          caption: 'Chorus 2 — 2 times · riff, then the riff ending C5 D5 C5 B5', caption_es: 'Coro 2 — 2 veces · riff, luego el riff que termina C5 D5 C5 B5',
           lineEnd: true,  // Song Journey whole-song tab: this section ends its line
           fromBar: 107, bars: 4, reps: 2,
           rows: [7, 9],     // one riff lap per tab row

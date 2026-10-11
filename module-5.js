@@ -380,8 +380,8 @@ SETS.push(
             response: { type: 'mc', prompt: 'In the 3-finger G chord, what are the B, G, and D strings doing?',
               prompt_es: 'En el acorde G de 3 dedos, ¿qué están haciendo las cuerdas Si, Sol y Re?',
               answer: 0,
-              explain: 'G puts fingers only on the outside strings — the three in the middle ring open. That gap is why the chord sounds so big, and why it feels like such a stretch at first.',
-              explain_es: 'G pone dedos solo en las cuerdas de los extremos — las tres del medio suenan al aire. Ese hueco es la razón de que el acorde suene tan grande, y de que al principio se sienta como un gran estiramiento.',
+              explain: 'G puts fingers on the low E, A and high e strings — the D, G and B strings ring open. That gap is why the chord sounds so big, and why it feels like such a stretch at first.',
+              explain_es: 'G pone dedos en las cuerdas Mi grave, La y mi aguda — las cuerdas Re, Sol y Si suenan al aire. Ese hueco es la razón de que el acorde suene tan grande, y de que al principio se sienta como un gran estiramiento.',
               choices: [
               'Ringing open — no fingers on them',
               'Muted with the picking hand',
@@ -1023,8 +1023,8 @@ SETS.push(
           },
           {
             label: 'Watch: Bm two ways', label_es: 'Mira: Bm de dos maneras',
-            text: 'Watch: <a href="https://www.youtube.com/watch?v=suJnbc2TERU&t=32" target="_blank">B minor (Bm) Chord, 2 Ways (start easy, then barre) – Guitar Goddess (0:32–3:12)</a>. While you watch: find the four-finger version (xx4432) — no barre (one finger pressed flat across several strings) anywhere in it. You\'ve got it when: you have played the version you picked four times in a row, every string in the shape ringing.',
-            text_es: 'Mira: <a href="https://www.youtube.com/watch?v=suJnbc2TERU&t=32" target="_blank">B minor (Bm) Chord, 2 Ways (start easy, then barre) – Guitar Goddess (0:32–3:12)</a>. Mientras miras: encuentra la versión de cuatro dedos (xx4432) — sin cejilla (un dedo presionado plano a lo largo de varias cuerdas) en ninguna parte. Lo tienes cuando: ya tocaste cuatro veces seguidas la versión que elegiste, con todas las cuerdas de la forma sonando.',
+            text: 'Watch: <a href="https://www.youtube.com/watch?v=suJnbc2TERU&t=32" target="_blank">B minor (Bm) Chord, 2 Ways (start easy, then barre) – Guitar Goddess (0:32–3:12)</a>. While you watch: find the four-finger version (xx4432) — no barre (one finger pressed flat across several strings) anywhere in it. You\'ve got it when: you have played the xx4432 version four times in a row, every string in the shape ringing.',
+            text_es: 'Mira: <a href="https://www.youtube.com/watch?v=suJnbc2TERU&t=32" target="_blank">B minor (Bm) Chord, 2 Ways (start easy, then barre) – Guitar Goddess (0:32–3:12)</a>. Mientras miras: encuentra la versión de cuatro dedos (xx4432) — sin cejilla (un dedo presionado plano a lo largo de varias cuerdas) en ninguna parte. Lo tienes cuando: ya tocaste cuatro veces seguidas la versión xx4432, con todas las cuerdas de la forma sonando.',
             hint: 'Bm is the trickiest chord in this group. The four-finger version (xx4432) is the most accessible — one finger per string, no barre anywhere in it. Don\'t try the full barre version yet (that\'s Module 7) — get every string to ring first.',
             hint_es: 'Bm es el acorde más complicado de este grupo. La versión de cuatro dedos (xx4432) es la más accesible — un dedo por cuerda, sin ninguna cejilla. No intentes todavía la versión con cejilla completa (eso es el Módulo 7) — primero logra que suenen todas las cuerdas.',
             skills: [3],
@@ -1193,8 +1193,8 @@ SETS.push(
                 text: '<ol><li>Run the deck below — it mixes every Group 1 and Group 2 chord, plus Dm and G/B from "the cure."</li><li>Tap Shuffle and deal. For each of the first three cards, play the chord, then tap Done.</li><li>Play those three chords as an 8-bar loop, 4 down-strums per bar: first chord 2 bars, second chord 2 bars, third chord 2 bars, first chord again 2 bars.</li><li>Start at 60 BPM. Then play it at 70 BPM.</li></ol>You\'ve got it when: two different sets of three cards in a row at 70 BPM, every change on beat 1.',
                 text_es: '<ol><li>Corre la baraja de abajo — mezcla todos los acordes del Grupo 1 y del Grupo 2, más Dm y G/B de "the cure."</li><li>Toca Barajar y repartir. En cada una de las tres primeras cartas, toca el acorde, y luego toca Listo.</li><li>Toca esos tres acordes como una vuelta de 8 compases, 4 rasgueos hacia abajo por compás: el primer acorde 2 compases, el segundo acorde 2 compases, el tercer acorde 2 compases, y otra vez el primer acorde 2 compases.</li><li>Empieza a 60 BPM. Luego tócalo a 70 BPM.</li></ol>Lo tienes cuando: dos grupos distintos de tres cartas seguidos a 70 BPM, cada cambio en el tiempo 1.',
                 drill: { type: 'deck', deck: 'chords-m5', skill: 'm5w3-s5' },
-                hint: 'The deck is already shuffled — draw, name the chord, then flip to check.',
-                hint_es: 'La baraja ya viene mezclada — saca una carta, nombra el acorde y voltéala para comprobar.',
+                hint: 'Deal a card, play that chord, then tap Done.',
+                hint_es: 'Reparte una carta, toca ese acorde y luego toca Listo.',
                 levelUp: 'Use the first four cards and give each one 2 bars.',
                 levelUp_es: 'Usa las cuatro primeras cartas y dale 2 compases a cada una.',
                 skills: [5]

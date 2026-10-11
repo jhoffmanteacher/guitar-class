@@ -78,7 +78,7 @@ function teacherOpenThroughPillHtml(stu){
 // renders alongside.
 function teacherBlockedBadgeHtml(stu){
   const n=teacherBlockersFor(stu, teacherClassConfig).length;
-  return n?` <span class="stu-period stu-blocked" title="${n} of today's activit${n===1?'y':'ies'} not yet done or cleared — In-Class Activities opens first when they sign in">Pending ${n}</span>`:'';
+  return n?` <span class="stu-period stu-blocked" title="${n} of today's activities not yet done or cleared — In-Class Activities opens first when they sign in">Pending ${n}</span>`:'';
 }
 /* 'all' | '4' | '7' | 'CAS' | 'none'. Persisted per-device so a mid-period
    reload comes back to the class the teacher was actually looking at. */
@@ -905,15 +905,24 @@ function teacherBoardView(cfg){
    archived card keeps its slot inside its module precisely so Restore puts
    it back where it was, so it has to be in this list even though it never
    renders in the live run of cards. */
-function teacherBoardModuleIds(cfg, module){
-  const b=(cfg&&cfg.activityBoard)||{};
-  return (window.CLASS_ACTIVITIES||[]).filter(a=>b[a.id] && (Number(b[a.id].module)||0)===Number(module))
-    .sort((x,y)=>{
-      const px=Number(b[x.id].pos), py=Number(b[y.id].pos);
-      return ((Number.isFinite(px)?px:Infinity)-(Number.isFinite(py)?py:Infinity))
-        || (teacherActivityIdNum(x)-teacherActivityIdNum(y));
-    })
-    .map(a=>a.id);
+function teacherBoardModuleIds(cfg, module, board){
+  /* Ordered by caBoardOrder itself (app.js, loaded before this file — the
+     same function teacherBoardView reads), so the tie-break the console
+     splices against is the one students' #N comes from: pos, then the
+     legacy number, then the id. A copy of its comparator here had already
+     drifted (pos -> id). `retired: {}` keeps archived rows IN each module's
+     ids, interleaved at their own slot, and `seeded: true` takes only the
+     cards that have a board entry — exactly this list's contract.
+     `board` overrides cfg.activityBoard (the board writers plan against a
+     board that isn't the one on cfg). */
+  const b=board||(cfg&&cfg.activityBoard)||{};
+  const view=caBoardOrder(window.CLASS_ACTIVITIES||[], b, {
+    retired:{},
+    legacyNumbers:(cfg&&cfg.activityNumbers)||{},
+    seeded:true,
+  });
+  const sec=view.sections.find(x=>x.module===Number(module));
+  return sec ? sec.ids.slice() : [];
 }
 function teacherActivityIdNum(a){ const m=/^ca-(\d+)$/.exec(String(a&&a.id)); return m?Number(m[1]):Infinity; }
 /* One line saying where a card sits, for the two detail pages. Reads the
@@ -1424,43 +1433,86 @@ function waitBoardWriteTurn(){
   _boardWriteGate = new Promise(r => { release = r; });
   return mine.catch(() => {}).then(() => release);
 }
+/* The queue alone was not enough (2026-10-10): each writer still worked out
+   its patch BEFORE waiting its turn, from a board that already carried the
+   optimistic result of the write queued ahead of it. If that write failed,
+   the queued one sent a patch built on a move that never happened. So the
+   three re-packing writers now apply their optimistic board straight away
+   (the UI follows the click at once, as before) but work out the patch they
+   SEND only once it is their turn, from the board as it stands then.
+
+   "As it stands then" has to exclude this writer's own optimism. Every
+   writer settles the board when its write ends — the computed board on
+   success, the base it started from on failure — and bumps boardSettled
+   while still holding the gate. So at a writer's turn: if nothing settled
+   since its click (it was first in line), the board before its own
+   optimism (`prev`) is the confirmed one; otherwise the writer ahead of it
+   just settled the board, wiping every queued optimism including its own,
+   and the live board IS the confirmed one. A config reload in between
+   (renderTeacherActivities re-reads after each write) hands back a fresh
+   object straight from Firestore, which is confirmed by definition. */
+let boardSettled = 0;
+function teacherBoardTurnBase(cfg, prev, seq0){
+  const live = teacherClassConfig || cfg;
+  const base = (live === cfg && boardSettled === seq0) ? prev : (live.activityBoard || {});
+  return { live, base };
+}
+// Ends a board writer's turn. Called inside the gate, before release().
+function teacherBoardSettle(live, board){
+  live.activityBoard = board;
+  boardSettled++;
+}
 async function teacherMoveActivity(id, module, pos){
   const cfg=teacherClassConfig;
   const a=(window.CLASS_ACTIVITIES||[]).find(x=>x.id===id);
   if(!a) return;
   const mn=Number(module)||0;
+  /* The board this move leads to, worked out from `board`, and the rows of
+     it that differ. Run twice: once now for the optimistic repaint, and
+     again at the gate from the confirmed board — that second one is sent. */
+  const plan=board=>{
+    const from=board[id] ? (Number(board[id].module)||0) : null;
+    const target=teacherBoardModuleIds(cfg,mn,board).filter(x=>x!==id);
+    const at=(pos===null||pos===undefined) ? target.length : Math.max(0, Math.min(target.length, Math.round(pos)-1));
+    target.splice(at,0,id);
+    const next={};
+    Object.keys(board).forEach(k=>{ next[k]=board[k]; });
+    target.forEach((x,i)=>{ next[x]={module:mn, pos:i+1}; });
+    if(from!==null && from!==mn) teacherBoardModuleIds(cfg,from,board).filter(x=>x!==id).forEach((x,i)=>{ next[x]={module:from, pos:i+1}; });
+    // Only what actually moved. An unchanged row re-sent would cost nothing
+    // but noise, and the patch is easier to read in the console when it names
+    // exactly the cards that moved.
+    const patch={};
+    Object.keys(next).forEach(k=>{
+      const p=board[k];
+      if(!p || Number(p.module)!==next[k].module || Number(p.pos)!==next[k].pos) patch[k]=next[k];
+    });
+    return {next, patch};
+  };
   const prev=cfg.activityBoard||{};
-  const from=prev[id] ? (Number(prev[id].module)||0) : null;
-  const target=teacherBoardModuleIds(cfg,mn).filter(x=>x!==id);
-  const at=(pos===null||pos===undefined) ? target.length : Math.max(0, Math.min(target.length, Math.round(pos)-1));
-  target.splice(at,0,id);
-  const next={};
-  Object.keys(prev).forEach(k=>{ next[k]=prev[k]; });
-  target.forEach((x,i)=>{ next[x]={module:mn, pos:i+1}; });
-  if(from!==null && from!==mn) teacherBoardModuleIds(cfg,from).filter(x=>x!==id).forEach((x,i)=>{ next[x]={module:from, pos:i+1}; });
-  // Only what actually moved. An unchanged row re-sent would cost nothing
-  // but noise, and the patch is easier to read in the console when it names
-  // exactly the cards that moved.
-  const patch={};
-  Object.keys(next).forEach(k=>{
-    const p=prev[k];
-    if(!p || Number(p.module)!==next[k].module || Number(p.pos)!==next[k].pos) patch[k]=next[k];
-  });
-  if(!Object.keys(patch).length){ renderTeacherActivities({cached:true}); return; }
-  cfg.activityBoard=next;
+  const opt=plan(prev);
+  if(!Object.keys(opt.patch).length){ renderTeacherActivities({cached:true}); return; }
+  cfg.activityBoard=opt.next;   // optimistic — the click shows at once
+  const seq0=boardSettled;
   const release=await waitBoardWriteTurn();
+  const {live, base}=teacherBoardTurnBase(cfg, prev, seq0);
+  const {next, patch}=plan(base);
   try{
+    // The write ahead of this one already put the card here: nothing to send.
+    if(!Object.keys(patch).length){ teacherBoardSettle(live, base); return; }
+    live.activityBoard=next;
     /* Strict (no base): `pos` is re-packed 1..N from the copy of the board
        this tab holds, so a base one move out of date writes a run with a
        duplicate or a hole in it — and nothing downstream would notice. */
     await teacherWriteConfig({activityBoard:patch});
+    teacherBoardSettle(live, next);
   }catch(e){
-    cfg.activityBoard=prev;
+    teacherBoardSettle(live, base);
     teacherConfigSaveFailed(e, 'Could not save that move — check your connection and Firestore rules.');
   }finally{
     release();
+    if(teacherView==='activities') renderTeacherActivities();
   }
-  if(teacherView==='activities') renderTeacherActivities();
 }
 /* Back to Built. The entry goes away and the module it left is re-packed;
    the release date, the rename and the Hidden flag are deliberately left
@@ -1468,32 +1520,44 @@ async function teacherMoveActivity(id, module, pos){
    should come back with its settings when it's dropped in again. */
 async function teacherUnassignActivity(id){
   const cfg=teacherClassConfig;
+  // Same two-pass shape as teacherMoveActivity: optimistic now, sent from
+  // the confirmed board at the gate.
+  const plan=board=>{
+    const from=Number(board[id].module)||0;
+    const next={};
+    Object.keys(board).forEach(k=>{ if(k!==id) next[k]=board[k]; });
+    const patch={};
+    teacherBoardModuleIds(cfg,from,board).filter(x=>x!==id).forEach((x,i)=>{
+      next[x]={module:from, pos:i+1};
+      const p=board[x];
+      if(!p || Number(p.module)!==from || Number(p.pos)!==i+1) patch[x]=next[x];
+    });
+    return {next, patch};
+  };
   const prev=cfg.activityBoard||{};
   if(!prev[id]) return;
-  const from=Number(prev[id].module)||0;
-  const next={};
-  Object.keys(prev).forEach(k=>{ if(k!==id) next[k]=prev[k]; });
-  const patch={};
-  teacherBoardModuleIds(cfg,from).filter(x=>x!==id).forEach((x,i)=>{
-    next[x]={module:from, pos:i+1};
-    const p=prev[x];
-    if(!p || Number(p.module)!==from || Number(p.pos)!==i+1) patch[x]=next[x];
-  });
-  cfg.activityBoard=next;
+  cfg.activityBoard=plan(prev).next;   // optimistic
+  const seq0=boardSettled;
   const release=await waitBoardWriteTurn();
+  const {live, base}=teacherBoardTurnBase(cfg, prev, seq0);
   try{
+    // A write queued ahead of this one already took it off the board.
+    if(!base[id]){ teacherBoardSettle(live, base); return; }
+    const {next, patch}=plan(base);
+    live.activityBoard=next;
     await ensureDb();   // for FieldValue — teacherWriteConfig calls it again, cached
     const fv=firebase.firestore.FieldValue;
     patch[id]=fv.delete();
     // Strict, same re-packing reason as teacherMoveActivity.
     await teacherWriteConfig({activityBoard:patch});
+    teacherBoardSettle(live, next);
   }catch(e){
-    cfg.activityBoard=prev;
+    teacherBoardSettle(live, base);
     teacherConfigSaveFailed(e, 'Could not un-assign that activity — check your connection and Firestore rules.');
   }finally{
     release();
+    if(teacherView==='activities') renderTeacherActivities();
   }
-  if(teacherView==='activities') renderTeacherActivities();
 }
 // ▲ / ▼ — one place within the card's own module. The keyboard and touch
 // equivalent of a short drag; anything further is the "Move to" select.
@@ -2112,24 +2176,34 @@ async function teacherDeleteActivity(id){
   clearUids.forEach(uid=>{ beforeClears[uid]=clears[uid][id]; });
   /* Taking the card off the board leaves a hole in its module's 1..N run,
      so the survivors are re-packed in the same write — same contract every
-     other board writer keeps (teacherMoveActivity). Computed BEFORE the
-     entry is deleted, since teacherBoardModuleIds reads the board. */
-  const boardEntry=cfg.activityBoard[id];
-  const repack={};
-  if(boardEntry){
-    const from=Number(boardEntry.module)||0;
-    teacherBoardModuleIds(cfg,from).filter(x=>x!==id).forEach((x,i)=>{
-      const p=cfg.activityBoard[x];
-      if(!p || Number(p.pos)!==i+1) repack[x]={module:from, pos:i+1};
-    });
-  }
-  const beforeRepack={};
-  Object.keys(repack).forEach(k=>{ beforeRepack[k]=cfg.activityBoard[k]; });
+     other board writer keeps (teacherMoveActivity), including its two
+     passes: the board shown now is optimistic, and the re-pack SENT is
+     worked out again at the gate from the confirmed board (see
+     teacherBoardTurnBase). The board is replaced, never edited in place, so
+     the `prev` a queued writer holds can't change under it. */
+  const plan=board=>{
+    const next={}, repack={};
+    Object.keys(board).forEach(k=>{ if(k!==id) next[k]=board[k]; });
+    const entry=board[id];
+    if(entry){
+      const from=Number(entry.module)||0;
+      teacherBoardModuleIds(cfg,from,board).filter(x=>x!==id).forEach((x,i)=>{
+        const p=board[x];
+        if(!p || Number(p.pos)!==i+1) repack[x]=next[x]={module:from, pos:i+1};
+      });
+    }
+    return {next, repack};
+  };
+  const prev=cfg.activityBoard;
   cfg.deletedActivities[id]=true;
-  MAPS.filter(m=>m!=='deletedActivities').forEach(m=>{ delete cfg[m][id]; });
-  Object.keys(repack).forEach(k=>{ cfg.activityBoard[k]=repack[k]; });
+  MAPS.filter(m=>m!=='deletedActivities' && m!=='activityBoard').forEach(m=>{ delete cfg[m][id]; });
+  cfg.activityBoard=plan(prev).next;   // optimistic
   clearUids.forEach(uid=>{ delete clears[uid][id]; });
+  const seq0=boardSettled;
   const release=await waitBoardWriteTurn();
+  const {live, base}=teacherBoardTurnBase(cfg, prev, seq0);
+  const {next, repack}=plan(base);
+  live.activityBoard=next;
   try{
     await ensureDb();
     const fv=firebase.firestore.FieldValue;
@@ -2143,9 +2217,10 @@ async function teacherDeleteActivity(id){
     // Strict (no base): like a move, this re-packs the module the card
     // leaves, so it depends on more of the board than the patch names.
     await teacherWriteConfig(patch);
+    teacherBoardSettle(live, next);
   }catch(e){
-    MAPS.forEach(m=>{ if(before[m]===undefined) delete cfg[m][id]; else cfg[m][id]=before[m]; });
-    Object.keys(beforeRepack).forEach(k=>{ if(beforeRepack[k]===undefined) delete cfg.activityBoard[k]; else cfg.activityBoard[k]=beforeRepack[k]; });
+    MAPS.filter(m=>m!=='activityBoard').forEach(m=>{ if(before[m]===undefined) delete cfg[m][id]; else cfg[m][id]=before[m]; });
+    teacherBoardSettle(live, base);
     clearUids.forEach(uid=>{ clears[uid][id]=beforeClears[uid]; });
     teacherConfigSaveFailed(e, 'Could not delete that activity — check your connection and Firestore rules.');
   }finally{
@@ -2694,7 +2769,9 @@ async function teacherOpenAllThrough(){
   const arch=(teacherClassConfig&&teacherClassConfig.archived)||{};
   const targets=allStudentsRaw.filter(s=>!arch[s.uid] && teacherStudentOpenThrough(s)<n);
   if(!targets.length){ alert('Everyone is already open through Module '+n+' or further.'); return; }
-  if(!confirm('Open every set of Modules 1–'+(n-1)+' and Module '+n+' from Set 1, for '+targets.length+' student'+(targets.length===1?'':'s')+'? Students who sign in for the first time later are not included. Nothing is marked done; you can set any student back to Auto.')) return;
+  // n===2 would read "Modules 1–1": name the one earlier module on its own.
+  const earlier = n===2 ? 'Module 1' : 'Modules 1–'+(n-1);
+  if(!confirm('Open every set of '+earlier+' and Module '+n+' from Set 1, for '+targets.length+' student'+(targets.length===1?'':'s')+'? Students who sign in for the first time later are not included. Nothing is marked done; you can set any student back to Auto.')) return;
   const prev=Object.assign({}, teacherClassConfig.moduleOpenThrough||{});
   const map={}; targets.forEach(s=>{ map[s.uid]=n; });
   teacherClassConfig.moduleOpenThrough=Object.assign({}, prev, map);
@@ -3346,9 +3423,15 @@ function micEvalTake(pcm, R, d, deps){
 
 // The device, from what the take recorded about itself.
 /* The download is "no names", but a Bluetooth mic is often labelled with
-   its owner's ("Maria's AirPods") — keep the device, drop the owner. */
+   its owner's ("Maria's AirPods", or Spanish-style "AirPods de María") —
+   keep the device, drop the owner. The Spanish strip needs a CAPITALISED
+   word after "de" (case-sensitive, no i flag): Windows' own Spanish labels
+   use a lower-case "de" phrase ("Matriz de micrófonos (Realtek…)") that is
+   the device, not a person. A trailing "(…)" device note is kept. */
 function micEvalMicName(label){
-  return String(label || '').replace(/^.*?['’]s\s+/i, '');
+  return String(label || '')
+    .replace(/^.*?['’]s\s+/i, '')
+    .replace(/\s+de\s+\p{Lu}[^\s()]*(?:\s+\p{Lu}[^\s()]*)*/u, '');
 }
 function micEvalDevice(d){
   const ua = String(d.userAgent || '');

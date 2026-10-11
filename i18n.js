@@ -286,6 +286,8 @@
     'nav.moduleProgValue':{ en: '{done} of {total} skills', es: '{done} de {total} destrezas' },
     'nav.setsGroupAria':  { en: 'Sets in this module', es: 'Unidades de este módulo' },
     'nav.gamesScreenAria':{ en: 'Guitar games', es: 'Juegos de guitarra' },
+    // The arcade's own title in its top bar (index.html .games-logo).
+    'nav.gamesLogo':      { en: 'Guitar Games', es: 'Juegos de guitarra' },
 
     // ── Skill status / checklist ──
     'skill.stillWorking':      { en: 'Still working on it', es: 'Todavía lo estoy practicando' },
@@ -293,9 +295,9 @@
     'skill.stillLearning':     { en: 'Still learning', es: 'Todavía aprendiendo' },
 
     // ── Listening Coach check-off gate (soft: student can always override) ──
-    'gate.title':              { en: 'Let the Coach hear it first', es: 'Deja que el Coach lo escuche primero' },
+    'gate.title':              { en: 'Let the Coach hear it first', es: 'Deja que el Entrenador lo escuche primero' },
     'gate.body':               { en: 'The Listening Coach hasn\'t heard you play this one at 💪 Good yet. Play it into the mic first — it only takes a minute.',
-                                 es: 'El Coach de Escucha todavía no te ha escuchado tocar esto a nivel 💪 Bien. Tócalo al micrófono primero — solo toma un minuto.' },
+                                 es: 'El Entrenador de Escucha todavía no te ha escuchado tocar esto a nivel 💪 Bien. Tócalo al micrófono primero — solo toma un minuto.' },
     'gate.practice':           { en: 'Practice it now', es: 'Practicarlo ahora' },
     'gate.markAnyway':         { en: 'Mark it anyway', es: 'Marcarlo de todos modos' },
     'gate.closeAria':          { en: 'Close', es: 'Cerrar' },
@@ -308,7 +310,7 @@
     // ── Shuffle-deck check-off gate (soft: student can always override) ──
     'dgate.title':             { en: 'Prove it with the deck', es: 'Demuéstralo con el mazo' },
     'dgate.body':              { en: 'This skill has its own shuffle deck, and the deck can check it off for you — 9 of 10 within the time limit, right there. Give it a run first; it takes under a minute.',
-                                 es: 'Esta destreza tiene su propio mazo de cartas, y el mazo puede marcarla por ti — 9 de 10 dentro del límite de tiempo, ahí mismo. Dale una vuelta primero; toma menos de un minuto.' },
+                                 es: 'Esta destreza tiene su propio mazo de cartas, y el mazo puede marcarla por ti — 9 de 10 dentro del límite de tiempo, ahí mismo. Pruébalo primero; toma menos de un minuto.' },
     'dgate.goto':              { en: 'Take me to the deck', es: 'Llévame al mazo' },
 
     // ── In-Class Activities (teacher-curated, day-specific work) ──
@@ -521,7 +523,7 @@
     // salida" reads like a technical manual. Song titles stay English in both
     // languages, as they do everywhere else on the site.
     'check.prefix':            { en: 'Exit check', es: 'Boleto de salida' },
-    'check.start':             { en: 'Start the check', es: 'Empezar el boleto' },
+    'check.start':             { en: 'Start the check', es: 'Empezar la prueba' },
     'check.oneTry':            { en: 'One try. Listen as many times as you need before you pick.',
                                  es: 'Un solo intento. Escucha todas las veces que necesites antes de elegir.' },
     'check.retakeOk':          { en: 'You can try this one as many times as you like.',
@@ -619,7 +621,7 @@
     'tools.tunerTip':      { en: 'Noisy room? Pick your string above and play close to the computer.',
                              es: '¿Sala ruidosa? Elige tu cuerda arriba y toca cerca de la computadora.' },
     'tools.metroMuted':    { en: 'Silent while the Listening Coach’s mic is on — the beat still flashes above.',
-                             es: 'Silencioso mientras el micrófono del Coach de Escucha está activo — el pulso sigue destellando arriba.' },
+                             es: 'Silencioso mientras el micrófono del Entrenador de Escucha está activo — el pulso sigue destellando arriba.' },
     'tools.ladder':        { en: 'Tempo ladder', es: 'Escalera de tempo' },
     'tools.ladderHint':    { en: 'Play your part once through, then tap how it went. Two clean laps in a row raise the tempo; a slip brings it back down.',
                              es: 'Toca tu parte una vez completa y marca cómo salió. Dos vueltas limpias seguidas suben el tempo; un fallo lo baja de nuevo.' },
@@ -725,7 +727,7 @@
     'step.playAll':          { en: 'Play all', es: 'Reproducir todo' },
     'step.practiceThis':     { en: 'Practice this', es: 'Practica esto' },
     'step.correct':          { en: 'Correct!', es: '¡Correcto!' },
-    'step.notQuite':         { en: 'Not quite — try again.', es: 'Casi — inténtalo de nuevo.' },
+    'step.notQuite':         { en: 'Not quite — try again.', es: 'No es eso — inténtalo otra vez.' },
 
     // ── Song rows (the Songs hub, and the video overlay it opens) ──
     'songs.original':        { en: 'Original', es: 'Original' },
@@ -748,7 +750,7 @@
     'songs.echoLayer':       { en: '\u{1F3B8} You can now play more of {name} (Layer {layer}).',
                                 es: '\u{1F3B8} Ya puedes tocar más de {name} (Capa {layer}).' },
     'songs.echoLayerBonus':  { en: '\u{1F3B8} You can now play more of {name} (Bonus Layer {layer}).',
-                                es: '\u{1F3B8} Ya puedes tocar más de {name} (Capa {layer} de bono).' },
+                                es: '\u{1F3B8} Ya puedes tocar más de {name} (Capa extra {layer}).' },
     'songs.echoPlain':       { en: '\u{1F3B8} You can now play more of {name}.',
                                 es: '\u{1F3B8} Ya puedes tocar más de {name}.' },
 
@@ -1035,11 +1037,11 @@
     'deck.hPlayIt':          { en: 'Play that chord, then check yourself.', es: 'Toca ese acorde, y luego revísate.' },
     'deck.hSayIt':           { en: 'Name the relative minor out loud.', es: 'Nombra la menor relativa en voz alta.' },
     'deck.hFindBox':         { en: 'Play minor pentatonic box 1 in that key, then check the fret.',
-                               es: 'Toca la caja 1 de la pentatónica menor en ese tono, y luego revisa el traste.' },
+                               es: 'Toca la caja 1 de la pentatónica menor en esa tonalidad, y luego revisa el traste.' },
     'deck.hFindNote':        { en: 'Find and play it, then move on.', es: 'Encuéntrala, tócala y sigue.' },
-    'deck.hPlayIIVV':        { en: 'Play I–IV–V in that key.', es: 'Toca I–IV–V en ese tono.' },
+    'deck.hPlayIIVV':        { en: 'Play I–IV–V in that key.', es: 'Toca I–IV–V en esa tonalidad.' },
     'deck.hNameKey':         { en: 'Find the single family that contains every chord in the set — say the key out loud, then check.',
-                               es: 'Encuentra la única familia que contiene todos los acordes del conjunto — di el tono en voz alta, y luego revisa.' },
+                               es: 'Encuentra la única familia que contiene todos los acordes del conjunto — di la tonalidad en voz alta, y luego revisa.' },
 
     // ── Ear Spark drill (hidden sequence, played not written) ──
     'ear.openStrings':       { en: 'Ear Spark — open strings', es: 'Chispa auditiva — cuerdas al aire' },
@@ -1059,7 +1061,7 @@
     'ear.scoreSub':          { en: 'named by ear', es: 'nombradas de oído' },
     'ear.kString':           { en: 'string', es: 'cuerda' },
     'ear.kFret':             { en: 'fret', es: 'traste' },
-    'ear.kBassString':       { en: 'bass string', es: 'cuerda del bajo' },
+    'ear.kBassString':       { en: 'bass string', es: 'cuerda grave' },
     'ear.kStringHint':       { en: 'Thickest to thinnest is E–A–D–G–B–e.', es: 'De la más gruesa a la más delgada: E–A–D–G–B–e.' },
     'ear.kFretHint':         { en: 'Every note is on the low E string, frets 0–5.', es: 'Cada nota está en la cuerda Mi grave, trastes 0–5.' },
     'ear.kBassStringHint':   { en: 'A string is Am\'s root and rings lower; D string is Dm\'s root, a fourth higher.',
@@ -1326,7 +1328,7 @@
     'coach.crit.tempo.steady': { en: 'You held ~{bpm} BPM steady the whole way through.',
       es: 'Mantuviste ~{bpm} BPM estable durante todo el recorrido.' },
     'coach.crit.tempo.tooShort': { en: 'Too short a try to judge tempo drift — play a longer try so the Coach can check your tempo.',
-      es: 'El intento fue muy corto para juzgar cambios de tempo — toca un intento más largo para que el Coach revise tu tempo.' },
+      es: 'El intento fue muy corto para juzgar cambios de tempo — toca un intento más largo para que el Entrenador revise tu tempo.' },
     'coach.crit.tempo.unclear': { en: 'I couldn’t get a clear tempo reading on that try — go again and hit each beat firmly.',
       es: 'No pude obtener una lectura clara del tempo en ese intento — vuelve a intentarlo y toca cada tiempo con firmeza.' },
     'coach.crit.timing.countedEarly': { en: 'The {total} notes I heard all counted — they just kept landing ahead of the beat. Drop the BPM, tap your foot, and let the foot come down first.',
@@ -1875,7 +1877,7 @@
     'games.ntr.title': { en: 'Name That Riff',
       es: 'Adivina el riff' },
     'games.pd.desc': { en: '60 seconds: one strum pattern is written, one bar is played out loud — does what you hear match what you see?',
-      es: '60 segundos: un patrón de rasgueo está escrito y suena un compás en voz alta — ¿lo que escuchas coincide con lo que ves?' },
+      es: '60 segundos: un patrón de rasgueo está escrito y se oye un compás — ¿lo que escuchas coincide con lo que ves?' },
     'games.pd.match': { en: 'It matches',
       es: 'Coincide' },
     'games.pd.noMatch': { en: 'It doesn\'t match',
@@ -2172,7 +2174,7 @@
     'games.rr.card26': { en: 'Fingerpick Am: thumb plays the A string, then your first, second, and third fingers play the G, B, and high e strings — one at a time, one note per click.',
       es: 'Fingerpicking en Am: el pulgar toca la cuerda La, y luego tus dedos índice, medio y anular tocan las cuerdas Sol, Si y mi aguda — uno a la vez, una nota por clic.' },
     'games.rr.card27': { en: 'Hold Em and let your thumb walk: the low E string, the D string, the low E string, the D string — one pluck per click, steady like a heartbeat.',
-      es: 'Sostén Em y deja que tu pulgar camine: la cuerda Mi grave, la cuerda Re, la cuerda Mi grave, la cuerda Re — un pulso por clic, constante como un latido.' },
+      es: 'Sostén Em y deja que tu pulgar camine: la cuerda Mi grave, la cuerda Re, la cuerda Mi grave, la cuerda Re — una pulsación por clic, constante como un latido.' },
     'games.rr.card28': { en: 'Pick a dot fret — 3, 5, 7, or 9. Pluck that fret on all 6 strings, thickest to thinnest, saying each note’s name out loud as you go. Finished all six strings? Pick a new dot fret and go again.',
       es: 'Elige un traste marcado — 3, 5, 7 o 9. Pulsa ese traste en las 6 cuerdas, de la más gruesa a la más fina, diciendo en voz alta el nombre de cada nota. ¿Terminaste las seis cuerdas? Elige otro traste marcado y hazlo de nuevo.' },
     'games.rr.card29': { en: 'Play the first four notes of the "Seven Nation Army" riff, then say each one the way you’d write it in TAB — string, then fret (like “A string, fret 7”). Play it once more to check yourself.',
@@ -2202,7 +2204,7 @@
     'games.rr.desc': { en: 'Spin for a short real-guitar challenge matched to what you’ve learned so far. Score yourself honestly — you are the judge.',
       es: 'Gira para un reto corto de guitarra real, según lo que ya has aprendido. Califícate con honestidad — tú eres el juez.' },
     'games.rr.doneBanner': { en: 'Today’s set is done — {pts} points. Extra spins still count.',
-      es: 'La unidad de hoy está lista — {pts} puntos. Los giros extra todavía cuentan.' },
+      es: 'Las cartas de hoy están listas — {pts} puntos. Los giros extra todavía cuentan.' },
     'games.rr.doublePoints': { en: 'Double points',
       es: 'Puntos dobles' },
     'games.rr.playUntilTimer': { en: 'Play until the timer ends — you score it yourself after.',
@@ -2428,6 +2430,9 @@
     'lq.locked':             { en: 'Locked in', es: 'Respuesta enviada' },
     'lq.lockedWait':         { en: 'Waiting for the rest of the class…', es: 'Esperando al resto de la clase…' },
     'lq.correct':            { en: 'Correct!', es: '¡Correcto!' },
+    // A right answer that reached Firestore after the teacher's Reveal: the
+    // round was already scored, so it earns nothing (live-quiz.js).
+    'lq.correctLate':        { en: "Correct — but it arrived after the reveal, so it doesn't count", es: 'Correcto — pero llegó después de la revelación, así que no cuenta' },
     'lq.wrong':              { en: 'Not this time', es: 'Esta vez no' },
     'lq.noAnswer':           { en: "You didn't answer this one", es: 'No respondiste esta' },
     'lq.answerIs':           { en: 'Answer: {answer}', es: 'Respuesta: {answer}' },

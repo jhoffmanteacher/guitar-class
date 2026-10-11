@@ -672,6 +672,20 @@ function lqStudentFretQuestionHtml(s, quiz){
   return top + `<p class="lq-note" data-i18n="lq.tapHint">${escHtml(t('lq.tapHint'))}</p>` + board;
 }
 
+/* A right pick that the reveal never scored: the teacher's Reveal scores
+   the answers it can read at that moment (lqScoreRound), but the rules keep
+   accepting writes while state is still 'question', so an answer that lands
+   in between is on this screen and in no score. lqScoreRound gives every
+   scored right answer last = lqPoints() >= 500 and resets everyone else's
+   to 0 — so no `last` means "too late", never "+1000". */
+function lqCorrectVerdictHtml(me){
+  if(!(me && me.last)){
+    return `<div class="lq-verdict lq-v-yes" data-i18n="lq.correctLate">${escHtml(t('lq.correctLate'))}</div>`;
+  }
+  return `<div class="lq-verdict lq-v-yes"><span data-i18n="lq.correct">${escHtml(t('lq.correct'))}</span>`
+    + ` <span class="lq-plus">+${escHtml(String(me.last))}</span></div>`;
+}
+
 function lqStudentRevealHtml(s, quiz){
   if(lqType(quiz) === 'fret') return lqStudentFretRevealHtml(s, quiz);
   const correct = lqChoice(quiz, s.correct);
@@ -681,9 +695,7 @@ function lqStudentRevealHtml(s, quiz){
   if(!mine){
     verdict = `<div class="lq-verdict lq-v-none" data-i18n="lq.noAnswer">${escHtml(t('lq.noAnswer'))}</div>`;
   } else if(mine === s.correct){
-    const pts = me && me.last ? me.last : LQ_MAX_POINTS;
-    verdict = `<div class="lq-verdict lq-v-yes"><span data-i18n="lq.correct">${escHtml(t('lq.correct'))}</span>`
-      + ` <span class="lq-plus">+${escHtml(String(pts))}</span></div>`;
+    verdict = lqCorrectVerdictHtml(me);
   } else {
     verdict = `<div class="lq-verdict lq-v-no" data-i18n="lq.wrong">${escHtml(t('lq.wrong'))}</div>`;
   }
@@ -706,9 +718,7 @@ function lqStudentFretRevealHtml(s, quiz){
   if(!mine){
     verdict = `<div class="lq-verdict lq-v-none" data-i18n="lq.noAnswer">${escHtml(t('lq.noAnswer'))}</div>`;
   } else if(correctIds.includes(mine)){
-    const pts = me && me.last ? me.last : LQ_MAX_POINTS;
-    verdict = `<div class="lq-verdict lq-v-yes"><span data-i18n="lq.correct">${escHtml(t('lq.correct'))}</span>`
-      + ` <span class="lq-plus">+${escHtml(String(pts))}</span></div>`;
+    verdict = lqCorrectVerdictHtml(me);
   } else {
     verdict = `<div class="lq-verdict lq-v-no" data-i18n="lq.wrong">${escHtml(t('lq.wrong'))}</div>`;
   }

@@ -39,6 +39,33 @@ see `WORKFLOW.md` and the git commit log.
 - **The metronome on the "the cure" play-along card is a little louder**,
   so you can hear it over the song.
 
+## 2026-10-10 — Second site-wide check
+
+- **Your progress is safer on bad Wi-Fi.** If the site could not load your
+  progress when you signed in, it no longer sends an empty list back to the
+  server on your next tap. Before, that could erase every "I've got it" you
+  had saved.
+- **Live quiz.** A tapped fret no longer shows its note name before the
+  reveal. An answer that reaches the teacher after the reveal now says
+  "too late to count" instead of showing points you did not get.
+- **Games.** You only earn arcade XP for a round you actually played: at
+  least one right answer or one hit. A new best score set when you stop a
+  round early is now saved. Leaving a Note Call running in a hidden tab no
+  longer races through the notes you missed. The 8-second note decks in
+  class activities no longer count toward the 3-second drill's "I've got it".
+- **Lesson fixes.** Happy Birthday's chords are now C–G–C–F–C–G–C (the first
+  G was missing). Module 8's Em pattern tells you to set the metronome to
+  3/4 so its loud click lands on counts 1 and 4. Module 2's fret-buzz hints
+  no longer say most beginners press too hard, which contradicted the quiz on
+  the same card. Smaller wording fixes in Modules 2–5, 8 and 11 and in
+  several class activities, in both languages.
+- **Open activity bar.** The print button and the Optional tag are back on an
+  open activity, in the top bar. The bar wraps instead of hiding the
+  activity's name on a narrow window. The printed handout keeps the intro.
+- **Spanish.** Several shell strings were corrected ("tonalidad" for key,
+  "una pulsación" for a pluck, one name for the Listening Coach: Entrenador
+  de Escucha). Search results now say "Unidad" in Spanish.
+
 ## 2026-10-10 — 6/8 on the metronome counts the big beats
 
 - **The BPM number in 6/8 now counts the two big beats in each bar**, not

@@ -5978,6 +5978,67 @@ function checkJourneyRetired() {
   if (bad === 0) ok(`${cards.length} whole-song cards — each names its song and layer, no two share a pair, none names the page; no retire switch; openSongLink wired`);
 }
 
+/* 1bo. A FAILED PROGRESS LOAD CANNOT WIPE A MAP (2026-10-10). When
+   loadProgress() fails, its catch leaves skills / responses / completed /
+   classActivities / caSteps EMPTY, and the next save used to send them whole.
+   Firestore's {merge:true} merges a map key by key — except an EMPTY map,
+   whose bare field lands in the update mask and REPLACES the stored map with
+   {}: every "I've got it", every rating, every answer, gone, from one save
+   after a blocked load. flushSave() now drops an empty whole-map category
+   from the payload while progressLoadFailed is set (LOAD_FAILED_EMPTY_MAPS in
+   app.js). This pins it:
+     - LOAD_FAILED_EMPTY_MAPS is exactly the five maps the catch empties;
+     - every `payload.X =` in flushSave() is one of them, a scalar, or a
+       category LOAD_DEPENDENT_SAVE_KEYS holds back whole — so a NEW map
+       field cannot arrive without someone deciding which it is;
+     - the payload literal carries only name/email;
+     - the drop runs after the last FieldValue.delete() stamp (a map holding
+       only sentinels must still go) and before the .set(payload). */
+const LOAD_FAILED_MAPS_EXPECTED = ['skills', 'responses', 'completed', 'classActivities', 'caSteps'];
+const PAYLOAD_SCALARS = ['lastModule', 'lastSet', 'period'];
+function checkLoadFailedMaps() {
+  head('1bo. A failed progress load cannot wipe a saved map');
+  let bad = 0;
+  const flag = m => { err(m); problems++; bad++; };
+  let src;
+  try { src = stripJsComments(readFileSync(join(ROOT, 'app.js'), 'utf8')); }
+  catch { flag('app.js unreadable — 1bo cannot check this'); return; }
+  const listOf = name => {
+    const m = new RegExp(`const ${name}\\s*=\\s*(?:new Set\\()?\\[([^\\]]*)\\]`).exec(src);
+    return m ? [...m[1].matchAll(/'([^']+)'/g)].map(x => x[1]) : null;
+  };
+  const maps = listOf('LOAD_FAILED_EMPTY_MAPS');
+  const held = listOf('LOAD_DEPENDENT_SAVE_KEYS');
+  if (!maps) { flag('app.js: no LOAD_FAILED_EMPTY_MAPS list — a save after a failed load can replace a whole map with {}'); return; }
+  if (!held) { flag('app.js: no LOAD_DEPENDENT_SAVE_KEYS list — 1bo cannot classify the held-back categories'); return; }
+  if (maps.length !== LOAD_FAILED_MAPS_EXPECTED.length || LOAD_FAILED_MAPS_EXPECTED.some(f => !maps.includes(f)))
+    flag(`app.js: LOAD_FAILED_EMPTY_MAPS is [${maps.join(', ')}] — expected exactly [${LOAD_FAILED_MAPS_EXPECTED.join(', ')}], the maps loadProgress()'s catch empties`);
+  const body = jsFunctionBody(src, 'flushSave');
+  if (body === null) { flag('app.js: no flushSave() found — 1bo cannot see the payload'); return; }
+  const lit = /const payload\s*=\s*\{([^}]*)\}/.exec(body);
+  if (!lit) flag('app.js: flushSave() no longer builds `const payload = { … }` — 1bo cannot see it');
+  else {
+    const litKeys = [...lit[1].matchAll(/(\w+)\s*:/g)].map(m => m[1]);
+    const extra = litKeys.filter(k => k !== 'name' && k !== 'email');
+    if (extra.length) flag(`app.js: flushSave()'s payload literal carries ${extra.join(', ')} — only name/email belong there; assign a category below so 1bo can classify it`);
+  }
+  const fields = [...body.matchAll(/\bpayload\.(\w+)\s*=(?!=)/g)].map(m => m[1]);
+  if (fields.length === 0) { flag('1bo found no `payload.X =` in flushSave() — it cannot see what it is supposed to guard'); return; }
+  for (const f of new Set(fields)) {
+    if (maps.includes(f) || PAYLOAD_SCALARS.includes(f) || held.includes(f)) continue;
+    flag(`app.js: flushSave() sends payload.${f}, which is neither on LOAD_FAILED_EMPTY_MAPS, a held-back LOAD_DEPENDENT_SAVE_KEYS category, nor a known scalar — after a failed load an empty map there would replace the student's whole record`);
+  }
+  for (const f of maps) if (!fields.includes(f)) flag(`app.js: LOAD_FAILED_EMPTY_MAPS names ${f}, but flushSave() never sends payload.${f} — stale entry`);
+  const drop = body.search(/if\s*\(\s*progressLoadFailed\s*\)\s*\{\s*LOAD_FAILED_EMPTY_MAPS\.forEach\([\s\S]*?Object\.keys\(\s*payload\[\s*(\w+)\s*\]\s*\)\.length\)\s*delete\s+payload\[\s*\1\s*\]/);
+  const lastStamp = body.lastIndexOf('FieldValue.delete()');
+  const set = body.search(/\.set\(\s*payload\b/);
+  if (drop < 0) flag('app.js: flushSave() no longer drops an empty LOAD_FAILED_EMPTY_MAPS field when progressLoadFailed — one save after a failed load replaces the map with {}');
+  else if (set < 0) flag('app.js: flushSave() has no .set(payload …) — 1bo cannot place the drop');
+  else if (drop > set) flag('app.js: flushSave() drops the empty maps AFTER .set(payload) — too late, the empty map was already sent');
+  else if (lastStamp > drop) flag('app.js: flushSave() drops the empty maps before the FieldValue.delete() sentinels are stamped — a map holding only deletes would be dropped, and an emptied delete set could slip an empty map through');
+  if (bad === 0) ok(`${maps.length} whole maps dropped while empty after a failed load; ${new Set(fields).size} payload fields, every one classified`);
+}
+
 /* 1bm. A CARD SECTION'S CAPTION COUNTS WITH ITS BADGE'S WORD (2026-10-06).
    A section with a `repLabel` shows a badge ("Lap 1 of 3"); its caption must
    count in the same word — "3 laps" under a Lap badge, "2 times" under a Time
@@ -6420,6 +6481,7 @@ function checkGuitarNotes() {
   checkJourneySlowBpmLabels();
   checkGuitarNotes();
   checkPeekSavesNothing();
+  checkLoadFailedMaps();
   checkSiteMadeClick();
   if (!SKIP_LINKS) await checkLinks();
   else warn('skipping link check (--skip-links)');

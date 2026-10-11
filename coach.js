@@ -134,11 +134,16 @@ function coachOnBeatMs(){
    before the analyser the way speaker playback would be). */
 const COACH_MIC_GAIN = 3;
 
-function coachFootHtml(){ return '<div class="coach-foot"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" style="width:1em;height:1em;vertical-align:-0.15em"><rect x="5" y="11" width="14" height="9" rx="2"/><path d="M8 11V7a4 4 0 0 1 8 0v4"/></svg> <span class="coach-foot-txt">' + coachFootText() + '</span></div>'; }
+/* `records` is true ONLY where a consented recording can actually run —
+   the Listening Coach card (micRecStart('coach')) and Note Runner
+   (micRecStart('nr')). Every other screen never records, so it always says
+   "nothing is recorded"; the data-rec mark is what micRecFootSync re-words. */
+function coachFootHtml(records){ return '<div class="coach-foot"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" style="width:1em;height:1em;vertical-align:-0.15em"><rect x="5" y="11" width="14" height="9" rx="2"/><path d="M8 11V7a4 4 0 0 1 8 0v4"/></svg> <span class="coach-foot-txt"' + (records ? ' data-rec="1"' : '') + '>' + coachFootText(records) + '</span></div>'; }
 /* "Nothing is recorded" is only true for a student who has not said yes to
    the consented recordings below — one who has, while collection is open,
-   is told their takes are saved instead (micRecFootSync re-words it live). */
-function coachFootText(){ return t(typeof micRecWanted === 'function' && micRecWanted() ? 'coach.footRec' : 'coach.foot'); }
+   is told their takes are saved instead (micRecFootSync re-words it live).
+   Only on a screen that records (`records`); elsewhere it stays "nothing". */
+function coachFootText(records){ return t(records && typeof micRecWanted === 'function' && micRecWanted() ? 'coach.footRec' : 'coach.foot'); }
 
 let coach = null;            // active check session (null = no card open)
 let coachStream = null, coachCtx = null, coachAnalyser = null, coachRaf = null,
@@ -221,7 +226,7 @@ function coachOpen(btn){
        <button type="button" class="coach-x" onclick="coachClose()" aria-label="${t('coach.closeAria')}">&#x2715;</button>
      </div>
      <div class="coach-body" id="coach-body"></div>
-     ${coachFootHtml()}`;
+     ${coachFootHtml(true)}`;
   const anchor = btn.closest('.bpm-control-group') || btn.parentElement;
   anchor.insertAdjacentElement('afterend', card);
 
@@ -1513,7 +1518,8 @@ function micRecRevoke(){
   micRecFootSync();
 }
 function micRecFootSync(){
-  document.querySelectorAll('.coach-foot-txt').forEach(el => { el.textContent = coachFootText(); });
+  // Only footers rendered with records=true (data-rec): the rest never record.
+  document.querySelectorAll('.coach-foot-txt[data-rec]').forEach(el => { el.textContent = coachFootText(true); });
 }
 
 /* Start capturing. A separate source node off the raw stream, into a
@@ -2772,7 +2778,7 @@ function gamesShow(view){
     return;
   }
   if (view === 'noterunner'){
-    p.innerHTML = gamesHeadHtml(GAME_ICO.noterunner + ' ' + t('games.nr.title'), true) + `<div id="nr-body"></div>`;
+    p.innerHTML = gamesHeadHtml(GAME_ICO.noterunner + ' ' + t('games.nr.title'), true) + `<div id="nr-body"></div>` + coachFootHtml(true);   // Note Runner records (micRecStart('nr')) — say so
     nrSetup();
     return;
   }
@@ -3188,8 +3194,9 @@ function ccFinish(complete){
   const ccOk = cc.changes.filter(c => c.result === 'ok').length;
   cc.isNewBest = cc.changes.length > 0 && ccOk / cc.changes.length >= 0.85 && cc.bpm > oldBest;
   // XP is participation credit for an actual round — an immediate Start →
-  // Stop is not one.
-  if (complete) awardArcadeXp(cc.isNewBest);
+  // Stop is not one, and nor is a full round with no change landed (the
+  // timer runs out on its own with the guitar silent).
+  if (complete && ccOk > 0) awardArcadeXp(cc.isNewBest);
   ccRenderDone();
 }
 
@@ -3632,7 +3639,9 @@ function cbFinish(){
     const old = cbSavedBest(games);
     const isNewBest = cb.score > old;
     if (isNewBest) games.cb = { v: 2, best: cb.score, deck: cb.deck, dir: cb.dir, level: cb.topLevel, at: new Date().toISOString().slice(0, 10) };
-    awardArcadeXp(isNewBest);
+    // XP only for a round with at least one right answer — letting the
+    // timer run out on an untouched round is not a round played.
+    if (cb.correct > 0) awardArcadeXp(isNewBest);
   }
   cbRenderDone();
 }
@@ -3997,7 +4006,9 @@ function cdFinish(){
     const old = cdSavedBest(games);
     const isNewBest = cd.score > old;
     if (isNewBest) games.cd = { v: 2, best: cd.score, deck: cd.deck, level: cd.topLevel, at: new Date().toISOString().slice(0, 10) };
-    awardArcadeXp(isNewBest);
+    // XP only for a round with at least one right answer — letting the
+    // timer run out on an untouched round is not a round played.
+    if (cd.correct > 0) awardArcadeXp(isNewBest);
   }
   cdRenderDone();
 }
@@ -4230,7 +4241,9 @@ function ntrFinish(){
     const old = (games.ntr && games.ntr.best) || 0;
     const isNewBest = ntr.score > old;
     if (isNewBest) games.ntr = { best: ntr.score, at: new Date().toISOString().slice(0, 10) };
-    awardArcadeXp(isNewBest);
+    // XP only for a round with at least one right answer — letting the
+    // timer run out on an untouched round is not a round played.
+    if (ntr.correct > 0) awardArcadeXp(isNewBest);
   }
   ntrRenderDone();
 }
@@ -4994,7 +5007,9 @@ function fzFinish(){
     const old = (games.fz && games.fz.best) || 0;
     const isNewBest = fz.score > old;
     if (isNewBest) games.fz = { best: fz.score, deck: fz.deck, at: new Date().toISOString().slice(0, 10) };
-    awardArcadeXp(isNewBest);
+    // XP only for a round with at least one right answer — letting the
+    // timer run out on an untouched round is not a round played.
+    if (fz.correct > 0) awardArcadeXp(isNewBest);
   }
   fzRenderDone();
 }
@@ -5423,8 +5438,13 @@ function shFinish(complete){
     const isNewBest = s.score > old;
     if (isNewBest) games.sh = Object.assign({}, games.sh, { [pat.id]: { best: s.score, bpm: s.bpm, at: new Date().toISOString().slice(0, 10) } });
     // XP is participation credit for an actual round — an immediate Start →
-    // Stop is not one.
-    if (complete) awardArcadeXp(isNewBest);
+    // Stop is not one, and nor is a round with no strum hit.
+    const hits = s.notes.filter(n => n.result === 'perfect' || n.result === 'good').length;
+    if (complete && hits > 0) awardArcadeXp(isNewBest);
+    /* A new best is saved on its own: awardArcadeXp is the only other
+       saveGames() here, and it is gated, so a best set before an early
+       Stop would otherwise sit in memory and never reach Firestore. */
+    if (isNewBest) saveGames();
   }
   shRenderDone();
 }
@@ -6019,6 +6039,10 @@ function rrSetDone(ptsTotal){
   const isNewBest = ptsTotal > (g.best || 0);
   if (isNewBest) g.best = ptsTotal;
   games.rr = g;
+  /* This only runs once all three cards are rated (done === 3), so there is
+     no idle path here — rating the set IS the round played. Three honest
+     "Not yet"s still pay the participation XP; an inflated rating earns no
+     more than an honest one, because XP doesn't scale with the points. */
   awardArcadeXp(isNewBest);
 }
 
@@ -6344,8 +6368,10 @@ function srFinish(complete){
     const isNewBest = s.acc > old;
     if (isNewBest) games.sr = Object.assign({}, games.sr, { [pat.id]: { best: s.acc, bpm: s.bpm, at: new Date().toISOString().slice(0, 10) } });
     // XP is participation credit for an actual round — an immediate Start →
-    // Stop is not one.
-    if (complete) awardArcadeXp(isNewBest);
+    // Stop is not one, and nor is a silent round that timed out (no hits).
+    if (complete && hits > 0) awardArcadeXp(isNewBest);
+    // Saved on its own — see shFinish.
+    if (isNewBest) saveGames();
   }
   srRenderDone();
 }
@@ -7066,8 +7092,10 @@ function rnFinish(complete){
       games.rn.at = new Date().toISOString().slice(0, 10);
     }
     // XP is participation credit for an actual round — an immediate Start →
-    // Stop is not one.
-    if (complete) awardArcadeXp(isNewBest);
+    // Stop is not one, and nor is a round with no note hit.
+    if (complete && nPerfect + nGood > 0) awardArcadeXp(isNewBest);
+    // Saved on its own — see shFinish.
+    if (isNewBest) saveGames();
   }
   rnRenderDone();
 }
@@ -7605,8 +7633,11 @@ const GAMES_SESSION_KEY_PREFIXES = [
   'bcDeck', 'bcBest:', 'cbDeck', 'cbDir', 'cbBest2:', 'ccBpm', 'ccProg', 'ccRate', 'ccBest:',
   'cdDeck', 'cdBest2:', 'fretLevel', 'fzDeck', 'fzBest:', 'nrStagePos', 'nrBest:',
   'ntrBest', 'pdBest', 'psBest', 'psgBest', 'rnMode', 'rnSong', 'rnBest:',
-  'rrDay', 'rrDone', 'rrLast', 'rrPts', 'rrQueue', 'rrSkips',
-  'shBpm', 'shPat', 'shBest:', 'srBpm', 'srPat', 'srBest:'
+  'rrBenched', 'rrDay', 'rrDone', 'rrLast', 'rrPts', 'rrQueue', 'rrSkips',
+  'shBpm', 'shPat', 'shBest:', 'srBpm', 'srPat', 'srBest:',
+  // app.js's own session caches: the shuffle-drill and deck bests and the
+  // Note Call progress (sdSessionKey, dkBest, ncProgKey).
+  'sdBest:', 'dkBest:', 'nc:'
 ];
 function gamesResetForUser(){
   nrWeakMap = null;
@@ -8521,8 +8552,12 @@ function nrFinish(complete){
     if (wkChanged){ games.nr.weak = wk; dirty = true; }
     if (dirty) games.nr.at = new Date().toISOString().slice(0, 10);
     // XP is participation credit for an actual round — an immediate Start →
-    // Stop is not one, same reasoning as the weak-map skip just above.
-    if (complete) awardArcadeXp(isNewBest);
+    // Stop is not one, same reasoning as the weak-map skip just above — and
+    // nor is a silent round that timed out with no note hit.
+    if (complete && nPerfect + nGood > 0) awardArcadeXp(isNewBest);
+    // Best, stage and weak map are saved on their own — awardArcadeXp is
+    // gated, so they would otherwise sit in memory unsaved (see shFinish).
+    if (dirty || isNewBest) saveGames();
   }
   nrRenderDone(nPerfect, nGood, nPitch, total);
 }
@@ -8869,7 +8904,9 @@ function pdFinish(){
     const old = (games.pd && games.pd.best) || 0;
     const isNewBest = pd.score > old;
     if (isNewBest) games.pd = { best: pd.score, at: new Date().toISOString().slice(0, 10) };
-    awardArcadeXp(isNewBest);
+    // XP only for a round with at least one right answer — letting the
+    // timer run out on an untouched round is not a round played.
+    if (pd.correct > 0) awardArcadeXp(isNewBest);
   }
   pdRenderDone();
 }
@@ -9226,7 +9263,9 @@ function bcFinish(){
     const old = (games.bc && games.bc.best) || 0;
     const isNewBest = bc.score > old;
     if (isNewBest) games.bc = { best: bc.score, deck: bc.deck, at: new Date().toISOString().slice(0, 10) };
-    awardArcadeXp(isNewBest);
+    // XP only for a round with at least one chord built — a revealed
+    // ("Show me") chord is seen, not built, and an untouched round is idle.
+    if (bc.built > 0) awardArcadeXp(isNewBest);
   }
   bcRenderDone();
 }

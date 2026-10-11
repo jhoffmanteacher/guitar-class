@@ -3583,7 +3583,11 @@ a.jl-song-btn{display:inline-block;text-decoration:none}
 .dkr-card:not(.flipped){cursor:pointer}
 .dkr-card:not(.flipped):hover{border-color:var(--purple-accent)}
 .dkr-card.flipped{border-color:var(--purple-accent);background:var(--bg3)}
-.dkr-face{font-size:2.6rem;font-weight:700;line-height:1.05;text-align:center}
+.dkr-face{font-size:2.6rem;font-weight:700;line-height:1.05;text-align:center;white-space:nowrap}
+/* dkFaceClass(): a face past 6 characters ("0 / 12 · 7") is too wide for the
+   162px card at 2.6rem; past 11 (a chord progression) it may wrap again. */
+.dkr-face.long{font-size:1.9rem}
+.dkr-face.wrap{white-space:normal}
 .dkr-sub{font-size:0.9375rem;color:var(--text2)}
 .dkr-prompt{font-size:0.875rem;color:var(--text2);margin:0 0 11px;line-height:1.45}
 .dkr-row{display:flex;gap:8px;justify-content:center;flex-wrap:wrap;margin-top:12px}
@@ -3738,6 +3742,10 @@ a.jl-song-btn{display:inline-block;text-decoration:none}
 .lq-board-off .fg-hit{pointer-events:none}
 .fg-marker.fg-pick{opacity:1}
 .fg-marker.fg-pick circle{fill:var(--bg2);stroke:var(--text2)}
+/* Every marker carries its note letter (fgBoardSvg), so a pick shows only
+   the ring until the reveal — the letter would tell the student whether
+   they tapped the right note before the teacher reveals it. */
+.fg-marker.fg-pick:not(.fg-good):not(.fg-bad) text{opacity:0}
 .fg-marker.fg-count{opacity:1}
 .fg-marker.fg-count text{fill:var(--text);font-weight:700}
 .lq-st-split .lq-board{margin:0;flex:1 1 55%}
