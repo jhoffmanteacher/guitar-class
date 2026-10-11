@@ -120,8 +120,9 @@ function syncPressedGroup(groupSel, itemSel, onClass){
 }
 
 /* Beat 1 of the bar rings out louder and higher — the downbeat you count "1" on
-   — everything else in the bar is the plain click. In 6/8 the BPM is the
-   eighth-note click (six per bar), and click 4 — the second big beat — gets a
+   — everything else in the bar is the plain click. In 6/8 there are six
+   clicks per bar, the BPM counts the two big beats (metroClickMs), and
+   click 4 — the second big beat — gets a
    middle accent so the bar is felt in two. */
 function tick(){
   if(!window.coachMicLive){
@@ -144,6 +145,11 @@ function syncMetroMutedNote(){
   if(note) note.hidden = !window.coachMicLive;
 }
 function getBpm(){ return parseInt(document.getElementById('bpm-slider').value); }
+/* Time between clicks. In 6/8 the BPM counts the two BIG beats of the bar
+   (Jonathan, 2026-10-10), each split into three clicks — so 60 means 60 big
+   beats a minute, the same number the Luna page's "60, then 70, then 80"
+   targets use. Every other meter clicks once per beat. */
+function metroClickMs(){ return Math.round(60000 / getBpm() / (getMetroMeter() === 6 ? 3 : 1)); }
 /* Retime a running click to the current BPM WITHOUT startMetro()'s immediate
    synchronous tick(): a slider drag fires many input events a second, and a
    beep per event was a machine-gun burst. Swaps only the interval, so the
@@ -151,7 +157,7 @@ function getBpm(){ return parseInt(document.getElementById('bpm-slider').value);
 function retimeMetro(){
   if(!metroRunning) return;
   clearInterval(metroInterval);
-  metroInterval = setInterval(tick, Math.round(60000/getBpm()));
+  metroInterval = setInterval(tick, metroClickMs());
 }
 function onBpmSlider(val){ document.getElementById('bpm-display').textContent=val; retimeMetro(); ladderCleans=0; ladderShowDefault(); }
 function nudgeBpm(d){ const s=document.getElementById('bpm-slider'); s.value=Math.min(220,Math.max(40,getBpm()+d)); document.getElementById('bpm-display').textContent=s.value; if(metroRunning){ stopMetro(); startMetro(); } ladderCleans=0; ladderShowDefault(); }
@@ -234,7 +240,7 @@ function startMetro(){
   metroRunning = true;
   metroBeatIdx = 0;
   document.getElementById('metro-btn').innerHTML=toolLabelHtml('<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" style="width:1em;height:1em;vertical-align:-0.15em"><path d="M9 5v14M15 5v14"/></svg>','tools.stop');
-  const beatMs = Math.round(60000/getBpm());
+  const beatMs = metroClickMs();
   tick();
   metroInterval = setInterval(tick, beatMs);
 }

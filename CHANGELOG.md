@@ -5,6 +5,13 @@ Notable changes to the Guitar Class site. Newest first.
 For the full session-by-session history (and the reasoning behind each change),
 see `WORKFLOW.md` and the git commit log.
 
+## 2026-10-10 — 6/8 on the metronome counts the big beats
+
+- **The BPM number in 6/8 now counts the two big beats in each bar**, not
+  every click. At 60 BPM you hear 60 big beats a minute, with three clicks
+  in each. This matches the tempo targets on the "Luna" page: 60, then 70,
+  then 80.
+
 ## 2026-10-10 — Fixes from a site-wide check
 
 - **Lesson fixes in Modules 6–13.** Corrected a few wrong facts. One said
