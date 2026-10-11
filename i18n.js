@@ -349,6 +349,12 @@
     // (caCloseOpen / caSyncSolo in app.js).
     'ca.allActivities':        { en: 'All activities', es: 'Todas las actividades' },
     'ca.barTop':               { en: 'Back to the top of this activity', es: 'Volver al inicio de esta actividad' },
+    // Sticky-bar Full screen button (caFullBtnHtml in app.js, 2026-10-10).
+    // The title is the tooltip before it is pressed; once on, the label says
+    // how to leave.
+    'ca.fullEnter':            { en: 'Full screen', es: 'Pantalla completa' },
+    'ca.fullExit':             { en: 'Exit full screen', es: 'Salir de pantalla completa' },
+    'ca.fullTitle':            { en: 'Fill the screen with this activity. Press Esc to go back.', es: 'Llena la pantalla con esta actividad. Pulsa Esc para volver.' },
     // "N of M" beside a module heading's progress bar, inside either fold
     // (caModuleHeadHtml, item 2f).
     'ca.moduleProgress':       { en: '{done} of {total}', es: '{done} de {total}' },

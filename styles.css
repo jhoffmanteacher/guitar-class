@@ -2397,6 +2397,79 @@ body.explore-open #week-panels{display:none}
 .ca-screen.ca-solo #class-activities-body > :not(.ca-solo-card):not(.ca-solo-path),
 .ca-screen.ca-solo .ca-solo-path > :not(.ca-solo-card):not(.ca-solo-path),
 .ca-screen.ca-solo #resume-card{display:none !important}
+/* ── Maximize the view (Jonathan, 2026-10-10: "maximize the view for class
+   activities on chromebook screen") — measured at 1366×657, a Chromebook
+   with its browser bars showing. All presentation; no data, no keys.
+   1. The open card's own title row goes: the sticky bar right above it
+      already carries the name, the count and the way back. It used to sit
+      half under that bar, which cut the top off a practice card's first
+      line ("Press Play song…"). The card's top now stops just under the
+      bar (scroll-margin-top = the bar's height). Screen only — the printed
+      handout keeps its title. */
+@media screen{
+  .ca-screen.ca-solo .ca-solo-card > .ca-card-summary{display:none}
+  .ca-screen.ca-solo .ca-solo-card{scroll-margin-top:48px}
+  .ca-screen.ca-solo .ca-solo-card > .ca-card-body{padding-top:8px}
+}
+/* 2. A Focus card's step buttons ride in the bar (caSyncTopbar), right after
+      the name; the card's own row of them hides while it is the open card.
+      32px tall here so the bar stays one 48px row. On a phone the bar
+      wraps and the buttons take a row of their own under the name. */
+.ca-bar-steps{flex-shrink:0;align-self:center}
+.ca-bar-steps .ca-focus-dots{margin:0;flex-wrap:nowrap;gap:4px}
+.ca-bar-steps .ca-focus-dot{min-width:40px;min-height:32px;padding:0 10px}
+.ca-screen.ca-solo .ca-solo-card > .ca-card-body > .ca-focus-dots{display:none}
+/* 3. Full screen (caFullBtnHtml) at the bar's right end; when a practice
+      card's Stop is showing, Stop takes the push and this sits beside it.
+      With a card open in full screen the site header folds away too
+      (body.ca-full, set by caSyncSolo) — scoped to the In class page being
+      the one on screen, so leaving for Modules brings the header straight
+      back. --hdr is what #app's height is worked out from. */
+.ca-bar-full{position:relative;flex-shrink:0;align-self:center;margin-left:auto;display:inline-flex;align-items:center;gap:6px;
+  font-family:inherit;font-size:0.875rem;font-weight:600;padding:6px 12px;border-radius:16px;
+  border:1px solid var(--border2);background:var(--bg2);color:var(--text);cursor:pointer;white-space:nowrap}
+.ca-bar-full svg{width:16px;height:16px;flex-shrink:0}
+.ca-bar-full:hover{border-color:var(--text2)}
+.ca-bar-full:focus-visible{outline:2px solid var(--blue-text);outline-offset:2px}
+.ca-bar-stop:not([hidden]) ~ .ca-bar-full{margin-left:0}
+body.ca-full:has(#class-activities-screen:not([hidden])){--hdr:0px}
+body.ca-full:has(#class-activities-screen:not([hidden])) .header{display:none}
+/*    Phone width: the Full screen word is clipped (still the button's
+      accessible name; the icon carries it), and a Focus card's bar wraps
+      so the name stays readable and the step buttons get their own row. */
+@media (max-width:760px){
+  .ca-bar-full{padding:6px 9px}
+  .ca-bar-full-lab{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap}
+  .ca-bar-open:has(.ca-bar-steps){flex-wrap:wrap;row-gap:6px}
+  .ca-bar-open:has(.ca-bar-steps) .ca-bar-name{flex:1 1 0}
+  .ca-bar-steps{order:5;flex:0 0 100%}
+  .ca-bar-steps .ca-focus-dots{flex-wrap:wrap}
+  .ca-screen.ca-solo:has(.ca-bar-steps) .ca-solo-card{scroll-margin-top:92px}
+}
+/* 4. A practice card's TAB head row. The pager (Previous / Section n of m /
+      Next) moves up to the right end of the "Tap a section…" line, which
+      was mostly empty — it was a row of its own under the TAB (~30px). The
+      status line ("Playing from Chorus", the count-in, "End of the song")
+      moves here from the player row (pcTabHtml), where at Chromebook width
+      it wrapped onto a blank line of its own (~31px): empty, it takes no
+      width and the hint shows; with text in it, the hint steps aside, so
+      nothing moves when the song starts. Never display:none — it is an
+      aria-live region. With no sections (ca-10, ca-20) it keeps a reserved
+      line of its own, as it had in the player row. Same elements and
+      handlers (pcPage and pcStatus look them up by class); only the order
+      on screen changes. The ::before is a line break, so the section
+      buttons always start the next row. */
+.pc-tab .tab-body > .pc-status{margin:0 0 4px;min-height:1.4em}
+.pc-tab .tab-body:has(> .pc-secs){display:flex;flex-wrap:wrap;align-items:center;gap:4px}
+.pc-tab .tab-body:has(> .pc-secs) > .pc-status{order:0;flex:1 1 auto;margin:0;min-height:0}
+.pc-tab .tab-body:has(> .pc-secs) > .pc-status:empty{flex:0 0 0;margin-right:-4px}
+.pc-tab .tab-body > .pc-status:not(:empty) ~ .pc-hint{display:none}
+.pc-tab .tab-body > .pc-hint{order:0;flex:1 1 auto;margin:0}
+.pc-tab .tab-body > .pc-pager{order:1;margin:0 0 0 auto}
+.pc-tab .tab-body:has(> .pc-secs)::before{content:'';order:2;flex:0 0 100%;height:0}
+.pc-tab .tab-body > .pc-secs{display:contents}
+.pc-tab .tab-body > .pc-secs > .pc-sec{order:3}
+.pc-tab .tab-body > .pc-page{order:4;flex:0 0 100%;min-width:0;margin-top:2px}
 .ca-screen .page-title svg{color:var(--ca-accent)}
 .ca-card{background:var(--bg);border:1px solid var(--border);border-left:3px solid var(--ca-accent);border-radius:var(--radius);margin-bottom:12px;overflow:hidden}
 .ca-card-summary{display:flex;align-items:center;gap:10px;padding:12px 14px;cursor:pointer;list-style:none}
@@ -2552,13 +2625,14 @@ body.explore-open #week-panels{display:none}
 /* Room for the tab (Jonathan, 2026-10-02: "can the activity take up more
    space on the screen?"). On a 1366x657 Chromebook the tab started ~300px
    down; these give back ~90px, all of it above the first tab row:
-   - the status line sits in the player row, not on a line of its own;
+   - the status line sits in the player row, not on a line of its own
+     (2026-10-10: it had started wrapping there, so it moved again, onto
+     the TAB's hint line — see "Maximize the view");
    - the open card's own title row drops its "n checks" line and padding
      (the sticky bar already names the card and counts the checks);
    - the TAB head bar, the hint and the section buttons are tighter, so
      ten sections fit on one row instead of two. */
 .pc-dir{margin:0 0 8px}
-.pc-player .pc-status{flex:1 1 12em;margin:0;min-height:0}
 .ca-card--practice[open] > .ca-card-summary{padding-top:6px;padding-bottom:6px}
 .ca-card--practice[open] > .ca-card-summary .ca-chunk-meta,
 .ca-card--practice[open] > .ca-card-summary .ca-hero-blurb,

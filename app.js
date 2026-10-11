@@ -10786,7 +10786,7 @@ function caHeroCardHtml(a, isCurrent = true){
       ${caPrintBtnHtml(a)}
     </summary>
     <div class="ca-card-body">
-      ${card ? caCardBodyHtml(a) : (tf(a, 'intro') ? `<p class="coach-tip">${escHtml(tf(a, 'intro'))}</p>` : '')}
+      ${card ? caCardBodyHtml(a) : (caShowIntro(a, focus, openStepIdx) ? `<p class="coach-tip">${escHtml(tf(a, 'intro'))}</p>` : '')}
       ${stepsHtml && focus ? caFocusDotsHtml(a, openStepIdx) : ''}
       ${stepsHtml ? `<ol class="ca-steps">${stepsHtml}</ol>` : ''}
       ${caMarkRowHtml(a, done, markLabel)}
@@ -10976,6 +10976,17 @@ function caFocusIdx(a){
   if(cur !== undefined && cur >= 0 && cur < n) return cur;
   const next = caDefaultOpenStep(a);
   return next >= 0 ? next : n - 1;
+}
+/* The intro on a Focus-view card shows with Step 1 only (Jonathan,
+   2026-10-10: "maximize the view for class activities on chromebook
+   screen"). It is the one line linking to last class; from Step 2 on it
+   only pushed the step's TAB further down a 657px screen (ca-17's is three
+   lines, 57px). The accordion and the printed handout keep it — printing
+   re-renders nothing, it just uncollapses the steps already on the page,
+   so a card printed from Step 3 prints without it. */
+function caShowIntro(a, focus, openStepIdx){
+  if(!tf(a, 'intro')) return false;
+  return !focus || openStepIdx === 0;
 }
 function caFocusDotsHtml(a, cur){
   const steps = a.steps || [];
@@ -11293,7 +11304,7 @@ function pcPlayerHtml(a, L){
     + (a.card.slowest ? pcSpeed3Html(L.tr) : pcSpeedSwitchHtml())
     /* The Guitar switch: only where a full mix exists, ON by default. */
     + (hasFull ? pcGuitarSwitchHtml() : '')
-    + `<p class="pc-status" aria-live="polite">&nbsp;</p></div>`;   // inside the row: a line of its own cost the tab ~26px
+    + `</div>`;
 }
 function pcTabHtml(a, L){
   const c = a.card;
@@ -11332,8 +11343,15 @@ function pcTabHtml(a, L){
       + `<button type="button" class="tab-pager-btn" onclick="pcPage(this,1)">${escHtml(t('tab.pageNext'))} &#x25B6;</button></div>`
     : '';
   const title = (c.caption && tf(c, 'caption')) || t('tab.defaultTitle');
+  /* The status line ("Playing from Chorus", the count-in, "End of the
+     song") lives at the top of the TAB, not in the player row (2026-10-10,
+     maximize-the-view): with the four-stop slider and the Guitar switch the
+     player row is full at Chromebook width, so the status wrapped onto a
+     blank line of its own and cost every card ~31px. On a card with
+     sections it takes the "Tap a section…" line while it has something to
+     say (styles.css), so nothing moves when the song starts. */
   return `<div class="tab pc-tab"><div class="tab-head"><span class="tab-icon">${PC_TAB_ICON}</span><span class="tab-title">${escHtml(title)}</span><span class="tab-kind">${t('tab.label')}</span></div>`
-    + `<div class="tab-body">${chips}${pages}${pager}</div></div>`;
+    + `<div class="tab-body"><p class="pc-status" aria-live="polite"></p>${chips}${pages}${pager}</div></div>`;
 }
 function pcChecksHtml(a, preview){
   const checks = caCardChecks(a);
@@ -11393,7 +11411,7 @@ function pcActivity(root){
   return (window.CLASS_ACTIVITIES || []).find(x => x.id === id);
 }
 function pcWindow(L, slow){ return snippetWindow(L.tr, { fromBar: L.firstBar, bars: L.totalBars }, slow); }
-function pcStatus(root, html){ const el = root.querySelector('.pc-status'); if(el) el.innerHTML = html || '&nbsp;'; }
+function pcStatus(root, html){ const el = root.querySelector('.pc-status'); if(el) el.innerHTML = html || ''; }   // '' = :empty, see styles.css
 function pcStop(){
   if(!pcState) return;
   const st = pcState;
@@ -11875,7 +11893,7 @@ function caActivityCardHtml(a){
       ${caPrintBtnHtml(a)}
     </summary>
     <div class="ca-card-body">
-      ${card ? caCardBodyHtml(a) : (tf(a, 'intro') ? `<p class="coach-tip">${escHtml(tf(a, 'intro'))}</p>` : '')}
+      ${card ? caCardBodyHtml(a) : (caShowIntro(a, focus, openStepIdx) ? `<p class="coach-tip">${escHtml(tf(a, 'intro'))}</p>` : '')}
       ${stepsHtml && focus ? caFocusDotsHtml(a, openStepIdx) : ''}
       ${stepsHtml ? `<ol class="ca-steps">${stepsHtml}</ol>` : ''}
       ${caMarkRowHtml(a, done, markLabel)}
@@ -12258,14 +12276,56 @@ function caSyncTopbar(){
   const keys = caTickKeys(a);   // a practice card's checks, or a ladder's steps
   const doneN = caTickCount(keys);
   const prog = keys.length ? t('ca.barProgress', {done: doneN, total: keys.length}) : '';
+  /* A Focus card's step buttons ride in the bar instead of on a row of
+     their own above the step (2026-10-10, maximize-the-view): the row cost
+     48px of every step, and up here they stay in reach while the student
+     scrolls. They already show which steps are done (✓), so they stand in
+     for "n of m done". styles.css hides the card's own copy while the card
+     is the open one (.ca-solo-card). Every step move re-renders and every
+     render ends in this function, so the two copies can't disagree. */
+  const steps = caIsFocus(a) && (a.steps || []).length > 1
+    ? `<div class="ca-bar-steps">${caFocusDotsHtml(a, caFocusIdx(a))}</div>` : '';
   bar.innerHTML = `<button type="button" class="ca-bar-back" onclick="caCloseOpen()">&#x25C0; ${escHtml(t('ca.allActivities'))}</button>`
     + `<button type="button" class="ca-bar-name" onclick="caScrollToActivity('${escAttr(a.id)}')" title="${escAttr(t('ca.barTop'))}" data-i18n-attr="title:ca.barTop">${escHtml(name)}</button>`
-    + (prog ? `<span class="ca-bar-prog">${escHtml(prog)}</span>` : '')
-    + (caIsCard(a) ? `<button type="button" class="ca-bar-stop" onclick="pcStop()" hidden>&#x25A0; ${escHtml(t('ca.snipStop'))}</button>` : '');
+    + (steps || (prog ? `<span class="ca-bar-prog">${escHtml(prog)}</span>` : ''))
+    + (caIsCard(a) ? `<button type="button" class="ca-bar-stop" onclick="pcStop()" hidden>&#x25A0; ${escHtml(t('ca.snipStop'))}</button>` : '')
+    + caFullBtnHtml();
   bar.hidden = false;
   title.hidden = true;
   pcSyncBarStop();
 }
+/* Full screen for an open activity (Jonathan, 2026-10-10: "maximize the
+   view for class activities on chromebook screen"). A Chromebook's browser
+   tabs and address bar take 111px of a 768px screen, and the site header
+   another 48px, so a student playing from an open card saw 562px of it.
+   The button in the sticky bar asks the browser for full screen (the
+   Fullscreen API — the same thing the video players do), and while the
+   page is full screen AND a card is open, styles.css also folds the site
+   header away (body.ca-full): 721px for the activity. "All activities"
+   brings the header back without leaving full screen, so the next card
+   opens full screen too; Esc, or the button again, leaves it. Nothing is
+   saved — a reload starts in the normal window, which is the browser's
+   own rule anyway (full screen needs a tap every time). Hidden where the
+   browser can't do it (an iPhone), so the button never does nothing. */
+const CA_FULL_ICON_ON = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 9V4h5M20 9V4h-5M4 15v5h5M20 15v5h-5"/></svg>';
+const CA_FULL_ICON_OFF = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 4v5H4M15 4v5h5M9 20v-5H4M15 20v-5h5"/></svg>';
+function caFullscreenNow(){ return !!document.fullscreenElement; }
+function caFullBtnHtml(){
+  if(!document.fullscreenEnabled || !document.documentElement.requestFullscreen) return '';
+  const on = caFullscreenNow();
+  const lab = t(on ? 'ca.fullExit' : 'ca.fullEnter');
+  return `<button type="button" class="ca-bar-full" aria-pressed="${on ? 'true' : 'false'}" onclick="caToggleFullscreen()" title="${escAttr(on ? lab : t('ca.fullTitle'))}">`
+    + `${on ? CA_FULL_ICON_OFF : CA_FULL_ICON_ON}<span class="ca-bar-full-lab">${escHtml(lab)}</span></button>`;
+}
+function caToggleFullscreen(){
+  try {
+    if(caFullscreenNow()){ document.exitFullscreen().catch(() => {}); return; }
+    document.documentElement.requestFullscreen({ navigationUI: 'hide' }).catch(() => {});
+  } catch(e) { /* an old browser: the button simply does nothing */ }
+}
+// Esc, the button and the Chromebook's own key all land here. caSyncTopbar
+// redraws the button's label; caSyncSolo sets body.ca-full.
+document.addEventListener('fullscreenchange', () => { caSyncTopbar(); });
 /* One activity on the page at a time (Jonathan, 2026-09-25). With a card
    open, the Unfinished / Completed groups, module headings, the other cards
    and the resume card used to sit right under it, and students opened them
@@ -12284,6 +12344,8 @@ function caSyncSolo(card){
   body.querySelectorAll('.ca-solo-card, .ca-solo-path').forEach(el => el.classList.remove('ca-solo-card', 'ca-solo-path'));
   const on = !!(card && body.contains(card));
   screen.classList.toggle('ca-solo', on);
+  // Full screen + a card open = the site header folds away (caFullBtnHtml).
+  document.body.classList.toggle('ca-full', on && caFullscreenNow());
   if(!on) return;
   card.classList.add('ca-solo-card');
   for(let el = card.parentElement; el && el !== body; el = el.parentElement) el.classList.add('ca-solo-path');

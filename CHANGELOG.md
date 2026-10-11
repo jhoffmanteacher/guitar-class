@@ -5,6 +5,20 @@ Notable changes to the Guitar Class site. Newest first.
 For the full session-by-session history (and the reasoning behind each change),
 see `WORKFLOW.md` and the git commit log.
 
+## 2026-10-10 — More room for class activities on a Chromebook
+
+- **Full screen button.** An open activity has a Full screen button at the
+  top right. It hides the browser bars and the site header, so more of the
+  activity fits on the screen. A whole-song play-along card fits with no
+  scrolling. Press Esc or Exit full screen to go back.
+- **Step buttons in the top bar.** On an activity with numbered steps, the
+  step buttons sit in the bar at the top, next to the activity's name. They
+  stay there when you scroll.
+- **Less space above the TAB.** The activity's name shows once, in the bar
+  at the top. On a play-along card, Previous / Next for the sections and the
+  "Playing from…" line moved up beside "Tap a section…". The note above the
+  steps shows on Step 1 only.
+
 ## 2026-10-10 — Song links and the "the cure" click
 
 - **Song names in "About this set" for Modules 6 and up open the song's
