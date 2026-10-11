@@ -7,6 +7,9 @@ see `WORKFLOW.md` and the git commit log.
 
 ## 2026-10-11 — Bigger Keep practicing cards, true full screen
 
+- **Keep practicing cards are blue.** They stand out from the other cards on
+  In-Class Activities.
+
 - **Keep practicing cards show more of the name.** The cards are taller and the
   letters are smaller, so a long activity name shows on up to three lines
   instead of being cut off.

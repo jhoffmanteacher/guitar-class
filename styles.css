@@ -2797,10 +2797,10 @@ body.ca-full:has(#class-activities-screen:not([hidden])) .rail-backdrop{display:
    title shows whole and hands its spare room to the long ones, instead of
    every title shrinking by the same proportion. */
 .ca-pin{flex:1 1 0;max-width:max-content;min-width:0;display:inline-flex;align-items:center;gap:6px;min-height:64px;
-  padding:8px 12px;background:var(--bg);color:var(--text);border:1px solid var(--border);
-  border-left:3px solid var(--ca-accent);border-radius:var(--radius);font:inherit;font-size:0.75rem;line-height:1.3;
+  padding:8px 12px;background:var(--blue-bg);color:var(--blue-text);border:1px solid var(--blue-soft);
+  border-left:3px solid var(--blue-text);border-radius:var(--radius);font:inherit;font-size:0.75rem;line-height:1.3;
   font-weight:600;cursor:pointer;text-align:left}
-.ca-pin:hover{border-color:var(--ca-accent)}
+.ca-pin:hover{border-color:var(--blue-text)}
 .ca-pin-t{min-width:0;overflow:hidden;display:-webkit-box;-webkit-box-orient:vertical;-webkit-line-clamp:3;line-clamp:3;overflow-wrap:anywhere}
 .ca-pin-check{width:15px;height:15px;flex-shrink:0;color:var(--green-text)}
 @media (max-width:600px){
