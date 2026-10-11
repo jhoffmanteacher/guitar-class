@@ -14,7 +14,7 @@ function makeSignal({bpm, notes, played, room, seed}){
       if(tt<0.006) v+=(r()-0.5)*6*(1-tt/0.006); x[i]+=v*env*0.5; } }
   return {x, ev: ev.filter(e=>e.mine), beat};
 }
-const pre='const COACH_LVL_WIN = 1024, COACH_LVL_HOP = 512; const COACH_CATCHUP_MAX_MS = 150; let coachHfRms=0, coachOnsetAt=0, coachReadCtx=null, coachReadCtxT=0, coachYinD=null;';
+const pre='const COACH_LVL_WIN = 1024, COACH_LVL_HOP = 512; const COACH_CATCHUP_MAX_MS = 150; let micRec=null, coachHfRms=0, coachOnsetAt=0, coachReadCtx=null, coachReadCtxT=0, coachYinD=null;';
 const mk=new Function('coachAnalyser','coachCtx','coachFrameBuf','coachUpdateMicLevel','performance','nrOffset',
   pre+['coachReadFrame','coachDetectPitch','coachPitchReadings'].map(n=>extract(src,n)).join('\n')+';return {read:coachReadFrame,hf:()=>coachHfRms,at:()=>coachOnsetAt,pr:coachPitchReadings};');
 const median=a=>{const b=[...a].sort((x,y)=>x-y);const k=b.length>>1;return b.length%2?b[k]:(b[k-1]+b[k])/2;};

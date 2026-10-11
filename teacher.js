@@ -78,7 +78,7 @@ function teacherOpenThroughPillHtml(stu){
 // renders alongside.
 function teacherBlockedBadgeHtml(stu){
   const n=teacherBlockersFor(stu, teacherClassConfig).length;
-  return n?` <span class="stu-period stu-blocked" title="${n} today's activit${n===1?'y':'ies'} not yet done or cleared">Blocked by ${n}</span>`:'';
+  return n?` <span class="stu-period stu-blocked" title="${n} of today's activit${n===1?'y':'ies'} not yet done or cleared — In-Class Activities opens first when they sign in">Pending ${n}</span>`:'';
 }
 /* 'all' | '4' | '7' | 'CAS' | 'none'. Persisted per-device so a mid-period
    reload comes back to the class the teacher was actually looking at. */
@@ -1161,7 +1161,7 @@ function renderTeacherActivities(opts){
       const isOpt=optional[a.id]===true;
       return `<div class="tg-seg">`
         +`<button class="tg-seg-btn ${!isOpt?'on':''}" data-set-activity-optional data-id="${escAttr(a.id)}" data-state="required" title="Students must finish this before the rest of the site opens">Required</button>`
-        +`<button class="tg-seg-btn ${isOpt?'on':''}" data-set-activity-optional data-id="${escAttr(a.id)}" data-state="optional" title="Students see it, tagged Optional, but it never locks the rest of the site">Optional</button></div>`;
+        +`<button class="tg-seg-btn ${isOpt?'on':''}" data-set-activity-optional data-id="${escAttr(a.id)}" data-state="optional" title="Students see it, tagged Optional, but it never opens first when they sign in">Optional</button></div>`;
     };
     // Practice cards only (view:'card'): when the Songs page's Play Along
     // list shows this card. "By date" is the rule every card follows — listed
@@ -2200,7 +2200,7 @@ function teacherRetiredBanner(id){
 // The Gate column for a CAS student on the activity/check detail grids:
 // every activity is optional for CAS (teacherBlockersFor), so a Clear
 // button there would do nothing.
-const TEACHER_CAS_GATE_CELL='<td><span class="stu-period" title="CAS students never get locked out — every activity is optional for them.">CAS · optional</span></td>';
+const TEACHER_CAS_GATE_CELL='<td><span class="stu-period" title="CAS students are never sent to an activity first — every activity is optional for them.">CAS · optional</span></td>';
 function teacherActivityOptional(id, cfg){ return ((cfg&&cfg.optionalActivities)||{})[id]===true; }
 function teacherBlockersFor(stu, cfg){
   const today=dayStr(new Date());
@@ -2694,7 +2694,7 @@ async function teacherOpenAllThrough(){
   const arch=(teacherClassConfig&&teacherClassConfig.archived)||{};
   const targets=allStudentsRaw.filter(s=>!arch[s.uid] && teacherStudentOpenThrough(s)<n);
   if(!targets.length){ alert('Everyone is already open through Module '+n+' or further.'); return; }
-  if(!confirm('Open Modules 1–'+n+' for '+targets.length+' student'+(targets.length===1?'':'s')+'? Nothing is marked done; you can set any student back to Auto.')) return;
+  if(!confirm('Open every set of Modules 1–'+(n-1)+' and Module '+n+' from Set 1, for '+targets.length+' student'+(targets.length===1?'':'s')+'? Students who sign in for the first time later are not included. Nothing is marked done; you can set any student back to Auto.')) return;
   const prev=Object.assign({}, teacherClassConfig.moduleOpenThrough||{});
   const map={}; targets.forEach(s=>{ map[s.uid]=n; });
   teacherClassConfig.moduleOpenThrough=Object.assign({}, prev, map);
@@ -3345,11 +3345,16 @@ function micEvalTake(pcm, R, d, deps){
 }
 
 // The device, from what the take recorded about itself.
+/* The download is "no names", but a Bluetooth mic is often labelled with
+   its owner's ("Maria's AirPods") — keep the device, drop the owner. */
+function micEvalMicName(label){
+  return String(label || '').replace(/^.*?['’]s\s+/i, '');
+}
 function micEvalDevice(d){
   const ua = String(d.userAgent || '');
   const cros = ua.match(/CrOS \S+ ([\d.]+)/), chrome = ua.match(/Chrome\/(\d+)/);
   const os = cros ? 'ChromeOS ' + cros[1] : /Windows/.test(ua) ? 'Windows' : /iPad|iPhone/.test(ua) ? 'iOS' : /Mac OS X/.test(ua) ? 'macOS' : /Android/.test(ua) ? 'Android' : /Linux/.test(ua) ? 'Linux' : '?';
-  return { os, chromebook: !!cros, chrome: chrome ? +chrome[1] : null, micLabel: d.micLabel || '', srcRate: d.srcSampleRate || null };
+  return { os, chromebook: !!cros, chrome: chrome ? +chrome[1] : null, micLabel: micEvalMicName(d.micLabel), srcRate: d.srcSampleRate || null };
 }
 
 /* One take -> one row: device + game + the analysis. No names, no uid —
@@ -3789,8 +3794,8 @@ function renderTeacherStudentDetail(uid){
   // activity/check detail pages use.
   const blockers=teacherBlockersFor(stu, teacherClassConfig);
   const gateHtml=blockers.length
-    ? `<div class="stu-section-head" style="margin-top:0">Today's activity gate</div>
-       <div class="tg-note">Blocked by ${blockers.length} — not yet done or cleared.
+    ? `<div class="stu-section-head" style="margin-top:0">Today's activity</div>
+       <div class="tg-note">${blockers.length} not yet done or cleared — In-Class Activities opens first when they sign in. Nothing else is locked.
          <button type="button" class="tg-seg-btn" data-clear-all-blockers data-uid="${escAttr(stu.uid)}" style="margin-left:8px">Clear all</button>
        </div>
        <div class="t-grid-wrap"><table><thead><tr><th class="nc">Activity</th><th>Gate</th></tr></thead><tbody>

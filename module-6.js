@@ -1029,7 +1029,7 @@ SETS.push(
       { id: 'm6w3-s2', text: 'Play a rock strum that sounds clearly heavier than the soft feel',
         text_es: 'Tocar un rasgueo rock que suene claramente más pesado que la sensación suave',
         gotItWhen: 'on a recording, the strum sounds clearly heavier than your soft-feel take — hit hardest on the downstrokes, with arm weight behind them.',
-        gotItWhen_es: 'en una grabación, el rasgueo suena claramente más pesado que tu toma de la sensación suave — golpeando más fuerte en los tiempos hacia abajo, con el peso del brazo detrás.',
+        gotItWhen_es: 'en una grabación, el rasgueo suena claramente más pesado que tu toma de la sensación suave — con más fuerza en los golpes hacia abajo, con el peso del brazo detrás.',
         practice: { type: 'mc', prompt: 'Your rock strum sounds thin, like the soft feel. What gives it a heavy sound?',
           prompt_es: 'Tu rasgueo rock suena delgado, como la sensación suave. ¿Qué le da un sonido pesado?',
           choices: ['Arm weight from the elbow behind accented downs', 'Strumming as fast as possible', 'Squeezing the chord harder with the fretting hand', 'Only strumming on beat 1'],

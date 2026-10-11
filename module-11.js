@@ -337,8 +337,8 @@ SETS.push(
               },
               {
                 label: 'Watch: "All Along the Watchtower"', label_es: 'Mira: "All Along the Watchtower"',
-                text: 'Watch: <a href="https://www.youtube.com/watch?v=bT7Hj-ea0VE" target="_blank">All Along the Watchtower – Bob Dylan (Official Audio)</a>. Listen to the Am–G–F loop and, without looking anything up, decide by ear which chord feels like "home."',
-                text_es: 'Mira: <a href="https://www.youtube.com/watch?v=bT7Hj-ea0VE" target="_blank">All Along the Watchtower – Bob Dylan (Official Audio)</a>. Escucha el loop Am–G–F y, sin buscar nada, decide de oído cuál acorde se siente como "base."',
+                text: 'Watch: <a href="https://www.youtube.com/watch?v=bT7Hj-ea0VE" target="_blank">All Along the Watchtower – Bob Dylan (Official Audio)</a>. Listen to its three-chord loop. Dylan plays it higher than we do (C#m–B–A), but it is the same loop as our Am–G–F. Without looking anything up, decide by ear which chord feels like "home."',
+                text_es: 'Mira: <a href="https://www.youtube.com/watch?v=bT7Hj-ea0VE" target="_blank">All Along the Watchtower – Bob Dylan (Official Audio)</a>. Escucha su loop de tres acordes. Dylan lo toca más agudo que nosotros (C#m–B–A), pero es el mismo loop que nuestro Am–G–F. Sin buscar nada, decide de oído cuál acorde se siente como "base."',
                 hint: 'Home is the chord the loop keeps landing back on — the one that makes the progression feel finished, not left unfinished.',
                 hint_es: 'La base es el acorde donde el loop siempre vuelve a caer — el que hace que la progresión se sienta terminada, no inconclusa.',
                 skills: [4],

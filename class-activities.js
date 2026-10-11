@@ -3443,7 +3443,7 @@ window.CLASS_ACTIVITIES = [
         },
         {
           label: 'Solo 1', label_es: 'Solo 1',
-          caption: 'Solo 1 — E C B A, 4 laps, then one more A', caption_es: 'Solo 1 — E C B A, 4 vueltas, y un A más',
+          caption: 'Solo 1 — E C B A four times, then one more A', caption_es: 'Solo 1 — E C B A cuatro veces, y un A más',
           fromBar: 113, bars: 17,
           notes: [
             { string: 'E', fret: 0, note: 'E', midi: 40, beats: 4 },
@@ -4507,7 +4507,7 @@ window.CLASS_ACTIVITIES = [
         },
         {
           label: 'Solo 1', label_es: 'Solo 1',
-          caption: 'Solo 1 — E5 C5 B5 A5, 4 laps, then one more A5', caption_es: 'Solo 1 — E5 C5 B5 A5, 4 vueltas, y un A5 más',
+          caption: 'Solo 1 — E5 C5 B5 A5 four times, then one more A5', caption_es: 'Solo 1 — E5 C5 B5 A5 cuatro veces, y un A5 más',
           fromBar: 113, bars: 17,
           notes: [
             { frets: [['A', 2], ['E', 0]], note: 'E5', midi: [47, 40], beats: 4 },

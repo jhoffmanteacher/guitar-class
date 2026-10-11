@@ -2011,6 +2011,7 @@ body.t-wide .t-main{max-width:none}
 .micrec-ask{padding:12px 14px;border:1px solid var(--border2);border-radius:var(--radius);margin:6px 0}
 .micrec-q{margin:0 0 10px;font-size:0.9375rem;line-height:1.5;color:var(--text)}
 .micrec-btns{display:flex;flex-wrap:wrap;gap:8px}
+.micrec-stop{margin-left:6px;padding:0 2px;border:0;background:none;color:inherit;font:inherit;text-decoration:underline;cursor:pointer}
 .micrec-on{display:inline-flex;align-items:center;gap:6px;margin:0 0 6px 8px;padding:2px 8px;border-radius:999px;font-size:0.75rem;font-weight:600;background:var(--red-bg);color:var(--red-text)}
 .micrec-dot{width:8px;height:8px;border-radius:50%;background:currentColor}
 .coach-target{font-size:0.875rem;color:var(--text);margin-bottom:6px;line-height:1.45}
@@ -2507,9 +2508,9 @@ body.explore-open #week-panels{display:none}
    the numbers out of the row's height, so the row centres the buttons on
    the slider's line, not on line + numbers; the row-gap on .pc-player
    leaves them room. */
-.pc-speed4{display:inline-flex;align-items:flex-start;flex-wrap:wrap;gap:4px 8px;margin-bottom:-18px;font-size:0.875rem;color:var(--text2)}
-.pc-speed-end{line-height:36px}
-.pc-speed-rail{--t:22px;position:relative;display:inline-block;width:180px;height:54px;flex:0 0 180px}
+.pc-speed4{display:inline-flex;align-items:flex-start;flex-wrap:nowrap;max-width:100%;gap:4px 8px;margin-bottom:-18px;font-size:0.875rem;color:var(--text2)}
+.pc-speed-end{line-height:36px;white-space:nowrap;flex:none}
+.pc-speed-rail{--t:22px;position:relative;display:inline-block;width:180px;min-width:120px;height:54px;flex:0 1 180px}
 .pc-speed-line{position:absolute;left:calc(var(--t) / 2);right:calc(var(--t) / 2);top:18px;height:4px;margin-top:-2px;border-radius:2px;background:var(--border2)}
 .pc-speed-tick{position:absolute;top:18px;left:calc(var(--t) / 2 + var(--i) * (100% - var(--t)) / 3);width:12px;height:12px;margin:-6px 0 0 -6px;border-radius:50%;background:var(--bg);border:2px solid var(--text2);box-sizing:border-box;pointer-events:none}
 .pc-speed-x{position:absolute;top:34px;left:calc(var(--t) / 2 + var(--i) * (100% - var(--t)) / 3);transform:translateX(-50%);font-size:0.8125rem;line-height:18px;white-space:nowrap;pointer-events:none}

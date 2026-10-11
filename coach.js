@@ -134,7 +134,11 @@ function coachOnBeatMs(){
    before the analyser the way speaker playback would be). */
 const COACH_MIC_GAIN = 3;
 
-function coachFootHtml(){ return '<div class="coach-foot"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" style="width:1em;height:1em;vertical-align:-0.15em"><rect x="5" y="11" width="14" height="9" rx="2"/><path d="M8 11V7a4 4 0 0 1 8 0v4"/></svg> ' + t('coach.foot') + '</div>'; }
+function coachFootHtml(){ return '<div class="coach-foot"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" style="width:1em;height:1em;vertical-align:-0.15em"><rect x="5" y="11" width="14" height="9" rx="2"/><path d="M8 11V7a4 4 0 0 1 8 0v4"/></svg> <span class="coach-foot-txt">' + coachFootText() + '</span></div>'; }
+/* "Nothing is recorded" is only true for a student who has not said yes to
+   the consented recordings below — one who has, while collection is open,
+   is told their takes are saved instead (micRecFootSync re-words it live). */
+function coachFootText(){ return t(typeof micRecWanted === 'function' && micRecWanted() ? 'coach.footRec' : 'coach.foot'); }
 
 let coach = null;            // active check session (null = no card open)
 let coachStream = null, coachCtx = null, coachAnalyser = null, coachRaf = null,
@@ -1490,10 +1494,21 @@ function micRecAskHtml(game){
    goes ahead (still inside their click, so the mic prompt can open). */
 function micRecConsent(yes, game){
   try { localStorage.setItem(micRecAskKey(), yes ? 'yes' : 'no'); } catch(e){}
+  micRecFootSync();
   if (game === 'nr') nrStart(); else coachStartCheck();
 }
 function micRecBadgeHtml(){
-  return `<div class="micrec-on" id="micrec-on"><span class="micrec-dot"></span>${escHtml(t('micrec.recording'))}</div>`;
+  return `<div class="micrec-on" id="micrec-on"><span class="micrec-dot"></span>${escHtml(t('micrec.recording'))}<button type="button" class="micrec-stop" onclick="micRecRevoke()">${escHtml(t('micrec.stop'))}</button></div>`;
+}
+/* A "yes" can be taken back: this take is dropped unsaved and none after it
+   is recorded (the answer becomes "no", which is never asked again). */
+function micRecRevoke(){
+  try { localStorage.setItem(micRecAskKey(), 'no'); } catch(e){}
+  micRecAbort();
+  micRecFootSync();
+}
+function micRecFootSync(){
+  document.querySelectorAll('.coach-foot-txt').forEach(el => { el.textContent = coachFootText(); });
 }
 
 /* Start capturing. A separate source node off the raw stream, into a

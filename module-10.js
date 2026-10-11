@@ -354,8 +354,8 @@ SETS.push(
             steps: [
               {
                 label: 'Ear training: relative vs. parallel', label_es: 'Oído: relativa vs. paralela',
-                text: '<ol><li>Play a C major chord, then an A minor chord, then a C minor chord (Cm = your full Bm barre shape from Module 7, slid up one fret to fret 3).</li><li>The keys of C major and A minor use the same seven notes — that\'s why the chords sound so closely related; C-to-Cm shares only the root (parallel).</li><li>Notice how different Am and Cm sound from each other, even though both are "C\'s minor."</li></ol>',
-                text_es: '<ol><li>Toca un acorde de C mayor, luego un acorde de A menor, y luego un acorde de C menor (Cm = tu forma completa de cejilla de Bm del Módulo 7, deslizada un traste hacia arriba, al traste 3).</li><li>Las tonalidades de C mayor y A menor usan las mismas siete notas — por eso los acordes suenan tan emparentados; C a Cm comparte solo la raíz (paralela).</li><li>Fíjate qué tan diferentes suenan Am y Cm entre sí, aunque ambos sean "el menor de C."</li></ol>',
+                text: '<ol><li>Play a C major chord, then an A minor chord, then a C minor chord (Cm = your full Bm barre shape from Module 7, slid up one fret to fret 3).</li><li>The keys of C major and A minor use the same seven notes — that\'s why the chords sound so closely related; C major and C minor share the same root, C, but three of their seven notes are different (parallel).</li><li>Notice how different Am and Cm sound from each other, even though both are "C\'s minor."</li></ol>',
+                text_es: '<ol><li>Toca un acorde de C mayor, luego un acorde de A menor, y luego un acorde de C menor (Cm = tu forma completa de cejilla de Bm del Módulo 7, deslizada un traste hacia arriba, al traste 3).</li><li>Las tonalidades de C mayor y A menor usan las mismas siete notas — por eso los acordes suenan tan emparentados; C mayor y C menor comparten la misma raíz, C, pero tres de sus siete notas son distintas (paralela).</li><li>Fíjate qué tan diferentes suenan Am y Cm entre sí, aunque ambos sean "el menor de C."</li></ol>',
                 hint: 'These two ideas get mixed up constantly — the exercise is hearing that "C\'s relative minor" and "C\'s parallel minor" are two completely different chords.',
                 hint_es: 'Estas dos ideas se confunden constantemente — el ejercicio es escuchar que "la relativa menor de C" y "la paralela menor de C" son dos acordes completamente distintos.',
                 skills: [2],
@@ -363,7 +363,7 @@ SETS.push(
                   prompt_es: 'La relativa menor frente a la paralela menor — la diferencia es:',
                   answer: 0,
                   explain: 'The key of A minor uses the exact same seven notes as C major — that is what relative means. The key of C minor shares its root with C major but changes three of the notes — that is parallel. Swapping the two definitions is the easy slip, and they are not two names for one thing: relative and parallel point at different keys.',
-                  explain_es: 'La tonalidad de A menor usa las mismas siete notas que C mayor (relativa). La tonalidad de C menor solo comparte la raíz con C mayor (paralela).',
+                  explain_es: 'La tonalidad de A menor usa las mismas siete notas que C mayor (relativa). La tonalidad de C menor comparte la raíz con C mayor, pero cambia tres de las notas (paralela).',
                   choices: ['Relative shares the same NOTES; parallel shares the same ROOT', 'They\'re two names for one thing', 'Parallel shares the same NOTES; relative shares the same ROOT', 'Both keep the same notes; only the name changes'],
                   choices_es: ['La relativa comparte las mismas NOTAS; la paralela comparte la misma RAÍZ', 'Son dos nombres para la misma cosa', 'La paralela comparte las mismas NOTAS; la relativa comparte la misma RAÍZ', 'Las dos conservan las mismas notas; solo cambia el nombre'] }
               }
@@ -472,7 +472,7 @@ SETS.push(
                 levelUp: 'Play the blues scale over a 12-bar blues feel, or build it starting from a different root.',
                 levelUp_es: 'Toca la escala de blues sobre la sensación de un blues de 12 compases, o constrúyela empezando desde otra raíz.',
                 skills: [4, 5],
-                playSeq: { label: 'A blues scale, box 1', label_es: 'Escala de blues de A, caja 1', bpm: 60, notes: [45, 48, 50, 51, 52, 55, 57] }
+                playSeq: { label: 'A blues scale, box 1', label_es: 'Escala de blues de A, caja 1', bpm: 60, notes: [45, 48, 50, 51, 52, 55, 57, 60, 62, 63, 64, 67, 69, 72] }
               }
             ]
           },
@@ -541,8 +541,8 @@ SETS.push(
           explain_es: 'Cuenta 3 trastes abajo desde G y caes en E, así que Em es la relativa menor de G mayor — las mismas notas, otro hogar. G menor es la paralela menor, que es una idea completamente distinta.' } },
       { id: 'm10w2-s2', text: 'Explain the difference between relative and parallel minor',
         text_es: 'Explicar la diferencia entre la relativa y la paralela menor',
-        gotItWhen: 'you can say out loud that relative minor shares the same NOTES as its major (just a different home), while parallel minor shares only the ROOT — and give a real example of each (C major → Am relative, Cm parallel).',
-        gotItWhen_es: 'puedes decir en voz alta que la relativa menor comparte las mismas NOTAS que su mayor (solo un hogar distinto), mientras que la paralela menor comparte solo la RAÍZ — y dar un ejemplo real de cada una (C mayor → Am relativa, Cm paralela).',
+        gotItWhen: 'you can say out loud that relative minor shares the same NOTES as its major (just a different home), while parallel minor keeps the same ROOT but changes three notes — and give a real example of each (C major → Am relative, Cm parallel).',
+        gotItWhen_es: 'puedes decir en voz alta que la relativa menor comparte las mismas NOTAS que su mayor (solo un hogar distinto), mientras que la paralela menor mantiene la misma RAÍZ pero cambia tres notas — y dar un ejemplo real de cada una (C mayor → Am relativa, Cm paralela).',
         practice: { type: 'mc', prompt: 'C major\'s PARALLEL minor is:',
           prompt_es: 'La PARALELA menor de C mayor es:',
           choices: ['A minor', 'C minor', 'E minor', 'F minor'],
@@ -573,7 +573,7 @@ SETS.push(
         text_es: 'Tocar la escala de blues subiendo y bajando a 60 BPM',
         gotItWhen: 'your ascending run matches the play button every time at 60 BPM, and you can play the descent on your own right after it.',
         gotItWhen_es: 'tu recorrido ascendente coincide con el botón de reproducir cada vez, a 60 BPM, y puedes tocar el descenso por tu cuenta justo después.',
-        practice: { type: 'playSeq', label: 'A blues scale, box 1', label_es: 'Escala de blues de A, caja 1', bpm: 60, notes: [45, 48, 50, 51, 52, 55, 57] } },
+        practice: { type: 'playSeq', label: 'A blues scale, box 1', label_es: 'Escala de blues de A, caja 1', bpm: 60, notes: [45, 48, 50, 51, 52, 55, 57, 60, 62, 63, 64, 67, 69, 72] } },
       { id: 'm10w2-s6', text: 'Name relative pairs for five of our six core songs\' keys ("Seven Nation Army" Em↔G · "Watchtower" Am↔C · "Luna" F↔Dm · "Let It Be" and "the cure" both C↔Am)',
         text_es: 'Nombrar los pares relativos de las tonalidades de cinco de nuestras seis canciones principales ("Seven Nation Army" Em↔G · "Watchtower" Am↔C · "Luna" F↔Dm · "Let It Be" y "the cure" ambas C↔Am)',
         gotItWhen: 'you can name all four relative pairs that cover five of our six core songs (Seven Nation Army Em↔G, Watchtower Am↔C, Luna F↔Dm, Let It Be and "the cure" both C↔Am) without looking any of them up.',

@@ -6982,8 +6982,10 @@ const DECKS = {
     cards:[{f:'C',b:'Am'},{f:'G',b:'Em'},{f:'F',b:'Dm'},{f:'D',b:'Bm'},{f:'A',b:'F#m'}] },
   'minor-keys-box1': { kicker:'deck.kKey', back:'deck.kBoxFret', hint:'deck.hFindBox',
     cards:[{f:'Am',b:'5'},{f:'Gm',b:'3'},{f:'Bm',b:'7'},{f:'Dm',b:'10'}] },
-  'naturals': { kicker:'deck.kNote', hint:'deck.hFindNote',
-    cards:[{f:'A'},{f:'B'},{f:'C'},{f:'D'},{f:'E'},{f:'F'},{f:'G'}] },
+  /* Module 9's D- and G-string drills (its only users): the back gives
+     both frets, D string first, so the student can check an answer. */
+  'naturals': { kicker:'deck.kNote', back:'deck.kFretDG', hint:'deck.hFindNote',
+    cards:[{f:'A',b:'7 · 2'},{f:'B',b:'9 · 4'},{f:'C',b:'10 · 5'},{f:'D',b:'0 / 12 · 7'},{f:'E',b:'2 · 9'},{f:'F',b:'3 · 10'},{f:'G',b:'5 · 0 / 12'}] },
   /* One string's natural notes, with the fret on the back so the student
      can check where they landed (2026-09-29: the class activities dealt the
      one-sided `naturals` deck, which never shows an answer — checks.mjs 1bi).
@@ -6992,8 +6994,8 @@ const DECKS = {
     cards:[{f:'E',b:'0 / 12'},{f:'F',b:'1'},{f:'G',b:'3'},{f:'A',b:'5'},{f:'B',b:'7'},{f:'C',b:'8'},{f:'D',b:'10'}] },
   'naturals-A': { kicker:'deck.kNote', back:'deck.kFretA', hint:'deck.hFindNote',
     cards:[{f:'A',b:'0 / 12'},{f:'B',b:'2'},{f:'C',b:'3'},{f:'D',b:'5'},{f:'E',b:'7'},{f:'F',b:'8'},{f:'G',b:'10'}] },
-  'naturals-plus': { kicker:'deck.kNote', hint:'deck.hFindNote',
-    cards:[{f:'A'},{f:'B'},{f:'C'},{f:'D'},{f:'E'},{f:'F'},{f:'G'},{f:'F#'},{f:'Bb'}] },
+  'naturals-plus': { kicker:'deck.kNote', back:'deck.kFretDG', hint:'deck.hFindNote',
+    cards:[{f:'A',b:'7 · 2'},{f:'B',b:'9 · 4'},{f:'C',b:'10 · 5'},{f:'D',b:'0 / 12 · 7'},{f:'E',b:'2 · 9'},{f:'F',b:'3 · 10'},{f:'G',b:'5 · 0 / 12'},{f:'F#',b:'4 · 11'},{f:'Bb',b:'8 · 3'}] },
   'keys-IIVV': { kicker:'deck.kKey', hint:'deck.hPlayIIVV',
     cards:[{f:'G'},{f:'A'},{f:'C'},{f:'D'},{f:'E'}] },
   'key-inventory': { kicker:'deck.kChordSet', back:'deck.kKey', hint:'deck.hNameKey',
@@ -11580,6 +11582,7 @@ function pcFrame(){
     st.timers.push(setTimeout(() => {
       if(pcState !== st || st.leaving !== old) return;
       if(st.audio !== old || !pcSpareReady(st)){ st.leaving = null; return; }   // switched under us: seek instead
+      slowestApplyRate(sp, pcRate(st.root));   // a speed tap in the last tenth of a second skipped pcSparePark
       sp.play().catch(() => {});
       st.audio = sp; st.spare = null;
       st.lastBeat = -1;
@@ -11773,6 +11776,15 @@ function pcRetrack(root){
   slowestApplyRate(st.audio, pcRate(root));   // Slowest <-> Slower and Slow <-> Normal are the same file, just the rate
   if(st.audio.src.endsWith(src)){ try { st.audio.currentTime = at; } catch(e) {} pcSparePark(st); return; }
   const wasPlaying = !st.audio.paused;
+  // After a lap the playing element may be the former spare, whose own error
+  // handler only drops it — a new file that fails to load must still stop
+  // the card and say so.
+  const el = st.audio;
+  el.addEventListener('error', () => {
+    if(pcState !== st || st.audio !== el) return;
+    pcStop();
+    if(typeof gateToast === 'function') gateToast(t('ca.snipLoadFailed'));
+  }, { once: true });
   st.audio.addEventListener('loadedmetadata', () => {
     if(pcState !== st) return;
     try { st.audio.currentTime = at; } catch(e) {}

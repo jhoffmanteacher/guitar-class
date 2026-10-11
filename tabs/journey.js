@@ -92,6 +92,9 @@ function openLayer(section, scroll){
   section.classList.remove('closed');
   var btn = section.querySelector('.layer-head');
   if(btn) btn.setAttribute('aria-expanded', 'true');
+  // An open whole-song tab is re-measured: a resize while its layer was
+  // closed could not size it (a hidden layer measures 0).
+  section.querySelectorAll('.ws-fold').forEach(wsReflow);
   // Same rule as app.js's scrollBehavior(): an OS "reduce motion" setting
   // means jump, not slide. Inlined because these pages don't load app.js.
   const reduce = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
@@ -648,7 +651,13 @@ function wsPreHtml(a){
     var notes = sec.notes || [];
     var total = notes.reduce(function(t, n){ return t + (n.beats > 0 ? n.beats : 1); }, 0);
     var bpb = total / Math.max(1, sec.bars || 1);
-    var head = '<span class="ws-sec" data-es="' + wsEsc(wsEsc(sec.caption_es || sec.caption)) + '">' + wsEsc(sec.caption) + '</span>';
+    /* Both languages padded to the same length, so a heading that sits
+       beside another one keeps its column when Español swaps the text in
+       (the side-by-side padding is counted once, from the English). */
+    var capEn = sec.caption || '', capEs = sec.caption_es || capEn;
+    var capW = Math.max(capEn.length, capEs.length);
+    function capPad(t){ return t + new Array(capW - t.length + 1).join(' '); }
+    var head = '<span class="ws-sec" data-es="' + wsEsc(wsEsc(capPad(capEs))) + '">' + wsEsc(capPad(capEn)) + '</span>';
     /* A section's own rows pack side by side first (the two chorus laps of
        a song, each a few bars long, share a line when the width holds). */
     var rowObjs = wsSectionRows(sec).map(function(r){
@@ -782,6 +791,7 @@ function wsReflow(fold){
   var pre = fold.querySelector('.tab-ascii');
   if(!tab || !pre) return;
   var col = fold.getBoundingClientRect();
+  if(!(col.width > 0)) return;   // inside a closed layer: openLayer re-measures
   var vw = document.documentElement.clientWidth;
   var width = Math.max(col.width, vw - 2 * WS_SIDE_GAP);
   tab.style.width = width + 'px';

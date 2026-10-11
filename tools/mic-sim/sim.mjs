@@ -25,7 +25,7 @@ function makeSignal({bpm, notes, room, quiet, seed}){
 function load(path, isNew){
   const src=fs.readFileSync(path,'utf8');
   const names=['coachReadFrame','coachDetectPitch'].concat(isNew?['coachPitchReadings','coachMicLatencyMs']:[]);
-  const pre = isNew ? 'const COACH_LVL_WIN = 1024, COACH_LVL_HOP = 512; const COACH_CATCHUP_MAX_MS = 150; let coachHfRms=0, coachOnsetAt=0, coachReadCtx=null, coachReadCtxT=0, coachYinD=null;' : 'let coachHfRms=0;';
+  const pre = isNew ? 'const COACH_LVL_WIN = 1024, COACH_LVL_HOP = 512; const COACH_CATCHUP_MAX_MS = 150; let micRec=null, coachHfRms=0, coachOnsetAt=0, coachReadCtx=null, coachReadCtxT=0, coachYinD=null;' : 'let coachHfRms=0;';
   const body = pre + names.map(n=>extract(src,n)).join('\n') +
     ';return {read:coachReadFrame, hf:()=>coachHfRms, at:()=>coachOnsetAt, pr: typeof coachPitchReadings!=="undefined"?coachPitchReadings:null, det:coachDetectPitch, lat: typeof coachMicLatencyMs!=="undefined"?coachMicLatencyMs:null};';
   return new Function('coachAnalyser','coachCtx','coachFrameBuf','coachUpdateMicLevel','performance','nrOffset', body);

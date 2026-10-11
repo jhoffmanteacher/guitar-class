@@ -599,7 +599,7 @@ Modules 4 and 5 send students there.
 | Songs page Core row | Play Along (only with an openable card) · Backing · Song Journey, every row |
 | Journey button on a card | never on a whole-song card; on another activity only while its song has no openable whole-song card (`caJourneyUrl()`) |
 | Resume card song row | all six songs |
-| The Journey page itself | open for every student, behind the activity gate as ever |
+| The Journey page itself | open for every student; the activity gate no longer locks it (`JOURNEY_GATE_LOCKS = false`, 2026-10-07) |
 
 **Layer matching:** a whole-song card carries `journey` + `journeyLayer` (2 on
 ca-24–ca-28, 3 on ca-29–ca-33), so a Module 2 link finds the Layer 2 card and a

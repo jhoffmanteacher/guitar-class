@@ -5,6 +5,27 @@ Notable changes to the Guitar Class site. Newest first.
 For the full session-by-session history (and the reasoning behind each change),
 see `WORKFLOW.md` and the git commit log.
 
+## 2026-10-10 — Fixes from a site-wide check
+
+- **Lesson fixes in Modules 6–13.** Corrected a few wrong facts. One said
+  C major and C minor share only the root note. One quiz explanation said
+  two wrong barre fixes were right. One hint left the high e string out of
+  the "Sweet Child O' Mine" intro. In Module 8, the Travis-picking cards now
+  agree: the root on beats 1 and 3, the other bass note on beats 2 and 4. The
+  index finger plays the G string, as Set 1 teaches.
+- **The blues scale play button plays all of box 1**, both octaves, so it
+  matches what the card asks you to play.
+- **The Module 9 note decks show the answer.** Flip a card to see the fret
+  on the D string and on the G string.
+- **Recordings for your teacher.** If you said yes to saving takes, the
+  note under the Listening Coach now says so. A new "Stop saving my takes"
+  button on the recording label turns it off.
+- **Play-along cards.** The speed slider stays on one line on a phone in
+  Spanish. A file that fails to load now stops the card and says so, even
+  after the first lap.
+- **Song Journey pages.** In Spanish, the section names in the whole-song
+  tab line up with their tabs again.
+
 ## 2026-10-09 — The speed control is a slider
 
 - **Easier to see all four speeds.** The speed control on the play-along
