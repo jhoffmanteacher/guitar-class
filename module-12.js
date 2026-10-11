@@ -542,8 +542,8 @@ SETS.push(
             steps: [
               {
                 label: 'Challenge — Happy Birthday in 3, fingerstyle', label_es: 'Reto — Happy Birthday en 3, con fingerstyle',
-                text: '<ul><li>Play the song\'s chords, C–F–C–G–C (the Module 6 version), with the 3/4 bass–pluck–pluck pattern all the way through.</li></ul>You\'ve got it when: the waltz feel never breaks, start to finish.',
-                text_es: '<ul><li>Toca los acordes de la canción, C–F–C–G–C (la versión del Módulo 6), con el patrón en 3/4 bajo–pulsación–pulsación de principio a fin.</li></ul>Lo tienes cuando: la sensación de vals nunca se rompe, de principio a fin.',
+                text: '<ul><li>Play the song\'s chords, C–G–C–F–C–G–C (the Module 6 version), with the 3/4 bass–pluck–pluck pattern all the way through.</li></ul>You\'ve got it when: the waltz feel never breaks, start to finish.',
+                text_es: '<ul><li>Toca los acordes de la canción, C–G–C–F–C–G–C (la versión del Módulo 6), con el patrón en 3/4 bajo–pulsación–pulsación de principio a fin.</li></ul>Lo tienes cuando: la sensación de vals nunca se rompe, de principio a fin.',
                 hint: 'Happy Birthday is a waltz — count ONE-two-three, ONE-two-three and let the bass land on beat 1 of each bar.',
                 hint_es: 'Happy Birthday es un vals — cuenta UNO-dos-tres, UNO-dos-tres y deja que el bajo caiga en el tiempo 1 de cada compás.',
                 stuck: 'Play just the chord changes with the pattern first, humming the melody instead of picking it out.',

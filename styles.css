@@ -2374,11 +2374,21 @@ body.explore-open #week-panels{display:none}
    "#20 - "the cure" — The Wh…" with the right half of the bar blank. */
 .ca-bar-open:not([hidden]) ~ .page-topbar-spacer{display:none}
 .ca-screen .page-title:focus{outline:none}
-/* The open card's name + "n of m done", swapped in for the page title. */
-.ca-bar-open{display:flex;align-items:baseline;gap:12px;min-width:0;flex:1}
+/* The open card's name + "n of m done", swapped in for the page title.
+   The row WRAPS when it doesn't fit, at any width (2026-10-10): the step
+   buttons, Print and Full screen don't shrink, so between ~761px and
+   ~1100px (and a 1366 Chromebook at 125% zoom) the name used to be the only
+   thing left to give and was squeezed to nothing. The name's flex-basis is
+   its 10ch floor, so the row only breaks once even 10ch of name no longer
+   fits — on a 1366 screen it stays one 48px row and the name just
+   ellipsizes; its max-width stops it growing past its own text, so the
+   step buttons still sit right after it and the spare room goes to the
+   auto margin before Print / Full screen. */
+.ca-bar-open{display:flex;flex-wrap:wrap;align-items:baseline;gap:6px 12px;min-width:0;flex:1}
 .ca-bar-open[hidden]{display:none}
 .ca-bar-name{font-family:var(--font-display);font-size:1.125rem;font-weight:600;color:var(--text);
-  background:transparent;border:0;padding:0;cursor:pointer;text-align:left;min-width:0;
+  background:transparent;border:0;padding:0;cursor:pointer;text-align:left;
+  flex:1 1 10ch;min-width:10ch;max-width:max-content;
   overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 .ca-bar-name:hover{color:var(--ca-accent)}
 .ca-bar-prog{flex-shrink:0;font-size:0.8125rem;font-weight:600;color:var(--text3);white-space:nowrap}
@@ -2410,6 +2420,9 @@ body.explore-open #week-panels{display:none}
   .ca-screen.ca-solo .ca-solo-card > .ca-card-summary{display:none}
   .ca-screen.ca-solo .ca-solo-card{scroll-margin-top:48px}
   .ca-screen.ca-solo .ca-solo-card > .ca-card-body{padding-top:8px}
+  /* A Focus card's intro shows with Step 1 only, and only on screen — the
+     handout always prints it (caIntroHtml in app.js). */
+  .ca-screen.ca-solo .ca-solo-card > .ca-card-body > .ca-intro-later{display:none}
 }
 /* 2. A Focus card's step buttons ride in the bar (caSyncTopbar), right after
       the name; the card's own row of them hides while it is the open card.
@@ -2425,13 +2438,23 @@ body.explore-open #week-panels{display:none}
       (body.ca-full, set by caSyncSolo) — scoped to the In class page being
       the one on screen, so leaving for Modules brings the header straight
       back. --hdr is what #app's height is worked out from. */
-.ca-bar-full{position:relative;flex-shrink:0;align-self:center;margin-left:auto;display:inline-flex;align-items:center;gap:6px;
+.ca-bar-full{position:relative;flex-shrink:0;align-self:center;display:inline-flex;align-items:center;gap:6px;
   font-family:inherit;font-size:0.875rem;font-weight:600;padding:6px 12px;border-radius:16px;
   border:1px solid var(--border2);background:var(--bg2);color:var(--text);cursor:pointer;white-space:nowrap}
 .ca-bar-full svg{width:16px;height:16px;flex-shrink:0}
 .ca-bar-full:hover{border-color:var(--text2)}
 .ca-bar-full:focus-visible{outline:2px solid var(--blue-text);outline-offset:2px}
-.ca-bar-stop:not([hidden]) ~ .ca-bar-full{margin-left:0}
+/*    The open card's title row is hidden on screen (item 1), and its 🖨
+      button and Optional tag went with it — caSyncTopbar puts both in the
+      bar. Print and Full screen ride together in .ca-bar-tools, which takes
+      the push to the right end (a showing Stop takes it instead) and, when
+      the bar wraps, drops to the right end of the second row as one unit
+      rather than leaving Full screen alone at the left of it. Print is
+      32px, the height of the step buttons. */
+.ca-bar-tools{flex-shrink:0;align-self:center;margin-left:auto;display:inline-flex;align-items:center;gap:8px}
+.ca-bar-stop:not([hidden]) ~ .ca-bar-tools{margin-left:0}
+.ca-bar-tools .ca-print-btn{width:32px;height:32px;border-radius:16px}
+.ca-bar-open .ca-optional-tag{flex-shrink:0;align-self:center;margin-right:0}
 body.ca-full:has(#class-activities-screen:not([hidden])){--hdr:0px}
 body.ca-full:has(#class-activities-screen:not([hidden])) .header{display:none}
 /*    Phone width: the Full screen word is clipped (still the button's
@@ -2442,6 +2465,9 @@ body.ca-full:has(#class-activities-screen:not([hidden])) .header{display:none}
   .ca-bar-full-lab{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap}
   .ca-bar-open:has(.ca-bar-steps){flex-wrap:wrap;row-gap:6px}
   .ca-bar-open:has(.ca-bar-steps) .ca-bar-name{flex:1 1 0}
+  /* The 10ch floor above is for the one-row bar; a phone keeps Back, the
+     name and Full screen on the first row, so the name gives way here. */
+  .ca-bar-name{min-width:0}
   .ca-bar-steps{order:5;flex:0 0 100%}
   .ca-bar-steps .ca-focus-dots{flex-wrap:wrap}
   .ca-screen.ca-solo:has(.ca-bar-steps) .ca-solo-card{scroll-margin-top:92px}

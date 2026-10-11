@@ -363,7 +363,7 @@ SETS.push(
                   prompt_es: 'La relativa menor frente a la paralela menor — la diferencia es:',
                   answer: 0,
                   explain: 'The key of A minor uses the exact same seven notes as C major — that is what relative means. The key of C minor shares its root with C major but changes three of the notes — that is parallel. Swapping the two definitions is the easy slip, and they are not two names for one thing: relative and parallel point at different keys.',
-                  explain_es: 'La tonalidad de A menor usa las mismas siete notas que C mayor (relativa). La tonalidad de C menor comparte la raíz con C mayor, pero cambia tres de las notas (paralela).',
+                  explain_es: 'La tonalidad de A menor usa las mismas siete notas que C mayor (relativa). La tonalidad de C menor comparte la raíz con C mayor, pero cambia tres de las notas (paralela). Confundir las dos definiciones es el error fácil, y no son dos nombres para una misma cosa: relativa y paralela señalan tonalidades distintas.',
                   choices: ['Relative shares the same NOTES; parallel shares the same ROOT', 'They\'re two names for one thing', 'Parallel shares the same NOTES; relative shares the same ROOT', 'Both keep the same notes; only the name changes'],
                   choices_es: ['La relativa comparte las mismas NOTAS; la paralela comparte la misma RAÍZ', 'Son dos nombres para la misma cosa', 'La paralela comparte las mismas NOTAS; la relativa comparte la misma RAÍZ', 'Las dos conservan las mismas notas; solo cambia el nombre'] }
               }

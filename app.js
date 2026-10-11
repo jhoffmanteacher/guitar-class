@@ -10551,7 +10551,15 @@ function caFocusActivity(id){
 function caScrollToActivity(id){
   const go = () => {
     const card = document.querySelector(`.ca-card[data-id="${CSS.escape(id)}"]`);
-    if(card) card.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    if(!card) return;
+    /* The open card stops just under the sticky bar. The bar is one row or,
+       once it no longer fits and wraps (styles.css, "Maximize the view"
+       item 2), two — at any window width, not only a phone's — so measure
+       it here rather than trust the CSS scroll-margin-top guess. */
+    const screen = card.classList.contains('ca-solo-card') ? card.closest('.ca-screen') : null;
+    const topbar = screen ? screen.querySelector('.page-topbar') : null;
+    card.style.scrollMarginTop = topbar ? topbar.offsetHeight + 'px' : '';
+    card.scrollIntoView({ behavior: 'smooth', block: 'start' });
   };
   requestAnimationFrame(go);
   setTimeout(go, 350);
@@ -10794,7 +10802,7 @@ function caHeroCardHtml(a, isCurrent = true){
       ${caPrintBtnHtml(a)}
     </summary>
     <div class="ca-card-body">
-      ${card ? caCardBodyHtml(a) : (caShowIntro(a, focus, openStepIdx) ? `<p class="coach-tip">${escHtml(tf(a, 'intro'))}</p>` : '')}
+      ${card ? caCardBodyHtml(a) : caIntroHtml(a, focus, openStepIdx)}
       ${stepsHtml && focus ? caFocusDotsHtml(a, openStepIdx) : ''}
       ${stepsHtml ? `<ol class="ca-steps">${stepsHtml}</ol>` : ''}
       ${caMarkRowHtml(a, done, markLabel)}
@@ -10989,12 +10997,18 @@ function caFocusIdx(a){
    2026-10-10: "maximize the view for class activities on chromebook
    screen"). It is the one line linking to last class; from Step 2 on it
    only pushed the step's TAB further down a 657px screen (ca-17's is three
-   lines, 57px). The accordion and the printed handout keep it — printing
-   re-renders nothing, it just uncollapses the steps already on the page,
-   so a card printed from Step 3 prints without it. */
-function caShowIntro(a, focus, openStepIdx){
-  if(!tf(a, 'intro')) return false;
-  return !focus || openStepIdx === 0;
+   lines, 57px). So it is always rendered, and from Step 2 on it carries
+   .ca-intro-later, which styles.css hides on SCREEN on the open card only
+   (.ca-solo-card). Printing re-renders nothing — it just uncollapses the
+   steps already on the page — so leaving the paragraph out of the markup
+   instead dropped it from the handout of any Focus card with a tick on it
+   (a closed card's openStepIdx is its first undone step), and from every
+   print made from the open card past Step 1. The accordion keeps it. */
+function caIntroHtml(a, focus, openStepIdx){
+  const intro = tf(a, 'intro');
+  if(!intro) return '';
+  const later = focus && openStepIdx !== 0;
+  return `<p class="coach-tip${later ? ' ca-intro-later' : ''}">${escHtml(intro)}</p>`;
 }
 function caFocusDotsHtml(a, cur){
   const steps = a.steps || [];
@@ -11902,7 +11916,7 @@ function caActivityCardHtml(a){
       ${caPrintBtnHtml(a)}
     </summary>
     <div class="ca-card-body">
-      ${card ? caCardBodyHtml(a) : (caShowIntro(a, focus, openStepIdx) ? `<p class="coach-tip">${escHtml(tf(a, 'intro'))}</p>` : '')}
+      ${card ? caCardBodyHtml(a) : caIntroHtml(a, focus, openStepIdx)}
       ${stepsHtml && focus ? caFocusDotsHtml(a, openStepIdx) : ''}
       ${stepsHtml ? `<ol class="ca-steps">${stepsHtml}</ol>` : ''}
       ${caMarkRowHtml(a, done, markLabel)}
@@ -12195,8 +12209,10 @@ function ecSubmit(id){
    afterprint fires on cancel as well as on a real print, so the restore
    runs either way; it's `once` so a second print doesn't stack listeners. */
 function printActivity(ev, id){
-  // The button lives inside the <summary>, whose default action toggles the
-  // card — swallow it or printing would also collapse what we just opened.
+  // The card's button lives inside the <summary>, whose default action
+  // toggles the card — swallow it or printing would also collapse what we
+  // just opened. (The sticky bar's copy, caSyncTopbar, sits outside the
+  // card and has no default action; it finds the card by id like this one.)
   if(ev){ ev.preventDefault(); ev.stopPropagation(); }
   const card = document.querySelector(`.ca-card[data-id="${CSS.escape(id)}"]`);
   if(!card) return;
@@ -12294,13 +12310,26 @@ function caSyncTopbar(){
      render ends in this function, so the two copies can't disagree. */
   const steps = caIsFocus(a) && (a.steps || []).length > 1
     ? `<div class="ca-bar-steps">${caFocusDotsHtml(a, caFocusIdx(a))}</div>` : '';
+  /* The open card's own title row is hidden on screen (styles.css, .ca-solo-
+     card), and the 🖨 button and the Optional tag lived in it — so both ride
+     in the bar too, or an open card can't be printed and doesn't say it is
+     optional. Exit checks carry no print button (see caPrintBtnHtml). */
+  const optTag = caOptionalTagHtml(a);
+  // Print + Full screen as one unit, so a bar too narrow for one row moves
+  // them down TOGETHER, to the right end of the second row (styles.css).
+  const tools = (a.kind === 'check' ? '' : caPrintBtnHtml(a)) + caFullBtnHtml();
+  // The bar is rebuilt on every fullscreenchange, which would drop keyboard
+  // focus from the Full screen button the student just pressed.
+  const refocusFull = !!(document.activeElement && document.activeElement.classList.contains('ca-bar-full') && bar.contains(document.activeElement));
   bar.innerHTML = `<button type="button" class="ca-bar-back" onclick="caCloseOpen()">&#x25C0; ${escHtml(t('ca.allActivities'))}</button>`
     + `<button type="button" class="ca-bar-name" onclick="caScrollToActivity('${escAttr(a.id)}')" title="${escAttr(t('ca.barTop'))}" data-i18n-attr="title:ca.barTop">${escHtml(name)}</button>`
+    + optTag
     + (steps || (prog ? `<span class="ca-bar-prog">${escHtml(prog)}</span>` : ''))
     + (caIsCard(a) ? `<button type="button" class="ca-bar-stop" onclick="pcStop()" hidden>&#x25A0; ${escHtml(t('ca.snipStop'))}</button>` : '')
-    + caFullBtnHtml();
+    + (tools ? `<span class="ca-bar-tools">${tools}</span>` : '');
   bar.hidden = false;
   title.hidden = true;
+  if(refocusFull){ const b = bar.querySelector('.ca-bar-full'); if(b) b.focus({ preventScroll: true }); }
   pcSyncBarStop();
 }
 /* Full screen for an open activity (Jonathan, 2026-10-10: "maximize the
@@ -12323,7 +12352,9 @@ function caFullBtnHtml(){
   if(!document.fullscreenEnabled || !document.documentElement.requestFullscreen) return '';
   const on = caFullscreenNow();
   const lab = t(on ? 'ca.fullExit' : 'ca.fullEnter');
-  return `<button type="button" class="ca-bar-full" aria-pressed="${on ? 'true' : 'false'}" onclick="caToggleFullscreen()" title="${escAttr(on ? lab : t('ca.fullTitle'))}">`
+  // No aria-pressed: the label already flips Enter/Exit, and both together
+  // read as "Exit full screen, pressed".
+  return `<button type="button" class="ca-bar-full" onclick="caToggleFullscreen()" title="${escAttr(on ? lab : t('ca.fullTitle'))}">`
     + `${on ? CA_FULL_ICON_OFF : CA_FULL_ICON_ON}<span class="ca-bar-full-lab">${escHtml(lab)}</span></button>`;
 }
 function caToggleFullscreen(){
@@ -12366,8 +12397,15 @@ function caCloseOpen(){
   stopCardAudio();
   const card = caOpenId ? document.querySelector(`.ca-card[open][data-id="${CSS.escape(caOpenId)}"]`) : null;
   if(card) card.open = false;
+  /* A Level up's card swapped into another card's slot (caSwap) needs the
+     list re-rendered to put the `from` card back. caOnToggle would do that,
+     but the toggle event fires after this function has already cleared
+     caOpenId, so its swap-back test never matches — clear the swap here and
+     re-render ourselves (renderClassActivities ends in caSyncTopbar). */
+  const hadSwap = !!caSwap;
+  caSwap = null;
   caOpenId = null;
-  caSyncTopbar();
+  if(hadSwap) renderClassActivities(); else caSyncTopbar();
   scrollPaneTop(false);
 }
 /* The open card is in the address (navigability round 2, 2026-09-23):

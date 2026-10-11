@@ -697,7 +697,7 @@ SETS.push(
             text: 'Watch: <a href="https://www.youtube.com/watch?v=JvtFd7vkea0" target="_blank">How To Travis Pick on Guitar – Lauren Bateman (0:00–5:00)</a>. As you watch, tap the alternating thumb on your knee — root on beats 1 and 3, the other bass on beats 2 and 4 — before you ever add the fingers.',
             text_es: 'Mira: <a href="https://www.youtube.com/watch?v=JvtFd7vkea0" target="_blank">How To Travis Pick on Guitar – Lauren Bateman (0:00–5:00)</a>. Mientras miras, marca el pulgar alternante en tu rodilla — raíz en los tiempos 1 y 3, el otro bajo en los tiempos 2 y 4 — antes de siquiera agregar los dedos.',
             hint: 'Travis picking uses an ALTERNATING thumb: the root on beats 1 and 3, a different bass note on beats 2 and 4. The fingers fill in between. You hear it in country, folk and pop.',
-            hint_es: 'El Travis picking usa un pulgar ALTERNANTE: nota grave en el tiempo 1, una nota grave distinta en el tiempo 3. Los dedos rellenan en el medio. Se escucha en el country, el folk y el pop.',
+            hint_es: 'El Travis picking usa un pulgar ALTERNANTE: la raíz en los tiempos 1 y 3, una nota grave distinta en los tiempos 2 y 4. Los dedos rellenan en el medio. Se escucha en el country, el folk y el pop.',
             skills: [1, 2],
             response: { type: 'mc', prompt: 'In Travis picking, what does the THUMB do?',
               prompt_es: 'En el Travis picking, ¿qué hace el PULGAR?',

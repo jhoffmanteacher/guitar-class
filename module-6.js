@@ -1085,7 +1085,7 @@ MODULE_SONGS[6] = [
       { name: '"Knockin\' on Heaven\'s Door" — Dylan', meta: 'G–D–Am–Am–G–D–C–C · slow tempo, perfect for first strum patterns', meta_es: 'G–D–Am–Am–G–D–C–C · tempo lento, perfecto para los primeros patrones de rasgueo', type: 'Focus', core: true,
         originalUrl: 'https://www.youtube.com/watch?v=rm9coqlk8fY',
         tutorialUrl: 'https://www.youtube.com/watch?v=pWIL4N6QZ-Y&start=55&end=529' },
-      { name: '"Happy Birthday"', meta: 'C–F–C–G–C · waltz strum in 3 (D · D · D, strong beat 1)', meta_es: 'C–F–C–G–C · rasgueo de vals en 3 (D · D · D, tiempo 1 fuerte)', type: 'Focus', core: true,
+      { name: '"Happy Birthday"', meta: 'C–G–C–F–C–G–C · waltz strum in 3 (D · D · D, strong beat 1)', meta_es: 'C–G–C–F–C–G–C · rasgueo de vals en 3 (D · D · D, tiempo 1 fuerte)', type: 'Focus', core: true,
         tutorialUrl: 'https://www.youtube.com/watch?v=wwiLAOjj16w&start=46' },
       { name: '"I\'m Yours" — Jason Mraz', meta: 'G–D–Em–C · iconic D-DU-UDU strum', meta_es: 'G–D–Em–C · rasgueo icónico D-DU-UDU', type: 'Focus', core: true,
         originalUrl: 'https://www.youtube.com/watch?v=EkHTsc9PU2A',
