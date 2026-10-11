@@ -2758,8 +2758,8 @@ window.CLASS_ACTIVITIES = [
     view:  'focus',   // one step at a time — see VIEW above
     title:    'Low E and A Notes in Time',
     title_es: 'Notas de las cuerdas Mi grave y La a tiempo',
-    intro:    'A note name comes up on the beat, and you play it on the low E or A string. Each step runs its own levels: start with Show answer on to learn the notes, then turn it off for the scored levels. A step is done when its Level 5 is unlocked.',
-    intro_es: 'El nombre de una nota aparece a tiempo, y tú la tocas en la cuerda Mi grave o en la cuerda La. Cada paso tiene sus propios niveles: empieza con «Mostrar la respuesta» encendido para aprender las notas, y luego apágalo para los niveles con puntaje. Un paso está terminado cuando su Nivel 5 queda desbloqueado.',
+    intro:    'A note name comes up on the beat, and you play it on the low E or A string. Each step runs its own levels: start with Show answer on to learn the notes, then turn it off for the scored levels. A step is done when you pass its Level 3.',
+    intro_es: 'El nombre de una nota aparece a tiempo, y tú la tocas en la cuerda Mi grave o en la cuerda La. Cada paso tiene sus propios niveles: empieza con «Mostrar la respuesta» encendido para aprender las notas, y luego apágalo para los niveles con puntaje. Un paso está terminado cuando pasas su Nivel 3.',
     steps: [
       {
         label:    'Practice — Frets 0 to 5',

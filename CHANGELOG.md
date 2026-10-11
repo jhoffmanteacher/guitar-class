@@ -57,7 +57,7 @@ see `WORKFLOW.md` and the git commit log.
 - **Module 13.** The "Trim the excess" step now says to cut each string's
   tail after that string is tuned and stretched, one string at a time.
 - **Class activities.** Activity #22's deck step says what to do with the
-  dealt card; #23 has a short intro saying how its levels work. An archived
+  dealt card; #23 has a short intro saying how its levels work: a step is done when you pass its Level 3. An archived
   pinned activity gives its pin slot back.
 
 ## 2026-10-10 — Second site-wide check
