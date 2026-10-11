@@ -23,7 +23,8 @@ rules_version = '2';
                       paused, archived, periodOverrides, hiddenActivities,
                       activityDates, activityTitles, activityNumbers,
                       activityClears, archivedActivities, deletedActivities,
-                      optionalActivities, playAlongActivities, activityBoard,
+                      optionalActivities, playAlongActivities, activityPins,
+                      activityBoard,
                       activityBoardSeeded, moduleOpenThrough,
                       micSampling, configVersion
                       (teacher writes, students read)

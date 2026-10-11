@@ -231,6 +231,8 @@ async function showTeacherApp(user){
       if(actOpt){ teacherSetActivityOptional(actOpt.dataset.id, actOpt.dataset.state); return; }
       const actPlay=e.target.closest('[data-set-activity-playalong]');
       if(actPlay){ teacherSetActivityPlayAlong(actPlay.dataset.id, actPlay.dataset.state); return; }
+      const actPin=e.target.closest('[data-set-activity-pin]');
+      if(actPin){ teacherSetActivityPin(actPin.dataset.id, actPin.dataset.state); return; }
       const actArch=e.target.closest('[data-set-activity-archived]');
       if(actArch){ teacherSetActivityArchived(actArch.dataset.id, actArch.dataset.state); return; }
       const actDel=e.target.closest('[data-delete-activity]');
@@ -1065,6 +1067,7 @@ function renderTeacherActivities(opts){
     const hidden=cfg.hiddenActivities||{};
     const optional=cfg.optionalActivities||{};
     const playAlong=cfg.playAlongActivities||{};
+    const pins=teacherActivityPins(cfg);
     const dates=cfg.activityDates||{};
     const today=dayStr(new Date());
     const view=teacherBoardView(cfg);
@@ -1184,6 +1187,17 @@ function renderTeacherActivities(opts){
         +`<button class="tg-seg-btn ${!isOn?'on':''}" data-set-activity-playalong data-id="${escAttr(a.id)}" data-state="date" title="Songs page lists this card under Play Along once its release date arrives">Play Along by date</button>`
         +`<button class="tg-seg-btn ${isOn?'on':''}" data-set-activity-playalong data-id="${escAttr(a.id)}" data-state="now" title="Songs page lists this card under Play Along now, with or without a release date. It stays off In-Class Activities and never blocks.">Play Along now</button></div>`;
     };
+    // The Keep practicing row (config/class.activityPins): a pinned card is
+    // one click away for students at the top of In-Class Activities, with
+    // or without a release date. Exit checks are never pinnable. See
+    // teacherSetActivityPin.
+    const pinBtn=a=>{
+      if(a.kind==='check') return '';
+      const at=pins.indexOf(a.id);
+      return `<div class="tg-seg">`
+        +`<button class="tg-seg-btn ${at<0?'on':''}" data-set-activity-pin data-id="${escAttr(a.id)}" data-state="off" title="Not on the Keep practicing row at the top of students' In-Class Activities page">Not pinned</button>`
+        +`<button class="tg-seg-btn ${at>=0?'on':''}" data-set-activity-pin data-id="${escAttr(a.id)}" data-state="on" title="On the Keep practicing row at the top of students' In-Class Activities page — no release date needed. It never blocks and never counts as one of today's activities. ${TEACHER_PINS_MAX} at most.">${at>=0?`Pinned ${at+1} of ${TEACHER_PINS_MAX}`:'Pin'}</button></div>`;
+    };
     // Where a card can be sent without a drag. Used as "Assign to" in Built
     // and "Move to" in Assigned; both append at the end of the section they
     // name, which is what a drag onto empty space does too.
@@ -1205,6 +1219,7 @@ function renderTeacherActivities(opts){
       if(dates[a.id]) strays.push(`release date ${escHtml(dates[a.id])}`);
       if(hidden[a.id]===true) strays.push('Hidden');
       if(optional[a.id]===true) strays.push('Optional');
+      if(pins.includes(a.id)) strays.push('Pinned');
       return `<div class="t-board-card${isRetired?' t-board-retired':''}"${isRetired?'':' draggable="true"'} data-board-card data-id="${escAttr(a.id)}">`
         +`<div class="t-board-row">${isRetired?'':'<span class="t-board-grip" aria-hidden="true">&#x2630;</span>'}${titleBlock(a)}</div>`
         // A leftover date or Hidden flag on an unplaced card decides nothing
@@ -1270,7 +1285,7 @@ function renderTeacherActivities(opts){
         +`<div class="t-board-row">${isRetired?'':'<span class="t-board-grip" aria-hidden="true">&#x2630;</span>'}${numBox}${titleBlock(a)}</div>`
         +(isRetired
           ? `<div class="t-board-stray">${teacherActivityDeleted(a.id,cfg)?'Deleted':'Archived'} — students don't see it and it holds no number. Restore puts it back here.</div>`
-          : publishBlock(a)+`<div class="t-board-ctl">${visSeg(a)}${optSeg(a)}${playSeg(a)}${moveSelect(a,'Move to…',curModule)}${moveBtns}</div>`)
+          : publishBlock(a)+`<div class="t-board-ctl">${visSeg(a)}${optSeg(a)}${playSeg(a)}${pinBtn(a)}${moveSelect(a,'Move to…',curModule)}${moveBtns}</div>`)
         /* Footer: what this card IS (how many have done it) and the actions
            that take it out of the run, behind a hairline — so the row above,
            which is what gets used every day, reads as the card's controls
@@ -1360,12 +1375,37 @@ function renderTeacherActivities(opts){
       +sectionOrder.map(sectionHtml).join('')
       +`</section>`;
 
+    /* What students' Keep practicing row holds right now, in pin order —
+       the console's preview of it, and the one place to unpin a card that
+       has no controls of its own any more (archived, or sent back to Built).
+       A pin that students can't see says why. */
+    const pinsHtml=(()=>{
+      const why=id=>{
+        const a=byId[id];
+        if(!a) return 'not on the site';
+        if(teacherActivityRetired(id,cfg)) return teacherActivityDeleted(id,cfg)?'deleted':'archived';
+        if(!view.assigned[id]) return 'not assigned';
+        if(hidden[id]===true) return 'Hidden';
+        return '';
+      };
+      const chips=pins.map((id,i)=>{
+        const a=byId[id], off=why(id);
+        return `<span class="t-pin-chip${off?' t-pin-off':''}">${i+1}. ${escHtml(a?teacherActivityTitle(a,cfg):id)}${off?` <em>(${escHtml(off)} — students don't see it)</em>`:''}`
+          +` <button class="tg-seg-btn" data-set-activity-pin data-id="${escAttr(id)}" data-state="off" aria-label="Unpin ${escAttr(a?teacherActivityTitle(a,cfg):id)}">Unpin</button></span>`;
+      }).join('');
+      return `<div class="tg-note t-pins-note"><strong>Keep practicing row (${pins.length} of ${TEACHER_PINS_MAX}):</strong> `
+        +(pins.length?chips:`empty — students see no row. Use <strong>Pin</strong> on an assigned card to add one.`)
+        +`</div>`;
+    })();
+
     setBoardWide(true);
     box.innerHTML=`<div class="tg-note">Drag a built activity into a module to assign it. It goes live for students on its release date.</div>`
+      +pinsHtml
       +`<details class="tg-help"><summary>How this page works</summary>`
       +`<div class="tg-note">A card shows to students only when all four are true: it is <strong>assigned</strong> to a module here, its <strong>release date</strong> has arrived, it is not <strong>Hidden</strong>, and it is not <strong>Archived</strong>. Publish now dates it today; scheduling a later day holds it until then; Unpublish clears the date. A card's date stays editable once it's live, so you can move it to another day without unpublishing first — type a future day and it goes back to Scheduled. Use Hidden to pull back something already live, then un-hide any time — the date and the Hidden switch are independent, either one hides.<br><br>`
       +`<strong>Required / Optional</strong> decides whether a live card locks the site. A Required card (the default) blocks everything but In-Class Activities and Live quiz until the student finishes it. An Optional card still shows, tagged “Optional”, and students can still do it and mark it done, but it never locks anything. Switch it either way at any time.<br><br>`
       +`<strong>Archive</strong> takes a card off students' In-Class Activities page for good but keeps its place in its module, its date and its name, so Restore puts it back exactly where it was. Archived cards hold no #number, so the ones after them count down by one. <strong>Delete</strong> also clears the date, rename and per-student gate clears, and takes the card off the board entirely — it comes back in Built, blank, to be placed and published from scratch. Neither one removes the activity from the site's code (only an update does) and neither touches what students have already finished, so the Done counts survive both.<br><br>`
+      +`<strong>Pin</strong> puts an assigned card on the <strong>Keep practicing</strong> row at the top of students' In-Class Activities page, up to ${TEACHER_PINS_MAX} cards, in the order you pinned them — for a card you reuse on many days, so you don't have to re-date it. A pin needs no release date. It never blocks the site, never counts as one of today's activities, and a pinned card that is also one of today's activities leaves the row that day. Hidden, Archive and Delete still win (Delete also unpins). Students' Done marks are untouched.<br><br>`
       +`<strong>Un-assign</strong> sends a card back to Built without clearing anything. The &#x270E; renames an activity for everyone, in both languages, until the Spanish twin ships. Copy link gives you a URL that opens the site straight to that one activity, card already open — paste it into Classroom. Type over a <strong>#number</strong> to move a card to that position; a number inside a title, like Finger Gym 2, is part of the name and stays put.</div></details>`
       +`<div class="t-board">${builtHtml}${assignedHtml}</div>`;
     // Opening the editor is a full re-render, so focus has to be re-placed
@@ -2081,6 +2121,51 @@ async function teacherSetActivityPlayAlong(id, state){
   }
   if(teacherView==='activities') renderTeacherActivities();
 }
+/* Keep practicing pins — config/class.activityPins, an ORDERED array of at
+   most TEACHER_PINS_MAX activity ids (app.js CA_PINS_MAX, caPinRowHtml).
+   Students get one button per pin at the top of In-Class Activities, in
+   this order, with or without a release date; a pin is never read by
+   caIsVisible or by any of the three blocker rules, so it can't gate
+   anyone or count as one of today's cards. Hidden, Archive, Delete and
+   "not assigned" still win on the student side.
+
+   An array, not an id -> true map like its neighbours, because the ORDER is
+   the point and four is a hard limit — so the write replaces the whole
+   array, and it is cell-checked on the whole array: a concurrent pin or
+   unpin from another console refuses rather than being overwritten, while
+   an unrelated edit (a date, Hidden) goes through. */
+const TEACHER_PINS_MAX = 4;
+function teacherActivityPins(cfg){
+  const v = cfg && cfg.activityPins;
+  return Array.isArray(v) ? v.filter(x=>typeof x==='string' && x) : [];
+}
+async function teacherSetActivityPin(id, state){
+  const cfg = teacherClassConfig;
+  const had = Object.prototype.hasOwnProperty.call(cfg,'activityPins');
+  const prev = cfg.activityPins;
+  const cur = teacherActivityPins(cfg);
+  let next;
+  if(state==='on'){
+    if(cur.includes(id)) return;
+    if(cur.length>=TEACHER_PINS_MAX){
+      alert('Keep practicing holds '+TEACHER_PINS_MAX+' cards at most. Unpin one first.');
+      return;
+    }
+    next = cur.concat(id);
+  } else {
+    if(!cur.includes(id)) return;
+    next = cur.filter(x=>x!==id);
+  }
+  cfg.activityPins = next;
+  try{
+    await ensureDb();
+    await teacherWriteConfig({activityPins: next}, {activityPins: had?prev:undefined});
+  }catch(e){
+    if(had) cfg.activityPins=prev; else delete cfg.activityPins;
+    teacherConfigSaveFailed(e, 'Could not save that pin — check your connection and Firestore rules.');
+  }
+  if(teacherView==='activities') renderTeacherActivities();
+}
 // The actual publish switch for an activity — see the schema note at the top
 // of renderTeacherActivities. Mirrors teacherSetActivityHidden's write shape
 // exactly, just against a different map on the same doc.
@@ -2200,6 +2285,9 @@ async function teacherDeleteActivity(id){
   cfg.activityBoard=plan(prev).next;   // optimistic
   clearUids.forEach(uid=>{ delete clears[uid][id]; });
   const seq0=boardSettled;
+  const pinsHad=Object.prototype.hasOwnProperty.call(cfg,'activityPins'), pinsPrev=cfg.activityPins;
+  const pinsBefore=teacherActivityPins(cfg);
+  if(pinsBefore.includes(id)) cfg.activityPins=pinsBefore.filter(x=>x!==id);
   const release=await waitBoardWriteTurn();
   const {live, base}=teacherBoardTurnBase(cfg, prev, seq0);
   const {next, repack}=plan(base);
@@ -2214,6 +2302,8 @@ async function teacherDeleteActivity(id){
       patch.activityClears={};
       clearUids.forEach(uid=>{ patch.activityClears[uid]={[id]:fv.delete()}; });
     }
+    // Delete wipes everything the console set for the card, its pin too.
+    if(pinsBefore.includes(id)) patch.activityPins=pinsBefore.filter(x=>x!==id);
     // Strict (no base): like a move, this re-packs the module the card
     // leaves, so it depends on more of the board than the patch names.
     await teacherWriteConfig(patch);
@@ -2222,6 +2312,7 @@ async function teacherDeleteActivity(id){
     MAPS.filter(m=>m!=='activityBoard').forEach(m=>{ if(before[m]===undefined) delete cfg[m][id]; else cfg[m][id]=before[m]; });
     teacherBoardSettle(live, base);
     clearUids.forEach(uid=>{ clears[uid][id]=beforeClears[uid]; });
+    if(pinsHad) cfg.activityPins=pinsPrev; else delete cfg.activityPins;
     teacherConfigSaveFailed(e, 'Could not delete that activity — check your connection and Firestore rules.');
   }finally{
     release();

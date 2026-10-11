@@ -214,6 +214,18 @@ let optionalActivityIds = {};
    this). See caIsPlayAlongOnly(). Cached like the other maps so a flaky
    read doesn't empty the list a student was just using. */
 let playAlongActivityIds = {};
+/* The "Keep practicing" row at the top of In-Class Activities —
+   config/class.activityPins, an ORDERED array of activity ids, at most
+   CA_PINS_MAX (2026-10-10, Jonathan: he reuses some cards on many days —
+   the song play-along cards, ca-23 — and wants them one click away without
+   re-dating anything). A pin stands in for the release date for THAT ROW
+   ONLY: the card still has to be placed on the board, not Hidden, not
+   archived/deleted, and not an exit check (caPinReachable). It is not read
+   by caIsVisible or by any blocker rule, so a pin never puts a card on the
+   dated list, never counts toward CA_TODAY_MAX and never gates anyone; it
+   writes no completion data. Cached like the other maps. */
+let activityPins = [];
+const CA_PINS_MAX = 4;
 let saveTimer   = null;
 
 /* ── Lazy module loading ──
@@ -642,7 +654,7 @@ if(auth) auth.onAuthStateChanged(async user=>{
     }
   } else {
     window.__authBootPending = false;
-    currentUser = null; progress = {}; responses = {}; completed = {}; completedDeletes = new Set(); classActivities = {}; classActivitiesDeletes = new Set(); caStepDone = {}; caStepDeletes = new Set(); exitChecks = {}; games = {}; streak = { count:0, lastDay:null }; gamesAccessOn = true; micSampling = { on: false, max: 0 }; micTakesCount = Infinity; studentPeriod = ''; periodOverride = ''; moduleOpenThrough = 0; hiddenActivityIds = {}; activityDates = {}; activityTitles = {}; activityNumbers = {}; activityBoard = {}; activityBoardOn = false; activityClears = {}; retiredActivityIds = {}; optionalActivityIds = {}; progressLoadFailed = false;
+    currentUser = null; progress = {}; responses = {}; completed = {}; completedDeletes = new Set(); classActivities = {}; classActivitiesDeletes = new Set(); caStepDone = {}; caStepDeletes = new Set(); exitChecks = {}; games = {}; streak = { count:0, lastDay:null }; gamesAccessOn = true; micSampling = { on: false, max: 0 }; micTakesCount = Infinity; studentPeriod = ''; periodOverride = ''; moduleOpenThrough = 0; hiddenActivityIds = {}; activityDates = {}; activityTitles = {}; activityNumbers = {}; activityBoard = {}; activityBoardOn = false; activityClears = {}; retiredActivityIds = {}; optionalActivityIds = {}; activityPins = []; progressLoadFailed = false;
     document.body.classList.remove('ca-gated');   // next sign-in recomputes it fresh — don't leave a stale gate showing over the sign-in wall
     if(typeof gamesResetForUser === 'function') gamesResetForUser();   // Note Runner's module caches must not leak into the next signed-in user
     if(typeof lqStopListening === 'function') lqStopListening();       // and the live-quiz listener must not keep firing under the next student
@@ -891,6 +903,9 @@ async function loadClassConfig(){
     // "Play Along now" practice cards (teacher.js board) — see playAlongActivityIds.
     playAlongActivityIds = d.playAlongActivities || {};
     try{ localStorage.setItem('caPlayAlong', JSON.stringify(playAlongActivityIds)); }catch(e){}
+    // "Keep practicing" pins (teacher.js board) — see activityPins.
+    activityPins = caCleanPins(d.activityPins);
+    try{ localStorage.setItem('caPins', JSON.stringify(activityPins)); }catch(e){}
     /* The activity board (teacher.js) — which activities are placed in the
        course, in which module, in what order. Cached, and for the same
        "must not fail open" reason as the dates: an empty board reads as
@@ -960,6 +975,10 @@ function restoreClassConfigFromCache(){
     const raw = localStorage.getItem('caPlayAlong');
     if(raw) playAlongActivityIds = JSON.parse(raw) || {};
   }catch(e){ /* ignore — playAlongActivityIds stays {} */ }
+  try{
+    const raw = localStorage.getItem('caPins');
+    if(raw) activityPins = caCleanPins(JSON.parse(raw));
+  }catch(e){ /* ignore — activityPins stays [] */ }
   try{
     const raw = localStorage.getItem('caBoard');
     const cached = raw ? JSON.parse(raw) : null;
@@ -10599,8 +10618,9 @@ function openClassActivitiesScreen(focusId){
    the teacher console's Class activities table ("Copy link"). */
 let caLinkMissingId = null;   // an id from the URL that isn't on the page
 function caFocusActivity(id){
-  // A "Play Along now" card opens here too, from the Songs page — see caIsPlayAlongOnly.
-  const found = (window.CLASS_ACTIVITIES || []).find(a => a.id === id && (caIsVisible(a) || caIsPlayAlongOnly(a)));
+  // A "Play Along now" card opens here too, from the Songs page — see
+  // caIsPlayAlongOnly — and so does a pinned one, from the Keep practicing row.
+  const found = (window.CLASS_ACTIVITIES || []).find(a => a.id === id && (caIsVisible(a) || caIsPlayAlongOnly(a) || caPinReachable(a)));
   caLinkMissingId = found ? null : id;
   caOpenId = found ? id : caOpenId;
   /* The card itself opening isn't enough any more (item 2f) — unless it's
@@ -11984,7 +12004,9 @@ function caActivityCardHtml(a){
   // Undated activities only reach a screen under dev bypass (caIsVisible
   // gates students on the date) — but an empty chip renders as a stray amber
   // dash, on the printed handout as much as on screen, so skip it entirely.
-  const dateLabel = caFormatDate(caDate(a));
+  // A card open under the Keep practicing row only (caIsPinOnly) shows none
+  // either — its own date can still be in the future.
+  const dateLabel = caIsPinOnly(a) ? '' : caFormatDate(caDate(a));
   return `<details class="ca-card${focus ? ' ca-card--focus' : ''}${card ? ' ca-card--practice' : ''}" ${open ? 'open' : ''} data-id="${escAttr(a.id)}" ontoggle="caOnToggle(this)">
     <summary class="ca-card-summary" onclick="caCardMarkOpening(this)">
       ${dateLabel ? `<span class="ca-chip">${escHtml(dateLabel)}</span>` : ''}
@@ -12845,6 +12867,56 @@ function caIsPlayAlongOnly(a){
   if(!caBoardView().assigned[a.id]) return false;
   return !caIsVisible(a);
 }
+/* ── "Keep practicing" pins (config/class.activityPins — see the global) ──
+   caCleanPins: whatever came out of Firestore or the cache, as an array of
+   distinct id strings, at most CA_PINS_MAX — a hand-edited doc can't make
+   the row grow past one line. */
+function caCleanPins(v){
+  if(!Array.isArray(v)) return [];
+  const out = [];
+  v.forEach(id => { if(typeof id === 'string' && id && !out.includes(id) && out.length < CA_PINS_MAX) out.push(id); });
+  return out;
+}
+/* A pinned card the row may show and open. The pin stands in for the
+   release date and nothing else — Hidden, Archive/Delete and "not placed on
+   the board" all still win, exactly as they do for Play Along now. Exit
+   checks are one-try work, so they are never pinnable. */
+function caPinReachable(a){
+  if(!a || a.kind === 'check' || !activityPins.includes(a.id)) return false;
+  if(retiredActivityIds[a.id] === true || hiddenActivityIds[a.id] === true) return false;
+  return !!caBoardView().assigned[a.id];
+}
+/* Reachable from the row ONLY — the pinned card isn't on the dated list.
+   Like caIsPlayAlongOnly, deliberately not folded into caIsVisible(): that
+   predicate is the gate's and the dated list's, and a pin must reach
+   neither. */
+function caIsPinOnly(a){ return caPinReachable(a) && !caIsVisible(a); }
+/* The row itself: one button per pin, in pin order, minus anything that is
+   one of today's cards (it is already right below). No pins, no row — not
+   an empty box. `todayIds` is passed in because renderClassActivities only
+   knows them partway through its own pass. */
+function caPinRowHtml(byId, todayIds){
+  const pins = activityPins.map(id => byId[id])
+    .filter(a => a && caPinReachable(a) && !todayIds.includes(a.id));
+  if(!pins.length) return '';
+  const btns = pins.map(a => {
+    const done = classActivities[a.id] === true;
+    const title = caTitle(a);
+    return `<button type="button" class="ca-pin${done ? ' done' : ''}" title="${escAttr(title)}" onclick="caOpenPin('${escAttr(a.id)}')"><span class="ca-pin-t">${escHtml(title)}</span>${done ? `<svg class="ca-pin-check" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" role="img" aria-label="${escAttr(t('ca.pinDone'))}"><path d="M5 12.5l4.5 4.5L19 7"/></svg>` : ''}</button>`;
+  }).join('');
+  return `<div class="ca-pins" role="group" aria-labelledby="ca-pins-lbl"><span class="ca-pins-lbl" id="ca-pins-lbl" data-i18n="ca.pinsTitle">${escHtml(t('ca.pinsTitle'))}</span><span class="ca-pins-row">${btns}</span></div>`;
+}
+/* A tap on a pin opens the card the way a tap on the card itself does:
+   where it already sits on the page if it is on the dated list, or under
+   the row if the pin is the only way to it (caIsPinOnly). Same open path as
+   a deep link (caFocusActivity), plus the tap-only metronome start. */
+function caOpenPin(id){
+  const a = (window.CLASS_ACTIVITIES || []).find(x => x.id === id);
+  if(!a || !caPinReachable(a)) return;
+  caSwap = null;
+  caFocusActivity(id);
+  caAutoStartMetro(a);
+}
 /* ── The activity gate (Today-first work order, Phase 1, approved by
    Jonathan 2026-09-11) ──
    A visible, undone, uncleared activity — any kind, checks included — blocks
@@ -12928,7 +13000,7 @@ function appIsOnScreen(){
    read came back byte-identical to what was already showing. */
 function classConfigSignature(){
   return JSON.stringify([activityDates, activityBoard, activityBoardOn, hiddenActivityIds,
-    retiredActivityIds, activityClears, optionalActivityIds, playAlongActivityIds, activityTitles,
+    retiredActivityIds, activityClears, optionalActivityIds, playAlongActivityIds, activityPins, activityTitles,
     activityNumbers, periodOverride, moduleOpenThrough]);
 }
 document.addEventListener('visibilitychange', () => {
@@ -13006,22 +13078,33 @@ function renderClassActivities(){
      It renders only while it is the open card — close it and the next render
      drops it — under the Songs section's own title, so it reads as where it
      came from. It is never the hero, never in a fold, never counted. */
-  const playOnly = caOpenId && byId[caOpenId] && caIsPlayAlongOnly(byId[caOpenId]) ? byId[caOpenId] : null;
+  /* A pinned card that isn't on the dated list (caIsPinOnly) is the same
+     kind of guest: open only while it is the open card, rendered straight
+     under the Keep practicing row that opened it, no heading of its own. */
+  const openCard = caOpenId && byId[caOpenId];
+  const playOnly = openCard && (caIsPlayAlongOnly(openCard) || caIsPinOnly(openCard)) ? openCard : null;
   /* Opened from another card's Level up (caOpenLinkedCard): it takes THAT
      card's slot instead of a Songs heading. Only while the `from` card is on
      the page — otherwise it falls back to the heading. */
   const swap = playOnly && caSwap && caSwap.to === playOnly.id && list.some(a => a.id === caSwap.from) ? caSwap : null;
   const swapIn = a => (swap && a.id === swap.from) ? playOnly : a;
-  const playOnlyHtml = playOnly && !swap
+  const pinOpen = playOnly && !swap && caIsPinOnly(playOnly) ? playOnly : null;
+  const playOnlyHtml = playOnly && !swap && !pinOpen
     ? `<div class="ca-mod-head" data-i18n="hub.playAlongTitle">${escHtml(t('hub.playAlongTitle'))}</div>${caActivityCardHtml(playOnly)}`
     : '';
+  // The Keep practicing row (caPinRowHtml) plus, under it, a pin-only card
+  // the student opened from it. Built once today's cards are known.
+  const pinsHtml = todayIds => caPinRowHtml(byId, todayIds) + (pinOpen ? caActivityCardHtml(pinOpen) : '');
   // A deep link whose id isn't published (or is mistyped) says so, above the
   // archive it did open — see caFocusActivity.
   const missing = caLinkMissingId
     ? `<div class="coach-tip" data-i18n="ca.linkMissing">${escHtml(t('ca.linkMissing'))}</div>`
     : '';
   if(!list.length){
-    bodyEl.innerHTML = missing + (playOnlyHtml || `<div class="coach-tip" data-i18n="ca.empty">${escHtml(t('ca.empty'))}</div>`);
+    // With a Keep practicing row up there is something to do, so the
+    // "nothing here yet" line would read wrong under it.
+    const pins = pinsHtml([]);
+    bodyEl.innerHTML = missing + pins + (playOnlyHtml || (pins ? '' : `<div class="coach-tip" data-i18n="ca.empty">${escHtml(t('ca.empty'))}</div>`));
   } else {
     // Done work collapses into its own group (caFinishedGroupHtml) so the
     // list a student actually needs to act on isn't buried under everything
@@ -13137,7 +13220,7 @@ function renderClassActivities(){
     const finishedGroups = groups
       .map(g => ({ sec: g.sec, cards: g.cards.filter(a => classActivities[a.id] === true) }))
       .filter(g => g.cards.length);
-    bodyEl.innerHTML = missing + gateIntro + playOnlyHtml + pendingHtml + (finished.length ? caFinishedGroupHtml(finishedGroups, finished, byId, swap) : '');
+    bodyEl.innerHTML = missing + pinsHtml(caTodayIds) + gateIntro + playOnlyHtml + pendingHtml + (finished.length ? caFinishedGroupHtml(finishedGroups, finished, byId, swap) : '');
   }
   if(typeof applyI18n === 'function') applyI18n(bodyEl);
   caArmTabReveals(bodyEl);

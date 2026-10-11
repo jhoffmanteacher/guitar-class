@@ -655,6 +655,38 @@
 
 ## Recently shipped (post-archive)
 
+- [x] **2026-10-10 — "Keep practicing" row (pinned activities).** Work order
+      "Keep practicing row on In-Class Activities". New
+      `config/class.activityPins` — an ORDERED array of up to 4 activity ids
+      (an array, not an id → true map like its neighbours, because the order
+      is what students see and 4 is a hard cap). **Console:** every assigned,
+      non-check card on the Class activities board has a **Not pinned /
+      Pinned n of 4** switch beside Play Along (`teacherSetActivityPin`); a
+      5th pin is refused with an alert. A strip above the board lists the
+      row in pin order with an Unpin per pin and says why a pin students
+      can't see is dark (Hidden, archived, not assigned) — it is the
+      console's preview of the row and the only way to unpin an archived
+      card. Built cards list a stray pin under "Carries:". Delete unpins in
+      its own strict write; Archive keeps the pin (students don't see it).
+      The writer is cell-checked on the whole array (`base:
+      {activityPins: prev}`), so a pin from another console refuses rather
+      than being overwritten; checks.mjs 1ai `CONFIG_WRITERS` 20 → 21.
+      **Students:** `caPinRowHtml()` draws the row above Today's activity,
+      one button per pin in pin order, minus any of today's cards, nothing at
+      all with no pins. A tap (`caOpenPin`) goes through `caFocusActivity`,
+      so a card on the dated list opens where it sits and a pin-only card
+      (`caIsPinOnly` — undated, or Play Along now) renders straight under the
+      row while it is the open card, no Songs heading, no date chip. The pin
+      stands in for the release date for that row only: `caIsVisible`, the
+      three blocker rules and `CA_TODAY_MAX` never read it, and it writes no
+      completion data. Hidden / Archive / Delete / unassigned all still win
+      (`caPinReachable`). Cached in `localStorage` (`caPins`) like the other
+      maps. Strings `ca.pinsTitle` («Sigue practicando») and `ca.pinDone`.
+      No `firestore.rules` change (header comment only — nothing to paste).
+      Verified at 1366×657, dev bypass with the cache seeded: 0, 1 and 4
+      pins (row 40px + 10px margin, one line), a practice card and ca-23
+      opened from the row, hidden + pinned not shown, ES; 390px phone wraps.
+
 - [x] **2026-10-06 — Play-along first: Song Journey pages stay open as the
       back door.** Reverses part 1's per-song retire switch and "moved" card
       (shipped as `fc7e878`, reversed the same day). One rule for every link

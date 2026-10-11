@@ -30,6 +30,19 @@
    a permanent archive, rendered in the console board's order (app.js sorts,
    this file doesn't need to be kept in any order).
 
+   PINS — nothing to write here either. A card Jonathan reuses on many days
+   (the song play-along cards, ca-23) can be PINNED from the console board:
+   config/class.activityPins, an ordered array of up to 4 ids (Jonathan,
+   2026-10-10). Students get a "Keep practicing" row (ES «Sigue
+   practicando») above Today's activity — one button per pin, in pin order,
+   opening the card exactly as a tap on it would. A pin stands in for the
+   release date for THAT ROW ONLY: the card stays off the dated list, never
+   counts toward CA_TODAY_MAX, never blocks and writes no completion data
+   (caPinReachable / caIsPinOnly / caPinRowHtml in app.js). It must still be
+   assigned on the board, not Hidden, not archived/deleted, and not an exit
+   check; a pinned card that is one of today's cards leaves the row that
+   day. Delete unpins; Archive keeps the pin but hides it.
+
    JOURNEY — `journey: '<slug>'` (optional; one of the six SONG_JOURNEYS ids
    in app.js: seven-nation-army, all-along-the-watchtower, sweet-child-o-mine,
    luna, let-it-be, the-cure; optional `journeyLayer: <n>` to land on a

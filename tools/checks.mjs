@@ -4562,7 +4562,7 @@ function checkChordBlitzRanks() {
    deliberately, after a look at whether it can pass a `base` or needs the
    strict default.
    ═════════════════════════════════════════════════════════════════ */
-const CONFIG_WRITERS = 20;   // teacherWriteConfig() call sites in teacher.js
+const CONFIG_WRITERS = 21;   // teacherWriteConfig() call sites in teacher.js — 21st: teacherSetActivityPin (2026-10-10), cell-checked on the whole activityPins array
 function checkConfigWriteGuard() {
   head('1ai. Every config/class write goes through the stale-write guard');
   let bad = 0;

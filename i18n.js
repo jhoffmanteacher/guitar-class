@@ -420,6 +420,12 @@
     // no leading article, so the unquoted template read "Open the the cure
     // Song Journey page" (Jonathan/Claude, 2026-09-12, found live).
     'ca.openCard':             { en: 'Open {title}', es: 'Abrir {title}' },
+    // The row of teacher-pinned cards above Today's activity (caPinRowHtml,
+    // config/class.activityPins). Same words as nav.keepPracticing on
+    // purpose (Jonathan's name for it), but its own key so the two can part.
+    // pinDone is the check's accessible name on a pin already completed.
+    'ca.pinsTitle':            { en: 'Keep practicing', es: 'Sigue practicando' },
+    'ca.pinDone':              { en: 'Done', es: 'Terminada' },
     'ca.openJourney':          { en: 'Open the "{song}" Song Journey page', es: 'Abrir la página de Recorrido de la canción de "{song}"' },
     // Shown above the Today hero only while the activity gate (below) is on
     // — names how many things are actually blocking (item 2f), from

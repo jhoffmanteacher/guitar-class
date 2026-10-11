@@ -456,6 +456,21 @@ it Optional" and "list every assigned card" and picked this). Cached in
 No `firestore.rules` change (comment only). checks.mjs 1ai's writer count
 went 16 → 17.
 
+**The "Keep practicing" row — pins (Jonathan, 2026-10-10).** For cards he
+reuses on many days (the play-along cards, ca-23). `config/class.activityPins`
+is an ORDERED array of up to 4 ids, set by the board's **Not pinned / Pinned
+n of 4** switch (`teacherSetActivityPin`, cell-checked on the whole array;
+1ai 20 → 21) and listed, with Unpin buttons, in a strip above the board.
+Students get one button per pin above Today's activity (`caPinRowHtml`), in
+pin order, minus any of today's cards, and no row at all with no pins. A tap
+(`caOpenPin` → `caFocusActivity`) opens a dated card where it sits; a
+pin-only card (`caIsPinOnly`: undated, or Play Along now) renders under the
+row while it is the open card. Same shape as Play Along now: the pin stands
+in for the release date for the ROW only — **don't fold it into
+`caIsVisible()`**, and no blocker rule or `CA_TODAY_MAX` reads it. Hidden,
+Archive, Delete (which unpins) and "not assigned" still win
+(`caPinReachable`); exit checks are never pinnable. Cached as `caPins`.
+
 **There was an Assessments page (2026-09-12–2026-09-20).** A rail button
 and standalone `#assessments` screen listed every module's in-person
 assessment items in one accordion, read-only. Removed 2026-09-20 (Jonathan:

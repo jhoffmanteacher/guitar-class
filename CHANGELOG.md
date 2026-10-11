@@ -5,6 +5,13 @@ Notable changes to the Guitar Class site. Newest first.
 For the full session-by-session history (and the reasoning behind each change),
 see `WORKFLOW.md` and the git commit log.
 
+## 2026-10-10 — Keep practicing
+
+- **A "Keep practicing" row on In class.** Your teacher can put up to four
+  activities in a row at the top of the page, for the ones the class uses
+  on many days. Tap one to open it. Your checks and Done marks stay the
+  same.
+
 ## 2026-10-10 — Smaller fixes
 
 - **Spanish quiz explanations in Modules 9–11** now say everything the
