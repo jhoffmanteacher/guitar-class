@@ -129,9 +129,15 @@ service cloud.firestore {
 
       /* One answer doc per student, keyed by uid, overwritten each round.
 
-         Read is teacher-only and there is no exception: if a student could
-         read this collection they could read the rest of the class's
-         answers before the reveal, which is the whole game.
+         Reading the collection is teacher-only: if a student could list
+         or read other answers they could see the rest of the class's picks
+         before the reveal, which is the whole game. The ONE exception is
+         `get` on a student's own doc (2026-10-10): after a reload mid-
+         question the client reads its own pick back so the choices come
+         back locked instead of offering a second pick (lqRestoreMyAnswer
+         in live-quiz.js). `get` only — never `list` — and only where the
+         doc id is the caller's uid, so it shows a student nothing they did
+         not write themselves.
 
          The three data conditions are what stop a student from scoring
          themselves. They may only write their OWN uid's doc, only while a
@@ -170,6 +176,7 @@ service cloud.firestore {
       }
       match /answers/{userId} {
         allow read, delete: if isTeacher();
+        allow get: if isSignedIn() && request.auth.uid == userId;
         allow create, update: if isSignedIn()
               && request.auth.uid == userId
               && request.resource.data.uid == request.auth.uid

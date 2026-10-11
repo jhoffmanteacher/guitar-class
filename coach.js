@@ -1508,7 +1508,7 @@ function micRecConsent(yes, game){
   if (game === 'nr') nrStart(); else coachStartCheck();
 }
 function micRecBadgeHtml(){
-  return `<div class="micrec-on" id="micrec-on"><span class="micrec-dot"></span>${escHtml(t('micrec.recording'))}<button type="button" class="micrec-stop" onclick="micRecRevoke()">${escHtml(t('micrec.stop'))}</button></div>`;
+  return `<div class="micrec-on" id="micrec-on"><span class="micrec-dot"></span>${escHtml(t('micrec.recording'))}<button type="button" class="micrec-stop" title="${escAttr(t('micrec.stopTitle'))}" onclick="micRecRevoke()">${escHtml(t('micrec.stop'))}</button></div>`;
 }
 /* A "yes" can be taken back: this take is dropped unsaved and none after it
    is recorded (the answer becomes "no", which is never asked again). */
@@ -7635,6 +7635,8 @@ const GAMES_SESSION_KEY_PREFIXES = [
   'ntrBest', 'pdBest', 'psBest', 'psgBest', 'rnMode', 'rnSong', 'rnBest:',
   'rrBenched', 'rrDay', 'rrDone', 'rrLast', 'rrPts', 'rrQueue', 'rrSkips',
   'shBpm', 'shPat', 'shBest:', 'srBpm', 'srPat', 'srBest:',
+  // The Listening Coach's per-card streak (coach.streakKey).
+  'coachStreak:',
   // app.js's own session caches: the shuffle-drill and deck bests and the
   // Note Call progress (sdSessionKey, dkBest, ncProgKey).
   'sdBest:', 'dkBest:', 'nc:'

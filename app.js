@@ -7216,13 +7216,17 @@ function dkCheckOff(key){
    - Answers go in as taps in order, with undo, so a student who hears
      note 4 first isn't forced to guess note 1 to get there. */
 const EAR_POOLS = {
-  openStrings: { midis:[40,45,50,55,59,64], labels:['E','A','D','G','B','e'], kicker:'ear.kString' },
+  openStrings: { midis:[40,45,50,55,59,64], labels:['E','A','D','G','B','e'], kicker:'ear.kString',
+                 // Named strings on the pads: EN low E … high e, ES solfège (ear.kStringHint says the same)
+                 labelKeys:['games.fret.string.lowE','games.fret.string.A','games.fret.string.D','games.fret.string.G','games.fret.string.B','games.fret.string.highE'] },
   lowEFrets:   { midis:[40,41,42,43,44,45], labels:['0','1','2','3','4','5'], kicker:'ear.kFret' },
   // A-string vs D-string bass under Am (module-8.js, m8w2 Station C) — a
   // 2-option pool, same shape as the binary-choice style of lowEFrets, just
   // with 2 distinct values instead of 6.
-  amBassAD:    { midis:[45,50], labels:['A','D'], kicker:'ear.kBassString' }
+  amBassAD:    { midis:[45,50], labels:['A','D'], kicker:'ear.kBassString', labelKeys:['games.fret.string.A','games.fret.string.D'] }
 };
+// A pool's pad/reveal label: the translated string name when it has labelKeys, else the raw label.
+function earLabel(pool, i){ return pool.labelKeys ? t(pool.labelKeys[i]) : pool.labels[i]; }
 const earDrills = {};
 function erBox(key){ return document.getElementById('err-' + key); }
 function erStop(key){
@@ -7277,7 +7281,7 @@ function erRunHtml(key){
     let cls = 'err-slot';
     if(st.revealed) cls += (g === n ? ' correct' : ' wrong');
     else if(g != null) cls += ' filled';
-    return `<div class="${cls}">${escHtml(st.revealed ? pool.labels[n] : (g != null ? pool.labels[g] : ''))}</div>`;
+    return `<div class="${cls}">${escHtml(st.revealed ? earLabel(pool, n) : (g != null ? earLabel(pool, g) : ''))}</div>`;
   }).join('');
   if(st.revealed){
     const right = st.seq.filter((n, i) => st.guesses[i] === n).length;
@@ -7294,8 +7298,8 @@ function erRunHtml(key){
         `</div></div>`;
   }
   const filled = st.guesses.filter(g => g != null).length;
-  const pads = pool.labels.map((l, i) =>
-    `<button type="button" class="sdr-note" onclick="erGuess('${key}',${i})">${escHtml(l)}</button>`).join('');
+  const pads = pool.labels.map((l0, i) =>
+    `<button type="button" class="sdr-note" onclick="erGuess('${key}',${i})">${escHtml(earLabel(pool, i))}</button>`).join('');
   return erHead(key, t('ear.named', { n: filled, total: st.cfg.draw })) +
     `<div class="sdr-body"><div class="err-slots">${slots}</div>` +
       `<div class="err-pads">${pads}</div>` +
@@ -11723,7 +11727,9 @@ function pcFrame(){
     // The lap, with no seek and no hole — see THE SPARE.
     const sp = st.spare, old = audio;
     st.leaving = old;
-    st.timers.push(setTimeout(() => {
+    // The two handoff timers' ids, so pcRetrack can cancel exactly these.
+    const hand = st.handoff = [];
+    hand.push(setTimeout(() => {
       if(pcState !== st || st.leaving !== old) return;
       if(st.audio !== old || !pcSpareReady(st)){ st.leaving = null; return; }   // switched under us: seek instead
       slowestApplyRate(sp, pcRate(st.root));   // a speed tap in the last tenth of a second skipped pcSparePark
@@ -11731,15 +11737,16 @@ function pcFrame(){
       st.audio = sp; st.spare = null;
       st.lastBeat = -1;
     }, Math.max(0, (left - PC_SPARE_START) * 1000)));
-    st.timers.push(setTimeout(() => {
+    hand.push(setTimeout(() => {
       if(pcState !== st || st.leaving !== old) return;
-      st.leaving = null;
+      st.leaving = null; st.handoff = null;
       if(st.audio === old) return;       // the spare never started; pcFrame seeks
       try { old.pause(); } catch(e) {}
       st.spare = old;
       pcSparePark(st);
       if(st.audio.paused) st.audio.play().catch(() => {});
     }, Math.max(0, left * 1000 - 4)));
+    st.timers.push(...hand);           // pcStop still clears them with the rest
   } else if(!st.leaving && (now >= st.win.end - 0.02 || audio.ended)){
     // A whole-song card stops at the end of the song (Jonathan, 2026-10-02:
     // it used to loop back to where it started). A card that is a few bars
@@ -11903,6 +11910,26 @@ function pcSetGuitar(btn){
   if(labs[1]) labs[1].classList.toggle('on', on);
   pcRetrack(root);
 }
+/* A speed or Guitar switch inside the last PC_LAP_LEAD of a lap lands after
+   pcFrame armed the two handoff timers at the OLD rate, so the spare would
+   start ~25 ms early and overlap the end of the window. Cancel the handoff
+   instead and let pcFrame take the lap again from scratch — re-armed at the
+   new rate if the spare is ready in time, otherwise the plain seek, which
+   THE SPARE already names as the acceptable worst case. If the spare has
+   already started (the first timer fired), the outgoing element is paused
+   here and becomes the spare, the second timer's job, since nothing else
+   would stop it running on into the bar after the window. */
+function pcCancelHandoff(st){
+  if(!st.leaving) return;
+  const old = st.leaving, hand = st.handoff || [];
+  hand.forEach(clearTimeout);
+  st.timers = st.timers.filter(id => hand.indexOf(id) < 0);
+  st.leaving = null; st.handoff = null;
+  if(st.audio !== old){
+    try { old.pause(); } catch(e) {}
+    st.spare = old;                    // pcRetrack's pcSparePark re-parks it
+  }
+}
 /* Switch files mid-song at the same MUSICAL position — bars into the
    window, not seconds, because the two tiers run on different clocks (the
    same rule snipSetTier follows). Mid count-in, the count restarts at the
@@ -11911,6 +11938,7 @@ function pcRetrack(root){
   const st = pcState;
   if(!st || st.root !== root) return;
   if(st.counting){ pcStart(root, st.loopFrom); return; }
+  pcCancelHandoff(st);
   const slow = root.dataset.slow === '1', guitar = root.dataset.guitar === '1';
   const barsIn = snipBarsAt(st.win, st.audio.currentTime);
   st.win = pcWindow(st.L, slow);
@@ -12502,9 +12530,15 @@ function caCloseOpen(){
      caOpenId, so its swap-back test never matches — clear the swap here and
      re-render ourselves (renderClassActivities ends in caSyncTopbar). */
   const hadSwap = !!caSwap;
+  /* Same for a "Play Along now" card opened from the Songs page: it is only
+     in the list because it is the open card (caIsPlayAlongOnly — it is not
+     on In-Class Activities by date), so closing it has to re-render or it
+     sits there until the next render. */
+  const closing = caOpenId ? (window.CLASS_ACTIVITIES || []).find(x => x.id === caOpenId) : null;
+  const paOnly = !!(closing && caIsPlayAlongOnly(closing));
   caSwap = null;
   caOpenId = null;
-  if(hadSwap) renderClassActivities(); else caSyncTopbar();
+  if(hadSwap || paOnly) renderClassActivities(); else caSyncTopbar();
   scrollPaneTop(false);
 }
 /* The open card is in the address (navigability round 2, 2026-09-23):

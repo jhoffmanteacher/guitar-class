@@ -1540,8 +1540,8 @@ window.CLASS_ACTIVITIES = [
       {
         label:    'Practice — Deal a card',
         label_es: 'Practica — Reparte una carta',
-        text: 'A is at fret 0 and fret 12 — either one counts.\nYou\'ve got it when: 7 of 7 on the first deal, no buzz. Missed one? Shuffle again.',
-        text_es: 'A está en el traste 0 y en el traste 12 — cualquiera de los dos cuenta.\nLo tienes cuando: 7 de 7 en el primer reparto, sin zumbido. ¿Fallaste una? Baraja de nuevo.',
+        text: 'The deck deals you a note name — find it on the A string and pluck it. Next card once it rings clean. A is at fret 0 and fret 12 — either one counts.\nYou\'ve got it when: 7 of 7 on the first deal, no buzz. Missed one? Shuffle again.',
+        text_es: 'La baraja te reparte el nombre de una nota — búscala en la cuerda La y púlsala. Otra carta cuando suene limpia. A está en el traste 0 y en el traste 12 — cualquiera de los dos cuenta.\nLo tienes cuando: 7 de 7 en el primer reparto, sin zumbido. ¿Fallaste una? Baraja de nuevo.',
         drill: { type: 'deck', deck: 'naturals-A' },
       },
       {
@@ -2758,6 +2758,8 @@ window.CLASS_ACTIVITIES = [
     view:  'focus',   // one step at a time — see VIEW above
     title:    'Low E and A Notes in Time',
     title_es: 'Notas de las cuerdas Mi grave y La a tiempo',
+    intro:    'A note name comes up on the beat, and you play it on the low E or A string. Each step runs its own levels: start with Show answer on to learn the notes, then turn it off for the scored levels. A step is done when its Level 5 is unlocked.',
+    intro_es: 'El nombre de una nota aparece a tiempo, y tú la tocas en la cuerda Mi grave o en la cuerda La. Cada paso tiene sus propios niveles: empieza con «Mostrar la respuesta» encendido para aprender las notas, y luego apágalo para los niveles con puntaje. Un paso está terminado cuando su Nivel 5 queda desbloqueado.',
     steps: [
       {
         label:    'Practice — Frets 0 to 5',

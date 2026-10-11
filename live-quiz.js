@@ -270,6 +270,9 @@ let _lqInviteReturnFocus = null;
 let lqQOpenedAt = 0;      // performance.now() when THIS round opened locally
 let lqSendError = false;
 let lqTick      = null;   // countdown interval, only while limitSec > 0
+// "sessionId:qIndex" whose answer doc is being read back after a reload —
+// see lqRestoreMyAnswer(). Taps are ignored while it is set.
+let lqRestoring = null;
 
 /* One listener per signed-in student, opened at sign-in and left open. The
    doc changes a handful of times per game and not at all the rest of the
@@ -287,7 +290,7 @@ function lqStartListening(){
 }
 function lqStopListening(){
   if(lqUnsub){ try{ lqUnsub(); }catch(e){} lqUnsub = null; }
-  lqSession = null; lqMyAnswer = null; lqJoinedId = null; lqInviteAnsweredId = null;
+  lqSession = null; lqMyAnswer = null; lqJoinedId = null; lqInviteAnsweredId = null; lqRestoring = null;
   lqStopTick();
   lqSyncBanner(); lqSyncInvite();
 }
@@ -306,6 +309,12 @@ function lqOnSession(data){
   if(live && live.state === 'question' && (!prev || prev.sessionId !== live.sessionId || prev.qIndex !== live.qIndex)){
     lqMyAnswer = null; lqSendError = false; lqQOpenedAt = performance.now();
   }
+  // Arriving in the middle of a game we did not watch open — a reload, a
+  // re-sign-in — means lqMyAnswer may only be null because memory was
+  // wiped, not because this student hasn't answered. Without this the
+  // choices came back and the rules allow `update`, so a reload was a
+  // second pick. Read our own answer doc back before taking a tap.
+  if(live && Number(live.qIndex) >= 0 && (!prev || prev.sessionId !== live.sessionId)) lqRestoreMyAnswer(live);
   lqSyncBanner();
   lqSyncInvite();
   lqRenderStudent();
@@ -323,6 +332,39 @@ function lqAnnouncePresence(s){
   if(typeof isDevBypassUser === 'function' && isDevBypassUser()) return;
   lqJoinedId = s.sessionId;
   lqWriteAnswer(s, -1, null, 0).catch(()=>{ lqJoinedId = null; });
+}
+
+/* Restores this round's locked-in pick from the student's own answer doc
+   (firestore.rules gives a student `get` on liveQuiz/current/answers/{their
+   uid} and nothing else under answers/). First tap still wins: a tap that
+   landed before the read came back is kept, and taps are refused while the
+   read is in flight so one can't slip in under it. If the read fails — rules
+   not yet published, offline — we fall back to the old behaviour rather
+   than locking the student out of the round. */
+function lqRestoreMyAnswer(s){
+  if(!lqCanPlayHere() || !lqUid()) return;
+  if(typeof isDevBypassUser === 'function' && isDevBypassUser()) return;
+  const key = s.sessionId + ':' + s.qIndex;
+  lqRestoring = key;
+  lqEnsureDb().then(()=>{
+    if(!lqDb) throw new Error('no db');
+    return lqDoc().collection('answers').doc(lqUid()).get();
+  }).then(snap => {
+    if(lqRestoring !== key) return;
+    lqRestoring = null;
+    const d = snap && snap.exists ? (snap.data() || {}) : null;
+    const cur = lqSessionIsLive(lqSession) ? lqSession : null;
+    if(d && d.choice != null && cur && d.sessionId === cur.sessionId && d.qIndex === cur.qIndex
+       && !(lqMyAnswer && lqMyAnswer.qIndex === cur.qIndex)){
+      lqSendError = false;
+      lqMyAnswer = { qIndex: cur.qIndex, choice: d.choice };
+    }
+    lqRenderStudent();
+    lqSyncTick();
+  }).catch(e => {
+    if(lqRestoring === key) lqRestoring = null;
+    console.warn('[live-quiz] could not read back this round\'s answer', e);
+  });
 }
 
 function lqWriteAnswer(s, qIndex, choice, ms){
@@ -858,6 +900,7 @@ function lqAnswer(choiceId){
   const s = lqSessionIsLive(lqSession) ? lqSession : null;
   if(!s || s.state !== 'question') return;
   if(lqMyAnswer && lqMyAnswer.qIndex === s.qIndex) return;
+  if(lqRestoring === s.sessionId + ':' + s.qIndex) return;   // still reading back a pick made before a reload
   if(Number(s.limitSec) && lqSecsLeft(s) === 0) return;
   if(!lqUid()) return;
   if(typeof isDevBypassUser === 'function' && isDevBypassUser()){

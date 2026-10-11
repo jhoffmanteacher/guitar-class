@@ -46,6 +46,20 @@ see `WORKFLOW.md` and the git commit log.
 - **The metronome on the "the cure" play-along card is a little louder**,
   so you can hear it over the song.
 
+## 2026-10-10 — Loose ends from the site-wide check
+
+- **Spanish figures.** Module 4's four fretboard pictures now have Spanish
+  copies with string names in solfège (Mi grave … mi aguda).
+- **Ear drill.** The answer buttons use the same string names as the hint:
+  "low E … high e" in English, solfège in Spanish.
+- **Live quiz.** Reloading the page mid-question no longer gives you a
+  second pick; your first answer comes back locked.
+- **Module 13.** The "Trim the excess" step now says to cut each string's
+  tail after that string is tuned and stretched, one string at a time.
+- **Class activities.** Activity #22's deck step says what to do with the
+  dealt card; #23 has a short intro saying how its levels work. An archived
+  pinned activity gives its pin slot back.
+
 ## 2026-10-10 — Second site-wide check
 
 - **Your progress is safer on bad Wi-Fi.** If the site could not load your

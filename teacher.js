@@ -2208,19 +2208,37 @@ async function teacherSetActivityArchived(id, state){
   // Restoring reaches BOTH maps on purpose: one Restore button serves an
   // archived row and a deleted one, so it has to clear whichever flag is set.
   delete cfg.deletedActivities[id];
+  // Archiving also unpins, the way Delete does: students never see an
+  // archived card, so a pin on one only held one of the TEACHER_PINS_MAX
+  // slots for nothing. Restore does not put the pin back.
+  const pinsHad=Object.prototype.hasOwnProperty.call(cfg,'activityPins'), pinsPrev=cfg.activityPins;
+  const pinsBefore=teacherActivityPins(cfg);
+  const unpin=on && pinsBefore.includes(id);
+  if(unpin) cfg.activityPins=pinsBefore.filter(x=>x!==id);
   try{
     await ensureDb();
     const fv=firebase.firestore.FieldValue;
-    await teacherWriteConfig({
+    const patch={
       archivedActivities:{[id]: on ? true : fv.delete()},
       deletedActivities:{[id]: fv.delete()}
-    }, {
+    };
+    const base={
       ['archivedActivities.'+id]: hadA?prevA:undefined,
       ['deletedActivities.'+id]:  hadD?prevD:undefined
-    });
+    };
+    // Still cell-checked, not strict: the new pin array is worked out from
+    // the pin array alone, so naming that whole array in `base` (exactly
+    // what teacherSetActivityPin does) is enough — a pin or unpin from
+    // another console refuses, an unrelated edit still goes through.
+    if(unpin){
+      patch.activityPins=pinsBefore.filter(x=>x!==id);
+      base.activityPins=pinsHad?pinsPrev:undefined;
+    }
+    await teacherWriteConfig(patch, base);
   }catch(e){
     if(hadA) cfg.archivedActivities[id]=prevA; else delete cfg.archivedActivities[id];
     if(hadD) cfg.deletedActivities[id]=prevD; else delete cfg.deletedActivities[id];
+    if(unpin){ if(pinsHad) cfg.activityPins=pinsPrev; else delete cfg.activityPins; }
     teacherConfigSaveFailed(e, 'Could not save that change — check your connection and Firestore rules.');
   }
   if(teacherView==='activities') renderTeacherActivities();
