@@ -2903,7 +2903,7 @@ function buildReportHref(a){
   a.href = 'mailto:jhoffman@seq.org?subject='+encodeURIComponent(subject)+'&body='+encodeURIComponent(body);
   return true;
 }
-// Footer "Report a problem" now opens an in-site form that writes to Firestore
+// The rail's "Report a problem" link now opens an in-site form that writes to Firestore
 // (issueReports collection) instead of navigating away to a mail client — but
 // falls back to the mailto link above whenever a Firestore write isn't
 // possible: Firebase failed to load, or the student is the dev-bypass user

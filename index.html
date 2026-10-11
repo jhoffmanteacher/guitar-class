@@ -227,6 +227,16 @@
           </div>
         </div>
         </div>
+        <!-- "Report a problem" lives at the foot of the rail now (the reading
+             column's footer was removed 2026-10-11). margin-top:auto parks it
+             at the bottom of a short rail and lets it scroll with the list
+             on a tall one, so it costs the rail no fixed height. Not a
+             .nav-btn: it goes nowhere in the course, so the activity gate
+             has no opinion about it (checks.mjs 1aa) and it must always work. -->
+        <a class="rail-report" id="sf-report" href="mailto:jhoffman@seq.org" onclick="return handleReportClick(this)" title="Report a problem" data-i18n-attr="title:btn.reportProblem">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 21V4M5 4h11l-1.8 4L16 12H5"/></svg>
+          <span data-i18n="btn.reportProblem">Report a problem</span>
+        </a>
       </div>
       <!-- ══ Practice tools — a compact dock locked to the bottom of the rail.
            Sibling of .rail-scroll, not inside it: the rail is a full-height
@@ -477,13 +487,6 @@
         </div>
       </div>
       <div id="week-panels"></div>
-      <!-- The footer rides at the end of the reading column, not below the
-           whole shell: .main is its own scroll container now, so anything
-           outside it would sit off-screen with nothing to scroll it. -->
-      <footer class="student-footer">
-        <span class="sf-left">Sequoia HS Music &middot; Mr. Hoffman</span>
-        <a class="sf-report" id="sf-report" href="mailto:jhoffman@seq.org" onclick="return handleReportClick(this)" data-i18n="btn.reportProblem">Report a problem</a>
-      </footer>
     </main>
   </div>
   <!-- Resource viewer: videos/docs/diagrams open in a floating mini-player

@@ -683,10 +683,17 @@ body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,"Helvetica N
 .module-select-label{font-size:0.8125rem;text-transform:uppercase;letter-spacing:.05em;color:var(--text2);white-space:nowrap}
 .module-select{font-size:0.9375rem;padding:6px 12px;border:1px solid var(--border2);border-radius:var(--radius);background:var(--bg);color:var(--text);cursor:pointer;flex:1;max-width:320px;appearance:none;-webkit-appearance:none;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath d='M2 4l4 4 4-4' stroke='%236b6b65' stroke-width='1.5' fill='none' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E");background-repeat:no-repeat;background-position:right 10px center;padding-right:28px}
 .module-select:focus{outline:none;border-color:var(--blue-text)}
-/* Slim student-view footer: school credit + a prefilled "report a problem" link. */
-.student-footer{display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap;padding:14px 20px;margin-top:4px;border-top:1px solid var(--border);font-size:0.8125rem;color:var(--text3)}
-.sf-report{color:var(--text3);text-decoration:underline;text-underline-offset:2px}
-.sf-report:hover{color:var(--text)}
+/* "Report a problem" — the quiet link at the foot of the left rail (index.html,
+   2026-10-11; it was the reading column's footer). margin-top:auto parks it at
+   the bottom of a short rail and lets it scroll with the list on a tall one.
+   The collapsed rail clips the word and keeps the flag; the label stays in the
+   DOM as the accessible name and title= carries it for hover. */
+.rail-report{display:flex;align-items:center;gap:9px;margin-top:auto;padding:7px 12px;border-radius:var(--radius);
+  font-size:0.8125rem;color:var(--text3);text-decoration:none;flex-shrink:0}
+.rail-report svg{width:16px;height:16px;flex-shrink:0}
+.rail-report:hover{background:rgba(0,0,0,0.05);color:var(--text)}
+.rail-report:focus-visible{outline:2px solid var(--blue-text);outline-offset:2px}
+@media(prefers-color-scheme:dark){.rail-report:hover{background:rgba(255,255,255,0.06)}}
 .module-select:focus-visible{outline:2px solid var(--blue-text);outline-offset:2px}
 /* ── Single-column layout: content column capped at 800px so the card's
       right edge ends where the capped prose (70–78ch) ends and the floating
@@ -729,17 +736,12 @@ body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,"Helvetica N
 .app-layout .main{flex:1;min-width:0;max-width:1000px;margin:0;padding:0 28px 60px;
   overflow-x:clip;overflow-y:auto;overscroll-behavior:contain;
   display:flex;flex-direction:column}
-.app-layout .main > :not(.games-screen):not(.page-screen):not(.student-footer){margin-top:24px}
+.app-layout .main > :not(.games-screen):not(.page-screen){margin-top:24px}
 /* …except the set panels, whose first row is the sticky band: 24px of
    empty page above a band that then pins itself to the top edge anyway is
    24px the lesson could have had. (The gap has to come off #week-panels —
    it is what .main > * actually matches; .set-eyebrow is two levels in.) */
 .app-layout .main > #week-panels{margin-top:0}
-/* Classic sticky-footer trick: .main is a flex column, so on short content
-   (e.g. an empty page-screen) this auto margin pushes the footer to the
-   bottom of the viewport instead of leaving it stranded right under the
-   content. On tall content it collapses to 0 and the footer scrolls normally. */
-.app-layout .main > .student-footer{margin-top:auto}
 @media(min-width:1240px){.app-layout .main{margin:0 auto}}
 .rail{width:252px;flex:0 0 252px;background:var(--rail-bg);color:var(--text);
   height:100%;border-right:1px solid var(--border);display:flex;flex-direction:column}
@@ -879,8 +881,10 @@ body.rail-collapsed .preview-note{display:none}
    name (clipped, never display:none) and index.html gives every nav item a
    translated title= for the hover tooltip. */
 body.rail-collapsed .nav-list{display:flex;flex-direction:column;gap:4px}
-body.rail-collapsed .nav-btn{justify-content:center;padding:10px 0;gap:0}
-body.rail-collapsed .nav-btn > span:not(.ico){position:absolute;width:1px;height:1px;
+body.rail-collapsed .nav-btn,
+body.rail-collapsed .rail-report{justify-content:center;padding:10px 0;gap:0}
+body.rail-collapsed .nav-btn > span:not(.ico),
+body.rail-collapsed .rail-report > span{position:absolute;width:1px;height:1px;
   padding:0;margin:-1px;overflow:hidden;clip:rect(0,0,0,0);white-space:nowrap;border:0}
 /* Four tools stacked. The collapsed rail is the one place the dock stays
    icon-only (the wide dock got its labels back 2026-09-23) — a 48px strip
@@ -964,8 +968,10 @@ body.rail-collapsed .rail-tools .tool-popup{
   body.rail-collapsed .g-module,body.rail-collapsed .g-set,
   body.rail-collapsed .rail-sec-label{display:block}
   body.rail-collapsed .rail-sec-label{display:flex}
-  body.rail-collapsed .nav-btn{justify-content:flex-start;padding:9px 12px;gap:11px}
-  body.rail-collapsed .nav-btn > span:not(.ico){position:static;width:auto;height:auto;
+  body.rail-collapsed .nav-btn,
+  body.rail-collapsed .rail-report{justify-content:flex-start;padding:9px 12px;gap:11px}
+  body.rail-collapsed .nav-btn > span:not(.ico),
+  body.rail-collapsed .rail-report > span{position:static;width:auto;height:auto;
     margin:0;overflow:visible;clip:auto}
   body.rail-collapsed .rail-tools .fab-buttons{grid-template-columns:1fr 1fr}
   body.rail-collapsed .rail-tools .tool-popup{left:8px;right:8px;width:auto;bottom:calc(100% + 6px)}
@@ -991,7 +997,7 @@ body.rail-collapsed .rail-tools .tool-popup{
   body.rail-open{overflow:hidden}
   .rail-scroll{overflow-y:auto;padding-bottom:20px}
   .app-layout .main{max-width:100%;padding:0 16px 50px}
-  .app-layout .main > :not(.games-screen):not(.page-screen):not(.student-footer){margin-top:20px}
+  .app-layout .main > :not(.games-screen):not(.page-screen){margin-top:20px}
   /* Bigger touch targets in the drawer — 44px minimum. The dock itself needs
      no override: the drawer is a full-height flex column too, so the dock is
      already pinned to its bottom. */
@@ -1807,7 +1813,6 @@ body.t-wide .t-main{max-width:none}
   /* Hide all on-screen chrome */
   .header,.rail,.rail-backdrop,.skip-link,.module-select-wrap,.week-pills,
   .resume-card,
-  .student-footer,
   .video-overlay,
   .fab-group,.save-ind,
   #google_translate_element,.btn-translate,.user-area,

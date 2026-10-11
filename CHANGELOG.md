@@ -7,6 +7,9 @@ see `WORKFLOW.md` and the git commit log.
 
 ## 2026-10-11 — Bigger Keep practicing cards, true full screen
 
+- **More room to read.** The strip at the bottom of the page is gone. "Report a
+  problem" is now at the bottom of the menu on the left.
+
 - **Keep practicing cards are blue.** They stand out from the other cards on
   In-Class Activities.
 
