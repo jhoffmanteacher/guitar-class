@@ -2462,6 +2462,11 @@ body.explore-open #week-panels{display:none}
 .ca-bar-open .ca-optional-tag{flex-shrink:0;align-self:center;margin-right:0}
 body.ca-full:has(#class-activities-screen:not([hidden])){--hdr:0px}
 body.ca-full:has(#class-activities-screen:not([hidden])) .header{display:none}
+/* Full screen takes the left rail too (Jonathan, 2026-10-11), the mobile
+   drawer and its backdrop with it — the header's menu button is gone anyway.
+   "All activities" or Esc brings both back. */
+body.ca-full:has(#class-activities-screen:not([hidden])) .rail,
+body.ca-full:has(#class-activities-screen:not([hidden])) .rail-backdrop{display:none !important}
 /*    Phone width: the Full screen word is clipped (still the button's
       accessible name; the icon carries it), and a Focus card's bar wraps
       so the name stays readable and the step buttons get their own row. */
@@ -2779,23 +2784,24 @@ body.ca-full:has(#class-activities-screen:not([hidden])) .header{display:none}
   .ca-hero-thumb{flex:1;min-width:0}
 }
 
-/* ── "Keep practicing" — the teacher's pinned cards, one line above Today's
-   activity (caPinRowHtml, 2026-10-10). One line at Chromebook width with
-   all four pins: the titles ellipsize rather than wrap, and the full title
-   rides in each button's title=. On a phone the label takes its own line
-   and the pins wrap. ── */
-.ca-pins{display:flex;align-items:center;gap:10px;margin:0 0 10px}
-.ca-pins-lbl{flex-shrink:0;font-family:var(--font-display);font-weight:600;font-size:0.875rem;color:var(--text2)}
+/* ── "Keep practicing" — the teacher's pinned cards, one row above Today's
+   activity (caPinRowHtml, 2026-10-10). Jonathan, 2026-10-11: "a little more
+   info" — so the cards are taller and the type smaller, and a title WRAPS
+   (up to three lines) instead of cutting to an ellipsis on one. The full
+   title still rides in each button's title=. On a phone the label takes its
+   own line and the pins wrap. ── */
+.ca-pins{display:flex;align-items:stretch;gap:10px;margin:0 0 10px}
+.ca-pins-lbl{flex-shrink:0;align-self:center;font-family:var(--font-display);font-weight:600;font-size:0.875rem;color:var(--text2)}
 .ca-pins-row{display:flex;gap:8px;flex:1;min-width:0}
 /* Equal shares from a zero basis, capped at the title's own width: a short
    title shows whole and hands its spare room to the long ones, instead of
    every title shrinking by the same proportion. */
-.ca-pin{flex:1 1 0;max-width:max-content;min-width:0;display:inline-flex;align-items:center;gap:6px;min-height:40px;
-  padding:6px 14px;background:var(--bg);color:var(--text);border:1px solid var(--border);
-  border-left:3px solid var(--ca-accent);border-radius:var(--radius);font:inherit;font-size:0.875rem;
+.ca-pin{flex:1 1 0;max-width:max-content;min-width:0;display:inline-flex;align-items:center;gap:6px;min-height:64px;
+  padding:8px 12px;background:var(--bg);color:var(--text);border:1px solid var(--border);
+  border-left:3px solid var(--ca-accent);border-radius:var(--radius);font:inherit;font-size:0.75rem;line-height:1.3;
   font-weight:600;cursor:pointer;text-align:left}
 .ca-pin:hover{border-color:var(--ca-accent)}
-.ca-pin-t{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.ca-pin-t{min-width:0;overflow:hidden;display:-webkit-box;-webkit-box-orient:vertical;-webkit-line-clamp:3;line-clamp:3;overflow-wrap:anywhere}
 .ca-pin-check{width:15px;height:15px;flex-shrink:0;color:var(--green-text)}
 @media (max-width:600px){
   .ca-pins{flex-wrap:wrap;gap:6px}

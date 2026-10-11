@@ -5,6 +5,16 @@ Notable changes to the Guitar Class site. Newest first.
 For the full session-by-session history (and the reasoning behind each change),
 see `WORKFLOW.md` and the git commit log.
 
+## 2026-10-11 — Bigger Keep practicing cards, true full screen
+
+- **Keep practicing cards show more of the name.** The cards are taller and the
+  letters are smaller, so a long activity name shows on up to three lines
+  instead of being cut off.
+- **Full screen now hides the left menu too.** When you press Full screen on
+  an open activity, the menu on the left goes away along with the top bar, so
+  the activity gets the whole screen. Press Esc or "All activities" to bring
+  them back.
+
 ## 2026-10-10 — Keep practicing
 
 - **A "Keep practicing" row on In class.** Your teacher can put up to four
