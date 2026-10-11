@@ -243,15 +243,24 @@ service cloud.firestore {
        a student can only ever write their own. They cannot read the pile
        back: a take is a recording of a classroom, and only the teacher
        listens to it. Students may delete nothing; the teacher deletes. */
+    /* Collection must be switched on in the console (config/class
+       .micSampling.on) — the app already checks this before recording; the
+       rule makes it true for a write that doesn't come from the app. */
+    function micSamplingOn() {
+      return get(/databases/$(database)/documents/config/class).data
+               .get('micSampling', {}).get('on', false) == true;
+    }
     match /micTakes/{takeId} {
       allow create, update: if isSignedIn()
                             && takeId.matches(request.auth.uid + '-(coach|nr)')
-                            && request.resource.data.uid == request.auth.uid;
+                            && request.resource.data.uid == request.auth.uid
+                            && micSamplingOn();
       allow read, delete:   if isTeacher();
 
       match /chunks/{chunkId} {
         allow create, update: if isSignedIn()
                               && takeId.matches(request.auth.uid + '-(coach|nr)')
+                              && micSamplingOn()
                               && request.resource.data.keys().hasOnly(['i','pcm'])
                               && request.resource.data.pcm is bytes
                               && request.resource.data.pcm.size() <= 750000;

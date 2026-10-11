@@ -165,7 +165,7 @@ h1{font-family:var(--font-display);font-size:1.875rem;font-weight:650;margin:4px
 .playline{font-size:0.9063rem;background:var(--bg2);border-left:3px solid var(--border2);padding:8px 12px;border-radius:0 8px 8px 0;margin-bottom:12px}
 .branch{font-size:0.8438rem;color:var(--text2);margin-bottom:6px}
 .branch b{color:var(--text)}
-/* Tap-to-open folds for Stuck?/Level up — mirrors the main app's step folds */
+/* Tap-to-open folds ("More about this song", "The whole song tab") — mirrors the main app's step folds */
 .fold{margin-bottom:6px}
 .fold summary{display:inline-flex;align-items:center;min-height:44px;padding:0 14px;cursor:pointer;font-size:0.8125rem;font-weight:600;color:var(--text2);border:1px solid var(--border2);border-radius:16px;list-style:none;user-select:none}
 .fold summary::-webkit-details-marker{display:none}
@@ -297,7 +297,7 @@ footer{margin-top:36px;font-size:0.7813rem;color:var(--text3);border-top:1px sol
 /* ── Layer 4 skill ladder ──
    The rungs are the module's real progression (Rule of 3 → whole box →
    dress-ups → licks), so they render as always-visible numbered steps on a
-   rail — visually distinct from the gray optional "Level up" folds. The
+   rail — always open, unlike the gray folds. The
    rating key on ladder layers maps 1/2/3 onto the rungs. */
 .ladder-lead{font-size:0.875rem;color:var(--text2);margin-bottom:12px}
 .ladder{position:relative;margin:2px 0 10px;padding-left:38px}

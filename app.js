@@ -708,8 +708,13 @@ function showApp(user){
   // A student with a pending activity lands there whatever the hash says —
   // the "pops up on login" half of the activity gate, kept when the lock
   // itself was switched off (CA_GATE_LOCKS, 2026-10-07).
+  // Except a student coming BACK from a Song Journey page ("Back to class
+  // site" when the tab can't just close): that link names the card they came
+  // from, and sending them somewhere else is the opposite of "back".
+  let fromJourney = false;
+  try { const r = new URL(document.referrer); fromJourney = r.origin === location.origin && /\/tabs\/[^/]+\.html$/.test(r.pathname); } catch(e) {}
   if(!location.hash ||
-     (caBlockers().length > 0 && !GATE_OPEN_HASHES.includes(exploreHashBase(location.hash)))){
+     (caBlockers().length > 0 && !fromJourney && !GATE_OPEN_HASHES.includes(exploreHashBase(location.hash)))){
     goExploreHash('class-activities');
   }
   routeExploreHash();
@@ -10577,7 +10582,8 @@ let caTodayIds = [];
 // line): this is a summary of every step in caStepDone, drawn once, never
 // clicked. Checks are excluded (no per-step ticks to summarize).
 function caHeroDotsHtml(a){
-  if(!caTodayIds.includes(a.id) || a.kind === 'check') return '';
+  // A Level up's card opened in a Today card's slot (caSwap) keeps the dots.
+  if((!caTodayIds.includes(a.id) && !caIsSwapIn(a)) || a.kind === 'check') return '';
   // A practice card's dots are its checks (caTickKeys), a ladder's its steps.
   const keys = caTickKeys(a);
   if(!keys.length) return '';
@@ -10740,7 +10746,9 @@ function caStartHereTagHtml(a, isCurrent){
     ? (isCurrent ? 'check.prefix' : 'ca.checkNotFinished')
     : (isCurrent ? 'ca.startHere' : 'ca.notFinished');
   const tag = `<span class="ca-start-tag${isCheck ? ' ca-start-tag--check' : ''}" data-i18n="${tagKey}">${escHtml(t(tagKey))}</span>`;
-  const dateLabel = caFormatDate(caDate(a));
+  // A card standing in another's slot (caSwap) shows no date — its own can
+  // be a release date still in the future.
+  const dateLabel = caIsSwapIn(a) ? '' : caFormatDate(caDate(a));
   if(isCurrent) return (dateLabel ? `<span class="ca-chip">${escHtml(dateLabel)}</span>` : '') + tag;
   return `<span class="ca-hero-tagrow">${tag}`
     + (dateLabel ? `<span class="ca-hero-from">${escHtml(t('ca.heroFromDate', {date: dateLabel}))}</span>` : '')
@@ -11093,6 +11101,7 @@ function caJourneyLinkHtml(a){
    to the list, and closing it puts `from` back (Jonathan, 2026-10-06 — the
    card isn't assigned yet, so it mustn't show up as an entry on the page). */
 let caSwap = null;   // { from, to } while a Level up's target is open in `from`'s slot
+function caIsSwapIn(a){ return !!(caSwap && a && caSwap.to === a.id); }
 function caCardLinkHtml(from, id){
   const b = (window.CLASS_ACTIVITIES || []).find(x => x.id === id);
   if(!b || !(caIsVisible(b) || caIsPlayAlongOnly(b))) return '';

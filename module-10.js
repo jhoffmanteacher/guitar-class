@@ -269,7 +269,7 @@ SETS.push(
           choices: ['It starts loud and stays loud all the way through', 'Its chords are built from one scale, and A feels like home', 'It uses only notes played on the A string', 'It\'s at a tempo of 100 beats per minute'],
           choices_es: ['Empieza fuerte y se mantiene así toda la canción', 'Sus acordes salen de una sola escala, y A se siente como casa', 'Usa solo notas tocadas en la cuerda La', 'Está a un tempo de 100 pulsos por minuto'], answer: 1,
           explain: 'A key names two things at once: the scale a song draws its notes and chords from, and the note that feels like home. It says nothing about how loud or how fast the song is, and it does not tie the song to one string — a song in A uses the whole neck.',
-          explain_es: 'Una tonalidad nombra dos cosas: la escala de la que la canción saca sus notas y acordes, y la nota que se siente como el hogar. No dice nada sobre qué tan fuerte ni qué tan rápida es la canción.' } },
+          explain_es: 'Una tonalidad nombra dos cosas: la escala de la que la canción saca sus notas y acordes, y la nota que se siente como el hogar. No dice nada sobre qué tan fuerte ni qué tan rápida es la canción, y no ata la canción a una sola cuerda — una canción en A usa todo el mástil.' } },
       { id: 'm10w1-s5', text: 'Explain how major pentatonic relates to the major scale',
         text_es: 'Explicar cómo se relaciona la pentatónica mayor con la escala mayor',
         gotItWhen: 'you can say, without looking it up, that major pentatonic is just the major scale with the 4th and 7th notes dropped out.',
@@ -707,7 +707,7 @@ SETS.push(
                   prompt_es: 'Para mover un patrón dos semitonos HACIA ARRIBA, lo mueves:',
                   answer: 1,
                   explain: 'Half steps are frets, so two half steps is two frets, and moving toward the body raises the pitch. Toward the headstock lowers it instead, and four frets would be two WHOLE steps — twice as far as you wanted to go.',
-                  explain_es: 'Los semitonos son trastes — dos semitonos = dos trastes hacia arriba del mástil.',
+                  explain_es: 'Los semitonos son trastes, así que dos semitonos son dos trastes, y moverte hacia el cuerpo de la guitarra sube el tono. Hacia el clavijero lo baja, y cuatro trastes serían dos tonos ENTEROS — el doble de lo que querías.',
                   choices: ['2 strings up', '2 frets toward the body', '2 frets toward the headstock', '4 frets toward the body'],
                   choices_es: ['2 cuerdas hacia arriba', '2 trastes hacia el cuerpo', '2 trastes hacia el clavijero', '4 trastes hacia el cuerpo'] }
               }

@@ -5,6 +5,18 @@ Notable changes to the Guitar Class site. Newest first.
 For the full session-by-session history (and the reasoning behind each change),
 see `WORKFLOW.md` and the git commit log.
 
+## 2026-10-10 — Smaller fixes
+
+- **Spanish quiz explanations in Modules 9–11** now say everything the
+  English ones say.
+- **Clearer directions in Modules 7, 11 and 12.** Module 12's fill names the
+  string (the open G string). Module 12's Am-to-C arpeggio says the thumb
+  stays on the A string.
+- **The whole-song tab on the Song Journey pages** keeps each 4-bar phrase
+  on one line.
+- **"Back to class site" from a Song Journey page** goes back to the card
+  you came from.
+
 ## 2026-10-10 — More room for class activities on a Chromebook
 
 - **Full screen button.** An open activity has a Full screen button at the

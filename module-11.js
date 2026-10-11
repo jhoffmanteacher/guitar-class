@@ -41,7 +41,7 @@ SETS.push(
                   prompt_es: 'Una tríada se construye apilando:',
                   answer: 1,
                   explain: 'Skip a note, skip a note: C, (skip D), E, (skip F), G — that is the C chord. Most full chords are one of these three-note stacks plus doubled notes — power chords are the one exception, since they drop the 3rd on purpose. Notes that sit next to each other are a run of the scale, not a chord, and the same note in three octaves is still only one note.',
-                  explain_es: 'Salta una nota, salta una nota: C-E-G arma el acorde de C. La mayoría de los acordes completos son una de estas pilas de tres notas más notas duplicadas — los acordes de potencia son la única excepción, porque quitan la 3ª a propósito.',
+                  explain_es: 'Salta una nota, salta una nota: C, (salta D), E, (salta F), G — ese es el acorde de C. La mayoría de los acordes completos son una de estas pilas de tres notas más notas duplicadas — los acordes de potencia son la única excepción, porque quitan la 3ª a propósito. Las notas que están una al lado de la otra son un tramo de la escala, no un acorde, y la misma nota en tres octavas sigue siendo una sola nota.',
                   choices: ['The first three notes of the scale, in order', 'Skip a note each time: root, 3rd, 5th', 'Three notes side by side on one string', 'The same note in three different octaves'],
                   choices_es: ['Las tres primeras notas de la escala, en orden', 'Saltando una nota cada vez: raíz, 3ª, 5ª', 'Tres notas seguidas en una sola cuerda', 'La misma nota en tres octavas distintas'] }
               },
@@ -285,7 +285,7 @@ SETS.push(
           explain_es: 'Cuenta la escala de G — G(I) A(ii) B(iii) C(IV) D(V) — así que el IV es C y el V es D. Esos dos más G son los tres acordes mayores de la tonalidad, y con ellos está construida casi cualquier canción en G.' } },
       { id: 'm11w1-s6', text: 'Label "Luna"\'s F–Am vamp as I–iii in F major (with the passing Dm as vi)',
         text_es: 'Etiquetar el vamp F–Am de "Luna" como I–iii en F mayor (con el Dm de paso como vi)',
-        gotItWhen: 'you can explain that Am is F major\'s iii chord (built on the 3rd scale note) and name the passing Dm as vi.',
+        gotItWhen: 'you can explain which Roman numeral Am gets in F major, and why, and name the passing Dm too.',
         gotItWhen_es: 'puedes explicar qué número romano recibe Am en F mayor, y por qué, y nombrar también el Dm de paso.',
         practice: { type: 'mc', prompt: '"Luna" vamps F → Am in the key of F major. What numeral does Am get?',
           prompt_es: '"Luna" alterna F → Am en la tonalidad de F mayor. ¿Qué número romano recibe Am?',
@@ -585,7 +585,7 @@ SETS.push(
           choices: ['Every phrase pulls back to Am and rests there', 'A song\'s first chord names its key', 'It has more minor chords than major ones', 'Am is the only minor chord in the loop'],
           choices_es: ['Cada frase regresa a Am y descansa ahí', 'El primer acorde de una canción nombra su tonalidad', 'Tiene más acordes menores que mayores', 'Am es el único acorde menor de la vuelta'], answer: 0,
           explain: 'The key is the resting place your ear hears, not the first chord — plenty of songs start away from home. Am being the only minor chord here proves nothing on its own: a G–C–Em loop has exactly one minor chord too and is not in a minor key. Hum along and notice where the loop feels finished — that is Am.',
-          explain_es: 'La tonalidad = el punto de descanso que escucha tu oído, no el primer acorde (muchas canciones empiezan lejos de la base). Tararea y nota dónde la vuelta se siente terminada — eso es Am.' } },
+          explain_es: 'La tonalidad es el punto de descanso que escucha tu oído, no el primer acorde — muchas canciones empiezan lejos de la base. Que Am sea el único acorde menor no prueba nada por sí solo: un loop G–C–Em también tiene un solo acorde menor y no está en una tonalidad menor. Tararea y nota dónde la vuelta se siente terminada — eso es Am.' } },
       { id: 'm11w2-s5', text: 'Explain what a slash chord tells you (chord / bass note)',
         text_es: 'Explicar qué te dice un acorde con barra diagonal (acorde / nota de bajo)',
         gotItWhen: 'you can say that in a chord like G/B, G is the shape you finger and B is the lowest note you make sure sounds — and play C to G/B to Am with the bass walking smoothly down.',
@@ -713,7 +713,7 @@ SETS.push(
                   prompt_es: 'Una forma movible te da doce acordes distintos porque:',
                   answer: 0,
                   explain: 'Slide the shape and the root fret renames it — one grip covers the whole chromatic set, because there are twelve frets before the note names start over at the octave. The fingering never changes, which is the whole point of a movable shape, and the neck dots are landmarks for your eye, not the reason the count is twelve.',
-                  explain_es: 'Desliza la forma, y el traste de la raíz la renombra — un solo agarre, todo el conjunto cromático.',
+                  explain_es: 'Desliza la forma y el traste de la raíz la renombra — un solo agarre cubre todo el conjunto cromático, porque hay doce trastes antes de que los nombres de las notas vuelvan a empezar en la octava. La digitación nunca cambia, que es justo la idea de una forma móvil, y los puntos del mástil son guías para tu vista, no la razón de que sean doce.',
                   choices: ['There are 12 frets before the octave repeats', 'There are 12 major chords and no more', 'The shape needs 12 different fingerings', 'A guitar neck has 12 dots marking positions'],
                   choices_es: ['Hay 12 trastes antes de que se repita la octava', 'Hay 12 acordes mayores y no más', 'La forma necesita 12 digitaciones distintas', 'El mástil tiene 12 puntos que marcan posiciones'] }
               }

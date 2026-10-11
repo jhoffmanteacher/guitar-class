@@ -585,7 +585,12 @@ function coachReleaseMicIfIdle(){
    frame ran. At 60 fps there is one window and nothing changes. A gap
    longer than COACH_CATCHUP_MAX_MS means the caller wasn't reading (a
    game's listen-to-me phase, a paused loop) — that old audio is not
-   scanned, or a game's own reference tone would read as a pluck. */
+   scanned, or a game's own reference tone would read as a pluck.
+   One limit under that: the analyser only holds COACH_FFT samples (about
+   85 ms at 48 kHz), so a gap between ~85 and 150 ms (a frame rate under
+   ~12 fps) is scanned only as far back as the buffer still reaches — the
+   start of that gap is already gone. The loop stops at the buffer's start
+   rather than reading past it. */
 const COACH_LVL_WIN = 1024, COACH_LVL_HOP = 512;
 const COACH_CATCHUP_MAX_MS = 150;
 let coachHfRms = 0;

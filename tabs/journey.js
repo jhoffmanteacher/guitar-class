@@ -587,17 +587,36 @@ function wsSectionRows(sec){
   });
   if(cur.length) bars.push(cur);
   /* As many bars as fit in WS_ROW_CHARS, then spread evenly over the rows
-     that takes, so a section never ends on one stray bar. */
+     that takes — in whole 4-bar phrases when a row holds at least one. */
   var widths = bars.map(function(b){
     return b.reduce(function(t, n){ return t + wsSlotWidth(n); }, 0) + 4;
   });
   var widest = Math.max.apply(null, widths.concat([1]));
   var fit = Math.max(1, Math.floor(WS_ROW_CHARS / widest));
-  var per = Math.ceil(bars.length / Math.ceil(bars.length / fit));
-  var rows = [];
-  for(var i = 0; i < bars.length; i += per){
-    rows.push([].concat.apply([], bars.slice(i, i + per)));
+  var counts = [];
+  if(fit >= 4 && bars.length > fit){
+    /* Whole 4-bar phrases per row, spread evenly; a short tail (Sweet
+       Child's 17th bar, a 2-bar tag) joins the last row when it fits there,
+       so no row starts or ends mid-phrase. */
+    var phrases = Math.floor(bars.length / 4), rem = bars.length % 4;
+    /* Fewer phrases a row if that is what lets the tail join the last row;
+       if even one phrase a row can't take it, the tail gets its own row. */
+    for(var max = Math.floor(fit / 4); max >= 1; max--){
+      var ppr = Math.ceil(phrases / Math.ceil(phrases / max));
+      counts = [];
+      for(var k = phrases; k > 0; k -= ppr) counts.push(Math.min(ppr, k) * 4);
+      if(!rem || counts[counts.length - 1] + rem <= fit) break;
+    }
+    if(rem){
+      if(counts[counts.length - 1] + rem <= fit) counts[counts.length - 1] += rem;
+      else counts.push(rem);
+    }
+  } else {
+    var per = Math.ceil(bars.length / Math.ceil(bars.length / fit));
+    for(var j = 0; j < bars.length; j += per) counts.push(Math.min(per, bars.length - j));
   }
+  var rows = [], at = 0;
+  counts.forEach(function(c){ rows.push([].concat.apply([], bars.slice(at, at + c))); at += c; });
   return rows;
 }
 function wsSlotWidth(n){
