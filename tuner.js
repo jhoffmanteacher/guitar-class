@@ -227,7 +227,7 @@ function tunerLoop() {
   const freqBuf = tunerFreqBuf;
   tunerFreqAnalyser.getFloatFrequencyData(freqBuf);
 
-  // Run both detectors; prefer HPS for low strings, YIN as fallback.
+  // Run both detectors; YIN gives the reading, HPS covers frames YIN misses.
   // In the quiet zone (0.003–0.006 RMS) only YIN listens — that's where the
   // softly-plucked high strings live, and YIN's dip threshold keeps it honest.
   // Locked to high e specifically, drop the bar further still — it's the
@@ -238,11 +238,18 @@ function tunerLoop() {
   const freqHPS = rms >= TUNER_RMS_GATE_HPS ? detectPitchHPS(freqBuf, tunerCtx.sampleRate, tunerFreqAnalyser.fftSize) : -1;
   const freqYIN = rms >= yinGate ? detectPitchYIN(timeBuf, tunerCtx.sampleRate, yinGate) : -1;
 
-  // Pick the best candidate — if both fire, prefer HPS; if HPS misses, use YIN
+  // Pick the best candidate — if both fire, use YIN; if YIN misses, use HPS.
+  // HPS reads its peak off 5.9 Hz FFT bins (8192 points at 48 kHz) — over a
+  // semitone wide at low E — and the three-bin interpolation under the
+  // analyser's Blackman window lands up to ~5 cents off (a perfect A2 reads
+  // about +4 cents). YIN measures the period directly: exact on the same
+  // steady tones, and about half HPS's error on every string with string
+  // stiffness, decay and noise added (simulated 2026-10-11) — so it wins
+  // whenever it has an answer. The octave-snap below is unchanged: when the
+  // two disagreed by a semitone or more this already took YIN.
   let freq = -1;
   if (freqHPS > 0 && freqYIN > 0) {
-    // They agree within a semitone — use HPS (more precise via interpolation)
-    freq = Math.abs(Math.log2(freqHPS / freqYIN)) < (1/12) ? freqHPS : freqYIN;
+    freq = freqYIN;
   } else if (freqHPS > 0) {
     freq = freqHPS;
   } else if (freqYIN > 0) {
@@ -367,6 +374,9 @@ async function startTuner() {
   // rather than running alongside the tuner. Guarded — stopAnyRec lives in
   // app.js, which journey pages don't load.
   if (typeof stopAnyRec === 'function') stopAnyRec();
+  // What THIS start acquired — the catch releases exactly these, never a
+  // newer start's stream that may already sit in the globals.
+  let myStream = null, myCtx = null;
   try {
     // Disable browser audio processing that distorts low-frequency guitar signals
     // (voiceIsolation: the speech-only filter ChromeOS can run on a built-in
@@ -382,9 +392,8 @@ async function startTuner() {
       stream.getTracks().forEach(t => t.stop());
       return;
     }
-    tunerStream = stream;
-    tunerCtx = new (window.AudioContext || window.webkitAudioContext)();
-    const myCtx = tunerCtx;   // the stale branch below must close THIS start's context, not whatever the global holds by then
+    tunerStream = myStream = stream;
+    tunerCtx = myCtx = new (window.AudioContext || window.webkitAudioContext)();   // the stale branch below must close THIS start's context, not whatever the global holds by then
     const src = tunerCtx.createMediaStreamSource(tunerStream);
 
     // Bandpass via highpass (kills sub-bass rumble / AC hum) into lowpass
@@ -437,6 +446,18 @@ async function startTuner() {
     setToolText(document.getElementById('tuner-freq'), 'tools.listening');
     tunerLoop();
   } catch(e) {
+    /* The mic can be granted and the setup still fail after it (a browser's
+       audio-context limit after many opens, say). Release this start's
+       stream and context now — left alone, the mic stayed on until the
+       popup closed, with the tuner showing an error. Same guard as
+       coachAcquireMicInner in coach.js. */
+    if (myStream) myStream.getTracks().forEach(tr => tr.stop());
+    if (myCtx){ try { myCtx.close(); } catch(_){} }
+    if (myStream && tunerStream === myStream){
+      tunerRunning = false;
+      tunerStream = null; tunerCtx = null; tunerAnalyser = null; tunerFreqAnalyser = null;
+      tunerHP = null; tunerLP = null;
+    }
     setToolText(document.getElementById('tuner-freq'), 'tools.micDenied');
   }
 }

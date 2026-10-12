@@ -3181,6 +3181,12 @@ function ccFinish(complete){
   cc.timeouts.forEach(clearTimeout);
   cc.timeouts = [];
   if (ccRaf){ cancelAnimationFrame(ccRaf); ccRaf = null; }
+  /* Stop once every change has been played or graded is the natural "I'm
+     done" — after the last change the round only runs on to the end of the
+     last chord plus one beat (ccLoop) — so that counts as a finished round.
+     Stop with a change still ahead of the player stays an early Stop. */
+  if (!complete && cc.phase === 'play' &&
+      cc.changes.every(c => c.result !== null || c.pend)) complete = true;
   cc.changes.forEach(c => {
     if (c.pend) ccResolvePend(c);
     if (c.result === null) c.result = 'miss';
@@ -3232,6 +3238,9 @@ function ccRenderDone(){
        (Firestore rejects that uid; the session best above still counts). */
     if (typeof saveGames === 'function' && currentUser && !isDevBypassUser() && cc.isNewBest){
       games.cc = { bestBpm: cc.bpm, progression: cc.chords, at: new Date().toISOString().slice(0, 10) };
+      /* Saved on its own — see shFinish. awardArcadeXp is the only other
+         saveGames() on this path, and it is gated on a finished round. */
+      saveGames();
     }
   } else if (r >= 0.5){
     const early = t(cc.bpc >= 4 ? 'games.cc.early.bar' : cc.bpc === 2 ? 'games.cc.early.half' : 'games.cc.early.beat');
@@ -9051,6 +9060,11 @@ function bcKeydown(e){
   if (!bc || bc.phase !== 'play' || bc.locked) return;
   const tag = (e.target && e.target.tagName) || '';
   if (tag === 'INPUT' || tag === 'TEXTAREA' || tag === 'SELECT') return;
+  /* Enter on a focused control is that control's own press — the browser
+     fires its click (Check / Next / Show me included). Grading here too
+     would score a half-built shape every time a keyboard student pressed
+     Enter on a fret cell. Only Enter with nothing pressable focused is ours. */
+  if (e.target && e.target.closest && e.target.closest('button,a,[role="button"]')) return;
   if (e.key === 'Enter'){
     if (bc.revealed) bcNextBtn(); else bcCheck();
   }
