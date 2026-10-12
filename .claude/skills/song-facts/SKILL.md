@@ -43,7 +43,7 @@ ear. This is chord *timing*, not BPM:
 - **Seven Nation Army** (123 BPM track) — the riff is NOT one note per beat:
   bar 1 is E (long) · E (short) · G · E, with D as a pickup on the "and" of 4;
   bar 2 is **C for two beats, B for two beats** — what ca-10 teaches. The
-  Journey page's Layer 5 singalong loop (`Em Em G Em | D C C –`) is a
+  Journey page's Layer 4 singalong loop (`Em Em G Em | D C C –`) is a
   teaching loop that does not line up with the record; the page says so.
 
 - **All Along the Watchtower** — `Am–G–F–G` loop (power chords `A5–G5–F5–G5`).

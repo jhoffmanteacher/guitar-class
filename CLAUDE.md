@@ -226,6 +226,20 @@ module above the class. `isPeekedResponseKey()` closes it and checks.mjs
 module the class is ABOUT to enter as frozen — which is why the numbers
 above were raised a day early.
 
+### ⚠️ Modules 4 and 5 were swapped (2026-10-12)
+Jonathan moved Open Chords ahead of Pentatonic Scales. **Open Chords is
+Module 4** (`module-4.js`, `m4w1`–`m4w4`, `mr4-*`); **Pentatonic is Module
+5** (`module-5.js`, `m5w1`–`m5w3`, `mr5-*`). Set, skill and Module Review ids
+moved with their content, and every Journey page swapped Layers 4 and 5 to
+match (Layer 4 Open Chords, Layer 5 Pentatonic Solo). The two-part set is
+`m4w2`; the 1ao and 1az pins, the Songs hub's module groups and the Core
+rows' backing-track choice follow the content. Nobody had progress in either
+module, so no key was migrated (a stray peeked answer under an old id now
+sits on other content — accepted). Notes dated before the swap may still use
+the old numbers. **Course order lives in the module NUMBER** — reordering
+again means a renumber like this one. Its script (`swapA.mjs`) lived in a
+session scratchpad and is not in the repo.
+
 ### ⚠️ Sweep findings ratchet into checks.mjs
 Any sweep or audit that finds **3+ instances of a mechanically-detectable error
 class** must add a permanent detector for that class to `checks.mjs` in the same
@@ -532,9 +546,11 @@ because nobody had reached them: `m3w1` "One shape, three chords", `m3w2`
 "Watch: using a metronome", `m4w1` "Listen: major vs. minor moods", `m5w1`
 "Challenge — Mystery Chart", `m6w3` "Watch: any-pattern exercise", plus three
 practice MCs (`w1-s1`, `m5w4-s2`, `m5w4-s4`) whose order and keyed index were
-held. Two of those videos turned out not to teach what the card asked — the
-JustinGuitar metronome video never says "10 BPM slower than you think you
-need" (it teaches one down strum per click at 80 BPM), and the any-pattern
+held. (Those are the ids of that date: since the 2026-10-12 swap the moods
+card is in `m5w1`, the Mystery Chart in `m4w1`, and the two practice MCs are
+`m4w4-s2` / `m4w4-s4`.) Two of those videos turned out not to teach what the
+card asked — the JustinGuitar metronome video never says "10 BPM slower
+than you think you need" (it teaches one down strum per click at 80 BPM), and the any-pattern
 video never mentions reggae in its 0:00–4:00 range — so those two questions
 were rewritten to match what the student actually watches. **Check the watch
 range before writing a question about a video**, not just the title.

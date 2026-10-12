@@ -2307,9 +2307,10 @@ const SLANG_PHRASES = [
      and reworded in Modules 2–6 and class-activities.js. Deliberately NOT
      banning "two homes" or "top of the ladder" — content agents reworded
      one instance of each, but both turned out to be established,
-     deliberately-defined site-wide terms predating this sweep (module-4/7/
+     deliberately-defined site-wide terms predating this sweep (module-5/7/
      11's "Two Homes for F"; i18n.js's own tools.ladderMax metronome-ladder
-     string and its module-5/6 companions), the same innocent-twin situation
+     string and its module-4/6 companions — numbers as of the 2026-10-12
+     Modules 4/5 swap), the same innocent-twin situation
      1w2's whitelist exists for. */
   'nine times out of ten', 'a hair toward the wire', 'park on just g5', 'park on the slide',
   'play it cold', 'read a lick cold', 'what will eat most of your practice time',
@@ -2645,15 +2646,16 @@ const TEACHER_PHRASE_ALLOW = [
 
 /* Spanish reassurance (2026-10-12). 1w-t read English only, so the
    Spanish twin of every retired comfort line could survive its English
-   fix: module-4.js's Challenge 2 hint said "Simple is fine." /
-   "Está bien si es simple." Each phrase was checked against every
-   Spanish value in the site before it went in:
+   fix: the pentatonic "Compose It in Scale Degrees" Challenge 2 hint
+   (module-5.js since the 2026-10-12 swap; module-4.js when found) said
+   "Simple is fine." / "Está bien si es simple." Each phrase was checked
+   against every Spanish value in the site before it went in:
      · 'es normal' — one use, module-7's deliberate wrong-answer choice
        (allowlisted below by file + field). A closing boundary keeps
        "normalmente" clear.
      · 'totalmente normal' — the twin of 'totally normal'; no uses.
      · 'no te preocupes' — "don't worry"; no uses.
-     · 'está bien si' — "it's okay if"; one use (module-4, reworded).
+     · 'está bien si' — "it's okay if"; one use (that hint, reworded).
        Plain "está bien" is NOT banned: "Está bien puesto cuando…" (the
        latency slider) and "…está bien — presionar Tocar el tab… no lo
        está" (a rule about what is allowed) are literal.

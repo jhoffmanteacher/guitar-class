@@ -21,3 +21,11 @@ deliberate differences are one property each (`margin` on `.tab`,
 `background` on `.tab-head`, whose Journey value is `--tab-head-bg` because
 Journey's `--brand` doubles as the link colour and goes light in dark mode).
 Adding a third means adding it to `JOURNEY_ALLOWED_DIFFS` on purpose.
+
+### Layer N is Module N
+A page's core layers follow the course order: layer N's `.layer-unit` says
+"Module N", `JOURNEY_LAYERS` in `app.js` is read from those spans, and
+checks.mjs 1ab fails on drift. Since Modules 4 and 5 swapped (2026-10-12),
+**Layer 4 is Open Chords and Layer 5 is Pentatonic Solo** on every page;
+layers 6 and up are bonus layers. Reordering modules again means moving
+these layers in the same change.
