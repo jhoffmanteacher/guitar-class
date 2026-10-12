@@ -459,8 +459,18 @@ function signIn(){
         best (sdBest / nrBestSession / rrPts / coachStreak — coach.js has no
         auth hook at all). Reloading clears the lot in one move and can't drift
         out of sync the way an ever-growing manual reset list does. */
+let _signOutReloading = false;   // signOut() reloads itself — the auth listener's cross-tab reload stands aside
 async function signOut(){
-  try { clearTimeout(saveTimer); await flushSave(); } catch(e){}
+  _signOutReloading = true;
+  /* A write already in flight empties the dirty set, so flushSave() alone
+     would return at once and the reload below would drop it — wait for that
+     one first, then flush whatever is left. Bounded: on a network that
+     accepts the connection and then stalls, set() never settles, and Sign
+     out must still sign out. */
+  try {
+    clearTimeout(saveTimer);
+    await withTimeout((async()=>{ if(_flushP) await _flushP; await flushSave(); })(), 4000);
+  } catch(e){}
   try { sessionStorage.clear(); } catch(e){}
   try { if(auth) await auth.signOut(); } catch(e){}
   location.reload();
@@ -653,6 +663,20 @@ if(auth) auth.onAuthStateChanged(async user=>{
       window.__authBootPending = false;
     }
   } else {
+    /* Signed out from ANOTHER tab (or the session ended under us) while this
+       one was showing a student. The resets below don't reach the built
+       #week-panels DOM (_modulesRendered keeps it), so the next student to
+       sign in on this tab would see — and, through toggleStepDone /
+       saveReflection reading that DOM, save into their own doc — the last
+       student's ticks and typed answers. Same hard reset signOut() does.
+       Can't loop: after the reload currentUser starts null. signOut()'s own
+       path skips this (it reloads itself), and so does the dev bypass, which
+       never signed in to Firebase. */
+    if(currentUser && !isDevBypassUser() && !_signOutReloading){
+      try { sessionStorage.clear(); } catch(e){}
+      location.reload();
+      return;
+    }
     window.__authBootPending = false;
     currentUser = null; progress = {}; responses = {}; completed = {}; completedDeletes = new Set(); classActivities = {}; classActivitiesDeletes = new Set(); caStepDone = {}; caStepDeletes = new Set(); exitChecks = {}; games = {}; streak = { count:0, lastDay:null }; gamesAccessOn = true; micSampling = { on: false, max: 0 }; micTakesCount = Infinity; studentPeriod = ''; periodOverride = ''; moduleOpenThrough = 0; hiddenActivityIds = {}; activityDates = {}; activityTitles = {}; activityNumbers = {}; activityBoard = {}; activityBoardOn = false; activityClears = {}; retiredActivityIds = {}; optionalActivityIds = {}; activityPins = []; progressLoadFailed = false;
     document.body.classList.remove('ca-gated');   // next sign-in recomputes it fresh — don't leave a stale gate showing over the sign-in wall
@@ -921,6 +945,12 @@ async function loadClassConfig(){
     // Every exit, early returns included: the teacher's "Open through" may
     // have changed under a rail that's already drawn (see repaintModuleGate).
     if(moduleOpenThrough !== openBefore) repaintModuleGate();
+    // Same for the teacher's games switch (the visibilitychange re-read):
+    // before this only showApp() applied it, so turning games OFF mid-class
+    // left a button that silently refused and ON left it hidden until a
+    // reload. The boot-time run is skipped — showApp() applies it itself.
+    // (A Pause is deliberately NOT applied live.)
+    if(appIsOnScreen()) applyGamesAccess();
   }
   applyActivityGate();
   refreshSongsPlayAlong();   // the Songs page's Play along list reads the same board and dates
@@ -1069,6 +1099,20 @@ function onStepMcSelect(key, btn){
    inline handlers and all over app.js). */
 const SAVE_MAX_AUTO_RETRIES = 5;   // then give up quietly until the next user action re-arms it
 let _saveFailCount = 0;
+/* The flushSave() run in flight, if any — a promise that settles (never
+   rejects) when it has finished, landed or not. signOut() waits on it: the
+   run took the dirty keys with it, so a second flushSave() sees nothing to
+   send and returns at once while the first write is still on the wire. */
+let _flushP = null;
+/* p, or a rejection after ms. A Firestore call on a network that accepts the
+   connection and then stalls never settles (see startAuthStallTimer), so a
+   button the student is waiting on gets a ceiling. The call itself is not
+   cancelled — it may still land later. */
+function withTimeout(p, ms){
+  let timer;
+  return Promise.race([p, new Promise((_, rej)=>{ timer = setTimeout(()=>rej(new Error('timeout')), ms); })])
+    .finally(()=>clearTimeout(timer));
+}
 /* Categories whose new value is computed FROM the old one: a streak count, an
    all-time best, a rep tally. If loadProgress() never read the doc, every one
    of them restarts from zero — and because flushSave writes {merge:true},
@@ -1113,6 +1157,8 @@ async function flushSave(){
   if(!currentUser) return;
   const keys = _dirtyKeys; _dirtyKeys = new Set();
   if(!keys.size) return;
+  let flushDone;
+  const thisFlush = _flushP = new Promise(r=>{ flushDone = r; });
   /* Each category is sent WHOLE, not just the keys this tab touched. What
      that does and doesn't cost, since the audit's phrasing overstated it:
      Firestore's {merge:true} merges a map field key by key (which is exactly
@@ -1209,6 +1255,9 @@ async function flushSave(){
       // counter and tries again.
       setSaveMsg('save.notSaving');
     }
+  } finally {
+    flushDone();
+    if(_flushP === thisFlush) _flushP = null;
   }
 }
 function saveResponses(){ queueSave('responses'); }
@@ -2998,7 +3047,9 @@ function openIssueModal(){
   openOverlay(ov, document.getElementById('issue-text'));
 }
 function issueEscClose(e){ if(e.key==='Escape') closeIssueModal(); }
+let _issueCloseTimer = null;   // the "Sent ✓" auto-close — see submitIssueReport
 function closeIssueModal(){
+  clearTimeout(_issueCloseTimer); _issueCloseTimer = null;
   const ov=document.getElementById('issue-overlay');
   if(!ov) return;
   ov.remove();
@@ -3017,23 +3068,31 @@ async function submitIssueReport(){
   if(btn){ btn.disabled = true; btn.textContent = t('issue.sending'); }
   if(status){ status.textContent = ''; status.className = 'issue-status'; }
   try{
-    await ensureDb();
-    await db.collection('issueReports').add({
-      uid: currentUser.uid,
-      email: currentUser.email || '',
-      name: currentUser.displayName || '',
-      message,
-      location: currentReportContext(),
-      moduleNum: lastModuleNum,
-      setId: lastSetId,
-      lang: getLang(),
-      userAgent: navigator.userAgent,
-      createdAt: firebase.firestore.FieldValue.serverTimestamp()
-    });
+    // Bounded (see withTimeout): on a stalled network the button would
+    // otherwise say "Sending…" forever. Out of time reads as a failed send.
+    await withTimeout((async()=>{
+      await ensureDb();
+      await db.collection('issueReports').add({
+        uid: currentUser.uid,
+        email: currentUser.email || '',
+        name: currentUser.displayName || '',
+        message,
+        location: currentReportContext(),
+        moduleNum: lastModuleNum,
+        setId: lastSetId,
+        lang: getLang(),
+        userAgent: navigator.userAgent,
+        createdAt: firebase.firestore.FieldValue.serverTimestamp()
+      });
+    })(), 10000);
     if(status){ status.textContent = t('issue.sent'); status.className = 'issue-status ok'; }
     if(ta) ta.disabled = true;
     if(btn) btn.remove();
-    setTimeout(closeIssueModal, 2200);
+    /* Cancelled by closeIssueModal(): closing and reopening inside the 2.2 s
+       used to have this close the NEW form and lose what was typed. Armed
+       only while this send's own form is still up, for the same reason. */
+    clearTimeout(_issueCloseTimer);
+    if(ta && document.contains(ta)) _issueCloseTimer = setTimeout(closeIssueModal, 2200);
   } catch(e){
     if(status){ status.textContent = t('issue.failed'); status.className = 'issue-status err'; }
     if(btn){ btn.disabled = false; btn.textContent = t('issue.submit'); }
@@ -3091,7 +3150,12 @@ async function periodPick(value){
   studentPeriod=value;
   queueSave('period');
   clearTimeout(saveTimer);   // the modal is waiting on this write — don't sit out the 800ms debounce
-  await flushSave();
+  /* Bounded (see withTimeout): on a stalled network the write never settles
+     and the buttons would stay disabled forever. Out of time counts as not
+     landed — the dirty set can't say so here, because the stalled run took
+     'period' with it. If that write lands later, flushSave closes the picker. */
+  let timedOut = false;
+  try { await withTimeout(flushSave(), 8000); } catch(e){ timedOut = true; }
   /* flushSave never throws: it catches, re-queues the keys it couldn't write
      and arms its own retry. So "did it land?" is read off the dirty set
      rather than a try/catch — which keeps this on the one shared save path
@@ -3100,7 +3164,7 @@ async function periodPick(value){
      the queued retry needs the real value, not an empty one.
      A successful save — here, or via flushSave's own later auto-retry —
      closes the picker and refreshes the gate itself (see flushSave). */
-  if(_dirtyKeys.has('period')){
+  if(timedOut || _dirtyKeys.has('period')){
     btns.forEach(b=>{ b.disabled=false; });
     if(status){ status.textContent=t('period.failed'); status.className='issue-status err'; }
     return;
@@ -3494,6 +3558,11 @@ function dismissResumeCard(){
 }
 function resumeGoModule(setId, tab){
   dismissResumeCard();
+  /* The card sits on In-Class Activities, whose open screen hides
+     #week-panels — switching the tab underneath it changed nothing the
+     student could see, so Continue just made the card vanish. Close the
+     covering page first, same as the rail's own station rows do. */
+  leaveTopPanelForSet();
   switchTabById(setId, tab);
 }
 function resumeGoSong(url){
@@ -3642,9 +3711,7 @@ function activateSet(id, opts){
   // never rebuilt like a language-switch re-render, so nothing else stops
   // it. Stopping every drill here (harmless no-op for ones not mid-round)
   // is simpler than tracking which set each key belongs to.
-  if(typeof shuffleDrills === 'object' && typeof sdStop === 'function'){
-    Object.keys(shuffleDrills).forEach(k=>sdStop(k));
-  }
+  if(typeof sdAbortAll === 'function') sdAbortAll();
   document.querySelectorAll('.wpill').forEach(b=>b.classList.toggle('active',b.dataset.id===id));
   // Module Review row lives outside .wpill now (see renderPills) — keep its
   // active/aria-current in step with every other set-switch, same as the loop above.
@@ -5370,7 +5437,7 @@ function buildModuleRoutine(moduleNum){
   const song=songSteps.length ? songSteps[songSteps.length-1] : null;
   const wu=WARMUP_BANK[moduleNum % WARMUP_BANK.length];
   const li=(mins, title, body)=>`<li class="routine-item"><span class="routine-min">${mins} min</span><div class="routine-body"><strong>${title}</strong> ${body}</div></li>`;
-  const setLink=(x)=>`<button type="button" class="mr-review-link" onclick="goToSet('${x.set.id}')" title="${escAttr(t('routine.openThisSet'))}">&#8617; ${escHtml(x.set.label)}</button>`;
+  const setLink=(x)=>`<button type="button" class="mr-review-link" onclick="goToSet('${x.set.id}')" title="${escAttr(t('routine.openThisSet'))}">&#8617; ${escHtml(tSetLabel(x.set.label))}</button>`;
   let items='';
   items+=li(1,t('routine.tuneUp'),t('routine.tuneUpBody'));
   items+=li(1,t('routine.fingerGym'),`&mdash; ${escHtml(tf(wu,'text'))}<br>${routinePlaySeq(wu, `bpm:routine:${moduleNum}:wu`)}`);
@@ -5406,7 +5473,10 @@ function printRoutine(){
    Everything below still works — flip this to true and the banner comes
    back exactly as it was (ladderHtml() in buildLesson() is the one reader,
    and the daily5.* i18n keys are all still in place for it). WARMUP_BANK
-   is NOT part of this: the Module Review's 10-Minute Routine reads it too. */
+   is NOT part of this switch, but nothing on screen reads it while this is
+   off: its only other reader, buildModuleRoutine() (the Module Review's
+   10-Minute Routine), lost its one caller in 52ae05f and is also kept,
+   unreached, so either can come back. */
 const DAILY5_ENABLED = false;
 /* Daily 5 — today's 5-minute warm-up for the current module. Same drill for
    everyone on the same date (rotated by day of year). Read-only. */
@@ -6672,6 +6742,21 @@ function sdStop(key){
   if(st && st.tick){ clearInterval(st.tick); st.tick = null; }
   if(st && st.pending){ clearTimeout(st.pending); st.pending = null; }
 }
+/* Navigating away (set switch, tab switch, closing In-Class Activities)
+   stops every drill AND puts a mid-round one back on its setup screen.
+   sdStop() alone cancelled the "next card" timeout of an answered card but
+   left it locked in phase 'play' — and module panels are cached, so coming
+   back found a frozen card with no Start button. Same shape as ncStopAll. */
+function sdAbortAll(){
+  Object.keys(shuffleDrills).forEach(k => {
+    sdStop(k);
+    const st = shuffleDrills[k];
+    if(!st || st.phase !== 'play') return;
+    st.phase = 'setup';
+    const box = sdBox(k);
+    if(box) box.innerHTML = sdSetupHtml(k);
+  });
+}
 
 function sdPlayHtml(key){
   const st = shuffleDrills[key], c = st.cfg;
@@ -6748,7 +6833,7 @@ function sdAnswer(key, pick){
         : t('drill.fbMiss', { pick: pick, fret: st.cur.fret, note: right });
   }
   // The reward for a right answer is hearing the note you just named.
-  if(ok && typeof playNote === 'function') playNote(SD_OPEN_MIDI[c.string] + st.cur.fret);
+  if(ok && !window.coachMicLive && typeof playNote === 'function') playNote(SD_OPEN_MIDI[c.string] + st.cur.fret);   // never into a live Coach mic
   st.pending = setTimeout(() => { st.pending = null; sdNext(key); }, inTime ? 620 : 1500);
 }
 
@@ -9502,9 +9587,7 @@ function switchTabById(wid, tab, keepScroll){
   // still-running inline Coach check — close it so its mic doesn't keep running
   // unseen. Ditto a Shuffle Drill, whose interval survives display:none.
   if(typeof coachClose === 'function') coachClose();
-  if(typeof shuffleDrills === 'object' && typeof sdStop === 'function'){
-    Object.keys(shuffleDrills).forEach(k=>sdStop(k));
-  }
+  if(typeof sdAbortAll === 'function') sdAbortAll();
   wrap.querySelectorAll('.tab-panel').forEach(p=>p.classList.remove('active'));
   panel.classList.add('active');
   /* The set band carries the lesson's chrome now (pill, "Step n of m", the
@@ -10582,9 +10665,7 @@ function caClosePanel(){
      pending "next card" timeout) running once this screen is merely hidden —
      nothing rebuilds it on the way out. Same teardown, and same reasoning, as
      the set-switch in switchTabById; a no-op for drills not mid-round. */
-  if(typeof shuffleDrills === 'object' && typeof sdStop === 'function'){
-    Object.keys(shuffleDrills).forEach(k => sdStop(k));
-  }
+  if(typeof sdAbortAll === 'function') sdAbortAll();
   /* Same reasoning for an exit check mid-run: its stimulus auto-plays, so
      closing the screen while a line is sounding would leave the notes
      ringing over whatever the student opened next.
