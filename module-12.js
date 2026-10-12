@@ -68,8 +68,8 @@ SETS.push(
             steps: [
               {
                 label: 'Listen: the alternating bass', label_es: 'Escucha: el bajo alternante',
-                text: 'On a C chord, the alternating thumb usually bounces between two bass strings. Listen for it in a Travis-picked recording of your choice.',
-                text_es: 'En un acorde de C, el pulgar alternante suele rebotar entre dos cuerdas graves. Escúchalo en una grabación tocada con Travis picking de tu elección.',
+                text: 'On a C chord, the alternating thumb usually bounces between two bass strings. Listen for it in "Dust in the Wind" by Kansas, the song you heard in Module 8.',
+                text_es: 'En un acorde de C, el pulgar alternante suele rebotar entre dos cuerdas graves. Escúchalo en "Dust in the Wind" de Kansas, la canción que escuchaste en el Módulo 8.',
                 hint: 'Find the two bass notes of C: the root C and its 5th, G. Each sits at fret 3 on a different string — the same alternating bass Module 8 taught for a C chord.',
                 hint_es: 'Encuentra las dos notas graves de C: la raíz C y su 5ª, G. Cada una está en el traste 3 de una cuerda distinta — el mismo bajo alternante que enseñó el Módulo 8 para un acorde de C.',
                 skills: [1, 4],
@@ -89,8 +89,8 @@ SETS.push(
             steps: [
               {
                 label: 'Try the alternating thumb', label_es: 'Prueba el pulgar alternante',
-                text: 'Alternate your thumb between the A and low E strings over a C chord — root on the A string (fret 3), 5th fretted on the low E string (fret 3 = G) — 8 bars, no finger notes yet.',
-                text_es: 'Alterna tu pulgar entre las cuerdas La y Mi grave sobre un acorde de C — raíz en la cuerda La (traste 3), 5ª trasteada en la cuerda Mi grave (traste 3 = G) — 8 compases, todavía sin notas de dedos.',
+                text: 'Feel the thumb bounce first, slowly and with no metronome:<ol><li>Fret the Travis C from Module 8: your open C shape plus the pinky on the low E string, fret 3.</li><li>Pluck the A string (C, the root), then the low E string (G, the 5th), with your thumb only.</li><li>Keep bouncing between the two for 4 bars, counting "1-2-3-4" out loud, one thumb note on each number.</li></ol>',
+                text_es: 'Siente primero el rebote del pulgar, despacio y sin metrónomo:<ol><li>Trastea el C de Travis del Módulo 8: tu forma de C al aire más el meñique en la cuerda Mi grave, traste 3.</li><li>Pulsa la cuerda La (C, la raíz) y luego la cuerda Mi grave (G, la 5ª), solo con el pulgar.</li><li>Sigue rebotando entre las dos durante 4 compases, contando "1-2-3-4" en voz alta, una nota del pulgar en cada número.</li></ol>',
                 hint: 'Rule one of Travis: the thumb never stops. Fingers can rejoin on the next beat.',
                 hint_es: 'Regla número uno del Travis picking: el pulgar nunca se detiene. Los dedos pueden reincorporarse en el siguiente tiempo.',
                 skills: [1, 5],
@@ -145,8 +145,8 @@ SETS.push(
             steps: [
               {
                 label: 'Challenge 1 — Alternating Thumb, No Fingers', label_es: 'Reto 1 — Pulgar alternante, sin dedos',
-                text: '<ul><li>Alternate between the A and low E strings in quarter notes — root on the A string (fret 3), 5th fretted on the low E string (fret 3) — 60 BPM, 8 bars, zero finger notes.</li></ul>You\'ve got it when: a steady, even alternating thumb with no wobble.',
-                text_es: '<ul><li>Alterna entre la cuerda La y la Mi grave en negras — raíz en la cuerda La (traste 3), 5ª trasteada en la cuerda Mi grave (traste 3) — 60 BPM, 8 compases, cero notas de dedos.</li></ul>Lo tienes cuando: un pulgar alternante constante y parejo, sin tambalearse.',
+                text: '<ol><li>Set the metronome to 60 BPM.</li><li>Alternate the thumb in quarter notes, one note per click — root on the A string (fret 3), 5th fretted on the low E string (fret 3).</li><li>Play 8 bars with zero finger notes.</li></ol>You\'ve got it when: 8 bars at 60 BPM with a thumb note on every click, three times in a row.',
+                text_es: '<ol><li>Pon el metrónomo a 60 BPM.</li><li>Alterna el pulgar en negras, una nota por clic — raíz en la cuerda La (traste 3), 5ª trasteada en la cuerda Mi grave (traste 3).</li><li>Toca 8 compases con cero notas de dedos.</li></ol>Lo tienes cuando: 8 compases a 60 BPM con una nota del pulgar en cada clic, tres veces seguidas.',
                 hint: 'Compared to Module 8\'s p-i-m-a-m-i arpeggio, the thumb ALTERNATES between bass strings instead of staying put — that bounce is the whole style.',
                 hint_es: 'Comparado con el arpegio p-i-m-a-m-i del Módulo 8, el pulgar ALTERNA entre cuerdas graves en lugar de quedarse quieto — ese rebote es todo el estilo.',
                 stuck: 'Drop to half tempo and count "1-2-3-4" aloud, landing the thumb exactly on each number.',
@@ -164,8 +164,8 @@ SETS.push(
             steps: [
               {
                 label: 'Challenge 2 — The Pinch', label_es: 'Reto 2 — El pellizco',
-                text: '<ul><li>Pinch (thumb on the A string + m on the B string) on beat 1, thumb alone beats 2–4.</li></ul>You\'ve got it when: both notes of the pinch sound together as one, perfectly in sync.',
-                text_es: '<ul><li>Pellizca (pulgar en la cuerda La + m en la cuerda Si) en el tiempo 1, pulgar solo en los tiempos 2–4.</li></ul>Lo tienes cuando: ambas notas del pellizco suenan juntas como una sola, perfectamente sincronizadas.',
+                text: '<ul><li>Pinch (thumb on the A string + m on the B string) on beat 1, thumb alone on beats 2–4, at 60 BPM.</li></ul>You\'ve got it when: both notes of each pinch start at the same moment for 4 bars at 60 BPM, three times in a row.',
+                text_es: '<ul><li>Pellizca (pulgar en la cuerda La + m en la cuerda Si) en el tiempo 1, pulgar solo en los tiempos 2–4, a 60 BPM.</li></ul>Lo tienes cuando: las dos notas de cada pellizco empiezan en el mismo instante durante 4 compases a 60 BPM, tres veces seguidas.',
                 hint: 'A pinch is the bridge between arpeggios and Travis picking — thumb and finger move toward each other and meet.',
                 hint_es: 'Un pellizco es el puente entre los arpegios y el Travis picking — el pulgar y el dedo se mueven uno hacia el otro y se encuentran.',
                 stuck: 'Pluck the bass and the treble separately first, slowly, then bring them closer until they land together.',
@@ -182,8 +182,8 @@ SETS.push(
             steps: [
               {
                 label: 'Challenge 3 — i-Finger Fill', label_es: 'Reto 3 — Relleno del dedo i',
-                text: 'A fill is an extra note played between the thumb\'s beats.<ul><li>Keep the thumb going.</li><li>Add i on the open G string, on the "and" of beat 2.</li></ul>You\'ve got it when: the fill lands cleanly between two thumb strokes without slowing the thumb down.',
-                text_es: 'Un relleno es una nota extra que se toca entre los tiempos del pulgar.<ul><li>Mantén el pulgar en marcha.</li><li>Agrega i en la cuerda Sol al aire, en el "y" del tiempo 2.</li></ul>Lo tienes cuando: el relleno cae limpio entre dos golpes del pulgar sin frenarlo.',
+                text: 'A fill is an extra note played between the thumb\'s beats.<ul><li>Keep the thumb going at 60 BPM.</li><li>Add i on the open G string, on the "and" of beat 2.</li></ul>You\'ve got it when: 4 bars at 60 BPM with the fill in every bar and no change in the thumb\'s speed, three times in a row.',
+                text_es: 'Un relleno es una nota extra que se toca entre los tiempos del pulgar.<ul><li>Mantén el pulgar en marcha a 60 BPM.</li><li>Agrega i en la cuerda Sol al aire, en el "y" del tiempo 2.</li></ul>Lo tienes cuando: 4 compases a 60 BPM con el relleno en cada compás y sin cambios en la velocidad del pulgar, tres veces seguidas.',
                 hint: 'Fingers decorate ON TOP of a thumb that\'s already keeping a steady groove (a groove is the steady rhythmic feel) — the thumb\'s rhythm never bends to fit the fingers.',
                 hint_es: 'Los dedos decoran ENCIMA de un pulgar que ya mantiene un groove constante (un groove es la sensación rítmica estable) — el ritmo del pulgar nunca se dobla para ajustarse a los dedos.',
                 stuck: 'Isolate just the thumb + one fill note, looping it until it\'s automatic before adding more.',
@@ -200,8 +200,8 @@ SETS.push(
             steps: [
               {
                 label: 'Challenge 4 — Am↔C', label_es: 'Reto 4 — Am↔C',
-                text: '<ul><li>Play the alternating thumb + pinch pattern through an Am↔C change.</li><li>On Am, alternate the open A string (the root) and the D string, fret 2 (E, the 5th).</li></ul>You\'ve got it when: the pattern survives the change with the thumb never stopping.',
-                text_es: '<ul><li>Toca el patrón de pulgar alternante + pellizco a través de un cambio Am↔C.</li><li>En Am, alterna la cuerda La al aire (la raíz) y la cuerda Re, traste 2 (E, la 5ª).</li></ul>Lo tienes cuando: el patrón sobrevive el cambio sin que el pulgar se detenga nunca.',
+                text: '<ul><li>Play the alternating thumb + pinch pattern at 60 BPM: one bar of Am, then one bar of C.</li><li>On Am, alternate the open A string (the root) and the D string, fret 2 (E, the 5th).</li></ul>You\'ve got it when: 4 bars (Am, C, Am, C) with no missed thumb note, three times in a row.',
+                text_es: '<ul><li>Toca el patrón de pulgar alternante + pellizco a 60 BPM: un compás de Am, y luego un compás de C.</li><li>En Am, alterna la cuerda La al aire (la raíz) y la cuerda Re, traste 2 (E, la 5ª).</li></ul>Lo tienes cuando: 4 compases (Am, C, Am, C) sin que el pulgar se salte ninguna nota, tres veces seguidas.',
                 hint: 'Anticipate the change — start moving your fretting hand on the last note of the bar so beat 1 always lands ready.',
                 hint_es: 'Anticipa el cambio — empieza a mover tu mano de trastear en la última nota del compás para que el tiempo 1 siempre caiga listo.',
                 stuck: 'Strum Am then C once each to check both chords ring clean, then loop just the thumb through the change before adding the pinch back.',
@@ -223,15 +223,27 @@ SETS.push(
             steps: [
               {
                 label: 'Challenge — "House of the Rising Sun", bass + roll in 6/8', label_es: 'Reto — "House of the Rising Sun", bajo + floreo en 6/8',
-                text: '<ul><li>Play the verse with a bass note on the downbeat (the first, strongest beat of the bar).</li><li>Roll your fingers up through each chord, following the progression.</li></ul>You\'ve got it when: the verse survives every chord change without the roll stopping.',
-                text_es: '<ul><li>Toca la estrofa con una nota grave en el tiempo fuerte (el primer tiempo, el más fuerte del compás).</li><li>Haz un floreo ascendente con tus dedos a través de cada acorde, siguiendo la progresión.</li></ul>Lo tienes cuando: la estrofa sobrevive cada cambio de acorde sin que el floreo se detenga.',
+                text: '<ul><li>Play one chord per bar, 16 bars in all: Am · C · D · F, then Am · C · E · E, then Am · C · D · F, then Am · E · Am · E.</li><li>On every chord, play the 6-note pattern from Module 8, p-i-m-a-m-i: the thumb plays the bass note on the downbeat (the first, strongest beat of the bar), then i-m-a roll up the G, B and high e strings and m-i come back down.</li><li>Thumb on the A string for Am and C, the D string for D and F, and the low E string for E.</li></ul>You\'ve got it when: all 16 bars with no stop at any chord change, two times in a row.',
+                text_es: '<ul><li>Toca un acorde por compás, 16 compases en total: Am · C · D · F, luego Am · C · E · E, luego Am · C · D · F, luego Am · E · Am · E.</li><li>En cada acorde, toca el patrón de 6 notas del Módulo 8, p-i-m-a-m-i: el pulgar toca la nota grave en el tiempo fuerte (el primer tiempo, el más fuerte del compás), luego i-m-a hacen un floreo ascendente por las cuerdas Sol, Si y mi aguda, y m-i vuelven a bajar.</li><li>Pulgar en la cuerda La para Am y C, en la cuerda Re para D y F, y en la cuerda Mi grave para E.</li></ul>Lo tienes cuando: los 16 compases sin detenerte en ningún cambio de acorde, dos veces seguidas.',
                 hint: '"House of the Rising Sun" is in 6/8: six eighth notes in a bar, grouped into two big beats of three — count "ONE-two-three TWO-two-three". It is the waltz\'s cousin, not the same thing. A waltz (3/4, coming up in Set 2) has THREE main beats a bar; 6/8 has TWO, each one filled with three quick notes. The thumb plays the bass on the downbeat; the fingers roll up through the chord between beats.',
                 hint_es: '"House of the Rising Sun" está en 6/8: seis corcheas en un compás, agrupadas en dos tiempos grandes de tres — cuenta "UNO-dos-tres DOS-dos-tres". Es primo del vals, no lo mismo. Un vals (3/4, que viene en la Unidad 2) tiene TRES tiempos principales por compás; el 6/8 tiene DOS, cada uno lleno de tres notas rápidas. El pulgar toca el bajo en el tiempo fuerte; los dedos hacen un floreo ascendente a través del acorde entre los tiempos.',
                 stuck: 'Loop just the first two chords of the verse until the pattern is completely steady before adding the rest.',
                 stuck_es: 'Repite solo los dos primeros acordes de la estrofa hasta que el patrón sea completamente estable antes de agregar el resto.',
                 levelUp: 'Play the whole verse from memory, no chord chart.',
                 levelUp_es: 'Toca la estrofa completa de memoria, sin diagrama de acordes.',
-                skills: [6]
+                skills: [6],
+                playSeq: { label: 'Hear the whole verse — p-i-m-a-m-i, one bar per chord', label_es: 'Escucha la estrofa completa — p-i-m-a-m-i, un compás por acorde', bpm: 80,
+                  notes: [45, 57, 60, 64, 60, 57,  48, 55, 60, 64, 60, 55,  50, 57, 62, 66, 62, 57,  53, 57, 60, 65, 60, 57,
+                          45, 57, 60, 64, 60, 57,  48, 55, 60, 64, 60, 55,  40, 56, 59, 64, 59, 56,  40, 56, 59, 64, 59, 56,
+                          45, 57, 60, 64, 60, 57,  48, 55, 60, 64, 60, 55,  50, 57, 62, 66, 62, 57,  53, 57, 60, 65, 60, 57,
+                          45, 57, 60, 64, 60, 57,  40, 56, 59, 64, 59, 56,  45, 57, 60, 64, 60, 57,  40, 56, 59, 64, 59, 56] },
+                chords: [
+                  { name: 'Am', chord: [[6,'x'],[5,0],[4,2,'2'],[3,2,'3'],[2,1,'1'],[1,0]], position: 0 },
+                  { name: 'C', chord: [[6,'x'],[5,3,'3'],[4,2,'2'],[3,0],[2,1,'1'],[1,0]], position: 0 },
+                  { name: 'D', chord: [[6,'x'],[5,'x'],[4,0],[3,2,'1'],[2,3,'3'],[1,2,'2']], position: 0 },
+                  { name: 'F', chord: [[6,'x'],[5,'x'],[4,3,'3'],[3,2,'2'],[2,1,'1'],[1,1,'1']], position: 0 },
+                  { name: 'E', chord: [[6,0],[5,2,'2'],[4,2,'3'],[3,1,'1'],[2,0],[1,0]], position: 0 }
+                ]
               }
             ]
           },
@@ -305,13 +317,13 @@ SETS.push(
     skills: [
       { id: 'm12w1-s1', text: 'Alternate the thumb between two bass strings in steady quarter notes',
         text_es: 'Alternar el pulgar entre dos cuerdas graves en negras constantes',
-        gotItWhen: 'the thumb bounces evenly between the A and low E strings in steady quarter notes, with no wobble.',
-        gotItWhen_es: 'el pulgar rebota parejo entre las cuerdas La y Mi grave en negras constantes, sin tambalearse.',
+        gotItWhen: 'the thumb bounces between the A and low E strings with a note on every click for 8 bars at 60 BPM, three times in a row.',
+        gotItWhen_es: 'el pulgar rebota entre las cuerdas La y Mi grave con una nota en cada clic durante 8 compases a 60 BPM, tres veces seguidas.',
         practice: { type: 'playSeq', label: 'Thumb alternation on C — the A and low E strings', label_es: 'Alternancia del pulgar en C — las cuerdas La y Mi grave', bpm: 60, notes: [48, 43, 48, 43] } },
       { id: 'm12w1-s2', text: 'Play a pinch (thumb + finger together) on the downbeat',
         text_es: 'Tocar un pellizco (pulgar + dedo juntos) en el tiempo fuerte',
-        gotItWhen: 'both notes of the pinch land together as one, perfectly in sync, right on the downbeat.',
-        gotItWhen_es: 'ambas notas del pellizco caen juntas como una sola, perfectamente sincronizadas, justo en el tiempo fuerte.',
+        gotItWhen: 'both notes of each pinch start at the same moment, on beat 1, for 4 bars at 60 BPM, three times in a row.',
+        gotItWhen_es: 'las dos notas de cada pellizco empiezan en el mismo instante, en el tiempo 1, durante 4 compases a 60 BPM, tres veces seguidas.',
         practice: { type: 'mc', prompt: 'A pinch means the bass and treble notes sound:',
           prompt_es: 'Un pellizco significa que las notas graves y agudas suenan:',
           choices: ['One after the other', 'At exactly the same time', 'Only on beat 3', 'Muted'],
@@ -320,8 +332,8 @@ SETS.push(
           explain_es: 'Un pellizco es el pulgar y el dedo apretando juntos, así que las dos notas caen como un solo sonido. Si las escuchas una después de la otra, tocaste un pequeño arpegio (notas una por una) en vez de un pellizco.' } },
       { id: 'm12w1-s3', text: 'Add an i-finger fill on the "and" of beat 2 while the thumb keeps alternating',
         text_es: 'Agregar un relleno del dedo i en el "y" del tiempo 2 mientras el pulgar sigue alternando',
-        gotItWhen: 'the i-finger fill lands cleanly between two thumb strokes without slowing the thumb down.',
-        gotItWhen_es: 'el relleno del dedo i cae limpio entre dos golpes del pulgar sin frenarlo.',
+        gotItWhen: 'the i-finger fill lands in every bar for 4 bars at 60 BPM with no change in the thumb\'s speed, three times in a row.',
+        gotItWhen_es: 'el relleno del dedo i cae en cada compás durante 4 compases a 60 BPM sin cambios en la velocidad del pulgar, tres veces seguidas.',
         practice: { type: 'playSeq', label: 'Thumb on beats 1-2-3-4, i-finger fill on the "and" of 2 — C', label_es: 'Pulgar en los tiempos 1-2-3-4, relleno del dedo i en el "y" del 2 — C', bpm: 60,
           notes: [48, { midi: 43, beats: 0.5 }, { midi: 55, beats: 0.5 }, 48, 43] } },
       { id: 'm12w1-s4', text: 'Play a Travis-feel pattern over C at 60 BPM for 8 bars',
@@ -333,15 +345,15 @@ SETS.push(
           unit: 'count', placeholder: 'e.g. 8 bars — try for a longer streak', placeholder_es: 'p. ej. 8 compases — intenta una racha más larga' } },
       { id: 'm12w1-s5', text: 'Keep the alternating pattern unbroken through an Am–C change',
         text_es: 'Mantener el patrón alternante sin interrupciones a través de un cambio Am–C',
-        gotItWhen: 'the alternating pattern survives every Am–C change with the thumb never stopping.',
-        gotItWhen_es: 'el patrón alternante sobrevive cada cambio Am–C sin que el pulgar se detenga nunca.',
+        gotItWhen: '4 bars of Am, C, Am, C at 60 BPM with no missed thumb note, three times in a row.',
+        gotItWhen_es: '4 compases de Am, C, Am, C a 60 BPM sin que el pulgar se salte ninguna nota, tres veces seguidas.',
         practice: { type: 'pr', prompt: '<ol><li>One minute: keep the alternating-thumb pattern going over Am ↔ C, switching every bar. On Am, alternate the open A string (the root) and the D string, fret 2 (E, the 5th).</li><li>Count the changes where the thumb never stopped.</li><li>Log your best.</li></ol>',
           prompt_es: '<ol><li>Un minuto: mantén el patrón de pulgar alternante sobre Am ↔ C, cambiando cada compás. En Am, alterna la cuerda La al aire (la raíz) y la cuerda Re, traste 2 (E, la 5ª).</li><li>Cuenta los cambios donde el pulgar nunca se detuvo.</li><li>Anota tu mejor número.</li></ol>',
           unit: 'count', placeholder: 'e.g. 8 changes — try for a higher number', placeholder_es: 'p. ej. 8 cambios — intenta superarlo' } },
       { id: 'm12w1-s6', text: 'Play a bass-note + roll verse of "House of the Rising Sun" (thumb bass, then fingers rolling up through the chord)',
         text_es: 'Tocar una estrofa de nota grave + floreo de "House of the Rising Sun" (bajo del pulgar, y luego dedos en floreo ascendente a través del acorde)',
-        gotItWhen: 'the verse survives every chord change with neither the roll nor the thumb stopping.',
-        gotItWhen_es: 'la estrofa sobrevive cada cambio de acorde sin que se detengan ni el floreo ni el pulgar.',
+        gotItWhen: 'you play all 16 bars of the verse with no stop at any chord change, two times in a row.',
+        gotItWhen_es: 'tocas los 16 compases de la estrofa sin detenerte en ningún cambio de acorde, dos veces seguidas.',
         practice: { type: 'playSeq', label: 'Am bass + roll — "House of the Rising Sun" feel (6/8)', label_es: 'Bajo de Am + floreo — sensación de "House of the Rising Sun" (6/8)', bpm: 80,
           notes: [45, 52, 57, 60, 64, 60] } }
     ]
@@ -486,8 +498,8 @@ SETS.push(
             steps: [
               {
                 label: 'Challenge 1 — 3/4 Count-and-Pick', label_es: 'Reto 1 — Cuenta y puntea en 3/4',
-                text: '<ul><li>Play the 3/4 pattern (bass–pluck–pluck) on one chord, counting aloud, 60 BPM.</li></ul>You\'ve got it when: a steady 3-count with the bass landing exactly on beat 1 every bar.',
-                text_es: '<ul><li>Toca el patrón en 3/4 (bajo–pulsación–pulsación) sobre un acorde, contando en voz alta, 60 BPM.</li></ul>Lo tienes cuando: un conteo de 3 constante con el bajo cayendo exactamente en el tiempo 1 de cada compás.',
+                text: '<ul><li>Play the 3/4 pattern (bass–pluck–pluck) on one chord, counting aloud, 60 BPM.</li></ul>You\'ve got it when: 8 bars at 60 BPM with the bass on every beat 1, three times in a row.',
+                text_es: '<ul><li>Toca el patrón en 3/4 (bajo–pulsación–pulsación) sobre un acorde, contando en voz alta, 60 BPM.</li></ul>Lo tienes cuando: 8 compases a 60 BPM con el bajo en cada tiempo 1, tres veces seguidas.',
                 hint: 'Beat 1 is the strongest — land the bass note exactly on it every bar, and the two plucks fall into place after.',
                 hint_es: 'El tiempo 1 es el más fuerte — haz caer la nota grave exactamente ahí en cada compás, y las dos pulsaciones caen en su lugar después.',
                 stuck: 'Say "BASS-pluck-pluck", one word per click, first word loudest.',
@@ -542,8 +554,8 @@ SETS.push(
             steps: [
               {
                 label: 'Challenge — Happy Birthday in 3, fingerstyle', label_es: 'Reto — Happy Birthday en 3, con fingerstyle',
-                text: '<ul><li>Play the song\'s chords, C–G–C–F–C–G–C (the Module 6 version), with the 3/4 bass–pluck–pluck pattern all the way through.</li></ul>You\'ve got it when: the waltz feel never breaks, start to finish.',
-                text_es: '<ul><li>Toca los acordes de la canción, C–G–C–F–C–G–C (la versión del Módulo 6), con el patrón en 3/4 bajo–pulsación–pulsación de principio a fin.</li></ul>Lo tienes cuando: la sensación de vals nunca se rompe, de principio a fin.',
+                text: '<ul><li>Play the song\'s chords, C–G–C–F–C–G–C (the Module 6 version), with the 3/4 bass–pluck–pluck pattern all the way through.</li></ul>You\'ve got it when: the whole song with the bass on beat 1 of every bar and no stops, two times in a row.',
+                text_es: '<ul><li>Toca los acordes de la canción, C–G–C–F–C–G–C (la versión del Módulo 6), con el patrón en 3/4 bajo–pulsación–pulsación de principio a fin.</li></ul>Lo tienes cuando: la canción completa con el bajo en el tiempo 1 de cada compás y sin paradas, dos veces seguidas.',
                 hint: 'Happy Birthday is a waltz — count ONE-two-three, ONE-two-three and let the bass land on beat 1 of each bar.',
                 hint_es: 'Happy Birthday es un vals — cuenta UNO-dos-tres, UNO-dos-tres y deja que el bajo caiga en el tiempo 1 de cada compás.',
                 stuck: 'Play just the chord changes with the pattern first, humming the melody instead of picking it out.',
@@ -575,8 +587,8 @@ SETS.push(
     skills: [
       { id: 'm12w2-s1', text: 'Play a 3/4 fingerpicking pattern (bass–pluck–pluck) in time',
         text_es: 'Tocar un patrón de fingerpicking en 3/4 (bajo–pulsación–pulsación) en tiempo',
-        gotItWhen: 'a steady 3-count with the bass landing exactly on beat 1 every bar.',
-        gotItWhen_es: 'un conteo de 3 constante con el bajo cayendo exactamente en el tiempo 1 de cada compás.',
+        gotItWhen: '8 bars at 60 BPM with the bass on every beat 1, three times in a row.',
+        gotItWhen_es: '8 compases a 60 BPM con el bajo en cada tiempo 1, tres veces seguidas.',
         practice: { type: 'playSeq', label: '3/4 pattern on C', label_es: 'Patrón en 3/4 sobre C', bpm: 60, notes: [48, 55, 60] } },
       { id: 'm12w2-s2', text: 'Count and feel the difference between 3/4 and 4/4 while picking',
         text_es: 'Contar y sentir la diferencia entre 3/4 y 4/4 mientras punteas',
@@ -609,8 +621,8 @@ SETS.push(
           unit: 'BPM', placeholder: 'e.g. 70 — try for a higher number next session', placeholder_es: 'p. ej. 70 — intenta superarlo la próxima sesión' } },
       { id: 'm12w2-s6', text: 'Play Happy Birthday\'s waltz feel fingerstyle',
         text_es: 'Tocar la sensación de vals de Happy Birthday con fingerstyle',
-        gotItWhen: 'the waltz feel never breaks, start to finish.',
-        gotItWhen_es: 'la sensación de vals nunca se rompe, de principio a fin.',
+        gotItWhen: 'the whole song with the bass on beat 1 of every bar and no stops, two times in a row.',
+        gotItWhen_es: 'la canción completa con el bajo en el tiempo 1 de cada compás y sin paradas, dos veces seguidas.',
         practice: { type: 'mc', prompt: 'Happy Birthday is in 3/4. How does your bass–pluck–pluck pattern line up with the count?',
           prompt_es: 'Happy Birthday está en 3/4. ¿Cómo se alinea tu patrón bajo–pulsación–pulsación con el conteo?',
           choices: ['Thumb bass on 1, finger plucks on 2 and 3', 'Bass on every one of the three beats', 'Plucks on beats 1 and 2, bass on beat 3', 'Same as 4/4 — just play it a bit faster'],
@@ -647,8 +659,8 @@ SETS.push(
             steps: [
               {
                 label: 'Watch: La Derrota requinto line', label_es: 'Mira: línea de requinto de La Derrota',
-                text: 'Watch: <a href="https://www.youtube.com/watch?v=cRJb_f4-M5g" target="_blank">La Derrota (Vicente Fernández) — requinto lesson, part 1 (English) – Jorge Aguilera</a> — a real requinto line from the ranchera tradition that sierreño (a Mexican acoustic-guitar style) grew out of, taught in English. Watch how his picking hand carries the melody a singer would otherwise have, then listen for the same job in:<ul><li>"Luna"</li><li>"Está Dañada"</li></ul>from this module\'s song list.',
-                text_es: 'Mira: <a href="https://www.youtube.com/watch?v=cRJb_f4-M5g" target="_blank">La Derrota (Vicente Fernández) — requinto lesson, part 1 (English) – Jorge Aguilera</a> — una línea de requinto real de la tradición ranchera de la que surgió el sierreño (un estilo de guitarra acústica mexicano), enseñada en inglés. Observa cómo su mano de pulsar lleva la melodía que de otro modo tendría un cantante, y luego escucha ese mismo papel en:<ul><li>"Luna"</li><li>"Está Dañada"</li></ul>de la lista de canciones de este módulo.',
+                text: 'Watch: <a href="https://www.youtube.com/watch?v=cRJb_f4-M5g" target="_blank">La Derrota (Vicente Fernández) — requinto lesson, part 1 (English) – Jorge Aguilera</a> — a real requinto line from ranchera (a traditional Mexican song style), the tradition that sierreño (a Mexican acoustic-guitar style) grew out of, taught in English. Watch how his picking hand carries the melody a singer would otherwise have, then listen for the same job in:<ul><li>"Luna"</li><li>"Está Dañada"</li></ul>from this module\'s song list.',
+                text_es: 'Mira: <a href="https://www.youtube.com/watch?v=cRJb_f4-M5g" target="_blank">La Derrota (Vicente Fernández) — requinto lesson, part 1 (English) – Jorge Aguilera</a> — una línea de requinto real de la ranchera (un estilo tradicional de canción mexicana), la tradición de la que surgió el sierreño (un estilo de guitarra acústica mexicano), enseñada en inglés. Observa cómo su mano de pulsar lleva la melodía que de otro modo tendría un cantante, y luego escucha ese mismo papel en:<ul><li>"Luna"</li><li>"Está Dañada"</li></ul>de la lista de canciones de este módulo.',
                 hint: 'The requinto plays the melodic lines you\'ve been hearing in "Luna" since the course\'s first listening drills.',
                 hint_es: 'El requinto toca las líneas melódicas que has estado escuchando en "Luna" desde los primeros ejercicios de escucha del curso.',
                 skills: [3],
@@ -704,11 +716,12 @@ SETS.push(
             steps: [
               {
                 label: 'Try melody on top over C', label_es: 'Prueba la melodía arriba sobre C',
-                text: 'Over a C chord, keep the thumb on steady quarters and pick a 3-note melody on the high e and B strings on top. You\'ve got it when: the thumb plays four steady beats in every bar while the melody notes ring clean on top, for two bars.',
-                text_es: 'Sobre un acorde de C, mantén el pulgar en negras constantes y puntea una melodía de 3 notas en las cuerdas mi aguda y Si encima. Lo tienes cuando: el pulgar toca cuatro tiempos constantes en cada compás mientras las notas de la melodía suenan limpias arriba, durante dos compases.',
-                hint: 'Keep the thumb going on every beat first. Add one melody note at a time on top of it.',
-                hint_es: 'Primero mantén el pulgar en cada tiempo. Agrega una nota de la melodía a la vez encima.',
-                skills: [4, 5]
+                text: 'Play this 3-note melody alone first, with no thumb:<ol><li>Hold a C chord.</li><li>Pick the open high e (E) with the a-finger.</li><li>Put your pinky on the B string, fret 3 (D), and pick it with the m-finger.</li><li>Lift the pinky and pick the B string again. Your index finger is still on fret 1, so you hear C.</li></ol>You\'ve got it when: E, D, C ring clear one after another, three times in a row.',
+                text_es: 'Toca primero esta melodía de 3 notas sola, sin el pulgar:<ol><li>Mantén un acorde de C.</li><li>Puntea la mi aguda al aire (E) con el dedo a.</li><li>Pon tu meñique en la cuerda Si, traste 3 (D), y puntéala con el dedo m.</li><li>Levanta el meñique y puntea la cuerda Si otra vez. Tu dedo índice sigue en el traste 1, así que escuchas C.</li></ol>Lo tienes cuando: E, D y C suenan claras una tras otra, tres veces seguidas.',
+                hint: 'Keep the C chord held the whole time. Only the pinky moves: press it for D, lift it for C.',
+                hint_es: 'Mantén el acorde de C todo el tiempo. Solo se mueve el meñique: lo pones para el D y lo levantas para el C.',
+                skills: [4, 5],
+                playSeq: { label: 'Hear the melody alone — E · D · C', label_es: 'Escucha la melodía sola — E · D · C', bpm: 60, notes: [64, 62, 60] }
               }
             ]
           },
@@ -753,8 +766,8 @@ SETS.push(
             steps: [
               {
                 label: 'Challenge 1 — "Luna" Intro', label_es: 'Reto 1 — Intro de "Luna"',
-                text: '<ul><li>Play the Layer 6 rolls from <a href="tabs/luna.html#layer-6" target="_blank">"Luna"\'s Song Journey page</a>, slow then at tempo.</li></ul>You\'ve got it when: all notes ring cleanly in order at performance tempo.',
-                text_es: '<ul><li>Toca los floreos de la Capa 6 en la <a href="tabs/luna.html#layer-6" target="_blank">página del Recorrido de "Luna"</a>, despacio y luego a tempo.</li></ul>Lo tienes cuando: todas las notas suenan limpias en orden al tempo de interpretación.',
+                text: '<ul><li>Play the Layer 6 rolls from <a href="tabs/luna.html#layer-6" target="_blank">"Luna"\'s Song Journey page</a>, slow then at tempo.</li></ul>You\'ve got it when: the full intro (two rolls, then let the chord ring) with every note clear, three times in a row.',
+                text_es: '<ul><li>Toca los floreos de la Capa 6 en la <a href="tabs/luna.html#layer-6" target="_blank">página del Recorrido de "Luna"</a>, despacio y luego a tempo.</li></ul>Lo tienes cuando: la intro completa (dos floreos y luego dejas sonar el acorde) con cada nota clara, tres veces seguidas.',
                 hint: 'This roll uses the little-F shape you already know from Module 5.',
                 hint_es: 'Este floreo usa la forma del F pequeño que ya conoces del Módulo 5.',
                 stuck: 'Fret the little F shape, strum it once to hear the target chord, then break it apart one string at a time.',
@@ -771,8 +784,8 @@ SETS.push(
             steps: [
               {
                 label: 'Challenge 2 — "Está Dañada" Requinto Line', label_es: 'Reto 2 — Línea de requinto de "Está Dañada"',
-                text: '<ul><li>Play the song\'s requinto intro line fingerstyle, following the "Está Dañada" tutorial video in this module\'s Songs section at the bottom of the page.</li></ul>You\'ve got it when: the line rings clean and in time.',
-                text_es: '<ul><li>Toca con fingerstyle la línea de requinto de la intro de la canción, siguiendo el video tutorial de "Está Dañada" en la sección de Canciones de este módulo, al final de la página.</li></ul>Lo tienes cuando: la línea suena limpia y en tiempo.',
+                text: '<ul><li>Play the song\'s requinto intro line fingerstyle, following the "Está Dañada" tutorial video in this module\'s Songs section at the bottom of the page.</li></ul>You\'ve got it when: the whole intro line with no stops and every note clear, three times in a row.',
+                text_es: '<ul><li>Toca con fingerstyle la línea de requinto de la intro de la canción, siguiendo el video tutorial de "Está Dañada" en la sección de Canciones de este módulo, al final de la página.</li></ul>Lo tienes cuando: toda la línea de la intro sin paradas y con cada nota clara, tres veces seguidas.',
                 hint: 'This is the real sierreño sound — a smaller, higher-pitched guitar carrying the melody. The line slides between notes on the thin strings instead of strumming chords.',
                 hint_es: 'Este es el sonido real del sierreño — una guitarra más pequeña y aguda que lleva la melodía. La línea se desliza entre notas en las cuerdas delgadas en lugar de rasguear acordes.',
                 stuck: 'Slow the line down to half tempo and isolate just the first 4 notes. Get those clean before adding the slide.',
@@ -789,15 +802,17 @@ SETS.push(
             steps: [
               {
                 label: 'Challenge 3 — 3-Note Melody over C', label_es: 'Reto 3 — Melodía de 3 notas sobre C',
-                text: 'Over a C chord:<ul><li>Keep the thumb going in steady quarters.</li><li>Pick a 3-note melody on the high e and B strings above it.</li></ul>You\'ve got it when: the thumb never wavers while the melody rides on top.',
-                text_es: 'Sobre un acorde de C:<ul><li>Mantén el pulgar sonando en negras constantes.</li><li>Puntea una melodía de 3 notas en las cuerdas mi aguda y Si encima.</li></ul>Lo tienes cuando: el pulgar nunca vacila mientras la melodía viaja arriba.',
+                text: 'Put the E, D, C melody on top of the thumb:<ol><li>Hold a C chord and set the metronome to 60 BPM.</li><li>Thumb on the A string (C) on every beat.</li><li>Pinch each melody note with the thumb: E (open high e) on beat 1, D (B string, fret 3) on beat 2, C (B string, fret 1) on beat 3. Beat 4 is the thumb alone.</li></ol>You\'ve got it when: 4 bars at 60 BPM with the thumb on every beat and all 3 melody notes clear, three times in a row.',
+                text_es: 'Pon la melodía E, D, C encima del pulgar:<ol><li>Mantén un acorde de C y pon el metrónomo a 60 BPM.</li><li>Pulgar en la cuerda La (C) en cada tiempo.</li><li>Pellizca cada nota de la melodía junto con el pulgar: E (mi aguda al aire) en el tiempo 1, D (cuerda Si, traste 3) en el tiempo 2, C (cuerda Si, traste 1) en el tiempo 3. En el tiempo 4 suena solo el pulgar.</li></ol>Lo tienes cuando: 4 compases a 60 BPM con el pulgar en cada tiempo y las 3 notas de la melodía claras, tres veces seguidas.',
                 hint: 'Two jobs, one hand — the requinto texture in short.',
                 hint_es: 'Dos trabajos, una mano — la textura del requinto en pocas palabras.',
                 stuck: 'Isolate the thumb alone first, then add just one melody note at a time.',
                 stuck_es: 'Aísla solo el pulgar primero, y luego agrega una sola nota de melodía a la vez.',
                 levelUp: 'Extend the melody to 6 notes without losing the thumb.',
                 levelUp_es: 'Extiende la melodía a 6 notas sin perder el pulgar.',
-                skills: [4]
+                skills: [4],
+                playSeq: { label: 'Hear it — thumb on C every beat, E · D · C on top (2 bars)', label_es: 'Escúchalo — pulgar en C en cada tiempo, E · D · C encima (2 compases)', bpm: 60,
+                  notes: [[48, 64], [48, 62], [48, 60], 48, [48, 64], [48, 62], [48, 60], 48] }
               }
             ]
           },
@@ -849,8 +864,8 @@ SETS.push(
                 label: 'Wrap-up: your performance song', label_es: 'Cierre: tu canción de interpretación',
                 text: 'Name your performance song and pattern — and the one spot you\'ll drill this week. Write it below.',
                 text_es: 'Nombra tu canción y patrón de interpretación — y el único punto que vas a practicar esta semana. Escríbelo abajo.',
-                response: { type: 'short', placeholder: 'e.g. "the cure," 6-note pattern — the Dm-to-F change still stumbles',
-                  placeholder_es: 'p. ej. "the cure," patrón de 6 notas — el cambio de Dm a F todavía tropieza' }
+                response: { type: 'short', placeholder: 'e.g. "the cure," 8-note pattern — the Dm-to-F change still stumbles',
+                  placeholder_es: 'p. ej. "the cure," patrón de 8 notas — el cambio de Dm a F todavía tropieza' }
               }
             ]
           }
@@ -861,14 +876,14 @@ SETS.push(
     skills: [
       { id: 'm12w3-s1', text: 'Play "Luna"\'s fingerpicked intro (Journey Layer 6) with p-i-m-a rolls',
         text_es: 'Tocar la intro de "Luna" con fingerpicking (Recorrido, Capa 6) con floreos p-i-m-a',
-        gotItWhen: 'all notes of the "Luna" intro ring cleanly in order at performance tempo.',
-        gotItWhen_es: 'todas las notas de la intro de "Luna" suenan limpias en orden al tempo de interpretación.',
+        gotItWhen: 'the full "Luna" intro (two rolls, then let the chord ring) with every note clear, three times in a row.',
+        gotItWhen_es: 'la intro completa de "Luna" (dos floreos y luego dejas sonar el acorde) con cada nota clara, tres veces seguidas.',
         practice: { type: 'playSeq', label: '"Luna" requinto intro — little-F roll (D string fret 3 · G string fret 2 · B string fret 1 · open high e)', label_es: 'Intro de requinto de "Luna" — floreo del F pequeño (cuerda Re traste 3 · cuerda Sol traste 2 · cuerda Si traste 1 · mi aguda al aire)', bpm: 60,
           notes: [53, 57, 60, 64] } },
       { id: 'm12w3-s2', text: 'Play "Está Dañada"\'s requinto intro line fingerstyle',
         text_es: 'Tocar la línea de requinto de la intro de "Está Dañada" con fingerstyle',
-        gotItWhen: 'the "Está Dañada" line rings clean and in time.',
-        gotItWhen_es: 'la línea de "Está Dañada" suena limpia y en tiempo.',
+        gotItWhen: 'the whole "Está Dañada" intro line with no stops and every note clear, three times in a row.',
+        gotItWhen_es: 'toda la línea de la intro de "Está Dañada" sin paradas y con cada nota clara, tres veces seguidas.',
         practice: { type: 'pr', prompt: '<ol><li>Learn the "Está Dañada" intro line from the tutorial.</li><li>Play it top to bottom and count your clean, no-stop passes.</li><li>Log your best.</li></ol>',
           prompt_es: '<ol><li>Aprende la línea de la intro de "Está Dañada" con el tutorial.</li><li>Tócala de principio a fin y cuenta tus pasadas limpias y sin paradas.</li><li>Anota tu mejor número.</li></ol>',
           unit: 'count', placeholder: 'e.g. 3 clean passes — try for a higher number', placeholder_es: 'p. ej. 3 pasadas limpias — intenta superarlo' } },
@@ -884,8 +899,8 @@ SETS.push(
           explain_es: 'El requinto es la guitarra pequeña y más aguda que toca las líneas melódicas sobre el grupo — la parte que escuchas en "Luna". Los acordes de ritmo y el bajo son trabajo de otros músicos.' } },
       { id: 'm12w3-s4', text: 'Blend melody notes into a picking pattern — tune on top, thumb bass below',
         text_es: 'Combinar notas de melodía en un patrón de punteo — melodía arriba, bajo del pulgar debajo',
-        gotItWhen: 'the thumb never wavers while the melody rides on top.',
-        gotItWhen_es: 'el pulgar nunca vacila mientras la melodía viaja arriba.',
+        gotItWhen: '4 bars at 60 BPM with the thumb on every beat and the melody notes clear on top, three times in a row.',
+        gotItWhen_es: '4 compases a 60 BPM con el pulgar en cada tiempo y las notas de la melodía claras encima, tres veces seguidas.',
         practice: { type: 'mc', prompt: 'You\'re blending a tune into your picking pattern, requinto-style. Where do the melody notes go?',
           prompt_es: 'Estás combinando una melodía en tu patrón de punteo, al estilo requinto. ¿Dónde van las notas de la melodía?',
           choices: ['On the high strings, above the thumb\'s steady bass', 'In the bass — the thumb carries the tune', 'On the same strings as the bass, one beat later', 'You pause the bass whenever the melody plays'],
