@@ -2,10 +2,12 @@
    i18n — hand-written Spanish for the APP SHELL (chrome that's on
    screen every session: header, nav rail, tool popups, the skills
    checklist, buttons/footer). Long-form module/lesson CONTENT is
-   NOT covered here — that still goes through Google Translate (see
-   toggleTranslate() in app.js / journey.js), which is an acceptable
-   stopgap for hundreds of lesson steps but not for words a student
-   reads 100 times a week.
+   NOT in this table, but it is hand-translated too — Google
+   Translate is gone. Module content carries `_es` twins read
+   through tf() in app.js, the Song Journey pages carry data-es
+   attributes swapped by tabs/journey.js, and the games arcade and
+   Listening Coach use the t() keys below. All of it is
+   hand-written Spanish.
 
    Self-contained, no dependency on app.js — loaded before app.js,
    fab-tools.js, and tuner.js on every page that uses it (index.html
@@ -35,9 +37,10 @@
       without this tagging a switch to Spanish would leave it stuck
       in whatever language it was first drawn in.
    5. translate="no" is added AUTOMATICALLY by applyI18n to anything
-      it touches — you never need to write it by hand. This stops
-      Google Translate from re-translating our already-Spanish text
-      when both layers are active at once.
+      it touches — you never need to write it by hand. The site no
+      longer runs Google Translate (every layer is hand-translated);
+      the marker only stops a browser's own built-in page translator
+      from re-translating text that is already in Spanish.
    6. There is no human bilingual reviewer, and no generated EN/ES
       review sheet — translations-review.md was deleted 2026-07-23
       and stays gone (it drifted out of date the moment a key was
@@ -111,7 +114,7 @@
                                                "cejilla", the barre TECHNIQUE)
        octave shape (fretboard-mapping shortcut) → forma de octava
        B-string bump (the half-step tuning offset when → el desfase de la
-         an octave shape crosses onto the B/high-e string) cuerda B
+         an octave shape crosses onto the B/high-e string) cuerda Si
        whole step / half step               → tono / semitono
        transpose / transposing              → transponer / transposición
        relative minor / relative major (relative key) → relativa menor /
@@ -122,7 +125,19 @@
                                                which reads as alternating bass)
        thread song (core song threaded      → canción hilo (coined course
          through the whole course)             term, deliberate — mirrors
-                                               the coined English)
+                                               the coined English; only
+                                               where the English says
+                                               "thread song")
+       core song (Core, vs. Choice)         → canción principal / Principal
+       power chord                          → acorde de potencia (never the
+                                               English "power chord" inside
+                                               Spanish — checks.mjs 1bp)
+       top N strings (the N highest-pitched) → las N cuerdas más agudas
+                                               (not "superiores" — "top" on a
+                                               guitar is ambiguous)
+       note names next to a string name     → note names stay letters, even
+                                               beside a solfège string name:
+                                               "F en la cuerda Mi grave"
        lick (short solo phrase)             → lick (kept — same loanword
                                                treatment as riff/vamp/chug)
        key (musical key, e.g. "key of C")   → tonalidad
@@ -823,7 +838,7 @@
     'routine.tuneUp':        { en: 'Tune up', es: 'Afina' },
     'routine.tuneUpBody':    { en: '— open the Tuner (in the tools at the bottom of the left menu) and tune all six strings until the tuner turns green.',
                                 es: '— abre el Afinador (en las herramientas al final del menú izquierdo) y afina las seis cuerdas hasta que el afinador se ponga verde.' },
-    'routine.fingerGym':     { en: 'Finger Gym', es: 'Gimnasia de dedos' },
+    'routine.fingerGym':     { en: 'Finger Gym', es: 'Gimnasio de Dedos' },
     'routine.skillDrill':    { en: 'Skill drill', es: 'Ejercicio de destreza' },
     'routine.chordScaleWork':{ en: 'Chord / scale work', es: 'Trabajo de acordes / escalas' },
     'routine.song':          { en: 'Song', es: 'Canción' },
@@ -1029,7 +1044,7 @@
     'deck.kNumeral':         { en: 'play this numeral', es: 'toca este número' },
     'deck.kChord':           { en: 'that chord is', es: 'ese acorde es' },
     'deck.kMajorKey':        { en: 'major key', es: 'tonalidad mayor' },
-    'deck.kRelMinor':        { en: 'relative minor', es: 'menor relativa' },
+    'deck.kRelMinor':        { en: 'relative minor', es: 'relativa menor' },
     'deck.kKey':             { en: 'key', es: 'tonalidad' },
     'deck.kFretLowE':        { en: 'fret on the low E string', es: 'traste en la cuerda Mi grave' },
     'deck.kFretA':           { en: 'fret on the A string', es: 'traste en la cuerda La' },
@@ -1041,7 +1056,7 @@
     'deck.kChordName':       { en: 'play this chord', es: 'toca este acorde' },
     'deck.hPlayChord':       { en: 'Play it, then move on.', es: 'Tócalo, y sigue.' },
     'deck.hPlayIt':          { en: 'Play that chord, then check yourself.', es: 'Toca ese acorde, y luego revísate.' },
-    'deck.hSayIt':           { en: 'Name the relative minor out loud.', es: 'Nombra la menor relativa en voz alta.' },
+    'deck.hSayIt':           { en: 'Name the relative minor out loud.', es: 'Nombra la relativa menor en voz alta.' },
     'deck.hFindBox':         { en: 'Play minor pentatonic box 1 in that key, then check the fret.',
                                es: 'Toca la caja 1 de la pentatónica menor en esa tonalidad, y luego revisa el traste.' },
     'deck.hFindNote':        { en: 'Find and play it, then move on.', es: 'Encuéntrala, tócala y sigue.' },
@@ -1093,7 +1108,7 @@
     'fret.stringD':          { en: 'D', es: 'Re' },
     'fret.stringG':          { en: 'G', es: 'Sol' },
     'fret.stringB':          { en: 'B', es: 'Si' },
-    'fret.stringHighE':      { en: 'high E', es: 'Mi aguda' },
+    'fret.stringHighE':      { en: 'high e', es: 'mi aguda' },
 
     // ── Fretboard/string diagram labels (guitar-diagrams.js) — the full
     //    "Low E (6th string)" form used in popup + panel titles, plus the
@@ -1152,10 +1167,10 @@
     // ── ♪ Songs hub panel ──
     'hub.allSongs':          { en: 'All the songs', es: 'Todas las canciones' },
     'hub.loading':           { en: 'Loading the song list…', es: 'Cargando la lista de canciones…' },
-    'hub.legendCore':        { en: 'Core — everyone learns these', es: 'Básicas — todos las aprenden' },
+    'hub.legendCore':        { en: 'Core — everyone learns these', es: 'Principales — todos las aprenden' },
     'hub.legendChoice':      { en: 'Choice menu', es: 'Menú a elección' },
     'hub.backing':           { en: 'Backing', es: 'Pista' },
-    'hub.tagCore':           { en: 'Core', es: 'Básica' },
+    'hub.tagCore':           { en: 'Core', es: 'Principal' },
     'hub.tagChoice':         { en: 'Choice', es: 'A elección' },
     /* Song-list badges. All four agree with "canción" (feminine). "Complementaria"
        is Jonathan's call (2026-08-08) over the shorter "Extra" — it's the widest
@@ -1170,7 +1185,7 @@
     'hub.playAlong':         { en: 'Play Along', es: 'Toca con la canción' },
     'hub.backingSolos':      { en: 'Backing track for solos', es: 'Pista para solos' },
     'hub.playAlongDone':     { en: 'Done', es: 'Terminada' },
-    'hub.coreTitle':         { en: 'Core songs', es: 'Canciones básicas' },
+    'hub.coreTitle':         { en: 'Core songs', es: 'Canciones principales' },
     'hub.choiceTitle':       { en: 'Choice menu', es: 'Menú a elección' },
     'hub.groupRiffs':        { en: 'First riffs & single notes', es: 'Primeros riffs y notas individuales' },
     'hub.groupChords':       { en: 'Chord & strumming songs', es: 'Canciones con acordes y rasgueo' },
@@ -1214,8 +1229,8 @@
     'journey.saving':        { en: 'Saving…', es: 'Guardando…' },
     'journey.saved':         { en: 'Saved ✓', es: 'Guardado ✓' },
     'journey.saveFailed':    { en: 'Save failed — check connection', es: 'No se pudo guardar — revisa tu conexión' },
-    'journey.signin':        { en: 'Sign in on the class site to save your ratings',
-                               es: 'Inicia sesión en el sitio de la clase para guardar tus evaluaciones' },
+    'journey.signin':        { en: 'Sign in on the class site to save your progress',
+                               es: 'Inicia sesión en el sitio de la clase para guardar tu progreso' },
     'journey.slow':          { en: 'Slow ({bpm} BPM)', es: 'Lento ({bpm} BPM)' },
     'journey.playalongTitle':{ en: 'Play-along backing track', es: 'Pista de acompañamiento para tocar encima' },
     'journey.trackFabAria':  { en: 'Play backing track', es: 'Reproducir pista de acompañamiento' },
@@ -1796,15 +1811,15 @@
     'games.nr.lv12': { en: 'Sixteenth sprint',
       es: 'Carrera de semicorcheas' },
     'games.nr.lv13': { en: 'First power chords',
-      es: 'Primeros power chords' },
+      es: 'Primeros acordes de potencia' },
     'games.nr.lv14': { en: 'Power chords up the neck',
-      es: 'Power chords por el mástil' },
+      es: 'Acordes de potencia por el mástil' },
     'games.nr.lv15': { en: 'Power-chord chug',
-      es: 'Chug de power chords' },
+      es: 'Chug de acordes de potencia' },
     'games.nr.meta.frets': { en: 'frets 0–{n}',
       es: 'trastes 0–{n}' },
     'games.nr.meta.pcRoots': { en: 'power chords, roots at frets 0–{n}',
-      es: 'power chords, raíces en los trastes 0–{n}' },
+      es: 'acordes de potencia, raíces en los trastes 0–{n}' },
     'games.nr.meta.stringsA': { en: 'A string only',
       es: 'solo la cuerda La' },
     'games.nr.meta.stringsBoth': { en: 'E + A strings',
@@ -2089,7 +2104,7 @@
     'games.riff.song.sweetchild.sub': { en: 'Verse bass notes — one long note every two bars.',
       es: 'Notas de bajo de la estrofa — una nota larga cada dos compases.' },
     'games.riff.song.watchtower.hint': { en: 'Each number is the root note of a power chord. Every chord gets two beats — press on counts 1 and 3 in both bars.',
-      es: 'Cada número es la nota raíz de un power chord. Cada acorde dura dos tiempos — presiona en los conteos 1 y 3 en los dos compases.' },
+      es: 'Cada número es la nota raíz de un acorde de potencia. Cada acorde dura dos tiempos — presiona en los conteos 1 y 3 en los dos compases.' },
     'games.riff.song.watchtower.sub': { en: 'The Am–G–F–G loop as single bass notes.',
       es: 'El bucle Am–G–F–G como notas de bajo individuales.' },
     'games.riff.speedLevelTitle': { en: 'Speed level',
@@ -2151,7 +2166,7 @@
     'games.rr.card11': { en: 'Play the "Seven Nation Army" riff 4 times in a row without stopping. Stay with the click.',
       es: 'Toca el riff de "Seven Nation Army" 4 veces seguidas sin parar. Sigue el clic.' },
     'games.rr.card12': { en: 'Power-chord ladder: E5 → G5 → A5, one strum each, 2 clicks per chord — then come back down.',
-      es: 'Escalera de power chords: E5 → G5 → A5, un rasgueo cada uno, 2 clics por acorde — y luego baja de regreso.' },
+      es: 'Escalera de acordes de potencia: E5 → G5 → A5, un rasgueo cada uno, 2 clics por acorde — y luego baja de regreso.' },
     'games.rr.card13': { en: 'Play minor pentatonic Pattern 1 going up, one note per click. Strict alternate picking: down-up-down-up.',
       es: 'Toca el Patrón 1 de la pentatónica menor subiendo, una nota por clic. Púa alterna estricta: abajo-arriba-abajo-arriba.' },
     'games.rr.card14': { en: 'Loop the first 4 notes of Pattern 1 with alternate picking. Keep the down-up motion steady the whole time.',
@@ -2173,7 +2188,7 @@
     'games.rr.card22': { en: 'G to C with down-up eighths: D-U-D-U-D-U-D-U on each chord, then switch chords without stopping your hand.',
       es: 'G a C con corcheas abajo-arriba: D-U-D-U-D-U-D-U en cada acorde, y cambia de acorde sin detener la mano.' },
     'games.rr.card23': { en: 'Bm to Am, one strum each, switching every 4 clicks. Use the small Bm (top 4 strings only).',
-      es: 'Bm a Am, un rasgueo cada uno, cambiando cada 4 clics. Usa el Bm pequeño (solo las 4 cuerdas superiores).' },
+      es: 'Bm a Am, un rasgueo cada uno, cambiando cada 4 clics. Usa el Bm pequeño (solo las 4 cuerdas más agudas).' },
     'games.rr.card24': { en: 'Full F barre chord: press, strum once, hold for about 4 seconds, then relax your hand completely. Repeat until the timer ends.',
       es: 'Cejilla completa de F: pisa, rasguea una vez, sostén unos 4 segundos, y luego relaja la mano por completo. Repite hasta que termine el tiempo.' },
     'games.rr.card25': { en: 'Make the E-shape barre at fret 1 (that is F), then slide the whole shape up 3 frets and back, strumming once at each stop.',
@@ -2211,7 +2226,7 @@
     'games.rr.desc': { en: 'Spin for a short real-guitar challenge matched to what you’ve learned so far. Score yourself honestly — you are the judge.',
       es: 'Gira para un reto corto de guitarra real, según lo que ya has aprendido. Califícate con honestidad — tú eres el juez.' },
     'games.rr.doneBanner': { en: 'Today’s set is done — {pts} points. Extra spins still count.',
-      es: 'Las cartas de hoy están listas — {pts} puntos. Los giros extra todavía cuentan.' },
+      es: 'Ya terminaste las cartas de hoy — {pts} puntos. Los giros extra todavía cuentan.' },
     'games.rr.doublePoints': { en: 'Double points',
       es: 'Puntos dobles' },
     'games.rr.playUntilTimer': { en: 'Play until the timer ends — you score it yourself after.',

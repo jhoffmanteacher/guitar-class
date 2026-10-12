@@ -311,10 +311,10 @@ function localStringSvg(kind, opts){
 var STRING_KIND_TO_NUM  = { lowE:6, A:5, D:4, G:3, B:2, highE:1 };
 var STRING_SHORT_LABEL  = gdLabelMap({
   lowE:['fret.stringLowE','low E'], A:['fret.stringA','A'], D:['fret.stringD','D'],
-  G:['fret.stringG','G'], B:['fret.stringB','B'], highE:['fret.stringHighE','high E']
+  G:['fret.stringG','G'], B:['fret.stringB','B'], highE:['fret.stringHighE','high e']
 });
 var STRING_NUM_TO_LABEL = gdLabelMap({
-  1:['fret.stringHighE','high E'], 2:['fret.stringB','B'], 3:['fret.stringG','G'],
+  1:['fret.stringHighE','high e'], 2:['fret.stringB','B'], 3:['fret.stringG','G'],
   4:['fret.stringD','D'], 5:['fret.stringA','A'], 6:['fret.stringLowE','low E']
 });
 var FRETBOARD_INLAYS = [3, 5, 7, 9, 12];
@@ -329,7 +329,7 @@ function localStringFretboardSvg(kind, opts){
   if (!sNum) return null;
   var t = gdTheme(opts);
   /* WO8: padL and padB carry the 1.35x gutters — a wider one for the string
-     labels ('high E', 'Mi aguda') and a taller one so the fret-number row
+     labels ('high e', 'mi aguda') and a taller one so the fret-number row
      clears the boosted open-string ring on the bottom string. The drawn board
      is unchanged: fretW and boxH both subtract the growth back out. */
   var W = 300, H = 92, padL = 56, padR = 10, padT = 7, padB = 28;

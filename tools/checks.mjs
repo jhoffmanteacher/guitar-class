@@ -5790,6 +5790,115 @@ function checkCaButtonNamesAndPaper() {
 }
 
 /* ════════════════════════════════════════════════════════════════════
+   1bp. ENGLISH GUITAR TERMS INSIDE SPANISH TEXT. The site's Spanish for
+   "power chord" is "acorde de potencia" (~150 uses). The 2026-10-11
+   Spanish audit found six i18n.js values still saying "power chords"
+   (Note Runner levels 13–15 and its meta line, the Watchtower Riff
+   Runner hint, Riff Roulette card 12) — English sitting in the middle of
+   a Spanish sentence, the class of slip nothing else reads Spanish for.
+   This also bans the English string names "low E" / "high e" inside
+   Spanish (the site says "Mi grave" / "mi aguda"); there were zero of
+   those when this check was written, so it only guards a relapse.
+
+   Scope — every Spanish value the site ships:
+   - i18n.js: the `es` side of every key, read from the REAL I18N table
+     (1e's vm load), so a value split across lines is still one string.
+   - module-*.js, class-activities.js, config-main.js: every `<field>_es`
+     value — a quoted string, a template literal, or an array of strings
+     (choices_es, assessItems_es), on one line or many. A `_es:` whose
+     value is none of those FAILS, so a new shape cannot slip past unread.
+   - index.html and tabs/*.html: every data-es="…" attribute, entities
+     decoded first.
+   Values are unescaped (unescapeJs) before matching, and link text
+   (<a>…</a>) is dropped first: a YouTube title is the video's real name
+   ("What Is A Power Chord?" in module-3) and stays English. Comments are
+   blanked, so a note ABOUT the rule (like the glossary) never trips it.
+   Fix: write the Spanish term from the glossary at the top of i18n.js.
+   ════════════════════════════════════════════════════════════════════ */
+const ES_ENGLISH_TERMS = [
+  { re: /\bpower[\s -]+chords?\b/i, fix: 'acorde(s) de potencia' },
+  { re: /\b(?:low|high)[\s -]+e\b/i, fix: 'Mi grave / mi aguda' },
+];
+function checkEnglishTermsInSpanish(I18N) {
+  head('1bp. English guitar terms inside Spanish text');
+  let bad = 0;
+  const seen = { i18n: 0, content: 0, dataEs: 0 };
+  const visible = v => v.replace(/<a\b[^>]*>[\s\S]*?<\/a>/gi, ' ').replace(/<[^>]*>/g, ' ');
+  /* `where` is a function: the file:line lookup only runs on a hit. */
+  const scan = (where, value) => {
+    const v = visible(value);
+    for (const { re, fix } of ES_ENGLISH_TERMS) {
+      const m = v.match(re);
+      if (m) { err(`${where()} — Spanish text says "${m[0]}"; use "${fix}" (1bp)`); problems++; bad++; }
+    }
+  };
+  const lineOf = (src, idx) => src.slice(0, idx).split('\n').length;
+
+  /* i18n.js — the es side of the real table. */
+  if (!I18N) { err('1bp: the i18n.js table failed to load (see 1e) — its Spanish was not checked'); problems++; bad++; }
+  else {
+    let lines = [];
+    try { lines = readFileSync(join(ROOT, 'i18n.js'), 'utf8').split('\n'); } catch { /* 1e already failed */ }
+    for (const [k, entry] of Object.entries(I18N)) {
+      if (!entry || typeof entry.es !== 'string') continue;   // 1e reports it
+      seen.i18n++;
+      scan(() => `i18n.js:${lines.findIndex(l => l.includes(`'${k}'`)) + 1} '${k}'`, entry.es);
+    }
+  }
+
+  /* Module content, class activities, songs config — every _es value. */
+  const readJsString = (src, i) => {   // src[i] is the opening quote
+    const end = skipStringOrComment(src, i);
+    return { text: unescapeJs(src.slice(i + 1, end - 1)), end };
+  };
+  for (const file of [...MODULE_FILES, 'class-activities.js', 'config-main.js']) {
+    let src;
+    try { src = stripJsComments(readFileSync(join(ROOT, file), 'utf8')); } catch { continue; }
+    for (const m of src.matchAll(/\b([A-Za-z0-9]+_es)\s*:\s*/g)) {
+      let i = m.index + m[0].length;
+      const where = (at = m.index) => () => `${file}:${lineOf(src, at)} ${m[1]}`;
+      if (src[i] === "'" || src[i] === '"' || src[i] === '`') {
+        seen.content++; scan(where(), readJsString(src, i).text);
+      } else if (src[i] === '[') {
+        let depth = 0;
+        for (; i < src.length; i++) {
+          const c = src[i];
+          if (c === "'" || c === '"' || c === '`') {
+            const s = readJsString(src, i);
+            seen.content++; scan(where(i), s.text);
+            i = s.end - 1; continue;
+          }
+          if (c === '[') depth++;
+          else if (c === ']' && --depth === 0) break;
+        }
+      } else {
+        err(`${where()()} — 1bp cannot read this _es value (not a string or an array of strings); teach 1bp the new shape so its Spanish is checked`);
+        problems++; bad++;
+      }
+    }
+  }
+
+  /* Shell + Journey pages — data-es attributes, entities decoded. */
+  const decode = s => s
+    .replace(/&nbsp;/g, ' ').replace(/&lt;/g, '<').replace(/&gt;/g, '>').replace(/&quot;/g, '"')
+    .replace(/&#x([0-9a-f]+);/gi, (_, h) => String.fromCodePoint(parseInt(h, 16)))
+    .replace(/&#(\d+);/g, (_, d) => String.fromCodePoint(+d))
+    .replace(/&amp;/g, '&');
+  for (const file of ['index.html', ...TAB_PAGES.filter(f => f.endsWith('.html'))]) {
+    let src;
+    try { src = readFileSync(join(ROOT, file), 'utf8'); } catch { continue; }
+    for (const m of src.matchAll(/\bdata-es="([^"]*)"/g)) {
+      seen.dataEs++;
+      scan(() => `${file}:${lineOf(src, m.index)} data-es`, decode(m[1]));
+    }
+  }
+
+  for (const [surface, n] of Object.entries(seen))
+    if (n === 0) { err(`1bp read no Spanish values from ${surface} — the scan has gone blind there`); problems++; bad++; }
+  if (bad === 0) ok(`${seen.i18n} i18n.js es values, ${seen.content} content _es values and ${seen.dataEs} data-es attributes — no English "power chord" or "low E"/"high e"`);
+}
+
+/* ════════════════════════════════════════════════════════════════════
    1bf. PRACTICE CARDS (view:'card' — Jonathan, 2026-09-27). The card's
    player follows the tab note by note over the real record, so a tab that
    doesn't add up to its bars puts the highlight on the wrong note, and a
@@ -6494,6 +6603,7 @@ function checkGuitarNotes() {
   checkJourneyButtonLastStep();
   checkFourStepsAndPaging();
   checkCaButtonNamesAndPaper();
+  checkEnglishTermsInSpanish(i18nTable);
   checkJourneyGuitarToggle();
   checkPracticeCards();
   checkCardCaptionWords();
