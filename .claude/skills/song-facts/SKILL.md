@@ -74,8 +74,9 @@ ear. This is chord *timing*, not BPM:
   `Dm · F · Dm · F`, then `C · G/B · C · G/B`, each pair playing twice
   before the next — was wrong. The last chord is a plain G; G/B survives
   only as a Module 4 Level up (the record's bass walks B under that
-  chord), never the main line. Layers 3, 5 and 6 of the Journey page
-  showed the four-bar shorthand until 2026-09-18, while Layer 2 and
+  chord), never the main line. Layers 3, 5 (Open Chords — Layer 4 since
+  2026-10-12) and 6 of the Journey page showed the four-bar shorthand
+  until 2026-09-18, while Layer 2 and
   ca-13 / ca-18 / ca-19 had it right — a student following the backing-track
   loop would have heard the disagreement. **Modules 3, 5 and 8 still carried
   the four-bar verse in playable data until 2026-09-18** (module-3's

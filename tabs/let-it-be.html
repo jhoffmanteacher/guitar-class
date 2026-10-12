@@ -25,7 +25,7 @@
 <link rel="icon" type="image/png" href="../icon-192.png">
 <link rel="apple-touch-icon" href="../apple-touch-icon.png">
 <link rel="manifest" href="../manifest.json">
-<meta name="description" content="One song, five layers plus two bonuses — a fingerpicked verse and the guitar solo: follow &quot;Let It Be&quot; from listening to open chords as your skills grow.">
+<meta name="description" content="One song, five layers plus two bonuses — a fingerpicked verse and the guitar solo: follow &quot;Let It Be&quot; from listening to a pentatonic solo as your skills grow.">
 <!-- Same Firebase project + sign-in session as the class site (same origin),
      so a student signed in there is already signed in here. Firestore SDK
      loads later, only once we know someone is signed in. -->
@@ -138,8 +138,35 @@ E |--------|--3-----|--1-----|--------|</pre></div>
 
   <!-- LAYER 4 -->
   <section class="layer l4 closed" id="layer-4">
-    <h2 class="layer-h"><button type="button" class="layer-head" aria-expanded="false" aria-controls="layer-4-body" onclick="toggleLayer(this)"><span class="layer-num" aria-hidden="true">4</span><span class="layer-title" data-es="Solo pentatónico">Pentatonic Solo</span><span class="layer-unit" data-es="Módulo 4">Module 4</span><span class="layer-rate-chip" aria-hidden="true"></span><span class="layer-chevron" aria-hidden="true">&#9662;</span></button></h2>
+    <h2 class="layer-h"><button type="button" class="layer-head" aria-expanded="false" aria-controls="layer-4-body" onclick="toggleLayer(this)"><span class="layer-num" aria-hidden="true">4</span><span class="layer-title" data-es="Acordes al aire">Open Chords</span><span class="layer-unit" data-es="Módulo 4">Module 4</span><span class="layer-rate-chip" aria-hidden="true"></span><span class="layer-chevron" aria-hidden="true">&#9662;</span></button></h2>
     <div class="layer-body" id="layer-4-body">
+      <p data-es="Ahora toda la progresión como acordes al aire — las formas que ya conoces, C, G, Am, F. Usa el F pequeño (las cuatro cuerdas más agudas, xx3211) — no necesitas cejilla (una cejilla presiona un dedo plano sobre varias cuerdas). Un compás completo por acorde te da tiempo para cambiar.">Now the whole progression as open chords — the shapes you know, C, G, Am, F. Use the small F (top four strings, xx3211) — no barre needed (a barre presses one finger flat across several strings). One full bar per chord gives you time to change.</p>
+      <p class="chord-row-lead" data-es="Las formas que rasgueas:">The shapes you're strumming:</p>
+      <div class="chord-row">
+        <figure class="chord-card"><div class="chord-svg" data-chord="C"></div><figcaption>C <small data-es="acorde base">home chord</small></figcaption></figure>
+        <figure class="chord-card"><div class="chord-svg" data-chord="G"></div><figcaption>G <small data-es="un compás">one bar</small></figcaption></figure>
+        <figure class="chord-card"><div class="chord-svg" data-chord="Am"></div><figcaption>Am <small data-es="un compás">one bar</small></figcaption></figure>
+        <figure class="chord-card"><div class="chord-svg" data-chord="F"></div><figcaption>F <small data-es="forma pequeña (xx3211)">little shape (xx3211)</small></figcaption></figure>
+      </div>
+      <div class="tab">
+        <div class="tab-head"><span class="tab-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" style="width:1em;height:1em;vertical-align:-0.15em"><path d="M9 18V5l12-2v13"/><circle cx="6" cy="18" r="3"/><circle cx="18" cy="16" r="3"/></svg></span><span class="tab-title" data-es="Ciclo del verso — 4 tiempos por acorde (tempo de práctica) · 60 BPM">Verse loop — 4 beats per chord (practice tempo) · 60 BPM</span><span class="tab-kind">Tab</span></div>
+        <div class="tab-body"><pre class="tab-ascii">|  C           |  G           |  Am          |  F           |
+   1  2  3  4     1  2  3  4     1  2  3  4     1  2  3  4</pre></div>
+      </div>
+      <div class="playline" data-es="&lt;b&gt;Tócalo:&lt;/b&gt; un rasgueo hacia abajo por tiempo, cuatro tiempos por acorde, un ciclo completo del verso con cada cambio cayendo en el tiempo 1. Empieza a formar el siguiente acorde en el tiempo 4."><b>Play it:</b> one down-strum per beat, four beats per chord, one full verse loop with every change landing on beat 1. Start forming the next chord on beat 4.</div>
+      <div class="branch" data-es="&lt;b&gt;Siguiente:&lt;/b&gt; ¿Listo para tocarla al tempo de la grabación? La escalera de Cambios de Medio Compás del Módulo 4, Unidad 2 y el reto rasgueado de Medio Compás del Módulo 6, Unidad 1 te llevan al ritmo real del disco, de dos tiempos por acorde."><b>Next:</b> Ready to play it at the record's tempo? Module 4, Set 2's Half-Bar Changes ladder and Module 6, Set 1's Half-Bar strummed challenge both get you to the record's actual two-beats-per-chord pace.</div>
+      <div class="ready-row" data-layer="4">
+        <label class="ready-label"><input type="checkbox" class="ready-box" onchange="readyChanged(this)">
+        <span data-es="Ya puedo pasar a la siguiente capa">I'm ready for the next layer</span></label>
+        <div class="ready-when" data-es="&lt;b&gt;Márcala cuando:&lt;/b&gt; el ciclo completo corre a 60 BPM con los cambios a tiempo."><b>Check it when:</b> the full loop runs at 60 BPM with changes on the beat.</div>
+      </div>
+    </div>
+  </section>
+
+  <!-- LAYER 5 -->
+  <section class="layer l5 closed" id="layer-5">
+    <h2 class="layer-h"><button type="button" class="layer-head" aria-expanded="false" aria-controls="layer-5-body" onclick="toggleLayer(this)"><span class="layer-num" aria-hidden="true">5</span><span class="layer-title" data-es="Solo pentatónico">Pentatonic Solo</span><span class="layer-unit" data-es="Módulo 5">Module 5</span><span class="layer-rate-chip" aria-hidden="true"></span><span class="layer-chevron" aria-hidden="true">&#9662;</span></button></h2>
+    <div class="layer-body" id="layer-5-body">
       <p data-es="La canción está en C mayor, y la pentatónica de A menor comparte todas sus notas con C mayor — la misma forma del Patrón 1 que ya conoces, con una nota base distinta (la nota donde descansa la música). Termina tus frases en C y el solo suena esperanzador, como la canción.">The song is in C major, and A minor pentatonic shares every note with C major — the same Pattern 1 shape you already know, with a different home (the note the music rests on). End your phrases on C and the solo sounds hopeful, like the song.</p>
       <p class="ladder-lead" data-es="Haz las partes de abajo en orden.">Do the parts below in order.</p>
       <div class="ladder">
@@ -213,37 +240,10 @@ E |--------------------|</pre></div>
       </div>
         </div>
       </div>
-      <div class="ready-row" data-layer="4">
-        <label class="ready-label"><input type="checkbox" class="ready-box" onchange="readyChanged(this)">
-        <span data-es="Ya puedo pasar a la siguiente capa">I'm ready for the next layer</span></label>
-        <div class="ready-when" data-es="&lt;b&gt;Márcala cuando:&lt;/b&gt; puedas tocar la caja, los movimientos y los dos licks en un solo."><b>Check it when:</b> you can play the box, the moves and both licks in a solo.</div>
-      </div>
-    </div>
-  </section>
-
-  <!-- LAYER 5 -->
-  <section class="layer l5 closed" id="layer-5">
-    <h2 class="layer-h"><button type="button" class="layer-head" aria-expanded="false" aria-controls="layer-5-body" onclick="toggleLayer(this)"><span class="layer-num" aria-hidden="true">5</span><span class="layer-title" data-es="Acordes al aire">Open Chords</span><span class="layer-unit" data-es="Módulo 5">Module 5</span><span class="layer-rate-chip" aria-hidden="true"></span><span class="layer-chevron" aria-hidden="true">&#9662;</span></button></h2>
-    <div class="layer-body" id="layer-5-body">
-      <p data-es="Ahora toda la progresión como acordes al aire — las formas que ya conoces, C, G, Am, F. Usa el F pequeño (las cuatro cuerdas más agudas, xx3211) — no necesitas cejilla (una cejilla presiona un dedo plano sobre varias cuerdas). Un compás completo por acorde te da tiempo para cambiar.">Now the whole progression as open chords — the shapes you know, C, G, Am, F. Use the small F (top four strings, xx3211) — no barre needed (a barre presses one finger flat across several strings). One full bar per chord gives you time to change.</p>
-      <p class="chord-row-lead" data-es="Las formas que rasgueas:">The shapes you're strumming:</p>
-      <div class="chord-row">
-        <figure class="chord-card"><div class="chord-svg" data-chord="C"></div><figcaption>C <small data-es="acorde base">home chord</small></figcaption></figure>
-        <figure class="chord-card"><div class="chord-svg" data-chord="G"></div><figcaption>G <small data-es="un compás">one bar</small></figcaption></figure>
-        <figure class="chord-card"><div class="chord-svg" data-chord="Am"></div><figcaption>Am <small data-es="un compás">one bar</small></figcaption></figure>
-        <figure class="chord-card"><div class="chord-svg" data-chord="F"></div><figcaption>F <small data-es="forma pequeña (xx3211)">little shape (xx3211)</small></figcaption></figure>
-      </div>
-      <div class="tab">
-        <div class="tab-head"><span class="tab-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" style="width:1em;height:1em;vertical-align:-0.15em"><path d="M9 18V5l12-2v13"/><circle cx="6" cy="18" r="3"/><circle cx="18" cy="16" r="3"/></svg></span><span class="tab-title" data-es="Ciclo del verso — 4 tiempos por acorde (tempo de práctica) · 60 BPM">Verse loop — 4 beats per chord (practice tempo) · 60 BPM</span><span class="tab-kind">Tab</span></div>
-        <div class="tab-body"><pre class="tab-ascii">|  C           |  G           |  Am          |  F           |
-   1  2  3  4     1  2  3  4     1  2  3  4     1  2  3  4</pre></div>
-      </div>
-      <div class="playline" data-es="&lt;b&gt;Tócalo:&lt;/b&gt; un rasgueo hacia abajo por tiempo, cuatro tiempos por acorde, un ciclo completo del verso con cada cambio cayendo en el tiempo 1. Empieza a formar el siguiente acorde en el tiempo 4."><b>Play it:</b> one down-strum per beat, four beats per chord, one full verse loop with every change landing on beat 1. Start forming the next chord on beat 4.</div>
-      <div class="branch" data-es="&lt;b&gt;Siguiente:&lt;/b&gt; ¿Listo para tocarla al tempo de la grabación? La escalera de Cambios de Medio Compás del Módulo 5, Unidad 2 y el reto rasgueado de Medio Compás del Módulo 6, Unidad 1 te llevan al ritmo real del disco, de dos tiempos por acorde."><b>Next:</b> Ready to play it at the record's tempo? Module 5, Set 2's Half-Bar Changes ladder and Module 6, Set 1's Half-Bar strummed challenge both get you to the record's actual two-beats-per-chord pace.</div>
       <div class="ready-row" data-layer="5">
         <label class="ready-label"><input type="checkbox" class="ready-box" onchange="readyChanged(this)">
         <span data-es="Ya puedo pasar a la siguiente capa">I'm ready for the next layer</span></label>
-        <div class="ready-when" data-es="&lt;b&gt;Márcala cuando:&lt;/b&gt; el ciclo completo corre a 60 BPM con los cambios a tiempo."><b>Check it when:</b> the full loop runs at 60 BPM with changes on the beat.</div>
+        <div class="ready-when" data-es="&lt;b&gt;Márcala cuando:&lt;/b&gt; puedas tocar la caja, los movimientos y los dos licks en un solo."><b>Check it when:</b> you can play the box, the moves and both licks in a solo.</div>
       </div>
     </div>
   </section>
@@ -288,8 +288,8 @@ E |--------------------------|--<span class="hl">3</span>-----------------------
   <section class="layer l7 closed bonus" id="layer-7">
     <h2 class="layer-h"><button type="button" class="layer-head" aria-expanded="false" aria-controls="layer-7-body" onclick="toggleLayer(this)"><span class="layer-num" aria-hidden="true">7</span><span class="layer-title" data-es="El solo">The Solo</span><span class="layer-unit" data-es="Extra">Bonus</span><span class="layer-chevron" aria-hidden="true">&#9662;</span></button></h2>
     <div class="layer-body" id="layer-7-body">
-      <div class="grain" data-es="Capa extra — reto opcional más difícil, sin puntuación. Mejor cuando la caja de la Capa 4 en el traste 5 ya se sienta automática.">Bonus layer — optional harder challenge, no score. Best once Layer 4's box at fret 5 feels automatic.</div>
-      <p data-es="El solo de guitarra de &quot;Let It Be&quot; no presume — canta, como una segunda voz que toma un verso. Esta frase didáctica hace lo mismo dentro de la caja de la Capa 4: sube, pregunta, y luego cae E&ndash;D&ndash;C — la misma forma que cantar &quot;let it be&quot; — aterrizando en la nota base.">The guitar solo in &quot;Let It Be&quot; doesn't show off — it sings, like a second voice taking a verse. This teaching phrase does the same thing inside the Layer 4 box: it rises, asks, and then falls E&ndash;D&ndash;C — the same shape as singing &quot;let it be&quot; — landing on home.</p>
+      <div class="grain" data-es="Capa extra — reto opcional más difícil, sin puntuación. Mejor cuando la caja de la Capa 5 en el traste 5 ya se sienta automática.">Bonus layer — optional harder challenge, no score. Best once Layer 5's box at fret 5 feels automatic.</div>
+      <p data-es="El solo de guitarra de &quot;Let It Be&quot; no presume — canta, como una segunda voz que toma un verso. Esta frase didáctica hace lo mismo dentro de la caja de la Capa 5: sube, pregunta, y luego cae E&ndash;D&ndash;C — la misma forma que cantar &quot;let it be&quot; — aterrizando en la nota base.">The guitar solo in &quot;Let It Be&quot; doesn't show off — it sings, like a second voice taking a verse. This teaching phrase does the same thing inside the Layer 5 box: it rises, asks, and then falls E&ndash;D&ndash;C — the same shape as singing &quot;let it be&quot; — landing on home.</p>
       <div class="tab">
         <div class="tab-head"><span class="tab-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" style="width:1em;height:1em;vertical-align:-0.15em"><path d="M9 18V5l12-2v13"/><circle cx="6" cy="18" r="3"/><circle cx="18" cy="16" r="3"/></svg></span><span class="tab-title" data-es="El solo — arreglo didáctico &middot; caja del Patrón 1 en el traste 5 &middot; una nota por tiempo &middot; 60 BPM">The solo — teaching arrangement &middot; Pattern 1 box at fret 5 &middot; one note per beat &middot; 60 BPM</span><span class="tab-kind">Tab</span></div>
         <div class="tab-body"><pre class="tab-ascii">     C         G          Am        F

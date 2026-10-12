@@ -2080,6 +2080,106 @@ function checkJourneyLayers() {
 }
 
 /* ════════════════════════════════════════════════════════════════════
+   1ab2. MODULE FILES ↔ JOURNEY LAYERS — 1ab proves the six pages and
+   JOURNEY_LAYERS agree; nothing proved the MODULE files agree with
+   either. Added 2026-10-12, when Open Chords and Pentatonic Scales
+   swapped places (Module 4 ↔ 5) and every page swapped Layers 4 and 5 to
+   match: a set names its layer by NUMBER in two places — its
+   `songThread` entries (the "About this set" line, deep-linked to
+   #layer-N) and its take-to-song text ("this is Layer N of 5") — so
+   moving a module's content without moving those numbers links every
+   one of its sets to the other skill's layer, with all of 1ab green.
+   Four rules:
+   - a songThread entry with a `layer` and no `bonus` must be the layer
+     JOURNEY_LAYERS gives that song for the set's module;
+   - a `bonus` entry must name a layer the page marks .bonus;
+   - "Layer N of 5" / "Capa N de 5" in module-M.js must have N = M,
+     except after "revisit" / "vuelve a la", which point back on purpose;
+   - a tabs/<slug>.html#layer-N link in a module file must name a layer
+     that page has.
+   And one rule that ties the NUMBERS to the SKILL, which nothing else
+   does (every rule above holds just as well with the pages and the
+   modules each numbered 1..5 but in different orders):
+   - a core layer whose title names a skill in LAYER_SKILL_WORDS must
+     carry the "Module N" whose MODULE_MANIFEST name says the same skill.
+   ════════════════════════════════════════════════════════════════════ */
+const LAYER_SKILL_WORDS = ['Power Chords', 'Pentatonic', 'Open Chords'];
+function checkModuleJourneyLayers(sets, ctx) {
+  head('1ab2. Module files name the right Journey layer');
+  let bad = 0;
+  const flag = m => { err(m); problems++; bad++; };
+  if (!sets || !sets.length || !ctx) { flag('1ab2: no parsed SETS — it cannot see the songThread layers it guards'); return; }
+  let JL;
+  try { JL = vm.runInContext('JOURNEY_LAYERS', ctx); } catch { flag('1ab2: JOURNEY_LAYERS not found in app.js'); return; }
+  const pageLayers = {};   // slug -> { all: Set, bonus: Set }
+  const layersOf = slug => {
+    if (pageLayers[slug]) return pageLayers[slug];
+    let src = '';
+    try { src = readFileSync(join(ROOT, 'tabs', `${slug}.html`), 'utf8'); } catch { /* reported below */ }
+    const all = new Set([...src.matchAll(/<section class="layer[^"]*" id="layer-(\d+)"/g)].map(m => Number(m[1])));
+    const bonus = new Set([...src.matchAll(/<section class="layer[^"]*\bbonus\b[^"]*" id="layer-(\d+)"/g)].map(m => Number(m[1])));
+    return (pageLayers[slug] = { all, bonus });
+  };
+  let threads = 0, texts = 0, links = 0;
+  for (const s of sets) {
+    const mod = Number(s.moduleNum);
+    for (const e of (Array.isArray(s.songThread) ? s.songThread : [])) {
+      if (!e || !e.journey || e.layer == null) continue;
+      const slug = String(e.journey).replace(/^tabs\//, '').replace(/\.html$/, '');
+      const L = layersOf(slug);
+      threads++;
+      if (!L.all.size) { flag(`${s.id}: songThread names ${e.journey} — no such Journey page (or it has no layers)`); continue; }
+      if (e.bonus) {
+        if (!L.bonus.has(Number(e.layer))) flag(`${s.id}: songThread marks "${slug}" layer ${e.layer} as bonus, but that page's bonus layers are ${[...L.bonus].join(', ') || 'none'}`);
+      } else {
+        const want = (JL[slug] || {})[mod];
+        if (Number(e.layer) !== want) flag(`${s.id} (Module ${mod}): songThread says "${slug}" layer ${e.layer}, but Module ${mod} is Layer ${want ?? '—'} on that page (JOURNEY_LAYERS) — the "About this set" link opens the wrong layer`);
+      }
+    }
+  }
+  for (const file of MODULE_FILES) {
+    const mod = Number(file.match(/\d+/)[0]);
+    let src;
+    try { src = readFileSync(join(ROOT, file), 'utf8'); } catch { continue; }
+    const lineOf = i => src.slice(0, i).split('\n').length;
+    for (const m of src.matchAll(/(revisit |vuelve a la )?\b(?:Layer|Capa) (\d+) (?:of|de) 5\b/g)) {
+      texts++;
+      if (m[1]) continue;
+      if (Number(m[2]) !== mod) flag(`${file}:${lineOf(m.index)}: "${m[0]}" — a Module ${mod} set builds Layer ${mod}; say "revisit" if it points back on purpose`);
+    }
+    for (const m of src.matchAll(/tabs\/([a-z0-9-]+)\.html#layer-(\d+)/g)) {
+      links++;
+      const L = layersOf(m[1]);
+      if (!L.all.has(Number(m[2]))) flag(`${file}:${lineOf(m.index)}: links ${m[0]} — that page has layers ${[...L.all].join(', ') || 'none'}`);
+    }
+  }
+  let manifest = [];
+  try { manifest = vm.runInContext('MODULE_MANIFEST', ctx) || []; } catch { /* flagged below */ }
+  const modName = {};
+  for (const m of manifest) modName[Number(m.num)] = String(m.name || '');
+  let tied = 0;
+  for (const file of TAB_PAGES.filter(f => f.endsWith('.html'))) {
+    let src;
+    try { src = readFileSync(join(ROOT, file), 'utf8'); } catch { continue; }
+    const re = /<span class="layer-num"[^>]*>(\d+)<\/span><span class="layer-title"[^>]*>([^<]*)<\/span><span class="layer-unit"[^>]*>Module (\d+)<\/span>/g;
+    for (const m of src.matchAll(re)) {
+      const word = LAYER_SKILL_WORDS.find(w => m[2].includes(w));
+      if (!word) continue;
+      tied++;
+      const mod = Number(m[3]);
+      if (!(modName[mod] || '').includes(word)) {
+        const owner = Object.keys(modName).find(k => modName[k].includes(word));
+        flag(`${file}: Layer ${m[1]} "${m[2].replace(/&nbsp;.*$/, '').trim()}" says Module ${mod}, but Module ${mod} is "${modName[mod] || '?'}"${owner ? ` — ${word} is Module ${owner}` : ''} (MODULE_MANIFEST)`);
+      }
+    }
+  }
+  if (!tied) flag('1ab2 matched no core layer title to a module — it cannot see what it is supposed to guard');
+  if (!threads) flag('1ab2 found no songThread entry with a layer — it cannot see what it is supposed to guard');
+  if (!texts) flag('1ab2 found no "Layer N of 5" text in the module files — it cannot see what it is supposed to guard');
+  if (bad === 0) ok(`${threads} songThread layers, ${texts} "Layer N of 5" mentions and ${links} #layer-N links in the module files name the right Journey layer; ${tied} core layer titles sit on the module that teaches them`);
+}
+
+/* ════════════════════════════════════════════════════════════════════
    1ac. visibleSteps/visibleSections ACTUALLY USED — the render-time-hiding
    helpers (Today-first work order, Phase 3) are only as good as every place
    that used to iterate `.sections`/`.steps` raw switching over to them. This
@@ -7063,6 +7163,7 @@ function checkGuitarNotes() {
   checkTabAsciiAlignment();
   checkTabAsciiEnglish();
   checkJourneyLayers();
+  checkModuleJourneyLayers(rcSets, rcCtx);
   checkGateSafeNav();
   checkVisibleHelperUsage();
   checkFigureDimensions();

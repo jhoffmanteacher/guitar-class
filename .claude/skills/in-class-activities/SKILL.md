@@ -549,7 +549,13 @@ sections by title.
 layerNum}}`) is authored from the six pages' real `.layer-unit` spans —
 today uniformly Module 1→Layer 1 … 5→5, anything past 5 an unnumbered
 "Extra". checks.mjs **1ab** rebuilds the map from those spans and fails on
-drift. **The box is one button per song** that calls `openSongLink(slug,
+drift. **1ab2** (2026-10-12, when Modules 4 and 5 swapped and the pages
+swapped Layers 4 and 5 with them — Layer 4 is Open Chords, Layer 5 the
+Pentatonic Solo) checks the module files against the same map — every
+`songThread` layer, every "Layer N of 5" in module-N.js, every
+`#layer-N` link — and ties the numbers to the skill: a layer titled Power
+Chords / Pentatonic / Open Chords must say the Module whose
+`MODULE_MANIFEST` name teaches it. **The box is one button per song** that calls `openSongLink(slug,
 layer)` (2026-10-06, play-along first — see that section): the song's
 whole-song card for this module's layer if students can open it, else
 `tabs/<slug>.html#layer-<n>`. The render rule (Modules 1–5 only, via

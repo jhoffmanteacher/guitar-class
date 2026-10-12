@@ -25,7 +25,7 @@
 <link rel="icon" type="image/png" href="../icon-192.png">
 <link rel="apple-touch-icon" href="../apple-touch-icon.png">
 <link rel="manifest" href="../manifest.json">
-<meta name="description" content="One song, five layers plus the slide solo as a bonus: follow &quot;Seven Nation Army&quot; from listening to open chords as your skills grow.">
+<meta name="description" content="One song, five layers plus the slide solo as a bonus: follow &quot;Seven Nation Army&quot; from listening to a pentatonic solo as your skills grow.">
 <!-- Same Firebase project + sign-in session as the class site (same origin),
      so a student signed in there is already signed in here. Firestore SDK
      loads later, only once we know someone is signed in. -->
@@ -150,8 +150,34 @@ E |--------------------|-------------------------|</pre></div>
 
   <!-- LAYER 4 -->
   <section class="layer l4 closed" id="layer-4">
-    <h2 class="layer-h"><button type="button" class="layer-head" aria-expanded="false" aria-controls="layer-4-body" onclick="toggleLayer(this)"><span class="layer-num" aria-hidden="true">4</span><span class="layer-title" data-es="Solo pentatónico">Pentatonic Solo</span><span class="layer-unit" data-es="Módulo 4">Module 4</span><span class="layer-rate-chip" aria-hidden="true"></span><span class="layer-chevron" aria-hidden="true">&#9662;</span></button></h2>
+    <h2 class="layer-h"><button type="button" class="layer-head" aria-expanded="false" aria-controls="layer-4-body" onclick="toggleLayer(this)"><span class="layer-num" aria-hidden="true">4</span><span class="layer-title" data-es="Acordes al aire">Open Chords</span><span class="layer-unit" data-es="Módulo 4">Module 4</span><span class="layer-rate-chip" aria-hidden="true"></span><span class="layer-chevron" aria-hidden="true">&#9662;</span></button></h2>
     <div class="layer-body" id="layer-4-body">
+      <p data-es="La versión sencilla para cantar. Las notas del riff se convierten en un ciclo de acordes que puedes rasguear y cantar encima — un arreglo didáctico hecho con acordes que ya conoces. Aprendes el acorde D en el Módulo 4, Unidad 3. Regresa a esta capa después de eso.">The simple singalong version. The riff's notes become a chord loop you can strum and sing over — a teaching arrangement built from chords you know. You learn the D chord in Module 4, Set 3. Come back to this layer after that.</p>
+      <p class="chord-row-lead" data-es="Las formas que rasgueas:">The shapes you're strumming:</p>
+      <div class="chord-row">
+        <figure class="chord-card"><div class="chord-svg" data-chord="Em"></div><figcaption>Em <small data-es="acorde base">home chord</small></figcaption></figure>
+        <figure class="chord-card"><div class="chord-svg" data-chord="G"></div><figcaption>G <small data-es="un tiempo">one beat</small></figcaption></figure>
+        <figure class="chord-card"><div class="chord-svg" data-chord="D"></div><figcaption>D <small data-es="un tiempo">one beat</small></figcaption></figure>
+        <figure class="chord-card"><div class="chord-svg" data-chord="C"></div><figcaption>C <small data-es="dos tiempos">two beats</small></figcaption></figure>
+      </div>
+      <div class="tab">
+        <div class="tab-head"><span class="tab-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" style="width:1em;height:1em;vertical-align:-0.15em"><path d="M9 18V5l12-2v13"/><circle cx="6" cy="18" r="3"/><circle cx="18" cy="16" r="3"/></svg></span><span class="tab-title" data-es="Ciclo para cantar — un acorde por tiempo · 2 compases · 60 BPM">Singalong loop — one chord per beat · 2 bars · 60 BPM</span><span class="tab-kind">Tab</span></div>
+        <div class="tab-body"><pre class="tab-ascii">|  Em  Em  G  Em |  D  C  C  <span data-es="(pausa)">(rest)</span> |
+   1   2  3   4     1  2  3    4</pre></div>
+      </div>
+      <div class="playline" data-es="&lt;b&gt;Tócalo:&lt;/b&gt; rasgueos hacia abajo, un acorde por tiempo, cada cambio cayendo en su tiempo — un ciclo más sencillo hecho con las notas del riff. No coincide con la grabación, así que tócalo con el metrónomo, no con la pista para tocar encima. Tararea el riff mientras rasgueas — las mismas notas, un sonido más grande."><b>Play it:</b> down-strums, one chord per beat, every change landing on its beat — a simpler loop built from the riff's notes. It does not line up with the record, so play it with the metronome, not the play-along track. Hum the riff while you strum — same notes, bigger sound.</div>
+      <div class="ready-row" data-layer="4">
+        <label class="ready-label"><input type="checkbox" class="ready-box" onchange="readyChanged(this)">
+        <span data-es="Ya puedo pasar a la siguiente capa">I'm ready for the next layer</span></label>
+        <div class="ready-when" data-es="&lt;b&gt;Márcala cuando:&lt;/b&gt; el ciclo completo corre a 60 BPM con los cambios a tiempo."><b>Check it when:</b> the full loop runs at 60 BPM with changes on the beat.</div>
+      </div>
+    </div>
+  </section>
+
+  <!-- LAYER 5 -->
+  <section class="layer l5 closed" id="layer-5">
+    <h2 class="layer-h"><button type="button" class="layer-head" aria-expanded="false" aria-controls="layer-5-body" onclick="toggleLayer(this)"><span class="layer-num" aria-hidden="true">5</span><span class="layer-title" data-es="Solo pentatónico">Pentatonic Solo</span><span class="layer-unit" data-es="Módulo 5">Module 5</span><span class="layer-rate-chip" aria-hidden="true"></span><span class="layer-chevron" aria-hidden="true">&#9662;</span></button></h2>
+    <div class="layer-body" id="layer-5-body">
       <p data-es="El riff está en E menor, así que la pentatónica de E menor encaja en cada compás. Empieza con solo tres notas — la Regla de 3 — y deja huecos de silencio entre nota y nota.">The riff is in E minor, so E minor pentatonic fits over every bar. Start with three notes only — Rule of 3 — and leave gaps of silence between notes.</p>
       <p class="ladder-lead" data-es="Haz las partes de abajo en orden.">Do the parts below in order.</p>
       <div class="ladder">
@@ -226,36 +252,10 @@ E |--------------------|</pre></div>
         </div>
       </div>
       <div class="branch" data-es="&lt;b&gt;Siguiente — el ritmo real del disco:&lt;/b&gt;&lt;ol style=&quot;padding-left:1.4em;margin:4px 0&quot;&gt;&lt;li&gt;Presiona &#x25B6; &#x1F3B5; Toca encima arriba de la página. Empieza con &#x1F422; Lento (100 BPM).&lt;/li&gt;&lt;li&gt;Toca el riff de la Capa 2 con el ritmo de la grabación: la primera E larga, la segunda E corta, y luego G, E y D rápidas. C y B suenan dos tiempos cada una.&lt;/li&gt;&lt;li&gt;Cuenta &quot;1 2 3 4, 1 2 3 4&quot; con la pista. La C cae en el tiempo 1 del segundo compás. La B cae en el tiempo 3.&lt;/li&gt;&lt;li&gt;Si el ritmo se te escapa, primero aplaude el riff sin guitarra. Luego tócalo otra vez.&lt;/li&gt;&lt;/ol&gt;Lo tienes cuando: cuatro vueltas seguidas con la pista, con la C en el tiempo 1 y la B en el tiempo 3 cada vez."><b>Next — the record's real rhythm:</b><ol style="padding-left:1.4em;margin:4px 0"><li>Press &#x25B6; &#x1F3B5; Play along at the top of this page. Start with &#x1F422; Slow (100 BPM).</li><li>Play the Layer 2 riff in the record's rhythm: the first E long, the second E short, then G, E and D quick. C and B ring for two beats each.</li><li>Count "1 2 3 4, 1 2 3 4" with the track. The C lands on beat 1 of the second bar. The B lands on beat 3.</li><li>If the timing slips, clap the riff with no guitar first. Then play it again.</li></ol>You've got it when: four laps in a row with the track, with the C on beat 1 and the B on beat 3 every time.</div>
-      <div class="ready-row" data-layer="4">
-        <label class="ready-label"><input type="checkbox" class="ready-box" onchange="readyChanged(this)">
-        <span data-es="Ya puedo pasar a la siguiente capa">I'm ready for the next layer</span></label>
-        <div class="ready-when" data-es="&lt;b&gt;Márcala cuando:&lt;/b&gt; puedas tocar la caja, los movimientos y los dos licks en un solo."><b>Check it when:</b> you can play the box, the moves and both licks in a solo.</div>
-      </div>
-    </div>
-  </section>
-
-  <!-- LAYER 5 -->
-  <section class="layer l5 closed" id="layer-5">
-    <h2 class="layer-h"><button type="button" class="layer-head" aria-expanded="false" aria-controls="layer-5-body" onclick="toggleLayer(this)"><span class="layer-num" aria-hidden="true">5</span><span class="layer-title" data-es="Acordes al aire">Open Chords</span><span class="layer-unit" data-es="Módulo 5">Module 5</span><span class="layer-rate-chip" aria-hidden="true"></span><span class="layer-chevron" aria-hidden="true">&#9662;</span></button></h2>
-    <div class="layer-body" id="layer-5-body">
-      <p data-es="La versión sencilla para cantar. Las notas del riff se convierten en un ciclo de acordes que puedes rasguear y cantar encima — un arreglo didáctico hecho con acordes que ya conoces. Aprendes el acorde D en el Módulo 5, Unidad 3. Regresa a esta capa después de eso.">The simple singalong version. The riff's notes become a chord loop you can strum and sing over — a teaching arrangement built from chords you know. You learn the D chord in Module 5, Set 3. Come back to this layer after that.</p>
-      <p class="chord-row-lead" data-es="Las formas que rasgueas:">The shapes you're strumming:</p>
-      <div class="chord-row">
-        <figure class="chord-card"><div class="chord-svg" data-chord="Em"></div><figcaption>Em <small data-es="acorde base">home chord</small></figcaption></figure>
-        <figure class="chord-card"><div class="chord-svg" data-chord="G"></div><figcaption>G <small data-es="un tiempo">one beat</small></figcaption></figure>
-        <figure class="chord-card"><div class="chord-svg" data-chord="D"></div><figcaption>D <small data-es="un tiempo">one beat</small></figcaption></figure>
-        <figure class="chord-card"><div class="chord-svg" data-chord="C"></div><figcaption>C <small data-es="dos tiempos">two beats</small></figcaption></figure>
-      </div>
-      <div class="tab">
-        <div class="tab-head"><span class="tab-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" style="width:1em;height:1em;vertical-align:-0.15em"><path d="M9 18V5l12-2v13"/><circle cx="6" cy="18" r="3"/><circle cx="18" cy="16" r="3"/></svg></span><span class="tab-title" data-es="Ciclo para cantar — un acorde por tiempo · 2 compases · 60 BPM">Singalong loop — one chord per beat · 2 bars · 60 BPM</span><span class="tab-kind">Tab</span></div>
-        <div class="tab-body"><pre class="tab-ascii">|  Em  Em  G  Em |  D  C  C  <span data-es="(pausa)">(rest)</span> |
-   1   2  3   4     1  2  3    4</pre></div>
-      </div>
-      <div class="playline" data-es="&lt;b&gt;Tócalo:&lt;/b&gt; rasgueos hacia abajo, un acorde por tiempo, cada cambio cayendo en su tiempo — un ciclo más sencillo hecho con las notas del riff. No coincide con la grabación, así que tócalo con el metrónomo, no con la pista para tocar encima. Tararea el riff mientras rasgueas — las mismas notas, un sonido más grande."><b>Play it:</b> down-strums, one chord per beat, every change landing on its beat — a simpler loop built from the riff's notes. It does not line up with the record, so play it with the metronome, not the play-along track. Hum the riff while you strum — same notes, bigger sound.</div>
       <div class="ready-row" data-layer="5">
         <label class="ready-label"><input type="checkbox" class="ready-box" onchange="readyChanged(this)">
         <span data-es="Ya puedo pasar a la siguiente capa">I'm ready for the next layer</span></label>
-        <div class="ready-when" data-es="&lt;b&gt;Márcala cuando:&lt;/b&gt; el ciclo completo corre a 60 BPM con los cambios a tiempo."><b>Check it when:</b> the full loop runs at 60 BPM with changes on the beat.</div>
+        <div class="ready-when" data-es="&lt;b&gt;Márcala cuando:&lt;/b&gt; puedas tocar la caja, los movimientos y los dos licks en un solo."><b>Check it when:</b> you can play the box, the moves and both licks in a solo.</div>
       </div>
     </div>
   </section>
