@@ -192,8 +192,8 @@ SETS.push(
                 label: 'Fast round: record all six', label_es: 'Ronda rápida: grábate los seis',
                 text: '<ol><li>Record yourself playing all six re-tests back to back.</li><li>Then listen with the checklist open and settle any you weren\'t sure about.</li></ol>Cleared all six? Module 9 proper starts at Set 2. Flagged some? Spend a session with the practice spots listed above first — they come back fast.',
                 text_es: '<ol><li>Grábate tocando los seis repasos seguidos.</li><li>Luego escucha con la lista de verificación abierta y resuelve cualquiera del que no estuvieras seguro.</li></ol>¿Aprobaste los seis? El Módulo 9 propiamente empieza en la Unidad 2. ¿Marcaste algunos? Dedica una sesión a los puntos de práctica listados arriba primero — vuelven rápido.',
-                hint: 'The recording shows exactly how you really sounded — that\'s exactly why it\'s useful.',
-                hint_es: 'La grabación muestra exactamente cómo sonaste de verdad — por eso es tan útil.'
+                hint: 'The recording shows exactly how you really sounded. Judge each re-test from the recording, not from memory.',
+                hint_es: 'La grabación muestra exactamente cómo sonaste de verdad. Juzga cada repaso con la grabación, no de memoria.'
               }
             ]
           }
@@ -310,8 +310,8 @@ SETS.push(
             steps: [
               {
                 label: 'Name notes up the D and G strings', label_es: 'Nombra las notas por las cuerdas Re y Sol',
-                text: '<ol><li>Play up the D string one fret at a time, saying each note name OUT LOUD before you check a chart.</li><li>Then do the same up the G string.</li><li>Notice where you hesitate — that\'s tonight\'s target.</li></ol>',
-                text_es: '<ol><li>Toca hacia arriba por la cuerda Re un traste a la vez, diciendo cada nombre de nota EN VOZ ALTA antes de revisar un diagrama.</li><li>Luego haz lo mismo en la cuerda Sol.</li><li>Fíjate dónde dudas — ese es tu objetivo de esta noche.</li></ol>',
+                text: '<ol><li>Play up the D string one fret at a time, saying each note name OUT LOUD before you check a chart.</li><li>Then do the same up the G string.</li><li>Notice where you hesitate — that\'s your next practice target.</li></ol>',
+                text_es: '<ol><li>Toca hacia arriba por la cuerda Re un traste a la vez, diciendo cada nombre de nota EN VOZ ALTA antes de revisar un diagrama.</li><li>Luego haz lo mismo en la cuerda Sol.</li><li>Fíjate dónde dudas — esa es tu próxima meta de práctica.</li></ol>',
                 hint: 'Say the name first, then check. Reading a chart at the same time you say the name just trains you to read the chart.',
                 hint_es: 'Di el nombre primero, y luego revisa. Leer un diagrama al mismo tiempo que dices el nombre solo te entrena a leer el diagrama.',
                 skills: [1, 2],
@@ -434,8 +434,8 @@ SETS.push(
             steps: [
               {
                 label: 'Challenge 3 — D & G Naturals Flash Drill (assessment preparation)', label_es: 'Reto 3 — Relámpago de naturales en Re y Sol (preparación para la evaluación)',
-                text: '<ol><li>Deal the natural-note deck below and find each note it gives you on the D or G string within 5 seconds.</li><li>Switch strings halfway through the deck.</li></ol>You\'ve got it when: 6 out of 7 correct within 5 seconds each, on both strings.',
-                text_es: '<ol><li>Reparte la baraja de notas naturales de abajo y encuentra cada nota que te dé en la cuerda Re o Sol en menos de 5 segundos.</li><li>Cambia de cuerda a la mitad de la baraja.</li></ol>Lo tienes cuando: 6 de 7 correctas en menos de 5 segundos cada una, en ambas cuerdas.',
+                text: '<ol><li>Deal the natural-note deck below on the D string and find each note it gives you within 5 seconds.</li><li>Then deal it again on the G string.</li></ol>You\'ve got it when: 6 of 7 correct within 5 seconds each, on each string.',
+                text_es: '<ol><li>Reparte la baraja de notas naturales de abajo en la cuerda Re y encuentra cada nota que te dé en menos de 5 segundos.</li><li>Luego repártela otra vez en la cuerda Sol.</li></ol>Lo tienes cuando: 6 de 7 correctas en menos de 5 segundos cada una, en cada cuerda.',
                 drill: { type: 'deck', deck: 'naturals' },
                 hint: 'If you\'re stuck, use the octave shape from a string you already know instead of counting up one fret at a time.',
                 hint_es: 'Si te atoras, usa la forma de octava desde una cuerda que ya conozcas en vez de contar traste por traste.',
@@ -462,10 +462,10 @@ SETS.push(
             steps: [
               {
                 label: 'Challenge — "Sweet Child O\' Mine", name it as you play it', label_es: 'Reto — "Sweet Child O\' Mine", nómbralo mientras lo tocas',
-                text: '<ol><li>Watch the intro-riff clip you first saw in Module 7 (<a href="https://www.youtube.com/watch?v=EBNlYH4P5r8" target="_blank">Sweet Child O\' Mine Intro in Standard Tuning – Jbf Music &amp; Guitar</a>).</li><li>Learn just its first four notes — D string fret 12, a skip up to the B string at fret 15, then two notes on the G string (frets 14 and 12).</li><li>Say each note\'s NAME as you play it — today\'s D/G-string knowledge covers three of the four; the B-string note is a preview.</li></ol><a href="tabs/sweet-child-o-mine.html" target="_blank"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" style="width:1em;height:1em;vertical-align:-0.15em"><circle cx="5" cy="6" r="2"/><circle cx="19" cy="18" r="2"/><path d="M5 8c0 6 14 2 14 8"/></svg> Song Journey: this song\'s Journey page</a> — the full intro riff isn\'t there yet on purpose; it waits for you at the end of the course.',
-                text_es: '<ol><li>Mira el clip del riff de intro que viste por primera vez en el Módulo 7 (<a href="https://www.youtube.com/watch?v=EBNlYH4P5r8" target="_blank">Sweet Child O\' Mine Intro in Standard Tuning – Jbf Music &amp; Guitar</a>).</li><li>Aprende solo sus primeras cuatro notas — cuerda Re traste 12, un salto a la cuerda Si en el traste 15, y luego dos notas en la cuerda Sol (trastes 14 y 12).</li><li>Di el NOMBRE de cada nota mientras la tocas — lo que sabes hoy de las cuerdas Re y Sol cubre tres de las cuatro; la nota de la cuerda Si es un adelanto.</li></ol><a href="tabs/sweet-child-o-mine.html" target="_blank"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" style="width:1em;height:1em;vertical-align:-0.15em"><circle cx="5" cy="6" r="2"/><circle cx="19" cy="18" r="2"/><path d="M5 8c0 6 14 2 14 8"/></svg> Recorrido de la canción: la página de Recorrido de esta canción</a> — el riff de intro completo todavía no está ahí a propósito; te espera al final del curso.',
-                hint: 'A riff is a short musical phrase that repeats. This riff lives up the neck on strings you\'ve never named notes on before today — that\'s exactly why it\'s the reward for this set.',
-                hint_es: 'Un riff es una frase musical corta que se repite. Este riff vive arriba en el mástil, en cuerdas donde nunca antes habías nombrado notas — por eso es exactamente la recompensa de esta unidad.',
+                text: '<ol><li>Watch the intro-riff clip you first saw in Module 7 (<a href="https://www.youtube.com/watch?v=EBNlYH4P5r8" target="_blank">Sweet Child O\' Mine Intro in Standard Tuning – Jbf Music &amp; Guitar</a>).</li><li>Learn just its first four notes — D string fret 12, a skip up to the B string at fret 15, then two notes on the G string (frets 14 and 12).</li><li>Say each note\'s NAME as you play it — today\'s D/G-string knowledge covers three of the four; the B-string note is a preview.</li></ol><a href="tabs/sweet-child-o-mine.html#layer-6" target="_blank"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" style="width:1em;height:1em;vertical-align:-0.15em"><circle cx="5" cy="6" r="2"/><circle cx="19" cy="18" r="2"/><path d="M5 8c0 6 14 2 14 8"/></svg> Song Journey: this song\'s Journey page</a> — bonus Layer 6 has the whole intro riff, one note per beat.',
+                text_es: '<ol><li>Mira el clip del riff de intro que viste por primera vez en el Módulo 7 (<a href="https://www.youtube.com/watch?v=EBNlYH4P5r8" target="_blank">Sweet Child O\' Mine Intro in Standard Tuning – Jbf Music &amp; Guitar</a>).</li><li>Aprende solo sus primeras cuatro notas — cuerda Re traste 12, un salto a la cuerda Si en el traste 15, y luego dos notas en la cuerda Sol (trastes 14 y 12).</li><li>Di el NOMBRE de cada nota mientras la tocas — lo que sabes hoy de las cuerdas Re y Sol cubre tres de las cuatro; la nota de la cuerda Si es un adelanto.</li></ol><a href="tabs/sweet-child-o-mine.html#layer-6" target="_blank"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" style="width:1em;height:1em;vertical-align:-0.15em"><circle cx="5" cy="6" r="2"/><circle cx="19" cy="18" r="2"/><path d="M5 8c0 6 14 2 14 8"/></svg> Recorrido de la canción: la página de Recorrido de esta canción</a> — la Capa 6, la capa extra, tiene el riff de intro completo, una nota por tiempo.',
+                hint: 'A riff is a short musical phrase that repeats. This one sits at frets 12–15, past where you named D- and G-string notes in Module 4.',
+                hint_es: 'Un riff es una frase musical corta que se repite. Este está en los trastes 12–15, más arriba de donde nombraste las notas de las cuerdas Re y Sol en el Módulo 4.',
                 stuck: 'Pause the video on the very first note and just name that one string/fret before moving on.',
                 stuck_es: 'Pausa el video en la primerísima nota y solo nombra esa cuerda/traste antes de continuar.',
                 levelUp: 'Name all four notes of the opening phrase before you play them, then check yourself against the video.',
@@ -582,10 +582,10 @@ SETS.push(
               },
               {
                 label: 'Watch: octaves and the B-string bump', label_es: 'Mira: octavas y el desfase de la cuerda Si',
-                text: 'Watch: <a href="https://youtu.be/wElX3v3POWU?t=87" target="_blank">Finding Notes On The Guitar Neck Using Octaves – JustinGuitar</a>. Pay close attention to what changes when the shape crosses onto the B string — that\'s today\'s 3-fret bump.',
-                text_es: 'Mira: <a href="https://youtu.be/wElX3v3POWU?t=87" target="_blank">Finding Notes On The Guitar Neck Using Octaves – JustinGuitar</a>. Presta mucha atención a qué cambia cuando la forma cruza hacia la cuerda Si — ese es el desfase de 3 trastes de hoy.',
-                hint: 'Every octave shape you\'ve used so far has been "two strings down, two frets up." Crossing onto B (or e) adds one extra fret — watch for it in the video.',
-                hint_es: 'Toda forma de octava que has usado hasta ahora ha sido "dos cuerdas hacia abajo, dos trastes hacia arriba." Cruzar hacia la Si (o la mi aguda) agrega un traste extra — obsérvalo en el video.',
+                text: 'Watch: <a href="https://youtu.be/wElX3v3POWU?t=87" target="_blank">Finding Notes On The Guitar Neck Using Octaves – JustinGuitar</a>. Pay close attention to what changes when the shape crosses onto the B string — that\'s the B-string bump.',
+                text_es: 'Mira: <a href="https://youtu.be/wElX3v3POWU?t=87" target="_blank">Finding Notes On The Guitar Neck Using Octaves – JustinGuitar</a>. Presta mucha atención a qué cambia cuando la forma cruza hacia la cuerda Si — ese es el desfase de la cuerda Si.',
+                hint: 'Every octave shape you\'ve used so far has been "two strings down, two frets up." When the shape crosses onto B (or e) in the video, count the frets it moves.',
+                hint_es: 'Toda forma de octava que has usado hasta ahora ha sido "dos cuerdas hacia abajo, dos trastes hacia arriba." Cuando la forma cruza hacia la Si (o la mi aguda) en el video, cuenta los trastes que se mueve.',
                 skills: [4],
                 response: { type: 'mc', prompt: 'The octave shape coming FROM the D or G string onto the B or e string moves:',
                   prompt_es: 'La forma de octava que va DESDE la cuerda Re o Sol hacia la cuerda Si o mi aguda se mueve:',
@@ -632,8 +632,8 @@ SETS.push(
                 response: { type: 'mc', prompt: 'The B string at fret 5 is the same pitch as which open string?',
                   prompt_es: '¿La cuerda Si en el traste 5 es la misma nota que cuál cuerda al aire?',
                   answer: 2,
-                  explain: 'B(0)→C(1)→D(3)→E(5). B at fret 5 = E, the open high-e — that\'s exactly how you tune by ear.',
-                  explain_es: 'B(0)→C(1)→D(3)→E(5). B en el traste 5 = E, la mi aguda al aire — así es exactamente como afinas de oído.',
+                  explain: 'B(0)→C(1)→D(3)→E(5). B at fret 5 = E, the open high-e.',
+                  explain_es: 'B(0)→C(1)→D(3)→E(5). B en el traste 5 = E, la mi aguda al aire.',
                   choices: ['G', 'D', 'high e', 'A'],
                   choices_es: ['Sol', 'Re', 'Mi aguda', 'La'] }
               },
@@ -641,8 +641,8 @@ SETS.push(
                 label: 'Try fret 7 on every string', label_es: 'Prueba el traste 7 en cada cuerda',
                 text: 'Try the dot at fret 7 on every string — name each note before checking. Dot frets are the fastest landmarks on the whole neck.',
                 text_es: 'Prueba el punto en el traste 7 en cada cuerda — nombra cada nota antes de revisar. Los trastes con punto son las referencias más rápidas de todo el mástil.',
-                hint: 'You already used fret 7 to tune by ear (5th-fret/7th-fret method) — now you\'re naming what\'s there.',
-                hint_es: 'Ya usaste el traste 7 para afinar de oído (método del traste 5/traste 7) — ahora estás nombrando lo que hay ahí.',
+                hint: 'Fret 7 is the dot two frets past fret 5. Name the note there on each string, low E to high e.',
+                hint_es: 'El traste 7 es el punto que está dos trastes después del traste 5. Nombra la nota ahí en cada cuerda, de la Mi grave a la mi aguda.',
                 skills: [6],
                 response: { type: 'mc', prompt: 'At the dot on fret 7, the low E string plays:',
                   prompt_es: 'En el punto del traste 7, la cuerda Mi grave toca:',
@@ -695,8 +695,8 @@ SETS.push(
                 label: 'Challenge 1 — B-String Naturals', label_es: 'Reto 1 — Notas naturales de la cuerda Si',
                 text: '<ul><li>Say-then-play every natural note on the B string, low to high, 0 through 12.</li></ul><span class="step-figure"><img src="img/m9-b-naturals.svg" alt="A fretboard diagram of the B string, frets 0 to 12, with the natural notes marked: B open, C at fret 1, D at fret 3, E at fret 5, F at fret 6, G at fret 8, A at fret 10, and B again at fret 12." width="640" height="244"></span>',
                 text_es: '<ul><li>Di y luego toca cada nota natural de la cuerda Si, de grave a aguda, del traste 0 al 12.</li></ul><span class="step-figure"><img src="img/m9-b-naturals.svg" alt="Un diagrama del diapasón de la cuerda Si, trastes 0 a 12, con las notas naturales marcadas: B al aire, C en el traste 1, D en el 3, E en el 5, F en el 6, G en el 8, A en el 10, y B de nuevo en el traste 12." width="640" height="244"></span>',
-                hint: 'Remember: B to C is only ONE fret, not two — the exception to the pattern you learned on D and G.',
-                hint_es: 'Recuerda: de B a C hay solo UN traste, no dos — la excepción al patrón que aprendiste en las cuerdas Re y Sol.',
+                hint: 'Remember: B to C is only ONE fret, so C sits at fret 1. E to F (frets 5–6) is the other one-fret gap.',
+                hint_es: 'Recuerda: de B a C hay solo UN traste, así que C está en el traste 1. De E a F (trastes 5–6) es el otro par separado por un solo traste.',
                 stuck: 'Cover frets 0–5 (B–E) first, then add 5–12.',
                 stuck_es: 'Cubre primero los trastes 0–5 (B–E), y luego agrega 5–12.',
                 levelUp: 'Say-then-play backwards, high to low, without slowing down.',
@@ -880,8 +880,8 @@ SETS.push(
                 label: 'Spot chords inside the TAB', label_es: 'Encuentra acordes en el TAB',
                 text: 'Read through a TAB\'d riff and notice where single notes stack into a chord (a vertical column) versus where they stay a single melodic line.',
                 text_es: 'Lee un riff en TAB y fíjate dónde las notas sueltas se apilan en un acorde (una columna vertical) frente a dónde se quedan como una sola línea melódica.',
-                hint: 'Spotting the difference between a melody line and a stacked chord in TAB is what lets you read faster.',
-                hint_es: 'Distinguir entre una línea melódica y un acorde apilado en el TAB es lo que te permite leer más rápido.',
+                hint: 'Scan the TAB for columns first. Numbers stacked in one column are a chord. Numbers spread out left to right are a melody line.',
+                hint_es: 'Busca primero las columnas en el TAB. Los números apilados en una columna son un acorde. Los números repartidos de izquierda a derecha son una línea melódica.',
                 skills: [1],
                 response: { type: 'mc', prompt: 'A "12" written on the thinnest TAB line tells you to play:',
                   prompt_es: 'Un "12" escrito en la línea más delgada del TAB te dice que toques:',
@@ -924,8 +924,8 @@ SETS.push(
                   answer: 1,
                   explain: 'Spacing IS the rhythm in TAB — cramped numbers make your riff unplayable for anyone else.',
                   explain_es: 'El espaciado ES el ritmo en el TAB — los números amontonados hacen que tu riff sea imposible de tocar para cualquier otra persona.',
-                  choices: ['Writing every fret number extra large', 'Even spacing that shows the rhythm', 'Putting each bar on its own page', 'Leaving a blank line between strings'],
-                  choices_es: ['Escribir cada número de traste extra grande', 'Un espaciado parejo que muestre el ritmo', 'Poner cada compás en su propia página', 'Dejar una línea en blanco entre cuerdas'] }
+                  choices: ['Writing every fret number extra large', 'Spacing that shows the rhythm', 'Putting each bar on its own page', 'Leaving a blank line between strings'],
+                  choices_es: ['Escribir cada número de traste extra grande', 'Un espaciado que muestre el ritmo', 'Poner cada compás en su propia página', 'Dejar una línea en blanco entre cuerdas'] }
               }
             ]
           },
@@ -970,8 +970,8 @@ SETS.push(
                 label: 'Challenge 1 — "Luna" Warm-Up Read (down low first)', label_es: 'Reto 1 — "Luna", lectura de calentamiento (primero abajo)',
                 text: '<ul><li>Read and play the little-F Layer 6 intro TAB from <a href="tabs/luna.html#layer-6" target="_blank">"Luna"\'s Song Journey page</a> — it is built on the little-F shape, but you leave the high e string open instead of fretting it (D3, G2, B1, open e), down at frets 0–3.</li></ul>You\'ve got it when: you can read it straight through, no one walking you through it first.',
                 text_es: '<ul><li>Lee y toca el TAB de intro de la Capa 6 de F pequeña de la <a href="tabs/luna.html#layer-6" target="_blank">página de Recorrido de la canción de "Luna"</a> — está construido sobre la forma de F pequeña, pero dejas la cuerda mi aguda al aire en vez de trastearla (D3, G2, B1, e al aire), abajo en los trastes 0–3.</li></ul>Lo tienes cuando: puedes leerlo de corrido, sin que nadie te lo explique primero.',
-                hint: 'Reading TAB up the neck feels harder mostly because the numbers are less familiar, not because it\'s actually different from reading it low.',
-                hint_es: 'Leer TAB arriba del mástil se siente más difícil sobre todo porque los números son menos familiares, no porque sea realmente distinto a leerlo abajo.',
+                hint: 'This one stays at frets 0–3, so the numbers are familiar. Read it the same way you will read the higher TAB in the next challenge.',
+                hint_es: 'Este se queda en los trastes 0–3, así que los números son conocidos. Léelo de la misma manera en que leerás el TAB más alto del siguiente reto.',
                 stuck: 'Fret the little F shape and strum it once to hear the target chord before reading the roll note by note.',
                 stuck_es: 'Trastea la forma de F pequeña y ráscala una vez para escuchar el acorde objetivo antes de leer el roll nota por nota.',
                 levelUp: 'Read a second higher-position TAB you haven\'t seen before today, at first sight.',
@@ -1049,15 +1049,15 @@ SETS.push(
                 label: 'Challenge — Read a Partial Shape', label_es: 'Reto — Lee una forma parcial',
                 text: 'The chart below shows dots on only three strings — the rest are marked X. That\'s a partial shape: just the top slice of a chord, the way slash-chord and lead-sheet charts often print it so you can grab it fast.<ul><li>Fret the three dots and play.</li></ul>You\'ve got it when: only the three fretted strings sound, and the X\'d strings stay silent under your strum.',
                 text_es: 'El diagrama de abajo muestra puntos en solo tres cuerdas — el resto están marcadas con X. Eso es una forma parcial: solo la rebanada superior de un acorde, tal como los diagramas de acordes con barra diagonal y de lead sheet suelen imprimirlos para que los agarres rápido.<ul><li>Trastea los tres puntos y toca.</li></ul>Lo tienes cuando: solo suenan las tres cuerdas trasteadas, y las marcadas con X se quedan silenciosas bajo tu rasgueo.',
-                hint: 'An X over a string means "don\'t let this ring." Here the three X\'d strings are the lowest ones — brush only the top three, or lean a fretting finger against the low strings to mute them.',
-                hint_es: 'Una X sobre una cuerda significa "no dejes que suene." Aquí las tres cuerdas con X son las más graves — rasguea solo las tres de arriba, o apoya un dedo de trastear contra las cuerdas graves para silenciarlas.',
+                hint: 'An X over a string means "don\'t let this ring." Find which strings have an X, then brush only the others — or lean a fretting finger against the X\'d strings to mute them.',
+                hint_es: 'Una X sobre una cuerda significa "no dejes que suene." Busca cuáles cuerdas tienen X, y rasguea solo las demás — o apoya un dedo de trastear contra las cuerdas con X para silenciarlas.',
                 stuck: 'Pick the three fretted strings one at a time first, so you can hear that each one rings clean, then brush them together.',
                 stuck_es: 'Pulsa las tres cuerdas trasteadas una a la vez primero, para que puedas escuchar que cada una suena limpia, y luego rasguéalas juntas.',
                 levelUp: 'Slide the same three-string shape up two frets and name the new chord it spells.',
                 levelUp_es: 'Desliza la misma forma de tres cuerdas dos trastes hacia arriba y nombra el nuevo acorde que forma.',
                 skills: [5],
                 chords: [
-                  { name: 'D (partial — top 3 strings)', name_es: 'D (parcial — tres cuerdas agudas)', chord: [[6,'x'],[5,'x'],[4,'x'],[3,2,'1'],[2,3,'3'],[1,2,'2']], position: 0 }
+                  { name: 'D (partial)', name_es: 'D (parcial)', chord: [[6,'x'],[5,'x'],[4,'x'],[3,2,'1'],[2,3,'3'],[1,2,'2']], position: 0 }
                 ],
                 response: { type: 'mc', prompt: 'On this partial-shape chart, which strings actually ring when you play it?',
                   prompt_es: 'En este diagrama de forma parcial, ¿cuáles cuerdas realmente suenan cuando lo tocas?',
@@ -1208,7 +1208,7 @@ MODULE_REVIEWS[9] = {
   ],
   assessItems_es: [
     'Nombra cada cuerda en el punto del traste 5 y del traste 7, sin diagrama, en menos de 5 segundos cada una',
-    'Toca una melodía de canción hilo a partir de TAB en una posición alta',
+    'Toca una melodía de canción principal a partir de TAB en una posición alta',
     'Termina un TAB de 4 compases que escribiste tú mismo y que pasa la prueba de lectura a primera vista — un día después, la página sola reproduce el riff',
     'Toca una melodía que cruce tres o más cuerdas de forma limpia, cada nota sonando en orden',
     'Lee un diagrama de forma parcial o de acorde con barra diagonal y nombra cuáles cuerdas realmente suenan'
