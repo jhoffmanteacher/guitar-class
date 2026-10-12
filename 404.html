@@ -78,7 +78,10 @@ document.addEventListener('DOMContentLoaded', function(){
 </head>
 <body>
 <header class="header">
-  <div>
+  <!-- The header's only child, so the shared phone rule's
+       `.header>div:last-child{flex:0 0 auto}` caught it and the Spanish title
+       pushed the page 401px wide on a 360px phone. It can shrink here. -->
+  <div style="min-width:0;flex:1 1 auto">
     <div class="header-title" data-es="Sequoia High School &ndash; Guitarra para principiantes">Sequoia High School &ndash; Beginning Guitar</div>
   </div>
 </header>

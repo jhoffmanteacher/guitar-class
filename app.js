@@ -9288,6 +9288,14 @@ function syncHeaderHeight(){
 window.addEventListener('resize', syncHeaderHeight);
 syncHeaderHeight();
 if(document.fonts && document.fonts.ready) document.fonts.ready.then(syncHeaderHeight);
+/* The header also changes height with no resize at all: sign-in swaps the
+   button for the 32px avatar (49px vs a stale 48 — a 1px page scroll on every
+   desktop), and Español re-wraps the title. Setting --hdr can't resize the
+   header, so this can't loop. */
+if(typeof ResizeObserver !== 'undefined'){
+  const hdrEl = document.querySelector('.header');
+  if(hdrEl) new ResizeObserver(syncHeaderHeight).observe(hdrEl);
+}
 
 /* ── Mobile nav drawer: below 760px the rail slides in as an overlay instead
    of stacking in the page flow (see styles.css @media(max-width:760px)). ── */
