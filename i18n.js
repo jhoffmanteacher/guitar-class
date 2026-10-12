@@ -1036,7 +1036,7 @@
     'deck.power-chord-shapes':{ en: 'Power chord shape deck', es: 'Baraja de formas de acorde de potencia' },
     'deck.e5-vs-emajor':     { en: 'Power vs. full chord deck', es: 'Baraja de acorde de potencia vs. completo' },
     'deck.chords-group1':    { en: 'Group 1 chord deck', es: 'Baraja de acordes del grupo 1' },
-    'deck.chords-m5':        { en: 'Module 4 chord deck', es: 'Baraja de acordes del módulo 4' },
+    'deck.chords-m4':        { en: 'Module 4 chord deck', es: 'Baraja de acordes del módulo 4' },
     'deck.headMeta':         { en: '{n} cards', es: '{n} cartas' },
     'deck.cardOf':           { en: 'Card {n} of {total}', es: 'Carta {n} de {total}' },
     'deck.introOne':         { en: 'The deck deals you one card at a time, shuffled. Do what it says, then move on — miss one and it comes back later in the run.',

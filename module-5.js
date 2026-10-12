@@ -1321,7 +1321,7 @@ MODULE_REVIEWS[5] = {
     'Toca un solo original de 4 compases sobre la pista de acompañamiento de una canción del curso, sosteniendo su pulso sin reiniciar, usando la caja de pentatónica menor y al menos un hammer-on, pull-off, o vibrato, con notas limpias en todo momento (sin zumbido ni notas apagadas — cuerdas agudas incluidas), siguiendo un plan (llamada y respuesta o cuatro frases)',
     'Lee un lick pentatónico corto de 4 compases del TAB y tócalo con precisión'
   ],
-  forward: 'In <strong>Module 6</strong> you go back to the open chords from Module 4 and learn strum patterns for them: the down-up pattern, skipped strums, accents, and three styles — soft, rock and reggae. You also take turns strumming and soloing with this scale.',
-  forward_es: 'En el <strong>Módulo 6</strong> vuelves a los acordes al aire del Módulo 4 y aprendes patrones de rasgueo para ellos: el patrón abajo-arriba, rasgueos saltados, acentos y tres estilos — suave, rock y reggae. También te turnas entre rasguear e improvisar con esta escala.',
+  forward: 'In <strong>Module 6</strong> you go back to the open chords from Module 4 and strum them in new ways: a steady down-up through every change, skipped strums, accents, and three styles — soft, rock and reggae. You also take turns strumming and soloing with this scale.',
+  forward_es: 'En el <strong>Módulo 6</strong> vuelves a los acordes al aire del Módulo 4 y los rasgueas de maneras nuevas: un abajo-arriba constante en cada cambio, rasgueos saltados, acentos y tres estilos — suave, rock y reggae. También te turnas entre rasguear e improvisar con esta escala.',
   standards: ['Cr.1a', 'Cr.2a', 'Pr.4a', 'Pr.5a', 'Pr.5b', 'Pr.6a']
 };

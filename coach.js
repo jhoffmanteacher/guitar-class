@@ -3373,10 +3373,11 @@ function ccAgain(d){
    Blitz (shapes, by eye) and Chord Detective (the same chords, by ear).
    One rank per chord, in the order the COURSE teaches them: Module 4's
    Group 1 (C F Am G), then Group 2 (D A Em) alongside the open power
-   shapes, then Dm and the movable power shapes, then Group 3 (E, B7, Bm).
+   shapes, then Dm and the movable power shapes, then Group 3 (E, B7) —
+   with Bm, a Group 2 chord, ranked alongside them.
 
    F#m and C#m were dropped from both games' decks 2026-09-28 (Jonathan)
-   — no module teaches either shape; only Bm (Group 3) is taught. (The
+   — no module teaches either shape; only Bm (Group 2) is taught. (The
    names do appear: a Module 6 reggae progression, a Module 7 Choice-song
    line that says to barre C#m, Module 10's relative-minor list — mentions,
    not lessons.) The former "barre" deck existed only to

@@ -226,7 +226,7 @@ var CHORD_DIAGRAMS = {
   'Fmaj7' : { position:0, chord:[[6,'x',''],[5,'x',''],[4,3,3],[3,2,2],[2,1,1],[1,0,0]] },
   'Dm7'   : { position:0, chord:[[6,'x',''],[5,'x',''],[4,0,0],[3,2,2],[2,1,1],[1,1,1]] },
   /* Bm / F#m / C#m: partial-barre (beginner) shapes. Only Bm is actually
-     taught anywhere in the course today (Module 4's Group 3) — F#m/C#m
+     taught anywhere in the course today (Module 4's Group 2) — F#m/C#m
      have shapes here but no lesson yet (2026-09-28: the names show up in
      a Module 6 progression, a Module 7 Choice-song line and Module 10's
      relative-minor list, but no step teaches the shape), so only the

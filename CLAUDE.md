@@ -235,10 +235,20 @@ match (Layer 4 Open Chords, Layer 5 Pentatonic Solo). The two-part set is
 `m4w2`; the 1ao and 1az pins, the Songs hub's module groups and the Core
 rows' backing-track choice follow the content. Nobody had progress in either
 module, so no key was migrated (a stray peeked answer under an old id now
-sits on other content — accepted). Notes dated before the swap may still use
-the old numbers. **Course order lives in the module NUMBER** — reordering
-again means a renumber like this one. Its script (`swapA.mjs`) lived in a
-session scratchpad and is not in the repo.
+sits on other content — accepted). The same goes for the Journey pages'
+saved "I'm ready" ticks: they are keyed by layer NUMBER
+(`songReady.<song>.<layer>`), so a tick a student made on old Layer 4
+(Pentatonic) or 5 (Open Chords) now shows on the other layer's content —
+accepted, low impact (it only moves the progress pill and which layer opens
+first). Notes dated before the swap may still use the old numbers. **Course
+order lives in the module NUMBER** — reordering again means a renumber like
+this one. Its script (`swapA.mjs`) lived in a session scratchpad and is not
+in the repo. **Run `node tools/rule-zero-proof.mjs` against `d0cd004`**
+(commit A, the mechanical swap) to prove the hand edits after it; against
+the pre-swap commit `1a1f6cc` it fails by design ("the SET list changed"),
+because every m4/m5 id now holds the other module's content. The swap
+itself was proved structurally equivalent with the 4↔5 id map by a
+throwaway script (`skeleton-equiv.mjs`, scratchpad, not in the repo).
 
 ### ⚠️ Sweep findings ratchet into checks.mjs
 Any sweep or audit that finds **3+ instances of a mechanically-detectable error

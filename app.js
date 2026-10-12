@@ -7387,7 +7387,7 @@ const DECKS = {
   'power-chord-shapes': { kicker:'deck.kPlayChord', hint:'deck.hPlayChord', cards:[{f:'A5'},{f:'G5'},{f:'C5'},{f:'D5'}] },
   'e5-vs-emajor': { kicker:'deck.kPlayChord', hint:'deck.hPlayChord', cards:[{f:'E5'},{f:'E'},{f:'E5'},{f:'E'}] },
   'chords-group1': { kicker:'deck.kChordName', hint:'deck.hPlayIt', cards:[{f:'C'},{f:'G'},{f:'Am'},{f:'F'}] },
-  'chords-m5': { kicker:'deck.kChordName', hint:'deck.hPlayIt', cards:[{f:'C'},{f:'G'},{f:'Am'},{f:'F'},{f:'D'},{f:'A'},{f:'Em'},{f:'Bm'},{f:'Dm'},{f:'G/B'}] }
+  'chords-m4': { kicker:'deck.kChordName', hint:'deck.hPlayIt', cards:[{f:'C'},{f:'G'},{f:'Am'},{f:'F'},{f:'D'},{f:'A'},{f:'Em'},{f:'Bm'},{f:'Dm'},{f:'G/B'}] }
 };
 const deckDrills = {};
 function dkBox(key){ return document.getElementById('dkr-' + key); }
@@ -10149,8 +10149,8 @@ async function renderSongsHub(){
        songs only the pentatonic list (MODULE_SONGS[5]) carries a solo
        backingUrl — so keeping the first entry whole dropped every core
        song's backing track from the hub, the only place Module 5's "pick a
-       core song's track" card (and Module 4's Call & Response hint) can send
-       a student. Carry it forward onto a copy; never mutate the module data.
+       core song's track" card can send a student. Carry it forward onto a
+       copy; never mutate the module data.
        Found 2026-09-25. */
     else { const bk = backingOf(e.song, song); if(bk !== e.song) e.song = { ...e.song, backingUrl: bk.backingUrl, backingKey: bk.backingKey }; }
     byName.set(song.name, e);

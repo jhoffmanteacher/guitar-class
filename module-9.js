@@ -750,8 +750,8 @@ SETS.push(
                 hint_es: 'Punteo = la línea melódica punteada, un término de guitarra en español. La Capa 6 es la capa bonus de intro con requinto — un requinto es una guitarra pequeña y más aguda que toca la melodía principal. Este roll usa la forma de F pequeña que ya conoces del Módulo 4, con un cambio: deja la cuerda mi aguda AL AIRE — no la trastees en el traste 1 como lo haces para la F pequeña normal. La destreza nueva de hoy es poder nombrar cada nota dentro de ella.',
                 stuck: 'Fret the little F shape first, strum it once to hear the target chord, then break it apart one string at a time.',
                 stuck_es: 'Trastea primero la forma de F pequeña, ráscala una vez para escuchar el acorde objetivo, y luego desármala una cuerda a la vez.',
-                levelUp: 'Name each note out loud as you roll through it, or drop it in front of the Layer 4 vamp (a vamp is a short chord pattern repeated over and over) as a real intro.',
-                levelUp_es: 'Nombra cada nota en voz alta mientras la tocas, o colócala antes del vamp de la Capa 4 (un vamp es un patrón de acordes corto que se repite una y otra vez) como una intro de verdad.',
+                levelUp: 'Name each note out loud as you roll through it, or drop it in front of the Layer 4 open-chord vamp (a vamp is a short chord pattern repeated over and over) as a real intro.',
+                levelUp_es: 'Nombra cada nota en voz alta mientras la tocas, o colócala antes del vamp de acordes al aire de la Capa 4 (un vamp es un patrón de acordes corto que se repite una y otra vez) como una intro de verdad.',
                 skills: [5]
               }
             ]

@@ -2093,17 +2093,96 @@ function checkJourneyLayers() {
    - a songThread entry with a `layer` and no `bonus` must be the layer
      JOURNEY_LAYERS gives that song for the set's module;
    - a `bonus` entry must name a layer the page marks .bonus;
-   - "Layer N of 5" / "Capa N de 5" in module-M.js must have N = M,
-     except after "revisit" / "vuelve a la", which point back on purpose;
+   - RULE X: any "Layer N" / "Capa N" (N ≤ 5) in module-M.js for M ≤ 5 —
+     "Layer N of 5" or free-form ("play this loop there, Layer 4") — must
+     have N = M, and "Layer N of 5" must have N = M in every module. The
+     one exception is a REVISIT ("revisit" / "back to" / "vuelve a (la)"),
+     and only when N < M: a revisit points back, so "revisit Layer 5 of 5"
+     in Module 4 is a wrong number, not a revisit. (A plural "Layers 2 and
+     3" names several layers on purpose and is left to RULE Y.)
    - a tabs/<slug>.html#layer-N link in a module file must name a layer
      that page has.
-   And one rule that ties the NUMBERS to the SKILL, which nothing else
+   And the rules that tie the NUMBERS to the SKILL, which nothing else
    does (every rule above holds just as well with the pages and the
    modules each numbered 1..5 but in different orders):
    - a core layer whose title names a skill in LAYER_SKILL_WORDS must
-     carry the "Module N" whose MODULE_MANIFEST name says the same skill.
+     carry the "Module N" whose MODULE_MANIFEST name says the same skill
+     — and there must be exactly CORE_LAYER_TITLES of them (3 skills × 6
+     pages): the title regex reads a title with no markup in it, so one
+     that gains a <small> would drop out of the count silently;
+   - RULE Y: a "Layer N" / "Capa N" (or "Layers 3 · 4", "Capas 2 y 3")
+     with a SKILL CUE within LAYER_CUE_WINDOW characters — pentatonic /
+     box / caja / scale / escala; open chords / strum / rasgue- / acordes
+     al aire / chord shapes / formas de acordes; power chords / acordes de
+     potencia — must name the layer whose TITLE carries that skill on that
+     page (the layer titles are read from each page's own headings, so
+     the rule follows the pages). The nearest cue wins, and a cue counts
+     only for the mention nearest to it, so "the Layer 2 riff and the
+     Layer 5 box" ties "box" to Layer 5 alone. Read on the six Journey
+     pages (English text and every data-es value, inline scripts and
+     comments blanked), in every string literal of the module files,
+     class-activities.js, i18n.js and app.js (comments stripped; a
+     tabs/<slug>.html link in the same string picks the page, otherwise
+     any page's layer is accepted), and in Watchtower's song-anatomy rows,
+     where a cue anywhere in a row's description must be one of the
+     layers the row lists. It is what guards the free-form numbers RULE X
+     can't (Modules 6+, the bonus-layer intros that say "Best once Layer
+     5's box feels automatic", the anatomy rows): a number with no cue
+     word near it is still unguarded there — add the cue word to the
+     sentence rather than widening the list.
+   Added 2026-10-12 after the Module 4/5 swap review: RULE X, RULE Y, the
+   N < M limit on "revisit" (it used to skip the check outright) and the
+   CORE_LAYER_TITLES pin were each proved red by mutation.
    ════════════════════════════════════════════════════════════════════ */
 const LAYER_SKILL_WORDS = ['Power Chords', 'Pentatonic', 'Open Chords'];
+const CORE_LAYER_TITLES = 18;    // 3 skill layers × 6 Journey pages
+const LAYER_CUE_WINDOW = 40;
+const LAYER_CUES = [
+  { skill: 'Pentatonic',   re: /pentat[oó]nic\w*|\bbox(?:es)?\b|\bcajas?\b|\bscales?\b|\bescalas?\b/gi },
+  { skill: 'Open Chords',  re: /\bopen[- ]chords?\b|\bstrum\w*|\brasgue\w*|\bacordes al aire\b|\bchord shapes?\b|\bformas? (?:\S+ )?del? acordes?\b/gi },
+  { skill: 'Power Chords', re: /\bpower[- ]chords?\b|\bacordes? de potencia\b/gi },
+];
+const LAYER_MENTION_RE = /\b(?:Layers?|Capas?) (\d+)((?:\s*(?:·|&middot;|,|and|&amp;|&|or|y|o)\s*\d+)*)/gi;
+/* Block-level tags become a \u0001 boundary a cue never reaches across;
+   every other tag becomes spaces. Same length either way, so an offset
+   in the masked text is an offset in the source (and gives its line). */
+const LAYER_BLOCK_TAG_RE = /<\/(?:p|div|li|ol|ul|h\d|summary|td|tr)>|<br\s*\/?>|<(?:p|div|li|ol|ul|h\d|summary|td|tr)\b[^>]*>/gi;
+const maskLayerHtml = s => s
+  .replace(LAYER_BLOCK_TAG_RE, m => '\u0001' + m.slice(1).replace(/[^\n]/g, ' '))
+  .replace(/<[^>]*>/g, m => m.replace(/[^\n]/g, ' '));
+/* Every "Layer N" in `text` (already masked) that has a skill cue tied to
+   it: [{ at, nums, raw, skill, word, ctx }]. */
+function layerCueMentions(text) {
+  const out = [];
+  let base = 0;
+  for (const seg of text.split('\u0001')) {
+    const mentions = [...seg.matchAll(LAYER_MENTION_RE)].map(m => ({
+      s: m.index, e: m.index + m[0].length, raw: m[0].replace(/\s+/g, ' '),
+      nums: (m[1] + m[2]).match(/\d+/g).map(Number), cues: [],
+    }));
+    if (mentions.length) {
+      for (const cue of LAYER_CUES) {
+        for (const c of seg.matchAll(cue.re)) {
+          const cs = c.index, ce = c.index + c[0].length;
+          let near = null, dist = Infinity;
+          for (const m of mentions) {
+            const d = ce <= m.s ? m.s - ce : cs >= m.e ? cs - m.e : 0;
+            if (d < dist) { dist = d; near = m; }
+          }
+          if (near && dist <= LAYER_CUE_WINDOW) near.cues.push({ skill: cue.skill, word: c[0], d: dist });
+        }
+      }
+      for (const m of mentions) {
+        if (!m.cues.length) continue;
+        const cue = m.cues.sort((a, b) => a.d - b.d)[0];
+        const ctx = seg.slice(Math.max(0, m.s - LAYER_CUE_WINDOW), m.e + LAYER_CUE_WINDOW).replace(/\s+/g, ' ').trim();
+        out.push({ at: base + m.s, nums: m.nums, raw: m.raw, skill: cue.skill, word: cue.word, ctx });
+      }
+    }
+    base += seg.length + 1;
+  }
+  return out;
+}
 function checkModuleJourneyLayers(sets, ctx) {
   head('1ab2. Module files name the right Journey layer');
   let bad = 0;
@@ -2120,7 +2199,7 @@ function checkModuleJourneyLayers(sets, ctx) {
     const bonus = new Set([...src.matchAll(/<section class="layer[^"]*\bbonus\b[^"]*" id="layer-(\d+)"/g)].map(m => Number(m[1])));
     return (pageLayers[slug] = { all, bonus });
   };
-  let threads = 0, texts = 0, links = 0;
+  let threads = 0, texts = 0, free = 0, links = 0;
   for (const s of sets) {
     const mod = Number(s.moduleNum);
     for (const e of (Array.isArray(s.songThread) ? s.songThread : [])) {
@@ -2137,15 +2216,22 @@ function checkModuleJourneyLayers(sets, ctx) {
       }
     }
   }
+  // RULE X (+ "Layer N of 5" in every module), on comment-stripped source.
+  const LAYER_REF_RE = /(\b(?:revisit|back to|vuelve(?: a)?)(?: (?:the|la|el))? )?\b(?:Layer|Capa) (\d+)( (?:of|de) 5\b)?/gi;
   for (const file of MODULE_FILES) {
     const mod = Number(file.match(/\d+/)[0]);
     let src;
-    try { src = readFileSync(join(ROOT, file), 'utf8'); } catch { continue; }
-    const lineOf = i => src.slice(0, i).split('\n').length;
-    for (const m of src.matchAll(/(revisit |vuelve a la )?\b(?:Layer|Capa) (\d+) (?:of|de) 5\b/g)) {
-      texts++;
-      if (m[1]) continue;
-      if (Number(m[2]) !== mod) flag(`${file}:${lineOf(m.index)}: "${m[0]}" — a Module ${mod} set builds Layer ${mod}; say "revisit" if it points back on purpose`);
+    try { src = stripJsComments(readFileSync(join(ROOT, file), 'utf8')); } catch { continue; }
+    const lineOf = lineLookup(src);
+    for (const m of src.matchAll(LAYER_REF_RE)) {
+      const n = Number(m[2]), ofFive = !!m[3], back = m[1] ? m[1].trim() : '';
+      if (ofFive) texts++;
+      else if (mod <= 5 && n <= 5) free++;
+      else continue;              // a bonus layer, or a free-form number in Modules 6+: RULE Y's
+      if (n === mod || (back && n < mod)) continue;
+      flag(`${file}:${lineOf(m.index)}: "${m[0].trim()}" — a Module ${mod} set builds Layer ${mod}; ${back
+        ? `"${back}" only excuses an EARLIER layer (a revisit points back, never forward)`
+        : 'say "revisit" if it points back on purpose'}`);
     }
     for (const m of src.matchAll(/tabs\/([a-z0-9-]+)\.html#layer-(\d+)/g)) {
       links++;
@@ -2158,6 +2244,7 @@ function checkModuleJourneyLayers(sets, ctx) {
   const modName = {};
   for (const m of manifest) modName[Number(m.num)] = String(m.name || '');
   let tied = 0;
+  const skillLayer = {};   // slug -> { skill word -> layer number }, from the page's own headings
   for (const file of TAB_PAGES.filter(f => f.endsWith('.html'))) {
     let src;
     try { src = readFileSync(join(ROOT, file), 'utf8'); } catch { continue; }
@@ -2172,11 +2259,77 @@ function checkModuleJourneyLayers(sets, ctx) {
         flag(`${file}: Layer ${m[1]} "${m[2].replace(/&nbsp;.*$/, '').trim()}" says Module ${mod}, but Module ${mod} is "${modName[mod] || '?'}"${owner ? ` — ${word} is Module ${owner}` : ''} (MODULE_MANIFEST)`);
       }
     }
+    // RULE Y's map reads markup inside a title too (tags dropped), so it
+    // never loses a layer the pinned count above is there to notice.
+    const slug = file.replace(/^tabs\//, '').replace(/\.html$/, ''), map = {};
+    for (const m of src.matchAll(/<span class="layer-num"[^>]*>(\d+)<\/span>\s*<span class="layer-title"[^>]*>((?:(?!<\/span>)[\s\S])*)<\/span>/g)) {
+      const word = LAYER_SKILL_WORDS.find(w => m[2].replace(/<[^>]*>/g, '').includes(w));
+      if (word) map[word] = Number(m[1]);
+    }
+    for (const w of LAYER_SKILL_WORDS) if (map[w] == null) flag(`${file}: no layer title names "${w}" — RULE Y cannot tell which layer a "${w}" cue points to`);
+    skillLayer[slug] = map;
   }
   if (!tied) flag('1ab2 matched no core layer title to a module — it cannot see what it is supposed to guard');
+  else if (tied !== CORE_LAYER_TITLES) flag(`1ab2 read ${tied} core layer titles (Power Chords / Pentatonic / Open Chords), expected ${CORE_LAYER_TITLES} (3 × 6 pages) — a title with markup inside it is invisible to this check; if a page or skill layer was genuinely added or removed, update CORE_LAYER_TITLES`);
   if (!threads) flag('1ab2 found no songThread entry with a layer — it cannot see what it is supposed to guard');
   if (!texts) flag('1ab2 found no "Layer N of 5" text in the module files — it cannot see what it is supposed to guard');
-  if (bad === 0) ok(`${threads} songThread layers, ${texts} "Layer N of 5" mentions and ${links} #layer-N links in the module files name the right Journey layer; ${tied} core layer titles sit on the module that teaches them`);
+
+  // RULE Y
+  let cued = 0;
+  const wantFor = (slug, skill) => {
+    if (slug && skillLayer[slug]) return new Set([skillLayer[slug][skill]]);
+    return new Set(Object.values(skillLayer).map(m => m[skill]).filter(v => v != null));
+  };
+  const judge = (where, slug, hit) => {
+    cued++;
+    const want = wantFor(slug, hit.skill);
+    if (hit.nums.some(n => want.has(n))) return;
+    flag(`${where}: "${hit.raw}" sits next to "${hit.word}", but ${hit.skill} is Layer ${[...want].join('/') || '—'} on ${slug ? `tabs/${slug}.html` : 'the Journey pages'} (read from the layer titles) — "…${hit.ctx}…"`);
+  };
+  for (const file of TAB_PAGES.filter(f => f.endsWith('.html'))) {
+    let raw;
+    try { raw = readFileSync(join(ROOT, file), 'utf8'); } catch { continue; }
+    const slug = file.replace(/^tabs\//, '').replace(/\.html$/, '');
+    raw = blankHtmlComments(raw).replace(/<(script|style)\b[\s\S]*?<\/\1>/gi, m => m.replace(/[^\n]/g, ' '));
+    const lineAt = lineLookup(raw);
+    // Song-anatomy rows: a cue in the description must be among the listed layers.
+    for (const row of raw.matchAll(/<div class="anatomy-row">([\s\S]*?)<\/div>/g)) {
+      const d = row[1].match(/<span data-es="([^"]*)">([\s\S]*?)<\/span>/);
+      const l = row[1].match(/<span class="an-layers" data-es="([^"]*)">([\s\S]*?)<\/span>/);
+      if (!d || !l) { flag(`${file}:${lineAt(row.index)}: an anatomy row 1ab2 cannot read (description or an-layers span missing)`); continue; }
+      for (const [desc, list, lang] of [[decodeHtmlEntities(d[1]), decodeHtmlEntities(l[1]), 'es'], [d[2], decodeHtmlEntities(l[2]), 'en']]) {
+        const nums = (list.match(/\d+/g) || []).map(Number);
+        for (const cue of LAYER_CUES) {
+          for (const c of desc.matchAll(cue.re)) {
+            judge(`${file}:${lineAt(row.index)} (anatomy row${lang === 'es' ? ', es' : ''})`, slug,
+              { raw: list.replace(/<[^>]*>/g, '').replace(/&middot;/g, '·').trim(), nums, skill: cue.skill, word: c[0], ctx: desc.replace(/<[^>]*>/g, '').trim() });
+          }
+        }
+      }
+    }
+    const body = raw.replace(/<div class="anatomy-row">[\s\S]*?<\/div>/g, m => m.replace(/[^\n]/g, ' '));
+    for (const m of body.matchAll(/\bdata-es="([^"]*)"/g)) {
+      for (const hit of layerCueMentions(maskLayerHtml(decodeHtmlEntities(m[1])))) judge(`${file}:${lineAt(m.index)} (es)`, slug, hit);
+    }
+    const en = maskLayerHtml(body.replace(/\bdata-es="[^"]*"/g, m => m.replace(/[^\n]/g, ' ')));
+    for (const hit of layerCueMentions(en)) judge(`${file}:${lineAt(hit.at)}`, slug, hit);
+  }
+  for (const file of [...MODULE_FILES, 'class-activities.js', 'i18n.js', 'app.js']) {
+    let src;
+    try { src = stripJsComments(readFileSync(join(ROOT, file), 'utf8')); } catch { continue; }
+    const lineOf = lineLookup(src);
+    for (let i = 0; i < src.length; ) {
+      if (!isQuote(src[i])) { i++; continue; }
+      const { text, end } = readJsString(src, i);
+      if (/\b(?:Layer|Capa)s? \d/i.test(text)) {
+        const link = text.match(/tabs\/([a-z0-9-]+)\.html/);
+        for (const hit of layerCueMentions(maskLayerHtml(decodeHtmlEntities(text)))) judge(`${file}:${lineOf(i)}`, link ? link[1] : null, hit);
+      }
+      i = end;
+    }
+  }
+  if (!cued) flag('1ab2 RULE Y tied no "Layer N" to a skill cue anywhere — it cannot see what it is supposed to guard');
+  if (bad === 0) ok(`${threads} songThread layers, ${texts} "Layer N of 5" mentions, ${free} other Module 1–5 layer numbers and ${links} #layer-N links in the module files name the right Journey layer; ${tied} core layer titles (pinned) sit on the module that teaches them; ${cued} layer numbers next to a skill cue name the layer with that skill`);
 }
 
 /* ════════════════════════════════════════════════════════════════════
@@ -5598,8 +5751,11 @@ function checkHappyBirthdayRhythm() {
    The budget only fails UPWARD. Removing one more is always fine;
    adding one back is the thing that needs a decision, so raise the
    number here on purpose when you mean to.
+   2026-10-12: the pentatonic module (Module 5 since the 4↔5 swap) had
+   carried one slot of slack — budget 3, real count 2 — so its budget is
+   now its real 2 and the total 7.
    ════════════════════════════════════════════════════════════════════ */
-const SHORT_RESPONSE_BUDGET = { 3: 0, 4: 4, 5: 3, 6: 1 };
+const SHORT_RESPONSE_BUDGET = { 3: 0, 4: 4, 5: 2, 6: 1 };
 function checkShortResponseBudget() {
   head('1ar. Short-response budget (Modules 3-6)');
   const configSrc = readFileSync(join(ROOT, 'config-main.js'), 'utf8');
