@@ -591,8 +591,8 @@ SETS.push(
             steps: [
           {
             label: 'Challenge 2 — D-DU-UDU on Em', label_es: 'Reto 2 — D-DU-UDU en Em',
-            text: '<ol><li>Fret Em.</li><li>Play D-DU-UDU at 60 BPM for 8 bars, counting aloud and accenting beats 2 and 4.</li></ol>You\'ve got it when: 8 clean bars with a clear "snare hit" feel on 2 and 4.',
-            text_es: '<ol><li>Trastea Em.</li><li>Toca D-DU-UDU a 60 BPM durante 8 compases, contando en voz alta y acentuando los tiempos 2 y 4.</li></ol>Lo tienes cuando: 8 compases limpios con una sensación clara de "golpe de tarola" en el 2 y el 4.',
+            text: '<ol><li>Fret Em.</li><li>Play D-DU-UDU at 60 BPM for 8 bars, counting aloud and accenting beats 2 and 4.</li></ol>You\'ve got it when: 8 clean bars in a row, with beats 2 and 4 clearly louder than beats 1 and 3.',
+            text_es: '<ol><li>Trastea Em.</li><li>Toca D-DU-UDU a 60 BPM durante 8 compases, contando en voz alta y acentuando los tiempos 2 y 4.</li></ol>Lo tienes cuando: 8 compases limpios seguidos, con los tiempos 2 y 4 claramente más fuertes que los tiempos 1 y 3.',
             hint: 'Add accents on beats 2 and 4 — those downstrokes should be a little louder. Feel the "snare hit" on those beats.',
             hint_es: 'Agrega acentos en los tiempos 2 y 4 — esos golpes hacia abajo deben ser un poco más fuertes. Siente el "golpe de tarola" en esos tiempos.',
             stuck: 'Drop the accents for now and just get the D-DU-UDU shape clean for 8 bars; add the louder 2-and-4 hits once the pattern feels automatic.',
@@ -831,8 +831,10 @@ SETS.push(
             hint: 'It\'s almost entirely the strum pattern. Reggae emphasizes the offbeats (the "+"); rock emphasizes the numbered beats.',
             hint_es: 'Es casi por completo el patrón de rasgueo. El reggae enfatiza los contratiempos (el "+"); el rock enfatiza los tiempos numerados (los números).',
             skills: [2, 3],
-            response: { type: 'short', placeholder: 'In one sentence: what is the biggest difference between the reggae strum and the rock strum?',
-              placeholder_es: 'En una oración: ¿cuál es la mayor diferencia entre el rasgueo de reggae y el de rock?' }
+            response: { type: 'short', prompt: 'In one sentence: what is the biggest difference between the reggae strum and the rock strum?',
+              prompt_es: 'En una oración: ¿cuál es la mayor diferencia entre el rasgueo de reggae y el de rock?',
+              placeholder: 'e.g. The reggae strum hits ____, but the rock strum hits ____.',
+              placeholder_es: 'p. ej. El rasgueo de reggae toca ____, pero el rasgueo de rock toca ____.' }
           },
           /* Inserted 2026-09-24 (pre-release review F8): m6w3-s4 asks the
              student to listen and CHOOSE a pattern, and every other step
@@ -920,8 +922,8 @@ SETS.push(
             steps: [
           {
             label: 'Challenge 2 — Rock Feel', label_es: 'Reto 2 — Sensación rock',
-            text: '<ol><li>Hold the same G at the same tempo.</li><li>Strum harder into the strings — heavy down-up-down-up, accenting every down.</li></ol>You\'ve got it when: four bars in a row, thick and driving, using arm weight, not just wrist.<div class="strum-line">D   U   D   U   D   U   D   U\n<span class="su-count">1   +   2   +   3   +   4   +</span></div>',
-            text_es: '<ol><li>Sostén el mismo G al mismo tempo.</li><li>Rasguea más fuerte hacia las cuerdas — abajo-arriba-abajo-arriba pesado, acentuando cada golpe hacia abajo.</li></ol>Lo tienes cuando: cuatro compases seguidos, gruesos e impulsores, usando el peso del brazo, no solo la muñeca.<div class="strum-line">D   U   D   U   D   U   D   U\n<span class="su-count">1   +   2   +   3   +   4   +</span></div>',
+            text: '<ol><li>Hold the same G at the same tempo.</li><li>Strum harder into the strings — heavy down-up-down-up, accenting every down.</li></ol>You\'ve got it when: four bars in a row with every down-strum louder than the up-strums, strummed from the elbow, not just the wrist.<div class="strum-line">D   U   D   U   D   U   D   U\n<span class="su-count">1   +   2   +   3   +   4   +</span></div>',
+            text_es: '<ol><li>Sostén el mismo G al mismo tempo.</li><li>Rasguea más fuerte hacia las cuerdas — abajo-arriba-abajo-arriba pesado, acentuando cada golpe hacia abajo.</li></ol>Lo tienes cuando: cuatro compases seguidos con cada golpe hacia abajo más fuerte que los golpes hacia arriba, rasgueados desde el codo, no solo desde la muñeca.<div class="strum-line">D   U   D   U   D   U   D   U\n<span class="su-count">1   +   2   +   3   +   4   +</span></div>',
             hint: 'Rock strumming uses arm weight more than wrist. Let the pick go deeper into the strings. Aim for a thick, heavy sound.',
             hint_es: 'El rasgueo de rock usa el peso del brazo más que la muñeca. Deja que la púa se hunda más en las cuerdas. Apunta a un sonido grueso y pesado.',
             stuck: 'Strum from the elbow, not just the wrist — rock needs weight. Keep the accents on the downs and let the ups stay light.',

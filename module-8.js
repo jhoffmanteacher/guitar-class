@@ -89,13 +89,15 @@ SETS.push(
             steps: [
           {
             label: 'Listen: "Dust in the Wind"', label_es: 'Escucha: "Dust in the Wind"',
-            text: 'Listen to "Dust in the Wind" by Kansas. Pay attention to the picking pattern — you can clearly hear the alternating bass (thumb) underneath the melody (fingers).',
-            text_es: 'Escucha "Dust in the Wind" de Kansas. Pon atención al patrón de punteo — puedes escuchar claramente el bajo alternante (pulgar) debajo de la melodía (dedos).',
+            text: 'Listen to <a href="https://www.youtube.com/watch?v=tH2w6Oxx0kQ" target="_blank">"Dust in the Wind" by Kansas</a>. Pay attention to the picking pattern — you can clearly hear the alternating bass (thumb) underneath the melody (fingers).',
+            text_es: 'Escucha <a href="https://www.youtube.com/watch?v=tH2w6Oxx0kQ" target="_blank">"Dust in the Wind" de Kansas</a>. Pon atención al patrón de punteo — puedes escuchar claramente el bajo alternante (pulgar) debajo de la melodía (dedos).',
             hint: 'This song is the classic example of fingerpicking. The bass moves on every beat, the fingers play between the beats.',
             hint_es: 'Esta canción es el ejemplo clásico de fingerpicking. El bajo se mueve en cada tiempo, los dedos tocan entre los tiempos.',
             skills: [4, 5],
-            response: { type: 'short', placeholder: 'In "Dust in the Wind", describe what you hear the THUMB doing vs. what the FINGERS are doing.',
-              placeholder_es: 'En "Dust in the Wind", describe qué escuchas haciendo al PULGAR frente a lo que hacen los DEDOS.' }
+            response: { type: 'short', prompt: 'In "Dust in the Wind", what do you hear the THUMB doing, and what do you hear the FINGERS doing?',
+              prompt_es: 'En "Dust in the Wind", ¿qué escuchas que hace el PULGAR, y qué escuchas que hacen los DEDOS?',
+              placeholder: 'e.g. The thumb plays ____. The fingers play ____.',
+              placeholder_es: 'p. ej. El pulgar toca ____. Los dedos tocan ____.' }
           }
             ]
           },
@@ -361,8 +363,10 @@ SETS.push(
             hint: 'Tap the finger order until you can do it without thinking. Then speed up.',
             hint_es: 'Marca el orden de los dedos hasta que puedas hacerlo sin pensar. Luego acelera.',
             skills: [3, 4],
-            response: { type: 'short', placeholder: 'What did Lauren show or explain that Set 1\'s videos didn\'t?',
-              placeholder_es: '¿Qué mostró o explicó Lauren que los videos de la Unidad 1 no mostraron?' }
+            response: { type: 'short', prompt: 'What did Lauren show or explain that Set 1\'s videos didn\'t?',
+              prompt_es: '¿Qué mostró o explicó Lauren que los videos de la Unidad 1 no mostraron?',
+              placeholder: 'e.g. Lauren showed ____, and Set 1\'s videos did not.',
+              placeholder_es: 'p. ej. Lauren mostró ____, y los videos de la Unidad 1 no.' }
           }
             ]
           },
@@ -372,8 +376,8 @@ SETS.push(
             steps: [
           {
             label: 'Listen: "Nothing Else Matters"', label_es: 'Escucha: "Nothing Else Matters"',
-            text: 'Listen to "Nothing Else Matters" by Metallica. The intro is entirely fingerpicked open chords. Tap along and count 1 to 6 for each bar.',
-            text_es: 'Escucha "Nothing Else Matters" de Metallica. El intro son acordes al aire tocados enteramente con fingerpicking. Sigue el ritmo y cuenta del 1 al 6 en cada compás.',
+            text: 'Listen to <a href="https://www.youtube.com/watch?v=tAGnKpE4NCI" target="_blank">"Nothing Else Matters" by Metallica</a>. The intro is entirely fingerpicked open chords. Tap along and count 1 to 6 for each bar.',
+            text_es: 'Escucha <a href="https://www.youtube.com/watch?v=tAGnKpE4NCI" target="_blank">"Nothing Else Matters" de Metallica</a>. El intro son acordes al aire tocados enteramente con fingerpicking. Sigue el ritmo y cuenta del 1 al 6 en cada compás.',
             hint: 'The intro is Em on open strings: low E, G, B, high e, B, G. The thumb plays once, then the fingers climb and come back down — the same p-i-m-a-m-i you play on Em further down this set.',
             hint_es: 'El intro es Em en cuerdas al aire: Mi grave, Sol, Si, mi aguda, Si, Sol. El pulgar toca una vez, y luego los dedos suben y vuelven a bajar — el mismo p-i-m-a-m-i que tocas en Em más adelante en esta unidad.',
             skills: [4, 5],
@@ -782,13 +786,15 @@ SETS.push(
             steps: [
           {
             label: 'Listen: a full fingerpicked verse', label_es: 'Escucha: una estrofa completa',
-            text: 'Listen to one of: "House of the Rising Sun", "Dust in the Wind", or "Hallelujah". Listen to a full verse. Can you hear when the chord changes? Does the pattern ever break?',
-            text_es: 'Escucha una de estas: "House of the Rising Sun", "Dust in the Wind", o "Hallelujah". Escucha una estrofa completa. ¿Puedes escuchar cuándo cambia el acorde? ¿El patrón se rompe en algún momento?',
+            text: 'Listen to one of: "House of the Rising Sun", <a href="https://www.youtube.com/watch?v=tH2w6Oxx0kQ" target="_blank">"Dust in the Wind" by Kansas</a>, or <a href="https://www.youtube.com/watch?v=y8AWFf7EAc4" target="_blank">"Hallelujah" by Jeff Buckley</a>. Listen to a full verse. Can you hear when the chord changes? Does the pattern ever break?',
+            text_es: 'Escucha una de estas: "House of the Rising Sun", <a href="https://www.youtube.com/watch?v=tH2w6Oxx0kQ" target="_blank">"Dust in the Wind" de Kansas</a>, o <a href="https://www.youtube.com/watch?v=y8AWFf7EAc4" target="_blank">"Hallelujah" de Jeff Buckley</a>. Escucha una estrofa completa. ¿Puedes escuchar cuándo cambia el acorde? ¿El patrón se rompe en algún momento?',
             hint: 'In professional recordings the pattern almost never breaks at a chord change. That is the standard to listen for — no pause, no stutter, right through the change.',
             hint_es: 'En las grabaciones profesionales el patrón casi nunca se rompe en un cambio de acorde. Ese es el estándar que debes escuchar — sin pausa, sin tropiezo, justo en el cambio.',
             skills: [4, 5],
-            response: { type: 'short', placeholder: 'Which song did you listen to? Did the picking pattern stay completely steady through every chord change?',
-              placeholder_es: '¿Cuál canción escuchaste? ¿El patrón de punteo se mantuvo completamente estable en cada cambio de acorde?' }
+            response: { type: 'short', prompt: 'Which song did you listen to? Did the picking pattern stay completely steady through every chord change?',
+              prompt_es: '¿Cuál canción escuchaste? ¿El patrón de punteo se mantuvo completamente estable en cada cambio de acorde?',
+              placeholder: 'e.g. I listened to ____. At the chord changes, the pattern ____.',
+              placeholder_es: 'p. ej. Escuché ____. En los cambios de acorde, el patrón ____.' }
           }
             ]
           },
