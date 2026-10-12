@@ -629,6 +629,21 @@ if(!firebaseReady) revealAuthWallSignIn();   // wall content is being replaced a
 if(auth) auth.onAuthStateChanged(async user=>{
   clearTimeout(_authRevealTimer);
   if(user){
+    /* A DIFFERENT student, with no signed-out answer in between (Firebase
+       reports B straight over A — another tab's sign-in on a shared
+       Chromebook). Everything the null branch below guards against applies
+       here too, plus a pending save of A's that would now go out under B's
+       uid. Same hard reset, same loop guard: after the reload currentUser
+       starts null. While signOut() is running it reloads itself, so stand
+       aside — and leave currentUser alone so its flush can't write A's work
+       into B's doc. */
+    if(currentUser && !isDevBypassUser() && currentUser.uid !== user.uid){
+      if(!_signOutReloading){
+        try { sessionStorage.clear(); } catch(e){}
+        location.reload();
+      }
+      return;
+    }
     currentUser = user;
     // They're in — but showApp() is still two Firestore round trips away.
     // Take BOTH sign-in buttons off the screen NOW, before the awaits below,
@@ -678,7 +693,7 @@ if(auth) auth.onAuthStateChanged(async user=>{
       return;
     }
     window.__authBootPending = false;
-    currentUser = null; progress = {}; responses = {}; completed = {}; completedDeletes = new Set(); classActivities = {}; classActivitiesDeletes = new Set(); caStepDone = {}; caStepDeletes = new Set(); exitChecks = {}; games = {}; streak = { count:0, lastDay:null }; gamesAccessOn = true; micSampling = { on: false, max: 0 }; micTakesCount = Infinity; studentPeriod = ''; periodOverride = ''; moduleOpenThrough = 0; hiddenActivityIds = {}; activityDates = {}; activityTitles = {}; activityNumbers = {}; activityBoard = {}; activityBoardOn = false; activityClears = {}; retiredActivityIds = {}; optionalActivityIds = {}; activityPins = []; progressLoadFailed = false;
+    currentUser = null; progress = {}; responses = {}; completed = {}; completedDeletes = new Map(); classActivities = {}; classActivitiesDeletes = new Map(); caStepDone = {}; caStepDeletes = new Map(); exitChecks = {}; games = {}; streak = { count:0, lastDay:null }; gamesAccessOn = true; micSampling = { on: false, max: 0 }; micTakesCount = Infinity; studentPeriod = ''; periodOverride = ''; moduleOpenThrough = 0; hiddenActivityIds = {}; activityDates = {}; activityTitles = {}; activityNumbers = {}; activityBoard = {}; activityBoardOn = false; activityClears = {}; retiredActivityIds = {}; optionalActivityIds = {}; activityPins = []; progressLoadFailed = false;
     document.body.classList.remove('ca-gated');   // next sign-in recomputes it fresh — don't leave a stale gate showing over the sign-in wall
     if(typeof gamesResetForUser === 'function') gamesResetForUser();   // Note Runner's module caches must not leak into the next signed-in user
     if(typeof lqStopListening === 'function') lqStopListening();       // and the live-quiz listener must not keep firing under the next student
@@ -1196,17 +1211,18 @@ async function flushSave(){
        raised the global "Something went wrong" banner instead of the ordinary
        save-failed retry. Un-marking a step with the SDK still unloaded (a
        first visit that went offline, or a blocked CDN) was enough to do it. */
+    // Each entry is [key, seq] — see completedDeletes for why the seq rides along.
     if(payload.completed && completedDeletes.size){
       sentDeletes = [...completedDeletes];
-      sentDeletes.forEach(k=>{ payload.completed[k] = firebase.firestore.FieldValue.delete(); });
+      sentDeletes.forEach(([k])=>{ payload.completed[k] = firebase.firestore.FieldValue.delete(); });
     }
     if(payload.classActivities && classActivitiesDeletes.size){
       sentCaDeletes = [...classActivitiesDeletes];
-      sentCaDeletes.forEach(k=>{ payload.classActivities[k] = firebase.firestore.FieldValue.delete(); });
+      sentCaDeletes.forEach(([k])=>{ payload.classActivities[k] = firebase.firestore.FieldValue.delete(); });
     }
     if(payload.caSteps && caStepDeletes.size){
       sentStepDeletes = [...caStepDeletes];
-      sentStepDeletes.forEach(k=>{ payload.caSteps[k] = firebase.firestore.FieldValue.delete(); });
+      sentStepDeletes.forEach(([k])=>{ payload.caSteps[k] = firebase.firestore.FieldValue.delete(); });
     }
     /* A failed load left these maps empty, and an empty map sent with
        {merge:true} REPLACES the server's map instead of merging into it (the
@@ -1224,11 +1240,14 @@ async function flushSave(){
       });
     }
     await db.collection('progress').doc(currentUser.uid).set(payload,{merge:true});
-    // Only now that the write landed: retire the deletes it carried. Keys
-    // un-marked DURING the write stay queued for the next flush.
-    if(sentDeletes) sentDeletes.forEach(k=>completedDeletes.delete(k));
-    if(sentCaDeletes) sentCaDeletes.forEach(k=>classActivitiesDeletes.delete(k));
-    if(sentStepDeletes) sentStepDeletes.forEach(k=>caStepDeletes.delete(k));
+    // Only now that the write landed: retire the deletes it carried — each
+    // one only if it is still the SAME un-mark this write sent. A key
+    // re-ticked and un-ticked again during the write has a newer seq and
+    // stays queued for the next flush.
+    const retire = (sent, queue)=>{ if(sent) sent.forEach(([k, seq])=>{ if(queue.get(k) === seq) queue.delete(k); }); };
+    retire(sentDeletes, completedDeletes);
+    retire(sentCaDeletes, classActivitiesDeletes);
+    retire(sentStepDeletes, caStepDeletes);
     setSaveMsg('save.saved', 2000);
     _saveFailCount = 0;
     /* A period save landing closes the picker and refreshes the gate — win
@@ -1267,21 +1286,28 @@ function saveResponses(){ queueSave('responses'); }
    `delete completed[key]` alone never un-marks the step server-side. Each
    un-marked key is queued here, written as FieldValue.delete() on the next
    flush, and cleared only after that write lands (a failed write retries it,
-   same as the dirty keys). */
-let completedDeletes = new Set();
+   same as the dirty keys).
+   A Map of key → the seq of the un-mark that queued it, not a Set: untick,
+   re-tick, untick again while the first delete's write is still in flight
+   (2 s+ on school Wi-Fi) used to let that first write's success retire the
+   SECOND un-mark too — the next flush then carried no delete, the re-tick's
+   `true` stood on the server, and the step came back done at next sign-in.
+   flushSave now retires an entry only if its seq still matches. */
+let _deleteSeq = 0;
+let completedDeletes = new Map();
 function onCompleteChange(key, isDone){
   if(isDone){ completed[key] = true; completedDeletes.delete(key); }
-  else { delete completed[key]; completedDeletes.add(key); }
+  else { delete completed[key]; completedDeletes.set(key, ++_deleteSeq); }
   saveCompleted();
 }
 function saveCompleted(){ queueSave('completed'); }
 
 // Same shape as completed/completedDeletes/onCompleteChange/saveCompleted
 // above, for In-Class Activities' own top-level Firestore field.
-let classActivitiesDeletes = new Set();
+let classActivitiesDeletes = new Map();
 function onClassActivityChange(id, isDone){
   if(isDone){ classActivities[id] = true; classActivitiesDeletes.delete(id); }
-  else { delete classActivities[id]; classActivitiesDeletes.add(id); }
+  else { delete classActivities[id]; classActivitiesDeletes.set(id, ++_deleteSeq); }
   saveClassActivities();
 }
 function saveClassActivities(){ queueSave('classActivities'); }
@@ -1289,10 +1315,10 @@ function saveClassActivities(){ queueSave('classActivities'); }
    the student's own top-level `caSteps` field, same set/delete shape as
    classActivities above. Kept in Firestore, not on the Chromebook, so they
    follow the student to any device and never reset (Jonathan, 2026-10-01). */
-let caStepDeletes = new Set();
+let caStepDeletes = new Map();
 function onCaStepChange(key, isDone){
   if(isDone){ caStepDone[key] = true; caStepDeletes.delete(key); }
-  else { delete caStepDone[key]; caStepDeletes.add(key); }
+  else { delete caStepDone[key]; caStepDeletes.set(key, ++_deleteSeq); }
   queueSave('caSteps');
 }
 function saveExitChecks(){ queueSave('exitChecks'); }
@@ -1361,8 +1387,10 @@ function renderAll(){
       // The dropdown redraw only fixes the 🔒 marker there — the visible
       // panel for the module already on screen was gated on the same stale
       // guess, so re-run the gate check against it too (idempotent: lands
-      // back on the same set when the guess was already right).
-      onModuleChange(lastModuleNum, lastSetId);
+      // back on the same set when the guess was already right). Quiet: when
+      // it lands back on what's already showing, it must not re-run
+      // activateSet's side effects — see onModuleChange.
+      onModuleChange(lastModuleNum, lastSetId, {quiet:true});
     });
   }
 }
@@ -3067,24 +3095,36 @@ async function submitIssueReport(){
   }
   if(btn){ btn.disabled = true; btn.textContent = t('issue.sending'); }
   if(status){ status.textContent = ''; status.className = 'issue-status'; }
+  /* No retryable timeout here. add() can't be cancelled: on a stalled network
+     it stays queued and lands once the connection is back, so a "couldn't
+     send — try again" after 10 s used to turn the student's second press into
+     a duplicate report. Instead the button stays disabled (one send per open
+     form) and after 10 s the status says it is still on its way. Only a real
+     rejection — nothing written — re-enables it. `cancelled`: this form was
+     closed (closeIssueModal removes it) or replaced by a new one; a send
+     still waiting on the SDK then sends nothing, and a late answer touches
+     nothing. */
+  const cancelled = ()=>!(ta && document.contains(ta));
+  const slowT = setTimeout(()=>{
+    if(!cancelled() && status){ status.textContent = t('issue.stillSending'); status.className = 'issue-status'; }
+  }, 10000);
   try{
-    // Bounded (see withTimeout): on a stalled network the button would
-    // otherwise say "Sending…" forever. Out of time reads as a failed send.
-    await withTimeout((async()=>{
-      await ensureDb();
-      await db.collection('issueReports').add({
-        uid: currentUser.uid,
-        email: currentUser.email || '',
-        name: currentUser.displayName || '',
-        message,
-        location: currentReportContext(),
-        moduleNum: lastModuleNum,
-        setId: lastSetId,
-        lang: getLang(),
-        userAgent: navigator.userAgent,
-        createdAt: firebase.firestore.FieldValue.serverTimestamp()
-      });
-    })(), 10000);
+    await ensureDb();
+    if(cancelled()) return;
+    await db.collection('issueReports').add({
+      uid: currentUser.uid,
+      email: currentUser.email || '',
+      name: currentUser.displayName || '',
+      message,
+      location: currentReportContext(),
+      moduleNum: lastModuleNum,
+      setId: lastSetId,
+      lang: getLang(),
+      userAgent: navigator.userAgent,
+      createdAt: firebase.firestore.FieldValue.serverTimestamp()
+    });
+    clearTimeout(slowT);
+    if(cancelled()) return;
     if(status){ status.textContent = t('issue.sent'); status.className = 'issue-status ok'; }
     if(ta) ta.disabled = true;
     if(btn) btn.remove();
@@ -3094,6 +3134,10 @@ async function submitIssueReport(){
     clearTimeout(_issueCloseTimer);
     if(ta && document.contains(ta)) _issueCloseTimer = setTimeout(closeIssueModal, 2200);
   } catch(e){
+    // A real rejection (rules, the SDK never loaded): nothing was written,
+    // so trying again cannot duplicate it.
+    clearTimeout(slowT);
+    if(cancelled()) return;
     if(status){ status.textContent = t('issue.failed'); status.className = 'issue-status err'; }
     if(btn){ btn.disabled = false; btn.textContent = t('issue.submit'); }
   }
@@ -3364,7 +3408,7 @@ function gateToast(msg){
    continuation repaints the pills and activates a Module 1 set underneath a
    dropdown reading "Module 7". A stale ticket now just bails. */
 let _moduleChangeReq = 0;
-async function onModuleChange(moduleNum, restoreSetId){
+async function onModuleChange(moduleNum, restoreSetId, opts){
   moduleNum = parseInt(moduleNum);
   const req = ++_moduleChangeReq;
   const prevModuleNum = lastModuleNum, prevSetId = lastSetId;
@@ -3420,7 +3464,26 @@ async function onModuleChange(moduleNum, restoreSetId){
   // it read-only instead of letting activateSet's backstop bounce off it and
   // leave a dead screen.
   const tw = moduleSets.find(w=>w.id===target);
-  if(tw && isSetLocked(tw)) activateSet(target, {peek:true});
+  const wantPeek = !!(tw && isSetLocked(tw));
+  /* opts.quiet: renderAll's catch-up re-run once every module's data has
+     loaded. On a slow cold load the student is already working by then —
+     In-Class Activities open, a Coach check started, a drill mid-answer, a
+     locked set opened to preview — and activateSet would scroll them to the
+     top, close the Coach, reset every drill and drop the preview. So when
+     the screen already shows what this would open (renderPills above has
+     already shed a peek the full data unlocked), or the student is
+     previewing a set that is still locked, leave it — renderPills above was
+     the whole correction. Anything else is a real correction and goes
+     through activateSet as before. */
+  const cur = (opts && opts.quiet) ? activeWeekPanel() : null;
+  const curW = cur ? SETS.find(w=>w.id===cur.dataset.id) : null;
+  const curPeek = !!(cur && cur.classList.contains('set-peek'));
+  if(cur && ((cur.dataset.id === target && curPeek === wantPeek) ||
+             (curPeek && curW && curW.moduleNum === moduleNum && isSetLocked(curW)))){
+    if(!curPeek && lastSetId !== target){ lastSetId = target; renderPills(moduleNum); }
+    syncRailStations();
+  }
+  else if(wantPeek) activateSet(target, {peek:true});
   else activateSet(target);
   // First completed render of the session: the restored set is on screen and
   // its data is loaded, so the resume card can finally compute step counts.

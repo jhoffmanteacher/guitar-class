@@ -2408,6 +2408,10 @@
                                es: 'Gracias — ¡recibido! El Sr. Hoffman lo va a revisar.' },
     'issue.failed':          { en: "Couldn't send that — check your connection and try again, or email jhoffman@seq.org directly.",
                                es: 'No se pudo enviar — revisa tu conexión e intenta de nuevo, o escribe directamente a jhoffman@seq.org.' },
+    // Shown after 10 s with no answer. The report is queued and cannot be
+    // cancelled, so the button stays off — a second press would send it twice.
+    'issue.stillSending':    { en: 'Still sending — it will go through when your connection is back.',
+                               es: 'Todavía se está enviando — se enviará cuando vuelva tu conexión.' },
     'issue.emptyWarn':       { en: 'Type a quick description first.', es: 'Escribe una breve descripción primero.' },
 
     // ── Module-review recording widget (renderRecBody) ──

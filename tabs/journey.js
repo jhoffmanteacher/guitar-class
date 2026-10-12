@@ -1091,6 +1091,15 @@ window.addEventListener('load', function(){
     if(authSettled && fbUser && fbUser.uid !== user.uid){
       pendingSave = false; dirty = false; resetReadyUi();
     }
+    // Someone signed in (another tab) after auth had already settled with
+    // nobody we could save for — the page sat signed out. Its unsaved ✓s
+    // belong to nobody: clear them before the read below paints this
+    // student's own, or their first click (or the pagehide flush) saves
+    // those ✓s into this student's doc. Boot-race ticks are untouched
+    // (authSettled is still false then) and flush as before.
+    else if(authSettled && !fbUser && dirty){
+      pendingSave = false; dirty = false; resetReadyUi();
+    }
     var firstResolution = !authSettled;
     authSettled = true;
     loadFirestoreSdk().then(function(){
