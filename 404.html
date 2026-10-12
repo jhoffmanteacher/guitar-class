@@ -49,6 +49,7 @@
     });
   document.addEventListener('DOMContentLoaded', function(){
     document.getElementById('nf-home').href = root + 'index.html';
+    document.getElementById('nf-songs').href = root + 'index.html#songs';
   });
 })();
 /* Match the student's saved language. This page is standalone (no i18n.js),
@@ -74,6 +75,7 @@ document.addEventListener('DOMContentLoaded', function(){
   .notfound-home{display:inline-block;padding:14px 32px;font-size:17px;font-weight:600;border-radius:999px;background:#322b78;color:#fff;text-decoration:none}
   .notfound-home:hover{background:#40378f}
   .notfound-sub{margin-top:22px;font-size:14px;color:var(--text3)}
+  .notfound-sub a{color:var(--text2);text-decoration:underline}
 </style>
 </head>
 <body>
@@ -94,7 +96,7 @@ document.addEventListener('DOMContentLoaded', function(){
        activity cards, not songs — the Journeys live on the Songs page. A stale
        Journey bookmark is exactly what lands a student here, so point them at
        the page that actually has them. -->
-  <p class="notfound-sub" data-es="¿Buscas una canción? Las canciones están en la página de Canciones.">Looking for a song? The songs are on the Songs page.</p>
+  <p class="notfound-sub"><span data-es="¿Buscas una canción? Las canciones están en">Looking for a song? The songs are on</span> <a id="nf-songs" href="./index.html#songs" data-es="la página de Canciones">the Songs page</a>.</p>
 </main>
 </body>
 </html>

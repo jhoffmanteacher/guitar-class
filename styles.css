@@ -2629,6 +2629,10 @@ body.ca-full:has(#class-activities-screen:not([hidden])) .rail-backdrop{display:
    for the handout), just not shown; the head is a label, not a toggle. */
 .ca-card--focus .ca-step.ca-step-collapsed{display:none}
 .ca-card--focus .ca-step + .ca-step{border-top:0}
+/* One step on screen, so the 56px under-the-title gutter is just margin —
+   the same 22px desktop gutter as .dp.focus .step-detail. The print rule
+   (body.print-activity) outranks this, so the handout keeps its 34px. */
+@media(min-width:761px){.ca-card--focus .ca-step-detail{padding-left:22px}}
 .ca-step-head--focus{cursor:default;font-weight:600}
 .ca-step-head--focus:hover{background:transparent}
 .ca-focus-dots{display:flex;flex-wrap:wrap;gap:6px;margin:12px 0 4px}
@@ -3408,6 +3412,24 @@ body.games-open{overflow:hidden}
    their hit area sideways would overlap the neighbouring note (and checks.mjs
    1o pins the grid's width maths). Grow only vertically. */
 .tab-note-btn::after{width:100%}
+/* Touch screens only (any-pointer, so a touchscreen Chromebook with a
+   trackpad counts too): the practice card's section pills (30px tall, in
+   wrapping rows 4px apart) and the rep-counter dots (26px, 6px apart) get
+   the same invisible overlay. Nothing changes size on screen.
+   - Pills: 36px tall. Rows are 4px apart, so two rows' overlays share a
+     2px band and the lower row (painted later) wins it — the split sits
+     1px off the middle of the gap. Taller would push it further.
+   - Dots: 44px tall, and as wide as the dot plus the 6px gap, so the
+     overlays tile edge to edge. A wider one overlapped the NEXT dot, and
+     that one painted on top — a tap just past a dot counted one rep extra.
+   button.rep-dot only: the ✓ row and the rep strip reuse the class on
+   plain spans. */
+@media (any-pointer:coarse){
+  .pc-sec,button.rep-dot{position:relative}
+  .pc-sec::after,button.rep-dot::after{content:'';position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);
+    width:max(100%,36px);height:max(100%,36px)}
+  button.rep-dot::after{width:calc(100% + 6px);height:44px}
+}
 
 
 /* ── Rail module progress bar — always-visible version of the done/total

@@ -86,7 +86,7 @@
       <span class="header-search-label" data-i18n="header.find">Find</span>
     </button>
     <button class="btn-translate" id="btn-translate" onclick="toggleTranslate()" title="Translate to Spanish" data-i18n-attr="title:header.translateTitle">
-      <span class="ico" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M3 12h18"/><path d="M12 3a14 14 0 0 1 0 18"/><path d="M12 3a14 14 0 0 0 0 18"/></svg></span><span id="translate-label">Español</span>
+      <span class="ico" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M3 12h18"/><path d="M12 3a14 14 0 0 1 0 18"/><path d="M12 3a14 14 0 0 0 0 18"/></svg></span><span id="translate-label" lang="es">Español</span>
     </button>
     <div class="user-area" id="user-area">
       <button class="btn-sign" onclick="signIn()" data-i18n="header.signIn">Sign in with Google</button>
@@ -433,7 +433,7 @@
                  move focus to the title the way it used to move it to the
                  button. Games and Live quiz keep their Back — they cover the
                  rail. -->
-            <div class="page-title" tabindex="-1"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 18V5l12-2v13"/><circle cx="6" cy="18" r="3"/><circle cx="18" cy="16" r="3"/></svg> <span data-i18n="hub.allSongs">All songs</span></div>
+            <h2 class="page-title" tabindex="-1"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 18V5l12-2v13"/><circle cx="6" cy="18" r="3"/><circle cx="18" cy="16" r="3"/></svg> <span data-i18n="hub.allSongs">All songs</span></h2>
             <span class="page-topbar-spacer"></span>
           </div>
           <div class="page-body" id="songs-screen-body"></div>
@@ -449,15 +449,15 @@
       <div class="page-screen" id="my-progress-screen" role="region" aria-label="My progress" data-i18n-attr="aria-label:nav.myProgress" hidden>
         <div class="page-shell">
           <div class="page-topbar">
-            <div class="page-title" tabindex="-1"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 20V10"/><path d="M12 20V4"/><path d="M20 20v-7"/></svg> <span data-i18n="nav.myProgress">My progress</span></div>
+            <h2 class="page-title" tabindex="-1"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 20V10"/><path d="M12 20V4"/><path d="M20 20v-7"/></svg> <span data-i18n="nav.myProgress">My progress</span></h2>
             <span class="page-topbar-spacer"></span>
           </div>
           <div class="page-body">
-            <div class="rail-sec-label" style="margin:0 0 8px" data-i18n="sr.title">Daily Review</div>
+            <h3 class="rail-sec-label" style="margin:0 0 8px" data-i18n="sr.title">Daily Review</h3>
             <div id="sr-screen-body"></div>
-            <div class="rail-sec-label" style="margin:22px 0 8px" data-i18n="nav.keepPracticing">Keep practicing</div>
+            <h3 class="rail-sec-label" style="margin:22px 0 8px" data-i18n="nav.keepPracticing">Keep practicing</h3>
             <div id="keep-practicing-body"></div>
-            <div class="rail-sec-label" style="margin:22px 0 8px" data-i18n="nav.myProgress">My progress</div>
+            <h3 class="rail-sec-label" style="margin:22px 0 8px" data-i18n="nav.myProgress">My progress</h3>
             <div id="my-progress-body"></div>
           </div>
         </div>
@@ -471,7 +471,7 @@
                  caSyncTopbar() swaps this title for the open card's own title
                  and "n of m done" while a card is open, so a student three
                  steps down still sees where they are. -->
-            <div class="page-title" tabindex="-1" id="ca-page-title"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="5" y="3" width="14" height="18" rx="2"/><path d="M9 3h6v2a1 1 0 0 1-1 1h-4a1 1 0 0 1-1-1z"/><path d="m9 13 2 2 4-4"/></svg> <span data-i18n="nav.classActivitiesNav">In class</span></div>
+            <h2 class="page-title" tabindex="-1" id="ca-page-title"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="5" y="3" width="14" height="18" rx="2"/><path d="M9 3h6v2a1 1 0 0 1-1 1h-4a1 1 0 0 1-1-1z"/><path d="m9 13 2 2 4-4"/></svg> <span data-i18n="nav.classActivitiesNav">In class</span></h2>
             <div class="ca-bar-open" id="ca-bar-open" hidden></div>
             <span class="page-topbar-spacer"></span>
           </div>

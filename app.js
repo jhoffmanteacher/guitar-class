@@ -1191,8 +1191,18 @@ function onStepMcSelect(key, btn){
   const group = btn.closest('.step-mc-keyed');
   if(!group) return;
   group.classList.add('answered');
-  group.querySelectorAll('.step-mc-opt').forEach(b=>b.classList.remove('correct','incorrect'));
-  btn.classList.add(btn.dataset.correct === '1' ? 'correct' : 'incorrect');
+  group.querySelectorAll('.step-mc-opt').forEach(b=>{ b.classList.remove('correct','incorrect'); b.setAttribute('aria-pressed', String(b === btn)); });
+  const right = btn.dataset.correct === '1';
+  btn.classList.add(right ? 'correct' : 'incorrect');
+  // Say what the colours show: right or not, the answer, then the explain.
+  const resp = group.closest('.step-resp');
+  const sr = resp && resp.querySelector('.step-mc-sr');
+  if(sr){
+    const ans = group.querySelector('.step-mc-opt.is-answer .step-mc-text');
+    const ex = resp.querySelector('.step-mc-explain');
+    const said = right ? t('step.correct') : t('step.mcAnswerIs', {answer: ans ? ans.textContent : ''});
+    sr.textContent = ex ? said.replace(/([^.!?])$/, '$1.') + ' ' + ex.textContent : said;
+  }
 }
 /* ── Unified progress writer ──
    skills, last-place, responses, and completed all live in the SAME Firestore
@@ -4862,10 +4872,13 @@ function buildLesson(w){
             let cls = 'step-mc-opt';
             if(c === ansChoice) cls += ' is-answer';
             if(answered && c === stored) cls += (c === ansChoice) ? ' correct' : ' incorrect';
-            return `<button type="button" class="${cls}" data-choice="${escAttr(c)}" data-correct="${c===ansChoice?'1':'0'}" onclick="onStepMcSelect('${key}', this)"><span class="step-mc-text">${escHtml(choicesEs[ci])}</span><span class="step-mc-check">&#x2713;</span></button>`;
+            return `<button type="button" class="${cls}" aria-pressed="${answered && c === stored}" data-choice="${escAttr(c)}" data-correct="${c===ansChoice?'1':'0'}" onclick="onStepMcSelect('${key}', this)"><span class="step-mc-text">${escHtml(choicesEs[ci])}</span><span class="step-mc-check">&#x2713;</span></button>`;
           }).join('');
           const explainHtml = r.explain ? `<div class="step-mc-explain">${escHtml(tf(r,'explain'))}</div>` : '';
-          return `<div class="step-resp">${labelHtml}${promptHtml}<div class="step-resp-mc step-mc-keyed${answered?' answered':''}">${opts}</div>${explainHtml}</div>`;
+          // The result is colour and a ✓ on screen; .step-mc-sr says it aloud
+          // (onStepMcSelect fills it). After the explain, so the
+          // `.answered + .step-mc-explain` reveal rule still matches.
+          return `<div class="step-resp">${labelHtml}${promptHtml}<div class="step-resp-mc step-mc-keyed${answered?' answered':''}">${opts}</div>${explainHtml}<span class="sr-only step-mc-sr" aria-live="polite"></span></div>`;
         }
         // Reflection / observation MCs stay unkeyed — record the pick only.
         const opts = r.choices.map((c,ci)=>{
@@ -5488,6 +5501,13 @@ function collapseAndAdvance(li){
     if(focus) nudgeStepIntoView(next);
   }
   syncStationFocus(dp);
+  /* The Done button just pressed is inside a row that is now collapsed
+     (hidden), so keyboard focus would fall back to <body>. Move it to the
+     row that opened — or this row's own head when nothing did. */
+  if(li.classList.contains('collapsed') && li.contains(document.activeElement)){
+    const to = (next || li).querySelector('.step-head');
+    if(to) to.focus({preventScroll: true});
+  }
 }
 
 function updateProgressPill(li){ refreshLessonPill(li.closest('.dp')); }
@@ -6275,7 +6295,7 @@ function renderPracticePanel(practice, skillId, wid){
           `<div class="fg-best">${bestHtml}</div>` +
         `</div>` +
         `<div class="fg-board">${fgBoardSvg(skillId, kind)}</div>` +
-        `<div class="fg-fb"></div>` +
+        `<div class="fg-fb" aria-live="polite"></div>` +
       `</div>` +
       playRow +
     `</div>`;
@@ -6335,17 +6355,17 @@ function renderPracticePanel(practice, skillId, wid){
       if(storedIdx === idx){
         cls += (idx === ansIdx) ? ' correct' : ' incorrect';
       }
-      return `<button type="button" class="${cls}" data-idx="${idx}" onclick="onPracticeMcSelect('${skillId}', ${idx}, ${ansIdx}, this)"><span>${escHtml(choicesEs[idx])}</span></button>`;
+      return `<button type="button" class="${cls}" aria-pressed="${storedIdx === idx}" data-idx="${idx}" onclick="onPracticeMcSelect('${skillId}', ${idx}, ${ansIdx}, this)"><span>${escHtml(choicesEs[idx])}</span></button>`;
     }).join('');
     let feedbackHtml = '';
     if(storedIdx >= 0){
       if(storedIdx === ansIdx){
-        feedbackHtml = `<div class="sk-practice-feedback correct">${t('step.correct')}</div>`;
+        feedbackHtml = `<div class="sk-practice-feedback correct" aria-live="polite">${t('step.correct')}</div>`;
       } else {
-        feedbackHtml = `<div class="sk-practice-feedback incorrect">${t('step.notQuite')}</div>`;
+        feedbackHtml = `<div class="sk-practice-feedback incorrect" aria-live="polite">${t('step.notQuite')}</div>`;
       }
     } else {
-      feedbackHtml = `<div class="sk-practice-feedback"></div>`;
+      feedbackHtml = `<div class="sk-practice-feedback" aria-live="polite"></div>`;
     }
     // Trusted HTML, same as step text: fields — module data is repo-authored.
     // (choices stay text-only — they're short button labels, escaped above.)
@@ -6384,6 +6404,7 @@ function onPracticeMcSelect(skillId, idx, ansIdx, btnEl){
   if(group){
     group.querySelectorAll('.sk-practice-mc-opt').forEach(b=>{
       b.classList.remove('correct','incorrect');
+      b.setAttribute('aria-pressed', String(b === btnEl));
     });
   }
   btnEl.classList.add(idx === ansIdx ? 'correct' : 'incorrect');
@@ -6640,7 +6661,10 @@ function fgBoardSvg(sid, kind, opts){
   if(opts.shade) for(let f = 0; f <= maxF; f++){
     if(shaded(f)) s += `<rect class="fg-shade" x="${colX(f)}" y="0" width="${colW(f)}" height="${H}"/>`;
   }
-  /* Feedback markers (hidden until a click) + hit zones on top */
+  /* Feedback markers (hidden until a click) + hit zones on top. The zones
+     are in the Tab order (tabindex="0" role="button"); the role="button"
+     keydown handler gives them Enter/Space. Their label is string + fret,
+     never the note — naming the note is the game. */
   strs.forEach((k, i) => {
     const y = stringYs[i], map = FG_NATURALS[k];
     for(let f = 0; f <= maxF; f++){
@@ -6655,7 +6679,7 @@ function fgBoardSvg(sid, kind, opts){
     const bandH   = multi ? rowGap : (wireBot - wireTop) + 16;
     for(let f = 0; f <= maxF; f++){
       if(shaded(f)) continue;
-      s += `<rect class="fg-hit" x="${colX(f)}" y="${bandTop}" width="${colW(f)}" height="${bandH}" rx="6" onclick="${clickFn}('${sid}','${k}',${f})" aria-label="${escAttr(t(FRET_STRING_KEY[k]))} — ${escAttr(t('fret.fretN',{n:f}))}"><title>${escHtml(t('fret.fretN',{n:f}))}</title></rect>`;
+      s += `<rect class="fg-hit" x="${colX(f)}" y="${bandTop}" width="${colW(f)}" height="${bandH}" rx="6" tabindex="0" role="button" onclick="${clickFn}('${sid}','${k}',${f})" aria-label="${escAttr(t(FRET_STRING_KEY[k]))} — ${escAttr(t('fret.fretN',{n:f}))}"><title>${escHtml(t('fret.fretN',{n:f}))}</title></rect>`;
     }
   });
   return s + '</svg>';
@@ -8735,7 +8759,14 @@ function syncTranslateBtn(){
   const lbl = document.getElementById('translate-label');
   const es = getLang() === 'es';
   if(btn) btn.classList.toggle('active', es);
-  if(lbl) lbl.textContent = es ? 'English' : 'Español';
+  if(lbl){
+    lbl.textContent = es ? 'English' : 'Español';
+    // The label names the OTHER language, in that language — tag it so a
+    // screen reader says "Español" in Spanish, not as an English word.
+    // No aria-pressed: the label changes with the state, so "English,
+    // pressed" would read as English being on — the opposite of the truth.
+    lbl.lang = es ? 'en' : 'es';
+  }
 }
 function toggleTranslate(){
   setLang(getLang() === 'es' ? 'en' : 'es');
@@ -9653,7 +9684,9 @@ document.addEventListener('keydown',e=>{
   const el=e.target.closest('[role="button"]');
   if(!el||el.tagName==='BUTTON'||el.tagName==='A') return;
   e.preventDefault();
-  el.click();
+  // SVG has no .click() — the Find-the-Note hit zones are <rect role="button">.
+  if(typeof el.click === 'function') el.click();
+  else el.dispatchEvent(new MouseEvent('click', {bubbles: true}));
 });
 
 /* ── Resource viewer (floating mini-player) ──
@@ -11448,7 +11481,7 @@ function caStepHtml(a, step, si, isOpen, isDone){
      steps. Same classes, so the print sheet reads the same either way. */
   if(focus){
     return `<li class="ca-step${isDone ? ' ca-step-done' : ''}${isOpen ? '' : ' ca-step-collapsed'}" data-idx="${si}">`
-      + `<div class="ca-step-head ca-step-head--focus">`
+      + `<div class="ca-step-head ca-step-head--focus" tabindex="-1">`
       + `<span class="ca-step-status" aria-hidden="true">${caStepStatusHtml(si + 1, isDone)}</span>`
       + `<span class="ca-step-label">${escHtml(caStepHeadText(step, si, (a.steps || []).length))}</span>`
       + `</div>`
@@ -11549,6 +11582,10 @@ function caFocusGo(id, si){
   caOpenId = id;
   renderClassActivities();
   caScrollToActivity(id);
+  // The button pressed went with the old markup — give focus to the step
+  // now on screen (tabindex="-1" head) so Tab carries on from there.
+  const head = document.querySelector(`.ca-card[data-id="${CSS.escape(id)}"] .ca-step:not(.ca-step-collapsed) .ca-step-head--focus`);
+  if(head) head.focus({preventScroll: true});
 }
 // "Got it": tick the step (the same caStepDone the accordion's Mark done
 // writes) and move to the next one. On an already-done step it just moves
@@ -12589,7 +12626,7 @@ function caCheckBodyHtml(a, opts){
     const promptKey = (a.check || {}).type === 'nextNote' ? 'check.whatNext' : 'check.whatNote';
     const qParams = {n: i + 1, total: items.length};
     return introHtml
-      + `<div class="ec-q" data-i18n="check.q" data-i18n-params='${escAttr(JSON.stringify(qParams))}'>${escHtml(t('check.q', qParams))}</div>`
+      + `<div class="ec-q" tabindex="-1" aria-live="polite" data-i18n="check.q" data-i18n-params='${escAttr(JSON.stringify(qParams))}'>${escHtml(t('check.q', qParams))}</div>`
       + ecStimulusHtml(a, item, i, opts)
       + `<div class="ec-prompt" data-i18n="${promptKey}">${escHtml(t(promptKey))}</div>`
       + ecChoicesHtml(a, item, a.id);
@@ -12627,7 +12664,7 @@ function caCheckBodyHtml(a, opts){
       ? `<button type="button" class="ca-mark-btn" onclick="ecRetake('${escAttr(a.id)}', ${preview ? 'true' : 'false'})"><span data-i18n="check.retake">${escHtml(t('check.retake'))}</span></button>`
       : '';
     return introHtml
-      + `<p class="ec-score" data-i18n="check.score" data-i18n-params='${escAttr(JSON.stringify(sParams))}'>${escHtml(t('check.score', sParams))}</p>`
+      + `<p class="ec-score" tabindex="-1" data-i18n="check.score" data-i18n-params='${escAttr(JSON.stringify(sParams))}'>${escHtml(t('check.score', sParams))}</p>`
       + stamp + `<div class="ec-results">${rowsHtml}</div>` + again;
   }
 
@@ -12664,6 +12701,15 @@ function ecRender(id){
   // When this question's choices appeared — ecPick ignores a tap inside
   // 400 ms of it (the second half of a double tap, see there).
   if(ecRuns[id]) ecRuns[id].shownAt = performance.now();
+  ecFocus(id);
+}
+/* The body was just rewritten under the button that was pressed, so focus
+   would drop to <body>. Put it on the question line (tabindex="-1") — or on
+   the score once the check is over — without scrolling the page. */
+function ecFocus(id){
+  const el = document.getElementById(ecBodyId(ecViewOpts[id] || {}) + id);
+  const q = el && el.querySelector('.ec-q, .ec-score');
+  if(q) q.focus({preventScroll: true});
 }
 /* Each item sounds once as it appears — the question is "what did you just
    hear", so making them press play first is a step with no teaching in it.
@@ -12704,6 +12750,7 @@ function ecPick(id, btn){
     ecAutoPlay(id);
   } else {
     ecSubmit(id);
+    ecFocus(id);   // ecSubmit re-renders the whole page for a student
   }
 }
 function ecSubmit(id){

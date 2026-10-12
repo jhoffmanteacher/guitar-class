@@ -755,6 +755,8 @@
     'step.practiceThis':     { en: 'Practice this', es: 'Practica esto' },
     'step.correct':          { en: 'Correct!', es: '¡Correcto!' },
     'step.notQuite':         { en: 'Not quite — try again.', es: 'No es eso — inténtalo otra vez.' },
+    // Screen-reader only: a graded step quiz shows the answer the moment you pick.
+    'step.mcAnswerIs':       { en: 'Not quite. The answer is: {answer}', es: 'No es eso. La respuesta es: {answer}' },
 
     // ── Song rows (the Songs hub, and the video overlay it opens) ──
     'songs.original':        { en: 'Original', es: 'Original' },
