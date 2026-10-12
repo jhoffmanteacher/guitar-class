@@ -370,6 +370,9 @@ async function showTeacherApp(user){
     shell.addEventListener('dragenter', teacherBoardDragOver);
     shell.addEventListener('drop',      teacherBoardDrop);
     shell.addEventListener('dragend',   teacherBoardDragEnd);
+    // ...and the dragend that never arrives — see teacherBoardStaleDragCheck.
+    document.addEventListener('mousemove', teacherBoardStaleDragCheck, {capture:true, passive:true});
+    document.addEventListener('mousedown', teacherBoardStaleDragCheck, true);
     // Enter saves, Escape backs out — the rename box is a one-line field in a
     // table cell, not a form, so there's no submit event to lean on.
     shell.addEventListener('keydown', e=>{
@@ -1432,7 +1435,8 @@ function renderTeacherActivities(opts){
     const publishBlock=a=>{
       const dateVal=dates[a.id]||'';
       const isHidden=hidden[a.id]===true;
-      const dateInput=`<input type="date" class="t-date-input" data-set-activity-date data-id="${escAttr(a.id)}" value="${escAttr(dateVal)}" aria-label="Release date for ${escAttr(teacherActivityTitle(a,cfg))}">`;
+      // max: the calendar greys out the years teacherCommitActivityDate refuses.
+      const dateInput=`<input type="date" class="t-date-input" data-set-activity-date data-id="${escAttr(a.id)}" value="${escAttr(dateVal)}" max="${new Date().getFullYear()+1}-12-31" aria-label="Release date for ${escAttr(teacherActivityTitle(a,cfg))}">`;
       const pubNow=`<button class="tg-seg-btn" data-publish-activity data-id="${escAttr(a.id)}" data-state="now" title="Publish today — students see it as soon as they reload">Publish now</button>`;
       const unpub=`<button class="tg-seg-btn" data-publish-activity data-id="${escAttr(a.id)}" data-state="off" title="Clear the release date — students stop seeing it">Unpublish</button>`;
       let status, controls;
@@ -1687,6 +1691,14 @@ function renderTeacherActivities(opts){
         +`</div>`;
     })();
 
+    /* The Built column is its own scroller (sticky, max-height, overflow-y in
+       styles.css), so keepY alone doesn't hold its place: every repaint —
+       the once-a-minute refresh included — would throw it back to the top
+       while the teacher is scrolling it for a card. Read it here, at the
+       moment of the swap, not before the config read above. Assigned grows
+       with the page, so the window's keepY already covers it. */
+    const oldBuilt=box.querySelector('[data-board-built]');
+    const builtTop=oldBuilt ? oldBuilt.scrollTop : 0;
     setBoardWide(true);
     box.innerHTML=`<div class="tg-note">Drag a built activity into a module to assign it. It goes live for students on its release date.</div>`
       +pinsHtml
@@ -1697,6 +1709,8 @@ function renderTeacherActivities(opts){
       +`<strong>Pin</strong> puts an assigned card on the <strong>Keep practicing</strong> row at the top of students' In-Class Activities page, up to ${TEACHER_PINS_MAX} cards, in the order you pinned them — for a card you reuse on many days, so you don't have to re-date it. A pin needs no release date. It never blocks the site, never counts as one of today's activities, and a pinned card that is also one of today's activities leaves the row that day. Hidden, Archive and Delete still win (Delete also unpins). Students' Done marks are untouched.<br><br>`
       +`<strong>Un-assign</strong> sends a card back to Built without clearing anything. The &#x270E; renames an activity for everyone, in both languages, until the Spanish twin ships. Copy link gives you a URL that opens the site straight to that one activity, card already open — paste it into Classroom. Type over a <strong>#number</strong> to move a card to that position; a number inside a title, like Finger Gym 2, is part of the name and stays put.</div></details>`
       +`<div class="t-board">${builtHtml}${assignedHtml}</div>`;
+    // Before the rename box's focus() below, so focus can still scroll it into view.
+    if(builtTop){ const nb=box.querySelector('[data-board-built]'); if(nb) nb.scrollTop=builtTop; }
     // Opening the editor is a full re-render, so focus has to be re-placed
     // afterwards or the pencil click would leave you looking at a box you
     // still have to click into. select() so typing replaces the old name.
@@ -1980,6 +1994,20 @@ function teacherBoardDragEnd(){
   boardDragId=null;
   document.querySelectorAll('.t-board-dragging').forEach(el=>el.classList.remove('t-board-dragging'));
   teacherBoardClearDropMarks();
+}
+/* A repaint that lands mid-drag (a typed date's write, a Refresh) replaces
+   the card being dragged. Its dragend then fires on a node that is no longer
+   in the page, so it reaches neither the shell nor the document, and a drop
+   outside a target fires no drop either — boardDragId stayed set, and with
+   it teacherRefreshSafe skipped every auto-refresh (and a stray text drag
+   over the board would carry that card) until the next successful drop.
+   The browser sends no mouse events while a drag runs, so a mouse event
+   that arrives with no .t-board-dragging card left in the page means the
+   drag is over. A live drag's card still has the class, so it's untouched —
+   a refresh during a real drag is still skipped. Bound once, beside the
+   shell's drag listeners. */
+function teacherBoardStaleDragCheck(){
+  if(boardDragId && !document.querySelector('.t-board-dragging')) teacherBoardDragEnd();
 }
 function teacherBoardDragOver(e){
   if(!boardDragId) return;
@@ -2523,8 +2551,12 @@ function teacherCommitActivityDate(box){
     // (a field blanked with Backspace) — the box reports the second as badInput.
     if(box.validity && box.validity.badInput){ teacherRejectActivityDate(box, saved, 'That date is not complete — nothing was saved.'); return; }
   } else {
-    const y=Number(value.slice(0,4)), now=new Date().getFullYear();
+    // The whole year, not its first four characters: the box takes up to six
+    // year digits, and '20277-10-12' read as 2027 passed here and was then
+    // dropped without a word by teacherSetActivityDate's format check.
+    const y=Number(value.split('-')[0]), now=new Date().getFullYear();
     if(!(y>=now-1 && y<=now+1)){ teacherRejectActivityDate(box, saved, `Year ${y} is not right — use ${now-1} to ${now+1}. Nothing was saved.`); return; }
+    if(!/^\d{4}-\d{2}-\d{2}$/.test(value)){ teacherRejectActivityDate(box, saved, 'That date is not complete — nothing was saved.'); return; }
   }
   teacherSetActivityDate(id, value);
 }

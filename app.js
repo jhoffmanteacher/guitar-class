@@ -487,8 +487,9 @@ function signIn(){
         best (sdBest / nrBestSession / rrPts / coachStreak — coach.js has no
         auth hook at all). Reloading clears the lot in one move and can't drift
         out of sync the way an ever-growing manual reset list does. */
-let _signOutReloading = false;   // signOut() reloads itself — the auth listener's cross-tab reload stands aside
+let _signOutReloading = false;   // signOut() reloads itself — the auth listener's signed-out (null) reload stands aside
 let _signOutBusy = false;        // a second click during the bounded wait is not a second sign-out
+let _authUserSwapped = false;    // another tab signed a different student in — this page is already reloading as them
 async function signOut(anyway){
   if(_signOutBusy) return;
   _signOutBusy = true;
@@ -501,6 +502,9 @@ async function signOut(anyway){
      skips the wait: the student has just been told, and a second silent
      4 s would read as the button not working. */
   const saved = anyway ? false : await flushBeforeLeaving(4000);
+  // Someone else signed in during the wait: the auth listener has already
+  // reloaded the page, and auth.signOut() now would sign THEM out.
+  if(_authUserSwapped) return;
   /* Still not saved when the wait ran out (offline, or a stalled write):
      reloading now would throw that work away without a word. Say so and
      stay signed in — Firestore keeps the write queued and sends it by
@@ -728,14 +732,20 @@ if(auth) auth.onAuthStateChanged(async user=>{
        Chromebook). Everything the null branch below guards against applies
        here too, plus a pending save of A's that would now go out under B's
        uid. Same hard reset, same loop guard: after the reload currentUser
-       starts null. While signOut() is running it reloads itself, so stand
-       aside — and leave currentUser alone so its flush can't write A's work
-       into B's doc. */
+       starts null. Leave currentUser alone so no flush can write A's work
+       into B's doc.
+       This reloads even while signOut() is running. It used to stand aside
+       ("signOut reloads itself"), but signOut() no longer always does: when
+       its wait runs out unsaved it stays on A's screen with the "not saved"
+       notice — now with Firebase signed in as B, every later save of A's
+       refused under B's credentials, and "Sign out anyway" signing B out.
+       A's queued work can't be sent under B either way. _authUserSwapped
+       stops that signOut(), once its wait ends, from signing B out of every
+       tab in the moment before this page goes. */
     if(currentUser && !isDevBypassUser() && currentUser.uid !== user.uid){
-      if(!_signOutReloading){
-        try { sessionStorage.clear(); } catch(e){}
-        location.reload();
-      }
+      _authUserSwapped = true;
+      try { sessionStorage.clear(); } catch(e){}
+      location.reload();
       return;
     }
     currentUser = user;
@@ -7896,7 +7906,10 @@ async function ncStart(key){
     if(noteCalls[key] !== st || !ncBox(key)){ if(ok) coachReleaseMicIfIdle(); return; }
     if(!ok){
       st.coach = false;             // fall back to tapping for this card
-      st.msg = t('nc.micDenied');
+      // Why it failed — no mic, a busy mic, or a refusal (nc.micDenied) —
+      // from coach.js's record of the last acquisition. No coach.js (it
+      // failed to load) keeps the plain line.
+      st.msg = typeof coachMicFailMsg === 'function' ? coachMicFailMsg('nc.micDenied') : t('nc.micDenied');
       ncRepaint(key, ncSetupHtml(key));
       return;
     }
