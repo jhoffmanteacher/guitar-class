@@ -7373,7 +7373,7 @@ async function rnwStart(){
   s.phase = 'wait';
   body.innerHTML = `<div class="coach-tip rn-center">${t('games.common.startingMic')}</div>`;
   if (!coachStream && !(await coachAcquireMic())){
-    if (rn === s){ s.phase = 'ready'; rnRenderReady(t('games.common.micAccessDenied')); }
+    if (rn === s){ s.phase = 'ready'; rnRenderReady(coachMicFailMsg('games.common.micAccessDenied')); }
     return;
   }
   await coachEnsureRunning();
