@@ -1004,7 +1004,7 @@ MODULE_REVIEWS[11] = {
   module_es: 'Acordes, tonalidades y armonía',
   skills: [
     { id: 'mr11-s1', text: 'I can build a triad (root–3rd–5th) from any major scale', text_es: 'Puedo construir una tríada (raíz–3ª–5ª) a partir de cualquier escala mayor', set: 'm11w1' },
-    { id: 'mr11-s2', text: 'I can label a chord progression with Roman numerals, including "Luna"\'s F–Am vamp as I–iii', text_es: 'Puedo etiquetar una progresión de acordes con números romanos, incluyendo el vamp F–Am de "Luna" como I–iii', set: 'm11w1' },
+    { id: 'mr11-s2', text: 'I can label a chord progression with Roman numerals, including "Luna"\'s F–Am vamp', text_es: 'Puedo etiquetar una progresión de acordes con números romanos, incluyendo el vamp F–Am de "Luna"', set: 'm11w1' },
     { id: 'mr11-s3', text: 'I can figure out a song\'s key from the chords it uses', text_es: 'Puedo averiguar la tonalidad de una canción a partir de los acordes que usa', set: 'm11w2' },
     { id: 'mr11-s4', text: 'I can read a slash chord (like G/B) and know which note goes on the bottom', text_es: 'Puedo leer un acorde con barra diagonal (como G/B) y saber qué nota va abajo', set: 'm11w2' },
     { id: 'mr11-s5', text: 'I can name a barre chord\'s root from either the E-shape or A-shape fret', text_es: 'Puedo nombrar la raíz de un acorde con cejilla a partir del traste en forma de E o de A', set: 'm11w3' },

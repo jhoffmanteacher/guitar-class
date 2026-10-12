@@ -845,12 +845,12 @@ SETS.push(
         text_es: 'Transponer la caja 1 de pentatónica menor a cualquier tonalidad nombrada',
         gotItWhen: 'you can find box 1\'s fret for any of the four named keys (Am fret 5, Gm fret 3, Bm fret 7, Dm fret 10) within 5 seconds of being asked.',
         gotItWhen_es: 'puedes encontrar el traste de la caja 1 para cualquiera de las cuatro tonalidades (Am traste 5, Gm traste 3, Bm traste 7, Dm traste 10) dentro de los 5 segundos de que te lo pidan.',
-        practice: { type: 'mc', prompt: 'For D minor, box 1\'s root sits at low-E fret:',
-          prompt_es: 'Para D menor, la raíz de la caja 1 se ubica en el traste de la Mi grave:',
-          choices: ['5', '7', '10', '12'],
-          choices_es: ['5', '7', '10', '12'], answer: 2,
-          explain: 'Box 1 is named by the note under your first finger on the low E string, and D sits at fret 10 there. Fret 5 is the tempting answer because that\'s A minor — the fret you first learned the shape at.',
-          explain_es: 'La caja 1 se nombra por la nota bajo tu primer dedo en la cuerda Mi grave, y ahí D está en el traste 10. El traste 5 es la respuesta tentadora porque ese es A menor — el traste donde aprendiste la forma por primera vez.' } },
+        practice: { type: 'mc', prompt: 'For C minor, box 1\'s root sits at low-E fret:',
+          prompt_es: 'Para C menor, la raíz de la caja 1 se ubica en el traste de la Mi grave:',
+          choices: ['5', '7', '8', '12'],
+          choices_es: ['5', '7', '8', '12'], answer: 2,
+          explain: 'Box 1 is named by the note under your first finger on the low E string, and C sits at fret 8 there. Fret 5 is the tempting answer because that\'s A minor — the fret you first learned the shape at.',
+          explain_es: 'La caja 1 se nombra por la nota bajo tu primer dedo en la cuerda Mi grave, y ahí C está en el traste 8. El traste 5 es la respuesta tentadora porque ese es A menor — el traste donde aprendiste la forma por primera vez.' } },
       { id: 'm10w3-s2', text: 'Move a riff up or down the neck to a new key and play it',
         text_es: 'Mover un riff hacia arriba o abajo del mástil a una nueva tonalidad y tocarlo',
         gotItWhen: 'you can move a riff to a new key and play it, with every fret distance inside the riff staying exactly as it was.',
@@ -944,12 +944,12 @@ MODULE_REVIEWS[10] = {
   assessItems: [
     'Transpose a pentatonic pattern to a randomly drawn key and play it',
     'Name the relative minor of a given major key',
-    'Identify major vs minor — and echo a short pattern — by ear'
+    'Tell major from minor — and echo a short pattern — by ear'
   ],
   assessItems_es: [
     'Transponer un patrón pentatónico a una tonalidad sacada al azar y tocarlo',
     'Nombrar la relativa menor de una tonalidad mayor dada',
-    'Identificar mayor vs. menor — y repetir un patrón corto — de oído'
+    'Distinguir mayor de menor — y repetir un patrón corto — de oído'
   ],
   forward: 'You can build scales, name keys, and trust your ear. <strong>Module 11 does the same for chords:</strong> you\'ll see why "Let It Be"\'s four chords work, number any progression, and play twelve chords with one barre shape.',
   forward_es: 'Puedes construir escalas, nombrar tonalidades, y confiar en tu oído. <strong>El Módulo 11 hace lo mismo con los acordes:</strong> verás por qué funcionan los cuatro acordes de "Let It Be", numerarás cualquier progresión, y tocarás doce acordes con una sola forma de cejilla.',

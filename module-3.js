@@ -407,8 +407,8 @@ SETS.push(
     },
 
     skills: [
-      { id: 'm3w1-s1', text: 'Fret a clean 2-finger power chord (root + 5th) with no buzzing',
-        text_es: 'Trastear un acorde de potencia limpio con dos dedos (raíz + quinta) sin zumbido',
+      { id: 'm3w1-s1', text: 'Fret a clean 2-finger power chord with no buzzing',
+        text_es: 'Trastear un acorde de potencia limpio con dos dedos sin zumbido',
         gotItWhen: 'both notes ring clearly when you strum, with no buzz and no muffled strings — and it sounds the same every time you play it.',
         gotItWhen_es: 'las dos notas suenan claramente al rasguear, sin zumbido y sin cuerdas apagadas — y suena igual cada vez que lo tocas.',
         practice: { type: 'mc', prompt: 'A power chord is built from which two scale degrees (a scale degree = a note\'s number in the scale, counting up from the root)?',
@@ -961,8 +961,8 @@ SETS.push(
           choices_es: ['Ambos en la cuerda Mi grave, trastes 3 y 8', 'Ambos en la cuerda La, trastes 3 y 10', 'G5 en Mi grave (traste 3), C5 en La (traste 3)', 'G5 en La (traste 10), C5 en Mi grave (traste 8)'], answer: 2,
           explain: 'G is at fret 3 of the low E string and C is at fret 3 of the A string — so the fret number never changes, only the string does. G5 at fret 10 of the A string and C5 at fret 8 of the low E string are real chords too, but they make your hand jump.',
           explain_es: 'G está en el traste 3 de la cuerda Mi grave y C está en el traste 3 de la cuerda La — así que el número de traste nunca cambia, solo la cuerda. G5 en el traste 10 de la cuerda La y C5 en el traste 8 de la cuerda Mi grave también son acordes reales, pero hacen que tu mano salte.' } },
-      { id: 'm3w2-s5', text: 'Optional: add pinky octave doubling to the power chord shape',
-        text_es: 'Opcional: agregar duplicación de octava con el meñique a la forma del acorde de potencia',
+      { id: 'm3w2-s5', text: 'Optional: add your pinky to the power chord shape (three notes)',
+        text_es: 'Opcional: agregar el meñique a la forma del acorde de potencia (tres notas)',
         gotItWhen: 'your pinky lands on the next string at the same fret as your ring finger and all three notes ring cleanly — no buzz, no muffled string.',
         gotItWhen_es: 'tu meñique cae en la siguiente cuerda en el mismo traste que tu anular y las tres notas suenan limpias — sin zumbido, sin cuerdas apagadas.',
         practice: { type: 'mc', prompt: 'You add your pinky on the next string, at the same fret as your ring finger. What interval (an interval = the distance between two notes) did you just add to the chord?',

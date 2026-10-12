@@ -799,6 +799,15 @@ function checkMcCatchAllDistractors(allSets) {
    A card whose job IS to restate its own teaching (Module 1's tuner
    step, where the MC is a read-the-card check) goes in MC_LEAK_ALLOW,
    keyed `<card key>|<n-gram>`, the way JOURNEY_ALLOWED_DIFFS works.
+
+   Hardened 2026-10-12: a keyed answer of 1–2 content words (139 of the
+   486 choice lists) has no 3-word n-gram and was invisible; it is now
+   matched whole (see the short-answer branch, which adds clause (d)).
+   Roman numerals keep their case. The first run found 3 cards —
+   m3w1-s1's label printed "(root + 5th)", m3w2-s5's printed "octave",
+   m8w2-s2's gotItWhen said the ring finger "is hardest" — plus 2 by
+   reading what clause (d) excuses: m8w1-s2's and m10w3-s1's gotItWhen
+   each printed the whole lookup table its practice MC quizzed.
    ════════════════════════════════════════════════════════════════════ */
 const MC_LEAK_STOP = new Set((
   'the a an and or of to in on at it is are you your for that this from then than so no not but as be by ' +
@@ -811,7 +820,15 @@ const MC_LEAK_STOP = new Set((
   'estan ser estar hace hacer no ni mas muy ya si cuando donde cual cuales esto este esos esas tu tus mi ' +
   'mis te cada todo toda todos todas otro otra pero tambien solo entre sobre desde hasta cuerda cuerdas'
 ).split(' '));
-const MC_LEAK_VOCAB = new Set('string strings fret frets chord chords note notes beat beats bar bars play plays played playing thumb finger fingers barre pattern scale guitar hand strum strums low high open'.split(' '));
+/* The Spanish half joined 2026-10-12: the list was English-only, so the
+   Spanish twin of a vocabulary-only phrase counted as a leak — "Pulgar" was
+   flagged on the very card where "Thumb" was not. */
+const MC_LEAK_VOCAB = new Set(('string strings fret frets chord chords note notes beat beats bar bars play plays played playing thumb finger fingers barre pattern scale guitar hand strum strums low high open ' +
+  'traste trastes acorde acordes nota notas tiempo tiempos compas compases toca tocar tocas pulgar dedo dedos cejilla patron escala guitarra mano rasgueo rasgueos rasguea grave aguda abierta abiertas').split(' '));
+/* 1av clause (d) only: words too general to count as a card "naming" a
+   distractor ("They sound identical", "Also major"). */
+const MC_LEAK_GENERIC = new Set(('sound sounds same identical exactly also both neither none all different ' +
+  'suena suenan igual iguales identicos exactamente tambien ambos ninguno ninguna todos diferente').split(' '));
 /* Every entry here is in Modules 1–6, which the 2026-09-20 sweep did not cover
    (it ran over 7–13). They are reviewed and deliberately carried, not tuned
    away — Modules 1–2's graded MCs are frozen for the year (1ap), so two of
@@ -828,22 +845,60 @@ const MC_LEAK_ALLOW = new Set([
 function checkMcAnswerOnCard(allSets) {
   head('1av. Keyed MC answer already printed on the same card');
   /* Strip accents BEFORE dropping punctuation — otherwise "más" becomes the two
-     tokens "m" and "s" and every Spanish n-gram turns to noise. */
-  const words = s => String(s || '').toLowerCase().normalize('NFD').replace(/\p{M}/gu, '')
-    .replace(/<[^>]*>/g, ' ').replace(/[^a-z0-9#]+/g, ' ')
-    .split(' ').filter(x => x && !MC_LEAK_STOP.has(x));
+     tokens "m" and "s" and every Spanish n-gram turns to noise.
+     A Roman numeral keeps its CASE (2026-10-12): case is the whole answer in
+     a numeral question — I–V–vi–IV and I–V–VI–IV are different progressions —
+     and lower-casing everything made a keyed "I–V–vi–IV" share its n-grams
+     with a "I–V–VI–IV" distractor, so clause (b) read it as vocabulary and
+     the check could never fire on a numeral card. */
+  const ROMAN = /^(?:I{1,3}|IV|VI{0,2}|i{1,3}|iv|vi{0,2})(?:7|maj7|dim|o)?$/;
+  const words = s => String(s || '').normalize('NFD').replace(/\p{M}/gu, '')
+    .replace(/<[^>]*>/g, ' ').replace(/[^A-Za-z0-9#]+/g, ' ')
+    .split(' ').map(x => (ROMAN.test(x) ? x : x.toLowerCase()))
+    .filter(x => x && !MC_LEAK_STOP.has(x));
   const grams = (a, n) => { const o = []; for (let i = 0; i + n <= a.length; i++) o.push(a.slice(i, i + n).join(' ')); return o; };
-  let bad = 0, allowed = 0, total = 0;
+  const hasRun = (toks, run) => { for (let i = 0; i + run.length <= toks.length; i++) if (run.every((t, k) => toks[i + k] === t)) return true; return false; };
+  let bad = 0, allowed = 0, total = 0, short = 0;
   for (const card of mcCards(allSets)) {
     for (const [lang, arr, vis] of [['en', card.mc.choices, card.visible], ['es', card.mc.choices_es, card.visible_es]]) {
       if (!Array.isArray(arr) || typeof card.mc.answer !== 'number' || !arr[card.mc.answer]) continue;
       total++;
-      const visG = new Set(grams(words(vis), 3));
-      if (!visG.size) continue;
-      const promptG = new Set(grams(words(lang === 'es' ? card.mc.prompt_es : card.mc.prompt), 3));
-      const distG = new Set(arr.filter((_, i) => i !== card.mc.answer).flatMap(c => grams(words(c), 3)));
-      const leaked = grams(words(arr[card.mc.answer]), 3).filter(g =>
-        visG.has(g) && !distG.has(g) && !promptG.has(g) && g.split(' ').some(t => !MC_LEAK_VOCAB.has(t)));
+      const visW = words(vis);
+      if (!visW.length) continue;
+      const promptW = words(lang === 'es' ? card.mc.prompt_es : card.mc.prompt);
+      const distW = arr.filter((_, i) => i !== card.mc.answer).map(words);
+      const keyW = words(arr[card.mc.answer]);
+      let leaked;
+      if (keyW.length >= 3) {
+        const visG = new Set(grams(visW, 3));
+        const promptG = new Set(grams(promptW, 3));
+        const distG = new Set(distW.flatMap(d => grams(d, 3)));
+        leaked = grams(keyW, 3).filter(g =>
+          visG.has(g) && !distG.has(g) && !promptG.has(g) && g.split(' ').some(t => !MC_LEAK_VOCAB.has(t)));
+      } else if (keyW.length && keyW.join('').length > 1) {
+        /* A keyed answer of only 1–2 content words ("I–iii", "Fret 5",
+           "An octave") has no 3-word n-gram at all, so until 2026-10-12 this
+           check could never see one. Match it whole, word for word, under
+           the same three clauses — on the card, in no distractor, not in the
+           prompt — plus one more, because a short answer is usually a plain
+           term the card has to use: (d) the card names NONE of the
+           alternatives. "Tell major from minor by ear" prints the keyed
+           "Minor" and the distractor "Major" side by side; a student
+           matching strings still has to choose, so that is vocabulary, not
+           a tell. A distractor counts as named when any of its own words
+           (not shared with the keyed answer, not course vocabulary, not
+           MC_LEAK_GENERIC) is on the card.
+           A ONE-LETTER answer is skipped: a note letter is also a string
+           and chord name ("the E and A strings", "low E"), so it collides
+           with ordinary text on nearly every card. Known blind spot: a card
+           that prints a whole lookup table ("Am fret 5 … Dm fret 10") names
+           the alternatives too, so (d) excuses it — read those by eye. */
+        short++;
+        const keySet = new Set(keyW);
+        const named = distW.some(d => d.some(t => !keySet.has(t) && !MC_LEAK_VOCAB.has(t) && !MC_LEAK_GENERIC.has(t) && visW.includes(t)));
+        leaked = hasRun(visW, keyW) && !distW.some(d => hasRun(d, keyW)) && !hasRun(promptW, keyW) &&
+          keyW.some(t => !MC_LEAK_VOCAB.has(t)) && !named ? [keyW.join(' ')] : [];
+      } else leaked = [];
       if (!leaked.length) continue;
       /* An allowlist entry excuses the CARD, not the phrase. A leaking answer
          usually overlaps its own card in several places at once, so a
@@ -855,7 +910,7 @@ function checkMcAnswerOnCard(allSets) {
       problems++; bad++;
     }
   }
-  if (bad === 0) ok(`no keyed answers printed on their own card across ${total} MC choice lists (${allowed} reviewed exceptions allowed)`);
+  if (bad === 0) ok(`no keyed answers printed on their own card across ${total} MC choice lists (${short} of them 1–2-word answers matched whole; ${allowed} reviewed exceptions allowed)`);
 }
 
 /* ════════════════════════════════════════════════════════════════════
@@ -2196,25 +2251,117 @@ const SLANG_PHRASES = [
 const SLANG_RE = new RegExp(
   '\\b(?:' + SLANG_PHRASES.map(p => p.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')).join('|') + ')\\b',
   'gi');
-/* Hoisted so 1w-t (below) can share the exact same field/choices/i18n
-   regexes instead of a second copy that could drift from 1w's. */
+/* Single-line field regexes. 1w and 1w-t no longer use these for module
+   content (they read through readFieldStrings, below, since 2026-10-12);
+   1bc/1bd still do. `choices` was the first ARRAY field — until 2026-09-20
+   neither check could see inside it, which is how a banned phrase in an
+   answer choice shipped while the identical phrase in its `explain` failed
+   the push; `caption` and `label` joined 2026-09-26 (module-9.js's TAB
+   cards shipped "cold-read" invisibly in both). The STUDENT_CHOICES_RE /
+   STUDENT_CAPTION_RE line regexes were retired with the switch. */
 const STUDENT_FIELD_RE =
   /\b(text|hint|stuck|levelUp|gotItWhen|explain|forward|subtitle|meta|intro|note|prompt|placeholder):\s*'((?:\\.|[^'\\])*)'/g;
-/* `choices` is an ARRAY, so the field regex above cannot see inside it — and
-   until 2026-09-20 neither could 1w, which is how a banned phrase in an
-   answer choice shipped while the identical phrase in its `explain` failed
-   the push. Sweep every quoted string on a choices line separately. */
-const STUDENT_CHOICES_RE = /\bchoices(?:_es)?:\s*\[((?:[^\]\\]|\\.)*)\]/g;
 const STUDENT_I18N_EN_RE = /\ben:\s*(?:'((?:\\.|[^'\\])*)'|"((?:\\.|[^"\\])*)")/g;
-/* label: is deliberately NOT in STUDENT_FIELD_RE (see the 1w comment above —
-   1w skips it on purpose, 1y sweeps exit-check item labels separately). But
-   the Challenge-card assessment tag ("(assessment preparation)") and most
-   Challenge titles live in `label`, so 1w-t alone also sweeps it. */
+const STUDENT_I18N_ES_RE = /\bes:\s*(?:'((?:\\.|[^'\\])*)'|"((?:\\.|[^"\\])*)")/g;
 const STUDENT_LABEL_RE = /\blabel:\s*'((?:\\.|[^'\\])*)'/g;
-/* `caption` (a tab's own heading) is student-facing but was never scanned by
-   either check — found 2026-09-26 alongside the `label:` gap below, both from
-   the same "cold-read" instances in module-9.js's TAB cards. */
-const STUDENT_CAPTION_RE = /\bcaption:\s*'((?:\\.|[^'\\])*)'/g;
+
+/* ════════════════════════════════════════════════════════════════════
+   Shared value reader for 1w, 1w-t and 1bp (2026-10-12). The line regexes
+   above only see a SINGLE-quoted value that opens and closes on ONE line,
+   so until this date 1w and 1w-t never read:
+     · a `choices: [` array whose elements sit on their own lines — about
+       50 of them, nearly all graded "Watch:" MCs in Modules 1–8;
+     · `assessItems` / `assessItems_es` (the Module Review's assessment
+       list, app.js renderModuleReview) and exit-check `items`;
+     · a double-quoted or template-literal value — module-13.js's nine
+       `text: \`…\`` restringing cards.
+   module-7.js's "Buzz a little — that's normal for this shape" sat in a
+   multi-line choices array with 1w-t green because of exactly this.
+
+   readJsString is 1bp's reader, hoisted so all three share one. The
+   source is comment-stripped, then every string's CONTENTS are masked
+   (maskJsStrings), so a field name is only matched in code — never inside
+   another value's text. Each value is read as one literal plus any
+   `+ 'literal'` pieces chained after it, or as every literal at any depth
+   inside an array. Each piece reports its OWN line, and a piece reachable
+   twice (a `label:` inside an `items:` array) is read once.
+   ════════════════════════════════════════════════════════════════════ */
+const readJsString = (src, i) => {   // src[i] is the opening quote
+  const end = skipStringOrComment(src, i);
+  return { text: unescapeJs(src.slice(i + 1, end - 1)), end };
+};
+function maskJsStrings(src) {
+  let out = '';
+  for (let i = 0; i < src.length; ) {
+    const c = src[i];
+    if (c === "'" || c === '"' || c === '`') {
+      const end = Math.min(skipStringOrComment(src, i), src.length);
+      out += c + src.slice(i + 1, end - 1).replace(/[^\n]/g, ' ') + src.slice(Math.max(i + 1, end - 1), end);
+      i = end; continue;
+    }
+    out += c; i++;
+  }
+  return out;
+}
+const lineLookup = src => {
+  const nl = [];
+  for (let i = 0; i < src.length; i++) if (src.charCodeAt(i) === 10) nl.push(i);
+  return idx => { let lo = 0, hi = nl.length; while (lo < hi) { const mid = (lo + hi) >> 1; if (nl[mid] < idx) lo = mid + 1; else hi = mid; } return lo + 1; };
+};
+const isQuote = c => c === "'" || c === '"' || c === '`';
+/* Every string value of every field whose name nameRe (global, group 1 =
+   the field name, match ending at the value) finds in `file`. Returns
+   [{ field, line, text }] with 1-based lines, or null if the file is
+   missing. */
+function readFieldStrings(file, nameRe) {
+  let src;
+  try { src = stripJsComments(readFileSync(join(ROOT, file), 'utf8')); } catch { return null; }
+  const masked = maskJsStrings(src), lineAt = lineLookup(src), seen = new Set(), out = [];
+  const take = (field, i) => {
+    const s = readJsString(src, i);
+    if (!seen.has(i)) { seen.add(i); out.push({ field, line: lineAt(i), text: s.text }); }
+    return s.end;
+  };
+  for (const m of masked.matchAll(nameRe)) {
+    const field = m[1];
+    let i = m.index + m[0].length;
+    if (isQuote(masked[i])) {
+      for (;;) {                                 // a literal, then any `+ literal` / `+ NAME` chain
+        let j = take(field, i), next = -1;
+        for (;;) {
+          const plus = /^\s*\+\s*/.exec(masked.slice(j, j + 200));
+          if (!plus) break;
+          j += plus[0].length;
+          if (isQuote(masked[j])) { next = j; break; }
+          const id = /^[A-Za-z_$][\w$]*/.exec(masked.slice(j, j + 200));
+          if (!id) break;
+          j += id[0].length;
+        }
+        if (next < 0) break;
+        i = next;
+      }
+    } else if (masked[i] === '[') {
+      for (let depth = 0; i < src.length; i++) {
+        const c = masked[i];
+        if (isQuote(c)) { i = take(field, i) - 1; continue; }
+        if (c === '[') depth++;
+        else if (c === ']' && --depth === 0) break;
+      }
+    }
+  }
+  return out;
+}
+/* The student-facing fields 1w and 1w-t read in module files and
+   class-activities.js: STUDENT_FIELD_RE's names plus label and caption
+   (the line regexes above), and the array fields. Joined 2026-10-12, as
+   every English field that has a Spanish `_es` twin somewhere in the
+   content (so it renders to students) but that neither check read:
+   title, unit, skillFocus, name, module, checklistSub, tabTitle, tabSub,
+   repLabel. */
+const STUDENT_VALUE_NAME_RE = new RegExp(
+  '\\b(text|hint|stuck|levelUp|gotItWhen|explain|forward|subtitle|meta|intro|note|prompt|placeholder|' +
+  'label|caption|title|unit|skillFocus|name|module|checklistSub|tabTitle|tabSub|repLabel|' +
+  'choices|choices_es|assessItems|assessItems_es|items)\\s*:\\s*', 'g');
 function checkSlangPhrasing() {
   head('1w. Slang and figurative phrasing in student-facing text');
   const RE = SLANG_RE;
@@ -2243,23 +2390,21 @@ function checkSlangPhrasing() {
      nested `label` (a tab/playSeq heading, not a step/Challenge title) —
      found missing 2026-09-26 when module-9.js's TAB cards shipped "cold-read"
      and "read it cold" invisibly in both. */
+  /* Read through readFieldStrings (2026-10-12): every quote style, every
+     element of a multi-line array, each on its own line — see the shared
+     reader above. Values arrive unescaped: the raw capture kept `\'`, so a
+     phrase with an apostrophe ("that one's free") could never match a
+     single-quoted field — see the 1w-t note on the same fix (2026-09-25). */
+  let read = 0;
   for (const file of [...MODULE_FILES, 'class-activities.js']) {
-    let lines;
-    try { lines = readFileSync(join(ROOT, file), 'utf8').split('\n'); } catch { continue; }
-    lines.forEach((line, li) => {
-      /* unescapeJs: the raw capture keeps `\'`, so a phrase with an
-         apostrophe ("that one's free") could never match a single-quoted
-         field — see the 1w-t note on the same fix (2026-09-25). */
-      for (const f of line.matchAll(STUDENT_FIELD_RE))
-        for (const m of straightQuotes(unescapeJs(f[2])).matchAll(RE)) flag(file, li, m[0]);
-      for (const c of line.matchAll(STUDENT_CHOICES_RE))
-        for (const m of straightQuotes(unescapeJs(c[1])).matchAll(RE)) flag(file, li, m[0]);
-      for (const c of line.matchAll(STUDENT_CAPTION_RE))
-        for (const m of straightQuotes(unescapeJs(c[1])).matchAll(RE)) flag(file, li, m[0]);
-      for (const l of line.matchAll(STUDENT_LABEL_RE))
-        for (const m of straightQuotes(unescapeJs(l[1])).matchAll(RE)) flag(file, li, m[0]);
-    });
+    const vals = readFieldStrings(file, STUDENT_VALUE_NAME_RE);
+    if (!vals) continue;
+    for (const v of vals) {
+      read++;
+      for (const m of straightQuotes(v.text).matchAll(RE)) flag(file, v.line - 1, m[0]);
+    }
   }
+  if (read === 0) { err('1w read no module values — the field reader has gone blind'); problems++; bad++; }
 
   /* i18n.js — the en: side of each key. Curly apostrophes straightened
      (straightQuotes, below): i18n.js writes ’ in ~70 en values. */
@@ -2270,7 +2415,7 @@ function checkSlangPhrasing() {
     });
   } catch { /* checked elsewhere */ }
 
-  if (bad === 0) ok('no banned slang phrases in student-facing text');
+  if (bad === 0) ok(`no banned slang phrases in student-facing text (${read} module values read)`);
 }
 
 /* ════════════════════════════════════════════════════════════════════
@@ -2283,8 +2428,10 @@ function checkSlangPhrasing() {
    strategy, confident level) and vague prompts (How did it go?). This
    guards a relapse of the exact phrases that sweep retired.
 
-   Shares 1w's own field/choices/i18n regexes (STUDENT_FIELD_RE /
-   STUDENT_CHOICES_RE / STUDENT_I18N_EN_RE) rather than a second copy.
+   Shares 1w's own reader and field list (readFieldStrings with
+   STUDENT_VALUE_NAME_RE; STUDENT_I18N_EN_RE for i18n.js) rather than a
+   second copy. Since 2026-10-12 it also reads Spanish — see
+   TEACHER_PHRASES_ES below.
 
    Hidden sections are exempt, the same way the audit itself excluded
    them: kind:tuning-warmup / routine / ear-spark / reflection, a
@@ -2371,11 +2518,14 @@ const TEACHER_PHRASE_ALLOW = [
   /* A plain fact about guitars, not comfort to the reader. */
   { file: 'module-13.js', phrase: 'is normal maintenance' },
   /* m7w3's graded MC offers "Buzz a little — that's normal for this shape"
-     as a WRONG answer (the beginner belief being rejected). Its choices
-     array spans several lines, which STUDENT_CHOICES_RE does not read, so
-     an entry for it here was dead — and excused the phrase in every other
-     module-7.js value. Removed 2026-10-11; a multi-line choices sweep would
-     need it back. */
+     as a WRONG answer (the beginner belief being rejected, and the best
+     distractor on the card). Removed 2026-10-11 while it was dead (the
+     multi-line choices array was unread, and the bare file+phrase entry
+     excused the phrase in every other module-7.js value); back 2026-10-12
+     now that readFieldStrings reads that array — scoped by `field` this
+     time, so only an answer CHOICE may say it. The Spanish twin is in
+     TEACHER_PHRASE_ALLOW_ES. */
+  { file: 'module-7.js', field: 'choices', phrase: "that's normal for this shape" },
   /* m2w2 Challenge 3's "(your low-E assessment piece)" label is frozen —
      Module 2 is in rule-zero-proof.mjs's FROZEN_THROUGH regime, where a step
      LABEL must match the base commit BYTE-FOR-BYTE by index (a rename would
@@ -2385,6 +2535,37 @@ const TEACHER_PHRASE_ALLOW = [
      see CLAUDE.md's "Summer reset list". */
   { file: 'module-2.js', phrase: 'assessment piece' },
 ];
+
+/* Spanish reassurance (2026-10-12). 1w-t read English only, so the
+   Spanish twin of every retired comfort line could survive its English
+   fix: module-4.js's Challenge 2 hint said "Simple is fine." /
+   "Está bien si es simple." Each phrase was checked against every
+   Spanish value in the site before it went in:
+     · 'es normal' — one use, module-7's deliberate wrong-answer choice
+       (allowlisted below by file + field). A closing boundary keeps
+       "normalmente" clear.
+     · 'totalmente normal' — the twin of 'totally normal'; no uses.
+     · 'no te preocupes' — "don't worry"; no uses.
+     · 'está bien si' — "it's okay if"; one use (module-4, reworded).
+       Plain "está bien" is NOT banned: "Está bien puesto cuando…" (the
+       latency slider) and "…está bien — presionar Tocar el tab… no lo
+       está" (a rule about what is allowed) are literal.
+     · 'tú puedes' — "you've got this", but ONLY where it ends a sentence
+       ("¡Tú puedes!"): "Tú puedes elegir…" is an ordinary verb phrase.
+   Matched on the accent-folded, lower-cased value (so "esta bien si" and
+   "tu puedes" typed without accents are caught too), with Unicode-aware
+   word edges — \b would treat "á" as a boundary. Read from every `_es`
+   value in the module files and class-activities.js (readFieldStrings),
+   the `es:` side of i18n.js, and every data-es="…" on the Journey pages. */
+const TEACHER_PHRASES_ES = ['es normal', 'totalmente normal', 'no te preocupes', 'esta bien si'];
+const foldEs = s => s.normalize('NFD').replace(/\p{M}/gu, '').toLowerCase();
+const TEACHER_RE_ES = new RegExp(
+  '(?<![\\p{L}\\p{N}])(?:' + TEACHER_PHRASES_ES.join('|') + '|tu puedes(?=\\s*(?:[!.?…]|$)))(?![\\p{L}\\p{N}])', 'gu');
+const TEACHER_PHRASE_ALLOW_ES = [
+  /* m7w3's graded MC — the Spanish twin of the English entry above. */
+  { file: 'module-7.js', field: 'choices_es', phrase: 'es normal en esta forma' },
+];
+const ES_VALUE_NAME_RE = /\b([A-Za-z0-9]+_es)\s*:\s*/g;
 
 const HIDDEN_SECTION_KINDS = new Set(['routine', 'ear-spark', 'reflection']);
 const HIDDEN_STEP_FIELDS = [
@@ -2461,18 +2642,39 @@ function checkTeacherSpeak(sets, journeySongsFor) {
      if", "that's the point", "you've got this" — could never match a
      single-quoted field, and a live "Don't worry about pressing any frets
      yet" sat in Module 1's first strum card with this check green. */
-  const sweepValue = (file, li, raw) => {
-    const parsed = unescapeJs(raw);
+  /* `parsed` is the real string (readFieldStrings unescapes); `field` lets
+     an allowlist entry be scoped to one field, not the whole file. */
+  const sweepParsed = (file, li, parsed, field) => {
     if (hidden.has(hiddenKey(file, parsed))) return;
     const value = straightQuotes(parsed);
     const lower = value.toLowerCase();
+    const allowed = (a, at) => a.file === file && (!a.field || a.field === field) && lower.startsWith(a.phrase, at);
     for (const m of value.matchAll(TEACHER_RE)) {
-      if (TEACHER_PHRASE_ALLOW.some(a => a.file === file && lower.startsWith(a.phrase, m.index))) continue;
+      if (TEACHER_PHRASE_ALLOW.some(a => allowed(a, m.index))) continue;
       flag(file, li, m[0]);
     }
     for (const m of value.matchAll(TEACHER_MAXIM_RE)) flag(file, li, m[0]);
     for (const re of TEACHER_PREFIXES) if (re.test(value)) flag(file, li, value.slice(0, 20) + '…');
   };
+  const sweepValue = (file, li, raw) => sweepParsed(file, li, unescapeJs(raw), null);
+  /* Spanish: the folded value keeps one char per char of the original only
+     after folding, so the allowlist is matched on the folded value too. */
+  let esRead = 0;
+  const sweepEs = (file, li, parsed, field) => {
+    esRead++;
+    if (hidden.has(hiddenKey(file, parsed))) return;
+    const folded = foldEs(parsed);
+    for (const m of folded.matchAll(TEACHER_RE_ES)) {
+      if (TEACHER_PHRASE_ALLOW_ES.some(a => a.file === file && (!a.field || a.field === field) && folded.startsWith(a.phrase, m.index))) continue;
+      flag(file, li, m[0]);
+    }
+  };
+  const decodeEntities = s => s
+    .replace(/&nbsp;/g, ' ').replace(/&lt;/g, '<').replace(/&gt;/g, '>').replace(/&quot;/g, '"')
+    .replace(/&iexcl;/g, '¡').replace(/&iquest;/g, '¿')
+    .replace(/&#x([0-9a-f]+);/gi, (_, h) => String.fromCodePoint(parseInt(h, 16)))
+    .replace(/&#(\d+);/g, (_, d) => String.fromCodePoint(+d))
+    .replace(/&amp;/g, '&');
 
   for (const file of TAB_PAGES.filter(f => f.endsWith('.html'))) {
     let raw;
@@ -2483,25 +2685,30 @@ function checkTeacherSpeak(sets, journeySongsFor) {
       for (const m of line.matchAll(TEACHER_RE)) flag(file, li, m[0]);
       for (const m of line.matchAll(TEACHER_MAXIM_RE)) flag(file, li, m[0]);
     });
-  }
-
-  for (const file of [...MODULE_FILES, 'class-activities.js']) {
-    let lines;
-    try { lines = readFileSync(join(ROOT, file), 'utf8').split('\n'); } catch { continue; }
-    lines.forEach((line, li) => {
-      for (const f of line.matchAll(STUDENT_FIELD_RE)) sweepValue(file, li, f[2]);
-      for (const c of line.matchAll(STUDENT_CHOICES_RE)) sweepValue(file, li, c[1]);
-      for (const l of line.matchAll(STUDENT_LABEL_RE)) sweepValue(file, li, l[1]);
+    raw.split('\n').forEach((line, li) => {
+      if (/^\s*<!--/.test(line)) return;
+      for (const m of line.matchAll(/\bdata-es="([^"]*)"/g)) sweepEs(file, li, decodeEntities(m[1]), 'data-es');
     });
   }
+
+  /* Every value through readFieldStrings (2026-10-12): multi-line arrays,
+     assessItems, exit-check items and template literals included. */
+  let read = 0;
+  for (const file of [...MODULE_FILES, 'class-activities.js']) {
+    for (const v of readFieldStrings(file, STUDENT_VALUE_NAME_RE) || []) { read++; sweepParsed(file, v.line - 1, v.text, v.field); }
+    for (const v of readFieldStrings(file, ES_VALUE_NAME_RE) || []) sweepEs(file, v.line - 1, v.text, v.field);
+  }
+  if (read === 0) { err('1w-t read no module values — the field reader has gone blind'); problems++; bad++; }
 
   try {
     readFileSync(join(ROOT, 'i18n.js'), 'utf8').split('\n').forEach((line, li) => {
       for (const e of line.matchAll(STUDENT_I18N_EN_RE)) sweepValue('i18n.js', li, e[1] ?? e[2] ?? '');
+      for (const e of line.matchAll(STUDENT_I18N_ES_RE)) sweepEs('i18n.js', li, unescapeJs(e[1] ?? e[2] ?? ''), 'es');
     });
   } catch { /* checked elsewhere */ }
+  if (esRead === 0) { err('1w-t read no Spanish values — the Spanish sweep has gone blind'); problems++; bad++; }
 
-  if (bad === 0) ok('no banned teacher-speak phrases in student-facing text');
+  if (bad === 0) ok(`no banned teacher-speak phrases in student-facing text (${read} module values in English, ${esRead} Spanish values)`);
 }
 
 /* ════════════════════════════════════════════════════════════════════
@@ -5953,11 +6160,8 @@ function checkEnglishTermsInSpanish(I18N) {
     }
   }
 
-  /* Module content, class activities, songs config — every _es value. */
-  const readJsString = (src, i) => {   // src[i] is the opening quote
-    const end = skipStringOrComment(src, i);
-    return { text: unescapeJs(src.slice(i + 1, end - 1)), end };
-  };
+  /* Module content, class activities, songs config — every _es value.
+     readJsString is the shared reader (hoisted above 1w, 2026-10-12). */
   /* A literal followed by `+ '…'` is a concatenation whose later pieces
      would go unread, so refuse it like any other unreadable shape. A bare
      named constant is allowed — module-13's `'…' + M13_P8_ES` appends a
