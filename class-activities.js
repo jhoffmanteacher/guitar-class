@@ -91,13 +91,18 @@
    for students") — ca-13, ca-19 and ca-20 were rebuilt to it that day.
    ca-18 is the model to match. One screen instead of a ladder: the song's
    tab, one "Play song" button that plays the real backing track and moves
-   the tab note by note, a Slower / Normal switch, the Metronome (a click on
-   every counted beat, made by the site), and three or four checkboxes. The
-   slides teach the rungs; the card is what students practise with. The
-   activity's `steps` stay, as the HELP ladder folded under "More practice
-   help" — read-only, still four at most, and none of them may name the
-   Song Journey page. Complete = every numbered check ticked; Level up is
-   extra. Shape (caCardBodyHtml / ccLayout in app.js; checks.mjs 1bf):
+   the tab note by note, a speed control (with `slowest: true`, which every
+   card has, a four-stop slider — Slowest / Slower / Slow / Normal — whose
+   only visible words are "Slower" at the left end and "Normal" at the
+   right, opening on the Slower stop; without it, a Slower / Normal
+   switch), the Metronome (a click on every counted beat, made by the
+   site), a Guitar switch where the track has a full mix, and three or four
+   checkboxes. The slides teach the rungs; the card is what students
+   practise with. No practice card has a help ladder any more (Jonathan,
+   2026-10-07): `steps: []`, which checks.mjs 1d allows only on a
+   `view: 'card'` activity, so "More practice help" never renders.
+   Complete = every numbered check ticked; Level up is extra. Shape
+   (caCardBodyHtml / pcLayout in app.js; checks.mjs 1bf):
      card: {
        track: 'the-cure',                  // a SNIPPET_TRACKS key
        caption, caption_es,                // the tab's heading
@@ -163,7 +168,8 @@
    — Finish the Song") was pulled from this array on 2026-08-25 when `ca-1`
    was widened to cover the whole song; its steps live on inside `ca-1`, and
    the original is in git history. That makes the counter max-EVER-used + 1,
-   NOT max-in-file + 1 — the next new activity is `ca-10`. Any student who
+   NOT max-in-file + 1 — the next new activity is `ca-34` (ca-33 is the
+   highest used as of 2026-10-11; check the file first). Any student who
    had already ticked `ca-9` keeps a harmless orphan key in Firestore.
    `ca-16` ("Happy Birthday — The A-String Way") went the same way on
    2026-09-16: its steps were merged into `ca-17`, after the A-string note
@@ -323,13 +329,16 @@
          // mid-phrase and they will assume they are the ones who are wrong.
          //
          // `track` is a key of SNIPPET_TRACKS in app.js, which holds the
-         // four mp3 paths (fast/slow x with/without metronome), the tempo
+         // mp3 paths (fast and slow rhythm-down mixes, plus an optional
+         // fast/slow full-mix pair for the Guitar toggle), the tempo
          // arithmetic, and the one measured number — the track's `anchor`,
          // its first downbeat — that places every window on every step of
-         // that song. The card renders a Slow and a Metronome toggle off
-         // the same files the Song Journey page uses, and the student can
-         // only ever hear one thing at a time: starting the band stops the
-         // tab player, and starting the tab stops the band.
+         // that song. There are no metronome mp3s (deleted 2026-10-01): the
+         // site makes the click itself. The card renders Slowest, Slow
+         // (turtle), Metronome and, where a full mix exists, Guitar toggles
+         // off the same files the Song Journey page uses, and the student
+         // can only ever hear one thing at a time: starting the band stops
+         // the tab player, and starting the tab stops the band.
          //
          // Built by buildSnippet() in app.js, called from caStepHtml()
          // there AND from renderTeacherActivityDetail() in teacher.js —
@@ -445,7 +454,7 @@ window.CLASS_ACTIVITIES = [
       {
         label:    'Higher landing marks',
         label_es: 'Marcas más altas',
-        text: 'The second half of the song is played higher up the same string. Two new landing marks: the double dot at fret 12 — that note is an E, the same note as the open string, only higher — and the single dot at fret 9.<br>Play the notes below, looking at the dot before your hand moves. Then try it without looking.<br>You\'ve got it when: you land on 12 and on 9 without hunting for them, three times in a row.',
+        text: 'The second half of the song is played higher up the same string. Two new landing marks: the double dot at fret 12 — that note is an E, the same note as the open string, only higher — and the single dot at fret 9.<br>Play the notes below, looking at the dot before your hand moves. Then try it without looking.<br>You\'ve got it when: you land on 12 and on 9 without searching for them, three times in a row.',
         text_es: 'La segunda mitad de la canción se toca más arriba en la misma cuerda. Dos marcas de referencia nuevas: el punto doble del traste 12 — esa nota es un E, la misma nota que la cuerda al aire, solo que más aguda — y el punto sencillo del traste 9.<br>Toca las notas de abajo, mirando el punto antes de mover la mano. Después inténtalo sin mirar.<br>Lo tienes cuando: caes en el 12 y en el 9 sin andarlos buscando, tres veces seguidas.',
         tab: {
           caption: 'Find the dots · open, 12, 9, 5',
@@ -1200,8 +1209,8 @@ window.CLASS_ACTIVITIES = [
           text:    'Four laps of the riff with the song on Slower, without stopping. A lap is once through the riff.',
           text_es: 'Cuatro vueltas del riff con la canción en Más lento, sin detenerte. Una vuelta es tocar el riff una vez completo.' },
         { label: 'The riff on Normal', label_es: 'El riff en Normal',
-          text:    'Press Normal. Four laps of the riff with the song, without stopping.',
-          text_es: 'Pulsa «Normal». Cuatro vueltas del riff con la canción, sin detenerte.' },
+          text:    'Slide the speed all the way right, to Normal. Four laps of the riff with the song, without stopping.',
+          text_es: 'Desliza la velocidad hasta el final, a «Normal». Cuatro vueltas del riff con la canción, sin detenerte.' },
         { levelUp: true,
           card: 'ca-25',    // its button opens the whole-song card, not the Song Journey page (Jonathan, 2026-10-06)
           text:    'Play along with the whole song on the Whole Song card.',
@@ -1747,9 +1756,10 @@ window.CLASS_ACTIVITIES = [
      students"). Was five ladder steps with numbered lists. Same notes and
      the same record bars as the old snippets: intro 1–4, verse 5–12 played
      twice (5–20, shown once with a "Verse 1 of 2" badge). The old intro /
-     verse / intro-into-verse steps became the three checks; the help
-     ladder keeps a Learn step for the three spots and the hand-shift
-     drill. Completion is keyed to the id, so nobody's saved progress moves. */
+     verse / intro-into-verse steps became the three checks; a help ladder
+     (a Learn step for the three spots and the hand-shift drill) followed
+     until 2026-10-07, when every help ladder was removed. Completion is
+     keyed to the id, so nobody's saved progress moves. */
   {
     id:    'ca-13',
     view:  'card',    // one screen: Play song + tab + checks — see CARD above
@@ -1840,8 +1850,8 @@ window.CLASS_ACTIVITIES = [
           text_es: 'La intro y las 2 estrofas con la canción en Más lento, sin detenerte.' },
         { levelUp: true,
           card: 'ca-24',    // its button opens the whole-song card, not the Song Journey page (Jonathan, 2026-10-06)
-          text:    'Press Normal and play the intro and 2 verses. Then play along with the whole song on the Whole Song card.',
-          text_es: 'Pulsa «Normal» y toca la intro y las 2 estrofas. Después toca con la canción completa en la tarjeta de La canción completa.' }
+          text:    'Slide the speed all the way right, to Normal, and play the intro and 2 verses. Then play along with the whole song on the Whole Song card.',
+          text_es: 'Desliza la velocidad hasta el final, a «Normal», y toca la intro y las 2 estrofas. Después toca con la canción completa en la tarjeta de La canción completa.' }
       ]
     },
     // No help ladder: a practice card is its checks and nothing else (Jonathan, 2026-10-07).
@@ -1855,9 +1865,10 @@ window.CLASS_ACTIVITIES = [
      REBUILT 2026-10-01 as a PRACTICE CARD (view:'card' — see CARD above),
      the ca-18 model. Was six ladder steps. The card is ca-18's intro and
      verses exactly (the intro is the verse's own A C A C, so nothing new is
-     asked); the chorus stays new on ca-18. Help ladder = the old A·C Learn
-     and Practice steps and the F·C Practice step, unchanged but for the
-     snippets (help steps carry none — 1bf). Completion is keyed to the id. */
+     asked); the chorus stays new on ca-18. Its help ladder (the old A·C
+     Learn and Practice steps and the F·C Practice step) was removed
+     2026-10-07 with every other help ladder. Completion is keyed to the
+     id. */
   {
     id:    'ca-19',
     view:  'card',    // one screen: Play song + tab + checks — see CARD above
@@ -1948,8 +1959,8 @@ window.CLASS_ACTIVITIES = [
           text_es: 'La intro y las 2 estrofas con la canción en Más lento, sin detenerte.' },
         { levelUp: true,
           card: 'ca-24',    // its button opens the whole-song card, not the Song Journey page (Jonathan, 2026-10-06)
-          text:    'Press Normal and play the intro and 2 verses. Then play along with the whole song on the Whole Song card.',
-          text_es: 'Pulsa «Normal» y toca la intro y las 2 estrofas. Después toca con la canción completa en la tarjeta de La canción completa.' }
+          text:    'Slide the speed all the way right, to Normal, and play the intro and 2 verses. Then play along with the whole song on the Whole Song card.',
+          text_es: 'Desliza la velocidad hasta el final, a «Normal», y toca la intro y las 2 estrofas. Después toca con la canción completa en la tarjeta de La canción completa.' }
       ]
     },
     // No help ladder: a practice card is its checks and nothing else (Jonathan, 2026-10-07).
@@ -1964,8 +1975,9 @@ window.CLASS_ACTIVITIES = [
      with a "Lap 1 of 4" badge (bars 1–16 of the steady-tempo grid — the
      120 BPM intro sits before bar 1). The card's own Metronome clicks the
      two big beats, which retires the old "click ticks six times" step and
-     the separate Metro-tool step. Help ladder: the F·A Learn step
-     (unchanged) and the F-to-A change the old recovery line pointed at. */
+     the separate Metro-tool step. Its help ladder (the F·A Learn step and
+     the F-to-A change the old recovery line pointed at) was removed
+     2026-10-07 with every other help ladder. */
   {
     id:    'ca-20',
     view:  'card',    // one screen: Play song + tab + checks — see CARD above
@@ -2001,8 +2013,8 @@ window.CLASS_ACTIVITIES = [
           text_es: 'Cuatro vueltas con la canción en Más lento, sin detenerte.' },
         { levelUp: true,
           card: 'ca-27',    // its button opens the whole-song card, not the Song Journey page (Jonathan, 2026-10-06)
-          text:    'Press Normal and play four laps. Then play along with the whole song on the Whole Song card.',
-          text_es: 'Pulsa «Normal» y toca cuatro vueltas. Después toca con la canción completa en la tarjeta de La canción completa.' }
+          text:    'Slide the speed all the way right, to Normal, and play four laps. Then play along with the whole song on the Whole Song card.',
+          text_es: 'Desliza la velocidad hasta el final, a «Normal», y toca cuatro vueltas. Después toca con la canción completa en la tarjeta de La canción completa.' }
       ]
     },
     // No help ladder: a practice card is its checks and nothing else (Jonathan, 2026-10-07).
@@ -2154,13 +2166,13 @@ window.CLASS_ACTIVITIES = [
         { label: 'Chorus', label_es: 'Coro',
           text:    'Two choruses in a row with the song on Slower, without stopping. Tap Chorus to start there.',
           text_es: 'Dos coros seguidos con la canción en Más lento, sin detenerte. Pulsa «Coro» para empezar ahí.' },
-        { label: 'The whole song', label_es: 'La canción completa',
+        { label: 'Intro to chorus', label_es: 'De la intro al coro',
           text:    'Intro to the end of the chorus with the song on Slower, without stopping.',
           text_es: 'De la intro al final del coro con la canción en Más lento, sin detenerte.' },
         { levelUp: true,
           card: 'ca-24',    // its button opens the whole-song card, not the Song Journey page (Jonathan, 2026-10-06)
-          text:    'Press Normal and play the whole song. Then play the whole record, intro to the end, on the Whole Song card.',
-          text_es: 'Pulsa «Normal» y toca la canción completa. Después toca toda la grabación, de la intro al final, en la tarjeta de La canción completa.' }
+          text:    'Slide the speed all the way right, to Normal, and play from the intro to the end of the chorus. Then play the whole song, intro to the end, on the Whole Song card.',
+          text_es: 'Desliza la velocidad hasta el final, a «Normal», y toca desde la intro hasta el final del coro. Después toca la canción completa, de la intro al final, en la tarjeta de La canción completa.' }
       ]
     },
     // No help ladder: a practice card is its checks and nothing else (Jonathan, 2026-10-07).
@@ -2191,8 +2203,8 @@ window.CLASS_ACTIVITIES = [
       track: 'the-cure',
       slowest: true,    // four-way speed control (Slow added 2026-10-09): Slowest (48) / Slower (60) / Slow (66) / Normal (72) — the student picks
       wholeSong: true,  // stops at the end of the song instead of looping — Jonathan, 2026-10-02
-      caption:    'The whole song in order · 4 plucks per note',
-      caption_es: 'La canción completa en orden · 4 pulsaciones por nota',
+      caption:    'The whole song in order · 4 plucks per bar (2 where two chords share a bar)',
+      caption_es: 'La canción completa en orden · 4 pulsaciones por compás (2 donde dos acordes comparten un compás)',
       sections: [
         {
           label: 'Intro', label_es: 'Intro',
@@ -2483,11 +2495,11 @@ window.CLASS_ACTIVITIES = [
       ],
       checks: [
         { label: 'The whole song, slower', label_es: 'La canción completa, más lenta',
-          text:    'Press Slowest or Slower. Play the whole song with the band, intro to the end, without stopping.',
-          text_es: 'Pulsa «Muy lento» o «Más lento». Toca la canción completa con la banda, de la intro al final, sin detenerte.' },
+          text:    'Leave the speed where the card starts it, or move it one stop left. Play the whole song with the band, intro to the end, without stopping.',
+          text_es: 'Deja la velocidad donde empieza la tarjeta, o muévela una parada a la izquierda. Toca la canción completa con la banda, de la intro al final, sin detenerte.' },
         { levelUp: true,
-          text:    'Press Normal. Play the whole song with the band at normal speed, intro to the end, without stopping.',
-          text_es: 'Pulsa «Normal». Toca la canción completa con la banda a velocidad normal, de la intro al final, sin detenerte.' }
+          text:    'Slide the speed all the way right, to Normal. Play the whole song with the band at normal speed, intro to the end, without stopping.',
+          text_es: 'Desliza la velocidad hasta el final, a «Normal». Toca la canción completa con la banda a velocidad normal, de la intro al final, sin detenerte.' }
       ]
     },
     // No help ladder: a practice card is its checks and nothing else (Jonathan, 2026-10-07).
@@ -2498,7 +2510,8 @@ window.CLASS_ACTIVITIES = [
      tab (line A `0 0 2 0 5 4`, B `0 0 2 0 7 5`, C `0 0 12 9 5 4 2`,
      D `10 10 9 5 7 5`), so the check can't drift away from the activity that
      taught it. Items 1 and 3 play the SAME four notes and differ only in
-     which line they are — flagged on the Summer reset list in CLAUDE.md;
+     which line they are — flagged on the Summer reset list (the
+     summer-reset skill, .claude/skills/summer-reset/SKILL.md);
      `items` is positional and frozen now that students have taken it. */
   {
     id:    'ca-14',
@@ -2608,7 +2621,7 @@ window.CLASS_ACTIVITIES = [
       {
         label:    'Practice — Line 1',
         label_es: 'Practica — Línea 1',
-        text: 'Say the frets of Line 1 out loud, left to right. Then play Line 1 on your guitar, one note per beat, slowly and evenly. Then press Play on the tab to check, ONLY AFTER you play it. You\'ve got it when: you play Line 1 once through without stopping and it matches the tab. Wrong note? Say each fret number out loud as you play it, and try again.',
+        text: 'Say the frets of Line 1 out loud, left to right. Then play Line 1 on your guitar, one note per beat, slowly and evenly. Then press Play tab to check, ONLY AFTER you play it. You\'ve got it when: you play Line 1 once through without stopping and it matches the tab. Wrong note? Say each fret number out loud as you play it, and try again.',
         text_es: 'Di en voz alta los trastes de la Línea 1, de izquierda a derecha. Después toca la Línea 1 en tu guitarra, una nota por tiempo, despacio y parejo. Después pulsa «Tocar el tab» para revisar, SOLO DESPUÉS de tocarla. Lo tienes cuando: tocas la Línea 1 completa sin detenerte y coincide con la tablatura. ¿Una nota equivocada? Di cada número de traste en voz alta mientras lo tocas, e inténtalo otra vez.',
         tab: {
           hideNames: true,
@@ -2630,7 +2643,7 @@ window.CLASS_ACTIVITIES = [
       {
         label:    'Practice — Line 2',
         label_es: 'Practica — Línea 2',
-        text: 'Line 2 is all on the A string, the second line from the bottom. Play it one note per beat, then press Play to check. You\'ve got it when: you play Line 2 once through without stopping and it matches the tab. Played it on the low E string? Find the second line from the bottom and start again.',
+        text: 'Line 2 is all on the A string, the second line from the bottom. Play it one note per beat, then press Play tab to check. You\'ve got it when: you play Line 2 once through without stopping and it matches the tab. Played it on the low E string? Find the second line from the bottom and start again.',
         text_es: 'La Línea 2 está toda en la cuerda La, la segunda línea desde abajo. Tócala una nota por tiempo, y luego pulsa «Tocar el tab» para revisar. Lo tienes cuando: tocas la Línea 2 completa sin detenerte y coincide con la tablatura. ¿La tocaste en la cuerda Mi grave? Busca la segunda línea desde abajo y empieza otra vez.',
         tab: {
           hideNames: true,
@@ -2652,7 +2665,7 @@ window.CLASS_ACTIVITIES = [
       {
         label:    'Practice — Line 3',
         label_es: 'Practica — Línea 3',
-        text: 'Line 3 starts on the low E string and moves up to the A string once, in bar 2. Play it one note per beat, then press Play to check. You\'ve got it when: you play Line 3 once through without stopping and it matches the tab. Missed the move to the A string? Say the string and the fret out loud for each note, and try again.',
+        text: 'Line 3 starts on the low E string and moves up to the A string once, in bar 2. Play it one note per beat, then press Play tab to check. You\'ve got it when: you play Line 3 once through without stopping and it matches the tab. Missed the move to the A string? Say the string and the fret out loud for each note, and try again.',
         text_es: 'La Línea 3 empieza en la cuerda Mi grave y sube a la cuerda La una vez, en el compás 2. Tócala una nota por tiempo, y luego pulsa «Tocar el tab» para revisar. Lo tienes cuando: tocas la Línea 3 completa sin detenerte y coincide con la tablatura. ¿Te saltaste el paso a la cuerda La? Di en voz alta la cuerda y el traste de cada nota, e inténtalo otra vez.',
         tab: {
           hideNames: true,
@@ -2674,7 +2687,7 @@ window.CLASS_ACTIVITIES = [
       {
         label:    'Practice — Line 4',
         label_es: 'Practica — Línea 4',
-        text: 'Line 4 switches between the A string and the low E string on every note. Play it one note per beat, then press Play to check. You\'ve got it when: you play Line 4 once through without stopping and it matches the tab. Losing your place? Point to each number with your finger before you play it.',
+        text: 'Line 4 switches between the A string and the low E string on every note. Play it one note per beat, then press Play tab to check. You\'ve got it when: you play Line 4 once through without stopping and it matches the tab. Losing your place? Point to each number with your finger before you play it.',
         text_es: 'La Línea 4 cambia entre la cuerda La y la cuerda Mi grave en cada nota. Tócala una nota por tiempo, y luego pulsa «Tocar el tab» para revisar. Lo tienes cuando: tocas la Línea 4 completa sin detenerte y coincide con la tablatura. ¿Te pierdes? Señala cada número con el dedo antes de tocarlo.',
         tab: {
           hideNames: true,
@@ -2696,7 +2709,7 @@ window.CLASS_ACTIVITIES = [
       {
         label:    'Practice — Line 5',
         label_es: 'Practica — Línea 5',
-        text: 'Line 5 goes up to fret 8. Play it one note per beat, then press Play to check. You\'ve got it when: Line 5 matches the tab. Then play it with the click. If the Metro tool stopped, press Start in it. Raise it 10 BPM each time it stays clean.',
+        text: 'Line 5 goes up to fret 8. Play it one note per beat, then press Play tab to check. You\'ve got it when: Line 5 matches the tab. Then play it with the click. If the Metro tool stopped, press Start in it. Raise it 10 BPM each time it stays clean.',
         text_es: 'La Línea 5 sube hasta el traste 8. Tócala una nota por tiempo, y luego pulsa «Tocar el tab» para revisar. Lo tienes cuando: la Línea 5 coincide con la tablatura. Después tócala con el clic. Si la herramienta Metro se detuvo, pulsa Iniciar en ella. Súbela 10 BPM cada vez que te salga limpia.',
         tab: {
           hideNames: true,
@@ -3020,7 +3033,7 @@ window.CLASS_ACTIVITIES = [
         },
         {
           label: 'Ending', label_es: 'Final',
-          caption: 'Ending — one E, let it ring', caption_es: 'Final — una E, déjala sonar',
+          caption: 'Ending — one E, let it ring', caption_es: 'Final — un E, déjalo sonar',
           fromBar: 115, bars: 2,
           notes: [
             { string: 'A', fret: 7, note: 'E', midi: 52, beats: 8 }
@@ -3031,11 +3044,11 @@ window.CLASS_ACTIVITIES = [
         // Two checks only, like every whole-song card (Jonathan, 2026-10-07).
         // `slot` keeps the tick keys these two had as checks 3 and 4.
         { slot: 2, label: 'The whole song, slower', label_es: 'La canción completa, más lenta',
-          text:    'Press Slowest or Slower. Play the whole song with the band, intro to the end, without stopping.',
-          text_es: 'Pulsa «Muy lento» o «Más lento». Toca la canción completa con la banda, de la intro al final, sin detenerte.' },
+          text:    'Leave the speed where the card starts it, or move it one stop left. Play the whole song with the band, intro to the end, without stopping.',
+          text_es: 'Deja la velocidad donde empieza la tarjeta, o muévela una parada a la izquierda. Toca la canción completa con la banda, de la intro al final, sin detenerte.' },
         { slot: 3, levelUp: true,
-          text:    'Press Normal. Play the whole song with the band at normal speed, intro to the end, without stopping.',
-          text_es: 'Pulsa «Normal». Toca la canción completa con la banda a velocidad normal, de la intro al final, sin detenerte.' }
+          text:    'Slide the speed all the way right, to Normal. Play the whole song with the band at normal speed, intro to the end, without stopping.',
+          text_es: 'Desliza la velocidad hasta el final, a «Normal». Toca la canción completa con la banda a velocidad normal, de la intro al final, sin detenerte.' }
       ]
     },
     // No help ladder: a practice card is its checks and nothing else (Jonathan, 2026-10-07).
@@ -3186,11 +3199,11 @@ window.CLASS_ACTIVITIES = [
       ],
       checks: [
         { label: 'The whole song, slower', label_es: 'La canción completa, más lenta',
-          text:    'Press Slowest or Slower. Play the whole song with the band, intro to the end, without stopping.',
-          text_es: 'Pulsa «Muy lento» o «Más lento». Toca la canción completa con la banda, de la intro al final, sin detenerte.' },
+          text:    'Leave the speed where the card starts it, or move it one stop left. Play the whole song with the band, intro to the end, without stopping.',
+          text_es: 'Deja la velocidad donde empieza la tarjeta, o muévela una parada a la izquierda. Toca la canción completa con la banda, de la intro al final, sin detenerte.' },
         { levelUp: true,
-          text:    'Press Normal. Play the whole song with the band at normal speed, intro to the end, without stopping.',
-          text_es: 'Pulsa «Normal». Toca la canción completa con la banda a velocidad normal, de la intro al final, sin detenerte.' }
+          text:    'Slide the speed all the way right, to Normal. Play the whole song with the band at normal speed, intro to the end, without stopping.',
+          text_es: 'Desliza la velocidad hasta el final, a «Normal». Toca la canción completa con la banda a velocidad normal, de la intro al final, sin detenerte.' }
       ]
     },
     // No help ladder: a practice card is its checks and nothing else (Jonathan, 2026-10-07).
@@ -3293,11 +3306,11 @@ window.CLASS_ACTIVITIES = [
       ],
       checks: [
         { label: 'The whole song, slower', label_es: 'La canción completa, más lenta',
-          text:    'Press Slowest or Slower. Play the whole song with the band, intro to the end, without stopping.',
-          text_es: 'Pulsa «Muy lento» o «Más lento». Toca la canción completa con la banda, de la intro al final, sin detenerte.' },
+          text:    'Leave the speed where the card starts it, or move it one stop left. Play the whole song with the band, intro to the end, without stopping.',
+          text_es: 'Deja la velocidad donde empieza la tarjeta, o muévela una parada a la izquierda. Toca la canción completa con la banda, de la intro al final, sin detenerte.' },
         { levelUp: true,
-          text:    'Press Normal. Play the whole song with the band at normal speed, intro to the end, without stopping.',
-          text_es: 'Pulsa «Normal». Toca la canción completa con la banda a velocidad normal, de la intro al final, sin detenerte.' }
+          text:    'Slide the speed all the way right, to Normal. Play the whole song with the band at normal speed, intro to the end, without stopping.',
+          text_es: 'Desliza la velocidad hasta el final, a «Normal». Toca la canción completa con la banda a velocidad normal, de la intro al final, sin detenerte.' }
       ]
     },
     // No help ladder: a practice card is its checks and nothing else (Jonathan, 2026-10-07).
@@ -3335,8 +3348,8 @@ window.CLASS_ACTIVITIES = [
       wholeSong: true,  // stops at the end of the song instead of looping
       track: 'sweet-child-o-mine',
       slowest: true,    // four-way speed control (Slow added 2026-10-09): Slowest (80) / Slower (100) / Normal (125) — the student picks
-      caption:    'The whole song in order · 1 pluck per chord, let it ring',
-      caption_es: 'La canción completa en orden · 1 pulsación por acorde, déjala sonar',
+      caption:    'The whole song in order · 1 pluck per bar, let it ring',
+      caption_es: 'La canción completa en orden · 1 pulsación por compás, déjala sonar',
       sections: [
         {
           label: 'Intro', label_es: 'Intro',
@@ -3528,11 +3541,11 @@ window.CLASS_ACTIVITIES = [
       ],
       checks: [
         { label: 'The whole song, slower', label_es: 'La canción completa, más lenta',
-          text:    'Press Slowest or Slower. Play the whole song with the band, intro to the end, without stopping.',
-          text_es: 'Pulsa «Muy lento» o «Más lento». Toca la canción completa con la banda, de la intro al final, sin detenerte.' },
+          text:    'Leave the speed where the card starts it, or move it one stop left. Play the whole song with the band, intro to the end, without stopping.',
+          text_es: 'Deja la velocidad donde empieza la tarjeta, o muévela una parada a la izquierda. Toca la canción completa con la banda, de la intro al final, sin detenerte.' },
         { levelUp: true,
-          text:    'Press Normal. Play the whole song with the band at normal speed, intro to the end, without stopping.',
-          text_es: 'Pulsa «Normal». Toca la canción completa con la banda a velocidad normal, de la intro al final, sin detenerte.' }
+          text:    'Slide the speed all the way right, to Normal. Play the whole song with the band at normal speed, intro to the end, without stopping.',
+          text_es: 'Desliza la velocidad hasta el final, a «Normal». Toca la canción completa con la banda a velocidad normal, de la intro al final, sin detenerte.' }
       ]
     },
     // No help ladder: a practice card is its checks and nothing else (Jonathan, 2026-10-07).
@@ -3674,11 +3687,11 @@ window.CLASS_ACTIVITIES = [
       ],
       checks: [
         { label: 'The whole song, slower', label_es: 'La canción completa, más lenta',
-          text:    'Press Slowest or Slower. Play the whole song with the band, intro to the end, without stopping.',
-          text_es: 'Pulsa «Muy lento» o «Más lento». Toca la canción completa con la banda, de la intro al final, sin detenerte.' },
+          text:    'Leave the speed where the card starts it, or move it one stop left. Play the whole song with the band, intro to the end, without stopping.',
+          text_es: 'Deja la velocidad donde empieza la tarjeta, o muévela una parada a la izquierda. Toca la canción completa con la banda, de la intro al final, sin detenerte.' },
         { levelUp: true,
-          text:    'Press Normal. Play the whole song with the band at normal speed, intro to the end, without stopping.',
-          text_es: 'Pulsa «Normal». Toca la canción completa con la banda a velocidad normal, de la intro al final, sin detenerte.' }
+          text:    'Slide the speed all the way right, to Normal. Play the whole song with the band at normal speed, intro to the end, without stopping.',
+          text_es: 'Desliza la velocidad hasta el final, a «Normal». Toca la canción completa con la banda a velocidad normal, de la intro al final, sin detenerte.' }
       ]
     },
     // No help ladder: a practice card is its checks and nothing else (Jonathan, 2026-10-07).
@@ -3702,8 +3715,8 @@ window.CLASS_ACTIVITIES = [
       wholeSong: true,  // stops at the end of the song instead of looping
       track: 'the-cure',
       slowest: true,    // four-way speed control (Slow added 2026-10-09): Slowest / Slower / Slow / Normal — the student picks
-      caption:    'The whole song in power chords · 4 strums per chord',
-      caption_es: 'La canción completa con acordes de potencia · 4 rasgueos por acorde',
+      caption:    'The whole song in power chords · 4 strums per bar (2 where two chords share a bar)',
+      caption_es: 'La canción completa con acordes de potencia · 4 rasgueos por compás (2 donde dos acordes comparten un compás)',
       sections: [
         {
           label: 'Intro', label_es: 'Intro',
@@ -3994,11 +4007,11 @@ window.CLASS_ACTIVITIES = [
       ],
       checks: [
         { label: 'The whole song, slower', label_es: 'La canción completa, más lenta',
-          text:    'Press Slowest or Slower. Play the whole song with the band, intro to the end, without stopping.',
-          text_es: 'Pulsa «Muy lento» o «Más lento». Toca la canción completa con la banda, de la intro al final, sin detenerte.' },
+          text:    'Leave the speed where the card starts it, or move it one stop left. Play the whole song with the band, intro to the end, without stopping.',
+          text_es: 'Deja la velocidad donde empieza la tarjeta, o muévela una parada a la izquierda. Toca la canción completa con la banda, de la intro al final, sin detenerte.' },
         { levelUp: true,
-          text:    'Press Normal. Play the whole song with the band at normal speed, intro to the end, without stopping.',
-          text_es: 'Pulsa «Normal». Toca la canción completa con la banda a velocidad normal, de la intro al final, sin detenerte.' }
+          text:    'Slide the speed all the way right, to Normal. Play the whole song with the band at normal speed, intro to the end, without stopping.',
+          text_es: 'Desliza la velocidad hasta el final, a «Normal». Toca la canción completa con la banda a velocidad normal, de la intro al final, sin detenerte.' }
       ]
     },
     // No help ladder: a practice card is its checks and nothing else (Jonathan, 2026-10-07).
@@ -4244,11 +4257,11 @@ window.CLASS_ACTIVITIES = [
       ],
       checks: [
         { label: 'The whole song, slower', label_es: 'La canción completa, más lenta',
-          text:    'Press Slowest or Slower. Play the whole song with the band, intro to the end, without stopping.',
-          text_es: 'Pulsa «Muy lento» o «Más lento». Toca la canción completa con la banda, de la intro al final, sin detenerte.' },
+          text:    'Leave the speed where the card starts it, or move it one stop left. Play the whole song with the band, intro to the end, without stopping.',
+          text_es: 'Deja la velocidad donde empieza la tarjeta, o muévela una parada a la izquierda. Toca la canción completa con la banda, de la intro al final, sin detenerte.' },
         { levelUp: true,
-          text:    'Press Normal. Play the whole song with the band at normal speed, intro to the end, without stopping.',
-          text_es: 'Pulsa «Normal». Toca la canción completa con la banda a velocidad normal, de la intro al final, sin detenerte.' }
+          text:    'Slide the speed all the way right, to Normal. Play the whole song with the band at normal speed, intro to the end, without stopping.',
+          text_es: 'Desliza la velocidad hasta el final, a «Normal». Toca la canción completa con la banda a velocidad normal, de la intro al final, sin detenerte.' }
       ]
     },
     // No help ladder: a practice card is its checks and nothing else (Jonathan, 2026-10-07).
@@ -4366,11 +4379,11 @@ window.CLASS_ACTIVITIES = [
       ],
       checks: [
         { label: 'The whole song, slower', label_es: 'La canción completa, más lenta',
-          text:    'Press Slowest or Slower. Play the whole song with the band, intro to the end, without stopping.',
-          text_es: 'Pulsa «Muy lento» o «Más lento». Toca la canción completa con la banda, de la intro al final, sin detenerte.' },
+          text:    'Leave the speed where the card starts it, or move it one stop left. Play the whole song with the band, intro to the end, without stopping.',
+          text_es: 'Deja la velocidad donde empieza la tarjeta, o muévela una parada a la izquierda. Toca la canción completa con la banda, de la intro al final, sin detenerte.' },
         { levelUp: true,
-          text:    'Press Normal. Play the whole song with the band at normal speed, intro to the end, without stopping.',
-          text_es: 'Pulsa «Normal». Toca la canción completa con la banda a velocidad normal, de la intro al final, sin detenerte.' }
+          text:    'Slide the speed all the way right, to Normal. Play the whole song with the band at normal speed, intro to the end, without stopping.',
+          text_es: 'Desliza la velocidad hasta el final, a «Normal». Toca la canción completa con la banda a velocidad normal, de la intro al final, sin detenerte.' }
       ]
     },
     // No help ladder: a practice card is its checks and nothing else (Jonathan, 2026-10-07).
@@ -4399,8 +4412,8 @@ window.CLASS_ACTIVITIES = [
       wholeSong: true,  // stops at the end of the song instead of looping
       track: 'sweet-child-o-mine',
       slowest: true,    // four-way speed control (Slow added 2026-10-09): Slowest / Slower / Slow / Normal — the student picks
-      caption:    'The whole song in power chords · 1 strum per chord, let it ring',
-      caption_es: 'La canción completa con acordes de potencia · 1 rasgueo por acorde, déjalo sonar',
+      caption:    'The whole song in power chords · 1 strum per bar, let it ring',
+      caption_es: 'La canción completa con acordes de potencia · 1 rasgueo por compás, déjalo sonar',
       sections: [
         {
           label: 'Intro', label_es: 'Intro',
@@ -4592,11 +4605,11 @@ window.CLASS_ACTIVITIES = [
       ],
       checks: [
         { label: 'The whole song, slower', label_es: 'La canción completa, más lenta',
-          text:    'Press Slowest or Slower. Play the whole song with the band, intro to the end, without stopping.',
-          text_es: 'Pulsa «Muy lento» o «Más lento». Toca la canción completa con la banda, de la intro al final, sin detenerte.' },
+          text:    'Leave the speed where the card starts it, or move it one stop left. Play the whole song with the band, intro to the end, without stopping.',
+          text_es: 'Deja la velocidad donde empieza la tarjeta, o muévela una parada a la izquierda. Toca la canción completa con la banda, de la intro al final, sin detenerte.' },
         { levelUp: true,
-          text:    'Press Normal. Play the whole song with the band at normal speed, intro to the end, without stopping.',
-          text_es: 'Pulsa «Normal». Toca la canción completa con la banda a velocidad normal, de la intro al final, sin detenerte.' }
+          text:    'Slide the speed all the way right, to Normal. Play the whole song with the band at normal speed, intro to the end, without stopping.',
+          text_es: 'Desliza la velocidad hasta el final, a «Normal». Toca la canción completa con la banda a velocidad normal, de la intro al final, sin detenerte.' }
       ]
     },
     // No help ladder: a practice card is its checks and nothing else (Jonathan, 2026-10-07).
