@@ -1180,8 +1180,8 @@ window.CLASS_ACTIVITIES = [
     number: 10,
     title:    'Seven Nation Army — The Riff',
     title_es: 'Seven Nation Army — El riff',
-    intro:    'The Seven Nation Army riff is seven notes on the A string — play it with the song, first on Slower, then at normal speed.',
-    intro_es: 'El riff de Seven Nation Army son siete notas en la cuerda La — tócalo con la canción, primero en Más lento y después a velocidad normal.',
+    intro:    'The Seven Nation Army riff is seven notes on the A string — play it with the song, first at a slower speed, then at normal speed.',
+    intro_es: 'El riff de Seven Nation Army son siete notas en la cuerda La — tócalo con la canción, primero a una velocidad más lenta y después a velocidad normal.',
     card: {
       track: 'seven-nation-army',
       slowest: true,    // four-way speed control (Slow added 2026-10-09): Slowest (80) / Slower (100) / Slow (~112) / Normal (123) — Jonathan, 2026-09-29
@@ -1205,12 +1205,12 @@ window.CLASS_ACTIVITIES = [
         }
       ],
       checks: [
-        { label: 'The riff on Slower', label_es: 'El riff en Más lento',
-          text:    'Four laps of the riff with the song on Slower, without stopping. A lap is once through the riff.',
-          text_es: 'Cuatro vueltas del riff con la canción en Más lento, sin detenerte. Una vuelta es tocar el riff una vez completo.' },
+        { label: 'The riff, slower', label_es: 'El riff, más lento',
+          text:    'Four laps of the riff with the song at the speed the card starts on, without stopping. A lap is once through the riff.',
+          text_es: 'Cuatro vueltas del riff con la canción a la velocidad con la que empieza la tarjeta, sin detenerte. Una vuelta es tocar el riff una vez completo.' },
         { label: 'The riff on Normal', label_es: 'El riff en Normal',
           text:    'Slide the speed all the way right, to Normal. Four laps of the riff with the song, without stopping.',
-          text_es: 'Desliza la velocidad hasta el final, a «Normal». Cuatro vueltas del riff con la canción, sin detenerte.' },
+          text_es: 'Desliza la velocidad hasta la derecha, a «Normal». Cuatro vueltas del riff con la canción, sin detenerte.' },
         { levelUp: true,
           card: 'ca-25',    // its button opens the whole-song card, not the Song Journey page (Jonathan, 2026-10-06)
           text:    'Play along with the whole song on the Whole Song card.',
@@ -1840,18 +1840,18 @@ window.CLASS_ACTIVITIES = [
       ],
       checks: [
         { label: 'Intro', label_es: 'Intro',
-          text:    'The intro with the song on Slower, without stopping.',
-          text_es: 'La intro con la canción en Más lento, sin detenerte.' },
+          text:    'The intro with the song at the speed the card starts on, without stopping.',
+          text_es: 'La intro con la canción a la velocidad con la que empieza la tarjeta, sin detenerte.' },
         { label: '2 verses', label_es: '2 estrofas',
-          text:    '2 verses with the song on Slower, without stopping. Tap 2 Verses to start there.',
-          text_es: 'Las 2 estrofas con la canción en Más lento, sin detenerte. Pulsa «2 estrofas» para empezar ahí.' },
+          text:    '2 verses with the song at the speed the card starts on, without stopping. Tap 2 Verses to start there.',
+          text_es: 'Las 2 estrofas con la canción a la velocidad con la que empieza la tarjeta, sin detenerte. Pulsa «2 estrofas» para empezar ahí.' },
         { label: 'Intro and 2 verses', label_es: 'Intro y 2 estrofas',
-          text:    'Intro and 2 verses with the song on Slower, without stopping.',
-          text_es: 'La intro y las 2 estrofas con la canción en Más lento, sin detenerte.' },
+          text:    'Intro and 2 verses with the song at the speed the card starts on, without stopping.',
+          text_es: 'La intro y las 2 estrofas con la canción a la velocidad con la que empieza la tarjeta, sin detenerte.' },
         { levelUp: true,
           card: 'ca-24',    // its button opens the whole-song card, not the Song Journey page (Jonathan, 2026-10-06)
           text:    'Slide the speed all the way right, to Normal, and play the intro and 2 verses. Then play along with the whole song on the Whole Song card.',
-          text_es: 'Desliza la velocidad hasta el final, a «Normal», y toca la intro y las 2 estrofas. Después toca con la canción completa en la tarjeta de La canción completa.' }
+          text_es: 'Desliza la velocidad hasta la derecha, a «Normal», y toca la intro y las 2 estrofas. Después toca con la canción completa en la tarjeta de La canción completa.' }
       ]
     },
     // No help ladder: a practice card is its checks and nothing else (Jonathan, 2026-10-07).
@@ -1949,18 +1949,18 @@ window.CLASS_ACTIVITIES = [
       ],
       checks: [
         { label: 'Intro', label_es: 'Intro',
-          text:    'The intro with the song on Slower, without stopping.',
-          text_es: 'La intro con la canción en Más lento, sin detenerte.' },
+          text:    'The intro with the song at the speed the card starts on, without stopping.',
+          text_es: 'La intro con la canción a la velocidad con la que empieza la tarjeta, sin detenerte.' },
         { label: '2 verses', label_es: '2 estrofas',
-          text:    '2 verses with the song on Slower, without stopping. Tap 2 Verses to start there.',
-          text_es: 'Las 2 estrofas con la canción en Más lento, sin detenerte. Pulsa «2 estrofas» para empezar ahí.' },
+          text:    '2 verses with the song at the speed the card starts on, without stopping. Tap 2 Verses to start there.',
+          text_es: 'Las 2 estrofas con la canción a la velocidad con la que empieza la tarjeta, sin detenerte. Pulsa «2 estrofas» para empezar ahí.' },
         { label: 'Intro and 2 verses', label_es: 'Intro y 2 estrofas',
-          text:    'Intro and 2 verses with the song on Slower, without stopping.',
-          text_es: 'La intro y las 2 estrofas con la canción en Más lento, sin detenerte.' },
+          text:    'Intro and 2 verses with the song at the speed the card starts on, without stopping.',
+          text_es: 'La intro y las 2 estrofas con la canción a la velocidad con la que empieza la tarjeta, sin detenerte.' },
         { levelUp: true,
           card: 'ca-24',    // its button opens the whole-song card, not the Song Journey page (Jonathan, 2026-10-06)
           text:    'Slide the speed all the way right, to Normal, and play the intro and 2 verses. Then play along with the whole song on the Whole Song card.',
-          text_es: 'Desliza la velocidad hasta el final, a «Normal», y toca la intro y las 2 estrofas. Después toca con la canción completa en la tarjeta de La canción completa.' }
+          text_es: 'Desliza la velocidad hasta la derecha, a «Normal», y toca la intro y las 2 estrofas. Después toca con la canción completa en la tarjeta de La canción completa.' }
       ]
     },
     // No help ladder: a practice card is its checks and nothing else (Jonathan, 2026-10-07).
@@ -2006,15 +2006,15 @@ window.CLASS_ACTIVITIES = [
       ],
       checks: [
         { label: 'Two laps', label_es: 'Dos vueltas',
-          text:    'Two laps with the song on Slower, without stopping. A lap is once through F F A A.',
-          text_es: 'Dos vueltas con la canción en Más lento, sin detenerte. Una vuelta es tocar F F A A una vez.' },
+          text:    'Two laps with the song at the speed the card starts on, without stopping. A lap is once through F F A A.',
+          text_es: 'Dos vueltas con la canción a la velocidad con la que empieza la tarjeta, sin detenerte. Una vuelta es tocar F F A A una vez.' },
         { label: 'Four laps', label_es: 'Cuatro vueltas',
-          text:    'Four laps with the song on Slower, without stopping.',
-          text_es: 'Cuatro vueltas con la canción en Más lento, sin detenerte.' },
+          text:    'Four laps with the song at the speed the card starts on, without stopping.',
+          text_es: 'Cuatro vueltas con la canción a la velocidad con la que empieza la tarjeta, sin detenerte.' },
         { levelUp: true,
           card: 'ca-27',    // its button opens the whole-song card, not the Song Journey page (Jonathan, 2026-10-06)
           text:    'Slide the speed all the way right, to Normal, and play four laps. Then play along with the whole song on the Whole Song card.',
-          text_es: 'Desliza la velocidad hasta el final, a «Normal», y toca cuatro vueltas. Después toca con la canción completa en la tarjeta de La canción completa.' }
+          text_es: 'Desliza la velocidad hasta la derecha, a «Normal», y toca cuatro vueltas. Después toca con la canción completa en la tarjeta de La canción completa.' }
       ]
     },
     // No help ladder: a practice card is its checks and nothing else (Jonathan, 2026-10-07).
@@ -2161,18 +2161,18 @@ window.CLASS_ACTIVITIES = [
       ],
       checks: [
         { label: 'Intro and 2 verses', label_es: 'Intro y 2 estrofas',
-          text:    'Intro and 2 verses with the song on Slower, without stopping.',
-          text_es: 'La intro y las 2 estrofas con la canción en Más lento, sin detenerte.' },
+          text:    'Intro and 2 verses with the song at the speed the card starts on, without stopping.',
+          text_es: 'La intro y las 2 estrofas con la canción a la velocidad con la que empieza la tarjeta, sin detenerte.' },
         { label: 'Chorus', label_es: 'Coro',
-          text:    'Two choruses in a row with the song on Slower, without stopping. Tap Chorus to start there.',
-          text_es: 'Dos coros seguidos con la canción en Más lento, sin detenerte. Pulsa «Coro» para empezar ahí.' },
+          text:    'Two choruses in a row with the song at the speed the card starts on, without stopping. Tap Chorus to start there.',
+          text_es: 'Dos coros seguidos con la canción a la velocidad con la que empieza la tarjeta, sin detenerte. Pulsa «Coro» para empezar ahí.' },
         { label: 'Intro to chorus', label_es: 'De la intro al coro',
-          text:    'Intro to the end of the chorus with the song on Slower, without stopping.',
-          text_es: 'De la intro al final del coro con la canción en Más lento, sin detenerte.' },
+          text:    'Intro to the end of the chorus with the song at the speed the card starts on, without stopping.',
+          text_es: 'De la intro al final del coro con la canción a la velocidad con la que empieza la tarjeta, sin detenerte.' },
         { levelUp: true,
           card: 'ca-24',    // its button opens the whole-song card, not the Song Journey page (Jonathan, 2026-10-06)
           text:    'Slide the speed all the way right, to Normal, and play from the intro to the end of the chorus. Then play the whole song, intro to the end, on the Whole Song card.',
-          text_es: 'Desliza la velocidad hasta el final, a «Normal», y toca desde la intro hasta el final del coro. Después toca la canción completa, de la intro al final, en la tarjeta de La canción completa.' }
+          text_es: 'Desliza la velocidad hasta la derecha, a «Normal», y toca desde la intro hasta el final del coro. Después toca la canción completa, de la intro al final, en la tarjeta de La canción completa.' }
       ]
     },
     // No help ladder: a practice card is its checks and nothing else (Jonathan, 2026-10-07).
@@ -2203,8 +2203,8 @@ window.CLASS_ACTIVITIES = [
       track: 'the-cure',
       slowest: true,    // four-way speed control (Slow added 2026-10-09): Slowest (48) / Slower (60) / Slow (66) / Normal (72) — the student picks
       wholeSong: true,  // stops at the end of the song instead of looping — Jonathan, 2026-10-02
-      caption:    'The whole song in order · 4 plucks per bar (2 where two chords share a bar)',
-      caption_es: 'La canción completa en orden · 4 pulsaciones por compás (2 donde dos acordes comparten un compás)',
+      caption:    'The whole song in order · 4 plucks per bar (2 per chord where two chords share a bar)',
+      caption_es: 'La canción completa en orden · 4 pulsaciones por compás (2 por acorde donde dos acordes comparten un compás)',
       sections: [
         {
           label: 'Intro', label_es: 'Intro',
@@ -2496,10 +2496,10 @@ window.CLASS_ACTIVITIES = [
       checks: [
         { label: 'The whole song, slower', label_es: 'La canción completa, más lenta',
           text:    'Leave the speed where the card starts it, or move it one stop left. Play the whole song with the band, intro to the end, without stopping.',
-          text_es: 'Deja la velocidad donde empieza la tarjeta, o muévela una parada a la izquierda. Toca la canción completa con la banda, de la intro al final, sin detenerte.' },
+          text_es: 'Deja la velocidad donde la tarjeta la deja al empezar, o muévela una posición a la izquierda. Toca la canción completa con la banda, de la intro al final, sin detenerte.' },
         { levelUp: true,
           text:    'Slide the speed all the way right, to Normal. Play the whole song with the band at normal speed, intro to the end, without stopping.',
-          text_es: 'Desliza la velocidad hasta el final, a «Normal». Toca la canción completa con la banda a velocidad normal, de la intro al final, sin detenerte.' }
+          text_es: 'Desliza la velocidad hasta la derecha, a «Normal». Toca la canción completa con la banda a velocidad normal, de la intro al final, sin detenerte.' }
       ]
     },
     // No help ladder: a practice card is its checks and nothing else (Jonathan, 2026-10-07).
@@ -3045,10 +3045,10 @@ window.CLASS_ACTIVITIES = [
         // `slot` keeps the tick keys these two had as checks 3 and 4.
         { slot: 2, label: 'The whole song, slower', label_es: 'La canción completa, más lenta',
           text:    'Leave the speed where the card starts it, or move it one stop left. Play the whole song with the band, intro to the end, without stopping.',
-          text_es: 'Deja la velocidad donde empieza la tarjeta, o muévela una parada a la izquierda. Toca la canción completa con la banda, de la intro al final, sin detenerte.' },
+          text_es: 'Deja la velocidad donde la tarjeta la deja al empezar, o muévela una posición a la izquierda. Toca la canción completa con la banda, de la intro al final, sin detenerte.' },
         { slot: 3, levelUp: true,
           text:    'Slide the speed all the way right, to Normal. Play the whole song with the band at normal speed, intro to the end, without stopping.',
-          text_es: 'Desliza la velocidad hasta el final, a «Normal». Toca la canción completa con la banda a velocidad normal, de la intro al final, sin detenerte.' }
+          text_es: 'Desliza la velocidad hasta la derecha, a «Normal». Toca la canción completa con la banda a velocidad normal, de la intro al final, sin detenerte.' }
       ]
     },
     // No help ladder: a practice card is its checks and nothing else (Jonathan, 2026-10-07).
@@ -3200,10 +3200,10 @@ window.CLASS_ACTIVITIES = [
       checks: [
         { label: 'The whole song, slower', label_es: 'La canción completa, más lenta',
           text:    'Leave the speed where the card starts it, or move it one stop left. Play the whole song with the band, intro to the end, without stopping.',
-          text_es: 'Deja la velocidad donde empieza la tarjeta, o muévela una parada a la izquierda. Toca la canción completa con la banda, de la intro al final, sin detenerte.' },
+          text_es: 'Deja la velocidad donde la tarjeta la deja al empezar, o muévela una posición a la izquierda. Toca la canción completa con la banda, de la intro al final, sin detenerte.' },
         { levelUp: true,
           text:    'Slide the speed all the way right, to Normal. Play the whole song with the band at normal speed, intro to the end, without stopping.',
-          text_es: 'Desliza la velocidad hasta el final, a «Normal». Toca la canción completa con la banda a velocidad normal, de la intro al final, sin detenerte.' }
+          text_es: 'Desliza la velocidad hasta la derecha, a «Normal». Toca la canción completa con la banda a velocidad normal, de la intro al final, sin detenerte.' }
       ]
     },
     // No help ladder: a practice card is its checks and nothing else (Jonathan, 2026-10-07).
@@ -3307,10 +3307,10 @@ window.CLASS_ACTIVITIES = [
       checks: [
         { label: 'The whole song, slower', label_es: 'La canción completa, más lenta',
           text:    'Leave the speed where the card starts it, or move it one stop left. Play the whole song with the band, intro to the end, without stopping.',
-          text_es: 'Deja la velocidad donde empieza la tarjeta, o muévela una parada a la izquierda. Toca la canción completa con la banda, de la intro al final, sin detenerte.' },
+          text_es: 'Deja la velocidad donde la tarjeta la deja al empezar, o muévela una posición a la izquierda. Toca la canción completa con la banda, de la intro al final, sin detenerte.' },
         { levelUp: true,
           text:    'Slide the speed all the way right, to Normal. Play the whole song with the band at normal speed, intro to the end, without stopping.',
-          text_es: 'Desliza la velocidad hasta el final, a «Normal». Toca la canción completa con la banda a velocidad normal, de la intro al final, sin detenerte.' }
+          text_es: 'Desliza la velocidad hasta la derecha, a «Normal». Toca la canción completa con la banda a velocidad normal, de la intro al final, sin detenerte.' }
       ]
     },
     // No help ladder: a practice card is its checks and nothing else (Jonathan, 2026-10-07).
@@ -3348,8 +3348,8 @@ window.CLASS_ACTIVITIES = [
       wholeSong: true,  // stops at the end of the song instead of looping
       track: 'sweet-child-o-mine',
       slowest: true,    // four-way speed control (Slow added 2026-10-09): Slowest (80) / Slower (100) / Normal (125) — the student picks
-      caption:    'The whole song in order · 1 pluck per bar, let it ring',
-      caption_es: 'La canción completa en orden · 1 pulsación por compás, déjala sonar',
+      caption:    'The whole song in order · 1 pluck per bar (3 in the C D G bar of Solo 2 and the Outro), let it ring',
+      caption_es: 'La canción completa en orden · 1 pulsación por compás (3 en el compás de C D G del Solo 2 y del Final), déjala sonar',
       sections: [
         {
           label: 'Intro', label_es: 'Intro',
@@ -3542,10 +3542,10 @@ window.CLASS_ACTIVITIES = [
       checks: [
         { label: 'The whole song, slower', label_es: 'La canción completa, más lenta',
           text:    'Leave the speed where the card starts it, or move it one stop left. Play the whole song with the band, intro to the end, without stopping.',
-          text_es: 'Deja la velocidad donde empieza la tarjeta, o muévela una parada a la izquierda. Toca la canción completa con la banda, de la intro al final, sin detenerte.' },
+          text_es: 'Deja la velocidad donde la tarjeta la deja al empezar, o muévela una posición a la izquierda. Toca la canción completa con la banda, de la intro al final, sin detenerte.' },
         { levelUp: true,
           text:    'Slide the speed all the way right, to Normal. Play the whole song with the band at normal speed, intro to the end, without stopping.',
-          text_es: 'Desliza la velocidad hasta el final, a «Normal». Toca la canción completa con la banda a velocidad normal, de la intro al final, sin detenerte.' }
+          text_es: 'Desliza la velocidad hasta la derecha, a «Normal». Toca la canción completa con la banda a velocidad normal, de la intro al final, sin detenerte.' }
       ]
     },
     // No help ladder: a practice card is its checks and nothing else (Jonathan, 2026-10-07).
@@ -3688,10 +3688,10 @@ window.CLASS_ACTIVITIES = [
       checks: [
         { label: 'The whole song, slower', label_es: 'La canción completa, más lenta',
           text:    'Leave the speed where the card starts it, or move it one stop left. Play the whole song with the band, intro to the end, without stopping.',
-          text_es: 'Deja la velocidad donde empieza la tarjeta, o muévela una parada a la izquierda. Toca la canción completa con la banda, de la intro al final, sin detenerte.' },
+          text_es: 'Deja la velocidad donde la tarjeta la deja al empezar, o muévela una posición a la izquierda. Toca la canción completa con la banda, de la intro al final, sin detenerte.' },
         { levelUp: true,
           text:    'Slide the speed all the way right, to Normal. Play the whole song with the band at normal speed, intro to the end, without stopping.',
-          text_es: 'Desliza la velocidad hasta el final, a «Normal». Toca la canción completa con la banda a velocidad normal, de la intro al final, sin detenerte.' }
+          text_es: 'Desliza la velocidad hasta la derecha, a «Normal». Toca la canción completa con la banda a velocidad normal, de la intro al final, sin detenerte.' }
       ]
     },
     // No help ladder: a practice card is its checks and nothing else (Jonathan, 2026-10-07).
@@ -3715,8 +3715,8 @@ window.CLASS_ACTIVITIES = [
       wholeSong: true,  // stops at the end of the song instead of looping
       track: 'the-cure',
       slowest: true,    // four-way speed control (Slow added 2026-10-09): Slowest / Slower / Slow / Normal — the student picks
-      caption:    'The whole song in power chords · 4 strums per bar (2 where two chords share a bar)',
-      caption_es: 'La canción completa con acordes de potencia · 4 rasgueos por compás (2 donde dos acordes comparten un compás)',
+      caption:    'The whole song in power chords · 4 strums per bar (2 per chord where two chords share a bar)',
+      caption_es: 'La canción completa con acordes de potencia · 4 rasgueos por compás (2 por acorde donde dos acordes comparten un compás)',
       sections: [
         {
           label: 'Intro', label_es: 'Intro',
@@ -4008,10 +4008,10 @@ window.CLASS_ACTIVITIES = [
       checks: [
         { label: 'The whole song, slower', label_es: 'La canción completa, más lenta',
           text:    'Leave the speed where the card starts it, or move it one stop left. Play the whole song with the band, intro to the end, without stopping.',
-          text_es: 'Deja la velocidad donde empieza la tarjeta, o muévela una parada a la izquierda. Toca la canción completa con la banda, de la intro al final, sin detenerte.' },
+          text_es: 'Deja la velocidad donde la tarjeta la deja al empezar, o muévela una posición a la izquierda. Toca la canción completa con la banda, de la intro al final, sin detenerte.' },
         { levelUp: true,
           text:    'Slide the speed all the way right, to Normal. Play the whole song with the band at normal speed, intro to the end, without stopping.',
-          text_es: 'Desliza la velocidad hasta el final, a «Normal». Toca la canción completa con la banda a velocidad normal, de la intro al final, sin detenerte.' }
+          text_es: 'Desliza la velocidad hasta la derecha, a «Normal». Toca la canción completa con la banda a velocidad normal, de la intro al final, sin detenerte.' }
       ]
     },
     // No help ladder: a practice card is its checks and nothing else (Jonathan, 2026-10-07).
@@ -4258,10 +4258,10 @@ window.CLASS_ACTIVITIES = [
       checks: [
         { label: 'The whole song, slower', label_es: 'La canción completa, más lenta',
           text:    'Leave the speed where the card starts it, or move it one stop left. Play the whole song with the band, intro to the end, without stopping.',
-          text_es: 'Deja la velocidad donde empieza la tarjeta, o muévela una parada a la izquierda. Toca la canción completa con la banda, de la intro al final, sin detenerte.' },
+          text_es: 'Deja la velocidad donde la tarjeta la deja al empezar, o muévela una posición a la izquierda. Toca la canción completa con la banda, de la intro al final, sin detenerte.' },
         { levelUp: true,
           text:    'Slide the speed all the way right, to Normal. Play the whole song with the band at normal speed, intro to the end, without stopping.',
-          text_es: 'Desliza la velocidad hasta el final, a «Normal». Toca la canción completa con la banda a velocidad normal, de la intro al final, sin detenerte.' }
+          text_es: 'Desliza la velocidad hasta la derecha, a «Normal». Toca la canción completa con la banda a velocidad normal, de la intro al final, sin detenerte.' }
       ]
     },
     // No help ladder: a practice card is its checks and nothing else (Jonathan, 2026-10-07).
@@ -4380,10 +4380,10 @@ window.CLASS_ACTIVITIES = [
       checks: [
         { label: 'The whole song, slower', label_es: 'La canción completa, más lenta',
           text:    'Leave the speed where the card starts it, or move it one stop left. Play the whole song with the band, intro to the end, without stopping.',
-          text_es: 'Deja la velocidad donde empieza la tarjeta, o muévela una parada a la izquierda. Toca la canción completa con la banda, de la intro al final, sin detenerte.' },
+          text_es: 'Deja la velocidad donde la tarjeta la deja al empezar, o muévela una posición a la izquierda. Toca la canción completa con la banda, de la intro al final, sin detenerte.' },
         { levelUp: true,
           text:    'Slide the speed all the way right, to Normal. Play the whole song with the band at normal speed, intro to the end, without stopping.',
-          text_es: 'Desliza la velocidad hasta el final, a «Normal». Toca la canción completa con la banda a velocidad normal, de la intro al final, sin detenerte.' }
+          text_es: 'Desliza la velocidad hasta la derecha, a «Normal». Toca la canción completa con la banda a velocidad normal, de la intro al final, sin detenerte.' }
       ]
     },
     // No help ladder: a practice card is its checks and nothing else (Jonathan, 2026-10-07).
@@ -4412,8 +4412,8 @@ window.CLASS_ACTIVITIES = [
       wholeSong: true,  // stops at the end of the song instead of looping
       track: 'sweet-child-o-mine',
       slowest: true,    // four-way speed control (Slow added 2026-10-09): Slowest / Slower / Slow / Normal — the student picks
-      caption:    'The whole song in power chords · 1 strum per bar, let it ring',
-      caption_es: 'La canción completa con acordes de potencia · 1 rasgueo por compás, déjalo sonar',
+      caption:    'The whole song in power chords · 1 strum per bar (3 in the C5 D5 G5 bar of Solo 2 and the Outro), let it ring',
+      caption_es: 'La canción completa con acordes de potencia · 1 rasgueo por compás (3 en el compás de C5 D5 G5 del Solo 2 y del Final), déjalo sonar',
       sections: [
         {
           label: 'Intro', label_es: 'Intro',
@@ -4606,10 +4606,10 @@ window.CLASS_ACTIVITIES = [
       checks: [
         { label: 'The whole song, slower', label_es: 'La canción completa, más lenta',
           text:    'Leave the speed where the card starts it, or move it one stop left. Play the whole song with the band, intro to the end, without stopping.',
-          text_es: 'Deja la velocidad donde empieza la tarjeta, o muévela una parada a la izquierda. Toca la canción completa con la banda, de la intro al final, sin detenerte.' },
+          text_es: 'Deja la velocidad donde la tarjeta la deja al empezar, o muévela una posición a la izquierda. Toca la canción completa con la banda, de la intro al final, sin detenerte.' },
         { levelUp: true,
           text:    'Slide the speed all the way right, to Normal. Play the whole song with the band at normal speed, intro to the end, without stopping.',
-          text_es: 'Desliza la velocidad hasta el final, a «Normal». Toca la canción completa con la banda a velocidad normal, de la intro al final, sin detenerte.' }
+          text_es: 'Desliza la velocidad hasta la derecha, a «Normal». Toca la canción completa con la banda a velocidad normal, de la intro al final, sin detenerte.' }
       ]
     },
     // No help ladder: a practice card is its checks and nothing else (Jonathan, 2026-10-07).

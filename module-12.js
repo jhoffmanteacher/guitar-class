@@ -807,8 +807,8 @@ SETS.push(
             steps: [
               {
                 label: 'Challenge 4 — Choose Your Pattern', label_es: 'Reto 4 — Elige tu patrón',
-                text: '<ol><li>Run ALL patterns learned this course (4-note p-i-m-a · 8-note p-i-m-a-m-i-m-i · Travis · pinch · 3/4 — use 3/4 only for a song in 3) over one chord.</li><li>Pick one and write it in the box below.</li></ol>You\'ve got it when: you\'ve named the pattern you\'ll perform with.',
-                text_es: '<ol><li>Corre TODOS los patrones aprendidos en este curso (p-i-m-a de 4 notas · p-i-m-a-m-i-m-i de 8 notas · Travis · pellizco · 3/4 — usa el 3/4 solo para una canción en 3) sobre un acorde.</li><li>Elige uno y escríbelo en el cuadro de abajo.</li></ol>Lo tienes cuando: has nombrado el patrón con el que vas a interpretar.',
+                text: '<ol><li>Run ALL patterns learned this course (4-note p-i-m-a · 6-note p-i-m-a-m-i — 6/8 songs only · 8-note p-i-m-a-m-i-m-i · Travis · pinch · 3/4 — use 3/4 only for a song in 3) over one chord.</li><li>Pick one and write it in the box below.</li></ol>You\'ve got it when: you\'ve named the pattern you\'ll perform with.',
+                text_es: '<ol><li>Corre TODOS los patrones aprendidos en este curso (p-i-m-a de 4 notas · p-i-m-a-m-i de 6 notas — solo para canciones en 6/8 · p-i-m-a-m-i-m-i de 8 notas · Travis · pellizco · 3/4 — usa el 3/4 solo para una canción en 3) sobre un acorde.</li><li>Elige uno y escríbelo en el cuadro de abajo.</li></ol>Lo tienes cuando: has nombrado el patrón con el que vas a interpretar.',
                 hint: 'The smartest choice is the one you can keep unbroken at performance tempo TODAY — not the hardest one.',
                 hint_es: 'La elección más inteligente es la que puedes mantener sin interrupciones al tempo de interpretación HOY — no la más difícil.',
                 stuck: 'If none feel ready, use Module 8\'s 4-note p-i-m-a — one note per beat.',

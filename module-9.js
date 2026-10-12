@@ -913,9 +913,9 @@ SETS.push(
                   choices_es: ['Tocar un acorde de G, y luego uno de B', 'Un acorde de G con B como su nota más grave', 'Un acorde de B con G como su nota más aguda', 'Un acorde de G tocado más arriba en el mástil'] }
               },
               {
-                label: 'Try spacing TAB rhythm', label_es: 'Prueba espaciar el ritmo del TAB',
-                text: 'Try spacing a few numbers the way you would in written TAB, then check: could someone else tell the rhythm from your spacing alone?',
-                text_es: 'Prueba espaciar unos números de la manera que lo harías en un TAB escrito, y luego revisa: ¿podría alguien más deducir el ritmo solo por tu espaciado?',
+                label: 'Try writing TAB', label_es: 'Prueba escribir TAB',
+                text: 'Try writing a few numbers as TAB, then check: could someone else play it back exactly the way you play it?',
+                text_es: 'Prueba escribir unos números como TAB, y luego revisa: ¿podría alguien más tocarlo exactamente como tú lo tocas?',
                 hint: 'Cramped numbers are the single most common reason a TAB is unplayable for anyone but the person who wrote it.',
                 hint_es: 'Los números amontonados son la razón más común por la que un TAB resulta imposible de tocar para cualquiera que no sea quien lo escribió.',
                 skills: [3],
@@ -1201,7 +1201,7 @@ MODULE_REVIEWS[9] = {
   ],
   assessItems: [
     'Name every string at the fret-5 dot and the fret-7 dot, no chart, within 5 seconds each',
-    'Play a thread-song melody from TAB in a higher position',
+    'Play a core-song melody from TAB in a higher position',
     'Finish a 4-bar TAB you wrote yourself that passes the at-first-sight test — a day later, the page alone reproduces the riff',
     'Play a melody that crosses three or more strings cleanly, every note ringing in order',
     'Read a partial-shape or slash chord chart and name which strings actually ring'

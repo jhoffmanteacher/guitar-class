@@ -635,7 +635,7 @@ SETS.push(
 
   {
     id: 'm7w3',
-    songThread: [{ name: '"All Along the Watchtower"', journey: 'tabs/all-along-the-watchtower.html', note: 'every chord as a barre' }, { name: '"Luna"', journey: 'tabs/luna.html', note: 'the barre upgrade — beyond Layer 5' }],
+    songThread: [{ name: '"All Along the Watchtower"', journey: 'tabs/all-along-the-watchtower.html', note: 'every chord as a barre — in this set, not on the Journey page' }, { name: '"Luna"', journey: 'tabs/luna.html', note: 'the full barre F — in this set, not on the Journey page' }],
     label: 'Set 3',
     locked: false,
     module: 'TAB Notation and Barre Chords',
@@ -831,8 +831,8 @@ SETS.push(
             hint_es: 'Pasaste el Módulo 6 haciendo que ese rasgueo fuera automático — ahora superpónlo sobre los acordes con cejilla, más difíciles. Si el patrón se desarma en un cambio, baja el metrónomo hasta que la cejilla y el rasgueo se mantengan juntos.',
             stuck: 'Strip it back: play the progression as one strum per bar until the changes are clean, THEN layer the D-DU-UDU pattern on top. Add the rhythm only once the chords land.',
             stuck_es: 'Simplifícalo: toca la progresión con un rasgueo por compás hasta que los cambios salgan limpios, y LUEGO superpón el patrón D-DU-UDU encima. Agrega el ritmo solo una vez que los acordes caigan bien.',
-            levelUp: 'Push the tempo, or accent beats 2 and 4 for a backbeat feel.',
-            levelUp_es: 'Sube el tempo, o acentúa los tiempos 2 y 4, como la tarola de la batería.',
+            levelUp: 'Push the tempo, or accent beats 2 and 4, where a drummer hits the snare (the backbeat).',
+            levelUp_es: 'Sube el tempo, o acentúa los tiempos 2 y 4, como el golpe de la tarola en la batería (el contratiempo).',
             skills: [5, 6]
           }
             ]
@@ -859,8 +859,8 @@ SETS.push(
               },
               {
                 label: 'Challenge — "Watchtower", no open chords', label_es: 'Reto — "Watchtower", sin acordes abiertos',
-                text: 'Play Am · G · F · G entirely as barres at 60 BPM — Am for two beats, G for two, F for two, G for two:<ul><li>Am is the E-shape minor at fret 5 (the bar plus your open-Em fingers).</li><li>G is your E-shape major at fret 3.</li><li>F is your E-shape major at fret 1.</li></ul>You\'ve got it when: four laps using ONLY barre chords — proof you no longer need the open shapes. <a href="tabs/all-along-the-watchtower.html" target="_blank">&#x1F9F5; Song Journey: from Layer 1 to every chord a barre</a>.',
-                text_es: 'Toca Am · G · F · G por completo como cejillas a 60 BPM — Am dos tiempos, G dos, F dos y G dos:<ul><li>Am es la forma menor de E en el traste 5 (la cejilla más tus dedos de Em abierto).</li><li>G es tu forma mayor de E en el traste 3.</li><li>F es tu forma mayor de E en el traste 1.</li></ul>Lo tienes cuando: cuatro vueltas usando SOLO acordes con cejilla — prueba de que ya no necesitas las formas abiertas. <a href="tabs/all-along-the-watchtower.html" target="_blank">&#x1F9F5; Recorrido de la canción: de la Capa 1 a cada acorde como cejilla</a>.',
+                text: 'Play Am · G · F · G entirely as barres at 60 BPM — Am for two beats, G for two, F for two, G for two:<ul><li>Am is the E-shape minor at fret 5 (the bar plus your open-Em fingers).</li><li>G is your E-shape major at fret 3.</li><li>F is your E-shape major at fret 1.</li></ul>You\'ve got it when: four laps using ONLY barre chords — proof you no longer need the open shapes. <a href="tabs/all-along-the-watchtower.html" target="_blank">&#x1F9F5; Song Journey: the "All Along the Watchtower" page</a>.',
+                text_es: 'Toca Am · G · F · G por completo como cejillas a 60 BPM — Am dos tiempos, G dos, F dos y G dos:<ul><li>Am es la forma menor de E en el traste 5 (la cejilla más tus dedos de Em abierto).</li><li>G es tu forma mayor de E en el traste 3.</li><li>F es tu forma mayor de E en el traste 1.</li></ul>Lo tienes cuando: cuatro vueltas usando SOLO acordes con cejilla — prueba de que ya no necesitas las formas abiertas. <a href="tabs/all-along-the-watchtower.html" target="_blank">&#x1F9F5; Recorrido de la canción: la página de "All Along the Watchtower"</a>.',
                 hint: 'Minor E-shape = the major shape minus the middle finger; the bar covers the note it left behind. Read the roots on the low E string: fret 5 = A, fret 3 = G, fret 1 = F.',
                 hint_es: 'Forma menor de E = la forma mayor menos el dedo medio; la cejilla cubre la nota que dejó atrás. Lee las raíces en la cuerda Mi grave: traste 5 = A, traste 3 = G, traste 1 = F.',
                 stuck: 'Get each chord clean on its own (pluck all 6 strings), then pair Am → G, and add the F last — it\'s the tightest squeeze.',
@@ -874,8 +874,8 @@ SETS.push(
               },
               {
                 label: 'Challenge — "Luna", full barre F', label_es: 'Reto — "Luna", cejilla completa de F',
-                text: 'Swap the little F (xx3211) for a full barre today:<ol><li>Index bars fret 1 across all six strings — the toughest fret on the neck to barre.</li><li>Play F ↔ Am with two downbeat strums per bar at 60 BPM.</li></ol>You\'ve got it when: four laps where all six strings of the F ring as clean as the Am — "Luna"\'s last beginner shortcut is gone. <a href="tabs/luna.html" target="_blank">&#x1F9F5; Song Journey: beyond Layer 5 — the barre upgrade</a>.',
-                text_es: 'Cambia hoy el F pequeño (xx3211) por la cejilla completa:<ol><li>El índice hace cejilla en el traste 1 a lo largo de las seis cuerdas — el traste más difícil del mástil para hacer cejilla.</li><li>Toca F ↔ Am con dos rasgueos en el tiempo fuerte por compás a 60 BPM.</li></ol>Lo tienes cuando: cuatro vueltas donde las seis cuerdas del F suenan tan limpias como el Am — el último atajo de principiante de "Luna" se acabó. <a href="tabs/luna.html" target="_blank">&#x1F9F5; Recorrido de la canción: más allá de la Capa 5 — la mejora de la cejilla</a>.',
+                text: 'Swap the little F (xx3211) for a full barre today:<ol><li>Index bars fret 1 across all six strings — the toughest fret on the neck to barre.</li><li>Play F ↔ Am with two downbeat strums per bar at 60 BPM.</li></ol>You\'ve got it when: four laps where all six strings of the F ring as clean as the Am — "Luna"\'s last beginner shortcut is gone. <a href="tabs/luna.html" target="_blank">&#x1F9F5; Song Journey: the "Luna" page</a>.',
+                text_es: 'Cambia hoy el F pequeño (xx3211) por la cejilla completa:<ol><li>El índice hace cejilla en el traste 1 a lo largo de las seis cuerdas — el traste más difícil del mástil para hacer cejilla.</li><li>Toca F ↔ Am con dos rasgueos en el tiempo fuerte por compás a 60 BPM.</li></ol>Lo tienes cuando: cuatro vueltas donde las seis cuerdas del F suenan tan limpias como el Am — el último atajo de principiante de "Luna" se acabó. <a href="tabs/luna.html" target="_blank">&#x1F9F5; Recorrido de la canción: la página de "Luna"</a>.',
                 hint: 'Roll the index onto its bony edge and add a gentle pull-back from the whole arm so the thumb doesn\'t do all the work — fret 1 needs that extra leverage on top of your thumb squeeze.',
                 hint_es: 'Rueda el índice hacia su borde óseo y agrega un ligero tirón hacia atrás desde todo el brazo para que el pulgar no haga todo el trabajo — el traste 1 necesita esa palanca extra además del apriete de tu pulgar.',
                 stuck: 'Barre just the top two strings at fret 1 and add one string per day until all six ring.',
