@@ -1271,7 +1271,7 @@ MODULE_SONGS[4] = [
         backingKey: 'C' },
       { name: '"Happy Birthday"', meta: 'Full melodic reharmonization using pentatonic (optional)', meta_es: 'Rearmonización melódica completa usando pentatónica (opcional)', type: 'Supp', core: false,
         tutorialUrl: 'https://www.youtube.com/watch?v=wwiLAOjj16w&start=46' },
-      { name: '"12-bar blues in E"', meta: 'E minor pentatonic — classic improv context', meta_es: 'E menor pentatónica — contexto clásico de improvisación', type: 'Choice', core: false, level: 1,
+      { name: '"12-bar blues in E"', name_es: '"Blues de 12 compases en E"', meta:'E minor pentatonic — classic improv context', meta_es: 'E menor pentatónica — contexto clásico de improvisación', type: 'Choice', core: false, level: 1,
         tutorialUrl: 'https://www.youtube.com/watch?v=pJL2j2v6XZM' },
       { name: '"La Bamba" — Ritchie Valens', meta: 'C major pentatonic — bright and fun', meta_es: 'C mayor pentatónica — brillante y divertida', type: 'Choice', core: false, level: 1,
         originalUrl: 'https://www.youtube.com/watch?v=BycLmWI97Nc',

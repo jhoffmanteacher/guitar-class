@@ -219,7 +219,7 @@ SETS.push(
     },
 
     songs: [
-      { name: 'Student choice — any song that means something to you', meta: 'Listening & sharing day · No playing required', meta_es: 'Día de escuchar y compartir · No necesitas tocar', type: 'Choice', core: false, request: true },
+      { name: 'Student choice — any song that means something to you', name_es: 'Tu elección — cualquier canción que signifique algo para ti', meta:'Listening & sharing day · No playing required', meta_es: 'Día de escuchar y compartir · No necesitas tocar', type: 'Choice', core: false, request: true },
       { name: '"the cure" — Olivia Rodrigo', meta: 'Listen — find the guitar in a current song (Am–C–Dm–F–G)', meta_es: 'Escucha — encuentra la guitarra en una canción actual (Am–C–Dm–F–G)', type: 'Core', core: true, journeyUrl: 'tabs/the-cure.html',
         originalUrl: 'https://www.youtube.com/watch?v=B402rKl4bUg',
         tutorialUrl: 'https://www.youtube.com/watch?v=adW_zSkClaY' },

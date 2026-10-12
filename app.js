@@ -7354,6 +7354,9 @@ function erStart(key){
 }
 function erPlay(key){
   const st = earDrills[key]; if(!st) return;
+  // Same guard as playSequence/playBeat/strumChord. The round stays dealt and
+  // its "Play again" button works once the mic is off.
+  if(window.coachMicLive) return;  // demo audio would score itself while the Coach listens
   if(typeof stopAllDemoAudio === 'function') stopAllDemoAudio();
   (st.timeouts || []).forEach(clearTimeout);
   st.timeouts = [];
@@ -7641,22 +7644,39 @@ async function ncStart(key){
   if(!st || st.phase === 'play' || st.starting) return;
   ncStopAll();                      // one Note Call at a time, anywhere on the page
   stopAllDemoAudio();               // tab player, snippets, practice card, metronome
+  // A Coach check listening elsewhere would score this round's clicks (tap
+  // mode never reaches the coachClose() below). Only exists once coach.js is
+  // loaded — and with no coach.js there is no Coach mic to stop.
+  if(typeof coachInterrupt === 'function') coachInterrupt(t('coach.interrupt.micLost'));
   try { getAudioCtx().resume(); } catch(e){}
   st.msg = '';
   st.micOn = false;
   if(st.coach){
     st.starting = true;
+    st.cancelled = false;           // set by ncStopAll if the student leaves mid-start
     ncRepaint(key, ncHeadHtml(st, '') + `<div class="sdr-body"><div class="coach-tip">${escHtml(t('nc.startingMic'))}</div></div>`);
     let ok = false;
     try {
       await ensureCoachJs();
-      coachClose();                 // one mic owner at a time
-      if(typeof gamesStopMic === 'function') gamesStopMic();
-      coachEvictTuner();
-      ok = !!(coachStream || await coachAcquireMic());
-      if(ok) await coachEnsureRunning();
+      if(!st.cancelled){            // left while coach.js loaded: touch no other mic owner
+        coachClose();               // one mic owner at a time
+        if(typeof gamesStopMic === 'function') gamesStopMic();
+        st.cancelled = false;       // gamesStopMic's own ncStopAll() just flagged THIS start
+        coachEvictTuner();
+        ok = !!(coachStream || await coachAcquireMic());
+        if(ok) await coachEnsureRunning();
+      }
     } catch(e){ ok = false; }
     st.starting = false;
+    /* The page was left (In class closed, the tab hidden…) while the mic was
+       starting: the card is only hidden, so ncBox still finds it — without
+       this the round would run unseen with the mic open. */
+    if(st.cancelled){
+      st.cancelled = false;
+      if(ok) coachReleaseMicIfIdle();
+      if(noteCalls[key] === st){ st.phase = 'setup'; ncRepaint(key, ncSetupHtml(key)); }
+      return;
+    }
     if(noteCalls[key] !== st || !ncBox(key)){ if(ok) coachReleaseMicIfIdle(); return; }
     if(!ok){
       st.coach = false;             // fall back to tapping for this card
@@ -8125,6 +8145,7 @@ function ncStop(key){
 function ncStopAll(){
   Object.keys(noteCalls).forEach(k => {
     const st = noteCalls[k];
+    if(st.starting){ st.cancelled = true; return; }   // mid mic-start: ncStart bails when its await returns
     if(st.phase !== 'play') return;
     ncStop(k);
     st.phase = 'setup';
@@ -9048,6 +9069,11 @@ function stopAllDemoAudio(){
   // metroRunning/stopMetro live in fab-tools.js (always loaded alongside
   // app.js on index.html) — guarded for robustness, not because it's optional.
   if(typeof metroRunning !== 'undefined' && metroRunning) stopMetro();
+  // …and the floating player's backing track (loadPanel 'audio': a looping
+  // <audio autoplay>), which would otherwise play under the card or the mic.
+  // Paused, not removed — its own ▶ resumes it. Nothing that opens or plays
+  // that player calls this, so it never stops the student's own press.
+  document.querySelectorAll('#rp-iframe-wrap audio').forEach(el => { try { el.pause(); } catch(e){} });
 }
 function playSequence(midis, bpm, btnEl){
   if(playSeqState){
@@ -9451,7 +9477,7 @@ function loadPanel(type,url,title,subtitle){
       wrap.innerHTML = `<div class="rp-chord-svg">${svg}</div>`;
       newtab.classList.remove('visible');
     } else {
-      wrap.innerHTML = `<div class="rp-chord-err">Unknown string: ${escHtml(kind)}</div>`;
+      wrap.innerHTML = `<div class="rp-chord-err" data-i18n="panel.noDiagram" data-i18n-params="${escAttr(JSON.stringify({name:kind}))}">${escHtml(t('panel.noDiagram',{name:kind}))}</div>`;
       newtab.classList.remove('visible');
     }
   } else if(type==='note'){
@@ -9678,7 +9704,7 @@ function scrollPane(){
   return (m && m.scrollHeight > m.clientHeight) ? m : window;
 }
 function scrollPaneTop(smooth){
-  scrollPane().scrollTo({ top:0, behavior: smooth ? 'smooth' : 'auto' });
+  scrollPane().scrollTo({ top:0, behavior: smooth ? scrollBehavior() : 'auto' });
 }
 /* Where the reading pane is right now — window has scrollY, .main scrollTop. */
 function paneScrollTop(){
@@ -9858,7 +9884,7 @@ async function renderSongsHub(){
     // (core:true, type:'Focus') still show their tag inside the choice groups.
     const tagHtml = isCoreSix(e) ? '' : `<span class="stag ${sg.core ? 'stag-core' : ''}">${escHtml(songTypeLabel(sg.type, sg.core))}</span>`;
     return `<div class="song-row"><div class="dot ${sg.core ? 'dc' : 'dch'}"></div>
-      <div class="song-name-col"><div class="sname">${escHtml(sg.name)}</div>${sg.meta ? `<div class="smeta">${escHtml(tf(sg, 'meta'))}</div>` : ''}</div>
+      <div class="song-name-col"><div class="sname">${escHtml(tf(sg, 'name'))}</div>${sg.meta ? `<div class="smeta">${escHtml(tf(sg, 'meta'))}</div>` : ''}</div>
       ${vids.length ? `<div class="song-vids">${vids.join('')}</div>` : ''}
       ${tagHtml}</div>`;
   };
@@ -10156,7 +10182,7 @@ async function openSearchPanel(){
     <div id="search-results" class="search-results" aria-live="polite"><div class="coach-tip" data-i18n="search.gettingReady">${escHtml(t('search.gettingReady'))}</div></div>`;
   const input = document.getElementById('search-input');
   if(input) input.focus();
-  if(!searchIndex) searchIndex = await buildSearchIndex();
+  if(!searchIndex) await ensureSearchIndex();
   const res = document.getElementById('search-results');
   // The student may have already typed a query while the index was still
   // loading (a real wait on slow Wi-Fi/Chromebooks, since this fetches every
@@ -10205,9 +10231,33 @@ function searchHighlight(raw, terms){
   return out + escHtml(raw.slice(at));
 }
 
+/* One build at a time, shared by openSearchPanel and runSearch. */
+let searchIndexPending = null;
+function ensureSearchIndex(){
+  if(searchIndex) return Promise.resolve(searchIndex);
+  if(!searchIndexPending){
+    searchIndexPending = buildSearchIndex()
+      .then(ix => { searchIndex = ix; return ix; })
+      .finally(() => { searchIndexPending = null; });
+  }
+  return searchIndexPending;
+}
+
 function runSearch(q){
   const res = document.getElementById('search-results');
-  if(!res || !searchIndex) return;
+  if(!res) return;
+  /* A language switch drops the index (gc-langchange) under an open panel,
+     and only openSearchPanel used to rebuild it — typing did nothing until
+     the panel was closed and reopened. Rebuild here, then run what is in
+     the box by then. */
+  if(!searchIndex){
+    res.innerHTML = `<div class="coach-tip" data-i18n="search.gettingReady">${escHtml(t('search.gettingReady'))}</div>`;
+    ensureSearchIndex().then(() => {
+      const input = document.getElementById('search-input');
+      if(searchIndex && input) runSearch(input.value);
+    }).catch(() => {});
+    return;
+  }
   const rawQ = (q || '').trim();
   q = searchFold(rawQ);
   if(q.length < 2){ res.innerHTML = `<div class="coach-tip">${escHtml(t('search.typeMore'))}</div>`; return; }
@@ -10432,8 +10482,11 @@ function srStoredTodayIds(){
   const loaded = new Set(SETS.map(w => w.moduleNum));
   return stored.ids.filter(sid => {
     if(skillById(sid)) return true;
+    // Module 1's skill ids carry no module number ('w1-s2'); every other
+    // module's start 'm<N>w' ('m3w1-s2').
     const m = /^m(\d+)/.exec(sid);
-    return !!m && !loaded.has(+m[1]);
+    const mod = m ? +m[1] : (/^w\d+-s\d+$/.test(sid) ? 1 : null);
+    return mod != null && !loaded.has(mod);
   });
 }
 // Today's picks are stable all day (no reshuffling as they're completed) —
@@ -10739,7 +10792,7 @@ function caScrollToActivity(id){
     const screen = card.classList.contains('ca-solo-card') ? card.closest('.ca-screen') : null;
     const topbar = screen ? screen.querySelector('.page-topbar') : null;
     card.style.scrollMarginTop = topbar ? topbar.offsetHeight + 'px' : '';
-    card.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    card.scrollIntoView({ behavior: scrollBehavior(), block: 'start' });
   };
   requestAnimationFrame(go);
   setTimeout(go, 350);
@@ -10820,7 +10873,7 @@ function caFreePlayHeroHtml(){
     <p class="ca-freeplay-text">${escHtml(t('ca.freePlayText'))}</p>
     <div class="ca-freeplay-actions">
       <button type="button" class="ca-mark-btn" onclick="caFreePlayTimer()">${escHtml(t('ca.freePlayTimer'))}</button>
-      <button type="button" class="btn-out" onclick="caFreePlayGames()">${escHtml(t('ca.freePlayGames'))}</button>
+      ${gamesAccessOn ? `<button type="button" class="btn-out" onclick="caFreePlayGames()">${escHtml(t('ca.freePlayGames'))}</button>` : ''}
     </div>
   </div>`;
 }
@@ -11235,9 +11288,16 @@ function caFocusGo(id, si){
 // "Got it": tick the step (the same caStepDone the accordion's Mark done
 // writes) and move to the next one. On an already-done step it just moves
 // on; on the LAST step it toggles, so a mistaken tap can be taken back.
+// A second activation inside 400 ms is ignored: the first re-renders the
+// card, and where steps share a layout (ca-23) the second tap of a double
+// tap lands on the NEXT step's button and would tick that step too.
+let caFocusGotItAt = 0;
 function caFocusGotIt(id, si){
   const a = (window.CLASS_ACTIVITIES || []).find(x => x.id === id);
   if(!a) return;
+  const now = performance.now();
+  if(now - caFocusGotItAt < 400) return;
+  caFocusGotItAt = now;
   const key = `${id}:${si}`;
   const last = si >= (a.steps || []).length - 1;
   if(caStepDone[key] === true){
@@ -12330,6 +12390,9 @@ function ecRender(id){
   if(!el) return;
   el.innerHTML = caCheckBodyHtml(a, opts);
   if(typeof applyI18n === 'function') applyI18n(el);
+  // When this question's choices appeared — ecPick ignores a tap inside
+  // 400 ms of it (the second half of a double tap, see there).
+  if(ecRuns[id]) ecRuns[id].shownAt = performance.now();
 }
 /* Each item sounds once as it appears — the question is "what did you just
    hear", so making them press play first is a step with no teaching in it.
@@ -12358,6 +12421,10 @@ function ecPick(id, btn){
   if(!run || !a) return;
   const items = ecItems(a);
   if(run.picks.length >= items.length) return;   // a double-tap must not consume two questions
+  /* …nor answer the NEXT question: the first tap re-renders the row, and on
+     a fixed-order row (noteName) the second lands on the same letter there.
+     A tap this soon after the row appeared can only be that second tap. */
+  if(performance.now() - (run.shownAt || 0) < 400) return;
   run.picks.push(btn.dataset.pick);
   if(typeof stopAllDemoAudio === 'function') stopAllDemoAudio();
   if(run.picks.length < items.length){
@@ -12614,9 +12681,11 @@ function caCloseOpen(){
   /* Same for a "Play Along now" card opened from the Songs page: it is only
      in the list because it is the open card (caIsPlayAlongOnly — it is not
      on In-Class Activities by date), so closing it has to re-render or it
-     sits there until the next render. */
+     sits there until the next render. A pinned card that is not on the
+     dated list (caIsPinOnly, opened from the Keep practicing row) is the
+     same case. */
   const closing = caOpenId ? (window.CLASS_ACTIVITIES || []).find(x => x.id === caOpenId) : null;
-  const paOnly = !!(closing && caIsPlayAlongOnly(closing));
+  const paOnly = !!(closing && (caIsPlayAlongOnly(closing) || caIsPinOnly(closing)));
   caSwap = null;
   caOpenId = null;
   if(hadSwap || paOnly) renderClassActivities(); else caSyncTopbar();
@@ -13158,6 +13227,10 @@ function refreshOpenClassActivitiesScreen(){
 function renderClassActivities(){
   const bodyEl = document.getElementById('class-activities-body');
   if(!bodyEl) return;
+  // Recomputed below only when the list has cards; an emptied list must not
+  // keep the last pass's hero, or renderResumeCard stays hidden for good.
+  caStartHereId = null;
+  caTodayIds = [];
   caResetRevealsIfNewDay();
   // This rebuilds every card, so a snippet playing in one of them is about to
   // be detached — and a detached <audio> keeps playing with nothing left on
