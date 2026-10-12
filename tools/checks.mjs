@@ -2302,7 +2302,18 @@ function checkSlangPhrasing() {
 const TEACHER_PHRASES = [
   'self-assessment', 'assessment piece', 'benchmark lap', 'next layer of learning',
   'answer in a frame', 'better than fast and', "that's completely fine", 'totally normal',
-  "that's normal!", "you've got this", 'it will feel easy', 'confident level',
+  /* Widened from "that's normal!" 2026-10-11, with the four entries after
+     it: the 2026-10-11 Modules 6–8 audit found the same reassurance class
+     six more times in module-7.js's barre cards ("If your hand cramps,
+     that's normal", "Cramping is normal;" twice, "Short tries are better
+     than one long tiring session", "...better than one long, tiring
+     session") plus "that's normal.)" on the Sweet Child intro. Say the
+     action ("If your hand cramps, shake it loose") and drop the comfort.
+     "better than one long" still appears in the Modules 1–5 practice-
+     routine hints, which are kind:'routine' (hidden) and so exempt. */
+  "that's normal", 'cramping is normal', 'is normal;', 'is normal.',
+  'better than one long',
+  "you've got this", 'it will feel easy', 'confident level',
   'confident volume', 'confident pluck', 'nafme', "don't worry", "it's okay if",
   'trust the', 'quality first', 'quality over speed', 'make them your own',
   /* Widened from 'a stepping stone' 2026-09-27: the article-only match let
@@ -2341,6 +2352,16 @@ const TEACHER_PHRASE_ALLOW = [
   { file: 'module-1.js', phrase: 'trust the needle' },
   { file: 'module-2.js', phrase: 'trust the fret numbers' },
   { file: 'module-7.js', phrase: 'trust the one with the highest star rating' },
+  /* m7w3's graded MC "what should the high e string do?" offers "Buzz a
+     little — that's normal for this shape" as a WRONG answer: the
+     beginner belief being rejected, not comfort to the reader. */
+  { file: 'module-7.js', phrase: "that's normal for this shape" },
+  /* NOT innocent — carried. m2w2's tuned-down-recording hint ends "— that's
+     normal, not a mistake." It is the same reassurance class, found when
+     "that's normal" was widened (2026-10-11) by a fix pass scoped to
+     Modules 6–8. Reword it ("...than the recording; your guitar is not out
+     of tune") in the next Module 2 text pass and delete this entry. */
+  { file: 'module-2.js', phrase: "that's normal, not a mistake" },
   /* m2w2 Challenge 3's "(your low-E assessment piece)" label is frozen —
      Module 2 is in rule-zero-proof.mjs's FROZEN_THROUGH regime, where a step
      LABEL must match the base commit BYTE-FOR-BYTE by index (a rename would
