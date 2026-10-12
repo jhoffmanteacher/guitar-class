@@ -197,6 +197,17 @@ async function showTeacherApp(user){
   if(toggle && !document.getElementById('t-period-filter')){
     toggle.insertAdjacentHTML('afterend', `<div class="tg-seg t-period-filter" id="t-period-filter" role="group" aria-label="Filter by class period"></div>`);
   }
+  /* Refresh student progress, and how old the progress on screen is — see
+     teacherRefreshStudents. Beside the period filter for the same reason
+     the filter sits beside the view toggle: it's class-wide, not one view's.
+     Inline styles because the console's CSS has no rule for it yet; the
+     spacing matches .t-period-filter. */
+  const periodFilter=document.getElementById('t-period-filter');
+  if(periodFilter && !document.getElementById('t-refresh-bar')){
+    periodFilter.insertAdjacentHTML('afterend', `<span id="t-refresh-bar" style="display:inline-flex;align-items:center;flex-wrap:wrap;gap:8px;margin:0 0 16px 10px;vertical-align:top;font-size:0.8125rem;color:var(--text2)">`
+      +`<span class="tg-seg"><button type="button" class="tg-seg-btn" data-refresh-students title="Read every student's progress again: Done counts, who hasn't finished, Pending">Refresh</button></span>`
+      +`<span data-refresh-when></span></span>`);
+  }
   // Two extra legend rows for the skills grid's got-it markers — the plain
   // green check (index.html's static legend) doesn't distinguish a Coach
   // pass or a gate override from a self-declared "I've got it!". Inserted
@@ -223,6 +234,7 @@ async function showTeacherApp(user){
   if(shell && !shell.dataset.delegated){
     shell.dataset.delegated='1';
     shell.addEventListener('click', e=>{
+      if(e.target.closest('[data-refresh-students]')){ teacherRefreshStudents({manual:true}); teacherRefreshReportsBadge(); return; }
       if(e.target.closest('[data-back-to-students]')){ backToStudentsRoster(); return; }
       const games=e.target.closest('[data-set-games]');
       if(games){ teacherSetStudentGames(games.dataset.uid, games.dataset.state); return; }
@@ -300,8 +312,11 @@ async function showTeacherApp(user){
     // shell — the date <input> in renderTeacherActivities re-renders often,
     // this listener doesn't need to.
     shell.addEventListener('change', e=>{
+      // A release date typed from the keyboard waits for blur or Enter (see
+      // teacherCommitActivityDate); a pick from the calendar has no keystroke
+      // behind it and saves at once, as it always did.
       const actDate=e.target.closest('[data-set-activity-date]');
-      if(actDate){ teacherSetActivityDate(actDate.dataset.id, actDate.value); return; }
+      if(actDate){ if(!actDate.dataset.typing) teacherCommitActivityDate(actDate); return; }
       const actNum=e.target.closest('[data-board-number]');
       if(actNum){ teacherMoveActivityToNumber(actNum.dataset.id, actNum.value); return; }
       // "Assign to…" / "Move to…" — both append at the end of the section
@@ -319,9 +334,34 @@ async function showTeacherApp(user){
        bubble, hence the capture phase. */
     shell.addEventListener('toggle', e=>{
       if(!e.target || typeof e.target.closest!=='function') return;
+      // Matched on the target itself, before the Archived check: a done list
+      // inside an archived card sits INSIDE a [data-board-arch] details, so
+      // closest() from it would find the archive fold instead.
+      if(e.target.matches('[data-board-done]')){ boardDoneOpen[e.target.dataset.key]=!!e.target.open; return; }
+      if(e.target.matches('[data-board-help]')){ boardHelpOpen=!!e.target.open; return; }
       const arch=e.target.closest('[data-board-arch]');
       if(arch) teacherBoardArchToggle(arch.dataset.module, arch.open);
     }, true);
+    /* Leaving a release-date box saves what was typed in it (focusout, not
+       blur — blur doesn't bubble to this listener). Moving between the
+       box's own month/day/year fields stays inside the box and fires
+       nothing. A box removed by a repaint is skipped: its half-typed value
+       is gone from the screen, and saving it unseen is the bug this fixes. */
+    shell.addEventListener('focusout', e=>{
+      const dateBox=e.target && typeof e.target.closest==='function' && e.target.closest('[data-set-activity-date]');
+      if(dateBox && dateBox.isConnected) teacherCommitActivityDate(dateBox);
+    });
+    /* Coming back to this tab: re-read student progress (on the views that
+       redraw cheaply) and the new-reports count, and start or stop the
+       once-a-minute timer — it doesn't run while the tab is hidden. Bound
+       here, inside the run-once block, so a second showTeacherApp can't
+       add a second listener. */
+    document.addEventListener('visibilitychange', ()=>{
+      teacherSyncAutoRefresh();
+      if(document.hidden) return;
+      if(Date.now()-teacherStudentsAt > 15000) teacherRefreshStudents();
+      teacherRefreshReportsBadge();
+    });
     /* Drag and drop for the board. Bound to the same stable shell for the
        same reason as the click listener — the board's innerHTML is replaced
        on every render, so per-card listeners would have to be re-bound. */
@@ -333,6 +373,16 @@ async function showTeacherApp(user){
     // Enter saves, Escape backs out — the rename box is a one-line field in a
     // table cell, not a form, so there's no submit event to lean on.
     shell.addEventListener('keydown', e=>{
+      // Release date: Enter saves, Escape puts the saved date back, and any
+      // key that edits the value marks the box as being typed in, so the
+      // per-keystroke 'change' events above don't save half a date.
+      const dateBox=e.target.closest('[data-set-activity-date]');
+      if(dateBox){
+        if(e.key==='Enter'){ e.preventDefault(); teacherCommitActivityDate(dateBox); }
+        else if(e.key==='Escape'){ dateBox.value=teacherSavedActivityDate(dateBox.dataset.id); delete dateBox.dataset.typing; }
+        else if(/^\d$/.test(e.key) || ['Backspace','Delete','ArrowUp','ArrowDown','PageUp','PageDown','Home','End'].includes(e.key)) dateBox.dataset.typing='1';
+        return;
+      }
       // A number box isn't in a form either, so Enter has nothing to submit —
       // blur it, which fires the 'change' the writer above listens for.
       const numBox=e.target.closest('.t-board-num');
@@ -430,12 +480,14 @@ function showTeacherLoadWarning(moduleNums){
   summaryEl.insertAdjacentHTML('beforebegin', `<div id="t-load-warning" class="t-loading"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" style="width:1em;height:1em;vertical-align:-0.15em"><path d="M12 3 2 20h20L12 3z"/><path d="M12 10v4"/><circle cx="12" cy="17" r="0.6" fill="currentColor" stroke="none"/></svg> ${escHtml(label)} skill data failed to load — counts and percentages below may be incomplete. Check the browser console for details, or reload.</div>`);
 }
 
-async function loadAllStudents(){
-  try{
-    await ensureDb();
-    const snap=await db.collection('progress').get();
-    allStudentsRaw=[];
-    snap.forEach(doc=>{
+/* Every student's progress doc, read once and mapped to the shape every view
+   reads. Shared by the first load and by teacherRefreshStudents. Throws on
+   a failed read — the callers decide what that means for the screen. */
+async function teacherFetchStudents(){
+  await ensureDb();
+  const snap=await db.collection('progress').get();
+  const out=[];
+  snap.forEach(doc=>{
       const raw=doc.data().skills||{};
       const skills={};
       Object.keys(raw).forEach(k=>{
@@ -449,17 +501,26 @@ async function loadAllStudents(){
       // name/email are coerced to strings: firestore.rules doesn't type-check
       // progress/{uid}, and the roster sorts call .localeCompare() on them —
       // one student writing a number there would blank every view.
-      allStudentsRaw.push({uid:doc.id,skills,name:String(doc.data().name||''),email:String(doc.data().email||''),responses:doc.data().responses||{},coachSkill:gamesData.coachSkill||{},drillSkill:gamesData.drillSkill||{},classActivities:doc.data().classActivities||{},exitChecks:doc.data().exitChecks||{},period:doc.data().period||''});
-    });
+      out.push({uid:doc.id,skills,name:String(doc.data().name||''),email:String(doc.data().email||''),responses:doc.data().responses||{},coachSkill:gamesData.coachSkill||{},drillSkill:gamesData.drillSkill||{},classActivities:doc.data().classActivities||{},exitChecks:doc.data().exitChecks||{},period:doc.data().period||''});
+  });
+  return out;
+}
+async function loadAllStudents(){
+  teacherRefreshing=true; teacherPaintRefreshBar();
+  try{
+    allStudentsRaw=await teacherFetchStudents();
     // Pause/archive flags live in config/class, so it has to be in hand
     // before the roster is filtered — otherwise the first paint shows
     // archived students and then blinks them away.
     await loadTeacherClassConfig();
     teacherApplyRosterFilter();
   } catch(e){
+    teacherRefreshing=false; teacherRefreshFailed=true; teacherPaintRefreshBar();
     document.getElementById('t-grid-container').innerHTML='<div class="t-loading">Could not load student data. Check your Firebase security rules.</div>';
     return;
   }
+  teacherRefreshing=false; teacherRefreshFailed=false;
+  teacherStudentsAt=Date.now();
   // Rendering is deliberately OUTSIDE the fetch try/catch above — a bug in
   // renderTeacherBody/renderTeacherSummary shouldn't be reported to the
   // teacher as a Firestore permissions problem, which sends debugging in
@@ -470,6 +531,204 @@ async function loadAllStudents(){
     console.error('Teacher dashboard render failed:', e);
     document.getElementById('t-grid-container').innerHTML='<div class="t-loading">Something went wrong displaying this data. Check the browser console for details.</div>';
   }
+  teacherPaintRefreshBar();
+  teacherRefreshReportsBadge();
+}
+
+/* ── Keeping student progress current (2026-10-12) ──────────────────────
+   loadAllStudents ran once, at page load, so every Done count, "who hasn't
+   finished" list and Pending badge was as old as the tab — a console opened
+   before the bell said nobody had finished anything all period. Now the
+   roster is read again:
+     - by the Refresh button beside the period filter, on any view that
+       shows student progress;
+     - when this tab comes back to the front (visibilitychange), on the
+       views that redraw cheaply (TEACHER_AUTO_REFRESH_VIEWS);
+     - about once a minute while Class activities (the board or an
+       activity's page) is open and the tab is visible — the screen that is
+       up during class. The timer stops on every other view and while the
+       tab is hidden.
+   One read at a time. A read that lands while the teacher is mid-drag,
+   typing in a box, has the rename box open or is selecting text is thrown
+   away rather than painted over that work; the next tick tries again. The
+   activity board repaints from the config already in hand (no extra
+   config read, nothing written), and an activity's page repaints only its
+   Students block, so a song or drill playing in its Preview keeps going.
+
+   Cost: each refresh reads every progress doc once (one read per student),
+   so the timer is about 60 reads a minute per 60 students, only while the
+   board is on screen. */
+const TEACHER_REFRESH_MS=60000;
+const TEACHER_AUTO_REFRESH_VIEWS=['activities','students','skills','responses','trouble'];
+// Views where student progress isn't on screen at all — no Refresh bar.
+const TEACHER_NO_REFRESH_BAR_VIEWS=['livequiz','mic','reports'];
+let teacherStudentsAt=0;          // when the roster on screen was read (ms); 0 = not yet
+let teacherRefreshing=false;      // a read is out — no overlapping fetches
+let teacherRefreshFailed=false;   // the last read failed; the screen shows the older roster
+let teacherAutoRefreshTimer=null;
+/* Would repainting now throw away something the teacher is in the middle
+   of? A drag, the rename box, focus in any input/select (a release date
+   half typed, a # box, a Move-to list), or a text selection in the body
+   (copying names out of a "who hasn't finished" list). */
+function teacherRefreshSafe(){
+  if(boardDragId) return false;
+  if(activityEditId) return false;
+  const ae=document.activeElement;
+  if(ae && /^(INPUT|SELECT|TEXTAREA)$/.test(ae.tagName) && ae.closest('#teacher-app')) return false;
+  const sel=window.getSelection ? window.getSelection() : null;
+  const grid=document.getElementById('t-grid-container');
+  if(sel && !sel.isCollapsed && grid && sel.anchorNode && grid.contains(sel.anchorNode)) return false;
+  return true;
+}
+async function teacherRefreshStudents(opts){
+  const manual=!!(opts&&opts.manual);
+  if(teacherRefreshing) return;
+  if(!manual && (document.hidden || !TEACHER_AUTO_REFRESH_VIEWS.includes(teacherView))) return;
+  // The first load never landed (it painted an error) — run it again, whole.
+  if(!teacherStudentsAt){ if(manual) loadAllStudents(); return; }
+  if(!teacherRefreshSafe()) return;
+  teacherRefreshing=true; teacherPaintRefreshBar();
+  let fresh=null;
+  try{ fresh=await teacherFetchStudents(); }
+  catch(e){ console.warn('[guitar-class] student progress refresh failed', e); }
+  teacherRefreshing=false;
+  teacherRefreshFailed=!fresh;
+  // Failed, or something started while the read was out: keep the screen
+  // (and its "as of" time) exactly as it is.
+  if(!fresh || !teacherRefreshSafe()){ teacherPaintRefreshBar(); return; }
+  allStudentsRaw=fresh;
+  teacherApplyRosterFilter();
+  teacherStudentsAt=Date.now();
+  try{
+    renderTeacherSummary();
+    if(teacherView==='activities'){
+      if(activityDetailId) teacherRepaintActivityStudents(activityDetailId);
+      // The button re-reads the class settings too, like any write's repaint;
+      // the timer and tab-return paint over the config already in hand.
+      else renderTeacherActivities(manual ? undefined : {cached:true});
+    } else if(!TEACHER_NO_REFRESH_BAR_VIEWS.includes(teacherView)){
+      // A student's page scrolls to the top when it's drawn (it's built for
+      // opening one); a refresh keeps the teacher's place.
+      const y=window.scrollY;
+      renderTeacherBody();
+      window.scrollTo({top:y});
+    }
+  }catch(e){ console.error('Teacher dashboard refresh render failed:', e); }
+  teacherPaintRefreshBar();
+}
+/* An activity's page: repaint the [data-ta-live] boxes only — the Students
+   block (teacherActivityGridHtml), and for an exit check its turned-in line
+   too (teacherCheckLiveParts). The Preview under them is left alone. */
+function teacherRepaintActivityStudents(id){
+  const box=document.getElementById('t-grid-container');
+  const a=(window.CLASS_ACTIVITIES||[]).find(x=>x.id===id);
+  if(!box || !a) return;
+  const parts = a.kind==='check' ? teacherCheckLiveParts(a) : {grid: teacherActivityGridHtml(a)};
+  Object.keys(parts).forEach(k=>{
+    const el=box.querySelector(`[data-ta-live="${k}"]`);
+    if(el) el.innerHTML=parts[k];
+  });
+}
+/* Start or stop the once-a-minute timer to match the view and the tab's
+   visibility, and repaint the bar. Called from renderTeacherBody (every view
+   change goes through it) and from the visibilitychange listener. */
+function teacherSyncAutoRefresh(){
+  const want = teacherView==='activities' && !document.hidden;
+  if(want && !teacherAutoRefreshTimer){
+    teacherAutoRefreshTimer=setInterval(()=>{
+      // A Refresh click or a tab return a moment ago already did this tick's work.
+      if(Date.now()-teacherStudentsAt < TEACHER_REFRESH_MS-5000) return;
+      teacherRefreshStudents();
+      teacherRefreshReportsBadge();
+    }, TEACHER_REFRESH_MS);
+  } else if(!want && teacherAutoRefreshTimer){
+    clearInterval(teacherAutoRefreshTimer);
+    teacherAutoRefreshTimer=null;
+  }
+  teacherPaintRefreshBar();
+}
+// The bar beside the period filter: Refresh, and how old the progress on screen is.
+function teacherPaintRefreshBar(){
+  const bar=document.getElementById('t-refresh-bar');
+  if(!bar) return;
+  bar.style.display = TEACHER_NO_REFRESH_BAR_VIEWS.includes(teacherView) ? 'none' : 'inline-flex';
+  const btn=bar.querySelector('[data-refresh-students]');
+  if(btn) btn.disabled=teacherRefreshing;
+  const when=bar.querySelector('[data-refresh-when]');
+  if(!when) return;
+  const at=teacherStudentsAt ? new Date(teacherStudentsAt).toLocaleTimeString([], {hour:'numeric', minute:'2-digit', second:'2-digit'}) : '';
+  when.textContent = !teacherStudentsAt
+    ? (teacherRefreshing ? 'Loading student progress…' : teacherRefreshFailed ? 'Could not load student progress.' : '')
+    : teacherRefreshing ? `Student progress as of ${at} · refreshing…`
+    : teacherRefreshFailed ? `Could not refresh — showing progress as of ${at}`
+    : `Student progress as of ${at}` + (teacherView==='activities' ? ' · refreshes every minute' : '');
+}
+
+/* ── Reports: how many are new (2026-10-12) ─────────────────────────────
+   A badge on the Reports button counting reports filed since the newest one
+   this console has shown. "Seen" is that report's createdAt, kept in
+   localStorage as exact {seconds, nanoseconds} — milliseconds would round
+   the newest report down and count it as new forever. Storage can throw
+   (blocked site data, some private windows), so every touch is wrapped and
+   an in-memory copy stands in for the rest of the session. Never stored
+   ⇒ every report counts as new, until Reports is opened once.
+
+   The count is a query for createdAt > seen, so it costs one read per NEW
+   report (a minimum of one), not one per report. */
+const TEACHER_REPORTS_SEEN_KEY='gc-teacher-reports-seen';
+const TEACHER_REPORTS_BADGE_MAX=100;   // shown as "99+" at this many
+let teacherReportsSeenMem=null;
+let teacherReportsBadgeReq=0;          // a newer count (or opening Reports) drops an older one in flight
+function teacherReportsSeen(){
+  let v=null;
+  try{ v=JSON.parse(localStorage.getItem(TEACHER_REPORTS_SEEN_KEY)||'null'); }catch(e){ v=null; }
+  v=v||teacherReportsSeenMem;
+  return (v && Number.isInteger(v.s) && Number.isInteger(v.n)) ? v : null;
+}
+function teacherMarkReportsSeen(ts){
+  if(!ts || typeof ts.seconds!=='number' || typeof ts.nanoseconds!=='number') return;
+  const cur=teacherReportsSeen();
+  if(cur && (cur.s>ts.seconds || (cur.s===ts.seconds && cur.n>=ts.nanoseconds))) return;   // never moves backwards
+  const v={s:ts.seconds, n:ts.nanoseconds};
+  teacherReportsSeenMem=v;
+  try{ localStorage.setItem(TEACHER_REPORTS_SEEN_KEY, JSON.stringify(v)); }catch(e){}
+}
+async function teacherRefreshReportsBadge(){
+  const req=++teacherReportsBadgeReq;
+  let n;
+  try{
+    await ensureDb();
+    const seen=teacherReportsSeen();
+    let q=db.collection('issueReports');
+    if(seen) q=q.where('createdAt','>',new firebase.firestore.Timestamp(seen.s, seen.n));
+    const snap=await q.orderBy('createdAt','desc').limit(TEACHER_REPORTS_BADGE_MAX).get();
+    n=snap.size;
+  }catch(e){
+    console.warn('[guitar-class] could not count new reports', e);
+    return;   // leave whatever badge is up
+  }
+  if(req!==teacherReportsBadgeReq) return;
+  teacherPaintReportsBadge(n);
+}
+function teacherPaintReportsBadge(n){
+  const btn=document.querySelector('#t-viewtoggle [data-view="reports"]');
+  if(!btn) return;
+  let b=btn.querySelector('.t-reports-badge');
+  if(!n){
+    if(b) b.remove();
+    btn.removeAttribute('aria-label');
+    return;
+  }
+  const label = n>=TEACHER_REPORTS_BADGE_MAX ? `${TEACHER_REPORTS_BADGE_MAX-1}+` : String(n);
+  if(!b){
+    b=document.createElement('span');
+    b.className='stu-period stu-blocked t-reports-badge';
+    b.setAttribute('aria-hidden','true');   // the button's aria-label says it in words
+    btn.appendChild(b);
+  }
+  b.textContent=label;
+  b.title=`${label} new since you last opened Reports`;
+  btn.setAttribute('aria-label', `Reports, ${label} new`);
 }
 
 function renderTeacherSummary(){
@@ -734,6 +993,7 @@ function backToActivitiesList(){
   renderTeacherBody();
 }
 function renderTeacherBody(){
+  teacherSyncAutoRefresh();   // the progress timer runs on Class activities only
   if(teacherView==='games') renderTeacherGames();
   else if(teacherView==='responses') renderTeacherResponses();
   else if(teacherView==='trouble') renderTeacherTrouble();
@@ -868,6 +1128,14 @@ function teacherCopyActivityLink(id, btn){
    fresh on re-entry, because none of it is worth a Firestore round trip. */
 let boardSectionClosed={};     // module number -> true; undefined = never touched, default open
 let boardArchOpen={};          // module number (or 'built') -> true
+// Which "who hasn't finished (N)" lists are open, keyed '<activity id>|<period
+// label>' (one list per period on each card). Same reason as boardArchOpen:
+// every toggle, date or move repaints the board, and a list that snapped shut
+// each time had to be re-opened after every click.
+let boardDoneOpen={};
+// "How this page works" — kept open across repaints too, now that the board
+// also repaints on its own (teacherRefreshStudents) while it's being read.
+let boardHelpOpen=false;
 let boardDragId=null;          // the id a drag is carrying — never in dataTransfer
 /* ── How the board is SHOWN (Jonathan, 2026-09-16) ──────────────────────
    Sorting here is the teacher's view and nothing else: it never writes, and
@@ -1039,7 +1307,10 @@ async function teacherMigrateActivityBoard(cfg){
    repaint to show what Firestore actually holds, and painting before the
    read would pull the pre-write copy back over the new state. Fresh is the
    DEFAULT, so a call site misjudged costs one extra read rather than
-   showing the teacher stale data. */
+   showing the teacher stale data. Two more cached callers: the three board
+   writers paint their optimistic board BEFORE their write (the fresh repaint
+   after it still follows), and the student-progress auto-refresh repaints
+   new done counts over the config already in hand (teacherRefreshStudents). */
 function renderTeacherActivities(opts){
   const cached = !!(opts && opts.cached) && teacherClassConfigLoaded;
   const box=document.getElementById('t-grid-container');
@@ -1121,7 +1392,8 @@ function renderTeacherActivities(opts){
         const head=isCheck
           ? `${g.label}: ${doneCount} / ${g.students.length} turned in${avg!==null?` &middot; avg ${avg}/${itemTotal}`:' &middot; avg —'}`
           : `${g.label}: ${doneCount} / ${g.students.length} done`;
-        return `<div class="t-board-done-row"><strong>${head}</strong> &middot; <details><summary>who hasn't ${isCheck?'turned it in':'finished'} (${notDone.length})</summary>${listHtml}</details></div>`;
+        const openKey=a.id+'|'+g.label;
+        return `<div class="t-board-done-row"><strong>${head}</strong> &middot; <details data-board-done data-key="${escAttr(openKey)}"${boardDoneOpen[openKey]?' open':''}><summary>who hasn't ${isCheck?'turned it in':'finished'} (${notDone.length})</summary>${listHtml}</details></div>`;
       }).join('');
       return `<div class="t-board-done">${rows||'<div class="t-board-done-row">No student data yet.</div>'}</div>`;
     };
@@ -1418,7 +1690,7 @@ function renderTeacherActivities(opts){
     setBoardWide(true);
     box.innerHTML=`<div class="tg-note">Drag a built activity into a module to assign it. It goes live for students on its release date.</div>`
       +pinsHtml
-      +`<details class="tg-help"><summary>How this page works</summary>`
+      +`<details class="tg-help" data-board-help${boardHelpOpen?' open':''}><summary>How this page works</summary>`
       +`<div class="tg-note">A card shows to students only when all four are true: it is <strong>assigned</strong> to a module here, its <strong>release date</strong> has arrived, it is not <strong>Hidden</strong>, and it is not <strong>Archived</strong>. Publish now dates it today; scheduling a later day holds it until then; Unpublish clears the date. A card's date stays editable once it's live, so you can move it to another day without unpublishing first — type a future day and it goes back to Scheduled. Use Hidden to pull back something already live, then un-hide any time — the date and the Hidden switch are independent, either one hides.<br><br>`
       +`<strong>Required / Optional</strong> decides whether a live card sends students to In-Class Activities when they sign in. Neither one locks any part of the site. Until a student finishes a Required card (the default) or you clear it for them, In-Class Activities opens first when they sign in, Today's activity shows it ahead of Optional cards, and the console marks them Pending. An Optional card still shows, tagged “Optional”, and students can still do it and mark it done, but it never opens first and never counts as Pending. Switch it either way at any time.<br><br>`
       +`<strong>Archive</strong> takes a card off students' In-Class Activities page for good but keeps its place in its module, its date and its name, so Restore puts it back exactly where it was. Archived cards hold no #number, so the ones after them count down by one. <strong>Delete</strong> also clears the date, rename and per-student gate clears, and takes the card off the board entirely — it comes back in Built, blank, to be placed and published from scratch. Neither one removes the activity from the site's code (only an update does) and neither touches what students have already finished, so the Done counts survive both.<br><br>`
@@ -1550,6 +1822,12 @@ async function teacherMoveActivity(id, module, pos){
   const opt=plan(prev);
   if(!Object.keys(opt.patch).length){ renderTeacherActivities({cached:true}); return; }
   cfg.activityBoard=opt.next;   // optimistic — the click shows at once
+  /* ...which it only does if something paints it. The repaint after the
+     write (finally, below) is a whole Firestore round trip away, and until
+     2026-10-12 nothing painted before it: a dropped card sat where it was for
+     a second or two, which read as a failed drop and invited a second drag.
+     Cached, because this paints the in-memory board — the optimistic one. */
+  if(teacherView==='activities') renderTeacherActivities({cached:true});
   const seq0=boardSettled;
   const release=await waitBoardWriteTurn();
   const {live, base}=teacherBoardTurnBase(cfg, prev, seq0);
@@ -1594,6 +1872,7 @@ async function teacherUnassignActivity(id){
   const prev=cfg.activityBoard||{};
   if(!prev[id]) return;
   cfg.activityBoard=plan(prev).next;   // optimistic
+  if(teacherView==='activities') renderTeacherActivities({cached:true});   // and shown now — see teacherMoveActivity
   const seq0=boardSettled;
   const release=await waitBoardWriteTurn();
   const {live, base}=teacherBoardTurnBase(cfg, prev, seq0);
@@ -1874,6 +2153,34 @@ function teacherDoneRollHtml(a, students, isDone){
     +(list.length?`<ul>${list.map(s=>name(s,cleared&&!!((clears[s.uid]||{})[a.id]))).join('')}</ul>`:`<div class="ta-roll-empty">${empty}</div>`)+'</div>';
   return `<div class="ta-roll">${col('ta-roll-done','Done',done,'Nobody yet.',false)}${col('ta-roll-not','Not done',not,'Everyone is done.',true)}</div>`;
 }
+/* The Students block of a regular activity's detail page: the Done / Not
+   done roll, the gate note and the per-student table. Its own function, and
+   its own [data-ta-live] box on the page, so the student-progress refresh
+   (teacherRefreshStudents) can repaint just this part — re-rendering the
+   whole page would stop a song or drill playing in the Preview below it.
+
+   Per-student status + gate clear (Today-first work order, Phase 1) — same
+   uid -> { activityId -> true } map, and the same Clear toggle, as the
+   exit-check grid (renderTeacherCheckDetail). Sorted by name, not by
+   done/not-done, so a teacher looking for one student doesn't have to scan
+   two groups. */
+function teacherActivityGridHtml(a){
+  const clearsMap=teacherClassConfig.activityClears||{};
+  const sortedStudents=[...allStudents].sort((x,y)=>String(x.name||x.email||'').localeCompare(String(y.name||y.email||'')));
+  const studentRows=sortedStudents.map(s=>{
+    const done=(s.classActivities||{})[a.id]===true;
+    const cleared=!!((clearsMap[s.uid]||{})[a.id]);
+    return `<tr><td class="nc">${escHtml(s.name||s.email||'(no name)')}</td>
+      <td>${done?'Done ✓':'Not yet'}</td>
+      ${teacherStudentPeriod(s)==='CAS'?TEACHER_CAS_GATE_CELL:`<td><button class="tg-seg-btn ${cleared?'on':''}" data-set-activity-clear data-uid="${escAttr(s.uid)}" data-id="${escAttr(a.id)}" data-state="${cleared?'unclear':'clear'}" title="Lets this student past the gate without finishing.">${cleared?'Cleared':'Clear'}</button></td>`}</tr>`;
+  }).join('');
+  const studentTable=sortedStudents.length
+    ? `<div class="t-grid-wrap"><table><thead><tr><th class="nc">Student</th><th>Status</th><th>Gate</th></tr></thead><tbody>${studentRows}</tbody></table></div>`
+    : '<div class="t-loading">No student data yet — students need to sign in first.</div>';
+  return teacherDoneRollHtml(a, sortedStudents)
+    +`<div class="tg-note">Gate: until a student finishes a Required activity, In-Class Activities opens first when they sign in. Nothing else on the site is locked. Clear lets one student skip this one at sign-in without finishing it — a sub day, a connectivity problem, work done on paper.</div>`
+    +studentTable;
+}
 function renderTeacherActivityDetail(id){
   setBoardWide(false);
   const box=document.getElementById('t-grid-container');
@@ -1950,24 +2257,6 @@ function renderTeacherActivityDetail(id){
       + `<div class="tr-card ca-prev-step">${n?stepInnerHtml(steps[cur],cur):'No steps on this activity yet.'}</div>`
       + `<div class="ca-focus-nav">${back}${next}</div>`;
   };
-  // Per-student status + gate clear (Today-first work order, Phase 1) — same
-  // uid -> { activityId -> true } map, and the same Clear toggle, as the
-  // exit-check grid below (renderTeacherCheckDetail). Sorted by name, not by
-  // done/not-done, so a teacher looking for one student doesn't have to
-  // scan two groups.
-  const clearsMap=teacherClassConfig.activityClears||{};
-  const sortedStudents=[...allStudents].sort((x,y)=>String(x.name||x.email||'').localeCompare(String(y.name||y.email||'')));
-  const studentRows=sortedStudents.map(s=>{
-    const done=(s.classActivities||{})[a.id]===true;
-    const cleared=!!((clearsMap[s.uid]||{})[a.id]);
-    return `<tr><td class="nc">${escHtml(s.name||s.email||'(no name)')}</td>
-      <td>${done?'Done ✓':'Not yet'}</td>
-      ${teacherStudentPeriod(s)==='CAS'?TEACHER_CAS_GATE_CELL:`<td><button class="tg-seg-btn ${cleared?'on':''}" data-set-activity-clear data-uid="${escAttr(s.uid)}" data-id="${escAttr(a.id)}" data-state="${cleared?'unclear':'clear'}" title="Lets this student past the gate without finishing.">${cleared?'Cleared':'Clear'}</button></td>`}</tr>`;
-  }).join('');
-  const rollHtml=teacherDoneRollHtml(a, sortedStudents);
-  const studentTable=sortedStudents.length
-    ? `<div class="t-grid-wrap"><table><thead><tr><th class="nc">Student</th><th>Status</th><th>Gate</th></tr></thead><tbody>${studentRows}</tbody></table></div>`
-    : '<div class="t-loading">No student data yet — students need to sign in first.</div>';
   box.innerHTML=`${back}
     <div class="stu-section-head" style="margin-top:0">${escHtml(teacherActivityTitle(a,teacherClassConfig))} <span style="opacity:.55;font-size:.72em">(${escHtml(a.id)})</span></div>
     <div class="tg-note">${escHtml(place)}</div>
@@ -1982,14 +2271,18 @@ function renderTeacherActivityDetail(id){
          one-step-at-a-time shape (focusPreviewHtml, above) — a local-only
          toggle, nothing saved. See caIsFocus in app.js. */
        a.view==='focus'?`<div class="tg-note">Focus view: students see one step at a time, with numbered step buttons above it and a "Got it — next step" button under it. A step opens only after the one before it is marked done. ${taFocusPreviewOn[a.id]?'Previewing one step at a time below.':'The preview below shows every step.'} <button type="button" class="tg-seg-btn" data-ta-focus-toggle data-id="${escAttr(a.id)}">${taFocusPreviewOn[a.id]?'Show full list':'Preview as student'}</button></div>`:''}
+    ${/* `metronome: <bpm>` (ca-21): tapping the card open starts each
+         student's own Metro tool at that tempo — caAutoStartMetro() in
+         app.js, which runs only on a real tap, never on a re-render or a
+         Copy-link deep link. Said here because nothing in the preview shows
+         it, and this preview never starts audio on its own. */
+       a.metronome?`<div class="tg-note">Metronome: when a student taps this activity open, the Metro tool on their device starts at ${escHtml(String(Number(a.metronome)))} BPM in 4/4, one click per beat. They can stop it or change the tempo. It does not start when they arrive from a Copy link URL, and it does not start in this preview.</div>`:''}
     ${/* Practice card (view:'card'): the preview IS the student card —
          caCardBodyHtml() in app.js, the one body renderer both sides call
          (same shape as an exit check's caCheckBodyHtml), so it can't drift.
          The song plays for real; ticks here save nothing. */ typeof caIsCard==='function'&&caIsCard(a)?`<div class="tg-note">Practice card: students see this one screen — Play song, the tab, and the checks. The card counts as done once every numbered check is ticked; Level up is extra. Ticks in this preview are not saved.</div>`:''}
     <div class="stu-section-head">Students</div>
-    ${rollHtml}
-    <div class="tg-note">Gate: until a student finishes a Required activity, In-Class Activities opens first when they sign in. Nothing else on the site is locked. Clear lets one student skip this one at sign-in without finishing it — a sub day, a connectivity problem, work done on paper.</div>
-    ${studentTable}
+    <div data-ta-live="grid">${teacherActivityGridHtml(a)}</div>
     <div class="stu-section-head">Preview</div>
     ${typeof caIsCard==='function'&&caIsCard(a) ? caCardBodyHtml(a,{preview:true})
       : (a.view==='focus' && taFocusPreviewOn[a.id]) ? focusPreviewHtml()
@@ -2009,9 +2302,28 @@ function renderTeacherActivityDetail(id){
    The preview at the bottom calls caCheckBodyHtml() in app.js, the same
    renderer the student card uses. Picks made there are graded and shown
    but written nowhere (ecSubmit bails on IS_TEACHER_MODE), so previewing
-   is not turning in. */
+   is not turning in.
+
+   The parts that read student progress — the "N of M turned in" line, the
+   roll and the results grid — are built by teacherCheckLiveParts() and sit
+   in their own [data-ta-live] boxes, so the student-progress refresh can
+   repaint them without rebuilding the preview (and wiping its picks). */
 function renderTeacherCheckDetail(a, back){
   const box=document.getElementById('t-grid-container');
+  const live=teacherCheckLiveParts(a);
+  box.innerHTML=`${back}
+    <div class="stu-section-head" style="margin-top:0">Exit check &middot; ${escHtml(teacherActivityTitle(a,teacherClassConfig))} <span style="opacity:.55;font-size:.72em">(${escHtml(a.id)})</span></div>
+    ${teacherRetiredBanner(a.id)}
+    ${teacherOptionalBanner(a.id)}
+    <div class="tg-note" data-ta-live="note">${live.note}</div>
+    ${linkRow(a)}
+    ${a.intro?`<div class="coach-tip" style="margin:0 2px 16px">${escHtml(a.intro)}</div>`:''}
+    <div data-ta-live="grid">${live.grid}</div>
+    <div class="stu-section-head">Preview</div>
+    <div class="tg-note">Try the check yourself — nothing you pick here is saved.</div>
+    <div id="ec-preview-body-${escAttr(a.id)}">${caCheckBodyHtml(a,{preview:true,keyPrefix:'ca-preview'})}</div>`;
+}
+function teacherCheckLiveParts(a){
   const c=a.check||{};
   const items=c.items||[];
   const dates=(teacherClassConfig&&teacherClassConfig.activityDates)||{};
@@ -2062,18 +2374,11 @@ function renderTeacherCheckDetail(a, back){
     ? `<div class="t-grid-wrap"><table><thead><tr><th class="nc">Student</th><th>Score</th><th>Date</th>${heads.map(h=>`<th>${h}</th>`).join('')}<th>Gate</th></tr></thead>`
       +`<tbody>${bodyRows}${missRow}${noneRows}</tbody></table></div>`
     : '<div class="t-loading">No student data yet — students need to sign in first.</div>';
-  box.innerHTML=`${back}
-    <div class="stu-section-head" style="margin-top:0">Exit check &middot; ${escHtml(teacherActivityTitle(a,teacherClassConfig))} <span style="opacity:.55;font-size:.72em">(${escHtml(a.id)})</span></div>
-    ${teacherRetiredBanner(a.id)}
-    ${teacherOptionalBanner(a.id)}
-    <div class="tg-note">${escHtml(teacherActivityPlace(a.id))} ${dateNote}. ${withRes.length} of ${allStudents.length} turned in. Checks take no #number — they never enter the course's numbered run.</div>
-    ${linkRow(a)}
-    ${a.intro?`<div class="coach-tip" style="margin:0 2px 16px">${escHtml(a.intro)}</div>`:''}
-    ${teacherDoneRollHtml(a, [...allStudents].sort((x,y)=>String(x.name||x.email||'').localeCompare(String(y.name||y.email||''))), s=>!!(s.exitChecks||{})[a.id])}
-    ${table}
-    <div class="stu-section-head">Preview</div>
-    <div class="tg-note">Try the check yourself — nothing you pick here is saved.</div>
-    <div id="ec-preview-body-${escAttr(a.id)}">${caCheckBodyHtml(a,{preview:true,keyPrefix:'ca-preview'})}</div>`;
+  return {
+    note: `${escHtml(teacherActivityPlace(a.id))} ${dateNote}. ${withRes.length} of ${allStudents.length} turned in. Checks take no #number — they never enter the course's numbered run.`,
+    grid: teacherDoneRollHtml(a, [...allStudents].sort((x,y)=>String(x.name||x.email||'').localeCompare(String(y.name||y.email||''))), s=>!!(s.exitChecks||{})[a.id])
+      +table,
+  };
 }
 async function teacherSetActivityHidden(id, state){
   const on = state==='hide';
@@ -2186,6 +2491,61 @@ async function teacherSetActivityPin(id, state){
     teacherConfigSaveFailed(e, 'Could not save that pin — check your connection and Firestore rules.');
   }
   if(teacherView==='activities') renderTeacherActivities();
+}
+/* ── Typing a release date (2026-10-12) ──────────────────────────────────
+   Chrome fires 'change' on a date box after EVERY keystroke that leaves a
+   complete date, not once at the end. Checked in headless Chrome over CDP
+   the same day, with the box holding 2026-10-12:
+     retype the day as 25    -> change 2026-10-02, then 2026-10-25
+     retype the year as 2027 -> change 0002-10-12, 0020-10-12, 0202-10-12,
+                                then 2027-10-12
+   Each of those was a write. 2026-10-02 and 0002-10-12 are in the past, so a
+   scheduled card went LIVE for students mid-keystroke, and the repaint after
+   that write threw away the box being typed in.
+
+   So a typed date is saved once — on Enter or on leaving the box — and a
+   year more than one away from this one is refused (the box goes back to the
+   saved date and says why), since no real release date is in 0202. A pick
+   from the calendar has no keystroke behind it (no data-typing flag), so it
+   still saves the moment it's made. */
+function teacherSavedActivityDate(id){
+  return ((teacherClassConfig&&teacherClassConfig.activityDates)||{})[id]||'';
+}
+function teacherCommitActivityDate(box){
+  if(!box) return;
+  delete box.dataset.typing;
+  const id=box.dataset.id;
+  const saved=teacherSavedActivityDate(id);
+  const value=box.value;
+  if(value===saved) return;   // nothing changed (or Enter then leaving the box — saved once)
+  if(!value){
+    // '' is either a cleared box (unpublish, as before) or a half-filled one
+    // (a field blanked with Backspace) — the box reports the second as badInput.
+    if(box.validity && box.validity.badInput){ teacherRejectActivityDate(box, saved, 'That date is not complete — nothing was saved.'); return; }
+  } else {
+    const y=Number(value.slice(0,4)), now=new Date().getFullYear();
+    if(!(y>=now-1 && y<=now+1)){ teacherRejectActivityDate(box, saved, `Year ${y} is not right — use ${now-1} to ${now+1}. Nothing was saved.`); return; }
+  }
+  teacherSetActivityDate(id, value);
+}
+/* Put the saved date back and say why, beside the box. Red is the site's
+   error colour (--red-text, as on the issue-report form's error line). It
+   clears on the next edit, or after a few seconds. */
+function teacherRejectActivityDate(box, saved, msg){
+  box.value=saved;
+  box.setAttribute('aria-invalid','true');
+  box.style.outline='2px solid var(--red-text)';
+  const old=box.parentNode && box.parentNode.querySelector('.t-date-err');
+  if(old) old.remove();
+  const note=document.createElement('span');
+  note.className='t-date-err';
+  note.setAttribute('role','alert');
+  note.style.cssText='color:var(--red-text);font-size:0.8125rem;margin-left:6px';
+  note.textContent=msg;
+  box.insertAdjacentElement('afterend', note);
+  const clear=()=>{ box.removeAttribute('aria-invalid'); box.style.outline=''; note.remove(); };
+  box.addEventListener('input', clear, {once:true});
+  setTimeout(clear, 6000);
 }
 // The actual publish switch for an activity — see the schema note at the top
 // of renderTeacherActivities. Mirrors teacherSetActivityHidden's write shape
@@ -2327,6 +2687,11 @@ async function teacherDeleteActivity(id){
   const pinsHad=Object.prototype.hasOwnProperty.call(cfg,'activityPins'), pinsPrev=cfg.activityPins;
   const pinsBefore=teacherActivityPins(cfg);
   if(pinsBefore.includes(id)) cfg.activityPins=pinsBefore.filter(x=>x!==id);
+  // A deleted row leaves the table, so an open rename box on it would be
+  // editing something that is no longer there. Cleared before the optimistic
+  // repaint below so that paint doesn't draw the editor on the deleted card.
+  if(activityEditId===id) activityEditId=null;
+  if(teacherView==='activities') renderTeacherActivities({cached:true});   // shown now — see teacherMoveActivity
   const release=await waitBoardWriteTurn();
   const {live, base}=teacherBoardTurnBase(cfg, prev, seq0);
   const {next, repack}=plan(base);
@@ -2356,9 +2721,6 @@ async function teacherDeleteActivity(id){
   }finally{
     release();
   }
-  // A deleted row leaves the table, so an open rename box on it would be
-  // editing something that is no longer there.
-  if(activityEditId===id) activityEditId=null;
   if(teacherView==='activities') renderTeacherActivities();
 }
 
@@ -3065,6 +3427,12 @@ async function renderTeacherReports(){
     return;
   }
   if(teacherView!=='reports') return;   // teacher switched views while the read was in flight
+  /* On screen now, so they're seen: remember the newest one's createdAt and
+     clear the badge (see teacherRefreshReportsBadge). Bumping the request
+     counter drops a count that was already in flight from before. */
+  teacherReportsBadgeReq++;
+  if(!snap.empty) teacherMarkReportsSeen(snap.docs[0].data().createdAt);
+  teacherPaintReportsBadge(0);
   if(snap.empty){ box.innerHTML='<div class="t-loading">No issue reports yet.</div>'; return; }
   const rows=snap.docs.map(doc=>{
     const d=doc.data();

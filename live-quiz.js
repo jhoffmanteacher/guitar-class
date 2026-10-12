@@ -1415,8 +1415,19 @@ async function lqTeacherRevealFret(){
   await lqWrite({ state: 'reveal', correct: ids[0], correctIds: ids, tally, scores });
 }
 
+/* End game with a question still OPEN throws that round away: scoring only
+   happens at reveal (lqScoreRound), so nobody gets points for it. That used
+   to happen on one click, so it asks first now (2026-10-12). Only while a
+   question is open — from a reveal, ending loses nothing. The wording names
+   no answer: the console is on the projector, and the room sees this box. */
 async function lqTeacherEnd(){
-  if(!lqTSession) return;
+  const s = lqTSession;
+  if(!s) return;
+  if(s.state === 'question'){
+    const howToScore = lqType(lqQuiz(s.quizId)) === 'fret' ? 'press Reveal' : 'mark the correct answer';
+    if(!window.confirm('This question is still open. If you end the game now, this round is thrown away and nobody gets points for it.\n\n'
+      + 'To count it: Cancel, ' + howToScore + ', then End game.\n\nEnd the game now anyway?')) return;
+  }
   await lqWrite({ state: 'ended', correct: null, endedAt: firebase.firestore.FieldValue.serverTimestamp() });
 }
 // Takes the game off every student's screen. Scores stay in the doc — it's

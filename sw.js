@@ -47,11 +47,16 @@ const PRECACHE_CRITICAL = [
 ];
 
 // Static shell — everything needed to render the practice content offline.
+// Two shipped files are left out on purpose (2026-10-12), because every
+// student re-downloads this whole list on every deploy: teacher.js (over
+// 250 KB, loaded only by the ?teacher console — ensureTeacherJs() in app.js) and
+// mood-chart.html (linked from nowhere since 2026-10-02). Both are still
+// served, and the fetch handler below caches them on first use like any
+// same-origin file. checks.mjs keeps them out on purpose (SHELL_NOT_PRECACHED).
 const ASSETS = [
   './',
   './index.html',
   './404.html',
-  './mood-chart.html',
   './styles.css',
   './fonts/fraunces.woff2',
   './i18n.js',
@@ -61,7 +66,6 @@ const ASSETS = [
   './fab-tools.js',
   './tuner.js',
   './coach.js',
-  './teacher.js',
   './live-quiz.js',
   './config-main.js',
   './firebase-config.js',
@@ -157,8 +161,8 @@ self.addEventListener('install', event => {
 
            So the shell (what the app needs to render at all) still uses
            addAll and must succeed; everything else — module content, the
-           games, the teacher dashboard, images, icons, the Journey pages —
-           is precached best-effort with allSettled. Anything that misses is
+           games, images, icons, the Journey pages — is precached
+           best-effort with allSettled. Anything that misses is
            simply fetched and cached on first use by the fetch handler
            below, exactly as it would be on a first visit. */
         const critical = ASSETS.filter(u => PRECACHE_CRITICAL.includes(u));

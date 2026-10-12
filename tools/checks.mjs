@@ -81,6 +81,19 @@ const SHELL_FILES = [
   ...TAB_PAGES,
 ];
 
+/* Shell files deliberately NOT in sw.js ASSETS (2026-10-12). Every student's
+   service worker re-downloads all of ASSETS on every deploy, so a file no
+   student ever loads is pure cost there. They stay in SHELL_FILES — still
+   fingerprinted into CACHE_VERSION, because the fetch handler runtime-caches
+   them into that cache on first use, and an edit has to retire the old copy.
+     teacher.js       only the ?teacher console loads it (ensureTeacherJs)
+     mood-chart.html  no link to it anywhere since 2026-10-02
+   checkSwAssets() fails the push if one of these turns up in ASSETS anyway
+   (one of the two lists would be wrong), and checkPrecacheCoverage() still
+   fails if a shipped page starts linking mood-chart.html again — at that
+   point it is student-facing and goes back in ASSETS, off this list. */
+const SHELL_NOT_PRECACHED = ['teacher.js', 'mood-chart.html'];
+
 /* Backing-track audio isn't in sw.js's ASSETS precache list (they're large —
    precaching them at install would bloat the offline install), but the SW's
    fetch handler still runtime-caches them cache-first same as everything else
@@ -3957,7 +3970,15 @@ function checkSwAssets(src) {
   // Every fingerprinted shell file belongs in the precache (icons/manifest
   // are listed in ASSETS too, but SHELL_FILES is the must-have core).
   for (const f of SHELL_FILES) {
+    if (SHELL_NOT_PRECACHED.includes(f)) {
+      if (assets.includes(f)) { err(`'${f}' is in sw.js ASSETS but checks.mjs SHELL_NOT_PRECACHED says it stays out of the precache — drop it from one of the two lists`); problems++; bad++; }
+      continue;
+    }
     if (!assets.includes(f)) { err(`shell file '${f}' is missing from sw.js ASSETS — it won't be precached for offline`); problems++; bad++; }
+  }
+  // An entry for a file that is no longer a shell file excuses nothing — remove it.
+  for (const f of SHELL_NOT_PRECACHED) {
+    if (!SHELL_FILES.includes(f)) { err(`checks.mjs SHELL_NOT_PRECACHED lists '${f}', which is not in SHELL_FILES — delete the entry`); problems++; bad++; }
   }
   /* PRECACHE_CRITICAL is the must-succeed tier of the install (sw.js splits
      the rest into a best-effort allSettled pass). An entry that isn't in
@@ -3978,7 +3999,7 @@ function checkSwAssets(src) {
     }
     if (critBad === 0) ok(`${critical.length} critical precache entries all present in ASSETS`);
   }
-  if (bad === 0) ok(`sw.js ASSETS ↔ shell files in sync (${assets.length} assets)`);
+  if (bad === 0) ok(`sw.js ASSETS ↔ shell files in sync (${assets.length} assets; ${SHELL_NOT_PRECACHED.length} shell files kept out on purpose: ${SHELL_NOT_PRECACHED.join(', ')})`);
 }
 
 /* Ratchet (2026-09-02 audit): a local file that shipped content REFERENCES but
