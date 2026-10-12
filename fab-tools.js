@@ -16,13 +16,17 @@ function flashClass(el, cls, ms){
 }
 let toolsAudioCtx = null;
 function toolsGetAudioCtx(){ if(!toolsAudioCtx) toolsAudioCtx = new (window.AudioContext||window.webkitAudioContext)(); return toolsAudioCtx; }
-function toolsBeep(freq,dur,gain){
+// `at` (an AudioContext time) and `dest` are optional: the metronome passes
+// both so each click sounds at its exact time through its own bus; the
+// timer's alarm passes neither and sounds now, as before.
+function toolsBeep(freq,dur,gain,at,dest){
   const ctx=toolsGetAudioCtx(), o=ctx.createOscillator(), g=ctx.createGain();
-  o.connect(g); g.connect(ctx.destination);
+  const t0 = at==null ? ctx.currentTime : at;
+  o.connect(g); g.connect(dest||ctx.destination);
   o.frequency.value=freq;
-  g.gain.setValueAtTime(gain==null?0.4:gain,ctx.currentTime);
-  g.gain.exponentialRampToValueAtTime(0.001,ctx.currentTime+dur);
-  o.start(); o.stop(ctx.currentTime+dur);
+  g.gain.setValueAtTime(gain==null?0.4:gain,t0);
+  g.gain.exponentialRampToValueAtTime(0.001,t0+dur);
+  o.start(t0); o.stop(t0+dur);
 }
 
 // Start/Stop/Pause/Reset labels are set dynamically here as the tool runs, so
@@ -119,26 +123,81 @@ function syncPressedGroup(groupSel, itemSel, onClass){
     b.setAttribute('aria-pressed', b.classList.contains(onClass) ? 'true' : 'false'));
 }
 
+/* The click runs on the AUDIO clock, not on a timer (2026-10-12). It was
+   setInterval(tick, beatMs): each click sounded whenever the main thread got
+   round to it, so on a busy Chromebook the beat wobbled with page load, and
+   a slider drag (one clearInterval/setInterval per input event) held the
+   next click back until the drag stopped. Now a 25 ms timer only looks
+   ahead: every click due in the next METRO_AHEAD seconds is handed to Web
+   Audio at its exact time, so a late timer changes when a click is queued,
+   never when it sounds. The same "two clocks" scheduler as Strum Hero's
+   shSchedule (coach.js) and the practice card's pcScheduleClick (app.js).
+   The horizon is 200 ms, not their ~100, so a main-thread stall of up to
+   ~175 ms still lands every click on time; a longer one skips the clicks
+   whose time has already gone rather than playing them late, so the grid
+   never shifts. Every click goes through metroBus, which Stop disconnects —
+   that silences the ones already queued.
+   metroBeatIdx is the place in the bar of the NEXT click to queue,
+   metroNextAt its time, metroLastAt the time of the last one queued. */
+const METRO_TICK_MS = 25, METRO_AHEAD = 0.2, METRO_LEAD = 0.05;
+let metroNextAt = 0, metroLastAt = 0, metroBus = null;
+const metroDotTimers = new Set();
+function metroGetBus(){
+  if(!metroBus){
+    const ctx = toolsGetAudioCtx();
+    metroBus = ctx.createGain();
+    metroBus.gain.value = 1;
+    metroBus.connect(ctx.destination);
+  }
+  return metroBus;
+}
+function metroBusKill(){
+  if(!metroBus) return;
+  try { metroBus.disconnect(); } catch(e){}
+  metroBus = null;
+}
+function metroAdvance(){
+  metroLastAt = metroNextAt;
+  metroBeatIdx = (metroBeatIdx + 1) % getMetroMeter();
+  metroNextAt += metroClickSec();
+}
+function metroSchedule(){
+  if(!metroRunning) return;
+  const now = toolsGetAudioCtx().currentTime;
+  // The Coach's mic opened after a click was queued: drop what's queued.
+  if(window.coachMicLive) metroBusKill();
+  while(metroNextAt < now) metroAdvance();   // a stall past the horizon: skip, don't play late
+  while(metroNextAt < now + METRO_AHEAD){
+    metroClickAt(metroNextAt, metroBeatIdx);
+    metroAdvance();
+  }
+}
 /* Beat 1 of the bar rings out louder and higher — the downbeat you count "1" on
    — everything else in the bar is the plain click. In 6/8 there are six
-   clicks per bar, the BPM counts the two big beats (metroClickMs), and
+   clicks per bar, the BPM counts the two big beats (metroClickSec), and
    click 4 — the second big beat — gets a
-   middle accent so the bar is felt in two. */
-function tick(){
+   middle accent so the bar is felt in two. Silent while the Coach's mic is
+   live (an audible click would be heard as a note); the dot still flashes. */
+function metroClickAt(at, idx){
+  const ctx = toolsGetAudioCtx();
   if(!window.coachMicLive){
-    const accent = metroBeatIdx === 0;
-    const mid = !accent && getMetroMeter() === 6 && metroBeatIdx === 3;
-    toolsBeep(accent ? 1320 : mid ? 1100 : 880, accent ? 0.08 : 0.06, accent ? 0.55 : mid ? 0.47 : 0.4);
+    const accent = idx === 0;
+    const mid = !accent && getMetroMeter() === 6 && idx === 3;
+    toolsBeep(accent ? 1320 : mid ? 1100 : 880, accent ? 0.08 : 0.06, accent ? 0.55 : mid ? 0.47 : 0.4, at, metroGetBus());
   }
+  // The dot flashes when the click is due, not when it was queued.
+  const id = setTimeout(() => { metroDotTimers.delete(id); metroFlashDot(); }, Math.max(0, (at - ctx.currentTime) * 1000));
+  metroDotTimers.add(id);
+}
+function metroFlashDot(){
   syncMetroMutedNote();
   const dot=document.getElementById('metro-dot'); if(dot){ dot.classList.add('flash'); setTimeout(()=>dot.classList.remove('flash'),80); }
-  metroBeatIdx = (metroBeatIdx + 1) % getMetroMeter();
 }
 /* Shows a small note in the popup when the click is running silent because
    the Listening Coach's mic is live (an audible click would bleed into its
    pitch/onset detection). Without this the Start button just looked broken —
    the dot flashes, the button says Stop, but nothing plays and nothing says
-   why. Checked on every tick (so it appears/disappears live) and when the
+   why. Checked on every click (so it appears/disappears live) and when the
    popup opens. */
 function syncMetroMutedNote(){
   const note = document.getElementById('metro-muted-note');
@@ -148,19 +207,26 @@ function getBpm(){ return parseInt(document.getElementById('bpm-slider').value);
 /* Time between clicks. In 6/8 the BPM counts the two BIG beats of the bar
    (Jonathan, 2026-10-10), each split into three clicks — so 60 means 60 big
    beats a minute, the same number the Luna page's "60, then 70, then 80"
-   targets use. Every other meter clicks once per beat. */
-function metroClickMs(){ return Math.round(60000 / getBpm() / (getMetroMeter() === 6 ? 3 : 1)); }
-/* Retime a running click to the current BPM WITHOUT startMetro()'s immediate
-   synchronous tick(): a slider drag fires many input events a second, and a
-   beep per event was a machine-gun burst. Swaps only the interval, so the
-   accent keeps its place in the bar instead of resetting to beat 1 per event. */
+   targets use. Every other meter clicks once per beat. In seconds, unrounded:
+   a click time rounded to the millisecond drifts off the beat bar by bar. */
+function metroClickSec(){ return 60 / getBpm() / (getMetroMeter() === 6 ? 3 : 1); }
+/* Retime a running click to the current BPM WITHOUT restarting it: a slider
+   drag fires many input events a second, and a restart per event was a
+   machine-gun burst (and, on the old timer, held the click back for the
+   whole drag). The bar keeps its place and the beat its phase — the next
+   click comes one NEW beat after the last one queued; clicks already handed
+   to Web Audio keep their times. Only when that moment has already gone (a
+   big jump faster after a long slow beat) does the next click come straight
+   away, still the next beat of the bar. The ±1/±5 buttons and the tempo
+   ladder retime the same way. */
 function retimeMetro(){
   if(!metroRunning) return;
-  clearInterval(metroInterval);
-  metroInterval = setInterval(tick, metroClickMs());
+  const now = toolsGetAudioCtx().currentTime;
+  metroNextAt = Math.max(metroLastAt + metroClickSec(), now + METRO_LEAD);
+  metroSchedule();
 }
 function onBpmSlider(val){ document.getElementById('bpm-display').textContent=val; retimeMetro(); ladderCleans=0; ladderShowDefault(); }
-function nudgeBpm(d){ const s=document.getElementById('bpm-slider'); s.value=Math.min(220,Math.max(40,getBpm()+d)); document.getElementById('bpm-display').textContent=s.value; if(metroRunning){ stopMetro(); startMetro(); } ladderCleans=0; ladderShowDefault(); }
+function nudgeBpm(d){ const s=document.getElementById('bpm-slider'); s.value=Math.min(220,Math.max(40,getBpm()+d)); document.getElementById('bpm-display').textContent=s.value; retimeMetro(); ladderCleans=0; ladderShowDefault(); }
 
 /* ── Tempo ladder ──
    Self-report, not mic detection — matches the site's self-check philosophy
@@ -234,20 +300,30 @@ function ladderMiss(){
 }
 
 function startMetro(){
-  // Runs even while the Coach's mic is live — tick() itself stays silent in
-  // that case (see its comment), so this just keeps the visible dot/button
-  // state honest instead of the Start button silently doing nothing.
+  // Runs even while the Coach's mic is live — metroClickAt() itself stays
+  // silent in that case (see its comment), so this just keeps the visible
+  // dot/button state honest instead of the Start button silently doing nothing.
   metroRunning = true;
   metroBeatIdx = 0;
   document.getElementById('metro-btn').innerHTML=toolLabelHtml('<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" style="width:1em;height:1em;vertical-align:-0.15em"><path d="M9 5v14M15 5v14"/></svg>','tools.stop');
-  const beatMs = metroClickMs();
-  tick();
-  metroInterval = setInterval(tick, beatMs);
+  const ctx = toolsGetAudioCtx();
+  // Start is a click, so a context the browser left suspended may resume here.
+  if(ctx.state === 'suspended'){ try { const p = ctx.resume(); if(p && p.catch) p.catch(()=>{}); } catch(e){} }
+  // Beat 1 straight away — METRO_LEAD only keeps it from being queued in the past.
+  metroNextAt = ctx.currentTime + METRO_LEAD;
+  metroLastAt = metroNextAt - metroClickSec();
+  clearInterval(metroInterval);
+  metroInterval = setInterval(metroSchedule, METRO_TICK_MS);
+  metroSchedule();
 }
 function stopMetro(){
   clearInterval(metroInterval);
+  metroInterval = null;
   metroRunning=false;
   metroBeatIdx=0;
+  metroBusKill();                          // clicks already queued go silent too
+  metroDotTimers.forEach(clearTimeout);
+  metroDotTimers.clear();
   document.getElementById('metro-btn').innerHTML=toolLabelHtml('&#x25B6;','tools.start');
 }
 function toggleMetro(){ if(metroRunning) stopMetro(); else startMetro(); }

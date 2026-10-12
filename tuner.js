@@ -458,7 +458,15 @@ async function startTuner() {
       tunerStream = null; tunerCtx = null; tunerAnalyser = null; tunerFreqAnalyser = null;
       tunerHP = null; tunerLP = null;
     }
-    setToolText(document.getElementById('tuner-freq'), 'tools.micDenied');
+    /* Say what actually went wrong (same split as coach.js coachMicFailMsg).
+       myStream is only set once getUserMedia has succeeded, so with it the
+       mic opened and the setup after it failed; without it, getUserMedia
+       itself refused — the student or the site setting said no (denied),
+       or there is no mic / another app holds it. */
+    const why = myStream ? 'tools.micError'
+      : /^(NotAllowedError|SecurityError|PermissionDeniedError)$/.test((e && e.name) || '') ? 'tools.micDenied'
+      : 'tools.micUnavailable';
+    setToolText(document.getElementById('tuner-freq'), why);
   }
 }
 

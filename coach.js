@@ -392,7 +392,7 @@ async function coachStartCheck(){
 
   const session = coach;
   if (!coachStream && !(await coachAcquireMic())){
-    if (coach === session) coachRenderReady(t('coach.mic.denied'));
+    if (coach === session) coachRenderReady(coachMicFailMsg('coach.mic.denied'));
     return;
   }
   await coachEnsureRunning();
@@ -474,6 +474,19 @@ function coachEvictTuner(){
   }
 }
 
+/* Why the last coachAcquireMic() failed: the getUserMedia error's name, or
+   'setup' when the mic opened but the audio graph behind it didn't. Every
+   failure used to say "access denied — check browser permissions", which
+   sent a student whose mic was simply missing, or held by another app (a
+   video call), to a permission setting that was already on. */
+let coachMicFailName = '';
+/* The line for a failed coachAcquireMic(). A refusal — the student, or the
+   browser's site setting, said no — keeps the caller's own "access denied"
+   key; no mic, a busy mic, or a failed setup each say so instead. */
+function coachMicFailMsg(deniedKey){
+  if (/^(NotAllowedError|SecurityError|PermissionDeniedError)$/.test(coachMicFailName)) return t(deniedKey);
+  return t(coachMicFailName === 'setup' ? 'coach.mic.failed' : 'coach.mic.unavailable');
+}
 let coachAcquirePending = null;
 function coachAcquireMic(){
   if (coachAcquirePending) return coachAcquirePending;
@@ -488,6 +501,7 @@ async function coachAcquireMicInner(){
   // Covers every coachAcquireMic call site (games included), not just
   // coachOpen's own stopAnyRec.
   if (typeof stopAnyRec === 'function') stopAnyRec();
+  coachMicFailName = '';
   try {
     /* voiceIsolation: ChromeOS (and Chrome on newer platforms) can run a
        speech-only filter on the built-in mic, which treats a held guitar
@@ -499,6 +513,7 @@ async function coachAcquireMicInner(){
       video: false
     });
   } catch(e) {
+    coachMicFailName = (e && e.name) || 'Error';
     return false;
   }
   // getUserMedia already succeeded and coachStream is live at this point —
@@ -537,6 +552,7 @@ async function coachAcquireMicInner(){
     };
   } catch(e) {
     coachMicOff();
+    coachMicFailName = 'setup';
     return false;
   }
   window.coachMicLive = true;   // cleared in coachMicOff — set/clear live in ONE pair
@@ -889,21 +905,60 @@ function coachUpdateMicLevel(rms){
 }
 
 /* Shared 4-click count-in: schedules the beeps + count digits on state's
-   beat grid, sets state.listenStart, and fires onGo after beat 4. */
+   beat grid, sets state.listenStart, and fires onGo after beat 4.
+
+   The beeps are on the AUDIO clock (2026-10-12). They were four setTimeouts,
+   and the graders (the Coach, Change Up, Strum Radar, Note Runner) time the
+   student against listenStart — so a timeout that fired late on a busy
+   Chromebook played a beep late, the student's pulse followed the beep, and
+   the whole take sat late against a grid they never heard. Now each beep is
+   handed to Web Audio COACH_COUNTIN_AHEAD before it is due, at its exact
+   time, so a stall shorter than that moves nothing. listenStart is still a
+   performance.now() time, as every caller expects: the audio-clock moment
+   one beat after beat 4, converted through one (performance.now(),
+   currentTime) pair read back to back — the clock bridge Strum Hero uses.
+   Beat 1 is queued COACH_COUNTIN_LEAD ahead so it is never in the past.
+   Each beep is queued just in time rather than all four up front so that
+   clearing state.timeouts (every stop path does) still cancels the beeps
+   not yet queued — at most the one due within COACH_COUNTIN_AHEAD can
+   still sound. A context that isn't running yet (its clock stands still)
+   takes the timer path this replaced. */
+const COACH_COUNTIN_LEAD = 0.1, COACH_COUNTIN_AHEAD = 0.2;   // seconds
+// beep() (app.js) with a start time: same voice, same envelope.
+function coachBeepAt(ac, at, freq, dur){
+  const o = ac.createOscillator(), g = ac.createGain();
+  o.connect(g); g.connect(ac.destination);
+  o.frequency.value = freq;
+  g.gain.setValueAtTime(0.4, at);
+  g.gain.exponentialRampToValueAtTime(0.001, at + dur);
+  o.start(at); o.stop(at + dur);
+}
 function coachCountIn(state, countElId, onGo){
-  const t0 = performance.now();
-  state.listenStart = t0 + 4 * state.beatMs;
-  if (typeof getAudioCtx === 'function'){
-    const ac = getAudioCtx();
-    if (ac.state === 'suspended') ac.resume();
-  }
+  const ac = typeof getAudioCtx === 'function' ? getAudioCtx() : null;
+  if (ac && ac.state === 'suspended') ac.resume();
   state.timeouts.forEach(clearTimeout);
   state.timeouts = [];
+  const showCount = i => { const el = document.getElementById(countElId); if (el) el.textContent = String(i + 1); };
+  if (ac && ac.state === 'running'){
+    const perf0 = performance.now(), ctx0 = ac.currentTime;
+    const beat = state.beatMs / 1000, a0 = ctx0 + COACH_COUNTIN_LEAD;
+    state.listenStart = perf0 + (a0 + 4 * beat - ctx0) * 1000;
+    for (let i = 0; i < 4; i++){
+      const at = a0 + i * beat, dueMs = (at - ctx0) * 1000;
+      const queue = () => coachBeepAt(ac, at, i === 3 ? 990 : 660, 0.08);
+      if (dueMs <= COACH_COUNTIN_AHEAD * 1000) queue();
+      else state.timeouts.push(setTimeout(queue, dueMs - COACH_COUNTIN_AHEAD * 1000));
+      state.timeouts.push(setTimeout(() => showCount(i), dueMs));
+    }
+    state.timeouts.push(setTimeout(onGo, state.listenStart - perf0));
+    return;
+  }
+  const t0 = performance.now();
+  state.listenStart = t0 + 4 * state.beatMs;
   for (let i = 0; i < 4; i++){
     state.timeouts.push(setTimeout(() => {
       beep(i === 3 ? 990 : 660, 0.08);
-      const el = document.getElementById(countElId);
-      if (el) el.textContent = String(i + 1);
+      showCount(i);
     }, Math.round(i * state.beatMs)));
   }
   state.timeouts.push(setTimeout(onGo, Math.round(4 * state.beatMs)));
@@ -1623,6 +1678,16 @@ function micRecPcm16(rec){
 /* Saves run one after another: two takes in quick succession write the
    same chunk docs, and overlapping writes could splice them together. */
 let micRecSaving = Promise.resolve();
+/* The mic's device label can carry its owner's name ("Maria's AirPods",
+   "AirPods de María"). Keep the device, drop the owner — BEFORE upload.
+   Same rule, same two regexes, as teacher.js micEvalMicName (which cleans
+   it again for display, and documents why the Spanish strip is
+   case-sensitive); change one and change the other. */
+function micRecMicName(label){
+  return String(label || '')
+    .replace(/^.*?['’]s\s+/i, '')
+    .replace(/\s+de\s+\p{Lu}[^\s()]*(?:\s+\p{Lu}[^\s()]*)*/u, '');
+}
 function micRecSave(rec, meta){
   micRecSaving = micRecSaving.then(() => micRecSaveNow(rec, meta)).catch(() => {});
   return micRecSaving;
@@ -1643,7 +1708,7 @@ async function micRecSaveNow(rec, meta){
     sampleRate: MICREC_RATE,
     srcSampleRate: rec.srcRate,
     durationSec: Math.round(rec.n / rec.srcRate * 100) / 100,
-    micLabel: rec.track,
+    micLabel: micRecMicName(rec.track),
     userAgent: (navigator.userAgent || '').slice(0, 300),
     frameMeanMs: rec.frames ? Math.round(rec.frameSum / rec.frames * 10) / 10 : null,
     frameMaxMs: Math.round(rec.frameMax * 10) / 10,
@@ -2079,9 +2144,27 @@ function coachInterrupt(msg){
 document.addEventListener('visibilitychange', () => {
   if (!document.hidden) return;
   coachInterrupt(t('coach.paused.backgrounded'));
-  gamesStopMic();
+  gamesHideStop();
   coachEvictTuner();
 });
+/* The hidden-tab half of gamesStopMic: only what holds the mic stops.
+   It used to be gamesStopMic itself, which ends EVERY game — a student
+   halfway through a Riff Roulette card who flipped to another tab to look
+   at a chord chart came back to the hub with the card gone, though that
+   game never opens the mic. A game that does hold it (the six below — the
+   same flags coachReleaseMicIfIdle reads) still gets the full gamesStopMic,
+   and so does a mic left live by anything this list doesn't know, so the
+   "never listening in a hidden tab" promise is unchanged. Only one game
+   runs at a time (gamesShow stops the last before opening the next), so
+   with the mic held the game being stopped is the one holding it. Note
+   Call (app.js) stops as before: its own mic start relies on this call to
+   cancel itself when the tab is hidden mid-start. */
+function gamesHideStop(){
+  if (typeof ncStopAll === 'function') ncStopAll();
+  const micHeld = fretRunning || psgRunning || (cc && cc.micOn) || (sr && sr.micOn) ||
+                  (rn && rn.micOn) || (nr && nr.micOn) || window.coachMicLive;
+  if (micHeld) gamesStopMic();
+}
 
 /* ════════════════════════════════════════════════════════════════════
    NOTE HUNT — fretboard trainer game (lives in the 🎮 Games panel).
@@ -2127,7 +2210,7 @@ async function fretStart(levelIdx){
   body.innerHTML = `<div class="coach-tip">${t('games.fret.startingMic')}</div>`;
   if (!coachStream && !(await coachAcquireMic())){
     const b2 = document.getElementById('fret-body');
-    if (b2) b2.innerHTML = `<div class="coach-note">${t('games.fret.micDenied')}</div>`;
+    if (b2) b2.innerHTML = `<div class="coach-note">${coachMicFailMsg('games.fret.micDenied')}</div>`;
     return;
   }
   await coachEnsureRunning();
@@ -2442,9 +2525,10 @@ function gamesStopMic(){
      micOn flag, so a state-tracking bug in any one of them (or a future
      game that forgets the pattern) could still leave window.coachMicLive
      stuck true — silently muting the metronome/demo audio for the rest of
-     the session (see fab-tools.js tick()/startMetro()). This umbrella is
-     called from every "leaving games/coach" path (tuner open, a Coach
-     check starting, the games panel closing, tab backgrounded), so it's
+     the session (see fab-tools.js metroClickAt()/startMetro()). This umbrella
+     is called from every "leaving games/coach" path (tuner open, a Coach
+     check starting, the games panel closing, tab backgrounded with the mic
+     live — see gamesHideStop), so it's
      the single hard-to-miss place to force the flag straight if anything
      above missed it. coachMicOff() is itself idempotent/safe to call with
      nothing running. */
@@ -2976,7 +3060,7 @@ async function ccStart(){
   coachEvictTuner();
   const session = cc;
   if (!coachStream && !(await coachAcquireMic())){
-    if (cc === session) ccRenderSetup(t('games.cc.micDenied'));
+    if (cc === session) ccRenderSetup(coachMicFailMsg('games.cc.micDenied'));
     return;
   }
   await coachEnsureRunning();
@@ -4560,7 +4644,7 @@ async function psgStart(){
   body.innerHTML = `<div class="coach-tip">${t('games.psg.startingMic')}</div>`;
   if (!coachStream && !(await coachAcquireMic())){
     const b2 = psgBody();
-    if (b2) b2.innerHTML = `<div class="coach-note">${t('games.psg.micDenied')}</div>`;
+    if (b2) b2.innerHTML = `<div class="coach-note">${coachMicFailMsg('games.psg.micDenied')}</div>`;
     return;
   }
   await coachEnsureRunning();
@@ -6177,7 +6261,7 @@ async function srStart(){
   if (!body) return;
   body.innerHTML = `<div class="coach-tip sr-center">${t('games.common.startingMic')}</div>`;
   if (!coachStream && !(await coachAcquireMic())){
-    if (sr === s) srRenderSetup(t('games.common.micAccessDenied'));
+    if (sr === s) srRenderSetup(coachMicFailMsg('games.common.micAccessDenied'));
     return;
   }
   await coachEnsureRunning();
@@ -7967,7 +8051,7 @@ async function nrStart(){
   nrHearStop();
   body.innerHTML = `<div class="coach-tip rn-center">${t('games.common.startingMic')}</div>`;
   if (!coachStream && !(await coachAcquireMic())){
-    if (nr === s){ s.phase = 'ready'; nrRenderReady(t('games.common.micAccessDenied')); }
+    if (nr === s){ s.phase = 'ready'; nrRenderReady(coachMicFailMsg('games.common.micAccessDenied')); }
     return;
   }
   await coachEnsureRunning();
