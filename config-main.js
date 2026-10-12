@@ -5,11 +5,17 @@
 //    module-1.js, module-2.js, module-3.js, etc.
 //
 //  HOW TO ADD A NEW MODULE:
-//    1. Create a new file, e.g. module-3.js
-//    2. Copy the SETS.push(...) pattern from an existing module file
-//    3. Add <script src="module-3.js"></script> to index.html
-//       (after config-main.js, before the closing </body>)
-//    4. Upload all changed files to GitHub
+//    1. Create a new file, e.g. module-14.js. Copy the SETS.push(...)
+//       pattern (and the MODULE_REVIEWS[N] / MODULE_SONGS[N] blocks, if
+//       the module has them) from an existing module file.
+//    2. Add the module's entry to MODULE_MANIFEST below (num, name,
+//       name_es, i18nComplete, skillCount, skillIdRe).
+//    3. Add './module-14.js' to the ASSETS list in sw.js so it is
+//       precached for offline use (tools/checks.mjs fails if it's missing).
+//    4. Run `node tools/checks.mjs`, then push to GitHub.
+//    Do NOT add a <script> tag for it to index.html: module files are
+//    fetched on demand by loadModuleData() in app.js, so a tag would load
+//    the file twice and push its SETS twice.
 // ============================================================
 
 const SETS = [];
@@ -55,10 +61,14 @@ const MODULE_MANIFEST = [
 // Content-independent dexterity warm-ups. playSeq format (midi note numbers),
 // all at 60 BPM. These are conditioning, not speed — slow and even beats fast
 // and sloppy, and the step text says so.
+// Neither reader is shown to students right now: the 10-Minute Routine card
+// was taken off Module Review in 52ae05f (buildModuleRoutine() in app.js is
+// left in place with no caller), and the Daily 5 is switched off
+// (DAILY5_ENABLED = false in app.js). The data stays so either can come back.
 // text_es/label_es: hand-written Spanish (module-content i18n, phase 2) —
-// picked up by tf() in app.js's buildModuleRoutine, which is embedded in
-// every module's (gated) Module Review panel, so every entry needs both
-// twins regardless of which modules are currently i18nComplete.
+// picked up by tf() in app.js's buildModuleRoutine and buildDaily5. Keep
+// both twins on every entry so switching either one back on needs no
+// translation work.
 const WARMUP_BANK = [
   { label: 'Spider walk — 1-2-3-4 up two strings', label_es: 'Caminata de araña — 1-2-3-4 subiendo dos cuerdas', bpm: 60,
     notes: [41, 42, 43, 44, 46, 47, 48, 49],
