@@ -5,6 +5,19 @@ Notable changes to the Guitar Class site. Newest first.
 For the full session-by-session history (and the reasoning behind each change),
 see `WORKFLOW.md` and the git commit log.
 
+## 2026-10-12 — Open Chords now comes before Pentatonic Scales
+
+- **Module 4 is Open Chords and Module 5 is Pentatonic Scales.** The other
+  modules keep their numbers. Every "Module 4" and "Module 5" in the lessons
+  now points to the right module. The notes at the end of Modules 3, 4 and 5
+  say which module comes next.
+- **Song Journey pages follow the same order.** Layer 4 is Open Chords
+  (Module 4) and Layer 5 is the Pentatonic Solo (Module 5). The links from the
+  modules open the right layer.
+- **Module 4 ends with a new strumming jam.** You play a chord pair, then play
+  it again with the same strumming rhythm, along with "the cure".
+- **The Songs page** keeps each song in the same group as before.
+
 ## 2026-10-12 — Song Journey, set buttons, saving, and Module 6–12 fixes
 
 - **Song Journey pages always open at the top.** Before, some links opened
