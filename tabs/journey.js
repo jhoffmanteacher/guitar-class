@@ -972,16 +972,56 @@ function queueSave(){
   saveTimer = setTimeout(flushSave, 800);
 }
 
+/* ── Module 4/5 swap (2026-10-12) ──
+   Layers 4 and 5 traded places with Modules 4 and 5, and songReady is keyed
+   by layer NUMBER. The main app moves each student's doc to the new
+   numbering once and marks it `migrations.swap45` (swap45Commit in app.js
+   — read the comment there); until then the doc holds OLD-numbered data
+   only, and it must stay that way, or the move would swap a tick made here
+   the wrong way. So this page shows an unmarked doc's Layer 4/5 ticks
+   swapped, and writes into an unmarked doc in ITS numbering — checked in
+   the same transaction as the write, so a main-app tab that moves the doc
+   meanwhile cannot be caught out. A doc this page creates is born in the
+   new numbering and carries the marker. Once the doc is known to be
+   marked, saves go back to the plain set().
+   Safe to remove with app.js's swap45 block (summer reset at the latest). */
+var swap45DocNew = false;   // the stored doc is known to carry migrations.swap45
+function swap45IsMarked(d){ return !!(d && d.migrations && d.migrations.swap45 === true); }
+function swap45SwapLayers(map){
+  if(!map || typeof map !== 'object') return map;
+  var out = {};
+  Object.keys(map).forEach(function(k){ out[k === '4' ? '5' : k === '5' ? '4' : k] = map[k]; });
+  return out;
+}
+
 function flushSave(){
   if(!fbUser || !dirty) return;
   dirty = false;
-  var payload = { songReady: {}, songReadyAt: {} };
-  payload.songReady[SONG_ID] = currentReady();
+  var ready = currentReady();
   /* Per-song "last touched" stamp (ms). The main app's resume card sorts on
      it to say which song the student was working on most recently; legacy
      docs without it fall back to first-unfinished order over there. */
-  payload.songReadyAt[SONG_ID] = Date.now();
-  fbDb.collection('progress').doc(fbUser.uid).set(payload, { merge: true })
+  var at = Date.now();
+  var build = function(oldNumbering, mark){
+    var payload = { songReady: {}, songReadyAt: {} };
+    payload.songReady[SONG_ID] = oldNumbering ? swap45SwapLayers(ready) : ready;
+    payload.songReadyAt[SONG_ID] = at;
+    if(mark) payload.migrations = { swap45: true };
+    return payload;
+  };
+  var uid = fbUser.uid;
+  var ref = fbDb.collection('progress').doc(uid);
+  var write = swap45DocNew
+    ? ref.set(build(false, false), { merge: true })
+    : fbDb.runTransaction(function(tx){
+        return tx.get(ref).then(function(snap){
+          var d = snap.exists ? snap.data() : null;
+          var isNew = !d || swap45IsMarked(d);
+          tx.set(ref, build(!isNew, !d), { merge: true });
+          return isNew;
+        });
+      }).then(function(isNew){ if(isNew && fbUser && fbUser.uid === uid) swap45DocNew = true; });
+  write
     .then(function(){ setSaveMsg('journey.saved'); setTimeout(function(){ setSaveMsg(''); }, 2000); })
     .catch(function(){ dirty = true; setSaveMsg('journey.saveFailed'); });
 }
@@ -1101,9 +1141,11 @@ window.addEventListener('load', function(){
       // wrong doc. Not on the first boot-time answer: ticks a signed-out
       // student made before Firebase answered stay on screen, session-only.
       if(wasSettled){ fbUser = null; dirty = false; resetReadyUi(); }
+      swap45DocNew = false;   // whoever signs in next has their own doc
       if(typeof lqStopListening === 'function') lqStopListening();
       return;
     }
+    if(!fbUser || fbUser.uid !== user.uid) swap45DocNew = false;   // a different doc — learn its numbering again
     // A DIFFERENT student just signed in (shared Chromebook, another tab).
     // Drop the previous student's unsaved ratings rather than writing them
     // into this one's doc, and clear the local-click guard so the read below
@@ -1145,7 +1187,10 @@ window.addEventListener('load', function(){
       return fbDb.collection('progress').doc(user.uid).get();
     }).then(function(doc){
       var data = doc && doc.exists ? doc.data() : null;
-      applyReady(data && data.songReady && data.songReady[SONG_ID]);
+      // Module 4/5 swap: an unmarked doc's Layer 4/5 ticks are in the old numbering (see flushSave).
+      if(swap45IsMarked(data)) swap45DocNew = true;
+      var saved = data && data.songReady && data.songReady[SONG_ID];
+      applyReady(data && !swap45IsMarked(data) ? swap45SwapLayers(saved) : saved);
       // Activity gate — skipped for the teacher's own account, same as
       // everywhere else it applies. class-activities.js is a second script
       // tag on this page (see index.html gate work order); CLASS_ACTIVITIES

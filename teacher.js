@@ -491,7 +491,15 @@ async function teacherFetchStudents(){
   const snap=await db.collection('progress').get();
   const out=[];
   snap.forEach(doc=>{
-      const raw=doc.data().skills||{};
+      /* Module 4/5 swap (2026-10-12): a doc whose student has not opened the
+         site since the swap is still in the OLD numbering (its Module 4 work
+         sits under the ids Module 5 uses now). Read it in the new numbering —
+         IN MEMORY ONLY: the console never writes progress/{uid}; the
+         student's own browser moves the stored doc (swap45Remap /
+         swap45Commit in app.js, which always loads before this file). Remove
+         with them. */
+      const data=swap45Marked(doc.data())?doc.data():swap45Remap(doc.data());
+      const raw=data.skills||{};
       const skills={};
       Object.keys(raw).forEach(k=>{
         if(raw[k]===true) skills[k]='gotit';
@@ -500,11 +508,11 @@ async function teacherFetchStudents(){
         else if((k.endsWith('-reflection')||k.endsWith('-performance')) && raw[k] && typeof raw[k]==='object') skills[k]=raw[k];
         else skills[k]='none';
       });
-      const gamesData=doc.data().games||{};
+      const gamesData=data.games||{};
       // name/email are coerced to strings: firestore.rules doesn't type-check
       // progress/{uid}, and the roster sorts call .localeCompare() on them —
       // one student writing a number there would blank every view.
-      out.push({uid:doc.id,skills,name:String(doc.data().name||''),email:String(doc.data().email||''),responses:doc.data().responses||{},coachSkill:gamesData.coachSkill||{},drillSkill:gamesData.drillSkill||{},classActivities:doc.data().classActivities||{},exitChecks:doc.data().exitChecks||{},period:doc.data().period||''});
+      out.push({uid:doc.id,skills,name:String(data.name||''),email:String(data.email||''),responses:data.responses||{},coachSkill:gamesData.coachSkill||{},drillSkill:gamesData.drillSkill||{},classActivities:data.classActivities||{},exitChecks:data.exitChecks||{},period:data.period||''});
   });
   return out;
 }

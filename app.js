@@ -900,13 +900,167 @@ let journeyReturnSeen = false;
    finished weeks ago), and the derived save categories are held back so a
    session started from a blank slate can't overwrite the real record. */
 let progressLoadFailed = false;
+
+/* ── Module 4/5 swap: one-time move of saved progress (2026-10-12) ─────────
+   On 2026-10-12 Modules 4 and 5 traded places (Open Chords is Module 4,
+   Pentatonic is Module 5) and every id moved WITH its content: what was
+   m4w1 is now m5w1, mr4-* is now mr5-*, the chords-m5 deck is chords-m4,
+   and the Journey pages' Layers 4 and 5 traded places. Set numbers and the
+   step/section positions inside each set did not change. A live scan that
+   day found 7 progress docs holding work saved under the OLD ids (ticked
+   steps, typed and graded answers, lastSet, game skill records, Journey
+   "I'm ready" ticks), all of it now attached to the other module's lessons.
+   The console cannot write progress/{uid} (firestore.rules: owner only), so
+   each student's own browser moves its own doc, once.
+
+   One rule every writer keeps: a doc WITHOUT migrations.swap45 holds only
+   OLD-numbered data; a doc WITH it holds only NEW-numbered data.
+     - loadProgress() remaps an unmarked doc in memory (swap45OnLoad) before
+       anything renders, and starts swap45Commit() straight away when the
+       remap moved something.
+     - flushSave() awaits swap45Commit() before its own write, so no
+       new-numbered key can merge into an unmarked doc (the next load would
+       swap it the wrong way). A doc with nothing to move — or no doc yet —
+       is marked by that first save, not at load: a student who saves
+       nothing causes no write.
+     - swap45Commit() is a transaction: it re-reads the doc, does nothing if
+       another tab already marked it, and otherwise REPLACES each affected
+       field with its remapped copy and sets the marker in the same write.
+       update() with a whole map replaces the field; set({merge:true}) would
+       merge the old keys back in.
+     - A failed commit leaves the stored doc unmarked and unchanged. Memory
+       stays remapped, every save retries the commit first (and fails, and
+       retries, like any failed save), and the next load starts again from
+       the same stored doc — nothing is lost and nothing swaps twice.
+     - tabs/journey.js writes songReady in the doc's own numbering, and
+       teacher.js remaps unmarked docs for display only.
+   swap45MapId is its own inverse, so the data alone cannot say which
+   numbering a doc is in — only the marker does. The one assumption: every
+   Module 4/5 key in an unmarked doc was saved BEFORE the swap went live
+   (pushed 2026-10-12 14:53 PDT). Work the swap build saved between then
+   and this move shipping is already new-numbered and would be swapped the
+   wrong way; the docs' update times are the way to check.
+
+   Safe to remove once every doc holding Module 4/5 data or Layer 4/5 ticks
+   carries migrations.swap45, or after the school year resets progress
+   (summer reset). Remove the flushSave gate, the teacher.js display remap
+   and the journey.js swap45 block with it. */
+function swap45MapId(id){
+  if(typeof id !== 'string') return id;
+  const flip = d => d === '4' ? '5' : '4';
+  let m = /^(practice-)?m([45])w\d/.exec(id);           // m4w1-b-sec0-1, m5w2-s3, practice-m4w1-s3, m4w1
+  if(m){ const p = m[1] || ''; return p + 'm' + flip(m[2]) + id.slice(p.length + 2); }
+  m = /^mr([45])(-|$)/.exec(id);                        // mr4, mr4-s1, mr5-complete, mr5-reflection
+  if(m) return 'mr' + flip(m[1]) + id.slice(3);
+  m = /^chords-m([45])$/.exec(id);                      // the Open Chords deck (games.dk)
+  if(m) return 'chords-m' + flip(m[1]);
+  return id;
+}
+function swap45IsMap(v){ return !!v && typeof v === 'object' && !Array.isArray(v); }
+function swap45Keys(map, fn){
+  const out = {};
+  Object.keys(map).forEach(k => { out[fn(k)] = map[k]; });   // fn is a bijection, so no two keys collide
+  return out;
+}
+const swap45Layer = k => k === '4' ? '5' : k === '5' ? '4' : k;
+// Whole maps keyed by set / step / skill / Module Review ids.
+const SWAP45_MAPS = ['skills', 'responses', 'completed', 'practiceLog'];
+// games.* maps keyed by skill ids (coachSkill, drillSkill) or deck ids (dk).
+const SWAP45_GAME_MAPS = ['coachSkill', 'drillSkill', 'dk'];
+function swap45Marked(d){ return !!(d && d.migrations && d.migrations.swap45 === true); }
+/* The doc in the other numbering — a new object; values are carried over
+   untouched (a graded MC answer is its choice TEXT, and the content moved
+   intact, so it still matches). Fields it does not name are left as they
+   are: classActivities / caSteps / exitChecks (activity ids), streak,
+   period, songReadyAt (song ids), name, email, migrations. */
+function swap45Remap(d){
+  if(!swap45IsMap(d)) return d;
+  const out = Object.assign({}, d);
+  SWAP45_MAPS.forEach(f => { if(swap45IsMap(d[f])) out[f] = swap45Keys(d[f], swap45MapId); });
+  if(swap45IsMap(d.games)){
+    const g = Object.assign({}, d.games);
+    SWAP45_GAME_MAPS.forEach(f => { if(swap45IsMap(d.games[f])) g[f] = swap45Keys(d.games[f], swap45MapId); });
+    out.games = g;
+  }
+  if('lastModule' in d){
+    const v = d.lastModule;
+    out.lastModule = v === 4 ? 5 : v === 5 ? 4 : v === '4' ? '5' : v === '5' ? '4' : v;
+  }
+  if('lastSet' in d) out.lastSet = swap45MapId(d.lastSet);
+  if(swap45IsMap(d.songReady)){
+    const s = {};
+    Object.keys(d.songReady).forEach(song => {
+      const v = d.songReady[song];
+      s[song] = swap45IsMap(v) ? swap45Keys(v, swap45Layer) : v;
+    });
+    out.songReady = s;
+  }
+  return out;
+}
+function swap45Canon(v){
+  if(Array.isArray(v)) return '[' + v.map(swap45Canon).join(',') + ']';
+  if(v && typeof v === 'object') return '{' + Object.keys(v).sort().map(k => JSON.stringify(k) + ':' + swap45Canon(v[k])).join(',') + '}';
+  return JSON.stringify(v);
+}
+/* The update() that moves a stored doc: each field (or games.* sub-map) the
+   remap changed, whole, by field path. null when nothing moves. */
+function swap45Patch(d){
+  if(!swap45IsMap(d)) return null;
+  const r = swap45Remap(d), patch = {};
+  SWAP45_MAPS.concat(['lastModule', 'lastSet', 'songReady']).forEach(f => {
+    if(f in d && swap45Canon(d[f]) !== swap45Canon(r[f])) patch[f] = r[f];
+  });
+  if(swap45IsMap(d.games)) SWAP45_GAME_MAPS.forEach(f => {
+    if(f in d.games && swap45Canon(d.games[f]) !== swap45Canon(r.games[f])) patch['games.' + f] = r.games[f];
+  });
+  return Object.keys(patch).length ? patch : null;
+}
+let swap45Done = false;   // the stored doc is known to be in the new numbering
+let _swap45P = null;      // the swap45Commit() in flight, shared by every caller
+/* Make sure the stored doc is in the new numbering. Resolves at once when
+   it is known to be; otherwise one transaction (shared by concurrent
+   callers). Rejects on any failure, leaving the doc as it was. */
+function swap45Commit(){
+  if(swap45Done || !currentUser || isDevBypassUser()) return Promise.resolve();
+  if(_swap45P) return _swap45P;
+  const user = currentUser;
+  const p = _swap45P = (async () => {
+    await ensureDb();
+    if(!db) throw new Error('swap45: Firestore not available');
+    const ref = db.collection('progress').doc(user.uid);
+    await db.runTransaction(async tx => {
+      const snap = await tx.get(ref);
+      if(!snap.exists){
+        // The doc this browser is about to create is born in the new numbering.
+        tx.set(ref, { name:user.displayName||'', email:user.email||'', migrations:{ swap45:true } }, { merge:true });
+        return;
+      }
+      const d = snap.data();
+      if(swap45Marked(d)) return;   // another tab (or an earlier visit) already moved it
+      tx.update(ref, Object.assign(swap45Patch(d) || {}, { 'migrations.swap45': true }));
+    });
+    if(currentUser === user) swap45Done = true;
+  })().finally(() => { if(_swap45P === p) _swap45P = null; });
+  return p;
+}
+/* loadProgress()'s half: the stored doc as this session should see it. */
+function swap45OnLoad(stored){
+  if(swap45Marked(stored)){ swap45Done = true; return stored; }
+  if(!currentUser || isDevBypassUser()) return stored;   // never reached — dev bypass loads no doc
+  if(swap45Patch(stored)) swap45Commit().catch(e => console.warn('[guitar-class] Module 4/5 progress move not saved yet — the next save retries it', e));
+  return swap45Remap(stored);
+}
+
 async function loadProgress(){
   progressLoadFailed = false;
+  swap45Done = false;
   try{
     await ensureDb();
     const doc = await db.collection('progress').doc(currentUser.uid).get();
     if(doc.exists){
-      const raw = doc.data().skills||{};
+      // Module 4/5 swap (2026-10-12): an unmarked doc is read in the new numbering — see swap45OnLoad.
+      const data = swap45OnLoad(doc.data());
+      const raw = data.skills||{};
       progress = {};
       Object.keys(raw).forEach(k=>{
         if(raw[k]===true) progress[k]='gotit';
@@ -915,23 +1069,26 @@ async function loadProgress(){
         else if((k.endsWith('-reflection')||k.endsWith('-performance')) && raw[k] && typeof raw[k]==='object') progress[k]=raw[k];
         else progress[k]='none';
       });
-      lastModuleNum = doc.data().lastModule||1;
-      lastSetId     = doc.data().lastSet||null;
-      responses     = doc.data().responses || {};
-      completed     = doc.data().completed || {};
-      classActivities = doc.data().classActivities || {};
-      caStepDone    = caCleanTicks(doc.data().caSteps);
-      exitChecks    = doc.data().exitChecks || {};
-      games         = doc.data().games || {};
-      streak        = doc.data().streak || { count:0, lastDay:null };
+      lastModuleNum = data.lastModule||1;
+      lastSetId     = data.lastSet||null;
+      responses     = data.responses || {};
+      completed     = data.completed || {};
+      classActivities = data.classActivities || {};
+      caStepDone    = caCleanTicks(data.caSteps);
+      exitChecks    = data.exitChecks || {};
+      games         = data.games || {};
+      streak        = data.streak || { count:0, lastDay:null };
       // practiceLog (per-skill rep history): Firestore is the source of truth
       // when signed in; fall back to the localStorage copy for older docs that
       // predate the field, then mirror back so the offline copy stays fresh.
-      practiceLog   = doc.data().practiceLog || loadLocalPracticeLog();
+      // (That local fallback is NOT swap45-remapped: nothing records which
+      // numbering a device copy was written in, and remapping a copy this
+      // code already wrote would swap it back.)
+      practiceLog   = data.practiceLog || loadLocalPracticeLog();
       savePracticeLogLocal();
-      songReady     = doc.data().songReady || {};
-      songReadyAt   = doc.data().songReadyAt || {};
-      studentPeriod = doc.data().period || '';
+      songReady     = data.songReady || {};
+      songReadyAt   = data.songReadyAt || {};
+      studentPeriod = data.period || '';
     } else { progress={}; lastModuleNum=1; lastSetId=null; responses={}; completed={}; classActivities={}; caStepDone={}; exitChecks={}; games={}; streak={ count:0, lastDay:null }; practiceLog=loadLocalPracticeLog(); songReady={}; songReadyAt={}; studentPeriod=''; restoreLocalPlace(); }
   } catch(e){ progressLoadFailed=true; console.warn('[guitar-class] progress load failed — running read-only on derived data', e); progress={}; lastModuleNum=1; lastSetId=null; responses={}; completed={}; classActivities={}; caStepDone={}; exitChecks={}; games={}; streak={ count:0, lastDay:null }; practiceLog=loadLocalPracticeLog(); songReady={}; songReadyAt={}; studentPeriod=''; restoreLocalPlace(); }
 }
@@ -1318,6 +1475,12 @@ async function flushSave(){
   if(keys.has('period'))    payload.period    = studentPeriod;
   try{
     await ensureDb();
+    /* Module 4/5 swap (2026-10-12): this write must never land on a doc
+       still in the old numbering, or the next load swaps its new keys the
+       wrong way — so the move (or, for a doc with nothing to move, just its
+       marker) lands first. Resolves at once after the first success; a
+       rejection is an ordinary failed save, retried below. See swap45Commit. */
+    await swap45Commit();
     /* The delete sentinels are stamped in HERE, after ensureDb(), and not
        where the payload is assembled: `firebase.firestore` doesn't exist
        until the Firestore SDK has actually loaded, so building them earlier

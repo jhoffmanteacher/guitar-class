@@ -101,3 +101,13 @@ around day 3 of the course — but the riff it prepares for spans frets 7–10.
 Not frozen by any regime; timed for next year because it needs six new
 figures (both Reach cards, both fret positions, EN and ES captions) that
 aren't worth rushing mid-year for two cards nobody has failed on.
+
+**Remove the Module 4/5 swap progress move (`swap45`).** The one-time move
+of saved progress after the 2026-10-12 swap (app.js `swap45MapId` …
+`swap45OnLoad`, the `await swap45Commit()` gate in `flushSave()`, the
+display remap in teacher.js `teacherFetchStudents()`, and the `swap45` block
+in `tabs/journey.js`). Once progress is reset nothing is in the old
+numbering, so all four halves go together — removing only some of them
+would let one writer save in a numbering another still reads differently.
+Delete the `migrations` field from the reset docs, or leave it: nothing
+else reads it.

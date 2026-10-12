@@ -233,14 +233,17 @@ Module 4** (`module-4.js`, `m4w1`–`m4w4`, `mr4-*`); **Pentatonic is Module
 moved with their content, and every Journey page swapped Layers 4 and 5 to
 match (Layer 4 Open Chords, Layer 5 Pentatonic Solo). The two-part set is
 `m4w2`; the 1ao and 1az pins, the Songs hub's module groups and the Core
-rows' backing-track choice follow the content. Nobody had progress in either
-module, so no key was migrated (a stray peeked answer under an old id now
-sits on other content — accepted). The same goes for the Journey pages'
-saved "I'm ready" ticks: they are keyed by layer NUMBER
-(`songReady.<song>.<layer>`), so a tick a student made on old Layer 4
-(Pentatonic) or 5 (Open Chords) now shows on the other layer's content —
-accepted, low impact (it only moves the progress pill and which layer opens
-first). Notes dated before the swap may still use the old numbers. **Course
+rows' backing-track choice follow the content. **Saved progress IS moved**
+— the swap shipped believing nobody was past Module 3, but a live scan the
+same day found 7 docs with Module 4/5 work or Layer 4/5 "I'm ready" ticks.
+Each student's own browser moves its doc once (the console cannot write
+`progress/{uid}`): `swap45*` in `app.js`, read the comment above
+`swap45MapId`. **The rule: a doc without `migrations.swap45` holds only
+OLD-numbered data, a doc with it only NEW-numbered data** — so `flushSave()`
+awaits `swap45Commit()` before every write, `tabs/journey.js` writes
+`songReady` in the doc's own numbering, and `teacher.js` remaps unmarked
+docs for display only. Don't remove one half without the others (Summer
+reset list). Notes dated before the swap may still use the old numbers. **Course
 order lives in the module NUMBER** — reordering again means a renumber like
 this one. Its script (`swapA.mjs`) lived in a session scratchpad and is not
 in the repo. **Run `node tools/rule-zero-proof.mjs` against `d0cd004`**
