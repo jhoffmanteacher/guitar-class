@@ -231,7 +231,7 @@ Any sweep or audit that finds **3+ instances of a mechanically-detectable error
 class** must add a permanent detector for that class to `checks.mjs` in the same
 session. Never leave a detector script in a session scratchpad — the 2026-07-31
 MC-tell audit died that way and the class recurred in the next sweep. The
-existing detectors (1h … 1bn) are each documented by a comment in
+existing detectors (1h … 1bp) are each documented by a comment in
 `tools/checks.mjs` — read it there rather than keeping a list here.
 
 **A phrase detector must match the UNESCAPED string.** Until 2026-09-25 1w
@@ -658,8 +658,10 @@ whole switch; `ladderHtml()` is its one reader. **Nothing was deleted** —
 CSS (including the `.dp.focus.pd-showing .daily5-inline` rule) and every
 `daily5.*` i18n key are all still there, so flipping the constant back to
 `true` brings the banner back as it was. Two things that are NOT part of
-this: `WARMUP_BANK` in `config-main.js` (the Module Review's 10-Minute
-Routine reads it too) and `kind:'tuning-warmup'` sections, which stay hidden
+this: `WARMUP_BANK` in `config-main.js` (kept, though nothing on screen
+reads it while the Daily 5 is off — its other reader, the Module Review's
+10-Minute Routine `buildModuleRoutine()`, has had no caller since `52ae05f`)
+and `kind:'tuning-warmup'` sections, which stay hidden
 exactly as before — `storageSections()` depends on that and every `gi` in
 Firestore was written under it.
 

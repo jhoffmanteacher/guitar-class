@@ -246,7 +246,7 @@
                                   // has never been written. Never bake a
                                   // "#N - " prefix into title itself.
      title:    'Power Chord Relay',
-     title_es: 'Relevo de acordes de poder',
+     title_es: 'Relevo de acordes de potencia',
      intro:    'One or two sentences connecting today\'s work to what the
                  student already did.',
      intro_es: '…',

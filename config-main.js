@@ -39,8 +39,9 @@ const MODULE_REVIEWS = {};
 // `i18nComplete: true` — set once EVERY required student-facing field in that
 // module's module-N.js has a real `_es` twin (tools/checks.mjs enforces this
 // on every run). Flips the module's Set/Module-Review panels to translate="no"
-// so Google Translate stops touching them — see CLAUDE.md's module-content
-// i18n section before setting this by hand.
+// so a browser's own built-in page translator doesn't re-translate text that
+// is already hand-translated (the site no longer runs Google Translate) — see
+// CLAUDE.md's i18n section before setting this by hand.
 const MODULE_MANIFEST = [
   { num: 1, name: 'Introductions: You and The Guitar',        name_es: 'Presentaciones: tú y la guitarra', i18nComplete: true, skillCount: 9,  skillIdRe: '^w\\d+-s\\d+$' },
   { num: 2, name: 'Notes on the E & A Strings',               name_es: 'Notas en las cuerdas Mi y La', i18nComplete: true, skillCount: 11, skillIdRe: '^m2w\\d+-s\\d+$' },

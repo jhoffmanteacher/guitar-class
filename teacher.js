@@ -446,7 +446,10 @@ async function loadAllStudents(){
         else skills[k]='none';
       });
       const gamesData=doc.data().games||{};
-      allStudentsRaw.push({uid:doc.id,skills,name:doc.data().name||'',email:doc.data().email||'',responses:doc.data().responses||{},coachSkill:gamesData.coachSkill||{},drillSkill:gamesData.drillSkill||{},classActivities:doc.data().classActivities||{},exitChecks:doc.data().exitChecks||{},period:doc.data().period||''});
+      // name/email are coerced to strings: firestore.rules doesn't type-check
+      // progress/{uid}, and the roster sorts call .localeCompare() on them —
+      // one student writing a number there would blank every view.
+      allStudentsRaw.push({uid:doc.id,skills,name:String(doc.data().name||''),email:String(doc.data().email||''),responses:doc.data().responses||{},coachSkill:gamesData.coachSkill||{},drillSkill:gamesData.drillSkill||{},classActivities:doc.data().classActivities||{},exitChecks:doc.data().exitChecks||{},period:doc.data().period||''});
     });
     // Pause/archive flags live in config/class, so it has to be in hand
     // before the roster is filtered — otherwise the first paint shows
@@ -1996,7 +1999,7 @@ function renderTeacherActivityDetail(id){
       const to=lu.levelUp&&lu.card?(window.CLASS_ACTIVITIES||[]).find(x=>x.id===lu.card):null;
       return to?`<div class="tg-note">Level up button opens ${escHtml(to.id)} · ${escHtml(to.title||'')} — shown to students once that card is released or set to Play Along now. Before its date it opens in place of this card, and closing it brings this card back.</div>`:'';
     })()}
-    ${caJourneyUrl(a)?`<div class="ca-journey-row"><a class="jl-song-btn" href="${escAttr(caJourneyUrl(a))}" target="_blank" rel="noopener">${escHtml(t('ca.openJourney',{song:(SONG_JOURNEYS.find(s=>s.id===a.journey)||{}).name||''}))} &#x2197;</a> <span class="tg-note" style="display:inline">— this page stays open behind the gate while the activity is pending.</span></div>`:''}`;
+    ${caJourneyUrl(a)?`<div class="ca-journey-row"><a class="jl-song-btn" href="${escAttr(caJourneyUrl(a))}" target="_blank" rel="noopener">${escHtml(t('ca.openJourney',{song:(SONG_JOURNEYS.find(s=>s.id===a.journey)||{}).name||''}))} &#x2197;</a></div>`:''}`;
 }
 /* An exit check's detail page: who turned it in, what they picked, and
    which question the room missed. Deliberately NOT the plain step list
@@ -2420,7 +2423,7 @@ function teacherBlockersFor(stu, cfg){
    of Clear buttons that do nothing students can see. */
 function teacherOptionalBanner(id){
   if(!teacherActivityOptional(id, teacherClassConfig)) return '';
-  return `<div class="tg-note"><strong>Optional.</strong> Students see this one, tagged “Optional”, but it doesn't lock the site, so the Clear buttons below change nothing for now. Switch it back to Required on the Class activities board.</div>`;
+  return `<div class="tg-note"><strong>Optional.</strong> Students see this one, tagged “Optional”, but it never sends them to In-Class Activities when they sign in, so the Clear buttons below change nothing for now. Switch it back to Required on the Class activities board.</div>`;
 }
 async function teacherSetActivityClear(uid, id, state){
   const on=state==='clear';
@@ -2944,9 +2947,10 @@ async function teacherSetStudentGames(uid, state){
    still have a bare scalar for these keys — normalize both to an array.
    Shared by renderTeacherResponses (per-set, every student) and
    renderTeacherStudentDetail (per-student, every set) so both read PR
-   trends identically. */
+   trends identically. Non-object array entries are dropped: the student
+   writes this doc, and a null entry would throw on `.value`. */
 function prEntries(raw){
-  if(Array.isArray(raw)) return raw;
+  if(Array.isArray(raw)) return raw.filter(e=>e&&typeof e==='object');
   if(raw!=null && String(raw).trim()!=='') return [{value:raw, date:null}];
   return [];
 }
@@ -3028,7 +3032,7 @@ function renderTeacherResponses(){
           ? `<span class="tr-lbl" style="opacity:.7">${entries.slice(-3).map(e=>escHtml(prNum(e.value)||e.value)).join(' &#x2192; ')}</span>` : '';
         return `<div class="tr-item"><span class="tr-pr"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="8"/><circle cx="12" cy="12" r="4"/><circle cx="12" cy="12" r="0.8" fill="currentColor" stroke="none"/></svg> ${escHtml(sl.label)}</span><span class="tr-prval">${n?escHtml(n)+' BPM':escHtml(latest)}</span>${trendHtml}</div>`;
       }
-      const val=(stu.responses&&stu.responses[sl.key]||'').trim();
+      const rv=stu.responses&&stu.responses[sl.key]; const val=String(rv==null?'':rv).trim();
       if(!val) return '';
       return `<div class="tr-item"><span class="tr-lbl"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M17 3a2.85 2.85 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5z"/></svg> ${escHtml(sl.label)}</span><span class="tr-txt">${escHtml(val)}</span></div>`;
     }).filter(Boolean).join('');
@@ -3893,7 +3897,7 @@ function renderTeacherStudentDetail(uid){
             ? `<span class="tr-lbl" style="opacity:.7">${entries.slice(-3).map(e=>escHtml(prNum(e.value)||e.value)).join(' &#x2192; ')}</span>` : '';
           return `<div class="tr-item"><span class="tr-pr"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="8"/><circle cx="12" cy="12" r="4"/><circle cx="12" cy="12" r="0.8" fill="currentColor" stroke="none"/></svg> ${escHtml(sl.label)}</span><span class="tr-prval">${n?escHtml(n)+' BPM':escHtml(latest)}</span>${trendHtml}</div>`;
         }
-        const val=(stu.responses&&stu.responses[sl.key]||'').trim();
+        const rv=stu.responses&&stu.responses[sl.key]; const val=String(rv==null?'':rv).trim();
         if(!val) return '';
         return `<div class="tr-item"><span class="tr-lbl"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M17 3a2.85 2.85 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5z"/></svg> ${escHtml(sl.label)}</span><span class="tr-txt">${escHtml(val)}</span></div>`;
       }).filter(Boolean).join('');

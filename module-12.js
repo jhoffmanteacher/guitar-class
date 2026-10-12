@@ -281,8 +281,8 @@ SETS.push(
               },
               {
                 label: 'Challenge — 4-Note Arpeggio, Am then C', label_es: 'Reto — Arpegio de 4 notas, Am y luego C',
-                text: '<ol><li>Play a p–i–m–a arpeggio on each chord — one thumb bass, then i-m-a rolling up the top three strings.</li><li>Play 2 bars of Am, then 2 bars of C, and loop.</li><li>On Am the thumb takes the open A string; on C the thumb stays on the A string, which your C shape now frets at fret 3 (the note C).</li></ol>You\'ve got it when: every note is the same volume and the a-finger (the high e) doesn\'t rush ahead of the beat.',
-                text_es: '<ol><li>Toca un arpegio p–i–m–a en cada acorde — un bajo del pulgar, y luego i-m-a en un floreo ascendente por las tres cuerdas más agudas.</li><li>Toca 2 compases de Am, y luego 2 compases de C, y repite.</li><li>En Am el pulgar toma la cuerda La al aire; en C el pulgar se queda en la cuerda La, que tu forma de C ahora pisa en el traste 3 (la nota C).</li></ol>Lo tienes cuando: cada nota tiene el mismo volumen y el dedo a (la mi aguda) no se adelanta al tiempo.',
+                text: '<ol><li>Play a p–i–m–a arpeggio on each chord — one thumb bass, then i-m-a rolling up the three highest strings (G, B, high e).</li><li>Play 2 bars of Am, then 2 bars of C, and loop.</li><li>On Am the thumb takes the open A string; on C the thumb stays on the A string, which your C shape now frets at fret 3 (the note C).</li></ol>You\'ve got it when: every note is the same volume and the a-finger (the high e) doesn\'t rush ahead of the beat.',
+                text_es: '<ol><li>Toca un arpegio p–i–m–a en cada acorde — un bajo del pulgar, y luego i-m-a en un floreo ascendente por las tres cuerdas más agudas (Sol, Si, mi aguda).</li><li>Toca 2 compases de Am, y luego 2 compases de C, y repite.</li><li>En Am el pulgar toma la cuerda La al aire; en C el pulgar se queda en la cuerda La, que tu forma de C ahora pisa en el traste 3 (la nota C).</li></ol>Lo tienes cuando: cada nota tiene el mismo volumen y el dedo a (la mi aguda) no se adelanta al tiempo.',
                 hint: 'This is the four-even-notes drill (a drill is a short exercise you repeat to build a skill) Module 8 built the whole pattern on — the a-finger is the one most likely to play too early, so keep it as calm as the thumb.',
                 hint_es: 'Este es el ejercicio de cuatro notas parejas (un ejercicio es una actividad corta que repites para desarrollar una destreza) sobre el que el Módulo 8 construyó todo el patrón — el dedo a es el que más probablemente toque demasiado temprano, así que mantenlo tan calmado como el pulgar.',
                 stuck: 'Loop just Am until the four notes are perfectly even, then add C — the only thing that changes between the chords is where the thumb lands.',
@@ -721,8 +721,8 @@ SETS.push(
                 label: 'Checkpoint', label_es: 'Punto de control',
                 text: 'Checkpoint — pause and think: what does the requinto add to a sierreño song that strummed chords alone can\'t?',
                 text_es: 'Punto de control — pausa y piensa: ¿qué le aporta el requinto a una canción de sierreño que los acordes rasgueados por sí solos no pueden?',
-                response: { type: 'short', placeholder: 'e.g. the melody — it sings the line a voice would carry',
-                  placeholder_es: 'p. ej. la melodía — canta la línea que llevaría una voz' }
+                response: { type: 'short', placeholder: 'e.g. the melody — it plays the line a voice would carry',
+                  placeholder_es: 'p. ej. la melodía — toca la línea que llevaría una voz' }
               }
             ]
           }
@@ -880,8 +880,8 @@ SETS.push(
           prompt_es: 'El trabajo del requinto en el grupo es:',
           choices: ['Strumming the rhythm chords', 'The melodic lead lines', 'Bass', 'Percussion'],
           choices_es: ['Rasguear los acordes de ritmo', 'Las melodías principales', 'El bajo', 'La percusión'], answer: 1,
-          explain: 'The requinto is the small, higher-pitched guitar that sings the melody lines over the group — the part you hear in "Luna." Rhythm chords and bass are other players\' jobs.',
-          explain_es: 'El requinto es la guitarra pequeña y más aguda que canta las líneas melódicas sobre el grupo — la parte que escuchas en "Luna". Los acordes de ritmo y el bajo son trabajo de otros músicos.' } },
+          explain: 'The requinto is the small, higher-pitched guitar that plays the melody lines over the group — the part you hear in "Luna." Rhythm chords and bass are other players\' jobs.',
+          explain_es: 'El requinto es la guitarra pequeña y más aguda que toca las líneas melódicas sobre el grupo — la parte que escuchas en "Luna". Los acordes de ritmo y el bajo son trabajo de otros músicos.' } },
       { id: 'm12w3-s4', text: 'Blend melody notes into a picking pattern — tune on top, thumb bass below',
         text_es: 'Combinar notas de melodía en un patrón de punteo — melodía arriba, bajo del pulgar debajo',
         gotItWhen: 'the thumb never wavers while the melody rides on top.',

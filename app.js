@@ -5358,8 +5358,8 @@ function openSongVid(s, kind){
   if(!s) return;
   if(kind==='journey'){ if(s.journeyUrl) window.open(journeyHref(s.journeyUrl, 0, location.hash === '#songs' ? 'songs' : ''), '_blank', 'noopener'); return; }
   if(kind==='original'){ if(s.originalUrl) window.open(s.originalUrl, '_blank', 'noopener'); return; }
-  if(kind==='backing'){ if(s.backingUrl) loadPanel(/\.(mp3|m4a|ogg|wav)(\?|$)/i.test(s.backingUrl)?'audio':'youtube', s.backingUrl, s.name, t('songs.backingTrackHint')); return; }
-  if(s.tutorialUrl) loadPanel('youtube', s.tutorialUrl, s.name, t('songs.tutorial'));
+  if(kind==='backing'){ if(s.backingUrl) loadPanel(/\.(mp3|m4a|ogg|wav)(\?|$)/i.test(s.backingUrl)?'audio':'youtube', s.backingUrl, tf(s, 'name'), t('songs.backingTrackHint')); return; }
+  if(s.tutorialUrl) loadPanel('youtube', s.tutorialUrl, tf(s, 'name'), t('songs.tutorial'));
 }
 /* ── 10-Minute Routine card (module review) + Daily 5 panel ──
    Both assemble themselves from the module's already-loaded SETS data, so
@@ -10112,7 +10112,7 @@ async function buildSearchIndex(){
       return;
     }
     const hayExtra = [bothLangs(song, 'meta'), bothLangs(song, 'name')].filter(Boolean).join(' ');
-    const entry = searchEntry({ kind: 'song', moduleNum, wid, title: song.name, text: song.name + (metaTextShown ? ' ' + metaTextShown : ''), chords: [...chords], hayExtra });
+    const entry = searchEntry({ kind: 'song', moduleNum, wid, title: tf(song, 'name'), text: tf(song, 'name') + (metaTextShown ? ' ' + metaTextShown : ''), chords: [...chords], hayExtra });
     songSeen.set(song.name, entry);
     ix.push(entry);
   };
@@ -12530,7 +12530,22 @@ function caOnToggle(details){
     caScrollToActivity(from);
     return;
   }
+  const wasOpenId = caOpenId;
   caOpenId = details.open ? details.dataset.id : (caOpenId === details.dataset.id ? null : caOpenId);
+  /* Same gap caCloseOpen closes for "◀ All activities": a Play Along now
+     card (caIsPlayAlongOnly) or a pin-only card (caIsPinOnly) is on the page
+     only because it is the open card, so closing it by its title has to
+     re-render or it sits there, closed, until the next render. The re-render
+     detaches the card, so silence it first (stopCardAudio covers the TAB
+     player, which the snipStop/pcStop below can't see). */
+  if(!details.open && wasOpenId === details.dataset.id){
+    const closing = (window.CLASS_ACTIVITIES || []).find(x => x.id === details.dataset.id);
+    if(closing && (caIsPlayAlongOnly(closing) || caIsPinOnly(closing))){
+      stopCardAudio();
+      renderClassActivities();
+      return;
+    }
+  }
   // A closed card's reveal-delay tabs aren't armed at render time (see
   // caArmTabReveals) — start their countdown now that the card is actually open.
   if(details.open) caArmTabReveals(details);
