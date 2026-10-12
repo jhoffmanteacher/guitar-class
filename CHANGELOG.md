@@ -5,6 +5,35 @@ Notable changes to the Guitar Class site. Newest first.
 For the full session-by-session history (and the reasoning behind each change),
 see `WORKFLOW.md` and the git commit log.
 
+## 2026-10-12 — Song Journey, set buttons, saving, and Module 6–12 fixes
+
+- **Song Journey pages always open at the top.** Before, some links opened
+  partway down the page. "Back to class site" still returns you to where you
+  came from.
+- **Set buttons are shorter.** In a module with three or more sets, the buttons
+  in the left menu show just the number (1, 2, 3…). "Report a problem" and
+  Module review now fit on a Chromebook screen in English and Spanish.
+- **Switching language keeps your place.** The step you were on, open hints,
+  and your scroll position stay where they were.
+- **Your work saves when you switch away from the page.** If you press Sign
+  out and something has not saved yet, the site tells you and lets you choose.
+- **The metronome and the count-in stay on the beat**, even when the computer
+  is busy.
+- **Clearer mic messages.** "No microphone found" and "another app is using
+  the mic" no longer say "access denied".
+- **Riff Runner takes a strummed power chord.** Play A5, G5 or F5 as a strum,
+  not just the one note.
+- **Screen readers and keyboards.** The page titles are real headings. You can
+  play Find the Note with the keyboard. Quiz answers tell you when you are
+  right or wrong. Focus moves to the next step after you finish one.
+- **Module 6 to 8.** Typed-answer questions stay on the screen while you
+  type. Module 8 listen steps have verified links. The A-shape barre video is
+  a new one with one finger on each string.
+- **Module 9 to 11.** Every Challenge card has a "You've got it when" line.
+  The Module 10 echo drills play the notes for you to find by ear.
+- **Module 12.** The "You've got it when" lines name a count you can check.
+  "House of the Rising Sun" now shows all 16 bars.
+
 ## 2026-10-12 — Site check: fixes across the whole site
 
 - **"Continue" on the resume card now opens your set.** Before, it only
