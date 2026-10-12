@@ -713,17 +713,23 @@ function coachMicLatencyMs(){ return nrOffset(); }
    behaviour; a slow Chromebook frame holds two unread windows (48 kHz) and
    gets both, so a 3-reading consensus doesn't take 3 slow frames. Each
    entry is { t: window end, midi: number|null } — callers advance their
-   spacing clock to t whether or not a pitch was found, as before. */
+   spacing clock to t whether or not a pitch was found, as before.
+   `clarity` is coachDetectPitch's gate — or an array of gates, strictest
+   first, where a window the first finds no pitch in is read again at the
+   next. Only Riff Runner's power-chord tokens pass an array
+   (RNW_POWER_CLARITY); every other caller passes a number or nothing. */
 function coachPitchReadings(sinceT, minEndT, clarity){
   const out = [];
   const buf = coachFrameBuf, L = buf.length, sr = coachCtx.sampleRate;
   const W = Math.min(L, sr > 60000 ? 4096 : 2048);
   const step = Math.ceil(0.040 * sr);
   const nowT = performance.now();
+  const tiers = Array.isArray(clarity) ? clarity : null;
   for (let end = L; end - W >= 0; end -= step){
     const endT = nowT - (L - end) / sr * 1000;
     if (endT < minEndT || endT - (sinceT || 0) < 40) break;
-    const f = coachDetectPitch(buf, sr, clarity, end);
+    let f = coachDetectPitch(buf, sr, tiers ? tiers[0] : clarity, end);
+    for (let q = 1; tiers && q < tiers.length && !(f > 0); q++) f = coachDetectPitch(buf, sr, tiers[q], end);
     out.unshift({ t: endT, midi: f > 0 ? 69 + 12 * Math.log2(f / 440) : null });
   }
   return out;
@@ -820,6 +826,9 @@ function coachTargetShare(readings, targets){
    the lockout a review had traced to it.
    `rms` is this frame's level; `floorT` (optional) is the earliest time a
    pluck may be dated, for a game that has just played its own note.
+   `clarity` (optional) goes to coachPitchReadings — left out, the 0.22
+   single-note gate; only Riff Runner's power-chord tokens pass one
+   (RNW_POWER_CLARITY).
    Returns that midi, or null while it's unsettled. st carries
    { attackT, lastPitchT, readings }; this adds its own fields. */
 const COACH_STANDOUT = 3;
@@ -856,7 +865,7 @@ function coachIdleTick(st, rms, floorT){
     st.seenAttackT = null;
   }
 }
-function coachSettlePitch(st, targets, rms, floorT){
+function coachSettlePitch(st, targets, rms, floorT, clarity){
   if (coachOnsetTick(st, rms, floorT)){
     st.attackT = st.onsetT; st.readings = [];
     st.seenAttackT = null;               // a new pluck: measure it below
@@ -867,7 +876,7 @@ function coachSettlePitch(st, targets, rms, floorT){
   } else if (rms > st.attackLvl) st.attackLvl = rms;
   const standsOut = st.attackLvl >= COACH_STANDOUT * st.preBg;
   const targetStandsOut = st.attackLvl >= COACH_STANDOUT_TARGET * st.preBg;
-  const rs = coachPitchReadings(st.lastPitchT, st.attackT + COACH_ATTACK_SKIP);
+  const rs = coachPitchReadings(st.lastPitchT, st.attackT + COACH_ATTACK_SKIP, clarity);
   for (let k = 0; k < rs.length; k++){
     st.lastPitchT = rs[k].t;
     if (rs[k].midi == null) continue;
@@ -7312,6 +7321,46 @@ function rnwWhere(n){
   return n.fret === 0 ? t('games.wait.stringOpen', {string}) : t('games.wait.stringFret', {string, fret: n.fret});
 }
 
+/* The pitches that answer token n (2026-10-12). A token labelled as a
+   power chord ('A5', 'G5', 'F5' — Watchtower) says "Play A5", so a
+   student strums the power chord: the root plus the fifth (and often the
+   octave) on two or three strings. Until now only the root counted, and
+   YIN reads a strum like that as the root, the fifth, the octave or
+   nothing at all — A2 + E3 only repeats every 55 Hz, under
+   coachDetectPitch's 60 Hz floor. A synthetic strum registered 0 times
+   in 40, so the student saw nothing happen and had to Skip. Now a
+   power-chord token takes the root, the fifth or the octave; a
+   single-note token still takes only its exact note; and a note that is
+   none of them keeps the wrong-note hints.
+   The targets alone changed nothing: at the 0.22 gate YIN found NO pitch
+   in most strums. So these tokens read each window at 0.22 first and,
+   only when that finds nothing, again at 0.45 (RNW_POWER_CLARITY). A
+   clean single note still reads at 0.22, as before.
+   Why not 0.55 alone, the Coach's chord-mode gate? With a weak low
+   fundamental (a laptop mic) it read a single root an octave sharp, so a
+   right note got a "wrong note" hint (7 of 60). It also counted a note
+   one fret low as right (31 of 60), and an open low E as A5 (50 of 60).
+   A second tier of 0.5 or 0.55 gave right strums false "wrong" hints
+   (9 and 19 of 60). The 0.22-then-0.45 pair counted no wrong note right
+   and gave no false hint in any quiet-room case tried. A strum counted
+   first time, quiet / one loud neighbour / classroom (tune.mjs's rooms):
+   0 / 1 / 1% before, 100 / 56 / 83% now. The cost: in those loud rooms a
+   neighbour's note on the fifth or octave now and then answers for a
+   wrong note (about 1 in 100, from 0).
+   Still missed: with strong low fundamentals, a two-string root+fifth,
+   and a strum whose root string is quietest, still read as nothing. They
+   stay silent, as before, and never get a wrong hint.
+   ALL of this is synthetic audio (tools/mic-sim's approach, 2026-10-12),
+   NOT a real guitar through a Chromebook mic. Check it with the console's
+   Mic recordings before tuning it further. */
+const RNW_POWER_RE = /^[A-G][#b]?5$/;
+const RNW_POWER_CLARITY = [0.22, 0.45];
+function rnwIsPower(n){ return !!n && RNW_POWER_RE.test(n.label || ''); }
+function rnwTargets(n){
+  if (!n) return null;
+  return rnwIsPower(n) ? [n.midi, n.midi + 7, n.midi + 12] : [n.midi];
+}
+
 async function rnwStart(){
   const song = RN_SONGS[rn.songIdx];
   const body = rnBody();
@@ -7431,7 +7480,9 @@ function rnwLoop(){
        silence IS the pluck. Readings wait out COACH_ATTACK_SKIP from there,
        same guard the Coach and Note Runner use from their onset timestamp. */
     if (!w.attackT) w.attackT = Math.max(coachOnsetAt, w.cooldownUntil);
-    const m = coachSettlePitch(w, w.notes[w.cur] ? [w.notes[w.cur].midi] : null, rms, w.cooldownUntil);
+    const n = w.notes[w.cur];
+    const m = coachSettlePitch(w, rnwTargets(n), rms, w.cooldownUntil,
+                               rnwIsPower(n) ? RNW_POWER_CLARITY : undefined);
     if (m != null) rnwJudge(m);
   } else {
     if (rms < COACH_PITCH_GATE * 0.5){
@@ -7450,7 +7501,7 @@ function rnwJudge(midi){
   w.needSilence = true;
   w.cooldownUntil = performance.now() + 350;
   w.tries++;
-  if (midi === n.midi){                      // correct note — advance
+  if (rnwTargets(n).indexOf(midi) >= 0){     // correct note (or power-chord tone) — advance
     n.result = w.tries === 1 ? 'first' : 'ok';
     if (w.tries === 1) w.firstTry++;
     /* No note playback: at tempo the student is already playing it, so the

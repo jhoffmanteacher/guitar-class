@@ -13,6 +13,16 @@ tuning pass — ideally on the real classroom recordings the teacher console's
   6–10 quieter ones over a din), five students (right, wrong, mixed,
   soft-after-loud, soft). Runs on 4 worker threads. The numbers in
   `coachSettlePitch`'s comments come from here.
+- `power-wait.mjs <coach.js> [trials] [--harm=std|mid|weak] [--only=…]
+  [--clarity=…]` — Riff Runner Wait Mode on Watchtower's power-chord tokens
+  (A5/G5/F5): one synthetic strum or wrong note in a quiet room through the
+  real settle code and the file's own accept rule (`rnwTargets`), so an old
+  coach.js gives the before and the current one the after. The numbers in
+  the `rnwTargets` comment come from here. The loud-room figures there come
+  from a scratch copy of `tune.mjs` (not kept) that does three things
+  differently: prompts 41/43/45 only, the student's pluck is the chord
+  shape, and the settle call is given `[t, t+7, t+12]` and
+  `RNW_POWER_CLARITY`.
 - `smoke.mjs <url>` — headless Chromium through the Dev bypass with the
   in-page harness: Coach, Note Runner, Note Hunt, Note Call, Change Up, PSG
   Hero, the consent prompt and the recording path. Start a static server on
