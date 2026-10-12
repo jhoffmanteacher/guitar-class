@@ -3564,6 +3564,13 @@ function resumeGoModule(setId, tab){
      covering page first, same as the rail's own station rows do. */
   leaveTopPanelForSet();
   switchTabById(setId, tab);
+  /* That close finishes on a popstate, and caClosePanel then put focus on
+     the rail's In class button — a screen-reader user who pressed Continue
+     heard nothing about the set. Hide the page now, without that refocus (the
+     router's own close is then a no-op), and focus the panel that opened. */
+  caClosePanel(true);
+  const panel = document.getElementById(`${setId}-${tab}`);
+  if(panel){ panel.setAttribute('tabindex', '-1'); panel.focus({ preventScroll: true }); }
 }
 function resumeGoSong(url){
   dismissResumeCard();
@@ -10708,12 +10715,14 @@ function closeClassActivitiesScreen(){
   if(exploreHashBase(location.hash) === '#class-activities'){ exitExploreHash(); return; }  // the router finishes the job
   caClosePanel();
 }
-function caClosePanel(){
+function caClosePanel(keepFocus){
   const screen = document.getElementById('class-activities-screen');
   const wasOpen = screen && !screen.hasAttribute('hidden');
   if(screen) screen.setAttribute('hidden', '');
   const btn = document.getElementById('class-activities-btn');
-  if(btn && wasOpen) btn.focus();   // return focus to where the page was opened
+  // Return focus to where the page was opened — unless the caller is moving
+  // it somewhere itself (resumeGoModule focuses the set it opened).
+  if(btn && wasOpen && keepFocus !== true) btn.focus();
   /* A Shuffle Drill in an activity step keeps its countdown interval (and any
      pending "next card" timeout) running once this screen is merely hidden —
      nothing rebuilds it on the way out. Same teardown, and same reasoning, as
@@ -13200,7 +13209,8 @@ function appIsOnScreen(){
 function classConfigSignature(){
   return JSON.stringify([activityDates, activityBoard, activityBoardOn, hiddenActivityIds,
     retiredActivityIds, activityClears, optionalActivityIds, playAlongActivityIds, activityPins, activityTitles,
-    activityNumbers, periodOverride, moduleOpenThrough]);
+    activityNumbers, periodOverride, moduleOpenThrough,
+    gamesAccessOn]);   // the free-play hero's Games button follows it
 }
 document.addEventListener('visibilitychange', () => {
   /* The snippet loop is closed by rAF (snipTick), and rAF stops firing in a

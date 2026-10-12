@@ -9056,18 +9056,24 @@ function bcTimerTick(){
 }
 
 function bcKeydown(e){
-  if (e.repeat) return;
-  if (!bc || bc.phase !== 'play' || bc.locked) return;
+  if (e.key !== 'Enter') return;
+  if (!bc || bc.phase !== 'play') return;
   const tag = (e.target && e.target.tagName) || '';
   if (tag === 'INPUT' || tag === 'TEXTAREA' || tag === 'SELECT') return;
-  /* Enter on a focused control is that control's own press — the browser
-     fires its click (Check / Next / Show me included). Grading here too
-     would score a half-built shape every time a keyboard student pressed
-     Enter on a fret cell. Only Enter with nothing pressable focused is ours. */
-  if (e.target && e.target.closest && e.target.closest('button,a,[role="button"]')) return;
-  if (e.key === 'Enter'){
-    if (bc.revealed) bcNextBtn(); else bcCheck();
-  }
+  const el = e.target && e.target.closest ? e.target : null;
+  /* Enter on a GRID square or string circle means "check", same as with
+     nothing focused. Chrome focuses a button on click and bcRenderGrid puts
+     focus back on the tapped square, so a trackpad student who builds the
+     shape and presses Enter (as the tip says) is focused on a square — left
+     alone, Enter would fire that square's click and take the finger off.
+     preventDefault cancels that click; keyboard students place fingers with
+     Space, which still clicks. The action buttons (Check / Next / Show me)
+     and links keep their own Enter-click — grading here too would count
+     the press twice. */
+  if (el && el.closest('.bc-cell,.bc-head')) e.preventDefault();
+  else if (el && el.closest('button,a,[role="button"]')) return;
+  if (e.repeat || bc.locked) return;
+  if (bc.revealed) bcNextBtn(); else bcCheck();
 }
 
 /* A missed chord is due again 2–3 chords later; otherwise random from the

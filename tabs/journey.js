@@ -1074,10 +1074,13 @@ window.addEventListener('load', function(){
     // before this point belongs to nobody we can write for, and must NOT be
     // held for whoever signs in next.
     if(!user){
+      var wasSettled = authSettled;
       authSettled = true; pendingSave = false; setSaveMsg('journey.signin');
-      // The student who was here is gone: forget them and clear their ✓s,
-      // or the next sign-in's first click saves them into the wrong doc.
-      fbUser = null; dirty = false; resetReadyUi();
+      // A real sign-OUT: the student who was here is gone — forget them and
+      // clear their ✓s, or the next sign-in's first click saves them into the
+      // wrong doc. Not on the first boot-time answer: ticks a signed-out
+      // student made before Firebase answered stay on screen, session-only.
+      if(wasSettled){ fbUser = null; dirty = false; resetReadyUi(); }
       if(typeof lqStopListening === 'function') lqStopListening();
       return;
     }
