@@ -217,6 +217,12 @@ h1{font-family:var(--font-display);font-size:1.875rem;font-weight:650;margin:4px
 #fab-buttons .fab svg{width:18px;height:18px}
 #fab-buttons .fab>span{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);clip-path:inset(50%);white-space:nowrap}
 #fab-buttons .fab-track{width:44px;padding:0;justify-content:center;border-radius:50%;font-size:1rem}
+/* The popups sit above that stack of five icons (about 234px of fixed
+   group below them), so on a 1366x657 Chromebook the Metronome (Tempo
+   ladder open) and the Tuner ran off the top of the screen — title, close
+   button, BPM and slider out of reach. Cap them to the room left and
+   scroll inside. Journey-only, for the same 1t2 reason as above. */
+#fab-group .tool-popup{max-height:calc(100vh - 250px);overflow-y:auto}
 /* No visual playing state by design — the pill always shows ▶ and keeps the
    same look; aria-pressed is maintained for assistive tech only. */
 footer{margin-top:36px;font-size:0.7813rem;color:var(--text3);border-top:1px solid var(--border);padding-top:14px}

@@ -904,6 +904,21 @@ function applyReady(saved){
   }
 }
 
+/* Clears every readiness checkbox and chip. Called when the signed-in
+   student goes away (sign-out) or changes (shared Chromebook): applyReady
+   only repaints layers the NEXT student has saved, so without this the
+   previous student's ✓s stay in the DOM and the next click's flushSave
+   (which reads currentReady() off the DOM) writes them into the new
+   student's doc. */
+function resetReadyUi(){
+  document.querySelectorAll('.ready-box').forEach(function(box){
+    box.checked = false;
+    paintChip(box.closest('.layer'), false);
+  });
+  locallyClickedLayers = {};
+  updateProgressPill();
+}
+
 /* Save-status line — takes an I18N key (or '' to clear) and tags the element
    with data-i18n so a language switch re-translates whatever is showing. */
 function setSaveMsg(key){
@@ -1045,7 +1060,14 @@ function loadFirestoreSdk(){
 }
 
 window.addEventListener('load', function(){
-  if(typeof firebase === 'undefined' || typeof firebaseConfig === 'undefined') return;
+  if(typeof firebase === 'undefined' || typeof firebaseConfig === 'undefined'){
+    /* The Firebase scripts themselves were blocked or offline — same
+       outcome as a failed Firestore SDK load below: nothing can ever be
+       written, so latch sdkFailed and tell a click that is already waiting. */
+    sdkFailed = true;
+    if(pendingSave){ pendingSave = false; setSaveMsg('journey.saveFailed'); }
+    return;
+  }
   firebase.initializeApp(firebaseConfig);
   firebase.auth().onAuthStateChanged(function(user){
     // A signed-out resolution still settles the boot race: anything rated
@@ -1053,6 +1075,9 @@ window.addEventListener('load', function(){
     // held for whoever signs in next.
     if(!user){
       authSettled = true; pendingSave = false; setSaveMsg('journey.signin');
+      // The student who was here is gone: forget them and clear their ✓s,
+      // or the next sign-in's first click saves them into the wrong doc.
+      fbUser = null; dirty = false; resetReadyUi();
       if(typeof lqStopListening === 'function') lqStopListening();
       return;
     }
@@ -1061,7 +1086,7 @@ window.addEventListener('load', function(){
     // into this one's doc, and clear the local-click guard so the read below
     // can repaint what THIS student actually saved.
     if(authSettled && fbUser && fbUser.uid !== user.uid){
-      pendingSave = false; dirty = false; locallyClickedLayers = {};
+      pendingSave = false; dirty = false; resetReadyUi();
     }
     var firstResolution = !authSettled;
     authSettled = true;
