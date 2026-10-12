@@ -3812,6 +3812,24 @@ function teacherBarFillHtml(got,working,total,extraClass){
       <div class="stu-fill-work" style="left:${got/t*100}%;width:${working/t*100}%"></div>
     </div>`;
 }
+/* The label at the right end of a student's bar: the furthest module they've
+   started, then skills FINISHED ("I've got it!", the green fill) out of the
+   whole course. "Still working on it" skills are the amber fill and are NOT
+   in the number. One helper for the roster row and the student's own page so
+   the two can't disagree again: until 2026-10-12 the roster counted finished
+   only (since a838c60) while the page added the amber ones, so the same
+   student read "34 / 120" on one screen and "41 / 120" on the other, and
+   neither said which. The cell keeps its width (--rightcol, 110px / 78px on
+   a phone); the meaning goes in the title and in the captions under the
+   bars. `tally.total` (got + working) is still what "Not started yet" and
+   "Furthest along" test — that is "touched anything", not this count. */
+function teacherStudentCountHtml(tally, universe){
+  const tip=[`Finished: ${tally.got} of ${universe.total} skills marked "I've got it!" (green).`];
+  if(tally.working) tip.push(`Not counted: ${tally.working} still being worked on (amber).`);
+  if(tally.furthest) tip.push(`M${tally.furthest} is the furthest module they've started.`);
+  const mod=tally.furthest===0?'&mdash;':'M'+tally.furthest;
+  return `<div class="stu-right" title="${escAttr(tip.join(' '))}"><span class="stu-mod">${mod}</span><span class="stu-count">${tally.got} / ${universe.total}</span></div>`;
+}
 function renderTeacherStudents(){
   const box=document.getElementById('t-grid-container');
   if(allStudents.length===0){ box.innerHTML='<div class="t-loading">No student data yet — students need to sign in and check off skills first.</div>'; return; }
@@ -3836,19 +3854,16 @@ function renderTeacherStudents(){
     : `<div class="t-scard-val">&mdash;</div>`;
   const scard=`<div class="t-summary" style="margin-top:0">
       <div class="t-scard"><div class="t-scard-lbl">Students</div><div class="t-scard-val">${studentsCount}</div></div>
-      <div class="t-scard"><div class="t-scard-lbl">Class average</div><div class="t-scard-val">${avgPct}%</div></div>
+      <div class="t-scard" title="Average share of the course's skills each student has finished. Skills still being worked on are not counted."><div class="t-scard-lbl">Class average</div><div class="t-scard-val">${avgPct}%</div></div>
       <div class="t-scard"><div class="t-scard-lbl">Furthest along</div>${furthestVal}</div>
       <div class="t-scard"><div class="t-scard-lbl">Not started yet</div><div class="t-scard-val">${notStarted}</div></div>
     </div>`;
   const rowsHtml=rows.map(({stu,tally})=>{
     const displayName=stu.name||stu.email||stu.uid.slice(0,8)+'…';
-    const rightLbl = tally.furthest===0
-      ? `<span class="stu-mod">&mdash;</span><span class="stu-count">0 / ${universe.total}</span>`
-      : `<span class="stu-mod">M${tally.furthest}</span><span class="stu-count">${tally.got} / ${universe.total}</span>`;
     return `<button type="button" class="stu-row" data-open-student data-uid="${escAttr(stu.uid)}">
         <div class="stu-name" title="${escAttr(displayName)}">${escHtml(displayName)}${teacherPeriodPillHtml(stu)}${teacherOpenThroughPillHtml(stu)}${teacherBlockedBadgeHtml(stu)}</div>
         ${teacherBarFillHtml(tally.got,tally.working,universe.total)}
-        <div class="stu-right">${rightLbl}</div>
+        ${teacherStudentCountHtml(tally, universe)}
       </button>`;
   }).join('');
   box.innerHTML = `${scard}
@@ -3861,7 +3876,7 @@ function renderTeacherStudents(){
         </div>
       </div>
     </div>
-    <div class="tr-meta" style="margin-top:10px">Each bar spans the full 13-module course. Tick marks are module boundaries. Click a student to see their work.</div>`;
+    <div class="tr-meta" style="margin-top:10px">Each bar spans the full 13-module course. Tick marks are module boundaries. Green is skills finished; amber is skills still being worked on. On the right: the furthest module started, then skills finished out of the whole course — "M5 34 / ${universe.total}" means 34 finished, with Module 5 the furthest started. Amber skills are not in that number. Click a student to see their work.</div>`;
 }
 
 function renderTeacherStudentDetail(uid){
@@ -4021,6 +4036,16 @@ function renderTeacherStudentDetail(uid){
        </tbody></table></div>`
     : '';
 
+  // Says in words what the number beside the bar is (teacherStudentCountHtml:
+  // finished only, the same number as this student's roster row). The
+  // Module-by-module rows further down deliberately count finished AND still
+  // working, so with any amber skills they add up to more than this — say so
+  // here rather than leave two totals on one page that don't match.
+  const countCaption = tally.total===0
+    ? 'No skills started yet.'
+    : `Finished: ${tally.got} of ${universe.total} skills (green).`
+      +(tally.working?` Still working on ${tally.working} more (amber) — not counted in the ${tally.got}. The Module-by-module progress rows below count both.`:'');
+
   box.innerHTML = `
     ${back}
     <div class="stu-detail-name">${escHtml(displayName)}${teacherPeriodPillHtml(stu)}${teacherBlockedBadgeHtml(stu)}</div>
@@ -4035,10 +4060,11 @@ function renderTeacherStudentDetail(uid){
           <div style="display:grid;grid-template-columns:var(--namecol) 1fr var(--rightcol);column-gap:var(--gap);align-items:center">
             <div></div>
             ${teacherBarFillHtml(tally.got,tally.working,universe.total,'stu-big-track')}
-            <div class="stu-right">${tally.furthest===0?'<span class="stu-mod">&mdash;</span>':'<span class="stu-mod">M'+tally.furthest+'</span>'}<span class="stu-count">${tally.total} / ${universe.total}</span></div>
+            ${teacherStudentCountHtml(tally, universe)}
           </div>
         </div>
       </div>
+      <div class="tr-meta" style="margin:6px 0 0">${countCaption}</div>
     </div>
 
     <div class="stu-section-head" style="margin-top:0">Written responses</div>
