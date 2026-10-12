@@ -565,7 +565,12 @@ nobody can enforce:
   that **no distractor shares the phrase** — a phrase the distractors also use
   is vocabulary, not a tell. An allowlist entry excuses the **card**, not the
   phrase, because a leaking answer usually overlaps its card in several places
-  and a per-phrase exception would just surface the next one.
+  and a per-phrase exception would just surface the next one. Since
+  2026-10-12 a 1–2-word keyed answer is matched whole (it has no 3-word
+  n-gram), excused when the card also names one of the alternatives
+  ("Tell major from minor"), and Roman numerals keep their case. Its known
+  blind spot: a card that prints a whole lookup table ("Am fret 5 … Dm
+  fret 10") names the alternatives too — read those by eye.
 
 Every allowlist entry is in Modules 1–6, which that sweep did not cover. They
 are carried deliberately, not tuned away; when a module gets swept, delete its
@@ -576,8 +581,14 @@ entries first and let the check say what is left.
 `choices` is an array a `field: '...'` regex cannot see into at all — so a
 banned phrase in an answer choice shipped while the identical phrase in its
 `explain` failed the push. Widened 2026-09-20 (it caught a real one in
-`module-9.js` the same day). **A new authoring field needs adding to
-`FIELD_RE`, and a new array field needs its own sweep beside `CHOICES_RE`.**
+`module-9.js` the same day). Since 2026-10-12 1w and 1w-t read through one
+bracket-walking reader (`readFieldStrings` in checks.mjs) that sees every
+quote style, template literals, and every element of a multi-line array
+(`choices`, `assessItems`, exit-check `items`) — the single-line regexes
+had missed ~50 multi-line `choices` arrays. **A new authoring field needs
+adding to `STUDENT_VALUE_NAME_RE`; an array field needs nothing more.** 1w-t
+also reads Spanish now (`TEACHER_PHRASES_ES`: "es normal", "no te
+preocupes", "está bien si", a sentence-final "tú puedes").
 
 The three Module 1 Set 2 graded-MC rewords, the `m2w2·c` 4-bar melody section
 title, and `ca-14`'s Happy Birthday exit check are all frozen mid-year fixes —
