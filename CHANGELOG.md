@@ -5,6 +5,40 @@ Notable changes to the Guitar Class site. Newest first.
 For the full session-by-session history (and the reasoning behind each change),
 see `WORKFLOW.md` and the git commit log.
 
+## 2026-10-12 — Site check: fixes across the whole site
+
+- **"Continue" on the resume card now opens your set.** Before, it only
+  closed the card.
+- **Shared Chromebooks.** When one student signs out and another signs in,
+  the first student's checks no longer stay on the screen or get saved to the
+  next student. This covers the lesson pages and the Song Journey pages.
+- **Sign out waits for your last save.** A slow connection no longer loses
+  your last tick or leaves Sign out stuck.
+- **Practice cards.** The directions about speed now match the slider you see
+  ("move it one stop left", "slide the speed all the way right, to Normal").
+  The dots that count your plays show up in "Practice this" again.
+- **"Print this set" button** looks like a button again.
+- **Phone and split-screen layout.** The top bar is shorter, "All steps" no
+  longer goes off the screen in Spanish, steps use the full width, and the
+  drill header fits.
+- **Song Journey pages.** The Metronome and Tuner windows fit on a Chromebook
+  screen. Layer tabs highlight the top note of every power chord. Small
+  fixes to "the cure" (the check tempo is 70 BPM), "Luna", and the Spanish.
+- **Tuner** reads each string exactly (it was up to 5 cents off).
+- **Games.** Build-a-Chord: Enter now checks your shape. Change Up saves your
+  best score when you press Stop after the last chord. Ear drills and Note
+  Call no longer play into the Listening Coach mic. Daily Review does not
+  give its bonus early.
+- **Exit checks.** A fast double tap no longer answers the next question too.
+- **Search** works again right after you switch language.
+- **Spanish.** "Acorde de potencia" everywhere, "mi aguda" for the high e
+  string, "canción principal" for Core songs, and a handful of word fixes.
+- **Modules 6–13.** "the cure" and "Let It Be" fingerstyle tabs now show the
+  eight-note pattern the card teaches. Module 12 and 13 directions are
+  clearer. Many quiz hints no longer give away the answer. Several
+  directions that talked about a partner, or about things the site does not
+  teach, were rewritten.
+
 ## 2026-10-11 — Bigger Keep practicing cards, true full screen
 
 - **More room to read.** The strip at the bottom of the page is gone. "Report a
