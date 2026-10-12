@@ -34,6 +34,25 @@ var userInteracted = false;
 if('scrollRestoration' in history) history.scrollRestoration = 'manual';
 window.scrollTo(0, 0);
 window.addEventListener('load', function(){ window.scrollTo(0, 0); });
+/* The scrollTo calls above could not beat a BARE '#layer-N' (2026-10-12).
+   That hash is also the layer's element id, so the browser jumps to it on
+   its own, and Chrome does that only once parsing has finished (after
+   every deferred script, so after this file) and re-applies it until
+   load. A scrollTo(0, 0) made while the page is still at 0 moves nothing,
+   so it never cancels the jump: the-cure.html#layer-3 opened at y=793,
+   luna.html#layer-4 at 819. '#layer-N&from=...' always opened at the top
+   because no element has that id. So: while parsing is still going on,
+   end a hash that names an element with '&' — the separator hashParts()
+   already splits on, so 'layer-N' still picks the open layer — and the
+   browser has nothing to jump to. Covers every bare '#layer-N' link,
+   including the hand-written ones in module step text. Needs this file to
+   load at the end of <body> (it does on all six pages), so the layer
+   elements exist when it looks for them. */
+(function(){
+  var h = (location.hash || '').slice(1);
+  var id; try { id = decodeURIComponent(h); } catch(e){ id = h; }
+  if(h && history.replaceState && document.getElementById(id)) history.replaceState(history.state, '', '#' + h + '&');
+})();
 
 /* Spanish toggle — hand-written translations, no Google Translate.
    Every translatable element in a Journey page carries a data-es attribute
@@ -119,7 +138,8 @@ function firstUnreadyLayer(){
    'layer-N' (which layer to open) and 'from=<hash without #>' (where on
    the class site the student came from — e.g. class-activities/ca-20).
    hashLayerId() is the first; journeyFrom() the second. Only ever read,
-   never rewritten, so the site's own links keep working unchanged. */
+   with one exception: a bare '#layer-N' gets a trailing '&' at load (see
+   the top of this file), which neither reader notices. */
 function hashParts(){
   return (location.hash || '').replace('#', '').split('&');
 }

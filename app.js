@@ -3731,7 +3731,7 @@ function resumeGoModule(setId, tab){
 }
 function resumeGoSong(url){
   dismissResumeCard();
-  window.open(url, '_blank', 'noopener');
+  window.open(journeyHref(url, 0, journeyFromHere()), '_blank', 'noopener');
 }
 
 function renderPills(moduleNum){
@@ -5523,7 +5523,7 @@ function songTypeLabel(type, core){
    routes through this so the kind dispatch and subtitles can't drift. */
 function openSongVid(s, kind){
   if(!s) return;
-  if(kind==='journey'){ if(s.journeyUrl) window.open(journeyHref(s.journeyUrl, 0, location.hash === '#songs' ? 'songs' : ''), '_blank', 'noopener'); return; }
+  if(kind==='journey'){ if(s.journeyUrl) window.open(journeyHref(s.journeyUrl, 0, journeyFromHere()), '_blank', 'noopener'); return; }
   if(kind==='original'){ if(s.originalUrl) window.open(s.originalUrl, '_blank', 'noopener'); return; }
   if(kind==='backing'){ if(s.backingUrl) loadPanel(/\.(mp3|m4a|ogg|wav)(\?|$)/i.test(s.backingUrl)?'audio':'youtube', s.backingUrl, tf(s, 'name'), t('songs.backingTrackHint')); return; }
   if(s.tutorialUrl) loadPanel('youtube', s.tutorialUrl, tf(s, 'name'), t('songs.tutorial'));
@@ -10185,7 +10185,7 @@ function openSongLink(slug, layer){
   const a = layer ? songsPlayAlongCard(slug, layer) : null;
   if(a){ songsHubOpenCard(a.id); return; }
   const sg = SONG_JOURNEYS.find(s => s.id === slug);
-  if(sg) window.open(journeyHref(sg.url, layer ? Number(layer) : 0, ''), '_blank', 'noopener');
+  if(sg) window.open(journeyHref(sg.url, layer ? Number(layer) : 0, journeyFromHere()), '_blank', 'noopener');
 }
 function songsPlayAlongBtn(slug){
   const a = songsPlayAlongCard(slug);
@@ -11584,6 +11584,12 @@ function journeyHref(url, layer, from){
   if(from) parts.push(`from=${encodeURIComponent(from)}`);
   return url + (parts.length ? '#' + parts.join('&') : '');
 }
+/* The `from` for a Journey link opened from wherever the student is now:
+   the page's own hash without the '#' — 'songs', 'class-activities',
+   'class-activities/ca-20' — so "Back to class site" lands back on it
+   (2026-10-12). '' on the practice view, which needs no address: the bare
+   site reopens the last set by itself (lastSet). */
+function journeyFromHere(){ return (location.hash || '').slice(1); }
 function caJourneyLinkHtml(a){
   const url = caJourneyUrl(a);
   if(!url) return '';
