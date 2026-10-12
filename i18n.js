@@ -677,6 +677,12 @@
     'save.saved':            { en: 'Saved ✓', es: 'Guardado ✓' },
     'save.failed':           { en: 'Save failed — check connection', es: 'No se pudo guardar — revisa tu conexión' },
     'save.notSaving':        { en: 'Not saving — check connection', es: 'No se está guardando — revisa tu conexión' },
+    // Sign out / the error banner's Refresh with work still unsaved after the
+    // bounded wait (showUnsavedNotice / the safety-net banner in app.js).
+    'save.notSavedYet':      { en: 'Not saved yet — reconnect to the internet first, then try again.',
+                               es: 'Todavía no se guardó — primero vuelve a conectarte a internet y luego inténtalo otra vez.' },
+    'save.signOutAnyway':    { en: 'Sign out anyway', es: 'Cerrar sesión de todos modos' },
+    'save.refreshAnyway':    { en: 'Refresh anyway', es: 'Actualizar de todos modos' },
 
     // ── Offline banner (app.js, near the top) ──
     'offline.body':          { en: "You're offline — practice pages still work; videos and saving resume when you reconnect.",

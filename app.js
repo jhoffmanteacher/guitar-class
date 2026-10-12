@@ -31,7 +31,31 @@ if('scrollRestoration' in history) history.scrollRestoration = 'manual';
       refresh.textContent = t('err.refresh');
       refresh.style.cssText = 'margin-left:4px;padding:3px 12px;border:0;border-radius:14px;'
         + 'background:#fff;color:#514a7d;font-weight:600;cursor:pointer';
-      refresh.onclick = () => location.reload();
+      /* A save still unsent when Refresh is pressed (2026-10-12) used to be
+         dropped by the reload without a word. Send it first, bounded like
+         Sign out (flushBeforeLeaving); if it still hasn't landed, say so and
+         make the button "Refresh anyway". Anything going wrong in here — the
+         error that raised this banner may have come before the save code
+         even loaded — falls back to the plain reload. */
+      let anyway = false;
+      refresh.onclick = () => {
+        let pending = false;
+        try { pending = !anyway && hasUnsavedWrites(); } catch(_) {}
+        if (!pending) { location.reload(); return; }
+        refresh.disabled = true;
+        refresh.setAttribute('data-i18n', 'save.saving');
+        refresh.textContent = t('save.saving');
+        flushBeforeLeaving(4000).then(saved => {
+          if (saved) { location.reload(); return; }
+          anyway = true;
+          refresh.disabled = false;
+          msg.setAttribute('data-i18n', 'save.notSavedYet');
+          msg.textContent = t('save.notSavedYet');
+          refresh.style.marginLeft = '8px';
+          refresh.setAttribute('data-i18n', 'save.refreshAnyway');
+          refresh.textContent = t('save.refreshAnyway');
+        }).catch(() => location.reload());
+      };
       const close = document.createElement('button');
       close.setAttribute('data-i18n-attr', 'aria-label:offline.dismiss');
       close.setAttribute('aria-label', t('offline.dismiss'));
@@ -460,20 +484,86 @@ function signIn(){
         auth hook at all). Reloading clears the lot in one move and can't drift
         out of sync the way an ever-growing manual reset list does. */
 let _signOutReloading = false;   // signOut() reloads itself — the auth listener's cross-tab reload stands aside
-async function signOut(){
+let _signOutBusy = false;        // a second click during the bounded wait is not a second sign-out
+async function signOut(anyway){
+  if(_signOutBusy) return;
+  _signOutBusy = true;
   _signOutReloading = true;
   /* A write already in flight empties the dirty set, so flushSave() alone
      would return at once and the reload below would drop it — wait for that
-     one first, then flush whatever is left. Bounded: on a network that
+     one first, then flush whatever is left. Bounded (4 s): on a network that
      accepts the connection and then stalls, set() never settles, and Sign
-     out must still sign out. */
-  try {
-    clearTimeout(saveTimer);
-    await withTimeout((async()=>{ if(_flushP) await _flushP; await flushSave(); })(), 4000);
-  } catch(e){}
+     out must still sign out. See flushBeforeLeaving. "Sign out anyway"
+     skips the wait: the student has just been told, and a second silent
+     4 s would read as the button not working. */
+  const saved = anyway ? false : await flushBeforeLeaving(4000);
+  /* Still not saved when the wait ran out (offline, or a stalled write):
+     reloading now would throw that work away without a word. Say so and
+     stay signed in — Firestore keeps the write queued and sends it by
+     itself on reconnect. "Sign out anyway" is the way out for a shared
+     Chromebook that has to move on to the next student. */
+  if(!saved && !anyway && currentUser){
+    _signOutReloading = false;
+    _signOutBusy = false;
+    showUnsavedNotice('save.signOutAnyway', () => signOut(true));
+    return;
+  }
   try { sessionStorage.clear(); } catch(e){}
   try { if(auth) await auth.signOut(); } catch(e){}
   location.reload();
+}
+/* Is any of the student's work not yet confirmed by Firestore? A category
+   still dirty (inside queueSave's 800 ms debounce, waiting out a retry, or
+   put back by a failed write) or a write still on the wire (_flushP). */
+function hasUnsavedWrites(){
+  return _dirtyKeys.size > 0 || !!_flushP;
+}
+/* Send what is pending now and wait for it, at most `ms` — the shared step
+   before anything that reloads the page (Sign out, the error banner's
+   Refresh). Resolves true when nothing is left unsaved. Never rejects.
+   flushSave() itself keeps every save rule (the failed-load drop, the
+   held-back categories); this only decides how long to wait. */
+async function flushBeforeLeaving(ms){
+  clearTimeout(saveTimer);
+  try {
+    await withTimeout((async()=>{ if(_flushP) await _flushP; await flushSave(); })(), ms);
+  } catch(e){}
+  return !hasUnsavedWrites();
+}
+/* "Not saved yet" with a way out — shown when a sign-out's bounded wait ends
+   with work still unsaved. Same look as the safety-net banner at the top of
+   this file, but at the TOP of the screen: offline is the usual reason, and
+   the offline banner already holds the bottom. */
+function showUnsavedNotice(anywayKey, onAnyway){
+  const old = document.getElementById('unsaved-notice');
+  if(old) old.remove();
+  const d = document.createElement('div');
+  d.id = 'unsaved-notice';
+  d.setAttribute('role', 'alert');
+  d.style.cssText = 'position:fixed;left:12px;right:12px;top:12px;z-index:99999;'
+    + 'max-width:520px;margin:0 auto;padding:12px 44px 12px 16px;border-radius:12px;'
+    + 'background:#514a7d;color:#fff;font:14px/1.45 system-ui,-apple-system,sans-serif;'
+    + 'box-shadow:0 6px 24px rgba(0,0,0,.28)';
+  const msg = document.createElement('span');
+  msg.setAttribute('data-i18n', 'save.notSavedYet');
+  msg.textContent = t('save.notSavedYet');
+  const go = document.createElement('button');
+  go.type = 'button';
+  go.setAttribute('data-i18n', anywayKey);
+  go.textContent = t(anywayKey);
+  go.style.cssText = 'margin-left:8px;padding:3px 12px;border:0;border-radius:14px;'
+    + 'background:#fff;color:#514a7d;font-weight:600;cursor:pointer';
+  go.onclick = () => { d.remove(); onAnyway(); };
+  const close = document.createElement('button');
+  close.type = 'button';
+  close.setAttribute('data-i18n-attr', 'aria-label:offline.dismiss');
+  close.setAttribute('aria-label', t('offline.dismiss'));
+  close.textContent = '×';
+  close.style.cssText = 'position:absolute;top:8px;right:12px;background:none;border:0;'
+    + 'color:#fff;font-size:1.25rem;line-height:1;cursor:pointer';
+  close.onclick = () => d.remove();
+  d.append(msg, go, close);
+  document.body.appendChild(d);
 }
 
 /* Which mode is this page in? Both flags live here, in the first script that
@@ -1349,6 +1439,10 @@ let _saveMsgT = null;
 // when the toggle is hit) re-resolves it instead of staying stuck in
 // whichever language it was first drawn in.
 function setSaveMsg(key, clearAfterMs){
+  /* "Saved ✓" only when nothing is left to send: a write that lands while a
+     newer change is still waiting out the debounce has not saved THAT one,
+     and the next flush will report it either way. */
+  if(key === 'save.saved' && _dirtyKeys.size){ key = 'save.saving'; clearAfterMs = 0; }
   clearTimeout(_saveMsgT);
   document.querySelectorAll('.save-ind').forEach(el=>{
     if(key){ el.textContent = t(key); el.setAttribute('data-i18n', key); }
@@ -4778,7 +4872,10 @@ function buildLesson(w){
     const statusIcon = isDone ? '&#x2713;' : String(num);
     if(isOpen) openNum = gnum;
     const curAttr = isCur ? ' aria-current="step"' : '';
-    return `<li class="step${isDone ? ' step-done' : ''}${isCur ? ' cur' : ''}${isOpen ? '' : ' collapsed'}"${skillsAttr} data-num="${num}">`
+    // data-key is the step's progress key, the same in both languages — the
+    // handle rebuildModuleContentPanels() uses to put the student back on
+    // this row after a language switch. Never a storage key of its own.
+    return `<li class="step${isDone ? ' step-done' : ''}${isCur ? ' cur' : ''}${isOpen ? '' : ' collapsed'}"${skillsAttr} data-num="${num}" data-key="${escAttr(doneKey)}">`
       + `<button type="button" class="step-head" aria-expanded="${isOpen}" onclick="toggleStepOpen(this)" aria-label="${escAttr(ariaLabel)}"${curAttr}>`
       + `<span class="step-status" aria-hidden="true">${statusIcon}</span>`
       + `<span class="step-label">${escHtml(label)}</span>`
@@ -8638,7 +8735,69 @@ document.addEventListener('DOMContentLoaded', syncTranslateBtn);
 // any _es fields available get picked up (a module still mid-translation
 // just falls back to English again, same as before this rebuild existed).
 // Cheap: only touches modules the student actually opened this session.
+/* What a rebuild would otherwise throw away (2026-10-12): bilingual students
+   flip the language often, and every flip used to put the ladder back on
+   the first not-done step, close an open Hint / Stuck? / Level up, close a
+   shown tab, and jump the scroll. Everything is addressed by the step's
+   data-key (its progress key) or a fold's id — both the same in either
+   language. Nothing here reads or writes progress. */
+function snapshotLessonState(panel){
+  const dp = panel.querySelector('.dp');
+  if(!dp) return null;
+  const steps = [...dp.querySelectorAll('li.step')];
+  return {
+    open: steps.filter(li => !li.classList.contains('collapsed')).map(li => li.dataset.key),
+    folds: [...dp.querySelectorAll('.step-fold-panel:not([hidden])')].map(p => p.id),
+    tabs: steps.flatMap(li => [...li.querySelectorAll('.tab-choice-btn')]
+      .map((b, n) => b.classList.contains('expanded') ? `${li.dataset.key}|${n}` : null).filter(Boolean)),
+    pdSeen: dp.dataset.pdSeen === '1',
+    pdShowing: dp.classList.contains('pd-showing'),
+  };
+}
+function restoreLessonState(panel, snap){
+  const dp = snap && panel.querySelector('.dp');
+  if(!dp) return;
+  const steps = [...dp.querySelectorAll('li.step')];
+  const byKey = new Map(steps.map(li => [li.dataset.key, li]));
+  /* Nothing open (list view with every row closed): leave the fresh
+     render's own choice — the first not-done step — as it always was. */
+  const open = snap.open.map(k => byKey.get(k)).filter(Boolean);
+  open.forEach((li, n) => expandStepEl(li, n > 0));
+  dp.querySelectorAll('.step-fold-pill').forEach(pill => {
+    if(snap.folds.includes(pill.getAttribute('aria-controls'))) toggleStepFold(pill);
+  });
+  steps.forEach(li => li.querySelectorAll('.tab-choice-btn').forEach((b, n) => {
+    if(snap.tabs.includes(`${li.dataset.key}|${n}`)) toggleTabChoice(b);
+  }));
+  if(snap.pdSeen) dp.dataset.pdSeen = '1';
+  if(snap.pdShowing && dp.classList.contains('focus')) dp.classList.add('pd-showing');
+}
+/* The row the student is reading in the open set: the open step if it is on
+   screen, else the first row showing below the top of the reading pane.
+   Restored by position, not by scrollTop — Spanish runs longer than English,
+   so the same scrollTop lands somewhere else after the switch. */
+function lessonScrollAnchor(){
+  const pane = scrollPane();
+  const y = paneScrollTop();
+  // An in-column page (Songs, My progress, In class) has the practice view
+  // swapped out — its place is already stashed in practiceScrollTop.
+  if(document.body.classList.contains('explore-open')) return null;
+  const tp = document.querySelector('#week-panels .week-panel.active .tab-panel.active');
+  const paneTop = pane === window ? 0 : pane.getBoundingClientRect().top;
+  const shown = tp ? [...tp.querySelectorAll('li.step')].filter(li => li.getClientRects().length) : [];
+  const onScreen = li => { const r = li.getBoundingClientRect(); return r.bottom > paneTop && r.top < window.innerHeight; };
+  const li = shown.find(s => !s.classList.contains('collapsed') && onScreen(s)) || shown.find(onScreen);
+  return { pane, y, key: li ? li.dataset.key : null, top: li ? li.getBoundingClientRect().top : 0 };
+}
+function restoreLessonScroll(a){
+  if(!a) return;
+  const tp = document.querySelector('#week-panels .week-panel.active .tab-panel.active');
+  const li = a.key && tp ? [...tp.querySelectorAll('li.step')].find(s => s.dataset.key === a.key) : null;
+  const to = li && li.getClientRects().length ? (a.pane === window ? window.scrollY : a.pane.scrollTop) + li.getBoundingClientRect().top - a.top : a.y;
+  a.pane.scrollTo({ top: to });
+}
 function rebuildModuleContentPanels(){
+  const anchor = lessonScrollAnchor();
   document.querySelectorAll('#week-panels .week-panel').forEach(panel=>{
     const wid = panel.dataset.id;
     const num = Number(panel.dataset.module);
@@ -8649,7 +8808,9 @@ function rebuildModuleContentPanels(){
       // student back to the lesson ladder.
       const activeEl = panel.querySelector('.tab-panel.active');
       const activeSuffix = activeEl ? activeEl.id.slice(wid.length+1) : null;
+      const lessonState = snapshotLessonState(panel);
       panel.innerHTML = w.comingSoon ? buildComingSoon(w) : buildSet(w);
+      restoreLessonState(panel, lessonState);
       if(activeSuffix && activeSuffix !== LESSON_TAB){
         const targetPanel = document.getElementById(`${wid}-${activeSuffix}`);
         if(targetPanel){
@@ -8674,6 +8835,7 @@ function rebuildModuleContentPanels(){
     const c = document.getElementById('week-panels');
     if(c) applyI18n(c);
   }
+  restoreLessonScroll(anchor);
 }
 window.addEventListener('gc-langchange', function(){
   // buildSearchIndex() now bakes in the CURRENT language via tf() — without
@@ -9710,14 +9872,16 @@ function switchTabById(wid, tab, keepScroll){
 /* Does any step in this set teach set-skill number n (and if so, in which
    half of the ladder)? Steps tag themselves with skills:[n] in the module
    data. The letter is now only used as a "yes, it's taught here" answer —
-   both halves render into the same panel. */
+   both halves render into the same panel.
+   Walks what the ladder RENDERS (lessonGroups → visibleSections, then
+   visibleSteps), not the raw arrays: a hidden step, a hidden section or a
+   take-to-song section showing its Journey card has no li.step for
+   showSkillLesson() to find, and counting it would draw a "Show me where"
+   button that does nothing. */
 function skillTaughtStation(w, n){
-  for(const st of ['b','c']){
-    const stn = w.stations && w.stations[st];
-    if(!stn) continue;
-    const sections = stn.sections || (stn.steps ? [{steps: stn.steps}] : []);
-    for(const sec of sections){
-      if((sec.steps || []).some(step => (step.skills || []).includes(n))) return st;
+  for(const g of lessonGroups(w)){
+    for(const {sec} of g.secs){
+      if(visibleSteps(sec, w.moduleNum).some(p => (p.st.skills || []).includes(n))) return g.id;
     }
   }
   return null;
@@ -13294,11 +13458,37 @@ document.addEventListener('visibilitychange', () => {
      its tempo up 8 notes at a time; a scored level marks each one a miss).
      coach.js's own handler stops it only when coach.js has loaded, and the
      default tap mode never loads it. */
-  if(document.hidden){ snipStop(); pcStop(); if(typeof ncStopAll === 'function') ncStopAll(); return; }
+  if(document.hidden){ snipStop(); pcStop(); if(typeof ncStopAll === 'function') ncStopAll(); flushOnHide(); return; }
   if(!currentUser || IS_TEACHER_MODE) return;
   const before = classConfigSignature();
-  loadClassConfig().then(() => { if(classConfigSignature() !== before) refreshOpenClassActivitiesScreen(); });
+  loadClassConfig().then(() => {
+    if(classConfigSignature() === before) return;
+    refreshOpenClassActivitiesScreen();
+    /* The search index holds one entry per VISIBLE activity (buildSearchIndex),
+       so an activity released while the tab was away stayed unfindable — and
+       an archived one stayed findable — until a language switch or reload.
+       Drop it; ensureSearchIndex() rebuilds on the next search, and an open
+       search re-runs what is in the box. */
+    searchIndex = null;
+    const input = document.getElementById('search-input');
+    const panel = document.getElementById('search-panel');
+    if(input && panel && !panel.hasAttribute('hidden') && input.value.trim().length >= 2) runSearch(input.value);
+  });
 });
+/* Save as the tab goes out of sight, not only on pagehide (2026-10-12).
+   Closing a Chromebook lid or switching apps hides the tab but often never
+   fires pagehide, so a step ticked inside queueSave's 800 ms debounce was
+   left waiting until the student came back — or lost with the tab. This
+   sends now what the debounce would have sent anyway: flushSave() takes the
+   dirty set with it (a pagehide straight after finds nothing and sends
+   nothing), keeps the failed-load drop (LOAD_FAILED_EMPTY_MAPS, 1bo), and
+   never sees the held-back categories — queueSave filters those before
+   they are ever dirty. Nothing dirty, nothing sent. */
+function flushOnHide(){
+  if(!currentUser || !_dirtyKeys.size) return;
+  clearTimeout(saveTimer);
+  flushSave();
+}
 // Shared "is In-Class Activities open, and if so re-render it" check — every
 // place that changes something the screen might already be showing (a period
 // pick, a language switch, a gate-clearing config reload) goes through this
