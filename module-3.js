@@ -1056,7 +1056,7 @@ MODULE_REVIEWS[3] = {
     'Lee una progresión de tres acordes (I–IV–V) a partir de símbolos de acorde / TAB con un patrón de rasgueo nombrado (corcheas rectas o el rasgueo dividido), y nombra acordes de potencia a partir de un diagrama de acordes',
     'Aplaude y cuenta un ritmo de 4 compases usando redondas, blancas, negras y corcheas'
   ],
-  forward: 'The E &amp; A string roots you slide between become your <strong>starting point for the pentatonic patterns in Module 5</strong> — that\'s where you\'ll play lead lines and solos over these very same power chords.',
-  forward_es: 'Las raíces de las cuerdas Mi &amp; La entre las que te deslizas se convierten en tu <strong>punto de partida para los patrones pentatónicos del Módulo 5</strong> — ahí es donde vas a tocar líneas melódicas y solos sobre estos mismos acordes de potencia.',
+  forward: '<strong>Module 4 teaches open chords</strong> — full chords that let open strings ring, like Am, C and G. You play "All Along the Watchtower" and "Sweet Child O\' Mine" again with them, on the same roots as your power chords. Then in Module 5, the E &amp; A string roots you slide between become the starting point for pentatonic scales (five-note scales) and your first solos.',
+  forward_es: '<strong>El Módulo 4 enseña acordes al aire</strong> — acordes completos que dejan sonar cuerdas al aire, como Am, C y G. Vuelves a tocar "All Along the Watchtower" y "Sweet Child O\' Mine" con ellos, sobre las mismas raíces que tus acordes de potencia. Después, en el Módulo 5, las raíces de las cuerdas Mi &amp; La entre las que te deslizas se convierten en el punto de partida para las escalas pentatónicas (escalas de cinco notas) y tus primeros solos.',
   standards: ['Pr.4a', 'Pr.5a', 'Pr.5b', 'Pr.6a', 'Re.7a']
 };
