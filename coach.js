@@ -1686,7 +1686,7 @@ let micRecSaving = Promise.resolve();
 function micRecMicName(label){
   return String(label || '')
     .replace(/^.*?['’]s\s+/i, '')
-    .replace(/\s+de\s+\p{Lu}[^\s()]*(?:\s+\p{Lu}[^\s()]*)*/u, '');
+    .replace(/\s+de\s+\p{Lu}[^\s()]*(?:\s+\p{Lu}[^\s()]*)*/gu, '');
 }
 function micRecSave(rec, meta){
   micRecSaving = micRecSaving.then(() => micRecSaveNow(rec, meta)).catch(() => {});

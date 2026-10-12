@@ -3929,11 +3929,15 @@ function micEvalTake(pcm, R, d, deps){
    keep the device, drop the owner. The Spanish strip needs a CAPITALISED
    word after "de" (case-sensitive, no i flag): Windows' own Spanish labels
    use a lower-case "de" phrase ("Matriz de micrófonos (Realtek…)") that is
-   the device, not a person. A trailing "(…)" device note is kept. */
+   the device, not a person. A trailing "(…)" device note is kept. EVERY
+   such run goes (g flag): macOS in Spanish labels a mic "Micrófono de
+   MacBook Pro de José Luis", and stripping only the first run left the
+   owner's name behind. The cost is "MacBook Pro" too — a capitalised
+   "de X" can't be told from a name. */
 function micEvalMicName(label){
   return String(label || '')
     .replace(/^.*?['’]s\s+/i, '')
-    .replace(/\s+de\s+\p{Lu}[^\s()]*(?:\s+\p{Lu}[^\s()]*)*/u, '');
+    .replace(/\s+de\s+\p{Lu}[^\s()]*(?:\s+\p{Lu}[^\s()]*)*/gu, '');
 }
 function micEvalDevice(d){
   const ua = String(d.userAgent || '');

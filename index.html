@@ -571,8 +571,10 @@
 <!-- coach.js (the games arcade + Listening Coach) and teacher.js (the
      ?teacher dashboard) are NOT loaded here: together they are 474 KB that
      most page loads never touch. app.js pulls each in on first use via
-     ensureCoachJs()/ensureTeacherJs() — see the comment there. Both stay
-     in the service worker precache, so the deferred fetch is a cache hit. -->
+     ensureCoachJs()/ensureTeacherJs() — see the comment there. coach.js
+     stays in the service worker precache, so its deferred fetch is a cache
+     hit; teacher.js is left out of it (sw.js ASSETS) and is cached on its
+     first fetch instead. -->
 <script defer src="live-quiz.js"></script>
 <!--
 ╔════════════════════════════════════════════════════════════════════╗

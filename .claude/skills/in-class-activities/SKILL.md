@@ -495,8 +495,9 @@ canonicalizes both to `#my-progress` before anything else runs (the gate
 check, the dedup guard, the scroll stash) — so an old bookmark or Journey
 link still resolves, onto the merged page. Mood Chart lost its rail button, and
 its row at the top of the Songs page was removed 2026-10-02 (Jonathan) —
-`mood-chart.html` still ships and is still precached, but nothing on the
-site links to it; don't add a link back without asking.
+`mood-chart.html` still ships (no longer precached since 2026-10-12 —
+`SHELL_NOT_PRECACHED` in checks.mjs), but nothing on the site links to it;
+don't add a link back without asking.
 
 **Phase 3 (render-time hiding), shipped 2026-09-12 — Module 2 piloted first
 (step 1), then the section-kind tagging rolled out to every other module

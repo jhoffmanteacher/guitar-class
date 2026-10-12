@@ -355,7 +355,7 @@ SETS.push(
         gotItWhen: 'you play all 16 bars of the verse with no stop at any chord change, two times in a row.',
         gotItWhen_es: 'tocas los 16 compases de la estrofa sin detenerte en ningún cambio de acorde, dos veces seguidas.',
         practice: { type: 'playSeq', label: 'Am bass + roll — "House of the Rising Sun" feel (6/8)', label_es: 'Bajo de Am + floreo — sensación de "House of the Rising Sun" (6/8)', bpm: 80,
-          notes: [45, 52, 57, 60, 64, 60] } }
+          notes: [45, 57, 60, 64, 60, 57] } }
     ]
   },
 

@@ -284,8 +284,12 @@ function loadModuleData(num){
    with ?teacher). On a school Chromebook's first visit that is most of the
    wait, and it is spent on code the student may never run.
 
-   Both are still precached by the service worker, so the deferred fetch is
-   a cache hit for anyone who has loaded the site before, online or off.
+   coach.js is still precached by the service worker, so its deferred fetch
+   is a cache hit for anyone who has loaded the site before, online or off.
+   teacher.js is NOT (2026-10-12 — sw.js ASSETS leaves it out so students
+   don't re-download it on every deploy; checks.mjs SHELL_NOT_PRECACHED):
+   the console's first load fetches it from the network, and the fetch
+   handler caches it from then on.
 
    Safe because every OTHER reference to these files across app.js is
    `typeof x === 'function'` guarded, and each of those is a teardown call
