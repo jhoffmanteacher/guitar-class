@@ -137,6 +137,10 @@
          { levelUp: true, text, text_es },               // last, exactly one;
          // slot: n (optional) keeps the tick key `<id>:c<n>` a check had
          // before earlier checks were removed (ca-25)
+         // card: 'ca-N' (optional, Level up only) — a button that opens that
+         // practice card. It renders only once the target is posted or set
+         // to Play Along now (caCardLinkHtml), so the text names the card
+         // with "once it is posted" / "cuando esté publicada" (2026-10-12)
        ],                                  // the only place the Song Journey
      }                                     // page may be named (its button
                                            // renders there)
@@ -269,20 +273,27 @@
          label:    'Tune it back',
          label_es: 'Vuelve a afinar',
          // text renders as TRUSTED HTML (same trust level as module step
-         // content — first-party authored files, not escaped). A step is a
-         // Learn step or a Practice step and asks for ONE thing (Jonathan,
-         // 2026-09-23). Learn: look, listen, say — no standard. Practice:
-         // play one thing — exactly one "You've got it when:" line with one
-         // recovery move inside it. No <ol>/<ul> inside a step; if you need
-         // a list, you need more steps. Label prefixes: "Learn — " /
-         // "Aprende — ", "Practice — " / "Practica — ".
+         // content — first-party authored files, not escaped).
+         // A NEW ladder follows the Learn / Practice rule (Jonathan,
+         // 2026-09-23; ca-21, ca-22, ca-23 are written this way): a step is a
+         // Learn step or a Practice step and asks for ONE thing. Learn: look,
+         // listen, say — no standard. Practice: play one thing — exactly one
+         // "You've got it when:" line with one recovery move inside it. A
+         // step that would need a list is usually two steps. Label prefixes:
+         // "Learn — " / "Aprende — ", "Practice — " / "Practica — ".
+         // The OLDER ladders (ca-1 to ca-8, ca-11, ca-12, ca-17) predate that
+         // rule and keep their own shape: plain labels without the prefixes,
+         // and an <ol>/<ul> inside a step for multi-step directions — the
+         // CLAUDE.md house rule for module content. That is expected, not
+         // drift; nothing in checks.mjs enforces either shape.
          // A trailing "You've got it when: …" / "Lo tienes cuando: …"
          // sentence (exact strings — matched by the render-time GOT_IT_RE)
          // gets the established green-rule/italic treatment for free; write
          // it as plain text after the list, never as its own <li> or a
          // hand-written <span class="got-it">.
-         text:    'What the student reads and does. Multi-step directions
-                    are an <ol>/<ul>, same house rule as module content.',
+         text:    'What the student reads and does. Where a step does carry
+                    multi-step directions (the older ladders), they are an
+                    <ol>/<ul>, same house rule as module content.',
          text_es: '…',
          // Optional — a step can carry video and/or tab together:
          video:  { id: 'YOUTUBE_ID', start: 45,       // oEmbed-verified at
@@ -507,8 +518,8 @@ window.CLASS_ACTIVITIES = [
       {
         label:    'The whole song',
         label_es: 'La canción completa',
-        text: 'All four lines, start to finish — the whole song on one string, no stopping in between. Then raise the tempo.<ul><li>Every clean pass: raise the BPM by 10</li><li>Fast already? Play it for the person next to you and have them sing along</li></ul>You\'ve got it when: the whole song start to finish without stopping, and the tempo raised at least three times without stopping — then keep climbing.',
-        text_es: 'Las cuatro líneas, de principio a fin — la canción completa en una sola cuerda, sin detenerte entre medio. Después sube el tempo.<ul><li>Cada pasada limpia: sube el BPM 10 puntos</li><li>¿Ya vas rápido? Tócala para la persona de al lado y que cante contigo</li></ul>Lo tienes cuando: las cuatro líneas, una tras otra sin detenerte, y el tempo subido al menos tres veces sin detenerte — y de ahí, sigue subiendo.',
+        text: 'All four lines, start to finish — the whole song on one string, no stopping in between. Then raise the tempo.<ul><li>Every clean pass: raise the BPM by 10</li><li>Fast already? Play it once more with your eyes closed</li></ul>You\'ve got it when: the whole song start to finish without stopping, and the tempo raised at least three times without stopping — then keep climbing.',
+        text_es: 'Las cuatro líneas, de principio a fin — la canción completa en una sola cuerda, sin detenerte entre medio. Después sube el tempo.<ul><li>Cada pasada limpia: sube el BPM 10 puntos</li><li>¿Ya vas rápido? Tócala una vez más con los ojos cerrados</li></ul>Lo tienes cuando: las cuatro líneas, una tras otra sin detenerte, y el tempo subido al menos tres veces sin detenerte — y de ahí, sigue subiendo.',
         tab: {
           // Off the site-wide paging default: the directions say "no stopping
           // in between," so a Next click hidden behind a paged-away Line 3/4
@@ -1213,8 +1224,8 @@ window.CLASS_ACTIVITIES = [
           text_es: 'Desliza la velocidad hasta la derecha, a «Normal». Cuatro vueltas del riff con la canción, sin detenerte.' },
         { levelUp: true,
           card: 'ca-25',    // its button opens the whole-song card, not the Song Journey page (Jonathan, 2026-10-06)
-          text:    'Play along with the whole song on the Whole Song card.',
-          text_es: 'Toca con la canción completa en la tarjeta de La canción completa.' }
+          text:    'Play along with the whole song on the Whole Song card once it is posted.',
+          text_es: 'Toca con la canción completa en la tarjeta de La canción completa cuando esté publicada.' }
       ]
     },
     // No help ladder: a practice card is its checks and nothing else (Jonathan, 2026-10-07).
@@ -1448,8 +1459,8 @@ window.CLASS_ACTIVITIES = [
       {
         label:    'The whole song',
         label_es: 'La canción completa',
-        text: 'The whole song the A-string way — Lines 1 and 2 stay on the low E, 3 and 4 cross to the A string. Start at BPM 70.<ul><li>Say each A-string note out loud as you land it</li><li>Every clean pass, raise the BPM by 10 — then play it for the person next to you</li></ul>You\'ve got it when: the whole song without stopping, every A-string note named out loud — then keep climbing.',
-        text_es: 'La canción completa en la versión con la cuerda La — las Líneas 1 y 2 se quedan en la Mi grave, 3 y 4 cruzan a la cuerda La. Empieza en BPM 70.<ul><li>Di en voz alta cada nota de la cuerda La al caer en ella</li><li>Cada pasada limpia, sube el BPM 10 puntos — y después tócala para la persona de al lado</li></ul>Lo tienes cuando: la canción completa sin detenerte, nombrando en voz alta cada nota de la cuerda La — y de ahí, sigue subiendo.',
+        text: 'The whole song the A-string way — Lines 1 and 2 stay on the low E, 3 and 4 cross to the A string. Start at BPM 70.<ul><li>Say each A-string note out loud as you land it</li><li>Every clean pass, raise the BPM by 10 — then play it once more with your eyes closed</li></ul>You\'ve got it when: the whole song without stopping, every A-string note named out loud — then keep climbing.',
+        text_es: 'La canción completa en la versión con la cuerda La — las Líneas 1 y 2 se quedan en la Mi grave, 3 y 4 cruzan a la cuerda La. Empieza en BPM 70.<ul><li>Di en voz alta cada nota de la cuerda La al caer en ella</li><li>Cada pasada limpia, sube el BPM 10 puntos — y después tócala una vez más con los ojos cerrados</li></ul>Lo tienes cuando: la canción completa sin detenerte, nombrando en voz alta cada nota de la cuerda La — y de ahí, sigue subiendo.',
         tab: {
           // Off the site-wide paging default, same reason as ca-1's whole-song
           // step: "the whole song without stopping" can't have a Next click
@@ -1850,8 +1861,8 @@ window.CLASS_ACTIVITIES = [
           text_es: 'La intro y las 2 estrofas con la canción a la velocidad con la que empieza la tarjeta, sin detenerte.' },
         { levelUp: true,
           card: 'ca-24',    // its button opens the whole-song card, not the Song Journey page (Jonathan, 2026-10-06)
-          text:    'Slide the speed all the way right, to Normal, and play the intro and 2 verses. Then play along with the whole song on the Whole Song card.',
-          text_es: 'Desliza la velocidad hasta la derecha, a «Normal», y toca la intro y las 2 estrofas. Después toca con la canción completa en la tarjeta de La canción completa.' }
+          text:    'Slide the speed all the way right, to Normal, and play the intro and 2 verses. Then play along with the whole song on the Whole Song card once it is posted.',
+          text_es: 'Desliza la velocidad hasta la derecha, a «Normal», y toca la intro y las 2 estrofas. Después toca con la canción completa en la tarjeta de La canción completa cuando esté publicada.' }
       ]
     },
     // No help ladder: a practice card is its checks and nothing else (Jonathan, 2026-10-07).
@@ -1959,8 +1970,8 @@ window.CLASS_ACTIVITIES = [
           text_es: 'La intro y las 2 estrofas con la canción a la velocidad con la que empieza la tarjeta, sin detenerte.' },
         { levelUp: true,
           card: 'ca-24',    // its button opens the whole-song card, not the Song Journey page (Jonathan, 2026-10-06)
-          text:    'Slide the speed all the way right, to Normal, and play the intro and 2 verses. Then play along with the whole song on the Whole Song card.',
-          text_es: 'Desliza la velocidad hasta la derecha, a «Normal», y toca la intro y las 2 estrofas. Después toca con la canción completa en la tarjeta de La canción completa.' }
+          text:    'Slide the speed all the way right, to Normal, and play the intro and 2 verses. Then play along with the whole song on the Whole Song card once it is posted.',
+          text_es: 'Desliza la velocidad hasta la derecha, a «Normal», y toca la intro y las 2 estrofas. Después toca con la canción completa en la tarjeta de La canción completa cuando esté publicada.' }
       ]
     },
     // No help ladder: a practice card is its checks and nothing else (Jonathan, 2026-10-07).
@@ -2013,8 +2024,8 @@ window.CLASS_ACTIVITIES = [
           text_es: 'Cuatro vueltas con la canción a la velocidad con la que empieza la tarjeta, sin detenerte.' },
         { levelUp: true,
           card: 'ca-27',    // its button opens the whole-song card, not the Song Journey page (Jonathan, 2026-10-06)
-          text:    'Slide the speed all the way right, to Normal, and play four laps. Then play along with the whole song on the Whole Song card.',
-          text_es: 'Desliza la velocidad hasta la derecha, a «Normal», y toca cuatro vueltas. Después toca con la canción completa en la tarjeta de La canción completa.' }
+          text:    'Slide the speed all the way right, to Normal, and play four laps. Then play along with the whole song on the Whole Song card once it is posted.',
+          text_es: 'Desliza la velocidad hasta la derecha, a «Normal», y toca cuatro vueltas. Después toca con la canción completa en la tarjeta de La canción completa cuando esté publicada.' }
       ]
     },
     // No help ladder: a practice card is its checks and nothing else (Jonathan, 2026-10-07).
@@ -2171,8 +2182,8 @@ window.CLASS_ACTIVITIES = [
           text_es: 'De la intro al final del coro con la canción a la velocidad con la que empieza la tarjeta, sin detenerte.' },
         { levelUp: true,
           card: 'ca-24',    // its button opens the whole-song card, not the Song Journey page (Jonathan, 2026-10-06)
-          text:    'Slide the speed all the way right, to Normal, and play from the intro to the end of the chorus. Then play the whole song, intro to the end, on the Whole Song card.',
-          text_es: 'Desliza la velocidad hasta la derecha, a «Normal», y toca desde la intro hasta el final del coro. Después toca la canción completa, de la intro al final, en la tarjeta de La canción completa.' }
+          text:    'Slide the speed all the way right, to Normal, and play from the intro to the end of the chorus. Then play the whole song, intro to the end, on the Whole Song card once it is posted.',
+          text_es: 'Desliza la velocidad hasta la derecha, a «Normal», y toca desde la intro hasta el final del coro. Después toca la canción completa, de la intro al final, en la tarjeta de La canción completa cuando esté publicada.' }
       ]
     },
     // No help ladder: a practice card is its checks and nothing else (Jonathan, 2026-10-07).
@@ -2602,7 +2613,8 @@ window.CLASS_ACTIVITIES = [
      4 are BACK, in their original places, so it is the original five lines
      again (Learn + 5 = six steps — the four-step rule is soft).
      Every tab carries `controlsBelow: true`, so ▶ Play tab sits UNDER the
-     board — read and play first, then check. */
+     board — read and play first, then check. 2026-10-12: the Learn step got
+     a four-note picture of its own (low E and A lines), same flags. */
   {
     id:    'ca-21',
     view:  'focus',   // one step at a time — see VIEW above
@@ -2617,6 +2629,22 @@ window.CLASS_ACTIVITIES = [
         label_es: 'Aprende — Cómo leer TAB',
         text: 'TAB shows the six strings as six lines. The bottom line is the low E string. The line above it is the A string. The number on a line is the fret. 0 means play that string open. Read left to right, one note per beat.',
         text_es: 'La TAB muestra las seis cuerdas como seis líneas. La línea de abajo es la cuerda Mi grave. La línea de arriba de esa es la cuerda La. El número en una línea es el traste. 0 significa tocar esa cuerda al aire. Lee de izquierda a derecha, una nota por tiempo.',
+        /* The picture for the paragraph above (2026-10-12): the two lines it
+           names, with the string letters the board prints at the left — open
+           low E, fret 3, open A, fret 2. hideNames + controlsBelow like every
+           other tab in this activity; here ▶ Play tab is just "listen". */
+        tab: {
+          hideNames: true,
+          controlsBelow: true,
+          caption: 'Bottom line: low E string · the line above it: A string',
+          caption_es: 'Línea de abajo: cuerda Mi grave · la línea de arriba de esa: cuerda La',
+          notes: [
+            { string: 'E', fret: 0, note: 'E', midi: 40 },
+            { string: 'E', fret: 3, note: 'G', midi: 43 },
+            { string: 'A', fret: 0, note: 'A', midi: 45 },
+            { string: 'A', fret: 2, note: 'B', midi: 47 }
+          ]
+        },
       },
       {
         label:    'Practice — Line 1',
@@ -3265,7 +3293,7 @@ window.CLASS_ACTIVITIES = [
           ]
         },
         {
-          label: 'Requinto', label_es: 'Requinto',
+          label: 'Requinto (lead guitar)', label_es: 'Requinto (guitarra líder)',
           caption: 'Requinto — F F A A, no singing', caption_es: 'Requinto — F F A A, sin canto',
           fromBar: 25, bars: 4,
           notes: [
@@ -4322,7 +4350,7 @@ window.CLASS_ACTIVITIES = [
           ]
         },
         {
-          label: 'Requinto', label_es: 'Requinto',
+          label: 'Requinto (lead guitar)', label_es: 'Requinto (guitarra líder)',
           caption: 'Requinto — F5 F5 A5 A5, no singing', caption_es: 'Requinto — F5 F5 A5 A5, sin canto',
           fromBar: 25, bars: 4,
           notes: [
