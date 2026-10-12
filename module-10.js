@@ -89,8 +89,8 @@ SETS.push(
             steps: [
               {
                 label: 'Build C major with the recipe', label_es: 'Construye C mayor con la receta',
-                text: 'Run the same W-W-H-W-W-W-H recipe starting from C first, and count how many sharps or flats you need.',
-                text_es: 'Corre la misma receta T-T-S-T-T-T-S empezando primero desde C, y cuenta cuántos sostenidos o bemoles necesitas.',
+                text: 'Follow the same W-W-H-W-W-W-H recipe starting from C first, and count how many sharps or flats you need.',
+                text_es: 'Sigue la misma receta T-T-S-T-T-T-S empezando primero desde C, y cuenta cuántos sostenidos o bemoles necesitas.',
                 hint: 'C major is the recipe\'s starting-point example — every other major key is the same shape, just starting somewhere else.',
                 hint_es: 'C mayor es el ejemplo de punto de partida de la receta — cada otra tonalidad mayor es la misma forma, solo que empieza en otro lugar.',
                 skills: [6],
@@ -158,8 +158,8 @@ SETS.push(
             steps: [
               {
                 label: 'Challenge 1 — C Major Walk', label_es: 'Reto 1 — Caminata de C Mayor',
-                text: '<ul><li>Play the C major scale on the B string using the recipe, saying "whole, whole, half…" out loud as you go.</li></ul>',
-                text_es: '<ul><li>Toca la escala de C mayor en la cuerda Si usando la receta, diciendo "tono, tono, semitono…" en voz alta mientras avanzas.</li></ul>',
+                text: '<ul><li>Play the C major scale on the B string using the recipe, saying "whole, whole, half…" out loud as you go.</li></ul>You\'ve got it when: you play all eight notes up the B string twice in a row, saying "whole" or "half" before every move, with no chart.',
+                text_es: '<ul><li>Toca la escala de C mayor en la cuerda Si usando la receta, diciendo "tono, tono, semitono…" en voz alta mientras avanzas.</li></ul>Lo tienes cuando: tocas las ocho notas subiendo por la cuerda Si dos veces seguidas, diciendo "tono" o "semitono" antes de cada movimiento, sin diagrama.',
                 hint: 'Start on C (B string, fret 1) and let the recipe — not a chart — tell you where each next note lands. This is the string you just mapped in Module 9, so you can name every note you land on. The top C sits one fret past the fret-12 octave dot.',
                 hint_es: 'Empieza en C (cuerda Si, traste 1) y deja que la receta — no un diagrama — te diga dónde cae cada siguiente nota. Esta es la cuerda que acabas de mapear en el Módulo 9, así que puedes nombrar cada nota donde caes. El C de arriba queda un traste después del punto de la octava en el traste 12.',
                 stuck: 'Play just the first three notes (C-D-E) until the whole-whole-half feel is automatic, then keep climbing.',
@@ -171,8 +171,8 @@ SETS.push(
               },
               {
                 label: 'Challenge 2 — G Major Walk', label_es: 'Reto 2 — Caminata de G Mayor',
-                text: '<ol><li>Play the G major scale on the G string, open string to fret 12, using the same recipe.</li><li>Catch the one note that needs to be sharp.</li></ol>',
-                text_es: '<ol><li>Toca la escala de G mayor en la cuerda Sol, de la cuerda al aire al traste 12, usando la misma receta.</li><li>Detecta la única nota que necesita ser sostenida.</li></ol>',
+                text: '<ol><li>Play the G major scale on the G string, open string to fret 12, using the same recipe.</li><li>Catch the one note that needs to be sharp.</li></ol>You\'ve got it when: you play all eight notes up the G string twice in a row with no chart, and name the one sharp note out loud.',
+                text_es: '<ol><li>Toca la escala de G mayor en la cuerda Sol, de la cuerda al aire al traste 12, usando la misma receta.</li><li>Detecta la única nota que necesita ser sostenida.</li></ol>Lo tienes cuando: tocas las ocho notas subiendo por la cuerda Sol dos veces seguidas sin diagrama, y nombras en voz alta la única nota sostenida.',
                 hint: 'Everything is identical to the C major walk except one note — the recipe itself will tell you which. Start on the open G string and the whole scale fits inside the fretboard map from Module 9, landing on the fret-12 octave dot.',
                 hint_es: 'Todo es idéntico a la caminata de C mayor excepto una nota — la receta misma te dirá cuál. Empieza en la cuerda Sol al aire y toda la escala cabe dentro del mapa del diapasón del Módulo 9, llegando al punto de la octava en el traste 12.',
                 stuck: 'Play up to the 6th note first (G-A-B-C-D-E), stop, and only then figure out what the 7th note needs to be.',
@@ -209,14 +209,14 @@ SETS.push(
             steps: [
               {
                 label: 'Challenge — "Let It Be", in the scale', label_es: 'Reto — "Let It Be", dentro de la escala',
-                text: '<ol><li>Hum the "Let It Be" melody while playing the C major walk underneath it.</li><li>Notice every note of the tune is inside the scale you just built.</li></ol>',
-                text_es: '<ol><li>Tararea la melodía de "Let It Be" mientras tocas la caminata de C mayor debajo.</li><li>Fíjate cómo cada nota de la melodía está dentro de la escala que acabas de construir.</li></ol>',
-                hint: 'A song\'s melody comes from the scale of its key. "Let It Be" is in C, so its melody uses the notes of C major.',
-                hint_es: 'La melodía de una canción sale de la escala de su tonalidad. "Let It Be" está en C, así que su melodía usa las notas de C mayor.',
-                stuck: 'Just hum the first line of the melody on its own first, then play the C major walk separately, then try them together.',
-                stuck_es: 'Primero tararea sola la primera línea de la melodía, luego toca la caminata de C mayor por separado, y después intenta ambas juntas.',
-                levelUp: 'Find where in the walk the melody\'s highest note lives, and name it.',
-                levelUp_es: 'Encuentra dónde en la caminata vive la nota más aguda de la melodía, y nómbrala.',
+                text: '<ol><li>Strum the first line of the "Let It Be" verse: C–G–Am–F, two beats per chord.</li><li>After each chord, find its root (the note the chord is named after) in your C major walk on the B string, and play it.</li><li>All four roots — C, G, A and F — are notes of the C major scale. That is what "in the key of C" means.</li></ol>You\'ve got it when: two loops in a row with every chord followed by its root on the B string, no chart.',
+                text_es: '<ol><li>Rasguea la primera línea de la estrofa de "Let It Be": C–G–Am–F, dos tiempos por acorde.</li><li>Después de cada acorde, encuentra su raíz (la nota que le da nombre al acorde) en tu caminata de C mayor en la cuerda Si, y tócala.</li><li>Las cuatro raíces — C, G, A y F — son notas de la escala de C mayor. Eso es lo que significa "en la tonalidad de C".</li></ol>Lo tienes cuando: dos vueltas seguidas con cada acorde seguido de su raíz en la cuerda Si, sin diagrama.',
+                hint: 'A song in the key of C takes its chords and its melody from the C major scale. Each chord\'s root is one of the seven notes you just walked.',
+                hint_es: 'Una canción en la tonalidad de C saca sus acordes y su melodía de la escala de C mayor. La raíz de cada acorde es una de las siete notas que acabas de recorrer.',
+                stuck: 'Play the walk once slowly, saying each note name out loud, and stop on the four roots you need: C, G, A and F.',
+                stuck_es: 'Toca la caminata una vez despacio, diciendo en voz alta el nombre de cada nota, y detente en las cuatro raíces que necesitas: C, G, A y F.',
+                levelUp: 'Add the second line of the verse — C–G–F–C — with each root after its chord.',
+                levelUp_es: 'Agrega la segunda línea de la estrofa — C–G–F–C — con cada raíz después de su acorde.',
                 skills: [2, 4]
               }
             ]
@@ -287,7 +287,7 @@ SETS.push(
           prompt_es: '¿Cuál es el deletreo correcto de la escala de G mayor?',
           choices: ['G A B C D E F G', 'G A B C D E F# G', 'G A Bb C D E F# G', 'G B D G B D G'],
           choices_es: ['G A B C D E F G', 'G A B C D E F# G', 'G A Bb C D E F# G', 'G B D G B D G'], answer: 1,
-          explain: 'Run the W-W-H-W-W-W-H recipe from G and the 7th note lands on F#, not F — forgetting that sharp is the classic slip. (C major is the one major key with no sharps or flats.)',
+          explain: 'Follow the W-W-H-W-W-W-H recipe from G and the 7th note lands on F#, not F — forgetting that sharp is the classic slip. (C major is the one major key with no sharps or flats.)',
           explain_es: 'Aplica la receta T-T-S-T-T-T-S desde G y la 7ª nota cae en F#, no en F — olvidar ese sostenido es el desliz clásico. (C mayor es la única tonalidad mayor sin sostenidos ni bemoles.)' } }
     ]
   },
@@ -301,10 +301,10 @@ SETS.push(
     unit: 'Module 10 · Scales, Keys & Ear Training',
     unit_es: 'Módulo 10 · Escalas, tonalidades y entrenamiento auditivo',
     title: 'Set 2',
-    subtitle: 'Every major key\'s minor twin · Relative vs parallel · Add the b5 = blues · Solo over a 12-bar blues',
-    subtitle_es: 'La gemela menor de cada tonalidad mayor · Relativa vs. paralela · Agrega la b5 = blues · Improvisa sobre un blues de 12 compases',
-    skillFocus: 'Relative minor = 3 frets down (the 6th degree) · Relative shares NOTES, parallel shares ROOT · Blues scale = minor pentatonic + b5 · The 12-bar blues form is where you use it',
-    skillFocus_es: 'La relativa menor = 3 trastes abajo (el 6º grado) · La relativa comparte NOTAS, la paralela comparte RAÍZ · La escala de blues = pentatónica menor + b5 · La forma de blues de 12 compases es donde se usa',
+    subtitle: 'Every major key\'s minor twin · Relative vs parallel · Add the ♭5 = blues · Solo over a 12-bar blues',
+    subtitle_es: 'La gemela menor de cada tonalidad mayor · Relativa vs. paralela · Agrega la ♭5 = blues · Improvisa sobre un blues de 12 compases',
+    skillFocus: 'Relative minor = 3 frets down (the 6th degree) · Relative shares NOTES, parallel shares ROOT · Blues scale = minor pentatonic + ♭5 · The 12-bar blues form is where you use it',
+    skillFocus_es: 'La relativa menor = 3 trastes abajo (el 6º grado) · La relativa comparte NOTAS, la paralela comparte RAÍZ · La escala de blues = pentatónica menor + ♭5 · La forma de blues de 12 compases es donde se usa',
     comingSoon: false,
 
     stations: {
@@ -318,8 +318,8 @@ SETS.push(
             steps: [
               {
                 label: 'Watch: minor pentatonic refresher', label_es: 'Mira: repaso de pentatónica menor',
-                text: 'Watch: <a href="https://www.youtube.com/watch?v=l6ayje1ug_0" target="_blank">The MINOR PENTATONIC scale on Guitar Explained – Lauren Bateman (0:00–5:30)</a> as a refresher on the box-1 shape you\'ll build the blues scale from today.',
-                text_es: 'Mira: <a href="https://www.youtube.com/watch?v=l6ayje1ug_0" target="_blank">The MINOR PENTATONIC scale on Guitar Explained – Lauren Bateman (0:00–5:30)</a> como repaso de la forma de la caja 1 sobre la que vas a construir la escala de blues hoy.',
+                text: 'Watch: <a href="https://www.youtube.com/watch?v=l6ayje1ug_0" target="_blank">The MINOR PENTATONIC scale on Guitar Explained – Lauren Bateman (0:00–5:30)</a> as a refresher on minor pentatonic box 1 (Pattern 1 from Module 4) — the shape you\'ll build the blues scale from today.',
+                text_es: 'Mira: <a href="https://www.youtube.com/watch?v=l6ayje1ug_0" target="_blank">The MINOR PENTATONIC scale on Guitar Explained – Lauren Bateman (0:00–5:30)</a> como repaso de la caja 1 de la pentatónica menor (el Patrón 1 del Módulo 4) — la forma sobre la que vas a construir la escala de blues hoy.',
                 hint: 'Start from the minor pentatonic box you learned in Module 4.',
                 hint_es: 'Empieza desde la caja de pentatónica menor que aprendiste en el Módulo 4.',
                 skills: [4],
@@ -333,8 +333,8 @@ SETS.push(
               },
               {
                 label: 'Watch: the blues scale', label_es: 'Mira: la escala de blues',
-                text: 'Watch: <a href="https://youtu.be/EILFkSGNkdA?t=55" target="_blank">The First Scale Beginners Should Learn for BLUES GUITAR – JustinGuitar</a>. Listen for the one extra note added to the minor pentatonic box you already know, and notice which scale degree it is.',
-                text_es: 'Mira: <a href="https://youtu.be/EILFkSGNkdA?t=55" target="_blank">The First Scale Beginners Should Learn for BLUES GUITAR – JustinGuitar</a>. Escucha la única nota extra que se agrega a la caja de pentatónica menor que ya conoces, y fíjate qué grado de la escala es.',
+                text: 'Watch: <a href="https://youtu.be/EILFkSGNkdA?t=55" target="_blank">The First Scale Beginners Should Learn for BLUES GUITAR – JustinGuitar</a>. You met the blues scale in Module 4, Set 3 — this is a refresher. Listen for the one extra note added to the minor pentatonic box you already know, and notice which scale degree it is.',
+                text_es: 'Mira: <a href="https://youtu.be/EILFkSGNkdA?t=55" target="_blank">The First Scale Beginners Should Learn for BLUES GUITAR – JustinGuitar</a>. Conociste la escala de blues en el Módulo 4, Unidad 3 — esto es un repaso. Escucha la única nota extra que se agrega a la caja de pentatónica menor que ya conoces, y fíjate qué grado de la escala es.',
                 hint: 'The blues scale is just minor pentatonic plus one extra note — listen for where it gets added in the video.',
                 hint_es: 'La escala de blues es simplemente la pentatónica menor más una nota extra — escucha dónde se agrega en el video.',
                 skills: [4],
@@ -343,8 +343,8 @@ SETS.push(
                   answer: 1,
                   explain: 'One added note — the flat five — gives the pentatonic scale its blues sound.',
                   explain_es: 'Una nota añadida — la quinta bemol — le da a la escala pentatónica su sonido de blues.',
-                  choices: ['The 2nd', 'The b5', 'The major 7th', 'The 4th'],
-                  choices_es: ['El 2º', 'La b5', 'La 7ª mayor', 'El 4º'] }
+                  choices: ['The 2nd', 'The ♭5', 'The major 7th', 'The 4th'],
+                  choices_es: ['El 2º', 'La ♭5', 'La 7ª mayor', 'El 4º'] }
               }
             ]
           },
@@ -444,8 +444,8 @@ SETS.push(
             steps: [
               {
                 label: 'Challenge 1 — Relative Pairs Drill', label_es: 'Reto 1 — Ejercicio de Pares Relativos',
-                text: 'A drill is a short exercise you repeat to build a skill.<ol><li>Run the deck below — major key on the front, relative minor on the back — and answer out loud before you check.</li><li>Then explain out loud how a PARALLEL minor would be different for the same key.</li></ol>',
-                text_es: 'Un ejercicio es una actividad corta que repites para desarrollar una destreza.<ol><li>Corre la baraja de abajo — tonalidad mayor al frente, relativa menor atrás — y responde en voz alta antes de revisar.</li><li>Luego explica en voz alta cómo sería distinta una paralela menor para esa misma tonalidad.</li></ol>',
+                text: 'A drill is a short exercise you repeat to build a skill.<ol><li>Deal the deck below — major key on the front, relative minor on the back — and answer out loud before you check.</li><li>Then explain out loud how a PARALLEL minor would be different for the same key.</li></ol>You\'ve got it when: two rounds in a row with all five relative minors named before you check.',
+                text_es: 'Un ejercicio es una actividad corta que repites para desarrollar una destreza.<ol><li>Reparte la baraja de abajo — tonalidad mayor al frente, relativa menor atrás — y responde en voz alta antes de revisar.</li><li>Luego explica en voz alta cómo sería distinta una paralela menor para esa misma tonalidad.</li></ol>Lo tienes cuando: dos rondas seguidas con las cinco relativas menores nombradas antes de ver la respuesta.',
                 drill: { type: 'deck', deck: 'relative-pairs' },
                 hint: 'The shortcut: relative minor is always 3 frets down from the major root, or the major scale\'s 6th note.',
                 hint_es: 'El atajo: la relativa menor siempre está 3 trastes abajo de la raíz mayor, o es la 6ª nota de la escala mayor.',
@@ -463,10 +463,10 @@ SETS.push(
             steps: [
               {
                 label: 'Challenge 2 — Blues Scale (assessment preparation)', label_es: 'Reto 2 — Escala de Blues (preparación para la evaluación)',
-                text: '<ol><li>Add the b5 to A minor pentatonic box 1 and play it ascending and descending at 60 BPM.</li><li>The play button checks the ascending run — match it.</li><li>Then play the descent on your own after.</li></ol>You\'ve got it when: the added note matches what you hear from the play button, every time.',
-                text_es: '<ol><li>Agrega la b5 a la caja 1 de la pentatónica menor de A y tócala subiendo y bajando a 60 BPM.</li><li>El botón de reproducir comprueba el recorrido ascendente — iguálalo.</li><li>Luego toca el descenso por tu cuenta después.</li></ol>Lo tienes cuando: la nota agregada coincide con lo que escuchas del botón de reproducir, cada vez.',
-                hint: 'The b5 sits between two notes you already know in the box — it\'s one extra finger placement, not a new shape to learn from scratch.',
-                hint_es: 'La b5 se ubica entre dos notas que ya conoces en la caja — es una colocación de dedo extra, no una forma nueva que aprender desde cero.',
+                text: '<ol><li>Add the ♭5 ("flat five": the scale\'s 5th note, one fret lower) to A minor pentatonic box 1 and play it ascending and descending at 60 BPM.</li><li>The play button checks the ascending run — match it.</li><li>Then play the descent on your own after.</li></ol>You\'ve got it when: the added note matches what you hear from the play button, every time.',
+                text_es: '<ol><li>Agrega la ♭5 ("quinta bemol": la 5ª nota de la escala, un traste más abajo) a la caja 1 de la pentatónica menor de A y tócala subiendo y bajando a 60 BPM.</li><li>El botón de reproducir comprueba el recorrido ascendente — iguálalo.</li><li>Luego toca el descenso por tu cuenta después.</li></ol>Lo tienes cuando: la nota agregada coincide con lo que escuchas del botón de reproducir, cada vez.',
+                hint: 'The ♭5 sits between two notes you already know in the box. It is the same blues note you added in Module 4, Set 3 — one extra finger placement, not a new shape to learn from scratch.',
+                hint_es: 'La ♭5 se ubica entre dos notas que ya conoces en la caja. Es la misma nota de blues que agregaste en el Módulo 4, Unidad 3 — una colocación de dedo extra, no una forma nueva que aprender desde cero.',
                 stuck: 'Play the plain minor pentatonic box first, then just add the one extra note once the rest is solid.',
                 stuck_es: 'Toca primero la caja simple de pentatónica menor, y luego agrega solo la nota extra una vez que el resto esté sólido.',
                 levelUp: 'Play the blues scale over a 12-bar blues feel, or build it starting from a different root.',
@@ -485,8 +485,8 @@ SETS.push(
                 label: 'Challenge — "Smoke on the Water", bluesy', label_es: 'Reto — "Smoke on the Water", con sabor a blues',
                 text: 'The riff (a riff is a short musical phrase that repeats) is in G, so the blues scale has to move there too — same shape, two frets down from where you built it:<ol><li>Play the G blues scale: the same box, starting at fret 3 on the low E string.</li><li>Play it over the feel of the riff. This is where this scale is normally used — the sound it was built for.</li></ol>You\'ve got it when: you loop a recording of the riff and play the G blues scale up and back over it, ending on G, two laps in a row.',
                 text_es: 'El riff (un riff es una frase musical corta que se repite) está en G, así que la escala de blues también tiene que mudarse — la misma forma, dos trastes más abajo de donde la armaste:<ol><li>Toca la escala de blues de G: la misma caja, empezando en el traste 3 de la cuerda Mi grave.</li><li>Tócala sobre la sensación del riff. Aquí es donde normalmente se usa esta escala — el sonido para el que fue creada.</li></ol>Lo tienes cuando: repites en loop una grabación del riff y tocas la escala de blues de G subiendo y bajando sobre ella, terminando en G, dos vueltas seguidas.',
-                hint: 'Look at the riff\'s own notes: G, Bb, C, then that Db before it falls back to C. Those are the first four notes of the G blues scale — and the Db IS the b5, the note you just added. The riff is not just in the same world as this scale; it is built out of it.',
-                hint_es: 'Fíjate en las notas del riff: G, Bb, C, y ese Db antes de volver a C. Son las primeras cuatro notas de la escala de blues de G — y el Db ES la b5, la nota que acabas de agregar. El riff no solo vive en el mismo mundo que esta escala; está hecho de ella.',
+                hint: 'Look at the riff\'s own notes: G, Bb, C, then that Db before it falls back to C. Those are the first four notes of the G blues scale — and the Db IS the ♭5, the note you just added. The riff is not just in the same world as this scale; it is built out of it.',
+                hint_es: 'Fíjate en las notas del riff: G, Bb, C, y ese Db antes de volver a C. Son las primeras cuatro notas de la escala de blues de G — y el Db ES la ♭5, la nota que acabas de agregar. El riff no solo vive en el mismo mundo que esta escala; está hecho de ella.',
                 stuck: 'Play the riff itself first to get the feel steady, then freely play the blues scale over the same groove (a groove is the steady rhythmic feel).',
                 stuck_es: 'Toca primero el riff mismo para asentar la sensación, y luego toca libremente la escala de blues sobre el mismo groove (un groove es la sensación rítmica constante).',
                 levelUp: 'Try soloing over the riff using only the G blues scale, no other notes — and land on G to finish.',
@@ -501,11 +501,11 @@ SETS.push(
             title_es: 'Cierre',
             steps: [
               {
-                label: 'Wrap-up: relative key and the b5', label_es: 'Cierre: la relativa y la b5',
+                label: 'Wrap-up: relative key and the ♭5', label_es: 'Cierre: la relativa y la ♭5',
                 text: 'What\'s the relative minor of F ("Luna"\'s key)? Which single note makes a pentatonic a blues scale? Write both below. (One more below: Jam it — the blues scale over a real form.)',
                 text_es: '¿Cuál es la relativa menor de F (la tonalidad de "Luna")? ¿Cuál nota única convierte una pentatónica en una escala de blues? Escribe ambas abajo. (Una más abajo: Tócalo de improviso — la escala de blues sobre una forma real.)',
-                response: { type: 'short', placeholder: 'e.g. Dm is F\'s relative minor; the b5 is what makes it blues',
-                  placeholder_es: 'p. ej. Dm es la relativa menor de F; la b5 es lo que la hace blues' }
+                response: { type: 'short', placeholder: 'e.g. Dm is F\'s relative minor; the ♭5 is what makes it blues',
+                  placeholder_es: 'p. ej. Dm es la relativa menor de F; la ♭5 es lo que la hace blues' }
               }
             ]
           },
@@ -559,12 +559,12 @@ SETS.push(
           choices_es: ['A menor — relativa mayor C', 'A mayor — relativa menor F#m', 'C menor — relativa mayor Eb', 'G mayor — porque G está en la vuelta'], answer: 0,
           explain: 'Home chord Am makes it A minor, and A minor shares all its notes with C major — its relative major, 3 frets up.',
           explain_es: 'El acorde base Am la hace A menor, y A menor comparte todas sus notas con C mayor — su relativa mayor, 3 trastes arriba.' } },
-      { id: 'm10w2-s4', text: 'Build the blues scale by adding the b5 to minor pentatonic box 1',
-        text_es: 'Construir la escala de blues agregando la b5 a la caja 1 de pentatónica menor',
-        gotItWhen: 'you can find and add the b5 inside minor pentatonic box 1 on your own — it sits between two notes you already know, one extra finger placement, not a new shape.',
-        gotItWhen_es: 'puedes encontrar y agregar la b5 dentro de la caja 1 de pentatónica menor por tu cuenta — se ubica entre dos notas que ya conoces, una colocación de dedo extra, no una forma nueva.',
-        practice: { type: 'mc', prompt: 'In A minor pentatonic at fret 5, the added blues note (b5, an Eb) sits on the A string at fret:',
-          prompt_es: 'En la pentatónica menor de A en el traste 5, la nota de blues agregada (b5, una Eb) se ubica en la cuerda La en el traste:',
+      { id: 'm10w2-s4', text: 'Build the blues scale by adding the ♭5 to minor pentatonic box 1',
+        text_es: 'Construir la escala de blues agregando la ♭5 a la caja 1 de pentatónica menor',
+        gotItWhen: 'you can find and add the ♭5 inside minor pentatonic box 1 on your own — it sits between two notes you already know, one extra finger placement, not a new shape.',
+        gotItWhen_es: 'puedes encontrar y agregar la ♭5 dentro de la caja 1 de pentatónica menor por tu cuenta — se ubica entre dos notas que ya conoces, una colocación de dedo extra, no una forma nueva.',
+        practice: { type: 'mc', prompt: 'In A minor pentatonic at fret 5, the added blues note (♭5, an Eb) sits on the A string at fret:',
+          prompt_es: 'En la pentatónica menor de A en el traste 5, la nota de blues agregada (♭5, una Eb) se ubica en la cuerda La en el traste:',
           choices: ['5', '6', '7', '8'],
           choices_es: ['5', '6', '7', '8'], answer: 1,
           explain: 'On the A string, fret 5 is D and fret 7 is E, so Eb squeezes in between them at fret 6. The blues note is one extra finger inside a shape you already know, not a new box.',
@@ -752,8 +752,8 @@ SETS.push(
             steps: [
               {
                 label: 'Challenge 1 — Transpose Drill', label_es: 'Reto 1 — Ejercicio de Transposición',
-                text: '<ol><li>Run the key deck below and play minor pentatonic box 1 at that key\'s fret: fret 5 (Am), fret 3 (Gm), fret 7 (Bm), fret 10 (Dm — "Luna"\'s solo box!).</li></ol>You\'ve got it when: you can find any of these four positions within 5 seconds of the card turning up.',
-                text_es: '<ol><li>Corre la baraja de tonalidades de abajo y toca la caja 1 de pentatónica menor en el traste de esa tonalidad: traste 5 (Am), traste 3 (Gm), traste 7 (Bm), traste 10 (Dm — ¡la caja del solo de "Luna"!).</li></ol>Lo tienes cuando: puedes encontrar cualquiera de estas cuatro posiciones dentro de los 5 segundos de que aparezca la carta.',
+                text: '<ol><li>Deal the key deck below and play minor pentatonic box 1 at that key\'s fret: fret 5 (Am), fret 3 (Gm), fret 7 (Bm), fret 10 (Dm — "Luna"\'s solo box!).</li></ol>You\'ve got it when: you can find any of these four positions within 5 seconds of the card turning up.',
+                text_es: '<ol><li>Reparte la baraja de tonalidades de abajo y toca la caja 1 de pentatónica menor en el traste de esa tonalidad: traste 5 (Am), traste 3 (Gm), traste 7 (Bm), traste 10 (Dm — ¡la caja del solo de "Luna"!).</li></ol>Lo tienes cuando: puedes encontrar cualquiera de estas cuatro posiciones dentro de los 5 segundos de que aparezca la carta.',
                 drill: { type: 'deck', deck: 'minor-keys-box1' },
                 hint: 'Fret 10 should feel familiar — it\'s the exact box you\'ve been using for "Luna"\'s solo since Module 4, now with a name attached.',
                 hint_es: 'El traste 10 debería sentirse familiar — es exactamente la caja que has estado usando para el solo de "Luna" desde el Módulo 4, ahora con un nombre asignado.',
@@ -771,14 +771,15 @@ SETS.push(
             steps: [
               {
                 label: 'Challenge 2 — Sing-Then-Play', label_es: 'Reto 2 — Canta y Luego Toca',
-                text: '<ol><li>Record yourself playing 3 random notes on the low E string (frets 0–5) without watching your hand — or use the Echo Drill play button below as your note source.</li><li>Wait a moment, play the recording back, and sing the notes.</li><li>Find and play them.</li></ol>',
-                text_es: '<ol><li>Grábate tocando 3 notas al azar en la cuerda Mi grave (trastes 0–5) sin mirar tu mano — o usa el botón de reproducir del Ejercicio de Eco de abajo como tu fuente de notas.</li><li>Espera un momento, reproduce la grabación, y canta las notas.</li><li>Encuéntralas y tócalas.</li></ol>',
+                text: '<ol><li>Press "Deal and play" below and listen to the three notes.</li><li>Sing them back, holding each one, before you touch the guitar.</li><li>Find each note on the low E string and play it.</li><li>Tap the frets you found, in order, then check.</li></ol>You\'ve got it when: three rounds in a row with all three notes right, each one sung before you play it.',
+                text_es: '<ol><li>Presiona «Repartir y tocar» abajo y escucha las tres notas.</li><li>Cántalas de vuelta, sosteniendo cada una, antes de tocar la guitarra.</li><li>Encuentra cada nota en la cuerda Mi grave y tócala.</li><li>Marca los trastes que encontraste, en orden, y luego revisa.</li></ol>Lo tienes cuando: tres rondas seguidas con las tres notas correctas, cada una cantada antes de tocarla.',
+                drill: { type: 'ear', pool: 'lowEFrets', draw: 3 },
                 hint: 'Sing FIRST, before you touch the guitar — that order is the whole skill.',
                 hint_es: 'Canta PRIMERO, antes de tocar la guitarra — ese orden es toda la destreza.',
-                stuck: 'Start with just one note instead of three, and build up once that\'s reliable.',
-                stuck_es: 'Empieza con solo una nota en lugar de tres, y aumenta una vez que eso sea confiable.',
-                levelUp: 'Extend to 5 notes, or record notes spread across two strings.',
-                levelUp_es: 'Extiéndelo a 5 notas, o graba notas repartidas en dos cuerdas.',
+                stuck: 'Press "Play again" as often as you need, and sing just the first note until you find it. Then add the second and the third.',
+                stuck_es: 'Presiona «Tocar de nuevo» las veces que necesites, y canta solo la primera nota hasta encontrarla. Luego agrega la segunda y la tercera.',
+                levelUp: 'Sing all three notes back as one short tune before you look for any of them.',
+                levelUp_es: 'Canta las tres notas de vuelta como una melodía corta antes de buscar cualquiera de ellas.',
                 skills: [3]
               }
             ]
@@ -789,16 +790,16 @@ SETS.push(
             steps: [
               {
                 label: 'Challenge 3 — Echo Drill (assessment preparation)', label_es: 'Reto 3 — Ejercicio de Eco (preparación para la evaluación)',
-                text: '<ol><li>For round 1, listen to the 3-note pattern once using the play button below, sing it back, then play it on the low E string.</li><li>For rounds 2–4, record yourself playing 3 random notes (eyes off your hand) and echo those back the same way.</li></ol>You\'ve got it when: 3 out of 4 patterns matched correctly, by ear alone.',
-                text_es: '<ol><li>Para la ronda 1, escucha el patrón de 3 notas una vez usando el botón de reproducir de abajo, cántalo de vuelta, y luego tócalo en la cuerda Mi grave.</li><li>Para las rondas 2–4, grábate tocando 3 notas al azar (sin mirar tu mano) y repítelas de la misma manera.</li></ol>Lo tienes cuando: 3 de 4 patrones coincidan correctamente, solo de oído.',
+                text: '<ol><li>Press "Deal and play" below and listen once — do not press "Play again".</li><li>Sing the three notes back as one short tune.</li><li>Play them on the low E string, then tap the frets in order and check.</li><li>Press "Deal again" for the next round. Do four rounds.</li></ol>You\'ve got it when: 3 out of 4 rounds have all three notes right, by ear alone.',
+                text_es: '<ol><li>Presiona «Repartir y tocar» abajo y escucha una sola vez — no presiones «Tocar de nuevo».</li><li>Canta las tres notas de vuelta como una melodía corta.</li><li>Tócalas en la cuerda Mi grave, y luego marca los trastes en orden y revisa.</li><li>Presiona «Repartir de nuevo» para la siguiente ronda. Haz cuatro rondas.</li></ol>Lo tienes cuando: 3 de 4 rondas tienen las tres notas correctas, solo de oído.',
+                drill: { type: 'ear', pool: 'lowEFrets', draw: 3 },
                 hint: 'Sing the pattern before you look for the frets.',
                 hint_es: 'Canta el patrón antes de buscar los trastes.',
-                stuck: 'Slow the pattern down and repeat just the first two notes until they\'re solid, then add the third.',
-                stuck_es: 'Baja la velocidad del patrón y repite solo las primeras dos notas hasta que estén sólidas, y luego agrega la tercera.',
-                levelUp: 'Extend the echo to 4 or 5 notes, or echo a short lick (a lick is a short solo phrase) from a tutorial video you haven\'t learned yet — a pattern you\'ve truly never heard.',
-                levelUp_es: 'Extiende el eco a 4 o 5 notas, o repite un lick corto (un lick es una frase corta de solo) de un video tutorial que no hayas aprendido todavía — un patrón que de verdad nunca hayas escuchado.',
-                skills: [3, 5],
-                playSeq: { label: 'Echo pattern — round 1', label_es: 'Patrón de eco — ronda 1', bpm: 60, notes: [40, 43, 45] }
+                stuck: 'Go back to Sing-Then-Play for a few rounds, pressing "Play again" as often as you need, then come back here.',
+                stuck_es: 'Vuelve a Canta y Luego Toca por unas rondas, presionando «Tocar de nuevo» las veces que necesites, y luego regresa aquí.',
+                levelUp: 'Echo a short lick (a lick is a short solo phrase) from a tutorial video you haven\'t learned yet — sing it, then find it, before you look at its TAB.',
+                levelUp_es: 'Repite un lick corto (un lick es una frase corta de solo) de un video tutorial que no hayas aprendido todavía — cántalo y encuéntralo antes de mirar su TAB.',
+                skills: [3, 5]
               }
             ]
           },
@@ -809,12 +810,12 @@ SETS.push(
             steps: [
               {
                 label: 'Challenge — "the cure", by ear', label_es: 'Reto — "the cure", de oído',
-                text: '<ol><li>Strum through the progression.</li><li>Without looking anything up, decide by ear which chords feel bright and which feel dark.</li></ol>',
-                text_es: '<ol><li>Rasguea la progresión.</li><li>Sin buscar nada, decide de oído cuáles acordes se sienten brillantes y cuáles se sienten oscuros.</li></ol>',
+                text: 'Strum the chorus of "the cure": Dm–F–C–G, one bar (four big, slow beats) per chord.<ol><li>Hold each chord and say "bright" or "dark" out loud before you strum the next one.</li><li>Then check each call against the chord name: an "m" after the letter means minor (dark); no "m" means major (bright).</li></ol>You\'ve got it when: two loops in a row with all four chords called right.',
+                text_es: 'Rasguea el coro de "the cure": Dm–F–C–G, un compás (cuatro tiempos grandes y lentos) por acorde.<ol><li>Sostén cada acorde y di "brillante" u "oscuro" en voz alta antes de rasguear el siguiente.</li><li>Luego compara cada respuesta con el nombre del acorde: una "m" después de la letra significa menor (oscuro); sin "m" significa mayor (brillante).</li></ol>Lo tienes cuando: dos vueltas seguidas con los cuatro acordes nombrados correctamente.',
                 hint: 'You\'ve known these chord names since Module 5 — today\'s challenge is trusting your ear to sort them into bright vs dark before you check.',
                 hint_es: 'Conoces estos nombres de acordes desde el Módulo 5 — el reto de hoy es confiar en tu oído para clasificarlos en brillante vs. oscuro antes de comprobarlo.',
-                stuck: 'Isolate just two chords at a time and compare them directly, back and forth.',
-                stuck_es: 'Aísla solo dos acordes a la vez y compáralos directamente, alternando.',
+                stuck: 'Compare just Dm and F, back and forth, until you hear the difference. Then add C and G.',
+                stuck_es: 'Compara solo Dm y F, alternando, hasta que escuches la diferencia. Luego agrega C y G.',
                 levelUp: 'Guess which chord is the "home" chord using only your ear, then confirm it.',
                 levelUp_es: 'Adivina cuál acorde es el acorde "base" usando solo tu oído, y luego confírmalo.',
                 skills: [4, 6]

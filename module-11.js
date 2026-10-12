@@ -158,8 +158,8 @@ SETS.push(
             steps: [
               {
                 label: 'Challenge 1 — C and G Chord Families', label_es: 'Reto 1 — Familias de acordes de C y G',
-                text: '<ol><li>Write out the chord families of C major and G major (six chords each) — type them below.</li><li>Play each family\'s chords in order.</li></ol>',
-                text_es: '<ol><li>Escribe las familias de acordes de C mayor y G mayor (seis acordes cada una) — anótalas abajo.</li><li>Toca los acordes de cada familia en orden.</li></ol>',
+                text: '<ol><li>Write out the chord families of C major and G major (six chords each) — type them below.</li><li>Play each family\'s chords in order.</li></ol>You\'ve got it when: you play the six chords of each family in order, twice in a row, without stopping to find a chord.',
+                text_es: '<ol><li>Escribe las familias de acordes de C mayor y G mayor (seis acordes cada una) — anótalas abajo.</li><li>Toca los acordes de cada familia en orden.</li></ol>Lo tienes cuando: tocas los seis acordes de cada familia en orden, dos veces seguidas, sin detenerte a buscar un acorde.',
                 hint: 'Build a triad on each scale note: major-minor-minor-major-major-minor.',
                 hint_es: 'Construye una tríada en cada nota de la escala: mayor-menor-menor-mayor-mayor-menor.',
                 stuck: 'Just play the C family first and get it solid before adding G.',
@@ -187,8 +187,8 @@ SETS.push(
             steps: [
               {
                 label: 'Challenge 2 — Numeral Flashcards', label_es: 'Reto 2 — Tarjetas de números romanos',
-                text: '<ol><li>Run the numeral deck below and play each chord it deals you in the key of C — no hesitating.</li><li>Run the deck twice.</li></ol>',
-                text_es: '<ol><li>Corre la baraja de números romanos de abajo y toca cada acorde que te reparta en la tonalidad de C — sin dudar.</li><li>Repite la baraja dos veces.</li></ol>',
+                text: '<ol><li>Deal the numeral deck below and play each chord it gives you in the key of C — no hesitating.</li><li>Deal it again for a second round.</li></ol>You\'ve got it when: two rounds in a row with all six chords right on the first try.',
+                text_es: '<ol><li>Reparte la baraja de números romanos de abajo y toca cada acorde que te dé en la tonalidad de C — sin dudar.</li><li>Repártela otra vez para una segunda ronda.</li></ol>Lo tienes cuando: dos rondas seguidas con los seis acordes correctos al primer intento.',
                 drill: { type: 'deck', deck: 'numerals-C' },
                 hint: 'If you know the family in order (C Dm Em F G Am), the numeral just tells you which slot to reach for.',
                 hint_es: 'Si conoces la familia en orden (C Dm Em F G Am), el número romano solo te dice cuál lugar buscar.',
@@ -448,8 +448,8 @@ SETS.push(
             steps: [
               {
                 label: 'Challenge 1 — Name the Key from a Chord Set', label_es: 'Reto 1 — Nombra la tonalidad de un conjunto de acordes',
-                text: 'A drill is a short exercise you repeat to build a skill.<ol><li>Run the key-detective deck below — for each mystery chord set, find the single family that contains every chord in it and say the key OUT LOUD before you flip the card.</li></ol>',
-                text_es: 'Un ejercicio es una actividad corta que repites para desarrollar una destreza.<ol><li>Corre la baraja detective de tonalidades de abajo — para cada conjunto misterioso de acordes, encuentra la única familia que contiene todos los acordes y di la tonalidad EN VOZ ALTA antes de voltear la tarjeta.</li></ol>',
+                text: 'A drill is a short exercise you repeat to build a skill.<ol><li>Deal the key-detective deck below — for each mystery chord set, find the single family that contains every chord in it and say the key OUT LOUD before you flip the card.</li></ol>You\'ve got it when: two rounds in a row with all four keys named right before you flip the card.',
+                text_es: 'Un ejercicio es una actividad corta que repites para desarrollar una destreza.<ol><li>Reparte la baraja detective de tonalidades de abajo — para cada conjunto misterioso de acordes, encuentra la única familia que contiene todos los acordes y di la tonalidad EN VOZ ALTA antes de voltear la tarjeta.</li></ol>Lo tienes cuando: dos rondas seguidas con las cuatro tonalidades nombradas correctamente antes de voltear la tarjeta.',
                 drill: { type: 'deck', deck: 'key-inventory', skill: 'm11w2-s1' },
                 hint: 'Find the single family that contains ALL the chords on the card — that\'s the key, before your ear even weighs in.',
                 hint_es: 'Encuentra la única familia que contiene TODOS los acordes de la tarjeta — esa es la tonalidad, incluso antes de que tu oído opine.',
@@ -467,8 +467,8 @@ SETS.push(
             steps: [
               {
                 label: 'Challenge 2 — Which Chord Feels Like Home? Am–G–F', label_es: 'Reto 2 — ¿Cuál acorde se siente como base? Am–G–F',
-                text: '<ol><li>Strum Am–G–F, stopping and holding each chord in turn.</li><li>Say (or type below) which one feels most like "home."</li></ol>',
-                text_es: '<ol><li>Rasguea Am–G–F, deteniéndote y sosteniendo cada acorde por turno.</li><li>Di (o escribe abajo) cuál se siente más como "base."</li></ol>',
+                text: '<ol><li>Strum Am–G–F, stopping and holding each chord in turn.</li><li>Say (or type below) which one feels most like "home."</li></ol>You\'ve got it when: you play the loop three times in a row and pick the same chord as home every time.',
+                text_es: '<ol><li>Rasguea Am–G–F, deteniéndote y sosteniendo cada acorde por turno.</li><li>Di (o escribe abajo) cuál se siente más como "base."</li></ol>Lo tienes cuando: tocas el loop tres veces seguidas y eliges el mismo acorde como base cada vez.',
                 hint: 'Play the loop a few times through first — home only reveals itself once you can hear the whole shape of the progression.',
                 hint_es: 'Toca el loop unas cuantas veces primero — la base solo se revela una vez que puedes escuchar la forma completa de la progresión.',
                 stuck: 'Play just Am, then G, then F in isolation and rate each one 1-10 for "does this feel finished."',
@@ -492,8 +492,8 @@ SETS.push(
             steps: [
               {
                 label: 'Challenge 3 — Slash Chord Walk', label_es: 'Reto 3 — Caminata de acorde con barra diagonal',
-                text: '<ul><li>Play C → G/B → Am as a smooth bass-line move — notice the bass note walks down one step at a time (C, B, A) while the chords change around it.</li></ul>',
-                text_es: '<ul><li>Toca C → G/B → Am como un movimiento suave de línea de bajo — fíjate cómo la nota de bajo baja un paso a la vez (C, B, A) mientras los acordes cambian alrededor.</li></ul>',
+                text: '<ul><li>Play C → G/B → Am as a smooth bass-line move — notice the bass note walks down one step at a time (C, B, A) while the chords change around it.</li></ul>You\'ve got it when: three walks in a row where the bass steps down C, B, A with no silence between the chords.',
+                text_es: '<ul><li>Toca C → G/B → Am como un movimiento suave de línea de bajo — fíjate cómo la nota de bajo baja un paso a la vez (C, B, A) mientras los acordes cambian alrededor.</li></ul>Lo tienes cuando: tres caminatas seguidas donde el bajo baja C, B, A sin silencio entre los acordes.',
                 hint: '"the cure" uses this same G/B — it lands right after the F chord and glides the loop back home to Am, closing the cycle — the slash chord is the piece that links two chords smoothly.',
                 hint_es: '"the cure" usa este mismo G/B — llega justo después del acorde de F y desliza el ciclo de vuelta a la base en Am, cerrando la vuelta — el acorde con barra diagonal es la pieza que conecta dos acordes suavemente.',
                 stuck: 'Play C and Am first without the G/B in between, then add it back and listen for how much smoother the move feels.',
@@ -796,8 +796,8 @@ SETS.push(
             steps: [
               {
                 label: 'Challenge 1 — Root-Naming Drill', label_es: 'Reto 1 — Ejercicio de nombrar raíces',
-                text: 'First, warm the hand up — then the drill:<ol><li>Run a quick Finger Gym stretch (<a href="https://youtu.be/XDt_4ha9Xjs" target="_blank">The Finger Gym – JustinGuitar</a>) before today\'s barre-heavy work.</li><li>Call out a handful of chord names from memory (any of the 12) and, for each one, find BOTH barre locations — the E-shape fret on the low E string AND the A-shape fret on the A string.</li></ol>',
-                text_es: 'Primero, calienta la mano — luego el ejercicio:<ol><li>Haz un estiramiento rápido de Gimnasio de Dedos (<a href="https://youtu.be/XDt_4ha9Xjs" target="_blank">The Finger Gym – JustinGuitar</a>) antes del trabajo intenso de cejillas de hoy.</li><li>Nombra de memoria un puñado de acordes (cualquiera de los 12) y, para cada uno, encuentra AMBAS ubicaciones de cejilla — el traste de la forma de E en la cuerda Mi grave Y el traste de la forma de A en la cuerda La.</li></ol>',
+                text: 'First, warm the hand up — then the drill:<ol><li>Run a quick Finger Gym stretch (<a href="https://youtu.be/XDt_4ha9Xjs" target="_blank">The Finger Gym – JustinGuitar</a>) before today\'s barre-heavy work.</li><li>Call out a handful of chord names from memory (any of the 12) and, for each one, find BOTH barre locations — the E-shape fret on the low E string AND the A-shape fret on the A string.</li></ol>You\'ve got it when: you find both barre frets for five chords in a row, with no mistakes and no chart.',
+                text_es: 'Primero, calienta la mano — luego el ejercicio:<ol><li>Haz un estiramiento rápido de Gimnasio de Dedos (<a href="https://youtu.be/XDt_4ha9Xjs" target="_blank">The Finger Gym – JustinGuitar</a>) antes del trabajo intenso de cejillas de hoy.</li><li>Nombra de memoria un puñado de acordes (cualquiera de los 12) y, para cada uno, encuentra AMBAS ubicaciones de cejilla — el traste de la forma de E en la cuerda Mi grave Y el traste de la forma de A en la cuerda La.</li></ol>Lo tienes cuando: encuentras ambos trastes de cejilla para cinco acordes seguidos, sin errores y sin diagrama.',
                 hint: 'Every chord has (at least) two barre homes — one for each shape. Module 9\'s fretboard naming is the key step here.',
                 hint_es: 'Cada acorde tiene (al menos) dos hogares de cejilla — uno por cada forma. El nombrado del diapasón del Módulo 9 es el paso clave aquí.',
                 stuck: 'Find the E-shape location first, get comfortable, then add the search for the A-shape position.',

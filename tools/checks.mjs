@@ -5194,6 +5194,68 @@ function checkShortResponseBudget() {
 }
 
 /* ════════════════════════════════════════════════════════════════════
+   1ar2. CHALLENGE CARDS SAY WHEN YOU'VE GOT IT (2026-10-12). A Challenge
+   card (a step whose label starts "Challenge") is where a set names its
+   standard, and the house pattern since Module 2 is a countable
+   "You've got it when: …" line after the list. The 2026-10-12 review
+   found 17 Challenge cards in Modules 9-11 with none — the student was
+   told what to do and never when it was done — and fixed all 17 (EN+ES).
+   The five left are in Modules 3, 5, 6, 7 and 8, carried as-is.
+   Same shape as 1ar: a per-module budget that only fails UPWARD. A card
+   counts as missing when EITHER language lacks the line. Taking one more
+   away is always fine (then lower the number here); adding a Challenge
+   card without a got-it line is the thing that needs a decision.
+   ════════════════════════════════════════════════════════════════════ */
+const CHALLENGE_NO_GOTIT_BUDGET = { 1: 0, 2: 0, 3: 1, 4: 0, 5: 1, 6: 1, 7: 1, 8: 1, 9: 0, 10: 0, 11: 0, 12: 0, 13: 0 };
+function checkChallengeGotItBudget() {
+  head('1ar2. Challenge cards without a "You\'ve got it when" line (budget)');
+  const configSrc = readFileSync(join(ROOT, 'config-main.js'), 'utf8');
+  const EN = /You(?:'|&#39;|’)ve got it when:/;   // the same three spellings as app.js GOT_IT_RE
+  const ES = /Lo tienes cuando:/;
+  const counts = {}, missing = {};
+  let cards = 0;
+  for (const file of MODULE_FILES) {
+    const sandbox = { console };
+    vm.createContext(sandbox);
+    let sets;
+    try {
+      vm.runInContext(configSrc, sandbox, { filename: 'config-main.js' });
+      vm.runInContext(readFileSync(join(ROOT, file), 'utf8'), sandbox, { filename: file });
+      sets = vm.runInContext('SETS', sandbox) || [];
+    } catch { continue; }                 // reported by 1
+    for (const s of sets) {
+      const m = Number(s && s.moduleNum);
+      counts[m] = counts[m] || 0;
+      for (const stId of Object.keys((s && s.stations) || {})) {
+        const stn = s.stations[stId];
+        const secs = stn.sections || (stn.steps ? [{ steps: stn.steps }] : []);
+        secs.forEach((sec, si) => (sec.steps || []).forEach((step, i) => {
+          if (!step || !/^Challenge\b/.test(step.label || '')) return;
+          cards++;
+          if (EN.test(step.text || '') && ES.test(step.text_es || '')) return;
+          counts[m]++;
+          (missing[m] = missing[m] || []).push(`${s.id}·${stId} section ${si + 1} step ${i + 1} "${step.label}"`);
+        }));
+      }
+    }
+  }
+  if (!cards) { err('1ar2 found no Challenge cards at all — it cannot see what it is supposed to guard'); problems++; return; }
+  let bad = 0;
+  const flag = m => { err(m); problems++; bad++; };
+  for (const m of Object.keys(CHALLENGE_NO_GOTIT_BUDGET).map(Number))
+    if (!(m in counts)) flag(`1ar2: Module ${m} has a budget but no sets were read for it — the check has gone blind there`);
+  const lower = [];
+  for (const m of Object.keys(counts).map(Number).sort((a, b) => a - b)) {
+    const have = counts[m], cap = CHALLENGE_NO_GOTIT_BUDGET[m];
+    if (cap === undefined) { flag(`1ar2: Module ${m} has no entry in CHALLENGE_NO_GOTIT_BUDGET — add one (0 unless a card genuinely has no countable finish)`); continue; }
+    if (have > cap) flag(`Module ${m}: ${have} Challenge card${have === 1 ? '' : 's'} without a "You've got it when:" / "Lo tienes cuando:" line, budget is ${cap} — add a countable got-it line after the list, in both languages: ${missing[m].join('; ')}`);
+    else if (have < cap) lower.push(`M${m} ${cap}→${have}`);
+  }
+  const total = Object.values(counts).reduce((a, b) => a + b, 0);
+  if (!bad) ok(`${cards} Challenge cards, ${total} without a got-it line — all within budget${lower.length ? ` (now below budget, lower it: ${lower.join(', ')})` : ''}`);
+}
+
+/* ════════════════════════════════════════════════════════════════════
    1as. THE DAILY 5 SWITCH — the "Tune and warm up first" banner was
    retired on 2026-09-19 by setting DAILY5_ENABLED = false rather than
    deleting buildDaily5() / openDaily5Here(), so flipping the constant
@@ -6295,7 +6357,7 @@ function checkCardCaptionWords() {
    one-sided label is itself the bug (dots in one language, none in the
    other), so it fails outright now rather than being skipped. Bump when a
    card genuinely adds or removes a got-it sentence in both languages. */
-const REP_COUNT_FIELDS = 381;   // 2026-10-07: part cards lose their help ladders too (-8). 2026-10-07: whole-song cards lose their help ladders (-13). 2026-10-06: m12w3 melody-on-top gets a countable got-it (+1). 2026-10-05: ca-27 Luna (+1) and ca-28 Sweet Child (+2) whole songs; ca-29..ca-33 power-chord whole songs (+6). 2026-10-01: ca-13/ca-19/ca-20 as practice cards (-7), ca-25 Seven Nation Army whole song (+2), ca-21 Lines 2 and 4 restored (+2), ca-26 Watchtower whole song (+1)
+const REP_COUNT_FIELDS = 398;   // 2026-10-12: 17 Challenge cards in Modules 9-11 get a countable got-it (+17, see 1ar2). 2026-10-07: part cards lose their help ladders too (-8). 2026-10-07: whole-song cards lose their help ladders (-13). 2026-10-06: m12w3 melody-on-top gets a countable got-it (+1). 2026-10-05: ca-27 Luna (+1) and ca-28 Sweet Child (+2) whole songs; ca-29..ca-33 power-chord whole songs (+6). 2026-10-01: ca-13/ca-19/ca-20 as practice cards (-7), ca-25 Seven Nation Army whole song (+2), ca-21 Lines 2 and 4 restored (+2), ca-26 Watchtower whole song (+1)
 function checkRepCountParity(sets, ctx) {
   head('1bg. Rep-count dots agree between English and Spanish');
   if (!ctx) { err('1bg cannot run — render context unavailable'); problems++; return; }
@@ -6658,6 +6720,7 @@ function checkGuitarNotes() {
   checkBareWatchSteps();
   checkHappyBirthdayRhythm();
   checkShortResponseBudget();
+  checkChallengeGotItBudget();
   checkDaily5Switch();
   checkUnbalancedInlineP();
   checkStrumLineGaps();
