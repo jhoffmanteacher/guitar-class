@@ -467,8 +467,8 @@ SETS.push(
             steps: [
               {
                 label: 'Challenge 2 — Which Chord Feels Like Home? Am–G–F', label_es: 'Reto 2 — ¿Cuál acorde se siente como base? Am–G–F',
-                text: '<ol><li>Strum Am–G–F, stopping and holding each chord in turn.</li><li>Say (or type below) which one feels most like "home."</li></ol>You\'ve got it when: you play the loop three times in a row and pick the same chord as home every time.',
-                text_es: '<ol><li>Rasguea Am–G–F, deteniéndote y sosteniendo cada acorde por turno.</li><li>Di (o escribe abajo) cuál se siente más como "base."</li></ol>Lo tienes cuando: tocas el loop tres veces seguidas y eliges el mismo acorde como base cada vez.',
+                text: '<ol><li>Strum Am–G–F, stopping and holding each chord in turn.</li><li>Say (or type below) which one feels most like "home."</li></ol>You\'ve got it when: you play the loop three times in a row and pick Am as home every time.',
+                text_es: '<ol><li>Rasguea Am–G–F, deteniéndote y sosteniendo cada acorde por turno.</li><li>Di (o escribe abajo) cuál se siente más como "base."</li></ol>Lo tienes cuando: tocas el loop tres veces seguidas y eliges Am como base cada vez.',
                 hint: 'Play the loop a few times through first — home only reveals itself once you can hear the whole shape of the progression.',
                 hint_es: 'Toca el loop unas cuantas veces primero — la base solo se revela una vez que puedes escuchar la forma completa de la progresión.',
                 stuck: 'Play just Am, then G, then F in isolation and rate each one 1-10 for "does this feel finished."',

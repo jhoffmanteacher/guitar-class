@@ -693,13 +693,13 @@ SETS.push(
               prompt_es: 'En este módulo, ¿qué debe hacer la cuerda mi aguda en tu cejilla en forma de A?',
               answer: 0,
               choices: [
-                'Ring cleanly, left open by how you angle your fingers',
+                'Ring cleanly — your other fingers stay off it',
                 'Stay muted by the ring finger, the way some players do it',
                 'Stay muted by the barre finger itself',
                 'Buzz a little — that\'s normal for this shape'
               ],
               choices_es: [
-                'Sonar limpia, dejada libre por cómo angulas los dedos',
+                'Sonar limpia — tus otros dedos no la tocan',
                 'Quedarse silenciada por el dedo anular, como hacen algunos guitarristas',
                 'Quedarse silenciada por el propio dedo de la cejilla',
                 'Zumbar un poco — eso es normal en esta forma'

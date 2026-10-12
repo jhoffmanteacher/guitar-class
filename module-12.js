@@ -68,8 +68,8 @@ SETS.push(
             steps: [
               {
                 label: 'Listen: the alternating bass', label_es: 'Escucha: el bajo alternante',
-                text: 'On a C chord, the alternating thumb usually bounces between two bass strings. Listen for it in "Dust in the Wind" by Kansas, the song you heard in Module 8.',
-                text_es: 'En un acorde de C, el pulgar alternante suele rebotar entre dos cuerdas graves. Escúchalo en "Dust in the Wind" de Kansas, la canción que escuchaste en el Módulo 8.',
+                text: 'Listen for the bass bouncing between two notes in "Dust in the Wind" by Kansas, the song you heard in Module 8. You are listening for the bounce, not for which strings it uses.',
+                text_es: 'Escucha el bajo rebotando entre dos notas en "Dust in the Wind" de Kansas, la canción que escuchaste en el Módulo 8. Escuchas el rebote, no las cuerdas que usa.',
                 hint: 'Find the two bass notes of C: the root C and its 5th, G. Each sits at fret 3 on a different string — the same alternating bass Module 8 taught for a C chord.',
                 hint_es: 'Encuentra las dos notas graves de C: la raíz C y su 5ª, G. Cada una está en el traste 3 de una cuerda distinta — el mismo bajo alternante que enseñó el Módulo 8 para un acorde de C.',
                 skills: [1, 4],
@@ -621,8 +621,8 @@ SETS.push(
           unit: 'BPM', placeholder: 'e.g. 70 — try for a higher number next session', placeholder_es: 'p. ej. 70 — intenta superarlo la próxima sesión' } },
       { id: 'm12w2-s6', text: 'Play Happy Birthday\'s waltz feel fingerstyle',
         text_es: 'Tocar la sensación de vals de Happy Birthday con fingerstyle',
-        gotItWhen: 'the whole song with the bass on beat 1 of every bar and no stops, two times in a row.',
-        gotItWhen_es: 'la canción completa con el bajo en el tiempo 1 de cada compás y sin paradas, dos veces seguidas.',
+        gotItWhen: 'the whole song counted ONE-two-three out loud, no stops, two times in a row.',
+        gotItWhen_es: 'la canción completa contando UNO-dos-tres en voz alta, sin paradas, dos veces seguidas.',
         practice: { type: 'mc', prompt: 'Happy Birthday is in 3/4. How does your bass–pluck–pluck pattern line up with the count?',
           prompt_es: 'Happy Birthday está en 3/4. ¿Cómo se alinea tu patrón bajo–pulsación–pulsación con el conteo?',
           choices: ['Thumb bass on 1, finger plucks on 2 and 3', 'Bass on every one of the three beats', 'Plucks on beats 1 and 2, bass on beat 3', 'Same as 4/4 — just play it a bit faster'],

@@ -209,8 +209,8 @@ SETS.push(
             steps: [
               {
                 label: 'Challenge — "Let It Be", in the scale', label_es: 'Reto — "Let It Be", dentro de la escala',
-                text: '<ol><li>Strum the first line of the "Let It Be" verse: C–G–Am–F, two beats per chord.</li><li>After each chord, find its root (the note the chord is named after) in your C major walk on the B string, and play it.</li><li>All four roots — C, G, A and F — are notes of the C major scale. That is what "in the key of C" means.</li></ol>You\'ve got it when: two loops in a row with every chord followed by its root on the B string, no chart.',
-                text_es: '<ol><li>Rasguea la primera línea de la estrofa de "Let It Be": C–G–Am–F, dos tiempos por acorde.</li><li>Después de cada acorde, encuentra su raíz (la nota que le da nombre al acorde) en tu caminata de C mayor en la cuerda Si, y tócala.</li><li>Las cuatro raíces — C, G, A y F — son notas de la escala de C mayor. Eso es lo que significa "en la tonalidad de C".</li></ol>Lo tienes cuando: dos vueltas seguidas con cada acorde seguido de su raíz en la cuerda Si, sin diagrama.',
+                text: '<ol><li>Strum the first line of the "Let It Be" verse: C–G–Am–F, two beats per chord.</li><li>After each chord, find its root (the note the chord is named after) in your C major walk on the B string, and play it.</li><li>All four chords — C, G, Am and F — use only notes of the C major scale, and C sounds like home. That is what "in the key of C" means.</li></ol>You\'ve got it when: two loops in a row with every chord followed by its root on the B string, no chart.',
+                text_es: '<ol><li>Rasguea la primera línea de la estrofa de "Let It Be": C–G–Am–F, dos tiempos por acorde.</li><li>Después de cada acorde, encuentra su raíz (la nota que le da nombre al acorde) en tu caminata de C mayor en la cuerda Si, y tócala.</li><li>Los cuatro acordes — C, G, Am y F — usan solo notas de la escala de C mayor, y C suena como la base. Eso es lo que significa "en la tonalidad de C".</li></ol>Lo tienes cuando: dos vueltas seguidas con cada acorde seguido de su raíz en la cuerda Si, sin diagrama.',
                 hint: 'A song in the key of C takes its chords and its melody from the C major scale. Each chord\'s root is one of the seven notes you just walked.',
                 hint_es: 'Una canción en la tonalidad de C saca sus acordes y su melodía de la escala de C mayor. La raíz de cada acorde es una de las siete notas que acabas de recorrer.',
                 stuck: 'Play the walk once slowly, saying each note name out loud, and stop on the four roots you need: C, G, A and F.',
@@ -816,8 +816,8 @@ SETS.push(
                 hint_es: 'Conoces estos nombres de acordes desde el Módulo 5 — el reto de hoy es confiar en tu oído para clasificarlos en brillante vs. oscuro antes de comprobarlo.',
                 stuck: 'Compare just Dm and F, back and forth, until you hear the difference. Then add C and G.',
                 stuck_es: 'Compara solo Dm y F, alternando, hasta que escuches la diferencia. Luego agrega C y G.',
-                levelUp: 'Guess which chord is the "home" chord using only your ear, then confirm it.',
-                levelUp_es: 'Adivina cuál acorde es el acorde "base" usando solo tu oído, y luego confírmalo.',
+                levelUp: 'Strum the verse, Am–C–Am–C then F–C–F–C, and guess by ear which chord is "home." Then check: it is the chord the verse starts on and keeps coming back to.',
+                levelUp_es: 'Rasguea la estrofa, Am–C–Am–C y luego F–C–F–C, y adivina de oído cuál acorde es la "base". Luego compruébalo: es el acorde con el que empieza la estrofa y al que vuelve una y otra vez.',
                 skills: [4, 6]
               }
             ]
@@ -881,11 +881,11 @@ SETS.push(
           choices_es: ['Mayor', 'Menor', 'Un acorde de potencia', 'Un acorde con barra diagonal (con un bajo distinto)'], answer: 1,
           explain: 'Dark and moody is the sound of minor; bright and happy is major. Power chords and slash chords aren\'t answers here — neither one is major or minor on its own.',
           explain_es: 'Oscuro y melancólico es el sonido de lo menor; brillante y alegre es lo mayor. Los acordes de potencia y los acordes con barra diagonal no son respuestas aquí — ninguno de los dos es mayor ni menor por sí solo.' } },
-      { id: 'm10w3-s5', text: 'Echo back a 3-note pattern by ear on the E or A string',
-        text_es: 'Repetir de oído un patrón de 3 notas en la cuerda Mi o La',
+      { id: 'm10w3-s5', text: 'Echo back a 3-note pattern by ear on the low E string',
+        text_es: 'Repetir de oído un patrón de 3 notas en la cuerda Mi grave',
         gotItWhen: 'you match 3 out of 4 echoed patterns correctly, by ear alone — singing each pattern back before you ever touch the fretboard.',
         gotItWhen_es: 'igualas correctamente 3 de 4 patrones repetidos, solo de oído — cantando cada patrón de vuelta antes de tocar siquiera el diapasón.',
-        practice: { type: 'playSeq', label: 'Echo pattern — round 1', label_es: 'Patrón de eco — ronda 1', bpm: 60, notes: [40, 43, 45] } },
+        practice: { type: 'playSeq', label: 'Hear a 3-note pattern — low E string', label_es: 'Escucha un patrón de 3 notas — cuerda Mi grave', bpm: 60, notes: [40, 43, 45] } },
       { id: 'm10w3-s6', text: 'Tell whether a core-song chord sounds major or minor ("Luna"\'s F = bright, Am = dark)',
         text_es: 'Distinguir si un acorde de una canción principal suena mayor o menor (la F de "Luna" = brillante, Am = oscuro)',
         gotItWhen: 'you can hear "Luna"\'s F (bright) and Am (dark) and explain that the difference comes down to a single note inside the chord.',
