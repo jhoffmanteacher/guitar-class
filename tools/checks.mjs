@@ -2230,7 +2230,7 @@ function checkSlangPhrasing() {
     let raw;
     try { raw = readFileSync(join(ROOT, file), 'utf8'); } catch { continue; }
     const en = raw.replace(/data-es="[^"]*"/g, m => m.replace(/[^\n]/g, ' '));
-    en.split('\n').forEach((line, li) => {
+    straightQuotes(en).split('\n').forEach((line, li) => {
       if (/^\s*<!--/.test(line)) return;
       for (const m of line.matchAll(RE)) flag(file, li, m[0]);
     });
@@ -2251,21 +2251,22 @@ function checkSlangPhrasing() {
          apostrophe ("that one's free") could never match a single-quoted
          field — see the 1w-t note on the same fix (2026-09-25). */
       for (const f of line.matchAll(STUDENT_FIELD_RE))
-        for (const m of unescapeJs(f[2]).matchAll(RE)) flag(file, li, m[0]);
+        for (const m of straightQuotes(unescapeJs(f[2])).matchAll(RE)) flag(file, li, m[0]);
       for (const c of line.matchAll(STUDENT_CHOICES_RE))
-        for (const m of unescapeJs(c[1]).matchAll(RE)) flag(file, li, m[0]);
+        for (const m of straightQuotes(unescapeJs(c[1])).matchAll(RE)) flag(file, li, m[0]);
       for (const c of line.matchAll(STUDENT_CAPTION_RE))
-        for (const m of unescapeJs(c[1]).matchAll(RE)) flag(file, li, m[0]);
+        for (const m of straightQuotes(unescapeJs(c[1])).matchAll(RE)) flag(file, li, m[0]);
       for (const l of line.matchAll(STUDENT_LABEL_RE))
-        for (const m of unescapeJs(l[1]).matchAll(RE)) flag(file, li, m[0]);
+        for (const m of straightQuotes(unescapeJs(l[1])).matchAll(RE)) flag(file, li, m[0]);
     });
   }
 
-  /* i18n.js — the en: side of each key. */
+  /* i18n.js — the en: side of each key. Curly apostrophes straightened
+     (straightQuotes, below): i18n.js writes ’ in ~70 en values. */
   try {
     readFileSync(join(ROOT, 'i18n.js'), 'utf8').split('\n').forEach((line, li) => {
       for (const e of line.matchAll(STUDENT_I18N_EN_RE))
-        for (const m of unescapeJs(e[1] ?? e[2] ?? '').matchAll(RE)) flag('i18n.js', li, m[0]);
+        for (const m of straightQuotes(unescapeJs(e[1] ?? e[2] ?? '')).matchAll(RE)) flag('i18n.js', li, m[0]);
     });
   } catch { /* checked elsewhere */ }
 
@@ -2309,10 +2310,20 @@ const TEACHER_PHRASES = [
      than one long tiring session", "...better than one long, tiring
      session") plus "that's normal.)" on the Sweet Child intro. Say the
      action ("If your hand cramps, shake it loose") and drop the comfort.
-     "better than one long" still appears in the Modules 1–5 practice-
-     routine hints, which are kind:'routine' (hidden) and so exempt. */
-  "that's normal", 'cramping is normal', 'is normal;', 'is normal.',
-  'better than one long',
+     "better than one long rushed session" still appears in the Modules 1–5
+     practice-routine hints, which are kind:'routine' (hidden) and so exempt.
+     Narrowed 2026-10-11 (review): bare 'better than one long' also hit the
+     musical "two short notes sound better than one long note", so it now
+     names the session — the exact shapes the audit found, plus the
+     routine's. A phrase ending in "normal" gets a closing \b when the
+     regex is built (TEACHER_RE below), so "That's normally played..." is
+     not a hit; that is also what let 'is normal;' / 'is normal.' widen to
+     plain 'is normal' ("Buzz is normal, so...", "is normal at first"). Its
+     one innocent use is allowlisted: module-13's "Restringing a guitar is
+     normal maintenance". */
+  "that's normal", 'cramping is normal', 'is normal',
+  'better than one long session', 'better than one long tiring',
+  'better than one long, tiring', 'better than one long rushed',
   /* Same class, 2026-10-11: m6w1's upstroke hint opened "It's normal for
      upstrokes to feel weaker at first." — the only use on the site, now
      reworded to the action ("Play the upstrokes lighter..."). Not bare
@@ -2340,7 +2351,7 @@ const TEACHER_MAXIM_RE = /\bbetter than fast and \w+,?\s*every time\./gi;
    ordinary verb; it's the checklist-style opening that's the tell). */
 const TEACHER_PREFIXES = [/^Demonstrate /, /^Apply /, /^Identify /];
 const TEACHER_RE = new RegExp(
-  '\\b(?:' + TEACHER_PHRASES.map(p => p.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')).join('|') + ')',
+  '\\b(?:' + TEACHER_PHRASES.map(p => p.replace(/[.*+?^${}()|[\]\\]/g, '\\$&') + (/normal$/.test(p) ? '\\b' : '')).join('|') + ')',
   'gi');
 /* 'trust the' guards the "trust the process" reassurance maxim, but it has
    real innocent twins — pointing a student at a tuner needle or a printed
@@ -2357,10 +2368,14 @@ const TEACHER_PHRASE_ALLOW = [
   { file: 'module-1.js', phrase: 'trust the needle' },
   { file: 'module-2.js', phrase: 'trust the fret numbers' },
   { file: 'module-7.js', phrase: 'trust the one with the highest star rating' },
-  /* m7w3's graded MC "what should the high e string do?" offers "Buzz a
-     little — that's normal for this shape" as a WRONG answer: the
-     beginner belief being rejected, not comfort to the reader. */
-  { file: 'module-7.js', phrase: "that's normal for this shape" },
+  /* A plain fact about guitars, not comfort to the reader. */
+  { file: 'module-13.js', phrase: 'is normal maintenance' },
+  /* m7w3's graded MC offers "Buzz a little — that's normal for this shape"
+     as a WRONG answer (the beginner belief being rejected). Its choices
+     array spans several lines, which STUDENT_CHOICES_RE does not read, so
+     an entry for it here was dead — and excused the phrase in every other
+     module-7.js value. Removed 2026-10-11; a multi-line choices sweep would
+     need it back. */
   /* m2w2 Challenge 3's "(your low-E assessment piece)" label is frozen —
      Module 2 is in rule-zero-proof.mjs's FROZEN_THROUGH regime, where a step
      LABEL must match the base commit BYTE-FOR-BYTE by index (a rename would
@@ -2376,27 +2391,35 @@ const HIDDEN_STEP_FIELDS = [
   'text', 'hint', 'stuck', 'levelUp', 'gotItWhen', 'explain', 'label',
   'prompt', 'placeholder', 'meta', 'note', 'forward', 'subtitle', 'intro',
 ];
+/* Keyed by FILE + value (2026-10-11 review): keyed by value alone, a
+   verbatim copy of a hidden routine hint pasted into a visible card in any
+   file was exempt too. A set's file is module-<moduleNum>.js — every
+   module file defines only its own module's sets. */
+const hiddenKey = (file, value) => `${file}\u0000${value}`;
 function collectHiddenStrings(sets, journeySongsFor) {
   const out = new Set();
+  let file = '';
+  const add = v => out.add(hiddenKey(file, v));
   const addObj = (obj) => {
     if (!obj || typeof obj !== 'object') return;
     for (const f of HIDDEN_STEP_FIELDS) {
-      if (typeof obj[f] === 'string') out.add(obj[f]);
-      if (typeof obj[f + '_es'] === 'string') out.add(obj[f + '_es']);
+      if (typeof obj[f] === 'string') add(obj[f]);
+      if (typeof obj[f + '_es'] === 'string') add(obj[f + '_es']);
     }
     for (const sub of [obj.response, obj.practice]) {
       if (!sub || typeof sub !== 'object') continue;
       for (const f of ['prompt', 'explain', 'placeholder']) {
-        if (typeof sub[f] === 'string') out.add(sub[f]);
-        if (typeof sub[f + '_es'] === 'string') out.add(sub[f + '_es']);
+        if (typeof sub[f] === 'string') add(sub[f]);
+        if (typeof sub[f + '_es'] === 'string') add(sub[f + '_es']);
       }
       for (const f of ['choices', 'choices_es']) {
-        if (Array.isArray(sub[f])) sub[f].forEach(c => { if (typeof c === 'string') out.add(c); });
+        if (Array.isArray(sub[f])) sub[f].forEach(c => { if (typeof c === 'string') add(c); });
       }
     }
   };
   const isTuning = (sec, moduleNum) => moduleNum !== 1 && sec.kind === 'tuning-warmup';
   for (const w of sets) {
+    file = `module-${w.moduleNum}.js`;
     for (const stId of ['b', 'c']) {
       const stn = w.stations && w.stations[stId];
       if (!stn || !(stn.sections && stn.sections.length)) continue;   // single-flow stations hide nothing
@@ -2421,6 +2444,11 @@ function collectHiddenStrings(sets, journeySongsFor) {
    \' \" \\ \n inside single-quoted strings, so a generic \X → X pass plus
    the \n special case covers every field this check reads. */
 const unescapeJs = s => s.replace(/\\n/g, '\n').replace(/\\(.)/g, '$1');
+/* Curly apostrophes read as straight ones before a phrase match
+   (2026-10-11 review): i18n.js writes ’ in ~70 en values, and "that’s
+   normal" there slipped past a list spelled with '. One char for one char,
+   so a match index still lines up with the original value. */
+const straightQuotes = s => s.replace(/[‘’]/g, "'");
 
 function checkTeacherSpeak(sets, journeySongsFor) {
   head('1w-t. Teacher speak in student-facing text');
@@ -2434,8 +2462,9 @@ function checkTeacherSpeak(sets, journeySongsFor) {
      single-quoted field, and a live "Don't worry about pressing any frets
      yet" sat in Module 1's first strum card with this check green. */
   const sweepValue = (file, li, raw) => {
-    const value = unescapeJs(raw);
-    if (hidden.has(value)) return;
+    const parsed = unescapeJs(raw);
+    if (hidden.has(hiddenKey(file, parsed))) return;
+    const value = straightQuotes(parsed);
     const lower = value.toLowerCase();
     for (const m of value.matchAll(TEACHER_RE)) {
       if (TEACHER_PHRASE_ALLOW.some(a => a.file === file && lower.startsWith(a.phrase, m.index))) continue;
@@ -2449,7 +2478,7 @@ function checkTeacherSpeak(sets, journeySongsFor) {
     let raw;
     try { raw = readFileSync(join(ROOT, file), 'utf8'); } catch { continue; }
     const en = raw.replace(/data-es="[^"]*"/g, m => m.replace(/[^\n]/g, ' '));
-    en.split('\n').forEach((line, li) => {
+    straightQuotes(en).split('\n').forEach((line, li) => {
       if (/^\s*<!--/.test(line)) return;
       for (const m of line.matchAll(TEACHER_RE)) flag(file, li, m[0]);
       for (const m of line.matchAll(TEACHER_MAXIM_RE)) flag(file, li, m[0]);
@@ -5805,27 +5834,44 @@ function checkCaButtonNamesAndPaper() {
    - module-*.js, class-activities.js, config-main.js: every `<field>_es`
      value — a quoted string, a template literal, or an array of strings
      (choices_es, assessItems_es), on one line or many. A `_es:` whose
-     value is none of those FAILS, so a new shape cannot slip past unread.
-   - index.html and tabs/*.html: every data-es="…" attribute, entities
-     decoded first.
-   Values are unescaped (unescapeJs) before matching, and link text
-   (<a>…</a>) is dropped first: a YouTube title is the video's real name
-   ("What Is A Power Chord?" in module-3) and stays English. Comments are
+     value is none of those FAILS, so a new shape cannot slip past unread
+     — and so does a literal joined to another literal with `+`.
+   - index.html, 404.html and tabs/*.html: every data-es="…" attribute.
+   Values are unescaped (unescapeJs) and entity-decoded before matching,
+   and the text of a YouTube link (<a href="…youtube…">…</a>) is dropped
+   first: a YouTube title is the video's real name ("What Is A Power
+   Chord?" in module-3) and stays English. Comments are
    blanked, so a note ABOUT the rule (like the glossary) never trips it.
    Fix: write the Spanish term from the glossary at the top of i18n.js.
    ════════════════════════════════════════════════════════════════════ */
+/* Separators widened 2026-10-11 (review): \s already covers the
+   non-breaking space; U+2010-U+2015 adds the Unicode hyphens and dashes
+   (a non-breaking hyphen, U+2011, let "power‑chord" read as clean),
+   and `*` catches "powerchord" written as one word. */
 const ES_ENGLISH_TERMS = [
-  { re: /\bpower[\s -]+chords?\b/i, fix: 'acorde(s) de potencia' },
-  { re: /\b(?:low|high)[\s -]+e\b/i, fix: 'Mi grave / mi aguda' },
+  { re: /\bpower[\s\u2010-\u2015-]*chords?\b/i, fix: 'acorde(s) de potencia' },
+  { re: /\b(?:low|high)[\s\u2010-\u2015-]+e\b/i, fix: 'Mi grave / mi aguda' },
 ];
 function checkEnglishTermsInSpanish(I18N) {
   head('1bp. English guitar terms inside Spanish text');
   let bad = 0;
   const seen = { i18n: 0, content: 0, dataEs: 0 };
-  const visible = v => v.replace(/<a\b[^>]*>[\s\S]*?<\/a>/gi, ' ').replace(/<[^>]*>/g, ' ');
+  /* Only a YOUTUBE link's text is exempt (2026-10-11 review) — that is the
+     video's real English title. A link to one of our own pages has text we
+     wrote, so it is Spanish like the rest. */
+  const visible = v => v
+    .replace(/<a\b[^>]*\bhref=["']https?:\/\/(?:www\.)?(?:youtube\.com|youtu\.be)\/[^"']*["'][^>]*>[\s\S]*?<\/a>/gi, ' ')
+    .replace(/<[^>]*>/g, ' ');
+  /* Entities are decoded in EVERY value, not only data-es (2026-10-11
+     review): "power&nbsp;chords" in an i18n es value read as clean. */
+  const decode = s => s
+    .replace(/&nbsp;/g, ' ').replace(/&lt;/g, '<').replace(/&gt;/g, '>').replace(/&quot;/g, '"')
+    .replace(/&#x([0-9a-f]+);/gi, (_, h) => String.fromCodePoint(parseInt(h, 16)))
+    .replace(/&#(\d+);/g, (_, d) => String.fromCodePoint(+d))
+    .replace(/&amp;/g, '&');
   /* `where` is a function: the file:line lookup only runs on a hit. */
   const scan = (where, value) => {
-    const v = visible(value);
+    const v = visible(decode(value));
     for (const { re, fix } of ES_ENGLISH_TERMS) {
       const m = v.match(re);
       if (m) { err(`${where()} — Spanish text says "${m[0]}"; use "${fix}" (1bp)`); problems++; bad++; }
@@ -5850,6 +5896,27 @@ function checkEnglishTermsInSpanish(I18N) {
     const end = skipStringOrComment(src, i);
     return { text: unescapeJs(src.slice(i + 1, end - 1)), end };
   };
+  /* A literal followed by `+ '…'` is a concatenation whose later pieces
+     would go unread, so refuse it like any other unreadable shape. A bare
+     named constant is allowed — module-13's `'…' + M13_P8_ES` appends a
+     figure, whose only Spanish is an alt attribute scan() drops with the
+     tag anyway — but the chain is followed past it, and a call, member or
+     anything else after a `+` is refused too. */
+  const concatAfter = (src, j) => {
+    for (;;) {
+      const plus = /^\s*\+\s*/.exec(src.slice(j, j + 200));
+      if (!plus) return false;
+      j += plus[0].length;
+      const id = /^[A-Za-z_$][\w$]*/.exec(src.slice(j, j + 200));
+      if (!id) return true;                                   // a literal, or anything else
+      j += id[0].length;
+      if (/^\s*[(.[`]/.test(src.slice(j, j + 50))) return true;   // a call / member / tagged template
+    }
+  };
+  const unreadable = where => {
+    err(`${where()} — 1bp cannot read this _es value (not a string or an array of strings); teach 1bp the new shape so its Spanish is checked`);
+    problems++; bad++;
+  };
   for (const file of [...MODULE_FILES, 'class-activities.js', 'config-main.js']) {
     let src;
     try { src = stripJsComments(readFileSync(join(ROOT, file), 'utf8')); } catch { continue; }
@@ -5857,38 +5924,35 @@ function checkEnglishTermsInSpanish(I18N) {
       let i = m.index + m[0].length;
       const where = (at = m.index) => () => `${file}:${lineOf(src, at)} ${m[1]}`;
       if (src[i] === "'" || src[i] === '"' || src[i] === '`') {
-        seen.content++; scan(where(), readJsString(src, i).text);
+        const s = readJsString(src, i);
+        if (concatAfter(src, s.end)) { unreadable(where()); continue; }
+        seen.content++; scan(where(), s.text);
       } else if (src[i] === '[') {
         let depth = 0;
         for (; i < src.length; i++) {
           const c = src[i];
           if (c === "'" || c === '"' || c === '`') {
             const s = readJsString(src, i);
-            seen.content++; scan(where(i), s.text);
+            if (concatAfter(src, s.end)) unreadable(where(i));
+            else { seen.content++; scan(where(i), s.text); }
             i = s.end - 1; continue;
           }
           if (c === '[') depth++;
           else if (c === ']' && --depth === 0) break;
         }
       } else {
-        err(`${where()()} — 1bp cannot read this _es value (not a string or an array of strings); teach 1bp the new shape so its Spanish is checked`);
-        problems++; bad++;
+        unreadable(where());
       }
     }
   }
 
-  /* Shell + Journey pages — data-es attributes, entities decoded. */
-  const decode = s => s
-    .replace(/&nbsp;/g, ' ').replace(/&lt;/g, '<').replace(/&gt;/g, '>').replace(/&quot;/g, '"')
-    .replace(/&#x([0-9a-f]+);/gi, (_, h) => String.fromCodePoint(parseInt(h, 16)))
-    .replace(/&#(\d+);/g, (_, d) => String.fromCodePoint(+d))
-    .replace(/&amp;/g, '&');
-  for (const file of ['index.html', ...TAB_PAGES.filter(f => f.endsWith('.html'))]) {
+  /* Shell, 404 and Journey pages — data-es attributes (scan decodes). */
+  for (const file of ['index.html', '404.html', ...TAB_PAGES.filter(f => f.endsWith('.html'))]) {
     let src;
     try { src = readFileSync(join(ROOT, file), 'utf8'); } catch { continue; }
     for (const m of src.matchAll(/\bdata-es="([^"]*)"/g)) {
       seen.dataEs++;
-      scan(() => `${file}:${lineOf(src, m.index)} data-es`, decode(m[1]));
+      scan(() => `${file}:${lineOf(src, m.index)} data-es`, m[1]);
     }
   }
 

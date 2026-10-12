@@ -213,8 +213,27 @@ head(`A. Structure vs ${BASE}`);
           }
         } else {
           const { keptA, keptB } = lcs(bl, hl);
-          const lost = bl.filter((_, i) => !keptA.has(i));
-          const gained = hl.map((l, i) => [l, i]).filter(([, i]) => !keptB.has(i));
+          const lostAll = bl.filter((_, i) => !keptA.has(i));
+          const gainedAll = hl.map((l, i) => [l, i]).filter(([, i]) => !keptB.has(i));
+          /* LCS reports a swapped pair as one label lost + one gained, which
+             used to print as a harmless "step relabelled" and pass whenever
+             the count held (2026-10-11 review). A label LCS dropped that is
+             still in the head list (as many times as in the base) was not
+             renamed — it MOVED, and its index is its progress key. Same for
+             a gained label the base already had. Counting copies keeps a
+             duplicate label that was genuinely added or removed out of it;
+             the count checks below catch those. A true rename (label gone
+             from the other side) still only prints. */
+          const tally = a => a.reduce((t, l) => t.set(l, (t.get(l) || 0) + 1), new Map());
+          const bc = tally(bl), hc = tally(hl);
+          const moved = [...new Set([
+            ...lostAll.filter(l => (hc.get(l) || 0) >= bc.get(l)),
+            ...gainedAll.map(([l]) => l).filter(l => (bc.get(l) || 0) >= hc.get(l)),
+          ])];
+          if (moved.length)
+            fail(`${id}·${stId}·sec${si}: step(s) MOVED ${JSON.stringify(moved)} — progress keys follow index`);
+          const lost = lostAll.filter(l => !moved.includes(l));
+          const gained = gainedAll.filter(([l]) => !moved.includes(l));
           if (regime === 'stable' && (lost.length || gained.length || bl.length !== hl.length)) {
             if (bl.length !== hl.length)
               fail(`${id}·${stId}·sec${si}: step COUNT changed ${bl.length} → ${hl.length} above Module ${OPEN_THROUGH} — every later key in this section moves`);
@@ -268,6 +287,14 @@ head(`B. Graded MC choices frozen in Modules 1–${FROZEN_THROUGH}`);
       console.log(`   - ${q(b.mc.choices_es)}\n   + ${q(h.mc.choices_es)}`);
       console.log(`   - answer ${b.mc.answer}  + answer ${h.mc.answer}`);
     }
+  }
+  /* The loop above only walks the HEAD's MCs, so a frozen graded MC that
+     was removed (or turned into another response type) passed here — only
+     checks.mjs 1ap caught it (2026-10-11 review). Walk the base too. */
+  for (const [k, b] of baseMc) {
+    if (b.kind !== 'graded' || b.moduleNum > FROZEN_THROUGH || headMc.has(k)) continue;
+    fail(`${k} — "${b.label}": FROZEN graded MC is GONE in a module students are in. Its stored picks are orphaned.`);
+    broken++;
   }
   if (!broken) ok(`${frozen} graded MCs in Modules 1–${FROZEN_THROUGH} are byte-identical (choices, choices_es, answer)`);
 }
