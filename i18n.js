@@ -1203,6 +1203,9 @@
     'hub.groupChords':       { en: 'Chord & strumming songs', es: 'Canciones con acordes y rasgueo' },
     'hub.groupAdv':          { en: 'Advanced', es: 'Avanzadas' },
     'hub.groupStart':        { en: 'start in Modules {a}–{b}', es: 'empiezan en los Módulos {a}–{b}' },
+    // {a}/{b} are a module number or a range ("1–3"): Open Chords (4) comes
+    // before the pentatonic scales (5), so two groups skip a number.
+    'hub.groupStartAnd':     { en: 'start in Modules {a} and {b}', es: 'empiezan en los Módulos {a} y {b}' },
     'hub.groupCount':        { en: '{n} songs', es: '{n} canciones' },
 
     // ── 🔁 Keep practicing panel ──

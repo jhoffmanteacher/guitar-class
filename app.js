@@ -4385,7 +4385,8 @@ function buildSet(w){
   const skills = items ? `<ul class="obj-skill-list">${items}</ul>` : '';
   /* Song-thread line: each core song is built LAYER BY LAYER across the
      course (the Journey pages' shared ladder: 1 Listen · 2 Single Notes ·
-     3 Power Chords · 4 Pentatonic Solo · 5 Open Chords · Luna bonus 6).
+     3 Power Chords · 4 Open Chords · 5 Pentatonic Solo · Luna bonus 6 —
+     4 and 5 swapped places with the modules on 2026-10-12).
      One compact line naming which layer this set builds, names deep-linked
      to that layer on the Journey page — full detail (videos, notes) lives
      in the module's Songs list at the bottom, so this doesn't repeat it. */
@@ -10129,17 +10130,29 @@ async function renderSongsHub(){
   p.innerHTML = `<div class="coach-tip">${t('hub.loading')}</div>`;
   await ensureAllModuleData();
   const byName = new Map();
+  /* Which entry's backing track a row shows: `b`'s when `a` has none, or
+     when `a`'s is a local mp3 and `b`'s is a YouTube jam track; otherwise
+     `a`'s. A Core row's one backing link is "Backing track for solos", and
+     solo work uses the YouTube jam tracks — the course mp3s are
+     rhythm-stripped play-alongs (song-facts). Until the 2026-10-12 Module
+     4/5 swap "first one met" got this right by luck: the pentatonic list
+     (then Module 4) came before Open Chords, whose "Let It Be" entry carries
+     the rhythm-stripped mp3. Choose by the kind of track, not by which
+     module number comes first. */
+  const isLocalAudio = u => /\.(mp3|m4a|ogg|wav)(\?|$)/i.test(u || '');
+  const backingOf = (a, b) => (b.backingUrl && (!a.backingUrl || (isLocalAudio(a.backingUrl) && !isLocalAudio(b.backingUrl)))) ? b : a;
   const noteSong = (song, moduleNum) => {
     const e = byName.get(song.name) || { song, modules: new Set() };
     e.modules.add(moduleNum);
-    if(song.journeyUrl && !e.song.journeyUrl) e.song = { ...song, backingUrl: song.backingUrl || e.song.backingUrl, backingKey: song.backingKey || e.song.backingKey };
+    if(song.journeyUrl && !e.song.journeyUrl){ const bk = backingOf(song, e.song); e.song = { ...song, backingUrl: bk.backingUrl, backingKey: bk.backingKey }; }
     /* The kept entry is the FIRST one met (Module 1/2), and for the six core
-       songs only MODULE_SONGS[4] carries a backingUrl — so keeping the first
-       entry whole dropped every core song's backing track from the hub, the
-       only place Module 4's "pick a core song's track" card (and Module 5's
-       Call & Response hint) can send a student. Carry it forward onto a
-       copy; never mutate the module data. Found 2026-09-25. */
-    else if(song.backingUrl && !e.song.backingUrl) e.song = { ...e.song, backingUrl: song.backingUrl, backingKey: song.backingKey };
+       songs only the pentatonic list (MODULE_SONGS[5]) carries a solo
+       backingUrl — so keeping the first entry whole dropped every core
+       song's backing track from the hub, the only place Module 5's "pick a
+       core song's track" card (and Module 4's Call & Response hint) can send
+       a student. Carry it forward onto a copy; never mutate the module data.
+       Found 2026-09-25. */
+    else { const bk = backingOf(e.song, song); if(bk !== e.song) e.song = { ...e.song, backingUrl: bk.backingUrl, backingKey: bk.backingKey }; }
     byName.set(song.name, e);
   };
   SETS.filter(w => w.moduleNum === 1 && w.songs).forEach(w => w.songs.forEach(sg => noteSong(sg, 1)));
@@ -10163,10 +10176,19 @@ async function renderSongsHub(){
   const coreEntries = entries.filter(isCoreSix).sort((a, b) => coreRank(a) - coreRank(b));
   const requestEntries = entries.filter(e => !isCoreSix(e) && e.song.request === true);
   const rest = entries.filter(e => !isCoreSix(e) && e.song.request !== true);
+  /* The groups follow CONTENT, not a run of module numbers (2026-10-12):
+     Open Chords moved ahead of the pentatonic scales, so the single-note
+     group is Modules 1–3 plus the pentatonic Module 5, and the chord group
+     is Open Chords (Module 4) plus 6–8. A plain "≤ 4" split would have
+     swapped nine Choice songs between the two groups. Each `sub` names the
+     same modules its `match` does — change them together. (The riff group
+     takes everything below 9 that isn't a chord module, so no song can
+     fall through every group.) */
+  const CHORD_MODS = [4, 6, 7, 8];
   const groups = [
-    { title: t('hub.groupRiffs'),  sub: t('hub.groupStart', {a: 1, b: 4}),  match: e => firstMod(e) <= 4 },
-    { title: t('hub.groupChords'), sub: t('hub.groupStart', {a: 5, b: 8}),  match: e => firstMod(e) >= 5 && firstMod(e) <= 8 },
-    { title: t('hub.groupAdv'),    sub: t('hub.groupStart', {a: 9, b: 12}), match: e => firstMod(e) >= 9 },
+    { title: t('hub.groupRiffs'),  sub: t('hub.groupStartAnd', {a: '1–3', b: 5}), match: e => firstMod(e) < 9 && !CHORD_MODS.includes(firstMod(e)) },
+    { title: t('hub.groupChords'), sub: t('hub.groupStartAnd', {a: 4, b: '6–8'}), match: e => CHORD_MODS.includes(firstMod(e)) },
+    { title: t('hub.groupAdv'),    sub: t('hub.groupStart', {a: 9, b: 12}),       match: e => firstMod(e) >= 9 },
   ].map(g => ({ ...g, entries: rest.filter(g.match) })).filter(g => g.entries.length);
   const ordered = [...coreEntries, ...groups.flatMap(g => g.entries), ...requestEntries];
   songsHubList = ordered.map(e => e.song);
