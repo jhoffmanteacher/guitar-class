@@ -797,7 +797,9 @@ body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,"Helvetica N
 .rail .wpill.active{background:var(--purple-bg);border-color:var(--purple-accent);color:var(--purple-text);font-weight:600}
 /* 4+ sets in a module: tighter buttons so one rail row still fits them all
    (the "· 2/6" started-set fraction is hidden at this size — the green
-   complete state and the aria-labels still carry the progress info) */
+   complete state and the aria-labels still carry the progress info).
+   3+ sets also show just the number ("1 2 3 4", 2026-10-12) — that is
+   renderPills() in app.js, with the full name kept in a .sr-only span. */
 .rail .week-pills.wp-many{gap:4px}
 .rail .week-pills.wp-many .wpill{font-size:0.8125rem;padding:7px 3px}
 .rail .week-pills.wp-many .wpill-frac,.rail .week-pills.wp-many .wpill-check{display:none}
@@ -938,8 +940,9 @@ body.rail-collapsed .rail-tools .tool-popup{
    below the drawer breakpoint too: on a phone the rail is a full-height
    overlay that scrolls, so it was never the problem. */
 @media(min-width:761px) and (max-height:800px){
-  .rail-scroll{gap:6px}
-  .rail-panel{gap:8px}
+  .rail-scroll{gap:4px;padding-top:8px;padding-bottom:8px}
+  .rail-collapse{margin-top:4px}
+  .rail-panel{gap:4px}
   .rail-divider{margin-top:0}
   .rail-sec-label{margin-bottom:2px}
   .nav-list{gap:2px 6px}
@@ -953,11 +956,14 @@ body.rail-collapsed .rail-tools .tool-popup{
   .rail-station-list{gap:2px}
   .rail-station{padding:6px 11px}
   .rail-parts{margin:-2px 0 0 44px}
-  .rail-part{padding:2px 10px}
+  .rail-part{padding:1px 10px}
   .rs-sub{display:none}
   /* Report a problem moved into the rail 2026-10-11 and tipped every module
      2px past the bottom at 1366×657 (measured). 5px is the most it can give
-     back here; m5w2, a two-part set, is still 19px over (needs another fix). */
+     back here. m5w2, a two-part set, was still 19px over; the 4px gaps, the
+     8px end padding, the collapse button's 4px top margin and the 1px part
+     links above won back 24px (2026-10-12, measured at 1366×657, student
+     view, EN and ES: m5w2 +5px, every other 3- or 4-set module +24px). */
   .rail-report{padding-top:5px;padding-bottom:5px}
 }
 /* the per-set tab switcher now lives in the rail — hide the in-panel one on screen

@@ -3740,6 +3740,21 @@ function renderPills(moduleNum){
   const sets = SETS.filter(w=>w.moduleNum===moduleNum);
   // 4+ sets: compact the buttons so they still fit on one rail row
   c.classList.toggle('wp-many', sets.length>3);
+  // 3+ sets: each button shows just the set's NUMBER, in both languages
+  // (2026-10-12). Measured at 1366×657: "Unidad 3" needs ~70px, so three or
+  // four Spanish buttons wrapped the 219px row onto a second line, and so
+  // did three English ones as soon as a set showed its "· 3/7" — the row
+  // grew 44 → 92px and pushed Module review below the rail. Two-set modules
+  // (1–3, the ones students know) keep "Set 1" / "Set 2". The full name is
+  // still the accessible name (the .sr-only span below, or an aria-label
+  // that names the set) and leads the hover title=. The number span carries
+  // no data-i18n-setlabel, so applyI18n can't write "Unidad 3" back into it.
+  const numOnly = sets.length >= 3;
+  const labelHtml = w => {
+    const n = numOnly && /^Set (\d+)$/.exec(w.label || '');
+    const name = `<span data-i18n-setlabel="${escAttr(w.label)}" translate="no" class="notranslate${n ? ' sr-only' : ''}">${escHtml(tSetLabel(w.label))}</span>`;
+    return n ? `<span class="wpill-num" aria-hidden="true">${n[1]}</span>${name}` : name;
+  };
   // A set that just became genuinely unlocked (finished the one before it,
   // possibly in another tab) sheds any leftover peek state from before —
   // otherwise the panel would still fail-safe as read-only after the real
@@ -3764,13 +3779,17 @@ function renderPills(moduleNum){
     btn.className='wpill'+(locked?' locked':'');
     btn.dataset.id=w.id;
     const { done, total } = locked ? { done:0, total:0 } : setCompletion(w);
+    // A number-only button's peek hint ("Preview available — finish Set 2…")
+    // never says which set it is on, so it gets the name in front, in the
+    // aria-label as well as the tooltip.
+    const named = s => !numOnly ? s : (s ? `${tSetLabel(w.label)} · ${s}` : tSetLabel(w.label));
     // Label text carries data-i18n-setlabel (not just plain text) so applyI18n
     // marks it translate="no" — otherwise these freshly-created buttons are
     // never caught by the DOM walk and stay exposed to Google Translate.
     if(!locked && total>0 && done===total){
       // All skills got-it: green treatment + leading ✓.
       btn.classList.add('complete');
-      btn.innerHTML = `<span class="wpill-check" aria-hidden="true">✓</span><span data-i18n-setlabel="${escAttr(w.label)}" translate="no" class="notranslate">${escHtml(tSetLabel(w.label))}</span>`;
+      btn.innerHTML = `<span class="wpill-check" aria-hidden="true">✓</span>${labelHtml(w)}`;
       btn.setAttribute('aria-label', t('gate.pillAllComplete', {set: tSetLabel(w.label), total}));
     } else if(!locked && done>0){
       // Started but not finished: full name + a small fraction. Untouched sets
@@ -3778,11 +3797,11 @@ function renderPills(moduleNum){
       const frac = document.createElement('span');
       frac.className = 'wpill-frac';
       frac.textContent = ` · ${done}/${total}`;
-      btn.innerHTML = `<span data-i18n-setlabel="${escAttr(w.label)}" translate="no" class="notranslate">${escHtml(tSetLabel(w.label))}</span>`;
+      btn.innerHTML = labelHtml(w);
       btn.appendChild(frac);
       btn.setAttribute('aria-label', t('gate.pillProgress', {set: tSetLabel(w.label), done, total}));
     } else {
-      btn.innerHTML = `<span data-i18n-setlabel="${escAttr(w.label)}" translate="no" class="notranslate">${escHtml(tSetLabel(w.label))}</span>`;
+      btn.innerHTML = labelHtml(w);
     }
     if(locked){
       // Static locked/comingSoon sets have nothing built yet — no preview,
@@ -3798,12 +3817,12 @@ function renderPills(moduleNum){
         btn.onclick = ()=> gateToast(t('gate.finishFirstLong', gp));
       } else if(isModuleGateCase(w)){
         const mgp = prevModuleGateParams(w);
-        btn.setAttribute('aria-label', t('gate.peekPillTitleModule', mgp));
-        btn.title = t('gate.peekPillTitleModule', mgp);
+        btn.setAttribute('aria-label', named(t('gate.peekPillTitleModule', mgp)));
+        btn.title = named(t('gate.peekPillTitleModule', mgp));
         btn.onclick = ()=>{ leaveTopPanelForSet(); activateSet(w.id, {peek:true}); };
       } else {
-        btn.setAttribute('aria-label', t('gate.peekPillTitle', gp));
-        btn.title = t('gate.peekPillTitle', gp);
+        btn.setAttribute('aria-label', named(t('gate.peekPillTitle', gp)));
+        btn.title = named(t('gate.peekPillTitle', gp));
         btn.onclick = ()=>{ leaveTopPanelForSet(); activateSet(w.id, {peek:true}); };
       }
     } else {
@@ -3811,7 +3830,9 @@ function renderPills(moduleNum){
       // "Set 2" says nothing about what's in it — the set's own subtitle
       // ("Reading chord diagrams · Am and Em · First strumming") as the
       // hover tooltip (item 7). Locked pills keep their unlock hint above.
-      if(w.subtitle) btn.title = tf(w, 'subtitle');
+      // A number-only button leads it with the set's name.
+      const sub = w.subtitle ? tf(w, 'subtitle') : '';
+      if(sub || numOnly) btn.title = named(sub);
     }
     btn.classList.toggle('active', btn.dataset.id===(peekedId || lastSetId));
     c.appendChild(btn);
