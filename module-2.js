@@ -34,7 +34,7 @@
 //    `title_es`; `partBreak` never sits on a set's first RENDERABLE
 //    section (that would leave Part 1 empty) and appears at most once per
 //    set; `partOne` is required with it and forbidden without it; neither
-//    part may end up with zero visible steps. Only m5w2 uses this today,
+//    part may end up with zero visible steps. Only m4w2 uses this today,
 //    and the count of sets with parts is pinned at 1.
 // ============================================================
 

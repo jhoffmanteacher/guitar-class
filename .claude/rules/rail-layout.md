@@ -91,7 +91,7 @@ full row, Songs | Games share the next, My progress the last** —
 and the **Live quiz rail button is gone** (students reach the game from the
 invite and the banner; `EXPLORE_PAGES`' live-quiz entry has `btn: null`).
 It is one row taller than the grid below describes, and measured the same
-way at 1366×657 on m5w2 Set 2: **student 17px slack (was 63), teacher /
+way at 1366×657 on m4w2 Set 2: **student 17px slack (was 63), teacher /
 dev-bypass −30px (was +16)** — the Preview-mode note is what tips it, so
 the preview rail scrolls a little in the worst case. The grid itself and the
 sizing numbers below still hold.
@@ -139,7 +139,7 @@ text isn't necessary… we can delete it from all instances to save space") —
 override already read 48px and needed no change, since `.header-sub` was
 already hidden there before this and the measured rendered height already
 matched. Confirmed by measurement, not estimate: at 1366×657 with Modules
-active on m5w2 (4 sets + Module review, two parts — the standing worst
+active on m4w2 (4 sets + Module review, two parts — the standing worst
 case), the rail fits with **~19px of slack for the teacher/dev-bypass view
 (Preview-mode banner showing) and ~66px for a real student (no banner)** —
 comfortably inside budget, not a bare fit repeating the previous day's

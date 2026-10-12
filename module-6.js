@@ -103,8 +103,8 @@ SETS.push(
             steps: [
           {
             label: 'Form Em and Am', label_es: 'Forma Em y Am',
-            text: 'Form your two chords for today, <strong>Em</strong> and <strong>Am</strong> (from Module 5), from the diagram, and strum once to make sure every string rings — you\'ll switch between these two for the rest of this set. You\'ve got it when: one strum of each chord with every string it uses ringing clean.',
-            text_es: 'Forma tus dos acordes de hoy, <strong>Em</strong> y <strong>Am</strong> (del Módulo 5), a partir del diagrama, y rasguea una vez para asegurarte de que suenen todas las cuerdas — vas a alternar entre estos dos durante el resto de esta unidad. Lo tienes cuando: un rasgueo de cada acorde con cada cuerda que usa sonando limpia.',
+            text: 'Form your two chords for today, <strong>Em</strong> and <strong>Am</strong> (from Module 4), from the diagram, and strum once to make sure every string rings — you\'ll switch between these two for the rest of this set. You\'ve got it when: one strum of each chord with every string it uses ringing clean.',
+            text_es: 'Forma tus dos acordes de hoy, <strong>Em</strong> y <strong>Am</strong> (del Módulo 4), a partir del diagrama, y rasguea una vez para asegurarte de que suenen todas las cuerdas — vas a alternar entre estos dos durante el resto de esta unidad. Lo tienes cuando: un rasgueo de cada acorde con cada cuerda que usa sonando limpia.',
             hint: 'Em uses two fingers; Am adds a third. The diagrams show exactly where each finger goes. Clean chords now make the strumming sound good later.',
             hint_es: 'Em usa dos dedos; Am agrega un tercero. Los diagramas muestran exactamente dónde va cada dedo. Acordes limpios ahora hacen que el rasgueo suene mejor después.',
             chords: [
@@ -239,8 +239,8 @@ SETS.push(
           },
           {
             label: 'Challenge — Three-Chord Half-Bar (3 chords)', label_es: 'Reto — Medio compás con tres acordes (3 acordes)',
-            text: '<ol><li>Add G (from Module 5).</li><li>Loop Em · Am · G, two beats each, the strum never stopping, at 60 BPM.</li></ol>You\'ve got it when: two clean laps with the pendulum unbroken through all three changes.',
-            text_es: '<ol><li>Agrega G (del Módulo 5).</li><li>Repite Em · Am · G, dos tiempos cada uno, el rasgueo sin detenerse, a 60 BPM.</li></ol>Lo tienes cuando: dos vueltas limpias con el péndulo sin interrupciones a través de los tres cambios.',
+            text: '<ol><li>Add G (from Module 4).</li><li>Loop Em · Am · G, two beats each, the strum never stopping, at 60 BPM.</li></ol>You\'ve got it when: two clean laps with the pendulum unbroken through all three changes.',
+            text_es: '<ol><li>Agrega G (del Módulo 4).</li><li>Repite Em · Am · G, dos tiempos cada uno, el rasgueo sin detenerse, a 60 BPM.</li></ol>Lo tienes cuando: dos vueltas limpias con el péndulo sin interrupciones a través de los tres cambios.',
             hint: 'Am → G moves every finger, so pre-shape G in the air while Am is still ringing. Em → Am shares your two fretting fingers — barely a move.',
             hint_es: 'Am → G mueve cada dedo, así que preforma G en el aire mientras Am todavía suena. Em → Am comparte tus dos dedos de trastear — apenas un movimiento.',
             stuck: 'Loop just Am → G until the strum survives that change, then drop Em back in front.',
@@ -257,8 +257,8 @@ SETS.push(
           },
           {
             label: 'Challenge — Four-Chord Half-Bar ("Let It Be", strummed)', label_es: 'Reto — Medio compás con cuatro acordes ("Let It Be", rasgueado)',
-            text: '<ul><li>Play the C · G · Am · F loop from Module 5 with down-up strumming, two beats per chord at 60 BPM, the strum hand moving the whole time. This is the first line of the record\'s verse, slowed down from about 71 BPM.</li></ul>You\'ve got it when: two clean laps, strum unbroken, every change on the beat.',
-            text_es: '<ul><li>Toca el loop C · G · Am · F del Módulo 5 rasgueando abajo-arriba, dos tiempos por acorde a 60 BPM, con la mano de rasgueo en movimiento todo el tiempo. Es la primera línea de la estrofa de la grabación, más lenta que sus unos 71 BPM.</li></ul>Lo tienes cuando: dos vueltas limpias, rasgueo sin interrupciones, cada cambio a tiempo.',
+            text: '<ul><li>Play the C · G · Am · F loop from Module 4 with down-up strumming, two beats per chord at 60 BPM, the strum hand moving the whole time. This is the first line of the record\'s verse, slowed down from about 71 BPM.</li></ul>You\'ve got it when: two clean laps, strum unbroken, every change on the beat.',
+            text_es: '<ul><li>Toca el loop C · G · Am · F del Módulo 4 rasgueando abajo-arriba, dos tiempos por acorde a 60 BPM, con la mano de rasgueo en movimiento todo el tiempo. Es la primera línea de la estrofa de la grabación, más lenta que sus unos 71 BPM.</li></ul>Lo tienes cuando: dos vueltas limpias, rasgueo sin interrupciones, cada cambio a tiempo.',
             hint: 'The right hand keeps the beat and never stops; the left hand changes chords between strokes. Keep upstrokes light — brush only the thin strings (high e, B, G).',
             hint_es: 'La mano derecha lleva el tiempo y nunca se detiene; la mano izquierda cambia de acorde entre golpes. Mantén los golpes hacia arriba ligeros — roza solo las cuerdas delgadas (mi aguda, Si, Sol).',
             stuck: 'Isolate the pair that lags (often G → Am or Am → F) and loop just those two with the strum before running the circle.',
@@ -317,8 +317,8 @@ SETS.push(
                 label: 'Challenge — "Watchtower", strummed', label_es: 'Reto — "Watchtower", rasgueado',
                 text: '<ul><li>Play Am · G · F (small F) · G at 60 BPM, down-up strumming the whole time: Am for two beats, G for two, F for two, G for two.</li></ul>You\'ve got it when: two full laps (a lap = one full time through the loop) where the strum hand never stops, even when your F shape is slow. <a href="tabs/all-along-the-watchtower.html" target="_blank">&#x1F9F5; Song Journey: this song has grown with you since Module 1</a>.',
                 text_es: '<ul><li>Toca Am · G · F (F pequeño) · G a 60 BPM, rasgueando abajo-arriba todo el tiempo: Am dos tiempos, G dos, F dos y G dos.</li></ul>Lo tienes cuando: dos vueltas completas (una vuelta = un recorrido completo del loop) donde la mano de rasgueo nunca se detiene, aunque tu forma de F sea lenta. <a href="tabs/all-along-the-watchtower.html" target="_blank">&#x1F9F5; Recorrido de la canción: esta canción ha crecido contigo desde el Módulo 1</a>.',
-                hint: 'Same loop and same timing you played in Module 5. The new part: your right hand keeps the beat and never stops. The chord changes BETWEEN strums.',
-                hint_es: 'El mismo loop y el mismo ritmo que tocaste en el Módulo 5. Lo nuevo: tu mano derecha lleva el tiempo y nunca se detiene. El cambio de acorde ocurre ENTRE rasgueos.',
+                hint: 'Same loop and same timing you played in Module 4. The new part: your right hand keeps the beat and never stops. The chord changes BETWEEN strums.',
+                hint_es: 'El mismo loop y el mismo ritmo que tocaste en el Módulo 4. Lo nuevo: tu mano derecha lleva el tiempo y nunca se detiene. El cambio de acorde ocurre ENTRE rasgueos.',
                 stuck: 'Drop to just Am ↔ G until the strum survives that change, then add the F back.',
                 stuck_es: 'Baja a solo Am ↔ G hasta que el rasgueo sobreviva ese cambio, y luego agrega de vuelta el F.',
                 levelUp: 'Speed up in steps of 5 BPM: 60 → 65 → 70. Or count "1 + 2 + 3 + 4 +" out loud the whole time.',
@@ -431,8 +431,8 @@ SETS.push(
             label: 'Watch: the D-DU-UDU pattern', label_es: 'Mira: el patrón D-DU-UDU',
             text: 'Watch: <a href="https://youtu.be/6LmQCdt_ZhQ" target="_blank">The Most Common Strumming Pattern of All Time! – JustinGuitar</a> (0:00–4:00). Your task while you watch: air-strum along and find the two moments the pick misses — the wrist keeps swinging, but on purpose it skips one upstroke and one downstroke.',
             text_es: 'Mira: <a href="https://youtu.be/6LmQCdt_ZhQ" target="_blank">The Most Common Strumming Pattern of All Time! – JustinGuitar</a> (0:00–4:00). Tu tarea mientras miras: rasguea en el aire junto con él y encuentra los dos momentos en que la púa falla a propósito — la muñeca sigue balanceándose, pero se salta un golpe hacia arriba y uno hacia abajo a propósito.',
-            hint: 'You already met this pattern in Module 5, where it was called the folk strum (D · D U · U D U) — it\'s the same six strums. Justin calls it the pattern you can always rely on — D-DU-UDU. Listen for which strums he skips: the wrist still moves, but the pick doesn\'t hit the strings on those two slots.',
-            hint_es: 'Ya conociste este patrón en el Módulo 5, donde se llamaba el rasgueo folk (D · D U · U D U) — son los mismos seis rasgueos. Justin lo llama el patrón en el que siempre puedes confiar — D-DU-UDU. Escucha cuáles rasgueos se salta: la muñeca sigue moviéndose, pero la púa no toca las cuerdas en esos dos espacios.',
+            hint: 'You already met this pattern in Module 4, where it was called the folk strum (D · D U · U D U) — it\'s the same six strums. Justin calls it the pattern you can always rely on — D-DU-UDU. Listen for which strums he skips: the wrist still moves, but the pick doesn\'t hit the strings on those two slots.',
+            hint_es: 'Ya conociste este patrón en el Módulo 4, donde se llamaba el rasgueo folk (D · D U · U D U) — son los mismos seis rasgueos. Justin lo llama el patrón en el que siempre puedes confiar — D-DU-UDU. Escucha cuáles rasgueos se salta: la muñeca sigue moviéndose, pero la púa no toca las cuerdas en esos dos espacios.',
             skills: [1, 2],
             response: { type: 'mc', prompt: 'In the D-DU-UDU pattern, which UPSTROKE is skipped (the wrist swings up but the pick misses)?',
               prompt_es: 'En el patrón D-DU-UDU, ¿cuál GOLPE HACIA ARRIBA se salta (la muñeca sube pero la púa falla)?',
@@ -536,8 +536,8 @@ SETS.push(
                 label: 'Warm-up: down-up', label_es: 'Calentamiento: abajo-arriba',
                 text: 'Warm the strum hand: 4 bars of steady down-up on Em at 60 BPM, the same strum as Set 1. You\'ve got it when: you have played 4 bars with the hand never stopping.',
                 text_es: 'Calienta la mano de rasgueo: 4 compases de abajo-arriba constante en Em a 60 BPM, el mismo rasgueo de la Unidad 1. Lo tienes cuando: tocaste 4 compases sin que la mano se detenga nunca.',
-                hint: 'Look back: D-DU-UDU is just the down-up you already know with two strums left out — the same six strums you met in Module 5 as the folk strum. Get the even swing going first.',
-                hint_es: 'Recuerda: D-DU-UDU es solo el abajo-arriba que ya dominas con dos rasgueos omitidos — los mismos seis rasgueos que conociste en el Módulo 5 como el rasgueo folk. Primero logra que el balanceo parejo funcione.',
+                hint: 'Look back: D-DU-UDU is just the down-up you already know with two strums left out — the same six strums you met in Module 4 as the folk strum. Get the even swing going first.',
+                hint_es: 'Recuerda: D-DU-UDU es solo el abajo-arriba que ya dominas con dos rasgueos omitidos — los mismos seis rasgueos que conociste en el Módulo 4 como el rasgueo folk. Primero logra que el balanceo parejo funcione.',
                 playSeq: { label: 'Hear the 8th-note pulse', label_es: 'Escucha el pulso de corcheas', bpm: 60, notes: [
                   {midi:64,beats:0.5},{midi:64,beats:0.5},{midi:64,beats:0.5},{midi:64,beats:0.5},
                   {midi:64,beats:0.5},{midi:64,beats:0.5},{midi:64,beats:0.5},{midi:64,beats:0.5}
@@ -666,8 +666,8 @@ SETS.push(
               },
               {
                 label: 'Challenge — "Oye Mi Amor", verse', label_es: 'Reto — "Oye Mi Amor", estrofa',
-                text: '<ol><li>The verse uses two chords, Bm and A (A is from Module 5). Play the small Bm on just four strings (D, G, B, high e), no barre.</li><li>Play one bar of each with D-DU-UDU at 60 BPM.</li></ol>You\'ve got it when: four laps with the pattern unbroken and beats 2 and 4 accented so it pushes like the record.',
-                text_es: '<ol><li>La estrofa usa dos acordes, Bm y A (A es del Módulo 5). Toca el Bm pequeño en solo cuatro cuerdas (Re, Sol, Si, mi aguda), sin cejilla.</li><li>Toca un compás de cada uno con D-DU-UDU a 60 BPM.</li></ol>Lo tienes cuando: cuatro vueltas con el patrón sin interrupciones y los tiempos 2 y 4 acentuados para que empuje como la grabación.',
+                text: '<ol><li>The verse uses two chords, Bm and A (A is from Module 4). Play the small Bm on just four strings (D, G, B, high e), no barre.</li><li>Play one bar of each with D-DU-UDU at 60 BPM.</li></ol>You\'ve got it when: four laps with the pattern unbroken and beats 2 and 4 accented so it pushes like the record.',
+                text_es: '<ol><li>La estrofa usa dos acordes, Bm y A (A es del Módulo 4). Toca el Bm pequeño en solo cuatro cuerdas (Re, Sol, Si, mi aguda), sin cejilla.</li><li>Toca un compás de cada uno con D-DU-UDU a 60 BPM.</li></ol>Lo tienes cuando: cuatro vueltas con el patrón sin interrupciones y los tiempos 2 y 4 acentuados para que empuje como la grabación.',
                 hint: 'The small Bm is the easier beginner version — the full-barre Bm (one finger pressed flat across several strings) arrives in Module 7.',
                 hint_es: 'El Bm pequeño es la versión más fácil para principiantes — el Bm con cejilla completa (un dedo presionado plano sobre varias cuerdas) llega en el Módulo 7.',
                 stuck: 'Loop just the A → Bm change with one strum per bar until the landing is clean, then add the pattern.',
@@ -856,8 +856,8 @@ SETS.push(
             steps: [
           {
             label: 'Refresh the C chord', label_es: 'Repasa el acorde C',
-            text: 'Form <strong>C</strong> from the diagram — today\'s progressions lean on it, your shape from Module 5, back again — and strum the five strings from A to high e (do not hit the low E) until it rings clean. You\'ve got it when: one strum with all five strings ringing clean.',
-            text_es: 'Forma <strong>C</strong> a partir del diagrama — las progresiones de hoy se apoyan en él, tu forma del Módulo 5, de vuelta — y rasguea las cinco cuerdas de La a mi aguda (no toques la Mi grave) hasta que suene limpio. Lo tienes cuando: un rasgueo con las cinco cuerdas sonando limpias.',
+            text: 'Form <strong>C</strong> from the diagram — today\'s progressions lean on it, your shape from Module 4, back again — and strum the five strings from A to high e (do not hit the low E) until it rings clean. You\'ve got it when: one strum with all five strings ringing clean.',
+            text_es: 'Forma <strong>C</strong> a partir del diagrama — las progresiones de hoy se apoyan en él, tu forma del Módulo 4, de vuelta — y rasguea las cinco cuerdas de La a mi aguda (no toques la Mi grave) hasta que suene limpio. Lo tienes cuando: un rasgueo con las cinco cuerdas sonando limpias.',
             hint: 'C skips the lowest string (the X on the low E). Your ring finger reaches to the 3rd fret of the A string — a big stretch at first.',
             hint_es: 'C se salta la cuerda más grave (la X en la cuerda Mi grave). Tu dedo anular se estira hasta el traste 3 de la cuerda La — un gran estiramiento al principio.',
             chords: [
@@ -906,8 +906,8 @@ SETS.push(
             label: 'Challenge 1 — Soft Feel', label_es: 'Reto 1 — Sensación suave',
             text: '<ol><li>Hold G.</li><li>Strum all downstrokes, one per beat, at 70 BPM — quiet and steady, singalong style.</li></ol>You\'ve got it when: four bars in a row, even and soft, with no accents sticking out.<div class="strum-line">D       D       D       D\n<span class="su-count">1   +   2   +   3   +   4   +</span></div>',
             text_es: '<ol><li>Sostén G.</li><li>Rasguea todo hacia abajo, uno por tiempo, a 70 BPM — tranquilo y constante, estilo para cantar junto.</li></ol>Lo tienes cuando: cuatro compases seguidos, parejos y suaves, sin acentos que sobresalgan.<div class="strum-line">D       D       D       D\n<span class="su-count">1   +   2   +   3   +   4   +</span></div>',
-            hint: 'Soft here means a FEEL, not one particular pattern — it\'s about supporting the singer instead of standing out. Light attack, even volume, no accents. Module 5\'s "folk strum" (D · D U · U D U) played gently is one way to get it; these steady downstrokes are just the plainest way.',
-            hint_es: 'Suave aquí significa una SENSACIÓN, no un patrón concreto — se trata de acompañar al cantante en vez de sobresalir. Ataque ligero, volumen parejo, sin acentos. El "rasgueo folk" del Módulo 5 (D · D U · U D U) tocado con suavidad es una manera de lograrla; estos golpes hacia abajo constantes son la más simple.',
+            hint: 'Soft here means a FEEL, not one particular pattern — it\'s about supporting the singer instead of standing out. Light attack, even volume, no accents. Module 4\'s "folk strum" (D · D U · U D U) played gently is one way to get it; these steady downstrokes are just the plainest way.',
+            hint_es: 'Suave aquí significa una SENSACIÓN, no un patrón concreto — se trata de acompañar al cantante en vez de sobresalir. Ataque ligero, volumen parejo, sin acentos. El "rasgueo folk" del Módulo 4 (D · D U · U D U) tocado con suavidad es una manera de lograrla; estos golpes hacia abajo constantes son la más simple.',
             stuck: 'Strum from the wrist only and let the pick barely graze the strings — imagine someone is singing and you must not cover them up.',
             stuck_es: 'Rasguea solo desde la muñeca y deja que la púa apenas roce las cuerdas — imagina que alguien está cantando y no debes taparlo.',
             levelUp: 'Add a gentle up-strum on the "+" of beats 2 and 4 for a fuller singalong feel.',
@@ -978,8 +978,8 @@ SETS.push(
             steps: [
           {
             label: 'Challenge 5 — Trade Off: Strum, Then Solo', label_es: 'Reto 5 — Túrnate: rasgueo y solo',
-            text: '<ol><li>Press ▶ Hear the roots to hear the root notes of Am–G–C.</li><li>Record yourself strumming 8 bars of a progression (try Am–G–C or G–D–Em–C) with any pattern from this module — or play <a href="https://www.youtube.com/watch?v=Vq8cApzOdy8" target="_blank">▶ &#x1F3B5; the Am jam track</a>.</li><li>Solo over it using A minor pentatonic Pattern 1 from Module 4, with your 1st finger at fret 5 of the low E string. It fits both progressions.</li><li>Take turns with yourself every 8 bars: strum one pass, then solo over the next.</li></ol>No score. Play a few notes, then rest.',
-            text_es: '<ol><li>Pulsa ▶ Escucha las raíces para oír las notas raíz de Am–G–C.</li><li>Grábate rasgueando 8 compases de una progresión (prueba Am–G–C o G–D–Em–C) con cualquier patrón de este módulo — o pon <a href="https://www.youtube.com/watch?v=Vq8cApzOdy8" target="_blank">▶ &#x1F3B5; la pista de jam en Am</a>.</li><li>Improvisa sobre ella usando el Patrón 1 de la pentatónica menor de A del Módulo 4, con tu dedo 1 en el traste 5 de la cuerda Mi grave. Encaja con las dos progresiones.</li><li>Túrnate contigo mismo cada 8 compases: rasguea un pase, y luego improvisa en el siguiente.</li></ol>Sin puntaje. Toca algunas notas, y luego descansa.',
+            text: '<ol><li>Press ▶ Hear the roots to hear the root notes of Am–G–C.</li><li>Record yourself strumming 8 bars of a progression (try Am–G–C or G–D–Em–C) with any pattern from this module — or play <a href="https://www.youtube.com/watch?v=Vq8cApzOdy8" target="_blank">▶ &#x1F3B5; the Am jam track</a>.</li><li>Solo over it using A minor pentatonic Pattern 1 from Module 5, with your 1st finger at fret 5 of the low E string. It fits both progressions.</li><li>Take turns with yourself every 8 bars: strum one pass, then solo over the next.</li></ol>No score. Play a few notes, then rest.',
+            text_es: '<ol><li>Pulsa ▶ Escucha las raíces para oír las notas raíz de Am–G–C.</li><li>Grábate rasgueando 8 compases de una progresión (prueba Am–G–C o G–D–Em–C) con cualquier patrón de este módulo — o pon <a href="https://www.youtube.com/watch?v=Vq8cApzOdy8" target="_blank">▶ &#x1F3B5; la pista de jam en Am</a>.</li><li>Improvisa sobre ella usando el Patrón 1 de la pentatónica menor de A del Módulo 5, con tu dedo 1 en el traste 5 de la cuerda Mi grave. Encaja con las dos progresiones.</li><li>Túrnate contigo mismo cada 8 compases: rasguea un pase, y luego improvisa en el siguiente.</li></ol>Sin puntaje. Toca algunas notas, y luego descansa.',
             hint: 'Leave space between your phrases — silence is part of a solo. Got another guitarist around? One strums, one solos, swap after 8 bars.',
             hint_es: 'Deja espacio entre tus frases — el silencio es parte de un solo. ¿Tienes a otro guitarrista cerca? Uno rasguea, uno improvisa, cambien después de 8 compases.',
             playSeq: { label: 'Hear the roots — Am · G · C', label_es: 'Escucha las raíces — Am · G · C', bpm: 70, notes: [45, 43, 48] }

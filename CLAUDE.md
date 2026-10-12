@@ -36,7 +36,7 @@ push on a relapse.
 `partOne` on a set and `partBreak` on one of its sections split the ladder
 into Part 1 / Part 2: a heading at the top, a heavier divider above the
 breaking section, a per-part progress pill and "Step n of m", and two jump
-links in the rail. **Only `m5w2` uses it** (13 steps + 7), and checks.mjs
+links in the rail. **Only `m4w2` uses it** (13 steps + 7), and checks.mjs
 **1ao** pins that count at 1. Nothing in the data moves — same set id, same
 arrays, same `gi`, so no progress key moves; 1af proves that independently
 and must stay green with NO change to its expected `data-ns` lists.
@@ -45,7 +45,7 @@ section walk. A set is still complete when the SET is complete: the sets
 gate, the checklist, Module Review, search and the Daily 5 never see a part,
 and `resumeLessonCounts()` stays whole-set. One consequence worth knowing:
 in focus mode the B→C seam now also hides once the open step is in Part 2 —
-it heads the sections at the top of station C, which in m5w2 are all inside
+it heads the sections at the top of station C, which in m4w2 are all inside
 Part 1, and it was otherwise stacking directly above the Part 2 divider
 saying "Now practice it". Same "don't head a part you're not in" rule the
 part marks follow. Field docs live in the schema comment at the top of
@@ -384,7 +384,7 @@ appears. checks.mjs 1w catches a relapse of specific retired phrases; it
 can't catch a new idiom on its own, so this rule is the standing instruction
 new content has to be written against. Not every figurative-sounding phrase
 is a violation — an established, deliberately-defined site term (Module
-4/7/11's "two homes" for a chord's two fretboard positions; the metronome
+5/7/11's "two homes" for a chord's two fretboard positions; the metronome
 ladder's "top of the ladder") is a real teaching device, not confusing
 prose; don't flag or "fix" those. Define "root" once, in the first visible
 Module 2 step that uses it: the note a chord is named after.
@@ -554,7 +554,7 @@ nobody can enforce:
 - **1au — a never-correct catch-all in a distractor** ("It doesn't matter",
   "Either works equally well", "Any string you like", "You can't"). This one
   DOES have an allowlist, because several are genuine beginner beliefs:
-  m4w1-s6's "Never repeating anything" is the plausible opposite of its keyed
+  m5w1-s6's "Never repeating anything" is the plausible opposite of its keyed
   answer, and m11w2-s6's "Can't tell from chords alone" is what a cautious
   student really writes. The keyed choice is never scanned — two correct
   answers in the course contain an absolute.

@@ -25,8 +25,8 @@ ear. This is chord *timing*, not BPM:
   everywhere. The bar-2 G is on **beat 4 in the intro** (the first ~18 s)
   and **about beat 3 once the singing starts** — Jonathan heard the same.
   Later in the song it is loose (anywhere from 3 to 4½, some laps with no
-  clear G). The site teaches the verse: G on beat 3 in Modules 2, 3, 5, 6
-  and 7, the Journey page and Riff Runner. Module 4's "the real rhythm" card
+  clear G). The site teaches the verse: G on beat 3 in Modules 2, 3, 4, 6
+  and 7, the Journey page and Riff Runner. Module 5's "the real rhythm" card
   teaches the intro/verse difference by ear. The track's tempo drifts
   (≈110 in the intro, ≈115 through the verses, ≈120 at the end), so a
   steady grid would slide by up to a second — which is why its
@@ -55,7 +55,7 @@ ear. This is chord *timing*, not BPM:
   paragraph states outright. The slug names the source recording, not the
   song's credited writer (Dylan). Don't "fix" it.
 - **Sweet Child O' Mine** — verse `D–C–G`, **two bars each**, ~123–125 BPM. (Corrected
-  2026-09-12 — content across module-2/3/5/7 and the Journey page is
+  2026-09-12 — content across module-2/3/4/7 and the Journey page is
   consistently "two bars each"; the old "full bar each" here was the outlier.)
 - **Let It Be** — verse `C–G–Am–F`, **two beats per chord**, ~71–76 BPM.
 - **"the cure"** — **FOUR felt beats per chord, one full bar** (track reads
@@ -73,7 +73,7 @@ ear. This is chord *timing*, not BPM:
   read Dm F C G straight through, twice. The 2026-09-18 reading here —
   `Dm · F · Dm · F`, then `C · G/B · C · G/B`, each pair playing twice
   before the next — was wrong. The last chord is a plain G; G/B survives
-  only as a Module 5 Level up (the record's bass walks B under that
+  only as a Module 4 Level up (the record's bass walks B under that
   chord), never the main line. Layers 3, 5 and 6 of the Journey page
   showed the four-bar shorthand until 2026-09-18, while Layer 2 and
   ca-13 / ca-18 / ca-19 had it right — a student following the backing-track
@@ -112,7 +112,7 @@ ear. This is chord *timing*, not BPM:
   Am–C–Dm–F+G/B loop (a composite of the record's verse and chorus).
 - **Luna** — F–Am vamp; Dm is a passing chord, no C; 6/8 felt in 2; no capo
   (simplified F `xx3211` until Module 7); solos use D minor pentatonic Pattern 1
-  at fret 10; ◐ in Module 3. Its Module 4 `backingUrl` stays the generic YouTube
+  at fret 10; ◐ in Module 3. Its Module 5 `backingUrl` stays the generic YouTube
   Dm jam loop by design — the local mp3 is the Journey-page track.
 - **Core songs are exactly six**: Seven Nation Army, Watchtower, Sweet Child,
   Luna, Let It Be, "the cure". The six `tabs/` Journey pages cover them
@@ -141,6 +141,6 @@ ear. This is chord *timing*, not BPM:
   call, 2026-07-31). It coexists with Module 12's "six eighth notes grouped
   into two big beats" and Luna's "felt in 2" — count-in-six and feel-in-two are
   the same meter at different zoom levels, not a contradiction. Don't flag.
-- **Module 5's assessment intentionally skips E/B7** (Jonathan's call,
-  2026-07-31). Group 3 is covered by the mr5-s5 review check; the assessment
+- **Module 4's assessment intentionally skips E/B7** (Jonathan's call,
+  2026-07-31). Group 3 is covered by the mr4-s5 review check; the assessment
   piece stays on Let It Be / Luna / "the cure". Don't flag.

@@ -3371,7 +3371,7 @@ function ccAgain(d){
 /* ════════════════════════════════════════════════════════════════════
    CHORD DIFFICULTY RANKS — shared by the two climbing card games, Chord
    Blitz (shapes, by eye) and Chord Detective (the same chords, by ear).
-   One rank per chord, in the order the COURSE teaches them: Module 5's
+   One rank per chord, in the order the COURSE teaches them: Module 4's
    Group 1 (C F Am G), then Group 2 (D A Em) alongside the open power
    shapes, then Dm and the movable power shapes, then Group 3 (E, B7, Bm).
 
@@ -4373,7 +4373,7 @@ function ntrRenderDone(){
 
 /* ════════════════════════════════════════════════════════════════════
    PENTATONIC SIMON — classic call-and-response memory game, notes drawn
-   from Am minor pentatonic Pattern 1 (Module 4/9's already-verified
+   from Am minor pentatonic Pattern 1 (Module 5/9's already-verified
    ascending run — see module-9.js's m9w0-s3 playSeq, notes
    [45,48,50,52,55,57,...]). Six pads = one full octave of the pattern
    (root, ♭3, 4, 5, ♭7, root). The game plays a growing sequence, you tap
@@ -5153,7 +5153,7 @@ function fzRenderDone(){
 const SH_BARS = 8;
 /* slots = one bar of eighth positions (1 + 2 + 3 + 4 +): 'D', 'U', or
    null for "hand moves, pick misses". Straight from the curriculum:
-   Module 5 Set 1 (all downs), M5 Set 2 / M6 Set 1 (down-up eighths),
+   Module 4 Set 1 (all downs), M4 Set 2 / M6 Set 1 (down-up eighths),
    M6 Set 2 (Old Faithful), M6 Set 3 (reggae chop). */
 const SH_PATTERNS = [
   { id: 'downs',    labelKey: 'games.sh.pattern.downs.label',
@@ -5676,22 +5676,22 @@ const RR_CARDS = [
     bpm: 90, secs: 60, minModule: 3 },
   { textKey: 'games.rr.card12',
     bpm: 70, secs: 45, minModule: 3 },
-  /* Module 4 — minor pentatonic Pattern 1, alternate picking */
+  /* Module 5 — minor pentatonic Pattern 1, alternate picking */
   { textKey: 'games.rr.card13',
-    bpm: 60, secs: 60, minModule: 4 },
-  { textKey: 'games.rr.card14',
-    bpm: 70, secs: 45, minModule: 4 },
-  { textKey: 'games.rr.card15',
-    bpm: 60, secs: 60, minModule: 4 },
-  /* Module 5 — open chords */
-  { textKey: 'games.rr.card16',
-    bpm: null, secs: 60, minModule: 5 },
-  { textKey: 'games.rr.card17',
-    bpm: null, secs: 60, minModule: 5 },
-  { textKey: 'games.rr.card18',
     bpm: 60, secs: 60, minModule: 5 },
+  { textKey: 'games.rr.card14',
+    bpm: 70, secs: 45, minModule: 5 },
+  { textKey: 'games.rr.card15',
+    bpm: 60, secs: 60, minModule: 5 },
+  /* Module 4 — open chords */
+  { textKey: 'games.rr.card16',
+    bpm: null, secs: 60, minModule: 4 },
+  { textKey: 'games.rr.card17',
+    bpm: null, secs: 60, minModule: 4 },
+  { textKey: 'games.rr.card18',
+    bpm: 60, secs: 60, minModule: 4 },
   { textKey: 'games.rr.card19',
-    bpm: null, secs: 45, minModule: 5 },
+    bpm: null, secs: 45, minModule: 4 },
   /* Module 6 — strumming patterns, partial barres */
   { textKey: 'games.rr.card20',
     bpm: 70, secs: 60, minModule: 6 },

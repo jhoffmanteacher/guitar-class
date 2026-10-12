@@ -609,8 +609,8 @@ activities (ca-2…ca-7) are generic dexterity drills, not song previews.
 "Notes on the Low E String" (ca-11) and "Sub Day Circuit" (ca-12) are
 Module 1/2-era content. `"the cure" — The Verse Root Line` (ca-13) teaches
 a single-note bass line, but Modules 3–8's own "the cure" steps each teach
-a *different* technique on it — power chords (Module 3), soloing (Module
-4), open-chord strumming (Module 5), fingerpicking (Module 8) — so none of
+a *different* technique on it — power chords (Module 3), open-chord strumming (Module
+4), soloing (Module 5), fingerpicking (Module 8) — so none of
 them duplicate ca-13's single-note reading (nor does Module 7's Seven
 Nation Army "real rhythm" step duplicate ca-10 — different skill, rhythm
 notation vs. frets). Real content, not a shortcut: verified with a search

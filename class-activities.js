@@ -3088,7 +3088,7 @@ window.CLASS_ACTIVITIES = [
      played with the Hendrix record from the first bar to the fade. No new
      part. The loop is written the same way in every section, intro
      included (Jonathan, 2026-10-01): on the record the intro's last G
-     waits until beat 4 — Module 4's "real rhythm" card teaches that by
+     waits until beat 4 — Module 5's "real rhythm" card teaches that by
      ear — but the card keeps the one loop the site teaches.
      Section map on the track's beat map (SNIPPET_TRACKS barTimes), from
      the vocal stem (Demucs) per bar: intro 1-8, verse 1 9-24, solo 1

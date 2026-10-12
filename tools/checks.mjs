@@ -743,7 +743,7 @@ function checkMcShoutedAnswer(allSets) {
    ── WHY THIS ONE HAS AN ALLOWLIST AND 1at DOESN'T ──
    CLAUDE.md: "Reach for a whitelist over a blacklist whenever the
    banned word has an innocent twin." Several of these are real beginner
-   beliefs, not filler — m4w1-s6's "Never repeating anything" is the
+   beliefs, not filler — m5w1-s6's "Never repeating anything" is the
    plausible OPPOSITE of its keyed "repeat an idea, vary it, leave
    space", and m11w2-s6's "Can't tell from chords alone" is what a
    cautious student genuinely answers. Those are the best distractors on
@@ -767,10 +767,10 @@ const MC_CATCHALL_ALLOW = new Set([
   'w2·b·sec0·step0|2|en',        // "It doesn't matter which way" — FROZEN graded (1ap); on the Summer reset list
   'w2·b·sec0·step0|2|es',        //   same card, Spanish twin
   'skill m3w1-s3|1|en',          // "only ever hit the two strings you want" — a real beginner belief about aim
-  'skill m4w1-s6|2|en',          // "Never repeating anything" — the plausible opposite of the keyed answer
-  'skill m4w1-s6|2|es',          //   same card, Spanish twin
-  'm4w2·b·sec1·step0|3|en',      // "They sound exactly the same" — a genuine hammer-on misconception
-  'skill m5w2-s5|3|es',          // "Al azar" — a real (wrong) way students pick a practice order
+  'skill m5w1-s6|2|en',          // "Never repeating anything" — the plausible opposite of the keyed answer
+  'skill m5w1-s6|2|es',          //   same card, Spanish twin
+  'm5w2·b·sec1·step0|3|en',      // "They sound exactly the same" — a genuine hammer-on misconception
+  'skill m4w2-s5|3|es',          // "Al azar" — a real (wrong) way students pick a practice order
   'skill m11w2-s6|3|en',         // "Can't tell from chords alone" — what a cautious student really answers
   'skill m11w2-s6|3|es',         //   same card, Spanish twin
 ]);
@@ -879,7 +879,7 @@ const MC_LEAK_ALLOW = new Set([
      would take the rule out of the skill, so the card is excused instead. */
   'skill m2w2-s2|ring 3',
   'skill m2w2-s2|anular 3',                 //   same card, Spanish twin
-  'skill m4w2-s1|p mf f',                   // the skill label has to define p / mf / f to be teachable at all
+  'skill m5w2-s1|p mf f',                   // the skill label has to define p / mf / f to be teachable at all
 ]);
 function checkMcAnswerOnCard(allSets) {
   head('1av. Keyed MC answer already printed on the same card');
@@ -4655,7 +4655,7 @@ function checkStorageNamespaces(sets, buildSet, ctx) {
 /* ════════════════════════════════════════════════════════════════════
    1ao. SETS SHOWN IN TWO PARTS — `partOne` on a set and `partBreak` on
    one of its sections split a long ladder into Part 1 / Part 2 for
-   DISPLAY ONLY (m5w2, 2026-09-19; see lessonParts() in app.js and the
+   DISPLAY ONLY (m4w2, 2026-09-19; see lessonParts() in app.js and the
    schema note at the top of module-2.js). Nothing moves in the data, so
    no progress key moves — 1af above proves that independently. What this
    one guards is the pair of fields themselves, where the failures are
@@ -4671,7 +4671,7 @@ function checkStorageNamespaces(sets, buildSet, ctx) {
    assertion goes the other way and reads the real rendered HTML, so
    deleting the render call fails here too.
    ════════════════════════════════════════════════════════════════════ */
-// Pinned: only Module 5 Set 2 is split today. A second split set is a
+// Pinned: only Module 4 Set 2 is split today. A second split set is a
 // deliberate content decision — bump this in the same edit.
 const PARTED_SETS_EXPECTED = 1;
 function checkSetParts(sets, buildSet, ctx) {
@@ -4753,7 +4753,7 @@ function checkSetParts(sets, buildSet, ctx) {
     err(`${parted} set${parted === 1 ? '' : 's'} declare parts, expected ${PARTED_SETS_EXPECTED} — splitting another set is a content decision, so bump PARTED_SETS_EXPECTED in the same edit`);
     problems++; bad++;
   }
-  if (!bad) ok(`${parted} set shown in two parts (m5w2), both titles in both languages, neither part empty, both marks rendered`);
+  if (!bad) ok(`${parted} set shown in two parts (m4w2), both titles in both languages, neither part empty, both marks rendered`);
 }
 
 /* ════════════════════════════════════════════════════════════════════
@@ -5497,7 +5497,7 @@ function checkHappyBirthdayRhythm() {
    adding one back is the thing that needs a decision, so raise the
    number here on purpose when you mean to.
    ════════════════════════════════════════════════════════════════════ */
-const SHORT_RESPONSE_BUDGET = { 3: 0, 4: 3, 5: 4, 6: 1 };
+const SHORT_RESPONSE_BUDGET = { 3: 0, 4: 4, 5: 3, 6: 1 };
 function checkShortResponseBudget() {
   head('1ar. Short-response budget (Modules 3-6)');
   const configSrc = readFileSync(join(ROOT, 'config-main.js'), 'utf8');
@@ -5546,13 +5546,13 @@ function checkShortResponseBudget() {
    "You've got it when: …" line after the list. The 2026-10-12 review
    found 17 Challenge cards in Modules 9-11 with none — the student was
    told what to do and never when it was done — and fixed all 17 (EN+ES).
-   The five left are in Modules 3, 5, 6, 7 and 8, carried as-is.
+   The five left are in Modules 3, 4, 6, 7 and 8, carried as-is.
    Same shape as 1ar: a per-module budget that only fails UPWARD. A card
    counts as missing when EITHER language lacks the line. Taking one more
    away is always fine (then lower the number here); adding a Challenge
    card without a got-it line is the thing that needs a decision.
    ════════════════════════════════════════════════════════════════════ */
-const CHALLENGE_NO_GOTIT_BUDGET = { 1: 0, 2: 0, 3: 1, 4: 0, 5: 1, 6: 1, 7: 1, 8: 1, 9: 0, 10: 0, 11: 0, 12: 0, 13: 0 };
+const CHALLENGE_NO_GOTIT_BUDGET = { 1: 0, 2: 0, 3: 1, 4: 1, 5: 0, 6: 1, 7: 1, 8: 1, 9: 0, 10: 0, 11: 0, 12: 0, 13: 0 };
 function checkChallengeGotItBudget() {
   head('1ar2. Challenge cards without a "You\'ve got it when" line (budget)');
   const configSrc = readFileSync(join(ROOT, 'config-main.js'), 'utf8');
@@ -5871,9 +5871,17 @@ function checkBeatsClaimMatchesTab() {
    pairs each repeated — see CLAUDE.md's settled-song-facts entry. Every
    place that plays or prints the chorus's root order has to agree:
    ca-19's `snippet.fromBar === 21` chorus tab in class-activities.js,
-   module-5.js's "the cure" play-along `playSeq`, and the Journey page's
+   module-4.js's "the cure" play-along `playSeq`, and the Journey page's
    Layer 2 (root line) and Layer 3 (power chords) chorus ASCII tabs.
+   The playSeq is read from module-4.js BY FILE NAME, so a module
+   renumber can move it out from under the check — the 2026-10-12
+   Modules 4/5 swap did exactly that — and the other places would stay
+   green on their own. CURE_CHORUS_PLACES pins how many places it
+   reads: the practice-card chorus sections (ca-18, ca-24, ca-30 today),
+   the module play-along, and the Journey page's two tabs. Bump it only
+   when a place is deliberately added or removed.
    ════════════════════════════════════════════════════════════════════ */
+const CURE_CHORUS_PLACES = 6;
 function checkCureChorusOrder() {
   head('1az. "the cure" chorus stays in root order D F C G, twice');
   let checked = 0, bad = 0;
@@ -5924,13 +5932,13 @@ function checkCureChorusOrder() {
     }
   } catch { /* reported by 1 */ }
 
-  // 2) module-5.js — the "the cure" play-along playSeq (last 8 of 16 entries)
+  // 2) module-4.js — the "the cure" play-along playSeq (last 8 of 16 entries)
   try {
     const configSrc = readFileSync(join(ROOT, 'config-main.js'), 'utf8');
     const sandbox = { console };
     vm.createContext(sandbox);
     vm.runInContext(configSrc, sandbox, { filename: 'config-main.js' });
-    vm.runInContext(readFileSync(join(ROOT, 'module-5.js'), 'utf8'), sandbox, { filename: 'module-5.js' });
+    vm.runInContext(readFileSync(join(ROOT, 'module-4.js'), 'utf8'), sandbox, { filename: 'module-4.js' });
     const sets = vm.runInContext('typeof SETS !== "undefined" ? SETS : []', sandbox) || [];
     const CHORD_SIG = {
       D: JSON.stringify([50, 57, 62, 65]),
@@ -5948,7 +5956,7 @@ function checkCureChorusOrder() {
           return Object.keys(CHORD_SIG).find(k => CHORD_SIG[k] === key) || `?(${key})`;
         });
         if (JSON.stringify(got) !== JSON.stringify(EXPECTED)) {
-          err(`module-5.js "the cure" playSeq: chorus half is ${got.join(' ')}, expected ${EXPECTED.join(' ')}`);
+          err(`module-4.js "the cure" playSeq: chorus half is ${got.join(' ')}, expected ${EXPECTED.join(' ')}`);
           problems++; bad++;
         }
       }
@@ -5997,6 +6005,10 @@ function checkCureChorusOrder() {
   } catch { /* reported by 1 */ }
 
   if (checked === 0) { err('1az found none of "the cure" chorus tabs/playSeq — it cannot see what it is supposed to guard'); problems++; return; }
+  if (checked !== CURE_CHORUS_PLACES) {
+    err(`1az checked ${checked} place(s), expected ${CURE_CHORUS_PLACES} — one it guards has moved or gone (a renumbered module file, a removed card section or Journey tab). Repoint the check to it; change CURE_CHORUS_PLACES only when a place is deliberately added or removed`);
+    problems++; return;
+  }
   if (bad === 0) ok(`${checked} "the cure" chorus tab(s)/playSeq checked — all read D F C G, twice`);
 }
 

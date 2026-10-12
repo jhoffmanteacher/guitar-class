@@ -162,10 +162,10 @@
                                                "showcase song" / "canción de
                                                presentación" and "la muestra"
                                                are both RETIRED — Module 12 was
-                                               the last holdout. Module 5 does
+                                               the last holdout. Module 4 does
                                                not name a performance song at
                                                all; choosing one is Module 12's
-                                               job. Module 5 also drops the
+                                               job. Module 4 also drops the
                                                "performance practice" framing
                                                (2026-08-07) — it names the
                                                assessment, and a full-run
@@ -1036,7 +1036,7 @@
     'deck.power-chord-shapes':{ en: 'Power chord shape deck', es: 'Baraja de formas de acorde de potencia' },
     'deck.e5-vs-emajor':     { en: 'Power vs. full chord deck', es: 'Baraja de acorde de potencia vs. completo' },
     'deck.chords-group1':    { en: 'Group 1 chord deck', es: 'Baraja de acordes del grupo 1' },
-    'deck.chords-m5':        { en: 'Module 5 chord deck', es: 'Baraja de acordes del módulo 5' },
+    'deck.chords-m5':        { en: 'Module 4 chord deck', es: 'Baraja de acordes del módulo 4' },
     'deck.headMeta':         { en: '{n} cards', es: '{n} cartas' },
     'deck.cardOf':           { en: 'Card {n} of {total}', es: 'Carta {n} de {total}' },
     'deck.introOne':         { en: 'The deck deals you one card at a time, shuffled. Do what it says, then move on — miss one and it comes back later in the run.',

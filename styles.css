@@ -960,10 +960,10 @@ body.rail-collapsed .rail-tools .tool-popup{
   .rs-sub{display:none}
   /* Report a problem moved into the rail 2026-10-11 and tipped every module
      2px past the bottom at 1366×657 (measured). 5px is the most it can give
-     back here. m5w2, a two-part set, was still 19px over; the 4px gaps, the
+     back here. m4w2, a two-part set, was still 19px over; the 4px gaps, the
      8px end padding, the collapse button's 4px top margin and the 1px part
      links above won back 24px (2026-10-12, measured at 1366×657, student
-     view, EN and ES: m5w2 +5px, every other 3- or 4-set module +24px). */
+     view, EN and ES: m4w2 +5px, every other 3- or 4-set module +24px). */
   .rail-report{padding-top:5px;padding-bottom:5px}
 }
 /* the per-set tab switcher now lives in the rail — hide the in-panel one on screen
@@ -1126,7 +1126,7 @@ body.rail-collapsed .rail-tools .tool-popup{
    the ~55px a 4-across dock gives each button at this size, so nothing
    ellipsizes; the full names stay on the popup titles and the title=
    tooltip. Costs ~12px of rail height — measured 7px+ of slack left at
-   1366×657 on the tallest rail (Modules · m5w2 with its Part links). */
+   1366×657 on the tallest rail (Modules · m4w2 with its Part links). */
 @media(min-width:761px){
   .rail-tools .fab-buttons{grid-template-columns:repeat(4,1fr);gap:2px}
   .rail-tools{padding:4px 6px 6px}
@@ -1740,7 +1740,7 @@ body.t-wide .t-main{max-width:none}
    .div-cur is toggled by syncStationFocus() as the student moves. */
 .dp.focus .stp-divider{display:none}
 .dp.focus .stp-group.div-cur .stp-divider{display:flex}
-/* ── Part marks: a long set shown as two parts (m5w2, 2026-09-19) ──
+/* ── Part marks: a long set shown as two parts (m4w2, 2026-09-19) ──
    Display only — no set id, section or step moves, so no stored key moves
    (see lessonParts() in app.js). A step heavier than the B→C seam above,
    deliberately: the seam is a handoff, this is a stopping point. Two of

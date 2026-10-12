@@ -394,8 +394,8 @@ SETS.push(
             steps: [
               {
                 label: 'Ear Spark: E5 vs. E major', label_es: 'Chispa auditiva: E5 vs. E mayor',
-                text: 'Ear Spark (optional, 2 min):<ol><li>First, build a full open E major — it\'s your E5 (open low E + A string, 2nd fret) with two notes added: G string, 1st fret and D string, 2nd fret, letting the open B and high e ring too (index on G string fret 1, middle on A string fret 2, ring on D string fret 2) — you\'ll meet chords like this properly in Module 5.</li><li>Run the deck below — it deals you "E5" or "E". Play whichever chord it names, a few reps of each.</li><li>Listen for the difference each time.</li></ol>',
-                text_es: 'Chispa auditiva (opcional, 2 min):<ol><li>Primero, arma un E mayor al aire completo — es tu E5 (Mi grave al aire + cuerda La, traste 2) con dos notas agregadas: cuerda Sol, traste 1 y cuerda Re, traste 2, dejando sonar también la Si y la mi aguda al aire (índice en la cuerda Sol traste 1, medio en la cuerda La traste 2, anular en la cuerda Re traste 2) — conocerás bien acordes así en el Módulo 5.</li><li>Corre la baraja de abajo — te reparte "E5" o "E". Toca el acorde que indique, varias repeticiones de cada uno.</li><li>Escucha la diferencia cada vez.</li></ol>',
+                text: 'Ear Spark (optional, 2 min):<ol><li>First, build a full open E major — it\'s your E5 (open low E + A string, 2nd fret) with two notes added: G string, 1st fret and D string, 2nd fret, letting the open B and high e ring too (index on G string fret 1, middle on A string fret 2, ring on D string fret 2) — you\'ll meet chords like this properly in Module 4.</li><li>Run the deck below — it deals you "E5" or "E". Play whichever chord it names, a few reps of each.</li><li>Listen for the difference each time.</li></ol>',
+                text_es: 'Chispa auditiva (opcional, 2 min):<ol><li>Primero, arma un E mayor al aire completo — es tu E5 (Mi grave al aire + cuerda La, traste 2) con dos notas agregadas: cuerda Sol, traste 1 y cuerda Re, traste 2, dejando sonar también la Si y la mi aguda al aire (índice en la cuerda Sol traste 1, medio en la cuerda La traste 2, anular en la cuerda Re traste 2) — conocerás bien acordes así en el Módulo 4.</li><li>Corre la baraja de abajo — te reparte "E5" o "E". Toca el acorde que indique, varias repeticiones de cada uno.</li><li>Escucha la diferencia cada vez.</li></ol>',
                 hint: 'What you\'re listening for each time: power chords are hollow, with no major/minor color.',
                 hint_es: 'Lo que escuchas cada vez: los acordes de potencia suenan huecos, sin color mayor o menor.',
                 drill: { type: 'deck', deck: 'e5-vs-emajor' }
@@ -1056,7 +1056,7 @@ MODULE_REVIEWS[3] = {
     'Lee una progresión de tres acordes (I–IV–V) a partir de símbolos de acorde / TAB con un patrón de rasgueo nombrado (corcheas rectas o el rasgueo dividido), y nombra acordes de potencia a partir de un diagrama de acordes',
     'Aplaude y cuenta un ritmo de 4 compases usando redondas, blancas, negras y corcheas'
   ],
-  forward: 'The E &amp; A string roots you slide between become your <strong>starting point for the pentatonic patterns in Module 4</strong> — that\'s where you\'ll play lead lines and solos over these very same power chords.',
-  forward_es: 'Las raíces de las cuerdas Mi &amp; La entre las que te deslizas se convierten en tu <strong>punto de partida para los patrones pentatónicos del Módulo 4</strong> — ahí es donde vas a tocar líneas melódicas y solos sobre estos mismos acordes de potencia.',
+  forward: 'The E &amp; A string roots you slide between become your <strong>starting point for the pentatonic patterns in Module 5</strong> — that\'s where you\'ll play lead lines and solos over these very same power chords.',
+  forward_es: 'Las raíces de las cuerdas Mi &amp; La entre las que te deslizas se convierten en tu <strong>punto de partida para los patrones pentatónicos del Módulo 5</strong> — ahí es donde vas a tocar líneas melódicas y solos sobre estos mismos acordes de potencia.',
   standards: ['Pr.4a', 'Pr.5a', 'Pr.5b', 'Pr.6a', 'Re.7a']
 };

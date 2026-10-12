@@ -210,8 +210,8 @@ SETS.push(
                 text: '<ol><li>Strum the verse, playing whatever numeral the deck below deals you each bar — you have to know which chord each numeral means, not just the C–G–Am–F letters.</li></ol>You\'ve got it when: one full loop with every numeral landing on the right chord.',
                 text_es: '<ol><li>Rasguea la estrofa, tocando el número romano que la baraja de abajo te reparta en cada compás — tienes que saber qué acorde significa cada número romano, no solo las letras C–G–Am–F.</li></ol>Lo tienes cuando: una vuelta completa con cada número romano cayendo en el acorde correcto.',
                 drill: { type: 'deck', deck: 'numerals-letitbe', skill: 'm11w1-s3' },
-                hint: 'This is the same verse you\'ve strummed since Module 5 — today the only new part is thinking in numerals instead of letters.',
-                hint_es: 'Esta es la misma estrofa que has rasgueado desde el Módulo 5 — hoy lo único nuevo es pensar en números romanos en lugar de letras.',
+                hint: 'This is the same verse you\'ve strummed since Module 4 — today the only new part is thinking in numerals instead of letters.',
+                hint_es: 'Esta es la misma estrofa que has rasgueado desde el Módulo 4 — hoy lo único nuevo es pensar en números romanos en lugar de letras.',
                 stuck: 'Say each chord\'s NAME out loud first, then its numeral, until the pairing sticks.',
                 stuck_es: 'Di primero el NOMBRE de cada acorde en voz alta, y luego su número romano, hasta que la relación se fije.',
                 levelUp: 'Deal a fresh order each loop, and always land back on I to finish.',
@@ -891,8 +891,8 @@ SETS.push(
               },
               {
                 label: 'Comp the full 12 bars', label_es: 'Acompaña los 12 compases completos',
-                text: '<ol><li>Comp the full 12 bars from memory with shuffle feel at 60 BPM.</li><li>Record a pass and loop your recording.</li><li>Solo over your own comping with A minor pentatonic (your Module 4 box at fret 5).</li></ol>You\'ve got it when: a full chorus of each job (one chorus = one full trip through the 12 bars) — comping without losing the form, soloing without losing the changes.',
-                text_es: '<ol><li>Acompaña los 12 compases completos de memoria con sensación de shuffle a 60 BPM.</li><li>Graba una pasada y repite tu grabación en loop.</li><li>Haz un solo sobre tu propio acompañamiento con la pentatónica menor de A (tu caja del Módulo 4 en el traste 5).</li></ol>Lo tienes cuando: una ronda completa de cada trabajo (una ronda = un recorrido completo por los 12 compases) — acompañar sin perder la forma, hacer un solo sin perder los cambios.',
+                text: '<ol><li>Comp the full 12 bars from memory with shuffle feel at 60 BPM.</li><li>Record a pass and loop your recording.</li><li>Solo over your own comping with A minor pentatonic (your Module 5 box at fret 5).</li></ol>You\'ve got it when: a full chorus of each job (one chorus = one full trip through the 12 bars) — comping without losing the form, soloing without losing the changes.',
+                text_es: '<ol><li>Acompaña los 12 compases completos de memoria con sensación de shuffle a 60 BPM.</li><li>Graba una pasada y repite tu grabación en loop.</li><li>Haz un solo sobre tu propio acompañamiento con la pentatónica menor de A (tu caja del Módulo 5 en el traste 5).</li></ol>Lo tienes cuando: una ronda completa de cada trabajo (una ronda = un recorrido completo por los 12 compases) — acompañar sin perder la forma, hacer un solo sin perder los cambios.',
                 hint: 'Comping = playing the backing chords while someone else solos. When the loop comes back to A7, land on an A — hearing that "home" arrival is the most important thing. Playing with someone? One comps while the other solos, then swap.',
                 hint_es: 'Acompañar = tocar los acordes de base mientras alguien más hace un solo. Cuando el loop vuelve a A7, aterriza en una A — escuchar esa llegada a "casa" es lo más importante. ¿Tocando con alguien? Uno acompaña mientras el otro hace el solo, y luego cambian.',
                 skills: [7, 8]

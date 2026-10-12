@@ -3003,7 +3003,7 @@ function populateModuleDropdown(){
     const { done, total, state } = moduleCompletion(m);
     /* State goes in FRONT of the name (navigability work order 2026-09-23,
        item 7): the select is ~200px wide, so a ✓ or 🔒 riding at the END of
-       "Module 4 — Major / Minor / Blues Pentatonic Scales" was cut off and
+       "Module 5 — Major / Minor / Blues Pentatonic Scales" was cut off and
        invisible in the closed control. "3/9" stays a tail — it only ever
        matters once the list is open. */
     let head = '';
@@ -4066,7 +4066,7 @@ function syncRailStations(){
      address each part's FIRST section by its storage namespace (data-ns),
      never by DOM position — the ladder runs both stations through one
      panel and render-time hides move rows around, so position identifies
-     nothing. Hidden for every other set, which is every set but m5w2. */
+     nothing. Hidden for every other set, which is every set but m4w2. */
   if(partsEl){
     const lp = (w && !w.comingSoon) ? lessonParts(w) : null;
     partsEl.hidden = !lp;
@@ -4712,14 +4712,14 @@ function lessonGroups(w){
     }));
 }
 
-/* ── A long set shown as two parts (Module 5 Set 2, 2026-09-19) ───────
+/* ── A long set shown as two parts (Module 4 Set 2, 2026-09-19) ───────
    DISPLAY ONLY, exactly the way stations B and C are merged in display
    only. `partOne` on the SET names the first part; `partBreak` on a
    SECTION opens the second one immediately above that section. Nothing is
    added, removed, moved or reordered in the data — the set keeps its one
    id, `stations.b`/`stations.c` keep their arrays, and every
    `${set}-${station}-sec{gi}-{i}` key is the key it always was. Splitting
-   m5w2 into two real sets would have moved all of them.
+   m4w2 into two real sets would have moved all of them.
 
    A part is chrome: the ladder's heading, the progress pill and the
    "Step n of m" counter. Set completion, the sequential set gate, the
@@ -4944,7 +4944,7 @@ function buildLesson(w){
   const flat = groups.flatMap(g => g.secs);
   /* A set shown as two parts (display only — see lessonParts). `parts.at`
      is the index in `flat` where Part 2 begins; everything before it is
-     Part 1. Null for every ordinary set, which is every set but m5w2. */
+     Part 1. Null for every ordinary set, which is every set but m4w2. */
   const parts = lessonParts(w, flat);
   const partOfIdx = k => (parts && k >= parts.at) ? 2 : 1;
   // Steps done / total for the ladder's progress pill — mirrors stepsHtml's
@@ -5097,7 +5097,7 @@ function buildLesson(w){
     });
     // Part 2's divider rides immediately above the section that opens it,
     // inside that section's own station wrapper — the B→C seam still
-    // renders exactly where it does today (in m5w2 it falls inside Part 1).
+    // renders exactly where it does today (in m4w2 it falls inside Part 1).
     if(parts) rendered.set(parts.breakNs, partMarkHtml(2, parts.title2, curPart === 2) + rendered.get(parts.breakNs));
     /* One wrapper per station so the seam divider can hide itself in focus
        mode until the student is actually in the practice half (syncStationFocus
@@ -5110,7 +5110,7 @@ function buildLesson(w){
     const partOneHtml = parts ? partMarkHtml(1, parts.title1, curPart === 1) : '';
     /* .div-cur, baked in (see above). For a set with parts there's a
        second condition: the seam introduces the sections at the TOP of
-       its station, which in m5w2 are all in Part 1 — so once the open
+       its station, which in m4w2 are all in Part 1 — so once the open
        step is in Part 2, "Now practice it" is a heading for a half that
        started nine steps ago, stacked right above the Part 2 divider.
        Same "don't head a part you're not in" rule the part marks follow. */
@@ -7307,7 +7307,7 @@ const MC_PINNED = /^(all|none|both|neither)\s+of\b|^(none|all)$/i;
    not a summary). Content-coupled: reword one of these choices in module
    data and this entry must change with it — nothing enforces the link. */
 const MC_PINNED_EXACT = new Set([
-  'All three show note sequences',                     // module-5
+  'All three show note sequences',                     // module-4
   "Anywhere — the thumb doesn't affect your fingers",  // module-2
 ]);
 function mcHash(str){

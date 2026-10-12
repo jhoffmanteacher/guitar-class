@@ -37,8 +37,8 @@ SETS.push(
               },
               {
                 label: 'Re-test 1: open chords', label_es: 'Repaso 1: acordes abiertos',
-                text: 'Re-test 1 — Open chords (Module 5): loop C → G → Am → F, two bars each at 60 BPM. Can you still land every change on beat 1 without breaking the strum?',
-                text_es: 'Repaso 1 — Acordes abiertos (Módulo 5): repite C → G → Am → F, dos compases cada uno a 60 BPM. ¿Todavía puedes caer en cada cambio justo en el tiempo 1 sin romper el rasgueo?',
+                text: 'Re-test 1 — Open chords (Module 4): loop C → G → Am → F, two bars each at 60 BPM. Can you still land every change on beat 1 without breaking the strum?',
+                text_es: 'Repaso 1 — Acordes abiertos (Módulo 4): repite C → G → Am → F, dos compases cada uno a 60 BPM. ¿Todavía puedes caer en cada cambio justo en el tiempo 1 sin romper el rasgueo?',
                 hint: 'If one change drags, name it — that exact change is your first One-Minute Changes drill (a drill is a short exercise you repeat to build a skill).',
                 hint_es: 'Si un cambio se atrasa, identifícalo — ese cambio exacto es tu primer ejercicio de Cambios de Un Minuto (un ejercicio es una actividad corta que repites para desarrollar una destreza).',
                 skills: [1],
@@ -55,8 +55,8 @@ SETS.push(
               },
               {
                 label: 'Re-test 3: pentatonic Pattern 1', label_es: 'Repaso 3: Patrón pentatónico 1',
-                text: 'Re-test 3 — Pentatonic (Module 4): Pattern 1, up and back down, from memory. No diagram, every note on a 60 BPM click?',
-                text_es: 'Repaso 3 — Pentatónica (Módulo 4): Patrón 1, hacia arriba y de vuelta hacia abajo, de memoria. ¿Sin diagrama, cada nota en el clic a 60 BPM?',
+                text: 'Re-test 3 — Pentatonic (Module 5): Pattern 1, up and back down, from memory. No diagram, every note on a 60 BPM click?',
+                text_es: 'Repaso 3 — Pentatónica (Módulo 5): Patrón 1, hacia arriba y de vuelta hacia abajo, de memoria. ¿Sin diagrama, cada nota en el clic a 60 BPM?',
                 hint: 'Hesitations count as "shaky" — you should know the pattern by feel, not by reading it.',
                 hint_es: 'Las dudas cuentan como "insegura" — deberías saber el patrón por sensación, no por leerlo.',
                 skills: [3],
@@ -102,8 +102,8 @@ SETS.push(
                 text_es: 'Mira tus seis respuestas. ¿Cuál ÚNICO repaso necesita más práctica antes de profundizar en el Módulo 9? Eso es lo primero que practicas la próxima sesión — las unidades del módulo original siguen ahí cuando las necesites.',
                 hint: 'One focused session on your weakest re-test is better than a vague "practice everything."',
                 hint_es: 'Una sesión enfocada en tu repaso más débil vale más que un vago "practicar todo."',
-                response: { type: 'short', placeholder: 'e.g. Re-test 3 — Pattern 1 is half-gone; starting next session with Module 4, Set 1',
-                  placeholder_es: 'p. ej. Repaso 3 — el Patrón 1 está a medio olvidar; empiezo la próxima sesión con el Módulo 4, Unidad 1' }
+                response: { type: 'short', placeholder: 'e.g. Re-test 3 — Pattern 1 is half-gone; starting next session with Module 5, Set 1',
+                  placeholder_es: 'p. ej. Repaso 3 — el Patrón 1 está a medio olvidar; empiezo la próxima sesión con el Módulo 5, Unidad 1' }
               }
             ]
           }
@@ -141,8 +141,8 @@ SETS.push(
               },
               {
                 label: 'Re-test 1: open chords', label_es: 'Repaso 1: acordes abiertos',
-                text: 'Re-test 1 — Open chords: 2 bars each of C, G, Am, F at 60 BPM, looped twice, every change on beat 1. Where to practice it: Module 5, Set 2 (the C–G–Am–F Loop and One-Minute Changes).',
-                text_es: 'Repaso 1 — Acordes abiertos: 2 compases cada uno de C, G, Am, F a 60 BPM, repetido dos veces, cada cambio en el tiempo 1. Dónde practicarlo: Módulo 5, Unidad 2 (el Loop C–G–Am–F y Cambios de Un Minuto).',
+                text: 'Re-test 1 — Open chords: 2 bars each of C, G, Am, F at 60 BPM, looped twice, every change on beat 1. Where to practice it: Module 4, Set 2 (the C–G–Am–F Loop and One-Minute Changes).',
+                text_es: 'Repaso 1 — Acordes abiertos: 2 compases cada uno de C, G, Am, F a 60 BPM, repetido dos veces, cada cambio en el tiempo 1. Dónde practicarlo: Módulo 4, Unidad 2 (el Loop C–G–Am–F y Cambios de Un Minuto).',
                 hint: 'Clean means: no dead strings, no pause at the change.',
                 hint_es: 'Limpio significa: sin cuerdas apagadas, sin pausa en el cambio.',
                 skills: [1]
@@ -157,8 +157,8 @@ SETS.push(
               },
               {
                 label: 'Re-test 3: pentatonic Pattern 1', label_es: 'Repaso 3: Patrón pentatónico 1',
-                text: 'Re-test 3 — Pentatonic Pattern 1: up and back down from memory at 60 BPM, every note on the click. Use the play button to hear the target. Where to practice it: Module 4, Set 1.',
-                text_es: 'Repaso 3 — Patrón pentatónico 1: hacia arriba y de vuelta hacia abajo de memoria a 60 BPM, cada nota en el clic. Usa el botón de reproducir para escuchar el objetivo. Dónde practicarlo: Módulo 4, Unidad 1.',
+                text: 'Re-test 3 — Pentatonic Pattern 1: up and back down from memory at 60 BPM, every note on the click. Use the play button to hear the target. Where to practice it: Module 5, Set 1.',
+                text_es: 'Repaso 3 — Patrón pentatónico 1: hacia arriba y de vuelta hacia abajo de memoria a 60 BPM, cada nota en el clic. Usa el botón de reproducir para escuchar el objetivo. Dónde practicarlo: Módulo 5, Unidad 1.',
                 hint: 'If you miss notes, drop to 50 BPM.',
                 hint_es: 'Si te equivocas en notas, baja a 50 BPM.',
                 skills: [3],
@@ -274,8 +274,8 @@ SETS.push(
             steps: [
               {
                 label: 'Watch: note system on D and G', label_es: 'Mira: sistema de notas en Re y Sol',
-                text: 'Watch: <a href="https://youtu.be/WQ8DSYD2kvw" target="_blank">Learn Every Note on the Fretboard (Start With This Simple System) – Marty Music</a> (0:00–6:00). You named the natural notes on these two strings in Module 4, Set 2 — this set takes them all the way up to fret 12. Follow along on your own guitar as he walks the D and G strings.',
-                text_es: 'Mira: <a href="https://youtu.be/WQ8DSYD2kvw" target="_blank">Learn Every Note on the Fretboard (Start With This Simple System) – Marty Music</a> (0:00–6:00). Ya nombraste las notas naturales de estas dos cuerdas en el Módulo 4, Unidad 2 — esta unidad las lleva hasta el traste 12. Sigue el ritmo en tu propia guitarra mientras él recorre las cuerdas Re y Sol.',
+                text: 'Watch: <a href="https://youtu.be/WQ8DSYD2kvw" target="_blank">Learn Every Note on the Fretboard (Start With This Simple System) – Marty Music</a> (0:00–6:00). You named the natural notes on these two strings in Module 5, Set 2 — this set takes them all the way up to fret 12. Follow along on your own guitar as he walks the D and G strings.',
+                text_es: 'Mira: <a href="https://youtu.be/WQ8DSYD2kvw" target="_blank">Learn Every Note on the Fretboard (Start With This Simple System) – Marty Music</a> (0:00–6:00). Ya nombraste las notas naturales de estas dos cuerdas en el Módulo 5, Unidad 2 — esta unidad las lleva hasta el traste 12. Sigue el ritmo en tu propia guitarra mientras él recorre las cuerdas Re y Sol.',
                 hint: 'Marty builds the fretboard the same way you already know the E and A strings from Module 2 — natural notes, then the sharps and flats that sit between them.',
                 hint_es: 'Marty construye el mástil de la misma manera que ya conoces las cuerdas Mi y La del Módulo 2 — notas naturales, y luego los sostenidos y bemoles que están entre ellas.',
                 skills: [1, 2],
@@ -464,8 +464,8 @@ SETS.push(
                 label: 'Challenge — "Sweet Child O\' Mine", name it as you play it', label_es: 'Reto — "Sweet Child O\' Mine", nómbralo mientras lo tocas',
                 text: '<ol><li>Watch the intro-riff clip you first saw in Module 7 (<a href="https://www.youtube.com/watch?v=EBNlYH4P5r8" target="_blank">Sweet Child O\' Mine Intro in Standard Tuning – Jbf Music &amp; Guitar</a>).</li><li>Learn just its first four notes — D string fret 12, a skip up to the B string at fret 15, then two notes on the G string (frets 14 and 12).</li><li>Say each note\'s NAME as you play it — today\'s D/G-string knowledge covers three of the four; the B-string note is a preview.</li></ol>You\'ve got it when: you play the four notes three times in a row and say the name of each D- and G-string note as you play it, with no chart.<a href="tabs/sweet-child-o-mine.html#layer-6" target="_blank"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" style="width:1em;height:1em;vertical-align:-0.15em"><circle cx="5" cy="6" r="2"/><circle cx="19" cy="18" r="2"/><path d="M5 8c0 6 14 2 14 8"/></svg> Song Journey: this song\'s Journey page</a> — bonus Layer 6 has the whole intro riff, one note per beat.',
                 text_es: '<ol><li>Mira el clip del riff de intro que viste por primera vez en el Módulo 7 (<a href="https://www.youtube.com/watch?v=EBNlYH4P5r8" target="_blank">Sweet Child O\' Mine Intro in Standard Tuning – Jbf Music &amp; Guitar</a>).</li><li>Aprende solo sus primeras cuatro notas — cuerda Re traste 12, un salto a la cuerda Si en el traste 15, y luego dos notas en la cuerda Sol (trastes 14 y 12).</li><li>Di el NOMBRE de cada nota mientras la tocas — lo que sabes hoy de las cuerdas Re y Sol cubre tres de las cuatro; la nota de la cuerda Si es un adelanto.</li></ol>Lo tienes cuando: tocas las cuatro notas tres veces seguidas y dices el nombre de cada nota de las cuerdas Re y Sol mientras la tocas, sin diagrama.<a href="tabs/sweet-child-o-mine.html#layer-6" target="_blank"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" style="width:1em;height:1em;vertical-align:-0.15em"><circle cx="5" cy="6" r="2"/><circle cx="19" cy="18" r="2"/><path d="M5 8c0 6 14 2 14 8"/></svg> Recorrido de la canción: la página de Recorrido de esta canción</a> — la Capa 6, la capa extra, tiene el riff de intro completo, una nota por tiempo.',
-                hint: 'A riff is a short musical phrase that repeats. This one sits at frets 12–15, past where you named D- and G-string notes in Module 4.',
-                hint_es: 'Un riff es una frase musical corta que se repite. Este está en los trastes 12–15, más arriba de donde nombraste las notas de las cuerdas Re y Sol en el Módulo 4.',
+                hint: 'A riff is a short musical phrase that repeats. This one sits at frets 12–15, past where you named D- and G-string notes in Module 5.',
+                hint_es: 'Un riff es una frase musical corta que se repite. Este está en los trastes 12–15, más arriba de donde nombraste las notas de las cuerdas Re y Sol en el Módulo 5.',
                 stuck: 'Pause the video on the very first note and just name that one string/fret before moving on.',
                 stuck_es: 'Pausa el video en la primerísima nota y solo nombra esa cuerda/traste antes de continuar.',
                 levelUp: 'Name all four notes of the opening phrase before you play them, then check yourself against the video.',
@@ -746,8 +746,8 @@ SETS.push(
                 label: 'Challenge — "Luna", the punteo line', label_es: 'Reto — "Luna", la línea de punteo',
                 text: '<ul><li>Play the fingerpicked intro fragment — one note each on D, G, B and open e, four strings — reading Layer 6 TAB from <a href="tabs/luna.html#layer-6" target="_blank">"Luna"\'s Song Journey page</a>.</li></ul>You\'ve got it when: all four notes ring cleanly in order, and you can name each one as you play it.',
                 text_es: '<ul><li>Toca el fragmento de intro con fingerpicking — una nota en cada una de Re, Sol, Si y mi aguda al aire, cuatro cuerdas — leyendo el TAB de la Capa 6 de la <a href="tabs/luna.html#layer-6" target="_blank">página de Recorrido de la canción de "Luna"</a>.</li></ul>Lo tienes cuando: las cuatro notas suenan limpias en orden, y puedes nombrar cada una mientras la tocas.',
-                hint: 'Punteo = the picked melody line, a Spanish guitar term. Layer 6 is the bonus requinto-intro layer — a requinto is a small, higher-pitched guitar that plays the lead melody. This roll uses the little-F shape you already know from Module 5, with one change: leave the high e string OPEN — don\'t fret it at fret 1 the way you do for the normal little F. Today\'s new skill is being able to name every note in it.',
-                hint_es: 'Punteo = la línea melódica punteada, un término de guitarra en español. La Capa 6 es la capa bonus de intro con requinto — un requinto es una guitarra pequeña y más aguda que toca la melodía principal. Este roll usa la forma de F pequeña que ya conoces del Módulo 5, con un cambio: deja la cuerda mi aguda AL AIRE — no la trastees en el traste 1 como lo haces para la F pequeña normal. La destreza nueva de hoy es poder nombrar cada nota dentro de ella.',
+                hint: 'Punteo = the picked melody line, a Spanish guitar term. Layer 6 is the bonus requinto-intro layer — a requinto is a small, higher-pitched guitar that plays the lead melody. This roll uses the little-F shape you already know from Module 4, with one change: leave the high e string OPEN — don\'t fret it at fret 1 the way you do for the normal little F. Today\'s new skill is being able to name every note in it.',
+                hint_es: 'Punteo = la línea melódica punteada, un término de guitarra en español. La Capa 6 es la capa bonus de intro con requinto — un requinto es una guitarra pequeña y más aguda que toca la melodía principal. Este roll usa la forma de F pequeña que ya conoces del Módulo 4, con un cambio: deja la cuerda mi aguda AL AIRE — no la trastees en el traste 1 como lo haces para la F pequeña normal. La destreza nueva de hoy es poder nombrar cada nota dentro de ella.',
                 stuck: 'Fret the little F shape first, strum it once to hear the target chord, then break it apart one string at a time.',
                 stuck_es: 'Trastea primero la forma de F pequeña, ráscala una vez para escuchar el acorde objetivo, y luego desármala una cuerda a la vez.',
                 levelUp: 'Name each note out loud as you roll through it, or drop it in front of the Layer 5 vamp (a vamp is a short chord pattern repeated over and over) as a real intro.',
