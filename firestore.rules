@@ -163,11 +163,18 @@ service cloud.firestore {
          a room of 30 students.
 
          HONEST LIMIT: none of this stops a student who opens DevTools and
-         writes a truthful-looking `ms: 0` for maximum speed points. Only
-         timing the answer server-side (against liveQuiz/current.askedAt)
-         would, and that needs a Cloud Function this project doesn't have.
-         Scoring is flat (`speedBonus: false`) for every quiz in the bank
-         today, so nothing currently reads `ms` for points at all.
+         writes a truthful-looking `ms: 0` for maximum speed points, and
+         `ms` IS read for points: only string-id opts out with
+         `speedBonus: false`; the three fret quizzes default to speed
+         scoring (lqDefaultScoring in live-quiz.js), and the teacher can
+         pick "Faster = more points" for any quiz, after which lqPoints()
+         scores from `ms`. Timing the answer server-side would close it, and
+         that needs no Cloud Function: a rule can pin
+         `request.resource.data.at == request.time` (the client already
+         writes `at` as serverTimestamp(), which passes), and the scoring
+         pass could then time each answer from `at` against
+         liveQuiz/current.askedAt instead of trusting `ms`. Not done yet —
+         it is a rule change (console re-paste) plus a scoring change.
 
          Deliberately no delete for students: clearing your own answer
          after seeing the tally would be a free retry. */

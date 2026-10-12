@@ -1034,7 +1034,10 @@ function lqTeacherListen(){
     }, e => console.warn('[live-quiz] teacher session listener stopped', e));
     lqTUnsubAns = lqDoc().collection('answers').onSnapshot(snap => {
       lqTAnswers = snap.docs.map(d => d.data() || {});
-      if(typeof teacherView !== 'undefined' && teacherView === 'livequiz'){ lqPaintStage(); lqPaintControls(); }
+      // Stage only: nothing in the control strip reads the answers, and
+      // rebuilding it on every answer could swap a button out from under a
+      // click (mousedown on the old one, mouseup on the new = no click).
+      if(typeof teacherView !== 'undefined' && teacherView === 'livequiz') lqPaintStage();
     }, e => console.warn('[live-quiz] teacher answers listener stopped', e));
   }).catch(()=>{});
 }

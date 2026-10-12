@@ -98,6 +98,17 @@ function teacherApplyRosterFilter(){
   allStudents = teacherPeriodFilter==='all' ? onRoster
     : teacherPeriodFilter==='none' ? onRoster.filter(s=>!teacherStudentPeriod(s))
     : onRoster.filter(s=>teacherStudentPeriod(s)===teacherPeriodFilter);
+  /* A filter onto nobody falls back to All — the last Unassigned student
+     just got a period (and that button disappears at zero, so it couldn't
+     be switched off), or a period has no one in it. Otherwise the saved
+     choice sticks and every view reads "No student data yet". Skipped while
+     the roster itself is empty, so a render before the first load can't
+     wipe the saved choice. */
+  if(teacherPeriodFilter!=='all' && !allStudents.length && onRoster.length){
+    teacherPeriodFilter='all';
+    try{ localStorage.setItem('gc-teacher-period', 'all'); }catch(e){}
+    allStudents=onRoster;
+  }
   renderTeacherPeriodFilter(onRoster);
 }
 /* The segmented control itself. Repainted from teacherApplyRosterFilter so
@@ -1036,7 +1047,9 @@ function renderTeacherActivities(opts){
     box.innerHTML='<div class="t-loading">No activities yet — they\'ll appear here once one is pushed to the site.</div>';
     return;
   }
-  if(allStudents.length===0){
+  // The whole roster, not the period-filtered list: the board is class-wide
+  // and its done counts already read allStudentsRaw (doneSummaryRoster).
+  if(allStudentsRaw.length===0){
     setBoardWide(false);
     box.innerHTML='<div class="t-loading">No student data yet — students need to sign in first.</div>';
     return;
@@ -1166,13 +1179,14 @@ function renderTeacherActivities(opts){
         +`<button class="tg-seg-btn ${!isHidden?'on':''}" data-set-activity-hidden data-id="${escAttr(a.id)}" data-state="show">Visible</button>`
         +`<button class="tg-seg-btn ${isHidden?'on':''}" data-set-activity-hidden data-id="${escAttr(a.id)}" data-state="hide">Hidden</button></div>`;
     };
-    // Required blocks the site until it's done (the activity gate);
-    // Optional still shows, tagged "Optional", but never blocks. Independent
+    // Required: until it's done or cleared, In-Class Activities opens first
+    // at sign-in (the activity gate's lock is off — CA_GATE_LOCKS in app.js);
+    // Optional still shows, tagged "Optional", but never does. Independent
     // of Visible/Hidden — see teacherSetActivityOptional.
     const optSeg=a=>{
       const isOpt=optional[a.id]===true;
       return `<div class="tg-seg">`
-        +`<button class="tg-seg-btn ${!isOpt?'on':''}" data-set-activity-optional data-id="${escAttr(a.id)}" data-state="required" title="Students must finish this before the rest of the site opens">Required</button>`
+        +`<button class="tg-seg-btn ${!isOpt?'on':''}" data-set-activity-optional data-id="${escAttr(a.id)}" data-state="required" title="Until students finish this (or you clear it for them), In-Class Activities opens first when they sign in. Nothing else is locked.">Required</button>`
         +`<button class="tg-seg-btn ${isOpt?'on':''}" data-set-activity-optional data-id="${escAttr(a.id)}" data-state="optional" title="Students see it, tagged Optional, but it never opens first when they sign in">Optional</button></div>`;
     };
     // Practice cards only (view:'card'): when the Songs page's Play Along
@@ -1403,7 +1417,7 @@ function renderTeacherActivities(opts){
       +pinsHtml
       +`<details class="tg-help"><summary>How this page works</summary>`
       +`<div class="tg-note">A card shows to students only when all four are true: it is <strong>assigned</strong> to a module here, its <strong>release date</strong> has arrived, it is not <strong>Hidden</strong>, and it is not <strong>Archived</strong>. Publish now dates it today; scheduling a later day holds it until then; Unpublish clears the date. A card's date stays editable once it's live, so you can move it to another day without unpublishing first — type a future day and it goes back to Scheduled. Use Hidden to pull back something already live, then un-hide any time — the date and the Hidden switch are independent, either one hides.<br><br>`
-      +`<strong>Required / Optional</strong> decides whether a live card locks the site. A Required card (the default) blocks everything but In-Class Activities and Live quiz until the student finishes it. An Optional card still shows, tagged “Optional”, and students can still do it and mark it done, but it never locks anything. Switch it either way at any time.<br><br>`
+      +`<strong>Required / Optional</strong> decides whether a live card sends students to In-Class Activities when they sign in. Neither one locks any part of the site. Until a student finishes a Required card (the default) or you clear it for them, In-Class Activities opens first when they sign in, Today's activity shows it ahead of Optional cards, and the console marks them Pending. An Optional card still shows, tagged “Optional”, and students can still do it and mark it done, but it never opens first and never counts as Pending. Switch it either way at any time.<br><br>`
       +`<strong>Archive</strong> takes a card off students' In-Class Activities page for good but keeps its place in its module, its date and its name, so Restore puts it back exactly where it was. Archived cards hold no #number, so the ones after them count down by one. <strong>Delete</strong> also clears the date, rename and per-student gate clears, and takes the card off the board entirely — it comes back in Built, blank, to be placed and published from scratch. Neither one removes the activity from the site's code (only an update does) and neither touches what students have already finished, so the Done counts survive both.<br><br>`
       +`<strong>Pin</strong> puts an assigned card on the <strong>Keep practicing</strong> row at the top of students' In-Class Activities page, up to ${TEACHER_PINS_MAX} cards, in the order you pinned them — for a card you reuse on many days, so you don't have to re-date it. A pin needs no release date. It never blocks the site, never counts as one of today's activities, and a pinned card that is also one of today's activities leaves the row that day. Hidden, Archive and Delete still win (Delete also unpins). Students' Done marks are untouched.<br><br>`
       +`<strong>Un-assign</strong> sends a card back to Built without clearing anything. The &#x270E; renames an activity for everyone, in both languages, until the Spanish twin ships. Copy link gives you a URL that opens the site straight to that one activity, card already open — paste it into Classroom. Type over a <strong>#number</strong> to move a card to that position; a number inside a title, like Finger Gym 2, is part of the name and stays put.</div></details>`
@@ -1743,7 +1757,11 @@ function teacherBoardDrop(e){
     if(cur && (Number(cur.module)||0)===mn){ renderTeacherActivities({cached:true}); return; }
     append(); return;
   }
-  if(!over || over.dataset.id===id || !section.contains(over)){ append(); return; }
+  // Let go on its own card: nothing moved, so nothing is written — same as
+  // the aborted drag above. append() here would send it to the end of the
+  // module and renumber every card after it.
+  if(over && over.dataset.id===id){ renderTeacherActivities({cached:true}); return; }
+  if(!over || !section.contains(over)){ append(); return; }
   // pos is counted in the target module AFTER the dragged card is removed,
   // which is exactly what teacherMoveActivity does with it.
   const list=teacherBoardModuleIds(teacherClassConfig, mn).filter(x=>x!==id);
@@ -1964,10 +1982,10 @@ function renderTeacherActivityDetail(id){
     ${/* Practice card (view:'card'): the preview IS the student card —
          caCardBodyHtml() in app.js, the one body renderer both sides call
          (same shape as an exit check's caCheckBodyHtml), so it can't drift.
-         The song plays for real; ticks here save nothing. */ typeof caIsCard==='function'&&caIsCard(a)?`<div class="tg-note">Practice card: students see this one screen — Play song, the tab, and the checks. The card counts as done once every numbered check is ticked; Level up is extra. The steps sit under "More practice help". Ticks in this preview are not saved.</div>`:''}
+         The song plays for real; ticks here save nothing. */ typeof caIsCard==='function'&&caIsCard(a)?`<div class="tg-note">Practice card: students see this one screen — Play song, the tab, and the checks. The card counts as done once every numbered check is ticked; Level up is extra. Ticks in this preview are not saved.</div>`:''}
     <div class="stu-section-head">Students</div>
     ${rollHtml}
-    <div class="tg-note">Gate: today's activities block the rest of the site until they're done (see the Today-first work order). Clear lets one student past this one without finishing it — a sub day, a connectivity problem, work done on paper.</div>
+    <div class="tg-note">Gate: until a student finishes a Required activity, In-Class Activities opens first when they sign in. Nothing else on the site is locked. Clear lets one student skip this one at sign-in without finishing it — a sub day, a connectivity problem, work done on paper.</div>
     ${studentTable}
     <div class="stu-section-head">Preview</div>
     ${typeof caIsCard==='function'&&caIsCard(a) ? caCardBodyHtml(a,{preview:true})
@@ -2030,7 +2048,7 @@ function renderTeacherCheckDetail(a, back){
   const bodyRows=withRes.map(({s,r})=>{
     const g=ecGrade(a,r.picks);
     const cells=g.rows.map(row=>`<td style="text-align:center">${cell(row.ok)}<div style="font-size:.72em;opacity:.7">${escHtml(row.pick||'—')}</div></td>`).join('');
-    return `<tr><td class="nc">${escHtml(s.name||s.email||'(no name)')}</td><td>${r.score}/${r.total}</td><td>${escHtml(r.at||'')}</td>${cells}${clearCell(s)}</tr>`;
+    return `<tr><td class="nc">${escHtml(s.name||s.email||'(no name)')}</td><td>${Number(r.score)||0}/${Number(r.total)||0}</td><td>${escHtml(r.at||'')}</td>${cells}${clearCell(s)}</tr>`;
   }).join('');
   const missRow=withRes.length
     ? `<tr><td class="nc" style="font-style:italic">Missed by</td><td colspan="2"></td>`
@@ -2420,7 +2438,10 @@ async function teacherSetActivityClear(uid, id, state){
     if(had) teacherClassConfig.activityClears[uid][id]=prev; else delete teacherClassConfig.activityClears[uid][id];
     teacherConfigSaveFailed(e, 'Could not save that change — check your connection and Firestore rules.');
   }
-  if(activityDetailId) renderTeacherActivityDetail(activityDetailId);
+  // activityDetailId outlives a switch to the Students tab (only the
+  // Activities tab resets it), so check the view too — a Clear on a
+  // student's page must repaint that page, not jump to the last activity.
+  if(teacherView==='activities' && activityDetailId) renderTeacherActivityDetail(activityDetailId);
   else if(teacherView==='students') studentDetailUid ? renderTeacherStudentDetail(studentDetailUid) : renderTeacherStudents();
 }
 // "Clear all" on a student's detail page — every CURRENT blocker for them,
@@ -3975,7 +3996,7 @@ function renderTeacherStudentDetail(uid){
   const exitChecksHtml=ecEntries.length
     ? `<div class="stu-section-head">Exit checks</div>`
       +ecEntries.map(e=>`<div class="tr-card"><div class="tr-name">Exit check &middot; ${escHtml(e.name)}</div>`
-        +`${e.r.score}/${e.r.total}${e.r.at?` &mdash; ${escHtml(e.r.at)}`:''}`
+        +`${Number(e.r.score)||0}/${Number(e.r.total)||0}${e.r.at?` &mdash; ${escHtml(e.r.at)}`:''}`
         +`${Number(e.r.attempts)>1?` <span style="opacity:.6">(${Number(e.r.attempts)} attempts)</span>`:''}</div>`).join('')
     : '';
 
