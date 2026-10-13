@@ -5,6 +5,14 @@ Notable changes to the Guitar Class site. Newest first.
 For the full session-by-session history (and the reasoning behind each change),
 see `WORKFLOW.md` and the git commit log.
 
+## 2026-10-13 — Full screen makes the activity bigger
+
+- **Full screen now fills the screen.** The open activity grows to the full
+  width of the screen, and the text, buttons and drills grow with it. Before,
+  it stayed the same size in the middle of the screen.
+- **No more "Something went wrong" message when you go full screen.**
+  Nothing was broken; the message was a false alarm.
+
 ## 2026-10-13 — Keep practicing row keeps every pinned activity
 
 - **A pinned activity stays in the Keep practicing row** on In-Class

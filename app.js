@@ -67,7 +67,15 @@ if('scrollRestoration' in history) history.scrollRestoration = 'manual';
       (document.body || document.documentElement).appendChild(d);
     } catch(_) { /* never let the safety net crash */ }
   }
-  window.addEventListener('error', e => { console.error('[guitar-class] error:', e.error || e.message); showBanner(); });
+  /* "ResizeObserver loop completed with undelivered notifications" is the
+     browser noting that an observer's callback resized something and the
+     rest waits a frame — nothing threw and nothing is broken. It fires on
+     big window resizes (entering full screen, 2026-10-13) and was putting
+     this banner over a working page. Logged as a warning, no banner. */
+  window.addEventListener('error', e => {
+    if (!e.error && /ResizeObserver loop/.test(e.message || '')) { console.warn('[guitar-class]', e.message); return; }
+    console.error('[guitar-class] error:', e.error || e.message); showBanner();
+  });
   window.addEventListener('unhandledrejection', e => { console.error('[guitar-class] unhandled rejection:', e.reason); showBanner(); });
 })();
 
@@ -13193,6 +13201,17 @@ function caToggleFullscreen(){
 // Esc, the button and the Chromebook's own key all land here. caSyncTopbar
 // redraws the button's label; caSyncSolo sets body.ca-full.
 document.addEventListener('fullscreenchange', () => { caSyncTopbar(); });
+/* Full screen also scales the activity up to fill the width (styles.css,
+   body.ca-full .main): the 1000px column times screen width / 1000, so a
+   1366 Chromebook gets ~1.37× and a 1920 monitor ~1.9×. Never below 1×,
+   capped at 2× for a very wide screen. Re-measured on resize because the
+   fullscreenchange event can land before the window has finished growing. */
+function caSyncFullZoom(){
+  const z = document.body.classList.contains('ca-full')
+    ? Math.min(2, Math.max(1, document.documentElement.clientWidth / 1000)) : 1;
+  document.body.style.setProperty('--ca-zoom', z.toFixed(3));
+}
+window.addEventListener('resize', caSyncFullZoom);
 /* One activity on the page at a time (Jonathan, 2026-09-25). With a card
    open, the Unfinished / Completed groups, module headings, the other cards
    and the resume card used to sit right under it, and students opened them
@@ -13213,6 +13232,7 @@ function caSyncSolo(card){
   screen.classList.toggle('ca-solo', on);
   // Full screen + a card open = the site header folds away (caFullBtnHtml).
   document.body.classList.toggle('ca-full', on && caFullscreenNow());
+  caSyncFullZoom();
   if(!on) return;
   card.classList.add('ca-solo-card');
   for(let el = card.parentElement; el && el !== body; el = el.parentElement) el.classList.add('ca-solo-path');

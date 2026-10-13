@@ -2523,6 +2523,13 @@ body.ca-full:has(#class-activities-screen:not([hidden])) .header{display:none}
    "All activities" or Esc brings both back. */
 body.ca-full:has(#class-activities-screen:not([hidden])) .rail,
 body.ca-full:has(#class-activities-screen:not([hidden])) .rail-backdrop{display:none !important}
+/* …and the activity grows to fill the width (Jonathan, 2026-10-13: "make
+   everything bigger too", not just wider). With the rail gone the 1000px
+   column sat centred with ~460px of empty page either side on a 1920
+   monitor and ~180px on a Chromebook. The column keeps its layout and is
+   zoomed by screen width / 1000 — text, buttons, boards and drills all
+   scale together. caSyncFullZoom (app.js) sets --ca-zoom. */
+body.ca-full:has(#class-activities-screen:not([hidden])) .app-layout .main{zoom:var(--ca-zoom,1)}
 /*    Phone width: the Full screen word is clipped (still the button's
       accessible name; the icon carries it), and a Focus card's bar wraps
       so the name stays readable and the step buttons get their own row. */
