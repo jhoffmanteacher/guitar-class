@@ -1248,6 +1248,11 @@ body.t-wide .t-main{max-width:none}
 .tg-table th,.tg-table td{text-align:left;padding:8px 12px;border-bottom:1px solid var(--border2);font-size:0.875rem}
 .tg-table th{font-weight:600;color:var(--text2)}
 .tg-name{font-weight:500}
+/* Manage view: the name column holds its width instead of wrapping to
+   two lines when the five control columns crowd it. */
+.tg-name-wide{min-width:240px;white-space:nowrap}
+.tg-group th{padding-top:16px;font-size:0.8125rem;color:var(--text);border-bottom:2px solid var(--border2)}
+.tg-group th span{font-weight:400;color:var(--text2)}
 .tg-eff{color:var(--text2);white-space:nowrap}
 /* Manage view's Period column + the "set" marker that says the shown value
    is the teacher's correction rather than the student's own answer. */

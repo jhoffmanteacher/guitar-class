@@ -240,6 +240,8 @@ async function showTeacherApp(user){
       if(games){ teacherSetStudentGames(games.dataset.uid, games.dataset.state); return; }
       if(e.target.closest('[data-toggle-archived]')){ teacherToggleShowArchived(); return; }
       if(e.target.closest('[data-open-all-through]')){ teacherOpenAllThrough(); return; }
+      const manageSort=e.target.closest('[data-manage-sort]');
+      if(manageSort){ teacherSetManageSort(manageSort.dataset.manageSort, manageSort.dataset.value); return; }
       const paused=e.target.closest('[data-set-paused]');
       if(paused){ teacherSetStudentPaused(paused.dataset.uid, paused.dataset.state); return; }
       const archived=e.target.closest('[data-set-archived]');
@@ -939,10 +941,11 @@ let taFocusPreviewIdx={};
    most of a 1366px Chromebook empty. Everything else here is a table or a
    page of text and stays centred, so this is a body class rather than a
    change to .t-main. Off for the activity DETAIL pages too: those are
-   reading, not laying out. */
+   reading, not laying out. Manage takes the full width too: its six
+   columns, with the student name kept on one line, overflow 900px. */
 function setBoardWide(on){ document.body.classList.toggle('t-wide', !!on); }
 function applyTeacherViewChrome(v){
-  if(v!=='activities') setBoardWide(false);
+  if(v!=='activities') setBoardWide(v==='manage');
   document.querySelectorAll('.t-vt').forEach(b=>b.classList.toggle('on',b.dataset.view===v));
   const legend=document.getElementById('t-legend'); if(legend) legend.style.display = v==='skills' ? '' : 'none';
   // Games, Trouble-spots and Students are all class-wide, not per-week —
@@ -3113,6 +3116,31 @@ async function teacherSetClassGames(enabled){
    classroom-management tool, not a security boundary: a student who opens
    DevTools can bypass a client-side check. Anything that must be
    *enforced* belongs in the Firestore rules. */
+/* Manage table order, persisted per device like the period filter:
+   group 'period' (each class together, untagged last) or 'all' (one list),
+   and name 'first' or 'last'. In 'last' mode the name column reads
+   "Last, First" so the column you scan matches the order it is in. */
+let teacherManageGroup=(function(){ let v=null; try{ v=localStorage.getItem('gc-teacher-manage-group'); }catch(e){} return v==='all'?'all':'period'; })();
+let teacherManageNameBy=(function(){ let v=null; try{ v=localStorage.getItem('gc-teacher-manage-name'); }catch(e){} return v==='last'?'last':'first'; })();
+function teacherSetManageSort(kind, value){
+  if(kind==='group' && (value==='period'||value==='all')){
+    teacherManageGroup=value;
+    try{ localStorage.setItem('gc-teacher-manage-group', value); }catch(e){}
+  }else if(kind==='name' && (value==='first'||value==='last')){
+    teacherManageNameBy=value;
+    try{ localStorage.setItem('gc-teacher-manage-name', value); }catch(e){}
+  }else return;
+  if(teacherView==='manage') renderTeacherManage();
+}
+/* A name with one word, or an email/uid standing in for one, has no last
+   name to split off — it sorts and displays as it is. */
+function teacherNameParts(s){
+  const raw=(s.name||'').trim();
+  if(!raw) return null;
+  const words=raw.split(/\s+/);
+  if(words.length<2) return null;
+  return {first:words.slice(0,-1).join(' '), last:words[words.length-1]};
+}
 function renderTeacherManage(){
   const box=document.getElementById('t-grid-container');
   box.innerHTML='<div class="t-loading">Loading student settings…</div>';
@@ -3141,6 +3169,19 @@ function renderTeacherManage(){
         </div>
       </div>
       <div class="tg-class">
+        <div class="tg-class-lbl">Sort</div>
+        <div style="display:flex;gap:8px;flex-wrap:wrap">
+        <div class="tg-seg">
+          <button class="tg-seg-btn ${teacherManageGroup==='period'?'on':''}" data-manage-sort="group" data-value="period">By period</button>
+          <button class="tg-seg-btn ${teacherManageGroup==='all'?'on':''}" data-manage-sort="group" data-value="all">Everyone</button>
+        </div>
+        <div class="tg-seg">
+          <button class="tg-seg-btn ${teacherManageNameBy==='first'?'on':''}" data-manage-sort="name" data-value="first">First name</button>
+          <button class="tg-seg-btn ${teacherManageNameBy==='last'?'on':''}" data-manage-sort="name" data-value="last">Last name</button>
+        </div>
+        </div>
+      </div>
+      <div class="tg-class">
         <div class="tg-class-lbl">Open everyone through</div>
         <div class="tg-seg">
           <select id="t-open-all-select" style="max-width:220px">${MODULE_MANIFEST.filter(m=>m.num>=2 && m.num<=12).map(m=>`<option value="${m.num}"${m.num===3?' selected':''}>Module ${m.num} — ${escHtml(m.name)}</option>`).join('')}</select>
@@ -3150,17 +3191,30 @@ function renderTeacherManage(){
       <div class="tg-note"><strong>Paused</strong> students can sign in but see a "your access is paused" message instead of the site — use it for a temporary hold, then un-pause. <strong>Archived</strong> students are hidden from every dashboard view; their work is kept and comes back if you restore them. Pausing takes effect the next time that student loads the site. <strong>Period</strong> is whatever the student picked when they first signed in — set 4, 7, or CAS here to correct a wrong tap, or Auto to go back to their own answer. <strong>Open through</strong> lets one student skip ahead: every module up to the one you pick opens (all sets in the modules before it, Set 1 of the one you pick), without marking anything done. Auto removes it. Modules they've already worked in stay open either way. This list always shows everyone, whatever the period filter above is set to.</div>`;
     if(allStudentsRaw.length===0){ box.innerHTML=head+'<div class="t-loading">No students yet — they’ll appear here once they sign in.</div>'; return; }
     const nameOf=s=>(s.name||s.email||s.uid);
-    // Period first, then name — this is the table you scan when a student
-    // says "I'm in 4th, not 7th", so the two classes group together.
+    const byLast=teacherManageNameBy==='last';
+    const shownName=s=>{ const p=byLast&&teacherNameParts(s); return p?`${p.last}, ${p.first}`:(s.name||s.email||s.uid.slice(0,8)+'…'); };
+    const nameKey=s=>{ const p=byLast&&teacherNameParts(s); return p?p.last+' '+p.first:nameOf(s); };
+    const byName=(a,b)=>nameKey(a).localeCompare(nameKey(b), undefined, {sensitivity:'base'});
+    // "By period": period first, then name — the table you scan when a
+    // student says "I'm in 4th, not 7th", so each class groups together.
     // Ranked numerically rather than by localeCompare: untagged students sort
     // LAST, and a sentinel string wouldn't get that (ICU collation puts
     // punctuation ahead of digits, so '~' landed them first).
+    const grouped=teacherManageGroup==='period';
     const perRank=s=>{ const p=teacherStudentPeriod(s); return !p?Infinity : p==='CAS'?8 : Number(p); };
     const list=(teacherShowArchived?allStudentsRaw:allStudentsRaw.filter(s=>!arch[s.uid]))
-      .sort((a,b)=>(perRank(a)-perRank(b))||nameOf(a).localeCompare(nameOf(b)));
+      .sort((a,b)=>(grouped?(perRank(a)-perRank(b)):0)||byName(a,b));
     if(list.length===0){ box.innerHTML=head+'<div class="t-loading">Every student is archived. Use “Show archived” to bring them back.</div>'; return; }
+    const perLabel=p=>!p?'No period':p==='CAS'?'CAS':'Period '+p;
+    const perCount={}; list.forEach(s=>{ const k=teacherStudentPeriod(s)||''; perCount[k]=(perCount[k]||0)+1; });
+    let lastGroup=null;
     const rows=list.map(stu=>{
-      const name=stu.name||stu.email||stu.uid.slice(0,8)+'…';
+      const name=shownName(stu);
+      // A heading row each time the period changes — keyed on the
+      // EFFECTIVE period, so correcting one moves the student under it.
+      const g=teacherStudentPeriod(stu)||'';
+      const groupRow=(grouped && g!==lastGroup)?`<tr class="tg-group"><th colspan="6">${perLabel(g)} <span>(${perCount[g]})</span></th></tr>`:'';
+      lastGroup=g;
       const isPaused=!!paused[stu.uid], isArch=!!arch[stu.uid];
       // data-uid + the delegated listener in showTeacherApp — a Firestore
       // uid is never spliced into an inline JS string literal.
@@ -3189,7 +3243,7 @@ function renderTeacherManage(){
       const archIco='<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" style="width:1em;height:1em;vertical-align:-0.15em"><rect x="3" y="6" width="18" height="4" rx="1"/><path d="M4 10v9a1 1 0 0 0 1 1h14a1 1 0 0 0 1-1v-9"/><path d="M10 14h4"/></svg>';
       const pauseIco='<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" style="width:1em;height:1em;vertical-align:-0.15em"><rect x="6" y="4" width="4" height="16" rx="1"/><rect x="14" y="4" width="4" height="16" rx="1"/></svg>';
       const status=isArch?`${archIco} archived`:isPaused?`${pauseIco} paused`:'&#x2713; active';
-      return `<tr${isArch?' style="opacity:.55"':''}><td class="tg-name" title="${escAttr(name)}">${escHtml(name)}</td>`+
+      return groupRow+`<tr${isArch?' style="opacity:.55"':''}><td class="tg-name tg-name-wide" title="${escAttr(name)}">${escHtml(name)}</td>`+
         `<td class="tg-period">${periodCell}</td>`+
         `<td>${openCell}</td>`+
         `<td><div class="tg-seg">${pauseBtns}</div></td>`+
