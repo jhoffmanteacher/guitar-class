@@ -1186,9 +1186,15 @@ window.addEventListener('load', function(){
       else pendingSave = false;
       return fbDb.collection('progress').doc(user.uid).get();
     }).then(function(doc){
+      /* A read that lands after a DIFFERENT student has signed in (shared
+         Chromebook, another tab) is not this page's student any more: paint
+         nothing and decide nothing from it, or the last student's ✓s — and
+         which numbering their doc was in — would carry over to this one. */
+      var current = firebase.auth().currentUser;
+      if(!current || current.uid !== user.uid) return;
       var data = doc && doc.exists ? doc.data() : null;
       // Module 4/5 swap: an unmarked doc's Layer 4/5 ticks are in the old numbering (see flushSave).
-      if(swap45IsMarked(data)) swap45DocNew = true;
+      swap45DocNew = swap45IsMarked(data);
       var saved = data && data.songReady && data.songReady[SONG_ID];
       applyReady(data && !swap45IsMarked(data) ? swap45SwapLayers(saved) : saved);
       // Activity gate — skipped for the teacher's own account, same as

@@ -916,13 +916,14 @@ let progressLoadFailed = false;
    One rule every writer keeps: a doc WITHOUT migrations.swap45 holds only
    OLD-numbered data; a doc WITH it holds only NEW-numbered data.
      - loadProgress() remaps an unmarked doc in memory (swap45OnLoad) before
-       anything renders, and starts swap45Commit() straight away when the
-       remap moved something.
+       anything renders, and starts swap45Commit() straight away — the
+       moved fields plus the marker, or the marker alone when nothing moves.
+       One marker write per student, once. A failed read commits nothing.
      - flushSave() awaits swap45Commit() before its own write, so no
        new-numbered key can merge into an unmarked doc (the next load would
-       swap it the wrong way). A doc with nothing to move — or no doc yet —
-       is marked by that first save, not at load: a student who saves
-       nothing causes no write.
+       swap it the wrong way) even when the load-time commit failed. A
+       student with no doc yet gets it created already marked by that first
+       save; loading writes nothing for them.
      - swap45Commit() is a transaction: it re-reads the doc, does nothing if
        another tab already marked it, and otherwise REPLACES each affected
        field with its remapped copy and sets the marker in the same write.
@@ -939,7 +940,10 @@ let progressLoadFailed = false;
    Module 4/5 key in an unmarked doc was saved BEFORE the swap went live
    (pushed 2026-10-12 14:53 PDT). Work the swap build saved between then
    and this move shipping is already new-numbered and would be swapped the
-   wrong way; the docs' update times are the way to check.
+   wrong way; the docs' update times are the way to check. And one gap no
+   client can close: a tab still running a build from before this one,
+   holding the doc as it was before the move, merges its old-numbered maps
+   back into the marked doc on its next save (CLAUDE.md, the swap section).
 
    Safe to remove once every doc holding Module 4/5 data or Layer 4/5 ticks
    carries migrations.swap45, or after the school year resets progress
@@ -1047,7 +1051,10 @@ function swap45Commit(){
 function swap45OnLoad(stored){
   if(swap45Marked(stored)){ swap45Done = true; return stored; }
   if(!currentUser || isDevBypassUser()) return stored;   // never reached — dev bypass loads no doc
-  if(swap45Patch(stored)) swap45Commit().catch(e => console.warn('[guitar-class] Module 4/5 progress move not saved yet — the next save retries it', e));
+  /* Every unmarked doc is committed now: the move when swap45Patch has one,
+     the marker alone when it doesn't. Teacher mode never loads a student
+     doc; if it ever did, its first save's gate would commit instead. */
+  if(!IS_TEACHER_MODE) swap45Commit().catch(e => console.warn('[guitar-class] Module 4/5 progress move not saved yet — the next save retries it', e));
   return swap45Remap(stored);
 }
 
@@ -4049,6 +4056,16 @@ function renderPills(moduleNum){
 }
 
 window.addEventListener('pagehide', function(){ if(_dirtyKeys.size){ clearTimeout(saveTimer); flushSave(); } });
+/* Back online (2026-10-12): flushSave gives up after SAVE_MAX_AUTO_RETRIES
+   ("Not saving") and the queued categories wait for the student's next
+   action — which may never come, and the first save after the Module 4/5
+   swap is a transaction, which fails offline rather than queueing. Re-arm
+   the ordinary debounced save instead. queueSave() with no new categories:
+   it bails with no signed-in user and clears the dev bypass; the held-back
+   categories never entered _dirtyKeys after a failed load; one timer at a
+   time and flushSave() taking the dirty set means nothing is sent twice;
+   and flushSave()'s swap45 gate still runs before the write. */
+window.addEventListener('online', function(){ if(currentUser && _dirtyKeys.size) queueSave(); });
 
 function activateSet(id, opts){
   // opts.peek: open a locked set read-only instead of bouncing off the gate

@@ -243,7 +243,18 @@ OLD-numbered data, a doc with it only NEW-numbered data** — so `flushSave()`
 awaits `swap45Commit()` before every write, `tabs/journey.js` writes
 `songReady` in the doc's own numbering, and `teacher.js` remaps unmarked
 docs for display only. Don't remove one half without the others (Summer
-reset list). Notes dated before the swap may still use the old numbers. **Course
+reset list). **One gap no client can close:** a tab or device that loaded
+the doc before it was moved (an older build, or one that missed the move)
+and saves AFTER the move merges its old-numbered maps into the now-marked
+doc, silently swapping the overlapping keys back. Repair is by hand: re-scan
+the 3 docs the 2026-10-12 scan found with real Module 4/5 work a day and a
+week after the deploy, and fix any old-numbered key that has reappeared in
+the Firebase console — a key the scan saw under its old id coming back, or
+any `m5w4-*` (Module 5 has three sets) or `chords-m5`. **`moduleOpenThrough`
+in `config/class` is per module NUMBER and the move does not touch it:** a
+student set to 4 before the swap had Pentatonic opened and now has Open
+Chords opened — set them to 5 if Pentatonic should be open. Notes dated
+before the swap may still use the old numbers. **Course
 order lives in the module NUMBER** — reordering again means a renumber like
 this one. Its script (`swapA.mjs`) lived in a session scratchpad and is not
 in the repo. **Run `node tools/rule-zero-proof.mjs` against `d0cd004`**
