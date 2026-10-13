@@ -17,6 +17,8 @@ see `WORKFLOW.md` and the git commit log.
 - **Module 4 ends with a new strumming jam.** You play a chord pair, then play
   it again with the same strumming rhythm, along with "the cure".
 - **The Songs page** keeps each song in the same group as before.
+- **If you already worked in Module 4 or 5**, your finished steps, answers and
+  last set move to the right lessons the next time you sign in.
 
 ## 2026-10-12 — Song Journey, set buttons, saving, and Module 6–12 fixes
 
