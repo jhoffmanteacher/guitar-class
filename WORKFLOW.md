@@ -672,8 +672,9 @@
       {activityPins: prev}`), so a pin from another console refuses rather
       than being overwritten; checks.mjs 1ai `CONFIG_WRITERS` 20 → 21.
       **Students:** `caPinRowHtml()` draws the row above Today's activity,
-      one button per pin in pin order, minus any of today's cards, nothing at
-      all with no pins. A tap (`caOpenPin`) goes through `caFocusActivity`,
+      one button per pin in pin order, nothing at all with no pins. (Until
+      2026-10-13 it also dropped any pin that was one of today's cards;
+      Jonathan wanted pins to stay put, so that filter is gone.) A tap (`caOpenPin`) goes through `caFocusActivity`,
       so a card on the dated list opens where it sits and a pin-only card
       (`caIsPinOnly` — undated, or Play Along now) renders straight under the
       row while it is the open card, no Songs heading, no date chip. The pin

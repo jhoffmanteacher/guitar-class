@@ -462,7 +462,9 @@ is an ORDERED array of up to 4 ids, set by the board's **Not pinned / Pinned
 n of 4** switch (`teacherSetActivityPin`, cell-checked on the whole array;
 1ai 20 → 21) and listed, with Unpin buttons, in a strip above the board.
 Students get one button per pin above Today's activity (`caPinRowHtml`), in
-pin order, minus any of today's cards, and no row at all with no pins. A tap
+pin order, and no row at all with no pins. A pin that is also one of today's
+cards STAYS in the row (Jonathan, 2026-10-13 — it was dropped from the row
+until then; don't bring that filter back). A tap
 (`caOpenPin` → `caFocusActivity`) opens a dated card where it sits; a
 pin-only card (`caIsPinOnly`: undated, or Play Along now) renders under the
 row while it is the open card. Same shape as Play Along now: the pin stands

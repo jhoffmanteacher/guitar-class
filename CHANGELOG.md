@@ -5,6 +5,12 @@ Notable changes to the Guitar Class site. Newest first.
 For the full session-by-session history (and the reasoning behind each change),
 see `WORKFLOW.md` and the git commit log.
 
+## 2026-10-13 — Keep practicing row keeps every pinned activity
+
+- **A pinned activity stays in the Keep practicing row** on In-Class
+  Activities, even on a day it is also Today's activity. Before, it left the
+  row on that day.
+
 ## 2026-10-12 — Open Chords now comes before Pentatonic Scales
 
 - **Module 4 is Open Chords and Module 5 is Pentatonic Scales.** The other

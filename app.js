@@ -13627,13 +13627,14 @@ function caPinReachable(a){
    predicate is the gate's and the dated list's, and a pin must reach
    neither. */
 function caIsPinOnly(a){ return caPinReachable(a) && !caIsVisible(a); }
-/* The row itself: one button per pin, in pin order, minus anything that is
-   one of today's cards (it is already right below). No pins, no row — not
-   an empty box. `todayIds` is passed in because renderClassActivities only
-   knows them partway through its own pass. */
-function caPinRowHtml(byId, todayIds){
+/* The row itself: one button per pin, in pin order. A pin that is also one
+   of today's cards stays in the row (Jonathan, 2026-10-13: "if I have pinned
+   an activity, I'd still like it to show at the top as pinned") — the row is
+   the teacher's fixed list, so it shouldn't change shape on the days a
+   pinned card is also dated. No pins, no row — not an empty box. */
+function caPinRowHtml(byId){
   const pins = activityPins.map(id => byId[id])
-    .filter(a => a && caPinReachable(a) && !todayIds.includes(a.id));
+    .filter(a => a && caPinReachable(a));
   if(!pins.length) return '';
   const btns = pins.map(a => {
     const done = classActivities[a.id] === true;
@@ -13860,8 +13861,8 @@ function renderClassActivities(){
     ? `<div class="ca-mod-head" data-i18n="hub.playAlongTitle">${escHtml(t('hub.playAlongTitle'))}</div>${caActivityCardHtml(playOnly)}`
     : '';
   // The Keep practicing row (caPinRowHtml) plus, under it, a pin-only card
-  // the student opened from it. Built once today's cards are known.
-  const pinsHtml = todayIds => caPinRowHtml(byId, todayIds) + (pinOpen ? caActivityCardHtml(pinOpen) : '');
+  // the student opened from it.
+  const pinsHtml = () => caPinRowHtml(byId) + (pinOpen ? caActivityCardHtml(pinOpen) : '');
   // A deep link whose id isn't published (or is mistyped) says so, above the
   // archive it did open — see caFocusActivity.
   const missing = caLinkMissingId
@@ -13870,7 +13871,7 @@ function renderClassActivities(){
   if(!list.length){
     // With a Keep practicing row up there is something to do, so the
     // "nothing here yet" line would read wrong under it.
-    const pins = pinsHtml([]);
+    const pins = pinsHtml();
     bodyEl.innerHTML = missing + pins + (playOnlyHtml || (pins ? '' : `<div class="coach-tip" data-i18n="ca.empty">${escHtml(t('ca.empty'))}</div>`));
   } else {
     // Done work collapses into its own group (caFinishedGroupHtml) so the
@@ -13987,7 +13988,7 @@ function renderClassActivities(){
     const finishedGroups = groups
       .map(g => ({ sec: g.sec, cards: g.cards.filter(a => classActivities[a.id] === true) }))
       .filter(g => g.cards.length);
-    bodyEl.innerHTML = missing + pinsHtml(caTodayIds) + gateIntro + playOnlyHtml + pendingHtml + (finished.length ? caFinishedGroupHtml(finishedGroups, finished, byId, swap) : '');
+    bodyEl.innerHTML = missing + pinsHtml() + gateIntro + playOnlyHtml + pendingHtml + (finished.length ? caFinishedGroupHtml(finishedGroups, finished, byId, swap) : '');
   }
   if(typeof applyI18n === 'function') applyI18n(bodyEl);
   caArmTabReveals(bodyEl);
