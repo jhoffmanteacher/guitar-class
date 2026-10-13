@@ -5,6 +5,12 @@ Notable changes to the Guitar Class site. Newest first.
 For the full session-by-session history (and the reasoning behind each change),
 see `WORKFLOW.md` and the git commit log.
 
+## 2026-10-13 — A slower speed in Low E and A Notes in Time
+
+- **The play-along now goes down to 30 BPM.** With Show answer on, press
+  Slower at 40 BPM to drop to 30. At 30 the fret lights up 4 seconds after
+  the name. The speed you reached before is kept.
+
 ## 2026-10-13 — Full screen makes the activity bigger
 
 - **Full screen now fills the screen.** The open activity grows to the full

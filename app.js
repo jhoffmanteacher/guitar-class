@@ -7866,8 +7866,9 @@ function erCheckOff(key){
    student plays, fret lights up … nothing is scored"). Each note gets four
    beats: the name lands on beat 1, the right fret lights up on beat 3 and
    stays lit to the end of beat 4, then the next name. It runs until Stop.
-   Every NC_ANS_EVERY notes it steps up NC_ANS_BPM (40 BPM = the answer
-   after 3 s … 120 BPM = after 1 s); "Slower" steps back one right away and
+   Every NC_ANS_EVERY notes it steps up NC_ANS_BPM (30 BPM = the answer
+   after 4 s … 120 BPM = after 1 s; a new student starts at 40, and
+   Slower reaches 30 — Jonathan, 2026-10-13); "Slower" steps back one right away and
    restarts the count, "Faster" steps up one the same way. No score, no levels, no unlocks. The speed a student
    reached is remembered per chunk. Notes: natural, or "With ♯ notes".
 
@@ -7902,8 +7903,13 @@ const NC_LEVELS = [
   { pile: 'all',      bpm: 80, beats: 2 }
 ];
 /* Play-along ladder. Each note is 4 beats and the answer lights on beat 3,
-   so the wait before the answer is 2 beats: 3 s at 40 BPM, 1 s at 120. */
-const NC_ANS_BPM = [40, 50, 60, 70, 80, 90, 100, 120];
+   so the wait before the answer is 2 beats: 4 s at 30 BPM, 1 s at 120.
+   30 was added below 40 on 2026-10-13 (Jonathan). The speed is SAVED as a
+   BPM (ansBpm), not a ladder index, so a step added later moves nobody;
+   saves from before that hold only the index `ans` into NC_ANS_BPM_V1. */
+const NC_ANS_BPM = [30, 40, 50, 60, 70, 80, 90, 100, 120];
+const NC_ANS_BPM_V1 = [40, 50, 60, 70, 80, 90, 100, 120];
+const NC_ANS_START = 40;   // where a student with no saved speed begins
 const NC_ANS_BEATS = 4, NC_ANS_REVEAL = 2, NC_ANS_EVERY = 8;
 const noteCalls = {};
 let ncLive = null;   // key of the drill whose round is running — one at a time
@@ -7915,18 +7921,25 @@ function ncLoadProg(c){
   try { s = JSON.parse(sessionStorage.getItem('nc:' + ncProgKey(c)) || 'null'); } catch(e){}
   const g = ((typeof games !== 'undefined' && games && games.nc) || {})[ncProgKey(c)] || null;
   const pick = (f, d) => Math.max((s && s[f] != null ? s[f] : d), (g && g[f] != null ? g[f] : d));
+  /* The play-along speed as a BPM: ansBpm if saved, else the old index. */
+  const ansOf = o => !o ? 0 : o.ansBpm != null ? o.ansBpm
+    : o.ans != null ? (NC_ANS_BPM_V1[Math.min(o.ans, NC_ANS_BPM_V1.length - 1)] || 0) : 0;
+  const ansBpm = Math.max(ansOf(s), ansOf(g)) || NC_ANS_START;
+  let ans = NC_ANS_BPM.indexOf(ansBpm);
+  if(ans < 0) ans = Math.max(0, NC_ANS_BPM.filter(b => b <= ansBpm).length - 1);
   return {
     lv:  Math.min(pick('lv', 1), NC_LEVELS.length),
     bpm: Math.min(pick('bpm', NC_LEVELS[4].bpm), NC_MAX_BPM),
-    ans: Math.min(pick('ans', 0), NC_ANS_BPM.length - 1)
+    ans
   };
 }
 function ncSaveProg(c, prog){
-  try { sessionStorage.setItem('nc:' + ncProgKey(c), JSON.stringify(prog)); } catch(e){}
+  const ansBpm = NC_ANS_BPM[prog.ans];
+  try { sessionStorage.setItem('nc:' + ncProgKey(c), JSON.stringify({ lv: prog.lv, bpm: prog.bpm, ansBpm })); } catch(e){}
   if(!currentUser || (typeof isDevBypassUser === 'function' && isDevBypassUser())) return;
   if(IS_TEACHER_MODE) return;   // previewing isn't practising
   if(!games.nc) games.nc = {};
-  games.nc[ncProgKey(c)] = { lv: prog.lv, bpm: prog.bpm, ans: prog.ans, at: dayStr(new Date()) };
+  games.nc[ncProgKey(c)] = { lv: prog.lv, bpm: prog.bpm, ansBpm, at: dayStr(new Date()) };
   saveGames();
 }
 function ncPref(name, dflt){
