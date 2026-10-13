@@ -1037,7 +1037,16 @@ function flushSave(){
 function journeyDayStr(d){
   return d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0') + '-' + String(d.getDate()).padStart(2, '0');
 }
-function journeyIsVisible(a, cfg){
+/* Individual activities (console "Who" picker): config/class.activityStudents,
+   id -> { uid -> true }. A card with nobody ticked is the whole class's.
+   Mirrors caForMe in app.js. */
+function journeyForStudent(a, cfg, uid){
+  var who = ((cfg && cfg.activityStudents) || {})[a.id];
+  if(!who || typeof who !== 'object') return true;
+  var any = Object.keys(who).some(function(k){ return who[k] === true; });
+  return !any || who[uid] === true;
+}
+function journeyIsVisible(a, cfg, uid){
   // Archived or deleted from the console — out of the course entirely, so it
   // can never gate a Journey page. Mirrors retiredActivityIds in app.js.
   if(((cfg && cfg.archivedActivities) || {})[a.id] === true) return false;
@@ -1052,6 +1061,7 @@ function journeyIsVisible(a, cfg){
      reason activityBoardOn in app.js spells out. */
   if(cfg && cfg.activityBoardSeeded === true && !((cfg.activityBoard || {})[a.id])) return false;
   if(((cfg && cfg.hiddenActivities) || {})[a.id] === true) return false;
+  if(!journeyForStudent(a, cfg, uid)) return false;
   var d = ((cfg && cfg.activityDates) || {})[a.id];
   return d ? d <= journeyDayStr(new Date()) : false;
 }
@@ -1079,7 +1089,7 @@ function journeyBlockers(cfg, classActivities, uid, ownPeriod){
   // Optional activities (console switch) never block — mirrors caBlockers.
   var optional = (cfg && cfg.optionalActivities) || {};
   return (window.CLASS_ACTIVITIES || []).filter(function(a){
-    return journeyIsVisible(a, cfg) && optional[a.id] !== true && (classActivities || {})[a.id] !== true && clears[a.id] !== true;
+    return journeyIsVisible(a, cfg, uid) && optional[a.id] !== true && (classActivities || {})[a.id] !== true && clears[a.id] !== true;
   });
 }
 /* Replaces the whole page — header, layers, tools dock, everything — with
@@ -1227,7 +1237,7 @@ window.addEventListener('load', function(){
           // cure" for good).
           (window.CLASS_ACTIVITIES || []).some(function(a){
             return a.view === 'card' && a.journey === SONG_ID &&
-              journeyIsVisible(a, cfg) && classActivities[a.id] === true &&
+              journeyIsVisible(a, cfg, user.uid) && classActivities[a.id] === true &&
               !blockers.some(function(b){ return journeyBoardAfter(b, a, cfg); });
           });
         if(blockers.length && !sentHere) showJourneyGate();

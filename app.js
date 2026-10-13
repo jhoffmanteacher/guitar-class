@@ -197,6 +197,12 @@ let periodOverride = '';   // config/class.periodOverrides[uid] — teacher's co
    read keeps the last known value instead of snapping modules shut. */
 let moduleOpenThrough = 0;
 let hiddenActivityIds = {}; // In-Class Activities the teacher has temporarily hidden (see loadClassConfig) — id -> true
+/* Activities the teacher gave to particular students only (console board,
+   "Who" picker → config/class.activityStudents, id -> { uid -> true }).
+   Kept here already reduced to THIS student: id -> true (one of mine) or
+   false (someone else's), so the cache never holds other students' uids.
+   An id that isn't here is a whole-class card. Read by caForMe(). */
+let activityForMe = {};
 let activityDates = {}; // In-Class Activities release dates, teacher-set in the console (see loadClassConfig) — id -> 'YYYY-MM-DD'
 let activityTitles = {}; // In-Class Activity renames, teacher-set in the console (see loadClassConfig / caTitle) — id -> { en, base }
 let activityNumbers = {}; // LEGACY In-Class Activity renumbering — see caBoardOrder's fallback note; read only while activityBoard is unseeded
@@ -805,7 +811,7 @@ if(auth) auth.onAuthStateChanged(async user=>{
       return;
     }
     window.__authBootPending = false;
-    currentUser = null; progress = {}; responses = {}; completed = {}; completedDeletes = new Map(); classActivities = {}; classActivitiesDeletes = new Map(); caStepDone = {}; caStepDeletes = new Map(); exitChecks = {}; games = {}; streak = { count:0, lastDay:null }; gamesAccessOn = true; micSampling = { on: false, max: 0 }; micTakesCount = Infinity; studentPeriod = ''; periodOverride = ''; moduleOpenThrough = 0; hiddenActivityIds = {}; activityDates = {}; activityTitles = {}; activityNumbers = {}; activityBoard = {}; activityBoardOn = false; activityClears = {}; retiredActivityIds = {}; optionalActivityIds = {}; activityPins = []; progressLoadFailed = false;
+    currentUser = null; progress = {}; responses = {}; completed = {}; completedDeletes = new Map(); classActivities = {}; classActivitiesDeletes = new Map(); caStepDone = {}; caStepDeletes = new Map(); exitChecks = {}; games = {}; streak = { count:0, lastDay:null }; gamesAccessOn = true; micSampling = { on: false, max: 0 }; micTakesCount = Infinity; studentPeriod = ''; periodOverride = ''; moduleOpenThrough = 0; hiddenActivityIds = {}; activityForMe = {}; activityDates = {}; activityTitles = {}; activityNumbers = {}; activityBoard = {}; activityBoardOn = false; activityClears = {}; retiredActivityIds = {}; optionalActivityIds = {}; activityPins = []; progressLoadFailed = false;
     document.body.classList.remove('ca-gated');   // next sign-in recomputes it fresh — don't leave a stale gate showing over the sign-in wall
     if(typeof gamesResetForUser === 'function') gamesResetForUser();   // Note Runner's module caches must not leak into the next signed-in user
     if(typeof lqStopListening === 'function') lqStopListening();       // and the live-quiz listener must not keep firing under the next student
@@ -1215,6 +1221,15 @@ async function loadClassConfig(){
     // Optional activities (teacher.js board) — see optionalActivityIds.
     optionalActivityIds = d.optionalActivities || {};
     try{ localStorage.setItem('caOptional', JSON.stringify(optionalActivityIds)); }catch(e){}
+    /* Individual activities (teacher.js board "Who" picker) — see
+       activityForMe. Cached, never failed open: a blocked read that reset
+       this to {} would turn one student's card into a whole-class card and
+       start sending everyone to it at sign-in. The cache carries the uid,
+       like caPeriodOverride: on a shared Chromebook the next student gets
+       every individual card read as someone else's, not the last
+       student's cards. */
+    activityForMe = caReduceForMe(d.activityStudents, currentUser.uid);
+    try{ localStorage.setItem('caForMe', JSON.stringify({uid: currentUser.uid, v: activityForMe})); }catch(e){}
     // "Play Along now" practice cards (teacher.js board) — see playAlongActivityIds.
     playAlongActivityIds = d.playAlongActivities || {};
     try{ localStorage.setItem('caPlayAlong', JSON.stringify(playAlongActivityIds)); }catch(e){}
@@ -1292,6 +1307,15 @@ function restoreClassConfigFromCache(){
     const raw = localStorage.getItem('caOptional');
     if(raw) optionalActivityIds = JSON.parse(raw) || {};
   }catch(e){ /* ignore — optionalActivityIds stays {} */ }
+  try{
+    const raw = localStorage.getItem('caForMe');
+    const c = raw ? JSON.parse(raw) : null;
+    if(c && c.v && typeof c.v === 'object'){
+      const mine = c.uid === (currentUser && currentUser.uid);
+      activityForMe = {};
+      Object.keys(c.v).forEach(id => { activityForMe[id] = mine ? c.v[id] === true : false; });
+    }
+  }catch(e){ /* ignore — activityForMe stays {} */ }
   try{
     const raw = localStorage.getItem('caPlayAlong');
     if(raw) playAlongActivityIds = JSON.parse(raw) || {};
@@ -13616,6 +13640,7 @@ function caIsVisible(a){
      An emptied board is a different answer and does hide everything. */
   if(!caBoardView().assigned[a.id]) return false;
   if(hiddenActivityIds[a.id] === true) return false;
+  if(!caForMe(a)) return false;   // given to other students only
   if(isDevBypassUser()) return true;
   const d = caDate(a);
   return d ? d <= dayStr(new Date()) : false;
@@ -13630,9 +13655,23 @@ function caIsVisible(a){
    Deliberately NOT folded into caIsVisible(): that predicate is also the
    gate's (caBlockers) and the In-Class Activities list's, and a Play Along
    card must appear on neither. */
+/* Individual activities: config/class.activityStudents (id -> { uid -> true })
+   reduced to this student — see activityForMe. A card with no entry is the
+   whole class's. Mirrored by teacherActivityForStudent (teacher.js) and
+   journeyForStudent (tabs/journey.js); change all three together. */
+function caReduceForMe(map, uid){
+  const out = {};
+  Object.keys(map || {}).forEach(id => {
+    const who = map[id];
+    if(who && typeof who === 'object' && Object.keys(who).some(k => who[k] === true)) out[id] = who[uid] === true;
+  });
+  return out;
+}
+function caForMe(a){ return activityForMe[a.id] !== false; }
 function caIsPlayAlongOnly(a){
   if(!a || a.view !== 'card' || playAlongActivityIds[a.id] !== true) return false;
   if(retiredActivityIds[a.id] === true || hiddenActivityIds[a.id] === true) return false;
+  if(!caForMe(a)) return false;
   if(!caBoardView().assigned[a.id]) return false;
   return !caIsVisible(a);
 }
@@ -13653,6 +13692,7 @@ function caCleanPins(v){
 function caPinReachable(a){
   if(!a || a.kind === 'check' || !activityPins.includes(a.id)) return false;
   if(retiredActivityIds[a.id] === true || hiddenActivityIds[a.id] === true) return false;
+  if(!caForMe(a)) return false;
   return !!caBoardView().assigned[a.id];
 }
 /* Reachable from the row ONLY — the pinned card isn't on the dated list.
@@ -13769,7 +13809,7 @@ function appIsOnScreen(){
    tab to page 1, and any paused tab-player position, even when the config
    read came back byte-identical to what was already showing. */
 function classConfigSignature(){
-  return JSON.stringify([activityDates, activityBoard, activityBoardOn, hiddenActivityIds,
+  return JSON.stringify([activityDates, activityBoard, activityBoardOn, hiddenActivityIds, activityForMe,
     retiredActivityIds, activityClears, optionalActivityIds, playAlongActivityIds, activityPins, activityTitles,
     activityNumbers, periodOverride, moduleOpenThrough,
     gamesAccessOn]);   // the free-play hero's Games button follows it

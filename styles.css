@@ -1368,6 +1368,17 @@ body.t-wide .t-main{max-width:none}
 .t-board-num:hover{border-color:var(--blue-text)}
 .t-board-num:focus-visible{outline:2px solid var(--blue-text);outline-offset:1px}
 .t-board-ctl{display:flex;flex-wrap:wrap;align-items:center;gap:6px;margin-top:8px}
+/* Board "Who" picker — the whole class, or only the students ticked. */
+.t-who{font-size:0.8125rem}
+.t-who>summary{cursor:pointer;border:1px solid var(--border2);border-radius:16px;padding:4px 13px;color:var(--text2);list-style:none}
+.t-who>summary::-webkit-details-marker{display:none}
+.t-who.t-who-on>summary{background:var(--text);color:var(--bg);border-color:var(--text)}
+.t-who[open]{flex-basis:100%}
+.t-who-body{margin-top:6px;padding:8px 10px;border:1px solid var(--border2);border-radius:var(--radius);background:var(--bg);max-height:280px;overflow-y:auto}
+.t-who-note{color:var(--text2);margin-bottom:6px}
+.t-who-group{margin-top:6px;columns:2 14em;column-gap:16px}
+.t-who-head{font-weight:600;color:var(--text2);column-span:all;margin-bottom:2px}
+.t-who-row{display:block;padding:2px 0;break-inside:avoid;cursor:pointer}
 .t-board-ctl-sp{margin-left:auto;display:flex;flex-wrap:wrap;gap:6px;justify-content:flex-end}
 .t-board-move{font:inherit;font-size:0.8125rem;color:inherit;background:var(--bg);
   border:1px solid var(--border2);border-radius:16px;padding:3px 8px;max-width:190px}

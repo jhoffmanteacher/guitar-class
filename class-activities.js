@@ -172,8 +172,8 @@
    — Finish the Song") was pulled from this array on 2026-08-25 when `ca-1`
    was widened to cover the whole song; its steps live on inside `ca-1`, and
    the original is in git history. That makes the counter max-EVER-used + 1,
-   NOT max-in-file + 1 — the next new activity is `ca-34` (ca-33 is the
-   highest used as of 2026-10-11; check the file first). Any student who
+   NOT max-in-file + 1 — the next new activity is `ca-35` (ca-34 is the
+   highest used as of 2026-10-13; check the file first). Any student who
    had already ticked `ca-9` keeps a harmless orphan key in Firestore.
    `ca-16` ("Happy Birthday — The A-String Way") went the same way on
    2026-09-16: its steps were merged into `ca-17`, after the A-string note
@@ -4642,5 +4642,90 @@ window.CLASS_ACTIVITIES = [
     },
     // No help ladder: a practice card is its checks and nothing else (Jonathan, 2026-10-07).
     steps: [],
+  },
+  /* Las Mañanitas — Ariel Camacho y Los Plebes del Rancho's 2018 recording
+     (Jonathan, 2026-10-13). Built to be given to INDIVIDUAL students from
+     the console board's "Who" picker, not the whole class. No backing track
+     on the site (a commercial recording), so it is a Focus-view ladder, the
+     chord-change ladder: A, E7, the change, then the 3/4 strum. Key, chords
+     and meter come from analysing the recording: A major, 3/4 at about 108
+     beats per minute, almost all A and E7 in long blocks. No video — the
+     recording's YouTube id could not be oEmbed-verified from the session
+     that built this. */
+  {
+    id:    'ca-34',
+    view:  'focus',   // one step at a time — see VIEW above
+    title:    'Las Mañanitas — A and E7',
+    title_es: 'Las Mañanitas — A y E7',
+    intro:    'Las Mañanitas uses two chords, A and E7. You learn each chord, the change between them, and a strum in 3 (three beats in each bar).',
+    intro_es: 'Las Mañanitas usa dos acordes, A y E7. Aprendes cada acorde, el cambio entre ellos y un rasgueo en 3 (tres tiempos en cada compás).',
+    steps: [
+      {
+        label:    'Practice — The A chord',
+        label_es: 'Practica — El acorde A',
+        text: 'Put fingers 1, 2 and 3 on fret 2 of the D, G and B strings. Pick each string from the A string to the high e, one at a time. You\'ve got it when: all five strings ring with no buzz, three times in a row. A string sounds dead? Press each finger just behind the fret.',
+        text_es: 'Pon los dedos 1, 2 y 3 en el traste 2 de las cuerdas Re, Sol y Si. Toca cada cuerda desde la cuerda La hasta la cuerda mi aguda, una por una. Lo tienes cuando: las cinco cuerdas suenan sin zumbido, tres veces seguidas. ¿Una cuerda no suena? Presiona cada dedo justo detrás del traste.',
+        tab: {
+          caption: 'A chord · don\'t play the low E string',
+          caption_es: 'Acorde A · no toques la cuerda Mi grave',
+          notes: [
+            { frets: [['A', 0], ['D', 2], ['G', 2], ['B', 2], ['e', 0]], note: 'A', midi: [45, 52, 57, 61, 64] }
+          ]
+        },
+      },
+      {
+        label:    'Practice — The E7 chord',
+        label_es: 'Practica — El acorde E7',
+        text: 'Put finger 2 on fret 2 of the A string and finger 1 on fret 1 of the G string. Pick all six strings, one at a time. You\'ve got it when: all six strings ring with no buzz, three times in a row. The B string is muted? Curl finger 1 so it doesn\'t touch it.',
+        text_es: 'Pon el dedo 2 en el traste 2 de la cuerda La y el dedo 1 en el traste 1 de la cuerda Sol. Toca las seis cuerdas, una por una. Lo tienes cuando: las seis cuerdas suenan sin zumbido, tres veces seguidas. ¿La cuerda Si no suena? Curva el dedo 1 para que no la toque.',
+        tab: {
+          caption: 'E7 chord · all six strings',
+          caption_es: 'Acorde E7 · las seis cuerdas',
+          notes: [
+            { frets: [['E', 0], ['A', 2], ['D', 0], ['G', 1], ['B', 0], ['e', 0]], note: 'E7', midi: [40, 47, 50, 56, 59, 64] }
+          ]
+        },
+      },
+      {
+        label:    'Practice — Change A to E7',
+        label_es: 'Practica — Cambia de A a E7',
+        text: 'Strum A once, change to E7 and strum once, then change back. Take as long as you need for each change. You\'ve got it when: you make eight clean changes in a row with every string ringing. Losing the shape? Look at the tab, set the chord, then strum.',
+        text_es: 'Rasguea A una vez, cambia a E7 y rasguea una vez, y luego vuelve. Tómate el tiempo que necesites en cada cambio. Lo tienes cuando: haces ocho cambios limpios seguidos con todas las cuerdas sonando. ¿Pierdes la forma? Mira la tablatura, arma el acorde y luego rasguea.',
+        tab: {
+          caption: 'A · E7 · A · E7 — one strum each',
+          caption_es: 'A · E7 · A · E7 — un rasgueo cada uno',
+          notes: [
+            { frets: [['A', 0], ['D', 2], ['G', 2], ['B', 2], ['e', 0]], note: 'A', midi: [45, 52, 57, 61, 64] },
+            { frets: [['E', 0], ['A', 2], ['D', 0], ['G', 1], ['B', 0], ['e', 0]], note: 'E7', midi: [40, 47, 50, 56, 59, 64] },
+            { frets: [['A', 0], ['D', 2], ['G', 2], ['B', 2], ['e', 0]], note: 'A', midi: [45, 52, 57, 61, 64] },
+            { frets: [['E', 0], ['A', 2], ['D', 0], ['G', 1], ['B', 0], ['e', 0]], note: 'E7', midi: [40, 47, 50, 56, 59, 64] }
+          ]
+        },
+      },
+      {
+        label:    'Practice — The strum in 3',
+        label_es: 'Practica — El rasgueo en 3',
+        text: 'Count 1, 2, 3 and strum down on each number. Strum hard on 1 and soft on 2 and 3. Play 2 bars of A, then 2 bars of E7, and repeat. You\'ve got it when: you play the tab four times through without stopping and every 1 is the loud strum. Late on the change? Start the change on beat 3.',
+        text_es: 'Cuenta 1, 2, 3 y rasguea hacia abajo en cada número. Rasguea fuerte en el 1 y suave en el 2 y el 3. Toca 2 compases de A, luego 2 compases de E7, y repite. Lo tienes cuando: tocas la tablatura cuatro veces completa sin detenerte y cada 1 es el rasgueo fuerte. ¿Llegas tarde al cambio? Empieza el cambio en el tiempo 3.',
+        tab: {
+          caption: '3 strums per bar · A for 2 bars · E7 for 2 bars',
+          caption_es: '3 rasgueos por compás · A por 2 compases · E7 por 2 compases',
+          notes: [
+            { frets: [['A', 0], ['D', 2], ['G', 2], ['B', 2], ['e', 0]], note: 'A', midi: [45, 52, 57, 61, 64] },
+            { frets: [['A', 0], ['D', 2], ['G', 2], ['B', 2], ['e', 0]], note: 'A', midi: [45, 52, 57, 61, 64] },
+            { frets: [['A', 0], ['D', 2], ['G', 2], ['B', 2], ['e', 0]], note: 'A', midi: [45, 52, 57, 61, 64] },
+            { frets: [['A', 0], ['D', 2], ['G', 2], ['B', 2], ['e', 0]], note: 'A', midi: [45, 52, 57, 61, 64] },
+            { frets: [['A', 0], ['D', 2], ['G', 2], ['B', 2], ['e', 0]], note: 'A', midi: [45, 52, 57, 61, 64] },
+            { frets: [['A', 0], ['D', 2], ['G', 2], ['B', 2], ['e', 0]], note: 'A', midi: [45, 52, 57, 61, 64] },
+            { frets: [['E', 0], ['A', 2], ['D', 0], ['G', 1], ['B', 0], ['e', 0]], note: 'E7', midi: [40, 47, 50, 56, 59, 64] },
+            { frets: [['E', 0], ['A', 2], ['D', 0], ['G', 1], ['B', 0], ['e', 0]], note: 'E7', midi: [40, 47, 50, 56, 59, 64] },
+            { frets: [['E', 0], ['A', 2], ['D', 0], ['G', 1], ['B', 0], ['e', 0]], note: 'E7', midi: [40, 47, 50, 56, 59, 64] },
+            { frets: [['E', 0], ['A', 2], ['D', 0], ['G', 1], ['B', 0], ['e', 0]], note: 'E7', midi: [40, 47, 50, 56, 59, 64] },
+            { frets: [['E', 0], ['A', 2], ['D', 0], ['G', 1], ['B', 0], ['e', 0]], note: 'E7', midi: [40, 47, 50, 56, 59, 64] },
+            { frets: [['E', 0], ['A', 2], ['D', 0], ['G', 1], ['B', 0], ['e', 0]], note: 'E7', midi: [40, 47, 50, 56, 59, 64] }
+          ]
+        },
+      },
+    ],
   },
 ];

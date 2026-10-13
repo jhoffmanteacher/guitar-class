@@ -256,6 +256,8 @@ async function showTeacherApp(user){
       if(actOpt){ teacherSetActivityOptional(actOpt.dataset.id, actOpt.dataset.state); return; }
       const actPlay=e.target.closest('[data-set-activity-playalong]');
       if(actPlay){ teacherSetActivityPlayAlong(actPlay.dataset.id, actPlay.dataset.state); return; }
+      const actWhole=e.target.closest('[data-activity-whole-class]');
+      if(actWhole){ teacherSetActivityWholeClass(actWhole.dataset.id); return; }
       const actPin=e.target.closest('[data-set-activity-pin]');
       if(actPin){ teacherSetActivityPin(actPin.dataset.id, actPin.dataset.state); return; }
       const actArch=e.target.closest('[data-set-activity-archived]');
@@ -329,6 +331,8 @@ async function showTeacherApp(user){
       if(sortSel){ teacherBoardSetSort(sortSel.value); return; }
       const openSel=e.target.closest('[data-set-open-through]');
       if(openSel){ teacherSetStudentOpenThrough(openSel.dataset.uid, openSel.value); return; }
+      const whoBox=e.target.closest('[data-set-activity-student]');
+      if(whoBox){ teacherSetActivityStudent(whoBox.dataset.id, whoBox.dataset.uid, whoBox.checked); return; }
     });
     /* An <details> in the board remembers whether it was open across the
        next re-render — the board repaints on every write, and an Archived
@@ -340,6 +344,7 @@ async function showTeacherApp(user){
       // inside an archived card sits INSIDE a [data-board-arch] details, so
       // closest() from it would find the archive fold instead.
       if(e.target.matches('[data-board-done]')){ boardDoneOpen[e.target.dataset.key]=!!e.target.open; return; }
+      if(e.target.matches('[data-board-who]')){ boardWhoOpen[e.target.dataset.id]=!!e.target.open; return; }
       if(e.target.matches('[data-board-help]')){ boardHelpOpen=!!e.target.open; return; }
       const arch=e.target.closest('[data-board-arch]');
       if(arch) teacherBoardArchToggle(arch.dataset.module, arch.open);
@@ -1147,6 +1152,7 @@ let boardArchOpen={};          // module number (or 'built') -> true
 // every toggle, date or move repaints the board, and a list that snapped shut
 // each time had to be re-opened after every click.
 let boardDoneOpen={};
+let boardWhoOpen={};   // id -> true while that card's "Who" picker is open, so a tick doesn't snap it shut
 // "How this page works" — kept open across repaints too, now that the board
 // also repaints on its own (teacherRefreshStudents) while it's being read.
 let boardHelpOpen=false;
@@ -1389,8 +1395,9 @@ function renderTeacherActivities(opts){
     const doneSummaryRoster=(teacherShowArchived?allStudentsRaw:allStudentsRaw.filter(s=>!((cfg.archived||{})[s.uid])));
     const doneSummary=a=>{
       const isCheck=a.kind==='check';
+      const forIt=doneSummaryRoster.filter(s=>teacherActivityForStudent(a,s.uid,cfg));
       const groups=[['4','P4'],['7','P7'],['CAS','CAS'],['','Unassigned']]
-        .map(([val,label])=>({label, students:doneSummaryRoster.filter(s=>teacherStudentPeriod(s)===val)}))
+        .map(([val,label])=>({label, students:forIt.filter(s=>teacherStudentPeriod(s)===val)}))
         .filter(g=>g.students.length);
       const rows=groups.map(g=>{
         const notDone=g.students.filter(s=>isCheck
@@ -1502,6 +1509,30 @@ function renderTeacherActivities(opts){
         +`<button class="tg-seg-btn ${at<0?'on':''}" data-set-activity-pin data-id="${escAttr(a.id)}" data-state="off" title="Not on the Keep practicing row at the top of students' In-Class Activities page">Not pinned</button>`
         +`<button class="tg-seg-btn ${at>=0?'on':''}" data-set-activity-pin data-id="${escAttr(a.id)}" data-state="on" title="On the Keep practicing row at the top of students' In-Class Activities page — no release date needed. It never blocks and never counts as one of today's activities. ${TEACHER_PINS_MAX} at most.">${at>=0?`Pinned ${at+1} of ${TEACHER_PINS_MAX}`:'Pin'}</button></div>`;
     };
+    /* Who: the whole class (the default), or only the students ticked here
+       — config/class.activityStudents, id -> { uid -> true }. Students
+       nobody ticked never see the card, aren't sent to it at sign-in, and
+       aren't counted in its done list. See teacherSetActivityStudent. */
+    const whoPicker=a=>{
+      const picked=teacherActivityStudents(a.id,cfg);
+      const n=Object.keys(picked).length;
+      const arch=cfg.archived||{};
+      const roster=allStudentsRaw.filter(s=>!arch[s.uid] || picked[s.uid])
+        .slice().sort((x,y)=>(x.name||x.email||'').localeCompare(y.name||y.email||'', undefined, {sensitivity:'base'}));
+      const perLabel=p=>!p?'No period':p==='CAS'?'CAS':'Period '+p;
+      const groups={};
+      roster.forEach(s=>{ const p=teacherStudentPeriod(s)||''; (groups[p]=groups[p]||[]).push(s); });
+      const order=['4','7','CAS',''].filter(p=>groups[p]);
+      const boxes=order.map(p=>`<div class="t-who-group"><div class="t-who-head">${perLabel(p)}</div>`
+        +groups[p].map(s=>`<label class="t-who-row"><input type="checkbox" data-set-activity-student data-id="${escAttr(a.id)}" data-uid="${escAttr(s.uid)}"${picked[s.uid]?' checked':''}> ${escHtml(s.name||s.email||s.uid.slice(0,8)+'…')}</label>`).join('')
+        +`</div>`).join('');
+      const sum=n?`Only ${n} student${n===1?'':'s'}`:'Whole class';
+      return `<details class="t-who${n?' t-who-on':''}" data-board-who data-id="${escAttr(a.id)}"${boardWhoOpen[a.id]?' open':''}>`
+        +`<summary title="Who this activity is for">Who: ${sum}</summary>`
+        +`<div class="t-who-body"><div class="t-who-note">Tick students to give this activity to them only. Nobody ticked = the whole class.</div>`
+        +(n?`<div class="tg-seg"><button class="tg-seg-btn" data-activity-whole-class data-id="${escAttr(a.id)}">Back to whole class</button></div>`:'')
+        +(boxes||'<div class="t-who-note">No students yet.</div>')+`</div></details>`;
+    };
     // Where a card can be sent without a drag. Used as "Assign to" in Built
     // and "Move to" in Assigned; both append at the end of the section they
     // name, which is what a drag onto empty space does too.
@@ -1589,7 +1620,7 @@ function renderTeacherActivities(opts){
         +`<div class="t-board-row">${isRetired?'':'<span class="t-board-grip" aria-hidden="true">&#x2630;</span>'}${numBox}${titleBlock(a)}</div>`
         +(isRetired
           ? `<div class="t-board-stray">${teacherActivityDeleted(a.id,cfg)?'Deleted':'Archived'} — students don't see it and it holds no number. Restore puts it back here.</div>`
-          : publishBlock(a)+`<div class="t-board-ctl">${visSeg(a)}${optSeg(a)}${playSeg(a)}${pinBtn(a)}${moveSelect(a,'Move to…',curModule)}${moveBtns}</div>`)
+          : publishBlock(a)+`<div class="t-board-ctl">${visSeg(a)}${optSeg(a)}${playSeg(a)}${pinBtn(a)}${whoPicker(a)}${moveSelect(a,'Move to…',curModule)}${moveBtns}</div>`)
         /* Footer: what this card IS (how many have done it) and the actions
            that take it out of the run, behind a hairline — so the row above,
            which is what gets used every day, reads as the card's controls
@@ -2205,7 +2236,9 @@ function teacherDoneRollHtml(a, students, isDone){
    two groups. */
 function teacherActivityGridHtml(a){
   const clearsMap=teacherClassConfig.activityClears||{};
-  const sortedStudents=[...allStudents].sort((x,y)=>String(x.name||x.email||'').localeCompare(String(y.name||y.email||'')));
+  // An individual activity (the board's "Who" picker) lists only its students.
+  const sortedStudents=allStudents.filter(s=>teacherActivityForStudent(a,s.uid,teacherClassConfig))
+    .sort((x,y)=>String(x.name||x.email||'').localeCompare(String(y.name||y.email||'')));
   const studentRows=sortedStudents.map(s=>{
     const done=(s.classActivities||{})[a.id]===true;
     const cleared=!!((clearsMap[s.uid]||{})[a.id]);
@@ -2462,6 +2495,49 @@ async function teacherSetActivityOptional(id, state){
   }
   if(teacherView==='activities') renderTeacherActivities();
 }
+/* Who — config/class.activityStudents (id -> { uid -> true }). One tick is
+   one cell, so the write is cell-checked on that cell, same shape as
+   teacherSetActivityOptional; an unticked student's key is deleted rather
+   than written false, and the last untick leaves an empty map, which every
+   reader takes as "whole class". Students read it in caForMe (app.js) and
+   journeyForStudent (tabs/journey.js); teacherBlockersFor here. Nothing in
+   progress/{uid} is touched. */
+async function teacherSetActivityStudent(id, uid, on){
+  if(!id || !uid) return;
+  if(!teacherClassConfig.activityStudents) teacherClassConfig.activityStudents={};
+  const map=teacherClassConfig.activityStudents;
+  const who=(map[id] && typeof map[id]==='object') ? map[id] : (map[id]={});
+  const had=Object.prototype.hasOwnProperty.call(who, uid);
+  const prev=who[uid];
+  if(on) who[uid]=true; else delete who[uid];
+  try{
+    await ensureDb();
+    const fv=firebase.firestore.FieldValue;
+    const patch={activityStudents:{[id]:{[uid]: on ? true : fv.delete()}}};
+    await teacherWriteConfig(patch, {['activityStudents.'+id+'.'+uid]: had?prev:undefined});
+  }catch(e){
+    if(had) who[uid]=prev; else delete who[uid];
+    teacherConfigSaveFailed(e, 'Could not save that change — check your connection and Firestore rules.');
+  }
+  if(teacherView==='activities') renderTeacherActivities();
+}
+/* "Back to whole class" — drops the activity's whole entry. Strict write
+   (no base): it clears ticks this tab may not have seen. */
+async function teacherSetActivityWholeClass(id){
+  const map=teacherClassConfig.activityStudents||{};
+  if(!map[id]) return;
+  const prev=map[id];
+  delete map[id];
+  try{
+    await ensureDb();
+    const fv=firebase.firestore.FieldValue;
+    await teacherWriteConfig({activityStudents:{[id]:fv.delete()}});
+  }catch(e){
+    map[id]=prev;
+    teacherConfigSaveFailed(e, 'Could not save that change — check your connection and Firestore rules.');
+  }
+  if(teacherView==='activities') renderTeacherActivities();
+}
 /* Play Along by date / now — config/class.playAlongActivities (id -> true),
    practice cards only. "Now" puts the card in the Songs page's Play Along
    list without a release date (app.js caIsPlayAlongOnly); it does not make
@@ -2691,7 +2767,7 @@ async function teacherDeleteActivity(id){
   // from scratch. Archive deliberately does NOT touch it — that's the whole
   // difference between the two, and why Restore-from-archive puts the card
   // back in its own module at its own position.
-  const MAPS=['archivedActivities','deletedActivities','hiddenActivities','optionalActivities','playAlongActivities','activityDates','activityTitles','activityNumbers','activityBoard'];
+  const MAPS=['archivedActivities','deletedActivities','hiddenActivities','optionalActivities','playAlongActivities','activityStudents','activityDates','activityTitles','activityNumbers','activityBoard'];
   MAPS.forEach(m=>{ if(!cfg[m]) cfg[m]={}; });
   if(!cfg.activityClears) cfg.activityClears={};
   const clears=cfg.activityClears;
@@ -2781,7 +2857,7 @@ async function teacherDeleteActivity(id){
    so those globals would read as empty here. This reads straight off the
    student's own doc (allStudents) and the config object this file already
    has in hand. If the visibility rule ever changes, change it in both. */
-function teacherActivityVisible(a, cfg, today){
+function teacherActivityVisible(a, cfg, today, uid){
   if(teacherActivityRetired(a.id, cfg)) return false;   // archived/deleted — see caIsVisible in app.js
   // Not placed on the board = not in the course. Same condition, same
   // position, as the assigned check in caIsVisible() — without it the
@@ -2789,6 +2865,8 @@ function teacherActivityVisible(a, cfg, today){
   // the per-student gate list, Clear all) for students it no longer blocks.
   if(cfg && cfg.activityBoardSeeded && !((cfg.activityBoard||{})[a.id])) return false;
   if(((cfg&&cfg.hiddenActivities)||{})[a.id]===true) return false;
+  // Given to other students only (the board's "Who" picker) — caForMe in app.js.
+  if(uid!==undefined && !teacherActivityForStudent(a,uid,cfg)) return false;
   const d=((cfg&&cfg.activityDates)||{})[a.id];
   return d ? d<=today : false;
 }
@@ -2811,6 +2889,18 @@ function teacherRetiredBanner(id){
 // every activity is optional for CAS (teacherBlockersFor), so a Clear
 // button there would do nothing.
 const TEACHER_CAS_GATE_CELL='<td><span class="stu-period" title="CAS students are never sent to an activity first — every activity is optional for them.">CAS · optional</span></td>';
+/* Individual activities — mirrors caForMe (app.js) and journeyForStudent
+   (tabs/journey.js). The ticked students, as uid -> true; {} = whole class. */
+function teacherActivityStudents(id, cfg){
+  const who=((cfg&&cfg.activityStudents)||{})[id];
+  const out={};
+  if(who && typeof who==='object') Object.keys(who).forEach(u=>{ if(who[u]===true) out[u]=true; });
+  return out;
+}
+function teacherActivityForStudent(a, uid, cfg){
+  const who=teacherActivityStudents(a.id, cfg);
+  return !Object.keys(who).length || who[uid]===true;
+}
 function teacherActivityOptional(id, cfg){ return ((cfg&&cfg.optionalActivities)||{})[id]===true; }
 function teacherBlockersFor(stu, cfg){
   const today=dayStr(new Date());
@@ -2821,7 +2911,7 @@ function teacherBlockersFor(stu, cfg){
   if(teacherStudentPeriod(stu, cfg)==='CAS') return [];
   // Optional activities never block — mirrors caBlockers() in app.js.
   return (window.CLASS_ACTIVITIES||[]).filter(a=>
-    teacherActivityVisible(a,cfg,today) && !teacherActivityOptional(a.id,cfg) && (stu.classActivities||{})[a.id]!==true && clears[a.id]!==true);
+    teacherActivityVisible(a,cfg,today,stu.uid) && !teacherActivityOptional(a.id,cfg) && (stu.classActivities||{})[a.id]!==true && clears[a.id]!==true);
 }
 /* The detail pages' Gate column reads as if the activity blocks. When it's
    Optional it doesn't, so say so above the grid rather than leave a column

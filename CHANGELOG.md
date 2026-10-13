@@ -5,6 +5,14 @@ Notable changes to the Guitar Class site. Newest first.
 For the full session-by-session history (and the reasoning behind each change),
 see `WORKFLOW.md` and the git commit log.
 
+## 2026-10-13 — Las Mañanitas, and activities just for you
+
+- **New activity: Las Mañanitas — A and E7.** Learn the two chords, the
+  change between them, and a strum with three beats in each bar.
+- **Some activities are now given to a few students only.** If your teacher
+  gives you one, it shows on your In-Class Activities page like any other.
+  Activities given to other students don't show for you.
+
 ## 2026-10-13 — A slower speed in Low E and A Notes in Time
 
 - **The play-along now goes down to 30 BPM.** With Show answer on, press
