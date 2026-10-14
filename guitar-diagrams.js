@@ -225,6 +225,24 @@ var CHORD_DIAGRAMS = {
   'Cmaj7' : { position:0, chord:[[6,'x',''],[5,3,3],[4,2,2],[3,0,0],[2,0,0],[1,0,0]] },
   'Fmaj7' : { position:0, chord:[[6,'x',''],[5,'x',''],[4,3,3],[3,2,2],[2,1,1],[1,0,0]] },
   'Dm7'   : { position:0, chord:[[6,'x',''],[5,'x',''],[4,0,0],[3,2,2],[2,1,1],[1,1,1]] },
+  /* Open-chord chart shapes (2026-10-14). Library only: nothing links to
+     them yet — not in app.js's CHORD_NAMES, no data-chord, no game deck —
+     so adding them changes nothing a student sees until a lesson names one.
+     A7 / D7 / E7 use the same frets and fingers as Module 11's inline
+     boxes and the E7 play-along cards; the sus/add shapes keep the fingers
+     of the chord they come from (Asus = A, Dsus = D, Em7 = Em + pinky). */
+  'A7'    : { position:0, chord:[[6,'x',''],[5,0,0],[4,2,2],[3,0,0],[2,2,3],[1,0,0]] },
+  'C7'    : { position:0, chord:[[6,'x',''],[5,3,3],[4,2,2],[3,3,4],[2,1,1],[1,0,0]] },
+  'D7'    : { position:0, chord:[[6,'x',''],[5,'x',''],[4,0,0],[3,2,2],[2,1,1],[1,2,3]] },
+  'E7'    : { position:0, chord:[[6,0,0],[5,2,2],[4,0,0],[3,1,1],[2,0,0],[1,0,0]] },
+  'G7'    : { position:0, chord:[[6,3,3],[5,2,2],[4,0,0],[3,0,0],[2,0,0],[1,1,1]] },
+  'Am7'   : { position:0, chord:[[6,'x',''],[5,0,0],[4,2,2],[3,0,0],[2,1,1],[1,0,0]] },
+  'Em7'   : { position:0, chord:[[6,0,0],[5,2,2],[4,2,3],[3,0,0],[2,3,4],[1,0,0]] },
+  'Cadd9' : { position:0, chord:[[6,'x',''],[5,3,2],[4,2,1],[3,0,0],[2,3,3],[1,0,0]] },
+  'Asus2' : { position:0, chord:[[6,'x',''],[5,0,0],[4,2,1],[3,2,2],[2,0,0],[1,0,0]] },
+  'Asus4' : { position:0, chord:[[6,'x',''],[5,0,0],[4,2,1],[3,2,2],[2,3,3],[1,0,0]] },
+  'Dsus2' : { position:0, chord:[[6,'x',''],[5,'x',''],[4,0,0],[3,2,1],[2,3,3],[1,0,0]] },
+  'Dsus4' : { position:0, chord:[[6,'x',''],[5,'x',''],[4,0,0],[3,2,1],[2,3,3],[1,3,4]] },
   /* Bm / F#m / C#m: partial-barre (beginner) shapes. Only Bm is actually
      taught anywhere in the course today (Module 4's Group 2) — F#m/C#m
      have shapes here but no lesson yet (2026-09-28: the names show up in
