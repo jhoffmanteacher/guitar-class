@@ -5,6 +5,13 @@ Notable changes to the Guitar Class site. Newest first.
 For the full session-by-session history (and the reasoning behind each change),
 see `WORKFLOW.md` and the git commit log.
 
+## 2026-10-14 — Las Mañanitas Play Along: the requinto solo
+
+- **The Solo section of Las Mañanitas — Play Along now shows the requinto
+  solo.** Tap Solo and play the lead part with the record, one row per bar.
+  Rows marked tremolo mean you pick each note fast and steady. If you play
+  rhythm, keep strumming E7, D, A, E7, A through the solo.
+
 ## 2026-10-14 — Las Mañanitas: play along with the record
 
 - **New activity: Las Mañanitas — Play Along.** Press Play song and strum
