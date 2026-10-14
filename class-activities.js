@@ -4684,11 +4684,14 @@ window.CLASS_ACTIVITIES = [
      A-and-E7-only ladder couldn't reach the song. Lyrics and chord
      placement come from that sheet ("fila" -> "pila", "solesito" ->
      "solecito", "Le venimos" -> "te venimos", accents added). The sheet's
-     second strum pattern (down-up for the first lines of each verse) and
-     its intro/solo tab are left out on purpose: one strum, all the way
-     through. Same id, so nobody's completion moves; step ticks are
-     day-scoped, so the new step count moves nothing either. No video — the
-     recording's YouTube id could not be oEmbed-verified. */
+     second strum pattern (down-up for the first lines of each verse) is
+     left out on purpose — one strum all the way through — and so are its
+     solo (tremolo) and the fills between verse lines. The requinto (lead guitar) intro and outro
+     from the same sheet are the last two steps (Jonathan, 2026-10-14: "and
+     the lead guitar parts?"); the 0h2 hammer-on is written as two picked
+     notes, and the outro is the sheet's easier version. Same id, so
+     nobody's completion moves; step ticks are day-scoped, so the new step
+     count moves nothing either. No video and no backing track yet. */
   {
     id:    'ca-34',
     view:  'focus',   // one step at a time — see VIEW above
@@ -4850,6 +4853,138 @@ window.CLASS_ACTIVITIES = [
               { frets: [['E', 0], ['A', 2], ['D', 0], ['G', 1], ['B', 0], ['e', 0]], note: 'E7', midi: [40, 47, 50, 56, 59, 64] },
               { frets: [['A', 0], ['D', 2], ['G', 2], ['B', 2], ['e', 0]], note: 'A', midi: [45, 52, 57, 61, 64] }
             ] }
+          ]
+        },
+      },
+      {
+        label:    'Practice — The intro on requinto (lead guitar)',
+        label_es: 'Practica — La intro en el requinto (guitarra líder)',
+        text: 'The requinto plays the melody, often on two strings at once. Two numbers in one column are picked together. Play the tab slowly, one page at a time. You\'ve got it when: you play the whole intro without stopping, at any speed. Only one string sounds? Pick through both strings in one motion.',
+        text_es: 'El requinto toca la melodía, muchas veces en dos cuerdas a la vez. Dos números en una columna se tocan juntos. Toca la tablatura despacio, una página a la vez. Lo tienes cuando: tocas toda la intro sin detenerte, a cualquier velocidad. ¿Solo suena una cuerda? Toca las dos cuerdas en un solo movimiento.',
+        tab: {
+          caption: 'Intro · requinto',
+          caption_es: 'Intro · requinto',
+          notes: [
+            { frets: [['e', 0], ['B', 0]], note: 'B/E', midi: [64, 59] },
+            { frets: [['e', 0], ['B', 0]], note: 'B/E', midi: [64, 59] },
+            { string: 'G', fret: 2, note: 'A', midi: 57 },
+            { string: 'G', fret: 1, note: 'G#', midi: 56 },
+            { string: 'G', fret: 1, note: 'G#', midi: 56 },
+            { string: 'G', fret: 0, note: 'G', midi: 55 },
+            { string: 'G', fret: 1, note: 'G#', midi: 56 },
+            { string: 'G', fret: 1, note: 'G#', midi: 56 },
+            { string: 'G', fret: 2, note: 'A', midi: 57 },
+            { frets: [['e', 0], ['B', 0]], note: 'B/E', midi: [64, 59] },
+            { string: 'B', fret: 2, note: 'C#', midi: 61 },
+            { frets: [['e', 0], ['B', 0]], note: 'B/E', midi: [64, 59] },
+            { frets: [['e', 0], ['B', 0]], note: 'B/E', midi: [64, 59] },
+            { frets: [['e', 0], ['B', 0]], note: 'B/E', midi: [64, 59] },
+            { frets: [['e', 0], ['B', 0]], note: 'B/E', midi: [64, 59] },
+            { frets: [['e', 0], ['B', 2]], note: 'C#/E', midi: [64, 61] },
+            { frets: [['e', 2], ['B', 3]], note: 'D/F#', midi: [66, 62] },
+            { frets: [['e', 2], ['B', 3]], note: 'D/F#', midi: [66, 62] },
+            { frets: [['e', 4], ['B', 5]], note: 'E/G#', midi: [68, 64] },
+            { frets: [['e', 4], ['B', 5]], note: 'E/G#', midi: [68, 64] },
+            { frets: [['e', 2], ['B', 3]], note: 'D/F#', midi: [66, 62] },
+            { string: 'B', fret: 2, note: 'C#', midi: 61 },
+            { string: 'B', fret: 3, note: 'D', midi: 62 },
+            { string: 'B', fret: 3, note: 'D', midi: 62 },
+            { string: 'B', fret: 2, note: 'C#', midi: 61 },
+            { string: 'B', fret: 3, note: 'D', midi: 62 },
+            { string: 'B', fret: 2, note: 'C#', midi: 61 },
+            { string: 'B', fret: 3, note: 'D', midi: 62 },
+            { string: 'e', fret: 0, note: 'E', midi: 64 },
+            { string: 'e', fret: 2, note: 'F#', midi: 66 },
+            { string: 'e', fret: 0, note: 'E', midi: 64 },
+            { string: 'B', fret: 3, note: 'D', midi: 62 },
+            { string: 'B', fret: 2, note: 'C#', midi: 61 },
+            { string: 'B', fret: 0, note: 'B', midi: 59 },
+            { string: 'G', fret: 2, note: 'A', midi: 57 },
+            { string: 'G', fret: 2, note: 'A', midi: 57 },
+            { string: 'G', fret: 1, note: 'G#', midi: 56 },
+            { string: 'G', fret: 2, note: 'A', midi: 57 },
+            { string: 'G', fret: 2, note: 'A', midi: 57 },
+            { string: 'G', fret: 2, note: 'A', midi: 57 },
+            { string: 'G', fret: 1, note: 'G#', midi: 56 },
+            { string: 'G', fret: 2, note: 'A', midi: 57 },
+            { frets: [['e', 0], ['B', 0]], note: 'B/E', midi: [64, 59] },
+            { frets: [['e', 0], ['B', 2]], note: 'C#/E', midi: [64, 61] },
+            { frets: [['e', 0], ['B', 2]], note: 'C#/E', midi: [64, 61] },
+            { frets: [['e', 0], ['B', 2]], note: 'C#/E', midi: [64, 61] },
+            { frets: [['e', 4], ['B', 5]], note: 'E/G#', midi: [68, 64] },
+            { frets: [['e', 2], ['B', 3]], note: 'D/F#', midi: [66, 62] },
+            { frets: [['e', 0], ['B', 2]], note: 'C#/E', midi: [64, 61] },
+            { frets: [['e', 2], ['B', 3]], note: 'D/F#', midi: [66, 62] },
+            { frets: [['e', 0], ['B', 2]], note: 'C#/E', midi: [64, 61] },
+            { frets: [['e', 0], ['B', 0]], note: 'B/E', midi: [64, 59] },
+            { frets: [['e', 0], ['B', 2]], note: 'C#/E', midi: [64, 61] },
+            { frets: [['e', 0], ['B', 0]], note: 'B/E', midi: [64, 59] },
+            { string: 'G', fret: 2, note: 'A', midi: 57 },
+            { string: 'G', fret: 2, note: 'A', midi: 57 },
+            { string: 'G', fret: 1, note: 'G#', midi: 56 },
+            { string: 'D', fret: 4, note: 'F#', midi: 54 },
+            { string: 'D', fret: 2, note: 'E', midi: 52 },
+            { string: 'D', fret: 0, note: 'D', midi: 50 },
+            { string: 'A', fret: 4, note: 'C#', midi: 49 },
+            { string: 'A', fret: 2, note: 'B', midi: 47 },
+            { string: 'A', fret: 0, note: 'A', midi: 45 },
+            { string: 'D', fret: 4, note: 'F#', midi: 54 },
+            { string: 'G', fret: 0, note: 'G', midi: 55 },
+            { string: 'G', fret: 2, note: 'A', midi: 57 },
+            { string: 'G', fret: 4, note: 'B', midi: 59 },
+            { string: 'G', fret: 2, note: 'A', midi: 57 },
+            { string: 'G', fret: 0, note: 'G', midi: 55 },
+            { string: 'G', fret: 4, note: 'B', midi: 59 },
+            { string: 'G', fret: 2, note: 'A', midi: 57 },
+            { string: 'G', fret: 0, note: 'G', midi: 55 },
+            { string: 'D', fret: 4, note: 'F#', midi: 54 },
+            { string: 'D', fret: 2, note: 'E', midi: 52 },
+            { string: 'D', fret: 0, note: 'D', midi: 50 },
+            { string: 'D', fret: 4, note: 'F#', midi: 54 },
+            { string: 'G', fret: 2, note: 'A', midi: 57 },
+            { string: 'B', fret: 2, note: 'C#', midi: 61 },
+            { string: 'G', fret: 4, note: 'B', midi: 59 },
+            { string: 'G', fret: 2, note: 'A', midi: 57 },
+            { string: 'D', fret: 4, note: 'F#', midi: 54 },
+            { string: 'D', fret: 3, note: 'F', midi: 53 },
+            { string: 'D', fret: 3, note: 'F', midi: 53 },
+            { string: 'D', fret: 2, note: 'E', midi: 52 },
+            { string: 'D', fret: 2, note: 'E', midi: 52 },
+            { string: 'D', fret: 0, note: 'D', midi: 50 },
+            { string: 'B', fret: 6, note: 'F', midi: 65 },
+            { string: 'B', fret: 6, note: 'F', midi: 65 },
+            { string: 'G', fret: 7, note: 'D', midi: 62 },
+            { string: 'B', fret: 6, note: 'F', midi: 65 },
+            { string: 'B', fret: 6, note: 'F', midi: 65 },
+            { string: 'B', fret: 6, note: 'F', midi: 65 },
+            { string: 'G', fret: 7, note: 'D', midi: 62 }
+          ]
+        },
+      },
+      {
+        label:    'Practice — The outro on requinto (lead guitar)',
+        label_es: 'Practica — El final en el requinto (guitarra líder)',
+        text: 'Play each pair of notes three times as you move up the neck. Slide from frets 5 and 7 up to frets 12 and 14 without lifting your fingers. You\'ve got it when: you play the outro twice in a row and the last chord rings. Then play the intro, the whole song and the outro in a row.',
+        text_es: 'Toca cada par de notas tres veces mientras subes por el mástil. Desliza de los trastes 5 y 7 a los trastes 12 y 14 sin levantar los dedos. Lo tienes cuando: tocas el final dos veces seguidas y el último acorde suena. Después toca la intro, toda la canción y el final seguidos.',
+        tab: {
+          caption: 'Outro · requinto · slide up to frets 12 and 14',
+          caption_es: 'Final · requinto · desliza a los trastes 12 y 14',
+          notes: [
+            { frets: [['e', 0], ['B', 2]], note: 'C#/E', midi: [64, 61] },
+            { frets: [['e', 0], ['B', 2]], note: 'C#/E', midi: [64, 61] },
+            { frets: [['e', 0], ['B', 2]], note: 'C#/E', midi: [64, 61] },
+            { frets: [['e', 2], ['B', 3]], note: 'D/F#', midi: [66, 62] },
+            { frets: [['e', 2], ['B', 3]], note: 'D/F#', midi: [66, 62] },
+            { frets: [['e', 2], ['B', 3]], note: 'D/F#', midi: [66, 62] },
+            { frets: [['e', 4], ['B', 5]], note: 'E/G#', midi: [68, 64] },
+            { frets: [['e', 4], ['B', 5]], note: 'E/G#', midi: [68, 64] },
+            { frets: [['e', 4], ['B', 5]], note: 'E/G#', midi: [68, 64] },
+            { frets: [['e', 5], ['B', 7]], note: 'F#/A', midi: [69, 66] },
+            { frets: [['e', 5], ['B', 7]], note: 'F#/A', midi: [69, 66] },
+            { frets: [['e', 5], ['B', 7]], note: 'F#/A', midi: [69, 66] },
+            { frets: [['e', 12], ['B', 14]], note: 'C#/E', midi: [76, 73] },
+            { frets: [['e', 12], ['B', 14]], note: 'C#/E', midi: [76, 73] },
+            { frets: [['e', 9], ['B', 10], ['G', 9]], note: 'E/A/C#', midi: [73, 69, 64] }
           ]
         },
       },
