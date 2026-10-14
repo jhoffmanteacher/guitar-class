@@ -79,6 +79,15 @@
    became practice cards, below. 2026-10-01: every remaining step ladder —
    ca-1 to ca-8, ca-11, ca-12, ca-17 — got Focus view too.)
 
+   OPTIONAL — `optional: true` (optional; the only value). The card starts
+   out Optional — shown, tagged Optional, never sent to first at sign-in —
+   until the teacher switches it to Required on the console board, which
+   stores an explicit false in config/class.optionalActivities. A card given
+   to individual students (the board's "Who" picker) is Optional by default
+   too, with or without this field. (Jonathan, 2026-10-14: ca-34.)
+   caIsOptional (app.js), teacherActivityOptional (teacher.js) and
+   journeyOptional (tabs/journey.js) read it.
+
    METRONOME — `metronome: <bpm>` (optional; whole number, 40–220). Tapping
    the card open starts the Metro tool at that tempo, so every step is
    played to a click. The student can stop it or change the tempo like any
@@ -4655,6 +4664,7 @@ window.CLASS_ACTIVITIES = [
   {
     id:    'ca-34',
     view:  'focus',   // one step at a time — see VIEW above
+    optional: true,   // Optional until switched to Required on the board (Jonathan, 2026-10-14) — see OPTIONAL above
     title:    'Las Mañanitas — A and E7',
     title_es: 'Las Mañanitas — A y E7',
     intro:    'Las Mañanitas uses two chords, A and E7. You learn each chord, the change between them, and a strum in 3 (three beats in each bar).',

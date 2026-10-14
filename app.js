@@ -13750,7 +13750,18 @@ function caStudentIsCAS(){ return (periodOverride || studentPeriod) === 'CAS'; }
 // "did the teacher mark this one Optional" — it also folds in the CURRENT
 // student's CAS status (ambient, via caStudentIsCAS()). A caller that wants
 // only the teacher's per-activity flag needs optionalActivityIds[a.id] directly.
-function caIsOptional(a){ return caStudentIsCAS() || optionalActivityIds[a.id] === true; }
+/* Optional by default (Jonathan, 2026-10-14): an activity whose data says
+   `optional: true` (ca-34), or one given to individual students from the
+   board's "Who" picker, is Optional until the teacher switches it to
+   Required — which the console stores as an explicit false. Absent = the
+   default. Mirrored by teacherActivityOptional (teacher.js) and
+   journeyOptional (tabs/journey.js). */
+function caOptionalByDefault(a){ return a.optional === true || Object.prototype.hasOwnProperty.call(activityForMe, a.id); }
+function caIsOptional(a){
+  if(caStudentIsCAS()) return true;
+  const f = optionalActivityIds[a.id];
+  return f === true || (f !== false && caOptionalByDefault(a));
+}
 function caBlockers(){
   if(isGatePreviewer() || progressLoadFailed) return [];
   const clears = (activityClears || {})[currentUser && currentUser.uid] || {};

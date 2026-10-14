@@ -1481,7 +1481,7 @@ function renderTeacherActivities(opts){
     // Optional still shows, tagged "Optional", but never does. Independent
     // of Visible/Hidden — see teacherSetActivityOptional.
     const optSeg=a=>{
-      const isOpt=optional[a.id]===true;
+      const isOpt=teacherActivityOptional(a.id,cfg);
       return `<div class="tg-seg">`
         +`<button class="tg-seg-btn ${!isOpt?'on':''}" data-set-activity-optional data-id="${escAttr(a.id)}" data-state="required" title="Until students finish this (or you clear it for them), In-Class Activities opens first when they sign in. Nothing else is locked.">Required</button>`
         +`<button class="tg-seg-btn ${isOpt?'on':''}" data-set-activity-optional data-id="${escAttr(a.id)}" data-state="optional" title="Students see it, tagged Optional, but it never opens first when they sign in">Optional</button></div>`;
@@ -1554,6 +1554,7 @@ function renderTeacherActivities(opts){
       if(dates[a.id]) strays.push(`release date ${escHtml(dates[a.id])}`);
       if(hidden[a.id]===true) strays.push('Hidden');
       if(optional[a.id]===true) strays.push('Optional');
+      if(optional[a.id]===false) strays.push('Required');
       if(pins.includes(a.id)) strays.push('Pinned');
       return `<div class="t-board-card${isRetired?' t-board-retired':''}"${isRetired?'':' draggable="true"'} data-board-card data-id="${escAttr(a.id)}">`
         +`<div class="t-board-row">${isRetired?'':'<span class="t-board-grip" aria-hidden="true">&#x2630;</span>'}${titleBlock(a)}</div>`
@@ -2483,11 +2484,16 @@ async function teacherSetActivityOptional(id, state){
   if(!teacherClassConfig.optionalActivities) teacherClassConfig.optionalActivities={};
   const had = Object.prototype.hasOwnProperty.call(teacherClassConfig.optionalActivities, id);
   const prev = teacherClassConfig.optionalActivities[id];
-  if(on) teacherClassConfig.optionalActivities[id]=true; else delete teacherClassConfig.optionalActivities[id];
+  /* The flag is stored only when it differs from the default
+     (teacherActivityOptionalByDefault): true for Optional on a card that is
+     Required by default, false for Required on one that is Optional by
+     default. Matching the default clears it. */
+  const keep = on!==teacherActivityOptionalByDefault(id, teacherClassConfig);
+  if(keep) teacherClassConfig.optionalActivities[id]=on; else delete teacherClassConfig.optionalActivities[id];
   try{
     await ensureDb();
     const fv=firebase.firestore.FieldValue;
-    const patch = on ? {optionalActivities:{[id]:true}} : {optionalActivities:{[id]:fv.delete()}};
+    const patch = {optionalActivities:{[id]: keep ? on : fv.delete()}};
     await teacherWriteConfig(patch, {['optionalActivities.'+id]: had?prev:undefined});
   }catch(e){
     if(had) teacherClassConfig.optionalActivities[id]=prev; else delete teacherClassConfig.optionalActivities[id];
@@ -2901,7 +2907,17 @@ function teacherActivityForStudent(a, uid, cfg){
   const who=teacherActivityStudents(a.id, cfg);
   return !Object.keys(who).length || who[uid]===true;
 }
-function teacherActivityOptional(id, cfg){ return ((cfg&&cfg.optionalActivities)||{})[id]===true; }
+/* Optional = the board switch (stored true / false), else the default:
+   Optional when the data says `optional: true` or the card is given to
+   individual students (Jonathan, 2026-10-14). Mirrors caIsOptional. */
+function teacherActivityOptionalByDefault(id, cfg){
+  const a=(window.CLASS_ACTIVITIES||[]).find(x=>x.id===id);
+  return !!(a && a.optional===true) || Object.keys(teacherActivityStudents(id,cfg)).length>0;
+}
+function teacherActivityOptional(id, cfg){
+  const f=((cfg&&cfg.optionalActivities)||{})[id];
+  return f===true || (f!==false && teacherActivityOptionalByDefault(id,cfg));
+}
 function teacherBlockersFor(stu, cfg){
   const today=dayStr(new Date());
   const clears=((cfg&&cfg.activityClears)||{})[stu.uid]||{};

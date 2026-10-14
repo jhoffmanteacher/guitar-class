@@ -1081,15 +1081,25 @@ function journeyBoardAfter(b, a, cfg){
 /* The activity gate no longer locks Journey pages (Jonathan, 2026-10-07).
    Kept as a switch, like CA_GATE_LOCKS in app.js — true restores it. */
 var JOURNEY_GATE_LOCKS = false;
+/* Optional: the console's flag (true / false), else the default — Optional
+   when the data says `optional: true` or the card is given to individual
+   students. Mirrors caIsOptional in app.js. */
+function journeyOptional(a, cfg){
+  var f = ((cfg && cfg.optionalActivities) || {})[a.id];
+  if(f === true) return true;
+  if(f === false) return false;
+  var who = ((cfg && cfg.activityStudents) || {})[a.id];
+  var individual = !!who && typeof who === 'object' && Object.keys(who).some(function(k){ return who[k] === true; });
+  return a.optional === true || individual;
+}
 function journeyBlockers(cfg, classActivities, uid, ownPeriod){
   var clears = ((cfg && cfg.activityClears) || {})[uid] || {};
   // CAS students: every activity is optional, so nothing blocks — mirrors
   // caStudentIsCAS() in app.js. Effective period = override || own answer.
   if((((cfg && cfg.periodOverrides) || {})[uid] || ownPeriod || '') === 'CAS') return [];
   // Optional activities (console switch) never block — mirrors caBlockers.
-  var optional = (cfg && cfg.optionalActivities) || {};
   return (window.CLASS_ACTIVITIES || []).filter(function(a){
-    return journeyIsVisible(a, cfg, uid) && optional[a.id] !== true && (classActivities || {})[a.id] !== true && clears[a.id] !== true;
+    return journeyIsVisible(a, cfg, uid) && !journeyOptional(a, cfg) && (classActivities || {})[a.id] !== true && clears[a.id] !== true;
   });
 }
 /* Replaces the whole page — header, layers, tools dock, everything — with
