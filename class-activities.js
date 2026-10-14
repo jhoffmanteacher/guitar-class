@@ -131,6 +131,8 @@
          rows: [7, 9],                     // optional: notes per tab row, to
                                            // end a row where the phrase ends
                                            // (must add up to notes.length)
+         rowLabels, rowLabels_es,          // optional, with rows: one line printed
+                                           // over each row — the lyric (ca-35)
          reps: 2, repLabel, repLabel_es,   // optional: the band plays these
                                            // notes `reps` times; the tab shows
                                            // them once, with "Verse 1 of 2"
@@ -4767,8 +4769,8 @@ window.CLASS_ACTIVITIES = [
       {
         label:    'Practice — The whole song',
         label_es: 'Practica — Toda la canción',
-        text: 'Strum 3 times in each bar, loud on 1. Each chord in [ ] starts on the word after it, and verse 2 adds Am (fret 1 on the B string instead of fret 2). You\'ve got it when: you play both verses and both choruses without stopping. Lost your place? Say the words out loud as you strum. Then sing while you play.',
-        text_es: 'Rasguea 3 veces en cada compás, fuerte en el 1. Cada acorde entre [ ] empieza en la palabra que le sigue, y la estrofa 2 agrega Am (traste 1 en la cuerda Si en vez del traste 2). Lo tienes cuando: tocas las dos estrofas y los dos coros sin detenerte. ¿Te pierdes? Di la letra en voz alta mientras rasgueas. Después, canta mientras tocas.',
+        text: 'Strum 3 times in each bar, loud on 1. Each chord in [ ] starts on the word after it. You\'ve got it when: you play both verses and both choruses without stopping. Lost your place? Say the words out loud as you strum. Then sing while you play.',
+        text_es: 'Rasguea 3 veces en cada compás, fuerte en el 1. Cada acorde entre [ ] empieza en la palabra que le sigue. Lo tienes cuando: tocas las dos estrofas y los dos coros sin detenerte. ¿Te pierdes? Di la letra en voz alta mientras rasgueas. Después, canta mientras tocas.',
         tab: {
           caption: 'Las Mañanitas · the chord in [ ] starts on the next word',
           caption_es: 'Las Mañanitas · el acorde entre [ ] empieza en la palabra siguiente',
@@ -4820,25 +4822,25 @@ window.CLASS_ACTIVITIES = [
               { frets: [['A', 0], ['D', 2], ['G', 2], ['B', 2], ['e', 0]], note: 'A', midi: [45, 52, 57, 61, 64] },
               { frets: [['E', 0], ['A', 2], ['D', 0], ['G', 1], ['B', 0], ['e', 0]], note: 'E7', midi: [40, 47, 50, 56, 59, 64] }
             ] },
-          { label: '[E7] Para venirte a cantar con la [D] música [E7] del [Am] cielo',
-            label_es: '[E7] Para venirte a cantar con la [D] música [E7] del [Am] cielo',
+          { label: '[E7] Para venirte a cantar con la [D] música [E7] del [A] cielo',
+            label_es: '[E7] Para venirte a cantar con la [D] música [E7] del [A] cielo',
             notes: [
               { frets: [['E', 0], ['A', 2], ['D', 0], ['G', 1], ['B', 0], ['e', 0]], note: 'E7', midi: [40, 47, 50, 56, 59, 64] },
               { frets: [['D', 0], ['G', 2], ['B', 3], ['e', 2]], note: 'D', midi: [50, 57, 62, 66] },
               { frets: [['E', 0], ['A', 2], ['D', 0], ['G', 1], ['B', 0], ['e', 0]], note: 'E7', midi: [40, 47, 50, 56, 59, 64] },
-              { frets: [['A', 0], ['D', 2], ['G', 2], ['B', 1], ['e', 0]], note: 'Am', midi: [45, 52, 57, 60, 64] }
+              { frets: [['A', 0], ['D', 2], ['G', 2], ['B', 2], ['e', 0]], note: 'A', midi: [45, 52, 57, 61, 64] }
             ] },
-          { label: '[Am] Quisiera ser solecito para entrar por tu [E7] ventana',
-            label_es: '[Am] Quisiera ser solecito para entrar por tu [E7] ventana',
+          { label: '[A] Quisiera ser solecito para entrar por tu [E7] ventana',
+            label_es: '[A] Quisiera ser solecito para entrar por tu [E7] ventana',
             notes: [
-              { frets: [['A', 0], ['D', 2], ['G', 2], ['B', 1], ['e', 0]], note: 'Am', midi: [45, 52, 57, 60, 64] },
+              { frets: [['A', 0], ['D', 2], ['G', 2], ['B', 2], ['e', 0]], note: 'A', midi: [45, 52, 57, 61, 64] },
               { frets: [['E', 0], ['A', 2], ['D', 0], ['G', 1], ['B', 0], ['e', 0]], note: 'E7', midi: [40, 47, 50, 56, 59, 64] }
             ] },
-          { label: 'Y [E7] darte los buenos días, acostadita en tu [Am] cama',
-            label_es: 'Y [E7] darte los buenos días, acostadita en tu [Am] cama',
+          { label: 'Y [E7] darte los buenos días, acostadita en tu [A] cama',
+            label_es: 'Y [E7] darte los buenos días, acostadita en tu [A] cama',
             notes: [
               { frets: [['E', 0], ['A', 2], ['D', 0], ['G', 1], ['B', 0], ['e', 0]], note: 'E7', midi: [40, 47, 50, 56, 59, 64] },
-              { frets: [['A', 0], ['D', 2], ['G', 2], ['B', 1], ['e', 0]], note: 'Am', midi: [45, 52, 57, 60, 64] }
+              { frets: [['A', 0], ['D', 2], ['G', 2], ['B', 2], ['e', 0]], note: 'A', midi: [45, 52, 57, 61, 64] }
             ] },
           { label: 'Chorus · [E7] Con jazmines y flores este [D] día voy a adornar',
             label_es: 'Coro · [E7] Con jazmines y flores este [D] día voy a adornar',
@@ -4846,8 +4848,8 @@ window.CLASS_ACTIVITIES = [
               { frets: [['E', 0], ['A', 2], ['D', 0], ['G', 1], ['B', 0], ['e', 0]], note: 'E7', midi: [40, 47, 50, 56, 59, 64] },
               { frets: [['D', 0], ['G', 2], ['B', 3], ['e', 2]], note: 'D', midi: [50, 57, 62, 66] }
             ] },
-          { label: 'Hoy por [A] ser tu cumpleaños te [E7] venimos a can[A]tar',
-            label_es: 'Hoy por [A] ser tu cumpleaños te [E7] venimos a can[A]tar',
+          { label: 'Hoy por [A] ser tu cumpleaños le [E7] venimos a can[A]tar',
+            label_es: 'Hoy por [A] ser tu cumpleaños le [E7] venimos a can[A]tar',
             notes: [
               { frets: [['A', 0], ['D', 2], ['G', 2], ['B', 2], ['e', 0]], note: 'A', midi: [45, 52, 57, 61, 64] },
               { frets: [['E', 0], ['A', 2], ['D', 0], ['G', 1], ['B', 0], ['e', 0]], note: 'E7', midi: [40, 47, 50, 56, 59, 64] },
@@ -4960,6 +4962,9 @@ window.CLASS_ACTIVITIES = [
             { string: 'G', fret: 7, note: 'D', midi: 62 }
           ]
         },
+        snippet: { track: 'las-mananitas', fromBar: 1, bars: 10,
+                   label:    'The intro, with the band',
+                   label_es: 'La intro, con la banda' },
       },
       {
         label:    'Practice — The outro on requinto (lead guitar)',
@@ -4987,7 +4992,175 @@ window.CLASS_ACTIVITIES = [
             { frets: [['e', 9], ['B', 10], ['G', 9]], note: 'E/A/C#', midi: [73, 69, 64] }
           ]
         },
+        snippet: { track: 'las-mananitas', fromBar: 105, bars: 3,
+                   label:    'The end, with the band',
+                   label_es: 'El final, con la banda' },
       },
     ],
+  },
+  /* Las Mañanitas — Play Along (Jonathan, 2026-10-14: "can you add play
+     along with the song too?", then the record itself). A whole-song card on
+     the RECORD (track 'las-mananitas' in app.js — its comment has how the
+     bars were found). Verse 1 to the last chorus, bars 11-104: bar 11 is the
+     last intro bar, so the pickup "Qué" is heard; the intro and the outro
+     are the requinto's, and ca-34 teaches those with their own snippets.
+     ONE COLUMN PER CHORD, not per strum — a column's `beats` is how long the
+     band holds that chord (15 = five bars), and the caption tells the
+     student to keep strumming 3 to the bar until the highlight moves. That
+     keeps each lyric line on ONE row with its lyric printed over it
+     (`rowLabels`, new for this card — pcTabHtml), which is the whole point:
+     the student reads the words and sees the change coming. A strum per
+     column would have been 100+ columns a verse. The chord on every bar was
+     read off the record's bass and harmony (chroma per beat); the "D, then
+     E7" bars (23, 42, 78) are one beat of D and two of E7, which is what
+     the record plays on "pla-cer a fe-li-ci-", "can-ta-ron los rui-" and
+     "mú-si-ca del". Verse 2 is A, not the chord sheet's Am. Given to the
+     same individual students as ca-34 from the board's Who picker. */
+  {
+    id:    'ca-35',
+    view:  'card',    // one screen: Play song + tab + checks — see CARD above
+    optional: true,   // Optional until switched to Required on the board — see OPTIONAL above
+    title:    'Las Mañanitas — Play Along',
+    title_es: 'Las Mañanitas — Toca con la canción',
+    intro:    'You learned A, E7, D and the strum in 3 — today you play Las Mañanitas with the band, from the first verse to the last chorus.',
+    intro_es: 'Aprendiste A, E7, D y el rasgueo en 3 — hoy tocas Las Mañanitas con la banda, de la primera estrofa al último coro.',
+    card: {
+      /* Not `wholeSong`: that flag also files the card under a Song Journey
+         page and a Songs row (1bf requires `journey`), and Las Mañanitas has
+         neither. So it loops — after the last chorus it goes back to the
+         section the student started from. */
+      track: 'las-mananitas',
+      slowest: true,    // Slowest / Slower / Slow / Normal
+      caption:    'The song in order · strum 3 times in every bar · change chords when the highlight moves',
+      caption_es: 'La canción en orden · rasguea 3 veces en cada compás · cambia de acorde cuando se mueva la marca',
+      sections: [
+        {
+          label: 'Verse 1', label_es: 'Estrofa 1',
+          caption: 'Verse 1 — A, E7 and D', caption_es: 'Estrofa 1 — A, E7 y D',
+          fromBar: 11, bars: 36,
+          rows: [2, 4, 2, 4],
+          rowLabels: [
+            '[A] Qué linda está la mañana, en que vengo a [E7] saludarte',
+            '[E7] Venimos todos con gusto y [D] placer a [E7] felici[A]tarte',
+            '[A] El día en que tú naciste nacieron todas las [E7] flores',
+            'Y [E7] en la pila del bautizo can[D]taron los [E7] rui[A]señores'
+          ],
+          rowLabels_es: [
+            '[A] Qué linda está la mañana, en que vengo a [E7] saludarte',
+            '[E7] Venimos todos con gusto y [D] placer a [E7] felici[A]tarte',
+            '[A] El día en que tú naciste nacieron todas las [E7] flores',
+            'Y [E7] en la pila del bautizo can[D]taron los [E7] rui[A]señores'
+          ],
+          notes: [
+            { frets: [['A', 0], ['D', 2], ['G', 2], ['B', 2], ['e', 0]], note: 'A', midi: [45, 52, 57, 61, 64], beats: 15 },
+            { frets: [['E', 0], ['A', 2], ['D', 0], ['G', 1], ['B', 0], ['e', 0]], note: 'E7', midi: [40, 47, 50, 56, 59, 64], beats: 15 },
+            { frets: [['E', 0], ['A', 2], ['D', 0], ['G', 1], ['B', 0], ['e', 0]], note: 'E7', midi: [40, 47, 50, 56, 59, 64], beats: 6 },
+            { frets: [['D', 0], ['G', 2], ['B', 3], ['e', 2]], note: 'D', midi: [50, 57, 62, 66], beats: 1 },
+            { frets: [['E', 0], ['A', 2], ['D', 0], ['G', 1], ['B', 0], ['e', 0]], note: 'E7', midi: [40, 47, 50, 56, 59, 64], beats: 2 },
+            { frets: [['A', 0], ['D', 2], ['G', 2], ['B', 2], ['e', 0]], note: 'A', midi: [45, 52, 57, 61, 64], beats: 15 },
+            { frets: [['A', 0], ['D', 2], ['G', 2], ['B', 2], ['e', 0]], note: 'A', midi: [45, 52, 57, 61, 64], beats: 12 },
+            { frets: [['E', 0], ['A', 2], ['D', 0], ['G', 1], ['B', 0], ['e', 0]], note: 'E7', midi: [40, 47, 50, 56, 59, 64], beats: 18 },
+            { frets: [['E', 0], ['A', 2], ['D', 0], ['G', 1], ['B', 0], ['e', 0]], note: 'E7', midi: [40, 47, 50, 56, 59, 64], beats: 9 },
+            { frets: [['D', 0], ['G', 2], ['B', 3], ['e', 2]], note: 'D', midi: [50, 57, 62, 66], beats: 1 },
+            { frets: [['E', 0], ['A', 2], ['D', 0], ['G', 1], ['B', 0], ['e', 0]], note: 'E7', midi: [40, 47, 50, 56, 59, 64], beats: 2 },
+            { frets: [['A', 0], ['D', 2], ['G', 2], ['B', 2], ['e', 0]], note: 'A', midi: [45, 52, 57, 61, 64], beats: 12 }
+          ]
+        },
+        {
+          label: 'Chorus 1', label_es: 'Coro 1',
+          caption: 'Chorus — E7, D, A', caption_es: 'Coro — E7, D, A',
+          fromBar: 47, bars: 8,
+          rows: [2, 3],
+          rowLabels: [
+            '[E7] Ya viene amaneciendo, ya la [D] luz del día nos dio',
+            'Le[A]vántate de mañana, mira [E7] que ya amane[A]ció'
+          ],
+          rowLabels_es: [
+            '[E7] Ya viene amaneciendo, ya la [D] luz del día nos dio',
+            'Le[A]vántate de mañana, mira [E7] que ya amane[A]ció'
+          ],
+          notes: [
+            { frets: [['E', 0], ['A', 2], ['D', 0], ['G', 1], ['B', 0], ['e', 0]], note: 'E7', midi: [40, 47, 50, 56, 59, 64], beats: 6 },
+            { frets: [['D', 0], ['G', 2], ['B', 3], ['e', 2]], note: 'D', midi: [50, 57, 62, 66], beats: 6 },
+            { frets: [['A', 0], ['D', 2], ['G', 2], ['B', 2], ['e', 0]], note: 'A', midi: [45, 52, 57, 61, 64], beats: 6 },
+            { frets: [['E', 0], ['A', 2], ['D', 0], ['G', 1], ['B', 0], ['e', 0]], note: 'E7', midi: [40, 47, 50, 56, 59, 64], beats: 3 },
+            { frets: [['A', 0], ['D', 2], ['G', 2], ['B', 2], ['e', 0]], note: 'A', midi: [45, 52, 57, 61, 64], beats: 3 }
+          ]
+        },
+        {
+          label: 'Solo', label_es: 'Solo',
+          caption: 'Solo — the requinto plays the melody; you keep strumming', caption_es: 'Solo — el requinto toca la melodía; tú sigues rasgueando',
+          fromBar: 55, bars: 14,
+          notes: [
+            { frets: [['E', 0], ['A', 2], ['D', 0], ['G', 1], ['B', 0], ['e', 0]], note: 'E7', midi: [40, 47, 50, 56, 59, 64], beats: 6 },
+            { frets: [['D', 0], ['G', 2], ['B', 3], ['e', 2]], note: 'D', midi: [50, 57, 62, 66], beats: 6 },
+            { frets: [['A', 0], ['D', 2], ['G', 2], ['B', 2], ['e', 0]], note: 'A', midi: [45, 52, 57, 61, 64], beats: 6 },
+            { frets: [['E', 0], ['A', 2], ['D', 0], ['G', 1], ['B', 0], ['e', 0]], note: 'E7', midi: [40, 47, 50, 56, 59, 64], beats: 3 },
+            { frets: [['A', 0], ['D', 2], ['G', 2], ['B', 2], ['e', 0]], note: 'A', midi: [45, 52, 57, 61, 64], beats: 21 }
+          ]
+        },
+        {
+          label: 'Verse 2', label_es: 'Estrofa 2',
+          caption: 'Verse 2 — A, E7 and D', caption_es: 'Estrofa 2 — A, E7 y D',
+          fromBar: 69, bars: 28,
+          rows: [2, 4, 2, 2],
+          rowLabels: [
+            '[A] Quisiera ser un San Juan, quisiera ser un San [E7] Pedro',
+            '[E7] Para venirte a cantar con la [D] música [E7] del [A] cielo',
+            '[A] Quisiera ser solecito para entrar por tu [E7] ventana',
+            'Y [E7] darte los buenos días, acostadita en tu [A] cama'
+          ],
+          rowLabels_es: [
+            '[A] Quisiera ser un San Juan, quisiera ser un San [E7] Pedro',
+            '[E7] Para venirte a cantar con la [D] música [E7] del [A] cielo',
+            '[A] Quisiera ser solecito para entrar por tu [E7] ventana',
+            'Y [E7] darte los buenos días, acostadita en tu [A] cama'
+          ],
+          notes: [
+            { frets: [['A', 0], ['D', 2], ['G', 2], ['B', 2], ['e', 0]], note: 'A', midi: [45, 52, 57, 61, 64], beats: 9 },
+            { frets: [['E', 0], ['A', 2], ['D', 0], ['G', 1], ['B', 0], ['e', 0]], note: 'E7', midi: [40, 47, 50, 56, 59, 64], beats: 12 },
+            { frets: [['E', 0], ['A', 2], ['D', 0], ['G', 1], ['B', 0], ['e', 0]], note: 'E7', midi: [40, 47, 50, 56, 59, 64], beats: 6 },
+            { frets: [['D', 0], ['G', 2], ['B', 3], ['e', 2]], note: 'D', midi: [50, 57, 62, 66], beats: 1 },
+            { frets: [['E', 0], ['A', 2], ['D', 0], ['G', 1], ['B', 0], ['e', 0]], note: 'E7', midi: [40, 47, 50, 56, 59, 64], beats: 2 },
+            { frets: [['A', 0], ['D', 2], ['G', 2], ['B', 2], ['e', 0]], note: 'A', midi: [45, 52, 57, 61, 64], beats: 12 },
+            { frets: [['A', 0], ['D', 2], ['G', 2], ['B', 2], ['e', 0]], note: 'A', midi: [45, 52, 57, 61, 64], beats: 9 },
+            { frets: [['E', 0], ['A', 2], ['D', 0], ['G', 1], ['B', 0], ['e', 0]], note: 'E7', midi: [40, 47, 50, 56, 59, 64], beats: 12 },
+            { frets: [['E', 0], ['A', 2], ['D', 0], ['G', 1], ['B', 0], ['e', 0]], note: 'E7', midi: [40, 47, 50, 56, 59, 64], beats: 12 },
+            { frets: [['A', 0], ['D', 2], ['G', 2], ['B', 2], ['e', 0]], note: 'A', midi: [45, 52, 57, 61, 64], beats: 9 }
+          ]
+        },
+        {
+          label: 'Chorus 2', label_es: 'Coro 2',
+          caption: 'Chorus — E7, D, A', caption_es: 'Coro — E7, D, A',
+          fromBar: 97, bars: 8,
+          rows: [2, 3],
+          rowLabels: [
+            '[E7] Con jazmines y flores este [D] día voy a adornar',
+            'Hoy por [A] ser tu cumpleaños le [E7] venimos a can[A]tar'
+          ],
+          rowLabels_es: [
+            '[E7] Con jazmines y flores este [D] día voy a adornar',
+            'Hoy por [A] ser tu cumpleaños le [E7] venimos a can[A]tar'
+          ],
+          notes: [
+            { frets: [['E', 0], ['A', 2], ['D', 0], ['G', 1], ['B', 0], ['e', 0]], note: 'E7', midi: [40, 47, 50, 56, 59, 64], beats: 6 },
+            { frets: [['D', 0], ['G', 2], ['B', 3], ['e', 2]], note: 'D', midi: [50, 57, 62, 66], beats: 6 },
+            { frets: [['A', 0], ['D', 2], ['G', 2], ['B', 2], ['e', 0]], note: 'A', midi: [45, 52, 57, 61, 64], beats: 6 },
+            { frets: [['E', 0], ['A', 2], ['D', 0], ['G', 1], ['B', 0], ['e', 0]], note: 'E7', midi: [40, 47, 50, 56, 59, 64], beats: 3 },
+            { frets: [['A', 0], ['D', 2], ['G', 2], ['B', 2], ['e', 0]], note: 'A', midi: [45, 52, 57, 61, 64], beats: 3 }
+          ]
+        }
+      ],
+      checks: [
+        { label: 'The whole song, slower', label_es: 'La canción completa, más lenta',
+          text:    'Leave the speed where the card starts it, or move it one stop left. Play with the band from verse 1 to the end of the last chorus, without stopping.',
+          text_es: 'Deja la velocidad donde la tarjeta la deja al empezar, o muévela una posición a la izquierda. Toca con la banda desde la estrofa 1 hasta el final del último coro, sin detenerte.' },
+        { levelUp: true,
+          text:    'Slide the speed all the way right, to Normal. Play the whole song with the band at normal speed, and sing the words while you strum.',
+          text_es: 'Desliza la velocidad hasta la derecha, a «Normal». Toca la canción completa con la banda a velocidad normal y canta la letra mientras rasgueas.' }
+      ]
+    },
+    // No help ladder: a practice card is its checks and nothing else (Jonathan, 2026-10-07).
+    steps: [],
   },
 ];

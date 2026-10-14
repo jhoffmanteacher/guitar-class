@@ -2434,6 +2434,55 @@ const SNIPPET_TRACKS = {
       231.829, 233.889, 235.911, 237.966,
     ],
   },
+  /* Las Mañanitas — Ariel Camacho y Los Plebes del Rancho, "Exclusivo 2018"
+     (Jonathan uploaded the recording, 2026-10-14). This is the RECORD
+     itself, not a Moises export: there is no rhythm-down mix, so `src` IS
+     the full mix and the card has no Guitar toggle. The slow tier is the
+     same file time-stretched by rubberband with the pitch held (90/108,
+     179.04 s -> 214.848 s, exactly 1.2x); every 5th downbeat checked on it
+     lands within ~50 ms of the fast time x 1.2. Tuning measured 1-9 cents
+     above A=440 — left alone.
+
+     3/4 at about 108 counted beats a minute, one strum per beat; the room
+     counts 3. A live sierreño band with no click, so it carries a beat map.
+     No metronome export existed to run tools/beat-map.py on; instead:
+     librosa beat tracking (107.7 BPM, 320 beats), bars fitted by dynamic
+     programming on the bass (the root on beat 1 — A for A, E for E7, D for
+     D), then each downbeat snapped to the nearest onset peak (±40 ms). An
+     independent check — harmonic change by beat position, in sliding
+     windows — agrees on the phase through the whole song. Bar 62 (101.98 s,
+     the end of the requinto solo's chorus pass) really is two beats long:
+     the phase moves by one beat there and stays moved. Lyric timing came
+     from a speech-to-text pass over the record (Whisper), which also
+     showed the record plays A, not the chord sheet's Am, in verse 2.
+     Song map on this list: intro 1-10, verse 1 11-46 (bar 11 holds the
+     pickup "Qué"), chorus 47-54, solo 55-68, verse 2 69-96, chorus 97-104,
+     outro 105-107 ("¡Adiós!" at 173.9 s). */
+  'las-mananitas': {
+    src:     'audio/ariel-camacho-las-mananitas-backing-A-108bpm-440hz-full.mp3',
+    srcSlow: 'audio/ariel-camacho-las-mananitas-backing-A-90bpm-440hz-full.mp3',
+    trackBpm: 108, trackBpmSlow: 90,
+    feltBpm: 108,
+    beatsPerBar: 3,
+    durationSec: 179,
+    anchor: 0.566,
+    anchorVerified: true,
+    defaultSlow: true,
+    barTimes: [
+      0.566, 2.247, 3.895, 5.509, 7.111, 8.742, 10.614, 12.176, 13.796, 15.340,
+      16.919, 18.588, 20.259, 21.975, 23.716, 25.406, 27.130, 28.729, 30.293, 31.983,
+      33.689, 35.416, 37.155, 38.830, 40.458, 42.043, 43.648, 45.305, 46.977, 48.628,
+      50.292, 52.039, 53.653, 55.336, 56.924, 58.552, 60.172, 61.843, 63.451, 65.199,
+      66.911, 68.580, 70.307, 71.944, 73.546, 75.267, 76.960, 78.655, 80.344, 82.022,
+      83.740, 85.455, 87.176, 88.892, 90.552, 92.215, 93.852, 95.570, 97.167, 98.853,
+      100.389, 102.060, 103.233, 104.977, 106.597, 108.217, 109.819, 111.650, 113.366, 115.043,
+      116.735, 118.442, 120.091, 121.719, 123.307, 125.034, 126.726, 128.450, 130.145, 131.817,
+      133.407, 135.021, 136.748, 138.446, 140.159, 141.819, 143.511, 145.183, 146.826, 148.480,
+      150.195, 151.922, 153.646, 155.339, 157.057, 158.700, 160.441, 162.168, 163.872, 165.547,
+      167.256, 168.925, 170.606, 172.391, 173.926, 175.607, 177.337,
+      179.000,   // not a downbeat: the end of the file (179.04 s), so bar 107 — the last chord — has an end and the outro snippet can reach it
+    ],
+  },
 };
 /* Does this track have a full mix at all? Both tiers or neither — the toggle
    has to survive the Slow button. */
@@ -12163,8 +12212,19 @@ function pcTabHtml(a, L){
       && S.s.rows.reduce((x, y) => x + y, 0) === S.notes.length ? S.s.rows : null;
     if(rowsSpec){
       const cols = Math.max(...rowsSpec);
+      /* `rowLabels` / `rowLabels_es` (optional, one string per row) print a
+         line over each row — the lyric that row is sung to (ca-35, Las
+         Mañanitas, Jonathan 2026-10-14: "add lyrics"). Plain text, escaped;
+         ignored unless there is exactly one per row (checks.mjs 1bf). The
+         label is a sibling of the .tab-grid rows, so pcFollow() skips over
+         it when it looks for the next row. */
+      const rl = tf(S.s, 'rowLabels');
+      const labels = Array.isArray(rl) && rl.length === rowsSpec.length ? rl : null;
       let k = 0;
-      rowsSpec.forEach(r => { grids.push(renderTabSystem(S.notes.slice(k, k + r), S.seqOff + k, cols, false)); k += r; });
+      rowsSpec.forEach((r, ri) => {
+        if(labels && labels[ri]) grids.push(`<div class="tab-phrase-label pc-row-label">${escHtml(String(labels[ri]))}</div>`);
+        grids.push(renderTabSystem(S.notes.slice(k, k + r), S.seqOff + k, cols, false)); k += r;
+      });
     } else {
       const perRow = Math.ceil(widest / Math.ceil(widest / TAB_MAX_COLS));
       for(let k = 0; k < S.notes.length; k += perRow) grids.push(renderTabSystem(S.notes.slice(k, k + perRow), S.seqOff + k, perRow, false));
@@ -12534,8 +12594,13 @@ function pcFollow(row, force){
     const tr = tab.getBoundingClientRect();
     if(tr.bottom < top || tr.top > bottom) return;
   }
-  const next = row.nextElementSibling && row.nextElementSibling.classList.contains('tab-grid') ? row.nextElementSibling : null;
-  const rr = row.getBoundingClientRect();
+  // The next row, past a lyric line (`rowLabels`, ca-35) sitting between them.
+  let next = row.nextElementSibling;
+  if(next && next.classList.contains('pc-row-label')) next = next.nextElementSibling;
+  if(next && !next.classList.contains('tab-grid')) next = null;
+  // Keep a row's lyric line (just above it) in view along with the row.
+  const lab = row.previousElementSibling && row.previousElementSibling.classList.contains('pc-row-label') ? row.previousElementSibling : null;
+  const rr = (lab || row).getBoundingClientRect();
   const need = (next || row).getBoundingClientRect().bottom;
   const pad = 12;
   let delta = 0;

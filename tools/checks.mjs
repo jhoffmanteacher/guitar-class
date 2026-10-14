@@ -2709,7 +2709,7 @@ function readFieldStrings(file, nameRe) {
 const STUDENT_VALUE_NAME_RE = new RegExp(
   '\\b(text|hint|stuck|levelUp|gotItWhen|explain|forward|subtitle|meta|intro|note|prompt|placeholder|' +
   'label|caption|title|unit|skillFocus|name|module|checklistSub|tabTitle|tabSub|repLabel|' +
-  'choices|choices_es|assessItems|assessItems_es|items)\\s*:\\s*', 'g');
+  'choices|choices_es|assessItems|assessItems_es|items|rowLabels|rowLabels_es)\\s*:\\s*', 'g');
 /* The JS files 1w and 1w-t read values from: the module content, class
    activities and — since 2026-10-12 — config-main.js, whose MODULE_MANIFEST
    `name` / `name_es` are the module titles students see on every page (and
@@ -5620,7 +5620,11 @@ function checkBackingSnippets() {
     warn(`${unverified} snippet track${unverified > 1 ? 's have' : ' has'} anchorVerified:false — ${unverified > 1 ? 'their first downbeats have' : 'its first downbeat has'} not been measured, so every snippet on ${unverified > 1 ? 'those songs starts' : 'that song starts'} in the wrong place. Measure ${unverified > 1 ? 'them' : 'it'} by adding ?snipcal=1 to the URL (works on the live site too) and pressing Find the first click — see SNIPPET_TRACKS in app.js.`);
     warnings++;
   }
-  const withFull = Object.values(TRACKS).filter(tr => tr.srcFull && tr.srcFullSlow).length;
+  /* A track whose src IS the record (`-full.mp3` — Las Mañanitas, 2026-10-14:
+     the uploaded recording, no Moises stems) already plays the part; there is
+     nothing for a Guitar toggle to switch to, so it isn't counted as missing. */
+  const isRecord = tr => /-full\.mp3$/.test(tr.src || '') && /-full\.mp3$/.test(tr.srcSlow || '');
+  const withFull = Object.values(TRACKS).filter(tr => (tr.srcFull && tr.srcFullSlow) || isRecord(tr)).length;
   if (withFull < trackNames.length) {
     warn(`${trackNames.length - withFull} of ${trackNames.length} snippet track${trackNames.length === 1 ? '' : 's'} have no full mix exported, so their cards show no Guitar toggle — students hear the rhythm-down mix only and cannot check the part they are learning against the record.`);
     warnings++;
@@ -6725,6 +6729,17 @@ function checkPracticeCards() {
         const okRows = Array.isArray(sec.rows) && sec.rows.length > 0 && sec.rows.every(r => Number.isInteger(r) && r > 0 && r <= 12);
         if (!okRows) flag(`${sw}: rows must be a list of whole numbers from 1 to 12 (notes per tab row)`);
         else if (sec.rows.reduce((x, y) => x + y, 0) !== (sec.notes || []).length) flag(`${sw}: rows add up to ${sec.rows.reduce((x, y) => x + y, 0)}, but the section has ${(sec.notes || []).length} notes — the tab would fall back to even rows`);
+      }
+      if ('rowLabels' in sec || 'rowLabels_es' in sec) {
+        // A line over each row (the lyric — ca-35). pcTabHtml drops the
+        // labels silently unless there is exactly one per row, and Spanish
+        // needs its own list like every other display string.
+        const n = Array.isArray(sec.rows) ? sec.rows.length : -1;
+        for (const f of ['rowLabels', 'rowLabels_es']) {
+          const v = sec[f];
+          if (!Array.isArray(v) || v.length !== n || v.some(x => typeof x !== 'string' || !x.trim()))
+            flag(`${sw}: ${f} must be a list of ${n < 0 ? 'strings, one per row — and the section needs rows' : `${n} non-empty strings, one per row`}`);
+        }
       }
       const wantBeats = sec.bars * tr.beatsPerBar;
       if (Math.abs(beats - wantBeats) > 1e-6) flag(`${sw}: notes add up to ${beats} beats, but ${sec.bars} bar${sec.bars === 1 ? '' : 's'} of ${c.track} is ${wantBeats} — the highlight would drift off the music`);

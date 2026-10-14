@@ -1573,6 +1573,10 @@ body.t-wide .t-main{max-width:none}
 .tab-phrase{margin-top:6px}
 .tab-phrase:first-of-type{margin-top:0}
 .tab-phrase-label{font-size:0.8125rem;color:var(--text2);font-style:italic;margin-bottom:2px;padding-left:2px;line-height:1.25}
+/* A lyric line over a practice-card tab row (`rowLabels`, ca-35): read while
+   playing, so full text colour and a size up from the italic phrase label. */
+.pc-row-label{font-size:0.9375rem;color:var(--text);font-style:normal;margin:8px 0 2px}
+.pc-row-label:first-child{margin-top:2px}
 /* The TAB board never scrolls sideways: it fills the card and a long phrase
    wraps into stacked systems (renderTabBlock, TAB_MAX_COLS). --tab-cell-h is
    the string-row height; the staff box reads it too, so one override resizes

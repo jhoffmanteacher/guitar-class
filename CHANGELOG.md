@@ -5,11 +5,22 @@ Notable changes to the Guitar Class site. Newest first.
 For the full session-by-session history (and the reasoning behind each change),
 see `WORKFLOW.md` and the git commit log.
 
+## 2026-10-14 — Las Mañanitas: play along with the record
+
+- **New activity: Las Mañanitas — Play Along.** Press Play song and strum
+  with the real recording, from the first verse to the last chorus. The
+  words are over the chords, and the chord you play lights up while the
+  song plays. Four speeds, from Slowest to Normal.
+- **The intro and the end in the Las Mañanitas activity now play the
+  band.** Loop the record's intro or ending while you work on the requinto
+  part.
+- **Verse 2 of Las Mañanitas is A, not Am.** It now matches the record.
+
 ## 2026-10-14 — Las Mañanitas: the whole song, with the words
 
 - **Las Mañanitas now goes all the way to the song.** The activity adds the
   D chord and a last step with both verses and both choruses. The words sit
-  over the chords, so you can see where each change comes. Verse 2 adds Am.
+  over the chords, so you can see where each change comes.
 - **Two requinto (lead guitar) steps at the end:** the intro and the outro,
   with the two-string melody the band plays.
 
