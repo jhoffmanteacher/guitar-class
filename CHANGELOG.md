@@ -5,6 +5,12 @@ Notable changes to the Guitar Class site. Newest first.
 For the full session-by-session history (and the reasoning behind each change),
 see `WORKFLOW.md` and the git commit log.
 
+## 2026-10-14 — Las Mañanitas: the whole song, with the words
+
+- **Las Mañanitas now goes all the way to the song.** The activity adds the
+  D chord and a last step with both verses and both choruses. The words sit
+  over the chords, so you can see where each change comes. Verse 2 adds Am.
+
 ## 2026-10-13 — Seven Nation Army highlight follows the record
 
 - **The highlighted note now matches the band.** In the Seven Nation Army

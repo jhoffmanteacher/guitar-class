@@ -4673,23 +4673,30 @@ window.CLASS_ACTIVITIES = [
     // No help ladder: a practice card is its checks and nothing else (Jonathan, 2026-10-07).
     steps: [],
   },
-  /* Las Mañanitas — Ariel Camacho y Los Plebes del Rancho's 2018 recording
+  /* Las Mañanitas — Ariel Camacho y Los Plebes del Rancho's recording
      (Jonathan, 2026-10-13). Built to be given to INDIVIDUAL students from
      the console board's "Who" picker, not the whole class. No backing track
      on the site (a commercial recording), so it is a Focus-view ladder, the
-     chord-change ladder: A, E7, the change, then the 3/4 strum. Key, chords
-     and meter come from analysing the recording: A major, 3/4 at about 108
-     beats per minute, almost all A and E7 in long blocks. No video — the
-     recording's YouTube id could not be oEmbed-verified from the session
-     that built this. */
+     chord-change ladder: A, E7, D, the changes in 3/4, then the whole song
+     with its words. Rebuilt 2026-10-14 from Jonathan's chord sheet for the
+     Los Plebes del Rancho version (a PDF he uploaded): the song
+     uses D as well as A and E7, and verse 2 turns to Am, so the old
+     A-and-E7-only ladder couldn't reach the song. Lyrics and chord
+     placement come from that sheet ("fila" -> "pila", "solesito" ->
+     "solecito", "Le venimos" -> "te venimos", accents added). The sheet's
+     second strum pattern (down-up for the first lines of each verse) and
+     its intro/solo tab are left out on purpose: one strum, all the way
+     through. Same id, so nobody's completion moves; step ticks are
+     day-scoped, so the new step count moves nothing either. No video — the
+     recording's YouTube id could not be oEmbed-verified. */
   {
     id:    'ca-34',
     view:  'focus',   // one step at a time — see VIEW above
     optional: true,   // Optional until switched to Required on the board (Jonathan, 2026-10-14) — see OPTIONAL above
-    title:    'Las Mañanitas — A and E7',
-    title_es: 'Las Mañanitas — A y E7',
-    intro:    'Las Mañanitas uses two chords, A and E7. You learn each chord, the change between them, and a strum in 3 (three beats in each bar).',
-    intro_es: 'Las Mañanitas usa dos acordes, A y E7. Aprendes cada acorde, el cambio entre ellos y un rasgueo en 3 (tres tiempos en cada compás).',
+    title:    'Las Mañanitas — A, E7 and D',
+    title_es: 'Las Mañanitas — A, E7 y D',
+    intro:    'You learn A, E7 and D, a strum in 3 (three beats in each bar), and then the whole song with the words.',
+    intro_es: 'Aprendes A, E7 y D, un rasgueo en 3 (tres tiempos en cada compás) y luego toda la canción con la letra.',
     steps: [
       {
         label:    'Practice — The A chord',
@@ -4718,42 +4725,131 @@ window.CLASS_ACTIVITIES = [
         },
       },
       {
-        label:    'Practice — Change A to E7',
-        label_es: 'Practica — Cambia de A a E7',
-        text: 'Strum A once, change to E7 and strum once, then change back. Take as long as you need for each change. You\'ve got it when: you make eight clean changes in a row with every string ringing. Losing the shape? Look at the tab, set the chord, then strum.',
-        text_es: 'Rasguea A una vez, cambia a E7 y rasguea una vez, y luego vuelve. Tómate el tiempo que necesites en cada cambio. Lo tienes cuando: haces ocho cambios limpios seguidos con todas las cuerdas sonando. ¿Pierdes la forma? Mira la tablatura, arma el acorde y luego rasguea.',
+        label:    'Practice — The D chord',
+        label_es: 'Practica — El acorde D',
+        text: 'Put finger 1 on fret 2 of the G string, finger 3 on fret 3 of the B string and finger 2 on fret 2 of the high e. Pick each string from the D string to the high e, one at a time. You\'ve got it when: all four strings ring with no buzz, three times in a row. The high e sounds dead? Curl finger 3 so it doesn\'t touch it.',
+        text_es: 'Pon el dedo 1 en el traste 2 de la cuerda Sol, el dedo 3 en el traste 3 de la cuerda Si y el dedo 2 en el traste 2 de la cuerda mi aguda. Toca cada cuerda desde la cuerda Re hasta la cuerda mi aguda, una por una. Lo tienes cuando: las cuatro cuerdas suenan sin zumbido, tres veces seguidas. ¿La cuerda mi aguda no suena? Curva el dedo 3 para que no la toque.',
         tab: {
-          caption: 'A · E7 · A · E7 — one strum each',
-          caption_es: 'A · E7 · A · E7 — un rasgueo cada uno',
+          caption: 'D chord · start on the D string',
+          caption_es: 'Acorde D · empieza en la cuerda Re',
           notes: [
-            { frets: [['A', 0], ['D', 2], ['G', 2], ['B', 2], ['e', 0]], note: 'A', midi: [45, 52, 57, 61, 64] },
-            { frets: [['E', 0], ['A', 2], ['D', 0], ['G', 1], ['B', 0], ['e', 0]], note: 'E7', midi: [40, 47, 50, 56, 59, 64] },
-            { frets: [['A', 0], ['D', 2], ['G', 2], ['B', 2], ['e', 0]], note: 'A', midi: [45, 52, 57, 61, 64] },
-            { frets: [['E', 0], ['A', 2], ['D', 0], ['G', 1], ['B', 0], ['e', 0]], note: 'E7', midi: [40, 47, 50, 56, 59, 64] }
+            { frets: [['D', 0], ['G', 2], ['B', 3], ['e', 2]], note: 'D', midi: [50, 57, 62, 66] }
           ]
         },
       },
       {
         label:    'Practice — The strum in 3',
         label_es: 'Practica — El rasgueo en 3',
-        text: 'Count 1, 2, 3 and strum down on each number. Strum hard on 1 and soft on 2 and 3. Play 2 bars of A, then 2 bars of E7, and repeat. You\'ve got it when: you play the tab four times through without stopping and every 1 is the loud strum. Late on the change? Start the change on beat 3.',
-        text_es: 'Cuenta 1, 2, 3 y rasguea hacia abajo en cada número. Rasguea fuerte en el 1 y suave en el 2 y el 3. Toca 2 compases de A, luego 2 compases de E7, y repite. Lo tienes cuando: tocas la tablatura cuatro veces completa sin detenerte y cada 1 es el rasgueo fuerte. ¿Llegas tarde al cambio? Empieza el cambio en el tiempo 3.',
+        text: 'Count 1, 2, 3 and strum down on each number. Strum hard on 1 and soft on 2 and 3. Play one bar of each chord in the tab, then start again. You\'ve got it when: you play the tab four times through without stopping and every 1 is the loud strum. Late on a change? Start the change on beat 3.',
+        text_es: 'Cuenta 1, 2, 3 y rasguea hacia abajo en cada número. Rasguea fuerte en el 1 y suave en el 2 y el 3. Toca un compás de cada acorde de la tablatura y vuelve a empezar. Lo tienes cuando: tocas la tablatura cuatro veces completa sin detenerte y cada 1 es el rasgueo fuerte. ¿Llegas tarde al cambio? Empieza el cambio en el tiempo 3.',
         tab: {
-          caption: '3 strums per bar · A for 2 bars · E7 for 2 bars',
-          caption_es: '3 rasgueos por compás · A por 2 compases · E7 por 2 compases',
+          caption: '3 strums per bar · A · E7 · D · E7, then back to A',
+          caption_es: '3 rasgueos por compás · A · E7 · D · E7, y vuelve a A',
           notes: [
             { frets: [['A', 0], ['D', 2], ['G', 2], ['B', 2], ['e', 0]], note: 'A', midi: [45, 52, 57, 61, 64] },
             { frets: [['A', 0], ['D', 2], ['G', 2], ['B', 2], ['e', 0]], note: 'A', midi: [45, 52, 57, 61, 64] },
             { frets: [['A', 0], ['D', 2], ['G', 2], ['B', 2], ['e', 0]], note: 'A', midi: [45, 52, 57, 61, 64] },
-            { frets: [['A', 0], ['D', 2], ['G', 2], ['B', 2], ['e', 0]], note: 'A', midi: [45, 52, 57, 61, 64] },
-            { frets: [['A', 0], ['D', 2], ['G', 2], ['B', 2], ['e', 0]], note: 'A', midi: [45, 52, 57, 61, 64] },
-            { frets: [['A', 0], ['D', 2], ['G', 2], ['B', 2], ['e', 0]], note: 'A', midi: [45, 52, 57, 61, 64] },
             { frets: [['E', 0], ['A', 2], ['D', 0], ['G', 1], ['B', 0], ['e', 0]], note: 'E7', midi: [40, 47, 50, 56, 59, 64] },
             { frets: [['E', 0], ['A', 2], ['D', 0], ['G', 1], ['B', 0], ['e', 0]], note: 'E7', midi: [40, 47, 50, 56, 59, 64] },
             { frets: [['E', 0], ['A', 2], ['D', 0], ['G', 1], ['B', 0], ['e', 0]], note: 'E7', midi: [40, 47, 50, 56, 59, 64] },
+            { frets: [['D', 0], ['G', 2], ['B', 3], ['e', 2]], note: 'D', midi: [50, 57, 62, 66] },
+            { frets: [['D', 0], ['G', 2], ['B', 3], ['e', 2]], note: 'D', midi: [50, 57, 62, 66] },
+            { frets: [['D', 0], ['G', 2], ['B', 3], ['e', 2]], note: 'D', midi: [50, 57, 62, 66] },
             { frets: [['E', 0], ['A', 2], ['D', 0], ['G', 1], ['B', 0], ['e', 0]], note: 'E7', midi: [40, 47, 50, 56, 59, 64] },
             { frets: [['E', 0], ['A', 2], ['D', 0], ['G', 1], ['B', 0], ['e', 0]], note: 'E7', midi: [40, 47, 50, 56, 59, 64] },
             { frets: [['E', 0], ['A', 2], ['D', 0], ['G', 1], ['B', 0], ['e', 0]], note: 'E7', midi: [40, 47, 50, 56, 59, 64] }
+          ]
+        },
+      },
+      {
+        label:    'Practice — The whole song',
+        label_es: 'Practica — Toda la canción',
+        text: 'Strum 3 times in each bar, loud on 1. Each chord in [ ] starts on the word after it, and verse 2 adds Am (fret 1 on the B string instead of fret 2). You\'ve got it when: you play both verses and both choruses without stopping. Lost your place? Say the words out loud as you strum. Then sing while you play.',
+        text_es: 'Rasguea 3 veces en cada compás, fuerte en el 1. Cada acorde entre [ ] empieza en la palabra que le sigue, y la estrofa 2 agrega Am (traste 1 en la cuerda Si en vez del traste 2). Lo tienes cuando: tocas las dos estrofas y los dos coros sin detenerte. ¿Te pierdes? Di la letra en voz alta mientras rasgueas. Después, canta mientras tocas.',
+        tab: {
+          caption: 'Las Mañanitas · the chord in [ ] starts on the next word',
+          caption_es: 'Las Mañanitas · el acorde entre [ ] empieza en la palabra siguiente',
+          phrases: [
+          { label: 'Verse 1 · [A] Qué linda está la mañana, en que vengo a [E7] saludarte',
+            label_es: 'Estrofa 1 · [A] Qué linda está la mañana, en que vengo a [E7] saludarte',
+            notes: [
+              { frets: [['A', 0], ['D', 2], ['G', 2], ['B', 2], ['e', 0]], note: 'A', midi: [45, 52, 57, 61, 64] },
+              { frets: [['E', 0], ['A', 2], ['D', 0], ['G', 1], ['B', 0], ['e', 0]], note: 'E7', midi: [40, 47, 50, 56, 59, 64] }
+            ] },
+          { label: '[E7] Venimos todos con gusto y [D] placer a [E7] felici[A]tarte',
+            label_es: '[E7] Venimos todos con gusto y [D] placer a [E7] felici[A]tarte',
+            notes: [
+              { frets: [['E', 0], ['A', 2], ['D', 0], ['G', 1], ['B', 0], ['e', 0]], note: 'E7', midi: [40, 47, 50, 56, 59, 64] },
+              { frets: [['D', 0], ['G', 2], ['B', 3], ['e', 2]], note: 'D', midi: [50, 57, 62, 66] },
+              { frets: [['E', 0], ['A', 2], ['D', 0], ['G', 1], ['B', 0], ['e', 0]], note: 'E7', midi: [40, 47, 50, 56, 59, 64] },
+              { frets: [['A', 0], ['D', 2], ['G', 2], ['B', 2], ['e', 0]], note: 'A', midi: [45, 52, 57, 61, 64] }
+            ] },
+          { label: '[A] El día en que tú naciste nacieron todas las [E7] flores',
+            label_es: '[A] El día en que tú naciste nacieron todas las [E7] flores',
+            notes: [
+              { frets: [['A', 0], ['D', 2], ['G', 2], ['B', 2], ['e', 0]], note: 'A', midi: [45, 52, 57, 61, 64] },
+              { frets: [['E', 0], ['A', 2], ['D', 0], ['G', 1], ['B', 0], ['e', 0]], note: 'E7', midi: [40, 47, 50, 56, 59, 64] }
+            ] },
+          { label: 'Y [E7] en la pila del bautizo can[D]taron los [E7] rui[A]señores',
+            label_es: 'Y [E7] en la pila del bautizo can[D]taron los [E7] rui[A]señores',
+            notes: [
+              { frets: [['E', 0], ['A', 2], ['D', 0], ['G', 1], ['B', 0], ['e', 0]], note: 'E7', midi: [40, 47, 50, 56, 59, 64] },
+              { frets: [['D', 0], ['G', 2], ['B', 3], ['e', 2]], note: 'D', midi: [50, 57, 62, 66] },
+              { frets: [['E', 0], ['A', 2], ['D', 0], ['G', 1], ['B', 0], ['e', 0]], note: 'E7', midi: [40, 47, 50, 56, 59, 64] },
+              { frets: [['A', 0], ['D', 2], ['G', 2], ['B', 2], ['e', 0]], note: 'A', midi: [45, 52, 57, 61, 64] }
+            ] },
+          { label: 'Chorus · [E7] Ya viene amaneciendo, ya la [D] luz del día nos dio',
+            label_es: 'Coro · [E7] Ya viene amaneciendo, ya la [D] luz del día nos dio',
+            notes: [
+              { frets: [['E', 0], ['A', 2], ['D', 0], ['G', 1], ['B', 0], ['e', 0]], note: 'E7', midi: [40, 47, 50, 56, 59, 64] },
+              { frets: [['D', 0], ['G', 2], ['B', 3], ['e', 2]], note: 'D', midi: [50, 57, 62, 66] }
+            ] },
+          { label: 'Le[A]vántate de mañana, mira [E7] que ya amane[A]ció',
+            label_es: 'Le[A]vántate de mañana, mira [E7] que ya amane[A]ció',
+            notes: [
+              { frets: [['A', 0], ['D', 2], ['G', 2], ['B', 2], ['e', 0]], note: 'A', midi: [45, 52, 57, 61, 64] },
+              { frets: [['E', 0], ['A', 2], ['D', 0], ['G', 1], ['B', 0], ['e', 0]], note: 'E7', midi: [40, 47, 50, 56, 59, 64] },
+              { frets: [['A', 0], ['D', 2], ['G', 2], ['B', 2], ['e', 0]], note: 'A', midi: [45, 52, 57, 61, 64] }
+            ] },
+          { label: 'Verse 2 · [A] Quisiera ser un San Juan, quisiera ser un San [E7] Pedro',
+            label_es: 'Estrofa 2 · [A] Quisiera ser un San Juan, quisiera ser un San [E7] Pedro',
+            notes: [
+              { frets: [['A', 0], ['D', 2], ['G', 2], ['B', 2], ['e', 0]], note: 'A', midi: [45, 52, 57, 61, 64] },
+              { frets: [['E', 0], ['A', 2], ['D', 0], ['G', 1], ['B', 0], ['e', 0]], note: 'E7', midi: [40, 47, 50, 56, 59, 64] }
+            ] },
+          { label: '[E7] Para venirte a cantar con la [D] música [E7] del [Am] cielo',
+            label_es: '[E7] Para venirte a cantar con la [D] música [E7] del [Am] cielo',
+            notes: [
+              { frets: [['E', 0], ['A', 2], ['D', 0], ['G', 1], ['B', 0], ['e', 0]], note: 'E7', midi: [40, 47, 50, 56, 59, 64] },
+              { frets: [['D', 0], ['G', 2], ['B', 3], ['e', 2]], note: 'D', midi: [50, 57, 62, 66] },
+              { frets: [['E', 0], ['A', 2], ['D', 0], ['G', 1], ['B', 0], ['e', 0]], note: 'E7', midi: [40, 47, 50, 56, 59, 64] },
+              { frets: [['A', 0], ['D', 2], ['G', 2], ['B', 1], ['e', 0]], note: 'Am', midi: [45, 52, 57, 60, 64] }
+            ] },
+          { label: '[Am] Quisiera ser solecito para entrar por tu [E7] ventana',
+            label_es: '[Am] Quisiera ser solecito para entrar por tu [E7] ventana',
+            notes: [
+              { frets: [['A', 0], ['D', 2], ['G', 2], ['B', 1], ['e', 0]], note: 'Am', midi: [45, 52, 57, 60, 64] },
+              { frets: [['E', 0], ['A', 2], ['D', 0], ['G', 1], ['B', 0], ['e', 0]], note: 'E7', midi: [40, 47, 50, 56, 59, 64] }
+            ] },
+          { label: 'Y [E7] darte los buenos días, acostadita en tu [Am] cama',
+            label_es: 'Y [E7] darte los buenos días, acostadita en tu [Am] cama',
+            notes: [
+              { frets: [['E', 0], ['A', 2], ['D', 0], ['G', 1], ['B', 0], ['e', 0]], note: 'E7', midi: [40, 47, 50, 56, 59, 64] },
+              { frets: [['A', 0], ['D', 2], ['G', 2], ['B', 1], ['e', 0]], note: 'Am', midi: [45, 52, 57, 60, 64] }
+            ] },
+          { label: 'Chorus · [E7] Con jazmines y flores este [D] día voy a adornar',
+            label_es: 'Coro · [E7] Con jazmines y flores este [D] día voy a adornar',
+            notes: [
+              { frets: [['E', 0], ['A', 2], ['D', 0], ['G', 1], ['B', 0], ['e', 0]], note: 'E7', midi: [40, 47, 50, 56, 59, 64] },
+              { frets: [['D', 0], ['G', 2], ['B', 3], ['e', 2]], note: 'D', midi: [50, 57, 62, 66] }
+            ] },
+          { label: 'Hoy por [A] ser tu cumpleaños te [E7] venimos a can[A]tar',
+            label_es: 'Hoy por [A] ser tu cumpleaños te [E7] venimos a can[A]tar',
+            notes: [
+              { frets: [['A', 0], ['D', 2], ['G', 2], ['B', 2], ['e', 0]], note: 'A', midi: [45, 52, 57, 61, 64] },
+              { frets: [['E', 0], ['A', 2], ['D', 0], ['G', 1], ['B', 0], ['e', 0]], note: 'E7', midi: [40, 47, 50, 56, 59, 64] },
+              { frets: [['A', 0], ['D', 2], ['G', 2], ['B', 2], ['e', 0]], note: 'A', midi: [45, 52, 57, 61, 64] }
+            ] }
           ]
         },
       },
