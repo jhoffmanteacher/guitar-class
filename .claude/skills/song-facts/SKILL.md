@@ -41,8 +41,12 @@ ear. This is chord *timing*, not BPM:
   full mixes ship for the Guitar toggle, on the card and on the Song
   Journey page (1be).
 - **Seven Nation Army** (123 BPM track) — the riff is NOT one note per beat:
-  bar 1 is E (long) · E (short) · G · E, with D as a pickup on the "and" of 4;
-  bar 2 is **C for two beats, B for two beats** — what ca-10 teaches. The
+  bar 1 is E (long) · E (short), then **G · E · D as a quarter-note triplet
+  across beats 3 and 4** (2/3 of a beat each — measured off the full mix on
+  the beat map, 2026-10-13; this replaces the old "G and E dotted eighths,
+  D a pickup on the 'and' of 4", which lit D a quarter-beat late on every
+  practice card); bar 2 is **C for two beats, B for two beats** — what ca-10
+  teaches. The
   Journey page's Layer 4 singalong loop (`Em Em G Em | D C C –`) is a
   teaching loop that does not line up with the record; the page says so.
 

@@ -5,6 +5,13 @@ Notable changes to the Guitar Class site. Newest first.
 For the full session-by-session history (and the reasoning behind each change),
 see `WORKFLOW.md` and the git commit log.
 
+## 2026-10-13 — Seven Nation Army highlight follows the record
+
+- **The highlighted note now matches the band.** In the Seven Nation Army
+  riff, G, E and D are played evenly across beats 3 and 4. The highlight
+  used to light D late; now each one lights up when the record plays it.
+  This is in the riff activity and both whole-song activities.
+
 ## 2026-10-13 — Las Mañanitas, and activities just for you
 
 - **New activity: Las Mañanitas — A and E7.** Learn the two chords, the
