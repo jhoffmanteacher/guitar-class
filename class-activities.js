@@ -3109,12 +3109,14 @@ window.CLASS_ACTIVITIES = [
   },
   /* All Along the Watchtower — The Whole Song (2026-10-01). A whole-song
      card like ca-24: the low-E bass loop students already know (Module 2,
-     Journey Layer 2 — A G F G, frets 5 3 1 3) played with the Hendrix
-     record from the first bar to the fade. No new part. Rhythm from
-     Jonathan's method book (2026-10-15), the same in both bars: 1 & 2
-     (rest on 3) & 4 — three plucks of A (or F), then G on the "&" of 3
-     and on 4. The card has no rest, so the pluck on 2 is held 1.5 beats.
-     The loop is written the same way in every section, intro included.
+     Journey Layer 2 — A A G G | F F G G, frets 5 3 1 3, two plucks per note)
+     played with the Hendrix record from the first bar to the fade. No new
+     part. The loop is written the same way in every section, intro
+     included (Jonathan, 2026-10-01). Kept at two plucks per note on
+     purpose (Jonathan, 2026-10-15): when the rest of the site moved to the
+     method book's 1 + 2 (rest) + 4 rhythm, he asked for this single-note
+     card to stay as it was; ca-29, its power-chord twin, uses the book
+     rhythm.
      Section map on the track's beat map (SNIPPET_TRACKS barTimes), from
      the vocal stem (Demucs) per bar: intro 1-8, verse 1 9-24, solo 1
      25-32, verse 2 33-50, solo 2 51-80, verse 3 81-104, outro 105-112.
@@ -3134,8 +3136,8 @@ window.CLASS_ACTIVITIES = [
       wholeSong: true,  // stops at the end of the song instead of looping — Jonathan, 2026-10-02
       track: 'all-along-the-watchtower',
       slowest: true,    // four-way speed control (Slow added 2026-10-09): Slowest (84) / Slower (105) / Slow (110) / Normal (115) — the student picks
-      caption:    'The whole song in order · count 1 & 2 (rest) & 4',
-      caption_es: 'La canción completa en orden · cuenta 1 y 2 (silencio) y 4',
+      caption:    'The whole song in order · 2 plucks per note',
+      caption_es: 'La canción completa en orden · 2 pulsaciones por nota',
       sections: [
         {
           label: 'Intro', label_es: 'Intro',
@@ -3143,16 +3145,14 @@ window.CLASS_ACTIVITIES = [
           fromBar: 1, bars: 2, reps: 4,
           repLabel: 'Lap', repLabel_es: 'Vuelta',
           notes: [
-            { string: 'E', fret: 5, note: 'A', midi: 45, beats: 0.5 },
-            { string: 'E', fret: 5, note: 'A', midi: 45, beats: 0.5 },
-            { string: 'E', fret: 5, note: 'A', midi: 45, beats: 1.5 },
-            { string: 'E', fret: 3, note: 'G', midi: 43, beats: 0.5 },
-            { string: 'E', fret: 3, note: 'G', midi: 43, beats: 1 },
-            { string: 'E', fret: 1, note: 'F', midi: 41, beats: 0.5 },
-            { string: 'E', fret: 1, note: 'F', midi: 41, beats: 0.5 },
-            { string: 'E', fret: 1, note: 'F', midi: 41, beats: 1.5 },
-            { string: 'E', fret: 3, note: 'G', midi: 43, beats: 0.5 },
-            { string: 'E', fret: 3, note: 'G', midi: 43, beats: 1 }
+            { string: 'E', fret: 5, note: 'A', midi: 45 },
+            { string: 'E', fret: 5, note: 'A', midi: 45 },
+            { string: 'E', fret: 3, note: 'G', midi: 43 },
+            { string: 'E', fret: 3, note: 'G', midi: 43 },
+            { string: 'E', fret: 1, note: 'F', midi: 41 },
+            { string: 'E', fret: 1, note: 'F', midi: 41 },
+            { string: 'E', fret: 3, note: 'G', midi: 43 },
+            { string: 'E', fret: 3, note: 'G', midi: 43 }
           ]
         },
         {
@@ -3161,16 +3161,14 @@ window.CLASS_ACTIVITIES = [
           fromBar: 9, bars: 2, reps: 8,
           repLabel: 'Lap', repLabel_es: 'Vuelta',
           notes: [
-            { string: 'E', fret: 5, note: 'A', midi: 45, beats: 0.5 },
-            { string: 'E', fret: 5, note: 'A', midi: 45, beats: 0.5 },
-            { string: 'E', fret: 5, note: 'A', midi: 45, beats: 1.5 },
-            { string: 'E', fret: 3, note: 'G', midi: 43, beats: 0.5 },
-            { string: 'E', fret: 3, note: 'G', midi: 43, beats: 1 },
-            { string: 'E', fret: 1, note: 'F', midi: 41, beats: 0.5 },
-            { string: 'E', fret: 1, note: 'F', midi: 41, beats: 0.5 },
-            { string: 'E', fret: 1, note: 'F', midi: 41, beats: 1.5 },
-            { string: 'E', fret: 3, note: 'G', midi: 43, beats: 0.5 },
-            { string: 'E', fret: 3, note: 'G', midi: 43, beats: 1 }
+            { string: 'E', fret: 5, note: 'A', midi: 45 },
+            { string: 'E', fret: 5, note: 'A', midi: 45 },
+            { string: 'E', fret: 3, note: 'G', midi: 43 },
+            { string: 'E', fret: 3, note: 'G', midi: 43 },
+            { string: 'E', fret: 1, note: 'F', midi: 41 },
+            { string: 'E', fret: 1, note: 'F', midi: 41 },
+            { string: 'E', fret: 3, note: 'G', midi: 43 },
+            { string: 'E', fret: 3, note: 'G', midi: 43 }
           ]
         },
         {
@@ -3179,16 +3177,14 @@ window.CLASS_ACTIVITIES = [
           fromBar: 25, bars: 2, reps: 4,
           repLabel: 'Lap', repLabel_es: 'Vuelta',
           notes: [
-            { string: 'E', fret: 5, note: 'A', midi: 45, beats: 0.5 },
-            { string: 'E', fret: 5, note: 'A', midi: 45, beats: 0.5 },
-            { string: 'E', fret: 5, note: 'A', midi: 45, beats: 1.5 },
-            { string: 'E', fret: 3, note: 'G', midi: 43, beats: 0.5 },
-            { string: 'E', fret: 3, note: 'G', midi: 43, beats: 1 },
-            { string: 'E', fret: 1, note: 'F', midi: 41, beats: 0.5 },
-            { string: 'E', fret: 1, note: 'F', midi: 41, beats: 0.5 },
-            { string: 'E', fret: 1, note: 'F', midi: 41, beats: 1.5 },
-            { string: 'E', fret: 3, note: 'G', midi: 43, beats: 0.5 },
-            { string: 'E', fret: 3, note: 'G', midi: 43, beats: 1 }
+            { string: 'E', fret: 5, note: 'A', midi: 45 },
+            { string: 'E', fret: 5, note: 'A', midi: 45 },
+            { string: 'E', fret: 3, note: 'G', midi: 43 },
+            { string: 'E', fret: 3, note: 'G', midi: 43 },
+            { string: 'E', fret: 1, note: 'F', midi: 41 },
+            { string: 'E', fret: 1, note: 'F', midi: 41 },
+            { string: 'E', fret: 3, note: 'G', midi: 43 },
+            { string: 'E', fret: 3, note: 'G', midi: 43 }
           ]
         },
         {
@@ -3197,16 +3193,14 @@ window.CLASS_ACTIVITIES = [
           fromBar: 33, bars: 2, reps: 9,
           repLabel: 'Lap', repLabel_es: 'Vuelta',
           notes: [
-            { string: 'E', fret: 5, note: 'A', midi: 45, beats: 0.5 },
-            { string: 'E', fret: 5, note: 'A', midi: 45, beats: 0.5 },
-            { string: 'E', fret: 5, note: 'A', midi: 45, beats: 1.5 },
-            { string: 'E', fret: 3, note: 'G', midi: 43, beats: 0.5 },
-            { string: 'E', fret: 3, note: 'G', midi: 43, beats: 1 },
-            { string: 'E', fret: 1, note: 'F', midi: 41, beats: 0.5 },
-            { string: 'E', fret: 1, note: 'F', midi: 41, beats: 0.5 },
-            { string: 'E', fret: 1, note: 'F', midi: 41, beats: 1.5 },
-            { string: 'E', fret: 3, note: 'G', midi: 43, beats: 0.5 },
-            { string: 'E', fret: 3, note: 'G', midi: 43, beats: 1 }
+            { string: 'E', fret: 5, note: 'A', midi: 45 },
+            { string: 'E', fret: 5, note: 'A', midi: 45 },
+            { string: 'E', fret: 3, note: 'G', midi: 43 },
+            { string: 'E', fret: 3, note: 'G', midi: 43 },
+            { string: 'E', fret: 1, note: 'F', midi: 41 },
+            { string: 'E', fret: 1, note: 'F', midi: 41 },
+            { string: 'E', fret: 3, note: 'G', midi: 43 },
+            { string: 'E', fret: 3, note: 'G', midi: 43 }
           ]
         },
         {
@@ -3215,16 +3209,14 @@ window.CLASS_ACTIVITIES = [
           fromBar: 51, bars: 2, reps: 15,
           repLabel: 'Lap', repLabel_es: 'Vuelta',
           notes: [
-            { string: 'E', fret: 5, note: 'A', midi: 45, beats: 0.5 },
-            { string: 'E', fret: 5, note: 'A', midi: 45, beats: 0.5 },
-            { string: 'E', fret: 5, note: 'A', midi: 45, beats: 1.5 },
-            { string: 'E', fret: 3, note: 'G', midi: 43, beats: 0.5 },
-            { string: 'E', fret: 3, note: 'G', midi: 43, beats: 1 },
-            { string: 'E', fret: 1, note: 'F', midi: 41, beats: 0.5 },
-            { string: 'E', fret: 1, note: 'F', midi: 41, beats: 0.5 },
-            { string: 'E', fret: 1, note: 'F', midi: 41, beats: 1.5 },
-            { string: 'E', fret: 3, note: 'G', midi: 43, beats: 0.5 },
-            { string: 'E', fret: 3, note: 'G', midi: 43, beats: 1 }
+            { string: 'E', fret: 5, note: 'A', midi: 45 },
+            { string: 'E', fret: 5, note: 'A', midi: 45 },
+            { string: 'E', fret: 3, note: 'G', midi: 43 },
+            { string: 'E', fret: 3, note: 'G', midi: 43 },
+            { string: 'E', fret: 1, note: 'F', midi: 41 },
+            { string: 'E', fret: 1, note: 'F', midi: 41 },
+            { string: 'E', fret: 3, note: 'G', midi: 43 },
+            { string: 'E', fret: 3, note: 'G', midi: 43 }
           ]
         },
         {
@@ -3233,16 +3225,14 @@ window.CLASS_ACTIVITIES = [
           fromBar: 81, bars: 2, reps: 12,
           repLabel: 'Lap', repLabel_es: 'Vuelta',
           notes: [
-            { string: 'E', fret: 5, note: 'A', midi: 45, beats: 0.5 },
-            { string: 'E', fret: 5, note: 'A', midi: 45, beats: 0.5 },
-            { string: 'E', fret: 5, note: 'A', midi: 45, beats: 1.5 },
-            { string: 'E', fret: 3, note: 'G', midi: 43, beats: 0.5 },
-            { string: 'E', fret: 3, note: 'G', midi: 43, beats: 1 },
-            { string: 'E', fret: 1, note: 'F', midi: 41, beats: 0.5 },
-            { string: 'E', fret: 1, note: 'F', midi: 41, beats: 0.5 },
-            { string: 'E', fret: 1, note: 'F', midi: 41, beats: 1.5 },
-            { string: 'E', fret: 3, note: 'G', midi: 43, beats: 0.5 },
-            { string: 'E', fret: 3, note: 'G', midi: 43, beats: 1 }
+            { string: 'E', fret: 5, note: 'A', midi: 45 },
+            { string: 'E', fret: 5, note: 'A', midi: 45 },
+            { string: 'E', fret: 3, note: 'G', midi: 43 },
+            { string: 'E', fret: 3, note: 'G', midi: 43 },
+            { string: 'E', fret: 1, note: 'F', midi: 41 },
+            { string: 'E', fret: 1, note: 'F', midi: 41 },
+            { string: 'E', fret: 3, note: 'G', midi: 43 },
+            { string: 'E', fret: 3, note: 'G', midi: 43 }
           ]
         },
         {
@@ -3251,16 +3241,14 @@ window.CLASS_ACTIVITIES = [
           fromBar: 105, bars: 2, reps: 4,
           repLabel: 'Lap', repLabel_es: 'Vuelta',
           notes: [
-            { string: 'E', fret: 5, note: 'A', midi: 45, beats: 0.5 },
-            { string: 'E', fret: 5, note: 'A', midi: 45, beats: 0.5 },
-            { string: 'E', fret: 5, note: 'A', midi: 45, beats: 1.5 },
-            { string: 'E', fret: 3, note: 'G', midi: 43, beats: 0.5 },
-            { string: 'E', fret: 3, note: 'G', midi: 43, beats: 1 },
-            { string: 'E', fret: 1, note: 'F', midi: 41, beats: 0.5 },
-            { string: 'E', fret: 1, note: 'F', midi: 41, beats: 0.5 },
-            { string: 'E', fret: 1, note: 'F', midi: 41, beats: 1.5 },
-            { string: 'E', fret: 3, note: 'G', midi: 43, beats: 0.5 },
-            { string: 'E', fret: 3, note: 'G', midi: 43, beats: 1 }
+            { string: 'E', fret: 5, note: 'A', midi: 45 },
+            { string: 'E', fret: 5, note: 'A', midi: 45 },
+            { string: 'E', fret: 3, note: 'G', midi: 43 },
+            { string: 'E', fret: 3, note: 'G', midi: 43 },
+            { string: 'E', fret: 1, note: 'F', midi: 41 },
+            { string: 'E', fret: 1, note: 'F', midi: 41 },
+            { string: 'E', fret: 3, note: 'G', midi: 43 },
+            { string: 'E', fret: 3, note: 'G', midi: 43 }
           ]
         }
       ],

@@ -27,7 +27,9 @@ ear. This is chord *timing*, not BPM:
   the low E: A5 = 5/7, G5 = 3/5, F5 = 1/3 — the open-A-string A5 is retired
   for this song. Every Watchtower spot follows it: Modules 2, 3, 4, 5 (the
   real-rhythm card now teaches the "+"-after-3 G by ear, no intro/verse
-  split), 6, 7, the Journey page Layers 2–5, Riff Runner, ca-26, ca-29.
+  split), 6, 7, the Journey page Layers 2–5, Riff Runner, ca-29. **One
+  exception, Jonathan's call (2026-10-15): ca-26, the single-note
+  whole-song card, keeps two plucks per note (`A A G G F F G G`).**
   Older reading, kept for history: **two beats per chord: `A A G G F F G G`** (2026-09-27). The
   play-along is now Jimi Hendrix's recording, moved down to Am in Moises; the
   Neil Young track and its "Am 2 · G 2 · F 3 · G 1" reading are retired.
