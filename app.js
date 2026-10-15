@@ -2405,7 +2405,7 @@ const SNIPPET_TRACKS = {
   },
   /* All Along the Watchtower — the Jimi Hendrix recording, the same files
      the Journey page plays. 4 to the bar at record speed; the chords run
-     A A G G | F F G G (CLAUDE.md, settled song facts), a two-bar cycle, so
+     A–G | F–G, G on the "+" after 3 (song-facts skill), a two-bar cycle, so
      bar 1 is the first A — the SECOND click (the first is a G pickup). Odd
      bars start on A, even bars on F, all the way through. */
   'all-along-the-watchtower': {

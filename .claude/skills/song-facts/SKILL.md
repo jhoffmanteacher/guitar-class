@@ -18,16 +18,26 @@ ear. This is chord *timing*, not BPM:
 - **Luna** (128 BPM track, clicks are eighth notes, ~43 big beats) — **F for
   two bars of 6/8, then Am for two bars, confirmed.** The chord is Am, not A.
 - **All Along the Watchtower** (Hendrix track, 115 BPM, slow tier 105) —
-  **two beats per chord: `A A G G F F G G`** (Jonathan, 2026-09-27). The
+  **THE RHYTHM IS THE METHOD BOOK'S (Jonathan, 2026-10-15) — supersedes the
+  two-beats-per-chord reading below.** Both bars of the loop, every section:
+  **1 + 2 (rest on 3) + 4** — three attacks of the first chord on 1, +, 2,
+  then G on the "+" after 3 and on 4 (`A A A · G G | F F F · G G`, beats
+  `.5 .5 1.5 .5 1` per bar; practice cards hold the beat-2 note through the
+  rest because cards have no rest symbol). Power chords are ALL rooted on
+  the low E: A5 = 5/7, G5 = 3/5, F5 = 1/3 — the open-A-string A5 is retired
+  for this song. Every Watchtower spot follows it: Modules 2, 3, 4, 5 (the
+  real-rhythm card now teaches the "+"-after-3 G by ear, no intro/verse
+  split), 6, 7, the Journey page Layers 2–5, Riff Runner, ca-26, ca-29.
+  Older reading, kept for history: **two beats per chord: `A A G G F F G G`** (2026-09-27). The
   play-along is now Jimi Hendrix's recording, moved down to Am in Moises; the
   Neil Young track and its "Am 2 · G 2 · F 3 · G 1" reading are retired.
   Measured off the click stem, loop by loop: bar 1 is A on 1–2, G on 3–4
   everywhere. The bar-2 G is on **beat 4 in the intro** (the first ~18 s)
   and **about beat 3 once the singing starts** — Jonathan heard the same.
   Later in the song it is loose (anywhere from 3 to 4½, some laps with no
-  clear G). The site teaches the verse: G on beat 3 in Modules 2, 3, 4, 6
-  and 7, the Journey page and Riff Runner. Module 5's "the real rhythm" card
-  teaches the intro/verse difference by ear. The track's tempo drifts
+  clear G). (Until 2026-10-15 the site taught G on beat 3 and Module 5
+  taught an intro/verse difference; both are replaced by the book rhythm
+  above, whose "+"-after-3 G sits inside that measured spread.) The track's tempo drifts
   (≈110 in the intro, ≈115 through the verses, ≈120 at the end), so a
   steady grid would slide by up to a second — which is why its
   `SNIPPET_TRACKS` entry carries a beat map (`barTimes`, 2026-09-27)
@@ -51,7 +61,9 @@ ear. This is chord *timing*, not BPM:
   teaching loop that does not line up with the record; the page says so.
 
 - **All Along the Watchtower** — `Am–G–F–G` loop (power chords `A5–G5–F5–G5`).
-  **Timing: two beats per chord, `A A G G F F G G`** — see "Chord timing
+  **Timing: 1 + 2 (rest) + 4 in both bars, G on the "+" after 3; power
+  chords all rooted on the low E** (method book, 2026-10-15). Before that:
+  two beats per chord, `A A G G F F G G` — see "Chord timing
   measured" above (2026-09-27, replaces the 2026-09-24 "F 3 · G 1" reading
   and the 2026-08-06 verse/chorus one). The map's "Am–G–F" is shorthand.
   **The `jimi-hendrix-…` audio slug is CORRECT** — the play-along is
