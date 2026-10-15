@@ -5,6 +5,13 @@ Notable changes to the Guitar Class site. Newest first.
 For the full session-by-session history (and the reasoning behind each change),
 see `WORKFLOW.md` and the git commit log.
 
+## 2026-10-15 — Sweet Child O' Mine: the last "where do we go" bar
+
+- **Sweet Child O' Mine — The Whole Song (single notes and power chords):**
+  in the Ending, the bar after E G A is now G for two beats, then A for
+  two beats ("where do we go"). E starts on the next bar. The card used
+  to have E there, a bar too early.
+
 ## 2026-10-14 — Las Mañanitas Play Along: the requinto solo
 
 - **The Solo section of Las Mañanitas — Play Along now shows the requinto

@@ -61,6 +61,10 @@ ear. This is chord *timing*, not BPM:
 - **Sweet Child O' Mine** — verse `D–C–G`, **two bars each**, ~123–125 BPM. (Corrected
   2026-09-12 — content across module-2/3/4/7 and the Journey page is
   consistently "two bars each"; the old "full bar each" here was the outlier.)
+  **The ending (bars 174-183 of the backing track):** `Em | G | A | G A`
+  (two beats each, "where do we go") `| E` to the end — E starts on bar
+  178, not 177 (Jonathan's chord chart, confirmed by a per-beat bass
+  reading of both mixes, 2026-10-15). ca-28 and ca-33 carry it.
 - **Let It Be** — verse `C–G–Am–F`, **two beats per chord**, ~71–76 BPM.
 - **"the cure"** — **FOUR felt beats per chord, one full bar** (track reads
   144 BPM but feels ~72). This line said "two felt beats per chord" until

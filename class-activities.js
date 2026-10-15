@@ -3383,7 +3383,10 @@ window.CLASS_ACTIVITIES = [
      riff 49-56, verse 2 57-72, chorus 2 73-80, riff 81-96 (x2), chorus 3
      97-112 (x4), solo 1 113-129 (Em C B7 Am x4, then one more Am), solo 2
      130-145 (Em G A, then C-C-D-G in one bar, x4), outro 146-173 (the same
-     loop x7), ending 174-183 (Em G A, then E through the slow-down). Bar
+     loop x7), ending 174-183 (Em G A, then G and A two beats each in bar 177 —
+     "where do we go" — then E from bar 178 through the slow-down; bar 177
+     was E until 2026-10-15, corrected from Jonathan's chord chart and a
+     per-beat bass reading of both mixes). Bar
      183 is the last whole measured bar, so the card stops there. This
      track is in D at A=440 (a pitch-class count over two minutes reads D
      major) — the original record's half-step-down tuning is not in these
@@ -3401,8 +3404,8 @@ window.CLASS_ACTIVITIES = [
       wholeSong: true,  // stops at the end of the song instead of looping
       track: 'sweet-child-o-mine',
       slowest: true,    // four-way speed control (Slow added 2026-10-09): Slowest (80) / Slower (100) / Normal (125) — the student picks
-      caption:    'The whole song in order · 1 pluck per bar (3 in the C D G bar of Solo 2 and the Outro), let it ring',
-      caption_es: 'La canción completa en orden · 1 pulsación por compás (3 en el compás de C D G del Solo 2 y del Final), déjala sonar',
+      caption:    'The whole song in order · 1 pluck per bar (3 in the C D G bar of Solo 2 and the Outro, 2 in the G A bar of the Ending), let it ring',
+      caption_es: 'La canción completa en orden · 1 pulsación por compás (3 en el compás de C D G del Solo 2 y del Final, 2 en el compás de G A del Cierre), déjala sonar',
       sections: [
         {
           label: 'Intro', label_es: 'Intro',
@@ -3576,13 +3579,14 @@ window.CLASS_ACTIVITIES = [
         },
         {
           label: 'Ending', label_es: 'Cierre',
-          caption: 'Ending — E G A, then E to the end', caption_es: 'Cierre — E G A, y E hasta el final',
+          caption: 'Ending — E G A, then G and A in one bar, then E to the end', caption_es: 'Cierre — E G A, luego G y A en un compás, y E hasta el final',
           fromBar: 174, bars: 10,
           notes: [
             { string: 'E', fret: 0, note: 'E', midi: 40, beats: 4 },
             { string: 'E', fret: 3, note: 'G', midi: 43, beats: 4 },
             { string: 'A', fret: 0, note: 'A', midi: 45, beats: 4 },
-            { string: 'E', fret: 0, note: 'E', midi: 40, beats: 4 },
+            { string: 'E', fret: 3, note: 'G', midi: 43, beats: 2 },  // bar 177: G 2 · A 2, then E from 178 (2026-10-15)
+            { string: 'A', fret: 0, note: 'A', midi: 45, beats: 2 },
             { string: 'E', fret: 0, note: 'E', midi: 40, beats: 4 },
             { string: 'E', fret: 0, note: 'E', midi: 40, beats: 4 },
             { string: 'E', fret: 0, note: 'E', midi: 40, beats: 4 },
@@ -4472,8 +4476,8 @@ window.CLASS_ACTIVITIES = [
       wholeSong: true,  // stops at the end of the song instead of looping
       track: 'sweet-child-o-mine',
       slowest: true,    // four-way speed control (Slow added 2026-10-09): Slowest / Slower / Slow / Normal — the student picks
-      caption:    'The whole song in power chords · 1 strum per bar (3 in the C5 D5 G5 bar of Solo 2 and the Outro), let it ring',
-      caption_es: 'La canción completa con acordes de potencia · 1 rasgueo por compás (3 en el compás de C5 D5 G5 del Solo 2 y del Final), déjalo sonar',
+      caption:    'The whole song in power chords · 1 strum per bar (3 in the C5 D5 G5 bar of Solo 2 and the Outro, 2 in the G5 A5 bar of the Ending), let it ring',
+      caption_es: 'La canción completa con acordes de potencia · 1 rasgueo por compás (3 en el compás de C5 D5 G5 del Solo 2 y del Final, 2 en el compás de G5 A5 del Cierre), déjalo sonar',
       sections: [
         {
           label: 'Intro', label_es: 'Intro',
@@ -4647,13 +4651,14 @@ window.CLASS_ACTIVITIES = [
         },
         {
           label: 'Ending', label_es: 'Cierre',
-          caption: 'Ending — E5 G5 A5, then E5 to the end', caption_es: 'Cierre — E5 G5 A5, y E5 hasta el final',
+          caption: 'Ending — E5 G5 A5, then G5 and A5 in one bar, then E5 to the end', caption_es: 'Cierre — E5 G5 A5, luego G5 y A5 en un compás, y E5 hasta el final',
           fromBar: 174, bars: 10,
           notes: [
             { frets: [['A', 2], ['E', 0]], note: 'E5', midi: [47, 40], beats: 4 },
             { frets: [['A', 5], ['E', 3]], note: 'G5', midi: [50, 43], beats: 4 },
             { frets: [['D', 2], ['A', 0]], note: 'A5', midi: [52, 45], beats: 4 },
-            { frets: [['A', 2], ['E', 0]], note: 'E5', midi: [47, 40], beats: 4 },
+            { frets: [['A', 5], ['E', 3]], note: 'G5', midi: [50, 43], beats: 2 },  // bar 177: G5 2 · A5 2, as ca-28 (2026-10-15)
+            { frets: [['D', 2], ['A', 0]], note: 'A5', midi: [52, 45], beats: 2 },
             { frets: [['A', 2], ['E', 0]], note: 'E5', midi: [47, 40], beats: 4 },
             { frets: [['A', 2], ['E', 0]], note: 'E5', midi: [47, 40], beats: 4 },
             { frets: [['A', 2], ['E', 0]], note: 'E5', midi: [47, 40], beats: 4 },
