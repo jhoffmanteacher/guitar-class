@@ -18,7 +18,8 @@ see `WORKFLOW.md` and the git commit log.
   switch.** Power chords swap A, E7 and D for A5, E5 and D5 (frets 5 to 9,
   two strings each) everywhere: the chord steps, the strum, the words over
   the chords, and the play-along. Your checks and finished steps count the
-  same in both. The site remembers your choice on this computer.
+  same in both. The activities start on Power chords; the site remembers
+  your choice on this computer.
 
 ## 2026-10-14 — Las Mañanitas Play Along: the requinto solo
 

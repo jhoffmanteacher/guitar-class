@@ -12063,7 +12063,10 @@ function caOpenLinkedCard(from, id){
    Nothing else moves: same id, same steps, same checks, same tick keys,
    same beats, so progress is shared by both versions and a student can
    switch mid-song. The choice is a per-viewer convenience in localStorage
-   (`caChordModes`, { id: 'power' }), default Full. ONE transform, called at
+   (`caChordModes`, { id: 'power' | 'full' }). Until a student picks, the
+   card opens on `chordStart` ('power' on ca-34 and ca-35 — Jonathan,
+   2026-10-16: "have it default to the power chord version to start"),
+   else Full. ONE transform, called at
    the top of caHeroCardHtml, caActivityCardHtml, caCardBodyHtml and
    teacher.js's renderTeacherActivityDetail, so the two renderers can't
    disagree. checks.mjs 1d validates the map and the `_power` twins. */
@@ -12073,7 +12076,11 @@ let caChordModes = (() => {
   catch(e) { return {}; }
 })();
 function caHasChordVersions(a){ return !!(a && a.chordVersions && a.chordVersions.power && typeof a.chordVersions.power === 'object'); }
-function caChordMode(a){ return caHasChordVersions(a) && caChordModes[a.id] === 'power' ? 'power' : 'full'; }
+function caChordMode(a){
+  if(!caHasChordVersions(a)) return 'full';
+  const m = caChordModes[a.id] || a.chordStart;
+  return m === 'power' ? 'power' : 'full';
+}
 const caChordViews = new WeakMap();
 function caView(a){
   if(!a || a.__chordView || caChordMode(a) !== 'power') return a;
@@ -12119,8 +12126,9 @@ function caChordSwitchHtml(a){
    a metronome the student started stays on (see the two silencers). */
 function caSetChordMode(id, mode){
   const want = mode === 'power' ? 'power' : 'full';
-  if((caChordModes[id] === 'power' ? 'power' : 'full') === want) return;
-  if(want === 'power') caChordModes[id] = 'power'; else delete caChordModes[id];
+  const a = (window.CLASS_ACTIVITIES || []).find(x => x.id === id);
+  if(a && caChordMode(a) === want) return;
+  caChordModes[id] = want;   // stored either way: the card's own start may be 'power'
   try { localStorage.setItem(CA_CHORD_MODES_KEY, JSON.stringify(caChordModes)); } catch(e) {}
   stopCardAudio();
   if(IS_TEACHER_MODE && typeof renderTeacherActivityDetail === 'function'){ renderTeacherActivityDetail(id); return; }

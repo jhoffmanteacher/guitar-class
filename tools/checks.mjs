@@ -3447,6 +3447,10 @@ function validateClassActivities() {
         });
         if (extra && extra.length) { err(`${where}: chordVersions has ${extra.join(', ')} — the only version is "power"`); problems++; }
       } else if (pw.length) { err(`${where}: has ${pw[0].k} but no chordVersions — the power text would never show`); problems++; }
+      if ('chordStart' in a) {
+        if (a.chordStart !== 'power' && a.chordStart !== 'full') { err(`${where}: chordStart "${a.chordStart}" — 'power' or 'full' (or leave it off for full)`); problems++; }
+        else if (!('chordVersions' in a)) { err(`${where}: chordStart without chordVersions — there is no other version to start on`); problems++; }
+      }
       for (const f of pw) {
         const twin = f.es ? `${f.base}_power` : `${f.base}_power_es`;
         if (!hasVal(f.obj[twin])) { err(`${where}${f.path}: ${f.k} has no ${twin} — write both, or the switch shows the other version's words in one language`); problems++; }

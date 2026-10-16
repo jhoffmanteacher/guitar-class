@@ -87,6 +87,8 @@
    `_power` twin (`text_power`, `label_power`, `caption_power`,
    `intro_power`, each with its `_power_es`) is shown instead of the base
    field. Same steps, checks, ticks and beats either way — caView in app.js.
+   `chordStart: 'power'` opens the card on Power chords until the student
+   picks; without it the card opens on Full chords.
    checks.mjs 1d checks the shapes and the `_power` / `_power_es` pairs.
 
    OPTIONAL — `optional: true` (optional; the only value). The card starts
@@ -4734,6 +4736,7 @@ window.CLASS_ACTIVITIES = [
     /* Full chords / Power chords switch (Jonathan, 2026-10-16) — see
        caView in app.js. Module 3's shapes, all in frets 5-9 so the hand
        barely moves: A5 on the low E string, E5 and D5 on the A string. */
+    chordStart: 'power',   // opens on Power chords until the student picks (Jonathan, 2026-10-16)
     chordVersions: {
       power: {
         A:  { frets: [['A', 7], ['E', 5]], note: 'A5', midi: [52, 45] },
@@ -5088,6 +5091,7 @@ window.CLASS_ACTIVITIES = [
     /* Full chords / Power chords switch (Jonathan, 2026-10-16) — see
        caView in app.js. Module 3's shapes, all in frets 5-9 so the hand
        barely moves: A5 on the low E string, E5 and D5 on the A string. */
+    chordStart: 'power',   // opens on Power chords until the student picks (Jonathan, 2026-10-16)
     chordVersions: {
       power: {
         A:  { frets: [['A', 7], ['E', 5]], note: 'A5', midi: [52, 45] },
