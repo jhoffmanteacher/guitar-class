@@ -432,8 +432,8 @@ SETS.push(
           explain_es: 'La nota bajo tu dedo índice le da nombre al acorde, y la cuerda Mi grave en el traste 5 es A — así que A5. El traste 3 te daría G5, y el traste 7 te daría B5.' } },
       { id: 'm3w1-s3', text: 'Mute unused strings with palm and fretting hand',
         text_es: 'Silenciar las cuerdas que no usas con la palma y la mano de trastear',
-        gotItWhen: 'you can strum hard across all 6 strings and only the two chord notes ring — the other 4 stay silent, with your fretting fingers leaning into the THINNER strings and your picking-hand palm covering the THICKER ones (on an E5 there are none, so the fretting hand does it all; on A-string chords, the tip of your index finger also touches the low E).',
-        gotItWhen_es: 'puedes rasguear fuerte las 6 cuerdas y solo suenan las dos notas del acorde — las otras 4 quedan en silencio, con tus dedos de trastear inclinados sobre las cuerdas más DELGADAS y la palma de tu mano de pulsar cubriendo las más GRUESAS (en un E5 no hay ninguna, así que la mano de trastear lo hace todo; en los acordes de la cuerda La, la punta del índice también roza la cuerda Mi grave para silenciarla).',
+        gotItWhen: 'you strum all 6 strings hard and only the two chord notes ring. Your fretting hand mutes the thinner strings. On A-string chords, the tip of your index finger also mutes the low E.',
+        gotItWhen_es: 'rasgueas fuerte las 6 cuerdas y solo suenan las dos notas del acorde. Tu mano de trastear silencia las cuerdas más delgadas. En los acordes de la cuerda La, la punta de tu dedo índice también silencia la Mi grave.',
         practice: { type: 'mc', prompt: 'You strum all 6 strings on an E-root power chord, but extra strings keep ringing. What\'s the real fix?',
           prompt_es: 'Rasgueas las 6 cuerdas en un acorde de potencia con raíz en Mi, pero siguen sonando cuerdas de más. ¿Cuál es el verdadero arreglo?',
           choices: ['Strum much more softly', 'Aim your strum so carefully that you only ever hit the two strings you want', 'Let your fretting fingers lean lightly against the unused strings to mute them', 'Press the unused strings all the way down with spare fingers'],
@@ -624,7 +624,7 @@ SETS.push(
           },
           {
             // Hidden 2026-10-16 (Module 3 trim): the same "Watchtower" loop
-            // and rhythm as Set 1 Challenge 7, only at 70 BPM — Challenge 1's
+            // and rhythm as Set 1 Challenge 7, only at 70 BPM — Set 1 Challenge 7's
             // level-up covers that. Kept so no progress key moves.
             hidden: true,
             label: 'Challenge — Four-Chord Half-Bar ("Watchtower")', label_es: 'Reto — Medio compás con cuatro acordes ("Watchtower")',
@@ -672,8 +672,8 @@ SETS.push(
             label: 'Challenge — Clap & Count', label_es: 'Reto — Aplaude y cuenta',
             text: 'Clap and count each bar out loud. X means clap. &middot; means count without clapping.<ol><li>Bar 1: one whole note. Clap once and hold for 4 beats.</li><li>Bar 2: two half notes. Clap on 1 and 3.</li><li>Bar 3: four quarter notes. Clap on 1, 2, 3 and 4.</li><li>Bar 4: eight eighth notes. Clap on every number and every +.</li></ol><div class="strum-line">X   &middot;   &middot;   &middot;   &middot;   &middot;   &middot;   &middot;\n<span class="su-count">1   +   2   +   3   +   4   +</span></div><div class="strum-line">X   &middot;   &middot;   &middot;   X   &middot;   &middot;   &middot;\n<span class="su-count">1   +   2   +   3   +   4   +</span></div><div class="strum-line">X   &middot;   X   &middot;   X   &middot;   X   &middot;\n<span class="su-count">1   +   2   +   3   +   4   +</span></div><div class="strum-line">X   X   X   X   X   X   X   X\n<span class="su-count">1   +   2   +   3   +   4   +</span></div>You\'ve got it when: you clap all 4 bars with the metronome at 70 BPM and name each note value.',
             text_es: 'Aplaude y cuenta cada compás en voz alta. X significa aplauso. &middot; significa contar sin aplaudir.<ol><li>Compás 1: una redonda. Aplaude una vez y sostén 4 tiempos.</li><li>Compás 2: dos blancas. Aplaude en 1 y 3.</li><li>Compás 3: cuatro negras. Aplaude en 1, 2, 3 y 4.</li><li>Compás 4: ocho corcheas. Aplaude en cada número y en cada +.</li></ol><div class="strum-line">X   &middot;   &middot;   &middot;   &middot;   &middot;   &middot;   &middot;\n<span class="su-count">1   +   2   +   3   +   4   +</span></div><div class="strum-line">X   &middot;   &middot;   &middot;   X   &middot;   &middot;   &middot;\n<span class="su-count">1   +   2   +   3   +   4   +</span></div><div class="strum-line">X   &middot;   X   &middot;   X   &middot;   X   &middot;\n<span class="su-count">1   +   2   +   3   +   4   +</span></div><div class="strum-line">X   X   X   X   X   X   X   X\n<span class="su-count">1   +   2   +   3   +   4   +</span></div>Lo tienes cuando: aplaudes los 4 compases con el metrónomo a 70 BPM y nombras cada figura rítmica.',
-            hint: 'A down-up strum on every number and every + plays eighth notes on the guitar.',
-            hint_es: 'Un rasgueo abajo-arriba en cada número y en cada + toca corcheas en la guitarra.',
+            hint: 'Count the claps in one beat. Hold each clap until the next one.',
+            hint_es: 'Cuenta los aplausos en un tiempo. Sostén cada aplauso hasta el siguiente.',
             stuck: 'Clap once per beat first: 1 2 3 4. Then clap twice per beat: 1 + 2 + 3 + 4 +.',
             stuck_es: 'Primero aplaude una vez por tiempo: 1 2 3 4. Luego aplaude dos veces por tiempo: 1 + 2 + 3 + 4 +.',
             levelUp: 'Switch between one bar of eighth notes and one bar of quarter notes without losing the count.',
@@ -752,8 +752,8 @@ SETS.push(
             label: 'Challenge — F5 ↔ A5 Two-Shape Drill ("Luna")', label_es: 'Reto — Ejercicio de dos formas F5 ↔ A5 ("Luna")',
             text: '"Luna" is in 6/8: six beats in each bar, counted 1 2 3 4 5 6. Strum only on 1 and 4.<ol><li>Play F5 for two bars: low E string, fret 1.</li><li>Play A5 for two bars: low E string, fret 5.</li><li>Repeat at 60 BPM.</li></ol>You\'ve got it when: you play the loop four times clean at 60 BPM, then at 70 and 80.',
             text_es: '"Luna" está en 6/8: seis tiempos en cada compás, contados 1 2 3 4 5 6. Rasguea solo en el 1 y el 4.<ol><li>Toca F5 dos compases: cuerda Mi grave, traste 1.</li><li>Toca A5 dos compases: cuerda Mi grave, traste 5.</li><li>Repite a 60 BPM.</li></ol>Lo tienes cuando: tocas la vuelta cuatro veces limpia a 60 BPM, y luego a 70 y a 80.',
-            hint: 'Keep the shape and slide your whole hand four frets.',
-            hint_es: 'Mantén la forma y desliza toda la mano cuatro trastes.',
+            hint: 'A vamp is a short chord pattern repeated over and over. Keep the shape and slide your whole hand four frets.',
+            hint_es: 'Un vamp es un patrón corto de acordes que se repite una y otra vez. Mantén la forma y desliza toda la mano cuatro trastes.',
             stuck: 'Slide between fret 1 and fret 5 with no metronome until the move is easy. Then add the metronome at 60 BPM.',
             stuck_es: 'Desliza entre el traste 1 y el traste 5 sin metrónomo hasta que el movimiento te salga fácil. Luego agrega el metrónomo a 60 BPM.',
             levelUp: 'Palm-mute: rest the side of your strumming hand on the strings next to the bridge. Then play without the mute and compare the two sounds.',
@@ -972,8 +972,8 @@ SETS.push(
         text_es: 'Toca acordes de potencia con raíz en Mi y en La en una misma canción',
         gotItWhen: 'you can switch between an E-root and an A-root power chord mid-song without a gap in the sound and without the wrong strings ringing.',
         gotItWhen_es: 'puedes cambiar entre un acorde de potencia con raíz en Mi y uno con raíz en La a mitad de la canción sin que se corte el sonido y sin que suenen las cuerdas equivocadas.',
-        practice: { type: 'mc', prompt: 'A song calls for G5 then C5. You want both roots at the SAME fret, so your hand only moves one string. Where does your index finger go for each?',
-          prompt_es: 'Una canción pide G5 y luego C5. Quieres las dos raíces en el MISMO traste, para que tu mano solo cambie de cuerda. ¿Dónde va tu dedo índice para cada uno?',
+        practice: { type: 'mc', prompt: 'A song calls for G5 then C5. You want the smallest hand move between them. Where does your index finger go for each?',
+          prompt_es: 'Una canción pide G5 y luego C5. Quieres el movimiento de mano más pequeño entre ellos. ¿Dónde va tu dedo índice para cada uno?',
           choices: ['Both on the low E string, frets 3 and 8', 'Both on the A string, frets 3 and 10', 'G5 on E (fret 3), C5 on A (fret 3)', 'G5 on A (fret 10), C5 on E (fret 8)'],
           choices_es: ['Ambos en la cuerda Mi grave, trastes 3 y 8', 'Ambos en la cuerda La, trastes 3 y 10', 'G5 en Mi grave (traste 3), C5 en La (traste 3)', 'G5 en La (traste 10), C5 en Mi grave (traste 8)'], answer: 2,
           explain: 'G is at fret 3 of the low E string and C is at fret 3 of the A string — so the fret number never changes, only the string does. G5 at fret 10 of the A string and C5 at fret 8 of the low E string are real chords too, but they make your hand jump.',
@@ -1064,13 +1064,13 @@ MODULE_REVIEWS[3] = {
       text_es: 'Puedo aplaudir y contar un ritmo de 4 compases y nombrar cuáles notas son redondas, blancas, negras y corcheas', set: 'm3w2' }
   ],
   assessItems: [
-    'Play a core-song excerpt ("Seven Nation Army", "All Along the Watchtower"\'s A5–G5–F5, or "Sweet Child"\'s D5–C5–G5 — which switches between E- and A-string roots on the same fret) with every chord change landing on its beat at 80 BPM, unused strings muted the whole way, holding it for at least 15 seconds',
-    'Read a three-chord (I–IV–V) progression from chord symbols / TAB with a named strumming pattern (straight eighths or the split strum), and name power chords from a chord chart',
+    'Play part of a core song at 80 BPM for at least 15 seconds: "Seven Nation Army", "All Along the Watchtower" (A5–G5–F5–G5) or "Sweet Child O\' Mine" (D5–C5–G5). Every change lands on its beat, and the strings you do not use stay silent.',
+    'Read a I–IV–V progression from chord names or TAB and play it with a named strum (straight eighths or the split strum). Name power chords from a chord chart.',
     'Clap and count a 4-bar rhythm using whole, half, quarter, and eighth notes'
   ],
   assessItems_es: [
-    'Toca un fragmento de canción principal ("Seven Nation Army", el A5–G5–F5 de "All Along the Watchtower", o el D5–C5–G5 de "Sweet Child" — que cambia entre raíces de las cuerdas Mi y La en el mismo traste) con cada cambio de acorde cayendo en su tiempo a 80 BPM, con las cuerdas que no usas silenciadas todo el tiempo, sosteniéndolo por al menos 15 segundos',
-    'Lee una progresión de tres acordes (I–IV–V) a partir de símbolos de acorde / TAB con un patrón de rasgueo nombrado (corcheas rectas o el rasgueo dividido), y nombra acordes de potencia a partir de un diagrama de acordes',
+    'Toca parte de una canción principal a 80 BPM durante al menos 15 segundos: "Seven Nation Army", "All Along the Watchtower" (A5–G5–F5–G5) o "Sweet Child O\' Mine" (D5–C5–G5). Cada cambio cae en su tiempo, y las cuerdas que no usas quedan en silencio.',
+    'Lee una progresión I–IV–V a partir de nombres de acordes o TAB y tócala con un rasgueo nombrado (corcheas rectas o el rasgueo dividido). Nombra acordes de potencia a partir de un diagrama de acordes.',
     'Aplaude y cuenta un ritmo de 4 compases usando redondas, blancas, negras y corcheas'
   ],
   forward: '<strong>Module 4 teaches open chords</strong> — full chords that let open strings ring, like Am, C and G. You play "All Along the Watchtower" and "Sweet Child O\' Mine" again with them, on the same roots as your power chords. Then in Module 5, the E &amp; A string roots you slide between become the starting point for pentatonic scales (five-note scales) and your first solos.',

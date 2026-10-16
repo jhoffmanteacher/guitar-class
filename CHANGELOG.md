@@ -5,6 +5,18 @@ Notable changes to the Guitar Class site. Newest first.
 For the full session-by-session history (and the reasoning behind each change),
 see `WORKFLOW.md` and the git commit log.
 
+## 2026-10-16 — Modules 4–6: shorter steps
+
+- **Every step in Modules 4, 5 and 6 is shorter.** Directions are numbered
+  lists with one action per line, each ending with a countable "You've got
+  it when". Hints, Stuck? and Level up are about a third shorter. The
+  skills checklists are plainer too.
+- **Two repeat videos are gone:** the second showing of the major/minor
+  pentatonic video at the start of Module 5 Set 3, and the second
+  any-pattern strumming video in Module 6 Set 3. Steps you already
+  finished still count.
+- **Module 3:** the Module Review assessment list is shorter and clearer.
+
 ## 2026-10-16 — Madrecita Querida play-along
 
 - **New practice card: Madrecita Querida — Play Along.** Play with the
