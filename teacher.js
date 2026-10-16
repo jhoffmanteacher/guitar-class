@@ -3987,40 +3987,68 @@ function micEvalTake(pcm, R, d, deps){
     return 2 * Math.sqrt(re * re + im * im) / (b - a);
   }
   const clicks = { found: false };
+  /* Clicks 2-4 only (2026-10-16). The FIRST click is scheduled ~0.1 s
+     after micRecStart, and on the 10-16 Chromebooks it lands in the first
+     ~200 ms of the recording, which is still near-silent (the capture is
+     warming up) — so requiring all four beeps failed on every take, and
+     the best-scoring "candidate" became a played E5/B5 (659/988 Hz, the
+     beep pitches) seconds later. Now:
+       · the search only runs where the clicks can be: click 1 between
+         100 ms early and 600 ms late on the Coach's schedule (Note
+         Runner: its four clicks end before its first note);
+       · each of clicks 2, 3, 4 must stand > CLICK_EACH x its OWN tone's
+         background (median of that tone over the count-in) — a per-beep
+         test, no overall ratio, so one loud beep can't carry two missing
+         ones;
+       · and their onsets must agree to within CLICK_JITTER ms.
+     Click 1 is measured and reported (`first`) when it is in the audio,
+     never required. A take with no clicks (fake-take.mjs clicks=0) stays
+     found: false. */
+  const CLICK_EACH = 4, CLICK_JITTER = 40;
   if (beat > 0){
-    const span = Math.min(N - ms2s(4 * beat), ms2s(Math.max(1500, (expected[0] && expected[0].t || 0) + 600)));
-    const halfS = ms2s(20), stepS = ms2s(4);
-    const sc = [];
-    for (let c = 0; c < span; c += stepS){
-      const k = [0, 1, 2].map(j => tone(660, c + ms2s(j * beat) + halfS, halfS));
-      k.push(tone(990, c + ms2s(3 * beat) + halfS, halfS));
-      sc.push({ c, v: k.reduce((p, q) => p + Math.min(q, 3 * Math.min(...k) + 1e-6), 0), k });
+    const e0 = expected[0] && expected[0].t;
+    const halfS = ms2s(20), stepS = ms2s(4), B = ms2s(beat);
+    const fOf = j => j === 3 ? 990 : 660;
+    // each tone's background over the count-in (and a beat past it)
+    const bgEnd = Math.min(N, ms2s((e0 != null ? e0 : 4 * beat) + beat));
+    const bg = [660, 990].map(f => { const v = []; for (let s = 0; s + 2 * halfS < bgEnd; s += ms2s(20)) v.push(tone(f, s + halfS, halfS)); return med(v) || 1e-9; });
+    const bgOf = j => j === 3 ? bg[1] : bg[0];
+    // click 1's arrival, on the recording's clock
+    let lo, hi;
+    if (d.mode !== 'nr' && e0 != null){ lo = ms2s(e0 - 4 * beat - 100); hi = ms2s(e0 - 4 * beat + 600); }
+    else { lo = -B; hi = e0 != null ? ms2s(e0 + 600) - 4 * B : ms2s(1500); }
+    lo = Math.max(lo, -B + 1); hi = Math.min(hi, N - 3 * B - 2 * halfS);
+    let best = null;
+    for (let c = lo; c <= hi; c += stepS){
+      const k = [1, 2, 3].map(j => tone(fOf(j), c + j * B + halfS, halfS) / bgOf(j));
+      const v = Math.min(...k);
+      if (!best || v > best.v) best = { c, v, k };
     }
-    if (sc.length){
-      const best = sc.reduce((p, q) => q.v > p.v ? q : p);
-      const bg = med(sc.map(o => o.v)) || 1e-9;
-      clicks.snrDb = r1(dB(best.v / bg));
-      // every one of the four beeps must stand clear of its own tone's background
-      const each = [0, 1, 2, 3].every(j => best.k[j] > 3 * (med(sc.map(o => o.k[j])) || 1e-9));
-      // and for the Coach, whose schedule we know, land somewhere a speaker could put them
-      const e0c = expected[0] && expected[0].t;
-      const lagC = d.mode !== 'nr' && e0c != null ? s2ms(best.c) - (e0c - 4 * beat) : 0;
-      if (best.v / bg > 4 && each && lagC > -100 && lagC < 600){
-        // each click's onset: first 2 ms step where its tone passes half its own peak
-        const ons = [0, 1, 2, 3].map(j => {
-          const f = j === 3 ? 990 : 660, c0 = best.c + ms2s(j * beat);
-          let pk = 0; const prof = [];
-          for (let s = c0 - ms2s(60); s < c0 + ms2s(100); s += ms2s(2)){ const v = tone(f, s, ms2s(5)); prof.push([s, v]); if (v > pk) pk = v; }
-          const hit = prof.find(p => p[1] >= pk * 0.5);
-          return s2ms(hit ? hit[0] : c0) - j * beat;
-        });
+    if (best){
+      const e0c = e0;
+      const lagC = d.mode !== 'nr' && e0c != null ? s2ms(best.c) - (e0c - 4 * beat) : null;
+      const first = best.c >= 0 ? r1(tone(660, best.c + halfS, halfS) / bg[0]) : null;
+      clicks.snrDb = r1(dB(best.v));
+      // each click's onset: first 2 ms step where its tone passes half its own peak
+      const onsetOf = j => {
+        const f = fOf(j), c0 = best.c + j * B;
+        let pk = 0; const prof = [];
+        for (let s = c0 - ms2s(60); s < c0 + ms2s(100); s += ms2s(2)){ const v = tone(f, s, ms2s(5)); prof.push([s, v]); if (v > pk) pk = v; }
+        const hit = prof.find(p => p[1] >= pk * 0.5);
+        return s2ms(hit ? hit[0] : c0) - j * beat;
+      };
+      const ons = [1, 2, 3].map(onsetOf);
+      const jitter = Math.max(...ons) - Math.min(...ons);
+      // why it was or wasn't found — eval-takes prints this per take
+      clicks.diag = { bestMs: r1(s2ms(best.c)), each: best.k.map(r1), first, jitterMs: r1(jitter),
+        lagC: lagC == null ? null : r1(lagC), firstNoteMs: e0c != null ? r1(e0c) : null };
+      if (best.k.every(v => v > CLICK_EACH) && jitter <= CLICK_JITTER){
         const c0ms = med(ons);
         clicks.found = true;
         clicks.audioMs = r1(c0ms);
-        clicks.jitterMs = r1(Math.max(...ons) - Math.min(...ons));
-        clicks.ampDb = r1(dB(Math.max(...best.k)));
+        clicks.jitterMs = r1(jitter);
+        clicks.ampDb = r1(dB(Math.max(...[1, 2, 3].map(j => tone(fOf(j), best.c + j * B + halfS, halfS)))));
         // when the first click was scheduled, on the recording's clock
-        const e0 = expected[0] && expected[0].t;
         if (e0 != null){
           if (d.mode === 'nr'){
             // Note Runner's first note can sit after beat 1: try each half beat
@@ -4047,7 +4075,7 @@ function micEvalTake(pcm, R, d, deps){
   const mapMs = maps.length >= 3 ? med(maps) : null;
   const latency = { settingMs: lat, clickFound: clicks.found, clickSnrDb: clicks.snrDb == null ? null : clicks.snrDb,
     clickAmpDb: clicks.ampDb == null ? null : clicks.ampDb, clickJitterMs: clicks.jitterMs == null ? null : clicks.jitterMs,
-    clickLagMs: clicks.lagMs == null ? null : clicks.lagMs, mapMs: r1(mapMs), mapN: maps.length };
+    clickLagMs: clicks.lagMs == null ? null : clicks.lagMs, mapMs: r1(mapMs), mapN: maps.length, clickDiag: clicks.diag || null };
   if (clicks.lagMs != null && mapMs != null){
     latency.idealMs = r1(clicks.lagMs + mapMs);
     latency.skewMs = r1(clicks.lagMs + mapMs - lat);

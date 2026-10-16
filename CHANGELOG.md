@@ -5,6 +5,16 @@ Notable changes to the Guitar Class site. Newest first.
 For the full session-by-session history (and the reasoning behind each change),
 see `WORKFLOW.md` and the git commit log.
 
+## 2026-10-16 — Teacher console: mic recordings
+
+- **Download all** saves every mic recording as one zip file.
+- **Evaluate all recordings** now says why each note the site did not
+  count was missed: too few pitch readings, too far off the beat, or no
+  pluck heard.
+- **The count-in beeps are found in more recordings**, so the mic delay
+  can be measured. The first beep is often lost at the start of a
+  recording, so the check now uses beeps 2, 3 and 4.
+
 ## 2026-10-15 — Sweet Child O' Mine: the last "where do we go" bar
 
 - **Sweet Child O' Mine — The Whole Song (single notes and power chords):**
