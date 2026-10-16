@@ -392,9 +392,15 @@ function checkSectionKindTitle(allSets) {
    the next person reading the module file (including a future audit) has
    nothing to tell them it's deliberate, let alone which activity replaced
    it. Mechanical: a line-above-line text check, not a data-shape one.
+   Since 2026-10-16 a step can also be hidden because it was TRIMMED (the
+   Module 3 clean-up: a frozen module can't delete a step without moving
+   every key after it, so `hidden` is how a step comes out). The reason
+   then reads "Hidden YYYY-MM-DD (...)" instead of naming an activity. The
+   comment block directly above (consecutive // lines) must carry one of
+   the two; a bare `hidden: true` still fails.
    ════════════════════════════════════════════════════════════════════ */
 function checkHiddenStepComments() {
-  head('1ae. Hidden steps carry a // ca-<n> comment');
+  head('1ae. Hidden steps carry a // ca-<n> or // Hidden <date> reason');
   let bad = 0, hiddenCount = 0;
   for (const file of MODULE_FILES) {
     let lines;
@@ -402,15 +408,17 @@ function checkHiddenStepComments() {
     lines.forEach((line, li) => {
       if (!/^\s*hidden:\s*true\s*,?\s*$/.test(line)) return;
       hiddenCount++;
-      const prev = (lines[li - 1] || '').trim();
-      if (!/^\/\/.*\bca-\d+\b/.test(prev)) {
-        err(`${file}:${li + 1}: 'hidden: true' with no "// ... ca-<n>" comment on the line above it — say which class activity now teaches this step`);
+      const block = [];
+      for (let k = li - 1; k >= 0 && /^\s*\/\//.test(lines[k]); k--) block.unshift(lines[k].trim());
+      const why = block.join(' ');
+      if (!block.length || !(/\bca-\d+\b/.test(why) || /\bHidden \d{4}-\d{2}-\d{2}\b/.test(why))) {
+        err(`${file}:${li + 1}: 'hidden: true' with no "// ... ca-<n>" or "// Hidden YYYY-MM-DD (why)" comment directly above it — say which class activity now teaches this step, or why it was trimmed`);
         problems++; bad++;
       }
     });
   }
   if (hiddenCount === 0) { warn('no hidden:true steps found yet — 1ae has nothing to check'); warnings++; return; }
-  if (bad === 0) ok(`${hiddenCount} hidden steps all carry a // ca-<n> comment above them`);
+  if (bad === 0) ok(`${hiddenCount} hidden steps all carry a // ca-<n> or // Hidden <date> reason above them`);
 }
 
 /* ════════════════════════════════════════════════════════════════════

@@ -5,6 +5,18 @@ Notable changes to the Guitar Class site. Newest first.
 For the full session-by-session history (and the reasoning behind each change),
 see `WORKFLOW.md` and the git commit log.
 
+## 2026-10-16 — Module 3: shorter steps, video first
+
+- **Module 3 Set 1 now opens with a video.** The first step starts with
+  Lauren Bateman's "What Is A Power Chord?" and then has you build E5, G5
+  and A5.
+- **Every Module 3 step is shorter.** Directions are numbered lists with
+  one action per line. Hints, Stuck? and Level up are about half as long.
+- **Four steps are gone:** the second copy of the power-chord video, the
+  bonus rock-songs video, the alternate-picking video, and the
+  four-chord "Watchtower" step that repeated Set 1. Steps you already
+  finished still count.
+
 ## 2026-10-16 — Listening Coach and Note Runner listen a little longer
 
 - **A note the site heard but could not read is no longer always
