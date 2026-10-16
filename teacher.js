@@ -2258,8 +2258,12 @@ function renderTeacherActivityDetail(id){
   setBoardWide(false);
   const box=document.getElementById('t-grid-container');
   const back=`<button type="button" class="stu-back" data-back-to-activities>&#x2190; All activities</button>`;
-  const a=(window.CLASS_ACTIVITIES||[]).find(x=>x.id===id);
-  if(!a){ box.innerHTML=`${back}<div class="t-loading">Could not find that activity — it may have been renamed or removed.</div>`; return; }
+  const raw=(window.CLASS_ACTIVITIES||[]).find(x=>x.id===id);
+  if(!raw){ box.innerHTML=`${back}<div class="t-loading">Could not find that activity — it may have been renamed or removed.</div>`; return; }
+  /* The Full chords / Power chords switch (chordVersions — caView in app.js):
+     the preview draws the version the switch shows, through the same
+     transform the student card uses, so the two can't disagree. */
+  const a=typeof caView==='function'?caView(raw):raw;
   // A check has no steps — its detail page is a results grid, see below.
   if(a.kind==='check') return renderTeacherCheckDetail(a, back);
   // Where this card sits in the course, straight off the board — "Module 3
@@ -2357,6 +2361,7 @@ function renderTeacherActivityDetail(id){
     <div class="stu-section-head">Students</div>
     <div data-ta-live="grid">${teacherActivityGridHtml(a)}</div>
     <div class="stu-section-head">Preview</div>
+    ${/* A practice card draws its own switch inside caCardBodyHtml. */ typeof caIsCard==='function'&&caIsCard(a)?'':(typeof caChordSwitchHtml==='function'?caChordSwitchHtml(a):'')}
     ${typeof caIsCard==='function'&&caIsCard(a) ? caCardBodyHtml(a,{preview:true})
       : (a.view==='focus' && taFocusPreviewOn[a.id]) ? focusPreviewHtml()
       : (stepsHtml || '<div class="stu-empty">No steps on this activity yet.</div>')}

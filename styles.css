@@ -1577,6 +1577,9 @@ body.t-wide .t-main{max-width:none}
    playing, so full text colour and a size up from the italic phrase label. */
 .pc-row-label{font-size:0.9375rem;color:var(--text);font-style:normal;margin:8px 0 2px}
 .pc-row-label:first-child{margin-top:2px}
+/* Full chords / Power chords (chordVersions — caChordSwitchHtml). */
+.ca-chord-switch{display:flex;flex-wrap:wrap;gap:6px;margin:0 0 10px}
+@media print{.ca-chord-switch{display:none}}
 /* The TAB board never scrolls sideways: it fills the card and a long phrase
    wraps into stacked systems (renderTabBlock, TAB_MAX_COLS). --tab-cell-h is
    the string-row height; the staff box reads it too, so one override resizes

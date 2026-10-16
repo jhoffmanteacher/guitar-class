@@ -79,6 +79,16 @@
    became practice cards, below. 2026-10-01: every remaining step ladder —
    ca-1 to ca-8, ca-11, ca-12, ca-17 — got Focus view too.)
 
+   CHORD VERSIONS — `chordVersions: { power: { <chord>: { frets, note,
+   midi } } }` (optional; Jonathan, 2026-10-16: ca-34, ca-35). The card gets
+   a Full chords / Power chords switch. In power mode every chord note whose
+   `note` the map names becomes the mapped shape (its `beats` kept), every
+   "[A]"-style mark in a string becomes "[A5]", and any field with a
+   `_power` twin (`text_power`, `label_power`, `caption_power`,
+   `intro_power`, each with its `_power_es`) is shown instead of the base
+   field. Same steps, checks, ticks and beats either way — caView in app.js.
+   checks.mjs 1d checks the shapes and the `_power` / `_power_es` pairs.
+
    OPTIONAL — `optional: true` (optional; the only value). The card starts
    out Optional — shown, tagged Optional, never sent to first at sign-in —
    until the teacher switches it to Required on the console board, which
@@ -4721,19 +4731,37 @@ window.CLASS_ACTIVITIES = [
     id:    'ca-34',
     view:  'focus',   // one step at a time — see VIEW above
     optional: true,   // Optional until switched to Required on the board (Jonathan, 2026-10-14) — see OPTIONAL above
+    /* Full chords / Power chords switch (Jonathan, 2026-10-16) — see
+       caView in app.js. Module 3's shapes, all in frets 5-9 so the hand
+       barely moves: A5 on the low E string, E5 and D5 on the A string. */
+    chordVersions: {
+      power: {
+        A:  { frets: [['A', 7], ['E', 5]], note: 'A5', midi: [52, 45] },
+        E7: { frets: [['D', 9], ['A', 7]], note: 'E5', midi: [59, 52] },
+        D:  { frets: [['D', 7], ['A', 5]], note: 'D5', midi: [57, 50] },
+      },
+    },
     title:    'Las Mañanitas — A, E7 and D',
     title_es: 'Las Mañanitas — A, E7 y D',
     intro:    'You learn A, E7 and D, a strum in 3 (three beats in each bar), and then the whole song with the words.',
     intro_es: 'Aprendes A, E7 y D, un rasgueo en 3 (tres tiempos en cada compás) y luego toda la canción con la letra.',
+    intro_power:    'You learn the A5, E5 and D5 power chords, a strum in 3 (three beats in each bar), and then the whole song with the words.',
+    intro_power_es: 'Aprendes los acordes de potencia A5, E5 y D5, un rasgueo en 3 (tres tiempos en cada compás) y luego toda la canción con la letra.',
     steps: [
       {
         label:    'Practice — The A chord',
         label_es: 'Practica — El acorde A',
+        label_power:    'Practice — The A5 power chord',
+        label_power_es: 'Practica — El acorde de potencia A5',
+        text_power: 'Put finger 1 on fret 5 of the low E string and finger 3 on fret 7 of the A string. Pick the two strings one at a time, then strum just those two. You\'ve got it when: both strings ring with no buzz, three times in a row. A string sounds dead? Press each finger just behind the fret.',
+        text_power_es: 'Pon el dedo 1 en el traste 5 de la cuerda Mi grave y el dedo 3 en el traste 7 de la cuerda La. Toca las dos cuerdas una por una y luego rasguea solo esas dos. Lo tienes cuando: las dos cuerdas suenan sin zumbido, tres veces seguidas. ¿Una cuerda no suena? Presiona cada dedo justo detrás del traste.',
         text: 'Put fingers 1, 2 and 3 on fret 2 of the D, G and B strings. Pick each string from the A string to the high e, one at a time. You\'ve got it when: all five strings ring with no buzz, three times in a row. A string sounds dead? Press each finger just behind the fret.',
         text_es: 'Pon los dedos 1, 2 y 3 en el traste 2 de las cuerdas Re, Sol y Si. Toca cada cuerda desde la cuerda La hasta la cuerda mi aguda, una por una. Lo tienes cuando: las cinco cuerdas suenan sin zumbido, tres veces seguidas. ¿Una cuerda no suena? Presiona cada dedo justo detrás del traste.',
         tab: {
           caption: 'A chord · don\'t play the low E string',
           caption_es: 'Acorde A · no toques la cuerda Mi grave',
+          caption_power:    'A5 · only the low E and A strings',
+          caption_power_es: 'A5 · solo las cuerdas Mi grave y La',
           notes: [
             { frets: [['A', 0], ['D', 2], ['G', 2], ['B', 2], ['e', 0]], note: 'A', midi: [45, 52, 57, 61, 64] }
           ]
@@ -4742,11 +4770,17 @@ window.CLASS_ACTIVITIES = [
       {
         label:    'Practice — The E7 chord',
         label_es: 'Practica — El acorde E7',
+        label_power:    'Practice — The E5 power chord',
+        label_power_es: 'Practica — El acorde de potencia E5',
+        text_power: 'Put finger 1 on fret 7 of the A string and finger 3 on fret 9 of the D string. Pick the two strings one at a time, then strum just those two. You\'ve got it when: both strings ring with no buzz, three times in a row. A string sounds dead? Press each finger just behind the fret.',
+        text_power_es: 'Pon el dedo 1 en el traste 7 de la cuerda La y el dedo 3 en el traste 9 de la cuerda Re. Toca las dos cuerdas una por una y luego rasguea solo esas dos. Lo tienes cuando: las dos cuerdas suenan sin zumbido, tres veces seguidas. ¿Una cuerda no suena? Presiona cada dedo justo detrás del traste.',
         text: 'Put finger 2 on fret 2 of the A string and finger 1 on fret 1 of the G string. Pick all six strings, one at a time. You\'ve got it when: all six strings ring with no buzz, three times in a row. The B string is muted? Curl finger 1 so it doesn\'t touch it.',
         text_es: 'Pon el dedo 2 en el traste 2 de la cuerda La y el dedo 1 en el traste 1 de la cuerda Sol. Toca las seis cuerdas, una por una. Lo tienes cuando: las seis cuerdas suenan sin zumbido, tres veces seguidas. ¿La cuerda Si no suena? Curva el dedo 1 para que no la toque.',
         tab: {
           caption: 'E7 chord · all six strings',
           caption_es: 'Acorde E7 · las seis cuerdas',
+          caption_power:    'E5 · only the A and D strings',
+          caption_power_es: 'E5 · solo las cuerdas La y Re',
           notes: [
             { frets: [['E', 0], ['A', 2], ['D', 0], ['G', 1], ['B', 0], ['e', 0]], note: 'E7', midi: [40, 47, 50, 56, 59, 64] }
           ]
@@ -4755,11 +4789,17 @@ window.CLASS_ACTIVITIES = [
       {
         label:    'Practice — The D chord',
         label_es: 'Practica — El acorde D',
+        label_power:    'Practice — The D5 power chord',
+        label_power_es: 'Practica — El acorde de potencia D5',
+        text_power: 'Put finger 1 on fret 5 of the A string and finger 3 on fret 7 of the D string. Pick the two strings one at a time, then strum just those two. You\'ve got it when: both strings ring with no buzz, three times in a row. A string sounds dead? Press each finger just behind the fret.',
+        text_power_es: 'Pon el dedo 1 en el traste 5 de la cuerda La y el dedo 3 en el traste 7 de la cuerda Re. Toca las dos cuerdas una por una y luego rasguea solo esas dos. Lo tienes cuando: las dos cuerdas suenan sin zumbido, tres veces seguidas. ¿Una cuerda no suena? Presiona cada dedo justo detrás del traste.',
         text: 'Put finger 1 on fret 2 of the G string, finger 3 on fret 3 of the B string and finger 2 on fret 2 of the high e. Pick each string from the D string to the high e, one at a time. You\'ve got it when: all four strings ring with no buzz, three times in a row. The high e sounds dead? Curl finger 3 so it doesn\'t touch it.',
         text_es: 'Pon el dedo 1 en el traste 2 de la cuerda Sol, el dedo 3 en el traste 3 de la cuerda Si y el dedo 2 en el traste 2 de la cuerda mi aguda. Toca cada cuerda desde la cuerda Re hasta la cuerda mi aguda, una por una. Lo tienes cuando: las cuatro cuerdas suenan sin zumbido, tres veces seguidas. ¿La cuerda mi aguda no suena? Curva el dedo 3 para que no la toque.',
         tab: {
           caption: 'D chord · start on the D string',
           caption_es: 'Acorde D · empieza en la cuerda Re',
+          caption_power:    'D5 · only the A and D strings',
+          caption_power_es: 'D5 · solo las cuerdas La y Re',
           notes: [
             { frets: [['D', 0], ['G', 2], ['B', 3], ['e', 2]], note: 'D', midi: [50, 57, 62, 66] }
           ]
@@ -4773,6 +4813,8 @@ window.CLASS_ACTIVITIES = [
         tab: {
           caption: '3 strums per bar · A · E7 · D · E7, then back to A',
           caption_es: '3 rasgueos por compás · A · E7 · D · E7, y vuelve a A',
+          caption_power:    '3 strums per bar · A5 · E5 · D5 · E5, then back to A5',
+          caption_power_es: '3 rasgueos por compás · A5 · E5 · D5 · E5, y vuelve a A5',
           notes: [
             { frets: [['A', 0], ['D', 2], ['G', 2], ['B', 2], ['e', 0]], note: 'A', midi: [45, 52, 57, 61, 64] },
             { frets: [['A', 0], ['D', 2], ['G', 2], ['B', 2], ['e', 0]], note: 'A', midi: [45, 52, 57, 61, 64] },
@@ -5043,10 +5085,22 @@ window.CLASS_ACTIVITIES = [
     id:    'ca-35',
     view:  'card',    // one screen: Play song + tab + checks — see CARD above
     optional: true,   // Optional until switched to Required on the board — see OPTIONAL above
+    /* Full chords / Power chords switch (Jonathan, 2026-10-16) — see
+       caView in app.js. Module 3's shapes, all in frets 5-9 so the hand
+       barely moves: A5 on the low E string, E5 and D5 on the A string. */
+    chordVersions: {
+      power: {
+        A:  { frets: [['A', 7], ['E', 5]], note: 'A5', midi: [52, 45] },
+        E7: { frets: [['D', 9], ['A', 7]], note: 'E5', midi: [59, 52] },
+        D:  { frets: [['D', 7], ['A', 5]], note: 'D5', midi: [57, 50] },
+      },
+    },
     title:    'Las Mañanitas — Play Along',
     title_es: 'Las Mañanitas — Toca con la canción',
     intro:    'You learned A, E7, D and the strum in 3 — today you play Las Mañanitas with the band, from the first verse to the last chorus.',
     intro_es: 'Aprendiste A, E7, D y el rasgueo en 3 — hoy tocas Las Mañanitas con la banda, de la primera estrofa al último coro.',
+    intro_power:    'You learned A5, E5, D5 and the strum in 3 — today you play Las Mañanitas with the band, from the first verse to the last chorus.',
+    intro_power_es: 'Aprendiste A5, E5, D5 y el rasgueo en 3 — hoy tocas Las Mañanitas con la banda, de la primera estrofa al último coro.',
     card: {
       /* Not `wholeSong`: that flag also files the card under a Song Journey
          page and a Songs row (1bf requires `journey`), and Las Mañanitas has
@@ -5060,6 +5114,7 @@ window.CLASS_ACTIVITIES = [
         {
           label: 'Verse 1', label_es: 'Estrofa 1',
           caption: 'Verse 1 — A, E7 and D', caption_es: 'Estrofa 1 — A, E7 y D',
+          caption_power: 'Verse 1 — A5, E5 and D5', caption_power_es: 'Estrofa 1 — A5, E5 y D5',
           fromBar: 11, bars: 36,
           rows: [2, 4, 2, 4],
           rowLabels: [
@@ -5092,6 +5147,7 @@ window.CLASS_ACTIVITIES = [
         {
           label: 'Chorus 1', label_es: 'Coro 1',
           caption: 'Chorus — E7, D, A', caption_es: 'Coro — E7, D, A',
+          caption_power: 'Chorus — E5, D5, A5', caption_power_es: 'Coro — E5, D5, A5',
           fromBar: 47, bars: 8,
           rows: [2, 3],
           rowLabels: [
@@ -5114,6 +5170,8 @@ window.CLASS_ACTIVITIES = [
           label: 'Solo', label_es: 'Solo',
           caption: 'Solo — requinto (lead guitar) tab · rhythm guitar keeps strumming E7, D, A, E7, A',
           caption_es: 'Solo — tablatura del requinto (guitarra líder) · la guitarra rítmica sigue rasgueando E7, D, A, E7, A',
+          caption_power:    'Solo — requinto (lead guitar) tab · rhythm guitar keeps strumming E5, D5, A5, E5, A5',
+          caption_power_es: 'Solo — tablatura del requinto (guitarra líder) · la guitarra rítmica sigue rasgueando E5, D5, A5, E5, A5',
           fromBar: 55, bars: 14,
           /* The requinto solo from Jonathan's chord sheet (2026-10-14: "add the
              solo part to the play along activity"), one row per bar of the
@@ -5256,6 +5314,7 @@ window.CLASS_ACTIVITIES = [
         {
           label: 'Verse 2', label_es: 'Estrofa 2',
           caption: 'Verse 2 — A, E7 and D', caption_es: 'Estrofa 2 — A, E7 y D',
+          caption_power: 'Verse 2 — A5, E5 and D5', caption_power_es: 'Estrofa 2 — A5, E5 y D5',
           fromBar: 69, bars: 28,
           rows: [2, 4, 2, 2],
           rowLabels: [
@@ -5286,6 +5345,7 @@ window.CLASS_ACTIVITIES = [
         {
           label: 'Chorus 2', label_es: 'Coro 2',
           caption: 'Chorus — E7, D, A', caption_es: 'Coro — E7, D, A',
+          caption_power: 'Chorus — E5, D5, A5', caption_power_es: 'Coro — E5, D5, A5',
           fromBar: 97, bars: 8,
           rows: [2, 3],
           rowLabels: [

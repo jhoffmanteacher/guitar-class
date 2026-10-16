@@ -11608,6 +11608,7 @@ function caStartHereTagHtml(a, isCurrent){
 }
 function caHeroCardHtml(a, isCurrent = true){
   if(a.kind === 'check') return caHeroCheckHtml(a, isCurrent);
+  a = caView(a);   // power-chord version when the switch says so — see caView
   const open = caOpenId === a.id;
   const done = classActivities[a.id] === true;
   // Focus view always has exactly one step open (caFocusIdx); the accordion
@@ -11646,7 +11647,7 @@ function caHeroCardHtml(a, isCurrent = true){
       ${caPrintBtnHtml(a)}
     </summary>
     <div class="ca-card-body">
-      ${card ? caCardBodyHtml(a) : caIntroHtml(a, focus, openStepIdx)}
+      ${card ? caCardBodyHtml(a) : caChordSwitchHtml(a) + caIntroHtml(a, focus, openStepIdx)}
       ${stepsHtml && focus ? caFocusDotsHtml(a, openStepIdx) : ''}
       ${stepsHtml ? `<ol class="ca-steps">${stepsHtml}</ol>` : ''}
       ${caMarkRowHtml(a, done, markLabel)}
@@ -12045,6 +12046,87 @@ function caOpenLinkedCard(from, id){
    through caToggleComplete, which closes the card and re-renders the page:
    that would stop the song mid-play and hide Level up. Ticks live in
    caStepDone under `<id>:c<n>` — saved to progress, like step ticks. */
+/* ── Chord versions: one activity, two ways to play it ──
+   Jonathan, 2026-10-16: "add power chords as an option to the las mananitas
+   activities. don't add activities but make a toggle switch to switch
+   between a power chord version and a full chord version."
+
+   An activity opts in with `chordVersions: { power: { <chord>: <shape> } }`
+   (ca-34, ca-35). The card then shows a Full chords / Power chords switch,
+   and in power mode every renderer draws caView(a) instead of `a`:
+     - every chord note (`frets` + a `note` the map names) becomes the mapped
+       shape, keeping its `beats`;
+     - every "[A]"-style chord mark in a string (lyric rows, phrase labels)
+       is renamed to the mapped chord, "[A5]";
+     - any field with a `_power` twin (`text_power`, `label_power_es`,
+       `caption_power`, `intro_power`…) replaces the base field.
+   Nothing else moves: same id, same steps, same checks, same tick keys,
+   same beats, so progress is shared by both versions and a student can
+   switch mid-song. The choice is a per-viewer convenience in localStorage
+   (`caChordModes`, { id: 'power' }), default Full. ONE transform, called at
+   the top of caHeroCardHtml, caActivityCardHtml, caCardBodyHtml and
+   teacher.js's renderTeacherActivityDetail, so the two renderers can't
+   disagree. checks.mjs 1d validates the map and the `_power` twins. */
+const CA_CHORD_MODES_KEY = 'caChordModes';
+let caChordModes = (() => {
+  try { const v = JSON.parse(localStorage.getItem(CA_CHORD_MODES_KEY) || '{}'); return v && typeof v === 'object' ? v : {}; }
+  catch(e) { return {}; }
+})();
+function caHasChordVersions(a){ return !!(a && a.chordVersions && a.chordVersions.power && typeof a.chordVersions.power === 'object'); }
+function caChordMode(a){ return caHasChordVersions(a) && caChordModes[a.id] === 'power' ? 'power' : 'full'; }
+const caChordViews = new WeakMap();
+function caView(a){
+  if(!a || a.__chordView || caChordMode(a) !== 'power') return a;
+  const hit = caChordViews.get(a);
+  if(hit) return hit;
+  const map = a.chordVersions.power;
+  const keys = Object.keys(map).sort((x, y) => y.length - x.length);
+  const re = keys.length ? new RegExp('\\[(' + keys.map(k => k.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')).join('|') + ')\\]', 'g') : null;
+  const walk = v => {
+    if(typeof v === 'string') return re ? v.replace(re, (m, k) => `[${map[k].note}]`) : v;
+    if(Array.isArray(v)) return v.map(walk);
+    if(v && typeof v === 'object'){
+      if(Array.isArray(v.frets) && Object.prototype.hasOwnProperty.call(map, v.note)){
+        const c = map[v.note];
+        return { ...v, frets: c.frets.map(f => f.slice()), midi: c.midi.slice(), note: c.note };
+      }
+      const out = {};
+      Object.keys(v).forEach(k => { out[k] = walk(v[k]); });
+      Object.keys(v).forEach(k => {
+        const m = /^(.+)_power(_es)?$/.exec(k);
+        if(m) out[m[1] + (m[2] || '')] = out[k];
+      });
+      return out;
+    }
+    return v;
+  };
+  const view = walk(a);
+  view.__chordView = true;
+  caChordViews.set(a, view);
+  return view;
+}
+function caChordSwitchHtml(a){
+  if(!caHasChordVersions(a)) return '';
+  const p = caChordMode(a) === 'power';
+  const id = escAttr(a.id);
+  return `<div class="ca-chord-switch" role="group" aria-label="${escAttr(t('ca.chordVersion'))}">`
+    + `<button type="button" class="snip-toggle${p ? '' : ' on'}" aria-pressed="${p ? 'false' : 'true'}" onclick="caSetChordMode('${id}','full')">${escHtml(t('ca.chordFull'))}</button>`
+    + `<button type="button" class="snip-toggle${p ? ' on' : ''}" aria-pressed="${p ? 'true' : 'false'}" onclick="caSetChordMode('${id}','power')">${escHtml(t('ca.chordPower'))}</button>`
+    + `</div>`;
+}
+/* Redraw in the other version. stopCardAudio first: the tab or song that
+   was playing belongs to markup about to be replaced. Not the full sweep —
+   a metronome the student started stays on (see the two silencers). */
+function caSetChordMode(id, mode){
+  const want = mode === 'power' ? 'power' : 'full';
+  if((caChordModes[id] === 'power' ? 'power' : 'full') === want) return;
+  if(want === 'power') caChordModes[id] = 'power'; else delete caChordModes[id];
+  try { localStorage.setItem(CA_CHORD_MODES_KEY, JSON.stringify(caChordModes)); } catch(e) {}
+  stopCardAudio();
+  if(IS_TEACHER_MODE && typeof renderTeacherActivityDetail === 'function'){ renderTeacherActivityDetail(id); return; }
+  caOpenId = id;
+  renderClassActivities();
+}
 function caIsCard(a){ return !!(a && a.view === 'card' && a.card); }
 function caCardChecks(a){ return (a && a.card && Array.isArray(a.card.checks)) ? a.card.checks : []; }
 /* A check's tick key. Positional by default; `slot: n` pins it to the key it
@@ -12288,10 +12370,12 @@ function pcHelpHtml(a, preview){
     + `<div class="pc-help" hidden><p class="pc-help-note">${escHtml(t('ca.cardHelpNote'))}</p>${body}</div>`;
 }
 function caCardBodyHtml(a, opts){
+  a = caView(a);   // power-chord version when the switch says so — see caView
   const L = pcLayout(a);
   if(!L) return '';
   const preview = !!(opts && opts.preview);
   return `<div class="pc" data-id="${escAttr(a.id)}" data-slow="1"${snippetHasFull(L.tr) ? ' data-guitar="1"' : ''}${preview ? ' data-preview="1"' : ''}>`
+    + caChordSwitchHtml(a)
     + `<p class="pc-dir">${escHtml(t('ca.cardDirections'))}</p>`
     + pcPlayerHtml(a, L) + pcTabHtml(a, L) + pcChecksHtml(a, preview) + pcHelpHtml(a, preview)
     + `</div>`;
@@ -12795,6 +12879,7 @@ function caPrintBtnHtml(a){
 }
 function caActivityCardHtml(a){
   if(a.kind === 'check') return caCheckCardHtml(a);
+  a = caView(a);   // power-chord version when the switch says so — see caView
   const done = classActivities[a.id] === true;
   const open = caOpenId === a.id;
   // Focus view always has exactly one step open (caFocusIdx); the accordion
@@ -12821,7 +12906,7 @@ function caActivityCardHtml(a){
       ${caPrintBtnHtml(a)}
     </summary>
     <div class="ca-card-body">
-      ${card ? caCardBodyHtml(a) : caIntroHtml(a, focus, openStepIdx)}
+      ${card ? caCardBodyHtml(a) : caChordSwitchHtml(a) + caIntroHtml(a, focus, openStepIdx)}
       ${stepsHtml && focus ? caFocusDotsHtml(a, openStepIdx) : ''}
       ${stepsHtml ? `<ol class="ca-steps">${stepsHtml}</ol>` : ''}
       ${caMarkRowHtml(a, done, markLabel)}

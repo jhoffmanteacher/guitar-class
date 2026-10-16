@@ -12,6 +12,14 @@ see `WORKFLOW.md` and the git commit log.
   two beats ("where do we go"). E starts on the next bar. The card used
   to have E there, a bar too early.
 
+## 2026-10-16 — Las Mañanitas: full chords or power chords
+
+- **Both Las Mañanitas activities have a Full chords / Power chords
+  switch.** Power chords swap A, E7 and D for A5, E5 and D5 (frets 5 to 9,
+  two strings each) everywhere: the chord steps, the strum, the words over
+  the chords, and the play-along. Your checks and finished steps count the
+  same in both. The site remembers your choice on this computer.
+
 ## 2026-10-14 — Las Mañanitas Play Along: the requinto solo
 
 - **The Solo section of Las Mañanitas — Play Along now shows the requinto

@@ -2709,7 +2709,7 @@ function readFieldStrings(file, nameRe) {
 const STUDENT_VALUE_NAME_RE = new RegExp(
   '\\b(text|hint|stuck|levelUp|gotItWhen|explain|forward|subtitle|meta|intro|note|prompt|placeholder|' +
   'label|caption|title|unit|skillFocus|name|module|checklistSub|tabTitle|tabSub|repLabel|' +
-  'choices|choices_es|assessItems|assessItems_es|items|rowLabels|rowLabels_es)\\s*:\\s*', 'g');
+  'choices|choices_es|assessItems|assessItems_es|items|rowLabels|rowLabels_es)(?:_power)?\\s*:\\s*', 'g');   // `_power`: the chord-version twin (caView)
 /* The JS files 1w and 1w-t read values from: the module content, class
    activities and — since 2026-10-12 — config-main.js, whose MODULE_MANIFEST
    `name` / `name_es` are the module titles students see on every page (and
@@ -2929,7 +2929,7 @@ const TEACHER_PHRASE_ALLOW_ES = [
   /* m7w3's graded MC — the Spanish twin of the English entry above. */
   { file: 'module-7.js', field: 'choices_es', phrase: 'es normal en esta forma' },
 ];
-const ES_VALUE_NAME_RE = /\b([A-Za-z0-9]+_es)\s*:\s*/g;
+const ES_VALUE_NAME_RE = /\b([A-Za-z0-9]+(?:_power)?_es)\s*:\s*/g;   // `_power_es`: the chord-version twin (caView)
 
 const HIDDEN_SECTION_KINDS = new Set(['routine', 'ear-spark', 'reflection']);
 const HIDDEN_STEP_FIELDS = [
@@ -3417,6 +3417,41 @@ function validateClassActivities() {
     // metronome: BPM the Metro tool starts at when the card is opened (caAutoStartMetro in app.js). Same 40–220 range as the slider.
     if ('metronome' in a && !(Number.isInteger(a.metronome) && a.metronome >= 40 && a.metronome <= 220)) { err(`${where}: metronome ${JSON.stringify(a.metronome)} — a whole-number BPM from 40 to 220 (or leave it off)`); problems++; }
     if ('card' in a && a.view !== 'card') { err(`${where}: has a "card" object but view is not 'card' — it would never render`); problems++; }
+    /* CHORD VERSIONS (2026-10-16, ca-34/ca-35 — caView in app.js). The power
+       map's every shape is a real chord (pitches recomputed from the
+       fretboard, a root + 5th named for its root); every `<field>_power`
+       anywhere in the activity has its `<field>_power_es` twin and the
+       reverse, because caView swaps the pair in together and a missing half
+       shows the other version's words in one language; and `_power` fields
+       on an activity with no map would never show. */
+    {
+      const pw = [];
+      (function walk(v, path) {
+        if (Array.isArray(v)) { v.forEach((x, i) => walk(x, `${path}[${i}]`)); return; }
+        if (!v || typeof v !== 'object') return;
+        for (const k of Object.keys(v)) {
+          if (path === '' && k === 'chordVersions') continue;
+          const m = /^(.+)_power(_es)?$/.exec(k);
+          if (m) pw.push({ path, obj: v, base: m[1], es: !!m[2], k });
+          walk(v[k], `${path}.${k}`);
+        }
+      })(a, '');
+      if ('chordVersions' in a) {
+        const map = a.chordVersions && a.chordVersions.power;
+        const extra = a.chordVersions && Object.keys(a.chordVersions).filter(k => k !== 'power');
+        if (!map || typeof map !== 'object' || !Object.keys(map).length) { err(`${where}: chordVersions needs a non-empty "power" map ({ <chord>: { frets, note, midi } })`); problems++; }
+        else Object.entries(map).forEach(([name, c]) => {
+          if (!c || !Array.isArray(c.frets)) { err(`${where}: chordVersions.power['${name}'] needs frets / note / midi`); problems++; return; }
+          caChordProblems(c).forEach(p => { err(`${where}: chordVersions.power['${name}']: ${p}`); problems++; });
+          if (!hasVal(c.note)) { err(`${where}: chordVersions.power['${name}'] is missing "note"`); problems++; }
+        });
+        if (extra && extra.length) { err(`${where}: chordVersions has ${extra.join(', ')} — the only version is "power"`); problems++; }
+      } else if (pw.length) { err(`${where}: has ${pw[0].k} but no chordVersions — the power text would never show`); problems++; }
+      for (const f of pw) {
+        const twin = f.es ? `${f.base}_power` : `${f.base}_power_es`;
+        if (!hasVal(f.obj[twin])) { err(`${where}${f.path}: ${f.k} has no ${twin} — write both, or the switch shows the other version's words in one language`); problems++; }
+      }
+    }
     if (isCheck) { /* no steps — see 1y */ }
     /* A practice card has no help ladder: `steps: []` (Jonathan,
        2026-10-07). Every other activity needs its steps. */
@@ -6986,7 +7021,7 @@ function checkCardCaptionWords() {
    one-sided label is itself the bug (dots in one language, none in the
    other), so it fails outright now rather than being skipped. Bump when a
    card genuinely adds or removes a got-it sentence in both languages. */
-const REP_COUNT_FIELDS = 407;   // 2026-10-14: ca-34 rebuilt — D chord and whole-song steps (+1), then requinto intro and outro steps (+2). 2026-10-13: ca-34 Las Mañanitas, four Practice steps (+4). 2026-10-12: m6-m8 Smoke on the Water watch step + A-shape watch card get a countable got-it (+2). 2026-10-12: 17 Challenge cards in Modules 9-11 get a countable got-it (+17, see 1ar2). 2026-10-07: part cards lose their help ladders too (-8). 2026-10-07: whole-song cards lose their help ladders (-13). 2026-10-06: m12w3 melody-on-top gets a countable got-it (+1). 2026-10-05: ca-27 Luna (+1) and ca-28 Sweet Child (+2) whole songs; ca-29..ca-33 power-chord whole songs (+6). 2026-10-01: ca-13/ca-19/ca-20 as practice cards (-7), ca-25 Seven Nation Army whole song (+2), ca-21 Lines 2 and 4 restored (+2), ca-26 Watchtower whole song (+1)
+const REP_COUNT_FIELDS = 410;   // 2026-10-16: ca-34's three power-chord step texts (text_power, +3). 2026-10-14: ca-34 rebuilt — D chord and whole-song steps (+1), then requinto intro and outro steps (+2). 2026-10-13: ca-34 Las Mañanitas, four Practice steps (+4). 2026-10-12: m6-m8 Smoke on the Water watch step + A-shape watch card get a countable got-it (+2). 2026-10-12: 17 Challenge cards in Modules 9-11 get a countable got-it (+17, see 1ar2). 2026-10-07: part cards lose their help ladders too (-8). 2026-10-07: whole-song cards lose their help ladders (-13). 2026-10-06: m12w3 melody-on-top gets a countable got-it (+1). 2026-10-05: ca-27 Luna (+1) and ca-28 Sweet Child (+2) whole songs; ca-29..ca-33 power-chord whole songs (+6). 2026-10-01: ca-13/ca-19/ca-20 as practice cards (-7), ca-25 Seven Nation Army whole song (+2), ca-21 Lines 2 and 4 restored (+2), ca-26 Watchtower whole song (+1)
 function checkRepCountParity(sets, ctx) {
   head('1bg. Rep-count dots agree between English and Spanish');
   if (!ctx) { err('1bg cannot run — render context unavailable'); problems++; return; }
