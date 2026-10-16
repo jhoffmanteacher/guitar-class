@@ -103,6 +103,15 @@ Not frozen by any regime; timed for next year because it needs six new
 figures (both Reach cards, both fret positions, EN and ES captions) that
 aren't worth rushing mid-year for two cards nobody has failed on.
 
+**Split Module 4 Set 2 (`m4w2`) into two sets.** 20 visible steps, about
+1,075 words on the cards after the 2026-10-16 trim. It shows as Part 1 / Part
+2 today (`partOne` / `partBreak`, display only). A real split moves Part 2's
+progress keys to a new set id, which mid-year would need a one-time progress
+move like `swap45`, with the same stale-tab gap. Jonathan, 2026-10-16: keep
+the parts until the reset. Splitting also changes the SET list and m4w2's
+section count, so `rule-zero-proof.mjs` fails it by design. After the split,
+drop the 1ao pin (sets with parts: 1 → 0) unless another set uses parts.
+
 **Remove the Module 4/5 swap progress move (`swap45`).** The one-time move
 of saved progress after the 2026-10-12 swap (app.js `swap45MapId` …
 `swap45OnLoad`, the `await swap45Commit()` gate in `flushSave()`, the
