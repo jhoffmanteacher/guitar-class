@@ -503,8 +503,8 @@ SETS.push(
     unit: 'Module 2 · Notes on the E & A Strings',
     unit_es: 'Módulo 2 · Notas en las cuerdas Mi y La',
     title: 'Set 2',
-    subtitle: 'Finger placement · Clean tone · TAB reading · 4-bar melodies',
-    subtitle_es: 'Colocación de los dedos · Tono limpio · Lectura de TAB · Melodías de 4 compases',
+    subtitle: 'Finger placement · Clean tone · TAB reading · Short melodies',
+    subtitle_es: 'Colocación de los dedos · Tono limpio · Lectura de TAB · Melodías cortas',
     skillFocus: 'Fretting notes cleanly · Reading basic TAB · Playing a melody in time',
     skillFocus_es: 'Trastear notas limpias · Leer TAB básico · Tocar una melodía a tiempo',
     comingSoon: false,
@@ -741,8 +741,8 @@ SETS.push(
             ]
           },
           {
-            title: 'Read TAB & play a 4-bar melody in time at 60 BPM',
-            title_es: 'Lee TAB y toca una melodía de 4 compases a tiempo a 60 BPM',
+            title: 'Read TAB & play a short melody in time at 60 BPM',
+            title_es: 'Lee TAB y toca una melodía corta a tiempo a 60 BPM',
             steps: [
           {
             label: 'Warm-up TAB read', label_es: 'Lectura de calentamiento',
@@ -1219,8 +1219,8 @@ SETS.push(
           choices_es: ['Un "3" en la línea de abajo', 'Un "3" en la segunda línea desde abajo', 'Un "0" en la línea de abajo', 'Un "3" en la línea de arriba'], answer: 0,
           explain: 'Two things have to be right: G is fret 3 of the low E string, and the low E is the BOTTOM line of the TAB — so it\'s a "3" written on that bottom line. A "3" one line up is C on the A string, a "0" on the bottom line is the open low E itself, and the top line is the thin high e.',
           explain_es: 'Dos cosas tienen que salir bien: G es el traste 3 de la cuerda Mi grave, y la Mi grave es la línea de ABAJO del TAB — así que es un "3" escrito en esa línea de abajo. Un "3" una línea más arriba es C en la cuerda La, un "0" en la línea de abajo es la Mi grave al aire, y la línea de arriba es la mi aguda delgada.' } },
-      { id: 'm2w2-s5', text: 'Play a 4-bar melody in time at 60 BPM',
-        text_es: 'Tocar una melodía de 4 compases a tiempo a 60 BPM',
+      { id: 'm2w2-s5', text: 'Play a short melody in time at 60 BPM',
+        text_es: 'Tocar una melodía corta a tiempo a 60 BPM',
         gotItWhen: 'you can play the "Smoke on the Water" riff — or the "Mary Had a Little Lamb" warm-up — all the way through at 60 BPM without stopping to find a note.',
         gotItWhen_es: 'puedes tocar el riff de "Smoke on the Water" — o el calentamiento de "Mary Had a Little Lamb" — completo a 60 BPM sin detenerte a buscar una nota.',
         practice: { type: 'pr', prompt: '<ol><li>Play the "Smoke on the Water" riff start to finish with no stops.</li><li>Start at 60 BPM and raise the metronome +5 at a time.</li><li>Log your fastest CLEAN run.</li></ol>',
@@ -1288,7 +1288,7 @@ MODULE_REVIEWS[2] = {
     { id: 'mr2-s3', text: 'I can name all natural notes on the A string (frets 0–12)', text_es: 'Puedo nombrar todas las notas naturales en la cuerda La (trastes 0–12)', set: 'm2w1' },
     { id: 'mr2-s4', text: 'I can press notes cleanly with no fret buzz', text_es: 'Puedo presionar notas limpias sin zumbido', set: 'm2w2' },
     { id: 'mr2-s6', text: 'I can use one finger per fret (index=1, middle=2, ring=3, pinky=4)', text_es: 'Puedo usar un dedo por traste (índice=1, medio=2, anular=3, meñique=4)', set: 'm2w2' },
-    { id: 'mr2-s5', text: 'I can read a basic TAB and play a 4-bar melody in time at 60 BPM', text_es: 'Puedo leer un TAB básico y tocar una melodía de 4 compases a tiempo a 60 BPM', set: 'm2w2' },
+    { id: 'mr2-s5', text: 'I can read a basic TAB and play a short melody in time at 60 BPM', text_es: 'Puedo leer un TAB básico y tocar una melodía corta a tiempo a 60 BPM', set: 'm2w2' },
     { id: 'mr2-s7', text: 'I can play the "Watchtower" bass line on the low E and the "Seven Nation Army" riff on the A string — or the "the cure" verse and chorus roots on both strings — from memory at 100 BPM with clean tone and correct fingering', text_es: 'Puedo tocar la línea de bajo de "Watchtower" en la cuerda Mi grave y el riff de "Seven Nation Army" en la cuerda La — o las raíces de la estrofa y el coro de "the cure" en las dos cuerdas — de memoria a 100 BPM con tono limpio y digitación correcta', set: 'm2w2' }
   ],
   assessItems: [

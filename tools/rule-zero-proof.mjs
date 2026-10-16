@@ -7,7 +7,8 @@
    TEXT-ONLY:
 
      A. STRUCTURE is identical. Same sets, same stations, same sections
-        in the same order with the same titles, same step count, same
+        in the same order (ordinary titles may be reworded; a kind-tagged
+        or tuning warm-up title may not), same step count, same
         step labels in the same order, same skills in the same order.
         Nothing added, removed or moved, so no positional progress key
         (`${setId}-${station}-sec${gi}-${i}`) can have shifted.
@@ -149,7 +150,19 @@ function skeleton(sets) {
 
    In every regime the SECTIONS themselves are fixed — same count, same
    order, same kind — because that is what `gi` is built from. A section
-   TITLE may be reworded (it moves no key); the rename is printed. */
+   TITLE may be reworded (it moves no key); the rename is printed.
+
+   That now holds in the frozen regime too (Jonathan, 2026-10-16: Module
+   3's headings had stopped matching their cards). Until then a frozen
+   module failed on ANY retitle, which is how Module 2's "4-bar melody"
+   heading sat on a 2-bar TAB all autumn. No saved key reads a title
+   (app.js builds every key from set id, station, gi and index). Two
+   kinds of title still fail in a frozen module, because code reads them:
+   any section with a `kind` (checks.mjs 1r and 1ad tie each kind to its
+   exact title), and the tuning warm-up title, which app.js keeps as a
+   backstop for `storageSections()`. Step LABELS stay frozen by index —
+   they are how this check sees an insertion. */
+const LOAD_BEARING_TITLE = 'Warm-up — tuning check (Module 1)';
 const OPEN_THROUGH = 6;
 function lcs(a, b) {
   const n = a.length, m = b.length;
@@ -195,7 +208,8 @@ head(`A. Structure vs ${BASE}`);
         if ((bSec.kind || null) !== (hSec.kind || null))
           fail(`${id}·${stId}·sec${si}: section kind changed ${bSec.kind || 'none'} → ${hSec.kind || 'none'}`);
         if (bSec.title !== hSec.title) {
-          if (regime === 'frozen') fail(`${id}·${stId}·sec${si}: section retitled in a module students are in`);
+          const loadBearing = bSec.kind || hSec.kind || bSec.title === LOAD_BEARING_TITLE || hSec.title === LOAD_BEARING_TITLE;
+          if (regime === 'frozen' && loadBearing) fail(`${id}·${stId}·sec${si}: ${bSec.kind || hSec.kind ? `kind:'${bSec.kind || hSec.kind}'` : 'tuning warm-up'} section retitled in a module students are in — code reads this title`);
           else { renamed++; notes.push(`   ${C.bold}${id}·${stId}·sec${si}${C.reset} section retitled\n     ${C.red}-${C.reset} ${JSON.stringify(bSec.title)}\n     ${C.green}+${C.reset} ${JSON.stringify(hSec.title)}`); }
         }
         const bl = (bSec.steps || []).map(x => x.label ?? '');

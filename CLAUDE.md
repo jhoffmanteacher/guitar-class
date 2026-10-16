@@ -207,7 +207,9 @@ What that permits depends on how far the class has got, and
 
 In every regime the SECTIONS are fixed: same count, same order, same
 kind. A section TITLE may be reworded (it moves no key) and the rename
-prints rather than failing. Run it as
+prints rather than failing — **in frozen modules too since 2026-10-16**
+(Jonathan), except a section with a `kind` or the tuning warm-up title,
+which code reads and which still fail. Run it as
 `node tools/rule-zero-proof.mjs <base-ref>` and paste the output into the
 report before any content push.
 
@@ -632,8 +634,8 @@ adding to `STUDENT_VALUE_NAME_RE`; an array field needs nothing more.** 1w-t
 also reads Spanish now (`TEACHER_PHRASES_ES`: "es normal", "no te
 preocupes", "está bien si", a sentence-final "tú puedes").
 
-The three Module 1 Set 2 graded-MC rewords, the `m2w2·c` 4-bar melody section
-title, and `ca-14`'s Happy Birthday exit check are all frozen mid-year fixes —
+The three Module 1 Set 2 graded-MC rewords, Module 3 Set 2's Challenge
+numbers, and `ca-14`'s Happy Birthday exit check are all frozen mid-year fixes —
 see the **Summer reset list** (the `summer-reset` skill).
 
 ## Play-along first; Song Journey pages are the back door (2026-10-06)

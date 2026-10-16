@@ -28,8 +28,8 @@ SETS.push(
         title_es: 'Estación de computadora — Mira · Escucha · Practica',
         sections: [
           {
-            title: 'See the power chord shape move',
-            title_es: 'Mira moverse la forma del acorde de potencia',
+            title: 'Watch: what a power chord is',
+            title_es: 'Mira: qué es un acorde de potencia',
             steps: [
           {
             label: 'One shape, three chords', label_es: 'Una forma, tres acordes',
@@ -65,8 +65,8 @@ SETS.push(
             ]
           },
           {
-            title: 'Watch the lesson videos',
-            title_es: 'Mira los videos de la lección',
+            title: 'Watch: move the shape',
+            title_es: 'Mira: mueve la forma',
             steps: [
           {
             // Hidden 2026-10-16: this video now opens the set, inside the
@@ -141,8 +141,8 @@ SETS.push(
             ]
           },
           {
-            title: 'Fret a clean power chord & mute unused strings',
-            title_es: 'Trastea un acorde de potencia limpio y silencia las cuerdas que no uses',
+            title: 'Play a clean power chord and mute the other strings',
+            title_es: 'Toca un acorde de potencia limpio y silencia las demás cuerdas',
             steps: [
           {
             label: 'Challenge 1 — Clean E5', label_es: 'Reto 1 — E5 limpio',
@@ -174,8 +174,8 @@ SETS.push(
             ]
           },
           {
-            title: 'Move the power chord shape along the E & A strings',
-            title_es: 'Mueve la forma del acorde de potencia por las cuerdas Mi y La',
+            title: 'Move the shape on the low E and A strings',
+            title_es: 'Mueve la forma en las cuerdas Mi grave y La',
             steps: [
           {
             label: 'Challenge 3 — Shape Shifter', label_es: 'Reto 3 — Cambiaformas',
@@ -215,8 +215,8 @@ SETS.push(
             ]
           },
           {
-            title: 'Name the root as you climb the neck (E & A strings)',
-            title_es: 'Nombra la raíz mientras subes por el mástil (cuerdas Mi y La)',
+            title: 'Name each root as you move up the neck',
+            title_es: 'Nombra cada raíz mientras subes por el mástil',
             steps: [
           {
             label: 'Challenge 4 — Name & Climb (E string)', label_es: 'Reto 4 — Nombra y sube (cuerda Mi)',
@@ -265,8 +265,8 @@ SETS.push(
             ]
           },
           {
-            title: 'Mystery Chart — name the power chord with no label',
-            title_es: 'Diagrama misterioso — nombra el acorde de potencia sin etiqueta',
+            title: 'Mystery Chart — name chords from the chart',
+            title_es: 'Diagrama misterioso — nombra acordes a partir del diagrama',
             steps: [
               {
                 label: 'Challenge 6 — Mystery Chart', label_es: 'Reto 6 — Diagrama misterioso',
@@ -295,8 +295,8 @@ SETS.push(
             ]
           },
           {
-            title: 'Play a power chord progression in time',
-            title_es: 'Toca una progresión de acordes de potencia a tiempo',
+            title: 'Play the "Watchtower" loop in time',
+            title_es: 'Toca la vuelta de "Watchtower" a tiempo',
             steps: [
           {
             label: 'Challenge 7 — "Watchtower" Loop (assessment preparation)', label_es: 'Reto 7 — Vuelta de "Watchtower" (preparación para la evaluación)',
@@ -490,8 +490,8 @@ SETS.push(
         title_es: 'Estación de computadora — Mira · Escucha · Practica',
         sections: [
           {
-            title: 'Watch the lesson videos',
-            title_es: 'Mira los videos de la lección',
+            title: 'Watch: play with a metronome',
+            title_es: 'Mira: toca con un metrónomo',
             steps: [
           {
             label: 'Watch: using a metronome', label_es: 'Mira: usar el metrónomo',
@@ -584,8 +584,8 @@ SETS.push(
             ]
           },
           {
-            title: 'Speed changes — every two beats, then every beat',
-            title_es: 'Cambios más rápidos — cada dos tiempos, y luego cada tiempo',
+            title: 'Change chords every two beats, then every beat',
+            title_es: 'Cambia de acorde cada dos tiempos, y luego cada tiempo',
             steps: [
           {
             label: 'Challenge — Half-Bar Power Switches (2 chords)', label_es: 'Reto — Cambios de potencia por medio compás (2 acordes)',
@@ -731,8 +731,8 @@ SETS.push(
             ]
           },
           {
-            title: 'Optional: add octave doubling',
-            title_es: 'Opcional: agrega duplicación de octava',
+            title: 'Optional: add a third note',
+            title_es: 'Opcional: agrega una tercera nota',
             steps: [
           {
             label: 'Challenge 4 — Octave Add-On (optional)', label_es: 'Reto 4 — Octava extra (opcional)',
@@ -745,8 +745,8 @@ SETS.push(
             ]
           },
           {
-            title: '"Luna": F5–A5 two-shape metronome drill',
-            title_es: '"Luna": ejercicio de metrónomo con dos formas F5–A5',
+            title: '"Luna": switch between F5 and A5',
+            title_es: '"Luna": cambia entre F5 y A5',
             steps: [
           {
             label: 'Challenge — F5 ↔ A5 Two-Shape Drill ("Luna")', label_es: 'Reto — Ejercicio de dos formas F5 ↔ A5 ("Luna")',

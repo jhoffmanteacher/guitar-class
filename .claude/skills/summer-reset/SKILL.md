@@ -44,15 +44,6 @@ The same card's read-the-tuner twin (`w2·b·sec0·step4`) is in
 is fine while the card's job is to check that you read the card, but worth
 re-deciding when the rest is reworded.
 
-**`m2w2·c`'s "Read TAB & play a 4-bar melody" section title.** The "Mary Had a
-Little Lamb" warm-up TAB it heads is seven one-beat notes — even with the
-last one now held two beats (2026-09-20, so the line at least fills whole
-bars) that's 2 bars, not 4. `rule-zero-proof.mjs` fails the push on ANY
-section retitle in Modules 1–2 (`section retitled in a module students are
-in`), so the title stays wrong until the reset; the skill checklist and
-Module Review line for it were reverted to match "4-bar" for the same reason,
-rather than say something the section heading doesn't.
-
 **`ca-14` (the Happy Birthday exit check, frozen `items`).** Its stimuli play
 the tune in even notes although the activities that teach it now teach the
 real rhythm, and items 1 and 3 play the same four notes, differing only by
@@ -80,9 +71,19 @@ choices in frozen modules (1ap), so they wait for the reset.
 practice MC prompt says "SAME fret", which gives away the one choice that
 repeats a fret number. Module 3 Module Review assess item says "Sweet Child's
 D5-C5-G5 … switches between E- and A-string roots on the same fret" — only
-C5→G5 does (D5 is A-string fret 5). Module 2 `m2w2-s5` "4-bar melody" gotItWhen
-also accepts "Smoke on the Water", which is 3 bars at one note per beat
-(Mary Had a Little Lamb is already listed above).
+C5→G5 does (D5 is A-string fret 5). (The Module 2 "4-bar melody" heading
+and skill, also on this list until 2026-10-16, are fixed: they say "short
+melody" now, after `rule-zero-proof.mjs` stopped failing ordinary section
+retitles in frozen modules.)
+
+**Module 3 Set 2's Challenge numbers** (2026-10-16 clean-up). The labels
+run "Challenge 1", then six unnumbered "Challenge —" cards, then
+"Challenge 2 / 3 / 4", then two more unnumbered ones. Step labels are
+frozen by index in Modules 1–3 (they are how the proof sees an insertion),
+so at the reset either number every Challenge in order or drop the numbers
+from all of them — the step circle already numbers each card. Set 1's
+"One shape, three chords" label can become "Watch: what a power chord is"
+in the same edit, since that card now opens with the video.
 
 **Module 1 Set 2 reorder: string names and guitar parts before tuning.** The
 tuning video (step 1) depends on string names (step 7) and tuning pegs (step

@@ -16,6 +16,10 @@ see `WORKFLOW.md` and the git commit log.
   bonus rock-songs video, the alternate-picking video, and the
   four-chord "Watchtower" step that repeated Set 1. Steps you already
   finished still count.
+- **Module 3's section headings now match their steps** (for example,
+  "Watch: what a power chord is" above the opening video).
+- **Module 2 Set 2:** the TAB heading says "short melody" instead of
+  "4-bar melody". The warm-up tune is 2 bars long.
 
 ## 2026-10-16 — Listening Coach and Note Runner listen a little longer
 
