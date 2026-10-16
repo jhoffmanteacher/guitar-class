@@ -3719,7 +3719,9 @@ async function renderTeacherMic(){
       `<button class="tg-seg-btn" onclick="teacherMicDelete(${i})">Delete</button></td></tr>`;
   }).join('');
   box.innerHTML = ctl + `<div class="t-grid-wrap"><table><thead><tr><th class="nc">Student</th><th>Period</th><th>Game</th><th>BPM</th><th>Length</th><th>Counted right</th><th>Saved</th><th></th></tr></thead><tbody>${rows}</tbody></table></div>
-    <div class="tg-note" style="margin-top:16px"><button class="tp-btn primary" style="flex:none;padding:8px 16px;margin-right:10px" onclick="teacherMicEvaluate()">Evaluate all recordings</button>
+    <div class="tg-note" style="margin-top:16px"><button class="tp-btn" id="t-mic-dl-all" style="flex:none;padding:8px 16px;margin-right:10px" onclick="teacherMicDownloadAll()">Download all (${takes.length})</button>
+      One .zip with every recording's WAV and data, named the same as the buttons above.</div>
+    <div class="tg-note" style="margin-top:8px"><button class="tp-btn primary" style="flex:none;padding:8px 16px;margin-right:10px" onclick="teacherMicEvaluate()">Evaluate all recordings</button>
       Measures every recording: how loud the mic is, the real mic delay, and whether each note the site missed is in the audio. About a minute; nothing is changed.</div>
     <div id="t-mic-eval">${teacherMicEvalRows.length ? teacherMicEvalHtml() : ''}</div>`;
 }
@@ -3780,20 +3782,94 @@ async function teacherMicChunks(d){
   return parts;
 }
 // The chunks back together, behind a 44-byte WAV header (16-bit mono PCM).
+async function teacherMicWavBlob(d){
+  const parts = await teacherMicChunks(d);
+  const len = parts.reduce((a, p) => a + p.length, 0);
+  const rate = d.sampleRate || 24000;
+  const h = new DataView(new ArrayBuffer(44));
+  const str = (o, s) => { for(let k = 0; k < s.length; k++) h.setUint8(o + k, s.charCodeAt(k)); };
+  str(0, 'RIFF'); h.setUint32(4, 36 + len, true); str(8, 'WAVE');
+  str(12, 'fmt '); h.setUint32(16, 16, true); h.setUint16(20, 1, true); h.setUint16(22, 1, true);
+  h.setUint32(24, rate, true); h.setUint32(28, rate * 2, true); h.setUint16(32, 2, true); h.setUint16(34, 16, true);
+  str(36, 'data'); h.setUint32(40, len, true);
+  return new Blob([h.buffer].concat(parts), { type: 'audio/wav' });
+}
 async function teacherMicDownloadWav(i){
   const d = teacherMicTakes[i]; if(!d) return;
   try{
-    const parts = await teacherMicChunks(d);
-    const len = parts.reduce((a, p) => a + p.length, 0);
-    const rate = d.sampleRate || 24000;
-    const h = new DataView(new ArrayBuffer(44));
-    const str = (o, s) => { for(let k = 0; k < s.length; k++) h.setUint8(o + k, s.charCodeAt(k)); };
-    str(0, 'RIFF'); h.setUint32(4, 36 + len, true); str(8, 'WAVE');
-    str(12, 'fmt '); h.setUint32(16, 16, true); h.setUint16(20, 1, true); h.setUint16(22, 1, true);
-    h.setUint32(24, rate, true); h.setUint32(28, rate * 2, true); h.setUint16(32, 2, true); h.setUint16(34, 16, true);
-    str(36, 'data'); h.setUint32(40, len, true);
-    teacherMicSaveFile(teacherMicFileBase(d) + '.wav', new Blob([h.buffer].concat(parts), { type: 'audio/wav' }));
+    teacherMicSaveFile(teacherMicFileBase(d) + '.wav', await teacherMicWavBlob(d));
   }catch(e){ alert('Could not download that recording — ' + (e && e.message ? e.message : 'check your connection.')); }
+}
+
+/* "Download all": every take's WAV + data in ONE .zip, the same file names
+   the per-row buttons use, so tools/mic-sim/anon-takes.mjs reads the
+   unzipped folder as-is (pairs share a base name). One file instead of two
+   clicks per row, and no "allow multiple downloads" prompt.
+   The zip is "stored" (no compression — WAV barely compresses and it keeps
+   this dependency-free): local header + data per file, then the central
+   directory, then the end record. Names are UTF-8 (flag bit 11). */
+let teacherMicCrcTable = null;
+function teacherMicCrc32(u8){
+  if(!teacherMicCrcTable){
+    teacherMicCrcTable = new Uint32Array(256);
+    for(let n = 0; n < 256; n++){ let c = n; for(let k = 0; k < 8; k++) c = c & 1 ? 0xEDB88320 ^ (c >>> 1) : c >>> 1; teacherMicCrcTable[n] = c >>> 0; }
+  }
+  let c = 0xFFFFFFFF;
+  for(let i = 0; i < u8.length; i++) c = teacherMicCrcTable[(c ^ u8[i]) & 0xFF] ^ (c >>> 8);
+  return (c ^ 0xFFFFFFFF) >>> 0;
+}
+// files: [{ name, data: Uint8Array }] -> Blob (application/zip)
+function teacherMicZip(files){
+  const enc = new TextEncoder(), now = new Date();
+  const dosTime = (now.getHours() << 11) | (now.getMinutes() << 5) | (now.getSeconds() >> 1);
+  const dosDate = ((now.getFullYear() - 1980) << 9) | ((now.getMonth() + 1) << 5) | now.getDate();
+  const out = [], cen = [];
+  let off = 0;
+  for(const f of files){
+    const nm = enc.encode(f.name), crc = teacherMicCrc32(f.data), sz = f.data.length;
+    const lh = new DataView(new ArrayBuffer(30));
+    lh.setUint32(0, 0x04034b50, true); lh.setUint16(4, 20, true); lh.setUint16(6, 0x0800, true);
+    lh.setUint16(8, 0, true); lh.setUint16(10, dosTime, true); lh.setUint16(12, dosDate, true);
+    lh.setUint32(14, crc, true); lh.setUint32(18, sz, true); lh.setUint32(22, sz, true);
+    lh.setUint16(26, nm.length, true); lh.setUint16(28, 0, true);
+    out.push(lh.buffer, nm, f.data);
+    const ch = new DataView(new ArrayBuffer(46));
+    ch.setUint32(0, 0x02014b50, true); ch.setUint16(4, 20, true); ch.setUint16(6, 20, true);
+    ch.setUint16(8, 0x0800, true); ch.setUint16(10, 0, true); ch.setUint16(12, dosTime, true); ch.setUint16(14, dosDate, true);
+    ch.setUint32(16, crc, true); ch.setUint32(20, sz, true); ch.setUint32(24, sz, true);
+    ch.setUint16(28, nm.length, true); ch.setUint32(42, off, true);
+    cen.push(ch.buffer, nm);
+    off += 30 + nm.length + sz;
+  }
+  const cenLen = cen.reduce((a, p) => a + (p.byteLength != null ? p.byteLength : p.length), 0);
+  const end = new DataView(new ArrayBuffer(22));
+  end.setUint32(0, 0x06054b50, true); end.setUint16(8, files.length, true); end.setUint16(10, files.length, true);
+  end.setUint32(12, cenLen, true); end.setUint32(16, off, true);
+  return new Blob(out.concat(cen, [end.buffer]), { type: 'application/zip' });
+}
+async function teacherMicDownloadAll(){
+  const takes = teacherMicTakes.slice();
+  if(!takes.length) return;
+  const btn = document.getElementById('t-mic-dl-all');
+  const label = btn ? btn.textContent : '';
+  const files = [], used = {};
+  try{
+    for(let i = 0; i < takes.length; i++){
+      if(btn){ btn.disabled = true; btn.textContent = `Packing ${i + 1} of ${takes.length}…`; }
+      const d = takes[i];
+      let base = teacherMicFileBase(d), k = 2;
+      while(used[base]) base = teacherMicFileBase(d) + '-' + (k++);
+      used[base] = true;
+      const wav = new Uint8Array(await (await teacherMicWavBlob(d)).arrayBuffer());
+      files.push({ name: base + '.wav', data: wav });
+      files.push({ name: base + '.json', data: new TextEncoder().encode(JSON.stringify(teacherMicJsonable(d), null, 2)) });
+    }
+    const day = new Date().toISOString().slice(0, 10);
+    teacherMicSaveFile(`mic-recordings-${day}.zip`, teacherMicZip(files));
+  }catch(e){
+    alert('Could not download all the recordings — ' + (e && e.message ? e.message : 'check your connection.'));
+  }
+  if(btn){ btn.disabled = false; btn.textContent = label; }
 }
 async function teacherMicDelete(i){
   const d = teacherMicTakes[i]; if(!d) return;
