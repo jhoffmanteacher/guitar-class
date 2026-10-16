@@ -23,7 +23,7 @@ const pitchSrc = extract(coachSrc, 'coachDetectPitch');
 const depsSrc = `{ GATE: ${constOf('COACH_PITCH_GATE')}, GAIN: ${constOf('COACH_MIC_GAIN')},
   detectPitch: (function(){ let coachYinD = null; ${pitchSrc}\n return coachDetectPitch; })() }`;
 const teacherSrc = fs.readFileSync(path.join(root, 'teacher.js'), 'utf8');
-const core = new Function(['micEvalTake', 'micEvalDevice', 'micEvalRow', 'micEvalText'].map(n => extract(teacherSrc, n)).join('\n') +
+const core = new Function(['micEvalTake', 'micEvalMicName', 'micEvalDevice', 'micEvalRow', 'micEvalText'].map(n => extract(teacherSrc, n)).join('\n') +
   '\nreturn { micEvalTake, micEvalDevice, micEvalRow, micEvalText };')();
 
 const args = process.argv.slice(2);
