@@ -59,6 +59,11 @@ tuning pass — ideally on the real classroom recordings the teacher console's
   readings — `no-onset`, `onset-elsewhere`, `readings-cut`, `vote-failed`
   — with the replay's own readings in the same window (`winN`) and after
   it (`lateN`, `lateHit`).
+- The second look that coach.js got from this (COACH_LOOK_TAIL /
+  COACH_LOOK_MIN, Coach melody + Note Runner melody) is the `look min3
+  tail 600` row below; a recording saved after it marks each note it
+  counted (`secondLook` on the expected note, `look` readings on the
+  event), and the console's Evaluate line counts them.
 - `whatif-tail.mjs <eval-takes --json output> [--flips]` — re-applies the
   site's verdict rules with a longer reading tail (all events / starved
   events only / a target-only "look"), on the real takes. Its first line

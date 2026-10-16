@@ -60,6 +60,24 @@ const COACH_ATTACK_SKIP   = 70;     // ms after an onset before pitch readings s
                                     // the analyser window still holds the pick scrape
                                     // (and the PREVIOUS note) until then
 const COACH_EVENT_TAIL    = 340;    // ms of pitch readings collected after an onset
+/* THE SECOND LOOK (2026-10-16, Listening Coach melody + Note Runner
+   melody). A note the site heard but read fewer than 2 pitches for in its
+   COACH_EVENT_TAIL comes out "unclear" — 51 of 112 notes in the
+   2026-10-16 period 4 takes, the biggest single reason a note went
+   uncounted (tools/mic-sim: eval-takes.mjs, per-note reason). Such an
+   event keeps reading up to COACH_LOOK_TAIL after its onset (never past
+   60 ms before the next written note), and turns RIGHT when the note or
+   its octave is at least COACH_VOTE_SHARE of at least COACH_LOOK_MIN
+   readings. Otherwise it stays unclear — the extra readings can never
+   produce a wrong verdict, and an event that already had 2+ readings is
+   never touched. 2026-10-16 period 4 takes, replayed on the site's own
+   schedule (whatif-tail.mjs): right 30 -> 35, wrong 12 -> 12, unclear
+   52 -> 47; 4 of the 5 are clearly the right note in the recording, 1 is
+   mixed. Two readings instead of three gave right 40 but credited 3 notes
+   the recording says were a different pitch; a full verdict on the
+   longer tail gave right 40 / wrong 19 — honest wrongs, but wrongs. */
+const COACH_LOOK_TAIL     = 600;
+const COACH_LOOK_MIN      = 3;
 const COACH_MAX_SLOTS     = 32;
 const COACH_BEATS_PER_CHORD = 4;
 /* How long the listening window stays open — see coachListenDeadline. The
@@ -258,7 +276,7 @@ function coachOpen(btn){
     /* Checklist skills this drill vouches for (app.js coachSkillsAttr). The
        report writes its level to each, and the "I've got it!" gate reads it. */
     skillIds: (btn.dataset.coachskills || '').split(',').filter(Boolean),
-    events: [], pendings: [],
+    events: [], pendings: [], looks: [],
     gridOffset: 0, listenStart: 0, timeouts: [],
     smoothRms: 0, smoothHf: 0, lastOnsetT: -1e9, lastPitchT: 0, lastMatchT: 0,
     pulseStreak: 0, pulseMuted: false   // visual beat-pulse fade state
@@ -423,7 +441,7 @@ async function coachStartCheck(){
 
   /* Fresh attempt state */
   coach.slots.forEach(s => { s.state = 'pending'; s.hit = null; s.loose = false; });
-  coach.events = []; coach.pendings = [];
+  coach.events = []; coach.pendings = []; coach.looks = [];
   coach.gridOffset = 0; coach.smoothRms = 0; coach.smoothHf = 0; coach.lastOnsetT = -1e9;
   coach.lastPulse = -1; coach.frameNo = 0; coach.lastPitchT = 0; coach.lastMatchT = 0;
   coach.pulseStreak = 0; coach.pulseMuted = false;
@@ -933,6 +951,15 @@ function coachUpdateMicLevel(rms){
    still sound. A context that isn't running yet (its clock stands still)
    takes the timer path this replaced. */
 const COACH_COUNTIN_LEAD = 0.1, COACH_COUNTIN_AHEAD = 0.2;   // seconds
+/* A RECORDED take (micRec live) waits longer for its first beep. The
+   capture's first buffers are digital silence: 43-118 ms of exact zeros at
+   the start of every 2026-10-16 Chromebook take, with stray zero runs to
+   ~280 ms — and the first beep, 0.1 s after micRecStart plus ~140 ms of
+   speaker delay, fell inside it, so no recording ever held all four beeps
+   and the eval could not measure the mic delay (teacher.js micEvalTake
+   now uses beeps 2-4). 0.4 s puts beep 1 past the silence with room to
+   spare. Takes that are not recorded keep 0.1 s. */
+const COACH_COUNTIN_REC_LEAD = 0.4;
 // beep() (app.js) with a start time: same voice, same envelope.
 function coachBeepAt(ac, at, freq, dur){
   const o = ac.createOscillator(), g = ac.createGain();
@@ -950,7 +977,8 @@ function coachCountIn(state, countElId, onGo){
   const showCount = i => { const el = document.getElementById(countElId); if (el) el.textContent = String(i + 1); };
   if (ac && ac.state === 'running'){
     const perf0 = performance.now(), ctx0 = ac.currentTime;
-    const beat = state.beatMs / 1000, a0 = ctx0 + COACH_COUNTIN_LEAD;
+    const lead = micRec && micRec.live ? COACH_COUNTIN_REC_LEAD : COACH_COUNTIN_LEAD;
+    const beat = state.beatMs / 1000, a0 = ctx0 + lead;
     state.listenStart = perf0 + (a0 + 4 * beat - ctx0) * 1000;
     for (let i = 0; i < 4; i++){
       const at = a0 + i * beat, dueMs = (at - ctx0) * 1000;
@@ -1202,22 +1230,26 @@ function coachLoop(){
     /* Half the usual gate here: readings start after the attack, and a
        palm-muted or lightly-plucked note has already decayed by then — the
        consensus filter below keeps low-level junk from becoming a verdict. */
-    if (coach.pendings.length && rms > COACH_PITCH_GATE * 0.5){
+    if ((coach.pendings.length || coach.looks.length) && rms > COACH_PITCH_GATE * 0.5){
       /* Chords aren't cleanly periodic, so YIN's strict single-note clarity
          gate rejects most chord frames (they logged 0 pitch reads). A looser
          gate for chord mode lets it lock onto the dominant chord tone — which
          real data showed is reliably one of the chord's notes. Melody stays
          strict (accuracy matters when the exact note is the answer). */
-      const ps = coach.pendings;
-      coachPitchReadings(coach.lastPitchT, ps[0].at + COACH_ATTACK_SKIP,
-                         coach.mode === 'chords' ? 0.55 : 0.22).forEach(r => {
+      const ps = coach.pendings, lk = coach.looks;
+      const from = Math.min(ps.length ? ps[0].at + COACH_ATTACK_SKIP : Infinity,
+                            lk.length ? Math.min.apply(null, lk.map(L => L.at)) + COACH_EVENT_TAIL : Infinity);
+      coachPitchReadings(coach.lastPitchT, from, coach.mode === 'chords' ? 0.55 : 0.22).forEach(r => {
         coach.lastPitchT = r.t;
-        if (r.midi != null) ps.forEach(p => {
+        if (r.midi == null) return;
+        ps.forEach(p => {
           if (r.t >= p.at + COACH_ATTACK_SKIP && r.t - p.at <= COACH_EVENT_TAIL) p.readings.push(r.midi);
         });
+        coachLookFeed(lk, r.t, r.midi);
       });
     }
     while (coach.pendings.length && now - coach.pendings[0].at > COACH_EVENT_TAIL) coachFinalizeEvent();
+    if (coach.looks.length) coachLookResolve(false);
 
     /* Beat pulse on the current slot — on the ADAPTED grid (listenStart +
        gridOffset), the same grid the scoring reads. On the rigid grid the
@@ -1270,7 +1302,8 @@ function coachLoop(){
       now - coachMicLatencyMs() > lastBeatT + Math.max(coachMatchWinMs(), coach.beatMs) * 0.5 + 60;
     // Only an event that could still land on a slot holds the take open —
     // in a loud room there is nearly always SOME neighbour's pluck pending.
-    const pendingEvent = coach.pendings.some(p => p.t <= lastBeatT + coachMatchWinMs());
+    // ...and so does a second look still reading (at most COACH_LOOK_TAIL).
+    const pendingEvent = coach.pendings.some(p => p.t <= lastBeatT + coachMatchWinMs()) || coach.looks.length > 0;
     if ((allHit || now > coachListenDeadline()) && !pendingEvent){
       coachFinish();
       return;
@@ -1352,6 +1385,12 @@ function coachFinalizeEvent(){
   }
   coach.events.push(ev);
   coachMatchEvent(ev);
+  // Heard, matched, but too few readings to say: take a second look (COACH_LOOK_TAIL).
+  if (coach.mode === 'melody' && ev.slot >= 0 && p.readings.length < 2 && coach.slots[ev.slot].state === 'dim'){
+    const next = coach.listenStart + coach.gridOffset + (ev.slot + 1) * coach.beatMs + coachMicLatencyMs() - 60;
+    const end = ev.slot + 1 < coach.slots.length ? Math.min(p.at + COACH_LOOK_TAIL, next) : p.at + COACH_LOOK_TAIL;
+    if (end > p.at + COACH_EVENT_TAIL) coach.looks.push({ ev, at: p.at, end, own: p.readings, extra: [] });
+  }
 }
 
 /* Melody: the readings didn't agree on one note, but the slot's note (or
@@ -1364,6 +1403,41 @@ function coachMelodyVote(ev, slot){
   const want = [];
   slot.midis.forEach(m => want.push(m, m + 12));
   return coachTargetShare(rd, want) >= COACH_VOTE_SHARE;
+}
+
+/* The second look (see COACH_LOOK_TAIL), shared by coachLoop and nrLoop.
+   coachLookFeed adds a reading (arrival time t, midi) to every open look
+   whose window it falls in — after the event's own tail, up to its end.
+   coachLookPass: does the event's own readings plus the look's make the
+   note? `targets` are exact midis; the octave above counts too. */
+function coachLookFeed(looks, t, midi){
+  for (let k = 0; k < looks.length; k++){
+    const L = looks[k];
+    if (t > L.at + COACH_EVENT_TAIL && t <= L.end) L.extra.push(midi);
+  }
+}
+function coachLookPass(L, targets){
+  const rd = (L.own || []).concat(L.extra);
+  if (rd.length < COACH_LOOK_MIN) return false;
+  const want = [];
+  targets.forEach(m => want.push(m, m + 12));
+  return coachTargetShare(rd, want) >= COACH_VOTE_SHARE;
+}
+// The Coach's side: resolve looks whose window has closed (all of them when `all`).
+function coachLookResolve(all){
+  const now = performance.now();
+  coach.looks = coach.looks.filter(L => {
+    if (!all && now <= L.end) return true;
+    const s = coach.slots[L.ev.slot];
+    // still this event's slot, still unclear: a nearer event may have taken it since
+    if (s && s.hit === L.ev && s.state === 'dim' && coachLookPass(L, s.midis || [s.midi])){
+      s.state = 'ok';
+      s.secondLook = true;
+      L.ev.look = L.extra.slice();
+      coachChipRefresh(L.ev.slot);
+    }
+    return false;
+  });
 }
 
 /* Fraction of an event's pitch readings that are tones of the slot's chord. */
@@ -1481,6 +1555,7 @@ function coachFinish(){
   coach.timeouts.forEach(clearTimeout);
   coach.timeouts = [];
   while (coach.pendings.length) coachFinalizeEvent();
+  coachLookResolve(true);   // an early finish (Stop, the backstop): judge each look on what it has
   if (coachRaf){ cancelAnimationFrame(coachRaf); coachRaf = null; }
   const rec = micRecStop();
   coachMicOff();
@@ -1500,10 +1575,10 @@ function coachRecMeta(){
               gridOffsetMs: r2(coach.gridOffset || 0), eventTimes: 'played (arrival - micLatencyMs)' },
     expected: coach.slots.map((s, i) => ({ i, t: coach.listenStart + i * coach.beatMs,
       midi: s.midi == null ? null : s.midi, midis: s.midis || null, chord: s.chordName || null,
-      label: s.label || '', verdict: s.state, loose: !!s.loose,
+      label: s.label || '', verdict: s.state, loose: !!s.loose, secondLook: !!s.secondLook,
       devMs: s.hit && s.hit.devMs != null ? r2(s.hit.devMs) : null })),
-    events: coach.events.map(ev => ({ t: ev.t, midi: ev.midi == null ? null : ev.midi, slot: ev.slot,
-      readings: (ev.readings || []).map(r2) }))
+    events: coach.events.map(ev => Object.assign({ t: ev.t, midi: ev.midi == null ? null : ev.midi, slot: ev.slot,
+      readings: (ev.readings || []).map(r2) }, ev.look ? { look: ev.look.map(r2) } : {}))
   };
 }
 
@@ -8142,7 +8217,7 @@ async function nrStart(){
   s.errs = [];
   s.sweepIdx = 0; s.lastBeat = -1;
   s.countCleared = false;   // else round 2+ never wipes the count-in "4" off the track
-  s.smoothRms = 0; s.smoothHf = 0; s.lastOnsetT = -1e9; s.lastPitchT = 0; s.pendings = [];
+  s.smoothRms = 0; s.smoothHf = 0; s.lastOnsetT = -1e9; s.lastPitchT = 0; s.pendings = []; s.looks = [];
   s.evLog = [];
 
   nrRenderPlay();
@@ -8228,19 +8303,24 @@ function nrLoop(){
       s.pendings.push({ t: at, readings: [] });
     }
     coachSmooth(s, rms, hf);
-    if (s.pendings.length && rms > COACH_PITCH_GATE * 0.5){
+    if ((s.pendings.length || s.looks.length) && rms > COACH_PITCH_GATE * 0.5){
       /* Chord levels loosen YIN's clarity gate the way the Coach's chord
          mode does — a strum isn't cleanly periodic, and the tone vote
          below is what keeps loose readings from becoming wrong verdicts. */
-      const ps = s.pendings;
-      coachPitchReadings(s.lastPitchT, ps[0].t + COACH_ATTACK_SKIP, s.chordMode ? 0.55 : 0.22).forEach(r => {
+      const ps = s.pendings, lk = s.looks;
+      const from = Math.min(ps.length ? ps[0].t + COACH_ATTACK_SKIP : Infinity,
+                            lk.length ? Math.min.apply(null, lk.map(L => L.at)) + COACH_EVENT_TAIL : Infinity);
+      coachPitchReadings(s.lastPitchT, from, s.chordMode ? 0.55 : 0.22).forEach(r => {
         s.lastPitchT = r.t;
-        if (r.midi != null) ps.forEach(p => {
+        if (r.midi == null) return;
+        ps.forEach(p => {
           if (r.t >= p.t + COACH_ATTACK_SKIP && r.t - p.t <= COACH_EVENT_TAIL) p.readings.push(r.midi);
         });
+        coachLookFeed(lk, r.t, r.midi);
       });
     }
     while (nr && s.pendings.length && now - s.pendings[0].t > COACH_EVENT_TAIL) nrFinalizeEvent();
+    if (nr && s.looks.length) nrLookResolve(false);
   }
 
   nrRaceFrame(now);   // the race lane above the track — see NR_RUNNER_SVG
@@ -8556,19 +8636,56 @@ function nrFinalizeEvent(){
   if (best < 0) return;   // stray onset with no note nearby: ignored, the
                           // same bargain the check flows strike (see CHK_*)
   const n = s.playable[best];
-  if (n.snap){
-    /* Undo the farther event's grade. Events finalize in onset order and
-       the next note is at least two windows away, so nothing after this
-       note has been graded since — restoring the snapshot is exact. */
-    Object.assign(s, n.snap.state);
-    s.errs.length = n.snap.errsLen;
-    const el = s.els[s.notes.indexOf(n)];
-    if (el) el.classList.remove('hit-perfect', 'hit-good', 'nr-hit-pitch');
-    n.result = null; n.unclear = false;
-  }
+  /* Undo the farther event's grade. Events finalize in onset order and
+     the next note is at least two windows away, so nothing after this
+     note has been graded since — restoring the snapshot is exact. */
+  if (n.snap) nrUndo(n);
   n.snap = { state: { score: s.score, combo: s.combo, missStreak: s.missStreak, maxCombo: s.maxCombo }, errsLen: s.errs.length };
   n.hitAbs = bestAbs;
-  const pv = pitchFor(n), pitchOk = pv.ok, unclear = pv.unclear;
+  n.hitP = p;
+  const pv = pitchFor(n);
+  nrGrade(n, tEv, pv.ok, pv.unclear);
+  /* Heard, on the beat, but too few readings to say: a second look
+     (COACH_LOOK_TAIL), cut 60 ms before the next note arrives. */
+  if (!n.chord && !pv.ok && pv.unclear && p.readings.length < 2){
+    const nx = s.playable[best + 1];
+    const end = nx ? Math.min(p.t + COACH_LOOK_TAIL, nx.t + nrOffset() - 60) : p.t + COACH_LOOK_TAIL;
+    if (end > p.t + COACH_EVENT_TAIL) s.looks.push({ n, p, tEv, at: p.t, end, own: p.readings, extra: [] });
+  }
+}
+// Take back note n's grade (its snapshot holds the score/combo from just before it).
+function nrUndo(n){
+  const s = nr;
+  Object.assign(s, n.snap.state);
+  s.errs.length = n.snap.errsLen;
+  const el = s.els[s.notes.indexOf(n)];
+  if (el) el.classList.remove('hit-perfect', 'hit-good', 'nr-hit-pitch');
+  n.result = null; n.unclear = false;
+}
+/* Note Runner's second looks whose window has closed (all of them when
+   `all`). A pass re-grades the note as right, through the same snapshot
+   undo a nearer event uses — but only while that note is still the last
+   thing graded (one s.errs entry since its snapshot), so a later note's
+   grade is never disturbed. */
+function nrLookResolve(all){
+  const s = nr;
+  if (!s || !s.looks || !s.looks.length) return;
+  const now = performance.now();
+  s.looks = s.looks.filter(L => {
+    if (!all && now <= L.end) return true;
+    const n = L.n;
+    if (n.result === 'pitch' && n.unclear && n.hitP === L.p && n.snap &&
+        s.errs.length === n.snap.errsLen + 1 && coachLookPass(L, [n.midi])){
+      nrUndo(n);
+      nrGrade(n, L.tEv, true, false);
+      n.secondLook = true;
+    }
+    return false;
+  });
+}
+// Score note n (n.hitAbs = how far off its beat) as right, or as 'pitch'.
+function nrGrade(n, tEv, pitchOk, unclear){
+  const s = nr, bestAbs = n.hitAbs;
   s.errs.push((tEv - n.t) / 1000);
   if (pitchOk){
     const prevMult = Math.min(4, 1 + Math.floor(s.combo / 8));
@@ -8625,6 +8742,7 @@ function nrFinish(complete){
   (s.timeouts || []).forEach(clearTimeout);
   s.timeouts = [];
   while (s.pendings.length) nrFinalizeEvent();
+  nrLookResolve(true);
   const rec = micRecStop();
   if (s.micOn){ s.micOn = false; coachMicOff(); }
   s.playable.forEach(n => { if (!n.result) n.result = 'miss'; });   // early Stop
@@ -8637,7 +8755,7 @@ function nrFinish(complete){
                 beatMs: Math.round(s.beatMs * 100) / 100, goodMs: s.goodMs, perfectMs: s.perfectMs,
                 score: s.score, eventTimes: 'played (arrival - micLatencyMs)' },
       expected: s.playable.map(n => ({ t: n.t, midi: n.midi, string: n.string, fret: n.fret,
-        chord: n.chord ? n.name : null, verdict: n.result, unclear: !!n.unclear })),
+        chord: n.chord ? n.name : null, verdict: n.result, unclear: !!n.unclear, secondLook: !!n.secondLook })),
       events: s.evLog || []
     });
   }

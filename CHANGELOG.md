@@ -5,6 +5,16 @@ Notable changes to the Guitar Class site. Newest first.
 For the full session-by-session history (and the reasoning behind each change),
 see `WORKFLOW.md` and the git commit log.
 
+## 2026-10-16 — Listening Coach and Note Runner listen a little longer
+
+- **A note the site heard but could not read is no longer always
+  "unclear".** The Listening Coach (single notes) and Note Runner now keep
+  listening a little longer to that note. If it is clearly the right note,
+  it counts. If it is still not clear, it stays unclear. This never marks
+  a note wrong.
+- **When your playing is being recorded, the count-in starts a moment
+  later.** This only happens on takes you said yes to recording.
+
 ## 2026-10-16 — Teacher console: mic recordings
 
 - **Download all** saves every mic recording as one zip file.

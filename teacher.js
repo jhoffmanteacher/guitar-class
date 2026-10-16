@@ -4166,9 +4166,10 @@ function micEvalTake(pcm, R, d, deps){
       const near = ex.map(r => r - T).concat(oc.map(r => r - T - 12));
       rec.cents = near.length ? Math.round(100 * med(near)) : null;
       rec.replay = rd.length < 2 ? 'none' : rec.exact + rec.oct >= 0.5 ? 'present' : rec.exact + rec.oct >= 0.2 ? 'mixed' : 'other';
-      /* An ESTIMATE of a "second look" the Coach does NOT have (proposed
-         2026-10-14, never built — there is no coachSecondLook in coach.js;
-         confirmed 2026-10-16): what it would do with a note it called
+      /* An ESTIMATE of the 2026-10-14 "second look" proposal, which was
+         never built (the one coach.js got on 2026-10-16 is COACH_LOOK_TAIL —
+         a different window and rule; tools/mic-sim/whatif-tail.mjs models
+         that one): what it would do with a note it called
          unclear: the same window — from
          the matched event's attack + 70 ms to 3/4 of a beat (at most
          600 ms) past the beat, or the event's own 340 ms if later — read
@@ -4325,7 +4326,8 @@ function micEvalTake(pcm, R, d, deps){
     presentSiteReadings: med(notes.filter(n => n.site === 'unclear' && n.replay === 'present').map(n => n.siteN)),
     // no new pick attack anywhere near the note: nothing was played there
     silentMiss: cnt(n => (n.site === 'miss' || n.site === 'unclear') && !n.played && n.replay !== 'present'),
-    // e.secondLook: nothing writes it (coach.js has no second look) — always 0
+    // counted right by the second look (coach.js COACH_LOOK_TAIL, 2026-10-16;
+    // takes saved before then never carry it)
     secondLook: cnt(n => n.secondLook),
     // what a second look WOULD do with this take's unclear notes (estimate only):
     // count right (and of those, how many the replay also finds clearly)
@@ -4477,11 +4479,8 @@ function teacherMicEvalHtml(){
       `<b>${why('no-onset')}</b> no pluck heard at all · ` +
       `<b>${why('vote-failed')}</b> enough readings, but they did not agree on the note.`);
   }
-  const unclearCoach = sum(r => r.game.indexOf('Coach') === 0 ? r.notes.siteUnclear : 0);
-  if(unclearCoach){
-    const would = sum(r => r.notes.lookWould), good = sum(r => r.notes.lookWouldPresent);
-    lines.push(`Estimate only — the Listening Coach has no "second look": one would count <b>${would}</b> of its ${unclearCoach} unclear notes right — ${good} of them clearly the right note in the recording, ${would - good} not clearly.`);
-  }
+  const looked = sum(r => r.notes.secondLook);
+  if(looked) lines.push(`<b>${looked}</b> ${looked === 1 ? 'note was' : 'notes were'} counted right by the second look (the site listened a little longer to a note it could not read at first).`);
   const tr = rows.map((r, i) => {
     const nb = r.notes, L = r.latency;
     return `<tr><td class="nc" title="${escAttr(teacherMicEvalNames[i] || '')}">${escHtml(r.take + ' · ' + (teacherMicEvalNames[i] || ''))}</td>`+
