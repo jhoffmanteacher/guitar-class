@@ -2483,6 +2483,77 @@ const SNIPPET_TRACKS = {
       179.000,   // not a downbeat: the end of the file (179.04 s), so bar 107 — the last chord — has an end and the outro snippet can reach it
     ],
   },
+  /* Madrecita Querida — Vicente Fernández (Jonathan uploaded the recording,
+     2026-10-16). Like Las Mañanitas this is the RECORD itself, not a Moises
+     export: no rhythm-down mix, so `src` IS the full mix and there is no
+     Guitar toggle. TWO keys, for ca-36's Key of G / Key of F switch
+     (keyVersions — caView): the record is in F and about 17 cents sharp
+     (measured 6-30 cents across the song, 16 on the bass), so the F files
+     are shifted down 17 cents to A=440, and the G files up 183 cents (two
+     half steps minus the same 17), formants held so the voice stays
+     natural. Every file is rubberband with the timing untouched, so the two
+     keys share ONE bar map (checked against the source: 0 ms and 6 ms
+     onset offset) — 1d fails the push if the two entries' barTimes differ.
+     Slow tier: the same file stretched 78/65 = exactly 1.2x, pitch held.
+
+     Counted in 4 at about 78 a minute; the band's chords change every two
+     beats at most, so a chord column in ca-36 is 2, 4, 6 or 8 beats. A live
+     mariachi with no click, so it carries a beat map: madmom's downbeat
+     tracker (RNN + DBN, 2 beats a bar, 293 beats from 5.11 s) — it follows
+     the band through the two slow-downs ("a llorar" in each chorus) and the
+     slow ending, where librosa's steady tracker ran ahead by up to a beat —
+     each beat snapped to the nearest bass onset within 50 ms, every 4th beat
+     a downbeat here. Bar 1 is the first downbeat after the opening flourish
+     (5.11 s, before "¡Ahí va pues!"); the flourish itself is not in time.
+     Song map in these 4-beat bars: intro 1-8, verse 1 9-24, chorus 25-35,
+     bridge 36-42 (the intro's chords, with the line about a mother), verse 2
+     43-58, chorus 59-67, ending 68-72 (slow), the last chord at 72. The last
+     entry, 235.119, is the last beat the tracker found, 0.5 s before the end
+     of the file. */
+  'madrecita-querida': {
+    src:     'audio/vicente-fernandez-madrecita-querida-backing-G-78bpm-440hz-full.mp3',
+    srcSlow: 'audio/vicente-fernandez-madrecita-querida-backing-G-65bpm-440hz-full.mp3',
+    trackBpm: 78, trackBpmSlow: 65,
+    feltBpm: 78,
+    beatsPerBar: 4,
+    durationSec: 235,
+    anchor: 5.114,
+    anchorVerified: true,
+    defaultSlow: true,
+    barTimes: [
+      5.114, 8.092, 11.128, 14.164, 17.148, 20.120, 23.104, 26.273, 29.414, 32.694,
+      35.869, 39.039, 42.173, 45.151, 48.112, 51.183, 54.253, 57.313, 60.320, 63.460,
+      66.461, 69.445, 72.528, 75.546, 78.629, 81.647, 84.904, 88.300, 91.860, 95.237,
+      98.464, 101.494, 104.629, 107.688, 110.771, 113.818, 116.860, 119.908, 122.950, 125.945,
+      128.958, 131.970, 135.123, 138.124, 141.119, 144.173, 147.215, 150.221, 153.223, 156.154,
+      159.219, 162.255, 165.314, 168.380, 171.381, 174.364, 177.377, 180.436, 183.496, 186.480,
+      189.701, 193.370, 196.586, 199.860, 203.262, 206.350, 209.560, 213.322, 217.120, 220.671,
+      224.142, 227.683, 231.310, 235.119,
+    ],
+  },
+  /* The same record in its own key, F (see above) — ca-36's Key of F. Same
+     bar map, number for number. */
+  'madrecita-querida-f': {
+    src:     'audio/vicente-fernandez-madrecita-querida-backing-F-78bpm-440hz-full.mp3',
+    srcSlow: 'audio/vicente-fernandez-madrecita-querida-backing-F-65bpm-440hz-full.mp3',
+    trackBpm: 78, trackBpmSlow: 65,
+    feltBpm: 78,
+    beatsPerBar: 4,
+    durationSec: 235,
+    anchor: 5.114,
+    anchorVerified: true,
+    defaultSlow: true,
+    barTimes: [
+      5.114, 8.092, 11.128, 14.164, 17.148, 20.120, 23.104, 26.273, 29.414, 32.694,
+      35.869, 39.039, 42.173, 45.151, 48.112, 51.183, 54.253, 57.313, 60.320, 63.460,
+      66.461, 69.445, 72.528, 75.546, 78.629, 81.647, 84.904, 88.300, 91.860, 95.237,
+      98.464, 101.494, 104.629, 107.688, 110.771, 113.818, 116.860, 119.908, 122.950, 125.945,
+      128.958, 131.970, 135.123, 138.124, 141.119, 144.173, 147.215, 150.221, 153.223, 156.154,
+      159.219, 162.255, 165.314, 168.380, 171.381, 174.364, 177.377, 180.436, 183.496, 186.480,
+      189.701, 193.370, 196.586, 199.860, 203.262, 206.350, 209.560, 213.322, 217.120, 220.671,
+      224.142, 227.683, 231.310, 235.119,
+    ],
+  },
 };
 /* Does this track have a full mix at all? Both tiers or neither — the toggle
    has to survive the Slow button. */
@@ -11647,7 +11718,7 @@ function caHeroCardHtml(a, isCurrent = true){
       ${caPrintBtnHtml(a)}
     </summary>
     <div class="ca-card-body">
-      ${card ? caCardBodyHtml(a) : caChordSwitchHtml(a) + caIntroHtml(a, focus, openStepIdx)}
+      ${card ? caCardBodyHtml(a) : caKeySwitchHtml(a) + caChordSwitchHtml(a) + caIntroHtml(a, focus, openStepIdx)}
       ${stepsHtml && focus ? caFocusDotsHtml(a, openStepIdx) : ''}
       ${stepsHtml ? `<ol class="ca-steps">${stepsHtml}</ol>` : ''}
       ${caMarkRowHtml(a, done, markLabel)}
@@ -12081,25 +12152,63 @@ function caChordMode(a){
   const m = caChordModes[a.id] || a.chordStart;
   return m === 'power' ? 'power' : 'full';
 }
-const caChordViews = new WeakMap();
+/* ── Key versions: one activity, two keys ──
+   Jonathan, 2026-10-16, for Madrecita Querida (ca-36): "Do F and G with a
+   toggle switch. Default to G." The record is in F, so full chords would be
+   F and Bb barres; a second copy of the record raised to G gives open G, C
+   and D7. An activity opts in with
+     key: 'G',                         // the key its chords are written in
+     keyStart: 'G',                    // optional: the key it opens on
+     keyVersions: { F: { track, full: { <chord>: <shape> },
+                                power: { <chord>: <shape> } } }
+   and the card shows a Key of G / Key of F switch beside the chord switch.
+   In another key caView swaps every chord through that key's `full` map
+   (or its `power` map when the chord switch says Power chords), renames the
+   "[G]" marks the same way, and plays the key's own `track` — the same
+   record pitch-shifted with the timing held, so its bar map is identical
+   (checks.mjs 1d pins that). Same id, checks and tick keys in every key.
+   The choice is per viewer in localStorage (`caKeyModes`, { id: key }),
+   like the chord switch. */
+const CA_KEY_MODES_KEY = 'caKeyModes';
+let caKeyModes = (() => {
+  try { const v = JSON.parse(localStorage.getItem(CA_KEY_MODES_KEY) || '{}'); return v && typeof v === 'object' ? v : {}; }
+  catch(e) { return {}; }
+})();
+function caHasKeyVersions(a){ return !!(a && a.key && a.keyVersions && typeof a.keyVersions === 'object' && Object.keys(a.keyVersions).length); }
+function caKeyList(a){ return caHasKeyVersions(a) ? [a.key].concat(Object.keys(a.keyVersions)) : []; }
+function caKeyMode(a){
+  if(!caHasKeyVersions(a)) return null;
+  const k = caKeyModes[a.id] || a.keyStart || a.key;
+  return caKeyList(a).includes(k) ? k : a.key;
+}
+const caChordViews = new WeakMap();   // raw activity -> Map('<key>|<mode>' -> view)
 function caView(a){
-  if(!a || a.__chordView || caChordMode(a) !== 'power') return a;
-  const hit = caChordViews.get(a);
+  if(!a || a.__chordView) return a;
+  const power = caChordMode(a) === 'power';
+  const k = caKeyMode(a);
+  const kv = (k && k !== a.key) ? a.keyVersions[k] : null;
+  if(!power && !kv) return a;
+  const combo = (kv ? k : '') + '|' + (power ? 'power' : 'full');
+  let byCombo = caChordViews.get(a);
+  if(!byCombo){ byCombo = new Map(); caChordViews.set(a, byCombo); }
+  const hit = byCombo.get(combo);
   if(hit) return hit;
-  const map = a.chordVersions.power;
+  const map = kv ? ((power ? kv.power : kv.full) || {}) : a.chordVersions.power;
   const keys = Object.keys(map).sort((x, y) => y.length - x.length);
   const re = keys.length ? new RegExp('\\[(' + keys.map(k => k.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')).join('|') + ')\\]', 'g') : null;
   const walk = v => {
     if(typeof v === 'string') return re ? v.replace(re, (m, k) => `[${map[k].note}]`) : v;
     if(Array.isArray(v)) return v.map(walk);
     if(v && typeof v === 'object'){
+      // The maps themselves are data, not content: never rename inside them.
+      if(v === a.chordVersions || v === a.keyVersions) return v;
       if(Array.isArray(v.frets) && Object.prototype.hasOwnProperty.call(map, v.note)){
         const c = map[v.note];
         return { ...v, frets: c.frets.map(f => f.slice()), midi: c.midi.slice(), note: c.note };
       }
       const out = {};
       Object.keys(v).forEach(k => { out[k] = walk(v[k]); });
-      Object.keys(v).forEach(k => {
+      if(power) Object.keys(v).forEach(k => {
         const m = /^(.+)_power(_es)?$/.exec(k);
         if(m) out[m[1] + (m[2] || '')] = out[k];
       });
@@ -12108,9 +12217,29 @@ function caView(a){
     return v;
   };
   const view = walk(a);
+  if(kv && view.card) view.card = { ...view.card, track: kv.track };
   view.__chordView = true;
-  caChordViews.set(a, view);
+  byCombo.set(combo, view);
   return view;
+}
+function caKeySwitchHtml(a){
+  if(!caHasKeyVersions(a)) return '';
+  const cur = caKeyMode(a);
+  const id = escAttr(a.id);
+  return `<div class="ca-chord-switch ca-key-switch" role="group" aria-label="${escAttr(t('ca.keyVersion'))}">`
+    + caKeyList(a).map(k => `<button type="button" class="snip-toggle${k === cur ? ' on' : ''}" aria-pressed="${k === cur ? 'true' : 'false'}" onclick="caSetKeyMode('${id}','${escAttr(k)}')">${escHtml(t('ca.keyOf', {key: k}))}</button>`).join('')
+    + `</div>`;
+}
+/* Redraw in the other key — same shape as caSetChordMode below. */
+function caSetKeyMode(id, k){
+  const a = (window.CLASS_ACTIVITIES || []).find(x => x.id === id);
+  if(!a || !caKeyList(a).includes(k) || caKeyMode(a) === k) return;
+  caKeyModes[id] = k;
+  try { localStorage.setItem(CA_KEY_MODES_KEY, JSON.stringify(caKeyModes)); } catch(e) {}
+  stopCardAudio();
+  if(IS_TEACHER_MODE && typeof renderTeacherActivityDetail === 'function'){ renderTeacherActivityDetail(id); return; }
+  caOpenId = id;
+  renderClassActivities();
 }
 function caChordSwitchHtml(a){
   if(!caHasChordVersions(a)) return '';
@@ -12383,7 +12512,7 @@ function caCardBodyHtml(a, opts){
   if(!L) return '';
   const preview = !!(opts && opts.preview);
   return `<div class="pc" data-id="${escAttr(a.id)}" data-slow="1"${snippetHasFull(L.tr) ? ' data-guitar="1"' : ''}${preview ? ' data-preview="1"' : ''}>`
-    + caChordSwitchHtml(a)
+    + caKeySwitchHtml(a) + caChordSwitchHtml(a)
     + `<p class="pc-dir">${escHtml(t('ca.cardDirections'))}</p>`
     + pcPlayerHtml(a, L) + pcTabHtml(a, L) + pcChecksHtml(a, preview) + pcHelpHtml(a, preview)
     + `</div>`;
@@ -12397,7 +12526,9 @@ function caCardBodyHtml(a, opts){
 let pcState = null;
 function pcActivity(root){
   const id = root && root.dataset.id;
-  return (window.CLASS_ACTIVITIES || []).find(x => x.id === id);
+  /* The view, not the raw entry: in another key (keyVersions) the card
+     plays that key's track. Same id, checks and timing either way. */
+  return caView((window.CLASS_ACTIVITIES || []).find(x => x.id === id));
 }
 function pcWindow(L, slow){ return snippetWindow(L.tr, { fromBar: L.firstBar, bars: L.totalBars }, slow); }
 function pcStatus(root, html){ const el = root.querySelector('.pc-status'); if(el) el.innerHTML = html || ''; }   // '' = :empty, see styles.css
@@ -12914,7 +13045,7 @@ function caActivityCardHtml(a){
       ${caPrintBtnHtml(a)}
     </summary>
     <div class="ca-card-body">
-      ${card ? caCardBodyHtml(a) : caChordSwitchHtml(a) + caIntroHtml(a, focus, openStepIdx)}
+      ${card ? caCardBodyHtml(a) : caKeySwitchHtml(a) + caChordSwitchHtml(a) + caIntroHtml(a, focus, openStepIdx)}
       ${stepsHtml && focus ? caFocusDotsHtml(a, openStepIdx) : ''}
       ${stepsHtml ? `<ol class="ca-steps">${stepsHtml}</ol>` : ''}
       ${caMarkRowHtml(a, done, markLabel)}

@@ -5,6 +5,15 @@ Notable changes to the Guitar Class site. Newest first.
 For the full session-by-session history (and the reasoning behind each change),
 see `WORKFLOW.md` and the git commit log.
 
+## 2026-10-16 — Madrecita Querida play-along
+
+- **New practice card: Madrecita Querida — Play Along.** Play with the
+  Vicente Fernández recording from the first verse to the last chord. Tap
+  a section to start there, and slow the song down with the speed slider.
+- **Pick your key.** Key of G uses G, C and D7. Key of F is the record's
+  own key and uses F, Bb and C7. The card starts in the key of G. Full
+  chords and Power chords work in both keys.
+
 ## 2026-10-16 — Module 3: shorter steps, video first
 
 - **Module 3 Set 1 now opens with a video.** The first step starts with

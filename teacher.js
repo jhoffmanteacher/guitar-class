@@ -2361,7 +2361,7 @@ function renderTeacherActivityDetail(id){
     <div class="stu-section-head">Students</div>
     <div data-ta-live="grid">${teacherActivityGridHtml(a)}</div>
     <div class="stu-section-head">Preview</div>
-    ${/* A practice card draws its own switch inside caCardBodyHtml. */ typeof caIsCard==='function'&&caIsCard(a)?'':(typeof caChordSwitchHtml==='function'?caChordSwitchHtml(a):'')}
+    ${/* A practice card draws its own switch inside caCardBodyHtml. */ typeof caIsCard==='function'&&caIsCard(a)?'':(typeof caKeySwitchHtml==='function'?caKeySwitchHtml(a):'')+(typeof caChordSwitchHtml==='function'?caChordSwitchHtml(a):'')}
     ${typeof caIsCard==='function'&&caIsCard(a) ? caCardBodyHtml(a,{preview:true})
       : (a.view==='focus' && taFocusPreviewOn[a.id]) ? focusPreviewHtml()
       : (stepsHtml || '<div class="stu-empty">No steps on this activity yet.</div>')}

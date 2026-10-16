@@ -1579,6 +1579,10 @@ body.t-wide .t-main{max-width:none}
 .pc-row-label:first-child{margin-top:2px}
 /* Full chords / Power chords (chordVersions — caChordSwitchHtml). */
 .ca-chord-switch{display:flex;flex-wrap:wrap;gap:6px;margin:0 0 10px}
+/* Key of G / Key of F (keyVersions, ca-36) sits on the same line as the
+   chord switch, so the two cost one row of a Chromebook screen, not two. */
+.ca-key-switch,.ca-key-switch + .ca-chord-switch{display:inline-flex;vertical-align:middle}
+.ca-key-switch{margin-right:16px}
 @media print{.ca-chord-switch{display:none}}
 /* The TAB board never scrolls sideways: it fills the card and a long phrase
    wraps into stacked systems (renderTabBlock, TAB_MAX_COLS). --tab-cell-h is

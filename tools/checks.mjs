@@ -3438,7 +3438,7 @@ function validateClassActivities() {
         if (Array.isArray(v)) { v.forEach((x, i) => walk(x, `${path}[${i}]`)); return; }
         if (!v || typeof v !== 'object') return;
         for (const k of Object.keys(v)) {
-          if (path === '' && k === 'chordVersions') continue;
+          if (path === '' && (k === 'chordVersions' || k === 'keyVersions')) continue;
           const m = /^(.+)_power(_es)?$/.exec(k);
           if (m) pw.push({ path, obj: v, base: m[1], es: !!m[2], k });
           walk(v[k], `${path}.${k}`);
@@ -3458,6 +3458,62 @@ function validateClassActivities() {
       if ('chordStart' in a) {
         if (a.chordStart !== 'power' && a.chordStart !== 'full') { err(`${where}: chordStart "${a.chordStart}" — 'power' or 'full' (or leave it off for full)`); problems++; }
         else if (!('chordVersions' in a)) { err(`${where}: chordStart without chordVersions — there is no other version to start on`); problems++; }
+      }
+      /* KEY VERSIONS (2026-10-16, ca-36 — caView in app.js): `key` names the
+         key the data is written in, `keyVersions` the others. Each other
+         key plays its own track, which must be the same record with the
+         timing held — so the same bar map, anchor, tempo fields and length
+         as the card's own track, or the highlight runs on the wrong bars in
+         that key. Its `full` map (and its `power` map, when the activity
+         has a chord switch) must name every chord the card plays, each a
+         real shape, or one chord stays in the old key. */
+      if ('keyVersions' in a || 'key' in a || 'keyStart' in a) {
+        const kv = a.keyVersions;
+        const used = new Set();
+        (function names(v) {
+          if (Array.isArray(v)) { v.forEach(names); return; }
+          if (!v || typeof v !== 'object' || v === a.keyVersions || v === a.chordVersions) return;
+          if (Array.isArray(v.frets) && hasVal(v.note)) used.add(v.note);
+          Object.values(v).forEach(names);
+        })(a);
+        let tracks = null;
+        try { tracks = loadConstObject(readFileSync(join(ROOT, 'app.js'), 'utf8'), 'SNIPPET_TRACKS'); } catch {}
+        if (!hasVal(a.key) || !kv || typeof kv !== 'object' || !Object.keys(kv).length) { err(`${where}: key versions need "key" (the key the chords are written in) and a non-empty "keyVersions" map`); problems++; }
+        else {
+          if (kv[a.key]) { err(`${where}: keyVersions has '${a.key}', the key the data is already in`); problems++; }
+          if ('keyStart' in a && a.keyStart !== a.key && !kv[a.keyStart]) { err(`${where}: keyStart '${a.keyStart}' is neither key '${a.key}' nor a keyVersions entry`); problems++; }
+          const baseTr = tracks && a.card && tracks[a.card.track];
+          for (const [k, v] of Object.entries(kv)) {
+            const w = `${where}: keyVersions.${k}`;
+            if (!v || typeof v !== 'object') { err(`${w} is not an object`); problems++; continue; }
+            const tr = tracks && tracks[v.track];
+            if (!tracks) { err(`${w}: could not load SNIPPET_TRACKS to check its track`); problems++; }
+            else if (!tr) { err(`${w}: track '${v.track}' is not in SNIPPET_TRACKS`); problems++; }
+            else if (baseTr) {
+              for (const f of ['anchor', 'beatsPerBar', 'feltBpm', 'trackBpm', 'trackBpmSlow', 'durationSec'])
+                if (tr[f] !== baseTr[f]) { err(`${w}: track '${v.track}' has ${f} ${tr[f]} but '${a.card.track}' has ${baseTr[f]} — a key version is the same record, timing held`); problems++; }
+              if (JSON.stringify(tr.barTimes || null) !== JSON.stringify(baseTr.barTimes || null)) { err(`${w}: track '${v.track}' and '${a.card.track}' have different barTimes — the two keys must share one bar map`); problems++; }
+              for (const f of ['src', 'srcSlow']) {
+                const x = tr[f] && existsSync(join(ROOT, tr[f])) ? mp3DurationSec(join(ROOT, tr[f])) : null;
+                const y = baseTr[f] && existsSync(join(ROOT, baseTr[f])) ? mp3DurationSec(join(ROOT, baseTr[f])) : null;
+                if (x !== null && y !== null && Math.abs(x - y) > 0.25) { err(`${w}: ${tr[f]} is ${x.toFixed(2)}s but ${baseTr[f]} is ${y.toFixed(2)}s — the two keys must be the same length`); problems++; }
+              }
+            }
+            const maps = [['full', v.full]];
+            if ('chordVersions' in a) maps.push(['power', v.power]);
+            else if ('power' in v) { err(`${w}: has a power map but the activity has no chordVersions — it would never show`); problems++; }
+            for (const [mn, map] of maps) {
+              if (!map || typeof map !== 'object') { err(`${w}: needs a "${mn}" map ({ <chord>: { frets, note, midi } })`); problems++; continue; }
+              for (const name of used) if (!map[name]) { err(`${w}.${mn}: no shape for '${name}' — that chord would stay in key ${a.key}`); problems++; }
+              for (const [name, c] of Object.entries(map)) {
+                if (!used.has(name)) { err(`${w}.${mn}: '${name}' is not a chord the card plays`); problems++; }
+                if (!c || !Array.isArray(c.frets)) { err(`${w}.${mn}['${name}'] needs frets / note / midi`); problems++; continue; }
+                caChordProblems(c).forEach(pr => { err(`${w}.${mn}['${name}']: ${pr}`); problems++; });
+                if (!hasVal(c.note)) { err(`${w}.${mn}['${name}'] is missing "note"`); problems++; }
+              }
+            }
+          }
+        }
       }
       for (const f of pw) {
         const twin = f.es ? `${f.base}_power` : `${f.base}_power_es`;
@@ -3642,7 +3698,11 @@ function caChordProblems(n) {
     const lo = Math.min(...n.midi), hi = Math.max(...n.midi);
     if (hi - lo === 7) {
       const want = NAMES[lo % 12] + '5';
-      if (ecNorm(n.note) !== want) out.push(`note "${n.note}" — a root and the 5th above it is ${want}`);
+      /* A flat spelling is the same chord — Bb5 in the key of F (ca-36),
+         where A#5 would be wrong on the page. */
+      const FLAT = { 'D♭': 'C♯', 'E♭': 'D♯', 'G♭': 'F♯', 'A♭': 'G♯', 'B♭': 'A♯' };
+      const got = ecNorm(n.note).replace(/^([A-G])b/, '$1♭').replace(/^([A-G]♭)/, (m, f) => FLAT[f] || f);
+      if (got !== want) out.push(`note "${n.note}" — a root and the 5th above it is ${want}`);
     }
   }
   return out;
