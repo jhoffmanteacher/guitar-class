@@ -4343,8 +4343,9 @@ async function checkLinks() {
    icons) are still hashed byte-exact, so a re-exported track bumps the
    audio version exactly as before. */
 const TEXT_FOR_HASH = /\.(js|mjs|css|html|json|svg|md|txt|rules|webmanifest)$/i;
-function fingerprint(files) {
+function fingerprint(files, extra = '') {
   const h = createHash('sha256');
+  if (extra) h.update(extra.replace(/\r\n/g, '\n') + '\0');
   for (const f of files) {
     try {
       const raw = readFileSync(join(ROOT, f));
@@ -4552,8 +4553,8 @@ function checkSdkVersion() {
    (audio/ only) — kept separate so a routine content push doesn't bump the
    audio version and purge every student's cached backing tracks, while a
    real re-exported track still bumps it and invalidates the stale cache. */
-function bumpVersionConst(constName, prefix, files, src, swPath, label) {
-  const fp = fingerprint(files);
+function bumpVersionConst(constName, prefix, files, src, swPath, label, extra = '') {
+  const fp = fingerprint(files, extra);
   const date = new Date().toISOString().slice(0, 10);
   const want = `${prefix}-${date}-${fp}`;
 
@@ -4589,7 +4590,13 @@ function bumpServiceWorker() {
   checkFirestoreRules();
 
   const before = src;
-  src = bumpVersionConst('CACHE_VERSION', 'guitar-class', [...SHELL_FILES, ...IMG_FILES], src, swPath, 'shell cache');
+  /* sw.js's own code is part of the shell fingerprint (2026-10-16), with
+     both version lines blanked so a bump can't feed itself. A change to how
+     the worker caches (that day: 'no-cache' on a miss) must rebuild every
+     visitor's cache, or a copy the old logic stored wrongly stays served
+     until some unrelated shell file happens to change. */
+  const swCode = src.replace(/const (AUDIO_)?CACHE_VERSION = '[^']*';/g, "const $1CACHE_VERSION = '';");
+  src = bumpVersionConst('CACHE_VERSION', 'guitar-class', [...SHELL_FILES, ...IMG_FILES], src, swPath, 'shell cache', swCode);
   src = bumpVersionConst('AUDIO_CACHE_VERSION', 'guitar-class-audio', AUDIO_FILES, src, swPath, 'audio cache');
   if (!CHECK_ONLY && src !== before) writeFileSync(swPath, src);
 }

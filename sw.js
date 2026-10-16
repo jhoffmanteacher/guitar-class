@@ -14,7 +14,7 @@
    progress-saving behave exactly as before.
    ════════════════════════════════════════════════════════════════ */
 
-const CACHE_VERSION = 'guitar-class-2026-10-16-c68de8e2d7';
+const CACHE_VERSION = 'guitar-class-2026-10-16-b8ffcb2a43';
 
 // Backing-track audio lives in its OWN cache, versioned independently of the
 // shell (see tools/checks.mjs, which fingerprints audio/ separately and
@@ -231,7 +231,17 @@ self.addEventListener('fetch', event => {
   event.respondWith((async () => {
     const cache = await caches.open(isAudio ? AUDIO_CACHE_VERSION : CACHE_VERSION);
     const cached = await cache.match(req);
-    const network = fetch(req)
+    // A miss is the first time this cache version stores the file, and
+    // whatever lands now is served until the NEXT deploy. A plain fetch may
+    // answer from the browser's HTTP cache (GitHub Pages: max-age=600), so
+    // a file fetched in the 10 minutes before a deploy — teacher.js, which
+    // is not precached — got the OLD copy pinned into the new cache
+    // (2026-10-16: the console's new "Download all" button stayed missing
+    // after the deploy landed). 'no-cache' revalidates instead: a 304 when
+    // unchanged, so it costs one small request. Navigations are left as
+    // they were.
+    const fresh = !cached && req.mode !== 'navigate';
+    const network = (fresh ? fetch(req, { cache: 'no-cache' }) : fetch(req))
       .then(res => {
         // Only cache good, basic (same-origin) responses.
         if (res && res.status === 200 && res.type === 'basic') {

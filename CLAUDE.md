@@ -140,7 +140,9 @@ Exits non-zero if anything's wrong — don't push until it passes. It:
    pushes even when no links changed — it catches videos taken down since.
 4. **Bumps `CACHE_VERSION`** in `sw.js` automatically. It's a content
    fingerprint of the cached shell *and* everything in `audio/`, so it can't be
-   forgotten and re-exported audio gets cache-busted too.
+   forgotten and re-exported audio gets cache-busted too. Since 2026-10-16 it
+   also covers `sw.js`'s own code (version lines blanked), so a change to how
+   the worker caches rebuilds every visitor's cache.
 
 **Flags:** `--skip-links` (fast), `--check` (verify without changing files),
 `--live` (fetch the live `sw.js` and confirm the deploy landed — run it a minute
