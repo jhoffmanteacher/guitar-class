@@ -3892,6 +3892,9 @@ async function teacherMicDelete(i){
      deps.detectPitch  coachDetectPitch, extracted from coach.js
      deps.GATE         COACH_PITCH_GATE   (RMS floor for a pitch reading)
      deps.GAIN         COACH_MIC_GAIN     (the fixed boost before the gate)
+     deps.ATTACK_SKIP / EVENT_TAIL / REFRACT / MATCH_FRAC / MATCH_MIN_MS /
+       VOTE_TOL        the COACH_* constants of the same names, for
+                       micEvalWhy (defaults inside it if a runner omits them)
 
    What one take tells us (micTakes/<uid>-<coach|nr>, see coach.js micRec*):
    the RAW mic from the count-in to the end, 24 kHz 16-bit mono, plus every
@@ -4083,7 +4086,7 @@ function micEvalTake(pcm, R, d, deps){
   /* The Coach's own reading schedule: one 2048-sample window ending every
      `step` ms from `fromEnd` to `toEnd` (recording ms), gated at half
      COACH_PITCH_GATE the way coachLoop gates its readings. */
-  function siteReadings(fromEnd, toEnd, step){
+  function siteReadings(fromEnd, toEnd, step, times){
     const out = [];
     for (let t = fromEnd; t <= toEnd; t += step){
       const end = Math.round(t / 1000 * R2);
@@ -4091,7 +4094,7 @@ function micEvalTake(pcm, R, d, deps){
       let s = 0; for (let i = end - 1024; i < end; i++) s += y[i] * y[i];
       if (Math.sqrt(s / 1024) <= deps.GATE * 0.5) continue;
       const f = deps.detectPitch(y, R2, 0.22, end);
-      if (f > 0) out.push(69 + 12 * Math.log2(f / 440));
+      if (f > 0){ out.push(69 + 12 * Math.log2(f / 440)); if (times) times.push(t); }
     }
     return out;
   }
@@ -4135,8 +4138,10 @@ function micEvalTake(pcm, R, d, deps){
       const near = ex.map(r => r - T).concat(oc.map(r => r - T - 12));
       rec.cents = near.length ? Math.round(100 * med(near)) : null;
       rec.replay = rd.length < 2 ? 'none' : rec.exact + rec.oct >= 0.5 ? 'present' : rec.exact + rec.oct >= 0.2 ? 'mixed' : 'other';
-      /* What the Coach's SECOND LOOK (coach.js coachSecondLook, on trial)
-         would do with a note it called unclear: the same window — from
+      /* An ESTIMATE of a "second look" the Coach does NOT have (proposed
+         2026-10-14, never built — there is no coachSecondLook in coach.js;
+         confirmed 2026-10-16): what it would do with a note it called
+         unclear: the same window — from
          the matched event's attack + 70 ms to 3/4 of a beat (at most
          600 ms) past the beat, or the event's own 340 ms if later — read
          on the Coach's 40 ms schedule; right when the note or its octave
@@ -4156,8 +4161,114 @@ function micEvalTake(pcm, R, d, deps){
         rec.h1h2Db = r1(dB(h1) - dB(h2));
       }
     } else return;
+    rec.why = micEvalWhy(e, i, site, chord, sev);
     notes.push(rec);
   });
+
+  /* WHY a note the site did not count ended up with too few readings
+     (2026-10-16 work order, Phase 1). Both the consensus median and
+     coachMelodyVote need >= 2 readings, so the question is where the
+     readings went. One category per not-counted note:
+       no-onset         no site event (onset) anywhere in the slot's match
+                        window — `audio` says whether the recording has a
+                        pick attack there that the site's detector missed
+       onset-elsewhere  a site event is in the window but went to another
+                        slot / stayed unmatched / (Note Runner) sat outside
+                        the ±goodMs timing window — or `refract`: the
+                        recording's attack fell inside COACH_ONSET_REFRACT
+                        of an earlier site onset, which swallowed it
+       readings-cut     the matched event had < 2 readings in its own
+                        window (ATTACK_SKIP..EVENT_TAIL after arrival)
+       vote-failed      >= 2 readings, but consensus and the vote both
+                        failed; `share` = fraction on the target (or octave)
+     and `counted` / `wrong` for the rest. For every category the replay
+     also reads the audio on the site's own schedule (40 ms, half gate,
+     YIN 0.22): `winN` inside the event's window, `lateN` / `lateHit` in
+     the 400 ms after it (stopping short of the next beat), so "would a
+     longer tail have helped" is answered from the audio, not a guess.
+     Site clock -> recording: arrival = t + micLatencyMs, minus mapMs. */
+  function micEvalWhy(e, i, site, chord, sevAny){
+    const m0 = mapMs != null ? mapMs : 0;
+    const toRec = siteArrival => siteArrival - m0;
+    const nr = d.mode === 'nr';
+    const SKIP = deps.ATTACK_SKIP || 70, TAIL = deps.EVENT_TAIL || 340, REFR = deps.REFRACT || 140;
+    const TOL = deps.VOTE_TOL || 0.6;
+    const winMs = nr ? (Number(d.goodMs) || 160)
+      : (beat ? Math.min(beat, Math.max(beat * (deps.MATCH_FRAC || 0.9), deps.MATCH_MIN_MS || 320)) : 320);
+    const beatSite = e.t + (nr ? 0 : (Number(d.gridOffsetMs) || 0));   // "played" clock
+    const targets = chord ? null : (e.midis && e.midis.length ? e.midis : [e.midi]).filter(m => m != null);
+    const onTarget = r => chord
+      ? (() => { const cls = (e.midis && e.midis.length ? e.midis : [e.midi, e.midi + 7]).filter(m => m != null).map(m => ((m % 12) + 12) % 12);
+          return cls.indexOf(((Math.round(r) % 12) + 12) % 12) >= 0; })()
+      : targets.some(m => Math.abs(r - m) <= TOL || Math.abs(r - m - 12) <= TOL);
+    // the event this note was graded on
+    let sev = null;
+    if (nr){
+      sev = events.filter(ev => ev.t != null && Math.abs(ev.t - e.t) <= winMs)
+        .sort((a, b) => Math.abs(a.t - e.t) - Math.abs(b.t - e.t))[0] || null;
+    } else sev = sevAny || null;
+    const out = { cat: site === 'right' ? 'counted' : site === 'wrong' ? 'wrong' : null };
+    // the window the readings came from (or would have), on the recording's clock
+    let hitA;
+    if (sev){
+      hitA = toRec(sev.t + lat);
+      // the recording's own pick attack nearest the site's onset: + = the
+      // site fired BEFORE the attack (its window opened on the room)
+      let ao = null;
+      for (const on of onsets){ const dd = on.ms - hitA; if (Math.abs(dd) <= 250 && (!ao || Math.abs(dd) < Math.abs(ao.ms - hitA))) ao = on; }
+      out.attackOffMs = ao ? r1(ao.ms - hitA) : null;
+    } else {
+      const beatA = toRec(beatSite + lat);
+      let ao = null;
+      for (const on of onsets){ const dd = on.ms - beatA; if (Math.abs(dd) <= winMs && (!ao || Math.abs(dd) < Math.abs(ao.ms - beatA))) ao = on; }
+      out.audio = !!ao;
+      hitA = ao ? ao.ms : beatA;
+      if (ao) out.audioDevMs = r1(ao.ms - beatA);
+    }
+    // stop short of the NEXT written note's arrival (Note Runner has rests
+    // and half-beat notes, so its own time, not one beat on)
+    const e2 = expected[i + 1];
+    const nextA = e2 && e2.t != null ? toRec(e2.t + (nr ? 0 : (Number(d.gridOffsetMs) || 0)) + lat) - 60
+      : hitA + TAIL + 400;
+    const win = siteReadings(hitA + SKIP, hitA + TAIL, 40);
+    const lateT = [];
+    const late = siteReadings(hitA + TAIL + 40, Math.min(hitA + TAIL + 400, nextA), 40, lateT);
+    // [ms after the tail, midi] — for tools/mic-sim/whatif-tail.mjs
+    out.lateR = late.map((m, k) => [Math.round(lateT[k] - hitA - TAIL), Math.round(m * 100) / 100]);
+    out.siteN = sev && Array.isArray(sev.readings) ? sev.readings.length : 0;
+    out.graded = !!sev;
+    if (sev && Array.isArray(sev.readings)) out.siteR = sev.readings.slice();
+    out.winN = win.length;
+    out.lateN = late.length;
+    out.lateHit = late.filter(onTarget).length;
+    if (sev && Array.isArray(sev.readings) && sev.readings.length){
+      out.share = Math.round(sev.readings.filter(onTarget).length / sev.readings.length * 100) / 100;
+    }
+    if (out.cat) return out;
+    if (sev){
+      out.cat = out.siteN >= 2 ? 'vote-failed' : 'readings-cut';
+      return out;
+    }
+    // no event graded this note: is there one nearby that went elsewhere?
+    const reach = nr ? Math.max(winMs, (beat || 600) / 2) : winMs;
+    const near = events.filter(ev => ev.t != null && Math.abs(ev.t - beatSite) <= reach)
+      .sort((a, b) => Math.abs(a.t - beatSite) - Math.abs(b.t - beatSite))[0];
+    if (near){
+      out.cat = 'onset-elsewhere';
+      out.detail = nr ? 'outside timing window' : (near.slot >= 0 ? 'slot ' + near.slot : 'unmatched');
+      out.devMs = r1(near.t - beatSite);
+      out.nearN = Array.isArray(near.readings) ? near.readings.length : 0;
+      return out;
+    }
+    if (out.audio){
+      // the recording's attack, back on the site's arrival clock
+      const aoSite = hitA + m0;
+      const prev = events.filter(ev => ev.t != null && aoSite - (ev.t + lat) > 0 && aoSite - (ev.t + lat) <= REFR);
+      if (prev.length){ out.cat = 'onset-elsewhere'; out.detail = 'refract'; return out; }
+    }
+    out.cat = 'no-onset';
+    return out;
+  }
 
   const cnt = f => notes.filter(f).length;
   const strong = n => n.played && n.snrDb != null && n.snrDb >= 15;
@@ -4186,12 +4297,15 @@ function micEvalTake(pcm, R, d, deps){
     presentSiteReadings: med(notes.filter(n => n.site === 'unclear' && n.replay === 'present').map(n => n.siteN)),
     // no new pick attack anywhere near the note: nothing was played there
     silentMiss: cnt(n => (n.site === 'miss' || n.site === 'unclear') && !n.played && n.replay !== 'present'),
-    // counted right by the Coach's second look (coach.js coachSecondLook)
+    // e.secondLook: nothing writes it (coach.js has no second look) — always 0
     secondLook: cnt(n => n.secondLook),
-    // what the second look WOULD do with this take's unclear notes:
+    // what a second look WOULD do with this take's unclear notes (estimate only):
     // count right (and of those, how many the replay also finds clearly)
     lookWould: cnt(n => n.look && n.look.pass),
     lookWouldPresent: cnt(n => n.look && n.look.pass && n.replay === 'present'),
+    // micEvalWhy's category for every note: counted / wrong / no-onset /
+    // onset-elsewhere / readings-cut / vote-failed
+    why: notes.reduce((h, n) => { const c = n.why && n.why.cat || '?'; h[c] = (h[c] || 0) + 1; return h; }, {}),
     octDominant: cnt(n => n.oct > n.exact && n.oct >= 0.3),
     medianSnrDb: r1(med(notes.filter(n => n.snrDb != null).map(n => n.snrDb))),
     medianCents: (() => { const c = notes.filter(n => n.cents != null).map(n => n.cents); return c.length ? med(c) : null; })(),
@@ -4280,7 +4394,9 @@ async function teacherMicEvaluate(){
   if(!box) return;
   try{ await ensureCoachJs(); }
   catch(e){ box.innerHTML = '<div class="t-loading">Could not load the listening code — check your connection and try again.</div>'; return; }
-  const deps = { detectPitch: coachDetectPitch, GATE: COACH_PITCH_GATE, GAIN: COACH_MIC_GAIN };
+  const deps = { detectPitch: coachDetectPitch, GATE: COACH_PITCH_GATE, GAIN: COACH_MIC_GAIN,
+    ATTACK_SKIP: COACH_ATTACK_SKIP, EVENT_TAIL: COACH_EVENT_TAIL, REFRACT: COACH_ONSET_REFRACT,
+    MATCH_FRAC: COACH_MATCH_FRAC, MATCH_MIN_MS: COACH_MATCH_MIN_MS, VOTE_TOL: COACH_VOTE_TOL };
   const takes = teacherMicTakes.slice();
   const rows = [], names = [], fails = [];
   for(let k = 0; k < takes.length; k++){
@@ -4323,10 +4439,20 @@ function teacherMicEvalHtml(){
       : 'Mic delay: the count-in beeps were not heard in any recording (speaker muted or headphones), so the delay could not be measured.',
     `Loudest notes: ${v(med(rows.map(r => r.level.loudDb)))} dB (0 is the maximum). ${clipped ? `<b>${clipped}</b> recordings were too loud and clipped.` : 'None clipped.'}`
   ];
+  // micEvalWhy's categories, summed — why the notes the site did not count weren't counted
+  const why = k => sum(r => (r.notes.why || {})[k]);
+  const notCounted = n - right - why('wrong');
+  if(notCounted > 0){
+    lines.push(`Why ${notCounted} ${notCounted === 1 ? 'note was' : 'notes were'} not counted (unclear or missed): ` +
+      `<b>${why('readings-cut')}</b> heard, but fewer than 2 pitch readings in the time the site listens to each note · ` +
+      `<b>${why('onset-elsewhere')}</b> heard, but too far off the beat or taken by another note · ` +
+      `<b>${why('no-onset')}</b> no pluck heard at all · ` +
+      `<b>${why('vote-failed')}</b> enough readings, but they did not agree on the note.`);
+  }
   const unclearCoach = sum(r => r.game.indexOf('Coach') === 0 ? r.notes.siteUnclear : 0);
   if(unclearCoach){
     const would = sum(r => r.notes.lookWould), good = sum(r => r.notes.lookWouldPresent);
-    lines.push(`Being tested, not live yet: a "second look" in the Listening Coach would count <b>${would}</b> of its ${unclearCoach} unclear notes right — ${good} of them clearly the right note in the recording, ${would - good} not clearly.`);
+    lines.push(`Estimate only — the Listening Coach has no "second look": one would count <b>${would}</b> of its ${unclearCoach} unclear notes right — ${good} of them clearly the right note in the recording, ${would - good} not clearly.`);
   }
   const tr = rows.map((r, i) => {
     const nb = r.notes, L = r.latency;

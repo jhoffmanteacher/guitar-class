@@ -48,6 +48,22 @@ tuning pass — ideally on the real classroom recordings the teacher console's
 - `eval-takes.mjs <folder of WAV+JSON pairs> [--json out.json]` — the same
   functions, pulled out of teacher.js, on the console's Download WAV /
   Download data files.
+- `anon-takes.mjs <raw-folder> <out-folder>` — **run this first, on the
+  teacher's machine.** The console's downloads are named after the student
+  and the JSON carries name/uid; this copies each pair to T01.wav/.json…
+  (newest first), strips every identifying field, refuses to write if a
+  removed value appears anywhere else, and prints counts only. Claude
+  works on the output folder, never the raw one.
+- Per-note reason (`micEvalWhy` in teacher.js, 2026-10-16): eval-takes
+  prints, for every note the site did not count, why it had too few
+  readings — `no-onset`, `onset-elsewhere`, `readings-cut`, `vote-failed`
+  — with the replay's own readings in the same window (`winN`) and after
+  it (`lateN`, `lateHit`).
+- `whatif-tail.mjs <eval-takes --json output> [--flips]` — re-applies the
+  site's verdict rules with a longer reading tail (all events / starved
+  events only / a target-only "look"), on the real takes. Its first line
+  re-derives the site's own verdicts from the site's readings and must say
+  0 differ.
 - `fake-take.mjs <out> [lag] [map] [coach|nr] [quiet|class] [clicks]` — a
   synthetic take with planted answers (the header lists them) to prove the
   evaluator.
