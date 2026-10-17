@@ -195,7 +195,7 @@
    — Finish the Song") was pulled from this array on 2026-08-25 when `ca-1`
    was widened to cover the whole song; its steps live on inside `ca-1`, and
    the original is in git history. That makes the counter max-EVER-used + 1,
-   NOT max-in-file + 1 — the next new activity is `ca-37` (ca-36 is the
+   NOT max-in-file + 1 — the next new activity is `ca-38` (ca-37 is the
    highest used as of 2026-10-16; check the file first). Any student who
    had already ticked `ca-9` keeps a harmless orphan key in Firestore.
    `ca-16` ("Happy Birthday — The A-String Way") went the same way on
@@ -5596,6 +5596,193 @@ window.CLASS_ACTIVITIES = [
         { label: 'Chorus 1, slower', label_es: 'Coro 1, más lento',
           text:    'Play chorus 1 with the band at the same speed, without stopping. Tap Chorus 1 to start there.',
           text_es: 'Toca el coro 1 con la banda a la misma velocidad, sin detenerte. Pulsa «Coro 1» para empezar ahí.' },
+        { label: 'The whole song, slower', label_es: 'La canción completa, más lenta',
+          text:    'Leave the speed where the card starts it, or move it one stop left. Play with the band from verse 1 to the last chord, without stopping.',
+          text_es: 'Deja la velocidad donde la tarjeta la deja al empezar, o muévela una posición a la izquierda. Toca con la banda desde la estrofa 1 hasta el último acorde, sin detenerte.' },
+        { levelUp: true,
+          text:    'Slide the speed all the way right, to Normal. Play the whole song with the band at normal speed.',
+          text_es: 'Desliza la velocidad hasta la derecha, a «Normal». Toca la canción completa con la banda a velocidad normal.' }
+      ]
+    },
+    // No help ladder: a practice card is its checks and nothing else (Jonathan, 2026-10-07).
+    steps: [],
+  },
+  /* Arsenal Efectivo — Play Along (Jonathan, 2026-10-16: "make a class
+     activity for this" with the record and a chord sheet; "like what we did
+     for las mananitas"; power chords; "go ahead without lyrics"). A practice
+     card on the RECORD (track 'arsenal-efectivo' in app.js — its comment has
+     how the grid was found), verse 1 to the last chord: bars 20-141 of the
+     6/8 grid, counted in two big beats a bar like Luna. Like ca-36, ONE
+     COLUMN PER CHORD with its held length in big beats, and it loops (no
+     Song Journey page, so not `wholeSong`). No lyrics: the song is not
+     public domain, so the rows carry no words. One row per time through
+     the chords (each row starts on B5), not per sung line: Jonathan's chord
+     sheet was machine-made and its lines don't follow the record.
+
+     POWER CHORDS ONLY (Jonathan picked power chords; the full chords are
+     Bm and Bb barre chords), so no chordVersions switch. All four shapes
+     sit in frets 5-9: B5 and Bb5 on the low E (7/9, 6/8), A5 on the low E
+     (5/7, the Watchtower A5), E5 on the A string (7/9).
+
+     THE CHORDS, read off the record: the harmony (chroma) on every eighth,
+     matched to the chord sheet's chords, and the bass note under each big
+     beat, which lands on B, E and A where the chords change. The verses are
+     one 4-bar loop, B5 2 · E5 2 · A5 3 · Bb5 1 big beats; the Bb is the
+     bass walking A-Bb-B back to the top, and the sheet's Bbm/Bbaug are that
+     same spot. Two laps read off by a beat (verse 1 lap 3, verse 2 lap 5)
+     are written as the loop: their eighth-by-eighth reading is the loop
+     with a stray label. The sheet's other passing chords (F#m, C#m, F#7,
+     the sus chords) last one big beat or less on the record and are folded
+     into the chord around them. The bridge (bars 54-83, the spoken lines)
+     changes chords at uneven times; it is the least certain part — check it
+     by ear. */
+  {
+    id:    'ca-37',
+    view:  'card',    // one screen: Play song + tab + checks — see CARD above
+    optional: true,   // Optional until switched to Required on the board — see OPTIONAL above
+    title:    'Arsenal Efectivo — Play Along',
+    title_es: 'Arsenal Efectivo — Toca con la canción',
+    intro:    'You can move a power chord along the low E and A strings — today you play Arsenal Efectivo with the band using B5, E5, A5 and Bb5, all between frets 5 and 9.',
+    intro_es: 'Ya puedes mover un acorde de potencia por las cuerdas Mi grave y La — hoy tocas Arsenal Efectivo con la banda con B5, E5, A5 y Bb5, todos entre los trastes 5 y 9.',
+    card: {
+      track: 'arsenal-efectivo',
+      slowest: true,    // Slowest / Slower / Slow / Normal
+      caption:    'The song in order · strum on every beat · change chords when the highlight moves',
+      caption_es: 'La canción en orden · rasguea en cada tiempo · cambia de acorde cuando se mueva la marca',
+      sections: [
+        {
+          label: 'Verse 1', label_es: 'Estrofa 1',
+          caption: 'Verse 1 · one row per time through the chords · Bb5 is B5 one fret lower', caption_es: 'Estrofa 1 · una fila por cada vuelta de los acordes · Bb5 es B5 un traste más abajo',
+          fromBar: 20, bars: 34,
+          rows: [4, 4, 4, 4, 4, 4, 4, 3],
+          notes: [
+            { frets: [['A', 9], ['E', 7]], note: 'B5', midi: [54, 47], beats: 2 },
+            { frets: [['D', 9], ['A', 7]], note: 'E5', midi: [59, 52], beats: 2 },
+            { frets: [['A', 7], ['E', 5]], note: 'A5', midi: [52, 45], beats: 3 },
+            { frets: [['A', 8], ['E', 6]], note: 'Bb5', midi: [53, 46], beats: 1 },
+            { frets: [['A', 9], ['E', 7]], note: 'B5', midi: [54, 47], beats: 2 },
+            { frets: [['D', 9], ['A', 7]], note: 'E5', midi: [59, 52], beats: 2 },
+            { frets: [['A', 7], ['E', 5]], note: 'A5', midi: [52, 45], beats: 3 },
+            { frets: [['A', 8], ['E', 6]], note: 'Bb5', midi: [53, 46], beats: 1 },
+            { frets: [['A', 9], ['E', 7]], note: 'B5', midi: [54, 47], beats: 2 },
+            { frets: [['D', 9], ['A', 7]], note: 'E5', midi: [59, 52], beats: 2 },
+            { frets: [['A', 7], ['E', 5]], note: 'A5', midi: [52, 45], beats: 3 },
+            { frets: [['A', 8], ['E', 6]], note: 'Bb5', midi: [53, 46], beats: 1 },
+            { frets: [['A', 9], ['E', 7]], note: 'B5', midi: [54, 47], beats: 2 },
+            { frets: [['D', 9], ['A', 7]], note: 'E5', midi: [59, 52], beats: 2 },
+            { frets: [['A', 7], ['E', 5]], note: 'A5', midi: [52, 45], beats: 3 },
+            { frets: [['A', 8], ['E', 6]], note: 'Bb5', midi: [53, 46], beats: 1 },
+            { frets: [['A', 9], ['E', 7]], note: 'B5', midi: [54, 47], beats: 2 },
+            { frets: [['D', 9], ['A', 7]], note: 'E5', midi: [59, 52], beats: 2 },
+            { frets: [['A', 7], ['E', 5]], note: 'A5', midi: [52, 45], beats: 3 },
+            { frets: [['A', 8], ['E', 6]], note: 'Bb5', midi: [53, 46], beats: 1 },
+            { frets: [['A', 9], ['E', 7]], note: 'B5', midi: [54, 47], beats: 2 },
+            { frets: [['D', 9], ['A', 7]], note: 'E5', midi: [59, 52], beats: 2 },
+            { frets: [['A', 7], ['E', 5]], note: 'A5', midi: [52, 45], beats: 3 },
+            { frets: [['A', 8], ['E', 6]], note: 'Bb5', midi: [53, 46], beats: 1 },
+            { frets: [['A', 9], ['E', 7]], note: 'B5', midi: [54, 47], beats: 2 },
+            { frets: [['D', 9], ['A', 7]], note: 'E5', midi: [59, 52], beats: 2 },
+            { frets: [['A', 7], ['E', 5]], note: 'A5', midi: [52, 45], beats: 3 },
+            { frets: [['A', 8], ['E', 6]], note: 'Bb5', midi: [53, 46], beats: 1 },
+            { frets: [['A', 9], ['E', 7]], note: 'B5', midi: [54, 47], beats: 2 },
+            { frets: [['D', 9], ['A', 7]], note: 'E5', midi: [59, 52], beats: 1 },
+            { frets: [['A', 7], ['E', 5]], note: 'A5', midi: [52, 45], beats: 9 }
+          ]
+        },
+        {
+          label: 'Bridge', label_es: 'Puente',
+          caption: 'Bridge · the chords change at new times · follow the highlight', caption_es: 'Puente · los acordes cambian en otros momentos · sigue la marca',
+          fromBar: 54, bars: 30,
+          rows: [3, 3, 3, 3, 3, 3],
+          notes: [
+            { frets: [['A', 9], ['E', 7]], note: 'B5', midi: [54, 47], beats: 3 },
+            { frets: [['D', 9], ['A', 7]], note: 'E5', midi: [59, 52], beats: 4 },
+            { frets: [['A', 7], ['E', 5]], note: 'A5', midi: [52, 45], beats: 4 },
+            { frets: [['A', 9], ['E', 7]], note: 'B5', midi: [54, 47], beats: 3 },
+            { frets: [['D', 9], ['A', 7]], note: 'E5', midi: [59, 52], beats: 2 },
+            { frets: [['A', 7], ['E', 5]], note: 'A5', midi: [52, 45], beats: 6 },
+            { frets: [['A', 9], ['E', 7]], note: 'B5', midi: [54, 47], beats: 2 },
+            { frets: [['D', 9], ['A', 7]], note: 'E5', midi: [59, 52], beats: 1 },
+            { frets: [['A', 7], ['E', 5]], note: 'A5', midi: [52, 45], beats: 4 },
+            { frets: [['A', 9], ['E', 7]], note: 'B5', midi: [54, 47], beats: 3 },
+            { frets: [['D', 9], ['A', 7]], note: 'E5', midi: [59, 52], beats: 1 },
+            { frets: [['A', 7], ['E', 5]], note: 'A5', midi: [52, 45], beats: 5 },
+            { frets: [['A', 9], ['E', 7]], note: 'B5', midi: [54, 47], beats: 4 },
+            { frets: [['D', 9], ['A', 7]], note: 'E5', midi: [59, 52], beats: 2 },
+            { frets: [['A', 7], ['E', 5]], note: 'A5', midi: [52, 45], beats: 6 },
+            { frets: [['A', 9], ['E', 7]], note: 'B5', midi: [54, 47], beats: 3 },
+            { frets: [['D', 9], ['A', 7]], note: 'E5', midi: [59, 52], beats: 2 },
+            { frets: [['A', 7], ['E', 5]], note: 'A5', midi: [52, 45], beats: 5 }
+          ]
+        },
+        {
+          label: 'Verse 2', label_es: 'Estrofa 2',
+          caption: 'Verse 2 · the same chords as verse 1', caption_es: 'Estrofa 2 · los mismos acordes que la estrofa 1',
+          fromBar: 84, bars: 34,
+          rows: [4, 4, 4, 4, 4, 4, 4, 3],
+          notes: [
+            { frets: [['A', 9], ['E', 7]], note: 'B5', midi: [54, 47], beats: 2 },
+            { frets: [['D', 9], ['A', 7]], note: 'E5', midi: [59, 52], beats: 2 },
+            { frets: [['A', 7], ['E', 5]], note: 'A5', midi: [52, 45], beats: 3 },
+            { frets: [['A', 8], ['E', 6]], note: 'Bb5', midi: [53, 46], beats: 1 },
+            { frets: [['A', 9], ['E', 7]], note: 'B5', midi: [54, 47], beats: 2 },
+            { frets: [['D', 9], ['A', 7]], note: 'E5', midi: [59, 52], beats: 2 },
+            { frets: [['A', 7], ['E', 5]], note: 'A5', midi: [52, 45], beats: 3 },
+            { frets: [['A', 8], ['E', 6]], note: 'Bb5', midi: [53, 46], beats: 1 },
+            { frets: [['A', 9], ['E', 7]], note: 'B5', midi: [54, 47], beats: 2 },
+            { frets: [['D', 9], ['A', 7]], note: 'E5', midi: [59, 52], beats: 2 },
+            { frets: [['A', 7], ['E', 5]], note: 'A5', midi: [52, 45], beats: 3 },
+            { frets: [['A', 8], ['E', 6]], note: 'Bb5', midi: [53, 46], beats: 1 },
+            { frets: [['A', 9], ['E', 7]], note: 'B5', midi: [54, 47], beats: 2 },
+            { frets: [['D', 9], ['A', 7]], note: 'E5', midi: [59, 52], beats: 2 },
+            { frets: [['A', 7], ['E', 5]], note: 'A5', midi: [52, 45], beats: 3 },
+            { frets: [['A', 8], ['E', 6]], note: 'Bb5', midi: [53, 46], beats: 1 },
+            { frets: [['A', 9], ['E', 7]], note: 'B5', midi: [54, 47], beats: 2 },
+            { frets: [['D', 9], ['A', 7]], note: 'E5', midi: [59, 52], beats: 2 },
+            { frets: [['A', 7], ['E', 5]], note: 'A5', midi: [52, 45], beats: 3 },
+            { frets: [['A', 8], ['E', 6]], note: 'Bb5', midi: [53, 46], beats: 1 },
+            { frets: [['A', 9], ['E', 7]], note: 'B5', midi: [54, 47], beats: 2 },
+            { frets: [['D', 9], ['A', 7]], note: 'E5', midi: [59, 52], beats: 2 },
+            { frets: [['A', 7], ['E', 5]], note: 'A5', midi: [52, 45], beats: 3 },
+            { frets: [['A', 8], ['E', 6]], note: 'Bb5', midi: [53, 46], beats: 1 },
+            { frets: [['A', 9], ['E', 7]], note: 'B5', midi: [54, 47], beats: 2 },
+            { frets: [['D', 9], ['A', 7]], note: 'E5', midi: [59, 52], beats: 2 },
+            { frets: [['A', 7], ['E', 5]], note: 'A5', midi: [52, 45], beats: 3 },
+            { frets: [['A', 8], ['E', 6]], note: 'Bb5', midi: [53, 46], beats: 1 },
+            { frets: [['A', 9], ['E', 7]], note: 'B5', midi: [54, 47], beats: 2 },
+            { frets: [['D', 9], ['A', 7]], note: 'E5', midi: [59, 52], beats: 2 },
+            { frets: [['A', 7], ['E', 5]], note: 'A5', midi: [52, 45], beats: 8 }
+          ]
+        },
+        {
+          label: 'Ending', label_es: 'Final',
+          caption: 'Ending · the chords slow down', caption_es: 'Final · los acordes van más lento',
+          fromBar: 118, bars: 24,
+          rows: [4, 3, 3, 3],
+          notes: [
+            { frets: [['A', 9], ['E', 7]], note: 'B5', midi: [54, 47], beats: 3 },
+            { frets: [['D', 9], ['A', 7]], note: 'E5', midi: [59, 52], beats: 4 },
+            { frets: [['A', 7], ['E', 5]], note: 'A5', midi: [52, 45], beats: 3 },
+            { frets: [['A', 8], ['E', 6]], note: 'Bb5', midi: [53, 46], beats: 1 },
+            { frets: [['A', 9], ['E', 7]], note: 'B5', midi: [54, 47], beats: 3 },
+            { frets: [['D', 9], ['A', 7]], note: 'E5', midi: [59, 52], beats: 3 },
+            { frets: [['A', 7], ['E', 5]], note: 'A5', midi: [52, 45], beats: 6 },
+            { frets: [['A', 9], ['E', 7]], note: 'B5', midi: [54, 47], beats: 3 },
+            { frets: [['D', 9], ['A', 7]], note: 'E5', midi: [59, 52], beats: 2 },
+            { frets: [['A', 7], ['E', 5]], note: 'A5', midi: [52, 45], beats: 6 },
+            { frets: [['A', 9], ['E', 7]], note: 'B5', midi: [54, 47], beats: 3 },
+            { frets: [['D', 9], ['A', 7]], note: 'E5', midi: [59, 52], beats: 2 },
+            { frets: [['A', 7], ['E', 5]], note: 'A5', midi: [52, 45], beats: 9 }
+          ]
+        }
+      ],
+      checks: [
+        { label: 'Verse 1, slower', label_es: 'Estrofa 1, más lenta',
+          text:    'Leave the speed where the card starts it. Play verse 1 with the band, without stopping.',
+          text_es: 'Deja la velocidad donde la tarjeta la deja al empezar. Toca la estrofa 1 con la banda, sin detenerte.' },
+        { label: 'The bridge, slower', label_es: 'El puente, más lento',
+          text:    'Play the bridge with the band at the same speed, without stopping. Tap Bridge to start there.',
+          text_es: 'Toca el puente con la banda a la misma velocidad, sin detenerte. Pulsa «Puente» para empezar ahí.' },
         { label: 'The whole song, slower', label_es: 'La canción completa, más lenta',
           text:    'Leave the speed where the card starts it, or move it one stop left. Play with the band from verse 1 to the last chord, without stopping.',
           text_es: 'Deja la velocidad donde la tarjeta la deja al empezar, o muévela una posición a la izquierda. Toca con la banda desde la estrofa 1 hasta el último acorde, sin detenerte.' },

@@ -2554,6 +2554,38 @@ const SNIPPET_TRACKS = {
       224.142, 227.683, 231.310, 235.119,
     ],
   },
+  /* Arsenal Efectivo — Lolo Félix (Jonathan uploaded the recording,
+     2026-10-16). Like Las Mañanitas and Madrecita Querida this is the RECORD
+     itself, not a Moises export: no rhythm-down mix, so `src` IS the full
+     mix and there is no Guitar toggle. The record is about 14 cents sharp
+     (13-16 across the song), so both files are rubberband-shifted down 14
+     cents to A=440, formants held, timing untouched (the fast file's grid
+     fits at the same phase as the source, 0 ms). Slow tier: the same file
+     stretched 119/100 = exactly 1.19x, pitch held (fits 6 ms off the scaled
+     grid).
+
+     A STEADY GRID, not a beat map: the record is made to a click. The
+     eighth note is 0.25211 s (238.0 a minute) and an onset-strength fit
+     holds its phase within 8 ms from 0 to 175 s. The song is 6/8 felt in
+     two, like Luna: six eighths a bar, two big beats of three, so the room
+     counts 238 / 3 = 79.3 and a bar is 1.513 s. Which eighth is beat 1 came
+     from the chords: the verse loop's B, E and A all start on the same
+     eighth of the six, and the bass lands on the root there. anchor 1.369 s
+     is that first downbeat (bar 1 is the intro's first full bar). Song map
+     in these bars: intro 1-19 (the spoken opening at bar 8), verse 1 20-53,
+     bridge 54-83 (spoken lines and the band alone from about 113 s), verse
+     2 84-117, ending 118-141, the last chord ringing out to 216 s. */
+  'arsenal-efectivo': {
+    src:     'audio/lolo-felix-arsenal-efectivo-backing-A-119bpm-440hz-full.mp3',
+    srcSlow: 'audio/lolo-felix-arsenal-efectivo-backing-A-100bpm-440hz-full.mp3',
+    trackBpm: 119, trackBpmSlow: 100,   // what the FILES are (quarter notes), for the slow-tier rescale
+    feltBpm: 238 / 3,                   // big beats: 3 eighth notes each
+    beatsPerBar: 2,                     // two big beats per 6/8 bar
+    durationSec: 216,
+    anchor: 1.369,
+    anchorVerified: true,
+    defaultSlow: true,
+  },
 };
 /* Does this track have a full mix at all? Both tiers or neither — the toggle
    has to survive the Slow button. */

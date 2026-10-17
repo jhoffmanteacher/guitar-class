@@ -5,6 +5,14 @@ Notable changes to the Guitar Class site. Newest first.
 For the full session-by-session history (and the reasoning behind each change),
 see `WORKFLOW.md` and the git commit log.
 
+## 2026-10-16 — Arsenal Efectivo play-along
+
+- **New practice card: Arsenal Efectivo — Play Along.** Play power chords
+  with the Lolo Félix recording, from the first verse to the last chord:
+  B5, E5, A5 and Bb5, all between frets 5 and 9. Tap a section to start
+  there, and slow the song down with the speed slider.
+- The card shows chords only, no words.
+
 ## 2026-10-16 — Modules 4–6: shorter steps
 
 - **Every step in Modules 4, 5 and 6 is shorter.** Directions are numbered
