@@ -121,3 +121,19 @@ numbering, so all four halves go together — removing only some of them
 would let one writer save in a numbering another still reads differently.
 Delete the `migrations` field from the reset docs, or leave it: nothing
 else reads it.
+
+**Delete the 29 "Take It to a Song" sections and their card code.**
+Switched off 2026-10-18 (`TAKE_TO_SONG_ENABLED = false` in app.js): no module
+ladder shows the Journey card (Modules 2–5) or the Challenge steps (Modules
+6–12) any more, but the sections are still in the module files because the
+section list is fixed in every rule-zero regime and each one counts toward its
+neighbours' `gi`. Removing them re-keys every section after them, so it is
+reset-only, and `rule-zero-proof.mjs` will fail it by design. With them go
+`journeyLinkCardHtml()`, `journeySongsFor()`, the `jl-*` CSS, the
+`journey.takeItTitle`/`takeItSub` i18n keys, the `KIND_TITLE_COUNTS`
+take-to-song pin (29 → 0), and the take-to-song branches of 1af / 1ao / 1w-t
+(`readTakeToSongSwitch`). **Decide first where the seven skills that lost their
+only teaching step belong** (m9w1-s5, m9w2-s5, m10w1-s4, m10w3-s6, m11w3-s6,
+m12w1-s6, m12w3-s6 — they are on the checklist with no "Show me where"); the
+Challenge cards in those sections are the content to re-home, Module 12's
+"Full-Verse Rehearsal (assessment preparation)" among them.

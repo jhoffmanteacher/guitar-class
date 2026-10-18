@@ -2796,9 +2796,10 @@ function checkSlangPhrasing() {
    TEACHER_PHRASES_ES below.
 
    Hidden sections are exempt, the same way the audit itself excluded
-   them: kind:tuning-warmup / routine / ear-spark / reflection, a
-   take-to-song section that resolves to the Journey link card (modules
-   1–5), and any individual step with hidden:true. This walks the REAL
+   them: kind:tuning-warmup / routine / ear-spark / reflection, every
+   take-to-song section while app.js's TAKE_TO_SONG_ENABLED is false (it
+   was only modules 1–5, the Journey link card, before 2026-10-18), and
+   any individual step with hidden:true. This walks the REAL
    parsed SETS objects (the same ones 1af/1ao already load in
    renderCheck) rather than raw text, so it can tell a hidden step's
    field value from a visible one — collectHiddenStrings() builds the
@@ -2940,6 +2941,14 @@ const TEACHER_PHRASE_ALLOW_ES = [
 const ES_VALUE_NAME_RE = /\b([A-Za-z0-9]+(?:_power)?_es)\s*:\s*/g;   // `_power_es`: the chord-version twin (caView)
 
 const HIDDEN_SECTION_KINDS = new Set(['routine', 'ear-spark', 'reflection']);
+/* app.js's TAKE_TO_SONG_ENABLED (false since 2026-10-18): off, a take-to-song
+   section renders in NO module — neither the Journey card (1–5) nor its own
+   steps (6–12). Read through the sandbox so 1w-t, 1af and 1ao judge the same
+   switch the real renderer does; null = the constant is gone. */
+const readTakeToSongSwitch = ctx => {
+  try { const v = vm.runInContext('TAKE_TO_SONG_ENABLED', ctx); return typeof v === 'boolean' ? v : null; }
+  catch { return null; }
+};
 const HIDDEN_STEP_FIELDS = [
   'text', 'hint', 'stuck', 'levelUp', 'gotItWhen', 'explain', 'label',
   'prompt', 'placeholder', 'meta', 'note', 'forward', 'subtitle', 'intro',
@@ -2949,7 +2958,7 @@ const HIDDEN_STEP_FIELDS = [
    file was exempt too. A set's file is module-<moduleNum>.js — every
    module file defines only its own module's sets. */
 const hiddenKey = (file, value) => `${file}\u0000${value}`;
-function collectHiddenStrings(sets, journeySongsFor) {
+function collectHiddenStrings(sets, journeySongsFor, takeToSongOn) {
   const out = new Set();
   let file = '';
   const add = v => out.add(hiddenKey(file, v));
@@ -2981,8 +2990,8 @@ function collectHiddenStrings(sets, journeySongsFor) {
           (sec.steps || []).forEach(addObj);
           continue;
         }
-        if (sec.kind === 'take-to-song' && journeySongsFor(w.moduleNum).length > 0) {
-          (sec.steps || []).forEach(addObj);   // the Journey card renders instead — steps invisible
+        if (sec.kind === 'take-to-song' && (takeToSongOn === false || journeySongsFor(w.moduleNum).length > 0)) {
+          (sec.steps || []).forEach(addObj);   // switched off (every module), or the Journey card renders instead — steps invisible
           continue;
         }
         (sec.steps || []).forEach(st => { if (st.hidden) addObj(st); });
@@ -3032,9 +3041,9 @@ const htmlDataEsValues = raw => {
   return [...src.matchAll(/\bdata-es="([^"]*)"/g)].map(m => ({ line: lineAt(m.index), text: decodeHtmlEntities(m[1]) }));
 };
 
-function checkTeacherSpeak(sets, journeySongsFor) {
+function checkTeacherSpeak(sets, journeySongsFor, takeToSongOn) {
   head('1w-t. Teacher speak in student-facing text');
-  const hidden = sets && journeySongsFor ? collectHiddenStrings(sets, journeySongsFor) : new Set();
+  const hidden = sets && journeySongsFor ? collectHiddenStrings(sets, journeySongsFor, takeToSongOn) : new Set();
   if (!sets || !journeySongsFor) warn('1w-t: no parsed SETS available — hidden-section exemption skipped this run');
   let bad = 0;
   const flag = (file, li, phrase) => { err(`${file}:${li + 1} — "${phrase}"`); problems++; bad++; };
@@ -4981,6 +4990,8 @@ function checkStorageNamespaces(sets, buildSet, ctx) {
   head('1af. Storage namespaces (progress keys) never move');
   const journeySongsFor = vm.runInContext('typeof journeySongsFor === "function" ? journeySongsFor : null', ctx);
   if (!journeySongsFor) { err('app.js: journeySongsFor() not found — 1af cannot judge take-to-song emptiness'); problems++; return; }
+  const takeToSongOn = readTakeToSongSwitch(ctx);
+  if (takeToSongOn === null) { err('app.js: TAKE_TO_SONG_ENABLED not found — 1af cannot tell whether take-to-song sections render'); problems++; return; }
   let bad = 0, checked = 0;
   const isTuning = (sec, moduleNum) => moduleNum !== 1 && (sec.kind === 'tuning-warmup' || sec.title === 'Warm-up — tuning check (Module 1)');
   for (const w of sets) {
@@ -4999,7 +5010,11 @@ function checkStorageNamespaces(sets, buildSet, ctx) {
           problems++; bad++;
         }
         if (RENDER_HIDDEN_KINDS.has(sec.kind)) return;
-        // A take-to-song section swaps in the Journey link card (always
+        // TAKE_TO_SONG_ENABLED false (2026-10-18): a take-to-song section
+        // renders in no module. gi was counted above, so the sections after
+        // it keep their keys.
+        if (sec.kind === 'take-to-song' && !takeToSongOn) return;
+        // On: a take-to-song section swaps in the Journey link card (always
         // renderable) only when this module has a layer to link to; with no
         // layer (module 6+) it falls back to a normal section's own "does it
         // have any steps" check below (2026-09-12 restore fix — the first
@@ -5047,6 +5062,8 @@ function checkSetParts(sets, buildSet, ctx) {
   head('1ao. Sets shown in two parts');
   const journeySongsFor = vm.runInContext('typeof journeySongsFor === "function" ? journeySongsFor : null', ctx);
   if (!journeySongsFor) { err('app.js: journeySongsFor() not found — 1ao cannot judge take-to-song emptiness'); problems++; return; }
+  const takeToSongOn = readTakeToSongSwitch(ctx);
+  if (takeToSongOn === null) { err('app.js: TAKE_TO_SONG_ENABLED not found — 1ao cannot tell whether take-to-song sections render'); problems++; return; }
   const isTuning = (sec, moduleNum) => moduleNum !== 1 && (sec.kind === 'tuning-warmup' || sec.title === 'Warm-up — tuning check (Module 1)');
   /* The sections a student actually sees, in render order, each with its
      visible step count — b's sections then c's, same as buildLesson. */
@@ -5062,7 +5079,9 @@ function checkSetParts(sets, buildSet, ctx) {
       for (const sec of stn.sections) {
         if (isTuning(sec, w.moduleNum)) continue;
         if (RENDER_HIDDEN_KINDS.has(sec.kind)) continue;
-        // A take-to-song section with a Journey layer renders the link
+        // Switched off (2026-10-18): not a section a student sees at all.
+        if (sec.kind === 'take-to-song' && !takeToSongOn) continue;
+        // On: a take-to-song section with a Journey layer renders the link
         // card instead of steps: it is renderable, and it contributes no
         // steps to the part's count.
         if (sec.kind === 'take-to-song' && journeySongsFor(w.moduleNum).length) { out.push({ sec, steps: 0 }); continue; }
@@ -7437,7 +7456,7 @@ function checkGuitarNotes() {
   checkBlockedTabSites();
   checkNarrativeLeadIns();
   checkSlangPhrasing();
-  checkTeacherSpeak(rcSets, rcCtx ? vm.runInContext('typeof journeySongsFor === "function" ? journeySongsFor : null', rcCtx) : null);
+  checkTeacherSpeak(rcSets, rcCtx ? vm.runInContext('typeof journeySongsFor === "function" ? journeySongsFor : null', rcCtx) : null, rcCtx ? readTakeToSongSwitch(rcCtx) : null);
   checkJourneyLickLabels();
   checkRetiredStationWording();
   checkStationNames();

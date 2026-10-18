@@ -4927,6 +4927,18 @@ function isEarSparkStep(s){
 function isTakeToSongSection(sec){
   return sec.kind === 'take-to-song';
 }
+/* "Take It to a Song" is switched off in every module ladder (2026-10-18,
+   Jonathan: "remove take it to a song from the steps of the modules"). The
+   Journey link card (Modules 1–5) and the Challenge steps that took its
+   place in Modules 6–12 are both gone from the ladder, like a routine or
+   reflection section. Switched off, not deleted — the Daily 5 pattern: the
+   sections stay in the module files (the section list is fixed in every
+   rule-zero regime, and `gi` counts them), and flipping this to `true`
+   restores the card and the 6–12 steps exactly as they were on 2026-10-17.
+   One consequence: seven skills (m9w1-s5, m9w2-s5, m10w1-s4, m10w3-s6,
+   m11w3-s6, m12w1-s6, m12w3-s6) had a take-to-song Challenge as their only
+   teaching step; they stay on the checklist but have no "Show me where". */
+const TAKE_TO_SONG_ENABLED = false;
 function isRoutineSection(sec){
   return sec.kind === 'routine';
 }
@@ -4972,7 +4984,9 @@ function visibleSteps(sec, moduleNum){
   // unconditionally and silently deleted real content across Modules 6–12,
   // Module 12's only graded assessment-piece card among it — Jonathan's call
   // was to restore the steps rather than leave the card-or-nothing rule).
-  if(isTakeToSongSection(sec) && journeySongsFor(moduleNum).length > 0) return [];
+  // TAKE_TO_SONG_ENABLED = false (2026-10-18) hides the section's steps in
+  // every module, with or without a card — see the constant above.
+  if(isTakeToSongSection(sec) && (!TAKE_TO_SONG_ENABLED || journeySongsFor(moduleNum).length > 0)) return [];
   return (sec.steps || []).map((st, idx) => ({ st, idx })).filter(p => !p.st.hidden);
 }
 /* ── The storage namespace rule (2026-09-12 hotfix) ──
@@ -5000,7 +5014,8 @@ function storageSections(station, moduleNum){
 }
 function isRenderableSection(sec, moduleNum){
   if(isRoutineSection(sec) || isEarSparkSection(sec) || isReflectionSection(sec)) return false;
-  // A take-to-song section swaps in the Journey link card in place of its
+  if(isTakeToSongSection(sec) && !TAKE_TO_SONG_ENABLED) return false;   // switched off, every module (2026-10-18)
+  // With TAKE_TO_SONG_ENABLED on, a take-to-song section swaps in the Journey link card in place of its
   // steps when this module has a layer to link to (modules 1–5) — always
   // renderable then, card or not. With no layer (6+) there's no card, so it
   // falls through to a normal section's own "does it have any steps" check

@@ -3565,12 +3565,14 @@ function setShortResponses(w){
     };
     if(stn.sections) storageSections(stn,w.moduleNum).forEach(({sec,gi})=>{
       const secRetired=!isRenderableSection(sec,w.moduleNum);
-      /* A step can be unreachable even when its SECTION still renders: a
-         take-to-song section in a module with a Journey layer renders the
-         link card INSTEAD of its steps, so isRenderableSection() is true
-         while visibleSteps() is empty. Tag off the steps the ladder actually
-         shows, or those slots read as live and Jonathan can't tell "nobody
-         has done this yet" from "this prompt left the course". */
+      /* A step can be unreachable even when its SECTION still renders: with
+         TAKE_TO_SONG_ENABLED on, a take-to-song section in a module with a
+         Journey layer renders the link card INSTEAD of its steps, so
+         isRenderableSection() is true while visibleSteps() is empty (off, as
+         it is since 2026-10-18, both say no and the whole section is tagged
+         retired). Tag off the steps the ladder actually shows, or those
+         slots read as live and Jonathan can't tell "nobody has done this
+         yet" from "this prompt left the course". */
       const live=new Set(visibleSteps(sec,w.moduleNum).map(p=>p.idx));
       (sec.steps||[]).forEach((st,i)=>pushStep(st,`${stationId}-sec${gi}`,i,secRetired||st.hidden===true||!live.has(i)));
     });

@@ -564,6 +564,18 @@ whole-song card for this module's layer if students can open it, else
 `journeySongsFor`) is unchanged, and `JOURNEY_LAYERS` is still what 1ab and 1af
 read.
 
+### ⚠️ SUPERSEDED 2026-10-18: take-to-song is switched off in EVERY module
+`TAKE_TO_SONG_ENABLED = false` in app.js (Jonathan: "remove take it to a song
+from the steps of the modules"). `visibleSteps()` returns nothing for a
+take-to-song section and `isRenderableSection()` says no, in all of Modules
+2–12 — neither the Journey card nor the Module 6–12 Challenge steps render.
+Switched off, not deleted (the Daily 5 pattern): flip it to `true` and
+everything below applies again exactly as written. Nothing in the data moved,
+so no progress key did; 1af / 1ao / 1w-t read the switch through
+`readTakeToSongSwitch()`. The 6–12 fallback below was Jonathan's 2026-09-12
+call, reversed here knowingly: seven skills lost their only teaching step
+(listed in the summer-reset entry that removes the sections for good).
+
 ### ⚠️ No Journey layer → the take-to-song section renders its OWN STEPS
 **Correction, 2026-09-12 (same day as Phase 3, found by an error sweep).**
 The first cut swapped a `take-to-song` section's steps for the Journey card

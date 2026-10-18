@@ -649,12 +649,30 @@ Modules 4 and 5 send students there.
 
 | Door | Behaviour |
 |---|---|
-| "Take it to a song" box, Modules 1–5 | one button per song; `openSongLink(slug, layer)` |
+| "Take it to a song" box, Modules 1–5 | **switched off 2026-10-18** (`TAKE_TO_SONG_ENABLED = false`, see below); when on, one button per song via `openSongLink(slug, layer)` |
 | "About this set" song names | links; same `openSongLink` |
 | Songs page Core row | Play Along (only with an openable card) · Backing · Song Journey, every row |
 | Journey button on a card | never on a whole-song card; on another activity only while its song has no openable whole-song card (`caJourneyUrl()`) |
 | Resume card song row | all six songs |
 | The Journey page itself | open for every student; the activity gate no longer locks it (`JOURNEY_GATE_LOCKS = false`, 2026-10-07) |
+
+**"Take It to a Song" is gone from the module ladders (2026-10-18)**
+(Jonathan: "remove take it to a song from the steps of the modules").
+`const TAKE_TO_SONG_ENABLED = false;` in `app.js`, beside
+`isTakeToSongSection()`, is the whole switch: `visibleSteps()` and
+`isRenderableSection()` hide every `kind:'take-to-song'` section — the
+Journey card in Modules 2–5 *and* the Challenge steps Modules 6–12 showed
+instead. **Switched off, not deleted**, the Daily 5 pattern: the sections
+stay in the module files because the section list is fixed in every rule-zero
+regime and each section counts toward its neighbours' `gi` (no progress key
+moved; checks.mjs 1af proves it). Flip it to `true` and the card and the 6–12
+steps return as they were. It reverses the 2026-09-12 call to restore the
+6–12 steps, knowingly: seven skills (m9w1-s5, m9w2-s5, m10w1-s4, m10w3-s6,
+m11w3-s6, m12w1-s6, m12w3-s6) lost their only teaching step and sit on the
+checklist with no "Show me where"; the console tags those steps "(retired)".
+1af / 1ao / 1w-t read the switch via `readTakeToSongSwitch()`. Deleting the
+sections for good is on the Summer reset list. The other doors in the table
+are untouched.
 
 **Layer matching:** a whole-song card carries `journey` + `journeyLayer` (2 on
 ca-24–ca-28, 3 on ca-29–ca-33), so a Module 2 link finds the Layer 2 card and a
@@ -749,7 +767,7 @@ holds ⚠️ rules as binding as anything here.
 | Area | File | Critical rule kept here |
 |---|---|---|
 | Backing tracks, snippets, practice-card audio, Journey clicks, `playNote`, `audio/` | skill `audio-and-snippets` | Snippet windows are bars, never seconds; never measure a second anchor; never pitch-correct one mix alone; new "silence it" call → `stopCardAudio()` |
-| In-Class Activities, the gate, exit checks, practice cards, Songs Core rows, render-time hiding | skill `in-class-activities` | Exit-check `items` are positional — frozen once taken; don't fold "Play Along now" into `caIsVisible()`; don't re-simplify the take-to-song card-or-steps rule |
+| In-Class Activities, the gate, exit checks, practice cards, Songs Core rows, render-time hiding | skill `in-class-activities` | Exit-check `items` are positional — frozen once taken; don't fold "Play Along now" into `caIsVisible()`; take-to-song is switched off in every module (`TAKE_TO_SONG_ENABLED`) — don't delete the sections, they hold `gi` |
 | Core/Choice song chords, keys, timing, bar numbers | skill `song-facts` | Don't re-flag settled facts; don't verify BPM in audits |
 | Fixes blocked by frozen modules | skill `summer-reset` | Add any blocked fix there the same day; raising FROZEN_* never unlocks anything |
 | Live quiz | `.claude/rules/live-quiz.md` (loads with `live-quiz.js`) | Nothing on the stage may reveal the answer before the reveal |

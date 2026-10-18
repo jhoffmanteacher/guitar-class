@@ -5,6 +5,16 @@ Notable changes to the Guitar Class site. Newest first.
 For the full session-by-session history (and the reasoning behind each change),
 see `WORKFLOW.md` and the git commit log.
 
+## 2026-10-18 — "Take It to a Song" is gone from the module steps
+
+- **The "Take it to a song" box and the "Take It to a Song" Challenge steps
+  are removed from every module.** Modules 2–5 no longer show the box of
+  song buttons at the end of a set, and Modules 6–12 no longer show the
+  last Challenge card of each set. Songs are still on the Songs page, in
+  "About this set", and in In-Class Activities.
+- Steps you already finished are not lost. They just do not show in the
+  steps any more.
+
 ## 2026-10-16 — Arsenal Efectivo play-along
 
 - **New practice card: Arsenal Efectivo — Play Along.** Play power chords
