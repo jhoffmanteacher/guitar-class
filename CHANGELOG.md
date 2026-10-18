@@ -5,6 +5,14 @@ Notable changes to the Guitar Class site. Newest first.
 For the full session-by-session history (and the reasoning behind each change),
 see `WORKFLOW.md` and the git commit log.
 
+## 2026-10-18 — Watchtower power chords: the verses match the record
+
+- **On the "All Along the Watchtower — The Whole Song in Power Chords" card,
+  the verses now light up the first G5 on beat 3**, the same place the
+  record plays it. Count the A5 bar "1 & 2, 3, 4": A5 on 1, & and 2, G5 on
+  3 and 4. The F5 bar does not change. The intro, solos and outro do not
+  change.
+
 ## 2026-10-18 — "Take It to a Song" is gone from the module steps
 
 - **The "Take it to a song" box and the "Take It to a Song" Challenge steps

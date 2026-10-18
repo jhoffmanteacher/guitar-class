@@ -3664,15 +3664,21 @@ window.CLASS_ACTIVITIES = [
           ]
         },
         {
+          /* Verses 1–3 follow the RECORD in the A bar (Jonathan, 2026-10-18):
+             G5 on beat 3 (A5 .5 .5 1 · G5 1 1), measured off the full mix
+             minus the rhythm-down mix in all 29 verse A-bars. The F bar
+             keeps the book's G5 on the "+" after 3, which is also where
+             the record puts it. Intro, solos and outro keep the book
+             rhythm in both bars (song-facts skill). */
           label: 'Verse 1', label_es: 'Estrofa 1',
-          caption: 'Verse 1 — A5 G5 F5 G5, 8 laps', caption_es: 'Estrofa 1 — A5 G5 F5 G5, 8 vueltas',
+          caption: 'Verse 1 — A5 G5 F5 G5, 8 laps · the first G5 is on beat 3', caption_es: 'Estrofa 1 — A5 G5 F5 G5, 8 vueltas · el primer G5 va en el tiempo 3',
           fromBar: 9, bars: 2, reps: 8,
           repLabel: 'Lap', repLabel_es: 'Vuelta',
           notes: [
             { frets: [['A', 7], ['E', 5]], note: 'A5', midi: [52, 45], beats: 0.5 },
             { frets: [['A', 7], ['E', 5]], note: 'A5', midi: [52, 45], beats: 0.5 },
-            { frets: [['A', 7], ['E', 5]], note: 'A5', midi: [52, 45], beats: 1.5 },
-            { frets: [['A', 5], ['E', 3]], note: 'G5', midi: [50, 43], beats: 0.5 },
+            { frets: [['A', 7], ['E', 5]], note: 'A5', midi: [52, 45], beats: 1 },
+            { frets: [['A', 5], ['E', 3]], note: 'G5', midi: [50, 43], beats: 1 },
             { frets: [['A', 5], ['E', 3]], note: 'G5', midi: [50, 43], beats: 1 },
             { frets: [['A', 3], ['E', 1]], note: 'F5', midi: [48, 41], beats: 0.5 },
             { frets: [['A', 3], ['E', 1]], note: 'F5', midi: [48, 41], beats: 0.5 },
@@ -3701,14 +3707,14 @@ window.CLASS_ACTIVITIES = [
         },
         {
           label: 'Verse 2', label_es: 'Estrofa 2',
-          caption: 'Verse 2 — A5 G5 F5 G5, 9 laps', caption_es: 'Estrofa 2 — A5 G5 F5 G5, 9 vueltas',
+          caption: 'Verse 2 — A5 G5 F5 G5, 9 laps · the first G5 is on beat 3', caption_es: 'Estrofa 2 — A5 G5 F5 G5, 9 vueltas · el primer G5 va en el tiempo 3',
           fromBar: 33, bars: 2, reps: 9,
           repLabel: 'Lap', repLabel_es: 'Vuelta',
           notes: [
             { frets: [['A', 7], ['E', 5]], note: 'A5', midi: [52, 45], beats: 0.5 },
             { frets: [['A', 7], ['E', 5]], note: 'A5', midi: [52, 45], beats: 0.5 },
-            { frets: [['A', 7], ['E', 5]], note: 'A5', midi: [52, 45], beats: 1.5 },
-            { frets: [['A', 5], ['E', 3]], note: 'G5', midi: [50, 43], beats: 0.5 },
+            { frets: [['A', 7], ['E', 5]], note: 'A5', midi: [52, 45], beats: 1 },
+            { frets: [['A', 5], ['E', 3]], note: 'G5', midi: [50, 43], beats: 1 },
             { frets: [['A', 5], ['E', 3]], note: 'G5', midi: [50, 43], beats: 1 },
             { frets: [['A', 3], ['E', 1]], note: 'F5', midi: [48, 41], beats: 0.5 },
             { frets: [['A', 3], ['E', 1]], note: 'F5', midi: [48, 41], beats: 0.5 },
@@ -3737,14 +3743,14 @@ window.CLASS_ACTIVITIES = [
         },
         {
           label: 'Verse 3', label_es: 'Estrofa 3',
-          caption: 'Verse 3 — A5 G5 F5 G5, 12 laps', caption_es: 'Estrofa 3 — A5 G5 F5 G5, 12 vueltas',
+          caption: 'Verse 3 — A5 G5 F5 G5, 12 laps · the first G5 is on beat 3', caption_es: 'Estrofa 3 — A5 G5 F5 G5, 12 vueltas · el primer G5 va en el tiempo 3',
           fromBar: 81, bars: 2, reps: 12,
           repLabel: 'Lap', repLabel_es: 'Vuelta',
           notes: [
             { frets: [['A', 7], ['E', 5]], note: 'A5', midi: [52, 45], beats: 0.5 },
             { frets: [['A', 7], ['E', 5]], note: 'A5', midi: [52, 45], beats: 0.5 },
-            { frets: [['A', 7], ['E', 5]], note: 'A5', midi: [52, 45], beats: 1.5 },
-            { frets: [['A', 5], ['E', 3]], note: 'G5', midi: [50, 43], beats: 0.5 },
+            { frets: [['A', 7], ['E', 5]], note: 'A5', midi: [52, 45], beats: 1 },
+            { frets: [['A', 5], ['E', 3]], note: 'G5', midi: [50, 43], beats: 1 },
             { frets: [['A', 5], ['E', 3]], note: 'G5', midi: [50, 43], beats: 1 },
             { frets: [['A', 3], ['E', 1]], note: 'F5', midi: [48, 41], beats: 0.5 },
             { frets: [['A', 3], ['E', 1]], note: 'F5', midi: [48, 41], beats: 0.5 },
