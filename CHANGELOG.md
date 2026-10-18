@@ -14,6 +14,10 @@ see `WORKFLOW.md` and the git commit log.
   "About this set", and in In-Class Activities.
 - Steps you already finished are not lost. They just do not show in the
   steps any more.
+- **Skills about one song now link to that song's Song Journey page.** In
+  Modules 4 and 9–12, a skill like "Label \"Let It Be\"'s C–G–Am–F with Roman
+  numerals" has an "Open the Song Journey page" link under it on the skills
+  checklist. It opens the layer that practises that skill.
 
 ## 2026-10-16 — Arsenal Efectivo play-along
 

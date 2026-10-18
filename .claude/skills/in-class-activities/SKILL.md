@@ -575,6 +575,8 @@ so no progress key did; 1af / 1ao / 1w-t read the switch through
 `readTakeToSongSwitch()`. The 6–12 fallback below was Jonathan's 2026-09-12
 call, reversed here knowingly: seven skills lost their only teaching step
 (listed in the summer-reset entry that removes the sections for good).
+The song links moved to the skills: `skill.journey` → `skillJourneyHtml()` in
+buildChecklist, checks.mjs 1ab3 (pinned 14 skills / 16 links).
 
 ### ⚠️ No Journey layer → the take-to-song section renders its OWN STEPS
 **Correction, 2026-09-12 (same day as Phase 3, found by an error sweep).**

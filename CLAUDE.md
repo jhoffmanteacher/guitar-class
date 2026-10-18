@@ -651,6 +651,7 @@ Modules 4 and 5 send students there.
 |---|---|
 | "Take it to a song" box, Modules 1–5 | **switched off 2026-10-18** (`TAKE_TO_SONG_ENABLED = false`, see below); when on, one button per song via `openSongLink(slug, layer)` |
 | "About this set" song names | links; same `openSongLink` |
+| A skill about one core song (checklist row) | `journey: [{ song, layer }]` on the skill → "Open the \"Luna\" Song Journey page" under it; same `openSongLink`. 14 skills in Modules 4 and 9–12 (2026-10-18; 1ab3 pins 14 / 16) |
 | Songs page Core row | Play Along (only with an openable card) · Backing · Song Journey, every row |
 | Journey button on a card | never on a whole-song card; on another activity only while its song has no openable whole-song card (`caJourneyUrl()`) |
 | Resume card song row | all six songs |
@@ -672,7 +673,11 @@ m11w3-s6, m12w1-s6, m12w3-s6) lost their only teaching step and sit on the
 checklist with no "Show me where"; the console tags those steps "(retired)".
 1af / 1ao / 1w-t read the switch via `readTakeToSongSwitch()`. Deleting the
 sections for good is on the Summer reset list. The other doors in the table
-are untouched.
+are untouched. **Songs now reach students from the skills, not the ladder:**
+the 14 skills whose own text names one core song carry the link (module-2.js's
+schema comment documents the field). Modules 2, 3, 5 and 6 have no such skill, so
+the box's old reach there is now the Songs page and "About this set" only —
+attaching a song to a skill there is a content call, one `journey` field.
 
 **Layer matching:** a whole-song card carries `journey` + `journeyLayer` (2 on
 ca-24–ca-28, 3 on ca-29–ca-33), so a Module 2 link finds the Layer 2 card and a

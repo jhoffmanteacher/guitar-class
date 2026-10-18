@@ -129,7 +129,7 @@ ladder shows the Journey card (Modules 2–5) or the Challenge steps (Modules
 section list is fixed in every rule-zero regime and each one counts toward its
 neighbours' `gi`. Removing them re-keys every section after them, so it is
 reset-only, and `rule-zero-proof.mjs` will fail it by design. With them go
-`journeyLinkCardHtml()`, `journeySongsFor()`, the `jl-*` CSS, the
+`journeyLinkCardHtml()`, `journeySongsFor()`, the `jl-song-btn` rules that only the card used (the activity cards share `.jl-song-btn`, so check first), the
 `journey.takeItTitle`/`takeItSub` i18n keys, the `KIND_TITLE_COUNTS`
 take-to-song pin (29 → 0), and the take-to-song branches of 1af / 1ao / 1w-t
 (`readTakeToSongSwitch`). **Decide first where the seven skills that lost their

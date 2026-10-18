@@ -36,6 +36,19 @@
 //    set; `partOne` is required with it and forbidden without it; neither
 //    part may end up with zero visible steps. Only m4w2 uses this today,
 //    and the count of sets with parts is pinned at 1.
+//
+//  ── OPTIONAL SKILL FIELD — a link to a Song Journey page ──────────
+//    A skill that is about one core song can carry
+//
+//      journey: [{ song: 'luna', layer: 4 }]
+//
+//    and its checklist row gets an "Open the "Luna" Song Journey page"
+//    link under it (skillJourneyHtml() in app.js; the same button the
+//    "Take It to a Song" box used to offer, now switched off). `song` is a
+//    SONG_JOURNEYS id, `layer` the layer whose heading is the part of that
+//    page the skill practises. The link goes through openSongLink(), so a
+//    song with a play-along card for that layer opens the card instead.
+//    Adds no step, section or progress key. Enforced by checks.mjs 1ab3.
 // ============================================================
 
 SETS.push(

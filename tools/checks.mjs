@@ -2191,6 +2191,60 @@ function layerCueMentions(text) {
   }
   return out;
 }
+/* ════════════════════════════════════════════════════════════════════
+   1ab3. SKILL → SONG JOURNEY LINKS (2026-10-18). A skill about one core song
+   carries `journey: [{ song, layer }]` and its checklist row links to that
+   page (skillJourneyHtml() in app.js) — the replacement for the "Take It to a
+   Song" box, which is switched off. The failures are silent: an unknown song
+   id renders nothing, and a layer the page does not have opens the page at
+   the top with no hint that the link meant something else. So this checks the
+   field against the real pages and then reads the real rendered checklist.
+   Pinned at 14 skills / 16 links so a link cannot disappear unnoticed; adding
+   one is a deliberate edit to these two numbers.
+   ════════════════════════════════════════════════════════════════════ */
+const SKILL_JOURNEY_SKILLS = 14, SKILL_JOURNEY_LINKS = 16;
+function checkSkillJourneyLinks(sets, ctx) {
+  head('1ab3. Skill → Song Journey links');
+  let bad = 0;
+  const flag = m => { err(m); problems++; bad++; };
+  if (!sets || !sets.length || !ctx) { flag('1ab3: no parsed SETS — it cannot see the skill links it guards'); return; }
+  let SJ, buildChecklist;
+  try { SJ = vm.runInContext('SONG_JOURNEYS', ctx); buildChecklist = vm.runInContext('buildChecklist', ctx); }
+  catch { flag('1ab3: SONG_JOURNEYS / buildChecklist not found in app.js'); return; }
+  const layersOf = slug => {
+    let src = '';
+    try { src = readFileSync(join(ROOT, 'tabs', `${slug}.html`), 'utf8'); } catch { /* reported by the caller */ }
+    return new Set([...src.matchAll(/<section class="layer[^"]*" id="layer-(\d+)"/g)].map(m => Number(m[1])));
+  };
+  let skills = 0, links = 0;
+  for (const w of sets) {
+    let want = 0;
+    for (const sk of (w.skills || [])) {
+      if (sk.journey === undefined) continue;
+      skills++;
+      const where = `${sk.id} (module-${w.moduleNum}.js)`;
+      if (!Array.isArray(sk.journey) || !sk.journey.length) { flag(`${where}: journey must be a non-empty array of { song, layer }`); continue; }
+      const seen = new Set();
+      for (const j of sk.journey) {
+        links++; want++;
+        const sg = j && SJ.find(x => x.id === j.song);
+        if (!sg) { flag(`${where}: journey song "${j && j.song}" is not a SONG_JOURNEYS id`); continue; }
+        if (!Number.isInteger(j.layer) || !layersOf(sg.id).has(j.layer)) flag(`${where}: ${sg.id} has no layer ${j.layer} — the link would open the page at the top`);
+        if (seen.has(j.song)) flag(`${where}: journey names ${j.song} twice`);
+        seen.add(j.song);
+      }
+    }
+    if (want) {
+      let html = '';
+      try { html = buildChecklist(w); } catch (e) { flag(`${w.id}: buildChecklist threw (${e.message}) — 1ab3 cannot read its skill links`); continue; }
+      const got = (html.match(/class="sk-where-btn sk-song-btn"/g) || []).length;
+      if (got !== want) flag(`${w.id}: ${want} skill journey link(s) in the data but ${got} rendered in the checklist`);
+      if (!/data-i18n="ca\.openJourney" data-i18n-params=/.test(html)) flag(`${w.id}: the skill link label lost data-i18n-params — it would stay in its first language`);
+    }
+  }
+  if (skills !== SKILL_JOURNEY_SKILLS || links !== SKILL_JOURNEY_LINKS) flag(`${skills} skills / ${links} links carry a journey field, pinned at ${SKILL_JOURNEY_SKILLS} / ${SKILL_JOURNEY_LINKS} — bump SKILL_JOURNEY_* in the same edit if that is on purpose`);
+  if (!bad) ok(`${skills} skills carry ${links} Song Journey links — every song and layer exists, every link renders in the checklist (pinned)`);
+}
 function checkModuleJourneyLayers(sets, ctx) {
   head('1ab2. Module files name the right Journey layer');
   let bad = 0;
@@ -7470,6 +7524,7 @@ function checkGuitarNotes() {
   checkTabAsciiEnglish();
   checkJourneyLayers();
   checkModuleJourneyLayers(rcSets, rcCtx);
+  checkSkillJourneyLinks(rcSets, rcCtx);
   checkGateSafeNav();
   checkVisibleHelperUsage();
   checkFigureDimensions();

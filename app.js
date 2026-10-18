@@ -6587,6 +6587,22 @@ function downloadRec(slot){
 }
 
 /* ── Checklist ── */
+/* A skill about a specific core song links to that song's Song Journey page
+   (2026-10-18, Jonathan — in place of the "Take It to a Song" box, which is
+   switched off). `skill.journey` is [{ song, layer }]; the field is documented
+   in module-2.js's schema comment and checked by checks.mjs 1ab3. It opens
+   through openSongLink(), the one door for song links: a play-along card for
+   that layer if students can open one, else the page at #layer-N. The label
+   reuses ca.openJourney and carries data-i18n-params, since the checklist is
+   built once and would otherwise stay in its first language. */
+function skillJourneyHtml(s){
+  return (s.journey || []).map(j => {
+    const sg = SONG_JOURNEYS.find(x => x.id === j.song);
+    if(!sg) return '';
+    const params = { song: sg.name };
+    return `<button type="button" class="sk-where-btn sk-song-btn" onclick="openSongLink('${escAttr(sg.id)}', ${Number(j.layer) || 0})"><span data-i18n="ca.openJourney" data-i18n-params="${escAttr(JSON.stringify(params))}">${escHtml(t('ca.openJourney', params))}</span> &#x2197;</button>`;
+  }).join('');
+}
 function buildChecklist(w){
   if(!w.skills||w.skills.length===0) return `<p style="font-size:0.9375rem;color:var(--text2);padding:12px 0">${t('skill.noneListed')}</p>`;
   const done=w.skills.filter(s=>progress[s.id]==='gotit').length;
@@ -6605,8 +6621,9 @@ function buildChecklist(w){
     const whereBtn = (skillNum && skillTaughtStation(w, Number(skillNum)))
       ? `<button type="button" class="sk-where-btn" onclick="showSkillLesson('${w.id}', ${skillNum})" title="${escAttr(t('skill.jumpToSteps'))}"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" style="width:1em;height:1em;vertical-align:-0.15em"><path d="M12 21s7-6.5 7-12a7 7 0 0 0-14 0c0 5.5 7 12 7 12z"/><circle cx="12" cy="9" r="2.3"/></svg> <span data-i18n="skill.showMeWhere">${t('skill.showMeWhere')}</span></button>` : '';
     const practicePanel = s.practice ? renderPracticePanel(s.practice, s.id, w.id) : '';
+    const songBtns = skillJourneyHtml(s);
     return `<div class="skill-row" data-sid="${escAttr(s.id)}">
-      <div class="sktxt"><div class="sn" style="flex-shrink:0;margin-top:0;margin-right:8px">${i+1}</div><div class="sk-body"><div class="sk-label">${skillText}</div>${helper}${practiceBtn}${whereBtn}</div></div>
+      <div class="sktxt"><div class="sn" style="flex-shrink:0;margin-top:0;margin-right:8px">${i+1}</div><div class="sk-body"><div class="sk-label">${skillText}</div>${helper}${practiceBtn}${whereBtn}${songBtns}</div></div>
       <div class="skchk-cell working-col${st==='working'?' active':''}" role="button" tabindex="0" aria-pressed="${st==='working'}" aria-label="${escAttr(t('skill.ariaStillWorking',{skill:skillText}))}" onclick="toggleSkill('${s.id}','${w.id}','working')" title="Still working on it" data-i18n-attr="title:skill.stillWorking"><div class="skbox">${st==='working'?wkSvg:''}</div></div>
       <div class="skchk-cell gotit-col${st==='gotit'?' active':''}" role="button" tabindex="0" aria-pressed="${st==='gotit'}" aria-label="${escAttr(t('skill.ariaGotIt',{skill:skillText}))}" onclick="toggleSkill('${s.id}','${w.id}','gotit')" title="I've got it!" data-i18n-attr="title:skill.gotIt"><div class="skbox">${st==='gotit'?giSvg:''}</div></div>
       ${practicePanel}
