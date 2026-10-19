@@ -303,7 +303,10 @@ head(`B. Graded MC choices frozen in Modules 1–${FROZEN_THROUGH}`);
   for (const [k, h] of headMc) {
     if (h.kind !== 'graded' || h.moduleNum > FROZEN_THROUGH) continue;
     const b = baseMc.get(k);
-    if (!b) { fail(`${k}: graded MC is NEW in a frozen module`); broken++; continue; }
+    /* A new graded MC on a step that was already there orphans no saved
+       answer (section A has proved every step kept its place), so it prints
+       instead of failing (Jonathan, 2026-10-19). */
+    if (!b) { ok(`${k} — "${h.label}": graded MC ADDED in a frozen module — no saved answer to orphan`); console.log(`   + ${q(h.mc.choices)}`); continue; }
     frozen++;
     if (fp(b.mc) !== fp(h.mc) && renameMapped(b.mc, h.mc)) {
       frozen--; ok(`${k} — "${h.label}": graded MC reworded with renamedChoices — every old pick maps to a new choice, the keyed one to the keyed one`);

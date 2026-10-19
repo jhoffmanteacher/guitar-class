@@ -626,6 +626,7 @@ const FROZEN_MC_FINGERPRINTS = {
   // Module 3 — pinned 2026-10-01, the day before the class reached it.
   'm3w1·b·sec0·step0': 'c96a4e8a77c9b746',   // 2026-10-19 reworded twice with renamedChoices (Jonathan)
   'm3w1·b·sec1·step1': '56086620b6ae5dc1',
+  'm3w1·c·sec2·step1': '132d5423a393f611',   // 2026-10-19 added after Module 3 opened (Jonathan)
   'm3w1·c·sec4·step0': '982ff1050e4ee042',
   'm3w2·b·sec0·step0': '1a402410b40720f2',
 };

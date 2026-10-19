@@ -223,7 +223,26 @@ SETS.push(
             chords: [
               { name: 'C5', chord: [[6,'x'],[5,3,'1'],[4,5,'3'],[3,'x'],[2,'x'],[1,'x']], position: 3 },
               { name: 'D5', chord: [[6,'x'],[5,5,'1'],[4,7,'3'],[3,'x'],[2,'x'],[1,'x']], position: 5 }
-            ]
+            ],
+            // Added 2026-10-19 (Jonathan) after Module 3 opened — a new question
+            // orphans no saved answer; rule-zero-proof prints it.
+            response: { type: 'mc', prompt: 'You strum D5 hard and the low E string rings. What fixes it?',
+              prompt_es: 'Rasgueas D5 fuerte y suena la cuerda Mi grave. ¿Qué lo arregla?',
+              answer: 0,
+              explain: 'The low E is not part of D5, so it has to stay silent. Your index fingertip leans back and touches it lightly, so it cannot ring. Strumming softer still lets it ring. Pressing it with your pinky adds a wrong note. The low E string at fret 5 is A5, not D5.',
+              explain_es: 'La Mi grave no es parte de D5, así que tiene que quedar en silencio. La punta de tu dedo índice se inclina hacia atrás y la toca suavemente, así que no puede sonar. Rasguear más suave igual la deja sonar. Presionarla con el meñique agrega una nota equivocada. La cuerda Mi grave en el traste 5 es A5, no D5.',
+              choices: [
+              'Your index fingertip leans back onto the low E',
+              'Strum softer so the low E is too quiet to hear',
+              'Your pinky presses the low E at fret 5',
+              'Move the shape to the low E string, fret 5'
+            ],
+              choices_es: [
+              'La punta de tu índice se inclina sobre la Mi grave',
+              'Rasguea más suave para que la Mi grave no se oiga',
+              'Tu meñique presiona la Mi grave en el traste 5',
+              'Mueve la forma a la cuerda Mi grave, traste 5'
+            ] }
           }
             ]
           },

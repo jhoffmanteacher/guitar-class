@@ -11,6 +11,8 @@ see `WORKFLOW.md` and the git commit log.
   the power chord shape the set has taught at that point. The right answer
   for C5 is fret 8 on the low E string. If you already answered it, your
   answer is still there.
+- **Module 3's "Mute Check — A-string chords" step has a new quiz question:**
+  what keeps the low E silent when you play D5.
 - **The optional Octave Add-On step now says what an octave is** before the
   checklist asks about it: the same note name, eight letters up.
 - **Module 4, Clean Am now explains chord shorthand** like x02210 (one
