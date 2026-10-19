@@ -47,19 +47,28 @@ SETS.push(
             response: { type: 'mc', prompt: 'C5 is not shown. Using the same shape, where does your index finger go for C5?',
               prompt_es: 'C5 no se muestra. Con la misma forma, ¿dónde va tu dedo índice para C5?',
               answer: 0,
-              explain: 'A power chord is one movable shape, and the note under your index finger names it. Fret 3 of the A string is C (A string: A, B at fret 2, C at fret 3), so C5 starts there. Fret 3 of the low E string is G, which gives G5, and fret 5 of the A string is D, which gives D5.',
-              explain_es: 'Un acorde de potencia es una sola forma movible, y la nota bajo tu dedo índice le da el nombre. El traste 3 de la cuerda La es C (cuerda La: A, B en el traste 2, C en el traste 3), así que C5 empieza ahí. El traste 3 de la cuerda Mi grave es G, que da G5, y el traste 5 de la cuerda La es D, que da D5.',
+              explain: 'A power chord is one movable shape, and the note under your index finger names it. Fret 3 of the A string is C (A string: A, B at fret 2, C at fret 3), so C5 starts there. Fret 8 of the low E string is also C (E, F at fret 1, G at fret 3, A at fret 5, B at fret 7, C at fret 8), so C5 works there too. Fret 3 of the low E string is G, which gives G5, and fret 5 of the A string is D, which gives D5.',
+              explain_es: 'Un acorde de potencia es una sola forma movible, y la nota bajo tu dedo índice le da el nombre. El traste 3 de la cuerda La es C (cuerda La: A, B en el traste 2, C en el traste 3), así que C5 empieza ahí. El traste 8 de la cuerda Mi grave también es C (E, F en el traste 1, G en el traste 3, A en el traste 5, B en el traste 7, C en el traste 8), así que C5 también funciona ahí. El traste 3 de la cuerda Mi grave es G, que da G5, y el traste 5 de la cuerda La es D, que da D5.',
+              // Each choice named one spot until 2026-10-19 (now two spots for the
+              // same chord), after Module 3 opened; renamedChoices maps a pick saved
+              // under the old text to the new one (the graded path stores the text).
+              renamedChoices: {
+                'Fret 3 on the A string': 'Fret 3 on the A string, or fret 8 on the low E string',
+                'Fret 3 on the low E string': 'Fret 3 on the low E string, or fret 10 on the A string',
+                'Fret 5 on the A string': 'Fret 5 on the A string, or fret 10 on the low E string',
+                'Fret 5 on the low E string': 'Fret 5 on the low E string, or fret 12 on the A string'
+              },
               choices: [
-              'Fret 3 on the A string',
-              'Fret 3 on the low E string',
-              'Fret 5 on the A string',
-              'Fret 5 on the low E string'
+              'Fret 3 on the A string, or fret 8 on the low E string',
+              'Fret 3 on the low E string, or fret 10 on the A string',
+              'Fret 5 on the A string, or fret 10 on the low E string',
+              'Fret 5 on the low E string, or fret 12 on the A string'
             ],
               choices_es: [
-              'Traste 3 de la cuerda La',
-              'Traste 3 de la cuerda Mi grave',
-              'Traste 5 de la cuerda La',
-              'Traste 5 de la cuerda Mi grave'
+              'Traste 3 de la cuerda La, o traste 8 de la cuerda Mi grave',
+              'Traste 3 de la cuerda Mi grave, o traste 10 de la cuerda La',
+              'Traste 5 de la cuerda La, o traste 10 de la cuerda Mi grave',
+              'Traste 5 de la cuerda Mi grave, o traste 12 de la cuerda La'
             ] }
           }
             ]

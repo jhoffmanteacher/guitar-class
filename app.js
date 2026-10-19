@@ -5252,7 +5252,11 @@ function buildLesson(w){
     const respHtml = s.response ? (()=>{
       const key = `${w.id}-${ns}-${i}`;
       const isPR = s.response.type === 'short' && (/personal record/i.test(s.response.prompt||'') || /\bBPM\b/i.test(s.response.prompt||''));
-      const stored = isPR ? prLatestValue(responses[key]) : (responses[key] || '');
+      let stored = isPR ? prLatestValue(responses[key]) : (responses[key] || '');
+      // A graded MC whose choice was reworded after students reached it maps the
+      // old saved text to the new one (response.renamedChoices).
+      const ren = s.response.renamedChoices;
+      if(ren && Object.prototype.hasOwnProperty.call(ren, stored)) stored = ren[stored];
       const promptHtml = s.response.prompt ? `<div class="step-resp-prompt">${escHtml(tf(s.response,'prompt'))}</div>` : '';
       const labelHtml = `<div class="step-resp-label"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M17 3a2.85 2.85 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5z"/></svg> ${t('step.yourResponse')}</div>`;
       if(s.response.type === 'short'){

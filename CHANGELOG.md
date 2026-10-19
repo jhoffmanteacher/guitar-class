@@ -5,6 +5,12 @@ Notable changes to the Guitar Class site. Newest first.
 For the full session-by-session history (and the reasoning behind each change),
 see `WORKFLOW.md` and the git commit log.
 
+## 2026-10-19 — Module 3: the C5 question names both spots
+
+- **The first Module 3 quiz now gives two places for each chord.** The right
+  answer for C5 is fret 3 on the A string or fret 8 on the low E string. If
+  you already answered it, your answer is still there.
+
 ## 2026-10-19 — Everyone starts on Module 3
 
 - **The site now opens on Module 3.** Modules 1 and 2 are open and you can

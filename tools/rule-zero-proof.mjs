@@ -285,6 +285,17 @@ for (const s of headSets) for (const [k, v] of mcsOf(s)) headMc.set(k, v);
 const fp = mc => JSON.stringify({ choices: mc.choices, choices_es: mc.choices_es, answer: mc.answer });
 const q = s => JSON.stringify(s);
 const changedGraded = [], changedPractice = [];
+/* A frozen graded MC may be reworded when `renamedChoices` (read by the
+   renderer in app.js) maps every old English choice to a new one: same count,
+   no two old picks landing on one new choice, and the keyed one still keyed. */
+function renameMapped(bm, hm) {
+  const ren = hm.renamedChoices || {};
+  const to = c => Object.prototype.hasOwnProperty.call(ren, c) ? ren[c] : c;
+  if (!Array.isArray(bm.choices) || !Array.isArray(hm.choices) || bm.choices.length !== hm.choices.length) return false;
+  const mapped = bm.choices.map(to);
+  if (new Set(mapped).size !== mapped.length || !mapped.every(c => hm.choices.includes(c))) return false;
+  return mapped[bm.answer] === hm.choices[hm.answer];
+}
 
 head(`B. Graded MC choices frozen in Modules 1–${FROZEN_THROUGH}`);
 {
@@ -294,7 +305,10 @@ head(`B. Graded MC choices frozen in Modules 1–${FROZEN_THROUGH}`);
     const b = baseMc.get(k);
     if (!b) { fail(`${k}: graded MC is NEW in a frozen module`); broken++; continue; }
     frozen++;
-    if (fp(b.mc) !== fp(h.mc)) {
+    if (fp(b.mc) !== fp(h.mc) && renameMapped(b.mc, h.mc)) {
+      frozen--; ok(`${k} — "${h.label}": graded MC reworded with renamedChoices — every old pick maps to a new choice, the keyed one to the keyed one`);
+      console.log(`   - ${q(b.mc.choices)}\n   + ${q(h.mc.choices)}`);
+    } else if (fp(b.mc) !== fp(h.mc)) {
       fail(`${k} — "${h.label}": FROZEN graded MC changed. Students have stored their pick as TEXT, so this orphans every answer already given. Reword only with an old→new map in the renderer.`);
       broken++;
       console.log(`   - ${q(b.mc.choices)}\n   + ${q(h.mc.choices)}`);
