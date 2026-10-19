@@ -118,6 +118,22 @@ try {
     .filter(f => /\.(svg|png|jpe?g|webp|gif)$/i.test(f)).sort().map(f => `img/${f}`);
 } catch { /* no img/ dir yet */ }
 
+/* Same reasoning again for the chord-sheet PDFs a lyric-sheet practice card
+   draws (card.sheet, 2026-10-19) and the pdf.js files that draw them: both
+   are runtime-cached cache-first and never precached, so re-saving a sheet
+   at the same name must bump CACHE_VERSION or returning students keep the
+   old page. */
+let SHEET_FILES = [];
+try {
+  SHEET_FILES = readdirSync(join(ROOT, 'sheets'))
+    .filter(f => /\.pdf$/i.test(f)).sort().map(f => `sheets/${f}`);
+} catch { /* no sheets/ dir */ }
+let VENDOR_FILES = [];
+try {
+  VENDOR_FILES = readdirSync(join(ROOT, 'vendor', 'pdfjs'))
+    .filter(f => /\.js$/i.test(f)).sort().map(f => `vendor/pdfjs/${f}`);
+} catch { /* no vendor/pdfjs dir */ }
+
 /* ════════════════════════════════════════════════════════════════════
    1. VALIDATE — load each module in a sandbox and check its Sets
    ════════════════════════════════════════════════════════════════════ */
@@ -4727,7 +4743,7 @@ function bumpServiceWorker() {
      visitor's cache, or a copy the old logic stored wrongly stays served
      until some unrelated shell file happens to change. */
   const swCode = src.replace(/const (AUDIO_)?CACHE_VERSION = '[^']*';/g, "const $1CACHE_VERSION = '';");
-  src = bumpVersionConst('CACHE_VERSION', 'guitar-class', [...SHELL_FILES, ...IMG_FILES], src, swPath, 'shell cache', swCode);
+  src = bumpVersionConst('CACHE_VERSION', 'guitar-class', [...SHELL_FILES, ...IMG_FILES, ...SHEET_FILES, ...VENDOR_FILES], src, swPath, 'shell cache', swCode);
   src = bumpVersionConst('AUDIO_CACHE_VERSION', 'guitar-class-audio', AUDIO_FILES, src, swPath, 'audio cache');
   if (!CHECK_ONLY && src !== before) writeFileSync(swPath, src);
 }
@@ -6983,6 +6999,60 @@ function checkPracticeCards() {
   if (bad === 0) ok(`${cards} practice card${cards === 1 ? '' : 's'} — sections add up to their bars and land inside the track, one Level up each, both renderers and every silencer wired`);
 }
 
+/* 1bf2. LYRIC-SHEET CARDS (card.sheet — ca-38, Jonathan 2026-10-19). The
+   card draws a chord sheet PDF and walks a dot over its chord names in
+   reading order: name n is the card's n-th chord CHANGE. If the card's
+   notes change (ca-38 shares ca-29's sections, so a ca-29 edit counts) the
+   dot walks onto the wrong chords with nothing to say so but the console
+   preview. Checked here, without opening the PDF (pdf.js does not run in
+   Node; the preview compares the PDF itself):
+   - the PDF exists under sheets/ and pdf.js is vendored where app.js loads it;
+   - `sheetChords` is set and equals the chord changes the notes make;
+   - the renderer is wired: caCardBodyHtml() builds pcSheetHtml(), pcFrame()
+     feeds pcSheetStrip(), pcStop() calls pcSheetStopped(). */
+function checkSheetCards() {
+  head('1bf2. Lyric-sheet practice cards');
+  let bad = 0, n = 0;
+  const flag = m => { err(m); problems++; bad++; };
+  let activities = [];
+  try {
+    const src = readFileSync(join(ROOT, 'class-activities.js'), 'utf8');
+    const sandbox = { console };
+    sandbox.window = sandbox;
+    vm.createContext(sandbox);
+    vm.runInContext(src, sandbox, { filename: 'class-activities.js' });
+    activities = sandbox.CLASS_ACTIVITIES || [];
+  } catch { return; /* reported by 1d */ }
+  for (const a of activities) {
+    if (!a || !a.card || !a.card.sheet) continue;
+    n++;
+    const c = a.card, w = a.id;
+    if (a.view !== 'card') flag(`${w}: card.sheet only renders on a view:'card' activity`);
+    if (typeof c.sheet !== 'string' || !/^sheets\/[^/]+\.pdf$/i.test(c.sheet)) { flag(`${w}: card.sheet "${c.sheet}" should be a PDF in sheets/ (sheets/<name>.pdf)`); continue; }
+    if (!existsSync(join(ROOT, c.sheet))) flag(`${w}: ${c.sheet} is not in the repo — the card would say the sheet did not load`);
+    let changes = 0, prev = null;
+    for (const s of (Array.isArray(c.sections) ? c.sections : [])) {
+      const reps = Number.isInteger(s && s.reps) ? s.reps : 1;
+      for (let r = 0; r < reps; r++) for (const nt of (s.notes || [])) { if (nt.note !== prev) { changes++; prev = nt.note; } }
+    }
+    if (!Number.isInteger(c.sheetChords)) flag(`${w}: card.sheetChords should say how many chord names the sheet has (the notes make ${changes} chord changes)`);
+    else if (c.sheetChords !== changes) flag(`${w}: the notes make ${changes} chord changes but card.sheetChords is ${c.sheetChords} — the dot would walk onto the wrong chords. Fix the notes, or the sheet and this number`);
+  }
+  for (const f of ['vendor/pdfjs/pdf.min.js', 'vendor/pdfjs/pdf.worker.min.js']) {
+    if (n && !existsSync(join(ROOT, f))) flag(`${f} is missing — no chord sheet can draw`);
+  }
+  let appSrc = '';
+  try { appSrc = readFileSync(join(ROOT, 'app.js'), 'utf8'); } catch { flag('app.js unreadable — 1bf2 cannot check the renderer'); return; }
+  const body = fn => { const b = jsFunctionBody(appSrc, fn); return b === null ? null : stripJsComments(b); };
+  const pins = [['caCardBodyHtml', /pcSheetHtml\(/, 'build the sheet (pcSheetHtml)'], ['pcFrame', /pcSheetStrip\(/, 'feed "This bar" (pcSheetStrip)'], ['pcPaint', /pcSheetPaint\(/, 'move the dot (pcSheetPaint)'], ['pcStop', /pcSheetStopped\(/, 'reset the sheet (pcSheetStopped)']];
+  for (const [fn, re, what] of pins) {
+    const b = body(fn);
+    if (b === null || !re.test(b)) flag(`app.js: ${fn}() must ${what} — a lyric-sheet card would not work`);
+  }
+  if (n === 0) { flag('1bf2 found no lyric-sheet card — it cannot see what it is supposed to guard'); return; }
+  if (bad === 0) ok(`${n} lyric-sheet card${n === 1 ? '' : 's'} — sheet in the repo, chord count matches the notes, pdf.js vendored, renderer wired`);
+}
+
 /* 1bn. PLAY-ALONG FIRST: WHOLE-SONG CARDS ARE FINDABLE AND NO PAGE IS BLOCKED
    (2026-10-06). A link to a song opens its whole-song practice card when
    students can open one for that layer, else the Song Journey page
@@ -7010,7 +7080,13 @@ function checkJourneyRetired() {
   const block = /const SONG_JOURNEYS = \[([\s\S]*?)\n\];/.exec(appSrc);
   const ids = block ? [...block[1].matchAll(/\bid:\s*'([^']+)'/g)].map(m => m[1]) : [];
   if (!ids.length) { flag('1bn cannot read the SONG_JOURNEYS ids from app.js'); return; }
-  const cards = activities.filter(a => a && a.view === 'card' && a.card && a.card.wholeSong === true);
+  /* A lyric-sheet card (card.sheet — ca-38) is another view of a whole song,
+     not its layer's play-along: it has no journey, so no link can pick it
+     over the real one and the Journey page draws no second tab for it. */
+  activities.filter(a => a && a.view === 'card' && a.card && a.card.sheet).forEach(a => {
+    if (a.journey !== undefined || a.journeyLayer !== undefined) flag(`${a.id}: a lyric-sheet card (card.sheet) has no journey / journeyLayer — it would compete with the song's play-along card`);
+  });
+  const cards = activities.filter(a => a && a.view === 'card' && a.card && a.card.wholeSong === true && !a.card.sheet);
   if (cards.length === 0) { flag('1bn found no whole-song card — it cannot see what it is supposed to guard'); return; }
   const NAMES_PAGE = /song journey|recorrido de la canci[oó]n/i;
   const walk = (v, path, a) => {
@@ -7550,6 +7626,7 @@ function checkGuitarNotes() {
   checkEnglishTermsInSpanish(i18nTable);
   checkJourneyGuitarToggle();
   checkPracticeCards();
+  checkSheetCards();
   checkCardCaptionWords();
   checkJourneyRetired();
   checkRepCountParity(rcSets, rcCtx);

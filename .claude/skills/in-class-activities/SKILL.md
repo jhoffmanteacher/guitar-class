@@ -369,6 +369,25 @@ draws a `frets` note. Each power-chord card is its roots card (ca-24–ca-28)
 with the same sections and bars, every root turned into the Journey Layer
 3 shape; Luna's is two strums per bar where its roots card is one.
 
+**A card can show a chord sheet PDF instead of its tab — `card.sheet`**
+(Jonathan, 2026-10-19; ca-38, Watchtower lyrics and chords). The PDF lives
+in `sheets/` (his own Word doc, saved as PDF — the lyrics come from his file,
+never typed into code) and pdf.js draws it (`vendor/pdfjs/`, loaded only for
+a sheet card — the CSP allows no CDN scripts). The chord positions are read
+from the PDF's text: every word on a line made only of chord names, in
+reading order, column by column. **Sheet chord n = the card's n-th chord
+CHANGE**, so the sheet needs exactly one name per change; `sheetChords`
+pins the count and **1bf2** holds the notes to it, and the console preview
+says so if the PDF itself doesn't match (the dot is then left off). The dot
+runs `PC_SHEET_LEAD` (0.175 s) AHEAD of the record — Jonathan tuned it by
+ear — where the tab takes the output latency off; "This bar" is sticky
+under the page bar, which is why a sheet card is `overflow:clip`, not
+hidden. A tap on a chord starts from that lap (`pcStart(root, si, rep)`).
+ca-38 has NO `journey` (1bn): it is another view of ca-29, not Layer 3's
+play-along, and it shares ca-29's sections by reference (joined after the
+array), so a ca-29 rhythm edit moves its dot too. Engine: `pcSheet*` in
+app.js, beside caCardBodyHtml.
+
 **Slowest (2026-09-29).** A practice card with `card.slowest: true` (every
 card today) gets a Slowest / Slower / Normal control in place of the switch, and
 every step snippet gets a Slowest button beside the turtle (the two release

@@ -134,6 +134,18 @@
                                            // song instead of looping — for a
                                            // card that IS the whole record
                                            // (ca-24 to ca-33)
+       sheet: 'sheets/<song>.pdf',         // optional (ca-38, 2026-10-19): show
+                                           // this chord sheet PDF instead of the
+                                           // tab, drawn as is (lyrics included),
+                                           // with a dot on the chord being played.
+                                           // The sheet's chord names, in reading
+                                           // order, must be one per chord CHANGE
+                                           // in the notes. sheetChords: <n> says
+                                           // how many the sheet has; checks.mjs
+                                           // 1bf2 holds the notes to it, and the
+                                           // console preview checks the PDF. A
+                                           // sheet card has no `journey` — it is
+                                           // not its layer's play-along (1bn).
        sections: [{                        // back to back, in song order
          label, label_es,                  // the tap-to-start button ("Chorus")
          caption, caption_es,              // the heading over its tab page
@@ -5811,4 +5823,48 @@ window.CLASS_ACTIVITIES = [
     // No help ladder: a practice card is its checks and nothing else (Jonathan, 2026-10-07).
     steps: [],
   },
+  /* All Along the Watchtower — Lyrics and Chords (Jonathan, 2026-10-19).
+     ca-29 shown as Jonathan's own chord sheet (sheets/all-along-the-watchtower.pdf,
+     saved from his Word doc) instead of the tab: the lyrics and chords as he
+     wrote them, and a dot that steps from chord to chord in the card's rhythm
+     on the Hendrix track. The sections are ca-29's — the SAME objects, joined
+     right after this array — so a change to ca-29's rhythm or bars moves
+     this card's dot too. The sheet's 224 chord names are the card's 224
+     chord changes, in reading order (checks.mjs 1bf2). */
+  {
+    id:    'ca-38',
+    view:  'card',    // one screen: Play song + sheet + checks — see CARD above
+    title:    'All Along the Watchtower — Lyrics and Chords',
+    title_es: 'All Along the Watchtower — Letra y acordes',
+    intro:    'Play the whole song in power chords from the chord sheet. The dot shows the chord to play and when to strum it.',
+    intro_es: 'Toca la canción completa con acordes de potencia desde la hoja de acordes. El punto muestra el acorde que tocas y cuándo rasguear.',
+    card: {
+      wholeSong: true,  // stops at the end of the song instead of looping
+      track: 'all-along-the-watchtower',
+      slowest: true,    // four-way speed control: Slowest / Slower / Slow / Normal
+      sheet: 'sheets/all-along-the-watchtower.pdf',
+      sheetChords: 224, // chord names on the sheet = chord changes in the notes (checks.mjs 1bf2)
+      caption:    'Lyrics and chords · count 1 & 2 (rest) & 4',
+      caption_es: 'Letra y acordes · cuenta 1 y 2 (silencio) y 4',
+      sections: null,   // ca-29's — joined after the array, below
+      checks: [
+        { label: 'The whole song, slower', label_es: 'La canción completa, más lenta',
+          text:    'Leave the speed where the card starts it, or move it one stop left. Play the whole song with the band from the sheet, intro to the end, without stopping.',
+          text_es: 'Deja la velocidad donde la tarjeta la deja al empezar, o muévela una posición a la izquierda. Toca la canción completa con la banda desde la hoja, de la intro al final, sin detenerte.' },
+        { levelUp: true,
+          text:    'Slide the speed all the way right, to Normal. Play the whole song with the band from the sheet, intro to the end, without stopping.',
+          text_es: 'Desliza la velocidad hasta la derecha, a «Normal». Toca la canción completa con la banda desde la hoja, de la intro al final, sin detenerte.' }
+      ]
+    },
+    // No help ladder: a practice card is its checks and nothing else (Jonathan, 2026-10-07).
+    steps: [],
+  },
 ];
+
+/* ca-38 plays ca-29's sections from its chord sheet (see ca-38 above). The
+   same array, not a copy: the two cards can't drift apart. */
+(function(){
+  const list = window.CLASS_ACTIVITIES;
+  const from = list.find(a => a.id === 'ca-29'), to = list.find(a => a.id === 'ca-38');
+  if(from && to) to.card.sections = from.card.sections;
+})();

@@ -5,6 +5,16 @@ Notable changes to the Guitar Class site. Newest first.
 For the full session-by-session history (and the reasoning behind each change),
 see `WORKFLOW.md` and the git commit log.
 
+## 2026-10-19 — Watchtower: lyrics and chords with the band
+
+- **New practice card: "All Along the Watchtower — Lyrics and Chords."** It
+  shows the song's chord sheet with the lyrics. Press Play song and a dot
+  moves to each chord as the band plays it. The dot fills in each time you
+  strum and is hollow while the chord rings. "This bar" above the sheet
+  counts 1 + 2 + 3 + 4 + and shows where the strums land. Tap a section, or
+  any chord on the sheet, to start the song there. The card has the same
+  speeds and Guitar switch as the power-chord card.
+
 ## 2026-10-19 — Note-name activities: 20 to 40 BPM
 
 - **"Notes on the Low E String", "Notes on the A String, Then Happy

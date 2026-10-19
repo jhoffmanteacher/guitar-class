@@ -2736,6 +2736,39 @@ body.ca-full:has(#class-activities-screen:not([hidden])) .app-layout .main{zoom:
 .pc-sec:hover{border-color:var(--purple-accent)}
 .pc-sec.cur{background:var(--purple-bg);border-color:var(--purple-accent);color:var(--purple-text)}
 .pc-sec-play{font-size:0.625rem;margin-right:6px;color:var(--purple-accent)}
+/* LYRIC SHEET practice card (card.sheet — ca-38, 2026-10-19; pcSheet* in
+   app.js). The chord sheet is the student's own PDF drawn on a canvas, so the
+   paper stays white in dark mode too, and its marks use the light-theme blue
+   that reads on white (#185fa5 = --blue-text, light). "This bar" sticks under
+   the page's sticky bar (--pc-sheet-top, set by pcSheetStickyTop). */
+.pc-sheet{margin-top:8px}
+.ca-card:has(.pc-sheet){overflow:clip}   /* hidden would make the card a scroll box, and the sheet's bar could not stick */
+.pc-sheet-title{margin:0 0 2px;font-size:0.875rem;font-weight:600;color:var(--text2)}
+.pc-sheet > .pc-status:empty{display:none}
+.pc-sheet > .pc-status:not(:empty) ~ .pc-hint{display:none}
+.pc-sheet-bar{position:sticky;top:var(--pc-sheet-top,0px);z-index:4;background:var(--bg);display:flex;flex-wrap:wrap;align-items:center;gap:6px 14px;padding:8px 0;border-bottom:1px solid var(--border)}
+.pc-sheet-where{font-size:0.875rem;font-weight:600;color:var(--purple-text);min-width:14ch}
+.pc-strip{display:grid;grid-template-columns:auto repeat(8,minmax(28px,1fr));gap:4px;flex:1 1 340px;max-width:520px;align-items:stretch}
+.pc-strip-label{font-size:0.75rem;color:var(--text2);align-self:center;padding-right:4px;white-space:nowrap}
+.pc-strip-cell{display:flex;flex-direction:column;align-items:center;border:1px solid var(--border);border-radius:6px;padding:2px 0 3px;min-width:0}
+.pc-strip-ch{font-size:0.8125rem;font-weight:700;min-height:1.25em;color:var(--text)}
+.pc-strip-n{font-size:0.75rem;color:var(--text2);font-variant-numeric:tabular-nums}
+.pc-strip-cell.strum{background:var(--bg3)}
+.pc-strip-cell.now{border-color:var(--blue-text);background:var(--blue-bg)}
+.pc-strip-cell.now .pc-strip-ch,.pc-strip-cell.now .pc-strip-n{color:var(--blue-text)}
+.pc-sheet-paper{position:relative;margin:12px auto 0;max-width:100%;min-height:120px;background:#fff;border:1px solid var(--border2);border-radius:4px}
+.pc-sheet-paper canvas{display:block;width:100%;height:auto;border-radius:4px}
+.pc-sheet-msg{margin:0;padding:16px;font-size:0.875rem;color:#5e5e58}
+.pc-sheet-hit{position:absolute;border:0;padding:0;margin:0;background:transparent;border-radius:4px;cursor:pointer}
+.pc-sheet-hit:hover{background:rgba(24,95,165,0.10)}
+.pc-sheet-hit:focus-visible{outline:2px solid #185fa5;outline-offset:1px}
+.pc-sheet-line{position:absolute;left:0;right:0;pointer-events:none}
+.pc-sheet-pill{position:absolute;border-radius:5px;background:rgba(24,95,165,0.16);box-shadow:0 0 0 2px #185fa5;pointer-events:none}
+.pc-sheet-dot{position:absolute;width:13px;height:13px;margin:-6.5px 0 0 -17px;border-radius:50%;border:2px solid #185fa5;background:#fff;pointer-events:none}
+.pc-sheet-dot.hit{animation:pc-sheet-hit var(--pc-hit,0.2s) steps(1,end) forwards}
+@keyframes pc-sheet-hit{0%{background:#185fa5}100%{background:#fff}}
+.pc-sheet-ghost{position:absolute;width:9px;height:9px;margin:-4.5px 0 0 -14px;border-radius:50%;border:1.5px solid rgba(24,95,165,0.45);pointer-events:none}
+.pc-sheet-paper:not(:has(canvas)) :is(.pc-sheet-pill,.pc-sheet-dot,.pc-sheet-ghost){display:none}
 .pc-rep{margin-left:8px;padding:1px 9px;border-radius:999px;background:var(--purple-accent);color:var(--bg);font-size:0.75rem;font-weight:700}
 .pc-progress{margin:12px 0 6px;font-size:0.8125rem;color:var(--text2)}
 .pc-checks{list-style:none;margin:0 0 12px;padding:0}

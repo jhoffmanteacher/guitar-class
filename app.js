@@ -12577,11 +12577,321 @@ function caCardBodyHtml(a, opts){
   const L = pcLayout(a);
   if(!L) return '';
   const preview = !!(opts && opts.preview);
+  /* A card with `card.sheet` shows that chord sheet PDF in place of the tab
+     (ca-38 — see LYRIC SHEET below). The sheet is drawn after the HTML is in
+     the page, so the builder only queues a scan; every caller (the student
+     card, the hero card, the console preview) gets it the same way. */
+  const sheet = !!a.card.sheet;
+  if(sheet) setTimeout(pcSheetScan, 0);
   return `<div class="pc" data-id="${escAttr(a.id)}" data-slow="1"${snippetHasFull(L.tr) ? ' data-guitar="1"' : ''}${preview ? ' data-preview="1"' : ''}>`
     + caKeySwitchHtml(a) + caChordSwitchHtml(a)
-    + `<p class="pc-dir">${escHtml(t('ca.cardDirections'))}</p>`
-    + pcPlayerHtml(a, L) + pcTabHtml(a, L) + pcChecksHtml(a, preview) + pcHelpHtml(a, preview)
+    + `<p class="pc-dir">${escHtml(t(sheet ? 'ca.sheetDirections' : 'ca.cardDirections'))}</p>`
+    + pcPlayerHtml(a, L) + (sheet ? pcSheetHtml(a, L) : pcTabHtml(a, L)) + pcChecksHtml(a, preview) + pcHelpHtml(a, preview)
     + `</div>`;
+}
+
+/* ══ LYRIC SHEET — a practice card drawn as a chord sheet PDF ═══════════
+   (Jonathan, 2026-10-19; ca-38.) `card.sheet` names a PDF in sheets/ — his
+   own chord sheet, saved from Word — and the card shows it AS IS, lyrics and
+   all, in place of the tab. Everything else is the practice card unchanged:
+   Play song, the four speeds, the Guitar switch, the Metronome, the checks,
+   pcFrame's clock and pcLocate. Only the marks differ:
+     - the DOT sits just left of the chord being played. It fills in on each
+       strum (each note of the card) and goes hollow while the chord rings;
+       a faint ring marks the next chord;
+     - "This bar" counts 1 + 2 + 3 + 4 + and marks where the strums land,
+       sticky at the top of the sheet so it stays on screen;
+     - the page follows the line being played (pcFollow, the tab's own rule).
+   Where the chords are is read from the PDF's TEXT, never typed into code:
+   every word on a line made only of chord names is a chord, in reading
+   order, a two-column page column by column. Chord n on the sheet is the
+   card's n-th chord CHANGE (a repeated strum of the same chord is the same
+   chord name), so the sheet must have exactly one name per change —
+   checks.mjs 1bf2 holds that, and the console preview says so if it breaks.
+   pdf.js (vendor/pdfjs, Mozilla, Apache-2.0) draws the page; it loads only
+   when a sheet card is on screen. Vendored, not a CDN: the CSP in
+   index.html runs scripts from this origin only (plus Google/Firebase). */
+const PC_SHEET_LEAD = 0.175;      // real seconds the dot runs ahead of the record — Jonathan tuned it by ear, 2026-10-19
+const PC_SHEET_SOLID = 0.42;      // beats the dot stays filled after a strum
+const PC_SHEET_MAX_SCALE = 1.9;   // CSS px per PDF point at most (chord names ~19px)
+const PC_SHEET_CHORD_RE = /^[A-G](#|b)?(maj|min|m|dim|aug|sus|add|\+|°|ø|[0-9])*(\/[A-G](#|b)?)?$/;
+function pcSheetLoadPdfjs(){
+  return loadScriptOnce('vendor/pdfjs/pdf.min.js').then(() => {
+    if(!window.pdfjsLib) throw new Error('pdf.js did not load');
+    window.pdfjsLib.GlobalWorkerOptions.workerSrc = 'vendor/pdfjs/pdf.worker.min.js';
+    return window.pdfjsLib;
+  });
+}
+/* One parse per PDF: its first page, and every chord name on it in reading
+   order, in PDF points with y running down the page. */
+const pcSheetModels = {};
+function pcSheetModel(url){
+  if(pcSheetModels[url]) return pcSheetModels[url];
+  pcSheetModels[url] = pcSheetLoadPdfjs().then(async lib => {
+    const doc = await lib.getDocument(url).promise;
+    const page = await doc.getPage(1);
+    const vp = page.getViewport({ scale: 1 });
+    const tc = await page.getTextContent();
+    const words = [];
+    tc.items.forEach(it => {
+      if(!it.str || !it.str.trim()) return;
+      const [a, b, , d, e, f] = it.transform;
+      const size = Math.hypot(a, b) || Math.abs(d) || it.height || 10;
+      const cw = it.width / it.str.length;   // the sheets are Courier: every character is one width
+      const re = /\S+/g; let m;
+      while((m = re.exec(it.str))){
+        const x0 = e + m.index * cw, x1 = x0 + m[0].length * cw;
+        const r = vp.convertToViewportRectangle([x0, f - size * 0.22, x1, f + size * 0.78]);
+        words.push({ s: m[0], x0: Math.min(r[0], r[2]), x1: Math.max(r[0], r[2]), y0: Math.min(r[1], r[3]), y1: Math.max(r[1], r[3]) });
+      }
+    });
+    if(!words.length) throw new Error('the PDF has no text — save it from Word, not as a scan');
+    // Lines by baseline; a wide gap past the middle of the page starts a second column.
+    const byY = new Map();
+    words.forEach(w => { const k = Math.round(w.y1); (byY.get(k) || byY.set(k, []).get(k)).push(w); });
+    const segs = [];
+    byY.forEach(ws => {
+      ws.sort((p, q) => p.x0 - q.x0);
+      let cur = [ws[0]];
+      for(let i = 1; i < ws.length; i++){
+        if(ws[i].x0 - ws[i - 1].x1 > vp.width * 0.08 && ws[i].x0 > vp.width * 0.4){ segs.push(cur); cur = []; }
+        cur.push(ws[i]);
+      }
+      segs.push(cur);
+    });
+    const lines = segs.filter(ws => ws.every(w => PC_SHEET_CHORD_RE.test(w.s)));
+    lines.forEach(ws => { ws.col = ws[0].x0 > vp.width * 0.45 ? 1 : 0; });
+    lines.sort((p, q) => p.col - q.col || p[0].y0 - q[0].y0);
+    const toks = lines.flatMap(ws => ws.map(w => ({ name: w.s, x0: w.x0, x1: w.x1, y0: w.y0, y1: w.y1 })));
+    const pad = 14;
+    const crop = { x: Math.max(0, Math.min(...words.map(w => w.x0)) - pad), y: Math.max(0, Math.min(...words.map(w => w.y0)) - pad) };
+    crop.w = Math.min(vp.width, Math.max(...words.map(w => w.x1)) + pad) - crop.x;
+    crop.h = Math.min(vp.height, Math.max(...words.map(w => w.y1)) + pad) - crop.y;
+    return { page, toks, crop };
+  });
+  pcSheetModels[url].catch(() => { delete pcSheetModels[url]; });   // a failed load can be tried again
+  return pcSheetModels[url];
+}
+/* Which sheet chord each note of the card is: tok[si][rep][ni]. The count
+   goes up at every chord CHANGE across the whole song, laps included. */
+function pcSheetMap(L){
+  const tok = [], start = [];
+  let n = -1, prev = null;
+  L.sections.forEach((S, si) => {
+    tok[si] = [];
+    for(let r = 0; r < S.reps; r++){
+      tok[si][r] = S.notes.map(nt => {
+        if(nt.note !== prev){ n++; prev = nt.note; start[n] = { si, rep: r, name: nt.note }; }
+        return n;
+      });
+    }
+  });
+  return { tok, start, count: n + 1 };
+}
+function pcSheetHtml(a, L){
+  const c = a.card;
+  const many = L.sections.length > 1;
+  const chips = many
+    ? `<div class="pc-secs">` + L.sections.map((S, si) => `<button type="button" class="pc-sec${si === 0 ? ' cur' : ''}" data-sec="${si}" onclick="pcFromSection(this,${si})"><span class="pc-sec-play" aria-hidden="true">&#x25B6;</span>${escHtml(tf(S.s, 'label'))}</button>`).join('') + `</div>`
+    : '';
+  const cells = ['1', '+', '2', '+', '3', '+', '4', '+'].slice(0, L.tr.beatsPerBar * 2)
+    .map(n => `<span class="pc-strip-cell"><span class="pc-strip-ch"></span><span class="pc-strip-n">${n}</span></span>`).join('');
+  const title = (c.caption && tf(c, 'caption')) || '';
+  return `<div class="pc-sheet" data-sheet="${escAttr(c.sheet)}">`
+    + (title ? `<p class="pc-sheet-title">${escHtml(title)}</p>` : '')
+    + `<p class="pc-status" aria-live="polite"></p>`
+    + `<p class="pc-hint">${escHtml(t('ca.sheetTapHint'))}</p>${chips}`
+    + `<div class="pc-sheet-bar"><span class="pc-sheet-where">${escHtml(pcSheetWhere(L, 0, 0))}</span>`
+    +   `<span class="pc-strip" aria-hidden="true"><span class="pc-strip-label">${escHtml(t('ca.sheetThisBar'))}</span>${cells}</span></div>`
+    + `<div class="pc-sheet-paper"><p class="pc-sheet-msg">${escHtml(t('ca.sheetLoading'))}</p></div>`
+    + `</div>`;
+}
+function pcSheetWhere(L, si, rep){
+  const S = L.sections[si];
+  if(!S) return '';
+  return tf(S.s, 'label') + (S.reps > 1 ? ' · ' + t('ca.cardRepOf', {what: tf(S.s, 'repLabel'), n: rep + 1, total: S.reps}) : '');
+}
+/* Draw every sheet on the page that has a width. A ResizeObserver redraws
+   on a width change — the card opening (a closed card is 0 wide), the
+   window, the rail collapsing. */
+let pcSheetRO = null;
+function pcSheetScan(){
+  document.querySelectorAll('.pc-sheet-paper:not([data-watched])').forEach(paper => {
+    paper.dataset.watched = '1';
+    if(typeof ResizeObserver === 'function'){
+      if(!pcSheetRO) pcSheetRO = new ResizeObserver(entries => entries.forEach(en => {
+        const p = en.target, w = Math.round(en.contentRect.width);
+        if(w > 0 && w !== p._sheetW){ p._sheetW = w; pcSheetDraw(p); }
+      }));
+      pcSheetRO.observe(paper.parentElement);   // the sheet column, not the paper (the paper takes its width from the drawing)
+      paper.parentElement._sheetPaper = paper;
+    } else pcSheetDraw(paper);
+  });
+}
+async function pcSheetDraw(paperOrCol){
+  const paper = paperOrCol._sheetPaper || paperOrCol;
+  const root = paper.closest('.pc');
+  const col = paper.parentElement;
+  if(!root || !col || !paper.isConnected) return;
+  const a = pcActivity(root), L = a && pcLayout(a);
+  if(!L || !a.card.sheet) return;
+  const job = paper._sheetJob = (paper._sheetJob || 0) + 1;
+  const msg = text => { let m = paper.querySelector('.pc-sheet-msg'); if(!m){ m = document.createElement('p'); m.className = 'pc-sheet-msg'; paper.appendChild(m); } m.textContent = text; m.hidden = !text; };
+  let model;
+  try { model = await pcSheetModel(a.card.sheet); }
+  catch(e){ if(paper._sheetJob === job) msg(t('ca.sheetFailed')); return; }
+  if(paper._sheetJob !== job || !paper.isConnected) return;
+  const avail = col.clientWidth;
+  if(!(avail > 0)) return;
+  const { crop } = model;
+  const scale = Math.min(avail / crop.w, PC_SHEET_MAX_SCALE);
+  const dpr = Math.min(window.devicePixelRatio || 1, 3);
+  let canvas = paper.querySelector('canvas');
+  if(!canvas){
+    canvas = document.createElement('canvas');
+    canvas.setAttribute('role', 'img');
+    canvas.setAttribute('aria-label', t('ca.sheetAlt'));
+    paper.insertBefore(canvas, paper.firstChild);
+  }
+  const vp = model.page.getViewport({ scale: scale * dpr, offsetX: -crop.x * scale * dpr, offsetY: -crop.y * scale * dpr });
+  const off = document.createElement('canvas');   // draw off screen, then swap — no blank flash on a redraw
+  off.width = Math.floor(crop.w * scale * dpr); off.height = Math.floor(crop.h * scale * dpr);
+  try { await model.page.render({ canvasContext: off.getContext('2d'), viewport: vp }).promise; }
+  catch(e){ if(paper._sheetJob === job) msg(t('ca.sheetFailed')); return; }
+  if(paper._sheetJob !== job || !paper.isConnected) return;
+  canvas.width = off.width; canvas.height = off.height;
+  canvas.getContext('2d').drawImage(off, 0, 0);
+  paper.style.width = crop.w * scale + 'px';
+  msg('');
+  const map = pcSheetMap(L);
+  const ok = map.count === model.toks.length && model.toks.every((T, i) => T.name === map.start[i].name);
+  paper._sheet = { model, scale, map, ok };
+  paper.querySelectorAll('.pc-sheet-hit, .pc-sheet-line').forEach(el => el.remove());
+  if(!ok){
+    /* The dot would land on the wrong chords — no dot at all. Say why in
+       the console preview, where Jonathan checks a card before class. */
+    if(root.dataset.preview === '1'){
+      const bad = model.toks.findIndex((T, i) => !map.start[i] || T.name !== map.start[i].name);
+      msg(t('ca.sheetMismatch', {sheet: model.toks.length, card: map.count, at: bad + 1}));
+    }
+    return;
+  }
+  const box = (T, padX, padY) => `left:${(T.x0 - crop.x - padX) * scale}px;top:${(T.y0 - crop.y - padY) * scale}px;width:${(T.x1 - T.x0 + 2 * padX) * scale}px;height:${(T.y1 - T.y0 + 2 * padY) * scale}px`;
+  const html = model.toks.map((T, i) => {
+    const at = map.start[i], S = L.sections[at.si];
+    return `<button type="button" class="pc-sheet-hit" style="${box(T, 2, 1.5)}" onclick="pcSheetStartAt(this,${i})" aria-label="${escAttr(t('ca.sheetStartAt', {chord: T.name, section: pcSheetWhere(L, at.si, at.rep)}))}"></button>`;
+  }).join('');
+  paper.insertAdjacentHTML('beforeend', html + '<span class="pc-sheet-line" aria-hidden="true"></span>');
+  ['pc-sheet-pill', 'pc-sheet-ghost', 'pc-sheet-dot'].forEach(cls => {
+    if(!paper.querySelector('.' + cls)){ const el = document.createElement('span'); el.className = cls; el.setAttribute('aria-hidden', 'true'); paper.appendChild(el); }
+  });
+  const st = pcState && pcState.root === root ? pcState : null;
+  const cur = st && st.si >= 0 ? map.tok[st.si][st.rep][st.seq - st.L.sections[st.si].seqOff] : 0;
+  pcSheetMark(paper, cur, false);
+}
+function pcSheetMark(paper, idx, hit, beatSec){
+  const sh = paper._sheet;
+  if(!sh || !sh.ok) return null;
+  const T = sh.model.toks[idx];
+  if(!T) return null;
+  const { crop } = sh.model, s = sh.scale;
+  const pill = paper.querySelector('.pc-sheet-pill'), dot = paper.querySelector('.pc-sheet-dot'), ghost = paper.querySelector('.pc-sheet-ghost');
+  if(pill) pill.style.cssText = `left:${(T.x0 - crop.x - 2) * s}px;top:${(T.y0 - crop.y - 1.5) * s}px;width:${(T.x1 - T.x0 + 4) * s}px;height:${(T.y1 - T.y0 + 3) * s}px`;
+  const mid = T2 => ((T2.y0 + T2.y1) / 2 - crop.y) * s;
+  if(dot){
+    dot.style.left = (T.x0 - crop.x) * s + 'px'; dot.style.top = mid(T) + 'px';
+    if(hit){
+      dot.style.setProperty('--pc-hit', Math.max(0.08, (beatSec || 0.5) * PC_SHEET_SOLID) + 's');
+      dot.classList.remove('hit'); void dot.offsetWidth; dot.classList.add('hit');
+    }
+  }
+  const N = sh.model.toks[idx + 1];
+  if(ghost){ ghost.hidden = !N; if(N){ ghost.style.left = (N.x0 - crop.x) * s + 'px'; ghost.style.top = mid(N) + 'px'; } }
+  // The line being played, with room for the lyric under it — what pcFollow keeps in view.
+  const line = paper.querySelector('.pc-sheet-line');
+  if(line){ line.style.top = (T.y0 - crop.y - 3) * s + 'px'; line.style.height = (T.y1 - T.y0) * 2.6 * s + 'px'; }
+  return line;
+}
+function pcSheetPaint(st, loc){
+  const paper = st.root.querySelector('.pc-sheet-paper');
+  const where = st.root.querySelector('.pc-sheet-where');
+  if(where && (loc.si !== st.si || loc.rep !== st.rep)) where.textContent = pcSheetWhere(st.L, loc.si, loc.rep);
+  if(loc.si !== st.si) pcShowSection(st.root, st.L, loc.si);
+  const sh = paper && paper._sheet;
+  if(!sh || !sh.ok) return;
+  const idx = sh.map.tok[loc.si][loc.rep][loc.ni];
+  const beatSec = st.win.bar / st.L.tr.beatsPerBar / pcRate(st.root);
+  const line = pcSheetMark(paper, idx, true, beatSec);
+  const T = sh.model.toks[idx];
+  if(line && st.sheetLine !== T.y0){ st.sheetLine = T.y0; pcSheetStickyTop(st.root); pcFollow(line, false); }
+}
+/* "This bar": the strums of the bar being played, and the count it is on. */
+function pcSheetStrip(st, loc, barsIn){
+  const cells = st.root.querySelectorAll('.pc-strip-cell');
+  if(!cells.length) return;
+  if(!loc){ cells.forEach(c => c.classList.remove('now')); return; }
+  const S = st.L.sections[loc.si], bpb = st.L.tr.beatsPerBar;
+  const local = (st.L.firstBar + barsIn - S.fromBar) * bpb - loc.rep * S.bars * bpb;   // beats into this lap
+  const bar = Math.max(0, Math.floor(local / bpb + 1e-6));
+  const key = loc.si + ':' + bar;
+  if(st.stripKey !== key){
+    st.stripKey = key;
+    const marks = [];
+    let pos = 0;
+    S.notes.forEach(n => {
+      if(Math.floor(pos / bpb + 1e-6) === bar) marks[Math.round((pos - bar * bpb) * 2)] = n.note;
+      pos += n.beats > 0 ? n.beats : 1;
+    });
+    cells.forEach((c, i) => { c.classList.toggle('strum', !!marks[i]); c.querySelector('.pc-strip-ch').textContent = marks[i] || ''; });
+  }
+  const now = Math.floor((local - bar * bpb) * 2 + 1e-6);
+  cells.forEach((c, i) => c.classList.toggle('now', i === now));
+}
+/* The bar sticks under whatever already sticks to the top of the scroll box
+   (.main on a laptop, the page on a phone): the In class page's sticky bar,
+   and on a phone the fixed site header. A sticky `top` counts from the top
+   of that box, so this measures the chrome's own sticky offset + height, not
+   where it happens to sit right now. The card itself is overflow:clip, not
+   hidden (styles.css), or nothing inside it could stick. */
+function pcSheetStickyTop(root){
+  let box = root.parentElement;
+  while(box && box !== document.body){
+    const oy = getComputedStyle(box).overflowY;
+    if(oy === 'auto' || oy === 'scroll') break;
+    box = box.parentElement;
+  }
+  const isDoc = !box || box === document.body;
+  let top = 0;
+  const hdr = document.querySelector('.header');
+  if(isDoc && hdr && hdr.offsetHeight && /fixed|sticky/.test(getComputedStyle(hdr).position)) top = hdr.offsetHeight;
+  const bar = document.querySelector('.ca-screen .page-topbar');
+  if(bar && bar.offsetHeight && getComputedStyle(bar).position === 'sticky' && (isDoc || box.contains(bar)))
+    top = Math.max(top, (parseFloat(getComputedStyle(bar).top) || 0) + bar.offsetHeight);
+  root.style.setProperty('--pc-sheet-top', Math.round(top) + 'px');
+}
+function pcSheetStarted(st){
+  pcSheetStickyTop(st.root);
+  st.sheetLine = null; st.stripKey = null;
+  const paper = st.root.querySelector('.pc-sheet-paper');
+  const sh = paper && paper._sheet;
+  const where = st.root.querySelector('.pc-sheet-where');
+  if(where) where.textContent = pcSheetWhere(st.L, st.loopFrom, st.fromRep);
+  if(!sh || !sh.ok) return;
+  const first = sh.map.tok[st.loopFrom][st.fromRep][0];
+  const line = pcSheetMark(paper, first, false);
+  st.sheetLine = sh.model.toks[first].y0;
+  pcFollow(line, true);
+}
+function pcSheetStopped(root){
+  root.querySelectorAll('.pc-strip-cell.now').forEach(c => c.classList.remove('now'));
+  root.querySelectorAll('.pc-sheet-dot.hit').forEach(d => d.classList.remove('hit'));
+}
+// A tap on a chord: the song from the start of that line's lap, after the count-in.
+function pcSheetStartAt(btn, idx){
+  const root = btn.closest('.pc');
+  const paper = btn.closest('.pc-sheet-paper');
+  const at = paper && paper._sheet && paper._sheet.map.start[idx];
+  if(root && at) pcStart(root, at.si, at.rep);
 }
 
 /* The player. One card plays at a time, and it shares the site's
@@ -12613,6 +12923,7 @@ function pcStop(){
     if(btn){ btn.innerHTML = pcPlayBtnHtml(false); btn.classList.remove('playing'); }
     root.querySelectorAll('.beat-now').forEach(el => el.classList.remove('beat-now'));
     root.querySelectorAll('.pc-rep').forEach(el => { el.hidden = true; el.textContent = ''; });
+    pcSheetStopped(root);
     pcStatus(root, '');
   }
   pcSyncBarStop();
@@ -12689,7 +13000,7 @@ function pcFromSection(btn, si){
   const root = btn.closest('.pc');
   if(root) pcStart(root, si);
 }
-function pcStart(root, si){
+function pcStart(root, si, rep){
   if(window.coachMicLive) return;      // same guard as snipToggle: never play into a live mic
   if(typeof stopAllDemoAudio === 'function') stopAllDemoAudio();   // includes pcStop()
   const a = pcActivity(root);
@@ -12701,13 +13012,18 @@ function pcStart(root, si){
   audio.loop = false;                  // the window is looped (or stopped) by hand, in pcFrame
   audio.src = snippetSrc(L.tr, slow, guitar);
   slowestApplyRate(audio, pcRate(root));
-  const st = { root, L, audio, win: pcWindow(L, slow), loopFrom: si, wholeSong: !!a.card.wholeSong, raf: 0, timers: [], lastBeat: -1, counting: true, si: -1, seq: -1, rep: -1, row: null };
+  /* `rep` (optional): start at that lap of the section — a tap on a chord on
+     a lyric sheet (pcSheetStartAt). The loop, if any, still returns to the
+     section's start. */
+  const fromRep = Math.max(0, Math.min(L.sections[si].reps - 1, rep | 0));
+  const st = { root, L, audio, win: pcWindow(L, slow), loopFrom: si, fromRep, wholeSong: !!a.card.wholeSong, sheet: !!a.card.sheet, raf: 0, timers: [], lastBeat: -1, counting: true, si: -1, seq: -1, rep: -1, row: null };
   pcState = st;
   const btn = root.querySelector('.pc-play');
   if(btn){ btn.innerHTML = pcPlayBtnHtml(true); btn.classList.add('playing'); }
   pcShowSection(root, L, si);
   pcSyncBarStop();
-  pcFollow(root.querySelector('.pc-tab .pc-page:not([hidden]) .tab-grid'), true);
+  if(st.sheet) pcSheetStarted(st);
+  else pcFollow(root.querySelector('.pc-tab .pc-page:not([hidden]) .tab-grid'), true);
   audio.addEventListener('error', () => {
     if(pcState !== st) return;
     // After a lap this element may be the spare (see THE SPARE): losing the
@@ -12718,7 +13034,7 @@ function pcStart(root, si){
   }, { once: true });
   const begin = () => {
     if(pcState !== st) return;
-    try { audio.currentTime = snipTimeAtBars(st.win, L.sections[si].fromBar - L.firstBar); } catch(e) {}
+    try { audio.currentTime = snipTimeAtBars(st.win, L.sections[si].fromBar + fromRep * L.sections[si].bars - L.firstBar); } catch(e) {}
     pcSparePark(st);                   // loads and parks during the count-in
     pcCountIn(st, si);
   };
@@ -12827,12 +13143,19 @@ function pcFrame(){
     st.lastBeat = -1;
   }
   if(st.root.dataset.metro === '1') pcScheduleClick(st, audio.currentTime);
-  const loc = pcLocate(L, snipBarsAt(st.win, audio.currentTime - snipLatency() * pcRate(st.root)));
+  /* The tab lights a note when it SOUNDS (the output latency taken off); a
+     lyric sheet's dot runs PC_SHEET_LEAD ahead, so the chord is on screen as
+     the student plays it (Jonathan tuned it by ear, 2026-10-19). */
+  const shift = st.sheet ? PC_SHEET_LEAD : -snipLatency();
+  const barsIn = snipBarsAt(st.win, audio.currentTime + shift * pcRate(st.root));
+  const loc = pcLocate(L, barsIn);
   if(loc && (loc.seq !== st.seq || loc.rep !== st.rep || loc.si !== st.si)) pcPaint(st, loc);
+  if(st.sheet) pcSheetStrip(st, loc, barsIn);
   st.raf = requestAnimationFrame(pcFrame);
 }
 function pcPaint(st, loc){
   const root = st.root;
+  if(st.sheet){ pcSheetPaint(st, loc); st.si = loc.si; st.seq = loc.seq; st.rep = loc.rep; return; }
   root.querySelectorAll('.pc-tab .beat-now').forEach(el => el.classList.remove('beat-now'));
   root.querySelectorAll(`.pc-tab [data-seq="${loc.seq}"]`).forEach(el => el.classList.add('beat-now'));
   if(loc.si !== st.si) pcShowSection(root, st.L, loc.si);
@@ -12878,6 +13201,12 @@ function pcFollow(row, force){
     const r = el.getBoundingClientRect();
     if(r.top <= top + 1 && r.bottom > top) top = r.bottom;
   });
+  // A lyric sheet's own sticky bar (the "This bar" strip) sits under those.
+  const sbar = row.closest('.pc-sheet') && row.closest('.pc-sheet').querySelector('.pc-sheet-bar');
+  if(sbar && sbar.offsetHeight){
+    const r = sbar.getBoundingClientRect();
+    if(r.top <= top + 1 && r.bottom > top) top = r.bottom;
+  }
   const tab = row.closest('.pc-tab');
   if(!force && tab){
     const tr = tab.getBoundingClientRect();
@@ -13004,7 +13333,7 @@ function pcCancelHandoff(st){
 function pcRetrack(root){
   const st = pcState;
   if(!st || st.root !== root) return;
-  if(st.counting){ pcStart(root, st.loopFrom); return; }
+  if(st.counting){ pcStart(root, st.loopFrom, st.fromRep); return; }
   pcCancelHandoff(st);
   const slow = root.dataset.slow === '1', guitar = root.dataset.guitar === '1';
   const barsIn = snipBarsAt(st.win, st.audio.currentTime);
