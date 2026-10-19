@@ -2819,10 +2819,10 @@ window.CLASS_ACTIVITIES = [
      Show answer (the play-along: the fret lights up 2 beats after the name,
      it speeds up every 8 notes, Slower backs it off, nothing is scored),
      then the student turns Show answer off for the five scored levels
-     (naturals 60 → 80 BPM → half the beats, then the ♯ notes). Listening
+     (naturals 20 → 30 BPM → half the beats, then the ♯ notes). Listening
      Coach starts off. Technique ladder: one position slow → the same move
-     across the neck → the whole neck at tempo, no ceiling (Level 5 speeds
-     up 10 BPM every pass). Engine: renderNoteCall in app.js. Follows ca-11
+     across the neck → the whole neck at tempo. Every speed is 20–40 BPM
+     (Jonathan, 2026-10-19): Level 5 speeds up 5 BPM a pass, up to 40. Engine: renderNoteCall in app.js. Follows ca-11
      / ca-17 / ca-22, which teach the names. */
   {
     id:    'ca-23',

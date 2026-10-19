@@ -5,6 +5,13 @@ Notable changes to the Guitar Class site. Newest first.
 For the full session-by-session history (and the reasoning behind each change),
 see `WORKFLOW.md` and the git commit log.
 
+## 2026-10-19 — Low E and A Notes in Time: slower speeds
+
+- **The "Low E and A Notes in Time" activity now runs between 20 and 40
+  BPM.** With Show answer on, it starts at 20 BPM and speeds up 5 BPM at
+  a time, up to 40. The scored levels start at 20 BPM, then go to 30, and
+  Level 5 speeds up 5 BPM each time you pass it, up to 40.
+
 ## 2026-10-18 — Watchtower power chords: the verses match the record
 
 - **On the "All Along the Watchtower — The Whole Song in Power Chords" card,
