@@ -13,6 +13,9 @@ see `WORKFLOW.md` and the git commit log.
   answer is still there.
 - **The optional Octave Add-On step now says what an octave is** before the
   checklist asks about it: the same note name, eight letters up.
+- **Module 4, Clean Am now explains chord shorthand** like x02210 (one
+  character per string: x = do not play, 0 = open, a number = the fret).
+  Later steps and questions use it for F, Bm and others.
 
 ## 2026-10-19 — Everyone starts on Module 3
 
