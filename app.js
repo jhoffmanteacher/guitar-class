@@ -196,6 +196,11 @@ let periodOverride = '';   // config/class.periodOverrides[uid] — teacher's co
    student's progress doc. Cached per uid like periodOverride, so a blocked
    read keeps the last known value instead of snapping modules shut. */
 let moduleOpenThrough = 0;
+/* The open-through actually in force: the student's own value or the
+   class-wide floor CLASS_OPEN_THROUGH (config-main.js), whichever is higher. */
+function classOpenThrough(){
+  return Math.max(moduleOpenThrough || 0, (typeof CLASS_OPEN_THROUGH === 'number') ? CLASS_OPEN_THROUGH : 0);
+}
 let hiddenActivityIds = {}; // In-Class Activities the teacher has temporarily hidden (see loadClassConfig) — id -> true
 /* Activities the teacher gave to particular students only (console board,
    "Who" picker → config/class.activityStudents, id -> { uid -> true }).
@@ -1688,6 +1693,10 @@ let songReadyAt = {};
 
 let _fullModuleDataQueued = false;
 function renderAll(){
+  // Class-wide start module (CLASS_OPEN_THROUGH): a saved place in a skipped
+  // module lands on the start module instead. Module 13 sits outside the chain.
+  const startNum = classOpenThrough();
+  if(startNum > 1 && (lastModuleNum||1) < startNum){ lastModuleNum = startNum; lastSetId = null; }
   populateModuleDropdown();
   onModuleChange(lastModuleNum||1, lastSetId);
   syncPreviewNote();
@@ -3754,7 +3763,7 @@ function isModuleGateLocked(moduleNum){
   if(moduleNum === 13) return false;               // String Changing: outside the chain, always open
   if(isGatePreviewer()) return false;
   if(progressLoadFailed) return false;             // never re-lock on a guess
-  if(moduleOpenThrough && moduleNum <= moduleOpenThrough) return false;   // teacher's "Open through Module N"
+  if(moduleNum <= classOpenThrough()) return false;   // teacher's "Open through Module N" (per student or class-wide)
   // Existing progress anywhere in THIS module keeps it open (never re-lock)
   const mySets = SETS.filter(w=>w.moduleNum===moduleNum);
   if(mySets.some(w=>hasProgressIn(w))) return false;
@@ -3794,7 +3803,7 @@ function isSetLocked(w){
   if(w.locked || w.comingSoon) return true;          // static/unbuilt stays locked for everyone
   if(isGatePreviewer()) return false;                // teacher/dev: skip the sequential gate
   if(progressLoadFailed) return false;               // we don't know what they've done — never re-lock on a guess
-  if(moduleOpenThrough && w.moduleNum < moduleOpenThrough) return false;   // a module the teacher let them skip: every set open
+  if(w.moduleNum < classOpenThrough()) return false;   // a module the teacher let them skip: every set open
   const moduleSets = SETS.filter(x=>x.moduleNum===w.moduleNum);
   const idx = moduleSets.indexOf(w);
   if(hasProgressIn(w)) return false;                 // already been here — never lock them back out

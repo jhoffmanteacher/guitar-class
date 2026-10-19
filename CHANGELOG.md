@@ -5,6 +5,12 @@ Notable changes to the Guitar Class site. Newest first.
 For the full session-by-session history (and the reasoning behind each change),
 see `WORKFLOW.md` and the git commit log.
 
+## 2026-10-19 — Everyone starts on Module 3
+
+- **The site now opens on Module 3.** Modules 1 and 2 are open and you can
+  still go back to them, but Module 3 is where you start. Nothing you did in
+  Modules 1 and 2 is lost.
+
 ## 2026-10-19 — Watchtower: lyrics and chords with the band
 
 - **New practice card: "All Along the Watchtower — Lyrics and Chords."** It

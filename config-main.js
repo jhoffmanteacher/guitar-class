@@ -42,6 +42,17 @@ const MODULE_REVIEWS = {};
 // so a browser's own built-in page translator doesn't re-translate text that
 // is already hand-translated (the site no longer runs Google Translate) — see
 // CLAUDE.md's i18n section before setting this by hand.
+/* Class-wide "Open through Module N" (Jonathan, 2026-10-19: "shut off
+   modules 1 and 2 for all students so they all start on module 3"). A floor
+   under every student's own config/class.moduleOpenThrough: Modules
+   1..N-1 are fully open (skipped, still visible and reviewable), Module N
+   is open from Set 1, and a student whose saved place is below N lands on
+   Module N at sign-in. Covers students who sign in for the first time later,
+   which the console's per-uid "Open everyone through" cannot. Nothing is
+   marked done and no progress key moves. Set to 0 to turn it off. Read by
+   app.js (classOpenThrough) and teacher.js (teacherStudentOpenThrough). */
+const CLASS_OPEN_THROUGH = 3;
+
 const MODULE_MANIFEST = [
   { num: 1, name: 'Introductions: You and The Guitar',        name_es: 'Presentaciones: tú y la guitarra', i18nComplete: true, skillCount: 9,  skillIdRe: '^w\\d+-s\\d+$' },
   { num: 2, name: 'Notes on the E & A Strings',               name_es: 'Notas en las cuerdas Mi y La', i18nComplete: true, skillCount: 11, skillIdRe: '^m2w\\d+-s\\d+$' },

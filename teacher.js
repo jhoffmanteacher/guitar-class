@@ -63,6 +63,12 @@ function teacherStudentOpenThrough(stu, cfg){
   const n=Number(map[stu.uid]);
   return (Number.isInteger(n) && n>=2 && n<=12) ? n : 0;
 }
+/* What is actually in force for the student: their own value or the
+   class-wide floor CLASS_OPEN_THROUGH (config-main.js), whichever is higher —
+   the same rule as app.js classOpenThrough(). */
+function teacherEffectiveOpenThrough(stu, cfg){
+  return Math.max(teacherStudentOpenThrough(stu, cfg), (typeof CLASS_OPEN_THROUGH === 'number') ? CLASS_OPEN_THROUGH : 0);
+}
 // "Open → M4" tag beside a student's name in the Students list. Silent when
 // unset, same as the period pill.
 function teacherOpenThroughPillHtml(stu){
@@ -3295,11 +3301,11 @@ function renderTeacherManage(){
       <div class="tg-class">
         <div class="tg-class-lbl">Open everyone through</div>
         <div class="tg-seg">
-          <select id="t-open-all-select" style="max-width:220px">${MODULE_MANIFEST.filter(m=>m.num>=2 && m.num<=12).map(m=>`<option value="${m.num}"${m.num===3?' selected':''}>Module ${m.num} — ${escHtml(m.name)}</option>`).join('')}</select>
+          <select id="t-open-all-select" style="max-width:220px">${MODULE_MANIFEST.filter(m=>m.num>=2 && m.num<=12).map(m=>`<option value="${m.num}"${m.num===Math.max(3,CLASS_OPEN_THROUGH+1)?' selected':''}>Module ${m.num} — ${escHtml(m.name)}</option>`).join('')}</select>
           <button class="tg-seg-btn" data-open-all-through>Open for all</button>
         </div>
       </div>
-      <div class="tg-note"><strong>Paused</strong> students can sign in but see a "your access is paused" message instead of the site — use it for a temporary hold, then un-pause. <strong>Archived</strong> students are hidden from every dashboard view; their work is kept and comes back if you restore them. Pausing takes effect the next time that student loads the site. <strong>Period</strong> is whatever the student picked when they first signed in — set 4, 7, or CAS here to correct a wrong tap, or Auto to go back to their own answer. <strong>Open through</strong> lets one student skip ahead: every module up to the one you pick opens (all sets in the modules before it, Set 1 of the one you pick), without marking anything done. Auto removes it. Modules they've already worked in stay open either way. This list always shows everyone, whatever the period filter above is set to.</div>`;
+      <div class="tg-note"><strong>Paused</strong> students can sign in but see a "your access is paused" message instead of the site — use it for a temporary hold, then un-pause. <strong>Archived</strong> students are hidden from every dashboard view; their work is kept and comes back if you restore them. Pausing takes effect the next time that student loads the site. <strong>Period</strong> is whatever the student picked when they first signed in — set 4, 7, or CAS here to correct a wrong tap, or Auto to go back to their own answer. <strong>Open through</strong> lets one student skip ahead: every module up to the one you pick opens (all sets in the modules before it, Set 1 of the one you pick), without marking anything done. Auto removes it. Modules they've already worked in stay open either way.${CLASS_OPEN_THROUGH>1?` <strong>Class-wide:</strong> every student is already open through Module ${CLASS_OPEN_THROUGH} and starts there (CLASS_OPEN_THROUGH in config-main.js), so Auto means Module ${CLASS_OPEN_THROUGH}.`:''} This list always shows everyone, whatever the period filter above is set to.</div>`;
     if(allStudentsRaw.length===0){ box.innerHTML=head+'<div class="t-loading">No students yet — they’ll appear here once they sign in.</div>'; return; }
     const nameOf=s=>(s.name||s.email||s.uid);
     const byLast=teacherManageNameBy==='last';
@@ -3350,7 +3356,7 @@ function renderTeacherManage(){
       const openN=teacherStudentOpenThrough(stu);
       const openOpts=MODULE_MANIFEST.filter(m=>m.num>=2 && m.num<=12)
         .map(m=>`<option value="${m.num}"${openN===m.num?' selected':''}>Module ${m.num} — ${escHtml(m.name)}</option>`).join('');
-      const openCell=`<select class="tg-open-through" data-set-open-through data-uid="${escAttr(stu.uid)}" style="max-width:220px"><option value="auto"${openN?'':' selected'}>Auto</option>${openOpts}</select>`;
+      const openCell=`<select class="tg-open-through" data-set-open-through data-uid="${escAttr(stu.uid)}" style="max-width:220px"><option value="auto"${openN?'':' selected'}>Auto${CLASS_OPEN_THROUGH>1?' (Module '+CLASS_OPEN_THROUGH+')':''}</option>${openOpts}</select>`;
       const archIco='<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" style="width:1em;height:1em;vertical-align:-0.15em"><rect x="3" y="6" width="18" height="4" rx="1"/><path d="M4 10v9a1 1 0 0 0 1 1h14a1 1 0 0 0 1-1v-9"/><path d="M10 14h4"/></svg>';
       const pauseIco='<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" style="width:1em;height:1em;vertical-align:-0.15em"><rect x="6" y="4" width="4" height="16" rx="1"/><rect x="14" y="4" width="4" height="16" rx="1"/></svg>';
       const status=isArch?`${archIco} archived`:isPaused?`${pauseIco} paused`:'&#x2713; active';
@@ -4590,7 +4596,7 @@ function teacherReviewIsBlocking(stu, moduleNum, tally){
   if(tally.rated>=tally.total) return false;
   const nextNum=moduleNum+1;
   if(nextNum>12) return false;                       // Module 13 sits outside the chain
-  if(teacherStudentOpenThrough(stu)>=nextNum) return false;   // the teacher opened the next module in Manage
+  if(teacherEffectiveOpenThrough(stu)>=nextNum) return false;   // the teacher opened the next module in Manage (or class-wide)
   const mySets=SETS.filter(w=>w.moduleNum===moduleNum && !w.locked && !w.comingSoon);
   if(!mySets.length) return false;
   const allDone=mySets.every(w=>(w.skills||[]).every(sk=>stu.skills[sk.id]==='gotit'));
