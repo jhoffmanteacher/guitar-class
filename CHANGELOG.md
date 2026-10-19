@@ -18,6 +18,8 @@ see `WORKFLOW.md` and the git commit log.
 - **Module 4, Clean Am now explains chord shorthand** like x02210 (one
   character per string: x = do not play, 0 = open, a number = the fret).
   Later steps and questions use it for F, Bm and others.
+- **Module 5's first video step now names the shape "Pattern 1"** before the
+  question that uses the name.
 
 ## 2026-10-19 — Everyone starts on Module 3
 
