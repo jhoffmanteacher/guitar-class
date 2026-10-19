@@ -44,8 +44,8 @@ SETS.push(
               { name: 'A5', chord: [[6,5,'1'],[5,7,'3'],[4,'x'],[3,'x'],[2,'x'],[1,'x']], position: 5 }
             ],
             playSeq: { label: 'Hear the roots climb (E · G · A)', label_es: 'Escucha subir las raíces (E · G · A)', bpm: 60, notes: [40, 43, 45] },
-            response: { type: 'mc', prompt: 'C5 is not on this card. Using the same shape, where does your index finger go for C5?',
-              prompt_es: 'C5 no está en esta tarjeta. Con la misma forma, ¿dónde va tu dedo índice para C5?',
+            response: { type: 'mc', prompt: 'C5 is not shown. Using the same shape, where does your index finger go for C5?',
+              prompt_es: 'C5 no se muestra. Con la misma forma, ¿dónde va tu dedo índice para C5?',
               answer: 0,
               explain: 'A power chord is one movable shape, and the note under your index finger names it. Fret 3 of the A string is C (A string: A, B at fret 2, C at fret 3), so C5 starts there. Fret 3 of the low E string is G, which gives G5, and fret 5 of the A string is D, which gives D5.',
               explain_es: 'Un acorde de potencia es una sola forma movible, y la nota bajo tu dedo índice le da el nombre. El traste 3 de la cuerda La es C (cuerda La: A, B en el traste 2, C en el traste 3), así que C5 empieza ahí. El traste 3 de la cuerda Mi grave es G, que da G5, y el traste 5 de la cuerda La es D, que da D5.',
