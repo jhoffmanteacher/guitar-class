@@ -11,6 +11,8 @@ see `WORKFLOW.md` and the git commit log.
   the power chord shape the set has taught at that point. The right answer
   for C5 is fret 8 on the low E string. If you already answered it, your
   answer is still there.
+- **The optional Octave Add-On step now says what an octave is** before the
+  checklist asks about it: the same note name, eight letters up.
 
 ## 2026-10-19 — Everyone starts on Module 3
 

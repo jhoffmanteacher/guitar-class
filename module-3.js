@@ -749,8 +749,8 @@ SETS.push(
             steps: [
           {
             label: 'Challenge 4 — Octave Add-On (optional)', label_es: 'Reto 4 — Octava extra (opcional)',
-            text: '<ol><li>Play G5.</li><li>Add your pinky on the D string, fret 5.</li><li>Strum the three strings.</li></ol>This step is optional. You\'ve got it when: you play three strums in a row with all three notes ringing and no buzz.',
-            text_es: '<ol><li>Toca G5.</li><li>Agrega tu meñique en la cuerda Re, traste 5.</li><li>Rasguea las tres cuerdas.</li></ol>Este paso es opcional. Lo tienes cuando: tocas tres rasgueos seguidos con las tres notas sonando y sin zumbido.',
+            text: 'Your pinky plays the root again, one octave higher. An octave is the same note name, eight letters up: G A B C D E F G.<ol><li>Play G5.</li><li>Add your pinky on the D string, fret 5.</li><li>Strum the three strings.</li></ol>This step is optional. You\'ve got it when: you play three strums in a row with all three notes ringing and no buzz.',
+            text_es: 'Tu meñique toca otra vez la raíz, una octava más aguda. Una octava es la misma nota, ocho letras más arriba: G A B C D E F G.<ol><li>Toca G5.</li><li>Agrega tu meñique en la cuerda Re, traste 5.</li><li>Rasguea las tres cuerdas.</li></ol>Este paso es opcional. Lo tienes cuando: tocas tres rasgueos seguidos con las tres notas sonando y sin zumbido.',
             hint: 'If the three-note chord buzzes, play the two-note shape.',
             hint_es: 'Si el acorde de tres notas zumba, toca la forma de dos notas.',
             skills: [5]
