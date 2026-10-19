@@ -5,6 +5,14 @@ Notable changes to the Guitar Class site. Newest first.
 For the full session-by-session history (and the reasoning behind each change),
 see `WORKFLOW.md` and the git commit log.
 
+## 2026-10-19 — Note-name activities: 20 to 40 BPM
+
+- **"Notes on the Low E String", "Notes on the A String, Then Happy
+  Birthday" and "A String Notes — Cards and Play-Along" now use the same
+  speeds as "Low E and A Notes in Time".** Every Play tab player starts at
+  20 BPM and its slider goes up to 40. The steps that ask you to speed up
+  now say to start at 20 BPM, raise it 5 at a time, and stop at 40.
+
 ## 2026-10-19 — Low E and A Notes in Time: slower speeds
 
 - **The "Low E and A Notes in Time" activity now runs between 20 and 40
