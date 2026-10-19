@@ -5859,6 +5859,158 @@ window.CLASS_ACTIVITIES = [
     // No help ladder: a practice card is its checks and nothing else (Jonathan, 2026-10-07).
     steps: [],
   },
+  /* Ella — Play Along (Jonathan, 2026-10-19: "draft a play along for ella
+     by junior h as well", with the record). A practice card on the RECORD
+     (track 'ella' in app.js — its comment has how the grid and the song map
+     were found), from the intro's first Em (bar 11) to the last chord: bars
+     11-132 of the 6/8 grid, counted in two big beats a bar like Arsenal
+     Efectivo. ONE COLUMN PER CHORD with its held length in big beats, and it
+     loops (no Song Journey page, so not `wholeSong`). No lyrics: the song is
+     not public domain, so the rows carry no words. One row per time through
+     the chords.
+
+     THE CHORDS, read off the record: the harmony (chroma) on every half bar
+     and the bass under it. The whole song is one 8-bar loop, Em 4 bars ·
+     Am 3 · D 1 (8 · 6 · 2 big beats); the intro's first lap is Em 4 · Am 4.
+     The bass walks D-D#-E back to Em in the D bar, and some laps play the
+     D bar as half Am, half D — written as the loop. Bars 1-10 (the requinto
+     alone, with a B7 hold) are left off the card. The section names are
+     read off the voice, not a lyric sheet: "Verse 1" and "Verse 2" are the
+     two stretches of singing and may each hold a chorus — the chords do not
+     change between them.
+
+     Full chords / Power chords switch, like ca-35: open Em, Am and D, or
+     Module 3's shapes in frets 5-9 (E5 on the A string, A5 on the low E,
+     D5 on the A string — ca-35's A5 and D5, ca-37's E5). Opens on Power
+     chords. */
+  {
+    id:    'ca-39',
+    view:  'card',    // one screen: Play song + tab + checks — see CARD above
+    optional: true,   // Optional until switched to Required on the board — see OPTIONAL above
+    chordStart: 'power',   // opens on Power chords until the student picks — see CHORD VERSIONS above
+    chordVersions: {
+      power: {
+        Em: { frets: [['D', 9], ['A', 7]], note: 'E5', midi: [59, 52] },
+        Am: { frets: [['A', 7], ['E', 5]], note: 'A5', midi: [52, 45] },
+        D:  { frets: [['D', 7], ['A', 5]], note: 'D5', midi: [57, 50] },
+      },
+    },
+    title:    'Ella — Play Along',
+    title_es: 'Ella — Toca con la canción',
+    intro:    'Ella uses three chords, Em, Am and D, in the same order all the way through. Today you play it with the band.',
+    intro_es: 'Ella usa tres acordes, Em, Am y D, en el mismo orden de principio a fin. Hoy la tocas con la banda.',
+    intro_power:    'Ella uses three power chords, E5, A5 and D5, in the same order all the way through. Today you play it with the band.',
+    intro_power_es: 'Ella usa tres acordes de potencia, E5, A5 y D5, en el mismo orden de principio a fin. Hoy la tocas con la banda.',
+    card: {
+      track: 'ella',
+      slowest: true,    // Slowest / Slower / Slow / Normal
+      caption:    'The song in order · strum on every beat · change chords when the highlight moves',
+      caption_es: 'La canción en orden · rasguea en cada tiempo · cambia de acorde cuando se mueva la marca',
+      sections: [
+        {
+          label: 'Intro', label_es: 'Intro',
+          caption: 'Intro · the band starts the loop · Em, then Am, then D', caption_es: 'Intro · la banda empieza la vuelta · Em, después Am, después D',
+          caption_power: 'Intro · the band starts the loop · E5, then A5, then D5', caption_power_es: 'Intro · la banda empieza la vuelta · E5, después A5, después D5',
+          fromBar: 11, bars: 16,
+          rows: [2, 3],
+          notes: [
+            { frets: [['E', 0], ['A', 2], ['D', 2], ['G', 0], ['B', 0], ['e', 0]], note: 'Em', midi: [40, 47, 52, 55, 59, 64], beats: 8 },
+            { frets: [['A', 0], ['D', 2], ['G', 2], ['B', 1], ['e', 0]], note: 'Am', midi: [45, 52, 57, 60, 64], beats: 8 },
+            { frets: [['E', 0], ['A', 2], ['D', 2], ['G', 0], ['B', 0], ['e', 0]], note: 'Em', midi: [40, 47, 52, 55, 59, 64], beats: 8 },
+            { frets: [['A', 0], ['D', 2], ['G', 2], ['B', 1], ['e', 0]], note: 'Am', midi: [45, 52, 57, 60, 64], beats: 6 },
+            { frets: [['D', 0], ['G', 2], ['B', 3], ['e', 2]], note: 'D', midi: [50, 57, 62, 66], beats: 2 }
+          ]
+        },
+        {
+          label: 'Verse 1', label_es: 'Estrofa 1',
+          caption: 'Verse 1 · one row per time through the chords', caption_es: 'Estrofa 1 · una fila por cada vuelta de los acordes',
+          fromBar: 27, bars: 40,
+          rows: [3, 3, 3, 3, 3],
+          notes: [
+            { frets: [['E', 0], ['A', 2], ['D', 2], ['G', 0], ['B', 0], ['e', 0]], note: 'Em', midi: [40, 47, 52, 55, 59, 64], beats: 8 },
+            { frets: [['A', 0], ['D', 2], ['G', 2], ['B', 1], ['e', 0]], note: 'Am', midi: [45, 52, 57, 60, 64], beats: 6 },
+            { frets: [['D', 0], ['G', 2], ['B', 3], ['e', 2]], note: 'D', midi: [50, 57, 62, 66], beats: 2 },
+            { frets: [['E', 0], ['A', 2], ['D', 2], ['G', 0], ['B', 0], ['e', 0]], note: 'Em', midi: [40, 47, 52, 55, 59, 64], beats: 8 },
+            { frets: [['A', 0], ['D', 2], ['G', 2], ['B', 1], ['e', 0]], note: 'Am', midi: [45, 52, 57, 60, 64], beats: 6 },
+            { frets: [['D', 0], ['G', 2], ['B', 3], ['e', 2]], note: 'D', midi: [50, 57, 62, 66], beats: 2 },
+            { frets: [['E', 0], ['A', 2], ['D', 2], ['G', 0], ['B', 0], ['e', 0]], note: 'Em', midi: [40, 47, 52, 55, 59, 64], beats: 8 },
+            { frets: [['A', 0], ['D', 2], ['G', 2], ['B', 1], ['e', 0]], note: 'Am', midi: [45, 52, 57, 60, 64], beats: 6 },
+            { frets: [['D', 0], ['G', 2], ['B', 3], ['e', 2]], note: 'D', midi: [50, 57, 62, 66], beats: 2 },
+            { frets: [['E', 0], ['A', 2], ['D', 2], ['G', 0], ['B', 0], ['e', 0]], note: 'Em', midi: [40, 47, 52, 55, 59, 64], beats: 8 },
+            { frets: [['A', 0], ['D', 2], ['G', 2], ['B', 1], ['e', 0]], note: 'Am', midi: [45, 52, 57, 60, 64], beats: 6 },
+            { frets: [['D', 0], ['G', 2], ['B', 3], ['e', 2]], note: 'D', midi: [50, 57, 62, 66], beats: 2 },
+            { frets: [['E', 0], ['A', 2], ['D', 2], ['G', 0], ['B', 0], ['e', 0]], note: 'Em', midi: [40, 47, 52, 55, 59, 64], beats: 8 },
+            { frets: [['A', 0], ['D', 2], ['G', 2], ['B', 1], ['e', 0]], note: 'Am', midi: [45, 52, 57, 60, 64], beats: 6 },
+            { frets: [['D', 0], ['G', 2], ['B', 3], ['e', 2]], note: 'D', midi: [50, 57, 62, 66], beats: 2 }
+          ]
+        },
+        {
+          label: 'Solo', label_es: 'Solo',
+          caption: 'Solo · the requinto (lead guitar) plays · keep strumming the same chords', caption_es: 'Solo · toca el requinto (guitarra líder) · sigue rasgueando los mismos acordes',
+          fromBar: 67, bars: 16,
+          rows: [3, 3],
+          notes: [
+            { frets: [['E', 0], ['A', 2], ['D', 2], ['G', 0], ['B', 0], ['e', 0]], note: 'Em', midi: [40, 47, 52, 55, 59, 64], beats: 8 },
+            { frets: [['A', 0], ['D', 2], ['G', 2], ['B', 1], ['e', 0]], note: 'Am', midi: [45, 52, 57, 60, 64], beats: 6 },
+            { frets: [['D', 0], ['G', 2], ['B', 3], ['e', 2]], note: 'D', midi: [50, 57, 62, 66], beats: 2 },
+            { frets: [['E', 0], ['A', 2], ['D', 2], ['G', 0], ['B', 0], ['e', 0]], note: 'Em', midi: [40, 47, 52, 55, 59, 64], beats: 8 },
+            { frets: [['A', 0], ['D', 2], ['G', 2], ['B', 1], ['e', 0]], note: 'Am', midi: [45, 52, 57, 60, 64], beats: 6 },
+            { frets: [['D', 0], ['G', 2], ['B', 3], ['e', 2]], note: 'D', midi: [50, 57, 62, 66], beats: 2 }
+          ]
+        },
+        {
+          label: 'Verse 2', label_es: 'Estrofa 2',
+          caption: 'Verse 2 · the same chords as verse 1', caption_es: 'Estrofa 2 · los mismos acordes que la estrofa 1',
+          fromBar: 83, bars: 32,
+          rows: [3, 3, 3, 3],
+          notes: [
+            { frets: [['E', 0], ['A', 2], ['D', 2], ['G', 0], ['B', 0], ['e', 0]], note: 'Em', midi: [40, 47, 52, 55, 59, 64], beats: 8 },
+            { frets: [['A', 0], ['D', 2], ['G', 2], ['B', 1], ['e', 0]], note: 'Am', midi: [45, 52, 57, 60, 64], beats: 6 },
+            { frets: [['D', 0], ['G', 2], ['B', 3], ['e', 2]], note: 'D', midi: [50, 57, 62, 66], beats: 2 },
+            { frets: [['E', 0], ['A', 2], ['D', 2], ['G', 0], ['B', 0], ['e', 0]], note: 'Em', midi: [40, 47, 52, 55, 59, 64], beats: 8 },
+            { frets: [['A', 0], ['D', 2], ['G', 2], ['B', 1], ['e', 0]], note: 'Am', midi: [45, 52, 57, 60, 64], beats: 6 },
+            { frets: [['D', 0], ['G', 2], ['B', 3], ['e', 2]], note: 'D', midi: [50, 57, 62, 66], beats: 2 },
+            { frets: [['E', 0], ['A', 2], ['D', 2], ['G', 0], ['B', 0], ['e', 0]], note: 'Em', midi: [40, 47, 52, 55, 59, 64], beats: 8 },
+            { frets: [['A', 0], ['D', 2], ['G', 2], ['B', 1], ['e', 0]], note: 'Am', midi: [45, 52, 57, 60, 64], beats: 6 },
+            { frets: [['D', 0], ['G', 2], ['B', 3], ['e', 2]], note: 'D', midi: [50, 57, 62, 66], beats: 2 },
+            { frets: [['E', 0], ['A', 2], ['D', 2], ['G', 0], ['B', 0], ['e', 0]], note: 'Em', midi: [40, 47, 52, 55, 59, 64], beats: 8 },
+            { frets: [['A', 0], ['D', 2], ['G', 2], ['B', 1], ['e', 0]], note: 'Am', midi: [45, 52, 57, 60, 64], beats: 6 },
+            { frets: [['D', 0], ['G', 2], ['B', 3], ['e', 2]], note: 'D', midi: [50, 57, 62, 66], beats: 2 }
+          ]
+        },
+        {
+          label: 'Ending', label_es: 'Final',
+          caption: 'Ending · two more times through · the song ends on Em', caption_es: 'Final · dos vueltas más · la canción termina en Em',
+          caption_power: 'Ending · two more times through · the song ends on E5', caption_power_es: 'Final · dos vueltas más · la canción termina en E5',
+          fromBar: 115, bars: 18,
+          rows: [3, 4],
+          notes: [
+            { frets: [['E', 0], ['A', 2], ['D', 2], ['G', 0], ['B', 0], ['e', 0]], note: 'Em', midi: [40, 47, 52, 55, 59, 64], beats: 8 },
+            { frets: [['A', 0], ['D', 2], ['G', 2], ['B', 1], ['e', 0]], note: 'Am', midi: [45, 52, 57, 60, 64], beats: 6 },
+            { frets: [['D', 0], ['G', 2], ['B', 3], ['e', 2]], note: 'D', midi: [50, 57, 62, 66], beats: 2 },
+            { frets: [['E', 0], ['A', 2], ['D', 2], ['G', 0], ['B', 0], ['e', 0]], note: 'Em', midi: [40, 47, 52, 55, 59, 64], beats: 8 },
+            { frets: [['A', 0], ['D', 2], ['G', 2], ['B', 1], ['e', 0]], note: 'Am', midi: [45, 52, 57, 60, 64], beats: 6 },
+            { frets: [['D', 0], ['G', 2], ['B', 3], ['e', 2]], note: 'D', midi: [50, 57, 62, 66], beats: 2 },
+            { frets: [['E', 0], ['A', 2], ['D', 2], ['G', 0], ['B', 0], ['e', 0]], note: 'Em', midi: [40, 47, 52, 55, 59, 64], beats: 4 }
+          ]
+        }
+
+      ],
+      checks: [
+        { label: 'Intro and verse 1, slower', label_es: 'Intro y estrofa 1, más lentas',
+          text:    'Leave the speed where the card starts it. Play the intro and verse 1 with the band, without stopping.',
+          text_es: 'Deja la velocidad donde la tarjeta la deja al empezar. Toca la intro y la estrofa 1 con la banda, sin detenerte.' },
+        { label: 'The whole song, slower', label_es: 'La canción completa, más lenta',
+          text:    'Leave the speed where the card starts it, or move it one stop left. Play with the band from the intro to the last chord, without stopping.',
+          text_es: 'Deja la velocidad donde la tarjeta la deja al empezar, o muévela una posición a la izquierda. Toca con la banda desde la intro hasta el último acorde, sin detenerte.' },
+        { levelUp: true,
+          text:    'Slide the speed all the way right, to Normal. Play the whole song with the band at normal speed.',
+          text_es: 'Desliza la velocidad hasta la derecha, a «Normal». Toca la canción completa con la banda a velocidad normal.' }
+      ]
+    },
+    // No help ladder: a practice card is its checks and nothing else (Jonathan, 2026-10-07).
+    steps: [],
+  },
 ];
 
 /* ca-38 plays ca-29's sections from its chord sheet (see ca-38 above). The

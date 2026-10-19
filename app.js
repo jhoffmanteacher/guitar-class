@@ -2595,6 +2595,37 @@ const SNIPPET_TRACKS = {
     anchorVerified: true,
     defaultSlow: true,
   },
+  /* Ella — Junior H (Jonathan uploaded the recording, 2026-10-19). Like
+     Arsenal Efectivo this is the RECORD itself, not a Moises export: no
+     rhythm-down mix, so `src` IS the full mix and there is no Guitar
+     toggle. Tuning measured about 5 cents above A=440 — left alone, like
+     Las Mañanitas. Both files are the record re-encoded at 192k, timing
+     untouched; the slow tier is rubberband, pitch held, 185/155 = 1.194x
+     (its grid fits about 15 ms early of the scaled one, steady).
+
+     A STEADY GRID: the record is made to a click. The eighth note is
+     185.00 a minute (0.32432 s); an onset-strength fit holds its phase
+     within 7 ms from 0 to 255 s. 6/8 felt in two, like Arsenal Efectivo:
+     six eighths a bar, two big beats of three, so the room counts
+     185 / 3 = 61.7 and a bar is 1.946 s. Which eighth is beat 1 came from
+     the chords: across the song the harmony changes most on one eighth of
+     the six, and the bass lands on the root there. anchor 0.864 s is that
+     first downbeat. Song map in these bars, read off the harmony and the
+     centre-panned (voice) energy: requinto intro 1-26 (the chord loop
+     starts at 11), singing 27-66 (pickup in 26), requinto solo 67-82,
+     singing 83-114 (pickup in 82), ending 115-132, the last Em ringing to
+     260 s. */
+  'ella': {
+    src:     'audio/junior-h-ella-backing-Em-185bpm-440hz-full.mp3',
+    srcSlow: 'audio/junior-h-ella-backing-Em-155bpm-440hz-full.mp3',
+    trackBpm: 185, trackBpmSlow: 155,   // what the FILES are (eighth notes), for the slow-tier rescale
+    feltBpm: 185 / 3,                   // big beats: 3 eighth notes each
+    beatsPerBar: 2,                     // two big beats per 6/8 bar
+    durationSec: 260,
+    anchor: 0.864,
+    anchorVerified: true,
+    defaultSlow: true,
+  },
 };
 /* Does this track have a full mix at all? Both tiers or neither — the toggle
    has to survive the Slow button. */

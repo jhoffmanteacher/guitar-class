@@ -5,6 +5,14 @@ Notable changes to the Guitar Class site. Newest first.
 For the full session-by-session history (and the reasoning behind each change),
 see `WORKFLOW.md` and the git commit log.
 
+## 2026-10-19 — Ella: play along with the band
+
+- **New practice card: "Ella — Play Along"** (Junior H). Press Play song and
+  play Em, Am and D with the record, from the intro to the last chord. The
+  three chords come in the same order all the way through. The card opens
+  on power chords (E5, A5, D5); switch to Full chords to play the open
+  chords. It has the same four speeds as the other play-along cards.
+
 ## 2026-10-19 — Module 3: the C5 question uses the low E string
 
 - **The first Module 3 quiz now asks about the low E string only.** That is
