@@ -191,7 +191,12 @@ What that permits depends on how far the class has got, and
   students are in here. Step
   labels must match BY INDEX; a new step may only be **appended** to the
   tail of a section. No renames: a rename here would hide an insertion
-  from the check. Graded-MC choices are frozen too (checks.mjs 1ap).
+  from the check. Graded-MC choices are frozen too (checks.mjs 1ap) —
+  but since 2026-10-19 a graded MC may be ADDED to an existing step
+  (nothing to orphan; it prints) and an existing one reworded through
+  `response.renamedChoices`, which maps each old saved text to its new
+  choice (the renderer applies it; the proof checks the map covers every
+  old choice and keeps the keyed one keyed). Re-pin 1ap either way.
 - **Modules `FROZEN_THROUGH`+1–`OPEN_THROUGH` (4–6 today)** — **nobody has
   reached Module 4.** A step may be
   **inserted anywhere inside** an existing section, and a step's
