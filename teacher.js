@@ -1173,10 +1173,11 @@ let boardDragId=null;          // the id a drag is carrying — never in dataTra
    almost always the most recent and scrolling past a semester to reach it
    was the whole complaint. Ascending is one click away.
 
-   Unsorted is pinned first regardless of direction — it is the tray of
-   cards not yet placed in the course, not a module with a number, so it
-   belongs where it will be noticed rather than at whichever end the sort
-   happens to put module 0. */
+   Unsorted is pinned LAST regardless of direction (Jonathan, 2026-10-20;
+   it was pinned first) — it is the tray of cards not yet placed in the
+   course, not a module with a number, so it sits below the modules rather
+   than at whichever end the sort happens to put module 0. Display only:
+   students' order and #numbers come from caBoardOrder, untouched. */
 let boardSortKey='order';      // 'order' | 'date' | 'title' | 'done'
 let boardSortDir='desc';       // 'desc' = newest/highest first
 /* Everything that MOVES a card counts positions in the board's own
@@ -1691,12 +1692,12 @@ function renderTeacherActivities(opts){
         +(arch.length?`<details class="t-board-arch" ${boardArchOpen[mn]?'open':''} data-board-arch data-module="${mn}"><summary>Archived (${arch.length})</summary>${arch.map(assignedCard).join('')}</details>`:'')
         +`</div></div>`;
     };
-    // Unsorted pinned first (see boardSortKey), then the modules that hold
-    // something, highest number first by default.
+    // The modules that hold something, highest number first by default,
+    // then Unsorted pinned last (see boardSortKey).
     const moduleNums=manifest.map(m=>m.num)
       .concat(Object.keys(sectionsById).map(Number).filter(mn=>mn!==0 && !manifest.some(m=>m.num===mn)))
       .filter(holds).sort((x,y)=>dirMul*(x-y));
-    const sectionOrder=(holds(0)?[0]:[]).concat(moduleNums);
+    const sectionOrder=moduleNums.concat(holds(0)?[0]:[]);
     const assignedCount=view.sections.reduce((n,sec)=>n+sec.ids.length,0);
     const hiddenModules=manifest.length-moduleNums.filter(mn=>manifest.some(m=>m.num===mn)).length;
     const SORT_LABELS={order:'Course order', date:'Release date', title:'Name', done:'How many done'};
