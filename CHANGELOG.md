@@ -5,6 +5,13 @@ Notable changes to the Guitar Class site. Newest first.
 For the full session-by-session history (and the reasoning behind each change),
 see `WORKFLOW.md` and the git commit log.
 
+## 2026-10-20 — More Play Along songs on the Songs page
+
+- **The Songs page has a new list: More Play Along songs.** It is under
+  Core songs. It has Arsenal Efectivo, Ella, Las Mañanitas and Madrecita
+  Querida. Press Play Along to open a song and play with the band.
+- **Every student can play every song on the list.**
+
 ## 2026-10-19 — Ella: play along with the band
 
 - **New practice card: "Ella — Play Along"** (Junior H). Press Play song and

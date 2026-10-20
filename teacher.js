@@ -1559,7 +1559,10 @@ function renderTeacherActivities(opts){
       const isRetired=teacherActivityRetired(a.id,cfg);
       const strays=[];
       if(dates[a.id]) strays.push(`release date ${escHtml(dates[a.id])}`);
-      if(hidden[a.id]===true) strays.push('Hidden');
+      const lib=teacherIsLibrarySong(a);
+      // A library song's Hidden is live from Built (it pulls the Songs row),
+      // so it's offered below rather than listed as a leftover.
+      if(hidden[a.id]===true && !lib) strays.push('Hidden');
       if(optional[a.id]===true) strays.push('Optional');
       if(optional[a.id]===false) strays.push('Required');
       if(pins.includes(a.id)) strays.push('Pinned');
@@ -1582,7 +1585,9 @@ function renderTeacherActivities(opts){
             +`<button class="tg-seg-btn" data-set-activity-archived data-id="${escAttr(a.id)}" data-state="restore" title="${escAttr(teacherActivityDeleted(a.id,cfg)?'Put this activity back — it returns blank, ready to place and publish':'Put this activity back, with its date and name')}">Restore</button>`
             +(teacherActivityDeleted(a.id,cfg)?'':`<button class="tg-seg-btn t-act-danger" data-delete-activity data-id="${escAttr(a.id)}" title="Clear this activity's date, name and gate clears too">Delete</button>`)
             +`<button class="tg-seg-btn" data-open-activity data-id="${escAttr(a.id)}">Preview</button></div>`
-          : `<div class="t-board-ctl">${moveSelect(a,'Assign to…',null)}`
+          : (lib?`<div class="t-board-stray">${hidden[a.id]===true?'Hidden — off the Songs page.':'On every student&rsquo;s Songs page, under More Play Along songs. Assign it only to also put it on In-Class Activities.'}</div>`
+              +`<div class="t-board-ctl">${visSeg(a)}</div>`:'')
+            +`<div class="t-board-ctl">${moveSelect(a,'Assign to…',null)}`
             +`<button class="tg-seg-btn" data-open-activity data-id="${escAttr(a.id)}">Preview</button>`
             +`<span class="t-board-ctl-sp">`
             +`<button class="tg-seg-btn" data-set-activity-archived data-id="${escAttr(a.id)}" data-state="archive" title="Retire this activity without ever placing it">Archive</button>`
@@ -1628,7 +1633,8 @@ function renderTeacherActivities(opts){
         +`<div class="t-board-row">${isRetired?'':'<span class="t-board-grip" aria-hidden="true">&#x2630;</span>'}${numBox}${titleBlock(a)}</div>`
         +(isRetired
           ? `<div class="t-board-stray">${teacherActivityDeleted(a.id,cfg)?'Deleted':'Archived'} — students don't see it and it holds no number. Restore puts it back here.</div>`
-          : publishBlock(a)+`<div class="t-board-ctl">${visSeg(a)}${optSeg(a)}${playSeg(a)}${pinBtn(a)}${whoPicker(a)}${moveSelect(a,'Move to…',curModule)}${moveBtns}</div>`)
+          : publishBlock(a)+(teacherIsLibrarySong(a)?`<div class="t-board-stray">Also on every student&rsquo;s Songs page (More Play Along songs), whatever Who says.</div>`:'')
+            +`<div class="t-board-ctl">${visSeg(a)}${optSeg(a)}${teacherIsLibrarySong(a)?'':playSeg(a)}${pinBtn(a)}${whoPicker(a)}${moveSelect(a,'Move to…',curModule)}${moveBtns}</div>`)
         /* Footer: what this card IS (how many have done it) and the actions
            that take it out of the run, behind a hairline — so the row above,
            which is what gets used every day, reads as the card's controls
@@ -2915,6 +2921,10 @@ function teacherActivityStudents(id, cfg){
   if(who && typeof who==='object') Object.keys(who).forEach(u=>{ if(who[u]===true) out[u]=true; });
   return out;
 }
+/* The song library — mirrors caIsLibrarySong (app.js): a `library: true`
+   practice card is on every student's Songs page, placed on the board or
+   not, unless it is Hidden, archived or deleted. */
+function teacherIsLibrarySong(a){ return !!a && a.view==='card' && a.library===true; }
 function teacherActivityForStudent(a, uid, cfg){
   const who=teacherActivityStudents(a.id, cfg);
   return !Object.keys(who).length || who[uid]===true;

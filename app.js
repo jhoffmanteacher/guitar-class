@@ -10686,7 +10686,28 @@ async function renderSongsHub(){
   // The Mood Chart row that sat here was removed 2026-10-02 (Jonathan). The
   // page itself, mood-chart.html, still ships — nothing on the site links it.
   p.innerHTML = `<div class="legend"><div class="leg"><div class="dot dc" style="margin-top:0"></div>${t('hub.legendCore')}</div><div class="leg"><div class="dot dch" style="margin-top:0"></div>${t('hub.legendChoice')}</div></div>
-    ${coreHtml}${groupsHtml}${requestHtml}`;
+    ${coreHtml}<div class="sh-lib-slot">${songsLibraryHtml()}</div>${groupsHtml}${requestHtml}`;
+}
+/* "More Play Along songs" — the song library (see caIsLibrarySong), between
+   the Core songs and the Choice menu. One row per library card: the song's
+   name (the card title up to its " — ") and a Play Along link to the card,
+   A–Z. No cards, no section.
+   This is NOT the "Play Along with the TAB/Chords" list removed 2026-10-05
+   (every part card, Core songs included); Core songs still open only from
+   their own rows, and only `library: true` cards are listed here. */
+function songsLibraryHtml(){
+  const cards = (window.CLASS_ACTIVITIES || []).filter(caIsLibrarySong);
+  if(!cards.length) return '';
+  const name = a => caTitle(a).split(' — ')[0];
+  cards.sort((x, y) => name(x).localeCompare(name(y)));
+  const rows = cards.map(a => {
+    const done = classActivities[a.id] === true;
+    const btn = `<button type="button" class="song-vid-btn sh-play-btn${done ? ' done' : ''}" onclick="songsHubOpenCard('${escAttr(a.id)}')"><span class="svb-play">&#x25B6;</span>${t('hub.playAlong')}${done ? ` <svg class="sh-play-check" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" role="img" aria-label="${escAttr(t('hub.playAlongDone'))}"><path d="M5 12.5l4.5 4.5L19 7"/></svg>` : ''}</button>`;
+    return `<div class="song-row"><div class="dot dch"></div>
+      <div class="song-name-col"><div class="sname">${escHtml(name(a))}</div></div>
+      <div class="song-vids">${btn}</div></div>`;
+  }).join('');
+  return `<div class="sh-sec-title">${t('hub.libraryTitle')}</div><div class="card">${rows}</div>`;
 }
 
 /* Songs-hub difficulty group open/close (header button). */
@@ -10757,6 +10778,10 @@ function refreshSongsPlayAlong(){
     const html = songsPlayAlongBtn(slot.dataset.slug);
     if(slot.innerHTML !== html) slot.innerHTML = html;
   });
+  // The library list reads Hidden / Archive / Delete from the class config.
+  // Its rows hold no open state, so swapping the whole slot is safe.
+  const lib = screen.querySelector('.sh-lib-slot');
+  if(lib){ const html = songsLibraryHtml(); if(lib.innerHTML !== html) lib.innerHTML = html; }
 }
 let songsHubList = [];
 function songsHubVid(idx, kind){
@@ -14396,7 +14421,25 @@ function caReduceForMe(map, uid){
   return out;
 }
 function caForMe(a){ return activityForMe[a.id] !== false; }
+/* The song library (Jonathan, 2026-10-20: "a better way to push out songs
+   to individual students instead of through class activities page"; he
+   picked a library for everyone over a private per-student box). A practice
+   card with `library: true` in its data is on the Songs page's "More Play
+   Along songs" list for EVERY student, from the day it ships: no board
+   slot, no release date, no "Play Along now", and the Who picker does not
+   hide it (Jonathan: "i could stop assigning things to individual
+   students" — so there is no per-student tag either). Hidden, Archive and Delete still take it off, exactly as everywhere
+   else. It never reaches caIsVisible(), so it never blocks, never shows on
+   In-Class Activities and takes no #N — unless the card is ALSO placed and
+   dated on the board, which still works the old way for the students Who
+   names. Mirrored in teacher.js (teacherIsLibrarySong). */
+function caIsLibrarySong(a){
+  if(!a || a.view !== 'card' || a.library !== true) return false;
+  return retiredActivityIds[a.id] !== true && hiddenActivityIds[a.id] !== true;
+}
 function caIsPlayAlongOnly(a){
+  // A library song opens from the Songs page for anyone — see caIsLibrarySong.
+  if(caIsLibrarySong(a)) return !caIsVisible(a);
   if(!a || a.view !== 'card' || playAlongActivityIds[a.id] !== true) return false;
   if(retiredActivityIds[a.id] === true || hiddenActivityIds[a.id] === true) return false;
   if(!caForMe(a)) return false;
@@ -14669,8 +14712,10 @@ function renderClassActivities(){
   const swap = playOnly && caSwap && caSwap.to === playOnly.id && list.some(a => a.id === caSwap.from) ? caSwap : null;
   const swapIn = a => (swap && a.id === swap.from) ? playOnly : a;
   const pinOpen = playOnly && !swap && caIsPinOnly(playOnly) ? playOnly : null;
+  // A library song is headed with the Songs list it came from (caIsLibrarySong).
+  const playOnlyHead = playOnly && caIsLibrarySong(playOnly) ? 'hub.libraryTitle' : 'hub.playAlongTitle';
   const playOnlyHtml = playOnly && !swap && !pinOpen
-    ? `<div class="ca-mod-head" data-i18n="hub.playAlongTitle">${escHtml(t('hub.playAlongTitle'))}</div>${caActivityCardHtml(playOnly)}`
+    ? `<div class="ca-mod-head" data-i18n="${playOnlyHead}">${escHtml(t(playOnlyHead))}</div>${caActivityCardHtml(playOnly)}`
     : '';
   // The Keep practicing row (caPinRowHtml) plus, under it, a pin-only card
   // the student opened from it.

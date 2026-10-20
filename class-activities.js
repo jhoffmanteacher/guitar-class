@@ -100,6 +100,16 @@
    caIsOptional (app.js), teacherActivityOptional (teacher.js) and
    journeyOptional (tabs/journey.js) read it.
 
+   LIBRARY — `library: true` (optional; practice cards only, the only value;
+   Jonathan, 2026-10-20). Puts the card on the Songs page's "More Play Along
+   songs" list for the WHOLE class as soon as it ships — no board slot,
+   release date or "Play Along now" needed, and no #N. A song one student
+   asked for goes here too: nobody is assigned anything (Jonathan,
+   2026-10-20). Hidden, Archive and Delete on the board still take it off
+   the list. Not for the
+   six Core songs — their whole-song cards open from their own Songs rows.
+   caIsLibrarySong (app.js) and teacherIsLibrarySong (teacher.js) read it.
+
    METRONOME — `metronome: <bpm>` (optional; whole number, 40–220). Tapping
    the card open starts the Metro tool at that tempo, so every step is
    played to a click. The student can stop it or change the tempo like any
@@ -5116,6 +5126,7 @@ window.CLASS_ACTIVITIES = [
   {
     id:    'ca-35',
     view:  'card',    // one screen: Play song + tab + checks — see CARD above
+    library: true,    // on the Songs page's More Play Along songs list for everyone — see LIBRARY above
     optional: true,   // Optional until switched to Required on the board — see OPTIONAL above
     /* Full chords / Power chords switch (Jonathan, 2026-10-16) — see
        caView in app.js. Module 3's shapes, all in frets 5-9 so the hand
@@ -5442,6 +5453,7 @@ window.CLASS_ACTIVITIES = [
   {
     id:    'ca-36',
     view:  'card',    // one screen: Play song + tab + checks — see CARD above
+    library: true,    // on the Songs page's More Play Along songs list for everyone — see LIBRARY above
     optional: true,   // Optional until switched to Required on the board — see OPTIONAL above
     /* Key of G / Key of F switch — see KEY VERSIONS beside caView in app.js.
        The record is in F; the G track is the same record raised two half
@@ -5668,6 +5680,7 @@ window.CLASS_ACTIVITIES = [
   {
     id:    'ca-37',
     view:  'card',    // one screen: Play song + tab + checks — see CARD above
+    library: true,    // on the Songs page's More Play Along songs list for everyone — see LIBRARY above
     optional: true,   // Optional until switched to Required on the board — see OPTIONAL above
     title:    'Arsenal Efectivo — Play Along',
     title_es: 'Arsenal Efectivo — Toca con la canción',
@@ -5886,6 +5899,7 @@ window.CLASS_ACTIVITIES = [
   {
     id:    'ca-39',
     view:  'card',    // one screen: Play song + tab + checks — see CARD above
+    library: true,    // on the Songs page's More Play Along songs list for everyone — see LIBRARY above
     optional: true,   // Optional until switched to Required on the board — see OPTIONAL above
     chordStart: 'power',   // opens on Power chords until the student picks — see CHORD VERSIONS above
     chordVersions: {

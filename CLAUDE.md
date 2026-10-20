@@ -658,6 +658,7 @@ Modules 4 and 5 send students there.
 | "About this set" song names | links; same `openSongLink` |
 | A skill about one core song (checklist row) | `journey: [{ song, layer }]` on the skill → "Open the \"Luna\" Song Journey page" under it; same `openSongLink`. 14 skills in Modules 4 and 9–12 (2026-10-18; 1ab3 pins 14 / 16) |
 | Songs page Core row | Play Along (only with an openable card) · Backing · Song Journey, every row |
+| Songs page "More Play Along songs" | every `library: true` practice card, for the WHOLE class, from the day it ships — no board slot, date, #N or "Play Along now", and Who does not hide it (2026-10-20, `caIsLibrarySong()`). How a song one student asked for reaches students now — Jonathan stopped assigning songs to individuals; don't build a per-student path back |
 | Journey button on a card | never on a whole-song card; on another activity only while its song has no openable whole-song card (`caJourneyUrl()`) |
 | Resume card song row | all six songs |
 | The Journey page itself | open for every student; the activity gate no longer locks it (`JOURNEY_GATE_LOCKS = false`, 2026-10-07) |

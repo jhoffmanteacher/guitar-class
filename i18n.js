@@ -1216,6 +1216,9 @@
     'hub.backingSolos':      { en: 'Backing track for solos', es: 'Pista para solos' },
     'hub.playAlongDone':     { en: 'Done', es: 'Terminada' },
     'hub.coreTitle':         { en: 'Core songs', es: 'Canciones principales' },
+    // The song library (2026-10-20, caIsLibrarySong in app.js): every
+    // `library: true` practice card, for the whole class.
+    'hub.libraryTitle':      { en: 'More Play Along songs', es: 'Más canciones para tocar con la banda' },
     'hub.choiceTitle':       { en: 'Choice menu', es: 'Menú a elección' },
     'hub.groupRiffs':        { en: 'First riffs & single notes', es: 'Primeros riffs y notas individuales' },
     'hub.groupChords':       { en: 'Chord & strumming songs', es: 'Canciones con acordes y rasgueo' },
