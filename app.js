@@ -257,6 +257,12 @@ let optionalActivityIds = {};
    this). See caIsPlayAlongOnly(). Cached like the other maps so a flaky
    read doesn't empty the list a student was just using. */
 let playAlongActivityIds = {};
+/* Where each movable song lives, set by the console's "Move to Songs" /
+   "Move to Class activities" buttons (config/class.songLibrary, id -> true
+   for the Songs page, false for Class activities). Overrides the card's
+   `library` field — see caIsLibraryCard. Cached like the board, so a flaky
+   read doesn't put a moved song back where it started. */
+let songLibraryIds = {};
 /* The "Keep practicing" row at the top of In-Class Activities —
    config/class.activityPins, an ORDERED array of activity ids, at most
    CA_PINS_MAX (2026-10-10, Jonathan: he reuses some cards on many days —
@@ -816,7 +822,7 @@ if(auth) auth.onAuthStateChanged(async user=>{
       return;
     }
     window.__authBootPending = false;
-    currentUser = null; progress = {}; responses = {}; completed = {}; completedDeletes = new Map(); classActivities = {}; classActivitiesDeletes = new Map(); caStepDone = {}; caStepDeletes = new Map(); exitChecks = {}; games = {}; streak = { count:0, lastDay:null }; gamesAccessOn = true; micSampling = { on: false, max: 0 }; micTakesCount = Infinity; studentPeriod = ''; periodOverride = ''; moduleOpenThrough = 0; hiddenActivityIds = {}; activityForMe = {}; activityDates = {}; activityTitles = {}; activityNumbers = {}; activityBoard = {}; activityBoardOn = false; activityClears = {}; retiredActivityIds = {}; optionalActivityIds = {}; activityPins = []; progressLoadFailed = false;
+    currentUser = null; progress = {}; responses = {}; completed = {}; completedDeletes = new Map(); classActivities = {}; classActivitiesDeletes = new Map(); caStepDone = {}; caStepDeletes = new Map(); exitChecks = {}; games = {}; streak = { count:0, lastDay:null }; gamesAccessOn = true; micSampling = { on: false, max: 0 }; micTakesCount = Infinity; studentPeriod = ''; periodOverride = ''; moduleOpenThrough = 0; hiddenActivityIds = {}; activityForMe = {}; activityDates = {}; activityTitles = {}; activityNumbers = {}; activityBoard = {}; activityBoardOn = false; activityClears = {}; retiredActivityIds = {}; optionalActivityIds = {}; activityPins = []; songLibraryIds = {}; progressLoadFailed = false;
     document.body.classList.remove('ca-gated');   // next sign-in recomputes it fresh — don't leave a stale gate showing over the sign-in wall
     if(typeof gamesResetForUser === 'function') gamesResetForUser();   // Note Runner's module caches must not leak into the next signed-in user
     if(typeof lqStopListening === 'function') lqStopListening();       // and the live-quiz listener must not keep firing under the next student
@@ -1238,6 +1244,9 @@ async function loadClassConfig(){
     // "Play Along now" practice cards (teacher.js board) — see playAlongActivityIds.
     playAlongActivityIds = d.playAlongActivities || {};
     try{ localStorage.setItem('caPlayAlong', JSON.stringify(playAlongActivityIds)); }catch(e){}
+    // Songs moved between Class activities and the Songs page — see songLibraryIds.
+    songLibraryIds = d.songLibrary || {};
+    try{ localStorage.setItem('caSongLib', JSON.stringify(songLibraryIds)); }catch(e){}
     // "Keep practicing" pins (teacher.js board) — see activityPins.
     activityPins = caCleanPins(d.activityPins);
     try{ localStorage.setItem('caPins', JSON.stringify(activityPins)); }catch(e){}
@@ -1325,6 +1334,10 @@ function restoreClassConfigFromCache(){
     const raw = localStorage.getItem('caPlayAlong');
     if(raw) playAlongActivityIds = JSON.parse(raw) || {};
   }catch(e){ /* ignore — playAlongActivityIds stays {} */ }
+  try{
+    const raw = localStorage.getItem('caSongLib');
+    if(raw) songLibraryIds = JSON.parse(raw) || {};
+  }catch(e){ /* ignore — songLibraryIds stays {} */ }
   try{
     const raw = localStorage.getItem('caPins');
     if(raw) activityPins = caCleanPins(JSON.parse(raw));
@@ -10698,7 +10711,10 @@ async function renderSongsHub(){
 function songsLibraryHtml(){
   const cards = (window.CLASS_ACTIVITIES || []).filter(caIsLibrarySong);
   if(!cards.length) return '';
-  const name = a => caTitle(a).split(' — ')[0];
+  const short = a => caTitle(a).split(' — ')[0];
+  // Two cards for one song (Las Mañanitas has a chord ladder and a Play
+  // Along) show their full titles, so the rows can be told apart.
+  const name = a => cards.filter(b => short(b) === short(a)).length > 1 ? caTitle(a) : short(a);
   cards.sort((x, y) => name(x).localeCompare(name(y)));
   const rows = cards.map(a => {
     const done = classActivities[a.id] === true;
@@ -14281,7 +14297,7 @@ function caBoardOrder(activities, board, opts){
   const legacy = o.legacyNumbers || {};
   // Library songs live on the Songs page only (caIsLibraryCard): off the
   // board, unnumbered, and never assigned — even with a leftover board entry.
-  const list = (activities || []).filter(a => a && a.id && !caIsLibraryCard(a));
+  const list = (activities || []).filter(a => a && a.id && !caIsLibraryCard(a, o.songLibrary));
   const manifest = (typeof MODULE_MANIFEST !== 'undefined') ? MODULE_MANIFEST : [];
   const shipped = a => { const n = Number(a.number); return Number.isFinite(n) ? n : Infinity; };
   // Numeric part of `ca-<n>`, never localeCompare on the id — that orders
@@ -14356,9 +14372,9 @@ function caBoardOrder(activities, board, opts){
 // whole list once per comparison.
 let caBoardCache = null;
 function caBoardView(){
-  if(!caBoardCache || caBoardCache.src !== activityBoard)
-    caBoardCache = { src: activityBoard, view: caBoardOrder(window.CLASS_ACTIVITIES || [], activityBoard,
-      { retired: retiredActivityIds, legacyNumbers: activityNumbers, seeded: activityBoardOn }) };
+  if(!caBoardCache || caBoardCache.src !== activityBoard || caBoardCache.lib !== songLibraryIds)
+    caBoardCache = { src: activityBoard, lib: songLibraryIds, view: caBoardOrder(window.CLASS_ACTIVITIES || [], activityBoard,
+      { retired: retiredActivityIds, legacyNumbers: activityNumbers, seeded: activityBoardOn, songLibrary: songLibraryIds }) };
   return caBoardCache.view;
 }
 function caNumber(a){
@@ -14443,9 +14459,20 @@ function caForMe(a){ return activityForMe[a.id] !== false; }
    song is never on the Class activities board, never on In-Class
    Activities and never holds a #N. The console's Songs view manages them
    (renderTeacherSongs in teacher.js). */
-function caIsLibraryCard(a){
-  return !!a && a.view === 'card' && a.library === true && !a.journey
+/* A song that can move between Class activities and the Songs page: a card
+   whose data carries `library` (true = starts on the Songs page, false =
+   starts in Class activities). Never an exit check, never a Core song. */
+function caIsSongCard(a){
+  return !!a && (a.library === true || a.library === false) && a.kind !== 'check' && !a.journey
     && !(a.card && (a.card.wholeSong || a.card.sheet));
+}
+/* Where it is now: the console's move (config/class.songLibrary) wins over
+   the data. `over` is that map — teacher.js passes its own config's copy;
+   students read songLibraryIds. */
+function caIsLibraryCard(a, over){
+  if(!caIsSongCard(a)) return false;
+  const m = over || songLibraryIds;
+  return typeof m[a.id] === 'boolean' ? m[a.id] : a.library === true;
 }
 function caIsLibrarySong(a){
   if(!caIsLibraryCard(a)) return false;

@@ -263,6 +263,8 @@ async function showTeacherApp(user){
       if(period){ teacherSetStudentPeriod(period.dataset.uid, period.dataset.value); return; }
       const actHidden=e.target.closest('[data-set-activity-hidden]');
       if(actHidden){ teacherSetActivityHidden(actHidden.dataset.id, actHidden.dataset.state); return; }
+      const songPlace=e.target.closest('[data-set-song-place]');
+      if(songPlace){ teacherSetSongPlace(songPlace.dataset.id, songPlace.dataset.state); return; }
       const actOpt=e.target.closest('[data-set-activity-optional]');
       if(actOpt){ teacherSetActivityOptional(actOpt.dataset.id, actOpt.dataset.state); return; }
       const actPlay=e.target.closest('[data-set-activity-playalong]');
@@ -1220,6 +1222,7 @@ function teacherBoardView(cfg){
     retired,
     legacyNumbers:(cfg&&cfg.activityNumbers)||{},
     seeded: !!(cfg&&cfg.activityBoardSeeded),
+    songLibrary: (cfg&&cfg.songLibrary)||{},
   });
 }
 /* Every id currently placed in one module, in board order, archived rows
@@ -1242,6 +1245,7 @@ function teacherBoardModuleIds(cfg, module, board){
     retired:{},
     legacyNumbers:(cfg&&cfg.activityNumbers)||{},
     seeded:true,
+    songLibrary:(cfg&&cfg.songLibrary)||{},
   });
   const sec=view.sections.find(x=>x.module===Number(module));
   return sec ? sec.ids.slice() : [];
@@ -1353,9 +1357,8 @@ function renderTeacherActivities(opts){
   const cached = !!(opts && opts.cached) && teacherClassConfigLoaded;
   const box=document.getElementById('t-grid-container');
   if(activityDetailId){ renderTeacherActivityDetail(activityDetailId); return; }
-  // Library songs aren't class activities — the Songs view manages them.
-  const activities=(window.CLASS_ACTIVITIES||[]).filter(a=>!caIsLibraryCard(a));
-  if(!activities.length){
+  const allActivities=window.CLASS_ACTIVITIES||[];
+  if(!allActivities.length){
     setBoardWide(false);
     box.innerHTML='<div class="t-loading">No activities yet — they\'ll appear here once one is pushed to the site.</div>';
     return;
@@ -1390,6 +1393,9 @@ function renderTeacherActivities(opts){
         return;
       }
     }
+    // Library songs aren't class activities — the Songs view manages them.
+    // Read against this config: a song can be moved either way (songBtn).
+    const activities=allActivities.filter(a=>!caIsLibraryCard(a, cfg.songLibrary||{}));
     const hidden=cfg.hiddenActivities||{};
     const optional=cfg.optionalActivities||{};
     const playAlong=cfg.playAlongActivities||{};
@@ -1552,6 +1558,11 @@ function renderTeacherActivities(opts){
         +(n?`<div class="tg-seg"><button class="tg-seg-btn" data-activity-whole-class data-id="${escAttr(a.id)}">Back to whole class</button></div>`:'')
         +(boxes||'<div class="t-who-note">No students yet.</div>')+`</div></details>`;
     };
+    // A movable song (caIsSongCard) can go to the Songs page instead — see
+    // teacherSetSongPlace. Its board slot is kept for the trip back.
+    const songBtn=a=>caIsSongCard(a)
+      ? `<button class="tg-seg-btn" data-set-song-place data-id="${escAttr(a.id)}" data-state="songs" title="Take this off the board and put it on every student's Songs page, under More Play Along songs">Move to Songs</button>`
+      : '';
     // Where a card can be sent without a drag. Used as "Assign to" in Built
     // and "Move to" in Assigned; both append at the end of the section they
     // name, which is what a drag onto empty space does too.
@@ -1596,6 +1607,7 @@ function renderTeacherActivities(opts){
             +`<button class="tg-seg-btn" data-open-activity data-id="${escAttr(a.id)}">Preview</button></div>`
           : `<div class="t-board-ctl">${moveSelect(a,'Assign to…',null)}`
             +`<button class="tg-seg-btn" data-open-activity data-id="${escAttr(a.id)}">Preview</button>`
+            +songBtn(a)
             +`<span class="t-board-ctl-sp">`
             +`<button class="tg-seg-btn" data-set-activity-archived data-id="${escAttr(a.id)}" data-state="archive" title="Retire this activity without ever placing it">Archive</button>`
             +`<button class="tg-seg-btn t-act-danger" data-delete-activity data-id="${escAttr(a.id)}" title="Retire it AND clear its date, name and gate clears">Delete</button>`
@@ -1640,7 +1652,7 @@ function renderTeacherActivities(opts){
         +`<div class="t-board-row">${isRetired?'':'<span class="t-board-grip" aria-hidden="true">&#x2630;</span>'}${numBox}${titleBlock(a)}</div>`
         +(isRetired
           ? `<div class="t-board-stray">${teacherActivityDeleted(a.id,cfg)?'Deleted':'Archived'} — students don't see it and it holds no number. Restore puts it back here.</div>`
-          : publishBlock(a)+`<div class="t-board-ctl">${visSeg(a)}${optSeg(a)}${playSeg(a)}${pinBtn(a)}${whoPicker(a)}${moveSelect(a,'Move to…',curModule)}${moveBtns}</div>`)
+          : publishBlock(a)+`<div class="t-board-ctl">${visSeg(a)}${optSeg(a)}${playSeg(a)}${pinBtn(a)}${whoPicker(a)}${moveSelect(a,'Move to…',curModule)}${moveBtns}${songBtn(a)}</div>`)
         /* Footer: what this card IS (how many have done it) and the actions
            that take it out of the run, behind a hairline — so the row above,
            which is what gets used every day, reads as the card's controls
@@ -2788,16 +2800,18 @@ async function teacherSetActivityArchived(id, state){
 function renderTeacherSongs(){
   setBoardWide(false);
   const box=document.getElementById('t-grid-container');
-  const songs=(window.CLASS_ACTIVITIES||[]).filter(caIsLibraryCard);
   const intro=`<div class="t-songs-intro">Every song here is on every student&rsquo;s Songs page, under <strong>More Play Along songs</strong>. Hidden takes a song off that list. Core songs are not here &mdash; they open from their own rows on the Songs page and are managed in Class activities.</div>`;
-  if(!songs.length){ box.innerHTML=intro+'<div class="t-loading">No library songs yet. A practice card with <code>library: true</code> shows up here once it is pushed.</div>'; return; }
   if(!box.querySelector('.t-songs')) box.innerHTML='<div class="t-loading">Loading…</div>';
   loadTeacherClassConfig().then(cfg=>{
     if(teacherView!=='songs') return;   // switched views mid-flight
     if(!cfg) return;                    // superseded by a newer read
+    const songs=(window.CLASS_ACTIVITIES||[]).filter(a=>caIsLibraryCard(a, cfg.songLibrary||{}));
+    if(!songs.length){ box.innerHTML=intro+'<div class="t-loading">No songs here yet. Use <strong>Move to Songs</strong> on a song in Class activities, or push a card with <code>library: true</code>.</div>'; return; }
     const hidden=cfg.hiddenActivities||{};
     const roster=allStudentsRaw.filter(s=>!((cfg.archived||{})[s.uid]));
-    const name=a=>teacherActivityTitle(a,cfg).split(' — ')[0];
+    const short=a=>teacherActivityTitle(a,cfg).split(' — ')[0];
+    // Two cards for one song show their full titles (same rule as the Songs page).
+    const name=a=>songs.filter(b=>short(b)===short(a)).length>1 ? teacherActivityTitle(a,cfg) : short(a);
     songs.sort((x,y)=>name(x).localeCompare(name(y)));
     const rows=songs.map(a=>{
       const retired=teacherActivityRetired(a.id,cfg);
@@ -2814,11 +2828,39 @@ function renderTeacherSongs(){
         +`<span class="t-songs-done">${roster.length?`${done} of ${roster.length} students done`:'No student data yet'}</span></div>`
         +`<div class="t-board-ctl">${status}<span class="t-board-ctl-sp">`
         +`<button class="tg-seg-btn" data-open-activity data-id="${escAttr(a.id)}">Preview</button>`
-        +`<button class="tg-seg-btn" data-copy-activity-link data-id="${escAttr(a.id)}">Copy link</button></span></div>`
+        +`<button class="tg-seg-btn" data-copy-activity-link data-id="${escAttr(a.id)}">Copy link</button>`
+        +`<button class="tg-seg-btn" data-set-song-place data-id="${escAttr(a.id)}" data-state="activities" title="Take this off the Songs page and put it back on the Class activities board — in its old slot if it had one, otherwise in Built">Move to Class activities</button></span></div>`
         +`</div>`;
     }).join('');
     box.innerHTML=intro+`<div class="t-songs">${rows}</div>`;
   });
+}
+/* Move a song (caIsSongCard in app.js) between Class activities and the
+   Songs page — config/class.songLibrary, id -> true (Songs) / false (Class
+   activities). Matching the card's own `library` field clears the row, so
+   the doc only holds real moves. Cell-checked on that one row. Nothing else
+   is touched: the board slot, date, Hidden and Who all stay, so a song
+   moved back lands where it was. Students' progress is never written. */
+async function teacherSetSongPlace(id, where){
+  const a=(window.CLASS_ACTIVITIES||[]).find(x=>x.id===id);
+  if(!a || !caIsSongCard(a)) return;
+  const toSongs = where==='songs';
+  if(!teacherClassConfig.songLibrary) teacherClassConfig.songLibrary={};
+  const map=teacherClassConfig.songLibrary;
+  const had=Object.prototype.hasOwnProperty.call(map, id);
+  const prev=map[id];
+  const clear = toSongs===(a.library===true);
+  if(clear) delete map[id]; else map[id]=toSongs;
+  try{
+    await ensureDb();
+    const fv=firebase.firestore.FieldValue;
+    await teacherWriteConfig({songLibrary:{[id]: clear ? fv.delete() : toSongs}}, {['songLibrary.'+id]: had?prev:undefined});
+  }catch(e){
+    if(had) map[id]=prev; else delete map[id];
+    teacherConfigSaveFailed(e, 'Could not move that song — check your connection and Firestore rules.');
+  }
+  if(teacherView==='activities') renderTeacherActivities();
+  else if(teacherView==='songs') renderTeacherSongs();
 }
 /* Delete = archive, plus wipe every console setting this activity has. The
    wipe is the whole point of having a second button: it is what makes a

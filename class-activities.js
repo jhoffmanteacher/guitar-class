@@ -100,8 +100,13 @@
    caIsOptional (app.js), teacherActivityOptional (teacher.js) and
    journeyOptional (tabs/journey.js) read it.
 
-   LIBRARY — `library: true` (optional; practice cards only, the only value;
-   Jonathan, 2026-10-20). Puts the card on the Songs page's "More Play Along
+   LIBRARY — `library: true` or `library: false` (optional; any card but an
+   exit check; Jonathan, 2026-10-20). Marks the card as a SONG the console
+   can move between Class activities and the Songs page ("Move to Songs" /
+   "Move to Class activities", stored in config/class.songLibrary, which
+   wins over this field). The value is only where it starts: true starts on
+   the Songs page, false starts as a class activity. On the Songs page it is
+   on the "More Play Along
    songs" list for the WHOLE class as soon as it ships — no board slot,
    release date or "Play Along now" needed, and no #N. A song one student
    asked for goes here too: nobody is assigned anything (Jonathan,
@@ -4774,6 +4779,7 @@ window.CLASS_ACTIVITIES = [
   {
     id:    'ca-34',
     view:  'focus',   // one step at a time — see VIEW above
+    library: true,    // on the Songs page for everyone (Jonathan, 2026-10-20: "move las mananitas from class activities to songs") — see LIBRARY above
     optional: true,   // Optional until switched to Required on the board (Jonathan, 2026-10-14) — see OPTIONAL above
     /* Full chords / Power chords switch (Jonathan, 2026-10-16) — see
        caView in app.js. Module 3's shapes, all in frets 5-9 so the hand

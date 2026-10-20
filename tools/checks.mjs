@@ -5418,7 +5418,7 @@ function checkChordBlitzRanks() {
    deliberately, after a look at whether it can pass a `base` or needs the
    strict default.
    ═════════════════════════════════════════════════════════════════ */
-const CONFIG_WRITERS = 23;   // teacherWriteConfig() call sites in teacher.js — 22nd/23rd: teacherSetActivityStudent (cell-checked on one student's tick) and teacherSetActivityWholeClass (strict), 2026-10-13
+const CONFIG_WRITERS = 24;   // teacherWriteConfig() call sites in teacher.js — 22nd/23rd: teacherSetActivityStudent (cell-checked on one student's tick) and teacherSetActivityWholeClass (strict), 2026-10-13; 24th: teacherSetSongPlace (cell-checked on its songLibrary row), 2026-10-20
 function checkConfigWriteGuard() {
   head('1ai. Every config/class write goes through the stale-write guard');
   let bad = 0;
@@ -7064,9 +7064,13 @@ function checkSheetCards() {
    it. This check makes that mistake loud instead, and also catches the
    case the code cannot see: a Core song's card with no `journey` (a part
    card like ca-10 or ca-18) whose track or title names a Core song. It also
-   requires `library` to be exactly true and only on practice cards, and
-   proves the guard is wired: caIsLibraryCard must exist, test `journey`,
-   and be what caBoardOrder filters on. */
+   requires `library` to be exactly true or false (false = a song the
+   console can move, starting in Class activities; 2026-10-20) and never on
+   an exit check, and proves the guard is wired: caIsSongCard must test
+   `journey` and `wholeSong`, caIsLibraryCard must go through it, and
+   caBoardOrder must filter on caIsLibraryCard with the console's moves. The
+   Core rule covers `library: false` too: a moved Core card would leave its
+   class activity. */
 function checkSongLibrary() {
   head('1bq. The song library holds no Core song');
   let activities = [];
@@ -7087,15 +7091,17 @@ function checkSongLibrary() {
   // Core song names as titles spell them: "the-cure" -> "the cure".
   const coreWords = core.map(id => id.replace(/-/g, ' '));
   const fold = t => String(t || '').toLowerCase().replace(/[\u2018\u2019'".,!?]/g, '').replace(/\s+/g, ' ');
-  const fn = /function caIsLibraryCard\(a\)\{([\s\S]*?)\n\}/.exec(appSrc);
-  if (!fn) flag('1bq: caIsLibraryCard() is missing from app.js — the Core-song guard is gone');
-  else if (!/a\.journey/.test(fn[1]) || !/wholeSong/.test(fn[1])) flag('1bq: caIsLibraryCard() no longer refuses journey / wholeSong cards');
-  if (!/filter\(a => a && a\.id && !caIsLibraryCard\(a\)\)/.test(appSrc)) flag('1bq: caBoardOrder no longer skips library cards — they would land back on the Class activities board');
+  const fn = /function caIsSongCard\(a\)\{([\s\S]*?)\n\}/.exec(appSrc);
+  const lfn = /function caIsLibraryCard\(a, over\)\{([\s\S]*?)\n\}/.exec(appSrc);
+  if (!fn || !lfn) flag('1bq: caIsSongCard() / caIsLibraryCard() is missing from app.js — the Core-song guard is gone');
+  else if (!/a\.journey/.test(fn[1]) || !/wholeSong/.test(fn[1])) flag('1bq: caIsSongCard() no longer refuses journey / wholeSong cards');
+  else if (!/if\(!caIsSongCard\(a\)\) return false;/.test(lfn[1])) flag('1bq: caIsLibraryCard() no longer goes through caIsSongCard() — a console move could put a Core song in the library');
+  if (!/filter\(a => a && a\.id && !caIsLibraryCard\(a, o\.songLibrary\)\)/.test(appSrc)) flag('1bq: caBoardOrder no longer skips library cards — they would land back on the Class activities board');
   let lib = 0;
   for (const a of activities) {
     if (!a || a.library === undefined) continue;
-    if (a.library !== true) { flag(`${a.id}: \`library\` takes only true (got ${JSON.stringify(a.library)})`); continue; }
-    if (a.view !== 'card') { flag(`${a.id}: \`library: true\` is for practice cards (view:'card') only`); continue; }
+    if (a.library !== true && a.library !== false) { flag(`${a.id}: \`library\` takes only true or false (got ${JSON.stringify(a.library)})`); continue; }
+    if (a.kind === 'check') { flag(`${a.id}: an exit check can't be a library song`); continue; }
     lib++;
     const track = String(a.track || (a.card && a.card.track) || '');
     const why = [];
@@ -7106,9 +7112,9 @@ function checkSongLibrary() {
     if (t) why.push(`track "${track}"`);
     const w = coreWords.find(cw => fold(a.title).includes(cw));
     if (w) why.push(`title names "${w}"`);
-    if (why.length) flag(`${a.id}: a Core song's card is marked \`library: true\` (${why.join(', ')}) — Core songs keep their class activities and stay out of the library`);
+    if (why.length) flag(`${a.id}: a Core song's card is marked \`library\` (${why.join(', ')}) — Core songs keep their class activities and stay out of the library`);
   }
-  if (!bad) ok(`${lib} library song${lib === 1 ? '' : 's'}, none of them a Core song; the board skips them`);
+  if (!bad) ok(`${lib} movable song${lib === 1 ? '' : 's'}, none of them a Core song; the board skips the ones on the Songs page`);
 }
 
 /* 1bn. PLAY-ALONG FIRST: WHOLE-SONG CARDS ARE FINDABLE AND NO PAGE IS BLOCKED

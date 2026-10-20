@@ -11,6 +11,9 @@ see `WORKFLOW.md` and the git commit log.
   Core songs. It has Arsenal Efectivo, Ella, Las Mañanitas and Madrecita
   Querida. Press Play Along to open a song and play with the band.
 - **Every student can play every song on the list.**
+- **Las Mañanitas — A, E7 and D moved to the Songs page.** It is in the
+  More Play Along songs list, next to Las Mañanitas — Play Along. It is no
+  longer on In-Class Activities.
 
 ## 2026-10-19 — Ella: play along with the band
 
