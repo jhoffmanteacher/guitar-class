@@ -14279,7 +14279,9 @@ function caBoardOrder(activities, board, opts){
   const b = board || {};
   const retired = o.retired || {};
   const legacy = o.legacyNumbers || {};
-  const list = (activities || []).filter(a => a && a.id);
+  // Library songs live on the Songs page only (caIsLibraryCard): off the
+  // board, unnumbered, and never assigned — even with a leftover board entry.
+  const list = (activities || []).filter(a => a && a.id && !caIsLibraryCard(a));
   const manifest = (typeof MODULE_MANIFEST !== 'undefined') ? MODULE_MANIFEST : [];
   const shipped = a => { const n = Number(a.number); return Number.isFinite(n) ? n : Infinity; };
   // Numeric part of `ca-<n>`, never localeCompare on the id — that orders
@@ -14430,11 +14432,23 @@ function caForMe(a){ return activityForMe[a.id] !== false; }
    hide it (Jonathan: "i could stop assigning things to individual
    students" — so there is no per-student tag either). Hidden, Archive and Delete still take it off, exactly as everywhere
    else. It never reaches caIsVisible(), so it never blocks, never shows on
-   In-Class Activities and takes no #N — unless the card is ALSO placed and
-   dated on the board, which still works the old way for the students Who
-   names. Mirrored in teacher.js (teacherIsLibrarySong). */
+   In-Class Activities and takes no #N: caBoardOrder skips library cards,
+   so they can't be placed on the board (see caIsLibraryCard). */
+/* The data rule alone, no config: is this card a library song at all?
+   Never a Core song's card (Jonathan, 2026-10-20: "the core songs are not
+   included with the library songs because those have class activities") —
+   anything tied to a Song Journey page, a whole-song card or a lyric sheet
+   is out, even if `library: true` slips onto it; checks.mjs 1bq fails the
+   push if it does. caBoardOrder skips these cards entirely, so a library
+   song is never on the Class activities board, never on In-Class
+   Activities and never holds a #N. The console's Songs view manages them
+   (renderTeacherSongs in teacher.js). */
+function caIsLibraryCard(a){
+  return !!a && a.view === 'card' && a.library === true && !a.journey
+    && !(a.card && (a.card.wholeSong || a.card.sheet));
+}
 function caIsLibrarySong(a){
-  if(!a || a.view !== 'card' || a.library !== true) return false;
+  if(!caIsLibraryCard(a)) return false;
   return retiredActivityIds[a.id] !== true && hiddenActivityIds[a.id] !== true;
 }
 function caIsPlayAlongOnly(a){

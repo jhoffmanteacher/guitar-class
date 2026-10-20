@@ -1347,6 +1347,14 @@ body.t-wide .t-main{max-width:none}
 
 /* One card. draggable, so the grip is a hint rather than the handle —
    the whole card drags, which is far easier to hit on a trackpad. */
+/* Teacher console Songs view (renderTeacherSongs in teacher.js) — reuses the
+   board's card, row and control styles; these only lay out the name line. */
+.t-songs-intro{font-size:0.875rem;color:var(--text2);margin:4px 2px 12px;line-height:1.45}
+.t-songs{display:flex;flex-direction:column;gap:10px}
+.t-songs-name{font-weight:600}
+.t-songs-id{font-size:0.75rem;color:var(--text2)}
+.t-songs-done{margin-left:auto;font-size:0.8125rem;color:var(--text2)}
+.t-songs-off{font-size:0.8125rem;color:var(--text2);margin-right:8px}
 .t-board-card{background:var(--bg);border:1px solid var(--border2);border-radius:var(--radius);
   padding:9px 10px;margin-bottom:8px;font-size:0.875rem;cursor:grab}
 .t-board-card:hover{border-color:var(--text3)}

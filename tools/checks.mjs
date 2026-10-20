@@ -7054,6 +7054,63 @@ function checkSheetCards() {
   if (bad === 0) ok(`${n} lyric-sheet card${n === 1 ? '' : 's'} — sheet in the repo, chord count matches the notes, pdf.js vendored, renderer wired`);
 }
 
+/* 1bq. THE SONG LIBRARY HOLDS NO CORE SONG (Jonathan, 2026-10-20: "make
+   sure that the core songs are not included with the library songs because
+   those have class activities"). A `library: true` card is on every
+   student's Songs page and off the Class activities board (caIsLibraryCard
+   in app.js). caIsLibraryCard already refuses a card tied to a Song Journey
+   page, a whole-song card or a lyric sheet — so a Core card marked by
+   mistake would silently drop out of the library instead of leaking into
+   it. This check makes that mistake loud instead, and also catches the
+   case the code cannot see: a Core song's card with no `journey` (a part
+   card like ca-10 or ca-18) whose track or title names a Core song. It also
+   requires `library` to be exactly true and only on practice cards, and
+   proves the guard is wired: caIsLibraryCard must exist, test `journey`,
+   and be what caBoardOrder filters on. */
+function checkSongLibrary() {
+  head('1bq. The song library holds no Core song');
+  let activities = [];
+  try {
+    const src = readFileSync(join(ROOT, 'class-activities.js'), 'utf8');
+    const sandbox = { console };
+    sandbox.window = sandbox;
+    vm.createContext(sandbox);
+    vm.runInContext(src, sandbox, { filename: 'class-activities.js' });
+    activities = sandbox.CLASS_ACTIVITIES || [];
+  } catch { return; /* reported by 1d */ }
+  let bad = 0;
+  const flag = m => { err(m); problems++; bad++; };
+  const appSrc = readFileSync(join(ROOT, 'app.js'), 'utf8');
+  const block = /const SONG_JOURNEYS = \[([\s\S]*?)\n\];/.exec(appSrc);
+  const core = block ? [...block[1].matchAll(/\bid:\s*'([^']+)'/g)].map(m => m[1]) : [];
+  if (core.length !== 6) { flag(`1bq expects the six Core songs in SONG_JOURNEYS, found ${core.length}`); return; }
+  // Core song names as titles spell them: "the-cure" -> "the cure".
+  const coreWords = core.map(id => id.replace(/-/g, ' '));
+  const fold = t => String(t || '').toLowerCase().replace(/[\u2018\u2019'".,!?]/g, '').replace(/\s+/g, ' ');
+  const fn = /function caIsLibraryCard\(a\)\{([\s\S]*?)\n\}/.exec(appSrc);
+  if (!fn) flag('1bq: caIsLibraryCard() is missing from app.js — the Core-song guard is gone');
+  else if (!/a\.journey/.test(fn[1]) || !/wholeSong/.test(fn[1])) flag('1bq: caIsLibraryCard() no longer refuses journey / wholeSong cards');
+  if (!/filter\(a => a && a\.id && !caIsLibraryCard\(a\)\)/.test(appSrc)) flag('1bq: caBoardOrder no longer skips library cards — they would land back on the Class activities board');
+  let lib = 0;
+  for (const a of activities) {
+    if (!a || a.library === undefined) continue;
+    if (a.library !== true) { flag(`${a.id}: \`library\` takes only true (got ${JSON.stringify(a.library)})`); continue; }
+    if (a.view !== 'card') { flag(`${a.id}: \`library: true\` is for practice cards (view:'card') only`); continue; }
+    lib++;
+    const track = String(a.track || (a.card && a.card.track) || '');
+    const why = [];
+    if (a.journey !== undefined) why.push(`journey "${a.journey}"`);
+    if (a.card && a.card.wholeSong) why.push('card.wholeSong');
+    if (a.card && a.card.sheet) why.push('card.sheet');
+    const t = core.find(id => track === id || track.startsWith(id + '-'));
+    if (t) why.push(`track "${track}"`);
+    const w = coreWords.find(cw => fold(a.title).includes(cw));
+    if (w) why.push(`title names "${w}"`);
+    if (why.length) flag(`${a.id}: a Core song's card is marked \`library: true\` (${why.join(', ')}) — Core songs keep their class activities and stay out of the library`);
+  }
+  if (!bad) ok(`${lib} library song${lib === 1 ? '' : 's'}, none of them a Core song; the board skips them`);
+}
+
 /* 1bn. PLAY-ALONG FIRST: WHOLE-SONG CARDS ARE FINDABLE AND NO PAGE IS BLOCKED
    (2026-10-06). A link to a song opens its whole-song practice card when
    students can open one for that layer, else the Song Journey page
@@ -7630,6 +7687,7 @@ function checkGuitarNotes() {
   checkSheetCards();
   checkCardCaptionWords();
   checkJourneyRetired();
+  checkSongLibrary();
   checkRepCountParity(rcSets, rcCtx);
   checkJourneySlowBpmLabels();
   checkGuitarNotes();

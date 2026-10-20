@@ -105,10 +105,13 @@
    songs" list for the WHOLE class as soon as it ships — no board slot,
    release date or "Play Along now" needed, and no #N. A song one student
    asked for goes here too: nobody is assigned anything (Jonathan,
-   2026-10-20). Hidden, Archive and Delete on the board still take it off
-   the list. Not for the
-   six Core songs — their whole-song cards open from their own Songs rows.
-   caIsLibrarySong (app.js) and teacherIsLibrarySong (teacher.js) read it.
+   2026-10-20). A library card is NOT a class activity: it never appears on
+   the Class activities board or on In-Class Activities. The teacher
+   console's Songs view manages it (Visible / Hidden, Preview, Copy link).
+   NEVER on a Core song's card (Jonathan: "those have class activities") —
+   caIsLibraryCard (app.js) ignores the field on any card with `journey`,
+   `card.wholeSong` or `card.sheet`, and checks.mjs 1bq fails the push if a
+   Core song's card is marked, by journey, track or title.
 
    METRONOME — `metronome: <bpm>` (optional; whole number, 40–220). Tapping
    the card open starts the Metro tool at that tempo, so every step is

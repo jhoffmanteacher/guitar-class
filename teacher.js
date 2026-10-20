@@ -183,6 +183,11 @@ async function showTeacherApp(user){
   if(toggle && !toggle.querySelector('[data-view="activities"]')){
     toggle.insertAdjacentHTML('beforeend', `<button class="t-vt" data-view="activities" onclick="setTeacherView('activities')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="5" y="3" width="14" height="18" rx="2"/><path d="M9 3h6v2a1 1 0 0 1-1 1h-4a1 1 0 0 1-1-1z"/><path d="m9 13 2 2 4-4"/></svg> Class activities</button>`);
   }
+  // Songs — the Songs page's library (renderTeacherSongs), managed apart
+  // from the Class activities board.
+  if(toggle && !toggle.querySelector('[data-view="songs"]')){
+    toggle.insertAdjacentHTML('beforeend', `<button class="t-vt" data-view="songs" onclick="setTeacherView('songs')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 18V5l12-2v13"/><circle cx="6" cy="18" r="3"/><circle cx="18" cy="16" r="3"/></svg> Songs</button>`);
+  }
   // Live quiz — the whole-class game (live-quiz.js). Injected here like its
   // neighbours so the feature stays in one file; the render call in
   // renderTeacherBody is guarded because that file loads separately.
@@ -961,7 +966,7 @@ function applyTeacherViewChrome(v){
   const legend=document.getElementById('t-legend'); if(legend) legend.style.display = v==='skills' ? '' : 'none';
   // Games, Trouble-spots and Students are all class-wide, not per-week —
   // hide the week tabs and the skill summary while any of them is showing.
-  const classWide = v==='games'||v==='trouble'||v==='students'||v==='manage'||v==='activities'||v==='reports'||v==='livequiz'||v==='mic';
+  const classWide = v==='games'||v==='trouble'||v==='students'||v==='manage'||v==='activities'||v==='reports'||v==='livequiz'||v==='mic'||v==='songs';
   const tabs=document.getElementById('t-week-tabs'); if(tabs) tabs.style.display = classWide ? 'none' : '';
   const summ=document.getElementById('t-summary'); if(summ) summ.style.display = classWide ? 'none' : '';
 }
@@ -1005,15 +1010,20 @@ let restoreActivityScroll = false;
    window, not a scroll pane: the dashboard is a plain long page, and #app
    (which does have its own pane — scrollPane() in app.js) is hidden the
    whole time teacher mode is up. */
+/* Which list the detail page was opened from — 'songs' when it came from the
+   Songs view, so Back returns there and that tab stays lit. */
+let activityDetailFrom='activities';
 function openActivityDetail(id){
   activityListScrollY = (teacherView==='activities' && !activityDetailId) ? window.scrollY : 0;
+  activityDetailFrom = (teacherView==='songs') ? 'songs' : 'activities';
   teacherView='activities'; activityDetailId=id;
-  applyTeacherViewChrome('activities');
+  applyTeacherViewChrome(activityDetailFrom);
   renderTeacherBody();   // synchronous for a detail page — renderTeacherActivities returns early before its config promise
   window.scrollTo({top:0});
 }
 function backToActivitiesList(){
   activityDetailId=null;
+  if(activityDetailFrom==='songs'){ activityDetailFrom='activities'; setTeacherView('songs'); window.scrollTo({top:0}); return; }
   restoreActivityScroll=true;   // the table paints from a promise — see renderTeacherActivities
   renderTeacherBody();
 }
@@ -1025,6 +1035,7 @@ function renderTeacherBody(){
   else if(teacherView==='students') studentDetailUid ? renderTeacherStudentDetail(studentDetailUid) : renderTeacherStudents();
   else if(teacherView==='manage') renderTeacherManage();
   else if(teacherView==='activities') renderTeacherActivities();
+  else if(teacherView==='songs') renderTeacherSongs();
   else if(teacherView==='reports') renderTeacherReports();
   else if(teacherView==='mic') renderTeacherMic();
   else if(teacherView==='livequiz'){ if(typeof renderTeacherLiveQuiz==='function') renderTeacherLiveQuiz(); }
@@ -1342,7 +1353,8 @@ function renderTeacherActivities(opts){
   const cached = !!(opts && opts.cached) && teacherClassConfigLoaded;
   const box=document.getElementById('t-grid-container');
   if(activityDetailId){ renderTeacherActivityDetail(activityDetailId); return; }
-  const activities=(window.CLASS_ACTIVITIES||[]);
+  // Library songs aren't class activities — the Songs view manages them.
+  const activities=(window.CLASS_ACTIVITIES||[]).filter(a=>!caIsLibraryCard(a));
   if(!activities.length){
     setBoardWide(false);
     box.innerHTML='<div class="t-loading">No activities yet — they\'ll appear here once one is pushed to the site.</div>';
@@ -1559,10 +1571,7 @@ function renderTeacherActivities(opts){
       const isRetired=teacherActivityRetired(a.id,cfg);
       const strays=[];
       if(dates[a.id]) strays.push(`release date ${escHtml(dates[a.id])}`);
-      const lib=teacherIsLibrarySong(a);
-      // A library song's Hidden is live from Built (it pulls the Songs row),
-      // so it's offered below rather than listed as a leftover.
-      if(hidden[a.id]===true && !lib) strays.push('Hidden');
+      if(hidden[a.id]===true) strays.push('Hidden');
       if(optional[a.id]===true) strays.push('Optional');
       if(optional[a.id]===false) strays.push('Required');
       if(pins.includes(a.id)) strays.push('Pinned');
@@ -1585,9 +1594,7 @@ function renderTeacherActivities(opts){
             +`<button class="tg-seg-btn" data-set-activity-archived data-id="${escAttr(a.id)}" data-state="restore" title="${escAttr(teacherActivityDeleted(a.id,cfg)?'Put this activity back — it returns blank, ready to place and publish':'Put this activity back, with its date and name')}">Restore</button>`
             +(teacherActivityDeleted(a.id,cfg)?'':`<button class="tg-seg-btn t-act-danger" data-delete-activity data-id="${escAttr(a.id)}" title="Clear this activity's date, name and gate clears too">Delete</button>`)
             +`<button class="tg-seg-btn" data-open-activity data-id="${escAttr(a.id)}">Preview</button></div>`
-          : (lib?`<div class="t-board-stray">${hidden[a.id]===true?'Hidden — off the Songs page.':'On every student&rsquo;s Songs page, under More Play Along songs. Assign it only to also put it on In-Class Activities.'}</div>`
-              +`<div class="t-board-ctl">${visSeg(a)}</div>`:'')
-            +`<div class="t-board-ctl">${moveSelect(a,'Assign to…',null)}`
+          : `<div class="t-board-ctl">${moveSelect(a,'Assign to…',null)}`
             +`<button class="tg-seg-btn" data-open-activity data-id="${escAttr(a.id)}">Preview</button>`
             +`<span class="t-board-ctl-sp">`
             +`<button class="tg-seg-btn" data-set-activity-archived data-id="${escAttr(a.id)}" data-state="archive" title="Retire this activity without ever placing it">Archive</button>`
@@ -1633,8 +1640,7 @@ function renderTeacherActivities(opts){
         +`<div class="t-board-row">${isRetired?'':'<span class="t-board-grip" aria-hidden="true">&#x2630;</span>'}${numBox}${titleBlock(a)}</div>`
         +(isRetired
           ? `<div class="t-board-stray">${teacherActivityDeleted(a.id,cfg)?'Deleted':'Archived'} — students don't see it and it holds no number. Restore puts it back here.</div>`
-          : publishBlock(a)+(teacherIsLibrarySong(a)?`<div class="t-board-stray">Also on every student&rsquo;s Songs page (More Play Along songs), whatever Who says.</div>`:'')
-            +`<div class="t-board-ctl">${visSeg(a)}${optSeg(a)}${teacherIsLibrarySong(a)?'':playSeg(a)}${pinBtn(a)}${whoPicker(a)}${moveSelect(a,'Move to…',curModule)}${moveBtns}</div>`)
+          : publishBlock(a)+`<div class="t-board-ctl">${visSeg(a)}${optSeg(a)}${playSeg(a)}${pinBtn(a)}${whoPicker(a)}${moveSelect(a,'Move to…',curModule)}${moveBtns}</div>`)
         /* Footer: what this card IS (how many have done it) and the actions
            that take it out of the run, behind a hairline — so the row above,
            which is what gets used every day, reads as the card's controls
@@ -2270,7 +2276,7 @@ function teacherActivityGridHtml(a){
 function renderTeacherActivityDetail(id){
   setBoardWide(false);
   const box=document.getElementById('t-grid-container');
-  const back=`<button type="button" class="stu-back" data-back-to-activities>&#x2190; All activities</button>`;
+  const back=`<button type="button" class="stu-back" data-back-to-activities>&#x2190; ${activityDetailFrom==='songs'?'All songs':'All activities'}</button>`;
   const raw=(window.CLASS_ACTIVITIES||[]).find(x=>x.id===id);
   if(!raw){ box.innerHTML=`${back}<div class="t-loading">Could not find that activity — it may have been renamed or removed.</div>`; return; }
   /* The Full chords / Power chords switch (chordVersions — caView in app.js):
@@ -2491,6 +2497,7 @@ async function teacherSetActivityHidden(id, state){
     teacherConfigSaveFailed(e, 'Could not save that change — check your connection and Firestore rules.');
   }
   if(teacherView==='activities') renderTeacherActivities();
+  else if(teacherView==='songs') renderTeacherSongs();
 }
 /* Required / Optional — config/class.optionalActivities (id -> true). An
    optional activity is still visible to students (caIsVisible ignores this
@@ -2766,6 +2773,52 @@ async function teacherSetActivityArchived(id, state){
     teacherConfigSaveFailed(e, 'Could not save that change — check your connection and Firestore rules.');
   }
   if(teacherView==='activities') renderTeacherActivities();
+  else if(teacherView==='songs') renderTeacherSongs();
+}
+/* ── Songs view (Jonathan, 2026-10-20: "manage these songs from a different
+   area of the teacher console instead of the class activities part") ──
+   The Songs page's "More Play Along songs" library — every card
+   caIsLibraryCard (app.js) accepts, Core songs never among them. Those
+   cards are not on the Class activities board at all (caBoardOrder skips
+   them), so this is the only place they are managed. One row per song:
+   Visible / Hidden (the same hiddenActivities flag the board writes), how
+   many students have checked off the whole card, Preview and Copy link.
+   No dates, no module, no #N, no Who: every student gets every song. An
+   archived or deleted one (from before this view existed) shows Restore. */
+function renderTeacherSongs(){
+  setBoardWide(false);
+  const box=document.getElementById('t-grid-container');
+  const songs=(window.CLASS_ACTIVITIES||[]).filter(caIsLibraryCard);
+  const intro=`<div class="t-songs-intro">Every song here is on every student&rsquo;s Songs page, under <strong>More Play Along songs</strong>. Hidden takes a song off that list. Core songs are not here &mdash; they open from their own rows on the Songs page and are managed in Class activities.</div>`;
+  if(!songs.length){ box.innerHTML=intro+'<div class="t-loading">No library songs yet. A practice card with <code>library: true</code> shows up here once it is pushed.</div>'; return; }
+  if(!box.querySelector('.t-songs')) box.innerHTML='<div class="t-loading">Loading…</div>';
+  loadTeacherClassConfig().then(cfg=>{
+    if(teacherView!=='songs') return;   // switched views mid-flight
+    if(!cfg) return;                    // superseded by a newer read
+    const hidden=cfg.hiddenActivities||{};
+    const roster=allStudentsRaw.filter(s=>!((cfg.archived||{})[s.uid]));
+    const name=a=>teacherActivityTitle(a,cfg).split(' — ')[0];
+    songs.sort((x,y)=>name(x).localeCompare(name(y)));
+    const rows=songs.map(a=>{
+      const retired=teacherActivityRetired(a.id,cfg);
+      const isHidden=hidden[a.id]===true;
+      const done=roster.filter(s=>(s.classActivities||{})[a.id]===true).length;
+      const status=retired
+        ? `<span class="t-songs-off">${teacherActivityDeleted(a.id,cfg)?'Deleted':'Archived'} &mdash; not on the Songs page</span>`
+          +`<button class="tg-seg-btn" data-set-activity-archived data-id="${escAttr(a.id)}" data-state="restore">Restore</button>`
+        : `<div class="tg-seg">`
+          +`<button class="tg-seg-btn ${!isHidden?'on':''}" data-set-activity-hidden data-id="${escAttr(a.id)}" data-state="show" title="On every student's Songs page">Visible</button>`
+          +`<button class="tg-seg-btn ${isHidden?'on':''}" data-set-activity-hidden data-id="${escAttr(a.id)}" data-state="hide" title="Off the Songs page for everyone">Hidden</button></div>`;
+      return `<div class="t-board-card t-songs-row${(isHidden||retired)?' t-board-dim':''}">`
+        +`<div class="t-board-row"><span class="t-songs-name">${escHtml(name(a))}</span><span class="t-songs-id">${escHtml(a.id)}</span>`
+        +`<span class="t-songs-done">${roster.length?`${done} of ${roster.length} students done`:'No student data yet'}</span></div>`
+        +`<div class="t-board-ctl">${status}<span class="t-board-ctl-sp">`
+        +`<button class="tg-seg-btn" data-open-activity data-id="${escAttr(a.id)}">Preview</button>`
+        +`<button class="tg-seg-btn" data-copy-activity-link data-id="${escAttr(a.id)}">Copy link</button></span></div>`
+        +`</div>`;
+    }).join('');
+    box.innerHTML=intro+`<div class="t-songs">${rows}</div>`;
+  });
 }
 /* Delete = archive, plus wipe every console setting this activity has. The
    wipe is the whole point of having a second button: it is what makes a
@@ -2921,10 +2974,6 @@ function teacherActivityStudents(id, cfg){
   if(who && typeof who==='object') Object.keys(who).forEach(u=>{ if(who[u]===true) out[u]=true; });
   return out;
 }
-/* The song library — mirrors caIsLibrarySong (app.js): a `library: true`
-   practice card is on every student's Songs page, placed on the board or
-   not, unless it is Hidden, archived or deleted. */
-function teacherIsLibrarySong(a){ return !!a && a.view==='card' && a.library===true; }
 function teacherActivityForStudent(a, uid, cfg){
   const who=teacherActivityStudents(a.id, cfg);
   return !Object.keys(who).length || who[uid]===true;
