@@ -262,7 +262,13 @@ var CHORD_DIAGRAMS = {
   'G5' : { position:3, chord:[[6,3,1],[5,5,3],[4,'x',''],[3,'x',''],[2,'x',''],[1,'x','']] },
   'A5' : { position:5, chord:[[6,5,1],[5,7,3],[4,'x',''],[3,'x',''],[2,'x',''],[1,'x','']] },
   'C5' : { position:3, chord:[[6,'x',''],[5,3,1],[4,5,3],[3,'x',''],[2,'x',''],[1,'x','']] },
-  'D5' : { position:5, chord:[[6,'x',''],[5,5,1],[4,7,3],[3,'x',''],[2,'x',''],[1,'x','']] }
+  'D5' : { position:5, chord:[[6,'x',''],[5,5,1],[4,7,3],[3,'x',''],[2,'x',''],[1,'x','']] },
+  /* F5 and B5 complete the natural-note power chords A5–G5 (2026-10-21, for
+     the Unit 3 power-chord quizzes). Same two-finger shape as the rest:
+     F5 is rooted on the low E at fret 1, B5 on the A string at fret 2.
+     Library only: nothing links to them yet. */
+  'F5' : { position:1, chord:[[6,1,1],[5,3,3],[4,'x',''],[3,'x',''],[2,'x',''],[1,'x','']] },
+  'B5' : { position:2, chord:[[6,'x',''],[5,2,1],[4,4,3],[3,'x',''],[2,'x',''],[1,'x','']] }
 };
 
 /* Strip the SVG's fixed width/height so it scales to its container via viewBox */
