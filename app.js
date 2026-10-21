@@ -1866,7 +1866,7 @@ function renderTabSystem(chunk, off, cols, hideNames, counts){
      it first. The beat cursor still lands on the fret cells (they carry
      data-seq too), and ▶ Play tab stays as the answer key. */
   if (hideNames) noteBtns.length = 0;
-  /* counts (optional, one string per note — tabCounts()): a row under the
+  /* counts (optional, one { lab, held } per note — tabCounts()): a row under the
      note names with the count each note starts on, "1 + 2 + 4" (ca-29,
      Jonathan 2026-10-21). Each cell carries data-seq, so the beat cursor
      lights the count with its note. Shown or hidden by the Counts switch
@@ -1874,7 +1874,11 @@ function renderTabSystem(chunk, off, cols, hideNames, counts){
   const countCells = [];
   if (Array.isArray(counts)) {
     countCells.push('<div class="tab-count" aria-hidden="true"></div>');
-    chunk.forEach((n, ci) => countCells.push(`<div class="tab-count" data-seq="${off + ci}" aria-hidden="true">${escHtml(counts[ci] || '')}</div>`));
+    chunk.forEach((n, ci) => {
+      const c = counts[ci] || { lab: '', held: [] };
+      const held = c.held.length ? ` <span class="tab-count-held">(${escHtml(c.held.join(' '))})</span>` : '';
+      countCells.push(`<div class="tab-count" data-seq="${off + ci}" aria-hidden="true">${escHtml(c.lab)}${held}</div>`);
+    });
     for (let pi = chunk.length; pi < cols; pi++) countCells.push('<div class="tab-count" aria-hidden="true"></div>');
   }
   return `
@@ -1887,20 +1891,26 @@ function renderTabSystem(chunk, off, cols, hideNames, counts){
 }
 /* The count each note STARTS on, worked out from its `beats`: "1" "2" "3"
    "4" on a beat, "+" on the half beat between. Anything finer (a triplet,
-   a sixteenth) gets no label rather than a wrong one. The notes start on
-   beat 1 of a bar — true of every practice-card section (fromBar is a
-   whole bar). */
+   a sixteenth) gets no label rather than a wrong one. `held` lists the
+   beats a note rings through with no new strum — ca-29's strum on 2 holds
+   through 3, shown as a grey "(3)" so the "+" after it reads as the "+" of
+   3, not of 2 (Jonathan, 2026-10-21). The notes start on beat 1 of a bar —
+   true of every practice-card section (fromBar is a whole bar). */
 function tabCounts(notes, beatsPerBar){
   const bpb = beatsPerBar > 0 ? beatsPerBar : 4;
+  const EPS = 1e-6;
+  const beatName = p => String((((Math.round(p) % bpb) + bpb) % bpb) + 1);
   let pos = 0;
   return notes.map(n => {
+    const len = n.beats > 0 ? n.beats : 1;
     const inBar = ((pos % bpb) + bpb) % bpb;
-    const whole = Math.round(inBar), half = Math.round(inBar * 2) / 2;
     let lab = '';
-    if (Math.abs(inBar - whole) < 1e-6) lab = String((whole % bpb) + 1);
-    else if (Math.abs(inBar - half) < 1e-6) lab = '+';
-    pos += n.beats > 0 ? n.beats : 1;
-    return lab;
+    if (Math.abs(inBar - Math.round(inBar)) < EPS) lab = beatName(inBar);
+    else if (Math.abs(inBar * 2 - Math.round(inBar * 2)) < EPS) lab = '+';
+    const held = [];
+    for (let b = Math.floor(pos + EPS) + 1; b < pos + len - EPS; b++) held.push(beatName(b));
+    pos += len;
+    return { lab, held };
   });
 }
 function renderTabBlock(notes, seqOffset, padTo, hideNames){

@@ -3690,8 +3690,8 @@ window.CLASS_ACTIVITIES = [
       track: 'all-along-the-watchtower',
       slowest: true,    // four-way speed control (Slow added 2026-10-09): Slowest / Slower / Slow / Normal — the student picks
       counts: true,     // Counts switch: the count under each chord, from its beats (2026-10-21) — see CARD above
-      caption:    'The whole song in power chords · count 1 & 2 (rest) & 4',
-      caption_es: 'La canción completa con acordes de potencia · cuenta 1 y 2 (silencio) y 4',
+      caption:    'The whole song in power chords',   // the count lives in the Counts switch and the section headings (2026-10-21)
+      caption_es: 'La canción completa con acordes de potencia',
       sections: [
         {
           label: 'Intro', label_es: 'Intro',
