@@ -268,7 +268,21 @@ var CHORD_DIAGRAMS = {
      F5 is rooted on the low E at fret 1, B5 on the A string at fret 2.
      Library only: nothing links to them yet. */
   'F5' : { position:1, chord:[[6,1,1],[5,3,3],[4,'x',''],[3,'x',''],[2,'x',''],[1,'x','']] },
-  'B5' : { position:2, chord:[[6,'x',''],[5,2,1],[4,4,3],[3,'x',''],[2,'x',''],[1,'x','']] }
+  'B5' : { position:2, chord:[[6,'x',''],[5,2,1],[4,4,3],[3,'x',''],[2,'x',''],[1,'x','']] },
+  /* Three-finger (three-note) power chords, 2026-10-21: the same roots as
+     the two-finger shapes above, plus the pinky on the next string up at the
+     ring finger's fret (the root again, one octave higher). Required in
+     Unit 3 since 2026-10-21 (Module 3 Set 2's "Add a third note"). The "-3"
+     keys are not in app.js's CHORD_NAMES, so nothing auto-links to them;
+     render with `node tools/guitar-diagrams-cli.mjs chord A5-3`. Open E5 uses
+     fingers 1 and 2 (no index-finger root to anchor). */
+  'E5-3' : { position:0, chord:[[6,0,0],[5,2,1],[4,2,2],[3,'x',''],[2,'x',''],[1,'x','']] },
+  'F5-3' : { position:1, chord:[[6,1,1],[5,3,3],[4,3,4],[3,'x',''],[2,'x',''],[1,'x','']] },
+  'G5-3' : { position:3, chord:[[6,3,1],[5,5,3],[4,5,4],[3,'x',''],[2,'x',''],[1,'x','']] },
+  'A5-3' : { position:5, chord:[[6,5,1],[5,7,3],[4,7,4],[3,'x',''],[2,'x',''],[1,'x','']] },
+  'B5-3' : { position:2, chord:[[6,'x',''],[5,2,1],[4,4,3],[3,4,4],[2,'x',''],[1,'x','']] },
+  'C5-3' : { position:3, chord:[[6,'x',''],[5,3,1],[4,5,3],[3,5,4],[2,'x',''],[1,'x','']] },
+  'D5-3' : { position:5, chord:[[6,'x',''],[5,5,1],[4,7,3],[3,7,4],[2,'x',''],[1,'x','']] }
 };
 
 /* Strip the SVG's fixed width/height so it scales to its container via viewBox */
