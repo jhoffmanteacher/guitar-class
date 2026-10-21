@@ -9,11 +9,13 @@ see `WORKFLOW.md` and the git commit log.
 
 - **"All Along the Watchtower — The Whole Song in Power Chords" has a new
   Counts switch.** It is at the top of the tab. Turn it on to see the count
-  under each chord, for example 1 + 2 (3) + 4. A grey number in brackets
-  is a beat with no strum: let the chord ring. The count lights up with the
+  under each chord, for example 1 + 2 3 + 4. A grey number is a beat with
+  no strum: let the chord ring. The count lights up with the
   chord as the song plays. The switch starts off.
 - **The tab heading on that card is shorter.** It no longer lists a count.
   Turn on Counts to see the count.
+- **The tab on that card is spaced by time.** A chord that lasts longer
+  takes more room, and each row is one bar.
 
 ## 2026-10-21 — Module 3: three-note power chords
 

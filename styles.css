@@ -2717,7 +2717,8 @@ body.ca-full:has(#class-activities-screen:not([hidden])) .app-layout .main{zoom:
 .tab-count{display:none;justify-content:center;align-items:center;margin-top:2px;font-size:0.875rem;font-weight:700;color:var(--text2);line-height:1.4;border-radius:4px}
 .pc-tab.counts-on .tab-count{display:flex}
 .tab-count.beat-now{background:var(--blue-text);color:var(--bg)}
-.tab-count-held{margin-left:4px;font-weight:600;color:var(--text3)}
+.tab-count-held{font-weight:600;color:var(--text3)}
+span.tab-count-held{margin-left:4px}
 .tab-count.beat-now .tab-count-held{color:var(--bg);opacity:0.75}
 /* The four-stop speed slider (pcSpeed3Html). --t is the thumb width: a
    native range puts stop i at t/2 + i*(100% - t)/3, so the ticks and the

@@ -1821,7 +1821,16 @@ const TAB_MAX_COLS = 8;
    padded column or a chord cell). `cols` is the column count every system in
    this tab shares; a short final chunk pads with empty cells that carry no
    data-seq, so the beat cursor never lands on one. */
-function renderTabSystem(chunk, off, cols, hideNames, counts){
+/* `timed` (with counts — a practice card's Counts TAB, 2026-10-21): each
+   note takes counts[ci].span eighth-note columns instead of one, so the
+   spacing follows the rhythm — an eighth is half the room of a quarter —
+   and a beat with no strum gets its own empty column with its count in
+   grey under it (Jonathan: "that way the 3 can sit alone without a chord
+   above it"). The filler columns carry no data-seq: the beat cursor still
+   lands only on the column a chord starts in. `cols` counts columns. */
+function renderTabSystem(chunk, off, cols, hideNames, counts, timed){
+  const spanOf = ci => (timed && counts && counts[ci] && counts[ci].span) || 1;
+  const used = chunk.reduce((a, n, ci) => a + spanOf(ci), 0);
   const rows = TAB_STRINGS.map(strLabel => {
     const cells = [`<div class="tab-str-label">${strLabel}</div>`];
     chunk.forEach((n, ci) => {
@@ -1837,8 +1846,9 @@ function renderTabSystem(chunk, off, cols, hideNames, counts){
       } else {
         cells.push(`<div class="tab-cell" data-seq="${off + ci}"></div>`);
       }
+      for (let k = 1; k < spanOf(ci); k++) cells.push('<div class="tab-cell"></div>');
     });
-    for (let pi = chunk.length; pi < cols; pi++) cells.push('<div class="tab-cell"></div>');
+    for (let pi = used; pi < cols; pi++) cells.push('<div class="tab-cell"></div>');
     return cells.join('');
   }).join('');
   const noteBtns = ['<div></div>'];
@@ -1858,8 +1868,9 @@ function renderTabSystem(chunk, off, cols, hideNames, counts){
       : `${escHtml(n.note)}<span class="tab-spkr"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" style="width:1em;height:1em;vertical-align:-0.15em"><path d="M4 9v6h4l5 4V5L8 9z"/><path d="M17 8a5 5 0 0 1 0 8"/></svg></span>`;
     const tip = hasFinger ? t('tab.playFinger',{n:n.finger, note:n.note}) : t('tab.playNote',{note:n.note});
     noteBtns.push(`<button type="button" class="tab-note-btn${hasFinger ? ' has-finger' : ''}" data-seq="${off + ci}" data-midis="${midisAttr}" onclick="playBeat(this)" title="${escAttr(tip)}" aria-label="${escAttr(tip)}">${label}</button>`);
+    for (let k = 1; k < spanOf(ci); k++) noteBtns.push('<div></div>');
   });
-  for (let pi = chunk.length; pi < cols; pi++) noteBtns.push('<div></div>');
+  for (let pi = used; pi < cols; pi++) noteBtns.push('<div></div>');
   /* hideNames (a tab spec's `hideNames: true`): no row under the staff at all —
      fret numbers only. Sight-reading practice (ca-21) needs the student to
      work out each note from the fret, not read the letter or tap it to hear
@@ -1875,11 +1886,14 @@ function renderTabSystem(chunk, off, cols, hideNames, counts){
   if (Array.isArray(counts)) {
     countCells.push('<div class="tab-count" aria-hidden="true"></div>');
     chunk.forEach((n, ci) => {
-      const c = counts[ci] || { lab: '', held: [] };
-      const held = c.held.length ? ` <span class="tab-count-held">(${escHtml(c.held.join(' '))})</span>` : '';
+      const c = counts[ci] || { lab: '', held: [], fill: [] };
+      /* Untimed, a held beat prints beside the count, "2 (3)"; timed, it
+         gets its own column (the filler cells below). */
+      const held = !timed && c.held.length ? ` <span class="tab-count-held">(${escHtml(c.held.join(' '))})</span>` : '';
       countCells.push(`<div class="tab-count" data-seq="${off + ci}" aria-hidden="true">${escHtml(c.lab)}${held}</div>`);
+      for (let k = 1; k < spanOf(ci); k++) countCells.push(`<div class="tab-count tab-count-held" aria-hidden="true">${escHtml((c.fill && c.fill[k - 1]) || '')}</div>`);
     });
-    for (let pi = chunk.length; pi < cols; pi++) countCells.push('<div class="tab-count" aria-hidden="true"></div>');
+    for (let pi = used; pi < cols; pi++) countCells.push('<div class="tab-count" aria-hidden="true"></div>');
   }
   return `
       <div class="tab-grid" style="grid-template-columns:28px repeat(${cols},1fr)">
@@ -1909,8 +1923,19 @@ function tabCounts(notes, beatsPerBar){
     else if (Math.abs(inBar * 2 - Math.round(inBar * 2)) < EPS) lab = '+';
     const held = [];
     for (let b = Math.floor(pos + EPS) + 1; b < pos + len - EPS; b++) held.push(beatName(b));
+    /* span: how many eighth-note columns the note fills on a timed TAB
+       (null when its length isn't a whole number of eighths — a triplet —
+       and the TAB falls back to one column a note). fill: the count under
+       each column after the first — a beat number on a beat, '' on a "+". */
+    const halves = len * 2, span = Math.abs(halves - Math.round(halves)) < EPS && halves >= 1 ? Math.round(halves) : null;
+    const fill = [];
+    for (let k = 1; span && k < span; k++){
+      const p = pos + k / 2;
+      fill.push(Math.abs(p - Math.round(p)) < EPS ? beatName(p) : '');
+    }
+    const start = pos;
     pos += len;
-    return { lab, held };
+    return { lab, held, span, fill, start };
   });
 }
 function renderTabBlock(notes, seqOffset, padTo, hideNames){
@@ -12621,7 +12646,22 @@ function pcTabHtml(a, L){
        Ignored unless it accounts for every note (checks.mjs 1bf fails that). */
     const rowsSpec = Array.isArray(S.s.rows) && S.s.rows.every(r => Number.isInteger(r) && r > 0)
       && S.s.rows.reduce((x, y) => x + y, 0) === S.notes.length ? S.s.rows : null;
-    if(rowsSpec){
+    /* A Counts card lays its TAB out in time (renderTabSystem `timed`): one
+       bar per row, every row as wide as a bar in eighths, so beat 3 sits
+       under beat 3 in every row. Needs every note a whole number of
+       eighths; otherwise the count row still shows, on the plain layout. */
+    const timed = !!counts && counts.length > 0 && counts.every(x => x.span);
+    if(timed){
+      const bpb = L.tr.beatsPerBar > 0 ? L.tr.beatsPerBar : 4;
+      const bars = [];
+      counts.forEach((x, i) => { const b = Math.floor(x.start / bpb + 1e-6); (bars[b] = bars[b] || []).push(i); });
+      const rowsIdx = bars.filter(Boolean);
+      const cols = Math.max(bpb * 2, ...rowsIdx.map(r => r.reduce((a, i) => a + counts[i].span, 0)));
+      rowsIdx.forEach(r => {
+        const k = r[0], m = r.length;
+        grids.push(renderTabSystem(S.notes.slice(k, k + m), S.seqOff + k, cols, false, counts.slice(k, k + m), true));
+      });
+    } else if(rowsSpec){
       const cols = Math.max(...rowsSpec);
       /* `rowLabels` / `rowLabels_es` (optional, one string per row) print a
          line over each row — the lyric that row is sung to (ca-35, Las
