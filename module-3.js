@@ -1,5 +1,5 @@
 // ============================================================
-//  MODULE 3 — Two-Finger Power Chords
+//  MODULE 3 — Power Chords
 //  Edit this file to change Module 3 content.
 //  Upload to GitHub alongside index.html + firebase-config.js
 // ============================================================
@@ -11,10 +11,10 @@ SETS.push(
     songThread: [{ name: '"Seven Nation Army"', journey: 'tabs/seven-nation-army.html', layer: 3, note: 'the riff as power chords' }, { name: '"All Along the Watchtower"', journey: 'tabs/all-along-the-watchtower.html', layer: 3, note: 'the loop as power chords' }],
     label: 'Set 1',
     locked: false,
-    module: 'Two-Finger Power Chords',
+    module: 'Power Chords',
     moduleNum: 3,
-    unit: 'Module 3 · Two-Finger Power Chords',
-    unit_es: 'Módulo 3 · Acordes de potencia con dos dedos',
+    unit: 'Module 3 · Power Chords',
+    unit_es: 'Módulo 3 · Acordes de potencia',
     title: 'Set 1',
     subtitle: 'Power chord shape · Moving on E & A strings · Muting',
     subtitle_es: 'Forma del acorde de potencia · Moverse por las cuerdas Mi y La · Silenciar cuerdas',
@@ -505,10 +505,10 @@ SETS.push(
     songThread: [{ name: '"Luna"', journey: 'tabs/luna.html', layer: 3, note: 'the F5–A5 vamp' }, { name: '"Sweet Child O\' Mine"', journey: 'tabs/sweet-child-o-mine.html', layer: 3, note: 'Assessment preparation: the D5–C5–G5 progression' }, { name: '"All Along the Watchtower"', journey: 'tabs/all-along-the-watchtower.html', layer: 3, note: 'the A5–G5–F5 loop' }, { name: '"the cure"', journey: 'tabs/the-cure.html', layer: 3, note: 'the changes as power chords' }],
     label: 'Set 2',
     locked: false,
-    module: 'Two-Finger Power Chords',
+    module: 'Power Chords',
     moduleNum: 3,
-    unit: 'Module 3 · Two-Finger Power Chords',
-    unit_es: 'Módulo 3 · Acordes de potencia con dos dedos',
+    unit: 'Module 3 · Power Chords',
+    unit_es: 'Módulo 3 · Acordes de potencia',
     title: 'Set 2',
     subtitle: 'Power chords with metronome · Chord changes · Strumming patterns',
     subtitle_es: 'Acordes de potencia con metrónomo · Cambios de acorde · Patrones de rasgueo',
@@ -763,16 +763,64 @@ SETS.push(
             ]
           },
           {
-            title: 'Optional: add a third note',
-            title_es: 'Opcional: agrega una tercera nota',
+            title: 'Add a third note',
+            title_es: 'Agrega una tercera nota',
             steps: [
           {
             label: 'Challenge 4 — Octave Add-On (optional)', label_es: 'Reto 4 — Octava extra (opcional)',
-            text: 'Your pinky plays the root again, one octave higher. An octave is the same note name, eight letters up: G A B C D E F G.<ol><li>Play G5.</li><li>Add your pinky on the D string, fret 5.</li><li>Strum the three strings.</li></ol>This step is optional. You\'ve got it when: you play three strums in a row with all three notes ringing and no buzz.',
-            text_es: 'Tu meñique toca otra vez la raíz, una octava más aguda. Una octava es la misma nota, ocho letras más arriba: G A B C D E F G.<ol><li>Toca G5.</li><li>Agrega tu meñique en la cuerda Re, traste 5.</li><li>Rasguea las tres cuerdas.</li></ol>Este paso es opcional. Lo tienes cuando: tocas tres rasgueos seguidos con las tres notas sonando y sin zumbido.',
-            hint: 'If the three-note chord buzzes, play the two-note shape.',
-            hint_es: 'Si el acorde de tres notas zumba, toca la forma de dos notas.',
+            text: 'Your pinky plays the root again, one octave higher. An octave is the same note name, eight letters up: G A B C D E F G.<ol><li>Play G5.</li><li>Add your pinky on the D string, fret 5.</li><li>Strum the three strings.</li></ol>You\'ve got it when: you play three strums in a row with all three notes ringing and no buzz.',
+            text_es: 'Tu meñique toca otra vez la raíz, una octava más aguda. Una octava es la misma nota, ocho letras más arriba: G A B C D E F G.<ol><li>Toca G5.</li><li>Agrega tu meñique en la cuerda Re, traste 5.</li><li>Rasguea las tres cuerdas.</li></ol>Lo tienes cuando: tocas tres rasgueos seguidos con las tres notas sonando y sin zumbido.',
+            hint: 'If a note buzzes, press your pinky closer to the fret wire.',
+            hint_es: 'Si una nota zumba, presiona tu meñique más cerca del traste.',
             skills: [5]
+          },
+          {
+            label: 'Challenge — Three-Note Power Chords on the A String', label_es: 'Reto — Acordes de potencia de tres notas en la cuerda La',
+            text: 'The root can be on the A string too. Your pinky goes on the G string, at the same fret as your ring finger.<ol><li>Play D5: index finger on the A string, fret 5. Ring finger on the D string, fret 7.</li><li>Add your pinky on the G string, fret 7.</li><li>Strum only those three strings.</li><li>Move the shape to C5: A string, fret 3. Then move back to D5.</li></ol>You\'ve got it when: you play D5 → C5 → D5 four times with all three notes ringing and no buzz.',
+            text_es: 'La raíz también puede estar en la cuerda La. Tu meñique va en la cuerda Sol, en el mismo traste que tu anular.<ol><li>Toca D5: dedo índice en la cuerda La, traste 5. Dedo anular en la cuerda Re, traste 7.</li><li>Agrega tu meñique en la cuerda Sol, traste 7.</li><li>Rasguea solo esas tres cuerdas.</li><li>Mueve la forma a C5: cuerda La, traste 3. Luego regresa a D5.</li></ol>Lo tienes cuando: tocas D5 → C5 → D5 cuatro veces con las tres notas sonando y sin zumbido.',
+            hint: 'Let the tip of your index finger touch the low E string. That keeps the low E string quiet.',
+            hint_es: 'Deja que la punta de tu dedo índice toque la cuerda Mi grave. Así la cuerda Mi grave no suena.',
+            stuck: 'Play D5 with two notes. Add the pinky. Strum once and listen to each string. Then try C5.',
+            stuck_es: 'Toca D5 con dos notas. Agrega el meñique. Rasguea una vez y escucha cada cuerda. Luego prueba C5.',
+            skills: [5],
+            chords: [
+              { name: 'D5', chord: [[6,'x'],[5,5,'1'],[4,7,'3'],[3,7,'4'],[2,'x'],[1,'x']], position: 5 },
+              { name: 'C5', chord: [[6,'x'],[5,3,'1'],[4,5,'3'],[3,5,'4'],[2,'x'],[1,'x']], position: 3 }
+            ],
+            playSeq: { label: 'Hear D5 → C5 → D5 (three notes)', label_es: 'Escucha D5 → C5 → D5 (tres notas)', bpm: 60, notes: [{ midi: [50,57,62], beats: 4 }, { midi: [48,55,60], beats: 4 }, { midi: [50,57,62], beats: 4 }] }
+          },
+          {
+            label: 'Challenge — "Watchtower" Loop with Three Notes', label_es: 'Reto — Vuelta de "Watchtower" con tres notas',
+            text: '<ol><li>Add your pinky to A5, G5 and F5. It goes on the D string, at the same fret as your ring finger.</li><li>Play the "Watchtower" loop: A5 · G5 · F5 · G5.</li><li>Count each bar: 1 + 2 + 3 + 4 +. Strum the first chord on 1, +, 2. Strum the second chord on the + after 3 and on 4.</li><li>Play at 60 BPM.</li></ol>You\'ve got it when: you play the loop four times with all three notes ringing on every strum and no stops.',
+            text_es: '<ol><li>Agrega tu meñique a A5, G5 y F5. Va en la cuerda Re, en el mismo traste que tu anular.</li><li>Toca la vuelta de "Watchtower": A5 · G5 · F5 · G5.</li><li>Cuenta cada compás: 1 + 2 + 3 + 4 +. Rasguea el primer acorde en 1, +, 2. Rasguea el segundo acorde en el + después del 3 y en el 4.</li><li>Toca a 60 BPM.</li></ol>Lo tienes cuando: tocas la vuelta cuatro veces con las tres notas sonando en cada rasgueo y sin detenerte.',
+            hint: 'Keep all three fingers down when you move. Slide your whole hand as one shape.',
+            hint_es: 'Mantén los tres dedos abajo cuando te mueves. Desliza toda la mano como una sola forma.',
+            stuck: 'Play the loop with two notes until the changes are clean. Then add your pinky to A5 only. Then add it to every chord.',
+            stuck_es: 'Toca la vuelta con dos notas hasta que los cambios salgan limpios. Luego agrega tu meñique solo a A5. Luego agrégalo a todos los acordes.',
+            levelUp: 'Play it at 70 BPM.',
+            levelUp_es: 'Tócalo a 70 BPM.',
+            skills: [1, 5],
+            chords: [
+              { name: 'A5', chord: [[6,5,'1'],[5,7,'3'],[4,7,'4'],[3,'x'],[2,'x'],[1,'x']], position: 5 },
+              { name: 'G5', chord: [[6,3,'1'],[5,5,'3'],[4,5,'4'],[3,'x'],[2,'x'],[1,'x']], position: 3 },
+              { name: 'F5', chord: [[6,1,'1'],[5,3,'3'],[4,3,'4'],[3,'x'],[2,'x'],[1,'x']], position: 1 }
+            ],
+            tab: {
+              caption: '"Watchtower" loop, three notes — A5 · G5 · F5 · G5 · 60 BPM',
+              caption_es: 'Vuelta de "Watchtower", tres notas — A5 · G5 · F5 · G5 · 60 BPM',
+              notes: [
+                { frets: [['D', 7], ['A', 7], ['E', 5]], note: 'A5', midi: [57, 52, 45], beats: 0.5 },
+                { frets: [['D', 7], ['A', 7], ['E', 5]], note: 'A5', midi: [57, 52, 45], beats: 0.5 },
+                { frets: [['D', 7], ['A', 7], ['E', 5]], note: 'A5', midi: [57, 52, 45], beats: 1.5 },
+                { frets: [['D', 5], ['A', 5], ['E', 3]], note: 'G5', midi: [55, 50, 43], beats: 0.5 },
+                { frets: [['D', 5], ['A', 5], ['E', 3]], note: 'G5', midi: [55, 50, 43], beats: 1 },
+                { frets: [['D', 3], ['A', 3], ['E', 1]], note: 'F5', midi: [53, 48, 41], beats: 0.5 },
+                { frets: [['D', 3], ['A', 3], ['E', 1]], note: 'F5', midi: [53, 48, 41], beats: 0.5 },
+                { frets: [['D', 3], ['A', 3], ['E', 1]], note: 'F5', midi: [53, 48, 41], beats: 1.5 },
+                { frets: [['D', 5], ['A', 5], ['E', 3]], note: 'G5', midi: [55, 50, 43], beats: 0.5 },
+                { frets: [['D', 5], ['A', 5], ['E', 3]], note: 'G5', midi: [55, 50, 43], beats: 1 }
+              ]
+            },
           }
             ]
           },
@@ -1010,8 +1058,8 @@ SETS.push(
           choices_es: ['Ambos en la cuerda Mi grave, trastes 3 y 8', 'Ambos en la cuerda La, trastes 3 y 10', 'G5 en Mi grave (traste 3), C5 en La (traste 3)', 'G5 en La (traste 10), C5 en Mi grave (traste 8)'], answer: 2,
           explain: 'G is at fret 3 of the low E string and C is at fret 3 of the A string — so the fret number never changes, only the string does. G5 at fret 10 of the A string and C5 at fret 8 of the low E string are real chords too, but they make your hand jump.',
           explain_es: 'G está en el traste 3 de la cuerda Mi grave y C está en el traste 3 de la cuerda La — así que el número de traste nunca cambia, solo la cuerda. G5 en el traste 10 de la cuerda La y C5 en el traste 8 de la cuerda Mi grave también son acordes reales, pero hacen que tu mano salte.' } },
-      { id: 'm3w2-s5', text: 'Optional: add your pinky to the power chord shape (three notes)',
-        text_es: 'Opcional: agregar el meñique a la forma del acorde de potencia (tres notas)',
+      { id: 'm3w2-s5', text: 'Add your pinky to the power chord shape (three notes)',
+        text_es: 'Agregar el meñique a la forma del acorde de potencia (tres notas)',
         gotItWhen: 'your pinky lands on the next string at the same fret as your ring finger and all three notes ring cleanly — no buzz, no muffled string.',
         gotItWhen_es: 'tu meñique cae en la siguiente cuerda en el mismo traste que tu anular y las tres notas suenan limpias — sin zumbido, sin cuerdas apagadas.',
         practice: { type: 'mc', prompt: 'You add your pinky on the next string, at the same fret as your ring finger. What interval (an interval = the distance between two notes) did you just add to the chord?',
@@ -1073,8 +1121,8 @@ MODULE_SONGS[3] = [
 
 MODULE_REVIEWS[3] = {
   moduleNum: 3,
-  module: 'Two-Finger Power Chords',
-  module_es: 'Acordes de potencia con dos dedos',
+  module: 'Power Chords',
+  module_es: 'Acordes de potencia',
   skills: [
     { id: 'mr3-s1', text: 'I can fret a clean 2-finger power chord (root + 5th) with both notes ringing and no buzz',
       text_es: 'Puedo trastear un acorde de potencia limpio con dos dedos (raíz + quinta) con las dos notas sonando y sin zumbido', set: 'm3w1' },

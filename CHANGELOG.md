@@ -5,6 +5,15 @@ Notable changes to the Guitar Class site. Newest first.
 For the full session-by-session history (and the reasoning behind each change),
 see `WORKFLOW.md` and the git commit log.
 
+## 2026-10-21 — Module 3: three-note power chords
+
+- **Module 3 is now called Power Chords.**
+- **Set 2: adding your pinky is no longer optional.** The "Add a third
+  note" steps now count, and so does the skill on your checklist.
+- **Two new steps in Set 2.** Play D5 and C5 with three notes, with the
+  root on the A string. Then play the "Watchtower" loop with three notes.
+- Your saved progress did not change.
+
 ## 2026-10-20 — More Play Along songs on the Songs page
 
 - **The Songs page has a new list: More Play Along songs.** It is under
