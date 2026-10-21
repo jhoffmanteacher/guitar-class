@@ -308,8 +308,8 @@ async function showTeacherApp(user){
       const actLink=e.target.closest('[data-copy-activity-link]');
       if(actLink){ teacherCopyActivityLink(actLink.dataset.id, actLink); return; }
       const actRename=e.target.closest('[data-rename-activity]');
-      if(actRename){ activityEditId=actRename.dataset.id; renderTeacherActivities({cached:true}); return; }
-      if(e.target.closest('[data-rename-cancel]')){ activityEditId=null; renderTeacherActivities({cached:true}); return; }
+      if(actRename){ activityEditId=actRename.dataset.id; teacherRenderRenameView(); return; }
+      if(e.target.closest('[data-rename-cancel]')){ activityEditId=null; teacherRenderRenameView(); return; }
       const actSave=e.target.closest('[data-rename-save]');
       if(actSave){ teacherSaveActivityTitle(actSave.dataset.id); return; }
       const actReset=e.target.closest('[data-rename-reset]');
@@ -413,7 +413,7 @@ async function showTeacherApp(user){
       const box=e.target.closest('.t-act-title-edit');
       if(!box) return;
       if(e.key==='Enter'){ e.preventDefault(); teacherSaveActivityTitle(box.dataset.id); }
-      else if(e.key==='Escape'){ e.preventDefault(); activityEditId=null; renderTeacherActivities({cached:true}); }
+      else if(e.key==='Escape'){ e.preventDefault(); activityEditId=null; teacherRenderRenameView(); }
     });
   }
   // The teacher grid spans every set, so load all module data first. Sequential
@@ -966,7 +966,7 @@ function applyTeacherViewChrome(v){
 function setTeacherView(v){
   teacherView=v;
   if(v==='students') studentDetailUid=null; // clicking the tab always starts back at the roster
-  if(v==='activities'){ activityDetailId=null; activityEditId=null; } // same — the tab always starts back at the list, nothing mid-rename
+  if(v==='activities'||v==='songs'){ activityDetailId=null; activityEditId=null; } // same — the tab always starts back at the list, nothing mid-rename
   applyTeacherViewChrome(v);
   renderTeacherBody();
 }
@@ -2162,7 +2162,16 @@ function teacherActivityTitle(a, cfg){
 // all reach the same value without each re-finding the input.
 function teacherSaveActivityTitle(id){
   const inp=document.querySelector(`.t-act-title-edit[data-id="${CSS.escape(id)}"]`);
-  teacherSetActivityTitle(id, inp ? inp.value : '');
+  // The Songs view edits only the song's NAME and hands the rest of the
+  // title (" — Play Along") back on data-suffix, so the card keeps it.
+  const name=inp ? inp.value.trim() : '';
+  teacherSetActivityTitle(id, name ? name+((inp && inp.dataset.suffix)||'') : '');
+}
+// The rename editor lives in two views — the Class activities board and the
+// Songs list — and the same handlers open, close and save it in both.
+function teacherRenderRenameView(){
+  if(teacherView==='songs') renderTeacherSongs();
+  else renderTeacherActivities({cached:true});
 }
 /* Write (or clear) a rename. Same optimistic-then-roll-back write shape as
    teacherSetActivityHidden/Date above, against a third map on the same doc.
@@ -2201,6 +2210,7 @@ async function teacherSetActivityTitle(id, value){
     return;
   }
   if(teacherView==='activities') renderTeacherActivities();
+  else if(teacherView==='songs') renderTeacherSongs();
 }
 // One activity's full content, read-only — the actual "click to go to the
 // activity" destination. Built straight from window.CLASS_ACTIVITIES (the
@@ -2786,7 +2796,7 @@ async function teacherSetActivityArchived(id, state){
    archived or deleted one (from before this view existed) shows Restore. */
 function renderTeacherSongs(){
   const box=document.getElementById('t-grid-container');
-  const intro=`<div class="t-songs-intro">Every song here is on every student&rsquo;s Songs page, under <strong>More Play Along songs</strong>. Hidden takes a song off that list. Core songs are not here &mdash; they open from their own rows on the Songs page and are managed in Class activities.</div>`;
+  const intro=`<div class="t-songs-intro">Every song here is on every student&rsquo;s Songs page, under <strong>More Play Along songs</strong>. Hidden takes a song off that list, and the pencil renames one. Core songs are not here &mdash; they open from their own rows on the Songs page and are managed in Class activities.</div>`;
   if(!box.querySelector('.t-songs')) box.innerHTML='<div class="t-loading">Loading…</div>';
   loadTeacherClassConfig().then(cfg=>{
     if(teacherView!=='songs') return;   // switched views mid-flight
@@ -2809,8 +2819,25 @@ function renderTeacherSongs(){
         : `<div class="tg-seg">`
           +`<button class="tg-seg-btn ${!isHidden?'on':''}" data-set-activity-hidden data-id="${escAttr(a.id)}" data-state="show" title="On every student's Songs page">Visible</button>`
           +`<button class="tg-seg-btn ${isHidden?'on':''}" data-set-activity-hidden data-id="${escAttr(a.id)}" data-state="hide" title="Off the Songs page for everyone">Hidden</button></div>`;
+      // Rename: the box holds the name the Songs page shows; the rest of the
+      // card title (" — Play Along") rides along on data-suffix so the card
+      // keeps it. Same activityTitles rename as the Class activities board.
+      const full=teacherActivityTitle(a,cfg);
+      const suffix=name(a)===full ? '' : full.slice(name(a).length);
+      const renamed=full!==a.title;
+      if(activityEditId===a.id){
+        return `<div class="t-board-card t-songs-row">`
+          +`<span class="t-act-title-lbl">rename</span>`
+          +`<input type="text" class="t-act-title-edit" data-id="${escAttr(a.id)}" data-suffix="${escAttr(suffix)}" value="${escAttr(name(a))}" maxlength="100" spellcheck="false" aria-label="Rename ${escAttr(name(a))}">`
+          +`<span class="t-act-title-hint">Students see this name right away, on the Songs page and on the card, in both languages.${renamed?` Was: ${escHtml(a.title.split(' — ')[0])}`:''}</span>`
+          +`<div style="margin-top:7px;display:flex;gap:6px;flex-wrap:wrap">`
+          +`<button class="tg-seg-btn on" data-rename-save data-id="${escAttr(a.id)}">Save</button>`
+          +`<button class="tg-seg-btn" data-rename-cancel>Cancel</button>`
+          +(renamed?`<button class="tg-seg-btn" data-rename-reset data-id="${escAttr(a.id)}">Undo rename</button>`:'')
+          +`</div></div>`;
+      }
       return `<div class="t-board-card t-songs-row${(isHidden||retired)?' t-board-dim':''}">`
-        +`<div class="t-board-row"><span class="t-songs-name">${escHtml(name(a))}</span><span class="t-songs-id">${escHtml(a.id)}</span>`
+        +`<div class="t-board-row"><span class="t-songs-name">${escHtml(name(a))}</span> <button class="t-act-pencil" data-rename-activity data-id="${escAttr(a.id)}" title="Rename this song" aria-label="Rename ${escAttr(name(a))}">&#x270E;</button><span class="t-songs-id">${escHtml(a.id)}</span>`
         +`<span class="t-songs-done">${roster.length?`${done} of ${roster.length} students done`:'No student data yet'}</span></div>`
         +`<div class="t-board-ctl">${status}<span class="t-board-ctl-sp">`
         +`<button class="tg-seg-btn" data-open-activity data-id="${escAttr(a.id)}">Preview</button>`
@@ -2819,6 +2846,11 @@ function renderTeacherSongs(){
         +`</div>`;
     }).join('');
     box.innerHTML=intro+`<div class="t-songs">${rows}</div>`;
+    // Opening the editor is a full re-render — put the cursor in the box.
+    if(activityEditId){
+      const inp=box.querySelector('.t-act-title-edit');
+      if(inp){ inp.focus(); inp.select(); }
+    }
   });
 }
 /* Move a song (caIsSongCard in app.js) between Class activities and the

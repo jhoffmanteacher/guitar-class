@@ -5,6 +5,12 @@ Notable changes to the Guitar Class site. Newest first.
 For the full session-by-session history (and the reasoning behind each change),
 see `WORKFLOW.md` and the git commit log.
 
+## 2026-10-21 — Lolo Félix by Arsenal Efectivo
+
+- **"Arsenal Efectivo — Play Along" is now "Lolo Félix by Arsenal
+  Efectivo — Play Along".** It shows the song's name and the band. It is
+  the same card, and your saved progress did not change.
+
 ## 2026-10-21 — Watchtower power chords: see the count
 
 - **"All Along the Watchtower — The Whole Song in Power Chords" has a new
