@@ -954,16 +954,7 @@ let taFocusPreviewIdx={};
    that section's "Archived (N)" disclosure — it still holds its place, so
    Restore puts it back where it was. A DELETED one is taken off the board
    as well, so it lands back in Built with everything else unplaced. */
-/* The Class activities board is the one teacher view that wants the whole
-   window — two columns of cards, where .t-main's 900px reading column left
-   most of a 1366px Chromebook empty. Everything else here is a table or a
-   page of text and stays centred, so this is a body class rather than a
-   change to .t-main. Off for the activity DETAIL pages too: those are
-   reading, not laying out. Manage takes the full width too: its six
-   columns, with the student name kept on one line, overflow 900px. */
-function setBoardWide(on){ document.body.classList.toggle('t-wide', !!on); }
 function applyTeacherViewChrome(v){
-  if(v!=='activities') setBoardWide(v==='manage');
   document.querySelectorAll('.t-vt').forEach(b=>b.classList.toggle('on',b.dataset.view===v));
   const legend=document.getElementById('t-legend'); if(legend) legend.style.display = v==='skills' ? '' : 'none';
   // Games, Trouble-spots and Students are all class-wide, not per-week —
@@ -1359,14 +1350,12 @@ function renderTeacherActivities(opts){
   if(activityDetailId){ renderTeacherActivityDetail(activityDetailId); return; }
   const allActivities=window.CLASS_ACTIVITIES||[];
   if(!allActivities.length){
-    setBoardWide(false);
     box.innerHTML='<div class="t-loading">No activities yet — they\'ll appear here once one is pushed to the site.</div>';
     return;
   }
   // The whole roster, not the period-filtered list: the board is class-wide
   // and its done counts already read allStudentsRaw (doneSummaryRoster).
   if(allStudentsRaw.length===0){
-    setBoardWide(false);
     box.innerHTML='<div class="t-loading">No student data yet — students need to sign in first.</div>';
     return;
   }
@@ -1773,7 +1762,6 @@ function renderTeacherActivities(opts){
        with the page, so the window's keepY already covers it. */
     const oldBuilt=box.querySelector('[data-board-built]');
     const builtTop=oldBuilt ? oldBuilt.scrollTop : 0;
-    setBoardWide(true);
     box.innerHTML=`<div class="tg-note">Drag a built activity into a module to assign it. It goes live for students on its release date.</div>`
       +pinsHtml
       +`<details class="tg-help" data-board-help${boardHelpOpen?' open':''}><summary>How this page works</summary>`
@@ -2286,7 +2274,6 @@ function teacherActivityGridHtml(a){
     +studentTable;
 }
 function renderTeacherActivityDetail(id){
-  setBoardWide(false);
   const box=document.getElementById('t-grid-container');
   const back=`<button type="button" class="stu-back" data-back-to-activities>&#x2190; ${activityDetailFrom==='songs'?'All songs':'All activities'}</button>`;
   const raw=(window.CLASS_ACTIVITIES||[]).find(x=>x.id===id);
@@ -2798,7 +2785,6 @@ async function teacherSetActivityArchived(id, state){
    No dates, no module, no #N, no Who: every student gets every song. An
    archived or deleted one (from before this view existed) shows Restore. */
 function renderTeacherSongs(){
-  setBoardWide(false);
   const box=document.getElementById('t-grid-container');
   const intro=`<div class="t-songs-intro">Every song here is on every student&rsquo;s Songs page, under <strong>More Play Along songs</strong>. Hidden takes a song off that list. Core songs are not here &mdash; they open from their own rows on the Songs page and are managed in Class activities.</div>`;
   if(!box.querySelector('.t-songs')) box.innerHTML='<div class="t-loading">Loading…</div>';

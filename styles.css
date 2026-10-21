@@ -1202,11 +1202,9 @@ body.rail-collapsed .rail-tools .tool-popup{
 #ladder-clean{background:var(--green-bg);border-color:var(--green-text);color:var(--green-text)}
 #ladder-miss{background:var(--amber-bg);border-color:var(--amber-text);color:var(--amber-text)}
 /* ── Teacher dashboard ── */
-.t-main{max-width:900px;margin:0 auto;padding:24px 16px 60px}
-/* The Class activities board takes the window (teacher.js setBoardWide).
-   Every other teacher view is a table or a page of text and stays in the
-   900px reading column. */
-body.t-wide .t-main{max-width:none}
+/* Every teacher view takes the whole window (Jonathan, 2026-10-21) —
+   the old 900px reading column made some tabs full width and some not. */
+.t-main{margin:0 auto;padding:24px 16px 60px}
 .t-header{margin-bottom:20px}
 .t-header-row{display:flex;align-items:flex-start;justify-content:space-between;gap:12px;flex-wrap:wrap}
 .t-title{font-size:1.25rem;font-weight:500;margin-bottom:3px;font-family:var(--font-display)}
