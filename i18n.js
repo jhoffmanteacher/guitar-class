@@ -512,6 +512,8 @@
     'ca.cardSlow':             { en: 'Slow', es: 'Lento' },
     'ca.cardSpeed4Aria':       { en: 'Speed: slowest, slower, slow or normal', es: 'Velocidad: muy lenta, más lenta, lenta o normal' },
     'ca.cardSpeedLabel':       { en: 'Speed', es: 'Velocidad' },
+    'ca.cardCounts':           { en: 'Counts', es: 'Conteo' },
+    'ca.cardCountsAria':       { en: 'Show the count under each chord', es: 'Mostrar el conteo debajo de cada acorde' },
     'ca.cardGuitarAria':       { en: 'Guitar', es: 'Guitarra' },
     'ca.cardGuitarOn':         { en: 'Guitar on', es: 'Con guitarra' },
     'ca.cardGuitarTitle':      { en: 'Guitar off makes the record\u2019s guitar quieter, not silent, so you can play the part.',

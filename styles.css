@@ -2711,6 +2711,12 @@ body.ca-full:has(#class-activities-screen:not([hidden])) .app-layout .main{zoom:
 .pc-guitar[aria-checked="true"] .pc-speed-track{background:var(--green-text)}
 .pc-guitar[aria-checked="true"] .pc-speed-knob{left:21px}
 .pc-guitar .pc-speed-lab.on{color:var(--text);font-weight:700}
+/* The count row under a practice card's TAB (card.counts) and its switch in
+   the TAB head. Hidden until the switch is on. */
+.pc-tab .tab-head .pc-counts{min-height:26px;padding:0 8px 0 10px;flex-shrink:0}
+.tab-count{display:none;justify-content:center;align-items:center;margin-top:2px;font-size:0.875rem;font-weight:700;color:var(--text2);line-height:1.4;border-radius:4px}
+.pc-tab.counts-on .tab-count{display:flex}
+.tab-count.beat-now{background:var(--blue-text);color:var(--bg)}
 /* The four-stop speed slider (pcSpeed3Html). --t is the thumb width: a
    native range puts stop i at t/2 + i*(100% - t)/3, so the ticks and the
    line use the same sum and sit exactly under the knob's stops. The

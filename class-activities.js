@@ -152,6 +152,12 @@
                                            // song instead of looping — for a
                                            // card that IS the whole record
                                            // (ca-24 to ca-33)
+       counts: true,                       // optional (ca-29, 2026-10-21): a
+                                           // Counts switch in the TAB head, off
+                                           // by default, that shows the count
+                                           // each note starts on ("1 + 2 + 4")
+                                           // under the TAB. Worked out from the
+                                           // notes' beats — nothing to type.
        sheet: 'sheets/<song>.pdf',         // optional (ca-38, 2026-10-19): show
                                            // this chord sheet PDF instead of the
                                            // tab, drawn as is (lyrics included),
@@ -3683,6 +3689,7 @@ window.CLASS_ACTIVITIES = [
       wholeSong: true,  // stops at the end of the song instead of looping
       track: 'all-along-the-watchtower',
       slowest: true,    // four-way speed control (Slow added 2026-10-09): Slowest / Slower / Slow / Normal — the student picks
+      counts: true,     // Counts switch: the count under each chord, from its beats (2026-10-21) — see CARD above
       caption:    'The whole song in power chords · count 1 & 2 (rest) & 4',
       caption_es: 'La canción completa con acordes de potencia · cuenta 1 y 2 (silencio) y 4',
       sections: [

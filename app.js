@@ -1821,7 +1821,7 @@ const TAB_MAX_COLS = 8;
    padded column or a chord cell). `cols` is the column count every system in
    this tab shares; a short final chunk pads with empty cells that carry no
    data-seq, so the beat cursor never lands on one. */
-function renderTabSystem(chunk, off, cols, hideNames){
+function renderTabSystem(chunk, off, cols, hideNames, counts){
   const rows = TAB_STRINGS.map(strLabel => {
     const cells = [`<div class="tab-str-label">${strLabel}</div>`];
     chunk.forEach((n, ci) => {
@@ -1866,12 +1866,42 @@ function renderTabSystem(chunk, off, cols, hideNames){
      it first. The beat cursor still lands on the fret cells (they carry
      data-seq too), and ▶ Play tab stays as the answer key. */
   if (hideNames) noteBtns.length = 0;
+  /* counts (optional, one string per note — tabCounts()): a row under the
+     note names with the count each note starts on, "1 + 2 + 4" (ca-29,
+     Jonathan 2026-10-21). Each cell carries data-seq, so the beat cursor
+     lights the count with its note. Shown or hidden by the Counts switch
+     on a practice card (.pc-tab.counts-on, styles.css). */
+  const countCells = [];
+  if (Array.isArray(counts)) {
+    countCells.push('<div class="tab-count" aria-hidden="true"></div>');
+    chunk.forEach((n, ci) => countCells.push(`<div class="tab-count" data-seq="${off + ci}" aria-hidden="true">${escHtml(counts[ci] || '')}</div>`));
+    for (let pi = chunk.length; pi < cols; pi++) countCells.push('<div class="tab-count" aria-hidden="true"></div>');
+  }
   return `
       <div class="tab-grid" style="grid-template-columns:28px repeat(${cols},1fr)">
         <div class="tab-box" style="grid-column:2/${cols + 2};grid-row:1/7"></div>
         ${rows}
         ${noteBtns.join('')}
+        ${countCells.join('')}
       </div>`;
+}
+/* The count each note STARTS on, worked out from its `beats`: "1" "2" "3"
+   "4" on a beat, "+" on the half beat between. Anything finer (a triplet,
+   a sixteenth) gets no label rather than a wrong one. The notes start on
+   beat 1 of a bar — true of every practice-card section (fromBar is a
+   whole bar). */
+function tabCounts(notes, beatsPerBar){
+  const bpb = beatsPerBar > 0 ? beatsPerBar : 4;
+  let pos = 0;
+  return notes.map(n => {
+    const inBar = ((pos % bpb) + bpb) % bpb;
+    const whole = Math.round(inBar), half = Math.round(inBar * 2) / 2;
+    let lab = '';
+    if (Math.abs(inBar - whole) < 1e-6) lab = String((whole % bpb) + 1);
+    else if (Math.abs(inBar - half) < 1e-6) lab = '+';
+    pos += n.beats > 0 ? n.beats : 1;
+    return lab;
+  });
 }
 function renderTabBlock(notes, seqOffset, padTo, hideNames){
   if (!notes || !notes.length) return '';
@@ -12573,6 +12603,7 @@ function pcTabHtml(a, L){
   const pages = L.sections.map((S, si) => {
     const widest = S.notes.length || 1;
     const grids = [];
+    const counts = c.counts ? tabCounts(S.notes, L.tr.beatsPerBar) : null;   // card.counts — the Counts switch
     /* `rows` on a section — notes per tab row, e.g. [7, 9] — ends each row
        where the music does instead of balancing them (ca-25 / ca-31 chorus:
        one riff lap per row; balanced, lap 2's first E sat at the end of row
@@ -12593,11 +12624,11 @@ function pcTabHtml(a, L){
       let k = 0;
       rowsSpec.forEach((r, ri) => {
         if(labels && labels[ri]) grids.push(`<div class="tab-phrase-label pc-row-label">${escHtml(String(labels[ri]))}</div>`);
-        grids.push(renderTabSystem(S.notes.slice(k, k + r), S.seqOff + k, cols, false)); k += r;
+        grids.push(renderTabSystem(S.notes.slice(k, k + r), S.seqOff + k, cols, false, counts && counts.slice(k, k + r))); k += r;
       });
     } else {
       const perRow = Math.ceil(widest / Math.ceil(widest / TAB_MAX_COLS));
-      for(let k = 0; k < S.notes.length; k += perRow) grids.push(renderTabSystem(S.notes.slice(k, k + perRow), S.seqOff + k, perRow, false));
+      for(let k = 0; k < S.notes.length; k += perRow) grids.push(renderTabSystem(S.notes.slice(k, k + perRow), S.seqOff + k, perRow, false, counts && counts.slice(k, k + perRow)));
     }
     return `<div class="tab-page pc-page" data-page="${si}"${si ? ' hidden' : ''}><div class="tab-phrase">`
       + `<div class="tab-phrase-label">${escHtml(tf(S.s, 'caption'))}<span class="pc-rep" hidden></span></div>`
@@ -12617,7 +12648,17 @@ function pcTabHtml(a, L){
      blank line of its own and cost every card ~31px. On a card with
      sections it takes the "Tap a section…" line while it has something to
      say (styles.css), so nothing moves when the song starts. */
-  return `<div class="tab pc-tab"><div class="tab-head"><span class="tab-icon">${PC_TAB_ICON}</span><span class="tab-title">${escHtml(title)}</span><span class="tab-kind">${t('tab.label')}</span></div>`
+  /* The Counts switch (card.counts, ca-29 — Jonathan 2026-10-21: "a toggle
+     switch to turn it on or off, default off"). In the TAB's own head, not
+     the player row, which is full at Chromebook width. The choice is
+     remembered per browser (pcCountsPref); first visit is off. */
+  const countsOn = !!c.counts && pcCountsPref();
+  const countsSw = c.counts
+    ? `<button type="button" class="pc-speed pc-guitar pc-counts" role="switch" aria-checked="${countsOn}" aria-label="${escAttr(t('ca.cardCountsAria'))}" title="${escAttr(t('ca.cardCountsAria'))}" onclick="pcSetCounts(this)">`
+      + `<span class="pc-speed-lab on">${escHtml(t('ca.cardCounts'))}</span>`
+      + `<span class="pc-speed-track" aria-hidden="true"><span class="pc-speed-knob"></span></span></button>`
+    : '';
+  return `<div class="tab pc-tab${countsOn ? ' counts-on' : ''}"><div class="tab-head"><span class="tab-icon">${PC_TAB_ICON}</span><span class="tab-title">${escHtml(title)}</span>${countsSw}<span class="tab-kind">${t('tab.label')}</span></div>`
     + `<div class="tab-body"><p class="pc-status" aria-live="polite"></p>${chips}${pages}${pager}</div></div>`;
 }
 function pcChecksHtml(a, preview){
@@ -13390,6 +13431,18 @@ function pcSetGuitar(btn){
   if(labs[0]) labs[0].classList.toggle('on', !on);
   if(labs[1]) labs[1].classList.toggle('on', on);
   pcRetrack(root);
+}
+/* The Counts switch's remembered choice — per browser, a convenience only:
+   storage can throw or come back empty, and then the switch starts off. */
+const PC_COUNTS_KEY = 'pcCounts';
+function pcCountsPref(){ try { return localStorage.getItem(PC_COUNTS_KEY) === '1'; } catch(e){ return false; } }
+function pcSetCounts(btn){
+  const tab = btn.closest('.pc-tab');
+  if(!tab) return;
+  const on = !tab.classList.contains('counts-on');
+  tab.classList.toggle('counts-on', on);
+  btn.setAttribute('aria-checked', on ? 'true' : 'false');
+  try { localStorage.setItem(PC_COUNTS_KEY, on ? '1' : '0'); } catch(e){}
 }
 /* A speed or Guitar switch inside the last PC_LAP_LEAD of a lap lands after
    pcFrame armed the two handoff timers at the OLD rate, so the spare would

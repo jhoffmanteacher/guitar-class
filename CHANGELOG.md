@@ -5,6 +5,13 @@ Notable changes to the Guitar Class site. Newest first.
 For the full session-by-session history (and the reasoning behind each change),
 see `WORKFLOW.md` and the git commit log.
 
+## 2026-10-21 — Watchtower power chords: see the count
+
+- **"All Along the Watchtower — The Whole Song in Power Chords" has a new
+  Counts switch.** It is at the top of the tab. Turn it on to see the count
+  under each chord, for example 1 + 2 + 4. The count lights up with the
+  chord as the song plays. The switch starts off.
+
 ## 2026-10-21 — Module 3: three-note power chords
 
 - **Module 3 is now called Power Chords.**
