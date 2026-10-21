@@ -84,6 +84,10 @@ so at the reset either number every Challenge in order or drop the numbers
 from all of them — the step circle already numbers each card. Set 1's
 "One shape, three chords" label can become "Watch: what a power chord is"
 in the same edit, since that card now opens with the video.
+Same edit: drop "(optional)" / "(opcional)" from "Challenge 4 — Octave
+Add-On (optional)" (`m3w2·c·sec4·step0`). The three-note power chord stopped
+being optional on 2026-10-21 (section title, step text, hint and skill
+`m3w2-s5` were reworded then), but the label is frozen by index.
 
 **Module 1 Set 2 reorder: string names and guitar parts before tuning.** The
 tuning video (step 1) depends on string names (step 7) and tuning pegs (step
