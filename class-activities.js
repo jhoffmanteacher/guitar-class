@@ -5698,10 +5698,10 @@ window.CLASS_ACTIVITIES = [
     view:  'card',    // one screen: Play song + tab + checks — see CARD above
     library: true,    // on the Songs page's More Play Along songs list for everyone — see LIBRARY above
     optional: true,   // Optional until switched to Required on the board — see OPTIONAL above
-    title:    '"Lolo Félix" - Arsenal Efectivo — Play Along',
-    title_es: '"Lolo Félix" - Arsenal Efectivo — Toca con la canción',
-    intro:    'You can move a power chord along the low E and A strings — today you play Lolo Félix with the band using B5, E5, A5 and Bb5, all between frets 5 and 9.',
-    intro_es: 'Ya puedes mover un acorde de potencia por las cuerdas Mi grave y La — hoy tocas Lolo Félix con la banda con B5, E5, A5 y Bb5, todos entre los trastes 5 y 9.',
+    title:    '"Arsenal Efectivo" - Lolo Félix — Play Along',
+    title_es: '"Arsenal Efectivo" - Lolo Félix — Toca con la canción',
+    intro:    'You can move a power chord along the low E and A strings — today you play Arsenal Efectivo with the band using B5, E5, A5 and Bb5, all between frets 5 and 9.',
+    intro_es: 'Ya puedes mover un acorde de potencia por las cuerdas Mi grave y La — hoy tocas Arsenal Efectivo con la banda con B5, E5, A5 y Bb5, todos entre los trastes 5 y 9.',
     card: {
       track: 'arsenal-efectivo',
       slowest: true,    // Slowest / Slower / Slow / Normal

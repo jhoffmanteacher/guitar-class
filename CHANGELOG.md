@@ -8,8 +8,8 @@ see `WORKFLOW.md` and the git commit log.
 ## 2026-10-21 — Song names show the artist
 
 - **The More Play Along songs now show the song name in quotes, then the
-  artist.** For example: "Ella" - Junior H. "Arsenal Efectivo" is now
-  "Lolo Félix" - Arsenal Efectivo. They are the same cards, and your saved
+  artist.** For example: "Ella" - Junior H. "Arsenal Efectivo" now shows
+  "Arsenal Efectivo" - Lolo Félix. They are the same cards, and your saved
   progress did not change.
 
 ## 2026-10-21 — Watchtower power chords: see the count
