@@ -4,10 +4,12 @@ Source-of-truth documents that live outside the repo. Update them in place; Clau
 
 ## Curriculum
 
-- **Semester 1 Curriculum Map (V16 as of 2026-07-11; updated in place)** — Google Doc
-  - Link: https://docs.google.com/document/d/14f7kIXidY78TDijiN60E-zIHSz0syEIHXyFrgH15UJ0/edit?usp=sharing
-  - File ID: `14f7kIXidY78TDijiN60E-zIHSz0syEIHXyFrgH15UJ0`
-  - When to consult: any time we're updating module content (Module 1–8) so the site stays aligned with the curriculum plan.
+- **Semester 1 Calendar — source of truth** ("0. Guitar Semester 1 Map and Calendar 2026-2027"; updated in place) — Google Doc
+  - Link: https://docs.google.com/document/d/1SlPb4QoUxB1cv3Lh-TgYy9E3NsFifqtC52Bu23Po4iA/edit
+  - File ID: `1SlPb4QoUxB1cv3Lh-TgYy9E3NsFifqtC52Bu23Po4iA`
+  - When to consult: any time we're updating module content so the site stays aligned with the semester plan.
+
+- **Semester 1 Curriculum Map — RETIRED (2026-10-21).** Superseded by the Calendar above; don't use it as a reference. Kept here only so the old file ID is recognisable: `14f7kIXidY78TDijiN60E-zIHSz0syEIHXyFrgH15UJ0`.
 
 ## Design prototypes (archived)
 
