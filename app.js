@@ -12801,6 +12801,12 @@ function caCardBodyHtml(a, opts){
    when a sheet card is on screen. Vendored, not a CDN: the CSP in
    index.html runs scripts from this origin only (plus Google/Firebase). */
 const PC_SHEET_LEAD = 0.175;      // real seconds the dot runs ahead of the record — Jonathan tuned it by ear, 2026-10-19
+/* The tab's note cursor lights on the decoder's position, NOT held back by
+   snipLatency() as it was until 2026-10-22 (Jonathan, on ca-29: "the
+   highlighting of the notes is a few ms behind"). Held back, it lit with the
+   sound, and a cue that arrives with the sound reads as late — the same
+   reason the snippet dots are left slightly early. Raise it to lead more. */
+const PC_TAB_LEAD = 0;
 const PC_SHEET_SOLID = 0.42;      // beats the dot stays filled after a strum
 const PC_SHEET_MAX_SCALE = 1.9;   // CSS px per PDF point at most (chord names ~19px)
 const PC_SHEET_CHORD_RE = /^[A-G](#|b)?(maj|min|m|dim|aug|sus|add|\+|°|ø|[0-9])*(\/[A-G](#|b)?)?$/;
@@ -13332,10 +13338,10 @@ function pcFrame(){
     st.lastBeat = -1;
   }
   if(st.root.dataset.metro === '1') pcScheduleClick(st, audio.currentTime);
-  /* The tab lights a note when it SOUNDS (the output latency taken off); a
-     lyric sheet's dot runs PC_SHEET_LEAD ahead, so the chord is on screen as
-     the student plays it (Jonathan tuned it by ear, 2026-10-19). */
-  const shift = st.sheet ? PC_SHEET_LEAD : -snipLatency();
+  /* The tab lights a note PC_TAB_LEAD ahead of the decoder; a lyric sheet's
+     dot runs PC_SHEET_LEAD ahead, so the chord is on screen as the student
+     plays it (Jonathan tuned it by ear, 2026-10-19). */
+  const shift = st.sheet ? PC_SHEET_LEAD : PC_TAB_LEAD;
   const barsIn = snipBarsAt(st.win, audio.currentTime + shift * pcRate(st.root));
   const loc = pcLocate(L, barsIn);
   if(loc && (loc.seq !== st.seq || loc.rep !== st.rep || loc.si !== st.si)) pcPaint(st, loc);
