@@ -5418,7 +5418,7 @@ function checkChordBlitzRanks() {
    deliberately, after a look at whether it can pass a `base` or needs the
    strict default.
    ═════════════════════════════════════════════════════════════════ */
-const CONFIG_WRITERS = 25;   // teacherWriteConfig() call sites in teacher.js — 25th: teacherSetClassSong (cell-checked on its classSongs row), 2026-10-22; 22nd/23rd: teacherSetActivityStudent (cell-checked on one student's tick) and teacherSetActivityWholeClass (strict), 2026-10-13; 24th: teacherSetSongPlace (cell-checked on its songLibrary row), 2026-10-20
+const CONFIG_WRITERS = 26;   // teacherWriteConfig() call sites in teacher.js — 26th: teacherSetModuleHidden (cell-checked on each hiddenActivities row it writes), 2026-10-22; 25th: teacherSetClassSong (cell-checked on its classSongs row), 2026-10-22; 22nd/23rd: teacherSetActivityStudent (cell-checked on one student's tick) and teacherSetActivityWholeClass (strict), 2026-10-13; 24th: teacherSetSongPlace (cell-checked on its songLibrary row), 2026-10-20
 function checkConfigWriteGuard() {
   head('1ai. Every config/class write goes through the stale-write guard');
   let bad = 0;

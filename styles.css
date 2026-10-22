@@ -1461,6 +1461,7 @@ body.rail-collapsed .rail-tools .tool-popup{
 .t-board-closed .t-board-caret{transform:rotate(-45deg)}
 .t-board-closed .t-board-secbody{display:none}
 .t-board-count{margin-left:auto;color:var(--text3);font-weight:400;font-size:0.8125rem}
+.t-board-grouphide{flex:0 0 auto;font-weight:500}
 .t-board-secbody{padding:10px}
 /* Very slight banding down a module's cards, so a long section reads as rows
    rather than one wall. --bg2 is the site's own "next surface up" in both

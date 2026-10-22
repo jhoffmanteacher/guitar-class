@@ -268,6 +268,10 @@ async function showTeacherApp(user){
       if(period){ teacherSetStudentPeriod(period.dataset.uid, period.dataset.value); return; }
       const actHidden=e.target.closest('[data-set-activity-hidden]');
       if(actHidden){ teacherSetActivityHidden(actHidden.dataset.id, actHidden.dataset.state); return; }
+      // Sits inside the section heading, which is the fold toggle — matched
+      // here, ahead of data-board-fold below, so it doesn't also fold.
+      const modHidden=e.target.closest('[data-set-module-hidden]');
+      if(modHidden){ teacherSetModuleHidden(modHidden.dataset.module, modHidden.dataset.state); return; }
       const tvsPick=e.target.closest('[data-tvs-pick]');
       if(tvsPick){ teacherViewSongPick(tvsPick.dataset.id); return; }
       const tvsShare=e.target.closest('[data-tvs-share]');
@@ -1716,10 +1720,16 @@ function renderTeacherActivities(opts){
       const closed=boardSectionClosed[mn]===true;
       const cards=sortIds(sec.ids).map(id=>byId[id]).filter(Boolean).map(assignedCard).join('');
       const arch=sortIds(sec.retiredIds).map(id=>byId[id]).filter(Boolean);
+      // Hide / Show the whole group in one write (teacherSetModuleHidden).
+      // "Show all" only once every live card in it is already Hidden.
+      const allHidden=sec.ids.length>0 && sec.ids.every(id=>hidden[id]===true);
+      const groupBtn=sec.ids.length
+        ? `<button class="tg-seg-btn t-board-grouphide" data-set-module-hidden data-module="${mn}" data-state="${allHidden?'show':'hide'}" title="${allHidden?'Set every card in this group to Visible':'Set every card in this group to Hidden — any one can still be set back to Visible on its own'}">${allHidden?'Show all':'Hide all'}</button>`
+        : '';
       return `<div class="t-board-section${closed?' t-board-closed':''}" data-board-section data-module="${mn}">`
         +`<div class="t-board-sechead" data-board-fold data-module="${mn}">`
         +`<span class="t-board-caret" aria-hidden="true"></span><span>${label}</span>`
-        +`<span class="t-board-count">${sec.ids.length}</span></div>`
+        +`<span class="t-board-count">${sec.ids.length}</span>${groupBtn}</div>`
         +`<div class="t-board-secbody">`
         +(cards||`<div class="t-board-empty">Drop an activity here, or use “Assign to…”.</div>`)
         +(arch.length?`<details class="t-board-arch" ${boardArchOpen[mn]?'open':''} data-board-arch data-module="${mn}"><summary>Archived (${arch.length})</summary>${arch.map(assignedCard).join('')}</details>`:'')
@@ -1785,7 +1795,7 @@ function renderTeacherActivities(opts){
     box.innerHTML=`<div class="tg-note">Drag a built activity into a module to assign it. It goes live for students on its release date.</div>`
       +pinsHtml
       +`<details class="tg-help" data-board-help${boardHelpOpen?' open':''}><summary>How this page works</summary>`
-      +`<div class="tg-note">A card shows to students only when all four are true: it is <strong>assigned</strong> to a module here, its <strong>release date</strong> has arrived, it is not <strong>Hidden</strong>, and it is not <strong>Archived</strong>. Publish now dates it today; scheduling a later day holds it until then; Unpublish clears the date. A card's date stays editable once it's live, so you can move it to another day without unpublishing first — type a future day and it goes back to Scheduled. Use Hidden to pull back something already live, then un-hide any time — the date and the Hidden switch are independent, either one hides.<br><br>`
+      +`<div class="tg-note">A card shows to students only when all four are true: it is <strong>assigned</strong> to a module here, its <strong>release date</strong> has arrived, it is not <strong>Hidden</strong>, and it is not <strong>Archived</strong>. Publish now dates it today; scheduling a later day holds it until then; Unpublish clears the date. A card's date stays editable once it's live, so you can move it to another day without unpublishing first — type a future day and it goes back to Scheduled. Use Hidden to pull back something already live, then un-hide any time — the date and the Hidden switch are independent, either one hides. <strong>Hide all</strong> on a module's heading sets every card in it to Hidden at once (<strong>Show all</strong> undoes it); after that, any one card can still be set back to Visible on its own.<br><br>`
       +`<strong>Required / Optional</strong> decides whether a live card sends students to In-Class Activities when they sign in. Neither one locks any part of the site. Until a student finishes a Required card (the default) or you clear it for them, In-Class Activities opens first when they sign in, Today's activity shows it ahead of Optional cards, and the console marks them Pending. An Optional card still shows, tagged “Optional”, and students can still do it and mark it done, but it never opens first and never counts as Pending. Switch it either way at any time.<br><br>`
       +`<strong>Archive</strong> takes a card off students' In-Class Activities page for good but keeps its place in its module, its date and its name, so Restore puts it back exactly where it was. Archived cards hold no #number, so the ones after them count down by one. <strong>Delete</strong> also clears the date, rename and per-student gate clears, and takes the card off the board entirely — it comes back in Built, blank, to be placed and published from scratch. Neither one removes the activity from the site's code (only an update does) and neither touches what students have already finished, so the Done counts survive both.<br><br>`
       +`<strong>Pin</strong> puts an assigned card on the <strong>Keep practicing</strong> row at the top of students' In-Class Activities page, up to ${TEACHER_PINS_MAX} cards, in the order you pinned them — for a card you reuse on many days, so you don't have to re-date it. A pin needs no release date. It never blocks the site, never counts as one of today's activities, and a pinned card that is also one of today's activities leaves the row that day. Hidden, Archive and Delete still win (Delete also unpins). Students' Done marks are untouched.<br><br>`
@@ -2527,6 +2537,40 @@ async function teacherSetActivityHidden(id, state){
   }
   if(teacherView==='activities') renderTeacherActivities();
   else if(teacherView==='songs') renderTeacherSongs();
+}
+/* The Hide all / Show all button on a board section's heading: the same
+   hiddenActivities flag teacherSetActivityHidden writes, for every live card
+   in that module group at once, in ONE write. It writes the cards' own flags
+   and nothing about the group, so any one card can be set back with its own
+   Visible / Hidden switch afterwards. Archived / deleted cards in the group
+   are left alone. Cell-checked on each card's row it touches — a card someone
+   else re-hid or un-hid in the meantime refuses the whole write. */
+async function teacherSetModuleHidden(module, state){
+  const mn=Number(module);
+  const on = state==='hide';
+  const sec=teacherBoardView(teacherClassConfig).sections.find(s=>s.module===mn);
+  const ids=sec ? sec.ids.slice() : [];
+  if(!ids.length) return;
+  if(!teacherClassConfig.hiddenActivities) teacherClassConfig.hiddenActivities={};
+  const map=teacherClassConfig.hiddenActivities;
+  const before={};
+  ids.forEach(id=>{ before[id]={had:Object.prototype.hasOwnProperty.call(map,id), prev:map[id]}; });
+  ids.forEach(id=>{ if(on) map[id]=true; else delete map[id]; });
+  try{
+    await ensureDb();
+    const fv=firebase.firestore.FieldValue;
+    const rows={}, base={};
+    ids.forEach(id=>{
+      rows[id] = on ? true : fv.delete();
+      base['hiddenActivities.'+id] = before[id].had ? before[id].prev : undefined;
+    });
+    await teacherWriteConfig({hiddenActivities:rows}, base);
+  }catch(e){
+    // Save failed — put every card's flag back as it was before the click.
+    ids.forEach(id=>{ if(before[id].had) map[id]=before[id].prev; else delete map[id]; });
+    teacherConfigSaveFailed(e, 'Could not save that change — check your connection and Firestore rules.');
+  }
+  if(teacherView==='activities') renderTeacherActivities();
 }
 /* Required / Optional — config/class.optionalActivities (id -> true). An
    optional activity is still visible to students (caIsVisible ignores this
