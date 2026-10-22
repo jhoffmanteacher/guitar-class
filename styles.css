@@ -3275,6 +3275,14 @@ body.games-open{overflow:hidden}
    adjustments plus the states Riff Runner doesn't have (amber wrong-note,
    sustain tails, rest glyphs, the results marks row, the offset slider). */
 .games-card.gc-noterun::before{background:var(--blue-text)}
+/* Finger Gym: The Ladder rides Note Runner's track; the token's label slot
+   holds the circled finger number instead of the note name. */
+.games-card.gc-fingergym::before{background:var(--green-text)}
+.rn-token-label.nr-finger{width:16px;height:16px;border:1.5px solid var(--text2);border-radius:999px;display:flex;align-items:center;justify-content:center;font-size:0.6875rem;color:var(--text);background:var(--bg)}
+.fg-ladder{display:flex;justify-content:center;gap:10px;margin:8px 0}
+.fg-step{display:flex;flex-direction:column;align-items:center;gap:4px}
+.fg-step-fret{width:32px;height:32px;border:2px solid var(--text2);border-radius:999px;display:flex;align-items:center;justify-content:center;font-weight:800;font-variant-numeric:tabular-nums}
+.fg-step-finger{width:20px;height:20px;border:1.5px solid var(--green-text);border-radius:999px;display:flex;align-items:center;justify-content:center;font-size:0.75rem;font-weight:700;color:var(--green-text)}
 .nr-rest{border:none;background:none;margin-top:-15px}
 .nr-rest .rn-token-fret{color:var(--text3);opacity:0.55;font-size:1.25rem}
 .nr-token.nr-hit-pitch{border-color:var(--amber-text);background:var(--amber-bg)}

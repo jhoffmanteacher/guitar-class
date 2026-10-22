@@ -2667,6 +2667,8 @@ const GAME_ICO = {
   noterunner: gIco('<circle cx="9" cy="17" r="3"/><path d="M12 17V4l7 2.5"/><path d="M2 9h3.5M2 13h2.5"/>'),
   // Riff Runner — a running figure.
   runner:     gIco('<circle cx="15.5" cy="4.5" r="2"/><path d="M14 8.5 10.5 10.5l1.5 4-3 6"/><path d="M12 14.5l4 1 1.5 5"/><path d="M14 8.5 17.5 10l3 2.5"/><path d="M10.5 10.5 6.5 12"/>'),
+  // Finger Gym: The Ladder — four steps climbing, one per finger.
+  fingergym:  gIco('<path d="M3 20h4v-4h4v-4h4V8h4V4"/><circle cx="5" cy="17.5" r="1.2" fill="currentColor" stroke="none"/><circle cx="9" cy="13.5" r="1.2" fill="currentColor" stroke="none"/><circle cx="13" cy="9.5" r="1.2" fill="currentColor" stroke="none"/><circle cx="17" cy="5.5" r="1.2" fill="currentColor" stroke="none"/>'),
   // Chord Blitz — a lightning bolt (speed round).
   blitz:      gIco('<path d="M13 2 3 14h9l-1 8 10-12h-9l1-8z"/>'),
   // Fret Zap — a fretboard with one fret lit up: name that note, fast.
@@ -2695,6 +2697,7 @@ const GAMES_META = [
   { key:'radar',    cls:'gc-radar',    ico:GAME_ICO.radar,      titleKey:'games.radar.title', guitar:true,  descKey:'games.radar.desc' },
   { key:'roulette', cls:'gc-roulette', ico:GAME_ICO.roulette,   titleKey:'games.rr.title',    guitar:true,  descKey:'games.rr.desc' },
   { key:'noterunner', cls:'gc-noterun', ico:GAME_ICO.noterunner, titleKey:'games.nr.title',   guitar:true,  descKey:'games.nr.desc' },
+  { key:'fingergym', cls:'gc-fingergym', ico:GAME_ICO.fingergym, titleKey:'games.fg.title',    guitar:true,  descKey:'games.fg.desc' },
   { key:'simonguitar', cls:'gc-simonguitar', ico:GAME_ICO.simonguitar, titleKey:'games.psg.title', guitar:true, descKey:'games.psg.desc' },
   { key:'runner',   cls:'gc-runner',   ico:GAME_ICO.runner,     titleKey:'games.riff.title',  guitar:false, descKey:'games.riff.desc' },
   { key:'blitz',    cls:'gc-blitz',    ico:GAME_ICO.blitz,      titleKey:'games.cb.title',    guitar:false, descKey:'games.cb.desc' },
@@ -2851,6 +2854,7 @@ function gamesRenderHub(p){
     for (const k in saved.nr.levels) nrAllTime = Math.max(nrAllTime, saved.nr.levels[k] || 0);
   }
   const nrChip = gamesBestChip(nrAllTime, nrSess, '%');
+  const fgChip = gamesBestChip(fgTopBpm(true), fgTopBpm(false), ' BPM');
   let cdBest = 0;
   try {
     for (const d of CD_DECKS){
@@ -2878,7 +2882,7 @@ function gamesRenderHub(p){
   } catch(e){}
   const bcChip = gamesBestChip(saved.bc && saved.bc.best, bcBest);
   /* Per-game best chips, keyed by game. */
-  const chips = { fret:fretChip, cc:ccChip, blitz:cbChip, fretzap:fzChip, strum:shChip, radar:srChip, roulette:rrChip, runner:rnChip, noterunner:nrChip, detective:cdChip, riffid:ntrChip, simon:psChip, simonguitar:psgChip, patterndet:pdChip, buildchord:bcChip };
+  const chips = { fret:fretChip, cc:ccChip, blitz:cbChip, fretzap:fzChip, strum:shChip, radar:srChip, roulette:rrChip, runner:rnChip, noterunner:nrChip, fingergym:fgChip, detective:cdChip, riffid:ntrChip, simon:psChip, simonguitar:psgChip, patterndet:pdChip, buildchord:bcChip };
   const card = g => `
        <button type="button" class="games-card ${g.cls}" onclick="gamesShow('${g.key}')">
          <span class="games-card-ico">${g.ico}</span>
@@ -2948,6 +2952,13 @@ function gamesShow(view){
   if (view === 'noterunner'){
     p.innerHTML = gamesHeadHtml(GAME_ICO.noterunner + ' ' + t('games.nr.title'), true) + `<div id="nr-body"></div>` + coachFootHtml(true);   // Note Runner records (micRecStart('nr')) — say so
     nrSetup();
+    return;
+  }
+  if (view === 'fingergym'){
+    /* Finger Gym runs on Note Runner's engine (same #nr-body, same nr state,
+       same mic pipeline) — see the FINGER GYM block below nrRenderDone. */
+    p.innerHTML = gamesHeadHtml(GAME_ICO.fingergym + ' ' + t('games.fg.title'), true) + `<div id="nr-body"></div>` + coachFootHtml(true);
+    fgSetup();
     return;
   }
   if (view === 'detective'){
@@ -7853,7 +7864,7 @@ function nrSetStagePos(p){
    the games arcade that happens to be sitting in sessionStorage at boot. */
 const GAMES_SESSION_KEY_PREFIXES = [
   'bcDeck', 'bcBest:', 'cbDeck', 'cbDir', 'cbBest2:', 'ccBpm', 'ccProg', 'ccRate', 'ccBest:',
-  'cdDeck', 'cdBest2:', 'fretLevel', 'fzDeck', 'fzBest:', 'nrStagePos', 'nrBest:',
+  'cdDeck', 'cdBest2:', 'fgBest:', 'fretLevel', 'fzDeck', 'fzBest:', 'nrStagePos', 'nrBest:',
   'ntrBest', 'pdBest', 'psBest', 'psgBest', 'rnMode', 'rnSong', 'rnBest:',
   'rrBenched', 'rrDay', 'rrDone', 'rrLast', 'rrPts', 'rrQueue', 'rrSkips',
   'shBpm', 'shPat', 'shBest:', 'srBpm', 'srPat', 'srBest:',
@@ -7874,6 +7885,9 @@ function gamesResetForUser(){
 }
 
 function nrBody(){ return document.getElementById('nr-body'); }
+/* The level a round is running. Finger Gym puts its own level object on the
+   state (s.lv) and borrows the rest of the engine unchanged. */
+function nrLv(s){ return (s && s.lv) || NR_LEVELS[s.level]; }
 function nrBestKey(i){ return 'nrBest:' + i; }
 
 function nrOffset(){
@@ -8016,6 +8030,7 @@ function nrPick(i){
 }
 
 function nrRenderReady(msg){
+  if (nr && nr.gym){ fgRenderReady(msg); return; }
   const body = nrBody();
   if (!body || !nr) return;
   const lv = NR_LEVELS[nr.level];
@@ -8054,7 +8069,7 @@ async function nrHear(){
   }
   if (nr !== s || s.phase !== 'ready' || s.pv) return;   // switched during the resume
   if (!nrBody()){ nrHearStop(); return; }
-  const lv = NR_LEVELS[s.level];
+  const lv = nrLv(s);
   const spb = 60 / lv.bpm;
   const notes = nrGen(lv).filter(n => !n.rest);
   const startAt = ctx.currentTime + 0.2;
@@ -8087,6 +8102,7 @@ function nrHearStop(){
    window repeats the shape — that's what a power-chord riff is), and
    every event carries chord:true + a display name (root + "5"). ── */
 function nrGen(lv){
+  if (lv.gym) return fgGen(lv);
   const pool = [];
   lv.strings.forEach(str => {
     for (let f = 0; f <= lv.maxFret; f++)
@@ -8195,7 +8211,7 @@ async function nrStart(){
   s.micOn = true;
   window.coachMicLive = true;
 
-  const lv = NR_LEVELS[s.level];
+  const lv = nrLv(s);
   s.phase = 'countin';
   s.chordMode = !!lv.chords;
   s.beatMs = 60000 / lv.bpm;
@@ -8249,7 +8265,7 @@ function nrRenderPlay(){
       /* Chord tokens ride the ROOT string's lane: fret number in the circle
          (where the root goes), chord name above — the shape is always
          root + two-frets-up one string down, so that fully specifies it. */
-      return `<span class="rn-token nr-token${n.chord ? ' nr-chord' : ''}" id="nr-n-${i}"><span class="rn-token-label">${n.chord ? n.name : coachNoteName(n.midi)}</span><span class="rn-token-fret">${n.fret}</span>${n.dur > 1 ? '<span class="nr-tail"></span>' : ''}</span>`;
+      return `<span class="rn-token nr-token${n.chord ? ' nr-chord' : ''}" id="nr-n-${i}">${n.finger ? `<span class="rn-token-label nr-finger" aria-label="${escAttr(t('games.fg.fingerN', {n: n.finger}))}">${n.finger}</span>` : `<span class="rn-token-label">${n.chord ? n.name : coachNoteName(n.midi)}</span>`}<span class="rn-token-fret">${n.fret}</span>${n.dur > 1 ? '<span class="nr-tail"></span>' : ''}</span>`;
     }).join('');
     return `<div class="rn-lane nr-lane"><span class="rn-lane-name">${str} ${names[str]}</span>${toks}</div>`;
   });
@@ -8265,7 +8281,7 @@ function nrRenderPlay(){
      <div class="cc-beats" id="nr-beats">${'<span class="cc-pip"></span>'.repeat(4)}</div>
      ${nrRaceHtml()}
      <div class="rn-track nr-track" id="nr-track">${lanes.join('')}${rests}<div class="rn-hitline"></div><div class="rn-count" id="nr-count">&nbsp;</div></div>
-     <div class="coach-tip rn-center">${t('games.nr.tipPlay')}</div>
+     <div class="coach-tip rn-center">${t(s.gym ? 'games.fg.tipPlay' : 'games.nr.tipPlay')}</div>
      <button type="button" class="tp-btn coach-stop" onclick="nrFinish()">&#x25A0; ${t('games.common.stop')}</button>`;
 }
 
@@ -8381,8 +8397,8 @@ function nrLoop(){
       s.lastBeat = beat;
       const bar = Math.floor(beat / 4);
       const barEl = document.getElementById('nr-bar');
-      if (barEl && bar < NR_LEVELS[s.level].bars)
-        barEl.textContent = t('games.nr.barOfTotal', {bar: bar + 1, total: NR_LEVELS[s.level].bars});
+      if (barEl && bar < nrLv(s).bars)
+        barEl.textContent = t('games.nr.barOfTotal', {bar: bar + 1, total: nrLv(s).bars});
       document.querySelectorAll('#nr-beats .cc-pip').forEach((el, i) =>
         el.classList.toggle('on', i === ((beat % 4) + 4) % 4));
     }
@@ -8749,9 +8765,9 @@ function nrFinish(complete){
   s.phase = 'done';
   // A round played to the end is saved; a Stopped one is thrown away.
   if (rec && complete){
-    const lv = NR_LEVELS[s.level] || {};
+    const lv = nrLv(s) || {};
     micRecSave(rec, {
-      fields: { game: 'nr', level: s.level, bpm: lv.bpm || null, chords: !!s.chordMode,
+      fields: { game: s.gym ? 'fg' : 'nr', level: s.level, bpm: lv.bpm || null, chords: !!s.chordMode,
                 beatMs: Math.round(s.beatMs * 100) / 100, goodMs: s.goodMs, perfectMs: s.perfectMs,
                 score: s.score, eventTimes: 'played (arrival - micLatencyMs)' },
       expected: s.playable.map(n => ({ t: n.t, midi: n.midi, string: n.string, fret: n.fret,
@@ -8766,6 +8782,8 @@ function nrFinish(complete){
   const nPitch = s.playable.filter(n => n.result === 'pitch').length;
   s.acc = total ? Math.round(100 * (nPerfect + nGood) / total) : 0;
   s.passed = s.acc >= NR_PASS;
+  // Finger Gym keeps its own bests (games.fg) and has no weak map or stage.
+  if (s.gym){ fgFinish(s, complete, nPerfect, nGood, nPitch, total); return; }
   s.prevBest = nrBestMerged(s.level);
 
   /* Weak-map upkeep: misses and wrong notes charge a position up; clean
@@ -8926,6 +8944,207 @@ function nrRenderDone(nPerfect, nGood, nPitch, total){
      ${biasLine}
      ${weakLine}
      <div class="rn-center">${buttons}</div>`;
+}
+
+/* ════════════════════════════════════════════════════════════════════
+   FINGER GYM: THE LADDER — Finger Gym 1's first event (ca-2) as an arcade
+   round: frets 1-2-3-4 on the low E, then the same on the A, one finger
+   per fret, quarter notes. Built ON Note Runner, not beside it: the game
+   puts `gym: true` and its own level object (`lv`) on the shared `nr`
+   state and renders into the same #nr-body, so the count-in, the scrolling
+   TAB track, the race lane, the mic grading (onset + YIN, mic offset) and
+   the results maths are Note Runner's own code. The hooks are nrLv(),
+   nrGen()'s `lv.gym` branch, nrRenderReady()'s redirect, the finger label
+   in nrRenderPlay(), and the early return in nrFinish().
+   Speeds are the Gym's own medal ladder (the circuit step: 50 bronze,
+   60 silver, 70 gold) plus 80 for platinum. Score NR_PASS (80%) at a
+   speed to earn its medal and open the next one. Bests live in games.fg
+   (levels: { index -> best % }), apart from games.nr, so a Gym round
+   never moves Note Runner's adaptive stage or weak-spot map.
+   ════════════════════════════════════════════════════════════════════ */
+
+const FG_LEVELS = [
+  { medal: 'bronze',   bpm: 50 },
+  { medal: 'silver',   bpm: 60 },
+  { medal: 'gold',     bpm: 70 },
+  { medal: 'platinum', bpm: 80 }
+].map(l => ({ gym: true, bars: 4, strings: [6, 5], ...l }));
+const FG_MEDAL_ICO = { bronze: '&#x1F949;', silver: '&#x1F948;', gold: '&#x1F947;', platinum: '&#x1F3C6;' };
+
+function fgMedal(lv){ return t('games.fg.medal.' + lv.medal); }
+function fgBestKey(i){ return 'fgBest:' + i; }
+function fgBestSession(i){
+  let v = 0;
+  try { v = parseInt(sessionStorage.getItem(fgBestKey(i)), 10) || 0; } catch(e){}
+  return v;
+}
+function fgBestSaved(i){
+  return (typeof games !== 'undefined' && games && games.fg && games.fg.levels && games.fg.levels[i]) || 0;
+}
+function fgBestMerged(i){ return Math.max(fgBestSession(i), fgBestSaved(i)); }
+function fgUnlocked(i){
+  if (typeof isGatePreviewer === 'function' && isGatePreviewer()) return true;   // same rule as nrUnlocked
+  return i === 0 || fgBestMerged(i - 1) >= NR_PASS;
+}
+/* Fastest medal earned, for the hub chip — saved bests or this session's. */
+function fgTopBpm(saved){
+  let top = 0;
+  FG_LEVELS.forEach((lv, i) => {
+    if ((saved ? fgBestSaved(i) : fgBestSession(i)) >= NR_PASS) top = lv.bpm;
+  });
+  return top;
+}
+
+/* The round: low E ladder, A ladder, twice — one bar each. Finger = fret. */
+function fgGen(lv){
+  const notes = [];
+  for (let b = 0; b < lv.bars; b++){
+    const str = lv.strings[b % lv.strings.length];
+    for (let f = 1; f <= 4; f++){
+      notes.push({ string: str, fret: f, finger: f, midi: STRING_OPEN_MIDI[str] + f,
+                   beat: b * 4 + (f - 1), dur: 1 });
+    }
+  }
+  return notes;
+}
+
+function fgSetup(){
+  nr = { gym: true, phase: 'home', level: 0, lv: FG_LEVELS[0], timeouts: [], pv: null, micOn: false };
+  fgRenderHome();
+}
+
+function fgRenderHome(){
+  const body = nrBody();
+  if (!body || !nr || !nr.gym) return;
+  nrHearStop();
+  nr.phase = 'home';
+  const cards = FG_LEVELS.map((lv, i) => {
+    const un = fgUnlocked(i);
+    const b = fgBestMerged(i);
+    let meta;
+    if (!un){
+      meta = `<span class="rn-song-lock">${t('games.fg.locked', {medal: fgMedal(FG_LEVELS[i - 1])})}</span>`;
+    } else if (b >= NR_PASS){
+      meta = `<span class="rn-song-best">${FG_MEDAL_ICO[lv.medal]} ${t('games.fg.earned')} &middot; ${t('games.nr.bestPercent', {pct: b})}</span>`;
+    } else if (b > 0){
+      meta = `<span class="rn-song-best">${t('games.nr.bestPercent', {pct: b})}</span>`;
+    } else {
+      meta = `<span class="rn-song-best dim">${t('games.nr.notPlayedYet')}</span>`;
+    }
+    return `<button type="button" class="rn-song${un ? '' : ' locked'}" ${un ? `onclick="fgPick(${i})"` : 'disabled'}>
+       <span class="rn-song-title">${fgMedal(lv)} &mdash; ${lv.bpm} BPM</span>
+       ${meta}</button>`;
+  }).join('');
+  body.innerHTML =
+    `<div class="coach-tip rn-center">${t('games.fg.homeIntro', {pct: NR_PASS})}</div>
+     <div class="rn-songs">${cards}</div>`;
+}
+
+function fgPick(i){
+  if (!nr || !nr.gym || !fgUnlocked(i)) return;
+  nrHearStop();
+  nr.level = i;
+  nr.lv = FG_LEVELS[i];
+  nr.phase = 'ready';
+  fgRenderReady();
+}
+
+function fgRenderReady(msg){
+  const body = nrBody();
+  if (!body || !nr || !nr.gym) return;
+  const lv = nr.lv;
+  const b = fgBestMerged(nr.level);
+  body.innerHTML =
+    `${msg ? `<div class="coach-tip rn-center">${msg}</div>` : ''}
+     <div class="coach-tip rn-center"><strong>${fgMedal(lv)} &mdash; ${lv.bpm} BPM</strong><br>
+       ${t('games.fg.readyLine', {bars: lv.bars, notes: lv.bars * 4, pct: NR_PASS})}</div>
+     <div class="fg-ladder" aria-hidden="true">${[1, 2, 3, 4].map(f => `<span class="fg-step"><span class="fg-step-finger">${f}</span><span class="fg-step-fret">${f}</span></span>`).join('')}</div>
+     <div class="coach-tip rn-center">${t('games.fg.readyHow')}</div>
+     ${b > 0 ? `<div class="coach-tip rn-center">${t('games.nr.bestPercent', {pct: b})}</div>` : ''}
+     <div class="rn-center">
+       <button type="button" class="tp-btn" id="nr-hear" onclick="nrHear()">&#x1F50A; ${t('games.nr.hearButton')}</button>
+       <button type="button" class="tp-btn" onclick="fgRenderHome()">&#x2190; ${t('games.fg.allSpeeds')}</button>
+     </div>
+     <div class="rn-center"><button type="button" class="coach-start" onclick="nrStart()">&#x1F3B8; ${t('games.nr.startButton')}</button></div>
+     <div class="nr-slider"><label for="nr-off">${t('games.nr.offsetLabel')}</label>
+       <input type="range" id="nr-off" min="0" max="250" step="5" value="${nrOffset()}" oninput="nrSetOffset(this.value)">
+       <span id="nr-off-lbl">${nrOffset()} ms</span></div>
+     <div class="coach-tip rn-center">${t('games.nr.offsetTip')}</div>
+     <div class="coach-tip rn-center">${t('games.nr.clickNote')}</div>`;
+}
+
+/* Called from nrFinish() once the shared results maths is done (s.acc,
+   s.passed). Saves the best, awards arcade XP, draws the results. */
+function fgFinish(s, complete, nPerfect, nGood, nPitch, total){
+  s.prevBest = fgBestMerged(s.level);
+  if (s.acc > fgBestSession(s.level)){
+    try { sessionStorage.setItem(fgBestKey(s.level), String(s.acc)); } catch(e){}
+  }
+  if (typeof saveGames === 'function' && currentUser && !isDevBypassUser()){
+    if (!games.fg) games.fg = {};
+    if (!games.fg.levels) games.fg.levels = {};
+    let isNewBest = false;
+    if (s.acc > (games.fg.levels[s.level] || 0)){
+      games.fg.levels[s.level] = s.acc;
+      games.fg.at = new Date().toISOString().slice(0, 10);
+      isNewBest = true;
+    }
+    // Same rule as Note Runner: XP only for a round played through with a hit.
+    if (complete && nPerfect + nGood > 0) awardArcadeXp(isNewBest);
+    if (isNewBest) saveGames();
+  }
+  fgRenderDone(nPerfect, nGood, nPitch, total);
+}
+
+function fgRenderDone(nPerfect, nGood, nPitch, total){
+  const body = nrBody();
+  if (!body || !nr || !nr.gym) return;
+  const s = nr;
+  const lv = s.lv;
+  const nxt = s.level + 1 < FG_LEVELS.length ? s.level + 1 : -1;
+  const firstClear = s.passed && s.prevBest < NR_PASS;
+  const nextOpen = nxt >= 0 && fgUnlocked(nxt);
+
+  let status;
+  if (s.passed && firstClear){
+    status = `<div class="rn-unlock">${FG_MEDAL_ICO[lv.medal]} ${t('games.fg.passEarned', {medal: fgMedal(lv)})}${nxt >= 0
+      ? ' ' + t('games.fg.passNext', {medal: fgMedal(FG_LEVELS[nxt]), bpm: FG_LEVELS[nxt].bpm}) : ''}</div>`;
+  } else if (s.passed){
+    status = `<div class="coach-tip rn-center">${nxt < 0 ? t('games.fg.passTop') : t('games.fg.passAgain', {medal: fgMedal(lv)})}</div>`;
+  } else {
+    status = `<div class="coach-tip rn-center">${t('games.fg.fail', {pct: NR_PASS, medal: fgMedal(lv)})}</div>`;
+  }
+
+  let biasLine = '';
+  if (s.errs.length >= 4){
+    const med = tunerMedian(s.errs) * 1000;
+    biasLine = `<div class="coach-tip rn-center">${Math.abs(med) > 25
+      ? (med < 0 ? t('games.nr.biasEarly', {ms: Math.round(-med)}) : t('games.nr.biasLate', {ms: Math.round(med)}))
+      : t('games.nr.biasTight')}</div>`;
+  }
+
+  const marks = s.playable.map(n => {
+    const cls = n.result === 'perfect' ? 'p' : n.result === 'good' ? 'g' : n.result === 'pitch' ? 'a' : 'm';
+    const sym = n.result === 'perfect' ? '&#x2605;' : n.result === 'good' ? '&#x2713;' : n.result === 'pitch' ? '~' : '&middot;';
+    const str = t(n.string === 6 ? 'games.fg.strE' : 'games.fg.strA');
+    return `<span class="nr-mark ${cls}" title="${escAttr(str + ' — ' + t('games.nr.fretN', {n: n.fret}))}">${sym}</span>`;
+  }).join('');
+
+  const bestLine = (s.prevBest > 0 && s.acc > s.prevBest)
+    ? `<div class="sh-newbest">&#x1F3C6; ${t('games.nr.newBest', {prevBest: s.prevBest + '%'})}</div>` : '';
+
+  body.innerHTML =
+    `<div class="nr-acc ${s.passed ? 'pass' : ''}">${s.acc}%</div>
+     <div class="coach-tip rn-center">${t('games.nr.resLine', {hits: nPerfect + nGood, total, perfects: nPerfect})}${nPitch ? ' ' + t('games.nr.resPitch', {n: nPitch}) : ''}</div>
+     ${status}
+     ${bestLine}
+     <div class="nr-marks">${marks}</div>
+     ${biasLine}
+     <div class="rn-center">
+       <button type="button" class="coach-start" onclick="fgPick(${s.level})">&#x21BB; ${t('games.nr.tryAgainButton')}</button>
+       ${nextOpen ? `<button type="button" class="coach-start" onclick="fgPick(${nxt})">${t('games.fg.nextButton')} &#x2192;</button>` : ''}
+       <button type="button" class="tp-btn" onclick="fgRenderHome()">&#x2190; ${t('games.fg.allSpeeds')}</button>
+     </div>`;
 }
 
 /* ════════════════════════════════════════════════════════════════════

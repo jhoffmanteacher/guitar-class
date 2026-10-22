@@ -5,6 +5,15 @@ Notable changes to the Guitar Class site. Newest first.
 For the full session-by-session history (and the reasoning behind each change),
 see `WORKFLOW.md` and the git commit log.
 
+## 2026-10-22 — New game: Finger Gym: The Ladder
+
+- **A new guitar game in the Games arcade.** Play the Ladder from Finger
+  Gym: frets 1, 2, 3, 4 on the low E string, then on the A string, one
+  finger per fret. The circled number over each note is the finger to use.
+  The mic checks each note and the beat. Score 80% to earn a medal: Bronze
+  at 50 BPM, Silver at 60, Gold at 70, Platinum at 80. Each medal opens the
+  next speed.
+
 ## 2026-10-22 — Module 3 has a new name
 
 - **Module 3 is now "Power Chords & Strumming Patterns."** Same sets, same
