@@ -263,11 +263,11 @@ let playAlongActivityIds = {};
    `library` field — see caIsLibraryCard. Cached like the board, so a flaky
    read doesn't put a moved song back where it started. */
 let songLibraryIds = {};
-/* Teacher-only cards the console has shared with the whole class
-   (config/class.classSongs, id -> true — the "Assign to whole class" button
-   on the console's Teacher view songs tab). A shared one is on the Songs
-   page's More Play Along songs list — see caIsTeacherSong / caIsLibrarySong.
-   Cached like songLibraryIds. */
+/* Teacher-only cards the console has moved to Class activities
+   (config/class.classSongs, id -> true — the "Move to Class activities"
+   button on the console's Teacher view songs tab). A moved one is an
+   ordinary class activity: on the board, assigned and dated like any other
+   — see caIsTeacherSong. Cached like songLibraryIds. */
 let classSongIds = {};
 /* The "Keep practicing" row at the top of In-Class Activities —
    config/class.activityPins, an ORDERED array of activity ids, at most
@@ -1253,7 +1253,7 @@ async function loadClassConfig(){
     // Songs moved between Class activities and the Songs page — see songLibraryIds.
     songLibraryIds = d.songLibrary || {};
     try{ localStorage.setItem('caSongLib', JSON.stringify(songLibraryIds)); }catch(e){}
-    // Teacher-only cards shared with the class — see classSongIds.
+    // Teacher-only cards moved to Class activities — see classSongIds.
     classSongIds = d.classSongs || {};
     try{ localStorage.setItem('caClassSongs', JSON.stringify(classSongIds)); }catch(e){}
     // "Keep practicing" pins (teacher.js board) — see activityPins.
@@ -14415,9 +14415,9 @@ function caBoardOrder(activities, board, opts){
   // board, unnumbered, and never assigned — even with a leftover board entry.
   const list = (activities || []).filter(a => a && a.id && !caIsLibraryCard(a, o.songLibrary))
     // Teacher-only cards (caIsTeacherSong) are never on the board either, so
-    // they can never be assigned, dated, numbered or pinned — students reach
-    // one only through the Songs page, once the console shares it.
-    .filter(a => !caIsTeacherSong(a));
+    // they can never be assigned, dated, numbered or pinned — until the
+    // console moves one to Class activities, which makes it a normal card.
+    .filter(a => !caIsTeacherSong(a, o.classSongs));
   const manifest = (typeof MODULE_MANIFEST !== 'undefined') ? MODULE_MANIFEST : [];
   const shipped = a => { const n = Number(a.number); return Number.isFinite(n) ? n : Infinity; };
   // Numeric part of `ca-<n>`, never localeCompare on the id — that orders
@@ -14492,9 +14492,9 @@ function caBoardOrder(activities, board, opts){
 // whole list once per comparison.
 let caBoardCache = null;
 function caBoardView(){
-  if(!caBoardCache || caBoardCache.src !== activityBoard || caBoardCache.lib !== songLibraryIds)
-    caBoardCache = { src: activityBoard, lib: songLibraryIds, view: caBoardOrder(window.CLASS_ACTIVITIES || [], activityBoard,
-      { retired: retiredActivityIds, legacyNumbers: activityNumbers, seeded: activityBoardOn, songLibrary: songLibraryIds }) };
+  if(!caBoardCache || caBoardCache.src !== activityBoard || caBoardCache.lib !== songLibraryIds || caBoardCache.cs !== classSongIds)
+    caBoardCache = { src: activityBoard, lib: songLibraryIds, cs: classSongIds, view: caBoardOrder(window.CLASS_ACTIVITIES || [], activityBoard,
+      { retired: retiredActivityIds, legacyNumbers: activityNumbers, seeded: activityBoardOn, songLibrary: songLibraryIds, classSongs: classSongIds }) };
   return caBoardCache.view;
 }
 function caNumber(a){
@@ -14596,11 +14596,15 @@ function caIsLibraryCard(a, over){
 }
 /* A teacher-only card (`teacherOnly: true` — see TEACHER ONLY in
    class-activities.js): the console's Teacher view songs tab plays it for the
-   room, and students never see it until that tab's "Assign to whole class"
-   shares it (classSongIds) — then it is a library song like any other. */
-function caIsTeacherSong(a){ return !!a && a.teacherOnly === true; }
+   room, and students never see it until that tab's "Move to Class
+   activities" moves it (classSongIds) — then it is an ordinary class
+   activity, placed and dated on the board like any other, and this returns
+   false. `over` is that map — teacher.js passes its own config's copy. */
+function caIsTeacherSong(a, over){
+  const m = over || classSongIds;
+  return !!a && a.teacherOnly === true && m[a.id] !== true;
+}
 function caIsLibrarySong(a){
-  if(caIsTeacherSong(a)) return classSongIds[a.id] === true && retiredActivityIds[a.id] !== true && hiddenActivityIds[a.id] !== true;
   if(!caIsLibraryCard(a)) return false;
   return retiredActivityIds[a.id] !== true && hiddenActivityIds[a.id] !== true;
 }

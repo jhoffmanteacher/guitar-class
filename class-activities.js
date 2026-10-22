@@ -124,11 +124,11 @@
    the console's "Teacher view songs" tab, where it plays in full. Students
    never see it — caBoardOrder (app.js) skips it, so it can never be placed
    on the Class activities board, dated, numbered or pinned, and it blocks
-   nothing. That tab's "Assign to whole class" button (config/class.
-   classSongs, id -> true) puts it on every student's Songs page, on the
-   "More Play Along songs" list (caIsLibrarySong); "Teacher only" takes it
-   back off. Hidden / Archive / Delete are not offered for it — the
-   button is the whole switch. A whole-song teacher-only card carries no
+   nothing. That tab's "Move to Class activities" button (config/class.
+   classSongs, id -> true) puts it on the Class activities board as an
+   ordinary card — assigned, dated, Hidden and Who all as usual;
+   "Teacher only" (or the board's "Move to Teacher view songs") takes it
+   back off. While it is teacher-only, that button is the whole switch. A whole-song teacher-only card carries no
    `journey` / `journeyLayer` (checks.mjs 1bn), so it never stands in for
    its song's real play-along. First one: ca-40.
 
@@ -6070,7 +6070,7 @@ window.CLASS_ACTIVITIES = [
   {
     id:    'ca-40',
     view:  'card',    // one screen: Play song + tab + checks — see CARD above
-    teacherOnly: true,   // console's "Teacher view songs" tab only, until shared — see TEACHER ONLY above
+    teacherOnly: true,   // console's "Teacher view songs" tab only, until moved to Class activities — see TEACHER ONLY above
     title:    'All Along the Watchtower in Power Chords — 2 Strums per Chord',
     title_es: 'All Along the Watchtower con acordes de potencia — 2 rasgueos por acorde',
     intro:    'You know the Watchtower power chords. Today you play them with the band for the whole song, two strums on each chord.',

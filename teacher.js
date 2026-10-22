@@ -1226,6 +1226,7 @@ function teacherBoardView(cfg){
     legacyNumbers:(cfg&&cfg.activityNumbers)||{},
     seeded: !!(cfg&&cfg.activityBoardSeeded),
     songLibrary: (cfg&&cfg.songLibrary)||{},
+    classSongs: (cfg&&cfg.classSongs)||{},
   });
 }
 /* Every id currently placed in one module, in board order, archived rows
@@ -1249,6 +1250,7 @@ function teacherBoardModuleIds(cfg, module, board){
     legacyNumbers:(cfg&&cfg.activityNumbers)||{},
     seeded:true,
     songLibrary:(cfg&&cfg.songLibrary)||{},
+    classSongs:(cfg&&cfg.classSongs)||{},
   });
   const sec=view.sections.find(x=>x.module===Number(module));
   return sec ? sec.ids.slice() : [];
@@ -1396,8 +1398,9 @@ function renderTeacherActivities(opts){
     }
     // Library songs aren't class activities — the Songs view manages them.
     // Read against this config: a song can be moved either way (songBtn).
-    // Teacher-only cards neither — the Teacher view songs tab has them.
-    const activities=allActivities.filter(a=>!caIsLibraryCard(a, cfg.songLibrary||{}) && !caIsTeacherSong(a));
+    // Teacher-only cards neither — the Teacher view songs tab has them,
+    // until its Move to Class activities brings one here.
+    const activities=allActivities.filter(a=>!caIsLibraryCard(a, cfg.songLibrary||{}) && !caIsTeacherSong(a, cfg.classSongs||{}));
     const hidden=cfg.hiddenActivities||{};
     const optional=cfg.optionalActivities||{};
     const playAlong=cfg.playAlongActivities||{};
@@ -1564,6 +1567,10 @@ function renderTeacherActivities(opts){
     // teacherSetSongPlace. Its board slot is kept for the trip back.
     const songBtn=a=>caIsSongCard(a)
       ? `<button class="tg-seg-btn" data-set-song-place data-id="${escAttr(a.id)}" data-state="songs" title="Take this off the board and put it on every student's Songs page, under More Play Along songs">Move to Songs</button>`
+      // A teacher-only card moved here goes back the same way — see
+      // teacherSetClassSong. Its board slot is kept for the next trip.
+      : a.teacherOnly===true
+      ? `<button class="tg-seg-btn" data-tvs-share data-id="${escAttr(a.id)}" data-state="teacher" title="Take this off the board and students' In-Class Activities, back to the Teacher view songs tab only">Move to Teacher view songs</button>`
       : '';
     // Where a card can be sent without a drag. Used as "Assign to" in Built
     // and "Move to" in Assigned; both append at the end of the section they
@@ -2869,7 +2876,8 @@ function renderTeacherSongs(){
 /* ── Teacher view songs (Jonathan, 2026-10-22: "make it only visible to
    me … add a teacher console page 'teacher view songs' and put it on there
    so I can pull it up for the whole class. add a button to assign it to the
-   whole class from there as an option") ──
+   whole class from there as an option"; later the same day: "i'd like to be
+   able to move a song to class activities instead of to the songs page") ──
    Every `teacherOnly: true` card (caIsTeacherSong in app.js), played right
    here for the projector: the real practice card from caCardBodyHtml (the
    one body renderer the student card and the Class activities preview
@@ -2877,18 +2885,20 @@ function renderTeacherSongs(){
    nothing. One song on screen at a time; a row of buttons above it picks
    which when there is more than one.
 
-   "Assign to whole class" writes config/class.classSongs[id] = true, which
-   puts the card on every student's Songs page under More Play Along songs
-   (caIsLibrarySong); "Teacher only" deletes the row. The share row repaints
-   on its own, so the song keeps playing while you click it. */
+   "Move to Class activities" writes config/class.classSongs[id] = true,
+   which puts the card on the Class activities board (in Built, or its old
+   slot) as an ordinary activity — Jonathan assigns and dates it there;
+   "Teacher only" deletes the row. A moved card stays listed here, so it can
+   still be played for the room and moved back. The share row repaints on
+   its own, so the song keeps playing while you click it. */
 let teacherViewSongId=null;
-function teacherViewSongs(){ return (window.CLASS_ACTIVITIES||[]).filter(a=>caIsTeacherSong(a)); }
+function teacherViewSongs(){ return (window.CLASS_ACTIVITIES||[]).filter(a=>a.teacherOnly===true); }
 function teacherViewSongShareHtml(a, cfg){
   const shared=((cfg&&cfg.classSongs)||{})[a.id]===true;
   return `<div class="tg-seg">`
     +`<button class="tg-seg-btn ${!shared?'on':''}" data-tvs-share data-id="${escAttr(a.id)}" data-state="teacher" title="Only on this tab. Students do not see it.">Teacher only</button>`
-    +`<button class="tg-seg-btn ${shared?'on':''}" data-tvs-share data-id="${escAttr(a.id)}" data-state="class" title="On every student's Songs page, under More Play Along songs">Assign to whole class</button></div>`
-    +`<span class="t-songs-off" style="margin-left:10px">${shared?'Every student has it on their Songs page, under <strong>More Play Along songs</strong>.':'Students do not see this song.'}</span>`;
+    +`<button class="tg-seg-btn ${shared?'on':''}" data-tvs-share data-id="${escAttr(a.id)}" data-state="class" title="Put it on the Class activities board, where you assign it to a module and date it like any activity">Move to Class activities</button></div>`
+    +`<span class="t-songs-off" style="margin-left:10px">${shared?'On the Class activities board. Students see it once you assign it to a module and its date arrives.':'Students do not see this song.'}</span>`;
 }
 function renderTeacherViewSongs(){
   const box=document.getElementById('t-grid-container');
@@ -2914,7 +2924,7 @@ function renderTeacherViewSongs(){
     }
     if(typeof stopCardAudio==='function') stopCardAudio();
     box.innerHTML=`<div data-tvs="${escAttr(raw.id)}">`
-      +`<div class="t-songs-intro">Songs only you can see, to play for the whole class. Students see one only after you assign it.</div>`
+      +`<div class="t-songs-intro">Songs only you can see, to play for the whole class. Students see one only after you move it to Class activities and assign it there.</div>`
       +picker
       +`<div class="stu-section-head" style="margin-top:0">${escHtml(teacherActivityTitle(raw,cfg))} <span style="opacity:.55;font-size:.72em">(${escHtml(raw.id)})</span></div>`
       +`<div data-tvs-ctl style="display:flex;align-items:center;flex-wrap:wrap;gap:6px;margin:0 2px 14px">${teacherViewSongShareHtml(raw, cfg)}</div>`
@@ -2928,13 +2938,15 @@ function teacherViewSongPick(id){
   teacherViewSongId=id;
   renderTeacherViewSongs();
 }
-/* Share a teacher-only card with the whole class, or take it back —
+/* Move a teacher-only card to Class activities, or take it back —
    config/class.classSongs, id -> true; "Teacher only" deletes the row.
+   Nothing else is touched: a board slot, date, Hidden and Who all stay, so
+   a card moved back and forth lands where it was.
    Cell-checked on that one row, like teacherSetSongPlace. Students'
    progress is never written. */
 async function teacherSetClassSong(id, on){
   const a=(window.CLASS_ACTIVITIES||[]).find(x=>x.id===id);
-  if(!a || !caIsTeacherSong(a)) return;
+  if(!a || a.teacherOnly!==true) return;
   if(!teacherClassConfig.classSongs) teacherClassConfig.classSongs={};
   const map=teacherClassConfig.classSongs;
   const had=Object.prototype.hasOwnProperty.call(map, id);
@@ -2949,9 +2961,10 @@ async function teacherSetClassSong(id, on){
     await teacherWriteConfig({classSongs:{[id]: on ? true : fv.delete()}}, {['classSongs.'+id]: had?prev:undefined});
   }catch(e){
     if(had) map[id]=prev; else delete map[id];
-    teacherConfigSaveFailed(e, 'Could not change who sees that song — check your connection and Firestore rules.');
+    teacherConfigSaveFailed(e, 'Could not move that song — check your connection and Firestore rules.');
   }
   if(teacherView==='tsongs') renderTeacherViewSongs();
+  else if(teacherView==='activities') renderTeacherActivities();
 }
 /* Move a song (caIsSongCard in app.js) between Class activities and the
    Songs page — config/class.songLibrary, id -> true (Songs) / false (Class
