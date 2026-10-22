@@ -314,7 +314,12 @@ var STRING_DIAGRAMS = {
    builders below shadow `t` with the theme object, hence window.t. ── */
 function gdT(key, fallback, params){
   var fn = (typeof window !== 'undefined') && window.t;
-  return (typeof fn === 'function') ? fn(key, params) : fallback;
+  if (typeof fn === 'function') return fn(key, params);
+  /* No i18n layer (the CLI, a static figure): fill the English fallback's
+     {placeholders} ourselves, or the label ships as "Chord diagram: {parts}". */
+  return String(fallback).replace(/\{(\w+)\}/g, function(m, k){
+    return (params && k in params) ? String(params[k]) : m;
+  });
 }
 function gdLang(){
   var fn = (typeof window !== 'undefined') && window.getLang;
