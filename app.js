@@ -12807,6 +12807,18 @@ const PC_SHEET_LEAD = 0.175;      // real seconds the dot runs ahead of the reco
    sound, and a cue that arrives with the sound reads as late — the same
    reason the snippet dots are left slightly early. Raise it to lead more. */
 const PC_TAB_LEAD = 0;
+/* …except at a LINE change (Jonathan, 2026-10-22, ca-29: "the highlight is
+   delayed every time it changes to the second line or goes back to the
+   first line"). Inside a line the eye is already on the next note; at a
+   line change it has to jump to the start of another row, so a cursor that
+   gets there with the sound reads as late. The first note of a new row (or
+   a new section's page) lights this many real seconds early; every other
+   note keeps PC_TAB_LEAD. Same reason as PC_SHEET_LEAD. */
+const PC_ROW_LEAD = 0.15;
+function pcRowOf(root, seq){
+  const cell = root.querySelector(`.pc-tab [data-seq="${seq}"]`);
+  return cell && cell.closest('.tab-grid');
+}
 const PC_SHEET_SOLID = 0.42;      // beats the dot stays filled after a strum
 const PC_SHEET_MAX_SCALE = 1.9;   // CSS px per PDF point at most (chord names ~19px)
 const PC_SHEET_CHORD_RE = /^[A-G](#|b)?(maj|min|m|dim|aug|sus|add|\+|°|ø|[0-9])*(\/[A-G](#|b)?)?$/;
@@ -13343,7 +13355,13 @@ function pcFrame(){
      plays it (Jonathan tuned it by ear, 2026-10-19). */
   const shift = st.sheet ? PC_SHEET_LEAD : PC_TAB_LEAD;
   const barsIn = snipBarsAt(st.win, audio.currentTime + shift * pcRate(st.root));
-  const loc = pcLocate(L, barsIn);
+  let loc = pcLocate(L, barsIn);
+  if(!st.sheet && loc){
+    // A note on another row lights PC_ROW_LEAD early — see PC_ROW_LEAD.
+    const ahead = pcLocate(L, snipBarsAt(st.win, audio.currentTime + (shift + PC_ROW_LEAD) * pcRate(st.root)));
+    if(ahead && (ahead.seq !== loc.seq || ahead.rep !== loc.rep || ahead.si !== loc.si)
+       && pcRowOf(st.root, ahead.seq) !== pcRowOf(st.root, loc.seq)) loc = ahead;
+  }
   if(loc && (loc.seq !== st.seq || loc.rep !== st.rep || loc.si !== st.si)) pcPaint(st, loc);
   if(st.sheet) pcSheetStrip(st, loc, barsIn);
   st.raf = requestAnimationFrame(pcFrame);
