@@ -118,6 +118,20 @@
    `card.wholeSong` or `card.sheet`, and checks.mjs 1bq fails the push if a
    Core song's card is marked, by journey, track or title.
 
+   TEACHER ONLY — `teacherOnly: true` (optional; the only value; Jonathan,
+   2026-10-22: "make it only visible to me … a teacher console page"). The
+   card is for the teacher to put up on the projector: it is listed only on
+   the console's "Teacher view songs" tab, where it plays in full. Students
+   never see it — caBoardOrder (app.js) skips it, so it can never be placed
+   on the Class activities board, dated, numbered or pinned, and it blocks
+   nothing. That tab's "Assign to whole class" button (config/class.
+   classSongs, id -> true) puts it on every student's Songs page, on the
+   "More Play Along songs" list (caIsLibrarySong); "Teacher only" takes it
+   back off. Hidden / Archive / Delete are not offered for it — the
+   button is the whole switch. A whole-song teacher-only card carries no
+   `journey` / `journeyLayer` (checks.mjs 1bn), so it never stands in for
+   its song's real play-along. First one: ca-40.
+
    METRONOME — `metronome: <bpm>` (optional; whole number, 40–220). Tapping
    the card open starts the Metro tool at that tempo, so every step is
    played to a click. The student can stop it or change the tempo like any
@@ -231,8 +245,8 @@
    — Finish the Song") was pulled from this array on 2026-08-25 when `ca-1`
    was widened to cover the whole song; its steps live on inside `ca-1`, and
    the original is in git history. That makes the counter max-EVER-used + 1,
-   NOT max-in-file + 1 — the next new activity is `ca-38` (ca-37 is the
-   highest used as of 2026-10-16; check the file first). Any student who
+   NOT max-in-file + 1 — the next new activity is `ca-41` (ca-40 is the
+   highest used as of 2026-10-22; check the file first). Any student who
    had already ticked `ca-9` keeps a harmless orphan key in Firestore.
    `ca-16` ("Happy Birthday — The A-String Way") went the same way on
    2026-09-16: its steps were merged into `ca-17`, after the A-string note
@@ -6036,6 +6050,158 @@ window.CLASS_ACTIVITIES = [
         { levelUp: true,
           text:    'Slide the speed all the way right, to Normal. Play the whole song with the band at normal speed.',
           text_es: 'Desliza la velocidad hasta la derecha, a «Normal». Toca la canción completa con la banda a velocidad normal.' }
+      ]
+    },
+    // No help ladder: a practice card is its checks and nothing else (Jonathan, 2026-10-07).
+    steps: [],
+  },
+  /* All Along the Watchtower — Power Chords, Old Rhythm (Jonathan,
+     2026-10-22: "adapt the Watchtower power chord play along to the old
+     rhythm … make it look like the single note class activity but with two
+     finger power chord tab"). ca-26's card exactly — same sections, bars,
+     laps and checks — with each single note turned into its two-finger
+     power chord, root on the low E: A5 = 5/7, G5 = 3/5, F5 = 1/3. The OLD
+     rhythm: two strums per chord, one per beat (A5 A5 G5 G5 | F5 F5 G5 G5),
+     the rhythm ca-29 had before the method book's 1 & 2 (rest) & 4 replaced
+     it on 2026-10-15. ca-29 keeps the book rhythm.
+     TEACHER-ONLY (see TEACHER ONLY above): no `journey` / `journeyLayer`
+     on purpose — it is not its layer's play-along, so no song link picks it
+     and the Journey page draws no tab for it (checks.mjs 1bn). */
+  {
+    id:    'ca-40',
+    view:  'card',    // one screen: Play song + tab + checks — see CARD above
+    teacherOnly: true,   // console's "Teacher view songs" tab only, until shared — see TEACHER ONLY above
+    title:    'All Along the Watchtower in Power Chords — 2 Strums per Chord',
+    title_es: 'All Along the Watchtower con acordes de potencia — 2 rasgueos por acorde',
+    intro:    'You know the Watchtower power chords. Today you play them with the band for the whole song, two strums on each chord.',
+    intro_es: 'Ya sabes los acordes de potencia de Watchtower. Hoy los tocas con la banda durante toda la canción, dos rasgueos en cada acorde.',
+    card: {
+      wholeSong: true,  // stops at the end of the song instead of looping
+      track: 'all-along-the-watchtower',
+      slowest: true,    // Slowest / Slower / Slow / Normal — the student picks
+      caption:    'The whole song in power chords · 2 strums per chord',
+      caption_es: 'La canción completa con acordes de potencia · 2 rasgueos por acorde',
+      sections: [
+        {
+          label: 'Intro', label_es: 'Intro',
+          caption: 'Intro — A5 G5 F5 G5, 4 laps', caption_es: 'Intro — A5 G5 F5 G5, 4 vueltas',
+          fromBar: 1, bars: 2, reps: 4,
+          repLabel: 'Lap', repLabel_es: 'Vuelta',
+          notes: [
+            { frets: [['A', 7], ['E', 5]], note: 'A5', midi: [52, 45] },
+            { frets: [['A', 7], ['E', 5]], note: 'A5', midi: [52, 45] },
+            { frets: [['A', 5], ['E', 3]], note: 'G5', midi: [50, 43] },
+            { frets: [['A', 5], ['E', 3]], note: 'G5', midi: [50, 43] },
+            { frets: [['A', 3], ['E', 1]], note: 'F5', midi: [48, 41] },
+            { frets: [['A', 3], ['E', 1]], note: 'F5', midi: [48, 41] },
+            { frets: [['A', 5], ['E', 3]], note: 'G5', midi: [50, 43] },
+            { frets: [['A', 5], ['E', 3]], note: 'G5', midi: [50, 43] }
+          ]
+        },
+        {
+          label: 'Verse 1', label_es: 'Estrofa 1',
+          caption: 'Verse 1 — A5 G5 F5 G5, 8 laps', caption_es: 'Estrofa 1 — A5 G5 F5 G5, 8 vueltas',
+          fromBar: 9, bars: 2, reps: 8,
+          repLabel: 'Lap', repLabel_es: 'Vuelta',
+          notes: [
+            { frets: [['A', 7], ['E', 5]], note: 'A5', midi: [52, 45] },
+            { frets: [['A', 7], ['E', 5]], note: 'A5', midi: [52, 45] },
+            { frets: [['A', 5], ['E', 3]], note: 'G5', midi: [50, 43] },
+            { frets: [['A', 5], ['E', 3]], note: 'G5', midi: [50, 43] },
+            { frets: [['A', 3], ['E', 1]], note: 'F5', midi: [48, 41] },
+            { frets: [['A', 3], ['E', 1]], note: 'F5', midi: [48, 41] },
+            { frets: [['A', 5], ['E', 3]], note: 'G5', midi: [50, 43] },
+            { frets: [['A', 5], ['E', 3]], note: 'G5', midi: [50, 43] }
+          ]
+        },
+        {
+          label: 'Solo 1', label_es: 'Solo 1',
+          caption: 'Solo 1 — A5 G5 F5 G5, 4 laps', caption_es: 'Solo 1 — A5 G5 F5 G5, 4 vueltas',
+          fromBar: 25, bars: 2, reps: 4,
+          repLabel: 'Lap', repLabel_es: 'Vuelta',
+          notes: [
+            { frets: [['A', 7], ['E', 5]], note: 'A5', midi: [52, 45] },
+            { frets: [['A', 7], ['E', 5]], note: 'A5', midi: [52, 45] },
+            { frets: [['A', 5], ['E', 3]], note: 'G5', midi: [50, 43] },
+            { frets: [['A', 5], ['E', 3]], note: 'G5', midi: [50, 43] },
+            { frets: [['A', 3], ['E', 1]], note: 'F5', midi: [48, 41] },
+            { frets: [['A', 3], ['E', 1]], note: 'F5', midi: [48, 41] },
+            { frets: [['A', 5], ['E', 3]], note: 'G5', midi: [50, 43] },
+            { frets: [['A', 5], ['E', 3]], note: 'G5', midi: [50, 43] }
+          ]
+        },
+        {
+          label: 'Verse 2', label_es: 'Estrofa 2',
+          caption: 'Verse 2 — A5 G5 F5 G5, 9 laps', caption_es: 'Estrofa 2 — A5 G5 F5 G5, 9 vueltas',
+          fromBar: 33, bars: 2, reps: 9,
+          repLabel: 'Lap', repLabel_es: 'Vuelta',
+          notes: [
+            { frets: [['A', 7], ['E', 5]], note: 'A5', midi: [52, 45] },
+            { frets: [['A', 7], ['E', 5]], note: 'A5', midi: [52, 45] },
+            { frets: [['A', 5], ['E', 3]], note: 'G5', midi: [50, 43] },
+            { frets: [['A', 5], ['E', 3]], note: 'G5', midi: [50, 43] },
+            { frets: [['A', 3], ['E', 1]], note: 'F5', midi: [48, 41] },
+            { frets: [['A', 3], ['E', 1]], note: 'F5', midi: [48, 41] },
+            { frets: [['A', 5], ['E', 3]], note: 'G5', midi: [50, 43] },
+            { frets: [['A', 5], ['E', 3]], note: 'G5', midi: [50, 43] }
+          ]
+        },
+        {
+          label: 'Solo 2', label_es: 'Solo 2',
+          caption: 'Solo 2 — A5 G5 F5 G5, 15 laps', caption_es: 'Solo 2 — A5 G5 F5 G5, 15 vueltas',
+          fromBar: 51, bars: 2, reps: 15,
+          repLabel: 'Lap', repLabel_es: 'Vuelta',
+          notes: [
+            { frets: [['A', 7], ['E', 5]], note: 'A5', midi: [52, 45] },
+            { frets: [['A', 7], ['E', 5]], note: 'A5', midi: [52, 45] },
+            { frets: [['A', 5], ['E', 3]], note: 'G5', midi: [50, 43] },
+            { frets: [['A', 5], ['E', 3]], note: 'G5', midi: [50, 43] },
+            { frets: [['A', 3], ['E', 1]], note: 'F5', midi: [48, 41] },
+            { frets: [['A', 3], ['E', 1]], note: 'F5', midi: [48, 41] },
+            { frets: [['A', 5], ['E', 3]], note: 'G5', midi: [50, 43] },
+            { frets: [['A', 5], ['E', 3]], note: 'G5', midi: [50, 43] }
+          ]
+        },
+        {
+          label: 'Verse 3', label_es: 'Estrofa 3',
+          caption: 'Verse 3 — A5 G5 F5 G5, 12 laps', caption_es: 'Estrofa 3 — A5 G5 F5 G5, 12 vueltas',
+          fromBar: 81, bars: 2, reps: 12,
+          repLabel: 'Lap', repLabel_es: 'Vuelta',
+          notes: [
+            { frets: [['A', 7], ['E', 5]], note: 'A5', midi: [52, 45] },
+            { frets: [['A', 7], ['E', 5]], note: 'A5', midi: [52, 45] },
+            { frets: [['A', 5], ['E', 3]], note: 'G5', midi: [50, 43] },
+            { frets: [['A', 5], ['E', 3]], note: 'G5', midi: [50, 43] },
+            { frets: [['A', 3], ['E', 1]], note: 'F5', midi: [48, 41] },
+            { frets: [['A', 3], ['E', 1]], note: 'F5', midi: [48, 41] },
+            { frets: [['A', 5], ['E', 3]], note: 'G5', midi: [50, 43] },
+            { frets: [['A', 5], ['E', 3]], note: 'G5', midi: [50, 43] }
+          ]
+        },
+        {
+          label: 'Outro', label_es: 'Final',
+          caption: 'Outro — A5 G5 F5 G5, 4 laps', caption_es: 'Final — A5 G5 F5 G5, 4 vueltas',
+          fromBar: 105, bars: 2, reps: 4,
+          repLabel: 'Lap', repLabel_es: 'Vuelta',
+          notes: [
+            { frets: [['A', 7], ['E', 5]], note: 'A5', midi: [52, 45] },
+            { frets: [['A', 7], ['E', 5]], note: 'A5', midi: [52, 45] },
+            { frets: [['A', 5], ['E', 3]], note: 'G5', midi: [50, 43] },
+            { frets: [['A', 5], ['E', 3]], note: 'G5', midi: [50, 43] },
+            { frets: [['A', 3], ['E', 1]], note: 'F5', midi: [48, 41] },
+            { frets: [['A', 3], ['E', 1]], note: 'F5', midi: [48, 41] },
+            { frets: [['A', 5], ['E', 3]], note: 'G5', midi: [50, 43] },
+            { frets: [['A', 5], ['E', 3]], note: 'G5', midi: [50, 43] }
+          ]
+        }
+      ],
+      checks: [
+        { label: 'The whole song, slower', label_es: 'La canción completa, más lenta',
+          text:    'Leave the speed where the card starts it, or move it one stop left. Play the whole song with the band, intro to the end, without stopping.',
+          text_es: 'Deja la velocidad donde la tarjeta la deja al empezar, o muévela una posición a la izquierda. Toca la canción completa con la banda, de la intro al final, sin detenerte.' },
+        { levelUp: true,
+          text:    'Slide the speed all the way right, to Normal. Play the whole song with the band at normal speed, intro to the end, without stopping.',
+          text_es: 'Desliza la velocidad hasta la derecha, a «Normal». Toca la canción completa con la banda a velocidad normal, de la intro al final, sin detenerte.' }
       ]
     },
     // No help ladder: a practice card is its checks and nothing else (Jonathan, 2026-10-07).

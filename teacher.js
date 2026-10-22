@@ -188,6 +188,11 @@ async function showTeacherApp(user){
   if(toggle && !toggle.querySelector('[data-view="songs"]')){
     toggle.insertAdjacentHTML('beforeend', `<button class="t-vt" data-view="songs" onclick="setTeacherView('songs')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 18V5l12-2v13"/><circle cx="6" cy="18" r="3"/><circle cx="18" cy="16" r="3"/></svg> Songs</button>`);
   }
+  // Teacher view songs — teacher-only practice cards (teacherOnly: true),
+  // played from here for the whole room; renderTeacherViewSongs.
+  if(toggle && !toggle.querySelector('[data-view="tsongs"]')){
+    toggle.insertAdjacentHTML('beforeend', `<button class="t-vt" data-view="tsongs" onclick="setTeacherView('tsongs')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="2" y="4" width="20" height="13" rx="2"/><path d="M8 21h8M12 17v4"/><path d="m10 8 5 2.5-5 2.5z"/></svg> Teacher view songs</button>`);
+  }
   // Live quiz — the whole-class game (live-quiz.js). Injected here like its
   // neighbours so the feature stays in one file; the render call in
   // renderTeacherBody is guarded because that file loads separately.
@@ -263,6 +268,10 @@ async function showTeacherApp(user){
       if(period){ teacherSetStudentPeriod(period.dataset.uid, period.dataset.value); return; }
       const actHidden=e.target.closest('[data-set-activity-hidden]');
       if(actHidden){ teacherSetActivityHidden(actHidden.dataset.id, actHidden.dataset.state); return; }
+      const tvsPick=e.target.closest('[data-tvs-pick]');
+      if(tvsPick){ teacherViewSongPick(tvsPick.dataset.id); return; }
+      const tvsShare=e.target.closest('[data-tvs-share]');
+      if(tvsShare){ teacherSetClassSong(tvsShare.dataset.id, tvsShare.dataset.state==='class'); return; }
       const songPlace=e.target.closest('[data-set-song-place]');
       if(songPlace){ teacherSetSongPlace(songPlace.dataset.id, songPlace.dataset.state); return; }
       const actOpt=e.target.closest('[data-set-activity-optional]');
@@ -592,7 +601,7 @@ async function loadAllStudents(){
 const TEACHER_REFRESH_MS=60000;
 const TEACHER_AUTO_REFRESH_VIEWS=['activities','students','skills','responses','trouble'];
 // Views where student progress isn't on screen at all — no Refresh bar.
-const TEACHER_NO_REFRESH_BAR_VIEWS=['livequiz','mic','reports'];
+const TEACHER_NO_REFRESH_BAR_VIEWS=['livequiz','mic','reports','tsongs'];
 let teacherStudentsAt=0;          // when the roster on screen was read (ms); 0 = not yet
 let teacherRefreshing=false;      // a read is out — no overlapping fetches
 let teacherRefreshFailed=false;   // the last read failed; the screen shows the older roster
@@ -959,11 +968,13 @@ function applyTeacherViewChrome(v){
   const legend=document.getElementById('t-legend'); if(legend) legend.style.display = v==='skills' ? '' : 'none';
   // Games, Trouble-spots and Students are all class-wide, not per-week —
   // hide the week tabs and the skill summary while any of them is showing.
-  const classWide = v==='games'||v==='trouble'||v==='students'||v==='manage'||v==='activities'||v==='reports'||v==='livequiz'||v==='mic'||v==='songs';
+  const classWide = v==='games'||v==='trouble'||v==='students'||v==='manage'||v==='activities'||v==='reports'||v==='livequiz'||v==='mic'||v==='songs'||v==='tsongs';
   const tabs=document.getElementById('t-week-tabs'); if(tabs) tabs.style.display = classWide ? 'none' : '';
   const summ=document.getElementById('t-summary'); if(summ) summ.style.display = classWide ? 'none' : '';
 }
 function setTeacherView(v){
+  // The Teacher view songs card plays the record — leaving the tab stops it.
+  if(teacherView==='tsongs' && v!=='tsongs' && typeof stopCardAudio==='function') stopCardAudio();
   teacherView=v;
   if(v==='students') studentDetailUid=null; // clicking the tab always starts back at the roster
   if(v==='activities'||v==='songs'){ activityDetailId=null; activityEditId=null; } // same — the tab always starts back at the list, nothing mid-rename
@@ -1029,6 +1040,7 @@ function renderTeacherBody(){
   else if(teacherView==='manage') renderTeacherManage();
   else if(teacherView==='activities') renderTeacherActivities();
   else if(teacherView==='songs') renderTeacherSongs();
+  else if(teacherView==='tsongs') renderTeacherViewSongs();
   else if(teacherView==='reports') renderTeacherReports();
   else if(teacherView==='mic') renderTeacherMic();
   else if(teacherView==='livequiz'){ if(typeof renderTeacherLiveQuiz==='function') renderTeacherLiveQuiz(); }
@@ -1384,7 +1396,8 @@ function renderTeacherActivities(opts){
     }
     // Library songs aren't class activities — the Songs view manages them.
     // Read against this config: a song can be moved either way (songBtn).
-    const activities=allActivities.filter(a=>!caIsLibraryCard(a, cfg.songLibrary||{}));
+    // Teacher-only cards neither — the Teacher view songs tab has them.
+    const activities=allActivities.filter(a=>!caIsLibraryCard(a, cfg.songLibrary||{}) && !caIsTeacherSong(a));
     const hidden=cfg.hiddenActivities||{};
     const optional=cfg.optionalActivities||{};
     const playAlong=cfg.playAlongActivities||{};
@@ -2852,6 +2865,93 @@ function renderTeacherSongs(){
       if(inp){ inp.focus(); inp.select(); }
     }
   });
+}
+/* ── Teacher view songs (Jonathan, 2026-10-22: "make it only visible to
+   me … add a teacher console page 'teacher view songs' and put it on there
+   so I can pull it up for the whole class. add a button to assign it to the
+   whole class from there as an option") ──
+   Every `teacherOnly: true` card (caIsTeacherSong in app.js), played right
+   here for the projector: the real practice card from caCardBodyHtml (the
+   one body renderer the student card and the Class activities preview
+   share), so the room sees exactly what a student would. Ticks here save
+   nothing. One song on screen at a time; a row of buttons above it picks
+   which when there is more than one.
+
+   "Assign to whole class" writes config/class.classSongs[id] = true, which
+   puts the card on every student's Songs page under More Play Along songs
+   (caIsLibrarySong); "Teacher only" deletes the row. The share row repaints
+   on its own, so the song keeps playing while you click it. */
+let teacherViewSongId=null;
+function teacherViewSongs(){ return (window.CLASS_ACTIVITIES||[]).filter(a=>caIsTeacherSong(a)); }
+function teacherViewSongShareHtml(a, cfg){
+  const shared=((cfg&&cfg.classSongs)||{})[a.id]===true;
+  return `<div class="tg-seg">`
+    +`<button class="tg-seg-btn ${!shared?'on':''}" data-tvs-share data-id="${escAttr(a.id)}" data-state="teacher" title="Only on this tab. Students do not see it.">Teacher only</button>`
+    +`<button class="tg-seg-btn ${shared?'on':''}" data-tvs-share data-id="${escAttr(a.id)}" data-state="class" title="On every student's Songs page, under More Play Along songs">Assign to whole class</button></div>`
+    +`<span class="t-songs-off" style="margin-left:10px">${shared?'Every student has it on their Songs page, under <strong>More Play Along songs</strong>.':'Students do not see this song.'}</span>`;
+}
+function renderTeacherViewSongs(){
+  const box=document.getElementById('t-grid-container');
+  const songs=teacherViewSongs();
+  if(!songs.length){ box.innerHTML='<div class="t-loading">No teacher-only songs yet. A card with <code>teacherOnly: true</code> shows up here.</div>'; return; }
+  if(!songs.some(a=>a.id===teacherViewSongId)) teacherViewSongId=songs[0].id;
+  if(!box.querySelector('[data-tvs]')) box.innerHTML='<div class="t-loading">Loading…</div>';
+  loadTeacherClassConfig().then(cfg=>{
+    if(teacherView!=='tsongs') return;   // switched views mid-flight
+    if(!cfg) return;                     // superseded by a newer read
+    const raw=songs.find(a=>a.id===teacherViewSongId);
+    const a=typeof caView==='function'?caView(raw):raw;
+    const picker=songs.length>1
+      ? `<div class="tg-seg" style="margin-bottom:12px">${songs.map(x=>`<button class="tg-seg-btn ${x.id===raw.id?'on':''}" data-tvs-pick data-id="${escAttr(x.id)}">${escHtml(teacherActivityTitle(x,cfg))}</button>`).join('')}</div>`
+      : '';
+    // Same card already up (a config re-read): leave it, so the song keeps
+    // playing; only the share row is repainted.
+    const cur=box.querySelector('[data-tvs]');
+    if(cur && cur.dataset.tvs===raw.id){
+      const ctl=box.querySelector('[data-tvs-ctl]');
+      if(ctl) ctl.innerHTML=teacherViewSongShareHtml(raw, cfg);
+      return;
+    }
+    if(typeof stopCardAudio==='function') stopCardAudio();
+    box.innerHTML=`<div data-tvs="${escAttr(raw.id)}">`
+      +`<div class="t-songs-intro">Songs only you can see, to play for the whole class. Students see one only after you assign it.</div>`
+      +picker
+      +`<div class="stu-section-head" style="margin-top:0">${escHtml(teacherActivityTitle(raw,cfg))} <span style="opacity:.55;font-size:.72em">(${escHtml(raw.id)})</span></div>`
+      +`<div data-tvs-ctl style="display:flex;align-items:center;flex-wrap:wrap;gap:6px;margin:0 2px 14px">${teacherViewSongShareHtml(raw, cfg)}</div>`
+      +(a.intro?`<div class="coach-tip" style="margin:0 2px 16px">${escHtml(a.intro)}</div>`:'')
+      +caCardBodyHtml(a,{preview:true})
+      +`</div>`;
+  });
+}
+function teacherViewSongPick(id){
+  if(id===teacherViewSongId) return;
+  teacherViewSongId=id;
+  renderTeacherViewSongs();
+}
+/* Share a teacher-only card with the whole class, or take it back —
+   config/class.classSongs, id -> true; "Teacher only" deletes the row.
+   Cell-checked on that one row, like teacherSetSongPlace. Students'
+   progress is never written. */
+async function teacherSetClassSong(id, on){
+  const a=(window.CLASS_ACTIVITIES||[]).find(x=>x.id===id);
+  if(!a || !caIsTeacherSong(a)) return;
+  if(!teacherClassConfig.classSongs) teacherClassConfig.classSongs={};
+  const map=teacherClassConfig.classSongs;
+  const had=Object.prototype.hasOwnProperty.call(map, id);
+  const prev=map[id];
+  if((prev===true)===on) return;
+  if(on) map[id]=true; else delete map[id];
+  const ctl=document.querySelector('[data-tvs-ctl]');
+  if(ctl) ctl.innerHTML=teacherViewSongShareHtml(a, teacherClassConfig);   // shown now
+  try{
+    await ensureDb();
+    const fv=firebase.firestore.FieldValue;
+    await teacherWriteConfig({classSongs:{[id]: on ? true : fv.delete()}}, {['classSongs.'+id]: had?prev:undefined});
+  }catch(e){
+    if(had) map[id]=prev; else delete map[id];
+    teacherConfigSaveFailed(e, 'Could not change who sees that song — check your connection and Firestore rules.');
+  }
+  if(teacherView==='tsongs') renderTeacherViewSongs();
 }
 /* Move a song (caIsSongCard in app.js) between Class activities and the
    Songs page — config/class.songLibrary, id -> true (Songs) / false (Class

@@ -5418,7 +5418,7 @@ function checkChordBlitzRanks() {
    deliberately, after a look at whether it can pass a `base` or needs the
    strict default.
    ═════════════════════════════════════════════════════════════════ */
-const CONFIG_WRITERS = 24;   // teacherWriteConfig() call sites in teacher.js — 22nd/23rd: teacherSetActivityStudent (cell-checked on one student's tick) and teacherSetActivityWholeClass (strict), 2026-10-13; 24th: teacherSetSongPlace (cell-checked on its songLibrary row), 2026-10-20
+const CONFIG_WRITERS = 25;   // teacherWriteConfig() call sites in teacher.js — 25th: teacherSetClassSong (cell-checked on its classSongs row), 2026-10-22; 22nd/23rd: teacherSetActivityStudent (cell-checked on one student's tick) and teacherSetActivityWholeClass (strict), 2026-10-13; 24th: teacherSetSongPlace (cell-checked on its songLibrary row), 2026-10-20
 function checkConfigWriteGuard() {
   head('1ai. Every config/class write goes through the stale-write guard');
   let bad = 0;
@@ -7150,7 +7150,19 @@ function checkJourneyRetired() {
   activities.filter(a => a && a.view === 'card' && a.card && a.card.sheet).forEach(a => {
     if (a.journey !== undefined || a.journeyLayer !== undefined) flag(`${a.id}: a lyric-sheet card (card.sheet) has no journey / journeyLayer — it would compete with the song's play-along card`);
   });
-  const cards = activities.filter(a => a && a.view === 'card' && a.card && a.card.wholeSong === true && !a.card.sheet);
+  /* A teacher-only card (teacherOnly — ca-40, 2026-10-22) is played from the
+     console and, once shared, listed on the Songs page; it is never its
+     layer's play-along, so like a lyric sheet it names no journey / layer.
+     And it must stay off the board: caBoardOrder has to skip it, or an
+     unseeded board would read it as assigned. */
+  const teacherOnly = activities.filter(a => a && a.teacherOnly !== undefined);
+  teacherOnly.forEach(a => {
+    if (a.teacherOnly !== true) flag(`${a.id}: \`teacherOnly\` takes only true (got ${JSON.stringify(a.teacherOnly)})`);
+    if (a.journey !== undefined || a.journeyLayer !== undefined) flag(`${a.id}: a teacher-only card has no journey / journeyLayer — it would compete with the song's play-along card`);
+    if (a.library !== undefined) flag(`${a.id}: a teacher-only card has no \`library\` field — the console's Assign to whole class button is its only switch`);
+  });
+  if (teacherOnly.length && !/\.filter\(a => !caIsTeacherSong\(a\)\)/.test(appSrc)) flag('1bn: caBoardOrder no longer skips teacher-only cards (caIsTeacherSong) — students could see one');
+  const cards = activities.filter(a => a && a.view === 'card' && a.card && a.card.wholeSong === true && !a.card.sheet && a.teacherOnly !== true);
   if (cards.length === 0) { flag('1bn found no whole-song card — it cannot see what it is supposed to guard'); return; }
   const NAMES_PAGE = /song journey|recorrido de la canci[oó]n/i;
   const walk = (v, path, a) => {

@@ -263,6 +263,12 @@ let playAlongActivityIds = {};
    `library` field — see caIsLibraryCard. Cached like the board, so a flaky
    read doesn't put a moved song back where it started. */
 let songLibraryIds = {};
+/* Teacher-only cards the console has shared with the whole class
+   (config/class.classSongs, id -> true — the "Assign to whole class" button
+   on the console's Teacher view songs tab). A shared one is on the Songs
+   page's More Play Along songs list — see caIsTeacherSong / caIsLibrarySong.
+   Cached like songLibraryIds. */
+let classSongIds = {};
 /* The "Keep practicing" row at the top of In-Class Activities —
    config/class.activityPins, an ORDERED array of activity ids, at most
    CA_PINS_MAX (2026-10-10, Jonathan: he reuses some cards on many days —
@@ -822,7 +828,7 @@ if(auth) auth.onAuthStateChanged(async user=>{
       return;
     }
     window.__authBootPending = false;
-    currentUser = null; progress = {}; responses = {}; completed = {}; completedDeletes = new Map(); classActivities = {}; classActivitiesDeletes = new Map(); caStepDone = {}; caStepDeletes = new Map(); exitChecks = {}; games = {}; streak = { count:0, lastDay:null }; gamesAccessOn = true; micSampling = { on: false, max: 0 }; micTakesCount = Infinity; studentPeriod = ''; periodOverride = ''; moduleOpenThrough = 0; hiddenActivityIds = {}; activityForMe = {}; activityDates = {}; activityTitles = {}; activityNumbers = {}; activityBoard = {}; activityBoardOn = false; activityClears = {}; retiredActivityIds = {}; optionalActivityIds = {}; activityPins = []; songLibraryIds = {}; progressLoadFailed = false;
+    currentUser = null; progress = {}; responses = {}; completed = {}; completedDeletes = new Map(); classActivities = {}; classActivitiesDeletes = new Map(); caStepDone = {}; caStepDeletes = new Map(); exitChecks = {}; games = {}; streak = { count:0, lastDay:null }; gamesAccessOn = true; micSampling = { on: false, max: 0 }; micTakesCount = Infinity; studentPeriod = ''; periodOverride = ''; moduleOpenThrough = 0; hiddenActivityIds = {}; activityForMe = {}; activityDates = {}; activityTitles = {}; activityNumbers = {}; activityBoard = {}; activityBoardOn = false; activityClears = {}; retiredActivityIds = {}; optionalActivityIds = {}; activityPins = []; songLibraryIds = {}; classSongIds = {}; progressLoadFailed = false;
     document.body.classList.remove('ca-gated');   // next sign-in recomputes it fresh — don't leave a stale gate showing over the sign-in wall
     if(typeof gamesResetForUser === 'function') gamesResetForUser();   // Note Runner's module caches must not leak into the next signed-in user
     if(typeof lqStopListening === 'function') lqStopListening();       // and the live-quiz listener must not keep firing under the next student
@@ -1247,6 +1253,9 @@ async function loadClassConfig(){
     // Songs moved between Class activities and the Songs page — see songLibraryIds.
     songLibraryIds = d.songLibrary || {};
     try{ localStorage.setItem('caSongLib', JSON.stringify(songLibraryIds)); }catch(e){}
+    // Teacher-only cards shared with the class — see classSongIds.
+    classSongIds = d.classSongs || {};
+    try{ localStorage.setItem('caClassSongs', JSON.stringify(classSongIds)); }catch(e){}
     // "Keep practicing" pins (teacher.js board) — see activityPins.
     activityPins = caCleanPins(d.activityPins);
     try{ localStorage.setItem('caPins', JSON.stringify(activityPins)); }catch(e){}
@@ -1338,6 +1347,10 @@ function restoreClassConfigFromCache(){
     const raw = localStorage.getItem('caSongLib');
     if(raw) songLibraryIds = JSON.parse(raw) || {};
   }catch(e){ /* ignore — songLibraryIds stays {} */ }
+  try{
+    const raw = localStorage.getItem('caClassSongs');
+    if(raw) classSongIds = JSON.parse(raw) || {};
+  }catch(e){ /* ignore — classSongIds stays {} */ }
   try{
     const raw = localStorage.getItem('caPins');
     if(raw) activityPins = caCleanPins(JSON.parse(raw));
@@ -14400,7 +14413,11 @@ function caBoardOrder(activities, board, opts){
   const legacy = o.legacyNumbers || {};
   // Library songs live on the Songs page only (caIsLibraryCard): off the
   // board, unnumbered, and never assigned — even with a leftover board entry.
-  const list = (activities || []).filter(a => a && a.id && !caIsLibraryCard(a, o.songLibrary));
+  const list = (activities || []).filter(a => a && a.id && !caIsLibraryCard(a, o.songLibrary))
+    // Teacher-only cards (caIsTeacherSong) are never on the board either, so
+    // they can never be assigned, dated, numbered or pinned — students reach
+    // one only through the Songs page, once the console shares it.
+    .filter(a => !caIsTeacherSong(a));
   const manifest = (typeof MODULE_MANIFEST !== 'undefined') ? MODULE_MANIFEST : [];
   const shipped = a => { const n = Number(a.number); return Number.isFinite(n) ? n : Infinity; };
   // Numeric part of `ca-<n>`, never localeCompare on the id — that orders
@@ -14577,7 +14594,13 @@ function caIsLibraryCard(a, over){
   const m = over || songLibraryIds;
   return typeof m[a.id] === 'boolean' ? m[a.id] : a.library === true;
 }
+/* A teacher-only card (`teacherOnly: true` — see TEACHER ONLY in
+   class-activities.js): the console's Teacher view songs tab plays it for the
+   room, and students never see it until that tab's "Assign to whole class"
+   shares it (classSongIds) — then it is a library song like any other. */
+function caIsTeacherSong(a){ return !!a && a.teacherOnly === true; }
 function caIsLibrarySong(a){
+  if(caIsTeacherSong(a)) return classSongIds[a.id] === true && retiredActivityIds[a.id] !== true && hiddenActivityIds[a.id] !== true;
   if(!caIsLibraryCard(a)) return false;
   return retiredActivityIds[a.id] !== true && hiddenActivityIds[a.id] !== true;
 }

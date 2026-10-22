@@ -30,6 +30,9 @@ ear. This is chord *timing*, not BPM:
   split), 6, 7, the Journey page Layers 2–5, Riff Runner, ca-29. **One
   exception, Jonathan's call (2026-10-15): ca-26, the single-note
   whole-song card, keeps two plucks per note (`A A G G F F G G`).**
+  **Second exception (2026-10-22): ca-40, the teacher-only power-chord
+  card, is ca-26 in two-finger power chords — two strums per chord
+  (`A5 A5 G5 G5 F5 F5 G5 G5`), on purpose. Don't "fix" it to the book.**
   Older reading, kept for history: **two beats per chord: `A A G G F F G G`** (2026-09-27). The
   play-along is now Jimi Hendrix's recording, moved down to Am in Moises; the
   Neil Young track and its "Am 2 · G 2 · F 3 · G 1" reading are retired.
