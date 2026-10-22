@@ -5,6 +5,12 @@ Notable changes to the Guitar Class site. Newest first.
 For the full session-by-session history (and the reasoning behind each change),
 see `WORKFLOW.md` and the git commit log.
 
+## 2026-10-22 — Module 3 has a new name
+
+- **Module 3 is now "Power Chords & Strumming Patterns."** Same sets, same
+  steps, same saved progress — only the name on the module list and the set
+  headers changed, to match what the module covers.
+
 ## 2026-10-21 — Song names show the artist
 
 - **The More Play Along songs now show the song name in quotes, then the

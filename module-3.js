@@ -1,5 +1,5 @@
 // ============================================================
-//  MODULE 3 — Power Chords
+//  MODULE 3 — Power Chords & Strumming Patterns
 //  Edit this file to change Module 3 content.
 //  Upload to GitHub alongside index.html + firebase-config.js
 // ============================================================
@@ -11,10 +11,10 @@ SETS.push(
     songThread: [{ name: '"Seven Nation Army"', journey: 'tabs/seven-nation-army.html', layer: 3, note: 'the riff as power chords' }, { name: '"All Along the Watchtower"', journey: 'tabs/all-along-the-watchtower.html', layer: 3, note: 'the loop as power chords' }],
     label: 'Set 1',
     locked: false,
-    module: 'Power Chords',
+    module: 'Power Chords & Strumming Patterns',
     moduleNum: 3,
-    unit: 'Module 3 · Power Chords',
-    unit_es: 'Módulo 3 · Acordes de potencia',
+    unit: 'Module 3 · Power Chords & Strumming Patterns',
+    unit_es: 'Módulo 3 · Acordes de potencia y patrones de rasgueo',
     title: 'Set 1',
     subtitle: 'Power chord shape · Moving on E & A strings · Muting',
     subtitle_es: 'Forma del acorde de potencia · Moverse por las cuerdas Mi y La · Silenciar cuerdas',
@@ -505,10 +505,10 @@ SETS.push(
     songThread: [{ name: '"Luna"', journey: 'tabs/luna.html', layer: 3, note: 'the F5–A5 vamp' }, { name: '"Sweet Child O\' Mine"', journey: 'tabs/sweet-child-o-mine.html', layer: 3, note: 'Assessment preparation: the D5–C5–G5 progression' }, { name: '"All Along the Watchtower"', journey: 'tabs/all-along-the-watchtower.html', layer: 3, note: 'the A5–G5–F5 loop' }, { name: '"the cure"', journey: 'tabs/the-cure.html', layer: 3, note: 'the changes as power chords' }],
     label: 'Set 2',
     locked: false,
-    module: 'Power Chords',
+    module: 'Power Chords & Strumming Patterns',
     moduleNum: 3,
-    unit: 'Module 3 · Power Chords',
-    unit_es: 'Módulo 3 · Acordes de potencia',
+    unit: 'Module 3 · Power Chords & Strumming Patterns',
+    unit_es: 'Módulo 3 · Acordes de potencia y patrones de rasgueo',
     title: 'Set 2',
     subtitle: 'Power chords with metronome · Chord changes · Strumming patterns',
     subtitle_es: 'Acordes de potencia con metrónomo · Cambios de acorde · Patrones de rasgueo',
@@ -1121,8 +1121,8 @@ MODULE_SONGS[3] = [
 
 MODULE_REVIEWS[3] = {
   moduleNum: 3,
-  module: 'Power Chords',
-  module_es: 'Acordes de potencia',
+  module: 'Power Chords & Strumming Patterns',
+  module_es: 'Acordes de potencia y patrones de rasgueo',
   skills: [
     { id: 'mr3-s1', text: 'I can fret a clean 2-finger power chord (root + 5th) with both notes ringing and no buzz',
       text_es: 'Puedo trastear un acorde de potencia limpio con dos dedos (raíz + quinta) con las dos notas sonando y sin zumbido', set: 'm3w1' },

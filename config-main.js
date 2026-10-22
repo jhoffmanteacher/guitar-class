@@ -56,7 +56,7 @@ const CLASS_OPEN_THROUGH = 3;
 const MODULE_MANIFEST = [
   { num: 1, name: 'Introductions: You and The Guitar',        name_es: 'Presentaciones: tú y la guitarra', i18nComplete: true, skillCount: 9,  skillIdRe: '^w\\d+-s\\d+$' },
   { num: 2, name: 'Notes on the E & A Strings',               name_es: 'Notas en las cuerdas Mi y La', i18nComplete: true, skillCount: 11, skillIdRe: '^m2w\\d+-s\\d+$' },
-  { num: 3, name: 'Power Chords',                             name_es: 'Acordes de potencia', i18nComplete: true, skillCount: 12, skillIdRe: '^m3w\\d+-s\\d+$' },
+  { num: 3, name: 'Power Chords & Strumming Patterns',         name_es: 'Acordes de potencia y patrones de rasgueo', i18nComplete: true, skillCount: 12, skillIdRe: '^m3w\\d+-s\\d+$' },
   { num: 4, name: 'Open Chords',                              name_es: 'Acordes al aire', i18nComplete: true, skillCount: 25, skillIdRe: '^m4w\\d+-s\\d+$' },
   { num: 5, name: 'Major / Minor / Blues Pentatonic Scales',  name_es: 'Escalas pentatónicas mayor, menor y de blues', i18nComplete: true, skillCount: 21, skillIdRe: '^m5w\\d+-s\\d+$' },
   { num: 6, name: 'Strumming Patterns with Chords',           name_es: 'Patrones de rasgueo con acordes', i18nComplete: true, skillCount: 18, skillIdRe: '^m6w\\d+-s\\d+$' },
