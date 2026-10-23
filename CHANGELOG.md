@@ -5,6 +5,13 @@ Notable changes to the Guitar Class site. Newest first.
 For the full session-by-session history (and the reasoning behind each change),
 see `WORKFLOW.md` and the git commit log.
 
+## 2026-10-23 — Las Mañanitas play along: alternating bass
+
+- **The full-chord version now uses an alternating bass.** In every bar, pick
+  one bass note on beat 1, then strum twice. Use the root in one bar and the
+  5th in the next. The card lists the two bass strings for A, E7 and D. The
+  Power chords version is the same as before.
+
 ## 2026-10-22 — Finger Gym: The Ladder speeds up as you play
 
 - **The Ladder now gets faster every 16 notes.** A round is four laps of

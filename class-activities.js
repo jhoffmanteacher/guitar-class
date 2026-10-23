@@ -5171,8 +5171,14 @@ window.CLASS_ACTIVITIES = [
     },
     title:    '"Las Mañanitas" - Ariel Camacho y Los Plebes del Rancho — Play Along',
     title_es: '"Las Mañanitas" - Ariel Camacho y Los Plebes del Rancho — Toca con la canción',
-    intro:    'You learned A, E7, D and the strum in 3 — today you play Las Mañanitas with the band, from the first verse to the last chorus.',
-    intro_es: 'Aprendiste A, E7, D y el rasgueo en 3 — hoy tocas Las Mañanitas con la banda, de la primera estrofa al último coro.',
+    /* Alternating bass (Jonathan, 2026-10-23), full chords only — the Power
+       chords version keeps the plain strum (its `_power` twins below). Beat 1
+       of every bar is ONE bass note, root in one bar and 5th in the next; beats
+       2 and 3 are the strum. Roots / 5ths: A = A string / low E string,
+       E7 = low E string / A string fret 2, D = D string / A string. Text only:
+       a column holds a chord for many bars, so the tab can't draw each bass note. */
+    intro:    'You learned A, E7, D and the strum in 3 — today you play Las Mañanitas with the band, from the first verse to the last chorus, with an alternating bass: one bass note on beat 1 (the root in one bar, the 5th in the next), then two strums.',
+    intro_es: 'Aprendiste A, E7, D y el rasgueo en 3 — hoy tocas Las Mañanitas con la banda, de la primera estrofa al último coro, con un bajo alternado: una nota de bajo en el tiempo 1 (la raíz en un compás, la quinta en el siguiente) y luego dos rasgueos.',
     intro_power:    'You learned A5, E5, D5 and the strum in 3 — today you play Las Mañanitas with the band, from the first verse to the last chorus.',
     intro_power_es: 'Aprendiste A5, E5, D5 y el rasgueo en 3 — hoy tocas Las Mañanitas con la banda, de la primera estrofa al último coro.',
     card: {
@@ -5182,8 +5188,10 @@ window.CLASS_ACTIVITIES = [
          section the student started from. */
       track: 'las-mananitas',
       slowest: true,    // Slowest / Slower / Slow / Normal
-      caption:    'The song in order · strum 3 times in every bar · change chords when the highlight moves',
-      caption_es: 'La canción en orden · rasguea 3 veces en cada compás · cambia de acorde cuando se mueva la marca',
+      caption:    'The song in order · every bar: 1 bass note, then 2 strums · A: A string / low E · E7: low E / A string fret 2 · D: D string / A string · change chords when the highlight moves',
+      caption_es: 'La canción en orden · cada compás: 1 nota de bajo y 2 rasgueos · A: cuerda La / Mi grave · E7: Mi grave / cuerda La traste 2 · D: cuerda Re / cuerda La · cambia de acorde cuando se mueva la marca',
+      caption_power:    'The song in order · strum 3 times in every bar · change chords when the highlight moves',
+      caption_power_es: 'La canción en orden · rasguea 3 veces en cada compás · cambia de acorde cuando se mueva la marca',
       sections: [
         {
           label: 'Verse 1', label_es: 'Estrofa 1',
