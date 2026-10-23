@@ -8057,6 +8057,35 @@ function nrRenderReady(msg){
 /* ── "Hear an example" — one generated round through the pluck synth,
    scheduled on the audio clock (rnPluckAt is Riff Runner's). ── */
 
+/* Beat <-> ms after beat 1. A round is ONE constant tempo, except the Finger
+   Gym's: it steps up lv.bpmStep BPM at the start of every lap (lv.lapBars
+   bars = 16 notes). s.laps / this map holds one { beat, ms, beatMs } per
+   tempo, so everything that places a note in time asks here rather than
+   multiplying by a single beatMs. With no lv.laps it is one entry and the
+   maths is exactly beat * beatMs. */
+function nrLapMap(lv){
+  const laps = lv.laps || 1;
+  const per = (lv.lapBars || lv.bars) * 4;
+  const out = [];
+  let ms = 0;
+  for (let k = 0; k < laps; k++){
+    const beatMs = 60000 / (lv.bpm + k * (lv.bpmStep || 0));
+    out.push({ beat: k * per, ms, beatMs });
+    ms += per * beatMs;
+  }
+  return out;
+}
+function nrBeatToMs(laps, beat){
+  let i = laps.length - 1;
+  while (i > 0 && beat < laps[i].beat) i--;
+  return laps[i].ms + (beat - laps[i].beat) * laps[i].beatMs;
+}
+function nrMsToBeat(laps, ms){
+  let i = laps.length - 1;
+  while (i > 0 && ms < laps[i].ms) i--;
+  return laps[i].beat + (ms - laps[i].ms) / laps[i].beatMs;
+}
+
 async function nrHear(){
   const s = nr;
   if (!s || s.phase !== 'ready') return;
@@ -8070,17 +8099,17 @@ async function nrHear(){
   if (nr !== s || s.phase !== 'ready' || s.pv) return;   // switched during the resume
   if (!nrBody()){ nrHearStop(); return; }
   const lv = nrLv(s);
-  const spb = 60 / lv.bpm;
+  const laps = nrLapMap(lv);
   const notes = nrGen(lv).filter(n => !n.rest);
   const startAt = ctx.currentTime + 0.2;
   /* A chord token previews as root + fifth + octave — the power-chord sound. */
   s.pv = { srcs: notes.flatMap(n => (n.chord ? [0, 7, 12] : [0])
-    .map(iv => rnPluckAt(n.midi + iv, startAt + n.beat * spb))) };
+    .map(iv => rnPluckAt(n.midi + iv, startAt + nrBeatToMs(laps, n.beat) / 1000))) };
   const btn = document.getElementById('nr-hear');
   if (btn) btn.innerHTML = '&#x25A0; ' + t('games.common.stop');
   const pv = s.pv;
   pv.autoStop = setTimeout(() => { if (nr === s && s.pv === pv) nrHearStop(); },
-    (0.2 + lv.bars * 4 * spb + 1.6) * 1000);
+    (0.2 + nrBeatToMs(laps, lv.bars * 4) / 1000 + 1.6) * 1000);
   s.timeouts.push(pv.autoStop);
 }
 
@@ -8214,7 +8243,8 @@ async function nrStart(){
   const lv = nrLv(s);
   s.phase = 'countin';
   s.chordMode = !!lv.chords;
-  s.beatMs = 60000 / lv.bpm;
+  s.laps = nrLapMap(lv);
+  s.beatMs = s.laps[0].beatMs;   // the count-in runs at the starting tempo
   s.totalBeats = lv.bars * 4;
   s.notes = nrGen(lv);
   s.playable = s.notes.filter(n => !n.rest);
@@ -8225,7 +8255,7 @@ async function nrStart(){
      one pluck. */
   let minGap = Infinity;
   for (let i = 1; i < s.playable.length; i++)
-    minGap = Math.min(minGap, (s.playable[i].beat - s.playable[i - 1].beat) * s.beatMs);
+    minGap = Math.min(minGap, nrBeatToMs(s.laps, s.playable[i].beat) - nrBeatToMs(s.laps, s.playable[i - 1].beat));
   s.goodMs = Math.min(180, 0.45 * minGap);
   s.perfectMs = Math.min(90, s.goodMs * 0.55);
 
@@ -8245,7 +8275,7 @@ async function nrStart(){
   coachCountIn(s, 'nr-count', () => {
     if (nr === s && s.phase === 'countin') s.phase = 'play';
   });
-  s.playable.forEach(n => { n.t = s.listenStart + n.beat * s.beatMs; n.result = null; });
+  s.playable.forEach(n => { n.t = s.listenStart + nrBeatToMs(s.laps, n.beat); n.result = null; });
   if (nrRaf) cancelAnimationFrame(nrRaf);
   nrLoop();
 }
@@ -8348,13 +8378,16 @@ function nrLoop(){
     const w = track.clientWidth;
     const hitX = w * 0.22;
     const lookBeats = w < 480 ? 4 : 8;
-    const pxPerMs = (w - hitX) / (lookBeats * s.beatMs);
+    /* Scroll in BEATS, not ms: tokens keep one spacing on screen and a
+       faster lap just moves them faster. At a constant tempo this is the
+       old (tt - now) * pxPerMs, term for term. */
+    const pxPerBeat = (w - hitX) / lookBeats;
+    const curBeat = nrMsToBeat(s.laps, now - s.listenStart);
     for (let i = 0; i < s.notes.length; i++){
       const el = s.els[i];
       if (!el) continue;
       const n = s.notes[i];
-      const tt = n.rest ? s.listenStart + n.beat * s.beatMs : n.t;
-      const x = hitX + (tt - now) * pxPerMs;
+      const x = hitX + (n.beat - curBeat) * pxPerBeat;
       if (x < -80 || x > w + 40){
         el.style.visibility = 'hidden';
       } else {
@@ -8362,7 +8395,7 @@ function nrLoop(){
         el.style.transform = 'translateX(' + x + 'px)';
         if (n.dur > 1){
           const tail = el.querySelector('.nr-tail');
-          if (tail) tail.style.width = ((n.dur - 1) * s.beatMs * pxPerMs) + 'px';
+          if (tail) tail.style.width = ((n.dur - 1) * pxPerBeat) + 'px';
         }
       }
     }
@@ -8392,17 +8425,25 @@ function nrLoop(){
         for (let j = i + 1; j < s.playable.length && s.playable[j].result; j++) s.playable[j].snap = null;
       }
     }
-    const beat = Math.floor((now - s.listenStart) / s.beatMs);
+    const beat = Math.floor(nrMsToBeat(s.laps, now - s.listenStart));
     if (beat !== s.lastBeat && beat >= 0){
       s.lastBeat = beat;
       const bar = Math.floor(beat / 4);
       const barEl = document.getElementById('nr-bar');
-      if (barEl && bar < nrLv(s).bars)
-        barEl.textContent = t('games.nr.barOfTotal', {bar: bar + 1, total: nrLv(s).bars});
+      if (barEl && bar < nrLv(s).bars){
+        if (s.gym){
+          /* Gym: say which lap and how fast — the speed-up is the point. */
+          let k = s.laps.length - 1;
+          while (k > 0 && beat < s.laps[k].beat) k--;
+          barEl.textContent = t('games.fg.lapBpm', {lap: k + 1, total: s.laps.length, bpm: Math.round(60000 / s.laps[k].beatMs)});
+        } else {
+          barEl.textContent = t('games.nr.barOfTotal', {bar: bar + 1, total: nrLv(s).bars});
+        }
+      }
       document.querySelectorAll('#nr-beats .cc-pip').forEach((el, i) =>
         el.classList.toggle('on', i === ((beat % 4) + 4) % 4));
     }
-    if (now > s.listenStart + s.totalBeats * s.beatMs + COACH_EVENT_TAIL + 300){ nrFinish(true); return; }   // played through — this one counts
+    if (now > s.listenStart + nrBeatToMs(s.laps, s.totalBeats) + COACH_EVENT_TAIL + 300){ nrFinish(true); return; }   // played through — this one counts
   }
   nrRaf = requestAnimationFrame(nrLoop);
 }
@@ -8957,18 +8998,26 @@ function nrRenderDone(nPerfect, nGood, nPitch, total){
    nrGen()'s `lv.gym` branch, nrRenderReady()'s redirect, the finger label
    in nrRenderPlay(), and the early return in nrFinish().
    Speeds are the Gym's own medal ladder (the circuit step: 50 bronze,
-   60 silver, 70 gold) plus 80 for platinum. Score NR_PASS (80%) at a
-   speed to earn its medal and open the next one. Bests live in games.fg
+   60 silver, 70 gold) plus 80 for platinum — each is the STARTING speed:
+   the round is FG_LAPS laps of 16 notes and every lap runs FG_BPM_STEP BPM
+   faster than the one before (nrLapMap carries the tempo). Score NR_PASS
+   (80%) over the whole round to earn the medal and open the next one. Bests live in games.fg
    (levels: { index -> best % }), apart from games.nr, so a Gym round
    never moves Note Runner's adaptive stage or weak-spot map.
    ════════════════════════════════════════════════════════════════════ */
 
+const FG_LAPS = 4;      // a round is this many laps...
+const FG_LAP_BARS = 4;  // ...of 4 bars (16 notes: low E, A, low E, A)
+const FG_BPM_STEP = 5;  // and each lap runs this many BPM faster than the last
 const FG_LEVELS = [
   { medal: 'bronze',   bpm: 50 },
   { medal: 'silver',   bpm: 60 },
   { medal: 'gold',     bpm: 70 },
   { medal: 'platinum', bpm: 80 }
-].map(l => ({ gym: true, bars: 4, strings: [6, 5], ...l }));
+].map(l => ({ gym: true, strings: [6, 5], laps: FG_LAPS, lapBars: FG_LAP_BARS,
+              bars: FG_LAPS * FG_LAP_BARS, bpmStep: FG_BPM_STEP, ...l }));
+/* "50–65": the speeds a level's first and last laps run at. */
+function fgBpmRange(lv){ return lv.bpm + '–' + (lv.bpm + (lv.laps - 1) * lv.bpmStep); }
 const FG_MEDAL_ICO = { bronze: '&#x1F949;', silver: '&#x1F948;', gold: '&#x1F947;', platinum: '&#x1F3C6;' };
 
 function fgMedal(lv){ return t('games.fg.medal.' + lv.medal); }
@@ -8995,7 +9044,9 @@ function fgTopBpm(saved){
   return top;
 }
 
-/* The round: low E ladder, A ladder, twice — one bar each. Finger = fret. */
+/* One lap: low E ladder, A ladder, twice — one bar each. The round repeats
+   it FG_LAPS times (the speed changes between laps, not the notes).
+   Finger = fret. */
 function fgGen(lv){
   const notes = [];
   for (let b = 0; b < lv.bars; b++){
@@ -9032,11 +9083,11 @@ function fgRenderHome(){
       meta = `<span class="rn-song-best dim">${t('games.nr.notPlayedYet')}</span>`;
     }
     return `<button type="button" class="rn-song${un ? '' : ' locked'}" ${un ? `onclick="fgPick(${i})"` : 'disabled'}>
-       <span class="rn-song-title">${fgMedal(lv)} &mdash; ${lv.bpm} BPM</span>
+       <span class="rn-song-title">${fgMedal(lv)} &mdash; ${fgBpmRange(lv)} BPM</span>
        ${meta}</button>`;
   }).join('');
   body.innerHTML =
-    `<div class="coach-tip rn-center">${t('games.fg.homeIntro', {pct: NR_PASS})}</div>
+    `<div class="coach-tip rn-center">${t('games.fg.homeIntro', {step: FG_BPM_STEP, pct: NR_PASS})}</div>
      <div class="rn-songs">${cards}</div>`;
 }
 
@@ -9056,8 +9107,8 @@ function fgRenderReady(msg){
   const b = fgBestMerged(nr.level);
   body.innerHTML =
     `${msg ? `<div class="coach-tip rn-center">${msg}</div>` : ''}
-     <div class="coach-tip rn-center"><strong>${fgMedal(lv)} &mdash; ${lv.bpm} BPM</strong><br>
-       ${t('games.fg.readyLine', {bars: lv.bars, notes: lv.bars * 4, pct: NR_PASS})}</div>
+     <div class="coach-tip rn-center"><strong>${fgMedal(lv)} &mdash; ${fgBpmRange(lv)} BPM</strong><br>
+       ${t('games.fg.readyLine', {notes: lv.bars * 4, step: lv.bpmStep, pct: NR_PASS})}</div>
      <div class="fg-ladder" aria-hidden="true">${[1, 2, 3, 4].map(f => `<span class="fg-step"><span class="fg-step-finger">${f}</span><span class="fg-step-fret">${f}</span></span>`).join('')}</div>
      <div class="coach-tip rn-center">${t('games.fg.readyHow')}</div>
      ${b > 0 ? `<div class="coach-tip rn-center">${t('games.nr.bestPercent', {pct: b})}</div>` : ''}
@@ -9108,7 +9159,7 @@ function fgRenderDone(nPerfect, nGood, nPitch, total){
   let status;
   if (s.passed && firstClear){
     status = `<div class="rn-unlock">${FG_MEDAL_ICO[lv.medal]} ${t('games.fg.passEarned', {medal: fgMedal(lv)})}${nxt >= 0
-      ? ' ' + t('games.fg.passNext', {medal: fgMedal(FG_LEVELS[nxt]), bpm: FG_LEVELS[nxt].bpm}) : ''}</div>`;
+      ? ' ' + t('games.fg.passNext', {medal: fgMedal(FG_LEVELS[nxt]), bpm: fgBpmRange(FG_LEVELS[nxt])}) : ''}</div>`;
   } else if (s.passed){
     status = `<div class="coach-tip rn-center">${nxt < 0 ? t('games.fg.passTop') : t('games.fg.passAgain', {medal: fgMedal(lv)})}</div>`;
   } else {

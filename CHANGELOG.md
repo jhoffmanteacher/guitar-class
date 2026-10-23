@@ -5,6 +5,13 @@ Notable changes to the Guitar Class site. Newest first.
 For the full session-by-session history (and the reasoning behind each change),
 see `WORKFLOW.md` and the git commit log.
 
+## 2026-10-22 — Finger Gym: The Ladder speeds up as you play
+
+- **The Ladder now gets faster every 16 notes.** A round is four laps of
+  16 notes. Each lap runs 5 BPM faster than the one before, so Bronze goes
+  from 50 to 65 BPM and Platinum from 80 to 95. The top bar shows which lap
+  you are on and the speed. The medal still needs 80% over the whole round.
+
 ## 2026-10-22 — New game: Finger Gym: The Ladder
 
 - **A new guitar game in the Games arcade.** Play the Ladder from Finger
