@@ -370,7 +370,15 @@ async function showTeacherApp(user){
       // inside an archived card sits INSIDE a [data-board-arch] details, so
       // closest() from it would find the archive fold instead.
       if(e.target.matches('[data-board-done]')){ boardDoneOpen[e.target.dataset.key]=!!e.target.open; return; }
-      if(e.target.matches('[data-board-who]')){ boardWhoOpen[e.target.dataset.id]=!!e.target.open; return; }
+      if(e.target.matches('[data-board-who]')){
+        const id=e.target.dataset.id;
+        boardWhoOpen[id]=!!e.target.open;
+        // A closed picker is drawn without its student list — fill it now.
+        const slot=e.target.open && e.target.querySelector('[data-who-boxes]');
+        const a=slot && !slot.childElementCount && (window.CLASS_ACTIVITIES||[]).find(x=>x.id===id);
+        if(a) slot.innerHTML=teacherWhoBoxesHtml(a, teacherClassConfig);
+        return;
+      }
       if(e.target.matches('[data-board-help]')){ boardHelpOpen=!!e.target.open; return; }
       const arch=e.target.closest('[data-board-arch]');
       if(arch) teacherBoardArchToggle(arch.dataset.module, arch.open);
@@ -1551,24 +1559,13 @@ function renderTeacherActivities(opts){
        nobody ticked never see the card, aren't sent to it at sign-in, and
        aren't counted in its done list. See teacherSetActivityStudent. */
     const whoPicker=a=>{
-      const picked=teacherActivityStudents(a.id,cfg);
-      const n=Object.keys(picked).length;
-      const arch=cfg.archived||{};
-      const roster=allStudentsRaw.filter(s=>!arch[s.uid] || picked[s.uid])
-        .slice().sort((x,y)=>(x.name||x.email||'').localeCompare(y.name||y.email||'', undefined, {sensitivity:'base'}));
-      const perLabel=p=>!p?'No period':p==='CAS'?'CAS':'Period '+p;
-      const groups={};
-      roster.forEach(s=>{ const p=teacherStudentPeriod(s)||''; (groups[p]=groups[p]||[]).push(s); });
-      const order=['4','7','CAS',''].filter(p=>groups[p]);
-      const boxes=order.map(p=>`<div class="t-who-group"><div class="t-who-head">${escHtml(perLabel(p))}</div>`
-        +groups[p].map(s=>`<label class="t-who-row"><input type="checkbox" data-set-activity-student data-id="${escAttr(a.id)}" data-uid="${escAttr(s.uid)}"${picked[s.uid]?' checked':''}> ${escHtml(s.name||s.email||s.uid.slice(0,8)+'…')}</label>`).join('')
-        +`</div>`).join('');
+      const n=Object.keys(teacherActivityStudents(a.id,cfg)).length;
       const sum=n?`Only ${n} student${n===1?'':'s'}`:'Whole class';
       return `<details class="t-who${n?' t-who-on':''}" data-board-who data-id="${escAttr(a.id)}"${boardWhoOpen[a.id]?' open':''}>`
         +`<summary title="Who this activity is for">Who: ${sum}</summary>`
         +`<div class="t-who-body"><div class="t-who-note">Tick students to give this activity to them only. Nobody ticked = the whole class.</div>`
         +(n?`<div class="tg-seg"><button class="tg-seg-btn" data-activity-whole-class data-id="${escAttr(a.id)}">Back to whole class</button></div>`:'')
-        +(boxes||'<div class="t-who-note">No students yet.</div>')+`</div></details>`;
+        +`<div data-who-boxes>${boardWhoOpen[a.id]?teacherWhoBoxesHtml(a,cfg):''}</div></div></details>`;
     };
     // A movable song (caIsSongCard) can go to the Songs page instead — see
     // teacherSetSongPlace. Its board slot is kept for the trip back.
@@ -3218,6 +3215,25 @@ function teacherActivityStudents(id, cfg){
 function teacherActivityForStudent(a, uid, cfg){
   const who=teacherActivityStudents(a.id, cfg);
   return !Object.keys(who).length || who[uid]===true;
+}
+/* The board's Who picker list: one checkbox per student, by period. Drawn
+   only while that card's picker is open (boardWhoOpen) — closed, it was ~60
+   checkboxes on every card that nobody could see, rebuilt on every repaint
+   and every minute's refresh. Opening one fills it in place (the toggle
+   listener in showTeacherApp); a repaint redraws an open one in full. */
+function teacherWhoBoxesHtml(a, cfg){
+  const picked=teacherActivityStudents(a.id,cfg);
+  const arch=cfg.archived||{};
+  const roster=allStudentsRaw.filter(s=>!arch[s.uid] || picked[s.uid])
+    .slice().sort((x,y)=>(x.name||x.email||'').localeCompare(y.name||y.email||'', undefined, {sensitivity:'base'}));
+  const perLabel=p=>!p?'No period':p==='CAS'?'CAS':'Period '+p;
+  const groups={};
+  roster.forEach(s=>{ const p=teacherStudentPeriod(s)||''; (groups[p]=groups[p]||[]).push(s); });
+  const order=['4','7','CAS',''].filter(p=>groups[p]);
+  const boxes=order.map(p=>`<div class="t-who-group"><div class="t-who-head">${escHtml(perLabel(p))}</div>`
+    +groups[p].map(s=>`<label class="t-who-row"><input type="checkbox" data-set-activity-student data-id="${escAttr(a.id)}" data-uid="${escAttr(s.uid)}"${picked[s.uid]?' checked':''}> ${escHtml(s.name||s.email||s.uid.slice(0,8)+'…')}</label>`).join('')
+    +`</div>`).join('');
+  return boxes||'<div class="t-who-note">No students yet.</div>';
 }
 /* Optional = the board switch (stored true / false), else the default:
    Optional when the data says `optional: true` or the card is given to
