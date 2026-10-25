@@ -2595,7 +2595,10 @@ async function teacherSetActivityOptional(id, state){
     await ensureDb();
     const fv=firebase.firestore.FieldValue;
     const patch = {optionalActivities:{[id]: keep ? on : fv.delete()}};
-    await teacherWriteConfig(patch, {['optionalActivities.'+id]: had?prev:undefined});
+    // activityStudents too: `keep` came from it (a card given to individual
+    // students is Optional by default), so a Who change from another console
+    // since this tab's read has to refuse, not store the wrong flag.
+    await teacherWriteConfig(patch, {['optionalActivities.'+id]: had?prev:undefined, ['activityStudents.'+id]: (teacherClassConfig.activityStudents||{})[id]});
   }catch(e){
     if(had) teacherClassConfig.optionalActivities[id]=prev; else delete teacherClassConfig.optionalActivities[id];
     teacherConfigSaveFailed(e, 'Could not save that change — check your connection and Firestore rules.');
