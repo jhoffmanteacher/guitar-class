@@ -2783,14 +2783,12 @@ const SLANG_PHRASES = [
      place" too. */
   'lives', 'living', 'parked', 'stays put', 'stay put',
 ];
-/* One reviewed occurrence each, matched at its exact position the way
-   TEACHER_PHRASE_ALLOW is: module-9.js's m9w3 sight-reading card ("It lives
-   entirely at frets 5–10") sits in lines another branch was rewriting when
-   this ratchet landed (2026-10-25). Delete both entries once that card is
-   reworded — an unused entry only stands ready to excuse a new one. */
-const SLANG_ALLOW = [
-  { file: 'module-9.js', phrase: 'lives entirely at frets 5' },
-];
+/* Reviewed occurrences that stay, matched at their exact position the way
+   TEACHER_PHRASE_ALLOW is. None today: the one entry (module-9.js's m9w3
+   sight-reading card, "It lives entirely at frets 5–10") was reworded on
+   2026-10-25. An unused entry only stands ready to excuse a new one, so add
+   one only for a phrase that is genuinely right where it is. */
+const SLANG_ALLOW = [];
 /* Spanish figurative "vive / viven" for where a note, riff or chord sits —
    the twin of 'lives' above (eight found 2026-10-25: "la bolita vive debajo
    del puente", "¿Dónde viven el IV y el V?", "el riff vive en el mismo
@@ -2798,9 +2796,7 @@ const SLANG_ALLOW = [
    word edges, so "en vivo" and "vivir" are not hits. Read from every `_es`
    value, the es: side of i18n.js and every data-es attribute. */
 const SLANG_PHRASES_ES = ['vive', 'viven'];
-const SLANG_ALLOW_ES = [
-  { file: 'module-9.js', phrase: 'vive completamente en los trastes 5' },   // same card as SLANG_ALLOW
-];
+const SLANG_ALLOW_ES = [];   // none today — see SLANG_ALLOW
 /* Hoisted to module scope so 1y can sweep exit-check item labels with the
    exact same list — 1w's own FIELD_RE has no `label`, and widening it would
    re-scan every module step label. matchAll clones the regex, so sharing one
