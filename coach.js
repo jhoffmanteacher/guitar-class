@@ -5378,18 +5378,20 @@ function shRenderSetup(msg){
      <button type="button" class="coach-start" onclick="shStart()">${t('games.sh.startBarsButton', {bars: SH_BARS})}</button>`;
 }
 
-/* One metronome click, scheduled at an exact audio-clock time — beep()'s
-   envelope recipe, parameterized with a future start. Same voice as the
-   count-in (660 normal / 990 accent), but quieter. */
-function shClickAt(t, accent){
-  const ctx = sh.ctx;
+/* One metronome click on `ctx`, scheduled at an exact audio-clock time —
+   beep()'s envelope recipe, parameterized with a future start. Same voice
+   as the count-in (660 normal / 990 accent), but quieter. Strum Hero, Riff
+   Roulette and Riff Runner each click through this (their own ctx and
+   level). */
+function gameClickAt(ctx, t, accent, level){
   const o = ctx.createOscillator(), g = ctx.createGain();
   o.connect(g); g.connect(ctx.destination);
   o.frequency.value = accent ? 990 : 660;
-  g.gain.setValueAtTime(0.25, t);
+  g.gain.setValueAtTime(level, t);
   g.gain.exponentialRampToValueAtTime(0.001, t + 0.05);
   o.start(t); o.stop(t + 0.05);
 }
+function shClickAt(t, accent){ gameClickAt(sh.ctx, t, accent, 0.25); }
 
 /* Short muted-strum "chick" on every tap (filtered noise burst) so
    tapping feels like strumming, not like clicking a button. */
@@ -6080,17 +6082,9 @@ function rrSkip(){
   rrSpin();
 }
 
-/* One metronome click at an exact audio-clock time — same lookahead
-   voice as Strum Hero's, reading this game's state. */
-function rrClickAt(t, accent){
-  const ctx = rr.ctx;
-  const o = ctx.createOscillator(), g = ctx.createGain();
-  o.connect(g); g.connect(ctx.destination);
-  o.frequency.value = accent ? 990 : 660;
-  g.gain.setValueAtTime(0.25, t);
-  g.gain.exponentialRampToValueAtTime(0.001, t + 0.05);
-  o.start(t); o.stop(t + 0.05);
-}
+/* One metronome click at an exact audio-clock time — Strum Hero's voice
+   (gameClickAt), on this game's context. */
+function rrClickAt(t, accent){ gameClickAt(rr.ctx, t, accent, 0.25); }
 
 /* Lookahead scheduler: every ~25ms, post the clicks due in the next
    ~120ms. Beat 1 of each group of 4 is accented. The beat pips ride
@@ -6972,15 +6966,7 @@ function rnHearStop(){
 /* One metronome click at an exact audio-clock time — Strum Hero's voice
    (660 normal / 990 accent), but softer during play so the plucked riff
    notes stay on top of the pulse. */
-function rnClickAt(t, accent, loud){
-  const ctx = rn.ctx;
-  const o = ctx.createOscillator(), g = ctx.createGain();
-  o.connect(g); g.connect(ctx.destination);
-  o.frequency.value = accent ? 990 : 660;
-  g.gain.setValueAtTime(loud ? 0.25 : 0.12, t);
-  g.gain.exponentialRampToValueAtTime(0.001, t + 0.05);
-  o.start(t); o.stop(t + 0.05);
-}
+function rnClickAt(t, accent, loud){ gameClickAt(rn.ctx, t, accent, loud ? 0.25 : 0.12); }
 
 /* Combo streak at which the click fades out for the rest of the round — the
    student's timing has clearly locked onto the tempo on its own, so the
