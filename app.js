@@ -12966,8 +12966,17 @@ function pcSheetWhere(L, si, rep){
 /* Draw every sheet on the page that has a width. A ResizeObserver redraws
    on a width change — the card opening (a closed card is 0 wide), the
    window, the rail collapsing. */
-let pcSheetRO = null;
+let pcSheetRO = null, pcSheetCols = [];
 function pcSheetScan(){
+  /* Every renderClassActivities() builds a new sheet, and an observed column
+     is never let go by itself: drop the ones that have left the page, and
+     the paper (with its canvas) each one points at. */
+  if(pcSheetRO) pcSheetCols = pcSheetCols.filter(col => {
+    if(col.isConnected) return true;
+    pcSheetRO.unobserve(col);
+    col._sheetPaper = null;
+    return false;
+  });
   document.querySelectorAll('.pc-sheet-paper:not([data-watched])').forEach(paper => {
     paper.dataset.watched = '1';
     if(typeof ResizeObserver === 'function'){
@@ -12977,6 +12986,7 @@ function pcSheetScan(){
       }));
       pcSheetRO.observe(paper.parentElement);   // the sheet column, not the paper (the paper takes its width from the drawing)
       paper.parentElement._sheetPaper = paper;
+      pcSheetCols.push(paper.parentElement);
     } else pcSheetDraw(paper);
   });
 }
