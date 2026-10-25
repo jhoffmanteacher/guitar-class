@@ -1208,6 +1208,71 @@ function checkStationNames() {
 }
 
 /* ════════════════════════════════════════════════════════════════════
+   1br. A STEP POINTS AT PAGE PARTS THAT NO LONGER RENDER (2026-10-25).
+   Two places a step used to send students are gone:
+     · the per-module Songs fold at the foot of a set page — removed with
+       the per-set Songs tab (2026-08-27); MODULE_SONGS now reaches students
+       only through the Songs page in the left menu and search;
+     · the "song card at the bottom of this station" — every
+       kind:'take-to-song' section, hidden since TAKE_TO_SONG_ENABLED went
+       false (2026-10-18).
+   The 2026-10-25 sweep of Modules 7–13 found four rendered steps still
+   pointing at one or the other: m12w3's "this module's Songs section at
+   the bottom of the page", m8w2's "the song card at the bottom of this
+   station", and two that named a hidden step by its module — m10w2's
+   "your full Bm barre shape from Module 7" and m12w2's "you already
+   fingerpicked this verse in Module 8".
+
+   This bans the wording of the first two kinds, in BOTH languages: every
+   student-facing field 1w reads (STUDENT_VALUE_NAME_RE) plus its `_es`
+   twin, through readFieldStrings, matched on the UNESCAPED value. Hidden
+   sections are read too — the take-to-song switch can be turned back on,
+   and the Songs fold would still be gone. Fix a relapse by putting the
+   link in the step, or by naming where the thing really is: the Songs page
+   (left menu), or a place in the ladder ("Set 3, Challenge 2").
+
+   Two innocent twins are carved out. "Whole Song card" (EN) / "tarjeta
+   de La canción completa" (ES) is the real name of the whole-song
+   play-along cards (ca-24…ca-28), which five class-activity steps send
+   students to — so "song card" never matches after "whole", and the
+   Spanish "tarjeta de canción" never matches before "completa". And it is
+   plural "songs section/tab" only: a singular "song tab" is a song's TAB.
+   i18n.js is not read — review.assessPopNote's "the bottom of this page"
+   is the Module Review page, which does end in that section.
+
+   HONEST LIMIT: phrases only. A pointer at a hidden step by its module
+   number ("you did this in Module 8") passes; only reading finds those.
+   ════════════════════════════════════════════════════════════════════ */
+const GONE_UI_RE = new RegExp(
+  '(?<!whole[ -])\\bsong cards?\\b|\\bsongs (?:section|tab|fold)s?\\b|\\bbottom of (?:this|the) (?:station|page)\\b' +
+  '|\\btarjetas? de canci[oó]n(?! completa)|\\b(?:secci[oó]n|pesta[ñn]a) de canciones|\\bal final de (?:esta|la) (?:estaci[oó]n|p[aá]gina)',
+  'gi');
+function checkGoneUiPointers() {
+  head('1br. Steps that point at page parts that no longer render');
+  let bad = 0, read = 0;
+  /* The `_es` twins: STUDENT_VALUE_NAME_RE reads English only (1w's list
+     is English), so widen its own source rather than keep a second field
+     list that could drift from it. */
+  const src = STUDENT_VALUE_NAME_RE.source;
+  if (!src.includes('(?:_power)?')) {
+    err('1br: STUDENT_VALUE_NAME_RE changed shape — cannot add the `_es` twins, so Spanish is NOT checked');
+    problems++; return;
+  }
+  const NAME_RE = new RegExp(src.replace('(?:_power)?', '(?:_power)?(?:_es)?'), 'g');
+  for (const file of STUDENT_VALUE_FILES) {
+    for (const v of readFieldStrings(file, NAME_RE) || []) {
+      read++;
+      for (const m of straightQuotes(v.text).matchAll(GONE_UI_RE)) {
+        err(`${file}:${v.line}: ${v.field} points at a page part that no longer renders — "${m[0]}" (link it in the step, or name the Songs page or a place in the ladder)`);
+        problems++; bad++;
+      }
+    }
+  }
+  if (read === 0) { err('1br read no module values — the field reader has gone blind'); problems++; return; }
+  if (bad === 0) ok(`no step points at the removed Songs fold or a hidden song card (${read} EN + ES values read)`);
+}
+
+/* ════════════════════════════════════════════════════════════════════
    1o. TAB CAN SCROLL SIDEWAYS AGAIN — the inline TAB board is laid out to
    fill its card and wrap a long phrase onto a second staff (WO7,
    2026-08-28). Nothing about it may scroll horizontally: a student on a
@@ -7666,6 +7731,7 @@ function checkGuitarNotes() {
   checkJourneyLickLabels();
   checkRetiredStationWording();
   checkStationNames();
+  checkGoneUiPointers();
   checkTabNoScroll();
   checkContrast();
   checkJourneyThemeDrift();
