@@ -9427,6 +9427,10 @@ function restoreLessonScroll(a){
   a.pane.scrollTo({ top: to });
 }
 function rebuildModuleContentPanels(){
+  /* Every card in these panels is about to be rebuilt (see stopCardAudio):
+     a tab line left playing would keep sounding with its cursor and its
+     Stop button on the old, detached nodes. */
+  stopCardAudio();
   const anchor = lessonScrollAnchor();
   document.querySelectorAll('#week-panels .week-panel').forEach(panel=>{
     const wid = panel.dataset.id;
