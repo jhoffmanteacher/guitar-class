@@ -3151,13 +3151,18 @@ async function teacherDeleteActivity(id){
    so those globals would read as empty here. This reads straight off the
    student's own doc (allStudents) and the config object this file already
    has in hand. If the visibility rule ever changes, change it in both. */
-function teacherActivityVisible(a, cfg, today, uid){
+function teacherActivityVisible(a, cfg, today, uid, view){
   if(teacherActivityRetired(a.id, cfg)) return false;   // archived/deleted — see caIsVisible in app.js
   // Not placed on the board = not in the course. Same condition, same
   // position, as the assigned check in caIsVisible() — without it the
   // console keeps counting an un-assigned card as a blocker ("Blocked by N",
   // the per-student gate list, Clear all) for students it no longer blocks.
-  if(cfg && cfg.activityBoardSeeded && !((cfg.activityBoard||{})[a.id])) return false;
+  // Read through the board resolver students use (teacherBoardView ->
+  // caBoardOrder), not the raw activityBoard row: Move to Songs and Move to
+  // Teacher view songs keep the row for the trip back, and caBoardOrder
+  // never assigns a library song or a teacher-only card. `view` lets
+  // teacherBlockersFor work the board out once per student.
+  if(!(view||teacherBoardView(cfg)).assigned[a.id]) return false;
   if(((cfg&&cfg.hiddenActivities)||{})[a.id]===true) return false;
   // Given to other students only (the board's "Who" picker) — caForMe in app.js.
   if(uid!==undefined && !teacherActivityForStudent(a,uid,cfg)) return false;
@@ -3213,9 +3218,10 @@ function teacherBlockersFor(stu, cfg){
   // caStudentIsCAS() in app.js. Effective period via the shared helper, same
   // formula teacherStudentPeriod() uses at every other call site.
   if(teacherStudentPeriod(stu, cfg)==='CAS') return [];
+  const view=teacherBoardView(cfg);
   // Optional activities never block — mirrors caBlockers() in app.js.
   return (window.CLASS_ACTIVITIES||[]).filter(a=>
-    teacherActivityVisible(a,cfg,today,stu.uid) && !teacherActivityOptional(a.id,cfg) && (stu.classActivities||{})[a.id]!==true && clears[a.id]!==true);
+    teacherActivityVisible(a,cfg,today,stu.uid,view) &&!teacherActivityOptional(a.id,cfg) && (stu.classActivities||{})[a.id]!==true && clears[a.id]!==true);
 }
 /* The detail pages' Gate column reads as if the activity blocks. When it's
    Optional it doesn't, so say so above the grid rather than leave a column

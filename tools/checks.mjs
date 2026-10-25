@@ -5473,7 +5473,18 @@ function checkVisibilityParity() {
   // satisfies the concept if ANY of its patterns appears in its body.
   const CONCEPTS = [
     { name: 'archived/deleted', re: /retiredActivityIds|teacherActivityRetired|archivedActivities/ },
-    { name: 'assigned to the board', re: /caBoardView\(\)\.assigned|activityBoardSeeded/ },
+    /* Per file since 2026-10-25. "Assigned" is caBoardOrder's answer, which
+       never assigns a library song or a teacher-only card — and Move to
+       Songs / Move to Teacher view songs keep the card's board row for the
+       trip back. teacher.js used to accept the bare activityBoardSeeded test
+       here, read the raw row, and kept counting a moved card as a blocker for
+       every student. So app.js and teacher.js must read the resolver itself,
+       and journey.js (no app.js on those pages) must test both moves. */
+    { name: 'assigned to the board (caBoardOrder: library songs and teacher-only cards never are)', re: {
+      'app.js': /caBoardView\(\)\.assigned\[a\.id\]/,
+      'teacher.js': /teacherBoardView\(cfg\)\)?\.assigned\[a\.id\]/,
+      'tabs/journey.js': /^(?=[\s\S]*activityBoardSeeded)(?=[\s\S]*cfg\.songLibrary)(?=[\s\S]*cfg\.classSongs)/,
+    } },
     { name: 'teacher hide toggle', re: /hiddenActivityIds|hiddenActivities/ },
     { name: 'release date', re: /caDate\(|activityDates/ },
     // 2026-10-13: the board's "Who" picker (config/class.activityStudents).
@@ -5498,7 +5509,8 @@ function checkVisibilityParity() {
     if (end < 0) { err(`${c.file}: could not read ${c.fn}()'s body`); problems++; bad++; continue; }
     const body = src.slice(open, end + 1);
     for (const con of CONCEPTS) {
-      if (!con.re.test(body)) {
+      const re = con.re instanceof RegExp ? con.re : con.re[c.file];
+      if (!re || !re.test(body)) {
         err(`${c.file} · ${c.fn}(): never tests "${con.name}" — the other copies do, and all three have to agree on what hides an activity`);
         problems++; bad++;
       }

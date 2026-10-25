@@ -1073,8 +1073,17 @@ function journeyIsVisible(a, cfg, uid){
      back to Built would stop blocking the main site while still blanking all
      six Journey pages — a lock with nothing left on In-Class Activities to clear it.
      Keyed off activityBoardSeeded, never off the board being empty, for the
-     reason activityBoardOn in app.js spells out. */
-  if(cfg && cfg.activityBoardSeeded === true && !((cfg.activityBoard || {})[a.id])) return false;
+     reason activityBoardOn in app.js spells out.
+     A library song or a teacher-only card is never assigned either, whatever
+     the board holds — Move to Songs and Move to Teacher view songs keep the
+     row for the trip back. Copies caIsSongCard / caIsLibraryCard /
+     caIsTeacherSong, which caBoardOrder (app.js) applies before it assigns
+     anything; this page has no app.js to call them through. */
+  var lib = (cfg && cfg.songLibrary) || {};
+  var songCard = (a.library === true || a.library === false) && a.kind !== 'check' && !a.journey && !(a.card && (a.card.wholeSong || a.card.sheet));
+  var onSongs = songCard && (typeof lib[a.id] === 'boolean' ? lib[a.id] : a.library === true);
+  var teacherOnly = a.teacherOnly === true && ((cfg && cfg.classSongs) || {})[a.id] !== true;
+  if(onSongs || teacherOnly || (cfg && cfg.activityBoardSeeded === true && !((cfg.activityBoard || {})[a.id]))) return false;
   if(((cfg && cfg.hiddenActivities) || {})[a.id] === true) return false;
   if(!journeyForStudent(a, cfg, uid)) return false;
   var d = ((cfg && cfg.activityDates) || {})[a.id];
