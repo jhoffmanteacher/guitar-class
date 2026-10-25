@@ -100,7 +100,7 @@ SETS.push(
             hint: 'Keep the shape the same. Move your whole hand to the new fret.',
             hint_es: 'Mantén la misma forma. Mueve toda la mano al traste nuevo.',
             skills: [2, 4],
-            response: { type: 'mc', prompt: 'You play the same power chord shape with your index finger on the low E string, fret 5. What chord is it?',
+            response: { type: 'mc', prompt: 'If you play the same power chord shape with your index finger on the 5th fret of the low E string, what chord is it?',
               prompt_es: 'Tocas la misma forma de acorde de potencia con tu dedo índice en la cuerda Mi grave, traste 5. ¿Qué acorde es?',
               answer: 0,
               explain: 'The root sets the name. Fret 5 of the low E is A, so the power chord rooted there is A5.',
