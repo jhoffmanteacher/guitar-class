@@ -784,8 +784,8 @@ SETS.push(
             steps: [
               {
                 label: 'Challenge 2 — "Está Dañada" Requinto Line', label_es: 'Reto 2 — Línea de requinto de "Está Dañada"',
-                text: '<ul><li>Play the song\'s requinto intro line fingerstyle, following the "Está Dañada" tutorial video in this module\'s Songs section at the bottom of the page.</li></ul>You\'ve got it when: the whole intro line with no stops and every note clear, three times in a row.',
-                text_es: '<ul><li>Toca con fingerstyle la línea de requinto de la intro de la canción, siguiendo el video tutorial de "Está Dañada" en la sección de Canciones de este módulo, al final de la página.</li></ul>Lo tienes cuando: toda la línea de la intro sin paradas y con cada nota clara, tres veces seguidas.',
+                text: '<ul><li>Play the song\'s requinto intro line fingerstyle. Learn it from this tutorial (in Spanish): <a href="https://www.youtube.com/watch?v=DjSzkgEeddc" target="_blank">Está Dañada - Ivan Cornejo - Requinto y Acordes – David Casas</a>.</li></ul>You\'ve got it when: the whole intro line with no stops and every note clear, three times in a row.',
+                text_es: '<ul><li>Toca con fingerstyle la línea de requinto de la intro de la canción. Apréndela con este video tutorial: <a href="https://www.youtube.com/watch?v=DjSzkgEeddc" target="_blank">Está Dañada - Ivan Cornejo - Requinto y Acordes – David Casas</a>.</li></ul>Lo tienes cuando: toda la línea de la intro sin paradas y con cada nota clara, tres veces seguidas.',
                 hint: 'This is the real sierreño sound — a smaller, higher-pitched guitar carrying the melody. The line slides between notes on the thin strings instead of strumming chords.',
                 hint_es: 'Este es el sonido real del sierreño — una guitarra más pequeña y aguda que lleva la melodía. La línea se desliza entre notas en las cuerdas delgadas en lugar de rasguear acordes.',
                 stuck: 'Slow the line down to half tempo and isolate just the first 4 notes. Get those clean before adding the slide.',
