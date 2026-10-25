@@ -778,13 +778,17 @@ function lqFretAnswerHtml(correctIds){
   return `<div class="lq-answer" data-i18n="lq.answerFretAlso" data-i18n-params="${escAttr(JSON.stringify(params))}">${escHtml(t('lq.answerFretAlso', params))}</div>`;
 }
 
+// One leaderboard row: rank, name, points. The student's own screen marks
+// its rows lq-lb-row (and its own one .me); the stage's rows carry no class.
+function lqLbRowHtml(r, cls){
+  return `<li${cls ? ` class="${cls}"` : ''}><span class="lq-lb-rank">${r.rank}</span>`
+    + `<span class="lq-lb-name">${escHtml(r.name || '—')}</span>`
+    + `<span class="lq-lb-pts">${escHtml(String(r.pts || 0))}</span></li>`;
+}
 function lqStudentEndedHtml(s){
   const rows = lqRanked(s.scores);
   const me = rows.find(r => r.uid && r.uid === lqUid()) || null;
-  const top = rows.slice(0, 5).map(r =>
-    `<li class="lq-lb-row${me && r.uid === me.uid ? ' me' : ''}"><span class="lq-lb-rank">${r.rank}</span>`
-    + `<span class="lq-lb-name">${escHtml(r.name || '—')}</span>`
-    + `<span class="lq-lb-pts">${escHtml(String(r.pts || 0))}</span></li>`).join('');
+  const top = rows.slice(0, 5).map(r => lqLbRowHtml(r, 'lq-lb-row' + (me && r.uid === me.uid ? ' me' : ''))).join('');
   const mine = me
     ? `<div class="lq-final-me"><div class="lq-final-rank" data-i18n="lq.rank" data-i18n-params="${escAttr(JSON.stringify({n:me.rank,total:rows.length}))}">${escHtml(t('lq.rank',{n:me.rank,total:rows.length}))}</div>`
       + `<div class="lq-final-pts" data-i18n="lq.points" data-i18n-params="${escAttr(JSON.stringify({n:me.pts||0}))}">${escHtml(t('lq.points',{n:me.pts||0}))}</div></div>`
@@ -1137,9 +1141,7 @@ function lqStageRevealHtml(s, quiz){
   if(lqType(quiz) === 'fret') return lqStageFretRevealHtml(s, quiz);
   const c = lqChoice(quiz, s.correct);
   const answer = c ? lqBilingual(c.key, 'lq-st-answer') : '';
-  const board = lqRanked(s.scores).slice(0, 5).map(r =>
-    `<li><span class="lq-lb-rank">${r.rank}</span><span class="lq-lb-name">${escHtml(r.name || '—')}</span>`
-    + `<span class="lq-lb-pts">${escHtml(String(r.pts || 0))}</span></li>`).join('');
+  const board = lqRanked(s.scores).slice(0, 5).map(r => lqLbRowHtml(r)).join('');
   return lqBilingualParams('lq.stageAnswerLabel', 'lq-st-qnum', {n: Number(s.qIndex) + 1}, {n: Number(s.qIndex) + 1})
     + answer
     + `<div class="lq-st-split">${lqTallyHtml(s, quiz, null)}<ol class="lq-lb lq-lb-stage">${board}</ol></div>`;
@@ -1167,9 +1169,7 @@ function lqStageFretRevealHtml(s, quiz){
   const correctIds = lqCorrectIds(s);
   const answer = correctIds.length ? lqFretBilingualAnswer(correctIds) : '';
   const board = `<div class="lq-board" id="lq-st-board">${typeof fgBoardSvg === 'function' ? fgBoardSvg('lqst', null, { strings: quiz.strings, hit: false }) : ''}</div>`;
-  const lb = lqRanked(s.scores).slice(0, 5).map(r =>
-    `<li><span class="lq-lb-rank">${r.rank}</span><span class="lq-lb-name">${escHtml(r.name || '—')}</span>`
-    + `<span class="lq-lb-pts">${escHtml(String(r.pts || 0))}</span></li>`).join('');
+  const lb = lqRanked(s.scores).slice(0, 5).map(r => lqLbRowHtml(r)).join('');
   return lqBilingualParams('lq.stageAnswerLabel', 'lq-st-qnum', {n: Number(s.qIndex) + 1}, {n: Number(s.qIndex) + 1})
     + answer
     + `<div class="lq-st-split">${board}<div>${lqTallyHtml(s, quiz, null)}<ol class="lq-lb lq-lb-stage">${lb}</ol></div></div>`;
@@ -1177,9 +1177,7 @@ function lqStageFretRevealHtml(s, quiz){
 
 function lqStageEndedHtml(s){
   const rows = lqRanked(s.scores);
-  const board = rows.slice(0, 10).map(r =>
-    `<li><span class="lq-lb-rank">${r.rank}</span><span class="lq-lb-name">${escHtml(r.name || '—')}</span>`
-    + `<span class="lq-lb-pts">${escHtml(String(r.pts || 0))}</span></li>`).join('');
+  const board = rows.slice(0, 10).map(r => lqLbRowHtml(r)).join('');
   return lqBilingual('lq.finalTitle', 'lq-st-title') + `<ol class="lq-lb lq-lb-stage">${board}</ol>`;
 }
 
