@@ -2729,6 +2729,61 @@ const SNIPPET_TRACKS = {
     anchorVerified: true,
     defaultSlow: true,
   },
+  /* Smells Like Teen Spirit — Nirvana (Jonathan uploaded the record — the
+     music-video audio, 278.4 s — 2026-10-25). Unlike the other uploaded
+     records this one HAS a Guitar toggle: the guitar-out mix was made here,
+     not in Moises — Demucs htdemucs_6s split the record, and the
+     `rhythm-down` file is the record minus the guitar stem (sample-aligned
+     with the full mix, 0 ms; both scaled by 0.97 for headroom, so the
+     toggle does not jump in level). The solo's lead guitar is mostly in the
+     guitar stem too, so the rhythm-down solo is drums, bass and a little
+     lead. Bars 1-4 are the clean guitar alone on the record, so the
+     rhythm-down file is SILENT there — the student plays the intro alone
+     and the band comes in at bar 5. Tuning about 5 cents above A=440 —
+     left alone, like Ella. 192k, 44.1 kHz. Slow tier: rubberband, pitch
+     held, 117/100 = 1.17x (fits 6 ms off the scaled grid, steady).
+
+     Counted in 4 at record speed. The band settles at about 117; the clean
+     intro is about 110, so this is a BEAT MAP, not a grid: librosa's beat
+     tracker on the full mix, each beat snapped to the nearest drum/guitar
+     onset (stems) within 60 ms and smoothed over 5 beats. Which beat is 1
+     came from the chords: the bass lands on F and Ab on beats 1 of
+     alternate bars all the way through. Bar 1 is the first F of the clean
+     intro (1.068 s). Song map in these bars, read off the vocal and guitar
+     stems: intro 1-8 (clean 1-4), verse 1 9-28 (singing from 13, "hello"
+     from 21), chorus 29-40, interlude 41-44, verse 2 45-64, chorus 65-76,
+     interlude 77-80, solo 81-92, verse 3 93-108, chorus 109-120, outro
+     121-128, the last F from 129, ringing to about 272 s. The last two
+     entries are past the music, so the last chord's window has an end. */
+  'smells-like-teen-spirit': {
+    src:         'audio/nirvana-smells-like-teen-spirit-backing-Fm-117bpm-440hz-rhythm-down.mp3',
+    srcSlow:     'audio/nirvana-smells-like-teen-spirit-backing-Fm-100bpm-440hz-rhythm-down.mp3',
+    srcFull:     'audio/nirvana-smells-like-teen-spirit-backing-Fm-117bpm-440hz-full.mp3',
+    srcFullSlow: 'audio/nirvana-smells-like-teen-spirit-backing-Fm-100bpm-440hz-full.mp3',
+    trackBpm: 117, trackBpmSlow: 100,
+    feltBpm: 117,                       // counted at record speed
+    beatsPerBar: 4,
+    durationSec: 278,
+    anchor: 1.068,
+    anchorVerified: true,
+    defaultSlow: true,
+    barTimes: [
+      1.068, 3.272, 5.442, 7.603, 9.725, 11.781, 13.803, 15.810, 17.848, 19.918,
+      21.992, 24.072, 26.150, 28.223, 30.293, 32.374, 34.453, 36.534, 38.610, 40.688,
+      42.767, 44.837, 46.901, 48.967, 51.027, 53.077, 55.118, 57.162, 59.187, 61.226,
+      63.281, 65.337, 67.381, 69.420, 71.464, 73.496, 75.528, 77.563, 79.592, 81.620,
+      83.672, 85.752, 87.800, 89.853, 91.892, 93.949, 96.024, 98.114, 100.186, 102.249,
+      104.319, 106.397, 108.476, 110.573, 112.657, 114.723, 116.800, 118.878, 120.941, 123.011,
+      125.067, 127.108, 129.137, 131.166, 133.171, 135.219, 137.272, 139.310, 141.357, 143.404,
+      145.438, 147.473, 149.512, 151.531, 153.551, 155.563, 157.603, 159.659, 161.683, 163.722,
+      165.751, 167.764, 169.780, 171.806, 173.825, 175.856, 177.890, 179.928, 181.971, 184.019,
+      186.079, 188.142, 190.203, 192.265, 194.325, 196.393, 198.454, 200.507, 202.569, 204.630,
+      206.695, 208.747, 210.799, 212.842, 214.876, 216.906, 218.929, 220.948, 222.946, 224.986,
+      227.018, 229.031, 231.055, 233.088, 235.121, 237.147, 239.156, 241.152, 243.158, 245.175,
+      247.183, 249.223, 251.288, 253.336, 255.384, 257.427, 259.459, 261.486, 263.536, 265.548,
+      267.550, 269.588,
+    ],
+  },
 };
 /* Does this track have a full mix at all? Both tiers or neither — the toggle
    has to survive the Slow button. */

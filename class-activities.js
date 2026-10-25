@@ -246,8 +246,8 @@
    — Finish the Song") was pulled from this array on 2026-08-25 when `ca-1`
    was widened to cover the whole song; its steps live on inside `ca-1`, and
    the original is in git history. That makes the counter max-EVER-used + 1,
-   NOT max-in-file + 1 — the next new activity is `ca-41` (ca-40 is the
-   highest used as of 2026-10-22; check the file first). Any student who
+   NOT max-in-file + 1 — the next new activity is `ca-42` (ca-41 is the
+   highest used as of 2026-10-25; check the file first). Any student who
    had already ticked `ca-9` keeps a harmless orphan key in Firestore.
    `ca-16` ("Happy Birthday — The A-String Way") went the same way on
    2026-09-16: its steps were merged into `ca-17`, after the A-string note
@@ -6192,6 +6192,206 @@ window.CLASS_ACTIVITIES = [
         { levelUp: true,
           text:    'Slide the speed all the way right, to Normal. Play the whole song with the band, intro to the end, without stopping.',
           text_es: 'Desliza la velocidad hasta la derecha, a «Normal». Toca la canción completa con la banda, de la intro al final, sin detenerte.' }
+      ]
+    },
+    // No help ladder: a practice card is its checks and nothing else (Jonathan, 2026-10-07).
+    steps: [],
+  },
+  /* "Smells Like Teen Spirit" — Nirvana — Play Along (Jonathan, 2026-10-25:
+     "make me a song play along lesson for smells like teen spirit", with
+     the record; power chords). A practice card on the RECORD (track
+     'smells-like-teen-spirit' in app.js — its comment has how the beat map,
+     the guitar-out mix and the song map were made), bar 1 to the last chord.
+     Not a Core song, so no `journey` and not `wholeSong`; like ca-37 and
+     ca-39 it loops. `library: false`: it starts on the Class activities
+     board, and the console's "Move to Songs" puts it on the Songs page.
+
+     POWER CHORDS ONLY (Jonathan's pick), root on the low E or A string:
+     F5 = 1/3 and Ab5 = 4/6 on the low E, Bb5 = 1/3 and Db5 = 4/6 on the A
+     string. Ab5 and Db5 reach fret 6, one past the usual fret-5 limit —
+     Jonathan chose power chords knowing that.
+
+     THE RHYTHM, read off the guitar stem folded onto the beat map: one
+     strum per chord where the record changes chord — F5 on 1, Bb5 on the
+     "+" after 2, Ab5 on the next 1, Db5 on the "+" after 2 (beats 1.5 · 2.5
+     · 1.5 · 2.5). The record strums sixteenths through every chord; the
+     card keeps the changes and drops the strumming, so the picking hand
+     stays simple. `counts: true` shows the "+" under each pushed chord.
+
+     THE CHORDS: the whole song is the F-Bb-Ab-Db riff (bass chroma per
+     beat, 520 beats) except the two 4-bar interludes after choruses 1 and 2
+     (bars 41-44, 77-80). Their bass walks F-Gb | C-Bb-A-Ab; the card plays
+     F5 Gb5 | C5 Bb5, two beats each — the least certain spot on the card;
+     check it by ear. */
+  {
+    id:    'ca-41',
+    view:  'card',    // one screen: Play song + tab + checks — see CARD above
+    library: false,   // starts as a class activity; the console can move it to the Songs page — see LIBRARY above
+    title:    '"Smells Like Teen Spirit" - Nirvana — Play Along',
+    title_es: '"Smells Like Teen Spirit" - Nirvana — Toca con la canción',
+    intro:    'You can move a power chord along the low E and A strings — today you play Smells Like Teen Spirit with the band using F5, Bb5, Ab5 and Db5.',
+    intro_es: 'Ya puedes mover un acorde de potencia por las cuerdas Mi grave y La — hoy tocas Smells Like Teen Spirit con la banda con F5, Bb5, Ab5 y Db5.',
+    card: {
+      track: 'smells-like-teen-spirit',
+      slowest: true,    // Slowest / Slower / Slow / Normal
+      counts: true,     // Counts switch: shows Bb5 and Db5 on the "+" after 2 — see CARD above
+      caption:    'The song in order · one strum per chord · let each chord ring',
+      caption_es: 'La canción en orden · un rasgueo por acorde · deja sonar cada acorde',
+      sections: [
+        {
+          label: 'Intro', label_es: 'Intro',
+          caption: 'Intro — F5 Bb5 Ab5 Db5, 4 laps · the band comes in on lap 3', caption_es: 'Intro — F5 Bb5 Ab5 Db5, 4 vueltas · la banda entra en la vuelta 3',
+          fromBar: 1, bars: 2, reps: 4,
+          repLabel: 'Lap', repLabel_es: 'Vuelta',
+          notes: [
+            { frets: [['A', 3], ['E', 1]], note: 'F5', midi: [48, 41], beats: 1.5 },
+            { frets: [['D', 3], ['A', 1]], note: 'Bb5', midi: [53, 46], beats: 2.5 },
+            { frets: [['A', 6], ['E', 4]], note: 'Ab5', midi: [51, 44], beats: 1.5 },
+            { frets: [['D', 6], ['A', 4]], note: 'Db5', midi: [56, 49], beats: 2.5 }
+          ]
+        },
+        {
+          label: 'Verse 1', label_es: 'Estrofa 1',
+          caption: 'Verse 1 — F5 Bb5 Ab5 Db5, 10 laps', caption_es: 'Estrofa 1 — F5 Bb5 Ab5 Db5, 10 vueltas',
+          fromBar: 9, bars: 2, reps: 10,
+          repLabel: 'Lap', repLabel_es: 'Vuelta',
+          notes: [
+            { frets: [['A', 3], ['E', 1]], note: 'F5', midi: [48, 41], beats: 1.5 },
+            { frets: [['D', 3], ['A', 1]], note: 'Bb5', midi: [53, 46], beats: 2.5 },
+            { frets: [['A', 6], ['E', 4]], note: 'Ab5', midi: [51, 44], beats: 1.5 },
+            { frets: [['D', 6], ['A', 4]], note: 'Db5', midi: [56, 49], beats: 2.5 }
+          ]
+        },
+        {
+          label: 'Chorus 1', label_es: 'Coro 1',
+          caption: 'Chorus 1 — F5 Bb5 Ab5 Db5, 6 laps', caption_es: 'Coro 1 — F5 Bb5 Ab5 Db5, 6 vueltas',
+          fromBar: 29, bars: 2, reps: 6,
+          repLabel: 'Lap', repLabel_es: 'Vuelta',
+          notes: [
+            { frets: [['A', 3], ['E', 1]], note: 'F5', midi: [48, 41], beats: 1.5 },
+            { frets: [['D', 3], ['A', 1]], note: 'Bb5', midi: [53, 46], beats: 2.5 },
+            { frets: [['A', 6], ['E', 4]], note: 'Ab5', midi: [51, 44], beats: 1.5 },
+            { frets: [['D', 6], ['A', 4]], note: 'Db5', midi: [56, 49], beats: 2.5 }
+          ]
+        },
+        {
+          label: 'Interlude 1', label_es: 'Interludio 1',
+          caption: 'Interlude 1 — new chords: F5 Gb5 C5 Bb5, 2 laps', caption_es: 'Interludio 1 — acordes nuevos: F5 Gb5 C5 Bb5, 2 vueltas',
+          fromBar: 41, bars: 2, reps: 2,
+          repLabel: 'Lap', repLabel_es: 'Vuelta',
+          notes: [
+            { frets: [['A', 3], ['E', 1]], note: 'F5', midi: [48, 41], beats: 2 },
+            { frets: [['A', 4], ['E', 2]], note: 'Gb5', midi: [49, 42], beats: 2 },
+            { frets: [['D', 5], ['A', 3]], note: 'C5', midi: [55, 48], beats: 2 },
+            { frets: [['D', 3], ['A', 1]], note: 'Bb5', midi: [53, 46], beats: 2 }
+          ]
+        },
+        {
+          label: 'Verse 2', label_es: 'Estrofa 2',
+          caption: 'Verse 2 — F5 Bb5 Ab5 Db5, 10 laps', caption_es: 'Estrofa 2 — F5 Bb5 Ab5 Db5, 10 vueltas',
+          fromBar: 45, bars: 2, reps: 10,
+          repLabel: 'Lap', repLabel_es: 'Vuelta',
+          notes: [
+            { frets: [['A', 3], ['E', 1]], note: 'F5', midi: [48, 41], beats: 1.5 },
+            { frets: [['D', 3], ['A', 1]], note: 'Bb5', midi: [53, 46], beats: 2.5 },
+            { frets: [['A', 6], ['E', 4]], note: 'Ab5', midi: [51, 44], beats: 1.5 },
+            { frets: [['D', 6], ['A', 4]], note: 'Db5', midi: [56, 49], beats: 2.5 }
+          ]
+        },
+        {
+          label: 'Chorus 2', label_es: 'Coro 2',
+          caption: 'Chorus 2 — F5 Bb5 Ab5 Db5, 6 laps', caption_es: 'Coro 2 — F5 Bb5 Ab5 Db5, 6 vueltas',
+          fromBar: 65, bars: 2, reps: 6,
+          repLabel: 'Lap', repLabel_es: 'Vuelta',
+          notes: [
+            { frets: [['A', 3], ['E', 1]], note: 'F5', midi: [48, 41], beats: 1.5 },
+            { frets: [['D', 3], ['A', 1]], note: 'Bb5', midi: [53, 46], beats: 2.5 },
+            { frets: [['A', 6], ['E', 4]], note: 'Ab5', midi: [51, 44], beats: 1.5 },
+            { frets: [['D', 6], ['A', 4]], note: 'Db5', midi: [56, 49], beats: 2.5 }
+          ]
+        },
+        {
+          label: 'Interlude 2', label_es: 'Interludio 2',
+          caption: 'Interlude 2 — F5 Gb5 C5 Bb5, 2 laps', caption_es: 'Interludio 2 — F5 Gb5 C5 Bb5, 2 vueltas',
+          fromBar: 77, bars: 2, reps: 2,
+          repLabel: 'Lap', repLabel_es: 'Vuelta',
+          notes: [
+            { frets: [['A', 3], ['E', 1]], note: 'F5', midi: [48, 41], beats: 2 },
+            { frets: [['A', 4], ['E', 2]], note: 'Gb5', midi: [49, 42], beats: 2 },
+            { frets: [['D', 5], ['A', 3]], note: 'C5', midi: [55, 48], beats: 2 },
+            { frets: [['D', 3], ['A', 1]], note: 'Bb5', midi: [53, 46], beats: 2 }
+          ]
+        },
+        {
+          label: 'Solo', label_es: 'Solo',
+          caption: 'Solo — F5 Bb5 Ab5 Db5, 6 laps · the lead guitar plays · keep strumming the same chords', caption_es: 'Solo — F5 Bb5 Ab5 Db5, 6 vueltas · toca la guitarra líder · sigue rasgueando los mismos acordes',
+          fromBar: 81, bars: 2, reps: 6,
+          repLabel: 'Lap', repLabel_es: 'Vuelta',
+          notes: [
+            { frets: [['A', 3], ['E', 1]], note: 'F5', midi: [48, 41], beats: 1.5 },
+            { frets: [['D', 3], ['A', 1]], note: 'Bb5', midi: [53, 46], beats: 2.5 },
+            { frets: [['A', 6], ['E', 4]], note: 'Ab5', midi: [51, 44], beats: 1.5 },
+            { frets: [['D', 6], ['A', 4]], note: 'Db5', midi: [56, 49], beats: 2.5 }
+          ]
+        },
+        {
+          label: 'Verse 3', label_es: 'Estrofa 3',
+          caption: 'Verse 3 — F5 Bb5 Ab5 Db5, 8 laps', caption_es: 'Estrofa 3 — F5 Bb5 Ab5 Db5, 8 vueltas',
+          fromBar: 93, bars: 2, reps: 8,
+          repLabel: 'Lap', repLabel_es: 'Vuelta',
+          notes: [
+            { frets: [['A', 3], ['E', 1]], note: 'F5', midi: [48, 41], beats: 1.5 },
+            { frets: [['D', 3], ['A', 1]], note: 'Bb5', midi: [53, 46], beats: 2.5 },
+            { frets: [['A', 6], ['E', 4]], note: 'Ab5', midi: [51, 44], beats: 1.5 },
+            { frets: [['D', 6], ['A', 4]], note: 'Db5', midi: [56, 49], beats: 2.5 }
+          ]
+        },
+        {
+          label: 'Chorus 3', label_es: 'Coro 3',
+          caption: 'Chorus 3 — F5 Bb5 Ab5 Db5, 6 laps', caption_es: 'Coro 3 — F5 Bb5 Ab5 Db5, 6 vueltas',
+          fromBar: 109, bars: 2, reps: 6,
+          repLabel: 'Lap', repLabel_es: 'Vuelta',
+          notes: [
+            { frets: [['A', 3], ['E', 1]], note: 'F5', midi: [48, 41], beats: 1.5 },
+            { frets: [['D', 3], ['A', 1]], note: 'Bb5', midi: [53, 46], beats: 2.5 },
+            { frets: [['A', 6], ['E', 4]], note: 'Ab5', midi: [51, 44], beats: 1.5 },
+            { frets: [['D', 6], ['A', 4]], note: 'Db5', midi: [56, 49], beats: 2.5 }
+          ]
+        },
+        {
+          label: 'Outro', label_es: 'Final',
+          caption: 'Outro — F5 Bb5 Ab5 Db5, 4 laps', caption_es: 'Final — F5 Bb5 Ab5 Db5, 4 vueltas',
+          fromBar: 121, bars: 2, reps: 4,
+          repLabel: 'Lap', repLabel_es: 'Vuelta',
+          notes: [
+            { frets: [['A', 3], ['E', 1]], note: 'F5', midi: [48, 41], beats: 1.5 },
+            { frets: [['D', 3], ['A', 1]], note: 'Bb5', midi: [53, 46], beats: 2.5 },
+            { frets: [['A', 6], ['E', 4]], note: 'Ab5', midi: [51, 44], beats: 1.5 },
+            { frets: [['D', 6], ['A', 4]], note: 'Db5', midi: [56, 49], beats: 2.5 }
+          ]
+        },
+        {
+          label: 'Last chord', label_es: 'Último acorde',
+          caption: 'Last chord — F5 · strum once and let it ring', caption_es: 'Último acorde — F5 · rasguea una vez y deja que suene',
+          fromBar: 129, bars: 2,
+          notes: [
+            { frets: [['A', 3], ['E', 1]], note: 'F5', midi: [48, 41], beats: 8 }
+          ]
+        }
+      ],
+      checks: [
+        { label: 'Intro and verse 1, slower', label_es: 'Intro y estrofa 1, más lentas',
+          text:    'Leave the speed where the card starts it. Play the intro and verse 1 with the band, without stopping.',
+          text_es: 'Deja la velocidad donde la tarjeta la deja al empezar. Toca la intro y la estrofa 1 con la banda, sin detenerte.' },
+        { label: 'Chorus 1 and the new chords, slower', label_es: 'Coro 1 y los acordes nuevos, más lentos',
+          text:    'Tap Chorus 1 to start there. Play chorus 1 and interlude 1 with the band, without stopping.',
+          text_es: 'Toca «Coro 1» para empezar ahí. Toca el coro 1 y el interludio 1 con la banda, sin detenerte.' },
+        { label: 'The whole song, slower', label_es: 'La canción completa, más lenta',
+          text:    'Leave the speed where the card starts it, or move it one stop left. Play with the band from the intro to the last chord, without stopping.',
+          text_es: 'Deja la velocidad donde la tarjeta la deja al empezar, o muévela una posición a la izquierda. Toca con la banda desde la intro hasta el último acorde, sin detenerte.' },
+        { levelUp: true,
+          text:    'Slide the speed all the way right, to Normal. Play the whole song with the band at normal speed.',
+          text_es: 'Desliza la velocidad hasta la derecha, a «Normal». Toca la canción completa con la banda a velocidad normal.' }
       ]
     },
     // No help ladder: a practice card is its checks and nothing else (Jonathan, 2026-10-07).
