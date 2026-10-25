@@ -649,8 +649,8 @@ SETS.push(
                 response: { type: 'mc', prompt: 'The best FIRST step to playing a melody by ear is:',
                   prompt_es: 'El mejor PRIMER paso para tocar una melodía de oído es:',
                   answer: 1,
-                  explain: 'If you can sing it, you already know it — your hands just have to find what your voice has solved. Reading the TAB works, but it is not playing by ear; hunting fret by fret from the bottom of the neck is slow and teaches you nothing about the tune; and working out the key is useful later, not as the first move.',
-                  explain_es: 'Si puedes cantarla, ya te la sabes — tus manos solo tienen que encontrar lo que tu voz ya resolvió. Leer el TAB funciona, pero eso no es tocar de oído; buscar traste por traste desde abajo del mástil es lento y no te enseña nada de la melodía; y deducir la tonalidad sirve más adelante, no como primer movimiento.',
+                  explain: 'If you can sing it, you already know it. Your hands only have to find the notes your voice sings. Reading the TAB works, but it is not playing by ear. Hunting fret by fret from the bottom of the neck is slow and teaches you nothing about the tune. Working out the key is useful later, not as the first move.',
+                  explain_es: 'Si puedes cantarla, ya te la sabes. Tus manos solo tienen que encontrar las notas que canta tu voz. Leer el TAB funciona, pero eso no es tocar de oído. Buscar traste por traste desde abajo del mástil es lento y no te enseña nada de la melodía. Deducir la tonalidad sirve más adelante, no como primer movimiento.',
                   choices: ['Work out the key, then play the scale it comes from', 'Sing it, then hunt for it on one string', 'Look up the TAB and read it note by note', 'Start at the lowest fret and work upward'],
                   choices_es: ['Deducir la tonalidad y tocar la escala de la que viene', 'Cantarla, y luego buscarla en una sola cuerda', 'Buscar el TAB y leerlo nota por nota', 'Empezar en el traste más bajo e ir subiendo'] }
               },

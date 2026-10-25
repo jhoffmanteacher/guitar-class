@@ -538,8 +538,8 @@ SETS.push(
             steps: [
           {
             label: 'Challenge 1 — Tune-Up Under 2 Minutes', label_es: 'Reto 1 — Afinación en menos de 2 minutos',
-            text: '<ol><li>Get all 6 strings to green on the tuner.</li><li>Race the timer — can you do it in under 2 minutes?</li></ol>You\'ve got it when: all 6 strings green in under 2 minutes. Log your time so you can try for a faster time next session.',
-            text_es: '<ol><li>Pon las 6 cuerdas en verde en el afinador.</li><li>Compite contra el cronómetro — ¿puedes lograrlo en menos de 2 minutos?</li></ol>Lo tienes cuando: las 6 cuerdas en verde en menos de 2 minutos. Anota tu tiempo para intentar superarlo en la próxima sesión.',
+            text: '<ol><li>Get all 6 strings to green on the tuner.</li><li>Time yourself. Try to do it in under 2 minutes.</li></ol>You\'ve got it when: all 6 strings green in under 2 minutes. Log your time so you can try for a faster time next session.',
+            text_es: '<ol><li>Pon las 6 cuerdas en verde en el afinador.</li><li>Toma el tiempo. Intenta lograrlo en menos de 2 minutos.</li></ol>Lo tienes cuando: las 6 cuerdas en verde en menos de 2 minutos. Anota tu tiempo para intentar superarlo en la próxima sesión.',
             hint: 'Tune low to high: E A D G B e. Say each target letter before you pluck, and check the letter before you trust the needle — a green G on the A string is not done. Use the play button to hear the target pitches.',
             hint_es: 'Afina de grave a aguda: E A D G B e. Di cada letra meta antes de pulsar, y revisa la letra antes de confiar en la aguja — un G verde en la cuerda La no está lista. Usa el botón de reproducir para escuchar los tonos objetivo.',
             stuck: 'Tune just one string to green and leave it, then the next. Hit the play button to hear each target pitch first so your ear knows where it\'s headed.',
