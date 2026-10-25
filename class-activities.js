@@ -816,7 +816,7 @@ window.CLASS_ACTIVITIES = [
         text_es: 'Muévete a las tres cuerdas delgadas — la cuerda Sol, la cuerda Si y la cuerda mi aguda.<ul><li>Presiona justo detrás del traste, no encima</li><li>Las cuerdas delgadas zumban más fácil que las gruesas</li></ul>Lo tienes cuando: las tres cuerdas, sin detenerte, a cualquier velocidad.',
         tab: {
           caption: 'G · B · high e — thin strings buzz easier',
-          caption_es: 'Sol · Si · Mi aguda — las delgadas zumban más fácil',
+          caption_es: 'Sol · Si · mi aguda — las delgadas zumban más fácil',
           notes: [
             { string: 'G', fret: 1, note: 'G#', midi: 56, finger: 1 },
             { string: 'G', fret: 2, note: 'A',  midi: 57, finger: 2 },
