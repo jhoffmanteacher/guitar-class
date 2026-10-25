@@ -2383,11 +2383,14 @@ function fretLoop(){
     /* One pluck = one answer: after judging, wait for the note to decay
        below the gate (or 1.8s, whichever first) before listening again. */
     /* A right answer's (or a Skip's) reveal is counting down to the next
-       prompt: hear nothing until it is up (and the idle tick below stays
-       deaf). The 700 ms cooldown ends inside the 900 ms reveal, so a
-       re-pluck there was judged against the prompt just answered — a
-       phantom miss and a second next-prompt timer. A note still ringing
-       when the prompt changes must die or be re-plucked first. */
+       prompt: judge nothing until it is up. The 700 ms cooldown ends inside
+       the 900 ms reveal, so a re-pluck there was judged against the prompt
+       just answered — a phantom miss and a second next-prompt timer. A note
+       still ringing when the prompt changes must die or be re-plucked
+       first. The onset detector below still LOGS a pluck during the reveal
+       (without ending the wait): left deaf, it saw a re-pluck from just
+       before the change as a new pluck on the first frame after it, since
+       the smoothed level is still catching up. */
     if (g.advancing) g.needSilence = true;
     else if (g.needSilence && (rms < COACH_PITCH_GATE * 0.7 || now > g.cooldownUntil + 1800)){
       g.needSilence = false;
@@ -2409,7 +2412,8 @@ function fretLoop(){
         g.readings = [];
         g.attackT = 0;    // note died — next gate crossing is a new pluck
       }
-      coachIdleTick(g, rms, g.advancing ? Infinity : g.cooldownUntil);   // a new pluck ends the wait for silence
+      if (g.advancing) coachOnsetTick(g, rms, g.cooldownUntil, now >= g.cooldownUntil);   // log it, end nothing (see above)
+      else coachIdleTick(g, rms, g.cooldownUntil);   // a new pluck ends the wait for silence
     }
   }
   // Re-arm only while the round is live: fretJudge/fretSkip can end it
