@@ -4119,17 +4119,22 @@ function teacherMicDownloadJson(i){
   teacherMicSaveFile(teacherMicFileBase(d) + '.json',
     new Blob([JSON.stringify(teacherMicJsonable(d), null, 2)], { type: 'application/json' }));
 }
-// A take's audio chunks, in order (the raw 16-bit PCM bytes).
+/* A take's audio chunks, in order (the raw 16-bit PCM bytes). Read side by
+   side, not one round trip after another: Download all and Evaluate all call
+   this once per take. `chunks` is off the student-written take doc, so it is
+   bounded before it sizes anything — a real take is at most 30 s, three
+   chunks (coach.js MICREC_MAX_SEC / MICREC_CHUNK). */
+const TEACHER_MIC_MAX_CHUNKS = 16;
 async function teacherMicChunks(d){
   await ensureDb();
   const ref = db.collection('micTakes').doc(d.id).collection('chunks');
-  const parts = [];
-  for(let k = 0; k < (d.chunks || 0); k++){
+  const n = Math.max(0, Math.ceil(Number(d.chunks) || 0));
+  if(n > TEACHER_MIC_MAX_CHUNKS) throw new Error(n + ' chunks is more than one take can hold');
+  return Promise.all(Array.from({ length: n }, async (_, k) => {
     const c = await ref.doc(String(k)).get();
     if(!c.exists) throw new Error('chunk ' + k + ' missing');
-    parts.push(c.data().pcm.toUint8Array());
-  }
-  return parts;
+    return c.data().pcm.toUint8Array();
+  }));
 }
 // The chunks back together, behind a 44-byte WAV header (16-bit mono PCM).
 async function teacherMicWavBlob(d){
