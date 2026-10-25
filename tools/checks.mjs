@@ -4809,9 +4809,59 @@ function bumpServiceWorker() {
      visitor's cache, or a copy the old logic stored wrongly stays served
      until some unrelated shell file happens to change. */
   const swCode = src.replace(/const (AUDIO_)?CACHE_VERSION = '[^']*';/g, "const $1CACHE_VERSION = '';");
-  src = bumpVersionConst('CACHE_VERSION', 'guitar-class', [...SHELL_FILES, ...IMG_FILES, ...SHEET_FILES, ...VENDOR_FILES], src, swPath, 'shell cache', swCode);
+  const shellFp = [...SHELL_FILES, ...IMG_FILES, ...SHEET_FILES, ...VENDOR_FILES, ...precachedExtraFiles(src)];
+  src = bumpVersionConst('CACHE_VERSION', 'guitar-class', shellFp, src, swPath, 'shell cache', swCode);
   src = bumpVersionConst('AUDIO_CACHE_VERSION', 'guitar-class-audio', AUDIO_FILES, src, swPath, 'audio cache');
   if (!CHECK_ONLY && src !== before) writeFileSync(swPath, src);
+  checkPrecacheFingerprinted(src, shellFp);
+}
+
+/* Precached files that no list above fingerprints (2026-10-25). ASSETS also
+   precaches the font and the raster icons (fonts/fraunces.woff2,
+   apple-touch-icon.png, icon-*.png), and none of SHELL_FILES / IMG_FILES /
+   SHEET_FILES / VENDOR_FILES named them, so a font or icon re-exported under
+   the same name never changed CACHE_VERSION and returning students kept the
+   old copy. Derived from ASSETS rather than added to SHELL_FILES: SHELL_FILES
+   is the must-be-precached core that other checks walk, and deriving means a
+   file added to ASSETS later is fingerprinted with no second list to keep.
+   fingerprint() hashes these as raw bytes (they aren't TEXT_FOR_HASH). A
+   missing file is skipped here; checkSwAssets() already fails on it. */
+const FINGERPRINTED_ELSEWHERE = () => new Set([...SHELL_FILES, ...IMG_FILES, ...SHEET_FILES, ...VENDOR_FILES]);
+function swAssetFiles(src) {
+  const m = src.match(/const ASSETS = \[([\s\S]*?)\];/);
+  // './' is the site root: GitHub Pages serves index.html for it.
+  return m ? [...new Set(swEntries(m[1]).map(a => a === '' ? 'index.html' : a))] : [];
+}
+function precachedExtraFiles(src) {
+  const have = FINGERPRINTED_ELSEWHERE();
+  return swAssetFiles(src).filter(f => !have.has(f) && existsSync(join(ROOT, f))).sort();
+}
+
+/* ════════════════════════════════════════════════════════════════════
+   1br. EVERY PRECACHED FILE IS FINGERPRINTED — the class above, as a
+   ratchet: a file in sw.js ASSETS that is not part of the CACHE_VERSION
+   fingerprint can change on disk without the version changing, so the old
+   copy stays in every returning student's cache. Reads the exact list
+   bumpServiceWorker() hashed, so dropping a list from that call fails here.
+   The count of files that only ASSETS brings in is pinned: one more means
+   a new kind of precached file, worth a look; one fewer means one moved.
+   ════════════════════════════════════════════════════════════════════ */
+const PRECACHED_EXTRA_COUNT = 6;
+function checkPrecacheFingerprinted(src, hashed) {
+  head('1br. Every precached file is part of the cache fingerprint');
+  const set = new Set(hashed);
+  const assets = swAssetFiles(src);
+  if (!assets.length) { err('could not read ASSETS from sw.js — fingerprint coverage NOT checked'); problems++; return; }
+  // a file that isn't on disk at all is checkSwAssets()'s error, not this one
+  const missing = assets.filter(f => !set.has(f) && existsSync(join(ROOT, f)));
+  for (const f of missing) { err(`sw.js ASSETS precaches '${f}' but CACHE_VERSION doesn't fingerprint it — a new copy at the same name would never reach returning students`); problems++; }
+  const extras = precachedExtraFiles(src);
+  if (extras.length !== PRECACHED_EXTRA_COUNT) {
+    err(`${extras.length} precached files are fingerprinted only because ASSETS lists them (pinned at ${PRECACHED_EXTRA_COUNT}): ${extras.join(', ')} — update PRECACHED_EXTRA_COUNT on purpose`);
+    problems++;
+  }
+  if (!missing.length && extras.length === PRECACHED_EXTRA_COUNT)
+    ok(`all ${assets.length} precached files are fingerprinted (${extras.length} via ASSETS alone: ${extras.join(', ')})`);
 }
 
 /* ════════════════════════════════════════════════════════════════════ */

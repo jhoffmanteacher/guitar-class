@@ -5,8 +5,9 @@
        `node tools/checks.mjs` writes both, as content fingerprints.
        CACHE_VERSION covers the shell files (the pages, styles.css, every
        shipped .js, module-*.js, manifest.json, icon.svg, tabs/*), img/,
-       sheets/ and vendor/pdfjs, plus this file's own code with both
-       version lines blanked. AUDIO_CACHE_VERSION covers audio/ alone. A
+       sheets/, vendor/pdfjs, every other file in ASSETS below (the font
+       and the PNG icons), plus this file's own code with both version
+       lines blanked. AUDIO_CACHE_VERSION covers audio/ alone. A
        changed file changes the version, and a new version is what makes
        returning students drop the old cache. See CLAUDE.md.
 
