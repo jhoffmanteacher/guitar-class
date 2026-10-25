@@ -1777,14 +1777,21 @@ function renderTeacherActivities(opts){
     const pinsHtml=(()=>{
       const why=id=>{
         const a=byId[id];
-        if(!a) return 'not on the site';
+        if(!a){
+          // Not on this board, but still in the code: Move to Songs and Move
+          // to Teacher view songs keep the pin.
+          const raw=allActivities.find(x=>x.id===id);
+          if(raw && caIsLibraryCard(raw, cfg.songLibrary||{})) return 'moved to Songs';
+          if(raw && caIsTeacherSong(raw, cfg.classSongs||{})) return 'Teacher view songs only';
+          return 'not on the site';
+        }
         if(teacherActivityRetired(id,cfg)) return teacherActivityDeleted(id,cfg)?'deleted':'archived';
         if(!view.assigned[id]) return 'not assigned';
         if(hidden[id]===true) return 'Hidden';
         return '';
       };
       const chips=pins.map((id,i)=>{
-        const a=byId[id], off=why(id);
+        const a=byId[id]||allActivities.find(x=>x.id===id), off=why(id);
         return `<span class="t-pin-chip${off?' t-pin-off':''}">${i+1}. ${escHtml(a?teacherActivityTitle(a,cfg):id)}${off?` <em>(${escHtml(off)} — students don't see it)</em>`:''}`
           +` <button class="tg-seg-btn" data-set-activity-pin data-id="${escAttr(id)}" data-state="off" aria-label="Unpin ${escAttr(a?teacherActivityTitle(a,cfg):id)}">Unpin</button></span>`;
       }).join('');
