@@ -61,6 +61,14 @@ remove the `module-2.js` / `'assessment piece'` entry from
 `module-2.js`'s Seven Nation Army Challenge — "(your A-string assessment
 piece)" — so the phrase is gone from the file, not just unflagged.
 
+**`m2w2`'s visible Mystery TAB label, "Challenge — Mystery TAB, a second
+sight-read" → "Challenge — Mystery TAB (read it before you hear it)"**
+(2026-10-25 audit). The first Mystery TAB sits in the switched-off Take It
+to a Song section, so students only ever see the "second" one
+(`m2w2·c·sec1·step5`). Its tab caption's "2" came off on 2026-10-25; the
+label is frozen by index. ES: "Reto — TAB misterioso (léelo antes de
+escucharlo)".
+
 **Two graded-MC choice wordings found by the 2026-09-25 sweep.** Module 2's
 "the TOP line represents which string?" keys "The high E (thinnest) string" —
 the site's convention is "high e". Module 1's "which comes right after G?"

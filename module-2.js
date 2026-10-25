@@ -887,8 +887,8 @@ SETS.push(
             levelUp_es: 'Cubre los nombres de las notas y lee solo con los números de traste, o tócala una vez, mira hacia otro lado, e intenta tocarla de nuevo de memoria.',
             skills: [4],
             tab: {
-              caption: 'Mystery melody 2 — read it before you hear it · A & D strings · frets 0–3 · 60 BPM',
-              caption_es: 'Melodía misteriosa 2 — léela antes de escucharla · cuerdas La y Re · trastes 0–3 · 60 BPM',
+              caption: 'Mystery melody — read it before you hear it · A & D strings · frets 0–3 · 60 BPM',
+              caption_es: 'Melodía misteriosa — léela antes de escucharla · cuerdas La y Re · trastes 0–3 · 60 BPM',
               notes: [
                 { string: 'D', fret: 0, note: 'D', midi: 50 },
                 { string: 'D', fret: 3, note: 'F', midi: 53 },
