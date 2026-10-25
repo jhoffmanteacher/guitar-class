@@ -4838,7 +4838,7 @@ function precachedExtraFiles(src) {
 }
 
 /* ════════════════════════════════════════════════════════════════════
-   1br. EVERY PRECACHED FILE IS FINGERPRINTED — the class above, as a
+   1bt. EVERY PRECACHED FILE IS FINGERPRINTED — the class above, as a
    ratchet: a file in sw.js ASSETS that is not part of the CACHE_VERSION
    fingerprint can change on disk without the version changing, so the old
    copy stays in every returning student's cache. Reads the exact list
@@ -4848,7 +4848,7 @@ function precachedExtraFiles(src) {
    ════════════════════════════════════════════════════════════════════ */
 const PRECACHED_EXTRA_COUNT = 6;
 function checkPrecacheFingerprinted(src, hashed) {
-  head('1br. Every precached file is part of the cache fingerprint');
+  head('1bt. Every precached file is part of the cache fingerprint');
   const set = new Set(hashed);
   const assets = swAssetFiles(src);
   if (!assets.length) { err('could not read ASSETS from sw.js — fingerprint coverage NOT checked'); problems++; return; }
