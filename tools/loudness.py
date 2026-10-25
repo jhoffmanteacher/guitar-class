@@ -46,10 +46,12 @@ loudness as "the cure".
   tags.
 
 HOW
-1. The limiter eats loudness on a dynamic mix, so the gain is iterated: the
-   level file is encoded, decoded and measured until it lands within
-   ±0.1 LU of the target (±0.3 passes). Still one gain — every other file
-   of the song gets the gain the level file ended on.
+1. The limiter eats loudness on a dynamic mix, and so does the re-encode
+   itself at 192k (LAME loses about 0.25 dB a generation there; at 320k,
+   nothing measurable), so the gain is iterated: the level file is
+   encoded, decoded and measured until it lands within ±0.1 LU of the
+   target (±0.3 passes). Still one gain — every other file of the song
+   gets the gain the level file ended on.
 2. The -1 dBFS ceiling is checked on the DECODED FINAL mp3 (sample peak and
    true peak), because the limiter works on samples and the encoder
    overshoots what it let through. A file that overshoots is re-encoded
@@ -329,8 +331,8 @@ def main(argv):
         all_songs = songs()
         ref = reference_file()
         print(json.dumps({
-            'reference': str(ref.relative_to(ROOT)) if ref else None,
-            'songs': {s: str(level_file(f).relative_to(ROOT))
+            'reference': ref.relative_to(ROOT).as_posix() if ref else None,
+            'songs': {s: level_file(f).relative_to(ROOT).as_posix()
                       for s, f in all_songs.items() if s != REFERENCE_SLUG and level_file(f)},
         }, indent=1))
         return 0
@@ -408,7 +410,7 @@ def main(argv):
                 break
             gain += miss
         print(f'gain    {gain:+.2f} dB on every file (first estimate {target - before[lvl]["I"]:+.2f}; '
-              f'the limiter ate {before[lvl]["I"] + gain - after[lvl]["I"]:.2f} LU of the level file)')
+              f'the limiter and the re-encode took {before[lvl]["I"] + gain - after[lvl]["I"]:.2f} LU off the level file)')
 
         # 2. every other file: the same gain, its own ceiling only if it overshoots.
         others = [p for p in files if p != lvl]
