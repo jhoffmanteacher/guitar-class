@@ -1091,6 +1091,13 @@ function swap45OnLoad(stored){
   return swap45Remap(stored);
 }
 
+/* A brand-new student (no doc) and a failed read start from the same empty
+   state. The signed-out branch of onAuthStateChanged keeps its own, longer
+   list on purpose: it also clears the delete maps and the class config. */
+function resetLoadedProgress(){
+  progress={}; lastModuleNum=1; lastSetId=null; responses={}; completed={}; classActivities={}; caStepDone={}; exitChecks={}; games={};
+  streak={ count:0, lastDay:null }; practiceLog=loadLocalPracticeLog(); songReady={}; songReadyAt={}; studentPeriod=''; restoreLocalPlace();
+}
 async function loadProgress(){
   progressLoadFailed = false;
   swap45Done = false;
@@ -1129,8 +1136,8 @@ async function loadProgress(){
       songReady     = data.songReady || {};
       songReadyAt   = data.songReadyAt || {};
       studentPeriod = data.period || '';
-    } else { progress={}; lastModuleNum=1; lastSetId=null; responses={}; completed={}; classActivities={}; caStepDone={}; exitChecks={}; games={}; streak={ count:0, lastDay:null }; practiceLog=loadLocalPracticeLog(); songReady={}; songReadyAt={}; studentPeriod=''; restoreLocalPlace(); }
-  } catch(e){ progressLoadFailed=true; console.warn('[guitar-class] progress load failed — running read-only on derived data', e); progress={}; lastModuleNum=1; lastSetId=null; responses={}; completed={}; classActivities={}; caStepDone={}; exitChecks={}; games={}; streak={ count:0, lastDay:null }; practiceLog=loadLocalPracticeLog(); songReady={}; songReadyAt={}; studentPeriod=''; restoreLocalPlace(); }
+    } else resetLoadedProgress();
+  } catch(e){ progressLoadFailed=true; console.warn('[guitar-class] progress load failed — running read-only on derived data', e); resetLoadedProgress(); }
 }
 
 /* ── Games access (teacher-controlled) ──
