@@ -1805,6 +1805,10 @@ function renderTeacherActivities(opts){
        with the page, so the window's keepY already covers it. */
     const oldBuilt=box.querySelector('[data-board-built]');
     const builtTop=oldBuilt ? oldBuilt.scrollTop : 0;
+    // The window's place is read here too: an older repaint handed a newer
+    // read's config (loadTeacherClassConfig) paints just after that one, and
+    // the keepY it took when it started can be a scroll the teacher has left.
+    const paintY=oldBuilt ? window.scrollY : keepY;
     box.innerHTML=`<div class="tg-note">Drag a built activity into a module to assign it. It goes live for students on its release date.</div>`
       +pinsHtml
       +`<details class="tg-help" data-board-help${boardHelpOpen?' open':''}><summary>How this page works</summary>`
@@ -1828,7 +1832,7 @@ function renderTeacherActivities(opts){
     // scrolling before it resolves would only hit the one-line "Loading…"
     // box, which has nowhere to scroll to.
     if(restoreActivityScroll){ restoreActivityScroll=false; window.scrollTo({top:activityListScrollY}); }
-    else if(keepY!==null) window.scrollTo({top:keepY});
+    else if(paintY!==null) window.scrollTo({top:paintY});
   });
 }
 function teacherBoardFold(module){
@@ -3326,9 +3330,13 @@ let teacherClassConfig = { gamesEnabled:true, gameOverrides:{} };
 // reads of config/class, and they can resolve out of order — an earlier one
 // landing last would overwrite both teacherClassConfig and the repainted rows
 // with a stale value, showing "On" while Firestore holds false. Every call
-// takes a ticket; only the most recently issued one may touch state or return
-// a config to render from. A stale response resolves to null and is dropped.
+// takes a ticket; only the most recently issued one may touch state. An older
+// one is handed the NEWEST read's result instead of its own (2026-10-25: it
+// used to get null, and a caller whose view nothing else repaints — Manage,
+// Games, Songs, Mic — stayed on "Loading…"; a diverged write's own reload was
+// the usual newer read).
 let teacherClassConfigReq = 0;
+let teacherClassConfigLatest = null;   // the promise of the newest read
 /* Has a real config ever landed? teacherClassConfig starts as a DEFAULT
    ({gamesEnabled:true, gameOverrides:{}}) with none of the activity maps, so
    a cached repaint before the first load would silently paint every activity
@@ -3345,7 +3353,10 @@ let teacherClassConfigLoaded = false;
    work gone and no way to tell it apart from a deliberate empty board. So
    the read's success is recorded explicitly rather than inferred. */
 let teacherClassConfigReadOk = false;
-async function loadTeacherClassConfig(){
+function loadTeacherClassConfig(){
+  return (teacherClassConfigLatest = teacherReadClassConfig());
+}
+async function teacherReadClassConfig(){
   const req = ++teacherClassConfigReq;
   const writeSeq = teacherConfigWriteSeq, writesOpen = teacherConfigWritesOpen;
   let cfg, ok = false;
@@ -3356,7 +3367,7 @@ async function loadTeacherClassConfig(){
     ok = true;                      // a doc that doesn't exist yet still counts: we reached Firestore and it said so
   }catch(e){ cfg = {}; }
   if(!cfg.gameOverrides) cfg.gameOverrides = {};
-  if(req !== teacherClassConfigReq) return null;   // a newer request is in flight — discard this one
+  if(req !== teacherClassConfigReq) return teacherClassConfigLatest;   // a newer read is out — its answer, not this one
   /* One of this tab's own writes was open, or started, while this read was
      out, so it may hold the doc from BEFORE that write. Taken, it replaced
      the copy the write's optimistic change lives in, and the write then
@@ -3365,7 +3376,7 @@ async function loadTeacherClassConfig(){
      missing the move before it). Wait for the writes, then read again. */
   if(ok && (writesOpen || teacherConfigWritesOpen || writeSeq !== teacherConfigWriteSeq)){
     await teacherConfigWritesSettled();
-    return req === teacherClassConfigReq ? loadTeacherClassConfig() : null;
+    return req === teacherClassConfigReq ? loadTeacherClassConfig() : teacherClassConfigLatest;
   }
   teacherClassConfig = cfg;
   teacherClassConfigLoaded = true;
