@@ -5430,58 +5430,81 @@ function checkSetParts(sets, buildSet, ctx) {
 /* ════════════════════════════════════════════════════════════════════
    1bs. EVERY INLINE HANDLER IN A RENDERED SET PARSES (2026-10-25).
    A step's YouTube <a> becomes a ▶ button whose onclick carries the
-   link's label as a JS string, inside a double-quoted attribute. Until
-   this date only the label's ' was escaped, so a label that opened with a
-   quote ("Let It Be" by The Beatles) ended the attribute at that quote:
-   the button showed, and clicking it threw a SyntaxError. 15 links in
-   Modules 4, 5, 6 and 8, in both languages, were dead that way with 0b
-   green, because nothing ever parsed a handler.
+   link's url and label as JS strings, inside a double-quoted attribute.
+   Until this date only the label's ' was escaped, so a label that opened
+   with a quote ("Let It Be" by The Beatles) ended the attribute at that
+   quote: the button showed, and clicking it threw a SyntaxError. 15 links
+   in Modules 4, 5, 6 and 8, in both languages, were dead that way with 0b
+   green, because nothing ever parsed a handler. ytLinksToButtons() now
+   passes each argument as an attribute-escaped JSON string (jsonAttrArg).
 
-   Two halves. The fixture feeds ytLinksToButtons() (app.js) a label that
-   holds every character needing an escape and runs the handler it builds
-   against a stub, so a curriculum with no quotes in it can't hide a
-   regression. The scan renders every set in English and Spanish through
-   the real buildSet(), cuts each on*="…" attribute where a browser does
-   (at the first matching quote), decodes its entities the way the
-   attribute parser does, and compiles it. The YouTube-button count has a
-   floor so the scan can't go blind.
+   Three parts:
+   - The fixture feeds ytLinksToButtons() hostile labels (quotes, \, a
+     newline, &#39; &bsol; &#92; &lt;…) and runs each handler against a
+     stub: it must run, and pass the url and the label EXACTLY as written
+     (loadPanel puts the label in with innerHTML, so passing it as written
+     is what makes the player show what the link showed). A curriculum
+     with no hostile label in it can't hide a regression.
+   - The scan renders every set in English and Spanish through the real
+     buildSet(), cuts each on*="…" attribute where a browser does (at the
+     first matching quote), decodes its entities, and compiles it. Every
+     ▶ button is also run: it must pass the label its own text shows, and
+     a url with no HTML entity in it (the url goes over as written in the
+     href, so &amp; there would reach YouTube as "&amp;").
+   - The decoder knows only the references escAttr writes (&amp; &quot;
+     &#39; &lt; &gt;) plus numeric ones and a few names, and any OTHER
+     `&name` in a handler fails instead of being read wrong: a browser
+     decodes every HTML5 name, and a handler that leaves one raw for it
+     (&bsol; is a backslash) is one this check would otherwise misread.
+   The ▶ count has a floor so the scan can't go blind; the ok line prints
+   today's count.
    ════════════════════════════════════════════════════════════════════ */
-const YT_BUTTONS_FLOOR = 150;   // ▶ buttons the scan must see (EN + ES): 204 on 2026-10-25
+const YT_BUTTONS_FLOOR = 150;   // a floor, not a pin — see the ok line for the count
 function checkInlineHandlersParse(sets, buildSet, ctx) {
   head('1bs. Every inline handler in a rendered set parses');
   const ytLinksToButtons = vm.runInContext('typeof ytLinksToButtons === "function" ? ytLinksToButtons : null', ctx);
   const setLang = vm.runInContext('typeof setLang === "function" ? setLang : null', ctx);
   // A rename in app.js must fail here, not turn the check off (0b's rule).
   if (!setLang) { err('1bs cannot run — setLang() not found in i18n.js (renamed? update this check with it)'); problems++; return; }
+  const KNOWN_REF = /^&(?:amp|quot|lt|gt|apos|nbsp|iexcl|iquest|#\d+|#x[0-9a-f]+);/i;
+  const strange = s => (s.match(/&[A-Za-z#][A-Za-z0-9#]*;?/g) || []).filter(r => !KNOWN_REF.test(r));
   const decodeAttr = s => decodeHtmlEntities(s.replace(/&apos;/g, "'"));
   const ATTR_RE = /\son[a-z]+\s*=\s*(?:"([^"]*)"|'([^']*)')/gi;
+  const BTN_RE = /<button class="rp-trigger" onclick="([^"]*)"[^>]*>&#x25B6; ([^<]*?)(?: <span[^>]*>&#x2197;<\/span>)?<\/button>/g;
+  const ENTITY = /&(?:[A-Za-z][A-Za-z0-9]*|#\d+|#x[0-9a-f]+);/i;
   const compiles = code => { try { new vm.Script(`(function(event){${code}\n})`); return true; } catch { return false; } };
-  let bad = 0;
-  if (!ytLinksToButtons) { err('app.js: ytLinksToButtons() not found — the YouTube-button escape is untested (renamed? update this check with it)'); problems++; bad++; }
-
-  // ── Fixture: the label as authored HTML, and what the student should get.
-  const url = 'https://www.youtube.com/watch?v=CGj85pVzRJs';
-  const fixtureLabel = `"Q" &amp; 'A' \\ z`;
-  const wantTitle = `"Q" & 'A' \\ z`;
-  for (const ext of ytLinksToButtons ? [false, true] : []) {
-    const out = String(ytLinksToButtons(`<a href="${url}"${ext ? ' data-ext' : ''} target="_blank">${fixtureLabel}</a>`));
-    const m = /\sonclick="([^"]*)"/.exec(out);
-    const code = m ? decodeAttr(m[1]) : null;
+  // Runs a ▶ handler against stubs: [what it called, url, title] or null.
+  const runYt = code => {
     let got = null;
     try {
       // eslint-disable-next-line no-new-func
-      if (code) new Function('loadPanel', 'window', code)((...a) => { got = a; }, { open: (...a) => { got = a; } });
-    } catch { got = null; }
-    const okay = ext ? (got && got[0] === url) : (got && got[0] === 'youtube' && got[1] === url && got[2] === wantTitle);
+      new Function('loadPanel', 'window', code)((...a) => { got = ['loadPanel', a[1], a[2], a[0]]; }, { open: (...a) => { got = ['open', a[0]]; } });
+    } catch { return null; }
+    return got;
+  };
+  let bad = 0;
+  if (!ytLinksToButtons) { err('app.js: ytLinksToButtons() not found — the YouTube-button escape is untested (renamed? update this check with it)'); problems++; bad++; }
+
+  // ── Fixture: hostile labels, as authored HTML. Each must reach the
+  // handler exactly as written.
+  const url = 'https://www.youtube.com/watch?v=CGj85pVzRJs&t=30';
+  const LABELS = [`"Q" &amp; 'A' \\ z`, 'Don&#39;t', 'Don&apos;t', 'a&bsol;b', 'a&#92;n', 'line1\nline2', 'a\rb', 'a&#10;b',
+    '&lt;b&gt;x&lt;/b&gt;', 'ends in \\', 'a `b` ${c}', ' '];
+  for (const ext of ytLinksToButtons ? [false, true] : []) for (const label of LABELS) {
+    const out = String(ytLinksToButtons(`<a href="${url}"${ext ? ' data-ext' : ''} target="_blank">${label}</a>`));
+    const m = /\sonclick="([^"]*)"/.exec(out);
+    const odd = m ? strange(m[1]) : [];
+    const got = m && !odd.length ? runYt(decodeAttr(m[1])) : null;
+    const okay = got && got[1] === url && (ext ? got[0] === 'open' : (got[0] === 'loadPanel' && got[3] === 'youtube' && got[2] === label));
     if (!okay) {
-      err(`ytLinksToButtons()${ext ? ' (data-ext)' : ''}: a label of ${fixtureLabel} built ${code ? `onclick="${code.slice(0, 90)}"` : 'no onclick'} — ${got ? `it passed ${JSON.stringify(got[2] ?? got[0])}` : 'it does not run'}; the label needs \\ and ' escaped for the JS string and " for the attribute`);
+      err(`ytLinksToButtons()${ext ? ' (data-ext)' : ''}: a label of ${JSON.stringify(label)} built ${m ? `onclick="${m[1].slice(0, 90)}"` : 'no onclick'} — ${odd.length ? `it leaves ${odd.join(' ')} raw for the browser to decode` : got ? `it passed ${JSON.stringify(got.slice(1, 3))}` : 'it does not run'}; each argument has to be escAttr(JSON.stringify(…))`);
       problems++; bad++;
     }
   }
 
   // ── Scan: every handler the real renderer emits, both languages.
-  let handlers = 0, ytButtons = 0;
-  const failures = [];
+  let handlers = 0, ytButtons = 0, ytChecked = 0;
+  const failures = [], wrongArgs = [], oddRefs = [];
   try {
     for (const lang of ['en', 'es']) {
       setLang(lang);
@@ -5489,22 +5512,40 @@ function checkInlineHandlersParse(sets, buildSet, ctx) {
         let html = '';
         try { html = buildSet(w); } catch { continue; /* 0b already reported the throw */ }
         for (const m of html.matchAll(ATTR_RE)) {
-          const code = decodeAttr(m[1] ?? m[2]);
+          const raw = m[1] ?? m[2];
+          const odd = strange(raw);
+          if (odd.length) { oddRefs.push(`${w.id} (${lang}): ${odd.join(' ')} in ${m[0].trim().slice(0, 90)}`); continue; }
+          const code = decodeAttr(raw);
           handlers++;
           if (code.includes("loadPanel('youtube'")) ytButtons++;
           if (!compiles(code)) failures.push(`${w.id} (${lang}): ${m[0].trim().slice(0, 110)}`);
+        }
+        for (const b of html.matchAll(BTN_RE)) {
+          if (strange(b[1]).length) continue;   // reported above
+          const got = runYt(decodeAttr(b[1]));
+          if (!got) continue;                   // a parse failure, reported above
+          const label = b[2];
+          if (got[0] === 'loadPanel') ytChecked++;
+          if (ENTITY.test(got[1])) wrongArgs.push(`${w.id} (${lang}): the href ${got[1]} carries an HTML entity — write the character itself (the ▶ button passes the href as written)`);
+          else if (got[0] === 'loadPanel' && got[2] !== label) wrongArgs.push(`${w.id} (${lang}): the ▶ "${label.slice(0, 50)}" passes the title ${JSON.stringify(String(got[2]).slice(0, 60))}`);
         }
       }
     }
   } finally { setLang('en'); }
   for (const f of failures.slice(0, 12)) err(`handler does not parse — ${f}`);
   if (failures.length > 12) err(`…and ${failures.length - 12} more`);
-  if (failures.length) { problems++; bad++; }
-  if (ytButtons < YT_BUTTONS_FLOOR) {
-    err(`the scan saw only ${ytButtons} YouTube ▶ buttons (floor ${YT_BUTTONS_FLOOR}) — the renderer's button markup changed and 1bs can no longer see it; update ATTR_RE / the loadPanel test`);
+  for (const f of oddRefs.slice(0, 8)) err(`handler leaves a character reference raw for the browser — ${f} (escAttr its arguments; 1bs decodes only what escAttr writes)`);
+  for (const f of wrongArgs.slice(0, 8)) err(f);
+  if (failures.length || oddRefs.length || wrongArgs.length) { problems++; bad++; }
+  if (ytChecked !== ytButtons) {
+    err(`BTN_RE checked ${ytChecked} YouTube ▶ buttons but the handler scan counted ${ytButtons} — the button markup changed and 1bs no longer checks what each one passes; update BTN_RE / the loadPanel test`);
     problems++; bad++;
   }
-  if (!bad) ok(`${handlers} inline handlers across ${sets.length} sets × EN/ES all parse (${ytButtons} YouTube ▶ buttons); ytLinksToButtons() escapes " ' \\ in a label`);
+  if (ytButtons < YT_BUTTONS_FLOOR) {
+    err(`the scan saw only ${ytButtons} YouTube ▶ buttons (floor ${YT_BUTTONS_FLOOR}) — the renderer's button markup changed and 1bs can no longer see it; update ATTR_RE / BTN_RE / the loadPanel test`);
+    problems++; bad++;
+  }
+  if (!bad) ok(`${handlers} inline handlers across ${sets.length} sets × EN/ES all parse; all ${ytButtons} YouTube ▶ buttons pass their own label and an entity-free url; ${LABELS.length} hostile labels × 2 reach ytLinksToButtons()'s handlers as written`);
 }
 
 /* ════════════════════════════════════════════════════════════════════

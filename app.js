@@ -5274,21 +5274,23 @@ function lessonParts(w, flat){
 }
 
 /* A step's YouTube <a> becomes a ▶ button that opens the in-app viewer.
-   The label goes into a JS string inside a double-quoted onclick, so it
-   needs both layers escaped: \ and ' for the JS string, " for the
-   attribute. Only ' used to be, and a label like "Let It Be" by The Beatles
-   ended the attribute at its first quote, so the button threw on click
-   (15 links, 2026-10-25). Nothing else is escaped on purpose: the attribute
-   parser still decodes the label's own entities (&amp; → &) before the JS
-   runs, exactly as before. checks.mjs 1bs parses every handler. */
-const jsArgInAttr = s => String(s).replace(/\\/g,'\\\\').replace(/'/g,"\\'").replace(/"/g,'&quot;');
+   Each argument is a JSON string literal, attribute-escaped (jsonAttrArg):
+   nothing in a label can end the onclick attribute or the JS string. A
+   label like "Let It Be" by The Beatles once did both, and the button threw
+   on click (15 links, 2026-10-25). The browser undoes escAttr, so the JS
+   gets the text exactly as written in the module file: the label as HTML,
+   which loadPanel puts in with innerHTML, so the player's title shows what
+   the link showed; the url as written in the href (checks.mjs 1bs keeps
+   entities out of those). checks.mjs 1bs parses every handler and checks
+   what it passes. */
+const jsonAttrArg = s => escAttr(JSON.stringify(String(s)));
 function ytLinksToButtons(html){
   return html.replace(/<a href="(https?:\/\/(?:www\.)?(?:youtube\.com|youtu\.be)[^"]*)"([^>]*)>([^<]*)<\/a>/g,(match,url,attrs,label)=>{
     // data-ext links can't be embedded (official recordings block it) — open on YouTube in a new tab.
     if(/data-ext/.test(attrs)){
-      return `<button class="rp-trigger" onclick="window.open('${jsArgInAttr(url)}','_blank','noopener')" title="${escAttr(t('panel.opensOnYouTube'))}">&#x25B6; ${label} <span style="font-size:0.6875rem;opacity:0.6">&#x2197;</span></button>`;
+      return `<button class="rp-trigger" onclick="window.open(${jsonAttrArg(url)},'_blank','noopener')" title="${escAttr(t('panel.opensOnYouTube'))}">&#x25B6; ${label} <span style="font-size:0.6875rem;opacity:0.6">&#x2197;</span></button>`;
     }
-    return `<button class="rp-trigger" onclick="loadPanel('youtube','${jsArgInAttr(url)}','${jsArgInAttr(label)}','YouTube')">&#x25B6; ${label}</button>`;
+    return `<button class="rp-trigger" onclick="loadPanel('youtube',${jsonAttrArg(url)},${jsonAttrArg(label)},'YouTube')">&#x25B6; ${label}</button>`;
   });
 }
 
