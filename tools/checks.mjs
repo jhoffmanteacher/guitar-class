@@ -1224,52 +1224,82 @@ function checkStationNames() {
    fingerpicked this verse in Module 8".
 
    This bans the wording of the first two kinds, in BOTH languages: every
-   student-facing field 1w reads (STUDENT_VALUE_NAME_RE) plus its `_es`
-   twin, through readFieldStrings, matched on the UNESCAPED value. Hidden
-   sections are read too — the take-to-song switch can be turned back on,
-   and the Songs fold would still be gone. Fix a relapse by putting the
-   link in the step, or by naming where the thing really is: the Songs page
-   (left menu), or a place in the ladder ("Set 3, Challenge 2").
+   student-facing field 1w reads (STUDENT_VALUE_NAME_RE), every `*_es`
+   field 1w-t reads (ES_VALUE_NAME_RE), and both sides of i18n.js, through
+   readFieldStrings, matched on the UNESCAPED value with &nbsp; read as a
+   space. Hidden sections are read too — the take-to-song switch can be
+   turned back on, and the Songs fold would still be gone. Fix a relapse by
+   putting the link in the step, or by naming where the thing really is:
+   the Songs page (left menu), or a place in the ladder ("Set 3,
+   Challenge 2").
+
+   Widened the same day after review: "end of this set / module / page /
+   station" and "al final de esta unidad" / "al final del módulo" (the
+   Songs fold sat there too), "pestaña Canciones" / "sección Canciones"
+   without the "de", and "tarjeta de la canción".
 
    Two innocent twins are carved out. "Whole Song card" (EN) / "tarjeta
    de La canción completa" (ES) is the real name of the whole-song
    play-along cards (ca-24…ca-28), which five class-activity steps send
    students to — so "song card" never matches after "whole", and the
-   Spanish "tarjeta de canción" never matches before "completa". And it is
+   Spanish "tarjeta de (la) canción" never matches before "completa". The
+   carve-out excuses only those words: "the Whole Song card at the bottom
+   of this station" still fails on "bottom of this station". And it is
    plural "songs section/tab" only: a singular "song tab" is a song's TAB.
-   i18n.js is not read — review.assessPopNote's "the bottom of this page"
-   is the Module Review page, which does end in that section.
+   One i18n.js key is excused (GONE_UI_I18N_OK, below).
 
    HONEST LIMIT: phrases only. A pointer at a hidden step by its module
    number ("you did this in Module 8") passes; only reading finds those.
    ════════════════════════════════════════════════════════════════════ */
 const GONE_UI_RE = new RegExp(
-  '(?<!whole[ -])\\bsong cards?\\b|\\bsongs (?:section|tab|fold)s?\\b|\\bbottom of (?:this|the) (?:station|page)\\b' +
-  '|\\btarjetas? de canci[oó]n(?! completa)|\\b(?:secci[oó]n|pesta[ñn]a) de canciones|\\bal final de (?:esta|la) (?:estaci[oó]n|p[aá]gina)',
+  '(?<!whole[ -])\\bsong cards?\\b|\\bsongs (?:section|tab|fold)s?\\b' +
+  '|\\bbottom of (?:this|the) (?:station|page)\\b|\\bend of (?:this|the) (?:station|page|set|module)\\b' +
+  '|\\btarjetas? de (?:la )?canci[oó]n(?! completa)|\\b(?:secci[oó]n|pesta[ñn]a)(?: de)? canciones' +
+  '|\\bal final de (?:esta|la) (?:estaci[oó]n|p[aá]gina|unidad)|\\bal final del (?:m[oó]dulo|set)',
   'gi');
+/* review.assessPopNote's "the bottom of this page" is the Module Review
+   popup, and that page does end in the section it names. */
+const GONE_UI_I18N_OK = new Set(['review.assessPopNote']);
+/* 17,801 values on 2026-10-25 (9,199 EN · 5,912 ES · 2,690 i18n.js). The
+   floor sits ~4% under that: losing i18n.js or the Spanish pass, or a big
+   module file, fails; ordinary rewording does not. Lower it on purpose
+   when content is deleted on purpose. */
+const GONE_UI_READ_FLOOR = 17000;
 function checkGoneUiPointers() {
   head('1br. Steps that point at page parts that no longer render');
   let bad = 0, read = 0;
-  /* The `_es` twins: STUDENT_VALUE_NAME_RE reads English only (1w's list
-     is English), so widen its own source rather than keep a second field
-     list that could drift from it. */
-  const src = STUDENT_VALUE_NAME_RE.source;
-  if (!src.includes('(?:_power)?')) {
-    err('1br: STUDENT_VALUE_NAME_RE changed shape — cannot add the `_es` twins, so Spanish is NOT checked');
-    problems++; return;
-  }
-  const NAME_RE = new RegExp(src.replace('(?:_power)?', '(?:_power)?(?:_es)?'), 'g');
-  for (const file of STUDENT_VALUE_FILES) {
-    for (const v of readFieldStrings(file, NAME_RE) || []) {
-      read++;
-      for (const m of straightQuotes(v.text).matchAll(GONE_UI_RE)) {
-        err(`${file}:${v.line}: ${v.field} points at a page part that no longer renders — "${m[0]}" (link it in the step, or name the Songs page or a place in the ladder)`);
-        problems++; bad++;
-      }
+  const scan = (file, line, field, text) => {
+    read++;
+    // &nbsp; / U+00A0 count as a space: "Songs&nbsp;section" is the same pointer.
+    const t = straightQuotes(text).replace(/&nbsp;|\u00a0/g, ' ');
+    for (const m of t.matchAll(GONE_UI_RE)) {
+      err(`${file}:${line}: ${field} points at a page part that no longer renders — "${m[0]}" (link it in the step, or name the Songs page or a place in the ladder)`);
+      problems++; bad++;
     }
+  };
+  /* English through 1w's field list, Spanish through 1w-t's (every `*_es`
+     field), so each error names the field it is really in. */
+  for (const file of STUDENT_VALUE_FILES) {
+    for (const v of readFieldStrings(file, STUDENT_VALUE_NAME_RE) || [])
+      if (!v.field.endsWith('_es')) scan(file, v.line, v.field, v.text);   // choices_es etc.: the ES pass reads them
+    for (const v of readFieldStrings(file, ES_VALUE_NAME_RE) || []) scan(file, v.line, v.field, v.text);
   }
-  if (read === 0) { err('1br read no module values — the field reader has gone blind'); problems++; return; }
-  if (bad === 0) ok(`no step points at the removed Songs fold or a hidden song card (${read} EN + ES values read)`);
+  /* i18n.js — both sides of every key but the one excused above. A key's
+     values may sit on the lines after it, so the last key seen owns them. */
+  try {
+    let key = '';
+    readFileSync(join(ROOT, 'i18n.js'), 'utf8').split('\n').forEach((line, li) => {
+      const k = /^\s*'([\w.-]+)'\s*:/.exec(line);
+      if (k) key = k[1];
+      if (GONE_UI_I18N_OK.has(key)) return;
+      for (const re of [STUDENT_I18N_EN_RE, STUDENT_I18N_ES_RE])
+        for (const e of line.matchAll(re)) scan('i18n.js', li + 1, `${key} ${re === STUDENT_I18N_EN_RE ? 'en' : 'es'}`, unescapeJs(e[1] ?? e[2] ?? ''));
+    });
+  } catch { /* checked elsewhere */ }
+  /* A floor, not just "read anything": a reader that silently loses a file
+     or a language still reads thousands of values. */
+  if (read < GONE_UI_READ_FLOOR) { err(`1br read only ${read} values (floor ${GONE_UI_READ_FLOOR}) — the field reader has lost a file or a language`); problems++; return; }
+  if (bad === 0) ok(`no step points at the removed Songs fold or a hidden song card (${read} EN + ES values read, i18n.js included)`);
 }
 
 /* ════════════════════════════════════════════════════════════════════
