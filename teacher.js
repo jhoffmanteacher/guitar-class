@@ -3382,6 +3382,7 @@ async function teacherReadClassConfig(){
   teacherClassConfigLoaded = true;
   teacherClassConfigReadOk = ok;
   teacherConfigVersion = Number(cfg.configVersion) || 0;
+  teacherConfigOwnVersions.clear();   // no write overlapped this read, so it holds them all
   return teacherClassConfig;
 }
 
@@ -3427,6 +3428,10 @@ let teacherConfigVersion = 0;
 // This tab's writes: how many have started, and how many are still out —
 // loadTeacherClassConfig won't take a read that overlapped one.
 let teacherConfigWriteSeq = 0, teacherConfigWritesOpen = 0, teacherConfigIdleWaiters = [];
+// Versions this tab's own writes made that its version hasn't reached yet
+// (the end of teacherWriteConfig). Every writer changes the copy before it
+// writes, so the copy already holds each of them.
+let teacherConfigOwnVersions = new Set();
 function teacherConfigWritesSettled() {
   return teacherConfigWritesOpen ? new Promise(r => teacherConfigIdleWaiters.push(r)) : Promise.resolve();
 }
@@ -3475,14 +3480,24 @@ async function teacherWriteConfig(patch, base) {
   } finally {
     if (--teacherConfigWritesOpen === 0) { const w = teacherConfigIdleWaiters; teacherConfigIdleWaiters = []; w.forEach(r => r()); }
   }
-  teacherConfigVersion = wrote;
-  if (teacherClassConfig) teacherClassConfig.configVersion = wrote;
-  if (diverged) {
+  /* The version moves on only through versions this tab wrote itself, in
+     whatever order its writes come back. A diverged write landed on top of
+     a version this copy may not hold. When the gap is this tab's own
+     overlapping writes, the version catches up as each returns. When it is
+     another console's, the version stops below it: stamping `wrote` there
+     let a board move already on its way pass the check and re-pack `pos`
+     from a board missing that change (duplicate #positions in a two-console
+     simulation). The reload below then brings version and copy up together. */
+  teacherConfigOwnVersions.add(wrote);
+  while (teacherConfigOwnVersions.has(teacherConfigVersion + 1)) teacherConfigOwnVersions.delete(++teacherConfigVersion);
+  if (teacherClassConfig) teacherClassConfig.configVersion = teacherConfigVersion;
+  if (diverged && teacherConfigVersion < wrote) {
     /* The patch was safe, but this tab is still missing whatever the other
-       session changed — and the version number now claims it is current, so
-       the next write would sail through its check on a copy that isn't.
-       Awaited, not fired and forgotten: the caller repaints as soon as we
-       return, and it should repaint from the merged truth. */
+       session changed, and its version was left behind on purpose (above),
+       so until this lands a strict write refuses rather than sail through
+       on a copy that isn't current. Awaited, not fired and forgotten: the
+       caller repaints as soon as we return, and it should repaint from the
+       merged truth. */
     await loadTeacherClassConfig();
   }
 }
