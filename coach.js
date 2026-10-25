@@ -8573,8 +8573,13 @@ const NR_RUNNER_SVG =
      </svg>
    </span>`;
 
+/* One MediaQueryList, made on first use and read live (.matches follows a
+   setting change): this runs every animation frame of a round, and each
+   matchMedia() call parses the query and builds a new list. */
+let nrRaceMql;
 function nrRaceMotionOk(){
-  return !(window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches);
+  if (nrRaceMql === undefined) nrRaceMql = window.matchMedia ? window.matchMedia('(prefers-reduced-motion: reduce)') : null;
+  return !(nrRaceMql && nrRaceMql.matches);
 }
 
 /* Called once per note that extends a miss streak to 2+ (s.missStreak,
