@@ -14801,6 +14801,7 @@ function classConfigSignature(){
   return JSON.stringify([activityDates, activityBoard, activityBoardOn, hiddenActivityIds, activityForMe,
     retiredActivityIds, activityClears, optionalActivityIds, playAlongActivityIds, activityPins, activityTitles,
     activityNumbers, periodOverride, moduleOpenThrough,
+    songLibraryIds, classSongIds,   // a Move to Songs / Move to Class activities changes which cards show
     gamesAccessOn]);   // the free-play hero's Games button follows it
 }
 document.addEventListener('visibilitychange', () => {
