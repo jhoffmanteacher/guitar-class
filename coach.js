@@ -4330,7 +4330,11 @@ function ntrKeydown(e){
    4 songs. Never the same song twice in a row. */
 function ntrPickCard(){
   const i = ntr.requeue.findIndex(q => q.due <= ntr.answered && q.id !== ntr.prevId);
-  if (i >= 0) return RN_SONGS.find(s => s.id === ntr.requeue.splice(i, 1)[0].id);
+  if (i >= 0){
+    // Splice once, outside find(): inside it, it ran once per song tested.
+    const id = ntr.requeue.splice(i, 1)[0].id;
+    return RN_SONGS.find(s => s.id === id);
+  }
   const pool = RN_SONGS.filter(s => s.id !== ntr.prevId);
   return pool[Math.floor(Math.random() * pool.length)];
 }
