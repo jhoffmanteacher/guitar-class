@@ -1603,7 +1603,8 @@ function coachMicOff(){
        one-time question (localStorage, keyed by uid so the next student on
        a shared Chromebook is asked for themselves — "No thanks" is never
        asked again).
-   Then a Listening Coach take or a Note Runner round records the RAW mic
+   Then a Listening Coach take or a Note Runner round (not a Finger Gym
+   round, which shares Note Runner's engine) records the RAW mic
    (before COACH_MIC_GAIN and the filters) from the count-in to the end, at
    most MICREC_MAX_SEC, with a visible "Recording this take for your
    teacher" label the whole time, and saves it to micTakes/<uid>-<mode>
@@ -2956,8 +2957,10 @@ function gamesShow(view){
   }
   if (view === 'fingergym'){
     /* Finger Gym runs on Note Runner's engine (same #nr-body, same nr state,
-       same mic pipeline) — see the FINGER GYM block below nrRenderDone. */
-    p.innerHTML = gamesHeadHtml(GAME_ICO.fingergym + ' ' + t('games.fg.title'), true) + `<div id="nr-body"></div>` + coachFootHtml(true);
+       same mic pipeline) — see the FINGER GYM block below nrRenderDone.
+       It does NOT record (nrStart skips micRecStart for `gym`), so its
+       footer always says nothing is recorded. */
+    p.innerHTML = gamesHeadHtml(GAME_ICO.fingergym + ' ' + t('games.fg.title'), true) + `<div id="nr-body"></div>` + coachFootHtml();
     fgSetup();
     return;
   }
@@ -8223,7 +8226,8 @@ async function nrStart(){
   const body = nrBody();
   if (!body) return;
   // Collection is on and this device hasn't answered yet: ask first.
-  if (micRecShouldAsk()){ body.innerHTML = micRecAskHtml('nr'); return; }
+  // Never for a Finger Gym round: it is not recorded (see below).
+  if (!s.gym && micRecShouldAsk()){ body.innerHTML = micRecAskHtml('nr'); return; }
   coachClose();
   coachEvictTuner();
   nrHearStop();
@@ -8272,8 +8276,11 @@ async function nrStart(){
 
   nrRenderPlay();
   s.els = s.notes.map((_, i) => document.getElementById('nr-n-' + i));
-  // A consented recording runs from here to the end of the round.
-  if (micRecStart('nr')){ const b = nrBody(); if (b) b.insertAdjacentHTML('afterbegin', micRecBadgeHtml()); }
+  /* A consented recording runs from here to the end of the round. Not a
+     Finger Gym round: it would save to the same micTakes/<uid>-nr doc and
+     overwrite the student's Note Runner take, and at ~67 s it runs past
+     the 30 s cap while `expected` lists every note. */
+  if (!s.gym && micRecStart('nr')){ const b = nrBody(); if (b) b.insertAdjacentHTML('afterbegin', micRecBadgeHtml()); }
   /* coachCountIn beeps 4 clicks and sets s.listenStart = beat 1. The
      clicks stop there — see the header comment. */
   coachCountIn(s, 'nr-count', () => {
@@ -8812,7 +8819,7 @@ function nrFinish(complete){
   if (rec && complete){
     const lv = nrLv(s) || {};
     micRecSave(rec, {
-      fields: { game: s.gym ? 'fg' : 'nr', level: s.level, bpm: lv.bpm || null, chords: !!s.chordMode,
+      fields: { game: 'nr', level: s.level,   // a Finger Gym round never records (nrStart) bpm: lv.bpm || null, chords: !!s.chordMode,
                 beatMs: Math.round(s.beatMs * 100) / 100, goodMs: s.goodMs, perfectMs: s.perfectMs,
                 score: s.score, eventTimes: 'played (arrival - micLatencyMs)' },
       expected: s.playable.map(n => ({ t: n.t, midi: n.midi, string: n.string, fret: n.fret,
