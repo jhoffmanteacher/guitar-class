@@ -1387,6 +1387,9 @@ function renderTeacherActivities(opts){
   (cached ? Promise.resolve(teacherClassConfig) : loadTeacherClassConfig()).then(async cfg=>{
     if(teacherView!=='activities') return;   // switched views mid-flight
     if(!cfg) return;                         // superseded by a newer toggle
+    // An activity's page opened mid-flight. It starts no config read of its
+    // own, so this one is still the newest and would paint the board over it.
+    if(activityDetailId) return;
     // First ever board render: place what's already published, then paint.
     if(!cfg.activityBoardSeeded && !boardMigrating){
       if(!teacherClassConfigReadOk){
