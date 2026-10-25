@@ -12174,7 +12174,7 @@ function caStepHtml(a, step, si, isOpen, isDone){
    The same step ladder, shown one step at a time: a row of numbered step
    buttons over the card (done = green ✓, current = filled), only the current
    step on screen, and a "Got it — next step" button under it in place of
-   Mark done. Presentation only — the steps, the ids, the day-scoped ticks in
+   Mark done. Presentation only — the steps, the ids, the saved ticks in
    caStepDone and the Mark complete row are exactly what the accordion uses,
    so an activity can be switched in or out of Focus view at any time
    without touching anyone's progress.
@@ -12219,8 +12219,8 @@ function caFocusDotsHtml(a, cur){
   const reach = caDefaultOpenStep(a);   // first not-done step; -1 = all done
   const dots = steps.map((st, si) => {
     const done = caStepDone[`${a.id}:${si}`] === true;
-    // A finished activity never re-locks: its ticks are day-scoped, so the
-    // next day would otherwise make the student re-tick to reach step 4.
+    // A finished activity never re-locks: once the activity is complete,
+    // every step button stays open, whatever its saved ticks say.
     const locked = classActivities[a.id] !== true && reach >= 0 && si > reach;
     const cls = `ca-focus-dot${done ? ' is-done' : ''}${si === cur ? ' is-now' : ''}`;
     const label = escAttr(caStepHeadText(st, si, steps.length));
