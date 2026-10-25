@@ -497,8 +497,8 @@ window.CLASS_ACTIVITIES = [
     number: 2,
     title:    'Playing Happy Birthday — The Whole Song',
     title_es: 'Tocando Happy Birthday — La canción completa',
-    intro:    'You played Line 1 already. Today you play all four lines without ever leaving the low E string — the melody goes up to the double dot at fret 12 and comes back down.',
-    intro_es: 'Ya tocaste la Línea 1. Hoy tocas las cuatro líneas sin salirte nunca de la cuerda Mi grave — la melodía sube hasta el punto doble del traste 12 y vuelve a bajar.',
+    intro:    'You played Line 1 already. Today you play all four lines, all on the low E string. The melody goes up to the double dot at fret 12 and comes back down.',
+    intro_es: 'Ya tocaste la Línea 1. Hoy tocas las cuatro líneas, todas en la cuerda Mi grave. La melodía sube hasta el punto doble del traste 12 y vuelve a bajar.',
     steps: [
       {
         label:    'Lines 1 and 2',
@@ -539,8 +539,8 @@ window.CLASS_ACTIVITIES = [
       {
         label:    'Higher landing marks',
         label_es: 'Marcas más altas',
-        text: 'The second half of the song is played higher up the same string. Two new landing marks: the double dot at fret 12 — that note is an E, the same note as the open string, only higher — and the single dot at fret 9.<br>Play the notes below, looking at the dot before your hand moves. Then try it without looking.<br>You\'ve got it when: you land on 12 and on 9 without searching for them, three times in a row.',
-        text_es: 'La segunda mitad de la canción se toca más arriba en la misma cuerda. Dos marcas de referencia nuevas: el punto doble del traste 12 — esa nota es un E, la misma nota que la cuerda al aire, solo que más aguda — y el punto sencillo del traste 9.<br>Toca las notas de abajo, mirando el punto antes de mover la mano. Después inténtalo sin mirar.<br>Lo tienes cuando: caes en el 12 y en el 9 sin andarlos buscando, tres veces seguidas.',
+        text: 'The second half of the song is higher up the same string. It has two new landing marks: the double dot at fret 12 and the single dot at fret 9. The note at fret 12 is E, the same note as the open string, only higher.<br>Play the notes below, looking at the dot before your hand moves. Then try it without looking.<br>You\'ve got it when: you land on 12 and on 9 without searching for them, three times in a row.',
+        text_es: 'La segunda mitad de la canción va más arriba en la misma cuerda. Tiene dos marcas de referencia nuevas: el punto doble del traste 12 y el punto sencillo del traste 9. La nota del traste 12 es E, la misma nota que la cuerda al aire, solo que más aguda.<br>Toca las notas de abajo, mirando el punto antes de mover la mano. Después inténtalo sin mirar.<br>Lo tienes cuando: caes en el 12 y en el 9 sin andarlos buscando, tres veces seguidas.',
         tab: {
           caption: 'Find the dots · open, 12, 9, 5',
           caption_es: 'Encuentra los puntos · al aire, 12, 9, 5',
@@ -555,8 +555,8 @@ window.CLASS_ACTIVITIES = [
       {
         label:    'Line 3',
         label_es: 'Línea 3',
-        text: 'Line 3 makes the biggest jump in the song — it\'s where you sing the name.<ul><li>Two open notes, then your hand travels: finger 1 on fret 9, finger 4 reaching the double dot at fret 12</li><li>Walk down 12 → 9, then shift home: finger 4 → fret 5, finger 3 → fret 4, finger 1 → fret 2</li></ul>You\'ve got it when: Line 3, four times through, without stopping.',
-        text_es: 'La Línea 3 da el salto más grande de la canción — es donde cantas el nombre.<ul><li>Dos notas al aire, y luego tu mano viaja: dedo 1 en el traste 9, dedo 4 estirándose al punto doble del traste 12</li><li>Baja del 12 al 9, y después regresa a la posición base: dedo 4 → traste 5, dedo 3 → traste 4, dedo 1 → traste 2</li></ul>Lo tienes cuando: la Línea 3, cuatro veces seguidas, sin detenerte.',
+        text: 'Line 3 makes the biggest jump in the song — it\'s where you sing the name.<ul><li>Two open notes, then your hand travels: finger 1 on fret 9, finger 4 reaching the double dot at fret 12</li><li>Walk down 12 → 9, then shift back down: finger 4 → fret 5, finger 3 → fret 4, finger 1 → fret 2</li></ul>You\'ve got it when: Line 3, four times through, without stopping.',
+        text_es: 'La Línea 3 da el salto más grande de la canción — es donde cantas el nombre.<ul><li>Dos notas al aire, y luego tu mano viaja: dedo 1 en el traste 9, dedo 4 estirándose al punto doble del traste 12</li><li>Baja del 12 al 9, y después vuelve a bajar: dedo 4 → traste 5, dedo 3 → traste 4, dedo 1 → traste 2</li></ul>Lo tienes cuando: la Línea 3, cuatro veces seguidas, sin detenerte.',
         tab: {
           caption: 'Line 3 · low E string only',
           caption_es: 'Línea 3 · solo la cuerda Mi grave',
@@ -668,7 +668,7 @@ window.CLASS_ACTIVITIES = [
       {
         label:    'The Ladder',
         label_es: 'La Escalera',
-        text: 'Event 1 — the Ladder. Play the tab below, one finger per fret — the circled number under each note is the finger it wants.<ul><li>Set the BPM to 50 — one note per click</li><li>Press with the tips of your fingers, thumb BEHIND the neck</li></ul>You\'ve got it when: all four notes ring clean — no buzz — three times in a row. Buzz twice? Drop the BPM by 10 and try again.',
+        text: 'Event 1 — the Ladder. Play the tab below, one finger per fret — the circled number under each note is the finger to use.<ul><li>Set the BPM to 50 — one note per click</li><li>Press with the tips of your fingers, thumb BEHIND the neck</li></ul>You\'ve got it when: all four notes ring clean — no buzz — three times in a row. Buzz twice? Drop the BPM by 10 and try again.',
         text_es: 'Evento 1 — la Escalera. Toca la tablatura de abajo, un dedo por traste — el número en el círculo debajo de cada nota es el dedo que va ahí.<ul><li>Pon el BPM en 50 — una nota por clic</li><li>Presiona con las puntas de los dedos, pulgar DETRÁS del mástil</li></ul>Lo tienes cuando: las cuatro notas suenan limpias — sin zumbido — tres veces seguidas. ¿Zumbó dos veces? Baja el BPM 10 puntos y vuelve a intentarlo.',
         tab: {
           caption: 'The Ladder · position 1',
@@ -1141,8 +1141,8 @@ window.CLASS_ACTIVITIES = [
       {
         label:    'Reach endurance',
         label_es: 'Resistencia en el Estiramiento',
-        text: 'Reach endurance — eight reaches without stopping, twice the usual.<ul><li>The hand starts to tire around six</li><li>Pain is different from work: if it hurts, STOP</li></ul>You\'ve got it when: eight reaches without stopping and finger 1 never lifts.',
-        text_es: 'Resistencia en el Estiramiento — ocho estiramientos sin detenerte, el doble de lo normal.<ul><li>La mano empieza a cansarse cerca del sexto</li><li>El dolor es distinto del esfuerzo: si duele, DETENTE</li></ul>Lo tienes cuando: ocho estiramientos sin detenerte y el dedo 1 nunca se levanta.',
+        text: 'Reach endurance — eight reaches without stopping, twice the usual.<ul><li>The hand starts to tire around six</li><li>If it hurts, STOP</li></ul>You\'ve got it when: eight reaches without stopping and finger 1 never lifts.',
+        text_es: 'Resistencia en el Estiramiento — ocho estiramientos sin detenerte, el doble de lo normal.<ul><li>La mano empieza a cansarse cerca del sexto</li><li>Si duele, DETENTE</li></ul>Lo tienes cuando: ocho estiramientos sin detenerte y el dedo 1 nunca se levanta.',
         tab: {
           caption: 'Reach endurance · eight in a row',
           caption_es: 'Resistencia · ocho seguidos',
@@ -1240,8 +1240,8 @@ window.CLASS_ACTIVITIES = [
       {
         label:    'Keep going',
         label_es: 'Sigue',
-        text: 'Keep going — there\'s no set stopping point on this one.<ul><li>Set the Metro tool to 60 BPM and play with the beat</li><li>Every clean pass: raise the BPM by 10</li><li>Fast already? Say each note\'s name as you land it — E, F#, A, G#</li></ul>You\'ve got it when: you\'ve raised the BPM twice without stopping — then keep climbing.',
-        text_es: 'Sigue — aquí no hay un punto de parada fijo.<ul><li>Pon la herramienta Metro en 60 BPM y toca con el pulso</li><li>Cada pasada limpia: sube el BPM 10 puntos</li><li>¿Ya vas rápido? Di el nombre de cada nota al caer en ella — E, F#, A, G#</li></ul>Lo tienes cuando: ya subiste el BPM dos veces sin detenerte — y de ahí, sigue subiendo.',
+        text: 'Keep going. This step has no end point.<ul><li>Set the Metro tool to 60 BPM and play with the beat</li><li>Every clean pass: raise the BPM by 10</li><li>Fast already? Say each note\'s name as you land it — E, F#, A, G#</li></ul>You\'ve got it when: you\'ve raised the BPM twice without stopping — then keep climbing.',
+        text_es: 'Sigue. Este paso no tiene un punto final.<ul><li>Pon la herramienta Metro en 60 BPM y toca con el pulso</li><li>Cada pasada limpia: sube el BPM 10 puntos</li><li>¿Ya vas rápido? Di el nombre de cada nota al caer en ella — E, F#, A, G#</li></ul>Lo tienes cuando: ya subiste el BPM dos veces sin detenerte — y de ahí, sigue subiendo.',
       },
     ],
   },
@@ -1272,8 +1272,8 @@ window.CLASS_ACTIVITIES = [
     number: 10,
     title:    'Seven Nation Army — The Riff',
     title_es: 'Seven Nation Army — El riff',
-    intro:    'The Seven Nation Army riff is seven notes on the A string — play it with the song, first at a slower speed, then at normal speed.',
-    intro_es: 'El riff de Seven Nation Army son siete notas en la cuerda La — tócalo con la canción, primero a una velocidad más lenta y después a velocidad normal.',
+    intro:    'The Seven Nation Army riff is seven notes on the A string. Play it with the song, first slower, then at normal speed.',
+    intro_es: 'El riff de Seven Nation Army son siete notas en la cuerda La. Tócalo con la canción, primero más lento y después a velocidad normal.',
     card: {
       track: 'seven-nation-army',
       slowest: true,    // four-way speed control (Slow added 2026-10-09): Slowest (80) / Slower (100) / Slow (~112) / Normal (123) — Jonathan, 2026-09-29
@@ -1318,8 +1318,8 @@ window.CLASS_ACTIVITIES = [
     number: 4,
     title:    'Notes on the Low E String',
     title_es: 'Notas en la cuerda Mi grave',
-    intro:    'You\'ve been landing on frets for Happy Birthday. Today those landings get names — every natural note (the notes with no ♯) on the low E string, from open E to the E at fret 12.',
-    intro_es: 'Ya has estado cayendo en trastes para Happy Birthday. Hoy esas caídas reciben nombres — todas las notas naturales (las notas sin ♯) de la cuerda Mi grave, desde E al aire hasta E en el traste 12.',
+    intro:    'You have played frets on the low E string for Happy Birthday. Today you learn their names: every natural note (a note with no ♯) on that string, from open E to the E at fret 12.',
+    intro_es: 'Ya tocaste trastes de la cuerda Mi grave para Happy Birthday. Hoy aprendes sus nombres: todas las notas naturales (una nota sin ♯) de esa cuerda, desde E al aire hasta E en el traste 12.',
     steps: [
       {
         label:    'The dot notes',
@@ -1414,8 +1414,8 @@ window.CLASS_ACTIVITIES = [
     number: 13,
     title:    'Notes on the A String, Then Happy Birthday',
     title_es: 'Notas en la cuerda La, y luego Happy Birthday',
-    intro:    'You already know the names on the low E string, and you play Happy Birthday start to finish on it. Today the A string gets names too — every natural note (the notes with no ♯) from open A to the A at fret 12. Then you put those names to work: a second way to play Happy Birthday that crosses to the A string and never leaves the first seven frets.',
-    intro_es: 'Ya conoces los nombres de la cuerda Mi grave, y tocas Happy Birthday de principio a fin en ella. Hoy la cuerda La también recibe nombres — todas las notas naturales (las notas sin ♯) desde A al aire hasta A en el traste 12. Después pones esos nombres a trabajar: una segunda forma de tocar Happy Birthday que cruza a la cuerda La y nunca se sale de los primeros siete trastes.',
+    intro:    'You know the note names on the low E string, and you play Happy Birthday start to finish on it. Today you learn the names on the A string: every natural note (a note with no ♯) from open A to the A at fret 12. Then you use them to play Happy Birthday a second way. This way crosses to the A string and stays inside the first seven frets.',
+    intro_es: 'Ya conoces los nombres de las notas de la cuerda Mi grave, y tocas Happy Birthday de principio a fin en ella. Hoy aprendes los nombres de la cuerda La: todas las notas naturales (una nota sin ♯) desde A al aire hasta A en el traste 12. Después los usas para tocar Happy Birthday de una segunda forma. Esta forma cruza a la cuerda La y se queda dentro de los primeros siete trastes.',
     steps: [
       {
         label:    'Learn the notes',
@@ -1846,8 +1846,8 @@ window.CLASS_ACTIVITIES = [
       {
         label:    'Keep going',
         label_es: 'Sigue',
-        text: 'There is no set stopping point here. Play Happy Birthday from memory with the Metro tool.<ul><li>Start at 60 BPM. "Hap-py" fits inside one click, and the last note of each line is held for two</li><li>Every clean pass, add 10 BPM</li></ul>You\'ve got it when: a clean pass at a faster BPM than you started — then keep climbing.',
-        text_es: 'Aquí no hay un punto de parada fijo. Toca Happy Birthday de memoria con la herramienta Metro.<ul><li>Empieza en 60 BPM. "Hap-py" cabe dentro de un clic, y la última nota de cada línea se sostiene dos</li><li>Cada pasada limpia, súbele 10 BPM</li></ul>Lo tienes cuando: una pasada limpia a un BPM más alto que al empezar — y de ahí, sigue subiendo.',
+        text: 'This step has no end point. Play Happy Birthday from memory with the Metro tool.<ul><li>Start at 60 BPM. "Hap-py" fits inside one click, and the last note of each line is held for two</li><li>Every clean pass, add 10 BPM</li></ul>You\'ve got it when: a clean pass at a faster BPM than you started — then keep climbing.',
+        text_es: 'Este paso no tiene un punto final. Toca Happy Birthday de memoria con la herramienta Metro.<ul><li>Empieza en 60 BPM. "Hap-py" cabe dentro de un clic, y la última nota de cada línea se sostiene dos</li><li>Cada pasada limpia, súbele 10 BPM</li></ul>Lo tienes cuando: una pasada limpia a un BPM más alto que al empezar — y de ahí, sigue subiendo.',
       },
     ],
   },
@@ -1869,8 +1869,8 @@ window.CLASS_ACTIVITIES = [
     number: 12,
     title:    '"the cure" — Intro and Verse on the Low E',
     title_es: '"the cure" — Intro y estrofa en la cuerda Mi grave',
-    intro:    'Like Watchtower, this is played on the low E string — today you play the intro and verse of "the cure" with the band.',
-    intro_es: 'Como Watchtower, esto se toca en la cuerda Mi grave — hoy tocas la intro y la estrofa de "the cure" con la banda.',
+    intro:    'Like Watchtower, this song is played on the low E string. Today you play the intro and verse of "the cure" with the band.',
+    intro_es: 'Como Watchtower, esta canción se toca en la cuerda Mi grave. Hoy tocas la intro y la estrofa de "the cure" con la banda.',
     card: {
       track: 'the-cure',
       slowest: true,    // Slowest / Slower / Slow / Normal — like ca-18 and ca-10
@@ -1978,8 +1978,8 @@ window.CLASS_ACTIVITIES = [
     number: 14,
     title:    '"the cure" — The Verse on Two Strings',
     title_es: '"the cure" — La estrofa en dos cuerdas',
-    intro:    'You played the verse of "the cure" on the low E string — today C moves to the A string, fret 3, so the hand stays inside the first five frets.',
-    intro_es: 'Ya tocaste la estrofa de "the cure" en la cuerda Mi grave — hoy el C se pasa a la cuerda La, traste 3, así la mano se queda dentro de los primeros cinco trastes.',
+    intro:    'You played the verse of "the cure" on the low E string. Today C moves to the A string, fret 3, so your hand stays inside the first five frets.',
+    intro_es: 'Ya tocaste la estrofa de "the cure" en la cuerda Mi grave. Hoy el C se pasa a la cuerda La, traste 3, así la mano se queda dentro de los primeros cinco trastes.',
     card: {
       track: 'the-cure',
       slowest: true,    // Slowest / Slower / Slow / Normal — like ca-18 and ca-10
@@ -2086,8 +2086,8 @@ window.CLASS_ACTIVITIES = [
     view:  'card',    // one screen: Play song + tab + checks — see CARD above
     title:    '"Luna" — The Bassline',
     title_es: '"Luna" — La línea de bajo',
-    intro:    'You already play F at fret 1 on the low E string — today you add the open A string and play the "Luna" loop with the band.',
-    intro_es: 'Ya tocas el F en el traste 1 de la cuerda Mi grave — hoy agregas la cuerda La al aire y tocas el bucle de "Luna" con la banda.',
+    intro:    'You already play F at fret 1 on the low E string. Today you add the open A string and play the "Luna" loop with the band.',
+    intro_es: 'Ya tocas el F en el traste 1 de la cuerda Mi grave. Hoy agregas la cuerda La al aire y tocas el bucle de "Luna" con la banda.',
     card: {
       track: 'luna',
       slowest: true,    // Slowest / Slower / Slow / Normal — like ca-18 and ca-10
@@ -2151,8 +2151,8 @@ window.CLASS_ACTIVITIES = [
     number: 15,
     title:    '"the cure" — Intro, Verse and Chorus',
     title_es: '"the cure" — Intro, estrofa y coro',
-    intro:    'You moved the verse of "the cure" onto two strings — today you add the chorus and play it from the intro to the end of the chorus with the band.',
-    intro_es: 'Ya moviste la estrofa de "the cure" a dos cuerdas — hoy agregas el coro y la tocas desde la intro hasta el final del coro con la banda.',
+    intro:    'You moved the verse of "the cure" onto two strings. Today you add the chorus and play it from the intro to the end of the chorus with the band.',
+    intro_es: 'Ya moviste la estrofa de "the cure" a dos cuerdas. Hoy agregas el coro y la tocas desde la intro hasta el final del coro con la banda.',
     card: {
       track: 'the-cure',
       slowest: true,    // four-way speed control (Slow added 2026-10-09): Slowest (48) / Slower (60) / Slow (66) / Normal (72) — Jonathan, 2026-09-29
@@ -2300,8 +2300,8 @@ window.CLASS_ACTIVITIES = [
     journeyLayer: 2,
     title:    '"the cure" — The Whole Song',
     title_es: '"the cure" — La canción completa',
-    intro:    'You know every part of "the cure" — today you play the whole song with the band, start to finish.',
-    intro_es: 'Ya sabes cada parte de "the cure" — hoy tocas la canción completa con la banda, de principio a fin.',
+    intro:    'You know every part of "the cure". Today you play the whole song with the band, start to finish.',
+    intro_es: 'Ya sabes cada parte de "the cure". Hoy tocas la canción completa con la banda, de principio a fin.',
     card: {
       track: 'the-cure',
       slowest: true,    // four-way speed control (Slow added 2026-10-09): Slowest (48) / Slower (60) / Slow (66) / Normal (72) — the student picks
@@ -2598,11 +2598,11 @@ window.CLASS_ACTIVITIES = [
       ],
       checks: [
         { label: 'The whole song, slower', label_es: 'La canción completa, más lenta',
-          text:    'Leave the speed where the card starts it, or move it one stop left. Play the whole song with the band, intro to the end, without stopping.',
-          text_es: 'Deja la velocidad donde la tarjeta la deja al empezar, o muévela una posición a la izquierda. Toca la canción completa con la banda, de la intro al final, sin detenerte.' },
+          text:    'Use the speed the card starts on, or one stop slower. Play the whole song with the band, intro to the end, without stopping.',
+          text_es: 'Usa la velocidad con la que empieza la tarjeta, o una posición más lenta. Toca la canción completa con la banda, de la intro al final, sin detenerte.' },
         { levelUp: true,
-          text:    'Slide the speed all the way right, to Normal. Play the whole song with the band at normal speed, intro to the end, without stopping.',
-          text_es: 'Desliza la velocidad hasta la derecha, a «Normal». Toca la canción completa con la banda a velocidad normal, de la intro al final, sin detenerte.' }
+          text:    'Slide the speed all the way right, to Normal. Play the whole song with the band, intro to the end, without stopping.',
+          text_es: 'Desliza la velocidad hasta la derecha, a «Normal». Toca la canción completa con la banda, de la intro al final, sin detenerte.' }
       ]
     },
     // No help ladder: a practice card is its checks and nothing else (Jonathan, 2026-10-07).
@@ -2943,8 +2943,8 @@ window.CLASS_ACTIVITIES = [
     journeyLayer: 2,
     title:    'Seven Nation Army — The Whole Song',
     title_es: 'Seven Nation Army — La canción completa',
-    intro:    'You play the riff with the band — today you add the G and A between the sections and play the whole song.',
-    intro_es: 'Ya tocas el riff con la banda — hoy añades el G y el A entre las secciones y tocas la canción completa.',
+    intro:    'You play the riff with the band. Today you add the G and A between the sections and play the whole song.',
+    intro_es: 'Ya tocas el riff con la banda. Hoy añades el G y el A entre las secciones y tocas la canción completa.',
     card: {
       track: 'seven-nation-army',
       wholeSong: true,  // stops at the end of the song instead of looping — Jonathan, 2026-10-02
@@ -3171,11 +3171,11 @@ window.CLASS_ACTIVITIES = [
         // Two checks only, like every whole-song card (Jonathan, 2026-10-07).
         // `slot` keeps the tick keys these two had as checks 3 and 4.
         { slot: 2, label: 'The whole song, slower', label_es: 'La canción completa, más lenta',
-          text:    'Leave the speed where the card starts it, or move it one stop left. Play the whole song with the band, intro to the end, without stopping.',
-          text_es: 'Deja la velocidad donde la tarjeta la deja al empezar, o muévela una posición a la izquierda. Toca la canción completa con la banda, de la intro al final, sin detenerte.' },
+          text:    'Use the speed the card starts on, or one stop slower. Play the whole song with the band, intro to the end, without stopping.',
+          text_es: 'Usa la velocidad con la que empieza la tarjeta, o una posición más lenta. Toca la canción completa con la banda, de la intro al final, sin detenerte.' },
         { slot: 3, levelUp: true,
-          text:    'Slide the speed all the way right, to Normal. Play the whole song with the band at normal speed, intro to the end, without stopping.',
-          text_es: 'Desliza la velocidad hasta la derecha, a «Normal». Toca la canción completa con la banda a velocidad normal, de la intro al final, sin detenerte.' }
+          text:    'Slide the speed all the way right, to Normal. Play the whole song with the band, intro to the end, without stopping.',
+          text_es: 'Desliza la velocidad hasta la derecha, a «Normal». Toca la canción completa con la banda, de la intro al final, sin detenerte.' }
       ]
     },
     // No help ladder: a practice card is its checks and nothing else (Jonathan, 2026-10-07).
@@ -3204,8 +3204,8 @@ window.CLASS_ACTIVITIES = [
     journeyLayer: 2,
     title:    'All Along the Watchtower — The Whole Song',
     title_es: 'All Along the Watchtower — La canción completa',
-    intro:    'You know the Watchtower bass line — today you play it with the band for the whole song, start to finish.',
-    intro_es: 'Ya sabes la línea de bajo de Watchtower — hoy la tocas con la banda durante toda la canción, de principio a fin.',
+    intro:    'You know the Watchtower bass line. Today you play it with the band for the whole song, start to finish.',
+    intro_es: 'Ya sabes la línea de bajo de Watchtower. Hoy la tocas con la banda durante toda la canción, de principio a fin.',
     card: {
       wholeSong: true,  // stops at the end of the song instead of looping — Jonathan, 2026-10-02
       track: 'all-along-the-watchtower',
@@ -3328,11 +3328,11 @@ window.CLASS_ACTIVITIES = [
       ],
       checks: [
         { label: 'The whole song, slower', label_es: 'La canción completa, más lenta',
-          text:    'Leave the speed where the card starts it, or move it one stop left. Play the whole song with the band, intro to the end, without stopping.',
-          text_es: 'Deja la velocidad donde la tarjeta la deja al empezar, o muévela una posición a la izquierda. Toca la canción completa con la banda, de la intro al final, sin detenerte.' },
+          text:    'Use the speed the card starts on, or one stop slower. Play the whole song with the band, intro to the end, without stopping.',
+          text_es: 'Usa la velocidad con la que empieza la tarjeta, o una posición más lenta. Toca la canción completa con la banda, de la intro al final, sin detenerte.' },
         { levelUp: true,
-          text:    'Slide the speed all the way right, to Normal. Play the whole song with the band at normal speed, intro to the end, without stopping.',
-          text_es: 'Desliza la velocidad hasta la derecha, a «Normal». Toca la canción completa con la banda a velocidad normal, de la intro al final, sin detenerte.' }
+          text:    'Slide the speed all the way right, to Normal. Play the whole song with the band, intro to the end, without stopping.',
+          text_es: 'Desliza la velocidad hasta la derecha, a «Normal». Toca la canción completa con la banda, de la intro al final, sin detenerte.' }
       ]
     },
     // No help ladder: a practice card is its checks and nothing else (Jonathan, 2026-10-07).
@@ -3360,8 +3360,8 @@ window.CLASS_ACTIVITIES = [
     journeyLayer: 2,
     title:    '"Luna" — The Whole Song',
     title_es: '"Luna" — La canción completa',
-    intro:    'You know the "Luna" loop, F F A A — today you play it with the band for the whole song, start to finish.',
-    intro_es: 'Ya sabes el bucle de "Luna", F F A A — hoy lo tocas con la banda durante toda la canción, de principio a fin.',
+    intro:    'You know the "Luna" loop, F F A A. Today you play it with the band for the whole song, start to finish.',
+    intro_es: 'Ya sabes el bucle de "Luna", F F A A. Hoy lo tocas con la banda durante toda la canción, de principio a fin.',
     card: {
       wholeSong: true,  // stops at the end of the song instead of looping
       track: 'luna',
@@ -3435,11 +3435,11 @@ window.CLASS_ACTIVITIES = [
       ],
       checks: [
         { label: 'The whole song, slower', label_es: 'La canción completa, más lenta',
-          text:    'Leave the speed where the card starts it, or move it one stop left. Play the whole song with the band, intro to the end, without stopping.',
-          text_es: 'Deja la velocidad donde la tarjeta la deja al empezar, o muévela una posición a la izquierda. Toca la canción completa con la banda, de la intro al final, sin detenerte.' },
+          text:    'Use the speed the card starts on, or one stop slower. Play the whole song with the band, intro to the end, without stopping.',
+          text_es: 'Usa la velocidad con la que empieza la tarjeta, o una posición más lenta. Toca la canción completa con la banda, de la intro al final, sin detenerte.' },
         { levelUp: true,
-          text:    'Slide the speed all the way right, to Normal. Play the whole song with the band at normal speed, intro to the end, without stopping.',
-          text_es: 'Desliza la velocidad hasta la derecha, a «Normal». Toca la canción completa con la banda a velocidad normal, de la intro al final, sin detenerte.' }
+          text:    'Slide the speed all the way right, to Normal. Play the whole song with the band, intro to the end, without stopping.',
+          text_es: 'Desliza la velocidad hasta la derecha, a «Normal». Toca la canción completa con la banda, de la intro al final, sin detenerte.' }
       ]
     },
     // No help ladder: a practice card is its checks and nothing else (Jonathan, 2026-10-07).
@@ -3474,8 +3474,8 @@ window.CLASS_ACTIVITIES = [
     journeyLayer: 2,
     title:    'Sweet Child O\' Mine — The Whole Song',
     title_es: 'Sweet Child O\' Mine — La canción completa',
-    intro:    'You know the verse roots D, C and G — today you play the root of every chord with the band, start to finish.',
-    intro_es: 'Ya sabes las raíces de la estrofa, D, C y G — hoy tocas la raíz de cada acorde con la banda, de principio a fin.',
+    intro:    'You know the verse roots D, C and G. Today you play the root of every chord with the band, start to finish.',
+    intro_es: 'Ya sabes las raíces de la estrofa, D, C y G. Hoy tocas la raíz de cada acorde con la banda, de principio a fin.',
     card: {
       wholeSong: true,  // stops at the end of the song instead of looping
       track: 'sweet-child-o-mine',
@@ -3674,11 +3674,11 @@ window.CLASS_ACTIVITIES = [
       ],
       checks: [
         { label: 'The whole song, slower', label_es: 'La canción completa, más lenta',
-          text:    'Leave the speed where the card starts it, or move it one stop left. Play the whole song with the band, intro to the end, without stopping.',
-          text_es: 'Deja la velocidad donde la tarjeta la deja al empezar, o muévela una posición a la izquierda. Toca la canción completa con la banda, de la intro al final, sin detenerte.' },
+          text:    'Use the speed the card starts on, or one stop slower. Play the whole song with the band, intro to the end, without stopping.',
+          text_es: 'Usa la velocidad con la que empieza la tarjeta, o una posición más lenta. Toca la canción completa con la banda, de la intro al final, sin detenerte.' },
         { levelUp: true,
-          text:    'Slide the speed all the way right, to Normal. Play the whole song with the band at normal speed, intro to the end, without stopping.',
-          text_es: 'Desliza la velocidad hasta la derecha, a «Normal». Toca la canción completa con la banda a velocidad normal, de la intro al final, sin detenerte.' }
+          text:    'Slide the speed all the way right, to Normal. Play the whole song with the band, intro to the end, without stopping.',
+          text_es: 'Desliza la velocidad hasta la derecha, a «Normal». Toca la canción completa con la banda, de la intro al final, sin detenerte.' }
       ]
     },
     // No help ladder: a practice card is its checks and nothing else (Jonathan, 2026-10-07).
@@ -3698,8 +3698,8 @@ window.CLASS_ACTIVITIES = [
     journeyLayer: 3,
     title:    'All Along the Watchtower — The Whole Song in Power Chords',
     title_es: 'All Along the Watchtower — La canción completa con acordes de potencia',
-    intro:    'You play the whole song as single notes — today you play it in power chords: the same roots, with a second string added.',
-    intro_es: 'Ya tocas la canción completa con notas sueltas — hoy la tocas con acordes de potencia: las mismas raíces, con una segunda cuerda.',
+    intro:    'You play the whole song as single notes. Today you play it in power chords: the same roots, with a second string added.',
+    intro_es: 'Ya tocas la canción completa con notas sueltas. Hoy la tocas con acordes de potencia: las mismas raíces, con una segunda cuerda.',
     card: {
       wholeSong: true,  // stops at the end of the song instead of looping
       track: 'all-along-the-watchtower',
@@ -3843,11 +3843,11 @@ window.CLASS_ACTIVITIES = [
       ],
       checks: [
         { label: 'The whole song, slower', label_es: 'La canción completa, más lenta',
-          text:    'Leave the speed where the card starts it, or move it one stop left. Play the whole song with the band, intro to the end, without stopping.',
-          text_es: 'Deja la velocidad donde la tarjeta la deja al empezar, o muévela una posición a la izquierda. Toca la canción completa con la banda, de la intro al final, sin detenerte.' },
+          text:    'Use the speed the card starts on, or one stop slower. Play the whole song with the band, intro to the end, without stopping.',
+          text_es: 'Usa la velocidad con la que empieza la tarjeta, o una posición más lenta. Toca la canción completa con la banda, de la intro al final, sin detenerte.' },
         { levelUp: true,
-          text:    'Slide the speed all the way right, to Normal. Play the whole song with the band at normal speed, intro to the end, without stopping.',
-          text_es: 'Desliza la velocidad hasta la derecha, a «Normal». Toca la canción completa con la banda a velocidad normal, de la intro al final, sin detenerte.' }
+          text:    'Slide the speed all the way right, to Normal. Play the whole song with the band, intro to the end, without stopping.',
+          text_es: 'Desliza la velocidad hasta la derecha, a «Normal». Toca la canción completa con la banda, de la intro al final, sin detenerte.' }
       ]
     },
     // No help ladder: a practice card is its checks and nothing else (Jonathan, 2026-10-07).
@@ -3865,8 +3865,8 @@ window.CLASS_ACTIVITIES = [
     journeyLayer: 3,
     title:    '"the cure" — The Whole Song in Power Chords',
     title_es: '"the cure" — La canción completa con acordes de potencia',
-    intro:    'You play the whole song as single notes — today you play it in power chords: the same roots, with a second string added.',
-    intro_es: 'Ya tocas la canción completa con notas sueltas — hoy la tocas con acordes de potencia: las mismas raíces, con una segunda cuerda.',
+    intro:    'You play the whole song as single notes. Today you play it in power chords: the same roots, with a second string added.',
+    intro_es: 'Ya tocas la canción completa con notas sueltas. Hoy la tocas con acordes de potencia: las mismas raíces, con una segunda cuerda.',
     card: {
       wholeSong: true,  // stops at the end of the song instead of looping
       track: 'the-cure',
@@ -4163,11 +4163,11 @@ window.CLASS_ACTIVITIES = [
       ],
       checks: [
         { label: 'The whole song, slower', label_es: 'La canción completa, más lenta',
-          text:    'Leave the speed where the card starts it, or move it one stop left. Play the whole song with the band, intro to the end, without stopping.',
-          text_es: 'Deja la velocidad donde la tarjeta la deja al empezar, o muévela una posición a la izquierda. Toca la canción completa con la banda, de la intro al final, sin detenerte.' },
+          text:    'Use the speed the card starts on, or one stop slower. Play the whole song with the band, intro to the end, without stopping.',
+          text_es: 'Usa la velocidad con la que empieza la tarjeta, o una posición más lenta. Toca la canción completa con la banda, de la intro al final, sin detenerte.' },
         { levelUp: true,
-          text:    'Slide the speed all the way right, to Normal. Play the whole song with the band at normal speed, intro to the end, without stopping.',
-          text_es: 'Desliza la velocidad hasta la derecha, a «Normal». Toca la canción completa con la banda a velocidad normal, de la intro al final, sin detenerte.' }
+          text:    'Slide the speed all the way right, to Normal. Play the whole song with the band, intro to the end, without stopping.',
+          text_es: 'Desliza la velocidad hasta la derecha, a «Normal». Toca la canción completa con la banda, de la intro al final, sin detenerte.' }
       ]
     },
     // No help ladder: a practice card is its checks and nothing else (Jonathan, 2026-10-07).
@@ -4194,8 +4194,8 @@ window.CLASS_ACTIVITIES = [
     journeyLayer: 3,
     title:    'Seven Nation Army — The Whole Song in Power Chords',
     title_es: 'Seven Nation Army — La canción completa con acordes de potencia',
-    intro:    'You play the whole song as single notes — today you play it in power chords: the same roots, with a second string added.',
-    intro_es: 'Ya tocas la canción completa con notas sueltas — hoy la tocas con acordes de potencia: las mismas raíces, con una segunda cuerda.',
+    intro:    'You play the whole song as single notes. Today you play it in power chords: the same roots, with a second string added.',
+    intro_es: 'Ya tocas la canción completa con notas sueltas. Hoy la tocas con acordes de potencia: las mismas raíces, con una segunda cuerda.',
     card: {
       wholeSong: true,  // stops at the end of the song instead of looping
       track: 'seven-nation-army',
@@ -4420,11 +4420,11 @@ window.CLASS_ACTIVITIES = [
       ],
       checks: [
         { label: 'The whole song, slower', label_es: 'La canción completa, más lenta',
-          text:    'Leave the speed where the card starts it, or move it one stop left. Play the whole song with the band, intro to the end, without stopping.',
-          text_es: 'Deja la velocidad donde la tarjeta la deja al empezar, o muévela una posición a la izquierda. Toca la canción completa con la banda, de la intro al final, sin detenerte.' },
+          text:    'Use the speed the card starts on, or one stop slower. Play the whole song with the band, intro to the end, without stopping.',
+          text_es: 'Usa la velocidad con la que empieza la tarjeta, o una posición más lenta. Toca la canción completa con la banda, de la intro al final, sin detenerte.' },
         { levelUp: true,
-          text:    'Slide the speed all the way right, to Normal. Play the whole song with the band at normal speed, intro to the end, without stopping.',
-          text_es: 'Desliza la velocidad hasta la derecha, a «Normal». Toca la canción completa con la banda a velocidad normal, de la intro al final, sin detenerte.' }
+          text:    'Slide the speed all the way right, to Normal. Play the whole song with the band, intro to the end, without stopping.',
+          text_es: 'Desliza la velocidad hasta la derecha, a «Normal». Toca la canción completa con la banda, de la intro al final, sin detenerte.' }
       ]
     },
     // No help ladder: a practice card is its checks and nothing else (Jonathan, 2026-10-07).
@@ -4443,8 +4443,8 @@ window.CLASS_ACTIVITIES = [
     journeyLayer: 3,
     title:    '"Luna" — The Whole Song in Power Chords',
     title_es: '"Luna" — La canción completa con acordes de potencia',
-    intro:    'You play the whole song as single notes — today you play it in power chords: the same roots, with a second string added.',
-    intro_es: 'Ya tocas la canción completa con notas sueltas — hoy la tocas con acordes de potencia: las mismas raíces, con una segunda cuerda.',
+    intro:    'You play the whole song as single notes. Today you play it in power chords: the same roots, with a second string added.',
+    intro_es: 'Ya tocas la canción completa con notas sueltas. Hoy la tocas con acordes de potencia: las mismas raíces, con una segunda cuerda.',
     card: {
       wholeSong: true,  // stops at the end of the song instead of looping
       track: 'luna',
@@ -4542,11 +4542,11 @@ window.CLASS_ACTIVITIES = [
       ],
       checks: [
         { label: 'The whole song, slower', label_es: 'La canción completa, más lenta',
-          text:    'Leave the speed where the card starts it, or move it one stop left. Play the whole song with the band, intro to the end, without stopping.',
-          text_es: 'Deja la velocidad donde la tarjeta la deja al empezar, o muévela una posición a la izquierda. Toca la canción completa con la banda, de la intro al final, sin detenerte.' },
+          text:    'Use the speed the card starts on, or one stop slower. Play the whole song with the band, intro to the end, without stopping.',
+          text_es: 'Usa la velocidad con la que empieza la tarjeta, o una posición más lenta. Toca la canción completa con la banda, de la intro al final, sin detenerte.' },
         { levelUp: true,
-          text:    'Slide the speed all the way right, to Normal. Play the whole song with the band at normal speed, intro to the end, without stopping.',
-          text_es: 'Desliza la velocidad hasta la derecha, a «Normal». Toca la canción completa con la banda a velocidad normal, de la intro al final, sin detenerte.' }
+          text:    'Slide the speed all the way right, to Normal. Play the whole song with the band, intro to the end, without stopping.',
+          text_es: 'Desliza la velocidad hasta la derecha, a «Normal». Toca la canción completa con la banda, de la intro al final, sin detenerte.' }
       ]
     },
     // No help ladder: a practice card is its checks and nothing else (Jonathan, 2026-10-07).
@@ -4569,8 +4569,8 @@ window.CLASS_ACTIVITIES = [
     journeyLayer: 3,
     title:    'Sweet Child O\' Mine — The Whole Song in Power Chords',
     title_es: 'Sweet Child O\' Mine — La canción completa con acordes de potencia',
-    intro:    'You play the whole song as single notes — today you play it in power chords: the same roots, with a second string added.',
-    intro_es: 'Ya tocas la canción completa con notas sueltas — hoy la tocas con acordes de potencia: las mismas raíces, con una segunda cuerda.',
+    intro:    'You play the whole song as single notes. Today you play it in power chords: the same roots, with a second string added.',
+    intro_es: 'Ya tocas la canción completa con notas sueltas. Hoy la tocas con acordes de potencia: las mismas raíces, con una segunda cuerda.',
     card: {
       wholeSong: true,  // stops at the end of the song instead of looping
       track: 'sweet-child-o-mine',
@@ -4769,11 +4769,11 @@ window.CLASS_ACTIVITIES = [
       ],
       checks: [
         { label: 'The whole song, slower', label_es: 'La canción completa, más lenta',
-          text:    'Leave the speed where the card starts it, or move it one stop left. Play the whole song with the band, intro to the end, without stopping.',
-          text_es: 'Deja la velocidad donde la tarjeta la deja al empezar, o muévela una posición a la izquierda. Toca la canción completa con la banda, de la intro al final, sin detenerte.' },
+          text:    'Use the speed the card starts on, or one stop slower. Play the whole song with the band, intro to the end, without stopping.',
+          text_es: 'Usa la velocidad con la que empieza la tarjeta, o una posición más lenta. Toca la canción completa con la banda, de la intro al final, sin detenerte.' },
         { levelUp: true,
-          text:    'Slide the speed all the way right, to Normal. Play the whole song with the band at normal speed, intro to the end, without stopping.',
-          text_es: 'Desliza la velocidad hasta la derecha, a «Normal». Toca la canción completa con la banda a velocidad normal, de la intro al final, sin detenerte.' }
+          text:    'Slide the speed all the way right, to Normal. Play the whole song with the band, intro to the end, without stopping.',
+          text_es: 'Desliza la velocidad hasta la derecha, a «Normal». Toca la canción completa con la banda, de la intro al final, sin detenerte.' }
       ]
     },
     // No help ladder: a practice card is its checks and nothing else (Jonathan, 2026-10-07).
@@ -5185,10 +5185,10 @@ window.CLASS_ACTIVITIES = [
        2 and 3 are the strum. Roots / 5ths: A = A string / low E string,
        E7 = low E string / A string fret 2, D = D string / A string. Text only:
        a column holds a chord for many bars, so the tab can't draw each bass note. */
-    intro:    'You learned A, E7, D and the strum in 3 — today you play Las Mañanitas with the band, from the first verse to the last chorus, with an alternating bass: one bass note on beat 1 (the root in one bar, the 5th in the next), then two strums.',
-    intro_es: 'Aprendiste A, E7, D y el rasgueo en 3 — hoy tocas Las Mañanitas con la banda, de la primera estrofa al último coro, con un bajo alternado: una nota de bajo en el tiempo 1 (la raíz en un compás, la quinta en el siguiente) y luego dos rasgueos.',
-    intro_power:    'You learned A5, E5, D5 and the strum in 3 — today you play Las Mañanitas with the band, from the first verse to the last chorus.',
-    intro_power_es: 'Aprendiste A5, E5, D5 y el rasgueo en 3 — hoy tocas Las Mañanitas con la banda, de la primera estrofa al último coro.',
+    intro:    'You learned A, E7, D and the strum in 3. Today you play Las Mañanitas with the band, from the first verse to the last chorus. The strum has an alternating bass: one bass note on beat 1, then two strums. The bass note is the root in one bar and the 5th in the next.',
+    intro_es: 'Aprendiste A, E7, D y el rasgueo en 3. Hoy tocas Las Mañanitas con la banda, de la primera estrofa al último coro. El rasgueo lleva un bajo alternado: una nota de bajo en el tiempo 1 y luego dos rasgueos. La nota de bajo es la raíz en un compás y la quinta en el siguiente.',
+    intro_power:    'You learned A5, E5, D5 and the strum in 3. Today you play Las Mañanitas with the band, from the first verse to the last chorus.',
+    intro_power_es: 'Aprendiste A5, E5, D5 y el rasgueo en 3. Hoy tocas Las Mañanitas con la banda, de la primera estrofa al último coro.',
     card: {
       /* Not `wholeSong`: a whole-song card is how links to a Core song find
          its play-along, so checks.mjs 1bn wants a `journey` on one (only a
@@ -5459,14 +5459,14 @@ window.CLASS_ACTIVITIES = [
       ],
       checks: [
         { label: 'The whole song, slower', label_es: 'La canción completa, más lenta',
-          text:    'Leave the speed where the card starts it, or move it one stop left. Play with the band from verse 1 to the end of the last chorus, without stopping.',
-          text_es: 'Deja la velocidad donde la tarjeta la deja al empezar, o muévela una posición a la izquierda. Toca con la banda desde la estrofa 1 hasta el final del último coro, sin detenerte.' },
+          text:    'Use the speed the card starts on, or one stop slower. Play with the band from verse 1 to the end of the last chorus, without stopping.',
+          text_es: 'Usa la velocidad con la que empieza la tarjeta, o una posición más lenta. Toca con la banda desde la estrofa 1 hasta el final del último coro, sin detenerte.' },
         { label: 'The solo on requinto', label_es: 'El solo en el requinto',
           text:    'The requinto solo with the band, at the speed the card starts on, without stopping. Tap Solo to start there.',
           text_es: 'El solo del requinto con la banda, a la velocidad con la que empieza la tarjeta, sin detenerte. Pulsa «Solo» para empezar ahí.' },
         { levelUp: true,
-          text:    'Slide the speed all the way right, to Normal. Play the whole song with the band at normal speed, and sing the words while you strum.',
-          text_es: 'Desliza la velocidad hasta la derecha, a «Normal». Toca la canción completa con la banda a velocidad normal y canta la letra mientras rasgueas.' }
+          text:    'Slide the speed all the way right, to Normal. Play the whole song with the band, and sing the words while you strum.',
+          text_es: 'Desliza la velocidad hasta la derecha, a «Normal». Toca la canción completa con la banda y canta la letra mientras rasgueas.' }
       ]
     },
     // No help ladder: a practice card is its checks and nothing else (Jonathan, 2026-10-07).
@@ -5535,8 +5535,8 @@ window.CLASS_ACTIVITIES = [
     },
     title:    '"Madrecita Querida" - Vicente Fernández — Play Along',
     title_es: '"Madrecita Querida" - Vicente Fernández — Toca con la canción',
-    intro:    'You can change chords on the beat — today you play Madrecita Querida with the band, from the first verse to the last chord.',
-    intro_es: 'Ya puedes cambiar de acorde a tiempo — hoy tocas Madrecita Querida con la banda, de la primera estrofa al último acorde.',
+    intro:    'You can change chords on the beat. Today you play Madrecita Querida with the band, from the first verse to the last chord.',
+    intro_es: 'Ya puedes cambiar de acorde a tiempo. Hoy tocas Madrecita Querida con la banda, de la primera estrofa al último acorde.',
     card: {
       track: 'madrecita-querida',
       slowest: true,    // Slowest / Slower / Slow / Normal
@@ -5680,17 +5680,17 @@ window.CLASS_ACTIVITIES = [
       ],
       checks: [
         { label: 'Verse 1, slower', label_es: 'Estrofa 1, más lenta',
-          text:    'Leave the speed where the card starts it. Play verse 1 with the band, without stopping.',
-          text_es: 'Deja la velocidad donde la tarjeta la deja al empezar. Toca la estrofa 1 con la banda, sin detenerte.' },
+          text:    'Use the speed the card starts on. Play verse 1 with the band, without stopping.',
+          text_es: 'Usa la velocidad con la que empieza la tarjeta. Toca la estrofa 1 con la banda, sin detenerte.' },
         { label: 'Chorus 1, slower', label_es: 'Coro 1, más lento',
           text:    'Play chorus 1 with the band at the same speed, without stopping. Tap Chorus 1 to start there.',
           text_es: 'Toca el coro 1 con la banda a la misma velocidad, sin detenerte. Pulsa «Coro 1» para empezar ahí.' },
         { label: 'The whole song, slower', label_es: 'La canción completa, más lenta',
-          text:    'Leave the speed where the card starts it, or move it one stop left. Play with the band from verse 1 to the last chord, without stopping.',
-          text_es: 'Deja la velocidad donde la tarjeta la deja al empezar, o muévela una posición a la izquierda. Toca con la banda desde la estrofa 1 hasta el último acorde, sin detenerte.' },
+          text:    'Use the speed the card starts on, or one stop slower. Play with the band from verse 1 to the last chord, without stopping.',
+          text_es: 'Usa la velocidad con la que empieza la tarjeta, o una posición más lenta. Toca con la banda desde la estrofa 1 hasta el último acorde, sin detenerte.' },
         { levelUp: true,
-          text:    'Slide the speed all the way right, to Normal. Play the whole song with the band at normal speed.',
-          text_es: 'Desliza la velocidad hasta la derecha, a «Normal». Toca la canción completa con la banda a velocidad normal.' }
+          text:    'Slide the speed all the way right, to Normal. Play the whole song with the band.',
+          text_es: 'Desliza la velocidad hasta la derecha, a «Normal». Toca la canción completa con la banda.' }
       ]
     },
     // No help ladder: a practice card is its checks and nothing else (Jonathan, 2026-10-07).
@@ -5732,8 +5732,8 @@ window.CLASS_ACTIVITIES = [
     optional: true,   // Optional until switched to Required on the board — see OPTIONAL above
     title:    '"Arsenal Efectivo" - Lolo Félix — Play Along',
     title_es: '"Arsenal Efectivo" - Lolo Félix — Toca con la canción',
-    intro:    'You can move a power chord along the low E and A strings — today you play Arsenal Efectivo with the band using B5, E5, A5 and Bb5, all between frets 5 and 9.',
-    intro_es: 'Ya puedes mover un acorde de potencia por las cuerdas Mi grave y La — hoy tocas Arsenal Efectivo con la banda con B5, E5, A5 y Bb5, todos entre los trastes 5 y 9.',
+    intro:    'You can move a power chord along the low E and A strings. Today you play Arsenal Efectivo with the band using B5, E5, A5 and Bb5, all between frets 5 and 9.',
+    intro_es: 'Ya puedes mover un acorde de potencia por las cuerdas Mi grave y La. Hoy tocas Arsenal Efectivo con la banda con B5, E5, A5 y Bb5, todos entre los trastes 5 y 9.',
     card: {
       track: 'arsenal-efectivo',
       slowest: true,    // Slowest / Slower / Slow / Normal
@@ -5868,17 +5868,17 @@ window.CLASS_ACTIVITIES = [
       ],
       checks: [
         { label: 'Verse 1, slower', label_es: 'Estrofa 1, más lenta',
-          text:    'Leave the speed where the card starts it. Play verse 1 with the band, without stopping.',
-          text_es: 'Deja la velocidad donde la tarjeta la deja al empezar. Toca la estrofa 1 con la banda, sin detenerte.' },
+          text:    'Use the speed the card starts on. Play verse 1 with the band, without stopping.',
+          text_es: 'Usa la velocidad con la que empieza la tarjeta. Toca la estrofa 1 con la banda, sin detenerte.' },
         { label: 'The bridge, slower', label_es: 'El puente, más lento',
           text:    'Play the bridge with the band at the same speed, without stopping. Tap Bridge to start there.',
           text_es: 'Toca el puente con la banda a la misma velocidad, sin detenerte. Pulsa «Puente» para empezar ahí.' },
         { label: 'The whole song, slower', label_es: 'La canción completa, más lenta',
-          text:    'Leave the speed where the card starts it, or move it one stop left. Play with the band from verse 1 to the last chord, without stopping.',
-          text_es: 'Deja la velocidad donde la tarjeta la deja al empezar, o muévela una posición a la izquierda. Toca con la banda desde la estrofa 1 hasta el último acorde, sin detenerte.' },
+          text:    'Use the speed the card starts on, or one stop slower. Play with the band from verse 1 to the last chord, without stopping.',
+          text_es: 'Usa la velocidad con la que empieza la tarjeta, o una posición más lenta. Toca con la banda desde la estrofa 1 hasta el último acorde, sin detenerte.' },
         { levelUp: true,
-          text:    'Slide the speed all the way right, to Normal. Play the whole song with the band at normal speed.',
-          text_es: 'Desliza la velocidad hasta la derecha, a «Normal». Toca la canción completa con la banda a velocidad normal.' }
+          text:    'Slide the speed all the way right, to Normal. Play the whole song with the band.',
+          text_es: 'Desliza la velocidad hasta la derecha, a «Normal». Toca la canción completa con la banda.' }
       ]
     },
     // No help ladder: a practice card is its checks and nothing else (Jonathan, 2026-10-07).
@@ -5910,8 +5910,8 @@ window.CLASS_ACTIVITIES = [
       sections: null,   // ca-29's — joined after the array, below
       checks: [
         { label: 'The whole song, slower', label_es: 'La canción completa, más lenta',
-          text:    'Leave the speed where the card starts it, or move it one stop left. Play the whole song with the band from the sheet, intro to the end, without stopping.',
-          text_es: 'Deja la velocidad donde la tarjeta la deja al empezar, o muévela una posición a la izquierda. Toca la canción completa con la banda desde la hoja, de la intro al final, sin detenerte.' },
+          text:    'Use the speed the card starts on, or one stop slower. Play the whole song with the band from the sheet, intro to the end, without stopping.',
+          text_es: 'Usa la velocidad con la que empieza la tarjeta, o una posición más lenta. Toca la canción completa con la banda desde la hoja, de la intro al final, sin detenerte.' },
         { levelUp: true,
           text:    'Slide the speed all the way right, to Normal. Play the whole song with the band from the sheet, intro to the end, without stopping.',
           text_es: 'Desliza la velocidad hasta la derecha, a «Normal». Toca la canción completa con la banda desde la hoja, de la intro al final, sin detenerte.' }
@@ -6060,14 +6060,14 @@ window.CLASS_ACTIVITIES = [
       ],
       checks: [
         { label: 'Intro and verse 1, slower', label_es: 'Intro y estrofa 1, más lentas',
-          text:    'Leave the speed where the card starts it. Play the intro and verse 1 with the band, without stopping.',
-          text_es: 'Deja la velocidad donde la tarjeta la deja al empezar. Toca la intro y la estrofa 1 con la banda, sin detenerte.' },
+          text:    'Use the speed the card starts on. Play the intro and verse 1 with the band, without stopping.',
+          text_es: 'Usa la velocidad con la que empieza la tarjeta. Toca la intro y la estrofa 1 con la banda, sin detenerte.' },
         { label: 'The whole song, slower', label_es: 'La canción completa, más lenta',
-          text:    'Leave the speed where the card starts it, or move it one stop left. Play with the band from the intro to the last chord, without stopping.',
-          text_es: 'Deja la velocidad donde la tarjeta la deja al empezar, o muévela una posición a la izquierda. Toca con la banda desde la intro hasta el último acorde, sin detenerte.' },
+          text:    'Use the speed the card starts on, or one stop slower. Play with the band from the intro to the last chord, without stopping.',
+          text_es: 'Usa la velocidad con la que empieza la tarjeta, o una posición más lenta. Toca con la banda desde la intro hasta el último acorde, sin detenerte.' },
         { levelUp: true,
-          text:    'Slide the speed all the way right, to Normal. Play the whole song with the band at normal speed.',
-          text_es: 'Desliza la velocidad hasta la derecha, a «Normal». Toca la canción completa con la banda a velocidad normal.' }
+          text:    'Slide the speed all the way right, to Normal. Play the whole song with the band.',
+          text_es: 'Desliza la velocidad hasta la derecha, a «Normal». Toca la canción completa con la banda.' }
       ]
     },
     // No help ladder: a practice card is its checks and nothing else (Jonathan, 2026-10-07).
@@ -6187,11 +6187,11 @@ window.CLASS_ACTIVITIES = [
       ],
       checks: [
         { label: 'The whole song, slower', label_es: 'La canción completa, más lenta',
-          text:    'Leave the speed where the card starts it, or move it one stop left. Play the whole song with the band, intro to the end, without stopping.',
-          text_es: 'Deja la velocidad donde la tarjeta la deja al empezar, o muévela una posición a la izquierda. Toca la canción completa con la banda, de la intro al final, sin detenerte.' },
+          text:    'Use the speed the card starts on, or one stop slower. Play the whole song with the band, intro to the end, without stopping.',
+          text_es: 'Usa la velocidad con la que empieza la tarjeta, o una posición más lenta. Toca la canción completa con la banda, de la intro al final, sin detenerte.' },
         { levelUp: true,
-          text:    'Slide the speed all the way right, to Normal. Play the whole song with the band at normal speed, intro to the end, without stopping.',
-          text_es: 'Desliza la velocidad hasta la derecha, a «Normal». Toca la canción completa con la banda a velocidad normal, de la intro al final, sin detenerte.' }
+          text:    'Slide the speed all the way right, to Normal. Play the whole song with the band, intro to the end, without stopping.',
+          text_es: 'Desliza la velocidad hasta la derecha, a «Normal». Toca la canción completa con la banda, de la intro al final, sin detenerte.' }
       ]
     },
     // No help ladder: a practice card is its checks and nothing else (Jonathan, 2026-10-07).
