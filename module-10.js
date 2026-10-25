@@ -885,7 +885,7 @@ SETS.push(
         practice: { type: 'mc', prompt: 'A progression feels moody and dark. Its home chord is most likely:',
           prompt_es: 'Una progresión se siente melancólica y oscura. Su acorde base es más probablemente:',
           choices: ['Major', 'Minor', 'A power chord', 'A slash chord'],
-          choices_es: ['Mayor', 'Menor', 'Un acorde de potencia', 'Un acorde con barra diagonal (con un bajo distinto)'], answer: 1,
+          choices_es: ['Mayor', 'Menor', 'Un acorde de potencia', 'Un acorde con barra diagonal'], answer: 1,
           explain: 'Dark and moody is the sound of minor; bright and happy is major. Power chords and slash chords aren\'t answers here — neither one is major or minor on its own.',
           explain_es: 'Oscuro y melancólico es el sonido de lo menor; brillante y alegre es lo mayor. Los acordes de potencia y los acordes con barra diagonal no son respuestas aquí — ninguno de los dos es mayor ni menor por sí solo.' } },
       { id: 'm10w3-s5', text: 'Echo back a 3-note pattern by ear on the low E string',

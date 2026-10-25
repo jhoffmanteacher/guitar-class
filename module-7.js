@@ -956,7 +956,7 @@ SETS.push(
         gotItWhen_es: 'tu dedo índice silencia ligeramente la cuerda Mi grave para que no tengas que pensar en evitarla al rasguear — incluso un rasgueo un poco amplio suena bien.',
         practice: { type: 'mc', prompt: 'In an A-shape barre chord, what happens to the low E string?',
           prompt_es: 'En un acorde con cejilla en forma de A, ¿qué pasa con la cuerda Mi grave?',
-          choices: ['It rings out as part of the chord', 'It is muted by your index finger', 'You skip your strum carefully', 'You tune it to a different note'],
+          choices: ['It rings out as part of the chord', 'It is muted by your index finger', 'You carefully skip that string when you strum', 'You tune it to a different note'],
           choices_es: ['Resuena como parte del acorde', 'Está silenciada por tu dedo índice', 'Te saltas esa cuerda con cuidado al rasguear', 'La afinas a una nota distinta'], answer: 1,
           explain: 'The tip of your index finger leans over and rests on the low E string just enough to deaden it, so even a wide strum still sounds right. An A-shape has its root on the A string — if the low E rings, the chord loses its solid root note underneath.',
           explain_es: 'La punta de tu dedo índice se inclina y se apoya en la cuerda Mi grave lo justo para apagarla, así que incluso un rasgueo amplio suena bien. La forma de A tiene su raíz en la cuerda La — si la Mi grave suena, el acorde pierde su raíz firme en el bajo.' } },
