@@ -258,10 +258,19 @@ self.addEventListener('fetch', event => {
     event.waitUntil(network);
 
     // Serve cache first if we have it; otherwise wait on the network.
-    // For navigations that miss both, fall back to the cached shell.
     if (cached) return cached;
     const res = await network;
+    if (res) return res;
+    // Missed both. A navigation to the app itself (this worker's own
+    // folder, any query) falls back to the cached shell. Anywhere else —
+    // a tabs/ Journey page the best-effort precache missed — index.html
+    // would load with every relative link pointing into tabs/ and never
+    // render, so the browser's own offline page is the better answer.
+    // Response.error() is that network error; respondWith(undefined) threw.
     // isAudio is never true for a navigation, so `cache` here is always CACHE_VERSION.
-    return res || (req.mode === 'navigate' ? cache.match('./index.html') : undefined);
+    if (req.mode === 'navigate' && new URL('./', url).href === new URL('./', self.location.href).href) {
+      return (await cache.match('./index.html')) || Response.error();
+    }
+    return Response.error();
   })());
 });
