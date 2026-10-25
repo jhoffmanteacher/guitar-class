@@ -1687,11 +1687,17 @@ function renderTeacherActivities(opts){
     const sortIds=ids=>{
       const arr=ids.slice();
       if(boardSortKey==='order') return dirMul<0 ? arr.reverse() : arr;
+      // The students each card's own counts read (doneSummary): the whole
+      // roster minus archived, and only those the card is for — not the
+      // period-filtered allStudents, or the order disagrees with the numbers.
+      const doneMemo={};
       const doneOf=id=>{
         const a=byId[id]; if(!a) return 0;
-        return a.kind==='check'
-          ? allStudents.filter(s=>(s.exitChecks||{})[id]).length
-          : allStudents.filter(s=>(s.classActivities||{})[id]===true).length;
+        if(doneMemo[id]!==undefined) return doneMemo[id];
+        const forIt=doneSummaryRoster.filter(s=>teacherActivityForStudent(a,s.uid,cfg));
+        return (doneMemo[id]=a.kind==='check'
+          ? forIt.filter(s=>(s.exitChecks||{})[id]).length
+          : forIt.filter(s=>(s.classActivities||{})[id]===true).length);
       };
       const cmp=(x,y)=>{
         if(boardSortKey==='date'){
