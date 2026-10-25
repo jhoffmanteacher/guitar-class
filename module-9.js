@@ -980,8 +980,8 @@ SETS.push(
               },
               {
                 label: 'Challenge — Higher Still (the real up-high read)', label_es: 'Reto — Todavía más alto (la verdadera lectura arriba)',
-                text: '<ul><li>Read the 8-note line below at first sight — the up-high follow-up to the "Luna" warm-up above (frets 0–3). It lives entirely at frets 5–10, anchored around 5th position with a stretch up to fret 10, crossing the D, G, and B strings.</li></ul>You\'ve got it when: you play all eight notes in order, in tune, reading only the TAB.',
-                text_es: '<ul><li>Lee a primera vista la línea de 8 notas de abajo — la continuación en posición alta de la lectura de calentamiento de "Luna" de arriba (trastes 0–3). Vive completamente en los trastes 5–10, anclada alrededor de la 5ª posición con un estiramiento hasta el traste 10, cruzando las cuerdas Re, Sol y Si.</li></ul>Lo tienes cuando: tocas las ocho notas en orden, afinado, leyendo solo el TAB.',
+                text: '<ul><li>Read the 8-note line below at first sight — the up-high follow-up to the "Luna" warm-up above (frets 0–3). It lives entirely at frets 5–10, anchored around 5th position with a stretch up to fret 10, crossing the D, G, and B strings.</li><li>Then press Play tab, under the board, to check yourself — only after you have played it.</li></ul>You\'ve got it when: you play all eight notes in order, in tune, reading only the TAB.',
+                text_es: '<ul><li>Lee a primera vista la línea de 8 notas de abajo — la continuación en posición alta de la lectura de calentamiento de "Luna" de arriba (trastes 0–3). Vive completamente en los trastes 5–10, anclada alrededor de la 5ª posición con un estiramiento hasta el traste 10, cruzando las cuerdas Re, Sol y Si.</li><li>Después pulsa «Tocar el tab», debajo del TAB, para revisarte — solo después de haberla tocado.</li></ul>Lo tienes cuando: tocas las ocho notas en orden, afinado, leyendo solo el TAB.',
                 hint: 'The shapes feel unfamiliar this high up, but the rule never changes: top line = thinnest string, numbers = frets. Find fret 5 (two frets past the fret-3 dot) and anchor your hand there.',
                 hint_es: 'Las formas se sienten poco familiares tan arriba, pero la regla nunca cambia: línea superior = cuerda más delgada, números = trastes. Encuentra el traste 5 (dos trastes después del punto del traste 3) y ancla tu mano ahí.',
                 stuck: 'Play it one note at a time and say each fret out loud before you fret it. Get each note right first. Then speed up.',
@@ -989,7 +989,13 @@ SETS.push(
                 levelUp: 'Play the line backwards, from the last note to the first, still reading only the page.',
                 levelUp_es: 'Toca la línea al revés, de la última nota a la primera, todavía leyendo solo la página.',
                 skills: [1],
-                tab: { caption: 'At first sight: a 5th-position line with a stretch to fret 10, across the D, G & B strings (frets 5–10)',
+                /* Sight-reading, like ca-21: the tab's own ▶ Play tab is the
+                   answer key, so it sits UNDER the board (controlsBelow) and the
+                   note-name row is off (hideNames). This step used to carry a
+                   playSeq as well, which put a second Play button, BPM slider and
+                   Coach button above the board. */
+                tab: { bpm: 70, controlsBelow: true, hideNames: true,
+                  caption: 'At first sight: a 5th-position line with a stretch to fret 10, across the D, G & B strings (frets 5–10)',
                   caption_es: 'Lectura a primera vista: una línea en 5ª posición con un estiramiento hasta el traste 10, a través de las cuerdas Re, Sol y Si (trastes 5–10)', notes: [
                   { string: 'G', fret: 5, note: 'C', midi: 60 },
                   { string: 'G', fret: 7, note: 'D', midi: 62 },
@@ -999,8 +1005,7 @@ SETS.push(
                   { string: 'B', fret: 8, note: 'G', midi: 67 },
                   { string: 'G', fret: 7, note: 'D', midi: 62 },
                   { string: 'D', fret: 7, note: 'A', midi: 57 }
-                ] },
-                playSeq: { label: 'Hear the line (check yourself only AFTER you\'ve read it at first sight)', label_es: 'Escucha la línea (compruébate solo DESPUÉS de haberla leído a primera vista)', bpm: 70, notes: [60, 62, 64, 67, 69, 67, 62, 57] }
+                ] }
               }
             ]
           },
