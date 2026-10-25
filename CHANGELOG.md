@@ -5,6 +5,13 @@ Notable changes to the Guitar Class site. Newest first.
 For the full session-by-session history (and the reasoning behind each change),
 see `WORKFLOW.md` and the git commit log.
 
+## 2026-10-25 — Louder backing tracks for four songs
+
+- **Seven Nation Army, All Along the Watchtower, Sweet Child O' Mine and
+  Let It Be are louder now.** They play at about the same volume as the
+  other songs, at both speeds, with the Guitar button on or off. Nothing
+  else about the tracks changed.
+
 ## 2026-10-23 — Las Mañanitas play along: alternating bass
 
 - **The full-chord version now uses an alternating bass.** In every bar, pick

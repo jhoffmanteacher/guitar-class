@@ -25,7 +25,7 @@ const CACHE_VERSION = 'guitar-class-2026-10-23-0f282bb338';
 // re-download over school Wi-Fi. Splitting the version keeps a routine JS/
 // content push from touching cached audio, while a real re-exported track
 // still invalidates it (both versions are swept the same way at activate).
-const AUDIO_CACHE_VERSION = 'guitar-class-audio-2026-10-19-0cd85e94c6';
+const AUDIO_CACHE_VERSION = 'guitar-class-audio-2026-10-25-e8c797d2c9';
 const AUDIO_RE = /\.(mp3|m4a|wav|ogg)$/i;
 
 /* The subset of ASSETS whose absence means the app cannot render at all.
