@@ -5,6 +5,40 @@ Notable changes to the Guitar Class site. Newest first.
 For the full session-by-session history (and the reasoning behind each change),
 see `WORKFLOW.md` and the git commit log.
 
+## 2026-10-25 — Fixes and plainer wording across the site
+
+- **Lesson video buttons open again.** About 15 ▶ buttons in Modules 4, 5,
+  6 and 8 did nothing when you clicked them, because the song title had
+  quote marks, like "Let It Be". They open the video now, in English and
+  Spanish.
+- **Steps point to things you can find.** Hints in Modules 8, 9, 10 and 12
+  no longer send you to a song card or a Songs section that is not on the
+  page. The "Está Dañada" challenge has the tutorial link in the step.
+  Module 10 shows the Cm chord box. Module 9 "Higher Still" has one Play
+  button, under the TAB.
+- **The A chord matches Module 4.** The chord pop-ups and the Las Mañanitas
+  card show the middle finger on D, the index finger on G and the ring
+  finger on B.
+- **Games.** Name That Riff no longer freezes when a missed riff comes
+  back. Note Hunt no longer counts a quick second pluck as a miss. Finger
+  Gym no longer asks to save a recording. The games list draws once when
+  you leave a game.
+- **Song Journey pages.** Opening the tuner pauses the backing track. The
+  language button reads correctly with a screen reader. A page you have not
+  opened before shows the browser's offline page when you have no
+  connection.
+- **A site update waits for your song.** The page no longer reloads in the
+  middle of a practice-card song. A card that loses its sound now stops and
+  says so, and switching language stops a lesson tab that was playing.
+- **Phones.** The "↑ Top" button no longer floats over the open menu.
+- **Module 4 goal step.** It works if you never wrote a goal in Module 1.
+  The Module 3 review names the songs Module 4 really uses.
+- **Plainer wording.** About 200 passages in the lessons, activities, game
+  tips and Song Journey pages have shorter sentences and plainer words, in
+  English and Spanish. "Note:" replaces "Heads up".
+- **Fonts and icons.** A re-saved font or app icon now reaches you after
+  the next update.
+
 ## 2026-10-25 — Louder backing tracks for four songs
 
 - **Seven Nation Army, All Along the Watchtower, Sweet Child O' Mine and
