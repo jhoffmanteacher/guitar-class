@@ -3315,6 +3315,7 @@ let teacherClassConfigLoaded = false;
 let teacherClassConfigReadOk = false;
 async function loadTeacherClassConfig(){
   const req = ++teacherClassConfigReq;
+  const writeSeq = teacherConfigWriteSeq, writesOpen = teacherConfigWritesOpen;
   let cfg, ok = false;
   try{
     await ensureDb();
@@ -3324,6 +3325,16 @@ async function loadTeacherClassConfig(){
   }catch(e){ cfg = {}; }
   if(!cfg.gameOverrides) cfg.gameOverrides = {};
   if(req !== teacherClassConfigReq) return null;   // a newer request is in flight — discard this one
+  /* One of this tab's own writes was open, or started, while this read was
+     out, so it may hold the doc from BEFORE that write. Taken, it replaced
+     the copy the write's optimistic change lives in, and the write then
+     stamped its new configVersion on it — so the guard waved the next write
+     through on a stale copy (a queued board move re-packed `pos` off a board
+     missing the move before it). Wait for the writes, then read again. */
+  if(ok && (writesOpen || teacherConfigWritesOpen || writeSeq !== teacherConfigWriteSeq)){
+    await teacherConfigWritesSettled();
+    return req === teacherClassConfigReq ? loadTeacherClassConfig() : null;
+  }
   teacherClassConfig = cfg;
   teacherClassConfigLoaded = true;
   teacherClassConfigReadOk = ok;
@@ -3370,6 +3381,12 @@ async function loadTeacherClassConfig(){
    Paths are dotted. Activity ids (`ca-<n>`) and Firestore uids contain no
    dots, which is what makes that spelling safe here. */
 let teacherConfigVersion = 0;
+// This tab's writes: how many have started, and how many are still out —
+// loadTeacherClassConfig won't take a read that overlapped one.
+let teacherConfigWriteSeq = 0, teacherConfigWritesOpen = 0, teacherConfigIdleWaiters = [];
+function teacherConfigWritesSettled() {
+  return teacherConfigWritesOpen ? new Promise(r => teacherConfigIdleWaiters.push(r)) : Promise.resolve();
+}
 function teacherConfigAt(obj, path) {
   let cur = obj;
   const parts = String(path).split('.');
@@ -3392,24 +3409,29 @@ async function teacherWriteConfig(patch, base) {
   if (!dbh) throw new Error('Firestore is not available');
   const ref = dbh.collection('config').doc('class');
   let wrote = 0, diverged = false;
-  await dbh.runTransaction(async t => {
-    // Re-read inside the transaction on every attempt — Firestore may run
-    // this function more than once, and the second run has to judge the
-    // doc as it is then, not as the first run found it.
-    const snap = await t.get(ref);
-    const live = snap.exists ? (snap.data() || {}) : {};
-    const liveV = Number(live.configVersion) || 0;
-    diverged = liveV !== teacherConfigVersion;
-    if (diverged) {
-      // An empty `base` is strict too: "this write depends on nothing in the
-      // doc" is never true of a writer here, so it reads as one that forgot.
-      if (!base || !Object.keys(base).length) throw teacherStaleConfigError(null);
-      const moved = Object.keys(base).filter(k => !teacherConfigSame(teacherConfigAt(live, k), base[k]));
-      if (moved.length) throw teacherStaleConfigError(moved);
-    }
-    wrote = liveV + 1;
-    t.set(ref, Object.assign({}, patch, { configVersion: wrote }), { merge: true });
-  });
+  teacherConfigWriteSeq++; teacherConfigWritesOpen++;
+  try {
+    await dbh.runTransaction(async t => {
+      // Re-read inside the transaction on every attempt — Firestore may run
+      // this function more than once, and the second run has to judge the
+      // doc as it is then, not as the first run found it.
+      const snap = await t.get(ref);
+      const live = snap.exists ? (snap.data() || {}) : {};
+      const liveV = Number(live.configVersion) || 0;
+      diverged = liveV !== teacherConfigVersion;
+      if (diverged) {
+        // An empty `base` is strict too: "this write depends on nothing in the
+        // doc" is never true of a writer here, so it reads as one that forgot.
+        if (!base || !Object.keys(base).length) throw teacherStaleConfigError(null);
+        const moved = Object.keys(base).filter(k => !teacherConfigSame(teacherConfigAt(live, k), base[k]));
+        if (moved.length) throw teacherStaleConfigError(moved);
+      }
+      wrote = liveV + 1;
+      t.set(ref, Object.assign({}, patch, { configVersion: wrote }), { merge: true });
+    });
+  } finally {
+    if (--teacherConfigWritesOpen === 0) { const w = teacherConfigIdleWaiters; teacherConfigIdleWaiters = []; w.forEach(r => r()); }
+  }
   teacherConfigVersion = wrote;
   if (teacherClassConfig) teacherClassConfig.configVersion = wrote;
   if (diverged) {
