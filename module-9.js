@@ -82,7 +82,7 @@ SETS.push(
               },
               {
                 label: 'Re-test 6: fingerpicking', label_es: 'Repaso 6: fingerpicking',
-                text: 'Re-test 6 — Fingerpicking (Module 8):<ol><li>Fingerpick p-i-m-a over Am, thumb on the A string, without stopping.</li><li>Then change Em → Am and let the thumb switch bass strings while i-m-a stay put.</li></ol>',
+                text: 'Re-test 6 — Fingerpicking (Module 8):<ol><li>Fingerpick p-i-m-a over Am, thumb on the A string, without stopping.</li><li>Then change Em → Am and let the thumb switch bass strings while i-m-a stay in place.</li></ol>',
                 text_es: 'Repaso 6 — Fingerpicking (Módulo 8):<ol><li>Toca con fingerpicking p-i-m-a sobre Am, pulgar en la cuerda La, sin detenerte.</li><li>Luego cambia Em → Am y deja que el pulgar cambie de cuerda grave mientras i-m-a se quedan quietos.</li></ol>',
                 hint: 'The fingers keep their strings for the whole test — only the thumb travels.',
                 hint_es: 'Los dedos mantienen sus cuerdas durante toda la prueba — solo el pulgar viaja.',

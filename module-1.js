@@ -160,7 +160,7 @@ SETS.push(
           },
           {
             label: 'Find your sitting position', label_es: 'Encuentra tu posición al sentarte',
-            text: '<ol><li>Try playing with your foot up on a stool.</li><li>Then try it flat on the ground.</li><li>Keep whichever one lets you sit up straight without gripping the neck to hold the guitar up.</li></ol>You\'ve got it when: you can let go with your fretting hand and the guitar stays put on your leg.<span class="step-figure"><img src="img/posture-check.jpg" alt="Side-view drawing comparing sitting with a footstool (comfortable: back upright, guitar resting steady) to sitting without one (uncomfortable: hunched forward to reach the guitar)." width="700" height="525"></span>',
+            text: '<ol><li>Try playing with your foot up on a stool.</li><li>Then try it flat on the ground.</li><li>Keep whichever one lets you sit up straight without gripping the neck to hold the guitar up.</li></ol>You\'ve got it when: you can let go with your fretting hand and the guitar stays still on your leg.<span class="step-figure"><img src="img/posture-check.jpg" alt="Side-view drawing comparing sitting with a footstool (comfortable: back upright, guitar resting steady) to sitting without one (uncomfortable: hunched forward to reach the guitar)." width="700" height="525"></span>',
             text_es: '<ol><li>Prueba tocar con el pie apoyado en un banquito.</li><li>Luego prueba con el pie plano en el suelo.</li><li>Quédate con la posición que te permita sentarte derecho sin agarrar el mástil para sostener la guitarra.</li></ol>Lo tienes cuando: puedes soltar la mano de trastear y la guitarra se queda quieta sobre tu pierna.<span class="step-figure"><img src="img/posture-check.jpg" alt="Dibujo de perfil comparando sentarse con un banquito para el pie (cómodo: espalda derecha, guitarra firme) con sentarse sin uno (incómodo: encorvado hacia adelante para alcanzar la guitarra)." width="700" height="525"></span>',
             hint: 'The guitar should balance on your leg, not hang from your hand. Your fretting hand needs to be free to move.',
             hint_es: 'La guitarra debe quedar equilibrada sobre tu pierna, no colgando de tu mano. Tu mano de trastear necesita estar libre para moverse.',
@@ -352,7 +352,7 @@ SETS.push(
           },
           {
             label: 'Watch: how to hold the guitar', label_es: 'Mira: cómo sostener la guitarra',
-            text: 'Watch: <a href="https://www.youtube.com/watch?v=eyrgiiONULE&t=20" target="_blank">How to Hold Your Guitar Comfortably – Lauren Bateman (0:20–4:00)</a>. While you watch, set up in your chair and copy her position piece by piece:<ul><li>Feet.</li><li>Guitar on leg.</li><li>Back.</li><li>Strumming arm.</li></ul>You\'ve got it when: you can look away from the screen and your guitar stays put without your fretting hand holding it up.',
+            text: 'Watch: <a href="https://www.youtube.com/watch?v=eyrgiiONULE&t=20" target="_blank">How to Hold Your Guitar Comfortably – Lauren Bateman (0:20–4:00)</a>. While you watch, set up in your chair and copy her position piece by piece:<ul><li>Feet.</li><li>Guitar on leg.</li><li>Back.</li><li>Strumming arm.</li></ul>You\'ve got it when: you can look away from the screen and your guitar stays in place without your fretting hand holding it up.',
             text_es: 'Mira: <a href="https://www.youtube.com/watch?v=eyrgiiONULE&t=20" target="_blank">How to Hold Your Guitar Comfortably – Lauren Bateman (0:20–4:00)</a>. Mientras miras, acomódate en tu silla y copia su posición paso a paso:<ul><li>Pies.</li><li>Guitarra sobre la pierna.</li><li>Espalda.</li><li>Brazo de rasgueo.</li></ul>Lo tienes cuando: puedes dejar de mirar la pantalla y tu guitarra se queda en su lugar sin que tu mano de trastear la sostenga.',
             hint: 'Notice where the guitar rests and how the back stays straight.',
             hint_es: 'Fíjate en dónde descansa la guitarra y en cómo la espalda se mantiene derecha.',
@@ -644,7 +644,7 @@ SETS.push(
           explain_es: 'Encorvarse para ver los dedos es el error de postura más común — siéntate derecho e inclina un poco el mástil hacia arriba en vez de agacharte hacia él.' } },
       { id: 'w2-s3', text: 'Hold the pick correctly — 3–4mm of tip showing',
         text_es: 'Sostener la púa correctamente — con 3–4 mm de punta asomando',
-        gotItWhen: 'your pick stays put when you strum, only a small tip pokes past your thumb, and your wrist stays relaxed.',
+        gotItWhen: 'your pick stays in place when you strum, only a small tip pokes past your thumb, and your wrist stays relaxed.',
         gotItWhen_es: 'tu púa se mantiene en su lugar al rasguear, solo asoma una puntita más allá del pulgar, y tu muñeca se mantiene relajada.',
         practice: { type: 'mc', prompt: 'Your pick keeps twisting sideways in your fingers halfway through a strum. What\'s the most likely fix?',
           prompt_es: 'Tu púa se sigue girando de lado entre tus dedos a mitad del rasgueo. ¿Cuál es la solución más probable?',
