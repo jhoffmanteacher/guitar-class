@@ -3459,13 +3459,23 @@ function teacherConfigAt(obj, path) {
   }
   return cur;
 }
-/* config/class holds strings, numbers, booleans and the board's {module,pos}
-   pairs, so JSON compares them exactly. `undefined` — the cell was absent —
-   is its own case, because JSON.stringify gives undefined back for it and
-   would then equal any other absent value by accident. */
+/* config/class holds strings, numbers, booleans, arrays (the pin order) and
+   maps — the board's {module,pos} pairs, a card's Who list (uid -> true). A
+   map compares by its keys sorted: Firestore hands keys back sorted while
+   this tab's copy keeps the order they were ticked in, and plain
+   JSON.stringify called {u9,u1} and {u1,u9} different, so a Required click
+   refused as "stale" over nothing. Arrays keep their order. `undefined` —
+   the cell was absent — is its own case, so it can't equal another absent
+   value by accident. */
+function teacherConfigCanon(v) {
+  if (v === null || typeof v !== 'object') return JSON.stringify(v);
+  if (Array.isArray(v)) return '[' + v.map(teacherConfigCanon).join(',') + ']';
+  return '{' + Object.keys(v).filter(k => v[k] !== undefined).sort()
+    .map(k => JSON.stringify(k) + ':' + teacherConfigCanon(v[k])).join(',') + '}';
+}
 function teacherConfigSame(a, b) {
   if (a === undefined || b === undefined) return a === b;
-  return JSON.stringify(a) === JSON.stringify(b);
+  return teacherConfigCanon(a) === teacherConfigCanon(b);
 }
 async function teacherWriteConfig(patch, base) {
   const dbh = await ensureDb();
