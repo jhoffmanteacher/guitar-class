@@ -2735,6 +2735,37 @@ const SLANG_PHRASES = [
   'live in', 'live on', 'live at', 'live around',
   'owns the', 'own the',
   'rock-steady', 'stay parked', 'still fighting', 'rattle off',
+  /* Language pass, 2026-10-25. The preposition list above let the same
+     verb through with any other word after it — "the octave lives two
+     strings toward the floor", "the intro lives up high", "the ball end
+     lives under the bridge", "Part A lives down low", "a line living
+     entirely at fret 5", "where each note lives" (i18n), "Where do IV and V
+     live?" — eight found and reworded to is / goes / stays. So the bare
+     verb is banned now: no student text uses "lives" or "living" in any
+     other sense. Plain "live" stays legal ("live quiz", "Try it live"); its
+     figurative prepositions are still listed above. "parked" joined for the
+     same reason as "stay parked": "hand parked in 5th position", "parked at
+     the semester's highest position" (both Journey pages). The Spanish twin
+     ("la octava vive…") is SLANG_PHRASES_ES, below. */
+  'lives', 'living', 'parked',
+];
+/* One reviewed occurrence each, matched at its exact position the way
+   TEACHER_PHRASE_ALLOW is: module-9.js's m9w3 sight-reading card ("It lives
+   entirely at frets 5–10") sits in lines another branch was rewriting when
+   this ratchet landed (2026-10-25). Delete both entries once that card is
+   reworded — an unused entry only stands ready to excuse a new one. */
+const SLANG_ALLOW = [
+  { file: 'module-9.js', phrase: 'lives entirely at frets 5' },
+];
+/* Spanish figurative "vive / viven" for where a note, riff or chord sits —
+   the twin of 'lives' above (eight found 2026-10-25: "la bolita vive debajo
+   del puente", "¿Dónde viven el IV y el V?", "el riff vive en el mismo
+   mundo…"). Matched on the accent-folded, lower-cased value with Unicode
+   word edges, so "en vivo" and "vivir" are not hits. Read from every `_es`
+   value, the es: side of i18n.js and every data-es attribute. */
+const SLANG_PHRASES_ES = ['vive', 'viven'];
+const SLANG_ALLOW_ES = [
+  { file: 'module-9.js', phrase: 'vive completamente en los trastes 5' },   // same card as SLANG_ALLOW
 ];
 /* Hoisted to module scope so 1y can sweep exit-check item labels with the
    exact same list — 1w's own FIELD_RE has no `label`, and widening it would
@@ -2899,7 +2930,11 @@ function checkSlangPhrasing() {
     if (!vals) continue;
     for (const v of vals) {
       read++;
-      for (const m of straightQuotes(v.text).matchAll(RE)) flag(file, v.line - 1, m[0]);
+      const value = straightQuotes(v.text), lower = value.toLowerCase();
+      for (const m of value.matchAll(RE)) {
+        if (SLANG_ALLOW.some(a => a.file === file && lower.startsWith(a.phrase, m.index))) continue;
+        flag(file, v.line - 1, m[0]);
+      }
     }
   }
   if (read === 0) { err('1w read no module values — the field reader has gone blind'); problems++; bad++; }
@@ -2913,7 +2948,33 @@ function checkSlangPhrasing() {
     });
   } catch { /* checked elsewhere */ }
 
-  if (bad === 0) ok(`no banned slang phrases in student-facing text (${read} module values read)`);
+  /* Spanish (2026-10-25) — SLANG_PHRASES_ES on the folded value, the same
+     three sources 1w-t's Spanish sweep reads. */
+  const RE_ES = new RegExp('(?<![\\p{L}\\p{N}])(?:' + SLANG_PHRASES_ES.join('|') + ')(?![\\p{L}\\p{N}])', 'gu');
+  let esRead = 0;
+  const sweepEs = (file, li, text) => {
+    esRead++;
+    const folded = foldEs(text);
+    for (const m of folded.matchAll(RE_ES)) {
+      if (SLANG_ALLOW_ES.some(a => a.file === file && folded.startsWith(a.phrase, m.index))) continue;
+      flag(file, li, m[0]);
+    }
+  };
+  for (const file of STUDENT_VALUE_FILES)
+    for (const v of readFieldStrings(file, ES_VALUE_NAME_RE) || []) sweepEs(file, v.line - 1, v.text);
+  for (const file of STUDENT_HTML_PAGES()) {
+    let raw;
+    try { raw = readFileSync(join(ROOT, file), 'utf8'); } catch { continue; }
+    for (const v of htmlDataEsValues(raw)) sweepEs(file, v.line - 1, v.text);
+  }
+  try {
+    readFileSync(join(ROOT, 'i18n.js'), 'utf8').split('\n').forEach((line, li) => {
+      for (const e of line.matchAll(STUDENT_I18N_ES_RE)) sweepEs('i18n.js', li, unescapeJs(e[1] ?? e[2] ?? ''));
+    });
+  } catch { /* checked elsewhere */ }
+  if (esRead === 0) { err('1w read no Spanish values — the Spanish sweep has gone blind'); problems++; bad++; }
+
+  if (bad === 0) ok(`no banned slang phrases in student-facing text (${read} module values read, ${esRead} Spanish values)`);
 }
 
 /* ════════════════════════════════════════════════════════════════════
@@ -3164,7 +3225,12 @@ const decodeHtmlEntities = s => s
 const STUDENT_HTML_PAGES = () => ['index.html', '404.html', ...TAB_PAGES.filter(f => f.endsWith('.html'))];
 /* HTML comments blanked in place (newlines kept, so a match index still
    gives the right line) — a developer note is not student text. */
-const blankHtmlComments = raw => raw.replace(/<!--[\s\S]*?-->/g, c => c.replace(/[^\n]/g, ' '));
+const blankHtmlComments = raw => raw.replace(/<!--[\s\S]*?-->/g, c => c.replace(/[^\n]/g, ' '))
+  /* …and a block comment inside an inline <script> (2026-10-25): 404.html's
+     note on GitHub Pages paths ("the site lives one segment deep") is a
+     developer note too. Only the comments are blanked — the script's own
+     strings are still read. */
+  .replace(/<script\b[^>]*>[\s\S]*?<\/script>/gi, s => s.replace(/\/\*[\s\S]*?\*\//g, c => c.replace(/[^\n]/g, ' ')));
 /* A page's English text, line by line: comments and every data-es="…"
    attribute blanked in place, curly apostrophes straightened. */
 const htmlEnglishLines = raw =>
