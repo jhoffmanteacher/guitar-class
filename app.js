@@ -9463,8 +9463,10 @@ function restoreLessonScroll(a){
 function rebuildModuleContentPanels(){
   /* Every card in these panels is about to be rebuilt (see stopCardAudio):
      a tab line left playing would keep sounding with its cursor and its
-     Stop button on the old, detached nodes. */
-  stopCardAudio();
+     Stop button on the old, detached nodes. Not on the console: it has no
+     module panels to rebuild, and a Teacher view song playing for the room
+     must keep playing through a language switch (teacher.js). */
+  if(!IS_TEACHER_MODE) stopCardAudio();
   const anchor = lessonScrollAnchor();
   document.querySelectorAll('#week-panels .week-panel').forEach(panel=>{
     const wid = panel.dataset.id;
