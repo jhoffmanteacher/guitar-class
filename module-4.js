@@ -1433,13 +1433,13 @@ SETS.push(
           },
           {
             label: 'Revisit your Module 1 goal', label_es: 'Vuelve a tu meta del Módulo 1',
-            text: '<ol><li>Read the goal you typed in Module 1, Set 1.</li><li>Below, write one thing you can play now that you could not play then.</li><li>Write one thing you want to play by the end of Module 4.</li></ol>',
-            text_es: '<ol><li>Lee la meta que escribiste en el Módulo 1, Unidad 1.</li><li>Abajo, escribe una cosa que puedes tocar ahora y que no podías tocar entonces.</li><li>Escribe una cosa que quieres tocar para el final del Módulo 4.</li></ol>',
+            text: '<ol><li>If you typed a goal in Module 1, Set 1, read it. If not, say out loud the song you most want to play.</li><li>Below, write one thing you can play now that you could not play when you started this class.</li><li>Write one thing you want to play by the end of Module 4.</li></ol>',
+            text_es: '<ol><li>Si escribiste una meta en el Módulo 1, Unidad 1, léela. Si no, di en voz alta la canción que más quieres tocar.</li><li>Abajo, escribe una cosa que puedes tocar ahora y que no podías tocar cuando empezaste esta clase.</li><li>Escribe una cosa que quieres tocar para el final del Módulo 4.</li></ol>',
             hint: 'Name a song or a chord change, for example: "I can switch C to G without stopping."',
             hint_es: 'Nombra una canción o un cambio de acorde, por ejemplo: "puedo cambiar de C a G sin detenerme".',
             skills: [5],
-            response: { type: 'short', placeholder: 'One thing you can do now that you couldn\'t in Module 1 — and one goal for the assessment.',
-              placeholder_es: 'Una cosa que puedes hacer ahora que no podías en el Módulo 1 — y una meta para la evaluación.' }
+            response: { type: 'short', placeholder: 'One thing you can do now that you couldn\'t when you started — and one goal for the assessment.',
+              placeholder_es: 'Una cosa que puedes hacer ahora que no podías cuando empezaste — y una meta para la evaluación.' }
           },
             ]
           },
@@ -1737,13 +1737,13 @@ MODULE_REVIEWS[4] = {
     'Run the chord deck (Set 3) for three chords at random and play them in an 8-bar progression at 70 BPM with clean changes in time',
     'Record (or perform for someone) one core song from memory — "Let It Be", "Luna", or "the cure" — with clean tone and smooth transitions, then listen back and check it',
     'Name the chords on an unlabelled chord chart',
-    'Write a few sentences (not graded) on what you can play now that you could not play when you wrote your Module 1 goal'
+    'Write a few sentences (not graded) on what you can play now that you could not play when you started this class'
   ],
   assessItems_es: [
     'Corre la baraja de acordes (Unidad 3) para elegir tres acordes al azar y tócalos en una progresión de 8 compases a 70 BPM con cambios limpios a tiempo',
     'Graba (o interpreta para alguien) una canción principal de memoria — "Let It Be", "Luna", o "the cure" — con tono limpio y transiciones suaves, y luego escúchala y revísala',
     'Nombra los acordes en un diagrama de acordes sin etiquetar',
-    'Escribe unas oraciones (no calificadas) sobre lo que puedes tocar ahora y no podías cuando escribiste tu meta del Módulo 1'
+    'Escribe unas oraciones (no calificadas) sobre lo que puedes tocar ahora y no podías cuando empezaste esta clase'
   ],
   forward: 'In <strong>Module 5</strong> you learn pentatonic scales (five-note scales) and play your first solos over these same songs. Then <strong>Module 6</strong> brings these chords back with new strum patterns.',
   forward_es: 'En el <strong>Módulo 5</strong> aprendes escalas pentatónicas (escalas de cinco notas) y tocas tus primeros solos sobre estas mismas canciones. Después, el <strong>Módulo 6</strong> trae de vuelta estos acordes con patrones de rasgueo nuevos.',
