@@ -1557,7 +1557,7 @@ function renderTeacherActivities(opts){
       const groups={};
       roster.forEach(s=>{ const p=teacherStudentPeriod(s)||''; (groups[p]=groups[p]||[]).push(s); });
       const order=['4','7','CAS',''].filter(p=>groups[p]);
-      const boxes=order.map(p=>`<div class="t-who-group"><div class="t-who-head">${perLabel(p)}</div>`
+      const boxes=order.map(p=>`<div class="t-who-group"><div class="t-who-head">${escHtml(perLabel(p))}</div>`
         +groups[p].map(s=>`<label class="t-who-row"><input type="checkbox" data-set-activity-student data-id="${escAttr(a.id)}" data-uid="${escAttr(s.uid)}"${picked[s.uid]?' checked':''}> ${escHtml(s.name||s.email||s.uid.slice(0,8)+'…')}</label>`).join('')
         +`</div>`).join('');
       const sum=n?`Only ${n} student${n===1?'':'s'}`:'Whole class';
@@ -3607,7 +3607,9 @@ function renderTeacherManage(){
       // A heading row each time the period changes — keyed on the
       // EFFECTIVE period, so correcting one moves the student under it.
       const g=teacherStudentPeriod(stu)||'';
-      const groupRow=(grouped && g!==lastGroup)?`<tr class="tg-group"><th colspan="6">${perLabel(g)} <span>(${perCount[g]})</span></th></tr>`:'';
+      // Escaped: g is the student's own answer when no override is set, and
+      // firestore.rules doesn't check what a student writes to progress/{uid}.
+      const groupRow=(grouped && g!==lastGroup)?`<tr class="tg-group"><th colspan="6">${escHtml(perLabel(g))} <span>(${perCount[g]})</span></th></tr>`:'';
       lastGroup=g;
       const isPaused=!!paused[stu.uid], isArch=!!arch[stu.uid];
       // data-uid + the delegated listener in showTeacherApp — a Firestore
