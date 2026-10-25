@@ -235,8 +235,11 @@ function tunerLoop() {
   // headroom; the ±2-semitone string lock (applied below) guards against the
   // extra noise sensitivity this invites.
   const yinGate = tunerTargetString === 'E4' ? TUNER_RMS_GATE_YIN_E4 : TUNER_RMS_GATE_YIN;
-  const freqHPS = rms >= TUNER_RMS_GATE_HPS ? detectPitchHPS(freqBuf, tunerCtx.sampleRate, tunerFreqAnalyser.fftSize) : -1;
   const freqYIN = rms >= yinGate ? detectPitchYIN(timeBuf, tunerCtx.sampleRate, yinGate) : -1;
+  // HPS is only read when YIN has no answer (the pick below), so it isn't
+  // run when YIN has one. getFloatFrequencyData above still runs every frame,
+  // so the analyser's smoothing is the same either way.
+  const freqHPS = !(freqYIN > 0) && rms >= TUNER_RMS_GATE_HPS ? detectPitchHPS(freqBuf, tunerCtx.sampleRate, tunerFreqAnalyser.fftSize) : -1;
 
   // Pick the best candidate — if both fire, use YIN; if YIN misses, use HPS.
   // HPS reads its peak off 5.9 Hz FFT bins (8192 points at 48 kHz) — over a
