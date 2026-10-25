@@ -2539,6 +2539,11 @@ async function teacherSetActivityHidden(id, state){
   const had = Object.prototype.hasOwnProperty.call(teacherClassConfig.hiddenActivities, id);
   const prev = teacherClassConfig.hiddenActivities[id];
   if(on) teacherClassConfig.hiddenActivities[id]=true; else delete teacherClassConfig.hiddenActivities[id];
+  /* Painted now from the copy just changed, like teacherMoveActivity: the
+     read after the write waits while any of this tab's writes are out
+     (loadTeacherClassConfig), so a run of quick toggles showed nothing
+     until the last one landed. */
+  if(teacherView==='activities') renderTeacherActivities({cached:true});
   try{
     await ensureDb();
     const fv=firebase.firestore.FieldValue;
@@ -2573,6 +2578,7 @@ async function teacherSetModuleHidden(module, state){
   const before={};
   ids.forEach(id=>{ before[id]={had:Object.prototype.hasOwnProperty.call(map,id), prev:map[id]}; });
   ids.forEach(id=>{ if(on) map[id]=true; else delete map[id]; });
+  if(teacherView==='activities') renderTeacherActivities({cached:true});   // shown now — see teacherSetActivityHidden
   try{
     await ensureDb();
     const fv=firebase.firestore.FieldValue;
@@ -2605,6 +2611,7 @@ async function teacherSetActivityOptional(id, state){
      default. Matching the default clears it. */
   const keep = on!==teacherActivityOptionalByDefault(id, teacherClassConfig);
   if(keep) teacherClassConfig.optionalActivities[id]=on; else delete teacherClassConfig.optionalActivities[id];
+  if(teacherView==='activities') renderTeacherActivities({cached:true});   // shown now — see teacherSetActivityHidden
   try{
     await ensureDb();
     const fv=firebase.firestore.FieldValue;
@@ -2634,6 +2641,7 @@ async function teacherSetActivityStudent(id, uid, on){
   const had=Object.prototype.hasOwnProperty.call(who, uid);
   const prev=who[uid];
   if(on) who[uid]=true; else delete who[uid];
+  if(teacherView==='activities') renderTeacherActivities({cached:true});   // shown now — see teacherSetActivityHidden
   try{
     await ensureDb();
     const fv=firebase.firestore.FieldValue;
@@ -2652,6 +2660,7 @@ async function teacherSetActivityWholeClass(id){
   if(!map[id]) return;
   const prev=map[id];
   delete map[id];
+  if(teacherView==='activities') renderTeacherActivities({cached:true});   // shown now — see teacherSetActivityHidden
   try{
     await ensureDb();
     const fv=firebase.firestore.FieldValue;
@@ -2675,6 +2684,7 @@ async function teacherSetActivityPlayAlong(id, state){
   const had = Object.prototype.hasOwnProperty.call(teacherClassConfig.playAlongActivities, id);
   const prev = teacherClassConfig.playAlongActivities[id];
   if(on) teacherClassConfig.playAlongActivities[id]=true; else delete teacherClassConfig.playAlongActivities[id];
+  if(teacherView==='activities') renderTeacherActivities({cached:true});   // shown now — see teacherSetActivityHidden
   try{
     await ensureDb();
     const fv=firebase.firestore.FieldValue;
@@ -2722,6 +2732,7 @@ async function teacherSetActivityPin(id, state){
     next = cur.filter(x=>x!==id);
   }
   cfg.activityPins = next;
+  if(teacherView==='activities') renderTeacherActivities({cached:true});   // shown now — see teacherSetActivityHidden
   try{
     await ensureDb();
     await teacherWriteConfig({activityPins: next}, {activityPins: had?prev:undefined});
@@ -2800,6 +2811,7 @@ async function teacherSetActivityDate(id, value){
   const had = Object.prototype.hasOwnProperty.call(teacherClassConfig.activityDates, id);
   const prev = teacherClassConfig.activityDates[id];
   if(value) teacherClassConfig.activityDates[id]=value; else delete teacherClassConfig.activityDates[id];
+  if(teacherView==='activities') renderTeacherActivities({cached:true});   // shown now — see teacherSetActivityHidden
   try{
     await ensureDb();
     const fv=firebase.firestore.FieldValue;
@@ -2839,6 +2851,7 @@ async function teacherSetActivityArchived(id, state){
   const pinsBefore=teacherActivityPins(cfg);
   const unpin=on && pinsBefore.includes(id);
   if(unpin) cfg.activityPins=pinsBefore.filter(x=>x!==id);
+  if(teacherView==='activities') renderTeacherActivities({cached:true});   // shown now — see teacherSetActivityHidden
   try{
     await ensureDb();
     const fv=firebase.firestore.FieldValue;
@@ -3019,6 +3032,7 @@ async function teacherSetClassSong(id, on){
   if(on) map[id]=true; else delete map[id];
   const ctl=document.querySelector('[data-tvs-ctl]');
   if(ctl) ctl.innerHTML=teacherViewSongShareHtml(a, teacherClassConfig);   // shown now
+  if(teacherView==='activities') renderTeacherActivities({cached:true});   // shown now — see teacherSetActivityHidden
   try{
     await ensureDb();
     const fv=firebase.firestore.FieldValue;
@@ -3046,6 +3060,7 @@ async function teacherSetSongPlace(id, where){
   const prev=map[id];
   const clear = toSongs===(a.library===true);
   if(clear) delete map[id]; else map[id]=toSongs;
+  if(teacherView==='activities') renderTeacherActivities({cached:true});   // shown now — see teacherSetActivityHidden
   try{
     await ensureDb();
     const fv=firebase.firestore.FieldValue;
