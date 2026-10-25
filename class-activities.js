@@ -503,8 +503,8 @@ window.CLASS_ACTIVITIES = [
       {
         label:    'Lines 1 and 2',
         label_es: 'Líneas 1 y 2',
-        text: 'The first half of the song. Line 1 is the line you learned last time; Line 2 starts the same and ends higher.<ul><li>Line 1 fingers: open, open, 1, open, 4, 3</li><li>Line 2: your hand moves up until finger 1 sits on fret 5 — finger 3 → fret 7, finger 1 → fret 5. Eyes on fret 7 <em>before</em> your hand moves</li><li>BPM 70. Loop each line alone until it\'s clean, then play them back to back</li></ul>You\'ve got it when: Line 1 into Line 2, four times through, without stopping.',
-        text_es: 'La primera mitad de la canción. La Línea 1 es la que aprendiste la vez pasada; la Línea 2 empieza igual y termina más arriba.<ul><li>Dedos de la Línea 1: al aire, al aire, 1, al aire, 4, 3</li><li>Línea 2: la mano sube hasta que el dedo 1 queda en el traste 5 — dedo 3 → traste 7, dedo 1 → traste 5. Ojos en el traste 7 <em>antes</em> de mover la mano</li><li>BPM 70. Repite cada línea sola hasta que salga limpia, y después tócalas seguidas</li></ul>Lo tienes cuando: de la Línea 1 a la Línea 2, cuatro veces seguidas, sin detenerte.',
+        text: 'The first half of the song. Line 1 is the line you learned last time; Line 2 starts the same and ends higher.<ul><li>Line 1 fingers: open, open, 1, open, 4, 3</li><li>Line 2: your hand moves up — finger 3 → fret 7, finger 1 → fret 5. Eyes on fret 7 <em>before</em> your hand moves</li><li>BPM 70. Loop each line alone until it\'s clean, then play them back to back</li></ul>You\'ve got it when: Line 1 into Line 2, four times through, without stopping.',
+        text_es: 'La primera mitad de la canción. La Línea 1 es la que aprendiste la vez pasada; la Línea 2 empieza igual y termina más arriba.<ul><li>Dedos de la Línea 1: al aire, al aire, 1, al aire, 4, 3</li><li>Línea 2: la mano sube — dedo 3 → traste 7, dedo 1 → traste 5. Ojos en el traste 7 <em>antes</em> de mover la mano</li><li>BPM 70. Repite cada línea sola hasta que salga limpia, y después tócalas seguidas</li></ul>Lo tienes cuando: de la Línea 1 a la Línea 2, cuatro veces seguidas, sin detenerte.',
         tab: {
           caption: 'First half · Lines 1 and 2',
           caption_es: 'Primera mitad · Líneas 1 y 2',
@@ -1141,8 +1141,8 @@ window.CLASS_ACTIVITIES = [
       {
         label:    'Reach endurance',
         label_es: 'Resistencia en el Estiramiento',
-        text: 'Reach endurance — eight reaches without stopping, twice the usual.<ul><li>The hand starts to tire around six</li><li>If it hurts, STOP</li></ul>You\'ve got it when: eight reaches without stopping and finger 1 never lifts.',
-        text_es: 'Resistencia en el Estiramiento — ocho estiramientos sin detenerte, el doble de lo normal.<ul><li>La mano empieza a cansarse cerca del sexto</li><li>Si duele, DETENTE</li></ul>Lo tienes cuando: ocho estiramientos sin detenerte y el dedo 1 nunca se levanta.',
+        text: 'Reach endurance — eight reaches without stopping, twice the usual.<ul><li>The hand starts to tire around six</li><li>Keep going if your hand is only tired. If it hurts, STOP</li></ul>You\'ve got it when: eight reaches without stopping and finger 1 never lifts.',
+        text_es: 'Resistencia en el Estiramiento — ocho estiramientos sin detenerte, el doble de lo normal.<ul><li>La mano empieza a cansarse cerca del sexto</li><li>Sigue si la mano solo está cansada. Si duele, DETENTE</li></ul>Lo tienes cuando: ocho estiramientos sin detenerte y el dedo 1 nunca se levanta.',
         tab: {
           caption: 'Reach endurance · eight in a row',
           caption_es: 'Resistencia · ocho seguidos',
@@ -1318,8 +1318,8 @@ window.CLASS_ACTIVITIES = [
     number: 4,
     title:    'Notes on the Low E String',
     title_es: 'Notas en la cuerda Mi grave',
-    intro:    'You have played frets on the low E string for Happy Birthday. Today you learn their names: every natural note (a note with no ♯) on that string, from open E to the E at fret 12.',
-    intro_es: 'Ya tocaste trastes de la cuerda Mi grave para Happy Birthday. Hoy aprendes sus nombres: todas las notas naturales (una nota sin ♯) de esa cuerda, desde E al aire hasta E en el traste 12.',
+    intro:    'You have played Happy Birthday on the low E string. Today you learn the names of its notes: every natural note (a note with no ♯) on that string, from open E to the E at fret 12.',
+    intro_es: 'Ya tocaste Happy Birthday en la cuerda Mi grave. Hoy aprendes los nombres de sus notas: todas las notas naturales (las notas sin ♯) de esa cuerda, desde E al aire hasta E en el traste 12.',
     steps: [
       {
         label:    'The dot notes',
@@ -1415,7 +1415,7 @@ window.CLASS_ACTIVITIES = [
     title:    'Notes on the A String, Then Happy Birthday',
     title_es: 'Notas en la cuerda La, y luego Happy Birthday',
     intro:    'You know the note names on the low E string, and you play Happy Birthday start to finish on it. Today you learn the names on the A string: every natural note (a note with no ♯) from open A to the A at fret 12. Then you use them to play Happy Birthday a second way. This way crosses to the A string and stays inside the first seven frets.',
-    intro_es: 'Ya conoces los nombres de las notas de la cuerda Mi grave, y tocas Happy Birthday de principio a fin en ella. Hoy aprendes los nombres de la cuerda La: todas las notas naturales (una nota sin ♯) desde A al aire hasta A en el traste 12. Después los usas para tocar Happy Birthday de una segunda forma. Esta forma cruza a la cuerda La y se queda dentro de los primeros siete trastes.',
+    intro_es: 'Ya conoces los nombres de las notas de la cuerda Mi grave, y tocas Happy Birthday de principio a fin en ella. Hoy aprendes los nombres de la cuerda La: todas las notas naturales (las notas sin ♯) desde A al aire hasta A en el traste 12. Después los usas para tocar Happy Birthday de una segunda forma. Esta forma cruza a la cuerda La y se queda dentro de los primeros siete trastes.',
     steps: [
       {
         label:    'Learn the notes',
@@ -1772,8 +1772,8 @@ window.CLASS_ACTIVITIES = [
       {
         label:    'Tune it back',
         label_es: 'Vuelve a afinar',
-        text: 'Loosen the low E string only, about half a turn, then bring it back up to pitch. Just the one string.<ol><li>Clip the tuner on. Start a timer at 1:00</li><li>Pluck the low E string, loosen the peg a little, pluck again</li><li>Once it sounds lower, tune it back up. Went too high? Loosen it below the note and come back up — never keep tightening past it</li></ol>You\'ve got it when: the tuner shows E in green, inside 1:00. Out of time? Reset and go again.',
-        text_es: 'Afloja solo la cuerda Mi grave, más o menos media vuelta, y después vuelve a subirla a su nota. Solo esa cuerda.<ol><li>Pon el afinador de pinza. Arranca un temporizador en 1:00</li><li>Pulsa la cuerda Mi grave, afloja la clavija un poco, pulsa otra vez</li><li>Cuando suene más grave, vuelve a subirla. ¿Se pasó de aguda al subir? Afloja por debajo de la nota y sube de nuevo hasta ella — nunca sigas apretando de más</li></ol>Lo tienes cuando: el afinador marca E en verde, dentro de 1:00. ¿Se acabó el tiempo? Reinicia y hazlo otra vez.',
+        text: 'Loosen the low E string only, about half a turn, then bring it back up to pitch.<ol><li>Clip the tuner on. Start a timer at 1:00</li><li>Pluck the low E string, loosen the peg a little, pluck again</li><li>Once it sounds lower, tune it back up. Went too high? Loosen it below the note and come back up — never keep tightening past it</li></ol>You\'ve got it when: the tuner shows E in green, inside 1:00. Out of time? Reset and go again.',
+        text_es: 'Afloja solo la cuerda Mi grave, más o menos media vuelta, y después vuelve a subirla a su nota.<ol><li>Pon el afinador de pinza. Arranca un temporizador en 1:00</li><li>Pulsa la cuerda Mi grave, afloja la clavija un poco, pulsa otra vez</li><li>Cuando suene más grave, vuelve a subirla. ¿Se pasó de aguda al subir? Afloja por debajo de la nota y sube de nuevo hasta ella — nunca sigas apretando de más</li></ol>Lo tienes cuando: el afinador marca E en verde, dentro de 1:00. ¿Se acabó el tiempo? Reinicia y hazlo otra vez.',
       },
       {
         label:    'Play it from memory',
