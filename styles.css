@@ -128,7 +128,6 @@ body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,"Helvetica N
 .btn-translate .ico{width:15px;height:15px;flex:0 0 15px;display:flex}
 .btn-translate:hover{background:var(--bg3)}
 .btn-translate.active{background:var(--blue-bg);color:var(--blue-text);border-color:var(--blue-text)}
-#google_translate_element{display:none}
 .auth-wall{max-width:400px;margin:80px auto;padding:0 20px;text-align:center}
 /* "Checking your sign-in…" note shown while Firebase resolves the previous
    session (see index.html #auth-checking) — quiet on purpose, so it reads as
@@ -627,7 +626,6 @@ body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,"Helvetica N
 .atxt{font-size:0.9375rem;line-height:1.6}
 .mr-assess-list{margin:8px 0 0;padding-left:22px}
 .mr-assess-list li{margin-bottom:4px}
-.spill{display:inline-block;font-size:0.8125rem;padding:2px 8px;border-radius:10px;border:1px solid var(--border2);color:var(--text2);margin:2px 2px 0 0}
 /* ── Checklist — two-column ── */
 .cl-intro{background:var(--bg3);border-radius:var(--radius-sm);padding:12px 14px;margin-bottom:12px;font-size:0.9375rem;color:var(--text2);line-height:1.6}
 .cl-grid-wrap{background:var(--bg);border:1px solid var(--border);border-radius:var(--radius);overflow:hidden;margin-bottom:12px}
@@ -1885,7 +1883,7 @@ body.rail-collapsed .rail-tools .tool-popup{
   .resume-card,
   .video-overlay,
   .fab-group,.save-ind,
-  #google_translate_element,.btn-translate,.user-area,
+  .btn-translate,.user-area,
   .print-set-btn,.se-chrome,.daily5-panel,.daily5-overlay,.games-screen,.page-screen,
   .back-to-top,.panel-next,.mr-done,.sk-where-btn,
   .step-done-row,.mr-rec,.mr-locked-banner,.set-peek-banner,
