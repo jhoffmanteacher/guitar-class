@@ -284,6 +284,41 @@ is being wired up, measure, and leave it out of the commit. Don't ask for
 the other three metronome variants, and don't tell him a song is "missing"
 its metronome files.
 
+**Every backing track plays at the loudness of "the cure"** (Jonathan's
+standing rule, 2026-10-25). **A new song is levelled to "the cure" with
+`python3 tools/loudness.py <song-slug>` before it ships** — the slug is the
+file name up to `-backing-`; `--dry-run` does it all but write. It measures
+the reference fresh each run (the cure's 144 BPM full mix, about -12.5
+LUFS), levels every file of the song, and moves nothing into `audio/`
+unless every file passes: loudness, both peaks ≤ -1 dBFS on the DECODED
+mp3, length within 0.05 s, first 40 s cross-correlated under 10 ms — so
+`anchor`, `barTimes` and `data-click-bars` still hold. What it encodes:
+
+- **One gain per SONG**, worked out from its record-tempo full mix (its
+  rhythm-down mix if it has no full one), and the same gain on every file
+  — both tempos, both mixes, both keys — so the Guitar toggle keeps its
+  balance. A rhythm-down mix is quieter than its full twin on purpose; one
+  that lands outside ±1 LU is reported (`--accept-spread` writes it
+  anyway), never given a gain of its own. Ask Jonathan.
+- **Never re-level "the cure"** — it is the target; the tool refuses it.
+- **Gain and a -1 dBFS limiter, nothing else**: no resample, no pitch
+  change, no trim, same bitrate and sample rate. A clipped record can need
+  a lower ceiling to get its TRUE peak under -1 (the limiter holds sample
+  peaks); the tool finds it and the table says so. A song that was already
+  re-encoded once is levelled from the earlier bytes, `--source-ref
+  <commit>`, so it is only re-encoded once.
+- ⚠️ **ffmpeg's `alimiter` has `level` ON by default** — it normalises the
+  output back up toward full scale and silently undoes the gain — and it
+  delays the audio by its 5 ms lookahead unless `latency` is on. Always
+  `level=disabled:latency=1`, and trust the measured output, never the
+  filter chain.
+
+checks.mjs **1br** warns (never fails) when a song's record-tempo full mix
+is more than 1 LU from the cure's — it reads the file choice from
+`loudness.py --list-reference-files` and caches results in the gitignored
+`tools/.loudness-cache.json`; without ffmpeg or Python on PATH it skips
+with a note.
+
 **The deleted files are still in git history**, so the repo's `.git` did
 not get smaller (about 580 MB) — what shrank is the published site, which
 is what GitHub Pages' 1 GB limit counts: `audio/` went from 439 MB to
