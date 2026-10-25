@@ -74,7 +74,12 @@ function applyJourneyLang(lang){
   var btn = document.getElementById('btn-translate');
   var lbl = document.getElementById('translate-label');
   if(btn) btn.classList.toggle('active', lang === 'es');
-  if(lbl) lbl.textContent = (lang === 'es') ? 'English' : 'Español';
+  if(lbl){
+    lbl.textContent = (lang === 'es') ? 'English' : 'Español';
+    // The label names the OTHER language, in that language — tag it so a
+    // screen reader says "Español" in Spanish (same as syncTranslateBtn in app.js).
+    lbl.lang = (lang === 'es') ? 'en' : 'es';
+  }
   updateProgressPill();
 }
 function toggleTranslate(){
