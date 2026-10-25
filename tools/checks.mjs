@@ -2746,8 +2746,12 @@ const SLANG_PHRASES = [
      figurative prepositions are still listed above. "parked" joined for the
      same reason as "stay parked": "hand parked in 5th position", "parked at
      the semester's highest position" (both Journey pages). The Spanish twin
-     ("la octava vive…") is SLANG_PHRASES_ES, below. */
-  'lives', 'living', 'parked',
+     ("la octava vive…") is SLANG_PHRASES_ES, below. "stays put" (seven
+     uses, Modules 1, 4, 8, 9, 13 — "the guitar stays put on your leg")
+     joined the same day: its Spanish twins were already the literal "se
+     queda quieta / en su lugar", so English now says "stays still / in
+     place" too. */
+  'lives', 'living', 'parked', 'stays put', 'stay put',
 ];
 /* One reviewed occurrence each, matched at its exact position the way
    TEACHER_PHRASE_ALLOW is: module-9.js's m9w3 sight-reading card ("It lives
