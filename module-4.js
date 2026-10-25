@@ -1433,8 +1433,8 @@ SETS.push(
           },
           {
             label: 'Revisit your Module 1 goal', label_es: 'Vuelve a tu meta del Módulo 1',
-            text: '<ol><li>If you typed a goal in Module 1, Set 1, read it. If not, say out loud the song you most want to play.</li><li>Below, write one thing you can play now that you could not play when you started this class.</li><li>Write one thing you want to play by the end of Module 4.</li></ol>',
-            text_es: '<ol><li>Si escribiste una meta en el Módulo 1, Unidad 1, léela. Si no, di en voz alta la canción que más quieres tocar.</li><li>Abajo, escribe una cosa que puedes tocar ahora y que no podías tocar cuando empezaste esta clase.</li><li>Escribe una cosa que quieres tocar para el final del Módulo 4.</li></ol>',
+            text: '<ol><li>If you typed a goal in Module 1, Set 1, read it. If not, go on to step 2.</li><li>Below, write one thing you can play now that you could not play when you started this class.</li><li>Write one thing you want to play by the end of Module 4.</li></ol>',
+            text_es: '<ol><li>Si escribiste una meta en el Módulo 1, Unidad 1, léela. Si no, pasa al paso 2.</li><li>Abajo, escribe una cosa que puedes tocar ahora y que no podías tocar cuando empezaste esta clase.</li><li>Escribe una cosa que quieres tocar para el final del Módulo 4.</li></ol>',
             hint: 'Name a song or a chord change, for example: "I can switch C to G without stopping."',
             hint_es: 'Nombra una canción o un cambio de acorde, por ejemplo: "puedo cambiar de C a G sin detenerme".',
             skills: [5],
