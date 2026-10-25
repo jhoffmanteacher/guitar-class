@@ -313,7 +313,7 @@ mp3, length within 0.05 s, first 40 s cross-correlated under 10 ms — so
   `level=disabled:latency=1`, and trust the measured output, never the
   filter chain.
 
-checks.mjs **1br** warns (never fails) when a song's record-tempo full mix
+checks.mjs **1bu** warns (never fails) when a song's record-tempo full mix
 is more than 1 LU from the cure's — it reads the file choice from
 `loudness.py --list-reference-files` and caches results in the gitignored
 `tools/.loudness-cache.json`; without ffmpeg or Python on PATH it skips

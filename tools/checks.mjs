@@ -8040,7 +8040,7 @@ function checkGuitarNotes() {
 }
 
 /* ════════════════════════════════════════════════════════════════════
-   1br. Every song plays at "the cure"'s loudness  (SOFT — warns only)
+   1bu. Every song plays at "the cure"'s loudness  (SOFT — warns only)
 
    Jonathan's standing rule (2026-10-25): every backing track plays at the
    same loudness as "the cure", so nobody in the room reaches for the volume
@@ -8079,10 +8079,10 @@ function measureLufs(file) {
   });
 }
 async function checkBackingLoudness() {
-  head('1br. Every song plays at "the cure"\'s loudness (soft)');
+  head('1bu. Every song plays at "the cure"\'s loudness (soft)');
   const runs = (cmd, a) => { const r = spawnSync(cmd, a, { encoding: 'utf8', timeout: 30000 }); return !r.error && r.status === 0 ? r : null; };
   if (!runs('ffmpeg', ['-hide_banner', '-version'])) {
-    warn('1br skipped: ffmpeg is not on PATH, so backing-track loudness was not measured');
+    warn('1bu skipped: ffmpeg is not on PATH, so backing-track loudness was not measured');
     return;
   }
   let list = null;
@@ -8091,11 +8091,11 @@ async function checkBackingLoudness() {
     if (r) { try { list = JSON.parse(r.stdout); break; } catch { /* try the next name */ } }
   }
   if (!list) {
-    warn('1br skipped: no Python on PATH to run tools/loudness.py (it picks each song\'s file), so backing-track loudness was not measured');
+    warn('1bu skipped: no Python on PATH to run tools/loudness.py (it picks each song\'s file), so backing-track loudness was not measured');
     return;
   }
   if (!list.reference) {
-    warn('1br: tools/loudness.py found no "the cure" record-tempo full mix in audio/ — nothing to measure against'); warnings++;
+    warn('1bu: tools/loudness.py found no "the cure" record-tempo full mix in audio/ — nothing to measure against'); warnings++;
     return;
   }
   let cache = {};
@@ -8122,13 +8122,13 @@ async function checkBackingLoudness() {
   }));
   if (changed) { try { writeFileSync(LOUDNESS_CACHE, JSON.stringify(cache, null, 1) + '\n'); } catch { /* read-only: measure next time */ } }
   const ref = lufs[list.reference];
-  if (ref === undefined) { warn(`1br: could not measure ${list.reference} — nothing to measure against`); warnings++; return; }
+  if (ref === undefined) { warn(`1bu: could not measure ${list.reference} — nothing to measure against`); warnings++; return; }
   let off = 0;
   for (const [slug, f] of Object.entries(list.songs)) {
-    if (lufs[f] === undefined) { warn(`1br: could not measure ${f}`); warnings++; off++; continue; }
+    if (lufs[f] === undefined) { warn(`1bu: could not measure ${f}`); warnings++; off++; continue; }
     const d = lufs[f] - ref;
     if (Math.abs(d) > LOUDNESS_TOLERANCE_LU) {
-      warn(`1br: ${slug} plays ${Math.abs(d).toFixed(1)} LU ${d > 0 ? 'louder' : 'quieter'} than "the cure" (${f}: ${lufs[f].toFixed(1)} against ${ref.toFixed(1)} LUFS) — level it with: python3 tools/loudness.py ${slug}`);
+      warn(`1bu: ${slug} plays ${Math.abs(d).toFixed(1)} LU ${d > 0 ? 'louder' : 'quieter'} than "the cure" (${f}: ${lufs[f].toFixed(1)} against ${ref.toFixed(1)} LUFS) — level it with: python3 tools/loudness.py ${slug}`);
       warnings++; off++;
     }
   }

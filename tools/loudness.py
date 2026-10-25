@@ -19,7 +19,7 @@ song. See the audio-and-snippets skill, "Backing tracks".
                    file its own gain instead
   --list-reference-files
                    print, as JSON, the reference file and every song's level
-                   file. checks.mjs (1br) reads this, so the choice of file
+                   file. checks.mjs (1bu) reads this, so the choice of file
                    lives here and nowhere else
 
 Needs ffmpeg on PATH plus numpy, like tools/beat-map.py (scipy not needed).
