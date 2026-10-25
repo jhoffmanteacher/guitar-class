@@ -104,8 +104,8 @@ SETS.push(
             steps: [
           {
             label: 'Challenge 1 — Clean Am', label_es: 'Reto 1 — Am limpio',
-            text: 'A chord can also be written as six characters, one for each string, from the low E to the high e. x means do not play, 0 means open, and a number is the fret. Am is x02210.<ol><li>Put your index finger on the B string, fret 1.</li><li>Put your middle finger on the D string, fret 2.</li><li>Put your ring finger on the G string, fret 2.</li><li>Strum five strings, from the A string to the high e. Do not play the low E.</li><li>Lift all three fingers. Put them down again together, in one move.</li></ol>You\'ve got it when: you pluck each of the five strings and every one rings clean.',
-            text_es: 'Un acorde también se puede escribir con seis caracteres, uno para cada cuerda, de la Mi grave a la mi aguda. x significa no tocar, 0 significa al aire y un número es el traste. Am es x02210.<ol><li>Pon tu dedo índice en la cuerda Si, traste 1.</li><li>Pon tu dedo medio en la cuerda Re, traste 2.</li><li>Pon tu dedo anular en la cuerda Sol, traste 2.</li><li>Rasguea cinco cuerdas, desde la cuerda La hasta la mi aguda. No toques la Mi grave.</li><li>Levanta los tres dedos. Vuelve a ponerlos juntos, en un solo movimiento.</li></ol>Lo tienes cuando: pulsas cada una de las cinco cuerdas y todas suenan limpias.',
+            text: 'A chord can also be written as six characters, one for each string, from the low E to the high e. An x means do not play, a 0 means open, and a number is the fret. Am is x02210.<ol><li>Put your index finger on the B string, fret 1.</li><li>Put your middle finger on the D string, fret 2.</li><li>Put your ring finger on the G string, fret 2.</li><li>Strum five strings, from the A string to the high e. Do not play the low E.</li><li>Lift all three fingers. Put them down again together, in one move.</li></ol>You\'ve got it when: you pluck each of the five strings and every one rings clean.',
+            text_es: 'Un acorde también se puede escribir con seis caracteres, uno para cada cuerda, de la Mi grave a la mi aguda. Una x significa no tocar, un 0 significa al aire y un número es el traste. Am es x02210.<ol><li>Pon tu dedo índice en la cuerda Si, traste 1.</li><li>Pon tu dedo medio en la cuerda Re, traste 2.</li><li>Pon tu dedo anular en la cuerda Sol, traste 2.</li><li>Rasguea cinco cuerdas, desde la cuerda La hasta la mi aguda. No toques la Mi grave.</li><li>Levanta los tres dedos. Vuelve a ponerlos juntos, en un solo movimiento.</li></ol>Lo tienes cuando: pulsas cada una de las cinco cuerdas y todas suenan limpias.',
             hint: 'Press just behind the fret wire. Curve your fingers so they do not touch the next string.',
             hint_es: 'Presiona justo detrás del traste. Curva tus dedos para que no toquen la cuerda de al lado.',
             stuck: 'Put down your index and ring fingers first. Make the B and G strings ring. Then add your middle finger. Press with the tip of each finger.',
@@ -233,14 +233,14 @@ SETS.push(
               },
               {
                 label: 'Challenge — Play a Shape You Have Never Seen', label_es: 'Reto — Toca una forma que nunca has visto',
-                text: 'The chart below has no name. You have not learned this shape yet.<ol><li>Read the low E string first: X or O?</li><li>Read each dot: which string, which fret, which finger.</li><li>Put your fingers where the chart shows.</li><li>Pluck each string one at a time. Skip any string with an X.</li><li>Press &#x25B6; and compare your notes with it.</li></ol>You\'ve got it when: every string with an O or a dot rings clean three times in a row, and your notes match the &#x25B6; notes.',
-                text_es: 'El diagrama de abajo no tiene nombre. Todavía no has aprendido esta forma.<ol><li>Lee primero la cuerda Mi grave: ¿X u O?</li><li>Lee cada punto: qué cuerda, qué traste, qué dedo.</li><li>Pon tus dedos donde muestra el diagrama.</li><li>Pulsa cada cuerda una por una. Sáltate cualquier cuerda con X.</li><li>Presiona &#x25B6; y compara tus notas con él.</li></ol>Lo tienes cuando: cada cuerda con O o con un punto suena limpia tres veces seguidas, y tus notas son iguales a las notas de &#x25B6;.',
+                text: 'The chart below has no name.<ol><li>Read the low E string first: X or O?</li><li>Read each dot: which string, which fret, which finger.</li><li>Put your fingers where the chart shows.</li><li>Pluck each string one at a time. Skip any string with an X.</li><li>Press &#x25B6; and compare your notes with it.</li></ol>You\'ve got it when: every string with an O or a dot rings clean three times in a row, and your notes match the &#x25B6; notes.',
+                text_es: 'El diagrama de abajo no tiene nombre.<ol><li>Lee primero la cuerda Mi grave: ¿X u O?</li><li>Lee cada punto: qué cuerda, qué traste, qué dedo.</li><li>Pon tus dedos donde muestra el diagrama.</li><li>Pulsa cada cuerda una por una. Sáltate cualquier cuerda con X.</li><li>Presiona &#x25B6; y compara tus notas con él.</li></ol>Lo tienes cuando: cada cuerda con O o con un punto suena limpia tres veces seguidas, y tus notas son iguales a las notas de &#x25B6;.',
                 hint: 'The number in each dot is the finger. The row the dot sits in is the fret.',
                 hint_es: 'El número dentro de cada punto es el dedo. La fila donde está el punto es el traste.',
                 stuck: 'Build the left chart from the Mystery Chart above. Compare it with this chart, dot by dot. Find the dot that is missing.',
                 stuck_es: 'Arma el diagrama de la izquierda del Diagrama misterioso de arriba. Compáralo con este diagrama, punto por punto. Encuentra el punto que falta.',
-                levelUp: 'This chord is called Asus2. It is Am with the index finger lifted. Switch Am, Asus2, Am four times. Lift only your index finger.',
-                levelUp_es: 'Este acorde se llama Asus2. Es Am con el dedo índice levantado. Cambia Am, Asus2, Am cuatro veces. Levanta solo tu dedo índice.',
+                levelUp: 'This chord is called Asus2. It is Am with the index finger lifted. Switch Am, Asus2, Am four times.',
+                levelUp_es: 'Este acorde se llama Asus2. Es Am con el dedo índice levantado. Cambia Am, Asus2, Am cuatro veces.',
                 skills: [1, 6],
                 chords: [
                   { chord: [[6,'x'],[5,0],[4,2,'2'],[3,2,'3'],[2,0],[1,0]], position: 0 }
@@ -262,7 +262,7 @@ SETS.push(
           prompt_es: 'Un acorde escrito en texto dice "x32010". ¿Qué cuerdas rasgueas?',
           choices: ['All six strings', 'From the A string down to the high e', 'Only the three fretted strings', 'From the low E down to the G string'],
           choices_es: ['Las seis cuerdas', 'De la cuerda La hasta la mi aguda', 'Solo las tres cuerdas trasteadas', 'De la cuerda Mi grave hasta la cuerda Sol'], answer: 1,
-          explain: 'Read the six characters from the low E to the high e. The first "x" mutes the low E. A "0" means that string rings open. So every string from the A string to the high e rings, fretted or open. You see this shorthand again for the small F (xx3211) and Bm (xx4432) in the next two sets.',
+          explain: 'Read the six characters from the low E to the high e. The first "x" mutes the low E. A "0" means that string rings open. So every string from the A string to the high e rings, fretted or open. You will see this shorthand again for the small F (xx3211) and Bm (xx4432) in the next two sets.',
           explain_es: 'Lee los seis caracteres desde la cuerda Mi grave hasta la cuerda mi aguda. La primera "x" silencia la Mi grave. Un "0" significa que esa cuerda suena al aire. Así que todas las cuerdas desde la cuerda La hasta la mi aguda suenan, trasteadas o al aire. Verás esta forma de escribirlo otra vez con el F pequeño (xx3211) y el Bm (xx4432) en las dos unidades siguientes.' } },
       { id: 'm4w1-s2', text: 'Tell a chord diagram from TAB, and say what each one shows',
         text_es: 'Distinguir un diagrama de acorde de un TAB, y decir qué muestra cada uno',
@@ -579,8 +579,8 @@ SETS.push(
             text_es: '<ol><li>Apoya tu mano de trastear sobre las cuerdas para que solo suenen apagadas.</li><li>Rasguea abajo-arriba durante cuatro compases a 60 BPM. Mantén la mano en movimiento todo el tiempo.</li><li>Toca la vuelta C–G–Am–F. Rasguea hacia abajo en 1 2 3 4 y hacia arriba en cada +.</li><li>Cuenta "1 + 2 + 3 + 4 +" en voz alta.</li><li>Acelera a 70 BPM.</li></ol>Lo tienes cuando: tocas 8 compases seguidos a 70 BPM, hacia abajo en cada número y hacia arriba en cada +, sin fallar ningún rasgueo.<span class="step-figure"><img src="img/m6-strum-pendulum.jpg" alt="Foto de una mano de rasgueo sosteniendo una púa sobre la boca de una guitarra acústica, con una flecha curva de dos puntas que marca el arco abajo-arriba del balanceo de péndulo de la muñeca." width="1200" height="654"></span>',
             hint: 'Play the upstroke lighter than the downstroke. Swing from your wrist.',
             hint_es: 'Toca el rasgueo hacia arriba más suave que el de abajo. Mueve la muñeca.',
-            stuck: 'Keep your hand moving down-up the whole time. To leave out a strum, move your hand past the strings without touching them.',
-            stuck_es: 'Mantén tu mano moviéndose abajo-arriba todo el tiempo. Para no tocar un rasgueo, pasa la mano sin tocar las cuerdas.',
+            stuck: 'Keep your hand moving down-up the whole time.',
+            stuck_es: 'Mantén tu mano moviéndose abajo-arriba todo el tiempo.',
             levelUp: 'Leave out two of the eight strums: the up after beat 1 and the down on beat 3. You get D &middot; D U &middot; U D U. Keep your hand moving through both gaps.',
             levelUp_es: 'Deja fuera dos de los ocho rasgueos: el de arriba después del tiempo 1 y el de abajo en el tiempo 3. Te queda D &middot; D U &middot; U D U. Mantén la mano en movimiento en los dos huecos.',
             skills: [5, 6]
@@ -942,7 +942,7 @@ SETS.push(
           choices: ['Play a B chord instead of the G chord', 'B is the bass note under a G shape', 'Barre the B string with your index finger', 'Tune the B string down to a B note'],
           choices_es: ['Toca un acorde B en vez del acorde G', 'B es la nota de bajo debajo de una forma de G', 'Haz cejilla en la cuerda Si con el dedo índice', 'Afina la cuerda Si hacia abajo hasta un B'], answer: 1,
           explain: 'A slash chord names the chord first and the bass note second. Play your normal G shape, but start the strum on the A string, so the B on that string is the lowest note. It is still a G chord, with a different lowest note.',
-          explain_es: 'Un acorde con barra diagonal nombra primero el acorde y después la nota de bajo. Toca tu forma normal de G, pero empieza el rasgueo en la cuerda La, para que el B de esa cuerda sea la nota más grave. Sigue siendo un acorde G, con otra nota más grave.' } }
+          explain_es: 'Un acorde con barra diagonal nombra primero el acorde y después la nota de bajo. Toca tu forma normal de G, pero empieza el rasgueo en la cuerda La, para que el B de esa cuerda sea la nota más grave. Sigue siendo un acorde G, pero con otra nota en el bajo.' } }
     ]
   },
 
@@ -1603,8 +1603,8 @@ SETS.push(
                 hint_es: 'Mantén tu mano de rasgueo moviéndose abajo-arriba todo el tiempo. En los rasgueos que dejas fuera, pasa sin tocar las cuerdas.',
                 stuck: 'Start with four down-strums in each bar for the call. Answer with the same four. Then add one up-strum to the next call.',
                 stuck_es: 'Empieza con cuatro rasgueos hacia abajo en cada compás para la llamada. Responde con los mismos cuatro. Luego agrega un rasgueo hacia arriba a la siguiente llamada.',
-                levelUp: 'Press &#x1F422; Slow again to turn it off. Play the four pairs at full speed. Or take turns with a friend: one plays the call, the other plays the response.',
-                levelUp_es: 'Presiona &#x1F422; Lento otra vez para apagarlo. Toca los cuatro pares a velocidad completa. O túrnate con un amigo: uno toca la llamada y el otro la respuesta.'
+                levelUp: 'Press &#x1F422; Slow again and play the four pairs at full speed. Or take turns with a friend: one plays the call, the other plays the response.',
+                levelUp_es: 'Presiona &#x1F422; Lento otra vez y toca los cuatro pares a velocidad completa. O túrnate con un amigo: uno toca la llamada y el otro la respuesta.'
               }
             ]
           },
@@ -1639,8 +1639,8 @@ SETS.push(
           prompt_es: 'B7 tiene una nota que un acorde B normal no tiene. ¿Qué hace esa nota extra?',
           choices: ['It makes the chord sound sad, like a minor chord', 'It adds tension that wants to move to E', 'It makes the chord louder', 'Nothing — it is just a different fingering'],
           choices_es: ['Hace que el acorde suene triste, como un acorde menor', 'Agrega tensión que quiere moverse hacia E', 'Hace que el acorde suene más fuerte', 'Nada — solo es una digitación distinta'], answer: 1,
-          explain: 'That extra note is the seventh. It makes the chord sound unfinished, so it pulls toward E. That is why this set plays E→B7→E again and again. It does not make the chord minor: B7 still sounds bright. That pull to E is called resolving.',
-          explain_es: 'Esa nota extra es la séptima. Hace que el acorde suene inconcluso, así que tira hacia E. Por eso esta unidad toca E→B7→E una y otra vez. No vuelve menor al acorde: B7 sigue sonando brillante. Ese tirón hacia E se llama resolución.' } },
+          explain: 'That extra note is the seventh. It makes the chord sound unfinished, so it pulls toward E. That is why you play E→B7→E again and again in this set. It does not make the chord minor: B7 still sounds bright. Moving from B7 to E is called resolving.',
+          explain_es: 'Esa nota extra es la séptima. Hace que el acorde suene inconcluso, así que tira hacia E. Por eso en esta unidad tocas E→B7→E una y otra vez. No vuelve menor al acorde: B7 sigue sonando brillante. Pasar de B7 a E se llama resolver.' } },
       { id: 'm4w4-s4', text: 'Play one chord from each of the 3 chord groups',
         text_es: 'Tocar un acorde de cada uno de los 3 grupos de acordes',
         gotItWhen: 'you play one chord from each of Groups 1, 2 and 3 clean, and name each chord\'s group.',

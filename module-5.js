@@ -483,7 +483,7 @@ SETS.push(
           prompt_es: 'Tu dedo índice está en la cuerda Mi grave, traste 8. ¿Qué escala pentatónica menor estás listo para tocar?',
           choices: ['A minor', 'C minor', 'E minor', 'G minor'], choices_es: ['A menor', 'C menor', 'E menor', 'G menor'], answer: 1,
           explain: 'In the minor version of Pattern 1 your 1st finger sits on the root, and the low E string at fret 8 is C — so C minor pentatonic. A minor is not right: it starts at fret 5.',
-          explain_es: 'En la versión menor del Patrón 1 tu dedo índice va sobre la raíz, y la cuerda Mi grave en el traste 8 es C — así que pentatónica de C menor. A menor no es: esa empieza en el traste 5.' } },
+          explain_es: 'En la versión menor del Patrón 1 tu dedo índice va sobre la raíz, y la cuerda Mi grave en el traste 8 es C — así que pentatónica de C menor. No es A menor: esa empieza en el traste 5.' } },
       { id: 'm5w1-s4', text: 'Position Pattern 1 as a major pentatonic scale in any key',
         text_es: 'Posicionar el Patrón 1 como escala pentatónica mayor en cualquier tonalidad',
         gotItWhen: 'you can pick any major key (C, G, D…), find its root on the low E, put the correct finger on it, and play the pattern from there.',
