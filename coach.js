@@ -1343,7 +1343,7 @@ function coachDetectPitch(buf, sampleRate, clarity, end){
   d[0] = 1;
   const tauMin = Math.max(2, Math.floor(sampleRate / 1400));
   let runSum = 0, filled = 0;  // d[1..filled] hold this window's values
-  for (let q = 0, nq = tiers ? tiers.length : 1; q < nq; q++){
+  for (let q = 0, nq = tiers ? tiers.length || 1 : 1; q < nq; q++){   // [] reads once at the default gate, as before
     const gate = (tiers ? tiers[q] : clarity) || 0.22;   // YIN accept threshold; higher = more permissive (chords)
     let cur = -1;    // cur: bottom-so-far of the first dip under gate
     for (let tau = 1; tau <= maxTau; tau++){
