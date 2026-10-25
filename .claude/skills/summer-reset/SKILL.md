@@ -75,15 +75,6 @@ the site's convention is "high e". Module 1's "which comes right after G?"
 mixes note letters and "mi aguda" in its `choices_es`. Both are graded
 choices in frozen modules (1ap), so they wait for the reset.
 
-**Found by the 2026-10-06 audit, all in frozen modules.** Module 3 `m3w2-s4`
-practice MC prompt says "SAME fret", which gives away the one choice that
-repeats a fret number. Module 3 Module Review assess item says "Sweet Child's
-D5-C5-G5 … switches between E- and A-string roots on the same fret" — only
-C5→G5 does (D5 is A-string fret 5). (The Module 2 "4-bar melody" heading
-and skill, also on this list until 2026-10-16, are fixed: they say "short
-melody" now, after `rule-zero-proof.mjs` stopped failing ordinary section
-retitles in frozen modules.)
-
 **Module 3 Set 2's Challenge numbers** (2026-10-16 clean-up). The labels
 run "Challenge 1", then six unnumbered "Challenge —" cards, then
 "Challenge 2 / 3 / 4", then two more unnumbered ones. Step labels are
