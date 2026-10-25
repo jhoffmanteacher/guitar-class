@@ -5254,6 +5254,25 @@ function lessonParts(w, flat){
   };
 }
 
+/* A step's YouTube <a> becomes a ▶ button that opens the in-app viewer.
+   The label goes into a JS string inside a double-quoted onclick, so it
+   needs both layers escaped: \ and ' for the JS string, " for the
+   attribute. Only ' used to be, and a label like "Let It Be" by The Beatles
+   ended the attribute at its first quote, so the button threw on click
+   (15 links, 2026-10-25). Nothing else is escaped on purpose: the attribute
+   parser still decodes the label's own entities (&amp; → &) before the JS
+   runs, exactly as before. checks.mjs 1br parses every handler. */
+const jsArgInAttr = s => String(s).replace(/\\/g,'\\\\').replace(/'/g,"\\'").replace(/"/g,'&quot;');
+function ytLinksToButtons(html){
+  return html.replace(/<a href="(https?:\/\/(?:www\.)?(?:youtube\.com|youtu\.be)[^"]*)"([^>]*)>([^<]*)<\/a>/g,(match,url,attrs,label)=>{
+    // data-ext links can't be embedded (official recordings block it) — open on YouTube in a new tab.
+    if(/data-ext/.test(attrs)){
+      return `<button class="rp-trigger" onclick="window.open('${jsArgInAttr(url)}','_blank','noopener')" title="${escAttr(t('panel.opensOnYouTube'))}">&#x25B6; ${label} <span style="font-size:0.6875rem;opacity:0.6">&#x2197;</span></button>`;
+    }
+    return `<button class="rp-trigger" onclick="loadPanel('youtube','${jsArgInAttr(url)}','${jsArgInAttr(label)}','YouTube')">&#x25B6; ${label}</button>`;
+  });
+}
+
 /* ── The lesson ladder ──
    The classroom no longer runs a three-group B/C rotation — one group is with
    the teacher, one is on the site — so a set's job here is a single, linear
@@ -5295,14 +5314,7 @@ function buildLesson(w){
    const openPos = curPos >= 0 ? curPos : (openIfNoCur ? 0 : -1);
    return pairs.map((p,pos)=>{
     const s = p.st, i = p.idx;
-    const text=((isEarSparkStep(s) ? ICO_BOLT + ' ' : isSpicyLevelUpStep(s) ? ICO_CHILI + ' ' : '') + tf(s,'text')).replace(/<a href="(https?:\/\/(?:www\.)?(?:youtube\.com|youtu\.be)[^"]*)"([^>]*)>([^<]*)<\/a>/g,(match,url,attrs,label)=>{
-      const safe=label.replace(/'/g,"\\'");
-      // data-ext links can't be embedded (official recordings block it) — open on YouTube in a new tab.
-      if(/data-ext/.test(attrs)){
-        return `<button class="rp-trigger" onclick="window.open('${url}','_blank','noopener')" title="${escAttr(t('panel.opensOnYouTube'))}">&#x25B6; ${label} <span style="font-size:0.6875rem;opacity:0.6">&#x2197;</span></button>`;
-      }
-      return `<button class="rp-trigger" onclick="loadPanel('youtube','${url}','${safe}','YouTube')">&#x25B6; ${label}</button>`;
-    });
+    const text=ytLinksToButtons((isEarSparkStep(s) ? ICO_BOLT + ' ' : isSpicyLevelUpStep(s) ? ICO_CHILI + ' ' : '') + tf(s,'text'));
     const text2 = wrapGotItWhen(text, {
       key: `lesson:${w.id}-${ns}-${i}`, isDone: completed[`${w.id}-${ns}-${i}`] === true,
       closestSel: '.step', btnSel: '.step-done-btn', id: `${w.id}-${ns}-${i}`,
