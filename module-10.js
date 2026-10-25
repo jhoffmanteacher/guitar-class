@@ -354,11 +354,18 @@ SETS.push(
             steps: [
               {
                 label: 'Ear training: relative vs. parallel', label_es: 'Oído: relativa vs. paralela',
-                text: '<ol><li>Play a C major chord, then an A minor chord, then a C minor chord (Cm = your full Bm barre shape from Module 7, slid up one fret to fret 3).</li><li>The keys of C major and A minor use the same seven notes — that\'s why the chords sound so closely related; C major and C minor share the same root, C, but three of their seven notes are different (parallel).</li><li>Notice how different Am and Cm sound from each other, even though both are "C\'s minor."</li></ol>',
-                text_es: '<ol><li>Toca un acorde de C mayor, luego un acorde de A menor, y luego un acorde de C menor (Cm = tu forma completa de cejilla de Bm del Módulo 7, deslizada un traste hacia arriba, al traste 3).</li><li>Las tonalidades de C mayor y A menor usan las mismas siete notas — por eso los acordes suenan tan emparentados; C mayor y C menor comparten la misma raíz, C, pero tres de sus siete notas son distintas (paralela).</li><li>Fíjate qué tan diferentes suenan Am y Cm entre sí, aunque ambos sean "el menor de C."</li></ol>',
+                text: '<ol><li>Play a C major chord, then an A minor chord, then a C minor chord (Cm: your index finger bars fret 3 from the A string down, and your other three fingers make the Am shape on frets 4 and 5 — see the chart below).</li><li>The keys of C major and A minor use the same seven notes — that\'s why the chords sound so closely related; C major and C minor share the same root, C, but three of their seven notes are different (parallel).</li><li>Notice how different Am and Cm sound from each other, even though both are "C\'s minor."</li></ol>',
+                text_es: '<ol><li>Toca un acorde de C mayor, luego un acorde de A menor, y luego un acorde de C menor (Cm: tu índice hace cejilla en el traste 3 desde la cuerda La hacia abajo, y tus otros tres dedos hacen la forma de Am en los trastes 4 y 5 — mira el diagrama de abajo).</li><li>Las tonalidades de C mayor y A menor usan las mismas siete notas — por eso los acordes suenan tan emparentados; C mayor y C menor comparten la misma raíz, C, pero tres de sus siete notas son distintas (paralela).</li><li>Fíjate qué tan diferentes suenan Am y Cm entre sí, aunque ambos sean "el menor de C."</li></ol>',
                 hint: 'These two ideas get mixed up constantly — the exercise is hearing that "C\'s relative minor" and "C\'s parallel minor" are two completely different chords.',
                 hint_es: 'Estas dos ideas se confunden constantemente — el ejercicio es escuchar que "la relativa menor de C" y "la paralela menor de C" son dos acordes completamente distintos.',
                 skills: [2],
+                /* The A-shape barre in its minor form. Module 7's rendered steps
+                   teach only the MAJOR A-shape (B, C, D, E); its one full minor
+                   barre, Bm, sits in a switched-off take-to-song section, so the
+                   shape is drawn here rather than pointed at. C G C Eb G. */
+                chords: [
+                  { name: 'Cm (A-shape)', name_es: 'Cm (forma de A)', chord: [[6,'x'],[5,3,'1'],[4,5,'3'],[3,5,'4'],[2,4,'2'],[1,3,'1']], position: 3 }
+                ],
                 response: { type: 'mc', prompt: 'Relative minor vs parallel minor — the difference is:',
                   prompt_es: 'La relativa menor frente a la paralela menor — la diferencia es:',
                   answer: 0,
