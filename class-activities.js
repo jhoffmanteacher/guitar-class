@@ -813,7 +813,7 @@ window.CLASS_ACTIVITIES = [
         label:    'Thin strings',
         label_es: 'Cuerdas delgadas',
         text: 'Move to the three thin strings — G, B, and high e.<ul><li>Press just behind the fret, not on top of it</li><li>Thin strings buzz more easily than thick ones</li></ul>You\'ve got it when: all three strings, no stopping, any speed.',
-        text_es: 'Muévete a las tres cuerdas delgadas — la cuerda Sol, la cuerda Si y la cuerda Mi aguda.<ul><li>Presiona justo detrás del traste, no encima</li><li>Las cuerdas delgadas zumban más fácil que las gruesas</li></ul>Lo tienes cuando: las tres cuerdas, sin detenerte, a cualquier velocidad.',
+        text_es: 'Muévete a las tres cuerdas delgadas — la cuerda Sol, la cuerda Si y la cuerda mi aguda.<ul><li>Presiona justo detrás del traste, no encima</li><li>Las cuerdas delgadas zumban más fácil que las gruesas</li></ul>Lo tienes cuando: las tres cuerdas, sin detenerte, a cualquier velocidad.',
         tab: {
           caption: 'G · B · high e — thin strings buzz easier',
           caption_es: 'Sol · Si · Mi aguda — las delgadas zumban más fácil',
@@ -837,7 +837,7 @@ window.CLASS_ACTIVITIES = [
         label:    'The circuit',
         label_es: 'El circuito',
         text: 'The circuit:<ol><li>Climb up and back down on all six strings — low E to high e and home again. That\'s one set.</li><li>Start the Metro tool at 50 BPM. Every clean set, raise it by 10 BPM.</li></ol>You\'ve got it when: two full sets in a row are clean, the second one 10 BPM faster than the first.',
-        text_es: 'El circuito:<ol><li>Sube y baja en las seis cuerdas — de la Mi grave a la Mi aguda y de regreso. Esa es una serie.</li><li>Arranca la herramienta Metro a 50 BPM. Cada serie limpia, súbela 10 BPM.</li></ol>Lo tienes cuando: dos series completas seguidas y limpias, la segunda 10 BPM más rápida que la primera.',
+        text_es: 'El circuito:<ol><li>Sube y baja en las seis cuerdas — de la Mi grave a la mi aguda y de regreso. Esa es una serie.</li><li>Arranca la herramienta Metro a 50 BPM. Cada serie limpia, súbela 10 BPM.</li></ol>Lo tienes cuando: dos series completas seguidas y limpias, la segunda 10 BPM más rápida que la primera.',
       },
     ],
   },
