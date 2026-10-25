@@ -8733,7 +8733,8 @@ function nrFinish(complete){
   if (rec && complete){
     const lv = nrLv(s) || {};
     micRecSave(rec, {
-      fields: { game: 'nr', level: s.level,   // a Finger Gym round never records (nrStart) bpm: lv.bpm || null, chords: !!s.chordMode,
+      // A Finger Gym round never records (nrStart), so this is always Note Runner.
+      fields: { game: 'nr', level: s.level, bpm: lv.bpm || null, chords: !!s.chordMode,
                 beatMs: Math.round(s.beatMs * 100) / 100, goodMs: s.goodMs, perfectMs: s.perfectMs,
                 score: s.score, eventTimes: 'played (arrival - micLatencyMs)' },
       expected: s.playable.map(n => ({ t: n.t, midi: n.midi, string: n.string, fret: n.fret,
