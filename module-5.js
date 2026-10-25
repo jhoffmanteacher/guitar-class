@@ -960,7 +960,7 @@ SETS.push(
             hint: 'On the A string, the ♭5 sits between the 4 (fret 5) and the 5 (fret 7). It is a passing note: you play it on the way to the next note, not as the note you stop on.',
             hint_es: 'En la cuerda La, la ♭5 queda entre el 4 (traste 5) y el 5 (traste 7). Es una nota de paso: la tocas de camino a la siguiente nota, no como la nota en la que te detienes.',
             skills: [4],
-            playSeq: { label: 'Hear the A blues scale (listen for the blue note)', label_es: 'Escucha la escala de blues de A (escucha la nota de blues)', bpm: 70, notes: [45, 48, 50, 51, 52, 55, 57] },
+            playSeq: { label: 'Hear the A blues scale', label_es: 'Escucha la escala de blues de A', bpm: 70, notes: [45, 48, 50, 51, 52, 55, 57] },
             response: { type: 'mc', prompt: 'Now play E minor pentatonic at the open strings. On the A string, which fret is the blue note (♭5)?',
               prompt_es: 'Ahora toca E menor pentatónica en las cuerdas al aire. En la cuerda La, ¿qué traste es la nota de blues (♭5)?',
               answer: 0,
