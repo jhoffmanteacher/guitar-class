@@ -318,8 +318,8 @@ SETS.push(
                 response: { type: 'mc', prompt: 'You know A is at fret 5 on the low E string. Using the octave shape — two strings down, two frets up — where\'s the next A?',
                   prompt_es: 'Sabes que A está en el traste 5 de la cuerda Mi grave. Usando la forma de octava — dos cuerdas hacia abajo, dos trastes hacia arriba — ¿dónde está la siguiente A?',
                   answer: 0,
-                  explain: 'From the low E or A string, the octave lives two strings toward the floor and two frets toward the body.',
-                  explain_es: 'Desde la cuerda Mi grave o La, la octava vive dos cuerdas hacia el piso y dos trastes hacia el cuerpo de la guitarra.',
+                  explain: 'From the low E or A string, the octave is two strings toward the floor and two frets toward the body.',
+                  explain_es: 'Desde la cuerda Mi grave o La, la octava está dos cuerdas hacia el piso y dos trastes hacia el cuerpo de la guitarra.',
                   choices: ['D string, fret 7', 'G string, fret 5', 'D string, fret 5', 'A string, fret 7'],
                   choices_es: ['Cuerda Re, traste 7', 'Cuerda Sol, traste 5', 'Cuerda Re, traste 5', 'Cuerda La, traste 7'] }
               }
@@ -1113,8 +1113,8 @@ SETS.push(
     skills: [
       { id: 'm9w3-s1', text: 'Read and play a TAB phrase written above fret 5',
         text_es: 'Leer y tocar una frase de TAB escrita arriba del traste 5',
-        gotItWhen: 'you can read an 8-note line at first sight living entirely at fret 5 and above, in tune, using only the TAB.',
-        gotItWhen_es: 'puedes leer a primera vista una línea de 8 notas que vive completamente en el traste 5 y más arriba, afinada, usando solo el TAB.',
+        gotItWhen: 'you can read an 8-note line at first sight that stays at fret 5 and above, in tune, using only the TAB.',
+        gotItWhen_es: 'puedes leer a primera vista una línea de 8 notas que se queda en el traste 5 y más arriba, afinada, usando solo el TAB.',
         practice: { type: 'mc', prompt: 'A high-position TAB shows "10" on the B-string line. What is it?',
           prompt_es: 'Un TAB en posición alta muestra "10" en la línea de la cuerda Si. ¿Qué es?',
           choices: ['One note — B string, fret 10', 'Two notes — fret 1, then fret 0', 'Finger 1, then an open string', 'Two strings played at the same time'],
