@@ -259,7 +259,6 @@
     // 2026-09-12 (Today-first work order, Phase 2, nav collapse).
     'nav.keepPracticing': { en: 'Keep practicing', es: 'Sigue practicando' },
     'nav.myProgress':     { en: 'My progress', es: 'Mi progreso' },
-    'btn.back':           { en: 'Back', es: 'Volver' },
     // Renamed to "Today" 2026-09-11 (Today-first work order, Phase 1), then
     // back to "In-Class Activities" 2026-09-17 (Jonathan's call) — the key
     // stays the same both times, so the hash/deep-link/console-link wiring
@@ -785,7 +784,6 @@
     // ── Song rows (the Songs hub, and the video overlay it opens) ──
     'songs.original':        { en: 'Original', es: 'Original' },
     'songs.tutorial':        { en: 'Tutorial', es: 'Tutorial' },
-    'songs.backingTrack':    { en: 'Backing track', es: 'Pista de acompañamiento' },
     'songs.backingTrackHint':{ en: 'Backing track — it repeats on its own; press play and solo over it',
                                 es: 'Pista de acompañamiento — se repite sola; presiona play e improvisa (solo) encima' },
     'songs.songJourney':     { en: 'Song Journey', es: 'Recorrido de la canción' },
