@@ -2577,7 +2577,7 @@ function gamesClosePanel(){
   // otherwise this silently kills an unrelated in-progress Coach check.
   const screen = document.getElementById('games-screen');
   if (!screen || screen.hasAttribute('hidden')) return;
-  gamesStopMic();
+  gamesStopMic(true);
   screen.setAttribute('hidden', '');
   const p = document.getElementById('games-panel');
   if (p) p.innerHTML = '';
@@ -2592,8 +2592,10 @@ function gamesClosePanel(){
    clock must die too). Called by app.js when the tuner opens, and by
    coachStartCheck when a Coach check starts. A stopped game view is a
    dead UI (it says "listening" but the mic is gone), so the panel falls
-   back to the hub. */
-function gamesStopMic(){
+   back to the hub. `keepPanel`: the caller (gamesShow, gamesClosePanel)
+   replaces the panel itself right after, so the hub isn't drawn only to be
+   thrown away. */
+function gamesStopMic(keepPanel){
   /* Note Call (a class-activity drill, app.js) isn't a game, but it shares
      the mic and the same "someone else needs it / tab went to the
      background" exits, so it stops here too. */
@@ -2627,7 +2629,7 @@ function gamesStopMic(){
   if (window.coachMicLive) coachMicOff();
   const screen = document.getElementById('games-screen');
   const p = document.getElementById('games-panel');
-  if (screen && !screen.hasAttribute('hidden') && p &&
+  if (!keepPanel && screen && !screen.hasAttribute('hidden') && p &&
       (document.getElementById('fret-body') || document.getElementById('cc-body') ||
        document.getElementById('cb-body') || document.getElementById('sh-body') ||
        document.getElementById('rr-body') || document.getElementById('sr-body') ||
@@ -2910,7 +2912,7 @@ function gamesRenderHub(p){
 }
 
 function gamesShow(view){
-  gamesStopMic();
+  gamesStopMic(true);
   const p = document.getElementById('games-panel');
   if (!p) return;
   if (view === 'hub'){
