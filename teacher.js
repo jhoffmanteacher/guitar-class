@@ -3870,6 +3870,24 @@ function prEntries(raw){
   return [];
 }
 function prNum(v){ const m=String(v).match(/\d{2,3}/); return m?m[0]:null; }
+/* One written response, for the Responses view and a student's own page —
+   a PR (BPM) slot with its last three values, or a text answer; '' when
+   the student wrote nothing there. One copy, so the two screens can't drift. */
+function teacherResponseItemHtml(stu, sl){
+  if(sl.isPR){
+    const entries=prEntries(stu.responses&&stu.responses[sl.key]);
+    if(!entries.length) return '';
+    const latest=String(entries[entries.length-1].value||'').trim();
+    if(!latest) return '';
+    const n=prNum(latest);
+    const trendHtml = entries.length>1
+      ? `<span class="tr-lbl" style="opacity:.7">${entries.slice(-3).map(e=>escHtml(prNum(e.value)||e.value)).join(' &#x2192; ')}</span>` : '';
+    return `<div class="tr-item"><span class="tr-pr"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="8"/><circle cx="12" cy="12" r="4"/><circle cx="12" cy="12" r="0.8" fill="currentColor" stroke="none"/></svg> ${escHtml(sl.label)}</span><span class="tr-prval">${n?escHtml(n)+' BPM':escHtml(latest)}</span>${trendHtml}</div>`;
+  }
+  const rv=stu.responses&&stu.responses[sl.key]; const val=String(rv==null?'':rv).trim();
+  if(!val) return '';
+  return `<div class="tr-item"><span class="tr-lbl"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M17 3a2.85 2.85 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5z"/></svg> ${escHtml(sl.label)}</span><span class="tr-txt">${escHtml(val)}</span></div>`;
+}
 
 /* Enumerate every short free-text response slot in a set, in display order,
    rebuilding the exact keys the student app saves under
@@ -3938,21 +3956,7 @@ function renderTeacherResponses(){
   const sorted=[...allStudents].sort((a,b)=>(a.name||a.email||a.uid).localeCompare(b.name||b.email||b.uid));
   let withAny=0;
   const cards=sorted.map(stu=>{
-    const items=slots.map(sl=>{
-      if(sl.isPR){
-        const entries=prEntries(stu.responses&&stu.responses[sl.key]);
-        if(!entries.length) return '';
-        const latest=String(entries[entries.length-1].value||'').trim();
-        if(!latest) return '';
-        const n=prNum(latest);
-        const trendHtml = entries.length>1
-          ? `<span class="tr-lbl" style="opacity:.7">${entries.slice(-3).map(e=>escHtml(prNum(e.value)||e.value)).join(' &#x2192; ')}</span>` : '';
-        return `<div class="tr-item"><span class="tr-pr"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="8"/><circle cx="12" cy="12" r="4"/><circle cx="12" cy="12" r="0.8" fill="currentColor" stroke="none"/></svg> ${escHtml(sl.label)}</span><span class="tr-prval">${n?escHtml(n)+' BPM':escHtml(latest)}</span>${trendHtml}</div>`;
-      }
-      const rv=stu.responses&&stu.responses[sl.key]; const val=String(rv==null?'':rv).trim();
-      if(!val) return '';
-      return `<div class="tr-item"><span class="tr-lbl"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M17 3a2.85 2.85 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5z"/></svg> ${escHtml(sl.label)}</span><span class="tr-txt">${escHtml(val)}</span></div>`;
-    }).filter(Boolean).join('');
+    const items=slots.map(sl=>teacherResponseItemHtml(stu, sl)).filter(Boolean).join('');
     if(!items) return '';
     withAny++;
     const name=stu.name||stu.email||stu.uid.slice(0,8)+'…';
@@ -5062,21 +5066,7 @@ function renderTeacherStudentDetail(uid){
       if(w.moduleNum!==m.num) return;
       const slots=setShortResponses(w);
       if(!slots.length) return;
-      const items=slots.map(sl=>{
-        if(sl.isPR){
-          const entries=prEntries(stu.responses&&stu.responses[sl.key]);
-          if(!entries.length) return '';
-          const latest=String(entries[entries.length-1].value||'').trim();
-          if(!latest) return '';
-          const n=prNum(latest);
-          const trendHtml=entries.length>1
-            ? `<span class="tr-lbl" style="opacity:.7">${entries.slice(-3).map(e=>escHtml(prNum(e.value)||e.value)).join(' &#x2192; ')}</span>` : '';
-          return `<div class="tr-item"><span class="tr-pr"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="8"/><circle cx="12" cy="12" r="4"/><circle cx="12" cy="12" r="0.8" fill="currentColor" stroke="none"/></svg> ${escHtml(sl.label)}</span><span class="tr-prval">${n?escHtml(n)+' BPM':escHtml(latest)}</span>${trendHtml}</div>`;
-        }
-        const rv=stu.responses&&stu.responses[sl.key]; const val=String(rv==null?'':rv).trim();
-        if(!val) return '';
-        return `<div class="tr-item"><span class="tr-lbl"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M17 3a2.85 2.85 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5z"/></svg> ${escHtml(sl.label)}</span><span class="tr-txt">${escHtml(val)}</span></div>`;
-      }).filter(Boolean).join('');
+      const items=slots.map(sl=>teacherResponseItemHtml(stu, sl)).filter(Boolean).join('');
       if(!items) return;
       anyResponse=true;
       moduleBlock+=`<div class="tr-card"><div class="tr-name">${escHtml(w.label)}</div>${items}</div>`;
