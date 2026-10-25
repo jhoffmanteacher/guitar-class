@@ -40,8 +40,9 @@
    counts toward CA_TODAY_MAX, never blocks and writes no completion data
    (caPinReachable / caIsPinOnly / caPinRowHtml in app.js). It must still be
    assigned on the board, not Hidden, not archived/deleted, and not an exit
-   check; a pinned card that is one of today's cards leaves the row that
-   day. Delete unpins; Archive keeps the pin but hides it.
+   check. A pinned card that is also one of today's cards stays in the row
+   that day (Jonathan, 2026-10-13 — see caPinRowHtml). Delete unpins;
+   Archive keeps the pin but hides it.
 
    JOURNEY — `journey: '<slug>'` (optional; one of the six SONG_JOURNEYS ids
    in app.js: seven-nation-army, all-along-the-watchtower, sweet-child-o-mine,
@@ -4780,13 +4781,15 @@ window.CLASS_ACTIVITIES = [
   },
   /* Las Mañanitas — Ariel Camacho y Los Plebes del Rancho's recording
      (Jonathan, 2026-10-13). Built to be given to INDIVIDUAL students from
-     the console board's "Who" picker, not the whole class. No backing track
-     on the site (a commercial recording), so it is a Focus-view ladder, the
+     the console board's "Who" picker, not the whole class; since 2026-10-20
+     it is a library song, on the Songs page for everyone (see `library`
+     below). It is a Focus-view ladder, the
      chord-change ladder: A, E7, D, the changes in 3/4, then the whole song
      with its words. Rebuilt 2026-10-14 from Jonathan's chord sheet for the
      Los Plebes del Rancho version (a PDF he uploaded): the song
-     uses D as well as A and E7, and verse 2 turns to Am, so the old
-     A-and-E7-only ladder couldn't reach the song. Lyrics and chord
+     uses D as well as A and E7, so the old A-and-E7-only ladder couldn't
+     reach the song. (The sheet writes Am in verse 2; the record plays A
+     there, and so does this card — see ca-35.) Lyrics and chord
      placement come from that sheet ("fila" -> "pila", "solesito" ->
      "solecito", "Le venimos" -> "te venimos", accents added). The sheet's
      second strum pattern (down-up for the first lines of each verse) is
@@ -4795,8 +4798,13 @@ window.CLASS_ACTIVITIES = [
      from the same sheet are the last two steps (Jonathan, 2026-10-14: "and
      the lead guitar parts?"); the 0h2 hammer-on is written as two picked
      notes, and the outro is the sheet's easier version. Same id, so
-     nobody's completion moves; step ticks are day-scoped, so the new step
-     count moves nothing either. No video and no backing track yet. */
+     nobody's completion moves. Step ticks are NOT day-scoped: since
+     2026-10-01 they are saved to progress/{uid}.caSteps, keyed
+     `ca-34:<step index>`, so inserting, removing or reordering a step moves
+     every saved tick after it (the 2026-10-14 insert was harmless only
+     because the card was a few hours old) — add a new step at the end.
+     The last two steps play the record (the 'las-mananitas' snippet track,
+     2026-10-14). No video. */
   {
     id:    'ca-34',
     view:  'focus',   // one step at a time — see VIEW above
@@ -5182,10 +5190,12 @@ window.CLASS_ACTIVITIES = [
     intro_power:    'You learned A5, E5, D5 and the strum in 3 — today you play Las Mañanitas with the band, from the first verse to the last chorus.',
     intro_power_es: 'Aprendiste A5, E5, D5 y el rasgueo en 3 — hoy tocas Las Mañanitas con la banda, de la primera estrofa al último coro.',
     card: {
-      /* Not `wholeSong`: that flag also files the card under a Song Journey
-         page and a Songs row (1bf requires `journey`), and Las Mañanitas has
-         neither. So it loops — after the last chorus it goes back to the
-         section the student started from. */
+      /* Not `wholeSong`: a whole-song card is how links to a Core song find
+         its play-along, so checks.mjs 1bn wants a `journey` on one (only a
+         lyric-sheet or teacher-only card is excused), and 1bq keeps
+         `wholeSong` off a library song. Las Mañanitas is a library song
+         with no Song Journey page. So it loops — after the last chorus it
+         goes back to the section the student started from. */
       track: 'las-mananitas',
       slowest: true,    // Slowest / Slower / Slow / Normal
       caption:    'The song in order · every bar: 1 bass note, then 2 strums · A: A string / low E · E7: low E / A string fret 2 · D: D string / A string · change chords when the highlight moves',
