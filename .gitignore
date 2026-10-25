@@ -17,3 +17,6 @@ song-journey-build/
 
 # Work orders, mockups and other session scratch output — never committed
 Claude outputs/
+
+# Loudness measurements cached by tools/checks.mjs (1br) — per machine, never committed
+tools/.loudness-cache.json

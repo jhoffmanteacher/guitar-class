@@ -33,12 +33,12 @@
    Exit code is non-zero if anything fails, so a push can be aborted.
    ════════════════════════════════════════════════════════════════════ */
 
-import { readFileSync, writeFileSync, readdirSync, mkdtempSync, rmSync, existsSync } from 'node:fs';
-import { spawnSync } from 'node:child_process';
+import { readFileSync, writeFileSync, readdirSync, mkdtempSync, rmSync, existsSync, statSync } from 'node:fs';
+import { spawnSync, spawn } from 'node:child_process';
 import { createHash } from 'node:crypto';
 import { fileURLToPath } from 'node:url';
 import { dirname, join } from 'node:path';
-import { tmpdir } from 'node:os';
+import { tmpdir, cpus } from 'node:os';
 import vm from 'node:vm';
 
 const ROOT = join(dirname(fileURLToPath(import.meta.url)), '..');
@@ -8039,6 +8039,103 @@ function checkGuitarNotes() {
   if (bad === 0) ok(`${n} recorded guitar notes (pinned), midi ${lo}–${hi} with no gaps, every file present and named for its pitch; playNote() is the only way to a synth buffer`);
 }
 
+/* ════════════════════════════════════════════════════════════════════
+   1br. Every song plays at "the cure"'s loudness  (SOFT — warns only)
+
+   Jonathan's standing rule (2026-10-25): every backing track plays at the
+   same loudness as "the cure", so nobody in the room reaches for the volume
+   between songs. tools/loudness.py does the levelling — one gain per song,
+   worked out from its record-tempo full mix — and a new song goes through
+   it before it ships (audio-and-snippets skill, "Backing tracks"). This
+   catches a song that skipped that step: more than 1 LU from "the cure" on
+   that same file is a warning, never a failure.
+
+   Which file stands for each song lives in ONE place: this shells out to
+   `tools/loudness.py --list-reference-files` rather than keeping a second
+   copy of the rule. The measurement is the same one loudness.py makes
+   (ffmpeg ebur128, integrated). No ffmpeg on PATH, or no Python, and the
+   check says so in one line and moves on — usually the Windows machine.
+
+   SPEED: the hooks run this on every commit, and a cold measurement of
+   eleven tracks is ~30 s of decoding. So each result is cached in
+   tools/.loudness-cache.json (gitignored), keyed by path, size and mtime: a
+   warm run measures nothing and costs the Python call (~0.2 s), and a
+   changed file is the only one re-measured. A cache that cannot be read or
+   written just means measuring.
+   ════════════════════════════════════════════════════════════════════ */
+const LOUDNESS_TOLERANCE_LU = 1;
+const LOUDNESS_CACHE = join(ROOT, 'tools', '.loudness-cache.json');
+function measureLufs(file) {
+  return new Promise(resolve => {
+    const p = spawn('ffmpeg', ['-hide_banner', '-nostats', '-v', 'error', '-i', file, '-af',
+      'ebur128=metadata=1,ametadata=mode=print:key=lavfi.r128.I:file=-', '-f', 'null', '-']);
+    let tail = '';   // ebur128 prints the running value every 100 ms; the last one is the integrated loudness
+    p.stdout.on('data', d => { tail = (tail + d).slice(-200); });
+    p.on('error', () => resolve(null));
+    p.on('close', code => {
+      const m = /lavfi\.r128\.I=(-?[\d.]+)\s*$/.exec(tail);
+      resolve(code === 0 && m ? Number(m[1]) : null);
+    });
+  });
+}
+async function checkBackingLoudness() {
+  head('1br. Every song plays at "the cure"\'s loudness (soft)');
+  const runs = (cmd, a) => { const r = spawnSync(cmd, a, { encoding: 'utf8', timeout: 30000 }); return !r.error && r.status === 0 ? r : null; };
+  if (!runs('ffmpeg', ['-hide_banner', '-version'])) {
+    warn('1br skipped: ffmpeg is not on PATH, so backing-track loudness was not measured');
+    return;
+  }
+  let list = null;
+  for (const [cmd, ...pre] of [['python3'], ['python'], ['py', '-3']]) {
+    const r = runs(cmd, [...pre, join(ROOT, 'tools', 'loudness.py'), '--list-reference-files']);
+    if (r) { try { list = JSON.parse(r.stdout); break; } catch { /* try the next name */ } }
+  }
+  if (!list) {
+    warn('1br skipped: no Python on PATH to run tools/loudness.py (it picks each song\'s file), so backing-track loudness was not measured');
+    return;
+  }
+  if (!list.reference) {
+    warn('1br: tools/loudness.py found no "the cure" record-tempo full mix in audio/ — nothing to measure against'); warnings++;
+    return;
+  }
+  let cache = {};
+  try { cache = JSON.parse(readFileSync(LOUDNESS_CACHE, 'utf8')); } catch { /* none yet, or unreadable: measure */ }
+  const files = [list.reference, ...Object.values(list.songs)];
+  const keyOf = f => { try { const s = statSync(join(ROOT, f)); return `${s.size}:${s.mtimeMs}`; } catch { return null; } };
+  const lufs = {}, todo = [];
+  for (const f of files) {
+    const k = keyOf(f);
+    if (k && cache[f] && cache[f].key === k && Number.isFinite(cache[f].lufs)) lufs[f] = cache[f].lufs;
+    else todo.push(f);
+  }
+  const workers = Math.max(1, Math.min(todo.length, cpus().length || 1));
+  let next = 0, changed = false;
+  await Promise.all(Array.from({ length: workers }, async () => {
+    while (next < todo.length) {
+      const f = todo[next++];
+      const v = await measureLufs(join(ROOT, f));
+      if (v === null) continue;
+      lufs[f] = v;
+      cache[f] = { key: keyOf(f), lufs: v };
+      changed = true;
+    }
+  }));
+  if (changed) { try { writeFileSync(LOUDNESS_CACHE, JSON.stringify(cache, null, 1) + '\n'); } catch { /* read-only: measure next time */ } }
+  const ref = lufs[list.reference];
+  if (ref === undefined) { warn(`1br: could not measure ${list.reference} — nothing to measure against`); warnings++; return; }
+  let off = 0;
+  for (const [slug, f] of Object.entries(list.songs)) {
+    if (lufs[f] === undefined) { warn(`1br: could not measure ${f}`); warnings++; off++; continue; }
+    const d = lufs[f] - ref;
+    if (Math.abs(d) > LOUDNESS_TOLERANCE_LU) {
+      warn(`1br: ${slug} plays ${Math.abs(d).toFixed(1)} LU ${d > 0 ? 'louder' : 'quieter'} than "the cure" (${f}: ${lufs[f].toFixed(1)} against ${ref.toFixed(1)} LUFS) — level it with: python3 tools/loudness.py ${slug}`);
+      warnings++; off++;
+    }
+  }
+  const n = Object.keys(list.songs).length;
+  if (off === 0) ok(`${n} songs within ±${LOUDNESS_TOLERANCE_LU} LU of "the cure" (${ref.toFixed(1)} LUFS), each on its record-tempo full mix (${todo.length} measured, ${files.length - todo.length} from the cache)`);
+}
+
 (async function main() {
   if (LIVE_ONLY) {
     console.log(`${C.bold}Guitar Class — post-push live check${C.reset}`);
@@ -8115,6 +8212,7 @@ function checkGuitarNotes() {
   checkPeekSavesNothing();
   checkLoadFailedMaps();
   checkSiteMadeClick();
+  await checkBackingLoudness();
   if (!SKIP_LINKS) await checkLinks();
   else warn('skipping link check (--skip-links)');
   bumpServiceWorker();
