@@ -7313,8 +7313,10 @@ function fgEnd(sid){
     `<button type="button" class="fg-start-btn" onclick="fgStart('${sid}')" data-i18n="fret.playAgain">${t('fret.playAgain')}</button>`;
   wrap.querySelector('.fg-fb').innerHTML = '';
   logPracticeRep(sid, { best: st.score });
+  // A peeked (locked) set saves nothing (logPracticeRep), so a skill never
+  // practised has no entry here: keep the line the panel was built with.
   const e = practiceLog[sid];
-  wrap.querySelector('.fg-best').innerHTML =
+  if(e && e.best != null) wrap.querySelector('.fg-best').innerHTML =
     `<span data-i18n="fret.best" data-i18n-params='{"n":${e.best},"total":${FG_ROUND}}'>${t('fret.best',{n:e.best,total:FG_ROUND})}</span>`;
 }
 
