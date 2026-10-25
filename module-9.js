@@ -134,8 +134,8 @@ SETS.push(
             steps: [
               {
                 label: 'How to mark each re-test', label_es: 'Cómo marcar cada repaso',
-                text: '<ol><li>Play each re-test below.</li><li>Mark its skill on the checklist.</li><li>Clear it → "I\'ve got it!". Struggle → "Still working on it".</li></ol>The link next to each re-test shows which module to practice.',
-                text_es: '<ol><li>Toca cada repaso de abajo.</li><li>Marca su destreza en la lista de verificación.</li><li>Lo apruebas → "¡Ya lo tengo!". Te cuesta → "Todavía en proceso".</li></ol>El enlace junto a cada repaso muestra qué módulo practicar.',
+                text: '<ol><li>Play each re-test below.</li><li>Mark its skill on the checklist.</li><li>Clear it → "I\'ve got it!". Struggle → "Still working on it".</li></ol>The "Where to practice it" line on each re-test names the module to go back to.',
+                text_es: '<ol><li>Toca cada repaso de abajo.</li><li>Marca su destreza en la lista de verificación.</li><li>Lo apruebas → "¡Ya lo tengo!". Te cuesta → "Todavía lo practico".</li></ol>La línea "Dónde practicarlo" de cada repaso dice a qué módulo volver.',
                 hint: 'Mark "I\'ve got it!" only if it was clean every time.',
                 hint_es: 'Marca "¡Ya lo tengo!" solo si salió limpio todas las veces.'
               },
