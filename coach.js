@@ -734,20 +734,19 @@ function coachMicLatencyMs(){ return nrOffset(); }
    spacing clock to t whether or not a pitch was found, as before.
    `clarity` is coachDetectPitch's gate — or an array of gates, strictest
    first, where a window the first finds no pitch in is read again at the
-   next. Only Riff Runner's power-chord tokens pass an array
-   (RNW_POWER_CLARITY); every other caller passes a number or nothing. */
+   next (coachDetectPitch walks the list itself). Only Riff Runner's
+   power-chord tokens pass an array (RNW_POWER_CLARITY); every other caller
+   passes a number or nothing. */
 function coachPitchReadings(sinceT, minEndT, clarity){
   const out = [];
   const buf = coachFrameBuf, L = buf.length, sr = coachCtx.sampleRate;
   const W = Math.min(L, sr > 60000 ? 4096 : 2048);
   const step = Math.ceil(0.040 * sr);
   const nowT = performance.now();
-  const tiers = Array.isArray(clarity) ? clarity : null;
   for (let end = L; end - W >= 0; end -= step){
     const endT = nowT - (L - end) / sr * 1000;
     if (endT < minEndT || endT - (sinceT || 0) < 40) break;
-    let f = coachDetectPitch(buf, sr, tiers ? tiers[0] : clarity, end);
-    for (let q = 1; tiers && q < tiers.length && !(f > 0); q++) f = coachDetectPitch(buf, sr, tiers[q], end);
+    const f = coachDetectPitch(buf, sr, clarity, end);
     out.unshift({ t: endT, midi: f > 0 ? 69 + 12 * Math.log2(f / 440) : null });
   }
   return out;
@@ -1322,10 +1321,16 @@ function coachLoop(){
    that dip was computed and never read. The result is identical; the cost
    falls with the pitch — a note on the B string needs about a fifth of the
    work it used to — which is frame time a Chromebook gets back for
-   listening. Only a frame with no pitch at all still scans the whole range. */
+   listening. Only a frame with no pitch at all still scans the whole range.
+
+   `clarity` may be a list of gates, strictest first (coachPitchReadings):
+   a window with no pitch at one gate is read at the next. d[] is filled
+   only as far as a gate needs it and kept for the next one, so a pitchless
+   window — where the first gate already scanned every tau — is not
+   computed twice (2026-10-25). Same answer as one call per gate. */
 let coachYinD = null;
 function coachDetectPitch(buf, sampleRate, clarity, end){
-  clarity = clarity || 0.22;   // YIN accept threshold; higher = more permissive (chords)
+  const tiers = Array.isArray(clarity) ? clarity : null;
   if (end == null) end = buf.length;
   // Window scales with sample rate: at 88.2/96kHz a fixed 2048 caps maxTau
   // below low E's 82Hz period — the whole 6th string became undetectable.
@@ -1337,27 +1342,35 @@ function coachDetectPitch(buf, sampleRate, clarity, end){
   const d = coachYinD;
   d[0] = 1;
   const tauMin = Math.max(2, Math.floor(sampleRate / 1400));
-  let runSum = 0, cur = -1;    // cur: bottom-so-far of the first dip under clarity
-  for (let tau = 1; tau <= maxTau; tau++){
-    let s = 0;
-    for (let i = 0; i < half; i++){
-      const diff = buf[start + i] - buf[start + i + tau];
-      s += diff * diff;
+  let runSum = 0, filled = 0;  // d[1..filled] hold this window's values
+  for (let q = 0, nq = tiers ? tiers.length : 1; q < nq; q++){
+    const gate = (tiers ? tiers[q] : clarity) || 0.22;   // YIN accept threshold; higher = more permissive (chords)
+    let cur = -1;    // cur: bottom-so-far of the first dip under gate
+    for (let tau = 1; tau <= maxTau; tau++){
+      if (tau > filled){
+        let s = 0;
+        for (let i = 0; i < half; i++){
+          const diff = buf[start + i] - buf[start + i + tau];
+          s += diff * diff;
+        }
+        runSum += s;
+        d[tau] = runSum ? s * tau / runSum : 1;
+        filled = tau;
+      }
+      if (cur >= 0){
+        if (d[tau] < d[cur]){ cur = tau; continue; }   // still descending
+        break;                                          // d[cur + 1] is known: done
+      }
+      if (tau >= tauMin && d[tau] < gate) cur = tau;
     }
-    runSum += s;
-    d[tau] = runSum ? s * tau / runSum : 1;
-    if (cur >= 0){
-      if (d[tau] < d[cur]){ cur = tau; continue; }   // still descending
-      break;                                          // d[cur + 1] is known: done
-    }
-    if (tau >= tauMin && d[tau] < clarity) cur = tau;
+    if (cur < 0) continue;
+    const x0 = d[cur - 1], x2 = cur < maxTau ? d[cur + 1] : d[cur];
+    const denom = 2 * (2 * d[cur] - x0 - x2);
+    const refined = denom ? cur + (x2 - x0) / denom : cur;
+    const freq = sampleRate / refined;
+    if (freq >= 60 && freq <= 1400) return freq;
   }
-  if (cur < 0) return -1;
-  const x0 = d[cur - 1], x2 = cur < maxTau ? d[cur + 1] : d[cur];
-  const denom = 2 * (2 * d[cur] - x0 - x2);
-  const refined = denom ? cur + (x2 - x0) / denom : cur;
-  const freq = sampleRate / refined;
-  return (freq >= 60 && freq <= 1400) ? freq : -1;
+  return -1;
 }
 
 function coachFinalizeEvent(){
