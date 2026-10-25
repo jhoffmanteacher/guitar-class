@@ -13206,6 +13206,16 @@ function pcSyncBarStop(){
    makes one. */
 const PC_LAP_LEAD = 0.1, PC_SPARE_START = 0.02;
 function pcLoopStart(st){ return snipTimeAtBars(st.win, st.L.sections[st.loopFrom].fromBar - st.L.firstBar); }
+/* One of the card's <audio> elements failed. The two swap roles every lap,
+   so both get this same handler: the PLAYING one stops the card and says
+   so; the spare (or the one on its way out) is just dropped, since losing
+   it is not losing the song — the lap falls back to a seek. */
+function pcAudioError(st, el){
+  if(pcState !== st) return;
+  if(st.audio !== el){ if(st.spare === el) st.spare = null; if(st.leaving === el) st.leaving = null; return; }
+  pcStop();
+  if(typeof gateToast === 'function') gateToast(t('ca.snipLoadFailed'));
+}
 function pcSparePark(st){
   if(st.wholeSong || pcState !== st || st.leaving) return;   // mid-handoff: the timer parks it
   let sp = st.spare;
@@ -13214,7 +13224,8 @@ function pcSparePark(st){
     sp.preload = 'auto';
     sp.loop = false;
     // A spare that cannot load is just dropped: the lap falls back to a seek.
-    sp.addEventListener('error', () => { if(st.spare === sp) st.spare = null; });
+    // After a lap it is the playing element, and then an error stops the card.
+    sp.addEventListener('error', () => pcAudioError(st, sp), { once: true });
   }
   slowestApplyRate(sp, pcRate(st.root));
   // Reads the window when it runs, not when it was queued — a speed switch
@@ -13264,14 +13275,8 @@ function pcStart(root, si, rep){
   pcSyncBarStop();
   if(st.sheet) pcSheetStarted(st);
   else pcFollow(root.querySelector('.pc-tab .pc-page:not([hidden]) .tab-grid'), true);
-  audio.addEventListener('error', () => {
-    if(pcState !== st) return;
-    // After a lap this element may be the spare (see THE SPARE): losing the
-    // spare is not losing the song.
-    if(st.audio !== audio){ if(st.spare === audio) st.spare = null; if(st.leaving === audio) st.leaving = null; return; }
-    pcStop();
-    if(typeof gateToast === 'function') gateToast(t('ca.snipLoadFailed'));
-  }, { once: true });
+  // After a lap this element may be the spare (see THE SPARE).
+  audio.addEventListener('error', () => pcAudioError(st, audio), { once: true });
   const begin = () => {
     if(pcState !== st) return;
     try { audio.currentTime = snipTimeAtBars(st.win, L.sections[si].fromBar + fromRep * L.sections[si].bars - L.firstBar); } catch(e) {}
