@@ -142,7 +142,10 @@ Exits non-zero if anything's wrong — don't push until it passes. It:
    fingerprint of the cached shell *and* everything in `audio/`, so it can't be
    forgotten and re-exported audio gets cache-busted too. Since 2026-10-16 it
    also covers `sw.js`'s own code (version lines blanked), so a change to how
-   the worker caches rebuilds every visitor's cache.
+   the worker caches rebuilds every visitor's cache. Since 2026-10-25 it also
+   covers every file listed in `sw.js`'s `ASSETS` (the font and the PNG icons
+   included), and check 1bt fails the push if a precached file is ever left
+   out of the fingerprint.
 
 **Flags:** `--skip-links` (fast), `--check` (verify without changing files),
 `--live` (fetch the live `sw.js` and confirm the deploy landed — run it a minute
@@ -278,7 +281,7 @@ Any sweep or audit that finds **3+ instances of a mechanically-detectable error
 class** must add a permanent detector for that class to `checks.mjs` in the same
 session. Never leave a detector script in a session scratchpad — the 2026-07-31
 MC-tell audit died that way and the class recurred in the next sweep. The
-existing detectors (1h … 1bp) are each documented by a comment in
+existing detectors (1h onward) are each documented by a comment in
 `tools/checks.mjs` — read it there rather than keeping a list here.
 
 **A phrase detector must match the UNESCAPED string.** Until 2026-09-25 1w
@@ -514,8 +517,9 @@ anything added there must land in both of its branches too.
 
 **Practice card (`view: 'card'`, 2026-09-27) is a whole card body, not a step
 field** — same shape as an exit check: ONE renderer, `caCardBodyHtml(a, opts)`
-in app.js, called by `caActivityCardHtml`/`caHeroCardHtml` for students and by
-`renderTeacherActivityDetail` with `{preview:true}` (1bf pins all three). See
+in app.js, reached by `caActivityCardHtml`/`caHeroCardHtml` for students
+through `caCardBodyBlockHtml(a, …)` and by `renderTeacherActivityDetail` with
+`{preview:true}` (1bf pins all three and renders both student builders). See
 "Practice cards" in the `in-class-activities` skill.
 
 checks.mjs 1v now enforces this for the one field it can see mechanically —
