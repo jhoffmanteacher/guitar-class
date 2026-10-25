@@ -13650,15 +13650,11 @@ function pcRetrack(root){
   slowestApplyRate(st.audio, pcRate(root));   // Slowest <-> Slower and Slow <-> Normal are the same file, just the rate
   if(st.audio.src.endsWith(src)){ try { st.audio.currentTime = at; } catch(e) {} pcSparePark(st); return; }
   const wasPlaying = !st.audio.paused;
-  // After a lap the playing element may be the former spare, whose own error
-  // handler only drops it — a new file that fails to load must still stop
-  // the card and say so.
+  // A new file that fails to load must stop the card and say so. Both
+  // elements already carry pcAudioError (pcStart / pcSparePark); this adds
+  // it again so a retrack never depends on which element is playing now.
   const el = st.audio;
-  el.addEventListener('error', () => {
-    if(pcState !== st || st.audio !== el) return;
-    pcStop();
-    if(typeof gateToast === 'function') gateToast(t('ca.snipLoadFailed'));
-  }, { once: true });
+  el.addEventListener('error', () => pcAudioError(st, el), { once: true });
   st.audio.addEventListener('loadedmetadata', () => {
     if(pcState !== st) return;
     try { st.audio.currentTime = at; } catch(e) {}
