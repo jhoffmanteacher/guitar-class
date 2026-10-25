@@ -647,7 +647,9 @@ function snipUrlParam(name){
      A delimiter-anchored match accepts all of them, and still won't match a
      longer name that merely ends in this one. */
   const m = new RegExp('[?&#]' + name + '=([^&#]*)').exec(window.location.href || '');
-  return m ? decodeURIComponent(m[1]) : null;
+  if(!m) return null;
+  // A stray % throws URIError, and this runs at load: keep the raw text.
+  try { return decodeURIComponent(m[1]); } catch(e){ return m[1]; }
 }
 if(snipUrlParam('snipcal') === '1'){
   window.__snipCal = true;
@@ -4728,7 +4730,10 @@ function exploreHashBase(h){
 }
 function exploreHashTail(h){
   const i = (h || '').indexOf('/');
-  return i === -1 ? '' : decodeURIComponent(h.slice(i + 1));
+  if(i === -1) return '';
+  // A link cut short mid-%2F leaves a stray % that throws URIError, which
+  // would stop sign-in partway: keep the raw text (journey.js does the same).
+  try { return decodeURIComponent(h.slice(i + 1)); } catch(e){ return h.slice(i + 1); }
 }
 function routeExploreHash(){
   let full = location.hash;
