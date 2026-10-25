@@ -1271,7 +1271,7 @@ async function loadClassConfig(){
     activityBoard = d.activityBoard || {};
     activityBoardOn = d.activityBoardSeeded === true;
     try{ localStorage.setItem('caBoard', JSON.stringify({on: activityBoardOn, map: activityBoard})); }catch(e){}
-  }catch(e){ restoreClassConfigFromCache(); /* leave games on, nothing hidden */ }
+  }catch(e){ console.warn('[guitar-class] class config load failed — using the cached copy', e); restoreClassConfigFromCache(); /* leave games on, nothing hidden */ }
   finally{
     // Every exit, early returns included: the teacher's "Open through" may
     // have changed under a rail that's already drawn (see repaintModuleGate).
