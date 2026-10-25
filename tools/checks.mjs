@@ -4146,36 +4146,37 @@ function loadConstObject(src, constName) {
   return vm.runInNewContext(`(${text})`, vm.createContext({}));
 }
 // Blanks out comments (line count preserved, so error locations stay
-// accurate), leaving string contents untouched.
+// accurate), leaving string contents untouched. A template literal's ${…}
+// parts are walked as code (2026-10-25): a comment inside one is blanked
+// too, and a nested template no longer ends the outer one early — the old
+// skip-to-the-next-backtick lost sync at a nested template holding an
+// apostrophe (teacher.js, ~640 lines read as code or string by accident).
 function stripJsComments(src) {
-  let out = '';
-  for (let i = 0; i < src.length; ) {
-    const c = src[i], d = src[i + 1];
-    if (c === "'" || c === '"' || c === '`') {
-      const skip = skipStringOrComment(src, i);
-      out += src.slice(i, skip);
-      i = skip;
-      continue;
+  let i = 0;
+  const code = inInterp => {     // up to the } that closes a ${…}, or the end
+    let out = '', depth = 0;
+    while (i < src.length) {
+      const c = src[i], d = src[i + 1];
+      if (c === '`') { out += tmpl(); continue; }
+      if (c === "'" || c === '"') { const j = skipStringOrComment(src, i); out += src.slice(i, j); i = j; continue; }
+      if (c === '/' && (d === '/' || d === '*')) { const j = Math.min(skipStringOrComment(src, i), src.length); out += src.slice(i, j).replace(/[^\n]/g, ' '); i = j; continue; }
+      if (inInterp && c === '{') depth++;
+      if (inInterp && c === '}' && depth-- === 0) return out;
+      out += c; i++;
     }
-    if (c === '/' && d === '/') {
-      let j = i;
-      while (j < src.length && src[j] !== '\n') j++;
-      out += ' '.repeat(j - i);
-      i = j;
-      continue;
+    return out;
+  };
+  const tmpl = () => {           // from the opening backtick to its close
+    let out = '`'; i++;
+    while (i < src.length && src[i] !== '`') {
+      if (src[i] === '\\') { out += src.slice(i, i + 2); i += 2; continue; }
+      if (src[i] === '$' && src[i + 1] === '{') { i += 2; out += '${' + code(true) + '}'; i++; continue; }
+      out += src[i++];
     }
-    if (c === '/' && d === '*') {
-      let j = i + 2;
-      while (j < src.length && !(src[j] === '*' && src[j + 1] === '/')) j++;
-      j = Math.min(j + 2, src.length);
-      out += src.slice(i, j).replace(/[^\n]/g, ' ');
-      i = j;
-      continue;
-    }
-    out += c;
     i++;
-  }
-  return out;
+    return out + '`';
+  };
+  return code(false);
 }
 // Every top-level `function name(...)` / `async function name(...)`
 // declaration in a classic (non-module) script. This codebase writes every
@@ -7210,7 +7211,7 @@ function checkEnglishTermsInSpanish(I18N) {
      console preview calls it with preview:true, and
      every silencer that stops a snippet also stops a card (pcStop).
    ════════════════════════════════════════════════════════════════════ */
-function checkPracticeCards() {
+function checkPracticeCards(ctx) {
   head('1bf. Practice cards');
   let bad = 0, cards = 0;
   const flag = m => { err(m); problems++; bad++; };
@@ -7343,6 +7344,25 @@ function checkPracticeCards() {
   }
   const tb = body(teacherSrc, 'renderTeacherActivityDetail');
   if (tb === null || !/caCardBodyHtml\(\s*a\s*,\s*\{\s*preview\s*:\s*true\s*\}\s*\)/.test(tb)) flag('teacher.js: renderTeacherActivityDetail() must call caCardBodyHtml(a,{preview:true}) — the console preview would not show the practice card');
+  /* …and by RENDERING (2026-10-25). A source pin can't see a wrong
+     argument (the hero passing false for `card`), an inverted `card ?` or
+     a call left inside a comment — all three stayed green. So both student
+     builders render a practice card, which must come out as the card
+     (class="pc", no step ladder), and an ordinary activity, which must come
+     out as its ladder (class="ca-steps", no card). */
+  if (!ctx) flag('1bf cannot render the card builders — the 0b render context is unavailable');
+  else {
+    const acts = vm.runInContext('window.CLASS_ACTIVITIES || []', ctx);
+    const pcA = acts.find(a => a.view === 'card' && a.card && a.kind !== 'check');
+    const ladA = acts.find(a => a.view !== 'card' && a.kind !== 'check' && (a.steps || []).length);
+    if (!pcA || !ladA) flag(`1bf found ${pcA ? '' : 'no practice card'}${!pcA && !ladA ? ' and ' : ''}${ladA ? '' : 'no ordinary activity'} to render`);
+    else for (const fn of ['caActivityCardHtml', 'caHeroCardHtml']) {
+      const draw = a => { try { return String(vm.runInContext(fn, ctx)(a, true)); } catch (e) { return `THREW ${e.message}`; } };
+      const c = draw(pcA), l = draw(ladA);
+      if (!/class="pc"/.test(c) || /class="ca-steps"/.test(c)) flag(`app.js: ${fn}(${pcA.id}) does not draw the practice card${c.startsWith('THREW') ? ` (${c})` : ''} — expected class="pc" and no step ladder`);
+      if (!/class="ca-steps"/.test(l) || /class="pc"/.test(l)) flag(`app.js: ${fn}(${ladA.id}) does not draw its step ladder${l.startsWith('THREW') ? ` (${l})` : ''} — expected class="ca-steps" and no practice card`);
+    }
+  }
   for (const fn of ['stopCardAudio', 'playSequence', 'renderClassActivities']) {
     const b = body(appSrc, fn);
     if (b === null || !/\bpcStop\(\)/.test(b)) flag(`app.js: ${fn}() must call pcStop() beside snipStop() — a practice card's song would keep playing under other sound`);
@@ -8053,7 +8073,7 @@ function checkGuitarNotes() {
   checkCaButtonNamesAndPaper();
   checkEnglishTermsInSpanish(i18nTable);
   checkJourneyGuitarToggle();
-  checkPracticeCards();
+  checkPracticeCards(rcCtx);
   checkSheetCards();
   checkCardCaptionWords();
   checkJourneyRetired();
