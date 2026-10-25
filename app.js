@@ -15187,6 +15187,10 @@ if ('serviceWorker' in navigator && location.protocol.startsWith('http')) {
         // A Note Call round in progress (ncLive): its score is only written
         // when the round ends, and a reload drops it mid-level.
         if (ncLive) return 'drill';
+        // A practice card counting in or playing (pcState is set from pcStart
+        // until pcStop): a reload cuts the song off mid-line and drops the
+        // card's speed / Guitar / Metronome switches.
+        if (pcState) return 'playing';
         return null;
       };
       const reload = async () => {
