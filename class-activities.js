@@ -4827,8 +4827,8 @@ window.CLASS_ACTIVITIES = [
         label_power_es: 'Practica — El acorde de potencia A5',
         text_power: 'Put finger 1 on fret 5 of the low E string and finger 3 on fret 7 of the A string. Pick the two strings one at a time, then strum just those two. You\'ve got it when: both strings ring with no buzz, three times in a row. A string sounds dead? Press each finger just behind the fret.',
         text_power_es: 'Pon el dedo 1 en el traste 5 de la cuerda Mi grave y el dedo 3 en el traste 7 de la cuerda La. Toca las dos cuerdas una por una y luego rasguea solo esas dos. Lo tienes cuando: las dos cuerdas suenan sin zumbido, tres veces seguidas. ¿Una cuerda no suena? Presiona cada dedo justo detrás del traste.',
-        text: 'Put fingers 1, 2 and 3 on fret 2 of the D, G and B strings. Pick each string from the A string to the high e, one at a time. You\'ve got it when: all five strings ring with no buzz, three times in a row. A string sounds dead? Press each finger just behind the fret.',
-        text_es: 'Pon los dedos 1, 2 y 3 en el traste 2 de las cuerdas Re, Sol y Si. Toca cada cuerda desde la cuerda La hasta la cuerda mi aguda, una por una. Lo tienes cuando: las cinco cuerdas suenan sin zumbido, tres veces seguidas. ¿Una cuerda no suena? Presiona cada dedo justo detrás del traste.',
+        text: 'Put finger 2 on fret 2 of the D string, finger 1 on fret 2 of the G string and finger 3 on fret 2 of the B string. Pick each string from the A string to the high e, one at a time. You\'ve got it when: all five strings ring with no buzz, three times in a row. A string sounds dead? Press each finger just behind the fret.',
+        text_es: 'Pon el dedo 2 en el traste 2 de la cuerda Re, el dedo 1 en el traste 2 de la cuerda Sol y el dedo 3 en el traste 2 de la cuerda Si. Toca cada cuerda desde la cuerda La hasta la cuerda mi aguda, una por una. Lo tienes cuando: las cinco cuerdas suenan sin zumbido, tres veces seguidas. ¿Una cuerda no suena? Presiona cada dedo justo detrás del traste.',
         tab: {
           caption: 'A chord · don\'t play the low E string',
           caption_es: 'Acorde A · no toques la cuerda Mi grave',

@@ -214,7 +214,10 @@ function chordDiagramSVG(cfg, opts){
 var CHORD_DIAGRAMS = {
   'E'  : { position:0, chord:[[6,0,0],[5,2,2],[4,2,3],[3,1,1],[2,0,0],[1,0,0]] },
   'Em' : { position:0, chord:[[6,0,0],[5,2,2],[4,2,3],[3,0,0],[2,0,0],[1,0,0]] },
-  'A'  : { position:0, chord:[[6,'x',''],[5,0,0],[4,2,1],[3,2,2],[2,2,3],[1,0,0]] },
+  /* A: middle on D, index on G, ring on B — Module 4's fingering (its text
+     and its inline boxes), so the index finger stays on the G string between
+     A and D. Was 1-2-3 across D, G, B until 2026-10-25. */
+  'A'  : { position:0, chord:[[6,'x',''],[5,0,0],[4,2,2],[3,2,1],[2,2,3],[1,0,0]] },
   'Am' : { position:0, chord:[[6,'x',''],[5,0,0],[4,2,2],[3,2,3],[2,1,1],[1,0,0]] },
   'D'  : { position:0, chord:[[6,'x',''],[5,'x',''],[4,0,0],[3,2,1],[2,3,3],[1,2,2]] },
   'Dm' : { position:0, chord:[[6,'x',''],[5,'x',''],[4,0,0],[3,2,2],[2,3,3],[1,1,1]] },
