@@ -1092,8 +1092,11 @@ function swap45OnLoad(stored){
 }
 
 /* A brand-new student (no doc) and a failed read start from the same empty
-   state. The signed-out branch of onAuthStateChanged keeps its own, longer
-   list on purpose: it also clears the delete maps and the class config. */
+   state. The signed-out branch of onAuthStateChanged keeps its own list on
+   purpose, and it is not a superset of this one: it also clears the delete
+   maps and the class config, but leaves lastModuleNum, lastSetId, songReady
+   and songReadyAt alone and never calls restoreLocalPlace() — loadProgress
+   sets all of those at the next sign-in. */
 function resetLoadedProgress(){
   progress={}; lastModuleNum=1; lastSetId=null; responses={}; completed={}; classActivities={}; caStepDone={}; exitChecks={}; games={};
   streak={ count:0, lastDay:null }; practiceLog=loadLocalPracticeLog(); songReady={}; songReadyAt={}; studentPeriod=''; restoreLocalPlace();
