@@ -433,7 +433,9 @@ async function startTuner() {
       // now orphaned. Tear this stale context down instead of wiring it up
       // (setting onstatechange on it would throw on the already-null global).
       stream.getTracks().forEach(t => t.stop());
-      try { myCtx.close(); } catch(e){}
+      // stopTuner() has usually closed this context already, and close() on a
+      // closed one REJECTS (try/catch can't see that): swallow it.
+      try { myCtx.close().catch(() => {}); } catch(e){}
       return;
     }
     // Belt-and-suspenders: Safari can also suspend a live context on an audio
@@ -452,7 +454,7 @@ async function startTuner() {
        popup closed, with the tuner showing an error. Same guard as
        coachAcquireMicInner in coach.js. */
     if (myStream) myStream.getTracks().forEach(tr => tr.stop());
-    if (myCtx){ try { myCtx.close(); } catch(_){} }
+    if (myCtx){ try { myCtx.close().catch(() => {}); } catch(_){} }
     if (myStream && tunerStream === myStream){
       tunerRunning = false;
       tunerStream = null; tunerCtx = null; tunerAnalyser = null; tunerFreqAnalyser = null;
