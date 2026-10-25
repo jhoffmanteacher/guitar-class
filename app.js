@@ -11914,7 +11914,7 @@ function caOptionalTagHtml(a){
    OWN summary markup — a two-column header (text left, a step-figure
    thumbnail over a big "Start →"/"Keep going →" call-to-action right) —
    built here rather than through caActivityCardHtml/caCheckCardHtml. The
-   BODY is identical to the plain card (same stepsHtml/caMarkRowHtml,
+   BODY is identical to the plain card (one caCardBodyBlockHtml,
    same caCheckBodyHtml for a check), so opening it is exactly the same
    card everyone else eventually opens; only the collapsed header differs.
    Collapsed by default (Jonathan, 2026-09-15) — the CTA span carries no
@@ -11958,6 +11958,22 @@ function caStartHereTagHtml(a, isCurrent){
     + (dateLabel ? `<span class="ca-hero-from">${escHtml(t('ca.heroFromDate', {date: dateLabel}))}</span>` : '')
     + `</span>`;
 }
+/* The .ca-card-body both card shapes share — the plain card and the hero
+   (caActivityCardHtml / caHeroCardHtml) differ only in their <summary>.
+   A practice card (view:'card') draws its own body, caCardBodyHtml, and
+   keeps its steps as the help ladder inside it. */
+function caCardBodyBlockHtml(a, done, focus, card){
+  const openStepIdx = focus ? caFocusIdx(a)
+    : caStepOpen[a.id] !== undefined ? caStepOpen[a.id] : caDefaultOpenStep(a);
+  const stepsHtml = card ? '' : (a.steps || []).map((s, si) => caStepHtml(a, s, si, si === openStepIdx, caStepDone[`${a.id}:${si}`] === true)).join('');
+  const markLabel = done ? t('ca.completed') : t('ca.markComplete');
+  return `<div class="ca-card-body">
+      ${card ? caCardBodyHtml(a) : caKeySwitchHtml(a) + caChordSwitchHtml(a) + caIntroHtml(a, focus, openStepIdx)}
+      ${stepsHtml && focus ? caFocusDotsHtml(a, openStepIdx) : ''}
+      ${stepsHtml ? `<ol class="ca-steps">${stepsHtml}</ol>` : ''}
+      ${caMarkRowHtml(a, done, markLabel)}
+    </div>`;
+}
 function caHeroCardHtml(a, isCurrent = true){
   if(a.kind === 'check') return caHeroCheckHtml(a, isCurrent);
   a = caView(a);   // power-chord version when the switch says so — see caView
@@ -11969,10 +11985,6 @@ function caHeroCardHtml(a, isCurrent = true){
   // A practice card (view:'card') draws its own body — caCardBodyHtml — and
   // keeps its steps as the help ladder inside it.
   const card = caIsCard(a);
-  const openStepIdx = focus ? caFocusIdx(a)
-    : caStepOpen[a.id] !== undefined ? caStepOpen[a.id] : caDefaultOpenStep(a);
-  const stepsHtml = card ? '' : (a.steps || []).map((s, si) => caStepHtml(a, s, si, si === openStepIdx, caStepDone[`${a.id}:${si}`] === true)).join('');
-  const markLabel = done ? t('ca.completed') : t('ca.markComplete');
   const num = caNumber(a);
   const titleHtml = (num ? `#${num} - ` : '') + escHtml(caTitle(a));
   const blurb = caFirstSentence(tf(a, 'intro'));
@@ -11998,12 +12010,7 @@ function caHeroCardHtml(a, isCurrent = true){
       </div>
       ${caPrintBtnHtml(a)}
     </summary>
-    <div class="ca-card-body">
-      ${card ? caCardBodyHtml(a) : caKeySwitchHtml(a) + caChordSwitchHtml(a) + caIntroHtml(a, focus, openStepIdx)}
-      ${stepsHtml && focus ? caFocusDotsHtml(a, openStepIdx) : ''}
-      ${stepsHtml ? `<ol class="ca-steps">${stepsHtml}</ol>` : ''}
-      ${caMarkRowHtml(a, done, markLabel)}
-    </div>
+    ${caCardBodyBlockHtml(a, done, focus, card)}
   </details>`;
 }
 // The check variant carries its own "Exit check" tag + blue band (item 2)
@@ -13712,10 +13719,6 @@ function caActivityCardHtml(a){
   // can have none (-1).
   const focus = caIsFocus(a);
   const card = caIsCard(a);   // practice card — see caCardBodyHtml
-  const openStepIdx = focus ? caFocusIdx(a)
-    : caStepOpen[a.id] !== undefined ? caStepOpen[a.id] : caDefaultOpenStep(a);
-  const stepsHtml = card ? '' : (a.steps || []).map((s, si) => caStepHtml(a, s, si, si === openStepIdx, caStepDone[`${a.id}:${si}`] === true)).join('');
-  const markLabel = done ? t('ca.completed') : t('ca.markComplete');
   const num = caNumber(a);
   const titleHtml = (num ? `#${num} - ` : '') + escHtml(caTitle(a));
   // Undated activities only reach a screen under dev bypass (caIsVisible
@@ -13731,12 +13734,7 @@ function caActivityCardHtml(a){
       ${done ? `<span class="ca-done-mark" aria-hidden="true">${TCK_CHECK_SVG_INLINE}</span>` : ''}
       ${caPrintBtnHtml(a)}
     </summary>
-    <div class="ca-card-body">
-      ${card ? caCardBodyHtml(a) : caKeySwitchHtml(a) + caChordSwitchHtml(a) + caIntroHtml(a, focus, openStepIdx)}
-      ${stepsHtml && focus ? caFocusDotsHtml(a, openStepIdx) : ''}
-      ${stepsHtml ? `<ol class="ca-steps">${stepsHtml}</ol>` : ''}
-      ${caMarkRowHtml(a, done, markLabel)}
-    </div>
+    ${caCardBodyBlockHtml(a, done, focus, card)}
   </details>`;
 }
 /* ── Exit checks (class activity, kind:'check') ─────────────────────────

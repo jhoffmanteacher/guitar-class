@@ -7007,7 +7007,8 @@ function checkEnglishTermsInSpanish(I18N) {
      numbered check has label + text with _es twins, the Level up text.
    - Help steps carry no snippet, drill or video (the card renders their
      text and tab only), and the renderer pins: both card builders call
-     caCardBodyHtml, the console preview calls it with preview:true, and
+     caCardBodyHtml (through their shared body, caCardBodyBlockHtml), the
+     console preview calls it with preview:true, and
      every silencer that stops a snippet also stops a card (pcStop).
    ════════════════════════════════════════════════════════════════════ */
 function checkPracticeCards() {
@@ -7131,10 +7132,15 @@ function checkPracticeCards() {
   }
   // Renderer pins, comments stripped (the 1ak lesson).
   const body = (src, fn) => { const b = jsFunctionBody(src, fn); return b === null ? null : stripJsComments(b); };
+  // The two student card builders share one body, caCardBodyBlockHtml
+  // (2026-10-25), and that body is what calls caCardBodyHtml(a).
+  const blk = body(appSrc, 'caCardBodyBlockHtml');
+  if (blk === null) flag('app.js: no caCardBodyBlockHtml() found — 1bf cannot tell whether students get the practice card');
+  else if (!/caCardBodyHtml\(\s*a\s*\)/.test(blk)) flag('app.js: caCardBodyBlockHtml() never calls caCardBodyHtml(a) — a practice card would render empty');
   for (const fn of ['caActivityCardHtml', 'caHeroCardHtml']) {
     const b = body(appSrc, fn);
     if (b === null) flag(`app.js: no ${fn}() found — 1bf cannot tell whether students get the practice card`);
-    else if (!/caCardBodyHtml\(\s*a\s*\)/.test(b)) flag(`app.js: ${fn}() never calls caCardBodyHtml(a) — a practice card would render empty there`);
+    else if (!/caCardBodyBlockHtml\(\s*a\s*,/.test(b)) flag(`app.js: ${fn}() never calls caCardBodyBlockHtml(a, …) — a practice card would render empty there`);
   }
   const tb = body(teacherSrc, 'renderTeacherActivityDetail');
   if (tb === null || !/caCardBodyHtml\(\s*a\s*,\s*\{\s*preview\s*:\s*true\s*\}\s*\)/.test(tb)) flag('teacher.js: renderTeacherActivityDetail() must call caCardBodyHtml(a,{preview:true}) — the console preview would not show the practice card');
