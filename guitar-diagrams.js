@@ -232,8 +232,13 @@ var CHORD_DIAGRAMS = {
      them yet — not in app.js's CHORD_NAMES, no data-chord, no game deck —
      so adding them changes nothing a student sees until a lesson names one.
      A7 / D7 / E7 use the same frets and fingers as Module 11's inline
-     boxes and the E7 play-along cards; the sus/add shapes keep the fingers
-     of the chord they come from (Asus = A, Dsus = D, Em7 = Em + pinky). */
+     boxes and the E7 play-along cards; Dsus = D's fingers, Em7 = Em +
+     pinky. The Asus2 / Asus4 / Cadd9 fingers are their own, not checked
+     against the course: since 2026-10-25 'A' is fingered 2-1-3 (Module 4),
+     while Asus2 / Asus4 here still put 1-2 on the D and G strings — and
+     Module 4's Asus2 level-up teaches it as Am with the index lifted
+     (fingers 2 and 3). Nothing draws these yet; check each against Module 4
+     before a lesson uses one. */
   'A7'    : { position:0, chord:[[6,'x',''],[5,0,0],[4,2,2],[3,0,0],[2,2,3],[1,0,0]] },
   'C7'    : { position:0, chord:[[6,'x',''],[5,3,3],[4,2,2],[3,3,4],[2,1,1],[1,0,0]] },
   'D7'    : { position:0, chord:[[6,'x',''],[5,'x',''],[4,0,0],[3,2,2],[2,1,1],[1,2,3]] },
