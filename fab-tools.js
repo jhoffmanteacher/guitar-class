@@ -445,8 +445,11 @@ document.addEventListener('click',e=>{
     // it listening in the background is a real cost. A running metronome or
     // timer keeps running: the student tapping a lesson step or a Journey page
     // shouldn't silently kill the click they're practicing to. Those popups
-    // just slide shut visually.
-    closePopup('tuner');
+    // just slide shut visually. Only when the tuner is open (a pending start
+    // counts — the popup opens first): every close already ran stopTuner(),
+    // and this listener sees every click on the page.
+    const tp = document.getElementById('tuner-popup');
+    if(tp && tp.classList.contains('open')) closePopup('tuner');
     ['metro','timer','rec'].forEach(w=>{
       const el = document.getElementById(w+'-popup');
       if(el) el.classList.remove('open');
