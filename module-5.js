@@ -683,8 +683,8 @@ SETS.push(
             ]
           },
           {
-            title: 'Improvise a call-and-response phrase',
-            title_es: 'Improvisa una frase de llamada y respuesta',
+            title: 'Hammer-ons and pull-offs, then call and response',
+            title_es: 'Hammer-ons y pull-offs, luego llamada y respuesta',
             steps: [
           /* INSERTED 2026-09-20 — a hammer-on and pull-off drill. Both are
              used by the expressive-phrasing work above and by the level-up
