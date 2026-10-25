@@ -1,15 +1,19 @@
 /* ════════════════════════════════════════════════════════════════
    Guitar Class — Service Worker (light PWA, offline resilience)
 
-   ⚠️  BUMP CACHE_VERSION ON EVERY PUSH that changes any cached file
-       (index.html, styles.css, app.js, config-main.js, module-*.js,
-        manifest.json, icon.svg, tabs/*.html). If you forget, returning
-        students may keep getting the OLD site from their cache. See CLAUDE.md.
+   ⚠️  NEVER EDIT CACHE_VERSION OR AUDIO_CACHE_VERSION BY HAND.
+       `node tools/checks.mjs` writes both, as content fingerprints.
+       CACHE_VERSION covers the shell files (the pages, styles.css, every
+       shipped .js, module-*.js, manifest.json, icon.svg, tabs/*), img/,
+       sheets/ and vendor/pdfjs, plus this file's own code with both
+       version lines blanked. AUDIO_CACHE_VERSION covers audio/ alone. A
+       changed file changes the version, and a new version is what makes
+       returning students drop the old cache. See CLAUDE.md.
 
    Strategy: stale-while-revalidate for same-origin GET requests —
    serve the cached copy instantly (fast on weak school Wi-Fi), then
    refresh the cache in the background for next time. Cross-origin
-   requests (Firebase, YouTube, Google Translate, gstatic) are NEVER
+   requests (Firebase, YouTube, gstatic) are NEVER
    intercepted — they always go straight to the network, so auth and
    progress-saving behave exactly as before.
    ════════════════════════════════════════════════════════════════ */
@@ -192,7 +196,7 @@ self.addEventListener('fetch', event => {
   const url = new URL(req.url);
 
   // Only handle our own same-origin GETs. Everything else (Firebase,
-  // YouTube embeds, Google Translate, gstatic SDKs) falls through to
+  // YouTube embeds, gstatic SDKs) falls through to
   // the browser's normal network handling.
   if (req.method !== 'GET' || url.origin !== self.location.origin) {
     return;
