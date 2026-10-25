@@ -548,12 +548,6 @@ function lqOpenFromBanner(){
 }
 
 /* ── The student screen (an overlay, like the Games arcade) ── */
-function toggleLiveQuiz(){
-  const screen = document.getElementById('live-quiz-screen');
-  if(!screen) return;
-  if(screen.hasAttribute('hidden')) goExploreHash('live-quiz');
-  else closeLiveQuizScreen();
-}
 function openLiveQuizScreen(){
   const screen = document.getElementById('live-quiz-screen');
   if(!screen || !screen.hasAttribute('hidden')) return;
