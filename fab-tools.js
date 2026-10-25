@@ -380,6 +380,7 @@ function togglePopup(which){
       if(typeof coachInterrupt==='function') coachInterrupt();
       if(typeof gamesStopMic==='function') gamesStopMic();
       if(typeof stopAllDemoAudio==='function') stopAllDemoAudio();
+      if(typeof stopJourneyAudio==='function') stopJourneyAudio();   // Journey pages: the backing track (no app.js there)
       if(metroRunning) stopMetro();
       startTuner();
     } else { stopTuner(); }

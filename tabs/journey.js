@@ -512,6 +512,16 @@ function toggleTrackFab(){
   a.paused ? a.play().catch(function(){}) : a.pause();
 }
 
+/* The tuner is opening (fab-tools.js) and it hears everything: pause the
+   backing track first. On index.html app.js's stopAllDemoAudio() does this;
+   this page has no app.js. The page's own click stops by itself once the
+   track is paused (clickTick returns while a.paused). */
+function stopJourneyAudio(){
+  var box = document.getElementById('playalong-frame');
+  var a = box && box.querySelector('audio');
+  if(a && !a.paused) a.pause();
+}
+
 /* ── Progress pill ── */
 function updateProgressPill(){
   var pill = document.querySelector('.prog-pill');
