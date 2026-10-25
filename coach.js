@@ -2643,14 +2643,7 @@ function gamesStopMic(keepPanel){
   const screen = document.getElementById('games-screen');
   const p = document.getElementById('games-panel');
   if (!keepPanel && screen && !screen.hasAttribute('hidden') && p &&
-      (document.getElementById('fret-body') || document.getElementById('cc-body') ||
-       document.getElementById('cb-body') || document.getElementById('sh-body') ||
-       document.getElementById('rr-body') || document.getElementById('sr-body') ||
-       document.getElementById('fz-body') || document.getElementById('rn-body') ||
-       document.getElementById('nr-body') || document.getElementById('cd-body') ||
-       document.getElementById('ntr-body') || document.getElementById('ps-body') ||
-       document.getElementById('psg-body') || document.getElementById('pd-body') ||
-       document.getElementById('bc-body'))){
+      GAMES_META.some(g => document.getElementById(g.body))){
     gamesRenderHub(p);
   }
 }
@@ -2661,7 +2654,13 @@ function gamesHeadHtml(title, inGame){
     `</div>`;
 }
 
-/* Single source of truth for the hub grid AND the guitar / no-guitar split.
+/* Single source of truth for the hub grid, the guitar / no-guitar split AND
+   each game's screen: `body` is the id its own code renders into (gamesShow
+   builds it; gamesStopMic looks for it to know a game is on screen),
+   `setup` starts it, `foot` adds the privacy footer under it, and `records`
+   says that footer is on a screen that can record (micRecStart). Finger Gym
+   shares Note Runner's #nr-body and engine but does not record. A game
+   added here gets its screen and its stop path from this row alone.
    `guitar:true` = you need a real guitar in hand (mic-graded, or self-judged
    like Riff Roulette); `guitar:false` = eyes + keyboard/tap only. Order here is
    the order shown within each section. titleKey/descKey are resolved at
@@ -2715,22 +2714,38 @@ const GAME_ICO = {
 };
 
 const GAMES_META = [
-  { key:'fret',     cls:'gc-hunt',     ico:GAME_ICO.fret,       titleKey:'games.fret.title',  guitar:true,  descKey:'games.fret.desc' },
-  { key:'cc',       cls:'gc-change',   ico:GAME_ICO.cc,         titleKey:'games.cc.title',    guitar:true,  descKey:'games.cc.desc' },
-  { key:'radar',    cls:'gc-radar',    ico:GAME_ICO.radar,      titleKey:'games.radar.title', guitar:true,  descKey:'games.radar.desc' },
-  { key:'roulette', cls:'gc-roulette', ico:GAME_ICO.roulette,   titleKey:'games.rr.title',    guitar:true,  descKey:'games.rr.desc' },
-  { key:'noterunner', cls:'gc-noterun', ico:GAME_ICO.noterunner, titleKey:'games.nr.title',   guitar:true,  descKey:'games.nr.desc' },
-  { key:'fingergym', cls:'gc-fingergym', ico:GAME_ICO.fingergym, titleKey:'games.fg.title',    guitar:true,  descKey:'games.fg.desc' },
-  { key:'simonguitar', cls:'gc-simonguitar', ico:GAME_ICO.simonguitar, titleKey:'games.psg.title', guitar:true, descKey:'games.psg.desc' },
-  { key:'runner',   cls:'gc-runner',   ico:GAME_ICO.runner,     titleKey:'games.riff.title',  guitar:false, descKey:'games.riff.desc' },
-  { key:'blitz',    cls:'gc-blitz',    ico:GAME_ICO.blitz,      titleKey:'games.cb.title',    guitar:false, descKey:'games.cb.desc' },
-  { key:'fretzap',  cls:'gc-fretzap',  ico:GAME_ICO.fretzap,    titleKey:'games.fz.title',    guitar:false, descKey:'games.fz.desc' },
-  { key:'strum',    cls:'gc-strum',    ico:GAME_ICO.strum,      titleKey:'games.sh.title',    guitar:false, descKey:'games.sh.desc' },
-  { key:'detective', cls:'gc-detective', ico:GAME_ICO.detective, titleKey:'games.cd.title',   guitar:false, descKey:'games.cd.desc' },
-  { key:'riffid',   cls:'gc-riffid',   ico:GAME_ICO.riffid,     titleKey:'games.ntr.title',   guitar:false, descKey:'games.ntr.desc' },
-  { key:'simon',    cls:'gc-simon',    ico:GAME_ICO.simon,      titleKey:'games.ps.title',    guitar:false, descKey:'games.ps.desc' },
-  { key:'patterndet', cls:'gc-patterndet', ico:GAME_ICO.patterndet, titleKey:'games.pd.title', guitar:false, descKey:'games.pd.desc' },
-  { key:'buildchord', cls:'gc-buildchord', ico:GAME_ICO.buildchord, titleKey:'games.bc.title', guitar:false, descKey:'games.bc.desc' },
+  { key:'fret',     cls:'gc-hunt',     ico:GAME_ICO.fret,       titleKey:'games.fret.title',  guitar:true,  descKey:'games.fret.desc',
+    body:'fret-body', setup:() => fretStart() },
+  { key:'cc',       cls:'gc-change',   ico:GAME_ICO.cc,         titleKey:'games.cc.title',    guitar:true,  descKey:'games.cc.desc',
+    body:'cc-body', setup:() => ccSetup() },
+  { key:'radar',    cls:'gc-radar',    ico:GAME_ICO.radar,      titleKey:'games.radar.title', guitar:true,  descKey:'games.radar.desc',
+    body:'sr-body', setup:() => srSetup() },
+  { key:'roulette', cls:'gc-roulette', ico:GAME_ICO.roulette,   titleKey:'games.rr.title',    guitar:true,  descKey:'games.rr.desc',
+    body:'rr-body', setup:() => rrSetup() },
+  { key:'noterunner', cls:'gc-noterun', ico:GAME_ICO.noterunner, titleKey:'games.nr.title',   guitar:true,  descKey:'games.nr.desc',
+    body:'nr-body', setup:() => nrSetup(), foot:true, records:true },
+  { key:'fingergym', cls:'gc-fingergym', ico:GAME_ICO.fingergym, titleKey:'games.fg.title',    guitar:true,  descKey:'games.fg.desc',
+    body:'nr-body', setup:() => fgSetup(), foot:true },
+  { key:'simonguitar', cls:'gc-simonguitar', ico:GAME_ICO.simonguitar, titleKey:'games.psg.title', guitar:true, descKey:'games.psg.desc',
+    body:'psg-body', setup:() => psgSetup() },
+  { key:'runner',   cls:'gc-runner',   ico:GAME_ICO.runner,     titleKey:'games.riff.title',  guitar:false, descKey:'games.riff.desc',
+    body:'rn-body', setup:() => rnSetup() },
+  { key:'blitz',    cls:'gc-blitz',    ico:GAME_ICO.blitz,      titleKey:'games.cb.title',    guitar:false, descKey:'games.cb.desc',
+    body:'cb-body', setup:() => cbSetup() },
+  { key:'fretzap',  cls:'gc-fretzap',  ico:GAME_ICO.fretzap,    titleKey:'games.fz.title',    guitar:false, descKey:'games.fz.desc',
+    body:'fz-body', setup:() => fzSetup() },
+  { key:'strum',    cls:'gc-strum',    ico:GAME_ICO.strum,      titleKey:'games.sh.title',    guitar:false, descKey:'games.sh.desc',
+    body:'sh-body', setup:() => shSetup() },
+  { key:'detective', cls:'gc-detective', ico:GAME_ICO.detective, titleKey:'games.cd.title',   guitar:false, descKey:'games.cd.desc',
+    body:'cd-body', setup:() => cdSetup() },
+  { key:'riffid',   cls:'gc-riffid',   ico:GAME_ICO.riffid,     titleKey:'games.ntr.title',   guitar:false, descKey:'games.ntr.desc',
+    body:'ntr-body', setup:() => ntrSetup() },
+  { key:'simon',    cls:'gc-simon',    ico:GAME_ICO.simon,      titleKey:'games.ps.title',    guitar:false, descKey:'games.ps.desc',
+    body:'ps-body', setup:() => psSetup() },
+  { key:'patterndet', cls:'gc-patterndet', ico:GAME_ICO.patterndet, titleKey:'games.pd.title', guitar:false, descKey:'games.pd.desc',
+    body:'pd-body', setup:() => pdSetup() },
+  { key:'buildchord', cls:'gc-buildchord', ico:GAME_ICO.buildchord, titleKey:'games.bc.title', guitar:false, descKey:'games.bc.desc',
+    body:'bc-body', setup:() => bcSetup() },
 ];
 
 /* Card chip for a game's best score. Prefers the all-time best persisted in
@@ -2932,90 +2947,10 @@ function gamesShow(view){
     gamesRenderHub(p);
     return;
   }
-  if (view === 'fret'){
-    p.innerHTML = gamesHeadHtml(GAME_ICO.fret + ' ' + t('games.fret.title'), true) + `<div id="fret-body"></div>`;
-    fretStart();
-    return;
-  }
-  if (view === 'cc'){
-    p.innerHTML = gamesHeadHtml(GAME_ICO.cc + ' ' + t('games.cc.title'), true) + `<div id="cc-body"></div>`;
-    ccSetup();
-    return;
-  }
-  if (view === 'blitz'){
-    p.innerHTML = gamesHeadHtml(GAME_ICO.blitz + ' ' + t('games.cb.title'), true) + `<div id="cb-body"></div>`;
-    cbSetup();
-    return;
-  }
-  if (view === 'strum'){
-    p.innerHTML = gamesHeadHtml(GAME_ICO.strum + ' ' + t('games.sh.title'), true) + `<div id="sh-body"></div>`;
-    shSetup();
-    return;
-  }
-  if (view === 'radar'){
-    p.innerHTML = gamesHeadHtml(GAME_ICO.radar + ' ' + t('games.radar.title'), true) + `<div id="sr-body"></div>`;
-    srSetup();
-    return;
-  }
-  if (view === 'roulette'){
-    p.innerHTML = gamesHeadHtml(GAME_ICO.roulette + ' ' + t('games.rr.title'), true) + `<div id="rr-body"></div>`;
-    rrSetup();
-    return;
-  }
-  if (view === 'fretzap'){
-    p.innerHTML = gamesHeadHtml(GAME_ICO.fretzap + ' ' + t('games.fz.title'), true) + `<div id="fz-body"></div>`;
-    fzSetup();
-    return;
-  }
-  if (view === 'runner'){
-    p.innerHTML = gamesHeadHtml(GAME_ICO.runner + ' ' + t('games.riff.title'), true) + `<div id="rn-body"></div>`;
-    rnSetup();
-    return;
-  }
-  if (view === 'noterunner'){
-    p.innerHTML = gamesHeadHtml(GAME_ICO.noterunner + ' ' + t('games.nr.title'), true) + `<div id="nr-body"></div>` + coachFootHtml(true);   // Note Runner records (micRecStart('nr')) — say so
-    nrSetup();
-    return;
-  }
-  if (view === 'fingergym'){
-    /* Finger Gym runs on Note Runner's engine (same #nr-body, same nr state,
-       same mic pipeline) — see the FINGER GYM block below nrRenderDone.
-       It does NOT record (nrStart skips micRecStart for `gym`), so its
-       footer always says nothing is recorded. */
-    p.innerHTML = gamesHeadHtml(GAME_ICO.fingergym + ' ' + t('games.fg.title'), true) + `<div id="nr-body"></div>` + coachFootHtml();
-    fgSetup();
-    return;
-  }
-  if (view === 'detective'){
-    p.innerHTML = gamesHeadHtml(GAME_ICO.detective + ' ' + t('games.cd.title'), true) + `<div id="cd-body"></div>`;
-    cdSetup();
-    return;
-  }
-  if (view === 'riffid'){
-    p.innerHTML = gamesHeadHtml(GAME_ICO.riffid + ' ' + t('games.ntr.title'), true) + `<div id="ntr-body"></div>`;
-    ntrSetup();
-    return;
-  }
-  if (view === 'simon'){
-    p.innerHTML = gamesHeadHtml(GAME_ICO.simon + ' ' + t('games.ps.title'), true) + `<div id="ps-body"></div>`;
-    psSetup();
-    return;
-  }
-  if (view === 'simonguitar'){
-    p.innerHTML = gamesHeadHtml(GAME_ICO.simonguitar + ' ' + t('games.psg.title'), true) + `<div id="psg-body"></div>`;
-    psgSetup();
-    return;
-  }
-  if (view === 'patterndet'){
-    p.innerHTML = gamesHeadHtml(GAME_ICO.patterndet + ' ' + t('games.pd.title'), true) + `<div id="pd-body"></div>`;
-    pdSetup();
-    return;
-  }
-  if (view === 'buildchord'){
-    p.innerHTML = gamesHeadHtml(GAME_ICO.buildchord + ' ' + t('games.bc.title'), true) + `<div id="bc-body"></div>`;
-    bcSetup();
-    return;
-  }
+  const g = GAMES_META.find(x => x.key === view);
+  if (!g) return;
+  p.innerHTML = gamesHeadHtml(g.ico + ' ' + t(g.titleKey), true) + `<div id="${g.body}"></div>` + (g.foot ? coachFootHtml(g.records) : '');
+  g.setup();
 }
 
 /* Language switch while the games screen is open: everything here is built
