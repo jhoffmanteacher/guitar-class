@@ -1933,11 +1933,14 @@ function coachRenderReport(){
   const compareHtml = prevCoach
     ? `<div class="coach-tip">${t('coach.compare', {last: LVL[prevCoach.level] || '—', now: LVL[overallLevel]})}</div>` : '';
 
-  /* The other half of the forgiveness: SAY it. When the notes were right
-     and the only thing short of Great is where they sat in the bar, the
-     report leads with "those all counted" and then asks for the beat —
-     otherwise a student reading three yellow rows has no way to tell that
-     the pitch part was already banked. */
+  /* The other half of the forgiveness: SAY it. When pitch scored at least
+     level 2 and a soft (timing) criterion fell short, the report counts the
+     right notes that sat off the beat (coach.tip.countedLoose: "Right
+     notes, but off the beat: {n}… Each one still counts as a right note")
+     and then asks for the beat — otherwise a student reading three yellow
+     rows has no way to tell those notes were already banked. The tip names
+     only the loose RIGHT notes, so it stays true when another note in the
+     take was wrong. */
   const looseCount = coach.slots.filter(s => s.loose && (s.state === 'ok' || s.state === 'oct')).length;
   const softShort = crits.some(c => c.soft && c.level > 0 && c.level < 3);
   const notesHtml = (crits[0].level >= 2 && softShort && looseCount > 0)
