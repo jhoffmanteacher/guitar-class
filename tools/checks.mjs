@@ -5600,6 +5600,36 @@ async function liveCheck() {
    exact mistake it exists to catch. Journey's count is one higher because
    it reads the two retire maps separately instead of a merged set.
    ════════════════════════════════════════════════════════════════════ */
+/* journey.js's copy of "assigned" (1ah). It has no app.js to ask, so its
+   guard tests the two moves itself, through local variables. Matching the
+   tokens anywhere in the body passed with the variables still defined but
+   dropped from the guard (2026-10-25 review), so this finds the
+   `if(…activityBoardSeeded…) return false;` guard and follows the names in
+   its condition back through their var/let/const lines: the guard must reach
+   cfg.songLibrary AND cfg.classSongs. */
+function journeyAssignedGuardOk(raw) {
+  const body = stripJsComments(raw);
+  const decls = {};
+  for (const m of body.matchAll(/\b(?:var|let|const)\s+([A-Za-z_$][\w$]*)\s*=\s*([^;]*);/g)) decls[m[1]] = m[2];
+  let cond = null;
+  for (const m of body.matchAll(/\bif\s*\(/g)) {
+    let depth = 0, i = m.index + m[0].length - 1, end = -1;
+    for (; i < body.length; i++) {
+      if (body[i] === '(') depth++;
+      else if (body[i] === ')' && --depth === 0) { end = i; break; }
+    }
+    if (end < 0) continue;
+    const c = body.slice(m.index + m[0].length, end);
+    if (c.includes('activityBoardSeeded') && /^\s*return false;/.test(body.slice(end + 1))) { cond = c; break; }
+  }
+  if (cond === null) return false;
+  const reaches = (expr, token, seen) => {
+    if (expr.includes(token)) return true;
+    return [...expr.matchAll(/(?<![\w$.])[A-Za-z_$][\w$]*/g)].map(x => x[0])
+      .some(id => decls[id] !== undefined && !seen.has(id) && reaches(decls[id], token, new Set([...seen, id])));
+  };
+  return reaches(cond, 'cfg.songLibrary', new Set()) && reaches(cond, 'cfg.classSongs', new Set());
+}
 function checkVisibilityParity() {
   head('1ah. caIsVisible / teacherActivityVisible / journeyIsVisible stay in step');
   const COPIES = [
@@ -5619,9 +5649,10 @@ function checkVisibilityParity() {
        every student. So app.js and teacher.js must read the resolver itself,
        and journey.js (no app.js on those pages) must test both moves. */
     { name: 'assigned to the board (caBoardOrder: library songs and teacher-only cards never are)', re: {
-      'app.js': /caBoardView\(\)\.assigned\[a\.id\]/,
-      'teacher.js': /teacherBoardView\(cfg\)\)?\.assigned\[a\.id\]/,
-      'tabs/journey.js': /^(?=[\s\S]*activityBoardSeeded)(?=[\s\S]*cfg\.songLibrary)(?=[\s\S]*cfg\.classSongs)/,
+      // In the guard itself, not just somewhere in the body.
+      'app.js': /if\s*\(\s*!\s*caBoardView\(\)\.assigned\[a\.id\]\s*\)\s*return false;/,
+      'teacher.js': /if\s*\(\s*!\s*\(\s*(?:view\s*\|\|\s*)?teacherBoardView\(cfg\)\s*\)\.assigned\[a\.id\]\s*\)\s*return false;/,
+      'tabs/journey.js': { test: journeyAssignedGuardOk },
     } },
     { name: 'teacher hide toggle', re: /hiddenActivityIds|hiddenActivities/ },
     { name: 'release date', re: /caDate\(|activityDates/ },
