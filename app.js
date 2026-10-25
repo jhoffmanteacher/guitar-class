@@ -2899,7 +2899,12 @@ function snipToggle(btn){
   audio.loop = false;                  // the window is looped by hand, below
   audio.src = snippetSrc(tr, slow, guitar);
   slowestApplyRate(audio, snipRate(card));
-  snipState = { card, audio, spec, tr, win, raf: 0, lastBeat: -1, cal: card.querySelector('.snip-cal') };
+  /* The bar dots and the sibling tab are looked up once, not every frame:
+     both are built with the card and nothing rewrites them in place — any
+     re-render replaces the card too, and the tick stops on !isConnected. */
+  snipState = { card, audio, spec, tr, win, raf: 0, lastBeat: -1, cal: card.querySelector('.snip-cal'),
+    dots: [...card.querySelectorAll('.snip-bar')], lastBar: -1,
+    tab: card.parentElement && card.parentElement.querySelector('.tab[data-total-notes]') };
   btn.innerHTML = snipPlayBtnHtml(true);
   btn.classList.add('playing');
   // preload='none' would leave currentTime unsettable until metadata lands;
@@ -2966,9 +2971,8 @@ function snipLatency(){
    The tab and the snippet are always siblings under one step body (never
    nested — caStepHtml/renderTeacherActivityDetail build them as adjacent
    pieces of `parts`), so the sibling search only has to look inside the
-   snippet card's own parent. */
-function snipSyncTabPage(card, spec, win, heard){
-  const tabEl = card.parentElement && card.parentElement.querySelector('.tab[data-total-notes]');
+   snippet card's own parent (snipToggle finds it once, as snipState.tab). */
+function snipSyncTabPage(tabEl, spec, win, heard){
   if(!tabEl) return;
   const total = Number(tabEl.dataset.totalNotes) || 0;
   if(!total || !spec.bars) return;
@@ -3017,8 +3021,11 @@ function snipTick(){
   // see SNIP_OUTPUT_LATENCY. The dots follow the ears, not the decoder.
   const heard = now - snipLatency() * snipRate(card);   // latency is real seconds; this is file time
   const bar = Math.max(0, Math.min(spec.bars - 1, Math.floor(snipBarsAt(win, heard))));
-  card.querySelectorAll('.snip-bar').forEach((d, i) => d.classList.toggle('bar-now', i === bar));
-  snipSyncTabPage(card, spec, win, heard);
+  if(bar !== snipState.lastBar){
+    snipState.lastBar = bar;
+    snipState.dots.forEach((d, i) => d.classList.toggle('bar-now', i === bar));
+  }
+  snipSyncTabPage(snipState.tab, spec, win, heard);
   if(cal){ const tEl = cal.querySelector('.snip-cal-time'); if(tEl) tEl.textContent = now.toFixed(2) + ' s'; }
   snipState.raf = requestAnimationFrame(snipTick);
 }
