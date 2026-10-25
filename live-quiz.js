@@ -1016,11 +1016,17 @@ function lqStageUpdateTimer(){
   if(left === 0) lqStageStopTick();
 }
 
+/* Kept for the whole console session, not dropped on leaving this view: Reveal
+   scores from lqTAnswers and the strip acts on lqTSession, so a listener
+   started again on the way back would leave both stale until its first
+   snapshot — a Reveal clicked in that gap would score the wrong answers. A
+   listener that errors is dead, though, so its slot is cleared and the next
+   render starts it again (each one independently). */
 function lqTeacherListen(){
-  if(lqTUnsubDoc) return;
+  if(lqTUnsubDoc && lqTUnsubAns) return;
   lqEnsureDb().then(()=>{
-    if(!lqDb || lqTUnsubDoc) return;
-    lqTUnsubDoc = lqDoc().onSnapshot(snap => {
+    if(!lqDb) return;
+    if(!lqTUnsubDoc) lqTUnsubDoc = lqDoc().onSnapshot(snap => {
       const prev = lqTSession;
       lqTSession = snap.exists ? (snap.data() || null) : null;
       // Same rule as the student clock: never trust a server timestamp for
@@ -1031,14 +1037,14 @@ function lqTeacherListen(){
       }
       if(typeof teacherView !== 'undefined' && teacherView === 'livequiz'){ lqPaintStage(); lqPaintControls(); }
       lqStageSyncTick();
-    }, e => console.warn('[live-quiz] teacher session listener stopped', e));
-    lqTUnsubAns = lqDoc().collection('answers').onSnapshot(snap => {
+    }, e => { console.warn('[live-quiz] teacher session listener stopped', e); lqTUnsubDoc = null; });
+    if(!lqTUnsubAns) lqTUnsubAns = lqDoc().collection('answers').onSnapshot(snap => {
       lqTAnswers = snap.docs.map(d => d.data() || {});
       // Stage only: nothing in the control strip reads the answers, and
       // rebuilding it on every answer could swap a button out from under a
       // click (mousedown on the old one, mouseup on the new = no click).
       if(typeof teacherView !== 'undefined' && teacherView === 'livequiz') lqPaintStage();
-    }, e => console.warn('[live-quiz] teacher answers listener stopped', e));
+    }, e => { console.warn('[live-quiz] teacher answers listener stopped', e); lqTUnsubAns = null; });
   }).catch(()=>{});
 }
 
