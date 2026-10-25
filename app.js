@@ -5280,7 +5280,7 @@ function lessonParts(w, flat){
    ended the attribute at its first quote, so the button threw on click
    (15 links, 2026-10-25). Nothing else is escaped on purpose: the attribute
    parser still decodes the label's own entities (&amp; → &) before the JS
-   runs, exactly as before. checks.mjs 1br parses every handler. */
+   runs, exactly as before. checks.mjs 1bs parses every handler. */
 const jsArgInAttr = s => String(s).replace(/\\/g,'\\\\').replace(/'/g,"\\'").replace(/"/g,'&quot;');
 function ytLinksToButtons(html){
   return html.replace(/<a href="(https?:\/\/(?:www\.)?(?:youtube\.com|youtu\.be)[^"]*)"([^>]*)>([^<]*)<\/a>/g,(match,url,attrs,label)=>{

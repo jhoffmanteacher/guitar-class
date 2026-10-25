@@ -5282,7 +5282,7 @@ function checkSetParts(sets, buildSet, ctx) {
 }
 
 /* ════════════════════════════════════════════════════════════════════
-   1br. EVERY INLINE HANDLER IN A RENDERED SET PARSES (2026-10-25).
+   1bs. EVERY INLINE HANDLER IN A RENDERED SET PARSES (2026-10-25).
    A step's YouTube <a> becomes a ▶ button whose onclick carries the
    link's label as a JS string, inside a double-quoted attribute. Until
    this date only the label's ' was escaped, so a label that opened with a
@@ -5302,11 +5302,11 @@ function checkSetParts(sets, buildSet, ctx) {
    ════════════════════════════════════════════════════════════════════ */
 const YT_BUTTONS_FLOOR = 150;   // ▶ buttons the scan must see (EN + ES): 204 on 2026-10-25
 function checkInlineHandlersParse(sets, buildSet, ctx) {
-  head('1br. Every inline handler in a rendered set parses');
+  head('1bs. Every inline handler in a rendered set parses');
   const ytLinksToButtons = vm.runInContext('typeof ytLinksToButtons === "function" ? ytLinksToButtons : null', ctx);
   const setLang = vm.runInContext('typeof setLang === "function" ? setLang : null', ctx);
   // A rename in app.js must fail here, not turn the check off (0b's rule).
-  if (!setLang) { err('1br cannot run — setLang() not found in i18n.js (renamed? update this check with it)'); problems++; return; }
+  if (!setLang) { err('1bs cannot run — setLang() not found in i18n.js (renamed? update this check with it)'); problems++; return; }
   const decodeAttr = s => decodeHtmlEntities(s.replace(/&apos;/g, "'"));
   const ATTR_RE = /\son[a-z]+\s*=\s*(?:"([^"]*)"|'([^']*)')/gi;
   const compiles = code => { try { new vm.Script(`(function(event){${code}\n})`); return true; } catch { return false; } };
@@ -5355,7 +5355,7 @@ function checkInlineHandlersParse(sets, buildSet, ctx) {
   if (failures.length > 12) err(`…and ${failures.length - 12} more`);
   if (failures.length) { problems++; bad++; }
   if (ytButtons < YT_BUTTONS_FLOOR) {
-    err(`the scan saw only ${ytButtons} YouTube ▶ buttons (floor ${YT_BUTTONS_FLOOR}) — the renderer's button markup changed and 1br can no longer see it; update ATTR_RE / the loadPanel test`);
+    err(`the scan saw only ${ytButtons} YouTube ▶ buttons (floor ${YT_BUTTONS_FLOOR}) — the renderer's button markup changed and 1bs can no longer see it; update ATTR_RE / the loadPanel test`);
     problems++; bad++;
   }
   if (!bad) ok(`${handlers} inline handlers across ${sets.length} sets × EN/ES all parse (${ytButtons} YouTube ▶ buttons); ytLinksToButtons() escapes " ' \\ in a label`);
