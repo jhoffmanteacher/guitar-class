@@ -5906,6 +5906,13 @@ function syncStationFocus(dp){
     const back = nav.querySelector('.fm-back'), next = nav.querySelector('.fm-next');
     if(back) back.hidden = idx <= 0;
     if(next) next.hidden = idx < 0 || idx >= steps.length - 1;
+    /* Hiding the focused button drops keyboard focus to <body> (Next on
+       the last step, Back on the first): hand it to the other button, or
+       to the open row's heading. */
+    if([back, next].some(b => b && b.hidden && b === document.activeElement)){
+      const to = [back, next].find(b => b && !b.hidden) || (open && open.querySelector('.step-head'));
+      if(to) to.focus({preventScroll: true});
+    }
   }
 }
 
@@ -5929,6 +5936,10 @@ function stationStepNav(btn, dir){
     dp.classList.add('pd-showing');
     const mark = dp.querySelector('.stp-partbreak');
     if(mark) requestAnimationFrame(()=>mark.scrollIntoView({block:'start'}));
+    // .pd-showing hides the Back/Next row this button sits in; "Keep going"
+    // (above it, in the divider) is the way on, so focus goes there.
+    const go = mark && mark.querySelector('.stp-part-go');
+    if(go && btn === document.activeElement) go.focus({preventScroll: true});
     return;
   }
   nudgeStepIntoView(target, true);
@@ -5948,6 +5959,10 @@ function dismissPartBreak(btn){
   const open = dp.querySelector('li.step:not(.collapsed)');
   if(open) nudgeStepIntoView(open, true);
   syncStationFocus(dp);
+  // "Keep going" hides itself with the divider screen: focus moves to the
+  // Part 2 step it opened onto.
+  const head = open && open.querySelector('.step-head');
+  if(head && btn === document.activeElement) head.focus({preventScroll: true});
 }
 
 /* Collapsing a taller open step ABOVE this one shortens the page, which
