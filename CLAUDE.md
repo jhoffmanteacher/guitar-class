@@ -3,6 +3,44 @@
 Operative rules only. History, worked examples, and the reasoning behind each
 rule live in `WORKFLOW.md` — read it when you need the *why*, not every session.
 
+## Start here — the short list (read this even if you read nothing else)
+
+**Before you say "done" on a code change:**
+1. While working: `node tools/checks.mjs --check --skip-links`. Before a push:
+   the full `node tools/checks.mjs`. Never hand-edit the version lines in `sw.js`.
+2. Touched a `module-N.js`? `node tools/rule-zero-proof.mjs origin/main`, and
+   paste its summary into your report.
+3. Touched a renderer, escaping, or 3+ files? `node tools/smoke.mjs --baseline
+   origin/main` — a real browser walks every set in English and Spanish (about a
+   minute).
+4. New student-facing text → its Spanish twin, same edit. A new step field →
+   both step renderers.
+5. A student can see the change → a `CHANGELOG.md` entry, same push.
+6. Right before pushing: `git fetch`, then `git log HEAD..origin/main`. After
+   pushing: `node tools/checks.mjs --live`.
+
+**Never, whatever the task says:** move or renumber a section or step (progress
+keys); reword a graded MC's choices — or its English prompt — in a frozen module
+or the one the class is about to enter ("Three regimes"); write `progress/{uid}`
+from console code; write `config/class` except through `teacherWriteConfig()`;
+change `firestore.rules` without telling Jonathan it needs a console paste;
+re-level "the cure"; delete what is switched off (Daily 5, Take It to a Song
+sections); resurrect the deleted student tour.
+
+**Habits that catch the expensive bugs:**
+- Grep before you edit — the same bug lives in sibling copies and in comments
+  that describe the old behaviour. Fix them together.
+- Unsure whether a change is allowed? Run the proof tool; don't reason it out.
+- A check fails → fix the cause. Never loosen the check, or add an allowlist
+  entry, to get green.
+- Report what you verified with the denominator ("306 handlers compiled"), not
+  "looks fine". A script that finds 0 in both the old and new tree proves nothing.
+- Product calls, and rules that contradict each other, go to Jonathan through
+  AskUserQuestion — don't pick silently.
+
+Which file to read before touching an area: the table under "Lazy-loaded
+guidance" near the end.
+
 ## Who I'm working with
 Jonathan Hoffman prefers plain-English instructions and wants Claude to handle
 all git mechanics without him needing to remember commands.
@@ -151,6 +189,16 @@ Exits non-zero if anything's wrong — don't push until it passes. It:
 `--live` (fetch the live `sw.js` and confirm the deploy landed — run it a minute
 after pushing; local sessions only, cloud can't reach the live site).
 
+**Real-browser smoke test (2026-10-25).** `checks.mjs` reads source text; it
+cannot click. `node tools/smoke.mjs --baseline origin/main` boots the site in
+headless Chrome (dev bypass, no network needed), walks every module and set in
+English and Spanish, opens Songs / Class activities / My progress / Games,
+visits every game view and the tuner, and fails on any JavaScript error the
+baseline did not have, or any inline handler that does not compile. It is for
+renderer, escaping or many-file changes, not every commit. Needs Node 22+ and
+Chrome (`--chrome <path>` if it can't find one). It caught what no check could:
+15 lesson ▶ buttons that were dead for weeks.
+
 A tracked pre-commit hook at `.githooks/pre-commit` runs the fast offline checks
 on every commit. Per-machine setup, once: `git config core.hooksPath .githooks`
 — **done on both machines**. Bypass with `--no-verify`.
@@ -284,6 +332,12 @@ MC-tell audit died that way and the class recurred in the next sweep. The
 existing detectors (1h onward) are each documented by a comment in
 `tools/checks.mjs` — read it there rather than keeping a list here.
 
+When several agents add checks at once, **hand each one its label before it
+starts** (`grep -o "head('1b[a-z0-9]*\." tools/checks.mjs | sort | tail -3`);
+three agents once all took `1br`. And a check that merely finds a call in the
+source proves nothing about behaviour — make it render or execute the thing
+(1bf renders both card builders, 1bs compiles every inline handler).
+
 **A phrase detector must match the UNESCAPED string.** Until 2026-09-25 1w
 and 1w-t matched the raw source capture, which keeps `\'`, so every banned
 phrase with an apostrophe ("don't worry", "that's the point", "that one's
@@ -376,6 +430,13 @@ Inserting one in the middle means retyping every later title's digit plus any
 "same as Gym 1" / "del Gimnasio 1" cross-reference in another activity's step
 text, in the SAME edit. Ids (`ca-<n>`) never move — student progress is keyed
 to them.
+
+**The read side has rules too (2026-10-25)** — a superseded read returns the
+newest read, never `null`; a diverged write never marks this tab's copy current;
+toggles repaint from the changed copy; visibility comes from
+`teacherBoardView(cfg).assigned`. They are in `.claude/rules/teacher-console.md`
+(loads with `teacher.js`) with the two-console test method. Read it before you
+touch `loadTeacherClassConfig` or `teacherWriteConfig`.
 
 ### ⚠️ Editing a module's skills? Update `MODULE_MANIFEST` in `config-main.js`
 Add or remove a `skills:` entry and you must bump that module's `skillCount`.
@@ -782,13 +843,16 @@ holds ⚠️ rules as binding as anything here.
 
 | Area | File | Critical rule kept here |
 |---|---|---|
-| Backing tracks, snippets, practice-card audio, Journey clicks, `playNote`, `audio/` | skill `audio-and-snippets` | Snippet windows are bars, never seconds; never measure a second anchor; never pitch-correct one mix alone; new "silence it" call → `stopCardAudio()` |
+| Backing tracks, snippets, practice-card audio, Journey clicks, `playNote`, `audio/` | skill `audio-and-snippets` | Snippet windows are bars, never seconds; never measure a second anchor; never pitch-correct one mix alone; new "silence it" call → `stopCardAudio()`; **every backing track is levelled to "the cure" (−12.5 LUFS) with `python3 tools/loudness.py <slug>`, one gain per song — never re-level the cure** |
 | In-Class Activities, the gate, exit checks, practice cards, Songs Core rows, render-time hiding | skill `in-class-activities` | Exit-check `items` are positional — frozen once taken; don't fold "Play Along now" into `caIsVisible()`; take-to-song is switched off in every module (`TAKE_TO_SONG_ENABLED`) — don't delete the sections, they hold `gi` |
 | Core/Choice song chords, keys, timing, bar numbers | skill `song-facts` | Don't re-flag settled facts; don't verify BPM in audits |
 | Fixes blocked by frozen modules | skill `summer-reset` | Add any blocked fix there the same day; raising FROZEN_* never unlocks anything |
 | Live quiz | `.claude/rules/live-quiz.md` (loads with `live-quiz.js`) | Nothing on the stage may reveal the answer before the reveal |
 | Set band, left rail, nav grid | `.claude/rules/rail-layout.md` (loads with `styles.css`/`index.html`) | The nav two-column grid is permanent — don't re-simplify; measure, don't do arithmetic |
 | Journey tab cards | `.claude/rules/journey-pages.md` (loads with `tabs/**`) | Restyle `.tab` in both stylesheets or neither |
+| Writing any JS (`app.js`, `teacher.js`, `coach.js`, `live-quiz.js`, `fab-tools.js`, `tuner.js`, `tabs/journey.js`) | `.claude/rules/code-hygiene.md` (loads with those files) | Inline handler args use `jsonAttrArg(x)`, never `'${escAttr(x)}'`; never a mid-line `//`; grep sibling copies and old-behaviour comments before and after a fix; stop everything you start; escape student-written values |
+| Teacher console shared config | `.claude/rules/teacher-console.md` (loads with `teacher.js`) | A superseded read returns the newest read, never `null`; a diverged write never marks the copy current; visibility via `teacherBoardView(cfg).assigned` |
+| Whole-site audits, many-file refactors, 50+ string wording passes with sub-agents | skill `site-sweep` (playbook + auditor/fixer/reviewer briefs) | Pre-create the worktrees; cherry-pick to one linear branch; an adversarial review of the *fixes* is required; fetch before pushing |
 
 ## How to work with Jonathan
 
@@ -815,12 +879,25 @@ implement it?".
   you don't think is ready for students.
 - When in doubt: pick the sensible default, proceed, say what you did and why.
 
-**Sub-agent sweeps need an adversarial audit budgeted in.** On any content sweep
-over ~50 items, run a second agent told to *find problems, not confirm the work*
-— the structural pass and the audit catch disjoint failure classes. Lead every
-sweep prompt with the calibration line ("convert EVERY card; do NOT skip one
-because the actions flow naturally — re-stitch it"), or agents go timid.
-Sonnet for mechanical work, the big model for design and verification.
+**Sub-agent sweeps need an adversarial audit budgeted in — and it audits the
+FIXES, not just the findings.** On any content sweep over ~50 items, run a
+second agent told to *find problems, not confirm the work* — the structural pass
+and the audit catch disjoint failure classes. Lead every sweep prompt with the
+calibration line ("convert EVERY card; do NOT skip one because the actions flow
+naturally — re-stitch it"), or agents go timid. Sonnet for mechanical work, the
+big model for design and verification. Every review round of the 2026-10-25
+sweep found real regressions that the fixers' own proofs missed. Playbook and
+the auditor / fixer / reviewer brief templates: skill `site-sweep`.
+
+**Triggers, so this doesn't depend on how hard you are thinking** (they hold at
+any effort level): run an adversarial reviewer, on a pinned commit, whenever a
+change touches 3+ files, a danger-zone file (`teacher.js` config plumbing,
+`sw.js`, `checks.mjs`, `coach.js` detection, the `app.js` save path,
+`firestore.rules`), or 50+ strings. For a danger-zone file write the failing
+scenario before the fix. When a rule says "run the tool", run it — don't
+substitute your own reading of the code. When an agent hands you a claim, read
+the quoted lines yourself before acting; when it hands you a fix, make it
+re-derive it on the real code.
 
 **Report the real numbers instead of accepting the premise**, and name the prior
 decision a request would reverse — both have produced better calls than fixing

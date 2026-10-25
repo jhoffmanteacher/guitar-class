@@ -655,6 +655,36 @@
 
 ## Recently shipped (post-archive)
 
+- [x] **2026-10-25 — Whole-site sweep + audio levelling.** Jonathan: "spawn
+      agents and check the site for errors, make changes and look for
+      inefficiencies such as instances to refactor", then a plain-wording pass,
+      a cache-fingerprint fix, a Teen Spirit zip and a loudness rule. 11
+      read-only auditors, 7 fixers (one per file family, each in a pre-created
+      worktree), 4 adversarial reviewers plus a review-fix round per family.
+      Pushed as 111 commits (`5d1ff51..6ea5898`, live `…-6f4dcd3b92`) and 18 more
+      for Teen Spirit (ca-41) and the loudness pass (`..ba655c7`, 32 mp3s
+      re-encoded, +267 MB in git history, every cached track re-downloaded
+      once). Headline fixes: ~15 dead lesson ▶ buttons (an `onclick` escape
+      hole); a stored XSS through a student's `period`; Name That Riff freeze;
+      Finger Gym no longer overwrites a Note Runner mic take; console counted
+      moved songs as Pending; two-console board corruption and views stuck on
+      "Loading…"; deploys no longer reload mid practice-card song; the A chord
+      diagram now matches Module 4; seven steps pointed at removed UI; fonts and
+      icons now bump the cache. New checks: **1br** (steps pointing at removed
+      UI), **1bs** (every inline handler in every rendered set compiles and
+      passes the right title), **1bt** (every precached file is fingerprinted),
+      **1bu** (soft: each song within 1 LU of "the cure"); 1bf now *renders* the
+      card builders; 1ah follows the guard, not the token. New tools:
+      `tools/smoke.mjs` (real-browser walk, `--baseline <ref>` to diff against a
+      clean ref), `tools/loudness.py`. New guidance: `.claude/rules/code-hygiene.md`,
+      `.claude/rules/teacher-console.md`, skill `site-sweep`, and a "Start here"
+      block at the top of CLAUDE.md. Left for Jonathan (praise voice, hidden-tab
+      games, the ca-38 Watchtower caption, sw.js re-download cost, language and
+      refactor backlogs) is in the project memory `site-sweep-2026-10-25`.
+      Six backing-track files stay more than 1 LU off "the cure" on purpose
+      (slow-tier and guitar-off exports are quieter at the source; Jonathan chose
+      one gain per song).
+
 - [x] **2026-10-10 — "Keep practicing" row (pinned activities).** Work order
       "Keep practicing row on In-Class Activities". New
       `config/class.activityPins` — an ORDERED array of up to 4 activity ids
@@ -1545,6 +1575,43 @@ Moved out of `CLAUDE.md` on 2026-07-26 so it stops being re-read on every turn
 of every session (it was ~8,800 tokens per turn; the trimmed file is ~3,300).
 The *rules* stay in `CLAUDE.md`; the reasoning, worked examples and history live
 here. Read this when you need the **why**.
+
+### Why the 2026-10-25 rules exist: "Start here", code-hygiene, teacher-console, site-sweep
+
+Jonathan asked for the lessons of the sweep to be written down so they carry
+forward, and asked what would help a *medium*-effort run behave like an
+extra-high-effort one. The design follows from how the two differ: a
+high-effort run cross-checks on its own initiative (greps siblings, re-reads the
+line it edited, distrusts a green run); a medium-effort run does the obvious next
+step and trusts the tools. So the guidance is built to not depend on initiative:
+
+- **A short "Start here" block at the very top of CLAUDE.md** (the file is 800+
+  lines; the top is what actually gets absorbed). It is a checklist of commands to
+  run before saying "done", a short *never* list, and five habits — not prose.
+- **Mechanical gates in place of judgement.** `node tools/checks.mjs`,
+  `rule-zero-proof.mjs`, and the new `tools/smoke.mjs` answer "is this allowed /
+  does this still work" by running something. The smoke test exists because
+  `checks.mjs` reads source text and cannot click: a label with quote marks ended
+  an `onclick` attribute early and 15 ▶ buttons were dead for weeks with every
+  check green. Pre-fix tree → 5 error events; fixed tree → none.
+- **Explicit triggers for review** (3+ files, a danger-zone file, 50+ strings)
+  instead of "review when it seems risky". Every review round of the sweep found
+  real regressions in the *fixes* (a mid-line `//` swallowing `bpm`/`chords`; a
+  simplified Coach tip that said "Every note was right" under wrong notes; a
+  console rewrite that left views on "Loading…"; the Español button stopping the
+  song playing for the room). Fixers' own proof scripts had passed each time.
+- **Rules as small numbered steps with the command that checks them**
+  (`code-hygiene.md`), loaded only when editing the files they govern, so the root
+  file stays small. `teacher-console.md` records the shared-config rules a
+  two-console stress test established (the harness found three majors that
+  reading did not); the harness itself was a scratchpad file and is *not* in the
+  repo — whoever next changes that plumbing should rebuild it and commit it to
+  `tools/`.
+- **The sweep playbook and its three brief templates are a skill** so the next
+  sweep starts from what worked: pre-created worktrees, one fixer per file family,
+  `git cherry-pick main..branch` onto one linear branch (fast-forward push),
+  check labels handed out in advance, reviewers on a pinned commit, `git fetch`
+  immediately before pushing (another session moved `origin/main` mid-sweep).
 
 ### Multi-step directions get lists (Jonathan, 2026-07-23; refined 2026-07-25)
 
