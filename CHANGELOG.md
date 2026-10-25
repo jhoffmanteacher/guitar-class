@@ -5,6 +5,13 @@ Notable changes to the Guitar Class site. Newest first.
 For the full session-by-session history (and the reasoning behind each change),
 see `WORKFLOW.md` and the git commit log.
 
+## 2026-10-25 — All backing tracks play at the same volume
+
+- **All backing tracks now play at the same volume.** Every song plays about
+  as loud as "the cure", at both speeds, so you can set the volume once and
+  leave it. Some songs got louder and some got quieter. Nothing else about
+  the tracks changed.
+
 ## 2026-10-25 — Fixes and plainer wording across the site
 
 - **Lesson video buttons open again.** About 15 ▶ buttons in Modules 4, 5,
