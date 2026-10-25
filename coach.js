@@ -3602,14 +3602,18 @@ function cbTimerTick(){
   if (left <= 0) cbTimeUp();
 }
 
-function cbKeydown(e){
+/* Keys 1–4 answer a four-choice card round on a laptop — the same rule for
+   Chord Blitz, Chord Detective, Name That Riff and Fret Zap. Each game keeps
+   its own named handler (add/removeEventListener need one). */
+function cardAnswerKey(e, s, answer){
   if (e.repeat) return;
-  if (!cb || cb.phase !== 'play' || cb.locked) return;
+  if (!s || s.phase !== 'play' || s.locked) return;
   const tag = (e.target && e.target.tagName) || '';
   if (tag === 'INPUT' || tag === 'TEXTAREA' || tag === 'SELECT') return;
   const i = ['1', '2', '3', '4'].indexOf(e.key);
-  if (i >= 0) cbAnswer(i);
+  if (i >= 0) answer(i);
 }
+function cbKeydown(e){ cardAnswerKey(e, cb, cbAnswer); }
 
 /* A missed chord is due again 3–5 cards later; otherwise random from the
    chords unlocked so far. Never the same card twice in a row. */
@@ -3805,12 +3809,7 @@ function cbRenderDone(){
   const body = cbBody();
   if (!body || !cb) return;
   const acc = cb.answered ? Math.round(100 * cb.correct / cb.answered) : 0;
-  let bestLine = '';
-  if (cb.prevBest > 0 && cb.score > cb.prevBest){
-    bestLine = `<div class="cb-newbest">&#x1F3C6; ${t('games.common.newBest', { value: cb.prevBest })}</div>`;
-  } else if (cb.prevBest > 0){
-    bestLine = `<div class="coach-tip">${t('games.common.bestTodayLabel')}: ${cb.prevBest}.</div>`;
-  }
+  const bestLine = cardBestLine(cb.prevBest, cb.score);
   const levelLine = cb.levels.length > 1
     ? `<div class="coach-overall">${t('games.common.reachedLevel', { n: cb.topLevel, total: cb.levels.length })}</div>`
     : '';
@@ -3986,14 +3985,7 @@ function cdPlay(){
   }
 }
 
-function cdKeydown(e){
-  if (e.repeat) return;
-  if (!cd || cd.phase !== 'play' || cd.locked) return;
-  const tag = (e.target && e.target.tagName) || '';
-  if (tag === 'INPUT' || tag === 'TEXTAREA' || tag === 'SELECT') return;
-  const i = ['1', '2', '3', '4'].indexOf(e.key);
-  if (i >= 0) cdAnswer(i);
-}
+function cdKeydown(e){ cardAnswerKey(e, cd, cdAnswer); }
 
 /* A missed chord is due again 3–5 cards later; otherwise random from the
    chords unlocked so far. Never the same card twice in a row. */
@@ -4172,12 +4164,7 @@ function cdRenderDone(){
   const body = cdBody();
   if (!body || !cd) return;
   const acc = cd.answered ? Math.round(100 * cd.correct / cd.answered) : 0;
-  let bestLine = '';
-  if (cd.prevBest > 0 && cd.score > cd.prevBest){
-    bestLine = `<div class="cb-newbest">&#x1F3C6; ${t('games.common.newBest', { value: cd.prevBest })}</div>`;
-  } else if (cd.prevBest > 0){
-    bestLine = `<div class="coach-tip">${t('games.common.bestTodayLabel')}: ${cd.prevBest}.</div>`;
-  }
+  const bestLine = cardBestLine(cd.prevBest, cd.score);
   const levelLine = cd.levels.length > 1
     ? `<div class="coach-overall">${t('games.common.reachedLevel', { n: cd.topLevel, total: cd.levels.length })}</div>`
     : '';
@@ -4254,6 +4241,16 @@ function ntrStart(){
   ntrNext();
 }
 
+/* The results screen's "best" line for a game scored as one number (Chord
+   Blitz, Chord Detective, Name That Riff, both Pentatonic Simons, Fret Zap,
+   Pattern Detective, Build-a-Chord): a new best over this session's, or the
+   session best to beat; nothing before there is one. */
+function cardBestLine(prevBest, now){
+  if (prevBest > 0 && now > prevBest) return `<div class="cb-newbest">&#x1F3C6; ${t('games.common.newBest', { value: prevBest })}</div>`;
+  if (prevBest > 0) return `<div class="coach-tip">${t('games.common.bestTodayLabel')}: ${prevBest}.</div>`;
+  return '';
+}
+
 /* Shared m:ss countdown formatter — Chord Blitz stopped needing it when it
    moved to a per-card seconds-only display (2026-09-16), but Name That Riff,
    Fret Zap, Pattern Detective and Build-a-Chord still run a 60–90s round
@@ -4277,14 +4274,7 @@ function ntrTimerTick(){
   if (left <= 0) ntrFinish();
 }
 
-function ntrKeydown(e){
-  if (e.repeat) return;
-  if (!ntr || ntr.phase !== 'play' || ntr.locked) return;
-  const tag = (e.target && e.target.tagName) || '';
-  if (tag === 'INPUT' || tag === 'TEXTAREA' || tag === 'SELECT') return;
-  const i = ['1', '2', '3', '4'].indexOf(e.key);
-  if (i >= 0) ntrAnswer(i);
-}
+function ntrKeydown(e){ cardAnswerKey(e, ntr, ntrAnswer); }
 
 /* A missed riff is due again 2–4 cards later; otherwise random from the
    4 songs. Never the same song twice in a row. */
@@ -4405,12 +4395,7 @@ function ntrRenderDone(){
   const body = ntrBody();
   if (!body || !ntr) return;
   const acc = ntr.answered ? Math.round(100 * ntr.correct / ntr.answered) : 0;
-  let bestLine = '';
-  if (ntr.prevBest > 0 && ntr.score > ntr.prevBest){
-    bestLine = `<div class="cb-newbest">&#x1F3C6; ${t('games.common.newBest', { value: ntr.prevBest })}</div>`;
-  } else if (ntr.prevBest > 0){
-    bestLine = `<div class="coach-tip">${t('games.common.bestTodayLabel')}: ${ntr.prevBest}.</div>`;
-  }
+  const bestLine = cardBestLine(ntr.prevBest, ntr.score);
   body.innerHTML =
     `<div class="coach-report">
        <div class="cb-done-score">${ntr.score}</div>
@@ -4579,12 +4564,7 @@ function psFinish(){
 function psRenderDone(){
   const body = psBody();
   if (!body || !ps) return;
-  let bestLine = '';
-  if (ps.prevBest > 0 && ps.round > ps.prevBest){
-    bestLine = `<div class="cb-newbest">&#x1F3C6; ${t('games.common.newBest', { value: ps.prevBest })}</div>`;
-  } else if (ps.prevBest > 0){
-    bestLine = `<div class="coach-tip">${t('games.common.bestTodayLabel')}: ${ps.prevBest}.</div>`;
-  }
+  const bestLine = cardBestLine(ps.prevBest, ps.round);
   body.innerHTML =
     `<div class="coach-report">
        <div class="cb-done-score">${ps.round}</div>
@@ -4896,12 +4876,7 @@ function psgRenderDone(){
   const body = psgBody();
   const s = psg;
   if (!body || !s) return;
-  let bestLine = '';
-  if (s.prevBest > 0 && s.round > s.prevBest){
-    bestLine = `<div class="cb-newbest">&#x1F3C6; ${t('games.common.newBest', { value: s.prevBest })}</div>`;
-  } else if (s.prevBest > 0){
-    bestLine = `<div class="coach-tip">${t('games.common.bestTodayLabel')}: ${s.prevBest}.</div>`;
-  }
+  const bestLine = cardBestLine(s.prevBest, s.round);
   let missLine = '';
   if (s.missPad >= 0){
     const p = PSG_POS[s.missPad];
@@ -5050,14 +5025,7 @@ function fzTimerTick(){
   if (left <= 0) fzFinish();
 }
 
-function fzKeydown(e){
-  if (e.repeat) return;
-  if (!fz || fz.phase !== 'play' || fz.locked) return;
-  const tag = (e.target && e.target.tagName) || '';
-  if (tag === 'INPUT' || tag === 'TEXTAREA' || tag === 'SELECT') return;
-  const i = ['1', '2', '3', '4'].indexOf(e.key);
-  if (i >= 0) fzAnswer(i);
-}
+function fzKeydown(e){ cardAnswerKey(e, fz, fzAnswer); }
 
 /* A missed spot is due again 2–4 cards later; otherwise a random legal
    position from the deck. Never the same (string+fret) twice in a row. */
@@ -5171,12 +5139,7 @@ function fzRenderDone(){
   const body = fzBody();
   if (!body || !fz) return;
   const acc = fz.answered ? Math.round(100 * fz.correct / fz.answered) : 0;
-  let bestLine = '';
-  if (fz.prevBest > 0 && fz.score > fz.prevBest){
-    bestLine = `<div class="cb-newbest">&#x1F3C6; ${t('games.common.newBest', { value: fz.prevBest })}</div>`;
-  } else if (fz.prevBest > 0){
-    bestLine = `<div class="coach-tip">${t('games.common.bestTodayLabel')}: ${fz.prevBest}.</div>`;
-  }
+  const bestLine = cardBestLine(fz.prevBest, fz.score);
   body.innerHTML =
     `<div class="coach-report">
        <div class="cb-done-score">${fz.score}</div>
@@ -9411,12 +9374,7 @@ function pdRenderDone(){
   const body = pdBody();
   if (!body || !pd) return;
   const acc = pd.answered ? Math.round(100 * pd.correct / pd.answered) : 0;
-  let bestLine = '';
-  if (pd.prevBest > 0 && pd.score > pd.prevBest){
-    bestLine = `<div class="cb-newbest">&#x1F3C6; ${t('games.common.newBest', { value: pd.prevBest })}</div>`;
-  } else if (pd.prevBest > 0){
-    bestLine = `<div class="coach-tip">${t('games.common.bestTodayLabel')}: ${pd.prevBest}.</div>`;
-  }
+  const bestLine = cardBestLine(pd.prevBest, pd.score);
   body.innerHTML =
     `<div class="coach-report">
        <div class="cb-done-score">${pd.score}</div>
@@ -9781,12 +9739,7 @@ function bcRenderDone(){
   const body = bcBody();
   if (!body || !bc) return;
   const acc = bc.done ? Math.round(100 * bc.firstTry / bc.done) : 0;
-  let bestLine = '';
-  if (bc.prevBest > 0 && bc.score > bc.prevBest){
-    bestLine = `<div class="cb-newbest">&#x1F3C6; ${t('games.common.newBest', { value: bc.prevBest })}</div>`;
-  } else if (bc.prevBest > 0){
-    bestLine = `<div class="coach-tip">${t('games.common.bestTodayLabel')}: ${bc.prevBest}.</div>`;
-  }
+  const bestLine = cardBestLine(bc.prevBest, bc.score);
   body.innerHTML =
     `<div class="coach-report">
        <div class="cb-done-score">${bc.score}</div>
