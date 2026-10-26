@@ -1612,6 +1612,24 @@ step and trusts the tools. So the guidance is built to not depend on initiative:
   `git cherry-pick main..branch` onto one linear branch (fast-forward push),
   check labels handed out in advance, reviewers on a pinned commit, `git fetch`
   immediately before pushing (another session moved `origin/main` mid-sweep).
+- **A Stop hook and per-role effort pins, added the same day at Jonathan's
+  request.** The hook (`.claude/hooks/stop-checks.mjs`, wired in
+  `.claude/settings.json`) runs the 10-second offline checks at the end of every
+  turn that changed code and blocks the stop on a real failure — the cheapest
+  "did I break something?" step, done whether or not the model remembers. The
+  design choices that matter: the expected "cache stale" lines are not failures
+  (only the full run before a push may recompute them); it blocks at most 3 times
+  per turn and never twice for the same file state (an unfixable failure must not
+  trap a session); every internal error fails open. It was proved against a clean
+  tree, a harmless edit, a planted syntax error, repeated attempts, a new turn,
+  the off switch (`GC_STOP_CHECKS=0`) and a non-repo directory. Effort cannot be
+  chosen automatically for the session (`/effort` and `--effort` are manual), but
+  a subagent definition and a skill can each pin it, so the three sweep roles are
+  project agents (`.claude/agents/`: auditor and fixer high, reviewer extra high)
+  and the `site-sweep` skill pins extra high. Trap found on the way: `.gitignore`
+  ignored everything under `.claude/` except three folders, so a new
+  `.claude/hooks/` or `.claude/agents/` would never have been committed; both are
+  un-ignored now.
 
 ### Multi-step directions get lists (Jonathan, 2026-07-23; refined 2026-07-25)
 

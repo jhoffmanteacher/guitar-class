@@ -42,5 +42,19 @@
       "Edit(CHANGELOG.md)",
       "Edit(WORKFLOW.md)"
     ]
+  },
+  "hooks": {
+    "Stop": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "node \"${CLAUDE_PROJECT_DIR}/.claude/hooks/stop-checks.mjs\"",
+            "timeout": 150,
+            "statusMessage": "Running the repo's offline checks…"
+          }
+        ]
+      }
+    ]
   }
 }

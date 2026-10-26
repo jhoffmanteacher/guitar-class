@@ -3,6 +3,8 @@
 !.claude/settings.json
 !.claude/skills/
 !.claude/rules/
+!.claude/hooks/
+!.claude/agents/
 
 # Screenshot output from local visual checks — never committed
 screens/

@@ -6,8 +6,10 @@ rule live in `WORKFLOW.md` — read it when you need the *why*, not every sessio
 ## Start here — the short list (read this even if you read nothing else)
 
 **Before you say "done" on a code change:**
-1. While working: `node tools/checks.mjs --check --skip-links`. Before a push:
-   the full `node tools/checks.mjs`. Never hand-edit the version lines in `sw.js`.
+1. While working: `node tools/checks.mjs --check --skip-links` (a Stop hook now
+   runs it for you at the end of every turn that changed code; if it blocks
+   your stop, fix the cause — see "Stop hook" below). Before a push: the full
+   `node tools/checks.mjs`. Never hand-edit the version lines in `sw.js`.
 2. Touched a `module-N.js`? `node tools/rule-zero-proof.mjs origin/main`, and
    paste its summary into your report.
 3. Touched a renderer, escaping, or 3+ files? `node tools/smoke.mjs --baseline
@@ -198,6 +200,21 @@ baseline did not have, or any inline handler that does not compile. It is for
 renderer, escaping or many-file changes, not every commit. Needs Node 22+ and
 Chrome (`--chrome <path>` if it can't find one). It caught what no check could:
 15 lesson ▶ buttons that were dead for weeks.
+
+**Stop hook (2026-10-25).** `.claude/settings.json` runs
+`.claude/hooks/stop-checks.mjs` whenever Claude finishes a turn. If code files
+are changed (`.js .mjs .css .html .json`, outside `.claude/` and `audio/`) and
+the working-tree state differs from the last one it checked, it runs
+`node tools/checks.mjs --check --skip-links` (about 10 s). A real failure
+**blocks the stop** and sends the output back, so you fix it in the same turn.
+**If it blocks, fix the cause — never loosen a check or add an allowlist entry.**
+The expected "shell cache stale" / "audio cache stale" lines are ignored (only
+the full `node tools/checks.mjs` before a push recomputes them). It gives up
+after 3 tries per turn, never re-blocks the same file state, and fails open on
+any internal error. Off switch: `GC_STOP_CHECKS=0` in the environment. It does
+not replace the git hooks, the full checks run, or `tools/smoke.mjs`. On
+Windows, Git Bash may not have `node` on PATH; the hook then silently doesn't
+run (a non-blocking error) and the git hooks remain the gate.
 
 A tracked pre-commit hook at `.githooks/pre-commit` runs the fast offline checks
 on every commit. Per-machine setup, once: `git config core.hooksPath .githooks`
@@ -898,6 +915,24 @@ scenario before the fix. When a rule says "run the tool", run it — don't
 substitute your own reading of the code. When an agent hands you a claim, read
 the quoted lines yourself before acting; when it hands you a fix, make it
 re-derive it on the real code.
+
+**Effort per task (2026-10-25).** Effort is how much reasoning Claude spends;
+higher finds more edge cases and verifies more, at more tokens. The session level
+is manual (`/effort low|medium|high|xhigh|max`, `/effort auto` to clear it, or
+`claude --effort <level>`); nothing picks it per task by itself, so these pins do:
+- **Agents.** The project agents in `.claude/agents/` pin their own level:
+  `site-auditor` and `site-fixer` high, `site-reviewer` extra high (always use
+  `site-reviewer` for adversarial reviews). If you spawn a general-purpose agent
+  instead, **pass `effort: "xhigh"` for an adversarial reviewer and `"high"` for
+  an auditor or fixer** — this paragraph is the explicit instruction the Agent
+  tool asks for. Never pass `max`.
+- **Skills.** `site-sweep` pins `effort: xhigh` while it is active.
+- **Your own session, as a guide:** `medium` for routine edits (changelog, a
+  small wording or content fix, renames); `high` for any bug fix, shipped JS, or
+  module content with graded MCs; `xhigh` for the danger-zone files listed
+  above, sweeps, and anything the Stop hook keeps blocking on. If a task turns
+  out to be in a higher tier than the session, say so and ask Jonathan to
+  `/effort` up (or run it through `site-reviewer`) rather than pressing on.
 
 **Report the real numbers instead of accepting the premise**, and name the prior
 decision a request would reverse — both have produced better calls than fixing

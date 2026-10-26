@@ -1,6 +1,7 @@
 ---
 name: site-sweep
 description: How to run a whole-site audit-and-fix sweep on the guitar site with sub-agents — roles, brief templates, the worktree + cherry-pick merge method, adversarial review, the real-browser smoke test, shipping, and the pitfalls the 2026-10-25 sweep hit. Read BEFORE launching more than ~3 agents or changing more than ~15 files in one go.
+effort: xhigh
 ---
 
 ## Site sweep playbook (from the 2026-10-25 sweep: 11 auditors, 7 fixers, 4 reviewers, 130 commits)
@@ -10,6 +11,16 @@ Use it for a whole-site audit, a many-file refactor, or a wording pass over
 Templates live next to this file: `auditor.md`, `fixer.md`, `reviewer.md`.
 Write the brief once to the session scratchpad and tell every agent to read it
 first; do not paste it into each prompt.
+
+**Spawn the project agents, not a general-purpose one:** `site-auditor` (high
+effort), `site-fixer` (high) and `site-reviewer` (extra high), defined in
+`.claude/agents/`. Each pins its own model (Opus) and effort, so the review —
+where the 2026-10-25 sweep found its real regressions — always gets the
+deepest pass without anyone remembering to ask for it, and routine fixes don't
+pay for more than they need. (A newly added agent file may need a restart or
+`/agents` before it is offered. If it isn't, fall back to a general-purpose
+agent with `model: opus` and, for reviewers, `effort: xhigh` — CLAUDE.md
+authorizes that pin.) This skill itself pins `effort: xhigh` while it is active.
 
 ### The flow
 0. **Baseline.** `git fetch origin`; fast-forward main; `git worktree list`;
