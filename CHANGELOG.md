@@ -5,6 +5,19 @@ Notable changes to the Guitar Class site. Newest first.
 For the full session-by-session history (and the reasoning behind each change),
 see `WORKFLOW.md` and the git commit log.
 
+## 2026-10-26 — Power chords in the songs have three notes
+
+- **Every power chord in the song cards and Song Journey pages is now a
+  three-note chord.** The tab shows a third note, one string higher, at the
+  same fret as your ring finger. Play it with your pinky. This covers the
+  Play Along cards on the Songs page (Watchtower, "the cure", Seven Nation
+  Army, Luna, Sweet Child O' Mine, Arsenal Efectivo, Teen Spirit, Vuelve a la
+  Vida and Las Mañanitas) and the Power Chords layer of each Journey page.
+- **Las Mañanitas power-chord practice steps** now ask for three strings.
+- **Module 3, Set 2:** the song steps use the three-note tab too. Set 1 still
+  teaches the two-finger shape first.
+- Your saved progress did not change.
+
 ## 2026-10-26 — Vuelve a la Vida: play along with the band
 
 - **New song on the Songs page: "Vuelve a la Vida — Play Along"** (Efecto
