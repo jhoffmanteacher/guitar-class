@@ -16,6 +16,10 @@ see `WORKFLOW.md` and the git commit log.
 - **Las Mañanitas power-chord practice steps** now ask for three strings.
 - **Module 3, Set 2:** the song steps use the three-note tab too. Set 1 still
   teaches the two-finger shape first.
+- **The power-chord pop-ups are three-note too.** Tap A5, G5, E5, D5 or C5
+  in a lesson and the diagram shows the pinky note. The chord game decks and
+  the diagram flash cards use the same shapes. Set 1 steps in Module 3 keep
+  their two-finger diagrams.
 - Your saved progress did not change.
 
 ## 2026-10-26 — Vuelve a la Vida: play along with the band
