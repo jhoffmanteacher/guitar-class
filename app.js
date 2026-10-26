@@ -2793,6 +2793,41 @@ const SNIPPET_TRACKS = {
       267.550, 269.588,
     ],
   },
+  /* Vuelve a la Vida — Efecto Elegante (Jonathan uploaded the record — the
+     official-video audio, 215.3 s — 2026-10-26). Like Ella this is the
+     RECORD itself: no rhythm-down mix, so `src` IS the full mix and there is
+     no Guitar toggle. Key of Bb (Bb, Gm, Eb, Cm, F); Jonathan chose to keep
+     the record's key and play it on power chords (2026-10-26). Tuning about
+     6 cents above A=440 — left alone, like Ella. Both files 320k, 48 kHz;
+     the slow tier is rubberband, pitch held, 147/120 = 1.225x. Levelled with
+     tools/loudness.py --accept-spread (-0.91 dB): the stretched slow file
+     lands 1.36 LU under the record, the same spread Ella and Las Mañanitas
+     shipped with.
+
+     A STEADY GRID: the record is made to a click. Counted in 3 at 147 a
+     minute (quarter notes; the eighths are the 294 pulse), one bar 1.2245 s.
+     An onset fit holds the beat's phase within 10 ms from 0 to 195 s; after
+     that the ending is sung without a steady beat, so the card stops before
+     it. Which beat is 1 came from the bass: it is loudest on one beat of
+     the three and changes root there. anchor 0.085 s is that first
+     downbeat (bar 1 is a pickup). Chords read off the Demucs stems (guitar
+     chroma per beat, bass root on beat 1). Song map in these bars: singing
+     2-51 (an 18-bar opening phrase, then the 16-bar loop twice), break
+     52-56 (Bb F Bb, then a two-bar band run), solo 57-72, singing 73-136
+     (the loop four times), break 137-140, solo 141-156 plus Eb F F in
+     157-159, free-time sung ending from bar 160 to the end. The loop is
+     Bb 4 bars · Gm 4 · Eb 2 · Cm 2 · F 4. */
+  'vuelve-a-la-vida': {
+    src:     'audio/efecto-elegante-vuelve-a-la-vida-backing-Bb-147bpm-440hz-full.mp3',
+    srcSlow: 'audio/efecto-elegante-vuelve-a-la-vida-backing-Bb-120bpm-440hz-full.mp3',
+    trackBpm: 147, trackBpmSlow: 120,
+    feltBpm: 147,
+    beatsPerBar: 3,
+    durationSec: 215,
+    anchor: 0.085,
+    anchorVerified: true,
+    defaultSlow: true,
+  },
 };
 /* Does this track have a full mix at all? Both tiers or neither — the toggle
    has to survive the Slow button. */

@@ -5,6 +5,14 @@ Notable changes to the Guitar Class site. Newest first.
 For the full session-by-session history (and the reasoning behind each change),
 see `WORKFLOW.md` and the git commit log.
 
+## 2026-10-26 — Vuelve a la Vida: play along with the band
+
+- **New song on the Songs page: "Vuelve a la Vida — Play Along"** (Efecto
+  Elegante). Press Play song and play five power chords with the record:
+  Bb5, G5, Eb5, C5 and F5. Strum 3 times in every bar. The card runs from
+  the first verse to the end of the second solo. It has the same four
+  speeds as the other play-along cards.
+
 ## 2026-10-26 — Teen Spirit verses have their own notes
 
 - **The verses of "Smells Like Teen Spirit" now show what the guitar plays.**

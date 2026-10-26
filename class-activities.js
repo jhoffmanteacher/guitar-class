@@ -250,8 +250,8 @@
    — Finish the Song") was pulled from this array on 2026-08-25 when `ca-1`
    was widened to cover the whole song; its steps live on inside `ca-1`, and
    the original is in git history. That makes the counter max-EVER-used + 1,
-   NOT max-in-file + 1 — the next new activity is `ca-42` (ca-41 is the
-   highest used as of 2026-10-25; check the file first). Any student who
+   NOT max-in-file + 1 — the next new activity is `ca-43` (ca-42 is the
+   highest used as of 2026-10-26; check the file first). Any student who
    had already ticked `ca-9` keeps a harmless orphan key in Firestore.
    `ca-16` ("Happy Birthday — The A-String Way") went the same way on
    2026-09-16: its steps were merged into `ca-17`, after the A-string note
@@ -6437,6 +6437,156 @@ window.CLASS_ACTIVITIES = [
         { label: 'The whole song, slower', label_es: 'La canción completa, más lenta',
           text:    'Leave the speed where the card starts it, or move it one stop left. Play with the band from the intro to the last chord, without stopping.',
           text_es: 'Deja la velocidad donde la tarjeta la deja al empezar, o muévela una posición a la izquierda. Toca con la banda desde la intro hasta el último acorde, sin detenerte.' },
+        { levelUp: true,
+          text:    'Slide the speed all the way right, to Normal. Play the whole song with the band at normal speed.',
+          text_es: 'Desliza la velocidad hasta la derecha, a «Normal». Toca la canción completa con la banda a velocidad normal.' }
+      ]
+    },
+    // No help ladder: a practice card is its checks and nothing else (Jonathan, 2026-10-07).
+    steps: [],
+  },
+  /* "Vuelve a la Vida" — Play Along (Jonathan, 2026-10-26: "make a song
+     play along of Vuelve a la Vida - Efecto Elegante", with the record). A
+     practice card on the RECORD (track 'vuelve-a-la-vida' in app.js — its
+     comment has how the grid and the song map were found), bars 2-159: from
+     the first sung bar to the end of the second solo. Bar 1 is a pickup and
+     the sung ending (bar 160 on) has no steady beat, so both are left off.
+     Counted in 3 like Las Mañanitas, ONE COLUMN PER CHORD with its held
+     length in beats, one row per time through the 16-bar loop (Bb 4 · Gm 4
+     · Eb 2 · Cm 2 · F 4). No lyrics: the song is not public domain.
+
+     POWER CHORDS ONLY, in the record's key of Bb (Jonathan's pick,
+     2026-10-26, over shifting the record to G for open chords): Bb5, G5,
+     Eb5, C5, F5 — roots on the low E and A strings in frets 1-6, the same
+     Bb5, C5 and F5 shapes as ca-41. The 2-bar band run in Interlude 1 (bars
+     55-56, a scale down and back up) is a rest column. Starts on the Songs
+     page like Ella (library). */
+  {
+    id:    'ca-42',
+    view:  'card',    // one screen: Play song + tab + checks — see CARD above
+    library: true,    // on the Songs page's More Play Along songs list for everyone — see LIBRARY above
+    optional: true,   // Optional until switched to Required on the board — see OPTIONAL above
+    title:    '"Vuelve a la Vida" - Efecto Elegante — Play Along',
+    title_es: '"Vuelve a la Vida" - Efecto Elegante — Toca con la canción',
+    intro:    'Vuelve a la Vida uses five power chords: Bb5, G5, Eb5, C5 and F5. Today you play it with the band.',
+    intro_es: 'Vuelve a la Vida usa cinco acordes de potencia: Bb5, G5, Eb5, C5 y F5. Hoy la tocas con la banda.',
+    card: {
+      track: 'vuelve-a-la-vida',
+      slowest: true,    // Slowest / Slower / Slow / Normal
+      caption:    'The song in order · strum 3 times in every bar · change chords when the highlight moves',
+      caption_es: 'La canción en orden · rasguea 3 veces en cada compás · cambia de acorde cuando se mueva la marca',
+      sections: [
+        {
+          label: 'Verse 1', label_es: 'Estrofa 1',
+          caption: 'Verse 1 · one row per time through the chords · the first row has one more Bb5', caption_es: 'Estrofa 1 · una fila por cada vuelta de los acordes · la primera fila tiene un Bb5 más',
+          fromBar: 2, bars: 50,
+          rows: [6, 5, 5],
+          notes: [
+            { frets: [['D', 3], ['A', 1]], note: 'Bb5', midi: [53, 46], beats: 12 },
+            { frets: [['A', 5], ['E', 3]], note: 'G5', midi: [50, 43], beats: 12 },
+            { frets: [['D', 8], ['A', 6]], note: 'Eb5', midi: [58, 51], beats: 6 },
+            { frets: [['D', 3], ['A', 1]], note: 'Bb5', midi: [53, 46], beats: 6 },
+            { frets: [['D', 5], ['A', 3]], note: 'C5', midi: [55, 48], beats: 6 },
+            { frets: [['A', 3], ['E', 1]], note: 'F5', midi: [48, 41], beats: 12 },
+            { frets: [['D', 3], ['A', 1]], note: 'Bb5', midi: [53, 46], beats: 12 },
+            { frets: [['A', 5], ['E', 3]], note: 'G5', midi: [50, 43], beats: 12 },
+            { frets: [['D', 8], ['A', 6]], note: 'Eb5', midi: [58, 51], beats: 6 },
+            { frets: [['D', 5], ['A', 3]], note: 'C5', midi: [55, 48], beats: 6 },
+            { frets: [['A', 3], ['E', 1]], note: 'F5', midi: [48, 41], beats: 12 },
+            { frets: [['D', 3], ['A', 1]], note: 'Bb5', midi: [53, 46], beats: 12 },
+            { frets: [['A', 5], ['E', 3]], note: 'G5', midi: [50, 43], beats: 12 },
+            { frets: [['D', 8], ['A', 6]], note: 'Eb5', midi: [58, 51], beats: 6 },
+            { frets: [['D', 5], ['A', 3]], note: 'C5', midi: [55, 48], beats: 6 },
+            { frets: [['A', 3], ['E', 1]], note: 'F5', midi: [48, 41], beats: 12 }
+          ]
+        },
+        {
+          label: 'Interlude 1', label_es: 'Interludio 1',
+          caption: 'Interlude 1 · Bb5, F5, Bb5 · then stop for 2 bars while the band plays a fast run', caption_es: 'Interludio 1 · Bb5, F5, Bb5 · después para 2 compases mientras la banda toca una escala rápida',
+          fromBar: 52, bars: 5,
+          rows: [4],
+          notes: [
+            { frets: [['D', 3], ['A', 1]], note: 'Bb5', midi: [53, 46], beats: 3 },
+            { frets: [['A', 3], ['E', 1]], note: 'F5', midi: [48, 41], beats: 3 },
+            { frets: [['D', 3], ['A', 1]], note: 'Bb5', midi: [53, 46], beats: 3 },
+            { rest: true, beats: 6 }
+          ]
+        },
+        {
+          label: 'Solo 1', label_es: 'Solo 1',
+          caption: 'Solo 1 · the requinto (lead guitar) plays · keep strumming the same chords', caption_es: 'Solo 1 · toca el requinto (guitarra líder) · sigue rasgueando los mismos acordes',
+          fromBar: 57, bars: 16,
+          rows: [5],
+          notes: [
+            { frets: [['D', 3], ['A', 1]], note: 'Bb5', midi: [53, 46], beats: 12 },
+            { frets: [['A', 5], ['E', 3]], note: 'G5', midi: [50, 43], beats: 12 },
+            { frets: [['D', 8], ['A', 6]], note: 'Eb5', midi: [58, 51], beats: 6 },
+            { frets: [['D', 5], ['A', 3]], note: 'C5', midi: [55, 48], beats: 6 },
+            { frets: [['A', 3], ['E', 1]], note: 'F5', midi: [48, 41], beats: 12 }
+          ]
+        },
+        {
+          label: 'Verse 2', label_es: 'Estrofa 2',
+          caption: 'Verse 2 · the same chords, four times through', caption_es: 'Estrofa 2 · los mismos acordes, cuatro vueltas',
+          fromBar: 73, bars: 64,
+          rows: [5, 5, 5, 5],
+          notes: [
+            { frets: [['D', 3], ['A', 1]], note: 'Bb5', midi: [53, 46], beats: 12 },
+            { frets: [['A', 5], ['E', 3]], note: 'G5', midi: [50, 43], beats: 12 },
+            { frets: [['D', 8], ['A', 6]], note: 'Eb5', midi: [58, 51], beats: 6 },
+            { frets: [['D', 5], ['A', 3]], note: 'C5', midi: [55, 48], beats: 6 },
+            { frets: [['A', 3], ['E', 1]], note: 'F5', midi: [48, 41], beats: 12 },
+            { frets: [['D', 3], ['A', 1]], note: 'Bb5', midi: [53, 46], beats: 12 },
+            { frets: [['A', 5], ['E', 3]], note: 'G5', midi: [50, 43], beats: 12 },
+            { frets: [['D', 8], ['A', 6]], note: 'Eb5', midi: [58, 51], beats: 6 },
+            { frets: [['D', 5], ['A', 3]], note: 'C5', midi: [55, 48], beats: 6 },
+            { frets: [['A', 3], ['E', 1]], note: 'F5', midi: [48, 41], beats: 12 },
+            { frets: [['D', 3], ['A', 1]], note: 'Bb5', midi: [53, 46], beats: 12 },
+            { frets: [['A', 5], ['E', 3]], note: 'G5', midi: [50, 43], beats: 12 },
+            { frets: [['D', 8], ['A', 6]], note: 'Eb5', midi: [58, 51], beats: 6 },
+            { frets: [['D', 5], ['A', 3]], note: 'C5', midi: [55, 48], beats: 6 },
+            { frets: [['A', 3], ['E', 1]], note: 'F5', midi: [48, 41], beats: 12 },
+            { frets: [['D', 3], ['A', 1]], note: 'Bb5', midi: [53, 46], beats: 12 },
+            { frets: [['A', 5], ['E', 3]], note: 'G5', midi: [50, 43], beats: 12 },
+            { frets: [['D', 8], ['A', 6]], note: 'Eb5', midi: [58, 51], beats: 6 },
+            { frets: [['D', 5], ['A', 3]], note: 'C5', midi: [55, 48], beats: 6 },
+            { frets: [['A', 3], ['E', 1]], note: 'F5', midi: [48, 41], beats: 12 }
+          ]
+        },
+        {
+          label: 'Interlude 2', label_es: 'Interludio 2',
+          caption: 'Interlude 2 · Bb5, F5, then Bb5 for 2 bars', caption_es: 'Interludio 2 · Bb5, F5 y después Bb5 por 2 compases',
+          fromBar: 137, bars: 4,
+          rows: [3],
+          notes: [
+            { frets: [['D', 3], ['A', 1]], note: 'Bb5', midi: [53, 46], beats: 3 },
+            { frets: [['A', 3], ['E', 1]], note: 'F5', midi: [48, 41], beats: 3 },
+            { frets: [['D', 3], ['A', 1]], note: 'Bb5', midi: [53, 46], beats: 6 }
+          ]
+        },
+        {
+          label: 'Solo 2', label_es: 'Solo 2',
+          caption: 'Solo 2 · the same chords, then Eb5 and F5 · the card stops on F5, and the singer ends the song without a steady beat', caption_es: 'Solo 2 · los mismos acordes, después Eb5 y F5 · la tarjeta termina en F5, y el cantante termina la canción sin un pulso fijo',
+          fromBar: 141, bars: 19,
+          rows: [5, 2],
+          notes: [
+            { frets: [['D', 3], ['A', 1]], note: 'Bb5', midi: [53, 46], beats: 12 },
+            { frets: [['A', 5], ['E', 3]], note: 'G5', midi: [50, 43], beats: 12 },
+            { frets: [['D', 8], ['A', 6]], note: 'Eb5', midi: [58, 51], beats: 6 },
+            { frets: [['D', 5], ['A', 3]], note: 'C5', midi: [55, 48], beats: 6 },
+            { frets: [['A', 3], ['E', 1]], note: 'F5', midi: [48, 41], beats: 12 },
+            { frets: [['D', 8], ['A', 6]], note: 'Eb5', midi: [58, 51], beats: 3 },
+            { frets: [['A', 3], ['E', 1]], note: 'F5', midi: [48, 41], beats: 6 }
+          ]
+        }
+      ],
+      checks: [
+        { label: 'Verse 1, slower', label_es: 'Estrofa 1, más lenta',
+          text:    'Leave the speed where the card starts it. Play verse 1 with the band, without stopping.',
+          text_es: 'Deja la velocidad donde la tarjeta la deja al empezar. Toca la estrofa 1 con la banda, sin detenerte.' },
+        { label: 'The whole song, slower', label_es: 'La canción completa, más lenta',
+          text:    'Leave the speed where the card starts it, or move it one stop left. Play with the band from verse 1 to the last chord, without stopping.',
+          text_es: 'Deja la velocidad donde la tarjeta la deja al empezar, o muévela una posición a la izquierda. Toca con la banda desde la estrofa 1 hasta el último acorde, sin detenerte.' },
         { levelUp: true,
           text:    'Slide the speed all the way right, to Normal. Play the whole song with the band at normal speed.',
           text_es: 'Desliza la velocidad hasta la derecha, a «Normal». Toca la canción completa con la banda a velocidad normal.' }
