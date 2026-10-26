@@ -5,9 +5,9 @@ paths:
 
 ## Teacher console — shared-config rules (2026-10-25)
 
-Read together with "Every write to `config/class` goes through
-`teacherWriteConfig()`" in `CLAUDE.md` (strict vs cell-checked writes). These are
-the rules a two-console stress test added; each one closed a real failure.
+The write rule (strict vs cell-checked, `configVersion`, check 1ai) is the last
+section of this file. The bullets below are the rules a two-console stress test
+added; each one closed a real failure.
 
 - **Reads.** `loadTeacherClassConfig()` is a thin wrapper that records the
   newest read in `teacherClassConfigLatest`. A read that overlapped one of this
@@ -49,3 +49,38 @@ the rules a two-console stress test added; each one closed a real failure.
   "Nothing was saved" counts, repaints during a burst. That harness found all
   three majors the 2026-10-25 review reported; it lived in a session scratchpad
   and is **not** in the repo — rebuild it, and when you do, commit it to `tools/`.
+
+## Every write to `config/class` goes through `teacherWriteConfig()` (moved here from CLAUDE.md, 2026-10-25)
+
+**2026-09-17.** The console reads `config/class` once per view and computes
+every merge patch from that in-memory copy (`teacherClassConfig`). Nothing
+listens to the doc, so a second console — another tab, the laptop beside the
+projector machine, the other OS — makes that copy stale, and a stale merge
+used to just win: Firestore accepted it, the other session's change was gone,
+and neither screen said anything. The board is where that corrupts rather
+than merely loses, since a move re-packs `pos` 1..N for a whole module from
+the board this tab holds.
+
+`config/class` now carries **`configVersion`**, a counter every write bumps
+inside a transaction, against the version this tab read. Two modes, and the
+caller picks:
+
+- **Strict** (`teacherWriteConfig(patch)`, no `base`) — any concurrent write
+  at all refuses. For anything derived from more of the doc than its patch
+  names: the three board writers, Delete (it re-packs), Clear all.
+- **Cell-checked** (`teacherWriteConfig(patch, base)`, `base` = the values
+  the write was worked out from, `undefined` for "was absent") — an
+  unrelated concurrent edit goes through; a cell that moved underneath us
+  refuses. For the single-cell toggles (a date, Hidden, a period, a clear).
+
+Blanket-strict would fail hiding an activity here because a period was
+corrected there, and a false alarm every time two tabs are open is what
+teaches Jonathan to click through the one that matters. So **omitting `base`
+is the safe default** — a writer that forgets gets strict, not nothing.
+Failures report through `teacherConfigSaveFailed(e, msg)`, which tells a
+stale rejection ("nothing was saved, reloading") apart from a dropped
+connection. checks.mjs **1ai** bans a bare `.set()` on the doc, pins the
+writer count at 16, and requires the transaction — add a writer and it fails
+until you bump `CONFIG_WRITERS` on purpose. `firestore.rules` deliberately
+does NOT enforce the counter (it would lock the Firebase console out of the
+one doc you'd repair by hand); that edit was comments only, nothing to paste.

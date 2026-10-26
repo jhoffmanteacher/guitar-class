@@ -378,82 +378,20 @@ was printed but never pinned. Where a total is meaningful, **pin it** (63
 Journey tab cards, 27 tuning warm-ups) so it cannot drop silently.
 
 ### ⚠️ Activity order and module placement live on the console board
-**Not in `class-activities.js`** (2026-09-16). `config/class.activityBoard`
-(`{ id -> { module, pos } }`, `module: 0` = the board's Unsorted pen) is
-written by the two-column **Class activities board** in `teacher.js` — Built
-on the left (pushed, not placed), Assigned on the right (grouped by module,
-in the order students read them). It decides the order, the module headings
-students see on In-Class Activities, and the `#N` prefix. A card with no entry is invisible
-to everyone; **assigned + dated-and-arrived + not Hidden + not
-archived/deleted** is the full live-for-students rule (`caIsVisible`).
-
-`caBoardOrder()` in `app.js` is the one resolver, read by students
-(`caBoardView`/`caNumber`) and by the console (`teacherBoardView`) so the two
-can't disagree. Archived cards keep their slot in their module but hold no
-`#N`, so the ones after them count down (Jonathan, 2026-09-16); Delete also
-takes the card off the board. Every move — drag, `Assign to…`/`Move to…`, ▲▼,
-a typed `#N` — goes through `teacherMoveActivity()`, which re-packs `pos`
-1..N in both the section left and the section joined. **Never write
-`progress/{uid}` from any of this**; completion is keyed to the id and is
-never touched by assign / un-assign / publish / archive / restore.
+**Not in `class-activities.js`:** order, module headings and the `#N` prefix live in
+`config/class.activityBoard`, written only by the console's Class activities board.
+`caBoardOrder()` (app.js) is the one resolver and every move goes through
+`teacherMoveActivity()`. Live for students = assigned + dated-and-arrived + not
+Hidden + not archived/deleted (`caIsVisible`). **Never write `progress/{uid}` from any
+of it.** `number` in `class-activities.js` is legacy; a digit in a title is a SERIES
+number (checks 1d, 1l). Full rules: skill `in-class-activities`.
 
 ### ⚠️ Every write to `config/class` goes through `teacherWriteConfig()`
-**2026-09-17.** The console reads `config/class` once per view and computes
-every merge patch from that in-memory copy (`teacherClassConfig`). Nothing
-listens to the doc, so a second console — another tab, the laptop beside the
-projector machine, the other OS — makes that copy stale, and a stale merge
-used to just win: Firestore accepted it, the other session's change was gone,
-and neither screen said anything. The board is where that corrupts rather
-than merely loses, since a move re-packs `pos` 1..N for a whole module from
-the board this tab holds.
-
-`config/class` now carries **`configVersion`**, a counter every write bumps
-inside a transaction, against the version this tab read. Two modes, and the
-caller picks:
-
-- **Strict** (`teacherWriteConfig(patch)`, no `base`) — any concurrent write
-  at all refuses. For anything derived from more of the doc than its patch
-  names: the three board writers, Delete (it re-packs), Clear all.
-- **Cell-checked** (`teacherWriteConfig(patch, base)`, `base` = the values
-  the write was worked out from, `undefined` for "was absent") — an
-  unrelated concurrent edit goes through; a cell that moved underneath us
-  refuses. For the single-cell toggles (a date, Hidden, a period, a clear).
-
-Blanket-strict would fail hiding an activity here because a period was
-corrected there, and a false alarm every time two tabs are open is what
-teaches Jonathan to click through the one that matters. So **omitting `base`
-is the safe default** — a writer that forgets gets strict, not nothing.
-Failures report through `teacherConfigSaveFailed(e, msg)`, which tells a
-stale rejection ("nothing was saved, reloading") apart from a dropped
-connection. checks.mjs **1ai** bans a bare `.set()` on the doc, pins the
-writer count at 16, and requires the transaction — add a writer and it fails
-until you bump `CONFIG_WRITERS` on purpose. `firestore.rules` deliberately
-does NOT enforce the counter (it would lock the Firebase console out of the
-one doc you'd repair by hand); that edit was comments only, nothing to paste.
-
-`number` in `class-activities.js` is **legacy and optional** now: the only
-thing that still reads it is the one-time seeding of a board that has never
-been written (`activityBoardSeeded`). Don't resequence it, and checks.mjs 1d
-no longer enforces a 1..N run. `activityNumbers` is retired — nothing writes
-it; leave any old rows in Firestore alone.
-
-**A number in an activity title is still a SERIES number.** A digit inside
-the title counts within its own series: the first Finger Gym is **Finger Gym
-1** even though the class meets it as activity **#3** (Jonathan,
-2026-08-20). Don't "fix" `#3 - Finger Gym 1`. A series must be contiguous
-1..N, EN and ES, which checks.mjs 1l enforces — **sorted by numeric id since
-2026-09-16**, because the course position is no longer in the file.
-Inserting one in the middle means retyping every later title's digit plus any
-"same as Gym 1" / "del Gimnasio 1" cross-reference in another activity's step
-text, in the SAME edit. Ids (`ca-<n>`) never move — student progress is keyed
-to them.
-
-**The read side has rules too (2026-10-25)** — a superseded read returns the
-newest read, never `null`; a diverged write never marks this tab's copy current;
-toggles repaint from the changed copy; visibility comes from
-`teacherBoardView(cfg).assigned`. They are in `.claude/rules/teacher-console.md`
-(loads with `teacher.js`) with the two-console test method. Read it before you
-touch `loadTeacherClassConfig` or `teacherWriteConfig`.
+Strict by default (omit `base`); pass `base` only for a single-cell toggle
+(cell-checked). A bare `.set()` on the doc fails check 1ai, which pins the writer
+count (`CONFIG_WRITERS`) — add a writer and bump it on purpose. The full rule, why
+there are two modes, and the read-side rules: `.claude/rules/teacher-console.md`
+(loads with `teacher.js`).
 
 ### ⚠️ Editing a module's skills? Update `MODULE_MANIFEST` in `config-main.js`
 Add or remove a `skills:` entry and you must bump that module's `skillCount`.
@@ -565,45 +503,6 @@ got-it-when styling are both render-time, so new cards inherit them and neither
 can regress. Reach for the renderer first whenever a change is about how
 something looks or is ordered rather than what it says.
 
-### ⚠️ There are TWO step renderers — patch both, or the teacher can't see it
-A class-activity step is rendered twice by different code: `caStepHtml()` in
-`app.js` for students, and `renderTeacherActivityDetail()` in `teacher.js` for
-the console's Class activities preview. They do NOT share a code path — each
-has its own `if(step.figure)` / `video` / `tab` / `drill` chain — so a field
-wired into one is silently invisible in the other. On 2026-08-31 the ca-11
-drills shipped student-side and the teacher preview showed nothing, because
-only `caStepHtml()` learned about `drill`.
-
-**Adding or changing a step field means editing both, in the same edit.** The
-preview is where Jonathan checks the day's activity before class, so it has to
-show what the room will see. Nothing enforces this yet — grep both functions
-whenever you touch either.
-
-Legitimate differences are only about what can't work outside `#app`: the
-preview uses a real YouTube link instead of the in-app `loadPanel()` panel,
-passes `suppressCoach:true` to `buildTab`, and drills there skip the
-best-score write (`sdSaveBest`/`dkSaveBest` bail on `IS_TEACHER_MODE`, so
-previewing isn't practising). Keep new exceptions to that shape, and comment
-them.
-
-**Focus view (`view: 'focus'`, 2026-09-25) is activity-level, not a step
-field** — it changes how `caActivityCardHtml`/`caHeroCardHtml` lay the steps
-out (via `caIsFocus`), and the teacher preview deliberately keeps listing
-every step with a one-line note instead. A new STEP field still goes in both
-renderers; `caStepHtml` has a focus branch for the head and the nav row, so
-anything added there must land in both of its branches too.
-
-**Practice card (`view: 'card'`, 2026-09-27) is a whole card body, not a step
-field** — same shape as an exit check: ONE renderer, `caCardBodyHtml(a, opts)`
-in app.js, reached by `caActivityCardHtml`/`caHeroCardHtml` for students
-through `caCardBodyBlockHtml(a, …)` and by `renderTeacherActivityDetail` with
-`{preview:true}` (1bf pins all three and renders both student builders). See
-"Practice cards" in the `in-class-activities` skill.
-
-checks.mjs 1v now enforces this for the one field it can see mechanically —
-the class-activity figure's `width`/`height` — and fails the push if only one
-renderer has them. Everything else is still grep-both-by-hand.
-
 **Strings are named, never numbered, in student-facing text** (Jonathan,
 2026-08-06): low E · A · D · G · B · high e; ES uses solfège (cuerda Mi grave …
 cuerda mi aguda). Chord-chart shorthand like `xx4432` is notation and stays.
@@ -625,6 +524,14 @@ strings:['lowE','A'], minFret:5, maxFret:8 }`; engine `renderNoteCall` in
 `drill: { type:'deck', deck:'numerals-C', skill:'m11w1-s3' }`. Decks live in
 `DECKS` in `app.js`; ear pools in `EAR_POOLS`. Drop the "Got someone around?"
 partner line from any card that gets a deck; no paper-fallback line.
+
+### ⚠️ There are TWO step renderers — patch both, or the teacher can't see it
+A class-activity step is rendered by `caStepHtml()` (app.js, students) and
+`renderTeacherActivityDetail()` (teacher.js, the console preview) — different code
+paths. **Adding or changing a step field means editing both, in the same edit**
+(check 1v enforces only the figure's `width`/`height`). Practice cards and exit
+checks are whole card bodies with ONE renderer each (`caCardBodyHtml`, pinned by
+1bf). Details and the legitimate differences: skill `in-class-activities`.
 
 ### ⚠️ Quiz answers and graded MCs
 **Quiz answers are shuffled at render time** by `mcOrder(choices, seed)` —
@@ -726,84 +633,15 @@ numbers, and `ca-14`'s Happy Birthday exit check are all frozen mid-year fixes �
 see the **Summer reset list** (the `summer-reset` skill).
 
 ## Play-along first; Song Journey pages are the back door (2026-10-06)
-**One rule for every link to a song: if students can open a play-along
-(whole-song) card for it, the link opens that card; if not, it opens the Song
-Journey page.** The site works that out from what Jonathan has released or set
-to "Play Along now" (`songsPlayAlongCard()`) — there is no list to maintain.
-Why: the play-along cards cover Layer 2 (single notes) and Layer 3 (power
-chords) only; the Journey pages also hold Layers 4–5 and the bonus layers, and
-Modules 4 and 5 send students there.
-
-| Door | Behaviour |
-|---|---|
-| "Take it to a song" box, Modules 1–5 | **switched off 2026-10-18** (`TAKE_TO_SONG_ENABLED = false`, see below); when on, one button per song via `openSongLink(slug, layer)` |
-| "About this set" song names | links; same `openSongLink` |
-| A skill about one core song (checklist row) | `journey: [{ song, layer }]` on the skill → "Open the \"Luna\" Song Journey page" under it; same `openSongLink`. 14 skills in Modules 4 and 9–12 (2026-10-18; 1ab3 pins 14 / 16) |
-| Songs page Core row | Play Along (only with an openable card) · Backing · Song Journey, every row |
-| Songs page "More Play Along songs" | every `library: true` practice card, for the WHOLE class, from the day it ships — no board slot, date, #N or "Play Along now", and Who does not hide it (2026-10-20, `caIsLibrarySong()`). How a song one student asked for reaches students now — Jonathan stopped assigning songs to individuals; don't build a per-student path back. Library cards are off the Class activities board entirely (`caBoardOrder` skips `caIsLibraryCard()`); the console's **Songs** tab (`renderTeacherSongs()`) is where they're managed. **Songs move both ways** (2026-10-20): any non-check card with a `library` field (true = starts on Songs, false = starts in Class activities) is a song (`caIsSongCard()`), and the console's Move to Songs / Move to Class activities buttons write `config/class.songLibrary` (id -> bool), which wins over the field; the board slot is kept for the trip back. **Never a Core song** — checks.mjs 1bq |
-| Teacher view songs (console tab) | `teacherOnly: true` cards (ca-40, 2026-10-22) — played there for the room; students never see one (`caBoardOrder` skips it) until **Move to Class activities** writes `config/class.classSongs[id]`, which puts it on the board as an ordinary activity (assign and date it there; the board's **Move to Teacher view songs** sends it back). No `journey`/`journeyLayer`/`library` on it — checks.mjs 1bn |
-| Journey button on a card | never on a whole-song card; on another activity only while its song has no openable whole-song card (`caJourneyUrl()`) |
-| Resume card song row | all six songs |
-| The Journey page itself | open for every student; the activity gate no longer locks it (`JOURNEY_GATE_LOCKS = false`, 2026-10-07) |
-
-**"Take It to a Song" is gone from the module ladders (2026-10-18)**
-(Jonathan: "remove take it to a song from the steps of the modules").
-`const TAKE_TO_SONG_ENABLED = false;` in `app.js`, beside
-`isTakeToSongSection()`, is the whole switch: `visibleSteps()` and
-`isRenderableSection()` hide every `kind:'take-to-song'` section — the
-Journey card in Modules 2–5 *and* the Challenge steps Modules 6–12 showed
-instead. **Switched off, not deleted**, the Daily 5 pattern: the sections
-stay in the module files because the section list is fixed in every rule-zero
-regime and each section counts toward its neighbours' `gi` (no progress key
-moved; checks.mjs 1af proves it). Flip it to `true` and the card and the 6–12
-steps return as they were. It reverses the 2026-09-12 call to restore the
-6–12 steps, knowingly: seven skills (m9w1-s5, m9w2-s5, m10w1-s4, m10w3-s6,
-m11w3-s6, m12w1-s6, m12w3-s6) lost their only teaching step and sit on the
-checklist with no "Show me where"; the console tags those steps "(retired)".
-1af / 1ao / 1w-t read the switch via `readTakeToSongSwitch()`. Deleting the
-sections for good is on the Summer reset list. The other doors in the table
-are untouched. **Songs now reach students from the skills, not the ladder:**
-the 14 skills whose own text names one core song carry the link (module-2.js's
-schema comment documents the field). Modules 2, 3, 5 and 6 have no such skill, so
-the box's old reach there is now the Songs page and "About this set" only —
-attaching a song to a skill there is a content call, one `journey` field.
-
-**Layer matching:** a whole-song card carries `journey` + `journeyLayer` (2 on
-ca-24–ca-28, 3 on ca-29–ca-33), so a Module 2 link finds the Layer 2 card and a
-Module 3 link the Layer 3 card. Modules 1, 4 and 5 have no card for their
-layer, so their links open the Journey page at `#layer-N`.
-**The decision is made at the click**, not at render time — the class config
-(dates, Play Along now) can land after the page holding the link was built.
-Don't fold "Play Along now" into `caIsVisible()`.
-
-**Each Journey page draws its whole-song cards' tabs** (2026-10-07,
-Jonathan: for students who prefer that visual). `addWholeSongTabs()` in
-`tabs/journey.js` turns every `card.wholeSong` activity's notes into an ASCII
-`.tab` folded under "The whole song tab" at the foot of its `journeyLayer`
-(Layers 2 and 3 on five pages; Let It Be has none). Drawn at load from
-`class-activities.js`, never hand-typed, so it cannot drift from the card —
-edit the card and the page follows. Not counted by 1q/1z (they read the
-static HTML). When open it spans the window, not the 760px column
-(Jonathan, same day: "use the entire width of a chromebook screen") —
-`wsReflow()` measures the column and a monospace character, sizes the card,
-re-draws the rows to fit, and drops `.layer`'s clip (`.ws-wide`) while open.
-
-**Journey pages have no Stuck? / Level up folds** (Jonathan, 2026-10-07:
-"they are no longer needed" — all 66 removed, every layer of all six pages;
-"More about this song" and "The whole song tab" are the only folds left).
-Don't add them back to a layer. **The floating tools there are icons only**
-— `#fab-buttons` rules in `journey-theme.css`, not `fab-tools.css` (1t2 keeps
-that file equal to the app's), label `<span>` clipped as the accessible
-name, `title=` via `data-i18n-attr` as the tooltip.
-
-**No Journey page is blocked and none is deleted.** Part 1 of this work
-(`fc7e878`: a per-song `JOURNEY_RETIRED` list and a "moved" card on the page)
-shipped and was reversed the same day, on Jonathan's second thought — **do not
-bring back a per-song list or a "moved" card**; checks.mjs **1bn** fails the push
-if either name reappears. The Journey pages are **not kept in step with the
-cards**: they can disagree (the "the cure" chorus is two laps on the page and
-three on the card) and that is accepted — **do not open work to sync a Journey
-page's text with a card.**
+**One rule for every link to a song: if students can open a play-along (whole-song)
+card for it, the link opens that card; if not, it opens the Song Journey page**
+(`songsPlayAlongCard()` decides — no list to maintain — and it decides at the click:
+don't fold "Play Along now" into `caIsVisible()`). "Take It to a Song" is **switched
+off, not deleted** (`TAKE_TO_SONG_ENABLED = false`): never delete those
+`kind:'take-to-song'` sections, they hold `gi`. Journey pages: no per-song retire
+list or "moved" card (check 1bn), no Stuck?/Level up folds, and don't sync a page's
+text to a card. The door table, layer matching and the rest: skill
+`in-class-activities` and `.claude/rules/journey-pages.md` (loads with `tabs/**`).
 
 ### ⚠️ Editing `firestore.rules` changes nothing until it's pasted into Firebase
 GitHub Pages doesn't deploy Firestore rules. After any push that touches
@@ -861,14 +699,14 @@ holds ⚠️ rules as binding as anything here.
 | Area | File | Critical rule kept here |
 |---|---|---|
 | Backing tracks, snippets, practice-card audio, Journey clicks, `playNote`, `audio/` | skill `audio-and-snippets` | Snippet windows are bars, never seconds; never measure a second anchor; never pitch-correct one mix alone; new "silence it" call → `stopCardAudio()`; **every backing track is levelled to "the cure" (−12.5 LUFS) with `python3 tools/loudness.py <slug>`, one gain per song — never re-level the cure** |
-| In-Class Activities, the gate, exit checks, practice cards, Songs Core rows, render-time hiding | skill `in-class-activities` | Exit-check `items` are positional — frozen once taken; don't fold "Play Along now" into `caIsVisible()`; take-to-song is switched off in every module (`TAKE_TO_SONG_ENABLED`) — don't delete the sections, they hold `gi` |
+| In-Class Activities, the gate, exit checks, practice cards, Songs Core rows, render-time hiding, **the two step renderers, the activity board and numbering, the play-along-first song links** | skill `in-class-activities` | Exit-check `items` are positional — frozen once taken; don't fold "Play Along now" into `caIsVisible()`; take-to-song is switched off in every module (`TAKE_TO_SONG_ENABLED`) — don't delete the sections, they hold `gi` |
 | Core/Choice song chords, keys, timing, bar numbers | skill `song-facts` | Don't re-flag settled facts; don't verify BPM in audits |
 | Fixes blocked by frozen modules | skill `summer-reset` | Add any blocked fix there the same day; raising FROZEN_* never unlocks anything |
 | Live quiz | `.claude/rules/live-quiz.md` (loads with `live-quiz.js`) | Nothing on the stage may reveal the answer before the reveal |
 | Set band, left rail, nav grid | `.claude/rules/rail-layout.md` (loads with `styles.css`/`index.html`) | The nav two-column grid is permanent — don't re-simplify; measure, don't do arithmetic |
-| Journey tab cards | `.claude/rules/journey-pages.md` (loads with `tabs/**`) | Restyle `.tab` in both stylesheets or neither |
+| Journey tab cards, and the Journey-page decisions (whole-song tabs, no Stuck?/Level up folds, no per-song retire list) | `.claude/rules/journey-pages.md` (loads with `tabs/**`) | Restyle `.tab` in both stylesheets or neither |
 | Writing any JS (`app.js`, `teacher.js`, `coach.js`, `live-quiz.js`, `fab-tools.js`, `tuner.js`, `tabs/journey.js`) | `.claude/rules/code-hygiene.md` (loads with those files) | Inline handler args use `jsonAttrArg(x)`, never `'${escAttr(x)}'`; never a mid-line `//`; grep sibling copies and old-behaviour comments before and after a fix; stop everything you start; escape student-written values |
-| Teacher console shared config | `.claude/rules/teacher-console.md` (loads with `teacher.js`) | A superseded read returns the newest read, never `null`; a diverged write never marks the copy current; visibility via `teacherBoardView(cfg).assigned` |
+| Teacher console shared config, **including the `config/class` write rule** (strict vs cell-checked) | `.claude/rules/teacher-console.md` (loads with `teacher.js`) | A superseded read returns the newest read, never `null`; a diverged write never marks the copy current; visibility via `teacherBoardView(cfg).assigned` |
 | Whole-site audits, many-file refactors, 50+ string wording passes with sub-agents | skill `site-sweep` (playbook + auditor/fixer/reviewer briefs) | Pre-create the worktrees; cherry-pick to one linear branch; an adversarial review of the *fixes* is required; fetch before pushing |
 
 ## How to work with Jonathan
