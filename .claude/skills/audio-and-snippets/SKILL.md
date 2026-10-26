@@ -150,6 +150,24 @@ full mix isn't exported is a card with one fewer button, never a broken one
 (checks.mjs 1ak fails a half-declared pair, and a declared path whose file
 isn't there).
 
+**The Guitar toggle never reloads a file while the twin is ready** (2026-10-26,
+Jonathan: "a delay when I toggle the guitar"). The two mixes are different
+~14 MB files, so the old toggle did `src=` + `load()` + a seek and the song
+went quiet until the new file buffered. THE TWIN (`twinPark` / `twinFollow` /
+`twinReady` / `twinSwap`, beside `snippetSrc()` in `app.js`) keeps a second,
+muted element on the OTHER mix of the tier now playing, in step with the
+audible one; the toggle swaps which is muted. Both engines use it: `snipState`
+(snippet cards) and `pcState` (practice / Play Along cards, whose `pcRetrack`
+tries the swap before the reload). The twin loads only once the main element
+is `playing`, follows by playback RATE (a seek on an mp3 lands late and makes
+a new gap), and is never trusted until `twinReady()` — right file, playing,
+buffered, within 60 ms. Otherwise the old reload path runs, so the worst case
+is the old behaviour. A speed switch (Slow/Slower) still reloads: it is a
+different tier, and the twin is re-parked on the new one. **Whoever owns the
+state must stop the twin on every exit** (`twinStop`; `snipStop` and `pcStop`
+do). The Song Journey page's own player (`ensurePlayer` in `tabs/journey.js`)
+still reloads — it has native controls and no app.js, so it needs its own port.
+
 **Metronome and Guitar are independent on every track, because the
 Metronome is not a file** (2026-10-01). It used to be: a second copy of
 each mix with a Moises click baked in, so "guitar in AND click on" needed

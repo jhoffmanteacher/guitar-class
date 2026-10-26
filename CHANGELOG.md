@@ -5,6 +5,16 @@ Notable changes to the Guitar Class site. Newest first.
 For the full session-by-session history (and the reasoning behind each change),
 see `WORKFLOW.md` and the git commit log.
 
+## 2026-10-26 — The Guitar switch is instant
+
+- **No more wait when you switch the guitar on or off.** On the Play Along
+  cards and the practice loops in Class activities, turning the guitar on or
+  off used to go quiet for a moment while the other version of the song
+  loaded. Now both versions play together, and the switch just picks which
+  one you hear. The first few seconds after you press Play, the switch can
+  still take a moment, while the second version loads. The Song Journey
+  pages are not changed yet.
+
 ## 2026-10-25 — All backing tracks play at the same volume
 
 - **All backing tracks now play at the same volume.** Every song plays about

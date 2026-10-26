@@ -2851,6 +2851,84 @@ function snippetSrc(tr, slow, guitar){
   if(guitar && snippetHasFull(tr)) return slow ? tr.srcFullSlow : tr.srcFull;
   return slow ? tr.srcSlow : tr.src;
 }
+/* THE TWIN — a Guitar toggle with no wait (Jonathan: "a delay when I toggle
+   the guitar"). The two mixes are different FILES, so flipping the toggle used
+   to mean src= and load() on a ~14 MB mp3, then a seek, and the song went
+   quiet until the new file had buffered. So a card whose song has a full mix
+   keeps a SECOND element on the other mix, muted, playing in step with the
+   audible one. The toggle only swaps which of the two is muted — nothing
+   loads, nothing seeks.
+   The twin is never trusted until it has proved itself: twinReady() wants it
+   on the right file, playing, buffered and within TWIN_READY_SEC of the
+   audible element. Until then (first seconds of a play, slow Wi-Fi, just after
+   a lap seek) the caller takes the old reload path, so the worst case is what
+   the cards did before.
+   Kept in step by RATE, not by seeking: a seek on an mp3 lands late by a few
+   tens of milliseconds, so seeking to "fix" a small gap just makes another
+   one. A twin a little behind runs a little fast (at most 5%, it is muted)
+   until the gap closes; only a gap over TWIN_SNAP_SEC (the song looped, the
+   student scrubbed) seeks, and at most twice a second.
+   Whoever owns the state (`st`: snipState or pcState) stops the twin on every
+   exit — it is one more element to pause and empty. */
+const TWIN_READY_SEC = 0.06, TWIN_SNAP_SEC = 0.25;
+function twinSrcIs(el, src){ return !!el && (el.getAttribute('src') === src || (el.src || '').endsWith(src)); }
+/* Point the twin at `src` (the other mix of the tier now playing), creating it
+   on first use. Does nothing while it is already there. */
+function twinPark(st, src){
+  let tw = st.twin;
+  if(!tw){
+    tw = st.twin = new Audio();
+    tw.preload = 'auto';
+    tw.loop = false;
+    tw.muted = true;
+    // A twin that cannot load is just dropped: the toggle falls back to a reload.
+    tw.addEventListener('error', () => { if(st.twin === tw) st.twin = null; }, { once: true });
+  }
+  tw.muted = true;
+  if(twinSrcIs(tw, src)) return;
+  try { tw.pause(); } catch(e) {}
+  tw.src = src;
+  tw.load();
+}
+function twinStop(st){
+  const tw = st.twin;
+  st.twin = null;
+  if(tw){ try { tw.pause(); tw.src = ''; } catch(e) {} }
+}
+/* Once per frame, from the owner's rAF loop. */
+function twinFollow(st, main){
+  const tw = st.twin;
+  if(!tw || tw.readyState < 3 || tw.seeking) return;
+  if(main.paused || main.ended){ if(!tw.paused) tw.pause(); return; }
+  const base = main.playbackRate || 1;
+  const gap = main.currentTime - tw.currentTime;           // > 0: the twin is behind
+  if(Math.abs(gap) > TWIN_SNAP_SEC){
+    const now = performance.now();
+    if(now - (st.twinSnapAt || 0) > 500){
+      st.twinSnapAt = now;
+      try { tw.currentTime = main.currentTime; } catch(e) {}
+    }
+    return;
+  }
+  tw.preservesPitch = tw.mozPreservesPitch = tw.webkitPreservesPitch = true;
+  tw.playbackRate = base * (1 + Math.max(-0.05, Math.min(0.05, gap * 0.5)));
+  if(tw.paused) tw.play().catch(() => {});
+}
+function twinReady(st, main, src){
+  const tw = st.twin;
+  return !!(tw && twinSrcIs(tw, src) && tw.readyState >= 3 && !tw.seeking && !tw.paused
+    && !main.paused && Math.abs(tw.currentTime - main.currentTime) < TWIN_READY_SEC);
+}
+/* Make the twin the audible element. Returns the element that was playing, now
+   the muted twin; the caller stores both. */
+function twinSwap(st, main){
+  const tw = st.twin;
+  tw.muted = false;
+  main.muted = true;
+  slowestApplyRate(tw, main.playbackRate || 1);
+  st.twin = main;
+  return tw;
+}
 /* ONE builder, called by caStepHtml() in app.js AND
    renderTeacherActivityDetail() in teacher.js — the same shape buildTab()
    already has, which is how a step field satisfies the two-renderers rule
@@ -2924,9 +3002,11 @@ let snipState = null;
 function snipStop(){
   if(!snipState) return;
   const { card, audio, raf } = snipState;
+  const gone = snipState;
   snipState = null;                    // first, so the tick's own guard bails
   if(raf) cancelAnimationFrame(raf);
   try { audio.pause(); audio.src = ''; } catch(e) {}
+  twinStop(gone);
   if(card && card.isConnected){
     const btn = card.querySelector('.snip-play');
     if(btn){ btn.innerHTML = snipPlayBtnHtml(false); btn.classList.remove('playing'); }
@@ -2988,6 +3068,9 @@ function snipToggle(btn){
     try { audio.currentTime = win.start; } catch(e) {}
     audio.play().catch(() => {});
     snipState.raf = requestAnimationFrame(snipTick);
+    // The other mix starts loading only once this one is playing, so the two
+    // never compete for a slow connection at the moment that matters.
+    audio.addEventListener('playing', () => { if(snipState && snipState.audio === audio) snipParkTwin(snipState); }, { once: true });
   };
   if(audio.readyState >= 1) begin();
   else audio.addEventListener('loadedmetadata', begin, { once: true });
@@ -3072,6 +3155,13 @@ function snipScheduleClick(st, now){
   pcClick(ctx.currentTime + Math.max(0, ahead + lat), nb % bpb === 0, false, st.tr.clickGain);
   st.lastBeat = nb;
 }
+/* The twin is the OTHER mix of the tier now playing — see THE TWIN. A song
+   with no full mix has nothing to swap to, so it never gets one. */
+function snipParkTwin(st){
+  if(!snippetHasFull(st.tr)) return;
+  const card = st.card;
+  twinPark(st, snippetSrc(st.tr, card.dataset.slow === '1', card.dataset.guitar !== '1'));
+}
 function snipTick(){
   if(!snipState) return;
   const { audio, win, card, spec, cal } = snipState;
@@ -3082,6 +3172,7 @@ function snipTick(){
     now = audio.currentTime;
   }
   if(card.dataset.metro === '1' && !audio.paused) snipScheduleClick(snipState, now);
+  twinFollow(snipState, audio);
   // `heard` is roughly where the music is by the time it reaches the room —
   // see SNIP_OUTPUT_LATENCY. The dots follow the ears, not the decoder.
   const heard = now - snipLatency() * snipRate(card);   // latency is real seconds; this is file time
@@ -3138,6 +3229,13 @@ function snipSetTier(btn, which){
     try { audio.currentTime = at; } catch(e) {}
     return;
   }
+  /* Guitar flipped and the twin is already playing the other mix in step:
+     swap which one is heard. No load, no seek — see THE TWIN. */
+  if(which === 'guitar' && twinReady(snipState, audio, src)){
+    snipState.audio = twinSwap(snipState, audio);
+    snipParkTwin(snipState);
+    return;
+  }
   const wasPlaying = !audio.paused;
   const resume = () => {
     try { audio.currentTime = at; } catch(e) {}
@@ -3146,6 +3244,8 @@ function snipSetTier(btn, which){
   audio.addEventListener('loadedmetadata', resume, { once: true });
   audio.src = src;
   audio.load();
+  // The twin was parked on the other mix of the OLD tier; follow the file.
+  audio.addEventListener('playing', () => { if(snipState && snipState.audio === audio) snipParkTwin(snipState); }, { once: true });
 }
 
 function toggleTabChoice(btn){
@@ -13255,6 +13355,7 @@ function pcStop(){
   try { st.audio.pause(); st.audio.src = ''; } catch(e) {}
   [st.spare, st.leaving].forEach(el => { if(el){ try { el.pause(); el.src = ''; } catch(e) {} } });
   st.spare = st.leaving = null;
+  twinStop(st);
   const root = st.root;
   if(root && root.isConnected){
     const btn = root.querySelector('.pc-play');
@@ -13310,7 +13411,7 @@ function pcLoopStart(st){ return snipTimeAtBars(st.win, st.L.sections[st.loopFro
    it is not losing the song — the lap falls back to a seek. */
 function pcAudioError(st, el){
   if(pcState !== st) return;
-  if(st.audio !== el){ if(st.spare === el) st.spare = null; if(st.leaving === el) st.leaving = null; return; }
+  if(st.audio !== el){ if(st.spare === el) st.spare = null; if(st.leaving === el) st.leaving = null; if(st.twin === el) st.twin = null; return; }
   pcStop();
   if(typeof gateToast === 'function') gateToast(t('ca.snipLoadFailed'));
 }
@@ -13390,6 +13491,15 @@ function pcGo(st, si){
   pcStatus(st.root, escHtml(t('ca.cardPlayingFrom', {section: tf(st.L.sections[si].s, 'label')})));
   st.audio.play().catch(() => {});
   st.raf = requestAnimationFrame(pcFrame);
+  // The other mix loads only once this one is playing (see THE TWIN).
+  const el = st.audio;
+  el.addEventListener('playing', () => { if(pcState === st) pcParkTwin(st); }, { once: true });
+}
+/* The twin is the OTHER mix of the tier now playing — see THE TWIN. */
+function pcParkTwin(st){
+  const root = st.root;
+  if(!snippetHasFull(st.L.tr)) return;
+  twinPark(st, snippetSrc(st.L.tr, root.dataset.slow === '1', root.dataset.guitar !== '1'));
 }
 /* Four clicks (one bar of the counted beat) before the song comes in, on
    every start — otherwise the student is dropped in with no way to find
@@ -13486,6 +13596,7 @@ function pcFrame(){
     st.lastBeat = -1;
   }
   if(st.root.dataset.metro === '1') pcScheduleClick(st, audio.currentTime);
+  twinFollow(st, st.audio);
   /* The tab lights a note PC_TAB_LEAD ahead of the decoder; a lyric sheet's
      dot runs PC_SHEET_LEAD ahead, so the chord is on screen as the student
      plays it (Jonathan tuned it by ear, 2026-10-19). */
@@ -13704,6 +13815,15 @@ function pcRetrack(root){
   const src = snippetSrc(st.L.tr, slow, guitar);
   slowestApplyRate(st.audio, pcRate(root));   // Slowest <-> Slower and Slow <-> Normal are the same file, just the rate
   if(st.audio.src.endsWith(src)){ try { st.audio.currentTime = at; } catch(e) {} pcSparePark(st); return; }
+  /* Guitar flipped and the twin is already playing the other mix in step:
+     swap which one is heard. No load, no seek — see THE TWIN. The spare is
+     still on the old mix, so it is re-parked on the new one as usual. */
+  if(twinReady(st, st.audio, src)){
+    st.audio = twinSwap(st, st.audio);
+    pcParkTwin(st);
+    pcSparePark(st);
+    return;
+  }
   const wasPlaying = !st.audio.paused;
   // A new file that fails to load must stop the card and say so. Both
   // elements already carry pcAudioError (pcStart / pcSparePark); this adds
@@ -13718,6 +13838,8 @@ function pcRetrack(root){
   st.audio.src = src;
   st.audio.load();
   pcSparePark(st);                     // the spare follows the file
+  // ...and so does the twin, once the new file is playing.
+  el.addEventListener('playing', () => { if(pcState === st && st.audio === el) pcParkTwin(st); }, { once: true });
 }
 function pcCheck(btn, id, ci){
   const root = btn.closest('.pc');
