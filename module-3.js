@@ -347,23 +347,27 @@ SETS.push(
               { name: 'F5',  chord: [[6,1,'1'],[5,3,'3'],[4,'x'],[3,'x'],[2,'x'],[1,'x']], position: 1 }
             ],
             tab: {
-              caption: '"Watchtower" loop — A5 · G5 · F5 · G5, count 1 + 2 + 3 + 4 + · G on 3, then G on the + after 3 · 60 BPM',
-              caption_es: 'Vuelta de "Watchtower" — A5 · G5 · F5 · G5, cuenta 1 + 2 + 3 + 4 + · G en el 3, luego G en el + después del 3 · 60 BPM',
-              notes: [
-                { frets: [['A', 7], ['E', 5]], note: 'A5', midi: [52, 45], beats: 0.5 },
-                { frets: [['A', 7], ['E', 5]], note: 'A5', midi: [52, 45], beats: 0.5 },
-                { frets: [['A', 7], ['E', 5]], note: 'A5', midi: [52, 45], beats: 0.5 },
-                { frets: [['A', 7], ['E', 5]], note: 'A5', midi: [52, 45], beats: 0.5 },
-                { frets: [['A', 5], ['E', 3]], note: 'G5', midi: [50, 43], beats: 0.5 },
-                { frets: [['A', 5], ['E', 3]], note: 'G5', midi: [50, 43], beats: 0.5 },
-                { frets: [['A', 5], ['E', 3]], note: 'G5', midi: [50, 43], beats: 0.5 },
-                { frets: [['A', 5], ['E', 3]], note: 'G5', midi: [50, 43], beats: 0.5 },
-                { frets: [['A', 3], ['E', 1]], note: 'F5', midi: [48, 41], beats: 0.5 },
-                { frets: [['A', 3], ['E', 1]], note: 'F5', midi: [48, 41], beats: 0.5 },
-                { frets: [['A', 3], ['E', 1]], note: 'F5', midi: [48, 41], beats: 1.5 },
-                { frets: [['A', 5], ['E', 3]], note: 'G5', midi: [50, 43], beats: 0.5 },
-                { frets: [['A', 5], ['E', 3]], note: 'G5', midi: [50, 43], beats: 0.5 },
-                { frets: [['A', 5], ['E', 3]], note: 'G5', midi: [50, 43], beats: 0.5 }
+              caption: '"Watchtower" loop — A5 · G5 · F5 · G5, count 1 + 2 + 3 + 4 + · bar 1: G on 3 · bar 2: G on the + after 3 · 60 BPM',
+              caption_es: 'Vuelta de "Watchtower" — A5 · G5 · F5 · G5, cuenta 1 + 2 + 3 + 4 + · compás 1: G en el 3 · compás 2: G en el + después del 3 · 60 BPM',
+              phrases: [
+                { label: 'Bar 1', label_es: 'Compás 1', notes: [
+                  { frets: [['A', 7], ['E', 5]], note: 'A5', midi: [52, 45], beats: 0.5 },
+                  { frets: [['A', 7], ['E', 5]], note: 'A5', midi: [52, 45], beats: 0.5 },
+                  { frets: [['A', 7], ['E', 5]], note: 'A5', midi: [52, 45], beats: 0.5 },
+                  { frets: [['A', 7], ['E', 5]], note: 'A5', midi: [52, 45], beats: 0.5 },
+                  { frets: [['A', 5], ['E', 3]], note: 'G5', midi: [50, 43], beats: 0.5 },
+                  { frets: [['A', 5], ['E', 3]], note: 'G5', midi: [50, 43], beats: 0.5 },
+                  { frets: [['A', 5], ['E', 3]], note: 'G5', midi: [50, 43], beats: 0.5 },
+                  { frets: [['A', 5], ['E', 3]], note: 'G5', midi: [50, 43], beats: 0.5 }
+                ] },
+                { label: 'Bar 2 — rest on the + after 2 and on 3', label_es: 'Compás 2 — silencio en el + después del 2 y en el 3', notes: [
+                  { frets: [['A', 3], ['E', 1]], note: 'F5', midi: [48, 41], beats: 0.5 },
+                  { frets: [['A', 3], ['E', 1]], note: 'F5', midi: [48, 41], beats: 0.5 },
+                  { frets: [['A', 3], ['E', 1]], note: 'F5', midi: [48, 41], beats: 1.5 },
+                  { frets: [['A', 5], ['E', 3]], note: 'G5', midi: [50, 43], beats: 0.5 },
+                  { frets: [['A', 5], ['E', 3]], note: 'G5', midi: [50, 43], beats: 0.5 },
+                  { frets: [['A', 5], ['E', 3]], note: 'G5', midi: [50, 43], beats: 0.5 }
+                ] }
               ]
             },
           }
@@ -812,21 +816,25 @@ SETS.push(
             tab: {
               caption: '"Watchtower" loop, three notes — A5 · G5 · F5 · G5 · 60 BPM',
               caption_es: 'Vuelta de "Watchtower", tres notas — A5 · G5 · F5 · G5 · 60 BPM',
-              notes: [
-                { frets: [['D', 7], ['A', 7], ['E', 5]], note: 'A5', midi: [57, 52, 45], beats: 0.5 },
-                { frets: [['D', 7], ['A', 7], ['E', 5]], note: 'A5', midi: [57, 52, 45], beats: 0.5 },
-                { frets: [['D', 7], ['A', 7], ['E', 5]], note: 'A5', midi: [57, 52, 45], beats: 0.5 },
-                { frets: [['D', 7], ['A', 7], ['E', 5]], note: 'A5', midi: [57, 52, 45], beats: 0.5 },
-                { frets: [['D', 5], ['A', 5], ['E', 3]], note: 'G5', midi: [55, 50, 43], beats: 0.5 },
-                { frets: [['D', 5], ['A', 5], ['E', 3]], note: 'G5', midi: [55, 50, 43], beats: 0.5 },
-                { frets: [['D', 5], ['A', 5], ['E', 3]], note: 'G5', midi: [55, 50, 43], beats: 0.5 },
-                { frets: [['D', 5], ['A', 5], ['E', 3]], note: 'G5', midi: [55, 50, 43], beats: 0.5 },
-                { frets: [['D', 3], ['A', 3], ['E', 1]], note: 'F5', midi: [53, 48, 41], beats: 0.5 },
-                { frets: [['D', 3], ['A', 3], ['E', 1]], note: 'F5', midi: [53, 48, 41], beats: 0.5 },
-                { frets: [['D', 3], ['A', 3], ['E', 1]], note: 'F5', midi: [53, 48, 41], beats: 1.5 },
-                { frets: [['D', 5], ['A', 5], ['E', 3]], note: 'G5', midi: [55, 50, 43], beats: 0.5 },
-                { frets: [['D', 5], ['A', 5], ['E', 3]], note: 'G5', midi: [55, 50, 43], beats: 0.5 },
-                { frets: [['D', 5], ['A', 5], ['E', 3]], note: 'G5', midi: [55, 50, 43], beats: 0.5 }
+              phrases: [
+                { label: 'Bar 1', label_es: 'Compás 1', notes: [
+                  { frets: [['D', 7], ['A', 7], ['E', 5]], note: 'A5', midi: [57, 52, 45], beats: 0.5 },
+                  { frets: [['D', 7], ['A', 7], ['E', 5]], note: 'A5', midi: [57, 52, 45], beats: 0.5 },
+                  { frets: [['D', 7], ['A', 7], ['E', 5]], note: 'A5', midi: [57, 52, 45], beats: 0.5 },
+                  { frets: [['D', 7], ['A', 7], ['E', 5]], note: 'A5', midi: [57, 52, 45], beats: 0.5 },
+                  { frets: [['D', 5], ['A', 5], ['E', 3]], note: 'G5', midi: [55, 50, 43], beats: 0.5 },
+                  { frets: [['D', 5], ['A', 5], ['E', 3]], note: 'G5', midi: [55, 50, 43], beats: 0.5 },
+                  { frets: [['D', 5], ['A', 5], ['E', 3]], note: 'G5', midi: [55, 50, 43], beats: 0.5 },
+                  { frets: [['D', 5], ['A', 5], ['E', 3]], note: 'G5', midi: [55, 50, 43], beats: 0.5 }
+                ] },
+                { label: 'Bar 2 — rest on the + after 2 and on 3', label_es: 'Compás 2 — silencio en el + después del 2 y en el 3', notes: [
+                  { frets: [['D', 3], ['A', 3], ['E', 1]], note: 'F5', midi: [53, 48, 41], beats: 0.5 },
+                  { frets: [['D', 3], ['A', 3], ['E', 1]], note: 'F5', midi: [53, 48, 41], beats: 0.5 },
+                  { frets: [['D', 3], ['A', 3], ['E', 1]], note: 'F5', midi: [53, 48, 41], beats: 1.5 },
+                  { frets: [['D', 5], ['A', 5], ['E', 3]], note: 'G5', midi: [55, 50, 43], beats: 0.5 },
+                  { frets: [['D', 5], ['A', 5], ['E', 3]], note: 'G5', midi: [55, 50, 43], beats: 0.5 },
+                  { frets: [['D', 5], ['A', 5], ['E', 3]], note: 'G5', midi: [55, 50, 43], beats: 0.5 }
+                ] }
               ]
             },
           }
@@ -895,23 +903,27 @@ SETS.push(
                 levelUp_es: 'Acelera: 70 BPM, y luego 80.',
                 skills: [3, 4],
                 tab: {
-                  caption: '"All Along the Watchtower" — verse loop as power chords · count 1 + 2 + 3 + 4 + · G on 3, then G on the + after 3 · 60 BPM',
-                  caption_es: '"All Along the Watchtower" — vuelta de la estrofa como acordes de potencia · cuenta 1 + 2 + 3 + 4 + · G en el 3, luego G en el + después del 3 · 60 BPM',
-                  notes: [
-                    { frets: [['D', 7], ['A', 7], ['E', 5]], note: 'A5', midi: [57, 52, 45], beats: 0.5 },
-                    { frets: [['D', 7], ['A', 7], ['E', 5]], note: 'A5', midi: [57, 52, 45], beats: 0.5 },
-                    { frets: [['D', 7], ['A', 7], ['E', 5]], note: 'A5', midi: [57, 52, 45], beats: 0.5 },
-                    { frets: [['D', 7], ['A', 7], ['E', 5]], note: 'A5', midi: [57, 52, 45], beats: 0.5 },
-                    { frets: [['D', 5], ['A', 5], ['E', 3]], note: 'G5', midi: [55, 50, 43], beats: 0.5 },
-                    { frets: [['D', 5], ['A', 5], ['E', 3]], note: 'G5', midi: [55, 50, 43], beats: 0.5 },
-                    { frets: [['D', 5], ['A', 5], ['E', 3]], note: 'G5', midi: [55, 50, 43], beats: 0.5 },
-                    { frets: [['D', 5], ['A', 5], ['E', 3]], note: 'G5', midi: [55, 50, 43], beats: 0.5 },
-                    { frets: [['D', 3], ['A', 3], ['E', 1]], note: 'F5', midi: [53, 48, 41], beats: 0.5 },
-                    { frets: [['D', 3], ['A', 3], ['E', 1]], note: 'F5', midi: [53, 48, 41], beats: 0.5 },
-                    { frets: [['D', 3], ['A', 3], ['E', 1]], note: 'F5', midi: [53, 48, 41], beats: 1.5 },
-                    { frets: [['D', 5], ['A', 5], ['E', 3]], note: 'G5', midi: [55, 50, 43], beats: 0.5 },
-                    { frets: [['D', 5], ['A', 5], ['E', 3]], note: 'G5', midi: [55, 50, 43], beats: 0.5 },
-                    { frets: [['D', 5], ['A', 5], ['E', 3]], note: 'G5', midi: [55, 50, 43], beats: 0.5 }
+                  caption: '"All Along the Watchtower" — verse loop as power chords · count 1 + 2 + 3 + 4 + · bar 1: G on 3 · bar 2: G on the + after 3 · 60 BPM',
+                  caption_es: '"All Along the Watchtower" — vuelta de la estrofa como acordes de potencia · cuenta 1 + 2 + 3 + 4 + · compás 1: G en el 3 · compás 2: G en el + después del 3 · 60 BPM',
+                  phrases: [
+                    { label: 'Bar 1', label_es: 'Compás 1', notes: [
+                      { frets: [['D', 7], ['A', 7], ['E', 5]], note: 'A5', midi: [57, 52, 45], beats: 0.5 },
+                      { frets: [['D', 7], ['A', 7], ['E', 5]], note: 'A5', midi: [57, 52, 45], beats: 0.5 },
+                      { frets: [['D', 7], ['A', 7], ['E', 5]], note: 'A5', midi: [57, 52, 45], beats: 0.5 },
+                      { frets: [['D', 7], ['A', 7], ['E', 5]], note: 'A5', midi: [57, 52, 45], beats: 0.5 },
+                      { frets: [['D', 5], ['A', 5], ['E', 3]], note: 'G5', midi: [55, 50, 43], beats: 0.5 },
+                      { frets: [['D', 5], ['A', 5], ['E', 3]], note: 'G5', midi: [55, 50, 43], beats: 0.5 },
+                      { frets: [['D', 5], ['A', 5], ['E', 3]], note: 'G5', midi: [55, 50, 43], beats: 0.5 },
+                      { frets: [['D', 5], ['A', 5], ['E', 3]], note: 'G5', midi: [55, 50, 43], beats: 0.5 }
+                    ] },
+                    { label: 'Bar 2 — rest on the + after 2 and on 3', label_es: 'Compás 2 — silencio en el + después del 2 y en el 3', notes: [
+                      { frets: [['D', 3], ['A', 3], ['E', 1]], note: 'F5', midi: [53, 48, 41], beats: 0.5 },
+                      { frets: [['D', 3], ['A', 3], ['E', 1]], note: 'F5', midi: [53, 48, 41], beats: 0.5 },
+                      { frets: [['D', 3], ['A', 3], ['E', 1]], note: 'F5', midi: [53, 48, 41], beats: 1.5 },
+                      { frets: [['D', 5], ['A', 5], ['E', 3]], note: 'G5', midi: [55, 50, 43], beats: 0.5 },
+                      { frets: [['D', 5], ['A', 5], ['E', 3]], note: 'G5', midi: [55, 50, 43], beats: 0.5 },
+                      { frets: [['D', 5], ['A', 5], ['E', 3]], note: 'G5', midi: [55, 50, 43], beats: 0.5 }
+                    ] }
                   ]
                 },
               },
@@ -1052,7 +1064,7 @@ SETS.push(
         text_es: 'Tocar una progresión completa de 6 compases de acordes de potencia a tiempo',
         gotItWhen: 'you can play through 6 bars without stopping, even if a chord change is rough — you keep going to the next downbeat.',
         gotItWhen_es: 'puedes tocar los 6 compases sin detenerte, aunque un cambio de acorde salga imperfecto — sigues hasta el siguiente tiempo fuerte.',
-        practice: { type: 'playSeq', label: '"Watchtower" roots — G on 3, then G on the + after 3', label_es: 'Raíces de "Watchtower" — G en el 3, luego G en el + después del 3', bpm: 60,
+        practice: { type: 'playSeq', label: '"Watchtower" roots — bar 1: G on 3 · bar 2: G on the + after 3', label_es: 'Raíces de "Watchtower" — compás 1: G en el 3 · compás 2: G en el + después del 3', bpm: 60,
           notes: [{ midi: 45, beats: 0.5 }, { midi: 45, beats: 0.5 }, { midi: 45, beats: 0.5 }, { midi: 45, beats: 0.5 }, { midi: 43, beats: 0.5 }, { midi: 43, beats: 0.5 }, { midi: 43, beats: 0.5 }, { midi: 43, beats: 0.5 }, { midi: 41, beats: 0.5 }, { midi: 41, beats: 0.5 }, { midi: 41, beats: 1.5 }, { midi: 43, beats: 0.5 }, { midi: 43, beats: 0.5 }, { midi: 43, beats: 0.5 }] } },
       { id: 'm3w2-s3', text: 'Play a straight-eighths strumming pattern with power chords',
         text_es: 'Tocar un patrón de rasgueo de corcheas rectas con acordes de potencia',

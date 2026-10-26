@@ -14,9 +14,9 @@ see `WORKFLOW.md` and the git commit log.
     beat 3.
   - **Bar 2:** the first chord on 1, +, 2. Rest. Then G on the "+" after 3, on
     4, and on the "+" after 4.
-- This changes the Watchtower steps in Modules 2, 3, 4, 5, 6 and 7, the Play
-  Along card on the Songs page, the Watchtower Riff Runner game, and the
-  tabs on the Watchtower Song Journey page.
+- This changes the Watchtower steps in Modules 2 and 3 (the tabs now show one
+  row for each bar), the Play Along card on the Songs page, the Watchtower
+  Riff Runner game, and the tabs on the Watchtower Song Journey page.
 - The single-note Play Along card keeps its two notes per chord.
 - Your saved progress did not change.
 

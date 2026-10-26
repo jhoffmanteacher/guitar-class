@@ -692,7 +692,7 @@
       clean ref), `tools/loudness.py`. New guidance: `.claude/rules/code-hygiene.md`,
       `.claude/rules/teacher-console.md`, skill `site-sweep`, and a "Start here"
       block at the top of CLAUDE.md. Left for Jonathan (praise voice, hidden-tab
-      games, the ca-38 Watchtower caption (done 2026-10-26, see below), sw.js re-download cost, language and
+      games, the ca-38 Watchtower caption (done 2026-10-26, see above), sw.js re-download cost, language and
       refactor backlogs) is in the project memory `site-sweep-2026-10-25`.
       Six backing-track files stay more than 1 LU off "the cure" on purpose
       (slow-tier and guitar-off exports are quieter at the source; Jonathan chose

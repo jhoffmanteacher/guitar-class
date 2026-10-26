@@ -820,23 +820,27 @@ SETS.push(
             levelUp_es: 'Toca el riff completo con los ojos cerrados — esa es la verdadera prueba "de memoria".',
             skills: [1, 2, 4, 5, 6],
             tab: {
-              caption: '"All Along the Watchtower" — bass-note riff · Low E string · count 1 + 2 + 3 + 4 + · G on 3, then G on the + after 3 · loops · 60 BPM',
-              caption_es: '"All Along the Watchtower" — riff de bajo · cuerda Mi grave · cuenta 1 + 2 + 3 + 4 + · G en el 3, luego G en el + después del 3 · en bucle · 60 BPM',
-              notes: [
-                { string: 'E', fret: 5, note: 'A', midi: 45, beats: 0.5 },
-                { string: 'E', fret: 5, note: 'A', midi: 45, beats: 0.5 },
-                { string: 'E', fret: 5, note: 'A', midi: 45, beats: 0.5 },
-                { string: 'E', fret: 5, note: 'A', midi: 45, beats: 0.5 },
-                { string: 'E', fret: 3, note: 'G', midi: 43, beats: 0.5 },
-                { string: 'E', fret: 3, note: 'G', midi: 43, beats: 0.5 },
-                { string: 'E', fret: 3, note: 'G', midi: 43, beats: 0.5 },
-                { string: 'E', fret: 3, note: 'G', midi: 43, beats: 0.5 },
-                { string: 'E', fret: 1, note: 'F', midi: 41, beats: 0.5 },
-                { string: 'E', fret: 1, note: 'F', midi: 41, beats: 0.5 },
-                { string: 'E', fret: 1, note: 'F', midi: 41, beats: 1.5 },
-                { string: 'E', fret: 3, note: 'G', midi: 43, beats: 0.5 },
-                { string: 'E', fret: 3, note: 'G', midi: 43, beats: 0.5 },
-                { string: 'E', fret: 3, note: 'G', midi: 43, beats: 0.5 }
+              caption: '"All Along the Watchtower" — bass-note riff · Low E string · count 1 + 2 + 3 + 4 + · bar 1: G on 3 · bar 2: G on the + after 3 · loops · 60 BPM',
+              caption_es: '"All Along the Watchtower" — riff de bajo · cuerda Mi grave · cuenta 1 + 2 + 3 + 4 + · compás 1: G en el 3 · compás 2: G en el + después del 3 · en bucle · 60 BPM',
+              phrases: [
+                { label: 'Bar 1', label_es: 'Compás 1', notes: [
+                  { string: 'E', fret: 5, note: 'A', midi: 45, beats: 0.5 },
+                  { string: 'E', fret: 5, note: 'A', midi: 45, beats: 0.5 },
+                  { string: 'E', fret: 5, note: 'A', midi: 45, beats: 0.5 },
+                  { string: 'E', fret: 5, note: 'A', midi: 45, beats: 0.5 },
+                  { string: 'E', fret: 3, note: 'G', midi: 43, beats: 0.5 },
+                  { string: 'E', fret: 3, note: 'G', midi: 43, beats: 0.5 },
+                  { string: 'E', fret: 3, note: 'G', midi: 43, beats: 0.5 },
+                  { string: 'E', fret: 3, note: 'G', midi: 43, beats: 0.5 }
+                ] },
+                { label: 'Bar 2 — rest on the + after 2 and on 3', label_es: 'Compás 2 — silencio en el + después del 2 y en el 3', notes: [
+                  { string: 'E', fret: 1, note: 'F', midi: 41, beats: 0.5 },
+                  { string: 'E', fret: 1, note: 'F', midi: 41, beats: 0.5 },
+                  { string: 'E', fret: 1, note: 'F', midi: 41, beats: 1.5 },
+                  { string: 'E', fret: 3, note: 'G', midi: 43, beats: 0.5 },
+                  { string: 'E', fret: 3, note: 'G', midi: 43, beats: 0.5 },
+                  { string: 'E', fret: 3, note: 'G', midi: 43, beats: 0.5 }
+                ] }
               ]
             },
             response: { type: 'short', prompt: 'Personal record: once it loops clean at 60, raise the metronome +10 at a time. Your fastest CLEAN loop today (BPM)?', prompt_es: 'Récord personal: una vez que el bucle salga limpio a 60, sube el metrónomo de 10 en 10. ¿Cuál es tu bucle LIMPIO más rápido hoy (BPM)?', placeholder: 'e.g. 100 — try for a higher number next session', placeholder_es: 'ej. 100 — intenta superarlo la próxima sesión' }
@@ -925,23 +929,27 @@ SETS.push(
                 levelUp_es: 'Di cada nombre de nota en voz alta mientras tocas, o duplica el bucle a ocho vueltas sin tropezar.',
                 skills: [1, 2, 4, 5, 6],
                 tab: {
-                  caption: '"All Along the Watchtower" — bass loop · Low E string · count 1 + 2 + 3 + 4 + · G on 3, then G on the + after 3 · 60 BPM',
-                  caption_es: '"All Along the Watchtower" — bucle de bajo · cuerda Mi grave · cuenta 1 + 2 + 3 + 4 + · G en el 3, luego G en el + después del 3 · 60 BPM',
-                  notes: [
-                    { string: 'E', fret: 5, note: 'A', midi: 45, beats: 0.5 },
-                    { string: 'E', fret: 5, note: 'A', midi: 45, beats: 0.5 },
-                    { string: 'E', fret: 5, note: 'A', midi: 45, beats: 0.5 },
-                    { string: 'E', fret: 5, note: 'A', midi: 45, beats: 0.5 },
-                    { string: 'E', fret: 3, note: 'G', midi: 43, beats: 0.5 },
-                    { string: 'E', fret: 3, note: 'G', midi: 43, beats: 0.5 },
-                    { string: 'E', fret: 3, note: 'G', midi: 43, beats: 0.5 },
-                    { string: 'E', fret: 3, note: 'G', midi: 43, beats: 0.5 },
-                    { string: 'E', fret: 1, note: 'F', midi: 41, beats: 0.5 },
-                    { string: 'E', fret: 1, note: 'F', midi: 41, beats: 0.5 },
-                    { string: 'E', fret: 1, note: 'F', midi: 41, beats: 1.5 },
-                    { string: 'E', fret: 3, note: 'G', midi: 43, beats: 0.5 },
-                    { string: 'E', fret: 3, note: 'G', midi: 43, beats: 0.5 },
-                    { string: 'E', fret: 3, note: 'G', midi: 43, beats: 0.5 }
+                  caption: '"All Along the Watchtower" — bass loop · Low E string · count 1 + 2 + 3 + 4 + · bar 1: G on 3 · bar 2: G on the + after 3 · 60 BPM',
+                  caption_es: '"All Along the Watchtower" — bucle de bajo · cuerda Mi grave · cuenta 1 + 2 + 3 + 4 + · compás 1: G en el 3 · compás 2: G en el + después del 3 · 60 BPM',
+                  phrases: [
+                    { label: 'Bar 1', label_es: 'Compás 1', notes: [
+                      { string: 'E', fret: 5, note: 'A', midi: 45, beats: 0.5 },
+                      { string: 'E', fret: 5, note: 'A', midi: 45, beats: 0.5 },
+                      { string: 'E', fret: 5, note: 'A', midi: 45, beats: 0.5 },
+                      { string: 'E', fret: 5, note: 'A', midi: 45, beats: 0.5 },
+                      { string: 'E', fret: 3, note: 'G', midi: 43, beats: 0.5 },
+                      { string: 'E', fret: 3, note: 'G', midi: 43, beats: 0.5 },
+                      { string: 'E', fret: 3, note: 'G', midi: 43, beats: 0.5 },
+                      { string: 'E', fret: 3, note: 'G', midi: 43, beats: 0.5 }
+                    ] },
+                    { label: 'Bar 2 — rest on the + after 2 and on 3', label_es: 'Compás 2 — silencio en el + después del 2 y en el 3', notes: [
+                      { string: 'E', fret: 1, note: 'F', midi: 41, beats: 0.5 },
+                      { string: 'E', fret: 1, note: 'F', midi: 41, beats: 0.5 },
+                      { string: 'E', fret: 1, note: 'F', midi: 41, beats: 1.5 },
+                      { string: 'E', fret: 3, note: 'G', midi: 43, beats: 0.5 },
+                      { string: 'E', fret: 3, note: 'G', midi: 43, beats: 0.5 },
+                      { string: 'E', fret: 3, note: 'G', midi: 43, beats: 0.5 }
+                    ] }
                   ]
                 },
                 response: { type: 'short', prompt: 'How many clean laps in a row did you get at 60 BPM?', prompt_es: '¿Cuántas vueltas limpias seguidas lograste a 60 BPM?', placeholder: 'e.g. 4 — try for a higher number next session', placeholder_es: 'ej. 4 — intenta superarlo la próxima sesión' }

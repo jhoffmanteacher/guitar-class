@@ -47,7 +47,7 @@ ear. This is chord *timing*, not BPM:
   beat 3, everything else the book rhythm) is retired — one rhythm now.
   **Method book's rhythm (2026-10-15 to 2026-10-26), kept for history:**
   `1 + 2 (rest on 3) + 4` in BOTH bars — `A A A · G G | F F F · G G`, beats
-  `.5 .5 1.5 .5 1` per bar. Right for the F bar, wrong for the A bar.
+  `.5 .5 1.5 .5 1` per bar. Close for the F bar (it lacks the G on the "+" after 4), wrong for the A bar.
   Older reading, kept for history: **two beats per chord: `A A G G F F G G`** (2026-09-27). The
   play-along is now Jimi Hendrix's recording, moved down to Am in Moises; the
   Neil Young track and its "Am 2 · G 2 · F 3 · G 1" reading are retired.

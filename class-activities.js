@@ -5933,8 +5933,8 @@ window.CLASS_ACTIVITIES = [
       slowest: true,    // four-way speed control: Slowest / Slower / Slow / Normal
       sheet: 'sheets/all-along-the-watchtower.pdf',
       sheetChords: 224, // chord names on the sheet = chord changes in the notes (checks.mjs 1bf2)
-      caption:    'Lyrics and chords · G on 3, then G on the + after 3',
-      caption_es: 'Letra y acordes · G en el 3, luego G en el + después del 3',
+      caption:    'Lyrics and chords · bar 1: G on 3 · bar 2: G on the + after 3',
+      caption_es: 'Letra y acordes · compás 1: G en el 3 · compás 2: G en el + después del 3',
       sections: null,   // ca-29's — joined after the array, below
       checks: [
         { label: 'The whole song, slower', label_es: 'La canción completa, más lenta',
