@@ -18,21 +18,36 @@ ear. This is chord *timing*, not BPM:
 - **Luna** (128 BPM track, clicks are eighth notes, ~43 big beats) — **F for
   two bars of 6/8, then Am for two bars, confirmed.** The chord is Am, not A.
 - **All Along the Watchtower** (Hendrix track, 115 BPM, slow tier 105) —
-  **THE RHYTHM IS THE METHOD BOOK'S (Jonathan, 2026-10-15) — supersedes the
-  two-beats-per-chord reading below.** Both bars of the loop, every section:
-  **1 + 2 (rest on 3) + 4** — three attacks of the first chord on 1, +, 2,
-  then G on the "+" after 3 and on 4 (`A A A · G G | F F F · G G`, beats
-  `.5 .5 1.5 .5 1` per bar; practice cards hold the beat-2 note through the
-  rest because cards have no rest symbol). Power chords are ALL rooted on
-  the low E: A5 = 5/7, G5 = 3/5, F5 = 1/3 — the open-A-string A5 is retired
-  for this song. Every Watchtower spot follows it: Modules 2, 3, 4, 5 (the
-  real-rhythm card now teaches the "+"-after-3 G by ear, no intro/verse
-  split), 6, 7, the Journey page Layers 2–5, Riff Runner, ca-29. **One
-  exception, Jonathan's call (2026-10-15): ca-26, the single-note
-  whole-song card, keeps two plucks per note (`A A G G F F G G`).**
-  **Second exception (2026-10-22): ca-40, the teacher-only power-chord
-  card, is ca-26 in two-finger power chords — two strums per chord
-  (`A5 A5 G5 G5 F5 F5 G5 G5`), on purpose. Don't "fix" it to the book.**
+  **THE RHYTHM IS THE RECORD'S (measured and confirmed by Jonathan's ear,
+  2026-10-26) — supersedes the method book's rhythm below.** The rhythm
+  guitar (full mix minus rhythm-down mix, on the `barTimes` beat map, all
+  three verses: 26 A-bars, 26 F-bars) plays two different bars, in every
+  section of every spot:
+  - **Bar 1 (A bar): `A A A A G G G G`** — four eighths of the first chord on
+    1 + 2 +, then four eighths of G on 3 + 4 +. **G lands ON beat 3. No rest.**
+  - **Bar 2 (F bar): `F F F · · G G G`** — F on 1, +, 2; rest on the "+" after
+    2 and on 3; G on the "+" after 3, on 4 and on the "+" after 4.
+  - Strums: down on numbers, up on "+". Bar 1 is straight eighths; bar 2 is
+    down up down · (miss up) (miss down) · up down up.
+  - Data encoding: bar 1 `.5 ×8`; bar 2 `.5 .5 1.5 .5 .5 .5` — the third F is
+    HELD through the rest, never `{ rest: true }` (a rest counts as two chord
+    changes in `pcSheetMap` and breaks ca-29's `sheetChords: 224`). 4 chord
+    changes per lap. The intro could not be measured (the lead guitar is in
+    the way), so intro, solos and outro keep the same two bars.
+  Power chords are ALL rooted on the low E: A5 = 5/7, G5 = 3/5, F5 = 1/3 —
+  the open-A-string A5 is retired for this song. Every Watchtower spot follows
+  it: Modules 2, 3, 4, 5 (the real-rhythm card teaches "G on 3 in bar 1, on
+  the + after 3 in bar 2" by ear), 6, 7, the Journey page Layers 2–5, Riff
+  Runner (14 targets a lap), ca-29, ca-38's caption. **Exceptions, on
+  purpose:** **ca-26, the single-note whole-song card, keeps two plucks per
+  note (`A A G G F F G G`, Jonathan 2026-10-15)**; **ca-40, the teacher-only
+  power-chord card, plays one 2-beat strum per chord (`A5 G5 F5 G5`, each
+  `beats: 2`) — it is ca-26's loop in power chords. Don't "fix" either to
+  this rhythm.** The ca-29 verse exception of 2026-10-18 (verses had G5 on
+  beat 3, everything else the book rhythm) is retired — one rhythm now.
+  **Method book's rhythm (2026-10-15 to 2026-10-26), kept for history:**
+  `1 + 2 (rest on 3) + 4` in BOTH bars — `A A A · G G | F F F · G G`, beats
+  `.5 .5 1.5 .5 1` per bar. Right for the F bar, wrong for the A bar.
   Older reading, kept for history: **two beats per chord: `A A G G F F G G`** (2026-09-27). The
   play-along is now Jimi Hendrix's recording, moved down to Am in Moises; the
   Neil Young track and its "Am 2 · G 2 · F 3 · G 1" reading are retired.
@@ -41,8 +56,8 @@ ear. This is chord *timing*, not BPM:
   and **about beat 3 once the singing starts** — Jonathan heard the same.
   Later in the song it is loose (anywhere from 3 to 4½, some laps with no
   clear G). (Until 2026-10-15 the site taught G on beat 3 and Module 5
-  taught an intro/verse difference; both are replaced by the book rhythm
-  above, whose "+"-after-3 G sits inside that measured spread.) The track's tempo drifts
+  taught an intro/verse difference; the 2026-10-26 measurement settles it:
+  G on beat 3 in the A bar, on the "+" after 3 in the F bar.) The track's tempo drifts
   (≈110 in the intro, ≈115 through the verses, ≈120 at the end), so a
   steady grid would slide by up to a second — which is why its
   `SNIPPET_TRACKS` entry carries a beat map (`barTimes`, 2026-09-27)
@@ -66,8 +81,10 @@ ear. This is chord *timing*, not BPM:
   teaching loop that does not line up with the record; the page says so.
 
 - **All Along the Watchtower** — `Am–G–F–G` loop (power chords `A5–G5–F5–G5`).
-  **Timing: 1 + 2 (rest) + 4 in both bars, G on the "+" after 3; power
-  chords all rooted on the low E** (method book, 2026-10-15). Before that:
+  **Timing (the record's, 2026-10-26): bar 1 A A A A G G G G, bar 2
+  F F F · · G G G — G on beat 3 in bar 1, on the "+" after 3 in bar 2; power
+  chords all rooted on the low E.** Before that, the method book's `1 + 2
+  (rest) + 4` in both bars (2026-10-15), and before that:
   two beats per chord, `A A G G F F G G` — see "Chord timing
   measured" above (2026-09-27, replaces the 2026-09-24 "F 3 · G 1" reading
   and the 2026-08-06 verse/chorus one). The map's "Am–G–F" is shorthand.

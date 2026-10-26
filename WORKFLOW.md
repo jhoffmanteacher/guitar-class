@@ -655,6 +655,19 @@
 
 ## Recently shipped (post-archive)
 
+- [x] **2026-10-26 — Watchtower: the record's rhythm replaces the book rhythm.**
+      Jonathan and Claude measured the Hendrix rhythm guitar on the beat map
+      (26 A-bars, 26 F-bars) and Jonathan confirmed it by ear. Bar 1 is
+      `A A A A G G G G` (G on beat 3, no rest); bar 2 is `F F F · · G G G`.
+      Changed everywhere the book rhythm lived: Modules 2–7 (text, captions,
+      `tab.notes`, playSeq data — frozen modules in place, rule-zero holds),
+      ca-29 (every section one rhythm, verse exception retired), ca-38's
+      caption (closes the 2026-10-25 open item), Riff Runner (14 targets a
+      lap, same minimum gap as before), the Journey page Layers 2–5, the
+      song-facts skill. Left on purpose: ca-26 (two plucks per note) and ca-40
+      (one 2-beat strum per chord). The F bar's rest is a HELD third F, never
+      `{ rest: true }`, so ca-29 stays at 224 chord changes.
+
 - [x] **2026-10-25 — Whole-site sweep + audio levelling.** Jonathan: "spawn
       agents and check the site for errors, make changes and look for
       inefficiencies such as instances to refactor", then a plain-wording pass,
@@ -679,7 +692,7 @@
       clean ref), `tools/loudness.py`. New guidance: `.claude/rules/code-hygiene.md`,
       `.claude/rules/teacher-console.md`, skill `site-sweep`, and a "Start here"
       block at the top of CLAUDE.md. Left for Jonathan (praise voice, hidden-tab
-      games, the ca-38 Watchtower caption, sw.js re-download cost, language and
+      games, the ca-38 Watchtower caption (done 2026-10-26, see below), sw.js re-download cost, language and
       refactor backlogs) is in the project memory `site-sweep-2026-10-25`.
       Six backing-track files stay more than 1 LU off "the cure" on purpose
       (slow-tier and guitar-off exports are quieter at the source; Jonathan chose

@@ -1912,7 +1912,7 @@ function renderTabSystem(chunk, off, cols, hideNames, counts, timed){
      data-seq too), and ▶ Play tab stays as the answer key. */
   if (hideNames) noteBtns.length = 0;
   /* counts (optional, one { lab, held } per note — tabCounts()): a row under the
-     note names with the count each note starts on, "1 + 2 + 4" (ca-29,
+     note names with the count each note starts on, "1 + 2 + 3 + 4 +" (ca-29,
      Jonathan 2026-10-21). Each cell carries data-seq, so the beat cursor
      lights the count with its note. Shown or hidden by the Counts switch
      on a practice card (.pc-tab.counts-on, styles.css). */
@@ -1940,8 +1940,8 @@ function renderTabSystem(chunk, off, cols, hideNames, counts, timed){
 /* The count each note STARTS on, worked out from its `beats`: "1" "2" "3"
    "4" on a beat, "+" on the half beat between. Anything finer (a triplet,
    a sixteenth) gets no label rather than a wrong one. `held` lists the
-   beats a note rings through with no new strum — ca-29's strum on 2 holds
-   through 3, shown as a grey "(3)" so the "+" after it reads as the "+" of
+   beats a note rings through with no new strum — ca-29's strum on 2 in
+   bar 2 holds through 3, shown as a grey "(3)" so the "+" after it reads as the "+" of
    3, not of 2 (Jonathan, 2026-10-21). The notes start on beat 1 of a bar —
    true of every practice-card section (fromBar is a whole bar). */
 function tabCounts(notes, beatsPerBar){
@@ -2526,7 +2526,8 @@ const SNIPPET_TRACKS = {
   },
   /* All Along the Watchtower — the Jimi Hendrix recording, the same files
      the Journey page plays. 4 to the bar at record speed; the chords run
-     A–G | F–G, G on the "+" after 3 (song-facts skill), a two-bar cycle, so
+     A–G | F–G, G on beat 3 in bar 1 and on the "+" after 3 in bar 2 (song-facts
+     skill), a two-bar cycle, so
      bar 1 is the first A — the SECOND click (the first is a G pickup). Odd
      bars start on A, even bars on F, all the way through. */
   'all-along-the-watchtower': {
@@ -10244,8 +10245,8 @@ function startPlaySequence(midis, bpm, btnEl, synthOnly){
   const tabRoot = btnEl ? btnEl.closest('.tab') : null;
   /* Each entry is normally a bare midi number or an array of midis (a
      chord/dyad played on one beat). It can also be { midi, beats } so a
-     note can hold longer than one beat — e.g. Watchtower's roots held
-     two full beats instead of one. Bare entries default to beats:1, so
+     note can hold longer than one beat — e.g. a Watchtower F held 1.5
+     beats through the rest that follows it. Bare entries default to beats:1, so
      every existing sequence schedules exactly as before. */
   let cursor = 0;
   const timeouts = midis.map((m, i) => {

@@ -6610,9 +6610,13 @@ const RN_SONGS = [
     subKey: 'games.riff.song.watchtower.sub',
     hintKey: 'games.riff.song.watchtower.hint',
     bpm: 80, bpb: 4, loopBeats: 8, laps: 4,
-    // The book rhythm, both bars: 1 & 2 (rest) & 4 — G on the "&" of 3 (Jonathan, 2026-10-15)
-    notes: [[6,5,0,'A5'],[6,5,0.5,'A5'],[6,5,1,'A5'],[6,3,2.5,'G5'],[6,3,3,'G5'],
-            [6,1,4,'F5'],[6,1,4.5,'F5'],[6,1,5,'F5'],[6,3,6.5,'G5'],[6,3,7,'G5']] },
+    // The record's rhythm (measured, Jonathan confirmed it by ear, 2026-10-26).
+    // Bar 1: A on 1 & 2 &, G on 3 & 4 & (four eighths each). Bar 2: F on 1 & 2,
+    // rest, G on the "&" of 3, on 4 and on the "&" of 4.
+    notes: [[6,5,0,'A5'],[6,5,0.5,'A5'],[6,5,1,'A5'],[6,5,1.5,'A5'],
+            [6,3,2,'G5'],[6,3,2.5,'G5'],[6,3,3,'G5'],[6,3,3.5,'G5'],
+            [6,1,4,'F5'],[6,1,4.5,'F5'],[6,1,5,'F5'],
+            [6,3,6.5,'G5'],[6,3,7,'G5'],[6,3,7.5,'G5']] },
   { id: 'luna', title: '"Luna"',
     subKey: 'games.riff.song.luna.sub',
     hintKey: 'games.riff.song.luna.hint',

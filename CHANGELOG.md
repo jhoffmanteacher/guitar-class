@@ -5,6 +5,21 @@ Notable changes to the Guitar Class site. Newest first.
 For the full session-by-session history (and the reasoning behind each change),
 see `WORKFLOW.md` and the git commit log.
 
+## 2026-10-26 — "All Along the Watchtower": the rhythm now matches the record
+
+- **The rhythm in every Watchtower step is now the one on the recording.**
+  The old rhythm had the same pattern in both bars. The record plays two
+  different bars:
+  - **Bar 1:** the first chord on 1 + 2 +, then G on 3 + 4 +. G comes in on
+    beat 3.
+  - **Bar 2:** the first chord on 1, +, 2. Rest. Then G on the "+" after 3, on
+    4, and on the "+" after 4.
+- This changes the Watchtower steps in Modules 2, 3, 4, 5, 6 and 7, the Play
+  Along card on the Songs page, the Watchtower Riff Runner game, and the
+  tabs on the Watchtower Song Journey page.
+- The single-note Play Along card keeps its two notes per chord.
+- Your saved progress did not change.
+
 ## 2026-10-26 — Power chords in the songs have three notes
 
 - **Every power chord in the song cards and Song Journey pages is now a
