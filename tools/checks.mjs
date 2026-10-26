@@ -7292,6 +7292,13 @@ function checkPracticeCards(ctx) {
       let beats = 0;
       notes.forEach((n, ni) => {
         const nw = `${sw} · notes[${ni}]`;
+        if (n && n.rest === true) {
+          // A rest (ca-41's verses, 2026-10-25): beats and nothing else.
+          if ('string' in n || 'fret' in n || 'frets' in n || 'midi' in n || 'note' in n) flag(`${nw}: a rest carries beats only — no string, fret, frets, midi or note`);
+          if (!(n.beats > 0)) flag(`${nw}: a rest needs beats (a positive number)`);
+          beats += n.beats > 0 ? n.beats : 0;
+          return;
+        }
         if (n && Array.isArray(n.frets)) {
           // A power chord on the card (ca-29..ca-33): same checks as a step tab's chord.
           caChordProblems(n).forEach(p => flag(`${nw}: ${p}`));

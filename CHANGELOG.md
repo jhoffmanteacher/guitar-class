@@ -5,6 +5,14 @@ Notable changes to the Guitar Class site. Newest first.
 For the full session-by-session history (and the reasoning behind each change),
 see `WORKFLOW.md` and the git commit log.
 
+## 2026-10-26 — Teen Spirit verses have their own notes
+
+- **The verses of "Smells Like Teen Spirit" now show what the guitar plays.**
+  In the Play Along card, each verse is two single notes, played one at a
+  time: B string, fret 1, then high e string, fret 1. Let them ring. The
+  power-chord part moves to a new Pre-chorus section after each verse. The
+  Counts view lines the first note up on beat 2.
+
 ## 2026-10-26 — The Guitar switch is instant
 
 - **No more wait when you switch the guitar on or off.** On the Play Along

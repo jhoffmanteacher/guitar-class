@@ -204,7 +204,11 @@
                                            // [['D', 2], ['A', 0]], note: 'A5',
                                            // midi: [52, 45], beats? } (ca-29..33);
                                            // beats must add up to bars x the
-                                           // track's beatsPerBar
+                                           // track's beatsPerBar; a REST is
+                                           // { rest: true, beats } — an empty
+                                           // column the highlight still stops
+                                           // on, so the next note lights on
+                                           // time (ca-41's verses, 2026-10-25)
        }],
        checks: [
          { label, label_es, text, text_es },            // numbered checks
@@ -6206,7 +6210,7 @@ window.CLASS_ACTIVITIES = [
      ca-39 it loops. `library: false`: it starts on the Class activities
      board, and the console's "Move to Songs" puts it on the Songs page.
 
-     POWER CHORDS ONLY (Jonathan's pick), root on the low E or A string:
+     POWER CHORDS (Jonathan's pick) everywhere but the verses, root on the low E or A string:
      F5 = 1/3 and Ab5 = 4/6 on the low E, Bb5 = 1/3 and Db5 = 4/6 on the A
      string. Ab5 and Db5 reach fret 6, one past the usual fret-5 limit —
      Jonathan chose power chords knowing that.
@@ -6217,6 +6221,17 @@ window.CLASS_ACTIVITIES = [
      · 1.5 · 2.5). The record strums sixteenths through every chord; the
      card keeps the changes and drops the strumming, so the picking hand
      stays simple. `counts: true` shows the "+" under each pushed chord.
+
+     THE VERSES (Jonathan, 2026-10-25: "add the very brief bit of tab for
+     1st fret b and 1st fret e string for the verses … it's easy enough"):
+     two single notes, plucked separately — B string fret 1 (C) on 2, high
+     e fret 1 (F) on the "+" after 2, ringing through the rest of the lap.
+     Read off the guitar stem: both hits land within 0.05 beat of those
+     spots in every lap of verses 1 and 2. A rest fills beat 1 so the
+     highlight lands on time (the `rest` note, see CARD above). Verse 3 on
+     the record has no guitar; the card plays the verse part there too
+     (Jonathan's call). The pre-choruses (bars 21-28, 57-64, 101-108) stay
+     power chords — the record's guitar is back to the riff there.
 
      THE CHORDS: the whole song is the F-Bb-Ab-Db riff (bass chroma per
      beat, 520 beats) except the two 4-bar interludes after choruses 1 and 2
@@ -6229,14 +6244,14 @@ window.CLASS_ACTIVITIES = [
     library: false,   // starts as a class activity; the console can move it to the Songs page — see LIBRARY above
     title:    '"Smells Like Teen Spirit" - Nirvana — Play Along',
     title_es: '"Smells Like Teen Spirit" - Nirvana — Toca con la canción',
-    intro:    'You can move a power chord along the low E and A strings — today you play Smells Like Teen Spirit with the band using F5, Bb5, Ab5 and Db5.',
-    intro_es: 'Ya puedes mover un acorde de potencia por las cuerdas Mi grave y La — hoy tocas Smells Like Teen Spirit con la banda con F5, Bb5, Ab5 y Db5.',
+    intro:    'You can move a power chord along the low E and A strings — today you play Smells Like Teen Spirit with the band using F5, Bb5, Ab5 and Db5, and two single notes in the verses.',
+    intro_es: 'Ya puedes mover un acorde de potencia por las cuerdas Mi grave y La — hoy tocas Smells Like Teen Spirit con la banda con F5, Bb5, Ab5 y Db5, y dos notas sueltas en las estrofas.',
     card: {
       track: 'smells-like-teen-spirit',
       slowest: true,    // Slowest / Slower / Slow / Normal
       counts: true,     // Counts switch: shows Bb5 and Db5 on the "+" after 2 — see CARD above
-      caption:    'The song in order · one strum per chord · let each chord ring',
-      caption_es: 'La canción en orden · un rasgueo por acorde · deja sonar cada acorde',
+      caption:    'The song in order · one strum per chord, one pluck per note · let each one ring',
+      caption_es: 'La canción en orden · un rasgueo por acorde, una pulsación por nota · deja que cada uno suene',
       sections: [
         {
           label: 'Intro', label_es: 'Intro',
@@ -6252,8 +6267,19 @@ window.CLASS_ACTIVITIES = [
         },
         {
           label: 'Verse 1', label_es: 'Estrofa 1',
-          caption: 'Verse 1 — F5 Bb5 Ab5 Db5, 10 laps', caption_es: 'Estrofa 1 — F5 Bb5 Ab5 Db5, 10 vueltas',
-          fromBar: 9, bars: 2, reps: 10,
+          caption: 'Verse 1 — B string fret 1, then high e fret 1, 6 laps · let them ring', caption_es: 'Estrofa 1 — cuerda Si traste 1, después Mi aguda traste 1, 6 vueltas · déjalas sonar',
+          fromBar: 9, bars: 2, reps: 6,
+          repLabel: 'Lap', repLabel_es: 'Vuelta',
+          notes: [
+            { rest: true, beats: 1 },
+            { string: 'B', fret: 1, note: 'C', midi: 60, beats: 0.5 },
+            { string: 'e', fret: 1, note: 'F', midi: 65, beats: 6.5 }
+          ]
+        },
+        {
+          label: 'Pre-chorus 1', label_es: 'Pre-coro 1',
+          caption: 'Pre-chorus 1 — F5 Bb5 Ab5 Db5, 4 laps', caption_es: 'Pre-coro 1 — F5 Bb5 Ab5 Db5, 4 vueltas',
+          fromBar: 21, bars: 2, reps: 4,
           repLabel: 'Lap', repLabel_es: 'Vuelta',
           notes: [
             { frets: [['A', 3], ['E', 1]], note: 'F5', midi: [48, 41], beats: 1.5 },
@@ -6288,8 +6314,19 @@ window.CLASS_ACTIVITIES = [
         },
         {
           label: 'Verse 2', label_es: 'Estrofa 2',
-          caption: 'Verse 2 — F5 Bb5 Ab5 Db5, 10 laps', caption_es: 'Estrofa 2 — F5 Bb5 Ab5 Db5, 10 vueltas',
-          fromBar: 45, bars: 2, reps: 10,
+          caption: 'Verse 2 — B string fret 1, then high e fret 1, 6 laps · let them ring', caption_es: 'Estrofa 2 — cuerda Si traste 1, después Mi aguda traste 1, 6 vueltas · déjalas sonar',
+          fromBar: 45, bars: 2, reps: 6,
+          repLabel: 'Lap', repLabel_es: 'Vuelta',
+          notes: [
+            { rest: true, beats: 1 },
+            { string: 'B', fret: 1, note: 'C', midi: 60, beats: 0.5 },
+            { string: 'e', fret: 1, note: 'F', midi: 65, beats: 6.5 }
+          ]
+        },
+        {
+          label: 'Pre-chorus 2', label_es: 'Pre-coro 2',
+          caption: 'Pre-chorus 2 — F5 Bb5 Ab5 Db5, 4 laps', caption_es: 'Pre-coro 2 — F5 Bb5 Ab5 Db5, 4 vueltas',
+          fromBar: 57, bars: 2, reps: 4,
           repLabel: 'Lap', repLabel_es: 'Vuelta',
           notes: [
             { frets: [['A', 3], ['E', 1]], note: 'F5', midi: [48, 41], beats: 1.5 },
@@ -6336,8 +6373,19 @@ window.CLASS_ACTIVITIES = [
         },
         {
           label: 'Verse 3', label_es: 'Estrofa 3',
-          caption: 'Verse 3 — F5 Bb5 Ab5 Db5, 8 laps', caption_es: 'Estrofa 3 — F5 Bb5 Ab5 Db5, 8 vueltas',
-          fromBar: 93, bars: 2, reps: 8,
+          caption: 'Verse 3 — B string fret 1, then high e fret 1, 4 laps · let them ring', caption_es: 'Estrofa 3 — cuerda Si traste 1, después Mi aguda traste 1, 4 vueltas · déjalas sonar',
+          fromBar: 93, bars: 2, reps: 4,
+          repLabel: 'Lap', repLabel_es: 'Vuelta',
+          notes: [
+            { rest: true, beats: 1 },
+            { string: 'B', fret: 1, note: 'C', midi: 60, beats: 0.5 },
+            { string: 'e', fret: 1, note: 'F', midi: 65, beats: 6.5 }
+          ]
+        },
+        {
+          label: 'Pre-chorus 3', label_es: 'Pre-coro 3',
+          caption: 'Pre-chorus 3 — F5 Bb5 Ab5 Db5, 4 laps', caption_es: 'Pre-coro 3 — F5 Bb5 Ab5 Db5, 4 vueltas',
+          fromBar: 101, bars: 2, reps: 4,
           repLabel: 'Lap', repLabel_es: 'Vuelta',
           notes: [
             { frets: [['A', 3], ['E', 1]], note: 'F5', midi: [48, 41], beats: 1.5 },

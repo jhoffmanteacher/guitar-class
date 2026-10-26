@@ -1878,6 +1878,15 @@ function renderTabSystem(chunk, off, cols, hideNames, counts, timed){
   }).join('');
   const noteBtns = ['<div></div>'];
   chunk.forEach((n, ci) => {
+    /* A rest ({ rest: true, beats } — a practice card's ca-41 verses,
+       2026-10-25): no fret on any string above and no note button here,
+       just a column the highlight stops on, so the note after it lights
+       on its beat. */
+    if (n.rest) {
+      noteBtns.push(`<div class="tab-rest" data-seq="${off + ci}" aria-hidden="true"></div>`);
+      for (let k = 1; k < spanOf(ci); k++) noteBtns.push('<div></div>');
+      return;
+    }
     const midis = (Array.isArray(n.midi) ? n.midi : [n.midi]).map(Number);
     const midisAttr = escAttr(JSON.stringify(midis));
     /* A note carrying `finger` (1-4) shows the FINGER in a light-purple circle
