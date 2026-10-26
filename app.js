@@ -1922,10 +1922,14 @@ function renderTabSystem(chunk, off, cols, hideNames, counts, timed){
     chunk.forEach((n, ci) => {
       const c = counts[ci] || { lab: '', held: [], fill: [] };
       /* Untimed, a held beat prints beside the count, "2 (3)"; timed, it
-         gets its own column (the filler cells below). */
+         gets its own column (the filler cells below) and prints in the same
+         parentheses, "(3)", so it never reads as a strum. */
       const held = !timed && c.held.length ? ` <span class="tab-count-held">(${escHtml(c.held.join(' '))})</span>` : '';
       countCells.push(`<div class="tab-count" data-seq="${off + ci}" aria-hidden="true">${escHtml(c.lab)}${held}</div>`);
-      for (let k = 1; k < spanOf(ci); k++) countCells.push(`<div class="tab-count tab-count-held" aria-hidden="true">${escHtml((c.fill && c.fill[k - 1]) || '')}</div>`);
+      for (let k = 1; k < spanOf(ci); k++){
+        const f = (c.fill && c.fill[k - 1]) || '';
+        countCells.push(`<div class="tab-count tab-count-held" aria-hidden="true">${f ? '(' + escHtml(f) + ')' : ''}</div>`);
+      }
     });
     for (let pi = used; pi < cols; pi++) countCells.push('<div class="tab-count" aria-hidden="true"></div>');
   }
@@ -1942,7 +1946,9 @@ function renderTabSystem(chunk, off, cols, hideNames, counts, timed){
    a sixteenth) gets no label rather than a wrong one. `held` lists the
    beats a note rings through with no new strum — ca-29's strum on 2 in
    bar 2 holds through 3, shown as a grey "(3)" so the "+" after it reads as the "+" of
-   3, not of 2 (Jonathan, 2026-10-21). The notes start on beat 1 of a bar —
+   3, not of 2 (Jonathan, 2026-10-21). On a timed TAB the held beat's own
+   column prints the same "(3)" (a bare 3 read as "strum on 3"); the "+"
+   columns stay empty. The notes start on beat 1 of a bar —
    true of every practice-card section (fromBar is a whole bar). */
 function tabCounts(notes, beatsPerBar){
   const bpb = beatsPerBar > 0 ? beatsPerBar : 4;

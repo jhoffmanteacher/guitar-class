@@ -5,6 +5,17 @@ Notable changes to the Guitar Class site. Newest first.
 For the full session-by-session history (and the reasoning behind each change),
 see `WORKFLOW.md` and the git commit log.
 
+## 2026-10-26 — Held beats show in parentheses; one old Coach hint removed
+
+- **A held beat now shows in parentheses under a timed tab.** When a note lasts
+  longer than one eighth, the count under the empty space where it rings now
+  reads "(3)", not "3". In bar 2 of the Watchtower card the count row is now
+  1 + 2 (3) + 4 +, so "(3)" is not a strum. The "+" counts stay as they were.
+  This also shows on the Bb5 / Db5 play-along card.
+- **Module 2, Challenge 3 ("Watchtower" Bass Riff) no longer sends you to the
+  Listening Coach.** That button is not on this step, so the last sentence of
+  the hint is gone.
+
 ## 2026-10-26 — "All Along the Watchtower": the rhythm now matches the record
 
 - **The rhythm in every Watchtower step is now the one on the recording.**
