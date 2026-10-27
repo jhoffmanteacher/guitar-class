@@ -1273,15 +1273,30 @@ function teacherActivityIdNum(a){ const m=/^ca-(\d+)$/.exec(String(a&&a.id)); re
    disagree with the board that linked to it. */
 function teacherActivityPlace(id){
   const cfg=teacherClassConfig;
-  const e=(cfg.activityBoard||{})[id];
-  if(!e) return 'Built \u2014 not assigned to a module yet, so no student sees it.';
-  const mn=Number(e.module)||0;
+  const a=(window.CLASS_ACTIVITIES||[]).find(x=>x.id===id);
+  /* Songs-page songs and teacher-only cards are off the board whatever row
+     they left behind (caBoardOrder), so ask about them first \u2014 the raw
+     activityBoard row called every library song "not assigned, no student
+     sees it". Neither one can gate, so their Clear buttons do nothing. */
+  const noGate=' It is never on the board and never sends anyone to In-Class Activities, so the Clear buttons below change nothing.';
+  if(a && caIsLibraryCard(a, cfg.songLibrary||{})){
+    const off=teacherActivityDeleted(id,cfg)?'deleted':teacherActivityArchived(id,cfg)?'archived':(cfg.hiddenActivities||{})[id]===true?'Hidden':'';
+    return (off
+      ? `A Songs-page song, ${off} \u2014 no student sees it.`
+      : 'A Songs-page song \u2014 every student can open it from the Songs page, under More Play Along songs.')+noGate;
+  }
+  if(a && caIsTeacherSong(a, cfg.classSongs||{}))
+    return 'A Teacher view songs card \u2014 no student sees it until you use Move to Class activities.'+noGate;
+  const view=teacherBoardView(cfg);
+  if(!view.assigned[id]) return 'Built \u2014 not assigned to a module yet, so no student sees it.';
+  const sec=view.sections.find(s=>s.ids.includes(id)||s.retiredIds.includes(id));
+  const mn=sec?sec.module:0;
   const manifest=(typeof MODULE_MANIFEST!=='undefined')?MODULE_MANIFEST:[];
   const mod=manifest.find(m=>m.num===mn);
   const where=mn===0?'Unsorted':(mod?`Module ${mn} \u2014 ${mod.name}`:`Module ${mn}`);
   if(teacherActivityDeleted(id,cfg)) return `${where} \u00b7 deleted \u2014 no number, and students don't see it.`;
   if(teacherActivityArchived(id,cfg)) return `${where} \u00b7 archived \u2014 no number, and students don't see it.`;
-  const n=teacherBoardView(cfg).number[id];
+  const n=view.number[id];
   return n ? `${where} \u00b7 #${n}` : `${where} \u00b7 no number \u2014 exit checks never take a #N slot.`;
 }
 
