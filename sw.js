@@ -224,7 +224,11 @@ self.addEventListener('fetch', event => {
       if (cached) return cached;
       event.waitUntil((async () => {
         try {
-          const res = await fetch(url.href);   // no Range header — full file
+          // 'no-cache' for the same reason as the miss in the main handler
+          // below: this fill is pinned until the next audio bump, and a plain
+          // fetch could answer from the HTTP cache (max-age=600) with the OLD
+          // file that a re-export just replaced.
+          const res = await fetch(url.href, { cache: 'no-cache' });   // no Range header — full file
           if (res && res.status === 200 && res.type === 'basic') await cache.put(url.href, res);
         } catch { /* offline or blocked — try again next play */ }
       })());
