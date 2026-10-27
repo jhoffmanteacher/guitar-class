@@ -290,8 +290,17 @@ async function walk(base, chromePort, label) {
   await run('games-hub-again', `openGamesScreen()`, 600);
   await run('lang-es-games', `setLang('es')`, 600);
   await run('lang-en-final', `setLang('en')`, 600);
-  await run('tuner-open', `(typeof toggleTuner === 'function') ? (toggleTuner(), 1) : 0`, 700);
-  await run('tuner-close', `(typeof toggleTuner === 'function') ? (toggleTuner(), 1) : 0`, 500);
+  // The tuner, opened the way its rail button does (fab-tools.js togglePopup). This
+  // used to call a toggleTuner() that does not exist, so the step silently did nothing.
+  // Chrome runs with a fake mic, so the tuner must open, start listening, and stop on close.
+  // A step that throws is already recorded by run(), so only a clean "no" is added here.
+  const tunerFail = (step, text) => events.push({ step, kind: 'step-failed', text });
+  const tunerOpen = await run('tuner-open', `(() => { togglePopup('tuner'); return document.getElementById('tuner-popup').classList.contains('open'); })()`, 1200);
+  if (tunerOpen === false) tunerFail('tuner-open', 'togglePopup(\'tuner\') did not open the tuner popup');
+  const tunerOn = await run('tuner-listening', `typeof tunerRunning !== 'undefined' && tunerRunning === true`, 10);
+  if (tunerOn === false) tunerFail('tuner-listening', 'the tuner opened but did not start listening to the (fake) mic');
+  const tunerShut = await run('tuner-close', `(() => { togglePopup('tuner'); return !document.getElementById('tuner-popup').classList.contains('open') && tunerRunning === false; })()`, 500);
+  if (tunerShut === false) tunerFail('tuner-close', 'a second togglePopup(\'tuner\') did not close the popup and stop the mic');
   await run('click-away', `document.body.click()`, 300);
   await chordGridWalk(page, run, events, stats);
   await page.close();
