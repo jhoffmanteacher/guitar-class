@@ -159,11 +159,17 @@ muted element on the OTHER mix of the tier now playing, in step with the
 audible one; the toggle swaps which is muted. Both engines use it: `snipState`
 (snippet cards) and `pcState` (practice / Play Along cards, whose `pcRetrack`
 tries the swap before the reload). The twin loads only once the main element
-is `playing`, follows by playback RATE (a seek on an mp3 lands late and makes
+is `playing`, and **up front only for the teacher** (the console, or the app
+signed in as the teacher — `twinWanted()`; Jonathan 2026-10-26: both mixes on
+every first play was too much for one classroom Wi-Fi). A student's card loads
+one mix; its first Guitar press takes the reload path (a short gap) and marks
+the card `data-twin`, and the twin parks from then on, so later presses are
+instant. A failure on a swapped-in twin stops the card like any playing
+element (`twinPark`'s `onLost`). It follows by playback RATE (a seek on an mp3 lands late and makes
 a new gap), and is never trusted until `twinReady()` — right file, playing,
 buffered, within 60 ms. Otherwise the old reload path runs, so the worst case
 is the old behaviour. A speed switch (Slow/Slower) still reloads: it is a
-different tier, and the twin is re-parked on the new one. **Whoever owns the
+different tier, and the twin (where the card keeps one) is re-parked on the new one. **Whoever owns the
 state must stop the twin on every exit** (`twinStop`; `snipStop` and `pcStop`
 do). The Song Journey page's own player (`ensurePlayer` in `tabs/journey.js`)
 still reloads — it has native controls and no app.js, so it needs its own port.

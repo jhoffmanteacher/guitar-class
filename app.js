@@ -2920,8 +2920,21 @@ function snippetSrc(tr, slow, guitar){
    until the gap closes; only a gap over TWIN_SNAP_SEC (the song looped, the
    student scrubbed) seeks, and at most twice a second.
    Whoever owns the state (`st`: snipState or pcState) stops the twin on every
-   exit — it is one more element to pause and empty. */
+   exit — it is one more element to pause and empty.
+   Only the teacher loads it up front — see twinWanted(). */
 const TWIN_READY_SEC = 0.06, TWIN_SNAP_SEC = 0.25;
+/* WHO LOADS THE TWIN UP FRONT (Jonathan, 2026-10-26). Parking it on every Play
+   pulled BOTH mixes (10-14 MB each) on a song's first play, for every
+   Chromebook on one classroom Wi-Fi. So only the teacher — the console, or the
+   student app signed in as the teacher — parks it as soon as the song plays.
+   Everyone else loads one mix; their first Guitar press on a card takes the
+   old reload path (a short gap) and marks the card `data-twin`, and from then
+   on the twin parks, so later presses are instant. The mark is on the card's
+   element, so it lasts through Stop and Play until the card is re-rendered. */
+function twinPreloadsAll(){
+  return IS_TEACHER_MODE || !!(currentUser && typeof TEACHER_EMAIL !== 'undefined' && currentUser.email === TEACHER_EMAIL);
+}
+function twinWanted(host){ return twinPreloadsAll() || !!(host && host.dataset.twin === '1'); }
 function twinSrcIs(el, src){ return !!el && (el.getAttribute('src') === src || (el.src || '').endsWith(src)); }
 /* Point the twin at `src` (the other mix of the tier now playing), creating it
    on first use. Does nothing while it is already there. `onLost(el)` is the
@@ -3121,7 +3134,8 @@ function snipToggle(btn){
     audio.play().catch(() => {});
     snipState.raf = requestAnimationFrame(snipTick);
     // The other mix starts loading only once this one is playing, so the two
-    // never compete for a slow connection at the moment that matters.
+    // never compete for a slow connection at the moment that matters (and only
+    // where twinWanted — snipParkTwin checks).
     audio.addEventListener('playing', () => { if(snipState && snipState.audio === audio) snipParkTwin(snipState); }, { once: true });
   };
   if(audio.readyState >= 1) begin();
@@ -3220,7 +3234,7 @@ function snipAudioError(st, el){
 /* The twin is the OTHER mix of the tier now playing — see THE TWIN. A song
    with no full mix has nothing to swap to, so it never gets one. */
 function snipParkTwin(st){
-  if(!snippetHasFull(st.tr)) return;
+  if(!snippetHasFull(st.tr) || !twinWanted(st.card)) return;
   const card = st.card;
   twinPark(st, snippetSrc(st.tr, card.dataset.slow === '1', card.dataset.guitar !== '1'), el => snipAudioError(st, el));
 }
@@ -3260,7 +3274,10 @@ function snipSetTier(btn, which){
   // `which` is the dataset key outright — a two-way ternary silently filed
   // 'guitar' under 'metro' when the third toggle arrived.
   card.dataset[which] = on ? '1' : '';
-  if(which === 'guitar') snipGuitarLabel(btn, on);
+  if(which === 'guitar'){
+    snipGuitarLabel(btn, on);
+    card.dataset.twin = '1';           // from now on this card keeps the twin — see twinWanted
+  }
   /* Slowest is the slow FILE at SLOWEST_RATE, so it sets data-slow too; the
      two buttons are one choice of speed, and pressing either visibly
      releases the other. Slowest off goes back to normal speed. */
@@ -13739,14 +13756,15 @@ function pcGo(st, si){
   pcStatus(st.root, escHtml(t('ca.cardPlayingFrom', {section: tf(st.L.sections[si].s, 'label')})));
   st.audio.play().catch(() => {});
   st.raf = requestAnimationFrame(pcFrame);
-  // The other mix loads only once this one is playing (see THE TWIN).
+  // The other mix loads only once this one is playing, and only where
+  // twinWanted (see THE TWIN).
   const el = st.audio;
   el.addEventListener('playing', () => { if(pcState === st) pcParkTwin(st); }, { once: true });
 }
 /* The twin is the OTHER mix of the tier now playing — see THE TWIN. */
 function pcParkTwin(st){
   const root = st.root;
-  if(!snippetHasFull(st.L.tr)) return;
+  if(!snippetHasFull(st.L.tr) || !twinWanted(root)) return;
   twinPark(st, snippetSrc(st.L.tr, root.dataset.slow === '1', root.dataset.guitar !== '1'), el => pcAudioError(st, el));
 }
 /* Four clicks (one bar of the counted beat) before the song comes in, on
@@ -14037,6 +14055,7 @@ function pcSetGuitar(btn){
   if(!root) return;
   const on = root.dataset.guitar !== '1';
   root.dataset.guitar = on ? '1' : '';
+  root.dataset.twin = '1';             // from now on this card keeps the twin — see twinWanted
   btn.setAttribute('aria-checked', on ? 'true' : 'false');
   const labs = btn.querySelectorAll('.pc-speed-lab');
   if(labs[0]) labs[0].classList.toggle('on', !on);
