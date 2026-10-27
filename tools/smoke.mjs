@@ -201,6 +201,17 @@ async function chordGridWalk(page, run, events, stats) {
     }
   }
   stats.chordCards = walked;
+  /* The Strum only / Alternating bass switch (bassNotes, ca-35), clicked for
+     real: Strum only clears every bass mark and saves 'off'; Alternating bass
+     brings them all back and saves 'on' (review R1-4, 2026-10-27). */
+  const bassIds = await run('chord-grid:bass-list', `CLASS_ACTIVITIES.filter(a => a.bassNotes && a.card && !a.teacherOnly).map(a => a.id)`, 10) || [];
+  for (const id of bassIds) {
+    const r = await run(`chord-grid:${id}:bass-switch`, `(() => { caFocusActivity('${id}'); const q = s => document.querySelector('.ca-card[open] ' + s); const count = () => document.querySelectorAll('.ca-card[open] .tab-bass').length; const saved = () => { try { return (JSON.parse(localStorage.getItem('caBassModes') || '{}') || {})['${id}']; } catch (e) { return 'unreadable'; } }; const out = { start: count() }; q('.ca-bass-switch button:nth-child(1)').click(); out.off = count(); out.savedOff = saved(); q('.ca-bass-switch button:nth-child(2)').click(); out.on = count(); out.savedOn = saved(); return out; })()`, 50);
+    if (!r) { events.push({ step: `chord-grid:${id}:bass-switch`, kind: 'chord-grid-bass', text: 'the bass switch could not be clicked' }); continue; }
+    if (r.off !== 0 || r.savedOff !== 'off') events.push({ step: `chord-grid:${id}:bass-switch`, kind: 'chord-grid-bass', text: `Strum only left ${r.off} bass notes and saved ${r.savedOff}` });
+    if (!(r.on > 0) || r.savedOn !== 'on') events.push({ step: `chord-grid:${id}:bass-switch`, kind: 'chord-grid-bass', text: `Alternating bass drew ${r.on} bass notes and saved ${r.savedOn}` });
+    stats.bassClicks = (stats.bassClicks || 0) + 1;
+  }
   // Layout: every grid page, wide and phone-sized.
   for (const [w, h] of [[1366, 657], [390, 844], [360, 740]]) {
     await run(`chord-grid:width-${w}`, `(window.__cgW = ${w}, 1)`, 10);
@@ -338,7 +349,7 @@ try {
   const norm = e => `${e.kind}|${e.step.replace(/^(en|es):/, '')}|${e.kind === 'bad-handler' ? '' : e.text}`;
   const baseCount = new Map(); (base ? base.errors : []).forEach(e => baseCount.set(norm(e), Math.max(baseCount.get(norm(e)) || 0, e.kind === 'bad-handler' ? +e.text : 1)));
   const report = base ? now.errors.filter(e => (e.kind === 'bad-handler' ? +e.text : 1) > (baseCount.get(norm(e)) || 0)) : now.errors;
-  say(`smoke: ${now.stats.sets} sets in ${now.stats.modules} modules (EN + ES), ${now.stats.games} game views, ${now.stats.buttons} inline handlers compiled${now.stats.chordCards ? `, ${now.stats.chordCards} chord-grid cards walked (cursor, lap, layout at 1366/390/360, lyric sheet${now.stats.chordSkipped ? `; ${now.stats.chordSkipped.join(', ')} is teacher-only and not walked` : ''})` : ''}`);
+  say(`smoke: ${now.stats.sets} sets in ${now.stats.modules} modules (EN + ES), ${now.stats.games} game views, ${now.stats.buttons} inline handlers compiled${now.stats.chordCards ? `, ${now.stats.chordCards} chord-grid cards walked (cursor, lap, layout at 1366/390/360, lyric sheet${now.stats.bassClicks ? `, bass switch clicked on ${now.stats.bassClicks}` : ''}${now.stats.chordSkipped ? `; ${now.stats.chordSkipped.join(', ')} is teacher-only and not walked` : ''})` : ''}`);
   if (base) say(`smoke: ${BASELINE} had ${base.errors.length} error event(s); this checkout has ${now.errors.length}`);
   if (report.length) {
     exitCode = 1;

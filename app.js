@@ -12923,7 +12923,9 @@ function caSetChordMode(id, mode){
    chord, the 5th in the next, back and forth until the chord changes (a
    new chord starts again on its root). In a bar where the chord itself
    starts on beat 1, its fret on that string is the bass note and is marked,
-   not drawn twice. A rest gets no bass note; a note-by-note section
+   not drawn twice (the chord's own fret wins in renderChordGridRow). The
+   mark is purple AND underlined (styles.css) — colour alone would vanish
+   under the cursor. A rest gets no bass note; a note-by-note section
    (chordGrid:false) is never touched. Display only: no `notes` change, so the
    audio, the beats, the checks and the tick keys are the same both ways.
    The choice is per viewer in localStorage (`caBassModes`, { id: 'on' |
@@ -12962,9 +12964,8 @@ function caSetBassMode(id, mode){
   caOpenId = id;
   renderClassActivities();
 }
-/* The bass note on beat 1 of each bar of one grid row: { <column>: { s, f,
-   onset } }. `onset` = the chord itself starts in that column (its fret on
-   that string is marked rather than drawn again). Pure: no DOM. */
+/* The bass note on beat 1 of each bar of one grid row: { <column>: { s, f } }
+   — string and fret. Pure: no DOM. */
 function pcBassMarks(events, row, bpb, bass){
   const out = {};
   if(!bass) return out;
@@ -12976,7 +12977,7 @@ function pcBassMarks(events, row, bpb, bass){
     if(!b) continue;
     const k = Math.round(pos / bpb) - Math.ceil(ev.start / bpb - 1e-6);   // bars of this chord before this one
     const pick = k % 2 ? b.fifth : b.root;
-    out[c] = { s: pick[0], f: pick[1], onset: Math.abs(ev.start - pos) < 1e-6 };
+    out[c] = { s: pick[0], f: pick[1] };
   }
   return out;
 }
@@ -13073,7 +13074,8 @@ function pcGridRows(S, bpb){
 }
 /* One row of a chord grid. Columns are eighths (a bar is 2 x beatsPerBar of
    them); `cols` is shared by every row of the section so beats line up row
-   to row. Fret numbers and the chord-name button sit at each event's onset
+   to row. Fret numbers (bar the alternating-bass note on beat 1 of a bar —
+   see BASS NOTES) and the chord-name button sit at each event's onset
    column only. data-beat (the beat within the pass) goes on every BEAT column
    — string cells and count cell — and never on a "+" column: that is what
    the cursor lights (pcPaint). The count row is always on here: beats in

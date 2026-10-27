@@ -5220,8 +5220,9 @@ window.CLASS_ACTIVITIES = [
      last intro bar, so the pickup "Qué" is heard; the intro and the outro
      are the requinto's, and ca-34 teaches those with their own snippets.
      ONE COLUMN PER CHORD, not per strum — a column's `beats` is how long the
-     band holds that chord (15 = five bars), and the caption tells the
-     student to keep strumming 3 to the bar until the highlight moves. That
+     band holds that chord (15 = five bars), and the chord grid's directions
+     tell the student to strum the way the record does until the next
+     chord name. That
      keeps each lyric line on ONE row with its lyric printed over it
      (`rowLabels`, new for this card — pcTabHtml), which is the whole point:
      the student reads the words and sees the change coming. A strum per
@@ -5272,8 +5273,8 @@ window.CLASS_ACTIVITIES = [
       E5: { root: ['A', 7], fifth: ['D', 9] },
       D5: { root: ['A', 5], fifth: ['D', 7] },
     },
-    bassDirections:    'Alternating bass: on beat 1 of each bar, pick the one bass note the TAB shows, then strum on beats 2 and 3. The bass note is the root in one bar and the 5th in the next.',
-    bassDirections_es: 'Bajo alternante: en el tiempo 1 de cada compás, toca la nota de bajo que muestra la tablatura y luego rasguea en los tiempos 2 y 3. La nota de bajo es la raíz en un compás y la quinta en el siguiente.',
+    bassDirections:    'Bass: on beat 1, pick only the purple, underlined note, then strum on beats 2 and 3.',
+    bassDirections_es: 'Bajo: en el tiempo 1, toca solo la nota morada y subrayada y luego rasguea en los tiempos 2 y 3.',
     intro:    'You learned A, E7, D and the strum in 3. Today you play Las Mañanitas with the band, from the first verse to the last chorus.',
     intro_es: 'Aprendiste A, E7, D y el rasgueo en 3. Hoy tocas Las Mañanitas con la banda, de la primera estrofa al último coro.',
     intro_power:    'You learned A5, E5, D5 and the strum in 3. Today you play Las Mañanitas with the band, from the first verse to the last chorus.',

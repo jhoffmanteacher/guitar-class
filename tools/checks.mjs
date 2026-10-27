@@ -3306,10 +3306,10 @@ function readFieldStrings(file, nameRe) {
    every English field that has a Spanish `_es` twin somewhere in the
    content (so it renders to students) but that neither check read:
    title, unit, skillFocus, name, module, checklistSub, tabTitle, tabSub,
-   repLabel. */
+   repLabel, bassDirections. */
 const STUDENT_VALUE_NAME_RE = new RegExp(
   '\\b(text|hint|stuck|levelUp|gotItWhen|explain|forward|subtitle|meta|intro|note|prompt|placeholder|' +
-  'label|caption|title|unit|skillFocus|name|module|checklistSub|tabTitle|tabSub|repLabel|' +
+  'label|caption|title|unit|skillFocus|name|module|checklistSub|tabTitle|tabSub|repLabel|bassDirections|' +
   'choices|choices_es|assessItems|assessItems_es|items|rowLabels|rowLabels_es)(?:_power)?\\s*:\\s*', 'g');   // `_power`: the chord-version twin (caView)
 /* The JS files 1w and 1w-t read values from: the module content, class
    activities and — since 2026-10-12 — config-main.js, whose MODULE_MANIFEST
@@ -8013,6 +8013,7 @@ function checkSheetCards() {
      at the "+" after it, and steps once per beat; on ca-10 it still steps
      per note. */
 const CHORD_GRID_BASS_CARDS = ['ca-35'];   // practice cards with an alternating-bass switch (bassNotes) — see BASS NOTES in 1bv
+const CHORD_GRID_BASS_START = { 'ca-35': 'on' };   // how each opens (Jonathan, 2026-10-27: start on Alternating bass) — a decision, not a default
 const CHORD_GRID_BASS_MARKS = 160;          // bass notes drawn, every bass card x chord view, bass on — see BASS NOTES in 1bv
 const CHORD_GRID_HELD_LABELS = 54;   // rows (both views) that open on a held "(Chord)" — see the column-0 check below
 const CHORD_GRID_CARDS = ['ca-29', 'ca-30', 'ca-32', 'ca-33', 'ca-35', 'ca-36', 'ca-37', 'ca-39', 'ca-40', 'ca-41', 'ca-42'];
@@ -8187,6 +8188,20 @@ function checkChordGridCards(ctx) {
   const bassCards = acts.filter(x => x && x.bassNotes);
   if (bassCards.map(x => x.id).join() !== CHORD_GRID_BASS_CARDS.join()) flag(`the cards with bassNotes are [${bassCards.map(x => x.id).join(', ')}], expected [${CHORD_GRID_BASS_CARDS.join(', ')}] — update CHORD_GRID_BASS_CARDS in the same edit`);
   for (const a of bassCards) {
+    /* The card's own start (bassStart) with no choice saved: the pressed
+       button and the marks follow it (review R1-4 — '|| "off"' in caBassMode
+       stayed green while every render above set the mode explicitly). */
+    {
+      const start = a.bassStart === 'on' ? 'on' : 'off';
+      if (CHORD_GRID_BASS_START[a.id] && CHORD_GRID_BASS_START[a.id] !== start) flag(`${a.id}: opens on bass ${start}, pinned at ${CHORD_GRID_BASS_START[a.id]} (Jonathan's choice) — change CHORD_GRID_BASS_START only when he asks`);
+      let h = '';
+      try { vm.runInContext(`delete caBassModes[${JSON.stringify(a.id)}]`, ctx); h = String(caCardBodyHtml(a)); }
+      catch (e) { flag(`caCardBodyHtml(${a.id}, no saved bass choice) threw: ${e.message}`); }
+      const sw0 = /class="ca-chord-switch ca-bass-switch"[\s\S]*?<\/div>/.exec(h);
+      const p0 = sw0 ? [...sw0[0].matchAll(/aria-pressed="(true|false)"[^>]*onclick="caSetBassMode\([^,]*,'(on|off)'\)/g)].filter(m => m[1] === 'true').map(m => m[2]) : [];
+      if (p0.join() !== start) flag(`${a.id}: with no saved choice the bass switch shows [${p0.join(', ')}] pressed, expected ${start} (bassStart)`);
+      if (/tab-bass/.test(h) !== (start === 'on')) flag(`${a.id}: with no saved choice the TAB ${start === 'on' ? 'draws no' : 'draws'} bass notes, but bassStart is ${start}`);
+    }
     for (const mode of ['full', 'power']) {
       if (mode === 'power' && !a.chordVersions) continue;
       for (const bass of ['on', 'off']) {
@@ -8265,7 +8280,7 @@ function checkChordGridCards(ctx) {
   if (heldLabels !== CHORD_GRID_HELD_LABELS) flag(`${heldLabels} rows across both views open on a held "(Chord)" label, pinned at ${CHORD_GRID_HELD_LABELS} — a row that starts mid-chord lost its label, or the cards' rows changed (update the pin only for an intended content change)`);
   // The new words are English AND Spanish (1e checks the key exists; this checks the Spanish is not the English).
   const I18N = loadI18nTable();
-  for (const k of ['ca.cardChordDirections', 'ca.cardChordMixedDirections', 'ca.cardCountsAriaGrid', 'tab.restStop', 'ca.sheetDirections']) {
+  for (const k of ['ca.cardChordDirections', 'ca.cardChordMixedDirections', 'ca.cardCountsAriaGrid', 'tab.restStop', 'ca.sheetDirections', 'ca.bassVersion', 'ca.bassOff', 'ca.bassOn']) {
     if (!I18N[k] || !I18N[k].es || I18N[k].es === I18N[k].en) flag(`i18n ${k}: the Spanish is missing or just the English`);
   }
   // Directions: all-grid, mixed and single-note cards each say their own thing.
