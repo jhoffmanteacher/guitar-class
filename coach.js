@@ -307,7 +307,9 @@ function coachChordDesc(chords, slotCount){
 }
 
 function coachChordSlots(chords){
-  const cycles = 2;   // 1 chord: 8 strums; 2+ chords: 2 passes through the loop
+  /* 1 chord: 8 strums; 2+ chords: 2 passes through the loop, cut off at
+     COACH_MAX_SLOTS from 5 chords up (coachChordDesc says so). */
+  const cycles = 2;
   const slots = [];
   for (let c = 0; c < cycles && slots.length < COACH_MAX_SLOTS; c++){
     chords.forEach(ch => {
