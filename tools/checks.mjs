@@ -8820,6 +8820,196 @@ async function checkBackingLoudness() {
   if (off === 0) ok(`${n} songs within ±${LOUDNESS_TOLERANCE_LU} LU of "the cure" (${ref.toFixed(1)} LUFS), each on its record-tempo full mix (${todo.length} measured, ${files.length - todo.length} from the cache)`);
 }
 
+/* ════════════════════════════════════════════════════════════════════
+   1ca. Coach and arcade verdict lines are true at 0, 1 and many
+   (2026-10-26 audit, findings 20-22). A line the code CHOOSES can be false
+   in a case nobody tried: "Everything was right." over a missed note, "The
+   8 notes I heard all counted" over two wrong ones, "twice through" on a
+   7-chord drill the 32-beat cap cuts to one pass, Note Runner's "Ladder
+   complete" on the power-chord branch's last level, "1 rounds cleared",
+   "1 correctas". So this RUNS coach.js (with app.js, as index.html loads
+   them) in a vm and renders:
+   - the Coach report over fixed takes, EN and ES: "Everything was right"
+     only when every beat was right, "all counted" only when every timed
+     hit was right, never "the other 1"; controls must still show both;
+   - the chord card's description for 1-10 chords against the beats the
+     drill really has;
+   - Note Runner's done screen on every level (first clear and re-clear):
+     "Ladder complete" only on the melody ladder's top level;
+   - eight arcade done screens at 0, 1 and many, EN and ES.
+   Every total is pinned, so a renamed function cannot turn this into a
+   check of nothing.
+   ════════════════════════════════════════════════════════════════════ */
+function checkCoachVerdicts() {
+  head('1ca. Coach and arcade verdict lines are true at 0, 1 and many');
+  const EXPECT = { reports: 18, descs: 10, nrLevels: 15, doneScreens: 58 };
+  let bad = 0;
+  const flag = m => { err(m); problems++; bad++; };
+  const bodies = {};
+  const el = id => ({
+    id, style: { setProperty(){}, removeProperty(){}, getPropertyValue(){ return ''; } }, dataset: {}, children: [], _h: '',
+    classList: { add(){}, remove(){}, toggle(){}, contains(){ return false; } },
+    get innerHTML(){ return this._h; }, set innerHTML(v){ this._h = v; if (id) bodies[id] = v; },
+    textContent: '', value: '', hidden: false, checked: false, isConnected: true,
+    addEventListener(){}, removeEventListener(){}, appendChild(){}, removeChild(){}, remove(){},
+    setAttribute(){}, getAttribute(){ return null; }, removeAttribute(){}, hasAttribute(){ return false; },
+    querySelector(){ return null; }, querySelectorAll(){ return []; }, closest(){ return null; },
+    focus(){}, blur(){}, click(){}, scrollIntoView(){}, insertAdjacentHTML(){}, insertAdjacentElement(){},
+    cloneNode(){ return el(''); }, contains(){ return false; },
+    getBoundingClientRect(){ return { top:0, left:0, width:0, height:0, bottom:0, right:0 }; },
+  });
+  const els = {};
+  const storage = () => ({ _d:{}, getItem(k){ return this._d[k] ?? null; }, setItem(k,v){ this._d[k]=String(v); },
+                           removeItem(k){ delete this._d[k]; }, clear(){ this._d={}; } });
+  const param = () => ({ value: 1, setValueAtTime(){}, setTargetAtTime(){}, cancelScheduledValues(){},
+                         linearRampToValueAtTime(){}, exponentialRampToValueAtTime(){} });
+  const actx = {
+    currentTime: 0, state: 'running', resume(){ return Promise.resolve(); }, destination: {}, sampleRate: 44100,
+    createOscillator(){ return { connect(){}, start(){}, stop(){}, frequency: param() }; },
+    createGain(){ return { connect(){}, disconnect(){}, context: actx, gain: param() }; },
+    createBufferSource(){ return { connect(){}, playbackRate: param(), start(){}, stop(){} }; },
+    createBuffer(){ return { getChannelData(){ return new Float32Array(16); } }; },
+    createDynamicsCompressor(){ return { connect(){}, threshold: param(), knee: param(), ratio: param(), attack: param(), release: param() }; },
+    close(){},
+  };
+  const ctx = {
+    console: { log(){}, warn(){}, error(){}, info(){} },
+    document: {
+      documentElement: el(''), head: el(''), body: el(''),
+      getElementById(id){ return els[id] || (els[id] = el(id)); },
+      querySelector(){ return null; }, querySelectorAll(){ return []; },
+      createElement(){ return el(''); }, createDocumentFragment(){ return el(''); },
+      addEventListener(){}, removeEventListener(){},
+      fonts: { ready: Promise.resolve() }, hidden: false, visibilityState: 'visible',
+    },
+    localStorage: storage(), sessionStorage: storage(),
+    location: { hostname:'localhost', href:'http://localhost/', pathname:'/', search:'', hash:'', reload(){} },
+    history: { scrollRestoration:'auto', replaceState(){}, pushState(){} },
+    navigator: { userAgent:'node', platform:'node', language:'en', onLine:true },
+    setTimeout: () => 0, clearTimeout(){}, setInterval: () => 0, clearInterval(){},
+    requestAnimationFrame: () => 0, cancelAnimationFrame(){},
+    matchMedia: () => ({ matches:false, addEventListener(){}, addListener(){} }),
+    getComputedStyle: () => ({ getPropertyValue: () => '' }),
+    fetch: () => Promise.reject(new Error('no network in 1ca')),
+    CustomEvent: class { constructor(t, o){ this.type = t; Object.assign(this, o || {}); } },
+    Image: class {}, Audio: class { play(){ return Promise.resolve(); } pause(){} },
+    AudioContext: class { constructor(){ return actx; } },
+    performance: { now: () => 0 },
+    URLSearchParams, URL, TextEncoder, TextDecoder,
+    addEventListener(){}, removeEventListener(){}, dispatchEvent(){}, scrollTo(){},
+    innerWidth: 1366, innerHeight: 657, devicePixelRatio: 1,
+  };
+  ctx.window = ctx; ctx.globalThis = ctx; ctx.self = ctx;
+  const FILES = ['i18n.js', 'guitar-diagrams.js', 'class-activities.js', 'config-main.js',
+    ...MODULE_FILES, 'app.js', 'fab-tools.js', 'tuner.js', 'coach.js'];
+  try {
+    vm.createContext(ctx);
+    for (const f of FILES) vm.runInContext(readFileSync(join(ROOT, f), 'utf8'), ctx, { filename: f });
+  } catch (e) { flag(`1ca: could not load coach.js with the site's scripts (${e.message}) — verdict lines NOT checked`); return; }
+  const run = code => vm.runInContext(code, ctx);
+  const text = id => (bodies[id] || '').replace(/<[^>]+>/g, ' ').replace(/&[#\w]+;/g, ' ').replace(/\s+/g, ' ');
+  const rep = (n, s) => Array(n).fill(s);
+  const right = s => s === 'ok' || s === 'oct';
+  const counts = { reports: 0, descs: 0, nrLevels: 0, doneScreens: 0 };
+  try {
+    /* Coach report. [mode, slot states, timing offset ms, must show Great line, must show "all counted"] */
+    const TAKES = [
+      ['melody', [...rep(9, 'ok'), 'miss'], 0, false, false],
+      ['melody', [...rep(7, 'ok'), ...rep(3, 'dim')], 0, false, false],
+      ['chords', [...rep(9, 'ok'), ...rep(7, 'dim')], 0, false, false],
+      ['melody', [...rep(12, 'ok'), 'miss'], 0, false, false],
+      ['melody', [...rep(6, 'ok'), 'wrong', 'wrong'], 600, false, false],
+      ['melody', [...rep(6, 'ok'), 'dim', 'dim'], 600, false, false],
+      ['melody', rep(10, 'ok'), 0, true, false],
+      ['chords', rep(16, 'ok'), 0, true, false],
+      ['melody', rep(8, 'ok'), 600, false, true],
+    ];
+    for (const lang of ['en', 'es']) {
+      run(`setLang(${JSON.stringify(lang)})`);
+      const great = run(`t('coach.overall.great')`);
+      const COUNTED = lang === 'es' ? /contaron todas/ : /all counted/;
+      for (const [mode, states, devMs, wantGreat, wantCounted] of TAKES) {
+        ctx.__fx = { mode, states, devMs };
+        run(`coach = { mode: __fx.mode, bpm: 60, beatMs: 1000, events: [], streakKey: 'k', drillId: null, skillIds: [],
+          timeouts: [], card: { isConnected: false },
+          slots: __fx.states.map((st, i) => ({ label: 'A',
+            chordName: __fx.mode === 'chords' ? (i < __fx.states.length / 2 ? 'C' : 'G') : undefined,
+            isChange: __fx.mode === 'chords' && i === __fx.states.length / 2,
+            state: st, hit: st === 'miss' ? null : { devMs: __fx.devMs, midi: 57, t: i * 1000 } })) };
+          coachRenderReport(); coach = null;`);
+        counts.reports++;
+        const out = text('coach-body'), what = `${lang} ${mode} take [${states.join(',')}]`;
+        const hasGreat = out.includes(great);
+        if (hasGreat && !states.every(right)) flag(`1ca: ${what} says "${great}" with beats that were not heard right`);
+        if (wantGreat && !hasGreat) flag(`1ca: ${what} — a perfect take no longer says "${great}" (control)`);
+        const hasCounted = COUNTED.test(out);
+        if (hasCounted && states.some(s => s !== 'miss' && !right(s))) flag(`1ca: ${what} says "${COUNTED.source}" over wrong or unclear notes`);
+        if (wantCounted && !hasCounted) flag(`1ca: ${what} — an all-right late take no longer says "${COUNTED.source}" (control)`);
+        if (/\b(other|otras) 1\b/.test(out)) flag(`1ca: ${what} reads "${out.match(/\b(other|otras) 1\b/)[0]}"`);
+      }
+    }
+    run(`setLang('en')`);
+
+    /* Chord card description vs the beats the drill really has. */
+    const NAMES = ['C', 'D', 'E', 'F', 'G', 'A', 'B', 'Cm', 'Dm', 'Em'];
+    for (let k = 1; k <= NAMES.length; k++) {
+      ctx.__btn = { dataset: { chords: JSON.stringify(NAMES.slice(0, k).map((n, i) => ({ n, m: [48 + i, 52 + i, 55 + i] }))) },
+        closest(){ return null; }, parentElement: { insertAdjacentElement(){}, closest(){ return null; } } };
+      run('coachOpen(__btn)');
+      const desc = run('coach.desc'), beats = run('coach.slots.map(s => s.chordName)');
+      run('coachClose()');
+      counts.descs++;
+      const listed = desc.split(' — ')[0].split(' → ');
+      if (/twice through/.test(desc) && beats.length < 2 * 4 * k) flag(`1ca: a ${k}-chord Coach card says "twice through" but the drill has ${beats.length} beats`);
+      listed.filter(n => !beats.includes(n)).forEach(n => flag(`1ca: a ${k}-chord Coach card names ${n}, which the drill never asks for`));
+      if (beats.length >= 4 * k && listed.length !== k) flag(`1ca: a ${k}-chord Coach card names ${listed.length} chords`);
+    }
+
+    /* Note Runner: "Ladder complete" only on the melody ladder's top level. */
+    const levels = run('NR_LEVELS.map(l => !!l.chords)');
+    const top = levels.lastIndexOf(false);
+    run(`games.nr = { best: {} }; NR_LEVELS.forEach((_, i) => { games.nr.best[i] = 100; });`);
+    for (const prev of [0, 100]) {
+      for (let i = 0; i < levels.length; i++) {
+        run(`nr = { level: ${i}, adaptive: false, passed: true, prevBest: ${prev}, acc: 100, errs: [], playable: [], micSuspect: false, timeouts: [] };
+          nrRenderDone(0, 0, 0, 0); nr = null;`);
+        if (prev === 0) counts.nrLevels++;
+        const out = text('nr-body');
+        if (/Ladder complete/.test(out) !== (i === top)) flag(`1ca: Note Runner Level ${i + 1} (${prev ? 're-clear' : 'first clear'}) ${i === top ? 'lost' : 'says'} "Ladder complete"`);
+      }
+    }
+
+    /* Arcade done screens at 0, 1 and many. */
+    const BAD = /\b1 (rounds|rondas|were|llegaron|correctas)\b|\b0 correcta\b/;
+    for (const lang of ['en', 'es']) {
+      run(`setLang(${JSON.stringify(lang)})`);
+      const shot = (code, id, what) => {
+        run(code); counts.doneScreens++;
+        const out = text(id);
+        if (BAD.test(out)) flag(`1ca: ${lang} ${what} reads "${out.match(BAD)[0]}"`);
+      };
+      for (const k of [0, 1, 2, 5]) {
+        shot(`ps = { phase: 'done', round: ${k}, prevBest: 0, timeouts: [] }; psRenderDone();`, 'ps-body', `Simon, ${k} rounds`);
+        shot(`psg = { phase: 'done', round: ${k}, prevBest: 0, heard: [], timeouts: [] }; psgRenderDone();`, 'psg-body', `Simon Guitar, ${k} rounds`);
+        for (const g of ['fz', 'pd', 'ntr']) for (const ans of [1, 5]) {
+          if (k > ans) continue;
+          shot(`${g} = { phase: 'done', answered: ${ans}, correct: ${k}, score: 0, prevBest: 0, timeouts: [], noteTimeouts: [] }; ${g}RenderDone();`,
+            `${g}-body`, `${g} ${ans} answered, ${k} right`);
+        }
+        if (k <= 3) shot(`cc = { phase: 'done', progIdx: 0, rateIdx: 0, bpm: 60, bpc: 4, chords: ['C', 'G'], timeouts: [],
+            changes: Array.from({ length: 8 }, (_, i) => ({ from: 'C', to: 'G', result: i < ${k} ? 'off' : i < 5 ? 'ok' : 'miss' })) }; ccRenderDone();`,
+          'cc-body', `Change Up, ${k} messy`);
+      }
+    }
+    run(`setLang('en')`);
+  } catch (e) { flag(`1ca: rendering threw (${e.message}) — a coach.js function was renamed or now needs more of the page`); return; }
+
+  for (const [k, n] of Object.entries(EXPECT)) {
+    if (counts[k] !== n) flag(`1ca: rendered ${counts[k]} ${k}, pinned ${n} — the check went partly blind (or grew: re-pin EXPECT on purpose)`);
+  }
+  if (bad === 0) ok(`${counts.reports} Coach reports, ${counts.descs} chord-card descriptions, ${counts.nrLevels} Note Runner levels ×2 and ${counts.doneScreens} arcade done screens read true`);
+}
+
 (async function main() {
   if (LIVE_ONLY) {
     console.log(`${C.bold}Guitar Class — post-push live check${C.reset}`);
@@ -8899,6 +9089,7 @@ async function checkBackingLoudness() {
   await checkJourneyReadySave();
   checkSiteMadeClick();
   checkLiveQuizTimerRepaint();
+  checkCoachVerdicts();
   await checkBackingLoudness();
   if (!SKIP_LINKS) await checkLinks();
   else warn('skipping link check (--skip-links)');
