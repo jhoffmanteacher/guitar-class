@@ -759,12 +759,23 @@ the auditor / fixer / reviewer brief templates: skill `site-sweep`.
 **Triggers, so this doesn't depend on how hard you are thinking** (they hold at
 any effort level): run an adversarial reviewer, on a pinned commit, whenever a
 change touches 3+ files, a danger-zone file (`teacher.js` config plumbing,
-`sw.js`, `checks.mjs`, `coach.js` detection, the `app.js` save path,
-`firestore.rules`), or 50+ strings. **Mechanical files don't count toward the 3**
+`sw.js`, `coach.js` detection, the `app.js` save path, `firestore.rules`),
+or 50+ strings. **Mechanical files don't count toward the 3**
 (Jonathan, 2026-10-26): `CHANGELOG.md`, the `sw.js` version lines that
 `checks.mjs` rewrites (that rewrite doesn't make `sw.js` a danger-zone edit —
 a change to its code does), and the Spanish twin (`_es` field or `i18n.js`
-key) of a string changed in the same edit. **Which reviewer** (2026-10-26):
+key) of a string changed in the same edit.
+
+**A pin-only `checks.mjs` edit is mechanical too** (Jonathan, 2026-10-27,
+after a play-along edit sat behind a 30-minute deep review). An edit that
+only updates pinned values a content change forces — a count, a fingerprint,
+an expected list, a `FROZEN_*` number — doesn't make the change danger-zone
+and doesn't count toward the 3. The checks themselves are the gate for it.
+Changing how a check WORKS (its logic, matching, or reading) is different:
+it needs the break-it proof (break the guarded thing in a scratch copy,
+watch the check go red, restore) with the output pasted into the report,
+and a brand-new detector also gets `site-reviewer` (high). Neither makes
+`checks.mjs` a deep-review file on its own. **Which reviewer** (2026-10-26):
 `site-reviewer-deep` (extra high) for a danger-zone file or a 50+-string
 sweep, `site-reviewer` (high) for everything else. For a danger-zone file
 write the failing scenario before the fix. When a rule says "run the tool", run it — don't
@@ -779,7 +790,8 @@ still runs: `checks.mjs --check` while working and the full `checks.mjs` before
 the push, `rule-zero-proof.mjs` if a `module-N.js` changed, the Spanish twin,
 the `CHANGELOG.md` entry, and `checks.mjs --live` after the push. **It never
 covers a danger-zone file** (`teacher.js` config plumbing, `sw.js`,
-`checks.mjs`, `coach.js` detection, the `app.js` save path, `firestore.rules`),
+`coach.js` detection, the `app.js` save path, `firestore.rules`) or a change
+to how a check in `checks.mjs` works (a pin-only update is fine),
 and it never covers moving, adding or removing a section or step. If a quick
 change turns out to need one of those, stop, tell Jonathan in one line why it
 needs the full review, and wait for his answer. Start the report with "Quick
