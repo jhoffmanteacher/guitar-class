@@ -432,7 +432,7 @@ body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,"Helvetica N
 .step.cur .step-status{background:var(--purple-accent);color:var(--bg)}
 .step.step-done .step-status{background:var(--green-bg);color:var(--green-text)}
 .step-label{flex:1;min-width:0;line-height:1.4}
-.step.step-done .step-label{text-decoration:line-through;color:var(--text2);opacity:.65}
+.step.step-done .step-label{text-decoration:line-through;color:var(--text2)}
 .step-chev{font-size:0.75rem;color:var(--text3);flex-shrink:0;transition:transform 0.15s}
 .step:not(.collapsed) .step-chev{transform:rotate(90deg)}
 .step-detail{padding:2px 4px 10px 56px;font-size:0.9375rem;line-height:1.5}
@@ -561,12 +561,16 @@ body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,"Helvetica N
 .step-done-btn.is-done{color:var(--green-text);background:var(--green-bg);border-color:var(--green-text);font-size:0.7812rem;padding:3px 12px;border-radius:14px;box-shadow:none;transform:none}
 .step-done-btn.is-done:hover{filter:brightness(0.97);background:var(--green-bg)}
 .step-done-btn.is-done:active{transform:none}
-/* When a step is marked done, dim + strike its full text (still viewable by re-expanding) */
-.step-done .st-text{text-decoration:line-through;color:var(--text2);opacity:.65}
+/* When a step is marked done, grey + strike its full text (still viewable by
+   re-expanding). No opacity on top of --text2: at .65 it fell to 3:1, too faint
+   to re-read; the same holds for the other done-text rules (1s checks opacity). */
+.step-done .st-text{text-decoration:line-through;color:var(--text2)}
 .skill-badge{display:inline-flex;align-items:center;justify-content:center;min-width:42px;height:20px;border-radius:10px;background:var(--blue-bg);border:none;font-size:0.75rem;font-weight:500;color:var(--blue-text);flex-shrink:0;margin-left:5px;vertical-align:middle;padding:0 7px;white-space:nowrap}
 .step-branch{font-size:0.8438rem;line-height:1.45;color:var(--text2);padding:5px 10px;border-radius:7px}
 .step-stuck{background:var(--blue-bg)}
 .step-levelup{background:var(--green-bg)}
+/* Dark --text2 is 4.0:1 on these two dark panels; light mode keeps --text2. */
+@media(prefers-color-scheme:dark){.step-stuck,.step-levelup{color:var(--text)}}
 .card{background:var(--bg);border:1px solid var(--border);border-radius:var(--radius);padding:4px 16px;margin-bottom:12px}
 .song-row{display:flex;align-items:flex-start;gap:10px;padding:10px 0;border-bottom:1px solid var(--border)}
 .song-row:last-child{border-bottom:none}
@@ -2445,7 +2449,7 @@ body.explore-open #week-panels{display:none}
 .sr-card-text{font-size:0.9375rem;font-weight:500;color:var(--text);line-height:1.4}
 .sr-card-meta{display:flex;flex-wrap:wrap;gap:4px 10px;font-size:0.8125rem;color:var(--text3);margin-top:4px}
 .sr-card-when{color:var(--text2)}
-.sr-card.sr-done .sr-card-text{text-decoration:line-through;color:var(--text2);opacity:.65}
+.sr-card.sr-done .sr-card-text{text-decoration:line-through;color:var(--text2)}
 .sr-card-check{flex-shrink:0;font-size:0.8125rem;font-weight:600;color:var(--green-text);background:var(--green-bg);border-radius:20px;padding:6px 14px;white-space:nowrap}
 .sr-go-btn{flex-shrink:0;background:var(--purple-bg);color:var(--purple-text);border:1px solid var(--purple-border);border-radius:20px;padding:9px 18px;font:inherit;font-size:0.875rem;font-weight:500;cursor:pointer;min-height:44px}
 .sr-go-btn:hover{background:var(--purple-text);color:var(--bg);border-color:var(--purple-text)}
@@ -2653,7 +2657,7 @@ body.ca-full:has(#class-activities-screen:not([hidden])) .app-layout .main{zoom:
 .ca-step-status{width:22px;height:22px;border-radius:50%;background:var(--bg3);color:var(--text2);font-size:0.8125rem;font-weight:600;display:flex;align-items:center;justify-content:center;flex-shrink:0}
 .ca-step.ca-step-done .ca-step-status{background:var(--green-bg);color:var(--green-text)}
 .ca-step-label{flex:1;min-width:0;line-height:1.4}
-.ca-step.ca-step-done .ca-step-label{text-decoration:line-through;color:var(--text2);opacity:.65}
+.ca-step.ca-step-done .ca-step-label{text-decoration:line-through;color:var(--text2)}
 .ca-step-chev{font-size:0.75rem;color:var(--text3);flex-shrink:0;transition:transform .15s}
 .ca-step:not(.ca-step-collapsed) .ca-step-chev{transform:rotate(90deg)}
 .ca-step-detail{padding:2px 4px 14px 56px;font-size:0.9375rem;line-height:1.55}
@@ -2833,6 +2837,8 @@ span.tab-count-held{margin-left:4px}
 .pc-check.is-done .pc-box{background:var(--green-text);border-color:var(--green-text)}
 .pc-check-head{display:block;font-size:0.75rem;font-weight:700;letter-spacing:0.02em;color:var(--text2)}
 .pc-check--lvl .pc-check-head{color:var(--ca-accent)}
+/* On the green done fill, --text2 (dark) and --ca-accent (light) drop under 4.5:1. */
+.pc-check.is-done .pc-check-head{color:var(--green-text)}
 .pc-check .ca-journey-row{margin:-4px 12px 12px 48px}
 .pc-help-btn{width:100%;text-align:left;font-family:inherit;font-size:0.9375rem;font-weight:600;padding:10px 12px;border:1px solid var(--border2);border-radius:10px;background:var(--bg2);color:var(--text);cursor:pointer}
 .pc-help-btn:hover{background:var(--bg3)}
@@ -3446,7 +3452,9 @@ body.games-open{overflow:hidden}
 .nr-race{position:relative;height:66px;margin:6px 0 2px;border:1px solid var(--border);border-radius:var(--radius);background:linear-gradient(180deg,var(--bg2) 0 74%,var(--bg3) 74%);overflow:hidden}
 .nr-race-lane{position:absolute;left:8px;right:44px;top:0;bottom:0}
 .nr-race-ground{position:absolute;left:0;right:-44px;top:49px;height:2px;background:var(--border2)}
-.nr-race-gate{position:absolute;top:10px;height:39px;width:2px;margin-left:-1px;background:var(--green-text);opacity:0.5}
+/* The line is dimmed through its colour, not opacity: opacity would dim the
+   "unlock" label (::after) too, down to 2.1:1. */
+.nr-race-gate{position:absolute;top:10px;height:39px;width:2px;margin-left:-1px;background:color-mix(in srgb,var(--green-text) 50%,transparent)}
 .nr-race-gate::after{content:attr(data-lbl);position:absolute;left:50%;top:41px;transform:translateX(-50%);font-size:0.625rem;font-weight:700;line-height:1;color:var(--green-text);white-space:nowrap}
 .nr-race-flag{position:absolute;right:8px;bottom:15px;font-size:1.375rem;line-height:1}
 .nr-runner{position:absolute;left:0;bottom:15px;width:36px;height:40px;will-change:transform}
