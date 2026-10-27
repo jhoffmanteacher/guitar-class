@@ -5,6 +5,15 @@ Notable changes to the Guitar Class site. Newest first.
 For the full session-by-session history (and the reasoning behind each change),
 see `WORKFLOW.md` and the git commit log.
 
+## 2026-10-26 — Chord play-along cards: every row shows its chord
+
+- **A row that starts while a chord is still ringing now shows that chord's
+  name in parentheses, like "(E7)",** at the start of the row. Before, some
+  rows started with an empty space, most of all on the Las Mañanitas sung
+  lines. The chord's frets are not drawn again: you keep holding the same
+  chord. This affects Las Mañanitas, Arsenal Efectivo, Ella, Vuelve a la Vida
+  and Sweet Child O' Mine in power chords.
+
 ## 2026-10-26 — Chord play-along cards: one name for each chord, and the highlight moves on the beat
 
 - **Each chord now shows once, where it starts.** On the chord play-along

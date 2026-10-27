@@ -12902,12 +12902,25 @@ function renderChordGridRow(events, row, cols, bpb, seqOff){
     else if(ev.start < row.b0 && end > row.b0 + 1e-6) col = 0;
     if(col >= 0) names += `<span class="tab-rest-lab" style="grid-row:7;grid-column:${col + 2}">${escHtml(t('tab.restStop'))}</span>`;
   });
+  /* A chord still ringing when a row begins (a lyric line or a 4-bar wrap that
+     starts mid-chord) gets its name at the row's first column in parentheses —
+     the site's mark for a held beat (the timed TAB count row uses the same) —
+     so no row opens on an empty name cell. Its frets are not repeated: the
+     chord is still shown once, where it starts. */
+  const chordBtn = (ev, col, held) => {
+    const midisAttr = escAttr(JSON.stringify(ev.midi.map(Number)));
+    const tip = t('tab.playNote', {note: ev.name});
+    const label = held ? `(${ev.name})` : ev.name;
+    return `<button type="button" class="tab-note-btn tab-chord-btn" style="grid-row:7;grid-column:${col + 2}" data-seq="${seqOff + ev.seq}" data-midis="${midisAttr}" onclick="playBeat(this)" title="${escAttr(tip)}" aria-label="${escAttr(tip)}">${escHtml(label)}<span class="tab-spkr"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" style="width:1em;height:1em;vertical-align:-0.15em"><path d="M4 9v6h4l5 4V5L8 9z"/><path d="M17 8a5 5 0 0 1 0 8"/></svg></span></button>`;
+  };
+  events.forEach(ev => {
+    if(ev.rest || at[0]) return;
+    if(ev.start < row.b0 - 1e-6 && ev.start + ev.beats > row.b0 + 1e-6) names += chordBtn(ev, 0, true);
+  });
   Object.keys(at).forEach(k => {
     const ev = at[k];
     if(ev.rest) return;
-    const midisAttr = escAttr(JSON.stringify(ev.midi.map(Number)));
-    const tip = t('tab.playNote', {note: ev.name});
-    names += `<button type="button" class="tab-note-btn tab-chord-btn" style="grid-row:7;grid-column:${Number(k) + 2}" data-seq="${seqOff + ev.seq}" data-midis="${midisAttr}" onclick="playBeat(this)" title="${escAttr(tip)}" aria-label="${escAttr(tip)}">${escHtml(ev.name)}<span class="tab-spkr"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" style="width:1em;height:1em;vertical-align:-0.15em"><path d="M4 9v6h4l5 4V5L8 9z"/><path d="M17 8a5 5 0 0 1 0 8"/></svg></span></button>`;
+    names += chordBtn(ev, Number(k), false);
   });
   let counts = '<div class="tab-count" style="grid-row:8;grid-column:1" aria-hidden="true"></div>';
   for(let c = 0; c < cols; c++){
