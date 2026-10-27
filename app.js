@@ -6831,7 +6831,9 @@ function saveReflection(moduleNum){
   const key=`mr${moduleNum}-reflection`;
   /* After a failed load the boxes render empty, so the box the student did
      not type in is "unknown", not "cleared": send only boxes with text, and
-     flushSave's merge keeps the stored other one (progressLoadFailed). */
+     flushSave's merge keeps the stored other one (progressLoadFailed).
+     Accepted cost, on failed-load sessions only: text typed and then erased
+     stays saved, because the erase is not sent. */
   const v={clicked,hard};
   if(progressLoadFailed) Object.keys(v).forEach(k=>{ if(!v[k]) delete v[k]; });
   progress[key]=Object.assign({}, progress[key], v);
@@ -6870,7 +6872,13 @@ function savePerformance(moduleNum){
   const songEl=document.getElementById(`mr${moduleNum}-song`);
   // Only the field this control sets. After a failed load the local entry is
   // empty, and writing the other field as ''/null would wipe the stored one.
-  progress[key]=Object.assign({}, progress[key], {song:songEl?songEl.value:''});
+  const song=songEl?songEl.value:'';
+  /* After a failed load an empty box is "unknown", not "cleared" (the stored
+     song was never shown), so it sends nothing — the same rule saveReflection
+     follows. Accepted cost, on failed-load sessions only: text typed and then
+     erased stays saved, because the erase is not sent. */
+  if(progressLoadFailed && !song) return;
+  progress[key]=Object.assign({}, progress[key], {song});
   saveProgress();
 }
 
