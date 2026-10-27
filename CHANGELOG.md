@@ -5,6 +5,54 @@ Notable changes to the Guitar Class site. Newest first.
 For the full session-by-session history (and the reasoning behind each change),
 see `WORKFLOW.md` and the git commit log.
 
+## 2026-10-27 — Bug fixes: saved ticks, audio, Coach, and a few wrong lines
+
+- **Song Journey ticks are safe on slow Wi-Fi.** On a slow or failed load, one
+  tick could erase the ticks you had saved on earlier layers. It no longer can.
+  A failed save also stays on screen as "Save failed".
+- **Journey and card players keep your place.** Pressing Slow or Guitar twice
+  quickly no longer sends the song back to the start. A song you paused from
+  the floating button stays paused when you reopen the player. The player's
+  tooltip follows the language.
+- **Audio.** Stop, tapping another section, or changing the speed now silences
+  the count-in clicks that were already coming. If a track fails to load after
+  you press Guitar, the card stops and tells you. Only one recording loads
+  until you press Guitar, so the first press can take a moment.
+- **The Coach turns off when you leave.** Opening Songs, My progress or Class
+  activities closes a check that was listening.
+- **The Coach says only what is true.** A report no longer says "Everything was
+  right" when some beats were missed or unclear, and the chord card no longer
+  says "twice through" when only one pass fits. The unlock message names the
+  line you need at the top of the report (💪 or 🌟).
+- **Games.** Note Runner says "Ladder complete" on Level 12 and Level 5 names
+  both new levels. The ear games stop the metronome when a round starts. Riff
+  Roulette keeps your metronome on cards with no click. Change Up starts one
+  round when you tap twice. Preview notes no longer blur together. Counts read
+  right at 1 ("1 round", "1 card").
+- **Module Review** opens after a failed load, keeps its listen-back when you
+  switch to Español, and does not count a second rep when you tap the same
+  correct answer again.
+- **Power chords in Module 3 Set 1 and the Module 9 re-test** no longer open
+  the three-finger pop-up when you tap the name, because those steps teach the
+  two-finger shape.
+- **Wording fixes.** The live-quiz lobby says to press Join. The Spanish Note
+  Call intro now says the name appears on the beat. Module 2 level-ups ask for
+  something the deck can do. The Module 12 waltz step no longer promises a
+  challenge that comes later. The Watchtower Layer 6 chord labels put the
+  second-bar G on the "+" after 3. The Module 6 and Module 12 chord boxes, a
+  few song blurbs, and three class-activity lines were corrected.
+- **Easier to read.** The Stuck? and Level up panels in dark mode, ticked check
+  labels, finished steps and the Note Runner unlock word have stronger
+  contrast. The ca-36 printout no longer shows the chord buttons.
+- **Live quiz** timer keeps counting while answers come in. **The tuner** turns
+  the mic off if the tab was hidden while it asked for permission. A
+  re-exported backing track replaces the old one on the next load.
+- **For the teacher console:** Manage and Games keep your place after a click;
+  Clear no longer cuts off a playing Preview; song pages show where the song
+  really is; the mic view opens even with a bad recording; the activity board
+  opens before any student has signed in; a playing whole-song card keeps
+  playing when the console tab is hidden.
+
 ## 2026-10-26 — Chord play-along cards: every row shows its chord
 
 - **A row that starts while a chord is still ringing now shows that chord's
