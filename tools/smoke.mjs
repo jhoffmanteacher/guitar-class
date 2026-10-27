@@ -120,24 +120,30 @@ async function chordGridWalk(page, run, events, stats) {
   if (!ids || !ids.length) return;
   stats.chordCards = ids.length;
   await run('chord-grid:open', `openClassActivitiesScreen()`, 600);
-  await run('chord-grid:sim-def', `window.__cgSim = function(id, si, maxSec, dt){
+  await run('chord-grid:sim-def', `window.__cgSim = function(id, si, maxSec, dt, lap){
     caFocusActivity(id);
     const root = document.querySelector('.ca-card[open] .pc');
     const a = pcActivity(root), L = pcLayout(a);
-    const fake = { currentTime: 0, paused: false, ended: false, playbackRate: 1, src: 'x', play(){ return Promise.resolve(); }, pause(){} };
+    const fake = { currentTime: 0, paused: false, ended: false, playbackRate: 1, src: 'data:audio/wav;base64,UklGRiQAAABXQVZFZm10IBAAAAABAAEAQB8AAEAfAAABAAgAZGF0YQAAAAA=', play(){ return Promise.resolve(); }, pause(){} };
     const st = { root, L, audio: fake, win: pcWindow(L, root.dataset.slow === '1'), loopFrom: si, fromRep: 0, wholeSong: !!a.card.wholeSong, sheet: false, raf: 0, timers: [], lastBeat: -1, counting: false, si: -1, seq: -1, rep: -1, beat: -1, key: '', row: null };
     pcState = st;
     const raf = window.requestAnimationFrame; window.requestAnimationFrame = () => 0;
     pcShowSection(root, L, si);
     fake.currentTime = snipTimeAtBars(st.win, L.sections[si].fromBar - L.firstBar);
-    const issues = []; const seen = new Set(); let frames = 0, paints = 0, last = '';
+    // A lap test starts a few seconds before the end of the window, so one short walk crosses the loop point.
+    if (lap) fake.currentTime = Math.max(fake.currentTime, st.win.end - 6);
+    const issues = []; const seen = new Set(), after = new Set(); let frames = 0, paints = 0, last = '', early = 0, rowChanges = 0, prevRow = null, prevT = fake.currentTime, lapped = false;
+    const rowOf = (s2, b) => { const c = root.querySelector('.pc-tab .pc-page[data-page="' + s2 + '"] [data-beat="' + b + '"]'); return c && c.closest('.tab-grid'); };
     const t0 = fake.currentTime;
     try {
       while (fake.currentTime - t0 < maxSec && frames < 6000) {
         pcFrame(); frames++;
         if (pcState !== st) break;
         const t = fake.currentTime;
+        if (t < prevT - 0.5) { lapped = true; after.clear(); }
+        prevT = t;
         const here = pcLocate(L, snipBarsAt(st.win, t)), ahead = pcLocate(L, snipBarsAt(st.win, t + 0.15));
+        if (here && L.sections[here.si].grid) { const r = rowOf(here.si, here.beat); if (r !== prevRow) { if (prevRow) rowChanges++; prevRow = r; } }
         const lit = [...root.querySelectorAll('.pc-tab .beat-now')];
         const sig = lit.map(e => (e.closest('.pc-page').dataset.page) + ':' + (e.dataset.beat ?? '-') + ':' + (e.dataset.seq ?? '-')).join(',');
         // The look-ahead (PC_ROW_LEAD) may already show the first note of a note-by-note section that follows.
@@ -149,8 +155,12 @@ async function chordGridWalk(page, run, events, stats) {
             if (lit.some(e => e.classList.contains('tab-count-held'))) issues.push('a "+" count cell lit at ' + t.toFixed(2));
             const beats = [...new Set(lit.map(e => +e.dataset.beat))], pg = [...new Set(lit.map(e => +e.closest('.pc-page').dataset.page))];
             if (beats.length !== 1 || pg.length !== 1) issues.push('lit more than one beat or page: ' + sig + ' at ' + t.toFixed(2));
-            else if (![here, ahead].some(l => l && l.si === pg[0] && l.beat === beats[0])) issues.push('wrong beat ' + pg[0] + ':' + beats[0] + ' (clock says ' + here.si + ':' + here.beat + ') at ' + t.toFixed(2));
-            else seen.add(pg[0] + ':' + beats[0]);
+            else if (pg[0] === here.si && beats[0] === here.beat) { seen.add(pg[0] + ':' + beats[0]); if (lapped) after.add(pg[0] + ':' + beats[0]); }
+            else if (ahead && pg[0] === ahead.si && beats[0] === ahead.beat && (ahead.si !== here.si || rowOf(ahead.si, ahead.beat) !== rowOf(here.si, here.beat))) { early++; seen.add(pg[0] + ':' + beats[0]); }
+            else issues.push('wrong or early beat ' + pg[0] + ':' + beats[0] + ' (clock says ' + here.si + ':' + here.beat + ', and the next row is not the one being entered) at ' + t.toFixed(2));
+            if (lit.length !== 7) issues.push(lit.length + ' cells lit, expected 7 (six string cells and the count cell) at ' + t.toFixed(2));
+            const cnt = lit.find(e => e.classList.contains('tab-count'));
+            if (cnt) { const cs = getComputedStyle(cnt); if (cs.color === cs.backgroundColor) issues.push('the lit count cell has its text colour equal to its background at ' + t.toFixed(2)); }
             const vis = root.querySelector('.pc-tab .pc-page:not([hidden])');
             if (vis && pg.length === 1 && +vis.dataset.page !== pg[0]) issues.push('lit page ' + pg[0] + ' is not the visible page ' + vis.dataset.page);
           }
@@ -159,11 +169,26 @@ async function chordGridWalk(page, run, events, stats) {
         fake.currentTime += dt;
       }
     } finally { window.requestAnimationFrame = raf; pcState = null; root.querySelectorAll('.beat-now').forEach(e => e.classList.remove('beat-now')); }
+    if (rowChanges > 0 && early === 0) issues.push('the cursor crossed ' + rowChanges + ' row changes and never lit the next row early (PC_ROW_LEAD look-ahead is not working)');
+    if (lap && !lapped) issues.push('the walk never reached the end of the loop');
+    if (lap && lapped && !after.has(si + ':0')) issues.push('after the lap the cursor never came back to beat 0 of section ' + si);
     return { frames, paints, beats: seen.size, issues: issues.slice(0, 6), n: issues.length };
   }; 1`, 50);
+  let walked = 0;
   for (const id of ids) {
-    const info = await run(`chord-grid:${id}:info`, `(() => { caFocusActivity('${id}'); const L = pcLayout(pcActivity(document.querySelector('.ca-card[open] .pc'))); return { grid: L.sections.map(S => S.grid), beats: L.sections.map(S => S.bars * L.tr.beatsPerBar) }; })()`, 200);
+    const info = await run(`chord-grid:${id}:info`, `(() => { caFocusActivity('${id}'); const L = pcLayout(pcActivity(document.querySelector('.ca-card[open] .pc'))); const a = pcActivity(document.querySelector('.ca-card[open] .pc')); return { opened: document.querySelector('.ca-card[open] .pc').dataset.id === '${id}', whole: !!a.card.wholeSong, grid: L.sections.map(S => S.grid), beats: L.sections.map(S => S.bars * L.tr.beatsPerBar) }; })()`, 200);
     if (!info) continue;
+    // A teacher-only card (ca-40) is not on the student page: it cannot be opened here and is not counted as walked.
+    if (info.opened !== true) { (stats.chordSkipped = stats.chordSkipped || []).push(id); continue; }
+    walked++;
+    // A looping card's LAST grid section, run past the end of its window: the lap must come back to beat 0 (wholeSong cards stop instead).
+    if (!info.whole) {
+      const lastGrid = info.grid.lastIndexOf(true);
+      if (lastGrid === info.grid.length - 1) {
+      const lr = await run(`chord-grid:${id}:lap`, `window.__cgSim('${id}', ${lastGrid}, 40, 0.05, true)`, 50);
+      if (lr && lr.n) events.push({ step: `chord-grid:${id}:lap`, kind: 'chord-grid-cursor', text: lr.issues.join(' | ') });
+      }
+    }
     // The first two grid sections, ~40 s of card time each, 50 ms frames.
     const todo = info.grid.map((g, i) => g ? i : -1).filter(i => i >= 0).slice(0, 2);
     for (const si of todo) {
@@ -173,30 +198,45 @@ async function chordGridWalk(page, run, events, stats) {
       else if (r.paints < 4) events.push({ step: `chord-grid:${id}:cursor-${si}`, kind: 'chord-grid-cursor', text: `the cursor painted only ${r.paints} times in ${r.frames} frames — it is not moving` });
     }
   }
+  stats.chordCards = walked;
   // Layout: every grid page, wide and phone-sized.
-  for (const [w, h] of [[1366, 657], [390, 844]]) {
+  for (const [w, h] of [[1366, 657], [390, 844], [360, 740]]) {
     await run(`chord-grid:width-${w}`, `(window.__cgW = ${w}, 1)`, 10);
     await page.send('Emulation.setDeviceMetricsOverride', { width: w, height: h, deviceScaleFactor: 1, mobile: false });
     await sleep(500);
     for (const id of ids) {
-      const r = await run(`chord-grid:${id}:layout-${w}`, `(() => { caFocusActivity('${id}'); const root = document.querySelector('.ca-card[open] .pc'); const L = pcLayout(pcActivity(root)); const bad = []; let pages = 0; L.sections.forEach((S, si) => { if (!S.grid) return; pcShowSection(root, L, si); pages++; const pg = root.querySelector('.pc-page:not([hidden])'), board = pg.querySelector('.tab-board'); if (board.scrollWidth > board.clientWidth + 1) bad.push(S.s.label + ': board ' + board.scrollWidth + ' > ' + board.clientWidth); const rows = [...pg.querySelectorAll('.tab-grid')].map(g => [...g.querySelectorAll('.tab-count[data-beat]')].map(c => c.getBoundingClientRect().left - g.getBoundingClientRect().left)); const n = Math.min(...rows.map(r => r.length)); let worst = 0; for (let i = 0; i < n; i++) { const col = rows.map(r => r[i]); worst = Math.max(worst, Math.max(...col) - Math.min(...col)); } if (worst > 1) bad.push(S.s.label + ': beat columns drift ' + worst.toFixed(1) + 'px between rows'); const cnt = pg.querySelector('.tab-count[data-beat]'); if (!cnt || !cnt.offsetHeight) bad.push(S.s.label + ': the count row is not showing'); }); return { pages, bad }; })()`, 30);
+      const r = await run(`chord-grid:${id}:layout-${w}`, `(() => { caFocusActivity('${id}'); const root = document.querySelector('.ca-card[open] .pc'); const L = pcLayout(pcActivity(root)); const bad = []; let pages = 0; L.sections.forEach((S, si) => { if (!S.grid) return; pcShowSection(root, L, si); pages++; const pg = root.querySelector('.pc-page:not([hidden])'), board = pg.querySelector('.tab-board'); if (board.scrollWidth > board.clientWidth + 1) bad.push(S.s.label + ': board ' + board.scrollWidth + ' > ' + board.clientWidth); const rows = [...pg.querySelectorAll('.tab-grid')].map(g => [...g.querySelectorAll('.tab-count[data-beat]')].map(c => c.getBoundingClientRect().left - g.getBoundingClientRect().left)); const n = Math.min(...rows.map(r => r.length)); let worst = 0; for (let i = 0; i < n; i++) { const col = rows.map(r => r[i]); worst = Math.max(worst, Math.max(...col) - Math.min(...col)); } if (worst > 1) bad.push(S.s.label + ': beat columns drift ' + worst.toFixed(1) + 'px between rows'); const cnt = pg.querySelector('.tab-count[data-beat]'); if (!cnt || !cnt.offsetHeight) bad.push(S.s.label + ': the count row is not showing'); const bl = pg.querySelector('.tab-bar-line'); if (bl && (!bl.offsetHeight || getComputedStyle(bl).borderLeftWidth === '0px')) bad.push(S.s.label + ': the bar lines are not visible'); const rw = pg.querySelector('.tab-rest-lab'); if (rw && (!rw.offsetWidth || !rw.offsetHeight)) bad.push(S.s.label + ': the rest word is not visible'); }); return { pages, bad }; })()`, 30);
       if (r && r.bad.length) events.push({ step: `chord-grid:${id}:layout-${w}`, kind: 'chord-grid-layout', text: r.bad.slice(0, 4).join(' | ') });
     }
   }
   await page.send('Emulation.clearDeviceMetricsOverride');
   // The lyric sheet (ca-38): "This bar" lights beat cells only; the dot fills once per beat.
-  const sheet = await run('chord-grid:sheet', `(() => { const a = CLASS_ACTIVITIES.find(x => x.card && x.card.sheet); if (!a) return null; caFocusActivity(a.id); const root = document.querySelector('.ca-card[open] .pc'); const L = pcLayout(pcActivity(root)); const bpb = L.tr.beatsPerBar; const fake = { currentTime: 0, paused: false, ended: false, playbackRate: 1, src: 'x', play(){ return Promise.resolve(); }, pause(){} }; const st = { root, L, audio: fake, win: pcWindow(L, false), loopFrom: 0, fromRep: 0, wholeSong: true, sheet: true, raf: 0, timers: [], lastBeat: -1, counting: false, si: -1, seq: -1, rep: -1, beat: -1, key: '', row: null, sheetLine: null, stripKey: null };
+  const sheet = await run('chord-grid:sheet', `(() => { const a = CLASS_ACTIVITIES.find(x => x.card && x.card.sheet); if (!a) return null; caFocusActivity(a.id); const root = document.querySelector('.ca-card[open] .pc'); const L = pcLayout(pcActivity(root)); const bpb = L.tr.beatsPerBar; const fake = { currentTime: 0, paused: false, ended: false, playbackRate: 1, src: 'data:audio/wav;base64,UklGRiQAAABXQVZFZm10IBAAAAABAAEAQB8AAEAfAAABAAgAZGF0YQAAAAA=', play(){ return Promise.resolve(); }, pause(){} }; const st = { root, L, audio: fake, win: pcWindow(L, false), loopFrom: 0, fromRep: 0, wholeSong: true, sheet: true, raf: 0, timers: [], lastBeat: -1, counting: false, si: -1, seq: -1, rep: -1, beat: -1, key: '', row: null, sheetLine: null, stripKey: null };
       const paper = root.querySelector('.pc-sheet-paper'); const map = pcSheetMap(L); const tk = { x0: 0, x1: 10, y0: 0, y1: 10, name: 'x' };
       paper._sheet = { ok: true, map, model: { crop: { x: 0, y: 0 }, toks: Array.from({ length: map.count + 1 }, () => tk) }, scale: 1 };
       const hits = [], oMark = window.pcSheetMark; window.pcSheetMark = function(pp, idx, hit){ hits.push(!!hit); return null; };
       const oFollow = window.pcFollow; window.pcFollow = function(){};
       pcState = st; const raf = window.requestAnimationFrame; window.requestAnimationFrame = () => 0;
-      const lit = new Set(); let frames = 0; const t0 = snipTimeAtBars(st.win, 0); fake.currentTime = t0;
-      try { while (fake.currentTime - t0 < 12 && frames < 2000) { pcFrame(); frames++; root.querySelectorAll('.pc-strip-cell').forEach((c, i) => { if (c.classList.contains('now')) lit.add(i); }); fake.currentTime += 0.02; } }
+      const lit = new Set(), wrong = []; let frames = 0; const t0 = snipTimeAtBars(st.win, 0); fake.currentTime = t0;
+      try { while (fake.currentTime - t0 < 12 && frames < 2000) {
+        pcFrame(); frames++;
+        const cells = [...root.querySelectorAll('.pc-strip-cell')]; const on = cells.map((c, i) => c.classList.contains('now') ? i : -1).filter(i => i >= 0);
+        on.forEach(i => lit.add(i));
+        // The strip must be on the beat's own cell and carry each chord name on the cell where it starts.
+        const loc = pcLocate(L, snipBarsAt(st.win, fake.currentTime + PC_SHEET_LEAD));
+        if (loc && frames > 3 && !(frames > 3 && st.stripKey == null)) {
+          const exp = 2 * (loc.beat % bpb);
+          if (on.length !== 1 || on[0] !== exp) { if (wrong.length < 3) wrong.push('strip lit [' + on + '] expected ' + exp + ' at beat ' + loc.beat); }
+          const want = []; pcChordGrid(L.sections[loc.si].notes, bpb).forEach(ev => { if (!ev.rest && ev.bar === loc.bar) want[Math.round((ev.start - loc.bar * bpb) * 2)] = ev.name; });
+          const got = cells.map(c => c.querySelector('.pc-strip-ch').textContent);
+          if (want.some((n, i) => (n || '') !== got[i]) || got.some((n, i) => n && !want[i])) { if (wrong.length < 3) wrong.push('strip names [' + got.join('|') + '] expected [' + Array.from({ length: got.length }, (_, i) => want[i] || '').join('|') + '] in bar ' + loc.bar); }
+        }
+        fake.currentTime += 0.02; } }
       finally { window.requestAnimationFrame = raf; window.pcSheetMark = oMark; window.pcFollow = oFollow; pcState = null; }
       const secPerBeat = st.win.bar / bpb;
-      return { lit: [...lit].sort(), fills: hits.filter(Boolean).length, expect: Math.floor(12 / secPerBeat), calls: hits.length }; })()`, 100);
+      return { lit: [...lit].sort(), fills: hits.filter(Boolean).length, expect: Math.floor(12 / secPerBeat), calls: hits.length, wrong }; })()`, 100);
   if (sheet) {
+    if (sheet.wrong && sheet.wrong.length) events.push({ step: 'chord-grid:sheet', kind: 'chord-grid-sheet', text: sheet.wrong.join(' | ') });
     if (sheet.lit.some(i => i % 2)) events.push({ step: 'chord-grid:sheet', kind: 'chord-grid-sheet', text: `"This bar" lit a "+" cell: ${sheet.lit.join(',')}` });
     if (Math.abs(sheet.fills - sheet.expect) > 2) events.push({ step: 'chord-grid:sheet', kind: 'chord-grid-sheet', text: `the dot filled ${sheet.fills} times in 12 s; one per beat is about ${sheet.expect}` });
   }
@@ -287,7 +327,7 @@ try {
   const norm = e => `${e.kind}|${e.step.replace(/^(en|es):/, '')}|${e.kind === 'bad-handler' ? '' : e.text}`;
   const baseCount = new Map(); (base ? base.errors : []).forEach(e => baseCount.set(norm(e), Math.max(baseCount.get(norm(e)) || 0, e.kind === 'bad-handler' ? +e.text : 1)));
   const report = base ? now.errors.filter(e => (e.kind === 'bad-handler' ? +e.text : 1) > (baseCount.get(norm(e)) || 0)) : now.errors;
-  say(`smoke: ${now.stats.sets} sets in ${now.stats.modules} modules (EN + ES), ${now.stats.games} game views, ${now.stats.buttons} inline handlers compiled${now.stats.chordCards ? `, ${now.stats.chordCards} chord-grid cards walked (cursor, layout at 1366 and 390, lyric sheet)` : ''}`);
+  say(`smoke: ${now.stats.sets} sets in ${now.stats.modules} modules (EN + ES), ${now.stats.games} game views, ${now.stats.buttons} inline handlers compiled${now.stats.chordCards ? `, ${now.stats.chordCards} chord-grid cards walked (cursor, lap, layout at 1366/390/360, lyric sheet${now.stats.chordSkipped ? `; ${now.stats.chordSkipped.join(', ')} is teacher-only and not walked` : ''})` : ''}`);
   if (base) say(`smoke: ${BASELINE} had ${base.errors.length} error event(s); this checkout has ${now.errors.length}`);
   if (report.length) {
     exitCode = 1;

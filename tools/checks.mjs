@@ -7607,6 +7607,17 @@ function checkChordGridCards(ctx) {
         });
         if (beats.join() !== Array.from({ length: S.bars * bpb }, (_, i) => i).join()) flag(`${a.id} · ${S.s.label} (${mode}): data-beat runs [${beats.slice(0, 20).join(',')}${beats.length > 20 ? '…' : ''}] over ${beats.length} beats, expected 0..${S.bars * bpb - 1} once each, in order`);
         const rests = S.notes.some(n => n.rest);
+        // The rest word sits at the rest's own column (or at column 1 of a row that starts inside it).
+        const restEvs = pcChordGrid(S.notes, bpb).filter(e => e.rest);
+        pcGridRows(S, bpb).forEach((row, ri) => {
+          const want = [];
+          for (const e of restEvs) {
+            if (e.start >= row.b0 - 1e-6 && e.start < row.b1 - 1e-6) want.push(Math.round((e.start - row.b0) * 2) + 2);
+            else if (e.start < row.b0 && e.start + e.beats > row.b0 + 1e-6) want.push(2);
+          }
+          const got = [...(grids[ri] || '').matchAll(/class="tab-rest-lab" style="grid-row:7;grid-column:(\d+)"/g)].map(m => +m[1]);
+          if (want.sort().join() !== got.sort().join()) flag(`${a.id} · ${S.s.label} (${mode}) row ${ri + 1}: rest words sit in grid columns [${got}], expected [${want}] — a rest word must sit where the rest starts`);
+        });
         const words = (pg.match(/class="tab-rest-lab"/g) || []).length;
         restWords += words;
         if (rests && !words) flag(`${a.id} · ${S.s.label}: has a rest but draws no rest word — a silent bar would look like a held chord`);
