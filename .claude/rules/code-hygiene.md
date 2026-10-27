@@ -23,10 +23,12 @@ and numbers: `WORKFLOW.md` ("2026-10-25 whole-site sweep").
    always passes a *string*; for a number or boolean use
    `escAttr(JSON.stringify(n))`. Better still: `data-*` plus a delegated
    listener (teacher.js never splices an id into a JS string). Check 1bs
-   compiles every handler in every rendered set. Nine older sites still use the
-   quoted form (resumeGoModule, resumeGoSong, openSongLink, sdAnswer,
-   strumChord, caStepHtml's video, a ca-card `window.open`, caOpenLinkedCard,
-   caSetKeyMode) — convert each when you touch it.
+   compiles every handler in every rendered set. 29 older handler lines still
+   use the quoted form (counted 2026-10-26: 28 in app.js, 1 in live-quiz.js;
+   `grep -cE " on[a-z]+=\"[^\"]*'\\$\{escAttr\(" app.js live-quiz.js`). Most
+   splice a module-authored id; the ones that carry text are the risk
+   (openSongLink, sdAnswer, strumChord, caStepHtml's video `loadPanel`, a
+   ca-card `window.open`) — convert each when you touch it.
 2. **A `//` comment goes on its own line, or ends a finished line — never
    between two things on one line.** A mid-line `//` swallowed `bpm` and
    `chords` out of an object literal; the file still parsed and every check

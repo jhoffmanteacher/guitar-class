@@ -114,8 +114,9 @@ box or by navigating away, while the ordinary lesson-step path
 depending on which kind of card it was. `fab-tools.js` already draws this
 line for dismissing a popup ("the student shouldn't silently lose the click
 they're practicing to"), so nothing in `app.js` should be stricter.
-After that change the full sweep has exactly three callers in `app.js` —
-`snipToggle()`, `erPlay()`, `ecPick()`, all "about to play" — plus the
+After that change the full sweep has exactly five callers in `app.js` —
+`snipToggle()`, `erPlay()`, `ncStart()`, `pcStart()`, `ecPick()`, all "about to
+play" (counted 2026-10-26) — plus the
 mic-opening ones in `coach.js` and `fab-tools.js`. New "silence it" call site
 → default to `stopCardAudio()`.
 

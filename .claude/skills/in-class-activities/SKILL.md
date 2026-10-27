@@ -373,9 +373,12 @@ were. Engine: `pcChordGrid` / `pcGridRows` / `renderChordGridRow` (rows),
 never the note, or the cursor steps onto a "+"), `pcLocRow` (the PC_ROW_LEAD
 look-ahead). `rows` without `rowLabels` are ignored; a lyric line keeps its row
 only where it starts on a bar line. ca-38 (lyric sheet) stays the PDF: its dot
-fills on every beat and "This bar" lights beat cells only. Ratchet **1bv**
-renders ca-29 and executes `pcLocate`/`pcLocKey`; turning a card on or off means
-editing its pinned list.
+fills on every beat and "This bar" lights beat cells only. A row that starts
+while a chord is still ringing names it at column 0 in parentheses, "(E7)".
+Ratchet **1bv** renders every opted-in card in both views (rows, bar lines,
+beats, rest words, the column-0 label of every row, held labels pinned) and
+executes `pcLocate`/`pcLocKey`; `tools/smoke.mjs` walks the same cards in a
+real browser. Turning a card on or off means editing its pinned list.
 
 **A card note may be a chord** (2026-10-05, the power-chord whole songs
 ca-29–ca-33): `{ frets: [[string, fret], ...], note: 'A5', midi: [...] }`,
@@ -415,9 +418,11 @@ each other). Slowest is the SLOW file at `SLOWEST_RATE` (0.8) with
 **Slow** / Normal (Jonathan: "just below the normal speed of each song").
 Slow is the FAST file at `pcSlowRate(tr)`, halfway between the slow tier and
 normal for that song (the cure 66, Seven Nation Army ~112, Watchtower 110),
-so it always sits above Slower. Only the two ends are labelled (Slowest, Normal); the middle
-two are dots, with Slower/Slow as their aria-label and tooltip (Jonathan,
-same day). Each option carries its rate in `data-rate`;
+so it always sits above Slower. It is a stepped slider (`pcSpeed3Html`): the
+two ends read "Slower" and "Normal" as directions, not stop names (Jonathan,
+2026-10-09), every stop shows how fast it plays against the record (`0.65×`,
+`pcSpeedFactor`), and each stop's name (Slowest / Slower / Slow / Normal) is
+its accessible label. Each option carries its rate in `data-rate`;
 `pcRate()` reads the card's `data-rate`. Step snippets keep their own
 Slowest/turtle buttons, unchanged. Anything
 reading the file's own clock is unchanged; only real-time amounts (count-in
