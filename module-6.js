@@ -105,8 +105,8 @@ SETS.push(
             label: 'Form Em and Am', label_es: 'Forma Em y Am',
             text: 'Today\'s chords are Em and Am, from Module 4. You use them for the rest of this set.<ol><li>Play Em from the diagram and strum once.</li><li>Play Am from the diagram and strum once.</li></ol>You\'ve got it when: every string in each chord rings clean.',
             text_es: 'Los acordes de hoy son Em y Am, del Módulo 4. Los usas durante el resto de esta unidad.<ol><li>Toca Em a partir del diagrama y rasguea una vez.</li><li>Toca Am a partir del diagrama y rasguea una vez.</li></ol>Lo tienes cuando: cada cuerda de cada acorde suena limpia.',
-            hint: 'Em uses two fingers. Am adds a third.',
-            hint_es: 'Em usa dos dedos. Am agrega un tercero.',
+            hint: 'From Em to Am, move fingers 2 and 3 over one string, toward the floor. Then put finger 1 on the B string, fret 1.',
+            hint_es: 'De Em a Am, mueve los dedos 2 y 3 una cuerda hacia el suelo. Luego pon el dedo 1 en la cuerda Si, traste 1.',
             chords: [
               { name: 'Em', chord: [[6,0],[5,2,'2'],[4,2,'3'],[3,0],[2,0],[1,0]], position: 0 },
               { name: 'Am', chord: [[6,'x'],[5,0],[4,2,'2'],[3,2,'3'],[2,1,'1'],[1,0]], position: 0 }
