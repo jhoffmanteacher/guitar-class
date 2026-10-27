@@ -4096,6 +4096,46 @@ function validateClassActivities() {
         if (a.chordStart !== 'power' && a.chordStart !== 'full') { err(`${where}: chordStart "${a.chordStart}" — 'power' or 'full' (or leave it off for full)`); problems++; }
         else if (!('chordVersions' in a)) { err(`${where}: chordStart without chordVersions — there is no other version to start on`); problems++; }
       }
+      /* BASS NOTES (2026-10-27, ca-35 — caBassSwitchHtml / pcBassMarks in
+         app.js). The map is drawn only on a chord-grid practice card. It is
+         keyed by the chord name the card SHOWS, so it must name every chord
+         a grid section plays in every chord view (A and A5) and nothing
+         else; each root is that chord's root note and each fifth the note
+         7 semitones above it (any octave); each root sits in the chord's
+         own shape, so a bar where the chord starts on beat 1 marks a fret
+         the shape already draws. bassStart is 'on' / 'off'; bassDirections has
+         its Spanish twin. */
+      if ('bassNotes' in a || 'bassStart' in a || 'bassDirections' in a || 'bassDirections_es' in a) {
+        const bn = a.bassNotes;
+        const OPEN = { E: 40, A: 45, D: 50, G: 55, B: 59, e: 64 };
+        const PC = { C: 0, D: 2, E: 4, F: 5, G: 7, A: 9, B: 11 };
+        const rootPc = name => { const m = /^([A-G])([#b♯♭]?)/.exec(String(name)); return m ? (PC[m[1]] + ({ '#': 1, '♯': 1, b: -1, '♭': -1 }[m[2]] || 0) + 12) % 12 : null; };
+        const pitch = p => (Array.isArray(p) && p.length === 2 && (p[0] in OPEN) && Number.isInteger(p[1]) && p[1] >= 0) ? OPEN[p[0]] + p[1] : null;
+        if (!bn || typeof bn !== 'object' || !Object.keys(bn).length) { err(`${where}: bassNotes needs a non-empty map ({ <chord>: { root: [string, fret], fifth: [string, fret] } })`); problems++; }
+        else if (a.view !== 'card' || !a.card || !a.card.chordGrid) { err(`${where}: bassNotes is drawn only on a chord-grid practice card (view 'card', card.chordGrid) — here it would never show`); problems++; }
+        else {
+          // The shapes each view shows, by the name it shows them under.
+          const shapes = new Map();
+          (a.card.sections || []).filter(sec => sec.chordGrid !== false).forEach(sec => (sec.notes || []).forEach(n => {
+            if (n.rest || !Array.isArray(n.frets)) return;
+            shapes.set(n.note, n.frets);
+            const pw = a.chordVersions && a.chordVersions.power && a.chordVersions.power[n.note];
+            if (pw) shapes.set(pw.note, pw.frets);
+          }));
+          for (const name of shapes.keys()) if (!(name in bn)) { err(`${where}: bassNotes has no entry for ${name} — a bar of ${name} would get no bass note`); problems++; }
+          Object.entries(bn).forEach(([name, b]) => {
+            if (!shapes.has(name)) { err(`${where}: bassNotes['${name}'] — no chord-grid section shows a ${name}`); problems++; return; }
+            const r = b && pitch(b.root), f = b && pitch(b.fifth);
+            if (r === null || f === null) { err(`${where}: bassNotes['${name}'] needs root and fifth as [string, fret] (string e/B/G/D/A/E, fret a whole number)`); problems++; return; }
+            if (r % 12 !== rootPc(name)) { err(`${where}: bassNotes['${name}'].root ${b.root.join(' fret ')} is not a ${String(name).replace(/[^A-G#b♯♭].*$/, '')}`); problems++; }
+            if ((f - r + 120) % 12 !== 7) { err(`${where}: bassNotes['${name}'].fifth ${b.fifth.join(' fret ')} is not the 5th of the root`); problems++; }
+            if (!shapes.get(name).some(([s, fr]) => s === b.root[0] && fr === b.root[1])) { err(`${where}: bassNotes['${name}'].root ${b.root.join(' fret ')} is not in the ${name} shape the card draws`); problems++; }
+          });
+        }
+        if ('bassStart' in a && a.bassStart !== 'on' && a.bassStart !== 'off') { err(`${where}: bassStart "${a.bassStart}" — 'on' or 'off' (or leave it off for off)`); problems++; }
+        if (!bn && ('bassStart' in a || 'bassDirections' in a)) { err(`${where}: bassStart / bassDirections without bassNotes — there is no bass to switch on`); problems++; }
+        if (('bassDirections' in a) !== ('bassDirections_es' in a)) { err(`${where}: bassDirections and bassDirections_es come as a pair — one language would show no bass directions`); problems++; }
+      }
       /* KEY VERSIONS (2026-10-16, ca-36 — caView in app.js): `key` names the
          key the data is written in, `keyVersions` the others. Each other
          key plays its own track, which must be the same record with the
@@ -7972,6 +8012,8 @@ function checkSheetCards() {
    - pcLocate + pcLocKey: on ca-29 the repaint key is the same at a beat and
      at the "+" after it, and steps once per beat; on ca-10 it still steps
      per note. */
+const CHORD_GRID_BASS_CARDS = ['ca-35'];   // practice cards with an alternating-bass switch (bassNotes) — see BASS NOTES in 1bv
+const CHORD_GRID_BASS_MARKS = 160;          // bass notes drawn, every bass card x chord view, bass on — see BASS NOTES in 1bv
 const CHORD_GRID_HELD_LABELS = 54;   // rows (both views) that open on a held "(Chord)" — see the column-0 check below
 const CHORD_GRID_CARDS = ['ca-29', 'ca-30', 'ca-32', 'ca-33', 'ca-35', 'ca-36', 'ca-37', 'ca-39', 'ca-40', 'ca-41', 'ca-42'];
 function checkChordGridCards(ctx) {
@@ -8133,6 +8175,93 @@ function checkChordGridCards(ctx) {
       });
     }
   }
+  /* BASS NOTES (2026-10-27, ca-35): every card with bassNotes, in every
+     chord view, with the bass on and off, rendered. On: exactly one bass
+     mark per bar of every grid section whose beat 1 is a chord, on the
+     string and fret worked out here from the notes — the root in the first
+     bar of each run of a chord, then 5th, root, 5th… until the name
+     changes — and the bass directions at the end of the card's directions
+     line (an open card shows no intro). Off: no mark and no bass
+     directions. The Spanish view is rendered too. The total is pinned. */
+  let bassMarks = 0;
+  const bassCards = acts.filter(x => x && x.bassNotes);
+  if (bassCards.map(x => x.id).join() !== CHORD_GRID_BASS_CARDS.join()) flag(`the cards with bassNotes are [${bassCards.map(x => x.id).join(', ')}], expected [${CHORD_GRID_BASS_CARDS.join(', ')}] — update CHORD_GRID_BASS_CARDS in the same edit`);
+  for (const a of bassCards) {
+    for (const mode of ['full', 'power']) {
+      if (mode === 'power' && !a.chordVersions) continue;
+      for (const bass of ['on', 'off']) {
+        const tag = `${a.id} (${mode}, bass ${bass})`;
+        let html = '', view = null;
+        try {
+          vm.runInContext(`caChordModes[${JSON.stringify(a.id)}] = ${JSON.stringify(mode)}; caBassModes[${JSON.stringify(a.id)}] = ${JSON.stringify(bass)}`, ctx);
+          html = String(caCardBodyHtml(a));
+          view = vm.runInContext(`caView(CLASS_ACTIVITIES.find(x => x.id === ${JSON.stringify(a.id)}))`, ctx);
+        } catch (e) { flag(`caCardBodyHtml(${tag}) threw: ${e.message}`); continue; }
+        finally { try { vm.runInContext(`delete caChordModes[${JSON.stringify(a.id)}]; delete caBassModes[${JSON.stringify(a.id)}]`, ctx); } catch {} }
+        const sw = /class="ca-chord-switch ca-bass-switch"[\s\S]*?<\/div>/.exec(html);
+        const pressed = sw ? [...sw[0].matchAll(/aria-pressed="(true|false)"[^>]*onclick="caSetBassMode\([^,]*,'(on|off)'\)/g)].filter(m => m[1] === 'true').map(m => m[2]) : [];
+        if (!sw) flag(`${tag}: no Strum only / Alternating bass switch`);
+        else if (pressed.join() !== bass) flag(`${tag}: the switch shows [${pressed.join(', ')}] pressed, expected ${bass}`);
+        const dirOf = h => { const m = /<p class="pc-dir">([\s\S]*?)<\/p>/.exec(h); return m ? m[1] : ''; };
+        const esc = vm.runInContext('escHtml', ctx);
+        let htmlEs = '';
+        try {
+          vm.runInContext(`caChordModes[${JSON.stringify(a.id)}] = ${JSON.stringify(mode)}; caBassModes[${JSON.stringify(a.id)}] = ${JSON.stringify(bass)}; setLang('es')`, ctx);
+          htmlEs = String(caCardBodyHtml(a));
+        } catch (e) { flag(`caCardBodyHtml(${tag}, es) threw: ${e.message}`); }
+        finally { try { vm.runInContext(`setLang('en'); delete caChordModes[${JSON.stringify(a.id)}]; delete caBassModes[${JSON.stringify(a.id)}]`, ctx); } catch {} }
+        for (const [sfx, h] of [['', html], ['_es', htmlEs]]) {
+          const dir = dirOf(h), add = a['bassDirections' + sfx] ? esc(a['bassDirections' + sfx]) : '';
+          if (bass === 'on' && (!add || !dir.endsWith(' ' + add))) flag(`${tag}${sfx}: the directions line does not end with bassDirections${sfx}`);
+          if (bass === 'off' && add && dir.includes(add)) flag(`${tag}${sfx}: the directions line shows the bass directions with the bass off`);
+        }
+        const L = pcLayout(view), bpb = L.tr.beatsPerBar;
+        const pages = html.split('<div class="tab-page pc-page"').slice(1);
+        const want = [], got = [];
+        L.sections.forEach((S, si) => {
+          if (!S.grid) { if (/tab-bass/.test(pages[si] || '')) flag(`${tag} · ${S.s.label}: a note-by-note section drew a bass note`); return; }
+          // Runs of one chord name (or of rests), worked out without the renderer.
+          const runs = [];
+          let pos = 0;
+          S.notes.forEach(n => {
+            const key = n.rest ? null : n.note, len = n.beats > 0 ? n.beats : 1, last = runs[runs.length - 1];
+            if (last && last.key === key) last.beats += len; else runs.push({ key, start: pos, beats: len });
+            pos += len;
+          });
+          if (bass === 'on') for (let m = 0; m < S.bars; m++) {
+            const p = m * bpb, r = runs.find(x => x.start <= p + 1e-6 && p < x.start + x.beats - 1e-6);
+            if (!r || r.key === null) continue;
+            const b = a.bassNotes[r.key];
+            if (!b) { flag(`${tag} · ${S.s.label}: bar ${m + 1} is ${r.key}, which has no bass note`); continue; }
+            const before = m - Math.ceil(r.start / bpb - 1e-6);
+            const pick = before % 2 ? b.fifth : b.root;
+            want.push(`${si}:${m}:${pick[0]}${pick[1]}`);
+          }
+          const grids = (pages[si] || '').split('class="tab-grid chord-grid"').slice(1);
+          const rows = pcGridRows(S, bpb);
+          grids.forEach((g, gi) => {
+            const b0 = rows[gi] ? rows[gi].b0 : NaN;
+            g.split('<div class="tab-str-label">').slice(1).forEach(piece => {
+              const lab = piece.slice(0, piece.indexOf('<'));
+              [...piece.matchAll(/<div class="tab-cell[^"]*"[^>]*>(?:<span class="tab-fret([^"]*)">([^<]*)<\/span>)?<\/div>/g)].forEach((c, i) => {
+                if (!/tab-bass/.test(c[1] || '')) return;
+                const bar = (b0 + i / 2) / bpb;
+                if (Math.abs(bar - Math.round(bar)) > 1e-6) flag(`${tag} · ${S.s.label} row ${gi + 1}: a bass note on column ${i}, which is not beat 1 of a bar`);
+                got.push(`${si}:${Math.round(bar)}:${lab}${c[2]}`);
+              });
+            });
+          });
+        });
+        const ws = [...want].sort(), gs = [...got].sort();
+        if (ws.join() !== gs.join()) {
+          const miss = ws.filter(x => !gs.includes(x)), extra = gs.filter(x => !ws.includes(x));
+          flag(`${tag}: ${gs.length} bass notes drawn, ${ws.length} expected (section:bar:string+fret) — missing [${miss.slice(0, 6).join(' ')}${miss.length > 6 ? ' …' : ''}], unexpected [${extra.slice(0, 6).join(' ')}${extra.length > 6 ? ' …' : ''}]`);
+        }
+        bassMarks += gs.length;
+      }
+    }
+  }
+  if (bassMarks !== CHORD_GRID_BASS_MARKS) flag(`${bassMarks} bass notes drawn across every view, pinned at ${CHORD_GRID_BASS_MARKS} — a bar lost (or gained) its bass note, or the card's bars changed (update the pin only for an intended content change)`);
   if (heldLabels !== CHORD_GRID_HELD_LABELS) flag(`${heldLabels} rows across both views open on a held "(Chord)" label, pinned at ${CHORD_GRID_HELD_LABELS} — a row that starts mid-chord lost its label, or the cards' rows changed (update the pin only for an intended content change)`);
   // The new words are English AND Spanish (1e checks the key exists; this checks the Spanish is not the English).
   const I18N = loadI18nTable();

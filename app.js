@@ -12824,13 +12824,14 @@ function caView(a){
   const power = caChordMode(a) === 'power';
   const k = caKeyMode(a);
   const kv = (k && k !== a.key) ? a.keyVersions[k] : null;
-  if(!power && !kv) return a;
-  const combo = (kv ? k : '') + '|' + (power ? 'power' : 'full');
+  const bass = caBassMode(a) === 'on';   // alternating bass — see BASS NOTES below
+  if(!power && !kv && !bass) return a;
+  const combo = (kv ? k : '') + '|' + (power ? 'power' : 'full') + (bass ? '|bass' : '');
   let byCombo = caChordViews.get(a);
   if(!byCombo){ byCombo = new Map(); caChordViews.set(a, byCombo); }
   const hit = byCombo.get(combo);
   if(hit) return hit;
-  const map = kv ? ((power ? kv.power : kv.full) || {}) : a.chordVersions.power;
+  const map = kv ? ((power ? kv.power : kv.full) || {}) : (power ? a.chordVersions.power : {});
   const keys = Object.keys(map).sort((x, y) => y.length - x.length);
   const re = keys.length ? new RegExp('\\[(' + keys.map(k => k.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')).join('|') + ')\\]', 'g') : null;
   const walk = v => {
@@ -12838,7 +12839,7 @@ function caView(a){
     if(Array.isArray(v)) return v.map(walk);
     if(v && typeof v === 'object'){
       // The maps themselves are data, not content: never rename inside them.
-      if(v === a.chordVersions || v === a.keyVersions) return v;
+      if(v === a.chordVersions || v === a.keyVersions || v === a.bassNotes) return v;
       if(Array.isArray(v.frets) && Object.prototype.hasOwnProperty.call(map, v.note)){
         const c = map[v.note];
         return { ...v, frets: c.frets.map(f => f.slice()), midi: c.midi.slice(), note: c.note };
@@ -12855,6 +12856,7 @@ function caView(a){
   };
   const view = walk(a);
   if(kv && view.card) view.card = { ...view.card, track: kv.track };
+  if(bass && view.card) view.card = { ...view.card, __bass: a.bassNotes };
   view.__chordView = true;
   byCombo.set(combo, view);
   return view;
@@ -12900,6 +12902,83 @@ function caSetChordMode(id, mode){
   if(IS_TEACHER_MODE && typeof renderTeacherActivityDetail === 'function'){ renderTeacherActivityDetail(id); return; }
   caOpenId = id;
   renderClassActivities();
+}
+/* ── BASS NOTES: Strum only / Alternating bass ──
+   Jonathan, 2026-10-27: "las mananitas play along needs alternate bass note
+   option toggle switch" — draw the bass notes in the TAB, open on
+   Alternating bass, in both chord versions (ca-35).
+
+   A practice card opts in with
+     bassNotes: { <chord name as shown>: { root: [string, fret],
+                                           fifth: [string, fret] } }
+     bassStart: 'on' | 'off'           // optional: how it opens (else off)
+     bassDirections / bassDirections_es  // added to the card's directions when on
+   keyed by the name the card SHOWS, so the power view looks up A5, not A.
+   (The directions line, not the intro: an open practice card shows no
+   intro — only the closed card's one-sentence blurb.) With the bass on,
+   caView hands the map to the chord grid as `card.__bass`, and
+   caCardBodyHtml adds bassDirections to its directions line;
+   renderChordGridRow then draws, on beat 1
+   of every bar, the one bass note to pick: the root in the first bar of a
+   chord, the 5th in the next, back and forth until the chord changes (a
+   new chord starts again on its root). In a bar where the chord itself
+   starts on beat 1, its fret on that string is the bass note and is marked,
+   not drawn twice. A rest gets no bass note; a note-by-note section
+   (chordGrid:false) is never touched. Display only: no `notes` change, so the
+   audio, the beats, the checks and the tick keys are the same both ways.
+   The choice is per viewer in localStorage (`caBassModes`, { id: 'on' |
+   'off' }), like the chord switch. checks.mjs 1d validates the map (every
+   chord the card shows, each note the chord's real root / 5th) and 1bv
+   counts the drawn notes in every view. */
+const CA_BASS_MODES_KEY = 'caBassModes';
+let caBassModes = (() => {
+  try { const v = JSON.parse(localStorage.getItem(CA_BASS_MODES_KEY) || '{}'); return v && typeof v === 'object' ? v : {}; }
+  catch(e) { return {}; }
+})();
+function caHasBass(a){ return !!(a && caIsCard(a) && a.bassNotes && typeof a.bassNotes === 'object' && Object.keys(a.bassNotes).length); }
+function caBassMode(a){
+  if(!caHasBass(a)) return null;
+  const m = caBassModes[a.id] || a.bassStart;
+  return m === 'on' ? 'on' : 'off';
+}
+function caBassSwitchHtml(a){
+  if(!caHasBass(a)) return '';
+  const on = caBassMode(a) === 'on';
+  const id = jsonAttrArg(a.id);
+  return `<div class="ca-chord-switch ca-bass-switch" role="group" aria-label="${escAttr(t('ca.bassVersion'))}">`
+    + `<button type="button" class="snip-toggle${on ? '' : ' on'}" aria-pressed="${on ? 'false' : 'true'}" onclick="caSetBassMode(${id},'off')">${escHtml(t('ca.bassOff'))}</button>`
+    + `<button type="button" class="snip-toggle${on ? ' on' : ''}" aria-pressed="${on ? 'true' : 'false'}" onclick="caSetBassMode(${id},'on')">${escHtml(t('ca.bassOn'))}</button>`
+    + `</div>`;
+}
+/* Redraw with or without the bass — same shape as caSetChordMode above. */
+function caSetBassMode(id, mode){
+  const want = mode === 'on' ? 'on' : 'off';
+  const a = (window.CLASS_ACTIVITIES || []).find(x => x.id === id);
+  if(!a || caBassMode(a) === want) return;
+  caBassModes[id] = want;   // stored either way: the card's own start may be 'on'
+  try { localStorage.setItem(CA_BASS_MODES_KEY, JSON.stringify(caBassModes)); } catch(e) {}
+  stopCardAudio();
+  if(IS_TEACHER_MODE && typeof renderTeacherActivityDetail === 'function'){ renderTeacherActivityDetail(id); return; }
+  caOpenId = id;
+  renderClassActivities();
+}
+/* The bass note on beat 1 of each bar of one grid row: { <column>: { s, f,
+   onset } }. `onset` = the chord itself starts in that column (its fret on
+   that string is marked rather than drawn again). Pure: no DOM. */
+function pcBassMarks(events, row, bpb, bass){
+  const out = {};
+  if(!bass) return out;
+  const used = Math.round((row.b1 - row.b0) * 2);
+  for(let c = 0; c < used; c += bpb * 2){
+    const pos = row.b0 + c / 2;
+    const ev = events.find(e => !e.rest && e.start <= pos + 1e-6 && pos < e.start + e.beats - 1e-6);
+    const b = ev && bass[ev.name];
+    if(!b) continue;
+    const k = Math.round(pos / bpb) - Math.ceil(ev.start / bpb - 1e-6);   // bars of this chord before this one
+    const pick = k % 2 ? b.fifth : b.root;
+    out[c] = { s: pick[0], f: pick[1], onset: Math.abs(ev.start - pos) < 1e-6 };
+  }
+  return out;
 }
 function caIsCard(a){ return !!(a && a.view === 'card' && a.card); }
 function caCardChecks(a){ return (a && a.card && Array.isArray(a.card.checks)) ? a.card.checks : []; }
@@ -12999,9 +13078,10 @@ function pcGridRows(S, bpb){
    — string cells and count cell — and never on a "+" column: that is what
    the cursor lights (pcPaint). The count row is always on here: beats in
    ink, "+" faint, so a chord on a "+" has a label under it. */
-function renderChordGridRow(events, row, cols, bpb, seqOff){
+function renderChordGridRow(events, row, cols, bpb, seqOff, bass){
   const barCols = bpb * 2;
   const used = Math.round((row.b1 - row.b0) * 2);
+  const bassAt = pcBassMarks(events, row, bpb, bass);   // alternating bass — see BASS NOTES
   const at = {};
   events.forEach(ev => {
     if(ev.start < row.b0 - 1e-6 || ev.start >= row.b1 - 1e-6) return;
@@ -13013,10 +13093,12 @@ function renderChordGridRow(events, row, cols, bpb, seqOff){
     for(let c = 0; c < cols; c++){
       const b = beatOf(c), ev = at[c];
       const hit = ev && !ev.rest ? ev.frets.find(([s]) => s === lab) : null;
+      const bn = bassAt[c] && bassAt[c].s === lab ? bassAt[c] : null;
       const attrs = (b !== null ? ` data-beat="${b}"` : '') + (ev && !ev.rest ? ` data-seq="${seqOff + ev.seq}"` : '');
       const cls = c < used ? 'tab-cell' : 'tab-cell tab-pad';   // a short last row's empty columns carry no string line
-      cells.push(hit
-        ? `<div class="${cls}"${attrs}><span class="tab-fret">${escHtml(String(hit[1]))}</span></div>`
+      const fret = hit ? hit[1] : (bn ? bn.f : null);
+      cells.push(fret !== null
+        ? `<div class="${cls}"${attrs}><span class="tab-fret${bn ? ' tab-bass' : ''}">${escHtml(String(fret))}</span></div>`
         : `<div class="${cls}"${attrs}></div>`);
     }
     return cells.join('');
@@ -13080,7 +13162,7 @@ function pcChordGridHtml(S, bpb){
   const cols = Math.min(PC_GRID_BARS, S.bars) * bpb * 2;
   return pcGridRows(S, bpb).map(row =>
     (row.label ? `<div class="tab-phrase-label pc-row-label">${escHtml(String(row.label))}</div>` : '')
-    + renderChordGridRow(events, row, cols, bpb, S.seqOff)
+    + renderChordGridRow(events, row, cols, bpb, S.seqOff, S.bass)
   ).join('');
 }
 /* Sections with their tab offsets and running beat totals, plus the window
@@ -13099,6 +13181,7 @@ function pcLayout(a){
     const out = { s, notes, fromBar: Math.max(1, s.fromBar || 1), bars: Math.max(1, s.bars || 1),
                   reps: Math.max(1, s.reps || 1), seqOff: seq, beatEnds: [],
                   grid: !!(c.chordGrid && s.chordGrid !== false) };
+    out.bass = out.grid && c.__bass ? c.__bass : null;   // alternating bass, drawn on the grid only — see BASS NOTES
     let acc = 0;
     notes.forEach(n => { acc += n.beats > 0 ? n.beats : 1; out.beatEnds.push(acc); });
     seq += notes.length;
@@ -13365,8 +13448,10 @@ function caCardBodyHtml(a, opts){
   const sheet = !!a.card.sheet;
   if(sheet) setTimeout(pcSheetScan, 0);
   return `<div class="pc" data-id="${escAttr(a.id)}" data-slow="1"${snippetHasFull(L.tr) ? ' data-guitar="1"' : ''}${preview ? ' data-preview="1"' : ''}>`
-    + caKeySwitchHtml(a) + caChordSwitchHtml(a)
-    + `<p class="pc-dir">${escHtml(t(sheet ? 'ca.sheetDirections' : L.sections.some(S => S.grid) ? (L.sections.every(S => S.grid) ? 'ca.cardChordDirections' : 'ca.cardChordMixedDirections') : 'ca.cardDirections'))}</p>`
+    + caKeySwitchHtml(a) + caChordSwitchHtml(a) + caBassSwitchHtml(a)
+    + `<p class="pc-dir">${escHtml(t(sheet ? 'ca.sheetDirections' : L.sections.some(S => S.grid) ? (L.sections.every(S => S.grid) ? 'ca.cardChordDirections' : 'ca.cardChordMixedDirections') : 'ca.cardDirections'))}`
+    + (caBassMode(a) === 'on' && tf(a, 'bassDirections') ? ' ' + escHtml(tf(a, 'bassDirections')) : '')   // alternating bass — see BASS NOTES
+    + `</p>`
     + pcPlayerHtml(a, L) + (sheet ? pcSheetHtml(a, L) : pcTabHtml(a, L)) + pcChecksHtml(a, preview) + pcHelpHtml(a, preview)
     + `</div>`;
 }

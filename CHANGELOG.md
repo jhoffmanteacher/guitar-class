@@ -5,6 +5,15 @@ Notable changes to the Guitar Class site. Newest first.
 For the full session-by-session history (and the reasoning behind each change),
 see `WORKFLOW.md` and the git commit log.
 
+## 2026-10-27 — Las Mañanitas: an alternating-bass switch
+
+- **Strum only / Alternating bass.** The Las Mañanitas play-along has a new
+  switch beside Full chords / Power chords. With Alternating bass on, the TAB
+  shows the one bass note to pick on beat 1 of every bar — the root in one
+  bar, the 5th in the next — and then you strum on beats 2 and 3. It works
+  with full chords and power chords, and it starts on Alternating bass.
+  Strum only hides the bass notes. Your ticks are the same either way.
+
 ## 2026-10-27 — Bug fixes: saved ticks, audio, Coach, and a few wrong lines
 
 - **Song Journey ticks are safe on slow Wi-Fi.** On a slow or failed load, one

@@ -1594,7 +1594,11 @@ body.rail-collapsed .rail-tools .tool-popup{
 .ca-key-switch{margin-right:16px}
 /* The sibling selector above outranks a bare .ca-chord-switch, so print has
    to name it too or ca-36's chord switch lands on the handout. */
-@media print{.ca-chord-switch,.ca-key-switch + .ca-chord-switch{display:none}}
+/* Strum only / Alternating bass (bassNotes, ca-35 — caBassSwitchHtml) sits
+   on the chord switch's line too: one row, not two. */
+.ca-chord-switch:has(+ .ca-bass-switch){display:inline-flex;vertical-align:middle;margin-right:16px}
+.ca-chord-switch.ca-bass-switch{display:inline-flex;vertical-align:middle}
+@media print{.ca-chord-switch,.ca-key-switch + .ca-chord-switch,.ca-chord-switch:has(+ .ca-bass-switch),.ca-chord-switch.ca-bass-switch{display:none}}
 /* The TAB board never scrolls sideways: it fills the card and a long phrase
    wraps into stacked systems (renderTabBlock, TAB_MAX_COLS). --tab-cell-h is
    the string-row height; the staff box reads it too, so one override resizes
@@ -1613,6 +1617,9 @@ body.rail-collapsed .rail-tools .tool-popup{
 .tab-cell{position:relative;height:var(--tab-cell-h);display:flex;align-items:center;justify-content:center}
 .tab-cell::before{content:'';position:absolute;top:50%;left:0;right:0;height:1.5px;background:var(--text);z-index:0}
 .tab-cell .tab-fret{position:relative;z-index:1;background:var(--bg);padding:0 4px;color:var(--text);font-weight:600;font-size:1rem;font-family:inherit;line-height:1}
+/* The alternating-bass note on beat 1 of a bar (chord grid, BASS NOTES in
+   app.js): the site's purple, so it reads as its own note, not a chord. */
+.tab-cell .tab-fret.tab-bass{color:var(--purple-accent);font-weight:700}
 /* The label is a whole sentence on many cards ("▶ Hear one p-i-m-a lap on Am,
    then C — loop it 2 bars each"), so it MUST be allowed to wrap: with
    white-space:nowrap this button measured 446px inside a 240px step body on a

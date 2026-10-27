@@ -5249,14 +5249,33 @@ window.CLASS_ACTIVITIES = [
     },
     title:    '"Las Mañanitas" - Ariel Camacho y Los Plebes del Rancho — Play Along',
     title_es: '"Las Mañanitas" - Ariel Camacho y Los Plebes del Rancho — Toca con la canción',
-    /* Alternating bass (Jonathan, 2026-10-23), full chords only — the Power
-       chords version keeps the plain strum (its `_power` twins below). Beat 1
-       of every bar is ONE bass note, root in one bar and 5th in the next; beats
-       2 and 3 are the strum. Roots / 5ths: A = A string / low E string,
-       E7 = low E string / A string fret 2, D = D string / A string. Text only:
-       a column holds a chord for many bars, so the tab can't draw each bass note. */
-    intro:    'You learned A, E7, D and the strum in 3. Today you play Las Mañanitas with the band, from the first verse to the last chorus. The strum has an alternating bass: one bass note on beat 1, then two strums. The bass note is the root in one bar and the 5th in the next.',
-    intro_es: 'Aprendiste A, E7, D y el rasgueo en 3. Hoy tocas Las Mañanitas con la banda, de la primera estrofa al último coro. El rasgueo lleva un bajo alternado: una nota de bajo en el tiempo 1 y luego dos rasgueos. La nota de bajo es la raíz en un compás y la quinta en el siguiente.',
+    /* Alternating bass (Jonathan, 2026-10-23; a switch since 2026-10-27:
+       "needs alternate bass note option toggle switch") — see BASS NOTES in
+       app.js. Strum only / Alternating bass, opening on Alternating bass,
+       in BOTH chord versions. Beat 1 of every bar is ONE bass note, the root
+       in the first bar of a chord and the 5th in the next, back and forth
+       until the chord changes; beats 2 and 3 are the strum. The chord grid
+       draws that note on beat 1 of every bar. `bassNotes` is keyed by the
+       chord name the card SHOWS (A5 in the power view), each [string, fret]:
+         A  = A string / low E      A5 = low E fret 5 / A string fret 7
+         E7 = low E / A string 2    E5 = A string 7 / D string 9
+         D  = D string / A string   D5 = A string 5 / D string 7
+       The power 5ths are the shape's own 2nd note, so the hand never moves.
+       `bassDirections` is added to the card's directions line while the
+       bass is on (an open card shows no intro). */
+    bassStart: 'on',
+    bassNotes: {
+      A:  { root: ['A', 0], fifth: ['E', 0] },
+      E7: { root: ['E', 0], fifth: ['A', 2] },
+      D:  { root: ['D', 0], fifth: ['A', 0] },
+      A5: { root: ['E', 5], fifth: ['A', 7] },
+      E5: { root: ['A', 7], fifth: ['D', 9] },
+      D5: { root: ['A', 5], fifth: ['D', 7] },
+    },
+    bassDirections:    'Alternating bass: on beat 1 of each bar, pick the one bass note the TAB shows, then strum on beats 2 and 3. The bass note is the root in one bar and the 5th in the next.',
+    bassDirections_es: 'Bajo alternante: en el tiempo 1 de cada compás, toca la nota de bajo que muestra la tablatura y luego rasguea en los tiempos 2 y 3. La nota de bajo es la raíz en un compás y la quinta en el siguiente.',
+    intro:    'You learned A, E7, D and the strum in 3. Today you play Las Mañanitas with the band, from the first verse to the last chorus.',
+    intro_es: 'Aprendiste A, E7, D y el rasgueo en 3. Hoy tocas Las Mañanitas con la banda, de la primera estrofa al último coro.',
     intro_power:    'You learned A5, E5, D5 and the strum in 3. Today you play Las Mañanitas with the band, from the first verse to the last chorus.',
     intro_power_es: 'Aprendiste A5, E5, D5 y el rasgueo en 3. Hoy tocas Las Mañanitas con la banda, de la primera estrofa al último coro.',
     card: {
@@ -5269,10 +5288,8 @@ window.CLASS_ACTIVITIES = [
       track: 'las-mananitas',
       chordGrid: true,  // chord grid: each chord once, cursor on the beats only (2026-10-26) — see CARD above
       slowest: true,    // Slowest / Slower / Slow / Normal
-      caption:    'The song in order · the highlight follows the beat · bass notes — A: A string / low E · E7: low E / A string fret 2 · D: D string / A string',
-      caption_es: 'La canción en orden · la marca sigue el tiempo · notas de bajo — A: cuerda La / Mi grave · E7: Mi grave / cuerda La traste 2 · D: cuerda Re / cuerda La',
-      caption_power:    'The song in order · the highlight follows the beat',
-      caption_power_es: 'La canción en orden · la marca sigue el tiempo',
+      caption:    'The song in order · the highlight follows the beat',
+      caption_es: 'La canción en orden · la marca sigue el tiempo',
       sections: [
         {
           label: 'Verse 1', label_es: 'Estrofa 1',
