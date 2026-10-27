@@ -15475,9 +15475,14 @@ document.addEventListener('visibilitychange', () => {
      default tap mode never loads it.
      One exception, in the teacher console only: a WHOLE-SONG card playing for
      the room (ca-40) keeps playing when Jonathan switches the projector's tab
-     to his slides (code-hygiene rule 4). It needs no rAF to keep going and
-     stops at the end of the song by itself. A looping card or a snippet needs
-     rAF to loop, so those still stop, there too; a student tab stops all. */
+     to his slides (code-hygiene rule 4). What a hidden tab does to it, since
+     no rAF runs there: it plays on to the end of the FILE, not the card's
+     window (1-13 s past it on ca-24..ca-40), and the card stops itself when
+     the tab is shown again; the Metronome click stops (pcScheduleClick runs
+     in the frame loop); hidden during the count-in, the song can come in
+     about a second late (timers are throttled). A looping card or a snippet
+     needs rAF to loop, so those still stop, there too; a student tab stops
+     all. */
   if(document.hidden){
     snipStop();
     if(!(IS_TEACHER_MODE && pcState && pcState.wholeSong)) pcStop();
