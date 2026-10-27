@@ -9251,8 +9251,10 @@ async function checkBackingLoudness() {
      EN and ES): "Ladder complete" only on the melody ladder's top level,
      "Next level" to the level the data says it opens, and an unlock line
      naming every level it opens;
-   - ten arcade done screens at 0, 1 and many, EN and ES (an off-by-one in
-     either direction: "1 cards", or "1 was" when 2 were).
+   - ten arcade done screens at 0, 1 and many, EN and ES: right grammar
+     ("1 cards", or "1 was" when 2 were) AND the real count in the line
+     (rounds, right answers, cards, messy changes); the chord card names its
+     first pass in order, and the unlock line names exactly what opened.
    It reads Note Runner's saved bests where coach.js does (games.nr.levels);
    with the wrong field every level but the first is locked and the Next
    button never draws (the first version of this check had that hole).
@@ -9391,8 +9393,9 @@ function checkCoachVerdicts() {
         const what = `${lang} ${k}-chord Coach card ("${desc}")`;
         const listed = desc.split(' — ')[0].split(' → ');
         if (k > 1 && TWICE.test(desc) !== (beats.length >= 2 * 4 * k)) flag(`1ca: ${what} ${TWICE.test(desc) ? 'says' : 'lost'} "twice through" with ${beats.length} beats`);
-        listed.filter(n => !beats.includes(n)).forEach(n => flag(`1ca: ${what} names ${n}, which the drill never asks for`));
-        if (beats.length >= 4 * k && listed.length !== k) flag(`1ca: ${what} names ${listed.length} chords`);
+        /* The names, in order, are the drill's first pass (8 chords at most). */
+        const firstPass = [...new Set(beats.slice(0, 4 * k))].join(' → ');
+        if (listed.join(' → ') !== firstPass) flag(`1ca: ${what} names ${listed.join(' → ')}, but the drill's first pass is ${firstPass}`);
         const after = [...new Set(beats.slice(4 * k))];
         const m = desc.match(THEN);
         const want = beats.length > 4 * k && beats.length < 8 * k ? after.join(' → ') : null;
@@ -9425,7 +9428,10 @@ function checkCoachVerdicts() {
           if ((nextTo[0] ?? null) !== wantNext) flag(`1ca: ${what} Next goes to ${nextTo.length ? 'Level ' + (nextTo[0] + 1) : 'nothing'}, the data says ${wantNext == null ? 'nothing' : 'Level ' + (wantNext + 1)}`);
           if (prev === 0) {
             const status = (out.match(/[^.!]*\b(?:unlocked|desbloquead[oa]s?)\b[^.!]*!?/i) || [''])[0];
-            opens[i].forEach(j => { if (!new RegExp('\\b' + (j + 1) + '\\b').test(status)) flag(`1ca: ${what} opens Level ${j + 1} but the unlock line ("${status.trim()}") does not name it`); });
+            /* The unlock line names exactly the levels this one opens. */
+            const named = (status.match(/\d+/g) || []).map(Number).sort((a, b) => a - b).join(',');
+            const opened = opens[i].map(j => j + 1).sort((a, b) => a - b).join(',');
+            if (named !== opened) flag(`1ca: ${what} opens ${opened ? 'Level ' + opened : 'nothing'} but the unlock line ("${status.trim()}") names ${named || 'nothing'}`);
           }
         }
       }
@@ -9436,23 +9442,34 @@ function checkCoachVerdicts() {
     const BAD = /\b1 (rounds|rondas|were|llegaron|correctas|cards|tarjetas)\b|\b0 correcta\b/;
     for (const lang of ['en', 'es']) {
       run(`setLang(${JSON.stringify(lang)})`);
-      const shot = (code, id, what) => {
+      /* `want` = [regex with one number group, the real count]: the line must
+         show that count, and every number the regex finds must be it. A
+         reworded line that loses the count fails too (loud, not blind). */
+      const shot = (code, id, what, wants = []) => {
         run(code); counts.doneScreens++;
         const out = text(id);
         if (BAD.test(out)) flag(`1ca: ${lang} ${what} reads "${out.match(BAD)[0]}"`);
+        for (const [re, n] of wants) {
+          const found = [...out.matchAll(re)].map(m => +(m[1] ?? m[2]));
+          if (!found.length || found.some(x => x !== n)) flag(`1ca: ${lang} ${what} shows ${found.length ? found.join('/') : 'no count'} where the real count is ${n} ("${out.slice(0, 140)}")`);
+        }
       };
+      const ROUNDS = /\b(\d+) (?:rounds?|rondas?)\b/g;
+      const RIGHT = /\b(\d+) right\b|\baciertos: (\d+)/g;
+      const CARDS = /\b(\d+) (?:cards?|tarjetas?)\b/g;
+      const MESSY = /\((\d+) (?:were|was|llegaron|llegó)/g;
       for (const k of [0, 1, 2, 5]) {
-        shot(`ps = { phase: 'done', round: ${k}, prevBest: 0, timeouts: [] }; psRenderDone();`, 'ps-body', `Simon, ${k} rounds`);
-        shot(`psg = { phase: 'done', round: ${k}, prevBest: 0, heard: [], timeouts: [] }; psgRenderDone();`, 'psg-body', `Simon Guitar, ${k} rounds`);
+        shot(`ps = { phase: 'done', round: ${k}, prevBest: 0, timeouts: [] }; psRenderDone();`, 'ps-body', `Simon, ${k} rounds`, [[ROUNDS, k]]);
+        shot(`psg = { phase: 'done', round: ${k}, prevBest: 0, heard: [], timeouts: [] }; psgRenderDone();`, 'psg-body', `Simon Guitar, ${k} rounds`, [[ROUNDS, k]]);
         for (const g of ['fz', 'pd', 'ntr', 'cb', 'cd']) for (const ans of [1, 5]) {
           if (k > ans) continue;
           shot(`${g} = { phase: 'done', answered: ${ans}, correct: ${k}, score: 0, prevBest: 0, levels: [], topLevel: 1, timeouts: [], noteTimeouts: [] }; ${g}RenderDone();`,
-            `${g}-body`, `${g} ${ans} answered, ${k} right`);
+            `${g}-body`, `${g} ${ans} answered, ${k} right`, [[RIGHT, k], [CARDS, ans]]);
         }
         if (k <= 3) {
           shot(`cc = { phase: 'done', progIdx: 0, rateIdx: 0, bpm: 60, bpc: 4, chords: ['C', 'G'], timeouts: [],
             changes: Array.from({ length: 8 }, (_, i) => ({ from: 'C', to: 'G', result: i < ${k} ? 'off' : i < ${k} + 4 ? 'ok' : 'miss' })) }; ccRenderDone();`,
-            'cc-body', `Change Up, ${k} messy`);
+            'cc-body', `Change Up, ${k} messy`, k ? [[MESSY, k]] : []);
           /* 4 good changes of 8 keeps the verdict in the band that names the messy ones. */
           if (k >= 2 && /\(1 (was|llegó)\b/.test(text('cc-body'))) flag(`1ca: ${lang} Change Up with ${k} messy changes says "${text('cc-body').match(/\(1 (was|llegó)\b/)[0]}"`);
         }
