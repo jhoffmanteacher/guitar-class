@@ -9785,7 +9785,16 @@ function rebuildModuleContentPanels(){
       // lesson's pill and step counter showing over it.
       panel.classList.toggle('on-checklist', activeSuffix === 'checklist');
     } else if(mr && wid===`mr${num}`){
+      /* A recorder slot that is recording or holds a listen-back keeps its own
+         node: rebuilt, its <audio> would restart at 0:00. Same guard as the
+         rail recorder's (refreshRecUI('fab') in the language handler below);
+         the slot redraws in the new language at its next state change. */
+      const busy = [...panel.querySelectorAll('.mr-rec-body')].filter(el => {
+        const rs = recState[el.id.replace(/^mr|-rec-body$/g, '')];
+        return !!(rs && (rs.recording || rs.pendingBlobUrl));
+      });
       panel.innerHTML = buildModuleReview(mr);
+      busy.forEach(old => { const fresh = panel.querySelector(`#${old.id}`); if(fresh) fresh.replaceWith(old); });
     } else {
       return;
     }
