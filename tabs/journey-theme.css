@@ -68,8 +68,9 @@ body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,"Helvetica N
 /* .wrap's max-width is what actually sets the side margin on wide screens
    (it auto-centers well inside body's padding there) — so widening the
    margin means narrowing this, not just bumping padding. 1000px since
-   2026-10-07 (the wider column); on narrower screens body's 48px side
-   padding above is the binding constraint. */
+   2026-10-07, the same width as the app's content column (it was 760px,
+   and 616px before that); body padding above sets the margin on narrower
+   screens, where padding is the binding constraint. */
 .wrap{max-width:1000px;margin:0 auto}
 a{color:var(--brand)}
 .crumb{font-size:0.8125rem;color:var(--text2);margin-bottom:18px;display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:8px 12px}
