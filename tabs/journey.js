@@ -975,7 +975,12 @@ function currentReady(){
   return out;
 }
 
-/* What a save may send — see readState above. */
+/* What a save may send — see readState above. Accepted cost: after a
+   failed read (or from a closing tab) a song never saved before is stored
+   with only the clicked layers ({"1":true}), and the resume card, which
+   counts keys, leaves it out until the next save after a successful read,
+   which writes every layer. A fill inside the swap45 transaction was
+   considered and declined (2026-10-26). */
 function readyToSave(){
   var all = currentReady();
   if(readState === 'done') return all;
