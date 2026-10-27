@@ -5,6 +5,11 @@ Notable changes to the Guitar Class site. Newest first.
 For the full session-by-session history (and the reasoning behind each change),
 see `WORKFLOW.md` and the git commit log.
 
+## 2026-10-27 — Songs: tap a song name to open its Play Along
+
+- **In "More Play Along songs", the song names are now links.** Tapping a
+  name opens the same Play Along card as the ▶ Play Along button next to it.
+
 ## 2026-10-27 — Module 3 Set 2: the "Watchtower" loop uses the record's rhythm
 
 - **Challenge 1 ("Watchtower" Loop in Time) now matches the record.** It used

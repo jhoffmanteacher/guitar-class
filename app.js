@@ -11186,9 +11186,10 @@ function songsLibraryHtml(){
   cards.sort((x, y) => name(x).localeCompare(name(y)));
   const rows = cards.map(a => {
     const done = classActivities[a.id] === true;
-    const btn = `<button type="button" class="song-vid-btn sh-play-btn${done ? ' done' : ''}" onclick="songsHubOpenCard('${escAttr(a.id)}')"><span class="svb-play">&#x25B6;</span>${t('hub.playAlong')}${done ? ` <svg class="sh-play-check" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" role="img" aria-label="${escAttr(t('hub.playAlongDone'))}"><path d="M5 12.5l4.5 4.5L19 7"/></svg>` : ''}</button>`;
+    const btn = `<button type="button" class="song-vid-btn sh-play-btn${done ? ' done' : ''}" onclick="songsHubOpenCard(${jsonAttrArg(a.id)})"><span class="svb-play">&#x25B6;</span>${t('hub.playAlong')}${done ? ` <svg class="sh-play-check" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" role="img" aria-label="${escAttr(t('hub.playAlongDone'))}"><path d="M5 12.5l4.5 4.5L19 7"/></svg>` : ''}</button>`;
+    // The song name opens the same card as its Play Along button (2026-10-27).
     return `<div class="song-row"><div class="dot dch"></div>
-      <div class="song-name-col"><div class="sname">${escHtml(name(a))}</div></div>
+      <div class="song-name-col"><button type="button" class="sname sname-link" onclick="songsHubOpenCard(${jsonAttrArg(a.id)})">${escHtml(name(a))}</button></div>
       <div class="song-vids">${btn}</div></div>`;
   }).join('');
   return `<div class="sh-sec-title">${t('hub.libraryTitle')}</div><div class="card">${rows}</div>`;
