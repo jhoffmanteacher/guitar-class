@@ -2923,6 +2923,9 @@ function snippetSrc(tr, slow, guitar){
    exit — it is one more element to pause and empty.
    Only the teacher loads it up front — see twinWanted(). */
 const TWIN_READY_SEC = 0.06, TWIN_SNAP_SEC = 0.25;
+/* A speed switch that keeps the file (Slowest <-> Slower, Slow <-> Normal)
+   lands on the position it is already at; seek only if it is further off. */
+const SAME_FILE_SEEK_SEC = 0.05;
 /* WHO LOADS THE TWIN UP FRONT (Jonathan, 2026-10-26). Parking it on every Play
    pulled BOTH mixes (10-14 MB each) on a song's first play, for every
    Chromebook on one classroom Wi-Fi. So only the teacher — the console, or the
@@ -3305,7 +3308,9 @@ function snipSetTier(btn, which){
   slowestApplyRate(audio, snipRate(card));   // Slowest <-> Slow is the same file, just the rate
   snipState.lastBeat = -1;
   if(audio.getAttribute('src') === src || audio.src.endsWith(src)){
-    try { audio.currentTime = at; } catch(e) {}
+    // Same file: only the rate moved, and `at` is where it already is. A seek
+    // there would only make a gap (an mp3 seek lands late — see THE TWIN).
+    if(Math.abs(audio.currentTime - at) > SAME_FILE_SEEK_SEC){ try { audio.currentTime = at; } catch(e) {} }
     return;
   }
   /* Guitar flipped and the twin is already playing the other mix in step:
@@ -14168,7 +14173,12 @@ function pcRetrack(root){
   const at = snipTimeAtBars(st.win, isFinite(barsIn) && barsIn > 0 ? barsIn : 0);
   const src = snippetSrc(st.L.tr, slow, guitar);
   slowestApplyRate(st.audio, pcRate(root));   // Slowest <-> Slower and Slow <-> Normal are the same file, just the rate
-  if(st.audio.src.endsWith(src)){ try { st.audio.currentTime = at; } catch(e) {} pcSparePark(st); return; }
+  if(st.audio.src.endsWith(src)){
+    // Same file, same window: only the rate moved — no seek (see snipSetTier).
+    if(Math.abs(st.audio.currentTime - at) > SAME_FILE_SEEK_SEC){ try { st.audio.currentTime = at; } catch(e) {} }
+    pcSparePark(st);
+    return;
+  }
   /* Guitar flipped and the twin is already playing the other mix in step:
      swap which one is heard. No load, no seek — see THE TWIN. The spare is
      still on the old mix, so it is re-parked on the new one as usual. */
