@@ -198,7 +198,7 @@ SETS.push(
             skills: [1, 3]
           },
           {
-            label: 'Challenge 1 — Pattern 1 Climb (skills-check warm-up)', label_es: 'Reto 1 — Subida del Patrón 1 (calentamiento de revisión de destrezas)',
+            label: 'Challenge 1 — Pattern 1 Climb', label_es: 'Reto 1 — Subida del Patrón 1',
             text: '<ol><li>Set the metronome to 60 BPM.</li><li>Play Pattern 1 up and back down, one note per beat.</li><li>Use alternate picking: down, up, down, up.</li></ol>The picture shows where each finger goes. Press "Play all" to hear it. You\'ve got it when: you play it up and back two times with every note clean and no missed picks.<span class="step-figure"><img src="img/m4-pentatonic-box1-en.svg" alt="Fretboard diagram of A minor pentatonic Pattern 1, frets 5 to 8: finger 1 on fret 5 of every string, finger 4 on fret 8 of the low E, B, and high e strings, and finger 3 on fret 7 of the A, D, and G strings. The root note A is marked solid at fret 5 on the low E and high e strings and at fret 7 on the D string." width="640" height="244"></span>',
             text_es: '<ol><li>Pon el metrónomo a 60 BPM.</li><li>Toca el Patrón 1 subiendo y luego bajando, una nota por tiempo.</li><li>Usa púa alterna: abajo, arriba, abajo, arriba.</li></ol>El dibujo muestra dónde va cada dedo. Presiona "Tocar todo" para escucharlo. Lo tienes cuando: lo tocas subiendo y bajando dos veces con cada nota limpia y sin púas falladas.<span class="step-figure"><img src="img/m4-pentatonic-box1-es.svg" alt="Diagrama del diapasón del Patrón 1 de A menor pentatónica, trastes 5 a 8: el dedo 1 en el traste 5 de todas las cuerdas, el dedo 4 en el traste 8 de las cuerdas Mi grave, Si y mi aguda, y el dedo 3 en el traste 7 de las cuerdas La, Re y Sol. La nota raíz A está marcada en sólido en el traste 5 de la Mi grave y la mi aguda, y en el traste 7 de la cuerda Re." width="640" height="244"></span>',
             hint: 'Go slow enough that every note rings. Set the ⏱ Timer for 2 minutes and repeat it.',
@@ -1086,7 +1086,7 @@ SETS.push(
             title_es: 'Lee un lick a primera vista',
             steps: [
           {
-            label: 'Challenge — Reading at First Sight (Knowledge & Reading)', label_es: 'Reto — Lectura a primera vista (Conocimiento y lectura)',
+            label: 'Challenge — Reading at First Sight', label_es: 'Reto — Lectura a primera vista',
             text: 'A lick is a short solo phrase. This 4-bar lick uses the A minor pentatonic box.<ol><li>Read the TAB first. Name each string and fret, left to right.</li><li>Play it before you press Play tab.</li></ol>You\'ve got it when: you play all 16 notes in order at 60 BPM before you press Play tab, with no more than one stop.',
             text_es: 'Un lick es una frase corta de solo. Este lick de 4 compases usa la caja de A menor pentatónica.<ol><li>Lee el TAB primero. Nombra cada cuerda y traste, de izquierda a derecha.</li><li>Tócalo antes de presionar Tocar el tab.</li></ol>Lo tienes cuando: tocas las 16 notas en orden a 60 BPM antes de presionar Tocar el tab, con no más de una parada.',
             hint: 'The bottom TAB line is the low E. The top line is the high e. The number is the fret. Say each one out loud, for example "G string, fret 5, C". Then press Play tab to check.',
