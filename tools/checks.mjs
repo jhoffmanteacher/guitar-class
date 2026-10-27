@@ -8630,7 +8630,7 @@ function checkLoadFailedMaps() {
    rows), a fake clock and a fake Firestore that merges the way the real one
    does (an empty map replaces), and plays each scenario through to what
    ends up stored. The scenario count is pinned. */
-const JOURNEY_SAVE_SCENARIOS = 17;
+const JOURNEY_SAVE_SCENARIOS = 22;
 async function checkJourneyReadySave() {
   head('1bw. A Journey "I\'m ready" save cannot wipe the saved ✓s');
   let src;
@@ -8718,7 +8718,12 @@ async function checkJourneyReadySave() {
       if (opts.writeDelay) setT(go, opts.writeDelay); else go();
     });
     const refOf = uid => ({ uid,
-      get: () => new Promise((res, rej) => { const d = (opts.readDelays && opts.readDelays[uid]) ?? opts.readDelay ?? 0; setT(() => (opts.readFails || (opts.readFailsFor && opts.readFailsFor[uid])) ? rej(new Error('offline')) : res(snapOf(uid)), d); }),
+      /* opts.readSeq: one delay per read, in order. opts.snapAtSend: the read
+         returns the doc as it was when SENT (a real read can be stale). */
+      get: () => new Promise((res, rej) => {
+        const d = (opts.readSeq && opts.readSeq.length) ? opts.readSeq.shift() : (opts.readDelays && opts.readDelays[uid]) ?? opts.readDelay ?? 0;
+        const early = opts.snapAtSend ? { exists: !!docs[uid], data: (k => () => copy(k))(copy(docs[uid])) } : null;
+        setT(() => (opts.readFails || (opts.readFailsFor && opts.readFailsFor[uid])) ? rej(new Error('offline')) : res(early || snapOf(uid)), d); }),
       set: data => commit(uid, copy(data)) });
     const db = { collection: () => ({ doc: uid => refOf(uid) }),
       runTransaction: fn => Promise.resolve().then(() => { let w = null; return Promise.resolve(fn({ get: r => Promise.resolve(snapOf(r.uid)), set: (r, data) => { w = [r.uid, copy(data)]; } }))
@@ -8755,6 +8760,7 @@ async function checkJourneyReadySave() {
       signIn: async uid => { auth.currentUser = { uid, email: uid + '@example.com' }; authCb(auth.currentUser); await drain(); },
       signOut: async () => { auth.currentUser = null; authCb(null); await drain(); },
       click: async (n, on = true) => { boxes[n].checked = on; win.readyChanged(boxes[n]); await drain(); },
+      mutate: (uid, fn) => fn(docs[uid]),   // another tab's write, straight into the store
       saved: (uid = 's1') => (docs[uid] && docs[uid].songReady && docs[uid].songReady[SONG]) || {} };
   }
   const marked = layers => ({ migrations: { swap45: true }, songReady: { [SONG]: layers } });
@@ -8839,7 +8845,30 @@ async function checkJourneyReadySave() {
     ['the last student\'s read failing late does not change how the next one saves', async () => {
       const p = await makePage({ stored: marked(T123), stored2: { migrations: { swap45: true } }, readDelays: { s1: 2000, s2: 4000 }, readFailsFor: { s1: true } });
       p.load(); await p.signIn('s1'); await p.advance(100); await p.signOut(); await p.signIn('s2'); await p.advance(50); await p.click(4); await p.advance(8000);
-      return want(p, { 1: false, 2: false, 3: false, 4: true, 5: false }, 's2'); }]
+      return want(p, { 1: false, 2: false, 3: false, 4: true, 5: false }, 's2'); }],
+    ['a stale read from before a sign-out/in does not overwrite another tab\'s save', async () => {
+      const p = await makePage({ stored: marked({ 1: true, 2: false, 3: false, 4: false, 5: false }), snapAtSend: true, readSeq: [5000, 6000] });
+      p.load(); await p.signIn('s1'); await p.advance(100);
+      p.mutate('s1', d => { d.songReady[SONG][3] = true; });
+      await p.signOut(); await p.signIn('s1'); await p.advance(100); await p.click(5); await p.advance(9000);
+      return want(p, { 1: true, 2: false, 3: true, 4: false, 5: true }); }],
+    ['direct switch to the next student (no sign-out): the last student\'s tick stays out', async () => {
+      const p = await makePage({ stored: marked(T123), stored2: marked({ 1: false, 2: false, 3: false, 4: false, 5: false }), readDelay: 50 });
+      p.load(); await p.signIn('s1'); await p.advance(200); await p.click(4); await p.advance(2000);
+      await p.signIn('s2'); await p.advance(1000); await p.click(5); await p.advance(2000);
+      return want(p, { 1: false, 2: false, 3: false, 4: false, 5: true }, 's2'); }],
+    ['a tick made signed out stays out when the next student signs in and ticks', async () => {
+      const p = await makePage({ stored2: marked({ 1: false, 2: false, 3: false, 4: false, 5: false }), readDelay: 50 });
+      p.load(); await p.signOut(); await p.click(4); await p.signIn('s2'); await p.advance(1000); await p.click(1); await p.advance(2000);
+      return want(p, { 1: true, 2: false, 3: false, 4: false, 5: false }, 's2'); }],
+    ['direct switch from a marked doc to an unmarked one whose read fails: saved in its old numbering', async () => {
+      const p = await makePage({ stored: marked({ 1: true }), stored2: { songReady: { [SONG]: { 1: true } } }, readDelay: 50, readFailsFor: { s2: true } });
+      p.load(); await p.signIn('s1'); await p.advance(200); await p.signIn('s2'); await p.advance(1000); await p.click(5); await p.advance(2000);
+      return want(p, { 1: true, 4: true }, 's2'); }],
+    ['an unmarked doc\'s Layer 4/5 ticks are shown and saved in the right numbering', async () => {
+      const p = await makePage({ stored: { songReady: { [SONG]: { 1: true, 2: false, 3: false, 4: true, 5: false } } }, readDelay: 50 });
+      p.load(); await p.signIn('s1'); await p.advance(200); await p.click(2); await p.advance(2000);
+      return want(p, { 1: true, 2: true, 3: false, 4: true, 5: false }); }]
   ];
   let bad = 0;
   if (scenarios.length !== JOURNEY_SAVE_SCENARIOS) { err(`1bw: ${scenarios.length} scenarios, pinned at ${JOURNEY_SAVE_SCENARIOS} — bump the pin on purpose`); problems++; bad++; }
