@@ -9156,17 +9156,23 @@ async function checkBackingLoudness() {
    - the Coach report over fixed takes, EN and ES: "Everything was right"
      only when every beat was right, "all counted" only when every timed
      hit was right, never "the other 1"; controls must still show both;
-   - the chord card's description for 1-10 chords against the beats the
-     drill really has;
-   - Note Runner's done screen on every level (first clear and re-clear):
-     "Ladder complete" only on the melody ladder's top level;
-   - eight arcade done screens at 0, 1 and many, EN and ES.
+   - the chord card's description for 1-10 chords, EN and ES, against the
+     beats the drill really has (the "then play X once more" list too);
+   - Note Runner's done screen on every level (first clear and re-clear,
+     EN and ES): "Ladder complete" only on the melody ladder's top level,
+     "Next level" to the level the data says it opens, and an unlock line
+     naming every level it opens;
+   - ten arcade done screens at 0, 1 and many, EN and ES (an off-by-one in
+     either direction: "1 cards", or "1 was" when 2 were).
+   It reads Note Runner's saved bests where coach.js does (games.nr.levels);
+   with the wrong field every level but the first is locked and the Next
+   button never draws (the first version of this check had that hole).
    Every total is pinned, so a renamed function cannot turn this into a
    check of nothing.
    ════════════════════════════════════════════════════════════════════ */
 function checkCoachVerdicts() {
   head('1ca. Coach and arcade verdict lines are true at 0, 1 and many');
-  const EXPECT = { reports: 18, descs: 10, nrLevels: 15, doneScreens: 58 };
+  const EXPECT = { reports: 20, descs: 20, nrLevels: 15, doneScreens: 82 };
   let bad = 0;
   const flag = m => { err(m); problems++; bad++; };
   const bodies = {};
@@ -9247,6 +9253,7 @@ function checkCoachVerdicts() {
       ['melody', rep(10, 'ok'), 0, true, false],
       ['chords', rep(16, 'ok'), 0, true, false],
       ['melody', rep(8, 'ok'), 600, false, true],
+      ['melody', [...rep(14, 'ok'), 'miss', 'miss'], 0, false, false],
     ];
     for (const lang of ['en', 'es']) {
       run(`setLang(${JSON.stringify(lang)})`);
@@ -9270,41 +9277,74 @@ function checkCoachVerdicts() {
         if (hasCounted && states.some(s => s !== 'miss' && !right(s))) flag(`1ca: ${what} says "${COUNTED.source}" over wrong or unclear notes`);
         if (wantCounted && !hasCounted) flag(`1ca: ${what} — an all-right late take no longer says "${COUNTED.source}" (control)`);
         if (/\b(other|otras) 1\b/.test(out)) flag(`1ca: ${what} reads "${out.match(/\b(other|otras) 1\b/)[0]}"`);
+        const unheard = states.filter(s => !right(s)).length;
+        if (unheard !== 1 && /\bother one\b|\bla otra no\b/.test(out)) flag(`1ca: ${what} says "the other one" with ${unheard} unheard notes`);
       }
     }
     run(`setLang('en')`);
 
-    /* Chord card description vs the beats the drill really has. */
+    /* Chord card description vs the beats the drill really has, EN and ES:
+       "twice through" exactly when two passes fit, every named chord is in
+       the drill, and a "then play X once more" list is exactly the chords
+       after the first pass. */
     const NAMES = ['C', 'D', 'E', 'F', 'G', 'A', 'B', 'Cm', 'Dm', 'Em'];
-    for (let k = 1; k <= NAMES.length; k++) {
-      ctx.__btn = { dataset: { chords: JSON.stringify(NAMES.slice(0, k).map((n, i) => ({ n, m: [48 + i, 52 + i, 55 + i] }))) },
-        closest(){ return null; }, parentElement: { insertAdjacentElement(){}, closest(){ return null; } } };
-      run('coachOpen(__btn)');
-      const desc = run('coach.desc'), beats = run('coach.slots.map(s => s.chordName)');
-      run('coachClose()');
-      counts.descs++;
-      const listed = desc.split(' — ')[0].split(' → ');
-      if (/twice through/.test(desc) && beats.length < 2 * 4 * k) flag(`1ca: a ${k}-chord Coach card says "twice through" but the drill has ${beats.length} beats`);
-      listed.filter(n => !beats.includes(n)).forEach(n => flag(`1ca: a ${k}-chord Coach card names ${n}, which the drill never asks for`));
-      if (beats.length >= 4 * k && listed.length !== k) flag(`1ca: a ${k}-chord Coach card names ${listed.length} chords`);
+    const TWICE = /twice through|dos vueltas/;
+    const THEN = /(?:then play|y luego toca) (.+?) (?:once more|una vez más)/;
+    for (const lang of ['en', 'es']) {
+      run(`setLang(${JSON.stringify(lang)})`);
+      for (let k = 1; k <= NAMES.length; k++) {
+        ctx.__btn = { dataset: { chords: JSON.stringify(NAMES.slice(0, k).map((n, i) => ({ n, m: [48 + i, 52 + i, 55 + i] }))) },
+          closest(){ return null; }, parentElement: { insertAdjacentElement(){}, closest(){ return null; } } };
+        run('coachOpen(__btn)');
+        const desc = run('coach.desc'), beats = run('coach.slots.map(s => s.chordName)');
+        run('coachClose()');
+        counts.descs++;
+        const what = `${lang} ${k}-chord Coach card ("${desc}")`;
+        const listed = desc.split(' — ')[0].split(' → ');
+        if (k > 1 && TWICE.test(desc) !== (beats.length >= 2 * 4 * k)) flag(`1ca: ${what} ${TWICE.test(desc) ? 'says' : 'lost'} "twice through" with ${beats.length} beats`);
+        listed.filter(n => !beats.includes(n)).forEach(n => flag(`1ca: ${what} names ${n}, which the drill never asks for`));
+        if (beats.length >= 4 * k && listed.length !== k) flag(`1ca: ${what} names ${listed.length} chords`);
+        const after = [...new Set(beats.slice(4 * k))];
+        const m = desc.match(THEN);
+        const want = beats.length > 4 * k && beats.length < 8 * k ? after.join(' → ') : null;
+        if ((m ? m[1] : null) !== want) flag(`1ca: ${what} — after the first pass the drill plays ${want || 'nothing'}`);
+      }
     }
+    run(`setLang('en')`);
 
     /* Note Runner: "Ladder complete" only on the melody ladder's top level. */
     const levels = run('NR_LEVELS.map(l => !!l.chords)');
     const top = levels.lastIndexOf(false);
-    run(`games.nr = { best: {} }; NR_LEVELS.forEach((_, i) => { games.nr.best[i] = 100; });`);
-    for (const prev of [0, 100]) {
-      for (let i = 0; i < levels.length; i++) {
-        run(`nr = { level: ${i}, adaptive: false, passed: true, prevBest: ${prev}, acc: 100, errs: [], playable: [], micSuspect: false, timeouts: [] };
-          nrRenderDone(0, 0, 0, 0); nr = null;`);
-        if (prev === 0) counts.nrLevels++;
-        const out = text('nr-body');
-        if (/Ladder complete/.test(out) !== (i === top)) flag(`1ca: Note Runner Level ${i + 1} (${prev ? 're-clear' : 'first clear'}) ${i === top ? 'lost' : 'says'} "Ladder complete"`);
+    /* What each level opens, read off the data (`after`, else the level
+       before). Every level is cleared, so every "Next level" button shows. */
+    const opens = run('NR_LEVELS.map((_, i) => NR_LEVELS.map((l, j) => j).filter(j => (NR_LEVELS[j].after !== undefined ? NR_LEVELS[j].after : j - 1) === i))');
+    run(`games.nr = { levels: {} }; NR_LEVELS.forEach((_, i) => { games.nr.levels[i] = 100; });`);
+    for (const lang of ['en', 'es']) {
+      run(`setLang(${JSON.stringify(lang)})`);
+      const LADDER = new RegExp(run(`t('games.nr.passLadderDone')`).split(' — ')[0]);
+      for (const prev of [0, 100]) {
+        for (let i = 0; i < levels.length; i++) {
+          run(`nr = { level: ${i}, adaptive: false, passed: true, prevBest: ${prev}, acc: 100, errs: [], playable: [], micSuspect: false, timeouts: [] };
+            nrRenderDone(0, 0, 0, 0); nr = null;`);
+          if (prev === 0 && lang === 'en') counts.nrLevels++;
+          const html = bodies['nr-body'] || '', out = text('nr-body');
+          const what = `${lang} Note Runner Level ${i + 1} (${prev ? 're-clear' : 'first clear'})`;
+          if (LADDER.test(out) !== (i === top)) flag(`1ca: ${what} ${i === top ? 'lost' : 'says'} "${LADDER.source}"`);
+          const next = html.match(/onclick="nrPick\((\d+)\)">[^<]*/g) || [];
+          const nextTo = next.map(b => +b.match(/\d+/)[0]).filter(j => j !== i);
+          const wantNext = opens[i].length ? opens[i][0] : null;
+          if ((nextTo[0] ?? null) !== wantNext) flag(`1ca: ${what} Next goes to ${nextTo.length ? 'Level ' + (nextTo[0] + 1) : 'nothing'}, the data says ${wantNext == null ? 'nothing' : 'Level ' + (wantNext + 1)}`);
+          if (prev === 0) {
+            const status = (out.match(/[^.!]*\b(?:unlocked|desbloquead[oa]s?)\b[^.!]*!?/i) || [''])[0];
+            opens[i].forEach(j => { if (!new RegExp('\\b' + (j + 1) + '\\b').test(status)) flag(`1ca: ${what} opens Level ${j + 1} but the unlock line ("${status.trim()}") does not name it`); });
+          }
+        }
       }
     }
+    run(`setLang('en')`);
 
     /* Arcade done screens at 0, 1 and many. */
-    const BAD = /\b1 (rounds|rondas|were|llegaron|correctas)\b|\b0 correcta\b/;
+    const BAD = /\b1 (rounds|rondas|were|llegaron|correctas|cards|tarjetas)\b|\b0 correcta\b/;
     for (const lang of ['en', 'es']) {
       run(`setLang(${JSON.stringify(lang)})`);
       const shot = (code, id, what) => {
@@ -9315,14 +9355,18 @@ function checkCoachVerdicts() {
       for (const k of [0, 1, 2, 5]) {
         shot(`ps = { phase: 'done', round: ${k}, prevBest: 0, timeouts: [] }; psRenderDone();`, 'ps-body', `Simon, ${k} rounds`);
         shot(`psg = { phase: 'done', round: ${k}, prevBest: 0, heard: [], timeouts: [] }; psgRenderDone();`, 'psg-body', `Simon Guitar, ${k} rounds`);
-        for (const g of ['fz', 'pd', 'ntr']) for (const ans of [1, 5]) {
+        for (const g of ['fz', 'pd', 'ntr', 'cb', 'cd']) for (const ans of [1, 5]) {
           if (k > ans) continue;
-          shot(`${g} = { phase: 'done', answered: ${ans}, correct: ${k}, score: 0, prevBest: 0, timeouts: [], noteTimeouts: [] }; ${g}RenderDone();`,
+          shot(`${g} = { phase: 'done', answered: ${ans}, correct: ${k}, score: 0, prevBest: 0, levels: [], topLevel: 1, timeouts: [], noteTimeouts: [] }; ${g}RenderDone();`,
             `${g}-body`, `${g} ${ans} answered, ${k} right`);
         }
-        if (k <= 3) shot(`cc = { phase: 'done', progIdx: 0, rateIdx: 0, bpm: 60, bpc: 4, chords: ['C', 'G'], timeouts: [],
-            changes: Array.from({ length: 8 }, (_, i) => ({ from: 'C', to: 'G', result: i < ${k} ? 'off' : i < 5 ? 'ok' : 'miss' })) }; ccRenderDone();`,
-          'cc-body', `Change Up, ${k} messy`);
+        if (k <= 3) {
+          shot(`cc = { phase: 'done', progIdx: 0, rateIdx: 0, bpm: 60, bpc: 4, chords: ['C', 'G'], timeouts: [],
+            changes: Array.from({ length: 8 }, (_, i) => ({ from: 'C', to: 'G', result: i < ${k} ? 'off' : i < ${k} + 4 ? 'ok' : 'miss' })) }; ccRenderDone();`,
+            'cc-body', `Change Up, ${k} messy`);
+          /* 4 good changes of 8 keeps the verdict in the band that names the messy ones. */
+          if (k >= 2 && /\(1 (was|llegó)\b/.test(text('cc-body'))) flag(`1ca: ${lang} Change Up with ${k} messy changes says "${text('cc-body').match(/\(1 (was|llegó)\b/)[0]}"`);
+        }
       }
     }
     run(`setLang('en')`);
