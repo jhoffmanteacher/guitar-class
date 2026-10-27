@@ -3300,7 +3300,14 @@ function snipSetTier(btn, which){
   const { audio, spec, tr } = snipState;
   const slow = card.dataset.slow === '1';
   const guitar = card.dataset.guitar === '1';
-  const barsIn = snipBarsAt(snipState.win, audio.currentTime);
+  /* A file switch still waiting for its metadata (src= put currentTime back
+     to 0 and paused the element): the place and play state to restore are the
+     ones that switch saved, not what the element reads now. Without this a
+     second press before the file loads (Guitar twice, Guitar then Slow — a
+     student's first Guitar press always reloads, see twinWanted) sent the song
+     back to the start of the window. */
+  const pend = snipState.pending;
+  const barsIn = pend ? pend.bars : snipBarsAt(snipState.win, audio.currentTime);
   const win = snippetWindow(tr, spec, slow);
   snipState.win = win;
   const at = snipTimeAtBars(win, isFinite(barsIn) && barsIn > 0 ? barsIn : 0);
@@ -3310,7 +3317,8 @@ function snipSetTier(btn, which){
   if(audio.getAttribute('src') === src || audio.src.endsWith(src)){
     // Same file: only the rate moved, and `at` is where it already is. A seek
     // there would only make a gap (an mp3 seek lands late — see THE TWIN).
-    if(Math.abs(audio.currentTime - at) > SAME_FILE_SEEK_SEC){ try { audio.currentTime = at; } catch(e) {} }
+    // A pending switch places it itself, on the window read when it fires.
+    if(!pend && Math.abs(audio.currentTime - at) > SAME_FILE_SEEK_SEC){ try { audio.currentTime = at; } catch(e) {} }
     return;
   }
   /* Guitar flipped and the twin is already playing the other mix in step:
@@ -3320,10 +3328,15 @@ function snipSetTier(btn, which){
     snipParkTwin(snipState);
     return;
   }
-  const wasPlaying = !audio.paused;
+  const st = snipState;
+  const p = st.pending = { bars: isFinite(barsIn) && barsIn > 0 ? barsIn : 0, play: pend ? pend.play : !audio.paused };
+  // Every queued resume fires on the same loadedmetadata; only the latest
+  // switch's acts, and nothing after a Stop.
   const resume = () => {
-    try { audio.currentTime = at; } catch(e) {}
-    if(wasPlaying) audio.play().catch(() => {});
+    if(snipState !== st || st.pending !== p) return;
+    st.pending = null;
+    try { audio.currentTime = snipTimeAtBars(st.win, p.bars); } catch(e) {}
+    if(p.play) audio.play().catch(() => {});
   };
   audio.addEventListener('loadedmetadata', resume, { once: true });
   audio.src = src;
@@ -14185,7 +14198,9 @@ function pcRetrack(root){
   if(st.counting){ pcStart(root, st.loopFrom, st.fromRep); return; }
   pcCancelHandoff(st);
   const slow = root.dataset.slow === '1', guitar = root.dataset.guitar === '1';
-  const barsIn = snipBarsAt(st.win, st.audio.currentTime);
+  // A switch still waiting for its file keeps the place it saved — see snipSetTier.
+  const pend = st.pending;
+  const barsIn = pend ? pend.bars : snipBarsAt(st.win, st.audio.currentTime);
   st.win = pcWindow(st.L, slow);
   st.lastBeat = -1;
   const at = snipTimeAtBars(st.win, isFinite(barsIn) && barsIn > 0 ? barsIn : 0);
@@ -14193,7 +14208,7 @@ function pcRetrack(root){
   slowestApplyRate(st.audio, pcRate(root));   // Slowest <-> Slower and Slow <-> Normal are the same file, just the rate
   if(st.audio.src.endsWith(src)){
     // Same file, same window: only the rate moved — no seek (see snipSetTier).
-    if(Math.abs(st.audio.currentTime - at) > SAME_FILE_SEEK_SEC){ try { st.audio.currentTime = at; } catch(e) {} }
+    if(!pend && Math.abs(st.audio.currentTime - at) > SAME_FILE_SEEK_SEC){ try { st.audio.currentTime = at; } catch(e) {} }
     pcSparePark(st);
     return;
   }
@@ -14206,16 +14221,18 @@ function pcRetrack(root){
     pcSparePark(st);
     return;
   }
-  const wasPlaying = !st.audio.paused;
+  const p = st.pending = { bars: isFinite(barsIn) && barsIn > 0 ? barsIn : 0, play: pend ? pend.play : !st.audio.paused };
   // A new file that fails to load must stop the card and say so. Both
   // elements already carry pcAudioError (pcStart / pcSparePark); this adds
   // it again so a retrack never depends on which element is playing now.
   const el = st.audio;
   el.addEventListener('error', () => pcAudioError(st, el), { once: true });
-  st.audio.addEventListener('loadedmetadata', () => {
-    if(pcState !== st) return;
-    try { st.audio.currentTime = at; } catch(e) {}
-    if(wasPlaying) st.audio.play().catch(() => {});
+  // Only the latest switch's handler acts (all fire on the same event).
+  el.addEventListener('loadedmetadata', () => {
+    if(pcState !== st || st.pending !== p) return;
+    st.pending = null;
+    try { el.currentTime = snipTimeAtBars(st.win, p.bars); } catch(e) {}
+    if(p.play) el.play().catch(() => {});
   }, { once: true });
   st.audio.src = src;
   st.audio.load();

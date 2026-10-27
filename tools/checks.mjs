@@ -8228,6 +8228,91 @@ function checkPowerChordPopups(sets, ctx) {
   }
 }
 
+/* 1bz. A SECOND FILE SWITCH BEFORE THE FIRST HAS LOADED KEEPS THE PLACE
+   (2026-10-26 review). Since only the teacher preloads the twin, a student's
+   first Guitar press reloads the file, and src= puts the element's position
+   back to 0 and pauses it until loadedmetadata. A second press (Guitar again,
+   or a speed change) in that gap used to read that 0 and send the song to the
+   start of the window. Checked by EXECUTING both engines (snipSetTier /
+   pcRetrack via pcSetGuitar) in the 0b context with an <audio> stand-in that
+   behaves like the load algorithm (src= resets position, readyState and
+   paused; a seek before metadata is lost): Guitar+Guitar and Guitar+Slow, in
+   each engine, must end on the same bar, still playing, and a Stop in the gap
+   must stay stopped. The case count is pinned. */
+const PENDING_SWITCH_CASES = 6;
+function checkPendingFileSwitch(ctx) {
+  head('1bz. A second file switch before the first has loaded keeps the place');
+  let bad = 0, cases = 0;
+  const flag = m => { err(m); problems++; bad++; };
+  if (!ctx) { flag('1bz cannot run — the 0b render context is unavailable'); return; }
+  const need = ['snipSetTier', 'snipToggle', 'snipStop', 'pcSetGuitar', 'pcRetrack', 'pcStop', 'pcWindow', 'snipBarsAt'];
+  const missing = need.filter(n => !vm.runInContext(`typeof ${n} === "function"`, ctx));
+  if (missing.length) { flag(`app.js: ${missing.join(', ')} gone — 1bz cannot drive the players`); return; }
+  const savedAudio = ctx.Audio, savedRaf = ctx.requestAnimationFrame;
+  class LoadAudio {
+    constructor() { this.l = {}; this._src = ''; this._t = 0; this.paused = true; this.readyState = 0; this.playbackRate = 1; this.defaultPlaybackRate = 1; this.muted = false; this.seeking = false; this.ended = false; }
+    get src() { return this._src; } set src(v) { this._src = v; this._t = 0; this.readyState = 0; this.paused = true; }
+    get currentTime() { return this._t; } set currentTime(v) { if (this.readyState >= 1) this._t = v; }
+    getAttribute(n) { return n === 'src' ? this._src : null; }
+    addEventListener(t, f, o) { (this.l[t] ||= []).push({ f, once: !!(o && o.once) }); }
+    removeEventListener() {}
+    fire(t) { const ls = this.l[t] || []; this.l[t] = ls.filter(x => !x.once); ls.forEach(x => x.f({ type: t })); }
+    play() { this.paused = false; return Promise.resolve(); } pause() { this.paused = true; } load() {}
+  }
+  const meta = a => { if (a.readyState === 0) { a.readyState = 1; a.fire('loadedmetadata'); } };
+  const el = (dataset) => ({ dataset, isConnected: true, parentElement: null, querySelector() { return null; }, querySelectorAll() { return []; }, closest() { return null; } });
+  const btn = (host, pressed) => ({ closest: () => host, _p: pressed, getAttribute() { return this._p ? 'true' : 'false'; }, setAttribute(k, v) { if (k === 'aria-pressed') this._p = v === 'true'; }, classList: { add() {}, remove() {}, toggle() {} }, querySelector() { return null; }, querySelectorAll() { return []; }, innerHTML: '' });
+  try {
+    ctx.Audio = LoadAudio; ctx.requestAnimationFrame = () => 0;
+    const track = vm.runInContext(`Object.keys(SNIPPET_TRACKS).find(k => snippetHasFull(SNIPPET_TRACKS[k]) && SNIPPET_TRACKS[k].srcSlow)`, ctx);
+    if (!track) { flag('1bz: no snippet track with a full mix and a slow tier to drive'); return; }
+    for (const steps of [['guitar', 'guitar'], ['guitar', 'slow'], ['guitar', 'stop']]) {
+      // Snippet engine.
+      const card = el({ snip: JSON.stringify({ track, fromBar: 1, bars: 8 }), guitar: '' });
+      ctx.__bz = { play: btn(card), gtr: btn(card, false), slow: btn(card, false) };
+      vm.runInContext('snipStop(); snipToggle(__bz.play)', ctx);
+      const sa = vm.runInContext('snipState.audio', ctx); sa.readyState = 1; sa.fire('loadedmetadata'); sa._t = vm.runInContext('snipState.win.start', ctx) + 7; sa.paused = false;
+      const sb0 = vm.runInContext('snipBarsAt(snipState.win, snipState.audio.currentTime)', ctx);
+      vm.runInContext('__bz.st = snipState', ctx);
+      for (const s of steps) vm.runInContext(s === 'stop' ? 'snipStop()' : `snipSetTier(__bz.${s === 'guitar' ? 'gtr' : 'slow'}, ${JSON.stringify(s)})`, ctx);
+      meta(vm.runInContext('__bz.st.audio', ctx));
+      cases++;
+      if (steps.includes('stop')) { if (vm.runInContext('snipState', ctx) || !vm.runInContext('__bz.st.audio.paused', ctx)) flag(`1bz snippet ${steps.join('+')}: playing again after a Stop in the gap`); }
+      else {
+        const b = vm.runInContext('snipBarsAt(snipState.win, snipState.audio.currentTime)', ctx), playing = !vm.runInContext('snipState.audio.paused', ctx);
+        if (Math.abs(b - sb0) > 0.02 || !playing) flag(`1bz snippet ${steps.join('+')}: was ${sb0.toFixed(2)} bars in, now ${b.toFixed(2)} (${playing ? 'playing' : 'stopped'}) — a second switch before the file loaded lost the place`);
+      }
+      vm.runInContext('snipStop()', ctx);
+      // Practice-card engine.
+      const root = el({ guitar: '', rate: '1', slow: '' });
+      ctx.__bz.root = root; ctx.__bz.g = { closest: () => root, setAttribute() {}, querySelectorAll() { return []; } };
+      vm.runInContext(`pcState = { root: __bz.root, L: { tr: SNIPPET_TRACKS[${JSON.stringify(track)}], firstBar: 1, totalBars: 16, sections: [{ s: { label: 'x' }, fromBar: 1, bars: 16, reps: 1 }] }, audio: new Audio(), win: null, timers: [], wholeSong: true, counting: false, lastBeat: -1 };
+        pcState.win = pcWindow(pcState.L, false); pcState.audio.src = snippetSrc(pcState.L.tr, false, false); pcState.audio.readyState = 4; pcState.audio.currentTime = pcState.win.start + 9; pcState.audio.paused = false; __bz.pst = pcState;`, ctx);
+      const pb0 = vm.runInContext('snipBarsAt(pcState.win, pcState.audio.currentTime)', ctx);
+      for (const s of steps) {
+        if (s === 'guitar') vm.runInContext('pcSetGuitar(__bz.g)', ctx);
+        else if (s === 'slow') { root.dataset.slow = '1'; vm.runInContext('pcRetrack(__bz.root)', ctx); }
+        else vm.runInContext('pcStop()', ctx);
+      }
+      meta(vm.runInContext('__bz.pst.audio', ctx));
+      cases++;
+      if (steps.includes('stop')) { if (vm.runInContext('pcState', ctx) || !vm.runInContext('__bz.pst.audio.paused', ctx)) flag(`1bz card ${steps.join('+')}: playing again after a Stop in the gap`); }
+      else {
+        const b = vm.runInContext('snipBarsAt(pcState.win, pcState.audio.currentTime)', ctx), playing = !vm.runInContext('pcState.audio.paused', ctx);
+        if (Math.abs(b - pb0) > 0.02 || !playing) flag(`1bz card ${steps.join('+')}: was ${pb0.toFixed(2)} bars in, now ${b.toFixed(2)} (${playing ? 'playing' : 'stopped'}) — a second switch before the file loaded lost the place`);
+      }
+      vm.runInContext('pcStop()', ctx);
+    }
+    if (cases !== PENDING_SWITCH_CASES) flag(`1bz ran ${cases} cases, pinned at ${PENDING_SWITCH_CASES}`);
+    if (!bad) ok(`${cases} double switches across both players (snippet + practice card: Guitar twice, Guitar then Slow, Stop in the gap) keep the bar and the play state`);
+  } catch (e) {
+    flag(`1bz: driving the players threw — ${e.message}`);
+  } finally {
+    ctx.Audio = savedAudio; ctx.requestAnimationFrame = savedRaf;
+    try { vm.runInContext('snipStop(); pcStop(); delete globalThis.__bz', ctx); } catch {}
+  }
+}
+
 /* 1bq. THE SONG LIBRARY HOLDS NO CORE SONG (Jonathan, 2026-10-20: "make
    sure that the core songs are not included with the library songs because
    those have class activities"). A `library: true` card is on every
@@ -9447,6 +9532,7 @@ function checkCoachVerdicts() {
   checkSheetCards();
   checkChordGridCards(rcCtx);
   checkPowerChordPopups(rcSets, rcCtx);
+  checkPendingFileSwitch(rcCtx);
   checkCardCaptionWords();
   checkJourneyRetired();
   checkSongLibrary();
