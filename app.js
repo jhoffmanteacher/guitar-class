@@ -3506,12 +3506,35 @@ function isIndefiniteArticleA(text, start, end){
   return before === '' || /[.!?:;]$/.test(before);  // only at a sentence boundary
 }
 
+/* Power-chord names open no pop-up where the lesson teaches the TWO-finger
+   shape (Jonathan, 2026-10-26). The chord library draws power chords with
+   three fingers (guitar-diagrams.js), but Module 3 Set 1 and Module 9's
+   power-chord re-test teach the two-finger shape and draw it in their own
+   chord boxes, so a pop-up would contradict the step beside it. A whole set,
+   or one skill: every step that checks it (data-skills holds the skill
+   numbers, `-sN`) and its checklist row. Only the power-chord names lose the
+   link — string and note links stay. checks.mjs 1by renders these. */
+const POWER_CHORD_NO_POPUP = { sets: ['m3w1'], skills: ['m9w0-s4'] };
+const POWER_CHORD_NAME_RE = /^[A-G][#b]?5$/;
+function powerChordLinksOff(rootEl){
+  if (!rootEl || !rootEl.closest) return false;
+  const panel = rootEl.closest('.week-panel');
+  const setId = panel && panel.dataset ? panel.dataset.id : '';
+  if (!setId) return false;
+  if (POWER_CHORD_NO_POPUP.sets.includes(setId)) return true;
+  const step = rootEl.closest('.step[data-skills]');
+  if (step && String(step.dataset.skills).split(',').some(n => POWER_CHORD_NO_POPUP.skills.includes(`${setId}-s${n.trim()}`))) return true;
+  const row = rootEl.closest('.skill-row[data-sid]');
+  return !!(row && POWER_CHORD_NO_POPUP.skills.includes(row.dataset.sid));
+}
+
 function wrapChordLinksIn(rootEl){
   if (!rootEl) return;
   /* Module 7 (barre chords): each step already shows accurate inline chord
      diagrams, and the shared chord library renders OPEN shapes that don't match
      the barre lesson — so skip all auto-link pop-ups inside Module 7 panels. */
   if (rootEl.closest && rootEl.closest('.week-panel[data-module="7"]')) return;
+  const noPowerLinks = powerChordLinksOff(rootEl);
   const walker = document.createTreeWalker(rootEl, NodeFilter.SHOW_TEXT, {
     acceptNode(node){
       if (!node.nodeValue || !/[A-G]/.test(node.nodeValue)) return NodeFilter.FILTER_REJECT;
@@ -3552,6 +3575,7 @@ function wrapChordLinksIn(rootEl){
       if (stringMatches.some(s => s.start < end && start < s.end)) continue;
       if (noteMatches.some(s => s.start < end && start < s.end)) continue;
       if (chord === 'A' && isIndefiniteArticleA(text, start, end)) continue;
+      if (noPowerLinks && POWER_CHORD_NAME_RE.test(chord)) continue;   // plain text — see POWER_CHORD_NO_POPUP
       chordMatches.push({ start, end, chord });
     }
 

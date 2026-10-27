@@ -7949,6 +7949,157 @@ function checkChordGridCards(ctx) {
   if (bad === 0) ok(`${CHORD_GRID_CARDS.length} chord-grid cards (pinned) — ${sections} grid sections, ${events} chord/rest onsets all on the eighth grid, ${labelled} lyric lines keep their row; ca-29 renders 28 chord names and 392 data-beat on beat columns only; ${rowsSeen} grid rows across both views each 4 bars wide with their bar lines, staff edge and 0..N beat run; ${restWords} rest words; the cursor steps once per beat; ca-10 untouched`);
 }
 
+/* 1by. POWER-CHORD NAMES OPEN NO POP-UP WHERE THE TWO-FINGER SHAPE IS TAUGHT
+   (Jonathan, 2026-10-26). The chord library draws power chords with three
+   fingers, but Module 3 Set 1 (m3w1) and Module 9's power-chord re-test
+   (skill m9w0-s4: its steps and its checklist row) teach the two-finger shape,
+   so there a power-chord name is plain text (POWER_CHORD_NO_POPUP and
+   powerChordLinksOff() in app.js). Checked by RENDERING both sets with the real
+   buildSet(), in English and Spanish, and running the real wrapChordLinksIn()
+   over every step text, hint and checklist label in a small fake DOM built from
+   that HTML (the real walker, skip classes and all):
+   - in scope: 0 power-chord links;
+   - the same elements under a set outside the scope (the control) link every
+     power-chord name, and that total is pinned (POWER_CHORD_SCOPE_LINKS) so the
+     check cannot go blind or lose its scope silently;
+   - m9w0's other text keeps its chord links (the scope is one skill, not the set). */
+const POWER_CHORD_SCOPE_LINKS = 101;
+function checkPowerChordPopups(sets, ctx) {
+  head('1by. Power-chord names open no pop-up where the two-finger shape is taught');
+  let bad = 0;
+  const flag = m => { err(m); problems++; bad++; };
+  if (!ctx || !sets) { flag('1by cannot run — the 0b render context is unavailable'); return; }
+  const buildSet = vm.runInContext('typeof buildSet === "function" ? buildSet : null', ctx);
+  const wrap = vm.runInContext('typeof wrapChordLinksIn === "function" ? wrapChordLinksIn : null', ctx);
+  if (!wrap) { flag('app.js: wrapChordLinksIn() is gone'); return; }
+  const decode = s => s.replace(/&nbsp;/g, ' ').replace(/&lt;/g, '<').replace(/&gt;/g, '>').replace(/&quot;/g, '"').replace(/&#39;/g, "'")
+    .replace(/&#x([0-9a-f]+);/gi, (_, h) => String.fromCodePoint(parseInt(h, 16))).replace(/&#(\d+);/g, (_, d) => String.fromCodePoint(+d))
+    .replace(/&rarr;/g, '→').replace(/&middot;/g, '·').replace(/&mdash;/g, '—').replace(/&ndash;/g, '–').replace(/&amp;/g, '&');
+  const VOID = new Set(['br', 'img', 'input', 'hr', 'wbr', 'source', 'col', 'area', 'meta', 'link']);
+  // A fake element: just what wrapChordLinksIn and its walker read.
+  const mkEl = (tag, attrs, parent) => {
+    const cls = (/\bclass="([^"]*)"/.exec(attrs || '') || [])[1] || '';
+    const dataset = {};
+    for (const m of (attrs || '').matchAll(/\bdata-([a-z-]+)="([^"]*)"/g)) dataset[m[1].replace(/-([a-z])/g, (_, c) => c.toUpperCase())] = decode(m[2]);
+    const el = { tagName: tag.toUpperCase(), parentNode: parent, childNodes: [], dataset, _cls: cls.split(/\s+/).filter(Boolean),
+      classList: { contains: c => el._cls.includes(c) },
+      closest(sel) {
+        const m = /^\.([\w-]+)(?:\[([\w-]+)(?:="([^"]*)")?\])?$/.exec(sel);
+        if (!m) throw new Error(`1by fake DOM: unsupported selector ${sel}`);
+        for (let p = el; p; p = p.parentNode) {
+          if (!p.classList || !p.classList.contains(m[1])) continue;
+          if (!m[2]) return p;
+          const v = p.dataset[m[2].replace(/^data-/, '').replace(/-([a-z])/g, (_, c) => c.toUpperCase())];
+          if (v !== undefined && (m[3] === undefined || v === m[3])) return p;
+        }
+        return null;
+      } };
+    return el;
+  };
+  const parseInto = (root, html) => {
+    let cur = root;
+    for (const m of html.matchAll(/<(\/?)([a-zA-Z][a-zA-Z0-9]*)([^>]*)>|([^<]+)/g)) {
+      if (m[4] !== undefined) { cur.childNodes.push({ nodeType: 3, nodeValue: decode(m[4]), parentNode: cur }); continue; }
+      const tag = m[2].toLowerCase();
+      if (m[1]) { if (cur !== root && cur.tagName === tag.toUpperCase()) cur = cur.parentNode; continue; }
+      const el = mkEl(tag, m[3], cur);
+      cur.childNodes.push(el);
+      if (!VOID.has(tag) && !/\/\s*$/.test(m[3])) cur = el;
+    }
+  };
+  // The inner HTML of the element that opens at `at` (balanced on its own tag name).
+  const innerAt = (html, at, tag) => {
+    const open = html.indexOf('>', at) + 1;
+    const re = new RegExp(`<(/?)${tag}\\b[^>]*>`, 'g');
+    re.lastIndex = open;
+    let depth = 1, m;
+    while ((m = re.exec(html))) { depth += m[1] ? -1 : 1; if (!depth) return html.slice(open, m.index); }
+    return html.slice(open);
+  };
+  // Every text-bearing element wrapAllChordLinks feeds the linker, with its context.
+  const elementsOf = (html) => {
+    const out = [];
+    const ctxTags = [...html.matchAll(/<li class="step[^"]*"([^>]*)>|<div class="skill-row"([^>]*)>/g)].map(m => ({ at: m.index, kind: m[1] !== undefined ? 'step' : 'skill', attrs: m[1] !== undefined ? m[1] : m[2] }));
+    for (const m of html.matchAll(/<(span) class="st-text">|<(div) class="sh">|<(div) class="sk-label">|<ul class="sh-list">/g)) {
+      const owner = [...ctxTags].reverse().find(c => c.at < m.index);
+      if (m[0].startsWith('<ul')) {
+        const list = innerAt(html, m.index, 'ul');
+        for (const li of list.matchAll(/<li>/g)) out.push({ owner, inner: innerAt(list, li.index, 'li') });
+      } else out.push({ owner, inner: innerAt(html, m.index, m[1] || m[2] || m[3]) });
+    }
+    return out;
+  };
+  // Run the real linker on one element placed under `setId`'s panel; returns the chord names it linked.
+  const NodeFilter = { SHOW_TEXT: 4, FILTER_ACCEPT: 1, FILTER_REJECT: 2, FILTER_SKIP: 3 };
+  const doc = vm.runInContext('document', ctx);
+  const saved = { createTreeWalker: doc.createTreeWalker, createDocumentFragment: doc.createDocumentFragment, createElement: doc.createElement, createTextNode: doc.createTextNode, NodeFilter: ctx.NodeFilter };
+  let linked = [];
+  try {
+    ctx.NodeFilter = NodeFilter;
+    doc.createTreeWalker = (root, _show, filter) => {
+      const all = [];
+      const walk = n => { for (const c of n.childNodes || []) { if (c.nodeType === 3) all.push(c); else walk(c); } };
+      walk(root);
+      const pass = all.filter(n => filter.acceptNode(n) === NodeFilter.FILTER_ACCEPT);
+      let i = 0;
+      return { nextNode: () => pass[i++] || null };
+    };
+    doc.createDocumentFragment = () => ({ kids: [], appendChild(c) { this.kids.push(c); } });
+    doc.createElement = () => ({ className: '', dataset: {}, textContent: '', addEventListener() {} });
+    doc.createTextNode = t => ({ nodeValue: t });
+    const replaceChild = frag => { for (const k of frag.kids) if (k.className === 'chord-link') linked.push(k.dataset.chord); };
+    const isPower = c => /^[A-G][#b]?5$/.test(c);
+    let inScopeEls = 0, controlLinks = 0, otherLinks = 0, langs = 0;
+    const getLang = vm.runInContext('typeof getLang === "function" ? getLang : null', ctx);
+    const setLang = vm.runInContext('typeof setLang === "function" ? setLang : null', ctx);
+    const was = getLang ? getLang() : 'en';
+    for (const lang of ['en', 'es']) {
+      if (setLang) setLang(lang); else if (lang === 'es') continue;
+      langs++;
+      for (const setId of ['m3w1', 'm9w0']) {
+        const w = sets.find(x => x.id === setId);
+        if (!w) { flag(`1by: set ${setId} is gone`); continue; }
+        const els = elementsOf(String(buildSet(w)));
+        for (const e of els) {
+          // Every element gets replaceChild, which reports the links made.
+          const patch = n => { for (const c of n.childNodes || []) { if (c.nodeType !== 3) patch(c); } n.replaceChild = replaceChild; };
+          const scoped = setId === 'm3w1' || (e.owner && (e.owner.kind === 'step'
+            ? (/data-skills="([^"]*)"/.exec(e.owner.attrs) || [, ''])[1].split(',').includes('4')
+            : /data-sid="m9w0-s4"/.test(e.owner.attrs)));
+          // The real linker on this element under `sid`'s panel; returns what it linked.
+          const realRun = sid => {
+            const panel = mkEl('div', `class="week-panel" data-id="${sid}" data-module="${(/^m(\d+)/.exec(sid) || [])[1]}"`, null);
+            const owner = e.owner ? mkEl(e.owner.kind === 'step' ? 'li' : 'div', `class="${e.owner.kind === 'step' ? 'step' : 'skill-row'}"${e.owner.attrs}`, panel) : panel;
+            const root = mkEl('div', 'class="probe"', owner);
+            parseInto(root, e.inner);
+            patch(root);
+            linked = [];
+            wrap(root);
+            return linked.slice();
+          };
+          const got = realRun(setId);
+          if (scoped) {
+            inScopeEls++;
+            const p = got.filter(isPower);
+            if (p.length) flag(`${setId} (${lang}): "${e.inner.replace(/<[^>]+>/g, '').slice(0, 60)}…" links ${p.join(', ')} to a pop-up — the two-finger lesson must show these as plain text (POWER_CHORD_NO_POPUP in app.js)`);
+            // Control: the same element under a set outside the scope.
+            controlLinks += realRun('m3w2').filter(isPower).length;
+          } else otherLinks += got.length;
+        }
+      }
+    }
+    if (setLang) setLang(was);
+    if (controlLinks !== POWER_CHORD_SCOPE_LINKS) flag(`1by: the in-scope text holds ${controlLinks} power-chord names that would link outside the scope, pinned at ${POWER_CHORD_SCOPE_LINKS} — a change to that text, or a linker that stopped seeing power chords (update the pin only for an intended text change)`);
+    if (!otherLinks) flag('1by: m9w0 outside its power-chord re-test linked no chord at all — the scope swallowed the whole set, or the harness is blind');
+    if (!bad) ok(`${inScopeEls} in-scope elements (m3w1 + the m9w0-s4 re-test, ${langs} languages) link 0 of ${controlLinks} power-chord names (pinned; the same text links all of them elsewhere); m9w0's other text keeps ${otherLinks} chord links`);
+  } catch (e) {
+    flag(`1by: the fake-DOM run threw — ${e.message}`);
+  } finally {
+    Object.assign(doc, { createTreeWalker: saved.createTreeWalker, createDocumentFragment: saved.createDocumentFragment, createElement: saved.createElement, createTextNode: saved.createTextNode });
+    ctx.NodeFilter = saved.NodeFilter;
+  }
+}
+
 /* 1bq. THE SONG LIBRARY HOLDS NO CORE SONG (Jonathan, 2026-10-20: "make
    sure that the core songs are not included with the library songs because
    those have class activities"). A `library: true` card is on every
@@ -9078,6 +9229,7 @@ function checkCoachVerdicts() {
   checkPracticeCards(rcCtx);
   checkSheetCards();
   checkChordGridCards(rcCtx);
+  checkPowerChordPopups(rcSets, rcCtx);
   checkCardCaptionWords();
   checkJourneyRetired();
   checkSongLibrary();
