@@ -8293,7 +8293,7 @@ function checkChordGridCards(ctx) {
     const ks = new Set(); for (let i = 0; i < L.sections[0].bars * L.tr.beatsPerBar * 8; i++) ks.add(pcLocKey(L, pcLocate(L, i / 8 / L.tr.beatsPerBar)));
     if (ks.size !== L.sections[0].notes.length) flag(`ca-10: ${ks.size} repaint keys over ${L.sections[0].notes.length} notes — a single-note card must still step per note`);
   }
-  if (bad === 0) ok(`${CHORD_GRID_CARDS.length} chord-grid cards (pinned) — ${sections} grid sections, ${events} chord/rest onsets all on the eighth grid, ${labelled} lyric lines keep their row; ca-29 renders 28 chord names and 392 data-beat on beat columns only; ${rowsSeen} grid rows across both views each 4 bars wide with their bar lines, staff edge and 0..N beat run; ${col0Rows} rows open on a label at column 0 (${heldLabels} held "(Chord)", pinned); ${restWords} rest words; the cursor steps once per beat; ca-10 untouched`);
+  if (bad === 0) ok(`${CHORD_GRID_CARDS.length} chord-grid cards (pinned) — ${sections} grid sections, ${events} chord/rest onsets all on the eighth grid, ${labelled} lyric lines keep their row; ca-29 renders 28 chord names and 392 data-beat on beat columns only; ${rowsSeen} grid rows across both views each 4 bars wide with their bar lines, staff edge and 0..N beat run; ${col0Rows} rows open on a label at column 0 (${heldLabels} held "(Chord)", pinned); ${restWords} rest words; ${bassMarks} alternating-bass notes (pinned) on beat 1, root / 5th as worked out from the notes, across ${CHORD_GRID_BASS_CARDS.length} bass card(s) x chord views, none with the bass off, the directions in EN + ES; the cursor steps once per beat; ca-10 untouched`);
 }
 
 /* 1by. POWER-CHORD NAMES OPEN NO POP-UP WHERE THE TWO-FINGER SHAPE IS TAUGHT
