@@ -8348,7 +8348,7 @@ function checkLoadFailedMaps() {
    rows), a fake clock and a fake Firestore that merges the way the real one
    does (an empty map replaces), and plays each scenario through to what
    ends up stored. The scenario count is pinned. */
-const JOURNEY_SAVE_SCENARIOS = 10;
+const JOURNEY_SAVE_SCENARIOS = 17;
 async function checkJourneyReadySave() {
   head('1bw. A Journey "I\'m ready" save cannot wipe the saved ✓s');
   let src;
@@ -8429,11 +8429,18 @@ async function checkJourneyReadySave() {
     const auth = { currentUser: null, onAuthStateChanged(cb) { authCb = cb; } };
     const snapOf = uid => ({ exists: !!docs[uid], data: () => copy(docs[uid]) });
     const doSet = (uid, data) => { writes.push({ uid, data: copy(data) }); if (!docs[uid]) docs[uid] = {}; mergeInto(docs[uid], data); };
+    /* A write commits after opts.writeDelay ms, and only while its own
+       student is still signed in (the security rules refuse it otherwise). */
+    const commit = (uid, data) => new Promise((res, rej) => {
+      const go = () => { if (!auth.currentUser || auth.currentUser.uid !== uid) return rej(new Error('permission-denied')); doSet(uid, data); res(); };
+      if (opts.writeDelay) setT(go, opts.writeDelay); else go();
+    });
     const refOf = uid => ({ uid,
-      get: () => new Promise((res, rej) => { const d = (opts.readDelays && opts.readDelays[uid]) ?? opts.readDelay ?? 0; setT(() => opts.readFails ? rej(new Error('offline')) : res(snapOf(uid)), d); }),
-      set: data => { doSet(uid, data); return Promise.resolve(); } });
+      get: () => new Promise((res, rej) => { const d = (opts.readDelays && opts.readDelays[uid]) ?? opts.readDelay ?? 0; setT(() => (opts.readFails || (opts.readFailsFor && opts.readFailsFor[uid])) ? rej(new Error('offline')) : res(snapOf(uid)), d); }),
+      set: data => commit(uid, copy(data)) });
     const db = { collection: () => ({ doc: uid => refOf(uid) }),
-      runTransaction: fn => Promise.resolve().then(() => fn({ get: r => Promise.resolve(snapOf(r.uid)), set: (r, data) => doSet(r.uid, data) })) };
+      runTransaction: fn => Promise.resolve().then(() => { let w = null; return Promise.resolve(fn({ get: r => Promise.resolve(snapOf(r.uid)), set: (r, data) => { w = [r.uid, copy(data)]; } }))
+        .then(v => w ? commit(w[0], w[1]).then(() => v) : v); }) };
     const win = { document, console, setTimeout: setT, clearTimeout: clearT, requestAnimationFrame: () => 0, cancelAnimationFrame() {},
       location: { hash: '' }, history: { scrollRestoration: 'auto', replaceState() {}, length: 1 },
       scrollTo() {}, matchMedia: () => ({ matches: false }), getComputedStyle: () => ({ paddingLeft: '0', paddingRight: '0' }),
@@ -8441,6 +8448,11 @@ async function checkJourneyReadySave() {
       t: k => k, getLang: () => 'en', setLang() {}, applyI18n() {},
       firebase: { initializeApp() {}, auth: () => auth, firestore: () => db }, firebaseConfig: {}, TEACHER_EMAIL: 'teacher@example.com', SONG_ID: SONG };
     win.window = win;
+    /* opts.sdkDelay: the Firestore SDK is a <script> that lands that many ms after it is asked for. */
+    if (opts.sdkDelay) {
+      const fs = win.firebase.firestore; delete win.firebase.firestore;
+      document.head.appendChild = sc => { sc.remove = () => {}; setT(() => { win.firebase.firestore = fs; sc.onload(); }, opts.sdkDelay); return sc; };
+    }
     vm.createContext(win);
     vm.runInContext(src, win, { filename: 'tabs/journey.js' });
     if (typeof win.readyChanged !== 'function') throw new Error('journey.js has no readyChanged() — 1bw cannot tick a layer');
@@ -8512,7 +8524,40 @@ async function checkJourneyReadySave() {
       const p = await makePage({ stored2: marked(s2), readDelay: 1000 });
       p.load(); await p.signOut(); await p.click(4); await p.signIn('s2'); await p.advance(4000);
       const [ok2, got] = want(p, s2, 's2');
-      return [ok2 && p.writes.length === 0, `${got}, ${p.writes.length} write(s)`]; }]
+      return [ok2 && p.writes.length === 0, `${got}, ${p.writes.length} write(s)`]; }],
+    ['shared Chromebook: the next student ticks before their read lands', async () => {
+      const s2 = { 1: true, 2: true, 3: true, 4: false, 5: false };
+      const p = await makePage({ stored: marked({ 1: true }), stored2: marked(s2), readDelay: 50, readDelays: { s2: 3000 } });
+      p.load(); await p.signIn('s1'); await p.advance(200); await p.signOut(); await p.signIn('s2'); await p.click(4); await p.advance(6000);
+      return want(p, { ...s2, 4: true }, 's2'); }],
+    ['shared Chromebook: the last student\'s ticks are cleared at sign-out', async () => {
+      const p = await makePage({ stored: marked(T123), stored2: marked({ 1: true }), readDelay: 50 });
+      p.load(); await p.signIn('s1'); await p.advance(200); await p.click(4); await p.advance(2000);
+      await p.signOut(); await p.signIn('s2'); await p.advance(200); await p.click(2); await p.advance(2000);
+      return want(p, { 1: true, 2: true, 3: false, 4: false, 5: false }, 's2'); }],
+    ['slow read that then fails: a tick made while it was out is still written', async () => {
+      const p = await makePage({ stored: marked(T123), readDelay: 3000, readFails: true });
+      p.load(); await p.signIn('s1'); await p.advance(10); await p.click(4); await p.advance(6000);
+      return want(p, { ...T123, 4: true }); }],
+    ['new song, slow read: the tick waits for the read, then all 5 keys', async () => {
+      const p = await makePage({ stored: { migrations: { swap45: true } }, readDelay: 3000 });
+      p.load(); await p.signIn('s1'); await p.advance(10); await p.click(4); await p.advance(6000);
+      return want(p, { 1: false, 2: false, 3: false, 4: true, 5: false }); }],
+    ['a save refused after the student left is not retried into the next student\'s doc', async () => {
+      const p = await makePage({ stored: { songReady: { [SONG]: { 1: true } } }, stored2: marked({}), readDelay: 50, readDelays: { s2: 3000 }, writeDelay: 2000 });
+      p.load(); await p.signIn('s1'); await p.advance(200); await p.click(2); await p.advance(900);
+      await p.signOut(); await p.signIn('s2'); await p.advance(8000);
+      const got = fmt(p.saved('s2'));
+      return [got === '{}', got]; }],
+    ['the SDK landing after a sign-out does not bring the student back', async () => {
+      const p = await makePage({ stored: marked(T123), readDelay: 50, sdkDelay: 2000 });
+      p.load(); await p.signIn('s1'); await p.advance(100); await p.signOut(); await p.advance(2000);
+      await p.click(4); await p.click(5); await p.advance(1000); await p.signIn('s1'); await p.advance(3000);
+      return want(p, T123); }],
+    ['the last student\'s read failing late does not change how the next one saves', async () => {
+      const p = await makePage({ stored: marked(T123), stored2: { migrations: { swap45: true } }, readDelays: { s1: 2000, s2: 4000 }, readFailsFor: { s1: true } });
+      p.load(); await p.signIn('s1'); await p.advance(100); await p.signOut(); await p.signIn('s2'); await p.advance(50); await p.click(4); await p.advance(8000);
+      return want(p, { 1: false, 2: false, 3: false, 4: true, 5: false }, 's2'); }]
   ];
   let bad = 0;
   if (scenarios.length !== JOURNEY_SAVE_SCENARIOS) { err(`1bw: ${scenarios.length} scenarios, pinned at ${JOURNEY_SAVE_SCENARIOS} — bump the pin on purpose`); problems++; bad++; }
