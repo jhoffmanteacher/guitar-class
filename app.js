@@ -7266,9 +7266,15 @@ function togglePracticePanel(sid, btn){
     btn.setAttribute('aria-expanded','true');
   }
 }
+/* The last pick on each practice MC in THIS page load: tapping the picked
+   choice again is not a new rep. Not the saved response — a student coming
+   back another day to the answer they saved still gets the rep. */
+const practiceMcLastPick = {};
 function onPracticeMcSelect(skillId, idx, ansIdx, btnEl){
   const key = `practice-${skillId}`;
   if(isPeekedResponseKey(key)) return;   // read-only preview of a locked set
+  const again = practiceMcLastPick[skillId] === idx;
+  practiceMcLastPick[skillId] = idx;
   responses[key] = String(idx);
   saveResponses();
   const group = document.getElementById('pp-mc-'+skillId);
@@ -7300,7 +7306,8 @@ function onPracticeMcSelect(skillId, idx, ansIdx, btnEl){
     if(ex) ex.removeAttribute('hidden');
   }
   // A correct pick counts as one practice rep (feeds the rep strip + review card).
-  if(idx === ansIdx) logPracticeRep(skillId);
+  // Tapping the choice that is already picked again is not a new rep.
+  if(idx === ansIdx && !again) logPracticeRep(skillId);
 }
 
 /* ══════════════════════════════════════════════════════════════════════
