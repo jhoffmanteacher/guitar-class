@@ -1275,7 +1275,7 @@ MODULE_SONGS[5] = [
         tutorialUrl: 'https://www.youtube.com/watch?v=wwiLAOjj16w&start=46' },
       { name: '"12-bar blues in E"', name_es: '"Blues de 12 compases en E"', meta:'E minor pentatonic — classic improv context', meta_es: 'E menor pentatónica — contexto clásico de improvisación', type: 'Choice', core: false, level: 1,
         tutorialUrl: 'https://www.youtube.com/watch?v=pJL2j2v6XZM' },
-      { name: '"La Bamba" — Ritchie Valens', meta: 'C major pentatonic — bright and fun', meta_es: 'C mayor pentatónica — brillante y divertida', type: 'Choice', core: false, level: 1,
+      { name: '"La Bamba" — Ritchie Valens', meta: 'C major pentatonic — a happy, major sound', meta_es: 'C mayor pentatónica — un sonido mayor y alegre', type: 'Choice', core: false, level: 1,
         originalUrl: 'https://www.youtube.com/watch?v=BycLmWI97Nc',
         tutorialUrl: 'https://www.youtube.com/watch?v=o-SdTXIAvTE&start=52' },
       { name: '"Back in Black" — AC/DC', meta: 'Simplified solo intro — A minor pentatonic', meta_es: 'Intro de solo simplificada — A menor pentatónica', type: 'Choice', core: false, level: 2,

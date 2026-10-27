@@ -1135,7 +1135,7 @@ MODULE_SONGS[3] = [
       { name: '"Master of Puppets" — Metallica', meta: 'Simplified intro power chord riff', meta_es: 'Riff de intro simplificado con acordes de potencia', type: 'Choice', core: false, level: 3,
         originalUrl: 'https://www.youtube.com/watch?v=hx27NL_iqEM',
         tutorialUrl: 'https://www.youtube.com/watch?v=FvVrCKgEu4s' },
-      { name: '"Blitzkrieg Bop" — Ramones', meta: 'A5 D5 E5 — fast and fun', meta_es: 'A5 D5 E5 — rápido y divertido', type: 'Choice', core: false, level: 1,
+      { name: '"Blitzkrieg Bop" — Ramones', meta: 'A5 D5 E5 — fast punk, three chords', meta_es: 'A5 D5 E5 — punk rápido, tres acordes', type: 'Choice', core: false, level: 1,
         originalUrl: 'https://www.youtube.com/watch?v=268C3N2dDYk',
         tutorialUrl: 'https://www.youtube.com/watch?v=9lFufklJ-nU' },
       { name: '"De Música Ligera" — Soda Stereo', meta: 'Bm–G–D–A riff, played as B5–G5–D5–A5 power chords', meta_es: 'Riff Bm–G–D–A, tocado como acordes de potencia B5–G5–D5–A5', type: 'Choice', core: false, level: 2,

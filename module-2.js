@@ -908,7 +908,7 @@ SETS.push(
                 { string: 'A', fret: 0, note: 'A', midi: 45 }
               ]
             },
-            response: { type: 'short', prompt: 'Your first try — did your played version match the ▶ Play tab check? Which note (if any) did you misread?', prompt_es: 'Tu primer intento — ¿tu versión tocada coincidió con la revisión de ▶ Tocar el tab? ¿Qué nota (si acaso) leíste mal?', placeholder: 'e.g. matched! / misread the D-string fret 0', placeholder_es: 'ej. ¡coincidió! / leí mal el traste 0 de la cuerda Re' }
+            response: { type: 'short', prompt: 'Your first try — did your played version match the ▶ Play tab check? Which note (if any) did you misread?', prompt_es: 'Tu primer intento — ¿tu versión tocada coincidió con la revisión de ▶ Tocar el tab? ¿Qué nota (si acaso) leíste mal?', placeholder: 'e.g. it matched / I misread the D string, fret 0', placeholder_es: 'ej. coincidió / leí mal el traste 0 de la cuerda Re' }
           }
             ]
           },
@@ -1188,7 +1188,7 @@ SETS.push(
                     { string: 'A', fret: 0, note: 'A', midi: 45 }
                   ]
                 },
-                response: { type: 'short', prompt: 'Your first try — did your played version match the ▶ Play tab check? Which note (if any) did you misread?', prompt_es: 'Tu primer intento — ¿tu versión tocada coincidió con la revisión de ▶ Tocar el tab? ¿Qué nota (si acaso) leíste mal?', placeholder: 'e.g. matched! / misread the D-string fret 2', placeholder_es: 'ej. ¡coincidió! / leí mal el traste 2 de la cuerda Re' }
+                response: { type: 'short', prompt: 'Your first try — did your played version match the ▶ Play tab check? Which note (if any) did you misread?', prompt_es: 'Tu primer intento — ¿tu versión tocada coincidió con la revisión de ▶ Tocar el tab? ¿Qué nota (si acaso) leíste mal?', placeholder: 'e.g. it matched / I misread the D string, fret 2', placeholder_es: 'ej. coincidió / leí mal el traste 2 de la cuerda Re' }
               }
             ]
           },
