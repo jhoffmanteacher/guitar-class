@@ -328,8 +328,8 @@ SETS.push(
                 drill: { type: 'shuffle', string: 'A', maxFret: 12, rounds: 10, seconds: 5, pile: 'naturals', skill: 'm2w1-s3' },
                 hint: 'No chart. If you stall on a note, loop just that part of the string until it\'s automatic.',
                 hint_es: 'Sin tabla. Si te trabas en una nota, repite solo esa parte de la cuerda hasta que sea automática.',
-                levelUp: 'Faster round: get the same score with only three seconds a card. Or switch to the sharps pile — all 13 frets, sharps included.',
-                levelUp_es: 'Ronda más rápida: logra el mismo resultado con solo tres segundos por carta. O cambia al montón con sostenidos — los 13 trastes, sostenidos incluidos.',
+                levelUp: 'Harder round: press "With sharps" — all 13 frets, sharps included — and get 9 of 10 again.',
+                levelUp_es: 'Ronda más difícil: pulsa «Con sostenidos» — los 13 trastes, sostenidos incluidos — y logra 9 de 10 otra vez.',
                 skills: [3, 4]
               },
               {
@@ -339,8 +339,8 @@ SETS.push(
                 drill: { type: 'shuffle', string: 'lowE', maxFret: 12, rounds: 10, seconds: 5, pile: 'naturals', skill: 'm2w1-s2' },
                 stuck: 'Stay on the naturals pile — it deals only the eight natural frets. Add the sharps pile once you hit 9 of 10.',
                 stuck_es: 'Quédate en el montón de solo naturales — reparte únicamente los ocho trastes naturales. Agrega el montón con sostenidos cuando logres 9 de 10.',
-                levelUp: 'Faster round: get the same 9 of 10 with only three seconds a card. Or run the deck on the A string too, or name a full lap going down the string (12 → 0) without counting.',
-                levelUp_es: 'Ronda más rápida: logra el mismo 9 de 10 con solo tres segundos por carta. O haz la baraja en la cuerda La también, o nombra una vuelta completa bajando por la cuerda (12 → 0) sin contar.',
+                levelUp: 'Harder round: press "With sharps" and get the same 9 of 10. Or run the deck on the A string too, or name a full lap going down the string (12 → 0) without counting.',
+                levelUp_es: 'Ronda más difícil: pulsa «Con sostenidos» y logra el mismo 9 de 10. O haz la baraja en la cuerda La también, o nombra una vuelta completa bajando por la cuerda (12 → 0) sin contar.',
                 skills: [2, 4]
               },
               {
