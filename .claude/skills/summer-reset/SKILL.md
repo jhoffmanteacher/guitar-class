@@ -13,7 +13,7 @@ scratchpad or a PR that never merges.
 1. Set `FROZEN_THROUGH` in `tools/rule-zero-proof.mjs` to 0.
 2. Set `FROZEN_MC_THROUGH_MODULE` in `tools/checks.mjs` to 0, **and empty
    `FROZEN_MC_FINGERPRINTS`** — with the constant at 0 but the table still
-   full, 1ap fails every leftover key as "pinned graded MC no longer exists."
+   full, 1ap fails every leftover key as "pinned keyed MC no longer exists."
 3. Make the fixes below.
 4. Raise both numbers again as the new class advances, pasting the newly
    printed fingerprints back into `FROZEN_MC_FINGERPRINTS` each time.
@@ -27,10 +27,10 @@ above.
 skill's practice MC stores the choice INDEX, not its text, so its wording may
 change any time — even in Modules 1–2. Only the choice ORDER is locked (see
 "Quiz answers are shuffled at render time," below). Don't confuse these with
-the graded MCs below, which store the choice text and are genuinely frozen.
+the keyed MCs below, which store the choice text and are genuinely frozen.
 
 **Reword next summer, when progress resets for the new year.** These three
-graded Module 1 Set 2 cards are frozen mid-year only because students have
+keyed Module 1 Set 2 cards are frozen mid-year only because students have
 already answered them; each has throwaway distractors worth replacing:
 - "Which of these is NOT a part of the guitar?" → "Hinge"
 - "If a string's pitch is too LOW…" → **two** dead choices, "Take the string
@@ -69,10 +69,10 @@ to a Song section, so students only ever see the "second" one
 label is frozen by index. ES: "Reto — TAB misterioso (léelo antes de
 escucharlo)".
 
-**Two graded-MC choice wordings found by the 2026-09-25 sweep.** Module 2's
+**Two keyed-MC choice wordings found by the 2026-09-25 sweep.** Module 2's
 "the TOP line represents which string?" keys "The high E (thinnest) string" —
 the site's convention is "high e". Module 1's "which comes right after G?"
-mixes note letters and "mi aguda" in its `choices_es`. Both are graded
+mixes note letters and "mi aguda" in its `choices_es`. Both are keyed
 choices in frozen modules (1ap), so they wait for the reset.
 
 **Module 3 Set 2's Challenge numbers** (2026-10-16 clean-up). The labels

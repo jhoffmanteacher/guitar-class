@@ -568,14 +568,14 @@ function checkMcAnswerTells(allSets) {
 }
 
 /* ════════════════════════════════════════════════════════════════════
-   1ap. FROZEN GRADED MCs — a GRADED multiple-choice (a `response:
+   1ap. FROZEN KEYED MCs — a KEYED multiple-choice (a `response:
    { type:'mc' }` on a lesson step) persists the chosen choice's TEXT,
    not its index. Reword a choice after a student has picked it and
    their stored answer matches nothing on the card any more: it renders
    as "answered, nothing selected", and there is no way to tell from
    the data that it was ever right.
 
-   So every graded MC in Modules 1..FROZEN_MC_THROUGH_MODULE is pinned
+   So every keyed MC in Modules 1..FROZEN_MC_THROUGH_MODULE is pinned
    by a fingerprint of its `choices` + `choices_es` + `answer`. Change
    one character and this check goes red with the reason, rather than
    the damage showing up weeks later in a student's progress page.
@@ -636,7 +636,7 @@ function gradedMcFingerprint(mc) {
     .digest('hex').slice(0, 16);
 }
 function checkFrozenGradedMcs(allSets) {
-  head(`1ap. Graded MC choices frozen through Module ${FROZEN_MC_THROUGH_MODULE}`);
+  head(`1ap. Keyed MC choices frozen through Module ${FROZEN_MC_THROUGH_MODULE}`);
   let bad = 0;
   const seen = {};
   for (const w of allSets) {
@@ -654,10 +654,10 @@ function checkFrozenGradedMcs(allSets) {
         seen[key] = fp;
         const pinned = FROZEN_MC_FINGERPRINTS[key];
         if (pinned === undefined) {
-          err(`${key} — "${step.label}": graded MC in Module ${w.moduleNum} is not pinned. Students may already have answered it; add its fingerprint to FROZEN_MC_FINGERPRINTS in checks.mjs.`);
+          err(`${key} — "${step.label}": keyed MC in Module ${w.moduleNum} is not pinned. Students may already have answered it; add its fingerprint to FROZEN_MC_FINGERPRINTS in checks.mjs.`);
           problems++; bad++;
         } else if (pinned !== fp) {
-          err(`${key} — "${step.label}": FROZEN graded MC changed (${pinned} → ${fp}). Students store their pick as the choice TEXT, so every answer already given to this card is orphaned — it renders as "answered, nothing selected". Reword only with an old→new map in the renderer, or wait until progress resets for the new school year.`);
+          err(`${key} — "${step.label}": FROZEN keyed MC changed (${pinned} → ${fp}). Students store their pick as the choice TEXT, so every answer already given to this card is orphaned — it renders as "answered, nothing selected". Reword only with an old→new map in the renderer, or wait until progress resets for the new school year.`);
           problems++; bad++;
         }
       }));
@@ -665,11 +665,11 @@ function checkFrozenGradedMcs(allSets) {
   }
   for (const key of Object.keys(FROZEN_MC_FINGERPRINTS)) {
     if (!(key in seen)) {
-      err(`${key}: pinned graded MC no longer exists — a frozen card was removed or moved, which orphans its stored answers too.`);
+      err(`${key}: pinned keyed MC no longer exists — a frozen card was removed or moved, which orphans its stored answers too.`);
       problems++; bad++;
     }
   }
-  if (bad === 0) ok(`${Object.keys(seen).length} graded MCs in Modules 1–${FROZEN_MC_THROUGH_MODULE} match their pinned choices`);
+  if (bad === 0) ok(`${Object.keys(seen).length} keyed MCs in Modules 1–${FROZEN_MC_THROUGH_MODULE} match their pinned choices`);
   else console.log(`  ${C.dim}current fingerprints:\n${Object.entries(seen).map(([k, v]) => `    '${k}': '${v}',`).join('\n')}${C.reset}`);
 }
 
@@ -681,7 +681,7 @@ function checkFrozenGradedMcs(allSets) {
 
    Shared helper — the strings that render on the SAME card as an MC,
    so a detector can ask "was the answer already on screen?".
-     · a GRADED MC lives on a lesson step: its label, text, hint, stuck
+     · a KEYED MC lives on a lesson step: its label, text, hint, stuck
        and levelUp all render around it (buildLesson in app.js).
      · a PRACTICE MC lives on a skill: buildChecklist prints the skill's
        `text` as an always-visible .sk-label right above the practice
@@ -782,7 +782,7 @@ function checkMcShoutedAnswer(allSets) {
    "the thumb never stops" is ordinary teaching.
 
    Entries below in Modules 1–6 are pre-existing and were reviewed, not
-   fixed: Module 1–2 graded MCs are frozen (see 1ap), and the rest were
+   fixed: Module 1–2 keyed MCs are frozen (see 1ap), and the rest were
    out of that sweep's scope. `w2·b·sec0·step0|2` is a genuine defect
    deferred to the reset — see CLAUDE.md's "Summer reset list".
    ════════════════════════════════════════════════════════════════════ */
@@ -889,7 +889,7 @@ const MC_LEAK_GENERIC = new Set(('sound sounds same identical exactly also both 
   'forma potencia').split(' '));
 /* Every entry here is in Modules 1–6, which the 2026-09-20 sweep did not cover
    (it ran over 7–13). They are reviewed and deliberately carried, not tuned
-   away — Modules 1–2's graded MCs are frozen for the year (1ap), so two of
+   away — Modules 1–2's keyed MCs are frozen for the year (1ap), so two of
    them cannot be reworded until progress resets. Clearing the rest is a
    separate job; when a module gets swept, delete its entries here first and
    let the check tell you what is left. */
@@ -3110,7 +3110,7 @@ const TEACHER_PHRASE_ALLOW = [
   { file: 'module-7.js', field: 'choices', phrase: 'trust the one with the highest star rating' },
   /* A plain fact about guitars, not comfort to the reader. */
   { file: 'module-13.js', phrase: 'is normal maintenance' },
-  /* m7w3's graded MC offers "Buzz a little — that's normal for this shape"
+  /* m7w3's keyed MC offers "Buzz a little — that's normal for this shape"
      as a WRONG answer (the beginner belief being rejected, and the best
      distractor on the card). Removed 2026-10-11 while it was dead (the
      multi-line choices array was unread, and the bare file+phrase entry
@@ -3162,7 +3162,7 @@ const foldEs = s => s.normalize('NFD').replace(/\p{M}/gu, '').toLowerCase();
 const TEACHER_RE_ES = new RegExp(
   '(?<![\\p{L}\\p{N}])(?:' + TEACHER_PHRASES_ES.join('|') + '|tu puedes(?=\\s*(?:[!.?…]|$)))(?![\\p{L}\\p{N}])', 'gu');
 const TEACHER_PHRASE_ALLOW_ES = [
-  /* m7w3's graded MC — the Spanish twin of the English entry above. */
+  /* m7w3's keyed MC — the Spanish twin of the English entry above. */
   { file: 'module-7.js', field: 'choices_es', phrase: 'es normal en esta forma' },
 ];
 const ES_VALUE_NAME_RE = /\b([A-Za-z0-9]+(?:_power)?_es)\s*:\s*/g;   // `_power_es`: the chord-version twin (caView)
@@ -7963,9 +7963,9 @@ function checkJourneySlowBpmLabels() {
    (the "set-peek" preview). toggleSkill, the step Done button and the
    drill check-offs always refused to write from inside one; the three
    functions that save an ANSWER did not, until 2026-10-01: a student
-   locked out of Module 3 could tap a graded quiz choice in the preview
+   locked out of Module 3 could tap a keyed quiz choice in the preview
    and it was stored under a Module 3 key. The module regimes
-   (rule-zero-proof.mjs) and the graded-MC freeze (1ap) both rest on
+   (rule-zero-proof.mjs) and the keyed-MC freeze (1ap) both rest on
    "nobody has written anything in the module above the class", so this
    pins the guard: every function that assigns into `responses[...]`
    must call isPeekedResponseKey() first, and the count of such

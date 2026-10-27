@@ -926,7 +926,7 @@
       last two genuine paper drills went digital: Challenge 2 ("Seven
       Nation Army" from memory) and Challenge 4 (day-later cold-read) now
       use a persisted free-text box, same mechanism as module-4.js's "type
-      your 4 bars" step. The "Try spacing TAB rhythm" step kept its graded
+      your 4 bars" step. The "Try spacing TAB rhythm" step kept its keyed
       MC quiz per Jonathan's direction — no second response slot exists on
       a step, so the Phase-1 worked example (swap MC for free-text) got
       sent back; the shipped version just drops the paper/hand-written
@@ -1589,6 +1589,29 @@ of every session (it was ~8,800 tokens per turn; the trimmed file is ~3,300).
 The *rules* stay in `CLAUDE.md`; the reasoning, worked examples and history live
 here. Read this when you need the **why**.
 
+### Why the review triggers were narrowed, and the "quick change" fast path (Jonathan, 2026-10-26)
+
+After the Watchtower rhythm orders ran full review rounds, Jonathan said the
+adversarial review felt like overkill. The real problem was the 3-file
+trigger: almost every content push touches the module file, `CHANGELOG.md`
+and `sw.js` (whose version lines `checks.mjs` rewrites on every push), so the
+"3+ files" and "danger-zone `sw.js`" triggers fired on one-line fixes. Those
+mechanical files, and the Spanish twin written in the same edit, no longer
+count.
+
+He also asked for a fast path for small multi-file edits: "quick change" /
+"quick fix" skips the reviewer and the smoke test, but keeps every other gate.
+The danger-zone and progress-key carve-outs keep the two expensive failure
+classes — broken saves or config, and lost student ticks — behind the full
+review.
+
+The same evening a `site-reviewer` run passed 36 minutes, and the reviewer was
+split in two: `site-reviewer` drops to high effort for ordinary reviews, and
+`site-reviewer-deep` keeps extra high for danger-zone files and sweeps. Not yet
+proved: every 2026-10-25 regression was found at extra high, so nobody knows
+what high would have missed. If a high review lets a real bug through, move
+that kind of change to the deep reviewer.
+
 ### Why the 2026-10-25 rules exist: "Start here", code-hygiene, teacher-console, site-sweep
 
 Jonathan asked for the lessons of the sweep to be written down so they carry
@@ -1733,7 +1756,7 @@ around?" lines survive on cards that never had a deck.
 
 Jonathan: *"the quiz correct answer choices should be randomized. right now the
 correct answers are always the first one."* The premise was close but not exact,
-and the real numbers were worth reporting back: across all 237 graded MCs,
+and the real numbers were worth reporting back: across all 237 keyed MCs,
 position 1 held 34%, position 2 **50%**, position 3 14%, position 4 **2%** —
 never picking the last option was right 98% of the time. After the shuffle:
 28 / 28 / 23 / 21.

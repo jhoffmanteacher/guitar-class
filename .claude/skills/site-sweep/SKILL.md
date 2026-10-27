@@ -13,7 +13,8 @@ Write the brief once to the session scratchpad and tell every agent to read it
 first; do not paste it into each prompt.
 
 **Spawn the project agents, not a general-purpose one:** `site-auditor` (high
-effort), `site-fixer` (high) and `site-reviewer` (extra high), defined in
+effort), `site-fixer` (high) and `site-reviewer-deep` (extra high — a sweep
+always gets the deep reviewer, not the high-effort `site-reviewer`), defined in
 `.claude/agents/`. Each pins its own model (Opus) and effort, so the review —
 where the 2026-10-25 sweep found its real regressions — always gets the
 deepest pass without anyone remembering to ask for it, and routine fixes don't

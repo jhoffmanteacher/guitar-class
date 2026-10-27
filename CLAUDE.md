@@ -12,9 +12,10 @@ rule live in `WORKFLOW.md` — read it when you need the *why*, not every sessio
    `node tools/checks.mjs`. Never hand-edit the version lines in `sw.js`.
 2. Touched a `module-N.js`? `node tools/rule-zero-proof.mjs origin/main`, and
    paste its summary into your report.
-3. Touched a renderer, escaping, or 3+ files? `node tools/smoke.mjs --baseline
-   origin/main` — a real browser walks every set in English and Spanish (about a
-   minute).
+3. Touched a renderer, escaping, or 3+ files (counted as in "Triggers" below)?
+   `node tools/smoke.mjs --baseline origin/main` — a real browser walks every set
+   in English and Spanish (about a minute). (Skipped on a "quick change" — see
+   "Quick change" under the Triggers.)
 4. New student-facing text → its Spanish twin, same edit. A new step field →
    both step renderers.
 5. A student can see the change → a `CHANGELOG.md` entry, same push.
@@ -22,7 +23,7 @@ rule live in `WORKFLOW.md` — read it when you need the *why*, not every sessio
    pushing: `node tools/checks.mjs --live`.
 
 **Never, whatever the task says:** move or renumber a section or step (progress
-keys); reword a graded MC's choices — or its English prompt — in a frozen module
+keys); reword a keyed MC's choices — or its English prompt — in a frozen module
 or the one the class is about to enter ("Three regimes"); write `progress/{uid}`
 from console code; write `config/class` except through `teacherWriteConfig()`;
 change `firestore.rules` without telling Jonathan it needs a console paste;
@@ -100,6 +101,13 @@ building a new one — don't resurrect the old file from git.
 the lesson ladder and the checklist — the per-set Songs tab was removed
 2026-08-27 (unreachable since the rail took over, and the Songs hub already
 lists the same songs, Module 1's included).
+
+**Target screen: a school Chromebook, 1366×657** (Jonathan, 2026-10-26: nobody
+uses the site on a phone). Design, test and measure at that size. Phone width is
+out of scope: don't audit, test or fix phone-only layout, and don't add phone
+breakpoints, unless Jonathan asks. Leave the phone CSS that's already there
+alone (don't spend time deleting it), and keep checks.mjs 1o — it costs nothing
+and also guards narrow Chromebook windows.
 
 **Live preview:** VS Code Live Server — right-click `index.html` → "Open with
 Live Server". No commit needed.
@@ -259,8 +267,8 @@ What that permits depends on how far the class has got, and
   students are in here. Step
   labels must match BY INDEX; a new step may only be **appended** to the
   tail of a section. No renames: a rename here would hide an insertion
-  from the check. Graded-MC choices are frozen too (checks.mjs 1ap) —
-  but since 2026-10-19 a graded MC may be ADDED to an existing step
+  from the check. Keyed-MC choices are frozen too (checks.mjs 1ap) —
+  but since 2026-10-19 a keyed MC may be ADDED to an existing step
   (nothing to orphan; it prints) and an existing one reworded through
   `response.renamedChoices`, which maps each old saved text to its new
   choice (the renderer applies it; the proof checks the map covers every
@@ -294,7 +302,7 @@ failing."
 A locked set opens as a read-only preview (`set-peek`), and until that day
 the preview refused skill ticks and Done buttons but still SAVED ANSWERS:
 `onResponseChange`, `onStepMcSelect` and `onPracticeMcSelect` had no peek
-guard, so a student locked out of Module 3 could tap a graded quiz choice
+guard, so a student locked out of Module 3 could tap a keyed quiz choice
 there and it was written to their progress under a Module 3 key. It
 unlocked nothing (`hasProgressIn()` reads skills and completed steps, both
 guarded) but it means a few `responses` keys may already exist in the
@@ -533,10 +541,14 @@ paths. **Adding or changing a step field means editing both, in the same edit**
 checks are whole card bodies with ONE renderer each (`caCardBodyHtml`, pinned by
 1bf). Details and the legitimate differences: skill `in-class-activities`.
 
-### ⚠️ Quiz answers and graded MCs
+### ⚠️ Quiz answers and keyed MCs
+A **keyed MC** is an on-site multiple-choice with an answer key — a
+`response:{type:'mc'}` on a lesson step. Nothing on the site is graded; the
+graded quizzes are the Canvas ones. (Called "graded MC" before 2026-10-26;
+older notes and code comments may still say that.)
 **Quiz answers are shuffled at render time** by `mcOrder(choices, seed)` —
 deterministic, catch-alls pinned via `MC_PINNED`, fewer than 3 choices left
-alone. The two MC paths store differently: the graded step persists the choice
+alone. The two MC paths store differently: the keyed step persists the choice
 **text**, the practice panel persists the **index**. Don't "simplify" that
 away. Write `answer: 0` freely — students never see it that way.
 
@@ -545,16 +557,16 @@ away. Write `answer: 0` freely — students never see it that way.
   re-rolls the display order**. Never name an option by its position in an
   `explain` ("the last option") — name it by content. m11w2-s3 was right only
   by luck after a 2026-09-05 reword.
-- **Rewording a GRADED MC's choices after students reach it orphans their
-  stored picks** — the graded path persists the choice text, so an old string
+- **Rewording a KEYED MC's choices after students reach it orphans their
+  stored picks** — the keyed path persists the choice text, so an old string
   renders as "answered, nothing selected". Reword before they get there, or
   map old→new in the renderer. The 2026-09-05 m8w1 reword was safe only
   because the live roster's furthest student was in Module 1.
 
 **That rule is now a ratchet — `FROZEN_MC_THROUGH_MODULE` in checks.mjs**
-(2026-09-19). Every graded MC in Modules 1..N is pinned by a fingerprint of
+(2026-09-19). Every keyed MC in Modules 1..N is pinned by a fingerprint of
 its `choices` + `choices_es` + `answer`, and **1ap** fails the push when one
-of them changes by a single character — including a graded MC that goes
+of them changes by a single character — including a keyed MC that goes
 missing. N is *the furthest module a student has reached or is about to*; it
 is **3** today (Jonathan, 2026-10-01; 2 from 2026-09-19). **Raise it as the class advances** — ask which module
 they're in, bump the constant, re-run and paste the printed fingerprints back
@@ -628,7 +640,7 @@ adding to `STUDENT_VALUE_NAME_RE`; an array field needs nothing more.** 1w-t
 also reads Spanish now (`TEACHER_PHRASES_ES`: "es normal", "no te
 preocupes", "está bien si", a sentence-final "tú puedes").
 
-The three Module 1 Set 2 graded-MC rewords, Module 3 Set 2's Challenge
+The three Module 1 Set 2 keyed-MC rewords, Module 3 Set 2's Challenge
 numbers, and `ca-14`'s Happy Birthday exit check are all frozen mid-year fixes —
 see the **Summer reset list** (the `summer-reset` skill).
 
@@ -748,29 +760,50 @@ the auditor / fixer / reviewer brief templates: skill `site-sweep`.
 any effort level): run an adversarial reviewer, on a pinned commit, whenever a
 change touches 3+ files, a danger-zone file (`teacher.js` config plumbing,
 `sw.js`, `checks.mjs`, `coach.js` detection, the `app.js` save path,
-`firestore.rules`), or 50+ strings. For a danger-zone file write the failing
-scenario before the fix. When a rule says "run the tool", run it — don't
+`firestore.rules`), or 50+ strings. **Mechanical files don't count toward the 3**
+(Jonathan, 2026-10-26): `CHANGELOG.md`, the `sw.js` version lines that
+`checks.mjs` rewrites (that rewrite doesn't make `sw.js` a danger-zone edit —
+a change to its code does), and the Spanish twin (`_es` field or `i18n.js`
+key) of a string changed in the same edit. **Which reviewer** (2026-10-26):
+`site-reviewer-deep` (extra high) for a danger-zone file or a 50+-string
+sweep, `site-reviewer` (high) for everything else. For a danger-zone file
+write the failing scenario before the fix. When a rule says "run the tool", run it — don't
 substitute your own reading of the code. When an agent hands you a claim, read
 the quoted lines yourself before acting; when it hands you a fix, make it
 re-derive it on the real code.
+
+**"Quick change" (Jonathan, 2026-10-26).** When Jonathan's request says "quick
+change" or "quick fix", skip the adversarial reviewer and `tools/smoke.mjs`,
+even past the 3-file / 50-string triggers. Everything else in "Start here"
+still runs: `checks.mjs --check` while working and the full `checks.mjs` before
+the push, `rule-zero-proof.mjs` if a `module-N.js` changed, the Spanish twin,
+the `CHANGELOG.md` entry, and `checks.mjs --live` after the push. **It never
+covers a danger-zone file** (`teacher.js` config plumbing, `sw.js`,
+`checks.mjs`, `coach.js` detection, the `app.js` save path, `firestore.rules`),
+and it never covers moving, adding or removing a section or step. If a quick
+change turns out to need one of those, stop, tell Jonathan in one line why it
+needs the full review, and wait for his answer. Start the report with "Quick
+change — reviewer skipped."
 
 **Effort per task (2026-10-25).** Effort is how much reasoning Claude spends;
 higher finds more edge cases and verifies more, at more tokens. The session level
 is manual (`/effort low|medium|high|xhigh|max`, `/effort auto` to clear it, or
 `claude --effort <level>`); nothing picks it per task by itself, so these pins do:
 - **Agents.** The project agents in `.claude/agents/` pin their own level:
-  `site-auditor` and `site-fixer` high, `site-reviewer` extra high (always use
-  `site-reviewer` for adversarial reviews). If you spawn a general-purpose agent
-  instead, **pass `effort: "xhigh"` for an adversarial reviewer and `"high"` for
-  an auditor or fixer** — this paragraph is the explicit instruction the Agent
+  `site-auditor`, `site-fixer` and `site-reviewer` high, `site-reviewer-deep`
+  extra high (always use one of the two reviewers for adversarial reviews —
+  which one is set under "Triggers"). If you spawn a general-purpose agent
+  instead, **pass `effort: "xhigh"` for a review the Triggers send to
+  `site-reviewer-deep`, and `"high"` for any other review, an auditor or a
+  fixer** — this paragraph is the explicit instruction the Agent
   tool asks for. Never pass `max`.
 - **Skills.** `site-sweep` pins `effort: xhigh` while it is active.
 - **Your own session, as a guide:** `medium` for routine edits (changelog, a
   small wording or content fix, renames); `high` for any bug fix, shipped JS, or
-  module content with graded MCs; `xhigh` for the danger-zone files listed
+  module content with keyed MCs; `xhigh` for the danger-zone files listed
   above, sweeps, and anything the Stop hook keeps blocking on. If a task turns
   out to be in a higher tier than the session, say so and ask Jonathan to
-  `/effort` up (or run it through `site-reviewer`) rather than pressing on.
+  `/effort` up (or run it through `site-reviewer-deep`) rather than pressing on.
 
 **Report the real numbers instead of accepting the premise**, and name the prior
 decision a request would reverse — both have produced better calls than fixing

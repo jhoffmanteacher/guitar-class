@@ -28,7 +28,7 @@ Read the fixers' own proof scripts to learn what they did NOT test.
    confirm red; hunt blind spots (fields not read, one language only, a floor too
    low, a pattern that matches the comment). Check labels are unique.
 5. **Freeze and progress rules.** `node tools/rule-zero-proof.mjs <base>`; no
-   progress key, step/section order, graded-MC choice or English prompt moved.
+   progress key, step/section order, keyed-MC choice or English prompt moved.
 6. **Anything else in the diff:** wrong operator, off-by-one, leaked listener, a
    comment that now lies, a mid-line `//` that swallows code.
 

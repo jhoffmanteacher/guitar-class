@@ -24,7 +24,7 @@ script outside the repo that fails on the old code and passes on the new.
 - New shell string → `i18n.js` EN **and** ES in the same edit; module content →
   its `_es` twin; a step field → both renderers (`caStepHtml`,
   `renderTeacherActivityDetail`).
-- Never change progress keys, section/step order, set/skill ids, or a graded MC's
+- Never change progress keys, section/step order, set/skill ids, or a keyed MC's
   choices (or English prompt).
 - Before changing anything, grep for sibling copies and for comments that state
   the old behaviour; fix or diff them too.

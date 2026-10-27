@@ -15,7 +15,8 @@ Your job is to FIND and REPORT. A separate step fixes, after the lead verifies.
    nothing.
 2. **INEFFICIENCIES** — measurable waste on a reachable path (whole-DOM rebuilds,
    layout reads in loops, redundant Firestore reads/writes, listeners added every
-   render, big synchronous work at load). Students use low-end Chromebooks.
+   render, big synchronous work at load). Students use low-end Chromebooks (1366×657); phone-width layout is
+   out of scope — don't report it.
 3. **REFACTOR** — duplicated blocks (≥ ~8 lines, ≥ 2 places), copies that have
    drifted, code *proved* dead, magic numbers repeated. Only where the fix is safe.
 

@@ -43,7 +43,7 @@ Two rules that are easy to break without noticing:
   recomputed per-question cells for different questions, and makes the
   "Missed by" row fiction. checks.mjs 1y recomputes the answer KEYS from the
   fretboard and passes straight through this. Same hazard as rewording a
-  graded MC's choices, one layer down: edit a check before students reach it,
+  keyed MC's choices, one layer down: edit a check before students reach it,
   or treat its `items` as frozen once they have.
 - **Seed the MC shuffle on language-stable data.** `ecChoicesHtml` seeds on
   the `fret·note` pairs, never the rendered chip labels — "fret 5 · A" and

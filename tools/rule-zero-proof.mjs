@@ -13,12 +13,12 @@
         Nothing added, removed or moved, so no positional progress key
         (`${setId}-${station}-sec${gi}-${i}`) can have shifted.
 
-     B. GRADED MCs in Modules 1..FROZEN_THROUGH are BYTE-IDENTICAL —
-        `choices`, `choices_es` and `answer`. The graded path persists the
+     B. KEYED MCs in Modules 1..FROZEN_THROUGH are BYTE-IDENTICAL —
+        `choices`, `choices_es` and `answer`. The keyed path persists the
         chosen choice's TEXT, so a reworded choice orphans every stored
         pick. Students are in Module 2 (Jonathan, 2026-09-19).
 
-     C. GRADED MCs in Modules above that MAY differ — every difference is
+     C. KEYED MCs in Modules above that MAY differ — every difference is
         printed in full, before and after, so it can be read rather than
         trusted.
 
@@ -285,7 +285,7 @@ for (const s of headSets) for (const [k, v] of mcsOf(s)) headMc.set(k, v);
 const fp = mc => JSON.stringify({ choices: mc.choices, choices_es: mc.choices_es, answer: mc.answer });
 const q = s => JSON.stringify(s);
 const changedGraded = [], changedPractice = [];
-/* A frozen graded MC may be reworded when `renamedChoices` (read by the
+/* A frozen keyed MC may be reworded when `renamedChoices` (read by the
    renderer in app.js) maps every old English choice to a new one: same count,
    no two old picks landing on one new choice, and the keyed one still keyed. */
 function renameMapped(bm, hm) {
@@ -297,44 +297,44 @@ function renameMapped(bm, hm) {
   return mapped[bm.answer] === hm.choices[hm.answer];
 }
 
-head(`B. Graded MC choices frozen in Modules 1–${FROZEN_THROUGH}`);
+head(`B. Keyed MC choices frozen in Modules 1–${FROZEN_THROUGH}`);
 {
   let frozen = 0, broken = 0;
   for (const [k, h] of headMc) {
     if (h.kind !== 'graded' || h.moduleNum > FROZEN_THROUGH) continue;
     const b = baseMc.get(k);
-    /* A new graded MC on a step that was already there orphans no saved
+    /* A new keyed MC on a step that was already there orphans no saved
        answer (section A has proved every step kept its place), so it prints
        instead of failing (Jonathan, 2026-10-19). */
-    if (!b) { ok(`${k} — "${h.label}": graded MC ADDED in a frozen module — no saved answer to orphan`); console.log(`   + ${q(h.mc.choices)}`); continue; }
+    if (!b) { ok(`${k} — "${h.label}": keyed MC ADDED in a frozen module — no saved answer to orphan`); console.log(`   + ${q(h.mc.choices)}`); continue; }
     frozen++;
     if (fp(b.mc) !== fp(h.mc) && renameMapped(b.mc, h.mc)) {
-      frozen--; ok(`${k} — "${h.label}": graded MC reworded with renamedChoices — every old pick maps to a new choice, the keyed one to the keyed one`);
+      frozen--; ok(`${k} — "${h.label}": keyed MC reworded with renamedChoices — every old pick maps to a new choice, the keyed one to the keyed one`);
       console.log(`   - ${q(b.mc.choices)}\n   + ${q(h.mc.choices)}`);
     } else if (fp(b.mc) !== fp(h.mc)) {
-      fail(`${k} — "${h.label}": FROZEN graded MC changed. Students have stored their pick as TEXT, so this orphans every answer already given. Reword only with an old→new map in the renderer.`);
+      fail(`${k} — "${h.label}": FROZEN keyed MC changed. Students have stored their pick as TEXT, so this orphans every answer already given. Reword only with an old→new map in the renderer.`);
       broken++;
       console.log(`   - ${q(b.mc.choices)}\n   + ${q(h.mc.choices)}`);
       console.log(`   - ${q(b.mc.choices_es)}\n   + ${q(h.mc.choices_es)}`);
       console.log(`   - answer ${b.mc.answer}  + answer ${h.mc.answer}`);
     }
   }
-  /* The loop above only walks the HEAD's MCs, so a frozen graded MC that
+  /* The loop above only walks the HEAD's MCs, so a frozen keyed MC that
      was removed (or turned into another response type) passed here — only
      checks.mjs 1ap caught it (2026-10-11 review). Walk the base too. */
   for (const [k, b] of baseMc) {
     if (b.kind !== 'graded' || b.moduleNum > FROZEN_THROUGH || headMc.has(k)) continue;
-    fail(`${k} — "${b.label}": FROZEN graded MC is GONE in a module students are in. Its stored picks are orphaned.`);
+    fail(`${k} — "${b.label}": FROZEN keyed MC is GONE in a module students are in. Its stored picks are orphaned.`);
     broken++;
   }
-  if (!broken) ok(`${frozen} graded MCs in Modules 1–${FROZEN_THROUGH} are byte-identical (choices, choices_es, answer)`);
+  if (!broken) ok(`${frozen} keyed MCs in Modules 1–${FROZEN_THROUGH} are byte-identical (choices, choices_es, answer)`);
 }
 
-head(`C. Graded MC changes above Module ${FROZEN_THROUGH} (expected — nobody has reached them)`);
+head(`C. Keyed MC changes above Module ${FROZEN_THROUGH} (expected — nobody has reached them)`);
 for (const [k, h] of headMc) {
   if (h.kind !== 'graded' || h.moduleNum <= FROZEN_THROUGH) continue;
   const b = baseMc.get(k);
-  if (!b) { console.log(`   ${k}: NEW graded MC`); continue; }
+  if (!b) { console.log(`   ${k}: NEW keyed MC`); continue; }
   const fields = ['prompt', 'prompt_es', 'answer', 'explain', 'explain_es'];
   const diffs = [];
   if (fp(b.mc) !== fp(h.mc)) diffs.push('choices');
@@ -348,7 +348,7 @@ for (const [k, h] of headMc) {
   }
 }
 if (!changedGraded.length) console.log('   (none)');
-else console.log(`\n   ${changedGraded.length} graded MC${changedGraded.length === 1 ? '' : 's'} changed: ${changedGraded.join(', ')}`);
+else console.log(`\n   ${changedGraded.length} keyed MC${changedGraded.length === 1 ? '' : 's'} changed: ${changedGraded.join(', ')}`);
 
 head('D. Practice MCs keep their choice order (answer index + count unchanged)');
 {
