@@ -203,8 +203,9 @@
                                            // rowLabels are ignored (four-bar rows);
                                            // a lyric line (rowLabels) keeps its row
                                            // where it starts on a bar line.
-                                           // Chord cards say "strum once each time
-                                           // a beat lights up" (ca.cardChordDirections).
+                                           // Chord cards say "each chord is shown once,
+                                           // strum the way the recording does"
+                                           // (ca.cardChordDirections).
        sheet: 'sheets/<song>.pdf',         // optional (ca-38, 2026-10-19): show
                                            // this chord sheet PDF instead of the
                                            // tab, drawn as is (lyrics included),

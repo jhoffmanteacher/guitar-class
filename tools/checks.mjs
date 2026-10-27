@@ -7554,7 +7554,7 @@ function checkChordGridCards(ctx) {
     const attrs = (html.match(/data-beat="/g) || []).length;
     if (attrs !== 7 * 8 * 7) flag(`ca-29 renders ${attrs} data-beat attributes, expected ${7 * 8 * 7} (7 sections x 8 beats x (6 string cells + 1 count cell))`);
     if (/pc-counts/.test(html)) flag('ca-29 draws a Counts switch — a card made only of chord grids always shows its count and needs none');
-    if (!/Strum once each time a beat lights up/.test(html)) flag('ca-29 does not show the chord-card directions (ca.cardChordDirections)');
+    if (!/Each chord is shown once/.test(html)) flag('ca-29 does not show the chord-card directions (ca.cardChordDirections)');
     // The cursor: one repaint key per beat, none on a "+".
     const L = pcLayout(c29), S0 = L.sections[0], bpb = L.tr.beatsPerBar;
     const keys = [];
@@ -7622,7 +7622,7 @@ function checkChordGridCards(ctx) {
   const dirOf = id => { const a = acts.find(x => x.id === id); return a ? (/<p class="pc-dir">([^<]*)<\/p>/.exec(String(caCardBodyHtml(a))) || [])[1] : null; };
   if (!/single notes/.test(dirOf('ca-41') || '')) flag('ca-41 (grid + single-note sections) does not say what to do in a section of single notes');
   if (/single notes/.test(dirOf('ca-29') || '')) flag('ca-29 (all grid) shows the mixed-card directions');
-  if (/Strum once/.test(dirOf('ca-10') || '')) flag('ca-10 (single notes) shows the chord-card directions');
+  if (/Each chord is shown once/.test(dirOf('ca-10') || '')) flag('ca-10 (single notes) shows the chord-card directions');
   // The sheet's "This bar" strip is fed by the beat, and the narrow-screen guard is in the stylesheet (the real overflow test is smoke.mjs).
   try {
     const css = readFileSync(join(ROOT, 'styles.css'), 'utf8');

@@ -12,10 +12,11 @@ see `WORKFLOW.md` and the git commit log.
   record changes through a song. You see the chord name once, at the beat (or
   the "+") where the chord begins, and the chord stays until the next name.
 - **The highlight moves on the beats only.** It steps once on every beat of the bar
-  and never lights a "+". Strum once each time a beat lights up, and change
-  chords when you reach the next chord name. The count under the tab is always
-  on for these cards: the beat numbers are dark and each "+" is light grey.
-  A rest shows the word "Stop" where the chord names go.
+  and never lights a "+". The card shows each chord once, so listen to the
+  recording and strum the way it does, and change chords when you reach the
+  next chord name. The count under the tab is always on for these cards: the
+  beat numbers are dark and each "+" is light grey. A rest shows the word
+  "Stop" where the chord names go.
 - **Four bars in each row.** A bar line separates the bars. A song with words
   (Las Mañanitas) starts each sung line on a new row.
 - **This covers** the Watchtower, "the cure", Luna and Sweet Child power-chord

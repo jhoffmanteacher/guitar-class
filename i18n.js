@@ -524,11 +524,11 @@
     'ca.cardDirections':       { en: 'Press Play song and play along. Check a box when you can do it.',
                                  es: 'Pulsa «Tocar la canción» y toca con ella. Marca una casilla cuando lo logres.' },
     // Chord-grid cards (card.chordGrid, 2026-10-26): the cursor moves on the beats and each chord name appears once.
-    'ca.cardChordDirections':  { en: 'Strum once each time a beat lights up. Change chords when you reach the next chord name.',
-                                 es: 'Rasguea una vez cada vez que se ilumina un tiempo. Cambia de acorde cuando llegues al siguiente nombre de acorde.' },
+    'ca.cardChordDirections':  { en: 'Each chord is shown once, where it starts. Listen to the recording and strum the way it does. Change chords when you reach the next chord name.',
+                                 es: 'Cada acorde aparece una sola vez, donde empieza. Escucha la grabación y rasguea como ella. Cambia de acorde cuando llegues al siguiente nombre de acorde.' },
     // A card with chord-grid sections AND single-note sections (ca-35's solo, ca-41's verses).
-    'ca.cardChordMixedDirections': { en: 'Strum once each time a beat lights up. Change chords when you reach the next chord name. In a section of single notes, play each note when it lights up.',
-                                 es: 'Rasguea una vez cada vez que se ilumina un tiempo. Cambia de acorde cuando llegues al siguiente nombre de acorde. En una sección de notas sueltas, toca cada nota cuando se ilumine.' },
+    'ca.cardChordMixedDirections': { en: 'Each chord is shown once, where it starts. Listen to the recording and strum the way it does. Change chords when you reach the next chord name. In a section of single notes, play each note when it lights up.',
+                                 es: 'Cada acorde aparece una sola vez, donde empieza. Escucha la grabación y rasguea como ella. Cambia de acorde cuando llegues al siguiente nombre de acorde. En una sección de notas sueltas, toca cada nota cuando se ilumine.' },
     'ca.cardSectionHint':      { en: 'Tap a section to start the song there.',
                                  es: 'Pulsa una sección para empezar la canción ahí.' },
     'ca.cardSectionOf':        { en: 'Section {a} of {n}', es: 'Sección {a} de {n}' },
