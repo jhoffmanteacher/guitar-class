@@ -8851,12 +8851,16 @@ function nrRenderDone(nPerfect, nGood, nPitch, total){
   const body = nrBody();
   if (!body || !nr) return;
   const s = nr;
-  const nxt = s.level + 1 < NR_LEVELS.length ? s.level + 1 : -1;
+  /* Next levels come from the unlock chain (`after`), not array order: the
+     power-chord branch sits at 12-14 but opens off level 5, so the melody
+     ladder tops out at index 11 and the branch ends at 14. Clearing level 5
+     opens two levels at once. */
+  const nexts = NR_LEVELS.map((_, j) => j).filter(j => j !== s.level && nrReq(j) === s.level);
+  const nxt = nexts.length ? nexts[0] : -1;
   /* "Unlocked!" only when THIS clear is what opened the next level — a
-     re-clear (or a level whose successor unlocks off a different branch
-     point, see `after`) gets the plain cleared line instead. */
+     re-clear gets the plain cleared line instead. */
   const firstClear = s.passed && s.prevBest < NR_PASS;
-  const justUnlocked = !s.adaptive && nxt >= 0 && firstClear && nrReq(nxt) === s.level;
+  const justUnlocked = !s.adaptive && nxt >= 0 && firstClear;
   const nextOpen = nxt >= 0 && nrUnlocked(nxt);
 
   let statusLine, banner = justUnlocked;
@@ -8878,8 +8882,12 @@ function nrRenderDone(nPerfect, nGood, nPitch, total){
       statusLine = t('games.nr.stageStay');
     }
   } else if (s.passed){
-    statusLine = justUnlocked ? t('games.nr.passUnlocked', {n: nxt + 1})
-      : nxt < 0 ? t('games.nr.passLadderDone')
+    /* "Ladder complete — you've run the whole neck" is the melody ladder's
+       top only; the end of the power-chord branch is a plain clear. */
+    statusLine = justUnlocked
+        ? (nexts.length > 1 ? t('games.nr.passUnlockedTwo', {a: nexts[0] + 1, b: nexts[1] + 1})
+          : t('games.nr.passUnlocked', {n: nxt + 1}))
+      : nxt < 0 && !NR_LEVELS[s.level].chords ? t('games.nr.passLadderDone')
       : t('games.nr.passCleared');
   } else {
     statusLine = t('games.nr.failLine', {pct: NR_PASS});

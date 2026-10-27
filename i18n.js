@@ -1952,6 +1952,8 @@
       es: '¡Escalera completa — recorriste todo el mástil!' },
     'games.nr.passUnlocked': { en: 'Level {n} unlocked!',
       es: '¡Nivel {n} desbloqueado!' },
+    'games.nr.passUnlockedTwo': { en: 'Levels {a} and {b} unlocked!',
+      es: '¡Niveles {a} y {b} desbloqueados!' },
     'games.nr.playButton': { en: 'Play',
       es: 'Jugar' },
     'games.nr.practiceDoor': { en: 'Practice a specific skill',
