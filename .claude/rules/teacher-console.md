@@ -80,7 +80,7 @@ is the safe default** — a writer that forgets gets strict, not nothing.
 Failures report through `teacherConfigSaveFailed(e, msg)`, which tells a
 stale rejection ("nothing was saved, reloading") apart from a dropped
 connection. checks.mjs **1ai** bans a bare `.set()` on the doc, pins the
-writer count at 16, and requires the transaction — add a writer and it fails
+writer count (`CONFIG_WRITERS`, 26 as of 2026-10-26), and requires the transaction — add a writer and it fails
 until you bump `CONFIG_WRITERS` on purpose. `firestore.rules` deliberately
 does NOT enforce the counter (it would lock the Firebase console out of the
 one doc you'd repair by hand); that edit was comments only, nothing to paste.
