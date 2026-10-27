@@ -277,6 +277,7 @@ function ensurePlayer(){
   a.loop = true;
   a.preload = 'none';
   a.title = t('journey.playalongTitle');
+  a.setAttribute('data-i18n-attr', 'title:journey.playalongTitle');   // re-translated on a language switch
 
   var d = box.dataset;
   var fullReady = !!d.audioFull
@@ -492,6 +493,7 @@ function togglePlayalong(btn){
       var f = document.createElement('iframe');
       f.src = 'https://www.youtube.com/embed/' + box.dataset.video;
       f.title = t('journey.playalongTitle');
+      f.setAttribute('data-i18n-attr', 'title:journey.playalongTitle');
       f.allow = 'autoplay; encrypted-media; picture-in-picture';
       f.allowFullscreen = true;
       box.appendChild(f);
