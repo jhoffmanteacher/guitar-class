@@ -310,8 +310,8 @@
 
     // ── Listening Coach check-off gate (soft: student can always override) ──
     'gate.title':              { en: 'Let the Coach hear it first', es: 'Deja que el Entrenador lo escuche primero' },
-    'gate.body':               { en: 'The Listening Coach hasn\'t heard you play this one at 💪 Good yet. Play it into the mic first — it only takes a minute.',
-                                 es: 'El Entrenador de Escucha todavía no te ha escuchado tocar esto a nivel 💪 Bien. Tócalo al micrófono primero — solo toma un minuto.' },
+    'gate.body':               { en: 'The Listening Coach hasn\'t heard you play this one at “You’re getting it” or “Great” yet. Play it into the mic first — it only takes a minute.',
+                                 es: 'El Entrenador de Escucha todavía no te ha escuchado tocar esto a nivel «Ya le vas agarrando» o «Excelente». Tócalo al micrófono primero — solo toma un minuto.' },
     'gate.practice':           { en: 'Practice it now', es: 'Practicarlo ahora' },
     'gate.markAnyway':         { en: 'Mark it anyway', es: 'Marcarlo de todos modos' },
     'gate.closeAria':          { en: 'Close', es: 'Cerrar' },
