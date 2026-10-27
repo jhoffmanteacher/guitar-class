@@ -4102,6 +4102,7 @@ function isModuleReviewLocked(moduleNum){
   if(sets.some(w=>w.locked||w.comingSoon)) return true;
   const allSkills = sets.flatMap(w=>w.skills||[]);
   if(!allSkills.length) return true;
+  if(progressLoadFailed) return false;               // never re-lock on a guess, same as isSetLocked
   return !allSkills.every(s=>progress[s.id]==='gotit');
 }
 
@@ -6786,7 +6787,12 @@ function saveReflection(moduleNum){
   const clicked=document.getElementById(`mr${moduleNum}-clicked`).value;
   const hard=document.getElementById(`mr${moduleNum}-hard`).value;
   const key=`mr${moduleNum}-reflection`;
-  progress[key]={clicked,hard};
+  /* After a failed load the boxes render empty, so the box the student did
+     not type in is "unknown", not "cleared": send only boxes with text, and
+     flushSave's merge keeps the stored other one (progressLoadFailed). */
+  const v={clicked,hard};
+  if(progressLoadFailed) Object.keys(v).forEach(k=>{ if(!v[k]) delete v[k]; });
+  progress[key]=Object.assign({}, progress[key], v);
   saveProgress();
 }
 
@@ -6820,8 +6826,9 @@ function savePerformance(moduleNum){
   if(isReviewPanelLocked(`mr${moduleNum}`)) return;
   const key=`mr${moduleNum}-performance`;
   const songEl=document.getElementById(`mr${moduleNum}-song`);
-  const cur=progress[key]||{};
-  progress[key]={song:songEl?songEl.value:'', level:cur.level||null};
+  // Only the field this control sets. After a failed load the local entry is
+  // empty, and writing the other field as ''/null would wipe the stored one.
+  progress[key]=Object.assign({}, progress[key], {song:songEl?songEl.value:''});
   saveProgress();
 }
 
@@ -6830,7 +6837,7 @@ function setPerformanceLevel(moduleNum, level){
   const key=`mr${moduleNum}-performance`;
   const cur=progress[key]||{};
   const newLvl=(cur.level===level)?null:level;
-  progress[key]={song:cur.song||'', level:newLvl};
+  progress[key]=Object.assign({}, cur, {level:newLvl});   // only the level — see savePerformance
   const rate=document.querySelector(`.week-panel[data-id="mr${moduleNum}"] .mr-play-rate .mr-rating`);
   if(rate){
     rate.querySelectorAll('.mr-rb').forEach(b=>{
