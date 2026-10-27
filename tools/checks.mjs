@@ -4417,6 +4417,95 @@ function checkMissingI18nKeys(I18N) {
 }
 
 /* ════════════════════════════════════════════════════════════════════
+   1cb. LIVE QUIZ — a repaint keeps the countdown's real time left
+   (2026-10-26 audit, MISC-1). The question HTML draws the timer at the FULL
+   limit, and the stage is repainted on every answer. Without a resync right
+   after the paint the projector flickered back to "20" on each answer, and an
+   answer landing after "Time's up" froze it on "20" (2.5 on a fret round)
+   until Reveal; the student screen did the same on a language switch, with
+   its choice buttons enabled again. EXECUTES the real live-quiz.js in its own
+   VM with a minimal fake DOM (the file must not depend on app.js, so none is
+   loaded) and repaints every timed question view — stage mc, stage fret,
+   student mc, student fret — once mid-countdown and once after time-up.
+   Pinned at 8 cases so a view that stops rendering cannot drop out silently.
+   ════════════════════════════════════════════════════════════════════ */
+const LQ_TIMER_CASES = 8;
+function checkLiveQuizTimerRepaint() {
+  head('1cb. Live quiz: a repaint keeps the countdown\'s real time left');
+  let bad = 0, cases = 0;
+  const flag = m => { err(`1cb: ${m}`); problems++; bad++; };
+  const TIME_UP = '<time up>';
+  const byId = {};
+  const mkEl = id => {
+    const cls = new Set();
+    const el = { id, textContent: '', buttons: [], kids: [],
+      classList: { add: c => cls.add(c), remove: c => cls.delete(c), toggle: (c, on) => (on ? cls.add(c) : cls.delete(c)), contains: c => cls.has(c) },
+      setAttribute() {}, hasAttribute: () => false, removeAttribute() {}, querySelector: () => null, querySelectorAll: () => [] };
+    let html = '';
+    Object.defineProperty(el, 'innerHTML', { get: () => html, set(h) {
+      html = String(h);
+      for (const k of el.kids) delete byId[k];
+      el.kids = []; el.buttons = [];
+      for (const m of html.matchAll(/<div class="lq(?:-st)?-timer" id="([^"]+)"[^>]*>([^<]*)<\/div>/g)) {
+        const c = mkEl(m[1]); c.textContent = m[2]; byId[m[1]] = c; el.kids.push(m[1]);
+      }
+      for (const _ of html.matchAll(/class="lq-choice"/g)) el.buttons.push({ disabled: false });
+    } });
+    return el;
+  };
+  for (const id of ['lq-stage', 'lq-controls', 'live-quiz-body']) byId[id] = mkEl(id);
+  let now = 1e6;
+  const box = {
+    console: { log() {}, warn() {}, error() {} },
+    performance: { now: () => now },
+    setInterval: () => 1, clearInterval() {}, setTimeout: () => 1, clearTimeout() {},
+    localStorage: { getItem: () => null, setItem() {} }, sessionStorage: { getItem: () => null, setItem() {} },
+    document: { hidden: false, getElementById: id => byId[id] || null,
+      querySelectorAll: sel => (sel === '#live-quiz-body .lq-choice' ? byId['live-quiz-body'].buttons : []),
+      addEventListener() {}, body: { classList: { add() {}, remove() {} }, appendChild() {} }, createElement: () => mkEl('x'), contains: () => false },
+    t: k => (k === 'lq.timeUp' ? TIME_UP : k), tIn: k => k,
+    escHtml: s => String(s), escAttr: s => String(s), applyI18n() {}, firebase: {}
+  };
+  box.window = { addEventListener() {} };
+  try {
+    vm.createContext(box);
+    vm.runInContext(readFileSync(join(ROOT, 'live-quiz.js'), 'utf8'), box, { filename: 'live-quiz.js' });
+    vm.runInContext('var teacherView = "livequiz";', box);
+  } catch (e) { flag(`live-quiz.js would not load in the test VM: ${e.message}`); return; }
+  const fretId = vm.runInContext('Object.keys(LIVE_QUIZZES).find(k => LIVE_QUIZZES[k].type === "fret") || ""', box);
+  const mcId = vm.runInContext('Object.keys(LIVE_QUIZZES).find(k => (LIVE_QUIZZES[k].type || "mc") === "mc") || ""', box);
+  if (!fretId || !mcId) { flag(`the bank needs one mc and one fret quiz to test (mc: ${mcId || 'none'}, fret: ${fretId || 'none'})`); return; }
+  const views = [
+    { name: 'stage mc', quiz: mcId, limit: 20, stage: true },
+    { name: 'stage fret', quiz: fretId, limit: 2.5, stage: true },
+    { name: 'student mc', quiz: mcId, limit: 20, stage: false },
+    { name: 'student fret', quiz: fretId, limit: 2.5, stage: false }
+  ];
+  for (const v of views) {
+    for (const [when, goneMs, want] of [['mid-countdown', v.limit === 20 ? 7200 : 1000, v.limit === 20 ? '13' : '1.5'], ['after time-up', v.limit * 1000 + 3000, TIME_UP]]) {
+      const sess = JSON.stringify({ state: 'question', sessionId: `S-${v.name}-${when}`, qIndex: 0, quizId: v.quiz, limitSec: v.limit, target: { string: 'lowE', note: 'G' }, scores: {} });
+      const timerId = v.stage ? 'lq-st-timer' : 'lq-timer';
+      try {
+        vm.runInContext(v.stage
+          ? `lqTSession = ${sess}; lqTQOpenedAt = ${now - goneMs}; lqTAnswers = [{ sessionId: lqTSession.sessionId, qIndex: 0, uid: 'u1', name: 'A', choice: 'a' }]; lqPaintStage();`
+          : `lqSession = ${sess}; lqQOpenedAt = ${now - goneMs}; lqMyAnswer = null; lqRestoring = null; lqRenderStudent();`, box);
+      } catch (e) { flag(`${v.name} ${when}: the repaint threw ${e.message}`); continue; }
+      cases++;
+      const el = byId[timerId];
+      if (!el) { flag(`${v.name} ${when}: no #${timerId} on a timed question`); continue; }
+      if (el.textContent !== want) flag(`${v.name} ${when}: the repainted timer reads "${el.textContent}", want "${want === TIME_UP ? "Time's up" : want}" — re-sync the tick right after the paint (lqStageSyncTick / lqSyncTick)`);
+      if (want === TIME_UP && !el.classList.contains('out')) flag(`${v.name} ${when}: the repainted timer lost its "out" colour`);
+      if (want === TIME_UP && v.name === 'student mc') {
+        const b = byId['live-quiz-body'].buttons;
+        if (!b.length || b.some(x => !x.disabled)) flag(`student mc after time-up: ${b.filter(x => !x.disabled).length} of ${b.length} choice buttons are enabled again after the repaint`);
+      }
+    }
+  }
+  if (cases !== LQ_TIMER_CASES) flag(`ran ${cases} repaint cases, pinned at ${LQ_TIMER_CASES}`);
+  if (bad === 0) ok(`${cases} timed live-quiz repaints (stage + student, mc + fret, mid-countdown + after time-up) keep the real time left`);
+}
+
+/* ════════════════════════════════════════════════════════════════════
    1g. DUPLICATE TOP-LEVEL GLOBALS — a same-named top-level function in two
    shipped classic scripts silently lets whichever loads LAST win, with no
    error (see fab-tools.js/app.js's flashClass history). Two mirrors are
@@ -8606,6 +8695,7 @@ async function checkBackingLoudness() {
   checkLoadFailedMaps();
   await checkJourneyReadySave();
   checkSiteMadeClick();
+  checkLiveQuizTimerRepaint();
   await checkBackingLoudness();
   if (!SKIP_LINKS) await checkLinks();
   else warn('skipping link check (--skip-links)');
