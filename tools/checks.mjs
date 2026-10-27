@@ -8331,9 +8331,10 @@ function checkPowerChordPopups(sets, ctx) {
    pcRetrack via pcSetGuitar) in the 0b context with an <audio> stand-in that
    behaves like the load algorithm (src= resets position, readyState and
    paused; a seek before metadata is lost): Guitar+Guitar and Guitar+Slow, in
-   each engine, must end on the same bar, still playing, and a Stop in the gap
-   must stay stopped. The case count is pinned. */
-const PENDING_SWITCH_CASES = 6;
+   each engine, must end on the same bar, still playing, a Stop in the gap
+   must stay stopped, and a Slow press after the Guitar file loaded and played
+   ~3 s on must land on the moved place. The case count is pinned. */
+const PENDING_SWITCH_CASES = 8;
 function checkPendingFileSwitch(ctx) {
   head('1bz. A second file switch before the first has loaded keeps the place');
   let bad = 0, cases = 0;
@@ -8360,21 +8361,29 @@ function checkPendingFileSwitch(ctx) {
     ctx.Audio = LoadAudio; ctx.requestAnimationFrame = () => 0;
     const track = vm.runInContext(`Object.keys(SNIPPET_TRACKS).find(k => snippetHasFull(SNIPPET_TRACKS[k]) && SNIPPET_TRACKS[k].srcSlow)`, ctx);
     if (!track) { flag('1bz: no snippet track with a full mix and a slow tier to drive'); return; }
-    for (const steps of [['guitar', 'guitar'], ['guitar', 'slow'], ['guitar', 'stop']]) {
+    /* 'meta' = the pending file finishes loading; 'move' = ~3 s of play after
+       it. The last case switches AFTER a load has finished: the place must be
+       the moved one, not the first switch's (a pending marker left set would
+       send it back there). */
+    for (const steps of [['guitar', 'guitar'], ['guitar', 'slow'], ['guitar', 'stop'], ['guitar', 'meta', 'move', 'slow']]) {
       // Snippet engine.
       const card = el({ snip: JSON.stringify({ track, fromBar: 1, bars: 8 }), guitar: '' });
       ctx.__bz = { play: btn(card), gtr: btn(card, false), slow: btn(card, false) };
       vm.runInContext('snipStop(); snipToggle(__bz.play)', ctx);
       const sa = vm.runInContext('snipState.audio', ctx); sa.readyState = 1; sa.fire('loadedmetadata'); sa._t = vm.runInContext('snipState.win.start', ctx) + 7; sa.paused = false;
-      const sb0 = vm.runInContext('snipBarsAt(snipState.win, snipState.audio.currentTime)', ctx);
+      let sb0 = vm.runInContext('snipBarsAt(snipState.win, snipState.audio.currentTime)', ctx);
       vm.runInContext('__bz.st = snipState', ctx);
-      for (const s of steps) vm.runInContext(s === 'stop' ? 'snipStop()' : `snipSetTier(__bz.${s === 'guitar' ? 'gtr' : 'slow'}, ${JSON.stringify(s)})`, ctx);
+      for (const s of steps) {
+        if (s === 'meta') { meta(vm.runInContext('__bz.st.audio', ctx)); continue; }
+        if (s === 'move') { vm.runInContext('__bz.st.audio', ctx)._t += 3; sb0 = vm.runInContext('snipBarsAt(snipState.win, snipState.audio.currentTime)', ctx); continue; }
+        vm.runInContext(s === 'stop' ? 'snipStop()' : `snipSetTier(__bz.${s === 'guitar' ? 'gtr' : 'slow'}, ${JSON.stringify(s)})`, ctx);
+      }
       meta(vm.runInContext('__bz.st.audio', ctx));
       cases++;
       if (steps.includes('stop')) { if (vm.runInContext('snipState', ctx) || !vm.runInContext('__bz.st.audio.paused', ctx)) flag(`1bz snippet ${steps.join('+')}: playing again after a Stop in the gap`); }
       else {
         const b = vm.runInContext('snipBarsAt(snipState.win, snipState.audio.currentTime)', ctx), playing = !vm.runInContext('snipState.audio.paused', ctx);
-        if (Math.abs(b - sb0) > 0.02 || !playing) flag(`1bz snippet ${steps.join('+')}: was ${sb0.toFixed(2)} bars in, now ${b.toFixed(2)} (${playing ? 'playing' : 'stopped'}) — a second switch before the file loaded lost the place`);
+        if (Math.abs(b - sb0) > 0.02 || !playing) flag(`1bz snippet ${steps.join('+')}: was ${sb0.toFixed(2)} bars in, now ${b.toFixed(2)} (${playing ? 'playing' : 'stopped'}) — a file switch lost the place`);
       }
       vm.runInContext('snipStop()', ctx);
       // Practice-card engine.
@@ -8382,9 +8391,11 @@ function checkPendingFileSwitch(ctx) {
       ctx.__bz.root = root; ctx.__bz.g = { closest: () => root, setAttribute() {}, querySelectorAll() { return []; } };
       vm.runInContext(`pcState = { root: __bz.root, L: { tr: SNIPPET_TRACKS[${JSON.stringify(track)}], firstBar: 1, totalBars: 16, sections: [{ s: { label: 'x' }, fromBar: 1, bars: 16, reps: 1 }] }, audio: new Audio(), win: null, timers: [], wholeSong: true, counting: false, lastBeat: -1 };
         pcState.win = pcWindow(pcState.L, false); pcState.audio.src = snippetSrc(pcState.L.tr, false, false); pcState.audio.readyState = 4; pcState.audio.currentTime = pcState.win.start + 9; pcState.audio.paused = false; __bz.pst = pcState;`, ctx);
-      const pb0 = vm.runInContext('snipBarsAt(pcState.win, pcState.audio.currentTime)', ctx);
+      let pb0 = vm.runInContext('snipBarsAt(pcState.win, pcState.audio.currentTime)', ctx);
       for (const s of steps) {
-        if (s === 'guitar') vm.runInContext('pcSetGuitar(__bz.g)', ctx);
+        if (s === 'meta') meta(vm.runInContext('__bz.pst.audio', ctx));
+        else if (s === 'move') { vm.runInContext('__bz.pst.audio', ctx)._t += 3; pb0 = vm.runInContext('snipBarsAt(pcState.win, pcState.audio.currentTime)', ctx); }
+        else if (s === 'guitar') vm.runInContext('pcSetGuitar(__bz.g)', ctx);
         else if (s === 'slow') { root.dataset.slow = '1'; vm.runInContext('pcRetrack(__bz.root)', ctx); }
         else vm.runInContext('pcStop()', ctx);
       }
@@ -8393,12 +8404,12 @@ function checkPendingFileSwitch(ctx) {
       if (steps.includes('stop')) { if (vm.runInContext('pcState', ctx) || !vm.runInContext('__bz.pst.audio.paused', ctx)) flag(`1bz card ${steps.join('+')}: playing again after a Stop in the gap`); }
       else {
         const b = vm.runInContext('snipBarsAt(pcState.win, pcState.audio.currentTime)', ctx), playing = !vm.runInContext('pcState.audio.paused', ctx);
-        if (Math.abs(b - pb0) > 0.02 || !playing) flag(`1bz card ${steps.join('+')}: was ${pb0.toFixed(2)} bars in, now ${b.toFixed(2)} (${playing ? 'playing' : 'stopped'}) — a second switch before the file loaded lost the place`);
+        if (Math.abs(b - pb0) > 0.02 || !playing) flag(`1bz card ${steps.join('+')}: was ${pb0.toFixed(2)} bars in, now ${b.toFixed(2)} (${playing ? 'playing' : 'stopped'}) — a file switch lost the place`);
       }
       vm.runInContext('pcStop()', ctx);
     }
     if (cases !== PENDING_SWITCH_CASES) flag(`1bz ran ${cases} cases, pinned at ${PENDING_SWITCH_CASES}`);
-    if (!bad) ok(`${cases} double switches across both players (snippet + practice card: Guitar twice, Guitar then Slow, Stop in the gap) keep the bar and the play state`);
+    if (!bad) ok(`${cases} double switches across both players (snippet + practice card: Guitar twice, Guitar then Slow, Stop in the gap, Slow after the Guitar file loaded and played on) keep the bar and the play state`);
   } catch (e) {
     flag(`1bz: driving the players threw — ${e.message}`);
   } finally {
