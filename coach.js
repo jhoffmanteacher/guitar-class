@@ -3420,7 +3420,7 @@ function ccRenderDone(){
     }
   } else if (r >= 0.5){
     const early = t(cc.bpc >= 4 ? 'games.cc.early.bar' : cc.bpc === 2 ? 'games.cc.early.half' : 'games.cc.early.beat');
-    verdict = '&#x1F4AA; ' + (off ? t('games.cc.verdict.okMessy', { ok, total, off }) : t('games.cc.verdict.ok', { ok, total }));
+    verdict = '&#x1F4AA; ' + (off ? t(off === 1 ? 'games.cc.verdict.okMessyOne' : 'games.cc.verdict.okMessy', { ok, total, off }) : t('games.cc.verdict.ok', { ok, total }));
     advice = worst ? t('games.cc.advice.practiceWorst', { worst, early }) : t('games.cc.advice.tryAgainSteady');
   } else {
     verdict = '&#x1F3B8; ' + t('games.cc.verdict.low', { ok, total });
@@ -4610,7 +4610,7 @@ function psRenderDone(){
   body.innerHTML =
     `<div class="coach-report">
        <div class="cb-done-score">${ps.round}</div>
-       <div class="coach-overall">${GAME_ICO.simon} ${t('games.ps.roundsCleared', { n: ps.round })}</div>
+       <div class="coach-overall">${GAME_ICO.simon} ${t(ps.round === 1 ? 'games.ps.roundsClearedOne' : 'games.ps.roundsCleared', { n: ps.round })}</div>
        ${bestLine}
        <div class="coach-actions">
          <button type="button" class="coach-start" onclick="psStart()">&#x21BB; ${t('games.common.playAgain')}</button>
@@ -4934,7 +4934,7 @@ function psgRenderDone(){
   body.innerHTML =
     `<div class="coach-report">
        <div class="cb-done-score">${s.round}</div>
-       <div class="coach-overall">${GAME_ICO.simonguitar} ${t('games.ps.roundsCleared', { n: s.round })}</div>
+       <div class="coach-overall">${GAME_ICO.simonguitar} ${t(s.round === 1 ? 'games.ps.roundsClearedOne' : 'games.ps.roundsCleared', { n: s.round })}</div>
        ${missLine}
        ${bestLine}
        <div class="coach-tip">${t('games.psg.tuneTip')}</div>
