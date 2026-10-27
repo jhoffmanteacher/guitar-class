@@ -5968,8 +5968,8 @@ window.CLASS_ACTIVITIES = [
     view:  'card',    // one screen: Play song + sheet + checks — see CARD above
     title:    'All Along the Watchtower — Lyrics and Chords',
     title_es: 'All Along the Watchtower — Letra y acordes',
-    intro:    'Play the whole song in power chords from the chord sheet. The dot shows the chord to play and when to strum it.',
-    intro_es: 'Toca la canción completa con acordes de potencia desde la hoja de acordes. El punto muestra el acorde que tocas y cuándo rasguear.',
+    intro:    'Play the whole song in power chords from the chord sheet. The dot shows the chord to play and keeps the beat.',
+    intro_es: 'Toca la canción completa con acordes de potencia desde la hoja de acordes. El punto muestra el acorde que tocas y marca el tiempo.',
     card: {
       wholeSong: true,  // stops at the end of the song instead of looping
       track: 'all-along-the-watchtower',

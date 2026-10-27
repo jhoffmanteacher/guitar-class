@@ -537,8 +537,8 @@
     'ca.cardPlayingFrom':      { en: 'Playing from: {section}', es: 'Tocando desde: {section}' },
     'ca.cardRepOf':            { en: '{what} {n} of {total}', es: '{what} {n} de {total}' },
     // Lyric-sheet practice card (card.sheet, ca-38 — 2026-10-19)
-    'ca.sheetDirections':      { en: 'Press Play song. The dot fills on every beat. Change chords on the word under each chord name. When the dot is hollow, let the chord ring. Check a box when you can do it.',
-                                 es: 'Presiona «Tocar la canción». El punto se llena en cada tiempo. Cambia de acorde en la palabra debajo de cada nombre de acorde. Cuando el punto está vacío, deja sonar el acorde. Marca una casilla cuando lo puedas hacer.' },
+    'ca.sheetDirections':      { en: 'Press Play song. The dot fills on every beat. Listen to the recording and strum the way it does. Change chords on the word under each chord name. Check a box when you can do it.',
+                                 es: 'Presiona «Tocar la canción». El punto se llena en cada tiempo. Escucha la grabación y rasguea como ella. Cambia de acorde en la palabra debajo de cada nombre de acorde. Marca una casilla cuando lo puedas hacer.' },
     'ca.sheetTapHint':         { en: 'Tap a section, or any chord on the sheet, to start the song there.',
                                  es: 'Toca una sección, o cualquier acorde de la hoja, para empezar la canción ahí.' },
     'ca.sheetThisBar':         { en: 'This bar', es: 'Este compás' },
