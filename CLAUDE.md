@@ -811,7 +811,7 @@ before any reviewer starts:
   one-line reason from the change itself ("changes what students see during
   play" vs "wording only").
 - **Always Reviewed, not offered:** a danger-zone file, a new kind of check,
-  or moving / adding / removing a section or step. Say why in one line and
+  a sub-agent sweep, or moving / adding / removing a section or step. Say why in one line and
   run the review instead of asking.
 - **No trigger → don't ask.** Ship as usual.
 - **No answer** (a scheduled or unattended session, or no AskUserQuestion
