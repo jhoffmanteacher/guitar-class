@@ -3955,6 +3955,10 @@ function cdRenderSetup(){
 function cdStart(){
   if (!cd || cd.phase === 'play') return;
   coachClose(); coachEvictTuner();   // one mic/audio owner at a time
+  /* The round is judged by ear, so it has to be heard clean: a metronome or
+     backing track the student left running would play under every card
+     (Name That Riff's ntrPlay does the same). */
+  if (typeof stopAllDemoAudio === 'function') stopAllDemoAudio();
   const s = cd;
   s.phase = 'play';
   s.score = 0; s.streak = 0; s.answered = 0; s.correct = 0;
@@ -6041,7 +6045,11 @@ async function rrStart(){
   coachClose(); coachEvictTuner();   // one mic/audio owner at a time
   const s = rr;
   s.phase = 'run';
-  stopAllDemoAudio();
+  /* A card with a click plays its own, so the student's metronome must stop;
+     a card with no click (holds, wildcards) plays nothing and leaves the
+     metronome alone, the stopCardAudio() rule. */
+  if (RR_CARDS[s.cardIdx] && RR_CARDS[s.cardIdx].bpm) stopAllDemoAudio();
+  else stopCardAudio();
   /* The click is scheduled on the audio clock and the done-beeps use
      beep(), which assumes a running context — resume a suspended
      (autoplay-blocked) one first, with the usual stale guard. */
@@ -9207,6 +9215,10 @@ function pdSetup(){
 function pdStart(){
   if (!pd || pd.phase === 'play') return;
   coachClose(); coachEvictTuner();   // one mic/audio owner at a time
+  /* The round is judged by ear, so it has to be heard clean: a metronome or
+     backing track the student left running would play under every card
+     (Name That Riff's ntrPlay does the same). */
+  if (typeof stopAllDemoAudio === 'function') stopAllDemoAudio();
   const s = pd;
   s.phase = 'play';
   s.score = 0; s.streak = 0; s.answered = 0; s.correct = 0;
