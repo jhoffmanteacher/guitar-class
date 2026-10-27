@@ -4858,7 +4858,8 @@ window.CLASS_ACTIVITIES = [
      reach the song. (The sheet writes Am in verse 2; the record plays A
      there, and so does this card — see ca-35.) Lyrics and chord
      placement come from that sheet ("fila" -> "pila", "solesito" ->
-     "solecito", "Le venimos" -> "te venimos", accents added). The sheet's
+     "solecito", accents added; "le venimos" stays as the record sings it —
+     Jonathan, 2026-10-26). The sheet's
      second strum pattern (down-up for the first lines of each verse) is
      left out on purpose — one strum all the way through — and so are its
      solo (tremolo) and the fills between verse lines. The requinto (lead guitar) intro and outro
