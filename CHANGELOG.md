@@ -5,6 +5,13 @@ Notable changes to the Guitar Class site. Newest first.
 For the full session-by-session history (and the reasoning behind each change),
 see `WORKFLOW.md` and the git commit log.
 
+## 2026-10-27 — Module 3 Set 2: the "Watchtower" loop uses the record's rhythm
+
+- **Challenge 1 ("Watchtower" Loop in Time) now matches the record.** It used
+  to say to give each chord one bar. Now bar 1 is A5 on 1 and 2, then G5 on 3
+  and 4. Bar 2 is F5 on 1 and 2, a rest on 3, then G5 on the + after 3 and on
+  4. The chords change on the same counts as Set 1, Challenge 7.
+
 ## 2026-10-27 — Las Mañanitas: an alternating-bass switch
 
 - **Strum only / Alternating bass.** The Las Mañanitas play-along has a new

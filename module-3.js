@@ -606,15 +606,15 @@ SETS.push(
         title_es: 'Estación de práctica — metrónomo y cambios de acorde',
         sections: [
           {
-            title: 'Change power chords on beat 1 at 60 BPM',
-            title_es: 'Cambia acordes de potencia en el tiempo 1 a 60 BPM',
+            title: 'Change power chords in time at 60 BPM',
+            title_es: 'Cambia acordes de potencia a tiempo a 60 BPM',
             steps: [
           {
             label: 'Challenge 1 — "Watchtower" Loop in Time', label_es: 'Reto 1 — Vuelta de "Watchtower" a tiempo',
-            text: '<ol><li>Set the metronome to 60 BPM.</li><li>Play A5, G5, F5, G5. Give each chord one bar: strum once on each beat.</li><li>Change chords on beat 1.</li><li>Play the loop four times.</li></ol>You\'ve got it when: every change lands on beat 1 and you do not stop.',
-            text_es: '<ol><li>Pon el metrónomo a 60 BPM.</li><li>Toca A5, G5, F5, G5. Dale a cada acorde un compás: rasguea una vez en cada tiempo.</li><li>Cambia de acorde en el tiempo 1.</li><li>Toca la vuelta cuatro veces.</li></ol>Lo tienes cuando: cada cambio cae en el tiempo 1 y no te detienes.',
-            hint: 'If you miss beat 1, keep playing. Join again on the next beat 1.',
-            hint_es: 'Si te pierdes el tiempo 1, sigue tocando. Vuelve a entrar en el siguiente tiempo 1.',
+            text: '<ol><li>Set the metronome to 60 BPM.</li><li>Bar 1: strum A5 on 1 and 2. Strum G5 on 3 and 4.</li><li>Bar 2: strum F5 on 1 and 2. Rest on 3. Strum G5 on the + after 3 and on 4.</li><li>Play the loop four times.</li></ol>You\'ve got it when: every chord change lands on its count and you do not stop.',
+            text_es: '<ol><li>Pon el metrónomo a 60 BPM.</li><li>Compás 1: rasguea A5 en 1 y 2. Rasguea G5 en 3 y 4.</li><li>Compás 2: rasguea F5 en 1 y 2. Silencio en el 3. Rasguea G5 en el + después del 3 y en el 4.</li><li>Toca la vuelta cuatro veces.</li></ol>Lo tienes cuando: cada cambio de acorde cae en su conteo y no te detienes.',
+            hint: 'If you miss a change, keep playing. Join again on the next beat 1.',
+            hint_es: 'Si fallas un cambio, sigue tocando. Vuelve a entrar en el siguiente tiempo 1.',
             stuck: 'Set the metronome to 50 BPM. Keep playing when you miss a change.',
             stuck_es: 'Pon el metrónomo a 50 BPM. Sigue tocando cuando falles un cambio.',
             levelUp: 'Play it at 70 BPM.',
