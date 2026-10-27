@@ -471,6 +471,10 @@ function ensurePlayer(){
     a.addEventListener('play', function(){ fabBtn.setAttribute('aria-pressed', 'true'); });
     a.addEventListener('pause', function(){ fabBtn.setAttribute('aria-pressed', 'false'); });
   }
+  /* Any play (the floating pill while the box is collapsed, say) means
+     collapsing is no longer what paused the track: forget the auto-pause,
+     so re-opening the box doesn't restart a track paused since then. */
+  a.addEventListener('play', function(){ delete box.dataset.autopaused; });
 
   box.dataset.loaded = '1';
   return a;
