@@ -3141,19 +3141,24 @@ function ccRenderSetup(msg){
 }
 
 async function ccStart(){
-  if (!cc || cc.phase === 'countin' || cc.phase === 'play') return;
+  /* 'starting' covers the mic await below: the Start and Again buttons stay
+     on screen during it, and a second tap used to run a second start (and
+     a double-tapped "+10 BPM" landed at +20). */
+  if (!cc || cc.phase === 'starting' || cc.phase === 'countin' || cc.phase === 'play') return;
   coachClose();
   fretStop();
   coachEvictTuner();
   const session = cc;
+  cc.phase = 'starting';
   if (!coachStream && !(await coachAcquireMic())){
-    if (cc === session) ccRenderSetup(coachMicFailMsg('games.cc.micDenied'));
+    if (cc === session){ cc.phase = 'setup'; ccRenderSetup(coachMicFailMsg('games.cc.micDenied')); }
     return;
   }
   await coachEnsureRunning();
   if (cc !== session){ coachReleaseMicIfIdle(); return; }   // panel closed during the prompt
   if (document.hidden){
     coachMicOff();
+    cc.phase = 'setup';
     ccRenderSetup(t('games.common.pausedBackgrounded'));
     return;
   }
@@ -3439,7 +3444,7 @@ function ccRenderDone(){
 }
 
 function ccAgain(d){
-  if (!cc) return;
+  if (!cc || cc.phase !== 'done') return;   // a second tap while the first is starting
   cc.bpm = Math.min(CC_BPM_MAX, Math.max(CC_BPM_MIN, cc.bpm + d));
   try { sessionStorage.setItem('ccBpm', String(cc.bpm)); } catch(e){}
   cc.phase = 'setup';
