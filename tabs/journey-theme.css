@@ -67,10 +67,9 @@ html{font-size:18px}
 body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,"Helvetica Neue",Arial,sans-serif;background:var(--bg);color:var(--text);line-height:1.55;padding:20px 48px 64px;-webkit-font-smoothing:antialiased}
 /* .wrap's max-width is what actually sets the side margin on wide screens
    (it auto-centers well inside body's padding there) — so widening the
-   margin means narrowing this, not just bumping padding. 616px = the old
-   760px minus .75in (72px) off each side; body padding above matches so
-   narrower/tablet screens, where padding is the binding constraint, get
-   the same extra margin. */
+   margin means narrowing this, not just bumping padding. 1000px since
+   2026-10-07 (the wider column); on narrower screens body's 48px side
+   padding above is the binding constraint. */
 .wrap{max-width:1000px;margin:0 auto}
 a{color:var(--brand)}
 .crumb{font-size:0.8125rem;color:var(--text2);margin-bottom:18px;display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:8px 12px}

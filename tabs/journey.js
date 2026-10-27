@@ -853,7 +853,7 @@ function addWholeSongTabs(){
 addWholeSongTabs();
 
 /* Full width (Jonathan, 2026-10-07: "use the entire width of a chromebook
-   screen"). An open whole-song tab leaves the page's 760px reading column
+   screen"). An open whole-song tab leaves the page's 1000px reading column
    and spans the window less a 24px margin each side, and its rows are
    re-drawn to as many bars as that width holds — about ten bars of "the
    cure" a row at 1366px, against four in the column. Measured, not set in
