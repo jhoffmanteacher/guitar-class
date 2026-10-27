@@ -177,12 +177,17 @@ function coachOpen(btn){
                                       // cleanly (its UI resets) before coachClose()
                                       // tears the stream down
   coachClose();                       // one card at a time
-  let slots, mode, desc, tabNotes = null, tabDerived = false, hideNames = false;
+  let slots, mode, desc, tabNotes = null, tabDerived = false, hideNames = false, chordShapes = null;
   if (btn.dataset.chords){
     let chords;
     try { chords = JSON.parse(btn.dataset.chords); } catch(e){ return; }
     if (!Array.isArray(chords) || !chords.length) return;
     mode = 'chords';
+    /* The step's own diagrams by name (app.js data-chord-shapes): a barre C
+       at fret 3 or a B5 at fret 7 on the low E must not be drawn as the
+       library's open C or A-string B5. Kept out of data-chords on purpose:
+       that JSON is the drill and streak key. */
+    try { chordShapes = btn.dataset.chordShapes ? JSON.parse(btn.dataset.chordShapes) : null; } catch(e){ chordShapes = null; }
     slots = coachChordSlots(chords);
     desc = coachChordDesc(chords, slots.length);
   } else {
@@ -266,7 +271,7 @@ function coachOpen(btn){
   }
 
   coach = {
-    phase: 'ready', mode, slots, desc, bpm, tabNotes, tabDerived, hideNames, hiddenTabs,
+    phase: 'ready', mode, slots, desc, bpm, tabNotes, tabDerived, hideNames, hiddenTabs, chordShapes,
     beatMs: 60000 / bpm,
     card, streakKey: 'coachStreak:' + (btn.dataset.chords || btn.dataset.midis),
     drillId: btn.dataset.chords || btn.dataset.midis,
@@ -1078,7 +1083,7 @@ function coachChordsHtml(curName){
   if (coach.mode !== 'chords') return '';
   const names = [];
   coach.slots.forEach(s => { if (s.chordName && names.indexOf(s.chordName) < 0) names.push(s.chordName); });
-  return ccDiagramsHtml(names, curName, 'coach-dia');
+  return ccDiagramsHtml(names, curName, 'coach-dia', coach.chordShapes);
 }
 
 /* Lane header: what the beat column is sitting on, and what's coming.
@@ -3093,11 +3098,17 @@ function ccNudgeBpm(d){
   else ccRenderSetup();
 }
 
-function ccDiagramsHtml(chords, curName, idPrefix){
+/* `shapes` (optional) maps a name to the step's own { position, chord }; a
+   name it holds is drawn from that, any other from the library. */
+function ccDiagramsHtml(chords, curName, idPrefix, shapes){
   if (typeof localChordSvg !== 'function') return '';
   const pre = idPrefix || 'cc-dia';
   const boxes = chords.map(n => {
-    const svg = localChordSvg(n);
+    const own = shapes && Object.prototype.hasOwnProperty.call(shapes, n) && shapes[n] && Array.isArray(shapes[n].chord) ? shapes[n] : null;
+    /* Width/height stripped so it scales, as localChordSvg does. */
+    const svg = own && typeof chordDiagramSVG === 'function'
+      ? chordDiagramSVG(own).replace(/width="\d+"\s+height="\d+"/, '')
+      : localChordSvg(n);
     if (!svg) return '';
     return `<div class="chord-box cc-dia${n === curName ? ' cur' : ''}" id="${pre}-${escAttr(n)}">${svg}<div class="chord-box-label">${escHtml(n)}</div></div>`;
   }).join('');
