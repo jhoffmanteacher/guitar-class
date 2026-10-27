@@ -300,19 +300,28 @@ function ensurePlayer(){
     return metroOn ? d.audioMetronome : d.audio;
   };
 
+  /* One switch at a time. load() pauses and rewinds to 0 at once, so a
+     second press (Slow twice, or Guitar then Slow) before the first
+     switch's metadata arrives would read paused / 0:00 back and seek there
+     after the first switch's seek. It carries the pending switch's place
+     and play state forward instead, and replaces its listener. */
+  var pendingSwitch = null;
   var switchSrc = function(rescale){
-    var wasPlaying = !a.paused;
-    var t = a.currentTime;
+    var wasPlaying = pendingSwitch ? pendingSwitch.play : !a.paused;
+    var t = pendingSwitch ? pendingSwitch.t : a.currentTime;
+    if(pendingSwitch) a.removeEventListener('loadedmetadata', pendingSwitch.resume);
     if(rescale){
       var bpm = parseFloat(box.dataset.bpm);
       var bpmSlow = parseFloat(box.dataset.bpmSlow);
       if(bpm && bpmSlow) t = slowOn ? t * (bpm / bpmSlow) : t * (bpmSlow / bpm);
     }
     var resume = function(){
+      pendingSwitch = null;
       a.currentTime = t;
       if(wasPlaying) a.play().catch(function(){});
       a.removeEventListener('loadedmetadata', resume);
     };
+    pendingSwitch = { t: t, play: wasPlaying, resume: resume };
     a.addEventListener('loadedmetadata', resume);
     a.src = currentSrc();
     a.load();
