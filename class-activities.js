@@ -6345,7 +6345,7 @@ window.CLASS_ACTIVITIES = [
         {
           label: 'Verse 1', label_es: 'Estrofa 1',
           chordGrid: false,  // single notes (B string, high e), not chords — keeps the note-by-note highlight
-          caption: 'Verse 1 — B string fret 1, then high e fret 1, 6 laps · let them ring', caption_es: 'Estrofa 1 — cuerda Si traste 1, después Mi aguda traste 1, 6 vueltas · déjalas sonar',
+          caption: 'Verse 1 — B string fret 1, then high e fret 1, 6 laps · let them ring', caption_es: 'Estrofa 1 — cuerda Si traste 1, después cuerda mi aguda traste 1, 6 vueltas · déjalas sonar',
           fromBar: 9, bars: 2, reps: 6,
           repLabel: 'Lap', repLabel_es: 'Vuelta',
           notes: [
@@ -6393,7 +6393,7 @@ window.CLASS_ACTIVITIES = [
         {
           label: 'Verse 2', label_es: 'Estrofa 2',
           chordGrid: false,  // single notes (B string, high e), not chords — keeps the note-by-note highlight
-          caption: 'Verse 2 — B string fret 1, then high e fret 1, 6 laps · let them ring', caption_es: 'Estrofa 2 — cuerda Si traste 1, después Mi aguda traste 1, 6 vueltas · déjalas sonar',
+          caption: 'Verse 2 — B string fret 1, then high e fret 1, 6 laps · let them ring', caption_es: 'Estrofa 2 — cuerda Si traste 1, después cuerda mi aguda traste 1, 6 vueltas · déjalas sonar',
           fromBar: 45, bars: 2, reps: 6,
           repLabel: 'Lap', repLabel_es: 'Vuelta',
           notes: [
@@ -6453,7 +6453,7 @@ window.CLASS_ACTIVITIES = [
         {
           label: 'Verse 3', label_es: 'Estrofa 3',
           chordGrid: false,  // single notes (B string, high e), not chords — keeps the note-by-note highlight
-          caption: 'Verse 3 — B string fret 1, then high e fret 1, 4 laps · let them ring', caption_es: 'Estrofa 3 — cuerda Si traste 1, después Mi aguda traste 1, 4 vueltas · déjalas sonar',
+          caption: 'Verse 3 — B string fret 1, then high e fret 1, 4 laps · let them ring', caption_es: 'Estrofa 3 — cuerda Si traste 1, después cuerda mi aguda traste 1, 4 vueltas · déjalas sonar',
           fromBar: 93, bars: 2, reps: 4,
           repLabel: 'Lap', repLabel_es: 'Vuelta',
           notes: [
@@ -6513,7 +6513,7 @@ window.CLASS_ACTIVITIES = [
           text_es: 'Deja la velocidad donde la tarjeta la deja al empezar. Toca la intro y la estrofa 1 con la banda, sin detenerte.' },
         { label: 'Chorus 1 and the new chords, slower', label_es: 'Coro 1 y los acordes nuevos, más lentos',
           text:    'Tap Chorus 1 to start there. Play chorus 1 and interlude 1 with the band, without stopping.',
-          text_es: 'Toca «Coro 1» para empezar ahí. Toca el coro 1 y el interludio 1 con la banda, sin detenerte.' },
+          text_es: 'Pulsa «Coro 1» para empezar ahí. Toca el coro 1 y el interludio 1 con la banda, sin detenerte.' },
         { label: 'The whole song, slower', label_es: 'La canción completa, más lenta',
           text:    'Leave the speed where the card starts it, or move it one stop left. Play with the band from the intro to the last chord, without stopping.',
           text_es: 'Deja la velocidad donde la tarjeta la deja al empezar, o muévela una posición a la izquierda. Toca con la banda desde la intro hasta el último acorde, sin detenerte.' },
