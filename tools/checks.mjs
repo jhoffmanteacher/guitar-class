@@ -8087,11 +8087,12 @@ function checkChordGridCards(ctx) {
    over every step text, hint and checklist label in a small fake DOM built from
    that HTML (the real walker, skip classes and all):
    - in scope: 0 power-chord links;
-   - the same elements under a set outside the scope (the control) link every
-     power-chord name, and that total is pinned (POWER_CHORD_SCOPE_LINKS) so the
+   - the same elements under a set outside the scope (the control; a
+     checklist row there gets that set's own skill id) link every power-chord
+     name, and that total is pinned (POWER_CHORD_SCOPE_LINKS) so the
      check cannot go blind or lose its scope silently;
    - m9w0's other text keeps its chord links (the scope is one skill, not the set). */
-const POWER_CHORD_SCOPE_LINKS = 101;
+const POWER_CHORD_SCOPE_LINKS = 107;
 function checkPowerChordPopups(sets, ctx) {
   head('1by. Power-chord names open no pop-up where the two-finger shape is taught');
   let bad = 0;
@@ -8197,7 +8198,10 @@ function checkPowerChordPopups(sets, ctx) {
           // The real linker on this element under `sid`'s panel; returns what it linked.
           const realRun = sid => {
             const panel = mkEl('div', `class="week-panel" data-id="${sid}" data-module="${(/^m(\d+)/.exec(sid) || [])[1]}"`, null);
-            const owner = e.owner ? mkEl(e.owner.kind === 'step' ? 'li' : 'div', `class="${e.owner.kind === 'step' ? 'step' : 'skill-row'}"${e.owner.attrs}`, panel) : panel;
+            // Outside the scope the checklist row is another set's too: a row
+            // keeps data-sid="m9w0-s4" wherever it sits, and the scope reads it.
+            const attrs = sid === setId ? e.owner && e.owner.attrs : e.owner && e.owner.attrs.replace(/data-sid="[^"]*"/, `data-sid="${sid}-s1"`);
+            const owner = e.owner ? mkEl(e.owner.kind === 'step' ? 'li' : 'div', `class="${e.owner.kind === 'step' ? 'step' : 'skill-row'}"${attrs}`, panel) : panel;
             const root = mkEl('div', 'class="probe"', owner);
             parseInto(root, e.inner);
             patch(root);
