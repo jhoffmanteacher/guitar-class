@@ -1020,8 +1020,8 @@ let restoreActivityScroll = false;
    since it was written; this was the copy that was missing.
 
    It lives HERE rather than at the end of the two detail renderers because
-   those re-render in place — teacherSetActivityClear repaints the page on
-   every per-student Clear, and jumping to the top mid-way down a 60-row
+   those re-render in place — a Preview-as-student toggle, a period filter
+   change, the Students part after every per-student Clear — and jumping to the top mid-way down a 60-row
    grid is its own bug. Opening is the only moment the scroll should move.
    window, not a scroll pane: the dashboard is a plain long page, and #app
    (which does have its own pane — scrollPane() in app.js) is hidden the
@@ -3303,7 +3303,10 @@ async function teacherSetActivityClear(uid, id, state){
   // activityDetailId outlives a switch to the Students tab (only the
   // Activities tab resets it), so check the view too — a Clear on a
   // student's page must repaint that page, not jump to the last activity.
-  if(teacherView==='activities' && activityDetailId) renderTeacherActivityDetail(activityDetailId);
+  // On an activity's page only the Students part repaints (the Clear buttons
+  // live there): rebuilding the whole page stopped a song playing in its
+  // Preview and wiped an exit check's preview picks.
+  if(teacherView==='activities' && activityDetailId) teacherRepaintActivityStudents(activityDetailId);
   else if(teacherView==='students') studentDetailUid ? renderTeacherStudentDetail(studentDetailUid) : renderTeacherStudents();
 }
 // "Clear all" on a student's detail page — every CURRENT blocker for them,
