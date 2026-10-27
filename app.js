@@ -5038,8 +5038,17 @@ function routeExploreHash(){
      in most browsers, and goExploreHash routes by hand on top of that.
      Routing is idempotent, but the scroll stash below is not — so bail on a
      repeat of the hash we already routed to. */
+  const leftPage = exploreHashBase(lastRoutedHash);
   if(full === lastRoutedHash) return;
   lastRoutedHash = full;
+  /* A Listening Coach check on the page being covered (the set, under Songs /
+     My progress / Class activities) or left (a class activity's card) is only
+     hidden by CSS: its mic and rAF loop would keep running unseen, and while
+     the mic is live every Play on the new page does nothing. Close it, the
+     same as activateSet() and switchTabById() do. #games closes it itself
+     (openGamesScreen). */
+  const inColumn = x => EXPLORE_PAGES.some(p => p.hash === x && !p.overlay);
+  if(h !== leftPage && (inColumn(h) || inColumn(leftPage)) && typeof coachClose === 'function') coachClose();
   /* Remember the student's place in the set BEFORE anything is shown or
      hidden — once a screen is in the flow, .main's scrollTop has already
      been shifted by scroll anchoring and no longer means what it says.
