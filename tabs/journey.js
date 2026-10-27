@@ -1101,7 +1101,7 @@ function flushSave(closing){
     if(mark) payload.migrations = { swap45: true };
     return payload;
   };
-  var uid = fbUser.uid;
+  var uid = fbUser.uid, gen = loadGen;
   var ref = fbDb.collection('progress').doc(uid);
   var write = swap45DocNew
     ? ref.set(build(false, false), { merge: true })
@@ -1115,7 +1115,13 @@ function flushSave(closing){
       }).then(function(isNew){ if(isNew && fbUser && fbUser.uid === uid) swap45DocNew = true; });
   write
     .then(function(){ setSaveMsg('journey.saved'); saveMsgTimer = setTimeout(function(){ setSaveMsg(''); }, 2000); })
-    .catch(function(){ dirty = true; setSaveMsg('journey.saveFailed'); });
+    .catch(function(){
+      /* A save refused after the student signed out or changed is theirs,
+         not the next student's: re-marking it dirty would write the reset
+         page into the new student's doc once their read lands. */
+      if(gen !== loadGen) return;
+      dirty = true; setSaveMsg('journey.saveFailed');
+    });
 }
 
 /* ── Activity gate (Today-first work order, Phase 1) ──
