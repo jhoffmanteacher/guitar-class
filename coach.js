@@ -4338,12 +4338,13 @@ function ntrPlay(){
   const s = ntr;
   const song = s.cur;
   const msPerBeat = 60000 / song.bpm;
+  const line = gameLine();   // each note lifts the one before (gameVoice)
   song.notes.forEach(nt => {
     const midi = STRING_OPEN_MIDI[nt[0]] + nt[1];
     const at = nt[2] * msPerBeat;
     s.noteTimeouts.push(setTimeout(() => {
       if (ntr !== s || s.cur !== song) return;
-      if (typeof playNote === 'function') playNote(midi);
+      if (typeof playNote === 'function') gameVoice(line, nt[2], midi);
     }, at));
   });
 }
@@ -6849,8 +6850,34 @@ function rnSetMode(guitar){
    loads first on index.html) so Riff Runner gets the same recorded guitar
    as every TAB Play button, and the synth fallback when a note isn't
    downloaded yet — it used to build its own synth buffer here. */
-function rnPluckAt(midi, t){
+function rnPluckAt(midi, t, line, group){
+  if (line) return gameVoice(line, group, midi, PLUCK_VOICE_GAIN, t);
   return playNote(midi, PLUCK_VOICE_GAIN, t).src;
+}
+
+/* A guitarist lifts the last note as the next one sounds. A recorded note
+   left alone rings for three seconds, so a riff preview turned into a wash
+   (app.js damps its own lines the same way: playSeqDamp). gameVoice plays
+   one note and fades out the previous group the moment this one starts.
+   `line` = { group, voices }, one per preview; notes that share a `group`
+   (one strum, one chord) ring together. Returns the source so a Stop can
+   still cut it. `at` is an audio-clock time, or omitted for now. */
+function gameLine(){ return { group: null, voices: [] }; }
+function gameVoice(line, group, midi, gain, at){
+  const v = playNote(midi, gain, at);
+  const when = at || getAudioCtx().currentTime;
+  if (line.group !== group){
+    line.voices.forEach(p => {
+      try {
+        p.gain.gain.setTargetAtTime(0, when, PLAY_SEQ_DAMP_TC);
+        p.src.stop(when + PLAY_SEQ_DAMP_TC * 8);
+      } catch(e){ /* already stopped */ }
+    });
+    line.voices = [];
+    line.group = group;
+  }
+  line.voices.push(v);
+  return v.src;
 }
 
 /* "Hear it" — the teaching moment: play one lap of the riff through the
@@ -6870,7 +6897,7 @@ async function rnHear(){
   if (!rnBody()){ rnStop(); return; }
   const song = RN_SONGS[s.songIdx];
   const spb = 60 / rnTierBpm(song, s.tier);
-  s.pv = { ctx, spb, notes: song.notes, idx: 0, srcs: [],
+  s.pv = { ctx, spb, notes: song.notes, idx: 0, srcs: [], line: gameLine(),
            startAt: ctx.currentTime + 0.15, sched: setInterval(rnPvSchedule, 25) };
   rnPvSchedule();
   const btn = document.getElementById('rn-hear');
@@ -6893,7 +6920,7 @@ function rnPvSchedule(){
     const nt = pv.notes[pv.idx];
     const t = pv.startAt + nt[2] * pv.spb;
     if (t >= horizon) break;
-    pv.srcs.push(rnPluckAt(STRING_OPEN_MIDI[nt[0]] + nt[1], t));
+    pv.srcs.push(rnPluckAt(STRING_OPEN_MIDI[nt[0]] + nt[1], t, pv.line, nt[2]));
     pv.idx++;
   }
   if (pv.idx >= pv.notes.length && pv.sched){ clearInterval(pv.sched); pv.sched = null; }
@@ -7101,7 +7128,8 @@ function rnPress(str, ts){
   }
   if (best >= 0){
     const n = s.notes[best];
-    if (typeof playNote === 'function') playNote(STRING_OPEN_MIDI[n.string] + n.fret);   // the reward: the riff itself
+    // The reward: the riff itself, each hit lifting the one before (gameVoice).
+    if (typeof playNote === 'function') gameVoice(s.rewardLine || (s.rewardLine = gameLine()), best + ':' + n.t, STRING_OPEN_MIDI[n.string] + n.fret);
     s.errs.push(t - n.t);
     s.combo++;
     if (s.combo > s.maxCombo) s.maxCombo = s.combo;
@@ -8062,11 +8090,13 @@ async function nrHear(){
   if (!nrBody()){ nrHearStop(); return; }
   const lv = nrLv(s);
   const laps = nrLapMap(lv);
-  const notes = nrGen(lv).filter(n => !n.rest);
+  /* In time order, so each note can lift the one before it (gameVoice). */
+  const notes = nrGen(lv).filter(n => !n.rest).sort((a, b) => a.beat - b.beat);
   const startAt = ctx.currentTime + 0.2;
+  const line = gameLine();
   /* A chord token previews as root + fifth + octave — the power-chord sound. */
   s.pv = { srcs: notes.flatMap(n => (n.chord ? [0, 7, 12] : [0])
-    .map(iv => rnPluckAt(n.midi + iv, startAt + nrBeatToMs(laps, n.beat) / 1000))) };
+    .map(iv => rnPluckAt(n.midi + iv, startAt + nrBeatToMs(laps, n.beat) / 1000, line, n.beat))) };
   const btn = document.getElementById('nr-hear');
   if (btn) btn.innerHTML = '&#x25A0; ' + t('games.common.stop');
   const pv = s.pv;
@@ -9305,6 +9335,11 @@ function pdPlayBar(){
      two bars overlapping would make the judgement unfair. */
   (s.audioT || []).forEach(clearTimeout);
   s.audioT = [];
+  /* Strums already sounding are lifted by the next strum (gameVoice), the
+     first strum of a replay or a new card included; `bar` keeps two bars'
+     strums in separate groups. */
+  if (!s.line) s.line = gameLine();
+  const bar = s.barN = (s.barN || 0) + 1;
   const eighthMs = 60000 / PD_BPM / 2;
   /* Two clocks (Strum Hero's shSchedule pattern): every sound starts at
      an exact audio-clock time; its setTimeout only has to fire in the
@@ -9323,7 +9358,7 @@ function pdPlayBar(){
     const order = dir === 'D' ? midis : midis.slice(-4).reverse();
     const stepMs = dir === 'D' ? 30 : 18;
     const vg = chordGain(order.length, true) * (dir === 'U' ? 0.8 : 1);
-    order.forEach((m, j) => schedule(i * eighthMs + j * stepMs, at => playNote(m, vg, at)));
+    order.forEach((m, j) => schedule(i * eighthMs + j * stepMs, at => gameVoice(s.line, bar + ':' + i, m, vg, at)));
   });
 }
 
