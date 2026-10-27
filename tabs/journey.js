@@ -16,9 +16,10 @@ var fbUser = null, fbDb = null, saveTimer = null, dirty = false;
    for whoever signs in NEXT — in another tab, minutes later. Flushing
    pendingSave on that would write the previous student's ratings straight
    into the new student's doc, unprompted, and {merge:true} would overwrite
-   their real values for those layers. So: flush only on the first auth
-   resolution after load (the student who was already sitting here), and on
-   any later change of user, throw the pending ratings away instead.
+   their real values for those layers. So: keep the pending ratings only for
+   the first auth resolution after load (the student who was already sitting
+   here), and on any later change of user, throw them away instead (the
+   resetReadyUi() calls in the onAuthStateChanged handler).
 
    `sdkFailed` is sticky because the failure is: once the Firestore script
    404s, fbUser never arrives, so every subsequent click needs to be told,
@@ -892,6 +893,19 @@ window.scrollTo(0, 0);
    state over the DOM — the pending debounced save reads readiness back out
    of the DOM, so an overwritten checkbox silently loses the click. */
 var locallyClickedLayers = {};
+/* Whether the signed-in student's saved readiness is on the page yet:
+   'pending' until the read of their doc lands, 'done' once applyReady has
+   painted it, 'failed' if that read failed. A save sends a layer as
+   true/false and {merge:true} overwrites each layer it names, so a save
+   built from a page that never showed the saved ✓s would write `false`
+   over every layer saved on another day. Hence (readyToSave, flushSave):
+   no save while 'pending' (the read flushes when it settles; only a closing
+   tab writes early), only the layers clicked this load after 'failed', and
+   every layer once 'done' — resumeSongPick() in app.js counts the keys as
+   the song's layer total. Same class as app.js's progressLoadFailed guard
+   (checks.mjs 1bo); checks.mjs 1bw runs this file against a fake Firestore.
+   loadGen tells a read that settles after a newer auth change to do nothing. */
+var readState = 'pending', loadGen = 0;
 function readyChanged(box){
   var row = box.closest('.ready-row');
   var section = box.closest('.layer');
@@ -915,6 +929,17 @@ function currentReady(){
   document.querySelectorAll('.ready-row').forEach(function(g){
     var box = g.querySelector('.ready-box');
     out[g.dataset.layer] = !!(box && box.checked);
+  });
+  return out;
+}
+
+/* What a save may send — see readState above. */
+function readyToSave(){
+  var all = currentReady();
+  if(readState === 'done') return all;
+  var out = {};
+  Object.keys(locallyClickedLayers).forEach(function(layer){
+    if(layer in all) out[layer] = all[layer];
   });
   return out;
 }
@@ -972,9 +997,10 @@ function queueSave(){
   /* Checkboxes are clickable from the moment the HTML parses, but `fbUser`
      only lands after load → onAuthStateChanged → the injected Firestore
      SDK — seconds later on school Wi-Fi. Don't drop the click: remember
-     that something is unsaved and flush once `fbUser` arrives. One flush
-     covers every layer checked in that window, because flushSave rebuilds
-     the whole readiness map from the DOM (see currentReady). */
+     that something is unsaved and flush once `fbUser` has arrived and the
+     read of the saved ✓s has settled (see readState). One flush covers
+     every layer checked in that window, because flushSave rebuilds the
+     readiness map from the DOM (see readyToSave). */
   /* The SDK never arrived (school filter, dead Wi-Fi). fbUser will never be
      set, so every later click would return silently while the chip paints
      "✓ 3" and the pill counts it — the page looks saved and isn't. Say so on
@@ -984,7 +1010,7 @@ function queueSave(){
   if(!fbUser){ pendingSave = true; return; }
   setSaveMsg('journey.saving');
   clearTimeout(saveTimer);
-  saveTimer = setTimeout(flushSave, 800);
+  saveTimer = setTimeout(function(){ flushSave(); }, 800);
 }
 
 /* ── Module 4/5 swap (2026-10-12) ──
@@ -1009,10 +1035,15 @@ function swap45SwapLayers(map){
   return out;
 }
 
-function flushSave(){
+/* closing: the pagehide flush — the tab may be going away before the read
+   lands, so it writes the layers clicked this load rather than nothing. */
+function flushSave(closing){
   if(!fbUser || !dirty) return;
+  if(readState === 'pending' && !closing) return;   // the read's settle flushes (stays dirty)
+  var ready = readyToSave();
+  /* An empty map in a merge REPLACES the stored one (see checks.mjs 1bo). */
+  if(!Object.keys(ready).length) return;
   dirty = false;
-  var ready = currentReady();
   /* Per-song "last touched" stamp (ms). The main app's resume card sorts on
      it to say which song the student was working on most recently; legacy
      docs without it fall back to first-unfinished order over there. */
@@ -1177,6 +1208,8 @@ window.addEventListener('load', function(){
     // A signed-out resolution still settles the boot race: anything rated
     // before this point belongs to nobody we can write for, and must NOT be
     // held for whoever signs in next.
+    loadGen++;
+    readState = 'pending';
     if(!user){
       var wasSettled = authSettled;
       authSettled = true; pendingSave = false; setSaveMsg('journey.signin');
@@ -1206,7 +1239,7 @@ window.addEventListener('load', function(){
     else if(authSettled && !fbUser && dirty){
       pendingSave = false; dirty = false; resetReadyUi();
     }
-    var firstResolution = !authSettled;
+    var gen = loadGen;
     authSettled = true;
     loadFirestoreSdk().then(function(){
       fbDb = firebase.firestore();
@@ -1222,12 +1255,12 @@ window.addEventListener('load', function(){
          actually landed. */
       if(typeof lqStartListening === 'function') lqStartListening();
       /* Anything rated while we were still booting has been sitting in the
-         DOM unsaved — write it now, before the read below, so a student who
-         taps a layer the second the page appears keeps that rating. The set
-         merges, so it can't clobber layers saved on another day. Boot race
-         only: see authSettled above for why a later sign-in must not flush. */
-      if(pendingSave && firstResolution){ pendingSave = false; flushSave(); }
-      else pendingSave = false;
+         DOM unsaved (dirty). It is written once the read below has settled,
+         never before it: a save names every layer, so one sent before the
+         saved ✓s are painted would write `false` over them (see readState).
+         applyReady keeps the boot clicks over the saved state. Ratings from
+         before a later sign-in are already gone (resetReadyUi above). */
+      pendingSave = false;
       return fbDb.collection('progress').doc(user.uid).get();
     }).then(function(doc){
       /* A read that lands after a DIFFERENT student has signed in (shared
@@ -1235,12 +1268,15 @@ window.addEventListener('load', function(){
          nothing and decide nothing from it, or the last student's ✓s — and
          which numbering their doc was in — would carry over to this one. */
       var current = firebase.auth().currentUser;
-      if(!current || current.uid !== user.uid) return;
+      if(gen !== loadGen || !current || current.uid !== user.uid) return;
       var data = doc && doc.exists ? doc.data() : null;
       // Module 4/5 swap: an unmarked doc's Layer 4/5 ticks are in the old numbering (see flushSave).
       swap45DocNew = swap45IsMarked(data);
       var saved = data && data.songReady && data.songReady[SONG_ID];
       applyReady(data && !swap45IsMarked(data) ? swap45SwapLayers(saved) : saved);
+      // The saved ✓s are on the page: a save may now send every layer.
+      readState = 'done';
+      if(dirty){ clearTimeout(saveTimer); flushSave(); }
       // Activity gate — skipped for the teacher's own account, same as
       // everywhere else it applies. class-activities.js is a second script
       // tag on this page (see index.html gate work order); CLASS_ACTIVITIES
@@ -1285,9 +1321,14 @@ window.addEventListener('load', function(){
          Firestore SDK itself never loaded, fbUser never arrives and NOTHING
          can be written, now or later; latch that so every click says so
          rather than only the one that happened to race this rejection. */
-      if(!fbUser){ sdkFailed = true; setSaveMsg('journey.saveFailed'); }
+      if(gen !== loadGen) return;
+      if(!fbUser){ sdkFailed = true; setSaveMsg('journey.saveFailed'); return; }
+      /* The read failed: the saved ✓s are unknown, so saves from now on send
+         only the layers clicked on this page (readyToSave). */
+      if(readState === 'pending') readState = 'failed';
+      if(dirty){ clearTimeout(saveTimer); flushSave(); }
     });
   });
   // Best-effort flush if the tab closes inside the debounce window.
-  window.addEventListener('pagehide', function(){ if(dirty){ clearTimeout(saveTimer); flushSave(); } });
+  window.addEventListener('pagehide', function(){ if(dirty){ clearTimeout(saveTimer); flushSave(true); } });
 });

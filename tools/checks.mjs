@@ -7865,6 +7865,197 @@ function checkLoadFailedMaps() {
   if (bad === 0) ok(`${maps.length} whole maps dropped while empty after a failed load; ${new Set(fields).size} payload fields, every one classified`);
 }
 
+/* 1bw. A JOURNEY "I'M READY" SAVE CANNOT WIPE THE SAVED ✓s (2026-10-26).
+   tabs/journey.js saves songReady.<song> as {layer: true/false} with
+   {merge:true}, which overwrites every layer the save names. Until this date
+   a save could go out before the read of the student's doc had painted the
+   saved ✓s — the boot flush ran BEFORE the read, the 800 ms debounce beat a
+   slow read, and after a failed read every click wrote — so one tick wrote
+   `false` over every layer saved on another day. The page now holds saves
+   until the read settles (readState), sends only the layers clicked this
+   load after a failed read or from a closing tab, and every layer once the
+   read is in (resumeSongPick() in app.js counts the keys as the layer
+   total). Same class as 1bo, the main app's copy.
+   This EXECUTES the real journey.js in a vm against a fake page (five layer
+   rows), a fake clock and a fake Firestore that merges the way the real one
+   does (an empty map replaces), and plays each scenario through to what
+   ends up stored. The scenario count is pinned. */
+const JOURNEY_SAVE_SCENARIOS = 10;
+async function checkJourneyReadySave() {
+  head('1bw. A Journey "I\'m ready" save cannot wipe the saved ✓s');
+  let src;
+  try { src = readFileSync(join(ROOT, 'tabs/journey.js'), 'utf8'); }
+  catch { err('tabs/journey.js unreadable — 1bw cannot check this'); problems++; return; }
+  const SONG = 'the-cure';
+  const drain = async () => { for (let i = 0; i < 30; i++) await new Promise(r => setImmediate(r)); };
+  const parseSel = sel => /^(\w+)?((?:\.[\w-]+)*)(?::not\(\.([\w-]+)\))?(?:\[([\w-]+)(?:="([^"]*)")?\])?$/.exec(sel);
+  const mergeInto = (target, data) => {
+    for (const [k, v] of Object.entries(data)) {
+      if (v && typeof v === 'object' && !Array.isArray(v)) {
+        if (!Object.keys(v).length) { target[k] = {}; continue; }   // Firestore: an empty map in a merge replaces
+        if (!target[k] || typeof target[k] !== 'object') target[k] = {};
+        mergeInto(target[k], v);
+      } else target[k] = v;
+    }
+  };
+  const copy = x => JSON.parse(JSON.stringify(x === undefined ? null : x));
+  async function makePage(opts) {
+    const all = [];
+    class El {
+      constructor(tag, cls = [], attrs = {}) {
+        this.tagName = tag.toUpperCase(); this.children = []; this.parentNode = null;
+        this._cls = new Set(cls); this.dataset = {}; this.attrs = {}; this.style = {};
+        this.checked = false; this.hidden = false; this.textContent = ''; this._html = '';
+        for (const [k, v] of Object.entries(attrs)) this.setAttribute(k, v);
+        const cl = this._cls;
+        this.classList = { add: c => cl.add(c), remove: c => cl.delete(c), contains: c => cl.has(c),
+          toggle: (c, on) => { const v = on === undefined ? !cl.has(c) : !!on; if (v) cl.add(c); else cl.delete(c); return v; } };
+        all.push(this);
+      }
+      get id() { return this.attrs.id || ''; }
+      setAttribute(k, v) { this.attrs[k] = String(v); if (k.startsWith('data-')) this.dataset[k.slice(5).replace(/-(\w)/g, (_, c) => c.toUpperCase())] = String(v); }
+      getAttribute(k) { return k in this.attrs ? this.attrs[k] : null; }
+      removeAttribute(k) { delete this.attrs[k]; }
+      appendChild(c) { c.parentNode = this; this.children.push(c); return c; }
+      insertBefore(c, ref) { c.parentNode = this; const i = ref ? this.children.indexOf(ref) : -1; if (i < 0) this.children.push(c); else this.children.splice(i, 0, c); return c; }
+      removeChild(c) { this.children = this.children.filter(x => x !== c); }
+      get innerHTML() { return this._html; }
+      set innerHTML(v) { this._html = v; }
+      get firstChild() { return this.children[0] || null; }
+      addEventListener() {}
+      removeEventListener() {}
+      scrollIntoView() {}
+      getBoundingClientRect() { return { width: 0, left: 0 }; }
+      matches(sel) {
+        const m = parseSel(sel); if (!m) return false;
+        const [, tag, clsPart, notCls, attr, val] = m;
+        if (tag && this.tagName !== tag.toUpperCase()) return false;
+        for (const c of (clsPart || '').split('.').filter(Boolean)) if (!this._cls.has(c)) return false;
+        if (notCls && this._cls.has(notCls)) return false;
+        if (attr) { const v = this.getAttribute(attr); if (v === null || (val !== undefined && v !== val)) return false; }
+        return true;
+      }
+      closest(sel) { let e = this; while (e && e.matches) { if (e.matches(sel)) return e; e = e.parentNode; } return null; }
+      querySelectorAll(sel) { const out = []; const walk = e => { for (const c of e.children) { if (c.matches(sel)) out.push(c); walk(c); } }; walk(this); return out; }
+      querySelector(sel) { return this.querySelectorAll(sel)[0] || null; }
+    }
+    const body = new El('body');
+    body.appendChild(new El('span', ['prog-pill']));
+    const boxes = {};
+    for (let n = 1; n <= 5; n++) {
+      const sec = body.appendChild(new El('section', n === 1 ? ['layer'] : ['layer', 'closed'], { id: 'layer-' + n }));
+      sec.appendChild(new El('button', ['layer-head']));
+      sec.appendChild(new El('span', ['layer-rate-chip']));
+      const lb = sec.appendChild(new El('div', [], { id: 'layer-' + n + '-body' }));
+      boxes[n] = lb.appendChild(new El('div', ['ready-row'], { 'data-layer': String(n) })).appendChild(new El('input', ['ready-box']));
+    }
+    const attached = e => { while (e) { if (e === body) return true; e = e.parentNode; } return false; };
+    const document = { body, readyState: 'complete', documentElement: { clientWidth: 1366 }, head: new El('head'),
+      createElement: t => new El(t), getElementById: id => all.find(e => e.id === id && attached(e)) || null,
+      querySelectorAll: s => body.querySelectorAll(s), querySelector: s => body.querySelector(s), addEventListener() {} };
+    let now = 0, nextId = 1; const timers = [], listeners = {}, writes = [];
+    const setT = (fn, ms) => { const id = nextId++; timers.push({ id, at: now + (ms || 0), fn }); return id; };
+    const clearT = id => { const i = timers.findIndex(t => t.id === id); if (i >= 0) timers.splice(i, 1); };
+    const docs = { s1: copy(opts.stored), s2: copy(opts.stored2) };
+    let authCb = null;
+    const auth = { currentUser: null, onAuthStateChanged(cb) { authCb = cb; } };
+    const snapOf = uid => ({ exists: !!docs[uid], data: () => copy(docs[uid]) });
+    const doSet = (uid, data) => { writes.push({ uid, data: copy(data) }); if (!docs[uid]) docs[uid] = {}; mergeInto(docs[uid], data); };
+    const refOf = uid => ({ uid,
+      get: () => new Promise((res, rej) => { const d = (opts.readDelays && opts.readDelays[uid]) ?? opts.readDelay ?? 0; setT(() => opts.readFails ? rej(new Error('offline')) : res(snapOf(uid)), d); }),
+      set: data => { doSet(uid, data); return Promise.resolve(); } });
+    const db = { collection: () => ({ doc: uid => refOf(uid) }),
+      runTransaction: fn => Promise.resolve().then(() => fn({ get: r => Promise.resolve(snapOf(r.uid)), set: (r, data) => doSet(r.uid, data) })) };
+    const win = { document, console, setTimeout: setT, clearTimeout: clearT, requestAnimationFrame: () => 0, cancelAnimationFrame() {},
+      location: { hash: '' }, history: { scrollRestoration: 'auto', replaceState() {}, length: 1 },
+      scrollTo() {}, matchMedia: () => ({ matches: false }), getComputedStyle: () => ({ paddingLeft: '0', paddingRight: '0' }),
+      addEventListener: (ev, fn) => { (listeners[ev] = listeners[ev] || []).push(fn); },
+      t: k => k, getLang: () => 'en', setLang() {}, applyI18n() {},
+      firebase: { initializeApp() {}, auth: () => auth, firestore: () => db }, firebaseConfig: {}, TEACHER_EMAIL: 'teacher@example.com', SONG_ID: SONG };
+    win.window = win;
+    vm.createContext(win);
+    vm.runInContext(src, win, { filename: 'tabs/journey.js' });
+    if (typeof win.readyChanged !== 'function') throw new Error('journey.js has no readyChanged() — 1bw cannot tick a layer');
+    const fire = ev => (listeners[ev] || []).forEach(fn => fn({}));
+    const advance = async ms => {
+      const target = now + ms;
+      for (;;) {
+        await drain();
+        timers.sort((a, b) => a.at - b.at || a.id - b.id);
+        const t = timers[0];
+        if (!t || t.at > target) break;
+        timers.shift(); now = t.at; t.fn();
+      }
+      now = target; await drain();
+    };
+    return { writes, docs, advance,
+      load: () => fire('load'), pagehide: () => fire('pagehide'),
+      signIn: async uid => { auth.currentUser = { uid, email: uid + '@example.com' }; authCb(auth.currentUser); await drain(); },
+      signOut: async () => { auth.currentUser = null; authCb(null); await drain(); },
+      click: async (n, on = true) => { boxes[n].checked = on; win.readyChanged(boxes[n]); await drain(); },
+      saved: (uid = 's1') => (docs[uid] && docs[uid].songReady && docs[uid].songReady[SONG]) || {} };
+  }
+  const marked = layers => ({ migrations: { swap45: true }, songReady: { [SONG]: layers } });
+  const fmt = m => JSON.stringify(Object.keys(m || {}).sort().reduce((o, k) => (o[k] = m[k], o), {}));
+  const want = (p, w, uid) => [fmt(p.saved(uid)) === fmt(w), fmt(p.saved(uid))];
+  const T123 = { 1: true, 2: true, 3: true, 4: false, 5: false };
+  const scenarios = [
+    ['boot race: a tick before sign-in, then a 3 s read', async () => {
+      const p = await makePage({ stored: marked(T123), readDelay: 3000 });
+      await p.click(4); p.load(); await p.signIn('s1'); await p.advance(6000);
+      return want(p, { ...T123, 4: true }); }],
+    ['slow read: a tick after sign-in, before the 3 s read lands', async () => {
+      const p = await makePage({ stored: marked(T123), readDelay: 3000 });
+      p.load(); await p.signIn('s1'); await p.advance(10); await p.click(4); await p.advance(6000);
+      return want(p, { ...T123, 4: true }); }],
+    ['failed read, marked doc: one tick', async () => {
+      const p = await makePage({ stored: marked(T123), readFails: true });
+      p.load(); await p.signIn('s1'); await p.advance(10); await p.click(4); await p.advance(3000);
+      return want(p, { ...T123, 4: true }); }],
+    ['failed read, unmarked (old-numbering) doc through the swap45 transaction: one tick', async () => {
+      const p = await makePage({ stored: { songReady: { [SONG]: { 1: true, 2: true, 3: true, 4: false, 5: true } } }, readFails: true });
+      p.load(); await p.signIn('s1'); await p.advance(10); await p.click(5); await p.advance(3000);
+      return want(p, { 1: true, 2: true, 3: true, 4: true, 5: true }); }],
+    ['tab closed while the read is out: the tick is kept, nothing erased', async () => {
+      const p = await makePage({ stored: marked(T123), readDelay: 5000 });
+      p.load(); await p.signIn('s1'); await p.advance(10); await p.click(4); p.pagehide(); await p.advance(100);
+      return want(p, { ...T123, 4: true }); }],
+    ['failed read: tick then untick writes only that layer', async () => {
+      const p = await makePage({ stored: marked({ ...T123, 4: true }), readFails: true });
+      p.load(); await p.signIn('s1'); await p.advance(10); await p.click(4, true); await p.click(4, false); await p.advance(3000);
+      return want(p, T123); }],
+    ['read landed: a tick writes all 5 layer keys (resumeSongPick counts them)', async () => {
+      const p = await makePage({ stored: { migrations: { swap45: true } }, readDelay: 50 });
+      p.load(); await p.signIn('s1'); await p.advance(200); await p.click(1); await p.advance(2000);
+      return want(p, { 1: true, 2: false, 3: false, 4: false, 5: false }); }],
+    ['boot tick on a new song: written once the read lands, all 5 keys', async () => {
+      const p = await makePage({ stored: { migrations: { swap45: true } }, readDelay: 3000 });
+      await p.click(2); p.load(); await p.signIn('s1'); await p.advance(6000);
+      return want(p, { 1: false, 2: true, 3: false, 4: false, 5: false }); }],
+    ['shared Chromebook: the next student\'s doc is untouched', async () => {
+      const s2 = { 1: false, 2: true, 3: false, 4: false, 5: false };
+      const p = await makePage({ stored: marked({ 1: true }), stored2: marked(s2), readDelay: 50, readDelays: { s2: 3000 } });
+      p.load(); await p.signIn('s1'); await p.advance(200); await p.click(3); await p.advance(2000);
+      await p.signOut(); await p.signIn('s2'); await p.advance(6000);
+      const [ok2, got] = want(p, s2, 's2');
+      return [ok2 && p.saved('s1')[3] === true, got]; }],
+    ['ticks made signed out never reach the next sign-in', async () => {
+      const s2 = { 1: true, 2: true, 3: false, 4: false, 5: false };
+      const p = await makePage({ stored2: marked(s2), readDelay: 1000 });
+      p.load(); await p.signOut(); await p.click(4); await p.signIn('s2'); await p.advance(4000);
+      const [ok2, got] = want(p, s2, 's2');
+      return [ok2 && p.writes.length === 0, `${got}, ${p.writes.length} write(s)`]; }]
+  ];
+  let bad = 0;
+  if (scenarios.length !== JOURNEY_SAVE_SCENARIOS) { err(`1bw: ${scenarios.length} scenarios, pinned at ${JOURNEY_SAVE_SCENARIOS} — bump the pin on purpose`); problems++; bad++; }
+  for (const [name, run] of scenarios) {
+    let res;
+    try { res = await run(); } catch (e) { res = [false, `threw: ${e && e.message}`]; }
+    if (!res[0]) { err(`tabs/journey.js — ${name}: stored ${res[1]}`); problems++; bad++; }
+  }
+  if (bad === 0) ok(`${scenarios.length} save scenarios run against tabs/journey.js — no saved ✓ erased, every layer key written once the read is in`);
+}
+
 /* 1bm. A CARD SECTION'S CAPTION COUNTS WITH ITS BADGE'S WORD (2026-10-06).
    A section with a `repLabel` shows a badge ("Lap 1 of 3"); its caption must
    count in the same word — "3 laps" under a Lap badge, "2 times" under a Time
@@ -8413,6 +8604,7 @@ async function checkBackingLoudness() {
   checkGuitarNotes();
   checkPeekSavesNothing();
   checkLoadFailedMaps();
+  await checkJourneyReadySave();
   checkSiteMadeClick();
   await checkBackingLoudness();
   if (!SKIP_LINKS) await checkLinks();
