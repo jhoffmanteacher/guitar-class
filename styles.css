@@ -2721,6 +2721,17 @@ body.ca-full:has(#class-activities-screen:not([hidden])) .app-layout .main{zoom:
 .tab-count.beat-now{background:var(--blue-text);color:var(--bg)}
 .tab-count-held{font-weight:600;color:var(--text3)}
 span.tab-count-held{margin-left:4px}
+/* A chord grid (card.chordGrid, renderChordGridRow in app.js, 2026-10-26):
+   eighth-note columns, a bar line between bars, each chord's name once at
+   its onset. Its count row is always on (beats in ink, "+" faint), not
+   behind the Counts switch. The bar line is absolutely placed, like
+   .tab-box, so it takes no grid cell and the string rows still auto-flow. */
+.tab-grid.chord-grid .tab-count{display:flex}
+.tab-bar-line{position:absolute;top:calc(var(--tab-cell-h) / 2);bottom:calc(var(--tab-cell-h) / 2);left:0;border-left:1.5px solid var(--text);pointer-events:none;z-index:1}
+/* One column wide, centred on its onset; a name wider than the column spills
+   evenly to both sides (flex centring) instead of widening the track. */
+.tab-note-btn.tab-chord-btn{width:100%;min-width:0;padding-left:0;padding-right:0}
+.tab-chord-pad{min-height:24px}
 .tab-count.beat-now .tab-count-held{color:var(--bg);opacity:0.75}
 /* The four-stop speed slider (pcSpeed3Html). --t is the thumb width: a
    native range puts stop i at t/2 + i*(100% - t)/3, so the ticks and the

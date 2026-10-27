@@ -172,7 +172,39 @@
                                            // by default, that shows the count
                                            // each note starts on ("1 + 2 + 3 + 4 +")
                                            // under the TAB. Worked out from the
-                                           // notes' beats — nothing to type.
+                                           // notes' beats — nothing to type. Only
+                                           // for the sections that are NOT a chord
+                                           // grid (below): a grid always shows its
+                                           // count, and a card made only of grid
+                                           // sections shows no switch (ca-41 keeps
+                                           // it for its single-note verses).
+       chordGrid: true,                    // optional (2026-10-26, Jonathan): draw
+                                           // the card's CHORD sections as a chord
+                                           // grid. The record's strumming is not
+                                           // consistent through a song and the
+                                           // strum patterns are taught on the
+                                           // slides, so the TAB stops drawing
+                                           // every strum: each chord appears ONCE,
+                                           // at the beat or "+" where it really
+                                           // starts (consecutive same-name notes
+                                           // fold into one), four bars to a row
+                                           // whatever the meter, a bar line
+                                           // between bars, and the cursor moves on
+                                           // the BEATS only (data-beat), never on
+                                           // a "+". Display only: no `notes`
+                                           // array changes, so audio, beat totals
+                                           // and the Journey whole-song tabs stay.
+                                           // Explicit, never inferred: a riff
+                                           // played as chords (ca-31) is not one.
+                                           // A section holds only chords and rests
+                                           // and every chord starts on an eighth
+                                           // (checks.mjs 1bv). Single-note cards
+                                           // never set it. `rows` without
+                                           // rowLabels are ignored (four-bar rows);
+                                           // a lyric line (rowLabels) keeps its row
+                                           // where it starts on a bar line.
+                                           // Chord cards say "strum once each time
+                                           // a beat lights up" (ca.cardChordDirections).
        sheet: 'sheets/<song>.pdf',         // optional (ca-38, 2026-10-19): show
                                            // this chord sheet PDF instead of the
                                            // tab, drawn as is (lyrics included),
@@ -188,6 +220,9 @@
        sections: [{                        // back to back, in song order
          label, label_es,                  // the tap-to-start button ("Chorus")
          caption, caption_es,              // the heading over its tab page
+         chordGrid: false,                 // optional: leave THIS section as a
+                                           // note-by-note tab on a chordGrid card
+                                           // (ca-41's verses, ca-35's solo)
          lineEnd: true, // optional: on the Song Journey page's whole-song tab the next section starts a new line
          fromBar: 21, bars: 8,             // bars of the RECORD, felt pulse,
                                            // like a snippet window
@@ -3709,8 +3744,8 @@ window.CLASS_ACTIVITIES = [
     card: {
       wholeSong: true,  // stops at the end of the song instead of looping
       track: 'all-along-the-watchtower',
+      chordGrid: true,  // chord grid: each chord once, cursor on the beats only (2026-10-26) — see CARD above
       slowest: true,    // four-way speed control (Slow added 2026-10-09): Slowest / Slower / Slow / Normal — the student picks
-      counts: true,     // Counts switch: the count under each chord, from its beats (2026-10-21) — see CARD above
       caption:    'The whole song in power chords',   // the count lives in the Counts switch and the section headings (2026-10-21)
       caption_es: 'La canción completa con acordes de potencia',
       sections: [
@@ -3898,9 +3933,10 @@ window.CLASS_ACTIVITIES = [
     card: {
       wholeSong: true,  // stops at the end of the song instead of looping
       track: 'the-cure',
+      chordGrid: true,  // chord grid: each chord once, cursor on the beats only (2026-10-26) — see CARD above
       slowest: true,    // four-way speed control (Slow added 2026-10-09): Slowest / Slower / Slow / Normal — the student picks
-      caption:    'The whole song in power chords · 4 strums per bar (2 per chord where two chords share a bar)',
-      caption_es: 'La canción completa con acordes de potencia · 4 rasgueos por compás (2 por acorde donde dos acordes comparten un compás)',
+      caption:    'The whole song in power chords · one chord per bar (two where they share a bar) · the highlight follows the beat',
+      caption_es: 'La canción completa con acordes de potencia · un acorde por compás (dos donde comparten un compás) · la marca sigue el tiempo',
       sections: [
         {
           label: 'Intro', label_es: 'Intro',
@@ -4476,9 +4512,10 @@ window.CLASS_ACTIVITIES = [
     card: {
       wholeSong: true,  // stops at the end of the song instead of looping
       track: 'luna',
+      chordGrid: true,  // chord grid: each chord once, cursor on the beats only (2026-10-26) — see CARD above
       slowest: true,    // four-way speed control (Slow added 2026-10-09): Slowest / Slower / Slow / Normal — the student picks
-      caption:    'The whole song in power chords · 2 strums per bar',
-      caption_es: 'La canción completa con acordes de potencia · 2 rasgueos por compás',
+      caption:    'The whole song in power chords · each chord lasts 2 bars · the highlight follows the beat',
+      caption_es: 'La canción completa con acordes de potencia · cada acorde dura 2 compases · la marca sigue el tiempo',
       sections: [
         {
           label: 'Intro', label_es: 'Intro',
@@ -4602,9 +4639,10 @@ window.CLASS_ACTIVITIES = [
     card: {
       wholeSong: true,  // stops at the end of the song instead of looping
       track: 'sweet-child-o-mine',
+      chordGrid: true,  // chord grid: each chord once, cursor on the beats only (2026-10-26) — see CARD above
       slowest: true,    // four-way speed control (Slow added 2026-10-09): Slowest / Slower / Slow / Normal — the student picks
-      caption:    'The whole song in power chords · 1 strum per bar (3 in the C5 D5 G5 bar of Solo 2 and the Outro, 2 in the G5 A5 bar of the Ending), let it ring',
-      caption_es: 'La canción completa con acordes de potencia · 1 rasgueo por compás (3 en el compás de C5 D5 G5 del Solo 2 y del Final, 2 en el compás de G5 A5 del Cierre), déjalo sonar',
+      caption:    'The whole song in power chords · one chord per bar (C5 D5 G5 share one bar in Solo 2 and the Outro, G5 and A5 share one bar in the Ending) · the highlight follows the beat',
+      caption_es: 'La canción completa con acordes de potencia · un acorde por compás (C5 D5 G5 comparten un compás en el Solo 2 y en el Final, G5 y A5 comparten un compás en el Cierre) · la marca sigue el tiempo',
       sections: [
         {
           label: 'Intro', label_es: 'Intro',
@@ -5225,11 +5263,12 @@ window.CLASS_ACTIVITIES = [
          with no Song Journey page. So it loops — after the last chorus it
          goes back to the section the student started from. */
       track: 'las-mananitas',
+      chordGrid: true,  // chord grid: each chord once, cursor on the beats only (2026-10-26) — see CARD above
       slowest: true,    // Slowest / Slower / Slow / Normal
-      caption:    'The song in order · every bar: 1 bass note, then 2 strums · A: A string / low E · E7: low E / A string fret 2 · D: D string / A string · change chords when the highlight moves',
-      caption_es: 'La canción en orden · cada compás: 1 nota de bajo y 2 rasgueos · A: cuerda La / Mi grave · E7: Mi grave / cuerda La traste 2 · D: cuerda Re / cuerda La · cambia de acorde cuando se mueva la marca',
-      caption_power:    'The song in order · strum 3 times in every bar · change chords when the highlight moves',
-      caption_power_es: 'La canción en orden · rasguea 3 veces en cada compás · cambia de acorde cuando se mueva la marca',
+      caption:    'The song in order · the highlight follows the beat · bass notes — A: A string / low E · E7: low E / A string fret 2 · D: D string / A string · change chords when you reach the next chord name',
+      caption_es: 'La canción en orden · la marca sigue el tiempo · notas de bajo — A: cuerda La / Mi grave · E7: Mi grave / cuerda La traste 2 · D: cuerda Re / cuerda La · cambia de acorde cuando llegues al siguiente nombre de acorde',
+      caption_power:    'The song in order · the highlight follows the beat · change chords when you reach the next chord name',
+      caption_power_es: 'La canción en orden · la marca sigue el tiempo · cambia de acorde cuando llegues al siguiente nombre de acorde',
       sections: [
         {
           label: 'Verse 1', label_es: 'Estrofa 1',
@@ -5288,6 +5327,7 @@ window.CLASS_ACTIVITIES = [
         },
         {
           label: 'Solo', label_es: 'Solo',
+          chordGrid: false,  // requinto tab, single notes — keeps the note-by-note highlight
           caption: 'Solo — requinto (lead guitar) tab · rhythm guitar keeps strumming E7, D, A, E7, A',
           caption_es: 'Solo — tablatura del requinto (guitarra líder) · la guitarra rítmica sigue rasgueando E7, D, A, E7, A',
           caption_power:    'Solo — requinto (lead guitar) tab · rhythm guitar keeps strumming E5, D5, A5, E5, A5',
@@ -5567,13 +5607,14 @@ window.CLASS_ACTIVITIES = [
     intro_es: 'Ya puedes cambiar de acorde a tiempo. Hoy tocas Madrecita Querida con la banda, de la primera estrofa al último acorde.',
     card: {
       track: 'madrecita-querida',
+      chordGrid: true,  // chord grid: each chord once, cursor on the beats only (2026-10-26) — see CARD above
       slowest: true,    // Slowest / Slower / Slow / Normal
-      caption:    'The song in order · strum on every beat · change chords when the highlight moves',
-      caption_es: 'La canción en orden · rasguea en cada tiempo · cambia de acorde cuando se mueva la marca',
+      caption:    'The song in order · the highlight follows the beat · change chords when you reach the next chord name',
+      caption_es: 'La canción en orden · la marca sigue el tiempo · cambia de acorde cuando llegues al siguiente nombre de acorde',
       sections: [
         {
           label: 'Verse 1', label_es: 'Estrofa 1',
-          caption: 'Verse 1 · one row per sung line', caption_es: 'Estrofa 1 · una fila por cada línea cantada',
+          caption: 'Verse 1', caption_es: 'Estrofa 1',
           fromBar: 9, bars: 16,
           rows: [4, 4, 2, 3, 4, 4, 2, 3],
           notes: [
@@ -5607,7 +5648,7 @@ window.CLASS_ACTIVITIES = [
         },
         {
           label: 'Chorus 1', label_es: 'Coro 1',
-          caption: 'Chorus 1 · one row per sung line · the band slows down in row 2', caption_es: 'Coro 1 · una fila por cada línea cantada · la banda va más lento en la fila 2',
+          caption: 'Chorus 1 · the band slows down from bar 4', caption_es: 'Coro 1 · la banda va más lento desde el compás 4',
           fromBar: 25, bars: 11,
           rows: [2, 3, 2, 4],
           notes: [
@@ -5676,7 +5717,7 @@ window.CLASS_ACTIVITIES = [
         },
         {
           label: 'Chorus 2', label_es: 'Coro 2',
-          caption: 'Chorus 2 · one row per sung line · the band slows down in row 2', caption_es: 'Coro 2 · una fila por cada línea cantada · la banda va más lento en la fila 2',
+          caption: 'Chorus 2 · the band slows down from bar 4', caption_es: 'Coro 2 · la banda va más lento desde el compás 4',
           fromBar: 59, bars: 9,
           rows: [2, 4, 2],
           notes: [
@@ -5764,9 +5805,10 @@ window.CLASS_ACTIVITIES = [
     intro_es: 'Ya puedes mover un acorde de potencia por las cuerdas Mi grave y La. Hoy tocas Arsenal Efectivo con la banda con B5, E5, A5 y Bb5, todos entre los trastes 5 y 9.',
     card: {
       track: 'arsenal-efectivo',
+      chordGrid: true,  // chord grid: each chord once, cursor on the beats only (2026-10-26) — see CARD above
       slowest: true,    // Slowest / Slower / Slow / Normal
-      caption:    'The song in order · strum on every beat · change chords when the highlight moves',
-      caption_es: 'La canción en orden · rasguea en cada tiempo · cambia de acorde cuando se mueva la marca',
+      caption:    'The song in order · the highlight follows the beat · change chords when you reach the next chord name',
+      caption_es: 'La canción en orden · la marca sigue el tiempo · cambia de acorde cuando llegues al siguiente nombre de acorde',
       sections: [
         {
           label: 'Verse 1', label_es: 'Estrofa 1',
@@ -5993,9 +6035,10 @@ window.CLASS_ACTIVITIES = [
     intro_power_es: 'Ella usa tres acordes de potencia, E5, A5 y D5, en el mismo orden de principio a fin. Hoy la tocas con la banda.',
     card: {
       track: 'ella',
+      chordGrid: true,  // chord grid: each chord once, cursor on the beats only (2026-10-26) — see CARD above
       slowest: true,    // Slowest / Slower / Slow / Normal
-      caption:    'The song in order · strum on every beat · change chords when the highlight moves',
-      caption_es: 'La canción en orden · rasguea en cada tiempo · cambia de acorde cuando se mueva la marca',
+      caption:    'The song in order · the highlight follows the beat · change chords when you reach the next chord name',
+      caption_es: 'La canción en orden · la marca sigue el tiempo · cambia de acorde cuando llegues al siguiente nombre de acorde',
       sections: [
         {
           label: 'Intro', label_es: 'Intro',
@@ -6013,7 +6056,7 @@ window.CLASS_ACTIVITIES = [
         },
         {
           label: 'Verse 1', label_es: 'Estrofa 1',
-          caption: 'Verse 1 · one row per time through the chords', caption_es: 'Estrofa 1 · una fila por cada vuelta de los acordes',
+          caption: 'Verse 1 · the chords repeat every 8 bars', caption_es: 'Estrofa 1 · los acordes se repiten cada 8 compases',
           fromBar: 27, bars: 40,
           rows: [3, 3, 3, 3, 3],
           notes: [
@@ -6126,9 +6169,10 @@ window.CLASS_ACTIVITIES = [
     card: {
       wholeSong: true,  // stops at the end of the song instead of looping
       track: 'all-along-the-watchtower',
+      chordGrid: true,  // chord grid: each chord once, cursor on the beats only (2026-10-26) — see CARD above
       slowest: true,    // Slowest / Slower / Slow / Normal — the student picks
-      caption:    'The whole song in power chords · 1 strum per chord',
-      caption_es: 'La canción completa con acordes de potencia · 1 rasgueo por acorde',
+      caption:    'The whole song in power chords · 2 beats per chord · the highlight follows the beat',
+      caption_es: 'La canción completa con acordes de potencia · 2 tiempos por acorde · la marca sigue el tiempo',
       sections: [
         {
           label: 'Intro', label_es: 'Intro',
@@ -6274,10 +6318,11 @@ window.CLASS_ACTIVITIES = [
     intro_es: 'Ya puedes mover un acorde de potencia por las cuerdas Mi grave y La — hoy tocas Smells Like Teen Spirit con la banda con F5, Bb5, Ab5 y Db5, y dos notas sueltas en las estrofas.',
     card: {
       track: 'smells-like-teen-spirit',
+      chordGrid: true,  // chord grid: each chord once, cursor on the beats only (2026-10-26) — see CARD above
       slowest: true,    // Slowest / Slower / Slow / Normal
       counts: true,     // Counts switch: shows Bb5 and Db5 on the "+" after 2 — see CARD above
-      caption:    'The song in order · one strum per chord, one pluck per note · let each one ring',
-      caption_es: 'La canción en orden · un rasgueo por acorde, una pulsación por nota · deja que cada uno suene',
+      caption:    'The song in order · the highlight follows the beat · let each chord and note ring',
+      caption_es: 'La canción en orden · la marca sigue el tiempo · deja que cada acorde y cada nota suene',
       sections: [
         {
           label: 'Intro', label_es: 'Intro',
@@ -6293,6 +6338,7 @@ window.CLASS_ACTIVITIES = [
         },
         {
           label: 'Verse 1', label_es: 'Estrofa 1',
+          chordGrid: false,  // single notes (B string, high e), not chords — keeps the note-by-note highlight
           caption: 'Verse 1 — B string fret 1, then high e fret 1, 6 laps · let them ring', caption_es: 'Estrofa 1 — cuerda Si traste 1, después Mi aguda traste 1, 6 vueltas · déjalas sonar',
           fromBar: 9, bars: 2, reps: 6,
           repLabel: 'Lap', repLabel_es: 'Vuelta',
@@ -6340,6 +6386,7 @@ window.CLASS_ACTIVITIES = [
         },
         {
           label: 'Verse 2', label_es: 'Estrofa 2',
+          chordGrid: false,  // single notes (B string, high e), not chords — keeps the note-by-note highlight
           caption: 'Verse 2 — B string fret 1, then high e fret 1, 6 laps · let them ring', caption_es: 'Estrofa 2 — cuerda Si traste 1, después Mi aguda traste 1, 6 vueltas · déjalas sonar',
           fromBar: 45, bars: 2, reps: 6,
           repLabel: 'Lap', repLabel_es: 'Vuelta',
@@ -6399,6 +6446,7 @@ window.CLASS_ACTIVITIES = [
         },
         {
           label: 'Verse 3', label_es: 'Estrofa 3',
+          chordGrid: false,  // single notes (B string, high e), not chords — keeps the note-by-note highlight
           caption: 'Verse 3 — B string fret 1, then high e fret 1, 4 laps · let them ring', caption_es: 'Estrofa 3 — cuerda Si traste 1, después Mi aguda traste 1, 4 vueltas · déjalas sonar',
           fromBar: 93, bars: 2, reps: 4,
           repLabel: 'Lap', repLabel_es: 'Vuelta',
@@ -6498,13 +6546,14 @@ window.CLASS_ACTIVITIES = [
     intro_es: 'Vuelve a la Vida usa cinco acordes de potencia: Bb5, G5, Eb5, C5 y F5. Hoy la tocas con la banda.',
     card: {
       track: 'vuelve-a-la-vida',
+      chordGrid: true,  // chord grid: each chord once, cursor on the beats only (2026-10-26) — see CARD above
       slowest: true,    // Slowest / Slower / Slow / Normal
-      caption:    'The song in order · strum 3 times in every bar · change chords when the highlight moves',
-      caption_es: 'La canción en orden · rasguea 3 veces en cada compás · cambia de acorde cuando se mueva la marca',
+      caption:    'The song in order · the highlight follows the beat · change chords when you reach the next chord name',
+      caption_es: 'La canción en orden · la marca sigue el tiempo · cambia de acorde cuando llegues al siguiente nombre de acorde',
       sections: [
         {
           label: 'Verse 1', label_es: 'Estrofa 1',
-          caption: 'Verse 1 · one row per time through the chords · the first row has one more Bb5', caption_es: 'Estrofa 1 · una fila por cada vuelta de los acordes · la primera fila tiene un Bb5 más',
+          caption: 'Verse 1 · the chords repeat every 16 bars · the first time through has one more Bb5, 2 bars long, after Eb5', caption_es: 'Estrofa 1 · los acordes se repiten cada 16 compases · la primera vez hay un Bb5 más, de 2 compases, después de Eb5',
           fromBar: 2, bars: 50,
           rows: [6, 5, 5],
           notes: [

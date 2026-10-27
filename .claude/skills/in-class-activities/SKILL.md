@@ -359,6 +359,24 @@ and it's last, help steps carry no snippet/drill/video. A section with a
 `repLabel` counts in that word in its caption — "3 laps" under a Lap badge,
 "2 times" under a Time badge — and 1bm fails the push on a mix.
 
+**Chord cards are drawn as a CHORD GRID (`card.chordGrid`, 2026-10-26).**
+Jonathan: the record's strumming is not consistent, so a chord card's TAB shows
+each chord once (consecutive same-name notes fold), at the beat or "+" where it
+really starts, four bars to a row whatever the meter, a bar line between bars,
+a count row always on (beats in ink, "+" faint), and the cursor on the BEATS
+only (`data-beat`, never on a "+"). Opt-in per card, `chordGrid: false` per
+section (ca-41's single-note verses, ca-35's solo); ca-31 (the riff as chords)
+and every single-note card stay out. Display only — no `notes` array moved, so
+audio, `pcLayout`, 1bf / 1bf2 / 1az and the Journey whole-song tabs are as they
+were. Engine: `pcChordGrid` / `pcGridRows` / `renderChordGridRow` (rows),
+`pcLocate` (`beat`, `bar`), `pcLocKey` (the repaint key is the BEAT on a grid —
+never the note, or the cursor steps onto a "+"), `pcLocRow` (the PC_ROW_LEAD
+look-ahead). `rows` without `rowLabels` are ignored; a lyric line keeps its row
+only where it starts on a bar line. ca-38 (lyric sheet) stays the PDF: its dot
+fills on every beat and "This bar" lights beat cells only. Ratchet **1bv**
+renders ca-29 and executes `pcLocate`/`pcLocKey`; turning a card on or off means
+editing its pinned list.
+
 **A card note may be a chord** (2026-10-05, the power-chord whole songs
 ca-29–ca-33): `{ frets: [[string, fret], ...], note: 'A5', midi: [...] }`,
 the same shape Module 3's tabs use, in a card section or a help step's

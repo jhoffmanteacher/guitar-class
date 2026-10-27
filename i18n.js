@@ -513,6 +513,8 @@
     'ca.cardSpeedLabel':       { en: 'Speed', es: 'Velocidad' },
     'ca.cardCounts':           { en: 'Counts', es: 'Conteo' },
     'ca.cardCountsAria':       { en: 'Show the count under each chord', es: 'Mostrar el conteo debajo de cada acorde' },
+    // A card with chord-grid sections (card.chordGrid, 2026-10-26): those sections always show the beats, so the switch is for the other sections.
+    'ca.cardCountsAriaGrid':   { en: 'Show the beat count under each note', es: 'Mostrar el conteo de tiempos debajo de cada nota' },
     'ca.cardGuitarAria':       { en: 'Guitar', es: 'Guitarra' },
     'ca.cardGuitarOn':         { en: 'Guitar on', es: 'Con guitarra' },
     'ca.cardGuitarTitle':      { en: 'Guitar off makes the record\u2019s guitar quieter, not silent, so you can play the part.',
@@ -521,6 +523,9 @@
     'ca.cardSpeedAria':        { en: 'Speed: slower or normal', es: 'Velocidad: más lenta o normal' },
     'ca.cardDirections':       { en: 'Press Play song and play along. Check a box when you can do it.',
                                  es: 'Pulsa «Tocar la canción» y toca con ella. Marca una casilla cuando lo logres.' },
+    // Chord-grid cards (card.chordGrid, 2026-10-26): the cursor moves on the beats and each chord name appears once.
+    'ca.cardChordDirections':  { en: 'Strum once each time a beat lights up. Change chords when you reach the next chord name.',
+                                 es: 'Rasguea una vez cada vez que se ilumina un tiempo. Cambia de acorde cuando llegues al siguiente nombre de acorde.' },
     'ca.cardSectionHint':      { en: 'Tap a section to start the song there.',
                                  es: 'Pulsa una sección para empezar la canción ahí.' },
     'ca.cardSectionOf':        { en: 'Section {a} of {n}', es: 'Sección {a} de {n}' },
@@ -529,8 +534,8 @@
     'ca.cardPlayingFrom':      { en: 'Playing from: {section}', es: 'Tocando desde: {section}' },
     'ca.cardRepOf':            { en: '{what} {n} of {total}', es: '{what} {n} de {total}' },
     // Lyric-sheet practice card (card.sheet, ca-38 — 2026-10-19)
-    'ca.sheetDirections':      { en: 'Press Play song. Strum each time the dot fills in. When the dot is hollow, let the chord ring. Check a box when you can do it.',
-                                 es: 'Presiona «Tocar la canción». Rasguea cada vez que el punto se llena. Cuando el punto está vacío, deja sonar el acorde. Marca una casilla cuando lo puedas hacer.' },
+    'ca.sheetDirections':      { en: 'Press Play song. The dot fills on every beat. Change chords on the word under each chord name. When the dot is hollow, let the chord ring. Check a box when you can do it.',
+                                 es: 'Presiona «Tocar la canción». El punto se llena en cada tiempo. Cambia de acorde en la palabra debajo de cada nombre de acorde. Cuando el punto está vacío, deja sonar el acorde. Marca una casilla cuando lo puedas hacer.' },
     'ca.sheetTapHint':         { en: 'Tap a section, or any chord on the sheet, to start the song there.',
                                  es: 'Toca una sección, o cualquier acorde de la hoja, para empezar la canción ahí.' },
     'ca.sheetThisBar':         { en: 'This bar', es: 'Este compás' },

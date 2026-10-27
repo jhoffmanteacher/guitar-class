@@ -7463,6 +7463,114 @@ function checkSheetCards() {
   if (bad === 0) ok(`${n} lyric-sheet card${n === 1 ? '' : 's'} — sheet in the repo, chord count matches the notes, pdf.js vendored, renderer wired`);
 }
 
+/* 1bv. CHORD-GRID PRACTICE CARDS (card.chordGrid — Jonathan, 2026-10-26).
+   The record's strumming is not consistent through a song, so a chord card's
+   TAB shows each chord ONCE, where it really starts (a beat or a "+"), four
+   bars to a row, and the cursor moves on the BEATS only. It is display only —
+   no `notes` array changed — so what can go wrong is quiet: a card opted in
+   that is really a riff (ca-31's triplets), a chord that starts between two
+   eighths, a lyric line that loses its row, a "+" column that gets a
+   data-beat (the cursor would land on it), or a repaint keyed on the note
+   again (the cursor would step on a "+"). Checked by RENDERING and EXECUTING
+   the real app.js in the 0b context, not by finding the calls:
+   - the opted-in cards are exactly the eleven below (ca-31 and every
+     single-note card stay out); every section of one that is not
+     `chordGrid:false` holds only chords (`frets`) and rests, and every
+     chord (and rest) starts on the eighth grid;
+   - every lyric line (`rowLabels`) of such a section starts on a bar line,
+     so pcGridRows keeps its label;
+   - ca-29 renders exactly one chord-name button per chord change (28 for its
+     7 sections), data-beat sits on every BEAT column and never on a "+"
+     (even columns only, counting up beat by beat, never on a faint "+"
+     count cell), and an all-grid card draws no Counts switch;
+   - a single-note card (ca-10) renders with no data-beat at all;
+   - pcLocate + pcLocKey: on ca-29 the repaint key is the same at a beat and
+     at the "+" after it, and steps once per beat; on ca-10 it still steps
+     per note. */
+const CHORD_GRID_CARDS = ['ca-29', 'ca-30', 'ca-32', 'ca-33', 'ca-35', 'ca-36', 'ca-37', 'ca-39', 'ca-40', 'ca-41', 'ca-42'];
+function checkChordGridCards(ctx) {
+  head('1bv. Chord-grid practice cards');
+  let bad = 0;
+  const flag = m => { err(m); problems++; bad++; };
+  if (!ctx) { flag('1bv cannot run — the 0b render context is unavailable'); return; }
+  const acts = vm.runInContext('window.CLASS_ACTIVITIES || []', ctx);
+  const fn = name => vm.runInContext(`typeof ${name} === "function" ? ${name} : null`, ctx);
+  const [pcChordGrid, pcGridRows, pcLayout, pcLocate, pcLocKey, caCardBodyHtml] = ['pcChordGrid', 'pcGridRows', 'pcLayout', 'pcLocate', 'pcLocKey', 'caCardBodyHtml'].map(fn);
+  if (![pcChordGrid, pcGridRows, pcLayout, pcLocate, pcLocKey, caCardBodyHtml].every(Boolean)) { flag('app.js: pcChordGrid / pcGridRows / pcLayout / pcLocate / pcLocKey / caCardBodyHtml is gone — the chord grid has no renderer'); return; }
+  const optedIn = acts.filter(a => a && a.card && a.card.chordGrid).map(a => a.id);
+  if (optedIn.join() !== CHORD_GRID_CARDS.join()) flag(`the cards with card.chordGrid are [${optedIn.join(', ')}], expected [${CHORD_GRID_CARDS.join(', ')}] — turning a card on or off is a decision (the work order's table); update CHORD_GRID_CARDS in the same edit`);
+  let sections = 0, events = 0, labelled = 0;
+  for (const a of acts.filter(x => x && x.card && x.card.chordGrid)) {
+    const L = pcLayout(a), bpb = L.tr.beatsPerBar;
+    L.sections.forEach((S, si) => {
+      const w = `${a.id} · ${S.s.label}`;
+      if (!S.grid) { if (S.s.chordGrid !== false) flag(`${w}: not drawn as a grid, though card.chordGrid is on and the section does not opt out`); return; }
+      sections++;
+      S.notes.forEach((n, ni) => { if (!n.rest && !Array.isArray(n.frets)) flag(`${w}: note ${ni + 1} is a single note — a chord-grid section holds only chords and rests (put chordGrid:false on this section)`); });
+      for (const ev of pcChordGrid(S.notes, bpb)) {
+        events++;
+        if (Math.abs(ev.start * 2 - Math.round(ev.start * 2)) > 1e-6) flag(`${w}: ${ev.rest ? 'a rest' : ev.name} starts at beat ${ev.start}, between two eighth-note columns — the grid cannot place it`);
+      }
+      const rl = S.s.rowLabels;
+      if (Array.isArray(rl) && Array.isArray(S.s.rows) && rl.length === S.s.rows.length) {
+        labelled += rl.length;
+        const kept = pcGridRows(S, bpb).filter(r => r.label).length;
+        if (kept !== rl.length) flag(`${w}: ${rl.length - kept} of ${rl.length} lyric lines lost their row — a line must start on a bar line to keep its label on a four-bar grid`);
+      }
+    });
+  }
+  // ca-29 as rendered.
+  const c29 = acts.find(a => a.id === 'ca-29');
+  const norm = html => String(html);
+  if (!c29) flag('ca-29 is gone — 1bv renders it');
+  else {
+    let html = '';
+    try { html = norm(caCardBodyHtml(c29)); } catch (e) { flag(`caCardBodyHtml(ca-29) threw: ${e.message}`); }
+    const grids = html.split('class="tab-grid chord-grid"').slice(1);
+    const names = (html.match(/class="tab-note-btn tab-chord-btn"/g) || []).length;
+    if (grids.length !== 7) flag(`ca-29 renders ${grids.length} chord-grid rows, expected 7 (one per section: each is 2 bars)`);
+    if (names !== 28) flag(`ca-29 renders ${names} chord-name buttons, expected 28 — one per chord change (A5 G5 F5 G5 in each of its 7 sections)`);
+    let beatsSeen = 0;
+    grids.forEach((g, gi) => {
+      // The first string row only: label, then one cell per column.
+      const rowE = g.split('tab-str-label">e<')[1] || '';
+      const cells = (rowE.split('tab-str-label">B<')[0].match(/<div class="tab-cell"[^>]*>/g) || []);
+      const beats = [];
+      cells.forEach((c, i) => { const m = /data-beat="(\d+)"/.exec(c); if (m) { beats.push(+m[1]); if (i % 2) flag(`ca-29 row ${gi + 1}: data-beat on column ${i} — a "+" column; the cursor would land on it`); } else if (i % 2 === 0) flag(`ca-29 row ${gi + 1}: beat column ${i} has no data-beat — the cursor would skip it`); });
+      if (beats.join() !== [0, 1, 2, 3, 4, 5, 6, 7].join()) flag(`ca-29 row ${gi + 1}: data-beat runs [${beats.join(',')}], expected 0..7`);
+      beatsSeen += beats.length;
+      // The count row: beats carry data-beat, the faint "+" never does.
+      for (const m of g.matchAll(/<div class="tab-count tab-count-held"[^>]*>/g)) if (/data-beat/.test(m[0])) flag(`ca-29 row ${gi + 1}: a "+" count cell carries data-beat`);
+    });
+    const attrs = (html.match(/data-beat="/g) || []).length;
+    if (attrs !== 7 * 8 * 7) flag(`ca-29 renders ${attrs} data-beat attributes, expected ${7 * 8 * 7} (7 sections x 8 beats x (6 string cells + 1 count cell))`);
+    if (/pc-counts/.test(html)) flag('ca-29 draws a Counts switch — a card made only of chord grids always shows its count and needs none');
+    if (!/Strum once each time a beat lights up/.test(html)) flag('ca-29 does not show the chord-card directions (ca.cardChordDirections)');
+    // The cursor: one repaint key per beat, none on a "+".
+    const L = pcLayout(c29), S0 = L.sections[0], bpb = L.tr.beatsPerBar;
+    const keys = [];
+    for (let i = 0; i < S0.bars * bpb * 2; i++) { const loc = pcLocate(L, i / 2 / bpb); keys.push(pcLocKey(L, loc)); if (loc.beat !== Math.floor(i / 2)) flag(`pcLocate(ca-29, eighth ${i}) says beat ${loc.beat}, expected ${Math.floor(i / 2)}`); }
+    for (let b = 0; b < S0.bars * bpb; b++) if (keys[2 * b] !== keys[2 * b + 1]) flag(`ca-29: the repaint key changes at the "+" after beat ${b} — the cursor would step onto a "+"`);
+    if (new Set(keys).size !== S0.bars * bpb) flag(`ca-29: ${new Set(keys).size} repaint keys across ${S0.bars * bpb} beats — the cursor must step once per beat`);
+  }
+  // ca-41: mixed card keeps the switch for its single-note verses.
+  const c41 = acts.find(a => a.id === 'ca-41');
+  if (c41) { let h = ''; try { h = String(caCardBodyHtml(c41)); } catch (e) { flag(`caCardBodyHtml(ca-41) threw: ${e.message}`); } if (!/pc-counts/.test(h)) flag('ca-41 lost its Counts switch — its single-note verses still need it'); }
+  // A single-note card is untouched.
+  const c10 = acts.find(a => a.id === 'ca-10');
+  if (!c10) flag('ca-10 is gone — 1bv renders it');
+  else {
+    let html = '';
+    try { html = String(caCardBodyHtml(c10)); } catch (e) { flag(`caCardBodyHtml(ca-10) threw: ${e.message}`); }
+    if (/data-beat|chord-grid/.test(html)) flag('ca-10 (a single-note card) renders chord-grid markup — single-note cards keep the note-by-note highlight');
+    if (!/Press Play song and play along/.test(html)) flag('ca-10 lost its own directions line');
+    const L = pcLayout(c10);
+    const ks = new Set(); for (let i = 0; i < L.sections[0].bars * L.tr.beatsPerBar * 8; i++) ks.add(pcLocKey(L, pcLocate(L, i / 8 / L.tr.beatsPerBar)));
+    if (ks.size !== L.sections[0].notes.length) flag(`ca-10: ${ks.size} repaint keys over ${L.sections[0].notes.length} notes — a single-note card must still step per note`);
+  }
+  if (bad === 0) ok(`${CHORD_GRID_CARDS.length} chord-grid cards (pinned) — ${sections} grid sections, ${events} chord/rest onsets all on the eighth grid, ${labelled} lyric lines keep their row; ca-29 renders 28 chord names and 392 data-beat on beat columns only; the cursor steps once per beat; ca-10 untouched`);
+}
+
 /* 1bq. THE SONG LIBRARY HOLDS NO CORE SONG (Jonathan, 2026-10-20: "make
    sure that the core songs are not included with the library songs because
    those have class activities"). A `library: true` card is on every
@@ -8210,6 +8318,7 @@ async function checkBackingLoudness() {
   checkJourneyGuitarToggle();
   checkPracticeCards(rcCtx);
   checkSheetCards();
+  checkChordGridCards(rcCtx);
   checkCardCaptionWords();
   checkJourneyRetired();
   checkSongLibrary();

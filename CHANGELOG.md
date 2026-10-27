@@ -5,6 +5,25 @@ Notable changes to the Guitar Class site. Newest first.
 For the full session-by-session history (and the reasoning behind each change),
 see `WORKFLOW.md` and the git commit log.
 
+## 2026-10-26 — Chord play-along cards: one name for each chord, and the highlight moves on the beat
+
+- **Each chord now shows once, where it starts.** On the chord play-along
+  cards, the tab no longer draws every strum, because the strumming on the
+  record changes through a song. You see the chord name once, at the beat (or
+  the "+") where the chord begins, and the chord stays until the next name.
+- **The highlight moves on the beats only.** It steps 1, 2, 3, 4 in each bar
+  and never lights a "+". Strum once each time a beat lights up, and change
+  chords when you reach the next chord name. The count under the tab is always
+  on for these cards: the beats are dark and each "+" is light grey.
+- **Four bars in each row.** A bar line separates the bars. A song with words
+  (Las Mañanitas) starts each sung line on a new row.
+- **This covers** the Watchtower, "the cure", Luna and Sweet Child power-chord
+  cards, Madrecita Querida, Arsenal Efectivo, Ella, Vuelve a la Vida, Las
+  Mañanitas (verses and choruses), and Smells Like Teen Spirit (chorus and
+  chords). Riffs, bass lines and single notes keep the note-by-note highlight.
+- **The Watchtower chord sheet:** the dot now fills in on every beat (it used
+  to fill on every strum), and "This bar" lights the four beats only.
+
 ## 2026-10-26 — Held beats show in parentheses; one old Coach hint removed
 
 - **A held beat now shows in parentheses under a timed tab.** When a note lasts

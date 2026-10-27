@@ -12603,7 +12603,9 @@ function caOpenLinkedCard(from, id){
    - The tab follows the song note by note (`.beat-now`, the TAB player's
      own cursor), one page per section, honouring each note's `beats`, so
      an uneven riff (Seven Nation Army) is followed as written. A section
-     with `reps` shows its notes once and a "Verse 1 of 2" badge.
+     with `reps` shows its notes once and a "Verse 1 of 2" badge. A chord
+     card (`card.chordGrid`) is the exception: its cursor sits on the BEATS
+     and each chord is drawn once — see CHORD GRID.
    - The Metronome is a click the SITE makes on every counted beat — there
      are no metronome mixes in audio/. Moises clicked "the cure" at the
      file's 144 BPM, twice the 72 the room counts; this click is always the
@@ -12783,6 +12785,145 @@ function caRequiredTickKeys(a){
   return caTickKeys(a);
 }
 function caTickCount(keys){ return keys.filter(k => caStepDone[k] === true).length; }
+/* ══ CHORD GRID — a chord card's TAB without the strumming ══════════════
+   (Jonathan, 2026-10-26.) The record's strumming is not consistent through a
+   song and the strum patterns are taught on the slides, so on a chord card
+   the TAB stops drawing every strum: each chord appears ONCE, where it
+   really starts — on a beat or on the "+" — and the cursor moves on the
+   beats only (1 2 3 4 of each bar), never on a "+". Opt in with
+   `card.chordGrid: true`, and `chordGrid: false` on a section to leave it as
+   it is (a solo, a single-note verse). Display only: no `notes` array
+   changes, so the audio, pcLayout's beat totals, checks 1bf / 1bf2 / 1az and
+   the Journey whole-song tabs are untouched. Single-note cards never opt in.
+   Layout: eighth-note columns, FOUR BARS to a row whatever the meter (16
+   beats across in 4/4, 12 in 3/4, 8 in 2/4), a bar line between bars. A
+   lyric line (`rowLabels`) keeps its own row where it starts on a bar line;
+   a 10-bar line is 4 + 4 + 2 bars with the lyric over the first. `rows`
+   without labels are only wrapping hints and are ignored here. */
+const PC_GRID_BARS = 4;
+/* Fold consecutive same-name notes into one event { name, frets, midi,
+   start, beats, ... } with `start` the running sum of beats. A rest ends a
+   chord and is an event of its own ({ rest: true }). Pure: no DOM. */
+function pcChordGrid(notes, beatsPerBar){
+  const bpb = beatsPerBar > 0 ? beatsPerBar : 4;
+  const events = [];
+  let pos = 0;
+  (notes || []).forEach((n, i) => {
+    const len = n.beats > 0 ? n.beats : 1;
+    const prev = events[events.length - 1];
+    if(n.rest){
+      if(prev && prev.rest) prev.beats += len;
+      else events.push({ rest: true, name: '', start: pos, beats: len, seq: i, bar: Math.floor(pos / bpb + 1e-6) });
+    } else if(prev && !prev.rest && prev.name === n.note){
+      prev.beats += len;
+    } else {
+      const frets = Array.isArray(n.frets) ? n.frets : (n.string != null ? [[n.string, n.fret]] : []);
+      events.push({ name: n.note, frets, midi: Array.isArray(n.midi) ? n.midi : [n.midi], start: pos, beats: len, seq: i, bar: Math.floor(pos / bpb + 1e-6) });
+    }
+    pos += len;
+  });
+  return events;
+}
+/* The rows of one chord-grid section: [{ b0, b1, label }] in beats from the
+   start of the pass. Every b0 is a bar line. A lyric line whose first note
+   does not start on a bar line loses its label (checks.mjs 1bv fails the
+   push on that, so it cannot happen quietly). */
+function pcGridRows(S, bpb){
+  const total = S.bars * bpb;
+  const starts = [];
+  let pos = 0;
+  S.notes.forEach(n => { starts.push(pos); pos += n.beats > 0 ? n.beats : 1; });
+  const spec = Array.isArray(S.s.rows) && S.s.rows.every(r => Number.isInteger(r) && r > 0)
+    && S.s.rows.reduce((x, y) => x + y, 0) === S.notes.length ? S.s.rows : null;
+  const rl = tf(S.s, 'rowLabels');
+  const labels = spec && Array.isArray(rl) && rl.length === spec.length ? rl : null;
+  const lines = [{ b0: 0, label: '' }];
+  if(labels){
+    lines.length = 0;
+    let k = 0;
+    spec.forEach((r, ri) => {
+      const b = starts[k];
+      k += r;
+      const bar = b / bpb;
+      if(ri === 0) lines.push({ b0: 0, label: labels[0] });
+      else if(Math.abs(bar - Math.round(bar)) < 1e-6 && labels[ri]) lines.push({ b0: Math.round(bar) * bpb, label: labels[ri] });
+    });
+  }
+  const rows = [];
+  lines.forEach((ln, li) => {
+    const end = li + 1 < lines.length ? lines[li + 1].b0 : total;
+    for(let b = ln.b0, first = true; b < end - 1e-6; b += PC_GRID_BARS * bpb, first = false){
+      rows.push({ b0: b, b1: Math.min(end, b + PC_GRID_BARS * bpb), label: first ? ln.label : '' });
+    }
+  });
+  return rows;
+}
+/* One row of a chord grid. Columns are eighths (a bar is 2 x beatsPerBar of
+   them); `cols` is shared by every row of the section so beats line up row
+   to row. Fret numbers and the chord-name button sit at each event's onset
+   column only. data-beat (the beat within the pass) goes on every BEAT column
+   — string cells and count cell — and never on a "+" column: that is what
+   the cursor lights (pcPaint). The count row is always on here: beats in
+   ink, "+" faint, so a chord on a "+" has a label under it. */
+function renderChordGridRow(events, row, cols, bpb, seqOff){
+  const barCols = bpb * 2;
+  const used = Math.round((row.b1 - row.b0) * 2);
+  const at = {};
+  events.forEach(ev => {
+    if(ev.start < row.b0 - 1e-6 || ev.start >= row.b1 - 1e-6) return;
+    at[Math.round((ev.start - row.b0) * 2)] = ev;
+  });
+  const beatOf = c => (c < used && c % 2 === 0) ? Math.round(row.b0 + c / 2) : null;
+  const strRows = TAB_STRINGS.map(lab => {
+    const cells = [`<div class="tab-str-label">${lab}</div>`];
+    for(let c = 0; c < cols; c++){
+      const b = beatOf(c), ev = at[c];
+      const hit = ev && !ev.rest ? ev.frets.find(([s]) => s === lab) : null;
+      const attrs = (b !== null ? ` data-beat="${b}"` : '') + (ev && !ev.rest ? ` data-seq="${seqOff + ev.seq}"` : '');
+      cells.push(hit
+        ? `<div class="tab-cell"${attrs}><span class="tab-fret">${escHtml(String(hit[1]))}</span></div>`
+        : `<div class="tab-cell"${attrs}></div>`);
+    }
+    return cells.join('');
+  }).join('');
+  let bars = '';
+  for(let c = barCols; c < used; c += barCols) bars += `<div class="tab-bar-line" style="grid-column:${c + 2};grid-row:1/7" aria-hidden="true"></div>`;
+  // The name row keeps its height in a row where no chord starts (a long chord held across the row).
+  let names = '<div class="tab-chord-pad" style="grid-row:7;grid-column:1" aria-hidden="true"></div>';
+  Object.keys(at).forEach(k => {
+    const ev = at[k];
+    if(ev.rest) return;
+    const midisAttr = escAttr(JSON.stringify(ev.midi.map(Number)));
+    const tip = t('tab.playNote', {note: ev.name});
+    names += `<button type="button" class="tab-note-btn tab-chord-btn" style="grid-row:7;grid-column:${Number(k) + 2}" data-seq="${seqOff + ev.seq}" data-midis="${midisAttr}" onclick="playBeat(this)" title="${escAttr(tip)}" aria-label="${escAttr(tip)}">${escHtml(ev.name)}<span class="tab-spkr"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" style="width:1em;height:1em;vertical-align:-0.15em"><path d="M4 9v6h4l5 4V5L8 9z"/><path d="M17 8a5 5 0 0 1 0 8"/></svg></span></button>`;
+  });
+  let counts = '<div class="tab-count" style="grid-row:8;grid-column:1" aria-hidden="true"></div>';
+  for(let c = 0; c < cols; c++){
+    const b = beatOf(c);
+    const pos = `style="grid-row:8;grid-column:${c + 2}"`;
+    if(c >= used) counts += `<div class="tab-count" ${pos} aria-hidden="true"></div>`;
+    else if(b !== null) counts += `<div class="tab-count" data-beat="${b}" ${pos} aria-hidden="true">${(c / 2) % bpb + 1}</div>`;
+    else counts += `<div class="tab-count tab-count-held" ${pos} aria-hidden="true">+</div>`;
+  }
+  return `
+      <div class="tab-grid chord-grid" style="grid-template-columns:28px repeat(${cols},1fr)">
+        <div class="tab-box" style="grid-column:2/${cols + 2};grid-row:1/7"></div>
+        ${strRows}
+        ${bars}
+        ${names}
+        ${counts}
+      </div>`;
+}
+/* The grid rows of one section, with a lyric line (pc-row-label) over each
+   row that starts one. */
+function pcChordGridHtml(S, bpb){
+  const events = pcChordGrid(S.notes, bpb);
+  const cols = Math.min(PC_GRID_BARS, S.bars) * bpb * 2;
+  return pcGridRows(S, bpb).map(row =>
+    (row.label ? `<div class="tab-phrase-label pc-row-label">${escHtml(String(row.label))}</div>` : '')
+    + renderChordGridRow(events, row, cols, bpb, S.seqOff)
+  ).join('');
+}
 /* Sections with their tab offsets and running beat totals, plus the window
    the player loops over (bars from the first section to the end of the
    last). null when the track is unknown — the card then renders nothing
@@ -12794,8 +12935,11 @@ function pcLayout(a){
   let seq = 0;
   const sections = (c.sections || []).map(s => {
     const notes = s.notes || [];
+    /* grid: this section is drawn as a chord grid (card.chordGrid, with
+       section.chordGrid:false to opt one out) — see CHORD GRID below. */
     const out = { s, notes, fromBar: Math.max(1, s.fromBar || 1), bars: Math.max(1, s.bars || 1),
-                  reps: Math.max(1, s.reps || 1), seqOff: seq, beatEnds: [] };
+                  reps: Math.max(1, s.reps || 1), seqOff: seq, beatEnds: [],
+                  grid: !!(c.chordGrid && s.chordGrid !== false) };
     let acc = 0;
     notes.forEach(n => { acc += n.beats > 0 ? n.beats : 1; out.beatEnds.push(acc); });
     seq += notes.length;
@@ -12807,8 +12951,8 @@ function pcLayout(a){
   return { tr, sections, firstBar, totalBars: last.fromBar + last.bars * last.reps - firstBar };
 }
 /* Where `barsIn` (fractional bars from the window start) falls: which
-   section, which repeat of it, which note on its page, and that note's
-   data-seq in the tab. */
+   section, which repeat of it, which note on its page, that note's
+   data-seq in the tab, and the beat / bar within the pass. */
 function pcLocate(L, barsIn){
   if(!(barsIn >= 0)) return null;
   const songBar = L.firstBar + barsIn;
@@ -12821,7 +12965,11 @@ function pcLocate(L, barsIn){
     const local = beatIn - rep * repBeats;
     let ni = S.beatEnds.findIndex(e => local < e - 1e-6);
     if(ni < 0) ni = S.notes.length - 1;
-    return { si, rep, ni, seq: S.seqOff + ni };
+    /* beat: the whole beat within this pass (0-based) — what a chord grid's
+       cursor sits on. bar: the bar within the pass. */
+    const bpb = L.tr.beatsPerBar > 0 ? L.tr.beatsPerBar : 4;
+    const beat = Math.max(0, Math.min(Math.round(repBeats) - 1, Math.floor(local + 1e-6)));
+    return { si, rep, ni, seq: S.seqOff + ni, beat, bar: Math.floor(beat / bpb) };
   }
   return null;
 }
@@ -12923,6 +13071,13 @@ function pcTabHtml(a, L){
   const pages = L.sections.map((S, si) => {
     const widest = S.notes.length || 1;
     const grids = [];
+    /* A chord-grid section (card.chordGrid) is laid out by pcChordGridHtml
+       instead — see CHORD GRID. It always shows its own count row. */
+    if(S.grid){
+      return `<div class="tab-page pc-page" data-page="${si}"${si ? ' hidden' : ''}><div class="tab-phrase">`
+        + `<div class="tab-phrase-label">${escHtml(tf(S.s, 'caption'))}<span class="pc-rep" hidden></span></div>`
+        + `<div class="tab-board">${pcChordGridHtml(S, L.tr.beatsPerBar > 0 ? L.tr.beatsPerBar : 4)}</div></div></div>`;
+    }
     const counts = c.counts ? tabCounts(S.notes, L.tr.beatsPerBar) : null;   // card.counts — the Counts switch
     /* `rows` on a section — notes per tab row, e.g. [7, 9] — ends each row
        where the music does instead of balancing them (ca-25 / ca-31 chorus:
@@ -12987,9 +13142,15 @@ function pcTabHtml(a, L){
      switch to turn it on or off, default off"). In the TAB's own head, not
      the player row, which is full at Chromebook width. The choice is
      remembered per browser (pcCountsPref); first visit is off. */
-  const countsOn = !!c.counts && pcCountsPref();
-  const countsSw = c.counts
-    ? `<button type="button" class="pc-speed pc-guitar pc-counts" role="switch" aria-checked="${countsOn}" aria-label="${escAttr(t('ca.cardCountsAria'))}" title="${escAttr(t('ca.cardCountsAria'))}" onclick="pcSetCounts(this)">`
+  /* A card whose every section is a chord grid has no switch: those sections
+     always show their count row. A mixed card (ca-41) keeps it for the
+     sections that are not a grid, and its label says the count shows beats. */
+  const hasGrid = L.sections.some(S => S.grid);
+  const needsCounts = !!c.counts && L.sections.some(S => !S.grid);
+  const countsOn = needsCounts && pcCountsPref();
+  const countsAria = t(hasGrid ? 'ca.cardCountsAriaGrid' : 'ca.cardCountsAria');
+  const countsSw = needsCounts
+    ? `<button type="button" class="pc-speed pc-guitar pc-counts" role="switch" aria-checked="${countsOn}" aria-label="${escAttr(countsAria)}" title="${escAttr(countsAria)}" onclick="pcSetCounts(this)">`
       + `<span class="pc-speed-lab on">${escHtml(t('ca.cardCounts'))}</span>`
       + `<span class="pc-speed-track" aria-hidden="true"><span class="pc-speed-knob"></span></span></button>`
     : '';
@@ -13046,7 +13207,7 @@ function caCardBodyHtml(a, opts){
   if(sheet) setTimeout(pcSheetScan, 0);
   return `<div class="pc" data-id="${escAttr(a.id)}" data-slow="1"${snippetHasFull(L.tr) ? ' data-guitar="1"' : ''}${preview ? ' data-preview="1"' : ''}>`
     + caKeySwitchHtml(a) + caChordSwitchHtml(a)
-    + `<p class="pc-dir">${escHtml(t(sheet ? 'ca.sheetDirections' : 'ca.cardDirections'))}</p>`
+    + `<p class="pc-dir">${escHtml(t(sheet ? 'ca.sheetDirections' : L.sections.some(S => S.grid) ? 'ca.cardChordDirections' : 'ca.cardDirections'))}</p>`
     + pcPlayerHtml(a, L) + (sheet ? pcSheetHtml(a, L) : pcTabHtml(a, L)) + pcChecksHtml(a, preview) + pcHelpHtml(a, preview)
     + `</div>`;
 }
@@ -13057,11 +13218,13 @@ function caCardBodyHtml(a, opts){
    all, in place of the tab. Everything else is the practice card unchanged:
    Play song, the four speeds, the Guitar switch, the Metronome, the checks,
    pcFrame's clock and pcLocate. Only the marks differ:
-     - the DOT sits just left of the chord being played. It fills in on each
-       strum (each note of the card) and goes hollow while the chord rings;
-       a faint ring marks the next chord;
-     - "This bar" counts 1 + 2 + 3 + 4 + and marks where the strums land,
-       sticky at the top of the sheet so it stays on screen;
+     - the DOT sits just left of the chord being played. It fills in on
+       every BEAT (2026-10-26 — not on every strum: the record's strumming
+       is not consistent) and goes hollow between beats; a faint ring marks
+       the next chord;
+     - "This bar" counts 1 + 2 + 3 + 4 + and marks where each chord starts
+       (a "+" cell too, never lit), lighting the beat cell only, sticky at
+       the top of the sheet so it stays on screen;
      - the page follows the line being played (pcFollow, the tab's own rule).
    Where the chords are is read from the PDF's TEXT, never typed into code:
    every word on a line made only of chord names is a chord, in reading
@@ -13085,13 +13248,10 @@ const PC_TAB_LEAD = 0;
    line change it has to jump to the start of another row, so a cursor that
    gets there with the sound reads as late. The first note of a new row (or
    a new section's page) lights this many real seconds early; every other
-   note keeps PC_TAB_LEAD. Same reason as PC_SHEET_LEAD. */
+   note keeps PC_TAB_LEAD. Same reason as PC_SHEET_LEAD. On a chord grid the
+   cursor is a beat, not a note, and the same rule holds (pcLocRow). */
 const PC_ROW_LEAD = 0.15;
-function pcRowOf(root, seq){
-  const cell = root.querySelector(`.pc-tab [data-seq="${seq}"]`);
-  return cell && cell.closest('.tab-grid');
-}
-const PC_SHEET_SOLID = 0.42;      // beats the dot stays filled after a strum
+const PC_SHEET_SOLID = 0.42;      // beats the dot stays filled after a beat
 const PC_SHEET_MAX_SCALE = 1.9;   // CSS px per PDF point at most (chord names ~19px)
 const PC_SHEET_CHORD_RE = /^[A-G](#|b)?(maj|min|m|dim|aug|sus|add|\+|°|ø|[0-9])*(\/[A-G](#|b)?)?$/;
 function pcSheetLoadPdfjs(){
@@ -13301,7 +13461,7 @@ function pcSheetMark(paper, idx, hit, beatSec){
   if(line){ line.style.top = (T.y0 - crop.y - 3) * s + 'px'; line.style.height = (T.y1 - T.y0) * 2.6 * s + 'px'; }
   return line;
 }
-function pcSheetPaint(st, loc){
+function pcSheetPaint(st, loc, flash){
   const paper = st.root.querySelector('.pc-sheet-paper');
   const where = st.root.querySelector('.pc-sheet-where');
   if(where && (loc.si !== st.si || loc.rep !== st.rep)) where.textContent = pcSheetWhere(st.L, loc.si, loc.rep);
@@ -13310,7 +13470,7 @@ function pcSheetPaint(st, loc){
   if(!sh || !sh.ok) return;
   const idx = sh.map.tok[loc.si][loc.rep][loc.ni];
   const beatSec = st.win.bar / st.L.tr.beatsPerBar / pcRate(st.root);
-  const line = pcSheetMark(paper, idx, true, beatSec);
+  const line = pcSheetMark(paper, idx, !!flash, beatSec);
   const T = sh.model.toks[idx];
   if(line && st.sheetLine !== T.y0){ st.sheetLine = T.y0; pcSheetStickyTop(st.root); pcFollow(line, false); }
 }
@@ -13325,15 +13485,15 @@ function pcSheetStrip(st, loc, barsIn){
   const key = loc.si + ':' + bar;
   if(st.stripKey !== key){
     st.stripKey = key;
+    // One name per chord CHANGE, on the cell it lands in (a "+" cell too): the strumming is not shown.
     const marks = [];
-    let pos = 0;
-    S.notes.forEach(n => {
-      if(Math.floor(pos / bpb + 1e-6) === bar) marks[Math.round((pos - bar * bpb) * 2)] = n.note;
-      pos += n.beats > 0 ? n.beats : 1;
+    pcChordGrid(S.notes, bpb).forEach(ev => {
+      if(!ev.rest && ev.bar === bar) marks[Math.round((ev.start - bar * bpb) * 2)] = ev.name;
     });
     cells.forEach((c, i) => { c.classList.toggle('strum', !!marks[i]); c.querySelector('.pc-strip-ch').textContent = marks[i] || ''; });
   }
-  const now = Math.floor((local - bar * bpb) * 2 + 1e-6);
+  // Lit on the BEAT only: the cell stays lit through its "+" and no "+" cell is ever lit.
+  const now = Math.floor(local - bar * bpb + 1e-6) * 2;
   cells.forEach((c, i) => c.classList.toggle('now', i === now));
 }
 /* The bar sticks under whatever already sticks to the top of the scroll box
@@ -13517,7 +13677,7 @@ function pcStart(root, si, rep){
      a lyric sheet (pcSheetStartAt). The loop, if any, still returns to the
      section's start. */
   const fromRep = Math.max(0, Math.min(L.sections[si].reps - 1, rep | 0));
-  const st = { root, L, audio, win: pcWindow(L, slow), loopFrom: si, fromRep, wholeSong: !!a.card.wholeSong, sheet: !!a.card.sheet, raf: 0, timers: [], lastBeat: -1, counting: true, si: -1, seq: -1, rep: -1, row: null };
+  const st = { root, L, audio, win: pcWindow(L, slow), loopFrom: si, fromRep, wholeSong: !!a.card.wholeSong, sheet: !!a.card.sheet, raf: 0, timers: [], lastBeat: -1, counting: true, si: -1, seq: -1, rep: -1, beat: -1, key: '', row: null };
   pcState = st;
   const btn = root.querySelector('.pc-play');
   if(btn){ btn.innerHTML = pcPlayBtnHtml(true); btn.classList.add('playing'); }
@@ -13655,31 +13815,54 @@ function pcFrame(){
   const barsIn = snipBarsAt(st.win, audio.currentTime + shift * pcRate(st.root));
   let loc = pcLocate(L, barsIn);
   if(!st.sheet && loc){
-    // A note on another row lights PC_ROW_LEAD early — see PC_ROW_LEAD.
+    // A note (a beat, on a chord grid) on another row lights PC_ROW_LEAD early — see PC_ROW_LEAD.
     const ahead = pcLocate(L, snipBarsAt(st.win, audio.currentTime + (shift + PC_ROW_LEAD) * pcRate(st.root)));
-    if(ahead && (ahead.seq !== loc.seq || ahead.rep !== loc.rep || ahead.si !== loc.si)
-       && pcRowOf(st.root, ahead.seq) !== pcRowOf(st.root, loc.seq)) loc = ahead;
+    if(ahead && pcLocKey(L, ahead) !== pcLocKey(L, loc)
+       && pcLocRow(st.root, L, ahead) !== pcLocRow(st.root, L, loc)) loc = ahead;
   }
-  if(loc && (loc.seq !== st.seq || loc.rep !== st.rep || loc.si !== st.si)) pcPaint(st, loc);
+  /* A chord grid repaints on a new BEAT, not a new note; a lyric sheet
+     repaints on either (its dot fills on every beat, its chord mark moves on
+     every chord change). */
+  if(loc && (pcLocKey(L, loc) !== st.key || (st.sheet && loc.beat !== st.beat))) pcPaint(st, loc);
   if(st.sheet) pcSheetStrip(st, loc, barsIn);
   st.raf = requestAnimationFrame(pcFrame);
 }
+/* What a repaint is keyed on: the beat on a chord-grid section, the note
+   everywhere else. Never the note on a grid — it moves on a "+". */
+function pcLocKey(L, loc){
+  return loc.si + ':' + loc.rep + ':' + (L.sections[loc.si].grid ? 'b' + loc.beat : 's' + loc.seq);
+}
+// The tab row the cursor is on for `loc` (a grid's beat is only unique within its page).
+function pcLocRow(root, L, loc){
+  const cell = L.sections[loc.si].grid
+    ? root.querySelector(`.pc-tab .pc-page[data-page="${loc.si}"] [data-beat="${loc.beat}"]`)
+    : root.querySelector(`.pc-tab [data-seq="${loc.seq}"]`);
+  return cell && cell.closest('.tab-grid');
+}
 function pcPaint(st, loc){
   const root = st.root;
-  if(st.sheet){ pcSheetPaint(st, loc); st.si = loc.si; st.seq = loc.seq; st.rep = loc.rep; return; }
+  const key = pcLocKey(st.L, loc);
+  if(st.sheet){
+    // The dot fills on a new beat; a chord change on a "+" moves the mark but does not fill it.
+    const flash = loc.beat !== st.beat || loc.rep !== st.rep || loc.si !== st.si;
+    pcSheetPaint(st, loc, flash);
+    st.si = loc.si; st.seq = loc.seq; st.rep = loc.rep; st.beat = loc.beat; st.key = key;
+    return;
+  }
+  const S = st.L.sections[loc.si];
   root.querySelectorAll('.pc-tab .beat-now').forEach(el => el.classList.remove('beat-now'));
-  root.querySelectorAll(`.pc-tab [data-seq="${loc.seq}"]`).forEach(el => el.classList.add('beat-now'));
+  const sel = S.grid ? `.pc-page[data-page="${loc.si}"] [data-beat="${loc.beat}"]` : `[data-seq="${loc.seq}"]`;
+  root.querySelectorAll(`.pc-tab ${sel}`).forEach(el => el.classList.add('beat-now'));
   if(loc.si !== st.si) pcShowSection(root, st.L, loc.si);
-  const cell = root.querySelector(`.pc-tab .pc-page:not([hidden]) [data-seq="${loc.seq}"]`);
+  const cell = root.querySelector(`.pc-tab .pc-page:not([hidden]) ${S.grid ? `[data-beat="${loc.beat}"]` : `[data-seq="${loc.seq}"]`}`);
   const row = cell && cell.closest('.tab-grid');
   if(row && row !== st.row){ st.row = row; pcFollow(row, false); }
-  const S = st.L.sections[loc.si];
   const rep = root.querySelector(`.pc-page[data-page="${loc.si}"] .pc-rep`);
   if(rep && S.reps > 1){
     rep.hidden = false;
     rep.textContent = t('ca.cardRepOf', {what: tf(S.s, 'repLabel'), n: loc.rep + 1, total: S.reps});
   }
-  st.si = loc.si; st.seq = loc.seq; st.rep = loc.rep;
+  st.si = loc.si; st.seq = loc.seq; st.rep = loc.rep; st.beat = loc.beat; st.key = key;
 }
 /* Keep the line being played on screen (Jonathan, 2026-09-30: a long
    section runs off the bottom of a Chromebook, and the student's hands are
