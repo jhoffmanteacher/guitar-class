@@ -1192,15 +1192,22 @@ function showJourneyGate(){
   document.body.appendChild(card);
 }
 
+/* Same two guards as loadFirestoreSdk() in app.js: one load shared by every
+   auth resolution that arrives while it is in flight (no second <script>),
+   and a failed tag removed and forgotten so a later sign-in can retry
+   without leaving dead tags in <head>. */
+var firestoreLoad = null;
 function loadFirestoreSdk(){
-  return new Promise(function(resolve, reject){
+  if(firestoreLoad) return firestoreLoad;
+  firestoreLoad = new Promise(function(resolve, reject){
     if(firebase.firestore){ resolve(); return; }
     var s = document.createElement('script');
     s.src = 'https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js';
-    s.onload = resolve;
-    s.onerror = function(){ reject(new Error('Firestore SDK failed to load')); };
+    s.onload = function(){ resolve(); };
+    s.onerror = function(){ s.remove(); firestoreLoad = null; reject(new Error('Firestore SDK failed to load')); };
     document.head.appendChild(s);
   });
+  return firestoreLoad;
 }
 
 window.addEventListener('load', function(){
@@ -1253,6 +1260,7 @@ window.addEventListener('load', function(){
     loadFirestoreSdk().then(function(){
       fbDb = firebase.firestore();
       fbUser = user;
+      sdkFailed = false;   // an earlier failed load was retried (loadFirestoreSdk) and landed
       setSaveMsg('');
       /* Live quiz (../live-quiz.js): a student parked on a Journey page while
          the class starts a game would otherwise miss the whole thing in
