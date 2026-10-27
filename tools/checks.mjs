@@ -1414,7 +1414,10 @@ function checkTabNoScroll() {
    light mode and near-black in dark.
 
    So: resolve every rule that sets BOTH a colour and a background,
-   through each palette, and fail under 4.5:1.
+   through each palette, and fail under 4.5:1. The rule's own `opacity`
+   fades the colour toward an ancestor's surface. A colour and a surface
+   that only the markup brings together are part 2 (CONTRAST_STATES,
+   2026-10-26), below checkContrast().
 
    HONEST LIMITS — both err on the side of not crying wolf:
    · a translucent background (rgba/transparent) is skipped, because the
@@ -1623,18 +1626,218 @@ function checkContrast() {
             const r = cssVar(tok, pal);
             if (cssRGB(r)) { bgV = r; break; }
           }
-          const f = cssRGB(fgV), b = cssRGB(bgV);
-          if (!f || !b) continue;
+          const f0 = cssRGB(fgV), b = cssRGB(bgV);
+          if (!f0 || !b) continue;
+          /* Opacity on the text's own rule fades it toward the surface behind
+             it. Only when that surface is an ancestor's: a rule that paints
+             its own background fades both, over something this cannot see. */
+          const op = bgOf(eff) == null ? parseFloat(eff.get('opacity')) : NaN;
+          const a = op >= 0 && op < 1 ? op : 1;
+          const f = f0.map((v, i) => a * v + (1 - a) * b[i]);
           pairs++;
           const r = ratio(f, b);
           if (r < need) {
-            flag(`${name}: ${media ? media + ' { ' : ''}${sel} — ${r.toFixed(2)}:1 in ${mode} mode (${fgV} on ${bgV}); needs ${need}${why ? ` (${why})` : ''}. If the text is genuinely large, or the colour is an icon rather than a glyph, add the selector to CONTRAST_ALLOW.`);
+            flag(`${name}: ${media ? media + ' { ' : ''}${sel} — ${r.toFixed(2)}:1 in ${mode} mode (${fgV}${a < 1 ? ` at opacity ${a}` : ''} on ${bgV}); needs ${need}${why ? ` (${why})` : ''}. If the text is genuinely large, or the colour is an icon rather than a glyph, add the selector to CONTRAST_ALLOW.`);
           }
         }
       }
     }
   }
-  if (!bad) ok(`${pairs} colour pairs checked across both palettes in ${files} stylesheets — all ≥ 4.5:1`);
+  const st = contrastStates(flag);
+  if (!bad) ok(`${pairs} colour pairs checked across both palettes in ${files} stylesheets, plus ${st} rendered states (cross-rule colour, background and opacity) — all ≥ 4.5:1`);
+}
+/* ── 1s, part 2: rendered states ─────────────────────────────────────────
+   The pass above pairs a colour with a background only when the selector
+   itself states both. It cannot see a colour in one rule and the surface in
+   another when only the MARKUP puts them together, and until 2026-10-26 it
+   ignored opacity. The 2026-10-26 audit found five that way, all green:
+   `.step-branch` (colour) inside `.step-stuck` / `.step-levelup` (fill) at
+   4.0:1 dark; a done practice-card check head on the green done fill (4.0
+   dark, 4.4 light for Level up); four done-text rules at opacity .65 (~3:1);
+   Note Runner's "unlock" label dimmed to 2.1:1 by its parent's opacity.
+
+   So each state below is an element chain as the code emits it (outermost
+   first, one compound per element, `::after` for a pseudo-element). A small
+   cascade resolves it against the real stylesheet at the 1366×657 target:
+   every rule whose selector matches the chain (descendant and child
+   combinators; rules with :hover, [attr], + or ~ are left out, as they
+   describe a state the chain does not claim), ordered by !important,
+   specificity and source order; colour inherits, background does not, and
+   the opacity of every element between the text and its surface multiplies
+   in. `over` names the surface when the text hangs outside the box that
+   paints it (the unlock label sits below its gate line, on the lane's lower
+   band). Every class must still appear in its emitter file, and a state
+   that resolves no colour or no surface FAILS rather than skips — so the
+   pinned count below is the number actually judged, in both palettes. */
+const CONTRAST_STATES = [
+  { name: 'Stuck? panel',             file: 'app.js',   chain: ['.step-fold-panel', 'div.step-branch.step-stuck'] },
+  { name: 'Level up panel',           file: 'app.js',   chain: ['.step-fold-panel', 'div.step-branch.step-levelup'] },
+  { name: 'practice check head',      file: 'app.js',   chain: ['li.pc-check', 'button.pc-check-btn', 'span.pc-check-body', 'span.pc-check-head'] },
+  { name: 'done check head',          file: 'app.js',   chain: ['li.pc-check.is-done', 'button.pc-check-btn', 'span.pc-check-body', 'span.pc-check-head'] },
+  { name: 'Level up check head',      file: 'app.js',   chain: ['li.pc-check.pc-check--lvl', 'button.pc-check-btn', 'span.pc-check-body', 'span.pc-check-head'] },
+  { name: 'done Level up check head', file: 'app.js',   chain: ['li.pc-check.is-done.pc-check--lvl', 'button.pc-check-btn', 'span.pc-check-body', 'span.pc-check-head'] },
+  { name: 'done step label',          file: 'app.js',   chain: ['.dp', 'li.step.step-done', 'button.step-head', 'span.step-label'] },
+  { name: 'done step text',           file: 'app.js',   chain: ['.dp', 'li.step.step-done', 'div.step-detail', 'span.st-text'] },
+  { name: 'done in-class step label', file: 'app.js',   chain: ['.ca-card', 'li.ca-step.ca-step-done', 'button.ca-step-head', 'span.ca-step-label'] },
+  { name: 'done review card text',    file: 'app.js',   chain: ['div.sr-card.sr-done', 'div.sr-card-main', 'div.sr-card-text'] },
+  { name: 'Note Runner unlock label', file: 'coach.js', chain: ['.nr-race', '.nr-race-lane', 'div.nr-race-gate', '::after'], over: '--bg3' },
+];
+const CONTRAST_STATES_PINNED = 11;
+/* Does @media context `m` apply at the 1366×657 target in this palette?
+   Unknown features (hover, pointer, reduced motion) and print answer no. */
+function contrastMediaApplies(m, mode) {
+  if (!m) return true;
+  if (/\bprint\b|,|\bnot\b|\bor\b/.test(m)) return false;
+  for (const [, feat, val] of m.matchAll(/\(\s*([\w-]+)\s*:\s*([^)]+?)\s*\)/g)) {
+    const px = /em$/.test(val) ? parseFloat(val) * 16 : parseFloat(val);
+    if (feat === 'prefers-color-scheme') { if (val !== mode) return false; }
+    else if (feat === 'min-width') { if (!(1366 >= px)) return false; }
+    else if (feat === 'max-width') { if (!(1366 <= px)) return false; }
+    else if (feat === 'min-height') { if (!(657 >= px)) return false; }
+    else if (feat === 'max-height') { if (!(657 <= px)) return false; }
+    else return false;
+  }
+  return true;
+}
+/* One compound ("li.step.step-done", "*", ".x::after") -> parts, or null for
+   anything this resolver does not model (pseudo-classes, attributes). */
+function contrastCompound(s) {
+  const m = /^([a-z][\w-]*|\*)?((?:[.#][\w-]+)*)(::(?:before|after))?$/i.exec(s);
+  if (!m || (!m[1] && !m[2] && !m[3])) return null;
+  const tag = m[1] && m[1] !== '*' ? m[1].toLowerCase() : null;
+  const cls = [...m[2].matchAll(/\.([\w-]+)/g)].map(x => x[1]);
+  const ids = [...m[2].matchAll(/#([\w-]+)/g)].map(x => x[1]);
+  return { tag, cls, ids, pseudo: m[3] || null };
+}
+function contrastStates(flag) {
+  let judged = 0;
+  let css, emit = {};
+  try { css = readFileSync(join(ROOT, 'styles.css'), 'utf8'); }
+  catch { flag('1s states: styles.css unreadable'); return 0; }
+  /* Ordered rule list: [{sel, media, decls, order}], one entry per selector
+     of a selector list — the order the cascade needs, which cssRuleMap's
+     merged map does not keep. */
+  const rules = [];
+  const clean = css.replace(/\/\*[\s\S]*?\*\//g, '');
+  let i = 0, order = 0;
+  const parse = (ctx) => {
+    let buf = '';
+    while (i < clean.length) {
+      const c = clean[i++];
+      if (c === '}') return;
+      if (c !== '{') { buf += c; continue; }
+      const sel = buf.trim().replace(/\s+/g, ' '); buf = '';
+      if (sel.startsWith('@')) { parse(ctx ? ctx + ' ' + sel : sel); continue; }
+      let body = '', depth = 1;
+      while (i < clean.length && depth > 0) {
+        const d = clean[i++];
+        if (d === '{') depth++;
+        else if (d === '}') { depth--; if (!depth) break; }
+        body += d;
+      }
+      const decls = cssDecls(body);
+      for (const s of sel.split(',').map(x => x.trim()).filter(Boolean)) rules.push({ sel: s, media: ctx, decls, order: order++ });
+    }
+  };
+  parse('');
+  /* Parse each rule's selector once into compounds + combinators. */
+  for (const r of rules) {
+    if (/[+~[:]/.test(r.sel.replace(/::(?:before|after)\b/g, ''))) { r.parts = null; continue; }
+    const toks = r.sel.replace(/\s*>\s*/g, ' > ').split(' ').filter(Boolean);
+    const parts = []; let comb = ' ';
+    for (const t of toks) {
+      if (t === '>') { comb = '>'; continue; }
+      const c = contrastCompound(t);
+      if (!c) { parts.length = 0; break; }
+      parts.push({ ...c, comb }); comb = ' ';
+    }
+    r.parts = parts.length ? parts : null;
+    if (r.parts) {
+      const all = r.parts;
+      r.spec = [all.reduce((n, p) => n + p.ids.length, 0), all.reduce((n, p) => n + p.cls.length, 0), all.reduce((n, p) => n + (p.tag ? 1 : 0) + (p.pseudo ? 1 : 0), 0)];
+    }
+  }
+  const compMatches = (p, el) => (!p.tag || p.tag === el.tag) && p.cls.every(c => el.cls.includes(c)) && p.ids.every(x => el.ids.includes(x));
+  /* Does rule part list `ps` (ending at index k) match chain node n? */
+  const matchAt = (ps, k, chain, n) => {
+    const p = ps[k];
+    if (!compMatches(p, chain[n])) return false;
+    if (k === 0) return true;
+    if (p.comb === '>') return n > 0 && matchAt(ps, k - 1, chain, n - 1);
+    for (let j = n - 1; j >= 0; j--) if (matchAt(ps, k - 1, chain, j)) return true;
+    return false;
+  };
+  const ruleMatches = (r, chain, n) => {
+    const ps = r.parts, last = ps[ps.length - 1];
+    if (chain[n].pseudo) {
+      if (last.pseudo !== chain[n].pseudo) return false;
+      return matchAt(ps.map((p, k) => k === ps.length - 1 ? { ...p, pseudo: null } : p), ps.length - 1, chain, n - 1);
+    }
+    if (last.pseudo || ps.some(p => p.pseudo)) return false;
+    return matchAt(ps, ps.length - 1, chain, n);
+  };
+  const isImp = v => /!\s*important\s*$/i.test(v);
+  const cmp = (a, b) => (a.imp - b.imp) || (a.spec[0] - b.spec[0]) || (a.spec[1] - b.spec[1]) || (a.spec[2] - b.spec[2]) || (a.order - b.order);
+  const winner = (chain, n, props, mode) => {
+    let best = null;
+    for (const r of rules) {
+      if (!r.parts || !contrastMediaApplies(r.media, mode) || !ruleMatches(r, chain, n)) continue;
+      for (const pr of props) {
+        if (!r.decls.has(pr)) continue;
+        const v = r.decls.get(pr);
+        const cand = { v, imp: isImp(v) ? 1 : 0, spec: r.spec, order: r.order };
+        if (!best || cmp(cand, best) >= 0) best = cand;
+      }
+    }
+    return best ? best.v : null;
+  };
+  const rootByMedia = cssRuleMap(css).get(':root');
+  if (!rootByMedia || !rootByMedia.get('')) { flag('1s states: styles.css has no :root palette'); return 0; }
+  const light = Object.fromEntries(rootByMedia.get(''));
+  const darkKey = [...rootByMedia.keys()].find(isDarkMedia);
+  const pals = { light, dark: { ...light, ...Object.fromEntries(rootByMedia.get(darkKey) || []) } };
+
+  if (CONTRAST_STATES.length !== CONTRAST_STATES_PINNED) {
+    flag(`1s states: ${CONTRAST_STATES.length} rendered states listed, ${CONTRAST_STATES_PINNED} pinned — change the pin on purpose, in the same edit`);
+  }
+  for (const st of CONTRAST_STATES) {
+    if (!(st.file in emit)) { try { emit[st.file] = readFileSync(join(ROOT, st.file), 'utf8'); } catch { emit[st.file] = ''; } }
+    const chain = [];
+    for (const s of st.chain) {
+      if (s === '::after' || s === '::before') { chain.push({ tag: null, cls: [], ids: [], pseudo: s }); continue; }
+      chain.push(contrastCompound(s));
+    }
+    const gone = chain.flatMap(e => e.cls).filter(c => !new RegExp(`(?<![\\w-])${c}(?![\\w-])`).test(emit[st.file]));
+    if (gone.length) { flag(`1s states: "${st.name}" — ${gone.join(', ')} no longer emitted in ${st.file}; update the chain to the real markup`); continue; }
+    for (const mode of ['light', 'dark']) {
+      const pal = pals[mode];
+      const t = chain.length - 1;
+      let fgRaw = null;
+      for (let n = t; n >= 0 && fgRaw == null; n--) fgRaw = winner(chain, n, ['color'], mode);
+      const opAt = n => { const v = parseFloat(winner(chain, n, ['opacity'], mode)); return v >= 0 && v < 1 ? v : 1; };
+      let bgV = null, alpha = 1;
+      if (st.over) {
+        bgV = cssVar(`var(${st.over})`, pal);
+        for (let n = 0; n <= t; n++) alpha *= opAt(n);
+      } else {
+        for (let n = t; n >= 0 && bgV == null; n--) {
+          const raw = winner(chain, n, ['background', 'background-color'], mode);
+          if (raw != null) {
+            for (const tok of cssTokens(raw)) { const r = cssVar(tok, pal); if (cssRGB(r)) { bgV = r; break; } }
+          }
+          if (bgV == null) alpha *= opAt(n);
+        }
+      }
+      const fgV = cssVar(fgRaw, pal), f0 = cssRGB(fgV), b = cssRGB(bgV);
+      if (!f0 || !b) { flag(`1s states: "${st.name}" (${mode}) resolved no ${!f0 ? 'text colour' : 'opaque surface'} — fix the chain or give it an \`over\` surface`); continue; }
+      const f = f0.map((v, k) => alpha * v + (1 - alpha) * b[k]);
+      judged++;
+      const r = ratio(f, b);
+      if (r < 4.5) flag(`styles.css: "${st.name}" (${st.chain.join(' ')}) — ${r.toFixed(2)}:1 in ${mode} mode (${fgV}${alpha < 1 ? ` at opacity ${+alpha.toFixed(3)}` : ''} on ${bgV}); needs 4.5`);
+    }
+  }
+  if (judged !== CONTRAST_STATES_PINNED * 2) flag(`1s states: ${judged} state/palette pairs judged, expected ${CONTRAST_STATES_PINNED * 2}`);
+  return judged / 2;
 }
 
 /* ════════════════════════════════════════════════════════════════════
