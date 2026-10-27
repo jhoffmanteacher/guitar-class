@@ -1657,36 +1657,58 @@ function checkContrast() {
    Note Runner's "unlock" label dimmed to 2.1:1 by its parent's opacity.
 
    So each state below is an element chain as the code emits it (outermost
-   first, one compound per element, `::after` for a pseudo-element). A small
-   cascade resolves it against the real stylesheet at the 1366×657 target:
-   every rule whose selector matches the chain (descendant and child
-   combinators; rules with :hover, [attr], + or ~ are left out, as they
-   describe a state the chain does not claim), ordered by !important,
+   first, one compound per element, `::after` for a pseudo-element). Where a
+   card has two views (the lesson's "One at a time" focus view, the default,
+   and its list view; an in-class card's focus and list views) both are
+   listed. A small cascade resolves each chain against the real stylesheet
+   at the 1366×657 target: every matching rule, ordered by !important,
    specificity and source order; colour inherits, background does not, and
    the opacity of every element between the text and its surface multiplies
-   in. `over` names the surface when the text hangs outside the box that
-   paints it (the unlock label sits below its gate line, on the lane's lower
-   band). Every class must still appear in its emitter file, and a state
-   that resolves no colour or no surface FAILS rather than skips — so the
-   pinned count below is the number actually judged, in both palettes. */
+   in.
+
+   What the matcher models: tag, class, id, `*`, ::before/::after, the
+   descendant and child combinators, and :not() / :is() / :where() over
+   simple compounds. What it leaves out ON PURPOSE, because the resting
+   text a student reads is not in that state: rules with a STATE-ONLY
+   pseudo-class (CONTRAST_STATE_ONLY: hover, active, focus, focus-visible,
+   focus-within, visited, disabled, checked, target, fullscreen) and rules
+   for any other pseudo-element (::placeholder, ::-webkit-…). Everything
+   else it cannot model — an attribute selector, :has(), a structural
+   pseudo-class (:first-child, :nth-child, :empty…), a + or ~ combinator —
+   is matched loosely (the unmodelled part treated as true) and, if it
+   could then reach a judged element and sets color, opacity or
+   background, the state FAILS with "cannot judge" rather than skipping.
+
+   `overStop` names the surface when the text hangs outside the box that
+   paints it: the last colour stop of that chain element's own resolved
+   background (the unlock label sits below its gate line, on the lane's
+   lower band). Every class must still appear in its emitter file, and a
+   state that resolves no colour or no surface FAILS rather than skips — so
+   the pinned count below is the number actually judged, in both palettes. */
 const CONTRAST_STATES = [
-  { name: 'Stuck? panel',             file: 'app.js',   chain: ['.step-fold-panel', 'div.step-branch.step-stuck'] },
-  { name: 'Level up panel',           file: 'app.js',   chain: ['.step-fold-panel', 'div.step-branch.step-levelup'] },
-  { name: 'practice check head',      file: 'app.js',   chain: ['li.pc-check', 'button.pc-check-btn', 'span.pc-check-body', 'span.pc-check-head'] },
-  { name: 'done check head',          file: 'app.js',   chain: ['li.pc-check.is-done', 'button.pc-check-btn', 'span.pc-check-body', 'span.pc-check-head'] },
-  { name: 'Level up check head',      file: 'app.js',   chain: ['li.pc-check.pc-check--lvl', 'button.pc-check-btn', 'span.pc-check-body', 'span.pc-check-head'] },
-  { name: 'done Level up check head', file: 'app.js',   chain: ['li.pc-check.is-done.pc-check--lvl', 'button.pc-check-btn', 'span.pc-check-body', 'span.pc-check-head'] },
-  { name: 'done step label',          file: 'app.js',   chain: ['.dp', 'li.step.step-done', 'button.step-head', 'span.step-label'] },
-  { name: 'done step text',           file: 'app.js',   chain: ['.dp', 'li.step.step-done', 'div.step-detail', 'span.st-text'] },
-  { name: 'done in-class step label', file: 'app.js',   chain: ['.ca-card', 'li.ca-step.ca-step-done', 'button.ca-step-head', 'span.ca-step-label'] },
+  { name: 'Stuck? panel',             file: 'app.js',   chain: ['li.step', 'div.step-detail', 'div.step-body', 'div.step-folds', 'div.step-fold-panel', 'div.step-branch.step-stuck'] },
+  { name: 'Level up panel',           file: 'app.js',   chain: ['li.step', 'div.step-detail', 'div.step-body', 'div.step-folds', 'div.step-fold-panel', 'div.step-branch.step-levelup'] },
+  { name: 'practice check head',      file: 'app.js',   chain: ['ul.pc-checks', 'li.pc-check', 'button.pc-check-btn', 'span.pc-check-body', 'span.pc-check-head'] },
+  { name: 'done check head',          file: 'app.js',   chain: ['ul.pc-checks', 'li.pc-check.is-done', 'button.pc-check-btn', 'span.pc-check-body', 'span.pc-check-head'] },
+  { name: 'Level up check head',      file: 'app.js',   chain: ['ul.pc-checks', 'li.pc-check.pc-check--lvl', 'button.pc-check-btn', 'span.pc-check-body', 'span.pc-check-head'] },
+  { name: 'done Level up check head', file: 'app.js',   chain: ['ul.pc-checks', 'li.pc-check.is-done.pc-check--lvl', 'button.pc-check-btn', 'span.pc-check-body', 'span.pc-check-head'] },
+  { name: 'done step label (focus)',  file: 'app.js',   chain: ['div.dp.focus', 'div.stp-sec', 'ul.steps', 'li.step.step-done', 'button.step-head', 'span.step-label'] },
+  { name: 'done step text (focus)',   file: 'app.js',   chain: ['div.dp.focus', 'div.stp-sec', 'ul.steps', 'li.step.step-done', 'div.step-detail', 'span.st-text'] },
+  { name: 'done step label (list)',   file: 'app.js',   chain: ['div.dp', 'div.stp-sec', 'ul.steps', 'li.step.step-done', 'button.step-head', 'span.step-label'] },
+  { name: 'done step text (list)',    file: 'app.js',   chain: ['div.dp', 'div.stp-sec', 'ul.steps', 'li.step.step-done', 'div.step-detail', 'span.st-text'] },
+  { name: 'done in-class step label (focus)', file: 'app.js', chain: ['details.ca-card.ca-card--focus', 'div.ca-card-body', 'ol.ca-steps', 'li.ca-step.ca-step-done', 'div.ca-step-head.ca-step-head--focus', 'span.ca-step-label'] },
+  { name: 'done in-class step label (list)',  file: 'app.js', chain: ['details.ca-card', 'div.ca-card-body', 'ol.ca-steps', 'li.ca-step.ca-step-done', 'button.ca-step-head', 'span.ca-step-label'] },
   { name: 'done review card text',    file: 'app.js',   chain: ['div.sr-card.sr-done', 'div.sr-card-main', 'div.sr-card-text'] },
-  { name: 'Note Runner unlock label', file: 'coach.js', chain: ['.nr-race', '.nr-race-lane', 'div.nr-race-gate', '::after'], over: '--bg3' },
+  { name: 'Note Runner unlock label', file: 'coach.js', chain: ['div.nr-race', 'div.nr-race-lane', 'div.nr-race-gate', '::after'], overStop: 0 },
 ];
-const CONTRAST_STATES_PINNED = 11;
+const CONTRAST_STATES_PINNED = 14;
+const CONTRAST_STATE_ONLY = new Set(['hover', 'active', 'focus', 'focus-visible', 'focus-within', 'visited', 'disabled', 'checked', 'target', 'fullscreen']);
 /* Does @media context `m` apply at the 1366×657 target in this palette?
-   Unknown features (hover, pointer, reduced motion) and print answer no. */
+   Unknown features (hover, pointer, reduced motion), print, and every
+   at-rule that is not @media (@keyframes frames, @font-face) answer no. */
 function contrastMediaApplies(m, mode) {
   if (!m) return true;
+  if (!/^@media\b/.test(m) || /@(?!media\b)/.test(m)) return false;
   if (/\bprint\b|,|\bnot\b|\bor\b/.test(m)) return false;
   for (const [, feat, val] of m.matchAll(/\(\s*([\w-]+)\s*:\s*([^)]+?)\s*\)/g)) {
     const px = /em$/.test(val) ? parseFloat(val) * 16 : parseFloat(val);
@@ -1699,15 +1721,82 @@ function contrastMediaApplies(m, mode) {
   }
   return true;
 }
-/* One compound ("li.step.step-done", "*", ".x::after") -> parts, or null for
-   anything this resolver does not model (pseudo-classes, attributes). */
+/* Split on `sep` at paren/bracket depth 0. */
+function contrastSplitTop(s, sep) {
+  const out = []; let d = 0, buf = '';
+  for (const ch of s) {
+    if (ch === '(' || ch === '[') d++;
+    else if (ch === ')' || ch === ']') d--;
+    if (d === 0 && ch === sep) { out.push(buf.trim()); buf = ''; continue; }
+    buf += ch;
+  }
+  out.push(buf.trim());
+  return out.filter(Boolean);
+}
+/* One compound ("li.step.step-done", "*", ".x::after", ".a:not(.b)") ->
+   { tag, cls, ids, pseudo, nots, iss, spec, unknown, stateOnly, otherPseudo },
+   or null if it does not parse. `unknown` = something matched loosely. */
 function contrastCompound(s) {
-  const m = /^([a-z][\w-]*|\*)?((?:[.#][\w-]+)*)(::(?:before|after))?$/i.exec(s);
-  if (!m || (!m[1] && !m[2] && !m[3])) return null;
-  const tag = m[1] && m[1] !== '*' ? m[1].toLowerCase() : null;
-  const cls = [...m[2].matchAll(/\.([\w-]+)/g)].map(x => x[1]);
-  const ids = [...m[2].matchAll(/#([\w-]+)/g)].map(x => x[1]);
-  return { tag, cls, ids, pseudo: m[3] || null };
+  const c = { tag: null, cls: [], ids: [], pseudo: null, nots: [], iss: [], spec: [0, 0, 0], unknown: false, stateOnly: false, otherPseudo: false };
+  let i = 0;
+  const name = () => { const m = /^-?[\w-]+/.exec(s.slice(i)); if (!m) return null; i += m[0].length; return m[0]; };
+  const group = () => { let d = 0, j = i; for (; j < s.length; j++) { if (s[j] === '(' || s[j] === '[') d++; else if (s[j] === ')' || s[j] === ']') { d--; if (!d) break; } } const inner = s.slice(i + 1, j); i = j + 1; return inner; };
+  const tm = /^([a-z][\w-]*|\*)/i.exec(s);
+  if (tm) { if (tm[1] !== '*') { c.tag = tm[1].toLowerCase(); c.spec[2]++; } i = tm[1].length; }
+  while (i < s.length) {
+    const ch = s[i];
+    if (ch === '.') { i++; const n = name(); if (!n) return null; c.cls.push(n); c.spec[1]++; }
+    else if (ch === '#') { i++; const n = name(); if (!n) return null; c.ids.push(n); c.spec[0]++; }
+    else if (ch === '[') { group(); c.unknown = true; c.spec[1]++; }
+    else if (s.startsWith('::', i)) {
+      i += 2; const n = name(); if (!n) return null;
+      if (n === 'before' || n === 'after') c.pseudo = '::' + n; else c.otherPseudo = true;
+      c.spec[2]++;
+    } else if (ch === ':') {
+      i++; const n = (name() || '').toLowerCase(); if (!n) return null;
+      const arg = s[i] === '(' ? group() : null;
+      if (n === 'before' || n === 'after') { c.pseudo = '::' + n; c.spec[2]++; continue; }
+      if ((n === 'not' || n === 'is' || n === 'where') && arg != null) {
+        const list = contrastSplitTop(arg, ',').map(x => /[\s>+~]/.test(x) ? null : contrastCompound(x));
+        if (list.some(x => !x || x.unknown || x.pseudo || x.otherPseudo)) { c.unknown = true; c.spec[1]++; continue; }
+        if (list.some(x => x.stateOnly)) {
+          // :not(:hover) is the resting state; :is(:hover) is not
+          if (n === 'not') continue;
+          c.stateOnly = true; continue;
+        }
+        if (n !== 'where') { const best = list.map(x => x.spec).sort((a, b) => (b[0] - a[0]) || (b[1] - a[1]) || (b[2] - a[2]))[0]; c.spec = c.spec.map((v, k) => v + best[k]); }
+        (n === 'not' ? c.nots : c.iss).push(list);
+        continue;
+      }
+      if (CONTRAST_STATE_ONLY.has(n)) { c.stateOnly = true; c.spec[1]++; continue; }
+      c.unknown = true; c.spec[1]++;
+    } else return null;
+  }
+  return c;
+}
+/* A whole selector -> { parts: [compound + comb], spec, unknown, never }. */
+function contrastSelector(sel) {
+  const toks = []; let d = 0, buf = '';
+  const push = () => { if (buf.trim()) toks.push(buf.trim()); buf = ''; };
+  for (const ch of sel) {
+    if (ch === '(' || ch === '[') d++;
+    else if (ch === ')' || ch === ']') d--;
+    if (d === 0 && /[\s>+~]/.test(ch)) { push(); if (ch !== ' ') toks.push(ch); continue; }
+    buf += ch;
+  }
+  push();
+  const parts = []; let comb = ' ';
+  for (const t of toks) {
+    if (t === '>' || t === '+' || t === '~') { comb = t; continue; }
+    const c = contrastCompound(t);
+    if (!c) return null;
+    parts.push({ ...c, comb }); comb = ' ';
+  }
+  if (!parts.length) return null;
+  const spec = parts.reduce((a, p) => a.map((v, k) => v + p.spec[k]), [0, 0, 0]);
+  const unknown = parts.some(p => p.unknown || p.comb === '+' || p.comb === '~');
+  const never = parts.some(p => p.stateOnly || p.otherPseudo) || parts.slice(0, -1).some(p => p.pseudo);
+  return { parts, spec, unknown, never };
 }
 function contrastStates(flag) {
   let judged = 0;
@@ -1736,52 +1825,58 @@ function contrastStates(flag) {
         body += d;
       }
       const decls = cssDecls(body);
-      for (const s of sel.split(',').map(x => x.trim()).filter(Boolean)) rules.push({ sel: s, media: ctx, decls, order: order++ });
+      for (const s of contrastSplitTop(sel, ',')) rules.push({ sel: s, media: ctx, decls, order: order++, ...(contrastSelector(s) || { parts: null }) });
     }
   };
   parse('');
-  /* Parse each rule's selector once into compounds + combinators. */
+  /* A selector the parser cannot read at all would otherwise drop out
+     unseen. @keyframes frames, @font-face and @page are not selectors. */
   for (const r of rules) {
-    if (/[+~[:]/.test(r.sel.replace(/::(?:before|after)\b/g, ''))) { r.parts = null; continue; }
-    const toks = r.sel.replace(/\s*>\s*/g, ' > ').split(' ').filter(Boolean);
-    const parts = []; let comb = ' ';
-    for (const t of toks) {
-      if (t === '>') { comb = '>'; continue; }
-      const c = contrastCompound(t);
-      if (!c) { parts.length = 0; break; }
-      parts.push({ ...c, comb }); comb = ' ';
-    }
-    r.parts = parts.length ? parts : null;
-    if (r.parts) {
-      const all = r.parts;
-      r.spec = [all.reduce((n, p) => n + p.ids.length, 0), all.reduce((n, p) => n + p.cls.length, 0), all.reduce((n, p) => n + (p.tag ? 1 : 0) + (p.pseudo ? 1 : 0), 0)];
-    }
+    if (!r.parts && !/@(?:keyframes|font-face|page)\b/.test(r.media || '') && !(r.media || '').includes('print')) flag(`1s states: cannot parse the selector "${r.sel}" — the rendered-state resolver would skip it`);
   }
-  const compMatches = (p, el) => (!p.tag || p.tag === el.tag) && p.cls.every(c => el.cls.includes(c)) && p.ids.every(x => el.ids.includes(x));
-  /* Does rule part list `ps` (ending at index k) match chain node n? */
-  const matchAt = (ps, k, chain, n) => {
+  /* `loose`: unmodelled parts count as matching, so a rule this cannot
+     judge is found rather than missed. */
+  const compMatches = (p, el, loose) => {
+    if (p.tag && p.tag !== el.tag) return false;
+    if (!p.cls.every(c => el.cls.includes(c)) || !p.ids.every(x => el.ids.includes(x))) return false;
+    if (p.nots.some(list => list.some(x => compMatches(x, el, false)))) return false;
+    if (!p.iss.every(list => list.some(x => compMatches(x, el, false)))) return false;
+    return loose || !p.unknown;
+  };
+  /* Does part list `ps` ending at k match chain node n? A sibling (+ ~)
+     stands where node n stands, so the part before it is skipped and the
+     match carries on from n's ancestors (loose mode only). */
+  const matchAt = (ps, k, chain, n, loose) => {
     const p = ps[k];
-    if (!compMatches(p, chain[n])) return false;
+    if (!compMatches(p, chain[n], loose)) return false;
     if (k === 0) return true;
-    if (p.comb === '>') return n > 0 && matchAt(ps, k - 1, chain, n - 1);
-    for (let j = n - 1; j >= 0; j--) if (matchAt(ps, k - 1, chain, j)) return true;
+    let kk = k, comb = p.comb;
+    while (comb === '+' || comb === '~') { kk--; if (kk === 0) return true; comb = ps[kk].comb; }
+    if (comb === '>') return n > 0 && matchAt(ps, kk - 1, chain, n - 1, loose);
+    for (let j = n - 1; j >= 0; j--) if (matchAt(ps, kk - 1, chain, j, loose)) return true;
     return false;
   };
-  const ruleMatches = (r, chain, n) => {
+  const ruleMatches = (r, chain, n, loose) => {
     const ps = r.parts, last = ps[ps.length - 1];
     if (chain[n].pseudo) {
       if (last.pseudo !== chain[n].pseudo) return false;
-      return matchAt(ps.map((p, k) => k === ps.length - 1 ? { ...p, pseudo: null } : p), ps.length - 1, chain, n - 1);
+      return matchAt(ps.map((p, k) => k === ps.length - 1 ? { ...p, pseudo: null } : p), ps.length - 1, chain, n - 1, loose);
     }
-    if (last.pseudo || ps.some(p => p.pseudo)) return false;
-    return matchAt(ps, ps.length - 1, chain, n);
+    if (last.pseudo) return false;
+    return matchAt(ps, ps.length - 1, chain, n, loose);
   };
   const isImp = v => /!\s*important\s*$/i.test(v);
   const cmp = (a, b) => (a.imp - b.imp) || (a.spec[0] - b.spec[0]) || (a.spec[1] - b.spec[1]) || (a.spec[2] - b.spec[2]) || (a.order - b.order);
+  let cannot = null;
   const winner = (chain, n, props, mode) => {
     let best = null;
     for (const r of rules) {
-      if (!r.parts || !contrastMediaApplies(r.media, mode) || !ruleMatches(r, chain, n)) continue;
+      if (!r.parts || r.never || !contrastMediaApplies(r.media, mode)) continue;
+      if (r.unknown) {
+        if (props.some(pr => r.decls.has(pr)) && ruleMatches(r, chain, n, true)) cannot.add(r.sel);
+        continue;
+      }
+      if (!ruleMatches(r, chain, n, false)) continue;
       for (const pr of props) {
         if (!r.decls.has(pr)) continue;
         const v = r.decls.get(pr);
@@ -1796,40 +1891,48 @@ function contrastStates(flag) {
   const light = Object.fromEntries(rootByMedia.get(''));
   const darkKey = [...rootByMedia.keys()].find(isDarkMedia);
   const pals = { light, dark: { ...light, ...Object.fromEntries(rootByMedia.get(darkKey) || []) } };
+  /* The opaque colour a background value paints: a plain colour, or for a
+     gradient its LAST colour stop when `lastStop` (else its first). */
+  const paintOf = (raw, pal, lastStop) => {
+    if (raw == null) return null;
+    const g = /-gradient\(([\s\S]*)\)\s*$/.exec(String(raw).trim());
+    const toks = g ? contrastSplitTop(g[1], ',').map(a => cssTokens(a)[0]) : cssTokens(raw);
+    const cols = toks.map(t => cssVar(t, pal)).filter(v => cssRGB(v));
+    return cols.length ? (lastStop ? cols[cols.length - 1] : cols[0]) : null;
+  };
 
   if (CONTRAST_STATES.length !== CONTRAST_STATES_PINNED) {
     flag(`1s states: ${CONTRAST_STATES.length} rendered states listed, ${CONTRAST_STATES_PINNED} pinned — change the pin on purpose, in the same edit`);
   }
   for (const st of CONTRAST_STATES) {
     if (!(st.file in emit)) { try { emit[st.file] = readFileSync(join(ROOT, st.file), 'utf8'); } catch { emit[st.file] = ''; } }
-    const chain = [];
-    for (const s of st.chain) {
-      if (s === '::after' || s === '::before') { chain.push({ tag: null, cls: [], ids: [], pseudo: s }); continue; }
-      chain.push(contrastCompound(s));
-    }
+    const chain = st.chain.map(s => /^::(before|after)$/.test(s) ? { tag: null, cls: [], ids: [], pseudo: s } : contrastCompound(s));
     const gone = chain.flatMap(e => e.cls).filter(c => !new RegExp(`(?<![\\w-])${c}(?![\\w-])`).test(emit[st.file]));
     if (gone.length) { flag(`1s states: "${st.name}" — ${gone.join(', ')} no longer emitted in ${st.file}; update the chain to the real markup`); continue; }
     for (const mode of ['light', 'dark']) {
       const pal = pals[mode];
       const t = chain.length - 1;
+      cannot = new Set();
       let fgRaw = null;
       for (let n = t; n >= 0 && fgRaw == null; n--) fgRaw = winner(chain, n, ['color'], mode);
       const opAt = n => { const v = parseFloat(winner(chain, n, ['opacity'], mode)); return v >= 0 && v < 1 ? v : 1; };
-      let bgV = null, alpha = 1;
-      if (st.over) {
-        bgV = cssVar(`var(${st.over})`, pal);
-        for (let n = 0; n <= t; n++) alpha *= opAt(n);
+      let bgV = null, alpha = 1, gradAt = null;
+      if (st.overStop != null) {
+        bgV = paintOf(winner(chain, st.overStop, ['background', 'background-color', 'background-image'], mode), pal, true);
+        for (let n = st.overStop + 1; n <= t; n++) alpha *= opAt(n);
       } else {
         for (let n = t; n >= 0 && bgV == null; n--) {
-          const raw = winner(chain, n, ['background', 'background-color'], mode);
-          if (raw != null) {
-            for (const tok of cssTokens(raw)) { const r = cssVar(tok, pal); if (cssRGB(r)) { bgV = r; break; } }
-          }
+          const raw = winner(chain, n, ['background', 'background-color', 'background-image'], mode);
+          // which stop of a gradient sits behind the text is a layout question;
+          // say so through overStop rather than guess
+          if (raw != null && /-gradient\(/.test(raw)) { gradAt = st.chain[n]; break; }
+          bgV = paintOf(raw, pal, false);
           if (bgV == null) alpha *= opAt(n);
         }
       }
+      if (cannot.size) { flag(`1s states: "${st.name}" (${mode}) — cannot judge ${[...cannot].join(' | ')}: it may set colour, opacity or a background on this text but uses a selector the resolver does not model; model it or write it without that part`); continue; }
       const fgV = cssVar(fgRaw, pal), f0 = cssRGB(fgV), b = cssRGB(bgV);
-      if (!f0 || !b) { flag(`1s states: "${st.name}" (${mode}) resolved no ${!f0 ? 'text colour' : 'opaque surface'} — fix the chain or give it an \`over\` surface`); continue; }
+      if (!f0 || !b) { flag(`1s states: "${st.name}" (${mode}) resolved no ${!f0 ? 'text colour' : gradAt ? `single surface (${gradAt} paints a gradient)` : 'opaque surface'} — fix the chain or give it an overStop`); continue; }
       const f = f0.map((v, k) => alpha * v + (1 - alpha) * b[k]);
       judged++;
       const r = ratio(f, b);
