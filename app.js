@@ -15011,11 +15011,17 @@ function caDate(a){ return activityDates[a.id] || null; }
    title. That is the deliberate trade — a teacher renaming a card mid-class
    needs it to say what they typed, in the room's own words — not an oversight.
    There is no o.es to read, so don't add a branch for one without also adding
-   the box that would write it. */
+   the box that would write it.
+   Resolved against the RAW activity, whichever one the caller holds: caView()
+   swaps in `title_power` in power-chord mode, and the closed card passes the
+   view while the sticky bar, pins, search and Songs pass the raw entry — so
+   o.base is compared with the shipped title, and the unrenamed title is the
+   current view's. Every caller then agrees, in both modes. */
 function caTitle(a){
-  const o = activityTitles[a.id];
-  if(o && o.en && o.base === a.title) return o.en;
-  return tf(a,'title');
+  const raw = (window.CLASS_ACTIVITIES || []).find(x => x.id === a.id) || a;
+  const o = activityTitles[raw.id];
+  if(o && o.en && o.base === raw.title) return o.en;
+  return tf(caView(raw),'title');
 }
 /* ── The activity board: order, module grouping and the "#N" prefix ──
    config/class.activityBoard (see the global above) is the single source of
