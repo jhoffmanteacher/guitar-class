@@ -6836,7 +6836,11 @@ function saveReflection(moduleNum){
      stays saved, because the erase is not sent. */
   const v={clicked,hard};
   if(progressLoadFailed) Object.keys(v).forEach(k=>{ if(!v[k]) delete v[k]; });
-  progress[key]=Object.assign({}, progress[key], v);
+  const next=Object.assign({}, progress[key], v);
+  // Nothing to say: an EMPTY map sent with merge REPLACES the stored one (the
+  // same hazard as LOAD_FAILED_EMPTY_MAPS), so send nothing at all.
+  if(!Object.keys(next).length) return;
+  progress[key]=next;
   saveProgress();
 }
 
