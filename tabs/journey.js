@@ -591,8 +591,11 @@ updateProgressPill();
    language swap below, so its data-es attributes are swapped with the rest.
 
    Layout: one block per section, its caption on top (which already says
-   "4 laps"), the notes once. A note's slot is 3 characters plus 3 per extra
-   beat it rings, so a held note looks held; a bar line falls every
+   "4 laps"), the notes once. A note's slot is 3 characters a beat (6 when
+   the card has notes shorter than a beat, so an eighth gets 3), never under
+   3, so a held note looks held and every bar of the card is the same width;
+   a note that rings past a bar line is drawn up to it and held on the other
+   side (wsNoteSegs). A bar line falls every
    beatsPerBar beats (bars x beatsPerBar = the section's beats, checks.mjs
    1bf); a row holds about 70 characters of bars, split evenly, unless the
    section names its own `rows`. The chord or note name sits over the fret
@@ -621,7 +624,7 @@ function wsNoteCells(n){
   return { label: n.note || '', frets: frets, hl: hl };
 }
 /* A section's notes → rows of { notes: [...] }, each row ending on a bar line. */
-function wsSectionRows(sec){
+function wsSectionRows(sec, cpb){
   var notes = sec.notes || [];
   if(sec.rows && sec.rows.length){
     var out = [], at = 0;
@@ -631,17 +634,19 @@ function wsSectionRows(sec){
   }
   var total = notes.reduce(function(t, n){ return t + (n.beats > 0 ? n.beats : 1); }, 0);
   var bpb = total / Math.max(1, sec.bars || 1);
-  var bars = [], cur = [], acc = 0;
+  /* A note held across a bar line keeps the bars it spans together. */
+  var bars = [], widths = [], cur = [], w = 0, acc = 0;
   notes.forEach(function(n){
-    cur.push(n); acc += n.beats > 0 ? n.beats : 1;
-    if(acc >= bpb - 1e-6){ bars.push(cur); cur = []; acc = 0; }
+    cur.push(n);
+    wsNoteSegs(n, acc, bpb).forEach(function(b){
+      w += wsSlotWidth(b, cpb); acc += b;
+      if(acc >= bpb - 1e-6){ w += 4; acc = 0; }
+    });
+    if(acc === 0){ bars.push(cur); widths.push(w); cur = []; w = 0; }
   });
-  if(cur.length) bars.push(cur);
+  if(cur.length){ bars.push(cur); widths.push(w + 4); }
   /* As many bars as fit in WS_ROW_CHARS, then spread evenly over the rows
      that takes — in whole 4-bar phrases when a row holds at least one. */
-  var widths = bars.map(function(b){
-    return b.reduce(function(t, n){ return t + wsSlotWidth(n); }, 0) + 4;
-  });
   var widest = Math.max.apply(null, widths.concat([1]));
   var fit = Math.max(1, Math.floor(WS_ROW_CHARS / widest));
   var counts = [];
@@ -670,14 +675,25 @@ function wsSectionRows(sec){
   counts.forEach(function(c){ rows.push([].concat.apply([], bars.slice(at, at + c))); at += c; });
   return rows;
 }
-function wsSlotWidth(n){
-  var beats = n.beats > 0 ? n.beats : 1;
-  return 3 + Math.max(0, Math.round((beats - 1) * 3));
+/* cpb: characters per beat for the card (wsPreHtml). */
+function wsSlotWidth(beats, cpb){
+  return Math.max(3, Math.round(beats * cpb));
+}
+/* A note's beats cut at the bar lines it rings across, from `acc` beats into the bar. */
+function wsNoteSegs(n, acc, bpb){
+  var left = n.beats > 0 ? n.beats : 1, out = [];
+  while(left > 1e-6){
+    var b = Math.min(left, bpb - acc);
+    if(left - b < 1e-6) b = left;
+    out.push(b); left -= b; acc += b;
+    if(acc >= bpb - 1e-6) acc = 0;
+  }
+  return out;
 }
 /* One row of notes → the label line + six string lines, with a bar line
    every beatsPerBar beats (counted from the row's own first note, which
    always starts a bar). */
-function wsRowText(notes, bpb){
+function wsRowText(notes, bpb, cpb){
   var label = '', lines = {};
   WS_STRINGS.forEach(function(s){ lines[s] = s + ' |'; });
   var col = 3, labelEnd = 0, prevLabel = null, acc = 0;
@@ -688,7 +704,8 @@ function wsRowText(notes, bpb){
     var showLabel = c.label && (c.label !== prevLabel || acc === 0);
     var lead = 2;
     if(showLabel && col + lead < labelEnd + 1) lead = labelEnd + 1 - col;
-    var slot = lead + digits + (wsSlotWidth(n) - 3);
+    var segs = wsNoteSegs(n, acc, bpb);
+    var slot = lead + digits + (wsSlotWidth(segs[0], cpb) - 3);
     WS_STRINGS.forEach(function(s){
       var f = c.frets[s];
       var cell;
@@ -706,17 +723,27 @@ function wsRowText(notes, bpb){
       prevLabel = c.label;
     }
     col += slot;
-    acc += n.beats > 0 ? n.beats : 1;
-    if(acc >= bpb - 1e-6){
-      WS_STRINGS.forEach(function(s){ lines[s] += '---|'; });
-      col += 4; acc = 0;
-    }
+    segs.forEach(function(b, k){
+      if(k){
+        var held = new Array(wsSlotWidth(b, cpb) + 1).join('-');
+        WS_STRINGS.forEach(function(s){ lines[s] += held; });
+        col += held.length;
+      }
+      acc += b;
+      if(acc >= bpb - 1e-6){
+        WS_STRINGS.forEach(function(s){ lines[s] += '---|'; });
+        col += 4; acc = 0;
+      }
+    });
   });
   if(acc > 0) WS_STRINGS.forEach(function(s){ lines[s] += '---|'; });
   return [wsEsc(label).replace(/\s+$/, '')].concat(WS_STRINGS.map(function(s){ return lines[s]; })).join('\n');
 }
 function wsPreHtml(a){
   var c = a.card;
+  var cpb = (c.sections || []).some(function(sec){
+    return (sec.notes || []).some(function(n){ return n.beats > 0 && n.beats < 1 - 1e-6; });
+  }) ? 6 : 3;
   var blocks = (c.sections || []).map(function(sec){
     var notes = sec.notes || [];
     var total = notes.reduce(function(t, n){ return t + (n.beats > 0 ? n.beats : 1); }, 0);
@@ -730,8 +757,8 @@ function wsPreHtml(a){
     var head = '<span class="ws-sec" data-es="' + wsEsc(wsEsc(capPad(capEs))) + '">' + wsEsc(capPad(capEn)) + '</span>';
     /* A section's own rows pack side by side first (the two chorus laps of
        a song, each a few bars long, share a line when the width holds). */
-    var rowObjs = wsSectionRows(sec).map(function(r){
-      var lines = wsRowText(r, bpb).split('\n'), w = 0;
+    var rowObjs = wsSectionRows(sec, cpb).map(function(r){
+      var lines = wsRowText(r, bpb, cpb).split('\n'), w = 0;
       lines.forEach(function(l){ w = Math.max(w, wsPlainLen(l)); });
       return { lines: lines, w: w };
     });
