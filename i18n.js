@@ -526,6 +526,9 @@
     // Chord-grid cards (card.chordGrid, 2026-10-26): the cursor moves on the beats and each chord name appears once.
     'ca.cardChordDirections':  { en: 'Strum once each time a beat lights up. Change chords when you reach the next chord name.',
                                  es: 'Rasguea una vez cada vez que se ilumina un tiempo. Cambia de acorde cuando llegues al siguiente nombre de acorde.' },
+    // A card with chord-grid sections AND single-note sections (ca-35's solo, ca-41's verses).
+    'ca.cardChordMixedDirections': { en: 'Strum once each time a beat lights up. Change chords when you reach the next chord name. In a section of single notes, play each note when it lights up.',
+                                 es: 'Rasguea una vez cada vez que se ilumina un tiempo. Cambia de acorde cuando llegues al siguiente nombre de acorde. En una sección de notas sueltas, toca cada nota cuando se ilumine.' },
     'ca.cardSectionHint':      { en: 'Tap a section to start the song there.',
                                  es: 'Pulsa una sección para empezar la canción ahí.' },
     'ca.cardSectionOf':        { en: 'Section {a} of {n}', es: 'Sección {a} de {n}' },
@@ -885,6 +888,8 @@
     'tab.playTab':           { en: 'Play tab', es: 'Tocar el tab' },
     'tab.playTabTitle':      { en: 'Play this tab', es: 'Tocar este tab' },
     'tab.playNote':          { en: 'Play {note}', es: 'Tocar {note}' },
+    // A rest on a chord grid (card.chordGrid): a word where the chord names go, so a silent bar does not read as a held chord.
+    'tab.restStop':          { en: 'Stop', es: 'Para' },
     'tab.playFinger':        { en: 'Finger {n} · play {note}', es: 'Dedo {n} · tocar {note}' },
     'tab.defaultTitle':      { en: 'Tab', es: 'Tab' },
     'tab.showTabLabel':      { en: 'Show TAB:', es: 'Mostrar TAB:' },

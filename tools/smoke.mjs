@@ -102,6 +102,107 @@ async function openPage(port) {
 // Network and browser-policy noise that says nothing about our code.
 const NOISE = /firebase|firestore|googleapis|gstatic|google\.com|youtube|ytimg|net::ERR|Failed to fetch|ERR_|auth\/|identitytoolkit|favicon|Content Security|websocket|WebChannel|Missing or insufficient|offline|Could not reach|NotAllowedError|play\(\) request|AbortError|NotSupportedError|The play\(\)/i;
 
+/* Chord-grid practice cards (card.chordGrid, 2026-10-26). checks.mjs 1bv renders
+   them and executes pcLocate; this runs the real pcFrame / pcPaint /
+   pcSheetStrip against a fake clock in a real browser, because the cursor is
+   the thing a student sees and no source check can see it. A checkout without
+   chord grids (the baseline) skips it. For every opted-in card: step the clock
+   through its first sections and fail if the cursor ever lights a cell with no
+   data-beat (a "+" column), lights the wrong beat, lights the count row's "+"
+   cell, or sits on a page that is not the visible one; then measure every grid
+   page at 1366 and 390px wide for sideways overflow and for beat columns that
+   drift out of line between rows (the 2026-10-26 phone-width bug: 32 columns
+   with a count in each pushed the board 78px past a 390px screen). ca-38's
+   "This bar" strip must light beat cells only and its dot must fill once per
+   beat, never on a "+". */
+async function chordGridWalk(page, run, events, stats) {
+  const ids = await run('chord-grid:list', `typeof pcChordGrid === 'function' ? CLASS_ACTIVITIES.filter(a => a.card && a.card.chordGrid).map(a => a.id) : []`, 50);
+  if (!ids || !ids.length) return;
+  stats.chordCards = ids.length;
+  await run('chord-grid:open', `openClassActivitiesScreen()`, 600);
+  await run('chord-grid:sim-def', `window.__cgSim = function(id, si, maxSec, dt){
+    caFocusActivity(id);
+    const root = document.querySelector('.ca-card[open] .pc');
+    const a = pcActivity(root), L = pcLayout(a);
+    const fake = { currentTime: 0, paused: false, ended: false, playbackRate: 1, src: 'x', play(){ return Promise.resolve(); }, pause(){} };
+    const st = { root, L, audio: fake, win: pcWindow(L, root.dataset.slow === '1'), loopFrom: si, fromRep: 0, wholeSong: !!a.card.wholeSong, sheet: false, raf: 0, timers: [], lastBeat: -1, counting: false, si: -1, seq: -1, rep: -1, beat: -1, key: '', row: null };
+    pcState = st;
+    const raf = window.requestAnimationFrame; window.requestAnimationFrame = () => 0;
+    pcShowSection(root, L, si);
+    fake.currentTime = snipTimeAtBars(st.win, L.sections[si].fromBar - L.firstBar);
+    const issues = []; const seen = new Set(); let frames = 0, paints = 0, last = '';
+    const t0 = fake.currentTime;
+    try {
+      while (fake.currentTime - t0 < maxSec && frames < 6000) {
+        pcFrame(); frames++;
+        if (pcState !== st) break;
+        const t = fake.currentTime;
+        const here = pcLocate(L, snipBarsAt(st.win, t)), ahead = pcLocate(L, snipBarsAt(st.win, t + 0.15));
+        const lit = [...root.querySelectorAll('.pc-tab .beat-now')];
+        const sig = lit.map(e => (e.closest('.pc-page').dataset.page) + ':' + (e.dataset.beat ?? '-') + ':' + (e.dataset.seq ?? '-')).join(',');
+        // The look-ahead (PC_ROW_LEAD) may already show the first note of a note-by-note section that follows.
+        const handover = here && ahead && !L.sections[ahead.si].grid && ahead.si !== here.si && lit.length && lit.every(e => +e.dataset.seq === ahead.seq);
+        if (here && L.sections[here.si].grid && !handover) {
+          if (!lit.length) issues.push('nothing lit at ' + t.toFixed(2));
+          else {
+            if (lit.some(e => e.dataset.beat == null)) issues.push('a cell with no data-beat (a "+" column?) lit at ' + t.toFixed(2) + ' ' + sig);
+            if (lit.some(e => e.classList.contains('tab-count-held'))) issues.push('a "+" count cell lit at ' + t.toFixed(2));
+            const beats = [...new Set(lit.map(e => +e.dataset.beat))], pg = [...new Set(lit.map(e => +e.closest('.pc-page').dataset.page))];
+            if (beats.length !== 1 || pg.length !== 1) issues.push('lit more than one beat or page: ' + sig + ' at ' + t.toFixed(2));
+            else if (![here, ahead].some(l => l && l.si === pg[0] && l.beat === beats[0])) issues.push('wrong beat ' + pg[0] + ':' + beats[0] + ' (clock says ' + here.si + ':' + here.beat + ') at ' + t.toFixed(2));
+            else seen.add(pg[0] + ':' + beats[0]);
+            const vis = root.querySelector('.pc-tab .pc-page:not([hidden])');
+            if (vis && pg.length === 1 && +vis.dataset.page !== pg[0]) issues.push('lit page ' + pg[0] + ' is not the visible page ' + vis.dataset.page);
+          }
+        }
+        if (sig !== last) { paints++; last = sig; }
+        fake.currentTime += dt;
+      }
+    } finally { window.requestAnimationFrame = raf; pcState = null; root.querySelectorAll('.beat-now').forEach(e => e.classList.remove('beat-now')); }
+    return { frames, paints, beats: seen.size, issues: issues.slice(0, 6), n: issues.length };
+  }; 1`, 50);
+  for (const id of ids) {
+    const info = await run(`chord-grid:${id}:info`, `(() => { caFocusActivity('${id}'); const L = pcLayout(pcActivity(document.querySelector('.ca-card[open] .pc'))); return { grid: L.sections.map(S => S.grid), beats: L.sections.map(S => S.bars * L.tr.beatsPerBar) }; })()`, 200);
+    if (!info) continue;
+    // The first two grid sections, ~40 s of card time each, 50 ms frames.
+    const todo = info.grid.map((g, i) => g ? i : -1).filter(i => i >= 0).slice(0, 2);
+    for (const si of todo) {
+      const r = await run(`chord-grid:${id}:cursor-${si}`, `window.__cgSim('${id}', ${si}, 40, 0.05)`, 50);
+      if (!r) continue;
+      if (r.n) events.push({ step: `chord-grid:${id}:cursor-${si}`, kind: 'chord-grid-cursor', text: r.issues.join(' | ') + (r.n > r.issues.length ? ` … (+${r.n - r.issues.length})` : '') });
+      else if (r.paints < 4) events.push({ step: `chord-grid:${id}:cursor-${si}`, kind: 'chord-grid-cursor', text: `the cursor painted only ${r.paints} times in ${r.frames} frames — it is not moving` });
+    }
+  }
+  // Layout: every grid page, wide and phone-sized.
+  for (const [w, h] of [[1366, 657], [390, 844]]) {
+    await run(`chord-grid:width-${w}`, `(window.__cgW = ${w}, 1)`, 10);
+    await page.send('Emulation.setDeviceMetricsOverride', { width: w, height: h, deviceScaleFactor: 1, mobile: false });
+    await sleep(500);
+    for (const id of ids) {
+      const r = await run(`chord-grid:${id}:layout-${w}`, `(() => { caFocusActivity('${id}'); const root = document.querySelector('.ca-card[open] .pc'); const L = pcLayout(pcActivity(root)); const bad = []; let pages = 0; L.sections.forEach((S, si) => { if (!S.grid) return; pcShowSection(root, L, si); pages++; const pg = root.querySelector('.pc-page:not([hidden])'), board = pg.querySelector('.tab-board'); if (board.scrollWidth > board.clientWidth + 1) bad.push(S.s.label + ': board ' + board.scrollWidth + ' > ' + board.clientWidth); const rows = [...pg.querySelectorAll('.tab-grid')].map(g => [...g.querySelectorAll('.tab-count[data-beat]')].map(c => c.getBoundingClientRect().left - g.getBoundingClientRect().left)); const n = Math.min(...rows.map(r => r.length)); let worst = 0; for (let i = 0; i < n; i++) { const col = rows.map(r => r[i]); worst = Math.max(worst, Math.max(...col) - Math.min(...col)); } if (worst > 1) bad.push(S.s.label + ': beat columns drift ' + worst.toFixed(1) + 'px between rows'); const cnt = pg.querySelector('.tab-count[data-beat]'); if (!cnt || !cnt.offsetHeight) bad.push(S.s.label + ': the count row is not showing'); }); return { pages, bad }; })()`, 30);
+      if (r && r.bad.length) events.push({ step: `chord-grid:${id}:layout-${w}`, kind: 'chord-grid-layout', text: r.bad.slice(0, 4).join(' | ') });
+    }
+  }
+  await page.send('Emulation.clearDeviceMetricsOverride');
+  // The lyric sheet (ca-38): "This bar" lights beat cells only; the dot fills once per beat.
+  const sheet = await run('chord-grid:sheet', `(() => { const a = CLASS_ACTIVITIES.find(x => x.card && x.card.sheet); if (!a) return null; caFocusActivity(a.id); const root = document.querySelector('.ca-card[open] .pc'); const L = pcLayout(pcActivity(root)); const bpb = L.tr.beatsPerBar; const fake = { currentTime: 0, paused: false, ended: false, playbackRate: 1, src: 'x', play(){ return Promise.resolve(); }, pause(){} }; const st = { root, L, audio: fake, win: pcWindow(L, false), loopFrom: 0, fromRep: 0, wholeSong: true, sheet: true, raf: 0, timers: [], lastBeat: -1, counting: false, si: -1, seq: -1, rep: -1, beat: -1, key: '', row: null, sheetLine: null, stripKey: null };
+      const paper = root.querySelector('.pc-sheet-paper'); const map = pcSheetMap(L); const tk = { x0: 0, x1: 10, y0: 0, y1: 10, name: 'x' };
+      paper._sheet = { ok: true, map, model: { crop: { x: 0, y: 0 }, toks: Array.from({ length: map.count + 1 }, () => tk) }, scale: 1 };
+      const hits = [], oMark = window.pcSheetMark; window.pcSheetMark = function(pp, idx, hit){ hits.push(!!hit); return null; };
+      const oFollow = window.pcFollow; window.pcFollow = function(){};
+      pcState = st; const raf = window.requestAnimationFrame; window.requestAnimationFrame = () => 0;
+      const lit = new Set(); let frames = 0; const t0 = snipTimeAtBars(st.win, 0); fake.currentTime = t0;
+      try { while (fake.currentTime - t0 < 12 && frames < 2000) { pcFrame(); frames++; root.querySelectorAll('.pc-strip-cell').forEach((c, i) => { if (c.classList.contains('now')) lit.add(i); }); fake.currentTime += 0.02; } }
+      finally { window.requestAnimationFrame = raf; window.pcSheetMark = oMark; window.pcFollow = oFollow; pcState = null; }
+      const secPerBeat = st.win.bar / bpb;
+      return { lit: [...lit].sort(), fills: hits.filter(Boolean).length, expect: Math.floor(12 / secPerBeat), calls: hits.length }; })()`, 100);
+  if (sheet) {
+    if (sheet.lit.some(i => i % 2)) events.push({ step: 'chord-grid:sheet', kind: 'chord-grid-sheet', text: `"This bar" lit a "+" cell: ${sheet.lit.join(',')}` });
+    if (Math.abs(sheet.fills - sheet.expect) > 2) events.push({ step: 'chord-grid:sheet', kind: 'chord-grid-sheet', text: `the dot filled ${sheet.fills} times in 12 s; one per beat is about ${sheet.expect}` });
+  }
+  await run('chord-grid:done', `(typeof caFocusActivity === 'function') ? (document.querySelectorAll('.ca-card[open]').forEach(c => { c.open = false; }), 1) : 0`, 100);
+}
+
 async function walk(base, chromePort, label) {
   const page = await openPage(chromePort);
   let step = 'boot'; const events = []; const stats = { sets: 0, modules: 0, games: 0, buttons: 0 };
@@ -152,6 +253,7 @@ async function walk(base, chromePort, label) {
   await run('tuner-open', `(typeof toggleTuner === 'function') ? (toggleTuner(), 1) : 0`, 700);
   await run('tuner-close', `(typeof toggleTuner === 'function') ? (toggleTuner(), 1) : 0`, 500);
   await run('click-away', `document.body.click()`, 300);
+  await chordGridWalk(page, run, events, stats);
   await page.close();
   return { label, stats, errors: events.filter(e => !NOISE.test(e.text || '')) };
 }
@@ -185,7 +287,7 @@ try {
   const norm = e => `${e.kind}|${e.step.replace(/^(en|es):/, '')}|${e.kind === 'bad-handler' ? '' : e.text}`;
   const baseCount = new Map(); (base ? base.errors : []).forEach(e => baseCount.set(norm(e), Math.max(baseCount.get(norm(e)) || 0, e.kind === 'bad-handler' ? +e.text : 1)));
   const report = base ? now.errors.filter(e => (e.kind === 'bad-handler' ? +e.text : 1) > (baseCount.get(norm(e)) || 0)) : now.errors;
-  say(`smoke: ${now.stats.sets} sets in ${now.stats.modules} modules (EN + ES), ${now.stats.games} game views, ${now.stats.buttons} inline handlers compiled`);
+  say(`smoke: ${now.stats.sets} sets in ${now.stats.modules} modules (EN + ES), ${now.stats.games} game views, ${now.stats.buttons} inline handlers compiled${now.stats.chordCards ? `, ${now.stats.chordCards} chord-grid cards walked (cursor, layout at 1366 and 390, lyric sheet)` : ''}`);
   if (base) say(`smoke: ${BASELINE} had ${base.errors.length} error event(s); this checkout has ${now.errors.length}`);
   if (report.length) {
     exitCode = 1;

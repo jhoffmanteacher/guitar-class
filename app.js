@@ -12880,9 +12880,10 @@ function renderChordGridRow(events, row, cols, bpb, seqOff){
       const b = beatOf(c), ev = at[c];
       const hit = ev && !ev.rest ? ev.frets.find(([s]) => s === lab) : null;
       const attrs = (b !== null ? ` data-beat="${b}"` : '') + (ev && !ev.rest ? ` data-seq="${seqOff + ev.seq}"` : '');
+      const cls = c < used ? 'tab-cell' : 'tab-cell tab-pad';   // a short last row's empty columns carry no string line
       cells.push(hit
-        ? `<div class="tab-cell"${attrs}><span class="tab-fret">${escHtml(String(hit[1]))}</span></div>`
-        : `<div class="tab-cell"${attrs}></div>`);
+        ? `<div class="${cls}"${attrs}><span class="tab-fret">${escHtml(String(hit[1]))}</span></div>`
+        : `<div class="${cls}"${attrs}></div>`);
     }
     return cells.join('');
   }).join('');
@@ -12890,6 +12891,17 @@ function renderChordGridRow(events, row, cols, bpb, seqOff){
   for(let c = barCols; c < used; c += barCols) bars += `<div class="tab-bar-line" style="grid-column:${c + 2};grid-row:1/7" aria-hidden="true"></div>`;
   // The name row keeps its height in a row where no chord starts (a long chord held across the row).
   let names = '<div class="tab-chord-pad" style="grid-row:7;grid-column:1" aria-hidden="true"></div>';
+  /* A rest is drawn as a word in the name row — at its onset, and at the start of
+     any row that begins inside one — so a silent bar does not look like a held
+     chord while the beats keep lighting. */
+  events.forEach(ev => {
+    if(!ev.rest) return;
+    const end = ev.start + ev.beats;
+    let col = -1;
+    if(ev.start >= row.b0 - 1e-6 && ev.start < row.b1 - 1e-6) col = Math.round((ev.start - row.b0) * 2);
+    else if(ev.start < row.b0 && end > row.b0 + 1e-6) col = 0;
+    if(col >= 0) names += `<span class="tab-rest-lab" style="grid-row:7;grid-column:${col + 2}">${escHtml(t('tab.restStop'))}</span>`;
+  });
   Object.keys(at).forEach(k => {
     const ev = at[k];
     if(ev.rest) return;
@@ -12907,7 +12919,7 @@ function renderChordGridRow(events, row, cols, bpb, seqOff){
   }
   return `
       <div class="tab-grid chord-grid" style="grid-template-columns:28px repeat(${cols},1fr)">
-        <div class="tab-box" style="grid-column:2/${cols + 2};grid-row:1/7"></div>
+        <div class="tab-box" style="grid-column:2/${used + 2};grid-row:1/7"></div>
         ${strRows}
         ${bars}
         ${names}
@@ -13138,7 +13150,7 @@ function pcTabHtml(a, L){
      blank line of its own and cost every card ~31px. On a card with
      sections it takes the "Tap a section…" line while it has something to
      say (styles.css), so nothing moves when the song starts. */
-  /* The Counts switch (card.counts, ca-29 — Jonathan 2026-10-21: "a toggle
+  /* The Counts switch (card.counts, first ca-29 — Jonathan 2026-10-21: "a toggle
      switch to turn it on or off, default off"). In the TAB's own head, not
      the player row, which is full at Chromebook width. The choice is
      remembered per browser (pcCountsPref); first visit is off. */
@@ -13207,7 +13219,7 @@ function caCardBodyHtml(a, opts){
   if(sheet) setTimeout(pcSheetScan, 0);
   return `<div class="pc" data-id="${escAttr(a.id)}" data-slow="1"${snippetHasFull(L.tr) ? ' data-guitar="1"' : ''}${preview ? ' data-preview="1"' : ''}>`
     + caKeySwitchHtml(a) + caChordSwitchHtml(a)
-    + `<p class="pc-dir">${escHtml(t(sheet ? 'ca.sheetDirections' : L.sections.some(S => S.grid) ? 'ca.cardChordDirections' : 'ca.cardDirections'))}</p>`
+    + `<p class="pc-dir">${escHtml(t(sheet ? 'ca.sheetDirections' : L.sections.some(S => S.grid) ? (L.sections.every(S => S.grid) ? 'ca.cardChordDirections' : 'ca.cardChordMixedDirections') : 'ca.cardDirections'))}</p>`
     + pcPlayerHtml(a, L) + (sheet ? pcSheetHtml(a, L) : pcTabHtml(a, L)) + pcChecksHtml(a, preview) + pcHelpHtml(a, preview)
     + `</div>`;
 }

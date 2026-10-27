@@ -2727,6 +2727,21 @@ span.tab-count-held{margin-left:4px}
    behind the Counts switch. The bar line is absolutely placed, like
    .tab-box, so it takes no grid cell and the string rows still auto-flow. */
 .tab-grid.chord-grid .tab-count{display:flex}
+/* Nothing in a chord grid may set a column's width: 32 columns in 4/4 and a
+   count in every one overflowed a 390px phone and pushed the beats out of line
+   between rows (min-width:auto on a grid item is its content). */
+.tab-grid.chord-grid > *{min-width:0}
+.tab-grid.chord-grid .tab-count{overflow:visible;white-space:nowrap}
+/* Beats in ink; the "+" faint. */
+.tab-grid.chord-grid .tab-count[data-beat]{color:var(--text)}
+.tab-grid.chord-grid .tab-count-held{opacity:0.65;font-weight:400}
+.tab-grid.chord-grid .tab-count[data-beat].beat-now{color:var(--bg)}
+.tab-cell.tab-pad::before{display:none}
+.tab-rest-lab{display:flex;justify-content:center;align-items:center;margin-top:4px;font-size:0.8125rem;font-weight:700;font-style:italic;color:var(--text2);white-space:nowrap;line-height:1}
+@media (max-width:480px){
+  .tab-grid.chord-grid .tab-count{font-size:0.6875rem}
+  .tab-note-btn.tab-chord-btn,.tab-rest-lab{font-size:0.6875rem}
+}
 .tab-bar-line{position:absolute;top:calc(var(--tab-cell-h) / 2);bottom:calc(var(--tab-cell-h) / 2);left:0;border-left:1.5px solid var(--text);pointer-events:none;z-index:1}
 /* One column wide, centred on its onset; a name wider than the column spills
    evenly to both sides (flex centring) instead of widening the track. */
