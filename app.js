@@ -14175,8 +14175,16 @@ function pcCheck(btn, id, ci){
     onClassActivityChange(id, true);
     applyActivityGate();
     const card = root.closest('.ca-card');
-    const mark = card && card.querySelector('.ca-mark-btn');
-    if(mark){ mark.classList.add('done'); mark.textContent = t('ca.completed'); }
+    /* Under the Mark-complete nudge the card's only .ca-mark-btn is the nudge's
+       confirm button, which TOGGLES: relabelled "Completed" it un-marked the
+       card it had just completed. Put the plain completed button back instead. */
+    const nudge = card && caNudgeId === id ? card.querySelector('.ca-nudge') : null;
+    if(caNudgeId === id) caNudgeId = null;
+    if(nudge) nudge.outerHTML = caMarkRowHtml(a, true, t('ca.completed'));
+    else {
+      const mark = card && card.querySelector('.ca-mark-btn');
+      if(mark){ mark.classList.add('done'); mark.textContent = t('ca.completed'); }
+    }
     gateToast(t('ca.cardDoneToast'));
   }
 }
