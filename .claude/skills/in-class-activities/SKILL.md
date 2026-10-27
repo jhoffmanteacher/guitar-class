@@ -223,7 +223,7 @@ is mirrored in all three places as ever — `caIsVisible` (app.js),
 
 The difference between the two is what **Restore** gives back: Archive keeps the
 release date, rename, board slot and per-student clears, so the card returns
-exactly where it was; Delete wipes all of that on the way out (behind a
+exactly where it was (minus any pin — Archive unpins); Delete wipes all of that on the way out (behind a
 `confirm()`) **including the board entry**, so a restored one comes back in
 Built — unplaced and undated, to be assigned and published from scratch. The two
 flags are mutually exclusive by construction, each writer clearing the other.
@@ -507,7 +507,7 @@ pin-only card (`caIsPinOnly`: undated, or Play Along now) renders under the
 row while it is the open card. Same shape as Play Along now: the pin stands
 in for the release date for the ROW only — **don't fold it into
 `caIsVisible()`**, and no blocker rule or `CA_TODAY_MAX` reads it. Hidden,
-Archive, Delete (which unpins) and "not assigned" still win
+Archive, Delete (both unpin; Restore does not re-pin) and "not assigned" still win
 (`caPinReachable`); exit checks are never pinnable. Cached as `caPins`.
 
 **There was an Assessments page (2026-09-12–2026-09-20).** A rail button
