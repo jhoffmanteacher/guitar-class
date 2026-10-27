@@ -2214,9 +2214,15 @@ function teacherBoardDrop(e){
    the activities table already has in hand, and both apply the same `base`
    staleness rule (see caTitle's comment for what `base` buys us). If that
    rule changes, change it in both. */
+/* The rename's `base` is the shipped title it was typed over, so compare it
+   with the RAW activity's title. The detail page passes the caView() copy,
+   whose title is the Power chords one (title_power) in Power mode, and that
+   never matched: the list showed the rename and the page head the shipped
+   title. Without a rename, return the title of the copy the caller shows. */
 function teacherActivityTitle(a, cfg){
   const o=((cfg&&cfg.activityTitles)||{})[a.id];
-  return (o && o.en && o.base===a.title) ? o.en : a.title;
+  const raw=(window.CLASS_ACTIVITIES||[]).find(x=>x.id===a.id)||a;
+  return (o && o.en && o.base===raw.title) ? o.en : a.title;
 }
 // Read the open editor's box and hand it to the writer. Split out from
 // teacherSetActivityTitle so Enter, the Save button and a future affordance
