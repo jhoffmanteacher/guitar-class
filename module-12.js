@@ -421,16 +421,16 @@ SETS.push(
             steps: [
               {
                 label: 'Listen: the waltz feel', label_es: 'Escucha: la sensación de vals',
-                text: 'Happy Birthday is a waltz — count along to any recording and you\'ll hear it go ONE-two-three, ONE-two-three. Today you\'ll pick it in 3 instead of strumming it.',
-                text_es: 'Happy Birthday es un vals — cuenta junto a cualquier grabación y escucharás que va UNO-dos-tres, UNO-dos-tres. Hoy lo puntearás en 3 en lugar de rasguearlo.',
+                text: 'Happy Birthday is a waltz — count along to any recording and you\'ll hear it go ONE-two-three, ONE-two-three. Today you\'ll pick in 3 instead of strumming.',
+                text_es: 'Happy Birthday es un vals — cuenta junto a cualquier grabación y escucharás que va UNO-dos-tres, UNO-dos-tres. Hoy vas a puntear en 3 en lugar de rasguear.',
                 hint: 'A waltz counts ONE-two-three, ONE-two-three, with the bass note owning beat one. Count the numbers in one bar.',
                 hint_es: 'Un vals se cuenta UNO-dos-tres, UNO-dos-tres, con la nota grave dueña del tiempo uno. Cuenta los números de un compás.',
                 skills: [2, 6],
                 response: { type: 'mc', prompt: 'A waltz (3/4 time) has how many beats per bar?',
                   prompt_es: '¿Un vals (compás de 3/4) tiene cuántos tiempos por compás?',
                   answer: 1,
-                  explain: 'Three — ONE-two-three, ONE-two-three. Happy Birthday is a classic waltz, and now you\'ll pick it in 3.',
-                  explain_es: 'Tres — UNO-dos-tres, UNO-dos-tres. Happy Birthday es un vals clásico, y ahora lo puntearás en 3.',
+                  explain: 'Three — ONE-two-three, ONE-two-three. Happy Birthday is a classic waltz. Next you\'ll pick a pattern in 3.',
+                  explain_es: 'Tres — UNO-dos-tres, UNO-dos-tres. Happy Birthday es un vals clásico. Ahora vas a puntear un patrón en 3.',
                   choices: ['4 beats', '3 beats', '2 beats', '6 beats'],
                   choices_es: ['4 tiempos', '3 tiempos', '2 tiempos', '6 tiempos'] }
               }
