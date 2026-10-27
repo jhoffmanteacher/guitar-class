@@ -593,7 +593,8 @@ updateProgressPill();
    Layout: one block per section, its caption on top (which already says
    "4 laps"), the notes once. A note's slot is 3 characters a beat (6 when
    the card has notes shorter than a beat, so an eighth gets 3), never under
-   3, so a held note looks held and every bar of the card is the same width;
+   3, so a held note looks held and every bar of the card is the same width
+   (one character wider per two-digit fret);
    a note that rings past a bar line is drawn up to it and held on the other
    side (wsNoteSegs). A bar line falls every
    beatsPerBar beats (bars x beatsPerBar = the section's beats, checks.mjs
