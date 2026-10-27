@@ -3556,9 +3556,15 @@ function teacherConfigSaveFailed(e, msg, opts) {
   }
   alert(msg);
 }
+/* Manage and Games repaint after every per-student click. A table already on
+   screen stays up while the config re-reads, and the scroll is put back after
+   the swap: painting the one-line "Loading…" box first shrank the page, so the
+   browser threw the teacher back to the top on every click (the board's fix,
+   renderTeacherActivities). data-tview marks whose table it is, because both
+   views share .tg-table. */
 function renderTeacherGames(){
   const box=document.getElementById('t-grid-container');
-  box.innerHTML='<div class="t-loading">Loading game settings…</div>';
+  if(!box.querySelector('[data-tview="games"]')) box.innerHTML='<div class="t-loading">Loading game settings…</div>';
   loadTeacherClassConfig().then(cfg=>{
     if(teacherView!=='games') return;   // teacher switched views while the get was in flight — don't stomp the current view's DOM
     if(!cfg) return;   // superseded by a newer toggle — leave the newer render's DOM alone
@@ -3598,8 +3604,11 @@ function renderTeacherGames(){
         `<td><div class="tg-seg">${seg('default','Default')}${seg('on','On')}${seg('off','Off')}</div></td>`+
         `<td class="tg-eff">${effective?'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="2.5" y="6.5" width="19" height="11" rx="5.5"/><path d="M7 9.5v3M5.5 11h3"/><circle cx="15.7" cy="10.7" r="0.95" fill="currentColor" stroke="none"/><circle cx="17.6" cy="12.6" r="0.95" fill="currentColor" stroke="none"/></svg> available':'— hidden'}</td></tr>`;
     }).join('');
+    // Read at the swap, not before the config read: the teacher may have scrolled since.
+    const keepY=box.querySelector('[data-tview="games"]') ? window.scrollY : null;
     box.innerHTML=classCtl+
-      `<div class="tg-grid-wrap"><table class="tg-table"><thead><tr><th>Student</th><th>Games access</th><th>Right now</th></tr></thead><tbody>${rows}</tbody></table></div>`;
+      `<div class="tg-grid-wrap" data-tview="games"><table class="tg-table"><thead><tr><th>Student</th><th>Games access</th><th>Right now</th></tr></thead><tbody>${rows}</tbody></table></div>`;
+    if(keepY!==null) window.scrollTo({top:keepY});
   });
 }
 async function teacherSetClassGames(enabled){
@@ -3649,9 +3658,10 @@ function teacherNameParts(s){
   if(words.length<2) return null;
   return {first:words.slice(0,-1).join(' '), last:words[words.length-1]};
 }
+// Keeps its table on screen across a re-read — see renderTeacherGames.
 function renderTeacherManage(){
   const box=document.getElementById('t-grid-container');
-  box.innerHTML='<div class="t-loading">Loading student settings…</div>';
+  if(!box.querySelector('[data-tview="manage"]')) box.innerHTML='<div class="t-loading">Loading student settings…</div>';
   loadTeacherClassConfig().then(cfg=>{
     if(teacherView!=='manage') return;   // switched views mid-flight — don't stomp the new view's DOM
     if(!cfg) return;                     // superseded by a newer toggle
@@ -3762,8 +3772,10 @@ function renderTeacherManage(){
     }).join('');
     const summary=(pausedCount||archCount)
       ? `<div class="tg-note">${pausedCount} paused · ${archCount} archived</div>` : '';
+    const keepY=box.querySelector('[data-tview="manage"]') ? window.scrollY : null;
     box.innerHTML=head+
-      `<div class="tg-grid-wrap"><table class="tg-table"><thead><tr><th>Student</th><th>Period</th><th>Open through</th><th>Access</th><th>Roster</th><th>Right now</th></tr></thead><tbody>${rows}</tbody></table></div>`+summary;
+      `<div class="tg-grid-wrap" data-tview="manage"><table class="tg-table"><thead><tr><th>Student</th><th>Period</th><th>Open through</th><th>Access</th><th>Roster</th><th>Right now</th></tr></thead><tbody>${rows}</tbody></table></div>`+summary;
+    if(keepY!==null) window.scrollTo({top:keepY});
   });
 }
 async function teacherSetStudentPaused(uid, state){
