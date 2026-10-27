@@ -11221,17 +11221,26 @@ function songsHubOpenCard(id){
    and only the ones that changed: loadClassConfig() runs again on every
    return to the browser tab, and re-rendering the whole page would close the
    student's open song groups each time. */
+/* The browser re-serialises innerHTML (`&#x25B6;` reads back as "▶"), so a
+   built string never equals what a slot reads back and every refresh rewrote
+   every slot (dropping keyboard focus on them). Compare the slot with the
+   new markup as the browser itself serialises it. */
+function songsSlotDiffers(slot, html){
+  const tpl = document.createElement('template');
+  tpl.innerHTML = html;
+  return slot.innerHTML !== tpl.innerHTML;
+}
 function refreshSongsPlayAlong(){
   const screen = document.getElementById('songs-screen');
   if(!screen || screen.hidden) return;
   screen.querySelectorAll('.sh-play-slot').forEach(slot => {
     const html = songsPlayAlongBtn(slot.dataset.slug);
-    if(slot.innerHTML !== html) slot.innerHTML = html;
+    if(songsSlotDiffers(slot, html)) slot.innerHTML = html;
   });
   // The library list reads Hidden / Archive / Delete from the class config.
   // Its rows hold no open state, so swapping the whole slot is safe.
   const lib = screen.querySelector('.sh-lib-slot');
-  if(lib){ const html = songsLibraryHtml(); if(lib.innerHTML !== html) lib.innerHTML = html; }
+  if(lib){ const html = songsLibraryHtml(); if(songsSlotDiffers(lib, html)) lib.innerHTML = html; }
 }
 let songsHubList = [];
 function songsHubVid(idx, kind){
