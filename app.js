@@ -13588,6 +13588,7 @@ function pcStop(){
   pcState = null;                      // first, so the frame loop's guard bails
   if(st.raf) cancelAnimationFrame(st.raf);
   st.timers.forEach(clearTimeout);
+  (st.clicks || []).forEach(o => { try { o.stop(0); } catch(e) {} try { o.disconnect(); } catch(e) {} });
   try { st.audio.pause(); st.audio.src = ''; } catch(e) {}
   [st.spare, st.leaving].forEach(el => { if(el){ try { el.pause(); el.src = ''; } catch(e) {} } });
   st.spare = st.leaving = null;
@@ -13746,8 +13747,13 @@ function pcCountIn(st, si){
   const n = st.L.tr.beatsPerBar;
   const beat = st.win.bar / n / pcRate(st.root);   // real seconds, not file seconds
   const t0 = ctx.currentTime + 0.1;
+  /* All four clicks are scheduled on the AudioContext up front, so clearing
+     the timers does not silence them: pcStop stops these nodes too, or a Stop,
+     a section tap or a speed switch mid count-in leaves the rest still
+     clicking (over the next count-in, at the old tempo). */
+  st.clicks = [];
   for(let k = 0; k < n; k++){
-    pcClick(t0 + k * beat, k === 0, true);
+    st.clicks.push(pcClick(t0 + k * beat, k === 0, true));
     st.timers.push(setTimeout(() => { if(pcState === st) pcStatus(st.root, escHtml(t('ca.cardCountIn', {n: k + 1}))); }, (0.1 + k * beat) * 1000));
   }
   st.timers.push(setTimeout(() => { if(pcState === st) pcGo(st, si); }, (0.1 + n * beat) * 1000));
@@ -13766,6 +13772,7 @@ function pcClick(at, accent, countIn, gain){
   g.gain.exponentialRampToValueAtTime(0.0001, at + 0.08);
   o.connect(g); g.connect(ctx.destination);
   o.start(at); o.stop(at + 0.1);
+  return o;
 }
 /* The next counted beat, scheduled once it is under 100 ms away. `lastBeat`
    is reset on a loop or a track switch, so a jump back never skips beats. */
