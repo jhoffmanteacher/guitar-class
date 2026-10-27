@@ -987,7 +987,7 @@
     'nc.head':         { en: 'Frets {min}–{max} · {strings} strings', es: 'Trastes {min}–{max} · cuerdas {strings}' },
     'nc.metaLevel':    { en: 'Level {n} · {bpm} BPM', es: 'Nivel {n} · {bpm} BPM' },
     'nc.intro':        { en: 'A note name comes up on the beat. Find it on that string and play it before the next name comes up.',
-                         es: 'El nombre de una nota aparece con el tiempo. Búscala en esa cuerda y tócala antes de que aparezca el siguiente nombre.' },
+                         es: 'El nombre de una nota aparece en el tiempo. Búscala en esa cuerda y tócala antes de que aparezca el siguiente nombre.' },
     'nc.levelN':       { en: 'Level {n}', es: 'Nivel {n}' },
     'nc.locked':       { en: 'locked', es: 'bloqueado' },
     'nc.descNaturals': { en: 'Natural notes · {bpm} BPM · a new note every {beats} beats',
