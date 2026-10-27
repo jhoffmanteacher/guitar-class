@@ -184,10 +184,7 @@ function coachOpen(btn){
     if (!Array.isArray(chords) || !chords.length) return;
     mode = 'chords';
     slots = coachChordSlots(chords);
-    const names = chords.map(c => c.n).join(' → ');
-    desc = chords.length > 1
-      ? t('coach.desc.chordsMulti', {names})
-      : t('coach.desc.chordsOne', {names});
+    desc = coachChordDesc(chords, slots.length);
   } else {
     let midis;
     try { midis = JSON.parse(btn.dataset.midis || '[]'); } catch(e){ return; }
@@ -283,6 +280,25 @@ function coachOpen(btn){
   };
   coachRenderReady();
   card.scrollIntoView({ block: 'nearest', behavior: scrollBehavior() });
+}
+
+/* The card's one-line description, read off the slots the drill really has.
+   COACH_MAX_SLOTS cuts the second pass short from 5 chords up (7 power
+   chords: one pass, then the first one again; 8 chords: one pass), so
+   "twice through" is said only when both passes fit. */
+function coachChordDesc(chords, slotCount){
+  const per = COACH_BEATS_PER_CHORD;
+  if (chords.length === 1) return t('coach.desc.chordsOne', { names: chords[0].n });
+  const shown = Math.min(chords.length, Math.floor(slotCount / per));
+  const names = chords.slice(0, shown).map(c => c.n).join(' → ');
+  const passes = Math.floor(slotCount / (chords.length * per));
+  if (passes >= 2) return t('coach.desc.chordsMulti', { names });
+  const again = (slotCount - chords.length * per) / per;
+  if (passes === 1 && again > 0){
+    return t('coach.desc.chordsOnceThen', { names,
+      again: chords.slice(0, again).map(c => c.n).join(' → ') });
+  }
+  return t('coach.desc.chordsOnce', { names });
 }
 
 function coachChordSlots(chords){
@@ -1907,7 +1923,12 @@ function coachRenderReport(){
   const hard = applicable.filter(c => !c.soft);
   if (overallLevel < 2 && hard.length && hard.every(c => c.level >= 2)) overallLevel = 2;
   let overall;
-  if (overallLevel === 3)      overall = '&#x1F31F; ' + t('coach.overall.great');
+  /* Great can still have beats the mic missed or could not read: pitch
+     leaves those out of its ratio. Then "Everything was right" is not
+     true, so say what is: every beat heard clearly was right. Wording only;
+     the level, and the gate that reads it, are unchanged. */
+  const everyBeatRight = slots.every(s => s.state === 'ok' || s.state === 'oct');
+  if (overallLevel === 3)      overall = '&#x1F31F; ' + t(everyBeatRight ? 'coach.overall.great' : 'coach.overall.greatHeard');
   else if (overallLevel === 2) overall = '&#x1F4AA; ' + t('coach.overall.good');
   else                         overall = '&#x1F3B8; ' + t('coach.overall.practice');
 
@@ -2033,7 +2054,7 @@ function coachScorePitch(){
     sentence = coach.mode === 'chords'
       ? t('coach.crit.pitch.greatChords', { good, total })
       : quietOnly
-        ? t('coach.crit.pitch.greatQuietMelody', { good, total, rest: total - good })
+        ? t(total - good === 1 ? 'coach.crit.pitch.greatQuietMelodyOne' : 'coach.crit.pitch.greatQuietMelody', { good, total, rest: total - good })
         : (octs ? t('coach.crit.pitch.correctWithOct', { good, total, octs }) : t('coach.crit.pitch.correctPerfect', { good, total }));
   } else if (r >= 0.55){
     level = 2;
@@ -2090,11 +2111,15 @@ function coachScoreTiming(){
   } else {
     /* Still "Needs work", never "wrong": the sentence names the notes that
        DID count before it asks for the beat, so the tier reads as the next
-       thing to practise rather than as a verdict on the notes. */
+       thing to practise rather than as a verdict on the notes. `devs` also
+       holds wrong and unclear hits, so "all counted" is said only when
+       every timed hit was a right note; otherwise just how many were heard. */
     level = 1;
+    const allRight = coach.slots.every(s => !(s.hit && s.hit.devMs != null) || s.state === 'ok' || s.state === 'oct');
+    const pre = allRight ? 'coach.crit.timing.counted' : 'coach.crit.timing.heard';
     sentence = lean
-      ? t(lean === 'early' ? 'coach.crit.timing.countedEarly' : 'coach.crit.timing.countedLate', { total: devs.length })
-      : t('coach.crit.timing.needsWork', { total: devs.length });
+      ? t(pre + (lean === 'early' ? 'Early' : 'Late'), { total: devs.length })
+      : t(allRight ? 'coach.crit.timing.needsWork' : 'coach.crit.timing.heardNeedsWork', { total: devs.length });
   }
   return { name, icon, soft: true, level, sentence };
 }
