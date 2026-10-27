@@ -12641,7 +12641,7 @@ function caIsSwapIn(a){ return !!(caSwap && a && caSwap.to === a.id && caOpenId 
 function caCardLinkHtml(from, id){
   const b = (window.CLASS_ACTIVITIES || []).find(x => x.id === id);
   if(!b || !(caIsVisible(b) || caIsPlayAlongOnly(b))) return '';
-  return `<div class="ca-journey-row"><button type="button" class="jl-song-btn" onclick="caOpenLinkedCard('${escAttr(from)}','${escAttr(id)}')">${escHtml(t('ca.openCard', { title: tf(b, 'title') }))} &#x2192;</button></div>`;
+  return `<div class="ca-journey-row"><button type="button" class="jl-song-btn" onclick="caOpenLinkedCard(${jsonAttrArg(from)},${jsonAttrArg(id)})">${escHtml(t('ca.openCard', { title: caTitle(b) }))} &#x2192;</button></div>`;
 }
 function caOpenLinkedCard(from, id){
   const b = (window.CLASS_ACTIVITIES || []).find(x => x.id === id);
