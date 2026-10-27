@@ -1483,7 +1483,7 @@ function renderTeacherActivities(opts){
     // delegated click listener (see showTeacherApp).
     const titleBlock=a=>{
       const shown=teacherActivityTitle(a,cfg);
-      const renamed=shown!==a.title;
+      const renamed=teacherActivityRenamed(a,cfg);
       if(activityEditId===a.id){
         return `<div class="t-board-title">`
           +`<span class="t-act-title-lbl">rename (English)</span>`
@@ -2218,11 +2218,22 @@ function teacherBoardDrop(e){
    with the RAW activity's title. The detail page passes the caView() copy,
    whose title is the Power chords one (title_power) in Power mode, and that
    never matched: the list showed the rename and the page head the shipped
-   title. Without a rename, return the title of the copy the caller shows. */
+   title. Without a rename, return the title of the view on screen
+   (caView: the Power chords title in Power mode — ca-34 opens there), so the
+   board, pins and sort read what the detail page and students read. Mirrors
+   caTitle() in app.js, in English like the rest of the console. */
 function teacherActivityTitle(a, cfg){
-  const o=((cfg&&cfg.activityTitles)||{})[a.id];
   const raw=(window.CLASS_ACTIVITIES||[]).find(x=>x.id===a.id)||a;
-  return (o && o.en && o.base===raw.title) ? o.en : a.title;
+  if(teacherActivityRenamed(raw, cfg)) return cfg.activityTitles[raw.id].en;
+  return (typeof caView==='function' ? caView(raw) : raw).title;
+}
+/* A live rename: one stored against the shipped title it was typed over.
+   Not "the shown title differs from a.title" — in Power mode the view title
+   differs with no rename at all, and that offered an Undo rename for nothing. */
+function teacherActivityRenamed(a, cfg){
+  const raw=(window.CLASS_ACTIVITIES||[]).find(x=>x.id===a.id)||a;
+  const o=((cfg&&cfg.activityTitles)||{})[raw.id];
+  return !!(o && o.en && o.base===raw.title);
 }
 // Read the open editor's box and hand it to the writer. Split out from
 // teacherSetActivityTitle so Enter, the Save button and a future affordance
@@ -2244,7 +2255,7 @@ function teacherRenderRenameView(){
    teacherSetActivityHidden/Date above, against a third map on the same doc.
 
    Two cases clear the override outright rather than storing it: an empty box,
-   and a value equal to the shipped title — both mean "no rename", and storing
+   and a value equal to the shipped title (either chord version's) — both mean "no rename", and storing
    either would leave a row in config/class that does nothing but has to be
    reasoned about later.
 
@@ -2255,7 +2266,11 @@ async function teacherSetActivityTitle(id, value){
   const a=(window.CLASS_ACTIVITIES||[]).find(x=>x.id===id);
   if(!a) return;
   const name=String(value||'').trim().slice(0,120);
-  const clear=!name || name===a.title;
+  // The editor opens holding the title on screen, which in Power mode is the
+  // Power chords one: saving it unchanged is "no rename" too, or Full-mode
+  // students would get the Power chords title as a rename.
+  const viewTitle=typeof caView==='function' ? caView(a).title : a.title;
+  const clear=!name || name===a.title || name===viewTitle || (!!a.title_power && name===a.title_power);
   if(!teacherClassConfig.activityTitles) teacherClassConfig.activityTitles={};
   const had=Object.prototype.hasOwnProperty.call(teacherClassConfig.activityTitles, id);
   const prev=teacherClassConfig.activityTitles[id];
@@ -2941,7 +2956,7 @@ function renderTeacherSongs(){
       // keeps it. Same activityTitles rename as the Class activities board.
       const full=teacherActivityTitle(a,cfg);
       const suffix=name(a)===full ? '' : full.slice(name(a).length);
-      const renamed=full!==a.title;
+      const renamed=teacherActivityRenamed(a,cfg);
       if(activityEditId===a.id){
         return `<div class="t-board-card t-songs-row">`
           +`<span class="t-act-title-lbl">rename</span>`
