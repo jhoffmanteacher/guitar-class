@@ -7779,6 +7779,7 @@ function checkSheetCards() {
    - pcLocate + pcLocKey: on ca-29 the repaint key is the same at a beat and
      at the "+" after it, and steps once per beat; on ca-10 it still steps
      per note. */
+const CHORD_GRID_HELD_LABELS = 54;   // rows (both views) that open on a held "(Chord)" — see the column-0 check below
 const CHORD_GRID_CARDS = ['ca-29', 'ca-30', 'ca-32', 'ca-33', 'ca-35', 'ca-36', 'ca-37', 'ca-39', 'ca-40', 'ca-41', 'ca-42'];
 function checkChordGridCards(ctx) {
   head('1bv. Chord-grid practice cards');
@@ -7861,17 +7862,18 @@ function checkChordGridCards(ctx) {
      row lit several rows at once and went dark after beat 15 — the reviewer's
      M19). A rest draws its word. Bar lines, rest words and the staff's
      closing edge are counted, not just present. */
-  let rowsSeen = 0, restWords = 0;
+  let rowsSeen = 0, restWords = 0, col0Rows = 0, heldLabels = 0;
   for (const a of acts.filter(x => x && x.card && x.card.chordGrid)) {
     for (const mode of ['full', 'power']) {
       if (mode === 'power' && !a.chordVersions) continue;
-      let html = '';
+      let html = '', L = null;
       try {
         vm.runInContext(`caChordModes[${JSON.stringify(a.id)}] = ${JSON.stringify(mode)}`, ctx);
         html = String(caCardBodyHtml(a));
+        // The layout of the view just rendered (the chord names differ between views).
+        L = pcLayout(vm.runInContext(`caView(CLASS_ACTIVITIES.find(x => x.id === ${JSON.stringify(a.id)}))`, ctx));
       } catch (e) { flag(`caCardBodyHtml(${a.id}, ${mode}) threw: ${e.message}`); continue; }
       finally { try { vm.runInContext(`delete caChordModes[${JSON.stringify(a.id)}]`, ctx); } catch {} }
-      const L = pcLayout(vm.runInContext(`caView(CLASS_ACTIVITIES.find(x => x.id === ${JSON.stringify(a.id)}))`, ctx));
       const bpb = L.tr.beatsPerBar;
       const pages = html.split('<div class="tab-page pc-page"').slice(1);
       if (pages.length !== L.sections.length) flag(`${a.id} (${mode}): ${pages.length} section pages for ${L.sections.length} sections`);
@@ -7910,12 +7912,35 @@ function checkChordGridCards(ctx) {
           const got = [...(grids[ri] || '').matchAll(/class="tab-rest-lab" style="grid-row:7;grid-column:(\d+)"/g)].map(m => +m[1]);
           if (want.sort().join() !== got.sort().join()) flag(`${a.id} · ${S.s.label} (${mode}) row ${ri + 1}: rest words sit in grid columns [${got}], expected [${want}] — a rest word must sit where the rest starts`);
         });
+        /* Every row opens on a label at column 0 (grid column 2): the chord that
+           starts there, the rest word, or — when a chord is still ringing from
+           the row before (a lyric line or a four-bar wrap that starts
+           mid-chord) — that chord's name in parentheses. Worked out here from
+           the fold and the rows, then read off the rendered row (CA-1: 6 of
+           ca-35's 12 lyric lines opened on nothing). */
+        const evs0 = pcChordGrid(S.notes, bpb);
+        pcGridRows(S, bpb).forEach((row, ri) => {
+          col0Rows++;
+          const g = grids[ri] || '';
+          const starts = evs0.find(e => Math.abs(e.start - row.b0) < 1e-6);
+          const ring = starts || evs0.find(e => e.start < row.b0 - 1e-6 && e.start + e.beats > row.b0 + 1e-6);
+          const btn = /class="tab-note-btn tab-chord-btn" style="grid-row:7;grid-column:2"[^>]*>([^<]*)</.exec(g);
+          const rest = /class="tab-rest-lab" style="grid-row:7;grid-column:2"/.test(g);
+          const where = `${a.id} · ${S.s.label} (${mode}) row ${ri + 1}`;
+          if (!ring) { flag(`${where}: no chord or rest starts at or rings through the row's first beat`); return; }
+          if (ring.rest) { if (!rest) flag(`${where}: opens inside a rest but draws no rest word at column 0`); return; }
+          const want = starts ? ring.name : `(${ring.name})`;
+          if (!btn) flag(`${where}: opens with no chord name at column 0 — expected "${want}" (a row that starts mid-chord names the held chord in parentheses)`);
+          else if (btn[1] !== want) flag(`${where}: column 0 reads "${btn[1]}", expected "${want}"`);
+          else if (!starts) heldLabels++;
+        });
         const words = (pg.match(/class="tab-rest-lab"/g) || []).length;
         restWords += words;
         if (rests && !words) flag(`${a.id} · ${S.s.label}: has a rest but draws no rest word — a silent bar would look like a held chord`);
       });
     }
   }
+  if (heldLabels !== CHORD_GRID_HELD_LABELS) flag(`${heldLabels} rows across both views open on a held "(Chord)" label, pinned at ${CHORD_GRID_HELD_LABELS} — a row that starts mid-chord lost its label, or the cards' rows changed (update the pin only for an intended content change)`);
   // The new words are English AND Spanish (1e checks the key exists; this checks the Spanish is not the English).
   const I18N = loadI18nTable();
   for (const k of ['ca.cardChordDirections', 'ca.cardChordMixedDirections', 'ca.cardCountsAriaGrid', 'tab.restStop', 'ca.sheetDirections']) {
@@ -7946,7 +7971,7 @@ function checkChordGridCards(ctx) {
     const ks = new Set(); for (let i = 0; i < L.sections[0].bars * L.tr.beatsPerBar * 8; i++) ks.add(pcLocKey(L, pcLocate(L, i / 8 / L.tr.beatsPerBar)));
     if (ks.size !== L.sections[0].notes.length) flag(`ca-10: ${ks.size} repaint keys over ${L.sections[0].notes.length} notes — a single-note card must still step per note`);
   }
-  if (bad === 0) ok(`${CHORD_GRID_CARDS.length} chord-grid cards (pinned) — ${sections} grid sections, ${events} chord/rest onsets all on the eighth grid, ${labelled} lyric lines keep their row; ca-29 renders 28 chord names and 392 data-beat on beat columns only; ${rowsSeen} grid rows across both views each 4 bars wide with their bar lines, staff edge and 0..N beat run; ${restWords} rest words; the cursor steps once per beat; ca-10 untouched`);
+  if (bad === 0) ok(`${CHORD_GRID_CARDS.length} chord-grid cards (pinned) — ${sections} grid sections, ${events} chord/rest onsets all on the eighth grid, ${labelled} lyric lines keep their row; ca-29 renders 28 chord names and 392 data-beat on beat columns only; ${rowsSeen} grid rows across both views each 4 bars wide with their bar lines, staff edge and 0..N beat run; ${col0Rows} rows open on a label at column 0 (${heldLabels} held "(Chord)", pinned); ${restWords} rest words; the cursor steps once per beat; ca-10 untouched`);
 }
 
 /* 1by. POWER-CHORD NAMES OPEN NO POP-UP WHERE THE TWO-FINGER SHAPE IS TAUGHT
