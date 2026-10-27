@@ -210,7 +210,7 @@ SETS.push(
                 levelUp_es: 'Corre Am → C → Am → C durante 8 compases sin un solo tiempo roto.',
                 skills: [5],
                 chords: [
-                  { name: 'C', chord: [[6,3,'4'],[5,3,'3'],[4,2,'2'],[3,0],[2,1,'1'],[1,0]], position: 0 },
+                  { name: 'Travis C', name_es: 'C de Travis', chord: [[6,3,'4'],[5,3,'3'],[4,2,'2'],[3,0],[2,1,'1'],[1,0]], position: 0 },
                   { name: 'Am', chord: [[6,'x'],[5,0],[4,2,'2'],[3,2,'3'],[2,1,'1'],[1,0]], position: 0 }
                 ]
               }
@@ -305,7 +305,7 @@ SETS.push(
                 playSeq: { label: 'Hear one p-i-m-a lap on Am, then C — loop it 2 bars each', label_es: 'Escucha una vuelta p-i-m-a en Am, y luego en C — repítelo 2 compases cada uno', bpm: 60, notes: [45, 57, 60, 64, 48, 55, 60, 64] },
                 chords: [
                   { name: 'Am', chord: [[6,'x'],[5,0],[4,2,'2'],[3,2,'3'],[2,1,'1'],[1,0]], position: 0 },
-                  { name: 'C', chord: [[6,3,'4'],[5,3,'3'],[4,2,'2'],[3,0],[2,1,'1'],[1,0]], position: 0 }
+                  { name: 'Travis C', name_es: 'C de Travis', chord: [[6,3,'4'],[5,3,'3'],[4,2,'2'],[3,0],[2,1,'1'],[1,0]], position: 0 }
                 ]
               }
             ]
