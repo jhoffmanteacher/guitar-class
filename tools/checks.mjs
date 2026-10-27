@@ -1672,8 +1672,10 @@ function checkContrast() {
    text a student reads is not in that state: rules with a STATE-ONLY
    pseudo-class (CONTRAST_STATE_ONLY: hover, active, focus, focus-visible,
    focus-within, visited, disabled, checked, target, fullscreen) and rules
-   for any other pseudo-element (::placeholder, ::-webkit-…). Everything
-   else it cannot model — an attribute selector, :has(), a structural
+   for any other pseudo-element (::placeholder, ::-webkit-…); a state-only
+   member inside :not()/:is()/:where() is dropped and the rest still
+   count. At-rules go through contrastMediaApplies (true / false / cannot
+   tell). Everything else it cannot model — an attribute selector, :has(), a structural
    pseudo-class (:first-child, :nth-child, :empty…), a + or ~ combinator —
    is matched loosely (the unmodelled part treated as true) and, if it
    could then reach a judged element and sets color, opacity or
@@ -1682,9 +1684,20 @@ function checkContrast() {
    `overStop` names the surface when the text hangs outside the box that
    paints it: the last colour stop of that chain element's own resolved
    background (the unlock label sits below its gate line, on the lane's
-   lower band). Every class must still appear in its emitter file, and a
-   state that resolves no colour or no surface FAILS rather than skips — so
-   the pinned count below is the number actually judged, in both palettes. */
+   lower band), unless an element between the two paints first. `offBox`
+   lists the chain elements the text hangs outside of (the gate line), so
+   their own background is not behind it; their opacity still is. Every
+   class must still appear in its emitter file, and a state that resolves
+   no colour or no surface FAILS rather than skips — so the pinned count
+   below is the number actually judged, in both palettes. A chain with no
+   colour of its own takes body's, as the page does.
+
+   KNOWN LIMITS, not modelled: filter:opacity()/brightness(),
+   -webkit-text-fill-color, ::first-line, a translucent background in the
+   chain (read as transparent), opacity on or above the element that paints
+   the surface (both fade together over the page), and :focus-within
+   (state-only here, though focus can rest inside a step after its Done
+   button is pressed). */
 const CONTRAST_STATES = [
   { name: 'Stuck? panel',             file: 'app.js',   chain: ['li.step', 'div.step-detail', 'div.step-body', 'div.step-folds', 'div.step-fold-panel', 'div.step-branch.step-stuck'] },
   { name: 'Level up panel',           file: 'app.js',   chain: ['li.step', 'div.step-detail', 'div.step-body', 'div.step-folds', 'div.step-fold-panel', 'div.step-branch.step-levelup'] },
@@ -1699,27 +1712,85 @@ const CONTRAST_STATES = [
   { name: 'done in-class step label (focus)', file: 'app.js', chain: ['details.ca-card.ca-card--focus', 'div.ca-card-body', 'ol.ca-steps', 'li.ca-step.ca-step-done', 'div.ca-step-head.ca-step-head--focus', 'span.ca-step-label'] },
   { name: 'done in-class step label (list)',  file: 'app.js', chain: ['details.ca-card', 'div.ca-card-body', 'ol.ca-steps', 'li.ca-step.ca-step-done', 'button.ca-step-head', 'span.ca-step-label'] },
   { name: 'done review card text',    file: 'app.js',   chain: ['div.sr-card.sr-done', 'div.sr-card-main', 'div.sr-card-text'] },
-  { name: 'Note Runner unlock label', file: 'coach.js', chain: ['div.nr-race', 'div.nr-race-lane', 'div.nr-race-gate', '::after'], overStop: 0 },
+  { name: 'Note Runner unlock label', file: 'coach.js', chain: ['div.nr-race', 'div.nr-race-lane', 'div.nr-race-gate', '::after'], overStop: 0, offBox: [2] },
 ];
 const CONTRAST_STATES_PINNED = 14;
 const CONTRAST_STATE_ONLY = new Set(['hover', 'active', 'focus', 'focus-visible', 'focus-within', 'visited', 'disabled', 'checked', 'target', 'fullscreen']);
-/* Does @media context `m` apply at the 1366×657 target in this palette?
-   Unknown features (hover, pointer, reduced motion), print, and every
-   at-rule that is not @media (@keyframes frames, @font-face) answer no. */
+/* Does at-rule context `m` apply at the 1366×657 target in this palette?
+   true, false, or null = cannot tell. Known false: print alone, a width or
+   height outside 1366×657 (min-/max- or range syntax), the other colour
+   scheme, prefers-reduced-motion:reduce, hover:none, (any-)pointer:coarse,
+   orientation:portrait. Known true: screen/all, the matching scheme,
+   hover:hover, pointer:fine, landscape. A rule under anything else
+   (@supports, @layer, @container, an unknown feature) is "cannot judge"
+   when it could reach the text, like an unmodelled selector. @keyframes
+   frames, @font-face and @page are not selectors: false. */
 function contrastMediaApplies(m, mode) {
   if (!m) return true;
-  if (!/^@media\b/.test(m) || /@(?!media\b)/.test(m)) return false;
-  if (/\bprint\b|,|\bnot\b|\bor\b/.test(m)) return false;
-  for (const [, feat, val] of m.matchAll(/\(\s*([\w-]+)\s*:\s*([^)]+?)\s*\)/g)) {
-    const px = /em$/.test(val) ? parseFloat(val) * 16 : parseFloat(val);
-    if (feat === 'prefers-color-scheme') { if (val !== mode) return false; }
-    else if (feat === 'min-width') { if (!(1366 >= px)) return false; }
-    else if (feat === 'max-width') { if (!(1366 <= px)) return false; }
-    else if (feat === 'min-height') { if (!(657 >= px)) return false; }
-    else if (feat === 'max-height') { if (!(657 <= px)) return false; }
-    else return false;
+  const segs = m.split(/(?=@)/).map(x => x.trim()).filter(Boolean);
+  let unknown = false;
+  for (const seg of segs) {
+    if (/^@(keyframes|font-face|page)\b/.test(seg)) return false;
+    if (!/^@media\b/.test(seg)) { unknown = true; continue; }
+    const v = contrastQueryList(seg.replace(/^@media/, '').trim(), mode);
+    if (v === false) return false;
+    if (v === null) unknown = true;
   }
-  return true;
+  return unknown ? null : true;
+}
+function contrastQueryList(list, mode) {
+  const vals = contrastSplitTop(list, ',').map(q => contrastQuery(q, mode));
+  if (vals.includes(true)) return true;
+  return vals.every(v => v === false) ? false : null;
+}
+function contrastQuery(q, mode) {
+  let neg = false;
+  q = q.trim().replace(/^only\s+/i, '');
+  if (/^not\s/i.test(q)) { neg = true; q = q.replace(/^not\s+/i, ''); }
+  const out = v => v === null ? null : (neg ? !v : v);
+  const px = t => { const n = parseFloat(t); return /r?em$/.test(t) ? n * 16 : /px$/.test(t) || n === 0 ? n : NaN; };
+  let res = true;
+  for (const part of contrastSplitTop(q.replace(/\)\s*and\s*\(/gi, ') , ('), ',').flatMap(x => x.split(/\s+and\s+/i))) {
+    const t = part.trim();
+    if (!t) continue;
+    let v = null;
+    if (/^(screen|all)$/i.test(t)) v = true;
+    else if (/^print$/i.test(t)) v = false;
+    else {
+      const f = /^\(\s*([\w-]+)\s*:\s*([^)]+?)\s*\)$/.exec(t);
+      const r = /^\(([^:]+)\)$/.exec(t);
+      if (f) {
+        const [, feat, val] = f;
+        const n = px(val);
+        if (feat === 'prefers-color-scheme') v = val === mode;
+        else if (feat === 'min-width' && !isNaN(n)) v = 1366 >= n;
+        else if (feat === 'max-width' && !isNaN(n)) v = 1366 <= n;
+        else if (feat === 'min-height' && !isNaN(n)) v = 657 >= n;
+        else if (feat === 'max-height' && !isNaN(n)) v = 657 <= n;
+        else if (feat === 'prefers-reduced-motion') v = val === 'no-preference';
+        else if (feat === 'hover' || feat === 'any-hover') v = val === 'hover' ? true : val === 'none' ? (feat === 'hover' ? false : null) : null;
+        else if (feat === 'pointer') v = val === 'fine' ? true : val === 'coarse' || val === 'none' ? false : null;
+        else if (feat === 'any-pointer') v = val === 'fine' ? true : val === 'coarse' ? false : null;
+        else if (feat === 'orientation') v = val === 'landscape';
+      } else if (r) {
+        // range syntax: (width <= 600px), (400px < width <= 900px)
+        const toks = r[1].match(/[\d.]+(?:px|r?em)?|width|height|<=|>=|<|>|=/g) || [];
+        const val = x => x === 'width' ? 1366 : x === 'height' ? 657 : px(x);
+        if (toks.length >= 3 && toks.length % 2 === 1 && toks.some(x => x === 'width' || x === 'height')) {
+          v = true;
+          for (let k = 0; k + 2 < toks.length; k += 2) {
+            const a = val(toks[k]), op = toks[k + 1], b = val(toks[k + 2]);
+            if (isNaN(a) || isNaN(b) || !/^(<=|>=|<|>|=)$/.test(op)) { v = null; break; }
+            const ok = op === '<=' ? a <= b : op === '>=' ? a >= b : op === '<' ? a < b : op === '>' ? a > b : a === b;
+            if (!ok) { v = false; break; }
+          }
+        }
+      }
+    }
+    if (v === false) return out(false);
+    if (v === null) res = null;
+  }
+  return out(res);
 }
 /* Split on `sep` at paren/bracket depth 0. */
 function contrastSplitTop(s, sep) {
@@ -1757,14 +1828,16 @@ function contrastCompound(s) {
       const arg = s[i] === '(' ? group() : null;
       if (n === 'before' || n === 'after') { c.pseudo = '::' + n; c.spec[2]++; continue; }
       if ((n === 'not' || n === 'is' || n === 'where') && arg != null) {
-        const list = contrastSplitTop(arg, ',').map(x => /[\s>+~]/.test(x) ? null : contrastCompound(x));
-        if (list.some(x => !x || x.unknown || x.pseudo || x.otherPseudo)) { c.unknown = true; c.spec[1]++; continue; }
-        if (list.some(x => x.stateOnly)) {
-          // :not(:hover) is the resting state; :is(:hover) is not
-          if (n === 'not') continue;
-          c.stateOnly = true; continue;
-        }
-        if (n !== 'where') { const best = list.map(x => x.spec).sort((a, b) => (b[0] - a[0]) || (b[1] - a[1]) || (b[2] - a[2]))[0]; c.spec = c.spec.map((v, k) => v + best[k]); }
+        const all = contrastSplitTop(arg, ',').map(x => /[\s>+~]/.test(x) ? null : contrastCompound(x));
+        if (all.some(x => !x)) { c.unknown = true; c.spec[1]++; continue; }
+        if (n !== 'where') { const best = all.map(x => x.spec).sort((a, b) => (b[0] - a[0]) || (b[1] - a[1]) || (b[2] - a[2]))[0]; c.spec = c.spec.map((v, k) => v + best[k]); }
+        /* A state-only member is false at rest: drop it. What is left still
+           negates (:not) or offers alternatives (:is/:where). :not() of only
+           state members is the resting state (no constraint); :is() of only
+           state members never matches at rest. */
+        const list = all.filter(x => !x.stateOnly);
+        if (!list.length) { if (n !== 'not') c.stateOnly = true; continue; }
+        if (list.some(x => x.unknown || x.pseudo || x.otherPseudo)) { c.unknown = true; continue; }
         (n === 'not' ? c.nots : c.iss).push(list);
         continue;
       }
@@ -1871,9 +1944,11 @@ function contrastStates(flag) {
   const winner = (chain, n, props, mode) => {
     let best = null;
     for (const r of rules) {
-      if (!r.parts || r.never || !contrastMediaApplies(r.media, mode)) continue;
-      if (r.unknown) {
-        if (props.some(pr => r.decls.has(pr)) && ruleMatches(r, chain, n, true)) cannot.add(r.sel);
+      if (!r.parts || r.never) continue;
+      const applies = contrastMediaApplies(r.media, mode);
+      if (applies === false) continue;
+      if (r.unknown || applies === null) {
+        if (props.some(pr => r.decls.has(pr)) && ruleMatches(r, chain, n, true)) cannot.add(applies === null ? `${r.media} { ${r.sel}` : r.sel);
         continue;
       }
       if (!ruleMatches(r, chain, n, false)) continue;
@@ -1914,12 +1989,27 @@ function contrastStates(flag) {
       const t = chain.length - 1;
       cannot = new Set();
       let fgRaw = null;
-      for (let n = t; n >= 0 && fgRaw == null; n--) fgRaw = winner(chain, n, ['color'], mode);
+      for (let n = t; n >= 0 && fgRaw == null; n--) {
+        fgRaw = winner(chain, n, ['color'], mode);
+        // inherit / currentColor on `color` mean the parent's colour
+        if (fgRaw != null && /^(inherit|unset|currentcolor)$/i.test(String(fgRaw).replace(/\s*!\s*important\s*$/i, '').trim())) fgRaw = null;
+      }
+      // nothing in the chain sets it: the page's own colour, from body
+      if (fgRaw == null) fgRaw = winner([{ tag: 'body', cls: [], ids: [], pseudo: null }], 0, ['color'], mode);
       const opAt = n => { const v = parseFloat(winner(chain, n, ['opacity'], mode)); return v >= 0 && v < 1 ? v : 1; };
       let bgV = null, alpha = 1, gradAt = null;
       if (st.overStop != null) {
-        bgV = paintOf(winner(chain, st.overStop, ['background', 'background-color', 'background-image'], mode), pal, true);
-        for (let n = st.overStop + 1; n <= t; n++) alpha *= opAt(n);
+        /* Anything painted between the text and overStop sits in front of
+           that stop, except the boxes the text hangs outside (offBox). */
+        for (let n = t; n > st.overStop && bgV == null && !gradAt; n--) {
+          if (!(st.offBox || []).includes(n)) {
+            const raw = winner(chain, n, ['background', 'background-color', 'background-image'], mode);
+            if (raw != null && /-gradient\(/.test(raw)) { gradAt = st.chain[n]; break; }
+            bgV = paintOf(raw, pal, false);
+          }
+          if (bgV == null) alpha *= opAt(n);
+        }
+        if (bgV == null && !gradAt) bgV = paintOf(winner(chain, st.overStop, ['background', 'background-color', 'background-image'], mode), pal, true);
       } else {
         for (let n = t; n >= 0 && bgV == null; n--) {
           const raw = winner(chain, n, ['background', 'background-color', 'background-image'], mode);
@@ -1930,7 +2020,7 @@ function contrastStates(flag) {
           if (bgV == null) alpha *= opAt(n);
         }
       }
-      if (cannot.size) { flag(`1s states: "${st.name}" (${mode}) — cannot judge ${[...cannot].join(' | ')}: it may set colour, opacity or a background on this text but uses a selector the resolver does not model; model it or write it without that part`); continue; }
+      if (cannot.size) { flag(`1s states: "${st.name}" (${mode}) — cannot judge ${[...cannot].join(' | ')}: it may set colour, opacity or a background on this text but uses a selector or at-rule the resolver does not model; model it or write it without that part`); continue; }
       const fgV = cssVar(fgRaw, pal), f0 = cssRGB(fgV), b = cssRGB(bgV);
       if (!f0 || !b) { flag(`1s states: "${st.name}" (${mode}) resolved no ${!f0 ? 'text colour' : gradAt ? `single surface (${gradAt} paints a gradient)` : 'opaque surface'} — fix the chain or give it an overStop`); continue; }
       const f = f0.map((v, k) => alpha * v + (1 - alpha) * b[k]);
