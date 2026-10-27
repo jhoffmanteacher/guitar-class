@@ -441,6 +441,16 @@ async function startTuner() {
       try { myCtx.close().catch(() => {}); } catch(e){}
       return;
     }
+    // The tab was hidden while the permission prompt or resume() was pending.
+    // The visibilitychange handler below skipped it (tunerRunning was still
+    // false), so nothing else would stop this mic: close the tuner now, the
+    // same way a hide of a running tuner does. The globals are this start's
+    // (the token still matches), so stopTuner releases this stream and context.
+    if (document.hidden) {
+      if (typeof closePopup === 'function') closePopup('tuner');
+      else stopTuner();
+      return;
+    }
     // Belt-and-suspenders: Safari can also suspend a live context on an audio
     // route change (AirPods connecting/disconnecting mid-session).
     tunerCtx.onstatechange = () => {
