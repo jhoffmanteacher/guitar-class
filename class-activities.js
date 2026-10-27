@@ -4642,8 +4642,8 @@ window.CLASS_ACTIVITIES = [
       track: 'sweet-child-o-mine',
       chordGrid: true,  // chord grid: each chord once, cursor on the beats only (2026-10-26) — see CARD above
       slowest: true,    // four-way speed control (Slow added 2026-10-09): Slowest / Slower / Slow / Normal — the student picks
-      caption:    'The whole song in power chords · one chord per bar (C5 D5 G5 share one bar in Solo 2 and the Outro, G5 and A5 share one bar in the Ending) · the highlight follows the beat',
-      caption_es: 'La canción completa con acordes de potencia · un acorde por compás (C5 D5 G5 comparten un compás en el Solo 2 y en el Final, G5 y A5 comparten un compás en el Cierre) · la marca sigue el tiempo',
+      caption:    'The whole song in power chords · each chord lasts until the next chord name (C5 D5 G5 share one bar in Solo 2 and the Outro, G5 and A5 share one bar in the Ending) · the highlight follows the beat',
+      caption_es: 'La canción completa con acordes de potencia · cada acorde dura hasta el siguiente nombre de acorde (C5 D5 G5 comparten un compás en el Solo 2 y en el Final, G5 y A5 comparten un compás en el Cierre) · la marca sigue el tiempo',
       sections: [
         {
           label: 'Intro', label_es: 'Intro',
