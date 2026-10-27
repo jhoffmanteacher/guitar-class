@@ -14,12 +14,22 @@ rule live in `WORKFLOW.md` — read it when you need the *why*, not every sessio
    paste its summary into your report.
 3. Touched a renderer, escaping, or 3+ files (counted as in "Triggers" below)?
    `node tools/smoke.mjs --baseline origin/main` — a real browser walks every set
-   in English and Spanish (about a minute). (Skipped on a "quick change" — see
-   "Quick change" under the Triggers.)
-4. New student-facing text → its Spanish twin, same edit. A new step field →
+   in English and Spanish (about a minute).
+4. Changed what a student SEES (a renderer, a colour, a new control, or
+   directions that describe the music)? Before reporting:
+   - Screenshot every state at 1366×657 — before, during and after any
+     highlight or toggle — and look at each one.
+   - A sentence that states a pattern across the data ("root in one bar, 5th
+     in the next") → prove it with a script over all of it and report the
+     count ("76 of 76").
+   - A new control or default → pin the default in `checks.mjs` and make
+     `tools/smoke.mjs` click it and reload.
+5. New student-facing text → its Spanish twin, same edit. A new step field →
    both step renderers.
-5. A student can see the change → a `CHANGELOG.md` entry, same push.
-6. Right before pushing: `git fetch`, then `git log HEAD..origin/main`. After
+6. A student can see the change → a `CHANGELOG.md` entry, same push.
+7. Hit a review trigger? Ask Jonathan **Fast or Reviewed** after the build —
+   see "Fast or Reviewed" under the Triggers.
+8. Right before pushing: `git fetch`, then `git log HEAD..origin/main`. After
    pushing: `node tools/checks.mjs --live`.
 
 **Never, whatever the task says:** move or renumber a section or step (progress
@@ -735,8 +745,9 @@ implement it?".
   tracks everything. Treat "can you…", "how do I…", "should this be…" about code
   as *do it*, not *ask first*.
 - **Still pause for:** a genuine fork where the choice changes the outcome (use
-  AskUserQuestion), or irreversible / outward-facing actions — deleting files,
-  touching the live site.
+  AskUserQuestion), irreversible / outward-facing actions — deleting files,
+  touching the live site — and the Fast-or-Reviewed question when a review
+  trigger fires (see Triggers).
 - **Pushing to `main` is NOT one of those** (Jonathan, 2026-08-28). When the
   checks pass and a fast-forward onto `main` is what you'd recommend anyway,
   just push it — don't ask first, and never offer "push the branch instead" as
@@ -757,8 +768,9 @@ sweep found real regressions that the fixers' own proofs missed. Playbook and
 the auditor / fixer / reviewer brief templates: skill `site-sweep`.
 
 **Triggers, so this doesn't depend on how hard you are thinking** (they hold at
-any effort level): run an adversarial reviewer, on a pinned commit, whenever a
-change touches 3+ files, a danger-zone file (`teacher.js` config plumbing,
+any effort level): a change hits a **review trigger** — an adversarial
+reviewer on a pinned commit, subject to "Fast or Reviewed" below — whenever it
+touches 3+ files, a danger-zone file (`teacher.js` config plumbing,
 `sw.js`, `coach.js` detection, the `app.js` save path, `firestore.rules`),
 or 50+ strings. **Mechanical files don't count toward the 3**
 (Jonathan, 2026-10-26): `CHANGELOG.md`, the `sw.js` version lines that
@@ -771,11 +783,14 @@ after a play-along edit sat behind a 30-minute deep review). An edit that
 only updates pinned values a content change forces — a count, a fingerprint,
 an expected list, a `FROZEN_*` number — doesn't make the change danger-zone
 and doesn't count toward the 3. The checks themselves are the gate for it.
-Changing how a check WORKS (its logic, matching, or reading) is different:
-it needs the break-it proof (break the guarded thing in a scratch copy,
-watch the check go red, restore) with the output pasted into the report,
-and a brand-new detector also gets `site-reviewer` (high). Neither makes
-`checks.mjs` a deep-review file on its own. **Which reviewer** (2026-10-26):
+A guard that pins a new default or extends what an existing check reads (a
+new field, a new colour, a new click in `tools/smoke.mjs`) needs only the
+break-it proof — break the guarded thing in a scratch copy, watch the check go
+red, restore — with the output pasted into the report; it doesn't count toward
+the 3 either. A new KIND of check (a detector for a new error class, or a
+change to an existing check's logic or matching) is a review trigger, for
+`site-reviewer` (high), plus the break-it proof. None of this makes
+`checks.mjs` a deep-review file. **Which reviewer** (2026-10-26):
 `site-reviewer-deep` (extra high) for a danger-zone file or a 50+-string
 sweep, `site-reviewer` (high) for everything else. For a danger-zone file
 write the failing scenario before the fix. When a rule says "run the tool", run it — don't
@@ -783,19 +798,30 @@ substitute your own reading of the code. When an agent hands you a claim, read
 the quoted lines yourself before acting; when it hands you a fix, make it
 re-derive it on the real code.
 
-**"Quick change" (Jonathan, 2026-10-26).** When Jonathan's request says "quick
-change" or "quick fix", skip the adversarial reviewer and `tools/smoke.mjs`,
-even past the 3-file / 50-string triggers. Everything else in "Start here"
-still runs: `checks.mjs --check` while working and the full `checks.mjs` before
-the push, `rule-zero-proof.mjs` if a `module-N.js` changed, the Spanish twin,
-the `CHANGELOG.md` entry, and `checks.mjs --live` after the push. **It never
-covers a danger-zone file** (`teacher.js` config plumbing, `sw.js`,
-`coach.js` detection, the `app.js` save path, `firestore.rules`) or a change
-to how a check in `checks.mjs` works (a pin-only update is fine),
-and it never covers moving, adding or removing a section or step. If a quick
-change turns out to need one of those, stop, tell Jonathan in one line why it
-needs the full review, and wait for his answer. Start the report with "Quick
-change — reviewer skipped."
+**Fast or Reviewed — Jonathan picks, after the build** (2026-10-27; replaces
+the 2026-10-26 "quick change" keyword). When a change hits a review trigger,
+finish the build and every "Start here" step first — checks, rule-zero proof,
+smoke test, the item-4 screenshot checklist — then ask with AskUserQuestion
+before any reviewer starts:
+- Lead with what was touched and what passed, one line each ("5 files,
+  including the TAB renderer and colours · checks, smoke and screenshots
+  pass").
+- **Fast** — ship now. **Reviewed** — run the reviewer named above first
+  (say it often takes 15–30+ minutes). Mark one "(Recommended)" with a
+  one-line reason from the change itself ("changes what students see during
+  play" vs "wording only").
+- **Always Reviewed, not offered:** a danger-zone file, a new kind of check,
+  or moving / adding / removing a section or step. Say why in one line and
+  run the review instead of asking.
+- **No trigger → don't ask.** Ship as usual.
+- **No answer** (a scheduled or unattended session, or no AskUserQuestion
+  tool) → Reviewed.
+- "Quick change" / "quick fix" in Jonathan's request pre-answers **Fast** —
+  don't ask, unless an always-Reviewed item turns up.
+- Start a Fast report with "Fast — reviewer skipped."
+
+This is a standing exception to "don't ask 'should I proceed?'" — the one
+question that fires on its own.
 
 **Effort per task (2026-10-25).** Effort is how much reasoning Claude spends;
 higher finds more edge cases and verifies more, at more tokens. The session level

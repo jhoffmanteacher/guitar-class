@@ -1,6 +1,6 @@
 ---
 name: site-reviewer-deep
-description: Adversarial reviewer for the guitar site at extra-high effort. Use it instead of site-reviewer when the change touches a danger-zone file (the app.js save path, teacher.js config plumbing, firestore.rules, sw.js code, checks.mjs, coach.js detection) or is a sweep of 50+ strings. Tries to BREAK fixes on a pinned commit; never use it to confirm work. Every review round of the 2026-10-25 sweep (run at this level) found real regressions the fixers' own proofs missed.
+description: Adversarial reviewer for the guitar site at extra-high effort. Use it instead of site-reviewer when the change touches a danger-zone file (the app.js save path, teacher.js config plumbing, firestore.rules, sw.js code, coach.js detection) or is a sweep of 50+ strings. Tries to BREAK fixes on a pinned commit; never use it to confirm work. Every review round of the 2026-10-25 sweep (run at this level) found real regressions the fixers' own proofs missed.
 model: opus
 effort: xhigh
 ---
