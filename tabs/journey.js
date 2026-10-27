@@ -989,8 +989,12 @@ function resetReadyUi(){
 }
 
 /* Save-status line — takes an I18N key (or '' to clear) and tags the element
-   with data-i18n so a language switch re-translates whatever is showing. */
+   with data-i18n so a language switch re-translates whatever is showing.
+   Any new message cancels the timer that clears "Saved" after 2 s, or that
+   timer would wipe a "Save failed" shown inside those 2 s. */
+var saveMsgTimer = null;
 function setSaveMsg(key){
+  clearTimeout(saveMsgTimer);
   var el = document.getElementById('save-msg');
   if(!el) return;   // the gate card can replace the page body while a save is in flight
   if(!key){ el.textContent = ''; el.removeAttribute('data-i18n'); return; }
@@ -1077,7 +1081,7 @@ function flushSave(closing){
         });
       }).then(function(isNew){ if(isNew && fbUser && fbUser.uid === uid) swap45DocNew = true; });
   write
-    .then(function(){ setSaveMsg('journey.saved'); setTimeout(function(){ setSaveMsg(''); }, 2000); })
+    .then(function(){ setSaveMsg('journey.saved'); saveMsgTimer = setTimeout(function(){ setSaveMsg(''); }, 2000); })
     .catch(function(){ dirty = true; setSaveMsg('journey.saveFailed'); });
 }
 
