@@ -4890,6 +4890,8 @@ window.CLASS_ACTIVITIES = [
     },
     title:    '"Las Mañanitas" - Ariel Camacho y Los Plebes del Rancho — A, E7 and D',
     title_es: '"Las Mañanitas" - Ariel Camacho y Los Plebes del Rancho — A, E7 y D',
+    title_power:    '"Las Mañanitas" - Ariel Camacho y Los Plebes del Rancho — A5, E5 and D5',
+    title_power_es: '"Las Mañanitas" - Ariel Camacho y Los Plebes del Rancho — A5, E5 y D5',
     intro:    'You learn A, E7 and D, a strum in 3 (three beats in each bar), and then the whole song with the words.',
     intro_es: 'Aprendes A, E7 y D, un rasgueo en 3 (tres tiempos en cada compás) y luego toda la canción con la letra.',
     intro_power:    'You learn the A5, E5 and D5 power chords, a strum in 3 (three beats in each bar), and then the whole song with the words.',
