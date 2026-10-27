@@ -1588,7 +1588,9 @@ body.rail-collapsed .rail-tools .tool-popup{
    chord switch, so the two cost one row of a Chromebook screen, not two. */
 .ca-key-switch,.ca-key-switch + .ca-chord-switch{display:inline-flex;vertical-align:middle}
 .ca-key-switch{margin-right:16px}
-@media print{.ca-chord-switch{display:none}}
+/* The sibling selector above outranks a bare .ca-chord-switch, so print has
+   to name it too or ca-36's chord switch lands on the handout. */
+@media print{.ca-chord-switch,.ca-key-switch + .ca-chord-switch{display:none}}
 /* The TAB board never scrolls sideways: it fills the card and a long phrase
    wraps into stacked systems (renderTabBlock, TAB_MAX_COLS). --tab-cell-h is
    the string-row height; the staff box reads it too, so one override resizes
