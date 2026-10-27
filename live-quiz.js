@@ -597,6 +597,10 @@ function lqRenderStudent(){
   body.innerHTML = html;
   if(typeof applyI18n === 'function') applyI18n(body);
   lqPaintMarkers(body, s, quiz);
+  // lqTimerHtml draws the FULL limit and enabled choices. Put the real time
+  // left (and, after time-up, the disabled choices) back now — a language
+  // switch after "Time's up" otherwise left "20" and live-looking buttons.
+  lqSyncTick();
 }
 
 /* Post-paint marker classes for a fret board — pure DOM, run after
@@ -992,10 +996,10 @@ function renderTeacherLiveQuiz(){
    teacher's own clock) since the stage has no server round-trip to wait on. */
 function lqStageSyncTick(){
   const s = lqTSession && lqTSession.state ? lqTSession : null;
-  // Defensive guard, same as the gc-langchange listener above: renderTeacherLiveQuiz
-  // (the only caller of this function) is teacher-console-only today, so teacherView
-  // is currently unreachable-undefined here — but this file also ships on the six
-  // Journey pages, which have no teacher.js and thus no teacherView global at all.
+  // Defensive guard, same as the gc-langchange listener above: every caller
+  // (renderTeacherLiveQuiz, lqPaintStage, the teacher session listener) is
+  // teacher-console-only today — but this file also ships on the six Journey
+  // pages, which have no teacher.js and thus no teacherView global at all.
   const need = !!(s && s.state === 'question' && Number(s.limitSec) && typeof teacherView !== 'undefined' && teacherView === 'livequiz' && document.getElementById('lq-st-timer'));
   if(need && !lqTTick) lqTTick = setInterval(lqStageUpdateTimer, lqTickMs(s.limitSec));
   if(!need) lqStageStopTick();
@@ -1076,6 +1080,10 @@ function lqPaintStage(){
   else if(s.state === 'reveal')   stage.innerHTML = lqStageRevealHtml(s, quiz);
   else                            stage.innerHTML = lqStageEndedHtml(s);
   lqPaintMarkers(stage, s, quiz, 'lqst');
+  // The question HTML draws the timer at the FULL limit. Every answer repaints
+  // the stage, so without this the projector flickered back to "20" on each
+  // answer, and an answer landing after "Time's up" left it stuck on "20".
+  lqStageSyncTick();
 }
 
 // English only on the projector for now (2026-09-29, Jonathan's ask — English
