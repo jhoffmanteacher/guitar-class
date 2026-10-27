@@ -2924,16 +2924,20 @@ function snippetSrc(tr, slow, guitar){
 const TWIN_READY_SEC = 0.06, TWIN_SNAP_SEC = 0.25;
 function twinSrcIs(el, src){ return !!el && (el.getAttribute('src') === src || (el.src || '').endsWith(src)); }
 /* Point the twin at `src` (the other mix of the tier now playing), creating it
-   on first use. Does nothing while it is already there. */
-function twinPark(st, src){
+   on first use. Does nothing while it is already there. `onLost(el)` is the
+   owner's own load-failure handler (snipAudioError / pcAudioError). */
+function twinPark(st, src, onLost){
   let tw = st.twin;
   if(!tw){
     tw = st.twin = new Audio();
     tw.preload = 'auto';
     tw.loop = false;
     tw.muted = true;
-    // A twin that cannot load is just dropped: the toggle falls back to a reload.
-    tw.addEventListener('error', () => { if(st.twin === tw) st.twin = null; }, { once: true });
+    /* A twin that cannot load is just dropped: the toggle falls back to a
+       reload. But after a Guitar swap this element is the AUDIBLE one, and a
+       failure then has to stop the card and say so, like any other playing
+       element — without this the card sat on Stop over silence. */
+    tw.addEventListener('error', () => { if(st.twin === tw) st.twin = null; else if(onLost) onLost(tw); }, { once: true });
   }
   tw.muted = true;
   if(twinSrcIs(tw, src)) return;
@@ -3109,11 +3113,8 @@ function snipToggle(btn){
      sw.js warms audio/ on first play — so a classroom Wi-Fi stall on a first
      press means loadedmetadata never fires. Without this the card sits on
      "Stop" over silence with no dots and nothing to explain it. */
-  audio.addEventListener('error', () => {
-    if(!snipState || snipState.audio !== audio) return;
-    snipStop();
-    if(typeof gateToast === 'function') gateToast(t('ca.snipLoadFailed'));
-  }, { once: true });
+  const st = snipState;
+  audio.addEventListener('error', () => snipAudioError(st, audio), { once: true });
   const begin = () => {
     if(!snipState || snipState.audio !== audio) return;
     try { audio.currentTime = win.start; } catch(e) {}
@@ -3206,12 +3207,22 @@ function snipScheduleClick(st, now){
   pcClick(ctx.currentTime + Math.max(0, ahead + lat), nb % bpb === 0, false, st.tr.clickGain);
   st.lastBeat = nb;
 }
+/* One of the snippet's <audio> elements failed. The PLAYING one stops the
+   card and says so; the twin is just dropped (the Guitar toggle falls back to
+   a reload). The same shape as the practice card's pcAudioError, and both are
+   handed to twinPark, because a Guitar swap makes the twin the playing one. */
+function snipAudioError(st, el){
+  if(snipState !== st) return;
+  if(st.audio !== el){ if(st.twin === el) st.twin = null; return; }
+  snipStop();
+  if(typeof gateToast === 'function') gateToast(t('ca.snipLoadFailed'));
+}
 /* The twin is the OTHER mix of the tier now playing — see THE TWIN. A song
    with no full mix has nothing to swap to, so it never gets one. */
 function snipParkTwin(st){
   if(!snippetHasFull(st.tr)) return;
   const card = st.card;
-  twinPark(st, snippetSrc(st.tr, card.dataset.slow === '1', card.dataset.guitar !== '1'));
+  twinPark(st, snippetSrc(st.tr, card.dataset.slow === '1', card.dataset.guitar !== '1'), el => snipAudioError(st, el));
 }
 function snipTick(){
   if(!snipState) return;
@@ -13736,7 +13747,7 @@ function pcGo(st, si){
 function pcParkTwin(st){
   const root = st.root;
   if(!snippetHasFull(st.L.tr)) return;
-  twinPark(st, snippetSrc(st.L.tr, root.dataset.slow === '1', root.dataset.guitar !== '1'));
+  twinPark(st, snippetSrc(st.L.tr, root.dataset.slow === '1', root.dataset.guitar !== '1'), el => pcAudioError(st, el));
 }
 /* Four clicks (one bar of the counted beat) before the song comes in, on
    every start — otherwise the student is dropped in with no way to find
