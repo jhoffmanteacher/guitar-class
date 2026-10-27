@@ -1301,6 +1301,10 @@ window.addEventListener('load', function(){
     var gen = loadGen;
     authSettled = true;
     loadFirestoreSdk().then(function(){
+      /* The SDK took long enough for a sign-out (or another sign-in) to come
+         in meanwhile: this student is not the one here any more, so don't
+         bring them back as fbUser. The newer auth change runs its own load. */
+      if(gen !== loadGen) return null;
       fbDb = firebase.firestore();
       fbUser = user;
       sdkFailed = false;   // an earlier failed load was retried (loadFirestoreSdk) and landed
