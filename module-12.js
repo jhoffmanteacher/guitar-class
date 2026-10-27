@@ -429,8 +429,8 @@ SETS.push(
                 response: { type: 'mc', prompt: 'A waltz (3/4 time) has how many beats per bar?',
                   prompt_es: '¿Un vals (compás de 3/4) tiene cuántos tiempos por compás?',
                   answer: 1,
-                  explain: 'Three — ONE-two-three, ONE-two-three. Happy Birthday is a classic waltz. Next you\'ll pick a pattern in 3.',
-                  explain_es: 'Tres — UNO-dos-tres, UNO-dos-tres. Happy Birthday es un vals clásico. Ahora vas a puntear un patrón en 3.',
+                  explain: 'Three — ONE-two-three, ONE-two-three. Happy Birthday is a classic waltz. Later in this set you\'ll pick a pattern in 3.',
+                  explain_es: 'Tres — UNO-dos-tres, UNO-dos-tres. Happy Birthday es un vals clásico. Más adelante en esta unidad vas a puntear un patrón en 3.',
                   choices: ['4 beats', '3 beats', '2 beats', '6 beats'],
                   choices_es: ['4 tiempos', '3 tiempos', '2 tiempos', '6 tiempos'] }
               }
