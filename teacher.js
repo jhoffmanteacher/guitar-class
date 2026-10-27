@@ -1395,12 +1395,10 @@ function renderTeacherActivities(opts){
     box.innerHTML='<div class="t-loading">No activities yet — they\'ll appear here once one is pushed to the site.</div>';
     return;
   }
-  // The whole roster, not the period-filtered list: the board is class-wide
-  // and its done counts already read allStudentsRaw (doneSummaryRoster).
-  if(allStudentsRaw.length===0){
-    box.innerHTML='<div class="t-loading">No student data yet — students need to sign in first.</div>';
-    return;
-  }
+  // No early return on an empty roster: only the done counts need students,
+  // and each card already says "No student data yet." (doneSummary). The
+  // first day of a school year, before anyone signs in, is exactly when the
+  // first activity has to be placed, dated and published.
   // A re-render over a board that's already on screen (every toggle on it —
   // Optional, Hidden, a date, Archive — ends in one) keeps the old board up
   // while the config re-reads, and lands back at the same scroll position.
