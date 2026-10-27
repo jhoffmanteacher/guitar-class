@@ -4100,6 +4100,19 @@ async function renderTeacherReports(){
    mic heard, the verdicts, the device). Needs the micTakes rules pasted
    into the Firebase console — see firestore.rules. */
 let teacherMicTakes = [];
+/* A take's saved time as a Date, or null. Students write these docs and the
+   micTakes rule checks only the id and uid, so savedAt can be a plain map
+   whose toDate / toMillis is not a function — calling it would throw and
+   leave the whole view on "Loading…". */
+function micTakeDate(d){
+  const t = d && d.savedAt;
+  return t && typeof t.toDate === 'function' ? t.toDate() : null;
+}
+/* The take's expected notes: an array of objects, whatever was written
+   (a non-array, or a null entry, threw on .filter / e.verdict). */
+function micTakeExpected(d){
+  return Array.isArray(d && d.expected) ? d.expected.filter(e => e && typeof e === 'object') : [];
+}
 async function renderTeacherMic(){
   const box=document.getElementById('t-grid-container');
   box.innerHTML='<div class="t-loading">Loading mic recordings…</div>';
@@ -4116,7 +4129,7 @@ async function renderTeacherMic(){
     count = c.exists ? (Number(c.data().n) || 0) : 0;
     const snap = await db.collection('micTakes').get();
     takes = snap.docs.map(d => Object.assign({ id: d.id }, d.data()));
-    takes.sort((a,b) => ((b.savedAt && b.savedAt.toMillis && b.savedAt.toMillis()) || 0) - ((a.savedAt && a.savedAt.toMillis && a.savedAt.toMillis()) || 0));
+    takes.sort((a,b) => ((micTakeDate(b) || 0) - (micTakeDate(a) || 0)));
   }catch(e){
     readErr = 'Could not load the recordings. If you have not yet pasted the new firestore.rules into the Firebase console (Firestore Database → Rules → Publish), do that first.';
   }
@@ -4143,13 +4156,14 @@ async function renderTeacherMic(){
   if(readErr){ box.innerHTML = ctl + `<div class="t-loading">${escHtml(readErr)}</div>`; return; }
   if(!takes.length){ box.innerHTML = ctl + '<div class="t-loading">No recordings yet.</div>'; return; }
   const rows = takes.map((d, i) => {
-    const when = d.savedAt && d.savedAt.toDate ? d.savedAt.toDate().toLocaleString() : '—';
+    const saved = micTakeDate(d), when = saved ? saved.toLocaleString() : '—';
     const game = d.mode === 'nr' ? 'Note Runner' + (d.level != null ? ' · level ' + (Number(d.level) + 1) : '')
                                  : 'Listening Coach' + (d.coachMode ? ' · ' + d.coachMode : '');
-    const right = (d.expected || []).filter(e => ['ok','oct','perfect','good'].indexOf(e.verdict) >= 0).length;
+    const exp = micTakeExpected(d);
+    const right = exp.filter(e => ['ok','oct','perfect','good'].indexOf(e.verdict) >= 0).length;
     return `<tr><td class="nc" title="${escAttr(d.name || d.uid || '')}">${escHtml(d.name || (d.uid || '').slice(0,8))}</td>`+
       `<td>${escHtml(d.period || '')}</td><td>${escHtml(game)}</td><td>${escHtml(String(d.bpm || ''))}</td>`+
-      `<td>${escHtml(String(d.durationSec || ''))} s</td><td>${right} / ${(d.expected || []).length}</td><td>${escHtml(when)}</td>`+
+      `<td>${escHtml(String(d.durationSec || ''))} s</td><td>${right} / ${exp.length}</td><td>${escHtml(when)}</td>`+
       `<td><button class="tg-seg-btn" onclick="teacherMicDownloadWav(${i})">Download WAV</button> `+
       `<button class="tg-seg-btn" onclick="teacherMicDownloadJson(${i})">Download data</button> `+
       `<button class="tg-seg-btn" onclick="teacherMicDelete(${i})">Delete</button></td></tr>`;
@@ -4191,7 +4205,8 @@ function teacherMicSaveFile(name, blob){
 }
 function teacherMicFileBase(d){
   const who = String(d.name || d.uid || 'student').replace(/[^A-Za-z0-9]+/g, '-').replace(/^-|-$/g, '');
-  const when = d.savedAt && d.savedAt.toDate ? d.savedAt.toDate().toISOString().slice(0, 16).replace(/[:T]/g, '-') : 'take';
+  const saved = micTakeDate(d);
+  const when = saved ? saved.toISOString().slice(0, 16).replace(/[:T]/g, '-') : 'take';
   return `mic-${d.mode || 'take'}-${who}-${when}`;
 }
 function teacherMicJsonable(v){
@@ -4372,7 +4387,9 @@ function micEvalTake(pcm, R, d, deps){
   const med = a => pct(a, 0.5);
   const lat = Number(d.micLatencyMs) || 0;
   const beat = Number(d.beatMs) || (d.bpm ? 60000 / d.bpm : 0);
-  const expected = Array.isArray(d.expected) ? d.expected : [];
+  // Inline, not micTakeExpected(): tools/mic-sim/eval-takes.mjs lifts this
+  // function out on its own. A null entry threw on e.t below.
+  const expected = Array.isArray(d.expected) ? d.expected.filter(e => e && typeof e === 'object') : [];
   const events = Array.isArray(d.events) ? d.events : [];
 
   /* ── levels: 20 ms RMS every 5 ms ── */
@@ -4880,7 +4897,8 @@ async function teacherMicEvaluate(){
       const len = parts.reduce((a, p) => a + p.length, 0);
       const bytes = new Uint8Array(len); let o = 0;
       parts.forEach(p => { bytes.set(p, o); o += p.length; });
-      const meta = Object.assign({}, d, { savedAt: d.savedAt && d.savedAt.toDate ? d.savedAt.toDate().toISOString() : null });
+      const saved = micTakeDate(d);
+      const meta = Object.assign({}, d, { savedAt: saved ? saved.toISOString() : null });
       rows.push(micEvalRow(label, meta, new Int16Array(bytes.buffer, 0, len >> 1), deps));
       names.push(d.name || (d.uid || '').slice(0, 8));
     }catch(e){ fails.push((d.name || label) + ': ' + (e && e.message ? e.message : 'could not read')); }
