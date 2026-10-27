@@ -10440,7 +10440,18 @@ function coachChordBtnRowHtml(chords, skillIds){
     m: chordSpecMidis(c.chord)
   })).filter(c=>c.m.length);
   if(!spec.length) return '';
-  return `<div class="coach-chord-row"><button type="button" class="coach-btn" data-chords="${escAttr(JSON.stringify(spec))}"${coachSkillsAttr(skillIds)} onclick="coachOpenLazy(this)" title="${escAttr(t('coach.chordBtnTitle'))}" data-i18n-attr="title:coach.chordBtnTitle"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" style="width:1em;height:1em;vertical-align:-0.15em"><rect x="9" y="2" width="6" height="12" rx="3"/><path d="M5 10a7 7 0 0 0 14 0"/><path d="M12 17v4M9 21h6"/></svg> <span data-i18n="coach.btn">${t('coach.btn')}</span></button></div>`;
+  /* The step's own diagrams by name, so the Coach card draws THIS step's boxes
+     (a barre C, a two-finger E5, a B5 at fret 7) rather than the library shape
+     of the same name (coach.js ccDiagramsHtml). A separate attribute on
+     purpose: data-chords is the drill and streak key, so it must not change.
+     The first diagram of a name wins, as on the step. */
+  const shapes = {};
+  (chords||[]).forEach(c=>{
+    if(!c || !c.name || !Array.isArray(c.chord)) return;
+    const n = tf(c,'name');
+    if(!Object.prototype.hasOwnProperty.call(shapes, n)) shapes[n] = { position: c.position || 0, chord: c.chord };
+  });
+  return `<div class="coach-chord-row"><button type="button" class="coach-btn" data-chords="${escAttr(JSON.stringify(spec))}" data-chord-shapes="${escAttr(JSON.stringify(shapes))}"${coachSkillsAttr(skillIds)} onclick="coachOpenLazy(this)" title="${escAttr(t('coach.chordBtnTitle'))}" data-i18n-attr="title:coach.chordBtnTitle"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" style="width:1em;height:1em;vertical-align:-0.15em"><rect x="9" y="2" width="6" height="12" rx="3"/><path d="M5 10a7 7 0 0 0 14 0"/><path d="M12 17v4M9 21h6"/></svg> <span data-i18n="coach.btn">${t('coach.btn')}</span></button></div>`;
 }
 // Escape closes the video/games overlays (a11y). Tool-popup closing
 // (metronome/timer/tuner) is handled by fab-tools.js's own Escape listener.
