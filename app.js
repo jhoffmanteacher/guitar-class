@@ -15352,8 +15352,19 @@ document.addEventListener('visibilitychange', () => {
      and on return it plays every missed note at once (a play-along steps
      its tempo up 8 notes at a time; a scored level marks each one a miss).
      coach.js's own handler stops it only when coach.js has loaded, and the
-     default tap mode never loads it. */
-  if(document.hidden){ snipStop(); pcStop(); if(typeof ncStopAll === 'function') ncStopAll(); flushOnHide(); return; }
+     default tap mode never loads it.
+     One exception, in the teacher console only: a WHOLE-SONG card playing for
+     the room (ca-40) keeps playing when Jonathan switches the projector's tab
+     to his slides (code-hygiene rule 4). It needs no rAF to keep going and
+     stops at the end of the song by itself. A looping card or a snippet needs
+     rAF to loop, so those still stop, there too; a student tab stops all. */
+  if(document.hidden){
+    snipStop();
+    if(!(IS_TEACHER_MODE && pcState && pcState.wholeSong)) pcStop();
+    if(typeof ncStopAll === 'function') ncStopAll();
+    flushOnHide();
+    return;
+  }
   if(!currentUser || IS_TEACHER_MODE) return;
   const before = classConfigSignature();
   loadClassConfig().then(() => {
