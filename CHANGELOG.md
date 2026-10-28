@@ -5,6 +5,12 @@ Notable changes to the Guitar Class site. Newest first.
 For the full session-by-session history (and the reasoning behind each change),
 see `WORKFLOW.md` and the git commit log.
 
+## 2026-10-28 — Watchtower power chords: the skipped strums are marked
+
+- **The Layer 3 power-chord tab now shows every strum.** A new row under the
+  count shows D (down) and U (up). The two strums you skip in bar 2, the "+"
+  after 2 and the 3, are in ( ) so you can see where the gap is.
+
 ## 2026-10-27 — Songs: tap a song name to open its Play Along
 
 - **In "More Play Along songs", the song names are now links.** Tapping a
