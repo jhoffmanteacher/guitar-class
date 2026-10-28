@@ -7,7 +7,7 @@ see `WORKFLOW.md` and the git commit log.
 
 ## 2026-10-28 — Watchtower power chords: the skipped strums are marked
 
-- **The Layer 3 power-chord tab now shows every strum.** A new row under the
+- **The Layer 2, 3 and 4 Watchtower tabs now show every strum.** A new row under the
   count shows D (down) and U (up). The two strums you skip in bar 2, the "+"
   after 2 and the 3, are in ( ) so you can see where the gap is.
 - **The Watchtower power-chord Play Along shows the gap too.** In bar 2, a
