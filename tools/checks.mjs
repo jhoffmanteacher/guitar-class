@@ -8084,6 +8084,8 @@ function checkChordGridCards(ctx) {
     if (attrs !== 7 * 8 * 7) flag(`ca-29 renders ${attrs} data-beat attributes, expected ${7 * 8 * 7} (7 sections x 8 beats x (6 string cells + 1 count cell))`);
     if (/pc-counts/.test(html)) flag('ca-29 draws a Counts switch — a card made only of chord grids always shows its count and needs none');
     if (!/Each chord is shown once/.test(html)) flag('ca-29 does not show the chord-card directions (ca.cardChordDirections)');
+    if (c29.card.restWord !== false) flag('ca-29 lost card.restWord:false — the bar-2 rest would draw the word "Stop" again');
+    if (/class="tab-rest-lab"/.test(html)) flag('ca-29 draws a rest word — the bar-2 rest is left empty (card.restWord:false)');
     if (!c29.card.everyStrum) flag("ca-29 lost card.everyStrum — the grid would fold A5 x4 into one name again");
     // The cursor: one repaint key per beat, none on a "+".
     const L = pcLayout(c29), S0 = L.sections[0], bpb = L.tr.beatsPerBar;
@@ -8138,11 +8140,12 @@ function checkChordGridCards(ctx) {
         });
         if (beats.join() !== Array.from({ length: S.bars * bpb }, (_, i) => i).join()) flag(`${a.id} · ${S.s.label} (${mode}): data-beat runs [${beats.slice(0, 20).join(',')}${beats.length > 20 ? '…' : ''}] over ${beats.length} beats, expected 0..${S.bars * bpb - 1} once each, in order`);
         const rests = S.notes.some(n => n.rest);
+        const quiet = a.card.restWord === false;   // card.restWord:false — the rest is left empty, no word (ca-29)
         // The rest word sits at the rest's own column (or at column 1 of a row that starts inside it).
         const restEvs = pcChordGrid(S.notes, bpb).filter(e => e.rest);
         pcGridRows(S, bpb).forEach((row, ri) => {
           const want = [];
-          for (const e of restEvs) {
+          for (const e of quiet ? [] : restEvs) {
             if (e.start >= row.b0 - 1e-6 && e.start < row.b1 - 1e-6) want.push(Math.round((e.start - row.b0) * 2) + 2);
             else if (e.start < row.b0 && e.start + e.beats > row.b0 + 1e-6) want.push(2);
           }
@@ -8165,7 +8168,7 @@ function checkChordGridCards(ctx) {
           const rest = /class="tab-rest-lab" style="grid-row:7;grid-column:2"/.test(g);
           const where = `${a.id} · ${S.s.label} (${mode}) row ${ri + 1}`;
           if (!ring) { flag(`${where}: no chord or rest starts at or rings through the row's first beat`); return; }
-          if (ring.rest) { if (!rest) flag(`${where}: opens inside a rest but draws no rest word at column 0`); return; }
+          if (ring.rest) { if (!rest && !quiet) flag(`${where}: opens inside a rest but draws no rest word at column 0`); return; }
           const want = starts ? ring.name : `(${ring.name})`;
           if (!btn) flag(`${where}: opens with no chord name at column 0 — expected "${want}" (a row that starts mid-chord names the held chord in parentheses)`);
           else if (btn[1] !== want) flag(`${where}: column 0 reads "${btn[1]}", expected "${want}"`);
@@ -8173,7 +8176,8 @@ function checkChordGridCards(ctx) {
         });
         const words = (pg.match(/class="tab-rest-lab"/g) || []).length;
         restWords += words;
-        if (rests && !words) flag(`${a.id} · ${S.s.label}: has a rest but draws no rest word — a silent bar would look like a held chord`);
+        if (quiet && words) flag(`${a.id} · ${S.s.label}: card.restWord is false but ${words} rest word(s) are drawn`);
+        if (rests && !words && !quiet) flag(`${a.id} · ${S.s.label}: has a rest but draws no rest word — a silent bar would look like a held chord`);
       });
     }
   }

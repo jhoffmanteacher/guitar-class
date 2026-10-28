@@ -244,7 +244,10 @@
                                            // { rest: true, beats } — an empty
                                            // column the highlight still stops
                                            // on, so the next note lights on
-                                           // time (ca-41's verses, 2026-10-25)
+                                           // time (ca-41's verses, 2026-10-25).
+                                           // A chord grid draws a rest as the
+                                           // word "Stop"; restWord: false on the
+                                           // card leaves the gap empty (ca-29)
        }],
        checks: [
          { label, label_es, text, text_es },            // numbered checks
@@ -3731,8 +3734,8 @@ window.CLASS_ACTIVITIES = [
      confirmed it by ear), the same in every section. Bar 1: A5 on 1 + 2 +
      (four eighths), then G5 on 3 + 4 + (four eighths). Bar 2: F5 on 1, +, 2,
      a rest on the "+" after 2 and on 3, then G5 on the "+" after 3, on 4 and
-     on the "+" after 4. The skipped strums are a real rest (one beat, shown as "Stop"
-     in the grid), 2026-10-28; every strum still lands where the record puts it. */
+     on the "+" after 4. The skipped strums are a real rest (one beat, left empty in
+     the grid: `restWord: false`, no "Stop"), 2026-10-28; every strum still lands where the record puts it. */
   {
     id:    'ca-29',
     view:  'card',    // one screen: Play song + tab + checks — see CARD above
@@ -3747,6 +3750,7 @@ window.CLASS_ACTIVITIES = [
       track: 'all-along-the-watchtower',
       chordGrid: true,  // chord grid: each chord once, cursor on the beats only (2026-10-26) — see CARD above
       everyStrum: true, // every strum gets its own chord name (A5 x4, G5 x4, F5 x3, G5 x3), not one per chord (Jonathan, 2026-10-28)
+      restWord: false,  // the bar-2 rest is left empty, no "Stop" word (Jonathan, 2026-10-28)
       slowest: true,    // four-way speed control (Slow added 2026-10-09): Slowest / Slower / Slow / Normal — the student picks
       caption:    'The whole song in power chords',   // the count row is always on: this card is a chord grid (2026-10-26)
       caption_es: 'La canción completa con acordes de potencia',

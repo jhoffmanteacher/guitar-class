@@ -13081,7 +13081,7 @@ function pcGridRows(S, bpb){
    — string cells and count cell — and never on a "+" column: that is what
    the cursor lights (pcPaint). The count row is always on here: beats in
    ink, "+" faint, so a chord on a "+" has a label under it. */
-function renderChordGridRow(events, row, cols, bpb, seqOff, bass){
+function renderChordGridRow(events, row, cols, bpb, seqOff, bass, restWord){
   const barCols = bpb * 2;
   const used = Math.round((row.b1 - row.b0) * 2);
   const bassAt = pcBassMarks(events, row, bpb, bass);   // alternating bass — see BASS NOTES
@@ -13119,7 +13119,7 @@ function renderChordGridRow(events, row, cols, bpb, seqOff, bass){
     let col = -1;
     if(ev.start >= row.b0 - 1e-6 && ev.start < row.b1 - 1e-6) col = Math.round((ev.start - row.b0) * 2);
     else if(ev.start < row.b0 && end > row.b0 + 1e-6) col = 0;
-    if(col >= 0) names += `<span class="tab-rest-lab" style="grid-row:7;grid-column:${col + 2}">${escHtml(t('tab.restStop'))}</span>`;
+    if(col >= 0 && restWord !== false) names += `<span class="tab-rest-lab" style="grid-row:7;grid-column:${col + 2}">${escHtml(t('tab.restStop'))}</span>`;
   });
   /* A chord still ringing when a row begins (a lyric line or a 4-bar wrap that
      starts mid-chord) gets its name at the row's first column in parentheses —
@@ -13165,7 +13165,7 @@ function pcChordGridHtml(S, bpb){
   const cols = Math.min(PC_GRID_BARS, S.bars) * bpb * 2;
   return pcGridRows(S, bpb).map(row =>
     (row.label ? `<div class="tab-phrase-label pc-row-label">${escHtml(String(row.label))}</div>` : '')
-    + renderChordGridRow(events, row, cols, bpb, S.seqOff, S.bass)
+    + renderChordGridRow(events, row, cols, bpb, S.seqOff, S.bass, !S.quietRest)
   ).join('');
 }
 /* Sections with their tab offsets and running beat totals, plus the window
@@ -13183,7 +13183,7 @@ function pcLayout(a){
        section.chordGrid:false to opt one out) — see CHORD GRID below. */
     const out = { s, notes, fromBar: Math.max(1, s.fromBar || 1), bars: Math.max(1, s.bars || 1),
                   reps: Math.max(1, s.reps || 1), seqOff: seq, beatEnds: [],
-                  grid: !!(c.chordGrid && s.chordGrid !== false), every: !!c.everyStrum };
+                  grid: !!(c.chordGrid && s.chordGrid !== false), every: !!c.everyStrum, quietRest: c.restWord === false };
     out.bass = out.grid && c.__bass ? c.__bass : null;   // alternating bass, drawn on the grid only — see BASS NOTES
     let acc = 0;
     notes.forEach(n => { acc += n.beats > 0 ? n.beats : 1; out.beatEnds.push(acc); });
