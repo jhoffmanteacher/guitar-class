@@ -7968,7 +7968,7 @@ function checkSheetCards() {
     let changes = 0, prev = null;
     for (const s of (Array.isArray(c.sections) ? c.sections : [])) {
       const reps = Number.isInteger(s && s.reps) ? s.reps : 1;
-      for (let r = 0; r < reps; r++) for (const nt of (s.notes || [])) { if (nt.note !== prev) { changes++; prev = nt.note; } }
+      for (let r = 0; r < reps; r++) for (const nt of (s.notes || [])) { if (!nt.rest && nt.note !== prev) { changes++; prev = nt.note; } }
     }
     if (!Number.isInteger(c.sheetChords)) flag(`${w}: card.sheetChords should say how many chord names the sheet has (the notes make ${changes} chord changes)`);
     else if (c.sheetChords !== changes) flag(`${w}: the notes make ${changes} chord changes but card.sheetChords is ${c.sheetChords} — the dot would walk onto the wrong chords. Fix the notes, or the sheet and this number`);

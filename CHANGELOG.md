@@ -10,6 +10,8 @@ see `WORKFLOW.md` and the git commit log.
 - **The Layer 3 power-chord tab now shows every strum.** A new row under the
   count shows D (down) and U (up). The two strums you skip in bar 2, the "+"
   after 2 and the 3, are in ( ) so you can see where the gap is.
+- **The Watchtower power-chord Play Along shows the gap too.** In bar 2, a
+  "Stop" mark now sits on the "+" after 2, where you skip the strums.
 
 ## 2026-10-27 — Songs: tap a song name to open its Play Along
 

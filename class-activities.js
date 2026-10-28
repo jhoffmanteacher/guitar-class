@@ -3731,8 +3731,8 @@ window.CLASS_ACTIVITIES = [
      confirmed it by ear), the same in every section. Bar 1: A5 on 1 + 2 +
      (four eighths), then G5 on 3 + 4 + (four eighths). Bar 2: F5 on 1, +, 2,
      a rest on the "+" after 2 and on 3, then G5 on the "+" after 3, on 4 and
-     on the "+" after 4. The card has no rest symbol, so the third F5 is held
-     1.5 beats; every strum still lands where the record puts it. */
+     on the "+" after 4. The skipped strums are a real rest (one beat, shown as "Stop"
+     in the grid), 2026-10-28; every strum still lands where the record puts it. */
   {
     id:    'ca-29',
     view:  'card',    // one screen: Play song + tab + checks — see CARD above
@@ -3766,7 +3766,8 @@ window.CLASS_ACTIVITIES = [
             { frets: [['D', 5], ['A', 5], ['E', 3]], note: 'G5', midi: [55, 50, 43], beats: 0.5 },
             { frets: [['D', 3], ['A', 3], ['E', 1]], note: 'F5', midi: [53, 48, 41], beats: 0.5 },
             { frets: [['D', 3], ['A', 3], ['E', 1]], note: 'F5', midi: [53, 48, 41], beats: 0.5 },
-            { frets: [['D', 3], ['A', 3], ['E', 1]], note: 'F5', midi: [53, 48, 41], beats: 1.5 },
+            { frets: [['D', 3], ['A', 3], ['E', 1]], note: 'F5', midi: [53, 48, 41], beats: 0.5 },
+            { rest: true, beats: 1 },
             { frets: [['D', 5], ['A', 5], ['E', 3]], note: 'G5', midi: [55, 50, 43], beats: 0.5 },
             { frets: [['D', 5], ['A', 5], ['E', 3]], note: 'G5', midi: [55, 50, 43], beats: 0.5 },
             { frets: [['D', 5], ['A', 5], ['E', 3]], note: 'G5', midi: [55, 50, 43], beats: 0.5 }
@@ -3788,7 +3789,8 @@ window.CLASS_ACTIVITIES = [
             { frets: [['D', 5], ['A', 5], ['E', 3]], note: 'G5', midi: [55, 50, 43], beats: 0.5 },
             { frets: [['D', 3], ['A', 3], ['E', 1]], note: 'F5', midi: [53, 48, 41], beats: 0.5 },
             { frets: [['D', 3], ['A', 3], ['E', 1]], note: 'F5', midi: [53, 48, 41], beats: 0.5 },
-            { frets: [['D', 3], ['A', 3], ['E', 1]], note: 'F5', midi: [53, 48, 41], beats: 1.5 },
+            { frets: [['D', 3], ['A', 3], ['E', 1]], note: 'F5', midi: [53, 48, 41], beats: 0.5 },
+            { rest: true, beats: 1 },
             { frets: [['D', 5], ['A', 5], ['E', 3]], note: 'G5', midi: [55, 50, 43], beats: 0.5 },
             { frets: [['D', 5], ['A', 5], ['E', 3]], note: 'G5', midi: [55, 50, 43], beats: 0.5 },
             { frets: [['D', 5], ['A', 5], ['E', 3]], note: 'G5', midi: [55, 50, 43], beats: 0.5 }
@@ -3810,7 +3812,8 @@ window.CLASS_ACTIVITIES = [
             { frets: [['D', 5], ['A', 5], ['E', 3]], note: 'G5', midi: [55, 50, 43], beats: 0.5 },
             { frets: [['D', 3], ['A', 3], ['E', 1]], note: 'F5', midi: [53, 48, 41], beats: 0.5 },
             { frets: [['D', 3], ['A', 3], ['E', 1]], note: 'F5', midi: [53, 48, 41], beats: 0.5 },
-            { frets: [['D', 3], ['A', 3], ['E', 1]], note: 'F5', midi: [53, 48, 41], beats: 1.5 },
+            { frets: [['D', 3], ['A', 3], ['E', 1]], note: 'F5', midi: [53, 48, 41], beats: 0.5 },
+            { rest: true, beats: 1 },
             { frets: [['D', 5], ['A', 5], ['E', 3]], note: 'G5', midi: [55, 50, 43], beats: 0.5 },
             { frets: [['D', 5], ['A', 5], ['E', 3]], note: 'G5', midi: [55, 50, 43], beats: 0.5 },
             { frets: [['D', 5], ['A', 5], ['E', 3]], note: 'G5', midi: [55, 50, 43], beats: 0.5 }
@@ -3832,7 +3835,8 @@ window.CLASS_ACTIVITIES = [
             { frets: [['D', 5], ['A', 5], ['E', 3]], note: 'G5', midi: [55, 50, 43], beats: 0.5 },
             { frets: [['D', 3], ['A', 3], ['E', 1]], note: 'F5', midi: [53, 48, 41], beats: 0.5 },
             { frets: [['D', 3], ['A', 3], ['E', 1]], note: 'F5', midi: [53, 48, 41], beats: 0.5 },
-            { frets: [['D', 3], ['A', 3], ['E', 1]], note: 'F5', midi: [53, 48, 41], beats: 1.5 },
+            { frets: [['D', 3], ['A', 3], ['E', 1]], note: 'F5', midi: [53, 48, 41], beats: 0.5 },
+            { rest: true, beats: 1 },
             { frets: [['D', 5], ['A', 5], ['E', 3]], note: 'G5', midi: [55, 50, 43], beats: 0.5 },
             { frets: [['D', 5], ['A', 5], ['E', 3]], note: 'G5', midi: [55, 50, 43], beats: 0.5 },
             { frets: [['D', 5], ['A', 5], ['E', 3]], note: 'G5', midi: [55, 50, 43], beats: 0.5 }
@@ -3854,7 +3858,8 @@ window.CLASS_ACTIVITIES = [
             { frets: [['D', 5], ['A', 5], ['E', 3]], note: 'G5', midi: [55, 50, 43], beats: 0.5 },
             { frets: [['D', 3], ['A', 3], ['E', 1]], note: 'F5', midi: [53, 48, 41], beats: 0.5 },
             { frets: [['D', 3], ['A', 3], ['E', 1]], note: 'F5', midi: [53, 48, 41], beats: 0.5 },
-            { frets: [['D', 3], ['A', 3], ['E', 1]], note: 'F5', midi: [53, 48, 41], beats: 1.5 },
+            { frets: [['D', 3], ['A', 3], ['E', 1]], note: 'F5', midi: [53, 48, 41], beats: 0.5 },
+            { rest: true, beats: 1 },
             { frets: [['D', 5], ['A', 5], ['E', 3]], note: 'G5', midi: [55, 50, 43], beats: 0.5 },
             { frets: [['D', 5], ['A', 5], ['E', 3]], note: 'G5', midi: [55, 50, 43], beats: 0.5 },
             { frets: [['D', 5], ['A', 5], ['E', 3]], note: 'G5', midi: [55, 50, 43], beats: 0.5 }
@@ -3876,7 +3881,8 @@ window.CLASS_ACTIVITIES = [
             { frets: [['D', 5], ['A', 5], ['E', 3]], note: 'G5', midi: [55, 50, 43], beats: 0.5 },
             { frets: [['D', 3], ['A', 3], ['E', 1]], note: 'F5', midi: [53, 48, 41], beats: 0.5 },
             { frets: [['D', 3], ['A', 3], ['E', 1]], note: 'F5', midi: [53, 48, 41], beats: 0.5 },
-            { frets: [['D', 3], ['A', 3], ['E', 1]], note: 'F5', midi: [53, 48, 41], beats: 1.5 },
+            { frets: [['D', 3], ['A', 3], ['E', 1]], note: 'F5', midi: [53, 48, 41], beats: 0.5 },
+            { rest: true, beats: 1 },
             { frets: [['D', 5], ['A', 5], ['E', 3]], note: 'G5', midi: [55, 50, 43], beats: 0.5 },
             { frets: [['D', 5], ['A', 5], ['E', 3]], note: 'G5', midi: [55, 50, 43], beats: 0.5 },
             { frets: [['D', 5], ['A', 5], ['E', 3]], note: 'G5', midi: [55, 50, 43], beats: 0.5 }
@@ -3898,7 +3904,8 @@ window.CLASS_ACTIVITIES = [
             { frets: [['D', 5], ['A', 5], ['E', 3]], note: 'G5', midi: [55, 50, 43], beats: 0.5 },
             { frets: [['D', 3], ['A', 3], ['E', 1]], note: 'F5', midi: [53, 48, 41], beats: 0.5 },
             { frets: [['D', 3], ['A', 3], ['E', 1]], note: 'F5', midi: [53, 48, 41], beats: 0.5 },
-            { frets: [['D', 3], ['A', 3], ['E', 1]], note: 'F5', midi: [53, 48, 41], beats: 1.5 },
+            { frets: [['D', 3], ['A', 3], ['E', 1]], note: 'F5', midi: [53, 48, 41], beats: 0.5 },
+            { rest: true, beats: 1 },
             { frets: [['D', 5], ['A', 5], ['E', 3]], note: 'G5', midi: [55, 50, 43], beats: 0.5 },
             { frets: [['D', 5], ['A', 5], ['E', 3]], note: 'G5', midi: [55, 50, 43], beats: 0.5 },
             { frets: [['D', 5], ['A', 5], ['E', 3]], note: 'G5', midi: [55, 50, 43], beats: 0.5 }

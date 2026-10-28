@@ -13558,7 +13558,8 @@ function pcSheetModel(url){
   pcSheetModels[url].catch(() => { delete pcSheetModels[url]; });   // a failed load can be tried again
   return pcSheetModels[url];
 }
-/* Which sheet chord each note of the card is: tok[si][rep][ni]. The count
+/* Which sheet chord each note of the card is: tok[si][rep][ni]. A rest is not a
+   chord on the sheet: the dot stays on the chord before it. The count
    goes up at every chord CHANGE across the whole song, laps included. */
 function pcSheetMap(L){
   const tok = [], start = [];
@@ -13567,7 +13568,7 @@ function pcSheetMap(L){
     tok[si] = [];
     for(let r = 0; r < S.reps; r++){
       tok[si][r] = S.notes.map(nt => {
-        if(nt.note !== prev){ n++; prev = nt.note; start[n] = { si, rep: r, name: nt.note }; }
+        if(!nt.rest && nt.note !== prev){ n++; prev = nt.note; start[n] = { si, rep: r, name: nt.note }; }
         return n;
       });
     }
