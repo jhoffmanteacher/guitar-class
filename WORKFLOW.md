@@ -1854,3 +1854,342 @@ that would make the service worker download every jam track at install time.
   Firestore, so `saveGames`/`saveProgress` are skipped under it.
 - Stale assumptions to avoid: `MODULE_MANIFEST` has **13** entries, not 12; there
   is no flat songs hub; screens use `*-screen` ids, not `*-panel`.
+
+
+## Moved from CLAUDE.md (2026-10-28)
+Trimmed out of CLAUDE.md by /doctor; text is verbatim.
+
+### The Daily 5 is retired
+
+### ⚠️ The Daily 5 is retired — switched off, not deleted
+**2026-09-19** (Jonathan): tuning and the finger warm-up happen together as a
+class, so the site should not ask for them a second time. The "Tune and warm
+up first" banner at the top of every ladder was the **only** entry point to
+the Daily 5 overlay, so turning the banner off retires the Daily 5 with it —
+and it was 97px of a 657px Chromebook screen spent on work the room had
+already done.
+
+`const DAILY5_ENABLED = false;` in `app.js`, beside `buildDaily5()`, is the
+whole switch; `ladderHtml()` is its one reader. **Nothing was deleted** —
+`buildDaily5()`, `openDaily5Here()`, `moduleStepsFlat()`, the `.daily5-*`
+CSS (including the `.dp.focus.pd-showing .daily5-inline` rule) and every
+`daily5.*` i18n key are all still there, so flipping the constant back to
+`true` brings the banner back as it was. Two things that are NOT part of
+this: `WARMUP_BANK` in `config-main.js` (kept, though nothing on screen
+reads it while the Daily 5 is off — its other reader, the Module Review's
+10-Minute Routine `buildModuleRoutine()`, has had no caller since `52ae05f`)
+and `kind:'tuning-warmup'` sections, which stay hidden
+exactly as before — `storageSections()` depends on that and every `gi` in
+Firestore was written under it.
+
+One student-facing mention pointed at nothing afterwards and was reworded in
+the same push: `module-13.js`'s final check, "one lap of the Daily 5" / "una
+vuelta del Daily 5" → "a few bars of anything you know". A grep of every
+module file and `class-activities.js` found no others.
+
+### Quiz answers — giveaway history and ratchets 1at/1au/1av/1w
+
+Modules 3–6's giveaway quiz items were **reworded on 2026-09-19** precisely
+because nobody had reached them: `m3w1` "One shape, three chords", `m3w2`
+"Watch: using a metronome", `m4w1` "Listen: major vs. minor moods", `m5w1`
+"Challenge — Mystery Chart", `m6w3` "Watch: any-pattern exercise", plus three
+practice MCs (`w1-s1`, `m5w4-s2`, `m5w4-s4`) whose order and keyed index were
+held. (Those are the ids of that date: since the 2026-10-12 swap the moods
+card is in `m5w1`, the Mystery Chart in `m4w1`, and the two practice MCs are
+`m4w4-s2` / `m4w4-s4`.) Two of those videos turned out not to teach what the
+card asked — the JustinGuitar metronome video never says "10 BPM slower
+than you think you need" (it teaches one down strum per click at 80 BPM), and the any-pattern
+video never mentions reggae in its 0:00–4:00 range — so those two questions
+were rewritten to match what the student actually watches. **Check the watch
+range before writing a question about a video**, not just the title.
+
+**Three MC-giveaway ratchets — 1at, 1au, 1av** (2026-09-20). A sweep of
+Modules 7–13 found **47 of 141 questions** a student could answer without
+knowing the material, so the classes are now detectors rather than a rule
+nobody can enforce:
+
+- **1at — the keyed choice is the only one shouting a word.** "On the BACK of
+  the neck" among three quiet choices is a free answer: scan for the capitals.
+  No allowlist, because there is no innocent twin — chord symbols, note names
+  and Roman numerals are excluded by name, and what is left is emphasis, which
+  belongs at render time. Fix by dropping the caps, or, where the emphasis
+  teaches a real contrast, by **mirroring it into the distractor it contrasts
+  with** (m10w2's relative/parallel pair now does exactly that).
+- **1au — a never-correct catch-all in a distractor** ("It doesn't matter",
+  "Either works equally well", "Any string you like", "You can't"). This one
+  DOES have an allowlist, because several are genuine beginner beliefs:
+  m5w1-s6's "Never repeating anything" is the plausible opposite of its keyed
+  answer, and m11w2-s6's "Can't tell from chords alone" is what a cautious
+  student really writes. The keyed choice is never scanned — two correct
+  answers in the course contain an absolute.
+- **1av — the keyed answer is already printed on the card.** The biggest class
+  and the one every reviewer under-counts, because the leak is usually in the
+  step's `hint` or in the skill's own always-visible `.sk-label`, not in the
+  question. Matching is on 3-word content n-grams, and the discriminator is
+  that **no distractor shares the phrase** — a phrase the distractors also use
+  is vocabulary, not a tell. An allowlist entry excuses the **card**, not the
+  phrase, because a leaking answer usually overlaps its card in several places
+  and a per-phrase exception would just surface the next one. Since
+  2026-10-12 a 1–2-word keyed answer is matched whole (it has no 3-word
+  n-gram), excused when the card also names one of the alternatives
+  ("Tell major from minor"), and Roman numerals keep their case. Its known
+  blind spot: a card that prints a whole lookup table ("Am fret 5 … Dm
+  fret 10") names the alternatives too — read those by eye.
+
+Every allowlist entry is in Modules 1–6, which that sweep did not cover. They
+are carried deliberately, not tuned away; when a module gets swept, delete its
+entries first and let the check say what is left.
+
+**1w was blind to the fields this all lives in.** Its `FIELD_RE` listed
+`text|hint|stuck|levelUp|gotItWhen|explain|…` and never `prompt`, and
+`choices` is an array a `field: '...'` regex cannot see into at all — so a
+banned phrase in an answer choice shipped while the identical phrase in its
+`explain` failed the push. Widened 2026-09-20 (it caught a real one in
+`module-9.js` the same day). Since 2026-10-12 1w and 1w-t read through one
+bracket-walking reader (`readFieldStrings` in checks.mjs) that sees every
+quote style, template literals, and every element of a multi-line array
+(`choices`, `assessItems`, exit-check `items`) — the single-line regexes
+had missed ~50 multi-line `choices` arrays. **A new authoring field needs
+adding to `STUDENT_VALUE_NAME_RE`; an array field needs nothing more.** 1w-t
+also reads Spanish now (`TEACHER_PHRASES_ES`: "es normal", "no te
+preocupes", "está bien si", a sentence-final "tú puedes").
+
+### Sweep findings ratchet — full text
+
+### ⚠️ Sweep findings ratchet into checks.mjs
+Any sweep or audit that finds **3+ instances of a mechanically-detectable error
+class** must add a permanent detector for that class to `checks.mjs` in the same
+session. Never leave a detector script in a session scratchpad — the 2026-07-31
+MC-tell audit died that way and the class recurred in the next sweep. The
+existing detectors (1h onward) are each documented by a comment in
+`tools/checks.mjs` — read it there rather than keeping a list here.
+
+When several agents add checks at once, **hand each one its label before it
+starts** (`grep -o "head('1b[a-z0-9]*\." tools/checks.mjs | sort | tail -3`);
+three agents once all took `1br`. And a check that merely finds a call in the
+source proves nothing about behaviour — make it render or execute the thing
+(1bf renders both card builders, 1bs compiles every inline handler).
+
+**A phrase detector must match the UNESCAPED string.** Until 2026-09-25 1w
+and 1w-t matched the raw source capture, which keeps `\'`, so every banned
+phrase with an apostrophe ("don't worry", "that's the point", "that one's
+free") was invisible in a single-quoted field — a live "Don't worry about
+pressing any frets yet" sat in Module 1 with both green. Run captures
+through `unescapeJs()` before matching.
+
+Not every class can be guarded by a banned-phrase list. 1w2 pins the Journey
+lick labels *positively* — every `Lick N — ...` card must use one of four
+approved descriptors, in both languages, with the total pinned at 12 —
+because the words it retired ("the reach", "the climb", "the fall") are all
+legitimate elsewhere on the same pages. Reach for a whitelist over a
+blacklist whenever the banned word has an innocent twin.
+
+**A ratchet that can't fail is not a ratchet.** Every detector added or changed
+gets proved by *breaking the guarded thing* in a scratch copy and watching the
+check go red, then restoring. The 2026-09-07 review found five that were green
+because they could not see what they guarded — a selector written twice, an
+`@media` prefix, an inline `<script>`, an exact-match opening tag, a count that
+was printed but never pinned. Where a total is meaningful, **pin it** (63
+Journey tab cards, 27 tuning warm-ups) so it cannot drop silently.
+
+### Modules 4 and 5 swap — full text
+
+### ⚠️ Modules 4 and 5 were swapped (2026-10-12)
+Jonathan moved Open Chords ahead of Pentatonic Scales. **Open Chords is
+Module 4** (`module-4.js`, `m4w1`–`m4w4`, `mr4-*`); **Pentatonic is Module
+5** (`module-5.js`, `m5w1`–`m5w3`, `mr5-*`). Set, skill and Module Review ids
+moved with their content, and every Journey page swapped Layers 4 and 5 to
+match (Layer 4 Open Chords, Layer 5 Pentatonic Solo). The two-part set is
+`m4w2`; the 1ao and 1az pins, the Songs hub's module groups and the Core
+rows' backing-track choice follow the content. **Saved progress IS moved**
+— the swap shipped believing nobody was past Module 3, but a live scan the
+same day found 7 docs with Module 4/5 work or Layer 4/5 "I'm ready" ticks.
+Each student's own browser moves its doc once (the console cannot write
+`progress/{uid}`): `swap45*` in `app.js`, read the comment above
+`swap45MapId`. **The rule: a doc without `migrations.swap45` holds only
+OLD-numbered data, a doc with it only NEW-numbered data** — so `flushSave()`
+awaits `swap45Commit()` before every write, `tabs/journey.js` writes
+`songReady` in the doc's own numbering, and `teacher.js` remaps unmarked
+docs for display only. Don't remove one half without the others (Summer
+reset list). **One gap no client can close:** a tab or device that loaded
+the doc before it was moved (an older build, or one that missed the move)
+and saves AFTER the move merges its old-numbered maps into the now-marked
+doc, silently swapping the overlapping keys back. Repair is by hand: re-scan
+the 3 docs the 2026-10-12 scan found with real Module 4/5 work a day and a
+week after the deploy, and fix any old-numbered key that has reappeared in
+the Firebase console — a key the scan saw under its old id coming back, or
+any `m5w4-*` (Module 5 has three sets) or `chords-m5`. **`moduleOpenThrough`
+in `config/class` is per module NUMBER and the move does not touch it:** a
+student set to 4 before the swap had Pentatonic opened and now has Open
+Chords opened — set them to 5 if Pentatonic should be open. Notes dated
+before the swap may still use the old numbers. **Course
+order lives in the module NUMBER** — reordering again means a renumber like
+this one. Its script (`swapA.mjs`) lived in a session scratchpad and is not
+in the repo. **Run `node tools/rule-zero-proof.mjs` against `d0cd004`**
+(commit A, the mechanical swap) to prove the hand edits after it; against
+the pre-swap commit `1a1f6cc` it fails by design ("the SET list changed"),
+because every m4/m5 id now holds the other module's content. The swap
+itself was proved structurally equivalent with the 4↔5 id map by a
+throwaway script (`skeleton-equiv.mjs`, scratchpad, not in the repo).
+
+### Stop hook and git hooks — full text
+
+**Stop hook (2026-10-25).** `.claude/settings.json` runs
+`.claude/hooks/stop-checks.mjs` whenever Claude finishes a turn. If code files
+are changed (`.js .mjs .css .html .json`, outside `.claude/` and `audio/`) and
+the working-tree state differs from the last one it checked, it runs
+`node tools/checks.mjs --check --skip-links` (about 10 s). A real failure
+**blocks the stop** and sends the output back, so you fix it in the same turn.
+**If it blocks, fix the cause — never loosen a check or add an allowlist entry.**
+The expected "shell cache stale" / "audio cache stale" lines are ignored (only
+the full `node tools/checks.mjs` before a push recomputes them). It gives up
+after 3 tries per turn, never re-blocks the same file state, and fails open on
+any internal error. Off switch: `GC_STOP_CHECKS=0` in the environment. It does
+not replace the git hooks, the full checks run, or `tools/smoke.mjs`. On
+Windows, Git Bash may not have `node` on PATH; the hook then silently doesn't
+run (a non-blocking error) and the git hooks remain the gate.
+
+A tracked pre-commit hook at `.githooks/pre-commit` runs the fast offline checks
+on every commit. Per-machine setup, once: `git config core.hooksPath .githooks`
+— **done on both machines**. Bypass with `--no-verify`.
+
+A second tracked hook, `.githooks/pre-push`, runs the same fast offline checks
+again at push time. Not redundant: **git doesn't run `pre-commit` on merge
+commits at all**, so a merge can carry a stale `sw.js` past every per-commit
+check — on 2026-08-20 one reached `main` that way. Pre-push is the last moment
+anything is still local. Both hooks skip the network; the full
+`node tools/checks.mjs` is still the real gate.
+
+Both hooks resolve `node` themselves rather than trusting PATH: on Windows they
+run under Git Bash, which doesn't inherit the PATH entry the Node installer
+adds for cmd/PowerShell, so `pre-commit` fell through to its "skipping checks"
+warning on every commit while looking installed (fixed 2026-08-20). If you ever
+see that warning, the hook is a no-op — run `node tools/checks.mjs` by hand.
+Keep the candidate-path list identical in both hooks.
+
+### Cloud sessions and patch handoff — full text
+
+**There are two kinds of cloud session and only one of them can push.** Work
+out which one you're in before planning a handoff: the old blanket "cloud
+can't push" rule was written for Cowork and would send a web session into a
+patch-pair handoff it doesn't need.
+
+- **Claude Code on the web pushes normally.** It runs in its own ephemeral
+  container with a writable clone and authenticated HTTPS to `origin`, so the
+  ordinary "push to GitHub" workflow applies, `main` included. Three limits:
+  there is no `gh` CLI (use the GitHub MCP tools instead); the sandbox proxy
+  blocks the live site, so `checks.mjs --live` comes back HTTP 403 — the
+  deploy has to be confirmed from a local machine; and **the credentials push
+  commits but cannot delete refs**, so branch cleanup is a local job. A
+  `git push origin --delete` fails with a bare `RPC failed; HTTP 403` from
+  GitHub itself, and the GitHub MCP server has `create_branch` but no
+  delete-branch tool — there is no way around it from a web session, so hand
+  Jonathan the command (or the repo's Branches page) instead of retrying.
+  (Pushing verified 2026-09-04, shipping the Journey tab-card restyle; the
+  delete limit 2026-09-09, cleaning up six merged branches.)
+- **Cowork sessions can't push** — GitHub access is read-only and git writes
+  through the device-bridge folder fail on lock files. Never attempt them.
+  Instead: run full `node tools/checks.mjs`, commit, `git format-patch`, and
+  ship **every patch as a pair with its own `APPLY-<name>.md`** stating the
+  base commit, apply order, and steps (`git status` → `git am` → `checks.mjs
+  --check --skip-links` → `git push` → `checks.mjs --live`). Afterwards,
+  hard-reset the cloud clone to origin — never re-merge.
+
+  **Deliver the pair as ONE zip** (Jonathan, 2026-10-05: "package multiple
+  files as zips in the future"). Any handoff of two or more files — a patch
+  and its `APPLY-<name>.md`, several patches, any other set — goes out as a
+  single `<name>.zip`, never as separate attachments. A single file is sent
+  as it is. The one exception is the phone workflow, which stays one plain
+  `CHANGES.md`.
+
+  **Applying a patch: a conflict on `sw.js`'s `CACHE_VERSION` line is
+  expected, not a problem.** That line is a fingerprint of every cached
+  file, so every patch touches it, and it conflicts whenever `main` moved
+  between cutting the patch and applying it (Windows line endings make it
+  likelier). Keep either side of that one line, finish the `git am`, then
+  run the FULL `node tools/checks.mjs` once (not `--check`) to recompute it
+  and commit the one-line change before pushing. Don't stop to ask. Any
+  conflict in another file is a real conflict — stop and report it.
+  (2026-09-24: the Watchtower/Modules 4–6 pair landed this way, `69ac805`.)
+
+### Stations B/C merge and Parts — full text
+
+**Stations B and C are merged in DISPLAY ONLY** (2026-08-27, Work Order 7).
+The room runs two groups now — one with the teacher, one on the site — so a
+set renders as ONE continuous step ladder: B's sections, a seam divider
+carrying C's own title words, then C's sections, numbered straight through.
+`stations.b` / `stations.c` in the module files are unchanged and so is every
+progress key (`${w.id}-b-sec{gi}-{i}` / `${w.id}-c-sec{gi}-{i}`) — never
+"simplify" the data to match the display. **`gi` is the section's position
+after excluding only tuning-warmup sections (`storageSections()`); render-time
+hiding never renumbers it** — checks.mjs 1af. `buildLesson()` in `app.js` is the
+renderer; the single tab-panel suffix is `LESSON_TAB` (still the literal
+`'station-b'`, so old deep links resolve). Sections are addressed by
+`data-ns`, never by DOM position. Don't reintroduce "Station B/C" wording in
+student-facing text — the mid-set reflection card is **Checkpoint / Punto de
+control**, the end-of-set one is **Wrap-Up / Cierre**; checks.mjs 1n fails the
+push on a relapse.
+
+**A long set can be shown as TWO PARTS — also display only** (2026-09-19).
+`partOne` on a set and `partBreak` on one of its sections split the ladder
+into Part 1 / Part 2: a heading at the top, a heavier divider above the
+breaking section, a per-part progress pill and "Step n of m", and two jump
+links in the rail. **Only `m4w2` uses it** (13 steps + 7), and checks.mjs
+**1ao** pins that count at 1. Nothing in the data moves — same set id, same
+arrays, same `gi`, so no progress key moves; 1af proves that independently
+and must stay green with NO change to its expected `data-ns` lists.
+`lessonParts()` in `app.js` is the resolver, `lessonGroups()` the shared
+section walk. A set is still complete when the SET is complete: the sets
+gate, the checklist, Module Review, search and the Daily 5 never see a part,
+and `resumeLessonCounts()` stays whole-set. One consequence worth knowing:
+in focus mode the B→C seam now also hides once the open step is in Part 2 —
+it heads the sections at the top of station C, which in m4w2 are all inside
+Part 1, and it was otherwise stacking directly above the Part 2 divider
+saying "Now practice it". Same "don't head a part you're not in" rule the
+part marks follow. Field docs live in the schema comment at the top of
+`module-2.js`.
+
+### Real-browser smoke test — full text
+
+**Real-browser smoke test (2026-10-25).** `checks.mjs` reads source text; it
+cannot click. `node tools/smoke.mjs --baseline origin/main` boots the site in
+headless Chrome (dev bypass, no network needed), walks every module and set in
+English and Spanish, opens Songs / Class activities / My progress / Games,
+visits every game view and the tuner, and fails on any JavaScript error the
+baseline did not have, or any inline handler that does not compile. It is for
+renderer, escaping or many-file changes, not every commit. Needs Node 22+ and
+Chrome (`--chrome <path>` if it can't find one). It caught what no check could:
+15 lesson ▶ buttons that were dead for weeks.
+
+### Effort per task — full text
+
+**Effort per task (2026-10-25).** Effort is how much reasoning Claude spends;
+higher finds more edge cases and verifies more, at more tokens. The session level
+is manual (`/effort low|medium|high|xhigh|max`, `/effort auto` to clear it, or
+`claude --effort <level>`); nothing picks it per task by itself, so these pins do:
+- **Agents.** The project agents in `.claude/agents/` pin their own level:
+  `site-auditor`, `site-fixer` and `site-reviewer` high, `site-reviewer-deep`
+  extra high (always use one of the two reviewers for adversarial reviews —
+  which one is set under "Triggers"). If you spawn a general-purpose agent
+  instead, **pass `effort: "xhigh"` for a review the Triggers send to
+  `site-reviewer-deep`, and `"high"` for any other review, an auditor or a
+  fixer** — this paragraph is the explicit instruction the Agent
+  tool asks for. Never pass `max`.
+- **Skills.** `site-sweep` pins `effort: xhigh` while it is active.
+- **Your own session, as a guide:** `medium` for routine edits (changelog, a
+  small wording or content fix, renames); `high` for any bug fix, shipped JS, or
+  module content with keyed MCs; `xhigh` for the danger-zone files listed
+  above, sweeps, and anything the Stop hook keeps blocking on. If a task turns
+  out to be in a higher tier than the session, say so and ask Jonathan to
+  `/effort` up (or run it through `site-reviewer-deep`) rather than pressing on.
+
+### Videos — pairing and diversity
+
+- **Watch-half video pairs** (`stations.b`): aim for video #2 from a *different*
+  instructor than #1, same skill. Same-channel pairs are fine when the
+  alternative is worse.
+- **Prefer diverse creators.** Before settling on Marty Music / JustinGuitar /
+  Andy Guitar, spend one extra search on a comparable lesson from a woman, a
+  creator of colour, or a Spanish-language channel. Already verified on the
+  site: Lauren Bateman, Nikhil D'Souza, guitarraviva, David Casas. Lesson
+  quality still wins.
