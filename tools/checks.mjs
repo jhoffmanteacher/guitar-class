@@ -9462,12 +9462,18 @@ async function checkBackingLoudness() {
     return;
   }
   let list = null;
-  for (const [cmd, ...pre] of [['python3'], ['python'], ['py', '-3']]) {
+  // Windows: python.exe is often installed per-user but not on PATH (the bare names hit the Store stub).
+  const winPy = [];
+  if (process.env.LOCALAPPDATA) {
+    const base = join(process.env.LOCALAPPDATA, 'Programs', 'Python');
+    try { for (const d of readdirSync(base).sort().reverse()) winPy.push([join(base, d, 'python.exe')]); } catch { /* no per-user Python */ }
+  }
+  for (const [cmd, ...pre] of [['python3'], ['python'], ['py', '-3'], ...winPy]) {
     const r = runs(cmd, [...pre, join(ROOT, 'tools', 'loudness.py'), '--list-reference-files']);
     if (r) { try { list = JSON.parse(r.stdout); break; } catch { /* try the next name */ } }
   }
   if (!list) {
-    warn('1bu skipped: no Python on PATH to run tools/loudness.py (it picks each song\'s file), so backing-track loudness was not measured');
+    warn('1bu skipped: no Python on PATH (or in %LOCALAPPDATA%\Programs\Python) to run tools/loudness.py (it picks each song\'s file), so backing-track loudness was not measured');
     return;
   }
   if (!list.reference) {
