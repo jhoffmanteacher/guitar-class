@@ -13018,8 +13018,8 @@ function caTickCount(keys){ return keys.filter(k => caStepDone[k] === true).leng
 const PC_GRID_BARS = 4;
 /* Fold consecutive same-name notes into one event { name, frets, midi,
    start, beats, ... } with `start` the running sum of beats. A rest ends a
-   chord and is an event of its own ({ rest: true }). Pure: no DOM. */
-function pcChordGrid(notes, beatsPerBar){
+   chord and is an event of its own ({ rest: true }). With everyStrum, consecutive same-name notes stay separate events (ca-29). Pure: no DOM. */
+function pcChordGrid(notes, beatsPerBar, everyStrum){
   const bpb = beatsPerBar > 0 ? beatsPerBar : 4;
   const events = [];
   let pos = 0;
@@ -13029,7 +13029,7 @@ function pcChordGrid(notes, beatsPerBar){
     if(n.rest){
       if(prev && prev.rest) prev.beats += len;
       else events.push({ rest: true, name: '', start: pos, beats: len, seq: i, bar: Math.floor(pos / bpb + 1e-6) });
-    } else if(prev && !prev.rest && prev.name === n.note){
+    } else if(!everyStrum && prev && !prev.rest && prev.name === n.note){
       prev.beats += len;
     } else {
       const frets = Array.isArray(n.frets) ? n.frets : (n.string != null ? [[n.string, n.fret]] : []);
@@ -13161,7 +13161,7 @@ function renderChordGridRow(events, row, cols, bpb, seqOff, bass){
 /* The grid rows of one section, with a lyric line (pc-row-label) over each
    row that starts one. */
 function pcChordGridHtml(S, bpb){
-  const events = pcChordGrid(S.notes, bpb);
+  const events = pcChordGrid(S.notes, bpb, S.every);
   const cols = Math.min(PC_GRID_BARS, S.bars) * bpb * 2;
   return pcGridRows(S, bpb).map(row =>
     (row.label ? `<div class="tab-phrase-label pc-row-label">${escHtml(String(row.label))}</div>` : '')
@@ -13183,7 +13183,7 @@ function pcLayout(a){
        section.chordGrid:false to opt one out) — see CHORD GRID below. */
     const out = { s, notes, fromBar: Math.max(1, s.fromBar || 1), bars: Math.max(1, s.bars || 1),
                   reps: Math.max(1, s.reps || 1), seqOff: seq, beatEnds: [],
-                  grid: !!(c.chordGrid && s.chordGrid !== false) };
+                  grid: !!(c.chordGrid && s.chordGrid !== false), every: !!c.everyStrum };
     out.bass = out.grid && c.__bass ? c.__bass : null;   // alternating bass, drawn on the grid only — see BASS NOTES
     let acc = 0;
     notes.forEach(n => { acc += n.beats > 0 ? n.beats : 1; out.beatEnds.push(acc); });

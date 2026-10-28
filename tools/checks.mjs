@@ -8004,7 +8004,7 @@ function checkSheetCards() {
      chord (and rest) starts on the eighth grid;
    - every lyric line (`rowLabels`) of such a section starts on a bar line,
      so pcGridRows keeps its label;
-   - ca-29 renders exactly one chord-name button per chord change (28 for its
+   - ca-29 renders exactly one chord-name button per STRUM (98 for its
      7 sections), data-beat sits on every BEAT column and never on a "+"
      (even columns only, counting up beat by beat, never on a faint "+"
      count cell), and an all-grid card draws no Counts switch;
@@ -8067,7 +8067,7 @@ function checkChordGridCards(ctx) {
     const grids = html.split('class="tab-grid chord-grid"').slice(1);
     const names = (html.match(/class="tab-note-btn tab-chord-btn"/g) || []).length;
     if (grids.length !== 7) flag(`ca-29 renders ${grids.length} chord-grid rows, expected 7 (one per section: each is 2 bars)`);
-    if (names !== 28) flag(`ca-29 renders ${names} chord-name buttons, expected 28 — one per chord change (A5 G5 F5 G5 in each of its 7 sections)`);
+    if (names !== 98) flag(`ca-29 renders ${names} chord-name buttons, expected 98 — one per strum (A5 x4, G5 x4, F5 x3, G5 x3 in each of its 7 sections; card.everyStrum)`);
     let beatsSeen = 0;
     grids.forEach((g, gi) => {
       // The first string row only: label, then one cell per column.
@@ -8084,6 +8084,7 @@ function checkChordGridCards(ctx) {
     if (attrs !== 7 * 8 * 7) flag(`ca-29 renders ${attrs} data-beat attributes, expected ${7 * 8 * 7} (7 sections x 8 beats x (6 string cells + 1 count cell))`);
     if (/pc-counts/.test(html)) flag('ca-29 draws a Counts switch — a card made only of chord grids always shows its count and needs none');
     if (!/Each chord is shown once/.test(html)) flag('ca-29 does not show the chord-card directions (ca.cardChordDirections)');
+    if (!c29.card.everyStrum) flag("ca-29 lost card.everyStrum — the grid would fold A5 x4 into one name again");
     // The cursor: one repaint key per beat, none on a "+".
     const L = pcLayout(c29), S0 = L.sections[0], bpb = L.tr.beatsPerBar;
     const keys = [];
@@ -8308,7 +8309,7 @@ function checkChordGridCards(ctx) {
     const ks = new Set(); for (let i = 0; i < L.sections[0].bars * L.tr.beatsPerBar * 8; i++) ks.add(pcLocKey(L, pcLocate(L, i / 8 / L.tr.beatsPerBar)));
     if (ks.size !== L.sections[0].notes.length) flag(`ca-10: ${ks.size} repaint keys over ${L.sections[0].notes.length} notes — a single-note card must still step per note`);
   }
-  if (bad === 0) ok(`${CHORD_GRID_CARDS.length} chord-grid cards (pinned) — ${sections} grid sections, ${events} chord/rest onsets all on the eighth grid, ${labelled} lyric lines keep their row; ca-29 renders 28 chord names and 392 data-beat on beat columns only; ${rowsSeen} grid rows across both views each 4 bars wide with their bar lines, staff edge and 0..N beat run; ${col0Rows} rows open on a label at column 0 (${heldLabels} held "(Chord)", pinned); ${restWords} rest words; ${bassMarks} alternating-bass notes (pinned) on beat 1, root / 5th as worked out from the notes, across ${CHORD_GRID_BASS_CARDS.length} bass card(s) x chord views, none with the bass off, the directions in EN + ES; the cursor steps once per beat; ca-10 untouched`);
+  if (bad === 0) ok(`${CHORD_GRID_CARDS.length} chord-grid cards (pinned) — ${sections} grid sections, ${events} chord/rest onsets all on the eighth grid, ${labelled} lyric lines keep their row; ca-29 renders 98 chord names (one per strum) and 392 data-beat on beat columns only; ${rowsSeen} grid rows across both views each 4 bars wide with their bar lines, staff edge and 0..N beat run; ${col0Rows} rows open on a label at column 0 (${heldLabels} held "(Chord)", pinned); ${restWords} rest words; ${bassMarks} alternating-bass notes (pinned) on beat 1, root / 5th as worked out from the notes, across ${CHORD_GRID_BASS_CARDS.length} bass card(s) x chord views, none with the bass off, the directions in EN + ES; the cursor steps once per beat; ca-10 untouched`);
 }
 
 /* 1by. POWER-CHORD NAMES OPEN NO POP-UP WHERE THE TWO-FINGER SHAPE IS TAUGHT

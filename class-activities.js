@@ -3746,6 +3746,7 @@ window.CLASS_ACTIVITIES = [
       wholeSong: true,  // stops at the end of the song instead of looping
       track: 'all-along-the-watchtower',
       chordGrid: true,  // chord grid: each chord once, cursor on the beats only (2026-10-26) — see CARD above
+      everyStrum: true, // every strum gets its own chord name (A5 x4, G5 x4, F5 x3, G5 x3), not one per chord (Jonathan, 2026-10-28)
       slowest: true,    // four-way speed control (Slow added 2026-10-09): Slowest / Slower / Slow / Normal — the student picks
       caption:    'The whole song in power chords',   // the count row is always on: this card is a chord grid (2026-10-26)
       caption_es: 'La canción completa con acordes de potencia',

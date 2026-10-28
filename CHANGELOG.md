@@ -11,7 +11,9 @@ see `WORKFLOW.md` and the git commit log.
   count shows D (down) and U (up). The two strums you skip in bar 2, the "+"
   after 2 and the 3, are in ( ) so you can see where the gap is.
 - **The Watchtower power-chord Play Along shows the gap too.** In bar 2, a
-  "Stop" mark now sits on the "+" after 2, where you skip the strums.
+  "Stop" mark now sits on the "+" after 2, where you skip the strums. Every
+  strum has its own chord name now: A5 four times, G5 four times, F5 three
+  times, G5 three times.
 
 ## 2026-10-27 — Songs: tap a song name to open its Play Along
 
