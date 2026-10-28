@@ -5,6 +5,13 @@ Notable changes to the Guitar Class site. Newest first.
 For the full session-by-session history (and the reasoning behind each change),
 see `WORKFLOW.md` and the git commit log.
 
+## 2026-10-28 — "Sweet Child O' Mine": a strum video on the Song Journey page
+
+- **Layer 4 (Open Chords) has a new Watch step.** It links to an
+  EpicGuitarInstruction video that opens at the verse (2:55–4:19). It shows the
+  verse strum D · D U · U D U, and then you play the D, C, G, D verse loop with
+  that strum at 60 BPM.
+
 ## 2026-10-28 — Watchtower power chords: the skipped strums are marked
 
 - **The Layer 2, 3 and 4 Watchtower tabs now show every strum.** A new row under the
