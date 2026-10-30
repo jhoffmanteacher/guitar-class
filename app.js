@@ -14874,8 +14874,8 @@ function caSyncTopbar(){
    Fullscreen API — the same thing the video players do), and while the
    page is full screen AND a card is open, styles.css also folds the site
    header away (body.ca-full): 721px for the activity. "All activities"
-   brings the header back without leaving full screen, so the next card
-   opens full screen too; Esc, or the button again, leaves it. Nothing is
+   leaves full screen too (Jonathan, 2026-10-29: it used to stay on, so the
+   next card opened full screen); Esc, or the button, leaves it. Nothing is
    saved — a reload starts in the normal window, which is the browser's
    own rule anyway (full screen needs a tap every time). Hidden where the
    browser can't do it (an iPhone), so the button never does nothing. */
@@ -14941,6 +14941,9 @@ function caSyncSolo(card){
 // the list. stopCardAudio() for the TAB player, which caOnToggle can't see.
 function caCloseOpen(){
   stopCardAudio();
+  // Back on the list means back in the normal window (see the Full screen
+  // note above caFullscreenNow). fullscreenchange then redraws the bar.
+  if(caFullscreenNow()){ try { document.exitFullscreen().catch(() => {}); } catch(e) { /* nothing to leave */ } }
   const card = caOpenId ? document.querySelector(`.ca-card[open][data-id="${CSS.escape(caOpenId)}"]`) : null;
   if(card) card.open = false;
   /* A Level up's card swapped into another card's slot (caSwap) needs the

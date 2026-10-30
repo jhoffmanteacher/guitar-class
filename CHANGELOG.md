@@ -5,6 +5,12 @@ Notable changes to the Guitar Class site. Newest first.
 For the full session-by-session history (and the reasoning behind each change),
 see `WORKFLOW.md` and the git commit log.
 
+## 2026-10-29 — "All activities" leaves full screen
+
+- **Tapping "◀ All activities" now exits full screen.** Before, the list stayed
+  full screen and the next activity you opened was full screen too. Use the
+  Full screen button in an open activity to go full screen again.
+
 ## 2026-10-29 — "Sweet Child O' Mine": the B5 chord in Layer 3
 
 - **Layer 3 (Power Chords) now explains B5.** The solos use B5, and the page
