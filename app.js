@@ -7521,7 +7521,10 @@ const fretGames = {};
    labels every marker, sharps included (FG_NATURALS only knows the
    naturals, so a sharp fret would otherwise read ✕); `shade: [lo, hi]`
    greys out every column outside that fret range and drops its hit zone,
-   so a drill on frets 5–8 shows the whole neck but only takes taps there. */
+   so a drill on frets 5–8 shows the whole neck but only takes taps there.
+   `hitStrings: [k…]` limits the hit zones to those strings (the rest are
+   drawn only) — the power-chord Note Call draws all six strings but takes
+   taps on the root strings. */
 function fgBoardSvg(sid, kind, opts){
   opts = opts || {};
   const clickFn = opts.clickFn || 'fgClick';
@@ -7583,6 +7586,7 @@ function fgBoardSvg(sid, kind, opts){
     }
   });
   if(opts.hit !== false) strs.forEach((k, i) => {
+    if(opts.hitStrings && opts.hitStrings.indexOf(k) < 0) return;
     const bandTop = multi ? stringYs[i] - rowGap / 2 : wireTop - 8;
     const bandH   = multi ? rowGap : (wireBot - wireTop) + 16;
     for(let f = 0; f <= maxF; f++){
@@ -8898,7 +8902,9 @@ function ncPromptHtml(p){
 function ncPlayHtml(key){
   const st = noteCalls[key], c = st.cfg;
   const board = fgBoardSvg(key, null, {
-    strings: c.strings.slice().sort((a, b) => SD_OPEN_MIDI[b] - SD_OPEN_MIDI[a]),   // high string on top
+    // Power chords draw all six strings (the whole chord shape sits on them); only the root strings take taps.
+    strings: (c.power ? ['highE', 'B', 'G', 'D', 'A', 'lowE'] : c.strings.slice().sort((a, b) => SD_OPEN_MIDI[b] - SD_OPEN_MIDI[a])),   // high string on top
+    hitStrings: c.power ? c.strings : null,
     clickFn: 'ncTap',
     noteAt: (k, f) => sdNoteAt(k, f),
     shade: [c.minFret, c.maxFret]
