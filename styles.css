@@ -3344,6 +3344,8 @@ body.games-open{overflow:hidden}
    adjustments plus the states Riff Runner doesn't have (amber wrong-note,
    sustain tails, rest glyphs, the results marks row, the offset slider). */
 .games-card.gc-noterun::before{background:var(--blue-text)}
+/* Power Chord Chug rides Note Runner's track too (the chord tokens, .nr-chord below). */
+.games-card.gc-powerchords::before{background:var(--red-text)}
 /* Finger Gym: The Ladder rides Note Runner's track; the token's label slot
    holds the circled finger number instead of the note name. */
 .games-card.gc-fingergym::before{background:var(--green-text)}

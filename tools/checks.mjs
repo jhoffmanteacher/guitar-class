@@ -9548,7 +9548,7 @@ async function checkBackingLoudness() {
    ════════════════════════════════════════════════════════════════════ */
 function checkCoachVerdicts() {
   head('1ca. Coach and arcade verdict lines are true at 0, 1 and many');
-  const EXPECT = { reports: 20, descs: 20, nrLevels: 15, doneScreens: 88, pwLoops: 20, pwHints: 102, pwViews: 47, pwMemory: 2, pwGates: 3 };
+  const EXPECT = { reports: 20, descs: 20, nrLevels: 12, doneScreens: 88, pwLoops: 20, pwHints: 102, pwViews: 47, pwMemory: 2, pwGates: 3 };
   let bad = 0;
   const flag = m => { err(m); problems++; bad++; };
   const bodies = {};

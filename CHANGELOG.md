@@ -28,6 +28,17 @@ see `WORKFLOW.md` and the git commit log.
   small to see a finger number. They are now 80 pixels wide.
 
 
+## 2026-10-30 — Power Chord Chug is its own game
+
+- **Power chords now have their own game in Games.** Power Chord Chug has three
+  levels: first power chords, power chords up the neck, and an eighth-note chug.
+  Score 80% on a level to open the next one. The first level is open from the
+  start. It starts fresh: your old Note Runner power-chord scores do not carry
+  over.
+- **Note Runner is now the 12 note levels only.** Its Play button no longer
+  deals power chords. If you were partway through, you stay at the note level
+  you had reached.
+
 ## 2026-10-30 — Louder metronome click in play-along activities
 
 - **The Metronome click is easier to hear over the song.** It is about 5 dB
