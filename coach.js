@@ -2698,7 +2698,7 @@ function gamesHeadHtml(title, inGame){
    builds it; gamesStopMic looks for it to know a game is on screen),
    `setup` starts it, `foot` adds the privacy footer under it, and `records`
    says that footer is on a screen that can record (micRecStart). Finger Gym
-   and Power Chord Chug share Note Runner's #nr-body and engine but do not record. A game
+   shares Note Runner's #nr-body and engine but does not record. A game
    added here gets its screen and its stop path from this row alone.
    `guitar:true` = you need a real guitar in hand (mic-graded, or self-judged
    like Riff Roulette); `guitar:false` = eyes + keyboard/tap only. Order here is
@@ -2731,8 +2731,6 @@ const GAME_ICO = {
   noterunner: gIco('<circle cx="9" cy="17" r="3"/><path d="M12 17V4l7 2.5"/><path d="M2 9h3.5M2 13h2.5"/>'),
   // Riff Runner — a running figure.
   runner:     gIco('<circle cx="15.5" cy="4.5" r="2"/><path d="M14 8.5 10.5 10.5l1.5 4-3 6"/><path d="M12 14.5l4 1 1.5 5"/><path d="M14 8.5 17.5 10l3 2.5"/><path d="M10.5 10.5 6.5 12"/>'),
-  // Power Chord Chug — three stacked notes (root, fifth, octave) over a ground line.
-  powerchords: gIco('<circle cx="7" cy="17" r="2.3"/><circle cx="12" cy="11.5" r="2.3"/><circle cx="17" cy="6" r="2.3"/><path d="M3 21h18"/>'),
   // Finger Gym: The Ladder — four steps climbing, one per finger.
   fingergym:  gIco('<path d="M3 20h4v-4h4v-4h4V8h4V4"/><circle cx="5" cy="17.5" r="1.2" fill="currentColor" stroke="none"/><circle cx="9" cy="13.5" r="1.2" fill="currentColor" stroke="none"/><circle cx="13" cy="9.5" r="1.2" fill="currentColor" stroke="none"/><circle cx="17" cy="5.5" r="1.2" fill="currentColor" stroke="none"/>'),
   // Chord Blitz — a lightning bolt (speed round).
@@ -2772,8 +2770,6 @@ const GAMES_META = [
     body:'rr-body', setup:() => rrSetup() },
   { key:'noterunner', cls:'gc-noterun', ico:GAME_ICO.noterunner, titleKey:'games.nr.title',   guitar:true,  descKey:'games.nr.desc',
     body:'nr-body', setup:() => nrSetup(), foot:true, records:true },
-  { key:'powerchords', cls:'gc-powerchords', ico:GAME_ICO.powerchords, titleKey:'games.pc.title', guitar:true, descKey:'games.pc.desc',
-    body:'nr-body', setup:() => pcSetup(), foot:true },
   { key:'fingergym', cls:'gc-fingergym', ico:GAME_ICO.fingergym, titleKey:'games.fg.title',    guitar:true,  descKey:'games.fg.desc',
     body:'nr-body', setup:() => fgSetup(), foot:true },
   { key:'simonguitar', cls:'gc-simonguitar', ico:GAME_ICO.simonguitar, titleKey:'games.psg.title', guitar:true, descKey:'games.psg.desc',
@@ -2948,16 +2944,9 @@ function gamesRenderHub(p){
   for (let i = 0; i < NR_LEVELS.length; i++) nrSess = Math.max(nrSess, nrBestSession(i));
   let nrAllTime = 0;
   if (saved.nr && saved.nr.levels){
-    // Only the levels Note Runner still has: a saved 12-14 is an old power-chord result.
-    for (const k in saved.nr.levels) if (+k < NR_LEVELS.length) nrAllTime = Math.max(nrAllTime, saved.nr.levels[k] || 0);
+    for (const k in saved.nr.levels) nrAllTime = Math.max(nrAllTime, saved.nr.levels[k] || 0);
   }
   const nrChip = gamesBestChip(nrAllTime, nrSess, '%');
-  let pcSess = 0, pcAllTime = 0;
-  for (let i = 0; i < PC_LEVELS.length; i++){
-    pcSess = Math.max(pcSess, pcBestSession(i));
-    pcAllTime = Math.max(pcAllTime, pcBestSaved(i));
-  }
-  const pcChip = gamesBestChip(pcAllTime, pcSess, '%');
   const fgChip = gamesBestChip(fgTopBpm(true), fgTopBpm(false), ' BPM');
   let cdBest = 0;
   try {
@@ -2986,7 +2975,7 @@ function gamesRenderHub(p){
   } catch(e){}
   const bcChip = gamesBestChip(saved.bc && saved.bc.best, bcBest);
   /* Per-game best chips, keyed by game. */
-  const chips = { fret:fretChip, cc:ccChip, power:pwChip, blitz:cbChip, fretzap:fzChip, strum:shChip, radar:srChip, roulette:rrChip, runner:rnChip, noterunner:nrChip, powerchords:pcChip, fingergym:fgChip, detective:cdChip, riffid:ntrChip, simon:psChip, simonguitar:psgChip, patterndet:pdChip, buildchord:bcChip };
+  const chips = { fret:fretChip, cc:ccChip, power:pwChip, blitz:cbChip, fretzap:fzChip, strum:shChip, radar:srChip, roulette:rrChip, runner:rnChip, noterunner:nrChip, fingergym:fgChip, detective:cdChip, riffid:ntrChip, simon:psChip, simonguitar:psgChip, patterndet:pdChip, buildchord:bcChip };
   const card = g => `
        <button type="button" class="games-card ${g.cls}" onclick="gamesShow('${g.key}')">
          <span class="games-card-ico">${g.ico}</span>
@@ -7903,27 +7892,25 @@ const NR_LEVELS = [
   { nameKey:'games.nr.lv9',  strings:[6,5], maxFret:7,  tiers:['e8s'],           bpm:72, bars:4 },
   { nameKey:'games.nr.lv10', strings:[6,5], maxFret:12, tiers:['q','long','e8'], bpm:84, bars:4 },
   { nameKey:'games.nr.lv11', strings:[6,5], maxFret:12, tiers:['e8s'],           bpm:76, bars:4 },
-  { nameKey:'games.nr.lv12', strings:[6,5], maxFret:12, tiers:['e8s','s16'],     bpm:63, bars:4 }
+  { nameKey:'games.nr.lv12', strings:[6,5], maxFret:12, tiers:['e8s','s16'],     bpm:63, bars:4 },
+  /* Power-chord branch: chords:true switches the generator to power-chord
+     shapes rooted on the E and A strings (maxFret bounds the ROOT) and the
+     grader to the Coach's chord-tone vote — single-pitch consensus is the
+     wrong test for a strum (see coachFinalizeEvent's note). chordHold =
+     beats before the chord may change, so lines chug like real power-chord
+     riffs instead of shape-hopping every strum. `after` reroutes the
+     unlock: clearing level 5 (index 4, both strings to fret 5) opens this
+     branch — power chords shouldn't have to wait behind sixteenth notes.
+     Within the branch, levels chain normally. */
+  { nameKey:'games.nr.lv13', strings:[6,5], maxFret:3, tiers:['q','long'], bpm:66, bars:4, chords:true, chordHold:4, after:4 },
+  { nameKey:'games.nr.lv14', strings:[6,5], maxFret:7, tiers:['q','long'], bpm:72, bars:4, chords:true, chordHold:2 },
+  { nameKey:'games.nr.lv15', strings:[6,5], maxFret:5, tiers:['e8s'],      bpm:66, bars:4, chords:true, chordHold:4 }
 ];
 
-/* Power Chord Chug — the game that used to be Note Runner's levels 13-15
-   (until 2026-10-30). It runs on this engine: chords:true switches the
-   generator to power-chord shapes rooted on the E and A strings (maxFret
-   bounds the ROOT) and the grader to the Coach's chord-tone vote —
-   single-pitch consensus is the wrong test for a strum (see
-   coachFinalizeEvent's note). chordHold = beats before the chord may
-   change, so lines chug like real power-chord riffs instead of
-   shape-hopping every strum. Levels chain: each opens when the one before
-   scores NR_PASS. The game, its screens and its saves are further down
-   (POWER CHORD CHUG). */
-const PC_LEVELS = [
-  { nameKey:'games.pc.lv1', strings:[6,5], maxFret:3, tiers:['q','long'], bpm:66, bars:4, chords:true, chordHold:4 },
-  { nameKey:'games.pc.lv2', strings:[6,5], maxFret:7, tiers:['q','long'], bpm:72, bars:4, chords:true, chordHold:2 },
-  { nameKey:'games.pc.lv3', strings:[6,5], maxFret:5, tiers:['e8s'],      bpm:66, bars:4, chords:true, chordHold:4 }
-].map(l => ({ pc: true, ...l }));
-
 /* ── Adaptive mode — the game's front door is ONE Play button ──
-   The stage order walks the melody ladder. Results move
+   The stage order walks the melody ladder with the power-chord branch
+   interleaved right after its level-5 prerequisite, so chords start
+   showing up mid-journey instead of after sixteenth notes. Results move
    the student along it: ≥90% steps up a stage, <65% steps back one
    (unless the round smells like a MIC problem — an unclear-heavy round
    means the machine couldn't hear, not that the student can't play),
@@ -7931,17 +7918,11 @@ const PC_LEVELS = [
    "practice a specific skill" door for targeted work (and for pointing
    the whole class at one thing).
    Weak spots: every missed or wrong-note position bumps a small score in
-   a per-student map ('string:fret'); the
+   a per-student map ('string:fret', 'c:'-prefixed for chords); the
    generator re-deals live weak spots ~⅓ of the time, and clean hits pay
    the score back down until the entry retires. Map + stage persist in
-   games.nr for signed-in students.
-   The stage is a position in this order, so it is also a level index. Until
-   2026-10-30 the order was NR_OLD_ADAPT_ORDER, with three power-chord levels
-   (12-14) woven in. The new-order stage lives in games.nr.stage2; a saved
-   games.nr.stage (a tab still running the old build keeps writing it) is a
-   position in THAT order (nrStageFromSaved). */
-const NR_ADAPT_ORDER = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11];
-const NR_OLD_ADAPT_ORDER = [0, 1, 2, 3, 4, 12, 5, 6, 13, 7, 8, 14, 9, 10, 11];
+   games.nr for signed-in students. */
+const NR_ADAPT_ORDER = [0, 1, 2, 3, 4, 12, 5, 6, 13, 7, 8, 14, 9, 10, 11];
 const NR_UP_PCT = 90, NR_DOWN_PCT = 65;
 
 let nr = null, nrRaf = null;
@@ -7953,7 +7934,6 @@ function nrWeak(){
     nrWeakMap = {};
     if (typeof games !== 'undefined' && games && games.nr && games.nr.weak){
       for (const k in games.nr.weak){
-        if (k.charAt(0) === 'c') continue;   // 'c:' = a power-chord spot from before Power Chord Chug split off; it has no home here
         const v = games.nr.weak[k] | 0;
         if (v > 0) nrWeakMap[k] = Math.min(6, v);
       }
@@ -7961,19 +7941,7 @@ function nrWeak(){
   }
   return nrWeakMap;
 }
-function nrWeakKey(n){ return n.string + ':' + n.fret; }
-
-/* A stage saved before 2026-10-30 is a position in NR_OLD_ADAPT_ORDER. The
-   same level in the new order sits at position = its level index, so walk
-   back from the saved position to the nearest melody level (a student who
-   was on a power-chord stage lands on the melody level just before it). */
-function nrStageFromSaved(n){
-  const top = NR_ADAPT_ORDER.length - 1;
-  for (let i = Math.max(0, Math.min(NR_OLD_ADAPT_ORDER.length - 1, n)); i >= 0; i--){
-    if (NR_OLD_ADAPT_ORDER[i] <= top) return NR_OLD_ADAPT_ORDER[i];
-  }
-  return 0;
-}
+function nrWeakKey(n){ return (n.chord ? 'c:' : '') + n.string + ':' + n.fret; }
 
 function nrStagePos(){
   // games.nr.stage (Firestore-synced) is preferred over the sessionStorage
@@ -7983,19 +7951,15 @@ function nrStagePos(){
   // position forever instead of picking up progress made elsewhere.
   // sessionStorage is the fallback for when Firestore data isn't in yet
   // (dev bypass, signed-out, or the very first paint of a fresh load).
-  if (typeof games !== 'undefined' && games && games.nr && typeof games.nr.stage2 === 'number'){
-    return Math.max(0, Math.min(NR_ADAPT_ORDER.length - 1, games.nr.stage2));
-  }
   if (typeof games !== 'undefined' && games && games.nr && typeof games.nr.stage === 'number'){
-    return nrStageFromSaved(games.nr.stage);
+    return Math.max(0, Math.min(NR_ADAPT_ORDER.length - 1, games.nr.stage));
   }
   let p = -1;
-  // 'nrStagePos2': the old 'nrStagePos' held a position in the old order.
-  try { p = parseInt(sessionStorage.getItem('nrStagePos2'), 10); } catch(e){}
+  try { p = parseInt(sessionStorage.getItem('nrStagePos'), 10); } catch(e){}
   return Math.max(0, Math.min(NR_ADAPT_ORDER.length - 1, p >= 0 ? p : 0));
 }
 function nrSetStagePos(p){
-  try { sessionStorage.setItem('nrStagePos2', String(p)); } catch(e){}
+  try { sessionStorage.setItem('nrStagePos', String(p)); } catch(e){}
 }
 /* A non-button sign-out (token revoked, remote sign-out) skips app.js's normal
    reload, so every game's sessionStorage-cached "today's best" / in-progress
@@ -8014,7 +7978,7 @@ const GAMES_SESSION_KEY_PREFIXES = [
   'bcDeck', 'bcBest:', 'cbDeck', 'cbDir', 'cbBest2:', 'ccBpm', 'ccProg', 'ccRate', 'ccBest:',
   'pwBpm', 'pwProg', 'pwRate',
   'cdDeck', 'cdBest2:', 'fgBest:', 'fretLevel', 'fzDeck', 'fzBest:', 'nrStagePos', 'nrBest:',
-  'ntrBest', 'pcBest:', 'pdBest', 'psBest', 'psgBest', 'rnMode', 'rnSong', 'rnBest:',
+  'ntrBest', 'pdBest', 'psBest', 'psgBest', 'rnMode', 'rnSong', 'rnBest:',
   'rrBenched', 'rrDay', 'rrDone', 'rrLast', 'rrPts', 'rrQueue', 'rrSkips',
   'shBpm', 'shPat', 'shBest:', 'srBpm', 'srPat', 'srBest:',
   // The Listening Coach's per-card streak (coach.streakKey).
@@ -8069,7 +8033,7 @@ function nrBestMerged(i){
   }
   return Math.max(nrBestSession(i), fs);
 }
-/* Which level must be cleared before level i opens: the one before it. */
+/* Which level must be cleared before level i opens (see `after` above). */
 function nrReq(i){
   const a = NR_LEVELS[i].after;
   return a !== undefined ? a : i - 1;
@@ -8180,7 +8144,6 @@ function nrPick(i){
 
 function nrRenderReady(msg){
   if (nr && nr.gym){ fgRenderReady(msg); return; }
-  if (nr && nr.pc){ pcRenderReady(msg); return; }
   const body = nrBody();
   if (!body || !nr) return;
   const lv = NR_LEVELS[nr.level];
@@ -8307,12 +8270,12 @@ function nrGen(lv){
      the line stays melodic around it — which also means its neighbours
      recur, so the effective dose is higher than the swap rate; don't
      raise this without playing a round. */
-  const wk = lv.pc ? {} : nrWeak();   // Power Chord Chug keeps no weak-spot map
-  const weakSwap = (curIdx) => {
+  const wk = nrWeak();
+  const weakSwap = (curIdx, chord) => {
     if (Math.random() >= 0.25) return curIdx;
     const cands = [];
     for (let i = 0; i < pool.length; i++){
-      if (wk[pool[i].string + ':' + pool[i].fret] > 0) cands.push(i);
+      if (wk[(chord ? 'c:' : '') + pool[i].string + ':' + pool[i].fret] > 0) cands.push(i);
     }
     return cands.length ? cands[Math.floor(Math.random() * cands.length)] : curIdx;
   };
@@ -8325,7 +8288,7 @@ function nrGen(lv){
     let wIdx = Math.floor(Math.random() * Math.min(4, pool.length));
     let wSame = 0;
     for (let wn = 0; wn < nWin; wn++){
-      wIdx = weakSwap(wIdx);
+      wIdx = weakSwap(wIdx, true);
       windows.push(pool[wIdx]);
       const next = walk(wIdx, wSame);
       wSame = next === wIdx ? wSame + 1 : 0;
@@ -8350,7 +8313,7 @@ function nrGen(lv){
                      name: coachNoteName(c.midi) + '5', beat, dur: ev[1] });
         return;
       }
-      idx = weakSwap(idx);
+      idx = weakSwap(idx, false);
       const cur = pool[idx];
       notes.push({ string: cur.string, fret: cur.fret, midi: cur.midi,
                    beat, dur: ev[1] });
@@ -8371,8 +8334,8 @@ async function nrStart(){
   const body = nrBody();
   if (!body) return;
   // Collection is on and this device hasn't answered yet: ask first.
-  // Never for a Finger Gym or Power Chord Chug round: they are not recorded (see below).
-  if (!s.gym && !s.pc && micRecShouldAsk()){ body.innerHTML = micRecAskHtml('nr'); return; }
+  // Never for a Finger Gym round: it is not recorded (see below).
+  if (!s.gym && micRecShouldAsk()){ body.innerHTML = micRecAskHtml('nr'); return; }
   coachClose();
   coachEvictTuner();
   nrHearStop();
@@ -8422,11 +8385,10 @@ async function nrStart(){
   nrRenderPlay();
   s.els = s.notes.map((_, i) => document.getElementById('nr-n-' + i));
   /* A consented recording runs from here to the end of the round. Not a
-     Finger Gym or Power Chord Chug round: it would save to the same
-     micTakes/<uid>-nr doc and overwrite the student's Note Runner take (and
-     a Finger Gym round at ~67 s runs past the 30 s cap while `expected`
-     lists every note). */
-  if (!s.gym && !s.pc && micRecStart('nr')){ const b = nrBody(); if (b) b.insertAdjacentHTML('afterbegin', micRecBadgeHtml()); }
+     Finger Gym round: it would save to the same micTakes/<uid>-nr doc and
+     overwrite the student's Note Runner take, and at ~67 s it runs past
+     the 30 s cap while `expected` lists every note. */
+  if (!s.gym && micRecStart('nr')){ const b = nrBody(); if (b) b.insertAdjacentHTML('afterbegin', micRecBadgeHtml()); }
   /* coachCountIn beeps 4 clicks and sets s.listenStart = beat 1. The
      clicks stop there — see the header comment. */
   coachCountIn(s, 'nr-count', () => {
@@ -8468,7 +8430,7 @@ function nrRenderPlay(){
      <div class="cc-beats" id="nr-beats">${'<span class="cc-pip"></span>'.repeat(4)}</div>
      ${nrRaceHtml()}
      <div class="rn-track nr-track" id="nr-track">${lanes.join('')}${rests}<div class="rn-hitline"></div><div class="rn-count" id="nr-count">&nbsp;</div></div>
-     <div class="coach-tip rn-center">${t(s.gym ? 'games.fg.tipPlay' : s.pc ? 'games.pc.tipPlay' : 'games.nr.tipPlay')}</div>
+     <div class="coach-tip rn-center">${t(s.gym ? 'games.fg.tipPlay' : 'games.nr.tipPlay')}</div>
      <button type="button" class="tp-btn coach-stop" onclick="nrFinish()">&#x25A0; ${t('games.common.stop')}</button>`;
 }
 
@@ -8970,7 +8932,7 @@ function nrFinish(complete){
   if (rec && complete){
     const lv = nrLv(s) || {};
     micRecSave(rec, {
-      // A Finger Gym or Power Chord Chug round never records (nrStart), so this is always Note Runner.
+      // A Finger Gym round never records (nrStart), so this is always Note Runner.
       fields: { game: 'nr', level: s.level, bpm: lv.bpm || null, chords: !!s.chordMode,
                 beatMs: Math.round(s.beatMs * 100) / 100, goodMs: s.goodMs, perfectMs: s.perfectMs,
                 score: s.score, eventTimes: 'played (arrival - micLatencyMs)' },
@@ -8988,8 +8950,6 @@ function nrFinish(complete){
   s.passed = s.acc >= NR_PASS;
   // Finger Gym keeps its own bests (games.fg) and has no weak map or stage.
   if (s.gym){ fgFinish(s, complete, nPerfect, nGood, nPitch, total); return; }
-  // Power Chord Chug too: its own bests (games.pc), no weak map or stage.
-  if (s.pc){ pcFinish(s, complete, nPerfect, nGood, nPitch, total); return; }
   s.prevBest = nrBestMerged(s.level);
 
   /* Weak-map upkeep: misses and wrong notes charge a position up; clean
@@ -9039,9 +8999,7 @@ function nrFinish(complete){
     if (!games.nr.levels) games.nr.levels = {};
     let dirty = false, isNewBest = false;
     if (s.acc > (games.nr.levels[s.level] || 0)){ games.nr.levels[s.level] = s.acc; dirty = true; isNewBest = true; }
-    if (s.adaptive && games.nr.stage2 !== s.stagePos){
-      games.nr.stage2 = s.stagePos; dirty = true;
-    }
+    if (s.adaptive && games.nr.stage !== s.stagePos){ games.nr.stage = s.stagePos; dirty = true; }
     if (wkChanged){ games.nr.weak = wk; dirty = true; }
     if (dirty) games.nr.at = new Date().toISOString().slice(0, 10);
     // XP is participation credit for an actual round — an immediate Start →
@@ -9055,31 +9013,14 @@ function nrFinish(complete){
   nrRenderDone(nPerfect, nGood, nPitch, total);
 }
 
-/* Early/late bias — median signed error, only with enough hits to
-   mean something (same bar Riff Runner uses). Shared by every game on this
-   engine's results screen. */
-function nrBiasLine(s){
-  if (s.errs.length < 4) return '';
-  const med = tunerMedian(s.errs) * 1000;
-  return `<div class="coach-tip rn-center">${Math.abs(med) > 25
-    ? (med < 0 ? t('games.nr.biasEarly', {ms: Math.round(-med)}) : t('games.nr.biasLate', {ms: Math.round(med)}))
-    : t('games.nr.biasTight')}</div>`;
-}
-/* The row of ★ ✓ ~ · marks, one per note; titleOf(n) is each mark's tooltip. */
-function nrMarksHtml(s, titleOf){
-  return s.playable.map(n => {
-    const cls = n.result === 'perfect' ? 'p' : n.result === 'good' ? 'g' : n.result === 'pitch' ? 'a' : 'm';
-    const sym = n.result === 'perfect' ? '&#x2605;' : n.result === 'good' ? '&#x2713;' : n.result === 'pitch' ? '~' : '&middot;';
-    return `<span class="nr-mark ${cls}" title="${escAttr(titleOf(n))}">${sym}</span>`;
-  }).join('');
-}
-
 function nrRenderDone(nPerfect, nGood, nPitch, total){
   const body = nrBody();
   if (!body || !nr) return;
   const s = nr;
-  /* Next levels come from the unlock chain (nrReq): each level opens the one
-     after it, and level 12 (index 11) opens nothing. */
+  /* Next levels come from the unlock chain (`after`), not array order: the
+     power-chord branch sits at 12-14 but opens off level 5, so the melody
+     ladder tops out at index 11 and the branch ends at 14. Clearing level 5
+     opens two levels at once. */
   const nexts = NR_LEVELS.map((_, j) => j).filter(j => j !== s.level && nrReq(j) === s.level);
   const nxt = nexts.length ? nexts[0] : -1;
   /* "Unlocked!" only when THIS clear is what opened the next level — a
@@ -9107,11 +9048,12 @@ function nrRenderDone(nPerfect, nGood, nPitch, total){
       statusLine = t('games.nr.stageStay');
     }
   } else if (s.passed){
-    /* "Ladder complete — you've run the whole neck" is the top level only. */
+    /* "Ladder complete — you've run the whole neck" is the melody ladder's
+       top only; the end of the power-chord branch is a plain clear. */
     statusLine = justUnlocked
         ? (nexts.length > 1 ? t('games.nr.passUnlockedTwo', {a: nexts[0] + 1, b: nexts[1] + 1})
           : t('games.nr.passUnlocked', {n: nxt + 1}))
-      : nxt < 0 ? t('games.nr.passLadderDone')
+      : nxt < 0 && !NR_LEVELS[s.level].chords ? t('games.nr.passLadderDone')
       : t('games.nr.passCleared');
   } else {
     statusLine = t('games.nr.failLine', {pct: NR_PASS});
@@ -9125,8 +9067,9 @@ function nrRenderDone(nPerfect, nGood, nPitch, total){
     const seen = [];
     Object.keys(wk).filter(k => wk[k] >= 2).sort((a, b) => wk[b] - wk[a]).forEach(k => {
       const parts = k.split(':');
-      const str = +parts[0], fret = +parts[1];
-      const name = coachNoteName(STRING_OPEN_MIDI[str] + fret) +
+      const chord = parts[0] === 'c';
+      const str = +parts[chord ? 1 : 0], fret = +parts[chord ? 2 : 1];
+      const name = coachNoteName(STRING_OPEN_MIDI[str] + fret) + (chord ? '5' : '') +
         ' (' + t('games.nr.fretN', {n: fret}) + ')';
       if (seen.indexOf(name) < 0) seen.push(name);
     });
@@ -9135,8 +9078,25 @@ function nrRenderDone(nPerfect, nGood, nPitch, total){
     }
   }
 
-  const biasLine = nrBiasLine(s);
-  const marks = nrMarksHtml(s, n => (n.chord ? n.name : coachNoteName(n.midi)) + ' — ' + t('games.nr.fretN', {n: n.fret}));
+  /* Early/late bias — median signed error, only with enough hits to
+     mean something (same bar Riff Runner uses). */
+  let biasLine = '';
+  if (s.errs.length >= 4){
+    const med = tunerMedian(s.errs) * 1000;
+    if (Math.abs(med) > 25){
+      biasLine = `<div class="coach-tip rn-center">${med < 0
+        ? t('games.nr.biasEarly', {ms: Math.round(-med)})
+        : t('games.nr.biasLate', {ms: Math.round(med)})}</div>`;
+    } else {
+      biasLine = `<div class="coach-tip rn-center">${t('games.nr.biasTight')}</div>`;
+    }
+  }
+
+  const marks = s.playable.map(n => {
+    const cls = n.result === 'perfect' ? 'p' : n.result === 'good' ? 'g' : n.result === 'pitch' ? 'a' : 'm';
+    const sym = n.result === 'perfect' ? '&#x2605;' : n.result === 'good' ? '&#x2713;' : n.result === 'pitch' ? '~' : '&middot;';
+    return `<span class="nr-mark ${cls}" title="${escAttr((n.chord ? n.name : coachNoteName(n.midi)) + ' — ' + t('games.nr.fretN', {n: n.fret}))}">${sym}</span>`;
+  }).join('');
 
   let bestLine = '';
   if (s.prevBest > 0 && s.acc > s.prevBest){
@@ -9339,8 +9299,20 @@ function fgRenderDone(nPerfect, nGood, nPitch, total){
     status = `<div class="coach-tip rn-center">${t('games.fg.fail', {pct: NR_PASS, medal: fgMedal(lv)})}</div>`;
   }
 
-  const biasLine = nrBiasLine(s);
-  const marks = nrMarksHtml(s, n => t(n.string === 6 ? 'games.fg.strE' : 'games.fg.strA') + ' — ' + t('games.nr.fretN', {n: n.fret}));
+  let biasLine = '';
+  if (s.errs.length >= 4){
+    const med = tunerMedian(s.errs) * 1000;
+    biasLine = `<div class="coach-tip rn-center">${Math.abs(med) > 25
+      ? (med < 0 ? t('games.nr.biasEarly', {ms: Math.round(-med)}) : t('games.nr.biasLate', {ms: Math.round(med)}))
+      : t('games.nr.biasTight')}</div>`;
+  }
+
+  const marks = s.playable.map(n => {
+    const cls = n.result === 'perfect' ? 'p' : n.result === 'good' ? 'g' : n.result === 'pitch' ? 'a' : 'm';
+    const sym = n.result === 'perfect' ? '&#x2605;' : n.result === 'good' ? '&#x2713;' : n.result === 'pitch' ? '~' : '&middot;';
+    const str = t(n.string === 6 ? 'games.fg.strE' : 'games.fg.strA');
+    return `<span class="nr-mark ${cls}" title="${escAttr(str + ' — ' + t('games.nr.fretN', {n: n.fret}))}">${sym}</span>`;
+  }).join('');
 
   const bestLine = (s.prevBest > 0 && s.acc > s.prevBest)
     ? `<div class="sh-newbest">&#x1F3C6; ${t('games.nr.newBest', {prevBest: s.prevBest + '%'})}</div>` : '';
@@ -9356,159 +9328,6 @@ function fgRenderDone(nPerfect, nGood, nPitch, total){
        <button type="button" class="coach-start" onclick="fgPick(${s.level})">&#x21BB; ${t('games.nr.tryAgainButton')}</button>
        ${nextOpen ? `<button type="button" class="coach-start" onclick="fgPick(${nxt})">${t('games.fg.nextButton')} &#x2192;</button>` : ''}
        <button type="button" class="tp-btn" onclick="fgRenderHome()">&#x2190; ${t('games.fg.allSpeeds')}</button>
-     </div>`;
-}
-
-/* ════════════════════════════════════════════════════════════════════
-   POWER CHORD CHUG — the power-chord levels that were Note Runner's 13-15,
-   now a game of their own. Same arrangement as Finger Gym: it puts `pc: true`
-   and its own level object (`lv`, from PC_LEVELS) on the shared `nr` state and
-   renders into #nr-body, so the count-in, the scrolling TAB track, the chord
-   mic grading and the results maths are Note Runner's code. The hooks are
-   nrLv(), nrGen() (lv.chords, and no weak map for lv.pc), nrRenderReady()'s
-   redirect, the record guards in nrStart(), the tip in nrRenderPlay() and the
-   early return in nrFinish(). Three levels chain: each opens when the one
-   before scores NR_PASS. Bests live in games.pc (levels: { index -> best % }),
-   apart from games.nr, so a chug round never moves Note Runner's stage.
-   ════════════════════════════════════════════════════════════════════ */
-
-function pcBestKey(i){ return 'pcBest:' + i; }
-function pcBestSession(i){
-  let v = 0;
-  try { v = parseInt(sessionStorage.getItem(pcBestKey(i)), 10) || 0; } catch(e){}
-  return v;
-}
-function pcBestSaved(i){
-  return (typeof games !== 'undefined' && games && games.pc && games.pc.levels && games.pc.levels[i]) || 0;
-}
-function pcBestMerged(i){ return Math.max(pcBestSession(i), pcBestSaved(i)); }
-function pcUnlocked(i){
-  if (typeof isGatePreviewer === 'function' && isGatePreviewer()) return true;   // same rule as nrUnlocked
-  return i === 0 || pcBestMerged(i - 1) >= NR_PASS;
-}
-
-function pcSetup(){
-  nr = { pc: true, phase: 'home', level: 0, lv: PC_LEVELS[0], timeouts: [], pv: null, micOn: false };
-  pcRenderHome();
-}
-
-function pcRenderHome(){
-  const body = nrBody();
-  if (!body || !nr || !nr.pc) return;
-  nrHearStop();
-  nr.phase = 'home';
-  const cards = PC_LEVELS.map((lv, i) => {
-    const un = pcUnlocked(i);
-    const b = pcBestMerged(i);
-    let meta;
-    if (!un){
-      meta = `<span class="rn-song-lock"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" style="width:1em;height:1em;vertical-align:-0.15em"><rect x="5" y="11" width="14" height="9" rx="2"/><path d="M8 11V7a4 4 0 0 1 8 0v4"/></svg> ${t('games.nr.clearToUnlock', {pct: NR_PASS, n: i})}</span>`;
-    } else if (b > 0){
-      meta = `<span class="rn-song-best">${t('games.nr.bestPercent', {pct: b})}${b >= NR_PASS ? ' &middot; ' + t('games.nr.clearedFlag') : ''}</span>`;
-    } else {
-      meta = `<span class="rn-song-best dim">${t('games.nr.notPlayedYet')}</span>`;
-    }
-    return `<button type="button" class="rn-song${un ? '' : ' locked'}" ${un ? `onclick="pcPick(${i})"` : 'disabled'}>
-       <span class="rn-song-title">${t('games.nr.levelChip', {n: i + 1})} — ${t(lv.nameKey)}</span>
-       <span class="rn-song-sub">${nrLevelMeta(lv)}</span>
-       ${meta}</button>`;
-  }).join('');
-  body.innerHTML =
-    `<div class="coach-tip rn-center">${t('games.pc.homeIntro', {pct: NR_PASS})}</div>
-     <div class="rn-songs">${cards}</div>`;
-}
-
-function pcPick(i){
-  if (!nr || !nr.pc || !pcUnlocked(i)) return;
-  nrHearStop();
-  nr.level = i;
-  nr.lv = PC_LEVELS[i];
-  nr.phase = 'ready';
-  pcRenderReady();
-}
-
-function pcRenderReady(msg){
-  const body = nrBody();
-  if (!body || !nr || !nr.pc) return;
-  const lv = nr.lv;
-  const tiers = lv.tiers.map(k => t(NR_RHYTHMS[k].nameKey)).join(' + ');
-  const b = pcBestMerged(nr.level);
-  body.innerHTML =
-    `${msg ? `<div class="coach-tip rn-center">${msg}</div>` : ''}
-     <div class="coach-tip rn-center"><strong>${t('games.nr.levelChip', {n: nr.level + 1})} — ${t(lv.nameKey)}</strong><br>
-       ${nrLevelMeta(lv)} &middot; ${t('games.nr.readyBars', {bars: lv.bars})}<br>
-       ${t('games.nr.readyRhythms', {list: tiers, pct: NR_PASS})}</div>
-     <div class="coach-tip rn-center">${t('games.pc.readyHow')}</div>
-     ${b > 0 ? `<div class="coach-tip rn-center">${t('games.nr.bestPercent', {pct: b})}</div>` : ''}
-     <div class="rn-center">
-       <button type="button" class="tp-btn" id="nr-hear" onclick="nrHear()">&#x1F50A; ${t('games.nr.hearButton')}</button>
-       <button type="button" class="tp-btn" onclick="pcRenderHome()">&#x2190; ${t('games.nr.allLevelsButton')}</button>
-     </div>
-     <div class="rn-center"><button type="button" class="coach-start" onclick="nrStart()">&#x1F3B8; ${t('games.nr.startButton')}</button></div>
-     <div class="nr-slider"><label for="nr-off">${t('games.nr.offsetLabel')}</label>
-       <input type="range" id="nr-off" min="0" max="250" step="5" value="${nrOffset()}" oninput="nrSetOffset(this.value)">
-       <span id="nr-off-lbl">${nrOffset()} ms</span></div>
-     <div class="coach-tip rn-center">${t('games.nr.offsetTip')}</div>
-     <div class="coach-tip rn-center">${t('games.nr.clickNote')}</div>`;
-}
-
-/* Called from nrFinish() once the shared results maths is done (s.acc,
-   s.passed). Saves the best, awards arcade XP, draws the results. */
-function pcFinish(s, complete, nPerfect, nGood, nPitch, total){
-  s.prevBest = pcBestMerged(s.level);
-  if (s.acc > pcBestSession(s.level)){
-    try { sessionStorage.setItem(pcBestKey(s.level), String(s.acc)); } catch(e){}
-  }
-  if (typeof saveGames === 'function' && currentUser && !isDevBypassUser()){
-    if (!games.pc) games.pc = {};
-    if (!games.pc.levels) games.pc.levels = {};
-    let isNewBest = false;
-    if (s.acc > (games.pc.levels[s.level] || 0)){
-      games.pc.levels[s.level] = s.acc;
-      games.pc.at = new Date().toISOString().slice(0, 10);
-      isNewBest = true;
-    }
-    // Same rule as Note Runner: XP only for a round played through with a hit.
-    if (complete && nPerfect + nGood > 0) awardArcadeXp(isNewBest);
-    if (isNewBest) saveGames();
-  }
-  pcRenderDone(nPerfect, nGood, nPitch, total);
-}
-
-function pcRenderDone(nPerfect, nGood, nPitch, total){
-  const body = nrBody();
-  if (!body || !nr || !nr.pc) return;
-  const s = nr;
-  const nxt = s.level + 1 < PC_LEVELS.length ? s.level + 1 : -1;
-  const firstClear = s.passed && s.prevBest < NR_PASS;
-  const nextOpen = nxt >= 0 && pcUnlocked(nxt);
-
-  let status;
-  if (s.passed && firstClear){
-    status = nxt >= 0
-      ? `<div class="rn-unlock">&#x1F513; ${t('games.nr.passUnlocked', {n: nxt + 1})}</div>`
-      : `<div class="rn-unlock">${t('games.pc.passTop')}</div>`;
-  } else if (s.passed){
-    status = `<div class="coach-tip rn-center">${nxt >= 0 ? t('games.nr.passCleared') : t('games.pc.passTop')}</div>`;
-  } else {
-    status = `<div class="coach-tip rn-center">${t('games.pc.failLine', {pct: NR_PASS})}</div>`;
-  }
-
-  const marks = nrMarksHtml(s, n => n.name + ' — ' + t('games.nr.fretN', {n: n.fret}));
-  const bestLine = (s.prevBest > 0 && s.acc > s.prevBest)
-    ? `<div class="sh-newbest">&#x1F3C6; ${t('games.nr.newBest', {prevBest: s.prevBest + '%'})}</div>` : '';
-
-  body.innerHTML =
-    `<div class="nr-acc ${s.passed ? 'pass' : ''}">${s.acc}%</div>
-     <div class="coach-tip rn-center">${t('games.pc.resLine', {hits: nPerfect + nGood, total, perfects: nPerfect})}${nPitch ? ' ' + t('games.pc.resPitch', {n: nPitch}) : ''}</div>
-     ${status}
-     ${bestLine}
-     <div class="nr-marks">${marks}</div>
-     ${nrBiasLine(s)}
-     <div class="rn-center">
-       <button type="button" class="coach-start" onclick="pcPick(${s.level})">&#x21BB; ${t('games.nr.tryAgainButton')}</button>
-       ${nextOpen ? `<button type="button" class="coach-start" onclick="pcPick(${nxt})">${t('games.nr.nextLevelButton')} &#x2192;</button>` : ''}
-       <button type="button" class="tp-btn" onclick="pcRenderHome()">&#x2190; ${t('games.nr.allLevelsButton')}</button>
      </div>`;
 }
 
