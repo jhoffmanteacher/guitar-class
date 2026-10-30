@@ -2226,7 +2226,15 @@ body.rail-collapsed .rail-tools .tool-popup{
 .cc-diagrams{margin:8px 0}
 .cc-dia{opacity:0.75;border-radius:8px;padding:2px;transition:opacity .15s,box-shadow .15s}
 .cc-dia.cur{opacity:1;box-shadow:0 0 0 2px var(--green-text)}
-.cc-now{display:flex;align-items:baseline;gap:14px;margin:4px 0}
+/* Change Up, Power Chord Switch and the Coach card all draw their chord
+   shapes through ccDiagramsHtml(). localChordSvg() strips the SVG's width and
+   height, and nothing gave it one back, so each diagram collapsed to its
+   label's width (8-20px) — too small to see a dot, never mind a finger
+   number. 64px reads on a 1366x657 screen. Measured (2026-10-30): a Coach
+   drill of 1-4 chords is one row; the largest, Module 3's seven power chords
+   (2 of the 14 drills), wraps to two rows and the card is about 500px tall. */
+.cc-diagrams .cc-dia svg{width:64px;height:auto}
+.cc-now{display:flex;flex-wrap:wrap;align-items:baseline;gap:4px 14px;margin:4px 0}
 .cc-chord{font-size:2.75rem;font-weight:700;color:var(--text);line-height:1.1;min-width:70px}
 .cc-next{font-size:0.875rem;font-weight:600;color:var(--text2)}
 .cc-beats{display:flex;gap:8px;margin:6px 0 10px}
@@ -3128,6 +3136,7 @@ body.games-open{overflow:hidden}
 .games-card::before{content:'';position:absolute;top:0;left:0;right:0;height:4px}
 .games-card.gc-hunt::before{background:var(--amber-text)}
 .games-card.gc-change::before{background:var(--green-text)}
+.games-card.gc-power::before{background:var(--red-text)}
 .games-card:hover{transform:translateY(-4px);box-shadow:0 10px 26px rgba(40,30,110,0.25);border-color:var(--purple-accent);background:var(--bg2)}
 .games-card-ico{font-size:2.25rem;line-height:1}
 .games-card-title{font-size:1.125rem;font-weight:700}

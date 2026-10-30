@@ -2720,6 +2720,9 @@ const GAME_ICO = {
   fret:       gIco('<circle cx="12" cy="12" r="9"/><circle cx="12" cy="12" r="4.5"/><circle cx="12" cy="12" r="1" fill="currentColor" stroke="none"/>'),
   // Change Up — repeat arrows: switch between two chords, over and over.
   cc:         gIco('<path d="M17 2l4 4-4 4"/><path d="M3 11v-1a4 4 0 0 1 4-4h14"/><path d="M7 22l-4-4 4-4"/><path d="M21 13v1a4 4 0 0 1-4 4H3"/>'),
+  // Power Chord Switch — the three dots of the power-chord shape, with a
+  // slide arrow under the fretboard: the same shape, moved.
+  power:      gIco('<path d="M4 4h16"/><circle cx="7" cy="9" r="1.7" fill="currentColor" stroke="none"/><circle cx="12" cy="13" r="1.7" fill="currentColor" stroke="none"/><circle cx="17" cy="13" r="1.7" fill="currentColor" stroke="none"/><path d="M3 20h18M6 17.5 3 20l3 2.5M18 17.5l3 2.5-3 2.5"/>'),
   // Strum Radar — signal waves picking up your strum.
   radar:      gIco('<circle cx="12" cy="19" r="1.4" fill="currentColor" stroke="none"/><path d="M8.5 15.5a5 5 0 0 1 7 0"/><path d="M5 12a9.5 9.5 0 0 1 14 0"/>'),
   // Riff Roulette — a spinning wheel.
@@ -2757,7 +2760,11 @@ const GAMES_META = [
     body:'fret-body', setup:() => fretStart() },
   { key:'cc',       cls:'gc-change',   ico:GAME_ICO.cc,         titleKey:'games.cc.title',    guitar:true,  descKey:'games.cc.desc',
     body:'cc-body', setup:() => ccSetup() },
-  { key:'radar',    cls:'gc-radar',    ico:GAME_ICO.radar,      titleKey:'games.radar.title', guitar:true,  descKey:'games.radar.desc',
+  /* Power Chord Switch runs Change Up's engine (ccSetup('power')) and shares
+     its #cc-body, as Finger Gym shares Note Runner's #nr-body. */
+  { key:'power',    cls:'gc-power',    ico:GAME_ICO.power,      titleKey:'games.pw.title',    guitar:true,  descKey:'games.pw.desc',
+    body:'cc-body', setup:() => ccSetup('power') },
+  { key:'radar',   cls:'gc-radar',    ico:GAME_ICO.radar,      titleKey:'games.radar.title', guitar:true,  descKey:'games.radar.desc',
     body:'sr-body', setup:() => srSetup() },
   { key:'roulette', cls:'gc-roulette', ico:GAME_ICO.roulette,   titleKey:'games.rr.title',    guitar:true,  descKey:'games.rr.desc',
     body:'rr-body', setup:() => rrSetup() },
@@ -2866,6 +2873,15 @@ function gamesRenderHub(p){
     }
   } catch(e){}
   const ccChip = gamesBestChip(saved.cc && saved.cc.bestBpm, ccBest, ' BPM');
+  let pwBest = 0;
+  try {
+    for (const pr of CC_POWER_PROGRESSIONS){
+      for (let ri = 0; ri < CC_RATES.length; ri++){
+        pwBest = Math.max(pwBest, parseInt(sessionStorage.getItem(ccBestKey(pr, ri)), 10) || 0);
+      }
+    }
+  } catch(e){}
+  const pwChip = gamesBestChip(saved.pw && saved.pw.bestBpm, pwBest, ' BPM');
   let cbBest = 0;
   try {
     for (const d of CB_DECKS){
@@ -2959,7 +2975,7 @@ function gamesRenderHub(p){
   } catch(e){}
   const bcChip = gamesBestChip(saved.bc && saved.bc.best, bcBest);
   /* Per-game best chips, keyed by game. */
-  const chips = { fret:fretChip, cc:ccChip, blitz:cbChip, fretzap:fzChip, strum:shChip, radar:srChip, roulette:rrChip, runner:rnChip, noterunner:nrChip, fingergym:fgChip, detective:cdChip, riffid:ntrChip, simon:psChip, simonguitar:psgChip, patterndet:pdChip, buildchord:bcChip };
+  const chips = { fret:fretChip, cc:ccChip, power:pwChip, blitz:cbChip, fretzap:fzChip, strum:shChip, radar:srChip, roulette:rrChip, runner:rnChip, noterunner:nrChip, fingergym:fgChip, detective:cdChip, riffid:ntrChip, simon:psChip, simonguitar:psgChip, patterndet:pdChip, buildchord:bcChip };
   const card = g => `
        <button type="button" class="games-card ${g.cls}" onclick="gamesShow('${g.key}')">
          <span class="games-card-ico">${g.ico}</span>
@@ -3041,7 +3057,62 @@ const CC_RATES = [
 ];
 const CC_BPM_MIN = 40, CC_BPM_MAX = 140;
 
+/* POWER CHORD SWITCH (hub key 'power') — this same engine on the
+   three-finger power chords: F5 G5 A5 (root on the low E string) and B5 C5 D5
+   (root on the A string). Open E5 is the two-finger shape, so it stays out.
+   `group` is what the hand does between the chords: 'low' slides along the
+   low E string, 'a' along the A string, 'jump' changes strings (checks.mjs
+   1cb proves every loop does what its group says). A loop may repeat a chord
+   (A5 – G5 – F5 – G5 is the Watchtower riff). */
+const CC_POWER_PROGRESSIONS = [
+  { group: 'low',  chords: ['F5','G5'] }, { group: 'low',  chords: ['G5','A5'] }, { group: 'low',  chords: ['F5','A5'] },
+  { group: 'low',  chords: ['A5','G5','F5'] }, { group: 'low',  chords: ['F5','G5','A5'] }, { group: 'low',  chords: ['A5','G5','F5','G5'] },
+  { group: 'a',    chords: ['B5','C5'] }, { group: 'a',    chords: ['C5','D5'] }, { group: 'a',    chords: ['B5','D5'] },
+  { group: 'a',    chords: ['B5','C5','D5'] }, { group: 'a',    chords: ['D5','C5','B5'] },
+  { group: 'jump', chords: ['G5','C5'] }, { group: 'jump', chords: ['A5','D5'] }, { group: 'jump', chords: ['G5','D5'] },
+  { group: 'jump', chords: ['F5','C5'] }, { group: 'jump', chords: ['F5','B5'] },
+  { group: 'jump', chords: ['G5','C5','D5'] }, { group: 'jump', chords: ['A5','D5','G5'] }, { group: 'jump', chords: ['F5','C5','G5'] },
+  { group: 'jump', chords: ['A5','D5','C5','G5'] }
+];
+const CC_POWER_GROUPS = [
+  { id: 'low',  titleKey: 'games.pw.group.low' },
+  { id: 'a',    titleKey: 'games.pw.group.a' },
+  { id: 'jump', titleKey: 'games.pw.group.jump' }
+];
+
 let cc = null, ccRaf = null;
+
+/* Which of the two games on this engine is running: Change Up (no mode, as
+   the 1ca check's hand-built state has none) or Power Chord Switch. */
+function ccIsPower(){ return !!(cc && cc.mode === 'power'); }
+function ccProgs(){ return ccIsPower() ? CC_POWER_PROGRESSIONS : CC_PROGRESSIONS; }
+/* Per-game session keys and saved-best key: each game remembers its own loop,
+   tempo and speed, and keeps its own best in games.cc / games.pw. */
+function ccSk(name){ return (ccIsPower() ? 'pw' : 'cc') + name; }
+function ccGameKey(){ return ccIsPower() ? 'pw' : 'cc'; }
+
+/* Where a power chord's root sits, read off the chord's own diagram so the
+   hint can't drift from the picture: the first string that isn't muted is the
+   root (the 3-finger shapes mute everything below it). */
+function pwRoot(name){
+  const cfg = (typeof CHORD_DIAGRAMS !== 'undefined') ? CHORD_DIAGRAMS[name] : null;
+  const r = cfg && cfg.chord.find(c => c[1] !== 'x');
+  return r ? { string: r[0], fret: r[1] } : null;
+}
+const PW_STRING_KEYS = { 6: 'games.wait.string.lowE', 5: 'games.wait.string.a' };
+/* "slide up 2 frets" along one string, "move to the A string, fret 3" when the
+   shape changes strings. '' when either chord has no diagram or nothing moves. */
+function pwMoveHint(from, to){
+  const a = pwRoot(from), b = pwRoot(to);
+  if (!a || !b) return '';
+  if (a.string !== b.string){
+    return PW_STRING_KEYS[b.string] ? t('games.pw.move.string', { string: t(PW_STRING_KEYS[b.string]), fret: b.fret }) : '';
+  }
+  const d = b.fret - a.fret;
+  if (!d) return '';
+  const n = Math.abs(d);
+  return t(d > 0 ? (n === 1 ? 'games.pw.move.upOne' : 'games.pw.move.up') : (n === 1 ? 'games.pw.move.downOne' : 'games.pw.move.down'), { n });
+}
 
 function ccStop(){
   if (ccRaf){ cancelAnimationFrame(ccRaf); ccRaf = null; }
@@ -3063,38 +3134,42 @@ function ccRandomFour(){
 }
 function ccBestKey(prog, rateIdx){ const rid = CC_RATES[rateIdx] ? CC_RATES[rateIdx].id : 'bar'; return 'ccBest:' + (prog.random ? 'RANDOM4' : prog.chords.join('-')) + ':' + rid; }
 
-function ccSetup(){
+/* mode: 'power' = Power Chord Switch; anything else (the hub passes nothing)
+   = Change Up. */
+function ccSetup(mode){
+  const power = mode === 'power';
+  const sk = power ? 'pw' : 'cc';
   let progIdx = 0, bpm = 60, rateIdx = 0;
   try {
-    progIdx = parseInt(sessionStorage.getItem('ccProg'), 10);
-    bpm = parseInt(sessionStorage.getItem('ccBpm'), 10);
-    rateIdx = parseInt(sessionStorage.getItem('ccRate'), 10);
+    progIdx = parseInt(sessionStorage.getItem(sk + 'Prog'), 10);
+    bpm = parseInt(sessionStorage.getItem(sk + 'Bpm'), 10);
+    rateIdx = parseInt(sessionStorage.getItem(sk + 'Rate'), 10);
   } catch(e){}
-  if (!(progIdx >= 0 && progIdx < CC_PROGRESSIONS.length)) progIdx = 0;
+  if (!(progIdx >= 0 && progIdx < (power ? CC_POWER_PROGRESSIONS : CC_PROGRESSIONS).length)) progIdx = 0;
   if (!(bpm >= CC_BPM_MIN && bpm <= CC_BPM_MAX)) bpm = 60;
   if (!(rateIdx >= 0 && rateIdx < CC_RATES.length)) rateIdx = 0;
-  cc = { phase: 'setup', progIdx, rateIdx, bpm, micOn: false, timeouts: [] };
+  cc = { phase: 'setup', mode: power ? 'power' : 'open', progIdx, rateIdx, bpm, micOn: false, timeouts: [] };
   ccRenderSetup();
 }
 
 function ccPickProg(i){
   if (!cc) return;
   cc.progIdx = i;
-  try { sessionStorage.setItem('ccProg', String(i)); } catch(e){}
+  try { sessionStorage.setItem(ccSk('Prog'), String(i)); } catch(e){}
   ccRenderSetup();
 }
 
 function ccPickRate(i){
   if (!cc) return;
   cc.rateIdx = i;
-  try { sessionStorage.setItem('ccRate', String(i)); } catch(e){}
+  try { sessionStorage.setItem(ccSk('Rate'), String(i)); } catch(e){}
   ccRenderSetup();
 }
 
 function ccNudgeBpm(d){
   if (!cc) return;
   cc.bpm = Math.min(CC_BPM_MAX, Math.max(CC_BPM_MIN, cc.bpm + d));
-  try { sessionStorage.setItem('ccBpm', String(cc.bpm)); } catch(e){}
+  try { sessionStorage.setItem(ccSk('Bpm'), String(cc.bpm)); } catch(e){}
   const el = document.getElementById('cc-bpm-readout');
   if (el) el.textContent = cc.bpm + ' BPM';
   else ccRenderSetup();
@@ -3105,6 +3180,9 @@ function ccNudgeBpm(d){
 function ccDiagramsHtml(chords, curName, idPrefix, shapes){
   if (typeof localChordSvg !== 'function') return '';
   const pre = idPrefix || 'cc-dia';
+  /* One box per chord: a loop that returns to a chord (A5 – G5 – F5 – G5)
+     would otherwise draw it twice under the same id. */
+  chords = chords.filter((n, i) => chords.indexOf(n) === i);
   const boxes = chords.map(n => {
     const own = shapes && Object.prototype.hasOwnProperty.call(shapes, n) && shapes[n] && Array.isArray(shapes[n].chord) ? shapes[n] : null;
     /* Width/height stripped so it scales, as localChordSvg does. */
@@ -3120,14 +3198,20 @@ function ccDiagramsHtml(chords, curName, idPrefix, shapes){
 function ccRenderSetup(msg){
   const body = ccBody();
   if (!body || !cc) return;
-  const groups = [[2, t('games.cc.group.two')], [3, t('games.cc.group.three')], [4, t('games.cc.group.four')]];
-  const pills = groups.map(([len, title]) =>
+  const power = ccIsPower();
+  /* Change Up groups its loops by how many chords; Power Chord Switch by what
+     the hand does between them (CC_POWER_GROUPS). */
+  const groups = power
+    ? CC_POWER_GROUPS.map(g => [pr => pr.group === g.id, t(g.titleKey)])
+    : [[2, t('games.cc.group.two')], [3, t('games.cc.group.three')], [4, t('games.cc.group.four')]]
+        .map(([len, title]) => [pr => pr.chords.length === len, title]);
+  const pills = groups.map(([inGroup, title]) =>
     `<div class="cc-group"><div class="cc-group-title">${title}</div><div class="fret-levels">` +
-    CC_PROGRESSIONS.map((pr, i) => pr.chords.length !== len ? '' :
-      `<button type="button" class="ts-btn${i === cc.progIdx ? ' active' : ''}" onclick="ccPickProg(${i})">${pr.random ? '&#x1F3B2; ' + t('games.cc.randomFour') : escHtml(pr.chords.join(len === 2 ? ' ↔ ' : ' – '))}</button>`
+    ccProgs().map((pr, i) => !inGroup(pr) ? '' :
+      `<button type="button" class="ts-btn${i === cc.progIdx ? ' active' : ''}" onclick="ccPickProg(${i})">${pr.random ? '&#x1F3B2; ' + t('games.cc.randomFour') : escHtml(pr.chords.join(pr.chords.length === 2 ? ' ↔ ' : ' – '))}</button>`
     ).join('') + `</div></div>`
   ).join('');
-  const prog = CC_PROGRESSIONS[cc.progIdx];
+  const prog = ccProgs()[cc.progIdx];
   const rate = CC_RATES[cc.rateIdx] || CC_RATES[0];
   let best = 0;
   try { best = parseInt(sessionStorage.getItem(ccBestKey(prog, cc.rateIdx)), 10) || 0; } catch(e){}
@@ -3148,7 +3232,7 @@ function ccRenderSetup(msg){
        <button type="button" class="tp-btn" onclick="ccNudgeBpm(5)">+5</button>
        ${best ? `<span class="cc-best">${t('games.common.bestTodayLabel')}: ${best} BPM</span>` : ''}
      </div>
-     <div class="coach-tip">&#x1F92B; ${t('games.cc.tip', { rate: tipRate })}</div>
+     <div class="coach-tip">&#x1F92B; ${t(power ? 'games.pw.tip' : 'games.cc.tip', { rate: tipRate })}</div>
      <button type="button" class="coach-start" onclick="ccStart()">&#x25B6; ${t('games.cc.startButton', { slots: rate.slots })}</button>
      ${coachFootHtml()}`;
 }
@@ -3178,7 +3262,7 @@ async function ccStart(){
   cc.micOn = true;
   stopAllDemoAudio();
 
-  const progDef = CC_PROGRESSIONS[cc.progIdx];
+  const progDef = ccProgs()[cc.progIdx];
   const prog = progDef.random ? ccRandomFour() : progDef.chords;
   cc.chords = prog;   // the actual chords this round (Random 4 differs each start)
   const rate = CC_RATES[cc.rateIdx] || CC_RATES[0];
@@ -3214,13 +3298,22 @@ function ccRenderPlay(){
   body.innerHTML =
     `<div class="cc-now">
        <div class="cc-chord" id="cc-chord">${escHtml(cc.seq[0])}</div>
-       <div class="cc-next" id="cc-next">${t('games.common.next')} ${escHtml(cc.seq[1])}</div>
+       <div class="cc-next" id="cc-next">${escHtml(ccNextText(0))}</div>
      </div>
      <div class="cc-beats" id="cc-beats"><span class="cc-pip"></span><span class="cc-pip"></span><span class="cc-pip"></span><span class="cc-pip"></span></div>
      ${ccDiagramsHtml(cc.chords, cc.seq[0])}
      <div class="coach-strip">${chips}</div>
      <div class="coach-live"><span class="coach-live-dot"></span>${t('games.cc.strumEveryBeat')}</div>
      <button type="button" class="tp-btn coach-stop" onclick="ccFinish()">&#x25A0; ${t('games.common.stop')}</button>`;
+}
+
+/* The "next:" line under the big chord name. Power Chord Switch adds how the
+   hand gets there (pwMoveHint) — that move is the whole game. */
+function ccNextText(slotIdx){
+  if (slotIdx + 1 >= cc.slots) return t('games.cc.lastOne');
+  const to = cc.seq[slotIdx + 1];
+  const hint = ccIsPower() ? pwMoveHint(cc.seq[slotIdx], to) : '';
+  return t('games.common.next') + ' ' + to + (hint ? ' — ' + hint : '');
 }
 
 function ccBeatTick(cur){
@@ -3234,7 +3327,7 @@ function ccBeatTick(cur){
     const dia = document.getElementById('cc-dia-' + cc.seq[slotIdx]);
     if (dia) dia.classList.add('cur');
   }
-  if (nextEl) nextEl.textContent = slotIdx + 1 < cc.slots ? t('games.common.next') + ' ' + cc.seq[slotIdx + 1] : t('games.cc.lastOne');
+  if (nextEl) nextEl.textContent = ccNextText(slotIdx);
   document.querySelectorAll('#cc-beats .cc-pip').forEach((el, i) => el.classList.toggle('on', i === beatInBar));
 }
 
@@ -3332,12 +3425,25 @@ function ccLoop(){
     const open = cc.changes.find(c => c.pend);
     if (open){
       if (rms > COACH_PITCH_GATE * 0.5){
-        // Change Up always grades chords — use the same looser YIN gate as the
-        // Listening Coach's chord mode so full strums actually register.
+        // Both games on this engine always grade chords. Change Up uses the same
+        // looser YIN gate (0.55) as the Listening Coach's chord mode so full
+        // strums actually register; Power Chord Switch's gate is below.
         // Spaced 40 ms like the Coach's (it was every 3rd frame — ~50 ms at
         // 60 fps, but 150 ms on a Chromebook drawing at 20).
         const p = open.pend;
-        coachPitchReadings(cc.lastPitchT, p.t + COACH_ATTACK_SKIP, 0.55).forEach(r => {
+        /* Power Chord Switch reads with Riff Runner's two-tier power-chord gate
+           (RNW_POWER_CLARITY), not the 0.55 chord gate. tools/mic-sim/
+           power-switch.mjs, synthetic, 22 pairs x 8 trials, a mic that loses
+           the low fundamental ("mid" / "weak"): a chord one fret wrong passed
+           35% / 19% of the time at 0.55 and 9% / 1% here; a right change was
+           marked messy 3% / 2% at 0.55 and 0% / 1% here.
+           NOT fixed by either gate: with a strong low fundamental a low-E
+           strum gives under 3 readings, so it passes on timing alone, and a
+           chord that never changed passes with it (45% of held strums); pairs
+           that share a note (G5 to C5, A5 to D5) pass held on every mic.
+           That is why the tip promises timing, and the notes only "when I
+           can hear them". Check on the console's Mic recordings before tuning. */
+        coachPitchReadings(cc.lastPitchT, p.t + COACH_ATTACK_SKIP, ccIsPower() ? RNW_POWER_CLARITY : 0.55).forEach(r => {
           cc.lastPitchT = r.t;
           if (r.midi != null && r.t - p.t <= COACH_EVENT_TAIL) p.readings.push(r.midi);
         });
@@ -3382,9 +3488,10 @@ function ccFinish(complete){
   });
   if (cc.micOn){ coachMicOff(); cc.micOn = false; }
   cc.phase = 'done';
-  const oldBest = (games.cc && games.cc.bestBpm) || 0;
+  const oldBest = (games[ccGameKey()] && games[ccGameKey()].bestBpm) || 0;
   // New-best only counts on a run clean enough to save — ccRenderDone's
-  // r >= 0.85 branch is what writes games.cc.bestBpm, so a bombed run at a
+  // r >= 0.85 branch is what writes games.cc.bestBpm (games.pw for Power
+  // Chord Switch), so a bombed run at a
   // high BPM would otherwise re-collect the +5 bonus on every attempt.
   const ccOk = cc.changes.filter(c => c.result === 'ok').length;
   cc.isNewBest = cc.changes.length > 0 && ccOk / cc.changes.length >= 0.85 && cc.bpm > oldBest;
@@ -3398,7 +3505,7 @@ function ccFinish(complete){
 function ccRenderDone(){
   const body = ccBody();
   if (!body || !cc) return;
-  const prog = CC_PROGRESSIONS[cc.progIdx];
+  const prog = ccProgs()[cc.progIdx];
   const total = cc.changes.length;
   const ok = cc.changes.filter(c => c.result === 'ok').length;
   const off = cc.changes.filter(c => c.result === 'off').length;
@@ -3426,7 +3533,7 @@ function ccRenderDone(){
     /* Cross-session best → the student's progress doc. Skipped in dev bypass
        (Firestore rejects that uid; the session best above still counts). */
     if (typeof saveGames === 'function' && currentUser && !isDevBypassUser() && cc.isNewBest){
-      games.cc = { bestBpm: cc.bpm, progression: cc.chords, at: new Date().toISOString().slice(0, 10) };
+      games[ccGameKey()] = { bestBpm: cc.bpm, progression: cc.chords, at: new Date().toISOString().slice(0, 10) };
       /* Saved on its own — see shFinish. awardArcadeXp is the only other
          saveGames() on this path, and it is gated on a finished round. */
       saveGames();
@@ -3452,14 +3559,14 @@ function ccRenderDone(){
        <button type="button" class="${rec === 'same' ? 'coach-start' : 'tp-btn'}" onclick="ccAgain(0)">&#x21BB; ${t('games.common.again', { bpm: cc.bpm })}</button>
        <button type="button" class="${rec === 'up' ? 'coach-start' : 'tp-btn'}" onclick="ccAgain(10)">&#x2B06; ${t('games.common.bpmUp10')}</button>
      </div>
-     <button type="button" class="tp-btn cc-change-loop" onclick="ccSetup()">${t('games.cc.pickDifferentLoop')}</button>
+     <button type="button" class="tp-btn cc-change-loop" onclick="ccSetup(${jsonAttrArg(cc.mode || '')})">${t('games.cc.pickDifferentLoop')}</button>
      ${coachFootHtml()}</div>`;
 }
 
 function ccAgain(d){
   if (!cc || cc.phase !== 'done') return;   // a second tap while the first is starting
   cc.bpm = Math.min(CC_BPM_MAX, Math.max(CC_BPM_MIN, cc.bpm + d));
-  try { sessionStorage.setItem('ccBpm', String(cc.bpm)); } catch(e){}
+  try { sessionStorage.setItem(ccSk('Bpm'), String(cc.bpm)); } catch(e){}
   cc.phase = 'setup';
   ccStart();
 }
@@ -7867,6 +7974,7 @@ function nrSetStagePos(p){
    the games arcade that happens to be sitting in sessionStorage at boot. */
 const GAMES_SESSION_KEY_PREFIXES = [
   'bcDeck', 'bcBest:', 'cbDeck', 'cbDir', 'cbBest2:', 'ccBpm', 'ccProg', 'ccRate', 'ccBest:',
+  'pwBpm', 'pwProg', 'pwRate',
   'cdDeck', 'cdBest2:', 'fgBest:', 'fretLevel', 'fzDeck', 'fzBest:', 'nrStagePos', 'nrBest:',
   'ntrBest', 'pdBest', 'psBest', 'psgBest', 'rnMode', 'rnSong', 'rnBest:',
   'rrBenched', 'rrDay', 'rrDone', 'rrLast', 'rrPts', 'rrQueue', 'rrSkips',

@@ -9548,7 +9548,7 @@ async function checkBackingLoudness() {
    ════════════════════════════════════════════════════════════════════ */
 function checkCoachVerdicts() {
   head('1ca. Coach and arcade verdict lines are true at 0, 1 and many');
-  const EXPECT = { reports: 20, descs: 20, nrLevels: 15, doneScreens: 82 };
+  const EXPECT = { reports: 20, descs: 20, nrLevels: 15, doneScreens: 88, pwLoops: 20, pwHints: 102, pwViews: 47 };
   let bad = 0;
   const flag = m => { err(m); problems++; bad++; };
   const bodies = {};
@@ -9616,7 +9616,7 @@ function checkCoachVerdicts() {
   const text = id => (bodies[id] || '').replace(/<[^>]+>/g, ' ').replace(/&[#\w]+;/g, ' ').replace(/\s+/g, ' ');
   const rep = (n, s) => Array(n).fill(s);
   const right = s => s === 'ok' || s === 'oct';
-  const counts = { reports: 0, descs: 0, nrLevels: 0, doneScreens: 0 };
+  const counts = { reports: 0, descs: 0, nrLevels: 0, doneScreens: 0, pwLoops: 0, pwHints: 0, pwViews: 0 };
   try {
     /* Coach report. [mode, slot states, timing offset ms, must show Great line, must show "all counted"] */
     const TAKES = [
@@ -9757,16 +9757,153 @@ function checkCoachVerdicts() {
             'cc-body', `Change Up, ${k} messy`, k ? [[MESSY, k]] : []);
           /* 4 good changes of 8 keeps the verdict in the band that names the messy ones. */
           if (k >= 2 && /\(1 (was|llegó)\b/.test(text('cc-body'))) flag(`1ca: ${lang} Change Up with ${k} messy changes says "${text('cc-body').match(/\(1 (was|llegó)\b/)[0]}"`);
+          /* The same done screen for Power Chord Switch, and its "pick a different
+             loop" button must send you back to Power Chord Switch. */
+          shot(`cc = { phase: 'done', mode: 'power', progIdx: 0, rateIdx: 0, bpm: 60, bpc: 4, chords: ['F5', 'G5'], timeouts: [],
+            changes: Array.from({ length: 8 }, (_, i) => ({ from: 'F5', to: 'G5', result: i < ${k} ? 'off' : i < ${k} + 4 ? 'ok' : 'miss' })) }; ccRenderDone();`,
+            'cc-body', `Power Chord Switch, ${k} messy`, k ? [[MESSY, k]] : []);
+          if (!/ccSetup\(&quot;power&quot;\)/.test(bodies['cc-body'])) flag(`1ca: ${lang} Power Chord Switch's "pick a different loop" button no longer returns to Power Chord Switch`);
         }
       }
     }
     run(`setLang('en')`);
+
+    /* Power Chord Switch is Change Up's engine on the three-finger power
+       chords (hub key 'power', ccSetup('power')). Four things must hold, and
+       each is executed here, not read off the source:
+       1. Every chord in every loop is the three-finger shape (fingers 1·3·4,
+          root then +2 frets on the next two strings), and each loop does what
+          its group's title says: "low E" loops stay on the low E string, "A
+          string" loops on the A string, "jump" loops use both.
+       2. The "next:" hint names the move the DIAGRAMS show (up/down, how many
+          frets, or which string and fret) — worked out here from
+          CHORD_DIAGRAMS, not from pwMoveHint — for every adjacent pair of
+          every loop (the last chord wraps to the first), both languages, and
+          1 fret never reads "1 frets".
+       3. The two games never share state: Change Up lists none of the power
+          loops and the other way round, each keeps its own remembered loop,
+          and a best saves to games.pw (not games.cc) and is compared with
+          its own game's best only.
+       4. The play screen and every beat tick show that same hint. */
+    const DIAG = JSON.parse(run('JSON.stringify(CHORD_DIAGRAMS)'));
+    const LOOPS = JSON.parse(run('JSON.stringify(CC_POWER_PROGRESSIONS)'));
+    const GROUP_IDS = JSON.parse(run('JSON.stringify(CC_POWER_GROUPS.map(g => g.id))'));
+    const OPEN_LOOPS = run('CC_PROGRESSIONS.length');
+    const played = n => (DIAG[n] ? DIAG[n].chord : []).filter(c => c[1] !== 'x');
+    const rootOf = n => { const r = played(n)[0]; return r ? { string: r[0], fret: r[1] } : null; };
+    const STR = { 6: ['low E', 'Mi grave'], 5: ['A', 'La'] };
+    const hintFor = (a, b, lang) => {
+      const x = rootOf(a), y = rootOf(b);
+      if (!x || !y) return null;
+      if (x.string !== y.string) return lang === 'en' ? `move to the ${STR[y.string][0]} string, fret ${y.fret}` : `pasa a la cuerda ${STR[y.string][1]}, traste ${y.fret}`;
+      const d = y.fret - x.fret, n = Math.abs(d);
+      if (!d) return '';
+      return lang === 'en' ? `slide ${d > 0 ? 'up' : 'down'} ${n} ${n === 1 ? 'fret' : 'frets'}` : `${d > 0 ? 'sube' : 'baja'} ${n} ${n === 1 ? 'traste' : 'trastes'}`;
+    };
+    const GROUP_OK = {
+      low: s => s.every(x => x === 6),
+      a: s => s.every(x => x === 5),
+      jump: s => s.includes(6) && s.includes(5),
+    };
+    for (const lp of LOOPS) {
+      counts.pwLoops++;
+      const name = lp.chords.join(' – ');
+      for (const n of new Set(lp.chords)) {
+        const p = played(n);
+        const shape = p.length === 3 && p.map(c => c[2]).join(',') === '1,3,4' &&
+          p[1][1] === p[0][1] + 2 && p[2][1] === p[0][1] + 2 && p[1][0] === p[0][0] - 1 && p[2][0] === p[0][0] - 2;
+        if (!shape) flag(`1ca: Power Chord Switch loop ${name}: ${n} is not the three-finger power chord (fingers 1·3·4, root then +2 frets on the next two strings)`);
+      }
+      if (!GROUP_IDS.includes(lp.group)) flag(`1ca: Power Chord Switch loop ${name} is in group "${lp.group}", which has no title`);
+      else if (!GROUP_OK[lp.group](lp.chords.map(n => (rootOf(n) || {}).string))) {
+        flag(`1ca: Power Chord Switch loop ${name} is under "${lp.group}" but its roots are on strings ${lp.chords.map(n => (rootOf(n) || {}).string).join(',')}`);
+      }
+      for (let i = 0; i < lp.chords.length; i++) {
+        const a = lp.chords[i], b = lp.chords[(i + 1) % lp.chords.length];
+        if (a === b) { flag(`1ca: Power Chord Switch loop ${name} holds ${a} across a change — nothing to grade`); continue; }
+        for (const lang of ['en', 'es']) {
+          run(`setLang(${JSON.stringify(lang)})`);
+          const got = run(`pwMoveHint(${JSON.stringify(a)}, ${JSON.stringify(b)})`), want = hintFor(a, b, lang);
+          counts.pwHints++;
+          if (!want || got !== want) flag(`1ca: ${lang} ${a} → ${b} hint is "${got}", the diagrams say "${want}"`);
+        }
+      }
+    }
+    run(`setLang('en')`);
+
+    /* 3. Two games, one engine, no shared state. */
+    const pillCount = html => (html.match(/onclick="ccPickProg\(/g) || []).length;
+    const POWER_NAME = /\b[A-G][#b]?5\b/;
+    for (const lang of ['en', 'es']) {
+      run(`setLang(${JSON.stringify(lang)})`);
+      run(`ccSetup('power')`); counts.pwViews++;
+      const pw = bodies['cc-body'], pwText = text('cc-body');
+      if (run('cc.mode') !== 'power') flag(`1ca: ${lang} ccSetup('power') left mode "${run('cc.mode')}"`);
+      if (pillCount(pw) !== LOOPS.length) flag(`1ca: ${lang} Power Chord Switch lists ${pillCount(pw)} loops, the data has ${LOOPS.length}`);
+      if ((pw.match(/cc-group-title/g) || []).length !== GROUP_IDS.length + 1) flag(`1ca: ${lang} Power Chord Switch shows ${(pw.match(/cc-group-title/g) || []).length} group titles, expected ${GROUP_IDS.length} loop groups + the speed row`);
+      for (const g of GROUP_IDS) {
+        const title = run(`t(CC_POWER_GROUPS.find(g => g.id === ${JSON.stringify(g)}).titleKey)`);
+        if (!pwText.includes(title)) flag(`1ca: ${lang} Power Chord Switch lost its "${title}" group`);
+      }
+      if (lang === 'es' && /power/i.test(pwText)) flag(`1ca: Spanish Power Chord Switch setup says "${pwText.match(/\S*power\S*/i)[0]}" — the glossary word is "acorde de potencia"`);
+      if (!/three|tres/.test(pwText)) flag(`1ca: ${lang} Power Chord Switch setup no longer mentions the three strings`);
+      run(`ccSetup()`);
+      const open = bodies['cc-body'];
+      if (run('cc.mode') !== 'open') flag(`1ca: ccSetup() with no argument left mode "${run('cc.mode')}" — Change Up must stay the default`);
+      if (pillCount(open) !== OPEN_LOOPS) flag(`1ca: ${lang} Change Up lists ${pillCount(open)} loops, the data has ${OPEN_LOOPS}`);
+      if (POWER_NAME.test(text('cc-body'))) flag(`1ca: ${lang} Change Up shows a power chord ("${text('cc-body').match(POWER_NAME)[0]}")`);
+    }
+    run(`setLang('en')`);
+    /* Each game remembers its own loop. */
+    run(`ccSetup('power'); ccPickProg(3); ccSetup();`);
+    if (run('cc.progIdx') !== 0) flag(`1ca: picking Power Chord Switch loop 4 moved Change Up's remembered loop to ${run('cc.progIdx')}`);
+    run(`ccSetup('power');`);
+    if (run('cc.progIdx') !== 3) flag(`1ca: Power Chord Switch forgot its remembered loop (got ${run('cc.progIdx')}, picked 3)`);
+    /* A best saves under the game's own key and is beaten only by its own game's best. */
+    const finish = (mode, bpm, saved) => {
+      run(`currentUser = { uid: 'pw-check' }; games = ${JSON.stringify(saved)}; globalThis.__saves = 0; saveGames = () => { __saves++; };
+        cc = { phase: 'play', mode: ${JSON.stringify(mode)}, progIdx: 0, rateIdx: 0, bpm: ${bpm}, bpc: 4, chords: ['F5', 'G5'], timeouts: [], micOn: false,
+          changes: Array.from({ length: 8 }, () => ({ from: 'F5', to: 'G5', result: 'ok' })) };
+        ccFinish(true);`);
+      counts.pwViews++;
+      return JSON.parse(run('JSON.stringify({ isNewBest: cc.isNewBest, games, saves: __saves })'));
+    };
+    const cleanPw = finish('power', 90, {}), cleanOpen = finish('open', 90, {});
+    if (!cleanPw.games.pw || cleanPw.games.pw.bestBpm !== 90 || cleanPw.games.cc) flag(`1ca: a clean Power Chord Switch round saved ${JSON.stringify(cleanPw.games)} — expected games.pw.bestBpm 90 and no games.cc`);
+    if (!cleanOpen.games.cc || cleanOpen.games.cc.bestBpm !== 90 || cleanOpen.games.pw) flag(`1ca: a clean Change Up round saved ${JSON.stringify(cleanOpen.games)} — expected games.cc.bestBpm 90 and no games.pw`);
+    if (!finish('power', 90, { cc: { bestBpm: 100 } }).isNewBest) flag(`1ca: Change Up's best (100 BPM) hid a Power Chord Switch best at 90 — the two games share a record`);
+    if (finish('power', 90, { pw: { bestBpm: 100 } }).isNewBest) flag(`1ca: Power Chord Switch called 90 BPM a new best over its own 100`);
+    if (!finish('open', 90, { pw: { bestBpm: 100 } }).isNewBest) flag(`1ca: a Power Chord Switch best (100 BPM) hid a Change Up best at 90 — the two games share a record`);
+    run(`currentUser = null; games = {};`);
+
+    /* 4. The play screen and each beat tick carry the hint. */
+    for (const lang of ['en', 'es']) {
+      run(`setLang(${JSON.stringify(lang)})`);
+      const nextWord = run(`t('games.common.next')`), lastOne = run(`t('games.cc.lastOne')`);
+      LOOPS.forEach((lp, i) => {
+        run(`ccSetup('power'); cc.progIdx = ${i}; cc.chords = ${JSON.stringify(lp.chords)}; cc.bpc = 4; cc.slots = 8;
+          cc.seq = Array.from({ length: 8 }, (_, k) => cc.chords[k % cc.chords.length]);
+          cc.changes = Array.from({ length: 7 }, (_, k) => ({ from: cc.seq[k], to: cc.seq[k + 1], result: null }));
+          ccRenderPlay();`);
+        counts.pwViews++;
+        const seq = Array.from({ length: 8 }, (_, k) => lp.chords[k % lp.chords.length]);
+        const shown = (bodies['cc-body'].match(/id="cc-next">([^<]*)</) || [])[1];
+        const line = k => k + 1 >= 8 ? lastOne : `${nextWord} ${seq[k + 1]} — ${hintFor(seq[k], seq[k + 1], lang)}`;
+        if (shown !== line(0).replace(/&/g, '&amp;')) flag(`1ca: ${lang} ${lp.chords.join('–')} play screen opens on "${shown}", expected "${line(0)}"`);
+        for (let k = 0; k < 8; k++) {
+          run(`ccBeatTick(${k * 4})`);
+          const got = els['cc-next'].textContent;
+          if (got !== line(k)) flag(`1ca: ${lang} ${lp.chords.join('–')} beat ${k * 4} shows "${got}", expected "${line(k)}"`);
+        }
+      });
+    }
+    run(`setLang('en'); cc = null; ccStop();`);
   } catch (e) { flag(`1ca: rendering threw (${e.message}) — a coach.js function was renamed or now needs more of the page`); return; }
 
   for (const [k, n] of Object.entries(EXPECT)) {
     if (counts[k] !== n) flag(`1ca: rendered ${counts[k]} ${k}, pinned ${n} — the check went partly blind (or grew: re-pin EXPECT on purpose)`);
   }
-  if (bad === 0) ok(`${counts.reports} Coach reports, ${counts.descs} chord-card descriptions, ${counts.nrLevels} Note Runner levels ×2 and ${counts.doneScreens} arcade done screens read true`);
+  if (bad === 0) ok(`${counts.reports} Coach reports, ${counts.descs} chord-card descriptions, ${counts.nrLevels} Note Runner levels ×2 and ${counts.doneScreens} arcade done screens read true; Power Chord Switch: ${counts.pwLoops} loops are three-finger shapes in the right group, ${counts.pwHints} slide hints match the diagrams (EN+ES), ${counts.pwViews} screens/rounds keep it apart from Change Up`);
 }
 
 (async function main() {

@@ -5,6 +5,26 @@ Notable changes to the Guitar Class site. Newest first.
 For the full session-by-session history (and the reasoning behind each change),
 see `WORKFLOW.md` and the git commit log.
 
+## 2026-10-30 — New game: Power Chord Switch
+
+- **Power Chord Switch is a new guitar game in the Games page.** It works like
+  Change Up, but with the three-finger power chords: F5, G5 and A5 on the low E
+  string, and B5, C5 and D5 on the A string. Pick a loop, pick a speed and a
+  tempo, then strum on every beat while the chord changes. The loops are in
+  three groups: slide along the low E string, slide along the A string, and jump
+  between the two strings. A loop with A5, G5, F5, G5 is the Watchtower riff.
+- **The screen tells you how to move.** Under the big chord name it says what is
+  next and how to get there: "slide up 2 frets", or "move to the A string,
+  fret 5". Keep all three fingers down and slide your whole hand as one shape.
+- **The game checks your timing, and the notes when it can hear them.** It
+  listens for a strum on each beat. When it can hear the notes clearly, it also
+  checks that the chord changed. A power chord on the low E string is hard for
+  a microphone to hear, so a round can pass on timing alone.
+- **Chord pictures are bigger in Change Up, Power Chord Switch and the Coach
+  card.** They were about as wide as the chord's name (8 to 20 pixels), too
+  small to see a finger number. They are now 64 pixels wide.
+
+
 ## 2026-10-30 — Louder metronome click in play-along activities
 
 - **The Metronome click is easier to hear over the song.** It is about 5 dB

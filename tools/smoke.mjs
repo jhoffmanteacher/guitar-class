@@ -300,6 +300,36 @@ async function walk(base, chromePort, label) {
   const views = (await run('games-meta', `(typeof GAMES_META !== 'undefined') ? GAMES_META.map(g => g.view || g.id || g.key) : []`, 50)) || [];
   stats.games = views.length;
   for (const v of views) await run(`game:${v}`, `gamesShow(${JSON.stringify(v)})`, 300);
+  /* Chord diagrams in the two games on the Change Up engine must be big enough
+     to read (2026-10-30): localChordSvg strips an SVG's width and height, and
+     for months nothing gave it one back, so every diagram collapsed to the
+     width of its label (8-20px). No source check can see a layout. A checkout
+     without the game (the baseline) skips it. */
+  for (const v of ['cc', 'power'].filter(x => views.includes(x))) {
+    const w = await run(`diagram-size:${v}`, `(() => { gamesShow(${JSON.stringify(v)}); return [...document.querySelectorAll('#cc-body .cc-dia svg')].map(s => Math.round(s.getBoundingClientRect().width)); })()`, 400);
+    if (w && (!w.length || Math.min(...w) < 48)) events.push({ step: `diagram-size:${v}`, kind: 'diagram-size', text: `${v}: ${w.length ? `${w.length} chord diagrams, the smallest ${Math.min(...w)}px wide` : 'no chord diagrams drawn'} — too small to read (they need a width: see .cc-diagrams .cc-dia svg)` });
+  }
+  /* Power Chord Switch's loop picker, clicked for real: pick a loop, leave the
+     game, come back — the same loop is still picked — and Change Up, which
+     shares the engine, still opens on its own first loop (the two games keep
+     separate remembered choices, ccSk). A checkout without the game skips it. */
+  if (views.includes('power')) {
+    const r = await run('power:pick-and-reopen', `(() => {
+      const pills = () => [...document.querySelectorAll('#cc-body .cc-group .ts-btn')].filter(b => /ccPickProg/.test(b.getAttribute('onclick') || ''));
+      const active = () => pills().filter(b => b.classList.contains('active')).map(b => b.textContent.trim());
+      gamesShow('power');
+      const n = pills().length, want = pills()[3].textContent.trim();
+      pills()[3].click();
+      gamesShow('hub'); gamesShow('power');
+      const again = active();
+      gamesShow('cc');
+      const ccFirst = pills()[0].textContent.trim(), ccActive = active();
+      return { n, want, again, ccFirst, ccActive };
+    })()`, 400);
+    if (r && (r.n !== 20 || r.again.length !== 1 || r.again[0] !== r.want || r.ccActive.length !== 1 || r.ccActive[0] !== r.ccFirst)) {
+      events.push({ step: 'power:pick-and-reopen', kind: 'power-loop-memory', text: `${r.n} loops (want 20); picked "${r.want}", reopened on "${r.again.join('|')}"; Change Up opened on "${r.ccActive.join('|')}", its first loop is "${r.ccFirst}"` });
+    }
+  }
   await run('games-hub-again', `openGamesScreen()`, 600);
   await run('lang-es-games', `setLang('es')`, 600);
   await run('lang-en-final', `setLang('en')`, 600);
