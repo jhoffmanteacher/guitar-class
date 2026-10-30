@@ -563,6 +563,7 @@
     'ca.bassOn':               { en: 'Alternating bass', es: 'Bajo alternante' },
     'ca.keyVersion':           { en: 'Key', es: 'Tonalidad' },
     'ca.keyOf':                { en: 'Key of {key}', es: 'Tonalidad de {key}' },
+    'ca.recordingVersion':     { en: 'Recording', es: 'Grabación' },
     'ca.cardHelpNote':         { en: 'The step-by-step help. Open any step.', es: 'La ayuda paso a paso. Abre cualquier paso.' },
     'ca.cardNudgeText':        { en: 'You checked {ticks} of {total} boxes. Finish anyway?',
                                  es: 'Marcaste {ticks} de {total} casillas. ¿Terminar de todos modos?' },

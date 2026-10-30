@@ -380,6 +380,21 @@ beats, rest words, the column-0 label of every row, held labels pinned) and
 executes `pcLocate`/`pcLocKey`; `tools/smoke.mjs` walks the same cards in a
 real browser. Turning a card on or off means editing its pinned list.
 
+**Recording versions — `recordingVersions` (2026-10-30, ca-26 / ca-29 / ca-40).**
+A card can play another RECORDING of its song: a Jimi Hendrix / Neil Young switch at
+the top of the card, Jimi the default. Unlike a key version (same record moved, same
+bar map) a recording has its own track, bars, form and chord rhythm, so a version
+carries a `card` (sections, caption…) that `caView` lays over the card's own, plus
+its `track`. Data: `recording`, `recordingLabel(_es)`, `recordingGroup` (one stored
+choice, `localStorage.caRecordingModes`, for every card of the song), `recordingStart`,
+`recordingVersions: { neil: { label, label_es, track, card } }`; the Neil cards are built
+by the IIFE at the end of class-activities.js. Not combinable with key / chord / bass
+versions. A version's track decides whether the Guitar switch shows (`snippetHasFull`). ca-38
+has none (its PDF holds Jimi's 224 chord names). Guarded by checks.mjs **1cc** (shape,
+render of every recording, pinned 3 cards / 1 group) and **1bf** (every version is run
+through the card rules as a virtual card); `tools/smoke.mjs` clicks the switch, reloads
+and flips back. The Song Journey page has no switch yet.
+
 **A card note may be a chord** (2026-10-05, the power-chord whole songs
 ca-29–ca-33): `{ frets: [[string, fret], ...], note: 'A5', midi: [...] }`,
 the same shape Module 3's tabs use, in a card section or a help step's

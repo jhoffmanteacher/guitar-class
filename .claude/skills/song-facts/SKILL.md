@@ -45,6 +45,15 @@ ear. This is chord *timing*, not BPM:
   `beats: 2`) — it is ca-26's loop in power chords. Don't "fix" either to
   this rhythm.** The ca-29 verse exception of 2026-10-18 (verses had G5 on
   beat 3, everything else the book rhythm) is retired — one rhythm now.
+  **The Neil Young track is BACK as the second recording (2026-10-30)** on
+  ca-26, ca-29 and ca-40 (`recordingVersions`, Jimi the default). Measured off
+  its 115 BPM file (beat map = `SNIPPET_TRACKS['all-along-the-watchtower-neil']`,
+  bar 1 = the first A, 164 bars, 82 laps; the band slows to the end after that):
+  one two-bar loop, **A 2 beats · G 1.5 · F 3 · G 1.5** — changes at beats 1,
+  3, 4.5 and 7.5 of the eight (per-eighth bass counts over 86 laps). Its guitar
+  strumming is NOT measured, so the power-chord card shows each chord once, where it
+  changes. Its full mix (Jonathan's 440 Hz m4a, 2026-10-30) was trimmed to the rhythm-down file; its 90 BPM full mix is the 115 one rubberband-stretched by 90/115 (no Moises export). No song map: eight 10-lap "Part N" sections. ca-38 (the PDF sheet) is
+  Jimi-only. The older "Am 2 · G 2 · F 3 · G 1" reading is superseded by this.
   **Method book's rhythm (2026-10-15 to 2026-10-26), kept for history:**
   `1 + 2 (rest on 3) + 4` in BOTH bars — `A A A · G G | F F F · G G`, beats
   `.5 .5 1.5 .5 1` per bar. Close for the F bar (it lacks the G on the "+" after 4), wrong for the A bar.

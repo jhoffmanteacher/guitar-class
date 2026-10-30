@@ -5,6 +5,17 @@ Notable changes to the Guitar Class site. Newest first.
 For the full session-by-session history (and the reasoning behind each change),
 see `WORKFLOW.md` and the git commit log.
 
+## 2026-10-30 — All Along the Watchtower: pick Jimi Hendrix or Neil Young
+
+- **The Watchtower play-along cards have a Jimi Hendrix / Neil Young switch.**
+  It sits at the top of the card and opens on Jimi Hendrix. Press Neil Young
+  and the card plays the Neil Young recording: its own tempo, its own parts and
+  its own chord timing, so the highlight lands where that band changes chord.
+  Your choice is kept for every Watchtower card. It is on the single-note card
+  and the power-chord card.
+- **The Guitar on / off switch works on both recordings.**
+- **The lyric sheet card stays on Jimi Hendrix.**
+
 ## 2026-10-30 — Power Chord Switch: two chords on every beat, bigger charts
 
 - **Power Chord Switch now opens on "Every beat".** The chord switches on every

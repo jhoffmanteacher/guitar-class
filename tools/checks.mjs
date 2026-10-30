@@ -7789,9 +7789,19 @@ function checkPracticeCards(ctx) {
     if (!has(o && o[f])) flag(`${where}: missing "${f}"`);
     else if (!has(o[f + '_es'])) flag(`${where}: missing "${f}_es"`);
   };
+  /* Recording versions (1cc): a version is a card of its own as far as
+     bars, beats and the end of the track go, so it goes through every rule
+     below as a virtual activity. */
+  const cardViews = [];
   for (const a of activities) {
+    cardViews.push(a);
+    if (a && a.view === 'card' && a.card && a.recordingVersions && typeof a.recordingVersions === 'object')
+      for (const [r, v] of Object.entries(a.recordingVersions))
+        cardViews.push({ ...a, id: a.id + ' [' + r + ']', card: { ...a.card, ...(v && v.card), track: v && v.track }, __rec: true });
+  }
+  for (const a of cardViews) {
     if (!a || a.view !== 'card' || !a.card) continue;
-    cards++;
+    if (!a.__rec) cards++;
     const c = a.card, w = a.id;
     const tr = TRACKS[c.track];
     if (!tr) { flag(`${w}: card.track "${c.track}" is not in SNIPPET_TRACKS (have: ${Object.keys(TRACKS).join(', ')})`); continue; }
@@ -7932,6 +7942,122 @@ function checkPracticeCards(ctx) {
   }
   if (cards === 0) { flag('1bf found no practice card — it cannot see what it is supposed to guard'); return; }
   if (bad === 0) ok(`${cards} practice card${cards === 1 ? '' : 's'} — sections add up to their bars and land inside the track, one Level up each, both renderers and every silencer wired`);
+}
+
+/* 1cc. RECORDING VERSIONS (Jonathan, 2026-10-30 — ca-26, ca-29, ca-40; caView
+   in app.js). A card can play another RECORDING of its song: the Jimi
+   Hendrix / Neil Young switch on the Watchtower play-alongs. The other
+   recording has its own tempo, bar map, form and chord rhythm, so a version
+   replaces the card's sections, not just its track. What can go wrong is
+   quiet — a version whose sections run off the end of its track or add up to
+   the wrong beats (1bf checks that, over every version, below), a switch
+   whose pressed button is the wrong one, a Guitar switch offered on a
+   recording with no full mix, a second card of the song that offers other
+   recordings (one stored choice drives every card of the group). Checked
+   here by RENDERING each card in each recording through the real app.js in
+   the 0b context, not by finding the calls:
+   - the shape: a practice card, recording / recordingGroup / label(+_es), no
+     key / chord / bass versions beside it, every version has its own track
+     (in SNIPPET_TRACKS, not the card's), label(+_es) and a card with sections;
+   - every card of a recordingGroup offers the same recordings and default;
+   - caCardBodyHtml() in each recording: pcLayout lands on that recording's
+     track and sections, the switch has exactly one pressed button and it is
+     the recording shown, the section chips are that recording's, and the
+     Guitar switch appears only where that track has a full mix;
+   - nothing stored -> the card's own recording (or recordingStart);
+   - the renderer is wired: caView() lays recordingVersions over the card,
+     caCardBodyHtml() draws caRecordingSwitchHtml().
+   Pinned: 3 cards, 1 group, 2 recordings each. */
+function checkRecordingVersions(ctx) {
+  head('1cc. Recording versions: a card that plays another recording');
+  const EXPECT = { cards: 3, groups: 1 };
+  let bad = 0, n = 0, rendered = 0;
+  const flag = m => { err(m); problems++; bad++; };
+  let appSrc = '', TRACKS = {}, activities = [];
+  try { appSrc = readFileSync(join(ROOT, 'app.js'), 'utf8'); TRACKS = loadConstObject(appSrc, 'SNIPPET_TRACKS'); }
+  catch (e) { flag('app.js: could not read SNIPPET_TRACKS \u2014 ' + e.message); return; }
+  try {
+    const src = readFileSync(join(ROOT, 'class-activities.js'), 'utf8');
+    const sandbox = { console };
+    sandbox.window = sandbox;
+    vm.createContext(sandbox);
+    vm.runInContext(src, sandbox, { filename: 'class-activities.js' });
+    activities = sandbox.CLASS_ACTIVITIES || [];
+  } catch { return; /* reported by 1d */ }
+  const has = v => v !== undefined && v !== null && v !== '';
+  const groups = {};
+  for (const a of activities) {
+    if (!a || !['recording', 'recordingVersions', 'recordingGroup', 'recordingStart', 'recordingLabel'].some(f => f in a)) continue;
+    n++;
+    const w = a.id, rv = a.recordingVersions;
+    if (a.view !== 'card' || !a.card) { flag(w + ': recording versions only render on a practice card (view:\'card\')'); continue; }
+    for (const f of ['keyVersions', 'chordVersions', 'bassNotes'])
+      if (f in a) flag(w + ': recording versions and ' + f + ' cannot be combined \u2014 caView lays the recording over the card after the chord / key rename, so its sections would keep the old chords');
+    if (!has(a.recording) || !has(a.recordingGroup) || !has(a.recordingLabel) || !has(a.recordingLabel_es)) flag(w + ': needs recording, recordingGroup, recordingLabel and recordingLabel_es');
+    if (!rv || typeof rv !== 'object' || !Object.keys(rv).length) { flag(w + ': needs a non-empty recordingVersions map'); continue; }
+    if (rv[a.recording]) flag(w + ': recordingVersions has \'' + a.recording + '\', the recording the data is already for');
+    if ('recordingStart' in a && a.recordingStart !== a.recording && !rv[a.recordingStart]) flag(w + ': recordingStart \'' + a.recordingStart + '\' is neither the card\'s recording nor a recordingVersions entry');
+    for (const [r, v] of Object.entries(rv)) {
+      const vw = w + ' \u00b7 recordingVersions.' + r;
+      if (!v || typeof v !== 'object') { flag(vw + ' is not an object'); continue; }
+      if (!has(v.label) || !has(v.label_es)) flag(vw + ': needs label and label_es');
+      if (!TRACKS[v.track]) flag(vw + ': track \'' + v.track + '\' is not in SNIPPET_TRACKS');
+      else if (v.track === a.card.track) flag(vw + ': plays the same track as the card \u2014 a recording version is another track');
+      if (!v.card || typeof v.card !== 'object' || !Array.isArray(v.card.sections) || !v.card.sections.length) flag(vw + ': needs a card with sections (the build at the end of class-activities.js fills it in)');
+      else if (has(v.card.caption) && !has(v.card.caption_es)) flag(vw + ': card.caption has no caption_es');
+    }
+    (groups[a.recordingGroup] = groups[a.recordingGroup] || []).push(a);
+  }
+  const sig = a => JSON.stringify([a.recording, a.recordingStart || a.recording, Object.keys(a.recordingVersions || {}).sort(), Object.values(a.recordingVersions || {}).map(v => v && v.track)]);
+  for (const [g, list] of Object.entries(groups))
+    if (new Set(list.map(sig)).size > 1) flag('recordingGroup \'' + g + '\': ' + list.map(a => a.id).join(', ') + ' do not offer the same recordings and default \u2014 one stored choice drives every card of the group');
+
+  // The renderer, by running it.
+  const body = fn => { const b = jsFunctionBody(appSrc, fn); return b === null ? null : stripJsComments(b); };
+  const cv = body('caView'), cb = body('caCardBodyHtml');
+  if (cv === null || !/recordingVersions/.test(cv) || !/rv\.track/.test(cv)) flag('app.js: caView() must lay recordingVersions over the card and play the version\'s track \u2014 the switch would change nothing');
+  if (cb === null || !/caRecordingSwitchHtml\(/.test(cb)) flag('app.js: caCardBodyHtml() must draw caRecordingSwitchHtml() \u2014 a card would have no switch');
+  if (!ctx) flag('1cc cannot render the cards \u2014 the 0b render context is unavailable');
+  else {
+    const J = JSON.stringify;
+    const acts = vm.runInContext('window.CLASS_ACTIVITIES || []', ctx);
+    for (const a of acts.filter(x => x && x.recordingVersions)) {
+      const g = a.recordingGroup;
+      const show = (r) => {
+        if (r !== null) vm.runInContext('caRecordingModes[' + J(g) + '] = ' + J(r), ctx);
+        try {
+          const html = String(vm.runInContext('caCardBodyHtml(CLASS_ACTIVITIES.find(x => x.id === ' + J(a.id) + '))', ctx));
+          const L = vm.runInContext('(function(){ const L = pcLayout(caView(CLASS_ACTIVITIES.find(x => x.id === ' + J(a.id) + '))); return L && { track: Object.keys(SNIPPET_TRACKS).find(k => SNIPPET_TRACKS[k] === L.tr), sections: L.sections.length, first: L.sections[0].s.label }; })()', ctx);
+          return { html, L };
+        } finally { vm.runInContext('delete caRecordingModes[' + J(g) + ']', ctx); }
+      };
+      const want = r => r === a.recording ? { track: a.card.track, secs: a.card.sections, label: a.recordingLabel } : { track: a.recordingVersions[r].track, secs: a.recordingVersions[r].card.sections, label: a.recordingVersions[r].label };
+      const cases = [[a.recording, a.recording]].concat(Object.keys(a.recordingVersions).map(r => [r, r]), [[null, a.recordingStart || a.recording]]);
+      for (const [pick, shown] of cases) {
+        const w = a.id + ' [' + (pick === null ? 'nothing stored' : pick) + ']';
+        let out;
+        try { out = show(pick); } catch (e) { flag(w + ': rendering threw ' + e.message); continue; }
+        rendered++;
+        const exp = want(shown), { html, L } = out;
+        if (!L) { flag(w + ': pcLayout found no layout'); continue; }
+        if (L.track !== exp.track) flag(w + ': plays track \'' + L.track + '\', expected \'' + exp.track + '\'');
+        if (L.sections !== exp.secs.length) flag(w + ': ' + L.sections + ' sections, expected ' + exp.secs.length);
+        if (L.first !== exp.secs[0].label) flag(w + ': first section is \'' + L.first + '\', expected \'' + exp.secs[0].label + '\'');
+        const chips = (html.match(/data-sec="\d+"/g) || []).length;
+        if (chips !== exp.secs.length) flag(w + ': ' + chips + ' section chips, expected ' + exp.secs.length);
+        const sw = (html.match(/<div class="ca-chord-switch ca-key-switch ca-rec-switch"[\s\S]*?<\/div>/) || [''])[0];
+        const pressed = [...sw.matchAll(/aria-pressed="true"[^>]*>([^<]*)</g)].map(m => m[1]);
+        if (!sw) flag(w + ': no recording switch drawn');
+        else if (pressed.length !== 1 || pressed[0] !== exp.label) flag(w + ': the switch shows ' + J(pressed) + ' pressed, expected ' + J([exp.label]));
+        const tr = TRACKS[exp.track];
+        const hasFull = !!(tr && tr.srcFull && tr.srcFullSlow);
+        if (/data-guitar="1"/.test(html) !== hasFull) flag(w + ': the Guitar switch is ' + (hasFull ? 'missing' : 'offered') + ' but ' + exp.track + (hasFull ? ' has' : ' has no') + ' full mix');
+      }
+    }
+  }
+  if (n !== EXPECT.cards) flag('1cc sees ' + n + ' card' + (n === 1 ? '' : 's') + ' with recording versions, expected ' + EXPECT.cards + ' (ca-26, ca-29, ca-40) \u2014 change the pin on purpose, or restore the card');
+  if (Object.keys(groups).length !== EXPECT.groups) flag('1cc sees ' + Object.keys(groups).length + ' recording groups, expected ' + EXPECT.groups);
+  if (bad === 0) ok(n + ' cards with recording versions, ' + rendered + ' renders (each recording + nothing stored) \u2014 right track, sections, switch and Guitar switch every time');
 }
 
 /* 1bf2. LYRIC-SHEET CARDS (card.sheet — ca-38, Jonathan 2026-10-19). The
@@ -10064,6 +10190,7 @@ function checkCoachVerdicts() {
   checkPracticeCards(rcCtx);
   checkSheetCards();
   checkChordGridCards(rcCtx);
+  checkRecordingVersions(rcCtx);
   checkPowerChordPopups(rcSets, rcCtx);
   checkPendingFileSwitch(rcCtx);
   checkCardCaptionWords();

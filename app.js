@@ -2562,6 +2562,68 @@ const SNIPPET_TRACKS = {
       231.829, 233.889, 235.911, 237.966,
     ],
   },
+  /* All Along the Watchtower — the Neil Young recording (Jonathan,
+     2026-10-30: a Neil Young / Jimi Hendrix switch on the Watchtower
+     play-along cards, Jimi the default; the card swaps to this track and
+     its own timing — caView, songVersions in class-activities.js). The two
+     rhythm-down files of the first Neil export (2026-09-18, removed with
+     the Hendrix move on 2026-09-27) put back: Am at 440 Hz, 115 and 90 BPM.
+     The 90 file came with 2.693 s of lead the 115 file does not have, so it
+     was trimmed by exactly that (envelope cross-correlation against the 115
+     file stretched by 115/90, agreeing to 0.5 ms across thirds of the song),
+     which makes it the same performance as the 115 file stretched — the
+     slow tier is derived by scaling, as for every track.
+     THE FULL MIX (Jonathan uploaded it at 440 Hz, 2026-10-30, as an m4a of the
+     115 BPM record, 380.68 s): trimmed to the rhythm-down file (it started
+     9.9406 s earlier, aligned to 0.0 ms in every quarter of the song by
+     envelope cross-correlation) and encoded to mp3 320k. NO MOISES EXPORT
+     EXISTS FOR ITS SLOW TIER: srcFullSlow is that file time-stretched by
+     rubberband, pitch held, by exactly 90/115 (the factor the Moises slow
+     rhythm-down file is to its 115 file, which agreed to 0.5 ms across the
+     song) and lands within 0.1 ms of the slow rhythm-down in every quarter
+     and 0.07 s in length. Swap in a Moises export if one is ever made.
+     NOT a click track: a live band, so it carries a beat map, measured with
+     tools/beat-map.py on the 115 file against its click-on twin (a
+     measuring input, not in the repo). Bar 1 is the A: the click on which
+     the bass moves from G to A, the third click (index 2) — the first two
+     are a pickup. The map ends at bar 165 (343.8 s): after that the band
+     slows to the end and a bar runs 3 s or more, which a steady-tempo
+     window cannot follow, so the card stops at the end of bar 164. THE
+     RECORD'S TWO-BAR LOOP (the bass on every eighth, 85 laps, the same in
+     every one that holds the pattern): A on 1 + 2 +, G on 3 + 4, F on the
+     "+" after 4 through 7, G on the "+" after 7, 8 and the "+" after 8 —
+     chord changes at beats 1, 3, 4.5 and 7.5 of the 8. */
+  'all-along-the-watchtower-neil': {
+    src:              'audio/neil-young-all-along-the-watchtower-backing-Am-115bpm-440hz-rhythm-down.mp3',
+    srcSlow:          'audio/neil-young-all-along-the-watchtower-backing-Am-90bpm-440hz-rhythm-down.mp3',
+    srcFull:          'audio/neil-young-all-along-the-watchtower-backing-Am-115bpm-440hz-full.mp3',
+    srcFullSlow:      'audio/neil-young-all-along-the-watchtower-backing-Am-90bpm-440hz-full.mp3',
+    trackBpm: 115, trackBpmSlow: 90,
+    feltBpm: 115,
+    beatsPerBar: 4,
+    durationSec: 371,
+    anchor: 1.160,
+    anchorVerified: true,
+    barTimes: [
+      1.160, 3.319, 5.462, 7.558, 9.638, 11.749, 13.817, 15.898, 17.978, 20.081,
+      22.179, 24.303, 26.419, 28.539, 30.641, 32.758, 34.858, 36.979, 39.102, 41.239,
+      43.339, 45.441, 47.521, 49.623, 51.718, 53.818, 55.939, 58.062, 60.159, 62.299,
+      64.401, 66.519, 68.640, 70.760, 72.898, 74.978, 77.101, 79.200, 81.258, 83.400,
+      85.518, 87.661, 89.799, 91.940, 94.079, 96.220, 98.322, 100.468, 102.580, 104.703,
+      106.783, 108.898, 111.019, 113.160, 115.201, 117.281, 119.384, 121.479, 123.600, 125.722,
+      127.824, 129.919, 131.999, 134.121, 136.242, 138.344, 140.439, 142.519, 144.619, 146.720,
+      148.780, 150.922, 153.039, 155.140, 157.260, 159.384, 161.500, 163.601, 165.679, 167.803,
+      169.919, 171.999, 174.101, 176.242, 178.344, 180.439, 182.500, 184.620, 186.720, 188.822,
+      190.881, 192.961, 195.040, 197.121, 199.223, 201.302, 203.400, 205.500, 207.579, 209.681,
+      211.802, 213.920, 216.020, 218.120, 220.220, 222.301, 224.353, 226.399, 228.479, 230.560,
+      232.640, 234.700, 236.760, 238.840, 240.861, 242.942, 244.981, 247.062, 249.099, 251.160,
+      253.226, 255.284, 257.279, 259.361, 261.400, 263.464, 265.480, 267.542, 269.580, 271.625,
+      273.662, 275.701, 277.740, 279.763, 281.780, 283.840, 285.864, 287.902, 289.901, 292.000,
+      294.101, 296.200, 298.260, 300.341, 302.422, 304.501, 306.561, 308.641, 310.700, 312.760,
+      314.805, 316.864, 318.901, 320.961, 322.981, 325.023, 327.103, 329.144, 331.146, 333.205,
+      335.263, 337.303, 339.306, 341.461, 343.803,
+    ],
+  },
   /* Las Mañanitas — Ariel Camacho y Los Plebes del Rancho, "Exclusivo 2018"
      (Jonathan uploaded the recording, 2026-10-14). This is the RECORD
      itself, not a Moises export: there is no rhythm-down mix, so `src` IS
@@ -12840,6 +12902,35 @@ function caKeyMode(a){
   const k = caKeyModes[a.id] || a.keyStart || a.key;
   return caKeyList(a).includes(k) ? k : a.key;
 }
+/* ── Recording versions: one activity, two recordings of the song ──
+   Jonathan, 2026-10-30, for All Along the Watchtower: "a toggle switch to
+   switch between the Neil Young track and the Jimi Hendrix track. Make Jimi
+   the default. The timing will change based on the selection." Unlike a key
+   version (the same record moved, so the same bar map), a different
+   RECORDING has its own tempo, bars, form and chord rhythm, so a version
+   carries everything that depends on the track:
+     recording: 'jimi',                 // the recording the data above is written for
+     recordingLabel: 'Jimi Hendrix', recordingLabel_es: 'Jimi Hendrix',
+     recordingGroup: 'all-along-the-watchtower',   // one choice for every card of the song
+     recordingStart: 'jimi',            // optional: the one it opens on
+     recordingVersions: { neil: { label, label_es, track,
+                                  card: { sections, caption, ... } } }
+   caView lays the version's `card` fields over the activity's own and plays
+   its `track`; the checks, tick keys and id are the activity's, unchanged.
+   The choice is per viewer in localStorage (`caRecordingModes`, { group:
+   recording }), like the key and chord switches. */
+const CA_RECORDING_MODES_KEY = 'caRecordingModes';
+let caRecordingModes = (() => {
+  try { const v = JSON.parse(localStorage.getItem(CA_RECORDING_MODES_KEY) || '{}'); return v && typeof v === 'object' ? v : {}; }
+  catch(e) { return {}; }
+})();
+function caHasRecordingVersions(a){ return !!(a && a.recording && a.recordingGroup && a.recordingVersions && typeof a.recordingVersions === 'object' && Object.keys(a.recordingVersions).length); }
+function caRecordingList(a){ return caHasRecordingVersions(a) ? [a.recording].concat(Object.keys(a.recordingVersions)) : []; }
+function caRecordingMode(a){
+  if(!caHasRecordingVersions(a)) return null;
+  const r = caRecordingModes[a.recordingGroup] || a.recordingStart || a.recording;
+  return caRecordingList(a).includes(r) ? r : a.recording;
+}
 const caChordViews = new WeakMap();   // raw activity -> Map('<key>|<mode>' -> view)
 function caView(a){
   if(!a || a.__chordView) return a;
@@ -12847,8 +12938,10 @@ function caView(a){
   const k = caKeyMode(a);
   const kv = (k && k !== a.key) ? a.keyVersions[k] : null;
   const bass = caBassMode(a) === 'on';   // alternating bass — see BASS NOTES below
-  if(!power && !kv && !bass) return a;
-  const combo = (kv ? k : '') + '|' + (power ? 'power' : 'full') + (bass ? '|bass' : '');
+  const rec = caRecordingMode(a);
+  const rv = (rec && rec !== a.recording) ? a.recordingVersions[rec] : null;
+  if(!power && !kv && !bass && !rv) return a;
+  const combo = (kv ? k : '') + '|' + (power ? 'power' : 'full') + (bass ? '|bass' : '') + (rv ? '|rec:' + rec : '');
   let byCombo = caChordViews.get(a);
   if(!byCombo){ byCombo = new Map(); caChordViews.set(a, byCombo); }
   const hit = byCombo.get(combo);
@@ -12861,7 +12954,7 @@ function caView(a){
     if(Array.isArray(v)) return v.map(walk);
     if(v && typeof v === 'object'){
       // The maps themselves are data, not content: never rename inside them.
-      if(v === a.chordVersions || v === a.keyVersions || v === a.bassNotes) return v;
+      if(v === a.chordVersions || v === a.keyVersions || v === a.bassNotes || v === a.recordingVersions) return v;
       if(Array.isArray(v.frets) && Object.prototype.hasOwnProperty.call(map, v.note)){
         const c = map[v.note];
         return { ...v, frets: c.frets.map(f => f.slice()), midi: c.midi.slice(), note: c.note };
@@ -12878,6 +12971,7 @@ function caView(a){
   };
   const view = walk(a);
   if(kv && view.card) view.card = { ...view.card, track: kv.track };
+  if(rv && view.card) view.card = { ...view.card, ...rv.card, track: rv.track };   // the recording's own bars, form and rhythm
   if(bass && view.card) view.card = { ...view.card, __bass: a.bassNotes };
   view.__chordView = true;
   byCombo.set(combo, view);
@@ -12897,6 +12991,27 @@ function caSetKeyMode(id, k){
   if(!a || !caKeyList(a).includes(k) || caKeyMode(a) === k) return;
   caKeyModes[id] = k;
   try { localStorage.setItem(CA_KEY_MODES_KEY, JSON.stringify(caKeyModes)); } catch(e) {}
+  stopCardAudio();
+  if(IS_TEACHER_MODE && typeof renderTeacherActivityDetail === 'function'){ renderTeacherActivityDetail(id); return; }
+  caOpenId = id;
+  renderClassActivities();
+}
+function caRecordingSwitchHtml(a){
+  if(!caHasRecordingVersions(a)) return '';
+  const cur = caRecordingMode(a);
+  const id = escAttr(a.id);
+  const label = r => r === a.recording ? tf(a, 'recordingLabel') : tf(a.recordingVersions[r], 'label');
+  return `<div class="ca-chord-switch ca-key-switch ca-rec-switch" role="group" aria-label="${escAttr(t('ca.recordingVersion'))}">`
+    + caRecordingList(a).map(r => `<button type="button" class="snip-toggle${r === cur ? ' on' : ''}" aria-pressed="${r === cur ? 'true' : 'false'}" onclick="caSetRecordingMode('${id}','${escAttr(r)}')">${escHtml(label(r))}</button>`).join('')
+    + `</div>`;
+}
+/* Redraw with the other recording — same shape as caSetKeyMode. The choice
+   belongs to the song (recordingGroup), so every card of it follows. */
+function caSetRecordingMode(id, r){
+  const a = (window.CLASS_ACTIVITIES || []).find(x => x.id === id);
+  if(!a || !caRecordingList(a).includes(r) || caRecordingMode(a) === r) return;
+  caRecordingModes[a.recordingGroup] = r;
+  try { localStorage.setItem(CA_RECORDING_MODES_KEY, JSON.stringify(caRecordingModes)); } catch(e) {}
   stopCardAudio();
   if(IS_TEACHER_MODE && typeof renderTeacherActivityDetail === 'function'){ renderTeacherActivityDetail(id); return; }
   caOpenId = id;
@@ -13472,7 +13587,7 @@ function caCardBodyHtml(a, opts){
   const sheet = !!a.card.sheet;
   if(sheet) setTimeout(pcSheetScan, 0);
   return `<div class="pc" data-id="${escAttr(a.id)}" data-slow="1"${snippetHasFull(L.tr) ? ' data-guitar="1"' : ''}${preview ? ' data-preview="1"' : ''}>`
-    + caKeySwitchHtml(a) + caChordSwitchHtml(a) + caBassSwitchHtml(a)
+    + caRecordingSwitchHtml(a) + caKeySwitchHtml(a) + caChordSwitchHtml(a) + caBassSwitchHtml(a)
     + `<p class="pc-dir">${escHtml(t(sheet ? 'ca.sheetDirections' : L.sections.some(S => S.grid) ? (L.sections.every(S => S.grid) ? 'ca.cardChordDirections' : 'ca.cardChordMixedDirections') : 'ca.cardDirections'))}`
     + (caBassMode(a) === 'on' && tf(a, 'bassDirections') ? ' ' + escHtml(tf(a, 'bassDirections')) : '')   // alternating bass — see BASS NOTES
     + `</p>`

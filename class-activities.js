@@ -3242,6 +3242,16 @@ window.CLASS_ACTIVITIES = [
      stops at the end of 112. */
   {
     id:    'ca-26',
+    /* Jimi Hendrix / Neil Young switch — see RECORDING VERSIONS beside caView in
+       app.js. The data below is Jimi's; the Neil version is built after the
+       array (end of this file). */
+    recording: 'jimi',
+    recordingLabel: 'Jimi Hendrix', recordingLabel_es: 'Jimi Hendrix',
+    recordingGroup: 'all-along-the-watchtower',
+    recordingStart: 'jimi',
+    recordingVersions: {
+      neil: { label: 'Neil Young', label_es: 'Neil Young', track: 'all-along-the-watchtower-neil', card: null }
+    },
     view:  'card',    // one screen: Play song + tab + checks — see CARD above
     journey: 'all-along-the-watchtower',   // the button renders under the Level up check — see JOURNEY above
     journeyLayer: 2,
@@ -3738,6 +3748,16 @@ window.CLASS_ACTIVITIES = [
      the grid: `restWord: false`, no "Stop"), 2026-10-28; every strum still lands where the record puts it. */
   {
     id:    'ca-29',
+    /* Jimi Hendrix / Neil Young switch — see RECORDING VERSIONS beside caView in
+       app.js. The data below is Jimi's; the Neil version is built after the
+       array (end of this file). */
+    recording: 'jimi',
+    recordingLabel: 'Jimi Hendrix', recordingLabel_es: 'Jimi Hendrix',
+    recordingGroup: 'all-along-the-watchtower',
+    recordingStart: 'jimi',
+    recordingVersions: {
+      neil: { label: 'Neil Young', label_es: 'Neil Young', track: 'all-along-the-watchtower-neil', card: null }
+    },
     view:  'card',    // one screen: Play song + tab + checks — see CARD above
     journey: 'all-along-the-watchtower',   // the button renders under the Level up check — see JOURNEY above
     journeyLayer: 3,
@@ -6195,6 +6215,16 @@ window.CLASS_ACTIVITIES = [
      and the Journey page draws no tab for it (checks.mjs 1bn). */
   {
     id:    'ca-40',
+    /* Jimi Hendrix / Neil Young switch — see RECORDING VERSIONS beside caView in
+       app.js. The data below is Jimi's; the Neil version is built after the
+       array (end of this file). */
+    recording: 'jimi',
+    recordingLabel: 'Jimi Hendrix', recordingLabel_es: 'Jimi Hendrix',
+    recordingGroup: 'all-along-the-watchtower',
+    recordingStart: 'jimi',
+    recordingVersions: {
+      neil: { label: 'Neil Young', label_es: 'Neil Young', track: 'all-along-the-watchtower-neil', card: null }
+    },
     view:  'card',    // one screen: Play song + tab + checks — see CARD above
     teacherOnly: true,   // console's "Teacher view songs" tab only, until moved to Class activities — see TEACHER ONLY above
     title:    'All Along the Watchtower in Power Chords — 1 Strum per Chord',
@@ -6752,4 +6782,74 @@ window.CLASS_ACTIVITIES = [
   const list = window.CLASS_ACTIVITIES;
   const from = list.find(a => a.id === 'ca-29'), to = list.find(a => a.id === 'ca-38');
   if(from && to) to.card.sections = from.card.sections;
+})();
+
+/* All Along the Watchtower — the Neil Young version of ca-26, ca-29 and ca-40
+   (Jonathan, 2026-10-30: "a toggle switch to switch between the Neil Young
+   track and the Jimi Hendrix track. Make Jimi the default. The timing will
+   change based on the selection"). Each card carries recordingVersions.neil
+   (see RECORDING VERSIONS beside caView in app.js); this fills in its `card`
+   fields, which replace the Jimi card's sections and caption when the
+   student picks Neil. ca-38 (the lyric sheet) has no Neil version: its PDF
+   has 224 chord names for Jimi's form, and this recording's form is
+   different.
+
+   THE RECORDING, measured on the 115 BPM file (track
+   'all-along-the-watchtower-neil' in app.js has how): one two-bar loop, 85
+   laps, with the chords changing at beats 1, 3, 4.5 and 7.5 of the eight —
+   A for 2 beats, G for 1.5, F for 3, G for 1.5 (per-eighth bass counts over
+   every lap: A on slots 1-4 in 69-82 laps of 86, G on 5-7, F from slot 8
+   to 13, G on 14-16). The card follows the bars up to 164, 82 laps; after
+   that the band slows to the end and a bar runs 3 s or more. The record's
+   guitar strumming was not measured (the rhythm-down mix turns it down), so
+   the power-chord card shows each chord once, where it changes, and the
+   single-note card plucks once per beat the chord is held.
+
+   NO SONG MAP: this recording's verse and solo boundaries were not marked,
+   so the card is eight parts of ten laps (the last one twelve), in bar
+   order. Rename them when someone has listened through. Every part starts
+   on an odd bar, so it starts on the A. */
+(function(){
+  const list = window.CLASS_ACTIVITIES;
+  // Laps 1-10, 11-20 ... 71-82 of the two-bar loop; each part starts on an odd bar, so on the A.
+  const parts = [
+    { label: 'Part 1', label_es: 'Parte 1', caption: 'Part 1 — A G F G, 10 laps', caption_es: 'Parte 1 — A G F G, 10 vueltas', fromBar: 1, bars: 2, reps: 10, repLabel: 'Lap', repLabel_es: 'Vuelta' },
+    { label: 'Part 2', label_es: 'Parte 2', caption: 'Part 2 — A G F G, 10 laps', caption_es: 'Parte 2 — A G F G, 10 vueltas', fromBar: 21, bars: 2, reps: 10, repLabel: 'Lap', repLabel_es: 'Vuelta' },
+    { label: 'Part 3', label_es: 'Parte 3', caption: 'Part 3 — A G F G, 10 laps', caption_es: 'Parte 3 — A G F G, 10 vueltas', fromBar: 41, bars: 2, reps: 10, repLabel: 'Lap', repLabel_es: 'Vuelta' },
+    { label: 'Part 4', label_es: 'Parte 4', caption: 'Part 4 — A G F G, 10 laps', caption_es: 'Parte 4 — A G F G, 10 vueltas', fromBar: 61, bars: 2, reps: 10, repLabel: 'Lap', repLabel_es: 'Vuelta' },
+    { label: 'Part 5', label_es: 'Parte 5', caption: 'Part 5 — A G F G, 10 laps', caption_es: 'Parte 5 — A G F G, 10 vueltas', fromBar: 81, bars: 2, reps: 10, repLabel: 'Lap', repLabel_es: 'Vuelta' },
+    { label: 'Part 6', label_es: 'Parte 6', caption: 'Part 6 — A G F G, 10 laps', caption_es: 'Parte 6 — A G F G, 10 vueltas', fromBar: 101, bars: 2, reps: 10, repLabel: 'Lap', repLabel_es: 'Vuelta' },
+    { label: 'Part 7', label_es: 'Parte 7', caption: 'Part 7 — A G F G, 10 laps', caption_es: 'Parte 7 — A G F G, 10 vueltas', fromBar: 121, bars: 2, reps: 10, repLabel: 'Lap', repLabel_es: 'Vuelta' },
+    { label: 'Part 8', label_es: 'Parte 8', caption: 'Part 8 — A G F G, 12 laps', caption_es: 'Parte 8 — A G F G, 12 vueltas', fromBar: 141, bars: 2, reps: 12, repLabel: 'Lap', repLabel_es: 'Vuelta' }
+  ];
+  const A5 = { frets: [['D', 7], ['A', 7], ['E', 5]], note: 'A5', midi: [57, 52, 45] };
+  const G5 = { frets: [['D', 5], ['A', 5], ['E', 3]], note: 'G5', midi: [55, 50, 43] };
+  const F5 = { frets: [['D', 3], ['A', 3], ['E', 1]], note: 'F5', midi: [53, 48, 41] };
+  const copy = n => ({ ...n, frets: n.frets ? n.frets.map(f => f.slice()) : undefined, midi: Array.isArray(n.midi) ? n.midi.slice() : n.midi });
+  // [note, string fret, midi, beats]: one pluck on each beat a chord is held, the half beat at the end of each G
+  const single = [['A', 5, 45, 1], ['A', 5, 45, 1], ['G', 3, 43, 1], ['G', 3, 43, 0.5], ['F', 1, 41, 1], ['F', 1, 41, 1], ['F', 1, 41, 1], ['G', 3, 43, 1], ['G', 3, 43, 0.5]]
+    .map(([note, fret, midi, beats]) => ({ string: 'E', fret, note, midi, beats }));
+  const power = [[A5, 2], [G5, 1.5], [F5, 3], [G5, 1.5]].map(([c, beats]) => ({ ...copy(c), beats }));
+  // rows: one tab row for the nine plucks of a lap, so the lap is not split 5 / 4
+  const sections = (notes, rows) => parts.map(p => ({ ...p, ...(rows ? { rows } : {}), notes: notes.map(copy) }));
+  const neil = (id, card) => {
+    const a = list.find(x => x.id === id);
+    if(a && a.recordingVersions && a.recordingVersions.neil) a.recordingVersions.neil.card = card;
+  };
+  neil('ca-26', {
+    caption:    'The whole song in order · a pluck on each beat of the chord · the notes land where Neil Young changes chord',
+    caption_es: 'La canción completa en orden · una pulsación en cada tiempo del acorde · las notas caen donde Neil Young cambia de acorde',
+    sections: sections(single, [9])
+  });
+  neil('ca-29', {
+    everyStrum: false,   // one strum shown where the chord changes: Neil's strumming was not measured
+    caption:    'The whole song in power chords · each chord where Neil Young changes it',
+    caption_es: 'La canción completa con acordes de potencia · cada acorde donde Neil Young lo cambia',
+    sections: sections(power)
+  });
+  neil('ca-40', {
+    caption:    'The whole song in power chords · 1 strum per chord, where Neil Young changes it · the highlight follows the beat',
+    caption_es: 'La canción completa con acordes de potencia · 1 rasgueo por acorde, donde Neil Young lo cambia · la marca sigue el tiempo',
+    sections: sections(power)
+  });
 })();

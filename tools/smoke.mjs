@@ -256,6 +256,57 @@ async function chordGridWalk(page, run, events, stats) {
   await run('chord-grid:done', `(typeof caFocusActivity === 'function') ? (document.querySelectorAll('.ca-card[open]').forEach(c => { c.open = false; }), 1) : 0`, 100);
 }
 
+/* Recording switch (recordingVersions, 2026-10-30 — the Jimi Hendrix / Neil
+   Young switch on the Watchtower play-alongs). checks.mjs 1cc renders every
+   recording through the real app.js; this clicks the switch for real. For each
+   card with versions: it opens on the card's own recording with nothing saved,
+   one press moves to the other recording (the other track, the pressed button,
+   the Guitar switch only where that track has a full mix, the choice saved for
+   the whole song), a second press moves back, and after a page reload the
+   saved choice is still the one showing. Leaves nothing saved. Teacher-only
+   cards (ca-40) are not walked: a student cannot open them; 1cc renders them. A checkout
+   without recording versions (the baseline) skips it. */
+async function recordingWalk(page, run, events, stats, base) {
+  const cards = await run('recording:list', `typeof caRecordingSwitchHtml === 'function' ? CLASS_ACTIVITIES.filter(a => a.recordingVersions && !a.teacherOnly).map(a => ({ id: a.id, group: a.recordingGroup })) : []`, 20);
+  if (!cards || !cards.length) return;
+  const fail = (id, text) => events.push({ step: 'recording:' + id, kind: 'recording-switch', text });
+  const state = `(() => { const q = s => document.querySelector('.ca-card[open] ' + s); const sw = q('.ca-rec-switch'); if (!sw) return { missing: true };
+    const L = pcLayout(pcActivity(q('.pc')));
+    return { pressed: [...sw.querySelectorAll('button')].filter(b => b.getAttribute('aria-pressed') === 'true').map(b => b.textContent.trim()), track: Object.keys(SNIPPET_TRACKS).find(k => SNIPPET_TRACKS[k] === L.tr),
+             secs: L.sections.length, chips: document.querySelectorAll('.ca-card[open] .pc-sec').length, guitar: !!q('.pc-guitar'), full: snippetHasFull(L.tr), saved: localStorage.getItem('caRecordingModes') }; })()`;
+  const press = `(() => { const b = [...document.querySelector('.ca-card[open] .ca-rec-switch').querySelectorAll('button')].find(x => x.getAttribute('aria-pressed') !== 'true'); b.click(); return 1; })()`;
+  await run('recording:open', 'openClassActivitiesScreen()', 600);
+  await run('recording:clear', `(localStorage.removeItem('caRecordingModes'), caRecordingModes = {}, 1)`, 10);
+  for (const { id, group } of cards) {
+    await run('recording:' + id + ':open', "caFocusActivity('" + id + "')", 500);
+    const a = await run('recording:' + id + ':default', state, 10);
+    if (!a || a.missing) { fail(id, 'the recording switch is not on the card'); continue; }
+    if (a.pressed.length !== 1 || a.saved) fail(id, 'opens with ' + JSON.stringify(a.pressed) + ' pressed and ' + a.saved + ' saved — it should open on the card\'s own recording with nothing saved');
+    await run('recording:' + id + ':press', press, 500);
+    const b = await run('recording:' + id + ':other', state, 10);
+    if (!b || b.missing) { fail(id, 'the switch is gone after one press'); continue; }
+    if (b.track === a.track || b.pressed[0] === a.pressed[0] || b.pressed.length !== 1) fail(id, 'one press left ' + a.track + ' playing / ' + JSON.stringify(b.pressed) + ' pressed');
+    if (b.guitar !== b.full) fail(id, 'the Guitar switch is ' + (b.guitar ? 'shown' : 'missing') + ' on ' + b.track + ', which ' + (b.full ? 'has' : 'has no') + ' full mix');
+    let saved = null; try { saved = JSON.parse(b.saved || '{}')[group]; } catch (e) { /* reported below */ }
+    if (!saved) fail(id, 'the choice was not saved for the song (' + b.saved + ')');
+    // Reload: the saved choice must still be the one showing.
+    await page.send('Page.navigate', { url: base + '/index.html' });
+    await sleep(3500);
+    await run('recording:' + id + ':devBypass', 'devBypass()', 3500);
+    // The app downgrades this benign browser warning to console.warn (app.js, near the top); a second boot trips it.
+    for (let i = events.length - 1; i >= 0; i--) if (events[i].step === 'recording:' + id + ':devBypass' && /ResizeObserver loop/.test(events[i].text)) events.splice(i, 1);
+    await run('recording:' + id + ':reopen', "caFocusActivity('" + id + "')", 700);
+    const c = await run('recording:' + id + ':after-reload', state, 10);
+    if (!c || c.missing || c.track !== b.track || c.pressed[0] !== b.pressed[0]) fail(id, 'after a reload the card shows ' + (c && c.track) + ' / ' + JSON.stringify(c && c.pressed) + ', not the saved ' + b.track);
+    await run('recording:' + id + ':back', press, 500);
+    const d = await run('recording:' + id + ':restored', state, 10);
+    if (!d || d.track !== a.track || d.pressed[0] !== a.pressed[0]) fail(id, 'a second press did not return to ' + a.track);
+    stats.recordingClicks = (stats.recordingClicks || 0) + 1;
+    await run('recording:' + id + ':reset', `(localStorage.removeItem('caRecordingModes'), caRecordingModes = {}, 1)`, 10);
+  }
+  await run('recording:done', `(document.querySelectorAll('.ca-card[open]').forEach(c => { c.open = false; }), 1)`, 100);
+}
+
 async function walk(base, chromePort, label) {
   const page = await openPage(chromePort);
   let step = 'boot'; const events = []; const stats = { sets: 0, modules: 0, games: 0, buttons: 0 };
@@ -375,6 +426,7 @@ async function walk(base, chromePort, label) {
   if (tunerShut === false) tunerFail('tuner-close', 'a second togglePopup(\'tuner\') did not close the popup and stop the mic');
   await run('click-away', `document.body.click()`, 300);
   await chordGridWalk(page, run, events, stats);
+  await recordingWalk(page, run, events, stats, base);
   await page.close();
   return { label, stats, errors: events.filter(e => !NOISE.test(e.text || '')) };
 }
@@ -408,7 +460,7 @@ try {
   const norm = e => `${e.kind}|${e.step.replace(/^(en|es):/, '')}|${e.kind === 'bad-handler' ? '' : e.text}`;
   const baseCount = new Map(); (base ? base.errors : []).forEach(e => baseCount.set(norm(e), Math.max(baseCount.get(norm(e)) || 0, e.kind === 'bad-handler' ? +e.text : 1)));
   const report = base ? now.errors.filter(e => (e.kind === 'bad-handler' ? +e.text : 1) > (baseCount.get(norm(e)) || 0)) : now.errors;
-  say(`smoke: ${now.stats.sets} sets in ${now.stats.modules} modules (EN + ES), ${now.stats.games} game views, ${now.stats.buttons} inline handlers compiled${now.stats.chordCards ? `, ${now.stats.chordCards} chord-grid cards walked (cursor, lap, layout at 1366/390/360, lyric sheet${now.stats.bassClicks ? `, bass switch clicked on ${now.stats.bassClicks}` : ''}${now.stats.chordSkipped ? `; ${now.stats.chordSkipped.join(', ')} is teacher-only and not walked` : ''})` : ''}`);
+  say(`smoke: ${now.stats.sets} sets in ${now.stats.modules} modules (EN + ES), ${now.stats.games} game views, ${now.stats.buttons} inline handlers compiled${now.stats.chordCards ? `, ${now.stats.chordCards} chord-grid cards walked (cursor, lap, layout at 1366/390/360, lyric sheet${now.stats.bassClicks ? `, bass switch clicked on ${now.stats.bassClicks}` : ''}${now.stats.recordingClicks ? `, recording switch clicked, reloaded and flipped back on ${now.stats.recordingClicks}` : ''}${now.stats.chordSkipped ? `; ${now.stats.chordSkipped.join(', ')} is teacher-only and not walked` : ''})` : ''}`);
   if (base) say(`smoke: ${BASELINE} had ${base.errors.length} error event(s); this checkout has ${now.errors.length}`);
   if (report.length) {
     exitCode = 1;
