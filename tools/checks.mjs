@@ -9548,7 +9548,7 @@ async function checkBackingLoudness() {
    ════════════════════════════════════════════════════════════════════ */
 function checkCoachVerdicts() {
   head('1ca. Coach and arcade verdict lines are true at 0, 1 and many');
-  const EXPECT = { reports: 20, descs: 20, nrLevels: 15, doneScreens: 88, pwLoops: 20, pwHints: 102, pwViews: 47 };
+  const EXPECT = { reports: 20, descs: 20, nrLevels: 15, doneScreens: 88, pwLoops: 20, pwHints: 102, pwViews: 47, pwMemory: 2, pwGates: 3 };
   let bad = 0;
   const flag = m => { err(m); problems++; bad++; };
   const bodies = {};
@@ -9616,7 +9616,7 @@ function checkCoachVerdicts() {
   const text = id => (bodies[id] || '').replace(/<[^>]+>/g, ' ').replace(/&[#\w]+;/g, ' ').replace(/\s+/g, ' ');
   const rep = (n, s) => Array(n).fill(s);
   const right = s => s === 'ok' || s === 'oct';
-  const counts = { reports: 0, descs: 0, nrLevels: 0, doneScreens: 0, pwLoops: 0, pwHints: 0, pwViews: 0 };
+  const counts = { reports: 0, descs: 0, nrLevels: 0, doneScreens: 0, pwLoops: 0, pwHints: 0, pwViews: 0, pwMemory: 0, pwGates: 0 };
   try {
     /* Coach report. [mode, slot states, timing offset ms, must show Great line, must show "all counted"] */
     const TAKES = [
@@ -9859,6 +9859,44 @@ function checkCoachVerdicts() {
     if (run('cc.progIdx') !== 0) flag(`1ca: picking Power Chord Switch loop 4 moved Change Up's remembered loop to ${run('cc.progIdx')}`);
     run(`ccSetup('power');`);
     if (run('cc.progIdx') !== 3) flag(`1ca: Power Chord Switch forgot its remembered loop (got ${run('cc.progIdx')}, picked 3)`);
+    /* ...and its own tempo and speed, including the "Again at +10 BPM" button
+       (ccAgain re-starts the round, so ccStart is stubbed for that one call). */
+    run(`ccSetup('power'); ccNudgeBpm(5); ccPickRate(2); globalThis.__realStart = ccStart; ccStart = () => {};
+      cc.phase = 'done'; ccAgain(10); ccStart = __realStart;`);
+    run(`ccSetup('power')`);
+    const pwMemory = { bpm: run('cc.bpm'), rate: run('cc.rateIdx') };
+    run(`ccSetup()`);
+    const ccMemory = { bpm: run('cc.bpm'), rate: run('cc.rateIdx') };
+    counts.pwMemory += 2;
+    if (pwMemory.bpm !== 75 || pwMemory.rate !== 2) flag(`1ca: Power Chord Switch reopened at ${pwMemory.bpm} BPM, speed ${pwMemory.rate}; it was set to 75 BPM (60 + 5 + the Again button's 10), speed 2`);
+    if (ccMemory.bpm !== 60 || ccMemory.rate !== 0) flag(`1ca: Change Up opened at ${ccMemory.bpm} BPM, speed ${ccMemory.rate} after Power Chord Switch's tempo and speed were changed — it must keep its own (60, 0)`);
+    /* The pitch gate each game reads strums with. ccLoop is run once per mode
+       against a stubbed mic reader, and records the third argument it hands to
+       coachPitchReadings: Change Up (with no mode, and with 'open') must keep
+       0.55, Power Chord Switch must read with Riff Runner's RNW_POWER_CLARITY
+       (tools/mic-sim/power-switch.mjs measured why). A run that never reaches
+       the reader is a failure too, not a pass. */
+    run(`globalThis.__orig = { rf: coachReadFrame, pr: coachPitchReadings, an: coachAnalyser, oa: coachOnsetAt, hf: coachHfRms };`);
+    const gateSeen = mode => {
+      run(`ccSetup(${mode === null ? '' : JSON.stringify(mode)});
+        coachAnalyser = {}; coachReadFrame = () => 0.5; coachOnsetAt = 1000; coachHfRms = 0;
+        globalThis.__gates = []; coachPitchReadings = (since, minEnd, gate) => { __gates.push(gate); return []; };
+        Object.assign(cc, { phase: 'play', beatMs: 500, bpc: 4, slots: 8, listenStart: 1000 - coachMicLatencyMs(), gridOffset: 0,
+          smoothRms: 0, smoothHf: 0, lastOnsetT: -1e9, lastPitchT: 0, lastBeat: -1,
+          seq: ['F5', 'G5', 'F5', 'G5', 'F5', 'G5', 'F5', 'G5'], classes: { F5: [5, 0], G5: [7, 2] },
+          changes: [{ beat: 0, from: 'F5', to: 'G5', result: null, pend: null }] });
+        ccLoop();`);
+      const gates = JSON.parse(run('JSON.stringify(__gates)'));
+      run(`ccStop(); coachReadFrame = __orig.rf; coachPitchReadings = __orig.pr; coachAnalyser = __orig.an; coachOnsetAt = __orig.oa; coachHfRms = __orig.hf;`);
+      return gates;
+    };
+    const POWER_GATE = JSON.stringify(JSON.parse(run('JSON.stringify(RNW_POWER_CLARITY)')));
+    for (const [mode, want] of [[null, '0.55'], ['open', '0.55'], ['power', POWER_GATE]]) {
+      counts.pwGates++;
+      const seen = gateSeen(mode).map(g => JSON.stringify(g));
+      if (!seen.length) flag(`1ca: ccLoop in mode ${JSON.stringify(mode)} never read pitch — the gate check went blind`);
+      else if (seen.some(g => g !== want)) flag(`1ca: ccLoop in mode ${JSON.stringify(mode)} read pitch with gate ${seen.join(', ')}; it must be ${want}`);
+    }
     /* A best saves under the game's own key and is beaten only by its own game's best. */
     const finish = (mode, bpm, saved) => {
       run(`currentUser = { uid: 'pw-check' }; games = ${JSON.stringify(saved)}; globalThis.__saves = 0; saveGames = () => { __saves++; };
@@ -9903,7 +9941,7 @@ function checkCoachVerdicts() {
   for (const [k, n] of Object.entries(EXPECT)) {
     if (counts[k] !== n) flag(`1ca: rendered ${counts[k]} ${k}, pinned ${n} — the check went partly blind (or grew: re-pin EXPECT on purpose)`);
   }
-  if (bad === 0) ok(`${counts.reports} Coach reports, ${counts.descs} chord-card descriptions, ${counts.nrLevels} Note Runner levels ×2 and ${counts.doneScreens} arcade done screens read true; Power Chord Switch: ${counts.pwLoops} loops are three-finger shapes in the right group, ${counts.pwHints} slide hints match the diagrams (EN+ES), ${counts.pwViews} screens/rounds keep it apart from Change Up`);
+  if (bad === 0) ok(`${counts.reports} Coach reports, ${counts.descs} chord-card descriptions, ${counts.nrLevels} Note Runner levels ×2 and ${counts.doneScreens} arcade done screens read true; Power Chord Switch: ${counts.pwLoops} loops are three-finger shapes in the right group, ${counts.pwHints} slide hints match the diagrams (EN+ES), ${counts.pwViews} screens/rounds, ${counts.pwMemory} remembered tempo/speed pairs and ${counts.pwGates} pitch gates keep it apart from Change Up`);
 }
 
 (async function main() {

@@ -12,17 +12,20 @@ see `WORKFLOW.md` and the git commit log.
   string, and B5, C5 and D5 on the A string. Pick a loop, pick a speed and a
   tempo, then strum on every beat while the chord changes. The loops are in
   three groups: slide along the low E string, slide along the A string, and jump
-  between the two strings. A loop with A5, G5, F5, G5 is the Watchtower riff.
-- **The screen tells you how to move.** Under the big chord name it says what is
-  next and how to get there: "slide up 2 frets", or "move to the A string,
-  fret 5". Keep all three fingers down and slide your whole hand as one shape.
-- **The game checks your timing, and the notes when it can hear them.** It
-  listens for a strum on each beat. When it can hear the notes clearly, it also
-  checks that the chord changed. A power chord on the low E string is hard for
-  a microphone to hear, so a round can pass on timing alone.
+  between the two strings. The A5, G5, F5, G5 loop is the chord loop of All
+  Along the Watchtower.
+- **The screen tells you how to move.** Next to the big chord name it says what
+  comes next and how to get there: "slide up 2 frets", or "move to the A string,
+  fret 5". Up means toward the body. Keep all three fingers down and slide your
+  whole hand as one shape.
+- **The game checks your timing first, and the chord when it can hear it.** It
+  listens for a strum on every beat. When it can hear the notes clearly, it also
+  checks the chord, but two chords that share a note (like G5 and C5) can fool
+  it. A power chord on the low E string is hard for a microphone to hear, so a
+  round can pass on timing alone.
 - **Chord pictures are bigger in Change Up, Power Chord Switch and the Coach
   card.** They were about as wide as the chord's name (8 to 20 pixels), too
-  small to see a finger number. They are now 64 pixels wide.
+  small to see a finger number. They are now 80 pixels wide.
 
 
 ## 2026-10-30 — Louder metronome click in play-along activities

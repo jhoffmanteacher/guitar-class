@@ -2230,10 +2230,12 @@ body.rail-collapsed .rail-tools .tool-popup{
    shapes through ccDiagramsHtml(). localChordSvg() strips the SVG's width and
    height, and nothing gave it one back, so each diagram collapsed to its
    label's width (8-20px) — too small to see a dot, never mind a finger
-   number. 64px reads on a 1366x657 screen. Measured (2026-10-30): a Coach
-   drill of 1-4 chords is one row; the largest, Module 3's seven power chords
-   (2 of the 14 drills), wraps to two rows and the card is about 500px tall. */
-.cc-diagrams .cc-dia svg{width:64px;height:auto}
+   number. The finger numerals are 12.15 of the SVG's 96 units, so 80px makes
+   them about 10px (64px made them 8px: marginal when looked at on a screen).
+   Measured at 1366x657 (2026-10-30): a Coach drill of 1-4 chords is one row;
+   the largest, Module 3's seven power chords (2 of the 14 drills), wraps to
+   two rows and the card is about 540px tall. */
+.cc-diagrams .cc-dia svg{width:80px;height:auto}
 .cc-now{display:flex;flex-wrap:wrap;align-items:baseline;gap:4px 14px;margin:4px 0}
 .cc-chord{font-size:2.75rem;font-weight:700;color:var(--text);line-height:1.1;min-width:70px}
 .cc-next{font-size:0.875rem;font-weight:600;color:var(--text2)}

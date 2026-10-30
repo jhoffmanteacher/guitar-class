@@ -3062,8 +3062,8 @@ const CC_BPM_MIN = 40, CC_BPM_MAX = 140;
    (root on the A string). Open E5 is the two-finger shape, so it stays out.
    `group` is what the hand does between the chords: 'low' slides along the
    low E string, 'a' along the A string, 'jump' changes strings (checks.mjs
-   1cb proves every loop does what its group says). A loop may repeat a chord
-   (A5 – G5 – F5 – G5 is the Watchtower riff). */
+   1ca proves every loop does what its group says). A loop may repeat a chord
+   (A5 – G5 – F5 – G5 is the chord loop of All Along the Watchtower). */
 const CC_POWER_PROGRESSIONS = [
   { group: 'low',  chords: ['F5','G5'] }, { group: 'low',  chords: ['G5','A5'] }, { group: 'low',  chords: ['F5','A5'] },
   { group: 'low',  chords: ['A5','G5','F5'] }, { group: 'low',  chords: ['F5','G5','A5'] }, { group: 'low',  chords: ['A5','G5','F5','G5'] },
@@ -3441,8 +3441,10 @@ function ccLoop(){
            strum gives under 3 readings, so it passes on timing alone, and a
            chord that never changed passes with it (45% of held strums); pairs
            that share a note (G5 to C5, A5 to D5) pass held on every mic.
-           That is why the tip promises timing, and the notes only "when I
-           can hear them". Check on the console's Mic recordings before tuning. */
+           That is why the tip promises a strum on every beat, and the chord
+           only "when I can hear the notes clearly, but two chords that share
+           a note can fool me". Check on the console's Mic recordings before
+           tuning. */
         coachPitchReadings(cc.lastPitchT, p.t + COACH_ATTACK_SKIP, ccIsPower() ? RNW_POWER_CLARITY : 0.55).forEach(r => {
           cc.lastPitchT = r.t;
           if (r.midi != null && r.t - p.t <= COACH_EVENT_TAIL) p.readings.push(r.midi);
