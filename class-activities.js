@@ -6795,23 +6795,25 @@ window.CLASS_ACTIVITIES = [
    different.
 
    THE RECORDING, measured on the 115 BPM file (track
-   'all-along-the-watchtower-neil' in app.js has how): one two-bar loop, 85
-   laps, with the chords changing at beats 1, 3, 4.5 and 7.5 of the eight —
+   'all-along-the-watchtower-neil' in app.js has how): one two-bar loop, 86
+   laps in the file, with the chords changing at beats 1, 3, 4.5 and 7.5 of the eight —
    A for 2 beats, G for 1.5, F for 3, G for 1.5 (per-eighth bass counts over
    every lap: A on slots 1-4 in 69-82 laps of 86, G on 5-7, F from slot 8
-   to 13, G on 14-16). The card follows the bars up to 164, 82 laps; after
-   that the band slows to the end and a bar runs 3 s or more. The record's
+   to 13, G on 14-16). The card follows the bars up to 162, 81 laps: lap 82
+   holds the A (the start of the ending), and after that the band slows to
+   the end and a bar runs 3 s or more. Laps 70-74 (bars 139-148, a solo) were
+   not confirmed: the bass wanders there. The record's
    guitar strumming was not measured (the rhythm-down mix turns it down), so
    the power-chord card shows each chord once, where it changes, and the
    single-note card plucks once per beat the chord is held.
 
    NO SONG MAP: this recording's verse and solo boundaries were not marked,
-   so the card is eight parts of ten laps (the last one twelve), in bar
+   so the card is eight parts of ten laps (the last one eleven), in bar
    order. Rename them when someone has listened through. Every part starts
    on an odd bar, so it starts on the A. */
 (function(){
   const list = window.CLASS_ACTIVITIES;
-  // Laps 1-10, 11-20 ... 71-82 of the two-bar loop; each part starts on an odd bar, so on the A.
+  // Laps 1-10, 11-20 ... 71-81 of the two-bar loop; each part starts on an odd bar, so on the A.
   const parts = [
     { label: 'Part 1', label_es: 'Parte 1', caption: 'Part 1 — A G F G, 10 laps', caption_es: 'Parte 1 — A G F G, 10 vueltas', fromBar: 1, bars: 2, reps: 10, repLabel: 'Lap', repLabel_es: 'Vuelta' },
     { label: 'Part 2', label_es: 'Parte 2', caption: 'Part 2 — A G F G, 10 laps', caption_es: 'Parte 2 — A G F G, 10 vueltas', fromBar: 21, bars: 2, reps: 10, repLabel: 'Lap', repLabel_es: 'Vuelta' },
@@ -6820,7 +6822,7 @@ window.CLASS_ACTIVITIES = [
     { label: 'Part 5', label_es: 'Parte 5', caption: 'Part 5 — A G F G, 10 laps', caption_es: 'Parte 5 — A G F G, 10 vueltas', fromBar: 81, bars: 2, reps: 10, repLabel: 'Lap', repLabel_es: 'Vuelta' },
     { label: 'Part 6', label_es: 'Parte 6', caption: 'Part 6 — A G F G, 10 laps', caption_es: 'Parte 6 — A G F G, 10 vueltas', fromBar: 101, bars: 2, reps: 10, repLabel: 'Lap', repLabel_es: 'Vuelta' },
     { label: 'Part 7', label_es: 'Parte 7', caption: 'Part 7 — A G F G, 10 laps', caption_es: 'Parte 7 — A G F G, 10 vueltas', fromBar: 121, bars: 2, reps: 10, repLabel: 'Lap', repLabel_es: 'Vuelta' },
-    { label: 'Part 8', label_es: 'Parte 8', caption: 'Part 8 — A G F G, 12 laps', caption_es: 'Parte 8 — A G F G, 12 vueltas', fromBar: 141, bars: 2, reps: 12, repLabel: 'Lap', repLabel_es: 'Vuelta' }
+    { label: 'Part 8', label_es: 'Parte 8', caption: 'Part 8 — A G F G, 11 laps', caption_es: 'Parte 8 — A G F G, 11 vueltas', fromBar: 141, bars: 2, reps: 11, repLabel: 'Lap', repLabel_es: 'Vuelta' }
   ];
   const A5 = { frets: [['D', 7], ['A', 7], ['E', 5]], note: 'A5', midi: [57, 52, 45] };
   const G5 = { frets: [['D', 5], ['A', 5], ['E', 3]], note: 'G5', midi: [55, 50, 43] };
@@ -6837,8 +6839,8 @@ window.CLASS_ACTIVITIES = [
     if(a && a.recordingVersions && a.recordingVersions.neil) a.recordingVersions.neil.card = card;
   };
   neil('ca-26', {
-    caption:    'The whole song in order · a pluck on each beat of the chord · the notes land where Neil Young changes chord',
-    caption_es: 'La canción completa en orden · una pulsación en cada tiempo del acorde · las notas caen donde Neil Young cambia de acorde',
+    caption:    'The whole song in order · pluck each note when it lights up · the notes change where Neil Young changes chord',
+    caption_es: 'La canción completa en orden · toca cada nota cuando se ilumine · las notas cambian donde Neil Young cambia de acorde',
     sections: sections(single, [9])
   });
   neil('ca-29', {

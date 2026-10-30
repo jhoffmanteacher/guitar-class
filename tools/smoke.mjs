@@ -267,7 +267,7 @@ async function chordGridWalk(page, run, events, stats) {
    cards (ca-40) are not walked: a student cannot open them; 1cc renders them. A checkout
    without recording versions (the baseline) skips it. */
 async function recordingWalk(page, run, events, stats, base) {
-  const cards = await run('recording:list', `typeof caRecordingSwitchHtml === 'function' ? CLASS_ACTIVITIES.filter(a => a.recordingVersions && !a.teacherOnly).map(a => ({ id: a.id, group: a.recordingGroup })) : []`, 20);
+  const cards = await run('recording:list', `typeof caRecordingSwitchHtml === 'function' ? CLASS_ACTIVITIES.filter(a => a.recordingVersions && !a.teacherOnly).map(a => ({ id: a.id, group: a.recordingGroup, label: a.recordingLabel })) : []`, 20);
   if (!cards || !cards.length) return;
   const fail = (id, text) => events.push({ step: 'recording:' + id, kind: 'recording-switch', text });
   const state = `(() => { const q = s => document.querySelector('.ca-card[open] ' + s); const sw = q('.ca-rec-switch'); if (!sw) return { missing: true };
@@ -277,15 +277,18 @@ async function recordingWalk(page, run, events, stats, base) {
   const press = `(() => { const b = [...document.querySelector('.ca-card[open] .ca-rec-switch').querySelectorAll('button')].find(x => x.getAttribute('aria-pressed') !== 'true'); b.click(); return 1; })()`;
   await run('recording:open', 'openClassActivitiesScreen()', 600);
   await run('recording:clear', `(localStorage.removeItem('caRecordingModes'), caRecordingModes = {}, 1)`, 10);
-  for (const { id, group } of cards) {
+  for (const { id, group, label } of cards) {
     await run('recording:' + id + ':open', "caFocusActivity('" + id + "')", 500);
     const a = await run('recording:' + id + ':default', state, 10);
     if (!a || a.missing) { fail(id, 'the recording switch is not on the card'); continue; }
+    if (a.pressed[0] !== label) fail(id, 'opens with ' + JSON.stringify(a.pressed) + ' pressed, not the card\'s own recording ' + JSON.stringify(label));
+    if (a.chips !== a.secs) fail(id, 'shows ' + a.chips + ' section buttons for ' + a.secs + ' sections');
     if (a.pressed.length !== 1 || a.saved) fail(id, 'opens with ' + JSON.stringify(a.pressed) + ' pressed and ' + a.saved + ' saved — it should open on the card\'s own recording with nothing saved');
     await run('recording:' + id + ':press', press, 500);
     const b = await run('recording:' + id + ':other', state, 10);
     if (!b || b.missing) { fail(id, 'the switch is gone after one press'); continue; }
     if (b.track === a.track || b.pressed[0] === a.pressed[0] || b.pressed.length !== 1) fail(id, 'one press left ' + a.track + ' playing / ' + JSON.stringify(b.pressed) + ' pressed');
+    if (b.chips !== b.secs) fail(id, 'after one press: ' + b.chips + ' section buttons for ' + b.secs + ' sections');
     if (b.guitar !== b.full) fail(id, 'the Guitar switch is ' + (b.guitar ? 'shown' : 'missing') + ' on ' + b.track + ', which ' + (b.full ? 'has' : 'has no') + ' full mix');
     let saved = null; try { saved = JSON.parse(b.saved || '{}')[group]; } catch (e) { /* reported below */ }
     if (!saved) fail(id, 'the choice was not saved for the song (' + b.saved + ')');

@@ -2565,7 +2565,7 @@ const SNIPPET_TRACKS = {
   /* All Along the Watchtower — the Neil Young recording (Jonathan,
      2026-10-30: a Neil Young / Jimi Hendrix switch on the Watchtower
      play-along cards, Jimi the default; the card swaps to this track and
-     its own timing — caView, songVersions in class-activities.js). The two
+     its own timing — caView, recordingVersions in class-activities.js). The two
      rhythm-down files of the first Neil export (2026-09-18, removed with
      the Hendrix move on 2026-09-27) put back: Am at 440 Hz, 115 and 90 BPM.
      The 90 file came with 2.693 s of lead the 115 file does not have, so it
@@ -2588,11 +2588,16 @@ const SNIPPET_TRACKS = {
      the bass moves from G to A, the third click (index 2) — the first two
      are a pickup. The map ends at bar 165 (343.8 s): after that the band
      slows to the end and a bar runs 3 s or more, which a steady-tempo
-     window cannot follow, so the card stops at the end of bar 164. THE
-     RECORD'S TWO-BAR LOOP (the bass on every eighth, 85 laps, the same in
-     every one that holds the pattern): A on 1 + 2 +, G on 3 + 4, F on the
-     "+" after 4 through 7, G on the "+" after 7, 8 and the "+" after 8 —
-     chord changes at beats 1, 3, 4.5 and 7.5 of the 8. */
+     window cannot follow. The card stops at the end of bar 162 (lap 81):
+     in lap 82 (bars 163-164) the band holds the A through the whole lap,
+     the start of the ending (review, 2026-10-30). THE RECORD'S TWO-BAR
+     LOOP (the bass on every eighth, 86 laps in the file, the same in every
+     one that holds the pattern): A on 1 + 2 +, G on 3 + 4, F on the "+"
+     after 4 through 7, G from the "+" after 7 to the end (the bass walks
+     up a half step into the next A on the last eighth, G# in most laps; the
+     chord is still G) — chord changes at beats 1, 3, 4.5 and 7.5 of the 8.
+     Laps 70-74 (bars 139-148, a solo) were not confirmed: the bass wanders
+     there and does not play the loop. */
   'all-along-the-watchtower-neil': {
     src:              'audio/neil-young-all-along-the-watchtower-backing-Am-115bpm-440hz-rhythm-down.mp3',
     srcSlow:          'audio/neil-young-all-along-the-watchtower-backing-Am-90bpm-440hz-rhythm-down.mp3',
@@ -12992,18 +12997,33 @@ function caSetKeyMode(id, k){
   caKeyModes[id] = k;
   try { localStorage.setItem(CA_KEY_MODES_KEY, JSON.stringify(caKeyModes)); } catch(e) {}
   stopCardAudio();
-  if(IS_TEACHER_MODE && typeof renderTeacherActivityDetail === 'function'){ renderTeacherActivityDetail(id); return; }
+  if(IS_TEACHER_MODE && caTeacherRedraw(id)) return;
   caOpenId = id;
   renderClassActivities();
 }
 function caRecordingSwitchHtml(a){
   if(!caHasRecordingVersions(a)) return '';
   const cur = caRecordingMode(a);
-  const id = escAttr(a.id);
   const label = r => r === a.recording ? tf(a, 'recordingLabel') : tf(a.recordingVersions[r], 'label');
   return `<div class="ca-chord-switch ca-key-switch ca-rec-switch" role="group" aria-label="${escAttr(t('ca.recordingVersion'))}">`
-    + caRecordingList(a).map(r => `<button type="button" class="snip-toggle${r === cur ? ' on' : ''}" aria-pressed="${r === cur ? 'true' : 'false'}" onclick="caSetRecordingMode('${id}','${escAttr(r)}')">${escHtml(label(r))}</button>`).join('')
+    + caRecordingList(a).map(r => `<button type="button" class="snip-toggle${r === cur ? ' on' : ''}" aria-pressed="${r === cur ? 'true' : 'false'}" onclick="caSetRecordingMode(${jsonAttrArg(a.id)},${jsonAttrArg(r)})">${escHtml(label(r))}</button>`).join('')
     + `</div>`;
+}
+/* Redraw a card in the teacher console after one of its switches. The Teacher
+   view songs tab (renderTeacherViewSongs, teacher.js) draws its own card and
+   leaves a card that is already up alone on a config re-read, so it is told
+   to start over; any other console page is the activity's detail page. Without
+   this a switch on ca-40 swapped the room's projector card for the Class
+   activities detail page (review R1-1, 2026-10-30). Used by all four switches. */
+function caTeacherRedraw(id){
+  if(typeof teacherView !== 'undefined' && teacherView === 'tsongs' && typeof renderTeacherViewSongs === 'function'){
+    const cur = document.querySelector('[data-tvs]');
+    if(cur) cur.removeAttribute('data-tvs');
+    renderTeacherViewSongs();
+    return true;
+  }
+  if(typeof renderTeacherActivityDetail === 'function'){ renderTeacherActivityDetail(id); return true; }
+  return false;
 }
 /* Redraw with the other recording — same shape as caSetKeyMode. The choice
    belongs to the song (recordingGroup), so every card of it follows. */
@@ -13013,7 +13033,7 @@ function caSetRecordingMode(id, r){
   caRecordingModes[a.recordingGroup] = r;
   try { localStorage.setItem(CA_RECORDING_MODES_KEY, JSON.stringify(caRecordingModes)); } catch(e) {}
   stopCardAudio();
-  if(IS_TEACHER_MODE && typeof renderTeacherActivityDetail === 'function'){ renderTeacherActivityDetail(id); return; }
+  if(IS_TEACHER_MODE && caTeacherRedraw(id)) return;
   caOpenId = id;
   renderClassActivities();
 }
@@ -13036,7 +13056,7 @@ function caSetChordMode(id, mode){
   caChordModes[id] = want;   // stored either way: the card's own start may be 'power'
   try { localStorage.setItem(CA_CHORD_MODES_KEY, JSON.stringify(caChordModes)); } catch(e) {}
   stopCardAudio();
-  if(IS_TEACHER_MODE && typeof renderTeacherActivityDetail === 'function'){ renderTeacherActivityDetail(id); return; }
+  if(IS_TEACHER_MODE && caTeacherRedraw(id)) return;
   caOpenId = id;
   renderClassActivities();
 }
@@ -13097,7 +13117,7 @@ function caSetBassMode(id, mode){
   caBassModes[id] = want;   // stored either way: the card's own start may be 'on'
   try { localStorage.setItem(CA_BASS_MODES_KEY, JSON.stringify(caBassModes)); } catch(e) {}
   stopCardAudio();
-  if(IS_TEACHER_MODE && typeof renderTeacherActivityDetail === 'function'){ renderTeacherActivityDetail(id); return; }
+  if(IS_TEACHER_MODE && caTeacherRedraw(id)) return;
   caOpenId = id;
   renderClassActivities();
 }
