@@ -100,18 +100,33 @@
     had a reviewer pass. Try: the switch on `ca-26`, `ca-29` and `ca-40`; the
     choice survives a reload; both recordings play; the Guitar on / off switch
     works on both; the lyric sheet card stays on Jimi Hendrix.
-  - **The main folder** (`C:\Users\jhoffman\Documents\GitHub\guitar-class`) is
-    NOT pushed and not clean. It has uncommitted edits in `app.js`,
-    `class-activities.js`, `sw.js`, `tools/checks.mjs`, `tools/smoke.mjs` and
-    `.claude/skills/song-facts/SKILL.md`, an untracked `tools/__pycache__/`, and
-    its local commit `5634815` (now on GitHub as the rebased Watchtower
-    commit). It is also 13+ commits behind. Do not push it as it is: save the
-    edits (`git stash`), `git fetch`, move `main` to `origin/main`, pop the
-    stash, then read and check the edits before anyone commits them.
+  - **Branch `wip/main-folder-2026-10-30` is NOT on `main` and is not live.**
+    It holds the uncommitted edits that were sitting in the main folder
+    (`C:\Users\jhoffman\Documents\GitHub\guitar-class`), pushed so Jonathan can
+    work on them from another machine. They look like review fixes to the
+    Watchtower switch: `caTeacherRedraw` (a switch on `ca-40` in the teacher
+    console swapped the room's projector card for the Class activities page;
+    review R1-1), the recording-switch inline handler now uses `jsonAttrArg`,
+    corrected lap counts (lap 82 holds the A, Part 8 is 11 laps, 86 laps in the
+    file, laps 70-74 not confirmed), `songVersions` renamed to
+    `recordingVersions` in comments, a clearer Neil Young caption, matching
+    pins in `tools/checks.mjs` and `tools/smoke.mjs`, and a `song-facts` note.
+    **`main` (live) has the Watchtower switch WITHOUT these fixes.**
+    Status of the branch: based on `main` at `6b120f8`; the full checks pass
+    (cache version bumped); the browser smoke test and a reviewer pass were NOT
+    run. To ship it: check it out, run
+    `node tools/smoke.mjs --baseline origin/main`, ask `site-reviewer`, then
+    fast-forward `main`. The untracked `tools/__pycache__/` was left out (a
+    Python cache, not in `.gitignore`).
+  - **The main folder itself** still holds those same edits, uncommitted, on an
+    old base (12+ commits behind). Its one local commit (`5634815`) is on
+    GitHub as `5e2061e`. Once the branch is safe on GitHub, the folder can be
+    moved to `origin/main` (`git stash`, `git fetch`, `git reset --hard
+    origin/main`); the stash keeps the edits as a second copy.
   - **Two leftover worktrees** to remove: `guitar-class-pcs` (branch
     `power-chord-switch-beat`) and `guitar-class-wt` (branch
-    `watchtower-rebase`). Leave them first (PowerShell's folder), or the empty
-    folder stays locked.
+    `wip/main-folder-2026-10-30`). Leave them first (PowerShell's folder), or
+    the empty folder stays locked.
 
 - [x] **2026-09-15 "the cure" both-strings root line — plan at
   `archive/PLAN-unit-2-assessment-site-v2-2026-09-15.md`.** Verse+chorus root
