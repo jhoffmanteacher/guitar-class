@@ -5,6 +5,13 @@ Notable changes to the Guitar Class site. Newest first.
 For the full session-by-session history (and the reasoning behind each change),
 see `WORKFLOW.md` and the git commit log.
 
+## 2026-10-30 — Louder metronome click in play-along activities
+
+- **The Metronome click is easier to hear over the song.** It is about 5 dB
+  louder on Play Along cards, on the looping snippet cards, and on the Song
+  Journey play-along. The count-in before a card starts, the Metro tool and the
+  other drills sound the same as before.
+
 ## 2026-10-29 — "All activities" leaves full screen
 
 - **Tapping "◀ All activities" now exits full screen.** Before, the list stayed

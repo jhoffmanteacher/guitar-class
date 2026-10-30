@@ -3221,7 +3221,7 @@ function snipScheduleClick(st, now){
   if(ahead > 0.1) return;
   const ctx = getAudioCtx();
   const lat = snipLatency() - (ctx.outputLatency || ctx.baseLatency || 0);
-  pcClick(ctx.currentTime + Math.max(0, ahead + lat), nb % bpb === 0, false, st.tr.clickGain);
+  pcClick(ctx.currentTime + Math.max(0, ahead + lat), nb % bpb === 0, false, (st.tr.clickGain || 1) * PLAYALONG_CLICK_GAIN);
   st.lastBeat = nb;
 }
 /* One of the snippet's <audio> elements failed. The PLAYING one stops the
@@ -13982,13 +13982,19 @@ function pcCountIn(st, si){
   }
   st.timers.push(setTimeout(() => { if(pcState === st) pcGo(st, si); }, (0.1 + n * beat) * 1000));
 }
+// +5 dB (10^(5/20), 2026-10-30) on the in-song click of the play-along cards:
+// practice cards (pcScheduleClick) and snippet cards (snipScheduleClick), and
+// the Song Journey page's own copy in tabs/journey.js. Those call sites pass
+// it as pcClick's `gain`. Not the 4-click count-in, and not Note Calls
+// (ncClicks), which share pcClick and keep their old level.
+const PLAYALONG_CLICK_GAIN = Math.pow(10, 5 / 20);
 function pcClick(at, accent, countIn, gain){
   const ctx = getAudioCtx();
   const o = ctx.createOscillator(), g = ctx.createGain();
   o.frequency.value = accent ? 1500 : 1000;
   // Quiet on purpose (Jonathan, 2026-09-27: the first cut was "very loud").
   // The count-in is a little louder (2026-09-29) — it plays over silence
-  // and has to be caught first time; the in-song click stays quiet.
+  // and has to be caught first time.
   // A track's clickGain lifts its in-song click where the mix buries it.
   const peak = (accent ? 0.2 : 0.13) * (countIn ? 1.6 : 1) * (gain || 1);
   g.gain.setValueAtTime(0.0001, at);
@@ -14010,7 +14016,7 @@ function pcScheduleClick(st, now){
   if(ahead > 0.1) return;
   const ctx = getAudioCtx();
   const lat = snipLatency() - (ctx.outputLatency || ctx.baseLatency || 0);
-  pcClick(ctx.currentTime + Math.max(0, ahead + lat), nb % bpb === 0, false, st.L.tr.clickGain);
+  pcClick(ctx.currentTime + Math.max(0, ahead + lat), nb % bpb === 0, false, (st.L.tr.clickGain || 1) * PLAYALONG_CLICK_GAIN);
   st.lastBeat = nb;
 }
 function pcFrame(){

@@ -357,11 +357,14 @@ function ensurePlayer(){
     var step = (clickBars[lo + 1] - clickBars[lo]) / clickBeats;
     return lo * clickBeats + Math.ceil((t - clickBars[lo]) / step - 1e-6);
   };
+  /* +5 dB (10^(5/20), 2026-10-30), the same constant as PLAYALONG_CLICK_GAIN
+     in app.js — this page has no app.js, so it is a hand-kept copy. */
+  var CLICK_GAIN = Math.pow(10, 5 / 20);
   var clickAt = function(at, accent){
     var o = clickCtx.createOscillator(), g = clickCtx.createGain();
     o.frequency.value = accent ? 1500 : 1000;
     g.gain.setValueAtTime(0.0001, at);
-    g.gain.exponentialRampToValueAtTime(accent ? 0.2 : 0.13, at + 0.005);
+    g.gain.exponentialRampToValueAtTime((accent ? 0.2 : 0.13) * CLICK_GAIN, at + 0.005);
     g.gain.exponentialRampToValueAtTime(0.0001, at + 0.08);
     o.connect(g); g.connect(clickCtx.destination);
     o.start(at); o.stop(at + 0.1);
