@@ -7937,11 +7937,11 @@ const PC_LEVELS = [
    games.nr for signed-in students.
    The stage is a position in this order, so it is also a level index. Until
    2026-10-30 the order was NR_OLD_ADAPT_ORDER, with three power-chord levels
-   (12-14) woven in; a saved stage without games.nr.stageV === 2 is a
+   (12-14) woven in. The new-order stage lives in games.nr.stage2; a saved
+   games.nr.stage (a tab still running the old build keeps writing it) is a
    position in THAT order (nrStageFromSaved). */
 const NR_ADAPT_ORDER = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11];
 const NR_OLD_ADAPT_ORDER = [0, 1, 2, 3, 4, 12, 5, 6, 13, 7, 8, 14, 9, 10, 11];
-const NR_STAGE_V = 2;
 const NR_UP_PCT = 90, NR_DOWN_PCT = 65;
 
 let nr = null, nrRaf = null;
@@ -7967,9 +7967,8 @@ function nrWeakKey(n){ return n.string + ':' + n.fret; }
    same level in the new order sits at position = its level index, so walk
    back from the saved position to the nearest melody level (a student who
    was on a power-chord stage lands on the melody level just before it). */
-function nrStageFromSaved(n, v){
+function nrStageFromSaved(n){
   const top = NR_ADAPT_ORDER.length - 1;
-  if (v === NR_STAGE_V) return Math.max(0, Math.min(top, n));
   for (let i = Math.max(0, Math.min(NR_OLD_ADAPT_ORDER.length - 1, n)); i >= 0; i--){
     if (NR_OLD_ADAPT_ORDER[i] <= top) return NR_OLD_ADAPT_ORDER[i];
   }
@@ -7984,8 +7983,11 @@ function nrStagePos(){
   // position forever instead of picking up progress made elsewhere.
   // sessionStorage is the fallback for when Firestore data isn't in yet
   // (dev bypass, signed-out, or the very first paint of a fresh load).
+  if (typeof games !== 'undefined' && games && games.nr && typeof games.nr.stage2 === 'number'){
+    return Math.max(0, Math.min(NR_ADAPT_ORDER.length - 1, games.nr.stage2));
+  }
   if (typeof games !== 'undefined' && games && games.nr && typeof games.nr.stage === 'number'){
-    return nrStageFromSaved(games.nr.stage, games.nr.stageV);
+    return nrStageFromSaved(games.nr.stage);
   }
   let p = -1;
   // 'nrStagePos2': the old 'nrStagePos' held a position in the old order.
@@ -8067,7 +8069,7 @@ function nrBestMerged(i){
   }
   return Math.max(nrBestSession(i), fs);
 }
-/* Which level must be cleared before level i opens (see `after` above). */
+/* Which level must be cleared before level i opens: the one before it. */
 function nrReq(i){
   const a = NR_LEVELS[i].after;
   return a !== undefined ? a : i - 1;
@@ -9037,8 +9039,8 @@ function nrFinish(complete){
     if (!games.nr.levels) games.nr.levels = {};
     let dirty = false, isNewBest = false;
     if (s.acc > (games.nr.levels[s.level] || 0)){ games.nr.levels[s.level] = s.acc; dirty = true; isNewBest = true; }
-    if (s.adaptive && (games.nr.stage !== s.stagePos || games.nr.stageV !== NR_STAGE_V)){
-      games.nr.stage = s.stagePos; games.nr.stageV = NR_STAGE_V; dirty = true;
+    if (s.adaptive && games.nr.stage2 !== s.stagePos){
+      games.nr.stage2 = s.stagePos; dirty = true;
     }
     if (wkChanged){ games.nr.weak = wk; dirty = true; }
     if (dirty) games.nr.at = new Date().toISOString().slice(0, 10);
