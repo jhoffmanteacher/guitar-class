@@ -8624,7 +8624,7 @@ const noteCalls = {};
 let ncLive = null;   // key of the drill whose round is running — one at a time
 
 function ncBox(key){ return document.getElementById('ncr-' + key); }
-function ncProgKey(c){ return c.strings.join('+') + ':' + c.minFret + '-' + c.maxFret; }
+function ncProgKey(c){ return c.strings.join('+') + (c.power ? '+5' : '') + ':' + c.minFret + '-' + c.maxFret; }
 function ncLoadProg(c){
   let s = null;
   try { s = JSON.parse(sessionStorage.getItem('nc:' + ncProgKey(c)) || 'null'); } catch(e){}
@@ -8667,11 +8667,25 @@ function ncPool(c, pile){
       if(pile === 'naturals' && n.indexOf('♯') >= 0) continue;
       (by[n] = by[n] || []).push(f);
     }
-    Object.keys(by).forEach(n => out.push({ str: k, note: n, frets: by[n], midis: by[n].map(f => SD_OPEN_MIDI[k] + f) }));
+    Object.keys(by).forEach(n => out.push({ str: k, note: c.power ? n + '5' : n, power: !!c.power, frets: by[n], midis: by[n].map(f => SD_OPEN_MIDI[k] + f) }));
   });
   return out;
 }
 function ncStrName(k){ return t(FRET_STRING_KEY[k] || 'fret.stringLowE'); }
+/* Power-chord mode (drill.power): the call is a chord, "G5 · root on the low E
+   string", and the answer is the ROOT fret (the tap and the mic both read the
+   root). Strings it differs in live under 'ncp.*'; ncK picks the key. The 5th
+   sits two frets up on the next string toward the floor (low E -> A, A -> D). */
+const NC_FIFTH_STR = { lowE: 'A', A: 'D' };
+function ncK(power, name){ return (power ? 'ncp.' : 'nc.') + name; }
+function ncVars(p){
+  const v = { note: p.note, string: ncStrName(p.str), fret: ncFretList(p) };
+  if(p.power){
+    v.fifthString = ncStrName(NC_FIFTH_STR[p.str] || p.str);
+    v.fifth = p.frets.map(f => f + 2).join(' / ');
+  }
+  return v;
+}
 function ncFretList(p){ return p.frets.join(' / '); }
 function ncLevel(st, i){
   const L = Object.assign({}, NC_LEVELS[i]);
@@ -8685,7 +8699,8 @@ function renderNoteCall(drill, key, wid){
   const strings = (drill.strings && drill.strings.length ? drill.strings : ['lowE', 'A'])
     .filter(k => SD_OPEN_MIDI[k] != null);
   const cfg = {
-    strings,
+    strings: drill.power ? strings.filter(k => NC_FIFTH_STR[k]) : strings,
+    power: !!drill.power,
     minFret: drill.minFret != null ? drill.minFret : 0,
     maxFret: drill.maxFret != null ? drill.maxFret : 5,
     wid
@@ -8703,8 +8718,8 @@ function ncHeadHtml(st, right){
   return `<div class="sdr-head"><span>${escHtml(t('nc.head', { strings: strs, min: c.minFret, max: c.maxFret }))}</span>` +
     `<span class="sdr-meta">${escHtml(right)}</span></div>`;
 }
-function ncLevelDesc(L){
-  return t(L.pile === 'naturals' ? 'nc.descNaturals' : 'nc.descAll', { bpm: L.bpm, beats: L.beats });
+function ncLevelDesc(L, power){
+  return t(ncK(power, L.pile === 'naturals' ? 'descNaturals' : 'descAll'), { bpm: L.bpm, beats: L.beats });
 }
 function ncAnsMeta(bpm){ return t('nc.metaAnswer', { bpm, s: ncAnsWait(bpm) }); }
 function ncSetupMeta(st){
@@ -8730,11 +8745,11 @@ function ncSetupHtml(key){
       `<button type="button" class="sdr-pill${st.sharps === on ? ' active' : ''}" aria-pressed="${st.sharps === on}" onclick="ncSet('${key}','sharps',${on})">${escHtml(label)}</button>`;
     return ncHeadHtml(st, ncSetupMeta(st)) +
       `<div class="sdr-body">` +
-        `<div class="sdr-intro">${escHtml(t('nc.introAnswer'))}</div>` +
+        `<div class="sdr-intro">${escHtml(t(ncK(st.cfg.power, 'introAnswer')))}</div>` +
         toggles +
-        `<div class="sdr-pills nc-pile">${pill(false, t('nc.pileNaturals'))}${pill(true, t('nc.pileAll'))}</div>` +
-        `<div class="nc-how">${escHtml(t('nc.descAnswer', { n: NC_ANS_EVERY }))}` +
-          (st.coach ? ' ' + escHtml(t('nc.howCoachAnswer')) : '') + `</div>` +
+        `<div class="sdr-pills nc-pile">${pill(false, t(ncK(st.cfg.power, 'pileNaturals')))}${pill(true, t(ncK(st.cfg.power, 'pileAll')))}</div>` +
+        `<div class="nc-how">${escHtml(t(ncK(st.cfg.power, 'descAnswer'), { n: NC_ANS_EVERY }))}` +
+          (st.coach ? ' ' + escHtml(t(ncK(st.cfg.power, 'howCoachAnswer'))) : '') + `</div>` +
         msg +
         `<button type="button" class="sdr-start" onclick="ncStart('${key}')">&#x25B6; ${escHtml(t('nc.startPlain'))}</button>` +
       `</div>`;
@@ -8749,11 +8764,11 @@ function ncSetupHtml(key){
   }).join('');
   return ncHeadHtml(st, ncSetupMeta(st)) +
     `<div class="sdr-body">` +
-      `<div class="sdr-intro">${escHtml(t('nc.intro'))}</div>` +
+      `<div class="sdr-intro">${escHtml(t(ncK(st.cfg.power, 'intro')))}</div>` +
       toggles +
       `<div class="sdr-pills nc-levels">${pills}</div>` +
-      `<div class="nc-desc">${escHtml(ncLevelDesc(L))}</div>` +
-      `<div class="nc-how">${escHtml(t(st.coach ? 'nc.howCoach' : 'nc.howTap'))}</div>` +
+      `<div class="nc-desc">${escHtml(ncLevelDesc(L, st.cfg.power))}</div>` +
+      `<div class="nc-how">${escHtml(t(ncK(st.cfg.power, st.coach ? 'howCoach' : 'howTap')))}</div>` +
       msg +
       `<button type="button" class="sdr-start" onclick="ncStart('${key}')">&#x25B6; ${escHtml(t('nc.start', { n: st.level + 1 }))}</button>` +
       `<div class="sdr-best">${escHtml(t('nc.passLine', { pass: NC_PASS, total: NC_ROUND }))}</div>` +
@@ -8878,7 +8893,7 @@ function ncDeal(st){
 
 function ncPromptHtml(p){
   return `<span class="nc-note">${escHtml(p.note)}</span>` +
-    `<span class="nc-str">${escHtml(t('nc.onString', { string: ncStrName(p.str) }))}</span>`;
+    `<span class="nc-str">${escHtml(t(ncK(p.power, 'onString'), { string: ncStrName(p.str) }))}</span>`;
 }
 function ncPlayHtml(key){
   const st = noteCalls[key], c = st.cfg;
@@ -9094,7 +9109,7 @@ function ncReveal(st){
   const fb = document.getElementById('nc-fb-' + st.key);
   if(fb && p.res !== 'hit'){
     fb.className = 'sdr-fb nc-fb';
-    fb.textContent = t('nc.fbAnswer', { note: p.note, string: ncStrName(p.str), fret: ncFretList(p) });
+    fb.textContent = t(ncK(p.power, 'fbAnswer'), ncVars(p));
   }
 }
 
@@ -9189,20 +9204,20 @@ function ncResolve(st, i, res, info){
   if(!p || p.res != null) return;
   p.res = res;
   const key = st.key, fb = document.getElementById('nc-fb-' + key);
-  const vars = { note: p.note, string: ncStrName(p.str), fret: ncFretList(p) };
+  const vars = ncVars(p);
   const card = document.getElementById('nc-card-' + key);
   if(res === 'hit'){
     ncMark(key, p.str, info.fret, 'fg-good');
-    if(fb){ fb.className = 'sdr-fb nc-fb hit'; fb.textContent = t('nc.fbHit', Object.assign(vars, { fret: info.fret })); }
+    if(fb){ fb.className = 'sdr-fb nc-fb hit'; fb.textContent = t(ncK(p.power, 'fbHit'), Object.assign(vars, { fret: info.fret })); }
     if(card && i === st.idx) card.classList.add('hit');
   } else {
     if(info && info.tap){
       ncMark(key, info.tap.k, info.tap.f, 'fg-bad');
-      if(fb){ fb.className = 'sdr-fb nc-fb miss'; fb.textContent = t('nc.fbWrong', Object.assign(vars, { pick: sdNoteAt(info.tap.k, info.tap.f) })); }
-    } else if(fb){ fb.className = 'sdr-fb nc-fb miss'; fb.textContent = t('nc.fbMiss', vars); }
+      if(fb){ fb.className = 'sdr-fb nc-fb miss'; fb.textContent = t(ncK(p.power, 'fbWrong'), Object.assign(vars, { pick: sdNoteAt(info.tap.k, info.tap.f) })); }
+    } else if(fb){ fb.className = 'sdr-fb nc-fb miss'; fb.textContent = t(ncK(p.power, 'fbMiss'), vars); }
     p.frets.forEach(f => ncMark(key, p.str, f, 'fg-good'));
     if(card && i === st.idx) card.classList.add('miss');
-    st.requeue.push({ p: { str: p.str, note: p.note, frets: p.frets, midis: p.midis }, due: i + 3 });
+    st.requeue.push({ p: { str: p.str, note: p.note, power: p.power, frets: p.frets, midis: p.midis }, due: i + 3 });
   }
   ncPaintDots(st);
 }
@@ -9242,13 +9257,13 @@ function ncFinish(key){
     if(p.res === 'miss' && !seen[id]){ seen[id] = 1; misses.push(p); }
   });
   const rows = misses.length
-    ? misses.map(p => `<div class="sdr-drill-row"><b>${escHtml(p.note)} · ${escHtml(ncStrName(p.str))}</b><span>${escHtml(t('nc.rowFret', { fret: ncFretList(p) }))}</span></div>`).join('')
+    ? misses.map(p => `<div class="sdr-drill-row"><b>${escHtml(p.note)} · ${escHtml(ncStrName(p.str))}</b><span>${escHtml(t(ncK(p.power, 'rowFret'), { fret: ncFretList(p) }))}</span></div>`).join('')
     : `<div class="sdr-drill-row"><b>${escHtml(t('nc.clean'))}</b></div>`;
   ncRepaint(key,
     ncHeadHtml(st, t('nc.metaLevel', { n: st.lvIdx + 1, bpm: st.L.bpm })) +
     `<div class="sdr-body">` +
       `<div class="sdr-score">${escHtml(t('nc.score', { n: score, total: NC_ROUND }))}</div>` +
-      `<div class="sdr-score-sub">${escHtml(ncLevelDesc(st.L))}</div>` +
+      `<div class="sdr-score-sub">${escHtml(ncLevelDesc(st.L, st.cfg.power))}</div>` +
       `<div class="sdr-verdict ${cls}">${escHtml(verdict)}</div>` +
       `<div class="sdr-drill"><div class="sdr-drill-title">${escHtml(t('nc.practiceThese'))}</div>${rows}</div>` +
       `<div class="sdr-actions">${nextBtn}` +

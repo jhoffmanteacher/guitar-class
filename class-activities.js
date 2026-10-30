@@ -6707,6 +6707,43 @@ window.CLASS_ACTIVITIES = [
     // No help ladder: a practice card is its checks and nothing else (Jonathan, 2026-10-07).
     steps: [],
   },
+  /* Power Chords on the Low E and A Strings in Time (Jonathan, 2026-10-30,
+     for Monday): ca-23's Note Call, with a power chord called instead of a
+     note. "G5 · root on the low E string" comes up on the beat; the student
+     plays the chord, and the root fret is the answer (a tap, or the mic
+     listening for the lowest note). Same chunks, levels and speeds as ca-23
+     (engine: renderNoteCall, drill.power). Roots on the low E and A strings
+     only, so the 5th always has a string above it. */
+  {
+    id:    'ca-43',
+    view:  'focus',   // one step at a time — see VIEW above
+    title:    'Power Chords on the Low E and A Strings in Time',
+    title_es: 'Acordes de potencia en las cuerdas Mi grave y La a tiempo',
+    intro:    'A power chord name comes up on the beat, and you play it with its root on the low E or A string. Each step runs its own levels: start with Show answer on to learn the roots, then turn it off for the scored levels. A step is done when you pass its Level 3.',
+    intro_es: 'El nombre de un acorde de potencia aparece a tiempo, y lo tocas con su raíz en la cuerda Mi grave o en la cuerda La. Cada paso tiene sus propios niveles: empieza con «Mostrar la respuesta» encendido para aprender las raíces, y luego apágalo para los niveles con puntaje. Un paso está terminado cuando pasas su Nivel 3.',
+    steps: [
+      {
+        label:    'Practice — Frets 0 to 5',
+        label_es: 'Practica — Trastes 0 a 5',
+        drill: { type: 'notecall', power: true, strings: ['lowE', 'A'], minFret: 0, maxFret: 5 },
+      },
+      {
+        label:    'Practice — Frets 5 to 8',
+        label_es: 'Practica — Trastes 5 a 8',
+        drill: { type: 'notecall', power: true, strings: ['lowE', 'A'], minFret: 5, maxFret: 8 },
+      },
+      {
+        label:    'Practice — Frets 8 to 12',
+        label_es: 'Practica — Trastes 8 a 12',
+        drill: { type: 'notecall', power: true, strings: ['lowE', 'A'], minFret: 8, maxFret: 12 },
+      },
+      {
+        label:    'Practice — The whole neck',
+        label_es: 'Practica — Todo el mástil',
+        drill: { type: 'notecall', power: true, strings: ['lowE', 'A'], minFret: 0, maxFret: 12 },
+      },
+    ],
+  },
 ];
 
 /* ca-38 plays ca-29's sections from its chord sheet (see ca-38 above). The

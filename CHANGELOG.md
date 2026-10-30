@@ -5,6 +5,16 @@ Notable changes to the Guitar Class site. Newest first.
 For the full session-by-session history (and the reasoning behind each change),
 see `WORKFLOW.md` and the git commit log.
 
+## 2026-10-30 — New activity: Power Chords on the Low E and A Strings in Time
+
+- **A new In-Class Activity, "Power Chords on the Low E and A Strings in Time".**
+  It works like "Low E and A Notes in Time", but a power chord comes up on the
+  beat, such as "G5 · root on the low E string". You play the chord, then tap
+  the fret of its root on the board. The mic can listen for the root instead.
+  There are four steps (frets 0–5, 5–8, 8–12 and the whole neck), each with
+  Show answer and five scored levels. When a chord is missed, the answer shows
+  the root fret and the fifth, two frets up on the next string.
+
 ## 2026-10-30 — New game: Power Chord Switch
 
 - **Power Chord Switch is a new guitar game in the Games page.** It works like
