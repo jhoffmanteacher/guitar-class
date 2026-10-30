@@ -11,6 +11,8 @@ see `WORKFLOW.md` and the git commit log.
   beat between two chords. "How fast the chord switches" is now the first
   thing on the screen, above the chord choices. You can still pick "Every 2
   beats" or "Every bar" to slow it down.
+- **The tempo buttons (−5 and +5) are at the top too**, right under "How fast
+  the chord switches", so you can change the tempo without scrolling.
 - **The first chord choice is "Two random chords".** The computer picks two
   power chords for each round and shows them when you press Start. It is
   selected when you open the game.

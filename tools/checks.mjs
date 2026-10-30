@@ -9880,11 +9880,14 @@ function checkCoachVerdicts() {
       const pw = bodies['cc-body'], pwText = text('cc-body');
       if (run('cc.mode') !== 'power') flag(`1ca: ${lang} ccSetup('power') left mode "${run('cc.mode')}"`);
       if (pillCount(pw) !== LOOPS.length) flag(`1ca: ${lang} Power Chord Switch lists ${pillCount(pw)} loops, the data has ${LOOPS.length}`);
-      if ((pw.match(/cc-group-title/g) || []).length !== GROUP_IDS.length + 1) flag(`1ca: ${lang} Power Chord Switch shows ${(pw.match(/cc-group-title/g) || []).length} group titles, expected ${GROUP_IDS.length} loop groups + the speed row`);
-      /* "How fast the chord switches" is the first thing on the screen, above every
-         loop, and a fresh game opens on every beat with the computer's pick chosen. */
-      const firstRate = pw.indexOf('ccPickRate('), firstProg = pw.indexOf('ccPickProg(');
+      if ((pw.match(/cc-group-title/g) || []).length !== GROUP_IDS.length + 2) flag(`1ca: ${lang} Power Chord Switch shows ${(pw.match(/cc-group-title/g) || []).length} group titles, expected ${GROUP_IDS.length} loop groups + the speed row + the tempo row`);
+      /* "How fast the chord switches" and the tempo buttons are the first things on
+         the screen, above every loop (the big charts push anything lower off a
+         657px screen), and a fresh game opens on every beat with the computer's
+         pick chosen. Change Up keeps its tempo below the loops. */
+      const firstRate = pw.indexOf('ccPickRate('), firstProg = pw.indexOf('ccPickProg('), firstBpm = pw.indexOf('ccNudgeBpm(');
       if (firstRate < 0 || firstRate > firstProg) flag(`1ca: ${lang} Power Chord Switch's speed row is not above its chord choices`);
+      if (firstBpm < 0 || firstBpm > firstProg || firstBpm < firstRate) flag(`1ca: ${lang} Power Chord Switch's tempo buttons are not between the speed row and the chord choices`);
       if (run('CC_RATES[cc.rateIdx].id') !== 'beat') flag(`1ca: ${lang} Power Chord Switch opens on speed "${run('CC_RATES[cc.rateIdx].id')}" — it must open on every beat`);
       if (run('cc.progIdx') !== 0 || !pw.includes('class="ts-btn active" onclick="ccPickProg(0)"')) flag(`1ca: ${lang} Power Chord Switch does not open with the computer's pick selected`);
       for (const g of GROUP_IDS) {
@@ -9899,6 +9902,7 @@ function checkCoachVerdicts() {
       if (pillCount(open) !== OPEN_LOOPS) flag(`1ca: ${lang} Change Up lists ${pillCount(open)} loops, the data has ${OPEN_LOOPS}`);
       if ((open.match(/ccPickRate[(]/g) || []).length !== 3) flag(`1ca: ${lang} Change Up lists ${(open.match(/ccPickRate[(]/g) || []).length} speeds, expected its three`);
       if (open.indexOf('ccPickRate(') < open.lastIndexOf('ccPickProg(')) flag(`1ca: ${lang} Change Up's speed row moved above its loops — only Power Chord Switch puts the speed first`);
+      if (open.indexOf('ccNudgeBpm(') < open.lastIndexOf('ccPickRate(')) flag(`1ca: ${lang} Change Up's tempo buttons moved above its speed row — only Power Chord Switch puts the tempo first`);
       if (POWER_NAME.test(text('cc-body'))) flag(`1ca: ${lang} Change Up shows a power chord ("${text('cc-body').match(POWER_NAME)[0]}")`);
     }
     run(`setLang('en')`);

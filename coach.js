@@ -3243,19 +3243,22 @@ function ccRenderSetup(msg){
      .cc-power); Change Up and the Coach card share ccDiagramsHtml. */
   body.classList.toggle('cc-power', power);
   const speedRow = `<div class="cc-group"><div class="cc-group-title">${t('games.cc.group.speedTitle')}</div><div class="fret-levels">${rateBtns}</div></div>`;
-  /* Power Chord Switch asks "how fast" first — it is the whole game — then which
-     two chords; Change Up keeps the loops first. */
-  body.innerHTML =
-    (msg ? `<div class="coach-note">${escHtml(msg)}</div>` : '') +
-    (power ? speedRow + pills : pills + speedRow) +
-    (prog.random ? `<div class="coach-note">&#x1F3B2; ${t(power ? 'games.pw.randomNote' : 'games.cc.randomNote')}</div>` : ccDiagramsHtml(prog.chords, null)) +
-    `<div class="coach-bpm-row">
+  const bpmRow = `<div class="coach-bpm-row">
        <button type="button" class="tp-btn" onclick="ccNudgeBpm(-5)">&#x2212;5</button>
        <span class="coach-bpm-readout" id="cc-bpm-readout">${cc.bpm} BPM</span>
        <button type="button" class="tp-btn" onclick="ccNudgeBpm(5)">+5</button>
        ${best ? `<span class="cc-best">${t('games.common.bestTodayLabel')}: ${best} BPM</span>` : ''}
-     </div>
-     <div class="coach-tip">&#x1F92B; ${t(power ? 'games.pw.tip' : 'games.cc.tip', { rate: tipRate })}</div>
+     </div>`;
+  /* Power Chord Switch asks "how fast" and the tempo first — they are the whole
+     game, and the big charts push anything below them off a 657px screen — then
+     which two chords; Change Up keeps the loops first and the tempo below. */
+  const tempoRow = `<div class="cc-group"><div class="cc-group-title">${t('games.pw.group.tempo')}</div>${bpmRow}</div>`;
+  body.innerHTML =
+    (msg ? `<div class="coach-note">${escHtml(msg)}</div>` : '') +
+    (power ? speedRow + tempoRow + pills : pills + speedRow) +
+    (prog.random ? `<div class="coach-note">&#x1F3B2; ${t(power ? 'games.pw.randomNote' : 'games.cc.randomNote')}</div>` : ccDiagramsHtml(prog.chords, null)) +
+    (power ? '' : bpmRow) +
+    `<div class="coach-tip">&#x1F92B; ${t(power ? 'games.pw.tip' : 'games.cc.tip', { rate: tipRate })}</div>
      <button type="button" class="coach-start" onclick="ccStart()">&#x25B6; ${t('games.cc.startButton', { slots: rate.slots })}</button>
      ${coachFootHtml()}`;
 }
