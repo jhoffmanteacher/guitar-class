@@ -5,6 +5,14 @@ Notable changes to the Guitar Class site. Newest first.
 For the full session-by-session history (and the reasoning behind each change),
 see `WORKFLOW.md` and the git commit log.
 
+## 2026-10-30 — Chord boxes: fret label no longer hidden
+
+- **The fret label beside a chord box ("3fr", "5fr") is fully visible again.**
+  On shapes with a finger on the low E string at the top fret of the box (G5,
+  A5, F5 and the low-E barre chords), the dot covered the end of the label. The
+  label now sits a little further left on those shapes. Every other chord box
+  looks the same as before.
+
 ## 2026-10-30 — New activity: Power Chords on the Low E and A Strings in Time
 
 - **A new In-Class Activity, "Power Chords on the Low E and A Strings in Time".**

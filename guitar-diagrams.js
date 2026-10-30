@@ -181,8 +181,12 @@ function chordDiagramSVG(cfg, opts){
        two-digit position is set a size down and held to the gutter's width
        with textLength, so it fits whatever font the page hands the SVG. */
     var wide = pos >= 10;
-    s += '<text x="' + (padL - 5) + '" y="' + (padT + fretGap * 0.55) + '" text-anchor="end" dominant-baseline="middle" font-size="'
-      +  t.b(wide ? 8 : 9) + '"' + (wide ? ' textLength="' + (padL - 6) + '" lengthAdjust="spacingAndGlyphs"' : '')
+    /* A dot on low E in the first row (G5, A5, F5, low-E barres) sits right
+       where the label ends and covered its last letter: only then the label
+       moves left to clear the dot, and a two-digit one fits the narrower gutter. */
+    var labelX = (ind[6] && ind[6].fret === pos) ? +(padL - dotR - 2).toFixed(2) : padL - 5;
+    s += '<text x="' + labelX + '" y="' + (padT + fretGap * 0.55) + '" text-anchor="end" dominant-baseline="middle" font-size="'
+      +  t.b(wide ? 8 : 9) + '"' + (wide ? ' textLength="' + +(labelX - 1).toFixed(2) + '" lengthAdjust="spacingAndGlyphs"' : '')
       +  ' fill="' + t.text2 + '"' + gdFF(t, 'sans-serif') + '>' + pos + 'fr</text>';
   }
 
