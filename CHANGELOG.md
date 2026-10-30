@@ -5,6 +5,12 @@ Notable changes to the Guitar Class site. Newest first.
 For the full session-by-session history (and the reasoning behind each change),
 see `WORKFLOW.md` and the git commit log.
 
+## 2026-10-29 — "Sweet Child O' Mine": the B5 chord in Layer 3
+
+- **Layer 3 (Power Chords) now explains B5.** The solos use B5, and the page
+  never named it. It is the C5 shape with every finger one fret number lower:
+  A string fret 2, D and G strings fret 4.
+
 ## 2026-10-28 — "Sweet Child O' Mine": a strum video on the Song Journey page
 
 - **Layer 4 (Open Chords) has a new Watch step.** It links to an

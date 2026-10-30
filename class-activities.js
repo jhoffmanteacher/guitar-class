@@ -4638,8 +4638,9 @@ window.CLASS_ACTIVITIES = [
      outro too, because the record puts C-D-G inside one bar; Layer 3's
      outro tab was moved to the same shapes the same day (Jonathan,
      2026-10-05 — it used to slide them up the low E string to frets 8 and
-     10). Same rhythm as ca-28 and
-     Layer 3 — one strum per chord, left ringing. */
+     10). Same bars and chord lengths
+     as ca-28 and Layer 3. The card shows where the chords change, not the
+     strumming pattern (card.chordGrid, 2026-10-26). */
   {
     id:    'ca-33',
     view:  'card',    // one screen: Play song + tab + checks — see CARD above
