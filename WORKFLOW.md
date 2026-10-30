@@ -80,6 +80,39 @@
 
 ## Open work
 
+- [ ] **2026-10-30 — Everything pushed in a hurry today needs to be checked.**
+  Jonathan had to reboot the machine, so the last pushes went out with the
+  checks and the browser smoke test but no reviewer pass, and no one looked at
+  them on the live site. Check each item in a real browser on the live site, in
+  English and Spanish, at 1366×657. Then run `site-reviewer` on the commits.
+  - **Power Chord Switch** (`d4544a3`, `1c3062b`, both sent as "Fast"). It now
+    opens on "Every beat"; the speed row and the tempo buttons sit above the
+    chord choices; "Two random chords" is the first choice and is selected; the
+    3- and 4-chord loops are gone (11 pairs left); the chord charts are 180px.
+    Try: a random round, "Every bar" and "Every 2 beats", the −5 / +5 tempo
+    buttons, a fixed pair, the done screen and its "pick a different loop"
+    button, and that Change Up still looks the same.
+  - **Watchtower play-alongs, Jimi Hendrix / Neil Young switch** (four large
+    mp3s). It was committed in an earlier session and pushed today after a
+    rebase onto 12 newer commits. The rebase had conflicts in `CHANGELOG.md`
+    and `sw.js`, fixed by hand (`sw.js` took GitHub's version line and the
+    full checks re-bumped it). We could not tell whether the original commit
+    had a reviewer pass. Try: the switch on `ca-26`, `ca-29` and `ca-40`; the
+    choice survives a reload; both recordings play; the Guitar on / off switch
+    works on both; the lyric sheet card stays on Jimi Hendrix.
+  - **The main folder** (`C:\Users\jhoffman\Documents\GitHub\guitar-class`) is
+    NOT pushed and not clean. It has uncommitted edits in `app.js`,
+    `class-activities.js`, `sw.js`, `tools/checks.mjs`, `tools/smoke.mjs` and
+    `.claude/skills/song-facts/SKILL.md`, an untracked `tools/__pycache__/`, and
+    its local commit `5634815` (now on GitHub as the rebased Watchtower
+    commit). It is also 13+ commits behind. Do not push it as it is: save the
+    edits (`git stash`), `git fetch`, move `main` to `origin/main`, pop the
+    stash, then read and check the edits before anyone commits them.
+  - **Two leftover worktrees** to remove: `guitar-class-pcs` (branch
+    `power-chord-switch-beat`) and `guitar-class-wt` (branch
+    `watchtower-rebase`). Leave them first (PowerShell's folder), or the empty
+    folder stays locked.
+
 - [x] **2026-09-15 "the cure" both-strings root line — plan at
   `archive/PLAN-unit-2-assessment-site-v2-2026-09-15.md`.** Verse+chorus root
   line now crosses the low E and A strings — A(low E 5) C(A 3), F(low E 1)
