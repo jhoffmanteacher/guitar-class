@@ -3055,26 +3055,29 @@ const CC_RATES = [
   { id: 'half', bpc: 2, slots: 12, shortKey: 'games.cc.rate.half', subKey: 'games.cc.rate.halfSub' },
   { id: 'beat', bpc: 1, slots: 16, shortKey: 'games.cc.rate.beat', subKey: 'games.cc.rate.beatSub' }
 ];
+/* Power Chord Switch opens on this speed (a change on every beat); the speed
+   row is still there to slow it down. */
+const CC_BEAT_IDX = CC_RATES.findIndex(r => r.id === 'beat');
 const CC_BPM_MIN = 40, CC_BPM_MAX = 140;
 
 /* POWER CHORD SWITCH (hub key 'power') — this same engine on the
    three-finger power chords: F5 G5 A5 (root on the low E string) and B5 C5 D5
    (root on the A string). Open E5 is the two-finger shape, so it stays out.
+   Every loop is a PAIR, and the first choice is the computer picking one:
+   `random` draws two chords from CC_POWER_RANDOM_POOL each round (ccPickChords).
    `group` is what the hand does between the chords: 'low' slides along the
    low E string, 'a' along the A string, 'jump' changes strings (checks.mjs
-   1ca proves every loop does what its group says). A loop may repeat a chord
-   (A5 – G5 – F5 – G5 is the chord loop of All Along the Watchtower). */
+   1ca proves every pair does what its group says). */
+const CC_POWER_RANDOM_POOL = ['F5','G5','A5','B5','C5','D5'];
 const CC_POWER_PROGRESSIONS = [
+  { group: 'random', random: true, randomKey: 'RANDOM2P', chords: ['F5','G5'] },
   { group: 'low',  chords: ['F5','G5'] }, { group: 'low',  chords: ['G5','A5'] }, { group: 'low',  chords: ['F5','A5'] },
-  { group: 'low',  chords: ['A5','G5','F5'] }, { group: 'low',  chords: ['F5','G5','A5'] }, { group: 'low',  chords: ['A5','G5','F5','G5'] },
   { group: 'a',    chords: ['B5','C5'] }, { group: 'a',    chords: ['C5','D5'] }, { group: 'a',    chords: ['B5','D5'] },
-  { group: 'a',    chords: ['B5','C5','D5'] }, { group: 'a',    chords: ['D5','C5','B5'] },
   { group: 'jump', chords: ['G5','C5'] }, { group: 'jump', chords: ['A5','D5'] }, { group: 'jump', chords: ['G5','D5'] },
-  { group: 'jump', chords: ['F5','C5'] }, { group: 'jump', chords: ['F5','B5'] },
-  { group: 'jump', chords: ['G5','C5','D5'] }, { group: 'jump', chords: ['A5','D5','G5'] }, { group: 'jump', chords: ['F5','C5','G5'] },
-  { group: 'jump', chords: ['A5','D5','C5','G5'] }
+  { group: 'jump', chords: ['F5','C5'] }, { group: 'jump', chords: ['F5','B5'] }
 ];
 const CC_POWER_GROUPS = [
+  { id: 'random', titleKey: 'games.pw.group.random' },
   { id: 'low',  titleKey: 'games.pw.group.low' },
   { id: 'a',    titleKey: 'games.pw.group.a' },
   { id: 'jump', titleKey: 'games.pw.group.jump' }
@@ -3132,7 +3135,22 @@ function ccRandomFour(){
   }
   return pick;
 }
-function ccBestKey(prog, rateIdx){ const rid = CC_RATES[rateIdx] ? CC_RATES[rateIdx].id : 'bar'; return 'ccBest:' + (prog.random ? 'RANDOM4' : prog.chords.join('-')) + ':' + rid; }
+/* Power Chord Switch's "computer picks": two different chords from the six. */
+function ccRandomPair(){
+  const pool = CC_POWER_RANDOM_POOL.slice(), pick = [];
+  for (let i = 0; i < 2; i++){
+    pick.push(pool.splice(Math.floor(Math.random() * pool.length), 1)[0]);
+  }
+  return pick;
+}
+/* The chords of one round: the loop's own, or a fresh draw for a random one. */
+function ccPickChords(progDef){
+  if (!progDef.random) return progDef.chords;
+  return ccIsPower() ? ccRandomPair() : ccRandomFour();
+}
+/* A random loop has its own best per game (Random 4 and Power Chord Switch's
+   random pair would otherwise share one session key). */
+function ccBestKey(prog, rateIdx){ const rid = CC_RATES[rateIdx] ? CC_RATES[rateIdx].id : 'bar'; return 'ccBest:' + (prog.random ? (prog.randomKey || 'RANDOM4') : prog.chords.join('-')) + ':' + rid; }
 
 /* mode: 'power' = Power Chord Switch; anything else (the hub passes nothing)
    = Change Up. */
@@ -3147,7 +3165,7 @@ function ccSetup(mode){
   } catch(e){}
   if (!(progIdx >= 0 && progIdx < (power ? CC_POWER_PROGRESSIONS : CC_PROGRESSIONS).length)) progIdx = 0;
   if (!(bpm >= CC_BPM_MIN && bpm <= CC_BPM_MAX)) bpm = 60;
-  if (!(rateIdx >= 0 && rateIdx < CC_RATES.length)) rateIdx = 0;
+  if (!(rateIdx >= 0 && rateIdx < CC_RATES.length)) rateIdx = power ? CC_BEAT_IDX : 0;   // Power Chord Switch opens on every beat
   cc = { phase: 'setup', mode: power ? 'power' : 'open', progIdx, rateIdx, bpm, micOn: false, timeouts: [] };
   ccRenderSetup();
 }
@@ -3208,7 +3226,7 @@ function ccRenderSetup(msg){
   const pills = groups.map(([inGroup, title]) =>
     `<div class="cc-group"><div class="cc-group-title">${title}</div><div class="fret-levels">` +
     ccProgs().map((pr, i) => !inGroup(pr) ? '' :
-      `<button type="button" class="ts-btn${i === cc.progIdx ? ' active' : ''}" onclick="ccPickProg(${i})">${pr.random ? '&#x1F3B2; ' + t('games.cc.randomFour') : escHtml(pr.chords.join(pr.chords.length === 2 ? ' ↔ ' : ' – '))}</button>`
+      `<button type="button" class="ts-btn${i === cc.progIdx ? ' active' : ''}" onclick="ccPickProg(${i})">${pr.random ? '&#x1F3B2; ' + t(power ? 'games.pw.randomPair' : 'games.cc.randomFour') : escHtml(pr.chords.join(pr.chords.length === 2 ? ' ↔ ' : ' – '))}</button>`
     ).join('') + `</div></div>`
   ).join('');
   const prog = ccProgs()[cc.progIdx];
@@ -3221,11 +3239,16 @@ function ccRenderSetup(msg){
   const tipRate = t(rate.bpc === 4 ? 'games.cc.tipRate.bar'
     : rate.bpc === 2 ? 'games.cc.tipRate.half'
     : 'games.cc.tipRate.beat');
+  /* The chord charts of Power Chord Switch are drawn larger (styles.css,
+     .cc-power); Change Up and the Coach card share ccDiagramsHtml. */
+  body.classList.toggle('cc-power', power);
+  const speedRow = `<div class="cc-group"><div class="cc-group-title">${t('games.cc.group.speedTitle')}</div><div class="fret-levels">${rateBtns}</div></div>`;
+  /* Power Chord Switch asks "how fast" first — it is the whole game — then which
+     two chords; Change Up keeps the loops first. */
   body.innerHTML =
     (msg ? `<div class="coach-note">${escHtml(msg)}</div>` : '') +
-    pills +
-    `<div class="cc-group"><div class="cc-group-title">${t('games.cc.group.speedTitle')}</div><div class="fret-levels">${rateBtns}</div></div>` +
-    (prog.random ? `<div class="coach-note">&#x1F3B2; ${t('games.cc.randomNote')}</div>` : ccDiagramsHtml(prog.chords, null)) +
+    (power ? speedRow + pills : pills + speedRow) +
+    (prog.random ? `<div class="coach-note">&#x1F3B2; ${t(power ? 'games.pw.randomNote' : 'games.cc.randomNote')}</div>` : ccDiagramsHtml(prog.chords, null)) +
     `<div class="coach-bpm-row">
        <button type="button" class="tp-btn" onclick="ccNudgeBpm(-5)">&#x2212;5</button>
        <span class="coach-bpm-readout" id="cc-bpm-readout">${cc.bpm} BPM</span>
@@ -3263,8 +3286,8 @@ async function ccStart(){
   stopAllDemoAudio();
 
   const progDef = ccProgs()[cc.progIdx];
-  const prog = progDef.random ? ccRandomFour() : progDef.chords;
-  cc.chords = prog;   // the actual chords this round (Random 4 differs each start)
+  const prog = ccPickChords(progDef);
+  cc.chords = prog;   // the actual chords this round (a random loop differs each start)
   const rate = CC_RATES[cc.rateIdx] || CC_RATES[0];
   cc.bpc = rate.bpc; cc.slots = rate.slots;
   cc.seq = Array.from({ length: cc.slots }, (_, i) => prog[i % prog.length]);

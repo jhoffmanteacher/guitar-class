@@ -5,6 +5,22 @@ Notable changes to the Guitar Class site. Newest first.
 For the full session-by-session history (and the reasoning behind each change),
 see `WORKFLOW.md` and the git commit log.
 
+## 2026-10-30 — Power Chord Switch: two chords on every beat, bigger charts
+
+- **Power Chord Switch now opens on "Every beat".** The chord switches on every
+  beat between two chords. "How fast the chord switches" is now the first
+  thing on the screen, above the chord choices. You can still pick "Every 2
+  beats" or "Every bar" to slow it down.
+- **The first chord choice is "Two random chords".** The computer picks two
+  power chords for each round and shows them when you press Start. It is
+  selected when you open the game.
+- **Only two-chord choices are left.** The loops with three and four chords
+  are gone. The 11 pairs stay, in three groups: slide along the low E string,
+  slide along the A string, and jump between strings.
+- **The chord charts are much bigger.** They were 80 pixels wide and are now
+  180. The chord you are on still has a green box around it.
+- Change Up is not changed.
+
 ## 2026-10-30 — Chord boxes: fret label no longer hidden
 
 - **The fret label beside a chord box ("3fr", "5fr") is fully visible again.**

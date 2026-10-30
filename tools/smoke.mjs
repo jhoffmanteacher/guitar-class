@@ -306,8 +306,19 @@ async function walk(base, chromePort, label) {
      width of its label (8-20px). No source check can see a layout. A checkout
      without the game (the baseline) skips it. */
   for (const v of ['cc', 'power'].filter(x => views.includes(x))) {
-    const w = await run(`diagram-size:${v}`, `(() => { gamesShow(${JSON.stringify(v)}); return [...document.querySelectorAll('#cc-body .cc-dia svg')].map(s => Math.round(s.getBoundingClientRect().width)); })()`, 400);
-    if (w && (!w.length || Math.min(...w) < 48)) events.push({ step: `diagram-size:${v}`, kind: 'diagram-size', text: `${v}: ${w.length ? `${w.length} chord diagrams, the smallest ${Math.min(...w)}px wide` : 'no chord diagrams drawn'} — too small to read (they need a width: see .cc-diagrams .cc-dia svg)` });
+    /* Power Chord Switch opens on "the computer picks" (no chart until Start),
+       on the every-beat speed, with the speed row above the chord choices — read
+       that fresh state first, then pick the first fixed pair so charts are drawn. */
+    if (v === 'power') {
+      const fresh = await run('power:opens-on', `(() => { gamesShow('power'); const rowAt = document.querySelector('#cc-body [onclick*="ccPickRate"]'), progAt = document.querySelector('#cc-body [onclick*="ccPickProg"]');
+        return { rate: CC_RATES[cc.rateIdx].id, prog: cc.progIdx, random: !!CC_POWER_PROGRESSIONS[0].random, speedFirst: !!(rowAt && progAt && (rowAt.compareDocumentPosition(progAt) & Node.DOCUMENT_POSITION_FOLLOWING)) }; })()`, 200);
+      if (fresh && (fresh.rate !== 'beat' || fresh.prog !== 0 || !fresh.random || !fresh.speedFirst)) events.push({ step: 'power:opens-on', kind: 'power-opens-on', text: `Power Chord Switch opened on speed "${fresh.rate}", choice ${fresh.prog} (computer's pick first: ${fresh.random}), speed row above the chords: ${fresh.speedFirst} — it must open on every beat with the computer's pick, speed first` });
+    }
+    const w = await run(`diagram-size:${v}`, `(() => { gamesShow(${JSON.stringify(v)}); ${v === 'power' ? 'ccPickProg(1);' : ''} return [...document.querySelectorAll('#cc-body .cc-dia svg')].map(s => Math.round(s.getBoundingClientRect().width)); })()`, 400);
+    /* Power Chord Switch shows two chords, so its charts are drawn at 180px
+       (2026-10-30, "the charts are very small"); Change Up keeps the shared 80. */
+    const minW = v === 'power' ? 150 : 48;
+    if (w && (!w.length || Math.min(...w) < minW)) events.push({ step: `diagram-size:${v}`, kind: 'diagram-size', text: `${v}: ${w.length ? `${w.length} chord diagrams, the smallest ${Math.min(...w)}px wide` : 'no chord diagrams drawn'} — too small to read, need ${minW}px (see .cc-diagrams .cc-dia svg and #cc-body.cc-power)` });
   }
   /* Power Chord Switch's loop picker, clicked for real: pick a loop, leave the
      game, come back — the same loop is still picked — and Change Up, which
@@ -324,10 +335,23 @@ async function walk(base, chromePort, label) {
       const again = active();
       gamesShow('cc');
       const ccFirst = pills()[0].textContent.trim(), ccActive = active();
-      return { n, want, again, ccFirst, ccActive };
+      gamesShow('power');
+      /* Power Chord Switch offers pairs only (the computer's pick, then 11 fixed
+         pairs): every choice but the first has two chords, and the speed row is
+         clicked for real and remembered across the reopen. */
+      const twoOnly = pills().slice(1).every(b => b.textContent.split('↔').length === 2);
+      const speedBtns = [...document.querySelectorAll('#cc-body [onclick*="ccPickRate"]')];
+      speedBtns[1].click();
+      gamesShow('hub'); gamesShow('power');
+      const rate = CC_RATES[cc.rateIdx].id;
+      ccPickRate(2);   // back to every beat for the steps after this one
+      return { n, want, again, ccFirst, ccActive, twoOnly, speedCount: speedBtns.length, rate };
     })()`, 400);
-    if (r && (r.n !== 20 || r.again.length !== 1 || r.again[0] !== r.want || r.ccActive.length !== 1 || r.ccActive[0] !== r.ccFirst)) {
-      events.push({ step: 'power:pick-and-reopen', kind: 'power-loop-memory', text: `${r.n} loops (want 20); picked "${r.want}", reopened on "${r.again.join('|')}"; Change Up opened on "${r.ccActive.join('|')}", its first loop is "${r.ccFirst}"` });
+    if (r && (r.n !== 12 || r.again.length !== 1 || r.again[0] !== r.want || r.ccActive.length !== 1 || r.ccActive[0] !== r.ccFirst)) {
+      events.push({ step: 'power:pick-and-reopen', kind: 'power-loop-memory', text: `${r.n} choices (want 12); picked "${r.want}", reopened on "${r.again.join('|')}"; Change Up opened on "${r.ccActive.join('|')}", its first loop is "${r.ccFirst}"` });
+    }
+    if (r && (!r.twoOnly || r.speedCount !== 3 || r.rate !== 'half')) {
+      events.push({ step: 'power:pairs-and-speed', kind: 'power-pairs-and-speed', text: `Power Chord Switch: every fixed choice is a pair: ${r.twoOnly}; ${r.speedCount} speed buttons (want 3); after clicking "Every 2 beats" and reopening it ran at "${r.rate}"` });
     }
   }
   await run('games-hub-again', `openGamesScreen()`, 600);

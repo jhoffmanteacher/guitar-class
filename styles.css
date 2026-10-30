@@ -2236,6 +2236,11 @@ body.rail-collapsed .rail-tools .tool-popup{
    the largest, Module 3's seven power chords (2 of the 14 drills), wraps to
    two rows and the card is about 540px tall. */
 .cc-diagrams .cc-dia svg{width:80px;height:auto}
+/* Power Chord Switch shows only two chords, so each chart can be much larger
+   than the 80px a Coach drill of up to seven shares a row with. */
+#cc-body.cc-power .cc-diagrams{justify-content:center;gap:28px}
+#cc-body.cc-power .cc-diagrams .cc-dia svg{width:180px;height:auto}
+#cc-body.cc-power .cc-dia .chord-box-label{font-size:1.125rem}
 .cc-now{display:flex;flex-wrap:wrap;align-items:baseline;gap:4px 14px;margin:4px 0}
 .cc-chord{font-size:2.75rem;font-weight:700;color:var(--text);line-height:1.1;min-width:70px}
 .cc-next{font-size:0.875rem;font-weight:600;color:var(--text2)}
