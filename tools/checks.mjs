@@ -7964,13 +7964,21 @@ function checkPracticeCards(ctx) {
      track and sections, the switch has exactly one pressed button and it is
      the recording shown, the section chips are that recording's, and the
      Guitar switch appears only where that track has a full mix;
-   - nothing stored -> the card's own recording (or recordingStart);
+   - nothing stored -> the card's own recording (or recordingStart), and that
+     default is Jimi on every card (Jonathan's call, 2026-10-30, pinned: a data
+     edit that made Neil the opening recording would otherwise pass);
+   - a version's card overrides display only: no checks / track / sheet /
+     wholeSong / slowest (a version's own checks would change what each
+     <id>:c<n> tick key means);
+   - caTeacherRedraw() (every switch's redraw in the console): on the Teacher
+     view songs tab it restarts that tab's card instead of opening the activity
+     detail page (review R1-1, a switch on ca-40 threw the projector card away);
    - the renderer is wired: caView() lays recordingVersions over the card,
      caCardBodyHtml() draws caRecordingSwitchHtml().
    Pinned: 3 cards, 1 group, 2 recordings each. */
 function checkRecordingVersions(ctx) {
   head('1cc. Recording versions: a card that plays another recording');
-  const EXPECT = { cards: 3, groups: 1 };
+  const EXPECT = { cards: 3, groups: 1, start: 'jimi' };
   let bad = 0, n = 0, rendered = 0;
   const flag = m => { err(m); problems++; bad++; };
   let appSrc = '', TRACKS = {}, activities = [];
@@ -7994,6 +8002,7 @@ function checkRecordingVersions(ctx) {
     for (const f of ['keyVersions', 'chordVersions', 'bassNotes'])
       if (f in a) flag(w + ': recording versions and ' + f + ' cannot be combined \u2014 caView lays the recording over the card after the chord / key rename, so its sections would keep the old chords');
     if (!has(a.recording) || !has(a.recordingGroup) || !has(a.recordingLabel) || !has(a.recordingLabel_es)) flag(w + ': needs recording, recordingGroup, recordingLabel and recordingLabel_es');
+    if ((a.recordingStart || a.recording) !== EXPECT.start) flag(w + ': opens on \'' + (a.recordingStart || a.recording) + '\', but the switch opens on \'' + EXPECT.start + '\' (Jonathan, 2026-10-30: Jimi the default) \u2014 change the pin on purpose');
     if (!rv || typeof rv !== 'object' || !Object.keys(rv).length) { flag(w + ': needs a non-empty recordingVersions map'); continue; }
     if (rv[a.recording]) flag(w + ': recordingVersions has \'' + a.recording + '\', the recording the data is already for');
     if ('recordingStart' in a && a.recordingStart !== a.recording && !rv[a.recordingStart]) flag(w + ': recordingStart \'' + a.recordingStart + '\' is neither the card\'s recording nor a recordingVersions entry');
@@ -8004,6 +8013,8 @@ function checkRecordingVersions(ctx) {
       if (!TRACKS[v.track]) flag(vw + ': track \'' + v.track + '\' is not in SNIPPET_TRACKS');
       else if (v.track === a.card.track) flag(vw + ': plays the same track as the card \u2014 a recording version is another track');
       if (!v.card || typeof v.card !== 'object' || !Array.isArray(v.card.sections) || !v.card.sections.length) flag(vw + ': needs a card with sections (the build at the end of class-activities.js fills it in)');
+      else for (const k of ['checks', 'track', 'sheet', 'sheetChords', 'wholeSong', 'slowest'])
+        if (k in v.card) flag(vw + ': card.' + k + ' \u2014 a version changes what the card shows, not its checks or how it plays (the card\'s own ' + k + ' stays; a version\'s track is recordingVersions.' + r + '.track)');
       else if (has(v.card.caption) && !has(v.card.caption_es)) flag(vw + ': card.caption has no caption_es');
     }
     (groups[a.recordingGroup] = groups[a.recordingGroup] || []).push(a);
@@ -8054,6 +8065,18 @@ function checkRecordingVersions(ctx) {
         if (/data-guitar="1"/.test(html) !== hasFull) flag(w + ': the Guitar switch is ' + (hasFull ? 'missing' : 'offered') + ' but ' + exp.track + (hasFull ? ' has' : ' has no') + ' full mix');
       }
     }
+  }
+  if (ctx) {
+    let calls = null;
+    try {
+      calls = vm.runInContext('(function(){ const calls = []; const oldQ = document.querySelector; const marker = { removed: false, removeAttribute(n){ if (n === \'data-tvs\') this.removed = true; } };'
+        + ' document.querySelector = s => s === \'[data-tvs]\' ? marker : oldQ.call(document, s);'
+        + ' globalThis.teacherView = \'tsongs\'; globalThis.renderTeacherViewSongs = () => calls.push(\'tsongs:\' + marker.removed); globalThis.renderTeacherActivityDetail = id => calls.push(\'detail:\' + id);'
+        + ' try { caTeacherRedraw(\'ca-40\'); globalThis.teacherView = \'activities\'; caTeacherRedraw(\'ca-26\'); }'
+        + ' finally { document.querySelector = oldQ; delete globalThis.teacherView; delete globalThis.renderTeacherViewSongs; delete globalThis.renderTeacherActivityDetail; }'
+        + ' return calls; })()', ctx);
+    } catch (e) { flag('caTeacherRedraw threw ' + e.message); }
+    if (calls && JSON.stringify(calls) !== JSON.stringify(['tsongs:true', 'detail:ca-26'])) flag('caTeacherRedraw: expected the Teacher view songs tab to restart (after dropping its data-tvs marker) and any other console page to open the activity detail, got ' + JSON.stringify(calls));
   }
   if (n !== EXPECT.cards) flag('1cc sees ' + n + ' card' + (n === 1 ? '' : 's') + ' with recording versions, expected ' + EXPECT.cards + ' (ca-26, ca-29, ca-40) \u2014 change the pin on purpose, or restore the card');
   if (Object.keys(groups).length !== EXPECT.groups) flag('1cc sees ' + Object.keys(groups).length + ' recording groups, expected ' + EXPECT.groups);
