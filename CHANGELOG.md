@@ -15,6 +15,10 @@ see `WORKFLOW.md` and the git commit log.
   and the power-chord card.
 - **The Guitar on / off switch works on both recordings.**
 - **The lyric sheet card stays on Jimi Hendrix.**
+- **Neil Young single-note card: the heading now matches the notes.** It says
+  "pluck each note when it lights up". Some plucks fall between the beats, so
+  "a pluck on each beat" was not true. The last part, Part 8, now has 11 laps
+  instead of 12, so the card stops where the song's ending starts.
 
 ## 2026-10-30 — Power Chord Switch: two chords on every beat, bigger charts
 

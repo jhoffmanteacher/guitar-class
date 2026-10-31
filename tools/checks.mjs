@@ -8013,9 +8013,12 @@ function checkRecordingVersions(ctx) {
       if (!TRACKS[v.track]) flag(vw + ': track \'' + v.track + '\' is not in SNIPPET_TRACKS');
       else if (v.track === a.card.track) flag(vw + ': plays the same track as the card \u2014 a recording version is another track');
       if (!v.card || typeof v.card !== 'object' || !Array.isArray(v.card.sections) || !v.card.sections.length) flag(vw + ': needs a card with sections (the build at the end of class-activities.js fills it in)');
-      else for (const k of ['checks', 'track', 'sheet', 'sheetChords', 'wholeSong', 'slowest'])
-        if (k in v.card) flag(vw + ': card.' + k + ' \u2014 a version changes what the card shows, not its checks or how it plays (the card\'s own ' + k + ' stays; a version\'s track is recordingVersions.' + r + '.track)');
-      else if (has(v.card.caption) && !has(v.card.caption_es)) flag(vw + ': card.caption has no caption_es');
+      else {
+        for (const k of ['checks', 'track', 'sheet', 'sheetChords', 'wholeSong', 'slowest']) {
+          if (k in v.card) flag(vw + ': card.' + k + ' \u2014 a version changes what the card shows, not its checks or how it plays (the card\'s own ' + k + ' stays; a version\'s track is recordingVersions.' + r + '.track)');
+        }
+        if (has(v.card.caption) && !has(v.card.caption_es)) flag(vw + ': card.caption has no caption_es');
+      }
     }
     (groups[a.recordingGroup] = groups[a.recordingGroup] || []).push(a);
   }
@@ -8065,6 +8068,14 @@ function checkRecordingVersions(ctx) {
         if (/data-guitar="1"/.test(html) !== hasFull) flag(w + ': the Guitar switch is ' + (hasFull ? 'missing' : 'offered') + ' but ' + exp.track + (hasFull ? ' has' : ' has no') + ' full mix');
       }
     }
+  }
+  // The four switches must go through caTeacherRedraw: running it (below) proves
+  // the helper, this proves they call it.
+  for (const fn of ['caSetKeyMode', 'caSetRecordingMode', 'caSetChordMode', 'caSetBassMode']) {
+    const sb = body(fn);
+    if (sb === null) flag('app.js: ' + fn + '() not found — 1cc cannot read what its teacher-console redraw calls');
+    else if (!/caTeacherRedraw\(id\)/.test(sb)) flag('app.js: ' + fn + '() must redraw the teacher console through caTeacherRedraw(id) — on Teacher view songs a switch would replace the projector card');
+    else if (/renderTeacherActivityDetail\(id\)/.test(sb)) flag('app.js: ' + fn + '() still calls renderTeacherActivityDetail(id) directly — use caTeacherRedraw(id)');
   }
   if (ctx) {
     let calls = null;
