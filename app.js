@@ -9341,9 +9341,9 @@ function ncResolve(st, i, res, info){
   const card = document.getElementById('nc-card-' + key);
   if(res === 'hit'){
     /* A power chord on a card with two frets (E5 on the low E string: 0 and 12)
-       sounds the same at both, and the mic credits whichever root it settled
-       on, often fret 0 when the student played fret 12 (the octave below fret
-       12's root is fret 0's root). So a MIC hit names and marks every fret the
+       sounds alike at both (one is an octave higher), and the mic credits
+       whichever root it settled on, often fret 0 when the student played fret 12
+       (the octave below fret 12's root is fret 0's root). So a MIC hit names and marks every fret the
        card has; a tap names the fret that was tapped. Single notes are exact. */
     const both = !!(info.mic && p.power && p.frets.length > 1);
     (both ? p.frets : [info.fret]).forEach(f => ncMark(key, p.str, f, 'fg-good'));

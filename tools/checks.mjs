@@ -5236,6 +5236,21 @@ function checkSwAssets(src) {
     }
     if (!assets.includes(f)) { err(`shell file '${f}' is missing from sw.js ASSETS — it won't be precached for offline`); problems++; bad++; }
   }
+  /* A script index.html loads with a plain <script src> runs on EVERY page, so it
+     cannot be "kept out of the precache": offline, every page load would ask for a
+     file the cache does not hold (Friday check R2-4, trainer-site-adapter.js,
+     2026-10-31). The two lists above only compare each other, so moving such a file
+     onto SHELL_NOT_PRECACHED and off ASSETS in ONE edit passed every check (review
+     R3-4). Comments are stripped first: index.html names coach.js and teacher.js in
+     comments, and they are loaded on demand. */
+  let pageScripts = [];
+  try {
+    const idxHtml = readFileSync(join(ROOT, 'index.html'), 'utf8').replace(/<!--[\s\S]*?-->/g, '');
+    pageScripts = [...idxHtml.matchAll(/<script\b[^>]*\bsrc="(?!https?:|\/\/)(?:\.\/)?([^"?#]+)"/g)].map(x => x[1]);
+  } catch { err('index.html could not be read \u2014 the every-page scripts cannot be checked against ASSETS'); problems++; bad++; }
+  for (const f of pageScripts) {
+    if (!assets.includes(f)) { err(`index.html loads '${f}' with <script src> on every page but sw.js ASSETS does not precache it${SHELL_NOT_PRECACHED.includes(f) ? ' (SHELL_NOT_PRECACHED keeps it out: that list is for files loaded on demand)' : ''} \u2014 offline, every page load would ask for a script the cache does not hold`); problems++; bad++; }
+  }
   // An entry for a file that is no longer a shell file excuses nothing — remove it.
   for (const f of SHELL_NOT_PRECACHED) {
     if (!SHELL_FILES.includes(f)) { err(`checks.mjs SHELL_NOT_PRECACHED lists '${f}', which is not in SHELL_FILES — delete the entry`); problems++; bad++; }
@@ -5259,7 +5274,7 @@ function checkSwAssets(src) {
     }
     if (critBad === 0) ok(`${critical.length} critical precache entries all present in ASSETS`);
   }
-  if (bad === 0) ok(`sw.js ASSETS ↔ shell files in sync (${assets.length} assets; ${SHELL_NOT_PRECACHED.length} shell files kept out on purpose: ${SHELL_NOT_PRECACHED.join(', ')})`);
+  if (bad === 0) ok(`sw.js ASSETS ↔ shell files in sync (${assets.length} assets; ${SHELL_NOT_PRECACHED.length} shell files kept out on purpose: ${SHELL_NOT_PRECACHED.join(', ')}); all ${pageScripts.length} scripts index.html loads on every page are precached`);
 }
 
 /* Ratchet (2026-09-02 audit): a local file that shipped content REFERENCES but
@@ -8202,21 +8217,25 @@ function checkRecordingVersions(ctx) {
 }
 
 /* 1cf. THE CLASS ROSTER SKIPS THE TEACHER'S OWN HEAR IT FIRST STUB (Friday
-   check R2-1, Jonathan 2026-10-31). Hear It First saves the signed-in
-   account's trainer profile into progress/{uid} with mergeFields, which creates
-   the document when it is missing. On the teacher's own account that document
-   holds only `trainer`, and teacherFetchStudents drew it as a nameless row
-   under Unassigned. The profile still has to be saved there (so it follows
-   Jonathan between machines), so the roster is what changes.
+   check R2-1, Jonathan 2026-10-31; widened after the review, R3-1/R3-2).
+   Hear It First saves the signed-in account's trainer profile into
+   progress/{uid} with mergeFields, which creates the document when it is
+   missing, so it follows Jonathan between machines. On the teacher's own account
+   that document holds nothing a student has, and teacherFetchStudents drew it as
+   a nameless row under Unassigned. It does not stay `{trainer}`: Hear It First
+   runs in student mode, every student-mode page load runs swap45Commit, and that
+   writes `migrations.swap45` into an unmarked document, so from the second visit
+   the stub is `{trainer, migrations}`. The test is therefore "the row would be
+   empty" (no name, no email, no period, no skills / responses / games / class
+   activities / exit checks), not "only these keys".
    Checked by RUNNING the real teacherFetchStudents (lifted out of teacher.js)
-   against a stand-in database, signed in as the teacher, over six documents:
-   - the teacher's own document holding only `trainer`        -> not listed;
-   - the same uid with a name, skills or responses too        -> listed (a
-     test-student account is not hidden);
-   - another account holding only `trainer`                   -> listed (the
-     skip is for the signed-in account, not for the field);
-   - two ordinary students                                    -> listed.
-   Signed out (no uid), nothing is skipped. Pinned: 6 documents x 2 sign-ins. */
+   against a stand-in database, once for each account that could be signed in.
+   The documents: two stubs (`{trainer}` and `{trainer, migrations}`), two
+   students, another account's stub, and three accounts that hold something (a
+   name, responses, a period). Expected, for each sign-in: the signed-in
+   account's own document is skipped when it is a stub and listed when it holds
+   anything; every other document is always listed; signed out, nothing is
+   skipped. Pinned: 8 documents x 6 sign-ins. */
 function checkRosterSkipsTrainerStub() {
   head('1cf. The class roster skips the teacher\'s own Hear It First stub');
   let bad = 0;
@@ -8228,14 +8247,17 @@ function checkRosterSkipsTrainerStub() {
   if (at < 0 || body === null) { flag('teacher.js: teacherFetchStudents() not found \u2014 1cf cannot run the roster (renamed? update this check with it)'); return; }
   const fnSrc = tsrc.slice(at, tsrc.indexOf('{', at)) + body;
   const DOCS = [
-    ['teacher-1', { trainer: { v: 1 } }],
+    ['teacher-0', { trainer: { v: 1 } }],                                           // a stub straight after the first Hear It First save
+    ['teacher-1', { trainer: { v: 1 }, migrations: { swap45: true } }],             // the same stub after the next student-mode page load (swap45Commit)
     ['stu-a', { name: 'Ana', email: 'ana@x.test', skills: { s1: 'gotit' } }],
     ['stu-b', { name: 'Ben', email: 'ben@x.test' }],
-    ['other-stub', { trainer: { v: 1 } }],
+    ['other-stub', { trainer: { v: 1 }, migrations: { swap45: true } }],            // another account's stub: not the signed-in one, so listed
     ['teacher-2', { trainer: { v: 1 }, name: 'Test Student', email: 'test@x.test' }],
     ['teacher-3', { trainer: { v: 1 }, responses: { r1: 'x' } }],
+    ['teacher-4', { trainer: { v: 1 }, migrations: { swap45: true }, period: '4' }],
   ];
-  const roster = async (uid, teacherUid) => {
+  const STUBS = new Set(['teacher-0', 'teacher-1']);
+  const roster = async (uid) => {
     const ctx = vm.createContext({ ensureDb: async () => {}, swap45Marked: () => true, swap45Remap: d => d, String, Object, Array, Promise,
       currentUser: uid ? { uid } : null,
       db: { collection: () => ({ get: async () => ({ forEach: fn => DOCS.forEach(([id, data]) => fn({ id, data: () => data })) }) }) } });
@@ -8243,18 +8265,13 @@ function checkRosterSkipsTrainerStub() {
     return got.map(x => x.uid);
   };
   return (async () => {
-    // Signed in as teacher-1: only its own trainer-only stub disappears.
-    let ids = await roster('teacher-1');
-    const want1 = ['stu-a', 'stu-b', 'other-stub', 'teacher-2', 'teacher-3'];
-    if (JSON.stringify(ids) !== JSON.stringify(want1)) flag('signed in as teacher-1, the roster lists ' + JSON.stringify(ids) + ', expected ' + JSON.stringify(want1) + ' (own trainer-only stub skipped; every other document listed)');
-    // Signed in as teacher-2 (a document with a name): nothing of its own is hidden, and teacher-1's stub is just another document.
-    ids = await roster('teacher-2');
-    const want2 = ['teacher-1', 'stu-a', 'stu-b', 'other-stub', 'teacher-2', 'teacher-3'];
-    if (JSON.stringify(ids) !== JSON.stringify(want2)) flag('signed in as teacher-2 (own document also holds a name), the roster lists ' + JSON.stringify(ids) + ', expected all six ' + JSON.stringify(want2));
-    // Signed out: nothing is skipped.
-    ids = await roster(null);
-    if (ids.length !== DOCS.length) flag('signed out, the roster lists ' + ids.length + ' of ' + DOCS.length + ' documents');
-    if (bad === 0) ok('teacherFetchStudents run for real against ' + DOCS.length + ' documents: the signed-in teacher\'s own trainer-only stub is skipped, the same uid with a name or responses is listed, another account\'s stub is listed, and nothing is skipped when signed out (3 sign-ins)');
+    const SIGN_INS = ['teacher-0', 'teacher-1', 'teacher-2', 'teacher-3', 'teacher-4', null];
+    for (const uid of SIGN_INS) {
+      const ids = await roster(uid);
+      const want = DOCS.map(d => d[0]).filter(id => !(uid && id === uid && STUBS.has(id)));
+      if (JSON.stringify(ids) !== JSON.stringify(want)) flag('signed in as ' + (uid || 'nobody') + ', the roster lists ' + JSON.stringify(ids) + ', expected ' + JSON.stringify(want) + (uid && STUBS.has(uid) ? ' (the signed-in account\'s own stub skipped, every other document listed)' : ' (nothing skipped: this account\'s own document holds data, or nobody is signed in)'));
+    }
+    if (bad === 0) ok('teacherFetchStudents run for real: ' + DOCS.length + ' documents x ' + SIGN_INS.length + ' sign-ins \u2014 the signed-in teacher\'s own stub is skipped in both shapes (before and after swap45Commit), the same uid holding a name, responses or a period is listed, other accounts\' stubs are listed, and nothing is skipped when signed out');
   })();
 }
 
@@ -8514,58 +8531,71 @@ function checkNoteCallPower(ctx) {
     for (const k of defined) if (!keys.has(k)) flag('i18n ' + k + ' is defined but no Note Call power screen shows it (dead, or a screen 1cd does not reach)');
     if (defined.length !== EXPECT.keys) flag('1cd sees ' + defined.length + ' ncp.* keys, pinned at ' + EXPECT.keys + ' — a new power-mode string needs its Spanish and a screen that shows it (update the pin on purpose)');
   }
-  /* What a HIT says about the fret (Friday check R1-1, Jonathan 2026-10-31). On a
-     card with two frets (E5 on the low E string: 0 and 12) the mic cannot tell
-     the octaves apart and credited fret 0 when the student played fret 12, so
-     a MIC hit now names every fret ("fret 0 / 12", "traste 0 / 12") and marks
-     both on the board; a tap names the fret tapped, and a card with one fret,
-     or any single-note card, names its one fret. The real ncResolve is run on
-     a power card with two frets, one with one, and a single-note card with two,
-     in English and Spanish, and the feedback text is read back. */
+  /* What a HIT says about the fret (Friday check R1-1, Jonathan 2026-10-31;
+     tightened after the review, R3-3). On a card with two frets (E5 on the low E
+     string: 0 and 12) the mic cannot reliably tell the octaves apart and credited
+     fret 0 when the student played fret 12, so a MIC hit now names every fret
+     ("fret 0 / 12", "traste 0 / 12") and flashes both markers green on the board;
+     a tap names and flashes only the fret tapped, and a card with one fret, or
+     any single-note card, names and flashes its one fret. The real ncResolve (mic
+     hits) and the real ncTap (taps, scored and play-along) are run on a two-fret
+     power card, a one-fret power card and a two-fret single-note card, in English
+     and Spanish. The text is read back AND every flashClass call is recorded, so
+     the check sees which marker flashed, on which string, in which colour. */
   {
     const origGet = ctx.document.getElementById, recs = {};
-    ctx.__marks = [];
-    ctx.document.getElementById = id => { if (id.startsWith('fgm-')) ctx.__marks.push(id); return recs[id] || (recs[id] = origGet(id)); };
-    const hadFlash2 = Object.prototype.hasOwnProperty.call(ctx, 'flashClass');
-    if (!hadFlash2) ctx.flashClass = () => {};
+    ctx.__flashes = [];
+    ctx.document.getElementById = id => recs[id] || (recs[id] = Object.assign(origGet(id), { id }));
+    const hadFlash2 = Object.prototype.hasOwnProperty.call(ctx, 'flashClass'), origFlash = ctx.flashClass;
+    ctx.flashClass = (el, cls) => { ctx.__flashes.push((el && el.id) + '|' + cls); };
     try {
       for (const lang of ['en', 'es']) {
         run('setLang(' + J(lang) + ')');
         const o = JSON.parse(run(`(function(){
           const o = {};
           const mk = (sid, power) => { renderNoteCall({ type: 'notecall', power, strings: ['lowE', 'A'], minFret: 0, maxFret: 12 }, sid, 'w'); const st = noteCalls[sid]; st.key = sid; return st; };
-          const hit = (st, card, info) => { __marks.length = 0; st.seq = [Object.assign({}, card, { res: null })]; st.idx = 0; st.requeue = []; ncResolve(st, 0, 'hit', info); return { t: document.getElementById('nc-fb-' + st.key).textContent, m: __marks.filter(x => x.startsWith('fgm-')).slice() }; };
+          const reset = (st, card, mode) => { __flashes.length = 0; st.seq = [Object.assign({}, card, { res: null })]; st.idx = 0; st.requeue = []; st.phase = 'play'; st.mode = mode; st.locked = false; };
+          const read = st => ({ t: document.getElementById('nc-fb-' + st.key).textContent, f: __flashes.slice() });
+          const mic = (st, card, fret) => { reset(st, card, 'levels'); ncResolve(st, 0, 'hit', { fret, mic: true }); return read(st); };
+          const tap = (st, card, fret, mode) => { reset(st, card, mode); ncTap(st.key, card.str, fret); return read(st); };
           const pw = mk('chk-fb1', true), sn = mk('chk-fb2', false);
           const two = ncPool(pw.cfg, 'all').find(c => c.frets.length === 2), one = ncPool(pw.cfg, 'all').find(c => c.frets.length === 1), sTwo = ncPool(sn.cfg, 'all').find(c => c.frets.length === 2);
-          o.two = two && two.frets; o.one = one && one.frets; o.sTwo = sTwo && sTwo.frets;
+          o.two = two && two.frets; o.twoStr = two && two.str; o.one = one && one.frets; o.oneStr = one && one.str; o.sTwo = sTwo && sTwo.frets; o.sTwoStr = sTwo && sTwo.str;
           if (two && one && sTwo) {
-            o.micTwo = hit(pw, two, { fret: two.frets[1], mic: true });
-            o.micTwo0 = hit(pw, two, { fret: two.frets[0], mic: true });
-            o.tapTwo = hit(pw, two, { fret: two.frets[1] });
-            o.micOne = hit(pw, one, { fret: one.frets[0], mic: true });
-            o.micSingle = hit(sn, sTwo, { fret: sTwo.frets[1], mic: true });
+            o.micTwo = mic(pw, two, two.frets[1]);
+            o.micTwo0 = mic(pw, two, two.frets[0]);
+            o.tapTwo = tap(pw, two, two.frets[1], 'levels');
+            o.tapTwoAnswer = tap(pw, two, two.frets[1], 'answer');
+            o.micOne = mic(pw, one, one.frets[0]);
+            o.micSingle = mic(sn, sTwo, sTwo.frets[1]);
           }
           delete noteCalls['chk-fb1']; delete noteCalls['chk-fb2'];
           return JSON.stringify(o);
         })()`));
         const W = lang === 'en' ? 'fret' : 'traste';
-        if (!o.two || !o.one || !o.sTwo) { flag(lang + ': 1cd could not build a two-fret power card, a one-fret power card and a two-fret single-note card for the hit feedback (' + J(o) + ') \u2014 ncPool changed'); continue; }
+        if (!o.two || !o.one || !o.sTwo) { flag(lang + ': 1cd could not build a two-fret power card, a one-fret power card and a two-fret single-note card for the hit feedback (' + J(o) + ') — ncPool changed'); continue; }
         const both = W + ' ' + o.two.join(' / ');
-        const marked = (r, frets) => frets.every(f => r.m.some(id => id.endsWith('-' + f))) && r.m.length === frets.length;
+        const want = (sid, str, frets) => new Set(frets.map(f => 'fgm-' + sid + '-' + str + '-' + f + '|fg-good'));
+        const flashesAre = (r, set) => { const got = new Set(r.f); return got.size === set.size && [...set].every(x => got.has(x)) && r.f.every(x => set.has(x)); };
+        const show = r => J(r.f);
         if (!o.micTwo.t.includes(both)) flag(lang + ': a mic hit on a two-fret power card says \'' + o.micTwo.t + '\', expected it to name both frets (\'' + both + '\')');
-        if (!marked(o.micTwo, o.two)) flag(lang + ': a mic hit on a two-fret power card marks ' + J(o.micTwo.m) + ' on the board, expected one mark on each of frets ' + J(o.two));
+        if (!flashesAre(o.micTwo, want('chk-fb1', o.twoStr, o.two))) flag(lang + ': a mic hit on a two-fret power card flashes ' + show(o.micTwo) + ', expected both frets ' + J(o.two) + ' on the ' + o.twoStr + ' string, green');
         if (!o.micTwo0.t.includes(both)) flag(lang + ': a mic hit credited to fret ' + o.two[0] + ' says \'' + o.micTwo0.t + '\', expected both frets (\'' + both + '\')');
-        if (!o.tapTwo.t.includes(W + ' ' + o.two[1]) || o.tapTwo.t.includes(' / ')) flag(lang + ': a TAP on fret ' + o.two[1] + ' of a two-fret power card says \'' + o.tapTwo.t + '\', expected just that fret');
-        if (!marked(o.tapTwo, [o.two[1]])) flag(lang + ': a TAP on fret ' + o.two[1] + ' marks ' + J(o.tapTwo.m) + ', expected only that fret');
+        if (!flashesAre(o.micTwo0, want('chk-fb1', o.twoStr, o.two))) flag(lang + ': a mic hit credited to fret ' + o.two[0] + ' flashes ' + show(o.micTwo0) + ', expected both frets green');
+        for (const [name, r] of [['TAP (scored)', o.tapTwo], ['TAP (play-along)', o.tapTwoAnswer]]) {
+          if (!r.t.includes(W + ' ' + o.two[1]) || r.t.includes(' / ')) flag(lang + ': a ' + name + ' on fret ' + o.two[1] + ' of a two-fret power card says \'' + r.t + '\', expected just that fret');
+          if (!flashesAre(r, want('chk-fb1', o.twoStr, [o.two[1]]))) flag(lang + ': a ' + name + ' on fret ' + o.two[1] + ' flashes ' + show(r) + ', expected only that fret, green');
+        }
         if (!o.micOne.t.includes(W + ' ' + o.one[0]) || o.micOne.t.includes(' / ')) flag(lang + ': a mic hit on a one-fret power card says \'' + o.micOne.t + '\', expected just fret ' + o.one[0]);
+        if (!flashesAre(o.micOne, want('chk-fb1', o.oneStr, o.one))) flag(lang + ': a mic hit on a one-fret power card flashes ' + show(o.micOne) + ', expected only fret ' + o.one[0] + ' on the ' + o.oneStr + ' string, green');
         if (!o.micSingle.t.includes(W + ' ' + o.sTwo[1]) || o.micSingle.t.includes(' / ')) flag(lang + ': a mic hit on a single-note card says \'' + o.micSingle.t + '\', expected just fret ' + o.sTwo[1] + ' (a single note is exact)');
-        if (!marked(o.micSingle, [o.sTwo[1]])) flag(lang + ': a mic hit on a single-note card marks ' + J(o.micSingle.m) + ', expected only fret ' + o.sTwo[1]);
-        stats.fbRenders += 5;
+        if (!flashesAre(o.micSingle, want('chk-fb2', o.sTwoStr, [o.sTwo[1]]))) flag(lang + ': a mic hit on a single-note card flashes ' + show(o.micSingle) + ', expected only fret ' + o.sTwo[1] + ' on the ' + o.sTwoStr + ' string, green');
+        stats.fbRenders += 6;
       }
     } catch (e) { flag('rendering the Note Call hit feedback threw ' + e.message); }
-    finally { ctx.document.getElementById = origGet; delete ctx.__marks; if (!hadFlash2) delete ctx.flashClass; try { run('setLang("en")'); } catch { /* best effort */ } }
+    finally { ctx.document.getElementById = origGet; delete ctx.__flashes; if (hadFlash2) ctx.flashClass = origFlash; else delete ctx.flashClass; try { run('setLang("en")'); } catch { /* best effort */ } }
   }
-  if (bad === 0) ok(EXPECT.power + ' power drills on ca-43 (frets ' + EXPECT.ranges.map(r => r.join('-')).join(' / ') + '); ' + stats.cards + ' cards x 53 pitches = ' + stats.answers + ' answers match the oracle (single-note cards exactly as before); ' + stats.clashCalls + ' ncClash calls match an oracle and ' + stats.deals + ' seeded ncDeal deals (no coach.js loaded) never dealt a clashing card while a clean one existed (' + stats.powerForced + ' of ' + stats.powerDeals + ' power deals had to, every card left clashing; ' + (stats.forced - stats.powerForced) + ' of ' + (stats.deals - stats.powerDeals) + ' single-note); ' + stats.listens + ' ncListen calls (targets, clarity, main and grace fret); ' + stats.micHits + ' mic hits all flagged as the mic; ' + stats.fbRenders + ' hit-feedback renders (a mic hit on a two-fret power card names both frets, a tap, a one-fret card and a single note name one); ' + stats.keys + ' of ' + EXPECT.keys + ' ncp.* strings rendered, EN + ES');
+  if (bad === 0) ok(EXPECT.power + ' power drills on ca-43 (frets ' + EXPECT.ranges.map(r => r.join('-')).join(' / ') + '); ' + stats.cards + ' cards x 53 pitches = ' + stats.answers + ' answers match the oracle (single-note cards exactly as before); ' + stats.clashCalls + ' ncClash calls match an oracle and ' + stats.deals + ' seeded ncDeal deals (no coach.js loaded) never dealt a clashing card while a clean one existed (' + stats.powerForced + ' of ' + stats.powerDeals + ' power deals had to, every card left clashing; ' + (stats.forced - stats.powerForced) + ' of ' + (stats.deals - stats.powerDeals) + ' single-note); ' + stats.listens + ' ncListen calls (targets, clarity, main and grace fret); ' + stats.micHits + ' mic hits all flagged as the mic; ' + stats.fbRenders + ' hit-feedback renders (a mic hit on a two-fret power card names and flashes both frets; a tap, scored or play-along, a one-fret card and a single note name and flash one); ' + stats.keys + ' of ' + EXPECT.keys + ' ncp.* strings rendered, EN + ES');
 }
 
 /* 1bf2. LYRIC-SHEET CARDS (card.sheet — ca-38, Jonathan 2026-10-19). The

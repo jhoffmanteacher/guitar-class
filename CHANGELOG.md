@@ -17,9 +17,9 @@ see `WORKFLOW.md` and the git commit log.
 
 - **When the mic hears the chord on a card that can be played at two frets, the
   card now names both.** On E5 and A5 you can play the root at fret 0 or at
-  fret 12, and a strum sounds the same at both, so the mic cannot tell which
-  you played. Before, it named one of them, often fret 0 when you had played
-  fret 12. Now it says "fret 0 / 12" (in Spanish, "traste 0 / 12") and marks both
+  fret 12. The two sound alike (one is an octave higher), so the mic often cannot
+  tell which you played. Before, it named one of them, often fret 0 when you had
+  played fret 12. Now it says "fret 0 / 12" (in Spanish, "traste 0 / 12") and marks both
   frets on the board. If you tap a fret on the board, the card still names the
   fret you tapped.
 

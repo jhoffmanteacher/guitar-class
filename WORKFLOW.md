@@ -100,16 +100,24 @@
     teacher's trainer profile local only (then it doesn't follow him between
     machines). Your call.
     **Shipped:** `teacherFetchStudents` skips the signed-in account's own
-    document when nothing but `trainer` is in it (a test-student document under
-    the same account is still listed; reported as an interpretation). New check
-    1cf runs the real function against six stand-in documents; broken four ways.
+    document when the row it would draw is empty (no name, email or period, and
+    nothing in skills, responses, games, classActivities or exitChecks). A
+    test-student document under the same account is still listed (reported as an
+    interpretation). The first version tested "only `trainer`" and the review
+    found it stops working at the second page load: Hear It First runs in student
+    mode, and every student-mode load runs `swap45Commit`, which adds
+    `migrations.swap45`, so the real stub is `{trainer, migrations}` (R3-1).
+    Check 1cf runs the real function: 8 documents x 6 sign-ins; broken six ways.
   - [x] **R2-4** — DONE 2026-10-31: `trainer-site-adapter.js` loads on every page but is listed in
     `SHELL_NOT_PRECACHED` (`tools/checks.mjs:98`), so offline page loads get a
     failed script request (console only). Fix = add it to `sw.js` `ASSETS`
     (sw.js code: always Reviewed). `checkPrecacheCoverage` reads only `img/`
     and `.html` references, not `<script src>`.
     **Shipped:** the adapter is in `sw.js` `ASSETS` (88 assets) and off
-    `SHELL_NOT_PRECACHED`; `checkSwAssets` enforces it from here (broken two ways).
+    `SHELL_NOT_PRECACHED`. `checkSwAssets` also fails when a script that
+    `index.html` loads on every page (comments stripped; 10 today) is not in
+    `ASSETS`: the two lists alone let the original bug come back in one edit
+    (review R3-4; shown with the adapter and with `live-quiz.js`).
   - [x] **R2-6** — DONE 2026-10-31: Hear It First's "Last session" date and decay days are UTC
     (`dayStr`, `trainer-core.js:87`), so an evening session shows tomorrow's
     date. A local-date `dayStr` makes `trainer-sim` U12 fail under
@@ -126,8 +134,11 @@
     ncListen expectations change with it (changed check logic: Reviewed).
     **Shipped:** a mic hit on a two-fret power card names and marks both frets
     ("fret 0 / 12"); a tap, a one-fret card and single notes are unchanged. 1cd
-    now checks every mic hit carries the flag and reads back the real text and
-    board marks, EN + ES (broken six ways).
+    now checks every mic hit carries the flag, and runs the real `ncResolve` and
+    the real `ncTap` (scored and play-along) on a two-fret power card, a one-fret
+    card and a two-fret single note, EN + ES, reading back the text and every
+    `flashClass` call (which marker, which string, which colour). Broken ten
+    ways, four of them found by the review (R3-3) that an earlier version missed.
   - [x] **R1-3** — DONE 2026-10-31: Change Up's setup at 1366×657: the −5/+5 row is now fully below
     the screen and Start is lower (80px charts from `639248b`). Power Chord
     Switch's sticky Start bar would fix it, but check 1ca pins "Change Up must
