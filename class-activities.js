@@ -206,6 +206,14 @@
                                            // Chord cards say "each chord is shown once,
                                            // strum the way the recording does"
                                            // (ca.cardChordDirections).
+       everyStrum: true,                   // optional (ca-29 and its Neil Young
+                                           // version, 2026-10-28 / 10-30): keep
+                                           // consecutive same-name notes as
+                                           // separate events, so every strum
+                                           // shows its chord name. Such a card
+                                           // says "each strum has its chord name"
+                                           // (ca.cardStrumDirections), not "shown
+                                           // once".
        sheet: 'sheets/<song>.pdf',         // optional (ca-38, 2026-10-19): show
                                            // this chord sheet PDF instead of the
                                            // tab, drawn as is (lyrics included),
@@ -6223,7 +6231,17 @@ window.CLASS_ACTIVITIES = [
     recordingGroup: 'all-along-the-watchtower',
     recordingStart: 'jimi',
     recordingVersions: {
-      neil: { label: 'Neil Young', label_es: 'Neil Young', track: 'all-along-the-watchtower-neil', card: null }
+      /* Neil's own title and intro (a version-level title / intro, see RECORDING VERSIONS beside caView): this
+         card's name says how it is played, and Neil's is a down-up strum on every eighth, not one strum per
+         chord. The card itself (sections, caption) is built at the end of this file. */
+      neil: {
+        label: 'Neil Young', label_es: 'Neil Young', track: 'all-along-the-watchtower-neil',
+        title:    'All Along the Watchtower in Power Chords — Down-Up Strum',
+        title_es: 'All Along the Watchtower con acordes de potencia — rasgueo abajo-arriba',
+        intro:    'You know the Watchtower power chords. Today you play them with Neil Young\'s band for the whole song, strumming down and up.',
+        intro_es: 'Ya sabes los acordes de potencia de Watchtower. Hoy los tocas con la banda de Neil Young durante toda la canción, rasgueando hacia abajo y hacia arriba.',
+        card: null
+      }
     },
     view:  'card',    // one screen: Play song + tab + checks — see CARD above
     teacherOnly: true,   // console's "Teacher view songs" tab only, until moved to Class activities — see TEACHER ONLY above
@@ -6802,10 +6820,20 @@ window.CLASS_ACTIVITIES = [
    to 13, G on 14-16). The card follows the bars up to 162, 81 laps: lap 82
    holds the A (the start of the ending), and after that the band slows to
    the end and a bar runs 3 s or more. Laps 70-74 (bars 139-148, a solo) were
-   not confirmed: the bass wanders there. The record's
-   guitar strumming was not measured (the rhythm-down mix turns it down), so
-   the power-chord card shows each chord once, where it changes, and the
-   single-note card plucks once per beat the chord is held.
+   not confirmed: the bass wanders there.
+
+   THE STRUMMING (Jonathan, 2026-10-30): the power-chord cards (ca-29 and
+   ca-40) show a strum on EVERY eighth, down on each number and up on each "+",
+   each with its chord name — the same look as Jimi's ca-29: A5 x4, G5 x3,
+   F5 x6, G5 x3 (the chord on each of the 16 eighths is the bass's, counted per
+   eighth over the laps above). The record's rhythm guitar itself was checked
+   by an onset pass (full mix minus rhythm-down mix, which are aligned to 3
+   samples, on the 81 laps): a strum attack above chance on 15 of the 16
+   eighths, the numbers strongest; the "+" after beat 1 of bar 1 shows none
+   above chance (12% of laps, 10% is chance), so a strum there is Jonathan's
+   call, not the record's (checked, not proven: distortion hides re-strikes).
+   The single-note card (ca-26) is unchanged: it plucks once per beat the
+   chord is held, with its own honest caption.
 
    NO SONG MAP: this recording's verse and solo boundaries were not marked,
    so the card is eight parts of ten laps (the last one eleven), in bar
@@ -6831,7 +6859,8 @@ window.CLASS_ACTIVITIES = [
   // [note, string fret, midi, beats]: one pluck on each beat a chord is held, the half beat at the end of each G
   const single = [['A', 5, 45, 1], ['A', 5, 45, 1], ['G', 3, 43, 1], ['G', 3, 43, 0.5], ['F', 1, 41, 1], ['F', 1, 41, 1], ['F', 1, 41, 1], ['G', 3, 43, 1], ['G', 3, 43, 0.5]]
     .map(([note, fret, midi, beats]) => ({ string: 'E', fret, note, midi, beats }));
-  const power = [[A5, 2], [G5, 1.5], [F5, 3], [G5, 1.5]].map(([c, beats]) => ({ ...copy(c), beats }));
+  // 16 strums of half a beat, no rest: A5 x4 (1 + 2 +), G5 x3, F5 x6 (it starts on the "+" after 4), G5 x3 (it starts on the "+" after 3 in bar 2)
+  const power = [[A5, 4], [G5, 3], [F5, 6], [G5, 3]].flatMap(([c, n]) => Array.from({ length: n }, () => ({ ...copy(c), beats: 0.5 })));
   // rows: one tab row for the nine plucks of a lap, so the lap is not split 5 / 4
   const sections = (notes, rows) => parts.map(p => ({ ...p, ...(rows ? { rows } : {}), notes: notes.map(copy) }));
   const neil = (id, card) => {
@@ -6844,14 +6873,16 @@ window.CLASS_ACTIVITIES = [
     sections: sections(single, [9])
   });
   neil('ca-29', {
-    everyStrum: false,   // one strum shown where the chord changes: Neil's strumming was not measured
-    caption:    'The whole song in power chords · each chord where Neil Young changes it',
-    caption_es: 'La canción completa con acordes de potencia · cada acorde donde Neil Young lo cambia',
+    everyStrum: true,   // a strum on every eighth, each with its chord name, like Jimi's (Jonathan, 2026-10-30)
+    caption:    'The whole song in power chords · strum down on each number, up on each + · the chords change where Neil Young changes them',
+    caption_es: 'La canción completa con acordes de potencia · rasguea hacia abajo en cada número y hacia arriba en cada + · los acordes cambian donde Neil Young los cambia',
     sections: sections(power)
   });
+  // ca-40's Neil title and intro are on its recordingVersions.neil entry (version level), above.
   neil('ca-40', {
-    caption:    'The whole song in power chords · 1 strum per chord, where Neil Young changes it · the highlight follows the beat',
-    caption_es: 'La canción completa con acordes de potencia · 1 rasgueo por acorde, donde Neil Young lo cambia · la marca sigue el tiempo',
+    everyStrum: true,   // ca-40's own Jimi card has one strum per chord; Neil's is the down-up strum on every eighth
+    caption:    'The whole song in power chords · strum down on each number, up on each + · the chords change where Neil Young changes them · the highlight follows the beat',
+    caption_es: 'La canción completa con acordes de potencia · rasguea hacia abajo en cada número y hacia arriba en cada + · los acordes cambian donde Neil Young los cambia · la marca sigue el tiempo',
     sections: sections(power)
   });
 })();

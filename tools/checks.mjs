@@ -7973,12 +7973,22 @@ function checkPracticeCards(ctx) {
    - caTeacherRedraw() (every switch's redraw in the console): on the Teacher
      view songs tab it restarts that tab's card instead of opening the activity
      detail page (review R1-1, a switch on ca-40 threw the projector card away);
+   - the Neil versions of ca-29 and ca-40 are a down-up strum on every eighth
+     (Jonathan, 2026-10-30): card.everyStrum true, 16 chord names a section x 8
+     sections = 128 each (pinned; computed from the notes for every every-strum
+     card, Jimi's ca-29 included), and the directions line says "each strum
+     has its chord name" (ca.cardStrumDirections), never "each chord is shown
+     once" — read back from the render in English and Spanish;
+   - a version may carry its own title / intro (+_es, both or neither); ca-40's
+     Neil version must, and caTitle() / the card's intro show the recording on
+     screen in both languages;
    - the renderer is wired: caView() lays recordingVersions over the card,
      caCardBodyHtml() draws caRecordingSwitchHtml().
    Pinned: 3 cards, 1 group, 2 recordings each. */
 function checkRecordingVersions(ctx) {
   head('1cc. Recording versions: a card that plays another recording');
-  const EXPECT = { cards: 3, groups: 1, start: 'jimi' };
+  // strum: the Neil versions of ca-29 and ca-40 draw a strum on every eighth, each with its chord name (16 x 8 sections); titled: ca-40's Neil version has its own title and intro
+  const EXPECT = { cards: 3, groups: 1, start: 'jimi', strum: { 'ca-29': 128, 'ca-40': 128 }, titled: ['ca-40'] };
   let bad = 0, n = 0, rendered = 0;
   const flag = m => { err(m); problems++; bad++; };
   let appSrc = '', TRACKS = {}, activities = [];
@@ -8010,6 +8020,12 @@ function checkRecordingVersions(ctx) {
       const vw = w + ' \u00b7 recordingVersions.' + r;
       if (!v || typeof v !== 'object') { flag(vw + ' is not an object'); continue; }
       if (!has(v.label) || !has(v.label_es)) flag(vw + ': needs label and label_es');
+      for (const f of ['title', 'intro']) {
+        if (has(v[f]) && !has(v[f + '_es'])) flag(vw + ': ' + f + ' has no ' + f + '_es');
+        if (has(v[f + '_es']) && !has(v[f])) flag(vw + ': ' + f + '_es without ' + f);
+      }
+      if (EXPECT.titled.includes(w) && (!has(v.title) || !has(v.intro))) flag(vw + ': needs its own title and intro \u2014 the card\'s name says how it is played, and this recording is not played that way');
+      if (EXPECT.strum[w] && v.card && v.card.everyStrum !== true) flag(vw + ': card.everyStrum must be true \u2014 this recording is a down-up strum on every eighth, the grid would fold A5 x4 into one name');
       if (!TRACKS[v.track]) flag(vw + ': track \'' + v.track + '\' is not in SNIPPET_TRACKS');
       else if (v.track === a.card.track) flag(vw + ': plays the same track as the card \u2014 a recording version is another track');
       if (!v.card || typeof v.card !== 'object' || !Array.isArray(v.card.sections) || !v.card.sections.length) flag(vw + ': needs a card with sections (the build at the end of class-activities.js fills it in)');
@@ -8042,7 +8058,12 @@ function checkRecordingVersions(ctx) {
         try {
           const html = String(vm.runInContext('caCardBodyHtml(CLASS_ACTIVITIES.find(x => x.id === ' + J(a.id) + '))', ctx));
           const L = vm.runInContext('(function(){ const L = pcLayout(caView(CLASS_ACTIVITIES.find(x => x.id === ' + J(a.id) + '))); return L && { track: Object.keys(SNIPPET_TRACKS).find(k => SNIPPET_TRACKS[k] === L.tr), sections: L.sections.length, first: L.sections[0].s.label }; })()', ctx);
-          return { html, L };
+          const text = {};
+          for (const lang of ['en', 'es']) {
+            try { text[lang] = vm.runInContext('(function(){ setLang(' + J(lang) + '); const x = CLASS_ACTIVITIES.find(x => x.id === ' + J(a.id) + '); const m = /<p class="pc-dir">([^<]*)<\\/p>/.exec(String(caCardBodyHtml(x))); return { title: caTitle(x), intro: tf(caView(x), \'intro\'), dir: m ? m[1] : null }; })()', ctx); }
+            finally { vm.runInContext("setLang('en')", ctx); }
+          }
+          return { html, L, text };
         } finally { vm.runInContext('delete caRecordingModes[' + J(g) + ']', ctx); }
       };
       const want = r => r === a.recording ? { track: a.card.track, secs: a.card.sections, label: a.recordingLabel } : { track: a.recordingVersions[r].track, secs: a.recordingVersions[r].card.sections, label: a.recordingVersions[r].label };
@@ -8052,7 +8073,7 @@ function checkRecordingVersions(ctx) {
         let out;
         try { out = show(pick); } catch (e) { flag(w + ': rendering threw ' + e.message); continue; }
         rendered++;
-        const exp = want(shown), { html, L } = out;
+        const exp = want(shown), { html, L, text } = out;
         if (!L) { flag(w + ': pcLayout found no layout'); continue; }
         if (L.track !== exp.track) flag(w + ': plays track \'' + L.track + '\', expected \'' + exp.track + '\'');
         if (L.sections !== exp.secs.length) flag(w + ': ' + L.sections + ' sections, expected ' + exp.secs.length);
@@ -8063,6 +8084,32 @@ function checkRecordingVersions(ctx) {
         const pressed = [...sw.matchAll(/aria-pressed="true"[^>]*>([^<]*)</g)].map(m => m[1]);
         if (!sw) flag(w + ': no recording switch drawn');
         else if (pressed.length !== 1 || pressed[0] !== exp.label) flag(w + ': the switch shows ' + J(pressed) + ' pressed, expected ' + J([exp.label]));
+        // The chord names and the directions that describe them: a strum on every eighth names every strum, so the card must not say "shown once".
+        const vcard = shown === a.recording ? a.card : { ...a.card, ...a.recordingVersions[shown].card };
+        const gridSecs = vcard.chordGrid ? exp.secs.filter(sc => sc.chordGrid !== false) : [];
+        const allGrid = gridSecs.length > 0 && gridSecs.length === exp.secs.length;
+        const names = (html.match(/class="tab-note-btn tab-chord-btn"/g) || []).length;
+        if (allGrid && vcard.everyStrum) {
+          const strums = gridSecs.reduce((x, sc) => x + sc.notes.filter(nt => !nt.rest).length, 0);
+          if (names !== strums) flag(w + ': draws ' + names + ' chord names, expected one per strum (' + strums + ')');
+          if (shown !== a.recording && EXPECT.strum[a.id] && names !== EXPECT.strum[a.id]) flag(w + ': draws ' + names + ' chord names, pinned at ' + EXPECT.strum[a.id] + ' (16 strums x 8 sections) \u2014 a lap lost a strum, or the card\'s parts changed (update the pin only for an intended content change)');
+        }
+        if (gridSecs.length && !allGrid && vcard.everyStrum) flag(w + ': a card with chord-grid AND single-note sections cannot be every-strum \u2014 no directions line describes it (the mixed one says each chord is shown once)');
+        if (gridSecs.length && !(gridSecs.length && !allGrid && vcard.everyStrum)) {
+          const dirKey = allGrid ? (vcard.everyStrum ? 'ca.cardStrumDirections' : 'ca.cardChordDirections') : 'ca.cardChordMixedDirections';
+          const I18N = loadI18nTable();
+          for (const lang of ['en', 'es'])
+            if (!text[lang].dir || text[lang].dir !== I18N[dirKey][lang]) flag(w + ': the ' + lang + ' directions read \'' + text[lang].dir + '\', expected ' + dirKey + ' (' + (allGrid ? (vcard.everyStrum ? 'every strum is named' : 'each chord once') : 'chords and single notes') + ')');
+        }
+        // The title and intro follow the recording (a version-level title / intro), else they are the card's own.
+        const rvv = shown === a.recording ? {} : a.recordingVersions[shown];
+        for (const lang of ['en', 'es']) {
+          const sfx = lang === 'es' ? '_es' : '';
+          for (const f of ['title', 'intro']) {
+            const want_ = has(rvv[f + sfx]) ? rvv[f + sfx] : a[f + sfx];
+            if (text[lang][f] !== want_) flag(w + ': the ' + lang + ' ' + f + ' reads \'' + text[lang][f] + '\', expected \'' + want_ + '\'');
+          }
+        }
         const tr = TRACKS[exp.track];
         const hasFull = !!(tr && tr.srcFull && tr.srcFullSlow);
         if (/data-guitar="1"/.test(html) !== hasFull) flag(w + ': the Guitar switch is ' + (hasFull ? 'missing' : 'offered') + ' but ' + exp.track + (hasFull ? ' has' : ' has no') + ' full mix');
@@ -8243,7 +8290,7 @@ function checkChordGridCards(ctx) {
     const attrs = (html.match(/data-beat="/g) || []).length;
     if (attrs !== 7 * 8 * 7) flag(`ca-29 renders ${attrs} data-beat attributes, expected ${7 * 8 * 7} (7 sections x 8 beats x (6 string cells + 1 count cell))`);
     if (/pc-counts/.test(html)) flag('ca-29 draws a Counts switch — a card made only of chord grids always shows its count and needs none');
-    if (!/Each chord is shown once/.test(html)) flag('ca-29 does not show the chord-card directions (ca.cardChordDirections)');
+    if (!/Each strum has its chord name/.test(html) || /Each chord is shown once/.test(html)) flag('ca-29 does not show the every-strum directions (ca.cardStrumDirections) \u2014 every strum has its chord name, so "each chord is shown once" would be false');
     if (c29.card.restWord !== false) flag('ca-29 lost card.restWord:false — the bar-2 rest would draw the word "Stop" again');
     if (/class="tab-rest-lab"/.test(html)) flag('ca-29 draws a rest word — the bar-2 rest is left empty (card.restWord:false)');
     if (!c29.card.everyStrum) flag("ca-29 lost card.everyStrum — the grid would fold A5 x4 into one name again");
@@ -8445,13 +8492,14 @@ function checkChordGridCards(ctx) {
   if (heldLabels !== CHORD_GRID_HELD_LABELS) flag(`${heldLabels} rows across both views open on a held "(Chord)" label, pinned at ${CHORD_GRID_HELD_LABELS} — a row that starts mid-chord lost its label, or the cards' rows changed (update the pin only for an intended content change)`);
   // The new words are English AND Spanish (1e checks the key exists; this checks the Spanish is not the English).
   const I18N = loadI18nTable();
-  for (const k of ['ca.cardChordDirections', 'ca.cardChordMixedDirections', 'ca.cardCountsAriaGrid', 'tab.restStop', 'ca.sheetDirections', 'ca.bassVersion', 'ca.bassOff', 'ca.bassOn']) {
+  for (const k of ['ca.cardChordDirections', 'ca.cardStrumDirections', 'ca.cardChordMixedDirections', 'ca.cardCountsAriaGrid', 'tab.restStop', 'ca.sheetDirections', 'ca.bassVersion', 'ca.bassOff', 'ca.bassOn']) {
     if (!I18N[k] || !I18N[k].es || I18N[k].es === I18N[k].en) flag(`i18n ${k}: the Spanish is missing or just the English`);
   }
   // Directions: all-grid, mixed and single-note cards each say their own thing.
   const dirOf = id => { const a = acts.find(x => x.id === id); return a ? (/<p class="pc-dir">([^<]*)<\/p>/.exec(String(caCardBodyHtml(a))) || [])[1] : null; };
   if (!/single notes/.test(dirOf('ca-41') || '')) flag('ca-41 (grid + single-note sections) does not say what to do in a section of single notes');
   if (/single notes/.test(dirOf('ca-29') || '')) flag('ca-29 (all grid) shows the mixed-card directions');
+  if (!/Each chord is shown once/.test(dirOf('ca-40') || '')) flag('ca-40 on Jimi (one strum per chord, each chord shown once) does not show the each-chord-once directions (ca.cardChordDirections)');
   if (/Each chord is shown once/.test(dirOf('ca-10') || '')) flag('ca-10 (single notes) shows the chord-card directions');
   // The sheet's "This bar" strip is fed by the beat, and the narrow-screen guard is in the stylesheet (the real overflow test is smoke.mjs).
   try {

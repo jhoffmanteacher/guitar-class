@@ -5,6 +5,18 @@ Notable changes to the Guitar Class site. Newest first.
 For the full session-by-session history (and the reasoning behind each change),
 see `WORKFLOW.md` and the git commit log.
 
+## 2026-10-30 — Watchtower power-chord card: Neil Young strums on every eighth
+
+- **On Neil Young, the power-chord card now shows every strum.** Before, it
+  showed each chord one time, where it changes. Now it shows a strum on every
+  eighth note with its chord name under it, the same as on Jimi Hendrix. Strum
+  down on each number and up on each +. The chords are A5, G5, F5, G5, and they
+  change where Neil Young changes them.
+- **The directions on that card now match what you see.** They said "Each
+  chord is shown once", but on Jimi Hendrix every strum already had its name.
+  They now say "Each strum has its chord name. Listen to the recording and
+  strum along. Change chords when the name changes."
+
 ## 2026-10-30 — All Along the Watchtower: pick Jimi Hendrix or Neil Young
 
 - **The Watchtower play-along cards have a Jimi Hendrix / Neil Young switch.**

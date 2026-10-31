@@ -526,6 +526,9 @@
     // Chord-grid cards (card.chordGrid, 2026-10-26): the cursor moves on the beats and each chord name appears once.
     'ca.cardChordDirections':  { en: 'Each chord is shown once, where it starts. Listen to the recording and strum the way it does. Change chords when you reach the next chord name.',
                                  es: 'Cada acorde aparece una sola vez, donde empieza. Escucha la grabación y rasguea como ella. Cambia de acorde cuando llegues al siguiente nombre de acorde.' },
+    // A chord-grid card with card.everyStrum (ca-29, both recordings): every strum has its own chord name, so "shown once" would be false.
+    'ca.cardStrumDirections':  { en: 'Each strum has its chord name. Listen to the recording and strum along. Change chords when the name changes.',
+                                 es: 'Cada rasgueo tiene el nombre de su acorde. Escucha la grabación y rasguea con ella. Cambia de acorde cuando cambie el nombre.' },
     // A card with chord-grid sections AND single-note sections (ca-35's solo, ca-41's verses).
     'ca.cardChordMixedDirections': { en: 'Each chord is shown once, where it starts. Listen to the recording and strum the way it does. Change chords when you reach the next chord name. In a section of single notes, play each note when it lights up.',
                                  es: 'Cada acorde aparece una sola vez, donde empieza. Escucha la grabación y rasguea como ella. Cambia de acorde cuando llegues al siguiente nombre de acorde. En una sección de notas sueltas, toca cada nota cuando se ilumine.' },

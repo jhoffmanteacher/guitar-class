@@ -366,7 +366,11 @@ really starts, four bars to a row whatever the meter, a bar line between bars,
 a count row always on (beats in ink, "+" faint), and the cursor on the BEATS
 only (`data-beat`, never on a "+"). Opt-in per card, `chordGrid: false` per
 section (ca-41's single-note verses, ca-35's solo); ca-31 (the riff as chords)
-and every single-note card stay out. Display only — no `notes` array moved, so
+and every single-note card stay out. `card.everyStrum` (ca-29 and the Neil Young
+power-chord cards) keeps every strum as its own named event, and its directions say
+"each strum has its chord name" (`ca.cardStrumDirections`) instead of "each chord is
+shown once"; a mixed grid + single-note card cannot be every-strum (1cc flags it).
+Display only — no `notes` array moved, so
 audio, `pcLayout`, 1bf / 1bf2 / 1az and the Journey whole-song tabs are as they
 were. Engine: `pcChordGrid` / `pcGridRows` / `renderChordGridRow` (rows),
 `pcLocate` (`beat`, `bar`), `pcLocKey` (the repaint key is the BEAT on a grid —
@@ -385,7 +389,10 @@ A card can play another RECORDING of its song: a Jimi Hendrix / Neil Young switc
 the top of the card, Jimi the default. Unlike a key version (same record moved, same
 bar map) a recording has its own track, bars, form and chord rhythm, so a version
 carries a `card` (sections, caption…) that `caView` lays over the card's own, plus
-its `track`. Data: `recording`, `recordingLabel(_es)`, `recordingGroup` (one stored
+its `track`. A version may carry its own `title` / `intro` (+`_es`) beside `label` and
+`track` (ca-40: Jimi's "1 Strum per Chord", Neil's "Down-Up Strum"); `caView` lays them
+over the activity, so `caTitle()`, the card, the board and the console's list rows follow
+the recording on screen. Data: `recording`, `recordingLabel(_es)`, `recordingGroup` (one stored
 choice, `localStorage.caRecordingModes`, for every card of the song), `recordingStart`,
 `recordingVersions: { neil: { label, label_es, track, card } }`; the Neil cards are built
 by the IIFE at the end of class-activities.js. Not combinable with key / chord / bass

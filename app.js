@@ -12922,6 +12922,13 @@ function caKeyMode(a){
                                   card: { sections, caption, ... } } }
    caView lays the version's `card` fields over the activity's own and plays
    its `track`; the checks, tick keys and id are the activity's, unchanged.
+   A version may also carry `title`, `title_es`, `intro` and `intro_es` beside
+   `label` / `track` (not inside `card`), for a card whose name or blurb
+   describes the recording (ca-40: Jimi's is "1 Strum per Chord", Neil's is
+   "Down-Up Strum"). caView lays them over the activity too, so caTitle() and
+   every renderer that reads the view show the recording on screen; the board,
+   pins and the console's list rows read caTitle / teacherActivityTitle, so they
+   follow the chosen recording the same way (as title_power does for ca-34).
    The choice is per viewer in localStorage (`caRecordingModes`, { group:
    recording }), like the key and chord switches. */
 const CA_RECORDING_MODES_KEY = 'caRecordingModes';
@@ -12977,6 +12984,7 @@ function caView(a){
   const view = walk(a);
   if(kv && view.card) view.card = { ...view.card, track: kv.track };
   if(rv && view.card) view.card = { ...view.card, ...rv.card, track: rv.track };   // the recording's own bars, form and rhythm
+  if(rv) ['title', 'title_es', 'intro', 'intro_es'].forEach(f => { if(rv[f]) view[f] = rv[f]; });   // its own name and blurb, where it has them (ca-40)
   if(bass && view.card) view.card = { ...view.card, __bass: a.bassNotes };
   view.__chordView = true;
   byCombo.set(combo, view);
@@ -13608,7 +13616,7 @@ function caCardBodyHtml(a, opts){
   if(sheet) setTimeout(pcSheetScan, 0);
   return `<div class="pc" data-id="${escAttr(a.id)}" data-slow="1"${snippetHasFull(L.tr) ? ' data-guitar="1"' : ''}${preview ? ' data-preview="1"' : ''}>`
     + caRecordingSwitchHtml(a) + caKeySwitchHtml(a) + caChordSwitchHtml(a) + caBassSwitchHtml(a)
-    + `<p class="pc-dir">${escHtml(t(sheet ? 'ca.sheetDirections' : L.sections.some(S => S.grid) ? (L.sections.every(S => S.grid) ? 'ca.cardChordDirections' : 'ca.cardChordMixedDirections') : 'ca.cardDirections'))}`
+    + `<p class="pc-dir">${escHtml(t(sheet ? 'ca.sheetDirections' : L.sections.some(S => S.grid) ? (L.sections.every(S => S.grid) ? (L.sections.every(S => S.every) ? 'ca.cardStrumDirections' : 'ca.cardChordDirections') : 'ca.cardChordMixedDirections') : 'ca.cardDirections'))}`
     + (caBassMode(a) === 'on' && tf(a, 'bassDirections') ? ' ' + escHtml(tf(a, 'bassDirections')) : '')   // alternating bass — see BASS NOTES
     + `</p>`
     + pcPlayerHtml(a, L) + (sheet ? pcSheetHtml(a, L) : pcTabHtml(a, L)) + pcChecksHtml(a, preview) + pcHelpHtml(a, preview)

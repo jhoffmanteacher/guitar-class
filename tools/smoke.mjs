@@ -273,7 +273,18 @@ async function recordingWalk(page, run, events, stats, base) {
   const state = `(() => { const q = s => document.querySelector('.ca-card[open] ' + s); const sw = q('.ca-rec-switch'); if (!sw) return { missing: true };
     const L = pcLayout(pcActivity(q('.pc')));
     return { pressed: [...sw.querySelectorAll('button')].filter(b => b.getAttribute('aria-pressed') === 'true').map(b => b.textContent.trim()), track: Object.keys(SNIPPET_TRACKS).find(k => SNIPPET_TRACKS[k] === L.tr),
-             secs: L.sections.length, chips: document.querySelectorAll('.ca-card[open] .pc-sec').length, guitar: !!q('.pc-guitar'), full: snippetHasFull(L.tr), saved: localStorage.getItem('caRecordingModes') }; })()`;
+             secs: L.sections.length, chips: document.querySelectorAll('.ca-card[open] .pc-sec').length, guitar: !!q('.pc-guitar'), full: snippetHasFull(L.tr), saved: localStorage.getItem('caRecordingModes'),
+             names: q('.chord-grid') ? q('.chord-grid').querySelectorAll('.tab-chord-btn').length : null,
+             dir: q('.pc-dir') ? q('.pc-dir').textContent.trim() : '', strumDir: t('ca.cardStrumDirections') }; })()`;
+  // ca-29 draws a strum on every eighth with its chord name (Jonathan, 2026-10-28 for Jimi, 10-30 for Neil): one lap of its first section shows
+  // 14 names on Jimi's recording (the bar-2 rest is empty) and 16 on Neil Young's, and the directions say each strum has its name.
+  const LAP_NAMES = { 'ca-29': { jimi: 14, neil: 16 } };
+  const strums = (id, st, where) => {
+    const pin = LAP_NAMES[id]; if (!pin || !st || st.missing) return;
+    const want = pin[/-neil$/.test(st.track) ? 'neil' : 'jimi'];
+    if (st.names !== want) fail(id, where + ': a lap shows ' + st.names + ' chord names on ' + st.track + ', expected ' + want);
+    if (!st.dir.startsWith(st.strumDir)) fail(id, where + ': the directions read ' + JSON.stringify(st.dir.slice(0, 70)) + ', not the every-strum ones');
+  };
   const press = `(() => { const b = [...document.querySelector('.ca-card[open] .ca-rec-switch').querySelectorAll('button')].find(x => x.getAttribute('aria-pressed') !== 'true'); b.click(); return 1; })()`;
   await run('recording:open', 'openClassActivitiesScreen()', 600);
   await run('recording:clear', `(localStorage.removeItem('caRecordingModes'), caRecordingModes = {}, 1)`, 10);
@@ -283,12 +294,14 @@ async function recordingWalk(page, run, events, stats, base) {
     if (!a || a.missing) { fail(id, 'the recording switch is not on the card'); continue; }
     if (a.pressed[0] !== label) fail(id, 'opens with ' + JSON.stringify(a.pressed) + ' pressed, not the card\'s own recording ' + JSON.stringify(label));
     if (a.chips !== a.secs) fail(id, 'shows ' + a.chips + ' section buttons for ' + a.secs + ' sections');
+    strums(id, a, 'on Jimi, first open');
     if (a.pressed.length !== 1 || a.saved) fail(id, 'opens with ' + JSON.stringify(a.pressed) + ' pressed and ' + a.saved + ' saved — it should open on the card\'s own recording with nothing saved');
     await run('recording:' + id + ':press', press, 500);
     const b = await run('recording:' + id + ':other', state, 10);
     if (!b || b.missing) { fail(id, 'the switch is gone after one press'); continue; }
     if (b.track === a.track || b.pressed[0] === a.pressed[0] || b.pressed.length !== 1) fail(id, 'one press left ' + a.track + ' playing / ' + JSON.stringify(b.pressed) + ' pressed');
     if (b.chips !== b.secs) fail(id, 'after one press: ' + b.chips + ' section buttons for ' + b.secs + ' sections');
+    strums(id, b, 'after one press');
     if (b.guitar !== b.full) fail(id, 'the Guitar switch is ' + (b.guitar ? 'shown' : 'missing') + ' on ' + b.track + ', which ' + (b.full ? 'has' : 'has no') + ' full mix');
     let saved = null; try { saved = JSON.parse(b.saved || '{}')[group]; } catch (e) { /* reported below */ }
     if (!saved) fail(id, 'the choice was not saved for the song (' + b.saved + ')');
@@ -301,9 +314,11 @@ async function recordingWalk(page, run, events, stats, base) {
     await run('recording:' + id + ':reopen', "caFocusActivity('" + id + "')", 700);
     const c = await run('recording:' + id + ':after-reload', state, 10);
     if (!c || c.missing || c.track !== b.track || c.pressed[0] !== b.pressed[0]) fail(id, 'after a reload the card shows ' + (c && c.track) + ' / ' + JSON.stringify(c && c.pressed) + ', not the saved ' + b.track);
+    strums(id, c, 'after a reload');
     await run('recording:' + id + ':back', press, 500);
     const d = await run('recording:' + id + ':restored', state, 10);
     if (!d || d.track !== a.track || d.pressed[0] !== a.pressed[0]) fail(id, 'a second press did not return to ' + a.track);
+    strums(id, d, 'back on Jimi');
     stats.recordingClicks = (stats.recordingClicks || 0) + 1;
     await run('recording:' + id + ':reset', `(localStorage.removeItem('caRecordingModes'), caRecordingModes = {}, 1)`, 10);
   }

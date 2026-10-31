@@ -50,9 +50,12 @@ ear. This is chord *timing*, not BPM:
   its 115 BPM file (beat map = `SNIPPET_TRACKS['all-along-the-watchtower-neil']`,
   bar 1 = the first A, 162 bars = 81 laps followed; lap 82 holds the A and the band slows to the end after that; laps 70-74 are a solo where the bass wanders, loop unconfirmed):
   one two-bar loop, **A 2 beats · G 1.5 · F 3 · G 1.5** — changes at beats 1,
-  3, 4.5 and 7.5 of the eight (per-eighth bass counts over the 86 laps in the file). Its guitar
-  strumming is NOT measured, so the power-chord card shows each chord once, where it
-  changes. Its full mix (Jonathan's 440 Hz m4a, 2026-10-30) was trimmed to the rhythm-down file; its 90 BPM full mix is the 115 one rubberband-stretched by 90/115 (no Moises export). No song map: eight "Part N" sections (10 laps, the last 11). ca-38 (the PDF sheet) is
+  3, 4.5 and 7.5 of the eight (per-eighth bass counts over the 86 laps in the file). The power-chord cards (ca-29, ca-40) show a **down-up
+  strum on every eighth, each strum named** (Jonathan, 2026-10-30 — like Jimi's ca-29):
+  A5 x4, G5 x3, F5 x6, G5 x3, 16 strums of half a beat. An onset pass over the rhythm guitar
+  (full mix minus rhythm-down, 81 laps) found strum attacks above chance on 15 of the 16
+  eighths; the "+" after beat 1 of bar 1 showed none (12% of laps, 10% is chance), so a strum
+  there is Jonathan's call, not proven by the record. Its full mix (Jonathan's 440 Hz m4a, 2026-10-30) was trimmed to the rhythm-down file; its 90 BPM full mix is the 115 one rubberband-stretched by 90/115 (no Moises export). No song map: eight "Part N" sections (10 laps, the last 11). ca-38 (the PDF sheet) is
   Jimi-only. The older "Am 2 · G 2 · F 3 · G 1" reading is superseded by this.
   **Method book's rhythm (2026-10-15 to 2026-10-26), kept for history:**
   `1 + 2 (rest on 3) + 4` in BOTH bars — `A A A · G G | F F F · G G`, beats
