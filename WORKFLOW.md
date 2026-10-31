@@ -91,7 +91,7 @@
   trainer-core/audio/ui" had a `\\.` regex that could never match (R2-3); the
   CHANGELOG said the trainer opens "for one signed-in account" (R2-7).
   Waiting for Jonathan:
-  - **R2-1 (MAJOR, teacher console):** a Hear It First save creates
+  - [x] **R2-1 (MAJOR, teacher console)** — DONE 2026-10-31, Jonathan chose to keep the profile in the cloud and skip his own uid: a Hear It First save creates
     `progress/{uid}` holding only `trainer` (`trainer-site-adapter.js:82`). If
     that is the teacher's own account, the console roster
     (`teacherFetchStudents`, `teacher.js:532`) shows a nameless row under
@@ -99,25 +99,42 @@
     `teacherFetchStudents` (a `teacher.js` change, always Reviewed), or keep the
     teacher's trainer profile local only (then it doesn't follow him between
     machines). Your call.
-  - **R2-4:** `trainer-site-adapter.js` loads on every page but is listed in
+    **Shipped:** `teacherFetchStudents` skips the signed-in account's own
+    document when nothing but `trainer` is in it (a test-student document under
+    the same account is still listed; reported as an interpretation). New check
+    1cf runs the real function against six stand-in documents; broken four ways.
+  - [x] **R2-4** — DONE 2026-10-31: `trainer-site-adapter.js` loads on every page but is listed in
     `SHELL_NOT_PRECACHED` (`tools/checks.mjs:98`), so offline page loads get a
     failed script request (console only). Fix = add it to `sw.js` `ASSETS`
     (sw.js code: always Reviewed). `checkPrecacheCoverage` reads only `img/`
     and `.html` references, not `<script src>`.
-  - **R2-6:** Hear It First's "Last session" date and decay days are UTC
+    **Shipped:** the adapter is in `sw.js` `ASSETS` (88 assets) and off
+    `SHELL_NOT_PRECACHED`; `checkSwAssets` enforces it from here (broken two ways).
+  - [x] **R2-6** — DONE 2026-10-31: Hear It First's "Last session" date and decay days are UTC
     (`dayStr`, `trainer-core.js:87`), so an evening session shows tomorrow's
     date. A local-date `dayStr` makes `trainer-sim` U12 fail under
     `TZ=America/Los_Angeles` (its `BASE` is UTC midnight), so the sim needs a
     noon `BASE` in the same change.
-  - **R1-1:** on ca-43's two-fret cards (E5 low E, A5 on A: frets 0 and 12) the
+    **Shipped:** `dayStr` is the local date; `trainer-sim` `BASE` is noon UTC and a
+    new unit U12b pins the local date. The sim passes under
+    `TZ=America/Los_Angeles`, `TZ=UTC` and `TZ=America/New_York`; it fails under
+    `TZ=Pacific/Auckland` (UTC+13), which the `BASE` comment says.
+  - [x] **R1-1** — DONE 2026-10-31: on ca-43's two-fret cards (E5 low E, A5 on A: frets 0 and 12) the
     mic usually credits fret 0 when the student plays at fret 12 (the octave
     below is fret 0's root). Score is right; the fret named is wrong. Fix idea:
     name and mark both frets ("fret 0 / 12") on a mic hit; check 1cd's
     ncListen expectations change with it (changed check logic: Reviewed).
-  - **R1-3:** Change Up's setup at 1366×657: the −5/+5 row is now fully below
+    **Shipped:** a mic hit on a two-fret power card names and marks both frets
+    ("fret 0 / 12"); a tap, a one-fret card and single notes are unchanged. 1cd
+    now checks every mic hit carries the flag and reads back the real text and
+    board marks, EN + ES (broken six ways).
+  - [x] **R1-3** — DONE 2026-10-31: Change Up's setup at 1366×657: the −5/+5 row is now fully below
     the screen and Start is lower (80px charts from `639248b`). Power Chord
     Switch's sticky Start bar would fix it, but check 1ca pins "Change Up must
     stay as it was". Your call.
+    **Shipped:** Change Up's Start is in the same sticky bar; the 1ca pin now says
+    so on purpose; a new smoke walk measures it at 1366×657 in five views. The
+    −5/+5 row is still below the first screen (only Start is pinned).
   - **Check 1cd blind spot:** it only sees strings asked for through `ncK()`,
     which is how R1-2 got past it; a direct `t('nc.*')` on a power screen is
     invisible.
