@@ -9379,7 +9379,7 @@ function ncFinish(key){
     st.level = st.lvIdx + 1;
     nextBtn = `<button type="button" class="sdr-start" onclick="ncStart('${key}')">&#x25B6; ${escHtml(t('nc.start', { n: st.lvIdx + 2 }))}</button>`;
   } else {
-    verdict = t('nc.verdictAgain', { pass: NC_PASS, total: NC_ROUND });
+    verdict = t(ncK(st.cfg.power, 'verdictAgain'), { pass: NC_PASS, total: NC_ROUND });
     st.level = st.lvIdx;
   }
   st.phase = 'done';
@@ -9398,7 +9398,7 @@ function ncFinish(key){
       `<div class="sdr-score">${escHtml(t('nc.score', { n: score, total: NC_ROUND }))}</div>` +
       `<div class="sdr-score-sub">${escHtml(ncLevelDesc(st.L, st.cfg.power))}</div>` +
       `<div class="sdr-verdict ${cls}">${escHtml(verdict)}</div>` +
-      `<div class="sdr-drill"><div class="sdr-drill-title">${escHtml(t('nc.practiceThese'))}</div>${rows}</div>` +
+      `<div class="sdr-drill"><div class="sdr-drill-title">${escHtml(t(ncK(st.cfg.power, 'practiceThese')))}</div>${rows}</div>` +
       `<div class="sdr-actions">${nextBtn}` +
         `<button type="button" class="sdr-btn2" onclick="ncAgain('${key}',${st.lvIdx})">${escHtml(t('nc.again'))}</button>` +
         `<button type="button" class="sdr-btn2" onclick="ncToSetup('${key}')">${escHtml(t('nc.levels'))}</button>` +

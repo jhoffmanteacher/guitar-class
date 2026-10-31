@@ -80,6 +80,53 @@
 
 ## Open work
 
+- [ ] **2026-10-31 — Friday check (first run, a practice run): what it found
+  and did not fix.** `site-reviewer-deep` (student-facing) and `site-reviewer`
+  (Hear It First) read every commit on `main` from `1c1e6c6` to `59e7915`.
+  No BLOCKER. Fixed in the same commit as this note: Note Call's power-chord
+  done screen said "notes" / "Practica estas" over a list of chords (R1-2, two
+  `ncp.*` keys, 1cd pin 16 → 18); a Hear It First phrase counted a note that
+  timed out as "not graded", so playing 1 of 5 notes scored 100% (R2-2); Stop
+  during placement counted as a session (R2-5); the e2e check "loads no
+  trainer-core/audio/ui" had a `\\.` regex that could never match (R2-3); the
+  CHANGELOG said the trainer opens "for one signed-in account" (R2-7).
+  Waiting for Jonathan:
+  - **R2-1 (MAJOR, teacher console):** a Hear It First save creates
+    `progress/{uid}` holding only `trainer` (`trainer-site-adapter.js:82`). If
+    that is the teacher's own account, the console roster
+    (`teacherFetchStudents`, `teacher.js:532`) shows a nameless row under
+    Unassigned. Two fixes: skip the signed-in teacher's uid in
+    `teacherFetchStudents` (a `teacher.js` change, always Reviewed), or keep the
+    teacher's trainer profile local only (then it doesn't follow him between
+    machines). Your call.
+  - **R2-4:** `trainer-site-adapter.js` loads on every page but is listed in
+    `SHELL_NOT_PRECACHED` (`tools/checks.mjs:98`), so offline page loads get a
+    failed script request (console only). Fix = add it to `sw.js` `ASSETS`
+    (sw.js code: always Reviewed). `checkPrecacheCoverage` reads only `img/`
+    and `.html` references, not `<script src>`.
+  - **R2-6:** Hear It First's "Last session" date and decay days are UTC
+    (`dayStr`, `trainer-core.js:87`), so an evening session shows tomorrow's
+    date. A local-date `dayStr` makes `trainer-sim` U12 fail under
+    `TZ=America/Los_Angeles` (its `BASE` is UTC midnight), so the sim needs a
+    noon `BASE` in the same change.
+  - **R1-1:** on ca-43's two-fret cards (E5 low E, A5 on A: frets 0 and 12) the
+    mic usually credits fret 0 when the student plays at fret 12 (the octave
+    below is fret 0's root). Score is right; the fret named is wrong. Fix idea:
+    name and mark both frets ("fret 0 / 12") on a mic hit; check 1cd's
+    ncListen expectations change with it (changed check logic: Reviewed).
+  - **R1-3:** Change Up's setup at 1366×657: the −5/+5 row is now fully below
+    the screen and Start is lower (80px charts from `639248b`). Power Chord
+    Switch's sticky Start bar would fix it, but check 1ca pins "Change Up must
+    stay as it was". Your call.
+  - **Check 1cd blind spot:** it only sees strings asked for through `ncK()`,
+    which is how R1-2 got past it; a direct `t('nc.*')` on a power screen is
+    invisible.
+  - **Should not have shipped Fast:** `639248b`, `6871747`, `b3a351c`,
+    `cb3dc5e` (mic detection) and `5e2061e` (new check 1cc). Reviewed now.
+  - The 2026-10-30 item below: the reviewer pass is done (findings above);
+    the look at the LIVE site in a real browser is still not done, so it
+    stays open.
+
 - [ ] **2026-10-31 — For the cloud review: pushed without a reviewer.**
   Jonathan asked for everything to be pushed and reviewed in the cloud. The four
   code commits below carry `Review: Fast` so the Friday check also finds them.
@@ -154,7 +201,9 @@
     file, laps 70-74 not confirmed), `songVersions` renamed to
     `recordingVersions` in comments, a clearer Neil Young caption, matching
     pins in `tools/checks.mjs` and `tools/smoke.mjs`, and a `song-facts` note.
-    **`main` (live) has the Watchtower switch WITHOUT these fixes.**
+    **Update (Friday check, 2026-10-31): `main` already has these fixes** — they
+    shipped as `158015d` (`git diff origin/wip/main-folder-2026-10-30 158015d` on
+    the code files is empty). Don't ship the branch; it can be deleted.
     Status of the branch: based on `main` at `6b120f8`; the full checks pass
     (cache version bumped); the browser smoke test and a reviewer pass were NOT
     run. To ship it: check it out, run
@@ -745,6 +794,57 @@
 ---
 
 ## Recently shipped (post-archive)
+
+- [x] **2026-10-31 — "Hear It First": a hidden adaptive ear + fretboard trainer.**
+      Work order `WO-hear-it-first.md` (kept out of the repo). For Jonathan's
+      own ear on an electric guitar: hear a tone and find it, see a fret and
+      know its sound, name and play intervals, play back phrases, find named
+      notes. It finds weak spots (moves on a string, across strings, across the
+      neck, intervals, phrases, note locations), spends practice there, and
+      teaches (a one-line lesson card, two easier items with "Hear the slide",
+      a contrast drill for a confused pair) until each one is gone.
+      **Where:** `index.html?hif=1` (add `&hifdebug=1` for `window.__hif`), any
+      signed-in account; no hub card, never visible to students.
+      **Files (flat, at the root):** `trainer-core.js` (pure engine, no DOM /
+      audio / Firebase / strings), `trainer-audio.js`, `trainer-ui.js` (the
+      English text, the screens, `createTrainer`), `trainer-site-adapter.js`
+      (the ONLY one that touches site globals; the one small script index.html
+      loads). `guitar-diagrams.js` gained one NEW function,
+      `trainerFretboardSvg`; every old diagram is byte-identical
+      (`node tools/diagram-regression.mjs <ref>`). All four are in
+      `SHELL_FILES` and `SHELL_NOT_PRECACHED` (loaded on demand, like
+      `teacher.js`).
+      **How it listens:** `coach.js`, unchanged — its mic, onset detector and
+      pitch reader, called from the adapter. The input picker is a
+      `getUserMedia` wrapper that is in force only while `coachAcquireMic()`
+      runs. Cents come from the readings `coachSettlePitch` leaves behind (it
+      returns a whole note). A reading within 45 cents counts; 45–50 is "didn't
+      catch that".
+      **Where it saves:** `progress/{uid}.trainer`, written with
+      `set({trainer}, {mergeFields:['trainer']})`, plus a uid-keyed localStorage
+      copy. `firestore.rules` is unchanged (that document has no field
+      whitelist). Under 30 KB: 25 KB with every one of 208 cells used.
+      **Sound:** the site's own `playNote(..., synthOnly=true)` (Karplus-Strong,
+      no audio files; the recorded notes stop at MIDI 74 and the trainer goes
+      to 84).
+      **How to test:** `node tools/trainer-sim.mjs` (19 unit checks, learners
+      A–H on 20 seeds; its own command, NOT in checks.mjs; run it after any
+      `trainer-core.js` change), `node tools/trainer-e2e.mjs` (real Chrome over
+      the DevTools protocol; a fake guitar plays synthesized plucks into
+      `getUserMedia`, so the site's real detection runs; `--quick` skips the
+      placement walk), `node tools/diagram-regression.mjs <ref>`.
+      **The finding to know before a student release:** the work order's unlock
+      rule (every new cell at m ≥ 0.75 and n ≥ 6) is slow. A steady 95%
+      learner starting at Zone 1 / Tier 1 opens Z2 at about session 7, Z3 at
+      28, Z4 at 60–78, and does not reach Z5 or T4 in 90 sessions; coverage
+      weighting, 4 answers per cell, or pooling by row help only a little
+      (`unlock.granularity`, `unlock.minN`, `weights.coverage` in the config
+      are the switches). Placement is how an expert gets up the ladder.
+      **Interpretations the work order left open** are numbered I1–I11 in the
+      header of `trainer-core.js`.
+      **Not yet checked on a real guitar:** the work order's electric-guitar
+      checklist (section 8), and frets 13–20 on the B and high e strings (up to
+      1046 Hz), which the existing games never reach.
 
 - [x] **2026-10-26 — Watchtower: the record's rhythm replaces the book rhythm.**
       Jonathan and Claude measured the Hendrix rhythm guitar on the beat map

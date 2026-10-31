@@ -746,7 +746,10 @@
       var pl = ans.played || [], graded = 0, right = 0, rights = [], errs = [], n;
       for (n = 0; n < item.notes.length; n++) {
         var pv = pl[n];
-        if (pv == null) { rights.push(null); continue; }
+        /* undefined = the note timed out (never heard): it counts as missed.
+           null = unclear three times: it is not graded. */
+        if (pv === undefined) { graded++; rights.push(false); continue; }
+        if (pv === null) { rights.push(null); continue; }
         graded++;
         var okn = pv === item.notes[n].midi;
         rights.push(okn);
@@ -1047,7 +1050,9 @@
       return { items: s.items, byTask: s.byTask, review: s.review };
     }
 
-    function nextItem() {
+    /* o.task forces the task ('Practice one task'); the cell is still picked
+       by the engine, so it stays adaptive inside that task. */
+    function nextItem(o) {
       if (!session) startSession();
       while (pending.length) {
         var p = pending.shift();
@@ -1069,7 +1074,7 @@
         }
         return p;
       }
-      var meta = pickCell(pickTask());
+      var meta = pickCell((o && o.task) || pickTask());
       var item = makeItemFor(meta);
       track(item);
       return item;
