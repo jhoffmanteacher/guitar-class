@@ -93,4 +93,4 @@ Don't rely on remembering the above. Follow the numbered flow literally, run the
 named commands, and treat the triggers as rules: a review is **required** for
 any change that touches 3+ files, a danger-zone file (teacher.js config
 plumbing, sw.js code, coach.js detection, app.js save path, firestore.rules),
-or 50+ strings of text. A sweep is always Reviewed, never offered as Fast.
+or 50+ strings of text. A sweep is always Reviewed the same day, never shipped Fast.

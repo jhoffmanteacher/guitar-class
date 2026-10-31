@@ -1637,6 +1637,21 @@ of every session (it was ~8,800 tokens per turn; the trimmed file is ~3,300).
 The *rules* stay in `CLAUDE.md`; the reasoning, worked examples and history live
 here. Read this when you need the **why**.
 
+### Why Fast became the default, with a Friday check (Jonathan, 2026-10-31)
+
+Reviews were still taking a long time on ordinary edits (a play-along change
+ran a reviewer 30+ minutes), and the 2026-10-27 question defaulted to
+Reviewed whenever Jonathan didn't answer. He asked whether same-day review was
+needed if agents checked for errors once a week. The split: content and
+display changes (play-alongs, wording, layout, new songs) break visibly and
+revert cleanly, so a weekly review is a fair trade; changes that can wipe
+student progress or strand Chromebooks on an old cache can't wait a week,
+because the Friday check would find them after the damage. Those stay
+always-Reviewed. The Friday check runs at 11 PM and fixes and pushes on its
+own (Jonathan's choice), except fixes that are themselves always-Reviewed,
+which go to a branch. Unproven: if a Friday check finds a Fast change that
+hurt students during the week, move that kind of change to always-Reviewed.
+
 ### Why the review triggers were narrowed, and the "quick change" fast path (Jonathan, 2026-10-26)
 
 After the Watchtower rhythm orders ran full review rounds, Jonathan said the
@@ -2634,8 +2649,8 @@ implement it?".
   as *do it*, not *ask first*.
 - **Still pause for:** a genuine fork where the choice changes the outcome (use
   AskUserQuestion), irreversible / outward-facing actions — deleting files,
-  touching the live site — and the Fast-or-Reviewed question when a review
-  trigger fires (see Triggers).
+  touching the live site. A review trigger no longer asks — see "Fast by
+  default" under Triggers.
 - **Pushing to `main` is NOT one of those** (Jonathan, 2026-08-28). When the
   checks pass and a fast-forward onto `main` is what you'd recommend anyway,
   just push it — don't ask first, and never offer "push the branch instead" as
@@ -2657,7 +2672,7 @@ the auditor / fixer / reviewer brief templates: skill `site-sweep`.
 
 **Triggers, so this doesn't depend on how hard you are thinking** (they hold at
 any effort level): a change hits a **review trigger** — an adversarial
-reviewer on a pinned commit, subject to "Fast or Reviewed" below — whenever it
+reviewer on a pinned commit, subject to "Fast by default" below — whenever it
 touches 3+ files, a danger-zone file (`teacher.js` config plumbing,
 `sw.js`, `coach.js` detection, the `app.js` save path, `firestore.rules`),
 or 50+ strings. **Mechanical files don't count toward the 3**
@@ -2686,30 +2701,25 @@ substitute your own reading of the code. When an agent hands you a claim, read
 the quoted lines yourself before acting; when it hands you a fix, make it
 re-derive it on the real code.
 
-**Fast or Reviewed — Jonathan picks, after the build** (2026-10-27; replaces
-the 2026-10-26 "quick change" keyword). When a change hits a review trigger,
-finish the build and every "Start here" step first — checks, rule-zero proof,
-smoke test, the item-4 screenshot checklist — then ask with AskUserQuestion
-before any reviewer starts:
-- Lead with what was touched and what passed, one line each ("5 files,
-  including the TAB renderer and colours · checks, smoke and screenshots
-  pass").
-- **Fast** — ship now. **Reviewed** — run the reviewer named above first
-  (say it often takes 15–30+ minutes). Mark one "(Recommended)" with a
-  one-line reason from the change itself ("changes what students see during
-  play" vs "wording only").
-- **Always Reviewed, not offered:** a danger-zone file, a new kind of check,
-  a sub-agent sweep, or moving / adding / removing a section or step. Say why in one line and
-  run the review instead of asking.
-- **No trigger → don't ask.** Ship as usual.
-- **No answer** (a scheduled or unattended session, or no AskUserQuestion
-  tool) → Reviewed.
-- "Quick change" / "quick fix" in Jonathan's request pre-answers **Fast** —
-  don't ask, unless an always-Reviewed item turns up.
-- Start a Fast report with "Fast — reviewer skipped."
-
-This is a standing exception to "don't ask 'should I proceed?'" — the one
-question that fires on its own.
+**Fast by default; a Friday check reviews it** (2026-10-31; replaces the
+2026-10-27 "Fast or Reviewed" question, which replaced the 2026-10-26 "quick
+change" keyword). When a change hits a review trigger, finish the build and
+every "Start here" step — checks, rule-zero proof, smoke test, the item-4
+screenshot checklist — then:
+- **Always Reviewed, same day, never Fast:** a danger-zone file, a new kind of
+  check, a sub-agent sweep, or moving / adding / removing a section or step.
+  Run the reviewer named above. These are the changes that can lose student
+  progress or break the live site, where a week's wait means the damage is
+  already done.
+- **Everything else ships Fast — don't ask.** No reviewer. Every Fast commit
+  ends with the trailer line `Review: Fast` (above any Co-Authored-By), and
+  the report starts "Fast — reviewer skipped; Friday check will review it."
+- Jonathan says "review this" / "Reviewed" in the request → review same day.
+- **No trigger → no trailer.** Ship as usual.
+- **Friday check:** a scheduled cloud task, Fridays 11:00 PM Pacific, runs
+  skill `friday-check` — `site-reviewer` on every `Review: Fast` commit since
+  the last `friday-check-*` tag, fixes pushed to `main`, always-Reviewed fixes
+  on a branch, content calls to Open work, then a new dated tag.
 
 **Effort per task.** Agents in `.claude/agents/` pin their own effort (auditor, fixer, `site-reviewer` high; `site-reviewer-deep` extra high). For a general-purpose agent pass `effort: "xhigh"` for a review the Triggers send to `site-reviewer-deep`, `"high"` for any other review, auditor or fixer; never `max`. Your own session: `medium` routine edits, `high` bug fixes / shipped JS / keyed-MC content, `xhigh` danger-zone files and sweeps — if the task is a tier higher than the session, say so and ask for `/effort`. Full text: `WORKFLOW.md`.
 
