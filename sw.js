@@ -19,7 +19,7 @@
    progress-saving behave exactly as before.
    ════════════════════════════════════════════════════════════════ */
 
-const CACHE_VERSION = 'guitar-class-2026-10-31-1ae029f7d2';
+const CACHE_VERSION = 'guitar-class-2026-10-31-a93f5ece12';
 
 // Backing-track audio lives in its OWN cache, versioned independently of the
 // shell (see tools/checks.mjs, which fingerprints audio/ separately and
@@ -52,12 +52,16 @@ const PRECACHE_CRITICAL = [
 ];
 
 // Static shell — everything needed to render the practice content offline.
-// Two shipped files are left out on purpose (2026-10-12), because every
+// Some shipped files are left out on purpose (2026-10-12), because every
 // student re-downloads this whole list on every deploy: teacher.js (over
-// 250 KB, loaded only by the ?teacher console — ensureTeacherJs() in app.js) and
-// mood-chart.html (linked from nowhere since 2026-10-02). Both are still
-// served, and the fetch handler below caches them on first use like any
-// same-origin file. checks.mjs keeps them out on purpose (SHELL_NOT_PRECACHED).
+// 250 KB, loaded only by the ?teacher console — ensureTeacherJs() in app.js),
+// mood-chart.html (linked from nowhere since 2026-10-02), and the hidden
+// "Hear It First" scripts trainer-core / trainer-audio / trainer-ui.js (about
+// 140 KB, loaded only from its direct link). All are still served, and the
+// fetch handler below caches them on first use like any same-origin file.
+// checks.mjs keeps them out on purpose (SHELL_NOT_PRECACHED).
+// trainer-site-adapter.js (15 KB) is NOT left out: index.html loads it on every
+// page, so offline it would be a failed script request (Friday check R2-4).
 const ASSETS = [
   './',
   './index.html',
@@ -72,6 +76,7 @@ const ASSETS = [
   './tuner.js',
   './coach.js',
   './live-quiz.js',
+  './trainer-site-adapter.js',
   './config-main.js',
   './firebase-config.js',
   './manifest.json',

@@ -89,13 +89,16 @@ const SHELL_FILES = [
    them into that cache on first use, and an edit has to retire the old copy.
      teacher.js       only the ?teacher console loads it (ensureTeacherJs)
      mood-chart.html  no link to it anywhere since 2026-10-02
-     trainer-*.js     "Hear It First" (hidden from students; one file per phase
-                      lands here, loaded only by its direct link — WO-hear-it-first)
+     trainer-core.js, trainer-audio.js, trainer-ui.js
+                      "Hear It First" (hidden from students; loaded only by its
+                      direct link — WO-hear-it-first). NOT trainer-site-adapter.js:
+                      index.html loads that one on every page, so it is precached
+                      (Friday check R2-4, 2026-10-31).
    checkSwAssets() fails the push if one of these turns up in ASSETS anyway
    (one of the two lists would be wrong), and checkPrecacheCoverage() still
    fails if a shipped page starts linking mood-chart.html again — at that
    point it is student-facing and goes back in ASSETS, off this list. */
-const SHELL_NOT_PRECACHED = ['teacher.js', 'mood-chart.html', 'trainer-core.js', 'trainer-audio.js', 'trainer-ui.js', 'trainer-site-adapter.js'];
+const SHELL_NOT_PRECACHED = ['teacher.js', 'mood-chart.html', 'trainer-core.js', 'trainer-audio.js', 'trainer-ui.js'];
 
 /* Backing-track audio isn't in sw.js's ASSETS precache list (they're large —
    precaching them at install would bloat the offline install), but the SW's
