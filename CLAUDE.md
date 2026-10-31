@@ -147,6 +147,7 @@ Every new student-facing shell string goes in `i18n.js` (read its header for wir
 | Teacher console shared config, **`config/class` write rule** | `.claude/rules/teacher-console.md` (loads with `teacher.js`) | A superseded read returns the newest read, never `null`; a diverged write never marks the copy current; visibility via `teacherBoardView(cfg).assigned` |
 | The weekly review of commits that shipped Fast | skill `friday-check` | Runs unattended Fridays 11 PM; new dated tag each run, never move one |
 | Whole-site audits, many-file refactors, 50+ string passes with sub-agents | skill `site-sweep` (playbook + auditor/fixer/reviewer briefs) | Pre-create the worktrees; cherry-pick to one linear branch; an adversarial review of the *fixes* is required; fetch before pushing |
+| "Hear It First" ear trainer (`trainer-*.js`, `tools/trainer-sim.mjs`) | the header of `trainer-core.js` and of `tools/trainer-sim.mjs` | Hidden from students (direct link only); after any `trainer-core.js` change run `node tools/trainer-sim.mjs` (it is NOT in `checks.mjs`); only the adapter file touches site globals; never edit `coach.js`/`tuner.js` behaviour for it |
 
 ## How to work with Jonathan
 **AskUserQuestion, not free text** (2–4 options). **Don't ask "should I proceed?"**: do the obvious, reversible work; "can you…/how do I…/should this be…" about code = do it. In doubt: pick a default, proceed, say why. Pause only for a real fork, irreversible / outward-facing actions. **Pushing to `main` is not one of those:** checks pass and a
