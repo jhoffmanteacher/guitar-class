@@ -5,6 +5,17 @@ Notable changes to the Guitar Class site. Newest first.
 For the full session-by-session history (and the reasoning behind each change),
 see `WORKFLOW.md` and the git commit log.
 
+## 2026-10-30 — Power Chords on the Low E and A Strings in Time: the mic hears a strummed chord
+
+- **With "Play guitar" on, the card now counts a strummed power chord.** Before,
+  the mic waited for the root note alone, and a strum almost never gave it, so
+  you could play the right chord and see nothing happen. Now the card turns
+  green when the mic hears the notes of the chord.
+- **The help line says so.** It said the mic listens for "the root, the lowest
+  note". It now says the mic listens for "the notes of the chord". Tapping the
+  root fret on the board still counts, as before.
+- **Note Call with single notes is not changed.**
+
 ## 2026-10-30 — Watchtower power-chord card: Neil Young strums on every eighth
 
 - **On Neil Young, the power-chord card now shows every strum.** Before, it

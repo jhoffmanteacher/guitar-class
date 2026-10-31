@@ -758,8 +758,9 @@ function coachMicLatencyMs(){ return nrOffset(); }
    `clarity` is coachDetectPitch's gate — or an array of gates, strictest
    first, where a window the first finds no pitch in is read again at the
    next (coachDetectPitch walks the list itself). Only Riff Runner's
-   power-chord tokens pass an array (RNW_POWER_CLARITY); every other caller
-   passes a number or nothing. */
+   power-chord listeners pass an array (RNW_POWER_CLARITY): Riff Runner's
+   Wait Mode, Note Call's power mode and Power Chord Switch; every other
+   caller passes a number or nothing. */
 function coachPitchReadings(sinceT, minEndT, clarity){
   const out = [];
   const buf = coachFrameBuf, L = buf.length, sr = coachCtx.sampleRate;
@@ -867,8 +868,8 @@ function coachTargetShare(readings, targets){
    `rms` is this frame's level; `floorT` (optional) is the earliest time a
    pluck may be dated, for a game that has just played its own note.
    `clarity` (optional) goes to coachPitchReadings — left out, the 0.22
-   single-note gate; only Riff Runner's power-chord tokens pass one
-   (RNW_POWER_CLARITY).
+   single-note gate; only the power-chord listeners pass one
+   (RNW_POWER_CLARITY: Riff Runner's Wait Mode, Note Call's power mode).
    Returns that midi, or null while it's unsettled. st carries
    { attackT, lastPitchT, readings }; this adds its own fields. */
 const COACH_STANDOUT = 3;
@@ -7582,10 +7583,19 @@ function rnwWhere(n){
    Mic recordings before tuning it further. */
 const RNW_POWER_RE = /^[A-G][#b]?5$/;
 const RNW_POWER_CLARITY = [0.22, 0.45];
+/* The three pitches that answer a power chord whose root is `rootMidi`: the
+   root, the 5th above it and the octave. One rule for every listener that
+   takes a strum for a power chord: Riff Runner's Wait Mode (rnwTargets) and
+   Note Call's power mode (ca-43, ncTargets / ncAnswerAt in app.js, 2026-10-30,
+   which waited for the exact root alone and counted a strummed A5 right 0
+   times in 40 on a normal guitar — tools/mic-sim/power-notecall.mjs; it adds
+   the octave below the root on top of these three, see ncPowerTones). Pair it
+   with RNW_POWER_CLARITY, never the single-note 0.22 gate alone. */
+function coachPowerTargets(rootMidi){ return [rootMidi, rootMidi + 7, rootMidi + 12]; }
 function rnwIsPower(n){ return !!n && RNW_POWER_RE.test(n.label || ''); }
 function rnwTargets(n){
   if (!n) return null;
-  return rnwIsPower(n) ? [n.midi, n.midi + 7, n.midi + 12] : [n.midi];
+  return rnwIsPower(n) ? coachPowerTargets(n.midi) : [n.midi];
 }
 
 async function rnwStart(){

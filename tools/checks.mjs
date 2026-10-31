@@ -8198,6 +8198,256 @@ function checkRecordingVersions(ctx) {
   if (bad === 0) ok(n + ' cards with recording versions, ' + rendered + ' renders (each recording + nothing stored) \u2014 right track, sections, switch and Guitar switch every time; ' + strumRenders + ' every-strum renders draw ' + strumNames + ' chord names (the Neil cards pinned at 128 each, every lap A5 x4 G5 x3 F5 x6 G5 x3); ' + readbacks + ' title / intro / directions read-backs in EN + ES; ' + consoleReads + ' console titles run through teacherActivityTitle');
 }
 
+/* 1cd. NOTE CALL POWER CHORDS (ca-43, Jonathan 2026-10-30). The student
+   STRUMS a power chord and the card is answered by its root fret. The mic used
+   to wait for the exact root alone, which a strummed A5 almost never gives
+   (YIN reads a strum as the root, the 5th, the octave, the note an octave
+   below, or nothing), so a right strum counted 0 times in 40 on a normal
+   guitar (tools/mic-sim/power-notecall.mjs). Power mode now takes the root,
+   the 5th or the octave (coachPowerTargets, the rule Riff Runner's Wait Mode
+   uses) plus the octave BELOW the root (YIN reads a strum's root and 5th as
+   that pitch from about B2 up, which is most of the neck: the exact-root rule
+   plus the three alone left 6 in 10 right strums unheard on a strong-fundamental
+   mic), at RNW_POWER_CLARITY; single-note Note Call (ca-23) is untouched.
+   Checked by EXECUTING the real app.js in the 0b context, not by finding the
+   calls (the context has no coach.js, so the one helper is lifted out of it
+   and the listening calls are stubbed):
+   - ca-43: four steps, each drill.power on the low E and A strings, frets
+     0-5 / 5-8 / 8-12 / 0-12; no other power drill; ncProgKey keeps ca-23's
+     key and gives power its own ("+5");
+   - the accept rule on every card of every step, naturals and all: ncTargets
+     is the octave below, root, 5th and octave of each root, ncAnswerAt agrees with an
+     oracle written here for every pitch 28-80 (the exact root first, so fret 0
+     and fret 12 of one note stay apart), and for single-note cards both are
+     exactly what they were (p.midis, indexOf);
+   - what may follow what (ncClash, ncDeal): a strum still ringing from the card
+     before must not answer the next one, and nothing resets the readings after
+     a hit, so a card is not dealt after one whose pitches it accepts; an oracle
+     over every card triple, and the real ncDeal for a few thousand seeded deals
+     (single-note: the old rule exactly);
+   - ncListen: what it hands coachSettlePitch (the targets, the clarity tiers
+     only for power) and which fret an answer resolves, on the main path and
+     the mic-grace path, power and single-note;
+   - every ncp.* string: the real setup screens (4 toggle states x every
+     level), prompt, answer reveal, hit / wrong / miss feedback and the done
+     screen are rendered under a spy on ncK; each key they ask for must exist
+     in English and Spanish, none may be the English, and none defined may go
+     unshown.
+   Pinned: 4 power steps, 16 ncp.* keys. */
+function checkNoteCallPower(ctx) {
+  head('1cd. Note Call power chords (ca-43): the mic takes a strum, every string it can show');
+  let bad = 0;
+  const flag = m => { err(m); problems++; bad++; };
+  if (!ctx) { flag('1cd cannot run — the 0b render context is unavailable'); return; }
+  const EXPECT = { power: 4, ranges: [[0, 5], [5, 8], [8, 12], [0, 12]], keys: 16 };
+  const J = JSON.stringify;
+  const run = x => vm.runInContext(x, ctx);
+  let csrc = '';
+  try { csrc = readFileSync(join(ROOT, 'coach.js'), 'utf8'); } catch { flag('coach.js could not be read — 1cd cannot check the mic rule'); return; }
+  const stats = { cards: 0, answers: 0, listens: 0, keys: 0 };
+
+  // The data.
+  const acts = run('window.CLASS_ACTIVITIES || []');
+  const drills = [];
+  for (const a of acts) for (const st of (a.steps || [])) if (st && st.drill && st.drill.type === 'notecall') drills.push({ id: a.id, d: st.drill });
+  const c43 = acts.find(a => a.id === 'ca-43');
+  if (!c43) flag('ca-43 is gone — 1cd checks its four drills');
+  else {
+    const steps = c43.steps || [];
+    if (steps.length !== EXPECT.ranges.length) flag('ca-43 has ' + steps.length + ' steps, expected ' + EXPECT.ranges.length + ' (frets 0-5, 5-8, 8-12, 0-12)');
+    EXPECT.ranges.forEach(([lo, hi], i) => {
+      const d = steps[i] && steps[i].drill;
+      if (!d || d.type !== 'notecall' || d.power !== true || J(d.strings) !== J(['lowE', 'A']) || d.minFret !== lo || d.maxFret !== hi)
+        flag('ca-43 step ' + (i + 1) + ': expected a power Note Call drill on the low E and A strings, frets ' + lo + '-' + hi + ', got ' + J(d));
+    });
+  }
+  const powerDrills = drills.filter(x => x.d.power);
+  if (powerDrills.length !== EXPECT.power || powerDrills.some(x => x.id !== 'ca-43')) flag('1cd sees ' + powerDrills.length + ' power Note Call drills (' + [...new Set(powerDrills.map(x => x.id))].join(', ') + '), expected ' + EXPECT.power + ', all in ca-43 — another one needs the same mic rule and pins');
+  const singles = drills.filter(x => !x.d.power);
+  if (!singles.length) flag('1cd sees no single-note Note Call drill — the "single-note is unchanged" proof below would be empty');
+
+  // Progress keys: ca-23's saved key is unchanged; power has its own.
+  const pk = pw => run('ncProgKey(' + J({ strings: ['lowE', 'A'], power: pw, minFret: 0, maxFret: 5 }) + ')');
+  if (pk(false) !== 'lowE+A:0-5') flag('ncProgKey of a single-note drill is \'' + pk(false) + '\', expected \'lowE+A:0-5\' — every student\'s saved ca-23 progress would be orphaned');
+  if (pk(true) !== 'lowE+A+5:0-5') flag('ncProgKey of a power drill is \'' + pk(true) + '\', expected \'lowE+A+5:0-5\' — power progress would share the single-note key');
+
+  // The helper (coach.js is not in the context) and the real value of the clarity tiers.
+  const fnText = nm => { const m = new RegExp('function\\s+' + nm + '\\s*\\(').exec(csrc), b = jsFunctionBody(csrc, nm); return m && b ? csrc.slice(m.index, csrc.indexOf('{', m.index)) + b : null; };
+  const helper = fnText('coachPowerTargets');
+  const clarM = /^const RNW_POWER_CLARITY\s*=\s*(\[[^\]]*\]);/m.exec(csrc);
+  if (!helper) flag('coach.js: coachPowerTargets() not found — Riff Runner and Note Call share it; 1cd cannot run the mic rule');
+  if (!clarM) flag('coach.js: RNW_POWER_CLARITY not found — 1cd cannot check the clarity Note Call reads at');
+  const rnwB = jsFunctionBody(csrc, 'rnwTargets');
+  if (rnwB === null || !/coachPowerTargets\(/.test(stripJsComments(rnwB))) flag('coach.js: rnwTargets() must use coachPowerTargets() — Riff Runner and Note Call would drift apart (the third copy of [root, root+7, root+12])');
+  const saved = [];
+  const setG = (name, val) => { saved.push([name, Object.prototype.hasOwnProperty.call(ctx, name), ctx[name]]); ctx[name] = val; };
+  const undo = () => { for (const [n, had, v] of saved.reverse()) { if (had) ctx[n] = v; else delete ctx[n]; } saved.length = 0; };
+  try {
+    if (helper && clarM) {
+      setG('coachPowerTargets', run('(' + helper + ')'));
+      const RNW = run(clarM[1]);
+
+      // The accept rule, on every card Note Call can deal.
+      const oracle = (midis, m, power) => {
+        const exact = midis.indexOf(m);
+        if (exact >= 0 || !power) return exact;
+        return midis.findIndex(r => [r - 12, r, r + 7, r + 12].includes(m));
+      };
+      const MS = Array.from({ length: 53 }, (_, i) => 28 + i);
+      const judge = (cfgObj, pile, label) => {
+        const out = run('(function(){ const o = []; ncPool(' + J(cfgObj) + ',' + J(pile) + ').forEach(p => o.push({ p: { str: p.str, note: p.note, power: p.power, frets: p.frets, midis: p.midis }, t: ncTargets(p), a: ' + J(MS) + '.map(m => ncAnswerAt(p, m)) })); return J(o); function J(x){ return JSON.stringify(x); } })()');
+        for (const c of JSON.parse(out)) {
+          stats.cards++;
+          const want = c.p.power ? c.p.midis.flatMap(r => [r - 12, r, r + 7, r + 12]) : c.p.midis;
+          if (J(c.t) !== J(want)) flag(label + ' ' + c.p.note + ' on ' + c.p.str + ': ncTargets is ' + J(c.t) + ', expected ' + J(want));
+          MS.forEach((m, i) => {
+            stats.answers++;
+            const w = oracle(c.p.midis, m, c.p.power);
+            if (c.a[i] !== w) flag(label + ' ' + c.p.note + ' on ' + c.p.str + ' (roots ' + J(c.p.midis) + '): ncAnswerAt(' + m + ') is ' + c.a[i] + ', expected ' + w + (c.p.power ? ' (a power card answers its root, 5th, octave or octave below, the exact root first)' : ' (a single note answers only its exact pitch)'));
+          });
+        }
+      };
+      for (const [lo, hi] of EXPECT.ranges) for (const pile of ['naturals', 'all']) judge({ strings: ['lowE', 'A'], power: true, minFret: lo, maxFret: hi }, pile, 'power ' + lo + '-' + hi + ' ' + pile + ':');
+      for (const { id, d } of singles) for (const pile of ['naturals', 'all']) judge({ strings: d.strings, power: false, minFret: d.minFret != null ? d.minFret : 0, maxFret: d.maxFret != null ? d.maxFret : 5 }, pile, id + ' single-note ' + pile + ':');
+
+      // What may follow what. Nothing resets the readings after a hit, so a strum still ringing from the card before would answer the next card
+      // if the next card accepts one of its pitches: ncClash (and so ncDeal) must compare accepted pitches. An oracle written here, over every
+      // card triple, and the real ncDeal run for a few thousand seeded deals.
+      const dealOut = JSON.parse(run(`(function(){
+        const tonesOf = (p, a) => p.power ? [a - 12, a, a + 7, a + 12] : [a];
+        const overlap = (p, q) => p.midis.some(a => tonesOf(p, a).some(x => q.midis.some(b => tonesOf(q, b).includes(x))));
+        const oracle = (p, last) => { const q1 = last[last.length - 1]; if (q1 && q1.str === p.str && q1.note === p.note) return true; return last.some(q => overlap(p, q)); };
+        const cfgs = [];
+        ${J(EXPECT.ranges)}.forEach(r => ['naturals', 'all'].forEach(pile => cfgs.push({ pile, cfg: { strings: ['lowE', 'A'], power: true, minFret: r[0], maxFret: r[1] } })));
+        ${J(singles.map(x => ({ strings: x.d.strings, minFret: x.d.minFret != null ? x.d.minFret : 0, maxFret: x.d.maxFret != null ? x.d.maxFret : 5 })))}.forEach(c => ['naturals', 'all'].forEach(pile => cfgs.push({ pile, cfg: { strings: c.strings, power: false, minFret: c.minFret, maxFret: c.maxFret } })));
+        const R = { clashCalls: 0, clashBad: [], deals: 0, forced: 0, viol: [], powerDeals: 0, powerForced: 0, dealsSingleDiff: 0 };
+        let seed = 20261030; const rnd = () => (seed = (seed * 1664525 + 1013904223) >>> 0) / 4294967296;
+        const origRandom = Math.random; Math.random = rnd;
+        try {
+          for (const { pile, cfg } of cfgs) {
+            const pool = ncPool(cfg, pile);
+            for (const p of pool) for (const q1 of pool) {
+              for (const last of [[], [q1]]) { R.clashCalls++; if (ncClash(p, last) !== oracle(p, last)) R.clashBad.push([cfg.power, p.note, p.str, q1.note, q1.str]); }
+              for (const q2 of pool) { R.clashCalls++; if (ncClash(p, [q1, q2]) !== oracle(p, [q1, q2])) R.clashBad.push([cfg.power, p.note, p.str, q1.note + q2.note]); }
+            }
+            for (let round = 0; round < 300; round++) {
+              const st = { mode: 'levels', seq: [], requeue: [], bag: [], cfg, L: { pile } };
+              for (let i = 0; i < 10; i++) {
+                if (rnd() < 0.25) st.requeue.push({ p: pool[Math.floor(rnd() * pool.length)], due: st.seq.length });
+                ncDeal(st);
+                const d = st.seq[st.seq.length - 1], prev = st.seq.slice(-3, -1);
+                const clashes = oracle(d, prev);
+                R.deals++; if (cfg.power) R.powerDeals++;
+                if (clashes) { R.forced++; if (cfg.power) R.powerForced++; if (pool.some(c => !oracle(c, prev))) R.viol.push([cfg.power, d.note, d.str, prev.map(x => x.note + x.str).join(',')]); }
+              }
+            }
+          }
+        } finally { Math.random = origRandom; }
+        return JSON.stringify(R);
+      })()`));
+      stats.clashCalls = dealOut.clashCalls; stats.deals = dealOut.deals; stats.forced = dealOut.forced; stats.powerDeals = dealOut.powerDeals; stats.powerForced = dealOut.powerForced;
+      for (const b of dealOut.clashBad.slice(0, 3)) flag('ncClash disagrees with the oracle (' + J(b) + ') \u2014 a card could follow one whose strum is still ringing as an answer to it (or a single-note rule changed)');
+      if (dealOut.clashBad.length > 3) flag('... and ' + (dealOut.clashBad.length - 3) + ' more ncClash disagreements');
+      for (const v of dealOut.viol.slice(0, 3)) flag('ncDeal dealt ' + J(v) + ' though a card that does not clash was available');
+      if (dealOut.viol.length > 3) flag('... and ' + (dealOut.viol.length - 3) + ' more ncDeal deals of a clashing card');
+
+      // ncListen: what it asks coachSettlePitch for, and which fret an answer resolves.
+      const seen = [], resolved = [];
+      let reply = null;
+      setG('COACH_PITCH_GATE', 0.01); setG('coachOnsetAt', 0); setG('coachMicLatencyMs', () => 0); setG('RNW_POWER_CLARITY', RNW);
+      setG('coachReadFrame', () => 1);
+      setG('coachSettlePitch', (st, targets, rms, floorT, clarity) => { seen.push({ targets: Array.from(targets), clarity: clarity === undefined ? 'undefined' : J(Array.from(clarity)) }); return reply; });
+      setG('ncResolve', (st, i, res, info) => { resolved.push({ i, res, fret: info && info.fret }); });
+      const ncListen = run('ncListen');
+      const cardOf = (cfgObj, note, str) => JSON.parse(run('(function(){ return JSON.stringify(ncPool(' + J(cfgObj) + ', "all").find(p => p.note === ' + J(note) + ' && p.str === ' + J(str) + ')); })()'));
+      const E5 = cardOf({ strings: ['lowE', 'A'], power: true, minFret: 0, maxFret: 12 }, 'E5', 'lowE');       // roots 40 (fret 0) and 52 (fret 12)
+      const A5 = cardOf({ strings: ['lowE', 'A'], power: true, minFret: 0, maxFret: 12 }, 'A5', 'A');         // roots 45 and 57
+      const B5 = cardOf({ strings: ['lowE', 'A'], power: true, minFret: 0, maxFret: 12 }, 'B5', 'lowE');     // one root, 47 (fret 7): the octave below is a pitch YIN can read
+      const E1 = cardOf({ strings: ['lowE', 'A'], power: false, minFret: 0, maxFret: 12 }, 'E', 'lowE');      // the same note as a single-note card
+      if (!E5 || !A5 || !B5 || !E1 || J(B5.midis) !== J([47]) || J(E5.midis) !== J([40, 52]) || J(E5.frets) !== J([0, 12])) flag('1cd could not build its test cards (E5 on the low E string should have roots 40 and 52 at frets 0 and 12) — ncPool changed');
+      else {
+        const listen = (cfgPower, seq, idx, grace, answer) => {
+          seen.length = 0; resolved.length = 0; reply = answer;
+          const st = { key: 'chk', cfg: { power: cfgPower }, seq: seq.map(c => Object.assign({}, c, { res: null })), idx, graceIdx: grace, graceFrom: 1e9, readings: [], attackT: 0, heard: null };
+          ncListen(st, 0);
+          stats.listens++;
+          return { seen: seen.slice(), resolved: resolved.slice(), st };
+        };
+        const tones = c => c.midis.flatMap(r => [r - 12, r, r + 7, r + 12]);
+        // What it asks for.
+        let r1 = listen(true, [E5], 0, null, null);
+        if (J(r1.seen[0] && r1.seen[0].targets) !== J(tones(E5))) flag('ncListen (power) asks coachSettlePitch for ' + J(r1.seen[0] && r1.seen[0].targets) + ', expected the octave below, root, 5th and octave of each root ' + J(tones(E5)));
+        if (!r1.seen[0] || r1.seen[0].clarity !== J(Array.from(RNW))) flag('ncListen (power) reads at clarity ' + (r1.seen[0] && r1.seen[0].clarity) + ', expected RNW_POWER_CLARITY ' + J(Array.from(RNW)) + ' — at the single-note gate YIN finds no pitch in most strums');
+        r1 = listen(false, [E1], 0, null, null);
+        if (J(r1.seen[0] && r1.seen[0].targets) !== J(E1.midis) || r1.seen[0].clarity !== 'undefined') flag('ncListen (single note) asks for ' + J(r1.seen[0]) + ', expected exactly its note ' + J(E1.midis) + ' at the default clarity — ca-23 must not change');
+        // The card in mic grace is listened for too.
+        r1 = listen(true, [A5, E5], 1, 0, null);
+        if (J(r1.seen[0] && r1.seen[0].targets) !== J(tones(E5).concat(tones(A5)))) flag('ncListen (power, mic grace) asks for ' + J(r1.seen[0] && r1.seen[0].targets) + ', expected this card\'s tones then the grace card\'s ' + J(tones(E5).concat(tones(A5))));
+        // Which fret an answer resolves (the exact root first; the 5th and octave answer the root they belong to).
+        const hit = (pw, card, m) => { const r = listen(pw, [card], 0, null, m); return r.resolved.length ? r.resolved.map(x => x.res + '@' + x.fret).join(',') : 'none'; };
+        for (const [m, want] of [[40, 'hit@0'], [47, 'hit@0'], [52, 'hit@12'], [59, 'hit@12'], [64, 'hit@12'], [41, 'none'], [45, 'none'], [38, 'none'], [53, 'none']]) {
+          const got = hit(true, E5, m);
+          if (got !== want) flag('ncListen (power E5, roots at frets 0 and 12): a heard ' + m + ' resolves \'' + got + '\', expected \'' + want + '\'');
+        }
+        for (const [m, want] of [[40, 'hit@0'], [52, 'hit@12'], [47, 'none'], [59, 'none'], [64, 'none']]) {
+          const got = hit(false, E1, m);
+          if (got !== want) flag('ncListen (single-note E): a heard ' + m + ' resolves \'' + got + '\', expected \'' + want + '\' — single-note Note Call answers only its exact pitch');
+        }
+        // One root: the octave below it answers (the pitch a strum of its root and 5th is read as), a neighbouring pitch does not.
+        for (const [m, want] of [[47, 'hit@7'], [35, 'hit@7'], [54, 'hit@7'], [59, 'hit@7'], [34, 'none'], [36, 'none'], [46, 'none'], [48, 'none']]) {
+          const got = hit(true, B5, m);
+          if (got !== want) flag('ncListen (power B5, one root at fret 7): a heard ' + m + ' resolves \'' + got + '\', expected \'' + want + '\'');
+        }
+        // The grace path answers the OLD card with the same rule.
+        for (const [pw, card, m, want] of [[true, E5, 47, 'hit@0'], [true, E5, 59, 'hit@12'], [true, E5, 41, 'none'], [false, E1, 47, 'none'], [false, E1, 40, 'hit@0']]) {
+          const r = listen(pw, [card, pw ? A5 : cardOf({ strings: ['lowE', 'A'], power: false, minFret: 0, maxFret: 12 }, 'A', 'A')], 1, 0, m);
+          const got = r.resolved.length ? r.resolved.map(x => x.i + ':' + x.res + '@' + x.fret).join(',') : 'none';
+          if (got !== (want === 'none' ? 'none' : '0:' + want)) flag('ncListen (' + (pw ? 'power' : 'single note') + ', mic grace): a heard ' + m + ' for the old card resolves \'' + got + '\', expected \'' + (want === 'none' ? 'none' : '0:' + want) + '\'');
+        }
+      }
+    }
+  } finally { undo(); }
+
+  // Every ncp.* string, rendered.
+  {
+    const I18N = loadI18nTable();
+    const keys = new Set();
+    const origNcK = ctx.ncK;
+    ctx.ncK = (pw, nm) => { const k = origNcK(pw, nm); keys.add(k); return k; };
+    const hadFlash = Object.prototype.hasOwnProperty.call(ctx, 'flashClass');   // fab-tools.js, not in the context: the board marks flash and nothing here looks at them
+    if (!hadFlash) ctx.flashClass = () => {};
+    try {
+      run(`(function(){
+        renderNoteCall({ type: 'notecall', power: true, strings: ['lowE', 'A'], minFret: 0, maxFret: 12 }, 'chk1', 'w');
+        const st = noteCalls['chk1'];
+        for (const answer of [true, false]) for (const coach of [true, false]) for (let lv = 0; lv < NC_LEVELS.length; lv++) {
+          st.answer = answer; st.coach = coach; st.level = lv; st.prog.lv = NC_LEVELS.length; ncSetupHtml('chk1');
+        }
+        const p = Object.assign({}, ncPool(st.cfg, 'all')[0], { res: null });
+        ncPromptHtml(p);
+        st.key = 'chk1'; st.seq = [p]; st.idx = 0; st.requeue = [];
+        ncResolve(st, 0, 'hit', { fret: p.frets[0] });
+        p.res = null; ncResolve(st, 0, 'miss', { tap: { k: 'A', f: 7 } });
+        p.res = null; ncResolve(st, 0, 'miss', null);
+        p.res = null; ncReveal(st);
+        st.lvIdx = 0; st.L = ncLevel(st, 0); st.idx = -1; st.seq = [Object.assign({}, p, { res: 'miss' })];
+        ncFinish('chk1');
+      })()`);
+    } catch (e) { flag('rendering Note Call in power mode threw ' + e.message); }
+    finally { ctx.ncK = origNcK; if (!hadFlash) delete ctx.flashClass; try { run('delete noteCalls["chk1"]'); } catch { /* best effort */ } }
+    const defined = Object.keys(I18N).filter(k => k.startsWith('ncp.'));
+    stats.keys = keys.size;
+    for (const k of keys) {
+      if (!k.startsWith('ncp.')) flag('power mode asked for \'' + k + '\' — ncK lost the power flag, the student would read the single-note wording');
+      else if (!I18N[k] || !I18N[k].en || !I18N[k].es) flag('i18n ' + k + ' is missing its English or Spanish');
+      else if (I18N[k].es === I18N[k].en) flag('i18n ' + k + ': the Spanish is just the English');
+    }
+    for (const k of defined) if (!keys.has(k)) flag('i18n ' + k + ' is defined but no Note Call power screen shows it (dead, or a screen 1cd does not reach)');
+    if (defined.length !== EXPECT.keys) flag('1cd sees ' + defined.length + ' ncp.* keys, pinned at ' + EXPECT.keys + ' — a new power-mode string needs its Spanish and a screen that shows it (update the pin on purpose)');
+  }
+  if (bad === 0) ok(EXPECT.power + ' power drills on ca-43 (frets ' + EXPECT.ranges.map(r => r.join('-')).join(' / ') + '); ' + stats.cards + ' cards x 53 pitches = ' + stats.answers + ' answers match the oracle (single-note cards exactly as before); ' + stats.clashCalls + ' ncClash calls match an oracle and ' + stats.deals + ' seeded ncDeal deals never dealt a clashing card while a clean one existed (' + stats.powerForced + ' of ' + stats.powerDeals + ' power deals had to, every card left clashing; ' + (stats.forced - stats.powerForced) + ' of ' + (stats.deals - stats.powerDeals) + ' single-note); ' + stats.listens + ' ncListen calls (targets, clarity, main and grace fret); ' + stats.keys + ' of ' + EXPECT.keys + ' ncp.* strings rendered, EN + ES');
+}
+
 /* 1bf2. LYRIC-SHEET CARDS (card.sheet — ca-38, Jonathan 2026-10-19). The
    card draws a chord sheet PDF and walks a dot over its chord names in
    reading order: name n is the card's n-th chord CHANGE. If the card's
@@ -10330,6 +10580,7 @@ function checkCoachVerdicts() {
   checkSheetCards();
   checkChordGridCards(rcCtx);
   checkRecordingVersions(rcCtx);
+  checkNoteCallPower(rcCtx);
   checkPowerChordPopups(rcSets, rcCtx);
   checkPendingFileSwitch(rcCtx);
   checkCardCaptionWords();

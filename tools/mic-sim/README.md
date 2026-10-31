@@ -23,6 +23,18 @@ tuning pass — ideally on the real classroom recordings the teacher console's
   differently: prompts 41/43/45 only, the student's pluck is the chord
   shape, and the settle call is given `[t, t+7, t+12]` and
   `RNW_POWER_CLARITY`.
+- `power-notecall.mjs <coach.js> <app.js> [trials] [--harm=std|mid|weak] [--only=…]
+  [--per-root] [--offsets=…]` — Note Call's power-chord mode (ca-43,
+  2026-10-30): one synthetic strum or wrong note in a quiet room for every
+  root the whole-neck step can call (low E and A strings, frets 0–12 = 26
+  roots, built the way `ncPool` builds the cards) through the real settle code
+  and the accept rule read from the files under test (`ncTargets` /
+  `ncAnswerAt` in app.js, `coachPowerTargets` in coach.js), so an old
+  coach.js + app.js (`git show <old>:coach.js`) gives the before and the
+  current pair the after. Wrong cases accepted more than 1 in 100 are marked
+  STOP. `--offsets=-12,0,7,12` is a what-if: answer each root with those
+  semitone offsets without editing app.js. Needs both files, not just
+  coach.js. Synthetic audio, not a guitar through a Chromebook mic.
 - `power-switch.mjs <coach.js> [trials] [--harm=std|mid|weak] [--clarity=…]` — Power Chord Switch (Change Up's engine on the three-finger power chords, 2026-10-30): every adjacent pair in `CC_POWER_PROGRESSIONS` through the real `coachPitchReadings` / `ccResolvePend`, as a real change, a held chord (never moved) and a chord one fret high, with `0.55` against `RNW_POWER_CLARITY`. The numbers in the `ccLoop` comment come from here. Synthetic audio only.
 - `smoke.mjs <url>` — headless Chromium through the Dev bypass with the
   in-page harness: Coach, Note Runner, Note Hunt, Note Call, Change Up, PSG

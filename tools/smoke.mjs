@@ -325,6 +325,68 @@ async function recordingWalk(page, run, events, stats, base) {
   await run('recording:done', `(document.querySelectorAll('.ca-card[open]').forEach(c => { c.open = false; }), 1)`, 100);
 }
 
+/* Note Call power chords (ca-43, 2026-10-30). checks.mjs 1cd executes the mic
+   rule and every string; this is the real page, in tap mode (the mic is not
+   what is under test here): each of ca-43's steps, in English and Spanish,
+   draws six strings with a tap area only on the low E and A strings (one per
+   fret of the step's range), shows the prompt in that language, counts a tap
+   on the right root fret as a hit, and (English) counts the 5th's fret on the
+   A string for a low-E root as a miss. Level 1 is sped up in the page (it runs
+   at 20 BPM: a count-in alone is 12 s) — a harness change, not the code
+   under test. A checkout without ca-43 skips it. */
+async function noteCallWalk(page, run, events, stats) {
+  const drills = await run('nc:list', `(CLASS_ACTIVITIES.find(a => a.id === 'ca-43') || { steps: [] }).steps.map(s => s.drill || null)`, 10);
+  if (!drills || !drills.length) return;
+  const fail = (step, text) => events.push({ step: 'notecall:' + step, kind: 'notecall', text });
+  await run('nc:open', 'openClassActivitiesScreen()', 600);
+  await run('nc:fast', 'NC_LEVELS[0].bpm = 150; NC_LEVELS[0].beats = 2; 1', 10);
+  const K = k => JSON.stringify(k);
+  const state = k => `(() => { const k = ${K(k)}, s = noteCalls[k]; if (!s) return null; const p = s.seq[s.idx];
+    return { idx: s.idx, phase: s.phase, res: p ? p.res : null, str: p && p.str, frets: p && p.frets, card: (document.getElementById('nc-card-' + k) || {}).textContent || '',
+             want: p ? t('ncp.onString', { string: ncStrName(p.str) }) : '', fb: (document.getElementById('nc-fb-' + k) || {}).textContent || '' }; })()`;
+  const waitFor = async (step, k, ok, tries = 40) => {
+    for (let i = 0; i < tries; i++) { const st = await run(step, state(k), 150); if (st && ok(st)) return st; }
+    return null;
+  };
+  for (const lang of ['en', 'es']) {
+    await run('nc:' + lang, `setLang('${lang}')`, 600);
+    await run('nc:focus:' + lang, "caFocusActivity('ca-43')", 700);
+    for (let i = 0; i < drills.length; i++) {
+      const w = lang + ' step ' + (i + 1), d = drills[i] || {};
+      await run('nc:go:' + w, `caFocusGo('ca-43', ${i})`, 700);
+      // Focus view keeps every step's drill in the page (the others collapsed), so the step's own drill is found by its key.
+      const key = await run('nc:key:' + w, `(() => { const b = document.getElementById('ncr-ca-43-s${i}'); return b ? 'ca-43-s${i}' : null; })()`, 10);
+      if (!key) { fail(w, 'the Note Call drill is not on the step'); continue; }
+      await run('nc:start:' + w, `(ncSet(${K(key)}, 'answer', false), ncSet(${K(key)}, 'coach', false), ncStart(${K(key)}), 1)`, 200);
+      const first = await waitFor('nc:first:' + w, key, st => st.idx >= 0 && st.phase === 'play');
+      if (!first) { fail(w, 'no card came up after Start'); await run('nc:quit:' + w, `ncQuit(${K(key)})`, 100); continue; }
+      const board = await run('nc:board:' + w, `(() => { const b = document.getElementById('nc-board-' + ${K(key)}); const per = {};
+        [...b.querySelectorAll('.fg-hit')].forEach(e => { const m = /ncTap\\(([^)]*)\\)/.exec(e.getAttribute('onclick') || ''); const str = m ? m[1].split(',')[1].replace(/['"]/g, '') : '?'; per[str] = (per[str] || 0) + 1; });
+        return { lines: [...b.querySelectorAll('line')].filter(l => l.getAttribute('y1') === l.getAttribute('y2')).length, per }; })()`, 10);
+      const frets = (d.maxFret != null ? d.maxFret : 5) - (d.minFret != null ? d.minFret : 0) + 1;
+      if (!board || board.lines !== 6) fail(w, 'the board draws ' + (board && board.lines) + ' strings, not six');
+      else if (JSON.stringify(Object.keys(board.per).sort()) !== JSON.stringify(['A', 'lowE']) || board.per.A !== frets || board.per.lowE !== frets) fail(w, 'tap areas are ' + JSON.stringify(board.per) + ', expected only A and lowE with ' + frets + ' frets each');
+      if (!first.card.includes(first.want)) fail(w, 'the card reads ' + JSON.stringify(first.card) + ', expected it to say ' + JSON.stringify(first.want));
+      const right = await run('nc:right:' + w, `(() => { const k = ${K(key)}, s = noteCalls[k], p = s.seq[s.idx]; ncTap(k, p.str, p.frets[0]); return { res: p.res, fb: document.getElementById('nc-fb-' + k).textContent }; })()`, 10);
+      if (!right || right.res !== 'hit' || !/^✓/.test(right.fb)) fail(w, 'a tap on the right root fret gave ' + JSON.stringify(right) + ', expected a hit');
+      if (lang === 'en') {
+        const next = await waitFor('nc:next:' + w, key, st => st.idx > first.idx);
+        if (!next) fail(w, 'the next card never came up');
+        else {
+          const wrong = await run('nc:wrong:' + w, `(() => { const k = ${K(key)}, s = noteCalls[k], p = s.seq[s.idx];
+            // The 5th of a low-E root sits two frets up on the A string; for an A-string root, the same fret on the low E string.
+            if (p.str === 'lowE') ncTap(k, 'A', p.frets[0] + 2); else ncTap(k, 'lowE', p.frets[0]);
+            return { str: p.str, res: p.res, fb: document.getElementById('nc-fb-' + k).textContent }; })()`, 10);
+          if (!wrong || wrong.res !== 'miss') fail(w, 'a tap on the wrong string (' + (wrong && wrong.str) + ' root) gave ' + JSON.stringify(wrong) + ', expected a miss');
+        }
+      }
+      await run('nc:quit:' + w, `ncQuit(${K(key)})`, 100);
+      stats.noteCallSteps = (stats.noteCallSteps || 0) + 1;
+    }
+  }
+  await run('nc:en', "setLang('en')", 600);
+}
+
 async function walk(base, chromePort, label) {
   const page = await openPage(chromePort);
   let step = 'boot'; const events = []; const stats = { sets: 0, modules: 0, games: 0, buttons: 0 };
@@ -444,6 +506,7 @@ async function walk(base, chromePort, label) {
   if (tunerShut === false) tunerFail('tuner-close', 'a second togglePopup(\'tuner\') did not close the popup and stop the mic');
   await run('click-away', `document.body.click()`, 300);
   await chordGridWalk(page, run, events, stats);
+  await noteCallWalk(page, run, events, stats);
   await recordingWalk(page, run, events, stats, base);
   await page.close();
   return { label, stats, errors: events.filter(e => !NOISE.test(e.text || '')) };
@@ -478,7 +541,7 @@ try {
   const norm = e => `${e.kind}|${e.step.replace(/^(en|es):/, '')}|${e.kind === 'bad-handler' ? '' : e.text}`;
   const baseCount = new Map(); (base ? base.errors : []).forEach(e => baseCount.set(norm(e), Math.max(baseCount.get(norm(e)) || 0, e.kind === 'bad-handler' ? +e.text : 1)));
   const report = base ? now.errors.filter(e => (e.kind === 'bad-handler' ? +e.text : 1) > (baseCount.get(norm(e)) || 0)) : now.errors;
-  say(`smoke: ${now.stats.sets} sets in ${now.stats.modules} modules (EN + ES), ${now.stats.games} game views, ${now.stats.buttons} inline handlers compiled${now.stats.chordCards ? `, ${now.stats.chordCards} chord-grid cards walked (cursor, lap, layout at 1366/390/360, lyric sheet${now.stats.bassClicks ? `, bass switch clicked on ${now.stats.bassClicks}` : ''}${now.stats.recordingClicks ? `, recording switch clicked, reloaded and flipped back on ${now.stats.recordingClicks}` : ''}${now.stats.chordSkipped ? `; ${now.stats.chordSkipped.join(', ')} is teacher-only and not walked` : ''})` : ''}`);
+  say(`smoke: ${now.stats.sets} sets in ${now.stats.modules} modules (EN + ES), ${now.stats.games} game views, ${now.stats.buttons} inline handlers compiled${now.stats.chordCards ? `, ${now.stats.chordCards} chord-grid cards walked (cursor, lap, layout at 1366/390/360, lyric sheet${now.stats.bassClicks ? `, bass switch clicked on ${now.stats.bassClicks}` : ''}${now.stats.recordingClicks ? `, recording switch clicked, reloaded and flipped back on ${now.stats.recordingClicks}` : ''}${now.stats.chordSkipped ? `; ${now.stats.chordSkipped.join(', ')} is teacher-only and not walked` : ''})` : ''}${now.stats.noteCallSteps ? `, ${now.stats.noteCallSteps} Note Call power-chord steps (EN + ES: six strings, taps on low E and A only, a hit and a miss)` : ''}`);
   if (base) say(`smoke: ${BASELINE} had ${base.errors.length} error event(s); this checkout has ${now.errors.length}`);
   if (report.length) {
     exitCode = 1;

@@ -8744,8 +8744,8 @@ function ncPool(c, pile){
 }
 function ncStrName(k){ return t(FRET_STRING_KEY[k] || 'fret.stringLowE'); }
 /* Power-chord mode (drill.power): the call is a chord, "G5 · root on the low E
-   string", and the answer is the ROOT fret (the tap and the mic both read the
-   root). Strings it differs in live under 'ncp.*'; ncK picks the key. The 5th
+   string", and the answer is the ROOT fret (a tap on the root fret; the mic
+   takes the root, the 5th, the octave or the octave below of a strum — ncTargets). Strings it differs in live under 'ncp.*'; ncK picks the key. The 5th
    sits two frets up on the next string toward the floor (low E -> A, A -> D). */
 const NC_FIFTH_STR = { lowE: 'A', A: 'D' };
 function ncK(power, name){ return (power ? 'ncp.' : 'nc.') + name; }
@@ -8935,19 +8935,30 @@ async function ncStart(key){
   st.raf = requestAnimationFrame(ncFrame);
 }
 
+/* True when card p must not follow `last` (the last two cards dealt): the
+   same name on the same string as the one before, or any pitch p would accept
+   that one of them could still be ringing as. "Accept" is ncTargets: for a
+   single note its exact pitch (as ever), for a power chord every pitch a strum
+   of it is read as (root, 5th, octave, octave below), because the mic would
+   take a strum still ringing from the card before for the answer to this one
+   (nothing resets the readings after a hit). Pure: no DOM. */
+function ncClash(p, last){
+  const q1 = last[last.length - 1];
+  if(q1 && q1.str === p.str && q1.note === p.note) return true;
+  const mine = ncTargets(p);
+  return last.some(q => ncTargets(q).some(m => mine.indexOf(m) >= 0));
+}
+
 /* Deal the next note: a missed one that's due comes back first; otherwise
    off a shuffled bag. Never the same name-on-string twice in a row, and never
    a pitch still ringing from either of the last two notes (it would count
-   before the student moved). The play-along never stops dealing. */
+   before the student moved: ncClash). When every card left clashes, the bag
+   deals one anyway. The play-along never stops dealing. */
 function ncDeal(st){
   if(st.mode !== 'answer' && st.seq.length >= NC_ROUND) return;
   const j = st.seq.length;
   const last = st.seq.slice(-2);
-  const clash = p => {
-    const q1 = last[last.length - 1];
-    if(q1 && q1.str === p.str && q1.note === p.note) return true;
-    return last.some(q => q.midis.some(m => p.midis.indexOf(m) >= 0));
-  };
+  const clash = p => ncClash(p, last);
   let p = null;
   const due = st.requeue.findIndex(q => q.due <= j && !clash(q.p));
   if(due >= 0) p = st.requeue.splice(due, 1)[0].p;
@@ -9208,23 +9219,53 @@ function ncClicks(st, now){
   }
 }
 
+/* What the mic accepts for a Note Call card (2026-10-30). A single note: its
+   exact pitch, as ever. A power chord (drill.power, ca-43): the student
+   STRUMS it, and the detector reads a strum as the root, the 5th, the octave,
+   the note an octave BELOW the root (the pitch a root and its 5th make
+   together, which YIN reads from about B2 up: every root of the 5-12 fret
+   steps), or nothing. So each root answers with all four: coachPowerTargets
+   (root, 5th, octave: the rule Riff Runner's Wait Mode uses) plus root - 12,
+   which only Note Call adds because its roots reach the middle of the neck
+   (Riff Runner's A5, G5, F5 put it under YIN's 60 Hz floor). Waiting for the
+   exact root alone counted a strummed power chord right 0 times in 40 on a
+   guitar with a strong low fundamental; with all four, 96% to 100% over all 26
+   roots in every harmonic balance tried and a wrong strum at most 1 in 520
+   (tools/mic-sim/power-notecall.mjs, synthetic audio, not a Chromebook mic).
+   ncTargets is what goes to the settle call; ncAnswerAt says which fret's
+   root a heard pitch answers (the exact root first, so fret 0 and fret 12 of
+   the same note stay apart when the root itself is heard), -1 for none.
+   Pure: no DOM. */
+function ncPowerTones(r){ return [r - 12].concat(coachPowerTargets(r)); }
+function ncTargets(p){
+  return p.power ? p.midis.reduce((all, r) => all.concat(ncPowerTones(r)), []) : p.midis;
+}
+function ncAnswerAt(p, m){
+  const exact = p.midis.indexOf(m);
+  if(exact >= 0 || !p.power) return exact;
+  for(let k = 0; k < p.midis.length; k++) if(ncPowerTones(p.midis[k]).indexOf(m) >= 0) return k;
+  return -1;
+}
+
 /* Mic: same shape as Note Hunt's loop — readings start COACH_ATTACK_SKIP
    after the signal crosses the gate, spaced >=40 ms, and three in a row
    within 0.6 semitone make a note. The right pitch answers the card; a
    steady wrong one just shows up as "Heard F" (the last note can still be
-   ringing, so it is never a miss by itself). */
+   ringing, so it is never a miss by itself). A power-chord card also reads
+   with Riff Runner's two-tier clarity (RNW_POWER_CLARITY): at the single-note
+   gate YIN finds no pitch in most strums. */
 function ncListen(st, now){
   const rms = coachReadFrame();
   if(rms > COACH_PITCH_GATE){
     if(!st.attackT) st.attackT = coachOnsetAt;   // when it arrived, not this frame
     // Waiting for: this card's note, and the card still in its mic grace.
-    const want = (st.seq[st.idx] ? st.seq[st.idx].midis : [])
-      .concat(st.graceIdx != null ? st.seq[st.graceIdx].midis : []);
-    const m = coachSettlePitch(st, want, rms);
+    const want = (st.seq[st.idx] ? ncTargets(st.seq[st.idx]) : [])
+      .concat(st.graceIdx != null ? ncTargets(st.seq[st.graceIdx]) : []);
+    const m = coachSettlePitch(st, want, rms, undefined, st.cfg.power ? RNW_POWER_CLARITY : undefined);
     if(m == null) return;
     // A pluck played before the last boundary answers the card in grace.
     if(st.graceIdx != null && st.attackT - coachMicLatencyMs() < st.graceFrom){
-      const g = st.seq[st.graceIdx], gi = st.graceIdx, ga = g.midis.indexOf(m);
+      const g = st.seq[st.graceIdx], gi = st.graceIdx, ga = ncAnswerAt(g, m);
       st.readings = []; st.attackT = 0;
       if(ga >= 0){
         st.graceIdx = null;
@@ -9236,7 +9277,7 @@ function ncListen(st, now){
     }
     const p = st.seq[st.idx];
     if(!p || p.res != null) return;   // the round's over, or this card is already answered
-    const at = p.midis.indexOf(m);
+    const at = ncAnswerAt(p, m);
     if(at >= 0){ ncResolve(st, st.idx, 'hit', { fret: p.frets[at] }); return; }
     if(m >= 36 && m <= 76){
       const name = sdNoteAt('lowE', m - SD_OPEN_MIDI.lowE);
