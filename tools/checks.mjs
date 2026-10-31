@@ -8210,8 +8210,11 @@ function checkRecordingVersions(ctx) {
    plus the three alone left 6 in 10 right strums unheard on a strong-fundamental
    mic), at RNW_POWER_CLARITY; single-note Note Call (ca-23) is untouched.
    Checked by EXECUTING the real app.js in the 0b context, not by finding the
-   calls (the context has no coach.js, so the one helper is lifted out of it
-   and the listening calls are stubbed):
+   calls. The context has NO coach.js, like a student in tap mode (coach.js is
+   lazy-loaded, only the mic path loads it): dealing a power card must work
+   without it (the first version threw there and Start did nothing), so nothing
+   from coach.js is lent to the context except, for the listening calls below,
+   stubs of coachSettlePitch and friends:
    - ca-43: four steps, each drill.power on the low E and A strings, frets
      0-5 / 5-8 / 8-12 / 0-12; no other power drill; ncProgKey keeps ca-23's
      key and gives power its own ("+5");
@@ -8220,11 +8223,11 @@ function checkRecordingVersions(ctx) {
      oracle written here for every pitch 28-80 (the exact root first, so fret 0
      and fret 12 of one note stay apart), and for single-note cards both are
      exactly what they were (p.midis, indexOf);
-   - what may follow what (ncClash, ncDeal): a strum still ringing from the card
-     before must not answer the next one, and nothing resets the readings after
-     a hit, so a card is not dealt after one whose pitches it accepts; an oracle
-     over every card triple, and the real ncDeal for a few thousand seeded deals
-     (single-note: the old rule exactly);
+   - what may follow what (ncClash, ncDeal): a root a card before could still be
+     ringing as is not dealt next (exact roots, power chords and single notes
+     alike, as it always was; the order of chords stays unpredictable and never
+     repeats a chord); an oracle over every card triple, and the real ncDeal for
+     a few thousand seeded deals, with no coach.js loaded;
    - ncListen: what it hands coachSettlePitch (the targets, the clarity tiers
      only for power) and which fret an answer resolves, on the main path and
      the mic-grace path, power and single-note;
@@ -8272,10 +8275,9 @@ function checkNoteCallPower(ctx) {
   if (pk(true) !== 'lowE+A+5:0-5') flag('ncProgKey of a power drill is \'' + pk(true) + '\', expected \'lowE+A+5:0-5\' — power progress would share the single-note key');
 
   // The helper (coach.js is not in the context) and the real value of the clarity tiers.
-  const fnText = nm => { const m = new RegExp('function\\s+' + nm + '\\s*\\(').exec(csrc), b = jsFunctionBody(csrc, nm); return m && b ? csrc.slice(m.index, csrc.indexOf('{', m.index)) + b : null; };
-  const helper = fnText('coachPowerTargets');
   const clarM = /^const RNW_POWER_CLARITY\s*=\s*(\[[^\]]*\]);/m.exec(csrc);
-  if (!helper) flag('coach.js: coachPowerTargets() not found — Riff Runner and Note Call share it; 1cd cannot run the mic rule');
+  if (run('typeof coachReadFrame') !== 'undefined' || run('typeof coachPowerTargets') !== 'function') flag('1cd needs the render context to have app.js but NOT coach.js (typeof coachReadFrame is ' + run('typeof coachReadFrame') + ', coachPowerTargets ' + run('typeof coachPowerTargets') + ') \u2014 a student in tap mode has no coach.js, and Note Call must deal its cards without it');
+  if (/function\s+coachPowerTargets\s*\(/.test(csrc)) flag('coach.js defines coachPowerTargets \u2014 it lives in app.js (Note Call needs it before coach.js loads), and two definitions would drift');
   if (!clarM) flag('coach.js: RNW_POWER_CLARITY not found — 1cd cannot check the clarity Note Call reads at');
   const rnwB = jsFunctionBody(csrc, 'rnwTargets');
   if (rnwB === null || !/coachPowerTargets\(/.test(stripJsComments(rnwB))) flag('coach.js: rnwTargets() must use coachPowerTargets() — Riff Runner and Note Call would drift apart (the third copy of [root, root+7, root+12])');
@@ -8283,8 +8285,7 @@ function checkNoteCallPower(ctx) {
   const setG = (name, val) => { saved.push([name, Object.prototype.hasOwnProperty.call(ctx, name), ctx[name]]); ctx[name] = val; };
   const undo = () => { for (const [n, had, v] of saved.reverse()) { if (had) ctx[n] = v; else delete ctx[n]; } saved.length = 0; };
   try {
-    if (helper && clarM) {
-      setG('coachPowerTargets', run('(' + helper + ')'));
+    if (clarM) {
       const RNW = run(clarM[1]);
 
       // The accept rule, on every card Note Call can deal.
@@ -8310,12 +8311,12 @@ function checkNoteCallPower(ctx) {
       for (const [lo, hi] of EXPECT.ranges) for (const pile of ['naturals', 'all']) judge({ strings: ['lowE', 'A'], power: true, minFret: lo, maxFret: hi }, pile, 'power ' + lo + '-' + hi + ' ' + pile + ':');
       for (const { id, d } of singles) for (const pile of ['naturals', 'all']) judge({ strings: d.strings, power: false, minFret: d.minFret != null ? d.minFret : 0, maxFret: d.maxFret != null ? d.maxFret : 5 }, pile, id + ' single-note ' + pile + ':');
 
-      // What may follow what. Nothing resets the readings after a hit, so a strum still ringing from the card before would answer the next card
-      // if the next card accepts one of its pitches: ncClash (and so ncDeal) must compare accepted pitches. An oracle written here, over every
-      // card triple, and the real ncDeal run for a few thousand seeded deals.
-      const dealOut = JSON.parse(run(`(function(){
-        const tonesOf = (p, a) => p.power ? [a - 12, a, a + 7, a + 12] : [a];
-        const overlap = (p, q) => p.midis.some(a => tonesOf(p, a).some(x => q.midis.some(b => tonesOf(q, b).includes(x))));
+      // What may follow what: a root a card before could still be ringing as is not dealt next (exact roots: a ringing strum answers only the
+      // same chord, measured). An oracle written here, over every card triple, and the real ncDeal run for a few thousand seeded deals, with
+      // no coach.js loaded (the first version of this change threw in ncDeal there).
+      let dealOut = null;
+      try { dealOut = JSON.parse(run(`(function(){
+        const overlap = (p, q) => p.midis.some(a => q.midis.includes(a));
         const oracle = (p, last) => { const q1 = last[last.length - 1]; if (q1 && q1.str === p.str && q1.note === p.note) return true; return last.some(q => overlap(p, q)); };
         const cfgs = [];
         ${J(EXPECT.ranges)}.forEach(r => ['naturals', 'all'].forEach(pile => cfgs.push({ pile, cfg: { strings: ['lowE', 'A'], power: true, minFret: r[0], maxFret: r[1] } })));
@@ -8338,18 +8339,21 @@ function checkNoteCallPower(ctx) {
                 const d = st.seq[st.seq.length - 1], prev = st.seq.slice(-3, -1);
                 const clashes = oracle(d, prev);
                 R.deals++; if (cfg.power) R.powerDeals++;
+                const q1 = st.seq[st.seq.length - 2]; if (q1 && q1.str === d.str && q1.note === d.note) R.viol.push([cfg.power, d.note, d.str, 'twice in a row']);
                 if (clashes) { R.forced++; if (cfg.power) R.powerForced++; if (pool.some(c => !oracle(c, prev))) R.viol.push([cfg.power, d.note, d.str, prev.map(x => x.note + x.str).join(',')]); }
               }
             }
           }
         } finally { Math.random = origRandom; }
         return JSON.stringify(R);
-      })()`));
+      })()`)); } catch (e) { flag('ncDeal / ncClash threw with no coach.js loaded: ' + e.message + ' \u2014 in tap mode coach.js never loads, so Start would do nothing'); }
+      if (dealOut) {
       stats.clashCalls = dealOut.clashCalls; stats.deals = dealOut.deals; stats.forced = dealOut.forced; stats.powerDeals = dealOut.powerDeals; stats.powerForced = dealOut.powerForced;
       for (const b of dealOut.clashBad.slice(0, 3)) flag('ncClash disagrees with the oracle (' + J(b) + ') \u2014 a card could follow one whose strum is still ringing as an answer to it (or a single-note rule changed)');
       if (dealOut.clashBad.length > 3) flag('... and ' + (dealOut.clashBad.length - 3) + ' more ncClash disagreements');
       for (const v of dealOut.viol.slice(0, 3)) flag('ncDeal dealt ' + J(v) + ' though a card that does not clash was available');
       if (dealOut.viol.length > 3) flag('... and ' + (dealOut.viol.length - 3) + ' more ncDeal deals of a clashing card');
+      }
 
       // ncListen: what it asks coachSettlePitch for, and which fret an answer resolves.
       const seen = [], resolved = [];
@@ -8445,7 +8449,7 @@ function checkNoteCallPower(ctx) {
     for (const k of defined) if (!keys.has(k)) flag('i18n ' + k + ' is defined but no Note Call power screen shows it (dead, or a screen 1cd does not reach)');
     if (defined.length !== EXPECT.keys) flag('1cd sees ' + defined.length + ' ncp.* keys, pinned at ' + EXPECT.keys + ' — a new power-mode string needs its Spanish and a screen that shows it (update the pin on purpose)');
   }
-  if (bad === 0) ok(EXPECT.power + ' power drills on ca-43 (frets ' + EXPECT.ranges.map(r => r.join('-')).join(' / ') + '); ' + stats.cards + ' cards x 53 pitches = ' + stats.answers + ' answers match the oracle (single-note cards exactly as before); ' + stats.clashCalls + ' ncClash calls match an oracle and ' + stats.deals + ' seeded ncDeal deals never dealt a clashing card while a clean one existed (' + stats.powerForced + ' of ' + stats.powerDeals + ' power deals had to, every card left clashing; ' + (stats.forced - stats.powerForced) + ' of ' + (stats.deals - stats.powerDeals) + ' single-note); ' + stats.listens + ' ncListen calls (targets, clarity, main and grace fret); ' + stats.keys + ' of ' + EXPECT.keys + ' ncp.* strings rendered, EN + ES');
+  if (bad === 0) ok(EXPECT.power + ' power drills on ca-43 (frets ' + EXPECT.ranges.map(r => r.join('-')).join(' / ') + '); ' + stats.cards + ' cards x 53 pitches = ' + stats.answers + ' answers match the oracle (single-note cards exactly as before); ' + stats.clashCalls + ' ncClash calls match an oracle and ' + stats.deals + ' seeded ncDeal deals (no coach.js loaded) never dealt a clashing card while a clean one existed (' + stats.powerForced + ' of ' + stats.powerDeals + ' power deals had to, every card left clashing; ' + (stats.forced - stats.powerForced) + ' of ' + (stats.deals - stats.powerDeals) + ' single-note); ' + stats.listens + ' ncListen calls (targets, clarity, main and grace fret); ' + stats.keys + ' of ' + EXPECT.keys + ' ncp.* strings rendered, EN + ES');
 }
 
 /* 1bf2. LYRIC-SHEET CARDS (card.sheet — ca-38, Jonathan 2026-10-19). The

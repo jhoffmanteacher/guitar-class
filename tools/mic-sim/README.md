@@ -29,7 +29,8 @@ tuning pass — ideally on the real classroom recordings the teacher console's
   root the whole-neck step can call (low E and A strings, frets 0–12 = 26
   roots, built the way `ncPool` builds the cards) through the real settle code
   and the accept rule read from the files under test (`ncTargets` /
-  `ncAnswerAt` in app.js, `coachPowerTargets` in coach.js), so an old
+  `ncAnswerAt` / `ncPowerTones` / `coachPowerTargets` in app.js; before
+  2026-10-31 `coachPowerTargets` was in coach.js), so an old
   coach.js + app.js (`git show <old>:coach.js`) gives the before and the
   current pair the after. Wrong cases accepted more than 1 in 100 are marked
   STOP. `--offsets=-12,0,7,12` is a what-if: answer each root with those

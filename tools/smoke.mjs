@@ -334,10 +334,22 @@ async function recordingWalk(page, run, events, stats, base) {
    A string for a low-E root as a miss. Level 1 is sped up in the page (it runs
    at 20 BPM: a count-in alone is 12 s) — a harness change, not the code
    under test. A checkout without ca-43 skips it. */
-async function noteCallWalk(page, run, events, stats) {
+async function noteCallWalk(page, run, events, stats, base) {
   const drills = await run('nc:list', `(CLASS_ACTIVITIES.find(a => a.id === 'ca-43') || { steps: [] }).steps.map(s => s.drill || null)`, 10);
   if (!drills || !drills.length) return;
   const fail = (step, text) => events.push({ step: 'notecall:' + step, kind: 'notecall', text });
+  /* A FRESH page, with coach.js not loaded: it is lazy-loaded and only the mic
+     path loads it, so a student in tap mode (the default) deals every card
+     without it. The first version of the power-chord change called a coach.js
+     helper from ncDeal, and Start did nothing on exactly this page (the walk
+     had loaded coach.js earlier, so nothing saw it). The first Start below runs
+     here. */
+  await page.send('Page.navigate', { url: base + '/index.html' });
+  await sleep(3500);
+  await run('nc:devBypass', 'devBypass()', 3500);
+  for (let i = events.length - 1; i >= 0; i--) if (events[i].step === 'nc:devBypass' && /ResizeObserver loop/.test(events[i].text)) events.splice(i, 1);
+  const lazy = await run('nc:no-coach', `typeof coachReadFrame === 'undefined' && typeof coachPowerTargets === 'function'`, 10);
+  if (!lazy) fail('fresh page', 'coach.js is already loaded on a fresh page (or coachPowerTargets is not in app.js) \u2014 this walk cannot show that Note Call deals its cards without coach.js');
   await run('nc:open', 'openClassActivitiesScreen()', 600);
   await run('nc:fast', 'NC_LEVELS[0].bpm = 150; NC_LEVELS[0].beats = 2; 1', 10);
   const K = k => JSON.stringify(k);
@@ -506,7 +518,7 @@ async function walk(base, chromePort, label) {
   if (tunerShut === false) tunerFail('tuner-close', 'a second togglePopup(\'tuner\') did not close the popup and stop the mic');
   await run('click-away', `document.body.click()`, 300);
   await chordGridWalk(page, run, events, stats);
-  await noteCallWalk(page, run, events, stats);
+  await noteCallWalk(page, run, events, stats, base);
   await recordingWalk(page, run, events, stats, base);
   await page.close();
   return { label, stats, errors: events.filter(e => !NOISE.test(e.text || '')) };

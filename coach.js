@@ -7583,15 +7583,9 @@ function rnwWhere(n){
    Mic recordings before tuning it further. */
 const RNW_POWER_RE = /^[A-G][#b]?5$/;
 const RNW_POWER_CLARITY = [0.22, 0.45];
-/* The three pitches that answer a power chord whose root is `rootMidi`: the
-   root, the 5th above it and the octave. One rule for every listener that
-   takes a strum for a power chord: Riff Runner's Wait Mode (rnwTargets) and
-   Note Call's power mode (ca-43, ncTargets / ncAnswerAt in app.js, 2026-10-30,
-   which waited for the exact root alone and counted a strummed A5 right 0
-   times in 40 on a normal guitar — tools/mic-sim/power-notecall.mjs; it adds
-   the octave below the root on top of these three, see ncPowerTones). Pair it
-   with RNW_POWER_CLARITY, never the single-note 0.22 gate alone. */
-function coachPowerTargets(rootMidi){ return [rootMidi, rootMidi + 7, rootMidi + 12]; }
+/* coachPowerTargets(rootMidi) (root, 5th, octave) lives in app.js, next to Note
+   Call, which needs it in tap mode before this file has loaded; Riff Runner's
+   Wait Mode below uses the same one, so the two cannot drift apart. */
 function rnwIsPower(n){ return !!n && RNW_POWER_RE.test(n.label || ''); }
 function rnwTargets(n){
   if (!n) return null;

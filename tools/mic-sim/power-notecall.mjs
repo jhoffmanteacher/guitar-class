@@ -7,7 +7,8 @@
    that sits on fret 0 AND fret 12 is one card with two roots).
 
    The accept rule comes from the files under test. With ncTargets /
-   ncAnswerAt in app.js (and coachPowerTargets in coach.js) the card is
+   ncAnswerAt in app.js (and coachPowerTargets, in app.js since 2026-10-31,
+   coach.js before) the card is
    answered by its root, 5th or octave, read at RNW_POWER_CLARITY; without
    them it is the old rule, the exact root at the default clarity. (ncPowerTones,
    the root, 5th, octave and the octave below, is read from app.js when it has it.) So the same
@@ -33,7 +34,17 @@
    "none" = nothing happened), and the lowest / highest root. WRONG cases that
    are accepted more than 1 in 100 are marked STOP. Synthetic audio only, not
    a guitar through a Chromebook mic: the console's Mic recordings view is the
-   real test. */
+   real test.
+
+   KNOWN STOPs, kept on purpose (Jonathan, 2026-10-31), 26 roots x 40 trials,
+   std / mid / weak: "WRONG strum, rooted a 5th above the card" 7.7% / 28.9% /
+   100%; "WRONG strum, rooted a 4th below the card" 0% / 4.5% / 7.7%; "WRONG
+   two strings, root + fifth, a 5th above" 7.7% / 7.7% / 7.8%. All of it is the
+   card's 5th being an accepted pitch (a chord a 5th above has the card's 5th
+   as its root). Any NEW row that prints STOP, or these rising, is a change to
+   look at. The right strums answer by root, octave or octave below and never by
+   the 5th in these runs, so removing the 5th from ncPowerTones would close the
+   STOPs (it stays: Riff Runner's Wait Mode uses the same three pitches). */
 import fs from 'fs';
 import { extract } from './extract.mjs';
 
@@ -55,12 +66,13 @@ const constLine = n => { const m = csrc.match(new RegExp('^const ' + n + '\\s*=\
 const consts = ['COACH_LVL_WIN', 'COACH_LVL_HOP', 'COACH_CATCHUP_MAX_MS', 'COACH_ATTACK_SKIP', 'COACH_ONSET_REFRACT',
   'CHK_ONSET_FLOOR', 'CHK_ONSET_RATIO', 'CHK_HF_FLOOR', 'CHK_HF_RATIO', 'COACH_STANDOUT', 'COACH_PITCH_GATE',
   'COACH_STANDOUT_TARGET', 'RNW_POWER_CLARITY'].map(constLine).join('\n');
-const hasHelper = csrc.includes('function coachPowerTargets(');
+const hasHelper = asrc.includes('function coachPowerTargets(');   // app.js (Note Call needs it before coach.js loads)
 const hasNcRule = asrc.includes('function ncTargets(') && asrc.includes('function ncAnswerAt(');
 const listenSrc = extract(asrc, 'ncListen');
 const hasClarity = /coachSettlePitch\([^)]*RNW_POWER_CLARITY/.test(listenSrc);
 const fns = ['coachReadFrame', 'coachDetectPitch', 'coachPitchReadings', 'coachSettlePitch', 'coachSmooth', 'coachOnsetTick']
-  .concat(hasHelper ? ['coachPowerTargets'] : []).map(n => extract(csrc, n)).join('\n')
+  .map(n => extract(csrc, n)).join('\n')
+  + (hasHelper ? '\n' + extract(asrc, 'coachPowerTargets') : '')
   + (hasNcRule ? '\n' + (asrc.includes('function ncPowerTones(') ? extract(asrc, 'ncPowerTones') + '\n' : '') + extract(asrc, 'ncTargets') + '\n' + extract(asrc, 'ncAnswerAt') : '');
 const body = `let micRec=null,coachHfRms=0,coachBgRms=0,coachBgPrev=0,coachOnsetAt=0,coachReadCtx=null,coachReadCtxT=0,coachYinD=null,coachSmoothA=0.18;
 const tunerMedian=a=>{const b=[...a].sort((x,y)=>x-y);return b[Math.floor(b.length/2)];};
@@ -129,6 +141,7 @@ const CASES = [
   ['RIGHT strum, equal strings',                false, strum(0, [1, 1, 1])],
   ['RIGHT strum, root loudest',                 false, strum(0, [1.3, 0.8, 0.8])],
   ['RIGHT strum, root quietest',                false, strum(0, [0.5, 1, 1])],
+  ['RIGHT two strings, root + fifth',           false, [[0, 1], [7, 1]]],
   ['WRONG single, one fret high',               true,  [[1, 1]]],
   ['WRONG single, one fret low',                true,  [[-1, 1]]],
   ['WRONG strum, one fret high',                true,  strum(1)],
@@ -136,6 +149,13 @@ const CASES = [
   ['WRONG strum, two frets high',               true,  strum(2)],
   ['WRONG strum, two frets low (next chord)',   true,  strum(-2)],
   ['WRONG strum, one string too high',          true,  [[5, 1], [12, 1], [17, 1]]],
+  // Another chord from the same step (2026-10-30 review): its root is a 5th or a 4th from the card's. A chord rooted a 5th ABOVE the card
+  // (E5 asked, B5 played) has the card's 5th as its root, so the 5th as an accepted pitch lets it through; a chord rooted a 5th below has the card's root as its 5th.
+  ['WRONG strum, rooted a 5th above the card',  true,  strum(7)],
+  ['WRONG strum, rooted a 5th below the card',  true,  strum(-7)],
+  ['WRONG strum, rooted a 4th above the card',  true,  strum(5)],
+  ['WRONG strum, rooted a 4th below the card',  true,  strum(-5)],
+  ['WRONG two strings, root + fifth, a 5th above', true, [[7, 1], [14, 1]]],
 ];
 console.log(`${coachFile} + ${appFile} · coachPowerTargets: ${hasHelper} · ncTargets/ncAnswerAt: ${hasNcRule} · power clarity in ncListen: ${hasClarity}${OFFSETS ? ' · WHAT-IF offsets ' + OFFSETS.join(',') + ' (RNW_POWER_CLARITY)' : ''} · harmonics ${opt('harm') || 'std'} · ${ROOTS.length} roots x ${TRIALS} trials`);
 let stop = 0;

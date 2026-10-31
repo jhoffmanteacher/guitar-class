@@ -13,7 +13,7 @@
      node tools/mic-sim/power-wait.mjs coach.js
 
    usage: node power-wait.mjs <coach.js> [trials=40] [--harm=std|mid|weak]
-                              [--only=<case text>] [--clarity=<json>]
+                              [--only=<case text>] [--clarity=<json>] [--app=<app.js>]
      --harm      each string's harmonic balance: std [1,.5,.25] (strong
                  fundamental), mid [.6,1,.5], weak [.3,1,.5] (a mic that
                  loses the low fundamental). Default std.
@@ -43,9 +43,17 @@ const consts = ['COACH_LVL_WIN', 'COACH_LVL_HOP', 'COACH_CATCHUP_MAX_MS', 'COACH
   'COACH_STANDOUT_TARGET', 'RNW_POWER_RE', 'RNW_POWER_CLARITY'].map(constLine).join('\n');
 const hasTargets = src.includes('function rnwTargets(');
 const hasPower = src.includes('function rnwIsPower(');
+/* coachPowerTargets (root, 5th, octave) lives in app.js since 2026-10-30 (Note Call needs it before coach.js loads), and rnwTargets calls it.
+   An old coach.js has it inline; for the current one it is read from --app=<app.js>, else the app.js next to the coach.js, else this stand-in. */
+const usesHelper = /coachPowerTargets\(/.test(src) && !src.includes('function coachPowerTargets(');
+let helperSrc = '';
+if (usesHelper) {
+  const appFile = opt('app') || (fs.existsSync(args[0].replace(/[^/\\]*$/, 'app.js')) ? args[0].replace(/[^/\\]*$/, 'app.js') : null);
+  try { helperSrc = extract(fs.readFileSync(appFile, 'utf8'), 'coachPowerTargets'); } catch { helperSrc = 'function coachPowerTargets(r){ return [r, r + 7, r + 12]; }'; }
+}
 const fns = ['coachReadFrame', 'coachDetectPitch', 'coachPitchReadings', 'coachSettlePitch', 'coachSmooth', 'coachOnsetTick', 'coachIdleTick']
   .concat(hasTargets ? ['rnwTargets'] : []).concat(hasPower ? ['rnwIsPower'] : [])
-  .map(n => extract(src, n)).join('\n');
+  .map(n => extract(src, n)).join('\n') + (helperSrc ? '\n' + helperSrc : '');
 const clarityExpr = FORCE_CLAR ? `n => (${hasPower ? 'rnwIsPower(n)' : 'true'} ? ${FORCE_CLAR} : undefined)`
   : hasPower ? 'n => (rnwIsPower(n) ? RNW_POWER_CLARITY : undefined)' : 'n => undefined';
 const body = `let micRec=null,coachHfRms=0,coachBgRms=0,coachBgPrev=0,coachOnsetAt=0,coachReadCtx=null,coachReadCtxT=0,coachYinD=null,coachSmoothA=0.18;
