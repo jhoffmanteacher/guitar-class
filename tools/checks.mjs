@@ -4371,16 +4371,22 @@ function caChordProblems(n) {
     seen.add(s);
     if (n.midi[i] !== OPEN[s] + f) out.push(`midi[${i}] ${n.midi[i]} is not ${s}-string fret ${f} (${OPEN[s] + f})`);
   });
+  const rootNamed = lo => {
+    const want = NAMES[lo % 12] + '5';
+    /* A flat spelling is the same chord — Bb5 in the key of F (ca-36),
+       where A#5 would be wrong on the page. */
+    const FLAT = { 'D♭': 'C♯', 'E♭': 'D♯', 'G♭': 'F♯', 'A♭': 'G♯', 'B♭': 'A♯' };
+    const got = ecNorm(n.note).replace(/^([A-G])b/, '$1♭').replace(/^([A-G]♭)/, (m, f) => FLAT[f] || f);
+    return got !== want ? `note "${n.note}" — a root and the 5th above it is ${want}` : null;
+  };
   if (!out.length && fr.length === 2) {
     const lo = Math.min(...n.midi), hi = Math.max(...n.midi);
-    if (hi - lo === 7) {
-      const want = NAMES[lo % 12] + '5';
-      /* A flat spelling is the same chord — Bb5 in the key of F (ca-36),
-         where A#5 would be wrong on the page. */
-      const FLAT = { 'D♭': 'C♯', 'E♭': 'D♯', 'G♭': 'F♯', 'A♭': 'G♯', 'B♭': 'A♯' };
-      const got = ecNorm(n.note).replace(/^([A-G])b/, '$1♭').replace(/^([A-G]♭)/, (m, f) => FLAT[f] || f);
-      if (got !== want) out.push(`note "${n.note}" — a root and the 5th above it is ${want}`);
-    }
+    if (hi - lo === 7) { const bad = rootNamed(lo); if (bad) out.push(bad); }
+  }
+  // The three-finger power chord the cards draw (root, 5th, root an octave up): named for its root too. An F5 carrying G5's frets read as fine before.
+  if (!out.length && fr.length === 3) {
+    const m3 = n.midi.slice().sort((x, y) => x - y);
+    if (m3[1] - m3[0] === 7 && m3[2] - m3[0] === 12) { const bad = rootNamed(m3[0]); if (bad) out.push(bad); }
   }
   return out;
 }
@@ -7988,8 +7994,9 @@ function checkPracticeCards(ctx) {
 function checkRecordingVersions(ctx) {
   head('1cc. Recording versions: a card that plays another recording');
   // strum: the Neil versions of ca-29 and ca-40 draw a strum on every eighth, each with its chord name (16 x 8 sections); titled: ca-40's Neil version has its own title and intro
-  const EXPECT = { cards: 3, groups: 1, start: 'jimi', strum: { 'ca-29': 128, 'ca-40': 128 }, titled: ['ca-40'] };
-  let bad = 0, n = 0, rendered = 0;
+  const EXPECT = { cards: 3, groups: 1, start: 'jimi', strum: { 'ca-29': 128, 'ca-40': 128 }, titled: ['ca-40'],
+                   lap: 'A5 A5 A5 A5 G5 G5 G5 F5 F5 F5 F5 F5 F5 G5 G5 G5' };   // the bass's chord on each of a lap's 16 eighths (A 1 + 2 + · G 3 + 4 · F + after 4 ... · G + after 3 in bar 2)
+  let bad = 0, n = 0, rendered = 0, strumRenders = 0, strumNames = 0, readbacks = 0, consoleReads = 0;
   const flag = m => { err(m); problems++; bad++; };
   let appSrc = '', TRACKS = {}, activities = [];
   try { appSrc = readFileSync(join(ROOT, 'app.js'), 'utf8'); TRACKS = loadConstObject(appSrc, 'SNIPPET_TRACKS'); }
@@ -8025,6 +8032,14 @@ function checkRecordingVersions(ctx) {
         if (has(v[f + '_es']) && !has(v[f])) flag(vw + ': ' + f + '_es without ' + f);
       }
       if (EXPECT.titled.includes(w) && (!has(v.title) || !has(v.intro))) flag(vw + ': needs its own title and intro \u2014 the card\'s name says how it is played, and this recording is not played that way');
+      for (const f of ['title', 'title_es', 'intro', 'intro_es']) {
+        if (has(v[f]) && v[f] === a[f]) flag(vw + ': ' + f + ' is the card\'s own \u2014 a version carries its own only to say something else (ca-40: "1 Strum per Chord" is Jimi\'s)');
+      }
+      if (EXPECT.strum[w] && v.card && Array.isArray(v.card.sections)) v.card.sections.forEach((sc, si) => {
+        const seq = (sc.notes || []).map(nt => nt.note).join(' ');
+        if (seq !== EXPECT.lap) flag(vw + ' \u00b7 section ' + (si + 1) + ' plays \'' + seq + '\', expected \'' + EXPECT.lap + '\' (a chord on the wrong eighth is a chord change the record does not make)');
+        if ((sc.notes || []).some(nt => nt.beats !== 0.5)) flag(vw + ' \u00b7 section ' + (si + 1) + ': every strum is half a beat \u2014 a down-up strum on every eighth');
+      });
       if (EXPECT.strum[w] && v.card && v.card.everyStrum !== true) flag(vw + ': card.everyStrum must be true \u2014 this recording is a down-up strum on every eighth, the grid would fold A5 x4 into one name');
       if (!TRACKS[v.track]) flag(vw + ': track \'' + v.track + '\' is not in SNIPPET_TRACKS');
       else if (v.track === a.card.track) flag(vw + ': plays the same track as the card \u2014 a recording version is another track');
@@ -8051,6 +8066,11 @@ function checkRecordingVersions(ctx) {
   else {
     const J = JSON.stringify;
     const acts = vm.runInContext('window.CLASS_ACTIVITIES || []', ctx);
+    {
+      // Said once: an every-strum card must never tell the student each chord is shown once, in either language (the render read-back below compares with this table, so a wrong string in it needs its own guard).
+      const I18Nt = loadI18nTable(), SD = I18Nt['ca.cardStrumDirections'], CD = I18Nt['ca.cardChordDirections'];
+      if (!SD || !CD || SD.es === CD.es || SD.en === CD.en || /shown once/i.test(SD.en) || /una sola vez/i.test(SD.es)) flag('i18n ca.cardStrumDirections says each chord is shown once (or copies ca.cardChordDirections) \u2014 on an every-strum card every strum has its name');
+    }
     for (const a of acts.filter(x => x && x.recordingVersions)) {
       const g = a.recordingGroup;
       const show = (r) => {
@@ -8091,6 +8111,7 @@ function checkRecordingVersions(ctx) {
         const names = (html.match(/class="tab-note-btn tab-chord-btn"/g) || []).length;
         if (allGrid && vcard.everyStrum) {
           const strums = gridSecs.reduce((x, sc) => x + sc.notes.filter(nt => !nt.rest).length, 0);
+          strumRenders++; strumNames += names;
           if (names !== strums) flag(w + ': draws ' + names + ' chord names, expected one per strum (' + strums + ')');
           if (shown !== a.recording && EXPECT.strum[a.id] && names !== EXPECT.strum[a.id]) flag(w + ': draws ' + names + ' chord names, pinned at ' + EXPECT.strum[a.id] + ' (16 strums x 8 sections) \u2014 a lap lost a strum, or the card\'s parts changed (update the pin only for an intended content change)');
         }
@@ -8098,14 +8119,17 @@ function checkRecordingVersions(ctx) {
         if (gridSecs.length && !(gridSecs.length && !allGrid && vcard.everyStrum)) {
           const dirKey = allGrid ? (vcard.everyStrum ? 'ca.cardStrumDirections' : 'ca.cardChordDirections') : 'ca.cardChordMixedDirections';
           const I18N = loadI18nTable();
-          for (const lang of ['en', 'es'])
+          for (const lang of ['en', 'es']) {
+            readbacks++;
             if (!text[lang].dir || text[lang].dir !== I18N[dirKey][lang]) flag(w + ': the ' + lang + ' directions read \'' + text[lang].dir + '\', expected ' + dirKey + ' (' + (allGrid ? (vcard.everyStrum ? 'every strum is named' : 'each chord once') : 'chords and single notes') + ')');
+          }
         }
         // The title and intro follow the recording (a version-level title / intro), else they are the card's own.
         const rvv = shown === a.recording ? {} : a.recordingVersions[shown];
         for (const lang of ['en', 'es']) {
           const sfx = lang === 'es' ? '_es' : '';
           for (const f of ['title', 'intro']) {
+            readbacks++;
             const want_ = has(rvv[f + sfx]) ? rvv[f + sfx] : a[f + sfx];
             if (text[lang][f] !== want_) flag(w + ': the ' + lang + ' ' + f + ' reads \'' + text[lang][f] + '\', expected \'' + want_ + '\'');
           }
@@ -8136,9 +8160,39 @@ function checkRecordingVersions(ctx) {
     } catch (e) { flag('caTeacherRedraw threw ' + e.message); }
     if (calls && JSON.stringify(calls) !== JSON.stringify(['tsongs:true', 'detail:ca-26'])) flag('caTeacherRedraw: expected the Teacher view songs tab to restart (after dropping its data-tvs marker) and any other console page to open the activity detail, got ' + JSON.stringify(calls));
   }
+  /* The console is where ca-40 lives (Teacher view songs and the activity detail page; it is teacher-only), so what the console reads
+     has to follow the recording too: teacherActivityTitle is run for real (its two functions lifted out of teacher.js into the render
+     context), and the two renderers must draw the caView copy (a `const a=raw` there shows Jimi's intro over a Neil card). */
+  {
+    let tsrc = '';
+    try { tsrc = readFileSync(join(ROOT, 'teacher.js'), 'utf8'); } catch { flag('teacher.js could not be read \u2014 1cc cannot check the console'); }
+    if (tsrc) {
+      for (const fn of ['renderTeacherViewSongs', 'renderTeacherActivityDetail']) {
+        const tb = jsFunctionBody(tsrc, fn);
+        if (tb === null || !/caView\(raw\)/.test(stripJsComments(tb))) flag('teacher.js: ' + fn + '() must draw caView(raw) \u2014 the console would show Jimi\'s title and intro over a Neil card');
+      }
+      const fnText = nm => { const m = new RegExp('function\\s+' + nm + '\\s*\\(').exec(tsrc), b = jsFunctionBody(tsrc, nm); return m && b ? tsrc.slice(m.index, tsrc.indexOf('{', m.index)) + b : null; };
+      const lifted = ['teacherActivityRenamed', 'teacherActivityTitle'].map(fnText);
+      if (ctx && lifted.some(f => !f)) flag('teacher.js: teacherActivityRenamed / teacherActivityTitle not found \u2014 1cc cannot run the console title (renamed? update this check with it)');
+      else if (ctx) {
+        const acts2 = vm.runInContext('window.CLASS_ACTIVITIES || []', ctx);
+        for (const a of acts2.filter(x => x && x.recordingVersions)) {
+          for (const r of [a.recording, ...Object.keys(a.recordingVersions)]) {
+            const rvv = r === a.recording ? {} : a.recordingVersions[r];
+            const want = has(rvv.title) ? rvv.title : a.title;
+            let got;
+            try { got = vm.runInContext('(function(){ ' + lifted.join('\n') + ' caRecordingModes[' + JSON.stringify(a.recordingGroup) + '] = ' + JSON.stringify(r) + '; try { return teacherActivityTitle(window.CLASS_ACTIVITIES.find(x => x.id === ' + JSON.stringify(a.id) + '), {}); } finally { delete caRecordingModes[' + JSON.stringify(a.recordingGroup) + ']; } })()', ctx); }
+            catch (e) { flag(a.id + ' [' + r + ']: teacherActivityTitle threw ' + e.message); continue; }
+            consoleReads++;
+            if (got !== want) flag(a.id + ' [' + r + ']: the console title reads \'' + got + '\', expected \'' + want + '\' \u2014 a list row, the picker or the page head would name the wrong recording');
+          }
+        }
+      }
+    }
+  }
   if (n !== EXPECT.cards) flag('1cc sees ' + n + ' card' + (n === 1 ? '' : 's') + ' with recording versions, expected ' + EXPECT.cards + ' (ca-26, ca-29, ca-40) \u2014 change the pin on purpose, or restore the card');
   if (Object.keys(groups).length !== EXPECT.groups) flag('1cc sees ' + Object.keys(groups).length + ' recording groups, expected ' + EXPECT.groups);
-  if (bad === 0) ok(n + ' cards with recording versions, ' + rendered + ' renders (each recording + nothing stored) \u2014 right track, sections, switch and Guitar switch every time');
+  if (bad === 0) ok(n + ' cards with recording versions, ' + rendered + ' renders (each recording + nothing stored) \u2014 right track, sections, switch and Guitar switch every time; ' + strumRenders + ' every-strum renders draw ' + strumNames + ' chord names (the Neil cards pinned at 128 each, every lap A5 x4 G5 x3 F5 x6 G5 x3); ' + readbacks + ' title / intro / directions read-backs in EN + ES; ' + consoleReads + ' console titles run through teacherActivityTitle');
 }
 
 /* 1bf2. LYRIC-SHEET CARDS (card.sheet — ca-38, Jonathan 2026-10-19). The

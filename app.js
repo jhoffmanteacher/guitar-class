@@ -12929,6 +12929,11 @@ function caKeyMode(a){
    every renderer that reads the view show the recording on screen; the board,
    pins and the console's list rows read caTitle / teacherActivityTitle, so they
    follow the chosen recording the same way (as title_power does for ca-34).
+   Known limit, the same trade title_power makes: a teacher rename is one title
+   for the whole card (`activityTitles[id] = { en, base }`, base = the card's own
+   title), so a rename typed on the Neil title shows on Jimi as well, and typing
+   a version's own title on the other recording is stored as a rename, not
+   cleared. The search index reads the card's own (Jimi) intro and title words.
    The choice is per viewer in localStorage (`caRecordingModes`, { group:
    recording }), like the key and chord switches. */
 const CA_RECORDING_MODES_KEY = 'caRecordingModes';
