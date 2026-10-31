@@ -38,6 +38,7 @@ import { spawnSync, spawn } from 'node:child_process';
 import { createHash } from 'node:crypto';
 import { fileURLToPath } from 'node:url';
 import { dirname, join } from 'node:path';
+import { audioHashMap, renderAudioBlock, AUDIO_BLOCK_RE } from './sw-audio-map.mjs';
 import { tmpdir, cpus } from 'node:os';
 import vm from 'node:vm';
 
@@ -5393,10 +5394,9 @@ function checkSdkVersion() {
 
 /* Bumps ONE named `const NAME = '...';` version constant in sw.js against a
    fingerprint of the given files, independently of any other constant in the
-   file. Used for both CACHE_VERSION (shell + img/) and AUDIO_CACHE_VERSION
-   (audio/ only) — kept separate so a routine content push doesn't bump the
-   audio version and purge every student's cached backing tracks, while a
-   real re-exported track still bumps it and invalidates the stale cache. */
+   file. Used for CACHE_VERSION (shell + img/). Audio is not versioned this way
+   any more (2026-10-30): see syncAudioHashes, which keeps one stable audio
+   cache and evicts per file. */
 function bumpVersionConst(constName, prefix, files, src, swPath, label, extra = '') {
   const fp = fingerprint(files, extra);
   const date = new Date().toISOString().slice(0, 10);
@@ -5423,6 +5423,40 @@ function bumpVersionConst(constName, prefix, files, src, swPath, label, extra = 
   return src.replace(line[0], `const ${constName} = '${want}';`);
 }
 
+/* sw.js's per-file audio hash map (2026-10-30). The worker keeps all audio in
+   one stable cache and evicts a file only when its hash here changed or the file
+   is gone, so adding a track costs students nothing. Written between the
+   AUDIO_HASHES markers by tools/sw-audio-map.mjs (shared with
+   tools/sw-audio-proof.mjs); --check fails when it is stale. Also guards the two
+   things that would quietly bring back the old purge-everything behaviour: the
+   cache's NAME (renaming AUDIO_CACHE drops what every student holds) and the
+   one-time migration (AUDIO_MIGRATION_FP adopts the stored files as-is, which
+   is only true while audio/ is unchanged since the deploy that set it). */
+const AUDIO_CACHE_NAME_PIN = 'guitar-class-audio-2026-10-30-ff9e913a6d';
+function syncAudioHashes(src) {
+  const map = audioHashMap(ROOT), n = Object.keys(map).length, want = renderAudioBlock(map);
+  const nm = src.match(/const AUDIO_CACHE = '([^']*)';/);
+  if (!nm) { err('sw.js has no `const AUDIO_CACHE = \'...\';` \u2014 the audio cache must be one stable name'); problems++; }
+  else if (nm[1] !== AUDIO_CACHE_NAME_PIN) { err(`AUDIO_CACHE is '${nm[1]}', pinned at '${AUDIO_CACHE_NAME_PIN}' \u2014 renaming it drops every track every student has downloaded (the old per-change purge); change the pin only on purpose`); problems++; }
+  const mig = src.match(/const AUDIO_MIGRATION_FP = '([0-9a-f]*)';/);
+  if (!mig) { err('sw.js has no `const AUDIO_MIGRATION_FP = \'...\';`'); problems++; }
+  else if (mig[1] && mig[1] !== fingerprint(AUDIO_FILES)) {
+    err(`audio/ has changed since the one-time audio migration was set (AUDIO_MIGRATION_FP '${mig[1]}', audio/ now '${fingerprint(AUDIO_FILES)}') \u2014 the migration adopts every stored track as matching AUDIO_HASHES, which is no longer true: set AUDIO_MIGRATION_FP to '' in sw.js (it has served its deploy), then re-run`);
+    problems++;
+  } else ok(mig[1] ? `audio migration still valid (audio/ unchanged since it was set: ${mig[1]})` : 'audio migration retired (AUDIO_MIGRATION_FP is empty)');
+  const m = src.match(AUDIO_BLOCK_RE);
+  if (!m) { err('sw.js has no AUDIO_HASHES:BEGIN \u2026 AUDIO_HASHES:END block'); problems++; return src; }
+  if (m[0] === want) { ok(`audio hash map up to date (${n} files)`); return src; }
+  if (CHECK_ONLY) {
+    err('audio hash map in sw.js is stale \u2014 audio/ changed but the AUDIO_HASHES block was not regenerated');
+    console.log(`${C.dim}      run node tools/checks.mjs (without --check) to write it${C.reset}`);
+    problems++;
+    return src;
+  }
+  ok(`audio hash map written (${n} files)`);
+  return src.replace(m[0], () => want);
+}
+
 function bumpServiceWorker() {
   head('3. Service-worker cache version');
   const swPath = join(ROOT, 'sw.js');
@@ -5439,12 +5473,45 @@ function bumpServiceWorker() {
      the worker caches (that day: 'no-cache' on a miss) must rebuild every
      visitor's cache, or a copy the old logic stored wrongly stays served
      until some unrelated shell file happens to change. */
-  const swCode = src.replace(/const (AUDIO_)?CACHE_VERSION = '[^']*';/g, "const $1CACHE_VERSION = '';");
+  /* The AUDIO_HASHES block is blanked too: an audio-only push must not rebuild
+     every student's shell cache (the worker still updates, as it must, because
+     its bytes changed; the shell cache name does not). */
+  const swCode = src.replace(/const CACHE_VERSION = '[^']*';/g, "const CACHE_VERSION = '';").replace(AUDIO_BLOCK_RE, '/* AUDIO_HASHES */');
   const shellFp = [...SHELL_FILES, ...IMG_FILES, ...SHEET_FILES, ...VENDOR_FILES, ...precachedExtraFiles(src)];
   src = bumpVersionConst('CACHE_VERSION', 'guitar-class', shellFp, src, swPath, 'shell cache', swCode);
-  src = bumpVersionConst('AUDIO_CACHE_VERSION', 'guitar-class-audio', AUDIO_FILES, src, swPath, 'audio cache');
+  src = syncAudioHashes(src);
   if (!CHECK_ONLY && src !== before) writeFileSync(swPath, src);
+  checkAudioWorker(swPath);
   checkPrecacheFingerprinted(src, shellFp);
+}
+
+/* 1ce. sw.js keeps students' downloaded backing tracks (2026-10-30).
+   Reading the worker for the right words proves nothing about what it does to a
+   cache, so this RUNS it: tools/sw-audio-proof.mjs boots the real sw.js (install,
+   activate, fetch) against a stand-in CacheStorage and counts what survives a
+   deploy that adds, re-exports and removes a track, the one-time migration, and
+   the fetch paths; then breaks the worker 13 ways and needs every one to turn
+   the proof red. The totals are pinned, so deleting a scenario or a breakage to
+   get green fails here too. */
+const SW_AUDIO_PROOF_PIN = { assertions: 39, scenarios: 8, mutations: 13 };
+function checkAudioWorker(swPath) {
+  head('1ce. sw.js keeps the audio cache (the worker is run, not read)');
+  const r = spawnSync(process.execPath, [join(ROOT, 'tools', 'sw-audio-proof.mjs'), swPath], { encoding: 'utf8', timeout: 120000 });
+  const lines = (r.stdout || '').trim().split('\n');
+  const m = /^sw-audio-proof: (\d+) assertions in (\d+) scenarios, (\d+) of (\d+) mutations caught/.exec(lines[lines.length - 1] || '');
+  if (r.status !== 0 || !m) {
+    err('tools/sw-audio-proof.mjs failed' + (r.error ? ': ' + r.error.message : ''));
+    for (const l of lines.slice(0, 8)) console.log(`${C.dim}      ${l}${C.reset}`);
+    problems++;
+    return;
+  }
+  const [a, s, c, n] = m.slice(1).map(Number), P = SW_AUDIO_PROOF_PIN;
+  if (a !== P.assertions || s !== P.scenarios || n !== P.mutations || c !== n) {
+    err(`sw-audio-proof ran ${a} assertions in ${s} scenarios and caught ${c} of ${n} breakages; pinned at ${P.assertions} / ${P.scenarios} / ${P.mutations} (all caught) — if you changed the proof on purpose, update SW_AUDIO_PROOF_PIN`);
+    problems++;
+    return;
+  }
+  ok(`${a} assertions in ${s} scenarios run against the real sw.js (add / re-export / remove a track, the one-time migration, every fetch path); ${c} of ${n} deliberate breakages each turned the proof red`);
 }
 
 /* Precached files that no list above fingerprints (2026-10-25). ASSETS also
