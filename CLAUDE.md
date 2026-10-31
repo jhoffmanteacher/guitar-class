@@ -26,8 +26,8 @@ Operative rules only. History and the *why*: `WORKFLOW.md` ("Moved from CLAUDE.m
 5. New student-facing text → its Spanish twin, same edit. A new step field →
    both step renderers.
 6. A student can see the change → a `CHANGELOG.md` entry, same push.
-7. Hit a review trigger? Ask Jonathan **Fast or Reviewed** after the build —
-   see "Fast or Reviewed" under the Triggers.
+7. Hit a review trigger? Always-Reviewed → run the reviewer now. Anything else
+   ships **Fast** with a `Review: Fast` trailer — see "Fast by default".
 8. Right before pushing: `git fetch`, then `git log HEAD..origin/main`. After
    pushing: `node tools/checks.mjs --live`.
 
@@ -145,10 +145,11 @@ Every new student-facing shell string goes in `i18n.js` (read its header for wir
 | Journey tab cards and Journey-page decisions | `.claude/rules/journey-pages.md` (loads with `tabs/**`) | Restyle `.tab` in both stylesheets or neither |
 | Writing any JS (`app.js`, `teacher.js`, `coach.js`, `live-quiz.js`, `fab-tools.js`, `tuner.js`, `tabs/journey.js`) | `.claude/rules/code-hygiene.md` (loads with those files) | Inline handler args use `jsonAttrArg(x)`, never `'${escAttr(x)}'`; never a mid-line `//`; grep sibling copies and old-behaviour comments before and after a fix; stop everything you start; escape student-written values |
 | Teacher console shared config, **`config/class` write rule** | `.claude/rules/teacher-console.md` (loads with `teacher.js`) | A superseded read returns the newest read, never `null`; a diverged write never marks the copy current; visibility via `teacherBoardView(cfg).assigned` |
+| The weekly review of commits that shipped Fast | skill `friday-check` | Runs unattended Fridays 11 PM; new dated tag each run, never move one |
 | Whole-site audits, many-file refactors, 50+ string passes with sub-agents | skill `site-sweep` (playbook + auditor/fixer/reviewer briefs) | Pre-create the worktrees; cherry-pick to one linear branch; an adversarial review of the *fixes* is required; fetch before pushing |
 
 ## How to work with Jonathan
-**AskUserQuestion, not free text** (2–4 options). **Don't ask "should I proceed?"**: do the obvious, reversible work; "can you…/how do I…/should this be…" about code = do it. In doubt: pick a default, proceed, say why. Pause only for a real fork, irreversible / outward-facing actions, Fast-or-Reviewed. **Pushing to `main` is not one of those:** checks pass and a
+**AskUserQuestion, not free text** (2–4 options). **Don't ask "should I proceed?"**: do the obvious, reversible work; "can you…/how do I…/should this be…" about code = do it. In doubt: pick a default, proceed, say why. Pause only for a real fork, irreversible / outward-facing actions. **Pushing to `main` is not one of those:** checks pass and a
 fast-forward is what you'd recommend → push, say what landed, `checks.mjs --live`. Ask for a merge, others' commits in the way, failing checks, or unready work.
 
 **Sweeps (50+ items)**: a second agent told to *find problems*, auditing the FIXES (`site-sweep`).
@@ -159,9 +160,9 @@ Not counted: `CHANGELOG.md`, `sw.js` version lines, a string's Spanish twin, pin
 `checks.mjs` edits. A guard on a new default, or extending what a check reads: break-it proof only (paste output). A new KIND of check, or changed logic/matching, is a trigger (`site-reviewer`, high) plus break-it. Reviewer: `site-reviewer-deep`
 (xhigh) for danger-zone / 50+ strings (failing scenario first), else `site-reviewer`. Agent claim → read its quoted lines yourself; agent fix → make it re-derive it on the real code.
 
-**Fast or Reviewed** — after the build and every "Start here" step, AskUserQuestion (what was touched and passed); **Fast** ships, **Reviewed** runs the reviewer; mark one "(Recommended)". Always Reviewed, not offered: danger-zone, new kind of check, sub-agent
-sweep, moving/adding/removing a section or step. No trigger → don't ask; no answer →
-Reviewed; "quick change/fix" = Fast unless always-Reviewed; Fast reports start "Fast — reviewer skipped."
+**Fast by default** (2026-10-31) — a trigger no longer asks. After the build and every "Start here" step, ship **Fast**: no reviewer, and every Fast commit ends with the trailer line `Review: Fast` (above any Co-Authored-By); the report starts "Fast — reviewer skipped; Friday check will review it." **Always Reviewed, same day, never Fast:** danger-zone file, new kind of check, sub-agent
+sweep, moving/adding/removing a section or step. Jonathan says "review this" / "Reviewed" → review same day. No trigger → no trailer.
+**Friday check** — a scheduled task, Fridays 11:00 PM Pacific, reviews every `Review: Fast` commit since the last `friday-check-*` tag, fixes and pushes (skill `friday-check`).
 
 **Effort**: agent `xhigh` for deep review, else `high`; never `max`. Session: `medium` routine, `high` bug fixes / JS / keyed-MC, `xhigh` danger-zone and sweeps; a tier above the session → ask for `/effort`. Report real numbers, not the premise; name the prior decision a request reverses.
 
