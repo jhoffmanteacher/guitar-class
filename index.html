@@ -576,6 +576,9 @@
      hit; teacher.js is left out of it (sw.js ASSETS) and is cached on its
      first fetch instead. -->
 <script defer src="live-quiz.js"></script>
+<!-- "Hear It First" ear trainer: hidden, direct link only (?hif=1). This one small file does
+     nothing without that flag; with it, it loads trainer-core / -audio / -ui on demand. -->
+<script defer src="trainer-site-adapter.js"></script>
 <!--
 ╔════════════════════════════════════════════════════════════════════╗
 ║                 FIREBASE SETUP — ONE TIME, ~15 MINUTES              ║

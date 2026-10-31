@@ -1047,7 +1047,9 @@
       return { items: s.items, byTask: s.byTask, review: s.review };
     }
 
-    function nextItem() {
+    /* o.task forces the task ('Practice one task'); the cell is still picked
+       by the engine, so it stays adaptive inside that task. */
+    function nextItem(o) {
       if (!session) startSession();
       while (pending.length) {
         var p = pending.shift();
@@ -1069,7 +1071,7 @@
         }
         return p;
       }
-      var meta = pickCell(pickTask());
+      var meta = pickCell((o && o.task) || pickTask());
       var item = makeItemFor(meta);
       track(item);
       return item;

@@ -740,6 +740,105 @@ function chordSvg(name, opts){
   return chordDiagramSVG(cfg, Object.assign({ theme: 'slide' }, opts || {}));
 }
 
+/* ══════════════════════════════════════════════════════════════
+   TRAINER FRETBOARD — all six strings, frets 0..maxFret (to 20), dots in
+   several styles, one highlighted string, an optional interval label
+   between two dots. Added for the "Hear It First" ear trainer
+   (trainer-ui.js). It is a NEW function: nothing above this block changed,
+   so every existing diagram renders byte-identically (tools/
+   guitar-diagrams-cli.mjs, checked before and after).
+
+   spec = {
+     maxFret:      default 20
+     dots:         [{ s, f, label, style }] — s is a string INDEX, 0 = low E
+                   … 5 = high e; style is 'ref' (solid), 'target' (ring),
+                   'ok', 'bad', 'dim' or 'plain'
+     highlight:    string index to draw in green, or null
+     fretNumbers:  false hides the number row (default true)
+     stringLabels: six labels, low E first (default: the site's own)
+     link:         { from:{s,f}, to:{s,f}, text } — a dashed line and a pill
+     label:        the figure's accessible name
+   }
+   Inlays follow the real neck: 3 5 7 9, a pair at 12, then 15 17 19. They
+   live in TRAINER_INLAYS, not FRETBOARD_INLAYS, which two older boards
+   draw unfiltered. ══════════════════════════════════════════════════════════════ */
+var TRAINER_INLAYS = [3, 5, 7, 9, 12, 15, 17, 19];
+function trainerFretboardSvg(spec, opts){
+  spec = spec || {};
+  var t = gdTheme(opts);
+  var isCss = !opts || !opts.theme || opts.theme === 'css';
+  var red = isCss ? 'var(--red-text)' : '#b3372a';
+  var soft = isCss ? 'var(--green-bg)' : NATURALS_LIGHT_GREEN;
+  var maxFret = spec.maxFret || 20;
+  var W = 900, H = 200, padL = 66, padR = 14, padT = 24, padB = spec.fretNumbers === false ? 14 : 42;
+  var openW = 34, fretW = (W - padL - padR - openW) / maxFret, boxH = H - padT - padB, strGap = boxH / 5;
+  var nutX = padL + openW;
+  var fretX = function(f){ return nutX + f * fretW; };
+  var cxOf = function(f){ return f === 0 ? padL + openW / 2 : nutX + (f - 0.5) * fretW; };
+  var cyOf = function(si){ return padT + (5 - si) * strGap; };
+  var r = Math.min(13, fretW * 0.36);
+
+  var s = gdOpen(W, H, t, opts, "-apple-system,'Segoe UI',Roboto,Arial,sans-serif");
+  s = s.replace('<svg ', '<svg role="img" aria-label="' + gdEsc(spec.label || 'Fretboard') + '" ');
+  s += gdGround(W, H, t);
+
+  TRAINER_INLAYS.filter(function(f){ return f <= maxFret; }).forEach(function(f){
+    var cx = nutX + (f - 0.5) * fretW, midY = padT + boxH / 2;
+    if (f === 12) {
+      s += '<circle cx="' + cx + '" cy="' + (midY - strGap) + '" r="' + t.b(3) + '" fill="' + t.text3 + '" opacity="0.35"/>';
+      s += '<circle cx="' + cx + '" cy="' + (midY + strGap) + '" r="' + t.b(3) + '" fill="' + t.text3 + '" opacity="0.35"/>';
+    } else {
+      s += '<circle cx="' + cx + '" cy="' + midY + '" r="' + t.b(3) + '" fill="' + t.text3 + '" opacity="0.35"/>';
+    }
+  });
+  for (var f1 = 1; f1 <= maxFret; f1++) {
+    s += '<line x1="' + fretX(f1) + '" y1="' + padT + '" x2="' + fretX(f1) + '" y2="' + (padT + boxH) + '" stroke="' + t.text3 + '" stroke-width="' + t.b(0.8) + '"/>';
+  }
+  s += '<rect x="' + (nutX - 2.5) + '" y="' + (padT - 2) + '" width="5" height="' + (boxH + 4) + '" fill="' + t.text + '" rx="1"/>';
+
+  for (var si = 0; si < 6; si++) {
+    var y = cyOf(si), hot = spec.highlight === si;
+    var lab = (spec.stringLabels && spec.stringLabels[si]) || STRING_NUM_TO_LABEL[6 - si];
+    s += '<line x1="' + padL + '" y1="' + y + '" x2="' + fretX(maxFret) + '" y2="' + y + '" stroke="' + (hot ? t.green : t.text3) + '" stroke-width="' + t.b(hot ? 2.6 : 1.5 - si * 0.16) + '" stroke-linecap="round"/>';
+    s += '<text x="' + (padL - 8) + '" y="' + y + '" text-anchor="end" dominant-baseline="central" font-size="' + t.b(10.5) + '" font-weight="' + (hot ? '700' : '400') + '" fill="' + (hot ? t.green : t.text2) + '">' + gdEsc(lab) + '</text>';
+  }
+  if (spec.fretNumbers !== false) {
+    s += '<g font-size="' + t.b(8.5) + '" fill="' + t.text2 + '" text-anchor="middle">';
+    for (var f2 = 0; f2 <= maxFret; f2++) s += '<text x="' + cxOf(f2) + '" y="' + (padT + boxH + 26) + '">' + f2 + '</text>';
+    s += '</g>';
+  }
+
+  var link = spec.link;
+  if (link && link.from && link.to) {
+    var x1 = cxOf(link.from.f), y1 = cyOf(link.from.s), x2 = cxOf(link.to.f), y2 = cyOf(link.to.s), mx = (x1 + x2) / 2, my = (y1 + y2) / 2;
+    if (link.from.s === link.to.s) {
+      my = y1 - 26;
+      s += '<path d="M' + x1 + ' ' + (y1 - r) + ' Q' + mx + ' ' + (y1 - 44) + ' ' + x2 + ' ' + (y2 - r) + '" fill="none" stroke="' + t.text2 + '" stroke-width="' + t.b(1.1) + '" stroke-dasharray="4 3"/>';
+    } else {
+      s += '<line x1="' + x1 + '" y1="' + y1 + '" x2="' + x2 + '" y2="' + y2 + '" stroke="' + t.text2 + '" stroke-width="' + t.b(1.1) + '" stroke-dasharray="4 3"/>';
+    }
+    if (link.text) {
+      var tw = Math.max(34, String(link.text).length * 7.4 + 14);
+      s += '<rect x="' + (mx - tw / 2) + '" y="' + (my - 10) + '" width="' + tw + '" height="20" rx="10" fill="' + t.bg + '" stroke="' + t.text2 + '" stroke-width="' + t.b(0.8) + '"/>';
+      s += '<text x="' + mx + '" y="' + my + '" text-anchor="middle" dominant-baseline="central" font-size="' + t.b(9.5) + '" font-weight="700" fill="' + t.text + '">' + gdEsc(link.text) + '</text>';
+    }
+  }
+
+  (spec.dots || []).forEach(function(d){
+    var cx = cxOf(d.f), cy = cyOf(d.s), st = d.style || 'plain', fill = soft, stroke = t.green, sw = t.b(1.4), tf = t.text;
+    if (st === 'ref') { fill = t.text; stroke = t.text; tf = t.bg; }
+    else if (st === 'target') { fill = t.bg; stroke = t.green; sw = t.b(2.4); }
+    else if (st === 'ok') { fill = t.green; stroke = t.green; tf = t.bg; }
+    else if (st === 'bad') { fill = red; stroke = red; tf = t.bg; }
+    else if (st === 'dim') { fill = 'none'; stroke = t.text3; tf = t.text3; }
+    s += '<circle cx="' + cx + '" cy="' + cy + '" r="' + r + '" fill="' + fill + '" stroke="' + stroke + '" stroke-width="' + sw + '"/>';
+    if (d.label != null && d.label !== '') {
+      s += '<text x="' + cx + '" y="' + cy + '" text-anchor="middle" dominant-baseline="central" font-size="' + t.b(Math.max(7.5, r * 0.62)) + '" font-weight="700" fill="' + tf + '">' + gdEsc(d.label) + '</text>';
+    }
+  });
+  return s + '</svg>';
+}
+
 /* Node entry point (tools/guitar-diagrams-cli.mjs). No effect in a browser. */
 if (typeof module !== 'undefined' && module.exports) {
   module.exports = {
@@ -748,5 +847,6 @@ if (typeof module !== 'undefined' && module.exports) {
     STRING_NATURALS,
     chordDiagramSVG, localChordSvg, localStringSvg, localStringFretboardSvg,
     localStringNaturalsSvg, localStringNotesSvg, localStringMultiNotesSvg, localNoteSvg, noteFullLabel, ordinal, chordSvg, chordSheetSvg,
+    trainerFretboardSvg, TRAINER_INLAYS,
   };
 }

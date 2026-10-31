@@ -746,6 +746,57 @@
 
 ## Recently shipped (post-archive)
 
+- [x] **2026-10-31 — "Hear It First": a hidden adaptive ear + fretboard trainer.**
+      Work order `WO-hear-it-first.md` (kept out of the repo). For Jonathan's
+      own ear on an electric guitar: hear a tone and find it, see a fret and
+      know its sound, name and play intervals, play back phrases, find named
+      notes. It finds weak spots (moves on a string, across strings, across the
+      neck, intervals, phrases, note locations), spends practice there, and
+      teaches (a one-line lesson card, two easier items with "Hear the slide",
+      a contrast drill for a confused pair) until each one is gone.
+      **Where:** `index.html?hif=1` (add `&hifdebug=1` for `window.__hif`), any
+      signed-in account; no hub card, never visible to students.
+      **Files (flat, at the root):** `trainer-core.js` (pure engine, no DOM /
+      audio / Firebase / strings), `trainer-audio.js`, `trainer-ui.js` (the
+      English text, the screens, `createTrainer`), `trainer-site-adapter.js`
+      (the ONLY one that touches site globals; the one small script index.html
+      loads). `guitar-diagrams.js` gained one NEW function,
+      `trainerFretboardSvg`; every old diagram is byte-identical
+      (`node tools/diagram-regression.mjs <ref>`). All four are in
+      `SHELL_FILES` and `SHELL_NOT_PRECACHED` (loaded on demand, like
+      `teacher.js`).
+      **How it listens:** `coach.js`, unchanged — its mic, onset detector and
+      pitch reader, called from the adapter. The input picker is a
+      `getUserMedia` wrapper that is in force only while `coachAcquireMic()`
+      runs. Cents come from the readings `coachSettlePitch` leaves behind (it
+      returns a whole note). A reading within 45 cents counts; 45–50 is "didn't
+      catch that".
+      **Where it saves:** `progress/{uid}.trainer`, written with
+      `set({trainer}, {mergeFields:['trainer']})`, plus a uid-keyed localStorage
+      copy. `firestore.rules` is unchanged (that document has no field
+      whitelist). Under 30 KB: 25 KB with every one of 208 cells used.
+      **Sound:** the site's own `playNote(..., synthOnly=true)` (Karplus-Strong,
+      no audio files; the recorded notes stop at MIDI 74 and the trainer goes
+      to 84).
+      **How to test:** `node tools/trainer-sim.mjs` (19 unit checks, learners
+      A–H on 20 seeds; its own command, NOT in checks.mjs; run it after any
+      `trainer-core.js` change), `node tools/trainer-e2e.mjs` (real Chrome over
+      the DevTools protocol; a fake guitar plays synthesized plucks into
+      `getUserMedia`, so the site's real detection runs; `--quick` skips the
+      placement walk), `node tools/diagram-regression.mjs <ref>`.
+      **The finding to know before a student release:** the work order's unlock
+      rule (every new cell at m ≥ 0.75 and n ≥ 6) is slow. A steady 95%
+      learner starting at Zone 1 / Tier 1 opens Z2 at about session 7, Z3 at
+      28, Z4 at 60–78, and does not reach Z5 or T4 in 90 sessions; coverage
+      weighting, 4 answers per cell, or pooling by row help only a little
+      (`unlock.granularity`, `unlock.minN`, `weights.coverage` in the config
+      are the switches). Placement is how an expert gets up the ladder.
+      **Interpretations the work order left open** are numbered I1–I11 in the
+      header of `trainer-core.js`.
+      **Not yet checked on a real guitar:** the work order's electric-guitar
+      checklist (section 8), and frets 13–20 on the B and high e strings (up to
+      1046 Hz), which the existing games never reach.
+
 - [x] **2026-10-26 — Watchtower: the record's rhythm replaces the book rhythm.**
       Jonathan and Claude measured the Hendrix rhythm guitar on the beat map
       (26 A-bars, 26 F-bars) and Jonathan confirmed it by ear. Bar 1 is

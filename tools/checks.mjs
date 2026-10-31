@@ -76,7 +76,7 @@ try {
 
 const SHELL_FILES = [
   'index.html', '404.html', 'mood-chart.html', 'styles.css', 'i18n.js', 'guitar-diagrams.js', 'class-activities.js', 'app.js', 'fab-tools.js', 'tuner.js', 'coach.js', 'teacher.js', 'live-quiz.js', 'config-main.js',
-  'trainer-core.js',
+  'trainer-core.js', 'trainer-audio.js', 'trainer-ui.js', 'trainer-site-adapter.js',
   'firebase-config.js', 'manifest.json', 'icon.svg',
   ...MODULE_FILES,
   ...TAB_PAGES,
@@ -95,7 +95,7 @@ const SHELL_FILES = [
    (one of the two lists would be wrong), and checkPrecacheCoverage() still
    fails if a shipped page starts linking mood-chart.html again — at that
    point it is student-facing and goes back in ASSETS, off this list. */
-const SHELL_NOT_PRECACHED = ['teacher.js', 'mood-chart.html', 'trainer-core.js'];
+const SHELL_NOT_PRECACHED = ['teacher.js', 'mood-chart.html', 'trainer-core.js', 'trainer-audio.js', 'trainer-ui.js', 'trainer-site-adapter.js'];
 
 /* Backing-track audio isn't in sw.js's ASSETS precache list (they're large —
    precaching them at install would bloat the offline install), but the SW's

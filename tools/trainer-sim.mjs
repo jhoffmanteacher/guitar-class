@@ -156,6 +156,21 @@ function runUnits() {
     const e4 = mk(0.7, 10, 1); go(e4, false); go(e4, false); eq(e4.getProfile().cells[key].r, 1, 'never below the floor');
     return '7 cases';
   });
+  unit('U18 song anchors are the riffs on the site (module-2.js), and each interval named has one', () => {
+    const UI = require(join(ROOT, 'trainer-ui.js'));
+    const fs = require('node:fs'), src = fs.readFileSync(join(ROOT, 'module-2.js'), 'utf8');
+    const sn = src.indexOf('"Seven Nation Army" — main riff · A string · 7 notes');
+    ok(sn > 0, 'Seven Nation Army tab not found in module-2.js');
+    const block = src.slice(sn, src.indexOf(']', sn)), midis = [...block.matchAll(/midi:\s*(\d+)/g)].map((m) => +m[1]);
+    eq(JSON.stringify(midis), JSON.stringify(UI.ANCHORS.sna.midis), 'Seven Nation Army midis');
+    const sm = /Smoke on the Water" main riff[\s\S]*?playSeq: \{[^}]*?notes: \[([^\]]*)\]/.exec(src);
+    ok(sm, 'Smoke on the Water playSeq not found in module-2.js');
+    eq(JSON.stringify(sm[1].split(',').map((x) => +x.trim())), JSON.stringify(UI.ANCHORS.sotw.midis), 'Smoke on the Water midis');
+    const has = [['m3', 'up'], ['m3', 'down'], ['M2', 'down'], ['M2', 'up'], ['m2', 'down'], ['P4', 'down']], none = [['P5', 'up'], ['TT', 'up'], ['M7', 'up'], ['P8', 'up']];
+    has.forEach(([n, d]) => { const a = UI.anchorFor(C, n, d); ok(a, 'no anchor for ' + n + ' ' + d); const semis = Math.abs(a.midis[a.i] - a.midis[a.i - 1]); eq(semis, C.semisOfName(n)); ok((a.midis[a.i] - a.midis[a.i - 1] > 0) === (d === 'up'), n + ' ' + d + ' direction'); });
+    none.forEach(([n, d]) => ok(!UI.anchorFor(C, n, d), 'unexpected anchor for ' + n + ' ' + d));
+    return 'both riffs match module-2.js; ' + has.length + ' intervals anchored, ' + none.length + ' correctly not';
+  });
   unit('U8 mic judging: 45 cents counts, 45-50 is unclear, vibrato reads, a wide spread does not', () => {
     eq(C.readPitch(60.45).midi, 60); ok(!C.readPitch(60.45).unclear, '45 cents');
     ok(C.readPitch(60.46).unclear, '46 cents'); ok(C.readPitch(60.5).unclear, '50 cents'); ok(C.readPitch(59.54).unclear, '-46 cents');

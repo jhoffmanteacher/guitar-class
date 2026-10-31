@@ -5,6 +5,14 @@ Notable changes to the Guitar Class site. Newest first.
 For the full session-by-session history (and the reasoning behind each change),
 see `WORKFLOW.md` and the git commit log.
 
+## 2026-10-31 — "Hear It First" ear trainer (hidden; nothing changes for students)
+
+- **A new ear and fretboard trainer exists, and students cannot see it.** It has
+  no hub card and no rail button. It opens only from a direct link
+  (`index.html?hif=1`) for one signed-in account, so a student's Games page,
+  navigation and lessons are unchanged. The only thing a student's browser
+  gains is one very small script that does nothing without that link.
+
 ## 2026-10-30 — Power Chord Switch: Start stays on screen, and the pair you saw is the pair you replay
 
 - **The Start button now stays at the bottom of the screen.** The big chord
