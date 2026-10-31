@@ -13,7 +13,13 @@
      fetch              -> a mapped track is stored WITH its record, a miss
                            revalidates (no-cache), a query string does not split
                            one file in two, an unmapped track is never cached,
-                           a cached track is never overwritten by a refetch
+                           a cached track is never overwritten by a refetch, a
+                           404 or a non-basic answer is never stored
+     a rollback round trip (the worker this one replaces activates in between and
+                           deletes the cache it does not know) -> a track that
+                           holds newer bytes is not adopted as the old one
+     the cache names    -> the values the worker EXECUTES, not the text, are the
+                           pinned ones (sw-audio-map.mjs)
 
    Then it breaks sw.js on purpose, one way at a time (--mutations, or by
    default), and requires the scenarios to go red every time: a proof that
@@ -27,12 +33,14 @@ import { readFileSync } from 'node:fs';
 import { dirname, join } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import vm from 'node:vm';
-import { AUDIO_BLOCK_RE, renderAudioBlock, fileHash } from './sw-audio-map.mjs';
+import { AUDIO_BLOCK_RE, renderAudioBlock, fileHash, AUDIO_CACHE_NAME, AUDIO_HASH_CACHE_NAME } from './sw-audio-map.mjs';
 
 const ROOT = join(dirname(fileURLToPath(import.meta.url)), '..');
 const args = process.argv.slice(2);
 const swPath = args.find(a => !a.startsWith('--')) || join(ROOT, 'sw.js');
-const BASE_SRC = readFileSync(swPath, 'utf8');
+/* LF only: a Windows checkout writes sw.js with CRLF, and every breakage below is
+   written with \n (Phase 5 review R1-1). */
+const BASE_SRC = readFileSync(swPath, 'utf8').replace(/\r\n/g, '\n');
 const BASE = 'https://class.test/guitar-class/';
 
 /* ── stand-ins for the browser ─────────────────────────────────────────── */
@@ -85,6 +93,7 @@ function boot(swSrc, storage, server) {
     calls.push({ path: url.pathname.replace(new URL(BASE).pathname, ''), cache: init.cache || 'default', range: !!range, query: url.search });
     const body = server[url.pathname.replace(new URL(BASE).pathname, '')];
     if (body == null) return new FakeResponse('', { status: 404, type: 'basic' });
+    if (typeof body === 'object' && !Buffer.isBuffer(body)) return new FakeResponse(body.body == null ? '' : body.body, { status: body.status == null ? 200 : body.status, type: body.type || 'basic' });
     return new FakeResponse(body, { status: range ? 206 : 200, type: 'basic' });
   };
   const ctx = vm.createContext({ self, caches: storage, fetch: fetchStub, Response: FakeResponse, Request: FakeRequest, URL, Promise, console });
@@ -252,6 +261,53 @@ async function runScenarios(swSrcOf) {
     check('a shell file goes to the shell cache, not the audio cache', shell.handled && (await st.open(sw.read('CACHE_VERSION'))).has(keyFor('index.html')) && !(await present(st, sw, 'index.html')));
   }
 
+  scenario = 'rollback round trip';
+  {
+    // D1: the first activate after this scheme ships adopts what students already hold.
+    const st = await stored(all, { noRecords: true });
+    const sw1 = boot(swSrcOf(mapOf(all), 'ff9e913a6d'), st, {});
+    await sw1.activate();
+    // D2: b is re-exported and the migration is retired; the next play stores the NEW bytes with their record.
+    const sw2 = boot(swSrcOf(mapOf({ 'audio/a.mp3': A, 'audio/b.mp3': B2 }), ''), st, { 'audio/b.mp3': B2 });
+    await sw2.activate();
+    await sw2.get('audio/b.mp3');
+    check('after the re-export b holds the new bytes, with their record', (await present(st, sw2, 'audio/b.mp3')) && (await record(st, sw2, 'audio/b.mp3')) === fileHash(B2));
+    // D3: rolled back to the worker this one replaces. Its activate deletes every cache it does not know, which
+    // is the records cache; it keeps the audio cache (its own AUDIO_CACHE_VERSION is that cache's name).
+    await st.delete(sw2.read('AUDIO_HASH_CACHE'));
+    // D4: rolled forward to the first state (audio/ back to the first tree, the migration armed again).
+    const sw4 = boot(swSrcOf(mapOf(all), 'ff9e913a6d'), st, {});
+    await sw4.activate();
+    check('after a rollback round trip the newer b is NOT adopted as the old b', !(await present(st, sw4, 'audio/b.mp3')));
+    check('the marker survived the rollback (it is kept in the audio cache)', (await (await st.open(sw4.read('AUDIO_CACHE'))).match(sw4.read('AUDIO_MARKER'))) !== undefined);
+  }
+
+  scenario = 'a failed or foreign answer is never stored';
+  {
+    const map = mapOf({ 'audio/a.mp3': A, 'audio/b.mp3': B });
+    const st = new FakeStorage();
+    const server = { 'audio/a.mp3': { status: 404, body: 'not found' }, 'audio/b.mp3': { status: 200, type: 'opaque', body: 'x' } };
+    const sw = boot(swSrcOf(map, ''), st, server);
+    await sw.activate();
+    const r404 = await sw.get('audio/a.mp3');
+    check('a 404 for a mapped track is passed on', r404.handled && r404.res.status === 404);
+    check('a 404 is not stored (the file)', !(await present(st, sw, 'audio/a.mp3')));
+    check('a 404 is not stored (its record)', (await record(st, sw, 'audio/a.mp3')) === null);
+    await sw.get('audio/a.mp3', { range: true });
+    check('a 404 on the range path is not stored either', !(await present(st, sw, 'audio/a.mp3')));
+    await sw.get('audio/b.mp3');
+    check('a non-basic answer is not stored', !(await present(st, sw, 'audio/b.mp3')));
+    await sw.get('audio/b.mp3', { range: true });
+    check('a non-basic answer on the range path is not stored either', !(await present(st, sw, 'audio/b.mp3')));
+  }
+
+  scenario = 'cache names';
+  {
+    const sw = boot(swSrcOf(mapOf(all), ''), new FakeStorage(), {});
+    check('AUDIO_CACHE, as the worker executes it, is the live name byte for byte', sw.read('AUDIO_CACHE') === AUDIO_CACHE_NAME);
+    check('AUDIO_HASH_CACHE, as the worker executes it, is the pinned name', sw.read('AUDIO_HASH_CACHE') === AUDIO_HASH_CACHE_NAME);
+  }
+
   scenario = 'install';
   {
     const st = new FakeStorage();
@@ -270,8 +326,22 @@ const MUTATIONS = [
   ['the migration does not adopt', "else if (migrating) { await hashes.put(req.url, new Response(info.hash)); keep = true; }", "else if (false) { keep = true; }"],
   ['nothing is ever evicted', "if (!keep) { await audio.delete(req); await hashes.delete(req.url); }", "if (!keep) { }"],
   ['everything is evicted', "let keep = false;\n    if (info) {", "let keep = false;\n    if (false) {"],
-  ['the migration marker is not written', "if (migrating) await hashes.put(AUDIO_MARKER, new Response('1'));", ""],
-  ['orphan records are not cleaned', "if (req.url !== AUDIO_MARKER && !(await audio.match(req.url))) await hashes.delete(req);", ""],
+  ['the migration marker is not written', "if (migrating) await audio.put(AUDIO_MARKER, new Response('1'));", ""],
+  ['orphan records are not cleaned', "if (!(await audio.match(req.url))) await hashes.delete(req);", ""],
+  ['the marker is evicted as if it were a track', "    if (req.url === AUDIO_MARKER) continue;   // the marker is not a track\n", ""],
+  /* The design this review replaced: the marker kept next to the records, where the worker being replaced deletes it. */
+  ['the marker is kept next to the records again (the old design)', [
+    ["const migrating = !!AUDIO_MIGRATION_FP && !(await audio.match(AUDIO_MARKER));", "const migrating = !!AUDIO_MIGRATION_FP && !(await hashes.match(AUDIO_MARKER));"],
+    ["if (migrating) await audio.put(AUDIO_MARKER, new Response('1'));", "if (migrating) await hashes.put(AUDIO_MARKER, new Response('1'));"],
+    ["    if (!(await audio.match(req.url))) await hashes.delete(req);", "    if (req.url !== AUDIO_MARKER && !(await audio.match(req.url))) await hashes.delete(req);"],
+    ["    if (req.url === AUDIO_MARKER) continue;   // the marker is not a track\n", ""],
+  ]],
+  ['a non-200 answer is stored (range path)', "if (res && res.status === 200 && res.type === 'basic') await storeAudio(audioFile, res);", "if (res && res.type === 'basic') await storeAudio(audioFile, res);"],
+  ['a non-200 answer is stored (main path)', "if (res && res.status === 200 && res.type === 'basic') {", "if (res && res.type === 'basic') {"],
+  ['a non-basic answer is stored (range path)', "if (res && res.status === 200 && res.type === 'basic') await storeAudio(audioFile, res);", "if (res && res.status === 200) await storeAudio(audioFile, res);"],
+  ['a non-basic answer is stored (main path)', "if (res && res.status === 200 && res.type === 'basic') {", "if (res && res.status === 200) {"],
+  ['AUDIO_CACHE is renamed', "const AUDIO_CACHE = 'guitar-class-audio-2026-10-30-ff9e913a6d';", "const AUDIO_CACHE = 'guitar-class-audio-v2';"],
+  ['AUDIO_HASH_CACHE is renamed', "const AUDIO_HASH_CACHE = 'guitar-class-audio-hashes';", "const AUDIO_HASH_CACHE = 'guitar-class-audio-records';"],
   ['the cache key keeps the query', "key: url.origin + url.pathname", "key: url.href"],
   ['a stored track has no record', "await hashes.put(info.key, new Response(info.hash));\n}", "}"],
   ['an unmapped track is cached', "if (isAudio && !audioFile) return;", ""],
@@ -294,9 +364,14 @@ let caught = 0, ranMutations = 0;
 if (!args.includes('--no-mutations')) {
   for (const [name, from, to] of MUTATIONS) {
     ranMutations++;
-    const n = BASE_SRC.split(from).length - 1;
-    if (n !== 1) { console.log(`  ✗ mutation "${name}": its target text occurs ${n} times in sw.js, expected 1 — update the proof`); problems++; continue; }
-    const mutated = BASE_SRC.replace(from, () => to);
+    const pairs = Array.isArray(from) ? from : [[from, to]];
+    let mutated = BASE_SRC, bad = null;
+    for (const [f, t] of pairs) {
+      const n = mutated.split(f).length - 1;
+      if (n !== 1) { bad = `its target text occurs ${n} times in sw.js, expected 1: ${JSON.stringify(f.slice(0, 70))}`; break; }
+      mutated = mutated.replace(f, () => t);
+    }
+    if (bad) { console.log(`  ✗ mutation "${name}": ${bad} — update the proof`); problems++; continue; }
     let red;
     try { red = summarise(await runScenarios((map, mig) => swFor(map, mig, mutated))).failed; }
     catch (e) { red = [['throw', e.message, false]]; }

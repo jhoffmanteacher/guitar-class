@@ -14,8 +14,22 @@ import { readdirSync, readFileSync } from 'node:fs';
 import { join } from 'node:path';
 
 export const AUDIO_RE = /\.(mp3|m4a|wav|ogg)$/i;
-/* The block in sw.js, markers included. Never edit it by hand. */
-export const AUDIO_BLOCK_RE = /\/\* AUDIO_HASHES:BEGIN[^\n]*\*\/\n[\s\S]*?\/\* AUDIO_HASHES:END \*\//;
+/* The block in sw.js, markers included. Never edit it by hand. The newline after
+   the BEGIN comment is \r?\n: a Windows checkout (core.autocrlf=true) writes
+   sw.js with CRLF, and the first version of this expression matched LF only, so
+   on that machine every check failed (Phase 5 review R1-1, 2026-10-31). */
+export const AUDIO_BLOCK_RE = /\/\* AUDIO_HASHES:BEGIN[^\n]*\*\/\r?\n[\s\S]*?\/\* AUDIO_HASHES:END \*\//;
+
+/* The two cache names the live site already holds. AUDIO_CACHE_NAME is the live
+   worker's own AUDIO_CACHE_VERSION for the audio tree ff9e913a6d (the deploy
+   before this scheme): a student's stored tracks sit under it, so renaming it
+   purges them. AUDIO_HASH_CACHE_NAME holds the records; renaming it purges them
+   and, with them, every adoption. Pinned HERE, once, and read by
+   tools/checks.mjs (the source text) and tools/sw-audio-proof.mjs (the value the
+   worker actually executes), so neither a comment nor a second definition in
+   sw.js can fake them. Change one only on purpose, and say why in the commit. */
+export const AUDIO_CACHE_NAME = 'guitar-class-audio-2026-10-30-ff9e913a6d';
+export const AUDIO_HASH_CACHE_NAME = 'guitar-class-audio-hashes';
 
 /* First 10 hex of the file's sha256, over the raw bytes (audio is binary:
    no line-ending normalisation, unlike checks.mjs's text fingerprint). */

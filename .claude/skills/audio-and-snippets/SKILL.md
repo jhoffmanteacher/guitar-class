@@ -273,10 +273,36 @@ on purpose: it's what the class set (ADM starters) sounds like.
   (25 ms time constant) — three-second recorded notes all ringing turned a
   line into a wash. A held `{ midi, beats }` note still rings its full
   length, the last note rings out, and a Stop press damps everything.
-- These files are in `audio/`, so they share the audio cache and its
-  fingerprint: adding them bumped `AUDIO_CACHE_VERSION` once. Changing one
-  will bump it again — every student re-downloads backing tracks as they
-  next play them — so batch any re-cut into one push.
+- These files are in `audio/`, so they are tracks like any other for the
+  service worker (see "The audio cache" below): adding one changes the
+  `AUDIO_HASHES` block in `sw.js` (`node tools/checks.mjs` writes it) and evicts
+  nothing; re-exporting one evicts that one file, and students download just it
+  the next time they play it.
+
+### The audio cache (`sw.js`, Phase 5, 2026-10-31)
+All backing tracks and notes live in ONE cache, `AUDIO_CACHE`, that never changes
+name. `tools/checks.mjs` writes a hash per file in `audio/` into `sw.js`
+(`AUDIO_HASHES`); a record per stored file (`AUDIO_HASH_CACHE`) says which hash it
+was stored under; at activate the worker evicts a file whose record differs or
+whose file is gone. A stored track is served as it is and never refetched.
+- **Never rename `AUDIO_CACHE` or `AUDIO_HASH_CACHE`.** Both names are pinned in
+  `tools/sw-audio-map.mjs`; renaming either purges every student's tracks.
+- **`AUDIO_MIGRATION_FP`** adopts the tracks students already hold, once, and is
+  only true of the audio tree in `AUDIO_CACHE`'s name (`ff9e913a6d`). The first
+  push that changes `audio/` must set it to `''` — **never to audio/'s new
+  fingerprint** (check 1ce and `syncAudioHashes` fail that). The "already adopted"
+  marker lives in `AUDIO_CACHE`, not next to the records.
+- **Rolling `sw.js` back past this scheme is not free.** The worker it replaced
+  deletes every cache it does not know when it activates, so it deletes the
+  records and keeps the tracks; if `audio/` changed in between, it then serves
+  tracks the server no longer has, with no network request, until a later
+  deploy changes that file's hash. After any rollback, edit the OLD worker's
+  `AUDIO_CACHE_VERSION` by hand (a new name) before it deploys.
+- **Tools:** `node tools/sw-audio-proof.mjs` runs the real `sw.js` against a
+  stand-in cache and breaks it 21 ways; check 1ce pins its totals.
+- Adding a track while editing code in the same turn: the Stop hook blocks on
+  "audio hash map in sw.js is stale" until the full `node tools/checks.mjs` has
+  written the block. That is intended; run it.
 
 ## Backing tracks
 

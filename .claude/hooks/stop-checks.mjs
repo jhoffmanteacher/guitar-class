@@ -10,8 +10,9 @@
    Built so that it can never trap a session:
    - It only runs when the set of changed code files differs from the last state
      it checked (a read-only or chat-only turn costs nothing).
-   - The expected "shell cache stale" / "audio cache stale" lines are NOT
-     failures here: the cache versions are recomputed once, by the full
+   - The expected "shell cache stale" line is NOT a failure here (there is no
+     separate audio version any more; a new or changed track makes "audio hash
+     map in sw.js is stale" fail until the full `node tools/checks.mjs` writes it): the cache versions are recomputed once, by the full
      `node tools/checks.mjs`, right before a push, and nobody may hand-edit them.
    - It blocks at most MAX_BLOCKS times per turn (prompt_id), and never twice
      for the exact same file state (if Claude changed nothing, there is nothing
@@ -106,7 +107,7 @@ done({
   decision: 'block',
   reason: [
     `The repo's offline checks fail after your edits (${files.slice(0, 8).join(', ')}${files.length > 8 ? ', …' : ''}).`,
-    'Fix the cause; do not loosen a check or add an allowlist entry. The "shell cache stale" / "audio cache stale" lines are expected and are not failures.',
+    'Fix the cause; do not loosen a check or add an allowlist entry. The "shell cache stale" line is expected and is not a failure. An "audio hash map in sw.js is stale" line IS one: run node tools/checks.mjs once (without --check) to write it.',
     `Re-run: node tools/checks.mjs --check --skip-links   (attempt ${blocks} of ${MAX_BLOCKS})`,
     '',
     ...detail,

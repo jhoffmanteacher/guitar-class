@@ -169,6 +169,28 @@
     error or two tabs on two worker versions do to the records. The brief for
     phase 5 was lost in the crash; this was built from the code comments, so check
     it against what Jonathan wanted.
+    **Reviewed 2026-10-31 (`site-reviewer-deep`, real headless Chrome with a
+    GitHub-Pages-like server; 61 live deployments checked).** The merge deploy
+    itself is correct: 0 audio re-downloads, the right bytes, 77 of 77 hashes
+    match the live files, and a brand-new student stores each track with its
+    record. Fixed on the branch: a CRLF `sw.js` (a Windows checkout) failed the
+    checks (R1-1); a rollback round trip lost the "already adopted" marker and
+    then vouched for the wrong bytes for good (R1-2: the marker now lives in
+    `AUDIO_CACHE`, which the old worker keeps); `AUDIO_MIGRATION_FP` set to the
+    NEW fingerprint passed every check (R1-3: it may only be `''` or the
+    fingerprint in `AUDIO_CACHE`'s name); the proof missed a stored 404 or
+    foreign answer, a commented-out pin and a renamed records cache (R1-4); stale
+    comments and docs (R1-6). Proof now 50 assertions in 11 scenarios, 21 of 21
+    breakages caught. **Left on purpose (R1-5):** a student who does not open the
+    site while the merge deploys loses every track at the next audio deploy (as
+    before this branch); the migration is a one-time adoption.
+    **Merge checklist:** (1) `git fetch`; if `audio/` changed on `main` since
+    `ff9e913a6d`, the live cache name is no longer `AUDIO_CACHE_NAME`: set
+    `AUDIO_MIGRATION_FP` to `''`, expect one full re-download, and re-pin the
+    name in `tools/sw-audio-map.mjs` deliberately; (2) `node tools/checks.mjs`,
+    `node tools/smoke.mjs --baseline origin/main`; (3) after the push,
+    `node tools/checks.mjs --live`; (4) never roll `sw.js` back past this merge
+    without the rollback step in `.claude/skills/audio-and-snippets/SKILL.md`.
 
 - [ ] **2026-10-30 — Everything pushed in a hurry today needs to be checked.**
   Jonathan had to reboot the machine, so the last pushes went out with the
@@ -2247,8 +2269,9 @@ the working-tree state differs from the last one it checked, it runs
 `node tools/checks.mjs --check --skip-links` (about 10 s). A real failure
 **blocks the stop** and sends the output back, so you fix it in the same turn.
 **If it blocks, fix the cause — never loosen a check or add an allowlist entry.**
-The expected "shell cache stale" / "audio cache stale" lines are ignored (only
-the full `node tools/checks.mjs` before a push recomputes them). It gives up
+The expected "shell cache stale" line is ignored (only the full
+`node tools/checks.mjs` before a push recomputes it); "audio hash map in sw.js is
+stale" is NOT ignored, and blocks until that run writes the block. It gives up
 after 3 tries per turn, never re-blocks the same file state, and fails open on
 any internal error. Off switch: `GC_STOP_CHECKS=0` in the environment. It does
 not replace the git hooks, the full checks run, or `tools/smoke.mjs`. On

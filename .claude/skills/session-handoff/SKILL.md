@@ -53,8 +53,8 @@ the working-tree state differs from the last one it checked, it runs
 `node tools/checks.mjs --check --skip-links` (about 10 s). A real failure
 **blocks the stop** and sends the output back, so you fix it in the same turn.
 **If it blocks, fix the cause — never loosen a check or add an allowlist entry.**
-The expected "shell cache stale" / "audio cache stale" lines are ignored (only
-the full `node tools/checks.mjs` before a push recomputes them). It gives up
+The expected "shell cache stale" line is ignored (only
+the full `node tools/checks.mjs` before a push recomputes it). It gives up
 after 3 tries per turn, never re-blocks the same file state, and fails open on
 any internal error. Off switch: `GC_STOP_CHECKS=0` in the environment. It does
 not replace the git hooks, the full checks run, or `tools/smoke.mjs`. On
