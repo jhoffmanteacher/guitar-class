@@ -8201,6 +8201,63 @@ function checkRecordingVersions(ctx) {
   if (bad === 0) ok(n + ' cards with recording versions, ' + rendered + ' renders (each recording + nothing stored) \u2014 right track, sections, switch and Guitar switch every time; ' + strumRenders + ' every-strum renders draw ' + strumNames + ' chord names (the Neil cards pinned at 128 each, every lap A5 x4 G5 x3 F5 x6 G5 x3); ' + readbacks + ' title / intro / directions read-backs in EN + ES; ' + consoleReads + ' console titles run through teacherActivityTitle');
 }
 
+/* 1cf. THE CLASS ROSTER SKIPS THE TEACHER'S OWN HEAR IT FIRST STUB (Friday
+   check R2-1, Jonathan 2026-10-31). Hear It First saves the signed-in
+   account's trainer profile into progress/{uid} with mergeFields, which creates
+   the document when it is missing. On the teacher's own account that document
+   holds only `trainer`, and teacherFetchStudents drew it as a nameless row
+   under Unassigned. The profile still has to be saved there (so it follows
+   Jonathan between machines), so the roster is what changes.
+   Checked by RUNNING the real teacherFetchStudents (lifted out of teacher.js)
+   against a stand-in database, signed in as the teacher, over six documents:
+   - the teacher's own document holding only `trainer`        -> not listed;
+   - the same uid with a name, skills or responses too        -> listed (a
+     test-student account is not hidden);
+   - another account holding only `trainer`                   -> listed (the
+     skip is for the signed-in account, not for the field);
+   - two ordinary students                                    -> listed.
+   Signed out (no uid), nothing is skipped. Pinned: 6 documents x 2 sign-ins. */
+function checkRosterSkipsTrainerStub() {
+  head('1cf. The class roster skips the teacher\'s own Hear It First stub');
+  let bad = 0;
+  const flag = m => { err(m); problems++; bad++; };
+  let tsrc = '';
+  try { tsrc = readFileSync(join(ROOT, 'teacher.js'), 'utf8'); } catch { flag('teacher.js could not be read \u2014 1cf cannot check the roster'); return; }
+  const at = tsrc.indexOf('async function teacherFetchStudents(');
+  const body = at < 0 ? null : jsFunctionBody(tsrc, 'teacherFetchStudents');
+  if (at < 0 || body === null) { flag('teacher.js: teacherFetchStudents() not found \u2014 1cf cannot run the roster (renamed? update this check with it)'); return; }
+  const fnSrc = tsrc.slice(at, tsrc.indexOf('{', at)) + body;
+  const DOCS = [
+    ['teacher-1', { trainer: { v: 1 } }],
+    ['stu-a', { name: 'Ana', email: 'ana@x.test', skills: { s1: 'gotit' } }],
+    ['stu-b', { name: 'Ben', email: 'ben@x.test' }],
+    ['other-stub', { trainer: { v: 1 } }],
+    ['teacher-2', { trainer: { v: 1 }, name: 'Test Student', email: 'test@x.test' }],
+    ['teacher-3', { trainer: { v: 1 }, responses: { r1: 'x' } }],
+  ];
+  const roster = async (uid, teacherUid) => {
+    const ctx = vm.createContext({ ensureDb: async () => {}, swap45Marked: () => true, swap45Remap: d => d, String, Object, Array, Promise,
+      currentUser: uid ? { uid } : null,
+      db: { collection: () => ({ get: async () => ({ forEach: fn => DOCS.forEach(([id, data]) => fn({ id, data: () => data })) }) }) } });
+    const got = await vm.runInContext('(' + fnSrc + ')()', ctx);
+    return got.map(x => x.uid);
+  };
+  return (async () => {
+    // Signed in as teacher-1: only its own trainer-only stub disappears.
+    let ids = await roster('teacher-1');
+    const want1 = ['stu-a', 'stu-b', 'other-stub', 'teacher-2', 'teacher-3'];
+    if (JSON.stringify(ids) !== JSON.stringify(want1)) flag('signed in as teacher-1, the roster lists ' + JSON.stringify(ids) + ', expected ' + JSON.stringify(want1) + ' (own trainer-only stub skipped; every other document listed)');
+    // Signed in as teacher-2 (a document with a name): nothing of its own is hidden, and teacher-1's stub is just another document.
+    ids = await roster('teacher-2');
+    const want2 = ['teacher-1', 'stu-a', 'stu-b', 'other-stub', 'teacher-2', 'teacher-3'];
+    if (JSON.stringify(ids) !== JSON.stringify(want2)) flag('signed in as teacher-2 (own document also holds a name), the roster lists ' + JSON.stringify(ids) + ', expected all six ' + JSON.stringify(want2));
+    // Signed out: nothing is skipped.
+    ids = await roster(null);
+    if (ids.length !== DOCS.length) flag('signed out, the roster lists ' + ids.length + ' of ' + DOCS.length + ' documents');
+    if (bad === 0) ok('teacherFetchStudents run for real against ' + DOCS.length + ' documents: the signed-in teacher\'s own trainer-only stub is skipped, the same uid with a name or responses is listed, another account\'s stub is listed, and nothing is skipped when signed out (3 sign-ins)');
+  })();
+}
+
 /* 1cd. NOTE CALL POWER CHORDS (ca-43, Jonathan 2026-10-30). The student
    STRUMS a power chord and the card is answered by its root fret. The mic used
    to wait for the exact root alone, which a strummed A5 almost never gives
@@ -10626,6 +10683,7 @@ function checkCoachVerdicts() {
   checkChordGridCards(rcCtx);
   checkRecordingVersions(rcCtx);
   checkNoteCallPower(rcCtx);
+  await checkRosterSkipsTrainerStub();
   checkPowerChordPopups(rcSets, rcCtx);
   checkPendingFileSwitch(rcCtx);
   checkCardCaptionWords();

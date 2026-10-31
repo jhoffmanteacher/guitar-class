@@ -531,7 +531,16 @@ async function teacherFetchStudents(){
   await ensureDb();
   const snap=await db.collection('progress').get();
   const out=[];
+  /* Hear It First saves the signed-in account's trainer profile into
+     progress/{uid} with mergeFields, which creates the document when it is
+     missing. On the teacher's own account that document holds ONLY `trainer`,
+     and the roster drew it as a nameless row under Unassigned (Friday check
+     R2-1, 2026-10-31). The signed-in teacher's own document is skipped when
+     nothing but `trainer` is in it; one that also holds student data (a
+     test-student account) is still listed, and so is every other account. */
+  const myUid=(typeof currentUser!=='undefined'&&currentUser&&currentUser.uid)||'';
   snap.forEach(doc=>{
+      if(myUid&&doc.id===myUid&&Object.keys(doc.data()||{}).every(k=>k==='trainer')) return;
       /* Module 4/5 swap (2026-10-12): a doc whose student has not opened the
          site since the swap is still in the OLD numbering (its Module 4 work
          sits under the ids Module 5 uses now). Read it in the new numbering —

@@ -19,7 +19,7 @@
    progress-saving behave exactly as before.
    ════════════════════════════════════════════════════════════════ */
 
-const CACHE_VERSION = 'guitar-class-2026-10-31-a93f5ece12';
+const CACHE_VERSION = 'guitar-class-2026-10-31-fd70eef9e1';
 
 // Backing-track audio lives in its OWN cache, versioned independently of the
 // shell (see tools/checks.mjs, which fingerprints audio/ separately and
