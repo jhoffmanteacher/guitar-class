@@ -84,7 +84,13 @@
     return items[items.length - 1];
   }
   function clamp(x, a, b) { return Math.max(a, Math.min(b, x)); }
-  function dayStr(ms) { return new Date(ms).toISOString().slice(0, 10); }
+  /* The learner's own calendar day, not UTC: an evening session in California
+     must carry today's date, not tomorrow's (Friday check R2-6, 2026-10-31).
+     daysBetween reads two such dates as UTC midnights, so the gap between two
+     dates is whole days in every timezone. Profiles saved before this date hold
+     UTC dates, which can sit one day ahead of the local date; a gap of zero or
+     less changes nothing (applyDecay returns on days <= 0). */
+  function dayStr(ms) { var d = new Date(ms); return d.getFullYear() + '-' + ('0' + (d.getMonth() + 1)).slice(-2) + '-' + ('0' + d.getDate()).slice(-2); }
   function daysBetween(a, b) {
     return Math.round((Date.parse(b + 'T00:00:00Z') - Date.parse(a + 'T00:00:00Z')) / 86400000);
   }
