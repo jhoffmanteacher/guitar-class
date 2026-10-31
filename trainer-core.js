@@ -746,7 +746,10 @@
       var pl = ans.played || [], graded = 0, right = 0, rights = [], errs = [], n;
       for (n = 0; n < item.notes.length; n++) {
         var pv = pl[n];
-        if (pv == null) { rights.push(null); continue; }
+        /* undefined = the note timed out (never heard): it counts as missed.
+           null = unclear three times: it is not graded. */
+        if (pv === undefined) { graded++; rights.push(false); continue; }
+        if (pv === null) { rights.push(null); continue; }
         graded++;
         var okn = pv === item.notes[n].midi;
         rights.push(okn);

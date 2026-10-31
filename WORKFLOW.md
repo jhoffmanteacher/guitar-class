@@ -80,6 +80,53 @@
 
 ## Open work
 
+- [ ] **2026-10-31 — Friday check (first run, a practice run): what it found
+  and did not fix.** `site-reviewer-deep` (student-facing) and `site-reviewer`
+  (Hear It First) read every commit on `main` from `1c1e6c6` to `59e7915`.
+  No BLOCKER. Fixed in the same commit as this note: Note Call's power-chord
+  done screen said "notes" / "Practica estas" over a list of chords (R1-2, two
+  `ncp.*` keys, 1cd pin 16 → 18); a Hear It First phrase counted a note that
+  timed out as "not graded", so playing 1 of 5 notes scored 100% (R2-2); Stop
+  during placement counted as a session (R2-5); the e2e check "loads no
+  trainer-core/audio/ui" had a `\\.` regex that could never match (R2-3); the
+  CHANGELOG said the trainer opens "for one signed-in account" (R2-7).
+  Waiting for Jonathan:
+  - **R2-1 (MAJOR, teacher console):** a Hear It First save creates
+    `progress/{uid}` holding only `trainer` (`trainer-site-adapter.js:82`). If
+    that is the teacher's own account, the console roster
+    (`teacherFetchStudents`, `teacher.js:532`) shows a nameless row under
+    Unassigned. Two fixes: skip the signed-in teacher's uid in
+    `teacherFetchStudents` (a `teacher.js` change, always Reviewed), or keep the
+    teacher's trainer profile local only (then it doesn't follow him between
+    machines). Your call.
+  - **R2-4:** `trainer-site-adapter.js` loads on every page but is listed in
+    `SHELL_NOT_PRECACHED` (`tools/checks.mjs:98`), so offline page loads get a
+    failed script request (console only). Fix = add it to `sw.js` `ASSETS`
+    (sw.js code: always Reviewed). `checkPrecacheCoverage` reads only `img/`
+    and `.html` references, not `<script src>`.
+  - **R2-6:** Hear It First's "Last session" date and decay days are UTC
+    (`dayStr`, `trainer-core.js:87`), so an evening session shows tomorrow's
+    date. A local-date `dayStr` makes `trainer-sim` U12 fail under
+    `TZ=America/Los_Angeles` (its `BASE` is UTC midnight), so the sim needs a
+    noon `BASE` in the same change.
+  - **R1-1:** on ca-43's two-fret cards (E5 low E, A5 on A: frets 0 and 12) the
+    mic usually credits fret 0 when the student plays at fret 12 (the octave
+    below is fret 0's root). Score is right; the fret named is wrong. Fix idea:
+    name and mark both frets ("fret 0 / 12") on a mic hit; check 1cd's
+    ncListen expectations change with it (changed check logic: Reviewed).
+  - **R1-3:** Change Up's setup at 1366×657: the −5/+5 row is now fully below
+    the screen and Start is lower (80px charts from `639248b`). Power Chord
+    Switch's sticky Start bar would fix it, but check 1ca pins "Change Up must
+    stay as it was". Your call.
+  - **Check 1cd blind spot:** it only sees strings asked for through `ncK()`,
+    which is how R1-2 got past it; a direct `t('nc.*')` on a power screen is
+    invisible.
+  - **Should not have shipped Fast:** `639248b`, `6871747`, `b3a351c`,
+    `cb3dc5e` (mic detection) and `5e2061e` (new check 1cc). Reviewed now.
+  - The 2026-10-30 item below: the reviewer pass is done (findings above);
+    the look at the LIVE site in a real browser is still not done, so it
+    stays open.
+
 - [ ] **2026-10-31 — For the cloud review: pushed without a reviewer.**
   Jonathan asked for everything to be pushed and reviewed in the cloud. The four
   code commits below carry `Review: Fast` so the Friday check also finds them.
@@ -154,7 +201,9 @@
     file, laps 70-74 not confirmed), `songVersions` renamed to
     `recordingVersions` in comments, a clearer Neil Young caption, matching
     pins in `tools/checks.mjs` and `tools/smoke.mjs`, and a `song-facts` note.
-    **`main` (live) has the Watchtower switch WITHOUT these fixes.**
+    **Update (Friday check, 2026-10-31): `main` already has these fixes** — they
+    shipped as `158015d` (`git diff origin/wip/main-folder-2026-10-30 158015d` on
+    the code files is empty). Don't ship the branch; it can be deleted.
     Status of the branch: based on `main` at `6b120f8`; the full checks pass
     (cache version bumped); the browser smoke test and a reviewer pass were NOT
     run. To ship it: check it out, run

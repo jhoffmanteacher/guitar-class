@@ -5,11 +5,17 @@ Notable changes to the Guitar Class site. Newest first.
 For the full session-by-session history (and the reasoning behind each change),
 see `WORKFLOW.md` and the git commit log.
 
+## 2026-10-31 — Power Chords on the Low E and A Strings: the last screen talks about chords
+
+- **After a round that doesn't unlock the next level, the advice now says
+  "Play the chords below"** (it said "notes"), and the list title in Spanish
+  reads "Practica estos" for the chords.
+
 ## 2026-10-31 — "Hear It First" ear trainer (hidden; nothing changes for students)
 
 - **A new ear and fretboard trainer exists, and students cannot see it.** It has
   no hub card and no rail button. It opens only from a direct link
-  (`index.html?hif=1`) for one signed-in account, so a student's Games page,
+  (`index.html?hif=1`), for any signed-in account that has the link, so a student's Games page,
   navigation and lessons are unchanged. The only thing a student's browser
   gains is one very small script that does nothing without that link.
 

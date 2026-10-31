@@ -208,7 +208,7 @@ try {
     await sleep(1500);
     const hasRoot = await p.ev(`!!document.getElementById('hif-root')`);
     const hasGlobals = await p.ev(`typeof window.HIF_CORE !== 'undefined' || typeof window.HIF_UI !== 'undefined'`);
-    const fetched = p.requested.filter((u) => /trainer-(core|audio|ui)\\.js/.test(u));
+    const fetched = p.requested.filter((u) => /trainer-(core|audio|ui)\.js/.test(u));
     check('a normal visit has no trainer overlay and loads no trainer-core/audio/ui', !hasRoot && !hasGlobals && fetched.length === 0, `adapter fetched: ${p.requested.some((u) => /trainer-site-adapter/.test(u))}`);
     await p.ev(`toggleGames()`);
     await p.until(`document.getElementById('games-panel') && document.getElementById('games-panel').textContent.length > 200`, 15000);

@@ -765,7 +765,7 @@
       if (act === 'tune-start') { tuneStart(); return; }
       if (act === 'open-tuner') { if (deps.onOpenTuner) deps.onOpenTuner(); return; }
       if (act === 'setup-done') { var to = st.afterSetup; if (to === 'placement') runPlacement(); else showHome(); return; }
-      if (act === 'stop') { cancelAsk(); tok++; if (eng) { eng.endSession(); persist(); } showHome(); return; }
+      if (act === 'stop') { cancelAsk(); tok++; if (eng) { if (!(st.sess && st.sess.placement)) eng.endSession(); persist(); } showHome(); return; }
       if (act === 'giveup' || act === 'skip') { if (st.pending) { var p = st.pending; st.pending = null; try { pitch.cancel(); } catch (x) { /* closed */ } p(act === 'skip' ? { skip: true, unclear: true } : 'giveup'); } return; }
       if (act === 'next' || act === 'go') { if (st.pending) { var q = st.pending; st.pending = null; q('next'); } return; }
       if (act === 'pick') {

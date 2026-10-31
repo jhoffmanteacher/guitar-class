@@ -8238,13 +8238,13 @@ function checkRecordingVersions(ctx) {
      screen are rendered under a spy on ncK; each key they ask for must exist
      in English and Spanish, none may be the English, and none defined may go
      unshown.
-   Pinned: 4 power steps, 16 ncp.* keys. */
+   Pinned: 4 power steps, 18 ncp.* keys. */
 function checkNoteCallPower(ctx) {
   head('1cd. Note Call power chords (ca-43): the mic takes a strum, every string it can show');
   let bad = 0;
   const flag = m => { err(m); problems++; bad++; };
   if (!ctx) { flag('1cd cannot run — the 0b render context is unavailable'); return; }
-  const EXPECT = { power: 4, ranges: [[0, 5], [5, 8], [8, 12], [0, 12]], keys: 16 };
+  const EXPECT = { power: 4, ranges: [[0, 5], [5, 8], [8, 12], [0, 12]], keys: 18 };
   const J = JSON.stringify;
   const run = x => vm.runInContext(x, ctx);
   let csrc = '';
