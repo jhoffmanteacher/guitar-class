@@ -3065,11 +3065,13 @@ const CC_BPM_MIN = 40, CC_BPM_MAX = 140;
    three-finger power chords: F5 G5 A5 (root on the low E string) and B5 C5 D5
    (root on the A string). Open E5 is the two-finger shape, so it stays out.
    Every loop is a PAIR, and the first choice is the computer picking one:
-   `random` draws two chords from CC_POWER_RANDOM_POOL each round (ccPickChords).
+   `random` draws one of the listed pairs below, in a random order, each time
+   Start is pressed on the setup screen (ccRandomPair; ccRoundChords). It never
+   draws a pair that is not in the list (2026-10-30: the old pool of six chords
+   could make four jumps the list does not teach, F5-D5, G5-B5, A5-B5, A5-C5).
    `group` is what the hand does between the chords: 'low' slides along the
    low E string, 'a' along the A string, 'jump' changes strings (checks.mjs
    1ca proves every pair does what its group says). */
-const CC_POWER_RANDOM_POOL = ['F5','G5','A5','B5','C5','D5'];
 const CC_POWER_PROGRESSIONS = [
   { group: 'random', random: true, randomKey: 'RANDOM2P', chords: ['F5','G5'] },
   { group: 'low',  chords: ['F5','G5'] }, { group: 'low',  chords: ['G5','A5'] }, { group: 'low',  chords: ['F5','A5'] },
@@ -3136,18 +3138,26 @@ function ccRandomFour(){
   }
   return pick;
 }
-/* Power Chord Switch's "computer picks": two different chords from the six. */
+/* Power Chord Switch's "computer picks": one of the listed pairs (never one
+   the list does not teach), its two chords in a random order. */
 function ccRandomPair(){
-  const pool = CC_POWER_RANDOM_POOL.slice(), pick = [];
-  for (let i = 0; i < 2; i++){
-    pick.push(pool.splice(Math.floor(Math.random() * pool.length), 1)[0]);
-  }
-  return pick;
+  const listed = CC_POWER_PROGRESSIONS.filter(p => !p.random);
+  const pair = listed[Math.floor(Math.random() * listed.length)].chords.slice();
+  return Math.random() < 0.5 ? pair : pair.reverse();
 }
 /* The chords of one round: the loop's own, or a fresh draw for a random one. */
 function ccPickChords(progDef){
   if (!progDef.random) return progDef.chords;
   return ccIsPower() ? ccRandomPair() : ccRandomFour();
+}
+/* The chords of the round about to start. Start on the setup screen draws
+   (ccPickChords); Again / -10 / +10 on the done screen (`again`) replay the
+   pair just played in Power Chord Switch, because the done screen's advice
+   names that pair's worst switch and a new draw would make it about chords the
+   student is no longer playing. Change Up's Random 4 keeps drawing four new
+   chords each start, as before. */
+function ccRoundChords(progDef, again){
+  return again && ccIsPower() && cc && Array.isArray(cc.chords) && progDef.random ? cc.chords : ccPickChords(progDef);
 }
 /* A random loop has its own best per game (Random 4 and Power Chord Switch's
    random pair would otherwise share one session key). */
@@ -3254,17 +3264,21 @@ function ccRenderSetup(msg){
      game, and the big charts push anything below them off a 657px screen — then
      which two chords; Change Up keeps the loops first and the tempo below. */
   const tempoRow = `<div class="cc-group"><div class="cc-group-title">${t('games.pw.group.tempo')}</div>${bpmRow}</div>`;
+  /* Power Chord Switch's two 180px charts push Start below a 657px screen, so
+     there it sits in a bar that sticks to the bottom of the scrolling games
+     screen (styles.css .cc-startbar). Change Up's markup is unchanged. */
+  const startBtn = `<button type="button" class="coach-start" onclick="ccStart()">&#x25B6; ${t('games.cc.startButton', { slots: rate.slots })}</button>`;
   body.innerHTML =
     (msg ? `<div class="coach-note">${escHtml(msg)}</div>` : '') +
     (power ? speedRow + tempoRow + pills : pills + speedRow) +
     (prog.random ? `<div class="coach-note">&#x1F3B2; ${t(power ? 'games.pw.randomNote' : 'games.cc.randomNote')}</div>` : ccDiagramsHtml(prog.chords, null)) +
     (power ? '' : bpmRow) +
     `<div class="coach-tip">&#x1F92B; ${t(power ? 'games.pw.tip' : 'games.cc.tip', { rate: tipRate })}</div>
-     <button type="button" class="coach-start" onclick="ccStart()">&#x25B6; ${t('games.cc.startButton', { slots: rate.slots })}</button>
+     ${power ? `<div class="cc-startbar">${startBtn}</div>` : startBtn}
      ${coachFootHtml()}`;
 }
 
-async function ccStart(){
+async function ccStart(again){
   /* 'starting' covers the mic await below: the Start and Again buttons stay
      on screen during it, and a second tap used to run a second start (and
      a double-tapped "+10 BPM" landed at +20). */
@@ -3290,8 +3304,8 @@ async function ccStart(){
   stopAllDemoAudio();
 
   const progDef = ccProgs()[cc.progIdx];
-  const prog = ccPickChords(progDef);
-  cc.chords = prog;   // the actual chords this round (a random loop differs each start)
+  const prog = ccRoundChords(progDef, again === true);
+  cc.chords = prog;   // the actual chords this round (a random loop differs each Start; Again replays them in Power Chord Switch)
   const rate = CC_RATES[cc.rateIdx] || CC_RATES[0];
   cc.bpc = rate.bpc; cc.slots = rate.slots;
   cc.seq = Array.from({ length: cc.slots }, (_, i) => prog[i % prog.length]);
@@ -3588,7 +3602,7 @@ function ccRenderDone(){
        <button type="button" class="${rec === 'same' ? 'coach-start' : 'tp-btn'}" onclick="ccAgain(0)">&#x21BB; ${t('games.common.again', { bpm: cc.bpm })}</button>
        <button type="button" class="${rec === 'up' ? 'coach-start' : 'tp-btn'}" onclick="ccAgain(10)">&#x2B06; ${t('games.common.bpmUp10')}</button>
      </div>
-     <button type="button" class="tp-btn cc-change-loop" onclick="ccSetup(${jsonAttrArg(cc.mode || '')})">${t('games.cc.pickDifferentLoop')}</button>
+     <button type="button" class="tp-btn cc-change-loop" onclick="ccSetup(${jsonAttrArg(cc.mode || '')})">${t(ccIsPower() ? 'games.pw.pickDifferent' : 'games.cc.pickDifferentLoop')}</button>
      ${coachFootHtml()}</div>`;
 }
 
@@ -3597,7 +3611,7 @@ function ccAgain(d){
   cc.bpm = Math.min(CC_BPM_MAX, Math.max(CC_BPM_MIN, cc.bpm + d));
   try { sessionStorage.setItem(ccSk('Bpm'), String(cc.bpm)); } catch(e){}
   cc.phase = 'setup';
-  ccStart();
+  ccStart(true);
 }
 
 /* ════════════════════════════════════════════════════════════════════

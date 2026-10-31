@@ -2136,6 +2136,9 @@
       es: 'sube 1 traste' },
     'games.pw.randomNote': { en: 'The computer picks two power chords each round and shows them when you press Start.',
       es: 'La computadora elige dos acordes de potencia en cada ronda y los muestra cuando presionas Empezar.' },
+    // The done screen's way back to the setup screen. Power Chord Switch has chords to pick, not loops (Change Up keeps games.cc.pickDifferentLoop).
+    'games.pw.pickDifferent': { en: 'Pick different chords',
+      es: 'Elige otros acordes' },
     'games.pw.randomPair': { en: 'Two random chords',
       es: 'Dos acordes al azar' },
     'games.pw.tip': { en: 'Quiet room, guitar close to the mic. 4 count-in clicks, then <strong>strum the power chord on every beat</strong> — it switches {rate}. I listen for a strum on every beat. When I can hear the notes clearly, I also check the chord, but two chords that share a note can fool me. Keep all three fingers down and slide your whole hand as one shape. Up means toward the body. Strum only the three strings with dots. The click is silent: watch the beat dots.',

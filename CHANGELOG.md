@@ -5,6 +5,20 @@ Notable changes to the Guitar Class site. Newest first.
 For the full session-by-session history (and the reasoning behind each change),
 see `WORKFLOW.md` and the git commit log.
 
+## 2026-10-30 — Power Chord Switch: Start stays on screen, and the pair you saw is the pair you replay
+
+- **The Start button now stays at the bottom of the screen.** The big chord
+  charts pushed it below the bottom on a Chromebook, so you had to scroll to
+  find it. Now it stays put and the charts scroll behind it.
+- **"Two random chords" picks only from the pairs on the list.** Before, it
+  could pick a pair that is not on the list, like F5 and D5 (a long jump). Now
+  it picks one of the 11 pairs, in either order.
+- **After a round, "Again", "−10 BPM" and "+10 BPM" play the same two chords.**
+  Before, a new pair could come up, while the advice on the screen was about
+  the pair you just played. Press Start on the first screen to get a new pair.
+- **The button on the last screen says "Pick different chords"** (it said "Pick
+  a different loop", but there are no loops here). Change Up is not changed.
+
 ## 2026-10-30 — Power Chords on the Low E and A Strings in Time: the mic hears a strummed chord
 
 - **With "Play guitar" on, the card now counts a strummed power chord.** Before,
@@ -43,7 +57,7 @@ see `WORKFLOW.md` and the git commit log.
   "a pluck on each beat" was not true. The last part, Part 8, now has 11 laps
   instead of 12, so the card stops where the song's ending starts.
 
-## 2026-10-30 — Power Chord Switch: two chords on every beat, bigger charts
+## 2026-10-30 — Power Chord Switch: the chord switches on every beat, bigger charts
 
 - **Power Chord Switch now opens on "Every beat".** The chord switches on every
   beat between two chords. "How fast the chord switches" is now the first

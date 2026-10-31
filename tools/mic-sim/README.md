@@ -37,6 +37,9 @@ tuning pass — ideally on the real classroom recordings the teacher console's
   semitone offsets without editing app.js. Needs both files, not just
   coach.js. Synthetic audio, not a guitar through a Chromebook mic.
 - `power-switch.mjs <coach.js> [trials] [--harm=std|mid|weak] [--clarity=…]` — Power Chord Switch (Change Up's engine on the three-finger power chords, 2026-10-30): every adjacent pair in `CC_POWER_PROGRESSIONS` through the real `coachPitchReadings` / `ccResolvePend`, as a real change, a held chord (never moved) and a chord one fret high, with `0.55` against `RNW_POWER_CLARITY`. The numbers in the `ccLoop` comment come from here. Synthetic audio only.
+  Since 2026-10-30 the game's "Two random chords" draws only one of the 11 listed pairs (in either order), so
+  every pair a student can get is one this tool covers; before, a pool of six chords could draw four
+  jumps (F5-D5, G5-B5, A5-B5, A5-C5) it never tested.
 - `smoke.mjs <url>` — headless Chromium through the Dev bypass with the
   in-page harness: Coach, Note Runner, Note Hunt, Note Call, Change Up, PSG
   Hero, the consent prompt and the recording path. Start a static server on

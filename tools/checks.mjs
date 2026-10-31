@@ -10067,7 +10067,7 @@ async function checkBackingLoudness() {
    ════════════════════════════════════════════════════════════════════ */
 function checkCoachVerdicts() {
   head('1ca. Coach and arcade verdict lines are true at 0, 1 and many');
-  const EXPECT = { reports: 20, descs: 20, nrLevels: 15, doneScreens: 88, pwLoops: 12, pwHints: 104, pwViews: 32, pwMemory: 2, pwGates: 3 };
+  const EXPECT = { reports: 20, descs: 20, nrLevels: 15, doneScreens: 88, pwLoops: 12, pwHints: 44, pwViews: 32, pwMemory: 2, pwGates: 3 };
   let bad = 0;
   const flag = m => { err(m); problems++; bad++; };
   const bodies = {};
@@ -10276,12 +10276,18 @@ function checkCoachVerdicts() {
             'cc-body', `Change Up, ${k} messy`, k ? [[MESSY, k]] : []);
           /* 4 good changes of 8 keeps the verdict in the band that names the messy ones. */
           if (k >= 2 && /\(1 (was|llegó)\b/.test(text('cc-body'))) flag(`1ca: ${lang} Change Up with ${k} messy changes says "${text('cc-body').match(/\(1 (was|llegó)\b/)[0]}"`);
+          /* The way back to the setup screen: Change Up has loops to pick, Power Chord Switch has chords (it has no loops of its own to
+             pick since 2026-10-30), so each game's done screen says its own word and never the other's. */
+          const WORD_LOOP = run(`t('games.cc.pickDifferentLoop')`), WORD_CHORDS = run(`t('games.pw.pickDifferent')`);
+          if (!text('cc-body').includes(WORD_LOOP) || text('cc-body').includes(WORD_CHORDS)) flag(`1ca: ${lang} Change Up's done screen does not say "${WORD_LOOP}" (or says Power Chord Switch's "${WORD_CHORDS}")`);
           /* The same done screen for Power Chord Switch, and its "pick a different
              loop" button must send you back to Power Chord Switch. */
           shot(`cc = { phase: 'done', mode: 'power', progIdx: 0, rateIdx: 2, bpm: 60, bpc: 1, chords: ['F5', 'G5'], timeouts: [],
             changes: Array.from({ length: 8 }, (_, i) => ({ from: 'F5', to: 'G5', result: i < ${k} ? 'off' : i < ${k} + 4 ? 'ok' : 'miss' })) }; ccRenderDone();`,
             'cc-body', `Power Chord Switch, ${k} messy`, k ? [[MESSY, k]] : []);
           if (!/ccSetup\(&quot;power&quot;\)/.test(bodies['cc-body'])) flag(`1ca: ${lang} Power Chord Switch's "pick a different loop" button no longer returns to Power Chord Switch`);
+          if (!text('cc-body').includes(WORD_CHORDS) || text('cc-body').includes(WORD_LOOP)) flag(`1ca: ${lang} Power Chord Switch's done screen does not say "${WORD_CHORDS}" (or says Change Up's "${WORD_LOOP}") \u2014 it has no loops to pick`);
+          if (WORD_CHORDS === WORD_LOOP || /loop|secuencia/i.test(WORD_CHORDS)) flag(`1ca: ${lang} games.pw.pickDifferent reads "${WORD_CHORDS}" \u2014 Power Chord Switch has chords to pick, not loops`);
         }
       }
     }
@@ -10356,35 +10362,65 @@ function checkCoachVerdicts() {
     }
     run(`setLang('en')`);
 
-    /* The computer's pick: it is the FIRST choice (the game opens on it), it
-       draws two different chords from a pool that is exactly the chords of the
-       pairs, every pair it can draw is a real switch whose hint matches the
-       diagrams (both directions, EN+ES), and the draw really varies. Change Up's
-       Random 4 is untouched and the two never share a best-score key. */
+    /* The computer's pick: it is the FIRST choice (the game opens on it), and it
+       draws ONE OF THE LISTED PAIRS in a random order (Jonathan, 2026-10-30; the
+       old pool of six chords could draw four jumps the list does not teach). The
+       draws are executed here: every one is a listed pair, none holds a chord
+       twice, and over 3000 draws each of the 11 pairs comes up, in both orders.
+       Every listed pair's hint is proved in the loop above. Change Up's Random 4
+       is untouched and the two never share a best-score key. */
     if (!LOOPS[0] || !LOOPS[0].random) flag('1ca: Power Chord Switch does not open with "the computer picks" as its first choice');
-    const POOL = JSON.parse(run('JSON.stringify(CC_POWER_RANDOM_POOL)'));
-    const pairChords = [...new Set(LOOPS.filter(l => !l.random).flatMap(l => l.chords))].sort().join(',');
-    if (POOL.slice().sort().join(',') !== pairChords) flag(`1ca: the computer's pool (${POOL.join(',')}) is not the chords of the pairs (${pairChords})`);
-    for (const n of POOL) if (!isShape(n)) flag(`1ca: the computer's pool holds ${n}, which is not the three-finger power chord`);
-    for (const a of POOL) for (const b of POOL) {
-      if (a === b) continue;
-      for (const lang of ['en', 'es']) {
-        run(`setLang(${JSON.stringify(lang)})`);
-        const got = run(`pwMoveHint(${JSON.stringify(a)}, ${JSON.stringify(b)})`), want = hintFor(a, b, lang);
-        counts.pwHints++;
-        if (!want || got !== want) flag(`1ca: ${lang} drawn pair ${a} → ${b} hint is "${got}", the diagrams say "${want}"`);
-      }
-    }
-    run(`setLang('en')`);
-    const draws = JSON.parse(run(`ccSetup('power'); JSON.stringify(Array.from({ length: 300 }, () => ccPickChords(CC_POWER_PROGRESSIONS[0])))`));
+    if (run('typeof CC_POWER_RANDOM_POOL') !== 'undefined') flag("1ca: CC_POWER_RANDOM_POOL is back \u2014 the computer must draw from the listed pairs, never from a pool of single chords (it could draw a pair the list does not teach)");
+    const LISTED = LOOPS.filter(l => !l.random).map(l => l.chords);
+    const pairKey = d => [...d].sort().join('');
+    const listedKeys = new Set(LISTED.map(pairKey));
+    if (LISTED.length !== 11 || listedKeys.size !== 11) flag(`1ca: Power Chord Switch lists ${LISTED.length} pairs (${listedKeys.size} different), pinned at 11 \u2014 change the pin and the draw's maths on purpose`);
+    const draws = JSON.parse(run(`ccSetup('power'); JSON.stringify(Array.from({ length: 3000 }, () => ccPickChords(CC_POWER_PROGRESSIONS[0])))`));
     counts.pwViews++;
     const seenPairs = new Set(), seenOrders = new Set();
     for (const d of draws) {
-      if (d.length !== 2 || d[0] === d[1] || d.some(n => !POOL.includes(n))) { flag(`1ca: the computer drew ${JSON.stringify(d)} — it must be two different chords from ${POOL.join(',')}`); break; }
-      seenPairs.add([...d].sort().join('')); seenOrders.add(d.join('>'));
+      if (d.length !== 2 || d[0] === d[1] || !listedKeys.has(pairKey(d))) { flag(`1ca: the computer drew ${JSON.stringify(d)} \u2014 it must be one of the ${LISTED.length} listed pairs, two different chords`); break; }
+      seenPairs.add(pairKey(d)); seenOrders.add(d.join('>'));
     }
-    const allPairs = POOL.length * (POOL.length - 1) / 2;
-    if (seenPairs.size < allPairs - 2 || seenOrders.size < allPairs + 2) flag(`1ca: 300 draws gave ${seenPairs.size} of ${allPairs} pairs and ${seenOrders.size} orders — the computer's pick is not random`);
+    counts.pwDraws = (counts.pwDraws || 0) + draws.length;
+    if (seenPairs.size !== listedKeys.size || seenOrders.size !== listedKeys.size * 2) flag(`1ca: 3000 draws gave ${seenPairs.size} of ${listedKeys.size} pairs and ${seenOrders.size} of ${listedKeys.size * 2} orders \u2014 the computer's pick is not random over the listed pairs`);
+    /* Again / -10 / +10 replay the pair just played (the done screen's advice names
+       that pair's worst switch); only Start on the setup screen draws a new one.
+       Change Up's Random 4 keeps drawing each start, and a fixed pair is its own. */
+    const rc = JSON.parse(run(`(function(){
+      ccSetup('power'); const rnd = CC_POWER_PROGRESSIONS[0]; cc.chords = ['G5', 'C5'];
+      const kept = [], fresh = [];
+      for (let i = 0; i < 80; i++){ kept.push(ccRoundChords(rnd, true).join('>')); fresh.push(ccRoundChords(rnd, false).join('>')); }
+      const fixedDef = CC_POWER_PROGRESSIONS[3]; cc.chords = ['X5', 'Y5'];
+      const fixed = ccRoundChords(fixedDef, true).join('>');
+      ccSetup(); const four = CC_PROGRESSIONS.find(p => p.random); cc.chords = ['C', 'G', 'Am', 'F'];
+      const open = []; for (let i = 0; i < 80; i++) open.push(ccRoundChords(four, true).join('>'));
+      return JSON.stringify({ kept: [...new Set(kept)], fresh: [...new Set(fresh)].length, fixed, fixedWant: fixedDef.chords.join('>'), open: [...new Set(open)].length });
+    })()`));
+    if (JSON.stringify(rc.kept) !== '["G5>C5"]') flag(`1ca: Again in Power Chord Switch drew ${JSON.stringify(rc.kept)}, expected to replay the pair just played ["G5>C5"]`);
+    if (rc.fresh < 2) flag('1ca: Start on the setup screen no longer draws a new pair each time in Power Chord Switch');
+    if (rc.fixed !== rc.fixedWant) flag(`1ca: a fixed pair came back as ${rc.fixed}, expected its own ${rc.fixedWant}`);
+    if (rc.open < 2) flag("1ca: Change Up's Random 4 stopped drawing new chords on Again \u2014 Change Up is unchanged");
+    run(`ccSetup('power'); globalThis.__realStart = ccStart; globalThis.__arg = 'unset'; ccStart = a => { globalThis.__arg = a; }; cc.phase = 'done'; ccAgain(0); ccStart = __realStart;`);
+    if (run('globalThis.__arg') !== true) flag(`1ca: ccAgain starts the next round with ccStart(${run('globalThis.__arg')}), expected ccStart(true) \u2014 Again would draw a new random pair`);
+    run(`ccSetup('power')`);
+    if (!/onclick="ccStart\(\)"/.test(bodies['cc-body'])) flag('1ca: the setup screen\'s Start must call ccStart() with no argument \u2014 only Start draws a new pair');
+    const coachSrc = readFileSync(join(ROOT, 'coach.js'), 'utf8');
+    const startBody = jsFunctionBody(coachSrc, 'ccStart');
+    if (startBody === null || !/ccRoundChords\(progDef, again === true\)/.test(stripJsComments(startBody))) flag('1ca: ccStart() must take its round\'s chords from ccRoundChords(progDef, again === true) \u2014 Again would draw a new pair, or Start would replay the old one');
+    /* Power Chord Switch's Start sits in a bar that sticks to the bottom of the
+       games screen (the real layout is measured in smoke.mjs at 1366x657): the
+       markup wraps it for Power Chord Switch only, and Change Up's is unchanged. */
+    const css = readFileSync(join(ROOT, 'styles.css'), 'utf8');
+    if (!/#cc-body\.cc-power \.cc-startbar\{[^}]*position:sticky;[^}]*bottom:0;[^}]*background:var\(--bg\)/.test(css)) flag('1ca: styles.css lost #cc-body.cc-power .cc-startbar{position:sticky;bottom:0;background:var(--bg)} \u2014 Start would scroll off a 657px screen under the 180px charts');
+    for (const lang of ['en', 'es']) {
+      run(`setLang(${JSON.stringify(lang)})`);
+      run(`ccSetup('power')`);
+      if (!/<div class="cc-startbar"><button type="button" class="coach-start" onclick="ccStart\(\)">/.test(bodies['cc-body'])) flag(`1ca: ${lang} Power Chord Switch's Start is not inside the sticky .cc-startbar`);
+      run(`ccSetup()`);
+      if (/cc-startbar/.test(bodies['cc-body'])) flag(`1ca: ${lang} Change Up's setup has the Power Chord Switch Start bar \u2014 Change Up must stay as it was`);
+    }
+    run(`setLang('en')`);
     const four = JSON.parse(run(`ccSetup(); JSON.stringify(ccPickChords(CC_PROGRESSIONS.find(p => p.random)))`));
     if (four.length !== 4 || new Set(four).size !== 4) flag(`1ca: Change Up's Random 4 drew ${JSON.stringify(four)}`);
     if (JSON.stringify(JSON.parse(run(`JSON.stringify(ccPickChords({ chords: ['F5', 'G5'] }))`))) !== '["F5","G5"]') flag('1ca: ccPickChords changed a fixed pair');
@@ -10512,7 +10548,7 @@ function checkCoachVerdicts() {
   for (const [k, n] of Object.entries(EXPECT)) {
     if (counts[k] !== n) flag(`1ca: rendered ${counts[k]} ${k}, pinned ${n} — the check went partly blind (or grew: re-pin EXPECT on purpose)`);
   }
-  if (bad === 0) ok(`${counts.reports} Coach reports, ${counts.descs} chord-card descriptions, ${counts.nrLevels} Note Runner levels ×2 and ${counts.doneScreens} arcade done screens read true; Power Chord Switch: ${counts.pwLoops} loops are three-finger shapes in the right group, ${counts.pwHints} slide hints match the diagrams (EN+ES), ${counts.pwViews} screens/rounds, ${counts.pwMemory} remembered tempo/speed pairs and ${counts.pwGates} pitch gates keep it apart from Change Up`);
+  if (bad === 0) ok(`${counts.reports} Coach reports, ${counts.descs} chord-card descriptions, ${counts.nrLevels} Note Runner levels ×2 and ${counts.doneScreens} arcade done screens read true; Power Chord Switch: ${counts.pwLoops} loops are three-finger shapes in the right group, ${counts.pwDraws} random draws all listed pairs (11 of 11 and both orders seen), the Again button replays the pair and Start draws, the Start bar is sticky, ${counts.pwHints} slide hints match the diagrams (EN+ES), ${counts.pwViews} screens/rounds, ${counts.pwMemory} remembered tempo/speed pairs and ${counts.pwGates} pitch gates keep it apart from Change Up`);
 }
 
 (async function main() {
