@@ -80,6 +80,49 @@
 
 ## Open work
 
+- [ ] **2026-10-31 — For the cloud review: pushed without a reviewer.**
+  Jonathan asked for everything to be pushed and reviewed in the cloud. The four
+  code commits below carry `Review: Fast` so the Friday check also finds them.
+  - **On `main`, after `66266c9`:** `ca-43 Note Call: the mic hears a strummed
+    power chord`, `...review fixes — Start works without coach.js...`,
+    `Power Chord Switch: Start stays on screen...` and `ca-43 Note Call: the mic
+    no longer accepts the 5th`. `coach.js` is a danger-zone file and was edited
+    (`coachPowerTargets` moved to `app.js`; Riff Runner's `rnwTargets` calls it).
+    Look for: any page or worker that loads `coach.js` without `app.js` (only
+    `index.html` loads it, and it loads `app.js` too); Note Call's Start with no
+    `coach.js` (tap mode); `ncClash`/`ncDeal` with a pool of 1-3 cards; whether
+    check 1cd and the fresh-page walk in `tools/smoke.mjs` go red when the
+    original bug comes back (1cd was broken three ways by hand; the smoke walk
+    was not mutated).
+  - **What was run:** full `node tools/checks.mjs` passes at the tip. The browser
+    smoke test passed at the tip, 0 errors against 9 on `origin/main` (the first
+    run hung for 29 minutes at 0% CPU and was killed; the second passed). The mic
+    sims on the real files, 20 trials, show no STOP row at any of the three
+    guitar sounds. **Not run:** a reviewer (one was started and stopped before it
+    reported), a look at the live site, a real guitar through a Chromebook mic.
+  - **Jonathan's call, 2026-10-31:** Note Call no longer accepts the 5th. Kept,
+    a wrong chord a 5th above the card counted right 7.7% / 28.9% / 100% at the
+    std / mid / weak sound. Dropped, 0 of 1040, and all 15 right-strum rows are
+    unchanged. An earlier question to Jonathan said dropping it "would miss more
+    right strums"; that was not measured and the sims showed it was wrong.
+  - **Weak spots left alone:** at the std sound a strum with the root string much
+    quieter is heard 67.1% of the time, and a two-string root + 5th 65.4%.
+    Riff Runner's Wait Mode still takes the 5th, so a chord a 5th above passes
+    there too (not measured).
+  - **Branch `phase5-sw-audio` is NOT on `main`.** It changes `sw.js` (always
+    Reviewed): one stable audio cache, a per-file hash map written into `sw.js`
+    by `tools/checks.mjs`, an eviction pass at activate, and a one-time migration
+    so the first deploy re-downloads nothing. New: `tools/sw-audio-map.mjs`,
+    `tools/sw-audio-proof.mjs` (runs the real `sw.js` against a stand-in cache:
+    39 assertions, 13 deliberate breakages all caught) and check 1ce. The proof
+    found one bug, fixed: a cached track was refetched on every play and stored
+    over under the current hash. Review before merging: `AUDIO_MIGRATION_FP` must
+    equal the live audio fingerprint (check 1ce and the sync check enforce it),
+    `AUDIO_CACHE` must keep its name, and what a half-failed install, a quota
+    error or two tabs on two worker versions do to the records. The brief for
+    phase 5 was lost in the crash; this was built from the code comments, so check
+    it against what Jonathan wanted.
+
 - [ ] **2026-10-30 — Everything pushed in a hurry today needs to be checked.**
   Jonathan had to reboot the machine, so the last pushes went out with the
   checks and the browser smoke test but no reviewer pass, and no one looked at
