@@ -2238,13 +2238,14 @@ body.rail-collapsed .rail-tools .tool-popup{
 .cc-diagrams .cc-dia svg{width:80px;height:auto}
 /* Power Chord Switch shows only two chords, so each chart can be much larger
    than the 80px a Coach drill of up to seven shares a row with. */
-/* Power Chord Switch: Start sticks to the bottom of the games screen (the
-   scroll container, position:fixed + overflow:auto), so the 180px charts below
-   the speed and tempo rows can't push it off a 657px screen. A solid bar, so
-   what scrolls under it stays readable. Only ccRenderSetup's power markup has
-   the bar; Change Up's Start is untouched. */
-#cc-body.cc-power .cc-startbar{position:sticky;bottom:0;z-index:2;background:var(--bg);padding:8px 0 6px;margin-top:4px;box-shadow:0 -10px 10px -6px var(--bg)}
-#cc-body.cc-power .cc-startbar .coach-start{margin-top:0}
+/* Change Up and Power Chord Switch: Start sticks to the bottom of the games
+   screen (the scroll container, position:fixed + overflow:auto), so the charts
+   and the tempo row below the loops can't push it off a 657px screen (Power
+   Chord Switch's 180px charts; Change Up's 80px ones with a loop picked: Friday
+   check R1-3, 2026-10-31). A solid bar, so what scrolls under it stays
+   readable. ccRenderSetup wraps Start in it for both games. */
+#cc-body .cc-startbar{position:sticky;bottom:0;z-index:2;background:var(--bg);padding:8px 0 6px;margin-top:4px;box-shadow:0 -10px 10px -6px var(--bg)}
+#cc-body .cc-startbar .coach-start{margin-top:0}
 #cc-body.cc-power .cc-diagrams{justify-content:center;gap:28px}
 #cc-body.cc-power .cc-diagrams .cc-dia svg{width:180px;height:auto}
 #cc-body.cc-power .cc-dia .chord-box-label{font-size:1.125rem}

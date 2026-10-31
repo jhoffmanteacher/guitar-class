@@ -10470,17 +10470,20 @@ function checkCoachVerdicts() {
     const coachSrc = readFileSync(join(ROOT, 'coach.js'), 'utf8');
     const startBody = jsFunctionBody(coachSrc, 'ccStart');
     if (startBody === null || !/ccRoundChords\(progDef, again === true\)/.test(stripJsComments(startBody))) flag('1ca: ccStart() must take its round\'s chords from ccRoundChords(progDef, again === true) \u2014 Again would draw a new pair, or Start would replay the old one');
-    /* Power Chord Switch's Start sits in a bar that sticks to the bottom of the
-       games screen (the real layout is measured in smoke.mjs at 1366x657): the
-       markup wraps it for Power Chord Switch only, and Change Up's is unchanged. */
+    /* Start sits in a bar that sticks to the bottom of the games screen in BOTH
+       games (the real layout is measured in smoke.mjs at 1366x657). It was Power
+       Chord Switch's alone, with this check holding Change Up "as it was"; the
+       80px charts pushed Change Up's tempo row and Start down a 657px screen
+       too, and Jonathan chose to give it the bar (Friday check R1-3, 2026-10-31). */
     const css = readFileSync(join(ROOT, 'styles.css'), 'utf8');
-    if (!/#cc-body\.cc-power \.cc-startbar\{[^}]*position:sticky;[^}]*bottom:0;[^}]*background:var\(--bg\)/.test(css)) flag('1ca: styles.css lost #cc-body.cc-power .cc-startbar{position:sticky;bottom:0;background:var(--bg)} \u2014 Start would scroll off a 657px screen under the 180px charts');
+    if (!/#cc-body \.cc-startbar\{[^}]*position:sticky;[^}]*bottom:0;[^}]*background:var\(--bg\)/.test(css)) flag('1ca: styles.css lost #cc-body .cc-startbar{position:sticky;bottom:0;background:var(--bg)} \u2014 Start would scroll off a 657px screen under the charts, in both games');
+    if (/#cc-body\.cc-power \.cc-startbar\{/.test(css)) flag('1ca: styles.css scopes .cc-startbar to #cc-body.cc-power again \u2014 Change Up\'s Start would not stick');
     for (const lang of ['en', 'es']) {
       run(`setLang(${JSON.stringify(lang)})`);
       run(`ccSetup('power')`);
       if (!/<div class="cc-startbar"><button type="button" class="coach-start" onclick="ccStart\(\)">/.test(bodies['cc-body'])) flag(`1ca: ${lang} Power Chord Switch's Start is not inside the sticky .cc-startbar`);
       run(`ccSetup()`);
-      if (/cc-startbar/.test(bodies['cc-body'])) flag(`1ca: ${lang} Change Up's setup has the Power Chord Switch Start bar \u2014 Change Up must stay as it was`);
+      if (!/<div class="cc-startbar"><button type="button" class="coach-start" onclick="ccStart\(\)">/.test(bodies['cc-body'])) flag(`1ca: ${lang} Change Up's Start is not inside the sticky .cc-startbar`);
     }
     run(`setLang('en')`);
     const four = JSON.parse(run(`ccSetup(); JSON.stringify(ccPickChords(CC_PROGRESSIONS.find(p => p.random)))`));
@@ -10610,7 +10613,7 @@ function checkCoachVerdicts() {
   for (const [k, n] of Object.entries(EXPECT)) {
     if (counts[k] !== n) flag(`1ca: rendered ${counts[k]} ${k}, pinned ${n} — the check went partly blind (or grew: re-pin EXPECT on purpose)`);
   }
-  if (bad === 0) ok(`${counts.reports} Coach reports, ${counts.descs} chord-card descriptions, ${counts.nrLevels} Note Runner levels ×2 and ${counts.doneScreens} arcade done screens read true; Power Chord Switch: ${counts.pwLoops} loops are three-finger shapes in the right group, ${counts.pwDraws} random draws all listed pairs (11 of 11 and both orders seen), the Again button replays the pair and Start draws, the Start bar is sticky, ${counts.pwHints} slide hints match the diagrams (EN+ES), ${counts.pwViews} screens/rounds, ${counts.pwMemory} remembered tempo/speed pairs and ${counts.pwGates} pitch gates keep it apart from Change Up`);
+  if (bad === 0) ok(`${counts.reports} Coach reports, ${counts.descs} chord-card descriptions, ${counts.nrLevels} Note Runner levels ×2 and ${counts.doneScreens} arcade done screens read true; Power Chord Switch: ${counts.pwLoops} loops are three-finger shapes in the right group, ${counts.pwDraws} random draws all listed pairs (11 of 11 and both orders seen), the Again button replays the pair and Start draws, the Start bar is sticky in both games, ${counts.pwHints} slide hints match the diagrams (EN+ES), ${counts.pwViews} screens/rounds, ${counts.pwMemory} remembered tempo/speed pairs and ${counts.pwGates} pitch gates keep it apart from Change Up`);
 }
 
 (async function main() {
