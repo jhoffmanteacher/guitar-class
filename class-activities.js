@@ -6759,9 +6759,8 @@ window.CLASS_ACTIVITIES = [
      for Monday): ca-23's Note Call, with a power chord called instead of a
      note. "G5 · root on the low E string" comes up on the beat; the student
      plays the chord, and the root fret is the answer (a tap on the root
-     fret, or the mic hearing the chord: its root, 5th, octave or the octave
-     below, Riff Runner's Wait Mode rule plus one — coachPowerTargets,
-     ncPowerTones). Same chunks, levels and speeds as ca-23
+     fret, or the mic hearing the chord: its root, its octave or the octave
+     below, not the 5th — ncPowerTones). Same chunks, levels and speeds as ca-23
      (engine: renderNoteCall, drill.power). Roots on the low E and A strings
      only, so the 5th always has a string above it. */
   {

@@ -9224,41 +9224,38 @@ function ncClicks(st, now){
 
 /* What the mic accepts for a Note Call card (2026-10-30). A single note: its
    exact pitch, as ever. A power chord (drill.power, ca-43): the student
-   STRUMS it, and the detector reads a strum as the root, the 5th, the octave,
-   the note an octave BELOW the root (the pitch a root and its 5th make
-   together, which YIN reads from about B2 up: low E fret 7 and everything
-   above), or nothing. So each root answers with all four: coachPowerTargets
-   (root, 5th, octave: the rule Riff Runner's Wait Mode uses) plus root - 12,
-   which only Note Call adds because its roots reach the middle of the neck
-   (Riff Runner's A5, G5, F5 put it under YIN's 60 Hz floor). Waiting for the
-   exact root alone counted a strummed power chord right 0 times in 40 on a
-   guitar with a strong low fundamental; with all four, a root + 5th + octave
-   strum was heard 96% to 100% of the time across the 26 roots at the three
-   harmonic balances tried (tools/mic-sim/power-notecall.mjs, synthetic audio,
-   not a Chromebook mic). Not every strum: the lowest roots (low E frets 0-6,
-   under B2) have their octave below under YIN's 60 Hz floor, and a strum whose
-   levels sit between the balances tried can still go unheard there; a strum
-   with the root string much quieter than the other two was heard 67% of the
-   time at the strong-fundamental balance (100% at the other two).
-   The cost of the 5th, kept on purpose (Jonathan, 2026-10-31): a WRONG chord
-   rooted a 5th above the card (B5 played for an E5 card) shares the card's
-   5th, so it is counted right 7.7% / 28.9% / 100% of the time at the strong /
-   middle / weak balance; one a 4th below the card, 0% / 4.5% / 7.7%. No other
-   wrong strum tried (a fret or two off, one string over) got through more than
-   1 in 1040 (tools/mic-sim/power-notecall.mjs; those rows print STOP there).
-   In every run a right strum was answered by the root, the octave or the
-   octave below, never by the 5th, so dropping the 5th from ncPowerTones would
-   close this; it stays because Riff Runner's Wait Mode uses the same three.
+   STRUMS it, and the detector reads a strum as the root, the octave, the note
+   an octave BELOW the root (the pitch a root and its 5th make together, which
+   YIN reads from about B2 up: low E fret 7 and everything above), the 5th, or
+   nothing. So each root answers with three: itself, root + 12 and root - 12.
+   Waiting for the exact root alone counted a strummed power chord right 0
+   times in 40 on a guitar with a strong low fundamental; with the three, a
+   root + 5th + octave strum was heard 96% to 100% of the time across the 26
+   roots at the three harmonic balances tried (tools/mic-sim/power-notecall.mjs,
+   synthetic audio, not a Chromebook mic). Not every strum: the lowest roots
+   (low E frets 0-6, under B2) have their octave below under YIN's 60 Hz floor,
+   and a strum whose levels sit between the balances tried can still go unheard
+   there; a strum with the root string much quieter than the other two was
+   heard 67% of the time at the strong-fundamental balance (100% at the other
+   two).
+   The 5th is NOT accepted here (Jonathan, 2026-10-31), though Riff Runner's
+   Wait Mode takes it (coachPowerTargets). A chord rooted a 5th above the card
+   (B5 played for an E5 card) has the card's 5th as its root, and with the 5th
+   accepted that wrong chord was counted right 7.7% / 28.9% / 100% of the time
+   at the strong / middle / weak balance (one a 4th below the card: 0% / 4.5% /
+   7.7%). Without it every one of those rows is 0 of 1040, and the 15 right-strum
+   rows are exactly the same numbers, because in every run a right strum was
+   answered by the root, the octave or the octave below, never by the 5th.
    ncTargets is what goes to the settle call; ncAnswerAt says which fret's
    root a heard pitch answers (the exact root first, so fret 0 and fret 12 of
    the same note stay apart when the root itself is heard), -1 for none.
    Pure: no DOM. */
-/* The three pitches that answer a power chord rooted on `rootMidi`: the root, the
-   5th above it and the octave. Here, not in coach.js: ncDeal needs it in tap
-   mode, before coach.js (loaded lazily, only for the mic) exists; Riff Runner's
-   Wait Mode (rnwTargets in coach.js) uses this same one. */
+/* The three pitches that answer a power chord in Riff Runner's Wait Mode
+   (rnwTargets in coach.js): the root, the 5th above it and the octave. Defined
+   here, in the file that always loads first. Note Call does not use it (it does
+   not take the 5th: see ncPowerTones). */
 function coachPowerTargets(rootMidi){ return [rootMidi, rootMidi + 7, rootMidi + 12]; }
-function ncPowerTones(r){ return [r - 12].concat(coachPowerTargets(r)); }
+function ncPowerTones(r){ return [r - 12, r, r + 12]; }
 function ncTargets(p){
   return p.power ? p.midis.reduce((all, r) => all.concat(ncPowerTones(r)), []) : p.midis;
 }

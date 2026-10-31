@@ -7,11 +7,9 @@
    that sits on fret 0 AND fret 12 is one card with two roots).
 
    The accept rule comes from the files under test. With ncTargets /
-   ncAnswerAt in app.js (and coachPowerTargets, in app.js since 2026-10-31,
-   coach.js before) the card is
-   answered by its root, 5th or octave, read at RNW_POWER_CLARITY; without
-   them it is the old rule, the exact root at the default clarity. (ncPowerTones,
-   the root, 5th, octave and the octave below, is read from app.js when it has it.) So the same
+   ncAnswerAt in app.js the card is answered by its root, its octave or the
+   octave below (ncPowerTones, read from app.js), at RNW_POWER_CLARITY; without
+   them it is the old rule, the exact root at the default clarity. So the same
    command gives the before and the after:
      git show <old>:coach.js > /tmp/coach-old.js
      git show <old>:app.js   > /tmp/app-old.js
@@ -36,15 +34,17 @@
    a guitar through a Chromebook mic: the console's Mic recordings view is the
    real test.
 
-   KNOWN STOPs, kept on purpose (Jonathan, 2026-10-31), 26 roots x 40 trials,
-   std / mid / weak: "WRONG strum, rooted a 5th above the card" 7.7% / 28.9% /
-   100%; "WRONG strum, rooted a 4th below the card" 0% / 4.5% / 7.7%; "WRONG
-   two strings, root + fifth, a 5th above" 7.7% / 7.7% / 7.8%. All of it is the
-   card's 5th being an accepted pitch (a chord a 5th above has the card's 5th
-   as its root). Any NEW row that prints STOP, or these rising, is a change to
-   look at. The right strums answer by root, octave or octave below and never by
-   the 5th in these runs, so removing the 5th from ncPowerTones would close the
-   STOPs (it stays: Riff Runner's Wait Mode uses the same three pitches). */
+   THE 5TH IS NOT ACCEPTED (Jonathan, 2026-10-31). Run on both rules, 26 roots
+   x 40 trials, std / mid / weak. With the 5th accepted (the code before that
+   day): "WRONG strum, rooted a 5th above the card" 7.7% / 28.9% / 100%; "WRONG
+   strum, rooted a 4th below the card" 0% / 4.5% / 7.7%; "WRONG two strings,
+   root + fifth, a 5th above" 7.7% / 7.7% / 7.8% (all STOP: a chord a 5th above
+   has the card's 5th as its root). Without it: those rows are 0 of 1040 at all
+   three balances and no row prints STOP. Of 51 rows (17 x 3), 43 are
+   identical and the 8 that changed are those wrong-chord rows; all 15 RIGHT
+   rows give the same numbers, because in every run a right strum was answered
+   by the root, the octave or the octave below, never by the 5th. A row that
+   prints STOP now is a change to look at. */
 import fs from 'fs';
 import { extract } from './extract.mjs';
 

@@ -7597,9 +7597,9 @@ function rnwWhere(n){
    Mic recordings before tuning it further. */
 const RNW_POWER_RE = /^[A-G][#b]?5$/;
 const RNW_POWER_CLARITY = [0.22, 0.45];
-/* coachPowerTargets(rootMidi) (root, 5th, octave) lives in app.js, next to Note
-   Call, which needs it in tap mode before this file has loaded; Riff Runner's
-   Wait Mode below uses the same one, so the two cannot drift apart. */
+/* coachPowerTargets(rootMidi) (root, 5th, octave) lives in app.js, which always
+   loads before this file. Riff Runner's Wait Mode below is its only user: Note
+   Call takes the root, the octave and the octave below, not the 5th. */
 function rnwIsPower(n){ return !!n && RNW_POWER_RE.test(n.label || ''); }
 function rnwTargets(n){
   if (!n) return null;
