@@ -8309,7 +8309,7 @@ function checkNoteCallPower(ctx) {
   const run = x => vm.runInContext(x, ctx);
   let csrc = '';
   try { csrc = readFileSync(join(ROOT, 'coach.js'), 'utf8'); } catch { flag('coach.js could not be read — 1cd cannot check the mic rule'); return; }
-  const stats = { cards: 0, answers: 0, listens: 0, keys: 0 };
+  const stats = { cards: 0, answers: 0, listens: 0, keys: 0, micHits: 0, fbRenders: 0 };
 
   // The data.
   const acts = run('window.CLASS_ACTIVITIES || []');
@@ -8418,12 +8418,12 @@ function checkNoteCallPower(ctx) {
       }
 
       // ncListen: what it asks coachSettlePitch for, and which fret an answer resolves.
-      const seen = [], resolved = [];
+      const seen = [], resolved = [], micFlags = [];
       let reply = null;
       setG('COACH_PITCH_GATE', 0.01); setG('coachOnsetAt', 0); setG('coachMicLatencyMs', () => 0); setG('RNW_POWER_CLARITY', RNW);
       setG('coachReadFrame', () => 1);
       setG('coachSettlePitch', (st, targets, rms, floorT, clarity) => { seen.push({ targets: Array.from(targets), clarity: clarity === undefined ? 'undefined' : J(Array.from(clarity)) }); return reply; });
-      setG('ncResolve', (st, i, res, info) => { resolved.push({ i, res, fret: info && info.fret }); });
+      setG('ncResolve', (st, i, res, info) => { resolved.push({ i, res, fret: info && info.fret }); if (res === 'hit') micFlags.push(!!(info && info.mic)); });
       const ncListen = run('ncListen');
       const cardOf = (cfgObj, note, str) => JSON.parse(run('(function(){ return JSON.stringify(ncPool(' + J(cfgObj) + ', "all").find(p => p.note === ' + J(note) + ' && p.str === ' + J(str) + ')); })()'));
       const E5 = cardOf({ strings: ['lowE', 'A'], power: true, minFret: 0, maxFret: 12 }, 'E5', 'lowE');       // roots 40 (fret 0) and 52 (fret 12)
@@ -8470,6 +8470,9 @@ function checkNoteCallPower(ctx) {
           const got = r.resolved.length ? r.resolved.map(x => x.i + ':' + x.res + '@' + x.fret).join(',') : 'none';
           if (got !== (want === 'none' ? 'none' : '0:' + want)) flag('ncListen (' + (pw ? 'power' : 'single note') + ', mic grace): a heard ' + m + ' for the old card resolves \'' + got + '\', expected \'' + (want === 'none' ? 'none' : '0:' + want) + '\'');
         }
+        // Every hit that came from the MIC says so (the main path and the grace path), so ncResolve can name both frets of a two-fret card.
+        stats.micHits = micFlags.length;
+        if (!micFlags.length || micFlags.includes(false)) flag('ncListen resolved ' + micFlags.filter(x => !x).length + ' of ' + micFlags.length + ' mic hits without { mic: true } \u2014 ncResolve could not tell a heard strum from a tap, and would name one fret for a chord the mic cannot place');
       }
     }
   } finally { undo(); }
@@ -8511,7 +8514,58 @@ function checkNoteCallPower(ctx) {
     for (const k of defined) if (!keys.has(k)) flag('i18n ' + k + ' is defined but no Note Call power screen shows it (dead, or a screen 1cd does not reach)');
     if (defined.length !== EXPECT.keys) flag('1cd sees ' + defined.length + ' ncp.* keys, pinned at ' + EXPECT.keys + ' — a new power-mode string needs its Spanish and a screen that shows it (update the pin on purpose)');
   }
-  if (bad === 0) ok(EXPECT.power + ' power drills on ca-43 (frets ' + EXPECT.ranges.map(r => r.join('-')).join(' / ') + '); ' + stats.cards + ' cards x 53 pitches = ' + stats.answers + ' answers match the oracle (single-note cards exactly as before); ' + stats.clashCalls + ' ncClash calls match an oracle and ' + stats.deals + ' seeded ncDeal deals (no coach.js loaded) never dealt a clashing card while a clean one existed (' + stats.powerForced + ' of ' + stats.powerDeals + ' power deals had to, every card left clashing; ' + (stats.forced - stats.powerForced) + ' of ' + (stats.deals - stats.powerDeals) + ' single-note); ' + stats.listens + ' ncListen calls (targets, clarity, main and grace fret); ' + stats.keys + ' of ' + EXPECT.keys + ' ncp.* strings rendered, EN + ES');
+  /* What a HIT says about the fret (Friday check R1-1, Jonathan 2026-10-31). On a
+     card with two frets (E5 on the low E string: 0 and 12) the mic cannot tell
+     the octaves apart and credited fret 0 when the student played fret 12, so
+     a MIC hit now names every fret ("fret 0 / 12", "traste 0 / 12") and marks
+     both on the board; a tap names the fret tapped, and a card with one fret,
+     or any single-note card, names its one fret. The real ncResolve is run on
+     a power card with two frets, one with one, and a single-note card with two,
+     in English and Spanish, and the feedback text is read back. */
+  {
+    const origGet = ctx.document.getElementById, recs = {};
+    ctx.__marks = [];
+    ctx.document.getElementById = id => { if (id.startsWith('fgm-')) ctx.__marks.push(id); return recs[id] || (recs[id] = origGet(id)); };
+    const hadFlash2 = Object.prototype.hasOwnProperty.call(ctx, 'flashClass');
+    if (!hadFlash2) ctx.flashClass = () => {};
+    try {
+      for (const lang of ['en', 'es']) {
+        run('setLang(' + J(lang) + ')');
+        const o = JSON.parse(run(`(function(){
+          const o = {};
+          const mk = (sid, power) => { renderNoteCall({ type: 'notecall', power, strings: ['lowE', 'A'], minFret: 0, maxFret: 12 }, sid, 'w'); const st = noteCalls[sid]; st.key = sid; return st; };
+          const hit = (st, card, info) => { __marks.length = 0; st.seq = [Object.assign({}, card, { res: null })]; st.idx = 0; st.requeue = []; ncResolve(st, 0, 'hit', info); return { t: document.getElementById('nc-fb-' + st.key).textContent, m: __marks.filter(x => x.startsWith('fgm-')).slice() }; };
+          const pw = mk('chk-fb1', true), sn = mk('chk-fb2', false);
+          const two = ncPool(pw.cfg, 'all').find(c => c.frets.length === 2), one = ncPool(pw.cfg, 'all').find(c => c.frets.length === 1), sTwo = ncPool(sn.cfg, 'all').find(c => c.frets.length === 2);
+          o.two = two && two.frets; o.one = one && one.frets; o.sTwo = sTwo && sTwo.frets;
+          if (two && one && sTwo) {
+            o.micTwo = hit(pw, two, { fret: two.frets[1], mic: true });
+            o.micTwo0 = hit(pw, two, { fret: two.frets[0], mic: true });
+            o.tapTwo = hit(pw, two, { fret: two.frets[1] });
+            o.micOne = hit(pw, one, { fret: one.frets[0], mic: true });
+            o.micSingle = hit(sn, sTwo, { fret: sTwo.frets[1], mic: true });
+          }
+          delete noteCalls['chk-fb1']; delete noteCalls['chk-fb2'];
+          return JSON.stringify(o);
+        })()`));
+        const W = lang === 'en' ? 'fret' : 'traste';
+        if (!o.two || !o.one || !o.sTwo) { flag(lang + ': 1cd could not build a two-fret power card, a one-fret power card and a two-fret single-note card for the hit feedback (' + J(o) + ') \u2014 ncPool changed'); continue; }
+        const both = W + ' ' + o.two.join(' / ');
+        const marked = (r, frets) => frets.every(f => r.m.some(id => id.endsWith('-' + f))) && r.m.length === frets.length;
+        if (!o.micTwo.t.includes(both)) flag(lang + ': a mic hit on a two-fret power card says \'' + o.micTwo.t + '\', expected it to name both frets (\'' + both + '\')');
+        if (!marked(o.micTwo, o.two)) flag(lang + ': a mic hit on a two-fret power card marks ' + J(o.micTwo.m) + ' on the board, expected one mark on each of frets ' + J(o.two));
+        if (!o.micTwo0.t.includes(both)) flag(lang + ': a mic hit credited to fret ' + o.two[0] + ' says \'' + o.micTwo0.t + '\', expected both frets (\'' + both + '\')');
+        if (!o.tapTwo.t.includes(W + ' ' + o.two[1]) || o.tapTwo.t.includes(' / ')) flag(lang + ': a TAP on fret ' + o.two[1] + ' of a two-fret power card says \'' + o.tapTwo.t + '\', expected just that fret');
+        if (!marked(o.tapTwo, [o.two[1]])) flag(lang + ': a TAP on fret ' + o.two[1] + ' marks ' + J(o.tapTwo.m) + ', expected only that fret');
+        if (!o.micOne.t.includes(W + ' ' + o.one[0]) || o.micOne.t.includes(' / ')) flag(lang + ': a mic hit on a one-fret power card says \'' + o.micOne.t + '\', expected just fret ' + o.one[0]);
+        if (!o.micSingle.t.includes(W + ' ' + o.sTwo[1]) || o.micSingle.t.includes(' / ')) flag(lang + ': a mic hit on a single-note card says \'' + o.micSingle.t + '\', expected just fret ' + o.sTwo[1] + ' (a single note is exact)');
+        if (!marked(o.micSingle, [o.sTwo[1]])) flag(lang + ': a mic hit on a single-note card marks ' + J(o.micSingle.m) + ', expected only fret ' + o.sTwo[1]);
+        stats.fbRenders += 5;
+      }
+    } catch (e) { flag('rendering the Note Call hit feedback threw ' + e.message); }
+    finally { ctx.document.getElementById = origGet; delete ctx.__marks; if (!hadFlash2) delete ctx.flashClass; try { run('setLang("en")'); } catch { /* best effort */ } }
+  }
+  if (bad === 0) ok(EXPECT.power + ' power drills on ca-43 (frets ' + EXPECT.ranges.map(r => r.join('-')).join(' / ') + '); ' + stats.cards + ' cards x 53 pitches = ' + stats.answers + ' answers match the oracle (single-note cards exactly as before); ' + stats.clashCalls + ' ncClash calls match an oracle and ' + stats.deals + ' seeded ncDeal deals (no coach.js loaded) never dealt a clashing card while a clean one existed (' + stats.powerForced + ' of ' + stats.powerDeals + ' power deals had to, every card left clashing; ' + (stats.forced - stats.powerForced) + ' of ' + (stats.deals - stats.powerDeals) + ' single-note); ' + stats.listens + ' ncListen calls (targets, clarity, main and grace fret); ' + stats.micHits + ' mic hits all flagged as the mic; ' + stats.fbRenders + ' hit-feedback renders (a mic hit on a two-fret power card names both frets, a tap, a one-fret card and a single note name one); ' + stats.keys + ' of ' + EXPECT.keys + ' ncp.* strings rendered, EN + ES');
 }
 
 /* 1bf2. LYRIC-SHEET CARDS (card.sheet — ca-38, Jonathan 2026-10-19). The
