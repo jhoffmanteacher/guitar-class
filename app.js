@@ -14695,11 +14695,13 @@ function caActivityCardHtml(a){
   const focus = caIsFocus(a);
   const card = caIsCard(a);   // practice card — see caCardBodyHtml
   const titleHtml = caNumHtml(caNumber(a)) + escHtml(caTitle(a));
-  /* Quieter edge for a card the TEACHER marked optional and the student
-     hasn't done (2026-10-31), so the required ones stand out. Reads the
-     teacher's flag, not caIsOptional(): for a CAS student every card is
-     optional, and fading the whole list would make nothing stand out. */
-  const quiet = !done && optionalActivityIds[a.id] === true;
+  /* Quieter edge for every card that shows the "Optional" tag and the
+     student hasn't done (2026-10-31; widened 2026-11-01), so the required
+     ones stand out: a teacher flag, an optional-in-its-data card, or one
+     given from the board's "Who" picker all look the same. Not for a CAS
+     student: every card is optional for them, and fading the whole list
+     would make nothing stand out. */
+  const quiet = !done && !caStudentIsCAS() && caIsOptional(a);
   // Undated activities only reach a screen under dev bypass (caIsVisible
   // gates students on the date) — but an empty chip renders as a stray amber
   // dash, on the printed handout as much as on screen, so skip it entirely.

@@ -569,6 +569,32 @@ async function walk(base, chromePort, label) {
   await run('lang-en', `setLang('en')`, 600);
   await run('load-coach', `ensureCoachJs()`, 1500);   // coach.js (the games) is lazy-loaded
   for (const [name, expr] of [['songs', `openSongsScreen()`], ['class-activities', `openClassActivitiesScreen()`], ['my-progress', `openMyProgressScreen()`], ['games-hub', `openGamesScreen()`]]) await run(name, expr, 900);
+  /* The quiet "optional" edge (2026-11-01): every card that shows the Optional tag
+     gets it — teacher flag, optional-in-its-data, or the board's Who picker — and
+     a CAS student, for whom every card is optional, gets none. Cards are rendered
+     for real with the three sources of "optional", then the state is put back. */
+  const edge = await run('optional-edge', `(() => {
+    const all = (window.CLASS_ACTIVITIES || []).filter(a => a.kind !== 'check');
+    const data = all.find(a => a.optional === true), req = all.find(a => a.optional !== true && a.id !== (data && data.id));
+    if (!data || !req) return { missing: true };
+    const keep = { f: optionalActivityIds, m: activityForMe, c: classActivities, p: periodOverride, s: studentPeriod };
+    const cls = a => { const d = document.createElement('div'); d.innerHTML = caActivityCardHtml(a); const c = d.firstElementChild; return { edge: c.classList.contains('ca-card--optional'), tag: !!c.querySelector('.ca-optional-tag') }; };
+    try {
+      optionalActivityIds = {}; activityForMe = {}; classActivities = {}; periodOverride = ''; studentPeriod = '';
+      const out = { data: cls(data), req: cls(req) };
+      optionalActivityIds = { [req.id]: true }; out.flag = cls(req);
+      optionalActivityIds = { [data.id]: false }; out.switchedRequired = cls(data);
+      optionalActivityIds = {}; activityForMe = { [req.id]: {} }; out.who = cls(req);
+      activityForMe = {}; classActivities = { [data.id]: true }; out.done = cls(data);
+      classActivities = {}; periodOverride = 'CAS'; out.cas = cls(data); out.casReq = cls(req);
+      return out;
+    } finally { optionalActivityIds = keep.f; activityForMe = keep.m; classActivities = keep.c; periodOverride = keep.p; studentPeriod = keep.s; }
+  })()`, 100);
+  if (edge && edge.missing) events.push({ step: 'optional-edge', kind: 'step-failed', text: 'no optional-in-its-data card and a required card to test' });
+  else if (edge) {
+    const want = { data: [true, true], req: [false, false], flag: [true, true], switchedRequired: [false, false], who: [true, true], done: [false, true], cas: [false, true], casReq: [false, true] };
+    for (const [k, [e, t]] of Object.entries(want)) if (!edge[k] || edge[k].edge !== e || edge[k].tag !== t) events.push({ step: 'optional-edge', kind: 'optional-edge', text: `${k}: grey edge ${edge[k] && edge[k].edge} (want ${e}), Optional tag ${edge[k] && edge[k].tag} (want ${t})` });
+  }
   const views = (await run('games-meta', `(typeof GAMES_META !== 'undefined') ? GAMES_META.map(g => g.view || g.id || g.key) : []`, 50)) || [];
   stats.games = views.length;
   for (const v of views) await run(`game:${v}`, `gamesShow(${JSON.stringify(v)})`, 300);

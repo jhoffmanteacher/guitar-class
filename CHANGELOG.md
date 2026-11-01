@@ -12,6 +12,11 @@ see `WORKFLOW.md` and the git commit log.
 - **On a narrow window (under 900px wide), Chord Blitz, Fret Zap and Power
   Chord Switch go back to a 560px column**, as they were before the two-column
   play screens. At 1366×657 nothing changes.
+- **Every Optional activity has the grey edge, not only some.** Before, the
+  grey edge showed only on activities your teacher marked Optional. Some
+  activities say Optional but had the normal orange edge. Now each card with the
+  "Optional" tag has the grey edge until you finish it. If you are in CAS, every
+  activity is optional, so none of them has the grey edge.
 
 ## 2026-10-31 — In class and the lessons: less clutter, same places
 
