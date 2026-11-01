@@ -22,7 +22,7 @@
    progress-saving behave exactly as before.
    ════════════════════════════════════════════════════════════════ */
 
-const CACHE_VERSION = 'guitar-class-2026-11-01-3541bd416b';
+const CACHE_VERSION = 'guitar-class-2026-11-01-c617183da5';
 
 /* BACKING-TRACK AUDIO (2026-10-30 rewrite). Every track lives in ONE cache that
    never changes name, AUDIO_CACHE, apart from the shell's CACHE_VERSION: a routine
@@ -222,6 +222,8 @@ const ASSETS = [
   './guitar-diagrams.js',
   './class-activities.js',
   './app.js',
+  './practice-minutes-config.js',
+  './practice-minutes.js',
   './fab-tools.js',
   './tuner.js',
   './coach.js',

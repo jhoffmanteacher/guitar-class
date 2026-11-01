@@ -1,0 +1,773 @@
+/* ══════════════════════════════════════════════════════════════════════
+   PRACTICE MINUTES — the engine.   (2026-11-01)   Settings: practice-minutes-config.js
+
+   WHAT IT COUNTS. Seconds of real BACKING-TRACK playback, anywhere on the
+   site: a class-activity practice or snippet card, a Song Journey play-along
+   (tabs/*.html), the Songs-page library (which opens a practice card or a
+   Journey page), a local backing track in the resource viewer. NOT the
+   metronome, the ear trainer, the games, guitar-note strums, the student's
+   own recording played back, or a YouTube video — only an <audio> element
+   whose file is audio/…-backing-… counts (isBacking()).
+
+   A second of wall-clock time counts only while ALL of these hold:
+     · a backing-track element is playing — not paused, not ended, not muted
+       (the Guitar toggle's twin plays muted beside the audible one), has
+       data buffered, and its currentTime is moving (a stalled download is
+       not practice);
+     · the tab is visible (Page Visibility API);
+     · a student is signed in (never the ?teacher console).
+   Two elements playing at once (a lap's "spare", the Guitar twin) are still
+   one second. Nothing here starts, loops or changes playback: the engine only
+   watches. When a song ends the element is ended/paused, so counting stops
+   until the student presses Play again. (A Journey page's player loops by
+   itself, as it always has; it counts while it plays, and the daily cap
+   bounds a loop left running.)
+
+   HOW IT FINDS THE ELEMENTS. Practice and snippet cards play from detached
+   `new Audio()` elements, which fire no event a document listener can see, so
+   HTMLMediaElement.prototype.play is wrapped (it returns the original's
+   result untouched and only notes the element). Elements in the page (the
+   Journey player, the resource viewer) are also caught by a capture-phase
+   `playing` listener. Both feed one Set; the 1 s tick does the counting.
+
+   WHAT IT STORES (Firestore; firestore.rules has the matching blocks).
+     minutes/{uid}/days/{YYYY-MM-DD}  { seconds }                 (capped per day)
+     minutes/{uid}/weeks/{YYYY-Www}   { seconds, goalSeconds, hit }
+     heartbeats/{sessionId}           { period, lastSeen }        (see below)
+   Seconds are kept whole; the display floors to whole minutes. They are added
+   with increment(), so two tabs or two devices never overwrite each other.
+
+   THE PENDING-WRITE QUEUE. Counted seconds go into pend[date] in memory and
+   into localStorage (pm:q:<uid>) every few seconds, on hide and on unload.
+   flush() sends them every 60 s while counting, when playback stops, when the
+   tab hides, on `online`, and at sign-in for anything a closed tab left. A
+   flush is one batch; its seconds leave the queue only when the batch is
+   acknowledged. Offline (navigator.onLine false) nothing is sent and nothing is
+   lost. On pagehide a fetch({keepalive:true}) to the Firestore REST endpoint
+   sends what is left (navigator.sendBeacon cannot carry the sign-in header,
+   so it cannot write to a rules-protected collection).
+   A flush the rules refuse is NOT thrown away: it first re-reads the server's
+   day total and trims the queue to the cap; if nothing is left to trim, the
+   refusal is something else (the rules not published yet, say), so the
+   seconds stay queued and are retried every 5 minutes.
+   Known limit: if the SDK delivers a batch AFTER its 20 s wait ran out, the
+   retry sends those seconds twice. That needs a connection that stalls for
+   20 s and then recovers, and is bounded by the daily cap.
+
+   LIVE COUNT. While counting, a heartbeat { period, lastSeen } is written
+   every 30 s to heartbeats/<random per-browser-session id> — never the uid, no
+   other field (Firestore cannot make a collection readable "as a count only",
+   so the docs carry nothing worth reading). The strip counts the docs of the
+   student's period with lastSeen in the last 60 s. Needs a composite index
+   (firestore.indexes.json). Switched off with uiOn.
+
+   EVERYTHING A STUDENT SEES is behind PRACTICE_MINUTES_CONFIG.uiOn and lives
+   in the second half of this file (strip, recap, toast, My progress). The first
+   half has no DOM beyond the media listeners.
+   ══════════════════════════════════════════════════════════════════════ */
+(function(){
+  'use strict';
+
+  /* ── Config, with a default for any key that is missing ── */
+  var DEFAULTS = {
+    uiOn: false, weeklyGoalMinutes: 30, dailyCapMinutes: 20,
+    meetingDays: { '4': [1, 3, 5], '7': [1, 2, 3, 4, 5] }, defaultMeetingDays: [1, 2, 3, 4, 5],
+    noSchool: [], shortWeeks: [], semesters: [], streakStartWeek: '',
+    liveMinCount: 3, recapMinSeconds: 60, recapGapSeconds: 180, recapShowSeconds: 6, toastSeconds: 3
+  };
+  function cfg(){
+    var c = (typeof PRACTICE_MINUTES_CONFIG !== 'undefined' && PRACTICE_MINUTES_CONFIG) || {};
+    var o = {};
+    for(var k in DEFAULTS) o[k] = (c[k] === undefined || c[k] === null) ? DEFAULTS[k] : c[k];
+    return o;
+  }
+
+  /* ════════════════════════════════════════════════════════════════════
+     CALENDAR MATHS — pure functions of (config, data). No DOM, no clock.
+     Dates are local 'YYYY-MM-DD'; weeks are ISO ('2026-W47'), Monday first.
+     ════════════════════════════════════════════════════════════════════ */
+  var calc = {};
+  function pad(n){ return (n < 10 ? '0' : '') + n; }
+  calc.ymd = function(d){ return d.getFullYear() + '-' + pad(d.getMonth() + 1) + '-' + pad(d.getDate()); };
+  calc.parse = function(s){ var p = String(s).split('-'); return new Date(+p[0], +p[1] - 1, +p[2], 12, 0, 0); };   // noon: DST never moves the date
+  calc.addDays = function(d, n){ var r = new Date(d.getTime()); r.setDate(r.getDate() + n); return r; };
+  calc.weekIdOf = function(dateStr){
+    var d = calc.parse(dateStr);
+    var thu = calc.addDays(d, 3 - ((d.getDay() + 6) % 7));
+    var jan1 = new Date(thu.getFullYear(), 0, 1, 12, 0, 0);
+    var doy = Math.round((thu.getTime() - jan1.getTime()) / 86400000);
+    return thu.getFullYear() + '-W' + pad(Math.floor(doy / 7) + 1);
+  };
+  calc.weekMonday = function(weekId){
+    var m = /^(\d{4})-W(\d{2})$/.exec(weekId);
+    var jan4 = new Date(+m[1], 0, 4, 12, 0, 0);
+    var mon1 = calc.addDays(jan4, -((jan4.getDay() + 6) % 7));
+    return calc.addDays(mon1, (+m[2] - 1) * 7);
+  };
+  calc.weekAdd = function(weekId, n){ return calc.weekIdOf(calc.ymd(calc.addDays(calc.weekMonday(weekId), 7 * n))); };
+  calc.noSchoolSet = function(c){
+    var set = {};
+    (c.noSchool || []).forEach(function(e){
+      if(typeof e === 'string'){ set[e] = true; return; }
+      if(Array.isArray(e) && e.length === 2){
+        var d = calc.parse(e[0]), end = calc.parse(e[1]);
+        for(var i = 0; i < 400 && d <= end; i++){ set[calc.ymd(d)] = true; d = calc.addDays(d, 1); }
+      }
+    });
+    return set;
+  };
+  calc.days = function(c, period){ return (c.meetingDays && c.meetingDays[period]) || c.defaultMeetingDays; };
+  calc.normalMeetings = function(c, period){ return calc.days(c, period).length; };
+  /* The dates a section meets in a week (no-school days left out), and how many
+     meetings the week has — a shortWeeks entry REPLACES the count. */
+  calc.meetings = function(c, weekId, period){
+    var ns = calc.noSchoolSet(c), mon = calc.weekMonday(weekId);
+    var dates = calc.days(c, period).map(function(wd){ return calc.ymd(calc.addDays(mon, wd - 1)); })
+      .filter(function(d){ return !ns[d]; });
+    var count = dates.length;
+    (c.shortWeeks || []).forEach(function(s){
+      if(s && s.week === weekId && s.meetings && typeof s.meetings[period] === 'number') count = s.meetings[period];
+    });
+    return { dates: dates, count: Math.max(0, count) };
+  };
+  /* goal × (meetings ÷ normal). 0 = a week with no meetings. */
+  calc.goalSeconds = function(c, weekId, period){
+    var normal = calc.normalMeetings(c, period), m = calc.meetings(c, weekId, period).count;
+    if(m <= 0 || normal <= 0) return 0;
+    return Math.round(c.weeklyGoalMinutes * 60 * Math.min(m, normal) / normal);
+  };
+  calc.semesterOf = function(c, weekId){
+    var thu = calc.ymd(calc.addDays(calc.weekMonday(weekId), 3));
+    for(var i = 0; i < (c.semesters || []).length; i++){
+      var s = c.semesters[i];
+      if(thu >= s.start && thu <= s.end) return i;
+    }
+    return -1;
+  };
+  /* The whole picture for one student. weekSecs = { 'YYYY-Www': seconds }.
+     Walks the weeks in order, once. A week with zero meetings is skipped. A hit
+     adds to the streak. The first miss in each semester is forgiven (the streak
+     is kept, not extended); any later miss resets it. The week in progress can
+     add to the streak but never breaks it. */
+  calc.status = function(c, weekSecs, period, today){
+    var cur = calc.weekIdOf(today), normalGoal = Math.round(c.weeklyGoalMinutes * 60);
+    var first = null;
+    Object.keys(weekSecs).forEach(function(w){ if((weekSecs[w] || 0) > 0 && (first === null || w < first)) first = w; });
+    if(c.streakStartWeek && (first === null || c.streakStartWeek > first)) first = c.streakStartWeek;
+    var streak = 0, longest = 0, used = {};
+    if(first !== null && first <= cur){
+      var w = first;
+      for(var i = 0; i < 160 && w < cur; i++, w = calc.weekAdd(w, 1)){
+        var g = calc.goalSeconds(c, w, period);
+        if(g <= 0) continue;
+        if((weekSecs[w] || 0) >= g){ streak++; if(streak > longest) longest = streak; }
+        else {
+          var sem = calc.semesterOf(c, w);
+          if(!used[sem]) used[sem] = true; else streak = 0;
+        }
+      }
+    }
+    var streakBefore = streak;
+    var curGoal = calc.goalSeconds(c, cur, period), curSecs = weekSecs[cur] || 0;
+    var isBreak = curGoal <= 0, hit = !isBreak && curSecs >= curGoal;
+    if(hit){ streak++; if(streak > longest) longest = streak; }
+    var history = [];
+    for(var k = 7; k >= 0; k--){
+      var id = calc.weekAdd(cur, -k), secs = weekSecs[id] || 0, goal = calc.goalSeconds(c, id, period), state;
+      if(id === cur) state = 'now';
+      else if(goal <= 0) state = 'break';
+      else if(secs >= goal) state = 'hit';
+      else state = (first !== null && id >= first) ? 'missed' : 'none';
+      history.push({ id: id, secs: secs, goal: goal, state: state, hit: id === cur ? hit : state === 'hit' });
+    }
+    return {
+      week: { id: cur, secs: curSecs, goal: isBreak ? normalGoal : curGoal, isBreak: isBreak, hit: hit },
+      streak: streak, streakBefore: streakBefore, longest: longest, history: history
+    };
+  };
+
+  /* ════════════════════════════════════════════════════════════════════
+     STATE
+     ════════════════════════════════════════════════════════════════════ */
+  var HEARTBEAT_MS = 30000, FLUSH_MS = 60000, PERSIST_MS = 5000, FLUSH_WAIT_MS = 20000, DENIED_BACKOFF_MS = 300000;
+  var host = null;
+  var S = null;                       // per-student state, rebuilt when the uid changes
+  var media = new Set();              // backing-track elements seen playing
+  var timer = 0, lastTick = 0, idleSec = 0, session = null;
+  var lastBeat = 0, lastFlush = 0, lastPersist = 0, deniedUntil = 0;
+  var sid = '';                       // random id for this browser session (heartbeats)
+
+  function freshState(uid){
+    return { uid: uid, days: {}, weeks: {}, pend: {}, frac: 0, loaded: false, loading: null, flushing: false,
+             live: 0, liveAt: 0, toastWeek: '', pendingToast: false, lastRecapAt: 0 };
+  }
+  function ls(k, v){
+    try {
+      if(v === undefined) return localStorage.getItem(k);
+      if(v === null) localStorage.removeItem(k); else localStorage.setItem(k, v);
+    } catch(e) {}
+    return null;
+  }
+  function lsJson(k){ try { return JSON.parse(ls(k) || 'null'); } catch(e) { return null; } }
+  function now(){ return (typeof performance !== 'undefined' && performance.now) ? performance.now() : Date.now(); }
+  function today(){ return calc.ymd(new Date()); }
+
+  function getHost(){ return host || (typeof window !== 'undefined' && window.PM_HOST) || null; }
+  function uid(){ var h = getHost(); var u = h && h.user && h.user(); return u ? u.uid : null; }
+  function period(){
+    var h = getHost(), p = h && h.period ? h.period() : '', u = uid();
+    if(p){ if(u) ls('pm:p:' + u, p); return p; }
+    return u ? (ls('pm:p:' + u) || '') : '';
+  }
+  function dbP(){ var h = getHost(); return h && h.db ? Promise.resolve(h.db()) : Promise.reject(new Error('no db')); }
+  function FV(){ return firebase.firestore.FieldValue; }
+
+  /* Rebuild S when the signed-in student changes (sign-out, shared Chromebook). */
+  function sync(){
+    var u = uid();
+    if(!S || S.uid !== u){
+      if(S && S.uid) persist();
+      S = u ? freshState(u) : null;
+      if(S){
+        var q = lsJson('pm:q:' + u), c = lsJson('pm:c:' + u);
+        if(q && q.days) S.pend = q.days;
+        if(c){ S.days = c.days || {}; S.weeks = c.weeks || {}; }
+        S.toastWeek = ls('pm:t:' + u) || '';
+        S.lastRecapAt = 0;
+      }
+      session = null; idleSec = 0;
+    }
+    return S;
+  }
+  function persist(){
+    if(!S) return;
+    lastPersist = now();
+    var has = Object.keys(S.pend).some(function(d){ return S.pend[d] > 0; });
+    ls('pm:q:' + S.uid, has ? JSON.stringify({ days: S.pend }) : null);
+  }
+  function cacheServer(){ if(S) ls('pm:c:' + S.uid, JSON.stringify({ days: S.days, weeks: S.weeks })); }
+
+  /* ── Totals: what the server holds plus what is still queued ── */
+  function dayTotal(d){ return (S.days[d] || 0) + (S.pend[d] || 0); }
+  function weekTotals(){
+    var m = {};
+    Object.keys(S.weeks).forEach(function(w){ m[w] = S.weeks[w].seconds || 0; });
+    Object.keys(S.pend).forEach(function(d){ if(S.pend[d] > 0){ var w = calc.weekIdOf(d); m[w] = (m[w] || 0) + S.pend[d]; } });
+    return m;
+  }
+  function status(){ return calc.status(cfg(), weekTotals(), period(), today()); }
+  function allTimeSeconds(){
+    var t = 0, m = weekTotals();
+    Object.keys(m).forEach(function(w){ t += m[w]; });
+    return t;
+  }
+
+  /* ════════════════════════════════════════════════════════════════════
+     FINDING THE PLAYING ELEMENTS
+     ════════════════════════════════════════════════════════════════════ */
+  function isBacking(el){
+    var s = '';
+    try { s = el.currentSrc || el.src || ''; } catch(e) {}
+    return /\/audio\/[^\/?#]*-backing-[^\/?#]*\.(mp3|m4a|wav|ogg)/i.test(s);
+  }
+  function note(el){
+    if(!el || media.has(el)) { ensureTimer(); return; }
+    media.add(el);
+    ensureTimer();
+  }
+  if(typeof HTMLMediaElement !== 'undefined' && !HTMLMediaElement.prototype.__pmWrapped){
+    var origPlay = HTMLMediaElement.prototype.play;
+    HTMLMediaElement.prototype.play = function(){
+      try { note(this); } catch(e) {}
+      return origPlay.apply(this, arguments);
+    };
+    HTMLMediaElement.prototype.__pmWrapped = true;
+  }
+  if(typeof document !== 'undefined'){
+    document.addEventListener('playing', function(e){ if(e.target && e.target.tagName === 'AUDIO') note(e.target); }, true);
+    document.addEventListener('visibilitychange', function(){
+      if(document.visibilityState === 'hidden'){ persist(); flush(); }
+      else tick();
+    });
+  }
+  function audible(el){
+    if(!isBacking(el)) return false;
+    if(el.paused || el.ended || el.muted || el.volume < 0.001 || el.readyState < 3) return false;
+    var moved = el.__pmT === undefined || el.currentTime !== el.__pmT;
+    el.__pmT = el.currentTime;
+    return moved;
+  }
+
+  /* ════════════════════════════════════════════════════════════════════
+     THE TICK — once a second while anything backing-track-ish may be playing
+     ════════════════════════════════════════════════════════════════════ */
+  function ensureTimer(){
+    if(timer || typeof setInterval === 'undefined') return;
+    lastTick = now();
+    timer = setInterval(tick, 1000);
+  }
+  function stopTimer(){ if(timer){ clearInterval(timer); timer = 0; } }
+
+  function tick(){
+    var t = now(), dt = Math.min(Math.max((t - lastTick) / 1000, 0), 2);
+    lastTick = t;
+    var st = sync();
+    var anyAudible = false;
+    media.forEach(function(el){
+      if(audible(el)) anyAudible = true;
+      else if(el.paused || el.ended){ media.delete(el); el.__pmT = undefined; }
+    });
+    var visible = typeof document === 'undefined' || document.visibilityState !== 'hidden';
+    if(st && anyAudible && visible){
+      idleSec = 0;
+      if(!session) session = { counted: 0, startedAt: Date.now() };
+      if(!st.loaded && !st.loading) load();
+      if(t - lastBeat >= HEARTBEAT_MS) beat(t);
+      addSeconds(dt);
+      if(t - lastFlush >= FLUSH_MS) flush();
+    } else {
+      idleSec += dt;
+      if(session && idleSec >= 2) endSession();
+    }
+    if(t - lastPersist >= PERSIST_MS) persist();
+    uiTick();
+    if(!media.size && !session && idleSec >= 2) stopTimer();
+  }
+
+  function addSeconds(dt){
+    var st = S, c = cfg();
+    st.frac += dt;
+    var whole = Math.floor(st.frac);
+    if(whole < 1) return;
+    st.frac -= whole;
+    var d = today(), cap = Math.round(c.dailyCapMinutes * 60);
+    var n = Math.min(whole, Math.max(0, cap - dayTotal(d)));
+    if(n <= 0) return;
+    var w = calc.weekIdOf(d), per = period();
+    var before = weekTotals()[w] || 0, goal = calc.goalSeconds(c, w, per);
+    st.pend[d] = (st.pend[d] || 0) + n;
+    session.counted += n;
+    if(goal > 0 && before < goal && before + n >= goal) goalCrossed(w);
+  }
+
+  function endSession(){
+    var s = session;
+    session = null; idleSec = 0;
+    if(!S) return;
+    persist();
+    flush();
+    if(s) recapMaybe(s);
+  }
+
+  /* ════════════════════════════════════════════════════════════════════
+     FIRESTORE — load, flush, heartbeat
+     ════════════════════════════════════════════════════════════════════ */
+  function load(){
+    var st = S;
+    if(!st) return Promise.resolve();
+    if(st.loading) return st.loading;
+    var mon = calc.ymd(calc.weekMonday(calc.weekIdOf(today())));
+    st.loading = dbP().then(function(db){
+      var base = db.collection('minutes').doc(st.uid);
+      return Promise.all([
+        base.collection('weeks').get(),
+        base.collection('days').where(firebase.firestore.FieldPath.documentId(), '>=', mon).get()
+      ]);
+    }).then(function(r){
+      if(S !== st) return;
+      var weeks = {}, days = {};
+      r[0].forEach(function(doc){ var v = doc.data() || {}; weeks[doc.id] = { seconds: +v.seconds || 0, goalSeconds: +v.goalSeconds || 0, hit: v.hit === true }; });
+      r[1].forEach(function(doc){ days[doc.id] = +(doc.data() || {}).seconds || 0; });
+      st.weeks = weeks; st.days = days; st.loaded = true;
+      cacheServer();
+      trimToCap();
+      flush();
+      uiNow();
+    }).catch(function(){ /* offline or rules not published yet: the cache and the queue carry on */ })
+      .then(function(){ if(S === st) st.loading = null; });
+    return st.loading;
+  }
+
+  /* Cut the queue so server + queue never passes the cap on any day. */
+  function trimToCap(){
+    var cap = Math.round(cfg().dailyCapMinutes * 60), changed = false;
+    Object.keys(S.pend).forEach(function(d){
+      var room = Math.max(0, cap - (S.days[d] || 0));
+      if(S.pend[d] > room){ S.pend[d] = room; changed = true; }
+      if(S.pend[d] <= 0){ delete S.pend[d]; changed = true; }
+    });
+    if(changed) persist();
+    return changed;
+  }
+
+  /* The writes for a set of queued seconds — shared by the SDK batch and the
+     keepalive REST call so the two cannot drift. */
+  function buildOps(snap){
+    var c = cfg(), per = period(), ops = [], byWeek = {};
+    Object.keys(snap).forEach(function(d){
+      if(!(snap[d] > 0)) return;
+      ops.push({ kind: 'day', id: d, inc: snap[d] });
+      var w = calc.weekIdOf(d);
+      byWeek[w] = (byWeek[w] || 0) + snap[d];
+    });
+    Object.keys(byWeek).forEach(function(w){
+      var goal = calc.goalSeconds(c, w, per) || Math.round(c.weeklyGoalMinutes * 60);
+      var total = ((S.weeks[w] && S.weeks[w].seconds) || 0) + byWeek[w];
+      var hit = (S.weeks[w] && S.weeks[w].hit === true) || (calc.goalSeconds(c, w, per) > 0 && total >= goal);
+      ops.push({ kind: 'week', id: w, inc: byWeek[w], goalSeconds: goal, hit: !!hit });
+    });
+    return ops;
+  }
+  function applySent(snap, ops){
+    ops.forEach(function(o){
+      if(o.kind === 'day') S.days[o.id] = (S.days[o.id] || 0) + o.inc;
+      else S.weeks[o.id] = { seconds: ((S.weeks[o.id] && S.weeks[o.id].seconds) || 0) + o.inc, goalSeconds: o.goalSeconds, hit: o.hit };
+    });
+    Object.keys(snap).forEach(function(d){
+      S.pend[d] = (S.pend[d] || 0) - snap[d];
+      if(S.pend[d] <= 0) delete S.pend[d];
+    });
+    persist(); cacheServer();
+  }
+  function snapshotPending(){
+    var snap = {}, any = false;
+    Object.keys(S.pend).forEach(function(d){ if(S.pend[d] > 0){ snap[d] = S.pend[d]; any = true; } });
+    return any ? snap : null;
+  }
+  function withTimeout(p, ms){
+    return new Promise(function(res, rej){
+      var t = setTimeout(function(){ rej(new Error('timeout')); }, ms);
+      p.then(function(v){ clearTimeout(t); res(v); }, function(e){ clearTimeout(t); rej(e); });
+    });
+  }
+  function flush(){
+    var st = S;
+    lastFlush = now();
+    if(!st || st.flushing) return Promise.resolve(false);
+    if(typeof navigator !== 'undefined' && navigator.onLine === false) return Promise.resolve(false);
+    if(Date.now() < deniedUntil) return Promise.resolve(false);
+    var snap = snapshotPending();
+    if(!snap) return Promise.resolve(true);
+    st.flushing = true;
+    var ops = buildOps(snap);
+    return withTimeout(dbP().then(function(db){
+      var batch = db.batch(), base = db.collection('minutes').doc(st.uid);
+      ops.forEach(function(o){
+        if(o.kind === 'day') batch.set(base.collection('days').doc(o.id), { seconds: FV().increment(o.inc) }, { merge: true });
+        else batch.set(base.collection('weeks').doc(o.id), { seconds: FV().increment(o.inc), goalSeconds: o.goalSeconds, hit: o.hit }, { merge: true });
+      });
+      return batch.commit();
+    }), FLUSH_WAIT_MS).then(function(){
+      st.flushing = false;
+      if(S === st){ applySent(snap, ops); uiNow(); }
+      refreshToken();
+      return true;
+    }, function(err){
+      st.flushing = false;
+      if(S !== st) return false;
+      if(err && err.code === 'permission-denied') return afterDenied(st);
+      return false;      // offline / timeout: the queue keeps everything
+    });
+  }
+  /* Refused by the rules. Re-read the server, trim the queue to the cap and
+     try again once; if the queue did not shrink, something other than the cap
+     is wrong (rules not published): keep the seconds, try again in 5 minutes. */
+  function afterDenied(st){
+    var before = JSON.stringify(st.pend);
+    return load().then(function(){
+      if(S !== st) return false;
+      if(JSON.stringify(st.pend) === before) deniedUntil = Date.now() + DENIED_BACKOFF_MS;
+      return false;
+    });
+  }
+
+  /* An ID token kept fresh for the unload write (getIdToken is async, and
+     pagehide cannot wait for it). */
+  var idToken = '';
+  function refreshToken(){
+    try {
+      var h = getHost(), u = h && h.user && h.user();
+      if(u) u.getIdToken().then(function(tk){ idToken = tk; }, function(){});
+    } catch(e) {}
+  }
+  function keepaliveFlush(){
+    var st = S;
+    if(!st || st.flushing || !idToken || typeof fetch === 'undefined') return;
+    if(typeof navigator !== 'undefined' && navigator.onLine === false) return;
+    if(Date.now() < deniedUntil) return;
+    var snap = snapshotPending();
+    if(!snap) return;
+    var ops = buildOps(snap);
+    var proj = firebaseConfig.projectId, root = 'projects/' + proj + '/databases/(default)/documents/minutes/' + st.uid + '/';
+    var writes = ops.map(function(o){
+      if(o.kind === 'day') return { update: { name: root + 'days/' + o.id, fields: {} }, updateMask: { fieldPaths: [] },
+        updateTransforms: [{ fieldPath: 'seconds', increment: { integerValue: String(o.inc) } }] };
+      return { update: { name: root + 'weeks/' + o.id, fields: { goalSeconds: { integerValue: String(o.goalSeconds) }, hit: { booleanValue: o.hit } } },
+        updateMask: { fieldPaths: ['goalSeconds', 'hit'] },
+        updateTransforms: [{ fieldPath: 'seconds', increment: { integerValue: String(o.inc) } }] };
+    });
+    try {
+      fetch('https://firestore.googleapis.com/v1/projects/' + proj + '/databases/(default)/documents:commit', {
+        method: 'POST', keepalive: true,
+        headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + idToken },
+        body: JSON.stringify({ writes: writes })
+      }).catch(function(){});
+      /* Assume it lands: leaving the seconds queued would send them twice the
+         next time this student opens the site. Losing under a minute is the
+         safer mistake than counting it twice. */
+      applySent(snap, ops);
+    } catch(e) {}
+  }
+  if(typeof window !== 'undefined'){
+    window.addEventListener('pagehide', function(){ if(S){ persist(); keepaliveFlush(); persist(); } });
+    window.addEventListener('online', function(){ if(sync()) { if(!S.loaded) load(); flush(); } });
+  }
+
+  function beat(t){
+    lastBeat = t;
+    var p = period();
+    if(!p || (typeof navigator !== 'undefined' && navigator.onLine === false)) return;
+    if(!sid){
+      try { sid = sessionStorage.getItem('pmSid') || ''; } catch(e) {}
+      if(!sid){
+        var a = new Uint8Array(12);
+        (window.crypto || window.msCrypto).getRandomValues(a);
+        sid = Array.prototype.map.call(a, function(b){ return (b < 16 ? '0' : '') + b.toString(16); }).join('');
+        try { sessionStorage.setItem('pmSid', sid); } catch(e) {}
+      }
+    }
+    dbP().then(function(db){
+      return db.collection('heartbeats').doc(sid).set({ period: p, lastSeen: FV().serverTimestamp() });
+    }).catch(function(){});
+  }
+
+  /* ════════════════════════════════════════════════════════════════════
+     EVERYTHING BELOW IS WHAT A STUDENT SEES — all of it behind uiOn
+     ════════════════════════════════════════════════════════════════════ */
+  function tr(k, p){ return typeof t === 'function' ? t(k, p) : k; }
+  function lang(){ return typeof getLang === 'function' ? getLang() : 'en'; }
+  function esc(s){ return String(s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;'); }
+  function uiOn(){ var h = getHost(); return !!(h && h.ui && cfg().uiOn && sync()); }
+  function mins(sec){ return Math.floor(sec / 60); }
+  function plural(base, n){ return tr(base + (n === 1 ? '.one' : '.many'), { n: n }); }
+
+  var FLAME = '<svg class="pm-flame-svg" viewBox="0 0 24 24" aria-hidden="true"><path fill="currentColor" d="M12 2c.6 3.1 2.2 4.6 3.9 6.3C17.6 10 19 11.8 19 14.5A7 7 0 0 1 5 14.5c0-1.9.8-3.5 1.9-4.6.2 1.4.9 2.4 2 2.9C8.5 9 9.7 5.1 12 2z"/></svg>';
+  var CIRC = 2 * Math.PI * 7;
+  function ringSvg(frac, hit, cls){
+    var f = Math.max(0, Math.min(1, frac));
+    return '<svg class="pm-ring ' + (cls || '') + (hit ? ' pm-hit' : '') + '" viewBox="0 0 20 20" aria-hidden="true">'
+      + '<circle class="pm-ring-bg" cx="10" cy="10" r="7"/>'
+      + '<circle class="pm-ring-fg" cx="10" cy="10" r="7" transform="rotate(-90 10 10)" stroke-dasharray="' + CIRC.toFixed(2) + '" stroke-dashoffset="' + (CIRC * (1 - f)).toFixed(2) + '"/></svg>';
+  }
+
+  /* ── The status strip: right side of the practice card's sticky bar ── */
+  function stripInner(){
+    var st = status(), w = st.week;
+    var live = (S.live >= cfg().liveMinCount)
+      ? '<span class="pm-live"><i class="pm-dot" aria-hidden="true"></i>' + esc(tr('pm.playing', { n: S.live })) + '</span>' : '';
+    var done = mins(w.secs), goal = mins(w.goal);
+    var weekTxt = tr('pm.weekMin', { done: done, goal: goal });
+    var flameLabel = plural('pm.streak', st.streak);
+    return live
+      + '<span class="pm-week">' + ringSvg(w.goal ? w.secs / w.goal : 0, w.hit) + '<span>' + esc(weekTxt) + '</span></span>'
+      + '<span class="pm-streak' + (w.hit ? ' pm-on' : '') + '" role="img" aria-label="' + esc(flameLabel) + '">' + FLAME + '<b>' + st.streak + '</b></span>';
+  }
+  function stripHtml(){
+    if(!uiOn()) return '';
+    ensureStripWork();
+    return '<span class="pm-strip" role="group">' + stripInner() + '</span>';
+  }
+  var stripKey = '';
+  function refreshStrip(force){
+    var els = typeof document !== 'undefined' ? document.querySelectorAll('.pm-strip') : [];
+    if(!els.length) return;
+    if(!uiOn()){ Array.prototype.forEach.call(els, function(e){ e.remove(); }); return; }
+    var html = stripInner(), key = lang() + '|' + html;
+    if(!force && key === stripKey) return;
+    stripKey = key;
+    Array.prototype.forEach.call(els, function(e){ e.innerHTML = html; });
+  }
+  /* The strip needs the server's numbers and the live count; start them when a
+     strip is first drawn, and keep the count fresh while one is on screen. */
+  var liveTimer = 0;
+  function ensureStripWork(){
+    if(!S) return;
+    if(!S.loaded && !S.loading) load();
+    if(!liveTimer && typeof setInterval !== 'undefined'){
+      pollLive();
+      liveTimer = setInterval(function(){
+        if(!document.querySelector('.pm-strip')){ clearInterval(liveTimer); liveTimer = 0; return; }
+        if(document.visibilityState !== 'hidden') pollLive();
+      }, HEARTBEAT_MS);
+    }
+    toastMaybe();
+  }
+  /* The count is ONE aggregation query over REST (runAggregationQuery, count) —
+     the compat SDK this site loads has no count(), and reading every matching
+     heartbeat doc on every poll would cost a read per player per poll for the
+     whole class. The same rule as a list applies (any signed-in user); the
+     query needs the composite index in firestore.indexes.json. Any failure
+     (no index yet, offline, no token) hides the "N playing" item. */
+  function pollLive(){
+    var st = S, p = period();
+    if(!st || !p || !uiOn() || (typeof navigator !== 'undefined' && navigator.onLine === false) || typeof fetch === 'undefined') return;
+    var h = getHost(), u = h && h.user && h.user();
+    if(!u || typeof u.getIdToken !== 'function') return;
+    var cutoff = new Date(Date.now() - 60000).toISOString();
+    var body = { structuredAggregationQuery: {
+      structuredQuery: {
+        from: [{ collectionId: 'heartbeats' }],
+        where: { compositeFilter: { op: 'AND', filters: [
+          { fieldFilter: { field: { fieldPath: 'period' }, op: 'EQUAL', value: { stringValue: p } } },
+          { fieldFilter: { field: { fieldPath: 'lastSeen' }, op: 'GREATER_THAN', value: { timestampValue: cutoff } } }
+        ] } }
+      },
+      aggregations: [{ alias: 'n', count: {} }]
+    } };
+    u.getIdToken().then(function(tok){
+      return fetch('https://firestore.googleapis.com/v1/projects/' + firebaseConfig.projectId + '/databases/(default)/documents:runAggregationQuery', {
+        method: 'POST', headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + tok }, body: JSON.stringify(body)
+      });
+    }).then(function(r){ return r.json(); }).then(function(j){
+      var n = +(((j[0] || {}).result || {}).aggregateFields || {}).n.integerValue;
+      if(S !== st) return;
+      st.live = isFinite(n) ? n : 0; st.liveAt = Date.now();
+      refreshStrip();
+    }).catch(function(){ if(S === st){ st.live = 0; refreshStrip(); } });
+  }
+  function uiTick(){ if(typeof document !== 'undefined' && document.querySelector('.pm-strip')) refreshStrip(); }
+  function uiNow(){ uiTick(); }
+
+  /* ── Pills that float under the sticky bar ── */
+  function anchorRect(){
+    var bar = document.querySelector('.ca-screen .page-topbar');
+    return bar ? bar.getBoundingClientRect() : null;
+  }
+  function removeEl(id){ var e = document.getElementById(id); if(e) e.remove(); }
+
+  function goalCrossed(weekId){
+    var st = S;
+    if(st.toastWeek === weekId) return;
+    st.pendingToast = weekId;
+    if(uiOn()) toastMaybe();
+  }
+  function toastMaybe(){
+    var st = S;
+    if(!st || !st.pendingToast || !uiOn()) return;
+    var bar = anchorRect();
+    if(!bar || !document.querySelector('.pm-strip')) return;          // no practice card on screen: show it at the next one
+    var w = st.pendingToast;
+    st.pendingToast = false; st.toastWeek = w; ls('pm:t:' + st.uid, w);
+    var s = status();
+    removeEl('pm-toast');
+    var el = document.createElement('div');
+    el.id = 'pm-toast'; el.className = 'pm-toast'; el.setAttribute('role', 'status');
+    el.innerHTML = FLAME + '<span>' + esc(s.streak >= 2 ? tr('pm.toastHit', { n: s.streak }) : tr('pm.toastHit1')) + '</span>';
+    el.style.top = Math.round(bar.bottom + 8) + 'px';
+    el.style.left = Math.round(bar.left + bar.width / 2) + 'px';
+    document.body.appendChild(el);
+    setTimeout(function(){ el.remove(); }, cfg().toastSeconds * 1000);
+  }
+
+  function recapMaybe(s){
+    var c = cfg(), st = S;
+    if(!uiOn() || !st || s.counted < c.recapMinSeconds) return;
+    var bar = anchorRect();
+    if(!bar || !document.querySelector('.pm-strip')) return;
+    if(Date.now() - st.lastRecapAt < c.recapGapSeconds * 1000) return;
+    st.lastRecapAt = Date.now();
+    var u = status(), w = u.week, need = Math.max(1, Math.ceil((w.goal - w.secs) / 60));
+    var line = tr('pm.recapWeek', { done: mins(w.secs), goal: mins(w.goal) }) + ' ';
+    if(w.isBreak) line = line.trim();
+    else if(w.hit) line += u.streak >= 2 ? tr('pm.recapHit', { n: u.streak }) : tr('pm.recapHit1');
+    else line += u.streakBefore >= 1
+      ? tr('pm.recapMore' + (u.streakBefore === 1 ? '.one' : '.many'), { need: need, n: u.streakBefore })
+      : tr('pm.recapMore0', { need: need });
+    removeEl('pm-recap');
+    var el = document.createElement('div');
+    el.id = 'pm-recap'; el.className = 'pm-recap'; el.setAttribute('role', 'status');
+    el.innerHTML = '<button type="button" class="pm-recap-x" aria-label="' + esc(tr('pm.close')) + '">&#x2715;</button>'
+      + '<div class="pm-recap-big">' + esc(tr('pm.recapPlus', { n: Math.max(1, mins(s.counted)) })) + '</div>'
+      + '<p class="pm-recap-sub">' + esc(line) + '</p>';
+    var toast = document.getElementById('pm-toast');
+    el.style.top = Math.round((toast ? toast.getBoundingClientRect().bottom : bar.bottom) + 8) + 'px';
+    el.style.right = Math.max(8, Math.round(window.innerWidth - bar.right)) + 'px';
+    document.body.appendChild(el);
+    var gone = function(){ el.remove(); };
+    el.querySelector('.pm-recap-x').addEventListener('click', gone);
+    setTimeout(gone, c.recapShowSeconds * 1000);
+  }
+
+  /* ── My progress ── */
+  var DOW_KEYS = { 1: 'pm.dow1', 2: 'pm.dow2', 3: 'pm.dow3', 4: 'pm.dow4', 5: 'pm.dow5', 6: 'pm.dow6', 7: 'pm.dow7' };
+  function renderProgress(host_el){
+    if(!host_el) return;
+    if(!uiOn()){ host_el.hidden = true; host_el.innerHTML = ''; return; }
+    host_el.hidden = false;
+    if(!S.loaded && !S.loading) load().then(function(){ if(!host_el.hidden && host_el.isConnected) host_el.innerHTML = progressHtml(); });
+    host_el.innerHTML = progressHtml();
+  }
+  function progressHtml(){
+    var c = cfg(), st = status(), w = st.week, per = period(), d = today();
+    var more = Math.max(1, Math.ceil((w.goal - w.secs) / 60));
+    var weekSub = w.isBreak ? '' : w.hit ? tr('pm.tileWeekHit')
+      : tr(st.streakBefore > 0 ? 'pm.tileWeekMore' : 'pm.tileWeekMore0', { n: more });
+    var tiles = '<div class="pm-tiles">'
+      + '<div class="pm-tile"><div class="pm-tile-h">' + esc(tr('pm.tileWeek')) + '</div>'
+      +   '<div class="pm-tile-row">' + ringSvg(w.goal ? w.secs / w.goal : 0, w.hit, 'pm-ring-lg') + '<b>' + esc(tr('pm.tileWeekVal', { done: mins(w.secs), goal: mins(w.goal) })) + '</b></div>'
+      +   '<div class="pm-tile-sub">' + esc(weekSub) + '</div></div>'
+      + '<div class="pm-tile"><div class="pm-tile-h">' + esc(tr('pm.tileStreak')) + '</div>'
+      +   '<div class="pm-tile-row"><span class="pm-streak pm-streak-lg' + (st.streak > 0 ? ' pm-on' : '') + '">' + FLAME + '</span><b>' + esc(plural('pm.tileStreakVal', st.streak)) + '</b></div>'
+      +   '<div class="pm-tile-sub">' + esc(plural('pm.tileLongest', st.longest)) + '</div></div>'
+      + '<div class="pm-tile"><div class="pm-tile-h">' + esc(tr('pm.tileToday')) + '</div>'
+      +   '<div class="pm-tile-row"><b class="pm-today">' + mins(dayTotal(d)) + '</b><span class="pm-today-u">' + esc(tr('pm.min')) + '</span></div>'
+      +   '<div class="pm-tile-sub">' + esc(tr('pm.tileAll', { n: mins(allTimeSeconds()) })) + '</div></div>'
+      + '</div>';
+    /* This week by day: only the weekdays this section meets (no-school days left out). */
+    var cap = Math.round(c.dailyCapMinutes * 60), dates = calc.meetings(c, w.id, per).dates;
+    var bars = dates.map(function(ds){
+      var secs = dayTotal(ds), wd = ((calc.parse(ds).getDay() + 6) % 7) + 1, h = Math.round(Math.min(1, secs / cap) * 100);
+      var label = tr(DOW_KEYS[wd]), tip = tr('pm.dayTip', { day: label, n: mins(secs) });
+      return '<div class="pm-bar' + (ds === d ? ' pm-bar-today' : '') + (ds > d ? ' pm-bar-future' : '') + '" title="' + esc(tip) + '" aria-label="' + esc(tip) + '" role="img">'
+        + '<span class="pm-bar-n">' + (secs ? mins(secs) : '') + '</span><span class="pm-bar-col"><i style="height:' + (secs ? Math.max(6, h) : 0) + '%"></i></span><span class="pm-bar-l">' + esc(label) + '</span></div>';
+    }).join('');
+    var days = '<div class="pm-sec-h">' + esc(tr('pm.byDay')) + '</div><div class="pm-bars">' + (bars || '') + '</div>';
+    /* Weeks: last 8, oldest first. */
+    var fmt = function(id){
+      try { return calc.weekMonday(id).toLocaleDateString(lang() === 'es' ? 'es' : 'en-US', { month: 'short', day: 'numeric' }); }
+      catch(e) { return id; }
+    };
+    var squares = st.history.map(function(h){
+      var key = h.state === 'hit' || (h.state === 'now' && h.hit) ? 'pm.weekHit' : h.state === 'break' ? 'pm.weekBreak' : h.state === 'now' ? 'pm.weekNow' : 'pm.weekMissed';
+      var tip = tr(key, { date: fmt(h.id), n: mins(h.secs) });
+      var cls = 'pm-sq pm-sq-' + h.state + (h.hit && h.state !== 'hit' ? ' pm-sq-hit' : '');
+      return '<button type="button" class="' + cls + '" title="' + esc(tip) + '" aria-label="' + esc(tip) + '" data-tip="' + esc(tip) + '">' + (h.hit ? FLAME : '') + '</button>';
+    }).join('');
+    var weeks = '<div class="pm-sec-h">' + esc(tr('pm.weeks')) + '</div><div class="pm-weeks" role="group">' + squares + '</div>'
+      + '<div class="pm-tip" id="pm-week-tip" aria-live="polite"></div>'
+      + '<p class="pm-cap">' + esc(tr('pm.caption')) + '</p>';
+    return '<div class="pm-panel"><div class="pm-panel-h">' + esc(tr('pm.title')) + '</div>' + tiles + days + weeks + '</div>';
+  }
+  if(typeof document !== 'undefined'){
+    document.addEventListener('click', function(e){
+      var b = e.target && e.target.closest ? e.target.closest('.pm-sq') : null;
+      if(!b) return;
+      var tip = document.getElementById('pm-week-tip');
+      if(tip) tip.textContent = b.getAttribute('data-tip') || '';
+    });
+  }
+  function onCardOpen(){ if(sync() && uiOn()){ ensureStripWork(); refreshStrip(true); } }
+
+  /* ── Public surface ── */
+  window.PM = {
+    calc: calc, cfg: cfg,
+    setHost: function(h){ host = h; },
+    track: note,
+    stripHtml: stripHtml, refreshStrip: refreshStrip, onCardOpen: onCardOpen,
+    renderProgress: renderProgress,
+    flush: flush, load: function(){ return sync() ? load() : Promise.resolve(); },
+    status: function(){ return sync() ? status() : null; },
+    _pollLive: pollLive, _session: function(){ return session; },
+    _state: function(){ return S; }, _tick: tick, _media: media, _end: endSession, _buildOps: buildOps
+  };
+})();

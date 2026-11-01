@@ -301,5 +301,76 @@ service cloud.firestore {
                         && request.resource.data.keys().hasOnly(['n'])
                         && request.resource.data.n == resource.data.n + 1);
     }
+
+    /* ══ PRACTICE MINUTES (2026-11-01; practice-minutes.js) ═══════════════
+       Two NEW blocks, nothing above this line was changed. They must be
+       published BEFORE (or with) the site code that writes to them, or every
+       write is refused.
+
+       minutes/{uid}/days/{YYYY-MM-DD}  { seconds }
+       minutes/{uid}/weeks/{YYYY-Www}   { seconds, goalSeconds, hit }
+       Only that signed-in uid reads or writes its own tree — not even the
+       teacher (no isTeacher() here on purpose: the numbers are the student's
+       own, an ungraded signal). The client adds seconds with increment(), so
+       the rule sees the resulting document: a day may hold at most
+       dailyCapSeconds() and a week at most seven days of that. No delete.
+       ⚠ dailyCapSeconds() is practice-minutes-config.js dailyCapMinutes × 60.
+       Raise one, raise the other, re-publish (checks.mjs 1cg fails a push
+       where they differ). HONEST LIMIT: a student at DevTools can write any
+       number up to the cap for themselves; the cap is the bound, and nothing
+       reads these numbers for a grade. */
+    function dailyCapSeconds() { return 1200; }
+    function pmOwner(userId) {
+      return isSignedIn() && request.auth.uid == userId;
+    }
+    match /minutes/{userId}/{document=**} {
+      allow read: if pmOwner(userId);
+    }
+    match /minutes/{userId}/days/{day} {
+      allow create, update: if pmOwner(userId)
+            && day.matches('^[0-9]{4}-[0-9]{2}-[0-9]{2}$')
+            && request.resource.data.keys().hasOnly(['seconds'])
+            && request.resource.data.seconds is number
+            && request.resource.data.seconds >= 0
+            && request.resource.data.seconds <= dailyCapSeconds();
+    }
+    match /minutes/{userId}/weeks/{week} {
+      allow create, update: if pmOwner(userId)
+            && week.matches('^[0-9]{4}-W[0-9]{2}$')
+            && request.resource.data.keys().hasOnly(['seconds', 'goalSeconds', 'hit'])
+            && request.resource.data.keys().hasAll(['seconds', 'goalSeconds', 'hit'])
+            && request.resource.data.seconds is number
+            && request.resource.data.seconds >= 0
+            && request.resource.data.seconds <= 7 * dailyCapSeconds()
+            && request.resource.data.goalSeconds is number
+            && request.resource.data.goalSeconds >= 0
+            && request.resource.data.goalSeconds <= 86400
+            && request.resource.data.hit is bool;
+    }
+
+    /* heartbeats/{sessionId}  { period, lastSeen } — the "N playing" count.
+       Firestore cannot make a collection readable "as a count only": a count
+       query needs the same read permission as reading the docs. So the docs
+       carry nothing worth reading. The id is a random string made once per
+       browser session (sessionStorage) — never a uid, and nothing here maps
+       back to one. The only fields are the class period and a server
+       timestamp; any other field is refused. Any signed-in user may read, so
+       the client can count the docs of its own period whose lastSeen is in
+       the last 60 s (needs the composite index in firestore.indexes.json).
+       lastSeen must equal the server's clock, so it cannot be backdated or
+       forged forward. No delete (old docs age out of the 60 s window; a TTL
+       policy on lastSeen can clear them — see APPLY-practice-minutes.md).
+       HONEST LIMIT: anyone signed in can write a heartbeat for a session id
+       they invent, so the count can be inflated; it is a decoration, and it
+       is hidden below three players. */
+    match /heartbeats/{sessionId} {
+      allow read: if isSignedIn();
+      allow create, update: if isSignedIn()
+            && sessionId.matches('^[0-9a-f]{24}$')
+            && request.resource.data.keys().hasOnly(['period', 'lastSeen'])
+            && request.resource.data.keys().hasAll(['period', 'lastSeen'])
+            && request.resource.data.period in ['4', '7', 'CAS']
+            && request.resource.data.lastSeen == request.time;
+    }
   }
 }

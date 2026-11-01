@@ -76,7 +76,7 @@ try {
 } catch { /* no tabs/ dir yet */ }
 
 const SHELL_FILES = [
-  'index.html', '404.html', 'mood-chart.html', 'styles.css', 'i18n.js', 'guitar-diagrams.js', 'class-activities.js', 'app.js', 'fab-tools.js', 'tuner.js', 'coach.js', 'teacher.js', 'live-quiz.js', 'config-main.js',
+  'index.html', '404.html', 'mood-chart.html', 'styles.css', 'i18n.js', 'guitar-diagrams.js', 'class-activities.js', 'app.js', 'practice-minutes-config.js', 'practice-minutes.js', 'fab-tools.js', 'tuner.js', 'coach.js', 'teacher.js', 'live-quiz.js', 'config-main.js',
   'trainer-core.js', 'trainer-audio.js', 'trainer-ui.js', 'trainer-site-adapter.js',
   'firebase-config.js', 'manifest.json', 'icon.svg',
   ...MODULE_FILES,
@@ -10810,6 +10810,135 @@ function checkCoachVerdicts() {
   if (bad === 0) ok(`${counts.reports} Coach reports, ${counts.descs} chord-card descriptions, ${counts.nrLevels} Note Runner levels ×2 and ${counts.doneScreens} arcade done screens read true; Power Chord Switch: ${counts.pwLoops} loops are three-finger shapes in the right group, ${counts.pwDraws} random draws all listed pairs (11 of 11 and both orders seen), the Again button replays the pair and Start draws, Start sticks in Change Up and not in Power Chord Switch (two columns that fit 657px), Every beat is the first speed button there, the live quiz keeps its 760px shell, ${counts.pwHints} slide hints match the diagrams (EN+ES), ${counts.pwViews} screens/rounds, ${counts.pwMemory} remembered tempo/speed pairs and ${counts.pwGates} pitch gates keep it apart from Change Up`);
 }
 
+/* ════════════════════════════════════════════════════════════════════
+   1cg. PRACTICE MINUTES (2026-11-01) — practice-minutes.js + its config + the
+   rules blocks it writes under.
+   The engine is RUN, not read: tools/pm-sim.mjs loads the real config and engine
+   into a sandbox with a fake clock, fake <audio>, fake network and fake Firestore
+   and plays sessions (what counts, the cap, offline and unload, a refusal by the
+   rules, the heartbeat, the week/streak maths against an independent ISO-week
+   algorithm). The count of assertions is pinned so deleting one to get green
+   fails here. The rest are source pins for things a run cannot see: the rules'
+   daily cap must equal the config's (a mismatch is silent — every write over the
+   rule's number is refused), the heartbeat block must keep carrying nothing but
+   { period, lastSeen } and no uid, the minutes block must stay owner-only with
+   no delete, every script tag is in place in order, every pm.* string the engine
+   asks for exists in English AND Spanish (and every one is used), and the three
+   hooks into app.js / journey.js are still there.
+   The browser half (strip, recap, toast, My progress, 1366×657, both languages,
+   a real <audio>) is tools/pm-e2e.mjs — it needs Chrome, so it is run by hand.
+   ════════════════════════════════════════════════════════════════════ */
+const PM_SIM_PIN = 79;
+function checkPracticeMinutes(i18nTable) {
+  head('1cg. Practice minutes: the engine is run; the rules cap, heartbeat shape, wiring and strings are pinned');
+  let bad = 0;
+  const fail = m => { err(m); problems++; bad++; };
+  const read = f => { try { return readFileSync(join(ROOT, f), 'utf8'); } catch { return null; } };
+  const strip = t => t.replace(/\/\*[\s\S]*?\*\//g, '').replace(/^\s*\/\/.*$/gm, '');
+
+  // 1. run the engine
+  const r = spawnSync(process.execPath, [join(ROOT, 'tools', 'pm-sim.mjs'), '--quiet'], { encoding: 'utf8', timeout: 180000 });
+  const lines = (r.stdout || '').trim().split('\n');
+  const m = /pm-sim: (\d+) passed, (\d+) failed/.exec(lines[lines.length - 1] || '') || /pm-sim: (\d+) passed, (\d+) failed/.exec((r.stdout || ''));
+  if (r.status !== 0 || !m) {
+    fail('tools/pm-sim.mjs failed' + (r.error ? ': ' + r.error.message : ''));
+    for (const l of lines.slice(-6)) console.log(`${C.dim}      ${l}${C.reset}`);
+    return;
+  }
+  if (+m[1] !== PM_SIM_PIN || +m[2] !== 0) fail(`pm-sim ran ${m[1]} assertions (${m[2]} failed); pinned at ${PM_SIM_PIN} — if you changed the simulation on purpose, re-pin PM_SIM_PIN (never lower it to hide a deleted scenario)`);
+
+  // 2. config shape + the rules' cap
+  const cfgSrc = read('practice-minutes-config.js'), rules = read('firestore.rules');
+  let cfg = null;
+  try { const sb = {}; vm.createContext(sb); vm.runInContext(cfgSrc + '\n;globalThis.__C = PRACTICE_MINUTES_CONFIG;', sb); cfg = sb.__C; } catch (e) { fail('practice-minutes-config.js does not run: ' + e.message); }
+  if (cfg) {
+    const num = (k, lo, hi) => { if (typeof cfg[k] !== 'number' || !isFinite(cfg[k]) || cfg[k] < lo || cfg[k] > hi) fail(`config.${k} must be a number from ${lo} to ${hi} (is ${JSON.stringify(cfg[k])})`); };
+    if (typeof cfg.uiOn !== 'boolean') fail('config.uiOn must be true or false');
+    num('weeklyGoalMinutes', 1, 600); num('dailyCapMinutes', 1, 240); num('liveMinCount', 1, 100);
+    const days = a => Array.isArray(a) && a.length > 0 && a.length <= 7 && a.every(d => Number.isInteger(d) && d >= 1 && d <= 7) && new Set(a).size === a.length;
+    if (!cfg.meetingDays || !Object.keys(cfg.meetingDays).length || !Object.values(cfg.meetingDays).every(days)) fail('config.meetingDays: each period needs a list of weekday numbers 1–7, no repeats');
+    if (!days(cfg.defaultMeetingDays)) fail('config.defaultMeetingDays must be a list of weekday numbers 1–7');
+    if (cfg.meetingDays && (cfg.meetingDays['4'] || []).length !== 3 || (cfg.meetingDays['7'] || []).length !== 5) fail('config.meetingDays: 4th must meet 3 days and 7th 5 (the spec) — if that really changed, change it here on purpose');
+    const dateRe = /^\d{4}-\d{2}-\d{2}$/;
+    (cfg.noSchool || []).forEach(e => { const ok2 = typeof e === 'string' ? dateRe.test(e) : Array.isArray(e) && e.length === 2 && dateRe.test(e[0]) && dateRe.test(e[1]) && e[0] <= e[1]; if (!ok2) fail(`config.noSchool entry ${JSON.stringify(e)} must be 'YYYY-MM-DD' or ['first','last']`); });
+    (cfg.semesters || []).forEach(e => { if (!e || !dateRe.test(e.start) || !dateRe.test(e.end) || e.start > e.end) fail(`config.semesters entry ${JSON.stringify(e)} needs start <= end as 'YYYY-MM-DD'`); });
+    (cfg.shortWeeks || []).forEach(e => { if (!e || !/^\d{4}-W\d{2}$/.test(e.week) || typeof e.meetings !== 'object') fail(`config.shortWeeks entry ${JSON.stringify(e)} must look like { week: '2026-W47', meetings: { '4': 2 } }`); });
+    if (cfg.streakStartWeek && !/^\d{4}-W\d{2}$/.test(cfg.streakStartWeek)) fail("config.streakStartWeek must be '' or an ISO week like '2026-W48'");
+    const cap = rules && /function dailyCapSeconds\(\)\s*\{\s*return\s+(\d+);\s*\}/.exec(rules);
+    if (!cap) fail('firestore.rules: dailyCapSeconds() not found — the cap check cannot run (renamed? update this check with it)');
+    else if (+cap[1] !== cfg.dailyCapMinutes * 60) fail(`firestore.rules dailyCapSeconds() is ${cap[1]} but practice-minutes-config.js dailyCapMinutes × 60 is ${cfg.dailyCapMinutes * 60}: every day above the smaller number is refused by the database. Change both, and re-publish the rules`);
+  }
+
+  // 3. the rules blocks
+  if (rules) {
+    // The block's own brace is the last one on its match line (the path has {params} before it).
+    const block = name => { const i = rules.indexOf(`match /${name}`); if (i < 0) return null; let d = 0, j = rules.lastIndexOf('{', rules.indexOf('\n', i)); for (let k = j; k < rules.length; k++) { if (rules[k] === '{') d++; else if (rules[k] === '}') { d--; if (!d) return strip(rules.slice(i, k + 1)); } } return null; };
+    const hb = block('heartbeats/{sessionId}');
+    if (!hb) fail('firestore.rules: match /heartbeats/{sessionId} not found');
+    else {
+      if (!/keys\(\)\.hasOnly\(\['period', 'lastSeen'\]\)/.test(hb)) fail("heartbeats rule must reject every field but period and lastSeen: request.resource.data.keys().hasOnly(['period', 'lastSeen'])");
+      if (!/lastSeen == request\.time/.test(hb)) fail('heartbeats rule must pin lastSeen to the server clock (== request.time)');
+      if (/request\.auth\.uid|\buid\b|userId/.test(hb)) fail('heartbeats rule mentions the uid — the doc id must be a random session id, never a uid');
+      if (!/\[0-9a-f\]\{24\}/.test(hb)) fail('heartbeats rule must require a 24-hex session id');
+      if (/allow[^;]*\bdelete\b|allow\s+write/.test(hb)) fail('heartbeats rule must not allow delete or blanket write');
+    }
+    const mins = block('minutes/{userId}/{document=**}'), days = block('minutes/{userId}/days/{day}'), weeks = block('minutes/{userId}/weeks/{week}');
+    if (!mins || !days || !weeks) fail('firestore.rules: the three minutes/{userId} blocks (tree read, days, weeks) must all be present');
+    else {
+      for (const [n, b] of [['tree', mins], ['days', days], ['weeks', weeks]]) {
+        if (/isTeacher/.test(b)) fail(`minutes ${n} rule lets the teacher in — the spec says only that signed-in uid`);
+        if (!/pmOwner\(userId\)/.test(b)) fail(`minutes ${n} rule is not owner-only (pmOwner(userId))`);
+        if (/\bdelete\b|allow\s+write/.test(b)) fail(`minutes ${n} rule allows delete or blanket write`);
+      }
+      if (!/hasOnly\(\['seconds'\]\)/.test(days) || !/<= dailyCapSeconds\(\)/.test(days)) fail("minutes days rule must be { seconds } only and capped at dailyCapSeconds()");
+      if (!/hasOnly\(\['seconds', 'goalSeconds', 'hit'\]\)/.test(weeks) || !/hit is bool/.test(weeks)) fail("minutes weeks rule must be { seconds, goalSeconds, hit } only, hit a bool");
+    }
+    /* Only for the change that INTRODUCES the blocks: while HEAD's rules do not
+       have them yet, everything above them must be byte-for-byte HEAD's (the
+       order was "new match blocks only"). Once they are committed this stands
+       down, so later edits to older rules are judged on their own. */
+    const git = spawnSync('git', ['show', 'HEAD:firestore.rules'], { cwd: ROOT, encoding: 'utf8' });
+    if (git.status === 0 && git.stdout && !git.stdout.includes('PRACTICE MINUTES')) {
+      const base = git.stdout.slice(0, git.stdout.lastIndexOf('  }\n}'));
+      if (!rules.startsWith(base.trimEnd())) fail('firestore.rules: text above the practice-minutes blocks differs from HEAD — the order was NEW match blocks only (if an older rule was changed on purpose, that is a different change: say so)');
+    }
+  }
+
+  // 4. wiring
+  const idx = read('index.html') || '';
+  const a = idx.indexOf('<script defer src="app.js">'), b = idx.indexOf('<script defer src="practice-minutes-config.js">'), c = idx.indexOf('<script defer src="practice-minutes.js">');
+  if (!(a >= 0 && b > a && c > b)) fail('index.html must load app.js, then practice-minutes-config.js, then practice-minutes.js (the engine picks up window.PM_HOST from app.js and the config at load)');
+  if (!/id="pm-progress"/.test(idx)) fail('index.html lost <div id="pm-progress"> (My progress panel host)');
+  let tabs = 0;
+  for (const f of readdirSync(join(ROOT, 'tabs')).filter(x => x.endsWith('.html'))) {
+    const t = read('tabs/' + f), j = t.indexOf('<script src="journey.js">'), k = t.indexOf('<script src="../practice-minutes-config.js">'), e = t.indexOf('<script src="../practice-minutes.js">');
+    tabs++;
+    if (!(j >= 0 && k > j && e > k)) fail(`tabs/${f} must load journey.js, then ../practice-minutes-config.js, then ../practice-minutes.js (Song Journey playback is counted)`);
+  }
+  const app = strip(read('app.js') || ''), jr = strip(read('tabs/journey.js') || ''), eng = read('practice-minutes.js') || '';
+  if (!/window\.PM_HOST\s*=\s*\{[\s\S]{0,400}?ui:\s*true[\s\S]{0,500}?period:\s*\(\)\s*=>\s*periodOverride\s*\|\|\s*studentPeriod/.test(app)) fail('app.js: window.PM_HOST (ui:true, effective period = periodOverride || studentPeriod) is missing');
+  if (!/window\.PM_HOST\s*=\s*\{[\s\S]{0,200}?ui:\s*false/.test(jr)) fail('tabs/journey.js: window.PM_HOST (ui:false) is missing — Song Journey playback would not count');
+  const sync = /function caSyncTopbar\(\)\{[\s\S]*?\n\}\n/.exec(app);
+  if (!sync || !/caIsCard\(a\)\s*&&\s*window\.PM\s*\?\s*PM\.stripHtml\(\)/.test(sync[0]) || !/PM\.onCardOpen\(\)/.test(sync[0])) fail('app.js caSyncTopbar(): the strip (PM.stripHtml) and PM.onCardOpen() hooks are missing');
+  const mp = /function renderMyProgress\(\)\{[\s\S]*?\n\}\n/.exec(app);
+  if (!mp || !/PM\.renderProgress\(document\.getElementById\('pm-progress'\)\)/.test(mp[0])) fail('app.js renderMyProgress(): PM.renderProgress(#pm-progress) is missing');
+  if (!/HTMLMediaElement\.prototype\.play\s*=/.test(eng) || !/-backing-/.test(eng)) fail('practice-minutes.js: the play() observer or the backing-track filter is missing');
+  if (/\.pause\(|\.play\(\)\.|\.loop\s*=|\.src\s*=|currentTime\s*=/.test(strip(eng).replace(/origPlay\.apply\(this, arguments\)/g, ''))) fail('practice-minutes.js must only WATCH playback (found a pause/play/loop/src/currentTime write)');
+
+  // 5. strings
+  if (!i18nTable) fail('i18n table did not load — pm.* strings not checked');
+  else {
+    const K = new Set(Object.keys(i18nTable).filter(k => k.startsWith('pm.')));
+    const used = new Set(); let litCount = 0;
+    for (const mm of strip(eng).matchAll(/'(pm\.[A-Za-z0-9.]+)'/g)) { litCount++; used.add(mm[1]); }
+    for (const u of used) if (!(K.has(u) || (K.has(u + '.one') && K.has(u + '.many')))) fail(`practice-minutes.js asks for i18n key '${u}' that i18n.js does not have (or has only one of .one/.many)`);
+    for (const k of K) { const base = k.replace(/\.(one|many)$/, ''); if (!used.has(k) && !used.has(base)) fail(`i18n.js has '${k}' that practice-minutes.js never uses (dead string)`); }
+    for (const k of K) { const e = i18nTable[k]; if (!e || !e.en || !e.es) fail(`i18n key '${k}' needs both en and es`); }
+    if (!bad) console.log(`${C.dim}      ${K.size} pm.* strings, ${litCount} references, ${tabs} Journey pages${C.reset}`);
+  }
+  if (!bad) ok(`engine run: ${m[1]} simulation assertions pass (pinned); rules cap = config cap (${cfg ? cfg.dailyCapMinutes * 60 : '?'} s); heartbeat rule carries only { period, lastSeen } with no uid; minutes rules owner-only, no delete; older rules untouched; hooks, script order and strings in place`);
+}
+
 (async function main() {
   if (LIVE_ONLY) {
     console.log(`${C.bold}Guitar Class — post-push live check${C.reset}`);
@@ -10895,6 +11024,7 @@ function checkCoachVerdicts() {
   checkSiteMadeClick();
   checkLiveQuizTimerRepaint();
   checkCoachVerdicts();
+  checkPracticeMinutes(i18nTable);
   await checkBackingLoudness();
   if (!SKIP_LINKS) await checkLinks();
   else warn('skipping link check (--skip-links)');

@@ -629,6 +629,59 @@
     'progress.openModule':     { en: 'Open Module {n}', es: 'Abrir el módulo {n}' },
     'progress.overall':        { en: 'Overall', es: 'En total' },
 
+    /* ── Practice minutes (practice-minutes.js; shown only when uiOn is true in
+       practice-minutes-config.js). "streak" is racha, as everywhere on the site;
+       a week streak is "racha de N semanas" (singular: "1 semana"). The pairs
+       ending .one / .many are chosen by the count (plural() in the engine). ── */
+    'pm.title':           { en: 'Practice minutes', es: 'Minutos de práctica' },
+    'pm.min':             { en: 'min', es: 'min' },
+    'pm.close':           { en: 'Close', es: 'Cerrar' },
+    // The status strip in a practice card's top bar.
+    'pm.playing':         { en: '{n} playing', es: '{n} tocando' },
+    'pm.weekMin':         { en: '{done}/{goal} min this week', es: '{done}/{goal} min esta semana' },
+    'pm.streak.one':      { en: '{n}-week streak', es: 'racha de {n} semana' },
+    'pm.streak.many':     { en: '{n}-week streak', es: 'racha de {n} semanas' },
+    // The card that appears after you stop.
+    'pm.recapPlus':       { en: '+{n} min', es: '+{n} min' },
+    'pm.recapWeek':       { en: 'This week: {done} of {goal} min.', es: 'Esta semana: {done} de {goal} min.' },
+    'pm.recapMore0':      { en: '{need} more reaches your week goal.', es: 'Con {need} más llegas a la meta de la semana.' },
+    'pm.recapMore.one':   { en: '{need} more keeps your {n}-week streak.', es: 'Con {need} más mantienes tu racha de {n} semana.' },
+    'pm.recapMore.many':  { en: '{need} more keeps your {n}-week streak.', es: 'Con {need} más mantienes tu racha de {n} semanas.' },
+    'pm.recapHit':        { en: 'That makes {n} weeks in a row.', es: 'Ya son {n} semanas seguidas.' },
+    'pm.recapHit1':       { en: 'That starts a streak.', es: 'Así empieza una racha.' },
+    // The pill when the week goal is reached.
+    'pm.toastHit':        { en: 'Week goal hit — {n} weeks in a row', es: 'Meta de la semana lograda — {n} semanas seguidas' },
+    'pm.toastHit1':       { en: 'Week goal hit', es: 'Meta de la semana lograda' },
+    // My progress.
+    'pm.tileWeek':        { en: 'This week', es: 'Esta semana' },
+    'pm.tileWeekVal':     { en: '{done} of {goal} min', es: '{done} de {goal} min' },
+    'pm.tileWeekMore':    { en: '{n} more keeps your streak', es: 'Con {n} más mantienes tu racha' },
+    'pm.tileWeekMore0':   { en: '{n} more reaches your goal', es: 'Con {n} más llegas a tu meta' },
+    'pm.tileWeekHit':     { en: 'Week goal hit', es: 'Meta de la semana lograda' },
+    'pm.tileStreak':      { en: 'Streak', es: 'Racha' },
+    'pm.tileStreakVal.one':  { en: '{n}-week streak', es: 'Racha de {n} semana' },
+    'pm.tileStreakVal.many': { en: '{n}-week streak', es: 'Racha de {n} semanas' },
+    'pm.tileLongest.one':    { en: 'Longest: {n} week', es: 'La más larga: {n} semana' },
+    'pm.tileLongest.many':   { en: 'Longest: {n} weeks', es: 'La más larga: {n} semanas' },
+    'pm.tileToday':       { en: 'Today', es: 'Hoy' },
+    'pm.tileAll':         { en: 'All time: {n} min', es: 'En total: {n} min' },
+    'pm.byDay':           { en: 'This week by day', es: 'Esta semana, por día' },
+    'pm.dayTip':          { en: '{day}: {n} min', es: '{day}: {n} min' },
+    'pm.dow1':            { en: 'Mon', es: 'Lun' },
+    'pm.dow2':            { en: 'Tue', es: 'Mar' },
+    'pm.dow3':            { en: 'Wed', es: 'Mié' },
+    'pm.dow4':            { en: 'Thu', es: 'Jue' },
+    'pm.dow5':            { en: 'Fri', es: 'Vie' },
+    'pm.dow6':            { en: 'Sat', es: 'Sáb' },
+    'pm.dow7':            { en: 'Sun', es: 'Dom' },
+    'pm.weeks':           { en: 'Weeks', es: 'Semanas' },
+    'pm.weekHit':         { en: 'Week of {date}: {n} min, goal hit', es: 'Semana del {date}: {n} min, meta lograda' },
+    'pm.weekMissed':      { en: 'Week of {date}: {n} min, goal missed', es: 'Semana del {date}: {n} min, meta no lograda' },
+    'pm.weekNow':         { en: 'This week (from {date}): {n} min so far', es: 'Esta semana (desde el {date}): {n} min hasta ahora' },
+    'pm.weekBreak':       { en: 'Week of {date}: no class', es: 'Semana del {date}: sin clases' },
+    'pm.caption':         { en: 'Flame = hit the week goal. Short weeks have a smaller goal. Breaks don’t count.',
+                            es: 'Llama = lograste la meta de la semana. Las semanas cortas tienen una meta más pequeña. Los descansos no cuentan.' },
+
     // ── Focus mode (station cards: one step at a time vs. the full list) ──
     'fm.stepOf':               { en: 'Step {n} of {m}', es: 'Paso {n} de {m}' },
     'fm.back':                 { en: '← Back', es: '← Atrás' },

@@ -188,6 +188,19 @@ let accountPaused = false; // teacher put this student on hold (see loadClassCon
    See maybeShowPeriodPicker(). */
 let studentPeriod = '';    // progress/{uid}.period — '4' | '7' | 'CAS' | '' (not answered yet)
 let periodOverride = '';   // config/class.periodOverrides[uid] — teacher's correction, read-only here
+/* Practice minutes (practice-minutes.js, settings in practice-minutes-config.js).
+   The engine is page-agnostic — the Journey pages host it too — so this is the
+   whole of what it asks of the main site: who is signed in (never the ?teacher
+   console, and only a real Firebase user, so the localhost dev bypass counts
+   nothing), the Firestore handle, the effective period, and "draw the UI".
+   Every callback reads app state when called, so nothing here runs before
+   sign-in. practice-minutes.js loads after this file and picks the object up. */
+window.PM_HOST = {
+  ui: true,
+  user: () => (typeof IS_TEACHER_MODE !== 'undefined' && IS_TEACHER_MODE) ? null : (auth && auth.currentUser) || null,
+  db: () => ensureDb(),
+  period: () => periodOverride || studentPeriod || ''
+};
 /* config/class.moduleOpenThrough[uid] — teacher's "Open through Module N"
    (teacher.js Manage view), 2..12, or 0 for no override. Opens modules
    2..N's cross-module gate (isModuleGateLocked, <= N) and every set of the
@@ -12148,6 +12161,8 @@ function renderMyProgress(){
   bodyEl.innerHTML = `<div class="coach-tip" data-i18n="progress.skillsMastered" data-i18n-params="${escAttr(JSON.stringify({done:totalDone,total:totalAll,modules:MODULE_MANIFEST.length}))}">${t('progress.skillsMastered',{done:totalDone,total:totalAll,modules:MODULE_MANIFEST.length})}</div>
     <div class="card">${overallRow}${rows}</div>`;
   if(typeof applyI18n === 'function') applyI18n(bodyEl);
+  // Practice minutes tiles, bars and the 8-week grid (hidden unless uiOn).
+  if(window.PM) PM.renderProgress(document.getElementById('pm-progress'));
 }
 
 /* ── ✓ In-Class Activities: teacher-curated, day-specific work pushed out
@@ -15153,9 +15168,13 @@ function caSyncTopbar(){
     + optTag
     + (steps || (prog ? `<span class="ca-bar-prog">${escHtml(prog)}</span>` : ''))
     + (caIsCard(a) ? `<button type="button" class="ca-bar-stop" onclick="pcStop()" hidden>&#x25A0; ${escHtml(t('ca.snipStop'))}</button>` : '')
+    /* Practice minutes: week ring, streak flame and "N playing", right side of
+       a practice card's bar. '' unless uiOn (practice-minutes-config.js). */
+    + (caIsCard(a) && window.PM ? PM.stripHtml() : '')
     + (tools ? `<span class="ca-bar-tools">${tools}</span>` : '');
   bar.hidden = false;
   title.hidden = true;
+  if(caIsCard(a) && window.PM) PM.onCardOpen();
   if(refocusFull){ const b = bar.querySelector('.ca-bar-full'); if(b) b.focus({ preventScroll: true }); }
   pcSyncBarStop();
 }

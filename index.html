@@ -461,6 +461,7 @@
             <h3 class="rail-sec-label" style="margin:22px 0 8px" data-i18n="nav.keepPracticing">Keep practicing</h3>
             <div id="keep-practicing-body"></div>
             <h3 class="rail-sec-label" style="margin:22px 0 8px" data-i18n="nav.myProgress">My progress</h3>
+            <div id="pm-progress" class="pm-progress" hidden></div>
             <div id="my-progress-body"></div>
           </div>
         </div>
@@ -565,6 +566,9 @@
 <script defer src="i18n.js"></script>
 <script defer src="guitar-diagrams.js"></script>
 <script defer src="app.js"></script>
+<!-- Practice minutes: settings first, then the engine (it picks up window.PM_HOST from app.js). -->
+<script defer src="practice-minutes-config.js"></script>
+<script defer src="practice-minutes.js"></script>
 <!-- Split out of app.js for maintainability. Load AFTER app.js; both attach
      global functions used by onclick handlers / the auth flow at event time.
      fab-tools.js is also loaded (unmodified) by every tabs/*.html Song

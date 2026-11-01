@@ -7,6 +7,24 @@
    in, or a school filter blocks the Firebase SDK, the highlight quietly
    stays session-only (same behavior the page always had). */
 var fbUser = null, fbDb = null, saveTimer = null, dirty = false;
+/* Practice minutes (../practice-minutes.js, loaded after this file) counts
+   backing-track playback on this page too. It asks for the signed-in student
+   (only once the Firestore SDK has landed, so a write can actually go out),
+   the Firestore handle, and the period: the teacher's correction cached by
+   app.js, else the answer on the progress doc read below. No UI here. */
+var pmDocPeriod = '';
+window.PM_HOST = {
+  ui: false,
+  user: function(){ return (fbUser && fbDb && typeof firebase !== 'undefined') ? firebase.auth().currentUser : null; },
+  db: function(){ return fbDb; },
+  period: function(){
+    try {
+      var c = JSON.parse(localStorage.getItem('caPeriodOverride') || 'null');
+      if(c && fbUser && c.uid === fbUser.uid && c.v) return c.v;
+    } catch(e) {}
+    return pmDocPeriod;
+  }
+};
 /* A rating clicked before Firebase auth resolved — flush it as soon as
    fbUser exists (see queueSave / the onAuthStateChanged handler).
 
@@ -1343,6 +1361,7 @@ window.addEventListener('load', function(){
       var current = firebase.auth().currentUser;
       if(gen !== loadGen || !current || current.uid !== user.uid) return;
       var data = doc && doc.exists ? doc.data() : null;
+      pmDocPeriod = (data && data.period) || '';
       // Module 4/5 swap: an unmarked doc's Layer 4/5 ticks are in the old numbering (see flushSave).
       swap45DocNew = swap45IsMarked(data);
       var saved = data && data.songReady && data.songReady[SONG_ID];

@@ -1,0 +1,13 @@
+{
+  "indexes": [
+    {
+      "collectionGroup": "heartbeats",
+      "queryScope": "COLLECTION",
+      "fields": [
+        { "fieldPath": "period", "order": "ASCENDING" },
+        { "fieldPath": "lastSeen", "order": "ASCENDING" }
+      ]
+    }
+  ],
+  "fieldOverrides": []
+}

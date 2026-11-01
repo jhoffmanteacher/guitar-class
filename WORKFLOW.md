@@ -875,6 +875,51 @@
 
 ## Recently shipped (post-archive)
 
+- [x] **2026-11-01 — Practice minutes (student view only; every visible piece behind `uiOn:false`).**
+      Counts seconds of real backing-track playback and shows a weekly goal, a
+      week streak and "N playing". Counting and writing ship LIVE; nothing is
+      drawn until `uiOn` is set to `true` in `practice-minutes-config.js`.
+      **Files:** `practice-minutes-config.js` (every setting, nothing else),
+      `practice-minutes.js` (engine + all UI; no build), `tools/pm-sim.mjs`
+      (runs the engine against fakes; part of checks.mjs **1cg**),
+      `tools/pm-e2e.mjs` (real Chrome at 1366×657, screenshots; by hand),
+      `tools/pm-rules-test.mjs` (the rules against the Firestore emulator; by
+      hand), `firestore.indexes.json` (one composite index). Hooks: `window.PM_HOST`
+      in `app.js` (ui:true) and `tabs/journey.js` (ui:false), `PM.stripHtml()` +
+      `PM.onCardOpen()` in `caSyncTopbar()`, `PM.renderProgress()` in
+      `renderMyProgress()`, a `<div id="pm-progress">` in index.html, two script
+      tags in index.html and in all six `tabs/*.html`.
+      **What counts:** an `<audio>` whose file is `audio/…-backing-…`, playing
+      (not paused/ended/muted, buffered, currentTime moving), tab visible,
+      student signed in, not the `?teacher` console. Detached `new Audio()`
+      elements are seen by wrapping `HTMLMediaElement.prototype.play` (it only
+      observes). NOT counted: metronome, ear trainer, games, note strums,
+      the student's own recording, YouTube. Cap `dailyCapMinutes` (20) per day.
+      **Storage:** `minutes/{uid}/days/{date}` `{seconds}`, `minutes/{uid}/weeks/{ISO week}`
+      `{seconds, goalSeconds, hit}`, added with `increment()`; queued in
+      localStorage (`pm:q:<uid>`), flushed every 60 s / on stop / on hide / on
+      `online`, and by a `fetch({keepalive})` to the REST `:commit` on
+      `pagehide` (sendBeacon cannot carry the auth header). `heartbeats/{random
+      session id}` `{period, lastSeen}` every 30 s while counting; the count is
+      one REST `runAggregationQuery` (the compat SDK has no `count()`).
+      **`firestore.rules` changed (new blocks only) → needs the console paste
+      BEFORE the code is live, or every write is refused** (the client keeps
+      refused seconds and retries every 5 min, so a late paste loses nothing).
+      `dailyCapSeconds()` in the rules must equal `dailyCapMinutes × 60` (1cg).
+      **Decisions taken, change any of them in the config:** 4th period meets
+      Mon/Wed/Fri (only "3 a week" was given); CAS uses Mon–Fri; the semester
+      and no-school dates are PLACEHOLDERS; `streakStartWeek` (set it to the
+      week `uiOn` goes live) makes the streak start fresh; the streak and "hit"
+      are recomputed from seconds against the CURRENT goal, so changing
+      `weeklyGoalMinutes` re-scores old weeks (the stored `hit`/`goalSeconds`
+      are a snapshot for later use); the first missed week in each semester is
+      free. **Layout:** with the strip showing, Full screen folds to its icon
+      (the phone-width rule) so the bar stays one row in Spanish. **Limits:**
+      a Journey page's player loops by itself and counts while it plays (the
+      daily cap bounds it); the heartbeat count can be inflated by anyone
+      signed in (rules comment says so); `--streak-dim` is 2.5:1 on its
+      background (the one graphic under 3:1, on purpose — "dim").
+
 - [x] **2026-10-31 — "Hear It First": a hidden adaptive ear + fretboard trainer.**
       Work order `WO-hear-it-first.md` (kept out of the repo). For Jonathan's
       own ear on an electric guitar: hear a tone and find it, see a fret and
