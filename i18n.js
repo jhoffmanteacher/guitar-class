@@ -682,9 +682,9 @@
     'pm.weekMissed':      { en: 'Week of {date}: {n} min, goal missed', es: 'Semana del {date}: {n} min, meta no lograda' },
     'pm.weekNow':         { en: 'This week (from {date}): {n} min so far', es: 'Esta semana (desde el {date}): {n} min hasta ahora' },
     'pm.weekNone':        { en: 'Week of {date}: {n} min', es: 'Semana del {date}: {n} min' },
-    'pm.weekBreak':       { en: 'Week of {date}: no class', es: 'Semana del {date}: sin clases' },
-    'pm.caption':         { en: 'Flame = hit the week goal. Short weeks have a smaller goal. Breaks don’t count.',
-                            es: 'Llama = lograste la meta de la semana. Las semanas cortas tienen una meta más pequeña. Los descansos no cuentan.' },
+    'pm.weekBreak':       { en: 'Week of {date}: break, {n} min', es: 'Semana del {date}: descanso, {n} min' },
+    'pm.caption':         { en: 'Flame = hit the week goal. Breaks don’t count.',
+                            es: 'Llama = lograste la meta de la semana. Los descansos no cuentan.' },
 
     // ── Focus mode (station cards: one step at a time vs. the full list) ──
     'fm.stepOf':               { en: 'Step {n} of {m}', es: 'Paso {n} de {m}' },

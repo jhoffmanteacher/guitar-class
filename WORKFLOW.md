@@ -912,24 +912,32 @@
       BEFORE the code is live, or every write is refused** (the client keeps
       refused seconds and retries every 5 min, so a late paste loses nothing).
       `dailyCapSeconds()` in the rules must equal `dailyCapMinutes × 60` (1cg).
-      **Decisions taken, change any of them in the config:** 4th period meets
-      Mon/Wed/Fri (only "3 a week" was given); CAS uses Mon–Fri; the semester
-      and no-school dates are PLACEHOLDERS; `streakStartWeek` (set it to the
-      week `uiOn` goes live) makes the streak start fresh; the streak and "hit"
+      **Rules (all in the config; simplified 2026-11-02 by work order):** the goal
+      is FLAT, `weeklyGoalMinutes` in every counted week for every student, whatever
+      days they practise. There are NO meeting days, no no-school dates, no short
+      weeks and no proration (checks.mjs 1cg fails if those keys return).
+      `skipWeeks` is a list of Mondays (checked to be Mondays); a skipped week
+      neither counts nor breaks a streak, and minutes played in it still add to the
+      totals and My progress. `semester2Start` (Mon 2027-01-04) is where the one
+      free missed week per semester resets. "This week by day" is Mon-Sun for
+      everyone, and a day with no practice is an empty bar. `streakStartWeek` (set it
+      to the week `uiOn` goes live) makes the streak start fresh; the streak and "hit"
       are recomputed from seconds against the CURRENT goal, so changing
       `weeklyGoalMinutes` re-scores old weeks (the stored `hit`/`goalSeconds`
-      are a snapshot for later use); the first missed week in each semester is
-      free. **Layout:** with the strip showing, Full screen folds to its icon
+      are a snapshot for later use). The prefilled skip weeks (Thanksgiving, two
+      winter-break weeks, mid-winter break, spring break) and the semester date
+      came from the work order, not from a calendar: check them against the district's.
+      **Layout:** with the strip showing, Full screen folds to its icon
       (the phone-width rule) so the bar stays one row in Spanish. **Limits:**
       a Journey page's player loops by itself and counts while it plays (the
       daily cap bounds it); the heartbeat count can be inflated by anyone
       signed in, and anyone signed in can list the heartbeats collection
       (random ids, but createTime/updateTime make a session-start log per
-      period: set a TTL on `lastSeen`, see APPLY-practice-minutes.md); the
+      period: a TTL policy on `lastSeen` is a console step, NOT set by the code;
+      see APPLY-practice-minutes.md); the
       stored week `hit` is a best-effort snapshot; "weeks in a row" is the work
       order's copy and stays true after a forgiven miss only because the miss
-      is forgiven; "This week by day" draws only meeting days while the week
-      total counts every day; the games card already shows a 🔥 day streak, so a
+      is forgiven; the games card already shows a 🔥 day streak, so a
       second flame (weeks) may confuse; `--streak-dim` is 2.5:1 on its
       background (the one graphic under 3:1, on purpose — "dim").
 

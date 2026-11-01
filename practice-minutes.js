@@ -80,8 +80,7 @@
   /* ── Config, with a default for any key that is missing ── */
   var DEFAULTS = {
     uiOn: false, weeklyGoalMinutes: 30, dailyCapMinutes: 20,
-    meetingDays: { '4': [1, 3, 5], '7': [1, 2, 3, 4, 5] }, defaultMeetingDays: [1, 2, 3, 4, 5],
-    noSchool: [], shortWeeks: [], semesters: [], streakStartWeek: '',
+    skipWeeks: [], semester2Start: '', streakStartWeek: '',
     liveMinCount: 3, recapMinSeconds: 60, recapGapSeconds: 180, recapShowSeconds: 6, toastSeconds: 3
   };
   function cfg(){
@@ -114,53 +113,29 @@
     return calc.addDays(mon1, (+m[2] - 1) * 7);
   };
   calc.weekAdd = function(weekId, n){ return calc.weekIdOf(calc.ymd(calc.addDays(calc.weekMonday(weekId), 7 * n))); };
-  calc.noSchoolSet = function(c){
+  /* skipWeeks: Monday dates ('YYYY-MM-DD'); a date that is not a Monday still skips the week it falls in. */
+  calc.skipSet = function(c){
     var set = {};
-    (c.noSchool || []).forEach(function(e){
-      if(typeof e === 'string'){ set[e] = true; return; }
-      if(Array.isArray(e) && e.length === 2){
-        var d = calc.parse(e[0]), end = calc.parse(e[1]);
-        for(var i = 0; i < 400 && d <= end; i++){ set[calc.ymd(d)] = true; d = calc.addDays(d, 1); }
-      }
-    });
+    (c.skipWeeks || []).forEach(function(d){ if(/^\d{4}-\d{2}-\d{2}$/.test(d)) set[calc.weekIdOf(d)] = true; });
     return set;
   };
-  calc.days = function(c, period){ return (c.meetingDays && c.meetingDays[period]) || c.defaultMeetingDays; };
-  calc.normalMeetings = function(c, period){ return calc.days(c, period).length; };
-  /* The dates a section meets in a week (no-school days left out), and how many
-     meetings the week has — a shortWeeks entry REPLACES the count. */
-  calc.meetings = function(c, weekId, period){
-    var ns = calc.noSchoolSet(c), mon = calc.weekMonday(weekId);
-    var dates = calc.days(c, period).map(function(wd){ return calc.ymd(calc.addDays(mon, wd - 1)); })
-      .filter(function(d){ return !ns[d]; });
-    var count = dates.length;
-    (c.shortWeeks || []).forEach(function(s){
-      if(s && s.week === weekId && s.meetings && typeof s.meetings[period] === 'number') count = s.meetings[period];
-    });
-    return { dates: dates, count: Math.max(0, count) };
+  /* The goal is flat: weeklyGoalMinutes, in whole seconds, in every counted week for every
+     student, whichever days they practise. 0 = a skipped week (no goal: it neither counts
+     nor breaks a streak). */
+  calc.goalSeconds = function(c, weekId){
+    return calc.skipSet(c)[weekId] ? 0 : Math.max(60, Math.round(c.weeklyGoalMinutes) * 60);
   };
-  /* goal × (meetings ÷ normal). 0 = a week with no meetings. */
-  calc.goalSeconds = function(c, weekId, period){
-    var normal = calc.normalMeetings(c, period), m = calc.meetings(c, weekId, period).count;
-    if(m <= 0 || normal <= 0) return 0;
-    /* Whole minutes (never fewer than one): the screens show whole minutes, so a goal of
-       13 min 20 s would read "13/13 min" while not yet hit. */
-    return Math.max(60, Math.round(c.weeklyGoalMinutes * Math.min(m, normal) / normal) * 60);
-  };
+  /* The free miss is per semester: semester 2 starts on semester2Start (a week belongs to
+     semester 2 when its Monday is on or after that date). With no date, there is one. */
   calc.semesterOf = function(c, weekId){
-    var thu = calc.ymd(calc.addDays(calc.weekMonday(weekId), 3));
-    for(var i = 0; i < (c.semesters || []).length; i++){
-      var s = c.semesters[i];
-      if(thu >= s.start && thu <= s.end) return i;
-    }
-    return -1;
+    return (c.semester2Start && calc.ymd(calc.weekMonday(weekId)) >= c.semester2Start) ? 1 : 0;
   };
   /* The whole picture for one student. weekSecs = { 'YYYY-Www': seconds }.
-     Walks the weeks in order, once. A week with zero meetings is skipped. A hit
-     adds to the streak. The first miss in each semester is forgiven (the streak
-     is kept, not extended); any later miss resets it. The week in progress can
-     add to the streak but never breaks it. */
-  calc.status = function(c, weekSecs, period, today){
+     Walks the weeks in order, once. A skipped week is passed over (its minutes still
+     count in the totals). A hit adds to the streak. The first miss in each semester is
+     forgiven (the streak is kept, not extended); any later miss resets it. The week in
+     progress can add to the streak but never breaks it. */
+  calc.status = function(c, weekSecs, today){
     var cur = calc.weekIdOf(today), normalGoal = Math.round(c.weeklyGoalMinutes * 60);
     var first = null;
     Object.keys(weekSecs).forEach(function(w){ if((weekSecs[w] || 0) > 0 && (first === null || w < first)) first = w; });
@@ -169,7 +144,7 @@
     if(first !== null && first <= cur){
       var w = first;
       for(var i = 0; i < 160 && w < cur; i++, w = calc.weekAdd(w, 1)){
-        var g = calc.goalSeconds(c, w, period);
+        var g = calc.goalSeconds(c, w);
         if(g <= 0) continue;
         if((weekSecs[w] || 0) >= g){ streak++; if(streak > longest) longest = streak; }
         else {
@@ -179,12 +154,12 @@
       }
     }
     var streakBefore = streak;
-    var curGoal = calc.goalSeconds(c, cur, period), curSecs = weekSecs[cur] || 0;
+    var curGoal = calc.goalSeconds(c, cur), curSecs = weekSecs[cur] || 0;
     var isBreak = curGoal <= 0, hit = !isBreak && curSecs >= curGoal;
     if(hit){ streak++; if(streak > longest) longest = streak; }
     var history = [];
     for(var k = 7; k >= 0; k--){
-      var id = calc.weekAdd(cur, -k), secs = weekSecs[id] || 0, goal = calc.goalSeconds(c, id, period), state;
+      var id = calc.weekAdd(cur, -k), secs = weekSecs[id] || 0, goal = calc.goalSeconds(c, id), state;
       if(id === cur) state = 'now';
       else if(goal <= 0) state = 'break';
       else if(secs >= goal) state = 'hit';
@@ -322,7 +297,7 @@
     Object.keys(held).forEach(function(d){ var w = calc.weekIdOf(d); m[w] = (m[w] || 0) + held[d]; });
     return m;
   }
-  function status(){ return calc.status(cfg(), weekTotals(), period(), today()); }
+  function status(){ return calc.status(cfg(), weekTotals(), today()); }
   function allTimeSeconds(){
     var t = 0, m = weekTotals();
     Object.keys(m).forEach(function(w){ t += m[w]; });
@@ -418,8 +393,8 @@
     var d = today(), cap = Math.round(c.dailyCapMinutes * 60);
     var n = Math.min(whole, Math.max(0, cap - dayTotal(d)));
     if(n <= 0) return;
-    var w = calc.weekIdOf(d), per = period();
-    var before = weekTotals()[w] || 0, goal = calc.goalSeconds(c, w, per);
+    var w = calc.weekIdOf(d);
+    var before = weekTotals()[w] || 0, goal = calc.goalSeconds(c, w);
     st.pend[d] = (st.pend[d] || 0) + n;
     session.counted += n;
     if(goal > 0 && before < goal && before + n >= goal) goalCrossed(w);
@@ -495,7 +470,7 @@
      true, or when this device has never seen the week's doc (a create needs it):
      a device with a stale copy must not flip another device's true back to false. */
   function buildOps(snap){
-    var c = cfg(), per = period(), ops = [], byWeek = {};
+    var c = cfg(), ops = [], byWeek = {};
     Object.keys(snap).forEach(function(d){
       if(!(snap[d] > 0)) return;
       ops.push({ kind: 'day', id: d, inc: snap[d] });
@@ -503,7 +478,7 @@
       byWeek[w] = (byWeek[w] || 0) + snap[d];
     });
     Object.keys(byWeek).forEach(function(w){
-      var g = calc.goalSeconds(c, w, per), goal = g || Math.round(c.weeklyGoalMinutes * 60), known = !!S.weeks[w];
+      var g = calc.goalSeconds(c, w), goal = g || Math.round(c.weeklyGoalMinutes * 60), known = !!S.weeks[w];
       var total = ((S.weeks[w] && S.weeks[w].seconds) || 0) + byWeek[w];
       var hit = !!((S.weeks[w] && S.weeks[w].hit === true) || (g > 0 && total >= goal));
       ops.push({ kind: 'week', id: w, inc: byWeek[w], goalSeconds: goal, hit: hit, sendHit: hit || !known });
@@ -814,7 +789,7 @@
     host_el.innerHTML = progressHtml();
   }
   function progressHtml(){
-    var c = cfg(), st = status(), w = st.week, per = period(), d = today();
+    var c = cfg(), st = status(), w = st.week, d = today();
     var more = Math.max(1, Math.ceil((w.goal - w.secs) / 60));
     var weekSub = w.isBreak ? '' : w.hit ? tr('pm.tileWeekHit')
       : tr(st.streakBefore > 0 ? 'pm.tileWeekMore' : 'pm.tileWeekMore0', { n: more });
@@ -829,8 +804,10 @@
       +   '<div class="pm-tile-row"><b class="pm-today">' + mins(dayTotal(d)) + '</b><span class="pm-today-u">' + esc(tr('pm.min')) + '</span></div>'
       +   '<div class="pm-tile-sub">' + esc(tr('pm.tileAll', { n: mins(allTimeSeconds()) })) + '</div></div>'
       + '</div>';
-    /* This week by day: only the weekdays this section meets (no-school days left out). */
-    var cap = Math.round(c.dailyCapMinutes * 60), dates = calc.meetings(c, w.id, per).dates;
+    /* This week by day: Monday to Sunday for every student. A day with no practice is an
+       empty bar, never a miss marker (the goal is for the whole week). */
+    var cap = Math.round(c.dailyCapMinutes * 60), mon = calc.weekMonday(w.id), dates = [];
+    for(var di = 0; di < 7; di++) dates.push(calc.ymd(calc.addDays(mon, di)));
     var bars = dates.map(function(ds){
       var secs = dayTotal(ds), wd = ((calc.parse(ds).getDay() + 6) % 7) + 1, h = Math.round(Math.min(1, secs / cap) * 100);
       var label = tr(DOW_KEYS[wd]), tip = tr('pm.dayTip', { day: label, n: mins(secs) });

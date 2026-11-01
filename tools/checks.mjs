@@ -10828,7 +10828,7 @@ function checkCoachVerdicts() {
    The browser half (strip, recap, toast, My progress, 1366×657, both languages,
    a real <audio>) is tools/pm-e2e.mjs — it needs Chrome, so it is run by hand.
    ════════════════════════════════════════════════════════════════════ */
-const PM_SIM_PIN = 104;
+const PM_SIM_PIN = 108;
 function checkPracticeMinutes(i18nTable) {
   head('1cg. Practice minutes: the engine is run; the rules cap, heartbeat shape, wiring and strings are pinned');
   let bad = 0;
@@ -10855,15 +10855,21 @@ function checkPracticeMinutes(i18nTable) {
     const num = (k, lo, hi) => { if (typeof cfg[k] !== 'number' || !isFinite(cfg[k]) || cfg[k] < lo || cfg[k] > hi) fail(`config.${k} must be a number from ${lo} to ${hi} (is ${JSON.stringify(cfg[k])})`); };
     if (typeof cfg.uiOn !== 'boolean') fail('config.uiOn must be true or false');
     num('weeklyGoalMinutes', 1, 600); num('dailyCapMinutes', 1, 240); num('liveMinCount', 1, 100);
-    const days = a => Array.isArray(a) && a.length > 0 && a.length <= 7 && a.every(d => Number.isInteger(d) && d >= 1 && d <= 7) && new Set(a).size === a.length;
-    if (!cfg.meetingDays || !Object.keys(cfg.meetingDays).length || !Object.values(cfg.meetingDays).every(days)) fail('config.meetingDays: each period needs a list of weekday numbers 1–7, no repeats');
-    if (!days(cfg.defaultMeetingDays)) fail('config.defaultMeetingDays must be a list of weekday numbers 1–7');
-    if (cfg.meetingDays && (cfg.meetingDays['4'] || []).length !== 3 || (cfg.meetingDays['7'] || []).length !== 5) fail('config.meetingDays: 4th must meet 3 days and 7th 5 (the spec) — if that really changed, change it here on purpose');
     const dateRe = /^\d{4}-\d{2}-\d{2}$/;
-    (cfg.noSchool || []).forEach(e => { const ok2 = typeof e === 'string' ? dateRe.test(e) : Array.isArray(e) && e.length === 2 && dateRe.test(e[0]) && dateRe.test(e[1]) && e[0] <= e[1]; if (!ok2) fail(`config.noSchool entry ${JSON.stringify(e)} must be 'YYYY-MM-DD' or ['first','last']`); });
-    (cfg.semesters || []).forEach(e => { if (!e || !dateRe.test(e.start) || !dateRe.test(e.end) || e.start > e.end) fail(`config.semesters entry ${JSON.stringify(e)} needs start <= end as 'YYYY-MM-DD'`); });
-    (cfg.shortWeeks || []).forEach(e => { if (!e || !/^\d{4}-W\d{2}$/.test(e.week) || typeof e.meetings !== 'object') fail(`config.shortWeeks entry ${JSON.stringify(e)} must look like { week: '2026-W47', meetings: { '4': 2 } }`); });
+    const monday = d => dateRe.test(d) && new Date(+d.slice(0, 4), +d.slice(5, 7) - 1, +d.slice(8, 10), 12).getDay() === 1;
+    if (!Array.isArray(cfg.skipWeeks)) fail('config.skipWeeks must be a list of Monday dates');
+    else {
+      cfg.skipWeeks.forEach(d => { if (!monday(d)) fail(`config.skipWeeks entry ${JSON.stringify(d)} must be a Monday, 'YYYY-MM-DD'`); });
+      if (new Set(cfg.skipWeeks).size !== cfg.skipWeeks.length) fail('config.skipWeeks has a repeated date');
+    }
+    if (cfg.semester2Start !== '' && !monday(cfg.semester2Start)) fail("config.semester2Start must be '' or a Monday, 'YYYY-MM-DD'");
     if (cfg.streakStartWeek && !/^\d{4}-W\d{2}$/.test(cfg.streakStartWeek)) fail("config.streakStartWeek must be '' or an ISO week like '2026-W48'");
+    /* The goal is flat: these settings were removed on purpose and must not creep back into the config or the engine. */
+    for (const k of ['meetingDays', 'defaultMeetingDays', 'noSchool', 'shortWeeks', 'semesters']) {
+      if (k in cfg) fail(`practice-minutes-config.js has '${k}': the goal is flat, there are no meeting days, no-school dates or proration (work order 2026-11-02)`);
+      if (new RegExp('\\b' + k + '\\b').test(strip(read('practice-minutes.js') || ''))) fail(`practice-minutes.js still reads '${k}'`);
+    }
+    if (/\b(calc\.meetings|normalMeetings|calc\.days)\b/.test(strip(read('practice-minutes.js') || ''))) fail('practice-minutes.js still has meeting-day maths (calc.meetings / normalMeetings / calc.days)');
     const cap = rules && /function dailyCapSeconds\(\)\s*\{\s*return\s+(\d+);\s*\}/.exec(rules);
     if (!cap) fail('firestore.rules: dailyCapSeconds() not found — the cap check cannot run (renamed? update this check with it)');
     else if (+cap[1] !== cfg.dailyCapMinutes * 60) fail(`firestore.rules dailyCapSeconds() is ${cap[1]} but practice-minutes-config.js dailyCapMinutes × 60 is ${cfg.dailyCapMinutes * 60}: every day above the smaller number is refused by the database. Change both, and re-publish the rules`);

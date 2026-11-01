@@ -238,9 +238,12 @@ await ev(`document.getElementById('pm-progress').scrollIntoView({block:'start'})
 const mp = await ev(`(() => { const p = document.getElementById('pm-progress'); const tiles = [...p.querySelectorAll('.pm-tile')].map(t => t.innerText.replace(/\\s+/g, ' ').trim()); return { hidden: p.hidden, tiles, bars: [...p.querySelectorAll('.pm-bar')].map(b => b.getAttribute('aria-label')), squares: [...p.querySelectorAll('.pm-sq')].map(b => b.className.replace('pm-sq ', '')), cap: p.querySelector('.pm-cap').innerText, h: [...p.querySelectorAll('.pm-sec-h')].map(x => x.innerText) }; })()`);
 console.log('    ', JSON.stringify(mp));
 check('3 tiles: This week / Streak (3 hit weeks, a free miss, 2 more hit weeks = 5) / Today', mp.tiles.length === 3 && /^This week .*23 of 30 min 7 more keeps your streak$/.test(mp.tiles[0]) && /^Streak 5-week streak Longest: 5 weeks$/.test(mp.tiles[1]) && /^Today 5 min All time: \d+ min$/.test(mp.tiles[2]), mp.tiles);
-check('"This week by day" shows ONLY the 5 weekdays 7th period meets (Mon–Fri), with this week\'s minutes (12, 0, 8, 20, 3)', mp.bars.length === 5 && mp.bars.every((b) => /^(Mon|Tue|Wed|Thu|Fri):/.test(b)) && mp.bars.map((b) => b.split(': ')[1]).join() === '12 min,0 min,8 min,20 min,3 min', mp.bars);
+const dowNow = (new Date().getDay() + 6) % 7, expDays = [12, 0, 8, 20, 3, 0, 0]; expDays[dowNow] = Math.max(expDays[dowNow], 5);   // today also holds the 5 minutes set above
+check('"This week by day" shows all seven days, Mon–Sun, with this week\'s minutes (12, 0, 8, 20, 3, 0, 0; today at least 5)', mp.bars.length === 7 && mp.bars.every((b, i) => b.startsWith(['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'][i] + ':')) && mp.bars.map((b) => +b.split(': ')[1].split(' ')[0]).join() === expDays.join(), mp.bars);
+const empties = await ev(`[...document.querySelectorAll('#pm-progress .pm-bar')].map(b => ({ fill: b.querySelector('.pm-bar-col i').style.height, label: b.querySelector('.pm-bar-n').textContent, marks: b.querySelectorAll('svg, .pm-miss, [class*=miss]').length }))`);
+check('a day with no practice is an empty bar: no fill, no number, no miss marker of any kind', empties.filter((e, i) => expDays[i] === 0).every((e) => (e.fill === '0%' || e.fill === '0px' || e.fill === '') && e.label === '' && e.marks === 0) && expDays.some((m) => m === 0), empties);
 check('"Weeks": 8 small squares, oldest first: none, hit, hit, missed, hit, hit, hit… and the current one outlined', mp.squares.length === 8 && mp.squares[7].includes('pm-sq-now') && mp.squares[6].includes('pm-sq-hit'), mp.squares);
-check('caption exactly as specified', mp.cap === 'Flame = hit the week goal. Short weeks have a smaller goal. Breaks don’t count.', mp.cap);
+check('caption exactly as specified: Flame = hit the week goal. Breaks don’t count.', mp.cap === 'Flame = hit the week goal. Breaks don’t count.', mp.cap);
 const cs = await ev(`(() => { const q = (s, p) => getComputedStyle(document.querySelector(s))[p]; return { today: q('.pm-today', 'color'), flame: q('#pm-progress .pm-streak-lg', 'color'), ring: q('#pm-progress .pm-ring-fg', 'stroke'), bar: q('.pm-bar-col i', 'backgroundColor'), hitSq: q('.pm-sq-hit', 'backgroundColor'), missed: q('.pm-sq-missed', 'backgroundColor'), nowShadow: q('.pm-sq-now', 'boxShadow'), panel: q('.pm-panel', 'backgroundColor') }; })()`);
 check('colours: Today green, streak flame orange, ring blue, bars blue, hit square orange, missed square grey, current square blue outline',
   cs.today === 'rgb(61, 220, 151)' && cs.flame === 'rgb(255, 138, 61)' && cs.ring === 'rgb(90, 169, 255)' && cs.bar === 'rgb(90, 169, 255)' && cs.hitSq === 'rgb(255, 138, 61)' && cs.missed === 'rgb(95, 105, 127)' && /90, 169, 255/.test(cs.nowShadow), cs);
@@ -250,10 +253,10 @@ check('tapping a square shows its minutes (and its hover title carries the same)
 await ev(`setLang('es')`); await sleep(900);
 await ev(`renderMyProgress(); document.getElementById('pm-progress').scrollIntoView({block:'start'})`); await sleep(400);
 const mpEs = await ev(`(() => { const p = document.getElementById('pm-progress'); return { tiles: [...p.querySelectorAll('.pm-tile')].map(t => t.innerText.replace(/\\s+/g, ' ').trim()), bars: [...p.querySelectorAll('.pm-bar')].map(b => b.getAttribute('aria-label')), cap: p.querySelector('.pm-cap').innerText, title: p.querySelector('.pm-panel-h').innerText, overflow: document.documentElement.scrollWidth > document.documentElement.clientWidth }; })()`);
-check('Spanish My progress: tiles, weekdays and caption are Spanish, no overflow', /^Esta semana .*23 de 30 min Con 7 más mantienes tu racha$/.test(mpEs.tiles[0]) && /^Racha Racha de 5 semanas La más larga: 5 semanas$/.test(mpEs.tiles[1]) && /^Hoy 5 min En total: \d+ min$/.test(mpEs.tiles[2]) && mpEs.bars.every((b) => /^(Lun|Mar|Mié|Jue|Vie):/.test(b)) && mpEs.cap.startsWith('Llama = lograste') && !mpEs.overflow, mpEs);
+check('Spanish My progress: tiles, weekdays and caption are Spanish, no overflow', /^Esta semana .*23 de 30 min Con 7 más mantienes tu racha$/.test(mpEs.tiles[0]) && /^Racha Racha de 5 semanas La más larga: 5 semanas$/.test(mpEs.tiles[1]) && /^Hoy 5 min En total: \d+ min$/.test(mpEs.tiles[2]) && mpEs.bars.length === 7 && mpEs.bars.every((b, i) => b.startsWith(['Lun', 'Mar', 'Mié', 'Jue', 'Vie', 'Sáb', 'Dom'][i] + ':')) && mpEs.cap === 'Llama = lograste la meta de la semana. Los descansos no cuentan.' && !mpEs.overflow, mpEs);
 await shot('6-my-progress-es');
 
-/* ── Review findings: the widest strip, a week with no class, a week that never counted ── */
+/* ── Review findings: the widest strip, a skipped week, a week that never counted ── */
 console.log('review follow-ups');
 await ev(`(() => { const s = PM._state(), cur = PM.calc.weekIdOf(PM.calc.ymd(new Date())); s.weeks = {}; for (let i = 1; i <= 12; i++) s.weeks[PM.calc.weekAdd(cur, -i)] = { seconds: 1900, goalSeconds: 1800, hit: true }; s.weeks[cur] = { seconds: 100 * 60, goalSeconds: 1800, hit: true }; s.days = {}; s.pend = {}; s.live = 25; return true; })()`);
 await ev(`window.__period = '7'; setLang('es'); location.hash = '#class-activities/${card}'; openClassActivitiesScreen(${JSON.stringify(card)})`); await sleep(1000);
@@ -261,23 +264,25 @@ await ev(`(() => { caSyncTopbar(); PM.refreshStrip(true); const n = document.que
 const worst = await ev(`(() => ({ h: Math.round(document.querySelector('#class-activities-screen .page-topbar').getBoundingClientRect().height), text: document.querySelector('.pm-strip').innerText.replace(/\\s+/g, ' ') }))()`);
 check('widest strip (ES, Optional tag, Stop showing, 25 playing, 100+ min, 12-week streak) stays one row; the strip never shows more than the goal', worst.h <= 56 && /^25 tocando 30\/30 min esta semana 13$/.test(worst.text), worst);
 await shot('7-widest-strip-es');
-await ev(`(() => { const cur = PM.calc.weekIdOf(PM.calc.ymd(new Date())), mon = PM.calc.weekMonday(cur), sun = PM.calc.addDays(mon, 6); PRACTICE_MINUTES_CONFIG.noSchool.push([PM.calc.ymd(mon), PM.calc.ymd(sun)]); PM._state().weeks[cur] = { seconds: 40 * 60, goalSeconds: 0, hit: false }; PM.refreshStrip(true); return true; })()`);
+await ev(`(() => { const cur = PM.calc.weekIdOf(PM.calc.ymd(new Date())), mon = PM.calc.weekMonday(cur), sun = PM.calc.addDays(mon, 6); PRACTICE_MINUTES_CONFIG.skipWeeks.push(PM.calc.ymd(mon)); PM._state().weeks[cur] = { seconds: 40 * 60, goalSeconds: 0, hit: false }; PM.refreshStrip(true); return true; })()`);
 await ev(`setLang('en'); PM.refreshStrip(true)`); await sleep(300);
 const brk = await ev(`(() => ({ strip: document.querySelector('.pm-strip .pm-week').innerText.trim(), flame: getComputedStyle(document.querySelector('.pm-strip .pm-streak')).color, dash: parseFloat(getComputedStyle(document.querySelector('.pm-strip .pm-ring-fg')).strokeDashoffset) }))()`);
-check('a week with no class: "40 min this week" (no goal, no "/30"), empty ring, flame not lit', brk.strip === '40 min this week' && brk.flame === 'rgb(122, 82, 54)' && brk.dash > 43, brk);
+check('a skipped week: "40 min this week" (no goal, no "/30"), empty ring, flame not lit', brk.strip === '40 min this week' && brk.flame === 'rgb(122, 82, 54)' && brk.dash > 43, brk);
 await ev(`location.hash = '#my-progress'`); await sleep(900);
 await ev(`renderMyProgress()`); await sleep(300);
 const bt = await ev(`(() => { const p = document.getElementById('pm-progress'); return { tile: p.querySelector('.pm-tile').innerText.replace(/\\s+/g, ' ').trim(), tips: [...p.querySelectorAll('.pm-sq')].map(b => b.getAttribute('aria-label')) }; })()`);
 check('…the This week tile says "40 min" with no goal and no "keeps your streak" line', /^This week 40 min\s*$/.test(bt.tile), bt.tile);
-check('the current no-class week reads "This week … 40 min so far" (no verdict)', /^This week \(from .*\): 40 min so far$/.test(bt.tips[7]), bt.tips[7]);
-await ev(`PRACTICE_MINUTES_CONFIG.noSchool.pop(); PM._state().weeks = {}; renderMyProgress()`); await sleep(300);
+check('the current skipped week reads "This week … 40 min so far" (no verdict)', /^This week \(from .*\): 40 min so far$/.test(bt.tips[7]), bt.tips[7]);
+await ev(`PRACTICE_MINUTES_CONFIG.skipWeeks.pop(); PM._state().weeks = {}; renderMyProgress()`); await sleep(300);
 const early = await ev(`[...document.querySelectorAll('#pm-progress .pm-sq')].map(b => b.getAttribute('aria-label'))`);
 check('with no history, weeks before the first practice read as plain minutes (not "goal missed")', early.slice(0, 7).every((tp) => !/goal missed|goal hit/.test(tp)), early);
 
-/* ── 4th period: three days ── */
-await ev(`window.__period = '4'; setLang('en'); renderMyProgress()`); await sleep(500);
-const b4 = await ev(`[...document.querySelectorAll('#pm-progress .pm-bar')].map(b => b.getAttribute('aria-label').split(':')[0])`);
-check('4th period: bars only for Mon, Wed, Fri', b4.join() === 'Mon,Wed,Fri', b4);
+/* ── The same grid for every student: period 4, CAS, none chosen ── */
+for (const per of ['4', 'CAS', '']) {
+  await ev(`window.__period = ${JSON.stringify(per)}; setLang('en'); renderMyProgress()`); await sleep(400);
+  const lab = await ev(`[...document.querySelectorAll('#pm-progress .pm-bar')].map(b => b.getAttribute('aria-label').split(':')[0]).join()`);
+  check(`period ${per || '(none chosen)'}: the same seven bars, Mon–Sun`, lab === 'Mon,Tue,Wed,Thu,Fri,Sat,Sun', lab);
+}
 
 check('no uncaught exceptions on the page', consoleErrors.length === 0, consoleErrors.slice(0, 3));
 console.log(`\n${fail ? '✗' : '✓'} pm-e2e: ${pass} passed, ${fail} failed — screenshots in ${OUT}`);

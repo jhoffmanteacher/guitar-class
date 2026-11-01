@@ -234,16 +234,19 @@ console.log('1. calendar maths');
   for (let wk = '2024-W01'; wk < '2031-W01'; wk = calc.weekAdd(wk, 1)) { rt++; if (calc.weekIdOf(calc.ymd(calc.weekMonday(wk))) !== wk) rtBad++; if (rt > 400) break; }
   check(`weekMonday → weekIdOf round-trips on ${rt} consecutive weeks`, rtBad === 0 && rt > 300, rtBad + ' bad');
   const c = w.PM.cfg();
-  check('4th period meets 3 days, 7th meets 5 (the spec)', calc.normalMeetings(c, '4') === 3 && calc.normalMeetings(c, '7') === 5);
-  check('normal week goal = 30 min = 1800 s for both', calc.goalSeconds(c, '2026-W45', '4') === 1800 && calc.goalSeconds(c, '2026-W45', '7') === 1800);
-  // Wed 11 Nov 2026 is Veterans Day (in the placeholder list) → W46 has one fewer meeting for both.
-  check('proration: Veterans Day week → 4th 2/3 of 1800 = 1200, 7th 4/5 = 1440',
-    calc.goalSeconds(c, '2026-W46', '4') === 1200 && calc.goalSeconds(c, '2026-W46', '7') === 1440, calc.goalSeconds(c, '2026-W46', '4') + ',' + calc.goalSeconds(c, '2026-W46', '7'));
-  check('Thanksgiving week and winter break have zero meetings (goal 0 = skipped)',
-    calc.goalSeconds(c, '2026-W48', '7') === 0 && calc.goalSeconds(c, '2026-W48', '4') === 0 && calc.goalSeconds(c, '2026-W52', '7') === 0);
-  check('"4 meetings of 5" week from the shortWeeks list overrides the count',
-    calc.goalSeconds({ ...c, shortWeeks: [{ week: '2026-W47', meetings: { '7': 2 } }] }, '2026-W47', '7') === 720);
-  check('a period missing from meetingDays (CAS) uses the default weekdays (5)', calc.normalMeetings(c, 'CAS') === 5 && calc.normalMeetings(c, '') === 5);
+  // The goal is flat and there are no meeting days: nothing a student does on any weekday changes it.
+  check('the shipped config has no meeting-day, no-school, short-week or semester-range keys (they were removed)', !['meetingDays', 'defaultMeetingDays', 'noSchool', 'shortWeeks', 'semesters'].some((k) => k in w.ctx.PRACTICE_MINUTES_CONFIG));
+  let zero = [], odd = [], weeks = 0;
+  for (let wk = '2026-W36'; wk <= '2027-W26'; wk = calc.weekAdd(wk, 1)) { weeks++; const g = calc.goalSeconds(c, wk); if (g === 0) zero.push(wk); else if (g !== 1800) odd.push(wk + '=' + g); }
+  check(`the goal is a flat 1800 s (30 min) in all ${weeks - zero.length} counted weeks of 2026-27 — no proration anywhere`, odd.length === 0 && weeks > 40, odd.join());
+  check('exactly the five prefilled weeks are skipped (goal 0): Thanksgiving, both winter-break weeks, mid-winter break, spring break',
+    eq(zero, ['2026-W48', '2026-W52', '2026-W53', '2027-W07', '2027-W15']), zero.join());
+  check('each skipWeeks entry is a Monday and maps to its own week: 2026-11-23, 2026-12-21, 2026-12-28, 2027-02-15, 2027-04-12',
+    eq(c.skipWeeks, ['2026-11-23', '2026-12-21', '2026-12-28', '2027-02-15', '2027-04-12']) && c.skipWeeks.every((d) => calc.parse(d).getDay() === 1));
+  check('Veterans Day week (Wed 11 Nov) is an ordinary week with the full goal (the no-school list is gone)', calc.goalSeconds(c, '2026-W46') === 1800);
+  check('semester 2 starts Mon 2027-01-04: the week of Dec 28 is semester 1, the week of Jan 4 is semester 2',
+    c.semester2Start === '2027-01-04' && calc.semesterOf(c, '2026-W53') === 0 && calc.semesterOf(c, '2027-W01') === 1 && calc.semesterOf(c, '2026-W36') === 0 && calc.semesterOf(c, '2027-W26') === 1);
+  check('a goal in minutes is a whole number of minutes whatever weeklyGoalMinutes is (20 → 1200 s, 45 → 2700 s)', calc.goalSeconds({ ...c, weeklyGoalMinutes: 20 }, '2026-W45') === 1200 && calc.goalSeconds({ ...c, weeklyGoalMinutes: 45 }, '2026-W45') === 2700);
 }
 
 /* ═══════════ 2. Streaks ═══════════ */
@@ -251,12 +254,12 @@ console.log('2. week streak');
 {
   const w = makeWorld();
   const calc = w.PM.calc;
-  const base = { ...w.PM.cfg(), noSchool: [], semesters: [{ start: '2026-08-01', end: '2026-12-31' }, { start: '2027-01-01', end: '2027-06-30' }], shortWeeks: [] };
+  const base = { ...w.PM.cfg(), skipWeeks: [], semester2Start: '' };
   const wk = (n) => calc.weekAdd('2026-W36', n);                          // W36 = Mon 31 Aug 2026
   const mk = (pattern, today) => {                                         // 'H' hit, 'x' miss, '.' = no play
     const m = {};
     pattern.split('').forEach((ch, i) => { if (ch === 'H') m[wk(i)] = 1800; else if (ch === 'x') m[wk(i)] = 600; });
-    return calc.status(base, m, '7', today);
+    return calc.status(base, m, today);
   };
   const T = (n) => calc.ymd(calc.addDays(calc.weekMonday(wk(n)), 2));      // a Wednesday of week n
   let s = mk('HHHH', T(4));
@@ -271,41 +274,46 @@ console.log('2. week streak');
   check('…and the next hit starts again at 1', s.streak === 1, 'got ' + s.streak);
   s = mk('xxHH', T(4));
   check('misses before any hit: first free, second resets, then 2 hits → 2', s.streak === 2, 'got ' + s.streak);
-  // Break (zero-meeting) week in the middle: skipped.
-  const brk = { ...base, noSchool: [[calc.ymd(calc.weekMonday(wk(2))), calc.ymd(calc.addDays(calc.weekMonday(wk(2)), 6))]] };
-  const m2 = {}; m2[wk(0)] = 1800; m2[wk(1)] = 1800; m2[wk(3)] = 1800;
-  s = calc.status(brk, m2, '7', T(4));
-  check('a break week between two hits neither counts nor breaks: streak 3', s.streak === 3, 'got ' + s.streak);
-  check('…and the break shows as "break" in the 8-week row', s.history.some((h) => h.state === 'break'));
-  // Freeze is per SEMESTER: a miss in each semester is forgiven.
-  const sem = { ...base, semesters: [{ start: '2026-08-01', end: '2026-09-27' }, { start: '2026-09-28', end: '2027-06-30' }] };
+  // A skipped week in the middle: passed over, and its minutes still count.
+  const brk = { ...base, skipWeeks: [calc.ymd(calc.weekMonday(wk(2)))] };
+  const m2 = {}; m2[wk(0)] = 1800; m2[wk(1)] = 1800; m2[wk(2)] = 100; m2[wk(3)] = 1800;
+  s = calc.status(brk, m2, T(4));
+  check('a skipped week between two hits neither counts nor breaks (even with a poor week of minutes in it): streak 3', s.streak === 3, 'got ' + s.streak);
+  check('…and it shows as "break" in the 8-week row', s.history.some((h) => h.state === 'break'));
+  check('…and its minutes are still in the row (100 s)', s.history.find((h) => h.state === 'break').secs === 100);
+  // Free miss is per SEMESTER, split on semester2Start.
   const m3 = {}; [0, 2, 3, 5].forEach((i) => { m3[wk(i)] = 1800; }); m3[wk(1)] = 100; m3[wk(4)] = 100;
-  s = calc.status(sem, m3, '7', T(6));
+  s = calc.status({ ...base, semester2Start: calc.ymd(calc.weekMonday(wk(4))) }, m3, T(6));
   check('one miss in each of two semesters is forgiven twice: H x H H x H → streak 4', s.streak === 4, 'got ' + s.streak);
-  const one = { ...base, semesters: [{ start: '2026-08-01', end: '2027-06-30' }] };
-  s = calc.status(one, m3, '7', T(6));
+  s = calc.status(base, m3, T(6));
   check('the same pattern inside ONE semester resets at the second miss: streak 1', s.streak === 1, 'got ' + s.streak);
+  // The shipped dates: the free miss resets on Mon 2027-01-04.
+  const real = w.PM.cfg();
+  const rs = { '2026-W50': 1800, '2026-W51': 100, '2027-W01': 100, '2027-W02': 1800 };            // hit · miss · (2 skipped weeks) · miss · hit
+  s = calc.status(real, rs, '2027-01-13');
+  check('shipped dates: the Dec miss uses semester 1\'s free miss, the Jan 4 miss uses semester 2\'s (the two winter-break weeks are skipped): streak 2', s.streak === 2 && s.week.hit, 'got ' + s.streak);
+  s = calc.status({ ...real, semester2Start: '' }, rs, '2027-01-13');
+  check('…with no semester split the Jan 4 miss would have been the second miss: streak 1', s.streak === 1, 'got ' + s.streak);
   // Longest.
   s = mk('HHHxxHH', T(7));
   check('longest streak is remembered after a reset (3), current 2', s.longest === 3 && s.streak === 2, s.longest + '/' + s.streak);
-  // Proration decides hit: a short week is hit with less.
-  const short = { ...base, noSchool: [calc.ymd(calc.addDays(calc.weekMonday(wk(0)), 1))] };    // Tue off → 4/5 → 1440
-  s = calc.status(short, { [wk(0)]: 1440 }, '7', T(1));
-  check('a short week is a hit at its smaller goal (1440 s)', s.streak === 1);
-  s = calc.status(short, { [wk(0)]: 1439 }, '7', T(1));
-  check('…and 1439 s misses it (the free miss keeps streak 0 → 0, no hit)', s.streak === 0);
+  // Flat goal: 1800 hits, 1799 misses, whatever the week looks like.
+  s = calc.status(base, { [wk(0)]: 1800 }, T(1));
+  check('1800 s is a hit', s.streak === 1);
+  s = calc.status(base, { [wk(0)]: 1799 }, T(1));
+  check('…and 1799 s is a miss (the free miss keeps streak 0 → 0, no hit)', s.streak === 0 && s.history.find((h) => h.id === wk(0)).state === 'missed');
   // streakStartWeek.
-  s = calc.status({ ...base, streakStartWeek: wk(2) }, { [wk(0)]: 1800, [wk(1)]: 1800, [wk(2)]: 1800 }, '7', T(3));
+  s = calc.status({ ...base, streakStartWeek: wk(2) }, { [wk(0)]: 1800, [wk(1)]: 1800, [wk(2)]: 1800 }, T(3));
   check('streakStartWeek ignores earlier weeks', s.streak === 1, 'got ' + s.streak);
   // History is 8 squares ending on this week.
   s = mk('HH', T(2));
   check('history = 8 weeks, oldest first, last is "now"', s.history.length === 8 && s.history[7].state === 'now' && s.history[6].id === wk(1));
   // No data at all.
-  s = calc.status(base, {}, '7', T(1));
+  s = calc.status(base, {}, T(1));
   check('a brand-new student: streak 0, longest 0, no crash', s.streak === 0 && s.longest === 0);
-  // Break week now: ring uses the normal goal, nothing is "hit".
-  s = calc.status(brk, {}, '7', T(2));
-  check('during a break week the week shows the normal goal and is flagged isBreak', s.week.isBreak && s.week.goal === 1800 && !s.week.hit);
+  // The week in progress is a skipped one: minutes show, no goal, nothing is hit.
+  s = calc.status(brk, { [wk(2)]: 2400 }, T(2));
+  check('during a skipped week the minutes (2400 s) still show, the goal shown is the normal one, and it is never a hit', s.week.isBreak && s.week.secs === 2400 && s.week.goal === 1800 && !s.week.hit && s.streak === 0);
 }
 
 /* ═══════════ 3. Counting ═══════════ */
@@ -549,8 +557,8 @@ console.log('7. defaults');
 {
   const w = makeWorld();
   check('shipped config: uiOn is false', w.ctx.PRACTICE_MINUTES_CONFIG.uiOn === false);
-  check('shipped config: goal 30, cap 20, 4th meets 3 days, 7th meets 5', w.ctx.PRACTICE_MINUTES_CONFIG.weeklyGoalMinutes === 30 && w.ctx.PRACTICE_MINUTES_CONFIG.dailyCapMinutes === 20
-    && w.ctx.PRACTICE_MINUTES_CONFIG.meetingDays['4'].length === 3 && w.ctx.PRACTICE_MINUTES_CONFIG.meetingDays['7'].length === 5);
+  check('shipped config: goal 30, cap 20, semester 2 starts 2027-01-04, five skip weeks', w.ctx.PRACTICE_MINUTES_CONFIG.weeklyGoalMinutes === 30 && w.ctx.PRACTICE_MINUTES_CONFIG.dailyCapMinutes === 20
+    && w.ctx.PRACTICE_MINUTES_CONFIG.semester2Start === '2027-01-04' && w.ctx.PRACTICE_MINUTES_CONFIG.skipWeeks.length === 5);
   check('uiOn false → stripHtml() is empty', w.PM.stripHtml() === '');
   const a = w.track(); a.play();
   await w.run(70, w.playing(a));
@@ -755,11 +763,10 @@ const shared = () => ({ clock: { ms: new Date(2026, 10, 16, 9, 0, 0).getTime(), 
   check('playback resumed from the OS media controls (no play() call, only the element\'s own `playing`) is counted', sec(w2) - before >= 8, 'added ' + (sec(w2) - before));
 }
 {
-  // Goal in whole minutes.
-  const w = makeWorld({ config: { weeklyGoalMinutes: 20 } });
-  const g = w.PM.calc.goalSeconds(w.PM.cfg(), '2026-W45', '4');
-  const c = { ...w.PM.cfg(), shortWeeks: [{ week: '2026-W45', meetings: { '4': 2 } }] };
-  check('a prorated goal is a whole number of minutes (20 min × 2/3 → 13 min, never 13 min 20 s)', w.PM.calc.goalSeconds(c, '2026-W45', '4') === 780 && g === 1200);
+  // The goal does not depend on the student's period (or on having none): 4th, 7th, CAS, nothing chosen yet.
+  const goals = [];
+  for (const period of ['4', '7', 'CAS', '']) { const wd = makeWorld({ period }); const a = wd.track(); a.play(); await wd.run(3, wd.playing(a)); goals.push(wd.PM.status().week.goal); }
+  check('the week goal is 1800 s for period 4, 7, CAS and "none chosen yet" alike', goals.every((g) => g === 1800), goals.join());
 }
 
 console.log(`\n${failed ? '✗' : '✓'} pm-sim: ${passed} passed, ${failed} failed`);

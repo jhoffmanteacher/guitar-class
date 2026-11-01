@@ -1,5 +1,5 @@
 /* ══════════════════════════════════════════════════════════════════════
-   PRACTICE MINUTES — settings you can edit.   (2026-11-01)
+   PRACTICE MINUTES — settings you can edit.   (2026-11-01; simplified 2026-11-02)
 
    Read by practice-minutes.js, which counts the seconds a student spends
    playing a backing track (class-activity practice cards, Song Journey
@@ -19,61 +19,35 @@ var PRACTICE_MINUTES_CONFIG = {
      no live "N playing" lookups. true = all of it appears. */
   uiOn: false,
 
-  /* The weekly goal, in minutes, for a section's NORMAL week. A week with
-     fewer class meetings gets a smaller goal: goal × (meetings this week ÷
-     normal meetings for that section), rounded to whole seconds. */
+  /* The weekly goal, in minutes. It is FLAT: the same number in every counted
+     week, for every student, whichever days they practise. (There is no
+     per-section schedule and no proration.) */
   weeklyGoalMinutes: 30,
 
   /* The most minutes counted in one day. Playing past it does not count.
-     ⚠ firestore.rules has the same number in seconds (DAILY_CAP_SECONDS,
+     ⚠ firestore.rules has the same number in seconds (dailyCapSeconds(),
      1200 = 20 minutes) and REJECTS a day above it. If you raise this, raise
      that number and re-publish the rules in the same push — checks.mjs (1cg)
      fails the push when the two disagree. */
   dailyCapMinutes: 20,
 
-  /* Which weekdays each class period meets: Monday = 1 … Friday = 5. The keys
-     are the period the student picked on the site ('4' = 4th, '7' = 7th,
-     'CAS'). The length of each list is that section's "meetings in a normal
-     week" (4th: 3, 7th: 5).
-     ⚠ 4th period's three days are a GUESS (Mon / Wed / Fri). Only "3 a week"
-     was specified. Put the real days here — "This week by day" on My progress
-     draws bars for exactly these weekdays. */
-  meetingDays: {
-    '4': [1, 3, 5],
-    '7': [1, 2, 3, 4, 5]
-  },
-  /* Used for a student with no period yet, or a period not listed above (CAS). */
-  defaultMeetingDays: [1, 2, 3, 4, 5],
-
-  /* Days with no school for anyone. A 'YYYY-MM-DD' string, or a
-     ['first', 'last'] pair for a run of days (both included). A week whose
-     meeting days are all listed here has zero meetings: it is SKIPPED — it
-     neither counts as a hit nor breaks a streak.
-     ⚠ PLACEHOLDERS. Check every line against the district calendar. */
-  noSchool: [
-    '2026-11-11',                       // Veterans Day
-    ['2026-11-23', '2026-11-27'],       // Thanksgiving week
-    ['2026-12-21', '2027-01-01'],       // Winter break
-    '2027-01-18',                       // MLK Day
-    '2027-02-15',                       // Presidents' Day
-    ['2027-04-05', '2027-04-09']        // Spring break
+  /* Weeks that neither count nor break a streak (breaks). Each entry is the
+     MONDAY of the week, 'YYYY-MM-DD' (checks.mjs fails a date that is not a
+     Monday). Minutes played in a skipped week still add to the totals and show
+     on My progress; they just are not held to the goal. */
+  skipWeeks: [
+    '2026-11-23',   // Thanksgiving
+    '2026-12-21',   // winter break
+    '2026-12-28',   // winter break
+    '2027-02-15',   // mid-winter break
+    '2027-04-12'    // spring break
   ],
 
-  /* Short weeks where the meetings are fewer than the weekdays above minus
-     noSchool (a half-day schedule, an assembly, a testing day). The listed
-     number REPLACES the count for that week and period; the goal shrinks to
-     match. Week ids are ISO weeks, Monday first: '2026-W47' starts Mon Nov 16.
-       { week: '2026-W47', meetings: { '4': 2, '7': 4 } }
-     Leave a period out to keep its normal count. */
-  shortWeeks: [],
-
-  /* The two semesters, for "one free missed week per semester". A week belongs
-     to the semester that holds its Thursday.
-     ⚠ PLACEHOLDERS. Put the real first and last day of each. */
-  semesters: [
-    { start: '2026-08-12', end: '2027-01-22' },
-    { start: '2027-01-25', end: '2027-06-04' }
-  ],
+  /* The first Monday of semester 2. Every student gets one free missed week per
+     semester (the streak is kept, not extended); the free miss resets on this
+     date. A week belongs to semester 2 when its Monday is on or after it.
+     '' = one semester all year. */
+  semester2Start: '2027-01-04',
 
   /* Weeks before this one never count toward a streak (an ISO week id such as
      '2026-W48'). Set it to the week you turn uiOn on, with the goal you want,
