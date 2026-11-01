@@ -90,13 +90,16 @@ const SHELL_FILES = [
    them into that cache on first use, and an edit has to retire the old copy.
      teacher.js       only the ?teacher console loads it (ensureTeacherJs)
      mood-chart.html  no link to it anywhere since 2026-10-02
-     trainer-*.js     "Hear It First" (hidden from students; one file per phase
-                      lands here, loaded only by its direct link — WO-hear-it-first)
+     trainer-core.js, trainer-audio.js, trainer-ui.js
+                      "Hear It First" (hidden from students; loaded only by its
+                      direct link — WO-hear-it-first). NOT trainer-site-adapter.js:
+                      index.html loads that one on every page, so it is precached
+                      (Friday check R2-4, 2026-10-31).
    checkSwAssets() fails the push if one of these turns up in ASSETS anyway
    (one of the two lists would be wrong), and checkPrecacheCoverage() still
    fails if a shipped page starts linking mood-chart.html again — at that
    point it is student-facing and goes back in ASSETS, off this list. */
-const SHELL_NOT_PRECACHED = ['teacher.js', 'mood-chart.html', 'trainer-core.js', 'trainer-audio.js', 'trainer-ui.js', 'trainer-site-adapter.js'];
+const SHELL_NOT_PRECACHED = ['teacher.js', 'mood-chart.html', 'trainer-core.js', 'trainer-audio.js', 'trainer-ui.js'];
 
 /* Backing-track audio isn't in sw.js's ASSETS precache list (they're large —
    precaching them at install would bloat the offline install). The SW's fetch
@@ -5235,6 +5238,21 @@ function checkSwAssets(src) {
     }
     if (!assets.includes(f)) { err(`shell file '${f}' is missing from sw.js ASSETS — it won't be precached for offline`); problems++; bad++; }
   }
+  /* A script index.html loads with a plain <script src> runs on EVERY page, so it
+     cannot be "kept out of the precache": offline, every page load would ask for a
+     file the cache does not hold (Friday check R2-4, trainer-site-adapter.js,
+     2026-10-31). The two lists above only compare each other, so moving such a file
+     onto SHELL_NOT_PRECACHED and off ASSETS in ONE edit passed every check (review
+     R3-4). Comments are stripped first: index.html names coach.js and teacher.js in
+     comments, and they are loaded on demand. */
+  let pageScripts = [];
+  try {
+    const idxHtml = readFileSync(join(ROOT, 'index.html'), 'utf8').replace(/<!--[\s\S]*?-->/g, '');
+    pageScripts = [...idxHtml.matchAll(/<script\b[^>]*\bsrc="(?!https?:|\/\/)(?:\.\/)?([^"?#]+)"/g)].map(x => x[1]);
+  } catch { err('index.html could not be read \u2014 the every-page scripts cannot be checked against ASSETS'); problems++; bad++; }
+  for (const f of pageScripts) {
+    if (!assets.includes(f)) { err(`index.html loads '${f}' with <script src> on every page but sw.js ASSETS does not precache it${SHELL_NOT_PRECACHED.includes(f) ? ' (SHELL_NOT_PRECACHED keeps it out: that list is for files loaded on demand)' : ''} \u2014 offline, every page load would ask for a script the cache does not hold`); problems++; bad++; }
+  }
   // An entry for a file that is no longer a shell file excuses nothing — remove it.
   for (const f of SHELL_NOT_PRECACHED) {
     if (!SHELL_FILES.includes(f)) { err(`checks.mjs SHELL_NOT_PRECACHED lists '${f}', which is not in SHELL_FILES — delete the entry`); problems++; bad++; }
@@ -5258,7 +5276,7 @@ function checkSwAssets(src) {
     }
     if (critBad === 0) ok(`${critical.length} critical precache entries all present in ASSETS`);
   }
-  if (bad === 0) ok(`sw.js ASSETS ↔ shell files in sync (${assets.length} assets; ${SHELL_NOT_PRECACHED.length} shell files kept out on purpose: ${SHELL_NOT_PRECACHED.join(', ')})`);
+  if (bad === 0) ok(`sw.js ASSETS ↔ shell files in sync (${assets.length} assets; ${SHELL_NOT_PRECACHED.length} shell files kept out on purpose: ${SHELL_NOT_PRECACHED.join(', ')}); all ${pageScripts.length} scripts index.html loads on every page are precached`);
 }
 
 /* Ratchet (2026-09-02 audit): a local file that shipped content REFERENCES but
@@ -8291,6 +8309,65 @@ function checkRecordingVersions(ctx) {
   if (bad === 0) ok(n + ' cards with recording versions, ' + rendered + ' renders (each recording + nothing stored) \u2014 right track, sections, switch and Guitar switch every time; ' + strumRenders + ' every-strum renders draw ' + strumNames + ' chord names (the Neil cards pinned at 128 each, every lap A5 x4 G5 x3 F5 x6 G5 x3); ' + readbacks + ' title / intro / directions read-backs in EN + ES; ' + consoleReads + ' console titles run through teacherActivityTitle');
 }
 
+/* 1cf. THE CLASS ROSTER SKIPS THE TEACHER'S OWN HEAR IT FIRST STUB (Friday
+   check R2-1, Jonathan 2026-10-31; widened after the review, R3-1/R3-2).
+   Hear It First saves the signed-in account's trainer profile into
+   progress/{uid} with mergeFields, which creates the document when it is
+   missing, so it follows Jonathan between machines. On the teacher's own account
+   that document holds nothing a student has, and teacherFetchStudents drew it as
+   a nameless row under Unassigned. It does not stay `{trainer}`: Hear It First
+   runs in student mode, every student-mode page load runs swap45Commit, and that
+   writes `migrations.swap45` into an unmarked document, so from the second visit
+   the stub is `{trainer, migrations}`. The test is therefore "the row would be
+   empty" (no name, no email, no period, no skills / responses / games / class
+   activities / exit checks), not "only these keys".
+   Checked by RUNNING the real teacherFetchStudents (lifted out of teacher.js)
+   against a stand-in database, once for each account that could be signed in.
+   The documents: two stubs (`{trainer}` and `{trainer, migrations}`), two
+   students, another account's stub, and three accounts that hold something (a
+   name, responses, a period). Expected, for each sign-in: the signed-in
+   account's own document is skipped when it is a stub and listed when it holds
+   anything; every other document is always listed; signed out, nothing is
+   skipped. Pinned: 8 documents x 6 sign-ins. */
+function checkRosterSkipsTrainerStub() {
+  head('1cf. The class roster skips the teacher\'s own Hear It First stub');
+  let bad = 0;
+  const flag = m => { err(m); problems++; bad++; };
+  let tsrc = '';
+  try { tsrc = readFileSync(join(ROOT, 'teacher.js'), 'utf8'); } catch { flag('teacher.js could not be read \u2014 1cf cannot check the roster'); return; }
+  const at = tsrc.indexOf('async function teacherFetchStudents(');
+  const body = at < 0 ? null : jsFunctionBody(tsrc, 'teacherFetchStudents');
+  if (at < 0 || body === null) { flag('teacher.js: teacherFetchStudents() not found \u2014 1cf cannot run the roster (renamed? update this check with it)'); return; }
+  const fnSrc = tsrc.slice(at, tsrc.indexOf('{', at)) + body;
+  const DOCS = [
+    ['teacher-0', { trainer: { v: 1 } }],                                           // a stub straight after the first Hear It First save
+    ['teacher-1', { trainer: { v: 1 }, migrations: { swap45: true } }],             // the same stub after the next student-mode page load (swap45Commit)
+    ['stu-a', { name: 'Ana', email: 'ana@x.test', skills: { s1: 'gotit' } }],
+    ['stu-b', { name: 'Ben', email: 'ben@x.test' }],
+    ['other-stub', { trainer: { v: 1 }, migrations: { swap45: true } }],            // another account's stub: not the signed-in one, so listed
+    ['teacher-2', { trainer: { v: 1 }, name: 'Test Student', email: 'test@x.test' }],
+    ['teacher-3', { trainer: { v: 1 }, responses: { r1: 'x' } }],
+    ['teacher-4', { trainer: { v: 1 }, migrations: { swap45: true }, period: '4' }],
+  ];
+  const STUBS = new Set(['teacher-0', 'teacher-1']);
+  const roster = async (uid) => {
+    const ctx = vm.createContext({ ensureDb: async () => {}, swap45Marked: () => true, swap45Remap: d => d, String, Object, Array, Promise,
+      currentUser: uid ? { uid } : null,
+      db: { collection: () => ({ get: async () => ({ forEach: fn => DOCS.forEach(([id, data]) => fn({ id, data: () => data })) }) }) } });
+    const got = await vm.runInContext('(' + fnSrc + ')()', ctx);
+    return got.map(x => x.uid);
+  };
+  return (async () => {
+    const SIGN_INS = ['teacher-0', 'teacher-1', 'teacher-2', 'teacher-3', 'teacher-4', null];
+    for (const uid of SIGN_INS) {
+      const ids = await roster(uid);
+      const want = DOCS.map(d => d[0]).filter(id => !(uid && id === uid && STUBS.has(id)));
+      if (JSON.stringify(ids) !== JSON.stringify(want)) flag('signed in as ' + (uid || 'nobody') + ', the roster lists ' + JSON.stringify(ids) + ', expected ' + JSON.stringify(want) + (uid && STUBS.has(uid) ? ' (the signed-in account\'s own stub skipped, every other document listed)' : ' (nothing skipped: this account\'s own document holds data, or nobody is signed in)'));
+    }
+    if (bad === 0) ok('teacherFetchStudents run for real: ' + DOCS.length + ' documents x ' + SIGN_INS.length + ' sign-ins \u2014 the signed-in teacher\'s own stub is skipped in both shapes (before and after swap45Commit), the same uid holding a name, responses or a period is listed, other accounts\' stubs are listed, and nothing is skipped when signed out');
+  })();
+}
+
 /* 1cd. NOTE CALL POWER CHORDS (ca-43, Jonathan 2026-10-30). The student
    STRUMS a power chord and the card is answered by its root fret. The mic used
    to wait for the exact root alone, which a strummed A5 almost never gives
@@ -8342,7 +8419,7 @@ function checkNoteCallPower(ctx) {
   const run = x => vm.runInContext(x, ctx);
   let csrc = '';
   try { csrc = readFileSync(join(ROOT, 'coach.js'), 'utf8'); } catch { flag('coach.js could not be read — 1cd cannot check the mic rule'); return; }
-  const stats = { cards: 0, answers: 0, listens: 0, keys: 0 };
+  const stats = { cards: 0, answers: 0, listens: 0, keys: 0, micHits: 0, fbRenders: 0 };
 
   // The data.
   const acts = run('window.CLASS_ACTIVITIES || []');
@@ -8451,12 +8528,12 @@ function checkNoteCallPower(ctx) {
       }
 
       // ncListen: what it asks coachSettlePitch for, and which fret an answer resolves.
-      const seen = [], resolved = [];
+      const seen = [], resolved = [], micFlags = [];
       let reply = null;
       setG('COACH_PITCH_GATE', 0.01); setG('coachOnsetAt', 0); setG('coachMicLatencyMs', () => 0); setG('RNW_POWER_CLARITY', RNW);
       setG('coachReadFrame', () => 1);
       setG('coachSettlePitch', (st, targets, rms, floorT, clarity) => { seen.push({ targets: Array.from(targets), clarity: clarity === undefined ? 'undefined' : J(Array.from(clarity)) }); return reply; });
-      setG('ncResolve', (st, i, res, info) => { resolved.push({ i, res, fret: info && info.fret }); });
+      setG('ncResolve', (st, i, res, info) => { resolved.push({ i, res, fret: info && info.fret }); if (res === 'hit') micFlags.push(!!(info && info.mic)); });
       const ncListen = run('ncListen');
       const cardOf = (cfgObj, note, str) => JSON.parse(run('(function(){ return JSON.stringify(ncPool(' + J(cfgObj) + ', "all").find(p => p.note === ' + J(note) + ' && p.str === ' + J(str) + ')); })()'));
       const E5 = cardOf({ strings: ['lowE', 'A'], power: true, minFret: 0, maxFret: 12 }, 'E5', 'lowE');       // roots 40 (fret 0) and 52 (fret 12)
@@ -8503,6 +8580,9 @@ function checkNoteCallPower(ctx) {
           const got = r.resolved.length ? r.resolved.map(x => x.i + ':' + x.res + '@' + x.fret).join(',') : 'none';
           if (got !== (want === 'none' ? 'none' : '0:' + want)) flag('ncListen (' + (pw ? 'power' : 'single note') + ', mic grace): a heard ' + m + ' for the old card resolves \'' + got + '\', expected \'' + (want === 'none' ? 'none' : '0:' + want) + '\'');
         }
+        // Every hit that came from the MIC says so (the main path and the grace path), so ncResolve can name both frets of a two-fret card.
+        stats.micHits = micFlags.length;
+        if (!micFlags.length || micFlags.includes(false)) flag('ncListen resolved ' + micFlags.filter(x => !x).length + ' of ' + micFlags.length + ' mic hits without { mic: true } \u2014 ncResolve could not tell a heard strum from a tap, and would name one fret for a chord the mic cannot place');
       }
     }
   } finally { undo(); }
@@ -8544,7 +8624,71 @@ function checkNoteCallPower(ctx) {
     for (const k of defined) if (!keys.has(k)) flag('i18n ' + k + ' is defined but no Note Call power screen shows it (dead, or a screen 1cd does not reach)');
     if (defined.length !== EXPECT.keys) flag('1cd sees ' + defined.length + ' ncp.* keys, pinned at ' + EXPECT.keys + ' — a new power-mode string needs its Spanish and a screen that shows it (update the pin on purpose)');
   }
-  if (bad === 0) ok(EXPECT.power + ' power drills on ca-43 (frets ' + EXPECT.ranges.map(r => r.join('-')).join(' / ') + '); ' + stats.cards + ' cards x 53 pitches = ' + stats.answers + ' answers match the oracle (single-note cards exactly as before); ' + stats.clashCalls + ' ncClash calls match an oracle and ' + stats.deals + ' seeded ncDeal deals (no coach.js loaded) never dealt a clashing card while a clean one existed (' + stats.powerForced + ' of ' + stats.powerDeals + ' power deals had to, every card left clashing; ' + (stats.forced - stats.powerForced) + ' of ' + (stats.deals - stats.powerDeals) + ' single-note); ' + stats.listens + ' ncListen calls (targets, clarity, main and grace fret); ' + stats.keys + ' of ' + EXPECT.keys + ' ncp.* strings rendered, EN + ES');
+  /* What a HIT says about the fret (Friday check R1-1, Jonathan 2026-10-31;
+     tightened after the review, R3-3). On a card with two frets (E5 on the low E
+     string: 0 and 12) the mic cannot reliably tell the octaves apart and credited
+     fret 0 when the student played fret 12, so a MIC hit now names every fret
+     ("fret 0 / 12", "traste 0 / 12") and flashes both markers green on the board;
+     a tap names and flashes only the fret tapped, and a card with one fret, or
+     any single-note card, names and flashes its one fret. The real ncResolve (mic
+     hits) and the real ncTap (taps, scored and play-along) are run on a two-fret
+     power card, a one-fret power card and a two-fret single-note card, in English
+     and Spanish. The text is read back AND every flashClass call is recorded, so
+     the check sees which marker flashed, on which string, in which colour. */
+  {
+    const origGet = ctx.document.getElementById, recs = {};
+    ctx.__flashes = [];
+    ctx.document.getElementById = id => recs[id] || (recs[id] = Object.assign(origGet(id), { id }));
+    const hadFlash2 = Object.prototype.hasOwnProperty.call(ctx, 'flashClass'), origFlash = ctx.flashClass;
+    ctx.flashClass = (el, cls) => { ctx.__flashes.push((el && el.id) + '|' + cls); };
+    try {
+      for (const lang of ['en', 'es']) {
+        run('setLang(' + J(lang) + ')');
+        const o = JSON.parse(run(`(function(){
+          const o = {};
+          const mk = (sid, power) => { renderNoteCall({ type: 'notecall', power, strings: ['lowE', 'A'], minFret: 0, maxFret: 12 }, sid, 'w'); const st = noteCalls[sid]; st.key = sid; return st; };
+          const reset = (st, card, mode) => { __flashes.length = 0; st.seq = [Object.assign({}, card, { res: null })]; st.idx = 0; st.requeue = []; st.phase = 'play'; st.mode = mode; st.locked = false; };
+          const read = st => ({ t: document.getElementById('nc-fb-' + st.key).textContent, f: __flashes.slice() });
+          const mic = (st, card, fret) => { reset(st, card, 'levels'); ncResolve(st, 0, 'hit', { fret, mic: true }); return read(st); };
+          const tap = (st, card, fret, mode) => { reset(st, card, mode); ncTap(st.key, card.str, fret); return read(st); };
+          const pw = mk('chk-fb1', true), sn = mk('chk-fb2', false);
+          const two = ncPool(pw.cfg, 'all').find(c => c.frets.length === 2), one = ncPool(pw.cfg, 'all').find(c => c.frets.length === 1), sTwo = ncPool(sn.cfg, 'all').find(c => c.frets.length === 2);
+          o.two = two && two.frets; o.twoStr = two && two.str; o.one = one && one.frets; o.oneStr = one && one.str; o.sTwo = sTwo && sTwo.frets; o.sTwoStr = sTwo && sTwo.str;
+          if (two && one && sTwo) {
+            o.micTwo = mic(pw, two, two.frets[1]);
+            o.micTwo0 = mic(pw, two, two.frets[0]);
+            o.tapTwo = tap(pw, two, two.frets[1], 'levels');
+            o.tapTwoAnswer = tap(pw, two, two.frets[1], 'answer');
+            o.micOne = mic(pw, one, one.frets[0]);
+            o.micSingle = mic(sn, sTwo, sTwo.frets[1]);
+          }
+          delete noteCalls['chk-fb1']; delete noteCalls['chk-fb2'];
+          return JSON.stringify(o);
+        })()`));
+        const W = lang === 'en' ? 'fret' : 'traste';
+        if (!o.two || !o.one || !o.sTwo) { flag(lang + ': 1cd could not build a two-fret power card, a one-fret power card and a two-fret single-note card for the hit feedback (' + J(o) + ') — ncPool changed'); continue; }
+        const both = W + ' ' + o.two.join(' / ');
+        const want = (sid, str, frets) => new Set(frets.map(f => 'fgm-' + sid + '-' + str + '-' + f + '|fg-good'));
+        const flashesAre = (r, set) => { const got = new Set(r.f); return got.size === set.size && [...set].every(x => got.has(x)) && r.f.every(x => set.has(x)); };
+        const show = r => J(r.f);
+        if (!o.micTwo.t.includes(both)) flag(lang + ': a mic hit on a two-fret power card says \'' + o.micTwo.t + '\', expected it to name both frets (\'' + both + '\')');
+        if (!flashesAre(o.micTwo, want('chk-fb1', o.twoStr, o.two))) flag(lang + ': a mic hit on a two-fret power card flashes ' + show(o.micTwo) + ', expected both frets ' + J(o.two) + ' on the ' + o.twoStr + ' string, green');
+        if (!o.micTwo0.t.includes(both)) flag(lang + ': a mic hit credited to fret ' + o.two[0] + ' says \'' + o.micTwo0.t + '\', expected both frets (\'' + both + '\')');
+        if (!flashesAre(o.micTwo0, want('chk-fb1', o.twoStr, o.two))) flag(lang + ': a mic hit credited to fret ' + o.two[0] + ' flashes ' + show(o.micTwo0) + ', expected both frets green');
+        for (const [name, r] of [['TAP (scored)', o.tapTwo], ['TAP (play-along)', o.tapTwoAnswer]]) {
+          if (!r.t.includes(W + ' ' + o.two[1]) || r.t.includes(' / ')) flag(lang + ': a ' + name + ' on fret ' + o.two[1] + ' of a two-fret power card says \'' + r.t + '\', expected just that fret');
+          if (!flashesAre(r, want('chk-fb1', o.twoStr, [o.two[1]]))) flag(lang + ': a ' + name + ' on fret ' + o.two[1] + ' flashes ' + show(r) + ', expected only that fret, green');
+        }
+        if (!o.micOne.t.includes(W + ' ' + o.one[0]) || o.micOne.t.includes(' / ')) flag(lang + ': a mic hit on a one-fret power card says \'' + o.micOne.t + '\', expected just fret ' + o.one[0]);
+        if (!flashesAre(o.micOne, want('chk-fb1', o.oneStr, o.one))) flag(lang + ': a mic hit on a one-fret power card flashes ' + show(o.micOne) + ', expected only fret ' + o.one[0] + ' on the ' + o.oneStr + ' string, green');
+        if (!o.micSingle.t.includes(W + ' ' + o.sTwo[1]) || o.micSingle.t.includes(' / ')) flag(lang + ': a mic hit on a single-note card says \'' + o.micSingle.t + '\', expected just fret ' + o.sTwo[1] + ' (a single note is exact)');
+        if (!flashesAre(o.micSingle, want('chk-fb2', o.sTwoStr, [o.sTwo[1]]))) flag(lang + ': a mic hit on a single-note card flashes ' + show(o.micSingle) + ', expected only fret ' + o.sTwo[1] + ' on the ' + o.sTwoStr + ' string, green');
+        stats.fbRenders += 6;
+      }
+    } catch (e) { flag('rendering the Note Call hit feedback threw ' + e.message); }
+    finally { ctx.document.getElementById = origGet; delete ctx.__flashes; if (hadFlash2) ctx.flashClass = origFlash; else delete ctx.flashClass; try { run('setLang("en")'); } catch { /* best effort */ } }
+  }
+  if (bad === 0) ok(EXPECT.power + ' power drills on ca-43 (frets ' + EXPECT.ranges.map(r => r.join('-')).join(' / ') + '); ' + stats.cards + ' cards x 53 pitches = ' + stats.answers + ' answers match the oracle (single-note cards exactly as before); ' + stats.clashCalls + ' ncClash calls match an oracle and ' + stats.deals + ' seeded ncDeal deals (no coach.js loaded) never dealt a clashing card while a clean one existed (' + stats.powerForced + ' of ' + stats.powerDeals + ' power deals had to, every card left clashing; ' + (stats.forced - stats.powerForced) + ' of ' + (stats.deals - stats.powerDeals) + ' single-note); ' + stats.listens + ' ncListen calls (targets, clarity, main and grace fret); ' + stats.micHits + ' mic hits all flagged as the mic; ' + stats.fbRenders + ' hit-feedback renders (a mic hit on a two-fret power card names and flashes both frets; a tap, scored or play-along, a one-fret card and a single note name and flash one); ' + stats.keys + ' of ' + EXPECT.keys + ' ncp.* strings rendered, EN + ES');
 }
 
 /* 1bf2. LYRIC-SHEET CARDS (card.sheet — ca-38, Jonathan 2026-10-19). The
@@ -10503,17 +10647,20 @@ function checkCoachVerdicts() {
     const coachSrc = readFileSync(join(ROOT, 'coach.js'), 'utf8');
     const startBody = jsFunctionBody(coachSrc, 'ccStart');
     if (startBody === null || !/ccRoundChords\(progDef, again === true\)/.test(stripJsComments(startBody))) flag('1ca: ccStart() must take its round\'s chords from ccRoundChords(progDef, again === true) \u2014 Again would draw a new pair, or Start would replay the old one');
-    /* Power Chord Switch's Start sits in a bar that sticks to the bottom of the
-       games screen (the real layout is measured in smoke.mjs at 1366x657): the
-       markup wraps it for Power Chord Switch only, and Change Up's is unchanged. */
+    /* Start sits in a bar that sticks to the bottom of the games screen in BOTH
+       games (the real layout is measured in smoke.mjs at 1366x657). It was Power
+       Chord Switch's alone, with this check holding Change Up "as it was"; the
+       80px charts pushed Change Up's tempo row and Start down a 657px screen
+       too, and Jonathan chose to give it the bar (Friday check R1-3, 2026-10-31). */
     const css = readFileSync(join(ROOT, 'styles.css'), 'utf8');
-    if (!/#cc-body\.cc-power \.cc-startbar\{[^}]*position:sticky;[^}]*bottom:0;[^}]*background:var\(--bg\)/.test(css)) flag('1ca: styles.css lost #cc-body.cc-power .cc-startbar{position:sticky;bottom:0;background:var(--bg)} \u2014 Start would scroll off a 657px screen under the 180px charts');
+    if (!/#cc-body \.cc-startbar\{[^}]*position:sticky;[^}]*bottom:0;[^}]*background:var\(--bg\)/.test(css)) flag('1ca: styles.css lost #cc-body .cc-startbar{position:sticky;bottom:0;background:var(--bg)} \u2014 Start would scroll off a 657px screen under the charts, in both games');
+    if (/#cc-body\.cc-power \.cc-startbar\{/.test(css)) flag('1ca: styles.css scopes .cc-startbar to #cc-body.cc-power again \u2014 Change Up\'s Start would not stick');
     for (const lang of ['en', 'es']) {
       run(`setLang(${JSON.stringify(lang)})`);
       run(`ccSetup('power')`);
       if (!/<div class="cc-startbar"><button type="button" class="coach-start" onclick="ccStart\(\)">/.test(bodies['cc-body'])) flag(`1ca: ${lang} Power Chord Switch's Start is not inside the sticky .cc-startbar`);
       run(`ccSetup()`);
-      if (/cc-startbar/.test(bodies['cc-body'])) flag(`1ca: ${lang} Change Up's setup has the Power Chord Switch Start bar \u2014 Change Up must stay as it was`);
+      if (!/<div class="cc-startbar"><button type="button" class="coach-start" onclick="ccStart\(\)">/.test(bodies['cc-body'])) flag(`1ca: ${lang} Change Up's Start is not inside the sticky .cc-startbar`);
     }
     run(`setLang('en')`);
     const four = JSON.parse(run(`ccSetup(); JSON.stringify(ccPickChords(CC_PROGRESSIONS.find(p => p.random)))`));
@@ -10643,7 +10790,7 @@ function checkCoachVerdicts() {
   for (const [k, n] of Object.entries(EXPECT)) {
     if (counts[k] !== n) flag(`1ca: rendered ${counts[k]} ${k}, pinned ${n} — the check went partly blind (or grew: re-pin EXPECT on purpose)`);
   }
-  if (bad === 0) ok(`${counts.reports} Coach reports, ${counts.descs} chord-card descriptions, ${counts.nrLevels} Note Runner levels ×2 and ${counts.doneScreens} arcade done screens read true; Power Chord Switch: ${counts.pwLoops} loops are three-finger shapes in the right group, ${counts.pwDraws} random draws all listed pairs (11 of 11 and both orders seen), the Again button replays the pair and Start draws, the Start bar is sticky, ${counts.pwHints} slide hints match the diagrams (EN+ES), ${counts.pwViews} screens/rounds, ${counts.pwMemory} remembered tempo/speed pairs and ${counts.pwGates} pitch gates keep it apart from Change Up`);
+  if (bad === 0) ok(`${counts.reports} Coach reports, ${counts.descs} chord-card descriptions, ${counts.nrLevels} Note Runner levels ×2 and ${counts.doneScreens} arcade done screens read true; Power Chord Switch: ${counts.pwLoops} loops are three-finger shapes in the right group, ${counts.pwDraws} random draws all listed pairs (11 of 11 and both orders seen), the Again button replays the pair and Start draws, the Start bar is sticky in both games, ${counts.pwHints} slide hints match the diagrams (EN+ES), ${counts.pwViews} screens/rounds, ${counts.pwMemory} remembered tempo/speed pairs and ${counts.pwGates} pitch gates keep it apart from Change Up`);
 }
 
 (async function main() {
@@ -10716,6 +10863,7 @@ function checkCoachVerdicts() {
   checkChordGridCards(rcCtx);
   checkRecordingVersions(rcCtx);
   checkNoteCallPower(rcCtx);
+  await checkRosterSkipsTrainerStub();
   checkPowerChordPopups(rcSets, rcCtx);
   checkPendingFileSwitch(rcCtx);
   checkCardCaptionWords();

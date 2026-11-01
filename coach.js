@@ -3264,9 +3264,10 @@ function ccRenderSetup(msg){
      game, and the big charts push anything below them off a 657px screen — then
      which two chords; Change Up keeps the loops first and the tempo below. */
   const tempoRow = `<div class="cc-group"><div class="cc-group-title">${t('games.pw.group.tempo')}</div>${bpmRow}</div>`;
-  /* Power Chord Switch's two 180px charts push Start below a 657px screen, so
-     there it sits in a bar that sticks to the bottom of the scrolling games
-     screen (styles.css .cc-startbar). Change Up's markup is unchanged. */
+  /* Start sits in a bar that sticks to the bottom of the scrolling games
+     screen (styles.css .cc-startbar), in both games: Power Chord Switch's two
+     180px charts push it below a 657px screen, and so do Change Up's 80px
+     charts once a loop is picked (Friday check R1-3, Jonathan 2026-10-31). */
   const startBtn = `<button type="button" class="coach-start" onclick="ccStart()">&#x25B6; ${t('games.cc.startButton', { slots: rate.slots })}</button>`;
   body.innerHTML =
     (msg ? `<div class="coach-note">${escHtml(msg)}</div>` : '') +
@@ -3274,7 +3275,7 @@ function ccRenderSetup(msg){
     (prog.random ? `<div class="coach-note">&#x1F3B2; ${t(power ? 'games.pw.randomNote' : 'games.cc.randomNote')}</div>` : ccDiagramsHtml(prog.chords, null)) +
     (power ? '' : bpmRow) +
     `<div class="coach-tip">&#x1F92B; ${t(power ? 'games.pw.tip' : 'games.cc.tip', { rate: tipRate })}</div>
-     ${power ? `<div class="cc-startbar">${startBtn}</div>` : startBtn}
+     <div class="cc-startbar">${startBtn}</div>
      ${coachFootHtml()}`;
 }
 

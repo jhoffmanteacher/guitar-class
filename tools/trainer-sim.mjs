@@ -39,7 +39,10 @@ const SEEDS = +opt('seeds', 20);
 const ONLY = opt('only', '') ? opt('only', '').split(',') : null;
 const QUIET = flag('quiet');
 const say = (...a) => { if (!QUIET) console.log(...a); };
-const BASE = Date.UTC(2026, 10, 3);
+/* Noon UTC, not midnight: dayStr is the LOCAL date, and noon UTC is November 3
+   on every clock from UTC-12 to UTC+11, so the '2026-11-03' dates below hold
+   whatever TZ the sim runs under (run it under TZ=America/Los_Angeles and TZ=UTC). */
+const BASE = Date.UTC(2026, 10, 3, 12);
 
 let failures = 0;
 const fail = (msg) => { failures++; console.log('  FAIL  ' + msg); };
@@ -213,6 +216,15 @@ function runUnits() {
     ok(Math.abs(p.cells[key].m - (m4 + 0.2 * (0 - m4))) < 1e-9, 'floor k 0.2: ' + p.cells[key].m);
     eq(p.cells[key].n, 5);
     return 'k = 1/2, 1/3, 1/4, 1/5, 0.2';
+  });
+  unit('U12b dayStr is the learner\'s local calendar day, and the gap between two days is whole days', () => {
+    // 03:00 UTC on Nov 4 is the evening of Nov 3 in California: the old UTC date said Nov 4.
+    const instants = [Date.UTC(2026, 10, 4, 3, 0), Date.UTC(2026, 10, 3, 12, 0), Date.UTC(2026, 2, 8, 9, 30), Date.UTC(2026, 10, 1, 7, 59), Date.UTC(2026, 11, 31, 23, 59)];
+    for (const ms of instants) eq(C.dayStr(ms), new Date(ms).toLocaleDateString('en-CA'), 'dayStr(' + new Date(ms).toISOString() + ')');
+    if (process.env.TZ === 'America/Los_Angeles') eq(C.dayStr(Date.UTC(2026, 10, 4, 3, 0)), '2026-11-03', 'an evening session in Los Angeles');
+    eq(C.daysBetween('2026-11-03', '2026-11-04'), 1, 'one day apart');
+    eq(C.daysBetween('2026-03-07', '2026-03-09'), 2, 'across the spring-forward night');
+    return 'checked in TZ=' + (process.env.TZ || 'the machine\'s zone');
   });
   unit('U12 status bands, and decay: 0.02 per unseen day, a mastered cell stops at 0.5', () => {
     const key = 'match|same-m|low|lo', prof = C.newProfile();

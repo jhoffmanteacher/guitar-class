@@ -5,6 +5,24 @@ Notable changes to the Guitar Class site. Newest first.
 For the full session-by-session history (and the reasoning behind each change),
 see `WORKFLOW.md` and the git commit log.
 
+## 2026-10-31 — Change Up: the Start button stays on the screen
+
+- **On a laptop screen, Change Up's Start button no longer drops off the
+  bottom.** The chord charts are bigger than they were, so after you picked a
+  loop you had to scroll to find Start. It now sits in a bar at the bottom of the
+  screen, the same as in Power Chord Switch. You can pick a loop and press Start
+  without scrolling. The −5 / +5 tempo buttons are still a little way down.
+
+## 2026-10-31 — Power Chords on the Low E and A Strings in Time: the mic names both frets
+
+- **When the mic hears the chord on a card that can be played at two frets, the
+  card now names both.** On E5 and A5 you can play the root at fret 0 or at
+  fret 12. The two sound alike (one is an octave higher), so the mic often cannot
+  tell which you played. Before, it named one of them, often fret 0 when you had
+  played fret 12. Now it says "fret 0 / 12" (in Spanish, "traste 0 / 12") and marks both
+  frets on the board. If you tap a fret on the board, the card still names the
+  fret you tapped.
+
 ## 2026-10-31 — Power Chords on the Low E and A Strings: the last screen talks about chords
 
 - **After a round that doesn't unlock the next level, the advice now says

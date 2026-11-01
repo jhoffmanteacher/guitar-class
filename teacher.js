@@ -531,6 +531,21 @@ async function teacherFetchStudents(){
   await ensureDb();
   const snap=await db.collection('progress').get();
   const out=[];
+  /* Hear It First saves the signed-in account's trainer profile into
+     progress/{uid} with mergeFields, which creates the document when it is
+     missing. On the teacher's own account that document holds nothing a student
+     has, and the roster drew it as a nameless row under Unassigned (Friday check
+     R2-1, 2026-10-31). It is not just {trainer}: Hear It First runs in student
+     mode, every student-mode page load runs swap45Commit, and that adds
+     `migrations.swap45` to an unmarked document, so from the second visit it is
+     {trainer, migrations} (review R3-1). So the test is what the roster would
+     DRAW: the signed-in teacher's own document is skipped when it has no name,
+     email or period and nothing in skills, responses, games, classActivities or
+     exitChecks. A document that holds any of those (a test-student account) is
+     still listed, and so is every other account. */
+  const myUid=(typeof currentUser!=='undefined'&&currentUser&&currentUser.uid)||'';
+  const rowIsEmpty=d=>!String(d.name||'')&&!String(d.email||'')&&!d.period
+    &&['skills','responses','games','classActivities','exitChecks'].every(k=>!Object.keys(d[k]||{}).length);
   snap.forEach(doc=>{
       /* Module 4/5 swap (2026-10-12): a doc whose student has not opened the
          site since the swap is still in the OLD numbering (its Module 4 work
@@ -540,6 +555,7 @@ async function teacherFetchStudents(){
          swap45Commit in app.js, which always loads before this file). Remove
          with them. */
       const data=swap45Marked(doc.data())?doc.data():swap45Remap(doc.data());
+      if(myUid&&doc.id===myUid&&rowIsEmpty(data)) return;
       const raw=data.skills||{};
       const skills={};
       Object.keys(raw).forEach(k=>{

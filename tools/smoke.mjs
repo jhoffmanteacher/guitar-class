@@ -447,6 +447,46 @@ async function powerSwitchWalk(page, run, events, stats, base) {
   await page.send('Emulation.clearDeviceMetricsOverride');
 }
 
+/* Change Up at the real window, 1366x657 (Friday check R1-3, Jonathan
+   2026-10-31). Its 80px charts (639248b) pushed the -5/+5 row and Start down the
+   scrolling games screen, so Start now sits in the same sticky bar as Power Chord
+   Switch (.cc-startbar). For the default screen and a 2-, 3- and 4-chord loop and
+   Random 4, assert Start is fully on screen and inside the bar; at least one of
+   those views must scroll, or the test would pass without the bar. Runs after
+   powerSwitchWalk, on the same page, with coach.js already loaded. */
+async function changeUpWalk(page, run, events, stats) {
+  const has = await run('cu:has', `typeof CC_PROGRESSIONS !== 'undefined' && typeof gamesShow === 'function' && typeof ccPickProg === 'function'`, 10);
+  if (!has) return;
+  const fail = (step, text) => events.push({ step: 'changeup-layout:' + step, kind: 'changeup-layout', text });
+  const size = { width: 1366, height: 657, deviceScaleFactor: 1, mobile: false };
+  const measure = `(() => { const sc = document.getElementById('games-screen'), st = document.querySelector('#cc-body .coach-start');
+    const s = st && st.getBoundingClientRect();
+    return { shown: sc.clientHeight > 0, innerH: window.innerHeight, scrollH: sc.scrollHeight, clientH: sc.clientHeight, start: s && { top: Math.round(s.top), bottom: Math.round(s.bottom) },
+      bar: !!(st && st.parentElement && st.parentElement.classList.contains('cc-startbar')), power: document.getElementById('cc-body').classList.contains('cc-power') }; })()`;
+  const idx = pred => `CC_PROGRESSIONS.findIndex(${pred})`;
+  const views = [['the default', `gamesShow('cc')`],
+    ['a 2-chord loop', `gamesShow('cc'); ccPickProg(${idx('p => !p.random && p.chords.length === 2')})`],
+    ['a 3-chord loop', `gamesShow('cc'); ccPickProg(${idx('p => !p.random && p.chords.length === 3')})`],
+    ['a 4-chord loop', `gamesShow('cc'); ccPickProg(${idx('p => !p.random && p.chords.length === 4')})`],
+    ['Random 4', `gamesShow('cc'); ccPickProg(${idx('p => p.random')})`]];
+  await page.send('Emulation.setDeviceMetricsOverride', size);
+  await sleep(400);
+  await run('cu:route', `ensureCoachJs().then(() => goExploreHash('games'))`, 1500);
+  let scrolled = 0;
+  for (const [name, expr] of views) {
+    await run('cu:show:' + name, expr, 500);
+    const m = await run('cu:measure:' + name, measure, 10);
+    if (!m || !m.shown) { fail(name, 'the games screen is not on screen \u2014 the measurement would be of a hidden panel'); continue; }
+    if (m.power) fail(name, 'the setup is in Power Chord Switch mode, not Change Up');
+    if (!m.start || m.start.top < 0 || m.start.bottom > m.innerH) fail(name, `Change Up's Start sits at ${m.start && m.start.top}-${m.start && m.start.bottom}px on a ${m.innerH}px screen \u2014 it must be fully on screen (see .cc-startbar)`);
+    if (!m.bar) fail(name, "Change Up's Start is not inside the sticky .cc-startbar");
+    if (m.scrollH > m.clientH) scrolled++;
+    stats.changeUpLayouts = (stats.changeUpLayouts || 0) + 1;
+  }
+  if (!scrolled) fail('all views', 'no Change Up view scrolls at 1366x657 \u2014 this check cannot show that Start sticks (did the charts shrink?)');
+  await page.send('Emulation.clearDeviceMetricsOverride');
+}
+
 async function walk(base, chromePort, label) {
   const page = await openPage(chromePort);
   let step = 'boot'; const events = []; const stats = { sets: 0, modules: 0, games: 0, buttons: 0 };
@@ -568,6 +608,7 @@ async function walk(base, chromePort, label) {
   await chordGridWalk(page, run, events, stats);
   // Before Note Call's walk: that one reloads a fresh page with no coach.js, and this one needs gamesShow (coach.js) to be there.
   await powerSwitchWalk(page, run, events, stats, base);
+  await changeUpWalk(page, run, events, stats);
   await noteCallWalk(page, run, events, stats, base);
   await recordingWalk(page, run, events, stats, base);
   await page.close();
@@ -603,7 +644,7 @@ try {
   const norm = e => `${e.kind}|${e.step.replace(/^(en|es):/, '')}|${e.kind === 'bad-handler' ? '' : e.text}`;
   const baseCount = new Map(); (base ? base.errors : []).forEach(e => baseCount.set(norm(e), Math.max(baseCount.get(norm(e)) || 0, e.kind === 'bad-handler' ? +e.text : 1)));
   const report = base ? now.errors.filter(e => (e.kind === 'bad-handler' ? +e.text : 1) > (baseCount.get(norm(e)) || 0)) : now.errors;
-  say(`smoke: ${now.stats.sets} sets in ${now.stats.modules} modules (EN + ES), ${now.stats.games} game views, ${now.stats.buttons} inline handlers compiled${now.stats.chordCards ? `, ${now.stats.chordCards} chord-grid cards walked (cursor, lap, layout at 1366/390/360, lyric sheet${now.stats.bassClicks ? `, bass switch clicked on ${now.stats.bassClicks}` : ''}${now.stats.recordingClicks ? `, recording switch clicked, reloaded and flipped back on ${now.stats.recordingClicks}` : ''}${now.stats.chordSkipped ? `; ${now.stats.chordSkipped.join(', ')} is teacher-only and not walked` : ''})` : ''}${now.stats.noteCallSteps ? `, ${now.stats.noteCallSteps} Note Call power-chord steps (EN + ES: six strings, taps on low E and A only, a hit and a miss)` : ''}${now.stats.powerLayouts ? `, Power Chord Switch at 1366\u00d7657 (Start and tempo on screen: ${now.stats.powerLayouts} views, incl. after a reload)` : ''}`);
+  say(`smoke: ${now.stats.sets} sets in ${now.stats.modules} modules (EN + ES), ${now.stats.games} game views, ${now.stats.buttons} inline handlers compiled${now.stats.chordCards ? `, ${now.stats.chordCards} chord-grid cards walked (cursor, lap, layout at 1366/390/360, lyric sheet${now.stats.bassClicks ? `, bass switch clicked on ${now.stats.bassClicks}` : ''}${now.stats.recordingClicks ? `, recording switch clicked, reloaded and flipped back on ${now.stats.recordingClicks}` : ''}${now.stats.chordSkipped ? `; ${now.stats.chordSkipped.join(', ')} is teacher-only and not walked` : ''})` : ''}${now.stats.noteCallSteps ? `, ${now.stats.noteCallSteps} Note Call power-chord steps (EN + ES: six strings, taps on low E and A only, a hit and a miss)` : ''}${now.stats.powerLayouts ? `, Power Chord Switch at 1366\u00d7657 (Start and tempo on screen: ${now.stats.powerLayouts} views, incl. after a reload)` : ''}${now.stats.changeUpLayouts ? `, Change Up at 1366\u00d7657 (Start on screen in its sticky bar: ${now.stats.changeUpLayouts} views)` : ''}`);
   if (base) say(`smoke: ${BASELINE} had ${base.errors.length} error event(s); this checkout has ${now.errors.length}`);
   if (report.length) {
     exitCode = 1;

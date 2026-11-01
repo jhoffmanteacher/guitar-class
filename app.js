@@ -9288,7 +9288,7 @@ function ncListen(st, now){
       st.readings = []; st.attackT = 0;
       if(ga >= 0){
         st.graceIdx = null;
-        if(g.res == null) ncResolve(st, gi, 'hit', { fret: g.frets[ga] });
+        if(g.res == null) ncResolve(st, gi, 'hit', { fret: g.frets[ga], mic: true });
       }
       // An old pluck only ever answers the old card — the new card's name
       // wasn't up yet, so even its note can't be an answer to it.
@@ -9297,7 +9297,7 @@ function ncListen(st, now){
     const p = st.seq[st.idx];
     if(!p || p.res != null) return;   // the round's over, or this card is already answered
     const at = ncAnswerAt(p, m);
-    if(at >= 0){ ncResolve(st, st.idx, 'hit', { fret: p.frets[at] }); return; }
+    if(at >= 0){ ncResolve(st, st.idx, 'hit', { fret: p.frets[at], mic: true }); return; }
     if(m >= 36 && m <= 76){
       const name = sdNoteAt('lowE', m - SD_OPEN_MIDI.lowE);
       if(name !== st.heard){
@@ -9340,8 +9340,14 @@ function ncResolve(st, i, res, info){
   const vars = ncVars(p);
   const card = document.getElementById('nc-card-' + key);
   if(res === 'hit'){
-    ncMark(key, p.str, info.fret, 'fg-good');
-    if(fb){ fb.className = 'sdr-fb nc-fb hit'; fb.textContent = t(ncK(p.power, 'fbHit'), Object.assign(vars, { fret: info.fret })); }
+    /* A power chord on a card with two frets (E5 on the low E string: 0 and 12)
+       sounds alike at both (one is an octave higher), and the mic credits
+       whichever root it settled on, often fret 0 when the student played fret 12
+       (the octave below fret 12's root is fret 0's root). So a MIC hit names and marks every fret the
+       card has; a tap names the fret that was tapped. Single notes are exact. */
+    const both = !!(info.mic && p.power && p.frets.length > 1);
+    (both ? p.frets : [info.fret]).forEach(f => ncMark(key, p.str, f, 'fg-good'));
+    if(fb){ fb.className = 'sdr-fb nc-fb hit'; fb.textContent = t(ncK(p.power, 'fbHit'), Object.assign(vars, { fret: both ? ncFretList(p) : info.fret })); }
     if(card && i === st.idx) card.classList.add('hit');
   } else {
     if(info && info.tap){
