@@ -3771,7 +3771,7 @@ window.CLASS_ACTIVITIES = [
     journeyLayer: 3,
     title:    'All Along the Watchtower — The Whole Song in Power Chords',
     title_es: 'All Along the Watchtower — La canción completa con acordes de potencia',
-    intro:    'You play the whole song as single notes. Today you play it in power chords: the same roots, with two more strings added.',
+    intro:    'You already play the whole song as single notes. Today you play it in power chords: the same roots, with two more strings added.',
     intro_es: 'Ya tocas la canción completa con notas sueltas. Hoy la tocas con acordes de potencia: las mismas raíces, con dos cuerdas más.',
     card: {
       wholeSong: true,  // stops at the end of the song instead of looping
@@ -3969,15 +3969,15 @@ window.CLASS_ACTIVITIES = [
     journeyLayer: 3,
     title:    '"the cure" — The Whole Song in Power Chords',
     title_es: '"the cure" — La canción completa con acordes de potencia',
-    intro:    'You play the whole song as single notes. Today you play it in power chords: the same roots, with two more strings added.',
+    intro:    'You already play the whole song as single notes. Today you play it in power chords: the same roots, with two more strings added.',
     intro_es: 'Ya tocas la canción completa con notas sueltas. Hoy la tocas con acordes de potencia: las mismas raíces, con dos cuerdas más.',
     card: {
       wholeSong: true,  // stops at the end of the song instead of looping
       track: 'the-cure',
       chordGrid: true,  // chord grid: each chord once, cursor on the beats only (2026-10-26) — see CARD above
       slowest: true,    // four-way speed control (Slow added 2026-10-09): Slowest / Slower / Slow / Normal — the student picks
-      caption:    'The whole song in power chords · one chord per bar (two where they share a bar) · the highlight follows the beat',
-      caption_es: 'La canción completa con acordes de potencia · un acorde por compás (dos donde comparten un compás) · la marca sigue el tiempo',
+      caption:    'The whole song in power chords',
+      caption_es: 'La canción completa con acordes de potencia',
       sections: [
         {
           label: 'Intro', label_es: 'Intro',
@@ -4299,7 +4299,7 @@ window.CLASS_ACTIVITIES = [
     journeyLayer: 3,
     title:    'Seven Nation Army — The Whole Song in Power Chords',
     title_es: 'Seven Nation Army — La canción completa con acordes de potencia',
-    intro:    'You play the whole song as single notes. Today you play it in power chords: the same roots, with two more strings added.',
+    intro:    'You already play the whole song as single notes. Today you play it in power chords: the same roots, with two more strings added.',
     intro_es: 'Ya tocas la canción completa con notas sueltas. Hoy la tocas con acordes de potencia: las mismas raíces, con dos cuerdas más.',
     card: {
       wholeSong: true,  // stops at the end of the song instead of looping
@@ -4548,15 +4548,15 @@ window.CLASS_ACTIVITIES = [
     journeyLayer: 3,
     title:    '"Luna" — The Whole Song in Power Chords',
     title_es: '"Luna" — La canción completa con acordes de potencia',
-    intro:    'You play the whole song as single notes. Today you play it in power chords: the same roots, with two more strings added.',
+    intro:    'You already play the whole song as single notes. Today you play it in power chords: the same roots, with two more strings added.',
     intro_es: 'Ya tocas la canción completa con notas sueltas. Hoy la tocas con acordes de potencia: las mismas raíces, con dos cuerdas más.',
     card: {
       wholeSong: true,  // stops at the end of the song instead of looping
       track: 'luna',
       chordGrid: true,  // chord grid: each chord once, cursor on the beats only (2026-10-26) — see CARD above
       slowest: true,    // four-way speed control (Slow added 2026-10-09): Slowest / Slower / Slow / Normal — the student picks
-      caption:    'The whole song in power chords · each chord lasts 2 bars (the last F5 lasts 1 bar) · the highlight follows the beat',
-      caption_es: 'La canción completa con acordes de potencia · cada acorde dura 2 compases (el último F5 dura 1 compás) · la marca sigue el tiempo',
+      caption:    'The whole song in power chords',
+      caption_es: 'La canción completa con acordes de potencia',
       sections: [
         {
           label: 'Intro', label_es: 'Intro',
@@ -4676,15 +4676,15 @@ window.CLASS_ACTIVITIES = [
     journeyLayer: 3,
     title:    'Sweet Child O\' Mine — The Whole Song in Power Chords',
     title_es: 'Sweet Child O\' Mine — La canción completa con acordes de potencia',
-    intro:    'You play the whole song as single notes. Today you play it in power chords: the same roots, with two more strings added.',
+    intro:    'You already play the whole song as single notes. Today you play it in power chords: the same roots, with two more strings added.',
     intro_es: 'Ya tocas la canción completa con notas sueltas. Hoy la tocas con acordes de potencia: las mismas raíces, con dos cuerdas más.',
     card: {
       wholeSong: true,  // stops at the end of the song instead of looping
       track: 'sweet-child-o-mine',
       chordGrid: true,  // chord grid: each chord once, cursor on the beats only (2026-10-26) — see CARD above
       slowest: true,    // four-way speed control (Slow added 2026-10-09): Slowest / Slower / Slow / Normal — the student picks
-      caption:    'The whole song in power chords · each chord lasts until the next chord name (C5 D5 G5 share one bar in Solo 2 and the Outro, G5 and A5 share one bar in the Ending) · the highlight follows the beat',
-      caption_es: 'La canción completa con acordes de potencia · cada acorde dura hasta el siguiente nombre de acorde (C5 D5 G5 comparten un compás en el Solo 2 y en el Final, G5 y A5 comparten un compás en el Cierre) · la marca sigue el tiempo',
+      caption:    'The whole song in power chords',
+      caption_es: 'La canción completa con acordes de potencia',
       sections: [
         {
           label: 'Intro', label_es: 'Intro',
@@ -5330,8 +5330,8 @@ window.CLASS_ACTIVITIES = [
       track: 'las-mananitas',
       chordGrid: true,  // chord grid: each chord once, cursor on the beats only (2026-10-26) — see CARD above
       slowest: true,    // Slowest / Slower / Slow / Normal
-      caption:    'The song in order · the highlight follows the beat',
-      caption_es: 'La canción en orden · la marca sigue el tiempo',
+      caption:    'The song in order',
+      caption_es: 'La canción en orden',
       sections: [
         {
           label: 'Verse 1', label_es: 'Estrofa 1',
@@ -5672,8 +5672,8 @@ window.CLASS_ACTIVITIES = [
       track: 'madrecita-querida',
       chordGrid: true,  // chord grid: each chord once, cursor on the beats only (2026-10-26) — see CARD above
       slowest: true,    // Slowest / Slower / Slow / Normal
-      caption:    'The song in order · the highlight follows the beat',
-      caption_es: 'La canción en orden · la marca sigue el tiempo',
+      caption:    'The song in order',
+      caption_es: 'La canción en orden',
       sections: [
         {
           label: 'Verse 1', label_es: 'Estrofa 1',
@@ -5870,8 +5870,8 @@ window.CLASS_ACTIVITIES = [
       track: 'arsenal-efectivo',
       chordGrid: true,  // chord grid: each chord once, cursor on the beats only (2026-10-26) — see CARD above
       slowest: true,    // Slowest / Slower / Slow / Normal
-      caption:    'The song in order · the highlight follows the beat',
-      caption_es: 'La canción en orden · la marca sigue el tiempo',
+      caption:    'The song in order',
+      caption_es: 'La canción en orden',
       sections: [
         {
           label: 'Verse 1', label_es: 'Estrofa 1',
@@ -6100,8 +6100,8 @@ window.CLASS_ACTIVITIES = [
       track: 'ella',
       chordGrid: true,  // chord grid: each chord once, cursor on the beats only (2026-10-26) — see CARD above
       slowest: true,    // Slowest / Slower / Slow / Normal
-      caption:    'The song in order · the highlight follows the beat',
-      caption_es: 'La canción en orden · la marca sigue el tiempo',
+      caption:    'The song in order',
+      caption_es: 'La canción en orden',
       sections: [
         {
           label: 'Intro', label_es: 'Intro',
@@ -6254,8 +6254,8 @@ window.CLASS_ACTIVITIES = [
       track: 'all-along-the-watchtower',
       chordGrid: true,  // chord grid: each chord once, cursor on the beats only (2026-10-26) — see CARD above
       slowest: true,    // Slowest / Slower / Slow / Normal — the student picks
-      caption:    'The whole song in power chords · 2 beats per chord · the highlight follows the beat',
-      caption_es: 'La canción completa con acordes de potencia · 2 tiempos por acorde · la marca sigue el tiempo',
+      caption:    'The whole song in power chords · 2 beats per chord',
+      caption_es: 'La canción completa con acordes de potencia · 2 tiempos por acorde',
       sections: [
         {
           label: 'Intro', label_es: 'Intro',
@@ -6406,8 +6406,8 @@ window.CLASS_ACTIVITIES = [
       chordGrid: true,  // chord grid: each chord once, cursor on the beats only (2026-10-26) — see CARD above
       slowest: true,    // Slowest / Slower / Slow / Normal
       counts: true,     // Counts switch: for the single-note verses only — the chord-grid sections always show their count row
-      caption:    'The song in order · the highlight follows the beat',
-      caption_es: 'La canción en orden · la marca sigue el tiempo',
+      caption:    'The song in order',
+      caption_es: 'La canción en orden',
       sections: [
         {
           label: 'Intro', label_es: 'Intro',
@@ -6633,8 +6633,8 @@ window.CLASS_ACTIVITIES = [
       track: 'vuelve-a-la-vida',
       chordGrid: true,  // chord grid: each chord once, cursor on the beats only (2026-10-26) — see CARD above
       slowest: true,    // Slowest / Slower / Slow / Normal
-      caption:    'The song in order · the highlight follows the beat',
-      caption_es: 'La canción en orden · la marca sigue el tiempo',
+      caption:    'The song in order',
+      caption_es: 'La canción en orden',
       sections: [
         {
           label: 'Verse 1', label_es: 'Estrofa 1',
@@ -6882,8 +6882,8 @@ window.CLASS_ACTIVITIES = [
   // ca-40's Neil title and intro are on its recordingVersions.neil entry (version level), above.
   neil('ca-40', {
     everyStrum: true,   // ca-40's own Jimi card has one strum per chord; Neil's is the down-up strum on every eighth
-    caption:    'The whole song in power chords · strum down on each number, up on each + · the chords change where Neil Young changes them · the highlight follows the beat',
-    caption_es: 'La canción completa con acordes de potencia · rasguea hacia abajo en cada número y hacia arriba en cada + · los acordes cambian donde Neil Young los cambia · la marca sigue el tiempo',
+    caption:    'The whole song in power chords · strum down on each number, up on each + · the chords change where Neil Young changes them',
+    caption_es: 'La canción completa con acordes de potencia · rasguea hacia abajo en cada número y hacia arriba en cada + · los acordes cambian donde Neil Young los cambia',
     sections: sections(power)
   });
 })();

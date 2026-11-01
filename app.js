@@ -12361,8 +12361,12 @@ function caMarkRowHtml(a, done, markLabel){
   // Focus view: Mark complete waits for the last step (Jonathan, 2026-09-27).
   // An already-complete card keeps it on every step, so it can be un-marked.
   if(caIsFocus(a) && !done && caFocusIdx(a) < (a.steps || []).length - 1) return '';
+  /* --finish: the "I'm done" buttons are green site-wide (2026-10-31, with
+     "Got it — next step" and the module ladder's "Mark done"). .ca-mark-btn
+     alone stays orange for its other uses (exit-check Start/Retake, the
+     free-play timer). */
   if(caNudgeId !== a.id){
-    return `<button type="button" class="ca-mark-btn ${done ? 'done' : ''}" onclick="caMarkClick('${escAttr(a.id)}')">${escHtml(markLabel)}</button>`;
+    return `<button type="button" class="ca-mark-btn ca-mark-btn--finish ${done ? 'done' : ''}" onclick="caMarkClick('${escAttr(a.id)}')">${escHtml(markLabel)}</button>`;
   }
   const req = caRequiredTickKeys(a);
   const total = req.length;
@@ -12371,7 +12375,7 @@ function caMarkRowHtml(a, done, markLabel){
     <p class="ca-nudge-text">${escHtml(caIsCard(a) ? t('ca.cardNudgeText', {ticks, total}) : t('ca.nudgeText', {ticks, total}))}</p>
     <div class="ca-nudge-actions">
       <button type="button" class="btn-out" onclick="caNudgeKeepGoing()">${escHtml(t('ca.keepGoing'))}</button>
-      <button type="button" class="ca-mark-btn" onclick="caNudgeConfirm('${escAttr(a.id)}')">${escHtml(t('ca.markComplete'))}</button>
+      <button type="button" class="ca-mark-btn ca-mark-btn--finish" onclick="caNudgeConfirm('${escAttr(a.id)}')">${escHtml(t('ca.markComplete'))}</button>
     </div>
   </div>`;
 }
@@ -12445,9 +12449,18 @@ function caHeroThumbHtml(a){
    is the point. No date set → nothing is shown; there is no honest date to
    invent. The date text itself carries no data-i18n, same as the .ca-chip it
    replaces: it is built by caFormatDate() in the current language and a
-   language switch re-renders this whole page anyway (gc-langchange). */
-function caStartHereTagHtml(a, isCurrent){
+   language switch re-renders this whole page anyway (gc-langchange).
+
+   GROUPED (2026-10-31, Jonathan — "one Today heading with the date shown
+   once"): renderClassActivities puts the label and the date ONCE above the
+   group (caTodayHeadHtml) instead of on every card, so a grouped card keeps
+   only what the heading cannot say for it — an exit check's own "Exit
+   check" tag. The ungrouped shape below is unchanged. */
+function caStartHereTagHtml(a, isCurrent, grouped){
   const isCheck = a.kind === 'check';
+  if(grouped) return isCheck
+    ? `<span class="ca-start-tag ca-start-tag--check" data-i18n="check.prefix">${escHtml(t('check.prefix'))}</span>`
+    : '';
   const tagKey = isCheck
     ? (isCurrent ? 'check.prefix' : 'ca.checkNotFinished')
     : (isCurrent ? 'ca.startHere' : 'ca.notFinished');
@@ -12459,6 +12472,31 @@ function caStartHereTagHtml(a, isCurrent){
   return `<span class="ca-hero-tagrow">${tag}`
     + (dateLabel ? `<span class="ca-hero-from">${escHtml(t('ca.heroFromDate', {date: dateLabel}))}</span>` : '')
     + `</span>`;
+}
+/* The heading over the Today group (2026-10-31): the same words a hero
+   card's tag used to carry, said once for the whole group. Every card in
+   todayCards shares the hero's day, so they are all CURRENT or all OLDER
+   together and one heading is true of each. CURRENT: "Today's activity" and
+   the day. OLDER: "Unfinished" and "From <day>", the date at full weight for
+   the same reason as on the tag row above. The day is the HERO's own (the
+   group is built on it), even when another card stands in its slot (caSwap)
+   — the heading names the day's slot, not the guest's release date. No date
+   set → no date. */
+function caTodayHeadHtml(hero, isCurrent){
+  if(!hero) return '';
+  const dateLabel = caFormatDate(caDate(hero));
+  const key = isCurrent ? 'ca.startHere' : 'ca.notFinished';
+  const date = !dateLabel ? ''
+    : isCurrent ? `<span class="ca-today-date">${escHtml(dateLabel)}</span>`
+    : `<span class="ca-today-date ca-today-date--from">${escHtml(t('ca.heroFromDate', {date: dateLabel}))}</span>`;
+  return `<div class="ca-today-head${isCurrent ? '' : ' ca-today-head--older'}"><span class="ca-today-label" data-i18n="${key}">${escHtml(t(key))}</span>${date}</div>`;
+}
+/* "#16" ahead of a card's title, quiet (2026-10-31): was "#16 - " in the
+   title's own weight, which put a hyphen beside the title's em dash
+   ("#17 - "the cure" — The Whole Song"). The number is the board's teaching
+   order (caNumber) — only how it looks changed. */
+function caNumHtml(num){
+  return num ? `<span class="ca-num">#${escHtml(String(num))}</span> ` : '';
 }
 /* The .ca-card-body both card shapes share — the plain card and the hero
    (caActivityCardHtml / caHeroCardHtml) differ only in their <summary>.
@@ -12476,8 +12514,11 @@ function caCardBodyBlockHtml(a, done, focus, card){
       ${caMarkRowHtml(a, done, markLabel)}
     </div>`;
 }
-function caHeroCardHtml(a, isCurrent = true){
-  if(a.kind === 'check') return caHeroCheckHtml(a, isCurrent);
+/* `grouped`: the card sits under caTodayHeadHtml, which carries the label and
+   the date — see caStartHereTagHtml. No 🖨 on the collapsed row any more
+   (2026-10-31): the open card's bar has it (caSyncTopbar). */
+function caHeroCardHtml(a, isCurrent = true, grouped = false){
+  if(a.kind === 'check') return caHeroCheckHtml(a, isCurrent, grouped);
   a = caView(a);   // power-chord version when the switch says so — see caView
   const open = caOpenId === a.id;
   const done = classActivities[a.id] === true;
@@ -12487,8 +12528,7 @@ function caHeroCardHtml(a, isCurrent = true){
   // A practice card (view:'card') draws its own body — caCardBodyHtml — and
   // keeps its steps as the help ladder inside it.
   const card = caIsCard(a);
-  const num = caNumber(a);
-  const titleHtml = (num ? `#${num} - ` : '') + escHtml(caTitle(a));
+  const titleHtml = caNumHtml(caNumber(a)) + escHtml(caTitle(a));
   const blurb = caFirstSentence(tf(a, 'intro'));
   const doneAny = caTickCount(caTickKeys(a)) > 0;
   const ctaKey = doneAny ? 'ca.heroKeepGoing' : 'ca.heroStart';
@@ -12501,7 +12541,7 @@ function caHeroCardHtml(a, isCurrent = true){
   return `<details class="ca-card ca-card--hero${isCurrent ? '' : ' ca-card--hero-older'}${focus ? ' ca-card--focus' : ''}${card ? ' ca-card--practice' : ''}" ${open ? 'open' : ''} data-id="${escAttr(a.id)}" ontoggle="caOnToggle(this)">
     <summary class="ca-card-summary ca-hero-summary" onclick="caCardMarkOpening(this)">
       <div class="ca-hero-main">
-        ${caStartHereTagHtml(a, isCurrent)}
+        ${caStartHereTagHtml(a, isCurrent, grouped)}
         <div class="ca-hero-title">${titleHtml}</div>
         ${blurb ? `<p class="ca-hero-blurb">${escHtml(blurb)}</p>` : ''}
         ${caChunkMetaHtml(a)}
@@ -12510,7 +12550,6 @@ function caHeroCardHtml(a, isCurrent = true){
         ${thumbHtml}
         <span class="ca-hero-cta">${escHtml(t(ctaKey))} &rarr;</span>
       </div>
-      ${caPrintBtnHtml(a)}
     </summary>
     ${caCardBodyBlockHtml(a, done, focus, card)}
   </details>`;
@@ -12518,13 +12557,13 @@ function caHeroCardHtml(a, isCurrent = true){
 // The check variant carries its own "Exit check" tag + blue band (item 2)
 // rather than caCheckCardHtml's "Exit check · Title" prefix — the pill
 // already says it, so the hero title is just the plain title.
-function caHeroCheckHtml(a, isCurrent = true){
+function caHeroCheckHtml(a, isCurrent = true, grouped = false){
   const open = caOpenId === a.id;
   const blurb = caFirstSentence(tf(a, 'intro'));
   return `<details class="ca-card ec-card ca-card--hero ca-card--hero-check${isCurrent ? '' : ' ca-card--hero-older'}" ${open ? 'open' : ''} data-id="${escAttr(a.id)}" ontoggle="caOnToggle(this)">
     <summary class="ca-card-summary ca-hero-summary" onclick="caCardMarkOpening(this)">
       <div class="ca-hero-main">
-        ${caStartHereTagHtml(a, isCurrent)}
+        ${caStartHereTagHtml(a, isCurrent, grouped)}
         <div class="ca-hero-title">${escHtml(caTitle(a))}</div>
         ${blurb ? `<p class="ca-hero-blurb">${escHtml(blurb)}</p>` : ''}
         ${caCheckMetaHtml(a)}
@@ -13658,8 +13697,14 @@ function pcChecksHtml(a, preview){
       + `<span class="pc-check-body"><span class="pc-check-head">${escHtml(head)}</span><span class="pc-check-text">${tf(c, 'text')}</span></span>`
       + `</button>${jl}</li>`;
   }).join('');
-  const doneN = preview ? 0 : caTickCount(caTickKeys(a));
-  return `<p class="pc-progress">${escHtml(t('ca.cardProgress', {done: doneN, total: checks.length}))}</p><ul class="pc-checks">${items}</ul>`;
+  /* "n of m checked" shows in the console preview only (2026-10-31). A
+     student's open card has the bar's "n of m done" (caSyncTopbar) pinned
+     at the top, so this second counter said the same thing twice. pcCheck
+     updates it only where it exists. */
+  const prog = preview
+    ? `<p class="pc-progress">${escHtml(t('ca.cardProgress', {done: 0, total: checks.length}))}</p>`
+    : '';
+  return `${prog}<ul class="pc-checks">${items}</ul>`;
 }
 /* The step ladder, read-only: each step a fold with its text and tab. No
    Mark done — the checks above are what a student ticks. */
@@ -14633,9 +14678,10 @@ function pcToggleHelp(btn){
   const arrow = btn.querySelector('.pc-help-arrow');
   if(arrow) arrow.innerHTML = open ? '&#x25BE;' : '&#x25B8;';
 }
-/* The 🖨 button, shared by the plain card and the Today hero so the two
-   can't drift — the hero shipped without one (7606590) because it builds its
-   own summary. Exit checks carry none on purpose (see caCheckCardHtml). */
+/* The 🖨 button. It rides in the open card's bar only (caSyncTopbar) since
+   2026-10-31 — Jonathan: the collapsed rows (plain card and Today hero) each
+   had one, a column of printer icons down the list. Open the card, then
+   print. Exit checks carry none on purpose (see caCheckCardHtml). */
 function caPrintBtnHtml(a){
   return `<button type="button" class="ca-print-btn" onclick="printActivity(event,'${escAttr(a.id)}')" title="${escAttr(t('ca.printTitle'))}" aria-label="${escAttr(t('ca.print'))}"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 9V3h12v6"/><path d="M6 18H4a2 2 0 0 1-2-2v-4a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v4a2 2 0 0 1-2 2h-2"/><rect x="6" y="14" width="12" height="7" rx="1"/></svg></button>`;
 }
@@ -14648,20 +14694,23 @@ function caActivityCardHtml(a){
   // can have none (-1).
   const focus = caIsFocus(a);
   const card = caIsCard(a);   // practice card — see caCardBodyHtml
-  const num = caNumber(a);
-  const titleHtml = (num ? `#${num} - ` : '') + escHtml(caTitle(a));
+  const titleHtml = caNumHtml(caNumber(a)) + escHtml(caTitle(a));
+  /* Quieter edge for a card the TEACHER marked optional and the student
+     hasn't done (2026-10-31), so the required ones stand out. Reads the
+     teacher's flag, not caIsOptional(): for a CAS student every card is
+     optional, and fading the whole list would make nothing stand out. */
+  const quiet = !done && optionalActivityIds[a.id] === true;
   // Undated activities only reach a screen under dev bypass (caIsVisible
   // gates students on the date) — but an empty chip renders as a stray amber
   // dash, on the printed handout as much as on screen, so skip it entirely.
   // A card open under the Keep practicing row only (caIsPinOnly) shows none
   // either — its own date can still be in the future.
   const dateLabel = caIsPinOnly(a) ? '' : caFormatDate(caDate(a));
-  return `<details class="ca-card${focus ? ' ca-card--focus' : ''}${card ? ' ca-card--practice' : ''}" ${open ? 'open' : ''} data-id="${escAttr(a.id)}" ontoggle="caOnToggle(this)">
+  return `<details class="ca-card${focus ? ' ca-card--focus' : ''}${card ? ' ca-card--practice' : ''}${quiet ? ' ca-card--optional' : ''}" ${open ? 'open' : ''} data-id="${escAttr(a.id)}" ontoggle="caOnToggle(this)">
     <summary class="ca-card-summary" onclick="caCardMarkOpening(this)">
       ${dateLabel ? `<span class="ca-chip">${escHtml(dateLabel)}</span>` : ''}
       <span class="ca-card-titlewrap"><span class="ca-card-title">${titleHtml}</span>${caChunkMetaHtml(a)}</span>
       ${done ? `<span class="ca-done-mark" aria-hidden="true">${TCK_CHECK_SVG_INLINE}</span>` : ''}
-      ${caPrintBtnHtml(a)}
     </summary>
     ${caCardBodyBlockHtml(a, done, focus, card)}
   </details>`;
@@ -14969,10 +15018,10 @@ function ecSubmit(id){
    afterprint fires on cancel as well as on a real print, so the restore
    runs either way; it's `once` so a second print doesn't stack listeners. */
 function printActivity(ev, id){
-  // The card's button lives inside the <summary>, whose default action
-  // toggles the card — swallow it or printing would also collapse what we
-  // just opened. (The sticky bar's copy, caSyncTopbar, sits outside the
-  // card and has no default action; it finds the card by id like this one.)
+  // The only 🖨 button is the sticky bar's (caSyncTopbar) since 2026-10-31;
+  // it sits outside the card and finds it by id. The preventDefault stays
+  // from when a copy lived inside the <summary>, whose default action
+  // toggles the card — harmless on a plain button.
   if(ev){ ev.preventDefault(); ev.stopPropagation(); }
   const card = document.querySelector(`.ca-card[data-id="${CSS.escape(id)}"]`);
   if(!card) return;
@@ -15071,8 +15120,8 @@ function caSyncTopbar(){
   caSyncHash(a);
   caSyncSolo(a ? card : null);
   if(!a){ bar.hidden = true; bar.innerHTML = ''; title.hidden = false; return; }
-  const num = caNumber(a);
-  const name = (a.kind === 'check' ? t('check.prefix') + ' · ' : num ? `#${num} - ` : '') + caTitle(a);
+  // Same quiet "#16" as the card rows (caNumHtml).
+  const nameHtml = (a.kind === 'check' ? escHtml(t('check.prefix') + ' · ') : caNumHtml(caNumber(a))) + escHtml(caTitle(a));
   const keys = caTickKeys(a);   // a practice card's checks, or a ladder's steps
   const doneN = caTickCount(keys);
   const prog = keys.length ? t('ca.barProgress', {done: doneN, total: keys.length}) : '';
@@ -15086,9 +15135,10 @@ function caSyncTopbar(){
   const steps = caIsFocus(a) && (a.steps || []).length > 1
     ? `<div class="ca-bar-steps">${caFocusDotsHtml(a, caFocusIdx(a))}</div>` : '';
   /* The open card's own title row is hidden on screen (styles.css, .ca-solo-
-     card), and the 🖨 button and the Optional tag lived in it — so both ride
-     in the bar too, or an open card can't be printed and doesn't say it is
-     optional. Exit checks carry no print button (see caPrintBtnHtml). */
+     card), and the Optional tag lives in it — so it rides in the bar too, or
+     an open card doesn't say it is optional. The 🖨 button lives ONLY here
+     since 2026-10-31 (the collapsed rows dropped theirs). Exit checks carry
+     no print button (see caPrintBtnHtml). */
   const optTag = caOptionalTagHtml(a);
   // Print + Full screen as one unit, so a bar too narrow for one row moves
   // them down TOGETHER, to the right end of the second row (styles.css).
@@ -15097,7 +15147,7 @@ function caSyncTopbar(){
   // focus from the Full screen button the student just pressed.
   const refocusFull = !!(document.activeElement && document.activeElement.classList.contains('ca-bar-full') && bar.contains(document.activeElement));
   bar.innerHTML = `<button type="button" class="ca-bar-back" onclick="caCloseOpen()">&#x25C0; ${escHtml(t('ca.allActivities'))}</button>`
-    + `<button type="button" class="ca-bar-name" onclick="caScrollToActivity('${escAttr(a.id)}')" title="${escAttr(t('ca.barTop'))}" data-i18n-attr="title:ca.barTop">${escHtml(name)}</button>`
+    + `<button type="button" class="ca-bar-name" onclick="caScrollToActivity('${escAttr(a.id)}')" title="${escAttr(t('ca.barTop'))}" data-i18n-attr="title:ca.barTop">${nameHtml}</button>`
     + optTag
     + (steps || (prog ? `<span class="ca-bar-prog">${escHtml(prog)}</span>` : ''))
     + (caIsCard(a) ? `<button type="button" class="ca-bar-stop" onclick="pcStop()" hidden>&#x25A0; ${escHtml(t('ca.snipStop'))}</button>` : '')
@@ -15999,7 +16049,11 @@ function renderClassActivities(){
          the student has already finished the newest of them. */
       const newestDay = caDate(list[0]);
       const isCurrent = a => a.id === list[0].id || (!!newestDay && caDate(a) === newestDay);
-      const heroHtml = todayCards.map(a => caHeroCardHtml(swapIn(a), isCurrent(a))).join('');
+      /* One heading over the group, then the cards without their own
+         tag/date (2026-10-31, caTodayHeadHtml). Every card in todayCards
+         shares the hero's day, so isCurrent is the same for all of them. */
+      const heroHtml = caTodayHeadHtml(todayCards[0], isCurrent(todayCards[0]))
+        + todayCards.map(a => caHeroCardHtml(swapIn(a), isCurrent(a), true)).join('');
       // Everything else pending, minus the hero, wrapped in ONE "Still to
       // do" fold (2f) — module headings (plain, no progress bar; that's an
       // Earlier-only addition below) when anything has been placed in a

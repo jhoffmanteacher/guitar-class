@@ -321,6 +321,15 @@ body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,"Helvetica N
    but .dp is no longer an ancestor — applyStationView() mirrors the view
    onto .cf-focus here instead. */
 .se-chrome:not(.cf-focus) .fm-count{display:none}
+/* One counter, not two (2026-10-31, Jonathan): in One-step mode "Step n of
+   m" says where you are and the mini bar beside it shows how much is done,
+   so the "n of m steps done" pill goes. All-steps mode shows the pill (no
+   step counter there). Kept: a set with parts (m4w2), whose pill is the only
+   thing naming the part, and below 1101px, where the mini bar is hidden
+   (rule below) and the pill is the only progress left. */
+@media(min-width:1101px){
+  .se-chrome.cf-focus .prog-pill:not([data-i18n="progress.partStepsDone"]){display:none}
+}
 .week-panel.on-checklist .se-chrome{display:none}
 /* On a phone the group can't fit one line ("Todos los pasos" alone is
    115px), and .main clips sideways, so the view switch was cut off past the
@@ -555,8 +564,12 @@ body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,"Helvetica N
 .step-mc-keyed.answered + .step-mc-explain{display:block}
 /* ── Per-step "Mark done" toggle (collapsed/current state is .step-detail above) ── */
 .step-done-row{margin-top:8px;display:flex;align-items:center;justify-content:space-between;gap:8px}
-.step-done-btn{display:inline-flex;align-items:center;gap:5px;font-family:inherit;font-size:0.875rem;font-weight:600;color:#fff;background:var(--brand);border:1px solid var(--brand);border-radius:18px;padding:8px 18px;cursor:pointer;box-shadow:0 3px 0 rgba(0,0,0,0.22)}
-.step-done-btn:hover{background:var(--brand-hover)}
+.step-done-btn{display:inline-flex;align-items:center;gap:5px;font-family:inherit;font-size:0.875rem;font-weight:600;color:var(--bg);background:var(--green-text);border:1px solid var(--green-text);border-radius:18px;padding:8px 18px;cursor:pointer;box-shadow:0 3px 0 rgba(0,0,0,0.22)}
+/* Green, not the brand purple (2026-10-31, Jonathan): every "I'm done"
+   button on the site is one colour — this, "Got it — next step"
+   (.ca-focus-next) and an activity's Mark complete (.ca-mark-btn--finish).
+   Purple stays for play/sound buttons, orange for Start. */
+.step-done-btn:hover{opacity:0.9}
 .step-done-btn:active{transform:translateY(3px);box-shadow:none}
 .step-done-btn.is-done{color:var(--green-text);background:var(--green-bg);border-color:var(--green-text);font-size:0.7812rem;padding:3px 12px;border-radius:14px;box-shadow:none;transform:none}
 .step-done-btn.is-done:hover{filter:brightness(0.97);background:var(--green-bg)}
@@ -2035,6 +2048,7 @@ body.rail-collapsed .rail-tools .tool-popup{
      card, so a stray "Module 2 — …" above it would read as the heading of
      the page rather than of a group. */
   body.print-activity .ca-mod-head,
+  body.print-activity .ca-today-head,
   body.print-activity .ca-gate-intro,
   body.print-activity .ca-pins{display:none !important}
   body.print-activity .ca-finished-group,body.print-activity .ca-finished-body,
@@ -2733,6 +2747,12 @@ body.ca-full:has(#class-activities-screen:not([hidden])) .app-layout .main{zoom:
 .ca-card[open] .ca-card-summary::before{transform:rotate(45deg)}
 .ca-card-titlewrap{display:flex;flex-direction:column;flex:1;min-width:0}
 .ca-card-title{font-weight:600}
+/* "#16" ahead of a title (caNumHtml, 2026-10-31) — present but quiet. */
+.ca-num{font-weight:400;color:var(--text3)}
+/* An optional card the student hasn't done (caActivityCardHtml): grey edge
+   and a softer title, so the required ones stand out (2026-10-31). */
+.ca-card--optional{border-left-color:var(--border2)}
+.ca-card--optional .ca-card-title{color:var(--text2)}
 /* Chunk-size line under the title, visible collapsed — see caChunkMetaHtml
    in app.js. Quiet on purpose: it's context, not another headline. */
 .ca-chunk-meta{font-size:0.75rem;font-weight:400;color:var(--text2);margin-top:1px}
@@ -2741,8 +2761,8 @@ body.ca-full:has(#class-activities-screen:not([hidden])) .app-layout .main{zoom:
    marked this card as not blocking the site. Outlined and quiet, so it reads
    as a label, not as another thing to do. */
 .ca-optional-tag{display:inline-block;font-size:0.6875rem;font-weight:600;padding:0 7px;margin-right:6px;border:1px solid var(--border2);border-radius:10px;color:var(--text2);vertical-align:1px;white-space:nowrap}
-/* Sits inside the <summary>, so printActivity() has to swallow the click —
-   see the note on that function in app.js. */
+/* The open card's 🖨, in the sticky bar (caSyncTopbar) — the collapsed rows
+   dropped theirs 2026-10-31. */
 .ca-print-btn{flex-shrink:0;display:flex;align-items:center;justify-content:center;width:30px;height:30px;padding:0;border:1px solid var(--border2);border-radius:8px;background:var(--bg2);color:var(--text3);cursor:pointer}
 .ca-print-btn svg{width:15px;height:15px}
 .ca-print-btn:hover{color:var(--text);border-color:var(--text2)}
@@ -2755,6 +2775,11 @@ body.ca-full:has(#class-activities-screen:not([hidden])) .app-layout .main{zoom:
 .ca-mark-btn{font-family:inherit;font-size:0.875rem;font-weight:600;padding:9px 16px;border-radius:20px;border:1px solid var(--ca-accent);background:var(--ca-accent);color:var(--bg);cursor:pointer}
 .ca-mark-btn:hover{opacity:0.88}
 .ca-mark-btn.done{background:var(--ca-accent-bg);color:var(--ca-accent);font-weight:500}
+/* Mark complete is an "I'm done" button: green like "Got it — next step"
+   and the module ladder's Mark done (2026-10-31). Plain .ca-mark-btn keeps
+   orange for exit-check Start/Retake and the free-play timer. */
+.ca-mark-btn--finish{border-color:var(--green-text);background:var(--green-text);color:var(--bg)}
+.ca-mark-btn--finish.done{border-color:var(--green-text);background:var(--green-bg);color:var(--green-text)}
 /* ── Soft nudge on Mark complete (caMarkRowHtml, app.js) ── replaces the
    button in place, same width column, so it never shifts the card taller
    than a step ladder already made it. */
@@ -2814,7 +2839,7 @@ body.ca-full:has(#class-activities-screen:not([hidden])) .app-layout .main{zoom:
    One Play song button, a Slower / Normal switch, the song's tab with one
    page per section, the checks, and the help ladder folded underneath.
    The tab reuses .tab / .tab-page / .tab-board / .beat-now as they are. */
-.pc-dir{margin:4px 0 10px;font-weight:600;color:var(--text)}
+.pc-dir{margin:4px 0 10px;font-weight:400;color:var(--text)}
 .pc-player{display:flex;flex-wrap:wrap;align-items:center;gap:10px}
 .pc-player:has(.pc-speed4){row-gap:20px;padding-bottom:8px}
 .pc-play{font-family:inherit;font-size:1rem;font-weight:700;min-height:44px;min-width:11em;padding:8px 18px;border:0;border-radius:12px;background:var(--brand);color:var(--brand-text);cursor:pointer;text-align:left}
@@ -2945,7 +2970,9 @@ span.tab-count-held{margin-left:4px}
 .pc-sheet-paper:not(:has(canvas)) :is(.pc-sheet-pill,.pc-sheet-dot,.pc-sheet-ghost){display:none}
 .pc-rep{margin-left:8px;padding:1px 9px;border-radius:999px;background:var(--purple-accent);color:var(--bg);font-size:0.75rem;font-weight:700}
 .pc-progress{margin:12px 0 6px;font-size:0.8125rem;color:var(--text2)}
-.pc-checks{list-style:none;margin:0 0 12px;padding:0}
+.pc-checks{list-style:none;margin:12px 0 12px;padding:0}
+/* The console preview still prints "n of m checked" above them (pcChecksHtml). */
+.pc-progress + .pc-checks{margin-top:0}
 .pc-check{margin-bottom:8px;border:1px solid var(--border);border-radius:10px;background:var(--bg)}
 .pc-check.is-done{background:var(--green-bg);border-color:transparent}
 .pc-check-btn{display:flex;gap:12px;align-items:flex-start;width:100%;padding:12px;border:0;background:none;font:inherit;color:var(--text);text-align:left;cursor:pointer}
@@ -3026,10 +3053,19 @@ span.tab-count-held{margin-left:4px}
 .ca-card--hero-check.ca-card--hero-older{border-left-color:var(--blue-soft)}
 /* On an older hero the date shares the tag's row and carries real weight:
    it is the thing that explains why this card is at the top at all. A
-   current hero keeps the small .ca-chip on its own row above the tag,
-   exactly as before. */
+   current hero keeps the small .ca-chip on its own row above the tag.
+   (On In-Class Activities both now sit ONCE in .ca-today-head above the
+   group instead — caStartHereTagHtml's `grouped`.) */
 .ca-hero-tagrow{display:flex;align-items:baseline;flex-wrap:wrap;gap:8px}
 .ca-hero-from{font-size:0.9375rem;font-weight:600;color:var(--text)}
+/* "Today's activity · Mon, 11/2" once above the Today cards (caTodayHeadHtml,
+   2026-10-31) — the label and date every hero card used to carry. An OLDER
+   group says "Unfinished · From <day>" in quieter colours instead. */
+.ca-today-head{display:flex;align-items:baseline;flex-wrap:wrap;gap:4px 10px;margin:4px 2px 10px}
+.ca-today-label{font:700 1.25rem var(--font-display);color:var(--ca-accent)}
+.ca-today-date{font-size:0.9375rem;font-weight:600;color:var(--text2)}
+.ca-today-head--older .ca-today-label{color:var(--text2)}
+.ca-today-date--from{color:var(--text)}
 .ca-hero-summary{align-items:stretch;gap:20px}
 /* align-items:flex-start (2f fix, found comparing to the mockup) — without it
    the flex column's default "stretch" cross-sizing stretches EVERY child to
@@ -3065,11 +3101,6 @@ span.tab-count-held{margin-left:4px}
    gap open beside the body. */
 .ca-card--hero[open] .ca-hero-cta{display:none}
 .ca-card--hero[open] .ca-hero-side--cta-only{display:none}
-/* The hero's 🖨 (caPrintBtnHtml) is the summary's last flex child, like the
-   plain card's — pinned to the top so the stretch row doesn't make it a
-   tall bar beside the CTA, and it stays put when the open card drops the
-   right-hand column. */
-.ca-hero-summary > .ca-print-btn{align-self:flex-start}
 .ca-card--hero-check{border-left-color:var(--blue-text)}
 .ca-start-tag--check{background:var(--blue-bg);color:var(--blue-text)}
 /* The little disclosure triangle reads as redundant next to a full-width
@@ -3080,11 +3111,7 @@ span.tab-count-held{margin-left:4px}
 .ca-hero-dot.f{background:var(--ca-accent);border-color:var(--ca-accent)}
 .ca-chunk-done{margin-left:8px}
 @media(max-width:640px){
-  /* Column layout would drop the 🖨 to its own row under the CTA — pin it
-     top-right instead, beside the tag pills, and keep the tag row clear. */
   .ca-hero-summary{flex-direction:column;position:relative}
-  .ca-hero-summary > .ca-print-btn{position:absolute;top:12px;right:14px}
-  .ca-hero-main{padding-right:40px}
   .ca-hero-side{width:100%;flex-direction:row-reverse;align-items:center}
   .ca-hero-thumb{flex:1;min-width:0}
 }

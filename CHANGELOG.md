@@ -5,6 +5,39 @@ Notable changes to the Guitar Class site. Newest first.
 For the full session-by-session history (and the reasoning behind each change),
 see `WORKFLOW.md` and the git commit log.
 
+## 2026-10-31 — In class and the lessons: less clutter, same places
+
+Nothing moved. Every page, button and activity is where it was. These changes
+only make things easier to read.
+
+- **"Today's activity" and the date show once, above today's cards.** Before,
+  each card had its own date and its own "Today's activity" label. Each card is
+  now about a third shorter, so more of the page fits on the screen. When the top
+  card is older work you did not finish, the heading says "Unfinished · From"
+  and the date instead.
+- **The printer button is gone from the list.** Open an activity, and the
+  printer button is at the top, next to Full screen.
+- **Activity numbers are quieter.** A title reads "#16 All Along the
+  Watchtower…" with the number in grey, instead of "#16 - All Along…".
+- **Optional activities have a grey edge,** so the ones you must do stand out.
+- **The power-chord whole-song cards say "You already play the whole song as
+  single notes."** Before, the list showed "You play the whole song as single
+  notes," which sounded like the card was single notes.
+- **Every "I'm done" button is green:** Mark complete, Got it — next step, and
+  Mark done in the lessons. Before, they were orange, green and purple.
+- **One counter instead of two.** On a play-along card, "0 of 2 done" at the
+  top is the count, and the "0 of 2 checked" line above the checks is gone. In
+  a lesson in One step mode, the top shows "Step 1 of 10" and a progress bar.
+  The "0 of 10 steps done" label is gone there but still shows in All steps
+  mode.
+- **Shorter labels over the TAB on play-along cards.** "The highlight follows
+  the beat" is gone from all of them. The note about how long each chord lasts
+  is gone from "the cure", "Luna" and "Sweet Child O' Mine" in power chords,
+  because the chord chart already shows it. How to pluck or strum
+  ("4 plucks per note", "strum down on each number…") is still there.
+- **The directions above Play song are no longer bold,** so the Play song
+  button stands out.
+
 ## 2026-10-31 — The games use the whole screen
 
 - **The games are wider.** On a laptop the games now fill the screen instead
