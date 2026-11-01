@@ -2220,8 +2220,6 @@ body.rail-collapsed .rail-tools .tool-popup{
 
 /* ── 🎮 Games panel (hub + Note Hunt + Change Up), coach.js ── */
 .games-panel{padding:0}
-.games-back{background:none;border:none;cursor:pointer;font-size:0.8125rem;font-weight:600;color:var(--blue-text);font-family:inherit;padding:0}
-.games-back:hover{text-decoration:underline}
 /* The hub cards' columns, padding, border, hover and icon/title sizes are in
    "funner hub cards" in the arcade section below. */
 .games-grid{display:grid;gap:10px;margin:4px 0 10px}
@@ -3274,7 +3272,10 @@ body.games-open{overflow:hidden}
 .lq-screen .games-shell{max-width:760px;padding:18px 16px 40px}
 @media (max-width:480px){.lq-screen .games-shell{padding:12px 10px 30px}}
 .games-topbar{display:grid;grid-template-columns:1fr auto 1fr;align-items:center;gap:12px;margin-bottom:18px}
-.games-topbar .games-exit{justify-self:start}
+.games-topbar-btns{justify-self:start;display:flex;flex-wrap:wrap;gap:8px}
+.games-topbar-btns .games-exit[hidden]{display:none}
+.games-topbar-btns .games-exit--games{background:rgba(255,255,255,0.22)}
+.games-topbar-btns .games-exit--games:hover{background:rgba(255,255,255,0.3)}
 .games-topbar-spacer{display:block}
 .games-exit{font-family:inherit;font-size:0.875rem;font-weight:600;padding:8px 16px;border-radius:20px;border:1px solid rgba(255,255,255,0.35);background:rgba(255,255,255,0.08);color:#fff;cursor:pointer;white-space:nowrap}
 .games-exit:hover{background:rgba(255,255,255,0.16)}
@@ -3704,9 +3705,9 @@ body.games-open{overflow:hidden}
 .bpm-slider{height:28px}
 /* Overlay hit area, full 44px — isolated controls with clear space around them */
 .btn-sign,.btn-out,.btn-translate,.tp-close,.coach-x,.rp-close,.rp-newtab,
-.games-back,.routine-print-btn,.print-set-btn,.header-search-btn{position:relative}
+.routine-print-btn,.print-set-btn,.header-search-btn{position:relative}
 .btn-sign::after,.btn-out::after,.btn-translate::after,.tp-close::after,.coach-x::after,
-.rp-close::after,.rp-newtab::after,.games-back::after,
+.rp-close::after,.rp-newtab::after,
 .routine-print-btn::after,.print-set-btn::after,.header-search-btn::after{
   content:'';position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);
   width:max(100%,44px);height:max(100%,44px)}

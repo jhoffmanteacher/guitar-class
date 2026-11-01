@@ -701,7 +701,8 @@
     'btn.next':              { en: 'Next:', es: 'Siguiente:' },
     'btn.nextModuleReview':  { en: 'Next: Module Review', es: 'Siguiente: Repaso del módulo' },
     'btn.theNextSet':        { en: 'the next set', es: 'la siguiente unidad' },
-    'btn.backToPractice':    { en: 'Back', es: 'Volver' },   // Games / Live quiz overlays only (2026-09-23)
+    'btn.backToPractice':    { en: 'Back', es: 'Volver' },   // Live quiz overlay only (2026-09-23)
+    'btn.toMainSite':        { en: 'Main site', es: 'Sitio principal' },   // Games overlay: leaves the games (2026-11-01)
     // In-Class Activities is the site's home page (see CLAUDE.md), so its
     // exit button points forward into practice rather than "back" to it —
     // Chromebook rail work order, 2026-09-19.

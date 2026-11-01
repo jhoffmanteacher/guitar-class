@@ -392,7 +392,10 @@
       <div class="games-screen" id="games-screen" role="dialog" aria-modal="true" aria-label="Guitar games" data-i18n-attr="aria-label:nav.gamesScreenAria" hidden>
         <div class="games-shell">
           <div class="games-topbar">
-            <button type="button" class="games-exit" onclick="closeGamesScreen()">&larr; <span data-i18n="btn.backToPractice">Back</span></button>
+            <div class="games-topbar-btns">
+              <button type="button" class="games-exit" id="games-main-btn" onclick="closeGamesScreen()">&larr; <span data-i18n="btn.toMainSite">Main site</span></button>
+              <button type="button" class="games-exit games-exit--games" id="games-all-btn" onclick="gamesShow('hub')" hidden>&larr; <span data-i18n="games.common.allGames">All games</span></button>
+            </div>
             <div class="games-logo" data-i18n="nav.gamesLogo">Guitar Games</div>
             <span class="games-topbar-spacer"></span>
           </div>

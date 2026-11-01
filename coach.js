@@ -2688,10 +2688,16 @@ function gamesStopMic(keepPanel){
   }
 }
 
-function gamesHeadHtml(title, inGame){
-  return `<div class="games-game-head"><span class="games-game-title">${title}</span>` +
-    (inGame ? `<button type="button" class="games-back" onclick="gamesShow('hub')">&#x2190; ${t('games.common.allGames')}</button>` : '') +
-    `</div>`;
+/* The top bar holds two exits (2026-11-01): "Main site" always, and "All
+   games" (back to the hub) only while a game is on screen. Both are in
+   index.html, so the language switch relabels them; this just shows or hides
+   the second one. Every path that draws the hub or a game calls it. */
+function gamesSyncTopbar(inGame){
+  const b = document.getElementById('games-all-btn');
+  if (b) b.hidden = !inGame;
+}
+function gamesHeadHtml(title){
+  return `<div class="games-game-head"><span class="games-game-title">${title}</span></div>`;
 }
 
 /* Single source of truth for the hub grid, the guitar / no-guitar split AND
@@ -2864,6 +2870,7 @@ function gamesMetaBarHtml(){
 }
 
 function gamesRenderHub(p){
+  gamesSyncTopbar(false);
   const saved = (typeof games !== 'undefined' && games) || {};
   let ccBest = 0;
   try {
@@ -3005,7 +3012,8 @@ function gamesShow(view){
   }
   const g = GAMES_META.find(x => x.key === view);
   if (!g) return;
-  p.innerHTML = gamesHeadHtml(g.ico + ' ' + t(g.titleKey), true) + `<div id="${g.body}"></div>` + (g.foot ? coachFootHtml(g.records) : '');
+  gamesSyncTopbar(true);
+  p.innerHTML = gamesHeadHtml(g.ico + ' ' + t(g.titleKey)) + `<div id="${g.body}"></div>` + (g.foot ? coachFootHtml(g.records) : '');
   g.setup();
 }
 

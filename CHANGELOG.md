@@ -17,6 +17,11 @@ see `WORKFLOW.md` and the git commit log.
   activities say Optional but had the normal orange edge. Now each card with the
   "Optional" tag has the grey edge until you finish it. If you are in CAS, every
   activity is optional, so none of them has the grey edge.
+- **Games: two buttons at the top, "Main site" and "All games".** Inside a
+  game, "All games" takes you back to the list of games, and "Main site" leaves
+  the games. On the list of games there is only "Main site". The small blue
+  "All games" link inside each game is gone, because the new button does the
+  same thing.
 
 ## 2026-10-31 — In class and the lessons: less clutter, same places
 

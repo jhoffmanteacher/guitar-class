@@ -569,6 +569,29 @@ async function walk(base, chromePort, label) {
   await run('lang-en', `setLang('en')`, 600);
   await run('load-coach', `ensureCoachJs()`, 1500);   // coach.js (the games) is lazy-loaded
   for (const [name, expr] of [['songs', `openSongsScreen()`], ['class-activities', `openClassActivitiesScreen()`], ['my-progress', `openMyProgressScreen()`], ['games-hub', `openGamesScreen()`]]) await run(name, expr, 900);
+  /* The Games top bar has two exits (2026-11-01): "Main site" always, "All games"
+     only inside a game. Clicked for real: hub shows one button, a game shows two,
+     "All games" returns to the hub (still open), "Main site" closes the games. */
+  const exits = await run('games-exits', `(() => {
+    const vis = id => { const b = document.getElementById(id); return !!b && !b.hidden && b.getClientRects().length > 0; };
+    openGamesScreen();
+    const out = { hub: [vis('games-main-btn'), vis('games-all-btn')] };
+    gamesShow('blitz'); out.game = [vis('games-main-btn'), vis('games-all-btn')];
+    out.labels = [document.getElementById('games-main-btn').textContent.trim(), document.getElementById('games-all-btn').textContent.trim()];
+    document.getElementById('games-all-btn').click();
+    out.afterAll = { open: !document.getElementById('games-screen').hidden, hub: !!document.querySelector('#games-panel .games-card'), btns: [vis('games-main-btn'), vis('games-all-btn')] };
+    gamesShow('blitz'); document.getElementById('games-main-btn').click();
+    return out;
+  })()`, 600);
+  const gamesClosed = await run('games-main-closed', `document.getElementById('games-screen').hidden`, 400);
+  await run('games-reopen', `openGamesScreen()`, 400);   // the steps after this one need the screen open
+  if (exits) {
+    const j = JSON.stringify;
+    if (j(exits.hub) !== '[true,false]') events.push({ step: 'games-exits', kind: 'games-exits', text: `hub shows [Main site, All games] = ${j(exits.hub)} (want [true,false])` });
+    if (j(exits.game) !== '[true,true]') events.push({ step: 'games-exits', kind: 'games-exits', text: `a game shows [Main site, All games] = ${j(exits.game)} (want [true,true])` });
+    if (!exits.afterAll.open || !exits.afterAll.hub || j(exits.afterAll.btns) !== '[true,false]') events.push({ step: 'games-exits', kind: 'games-exits', text: `All games did not land on the hub: ${j(exits.afterAll)}` });
+    if (gamesClosed !== true) events.push({ step: 'games-exits', kind: 'games-exits', text: 'Main site did not close the games screen' });
+  }
   /* The quiet "optional" edge (2026-11-01): every card that shows the Optional tag
      gets it — teacher flag, optional-in-its-data, or the board's Who picker — and
      a CAS student, for whom every card is optional, gets none. Cards are rendered
