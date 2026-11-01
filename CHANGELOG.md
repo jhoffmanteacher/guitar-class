@@ -38,6 +38,14 @@ only make things easier to read.
 - **The directions above Play song are no longer bold,** so the Play song
   button stands out.
 
+## 2026-10-31 — Chord Blitz and Fret Zap use two sides of the screen
+
+- **Chord Blitz and Fret Zap now put the picture on the left and the four
+  answers on the right.** The answers are big buttons in a 2 by 2 grid. The
+  clock, your score and the card timer stay across the top. Everything fits on a
+  laptop screen without scrolling. The start and results screens look the
+  same as before.
+
 ## 2026-10-31 — The games use the whole screen
 
 - **The games are wider.** On a laptop the games now fill the screen instead

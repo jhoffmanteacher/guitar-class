@@ -3946,8 +3946,7 @@ function cbNext(){
        ${levelChip}
      </div>
      <div class="cb-fuse"><div class="cb-fuse-fill" id="cb-fuse-fill"></div></div>
-     ${prompt}
-     <div class="cb-answers">${answers}</div>`;
+     <div class="cb-cols">${prompt}<div class="cb-answers">${answers}</div></div>`;
 }
 
 /* Wrong, or out of time: show the right button for a beat (inputs locked)
@@ -5311,8 +5310,7 @@ function fzNext(){
        <span class="cb-score" id="fz-score">${t('games.common.score', { n: s.score })}</span>
        <span class="cb-streak" id="fz-streak">${s.streak >= 2 ? '&#x1F525; ' + t('games.common.inARow', { n: s.streak }) + (mult > 1 ? ' &mdash; &times;' + mult : '') : '&nbsp;'}</span>
      </div>
-     <div class="fz-prompt">${svg}</div>
-     <div class="cb-answers">${answers}</div>`;
+     <div class="cb-cols"><div class="fz-prompt">${svg}</div><div class="cb-answers">${answers}</div></div>`;
 }
 
 function fzAnswer(i){

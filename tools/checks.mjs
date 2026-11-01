@@ -10659,6 +10659,7 @@ function checkCoachVerdicts() {
     const pwBar = css.match(/#cc-body\.cc-power \.cc-startbar\{([^}]*)\}/);
     if (!pwBar || !/position:static/.test(pwBar[1]) || /position:sticky/.test(pwBar[1])) flag('1ca: styles.css must give #cc-body.cc-power .cc-startbar{position:static} \u2014 Power Chord Switch fits 657px in two columns and does not need Start to stick');
     if (!/\.games-shell\{max-width:1240px;/.test(css)) flag('1ca: styles.css .games-shell is no longer max-width:1240px \u2014 the games stopped using the width of a 1366px screen');
+    if (!/#cb-body \.cb-cols,#fz-body \.cb-cols\{display:grid;grid-template-columns:/.test(css)) flag('1ca: styles.css lost the two-column play screen of Chord Blitz and Fret Zap (.cb-cols)');
     if (!/\.lq-screen \.games-shell\{max-width:760px;/.test(css)) flag('1ca: styles.css lost .lq-screen .games-shell{max-width:760px} \u2014 the live quiz would widen with the games');
     if (!/#cc-body\.cc-open-setup \.cc-cols\{display:grid;grid-template-columns:/.test(css) || !/#cc-body\.cc-open-setup \.cc-up-groups\{display:grid;grid-template-columns:repeat\(3,/.test(css)) flag("1ca: styles.css lost Change Up's wide setup (.cc-open-setup .cc-up-groups / .cc-cols)");
     if (!/#cc-body\.cc-power \.cc-cols\{display:grid;grid-template-columns:/.test(css) || !/#cc-body\.cc-power \.cc-groups\{display:grid;grid-template-columns:repeat\(4,/.test(css)) flag('1ca: styles.css lost Power Chord Switch\'s two-column layout (.cc-cols) or its four pair columns (.cc-groups)');

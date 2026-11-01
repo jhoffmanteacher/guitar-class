@@ -2335,6 +2335,36 @@ body.rail-collapsed .rail-tools .tool-popup{
    centred column, like the games that already had a cap (560-680px). Note Hunt
    was a 340px column stuck to the left. */
 #fret-body{margin:0 auto}
+/* Chord Blitz and Fret Zap, play screen in two columns (2026-10-31): the picture
+   on the left, the four answers as a 2x2 grid on the right, the clock, score and
+   fuse across the top. Their setup and done screens (every other child of the
+   body) stay a 560px column (a percentage margin, not margin:auto: the Start
+   button is not a block, and auto left it at the far left). Scoped to these two bodies: Chord Detective, Name
+   That Riff, Pattern Detective and Build-a-Chord share .cb-answers. */
+#cb-body > :not(.cb-hud):not(.cb-meta):not(.cb-fuse):not(.cb-cols),
+#fz-body > :not(.cb-hud):not(.cb-cols){max-width:560px;margin-left:max(0px,calc((100% - 560px) / 2));margin-right:auto}
+#cb-body .cb-cols,#fz-body .cb-cols{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:8px 32px;align-items:center;margin-top:6px}
+#cb-body .cb-cols .cb-prompt{min-height:0;margin:0}
+#cb-body .cb-cols .cb-prompt-dia{width:min(300px,100%)}
+#cb-body .cb-cols .cb-prompt-name{font-size:7rem}
+#fz-body .cb-cols .fz-prompt{max-width:none;margin:0}
+#cb-body .cb-cols .cb-answers,#fz-body .cb-cols .cb-answers{gap:12px}
+#cb-body .cb-cols .cb-answer,#fz-body .cb-cols .cb-answer{min-height:150px;font-size:1.75rem;display:flex;align-items:center;justify-content:center}
+#cb-body .cb-cols .cb-answer .cb-key,#fz-body .cb-cols .cb-answer .cb-key{font-size:0.875rem}
+#cb-body .cb-cols .cb-answer-dia{width:min(130px,100%)}
+@media (max-width:900px){
+  #cb-body{max-width:560px}
+  #fz-body{max-width:560px}
+  #cb-body .cb-cols,#fz-body .cb-cols{display:block}
+  #cb-body .cb-cols .cb-prompt{min-height:120px;margin:4px 0 12px}
+  #cb-body .cb-cols .cb-prompt-dia{width:160px}
+  #cb-body .cb-cols .cb-prompt-name{font-size:2.75rem}
+  #fz-body .cb-cols .fz-prompt{max-width:340px;margin:4px auto 12px}
+  #cb-body .cb-cols .cb-answers,#fz-body .cb-cols .cb-answers{gap:8px}
+  #cb-body .cb-cols .cb-answer,#fz-body .cb-cols .cb-answer{min-height:0;font-size:1.0625rem;display:block}
+  #cb-body .cb-cols .cb-answer .cb-key,#fz-body .cb-cols .cb-answer .cb-key{font-size:0.75rem}
+  #cb-body .cb-cols .cb-answer-dia{width:88px}
+}
 #cd-body,#ntr-body,#pd-body,#bc-body{max-width:720px;margin:0 auto}
 #ps-body{max-width:560px;margin:0 auto}
 #psg-body{max-width:640px;margin:0 auto}
@@ -3278,7 +3308,7 @@ body.games-open{overflow:hidden}
 
 /* ── ⚡ Chord Blitz (coach.js) ── */
 .games-card.gc-blitz::before{background:var(--blue-text)}
-#cb-body{max-width:560px;margin:0 auto}
+#cb-body{max-width:none;margin:0 auto}
 .cb-hud{display:flex;align-items:baseline;justify-content:space-between;gap:12px;margin-bottom:4px}
 .cb-timer{font-size:2.25rem;font-weight:700;letter-spacing:2px;color:var(--text);font-variant-numeric:tabular-nums}
 .cb-timer.low{color:var(--amber-text)}
@@ -3320,7 +3350,7 @@ body.games-open{overflow:hidden}
 /* ── 💥 Fret Zap (coach.js) — reuses the .cb-* HUD / answer / done classes;
    only the card gradient and the fretboard prompt are new. */
 .games-card.gc-fretzap::before{background:var(--red-text)}
-#fz-body{max-width:560px;margin:0 auto}
+#fz-body{max-width:none;margin:0 auto}
 .fz-prompt{display:flex;justify-content:center;align-items:center;margin:4px auto 12px;max-width:340px}
 .fz-prompt svg{width:100%;height:auto;display:block}
 @media(max-width:480px){.fz-prompt{max-width:100%}.cb-answer{min-height:48px}}

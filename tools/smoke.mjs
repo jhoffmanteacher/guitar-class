@@ -495,6 +495,39 @@ async function changeUpWalk(page, run, events, stats) {
   await page.send('Emulation.clearDeviceMetricsOverride');
 }
 
+/* Chord Blitz and Fret Zap at 1366x657 (2026-10-31): the picture on the left and
+   the four answers as a 2x2 grid on the right (.cb-cols), the clock across the
+   top. Starts each game, and for Chord Blitz both directions (name the shape,
+   spot the shape), and asserts the answers are two columns by two rows with the
+   picture to their left, the screen does not scroll, and every answer button is
+   fully on screen. A checkout without the two columns (the baseline) fails it. */
+async function twoColumnQuizWalk(page, run, events, stats) {
+  const has = await run('qz:has', `typeof gamesShow === 'function' && typeof cbPickDir === 'function'`, 10);
+  if (!has) return;
+  const size = { width: 1366, height: 657, deviceScaleFactor: 1, mobile: false };
+  const measure = body => `(() => { const sc = document.getElementById('games-screen'), a = [...document.querySelectorAll('#${body} .cb-answer')].map(e => e.getBoundingClientRect()),
+    pic = document.querySelector('#${body} .cb-cols > :first-child'), p = pic && pic.getBoundingClientRect();
+    return { scrollH: sc.scrollHeight, clientH: sc.clientHeight, innerH: window.innerHeight, n: a.length, lefts: [...new Set(a.map(r => Math.round(r.left)))].length, tops: [...new Set(a.map(r => Math.round(r.top)))].length,
+      minLeft: a.length ? Math.round(Math.min(...a.map(r => r.left))) : 0, bottom: a.length ? Math.round(Math.max(...a.map(r => r.bottom))) : 0, picRight: p ? Math.round(p.right) : null }; })()`;
+  await page.send('Emulation.setDeviceMetricsOverride', size);
+  await sleep(400);
+  await run('qz:route', `ensureCoachJs().then(() => goExploreHash('games'))`, 1500);
+  for (const [name, body, expr] of [['Chord Blitz, name it', 'cb-body', `gamesShow('blitz'); cbPickDir('name')`], ['Chord Blitz, spot it', 'cb-body', `gamesShow('blitz'); cbPickDir('spot')`], ['Fret Zap', 'fz-body', `gamesShow('fretzap')`]]) {
+    await run('qz:show:' + name, expr, 400);
+    await run('qz:start:' + name, `document.querySelector('#${body} .coach-start').click()`, 500);
+    const m = await run('qz:measure:' + name, measure(body), 10);
+    const fail = text => events.push({ step: 'quiz-layout:' + name, kind: 'quiz-layout', text: `${name}: ${text}` });
+    if (!m || m.n !== 4) { fail(`${m && m.n} answer buttons, expected 4`); continue; }
+    if (m.lefts !== 2 || m.tops !== 2) fail(`the answers are ${m.lefts} columns by ${m.tops} rows, expected a 2x2 grid`);
+    if (m.picRight == null || m.picRight > m.minLeft) fail(`the picture (right edge ${m.picRight}px) is not to the left of the answers (${m.minLeft}px)`);
+    if (m.scrollH > m.clientH) fail(`the play screen is ${m.scrollH}px tall on a ${m.clientH}px screen \u2014 it must fit without scrolling`);
+    if (m.bottom > m.innerH) fail(`the answers end at ${m.bottom}px on a ${m.innerH}px screen`);
+    stats.quizLayouts = (stats.quizLayouts || 0) + 1;
+    await run('qz:stop:' + name, `typeof cbStop === 'function' && cbStop(); typeof fzStop === 'function' && fzStop(); 1`, 100);
+  }
+  await page.send('Emulation.clearDeviceMetricsOverride');
+}
+
 async function walk(base, chromePort, label) {
   const page = await openPage(chromePort);
   let step = 'boot'; const events = []; const stats = { sets: 0, modules: 0, games: 0, buttons: 0 };
@@ -617,6 +650,7 @@ async function walk(base, chromePort, label) {
   // Before Note Call's walk: that one reloads a fresh page with no coach.js, and this one needs gamesShow (coach.js) to be there.
   await powerSwitchWalk(page, run, events, stats, base);
   await changeUpWalk(page, run, events, stats);
+  await twoColumnQuizWalk(page, run, events, stats);
   await noteCallWalk(page, run, events, stats, base);
   await recordingWalk(page, run, events, stats, base);
   await page.close();
@@ -652,7 +686,7 @@ try {
   const norm = e => `${e.kind}|${e.step.replace(/^(en|es):/, '')}|${e.kind === 'bad-handler' ? '' : e.text}`;
   const baseCount = new Map(); (base ? base.errors : []).forEach(e => baseCount.set(norm(e), Math.max(baseCount.get(norm(e)) || 0, e.kind === 'bad-handler' ? +e.text : 1)));
   const report = base ? now.errors.filter(e => (e.kind === 'bad-handler' ? +e.text : 1) > (baseCount.get(norm(e)) || 0)) : now.errors;
-  say(`smoke: ${now.stats.sets} sets in ${now.stats.modules} modules (EN + ES), ${now.stats.games} game views, ${now.stats.buttons} inline handlers compiled${now.stats.chordCards ? `, ${now.stats.chordCards} chord-grid cards walked (cursor, lap, layout at 1366/390/360, lyric sheet${now.stats.bassClicks ? `, bass switch clicked on ${now.stats.bassClicks}` : ''}${now.stats.recordingClicks ? `, recording switch clicked, reloaded and flipped back on ${now.stats.recordingClicks}` : ''}${now.stats.chordSkipped ? `; ${now.stats.chordSkipped.join(', ')} is teacher-only and not walked` : ''})` : ''}${now.stats.noteCallSteps ? `, ${now.stats.noteCallSteps} Note Call power-chord steps (EN + ES: six strings, taps on low E and A only, a hit and a miss)` : ''}${now.stats.powerLayouts ? `, Power Chord Switch at 1366\u00d7657 (Start and tempo on screen: ${now.stats.powerLayouts} views, incl. after a reload)` : ''}${now.stats.changeUpLayouts ? `, Change Up at 1366\u00d7657 (Start on screen in its sticky bar: ${now.stats.changeUpLayouts} views)` : ''}`);
+  say(`smoke: ${now.stats.sets} sets in ${now.stats.modules} modules (EN + ES), ${now.stats.games} game views, ${now.stats.buttons} inline handlers compiled${now.stats.chordCards ? `, ${now.stats.chordCards} chord-grid cards walked (cursor, lap, layout at 1366/390/360, lyric sheet${now.stats.bassClicks ? `, bass switch clicked on ${now.stats.bassClicks}` : ''}${now.stats.recordingClicks ? `, recording switch clicked, reloaded and flipped back on ${now.stats.recordingClicks}` : ''}${now.stats.chordSkipped ? `; ${now.stats.chordSkipped.join(', ')} is teacher-only and not walked` : ''})` : ''}${now.stats.noteCallSteps ? `, ${now.stats.noteCallSteps} Note Call power-chord steps (EN + ES: six strings, taps on low E and A only, a hit and a miss)` : ''}${now.stats.powerLayouts ? `, Power Chord Switch at 1366\u00d7657 (Start and tempo on screen: ${now.stats.powerLayouts} views, incl. after a reload)` : ''}${now.stats.changeUpLayouts ? `, Change Up at 1366\u00d7657 (Start on screen in its sticky bar: ${now.stats.changeUpLayouts} views)` : ''}${now.stats.quizLayouts ? `, Chord Blitz (both directions) and Fret Zap at 1366\u00d7657 (picture left, 2\u00d72 answers right, no scroll: ${now.stats.quizLayouts} views)` : ''}`);
   if (base) say(`smoke: ${BASELINE} had ${base.errors.length} error event(s); this checkout has ${now.errors.length}`);
   if (report.length) {
     exitCode = 1;
