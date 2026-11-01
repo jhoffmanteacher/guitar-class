@@ -10647,14 +10647,21 @@ function checkCoachVerdicts() {
     const coachSrc = readFileSync(join(ROOT, 'coach.js'), 'utf8');
     const startBody = jsFunctionBody(coachSrc, 'ccStart');
     if (startBody === null || !/ccRoundChords\(progDef, again === true\)/.test(stripJsComments(startBody))) flag('1ca: ccStart() must take its round\'s chords from ccRoundChords(progDef, again === true) \u2014 Again would draw a new pair, or Start would replay the old one');
-    /* Start sits in a bar that sticks to the bottom of the games screen in BOTH
-       games (the real layout is measured in smoke.mjs at 1366x657). It was Power
-       Chord Switch's alone, with this check holding Change Up "as it was"; the
-       80px charts pushed Change Up's tempo row and Start down a 657px screen
-       too, and Jonathan chose to give it the bar (Friday check R1-3, 2026-10-31). */
+    /* Change Up's Start sits in a bar that sticks to the bottom of the games
+       screen (the real layout is measured in smoke.mjs at 1366x657): its 80px
+       charts pushed the tempo row and Start down a 657px screen (Friday check
+       R1-3, 2026-10-31). Power Chord Switch wraps Start in the same bar but is now
+       laid out in two columns that fit 657px without scrolling (Jonathan,
+       2026-10-31), so ITS bar is static — the sticky rule must stay unscoped
+       (Change Up) and the power override must not make it sticky again. */
     const css = readFileSync(join(ROOT, 'styles.css'), 'utf8');
-    if (!/#cc-body \.cc-startbar\{[^}]*position:sticky;[^}]*bottom:0;[^}]*background:var\(--bg\)/.test(css)) flag('1ca: styles.css lost #cc-body .cc-startbar{position:sticky;bottom:0;background:var(--bg)} \u2014 Start would scroll off a 657px screen under the charts, in both games');
-    if (/#cc-body\.cc-power \.cc-startbar\{/.test(css)) flag('1ca: styles.css scopes .cc-startbar to #cc-body.cc-power again \u2014 Change Up\'s Start would not stick');
+    if (!/#cc-body \.cc-startbar\{[^}]*position:sticky;[^}]*bottom:0;[^}]*background:var\(--bg\)/.test(css)) flag('1ca: styles.css lost #cc-body .cc-startbar{position:sticky;bottom:0;background:var(--bg)} \u2014 Change Up\'s Start would scroll off a 657px screen under the charts');
+    const pwBar = css.match(/#cc-body\.cc-power \.cc-startbar\{([^}]*)\}/);
+    if (!pwBar || !/position:static/.test(pwBar[1]) || /position:sticky/.test(pwBar[1])) flag('1ca: styles.css must give #cc-body.cc-power .cc-startbar{position:static} \u2014 Power Chord Switch fits 657px in two columns and does not need Start to stick');
+    if (!/\.games-shell\{max-width:1240px;/.test(css)) flag('1ca: styles.css .games-shell is no longer max-width:1240px \u2014 the games stopped using the width of a 1366px screen');
+    if (!/\.lq-screen \.games-shell\{max-width:760px;/.test(css)) flag('1ca: styles.css lost .lq-screen .games-shell{max-width:760px} \u2014 the live quiz would widen with the games');
+    if (!/#cc-body\.cc-open-setup \.cc-cols\{display:grid;grid-template-columns:/.test(css) || !/#cc-body\.cc-open-setup \.cc-up-groups\{display:grid;grid-template-columns:repeat\(3,/.test(css)) flag("1ca: styles.css lost Change Up's wide setup (.cc-open-setup .cc-up-groups / .cc-cols)");
+    if (!/#cc-body\.cc-power \.cc-cols\{display:grid;grid-template-columns:/.test(css) || !/#cc-body\.cc-power \.cc-groups\{display:grid;grid-template-columns:repeat\(4,/.test(css)) flag('1ca: styles.css lost Power Chord Switch\'s two-column layout (.cc-cols) or its four pair columns (.cc-groups)');
     for (const lang of ['en', 'es']) {
       run(`setLang(${JSON.stringify(lang)})`);
       run(`ccSetup('power')`);
@@ -10682,6 +10689,11 @@ function checkCoachVerdicts() {
          the screen, above every loop (the big charts push anything lower off a
          657px screen), and a fresh game opens on every beat with the computer's
          pick chosen. Change Up keeps its tempo below the loops. */
+      /* Every beat is the first (leftmost) speed button in Power Chord Switch, Every
+         bar the first in Change Up: display order only, the index still names the
+         CC_RATES entry that the remembered pick and best-score keys use. */
+      const pwFirstRate = (pw.match(/ccPickRate\((\d+)\)/) || [])[1];
+      if (Number(pwFirstRate) !== run('CC_BEAT_IDX')) flag(`1ca: ${lang} Power Chord Switch's first speed button is rate ${pwFirstRate}, expected Every beat (${run('CC_BEAT_IDX')}) on the far left`);
       const firstRate = pw.indexOf('ccPickRate('), firstProg = pw.indexOf('ccPickProg('), firstBpm = pw.indexOf('ccNudgeBpm(');
       if (firstRate < 0 || firstRate > firstProg) flag(`1ca: ${lang} Power Chord Switch's speed row is not above its chord choices`);
       if (firstBpm < 0 || firstBpm > firstProg || firstBpm < firstRate) flag(`1ca: ${lang} Power Chord Switch's tempo buttons are not between the speed row and the chord choices`);

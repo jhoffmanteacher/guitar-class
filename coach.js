@@ -3244,16 +3244,23 @@ function ccRenderSetup(msg){
   const rate = CC_RATES[cc.rateIdx] || CC_RATES[0];
   let best = 0;
   try { best = parseInt(sessionStorage.getItem(ccBestKey(prog, cc.rateIdx)), 10) || 0; } catch(e){}
+  /* Power Chord Switch lists the speeds fastest first (Every beat on the far
+     left, the game's own default); Change Up keeps Every bar first. Display
+     order only: onclick still carries the index into CC_RATES, which the
+     remembered pick and the best-score keys use. */
   const rateBtns = CC_RATES.map((r, i) =>
     `<button type="button" class="ts-btn${i === cc.rateIdx ? ' active' : ''}" onclick="ccPickRate(${i})">${escHtml(t(r.shortKey))}<span class="cc-rate-sub">${escHtml(t(r.subKey))}</span></button>`
-  ).join('');
+  );
+  if (ccIsPower()) rateBtns.reverse();
+  const rateBtnsHtml = rateBtns.join('');
   const tipRate = t(rate.bpc === 4 ? 'games.cc.tipRate.bar'
     : rate.bpc === 2 ? 'games.cc.tipRate.half'
     : 'games.cc.tipRate.beat');
   /* The chord charts of Power Chord Switch are drawn larger (styles.css,
-     .cc-power); Change Up and the Coach card share ccDiagramsHtml. */
+     .cc-power, two columns); Change Up and the Coach card share
+     ccDiagramsHtml. */
   body.classList.toggle('cc-power', power);
-  const speedRow = `<div class="cc-group"><div class="cc-group-title">${t('games.cc.group.speedTitle')}</div><div class="fret-levels">${rateBtns}</div></div>`;
+  const speedRow = `<div class="cc-group"><div class="cc-group-title">${t('games.cc.group.speedTitle')}</div><div class="fret-levels">${rateBtnsHtml}</div></div>`;
   const bpmRow = `<div class="coach-bpm-row">
        <button type="button" class="tp-btn" onclick="ccNudgeBpm(-5)">&#x2212;5</button>
        <span class="coach-bpm-readout" id="cc-bpm-readout">${cc.bpm} BPM</span>
@@ -3264,19 +3271,37 @@ function ccRenderSetup(msg){
      game, and the big charts push anything below them off a 657px screen — then
      which two chords; Change Up keeps the loops first and the tempo below. */
   const tempoRow = `<div class="cc-group"><div class="cc-group-title">${t('games.pw.group.tempo')}</div>${bpmRow}</div>`;
-  /* Start sits in a bar that sticks to the bottom of the scrolling games
-     screen (styles.css .cc-startbar), in both games: Power Chord Switch's two
-     180px charts push it below a 657px screen, and so do Change Up's 80px
-     charts once a loop is picked (Friday check R1-3, Jonathan 2026-10-31). */
+  /* Start sits in .cc-startbar in both games. Change Up's bar sticks to the
+     bottom of the scrolling games screen (styles.css .cc-startbar): its 80px
+     charts push Start below a 657px screen once a loop is picked (Friday check
+     R1-3, Jonathan 2026-10-31). Power Chord Switch's two columns fit 657px, so
+     its bar is static (#cc-body.cc-power .cc-startbar). */
   const startBtn = `<button type="button" class="coach-start" onclick="ccStart()">&#x25B6; ${t('games.cc.startButton', { slots: rate.slots })}</button>`;
-  body.innerHTML =
-    (msg ? `<div class="coach-note">${escHtml(msg)}</div>` : '') +
-    (power ? speedRow + tempoRow + pills : pills + speedRow) +
-    (prog.random ? `<div class="coach-note">&#x1F3B2; ${t(power ? 'games.pw.randomNote' : 'games.cc.randomNote')}</div>` : ccDiagramsHtml(prog.chords, null)) +
-    (power ? '' : bpmRow) +
-    `<div class="coach-tip">&#x1F92B; ${t(power ? 'games.pw.tip' : 'games.cc.tip', { rate: tipRate })}</div>
-     <div class="cc-startbar">${startBtn}</div>
-     ${coachFootHtml()}`;
+  const pic = prog.random
+    ? `<div class="coach-note">&#x1F3B2; ${t(power ? 'games.pw.randomNote' : 'games.cc.randomNote')}</div>`
+    : ccDiagramsHtml(prog.chords, null);
+  const tip = `<div class="coach-tip">&#x1F92B; ${t(power ? 'games.pw.tip' : 'games.cc.tip', { rate: tipRate })}</div>`;
+  const note = msg ? `<div class="coach-note">${escHtml(msg)}</div>` : '';
+  /* Power Chord Switch uses the width of the games screen: the settings (speed,
+     tempo, the pairs, Start) in the left column, the two charts and the tip in
+     the right (styles.css .cc-cols). Start is still wrapped in .cc-startbar, but
+     in this game that bar does not stick: everything fits on a 657px screen. */
+  body.innerHTML = power
+    ? `${note}<div class="cc-cols">
+         <div class="cc-col-set"><div class="cc-speedtempo">${speedRow}${tempoRow}</div><div class="cc-groups">${pills}</div><div class="cc-startbar">${startBtn}</div></div>
+         <div class="cc-col-pic">${pic}${tip}</div>
+       </div>
+       ${coachFootHtml()}`
+    : `${note}<div class="cc-up-groups">${pills}</div>
+       <div class="cc-cols">
+         <div class="cc-col-set">${speedRow}${bpmRow}<div class="cc-startbar">${startBtn}</div></div>
+         <div class="cc-col-pic">${pic}${tip}</div>
+       </div>
+       ${coachFootHtml()}`;
+  /* Change Up's setup is wide (the three loop lists side by side, settings left,
+     the chosen loop's charts right: styles.css .cc-open-setup); its count-in,
+     play and done screens keep the 560px column, so ccStart takes the class off. */
+  body.classList.toggle('cc-open-setup', !power);
 }
 
 async function ccStart(again){
@@ -3322,8 +3347,11 @@ async function ccStart(again){
   cc.beatMs = 60000 / cc.bpm;
   cc.smoothRms = 0; cc.smoothHf = 0; cc.lastOnsetT = -1e9; cc.lastPitchT = 0; cc.gridOffset = 0; cc.lastBeat = -1;
   cc.phase = 'countin';
-  ccBody().innerHTML = `<div class="coach-count" id="cc-count">&nbsp;</div>` +
-    ccDiagramsHtml(prog, prog[0]);
+  ccBody().classList.remove('cc-open-setup');
+  ccBody().innerHTML = ccIsPower()
+    ? `<div class="cc-cols cc-cols-play"><div class="cc-col-set"><div class="coach-count" id="cc-count">&nbsp;</div></div>` +
+      `<div class="cc-col-pic">${ccDiagramsHtml(prog, prog[0])}</div></div>`
+    : `<div class="coach-count" id="cc-count">&nbsp;</div>` + ccDiagramsHtml(prog, prog[0]);
   coachCountIn(cc, 'cc-count', () => {
     if (cc && cc.phase === 'countin'){ cc.phase = 'play'; ccRenderPlay(); }
   });
@@ -3337,16 +3365,20 @@ function ccRenderPlay(){
   const chips = cc.changes.map((c, i) =>
     `<span class="coach-chip pending" id="cc-chip-${i}" title="${escAttr(t('games.cc.changeTooltip', { from: c.from, to: c.to }))}">${escHtml(c.to)}</span>`
   ).join('');
-  body.innerHTML =
-    `<div class="cc-now">
+  const now = `<div class="cc-now">
        <div class="cc-chord" id="cc-chord">${escHtml(cc.seq[0])}</div>
        <div class="cc-next" id="cc-next">${escHtml(ccNextText(0))}</div>
      </div>
-     <div class="cc-beats" id="cc-beats"><span class="cc-pip"></span><span class="cc-pip"></span><span class="cc-pip"></span><span class="cc-pip"></span></div>
-     ${ccDiagramsHtml(cc.chords, cc.seq[0])}
-     <div class="coach-strip">${chips}</div>
+     <div class="cc-beats" id="cc-beats"><span class="cc-pip"></span><span class="cc-pip"></span><span class="cc-pip"></span><span class="cc-pip"></span></div>`;
+  const charts = ccDiagramsHtml(cc.chords, cc.seq[0]);
+  const rest = `<div class="coach-strip">${chips}</div>
      <div class="coach-live"><span class="coach-live-dot"></span>${t('games.cc.strumEveryBeat')}</div>
      <button type="button" class="tp-btn coach-stop" onclick="ccFinish()">&#x25A0; ${t('games.common.stop')}</button>`;
+  /* Power Chord Switch: the chord, "next" and the beat pips on the left, the
+     two charts large on the right (styles.css .cc-cols-play). */
+  body.innerHTML = ccIsPower()
+    ? `<div class="cc-cols cc-cols-play"><div class="cc-col-set">${now}${rest}</div><div class="cc-col-pic">${charts}</div></div>`
+    : now + charts + rest;
 }
 
 /* The "next:" line under the big chord name. Power Chord Switch adds how the

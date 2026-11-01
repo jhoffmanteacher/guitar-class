@@ -5,6 +5,25 @@ Notable changes to the Guitar Class site. Newest first.
 For the full session-by-session history (and the reasoning behind each change),
 see `WORKFLOW.md` and the git commit log.
 
+## 2026-10-31 — The games use the whole screen
+
+- **The games are wider.** On a laptop the games now fill the screen instead
+  of sitting in a narrow box.
+- **Power Chord Switch has two sides.** The settings are on the left and the
+  two chord charts are on the right, and Start is on the screen without
+  scrolling. The chord lists are four columns (the computer's pick, the low E
+  string, the A string, jumping between strings). "Every beat" is now the first
+  speed button, on the far left.
+- **While you play Power Chord Switch,** the chord name, "next" and the beat dots
+  are large, so you can read them from across the room, and the two charts are
+  big.
+- **Change Up setup** shows the three loop lists side by side, with your settings
+  on the left and the chords of the loop you picked on the right.
+- **The other games** sit in one centered column, so the text lines are shorter
+  and the answer buttons are not stretched across the screen. Note Hunt is
+  centered. Pentatonic Simon's pads are smaller, so the whole board fits.
+- **The "Guitar Games" title is centered** over the page.
+
 ## 2026-10-31 — Change Up: the Start button stays on the screen
 
 - **On a laptop screen, Change Up's Start button no longer drops off the

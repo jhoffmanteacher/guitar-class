@@ -393,14 +393,15 @@ async function noteCallWalk(page, run, events, stats, base) {
   await run('nc:en', "setLang('en')", 600);
 }
 
-/* Power Chord Switch at the real window, 1366x657 (2026-10-30). Its two 180px
-   charts pushed Start to 728-772px (917-961px with a pair picked) on a 657px
-   screen, and the old smoke check measured only the tempo row. The setup scrolls
-   inside #games-screen (fixed, overflow:auto), so Start now sits in a sticky bar
-   (.cc-startbar). This opens the games screen through its route (so it is on
-   screen, not only in the page), and for the default, a fixed pair and a jump
-   pair asserts Start is fully on screen and the tempo row too; with a pair
-   picked the screen must scroll (else the test proves nothing). Then it reloads
+/* Power Chord Switch at the real window, 1366x657 (2026-10-30, redone
+   2026-10-31). Its two 180px charts once pushed Start to 728-772px on a 657px
+   screen; the setup is now two columns (settings left, the two charts and the tip
+   right) and fits without scrolling, so Start's bar (.cc-startbar) does not
+   stick. This opens the games screen through its route (so it is on screen, not
+   only in the page), and for the default, a fixed pair and a jump pair asserts
+   Start is fully on screen, the tempo row too, the games screen does NOT need
+   to scroll, the two charts sit side by side at 200px or wider (a fixed pair),
+   and the four pair columns share one top. Then it reloads
    and re-asserts what a new student sees: it opens on Every beat with the
    computer's pick selected and the speed and tempo above the chords. A checkout
    without the game (the baseline) skips it. */
@@ -411,7 +412,9 @@ async function powerSwitchWalk(page, run, events, stats, base) {
   const size = { width: 1366, height: 657, deviceScaleFactor: 1, mobile: false };
   const measure = `(() => { const sc = document.getElementById('games-screen'), st = document.querySelector('#cc-body .coach-start'), bpm = document.querySelector('#cc-body [onclick*="ccNudgeBpm"]');
     const s = st && st.getBoundingClientRect(), b = bpm && bpm.getBoundingClientRect();
-    return { shown: sc.clientHeight > 0, innerH: window.innerHeight, scrollH: sc.scrollHeight, clientH: sc.clientHeight, start: s && { top: Math.round(s.top), bottom: Math.round(s.bottom) }, tempoBottom: b && Math.round(b.bottom), bar: !!document.querySelector('#cc-body .cc-startbar .coach-start') }; })()`;
+    return { shown: sc.clientHeight > 0, innerH: window.innerHeight, scrollH: sc.scrollHeight, clientH: sc.clientHeight, start: s && { top: Math.round(s.top), bottom: Math.round(s.bottom) }, tempoBottom: b && Math.round(b.bottom), bar: !!document.querySelector('#cc-body .cc-startbar .coach-start'),
+      charts: [...document.querySelectorAll('#cc-body .cc-col-pic .cc-dia svg')].map(e => { const r = e.getBoundingClientRect(); return { top: Math.round(r.top), w: Math.round(r.width) }; }),
+      cols: [...document.querySelectorAll('#cc-body .cc-groups .cc-group')].map(e => Math.round(e.getBoundingClientRect().top)) }; })()`;
   const defaults = `(() => { gamesShow('power'); const rowAt = document.querySelector('#cc-body [onclick*="ccPickRate"]'), progAt = document.querySelector('#cc-body [onclick*="ccPickProg"]'), bpmAt = document.querySelector('#cc-body [onclick*="ccNudgeBpm"]');
     return { rate: CC_RATES[cc.rateIdx].id, prog: cc.progIdx, random: !!CC_POWER_PROGRESSIONS[0].random, active: [...document.querySelectorAll('#cc-body .ts-btn.active')].length,
       speedFirst: !!(rowAt && progAt && (rowAt.compareDocumentPosition(progAt) & Node.DOCUMENT_POSITION_FOLLOWING)), tempoFirst: !!(bpmAt && progAt && (bpmAt.compareDocumentPosition(progAt) & Node.DOCUMENT_POSITION_FOLLOWING)) }; })()`;
@@ -419,7 +422,10 @@ async function powerSwitchWalk(page, run, events, stats, base) {
     if (!m || !m.shown) { fail(step, 'the games screen is not on screen — the measurement would be of a hidden panel'); return; }
     if (!m.start || m.start.top < 0 || m.start.bottom > m.innerH) fail(step, `Start sits at ${m.start && m.start.top}-${m.start && m.start.bottom}px on a ${m.innerH}px screen — it must be fully on screen (see .cc-startbar)`);
     if (m.tempoBottom == null || m.tempoBottom > m.innerH) fail(step, `the tempo row ends at ${m.tempoBottom}px on a ${m.innerH}px screen`);
-    if (!m.bar) fail(step, 'Start is not inside the sticky .cc-startbar');
+    if (!m.bar) fail(step, 'Start is not inside .cc-startbar');
+    if (m.scrollH > m.clientH) fail(step, `the setup is ${m.scrollH}px tall on a ${m.clientH}px screen — Power Chord Switch's two columns must fit without scrolling`);
+    if (m.cols.length !== 4 || new Set(m.cols).size !== 1) fail(step, `the pair groups are not four columns on one row (tops: ${m.cols.join(', ')})`);
+    if (m.charts.length && (m.charts.length !== 2 || m.charts[0].top !== m.charts[1].top || Math.min(...m.charts.map(c => c.w)) < 200)) fail(step, `the two charts are not side by side and 200px or wider: ${JSON.stringify(m.charts)}`);
     stats.powerLayouts = (stats.powerLayouts || 0) + 1;
   };
   await page.send('Emulation.setDeviceMetricsOverride', size);
@@ -429,7 +435,7 @@ async function powerSwitchWalk(page, run, events, stats, base) {
     await run('pw:show:' + name, expr, 500);
     const m = await run('pw:measure:' + name, measure, 10);
     check(name, m);
-    if (name === 'a fixed pair' && m && m.shown && !(m.scrollH > m.clientH)) fail(name, 'the games screen does not scroll with a pair picked at 1366x657 — this check cannot show that Start sticks (did the charts shrink?)');
+    if (name === 'a fixed pair' && m && m.shown && m.charts.length !== 2) fail(name, `a fixed pair drew ${m.charts.length} charts — this check cannot show the charts fit`);
   }
   await page.send('Emulation.clearDeviceMetricsOverride');
   // Reload: a new student's first look (the remembered pick is sessionStorage, so a new session starts without it).
@@ -451,8 +457,10 @@ async function powerSwitchWalk(page, run, events, stats, base) {
    2026-10-31). Its 80px charts (639248b) pushed the -5/+5 row and Start down the
    scrolling games screen, so Start now sits in the same sticky bar as Power Chord
    Switch (.cc-startbar). For the default screen and a 2-, 3- and 4-chord loop and
-   Random 4, assert Start is fully on screen and inside the bar; at least one of
-   those views must scroll, or the test would pass without the bar. Runs after
+   Random 4, assert Start is fully on screen and inside the bar. Since the wide
+   setup (2026-10-31: the three loop lists across the top, settings left, charts
+   right) none of those views may need to scroll, and the three lists must share
+   one row. Runs after
    powerSwitchWalk, on the same page, with coach.js already loaded. */
 async function changeUpWalk(page, run, events, stats) {
   const has = await run('cu:has', `typeof CC_PROGRESSIONS !== 'undefined' && typeof gamesShow === 'function' && typeof ccPickProg === 'function'`, 10);
@@ -462,7 +470,8 @@ async function changeUpWalk(page, run, events, stats) {
   const measure = `(() => { const sc = document.getElementById('games-screen'), st = document.querySelector('#cc-body .coach-start');
     const s = st && st.getBoundingClientRect();
     return { shown: sc.clientHeight > 0, innerH: window.innerHeight, scrollH: sc.scrollHeight, clientH: sc.clientHeight, start: s && { top: Math.round(s.top), bottom: Math.round(s.bottom) },
-      bar: !!(st && st.parentElement && st.parentElement.classList.contains('cc-startbar')), power: document.getElementById('cc-body').classList.contains('cc-power') }; })()`;
+      bar: !!(st && st.parentElement && st.parentElement.classList.contains('cc-startbar')), power: document.getElementById('cc-body').classList.contains('cc-power'),
+      cols: [...document.querySelectorAll('#cc-body .cc-up-groups .cc-group')].map(e => Math.round(e.getBoundingClientRect().top)) }; })()`;
   const idx = pred => `CC_PROGRESSIONS.findIndex(${pred})`;
   const views = [['the default', `gamesShow('cc')`],
     ['a 2-chord loop', `gamesShow('cc'); ccPickProg(${idx('p => !p.random && p.chords.length === 2')})`],
@@ -472,7 +481,6 @@ async function changeUpWalk(page, run, events, stats) {
   await page.send('Emulation.setDeviceMetricsOverride', size);
   await sleep(400);
   await run('cu:route', `ensureCoachJs().then(() => goExploreHash('games'))`, 1500);
-  let scrolled = 0;
   for (const [name, expr] of views) {
     await run('cu:show:' + name, expr, 500);
     const m = await run('cu:measure:' + name, measure, 10);
@@ -480,10 +488,10 @@ async function changeUpWalk(page, run, events, stats) {
     if (m.power) fail(name, 'the setup is in Power Chord Switch mode, not Change Up');
     if (!m.start || m.start.top < 0 || m.start.bottom > m.innerH) fail(name, `Change Up's Start sits at ${m.start && m.start.top}-${m.start && m.start.bottom}px on a ${m.innerH}px screen \u2014 it must be fully on screen (see .cc-startbar)`);
     if (!m.bar) fail(name, "Change Up's Start is not inside the sticky .cc-startbar");
-    if (m.scrollH > m.clientH) scrolled++;
+    if (m.scrollH > m.clientH) fail(name, `the setup is ${m.scrollH}px tall on a ${m.clientH}px screen \u2014 Change Up's wide setup must fit without scrolling`);
+    if (m.cols.length !== 3 || new Set(m.cols).size !== 1) fail(name, `the three loop lists are not on one row (tops: ${m.cols.join(', ')})`);
     stats.changeUpLayouts = (stats.changeUpLayouts || 0) + 1;
   }
-  if (!scrolled) fail('all views', 'no Change Up view scrolls at 1366x657 \u2014 this check cannot show that Start sticks (did the charts shrink?)');
   await page.send('Emulation.clearDeviceMetricsOverride');
 }
 
@@ -551,8 +559,8 @@ async function walk(base, chromePort, label) {
       if (fresh && !fresh.tempoOnScreen) events.push({ step: 'power:opens-on', kind: 'power-tempo-visible', text: `Power Chord Switch's tempo buttons are below the fold at this window height — a student would have to scroll to change the tempo` });
     }
     const w = await run(`diagram-size:${v}`, `(() => { gamesShow(${JSON.stringify(v)}); ${v === 'power' ? 'ccPickProg(1);' : ''} return [...document.querySelectorAll('#cc-body .cc-dia svg')].map(s => Math.round(s.getBoundingClientRect().width)); })()`, 400);
-    /* Power Chord Switch shows two chords, so its charts are drawn at 180px
-       (2026-10-30, "the charts are very small"); Change Up keeps the shared 80. */
+    /* Power Chord Switch shows two chords, so its charts fill their half of the
+       right-hand column (2026-10-31; 180px before that); Change Up keeps the shared 80. */
     const minW = v === 'power' ? 150 : 48;
     if (w && (!w.length || Math.min(...w) < minW)) events.push({ step: `diagram-size:${v}`, kind: 'diagram-size', text: `${v}: ${w.length ? `${w.length} chord diagrams, the smallest ${Math.min(...w)}px wide` : 'no chord diagrams drawn'} — too small to read, need ${minW}px (see .cc-diagrams .cc-dia svg and #cc-body.cc-power)` });
   }
