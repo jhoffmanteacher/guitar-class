@@ -220,7 +220,7 @@ let activityNumbers = {}; // LEGACY In-Class Activity renumbering — see caBoar
    been pushed to the site; it is Built, not placed, and no student sees it.
 
    This is what drives BOTH the order students read the cards in and the
-   "#N - " prefix on them (caBoardOrder / caNumber), replacing the shipped
+   "#N" number before their titles (caBoardOrder / caNumber), replacing the shipped
    `number` field and the console's old activityNumbers overrides. */
 let activityBoard = {};
 /* config/class.activityBoardSeeded — has the console ever written a board?
@@ -11591,7 +11591,7 @@ async function buildSearchIndex(){
      A hit opens the card by its deep link (searchGoActivity). */
   (window.CLASS_ACTIVITIES || []).filter(caIsVisible).forEach(a => {
     const num = caNumber(a);
-    const title = (a.kind === 'check' ? t('check.prefix') + ' · ' : num ? `#${num} - ` : '') + caTitle(a);
+    const title = (a.kind === 'check' ? t('check.prefix') + ' · ' : num ? `#${num} ` : '') + caTitle(a);
     const stepLabels = (a.steps || []).map(st => stripTags(tf(st, 'label') || '')).filter(Boolean);
     const text = [caFirstSentence(tf(a, 'intro')), ...stepLabels].filter(Boolean).join(' · ');
     const hayExtra = [bothLangs(a, 'title'), bothLangs(a, 'intro') && stripTags(bothLangs(a, 'intro')),

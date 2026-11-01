@@ -80,6 +80,29 @@
 
 ## Open work
 
+- [ ] **2026-11-01 — Friday check (Fast commits `a615925`..`65898ce`): waiting
+  for Jonathan.** `site-reviewer` found no student-visible bug at 1366×657.
+  Fixed in the same commit as this note: Find results still showed "#30 - "
+  (R1-5); the under-900px 560px cap for Chord Blitz / Fret Zap / Power Chord
+  Switch lost to later same-specificity rules (R1-3); 1ca now also pins Every
+  bar as Change Up's first speed button (R1-2, proved red by reversing both
+  games); one stale coach.js comment and a 1ca flag still saying "sticky" (R1-4).
+  Your call:
+  - [ ] **R1-1 — the grey "optional" edge only shows on cards you flag in the
+    console.** Cards optional in their data (ca-34, ca-35, ca-36, ca-37, ca-39,
+    ca-42) and cards given through the board's "Who" picker show the
+    "Optional" tag with the normal orange edge, so two "Optional" cards can look
+    different, and the CHANGELOG line "Optional activities have a grey edge" is
+    not true for them. The commit chose the teacher flag on purpose (so a CAS
+    student's list isn't all faded). A fix that keeps that:
+    `const quiet = !done && !caStudentIsCAS() && caIsOptional(a);`
+    (app.js `caActivityCardHtml`). Not applied: it reverses a choice in 41df3cf.
+  - [ ] Leftover old-behaviour comments (no student effect): styles.css's
+    Change Up sticky-bar comment, tools/smoke.mjs's Change Up walk comment and
+    its "in its sticky bar" summary label, the ungrouped branch of
+    `caStartHereTagHtml` (now unused). Power Chord Switch's results screen is
+    full width, left-aligned (Change Up's is a centred 560px column).
+
 - [ ] **2026-10-31 — Friday check (first run, a practice run): what it found
   and did not fix.** `site-reviewer-deep` (student-facing) and `site-reviewer`
   (Hear It First) read every commit on `main` from `1c1e6c6` to `59e7915`.

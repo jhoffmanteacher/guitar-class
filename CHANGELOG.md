@@ -5,6 +5,14 @@ Notable changes to the Guitar Class site. Newest first.
 For the full session-by-session history (and the reasoning behind each change),
 see `WORKFLOW.md` and the git commit log.
 
+## 2026-11-01 — Small fixes from the weekly check
+
+- **Find shows activity numbers the new way.** A search result reads "#30 All
+  Along the Watchtower", like the activity list, not "#30 - All Along…".
+- **On a narrow window (under 900px wide), Chord Blitz, Fret Zap and Power
+  Chord Switch go back to a 560px column**, as they were before the two-column
+  play screens. At 1366×657 nothing changes.
+
 ## 2026-10-31 — In class and the lessons: less clutter, same places
 
 Nothing moved. Every page, button and activity is where it was. These changes

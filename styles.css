@@ -2353,8 +2353,9 @@ body.rail-collapsed .rail-tools .tool-popup{
 #cb-body .cb-cols .cb-answer .cb-key,#fz-body .cb-cols .cb-answer .cb-key{font-size:0.875rem}
 #cb-body .cb-cols .cb-answer-dia{width:min(130px,100%)}
 @media (max-width:900px){
-  #cb-body{max-width:560px}
-  #fz-body{max-width:560px}
+  div#cb-body{max-width:560px}
+  div#fz-body{max-width:560px}
+  div#cc-body.cc-power{max-width:560px}
   #cb-body .cb-cols,#fz-body .cb-cols{display:block}
   #cb-body .cb-cols .cb-prompt{min-height:120px;margin:4px 0 12px}
   #cb-body .cb-cols .cb-prompt-dia{width:160px}

@@ -3268,8 +3268,8 @@ function ccRenderSetup(msg){
        ${best ? `<span class="cc-best">${t('games.common.bestTodayLabel')}: ${best} BPM</span>` : ''}
      </div>`;
   /* Power Chord Switch asks "how fast" and the tempo first — they are the whole
-     game, and the big charts push anything below them off a 657px screen — then
-     which two chords; Change Up keeps the loops first and the tempo below. */
+     game — then which two chords, all in the left column (the charts have the
+     right one); Change Up keeps the loops first and the tempo below. */
   const tempoRow = `<div class="cc-group"><div class="cc-group-title">${t('games.pw.group.tempo')}</div>${bpmRow}</div>`;
   /* Start sits in .cc-startbar in both games. Change Up's bar sticks to the
      bottom of the scrolling games screen (styles.css .cc-startbar): its 80px

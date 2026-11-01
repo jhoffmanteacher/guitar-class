@@ -10666,7 +10666,7 @@ function checkCoachVerdicts() {
     for (const lang of ['en', 'es']) {
       run(`setLang(${JSON.stringify(lang)})`);
       run(`ccSetup('power')`);
-      if (!/<div class="cc-startbar"><button type="button" class="coach-start" onclick="ccStart\(\)">/.test(bodies['cc-body'])) flag(`1ca: ${lang} Power Chord Switch's Start is not inside the sticky .cc-startbar`);
+      if (!/<div class="cc-startbar"><button type="button" class="coach-start" onclick="ccStart\(\)">/.test(bodies['cc-body'])) flag(`1ca: ${lang} Power Chord Switch's Start is not inside .cc-startbar`);
       run(`ccSetup()`);
       if (!/<div class="cc-startbar"><button type="button" class="coach-start" onclick="ccStart\(\)">/.test(bodies['cc-body'])) flag(`1ca: ${lang} Change Up's Start is not inside the sticky .cc-startbar`);
     }
@@ -10695,6 +10695,10 @@ function checkCoachVerdicts() {
          CC_RATES entry that the remembered pick and best-score keys use. */
       const pwFirstRate = (pw.match(/ccPickRate\((\d+)\)/) || [])[1];
       if (Number(pwFirstRate) !== run('CC_BEAT_IDX')) flag(`1ca: ${lang} Power Chord Switch's first speed button is rate ${pwFirstRate}, expected Every beat (${run('CC_BEAT_IDX')}) on the far left`);
+      run(`ccSetup()`);
+      const cuFirstRate = (bodies['cc-body'].match(/ccPickRate\((\d+)\)/) || [])[1];
+      if (Number(cuFirstRate) !== 0) flag(`1ca: ${lang} Change Up's first speed button is rate ${cuFirstRate}, expected Every bar (0) on the far left`);
+      run(`ccSetup('power')`);
       const firstRate = pw.indexOf('ccPickRate('), firstProg = pw.indexOf('ccPickProg('), firstBpm = pw.indexOf('ccNudgeBpm(');
       if (firstRate < 0 || firstRate > firstProg) flag(`1ca: ${lang} Power Chord Switch's speed row is not above its chord choices`);
       if (firstBpm < 0 || firstBpm > firstProg || firstBpm < firstRate) flag(`1ca: ${lang} Power Chord Switch's tempo buttons are not between the speed row and the chord choices`);
