@@ -156,7 +156,9 @@
     var streakBefore = streak;
     var curGoal = calc.goalSeconds(c, cur), curSecs = weekSecs[cur] || 0;
     var isBreak = curGoal <= 0, hit = !isBreak && curSecs >= curGoal;
-    if(hit){ streak++; if(streak > longest) longest = streak; }
+    /* A week before streakStartWeek never counts toward a streak, this one included
+       (it can still be a hit: the ring and the "week goal hit" message are about the goal). */
+    if(hit && !(c.streakStartWeek && cur < c.streakStartWeek)){ streak++; if(streak > longest) longest = streak; }
     var history = [];
     for(var k = 7; k >= 0; k--){
       var id = calc.weekAdd(cur, -k), secs = weekSecs[id] || 0, goal = calc.goalSeconds(c, id), state;

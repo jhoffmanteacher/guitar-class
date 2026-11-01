@@ -16,8 +16,11 @@ var PRACTICE_MINUTES_CONFIG = {
   /* THE SWITCH FOR EVERYTHING A STUDENT SEES. false = the site still counts
      minutes and writes them (so you gather two weeks of data first) but draws
      nothing: no status strip, no recap, no toast, nothing on My progress, and
-     no live "N playing" lookups. true = all of it appears. */
-  uiOn: false,
+     no live "N playing" lookups. true = all of it appears.
+     ON since 2026-11-01. (checks.mjs 1cg / tools/pm-sim.mjs pin this value: flip
+     both together. The "N playing" item also needs the composite index in
+     firestore.indexes.json; without it that one item stays hidden.) */
+  uiOn: true,
 
   /* The weekly goal, in minutes. It is FLAT: the same number in every counted
      week, for every student, whichever days they practise. (There is no
@@ -52,7 +55,7 @@ var PRACTICE_MINUTES_CONFIG = {
   /* Weeks before this one never count toward a streak (an ISO week id such as
      '2026-W48'). Set it to the week you turn uiOn on, with the goal you want,
      so the streak starts fresh. '' = count from the student's first week. */
-  streakStartWeek: '',
+  streakStartWeek: '2026-W45',   // the first full week with the display on (Mon 2026-11-02): streaks start here
 
   /* ── Smaller knobs ── */
   liveMinCount: 3,        // hide "N playing" until at least this many are playing in the student's period

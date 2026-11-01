@@ -254,7 +254,7 @@ console.log('2. week streak');
 {
   const w = makeWorld();
   const calc = w.PM.calc;
-  const base = { ...w.PM.cfg(), skipWeeks: [], semester2Start: '' };
+  const base = { ...w.PM.cfg(), skipWeeks: [], semester2Start: '', streakStartWeek: '' };   // the shipped streakStartWeek would hide these 2026-09 test weeks
   const wk = (n) => calc.weekAdd('2026-W36', n);                          // W36 = Mon 31 Aug 2026
   const mk = (pattern, today) => {                                         // 'H' hit, 'x' miss, '.' = no play
     const m = {};
@@ -305,6 +305,9 @@ console.log('2. week streak');
   // streakStartWeek.
   s = calc.status({ ...base, streakStartWeek: wk(2) }, { [wk(0)]: 1800, [wk(1)]: 1800, [wk(2)]: 1800 }, T(3));
   check('streakStartWeek ignores earlier weeks', s.streak === 1, 'got ' + s.streak);
+  // The week in progress is before streakStartWeek: a hit is still a hit, but it is not a streak week.
+  s = calc.status({ ...base, streakStartWeek: wk(5) }, { [wk(2)]: 1800 }, T(2));
+  check('this week is before streakStartWeek: the goal is hit (ring, message) but the streak stays 0, like every earlier week', s.week.hit && s.streak === 0 && s.longest === 0);
   // History is 8 squares ending on this week.
   s = mk('HH', T(2));
   check('history = 8 weeks, oldest first, last is "now"', s.history.length === 8 && s.history[7].state === 'now' && s.history[6].id === wk(1));
@@ -556,13 +559,18 @@ console.log('6. heartbeats');
 console.log('7. defaults');
 {
   const w = makeWorld();
-  check('shipped config: uiOn is false', w.ctx.PRACTICE_MINUTES_CONFIG.uiOn === false);
+  check('shipped config: uiOn is true (on since 2026-11-01; flip this and the config together)', w.ctx.PRACTICE_MINUTES_CONFIG.uiOn === true);
+  check('shipped config: streaks start fresh at 2026-W45', w.ctx.PRACTICE_MINUTES_CONFIG.streakStartWeek === '2026-W45');
   check('shipped config: goal 30, cap 20, semester 2 starts 2027-01-04, five skip weeks', w.ctx.PRACTICE_MINUTES_CONFIG.weeklyGoalMinutes === 30 && w.ctx.PRACTICE_MINUTES_CONFIG.dailyCapMinutes === 20
     && w.ctx.PRACTICE_MINUTES_CONFIG.semester2Start === '2027-01-04' && w.ctx.PRACTICE_MINUTES_CONFIG.skipWeeks.length === 5);
-  check('uiOn false → stripHtml() is empty', w.PM.stripHtml() === '');
+  const off = makeWorld({ ui: true, config: { uiOn: false } });
+  check('uiOn false (a page with a UI host) → stripHtml() is empty', off.PM.stripHtml() === '');
   const a = w.track(); a.play();
   await w.run(70, w.playing(a));
   check('…yet minutes were counted and written', (w.server.days[todayStr]?.seconds || 0) >= 55);
+  const offA = off.track(); offA.play();
+  await off.run(70, off.playing(offA));
+  check('with uiOn false minutes are still counted and written (the display is the only thing the switch hides)', (off.server.days[todayStr]?.seconds || 0) >= 55);
 }
 
 

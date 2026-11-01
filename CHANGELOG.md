@@ -5,6 +5,27 @@ Notable changes to the Guitar Class site. Newest first.
 For the full session-by-session history (and the reasoning behind each change),
 see `WORKFLOW.md` and the git commit log.
 
+## 2026-11-01 — Practice minutes
+
+- **The site now counts your practice minutes.** When you play along with a
+  backing track (a practice card, a "Play Along now" card, or a Song Journey
+  page), the minutes you play are counted. The metronome, the games and
+  videos do not count. Up to 20 minutes a day count.
+- **A small bar at the top of a practice card** shows a ring that fills as you
+  play toward 30 minutes this week, and a flame with your streak. A streak is
+  how many weeks in a row you reached 30 minutes. The flame is orange once you
+  have reached 30 this week.
+- **After you press Stop,** a small card shows the minutes you just played and
+  how many more you need this week. It shows only if you played at least a
+  minute.
+- **When you reach 30 minutes in a week,** a short message with a flame tells
+  you.
+- **My progress has a new "Practice minutes" box.** It shows this week, your
+  streak, today, a bar for each day this week (Monday to Sunday), and your last
+  8 weeks. A flame on a week means you reached the goal.
+- **Break weeks do not count,** and they never break your streak. You also get
+  one missed week in each semester that does not break your streak.
+
 ## 2026-11-01 — Small fixes from the weekly check
 
 - **Find shows activity numbers the new way.** A search result reads "#30 All

@@ -99,8 +99,8 @@ Open Chords = 4, Pentatonic = 5. Progress moves once per browser (`swap45*`, `ap
 - **`firestore.rules` change** → tell Jonathan: Firebase console → Firestore → Rules → paste →
   Publish (GitHub Pages doesn't deploy it).
 - **Skills edit** → bump `skillCount` in `MODULE_MANIFEST` .
-- **Practice minutes** (`practice-minutes-config.js` + `practice-minutes.js`): counts always; students
-  see nothing until `uiOn: true`. Its `firestore.rules` blocks must be published BEFORE the code
+- **Practice minutes** (`practice-minutes-config.js` + `practice-minutes.js`): counts always; the display
+  is on (`uiOn: true` since 2026-11-01; the pin is in `tools/pm-sim.mjs`). Its `firestore.rules` blocks must be published BEFORE the code
   that writes them; `dailyCapMinutes` and the rules' `dailyCapSeconds()` move together (1cg). Entry:
   `WORKFLOW.md` → "Practice minutes".
 - **Play-along first**: a song link opens its play-along card if one is openable

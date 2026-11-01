@@ -875,7 +875,7 @@
 
 ## Recently shipped (post-archive)
 
-- [x] **2026-11-01 — Practice minutes (student view only; every visible piece behind `uiOn:false`).**
+- [x] **2026-11-01 — Practice minutes (student view only; display switched ON the same day: `uiOn: true`, `streakStartWeek: '2026-W45'`, goal 30).**
       Counts seconds of real backing-track playback and shows a weekly goal, a
       week streak and "N playing". Counting and writing ship LIVE; nothing is
       drawn until `uiOn` is set to `true` in `practice-minutes-config.js`.

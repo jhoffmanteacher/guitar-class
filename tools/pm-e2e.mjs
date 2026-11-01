@@ -116,6 +116,10 @@ const seedWeeks = (hits) => ev(`(() => { const f = window.__fs; f.weeks = {}; f.
   ${JSON.stringify(hits)}.forEach((secs, i) => { const w = PM.calc.weekAdd(cur, -(i + 1)); if (secs) f.weeks[w] = { seconds: secs, goalSeconds: 1800, hit: secs >= 1800 }; });
   const s = PM._state(); if (s) { s.weeks = {}; s.days = {}; s.pend = {}; s.loaded = false; s.loading = null; s.toastWeek = ''; s.pendingToast = false; s.lastRecapAt = 0; } return true; })()`);
 
+console.log('shipped config');
+check('the shipped config has uiOn true, goal 30, streaks starting 2026-W45', await ev(`PRACTICE_MINUTES_CONFIG.uiOn === true && PRACTICE_MINUTES_CONFIG.weeklyGoalMinutes === 30 && PRACTICE_MINUTES_CONFIG.streakStartWeek === '2026-W45'`));
+/* The seeded history below is dated from the real clock, so the shipped streak start (a week the real date may not have reached) is cleared for it. */
+await ev(`PRACTICE_MINUTES_CONFIG.streakStartWeek = ''`);
 /* ── uiOn false: nothing is drawn ── */
 console.log('uiOn false');
 await ev(`PRACTICE_MINUTES_CONFIG.uiOn = false`);
