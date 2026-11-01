@@ -37,22 +37,31 @@
    Seconds are kept whole; the display floors to whole minutes. They are added
    with increment(), so two tabs or two devices never overwrite each other.
 
-   THE PENDING-WRITE QUEUE. Counted seconds go into pend[date] in memory and
-   into localStorage (pm:q:<uid>) every few seconds, on hide and on unload.
-   flush() sends them every 60 s while counting, when playback stops, when the
-   tab hides, on `online`, and at sign-in for anything a closed tab left. A
-   flush is one batch; its seconds leave the queue only when the batch is
-   acknowledged. Offline (navigator.onLine false) nothing is sent and nothing is
-   lost. On pagehide a fetch({keepalive:true}) to the Firestore REST endpoint
-   sends what is left (navigator.sendBeacon cannot carry the sign-in header,
-   so it cannot write to a rules-protected collection).
+   THE PENDING-WRITE QUEUE. Counted seconds go into pend[date] in memory and into
+   this PAGE's own localStorage key (pm:q:<uid>:<pageId>) every few seconds, on
+   hide and on unload. flush() sends them every 60 s while counting, when playback
+   stops, when the tab hides, on `online`, about once a minute while idle with
+   something left, and a page takes over the key of a page that is gone (stamp older
+   than 3 minutes, or written by pagehide) as soon as the student is known.
+   A flush is one batch. Its seconds move from `pend` to `inflight` when it is sent
+   and leave only when the SDK answers — there is NO timeout: the SDK keeps a commit
+   it cannot deliver and delivers it when the connection returns, so sending the same
+   seconds again after "giving up" counts them once per attempt (measured: a 5-minute
+   stall stored the daily cap for 5 minutes of play). Offline (navigator.onLine
+   false) nothing is sent and nothing is lost. A load never overlaps a flush. On
+   pagehide a fetch({keepalive:true}) to the Firestore REST endpoint sends what is
+   left, with the ID token cached for THIS student (navigator.sendBeacon cannot carry
+   the sign-in header, so it cannot write to a rules-protected collection).
    A flush the rules refuse is NOT thrown away: it first re-reads the server's
-   day total and trims the queue to the cap; if nothing is left to trim, the
-   refusal is something else (the rules not published yet, say), so the
-   seconds stay queued and are retried every 5 minutes.
-   Known limit: if the SDK delivers a batch AFTER its 20 s wait ran out, the
-   retry sends those seconds twice. That needs a connection that stalls for
-   20 s and then recovers, and is bounded by the daily cap.
+   day totals (including any older day the queue holds) and trims the queue to the
+   cap; if nothing is left to trim, the refusal is something else (the rules not
+   published yet, say), so the seconds stay queued and are retried every 5 minutes,
+   and reads back off the same way.
+   Known limits: the week doc's `hit` and `goalSeconds` are a best-effort snapshot
+   for later (the app recomputes from `seconds`); a device that has never seen a
+   week's doc sends hit with its first write, which can overwrite a true another
+   device just wrote. Two pages of one student on a frozen tab (over 3 minutes
+   with no stamp refresh) can be adopted while still alive.
 
    LIVE COUNT. While counting, a heartbeat { period, lastSeen } is written
    every 30 s to heartbeats/<random per-browser-session id> — never the uid, no
@@ -134,7 +143,9 @@
   calc.goalSeconds = function(c, weekId, period){
     var normal = calc.normalMeetings(c, period), m = calc.meetings(c, weekId, period).count;
     if(m <= 0 || normal <= 0) return 0;
-    return Math.round(c.weeklyGoalMinutes * 60 * Math.min(m, normal) / normal);
+    /* Whole minutes (never fewer than one): the screens show whole minutes, so a goal of
+       13 min 20 s would read "13/13 min" while not yet hit. */
+    return Math.max(60, Math.round(c.weeklyGoalMinutes * Math.min(m, normal) / normal) * 60);
   };
   calc.semesterOf = function(c, weekId){
     var thu = calc.ymd(calc.addDays(calc.weekMonday(weekId), 3));
@@ -189,17 +200,19 @@
   /* ════════════════════════════════════════════════════════════════════
      STATE
      ════════════════════════════════════════════════════════════════════ */
-  var HEARTBEAT_MS = 30000, FLUSH_MS = 60000, PERSIST_MS = 5000, FLUSH_WAIT_MS = 20000, DENIED_BACKOFF_MS = 300000;
+  var HEARTBEAT_MS = 30000, FLUSH_MS = 60000, PERSIST_MS = 5000, DENIED_BACKOFF_MS = 300000, LOAD_RETRY_MS = 30000;
+  var STALE_QUEUE_MS = 180000, QUEUE_FRESH_MS = 10000, ADOPT_MS = 30000;
   var host = null;
   var S = null;                       // per-student state, rebuilt when the uid changes
   var media = new Set();              // backing-track elements seen playing
   var timer = 0, lastTick = 0, idleSec = 0, session = null;
-  var lastBeat = 0, lastFlush = 0, lastPersist = 0, deniedUntil = 0;
+  var lastBeat = 0, lastFlush = 0, lastPersist = 0, lastAdopt = 0, deniedUntil = 0, queueTimer = 0;
   var sid = '';                       // random id for this browser session (heartbeats)
+  var pid = '';                       // random id for this page (its own queue key)
 
   function freshState(uid){
-    return { uid: uid, days: {}, weeks: {}, pend: {}, frac: 0, loaded: false, loading: null, flushing: false,
-             live: 0, liveAt: 0, toastWeek: '', pendingToast: false, lastRecapAt: 0 };
+    return { uid: uid, days: {}, weeks: {}, pend: {}, inflight: null, flushP: null, frac: 0, loaded: false, loading: null, flushing: false,
+             loadRetryAt: 0, live: 0, liveAt: 0, toastWeek: '', pendingToast: false, lastRecapAt: 0 };
   }
   function ls(k, v){
     try {
@@ -211,9 +224,15 @@
   function lsJson(k){ try { return JSON.parse(ls(k) || 'null'); } catch(e) { return null; } }
   function now(){ return (typeof performance !== 'undefined' && performance.now) ? performance.now() : Date.now(); }
   function today(){ return calc.ymd(new Date()); }
+  function randHex(n){
+    var a = new Uint8Array(n), c = (typeof window !== 'undefined') && (window.crypto || window.msCrypto);
+    if(c && c.getRandomValues) c.getRandomValues(a); else for(var i = 0; i < n; i++) a[i] = Math.floor(Math.random() * 256);
+    return Array.prototype.map.call(a, function(b){ return (b < 16 ? '0' : '') + b.toString(16); }).join('');
+  }
 
   function getHost(){ return host || (typeof window !== 'undefined' && window.PM_HOST) || null; }
-  function uid(){ var h = getHost(); var u = h && h.user && h.user(); return u ? u.uid : null; }
+  function hostUser(){ var h = getHost(); return h && h.user ? h.user() : null; }
+  function uid(){ var u = hostUser(); return u ? u.uid : null; }
   function period(){
     var h = getHost(), p = h && h.period ? h.period() : '', u = uid();
     if(p){ if(u) ls('pm:p:' + u, p); return p; }
@@ -222,6 +241,56 @@
   function dbP(){ var h = getHost(); return h && h.db ? Promise.resolve(h.db()) : Promise.reject(new Error('no db')); }
   function FV(){ return firebase.firestore.FieldValue; }
 
+  /* ── The pending-write queue: ONE localStorage key PER PAGE ──
+     pm:q:<uid>:<pageId> = { days: { date: seconds }, at: ms }. A single shared
+     key let two tabs of one student adopt (and send) each other's unconfirmed
+     seconds, and overwrite each other's. Now a page writes only its own key and
+     refreshes `at` while it holds anything; it takes over another page's key only
+     when that stamp is older than STALE_QUEUE_MS (a closed tab, a crash), or 0
+     (written by pagehide: "I am leaving"). What a page holds = pend (not yet
+     sent) + inflight (sent, not yet acknowledged). */
+  function pageId(){ if(!pid) pid = randHex(6); return pid; }
+  function qKey(u){ return 'pm:q:' + u + ':' + pageId(); }
+  function queued(d){ return (S.pend[d] || 0) + ((S.inflight && S.inflight.snap[d]) || 0); }
+  function heldDays(){
+    var m = {};
+    Object.keys(S.pend).forEach(function(d){ if(S.pend[d] > 0) m[d] = (m[d] || 0) + S.pend[d]; });
+    if(S.inflight) Object.keys(S.inflight.snap).forEach(function(d){ m[d] = (m[d] || 0) + S.inflight.snap[d]; });
+    return m;
+  }
+  function persist(leaving){
+    if(!S) return;
+    lastPersist = now();
+    var held = heldDays(), any = Object.keys(held).length > 0;
+    ls(qKey(S.uid), any ? JSON.stringify({ days: held, at: leaving ? 0 : Date.now() }) : null);
+    if(any) keepQueueFresh(); else if(queueTimer){ clearInterval(queueTimer); queueTimer = 0; }
+  }
+  /* A page that is idle but still holds seconds (offline, a stalled commit) has no
+     tick running; this keeps its stamp fresh so nobody adopts it while it is alive. */
+  function keepQueueFresh(){
+    if(queueTimer || typeof setInterval === 'undefined') return;
+    var beats = 0;
+    queueTimer = setInterval(function(){
+      persist();
+      /* A page that is idle but still holds seconds (a connection that came back, a
+         commit that finally answered) sends them about once a minute. */
+      if(S && ++beats % 6 === 0 && !session && !S.flushing && !S.loading && takePending()) flush();
+    }, QUEUE_FRESH_MS);
+  }
+  function adopt(){
+    var st = S, took = false;
+    if(!st) return;
+    var prefix = 'pm:q:' + st.uid + ':', mine = qKey(st.uid), keys = [];
+    try { for(var i = 0; i < localStorage.length; i++){ var k = localStorage.key(i); if(k && k.indexOf(prefix) === 0 && k !== mine) keys.push(k); } } catch(e) { return; }
+    keys.forEach(function(k){
+      var v = lsJson(k);
+      if(v && v.days && typeof v.at === 'number' && v.at > 0 && Date.now() - v.at < STALE_QUEUE_MS && Date.now() >= v.at) return;   // a live page's
+      if(v && v.days) Object.keys(v.days).forEach(function(d){ if(v.days[d] > 0){ st.pend[d] = (st.pend[d] || 0) + v.days[d]; took = true; } });
+      ls(k, null);
+    });
+    if(took){ trimToCap(); persist(); if(!st.loaded) load(); else flush(); }
+  }
+
   /* Rebuild S when the signed-in student changes (sign-out, shared Chromebook). */
   function sync(){
     var u = uid();
@@ -229,30 +298,28 @@
       if(S && S.uid) persist();
       S = u ? freshState(u) : null;
       if(S){
-        var q = lsJson('pm:q:' + u), c = lsJson('pm:c:' + u);
-        if(q && q.days) S.pend = q.days;
+        var c = lsJson('pm:c:' + u);
         if(c){ S.days = c.days || {}; S.weeks = c.weeks || {}; }
         S.toastWeek = ls('pm:t:' + u) || '';
         S.lastRecapAt = 0;
+        idToken = ''; idTokenUid = '';
+        refreshToken();
+        var st = S;
+        // Anything a closed page left goes out now (a later tick would do, but a student who only opens a card never plays).
+        setTimeout(function(){ if(S === st){ adopt(); if(!st.loaded && Object.keys(heldDays()).length) load(); } }, 0);
       }
       session = null; idleSec = 0;
     }
     return S;
   }
-  function persist(){
-    if(!S) return;
-    lastPersist = now();
-    var has = Object.keys(S.pend).some(function(d){ return S.pend[d] > 0; });
-    ls('pm:q:' + S.uid, has ? JSON.stringify({ days: S.pend }) : null);
-  }
   function cacheServer(){ if(S) ls('pm:c:' + S.uid, JSON.stringify({ days: S.days, weeks: S.weeks })); }
 
   /* ── Totals: what the server holds plus what is still queued ── */
-  function dayTotal(d){ return (S.days[d] || 0) + (S.pend[d] || 0); }
+  function dayTotal(d){ return (S.days[d] || 0) + queued(d); }
   function weekTotals(){
-    var m = {};
+    var m = {}, held = heldDays();
     Object.keys(S.weeks).forEach(function(w){ m[w] = S.weeks[w].seconds || 0; });
-    Object.keys(S.pend).forEach(function(d){ if(S.pend[d] > 0){ var w = calc.weekIdOf(d); m[w] = (m[w] || 0) + S.pend[d]; } });
+    Object.keys(held).forEach(function(d){ var w = calc.weekIdOf(d); m[w] = (m[w] || 0) + held[d]; });
     return m;
   }
   function status(){ return calc.status(cfg(), weekTotals(), period(), today()); }
@@ -271,8 +338,15 @@
     return /\/audio\/[^\/?#]*-backing-[^\/?#]*\.(mp3|m4a|wav|ogg)/i.test(s);
   }
   function note(el){
-    if(!el || media.has(el)) { ensureTimer(); return; }
-    media.add(el);
+    if(!el) return;
+    if(!el.__pmL && el.addEventListener){
+      /* Playback resumed from the OS media controls or a media key runs no
+         play() call and, for a detached element, no document-level event; the
+         element's own `playing` still fires. */
+      el.__pmL = true;
+      el.addEventListener('playing', function(){ note(el); });
+    }
+    if(!media.has(el)) media.add(el);
     ensureTimer();
   }
   if(typeof HTMLMediaElement !== 'undefined' && !HTMLMediaElement.prototype.__pmWrapped){
@@ -292,7 +366,7 @@
   }
   function audible(el){
     if(!isBacking(el)) return false;
-    if(el.paused || el.ended || el.muted || el.volume < 0.001 || el.readyState < 3) return false;
+    if(el.paused || el.ended || el.error || el.muted || el.volume < 0.001 || el.readyState < 3) return false;
     var moved = el.__pmT === undefined || el.currentTime !== el.__pmT;
     el.__pmT = el.currentTime;
     return moved;
@@ -315,7 +389,7 @@
     var anyAudible = false;
     media.forEach(function(el){
       if(audible(el)) anyAudible = true;
-      else if(el.paused || el.ended){ media.delete(el); el.__pmT = undefined; }
+      else if(el.paused || el.ended || el.error){ media.delete(el); el.__pmT = undefined; }
     });
     var visible = typeof document === 'undefined' || document.visibilityState !== 'hidden';
     if(st && anyAudible && visible){
@@ -330,6 +404,7 @@
       if(session && idleSec >= 2) endSession();
     }
     if(t - lastPersist >= PERSIST_MS) persist();
+    if(st && t - lastAdopt >= ADOPT_MS){ lastAdopt = t; adopt(); }
     uiTick();
     if(!media.size && !session && idleSec >= 2) stopTimer();
   }
@@ -361,38 +436,53 @@
 
   /* ════════════════════════════════════════════════════════════════════
      FIRESTORE — load, flush, heartbeat
+
+     One rule keeps the numbers honest: READING and WRITING never overlap. flush()
+     does nothing while load() runs; load() first waits for a commit that is
+     still in flight. Without that a read could already contain a batch that is
+     then added to the local totals a second time.
      ════════════════════════════════════════════════════════════════════ */
-  function load(){
+  function load(noFlush){
     var st = S;
     if(!st) return Promise.resolve();
     if(st.loading) return st.loading;
-    var mon = calc.ymd(calc.weekMonday(calc.weekIdOf(today())));
-    st.loading = dbP().then(function(db){
-      var base = db.collection('minutes').doc(st.uid);
-      return Promise.all([
-        base.collection('weeks').get(),
-        base.collection('days').where(firebase.firestore.FieldPath.documentId(), '>=', mon).get()
-      ]);
+    if(Date.now() < st.loadRetryAt) return Promise.resolve();
+    st.loading = (st.flushing && st.flushP ? st.flushP.then(function(){}, function(){}) : Promise.resolve()).then(function(){
+      /* This week's days, and any OLDER day the queue still holds (a day left from
+         an earlier week must be read too, or the cap cannot be checked for it). */
+      var from = calc.ymd(calc.weekMonday(calc.weekIdOf(today()))), held = heldDays();
+      Object.keys(held).forEach(function(d){ if(d < from) from = d; });
+      return dbP().then(function(db){
+        var base = db.collection('minutes').doc(st.uid);
+        return Promise.all([
+          base.collection('weeks').get(),
+          base.collection('days').where(firebase.firestore.FieldPath.documentId(), '>=', from).get()
+        ]);
+      });
     }).then(function(r){
       if(S !== st) return;
       var weeks = {}, days = {};
       r[0].forEach(function(doc){ var v = doc.data() || {}; weeks[doc.id] = { seconds: +v.seconds || 0, goalSeconds: +v.goalSeconds || 0, hit: v.hit === true }; });
       r[1].forEach(function(doc){ days[doc.id] = +(doc.data() || {}).seconds || 0; });
-      st.weeks = weeks; st.days = days; st.loaded = true;
+      st.weeks = weeks; st.days = days; st.loaded = true; st.loadRetryAt = 0;
       cacheServer();
       trimToCap();
-      flush();
+      st.loading = null;
+      if(!noFlush) flush();
       uiNow();
-    }).catch(function(){ /* offline or rules not published yet: the cache and the queue carry on */ })
-      .then(function(){ if(S === st) st.loading = null; });
+    }).catch(function(err){
+      /* Offline, or the rules not published yet: the cache and the queue carry on.
+         Try again later, not on every tick. */
+      if(S === st) st.loadRetryAt = Date.now() + (err && err.code === 'permission-denied' ? DENIED_BACKOFF_MS : LOAD_RETRY_MS);
+    }).then(function(){ if(S === st) st.loading = null; });
     return st.loading;
   }
 
-  /* Cut the queue so server + queue never passes the cap on any day. */
+  /* Cut the queue so server + held never passes the cap on any day. */
   function trimToCap(){
     var cap = Math.round(cfg().dailyCapMinutes * 60), changed = false;
     Object.keys(S.pend).forEach(function(d){
-      var room = Math.max(0, cap - (S.days[d] || 0));
+      var room = Math.max(0, cap - (S.days[d] || 0) - ((S.inflight && S.inflight.snap[d]) || 0));
       if(S.pend[d] > room){ S.pend[d] = room; changed = true; }
       if(S.pend[d] <= 0){ delete S.pend[d]; changed = true; }
     });
@@ -401,7 +491,9 @@
   }
 
   /* The writes for a set of queued seconds — shared by the SDK batch and the
-     keepalive REST call so the two cannot drift. */
+     keepalive REST call so the two cannot drift. `hit` is sent only when it is
+     true, or when this device has never seen the week's doc (a create needs it):
+     a device with a stale copy must not flip another device's true back to false. */
   function buildOps(snap){
     var c = cfg(), per = period(), ops = [], byWeek = {};
     Object.keys(snap).forEach(function(d){
@@ -411,99 +503,111 @@
       byWeek[w] = (byWeek[w] || 0) + snap[d];
     });
     Object.keys(byWeek).forEach(function(w){
-      var goal = calc.goalSeconds(c, w, per) || Math.round(c.weeklyGoalMinutes * 60);
+      var g = calc.goalSeconds(c, w, per), goal = g || Math.round(c.weeklyGoalMinutes * 60), known = !!S.weeks[w];
       var total = ((S.weeks[w] && S.weeks[w].seconds) || 0) + byWeek[w];
-      var hit = (S.weeks[w] && S.weeks[w].hit === true) || (calc.goalSeconds(c, w, per) > 0 && total >= goal);
-      ops.push({ kind: 'week', id: w, inc: byWeek[w], goalSeconds: goal, hit: !!hit });
+      var hit = !!((S.weeks[w] && S.weeks[w].hit === true) || (g > 0 && total >= goal));
+      ops.push({ kind: 'week', id: w, inc: byWeek[w], goalSeconds: goal, hit: hit, sendHit: hit || !known });
     });
     return ops;
   }
-  function applySent(snap, ops){
+  /* The server confirmed these ops: fold them into the local copy of its numbers. */
+  function applyConfirmed(ops){
     ops.forEach(function(o){
       if(o.kind === 'day') S.days[o.id] = (S.days[o.id] || 0) + o.inc;
-      else S.weeks[o.id] = { seconds: ((S.weeks[o.id] && S.weeks[o.id].seconds) || 0) + o.inc, goalSeconds: o.goalSeconds, hit: o.hit };
+      else S.weeks[o.id] = { seconds: ((S.weeks[o.id] && S.weeks[o.id].seconds) || 0) + o.inc, goalSeconds: o.goalSeconds, hit: o.hit || !!(S.weeks[o.id] && S.weeks[o.id].hit) };
     });
-    Object.keys(snap).forEach(function(d){
-      S.pend[d] = (S.pend[d] || 0) - snap[d];
-      if(S.pend[d] <= 0) delete S.pend[d];
-    });
-    persist(); cacheServer();
   }
-  function snapshotPending(){
+  function takePending(){
     var snap = {}, any = false;
     Object.keys(S.pend).forEach(function(d){ if(S.pend[d] > 0){ snap[d] = S.pend[d]; any = true; } });
     return any ? snap : null;
   }
-  function withTimeout(p, ms){
-    return new Promise(function(res, rej){
-      var t = setTimeout(function(){ rej(new Error('timeout')); }, ms);
-      p.then(function(v){ clearTimeout(t); res(v); }, function(e){ clearTimeout(t); rej(e); });
-    });
+  function putBack(snap){
+    Object.keys(snap).forEach(function(d){ S.pend[d] = (S.pend[d] || 0) + snap[d]; });
   }
   function flush(){
     var st = S;
     lastFlush = now();
-    if(!st || st.flushing) return Promise.resolve(false);
+    if(!st || st.flushing || st.loading) return Promise.resolve(false);
     if(typeof navigator !== 'undefined' && navigator.onLine === false) return Promise.resolve(false);
     if(Date.now() < deniedUntil) return Promise.resolve(false);
-    var snap = snapshotPending();
+    var snap = takePending();
     if(!snap) return Promise.resolve(true);
-    st.flushing = true;
     var ops = buildOps(snap);
-    return withTimeout(dbP().then(function(db){
+    /* The seconds leave `pend` for `inflight` NOW and stay there until the SDK
+       answers. There is no timeout: the SDK keeps a commit it cannot deliver and
+       delivers it when the connection returns, so giving up on it and sending the
+       same seconds again would count them once per attempt. */
+    st.flushing = true;
+    st.inflight = { snap: snap, ops: ops };
+    Object.keys(snap).forEach(function(d){ delete st.pend[d]; });
+    persist();
+    st.flushP = dbP().then(function(db){
       var batch = db.batch(), base = db.collection('minutes').doc(st.uid);
       ops.forEach(function(o){
         if(o.kind === 'day') batch.set(base.collection('days').doc(o.id), { seconds: FV().increment(o.inc) }, { merge: true });
-        else batch.set(base.collection('weeks').doc(o.id), { seconds: FV().increment(o.inc), goalSeconds: o.goalSeconds, hit: o.hit }, { merge: true });
+        else {
+          var data = { seconds: FV().increment(o.inc), goalSeconds: o.goalSeconds };
+          if(o.sendHit) data.hit = o.hit;
+          batch.set(base.collection('weeks').doc(o.id), data, { merge: true });
+        }
       });
       return batch.commit();
-    }), FLUSH_WAIT_MS).then(function(){
-      st.flushing = false;
-      if(S === st){ applySent(snap, ops); uiNow(); }
-      refreshToken();
+    }).then(function(){
+      st.flushing = false; st.inflight = null;
+      if(S === st){
+        applyConfirmed(ops); persist(); cacheServer(); uiNow(); refreshToken();
+        // Seconds counted while this commit was in flight (a stalled connection) go out now, not at the next Play. Not while still counting: that keeps the 60 s rhythm.
+        if(!session && takePending()) setTimeout(function(){ if(S === st) flush(); }, 0);
+      }
       return true;
     }, function(err){
-      st.flushing = false;
+      st.flushing = false; st.inflight = null;
       if(S !== st) return false;
+      putBack(snap); persist();
       if(err && err.code === 'permission-denied') return afterDenied(st);
-      return false;      // offline / timeout: the queue keeps everything
+      return false;      // not delivered (SDK could not load, say): the queue keeps everything
     });
+    return st.flushP;
   }
   /* Refused by the rules. Re-read the server, trim the queue to the cap and
-     try again once; if the queue did not shrink, something other than the cap
-     is wrong (rules not published): keep the seconds, try again in 5 minutes. */
+     try again; if the queue did not shrink, something other than the cap is
+     wrong (rules not published): keep the seconds, try again in 5 minutes. */
   function afterDenied(st){
     var before = JSON.stringify(st.pend);
-    return load().then(function(){
+    return load(true).then(function(){
       if(S !== st) return false;
-      if(JSON.stringify(st.pend) === before) deniedUntil = Date.now() + DENIED_BACKOFF_MS;
-      return false;
+      if(JSON.stringify(st.pend) === before){ deniedUntil = Date.now() + DENIED_BACKOFF_MS; return false; }
+      return flush();      // the queue was trimmed: one more try (a second refusal lands here again with nothing left to trim, and backs off)
     });
   }
 
   /* An ID token kept fresh for the unload write (getIdToken is async, and
-     pagehide cannot wait for it). */
-  var idToken = '';
+     pagehide cannot wait for it). It is tied to the student it was issued to:
+     a token from the previous student on a shared Chromebook must never be sent
+     for this one's queue. */
+  var idToken = '', idTokenUid = '';
   function refreshToken(){
     try {
-      var h = getHost(), u = h && h.user && h.user();
-      if(u) u.getIdToken().then(function(tk){ idToken = tk; }, function(){});
+      var u = hostUser();
+      if(u && typeof u.getIdToken === 'function'){ var who = u.uid; u.getIdToken().then(function(tk){ if(S && S.uid === who){ idToken = tk; idTokenUid = who; } }, function(){}); }
     } catch(e) {}
   }
   function keepaliveFlush(){
     var st = S;
-    if(!st || st.flushing || !idToken || typeof fetch === 'undefined') return;
+    if(!st || st.flushing || st.loading || !idToken || idTokenUid !== st.uid || typeof fetch === 'undefined') return;
     if(typeof navigator !== 'undefined' && navigator.onLine === false) return;
     if(Date.now() < deniedUntil) return;
-    var snap = snapshotPending();
+    var snap = takePending();
     if(!snap) return;
     var ops = buildOps(snap);
     var proj = firebaseConfig.projectId, root = 'projects/' + proj + '/databases/(default)/documents/minutes/' + st.uid + '/';
     var writes = ops.map(function(o){
       if(o.kind === 'day') return { update: { name: root + 'days/' + o.id, fields: {} }, updateMask: { fieldPaths: [] },
         updateTransforms: [{ fieldPath: 'seconds', increment: { integerValue: String(o.inc) } }] };
-      return { update: { name: root + 'weeks/' + o.id, fields: { goalSeconds: { integerValue: String(o.goalSeconds) }, hit: { booleanValue: o.hit } } },
-        updateMask: { fieldPaths: ['goalSeconds', 'hit'] },
+      var fields = { goalSeconds: { integerValue: String(o.goalSeconds) } }, mask = ['goalSeconds'];
+      if(o.sendHit){ fields.hit = { booleanValue: o.hit }; mask.push('hit'); }
+      return { update: { name: root + 'weeks/' + o.id, fields: fields }, updateMask: { fieldPaths: mask },
         updateTransforms: [{ fieldPath: 'seconds', increment: { integerValue: String(o.inc) } }] };
     });
     try {
@@ -515,12 +619,13 @@
       /* Assume it lands: leaving the seconds queued would send them twice the
          next time this student opens the site. Losing under a minute is the
          safer mistake than counting it twice. */
-      applySent(snap, ops);
+      Object.keys(snap).forEach(function(d){ delete st.pend[d]; });
+      applyConfirmed(ops);
     } catch(e) {}
   }
   if(typeof window !== 'undefined'){
-    window.addEventListener('pagehide', function(){ if(S){ persist(); keepaliveFlush(); persist(); } });
-    window.addEventListener('online', function(){ if(sync()) { if(!S.loaded) load(); flush(); } });
+    window.addEventListener('pagehide', function(){ if(S){ keepaliveFlush(); persist(true); } });
+    window.addEventListener('online', function(){ if(sync()){ if(!S.loaded) load(); else flush(); } });
   }
 
   function beat(t){
@@ -530,9 +635,7 @@
     if(!sid){
       try { sid = sessionStorage.getItem('pmSid') || ''; } catch(e) {}
       if(!sid){
-        var a = new Uint8Array(12);
-        (window.crypto || window.msCrypto).getRandomValues(a);
-        sid = Array.prototype.map.call(a, function(b){ return (b < 16 ? '0' : '') + b.toString(16); }).join('');
+        sid = randHex(12);
         try { sessionStorage.setItem('pmSid', sid); } catch(e) {}
       }
     }
@@ -566,10 +669,13 @@
     var live = (S.live >= cfg().liveMinCount)
       ? '<span class="pm-live"><i class="pm-dot" aria-hidden="true"></i>' + esc(tr('pm.playing', { n: S.live })) + '</span>' : '';
     var done = mins(w.secs), goal = mins(w.goal);
-    var weekTxt = tr('pm.weekMin', { done: done, goal: goal });
+    /* The strip shows at most the goal ("30/30"): a long week must not widen it past
+       the bar (Spanish, an Optional tag and Stop are all in the same row). My progress
+       shows the true minutes. A week with no class has no goal: minutes only. */
+    var weekTxt = w.isBreak ? tr('pm.weekMinBreak', { done: done }) : tr('pm.weekMin', { done: Math.min(done, goal), goal: goal });
     var flameLabel = plural('pm.streak', st.streak);
     return live
-      + '<span class="pm-week">' + ringSvg(w.goal ? w.secs / w.goal : 0, w.hit) + '<span>' + esc(weekTxt) + '</span></span>'
+      + '<span class="pm-week">' + ringSvg(w.goal && !w.isBreak ? w.secs / w.goal : 0, w.hit) + '<span>' + esc(weekTxt) + '</span></span>'
       + '<span class="pm-streak' + (w.hit ? ' pm-on' : '') + '" role="img" aria-label="' + esc(flameLabel) + '">' + FLAME + '<b>' + st.streak + '</b></span>';
   }
   function stripHtml(){
@@ -677,7 +783,7 @@
     if(Date.now() - st.lastRecapAt < c.recapGapSeconds * 1000) return;
     st.lastRecapAt = Date.now();
     var u = status(), w = u.week, need = Math.max(1, Math.ceil((w.goal - w.secs) / 60));
-    var line = tr('pm.recapWeek', { done: mins(w.secs), goal: mins(w.goal) }) + ' ';
+    var line = (w.isBreak ? tr('pm.recapWeekBreak', { done: mins(w.secs) }) : tr('pm.recapWeek', { done: mins(w.secs), goal: mins(w.goal) })) + ' ';
     if(w.isBreak) line = line.trim();
     else if(w.hit) line += u.streak >= 2 ? tr('pm.recapHit', { n: u.streak }) : tr('pm.recapHit1');
     else line += u.streakBefore >= 1
@@ -714,7 +820,7 @@
       : tr(st.streakBefore > 0 ? 'pm.tileWeekMore' : 'pm.tileWeekMore0', { n: more });
     var tiles = '<div class="pm-tiles">'
       + '<div class="pm-tile"><div class="pm-tile-h">' + esc(tr('pm.tileWeek')) + '</div>'
-      +   '<div class="pm-tile-row">' + ringSvg(w.goal ? w.secs / w.goal : 0, w.hit, 'pm-ring-lg') + '<b>' + esc(tr('pm.tileWeekVal', { done: mins(w.secs), goal: mins(w.goal) })) + '</b></div>'
+      +   '<div class="pm-tile-row">' + ringSvg(w.goal && !w.isBreak ? w.secs / w.goal : 0, w.hit, 'pm-ring-lg') + '<b>' + esc(w.isBreak ? tr('pm.tileWeekValBreak', { done: mins(w.secs) }) : tr('pm.tileWeekVal', { done: mins(w.secs), goal: mins(w.goal) })) + '</b></div>'
       +   '<div class="pm-tile-sub">' + esc(weekSub) + '</div></div>'
       + '<div class="pm-tile"><div class="pm-tile-h">' + esc(tr('pm.tileStreak')) + '</div>'
       +   '<div class="pm-tile-row"><span class="pm-streak pm-streak-lg' + (st.streak > 0 ? ' pm-on' : '') + '">' + FLAME + '</span><b>' + esc(plural('pm.tileStreakVal', st.streak)) + '</b></div>'
@@ -738,7 +844,7 @@
       catch(e) { return id; }
     };
     var squares = st.history.map(function(h){
-      var key = h.state === 'hit' || (h.state === 'now' && h.hit) ? 'pm.weekHit' : h.state === 'break' ? 'pm.weekBreak' : h.state === 'now' ? 'pm.weekNow' : 'pm.weekMissed';
+      var key = h.state === 'hit' || (h.state === 'now' && h.hit) ? 'pm.weekHit' : h.state === 'break' ? 'pm.weekBreak' : h.state === 'now' ? 'pm.weekNow' : h.state === 'none' ? 'pm.weekNone' : 'pm.weekMissed';
       var tip = tr(key, { date: fmt(h.id), n: mins(h.secs) });
       var cls = 'pm-sq pm-sq-' + h.state + (h.hit && h.state !== 'hit' ? ' pm-sq-hit' : '');
       return '<button type="button" class="' + cls + '" title="' + esc(tip) + '" aria-label="' + esc(tip) + '" data-tip="' + esc(tip) + '">' + (h.hit ? FLAME : '') + '</button>';

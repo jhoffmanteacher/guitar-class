@@ -4419,7 +4419,7 @@ body.lq-invite-open{overflow:hidden}
 .pm-bar-col{width:100%;height:64px;background:var(--pm-tile);border-radius:6px;display:flex;align-items:flex-end;overflow:hidden}
 .pm-bar-col i{display:block;width:100%;background:var(--mins);border-radius:6px 6px 0 0}
 .pm-bar-today .pm-bar-l{color:var(--pm-text);font-weight:700}
-.pm-bar-future{opacity:0.55}
+.pm-bar-future .pm-bar-col{opacity:0.55}
 .pm-weeks{display:flex;gap:6px;flex-wrap:wrap}
 /* Week tiles: small squares, not cards. */
 .pm-sq{width:28px;height:28px;border-radius:6px;border:0;padding:0;background:var(--pm-grey);cursor:pointer;

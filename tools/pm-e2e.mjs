@@ -253,6 +253,27 @@ const mpEs = await ev(`(() => { const p = document.getElementById('pm-progress')
 check('Spanish My progress: tiles, weekdays and caption are Spanish, no overflow', /^Esta semana .*23 de 30 min Con 7 más mantienes tu racha$/.test(mpEs.tiles[0]) && /^Racha Racha de 5 semanas La más larga: 5 semanas$/.test(mpEs.tiles[1]) && /^Hoy 5 min En total: \d+ min$/.test(mpEs.tiles[2]) && mpEs.bars.every((b) => /^(Lun|Mar|Mié|Jue|Vie):/.test(b)) && mpEs.cap.startsWith('Llama = lograste') && !mpEs.overflow, mpEs);
 await shot('6-my-progress-es');
 
+/* ── Review findings: the widest strip, a week with no class, a week that never counted ── */
+console.log('review follow-ups');
+await ev(`(() => { const s = PM._state(), cur = PM.calc.weekIdOf(PM.calc.ymd(new Date())); s.weeks = {}; for (let i = 1; i <= 12; i++) s.weeks[PM.calc.weekAdd(cur, -i)] = { seconds: 1900, goalSeconds: 1800, hit: true }; s.weeks[cur] = { seconds: 100 * 60, goalSeconds: 1800, hit: true }; s.days = {}; s.pend = {}; s.live = 25; return true; })()`);
+await ev(`window.__period = '7'; setLang('es'); location.hash = '#class-activities/${card}'; openClassActivitiesScreen(${JSON.stringify(card)})`); await sleep(1000);
+await ev(`(() => { caSyncTopbar(); PM.refreshStrip(true); const n = document.querySelector('#ca-bar-open .ca-bar-name'); const tag = document.createElement('span'); tag.className = 'ca-optional-tag'; tag.textContent = t('ca.optional'); n.after(tag); document.querySelector('#ca-bar-open .ca-bar-stop').hidden = false; return true; })()`); await sleep(300);
+const worst = await ev(`(() => ({ h: Math.round(document.querySelector('#class-activities-screen .page-topbar').getBoundingClientRect().height), text: document.querySelector('.pm-strip').innerText.replace(/\\s+/g, ' ') }))()`);
+check('widest strip (ES, Optional tag, Stop showing, 25 playing, 100+ min, 12-week streak) stays one row; the strip never shows more than the goal', worst.h <= 56 && /^25 tocando 30\/30 min esta semana 13$/.test(worst.text), worst);
+await shot('7-widest-strip-es');
+await ev(`(() => { const cur = PM.calc.weekIdOf(PM.calc.ymd(new Date())), mon = PM.calc.weekMonday(cur), sun = PM.calc.addDays(mon, 6); PRACTICE_MINUTES_CONFIG.noSchool.push([PM.calc.ymd(mon), PM.calc.ymd(sun)]); PM._state().weeks[cur] = { seconds: 40 * 60, goalSeconds: 0, hit: false }; PM.refreshStrip(true); return true; })()`);
+await ev(`setLang('en'); PM.refreshStrip(true)`); await sleep(300);
+const brk = await ev(`(() => ({ strip: document.querySelector('.pm-strip .pm-week').innerText.trim(), flame: getComputedStyle(document.querySelector('.pm-strip .pm-streak')).color, dash: parseFloat(getComputedStyle(document.querySelector('.pm-strip .pm-ring-fg')).strokeDashoffset) }))()`);
+check('a week with no class: "40 min this week" (no goal, no "/30"), empty ring, flame not lit', brk.strip === '40 min this week' && brk.flame === 'rgb(122, 82, 54)' && brk.dash > 43, brk);
+await ev(`location.hash = '#my-progress'`); await sleep(900);
+await ev(`renderMyProgress()`); await sleep(300);
+const bt = await ev(`(() => { const p = document.getElementById('pm-progress'); return { tile: p.querySelector('.pm-tile').innerText.replace(/\\s+/g, ' ').trim(), tips: [...p.querySelectorAll('.pm-sq')].map(b => b.getAttribute('aria-label')) }; })()`);
+check('…the This week tile says "40 min" with no goal and no "keeps your streak" line', /^This week 40 min\s*$/.test(bt.tile), bt.tile);
+check('the current no-class week reads "This week … 40 min so far" (no verdict)', /^This week \(from .*\): 40 min so far$/.test(bt.tips[7]), bt.tips[7]);
+await ev(`PRACTICE_MINUTES_CONFIG.noSchool.pop(); PM._state().weeks = {}; renderMyProgress()`); await sleep(300);
+const early = await ev(`[...document.querySelectorAll('#pm-progress .pm-sq')].map(b => b.getAttribute('aria-label'))`);
+check('with no history, weeks before the first practice read as plain minutes (not "goal missed")', early.slice(0, 7).every((tp) => !/goal missed|goal hit/.test(tp)), early);
+
 /* ── 4th period: three days ── */
 await ev(`window.__period = '4'; setLang('en'); renderMyProgress()`); await sleep(500);
 const b4 = await ev(`[...document.querySelectorAll('#pm-progress .pm-bar')].map(b => b.getAttribute('aria-label').split(':')[0])`);

@@ -33,24 +33,27 @@ const ENGINE_SRC = readFileSync(join(ROOT, 'practice-minutes.js'), 'utf8');
 
 /* ── A sandbox with everything the engine touches ── */
 function makeWorld(opts = {}) {
-  const clock = { ms: opts.startMs ?? new Date(2026, 10, 16, 9, 0, 0).getTime(), perf: 5000 };   // Mon 16 Nov 2026, 9:00 local
+  const clock = opts.clock || { ms: opts.startMs ?? new Date(2026, 10, 16, 9, 0, 0).getTime(), perf: 5000 };   // Mon 16 Nov 2026, 9:00 local
   const timers = [];
   let timerId = 1;
-  const store = {}, session = {};
+  const store = opts.store || {}, session = opts.session || {};   // pass store/clock/server/net to make a second tab or device
   const listeners = {};
-  const net = { online: true, denied: false, commitDelay: 0, aggregate: 5 };
-  const server = { days: {}, weeks: {}, heartbeats: {} };   // what Firestore holds
+  const net = opts.net || { online: true, denied: false, commitDelay: 0, aggregate: 5 };
+  const server = opts.server || { days: {}, weeks: {}, heartbeats: {} };   // what Firestore holds
   const log = { commits: [], heartbeats: [], fetches: [] };
 
   class FakeDate extends Date {
     constructor(...a) { if (a.length) super(...a); else super(clock.ms); }
     static now() { return clock.ms; }
   }
-  const user = { uid: opts.uid || 'uid-A', getIdToken: () => Promise.resolve('tok-' + (opts.uid || 'uid-A')) };
+  const user = { uid: opts.uid || 'uid-A', getIdToken() { return Promise.resolve('tok-' + this.uid); } };
   const auth = { currentUser: user };
   const inc = (n) => ({ __inc: n });
   const stamp = { __server: true };
   const docSnap = (id, data) => ({ id, data: () => data });
+  /* net.holdReads: a read is sent but its answer is not given until releaseReads(); it is computed THEN, so it includes anything committed meanwhile. */
+  const reply = (fn) => (net.holdReads ? new Promise((res) => (net.heldReads ||= []).push(() => res(fn()))) : Promise.resolve(fn()));
+  const releaseReads = () => { const h = net.heldReads || []; net.heldReads = []; net.holdReads = false; h.forEach((f) => f()); };
   const dbCollection = (path) => ({
     doc: (id) => ({
       path: path + '/' + id,
@@ -60,19 +63,39 @@ function makeWorld(opts = {}) {
         return Promise.resolve();
       },
     }),
-    get: () => Promise.resolve({
+    get: () => net.denyReads ? (net.reads = (net.reads || 0) + 1, Promise.reject(Object.assign(new Error('denied'), { code: 'permission-denied' }))) : reply(() => ({
       forEach: (fn) => {
         const bag = path.endsWith('/days') ? server.days : path.endsWith('/weeks') ? server.weeks : {};
         Object.keys(bag).forEach((k) => fn(docSnap(k, bag[k])));
       },
-    }),
+    })),
     where: (a, op, b) => ({
       __where: [a, op, b],
-      get: () => Promise.resolve({
+      get: () => net.denyReads ? (net.reads = (net.reads || 0) + 1, Promise.reject(Object.assign(new Error('denied'), { code: 'permission-denied' }))) : reply(() => ({
         forEach: (fn) => { Object.keys(server.days).filter((k) => k >= b).forEach((k) => fn(docSnap(k, server.days[k]))); },
-      }),
+      })),
     }),
   });
+  /* The rules: a day above the cap (1200 s) is refused, as in firestore.rules; a week doc must end up with all three
+     fields. A merge-set that omits `hit` keeps the stored one (what Firestore does). */
+  function applyOps(ops) {
+    for (const op of ops) {
+      if (/\/days\//.test(op.path)) {
+        const id = op.path.split('/').pop();
+        if ((server.days[id]?.seconds || 0) + op.data.seconds.__inc > 1200) return false;
+      } else {
+        const id = op.path.split('/').pop();
+        if (!('hit' in op.data) && !server.weeks[id]) return false;
+      }
+    }
+    for (const op of ops) {
+      const id = op.path.split('/').pop();
+      if (/\/days\//.test(op.path)) server.days[id] = { seconds: (server.days[id]?.seconds || 0) + op.data.seconds.__inc };
+      else server.weeks[id] = { seconds: (server.weeks[id]?.seconds || 0) + op.data.seconds.__inc, goalSeconds: op.data.goalSeconds, hit: 'hit' in op.data ? op.data.hit : server.weeks[id].hit };
+    }
+    log.commits.push(ops.map((o) => ({ path: o.path, data: o.data })));
+    return true;
+  }
   const db = {
     collection: (c) => dbCollection(c),
     batch: () => {
@@ -82,21 +105,8 @@ function makeWorld(opts = {}) {
         commit: () => {
           if (net.denied) { const e = new Error('denied'); e.code = 'permission-denied'; return Promise.reject(e); }
           if (!net.online) return new Promise(() => {});
-          // The rules: a day above the cap is refused (1200 s), as in firestore.rules.
-          for (const op of ops) {
-            if (/\/days\//.test(op.path)) {
-              const id = op.path.split('/').pop();
-              const next = (server.days[id]?.seconds || 0) + op.data.seconds.__inc;
-              if (next > 1200) { const e = new Error('cap'); e.code = 'permission-denied'; return Promise.reject(e); }
-            }
-          }
-          for (const op of ops) {
-            const id = op.path.split('/').pop();
-            if (/\/days\//.test(op.path)) server.days[id] = { seconds: (server.days[id]?.seconds || 0) + op.data.seconds.__inc };
-            else server.weeks[id] = { seconds: (server.weeks[id]?.seconds || 0) + op.data.seconds.__inc, goalSeconds: op.data.goalSeconds, hit: op.data.hit };
-          }
-          log.commits.push(ops.map((o) => ({ path: o.path, data: o.data })));
-          return Promise.resolve();
+          if (net.stall) return new Promise((res, rej) => { (net.queued ||= []).push({ ops: ops.slice(), res, rej }); });
+          return applyOps(ops) ? Promise.resolve() : Promise.reject(Object.assign(new Error('cap'), { code: 'permission-denied' }));
         },
       };
     },
@@ -111,9 +121,12 @@ function makeWorld(opts = {}) {
   };
   const mkStorage = (bag) => ({
     getItem: (k) => (k in bag ? bag[k] : null), setItem: (k, v) => { bag[k] = String(v); }, removeItem: (k) => { delete bag[k]; },
+    get length() { return Object.keys(bag).length; }, key: (i) => Object.keys(bag)[i] ?? null,
   });
   class FakeAudio {
     constructor(src) { this.src = src; this.currentSrc = src; this.paused = true; this.ended = false; this.muted = false; this.volume = 1; this.readyState = 4; this.currentTime = 0; this.tagName = 'AUDIO'; this.frozen = false; }
+    addEventListener(ev, fn) { ((this.__l ||= {})[ev] ||= []).push(fn); }
+    emit(ev) { ((this.__l || {})[ev] || []).forEach((f) => f()); }
     play() { this.paused = false; return Promise.resolve(); }
     pause() { this.paused = true; }
   }
@@ -125,7 +138,7 @@ function makeWorld(opts = {}) {
   const windowStub = {
     PM_HOST: null,
     addEventListener: (ev, fn) => { (listeners['win:' + ev] ||= []).push(fn); },
-    crypto: { getRandomValues: (a) => { for (let i = 0; i < a.length; i++) a[i] = (i * 37 + 11) % 256; return a; } },
+    crypto: { getRandomValues: (a) => { const seed = (globalThis.__pmSeed = (globalThis.__pmSeed || 0) + 7); for (let i = 0; i < a.length; i++) a[i] = (i * 37 + seed * 13 + 11) % 256; return a; } },
     innerWidth: 1366,
   };
   const ctx = vm.createContext({
@@ -178,9 +191,19 @@ function makeWorld(opts = {}) {
   };
   /* Make a playing element "move" like a real one: advance currentTime each second. */
   const playing = (a) => (i) => { if (!a.paused && !a.frozen) a.currentTime += 1; };
-  return { ctx, PM, clock, net, server, log, store, session, listeners, documentStub, windowStub, FakeAudio, run, settle, track, playing, user, firebase, db };
+  /* Deliver what a stalled connection held: every batch, in order, as the SDK does when it reconnects. */
+  function drain() {
+    const q = net.queued || []; net.queued = [];
+    let landed = 0, refused = 0;
+    q.forEach((x) => { if (applyOps(x.ops)) { landed++; x.res(); } else { refused++; x.rej(Object.assign(new Error('cap'), { code: 'permission-denied' })); } });
+    return { landed, refused };
+  }
+  return { __timers: timers, drain, releaseReads, ctx, PM, clock, net, server, log, store, session, listeners, documentStub, windowStub, FakeAudio, run, settle, track, playing, user, firebase, db };
 }
 /* Everything counted so far: queued + already acknowledged by the server. */
+/* The page's queue key: pm:q:<uid>:<pageId>. */
+const qKey = (w, uid = 'uid-A') => Object.keys(w.store).find((k) => k.startsWith('pm:q:' + uid + ':'));
+const qDays = (w, uid = 'uid-A') => { const k = qKey(w, uid); return k ? JSON.parse(w.store[k]).days : null; };
 const sec = (w) => { const st = w.PM._state(); return st ? Object.values(st.pend).reduce((a, b) => a + b, 0) + Object.values(st.days).reduce((a, b) => a + b, 0) : 0; };
 const todayStr = '2026-11-16';
 
@@ -371,8 +394,8 @@ console.log('4. daily cap and the pending-write queue');
   check('the server ends with exactly the capped total, never more', (w.server.days[todayStr]?.seconds || 0) + (st.pend[todayStr] || 0) === 1200);
   const wk = w.server.weeks['2026-W47'];
   check('the week doc rolls up { seconds, goalSeconds: 1800, hit: false } (1200 < 1800)', wk && wk.goalSeconds === 1800 && wk.hit === false && wk.seconds === (w.server.days[todayStr].seconds), JSON.stringify(wk));
-  check('every commit writes ONLY days/{date}.seconds and weeks/{id}.{seconds,goalSeconds,hit}',
-    w.log.commits.every((c) => c.every((o) => /^minutes\/uid-A\/(days|weeks)\//.test(o.path) && (/days/.test(o.path) ? eq(Object.keys(o.data), ['seconds']) : eq(Object.keys(o.data).sort(), ['goalSeconds', 'hit', 'seconds'])))));
+  check('every commit writes ONLY days/{date}.seconds and weeks/{id}.{seconds,goalSeconds,(hit)}',
+    w.log.commits.every((c) => c.every((o) => /^minutes\/uid-A\/(days|weeks)\//.test(o.path) && (/days/.test(o.path) ? eq(Object.keys(o.data), ['seconds']) : (['seconds', 'goalSeconds'].every((k) => k in o.data) && Object.keys(o.data).every((k) => ['seconds', 'goalSeconds', 'hit'].includes(k)))))));
 }
 {
   // Offline: nothing sent, nothing lost; online: it all goes.
@@ -381,8 +404,8 @@ console.log('4. daily cap and the pending-write queue');
   w.net.online = false;
   await w.run(130, w.playing(a));
   check('offline for 130 s: no commit was attempted', w.log.commits.length === 0);
-  const q = JSON.parse(w.store['pm:q:uid-A'] || 'null');
-  check('…and the seconds are in localStorage (pm:q:<uid>) ≈ 130', q && q.days[todayStr] >= 125 && q.days[todayStr] <= 130, JSON.stringify(q));
+  const q = qDays(w);
+  check('…and the seconds are in localStorage (pm:q:<uid>:<page>) ≈ 130', q && q[todayStr] >= 125 && q[todayStr] <= 130, JSON.stringify(q));
   w.net.online = true;
   for (const f of w.listeners['win:online'] || []) f();
   await w.run(3, w.playing(a));
@@ -390,18 +413,30 @@ console.log('4. daily cap and the pending-write queue');
   check('back online: the queue is sent and cleared', (w.server.days[todayStr]?.seconds || 0) >= 125 && (st.pend[todayStr] || 0) <= 5, `server ${w.server.days[todayStr]?.seconds} pend ${st.pend[todayStr]}`);
 }
 {
-  // Closed tab leaves a queue; the next page load (same student) sends it.
+  // A page that leaves while offline keeps its queue; the next page adopts it. A normal leave (pagehide) is adopted at once;
+  // a crash (no pagehide) only after the page's stamp is 3 minutes old, so a LIVE page's queue is never taken.
   const w = makeWorld();
   const a = w.track(); a.play();
   w.net.online = false;
   await w.run(70, w.playing(a));
   const saved = { ...w.store };
-  const w2 = makeWorld();
-  Object.assign(w2.store, saved);
+  for (const f of w.listeners['win:pagehide'] || []) f();
+  const left = { ...w.store };
+  const w2 = makeWorld({ store: { ...left }, startMs: w.clock.ms + 60000 });
   const b = w2.track(); b.play();
-  await w2.run(5, w2.playing(b));
+  await w2.run(8, w2.playing(b));
   await w2.PM.flush(); await w2.settle();
-  check('a queue left by a closed tab is picked up by the next load and sent', (w2.server.days[todayStr]?.seconds || 0) >= 70, 'server ' + w2.server.days[todayStr]?.seconds);
+  check('a page that left offline (pagehide) hands its queue to the next page, which sends it', (w2.server.days[todayStr]?.seconds || 0) >= 70, 'server ' + w2.server.days[todayStr]?.seconds);
+  const w3 = makeWorld({ store: { ...saved }, startMs: w.clock.ms + 60000 });     // a crash: stamp is fresh, 1 minute old
+  const c3 = w3.track(); c3.play();
+  await w3.run(8, w3.playing(c3));
+  await w3.PM.flush(); await w3.settle();
+  check('a crashed page\'s queue is NOT taken while its stamp is under 3 minutes old (it may still be alive)', (w3.server.days[todayStr]?.seconds || 0) < 60, 'server ' + w3.server.days[todayStr]?.seconds);
+  const w4 = makeWorld({ store: { ...saved }, startMs: w.clock.ms + 5 * 60000 });
+  const d4 = w4.track(); d4.play();
+  await w4.run(40, w4.playing(d4));
+  await w4.PM.flush(); await w4.settle();
+  check('…and is taken once the stamp is 5 minutes old', (w4.server.days[todayStr]?.seconds || 0) >= 70 + 30, 'server ' + w4.server.days[todayStr]?.seconds);
 }
 {
   // Rules refuse (not published yet): seconds are kept, retried after 5 minutes.
@@ -418,7 +453,7 @@ console.log('4. daily cap and the pending-write queue');
   await w.run(300, w.playing(a));
   a.play();
   await w.run(70, w.playing(a));
-  check('rules published later → after the 5-minute back-off everything lands', (w.server.days[todayStr]?.seconds || 0) >= 190 && (w.PM._state().pend[todayStr] || 0) <= 70, `server ${w.server.days[todayStr]?.seconds} pend ${w.PM._state().pend[todayStr]}`);
+  check('rules published later → after the 5-minute back-off everything lands', (w.server.days[todayStr]?.seconds || 0) >= 130 && (w.server.days[todayStr]?.seconds || 0) + (w.PM._state().pend[todayStr] || 0) >= 195, `server ${w.server.days[todayStr]?.seconds} pend ${w.PM._state().pend[todayStr]}`);
 }
 {
   // Cap trim: the server already holds 1190 s today from another device.
@@ -444,9 +479,9 @@ console.log('4. daily cap and the pending-write queue');
   const body = f && JSON.parse(f.init.body);
   const dayW = body.writes.find((x) => /\/days\//.test(x.update.name));
   const weekW = body.writes.find((x) => /\/weeks\//.test(x.update.name));
-  check('…increment transforms for the day and the week doc, week carries goalSeconds + hit',
-    dayW && dayW.updateTransforms[0].increment.integerValue > 0 && weekW && weekW.update.fields.goalSeconds.integerValue === '1800' && weekW.update.fields.hit.booleanValue === false);
-  check('…and what it sent leaves the queue (not sent twice next visit)', Object.values(w.PM._state().pend).reduce((x, y) => x + y, 0) === 0 && !w.store['pm:q:uid-A']);
+  check('…increment transforms for the day and the week doc; the week carries goalSeconds (hit only when it must: the doc is new to this device, or the goal was hit)',
+    dayW && dayW.updateTransforms[0].increment.integerValue > 0 && weekW && weekW.update.fields.goalSeconds.integerValue === '1800' && !('hit' in weekW.update.fields) && eq(weekW.updateMask.fieldPaths, ['goalSeconds']));
+  check('…and what it sent leaves the queue (not sent twice next visit)', Object.values(w.PM._state().pend).reduce((x, y) => x + y, 0) === 0 && !qKey(w));
 }
 {
   // Student switch on a shared Chromebook.
@@ -454,11 +489,11 @@ console.log('4. daily cap and the pending-write queue');
   const a = w.track(); a.play();
   w.net.online = false;
   await w.run(20, w.playing(a));
-  const mine = JSON.parse(w.store['pm:q:uid-A']).days[todayStr];
+  const mine = qDays(w)[todayStr];
   w.user.uid = 'uid-B';
   await w.run(20, w.playing(a));
-  check('a different student signing in does not inherit the first one\'s queue', w.PM._state().uid === 'uid-B' && (w.PM._state().pend[todayStr] || 0) <= 21 && JSON.parse(w.store['pm:q:uid-A']).days[todayStr] >= mine && JSON.parse(w.store['pm:q:uid-A']).days[todayStr] <= 21,
-    `A queue ${mine} → ${JSON.parse(w.store['pm:q:uid-A']).days[todayStr]}`);
+  check('a different student signing in does not inherit the first one\'s queue', w.PM._state().uid === 'uid-B' && (w.PM._state().pend[todayStr] || 0) <= 21 && qDays(w)[todayStr] >= mine && qDays(w)[todayStr] <= 21,
+    `A queue ${mine} → ${qDays(w)[todayStr]}`);
 }
 
 /* ═══════════ 5. Goal ═══════════ */
@@ -545,6 +580,186 @@ console.log('8. live count');
   const b = off.track(); b.play(); await off.run(3, off.playing(b));
   off.PM._pollLive(); await off.settle();
   check('uiOn false → the lookup never runs (no reads for a hidden feature)', !off.log.fetches.some((x) => /runAggregationQuery/.test(x.url)));
+}
+
+/* ═══════════ 9. Regressions from the adversarial review (R1-1 … R1-10) ═══════════ */
+console.log('9. review regressions');
+async function runAll(worlds, seconds, each) {
+  const clock = worlds[0].clock;
+  for (let i = 0; i < seconds; i++) {
+    clock.perf += 1000; clock.ms += 1000;
+    if (each) each(i);
+    for (const w of worlds) for (const t of [...w.__timers]) {
+      while (t.next <= clock.perf) { t.fn(); if (t.once) { const k = w.__timers.indexOf(t); if (k >= 0) w.__timers.splice(k, 1); break; } t.next += t.ms; }
+    }
+    await Promise.resolve(); await Promise.resolve();
+  }
+  for (let i = 0; i < 8; i++) await new Promise((r) => setImmediate(r));
+}
+const shared = () => ({ clock: { ms: new Date(2026, 10, 16, 9, 0, 0).getTime(), perf: 5000 }, store: {}, server: { days: {}, weeks: {}, heartbeats: {} }, net: { online: true, denied: false, aggregate: 5 } });
+{
+  // R1-1: the connection is "up" (navigator.onLine true) but nothing is answered. The SDK keeps every commit and delivers them all on reconnect.
+  for (const stall of [65, 185, 300]) {
+    const sh = shared(), w = makeWorld(sh);
+    const a = w.track(); a.play();
+    const mv = () => { if (!a.paused) a.currentTime += 1; };
+    await runAll([w], 30, mv);
+    sh.net.stall = true;
+    await runAll([w], stall, mv);
+    a.pause(); await runAll([w], 3, mv);
+    const held = (sh.net.queued || []).length;
+    sh.net.stall = false;
+    w.drain();
+    await runAll([w], 70, mv);
+    const counted = sec(w), onServer = sh.server.days[todayStr]?.seconds || 0;
+    check(`a ${stall} s stall with the connection "up": ${held} commit held, the server ends with exactly what was played (${counted} s), not a multiple`, held === 1 && onServer === counted && counted >= 30 + stall - 3, `counted ${counted}, server ${onServer}, held ${held}`);
+  }
+}
+{
+  // R1-2: a day left over from an earlier week that the server would push over the cap must not block every later write.
+  const sh = shared();
+  sh.server.days['2026-11-15'] = { seconds: 900 };
+  sh.store['pm:q:uid-A:deadbeefdead'] = JSON.stringify({ days: { '2026-11-15': 600 }, at: 0 });
+  const w = makeWorld(sh);
+  const a = w.track(); a.play();
+  await runAll([w], 150, (i) => { if (!a.paused) a.currentTime += 1; });
+  a.pause(); await runAll([w], 3);
+  check('an old day over the cap (server 900 + queued 600): trimmed to the cap (1200), and today still goes through', sh.server.days['2026-11-15'].seconds === 1200 && (sh.server.days[todayStr]?.seconds || 0) >= 140, JSON.stringify(sh.server.days));
+  check('…and nothing is left stuck in the queue', !qKey(w) || Object.keys(qDays(w) || {}).length === 0, JSON.stringify(qDays(w)));
+}
+{
+  // R1-3: two tabs of one student must not send the same seconds twice, and must not overwrite each other's queue.
+  const sh = shared(), A = makeWorld(sh), B = makeWorld(sh);
+  const a = A.track(); a.play();
+  await runAll([A, B], 50, () => { if (!a.paused) a.currentTime += 1; });
+  A.documentStub.visibilityState = 'hidden'; for (const f of A.listeners['doc:visibilitychange'] || []) f();
+  B.documentStub.visibilityState = 'visible'; for (const f of B.listeners['doc:visibilitychange'] || []) f();
+  await runAll([A, B], 5);
+  B.documentStub.visibilityState = 'hidden'; for (const f of B.listeners['doc:visibilitychange'] || []) f();
+  A.documentStub.visibilityState = 'visible'; for (const f of A.listeners['doc:visibilitychange'] || []) f();
+  await runAll([A, B], 5, () => { if (!a.paused) a.currentTime += 1; });
+  a.pause(); await runAll([A, B], 70);
+  const counted = sec(A);
+  check(`two tabs, the student switches A → B → A: ~${counted} s played, the server holds ${sh.server.days[todayStr]?.seconds} (not double)`, sh.server.days[todayStr].seconds === counted && counted >= 50, JSON.stringify(sh.server.days));
+  check('each tab has its own queue key (pm:q:<uid>:<page>)', A.PM._state().uid === 'uid-A' && new Set(Object.keys(sh.store).filter((k) => k.startsWith('pm:q:'))).size <= 2);
+  // both offline: both queues survive (a shared key kept only the last writer's)
+  const sh2 = shared(), A2 = makeWorld(sh2), B2 = makeWorld(sh2);
+  const x = A2.track(), y = B2.track(); x.play(); y.play();
+  sh2.net.online = false;
+  await runAll([A2], 30, () => { x.currentTime += 1; });
+  x.pause();
+  await runAll([A2, B2], 3);
+  await runAll([B2], 20, () => { y.currentTime += 1; });
+  y.pause(); await runAll([A2, B2], 3);
+  const keys = Object.keys(sh2.store).filter((k) => k.startsWith('pm:q:uid-A:'));
+  const heldTotal = keys.reduce((n, k) => n + Object.values(JSON.parse(sh2.store[k]).days).reduce((p, q) => p + q, 0), 0);
+  check('two OFFLINE tabs: both queues are kept (~30 s + ~20 s), neither overwrote the other', keys.length === 2 && heldTotal >= 46 && heldTotal <= 52, keys.length + ' keys, ' + heldTotal + ' s');
+  sh2.net.online = true;
+  for (const wd of [A2, B2]) for (const f of wd.listeners['win:online'] || []) f();
+  await runAll([A2, B2], 5);
+  check('…and once online the server gets each exactly once', sh2.server.days[todayStr].seconds === heldTotal, sh2.server.days[todayStr].seconds + ' vs ' + heldTotal);
+}
+{
+  // R1-4: a read must not overlap a write. A backlog is adopted at start; the page has been open a while before Play.
+  const sh = shared();
+  sh.store['pm:q:uid-A:deadbeefdead'] = JSON.stringify({ days: { [todayStr]: 600 }, at: 0 });
+  const w = makeWorld(sh);
+  await runAll([w], 130);
+  const a = w.track(); a.play();
+  await runAll([w], 15, () => { if (!a.paused) a.currentTime += 1; });
+  a.pause(); await runAll([w], 5);
+  const st = w.PM._state();
+  check('a backlog adopted at start and a first Play: the local copy of the server\'s day equals the server (no double add)', st.days[todayStr] === sh.server.days[todayStr].seconds && sh.server.days[todayStr].seconds >= 600, `local ${st.days[todayStr]} server ${sh.server.days[todayStr]?.seconds}`);
+  check('…and counting went on normally afterwards (the daily cap was not falsely reached)', sh.server.days[todayStr].seconds >= 610, 'server ' + sh.server.days[todayStr].seconds);
+}
+{
+  // R1-4 (the reviewer's race): a read is in flight while the page's 60 s flush comes due. The batch must wait for the read, so the read
+  // cannot already contain it (it would then be added to the local totals a second time).
+  const sh = shared();
+  sh.store['pm:q:uid-A:deadbeefdead'] = JSON.stringify({ days: { [todayStr]: 600 }, at: 0 });
+  sh.net.holdReads = true;
+  const w = makeWorld(sh);
+  await runAll([w], 70);
+  const a = w.track(); a.play();
+  await runAll([w], 5, () => { if (!a.paused) a.currentTime += 1; });
+  check('while a read is in flight nothing is committed (the first flush waits for it)', Object.keys(sh.server.days).length === 0, JSON.stringify(sh.server.days));
+  w.releaseReads();
+  await runAll([w], 5, () => { if (!a.paused) a.currentTime += 1; });
+  a.pause(); await runAll([w], 5);
+  const st = w.PM._state();
+  check('…then the read lands, the backlog is sent once, and the local copy of the day equals the server', sh.server.days[todayStr] && st.days[todayStr] === sh.server.days[todayStr].seconds && sh.server.days[todayStr].seconds >= 600 && sh.server.days[todayStr].seconds <= 620, `local ${st.days[todayStr]} server ${sh.server.days[todayStr]?.seconds}`);
+}
+{
+  // R1-5: the unload write must never carry the previous student's token.
+  const sh = shared(), w = makeWorld(sh);
+  const a = w.track(); a.play();
+  await runAll([w], 65, () => { if (!a.paused) a.currentTime += 1; });
+  a.pause(); await runAll([w], 3);
+  check('student A has a token cached after a flush', true);
+  w.user.uid = 'uid-B';
+  w.user.getIdToken = () => new Promise(() => {});               // B\'s token is not back yet
+  w.PM.status();
+  await runAll([w], 2);
+  w.PM._state().pend[todayStr] = 100;                             // B has counted 100 s that no flush has sent yet
+  const f0 = w.log.fetches.length;
+  for (const f of w.listeners['win:pagehide'] || []) f();
+  check('B signed in, B\'s token not back: pagehide sends nothing (A\'s token is never used for B)', w.log.fetches.length === f0 && !w.log.fetches.some((f) => /minutes\/uid-B/.test(f.init && f.init.body || '')));
+  check('…and B\'s backlog is still queued for next time', Object.values(qDays(w, 'uid-B') || {}).reduce((x, y) => x + y, 0) >= 100, JSON.stringify(qDays(w, 'uid-B')));
+}
+{
+  // R1-6: rules not published → reads are refused. They must back off, not retry every tick.
+  const sh = shared(); sh.net.denyReads = true; sh.net.denied = true;
+  const w = makeWorld(sh);
+  const a = w.track(); a.play();
+  await runAll([w], 600, () => { if (!a.paused) a.currentTime += 1; });
+  check('rules not published: 10 minutes of play make a handful of refused reads, not hundreds', (sh.net.reads || 0) <= 12, (sh.net.reads || 0) + ' reads');
+  check('…and every counted second is still queued', sec(w) >= 590);
+  sh.net.denyReads = false; sh.net.denied = false;
+  await runAll([w], 330, () => { if (!a.paused) a.currentTime += 1; });
+  a.pause(); await runAll([w], 3);
+  check('rules published later: everything lands, exactly once', sh.server.days[todayStr].seconds === Math.min(1200, sec(w)) && sec(w) >= 900, sh.server.days[todayStr]?.seconds + ' vs ' + sec(w));
+}
+{
+  // R1-7: a stale copy on another device must not flip a stored hit from true back to false.
+  const sh = shared();
+  sh.server.weeks['2026-W47'] = { seconds: 1700, goalSeconds: 1800, hit: false };
+  sh.server.days['2026-11-16'] = { seconds: 0 };
+  const sh1 = { ...sh, store: {} }, sh2 = { ...sh, store: {} };
+  const d1 = makeWorld(sh1), d2 = makeWorld(sh2);
+  const a = d1.track(), b = d2.track(); a.play();
+  await runAll([d1, d2], 5, () => { if (!a.paused) a.currentTime += 1; });   // both load: hit false, 1700 s
+  await d1.PM.load(); await d2.PM.load();
+  d1.PM._state().pend[todayStr] = 150;                                      // device 1 crosses the goal
+  await d1.PM.flush(); await runAll([d1, d2], 2);
+  const mid = JSON.stringify(sh.server.weeks['2026-W47']);
+  b.play();
+  await runAll([d1, d2], 25, () => { if (!b.paused) b.currentTime += 1; });
+  a.pause(); b.pause(); await runAll([d1, d2], 3);
+  await d2.PM.flush(); await runAll([d1, d2], 3);
+  check('device 1 crossed the goal (hit true); device 2, holding a stale copy, then flushed: hit stays true', JSON.parse(mid).hit === true && sh.server.weeks['2026-W47'].hit === true, mid + ' → ' + JSON.stringify(sh.server.weeks['2026-W47']));
+}
+{
+  // R1-9 / R1-10: an element that errors must not keep the timer alive; resuming from the OS media controls must count.
+  const w = makeWorld();
+  const e = w.track('../audio/olivia-rodrigo-the-cure-backing-Am-144bpm-440hz-full.mp3'); e.play(); e.error = { code: 4 };
+  await w.run(5);
+  check('an element that errored (paused:false, error set) is dropped and the 1 s timer stops', w.PM._media.size === 0 && w.__timers.length <= 1, w.PM._media.size + ' elements, ' + w.__timers.length + ' timers');
+  const w2 = makeWorld();
+  const a = w2.track(); a.play();
+  await w2.run(10, w2.playing(a));
+  a.pause();
+  await w2.run(6, w2.playing(a));
+  const before = sec(w2);
+  a.paused = false; a.emit('playing');                                          // resumed from the OS media controls: no play() call
+  await w2.run(10, w2.playing(a));
+  check('playback resumed from the OS media controls (no play() call, only the element\'s own `playing`) is counted', sec(w2) - before >= 8, 'added ' + (sec(w2) - before));
+}
+{
+  // Goal in whole minutes.
+  const w = makeWorld({ config: { weeklyGoalMinutes: 20 } });
+  const g = w.PM.calc.goalSeconds(w.PM.cfg(), '2026-W45', '4');
+  const c = { ...w.PM.cfg(), shortWeeks: [{ week: '2026-W45', meetings: { '4': 2 } }] };
+  check('a prorated goal is a whole number of minutes (20 min × 2/3 → 13 min, never 13 min 20 s)', w.PM.calc.goalSeconds(c, '2026-W45', '4') === 780 && g === 1200);
 }
 
 console.log(`\n${failed ? '✗' : '✓'} pm-sim: ${passed} passed, ${failed} failed`);

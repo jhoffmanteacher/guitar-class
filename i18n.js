@@ -639,11 +639,13 @@
     // The status strip in a practice card's top bar.
     'pm.playing':         { en: '{n} playing', es: '{n} tocando' },
     'pm.weekMin':         { en: '{done}/{goal} min this week', es: '{done}/{goal} min esta semana' },
+    'pm.weekMinBreak':    { en: '{done} min this week', es: '{done} min esta semana' },
     'pm.streak.one':      { en: '{n}-week streak', es: 'racha de {n} semana' },
     'pm.streak.many':     { en: '{n}-week streak', es: 'racha de {n} semanas' },
     // The card that appears after you stop.
     'pm.recapPlus':       { en: '+{n} min', es: '+{n} min' },
     'pm.recapWeek':       { en: 'This week: {done} of {goal} min.', es: 'Esta semana: {done} de {goal} min.' },
+    'pm.recapWeekBreak':  { en: 'This week: {done} min.', es: 'Esta semana: {done} min.' },
     'pm.recapMore0':      { en: '{need} more reaches your week goal.', es: 'Con {need} más llegas a la meta de la semana.' },
     'pm.recapMore.one':   { en: '{need} more keeps your {n}-week streak.', es: 'Con {need} más mantienes tu racha de {n} semana.' },
     'pm.recapMore.many':  { en: '{need} more keeps your {n}-week streak.', es: 'Con {need} más mantienes tu racha de {n} semanas.' },
@@ -655,6 +657,7 @@
     // My progress.
     'pm.tileWeek':        { en: 'This week', es: 'Esta semana' },
     'pm.tileWeekVal':     { en: '{done} of {goal} min', es: '{done} de {goal} min' },
+    'pm.tileWeekValBreak': { en: '{done} min', es: '{done} min' },
     'pm.tileWeekMore':    { en: '{n} more keeps your streak', es: 'Con {n} más mantienes tu racha' },
     'pm.tileWeekMore0':   { en: '{n} more reaches your goal', es: 'Con {n} más llegas a tu meta' },
     'pm.tileWeekHit':     { en: 'Week goal hit', es: 'Meta de la semana lograda' },
@@ -678,6 +681,7 @@
     'pm.weekHit':         { en: 'Week of {date}: {n} min, goal hit', es: 'Semana del {date}: {n} min, meta lograda' },
     'pm.weekMissed':      { en: 'Week of {date}: {n} min, goal missed', es: 'Semana del {date}: {n} min, meta no lograda' },
     'pm.weekNow':         { en: 'This week (from {date}): {n} min so far', es: 'Esta semana (desde el {date}): {n} min hasta ahora' },
+    'pm.weekNone':        { en: 'Week of {date}: {n} min', es: 'Semana del {date}: {n} min' },
     'pm.weekBreak':       { en: 'Week of {date}: no class', es: 'Semana del {date}: sin clases' },
     'pm.caption':         { en: 'Flame = hit the week goal. Short weeks have a smaller goal. Breaks don’t count.',
                             es: 'Llama = lograste la meta de la semana. Las semanas cortas tienen una meta más pequeña. Los descansos no cuentan.' },

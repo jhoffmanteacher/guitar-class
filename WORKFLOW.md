@@ -897,9 +897,15 @@
       the student's own recording, YouTube. Cap `dailyCapMinutes` (20) per day.
       **Storage:** `minutes/{uid}/days/{date}` `{seconds}`, `minutes/{uid}/weeks/{ISO week}`
       `{seconds, goalSeconds, hit}`, added with `increment()`; queued in
-      localStorage (`pm:q:<uid>`), flushed every 60 s / on stop / on hide / on
-      `online`, and by a `fetch({keepalive})` to the REST `:commit` on
-      `pagehide` (sendBeacon cannot carry the auth header). `heartbeats/{random
+      localStorage, ONE KEY PER PAGE (`pm:q:<uid>:<pageId>`; a page adopts only a
+      dead page's key), flushed every 60 s / on stop / on hide / on `online`, and
+      by a `fetch({keepalive})` to the REST `:commit` on `pagehide` (sendBeacon
+      cannot carry the auth header; the cached token must be this student's).
+      A commit has NO timeout (the SDK keeps and later delivers it; re-sending
+      multiplied the seconds in the review, a 5-minute stall stored the daily
+      cap) and a read never overlaps a write. The first adversarial review
+      (2026-11-01) found 14 issues, R1-1…R1-14; `tools/pm-sim.mjs` section 9 has
+      a regression scenario for each fixed one. `heartbeats/{random
       session id}` `{period, lastSeen}` every 30 s while counting; the count is
       one REST `runAggregationQuery` (the compat SDK has no `count()`).
       **`firestore.rules` changed (new blocks only) → needs the console paste
@@ -917,7 +923,14 @@
       (the phone-width rule) so the bar stays one row in Spanish. **Limits:**
       a Journey page's player loops by itself and counts while it plays (the
       daily cap bounds it); the heartbeat count can be inflated by anyone
-      signed in (rules comment says so); `--streak-dim` is 2.5:1 on its
+      signed in, and anyone signed in can list the heartbeats collection
+      (random ids, but createTime/updateTime make a session-start log per
+      period: set a TTL on `lastSeen`, see APPLY-practice-minutes.md); the
+      stored week `hit` is a best-effort snapshot; "weeks in a row" is the work
+      order's copy and stays true after a forgiven miss only because the miss
+      is forgiven; "This week by day" draws only meeting days while the week
+      total counts every day; the games card already shows a 🔥 day streak, so a
+      second flame (weeks) may confuse; `--streak-dim` is 2.5:1 on its
       background (the one graphic under 3:1, on purpose — "dim").
 
 - [x] **2026-10-31 — "Hear It First": a hidden adaptive ear + fretboard trainer.**

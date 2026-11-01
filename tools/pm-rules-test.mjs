@@ -7,7 +7,7 @@
    heartbeats/{sessionId} blocks (the daily cap, the exact field lists, a uid or
    cardId in a heartbeat, a client-chosen timestamp, another student, the
    teacher, signed out, delete, a bad id) and then re-checks one rule on each
-   OLDER path to show they still behave. Last run: 64 passed, 0 failed.
+   OLDER path to show they still behave. Last run: 66 passed, 0 failed.
 
    To run it, in an empty scratch folder (NOT inside the repo):
      npm init -y
@@ -61,6 +61,8 @@ if (which.includes('orig')) {
   console.log('== minutes/{uid}/weeks');
   await t('own week { seconds, goalSeconds, hit }', () => wk(A, 'uidA', '2026-W47').set({ seconds: 1800, goalSeconds: 1800, hit: true }), true);
   await t('own week via merge + increment', () => wk(A, 'uidA', '2026-W48').set({ seconds: FV.increment(600), goalSeconds: 1800, hit: false }, { merge: true }), true);
+  await t('a merge that omits hit keeps the stored one (the client sends hit only when it must): allowed on an existing week', async () => { await wk(A, 'uidA', '2026-W52').set({ seconds: 60, goalSeconds: 1800, hit: true }); return wk(A, 'uidA', '2026-W52').set({ seconds: FV.increment(60), goalSeconds: 1800 }, { merge: true }); }, true);
+  await t('…but creating a week doc without hit is refused', () => wk(A, 'uidA', '2027-W01').set({ seconds: FV.increment(60), goalSeconds: 1800 }, { merge: true }), false);
   await t('week at 7 × cap (8400)', () => wk(A, 'uidA', '2026-W49').set({ seconds: 8400, goalSeconds: 1800, hit: true }), true);
   await t('week above 8400 refused', () => wk(A, 'uidA', '2026-W50').set({ seconds: 8401, goalSeconds: 1800, hit: true }), false);
   await t('missing hit refused', () => wk(A, 'uidA', '2026-W51').set({ seconds: 60, goalSeconds: 1800 }), false);

@@ -12,7 +12,7 @@ var fbUser = null, fbDb = null, saveTimer = null, dirty = false;
    (only once the Firestore SDK has landed, so a write can actually go out),
    the Firestore handle, and the period: the teacher's correction cached by
    app.js, else the answer on the progress doc read below. No UI here. */
-var pmDocPeriod = '';
+var pmDocPeriod = '', pmDocPeriodUid = '';
 window.PM_HOST = {
   ui: false,
   user: function(){ return (fbUser && fbDb && typeof firebase !== 'undefined') ? firebase.auth().currentUser : null; },
@@ -22,7 +22,9 @@ window.PM_HOST = {
       var c = JSON.parse(localStorage.getItem('caPeriodOverride') || 'null');
       if(c && fbUser && c.uid === fbUser.uid && c.v) return c.v;
     } catch(e) {}
-    return pmDocPeriod;
+    /* Only the answer read for THIS student: a Journey tab left open across a
+       shared-Chromebook switch must not hand the next student the last one's. */
+    return (fbUser && pmDocPeriodUid === fbUser.uid) ? pmDocPeriod : '';
   }
 };
 /* A rating clicked before Firebase auth resolved — flush it as soon as
@@ -1361,7 +1363,7 @@ window.addEventListener('load', function(){
       var current = firebase.auth().currentUser;
       if(gen !== loadGen || !current || current.uid !== user.uid) return;
       var data = doc && doc.exists ? doc.data() : null;
-      pmDocPeriod = (data && data.period) || '';
+      pmDocPeriod = (data && data.period) || ''; pmDocPeriodUid = user.uid;
       // Module 4/5 swap: an unmarked doc's Layer 4/5 ticks are in the old numbering (see flushSave).
       swap45DocNew = swap45IsMarked(data);
       var saved = data && data.songReady && data.songReady[SONG_ID];
