@@ -184,7 +184,10 @@
     quieter is heard 67.1% of the time, and a two-string root + 5th 65.4%.
     Riff Runner's Wait Mode still takes the 5th, so a chord a 5th above passes
     there too (not measured).
-  - **Branch `phase5-sw-audio` is NOT on `main`.** It changes `sw.js` (always
+  - **Branch `phase5-sw-audio` was merged to `main` on 2026-10-31** (Jonathan:
+    "push it", after the review below and its fixes; fast-forward, so the
+    branch's commits are on `main`, including the early one whose subject says
+    "NOT REVIEWED, NOT ON main"). It changes `sw.js` (always
     Reviewed): one stable audio cache, a per-file hash map written into `sw.js`
     by `tools/checks.mjs`, an eviction pass at activate, and a one-time migration
     so the first deploy re-downloads nothing. New: `tools/sw-audio-map.mjs`,
@@ -212,7 +215,13 @@
     breakages caught. **Left on purpose (R1-5):** a student who does not open the
     site while the merge deploys loses every track at the next audio deploy (as
     before this branch); the migration is a one-time adoption.
-    **Merge checklist:** (1) `git fetch`; if `audio/` changed on `main` since
+    **Done at the merge (2026-10-31):** no `audio/` change on `main` since
+    `ff9e913a6d`; the live `AUDIO_CACHE_VERSION` equals the branch's `AUDIO_CACHE`;
+    full checks, the audio proof and smoke passed on the tip. **Still to do after
+    it deploys:** `node tools/checks.mjs --live`; and **the next push that changes
+    `audio/` must set `AUDIO_MIGRATION_FP` to `''` first** (never to the new
+    fingerprint; check 1ce fails otherwise).
+    **Merge checklist (kept for the record):** (1) `git fetch`; if `audio/` changed on `main` since
     `ff9e913a6d`, the live cache name is no longer `AUDIO_CACHE_NAME`: set
     `AUDIO_MIGRATION_FP` to `''`, expect one full re-download, and re-pin the
     name in `tools/sw-audio-map.mjs` deliberately; (2) `node tools/checks.mjs`,
