@@ -5,6 +5,12 @@ Notable changes to the Guitar Class site. Newest first.
 For the full session-by-session history (and the reasoning behind each change),
 see `WORKFLOW.md` and the git commit log.
 
+## 2026-11-02 — In class: today's activities in the order you do them
+
+- **Today's activities now go lowest number first.** When there are two or
+  three activities for today, #11 is now above #12, the order you do them in
+  class. Activities from earlier days still show the newest one first.
+
 ## 2026-11-02 — Games: "Main site" takes you back where you were
 
 - **"Main site" in Games goes back to the page you came from.** Open Games from

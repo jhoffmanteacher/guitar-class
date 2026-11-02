@@ -89,6 +89,13 @@ course order underneath (teacher console, gating, and deep links all key off
 it), and the "#N" a card carries never moves — only `renderClassActivities()`
 reverses `view.sections` and each section's ids for display. The "Completed activities"
 group's order falls out of the same reversal now, not a second `.reverse()`.
+**Exception — the current day reads lowest number first** (Jonathan,
+2026-11-02): the cards sharing the newest visible card's date trade places
+among themselves so #11 sits above #12 (every other card keeps its slot,
+module grouping untouched). It's applied once to `groups`, so the Today
+group, the Unfinished fold and the Completed fold all agree, and the hero
+(`caStartHereId`) is the lowest-numbered pending required card of the day.
+Older days stay highest first.
 
 **Where the student is survives a reload** (navigability round 2,
 2026-09-23). The open card rides in the address — `caSyncHash()` (called

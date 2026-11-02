@@ -12509,7 +12509,8 @@ function caHeroThumbHtml(a){
    heading cannot say for it: an exit check's own "Exit check" tag. Every
    other card draws no tag line at all.
 
-   The hero is the newest PENDING card, which is not always the newest card
+   The hero is the first PENDING card in reading order (on the current day,
+   the lowest-numbered one — 2026-11-02), which is not always a newest card
    there is: finish this week's work and leave one August activity undone
    and that August card rises to the top, reading like today's job
    (2026-09-20). So the group is CURRENT only when its hero is also the newest
@@ -16008,7 +16009,14 @@ function renderClassActivities(){
      without scrolling past everything already behind them. Reversing
      view.sections and each section's ids does that without touching
      caBoardOrder/caNumber, which every other reader (teacher console,
-     caIsVisible, deep links) still expects in course order. */
+     caIsVisible, deep links) still expects in course order.
+     One exception (Jonathan, 2026-11-02): the CURRENT day — the newest
+     visible card's date — reads lowest number first (#11 above #12), the
+     order the class does them in. Everything older stays highest first.
+     Only the current day's cards trade places among themselves; every other
+     card keeps its slot, and module grouping is untouched. Done here, on
+     `groups`, so the Today group, the Unfinished fold and the Completed
+     fold all read the same order. */
   const byId = {};
   (window.CLASS_ACTIVITIES || []).forEach(a => { byId[a.id] = a; });
   const view = caBoardView();
@@ -16016,6 +16024,13 @@ function renderClassActivities(){
     sec,
     cards: sec.ids.slice().reverse().map(id => byId[id]).filter(a => a && caIsVisible(a)),
   })).filter(g => g.cards.length);
+  const currentDay = groups.length ? caDate(groups[0].cards[0]) : null;
+  if(currentDay){
+    groups.forEach(g => {
+      const today = g.cards.filter(a => caDate(a) === currentDay).reverse();
+      if(today.length > 1) g.cards = g.cards.map(a => caDate(a) === currentDay ? today.shift() : a);
+    });
+  }
   const list = groups.reduce((acc, g) => acc.concat(g.cards), []);
   /* The one card this page shows that is NOT in `list`: a "Play Along now"
      practice card the student opened from the Songs page (caIsPlayAlongOnly).
@@ -16054,9 +16069,9 @@ function renderClassActivities(){
   } else {
     // Done work collapses into its own group (caFinishedGroupHtml) so the
     // list a student actually needs to act on isn't buried under everything
-    // already turned in — `list` is already newest-module/newest-card
-    // first (see above), so filtering it straight through puts the thing
-    // they turned in most recently at the top, same as it always has.
+    // already turned in — `list` is already in reading order (newest module
+    // and card first, the current day lowest number first — see above), so
+    // filtering it straight through keeps that same order here.
     const finished = list.filter(a => classActivities[a.id] === true);
     // Every card starts collapsed, Do-now included — nothing is opened here.
     // caOpenId only ever becomes non-null because the student opened a card
