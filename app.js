@@ -8705,6 +8705,7 @@ const NC_LEVELS = [
 const NC_ANS_BPM = [20, 25, 30, 35, 40];
 const NC_ANS_BPM_V1 = [40, 50, 60, 70, 80, 90, 100, 120];
 const NC_ANS_START = 20;   // where a student with no saved speed begins
+const NC_ANS_START_POWER = 30;   // ca-43 (power chords) begins at 30 BPM (Jonathan, 2026-11-02)
 const NC_ANS_BEATS = 4, NC_ANS_REVEAL = 2, NC_ANS_EVERY = 8;
 const noteCalls = {};
 let ncLive = null;   // key of the drill whose round is running — one at a time
@@ -8719,7 +8720,7 @@ function ncLoadProg(c){
   /* The play-along speed as a BPM: ansBpm if saved, else the old index. */
   const ansOf = o => !o ? 0 : o.ansBpm != null ? o.ansBpm
     : o.ans != null ? (NC_ANS_BPM_V1[Math.min(o.ans, NC_ANS_BPM_V1.length - 1)] || 0) : 0;
-  const ansBpm = Math.max(ansOf(s), ansOf(g)) || NC_ANS_START;
+  const ansBpm = Math.max(ansOf(s), ansOf(g)) || (c.power ? NC_ANS_START_POWER : NC_ANS_START);
   let ans = NC_ANS_BPM.indexOf(ansBpm);
   if(ans < 0) ans = Math.max(0, NC_ANS_BPM.filter(b => b <= ansBpm).length - 1);
   return {
@@ -8763,6 +8764,7 @@ function ncStrName(k){ return t(FRET_STRING_KEY[k] || 'fret.stringLowE'); }
    takes the root, the 5th, the octave or the octave below of a strum — ncTargets). Strings it differs in live under 'ncp.*'; ncK picks the key. The 5th
    sits two frets up on the next string toward the floor (low E -> A, A -> D). */
 const NC_FIFTH_STR = { lowE: 'A', A: 'D' };
+const NC_POWER_UP = { lowE: ['A', 'D'], A: ['D', 'G'] };   // [5th string, octave string]
 function ncK(power, name){ return (power ? 'ncp.' : 'nc.') + name; }
 function ncVars(p){
   const v = { note: p.note, string: ncStrName(p.str), fret: ncFretList(p) };
@@ -9202,9 +9204,18 @@ function ncFaster(key){
 function ncReveal(st){
   st.revealed = true;
   const p = st.seq[st.idx];
-  p.frets.forEach(f => {
-    const m = document.getElementById(`fgm-${st.key}-${p.str}-${f}`);
+  const lit = (k, f) => {
+    const m = document.getElementById(`fgm-${st.key}-${k}-${f}`);
     if(m) m.classList.add('nc-lit');
+  };
+  p.frets.forEach(f => {
+    lit(p.str, f);
+    /* A power chord (ca-43) lights the whole shape: the 5th and the octave
+       sit two frets up on the next two strings toward the floor. */
+    if(p.power){
+      const up = NC_POWER_UP[p.str];
+      if(up) { lit(up[0], f + 2); lit(up[1], f + 2); }
+    }
   });
   const fb = document.getElementById('nc-fb-' + st.key);
   if(fb && p.res !== 'hit'){
