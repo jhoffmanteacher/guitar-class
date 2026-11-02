@@ -569,7 +569,13 @@ async function teacherFetchStudents(){
       // name/email are coerced to strings: firestore.rules doesn't type-check
       // progress/{uid}, and the roster sorts call .localeCompare() on them —
       // one student writing a number there would blank every view.
-      out.push({uid:doc.id,skills,name:String(data.name||''),email:String(data.email||''),responses:data.responses||{},coachSkill:gamesData.coachSkill||{},drillSkill:gamesData.drillSkill||{},classActivities:data.classActivities||{},exitChecks:data.exitChecks||{},period:data.period||''});
+      // songOpens (app.js songsLibraryOpen): student-written, and the rules
+      // don't type-check progress/{uid} — keep only whole counts 1..1000 per
+      // song, so one doctored doc can't swamp the Songs view's totals.
+      const opensRaw=(data.songOpens&&typeof data.songOpens==='object')?data.songOpens:{};
+      const songOpens={};
+      Object.keys(opensRaw).forEach(k=>{ const n=Math.floor(Number(opensRaw[k])); if(Number.isFinite(n)&&n>0) songOpens[k]=Math.min(n,1000); });
+      out.push({uid:doc.id,skills,name:String(data.name||''),email:String(data.email||''),responses:data.responses||{},coachSkill:gamesData.coachSkill||{},drillSkill:gamesData.drillSkill||{},classActivities:data.classActivities||{},exitChecks:data.exitChecks||{},period:data.period||'',songOpens});
   });
   return out;
 }
@@ -2944,7 +2950,7 @@ async function teacherSetActivityArchived(id, state){
    archived or deleted one (from before this view existed) shows Restore. */
 function renderTeacherSongs(){
   const box=document.getElementById('t-grid-container');
-  const intro=`<div class="t-songs-intro">Every song here is on every student&rsquo;s Songs page, under <strong>More Play Along songs</strong>. Hidden takes a song off that list, and the pencil renames one. Core songs are not here &mdash; they open from their own rows on the Songs page and are managed in Class activities.</div>`;
+  const intro=`<div class="t-songs-intro">Every song here is on every student&rsquo;s Songs page, under <strong>More Play Along songs</strong>. Hidden takes a song off that list, and the pencil renames one. <strong>Opened</strong> counts clicks on a song&rsquo;s row on the Songs page since Nov 1, 2026: how many students, and how many times in all. Core songs are not here &mdash; they open from their own rows on the Songs page and are managed in Class activities.</div>`;
   if(!box.querySelector('.t-songs')) box.innerHTML='<div class="t-loading">Loading…</div>';
   loadTeacherClassConfig().then(cfg=>{
     if(teacherView!=='songs') return;   // switched views mid-flight
@@ -2961,6 +2967,11 @@ function renderTeacherSongs(){
       const retired=teacherActivityRetired(a.id,cfg);
       const isHidden=hidden[a.id]===true;
       const done=roster.filter(s=>(s.classActivities||{})[a.id]===true).length;
+      // Popularity (songsLibraryOpen, app.js): students who opened it from the
+      // Songs page, and the total opens. Only clicks since 2026-11-01 count.
+      const openers=roster.filter(s=>((s.songOpens||{})[a.id]||0)>0);
+      const opens=openers.reduce((n,s)=>n+s.songOpens[a.id],0);
+      const popTxt=`${openers.length} ${openers.length===1?'student':'students'} \u00b7 ${opens} ${opens===1?'open':'opens'}`;
       const status=retired
         ? `<span class="t-songs-off">${teacherActivityDeleted(a.id,cfg)?'Deleted':'Archived'} &mdash; not on the Songs page</span>`
           +`<button class="tg-seg-btn" data-set-activity-archived data-id="${escAttr(a.id)}" data-state="restore">Restore</button>`
@@ -2986,7 +2997,8 @@ function renderTeacherSongs(){
       }
       return `<div class="t-board-card t-songs-row${(isHidden||retired)?' t-board-dim':''}">`
         +`<div class="t-board-row"><span class="t-songs-name">${escHtml(name(a))}</span> <button class="t-act-pencil" data-rename-activity data-id="${escAttr(a.id)}" title="Rename this song" aria-label="Rename ${escAttr(name(a))}">&#x270E;</button><span class="t-songs-id">${escHtml(a.id)}</span>`
-        +`<span class="t-songs-done">${roster.length?`${done} of ${roster.length} students done`:'No student data yet'}</span></div>`
+        +`<span class="t-songs-done">${roster.length?`${done} of ${roster.length} students done`:'No student data yet'}</span>`
+        +(roster.length?`<span class="t-songs-pop" title="Students who opened this song from the Songs page, and how many times in all (since Nov 1, 2026)">Opened: ${popTxt}</span>`:'')+`</div>`
         +`<div class="t-board-ctl">${status}<span class="t-board-ctl-sp">`
         +`<button class="tg-seg-btn" data-open-activity data-id="${escAttr(a.id)}">Preview</button>`
         +`<button class="tg-seg-btn" data-copy-activity-link data-id="${escAttr(a.id)}">Copy link</button>`

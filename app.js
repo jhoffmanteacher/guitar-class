@@ -11353,10 +11353,10 @@ function songsLibraryHtml(){
   cards.sort((x, y) => name(x).localeCompare(name(y)));
   const rows = cards.map(a => {
     const done = classActivities[a.id] === true;
-    const btn = `<button type="button" class="song-vid-btn sh-play-btn${done ? ' done' : ''}" onclick="songsHubOpenCard(${jsonAttrArg(a.id)})"><span class="svb-play">&#x25B6;</span>${t('hub.playAlong')}${done ? ` <svg class="sh-play-check" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" role="img" aria-label="${escAttr(t('hub.playAlongDone'))}"><path d="M5 12.5l4.5 4.5L19 7"/></svg>` : ''}</button>`;
+    const btn = `<button type="button" class="song-vid-btn sh-play-btn${done ? ' done' : ''}" onclick="songsLibraryOpen(${jsonAttrArg(a.id)})"><span class="svb-play">&#x25B6;</span>${t('hub.playAlong')}${done ? ` <svg class="sh-play-check" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" role="img" aria-label="${escAttr(t('hub.playAlongDone'))}"><path d="M5 12.5l4.5 4.5L19 7"/></svg>` : ''}</button>`;
     // The song name opens the same card as its Play Along button (2026-10-27).
     return `<div class="song-row"><div class="dot dch"></div>
-      <div class="song-name-col"><button type="button" class="sname sname-link" onclick="songsHubOpenCard(${jsonAttrArg(a.id)})">${escHtml(name(a))}</button></div>
+      <div class="song-name-col"><button type="button" class="sname sname-link" onclick="songsLibraryOpen(${jsonAttrArg(a.id)})">${escHtml(name(a))}</button></div>
       <div class="song-vids">${btn}</div></div>`;
   }).join('');
   return `<div class="sh-sec-title">${t('hub.libraryTitle')}</div><div class="card">${rows}</div>`;
@@ -11417,6 +11417,25 @@ function songsPlayAlongBtn(slug){
 function songsHubOpenCard(id){
   caSwap = null;   // from the Songs page it opens under the Songs heading, not in a card's slot
   goExploreHash('class-activities/' + id);
+}
+/* Song popularity (Jonathan, 2026-11-01: a counter on the teacher dashboard
+   for how many times each of the extra play-along songs is clicked; he chose
+   "students + total opens"). A click on a "More Play Along songs" row — the
+   name or Play Along — adds 1 to songOpens[id] in the student's OWN progress
+   doc with increment(): atomic (two tabs never overwrite each other) and never
+   part of flushSave()'s payload, so a failed progress load cannot wipe it
+   (1bo). The console's Songs view (renderTeacherSongs, teacher.js) shows how
+   many students opened each song and the total. Not counted: the teacher
+   account and the dev bypass (isGatePreviewer), a signed-out visitor, a Core
+   song's row, a card opened from In-Class Activities or a link. */
+function songsLibraryOpen(id){
+  try {
+    if(currentUser && db && !isGatePreviewer() && typeof firebase !== 'undefined' && firebase.firestore && firebase.firestore.FieldValue)
+      db.collection('progress').doc(currentUser.uid)
+        .set({ songOpens: { [String(id)]: firebase.firestore.FieldValue.increment(1) } }, { merge: true })
+        .catch(() => {});
+  } catch(e) {}
+  songsHubOpenCard(id);
 }
 /* The class config (board, dates) can land after the Songs page is already
    open — a cold load straight onto #songs. Swap just the Play Along slots,

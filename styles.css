@@ -1370,6 +1370,8 @@ body.rail-collapsed .rail-tools .tool-popup{
 .t-songs-name{font-weight:600}
 .t-songs-id{font-size:0.75rem;color:var(--text2)}
 .t-songs-done{margin-left:auto;font-size:0.8125rem;color:var(--text2)}
+/* "Opened: 9 students · 23 opens" — clicks on the Songs page (songsLibraryOpen). */
+.t-songs-pop{margin-left:14px;font-size:0.8125rem;color:var(--text2);white-space:nowrap}
 .t-songs-off{font-size:0.8125rem;color:var(--text2);margin-right:8px}
 .t-board-card{background:var(--bg);border:1px solid var(--border2);border-radius:var(--radius);
   padding:9px 10px;margin-bottom:8px;font-size:0.875rem;cursor:grab}

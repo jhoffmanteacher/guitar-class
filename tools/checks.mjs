@@ -8368,6 +8368,122 @@ function checkRosterSkipsTrainerStub() {
   })();
 }
 
+/* 1ch. SONG POPULARITY (Jonathan, 2026-11-01: a counter on the teacher dashboard
+   for the extra play-along songs; "students + total opens"). A click on a
+   "More Play Along songs" row adds 1 to songOpens[id] in the student's own
+   progress doc (songsLibraryOpen, app.js); the console's Songs view counts
+   students and opens (teacherFetchStudents + renderTeacherSongs, teacher.js).
+   Run for real, not found in the source:
+   - the library rows are RENDERED (songsLibraryHtml in the 0b context) and both
+     buttons of every row are clicked through their own onclick: each one
+     writes { songOpens: { <id>: increment(1) } } with { merge: true } to the
+     signed-in student's progress doc and still opens the card;
+   - the teacher account, the dev bypass and a signed-out visitor write nothing
+     (and still open the card); a Core song row writes nothing;
+   - teacherFetchStudents keeps only whole counts 1..1000 per song from a
+     student-written map (strings, negatives, NaN, huge numbers, a non-object).
+   Pinned: every library row (2 buttons each), 3 non-counted sign-ins, 8 doctored values. */
+async function checkSongPopularity(ctx) {
+  head('1ch. Song popularity: a Songs-page click counts once, for students only; the console reads it safely');
+  let bad = 0;
+  const flag = m => { err(m); problems++; bad++; };
+  if (!ctx) { flag('1ch cannot run \u2014 the 0b render context is unavailable'); return; }
+  const run = x => vm.runInContext(x, ctx);
+  let rows;
+  try {
+    rows = run(`(() => {
+      const keep = { u: currentUser, d: db, h: songsHubOpenCard, f: window.firebase, gp: isGatePreviewer };
+      const lentEmail = typeof TEACHER_EMAIL === 'undefined';   // firebase-config.js is not in the 0b context
+      if (lentEmail) globalThis.TEACHER_EMAIL = 'jhoffman@seq.org';
+      const log = [], opened = [];
+      const inc = n => ({ __inc: n });
+      window.firebase = { firestore: Object.assign(() => fakeDb, { FieldValue: { increment: inc } }) };
+      var fakeDb = { collection: c => ({ doc: id => ({ set: (data, opt) => { log.push({ c, id, data: JSON.parse(JSON.stringify(data)), merge: !!(opt && opt.merge) }); return Promise.resolve(); } }) }) };
+      db = fakeDb;
+      songsHubOpenCard = id => { opened.push(id); };
+      const out = { rows: [], who: {} };
+      try {
+        isGatePreviewer = () => false;
+        currentUser = { uid: 'stu-1', email: 'stu@x.test' };
+        /* No HTML parser here: take each row's onclick attributes out of the
+           markup and un-escape them the way the browser does before running. */
+        const unAttr = v => v.replace(/&quot;/g, '"').replace(/&#39;/g, "'").replace(/&lt;/g, '<').replace(/&gt;/g, '>').replace(/&amp;/g, '&');
+        songsLibraryHtml().split('class="song-row"').slice(1).forEach(r => {
+          const handlers = [...r.matchAll(/onclick="([^"]*)"/g)].map(m => unAttr(m[1]));
+          const res = handlers.map(h => { log.length = 0; opened.length = 0; new Function(h)(); return { log: log.slice(), opened: opened.slice() }; });
+          out.rows.push({ n: handlers.length, res });
+        });
+        const lib = (window.CLASS_ACTIVITIES || []).filter(caIsLibrarySong);
+        for (const [k, user, prev] of [['teacher', { uid: 't', email: TEACHER_EMAIL }, null], ['bypass', { uid: 'd', email: 'dev@x' }, true], ['signed out', null, false]]) {
+          currentUser = user; isGatePreviewer = prev === null ? keep.gp : () => prev;
+          log.length = 0; opened.length = 0;
+          if (lib[0]) songsLibraryOpen(lib[0].id);
+          out.who[k] = { writes: log.length, opened: opened.slice() };
+        }
+        out.lib = lib.map(a => a.id);
+      } finally { currentUser = keep.u; db = keep.d; songsHubOpenCard = keep.h; window.firebase = keep.f; isGatePreviewer = keep.gp; if (lentEmail) delete globalThis.TEACHER_EMAIL; }
+      return JSON.stringify(out);
+    })()`);
+    rows = JSON.parse(rows);
+  } catch (e) { flag('1ch could not run songsLibraryHtml/songsLibraryOpen: ' + e.message); return; }
+  if (!rows.lib.length) flag('no library song to test (every card with library: true hidden or retired?)');
+  if (rows.rows.length !== rows.lib.length) flag(`songsLibraryHtml drew ${rows.rows.length} rows for ${rows.lib.length} library songs`);
+  rows.rows.forEach((r, i) => {
+    const id = rows.lib[i];
+    if (r.n !== 2) flag(`library row ${i + 1} has ${r.n} buttons (want the name and Play Along)`);
+    r.res.forEach((x, j) => {
+      const w = x.log[0];
+      const okWrite = x.log.length === 1 && w.c === 'progress' && w.id === 'stu-1' && w.merge && w.data && w.data.songOpens && Object.keys(w.data.songOpens).length === 1 && w.data.songOpens[x.opened[0]] && w.data.songOpens[x.opened[0]].__inc === 1 && Object.keys(w.data).length === 1;
+      if (!okWrite) flag(`library row ${i + 1}, button ${j + 1}: wrote ${JSON.stringify(x.log)} (want exactly one { songOpens: { <id>: increment(1) } } merge-write to progress/stu-1)`);
+      if (x.opened.length !== 1) flag(`library row ${i + 1}, button ${j + 1}: opened ${JSON.stringify(x.opened)} (want the card once)`);
+    });
+  });
+  const opensIds = rows.rows.map(r => r.res[0] && r.res[0].opened[0]).sort();
+  if (JSON.stringify(opensIds) !== JSON.stringify([...rows.lib].sort())) flag(`the rows open ${JSON.stringify(opensIds)}, the library holds ${JSON.stringify(rows.lib)}`);
+  for (const [k, v] of Object.entries(rows.who)) {
+    if (v.writes !== 0) flag(`${k}: a Songs-page click wrote ${v.writes} time(s) \u2014 only students count`);
+    if (v.opened.length !== 1) flag(`${k}: the card did not open (${JSON.stringify(v.opened)})`);
+  }
+  /* A Core song's Play Along (songsPlayAlongBtn, the Core rows) must not count:
+     render it for every Core song with a play-along and click it. */
+  const core = JSON.parse(run(`(() => {
+    const keepDb = db, keepH = songsHubOpenCard, keepU = currentUser, keepGp = isGatePreviewer, keepCard = songsPlayAlongCard, keepFb = window.firebase; let writes = 0, clicks = 0;
+    db = { collection: () => ({ doc: () => ({ set: () => { writes++; return Promise.resolve(); } }) }) };
+    window.firebase = { firestore: Object.assign(() => db, { FieldValue: { increment: n => ({ __inc: n }) } }) };
+    songsHubOpenCard = () => { clicks++; }; currentUser = { uid: 'stu-1', email: 'stu@x.test' }; isGatePreviewer = () => false;
+    const unAttr = v => v.replace(/&quot;/g, '"').replace(/&#39;/g, "'").replace(/&lt;/g, '<').replace(/&gt;/g, '>').replace(/&amp;/g, '&');
+    /* A Core play-along shows only once released (dated); stand one in so the
+       Core row's own button is drawn and clicked whatever today's board says. */
+    const stand = (window.CLASS_ACTIVITIES || []).find(a => a.view === 'card' && !caIsLibraryCard(a));
+    songsPlayAlongCard = () => stand;
+    try {
+      [...String(songsPlayAlongBtn('the-cure') || '').matchAll(/onclick="([^"]*)"/g)].forEach(m => new Function(unAttr(m[1]))());
+    } finally { db = keepDb; songsHubOpenCard = keepH; currentUser = keepU; isGatePreviewer = keepGp; songsPlayAlongCard = keepCard; window.firebase = keepFb; }
+    return JSON.stringify({ writes, clicks });
+  })()`));
+  if (core.clicks === 0) flag('no Core song Play Along button rendered \u2014 1ch cannot prove Core rows do not count');
+  if (core.writes !== 0) flag(`clicking ${core.clicks} Core song Play Along button(s) wrote ${core.writes} count(s) \u2014 only "More Play Along songs" rows count`);
+  // teacherFetchStudents keeps only sane counts.
+  let tsrc = '';
+  try { tsrc = readFileSync(join(ROOT, 'teacher.js'), 'utf8'); } catch { flag('teacher.js unreadable'); return; }
+  const at = tsrc.indexOf('async function teacherFetchStudents(');
+  const body = at < 0 ? null : jsFunctionBody(tsrc, 'teacherFetchStudents');
+  if (body === null) { flag('teacherFetchStudents() not found'); return; }
+  const fnSrc = tsrc.slice(at, tsrc.indexOf('{', at)) + body;
+  const DOCS = [
+    ['a', { name: 'A', songOpens: { 'ca-36': 3, 'ca-42': '5', 'ca-35': -2, 'ca-37': 'x', 'ca-39': 2.9, 'ca-34': 1e9, 'ca-99': NaN, 'ca-98': 0 } }],
+    ['b', { name: 'B', songOpens: 'lots' }],
+    ['c', { name: 'C' }],
+  ];
+  const vctx = vm.createContext({ ensureDb: async () => {}, swap45Marked: () => true, swap45Remap: d => d, String, Object, Array, Promise, Number, Math, currentUser: null,
+    db: { collection: () => ({ get: async () => ({ forEach: fn => DOCS.forEach(([id, data]) => fn({ id, data: () => data })) }) }) } });
+  const got = await vm.runInContext('(' + fnSrc + ')()', vctx);
+  const so = Object.fromEntries(got.map(x => [x.uid, x.songOpens]));
+  const want = { a: { 'ca-36': 3, 'ca-42': 5, 'ca-39': 2, 'ca-34': 1000 }, b: {}, c: {} };
+  if (JSON.stringify(so) !== JSON.stringify(want)) flag(`teacherFetchStudents songOpens = ${JSON.stringify(so)}, want ${JSON.stringify(want)} (whole counts 1..1000 only)`);
+  if (bad === 0) ok(`${rows.rows.length} library rows rendered, ${rows.rows.length * 2} buttons clicked \u2014 each writes one songOpens increment(1) merge to the student's own progress doc and opens its card; the teacher, the dev bypass and a signed-out visitor write nothing; ${core.clicks} Core Play Along clicks write nothing; the console keeps 4 of 8 doctored counts (3, "5"\u21925, 2.9\u21922, 1e9\u21921000)`);
+}
+
 /* 1cd. NOTE CALL POWER CHORDS (ca-43, Jonathan 2026-10-30). The student
    STRUMS a power chord and the card is answered by its root fret. The mic used
    to wait for the exact root alone, which a strummed A5 almost never gives
@@ -11016,6 +11132,7 @@ function checkPracticeMinutes(i18nTable) {
   checkRecordingVersions(rcCtx);
   checkNoteCallPower(rcCtx);
   await checkRosterSkipsTrainerStub();
+  await checkSongPopularity(rcCtx);
   checkPowerChordPopups(rcSets, rcCtx);
   checkPendingFileSwitch(rcCtx);
   checkCardCaptionWords();
