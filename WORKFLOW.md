@@ -194,10 +194,10 @@
     checks 1cg: `weeklyGoalMinutes` must be ≤ 7 × `dailyCapMinutes` (else every
     week says "can't"). Jonathan chose (a) "hide Longest at 0" — DONE 2026-11-02 (the empty line keeps
     its height; "No streak yet" over "Longest: 5 weeks" after a lost streak stays).
-    Left, LOW: (b) a live OLD tab still running 70ef823 keeps rewriting
-    `pm:q:<uid>`, which a new page adopts and deletes: those seconds can count 2–3
-    times until that tab closes (daily cap bounds it; accepted as "liberal"). (c)
-    `weekReach` is covered by pm-e2e only (not in checks.mjs): 8 mutants of it
+    (b) an old tab still running 70ef823 could keep rewriting `pm:q:<uid>`, which a
+    new page adopts and deletes (those seconds could count 2–3 times) — CLOSED
+    2026-11-02, Jonathan: nobody opened the site on Sunday 11/1, so no tab ran that
+    build. Left, LOW: (c) `weekReach` is covered by pm-e2e only (not in checks.mjs): 8 mutants of it
     and `streakWords` all went red in pm-e2e, 8 stayed green in pm-sim.
   - [ ] The "goal reached" toast shows only on a practice card. A goal reached
     in a lesson snippet or on My progress waits for the next practice card on
