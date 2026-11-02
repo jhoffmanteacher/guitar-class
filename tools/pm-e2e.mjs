@@ -275,8 +275,8 @@ check('a skipped week: "40 min this week" (no goal, no "/30"), empty ring, flame
 await ev(`location.hash = '#my-progress'`); await sleep(900);
 await ev(`renderMyProgress()`); await sleep(300);
 const bt = await ev(`(() => { const p = document.getElementById('pm-progress'); return { tile: p.querySelector('.pm-tile').innerText.replace(/\\s+/g, ' ').trim(), tips: [...p.querySelectorAll('.pm-sq')].map(b => b.getAttribute('aria-label')) }; })()`);
-check('…the This week tile says "40 min" with no goal and no "keeps your streak" line', /^This week 40 min\s*$/.test(bt.tile), bt.tile);
-check('the current skipped week reads "This week … 40 min so far" (no verdict)', /^This week \(from .*\): 40 min so far$/.test(bt.tips[7]), bt.tips[7]);
+check('…the This week tile says "40 min" with no goal, and says it is a break week (2026-11-01: it used to say nothing)', /^This week 40 min Break week: no goal$/.test(bt.tile), bt.tile);
+check('the current skipped week\'s square says it is a break week, with its minutes', /^Week of .*: break, 40 min$/.test(bt.tips[7]), bt.tips[7]);
 await ev(`PRACTICE_MINUTES_CONFIG.skipWeeks.pop(); PM._state().weeks = {}; renderMyProgress()`); await sleep(300);
 const early = await ev(`[...document.querySelectorAll('#pm-progress .pm-sq')].map(b => b.getAttribute('aria-label'))`);
 check('with no history, weeks before the first practice read as plain minutes (not "goal missed")', early.slice(0, 7).every((tp) => !/goal missed|goal hit/.test(tp)), early);

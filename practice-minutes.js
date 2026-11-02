@@ -41,16 +41,20 @@
    this PAGE's own localStorage key (pm:q:<uid>:<pageId>) every few seconds, on
    hide and on unload. flush() sends them every 60 s while counting, when playback
    stops, when the tab hides, on `online`, about once a minute while idle with
-   something left, and a page takes over the key of a page that is gone (stamp older
-   than 3 minutes, or written by pagehide) as soon as the student is known.
+   something left, and a page takes over the key of a page that is gone (stamp more
+   than 3 minutes away from now, either way) as soon as the student is known; a
+   page that signs the same student back in folds its own key in (sync).
    A flush is one batch. Its seconds move from `pend` to `inflight` when it is sent
    and leave only when the SDK answers — there is NO timeout: the SDK keeps a commit
    it cannot deliver and delivers it when the connection returns, so sending the same
    seconds again after "giving up" counts them once per attempt (measured: a 5-minute
    stall stored the daily cap for 5 minutes of play). Offline (navigator.onLine
    false) nothing is sent and nothing is lost. A load never overlaps a flush. On
-   pagehide a fetch({keepalive:true}) to the Firestore REST endpoint sends what is
-   left, with the ID token cached for THIS student (navigator.sendBeacon cannot carry
+   pagehide (Chrome then fires visibilitychange; it starts nothing new) a
+   fetch({keepalive:true}) to the Firestore REST endpoint sends what is left in
+   `pend` — even with a commit in flight — and the leaving key drops a commit sent
+   under 30 s before (INFLIGHT_TRUST_MS: it almost certainly landed; losing it is
+   the better mistake than counting it twice), with the ID token cached for THIS student (navigator.sendBeacon cannot carry
    the sign-in header, so it cannot write to a rules-protected collection).
    A flush the rules refuse is NOT thrown away: it first re-reads the server's
    day totals (including any older day the queue holds) and trims the queue to the
@@ -132,8 +136,9 @@
   };
   /* The whole picture for one student. weekSecs = { 'YYYY-Www': seconds }.
      Walks the weeks in order, once. A skipped week is passed over (its minutes still
-     count in the totals). A hit adds to the streak. The first miss in each semester is
-     forgiven (the streak is kept, not extended); any later miss resets it. The week in
+     count in the totals). A hit adds to the streak. The first miss in each semester
+     while a streak is going is forgiven (the streak is kept, not extended); any
+     later miss resets it. A miss before any streak uses nothing up. The week in
      progress can add to the streak but never breaks it. */
   calc.status = function(c, weekSecs, today){
     var cur = calc.weekIdOf(today), normalGoal = Math.round(c.weeklyGoalMinutes * 60);
@@ -149,7 +154,7 @@
         if((weekSecs[w] || 0) >= g){ streak++; if(streak > longest) longest = streak; }
         else {
           var sem = calc.semesterOf(c, w);
-          if(!used[sem]) used[sem] = true; else streak = 0;
+          if(streak > 0 && !used[sem]) used[sem] = true; else streak = 0;   // nothing to forgive before a streak has started
         }
       }
     }
@@ -179,6 +184,12 @@
      ════════════════════════════════════════════════════════════════════ */
   var HEARTBEAT_MS = 30000, FLUSH_MS = 60000, PERSIST_MS = 5000, DENIED_BACKOFF_MS = 300000, LOAD_RETRY_MS = 30000;
   var STALE_QUEUE_MS = 180000, QUEUE_FRESH_MS = 10000, ADOPT_MS = 30000;
+  /* A commit sent less than this long before the page closed has almost
+     certainly landed: the page's leaving key drops it rather than risk sending
+     it twice (Jonathan, 2026-11-01: losing under a minute is the better mistake).
+     An older one that never answered almost certainly did not land, so it stays
+     queued — that keeps a stalled offline backlog. */
+  var INFLIGHT_TRUST_MS = 30000;
   var host = null;
   var S = null;                       // per-student state, rebuilt when the uid changes
   var media = new Set();              // backing-track elements seen playing
@@ -186,6 +197,8 @@
   var lastBeat = 0, lastFlush = 0, lastPersist = 0, lastAdopt = 0, deniedUntil = 0, queueTimer = 0;
   var sid = '';                       // random id for this browser session (heartbeats)
   var pid = '';                       // random id for this page (its own queue key)
+  var leavingPage = false;            // pagehide ran; cleared if the page comes back (back/forward cache)
+  var leftInflight = {};              // uid -> seconds a signed-out state still has on the wire (see sync)
 
   function freshState(uid){
     return { uid: uid, days: {}, weeks: {}, pend: {}, inflight: null, flushP: null, frac: 0, loaded: false, loading: null, flushing: false,
@@ -229,17 +242,24 @@
   function pageId(){ if(!pid) pid = randHex(6); return pid; }
   function qKey(u){ return 'pm:q:' + u + ':' + pageId(); }
   function queued(d){ return (S.pend[d] || 0) + ((S.inflight && S.inflight.snap[d]) || 0); }
-  function heldDays(){
+  function heldDays(leaving){
     var m = {};
     Object.keys(S.pend).forEach(function(d){ if(S.pend[d] > 0) m[d] = (m[d] || 0) + S.pend[d]; });
-    if(S.inflight) Object.keys(S.inflight.snap).forEach(function(d){ m[d] = (m[d] || 0) + S.inflight.snap[d]; });
+    var inf = S.inflight && !(leaving && Date.now() - S.inflight.at < INFLIGHT_TRUST_MS) ? S.inflight : null;
+    if(inf) Object.keys(inf.snap).forEach(function(d){ m[d] = (m[d] || 0) + inf.snap[d]; });
     return m;
   }
+  /* `leaving` (pagehide, and the visibilitychange Chrome fires right after it):
+     leave out a commit that is probably delivered (INFLIGHT_TRUST_MS). The stamp
+     stays Date.now(): in Chrome the visibilitychange after pagehide always
+     rewrote a 0 stamp anyway, and an at-once adoptable key re-sent seconds a
+     back/forward-cached page still held (2026-11-01 review). Another page takes
+     the key over once it is STALE_QUEUE_MS old. */
   function persist(leaving){
     if(!S) return;
     lastPersist = now();
-    var held = heldDays(), any = Object.keys(held).length > 0;
-    ls(qKey(S.uid), any ? JSON.stringify({ days: held, at: leaving ? 0 : Date.now() }) : null);
+    var held = heldDays(leaving), any = Object.keys(held).length > 0;
+    ls(qKey(S.uid), any ? JSON.stringify({ days: held, at: Date.now() }) : null);
     if(any) keepQueueFresh(); else if(queueTimer){ clearInterval(queueTimer); queueTimer = 0; }
   }
   /* A page that is idle but still holds seconds (offline, a stalled commit) has no
@@ -261,7 +281,7 @@
     try { for(var i = 0; i < localStorage.length; i++){ var k = localStorage.key(i); if(k && k.indexOf(prefix) === 0 && k !== mine) keys.push(k); } } catch(e) { return; }
     keys.forEach(function(k){
       var v = lsJson(k);
-      if(v && v.days && typeof v.at === 'number' && v.at > 0 && Date.now() - v.at < STALE_QUEUE_MS && Date.now() >= v.at) return;   // a live page's
+      if(v && v.days && typeof v.at === 'number' && v.at > 0 && Math.abs(Date.now() - v.at) < STALE_QUEUE_MS) return;   // a live page's (a stamp from the future — the clock moved back — is live too)
       if(v && v.days) Object.keys(v.days).forEach(function(d){ if(v.days[d] > 0){ st.pend[d] = (st.pend[d] || 0) + v.days[d]; took = true; } });
       ls(k, null);
     });
@@ -272,9 +292,22 @@
   function sync(){
     var u = uid();
     if(!S || S.uid !== u){
-      if(S && S.uid) persist();
+      if(S && S.uid){
+        persist();
+        /* Its commit may still land after the switch: remember it, so a sign-in
+           back to the same student on this page does not queue it again. */
+        if(S.inflight) leftInflight[S.uid] = S.inflight.snap;
+      }
       S = u ? freshState(u) : null;
       if(S){
+        /* This page's own key for this student (signed out and back in on an open
+           Journey page): adopt() never takes a page's own key, so fold it in here,
+           less anything an earlier state still has on the wire. */
+        var own = lsJson(qKey(u)), wire = leftInflight[u] || {};
+        if(own && own.days) Object.keys(own.days).forEach(function(d){
+          var n = (own.days[d] || 0) - (wire[d] || 0);
+          if(n > 0) S.pend[d] = (S.pend[d] || 0) + n;
+        });
         var c = lsJson('pm:c:' + u);
         if(c){ S.days = c.days || {}; S.weeks = c.weeks || {}; }
         S.toastWeek = ls('pm:t:' + u) || '';
@@ -337,7 +370,9 @@
   if(typeof document !== 'undefined'){
     document.addEventListener('playing', function(e){ if(e.target && e.target.tagName === 'AUDIO') note(e.target); }, true);
     document.addEventListener('visibilitychange', function(){
-      if(document.visibilityState === 'hidden'){ persist(); flush(); }
+      /* Chrome fires this right AFTER pagehide when a page closes: keep the
+         leaving key pagehide wrote, and start no commit the dying page cannot finish. */
+      if(document.visibilityState === 'hidden'){ if(leavingPage) persist(true); else { persist(); flush(); } }
       else tick();
     });
   }
@@ -371,14 +406,18 @@
     var visible = typeof document === 'undefined' || document.visibilityState !== 'hidden';
     if(st && anyAudible && visible){
       idleSec = 0;
-      if(!session) session = { counted: 0, startedAt: Date.now() };
+      if(!session){ session = { counted: 0, startedAt: Date.now() }; refreshToken(); }   // the unload write needs a token under an hour old
       if(!st.loaded && !st.loading) load();
       if(t - lastBeat >= HEARTBEAT_MS) beat(t);
       addSeconds(dt);
       if(t - lastFlush >= FLUSH_MS) flush();
     } else {
       idleSec += dt;
-      if(session && idleSec >= 2) endSession();
+      /* A practice card's section button pauses the song for a 3-5 s count-in;
+         while its player is still live (pcState, app.js), that is not the end of
+         a session — Stop clears pcState and ends it 2 s later as before. */
+      var cardLive = typeof pcState !== 'undefined' && !!pcState;
+      if(session && idleSec >= 2 && !(cardLive && idleSec < 30)) endSession();
     }
     if(t - lastPersist >= PERSIST_MS) persist();
     if(st && t - lastAdopt >= ADOPT_MS){ lastAdopt = t; adopt(); }
@@ -516,7 +555,7 @@
        delivers it when the connection returns, so giving up on it and sending the
        same seconds again would count them once per attempt. */
     st.flushing = true;
-    st.inflight = { snap: snap, ops: ops };
+    st.inflight = { snap: snap, ops: ops, at: Date.now() };
     Object.keys(snap).forEach(function(d){ delete st.pend[d]; });
     persist();
     st.flushP = dbP().then(function(db){
@@ -532,6 +571,7 @@
       return batch.commit();
     }).then(function(){
       st.flushing = false; st.inflight = null;
+      if(S !== st) settleAfterSwitch(st, snap, true);
       if(S === st){
         applyConfirmed(ops); persist(); cacheServer(); uiNow(); refreshToken();
         // Seconds counted while this commit was in flight (a stalled connection) go out now, not at the next Play. Not while still counting: that keeps the 60 s rhythm.
@@ -540,12 +580,29 @@
       return true;
     }, function(err){
       st.flushing = false; st.inflight = null;
-      if(S !== st) return false;
+      if(S !== st){ settleAfterSwitch(st, snap, false); return false; }
       putBack(snap); persist();
       if(err && err.code === 'permission-denied') return afterDenied(st);
       return false;      // not delivered (SDK could not load, say): the queue keeps everything
     });
     return st.flushP;
+  }
+  /* A commit answered after the page switched student (sign-out on a Journey
+     page). Its key no longer belongs to S, so nothing else would correct it.
+     Same student signed back in on this page: S owns the key now and folded it
+     in WITHOUT these seconds (sync), so a failed commit puts them into S.pend.
+     Anyone else (or nobody): rewrite the old student's key — what it still
+     holds, plus these seconds if they did not land. */
+  function settleAfterSwitch(st, snap, landed){
+    if(leftInflight[st.uid] === snap) delete leftInflight[st.uid];
+    if(S && S.uid === st.uid){
+      if(!landed){ Object.keys(snap).forEach(function(d){ S.pend[d] = (S.pend[d] || 0) + snap[d]; }); persist(); }
+      return;
+    }
+    if(!landed) Object.keys(snap).forEach(function(d){ st.pend[d] = (st.pend[d] || 0) + snap[d]; });
+    var held = {}, any = false;
+    Object.keys(st.pend).forEach(function(d){ if(st.pend[d] > 0){ held[d] = st.pend[d]; any = true; } });
+    ls(qKey(st.uid), any ? JSON.stringify({ days: held, at: Date.now() }) : null);
   }
   /* Refused by the rules. Re-read the server, trim the queue to the cap and
      try again; if the queue did not shrink, something other than the cap is
@@ -572,7 +629,7 @@
   }
   function keepaliveFlush(){
     var st = S;
-    if(!st || st.flushing || st.loading || !idToken || idTokenUid !== st.uid || typeof fetch === 'undefined') return;
+    if(!st || st.loading || !idToken || idTokenUid !== st.uid || typeof fetch === 'undefined') return;
     if(typeof navigator !== 'undefined' && navigator.onLine === false) return;
     if(Date.now() < deniedUntil) return;
     var snap = takePending();
@@ -601,7 +658,8 @@
     } catch(e) {}
   }
   if(typeof window !== 'undefined'){
-    window.addEventListener('pagehide', function(){ if(S){ keepaliveFlush(); persist(true); } });
+    window.addEventListener('pagehide', function(){ leavingPage = true; if(S){ keepaliveFlush(); persist(true); } });
+    window.addEventListener('pageshow', function(e){ if(e && e.persisted){ leavingPage = false; if(S) persist(); } });
     window.addEventListener('online', function(){ if(sync()){ if(!S.loaded) load(); else flush(); } });
   }
 
@@ -727,6 +785,20 @@
     return bar ? bar.getBoundingClientRect() : null;
   }
   function removeEl(id){ var e = document.getElementById(id); if(e) e.remove(); }
+  /* The toast and recap belong to the practice card under them: gone when the
+     card's bar is (My progress, a module page) or the language changes. */
+  function stripShown(){
+    var els = document.querySelectorAll('.pm-strip');
+    for(var i = 0; i < els.length; i++) if(els[i].getClientRects().length) return true;   // a hidden screen keeps its bar in the page
+    return false;
+  }
+  function followCard(el){
+    var iv = setInterval(function(){
+      if(!el.isConnected){ clearInterval(iv); return; }
+      if(!stripShown()){ el.remove(); clearInterval(iv); }
+    }, 250);
+  }
+  if(typeof window !== 'undefined') window.addEventListener('gc-langchange', function(){ removeEl('pm-toast'); removeEl('pm-recap'); });
 
   function goalCrossed(weekId){
     var st = S;
@@ -749,12 +821,14 @@
     el.style.top = Math.round(bar.bottom + 8) + 'px';
     el.style.left = Math.round(bar.left + bar.width / 2) + 'px';
     document.body.appendChild(el);
+    followCard(el);
     setTimeout(function(){ el.remove(); }, cfg().toastSeconds * 1000);
   }
 
   function recapMaybe(s){
     var c = cfg(), st = S;
     if(!uiOn() || !st || s.counted < c.recapMinSeconds) return;
+    if(document.visibilityState === 'hidden') return;          // unseen: it would only start the gap and block the real one
     var bar = anchorRect();
     if(!bar || !document.querySelector('.pm-strip')) return;
     if(Date.now() - st.lastRecapAt < c.recapGapSeconds * 1000) return;
@@ -776,6 +850,7 @@
     el.style.top = Math.round((toast ? toast.getBoundingClientRect().bottom : bar.bottom) + 8) + 'px';
     el.style.right = Math.max(8, Math.round(window.innerWidth - bar.right)) + 'px';
     document.body.appendChild(el);
+    followCard(el);
     var gone = function(){ el.remove(); };
     el.querySelector('.pm-recap-x').addEventListener('click', gone);
     setTimeout(gone, c.recapShowSeconds * 1000);
@@ -793,7 +868,7 @@
   function progressHtml(){
     var c = cfg(), st = status(), w = st.week, d = today();
     var more = Math.max(1, Math.ceil((w.goal - w.secs) / 60));
-    var weekSub = w.isBreak ? '' : w.hit ? tr('pm.tileWeekHit')
+    var weekSub = w.isBreak ? tr('pm.tileWeekBreak') : w.hit ? tr('pm.tileWeekHit')
       : tr(st.streakBefore > 0 ? 'pm.tileWeekMore' : 'pm.tileWeekMore0', { n: more });
     var tiles = '<div class="pm-tiles">'
       + '<div class="pm-tile"><div class="pm-tile-h">' + esc(tr('pm.tileWeek')) + '</div>'
@@ -823,7 +898,7 @@
       catch(e) { return id; }
     };
     var squares = st.history.map(function(h){
-      var key = h.state === 'hit' || (h.state === 'now' && h.hit) ? 'pm.weekHit' : h.state === 'break' ? 'pm.weekBreak' : h.state === 'now' ? 'pm.weekNow' : h.state === 'none' ? 'pm.weekNone' : 'pm.weekMissed';
+      var key = h.state === 'hit' || (h.state === 'now' && h.hit) ? 'pm.weekHit' : h.state === 'break' || (h.state === 'now' && !(h.goal > 0)) ? 'pm.weekBreak' : h.state === 'now' ? 'pm.weekNow' : h.state === 'none' ? 'pm.weekNone' : 'pm.weekMissed';
       var tip = tr(key, { date: fmt(h.id), n: mins(h.secs) });
       var cls = 'pm-sq pm-sq-' + h.state + (h.hit && h.state !== 'hit' ? ' pm-sq-hit' : '');
       return '<button type="button" class="' + cls + '" title="' + esc(tip) + '" aria-label="' + esc(tip) + '" data-tip="' + esc(tip) + '">' + (h.hit ? FLAME : '') + '</button>';
@@ -853,6 +928,6 @@
     flush: flush, load: function(){ return sync() ? load() : Promise.resolve(); },
     status: function(){ return sync() ? status() : null; },
     _pollLive: pollLive, _session: function(){ return session; },
-    _state: function(){ return S; }, _tick: tick, _media: media, _end: endSession, _buildOps: buildOps
+    _state: function(){ return S; }, _session: function(){ return session; }, _tick: tick, _media: media, _end: endSession, _buildOps: buildOps
   };
 })();

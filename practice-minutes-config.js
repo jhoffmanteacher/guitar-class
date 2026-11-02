@@ -1,5 +1,5 @@
 /* ══════════════════════════════════════════════════════════════════════
-   PRACTICE MINUTES — settings you can edit.   (2026-11-01; simplified 2026-11-02)
+   PRACTICE MINUTES — settings you can edit.   (2026-11-01; simplified the same day)
 
    Read by practice-minutes.js, which counts the seconds a student spends
    playing a backing track (class-activity practice cards, Song Journey

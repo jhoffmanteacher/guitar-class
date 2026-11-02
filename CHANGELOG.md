@@ -14,17 +14,22 @@ see `WORKFLOW.md` and the git commit log.
 - **A small bar at the top of a practice card** shows a ring that fills as you
   play toward 30 minutes this week, and a flame with your streak. A streak is
   how many weeks in a row you reached 30 minutes. The flame is orange once you
-  have reached 30 this week.
+  have reached 30 this week. While the bar is there, the Full screen button
+  shows only its icon, to keep the bar on one row.
+- **A green dot** shows how many students in your class period are playing a
+  backing track right now, when 3 or more are.
 - **After you press Stop,** a small card shows the minutes you just played and
   how many more you need this week. It shows only if you played at least a
-  minute.
+  minute. Starting a section in the middle of a song does not show it, and it
+  goes away when you leave the practice card.
 - **When you reach 30 minutes in a week,** a short message with a flame tells
   you.
 - **My progress has a new "Practice minutes" box.** It shows this week, your
   streak, today, a bar for each day this week (Monday to Sunday), and your last
   8 weeks. A flame on a week means you reached the goal.
-- **Break weeks do not count,** and they never break your streak. You also get
-  one missed week in each semester that does not break your streak.
+- **Break weeks do not count,** and they never break your streak. In a break
+  week, My progress says "Break week: no goal". You also get one missed week in
+  each semester that does not break your streak, once your streak has started.
 
 ## 2026-11-01 — Small fixes from the weekly check
 

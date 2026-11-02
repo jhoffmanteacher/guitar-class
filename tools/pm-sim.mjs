@@ -273,7 +273,12 @@ console.log('2. week streak');
   s = mk('HHxHxH', T(6));
   check('…and the next hit starts again at 1', s.streak === 1, 'got ' + s.streak);
   s = mk('xxHH', T(4));
-  check('misses before any hit: first free, second resets, then 2 hits → 2', s.streak === 2, 'got ' + s.streak);
+  check('misses before any hit use nothing up; then 2 hits → 2', s.streak === 2, 'got ' + s.streak);
+  // 2026-11-01 review (PD-1): a little play before any streak must not spend the free miss.
+  const a1 = mk('xHHxH', T(5)), b1 = mk('.HHxH', T(5));
+  check('playing a little (under the goal) before any streak keeps the free miss: x H H x H → 3, the same as . H H x H', a1.streak === 3 && b1.streak === 3, a1.streak + ' vs ' + b1.streak);
+  s = mk('xHHxHx', T(6));
+  check('…and the free miss is then spent by the first miss inside the streak: x H H x H x → 0', s.streak === 0, 'got ' + s.streak);
   // A skipped week in the middle: passed over, and its minutes still count.
   const brk = { ...base, skipWeeks: [calc.ymd(calc.weekMonday(wk(2)))] };
   const m2 = {}; m2[wk(0)] = 1800; m2[wk(1)] = 1800; m2[wk(2)] = 100; m2[wk(3)] = 1800;
@@ -424,20 +429,27 @@ console.log('4. daily cap and the pending-write queue');
   check('back online: the queue is sent and cleared', (w.server.days[todayStr]?.seconds || 0) >= 125 && (st.pend[todayStr] || 0) <= 5, `server ${w.server.days[todayStr]?.seconds} pend ${st.pend[todayStr]}`);
 }
 {
-  // A page that leaves while offline keeps its queue; the next page adopts it. A normal leave (pagehide) is adopted at once;
-  // a crash (no pagehide) only after the page's stamp is 3 minutes old, so a LIVE page's queue is never taken.
+  // A page that leaves while offline keeps its queue; the next page adopts it once the page's stamp is 3 minutes old
+  // (a crash the same), so a LIVE page's queue is never taken. Fired in Chrome's order: pagehide, THEN
+  // visibilitychange:hidden (measured in Chrome 153, 2026-11-01) — firing pagehide alone hid that Chrome's
+  // visibilitychange rewrote pagehide's 0 stamp, so the "adopted at once" this test claimed never happened.
   const w = makeWorld();
   const a = w.track(); a.play();
   w.net.online = false;
   await w.run(70, w.playing(a));
   const saved = { ...w.store };
-  for (const f of w.listeners['win:pagehide'] || []) f();
+  leaveLikeChrome(w);
   const left = { ...w.store };
-  const w2 = makeWorld({ store: { ...left }, startMs: w.clock.ms + 60000 });
+  const early = makeWorld({ store: { ...left }, startMs: w.clock.ms + 60000 });
+  const e1 = early.track(); e1.play();
+  await early.run(8, early.playing(e1));
+  await early.PM.flush(); await early.settle();
+  check('a page that left offline: 1 minute later its queue is still stored (not lost) and not yet sent', (early.server.days[todayStr]?.seconds || 0) <= 8 && Object.values(qDays(w) || {}).reduce((x, y) => x + y, 0) >= 70, 'server ' + early.server.days[todayStr]?.seconds);
+  const w2 = makeWorld({ store: { ...left }, startMs: w.clock.ms + 200000 });
   const b = w2.track(); b.play();
   await w2.run(8, w2.playing(b));
   await w2.PM.flush(); await w2.settle();
-  check('a page that left offline (pagehide) hands its queue to the next page, which sends it', (w2.server.days[todayStr]?.seconds || 0) >= 70, 'server ' + w2.server.days[todayStr]?.seconds);
+  check('…and a page opened after 3 minutes takes it over and sends it', (w2.server.days[todayStr]?.seconds || 0) >= 70, 'server ' + w2.server.days[todayStr]?.seconds);
   const w3 = makeWorld({ store: { ...saved }, startMs: w.clock.ms + 60000 });     // a crash: stamp is fresh, 1 minute old
   const c3 = w3.track(); c3.play();
   await w3.run(8, w3.playing(c3));
@@ -612,6 +624,12 @@ async function runAll(worlds, seconds, each) {
   }
   for (let i = 0; i < 8; i++) await new Promise((r) => setImmediate(r));
 }
+/* Close a page the way Chrome does: pagehide, then visibilitychange:hidden. */
+function leaveLikeChrome(w) {
+  for (const f of w.listeners['win:pagehide'] || []) f();
+  w.documentStub.visibilityState = 'hidden';
+  for (const f of w.listeners['doc:visibilitychange'] || []) f();
+}
 const shared = () => ({ clock: { ms: new Date(2026, 10, 16, 9, 0, 0).getTime(), perf: 5000 }, store: {}, server: { days: {}, weeks: {}, heartbeats: {} }, net: { online: true, denied: false, aggregate: 5 } });
 {
   // R1-1: the connection is "up" (navigator.onLine true) but nothing is answered. The SDK keeps every commit and delivers them all on reconnect.
@@ -775,6 +793,105 @@ const shared = () => ({ clock: { ms: new Date(2026, 10, 16, 9, 0, 0).getTime(), 
   const goals = [];
   for (const period of ['4', '7', 'CAS', '']) { const wd = makeWorld({ period }); const a = wd.track(); a.play(); await wd.run(3, wd.playing(a)); goals.push(wd.PM.status().week.goal); }
   check('the week goal is 1800 s for period 4, 7, CAS and "none chosen yet" alike', goals.every((g) => g === 1800), goals.join());
+}
+
+/* ═══════════ 10. Friday check 2026-11-01 (R2-*, PD-*) ═══════════ */
+console.log('10. friday check 2026-11-01');
+{
+  // R2-1: a commit on the wire when the page closes. Jonathan's call: losing under a minute beats counting it twice.
+  for (const delivered of [true, false]) {
+    const sh = shared(); const w = makeWorld(sh);
+    const a = w.track(); a.play();
+    await runAll([w], 64, () => { if (!a.paused) a.currentTime += 1; });   // what has been sent so far lands
+    await runAll([w], 20, () => { if (!a.paused) a.currentTime += 1; });   // 20 more seconds, still queued
+    a.pause(); sh.net.stall = true;
+    await runAll([w], 3);                                                   // Stop → a flush goes out and stalls
+    const inflight = w.PM._state().inflight;
+    leaveLikeChrome(w);
+    const left = Object.entries(sh.store).filter(([k]) => k.startsWith('pm:q:uid-A')).map(([, v]) => JSON.parse(v));
+    (sh.net.queued || []).forEach((x) => { x.res = () => {}; x.rej = () => {}; });   // the page is gone: nobody hears the answer
+    if (delivered) w.drain(); else sh.net.queued = [];
+    sh.net.stall = false;
+    const w2 = makeWorld({ ...sh, clock: { ms: sh.clock.ms + 240000, perf: 9000 } });
+    const b = w2.track(); b.play(); await runAll([w2], 5, () => { if (!b.paused) b.currentTime += 1; }); b.pause(); await runAll([w2], 4); await w2.PM.flush(); await w2.settle();
+    const total = sh.server.days[todayStr]?.seconds || 0, played = 84 + 5;
+    if (delivered) check('a commit sent seconds before the page closed and DELIVERED is not sent again by the next page (no double count)', !!inflight && total <= played && total >= played - 2, `server ${total} for ${played} played; leaving key ${JSON.stringify(left)}`);
+    else check('…and one that did NOT land is lost (under a minute), never sent twice', !!inflight && total <= played && total >= played - 60, `server ${total} for ${played} played`);
+  }
+  // …but a commit that has hung for over 30 s (offline backlog, no answer) stays queued: it almost certainly never landed.
+  {
+    const sh = shared(); const w = makeWorld(sh);
+    const a = w.track(); a.play();
+    await runAll([w], 84, () => { if (!a.paused) a.currentTime += 1; });
+    a.pause(); sh.net.stall = true;
+    await runAll([w], 40);                                                  // the Stop flush hangs for 40 s
+    leaveLikeChrome(w);
+    const held = Object.entries(sh.store).filter(([k]) => k.startsWith('pm:q:uid-A')).reduce((n, [, v]) => n + Object.values(JSON.parse(v).days).reduce((x, y) => x + y, 0), 0);
+    check('a commit that hung for 40 s with no answer stays in the leaving key (a stalled backlog is not thrown away)', held >= 3, 'held ' + held);
+  }
+  // R2-1 (a): the keepalive sends `pend` even while a commit is in flight — they are different seconds.
+  {
+    const sh = shared(); const w = makeWorld(sh);
+    const a = w.track(); a.play();
+    await runAll([w], 84, () => { if (!a.paused) a.currentTime += 1; });
+    sh.net.stall = true; w.PM.flush(); await w.settle();                    // a commit in flight…
+    const inFlight = !!w.PM._state().inflight;
+    await runAll([w], 10, () => { if (!a.paused) a.currentTime += 1; });   // …and 10 more seconds counted after it
+    const f0 = w.log.fetches.length;
+    leaveLikeChrome(w);
+    const f = w.log.fetches.slice(f0).find((x) => /documents:commit$/.test(x.url));
+    check('pagehide with a commit still in flight: the keepalive still sends the seconds counted after it', inFlight && !!f && /"integerValue":"(9|10|11)"/.test(f.init.body), (inFlight ? 'in flight; ' : 'NOTHING in flight; ') + (f ? f.init.body.slice(0, 160) : 'no keepalive'));
+  }
+}
+{
+  // R2-2: a Journey page (no reload) — the student signs out in another tab, then back in. Nothing queued may be lost.
+  for (const back of ['A', 'B-then-A']) {
+    const sh = shared(); const w = makeWorld(sh);
+    const users = { A: w.user, B: { uid: 'uid-B', getIdToken() { return Promise.resolve('tok-B'); } }, none: null };
+    let who = 'A';
+    w.windowStub.PM_HOST.user = () => users[who];
+    const a = w.track(); a.play();
+    const mv = () => { if (!a.paused) a.currentTime += 1; };
+    await runAll([w], 90, mv);
+    a.pause();
+    who = 'none'; await runAll([w], 1);
+    if (back === 'B-then-A') { who = 'B'; await runAll([w], 20); }
+    who = 'A'; await runAll([w], 15);
+    a.play(); await runAll([w], 30, mv); a.pause(); await runAll([w], 5); await w.PM.flush(); await w.settle();
+    const served = sh.server.days[todayStr]?.seconds || 0;
+    check(`signed out and back in on an open Journey page (${back}): every second arrives once (120 played)`, served >= 118 && served <= 121, 'server ' + served);
+  }
+}
+{
+  // R2-4: the device clock moves back 30 s while tab A (offline) holds 40 s; a new tab must not take A's live queue.
+  const sh = shared(); sh.net.online = false;
+  const A = makeWorld(sh);
+  const a = A.track(); a.play();
+  await runAll([A], 40, () => { if (!a.paused) a.currentTime += 1; });
+  a.pause(); await runAll([A], 3);
+  sh.clock.ms -= 30000;
+  const B = makeWorld(sh); B.PM.status();                                  // the new tab's first sync adopts dead pages' queues
+  await runAll([A, B], 3);
+  sh.net.online = true;
+  for (const w of [A, B]) for (const f of w.listeners['win:online'] || []) f();
+  await runAll([A, B], 70);
+  const total = sh.server.days[todayStr]?.seconds || 0;
+  check('the clock moved back 30 s: a new tab does not adopt a live tab\'s queue (40 played → 40 stored, not 80)', total >= 38 && total <= 41, 'server ' + total);
+}
+{
+  // PD-2: a practice card's section button pauses for a count-in; while its player is live that is not a session end.
+  const w = makeWorld();
+  const a = w.track(); a.play();
+  await w.run(20, w.playing(a));
+  w.ctx.pcState = { live: true };
+  a.pause(); await w.run(4);
+  check('section tap (song paused 4 s for the count-in, card player still live): the session carries on', !!w.PM._session());
+  a.play(); await w.run(5, w.playing(a));
+  w.ctx.pcState = null; a.pause(); await w.run(3);
+  check('…and Stop (player cleared) ends it 2 s later as before', !w.PM._session());
+  w.ctx.pcState = { live: true }; a.play(); await w.run(5, w.playing(a)); a.pause(); await w.run(31);
+  check('…a card left paused and live ends the session after 30 s', !w.PM._session());
+  w.ctx.pcState = null;
 }
 
 console.log(`\n${failed ? '✗' : '✓'} pm-sim: ${passed} passed, ${failed} failed`);

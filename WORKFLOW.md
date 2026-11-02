@@ -80,6 +80,37 @@
 
 ## Open work
 
+- [ ] **2026-11-01 — Early Friday check (Jonathan asked; range
+  `friday-check-2026-11-01`..`dfcb8a7`, the 2 Fast commits plus the 4
+  practice-minutes commits, the last 3 of which were never reviewed).** Three
+  reviewers (Fast commits at high; practice-minutes data path and display at
+  xhigh). Fixed and pushed: Live quiz Back button stretched (8a4376f); grey edge
+  missing on Today cards and exit checks (050017a); practice minutes R2-1 (no
+  double count on close; Jonathan: lose < 1 min instead), R2-2 (sign-out/in on a
+  Journey page lost the queue), R2-4 (clock moved back → double), R2-5 (token
+  refreshed at session start), PD-1 (Jonathan: a miss before any streak spends no
+  free miss), PD-2 (section tap popped the recap), PD-3 (recap stayed over My
+  progress / a language switch), PD-4 (a recap made in a hidden tab blocked the
+  real one), PD-5 ("Break week: no goal"). Left, all LOW:
+  - [ ] R2-6: queue keys `pm:q:<uid>` (no page id) written by 70ef823 (about
+    10:33–11:36 on 2026-11-01) are never adopted or removed. Seconds only.
+  - [ ] PD-6: with the "N playing" item, Spanish + Stop + Opcional squeezes the
+    card name in the bar to ~55px ("La…"). Appears only once the heartbeats
+    index exists.
+  - [ ] The bar's flame is orange only when this week is hit; My progress's flame
+    whenever the streak is above 0 — pick one.
+  - [ ] Impossible tips: at the 20-min daily cap on a Sunday the tile can say "10
+    more reaches your goal"; "0-week streak" reads oddly.
+  - [ ] The "goal reached" toast shows only on a practice card (a goal reached on
+    a Journey page or in a lesson snippet waits for the next practice card).
+  - [ ] `tools/pm-e2e.mjs` seeds history counting back from the real date: with
+    the live skip weeks its expectations fail in 24 of 32 school weeks from the
+    week of 2026-11-23. Not a site bug — make its dates fixed.
+  - [ ] `tools/smoke.mjs` draws no practice-minutes UI (dev bypass has no host
+    user), and `tools/pm-rules-test.mjs` needs the emulator (not run from the
+    cloud). The heartbeats composite index must exist in the console or "N
+    playing" stays hidden (harmless).
+
 - [ ] **2026-11-01 — Friday check (Fast commits `a615925`..`65898ce`): one
   small tidy-up left.** `site-reviewer` found no student-visible bug at 1366×657.
   Fixed in the same commit as this note: Find results still showed "#30 - "
@@ -901,6 +932,17 @@
       dead page's key), flushed every 60 s / on stop / on hide / on `online`, and
       by a `fetch({keepalive})` to the REST `:commit` on `pagehide` (sendBeacon
       cannot carry the auth header; the cached token must be this student's).
+      **Leaving a page (2026-11-01 Friday check):** Chrome fires `pagehide` THEN
+      `visibilitychange:hidden` (measured, Chrome 153); the second starts no
+      commit and keeps the leaving key. The keepalive sends `pend` even with a
+      commit in flight. A commit sent under `INFLIGHT_TRUST_MS` (30 s) before
+      the close is left out of the leaving key — **Jonathan's call: losing under
+      a minute beats counting it twice**; an older unanswered one stays queued
+      (a stalled backlog is kept). A leaving key is adopted only once it is 3
+      minutes old (the old "pagehide stamp 0 = adopt at once" never survived
+      Chrome's order). Signing out and back in on an open Journey page folds the
+      page's own key back in (`sync`, `leftInflight`). Streak: a miss before any
+      streak spends no free miss (Jonathan, 2026-11-01). pm-sim section 10.
       A commit has NO timeout (the SDK keeps and later delivers it; re-sending
       multiplied the seconds in the review, a 5-minute stall stored the daily
       cap) and a read never overlaps a write. The first adversarial review
@@ -912,7 +954,7 @@
       BEFORE the code is live, or every write is refused** (the client keeps
       refused seconds and retries every 5 min, so a late paste loses nothing).
       `dailyCapSeconds()` in the rules must equal `dailyCapMinutes × 60` (1cg).
-      **Rules (all in the config; simplified 2026-11-02 by work order):** the goal
+      **Rules (all in the config; simplified 2026-11-01 by work order):** the goal
       is FLAT, `weeklyGoalMinutes` in every counted week for every student, whatever
       days they practise. There are NO meeting days, no no-school dates, no short
       weeks and no proration (checks.mjs 1cg fails if those keys return).

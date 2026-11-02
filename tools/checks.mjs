@@ -10828,7 +10828,7 @@ function checkCoachVerdicts() {
    The browser half (strip, recap, toast, My progress, 1366×657, both languages,
    a real <audio>) is tools/pm-e2e.mjs — it needs Chrome, so it is run by hand.
    ════════════════════════════════════════════════════════════════════ */
-const PM_SIM_PIN = 111;
+const PM_SIM_PIN = 124;
 function checkPracticeMinutes(i18nTable) {
   head('1cg. Practice minutes: the engine is run; the rules cap, heartbeat shape, wiring and strings are pinned');
   let bad = 0;
@@ -10866,7 +10866,7 @@ function checkPracticeMinutes(i18nTable) {
     if (cfg.streakStartWeek && !/^\d{4}-W\d{2}$/.test(cfg.streakStartWeek)) fail("config.streakStartWeek must be '' or an ISO week like '2026-W48'");
     /* The goal is flat: these settings were removed on purpose and must not creep back into the config or the engine. */
     for (const k of ['meetingDays', 'defaultMeetingDays', 'noSchool', 'shortWeeks', 'semesters']) {
-      if (k in cfg) fail(`practice-minutes-config.js has '${k}': the goal is flat, there are no meeting days, no-school dates or proration (work order 2026-11-02)`);
+      if (k in cfg) fail(`practice-minutes-config.js has '${k}': the goal is flat, there are no meeting days, no-school dates or proration (work order 2026-11-01)`);
       if (new RegExp('\\b' + k + '\\b').test(strip(read('practice-minutes.js') || ''))) fail(`practice-minutes.js still reads '${k}'`);
     }
     if (/\b(calc\.meetings|normalMeetings|calc\.days)\b/.test(strip(read('practice-minutes.js') || ''))) fail('practice-minutes.js still has meeting-day maths (calc.meetings / normalMeetings / calc.days)');

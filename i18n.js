@@ -661,6 +661,7 @@
     'pm.tileWeekMore':    { en: '{n} more keeps your streak', es: 'Con {n} más mantienes tu racha' },
     'pm.tileWeekMore0':   { en: '{n} more reaches your goal', es: 'Con {n} más llegas a tu meta' },
     'pm.tileWeekHit':     { en: 'Week goal hit', es: 'Meta de la semana lograda' },
+    'pm.tileWeekBreak':   { en: 'Break week: no goal', es: 'Semana de descanso: sin meta' },
     'pm.tileStreak':      { en: 'Streak', es: 'Racha' },
     'pm.tileStreakVal.one':  { en: '{n}-week streak', es: 'Racha de {n} semana' },
     'pm.tileStreakVal.many': { en: '{n}-week streak', es: 'Racha de {n} semanas' },
