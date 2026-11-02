@@ -5,6 +5,11 @@ Notable changes to the Guitar Class site. Newest first.
 For the full session-by-session history (and the reasoning behind each change),
 see `WORKFLOW.md` and the git commit log.
 
+## 2026-11-02 — Power chords in time: the whole chord shows
+
+- **Power Chords on the Low E and A Strings in Time: the answer shows the whole chord.** When the answer comes up, the board now lights the root, the 5th and the octave, not just the root fret.
+- **Play along starts at 30 BPM** (it was 20) for this activity. Anyone who already picked a speed keeps it.
+
 ## 2026-11-02 — Power Chord Switch setup, practice minutes wording
 
 - **Power Chord Switch: the setup fits the screen after you have a best score.**
