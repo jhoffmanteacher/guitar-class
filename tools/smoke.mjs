@@ -660,6 +660,16 @@ async function walk(base, chromePort, label) {
     return out;
   })()`, 600);
   const gamesClosed = await run('games-main-closed', `document.getElementById('games-screen').hidden`, 400);
+  /* "Main site" goes back to the page Games was opened FROM (2026-11-02), not
+     all the way to the lesson: In class → Games → Main site lands on In class.
+     Through the real hash router, since that is where the bug lived. */
+  await run('games-from-ca-reset', `(() => { history.replaceState(null, '', location.pathname + location.search); routeExploreHash(); })()`, 600);
+  await run('games-from-ca-open-ca', `goExploreHash('class-activities')`, 900);
+  await run('games-from-ca-open-games', `goExploreHash('games')`, 900);
+  await run('games-from-ca-main', `document.getElementById('games-main-btn').click()`, 900);
+  const backTo = await run('games-from-ca-where', `({ hash: location.hash, ca: !document.getElementById('class-activities-screen').hidden, games: !document.getElementById('games-screen').hidden })`, 50);
+  if (backTo && (backTo.hash !== '#class-activities' || !backTo.ca || backTo.games)) events.push({ step: 'games-exits', kind: 'games-exits', text: `In class → Games → Main site landed on ${JSON.stringify(backTo)} (want In class open, games closed)` });
+  await run('games-from-ca-leave', `exitExploreHash()`, 900);
   await run('games-reopen', `openGamesScreen()`, 400);   // the steps after this one need the screen open
   if (exits) {
     const j = JSON.stringify;

@@ -5080,6 +5080,18 @@ function exitExploreHash(){
   routeExploreHash();
 }
 
+/* Leave an OVERLAY page (Games, Live quiz) for the page it was opened from.
+   An overlay sits on top of whatever was showing — In class, Songs, My
+   progress or a lesson — so its own exit button goes back ONE entry, not all
+   the way to the lesson. exitExploreHash() walks back every entry, which is
+   right for "Back to practice" but sent "Main site" from In class → Games to
+   a lesson the student wasn't on (2026-11-02). Rail jumps that must land on
+   the lesson (leaveTopPanelForSet) still use the full exit. */
+function exitOverlayHash(){
+  if(exploreDepth() > 0){ history.back(); return; }   // async: popstate → routeExploreHash()
+  exitExploreHash();
+}
+
 /* The pages a gated student may still open — In-Class Activities and Live
    quiz. In class is the rail's one data-gate="keep" button (checks.mjs 1aa);
    Live quiz has no rail button (2026-09-29) and is reached from its invite
@@ -10682,7 +10694,7 @@ function coachChordBtnRowHtml(chords, skillIds){
 document.addEventListener('keydown',e=>{
   if(e.key!=='Escape') return;
   const vo=document.getElementById('video-overlay'); if(vo&&!vo.hidden) clearPanel();
-  const gs=document.getElementById('games-screen'); if(gs&&!gs.hasAttribute('hidden')&&typeof closeGamesScreen==='function') closeGamesScreen();
+  const gs=document.getElementById('games-screen'); if(gs&&!gs.hasAttribute('hidden')&&typeof closeGamesScreen==='function') closeGamesScreen(true);
   if(document.body.classList.contains('rail-open')) closeRail();
 });
 

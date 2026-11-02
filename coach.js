@@ -2618,8 +2618,11 @@ function openGamesScreen(){
   const exit = screen.querySelector('.games-exit');
   if (exit) exit.focus();
 }
-function closeGamesScreen(){
-  if (location.hash === '#games'){ exitExploreHash(); return; }  // the router finishes the job
+/* `toPrevious`: the "Main site" button and Escape go back to the page Games
+   was opened from (exitOverlayHash, app.js). Without it — closeTopPanels on
+   the way to a set — it leaves for the lesson, as before. */
+function closeGamesScreen(toPrevious){
+  if (location.hash === '#games'){ toPrevious ? exitOverlayHash() : exitExploreHash(); return; }  // the router finishes the job
   gamesClosePanel();
 }
 function gamesClosePanel(){

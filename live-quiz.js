@@ -562,8 +562,10 @@ function openLiveQuizScreen(){
   const exit = screen.querySelector('.games-exit');
   if(exit) exit.focus();
 }
-function closeLiveQuizScreen(){
-  if(location.hash === '#live-quiz'){ exitExploreHash(); return; }   // the router finishes the job
+/* `toPrevious`: the Back button returns to the page the quiz was opened from
+   (exitOverlayHash, app.js), same as Games' "Main site". */
+function closeLiveQuizScreen(toPrevious){
+  if(location.hash === '#live-quiz'){ toPrevious ? exitOverlayHash() : exitExploreHash(); return; }   // the router finishes the job
   lqClosePanel();
 }
 function lqClosePanel(){

@@ -5,6 +5,13 @@ Notable changes to the Guitar Class site. Newest first.
 For the full session-by-session history (and the reasoning behind each change),
 see `WORKFLOW.md` and the git commit log.
 
+## 2026-11-02 — Games: "Main site" takes you back where you were
+
+- **"Main site" in Games goes back to the page you came from.** Open Games from
+  In class, Songs or My progress, and "Main site" (or the Esc key) takes you
+  back to that page. Before, it always took you to a lesson in your module.
+  The Back button on the Live quiz works the same way now.
+
 ## 2026-11-02 — Power chords in time: the whole chord shows
 
 - **Power Chords on the Low E and A Strings in Time: the answer shows the whole chord.** When the answer comes up, the board now lights the root, the 5th and the octave, not just the root fret.
