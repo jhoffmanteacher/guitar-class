@@ -614,10 +614,17 @@
       }
       return;
     }
-    if(!landed) Object.keys(snap).forEach(function(d){ st.pend[d] = (st.pend[d] || 0) + snap[d]; });
-    var held = {}, any = false;
-    Object.keys(st.pend).forEach(function(d){ if(st.pend[d] > 0){ held[d] = st.pend[d]; any = true; } });
-    ls(qKey(st.uid), any ? JSON.stringify({ days: held, at: Date.now() }) : null);
+    /* No newer state here: the key is what st left at the switch (pend + this
+       commit) — unless another page has adopted it since (then it is gone).
+       Edit it, never rebuild it from st: a rebuilt key would bring back
+       seconds the adopting page already sent (2026-11-01 re-review, R3-1).
+       Landed: take the commit out. Failed: leave it — the key holds it. */
+    if(!landed) return;
+    var cur = lsJson(qKey(st.uid));
+    if(!cur || !cur.days) return;
+    var left = {}, any = false;
+    Object.keys(cur.days).forEach(function(d){ var n = (cur.days[d] || 0) - (snap[d] || 0); if(n > 0){ left[d] = n; any = true; } });
+    ls(qKey(st.uid), any ? JSON.stringify({ days: left, at: cur.at || Date.now() }) : null);
   }
   /* Refused by the rules. Re-read the server, trim the queue to the cap and
      try again; if the queue did not shrink, something other than the cap is

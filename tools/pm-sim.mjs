@@ -985,5 +985,30 @@ console.log('10. friday check 2026-11-01');
   }
 }
 
+{
+  // Re-review R3-1: two pages of A (a Journey page P1 and the main site P2). A signs out with a commit stuck on P1 and
+  // comes back 4 minutes later; P2 adopts P1's stale key and sends it; THEN P1's old commit answers. P1 must edit
+  // its key, not rebuild it from its old state (that brought back seconds P2 had already sent).
+  for (const outcome of ['lands', 'fails']) {
+    const sh = shared();
+    const P1 = makeWorld(sh), P2 = makeWorld(sh);
+    let who = 'A'; const users = { A: P1.user, none: null };
+    P1.windowStub.PM_HOST.user = () => users[who]; P2.windowStub.PM_HOST.user = () => users[who];
+    P2.PM.status();
+    const a = P1.track(); const mv = () => { if (!a.paused) a.currentTime += 1; };
+    const play = async (n) => { a.play(); await runAll([P1, P2], n, mv); a.pause(); await runAll([P1, P2], 3); };
+    await play(64); sh.net.stall = true; await play(70); await play(30);
+    who = 'none'; P1.PM.status(); P2.PM.status(); await runAll([P1, P2], 2);
+    await runAll([P1, P2], 240);
+    who = 'A'; sh.net.stall = false;
+    P2.PM.status(); await runAll([P2], 3); await P2.settle();
+    if (outcome === 'lands') P1.drain(); else { const q = sh.net.queued; sh.net.queued = []; q.forEach((x) => x.rej(new Error('unavailable'))); }
+    await P1.settle();
+    P1.PM.status(); await runAll([P1, P2], 5); await P1.PM.flush(); await P1.settle(); await runAll([P1, P2], 70); await P1.PM.flush(); await P2.PM.flush(); await P1.settle();
+    const total = sh.server.days[todayStr]?.seconds || 0, stuck = 59;
+    check(`two pages, sign-out with a stuck commit that then ${outcome === 'lands' ? 'lands' : 'fails'} after the other page adopted the key: nothing lost, at most that one batch extra (164 played)`, total >= 162 && total <= 164 + (outcome === 'lands' ? stuck + 2 : 2), 'server ' + total);
+  }
+}
+
 console.log(`\n${failed ? '✗' : '✓'} pm-sim: ${passed} passed, ${failed} failed`);
 if (failed) { console.log('failed: ' + fails.join(' | ')); process.exit(1); }

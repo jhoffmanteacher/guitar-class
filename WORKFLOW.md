@@ -93,6 +93,19 @@
   free miss), PD-2 (section tap popped the recap), PD-3 (recap stayed over My
   progress / a language switch), PD-4 (a recap made in a hidden tab blocked the
   real one), PD-5 ("Break week: no goal"). Left, all LOW:
+  - [ ] Liberal counting can over-count (accepted, Jonathan 2026-11-01; the daily
+    cap bounds it): Stop then closing the tab 2–3 s later re-sends the
+    end-of-session batch (up to ~60 s) once; a chain of pages each opened and
+    closed within ~2 s can re-send the same batch several times (sim: 84 played →
+    144). To cap it at one extra send: keep the in-flight part of a leaving key
+    in its own bucket (`{days, at, once}`) that an adopting page never puts back
+    into its own leaving key while it is in flight.
+  - [ ] The keepalive's dead-link guard only sees a commit in flight: a link that
+    died after the last answer, with no commit sent yet, loses the keepalive's
+    seconds (up to ~60 s).
+  - [ ] Test gaps (re-review mutants that pm-sim does not catch): the `newestGen`
+    branch adding back failed seconds; buildOps' `flying` term; refreshToken() at
+    session start; pageshow clearing `leavingPage`.
   - [ ] R2-6: queue keys `pm:q:<uid>` (no page id) written by 70ef823 (about
     10:33–11:36 on 2026-11-01) are never adopted or removed. Seconds only.
   - [ ] PD-6: with the "N playing" item, Spanish + Stop + Opcional squeezes the
@@ -951,7 +964,9 @@
       Chrome's order). Signing out and back in on an open Journey page folds the
       page's own key back in (`sync`, `leftInflight`, used once); a commit that
       answers after a switch never rewrites a key a newer state of that student
-      has written (`newestGen`), it only adds back what did not land. Streak: a miss before any
+      has written (`newestGen`), it only adds back what did not land; with no
+      newer state it EDITS the key (takes out a commit that landed) and never
+      rebuilds it — another page may have adopted it (re-review R3-1). Streak: a miss before any
       streak spends no free miss (Jonathan, 2026-11-01). pm-sim section 10.
       A commit has NO timeout (the SDK keeps and later delivers it; re-sending
       multiplied the seconds in the review, a 5-minute stall stored the daily
