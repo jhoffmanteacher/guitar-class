@@ -16,7 +16,7 @@
    It writes a PNG per state into --out <dir> (default: a temp folder) so they
    can be LOOKED at. Needs Node 22+ and Chrome; not part of checks.mjs.
 
-     node tools/pm-e2e.mjs [--out <dir>] [--chrome <path>] */
+     node tools/pm-e2e.mjs [--out <dir>] [--chrome <path>] [--date YYYY-MM-DD] */
 import { createServer } from 'node:http';
 import { spawn } from 'node:child_process';
 import { mkdtempSync, mkdirSync, readFileSync, writeFileSync, existsSync, statSync, rmSync } from 'node:fs';
@@ -82,6 +82,13 @@ const waitFor = async (expr, ms = 20000) => { const t0 = Date.now(); while (Date
 const shot = async (name) => { const r = await send('Page.captureScreenshot', { format: 'png' }); writeFileSync(join(OUT, name + '.png'), Buffer.from(r.data, 'base64')); return join(OUT, name + '.png'); };
 
 await send('Page.enable'); await send('Runtime.enable');
+/* --date YYYY-MM-DD runs the whole test as if it were that day (10:00 local):
+   the page's Date is shifted before any script loads. Used to prove the test
+   holds on every school week, break weeks included. */
+const FAKE_DATE = opt('--date');
+if (FAKE_DATE) await send('Page.addScriptToEvaluateOnNewDocument', { source: `(() => { const D = Date, off = new D(${JSON.stringify(FAKE_DATE + 'T10:00:00')}).getTime() - D.now();
+  class FD extends D { constructor(...a) { if (a.length) super(...a); else super(D.now() + off); } static now() { return D.now() + off; } }
+  window.Date = FD; })()` });
 await send('Emulation.setDeviceMetricsOverride', { width: 1366, height: 657, deviceScaleFactor: 1, mobile: false });
 await send('Page.navigate', { url: `http://127.0.0.1:${port}/index.html` });
 for (let i = 0; i < 80; i++) { if (await ev(`typeof devBypass === 'function' && !!document.getElementById('dev-bypass-btn') && document.readyState === 'complete'`).catch(() => false)) break; await sleep(250); }
@@ -118,8 +125,12 @@ const seedWeeks = (hits) => ev(`(() => { const f = window.__fs; f.weeks = {}; f.
 
 console.log('shipped config');
 check('the shipped config has uiOn true, goal 30, streaks starting 2026-W45', await ev(`PRACTICE_MINUTES_CONFIG.uiOn === true && PRACTICE_MINUTES_CONFIG.weeklyGoalMinutes === 30 && PRACTICE_MINUTES_CONFIG.streakStartWeek === '2026-W45'`));
-/* The seeded history below is dated from the real clock, so the shipped streak start (a week the real date may not have reached) is cleared for it. */
-await ev(`PRACTICE_MINUTES_CONFIG.streakStartWeek = ''`);
+/* The seeded history below is dated from the real clock, so the shipped streak
+   start (a week the real date may not have reached), the shipped break weeks and
+   the semester split are cleared for it: with them, a seeded "hit" week could be
+   a break week, and the expectations failed on 24 of 32 school weeks from
+   2026-W48 (2026-11-01 review). The break-week tests below add their own. */
+await ev(`PRACTICE_MINUTES_CONFIG.streakStartWeek = ''; PRACTICE_MINUTES_CONFIG.skipWeeks = []; PRACTICE_MINUTES_CONFIG.semester2Start = ''`);
 /* ── uiOn false: nothing is drawn ── */
 console.log('uiOn false');
 await ev(`PRACTICE_MINUTES_CONFIG.uiOn = false`);
@@ -241,23 +252,29 @@ await sleep(600);
 await ev(`document.getElementById('pm-progress').scrollIntoView({block:'start'})`); await sleep(300);
 const mp = await ev(`(() => { const p = document.getElementById('pm-progress'); const tiles = [...p.querySelectorAll('.pm-tile')].map(t => t.innerText.replace(/\\s+/g, ' ').trim()); return { hidden: p.hidden, tiles, bars: [...p.querySelectorAll('.pm-bar')].map(b => b.getAttribute('aria-label')), squares: [...p.querySelectorAll('.pm-sq')].map(b => b.className.replace('pm-sq ', '')), cap: p.querySelector('.pm-cap').innerText, h: [...p.querySelectorAll('.pm-sec-h')].map(x => x.innerText) }; })()`);
 console.log('    ', JSON.stringify(mp));
-check('3 tiles: This week / Streak (3 hit weeks, a free miss, 2 more hit weeks = 5) / Today', mp.tiles.length === 3 && /^This week .*23 of 30 min 7 more keeps your streak$/.test(mp.tiles[0]) && /^Streak 5-week streak Longest: 5 weeks$/.test(mp.tiles[1]) && /^Today 5 min All time: \d+ min$/.test(mp.tiles[2]), mp.tiles);
-const dowNow = (new Date().getDay() + 6) % 7, expDays = [12, 0, 8, 20, 3, 0, 0]; expDays[dowNow] = Math.max(expDays[dowNow], 5);   // today also holds the 5 minutes set above
+/* "Today" is the PAGE's day (it may run under --date), and it holds at least the 5 minutes set above. */
+const dowNow = await ev(`(new Date().getDay() + 6) % 7`), expDays = [12, 0, 8, 20, 3, 0, 0]; expDays[dowNow] = Math.max(expDays[dowNow], 5);
+check('3 tiles: This week / Streak (3 hit weeks, a free miss, 2 more hit weeks = 5) / Today', mp.tiles.length === 3 && /^This week .*23 of 30 min 7 more keeps your streak$/.test(mp.tiles[0]) && /^Streak 5-week streak Longest: 5 weeks$/.test(mp.tiles[1]) && new RegExp(`^Today ${expDays[dowNow]} min All time: \\d+ min$`).test(mp.tiles[2]), mp.tiles);
 check('"This week by day" shows all seven days, Mon–Sun, with this week\'s minutes (12, 0, 8, 20, 3, 0, 0; today at least 5)', mp.bars.length === 7 && mp.bars.every((b, i) => b.startsWith(['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'][i] + ':')) && mp.bars.map((b) => +b.split(': ')[1].split(' ')[0]).join() === expDays.join(), mp.bars);
 const empties = await ev(`[...document.querySelectorAll('#pm-progress .pm-bar')].map(b => ({ fill: b.querySelector('.pm-bar-col i').style.height, label: b.querySelector('.pm-bar-n').textContent, marks: b.querySelectorAll('svg, .pm-miss, [class*=miss]').length }))`);
 check('a day with no practice is an empty bar: no fill, no number, no miss marker of any kind', empties.filter((e, i) => expDays[i] === 0).every((e) => (e.fill === '0%' || e.fill === '0px' || e.fill === '') && e.label === '' && e.marks === 0) && expDays.some((m) => m === 0), empties);
 check('"Weeks": 8 small squares, oldest first: none, hit, hit, missed, hit, hit, hit… and the current one outlined', mp.squares.length === 8 && mp.squares[7].includes('pm-sq-now') && mp.squares[6].includes('pm-sq-hit'), mp.squares);
 check('caption exactly as specified: Flame = hit the week goal. Breaks don’t count.', mp.cap === 'Flame = hit the week goal. Breaks don’t count.', mp.cap);
 const cs = await ev(`(() => { const q = (s, p) => getComputedStyle(document.querySelector(s))[p]; return { today: q('.pm-today', 'color'), flame: q('#pm-progress .pm-streak-lg', 'color'), ring: q('#pm-progress .pm-ring-fg', 'stroke'), bar: q('.pm-bar-col i', 'backgroundColor'), hitSq: q('.pm-sq-hit', 'backgroundColor'), missed: q('.pm-sq-missed', 'backgroundColor'), nowShadow: q('.pm-sq-now', 'boxShadow'), panel: q('.pm-panel', 'backgroundColor') }; })()`);
-check('colours: Today green, streak flame orange, ring blue, bars blue, hit square orange, missed square grey, current square blue outline',
-  cs.today === 'rgb(61, 220, 151)' && cs.flame === 'rgb(255, 138, 61)' && cs.ring === 'rgb(90, 169, 255)' && cs.bar === 'rgb(90, 169, 255)' && cs.hitSq === 'rgb(255, 138, 61)' && cs.missed === 'rgb(95, 105, 127)' && /90, 169, 255/.test(cs.nowShadow), cs);
+/* Both flames follow ONE rule (Jonathan, 2026-11-01): orange only once THIS week's
+   goal is reached — a 5-week streak with this week at 23 of 30 shows a grey flame. */
+check('colours: Today green, streak flame NOT orange yet (this week 23 of 30), ring blue, bars blue, hit square orange, missed square grey, current square blue outline',
+  cs.today === 'rgb(61, 220, 151)' && cs.flame !== 'rgb(255, 138, 61)' && cs.ring === 'rgb(90, 169, 255)' && cs.bar === 'rgb(90, 169, 255)' && cs.hitSq === 'rgb(255, 138, 61)' && cs.missed === 'rgb(95, 105, 127)' && /90, 169, 255/.test(cs.nowShadow), cs);
+const flameHit = await ev(`(() => { const s = PM._state(), cur = PM.calc.weekIdOf(PM.calc.ymd(new Date())); const keep = s.weeks[cur]; s.weeks[cur] = { seconds: 1800, goalSeconds: 1800, hit: true }; renderMyProgress();
+  const c = getComputedStyle(document.querySelector('#pm-progress .pm-streak-lg')).color, bar = document.querySelector('.pm-strip .pm-streak'); s.weeks[cur] = keep; renderMyProgress(); return c; })()`);
+check('…and orange once this week\'s 30 minutes are reached, like the flame on the practice card', flameHit === 'rgb(255, 138, 61)', flameHit);
 await shot('5-my-progress-en');
 await ev(`document.querySelectorAll('.pm-sq')[3].click()`);
 check('tapping a square shows its minutes (and its hover title carries the same)', (await ev(`document.getElementById('pm-week-tip').textContent`)).includes('6 min') || (await ev(`document.getElementById('pm-week-tip').textContent`)).includes('min'), await ev(`document.getElementById('pm-week-tip').textContent`));
 await ev(`setLang('es')`); await sleep(900);
 await ev(`renderMyProgress(); document.getElementById('pm-progress').scrollIntoView({block:'start'})`); await sleep(400);
 const mpEs = await ev(`(() => { const p = document.getElementById('pm-progress'); return { tiles: [...p.querySelectorAll('.pm-tile')].map(t => t.innerText.replace(/\\s+/g, ' ').trim()), bars: [...p.querySelectorAll('.pm-bar')].map(b => b.getAttribute('aria-label')), cap: p.querySelector('.pm-cap').innerText, title: p.querySelector('.pm-panel-h').innerText, overflow: document.documentElement.scrollWidth > document.documentElement.clientWidth }; })()`);
-check('Spanish My progress: tiles, weekdays and caption are Spanish, no overflow', /^Esta semana .*23 de 30 min Con 7 más mantienes tu racha$/.test(mpEs.tiles[0]) && /^Racha Racha de 5 semanas La más larga: 5 semanas$/.test(mpEs.tiles[1]) && /^Hoy 5 min En total: \d+ min$/.test(mpEs.tiles[2]) && mpEs.bars.length === 7 && mpEs.bars.every((b, i) => b.startsWith(['Lun', 'Mar', 'Mié', 'Jue', 'Vie', 'Sáb', 'Dom'][i] + ':')) && mpEs.cap === 'Llama = lograste la meta de la semana. Los descansos no cuentan.' && !mpEs.overflow, mpEs);
+check('Spanish My progress: tiles, weekdays and caption are Spanish, no overflow', /^Esta semana .*23 de 30 min Con 7 más mantienes tu racha$/.test(mpEs.tiles[0]) && /^Racha Racha de 5 semanas La más larga: 5 semanas$/.test(mpEs.tiles[1]) && new RegExp(`^Hoy ${expDays[dowNow]} min En total: \\d+ min$`).test(mpEs.tiles[2]) && mpEs.bars.length === 7 && mpEs.bars.every((b, i) => b.startsWith(['Lun', 'Mar', 'Mié', 'Jue', 'Vie', 'Sáb', 'Dom'][i] + ':')) && mpEs.cap === 'Llama = lograste la meta de la semana. Los descansos no cuentan.' && !mpEs.overflow, mpEs);
 await shot('6-my-progress-es');
 
 /* ── Review findings: the widest strip, a skipped week, a week that never counted ── */

@@ -901,7 +901,7 @@
       +   '<div class="pm-tile-row">' + ringSvg(w.goal && !w.isBreak ? w.secs / w.goal : 0, w.hit, 'pm-ring-lg') + '<b>' + esc(w.isBreak ? tr('pm.tileWeekValBreak', { done: mins(w.secs) }) : tr('pm.tileWeekVal', { done: mins(w.secs), goal: mins(w.goal) })) + '</b></div>'
       +   '<div class="pm-tile-sub">' + esc(weekSub) + '</div></div>'
       + '<div class="pm-tile"><div class="pm-tile-h">' + esc(tr('pm.tileStreak')) + '</div>'
-      +   '<div class="pm-tile-row"><span class="pm-streak pm-streak-lg' + (st.streak > 0 ? ' pm-on' : '') + '">' + FLAME + '</span><b>' + esc(plural('pm.tileStreakVal', st.streak)) + '</b></div>'
+      +   '<div class="pm-tile-row"><span class="pm-streak pm-streak-lg' + (w.hit ? ' pm-on' : '') + '">' + FLAME + '</span><b>' + esc(plural('pm.tileStreakVal', st.streak)) + '</b></div>'
       +   '<div class="pm-tile-sub">' + esc(plural('pm.tileLongest', st.longest)) + '</div></div>'
       + '<div class="pm-tile"><div class="pm-tile-h">' + esc(tr('pm.tileToday')) + '</div>'
       +   '<div class="pm-tile-row"><b class="pm-today">' + mins(dayTotal(d)) + '</b><span class="pm-today-u">' + esc(tr('pm.min')) + '</span></div>'

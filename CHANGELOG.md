@@ -26,7 +26,9 @@ see `WORKFLOW.md` and the git commit log.
   you.
 - **My progress has a new "Practice minutes" box.** It shows this week, your
   streak, today, a bar for each day this week (Monday to Sunday), and your last
-  8 weeks. A flame on a week means you reached the goal.
+  8 weeks. A flame on a week means you reached the goal. The streak flame there
+  turns orange once you reach 30 minutes this week, the same as on a practice
+  card.
 - **Break weeks do not count,** and they never break your streak. In a break
   week, My progress says "Break week: no goal". You also get one missed week in
   each semester that does not break your streak, once your streak has started.
