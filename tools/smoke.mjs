@@ -437,6 +437,73 @@ async function powerSwitchWalk(page, run, events, stats, base) {
     check(name, m);
     if (name === 'a fixed pair' && m && m.shown && m.charts.length !== 2) fail(name, `a fixed pair drew ${m.charts.length} charts — this check cannot show the charts fit`);
   }
+  /* With a "Best today" score showing (2026-11-01). The score joins the tempo
+     row, and once it made the speed and tempo rows too wide to sit side by side:
+     the tempo row dropped to its own line and the setup grew to ~698px on a 657px
+     screen, cutting off the privacy line under it. Same three views, English and
+     Spanish, with the widest score (CC_BPM_MAX). Asserts the "Best today" label is
+     really on screen (so the check cannot pass on a page that never drew it), the
+     games screen does not scroll, the speed and tempo rows share one top, and the
+     privacy line (the bottom of the card) is fully on screen. */
+  const bestMeasure = `(() => { const sc = document.getElementById('games-screen'), g = [...document.querySelectorAll('#cc-body .cc-speedtempo > .cc-group')].map(e => Math.round(e.getBoundingClientRect().top)),
+    best = document.querySelector('#cc-body .cc-best'), foot = document.querySelector('#cc-body .coach-foot'), f = foot && foot.getBoundingClientRect(), b = best && best.getBoundingClientRect();
+    return { shown: sc.clientHeight > 0, innerH: window.innerHeight, scrollH: sc.scrollHeight, clientH: sc.clientHeight, groupTops: g, best: best ? best.textContent.trim() : null, bestVisible: !!(b && b.width > 0 && b.bottom <= window.innerHeight),
+      foot: f && { top: Math.round(f.top), bottom: Math.round(f.bottom) } }; })()`;
+  for (const lang of ['en', 'es']) {
+    await run('pw:lang:' + lang, `setLang(${JSON.stringify(lang)})`, 400);
+    for (const [name, expr] of [['the default', `gamesShow('power')`], ['a fixed pair', `gamesShow('power'); ccPickProg(1)`], ['a jump pair', `gamesShow('power'); ccPickProg(7)`]]) {
+      const step = `${name} with a best score (${lang})`;
+      await run('pw:best:show:' + step, expr, 300);
+      await run('pw:best:set:' + step, `(() => { const k = ccBestKey(ccProgs()[cc.progIdx], cc.rateIdx); sessionStorage.setItem(k, String(CC_BPM_MAX)); ccRenderSetup(); return k; })()`, 300);
+      const m = await run('pw:best:measure:' + step, bestMeasure, 10);
+      if (!m || !m.shown) { fail(step, 'the games screen is not on screen \u2014 the measurement would be of a hidden panel'); continue; }
+      if (!m.best || !m.bestVisible) fail(step, `the "Best today" score is not on screen (text: ${JSON.stringify(m.best)}) \u2014 this check cannot show the setup fits with one`);
+      if (m.scrollH > m.clientH) fail(step, `with a best score the setup is ${m.scrollH}px tall on a ${m.clientH}px screen \u2014 it must fit without scrolling`);
+      if (m.groupTops.length !== 2 || new Set(m.groupTops).size !== 1) fail(step, `with a best score the speed and tempo rows are not side by side (tops: ${m.groupTops.join(', ')})`);
+      if (!m.foot || m.foot.bottom > m.innerH) fail(step, `with a best score the privacy line ends at ${m.foot && m.foot.bottom}px on a ${m.innerH}px screen \u2014 it is cut off`);
+      stats.powerBestLayouts = (stats.powerBestLayouts || 0) + 1;
+    }
+  }
+  /* The two cosmetic checks that go with it (2026-11-01), English and Spanish:
+     the group title "Slide along the low E string" must not break between "low"
+     and "E" ("Mi" and "grave"), and the done screen's "Pick different chords"
+     button needs side padding (.tp-btn has none: the label touched the border).
+     The title's line breaks depend on the window width (the four pair columns
+     share the games screen), so it is measured at every width from 1366 down to
+     920 in steps of 6, not only at 1366. */
+  const titleProbe = `(() => {
+      gamesShow('power');
+      const title = [...document.querySelectorAll('#cc-body .cc-groups .cc-group-title')].find(e => /low[\\s\\u00a0]E|Mi[\\s\\u00a0]grave/.test(e.textContent));
+      if (!title) return { found: false };
+      const n = title.firstChild, txt = n.textContent, m = txt.match(/(low)[\\s\\u00a0](E)|(Mi)[\\s\\u00a0](grave)/), a = m.index, mid = a + (m[1] || m[3]).length, end = mid + 1 + (m[2] || m[4]).length;
+      const top = (x, y) => { const r = document.createRange(); r.setStart(n, x); r.setEnd(n, y); return Math.round(r.getBoundingClientRect().top); };
+      return { found: true, words: txt.slice(a, end).replace(/\\u00a0/g, '<nbsp>'), broken: top(a, mid) !== top(mid + 1, end) }; })()`;
+  for (const lang of ['en', 'es']) {
+    await run('pw:cosmetic:lang:' + lang, `setLang(${JSON.stringify(lang)})`, 400);
+    let widths = 0, brokenAt = [], missing = false, words = '';
+    for (let w = 1366; w >= 920; w -= 6) {
+      await page.send('Emulation.setDeviceMetricsOverride', { ...size, width: w });
+      await sleep(120);
+      const c = await run('pw:cosmetic:title:' + lang + ':' + w, titleProbe, 10);
+      if (!c || !c.found) { missing = true; break; }
+      widths++; words = c.words;
+      if (c.broken) brokenAt.push(w);
+    }
+    await page.send('Emulation.setDeviceMetricsOverride', size);
+    await sleep(150);
+    if (missing) fail('cosmetic (' + lang + ')', 'the "Slide along the low E string" title was not found, so its line break cannot be checked');
+    else {
+      if (brokenAt.length) fail('cosmetic (' + lang + ')', `the title breaks inside "${words}" at window widths ${brokenAt.join(', ')} — the two words must stay on one line`);
+      if (!/<nbsp>/.test(words)) fail('cosmetic (' + lang + ')', `the title joins its two words with an ordinary space (${words}), not a no-break space`);
+    }
+    const c2 = await run('pw:cosmetic:button:' + lang, `(() => { gamesShow('power'); cc.changes = [{ from: 'A5', to: 'D5', result: 'miss' }]; cc.bpm = 60; ccRenderDone();
+      const btn = document.querySelector('#cc-body .cc-change-loop'), cs = btn && getComputedStyle(btn);
+      return { padL: cs && parseFloat(cs.paddingLeft), padR: cs && parseFloat(cs.paddingRight), text: btn && btn.textContent.trim() }; })()`, 300);
+    if (!c2 || !c2.text || c2.padL < 12 || c2.padR < 12) fail('cosmetic (' + lang + ')', `the done screen's "${c2 && c2.text}" button has ${c2 && c2.padL}px / ${c2 && c2.padR}px side padding — it needs 12px or more`);
+    stats.powerCosmetic = (stats.powerCosmetic || 0) + 1;
+    stats.powerTitleWidths = (stats.powerTitleWidths || 0) + widths;
+  }
+  await run('pw:best:clear', `(() => { Object.keys(sessionStorage).filter(k => k.indexOf('ccBest:') === 0).forEach(k => sessionStorage.removeItem(k)); setLang('en'); return 1; })()`, 300);
   await page.send('Emulation.clearDeviceMetricsOverride');
   // Reload: a new student's first look (the remembered pick is sessionStorage, so a new session starts without it).
   await run('pw:new-session', `(sessionStorage.clear(), 1)`, 10);
@@ -455,12 +522,12 @@ async function powerSwitchWalk(page, run, events, stats, base) {
 
 /* Change Up at the real window, 1366x657 (Friday check R1-3, Jonathan
    2026-10-31). Its 80px charts (639248b) pushed the -5/+5 row and Start down the
-   scrolling games screen, so Start now sits in the same sticky bar as Power Chord
-   Switch (.cc-startbar). For the default screen and a 2-, 3- and 4-chord loop and
-   Random 4, assert Start is fully on screen and inside the bar. Since the wide
-   setup (2026-10-31: the three loop lists across the top, settings left, charts
-   right) none of those views may need to scroll, and the three lists must share
-   one row. Runs after
+   scrolling games screen. Since the wide setup (2026-10-31: the three loop lists
+   across the top, settings left, charts right) none of its views needs to scroll.
+   For the default screen and a 2-, 3- and 4-chord loop and Random 4, assert Start
+   is fully on screen and inside .cc-startbar (whose position:sticky is only a
+   safety net for a shorter window; checks.mjs 1ca pins the rule), that the games
+   screen does not scroll, and that the three loop lists share one row. Runs after
    powerSwitchWalk, on the same page, with coach.js already loaded. */
 async function changeUpWalk(page, run, events, stats) {
   const has = await run('cu:has', `typeof CC_PROGRESSIONS !== 'undefined' && typeof gamesShow === 'function' && typeof ccPickProg === 'function'`, 10);
@@ -487,7 +554,7 @@ async function changeUpWalk(page, run, events, stats) {
     if (!m || !m.shown) { fail(name, 'the games screen is not on screen \u2014 the measurement would be of a hidden panel'); continue; }
     if (m.power) fail(name, 'the setup is in Power Chord Switch mode, not Change Up');
     if (!m.start || m.start.top < 0 || m.start.bottom > m.innerH) fail(name, `Change Up's Start sits at ${m.start && m.start.top}-${m.start && m.start.bottom}px on a ${m.innerH}px screen \u2014 it must be fully on screen (see .cc-startbar)`);
-    if (!m.bar) fail(name, "Change Up's Start is not inside the sticky .cc-startbar");
+    if (!m.bar) fail(name, "Change Up's Start is not inside .cc-startbar");
     if (m.scrollH > m.clientH) fail(name, `the setup is ${m.scrollH}px tall on a ${m.clientH}px screen \u2014 Change Up's wide setup must fit without scrolling`);
     if (m.cols.length !== 3 || new Set(m.cols).size !== 1) fail(name, `the three loop lists are not on one row (tops: ${m.cols.join(', ')})`);
     stats.changeUpLayouts = (stats.changeUpLayouts || 0) + 1;
@@ -613,11 +680,11 @@ async function walk(base, chromePort, label) {
        (hero) card, and both exit-check cards — the list card alone missed the
        Today and check cards on 2026-11-01. Each must agree with the list card. */
     const chk = (window.CLASS_ACTIVITIES || []).find(a => a.kind === 'check');
-    const cls = a => { const r = read(caActivityCardHtml(a)), h = read(caHeroCardHtml(a, true, true));
+    const cls = a => { const r = read(caActivityCardHtml(a)), h = read(caHeroCardHtml(a, true));
       if (h.edge !== r.edge || h.tag !== r.tag) return { edge: 'today card ' + JSON.stringify(h), tag: 'list card ' + JSON.stringify(r) };
       if (chk) { const was = optionalActivityIds[chk.id], wasDone = classActivities[chk.id]; optionalActivityIds = Object.assign({}, optionalActivityIds, { [chk.id]: r.tag });
         if (classActivities[a.id] === true) classActivities = Object.assign({}, classActivities, { [chk.id]: true });
-        const c1 = read(caCheckCardHtml(chk)), c2 = read(caHeroCheckHtml(chk, true, true));
+        const c1 = read(caCheckCardHtml(chk)), c2 = read(caHeroCheckHtml(chk, true));
         optionalActivityIds = Object.assign({}, optionalActivityIds, { [chk.id]: was }); if (was === undefined) delete optionalActivityIds[chk.id];
         classActivities = Object.assign({}, classActivities, { [chk.id]: wasDone }); if (wasDone === undefined) delete classActivities[chk.id];
         if (c1.edge !== r.edge || c2.edge !== r.edge) return { edge: 'check cards ' + JSON.stringify([c1, c2]), tag: 'list card ' + JSON.stringify(r) }; }
@@ -755,7 +822,7 @@ try {
   const norm = e => `${e.kind}|${e.step.replace(/^(en|es):/, '')}|${e.kind === 'bad-handler' ? '' : e.text}`;
   const baseCount = new Map(); (base ? base.errors : []).forEach(e => baseCount.set(norm(e), Math.max(baseCount.get(norm(e)) || 0, e.kind === 'bad-handler' ? +e.text : 1)));
   const report = base ? now.errors.filter(e => (e.kind === 'bad-handler' ? +e.text : 1) > (baseCount.get(norm(e)) || 0)) : now.errors;
-  say(`smoke: ${now.stats.sets} sets in ${now.stats.modules} modules (EN + ES), ${now.stats.games} game views, ${now.stats.buttons} inline handlers compiled${now.stats.chordCards ? `, ${now.stats.chordCards} chord-grid cards walked (cursor, lap, layout at 1366/390/360, lyric sheet${now.stats.bassClicks ? `, bass switch clicked on ${now.stats.bassClicks}` : ''}${now.stats.recordingClicks ? `, recording switch clicked, reloaded and flipped back on ${now.stats.recordingClicks}` : ''}${now.stats.chordSkipped ? `; ${now.stats.chordSkipped.join(', ')} is teacher-only and not walked` : ''})` : ''}${now.stats.noteCallSteps ? `, ${now.stats.noteCallSteps} Note Call power-chord steps (EN + ES: six strings, taps on low E and A only, a hit and a miss)` : ''}${now.stats.powerLayouts ? `, Power Chord Switch at 1366\u00d7657 (Start and tempo on screen: ${now.stats.powerLayouts} views, incl. after a reload)` : ''}${now.stats.changeUpLayouts ? `, Change Up at 1366\u00d7657 (Start on screen in its sticky bar: ${now.stats.changeUpLayouts} views)` : ''}${now.stats.quizLayouts ? `, Chord Blitz (both directions) and Fret Zap at 1366\u00d7657 (picture left, 2\u00d72 answers right, no scroll: ${now.stats.quizLayouts} views)` : ''}`);
+  say(`smoke: ${now.stats.sets} sets in ${now.stats.modules} modules (EN + ES), ${now.stats.games} game views, ${now.stats.buttons} inline handlers compiled${now.stats.chordCards ? `, ${now.stats.chordCards} chord-grid cards walked (cursor, lap, layout at 1366/390/360, lyric sheet${now.stats.bassClicks ? `, bass switch clicked on ${now.stats.bassClicks}` : ''}${now.stats.recordingClicks ? `, recording switch clicked, reloaded and flipped back on ${now.stats.recordingClicks}` : ''}${now.stats.chordSkipped ? `; ${now.stats.chordSkipped.join(', ')} is teacher-only and not walked` : ''})` : ''}${now.stats.noteCallSteps ? `, ${now.stats.noteCallSteps} Note Call power-chord steps (EN + ES: six strings, taps on low E and A only, a hit and a miss)` : ''}${now.stats.powerLayouts ? `, Power Chord Switch at 1366\u00d7657 (Start and tempo on screen: ${now.stats.powerLayouts} views, incl. after a reload${now.stats.powerBestLayouts ? `; with a "Best today" score, EN + ES, no scrolling and the privacy line on screen: ${now.stats.powerBestLayouts} views` : ''}${now.stats.powerCosmetic ? `; "low E" title kept together at ${now.stats.powerTitleWidths} window widths and the done-screen button padded, EN + ES: ${now.stats.powerCosmetic}` : ''})` : ''}${now.stats.changeUpLayouts ? `, Change Up at 1366\u00d7657 (Start on screen, no scrolling: ${now.stats.changeUpLayouts} views)` : ''}${now.stats.quizLayouts ? `, Chord Blitz (both directions) and Fret Zap at 1366\u00d7657 (picture left, 2\u00d72 answers right, no scroll: ${now.stats.quizLayouts} views)` : ''}`);
   if (base) say(`smoke: ${BASELINE} had ${base.errors.length} error event(s); this checkout has ${now.errors.length}`);
   if (report.length) {
     exitCode = 1;

@@ -12479,43 +12479,25 @@ function caHeroThumbHtml(a){
   // just be announced twice.
   return `<span class="ca-hero-thumb"><img src="${escAttr(step.figure)}" alt="" width="640" height="244" loading="lazy"></span>`;
 }
-/* ── The hero's tag line, and the date that rides with it ────────────
+/* ── The hero card's tag line ─────────────────────────────────────────
+   The label ("Today's activity" / "Unfinished") and the date are said ONCE
+   above the Today group (caTodayHeadHtml, 2026-10-31, Jonathan — "one Today
+   heading with the date shown once"), so a Today card keeps only what that
+   heading cannot say for it: an exit check's own "Exit check" tag. Every
+   other card draws no tag line at all.
+
    The hero is the newest PENDING card, which is not always the newest card
    there is: finish this week's work and leave one August activity undone
-   and that August card rises to the top, tagged "Start here", reading like
-   today's job (2026-09-20). So the hero is CURRENT only when it is also the
-   newest visible activity overall — the first card of the newest-first list,
-   done or not — and OLDER otherwise.
-
-   CURRENT is exactly what shipped: the small date chip on its own row, then
-   the tag. OLDER says "Not finished" instead, and pulls the date up ONTO the
-   tag's row at full weight ("From Wed, 8/26"), because on that card the date
-   is the point. No date set → nothing is shown; there is no honest date to
-   invent. The date text itself carries no data-i18n, same as the .ca-chip it
-   replaces: it is built by caFormatDate() in the current language and a
-   language switch re-renders this whole page anyway (gc-langchange).
-
-   GROUPED (2026-10-31, Jonathan — "one Today heading with the date shown
-   once"): renderClassActivities puts the label and the date ONCE above the
-   group (caTodayHeadHtml) instead of on every card, so a grouped card keeps
-   only what the heading cannot say for it — an exit check's own "Exit
-   check" tag. The ungrouped shape below is unchanged. */
-function caStartHereTagHtml(a, isCurrent, grouped){
-  const isCheck = a.kind === 'check';
-  if(grouped) return isCheck
+   and that August card rises to the top, reading like today's job
+   (2026-09-20). So the group is CURRENT only when its hero is also the newest
+   visible activity overall — the first card of the newest-first list, done or
+   not — and OLDER otherwise; caTodayHeadHtml words the heading for each.
+   (The per-card tag with its own date chip and "From <day>" row that this
+   replaced is gone; the page's one caller always grouped.) */
+function caStartHereTagHtml(a){
+  return a.kind === 'check'
     ? `<span class="ca-start-tag ca-start-tag--check" data-i18n="check.prefix">${escHtml(t('check.prefix'))}</span>`
     : '';
-  const tagKey = isCheck
-    ? (isCurrent ? 'check.prefix' : 'ca.checkNotFinished')
-    : (isCurrent ? 'ca.startHere' : 'ca.notFinished');
-  const tag = `<span class="ca-start-tag${isCheck ? ' ca-start-tag--check' : ''}" data-i18n="${tagKey}">${escHtml(t(tagKey))}</span>`;
-  // A card standing in another's slot (caSwap) shows no date — its own can
-  // be a release date still in the future.
-  const dateLabel = caIsSwapIn(a) ? '' : caFormatDate(caDate(a));
-  if(isCurrent) return (dateLabel ? `<span class="ca-chip">${escHtml(dateLabel)}</span>` : '') + tag;
-  return `<span class="ca-hero-tagrow">${tag}`
-    + (dateLabel ? `<span class="ca-hero-from">${escHtml(t('ca.heroFromDate', {date: dateLabel}))}</span>` : '')
-    + `</span>`;
 }
 /* The heading over the Today group (2026-10-31): the same words a hero
    card's tag used to carry, said once for the whole group. Every card in
@@ -12558,11 +12540,11 @@ function caCardBodyBlockHtml(a, done, focus, card){
       ${caMarkRowHtml(a, done, markLabel)}
     </div>`;
 }
-/* `grouped`: the card sits under caTodayHeadHtml, which carries the label and
-   the date — see caStartHereTagHtml. No 🖨 on the collapsed row any more
+/* The card sits under caTodayHeadHtml, which carries the label and the date —
+   see caStartHereTagHtml. No 🖨 on the collapsed row any more
    (2026-10-31): the open card's bar has it (caSyncTopbar). */
-function caHeroCardHtml(a, isCurrent = true, grouped = false){
-  if(a.kind === 'check') return caHeroCheckHtml(a, isCurrent, grouped);
+function caHeroCardHtml(a, isCurrent = true){
+  if(a.kind === 'check') return caHeroCheckHtml(a, isCurrent);
   a = caView(a);   // power-chord version when the switch says so — see caView
   const open = caOpenId === a.id;
   const done = classActivities[a.id] === true;
@@ -12585,7 +12567,7 @@ function caHeroCardHtml(a, isCurrent = true, grouped = false){
   return `<details class="ca-card ca-card--hero${isCurrent ? '' : ' ca-card--hero-older'}${focus ? ' ca-card--focus' : ''}${card ? ' ca-card--practice' : ''}${caQuietOptional(a, done) ? ' ca-card--optional' : ''}" ${open ? 'open' : ''} data-id="${escAttr(a.id)}" ontoggle="caOnToggle(this)">
     <summary class="ca-card-summary ca-hero-summary" onclick="caCardMarkOpening(this)">
       <div class="ca-hero-main">
-        ${caStartHereTagHtml(a, isCurrent, grouped)}
+        ${caStartHereTagHtml(a)}
         <div class="ca-hero-title">${titleHtml}</div>
         ${blurb ? `<p class="ca-hero-blurb">${escHtml(blurb)}</p>` : ''}
         ${caChunkMetaHtml(a)}
@@ -12601,14 +12583,14 @@ function caHeroCardHtml(a, isCurrent = true, grouped = false){
 // The check variant carries its own "Exit check" tag + blue band (item 2)
 // rather than caCheckCardHtml's "Exit check · Title" prefix — the pill
 // already says it, so the hero title is just the plain title.
-function caHeroCheckHtml(a, isCurrent = true, grouped = false){
+function caHeroCheckHtml(a, isCurrent = true){
   const open = caOpenId === a.id;
   const blurb = caFirstSentence(tf(a, 'intro'));
   const done = classActivities[a.id] === true;
   return `<details class="ca-card ec-card ca-card--hero ca-card--hero-check${isCurrent ? '' : ' ca-card--hero-older'}${caQuietOptional(a, done) ? ' ca-card--optional' : ''}" ${open ? 'open' : ''} data-id="${escAttr(a.id)}" ontoggle="caOnToggle(this)">
     <summary class="ca-card-summary ca-hero-summary" onclick="caCardMarkOpening(this)">
       <div class="ca-hero-main">
-        ${caStartHereTagHtml(a, isCurrent, grouped)}
+        ${caStartHereTagHtml(a)}
         <div class="ca-hero-title">${escHtml(caTitle(a))}</div>
         ${blurb ? `<p class="ca-hero-blurb">${escHtml(blurb)}</p>` : ''}
         ${caCheckMetaHtml(a)}
@@ -16104,7 +16086,7 @@ function renderClassActivities(){
          tag/date (2026-10-31, caTodayHeadHtml). Every card in todayCards
          shares the hero's day, so isCurrent is the same for all of them. */
       const heroHtml = caTodayHeadHtml(todayCards[0], isCurrent(todayCards[0]))
-        + todayCards.map(a => caHeroCardHtml(swapIn(a), isCurrent(a), true)).join('');
+        + todayCards.map(a => caHeroCardHtml(swapIn(a), isCurrent(a))).join('');
       // Everything else pending, minus the hero, wrapped in ONE "Still to
       // do" fold (2f) — module headings (plain, no progress bar; that's an
       // Earlier-only addition below) when anything has been placed in a

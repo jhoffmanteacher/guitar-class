@@ -80,6 +80,26 @@
 
 ## Open work
 
+- [x] **2026-11-02 — Power Chord Switch setup overflowed with a "Best today"
+  score (DONE).** "Best today: 60 BPM" joined the tempo row, the speed and tempo
+  groups no longer fit side by side, and the setup grew to 698px on a 657px
+  screen (the privacy line cut off). Now (Power Chord Switch only; Change Up's
+  render is byte-identical) the score is its own line under the −5/+5 row
+  (`.cc-best-line`, always drawn, empty without a score, so the pair buttons do
+  not jump); `#cc-body.cc-power .cc-change-loop` has side padding; the
+  "Slide along the low E string" / "Desliza por la cuerda Mi grave" titles join
+  the two words with U+00A0 (1ca pins it). `tools/smoke.mjs` powerSwitchWalk:
+  a best score of `CC_BPM_MAX` in 3 views × EN/ES (no scrolling, speed and tempo
+  on one row, privacy line on screen — 6 views, red on the old code at exactly
+  698px in all 6), the title at every window width 1366→920 in steps of 6 (the
+  Spanish title broke between "Mi" and "grave" at 20 of them without the fix; the
+  English one did not break at any width tried, so it is covered by the no-break
+  space pin), and the done-screen button's padding. Change Up's done-screen
+  "Pick different chords" button (the same `.cc-change-loop` class) still has no
+  side padding — left alone because Change Up was not to change; one line of CSS
+  (`.cc-change-loop{padding:10px 20px}`) if wanted.
+
+
 - [ ] **2026-11-01 — Song popularity counter (Jonathan: "a counter on the
   teacher dashboard ... how many times each of those songs has been clicked on
   by a student"; chose "students + total opens").** A click on a "More Play
@@ -123,18 +143,34 @@
   - [ ] The keepalive's dead-link guard only sees a commit in flight: a link that
     died after the last answer, with no commit sent yet, loses the keepalive's
     seconds (up to ~60 s).
-  - [ ] Test gaps (re-review mutants that pm-sim does not catch): the `newestGen`
-    branch adding back failed seconds; buildOps' `flying` term; refreshToken() at
-    session start; pageshow clearing `leavingPage`.
-  - [ ] R2-6: queue keys `pm:q:<uid>` (no page id) written by 70ef823 (about
-    10:33–11:36 on 2026-11-01) are never adopted or removed. Seconds only.
+  - [x] Test gaps — DONE 2026-11-02 (pm-sim section 11, 133 → 142 assertions,
+    `PM_SIM_PIN` 142): the `newestGen` branch adding back failed seconds (two
+    outcomes: a stuck commit that lands / fails after a newer sign-in AND another
+    student's sign-in); buildOps' `flying` term (a keepalive beside an in-flight
+    commit must mark the week hit); refreshToken() at session start (a page open
+    two hours, no commit landed); pageshow clearing `leavingPage` (and, the other
+    half, a really-leaving page whose keepalive could not go starts no commit when
+    hidden). Each proved red with its own mutant, green without; the old 133 stayed
+    green on 6 of the 7 mutants run.
+  - [x] R2-6 — DONE 2026-11-02: `adopt()` also takes the exact key `pm:q:<uid>`
+    (written by 70ef823, about 10:33–11:36 on 2026-11-01) and removes it; another
+    student's key, even one whose uid starts with this one's, is left alone. A rare
+    double is fine (counting is liberal). Red on the old engine in pm-sim.
   - [ ] PD-6: with the "N playing" item, Spanish + Stop + Opcional squeezes the
     card name in the bar to ~55px ("La…"). Appears only once the heartbeats
     index exists.
   - [ ] The bar's flame is orange only when this week is hit; My progress's flame
     whenever the streak is above 0 — pick one.
-  - [ ] Impossible tips: at the 20-min daily cap on a Sunday the tile can say "10
-    more reaches your goal"; "0-week streak" reads oddly.
+  - [x] Impossible tips — DONE 2026-11-02: `weekReach()` (practice-minutes.js):
+    days left in the week (today included) × the daily cap, less what today
+    already counted, against the minutes still needed. When it falls short the My
+    progress tile AND the Stop recap say `pm.weekOut` ("You can't reach the goal
+    this week. A new week starts Monday." / "Esta semana ya no puedes llegar a la
+    meta. El lunes empieza una semana nueva."). A streak of 0 says `pm.streakNone`
+    ("No streak yet" / "Aún no tienes racha") on the tile and the bar flame's
+    label. pm-e2e pins a Sunday/Saturday boundary table (exactly enough, one
+    minute short), EN + ES, the recap, and the flame label, under a moved clock so
+    it holds on any run date.
   - [ ] The "goal reached" toast shows only on a practice card. A goal reached
     in a lesson snippet or on My progress waits for the next practice card on
     that page; one reached on a Journey page never shows (`pendingToast` lives
@@ -162,11 +198,15 @@
     caIsOptional(a)` in `caActivityCardHtml`. `tools/smoke.mjs` step
     `optional-edge` renders 8 cases for real (red on the old code in 2 of them:
     data, who).
-  - [ ] Leftover old-behaviour comments (no student effect): styles.css's
-    Change Up sticky-bar comment, tools/smoke.mjs's Change Up walk comment and
-    its "in its sticky bar" summary label, the ungrouped branch of
-    `caStartHereTagHtml` (now unused). Power Chord Switch's results screen is
-    full width, left-aligned (Change Up's is a centred 560px column).
+  - [x] Leftover old-behaviour comments — DONE 2026-11-02: styles.css's Change
+    Up sticky-bar comment, tools/smoke.mjs's Change Up walk comment and its "in
+    its sticky bar" summary label, and the ungrouped branch of
+    `caStartHereTagHtml` (grep: its one production caller passed `grouped = true`;
+    the function is now just the exit-check tag, and `grouped` is gone from
+    `caHeroCardHtml`/`caHeroCheckHtml`). Went with it: the CSS rules
+    `.ca-hero-tagrow` / `.ca-hero-from` and the i18n key `ca.checkNotFinished`
+    (used nowhere else). Power Chord Switch's results screen is full width,
+    left-aligned (Change Up's is a centred 560px column) — still so, on purpose.
 
 - [ ] **2026-10-31 — Friday check (first run, a practice run): what it found
   and did not fix.** `site-reviewer-deep` (student-facing) and `site-reviewer`

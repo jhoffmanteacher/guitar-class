@@ -1010,5 +1010,115 @@ console.log('10. friday check 2026-11-01');
   }
 }
 
+/* ═══════════ 11. Tests for what the 2026-11-01 re-review's mutants got away with, and R2-6 ═══════════ */
+console.log('11. re-review test gaps and R2-6');
+const sumOf = (o) => Object.values(o || {}).reduce((x, y) => x + y, 0);
+const calcWeek = (w) => w.PM.calc.weekIdOf(todayStr);
+const commitFetch = (w, from) => w.log.fetches.slice(from).find((x) => /documents:commit$/.test(x.url));
+{
+  // Gap 1 — settleAfterSwitch's "a newer state of this student exists" branch. A signs out with a commit stuck on the
+  // wire (state A1), signs back in (A2, a newer state), then B signs in, and only THEN does A1's commit answer. A1 no
+  // longer owns the key and A2 has written it since, so nothing is rebuilt from A1: a commit that FAILED is added back
+  // to the key, one that LANDED is left alone. Mutants: drop the add-back (the stuck seconds are lost on a failure) or
+  // add back always (they are counted twice when it landed).
+  for (const outcome of ['lands', 'fails']) {
+    const sh = shared(), w = makeWorld(sh);
+    let who = 'A'; const users = { A: w.user, B: { uid: 'uid-B', getIdToken() { return Promise.resolve('tok-B'); } }, none: null };
+    w.windowStub.PM_HOST.user = () => users[who];
+    const a = w.track(); const mv = () => { if (!a.paused) a.currentTime += 1; };
+    const play = async (n) => { a.play(); await runAll([w], n, mv); a.pause(); await runAll([w], 3); };
+    const as = async (u) => { who = u; w.PM.status(); await runAll([w], 2); };
+    await play(64); sh.net.stall = true; await play(70); await play(30);
+    const stuck = sumOf(w.PM._state().inflight && w.PM._state().inflight.snap);
+    await as('none'); await as('A'); await as('B');
+    if (outcome === 'lands') { sh.net.stall = false; w.drain(); }
+    else { const q = sh.net.queued; sh.net.queued = []; sh.net.stall = false; q.forEach((x) => x.rej(new Error('unavailable'))); }
+    await runAll([w], 3);
+    await as('A');
+    await runAll([w], 5); await w.PM.flush(); await w.settle(); await runAll([w], 90); await w.PM.flush(); await w.settle();
+    const total = sh.server.days[todayStr]?.seconds || 0;
+    check(`a stuck commit answers after a NEWER sign-in of the same student and a sign-in of someone else, and ${outcome === 'lands' ? 'landed' : 'failed'}: ${outcome === 'lands' ? 'not counted twice' : 'not lost'} (164 played, ${stuck} s were on the wire)`, stuck > 0 && total >= 162 && total <= 165, `server ${total}, stuck ${stuck}`);
+  }
+}
+{
+  // Gap 2 — buildOps' `flying` term. A keepalive sent beside a commit still in flight must count the seconds in flight
+  // when it decides the week's goal is hit, or the week doc ends at "not hit" with more than the goal in it. The week's
+  // stored seconds are set so the queued seconds alone fall short of the goal and queued + in flight pass it.
+  const sh = shared();
+  const w = makeWorld(sh);
+  const a = w.track(); a.play();
+  await runAll([w], 84, () => { if (!a.paused) a.currentTime += 1; });
+  sh.net.stall = true; w.PM.flush(); await w.settle();                      // a commit in flight…
+  await runAll([w], 10, () => { if (!a.paused) a.currentTime += 1; });      // …and 10 more seconds queued after it
+  const st = w.PM._state(), flying = sumOf(st.inflight && st.inflight.snap), queuedNow = sumOf(st.pend), wk = calcWeek(w);
+  st.weeks[wk] = { seconds: 1800 - queuedNow - Math.ceil(flying / 2), goalSeconds: 1800, hit: false };
+  const base = st.weeks[wk].seconds;                                        // read before pagehide: the keepalive folds its seconds in
+  const f0 = w.log.fetches.length;
+  leaveLikeChrome(w);
+  const ka = commitFetch(w, f0);
+  const premise = flying > 5 && queuedNow > 5 && base + queuedNow < 1800 && base + queuedNow + flying >= 1800;
+  check('pagehide with a commit in flight that, with the queued seconds, passes the goal: the keepalive marks the week hit', premise && !!ka && /"hit":\{"booleanValue":true\}/.test(ka.init.body), `premise ${premise} (stored ${base}, in flight ${flying}, queued ${queuedNow}); ` + (ka ? ka.init.body.slice(0, 220) : 'no keepalive'));
+}
+{
+  // Gap 3 — refreshToken() when a session starts. The token cached at page load is an hour old after an hour: a page left
+  // open for two hours must send its unload write with a token issued when the session began, not the page-load one.
+  const sh = shared(); sh.net.stall = true;                                  // no commit is answered: a landed flush would refresh the token too
+  const w = makeWorld(sh);
+  w.user.getIdToken = function () { return Promise.resolve('tok@' + sh.clock.ms); };
+  w.PM.status(); await w.settle();
+  const t0 = sh.clock.ms;
+  sh.clock.ms += 2 * 3600 * 1000;                                           // the page stays open for two hours
+  const a = w.track(); a.play();
+  await runAll([w], 25, () => { if (!a.paused) a.currentTime += 1; });      // a session starts; no commit has landed yet
+  const f0 = w.log.fetches.length;
+  leaveLikeChrome(w);
+  const ka = commitFetch(w, f0);
+  const issued = ka ? +String(ka.init.headers.Authorization).split('@')[1] : 0;
+  check('a session that starts two hours after page load sends its unload write with a token issued when it started (not the page-load one)', !!ka && issued >= t0 + 2 * 3600 * 1000, ka ? 'token issued ' + Math.round((issued - t0) / 60000) + ' min after page load' : 'no keepalive sent');
+}
+{
+  // Gap 4 — pageshow clears `leavingPage`. A page frozen into the back/forward cache ran pagehide, then comes back. Hiding
+  // the tab must flush again, or every later tab switch sends nothing until the 60 s timer.
+  const sh = shared(); const w = makeWorld(sh);
+  const a = w.track(); a.play();
+  await runAll([w], 20, () => { if (!a.paused) a.currentTime += 1; });
+  for (const f of w.listeners['win:pagehide'] || []) f();
+  for (const f of w.listeners['win:pageshow'] || []) f({ persisted: true });
+  await runAll([w], 30, () => { if (!a.paused) a.currentTime += 1; });      // 30 s after the restore, under the 60 s timer
+  const before = sh.server.days[todayStr]?.seconds || 0;
+  w.documentStub.visibilityState = 'hidden';
+  for (const f of w.listeners['doc:visibilitychange'] || []) f();
+  await w.settle();
+  const sent = (sh.server.days[todayStr]?.seconds || 0) - before;
+  check('restored from the back/forward cache, then the tab is hidden: the seconds counted since the restore are sent', sent >= 28 && sent <= 31, 'sent ' + sent);
+  // …and a page that really leaves (pagehide, no pageshow) must start no commit on the visibilitychange that follows, even
+  // when its keepalive could not go (the new student's token is not back yet) and it still holds seconds: the dying page
+  // cannot finish a commit, and the seconds stay in its leaving key for the next page.
+  const sh2 = shared(); const w2 = makeWorld(sh2);
+  const b = w2.track(); b.play();
+  await runAll([w2], 20, () => { if (!b.paused) b.currentTime += 1; });
+  b.pause(); await runAll([w2], 3);
+  w2.user.uid = 'uid-B'; w2.user.getIdToken = () => new Promise(() => {});    // B signs in on this page; B's token is not back
+  w2.PM.status(); await runAll([w2], 3);
+  w2.PM._state().pend[todayStr] = 100;                                        // B has queued seconds and nothing to send them with
+  const c0 = w2.log.commits.length, held = sumOf(w2.PM._state().pend), f0 = w2.log.fetches.length;
+  leaveLikeChrome(w2); await w2.settle();
+  check('…while a page that is really leaving starts no commit when it is hidden, even holding seconds its keepalive could not send', held >= 100 && !commitFetch(w2, f0) && w2.log.commits.length === c0, `held ${held}, keepalive ${!!commitFetch(w2, f0)}, commits started ${w2.log.commits.length - c0}`);
+}
+{
+  // R2-6 — commit 70ef823 wrote pm:q:<uid> (no page id, no `at`) for about an hour on 2026-11-01. adopt() only looked at
+  // pm:q:<uid>:<page>, so those seconds sat there for ever. Adopt and remove it; leave other students' keys alone,
+  // including one whose uid only STARTS with this one's.
+  const sh = shared();
+  sh.store['pm:q:uid-A'] = JSON.stringify({ days: { [todayStr]: 45 } });
+  sh.store['pm:q:uid-B'] = JSON.stringify({ days: { [todayStr]: 30 } });
+  sh.store['pm:q:uid-AB'] = JSON.stringify({ days: { [todayStr]: 20 } });
+  const w = makeWorld(sh);
+  w.PM.status(); await runAll([w], 5); await w.PM.flush(); await w.settle();
+  check('a leftover pm:q:<uid> key (no page id, no `at`) is adopted and sent: its 45 s reach the server', (sh.server.days[todayStr]?.seconds || 0) === 45, 'server ' + (sh.server.days[todayStr]?.seconds || 0));
+  check('…and the key is removed', !('pm:q:uid-A' in sh.store), JSON.stringify(Object.keys(sh.store)));
+  check('…another student\'s keys (uid-B, and uid-AB whose name starts with uid-A) are not touched', sh.store['pm:q:uid-B'] === JSON.stringify({ days: { [todayStr]: 30 } }) && sh.store['pm:q:uid-AB'] === JSON.stringify({ days: { [todayStr]: 20 } }));
+}
+
 console.log(`\n${failed ? '✗' : '✓'} pm-sim: ${passed} passed, ${failed} failed`);
 if (failed) { console.log('failed: ' + fails.join(' | ')); process.exit(1); }

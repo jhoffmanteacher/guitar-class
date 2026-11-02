@@ -278,8 +278,12 @@
   function adopt(){
     var st = S, took = false;
     if(!st) return;
-    var prefix = 'pm:q:' + st.uid + ':', mine = qKey(st.uid), keys = [];
-    try { for(var i = 0; i < localStorage.length; i++){ var k = localStorage.key(i); if(k && k.indexOf(prefix) === 0 && k !== mine) keys.push(k); } } catch(e) { return; }
+    /* `legacy`: the key commit 70ef823 wrote for about an hour on 2026-11-01 (10:33
+       to 11:36) before the key got a page id: pm:q:<uid>, no `at`. Nothing else ever
+       adopted it. An exact match, so another student's key (pm:q:<uid>X) is never
+       taken. Counting is liberal on purpose, so a rare double is fine. */
+    var prefix = 'pm:q:' + st.uid + ':', legacy = 'pm:q:' + st.uid, mine = qKey(st.uid), keys = [];
+    try { for(var i = 0; i < localStorage.length; i++){ var k = localStorage.key(i); if(k && (k.indexOf(prefix) === 0 || k === legacy) && k !== mine) keys.push(k); } } catch(e) { return; }
     keys.forEach(function(k){
       var v = lsJson(k);
       if(v && v.days && typeof v.at === 'number' && v.at > 0 && Math.abs(Date.now() - v.at) < STALE_QUEUE_MS) return;   // a live page's (a stamp from the future — the clock moved back — is live too)
@@ -335,6 +339,19 @@
     return m;
   }
   function status(){ return calc.status(cfg(), weekTotals(), today()); }
+  /* How many more minutes this week's goal needs, and whether the daily cap still
+     lets the student get them. Each day left (today included) can add at most
+     dailyCapMinutes, and what today has already counted used part of today's. On a
+     Sunday at the cap, "10 more reaches your goal" cannot happen (2026-11-01). */
+  function weekReach(w){
+    var cap = Math.round(cfg().dailyCapMinutes * 60), d = today();
+    var daysLeft = 8 - (((calc.parse(d).getDay() + 6) % 7) + 1);   // Monday = 7 … Sunday = 1
+    var room = daysLeft * cap - Math.min(dayTotal(d), cap);
+    var more = Math.max(1, Math.ceil((w.goal - w.secs) / 60));
+    return { more: more, out: more * 60 > room };
+  }
+  /* "No streak yet" instead of "0-week streak". */
+  function streakWords(base, n){ return n > 0 ? plural(base, n) : tr('pm.streakNone'); }
   function allTimeSeconds(){
     var t = 0, m = weekTotals();
     Object.keys(m).forEach(function(w){ t += m[w]; });
@@ -734,7 +751,7 @@
        the bar (Spanish, an Optional tag and Stop are all in the same row). My progress
        shows the true minutes. A week with no class has no goal: minutes only. */
     var weekTxt = w.isBreak ? tr('pm.weekMinBreak', { done: done }) : tr('pm.weekMin', { done: Math.min(done, goal), goal: goal });
-    var flameLabel = plural('pm.streak', st.streak);
+    var flameLabel = streakWords('pm.streak', st.streak);
     return live
       + '<span class="pm-week">' + ringSvg(w.goal && !w.isBreak ? w.secs / w.goal : 0, w.hit) + '<span>' + esc(weekTxt) + '</span></span>'
       + '<span class="pm-streak' + (w.hit ? ' pm-on' : '') + '" role="img" aria-label="' + esc(flameLabel) + '">' + FLAME + '<b>' + st.streak + '</b></span>';
@@ -859,10 +876,11 @@
     if(!bar || !stripShown()) return;
     if(Date.now() - st.lastRecapAt < c.recapGapSeconds * 1000) return;
     st.lastRecapAt = Date.now();
-    var u = status(), w = u.week, need = Math.max(1, Math.ceil((w.goal - w.secs) / 60));
+    var u = status(), w = u.week, reach = weekReach(w), need = reach.more;
     var line = (w.isBreak ? tr('pm.recapWeekBreak', { done: mins(w.secs) }) : tr('pm.recapWeek', { done: mins(w.secs), goal: mins(w.goal) })) + ' ';
     if(w.isBreak) line = line.trim();
     else if(w.hit) line += u.streak >= 2 ? tr('pm.recapHit', { n: u.streak }) : tr('pm.recapHit1');
+    else if(reach.out) line += tr('pm.weekOut');
     else line += u.streakBefore >= 1
       ? tr('pm.recapMore' + (u.streakBefore === 1 ? '.one' : '.many'), { need: need, n: u.streakBefore })
       : tr('pm.recapMore0', { need: need });
@@ -893,15 +911,16 @@
   }
   function progressHtml(){
     var c = cfg(), st = status(), w = st.week, d = today();
-    var more = Math.max(1, Math.ceil((w.goal - w.secs) / 60));
+    var reach = weekReach(w);
     var weekSub = w.isBreak ? tr('pm.tileWeekBreak') : w.hit ? tr('pm.tileWeekHit')
-      : tr(st.streakBefore > 0 ? 'pm.tileWeekMore' : 'pm.tileWeekMore0', { n: more });
+      : reach.out ? tr('pm.weekOut')
+      : tr(st.streakBefore > 0 ? 'pm.tileWeekMore' : 'pm.tileWeekMore0', { n: reach.more });
     var tiles = '<div class="pm-tiles">'
       + '<div class="pm-tile"><div class="pm-tile-h">' + esc(tr('pm.tileWeek')) + '</div>'
       +   '<div class="pm-tile-row">' + ringSvg(w.goal && !w.isBreak ? w.secs / w.goal : 0, w.hit, 'pm-ring-lg') + '<b>' + esc(w.isBreak ? tr('pm.tileWeekValBreak', { done: mins(w.secs) }) : tr('pm.tileWeekVal', { done: mins(w.secs), goal: mins(w.goal) })) + '</b></div>'
       +   '<div class="pm-tile-sub">' + esc(weekSub) + '</div></div>'
       + '<div class="pm-tile"><div class="pm-tile-h">' + esc(tr('pm.tileStreak')) + '</div>'
-      +   '<div class="pm-tile-row"><span class="pm-streak pm-streak-lg' + (w.hit ? ' pm-on' : '') + '">' + FLAME + '</span><b>' + esc(plural('pm.tileStreakVal', st.streak)) + '</b></div>'
+      +   '<div class="pm-tile-row"><span class="pm-streak pm-streak-lg' + (w.hit ? ' pm-on' : '') + '">' + FLAME + '</span><b>' + esc(streakWords('pm.tileStreakVal', st.streak)) + '</b></div>'
       +   '<div class="pm-tile-sub">' + esc(plural('pm.tileLongest', st.longest)) + '</div></div>'
       + '<div class="pm-tile"><div class="pm-tile-h">' + esc(tr('pm.tileToday')) + '</div>'
       +   '<div class="pm-tile-row"><b class="pm-today">' + mins(dayTotal(d)) + '</b><span class="pm-today-u">' + esc(tr('pm.min')) + '</span></div>'

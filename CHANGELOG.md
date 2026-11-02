@@ -5,6 +5,23 @@ Notable changes to the Guitar Class site. Newest first.
 For the full session-by-session history (and the reasoning behind each change),
 see `WORKFLOW.md` and the git commit log.
 
+## 2026-11-02 — Power Chord Switch setup, practice minutes wording
+
+- **Power Chord Switch: the setup fits the screen after you have a best score.**
+  Once "Best today" showed, the tempo row dropped to its own line and the
+  privacy note at the bottom was cut off. "Best today" now sits on its own line
+  under the −5 / +5 buttons, and everything fits.
+- **Power Chord Switch, small fixes:** the "Pick different chords" button now has
+  room around its words, and the group name "Slide along the low E string" no
+  longer splits between "low" and "E" (in Spanish, "Mi" and "grave").
+- **Practice minutes: no more goals you cannot reach.** If the 20 minutes a day
+  limit means you cannot reach 30 minutes this week any more, My progress and the
+  card after you press Stop now say: "You can't reach the goal this week. A new
+  week starts Monday." It used to say something like "10 more keeps your streak"
+  on a Sunday when you had already played 20 minutes.
+- **Practice minutes: "No streak yet"** instead of "0-week streak" when you have
+  no streak.
+
 ## 2026-11-01 — Practice minutes
 
 - **The site now counts your practice minutes.** When you play along with a

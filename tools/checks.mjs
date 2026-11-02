@@ -10877,7 +10877,10 @@ function checkCoachVerdicts() {
       if (run('cc.progIdx') !== 0 || !pw.includes('class="ts-btn active" onclick="ccPickProg(0)"')) flag(`1ca: ${lang} Power Chord Switch does not open with the computer's pick selected`);
       for (const g of GROUP_IDS) {
         const title = run(`t(CC_POWER_GROUPS.find(g => g.id === ${JSON.stringify(g)}).titleKey)`);
-        if (!pwText.includes(title)) flag(`1ca: ${lang} Power Chord Switch lost its "${title}" group`);
+        /* text() turns every whitespace character (a no-break space too) into a plain space, so compare the title through the same step. */
+        if (!pwText.includes(String(title).replace(/\s+/g, ' '))) flag(`1ca: ${lang} Power Chord Switch lost its "${title}" group`);
+        /* "low E" / "Mi grave" must not break across two lines in the narrow pair columns (2026-11-01): tools/smoke.mjs measures it in a browser; this is the source pin. */
+        if (g === 'low' && !/(low|Mi)\u00a0(E|grave)/.test(title)) flag(`1ca: ${lang} Power Chord Switch's "${title}" group title joins "low E" / "Mi grave" with an ordinary space — use a no-break space (\\u00a0) so the title cannot break between the two words`);
       }
       if (lang === 'es' && /power/i.test(pwText)) flag(`1ca: Spanish Power Chord Switch setup says "${pwText.match(/\S*power\S*/i)[0]}" — the glossary word is "acorde de potencia"`);
       if (!/three|tres/.test(pwText)) flag(`1ca: ${lang} Power Chord Switch setup no longer mentions the three strings`);
@@ -10999,7 +11002,7 @@ function checkCoachVerdicts() {
    The browser half (strip, recap, toast, My progress, 1366×657, both languages,
    a real <audio>) is tools/pm-e2e.mjs — it needs Chrome, so it is run by hand.
    ════════════════════════════════════════════════════════════════════ */
-const PM_SIM_PIN = 133;
+const PM_SIM_PIN = 142;
 function checkPracticeMinutes(i18nTable) {
   head('1cg. Practice minutes: the engine is run; the rules cap, heartbeat shape, wiring and strings are pinned');
   let bad = 0;

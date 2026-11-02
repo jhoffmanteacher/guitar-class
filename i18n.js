@@ -374,15 +374,16 @@
     // "N of M" beside a module heading's progress bar, inside either fold
     // (caModuleHeadHtml, item 2f).
     'ca.moduleProgress':       { en: '{done} of {total}', es: '{done} de {total}' },
-    // Tag on the Today hero card (caHeroCardHtml) — Chromebook rail work
+    // Heading over the Today group (caTodayHeadHtml) — Chromebook rail work
     // order, 2026-09-19. Was "Start here" (+ a " · today" variant while
     // gated) until 2026-09-23; now the first of the page's three group
     // names, gated or not.
     'ca.startHere':            { en: "Today's activity", es: 'Actividad de hoy' },
     /* The same slot when the hero ISN'T today's work — the newest few are
        finished and an older activity is still undone, so it rises to the
-       top (caStartHereTagHtml, 2026-09-20). It says what it is instead of
-       "Today's activity", and carries its date at full weight beside it.
+       top (the Today group's heading, caTodayHeadHtml, 2026-09-20). It says
+       what it is instead of "Today's activity", and carries its date at full
+       weight beside it.
        "Unfinished" (was "Not finished") so it matches the Unfinished
        activities group it came from. */
     'ca.notFinished':          { en: 'Unfinished', es: 'Sin terminar' },
@@ -390,7 +391,6 @@
     // — it shows like any other but never locks the rest of the site.
     'ca.optional':             { en: 'Optional', es: 'Opcional' },
     'ca.optionalTitle':        { en: 'You can skip this one. It does not lock the rest of the site.', es: 'Puedes saltarte esta. No bloquea el resto del sitio.' },
-    'ca.checkNotFinished':     { en: 'Exit check · unfinished', es: 'Boleto de salida · sin terminar' },
     'ca.heroFromDate':         { en: 'From {date}', es: 'Del {date}' },
     // The Today hero's own call-to-action (caHeroCardHtml/caHeroCheckHtml)
     // — the arrow is appended in app.js, matching "Go to practice →".
@@ -640,6 +640,10 @@
     'pm.playing':         { en: '{n} playing', es: '{n} tocando' },
     'pm.weekMin':         { en: '{done}/{goal} min this week', es: '{done}/{goal} min esta semana' },
     'pm.weekMinBreak':    { en: '{done} min this week', es: '{done} min esta semana' },
+    // Streak of 0: the flame's label and the My progress tile say this instead of "0-week streak".
+    'pm.streakNone':      { en: 'No streak yet', es: 'Aún no tienes racha' },
+    // The goal cannot be reached any more this week: the daily cap leaves too few minutes. My progress tile and the recap card.
+    'pm.weekOut':         { en: 'You can’t reach the goal this week. A new week starts Monday.', es: 'Esta semana ya no puedes llegar a la meta. El lunes empieza una semana nueva.' },
     'pm.streak.one':      { en: '{n}-week streak', es: 'racha de {n} semana' },
     'pm.streak.many':     { en: '{n}-week streak', es: 'racha de {n} semanas' },
     // The card that appears after you stop.
@@ -2180,8 +2184,9 @@
       es: 'Desliza por la cuerda La' },
     'games.pw.group.jump': { en: 'Jump between strings',
       es: 'Salta entre cuerdas' },
-    'games.pw.group.low': { en: 'Slide along the low E string',
-      es: 'Desliza por la cuerda Mi grave' },
+    // \u00a0 (no-break space) keeps "low E" / "Mi grave" together: in the narrow pair columns the title broke between "low" and "E".
+    'games.pw.group.low': { en: 'Slide along the low\u00a0E string',
+      es: 'Desliza por la cuerda Mi\u00a0grave' },
     'games.pw.group.random': { en: 'The computer picks the chords',
       es: 'La computadora elige los acordes' },
     'games.pw.group.tempo': { en: 'Tempo (beats per minute)',

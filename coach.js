@@ -3269,16 +3269,24 @@ function ccRenderSetup(msg){
      ccDiagramsHtml. */
   body.classList.toggle('cc-power', power);
   const speedRow = `<div class="cc-group"><div class="cc-group-title">${t('games.cc.group.speedTitle')}</div><div class="fret-levels">${rateBtnsHtml}</div></div>`;
+  const bestChip = best ? `<span class="cc-best">${t('games.common.bestTodayLabel')}: ${best} BPM</span>` : '';
+  /* Change Up keeps the score on the -5/+5 row. Power Chord Switch puts it on
+     its own line under that row (.cc-best-line, below): beside the buttons it
+     made the tempo group too wide to sit next to the speed group, the tempo
+     dropped to a line of its own, and the setup grew to 698px on a 657px
+     screen (2026-11-01). */
   const bpmRow = `<div class="coach-bpm-row">
        <button type="button" class="tp-btn" onclick="ccNudgeBpm(-5)">&#x2212;5</button>
        <span class="coach-bpm-readout" id="cc-bpm-readout">${cc.bpm} BPM</span>
        <button type="button" class="tp-btn" onclick="ccNudgeBpm(5)">+5</button>
-       ${best ? `<span class="cc-best">${t('games.common.bestTodayLabel')}: ${best} BPM</span>` : ''}
+       ${power ? '' : bestChip}
      </div>`;
   /* Power Chord Switch asks "how fast" and the tempo first — they are the whole
      game — then which two chords, all in the left column (the charts have the
      right one); Change Up keeps the loops first and the tempo below. */
-  const tempoRow = `<div class="cc-group"><div class="cc-group-title">${t('games.pw.group.tempo')}</div>${bpmRow}</div>`;
+  /* The line is always drawn, empty when there is no score yet, so the pair
+     buttons below do not jump when a pick with a score is clicked. */
+  const tempoRow = `<div class="cc-group"><div class="cc-group-title">${t('games.pw.group.tempo')}</div>${bpmRow}<div class="cc-best-line">${bestChip}</div></div>`;
   /* Start sits in .cc-startbar in both games. Change Up's bar sticks to the
      bottom of the scrolling games screen (styles.css .cc-startbar): its 80px
      charts push Start below a 657px screen once a loop is picked (Friday check

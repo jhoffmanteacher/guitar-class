@@ -2253,12 +2253,15 @@ body.rail-collapsed .rail-tools .tool-popup{
 .cc-diagrams .cc-dia svg{width:80px;height:auto}
 /* Power Chord Switch shows only two chords, so each chart can be much larger
    than the 80px a Coach drill of up to seven shares a row with. */
-/* Change Up: Start sticks to the bottom of the games screen (the scroll
-   container, position:fixed + overflow:auto), so the loop's charts and the tempo
-   row below can't push it off a 657px screen (80px charts with a loop picked:
-   Friday check R1-3, 2026-10-31). A solid bar, so what scrolls under it stays
-   readable. Power Chord Switch wraps Start in the same bar but lays the screen
-   out in two columns (below) so it needs no sticking: .cc-power turns it off. */
+/* Start's bar (.cc-startbar). Change Up's setup is wide (three loop lists across
+   the top, settings left, charts right: .cc-open-setup) and fits 1366x657 without
+   scrolling, so on a Chromebook the bar never has anything to stick over; tools/
+   smoke.mjs asserts that. position:sticky stays as a safety net for a shorter
+   window: it keeps Start at the bottom of the games screen (the scroll container,
+   position:fixed + overflow:auto) when the loop's charts do push it down (Friday
+   check R1-3, 2026-10-31). A solid bar, so what scrolls under it stays readable.
+   Power Chord Switch lays the screen out in two columns (below) and turns the
+   sticking off above 900px: .cc-power. */
 #cc-body .cc-startbar{position:sticky;bottom:0;z-index:2;background:var(--bg);padding:8px 0 6px;margin-top:4px;box-shadow:0 -10px 10px -6px var(--bg)}
 #cc-body .cc-startbar .coach-start{margin-top:0}
 #cc-body.cc-power .cc-startbar{position:static;box-shadow:none;padding:6px 0 0;margin-top:4px}
@@ -2275,6 +2278,9 @@ body.rail-collapsed .rail-tools .tool-popup{
 #cc-body.cc-power .cc-groups .ts-btn{white-space:normal;text-align:center;min-width:0}
 #cc-body.cc-power .cc-col-set,#cc-body.cc-power .cc-col-pic{min-width:0}
 #cc-body.cc-power .cc-speedtempo{display:flex;flex-wrap:wrap;gap:0 32px;align-items:flex-start}
+/* "Best today" under the -5/+5 row, one line tall whether or not there is a score. */
+#cc-body.cc-power .cc-best-line{min-height:15px}
+#cc-body.cc-power .cc-best-line .cc-best{margin-left:0}
 #cc-body.cc-power .cc-col-pic .coach-tip{margin-top:6px}
 #cc-body.cc-power .cc-diagrams{flex-wrap:nowrap;justify-content:center;gap:20px;margin:0}
 #cc-body.cc-power .cc-diagrams .cc-dia{flex:1 1 0;min-width:0}
@@ -2380,6 +2386,9 @@ body.rail-collapsed .rail-tools .tool-popup{
 .cc-pip{width:14px;height:14px;border-radius:50%;background:var(--bg3);border:1px solid var(--border2)}
 .cc-pip.on{background:var(--green-text);border-color:var(--green-text)}
 .cc-change-loop{margin-top:8px}
+/* Power Chord Switch's done screen: .tp-btn has no side padding of its own (it
+   is built to stretch in a row), so alone on a line the label touched the border. */
+#cc-body.cc-power .cc-change-loop{padding:10px 20px}
 #cc-body .coach-chip.pending{opacity:0.8}
 
 /* ── Resource viewer: floating mini-player (replaces the right-side panel).
@@ -3076,19 +3085,12 @@ span.tab-count-held{margin-left:4px}
    caActivityCardHtml/caCheckCardHtml. */
 .ca-card--hero{border-left-width:6px;box-shadow:var(--shadow-card)}
 /* An OLDER hero — the newest cards are finished and this undone one floated
-   up to the top (caStartHereTagHtml, 2026-09-20). Same card, quieter band:
+   up to the top (caTodayHeadHtml says so, 2026-09-20). Same card, quieter band:
    a muted version of its OWN accent, so a glance down the page doesn't read
    it as today's work. Border colour only — nothing here is text, so neither
    value forms a contrast pair (1s). */
 .ca-card--hero-older{border-left-color:var(--ca-accent-soft)}
 .ca-card--hero-check.ca-card--hero-older{border-left-color:var(--blue-soft)}
-/* On an older hero the date shares the tag's row and carries real weight:
-   it is the thing that explains why this card is at the top at all. A
-   current hero keeps the small .ca-chip on its own row above the tag.
-   (On In-Class Activities both now sit ONCE in .ca-today-head above the
-   group instead — caStartHereTagHtml's `grouped`.) */
-.ca-hero-tagrow{display:flex;align-items:baseline;flex-wrap:wrap;gap:8px}
-.ca-hero-from{font-size:0.9375rem;font-weight:600;color:var(--text)}
 /* "Today's activity · Mon, 11/2" once above the Today cards (caTodayHeadHtml,
    2026-10-31) — the label and date every hero card used to carry. An OLDER
    group says "Unfinished · From <day>" in quieter colours instead. */
