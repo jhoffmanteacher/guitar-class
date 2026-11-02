@@ -288,6 +288,38 @@ for (const per of ['4', 'CAS', '']) {
   check(`period ${per || '(none chosen)'}: the same seven bars, Mon–Sun`, lab === 'Mon,Tue,Wed,Thu,Fri,Sat,Sun', lab);
 }
 
+/* ── The pills belong to a SHOWN practice card (2026-11-01 Friday check, PD-3/PD-4
+   and the review of that fix): leaving the card screen without Stop must not make
+   an unseen recap that starts the 3-minute gap; a goal crossed off the card waits
+   for the next card; a recap goes on a language switch and when the card goes. ── */
+await ev(`window.__period = '7'; setLang('en'); PRACTICE_MINUTES_CONFIG.skipWeeks = []; PRACTICE_MINUTES_CONFIG.streakStartWeek = ''; PRACTICE_MINUTES_CONFIG.uiOn = true`);
+await seedWeeks([1900, 1900, 1900]);
+await ev(`window.__pills = []; new MutationObserver((ms) => { for (const m of ms) for (const n of m.addedNodes) if (n.id === 'pm-recap' || n.id === 'pm-toast') window.__pills.push(n.id); }).observe(document.body, { childList: true }); true`);
+await ev(`openClassActivitiesScreen(${JSON.stringify(card)})`); await sleep(1500);
+await ev(`PM.onCardOpen(); caSyncTopbar(); (() => { const s = PM._state(); s.loaded = true; s.weeks = JSON.parse(JSON.stringify(window.__fs.weeks)); s.days = {}; s.pend = {}; s.lastRecapAt = 0; return true; })()`); await sleep(300);
+await ev(`document.querySelector('.ca-card[open] .pc-play').click()`); await waitFor(`PM._session() && PM._session().counted >= 3`);
+const pillSrc = await ev(`pcState.audio.currentSrc`);
+await ev(`PM._session().counted = 150; location.hash = '#my-progress'`); await sleep(3800);
+const lv = await ev(`({ lastRecapAt: PM._state().lastRecapAt, pills: window.__pills.slice() })`);
+check('left the card screen while playing (no Stop): no unseen recap, so the 3-minute gap is not started', lv.lastRecapAt === 0 && !lv.pills.length, lv);
+await ev(`window.__pills = []; openClassActivitiesScreen(${JSON.stringify(card)})`); await sleep(1500);
+await ev(`document.querySelector('.ca-card[open] .pc-play').click()`); await waitFor(`PM._session() && PM._session().counted >= 2`);
+await ev(`PM._session().counted = 150; pcStop()`); await sleep(3500);
+const recapUp = await ev(`!!document.getElementById('pm-recap')`);
+check('…so the recap after the next session on the card shows', recapUp);
+await ev(`setLang('es')`); await sleep(400);
+check('…and a language switch removes it (it would stay in the old language)', recapUp && !(await ev(`!!document.getElementById('pm-recap')`)), recapUp ? 'still there' : 'no recap to remove');
+await ev(`setLang('en')`); await sleep(300);
+await ev(`(() => { const s = PM._state(), d = PM.calc.ymd(new Date()); s.weeks[PM.calc.weekIdOf(d)] = { seconds: 1800 - 4, goalSeconds: 1800, hit: false }; s.days = {}; s.pend = {}; s.toastWeek = ''; s.pendingToast = false; s.lastRecapAt = 0; try { localStorage.removeItem('pm:t:e2e-student'); } catch(e) {} return true; })()`);
+await ev(`location.hash = '#my-progress'`); await sleep(1500);
+await ev(`window.__pills = []; window.__a = new Audio(${JSON.stringify(pillSrc)}); window.__a.play(); true`);
+await waitFor(`PM._state().pendingToast === ${JSON.stringify(todayWeek)} || PM._state().toastWeek !== ''`, 15000); await sleep(800);
+const off = await ev(`({ pending: PM._state().pendingToast, toastWeek: PM._state().toastWeek, pills: window.__pills.slice() })`);
+await ev(`window.__a.pause(); true`); await sleep(2500);
+await ev(`openClassActivitiesScreen(${JSON.stringify(card)})`); await sleep(2000);
+const on = await ev(`!!document.getElementById('pm-toast')`);
+check('the week goal crossed on My progress (a backing track playing there): no toast made unseen; it shows at the next practice card', !off.pills.length && off.toastWeek === '' && on, { off, toastOnCard: on });
+
 check('no uncaught exceptions on the page', consoleErrors.length === 0, consoleErrors.slice(0, 3));
 console.log(`\n${fail ? '✗' : '✓'} pm-e2e: ${pass} passed, ${fail} failed — screenshots in ${OUT}`);
 done(fail ? 1 : 0);

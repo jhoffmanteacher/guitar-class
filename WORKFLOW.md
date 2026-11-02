@@ -101,8 +101,10 @@
     whenever the streak is above 0 — pick one.
   - [ ] Impossible tips: at the 20-min daily cap on a Sunday the tile can say "10
     more reaches your goal"; "0-week streak" reads oddly.
-  - [ ] The "goal reached" toast shows only on a practice card (a goal reached on
-    a Journey page or in a lesson snippet waits for the next practice card).
+  - [ ] The "goal reached" toast shows only on a practice card. A goal reached
+    in a lesson snippet or on My progress waits for the next practice card on
+    that page; one reached on a Journey page never shows (`pendingToast` lives
+    in that page's memory only).
   - [ ] `tools/pm-e2e.mjs` seeds history counting back from the real date: with
     the live skip weeks its expectations fail in 24 of 32 school weeks from the
     week of 2026-11-23. Not a site bug — make its dates fixed.
@@ -935,13 +937,20 @@
       **Leaving a page (2026-11-01 Friday check):** Chrome fires `pagehide` THEN
       `visibilitychange:hidden` (measured, Chrome 153); the second starts no
       commit and keeps the leaving key. The keepalive sends `pend` even with a
-      commit in flight. A commit sent under `INFLIGHT_TRUST_MS` (30 s) before
-      the close is left out of the leaving key — **Jonathan's call: losing under
-      a minute beats counting it twice**; an older unanswered one stays queued
-      (a stalled backlog is kept). A leaving key is adopted only once it is 3
+      commit in flight — but not when that commit has been unanswered for 30 s
+      (a dead link: the keepalive would die too and its seconds be deleted as
+      landed). A commit sent under `INFLIGHT_TRUST_MS` (30 s) before the close
+      AND no bigger than `INFLIGHT_TRUST_MAX_SEC` (90 s — a normal flush or Stop)
+      is left out of the leaving key — **Jonathan's call: losing under a minute
+      beats counting it twice**; an older unanswered one, or a bigger one (an
+      offline backlog sent on `online`), stays queued: losing it would be
+      minutes. Known limit: such a big batch that DID land just before the close
+      is sent again by the next page (the rules' daily cap bounds it). A leaving key is adopted only once it is 3
       minutes old (the old "pagehide stamp 0 = adopt at once" never survived
       Chrome's order). Signing out and back in on an open Journey page folds the
-      page's own key back in (`sync`, `leftInflight`). Streak: a miss before any
+      page's own key back in (`sync`, `leftInflight`, used once); a commit that
+      answers after a switch never rewrites a key a newer state of that student
+      has written (`newestGen`), it only adds back what did not land. Streak: a miss before any
       streak spends no free miss (Jonathan, 2026-11-01). pm-sim section 10.
       A commit has NO timeout (the SDK keeps and later delivers it; re-sending
       multiplied the seconds in the review, a 5-minute stall stored the daily

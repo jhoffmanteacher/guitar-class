@@ -154,6 +154,19 @@ function makeWorld(opts = {}) {
     fetch: (url, init) => {
       log.fetches.push({ url, init });
       if (/runAggregationQuery$/.test(url)) return Promise.resolve({ ok: true, json: () => Promise.resolve([{ result: { aggregateFields: { n: { integerValue: String(net.aggregate) } } } }]) });
+      /* net.applyKeepalive (opt-in, section 10): the keepalive :commit really lands on
+         the fake server under the same rules as a batch — unless the link is down
+         (offline, net.keepaliveFails). Off, a keepalive changes nothing (sections 1–9). */
+      if (net.applyKeepalive && /documents:commit$/.test(url)) {
+        if (!net.online || net.keepaliveFails) return Promise.reject(new Error('net'));
+        const ops = JSON.parse(init.body).writes.map((wr) => {
+          const name = wr.update.name, id = name.split('/').pop(), kind = /\/days\//.test(name) ? 'days' : 'weeks';
+          const data = { seconds: { __inc: +wr.updateTransforms[0].increment.integerValue } };
+          if (kind === 'weeks') { data.goalSeconds = +wr.update.fields.goalSeconds.integerValue; if (wr.update.fields.hit) data.hit = wr.update.fields.hit.booleanValue; }
+          return { path: 'minutes/x/' + kind + '/' + id, data };
+        });
+        return Promise.resolve(applyOps(ops) ? { ok: true } : { ok: false, status: 403 });
+      }
       return Promise.resolve({ ok: true });
     },
     firebaseConfig: { projectId: process.env.PM_PROJECT || 'guitar-class-test' },
@@ -444,7 +457,8 @@ console.log('4. daily cap and the pending-write queue');
   const e1 = early.track(); e1.play();
   await early.run(8, early.playing(e1));
   await early.PM.flush(); await early.settle();
-  check('a page that left offline: 1 minute later its queue is still stored (not lost) and not yet sent', (early.server.days[todayStr]?.seconds || 0) <= 8 && Object.values(qDays(w) || {}).reduce((x, y) => x + y, 0) >= 70, 'server ' + early.server.days[todayStr]?.seconds);
+  const earlyHeld = Object.entries(early.store).filter(([k]) => k.startsWith('pm:q:uid-A')).reduce((n, [, v]) => n + Object.values(JSON.parse(v).days).reduce((x, y) => x + y, 0), 0);
+  check('a page that left offline: 1 minute later its queue is still stored on the next page (not lost) and not yet sent', (early.server.days[todayStr]?.seconds || 0) <= 8 && earlyHeld >= 70, `server ${early.server.days[todayStr]?.seconds}, still queued ${earlyHeld}`);
   const w2 = makeWorld({ store: { ...left }, startMs: w.clock.ms + 200000 });
   const b = w2.track(); b.play();
   await w2.run(8, w2.playing(b));
@@ -892,6 +906,81 @@ console.log('10. friday check 2026-11-01');
   w.ctx.pcState = { live: true }; a.play(); await w.run(5, w.playing(a)); a.pause(); await w.run(31);
   check('…a card left paused and live ends the session after 30 s', !w.PM._session());
   w.ctx.pcState = null;
+}
+
+{
+  // Review of the fix (2026-11-01), finding 1: a link that answers nothing (captive portal, ISP down). The keepalive
+  // must not be trusted over it — its seconds would be deleted as if they had landed.
+  for (const kaFails of [true, false]) {
+    const sh = shared(); sh.net.applyKeepalive = true; const w = makeWorld(sh);
+    const a = w.track(); a.play();
+    await runAll([w], 30, () => { if (!a.paused) a.currentTime += 1; });
+    sh.net.stall = true;
+    await runAll([w], 300, () => { if (!a.paused) a.currentTime += 1; });
+    sh.net.keepaliveFails = kaFails;
+    leaveLikeChrome(w);
+    sh.net.queued = []; sh.net.stall = false; sh.net.keepaliveFails = false;     // the page is gone: its SDK commit dies with it
+    const w2 = makeWorld({ ...sh, clock: { ms: sh.clock.ms + 240000, perf: 9000 } });
+    w2.PM.status(); await runAll([w2], 40); await w2.PM.flush(); await w2.settle(); await runAll([w2], 5);
+    const total = sh.server.days[todayStr]?.seconds || 0;
+    check(`a link that answered nothing for 5 min, then the tab closed (keepalive ${kaFails ? 'fails too' : 'would land'}): nothing is lost or doubled (330 played)`, total >= 325 && total <= 331, 'server ' + total);
+  }
+  // Finding 2: an offline backlog goes out as ONE batch on `online`; the tab closes 5 s later. Minutes, not seconds: kept.
+  {
+    const sh = shared(); sh.net.online = false; const w = makeWorld(sh);
+    const a = w.track(); a.play();
+    await runAll([w], 600, () => { if (!a.paused) a.currentTime += 1; });
+    a.pause(); await runAll([w], 5);
+    sh.net.online = true; sh.net.stall = true;
+    for (const f of w.listeners['win:online'] || []) f();
+    await runAll([w], 5);
+    leaveLikeChrome(w);
+    sh.net.queued = []; sh.net.stall = false;                                    // never landed
+    const w2 = makeWorld({ ...sh, clock: { ms: sh.clock.ms + 240000, perf: 9000 } });
+    w2.PM.status(); await runAll([w2], 40); await w2.PM.flush(); await w2.settle(); await runAll([w2], 5);
+    const total = sh.server.days[todayStr]?.seconds || 0;
+    check('a 10-minute offline backlog sent 5 s before the tab closed, never answered: kept and sent by the next page (not dropped as "probably landed")', total >= 595 && total <= 601, 'server ' + total);
+  }
+  // Findings 4 and 6: sign-out / sign-in with a commit stuck on the wire.
+  const signWorld = (extra = {}) => {
+    const sh = shared(); const w = makeWorld(sh);
+    let who = 'A'; const users = { A: w.user, B: { uid: 'uid-B', getIdToken() { return Promise.resolve('tok-B'); } }, none: null };
+    w.windowStub.PM_HOST.user = () => users[who];
+    const a = w.track(); const mv = () => { if (!a.paused) a.currentTime += 1; };
+    const play = async (n) => { a.play(); await runAll([w], n, mv); a.pause(); await runAll([w], 3); };
+    const as = async (u) => { who = u; w.PM.status(); await runAll([w], 2); };
+    const finish = async () => { sh.net.stall = false; sh.net.holdReads = false; w.releaseReads(); w.drain(); await runAll([w], 5); await w.PM.flush(); await w.settle(); await runAll([w], 90); await w.PM.flush(); await w.settle(); return sh.server.days[todayStr]?.seconds || 0; };
+    return { sh, w, play, as, finish };
+  };
+  {
+    const t = signWorld();
+    await t.play(64); t.sh.net.stall = true; t.sh.net.holdReads = true; await t.play(70); await t.play(30);
+    await t.as('none'); await t.as('A'); await t.as('none'); await t.as('A');
+    const total = await t.finish();
+    check('A → out → A → out → A while one commit is stuck: the stuck seconds are subtracted once, not twice (164 played)', total >= 162 && total <= 165, 'server ' + total);
+  }
+  for (const lands of [true, false]) {
+    const t = signWorld();
+    await t.play(64); t.sh.net.stall = true; await t.play(70); await t.play(30);
+    await t.as('none'); await t.as('A');
+    if (lands) { t.sh.net.stall = false; t.w.drain(); }
+    else { const q = t.sh.net.queued; t.sh.net.queued = []; t.sh.net.stall = false; q.forEach((x) => x.rej(new Error('unavailable'))); }
+    await runAll([t.w], 5);
+    const total = await t.finish();
+    check(`signed out and back in while a commit was on the wire, which then ${lands ? 'landed' : 'failed'}: 164 played → 164 stored`, total >= 162 && total <= 165, 'server ' + total);
+  }
+  {
+    const t = signWorld();
+    await t.play(64); t.sh.net.stall = true; t.sh.net.holdReads = true; await t.play(70); await t.play(30);
+    await t.as('none'); await t.as('A'); await runAll([t.w], 3);
+    await t.play(100);
+    await t.as('none');
+    t.sh.net.stall = false; t.w.drain(); await runAll([t.w], 3);                 // the old commit lands while A is away
+    t.sh.net.holdReads = false; t.w.releaseReads(); await runAll([t.w], 3);
+    await t.as('A');
+    const total = await t.finish();
+    check('a commit from an older sign-in lands after a newer sign-in counted more: the newer seconds are not overwritten (264 played)', total >= 262 && total <= 265, 'server ' + total);
+  }
 }
 
 console.log(`\n${failed ? '✗' : '✓'} pm-sim: ${passed} passed, ${failed} failed`);

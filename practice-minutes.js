@@ -190,6 +190,10 @@
      An older one that never answered almost certainly did not land, so it stays
      queued — that keeps a stalled offline backlog. */
   var INFLIGHT_TRUST_MS = 30000;
+  /* …and only a normal-sized one (a 60 s flush, a Stop). A bigger batch — an
+     offline backlog sent on `online`, an adopted key — stays queued: losing it
+     would be minutes, not seconds (2026-11-01 review of the fix). */
+  var INFLIGHT_TRUST_MAX_SEC = 90;
   var host = null;
   var S = null;                       // per-student state, rebuilt when the uid changes
   var media = new Set();              // backing-track elements seen playing
@@ -199,9 +203,11 @@
   var pid = '';                       // random id for this page (its own queue key)
   var leavingPage = false;            // pagehide ran; cleared if the page comes back (back/forward cache)
   var leftInflight = {};              // uid -> seconds a signed-out state still has on the wire (see sync)
+  var stateGen = 0, newestGen = {};   // uid -> gen of the newest state built for it (settleAfterSwitch)
 
   function freshState(uid){
-    return { uid: uid, days: {}, weeks: {}, pend: {}, inflight: null, flushP: null, frac: 0, loaded: false, loading: null, flushing: false,
+    newestGen[uid] = ++stateGen;
+    return { uid: uid, gen: stateGen, days: {}, weeks: {}, pend: {}, inflight: null, flushP: null, frac: 0, loaded: false, loading: null, flushing: false,
              loadRetryAt: 0, live: 0, liveAt: 0, toastWeek: '', pendingToast: false, lastRecapAt: 0 };
   }
   function ls(k, v){
@@ -236,16 +242,19 @@
      key let two tabs of one student adopt (and send) each other's unconfirmed
      seconds, and overwrite each other's. Now a page writes only its own key and
      refreshes `at` while it holds anything; it takes over another page's key only
-     when that stamp is older than STALE_QUEUE_MS (a closed tab, a crash), or 0
-     (written by pagehide: "I am leaving"). What a page holds = pend (not yet
+     when that stamp is more than STALE_QUEUE_MS from now (a closed tab, a crash;
+     a page that left writes a normal stamp too — see persist). What a page holds = pend (not yet
      sent) + inflight (sent, not yet acknowledged). */
   function pageId(){ if(!pid) pid = randHex(6); return pid; }
   function qKey(u){ return 'pm:q:' + u + ':' + pageId(); }
   function queued(d){ return (S.pend[d] || 0) + ((S.inflight && S.inflight.snap[d]) || 0); }
+  function snapSum(snap){ var n = 0; Object.keys(snap).forEach(function(d){ n += snap[d] || 0; }); return n; }
+  /* Sent moments ago on a working link, and a normal size: it almost certainly landed. */
+  function inflightTrusted(inf){ return Date.now() - inf.at < INFLIGHT_TRUST_MS && snapSum(inf.snap) <= INFLIGHT_TRUST_MAX_SEC; }
   function heldDays(leaving){
     var m = {};
     Object.keys(S.pend).forEach(function(d){ if(S.pend[d] > 0) m[d] = (m[d] || 0) + S.pend[d]; });
-    var inf = S.inflight && !(leaving && Date.now() - S.inflight.at < INFLIGHT_TRUST_MS) ? S.inflight : null;
+    var inf = S.inflight && !(leaving && inflightTrusted(S.inflight)) ? S.inflight : null;
     if(inf) Object.keys(inf.snap).forEach(function(d){ m[d] = (m[d] || 0) + inf.snap[d]; });
     return m;
   }
@@ -308,6 +317,7 @@
           var n = (own.days[d] || 0) - (wire[d] || 0);
           if(n > 0) S.pend[d] = (S.pend[d] || 0) + n;
         });
+        delete leftInflight[u];        // subtracted once; this state's first persist rewrites the key without it
         var c = lsJson('pm:c:' + u);
         if(c){ S.days = c.days || {}; S.weeks = c.weeks || {}; }
         S.toastWeek = ls('pm:t:' + u) || '';
@@ -520,7 +530,9 @@
     });
     Object.keys(byWeek).forEach(function(w){
       var g = calc.goalSeconds(c, w), goal = g || Math.round(c.weeklyGoalMinutes * 60), known = !!S.weeks[w];
-      var total = ((S.weeks[w] && S.weeks[w].seconds) || 0) + byWeek[w];
+      var flying = 0;
+      if(S.inflight) Object.keys(S.inflight.snap).forEach(function(d){ if(calc.weekIdOf(d) === w) flying += S.inflight.snap[d]; });
+      var total = ((S.weeks[w] && S.weeks[w].seconds) || 0) + byWeek[w] + flying;   // a keepalive sent beside an in-flight batch must not send hit:false over it
       var hit = !!((S.weeks[w] && S.weeks[w].hit === true) || (g > 0 && total >= goal));
       ops.push({ kind: 'week', id: w, inc: byWeek[w], goalSeconds: goal, hit: hit, sendHit: hit || !known });
     });
@@ -599,6 +611,17 @@
       if(!landed){ Object.keys(snap).forEach(function(d){ S.pend[d] = (S.pend[d] || 0) + snap[d]; }); persist(); }
       return;
     }
+    if(newestGen[st.uid] !== st.gen){
+      /* A later state of this student on this page has written the key since (it
+         may hold seconds st never saw, or another page may have adopted it):
+         never rewrite it from st. Only add back what did not land. */
+      if(!landed){
+        var k = lsJson(qKey(st.uid)) || { days: {} }; k.days = k.days || {};
+        Object.keys(snap).forEach(function(d){ k.days[d] = (k.days[d] || 0) + snap[d]; });
+        ls(qKey(st.uid), JSON.stringify({ days: k.days, at: Date.now() }));
+      }
+      return;
+    }
     if(!landed) Object.keys(snap).forEach(function(d){ st.pend[d] = (st.pend[d] || 0) + snap[d]; });
     var held = {}, any = false;
     Object.keys(st.pend).forEach(function(d){ if(st.pend[d] > 0){ held[d] = st.pend[d]; any = true; } });
@@ -630,6 +653,10 @@
   function keepaliveFlush(){
     var st = S;
     if(!st || st.loading || !idToken || idTokenUid !== st.uid || typeof fetch === 'undefined') return;
+    /* A commit unanswered for 30 s means the link is dead (captive portal, ISP
+       down): the keepalive would go the same way and its seconds would be
+       deleted as if they had landed. Leave everything in the leaving key. */
+    if(st.inflight && !inflightTrusted(st.inflight)) return;
     if(typeof navigator !== 'undefined' && navigator.onLine === false) return;
     if(Date.now() < deniedUntil) return;
     var snap = takePending();
@@ -651,8 +678,9 @@
         body: JSON.stringify({ writes: writes })
       }).catch(function(){});
       /* Assume it lands: leaving the seconds queued would send them twice the
-         next time this student opens the site. Losing under a minute is the
-         safer mistake than counting it twice. */
+         next time this student opens the site. Losing them is the safer mistake
+         than counting them twice (Jonathan, 2026-11-01) — and it is only sent on
+         a link that is answering (above). */
       Object.keys(snap).forEach(function(d){ delete st.pend[d]; });
       applyConfirmed(ops);
     } catch(e) {}
@@ -810,7 +838,7 @@
     var st = S;
     if(!st || !st.pendingToast || !uiOn()) return;
     var bar = anchorRect();
-    if(!bar || !document.querySelector('.pm-strip')) return;          // no practice card on screen: show it at the next one
+    if(!bar || !stripShown()) return;          // no practice card on screen (a hidden screen keeps its bar): show it at the next one
     var w = st.pendingToast;
     st.pendingToast = false; st.toastWeek = w; ls('pm:t:' + st.uid, w);
     var s = status();
@@ -830,7 +858,7 @@
     if(!uiOn() || !st || s.counted < c.recapMinSeconds) return;
     if(document.visibilityState === 'hidden') return;          // unseen: it would only start the gap and block the real one
     var bar = anchorRect();
-    if(!bar || !document.querySelector('.pm-strip')) return;
+    if(!bar || !stripShown()) return;
     if(Date.now() - st.lastRecapAt < c.recapGapSeconds * 1000) return;
     st.lastRecapAt = Date.now();
     var u = status(), w = u.week, need = Math.max(1, Math.ceil((w.goal - w.secs) / 60));
