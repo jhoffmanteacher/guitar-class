@@ -11029,6 +11029,8 @@ function checkPracticeMinutes(i18nTable) {
     const num = (k, lo, hi) => { if (typeof cfg[k] !== 'number' || !isFinite(cfg[k]) || cfg[k] < lo || cfg[k] > hi) fail(`config.${k} must be a number from ${lo} to ${hi} (is ${JSON.stringify(cfg[k])})`); };
     if (typeof cfg.uiOn !== 'boolean') fail('config.uiOn must be true or false');
     num('weeklyGoalMinutes', 1, 600); num('dailyCapMinutes', 1, 240); num('liveMinCount', 1, 100);
+    /* A goal above 7 days of the daily cap can never be reached: every week would say "You can't reach the goal this week" (2026-11-02 review). */
+    if (typeof cfg.weeklyGoalMinutes === 'number' && typeof cfg.dailyCapMinutes === 'number' && cfg.weeklyGoalMinutes > 7 * cfg.dailyCapMinutes) fail(`config.weeklyGoalMinutes (${cfg.weeklyGoalMinutes}) is more than 7 x dailyCapMinutes (${cfg.dailyCapMinutes}): no student could ever reach the goal`);
     const dateRe = /^\d{4}-\d{2}-\d{2}$/;
     const monday = d => dateRe.test(d) && new Date(+d.slice(0, 4), +d.slice(5, 7) - 1, +d.slice(8, 10), 12).getDay() === 1;
     if (!Array.isArray(cfg.skipWeeks)) fail('config.skipWeeks must be a list of Monday dates');

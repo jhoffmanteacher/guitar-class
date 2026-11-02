@@ -288,7 +288,7 @@ const shiftClock = (iso) => ev(`(() => { const B = window.__B || (window.__B = w
   return PM.calc.ymd(new Date()); })()`);
 const tilesAt = (weekMin, todayMin, prior, lang) => ev(`(() => { const s = PM._state(), d = PM.calc.ymd(new Date()), cur = PM.calc.weekIdOf(d); s.pend = {}; s.days = {}; s.weeks = {}; s.loaded = true;
   ${JSON.stringify(prior)}.forEach((secs, i) => { s.weeks[PM.calc.weekAdd(cur, -(i + 1))] = { seconds: secs, goalSeconds: 1800, hit: secs >= 1800 }; });
-  s.weeks[cur] = { seconds: ${weekMin} * 60, goalSeconds: 1800, hit: ${weekMin} >= 30 }; if (${todayMin}) s.days[d] = ${todayMin} * 60;
+  s.weeks[cur] = { seconds: Math.round(${weekMin} * 60), goalSeconds: 1800, hit: ${weekMin} >= 30 }; if (${todayMin}) s.days[d] = Math.round(${todayMin} * 60);
   setLang(${JSON.stringify(lang)}); renderMyProgress(); return [...document.querySelectorAll('#pm-progress .pm-tile')].map(t => t.innerText.replace(/\\s+/g, ' ').trim()); })()`);
 const OUT_EN = /^This week .* of 30 min You can.t reach the goal this week\. A new week starts Monday\.$/;
 check('the clock moved to a Sunday (2026-11-29)', await shiftClock('2026-11-29T10:00:00') === '2026-11-29');
@@ -299,6 +299,13 @@ const sunExact = await tilesAt(20, 10, [1900, 1900, 1900], 'en');
 check('Sunday, 20 of 30 min, 10 left in today\'s cap: exactly enough, still "10 more keeps your streak"', /^This week .*20 of 30 min 10 more keeps your streak$/.test(sunExact[0]), sunExact);
 const sunOver = await tilesAt(20, 11, [1900, 1900, 1900], 'en');
 check('Sunday, 20 of 30 min, 9 left in today\'s cap: one minute short, cannot be reached', OUT_EN.test(sunOver[0]), sunOver);
+/* Whole seconds, not whole minutes (2026-11-02 review): 1 s short of the goal with 1 s of room left can still be reached. */
+const secOk = await tilesAt(1799 / 60, 1199 / 60, [1900, 1900, 1900], 'en');
+check('Sunday, 1 s short of the goal with exactly 1 s of today\'s cap left: still reachable ("1 more keeps your streak"), not "can\'t reach"', /^This week .*1 more keeps your streak$/.test(secOk[0]), secOk);
+const secOut = await tilesAt(1799 / 60, 1200 / 60, [1900, 1900, 1900], 'en');
+check('Sunday, 1 s short with no cap left: cannot be reached', OUT_EN.test(secOut[0]), secOut);
+const secMin = await tilesAt(1741 / 60, 1141 / 60, [1900, 1900, 1900], 'en');
+check('Sunday, 59 s short with exactly 59 s of cap left ("1 more" rounded up): still reachable', /^This week .*1 more keeps your streak$/.test(secMin[0]), secMin);
 const sunNoStreak = await tilesAt(20, 20, [], 'en');
 check('…the same with no streak going (the "reaches your goal" wording): cannot be reached', OUT_EN.test(sunNoStreak[0]), sunNoStreak);
 const sunNoStreakOk = await tilesAt(20, 10, [], 'en');

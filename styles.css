@@ -2279,7 +2279,7 @@ body.rail-collapsed .rail-tools .tool-popup{
 #cc-body.cc-power .cc-col-set,#cc-body.cc-power .cc-col-pic{min-width:0}
 #cc-body.cc-power .cc-speedtempo{display:flex;flex-wrap:wrap;gap:0 32px;align-items:flex-start}
 /* "Best today" under the -5/+5 row, one line tall whether or not there is a score. */
-#cc-body.cc-power .cc-best-line{min-height:15px}
+#cc-body.cc-power .cc-best-line{min-height:18px}
 #cc-body.cc-power .cc-best-line .cc-best{margin-left:0}
 #cc-body.cc-power .cc-col-pic .coach-tip{margin-top:6px}
 #cc-body.cc-power .cc-diagrams{flex-wrap:nowrap;justify-content:center;gap:20px;margin:0}

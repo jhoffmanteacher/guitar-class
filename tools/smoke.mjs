@@ -448,18 +448,21 @@ async function powerSwitchWalk(page, run, events, stats, base) {
   const bestMeasure = `(() => { const sc = document.getElementById('games-screen'), g = [...document.querySelectorAll('#cc-body .cc-speedtempo > .cc-group')].map(e => Math.round(e.getBoundingClientRect().top)),
     best = document.querySelector('#cc-body .cc-best'), foot = document.querySelector('#cc-body .coach-foot'), f = foot && foot.getBoundingClientRect(), b = best && best.getBoundingClientRect();
     return { shown: sc.clientHeight > 0, innerH: window.innerHeight, scrollH: sc.scrollHeight, clientH: sc.clientHeight, groupTops: g, best: best ? best.textContent.trim() : null, bestVisible: !!(b && b.width > 0 && b.bottom <= window.innerHeight),
-      foot: f && { top: Math.round(f.top), bottom: Math.round(f.bottom) } }; })()`;
+      foot: f && { top: Math.round(f.top), bottom: Math.round(f.bottom) }, groupsTop: Math.round(document.querySelector('#cc-body .cc-groups .cc-group').getBoundingClientRect().top) }; })()`;
   for (const lang of ['en', 'es']) {
     await run('pw:lang:' + lang, `setLang(${JSON.stringify(lang)})`, 400);
     for (const [name, expr] of [['the default', `gamesShow('power')`], ['a fixed pair', `gamesShow('power'); ccPickProg(1)`], ['a jump pair', `gamesShow('power'); ccPickProg(7)`]]) {
       const step = `${name} with a best score (${lang})`;
       await run('pw:best:show:' + step, expr, 300);
+      await run('pw:best:clearscore:' + step, `(() => { Object.keys(sessionStorage).filter(k => k.indexOf('ccBest:') === 0).forEach(k => sessionStorage.removeItem(k)); ccRenderSetup(); return 1; })()`, 150);
+      const pre = await run('pw:best:pre:' + step, `Math.round(document.querySelector('#cc-body .cc-groups .cc-group').getBoundingClientRect().top)`, 10);
       await run('pw:best:set:' + step, `(() => { const k = ccBestKey(ccProgs()[cc.progIdx], cc.rateIdx); sessionStorage.setItem(k, String(CC_BPM_MAX)); ccRenderSetup(); return k; })()`, 300);
       const m = await run('pw:best:measure:' + step, bestMeasure, 10);
       if (!m || !m.shown) { fail(step, 'the games screen is not on screen \u2014 the measurement would be of a hidden panel'); continue; }
       if (!m.best || !m.bestVisible) fail(step, `the "Best today" score is not on screen (text: ${JSON.stringify(m.best)}) \u2014 this check cannot show the setup fits with one`);
       if (m.scrollH > m.clientH) fail(step, `with a best score the setup is ${m.scrollH}px tall on a ${m.clientH}px screen \u2014 it must fit without scrolling`);
       if (m.groupTops.length !== 2 || new Set(m.groupTops).size !== 1) fail(step, `with a best score the speed and tempo rows are not side by side (tops: ${m.groupTops.join(', ')})`);
+      if (pre !== m.groupsTop) fail(step, `the pair columns sit at ${pre}px with no score and ${m.groupsTop}px once "Best today" shows \u2014 the buttons would jump under a student's pointer`);
       if (!m.foot || m.foot.bottom > m.innerH) fail(step, `with a best score the privacy line ends at ${m.foot && m.foot.bottom}px on a ${m.innerH}px screen \u2014 it is cut off`);
       stats.powerBestLayouts = (stats.powerBestLayouts || 0) + 1;
     }

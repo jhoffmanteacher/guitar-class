@@ -90,8 +90,9 @@
   "Slide along the low E string" / "Desliza por la cuerda Mi grave" titles join
   the two words with U+00A0 (1ca pins it). `tools/smoke.mjs` powerSwitchWalk:
   a best score of `CC_BPM_MAX` in 3 views × EN/ES (no scrolling, speed and tempo
-  on one row, privacy line on screen — 6 views, red on the old code at exactly
-  698px in all 6), the title at every window width 1366→920 in steps of 6 (the
+  on one row, privacy line on screen, the pair columns at the same height with and
+  without a score — 6 views, red on the old code at exactly 698px in all 6; the
+  same-height check was red at a 15px `.cc-best-line`, green at 18px), the title at every window width 1366→920 in steps of 6 (the
   Spanish title broke between "Mi" and "grave" at 20 of them without the fix; the
   English one did not break at any width tried, so it is covered by the no-break
   space pin), and the done-screen button's padding. Change Up's done-screen
@@ -171,6 +172,19 @@
     label. pm-e2e pins a Sunday/Saturday boundary table (exactly enough, one
     minute short), EN + ES, the recap, and the flame label, under a moved clock so
     it holds on any run date.
+    `site-reviewer` (high) on 611503a: R1-1 FIXED — `weekReach` rounded the minutes
+    needed up before comparing against the seconds of room, so 1 s short with 1 s
+    left said "can't" (1.64% of reachable Saturday/Sunday states); now compared in
+    seconds, pm-e2e pins 1 s / 59 s cases (red on the old comparison). R1-2 FIXED —
+    checks 1cg: `weeklyGoalMinutes` must be ≤ 7 × `dailyCapMinutes` (else every
+    week says "can't"). Left, LOW, for Jonathan: (a) the Streak tile still prints
+    "Longest: 0 weeks" under "No streak yet", and "No streak yet" sits over
+    "Longest: 5 weeks" after a streak was lost — hide Longest at 0 / say "No streak
+    right now"? (b) a live OLD tab still running 70ef823 keeps rewriting
+    `pm:q:<uid>`, which a new page adopts and deletes: those seconds can count 2–3
+    times until that tab closes (daily cap bounds it; accepted as "liberal"). (c)
+    `weekReach` is covered by pm-e2e only (not in checks.mjs): 8 mutants of it
+    and `streakWords` all went red in pm-e2e, 8 stayed green in pm-sim.
   - [ ] The "goal reached" toast shows only on a practice card. A goal reached
     in a lesson snippet or on My progress waits for the next practice card on
     that page; one reached on a Journey page never shows (`pendingToast` lives

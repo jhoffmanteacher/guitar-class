@@ -347,8 +347,8 @@
     var cap = Math.round(cfg().dailyCapMinutes * 60), d = today();
     var daysLeft = 8 - (((calc.parse(d).getDay() + 6) % 7) + 1);   // Monday = 7 … Sunday = 1
     var room = daysLeft * cap - Math.min(dayTotal(d), cap);
-    var more = Math.max(1, Math.ceil((w.goal - w.secs) / 60));
-    return { more: more, out: more * 60 > room };
+    var need = w.goal - w.secs;                                    // seconds: the comparison must not round up to a whole minute first (a student 1 s short with 1 s of room can still reach it)
+    return { more: Math.max(1, Math.ceil(need / 60)), out: need > room };
   }
   /* "No streak yet" instead of "0-week streak". */
   function streakWords(base, n){ return n > 0 ? plural(base, n) : tr('pm.streakNone'); }
