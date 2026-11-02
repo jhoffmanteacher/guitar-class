@@ -4676,8 +4676,8 @@ window.CLASS_ACTIVITIES = [
     journeyLayer: 3,
     title:    'Sweet Child O\' Mine — The Whole Song in Power Chords',
     title_es: 'Sweet Child O\' Mine — La canción completa con acordes de potencia',
-    intro:    'You already play the whole song as single notes. Today you play it in power chords: the same roots, with two more strings added.',
-    intro_es: 'Ya tocas la canción completa con notas sueltas. Hoy la tocas con acordes de potencia: las mismas raíces, con dos cuerdas más.',
+    intro:    'Today you play the whole song in power chords: the same roots, with two more strings added.',
+    intro_es: 'Hoy tocas la canción completa con acordes de potencia: las mismas raíces, con dos cuerdas más.',
     card: {
       wholeSong: true,  // stops at the end of the song instead of looping
       track: 'sweet-child-o-mine',

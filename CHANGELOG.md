@@ -5,6 +5,10 @@ Notable changes to the Guitar Class site. Newest first.
 For the full session-by-session history (and the reasoning behind each change),
 see `WORKFLOW.md` and the git commit log.
 
+## 2026-11-02 — Sweet Child power-chord card: shorter intro
+
+- **The intro on "Sweet Child O' Mine — The Whole Song in Power Chords" no longer says you already play the song as single notes.** It starts with what you do today: play the whole song in power chords, the same roots with two more strings added.
+
 ## 2026-11-02 — Power Chord Switch: song buttons
 
 - **Power Chord Switch has a Songs column.** Sweet Child O' Mine and "the cure" each have one button that runs through every power-chord switch in the song, one time through: 22 chords for Sweet Child, 12 for "the cure". Pick the speed and the tempo the same way as for a pair.
