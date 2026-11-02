@@ -812,7 +812,8 @@ const shared = () => ({ clock: { ms: new Date(2026, 10, 16, 9, 0, 0).getTime(), 
 /* ═══════════ 10. Friday check 2026-11-01 (R2-*, PD-*) ═══════════ */
 console.log('10. friday check 2026-11-01');
 {
-  // R2-1: a commit on the wire when the page closes. Jonathan's call: losing under a minute beats counting it twice.
+  // R2-1: a commit on the wire when the page closes. Jonathan's call (2026-11-01, reversing an earlier one the same day):
+  // "be liberal with minutes since this is for motivation" — it stays queued; if it had landed, it counts twice ONCE.
   for (const delivered of [true, false]) {
     const sh = shared(); const w = makeWorld(sh);
     const a = w.track(); a.play();
@@ -829,8 +830,9 @@ console.log('10. friday check 2026-11-01');
     const w2 = makeWorld({ ...sh, clock: { ms: sh.clock.ms + 240000, perf: 9000 } });
     const b = w2.track(); b.play(); await runAll([w2], 5, () => { if (!b.paused) b.currentTime += 1; }); b.pause(); await runAll([w2], 4); await w2.PM.flush(); await w2.settle();
     const total = sh.server.days[todayStr]?.seconds || 0, played = 84 + 5;
-    if (delivered) check('a commit sent seconds before the page closed and DELIVERED is not sent again by the next page (no double count)', !!inflight && total <= played && total >= played - 2, `server ${total} for ${played} played; leaving key ${JSON.stringify(left)}`);
-    else check('…and one that did NOT land is lost (under a minute), never sent twice', !!inflight && total <= played && total >= played - 60, `server ${total} for ${played} played`);
+    const batch = inflight ? Object.values(inflight.snap).reduce((x, y) => x + y, 0) : 0;
+    if (delivered) check('a commit on the wire when the page closed, which DID land: re-sent by the next page — counted twice at most once (liberal on purpose)', !!inflight && total >= played && total <= played + batch, `server ${total} for ${played} played (batch ${batch}); leaving key ${JSON.stringify(left)}`);
+    else check('…and one that did NOT land is kept and sent by the next page: nothing lost', !!inflight && total >= played - 1 && total <= played, `server ${total} for ${played} played`);
   }
   // …but a commit that has hung for over 30 s (offline backlog, no answer) stays queued: it almost certainly never landed.
   {

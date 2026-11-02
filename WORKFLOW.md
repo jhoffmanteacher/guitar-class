@@ -85,8 +85,9 @@
   practice-minutes commits, the last 3 of which were never reviewed).** Three
   reviewers (Fast commits at high; practice-minutes data path and display at
   xhigh). Fixed and pushed: Live quiz Back button stretched (8a4376f); grey edge
-  missing on Today cards and exit checks (050017a); practice minutes R2-1 (no
-  double count on close; Jonathan: lose < 1 min instead), R2-2 (sign-out/in on a
+  missing on Today cards and exit checks (050017a); practice minutes R2-1 (a commit on the wire at
+  close is kept — Jonathan: count liberally, a rare double is fine; the keepalive no
+  longer goes out on a dead link), R2-2 (sign-out/in on a
   Journey page lost the queue), R2-4 (clock moved back → double), R2-5 (token
   refreshed at session start), PD-1 (Jonathan: a miss before any streak spends no
   free miss), PD-2 (section tap popped the recap), PD-3 (recap stayed over My
@@ -939,13 +940,13 @@
       commit and keeps the leaving key. The keepalive sends `pend` even with a
       commit in flight — but not when that commit has been unanswered for 30 s
       (a dead link: the keepalive would die too and its seconds be deleted as
-      landed). A commit sent under `INFLIGHT_TRUST_MS` (30 s) before the close
-      AND no bigger than `INFLIGHT_TRUST_MAX_SEC` (90 s — a normal flush or Stop)
-      is left out of the leaving key — **Jonathan's call: losing under a minute
-      beats counting it twice**; an older unanswered one, or a bigger one (an
-      offline backlog sent on `online`), stays queued: losing it would be
-      minutes. Known limit: such a big batch that DID land just before the close
-      is sent again by the next page (the rules' daily cap bounds it). A leaving key is adopted only once it is 3
+      landed; `DEAD_LINK_MS`). A commit still in flight at the close STAYS in the
+      leaving key — **Jonathan, 2026-11-01: "be liberal with minutes since this
+      is for motivation"** (this reversed his "lose under a minute" call from
+      earlier the same day): when unsure, count it; a batch that had landed is
+      counted twice once, bounded by the rules' daily cap. The keepalive's own
+      seconds are still taken as landed on a live link (keeping them too would
+      double the last minute of almost every session). A leaving key is adopted only once it is 3
       minutes old (the old "pagehide stamp 0 = adopt at once" never survived
       Chrome's order). Signing out and back in on an open Journey page folds the
       page's own key back in (`sync`, `leftInflight`, used once); a commit that

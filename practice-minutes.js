@@ -52,9 +52,11 @@
    false) nothing is sent and nothing is lost. A load never overlaps a flush. On
    pagehide (Chrome then fires visibilitychange; it starts nothing new) a
    fetch({keepalive:true}) to the Firestore REST endpoint sends what is left in
-   `pend` — even with a commit in flight — and the leaving key drops a commit sent
-   under 30 s before (INFLIGHT_TRUST_MS: it almost certainly landed; losing it is
-   the better mistake than counting it twice), with the ID token cached for THIS student (navigator.sendBeacon cannot carry
+   `pend` — even with a commit in flight, unless that commit has gone unanswered
+   for DEAD_LINK_MS (the link is dead) — and the leaving key keeps any commit still
+   in flight (Jonathan, 2026-11-01: "be liberal with minutes since this is for
+   motivation" — when unsure, count it; a rare double is bounded by the rules'
+   daily cap), with the ID token cached for THIS student (navigator.sendBeacon cannot carry
    the sign-in header, so it cannot write to a rules-protected collection).
    A flush the rules refuse is NOT thrown away: it first re-reads the server's
    day totals (including any older day the queue holds) and trims the queue to the
@@ -184,16 +186,9 @@
      ════════════════════════════════════════════════════════════════════ */
   var HEARTBEAT_MS = 30000, FLUSH_MS = 60000, PERSIST_MS = 5000, DENIED_BACKOFF_MS = 300000, LOAD_RETRY_MS = 30000;
   var STALE_QUEUE_MS = 180000, QUEUE_FRESH_MS = 10000, ADOPT_MS = 30000;
-  /* A commit sent less than this long before the page closed has almost
-     certainly landed: the page's leaving key drops it rather than risk sending
-     it twice (Jonathan, 2026-11-01: losing under a minute is the better mistake).
-     An older one that never answered almost certainly did not land, so it stays
-     queued — that keeps a stalled offline backlog. */
-  var INFLIGHT_TRUST_MS = 30000;
-  /* …and only a normal-sized one (a 60 s flush, a Stop). A bigger batch — an
-     offline backlog sent on `online`, an adopted key — stays queued: losing it
-     would be minutes, not seconds (2026-11-01 review of the fix). */
-  var INFLIGHT_TRUST_MAX_SEC = 90;
+  /* A commit unanswered this long means the link is dead (captive portal, ISP
+     down): no keepalive goes out beside it (keepaliveFlush). */
+  var DEAD_LINK_MS = 30000;
   var host = null;
   var S = null;                       // per-student state, rebuilt when the uid changes
   var media = new Set();              // backing-track elements seen playing
@@ -248,26 +243,23 @@
   function pageId(){ if(!pid) pid = randHex(6); return pid; }
   function qKey(u){ return 'pm:q:' + u + ':' + pageId(); }
   function queued(d){ return (S.pend[d] || 0) + ((S.inflight && S.inflight.snap[d]) || 0); }
-  function snapSum(snap){ var n = 0; Object.keys(snap).forEach(function(d){ n += snap[d] || 0; }); return n; }
-  /* Sent moments ago on a working link, and a normal size: it almost certainly landed. */
-  function inflightTrusted(inf){ return Date.now() - inf.at < INFLIGHT_TRUST_MS && snapSum(inf.snap) <= INFLIGHT_TRUST_MAX_SEC; }
-  function heldDays(leaving){
+  /* pend + inflight. A commit still in flight when the page closes stays in the
+     key even though it may have landed: liberal on purpose (Jonathan, 2026-11-01,
+     "be liberal with minutes since this is for motivation"). */
+  function heldDays(){
     var m = {};
     Object.keys(S.pend).forEach(function(d){ if(S.pend[d] > 0) m[d] = (m[d] || 0) + S.pend[d]; });
-    var inf = S.inflight && !(leaving && inflightTrusted(S.inflight)) ? S.inflight : null;
-    if(inf) Object.keys(inf.snap).forEach(function(d){ m[d] = (m[d] || 0) + inf.snap[d]; });
+    if(S.inflight) Object.keys(S.inflight.snap).forEach(function(d){ m[d] = (m[d] || 0) + S.inflight.snap[d]; });
     return m;
   }
-  /* `leaving` (pagehide, and the visibilitychange Chrome fires right after it):
-     leave out a commit that is probably delivered (INFLIGHT_TRUST_MS). The stamp
-     stays Date.now(): in Chrome the visibilitychange after pagehide always
+  /* The stamp is always Date.now(): in Chrome the visibilitychange after pagehide
      rewrote a 0 stamp anyway, and an at-once adoptable key re-sent seconds a
      back/forward-cached page still held (2026-11-01 review). Another page takes
      the key over once it is STALE_QUEUE_MS old. */
-  function persist(leaving){
+  function persist(){
     if(!S) return;
     lastPersist = now();
-    var held = heldDays(leaving), any = Object.keys(held).length > 0;
+    var held = heldDays(), any = Object.keys(held).length > 0;
     ls(qKey(S.uid), any ? JSON.stringify({ days: held, at: Date.now() }) : null);
     if(any) keepQueueFresh(); else if(queueTimer){ clearInterval(queueTimer); queueTimer = 0; }
   }
@@ -382,7 +374,7 @@
     document.addEventListener('visibilitychange', function(){
       /* Chrome fires this right AFTER pagehide when a page closes: keep the
          leaving key pagehide wrote, and start no commit the dying page cannot finish. */
-      if(document.visibilityState === 'hidden'){ if(leavingPage) persist(true); else { persist(); flush(); } }
+      if(document.visibilityState === 'hidden'){ persist(); if(!leavingPage) flush(); }
       else tick();
     });
   }
@@ -653,10 +645,10 @@
   function keepaliveFlush(){
     var st = S;
     if(!st || st.loading || !idToken || idTokenUid !== st.uid || typeof fetch === 'undefined') return;
-    /* A commit unanswered for 30 s means the link is dead (captive portal, ISP
-       down): the keepalive would go the same way and its seconds would be
-       deleted as if they had landed. Leave everything in the leaving key. */
-    if(st.inflight && !inflightTrusted(st.inflight)) return;
+    /* A dead link (a commit unanswered for DEAD_LINK_MS): the keepalive would
+       go the same way and its seconds would be deleted as if they had landed.
+       Leave everything in the leaving key. */
+    if(st.inflight && Date.now() - st.inflight.at >= DEAD_LINK_MS) return;
     if(typeof navigator !== 'undefined' && navigator.onLine === false) return;
     if(Date.now() < deniedUntil) return;
     var snap = takePending();
@@ -677,16 +669,15 @@
         headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + idToken },
         body: JSON.stringify({ writes: writes })
       }).catch(function(){});
-      /* Assume it lands: leaving the seconds queued would send them twice the
-         next time this student opens the site. Losing them is the safer mistake
-         than counting them twice (Jonathan, 2026-11-01) — and it is only sent on
-         a link that is answering (above). */
+      /* Assume it lands: on a link that is answering (above) it nearly always
+         does, and leaving its seconds queued too would count the last minute of
+         almost every session twice — past even a liberal count. */
       Object.keys(snap).forEach(function(d){ delete st.pend[d]; });
       applyConfirmed(ops);
     } catch(e) {}
   }
   if(typeof window !== 'undefined'){
-    window.addEventListener('pagehide', function(){ leavingPage = true; if(S){ keepaliveFlush(); persist(true); } });
+    window.addEventListener('pagehide', function(){ leavingPage = true; if(S){ keepaliveFlush(); persist(); } });
     window.addEventListener('pageshow', function(e){ if(e && e.persisted){ leavingPage = false; if(S) persist(); } });
     window.addEventListener('online', function(){ if(sync()){ if(!S.loaded) load(); else flush(); } });
   }
