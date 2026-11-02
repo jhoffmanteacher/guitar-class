@@ -12426,6 +12426,13 @@ function caCheckMetaHtml(a){
    half of the console's Optional switch (optionalActivityIds). Both meta
    builders above carry it, so the hero and the plain card, activity and
    check, all get it from one place. */
+/* Grey edge ("ca-card--optional") for every card that shows the Optional tag
+   and the student hasn't done — list cards, Today cards and exit checks alike
+   (2026-11-01). Not for a CAS student: every card is optional for them, and
+   fading the whole list would make nothing stand out. */
+function caQuietOptional(a, done){
+  return !done && !caStudentIsCAS() && caIsOptional(a);
+}
 function caOptionalTagHtml(a){
   if(!caIsOptional(a)) return '';
   return `<span class="ca-optional-tag" data-i18n="ca.optional" title="${escAttr(t('ca.optionalTitle'))}" data-i18n-attr="title:ca.optionalTitle">${escHtml(t('ca.optional'))}</span>`;
@@ -12553,7 +12560,7 @@ function caHeroCardHtml(a, isCurrent = true, grouped = false){
      nothing left in the right-hand column, so the column goes too rather
      than holding a 210px hole open. */
   const thumbHtml = caHeroThumbHtml(a);
-  return `<details class="ca-card ca-card--hero${isCurrent ? '' : ' ca-card--hero-older'}${focus ? ' ca-card--focus' : ''}${card ? ' ca-card--practice' : ''}" ${open ? 'open' : ''} data-id="${escAttr(a.id)}" ontoggle="caOnToggle(this)">
+  return `<details class="ca-card ca-card--hero${isCurrent ? '' : ' ca-card--hero-older'}${focus ? ' ca-card--focus' : ''}${card ? ' ca-card--practice' : ''}${caQuietOptional(a, done) ? ' ca-card--optional' : ''}" ${open ? 'open' : ''} data-id="${escAttr(a.id)}" ontoggle="caOnToggle(this)">
     <summary class="ca-card-summary ca-hero-summary" onclick="caCardMarkOpening(this)">
       <div class="ca-hero-main">
         ${caStartHereTagHtml(a, isCurrent, grouped)}
@@ -12575,7 +12582,8 @@ function caHeroCardHtml(a, isCurrent = true, grouped = false){
 function caHeroCheckHtml(a, isCurrent = true, grouped = false){
   const open = caOpenId === a.id;
   const blurb = caFirstSentence(tf(a, 'intro'));
-  return `<details class="ca-card ec-card ca-card--hero ca-card--hero-check${isCurrent ? '' : ' ca-card--hero-older'}" ${open ? 'open' : ''} data-id="${escAttr(a.id)}" ontoggle="caOnToggle(this)">
+  const done = classActivities[a.id] === true;
+  return `<details class="ca-card ec-card ca-card--hero ca-card--hero-check${isCurrent ? '' : ' ca-card--hero-older'}${caQuietOptional(a, done) ? ' ca-card--optional' : ''}" ${open ? 'open' : ''} data-id="${escAttr(a.id)}" ontoggle="caOnToggle(this)">
     <summary class="ca-card-summary ca-hero-summary" onclick="caCardMarkOpening(this)">
       <div class="ca-hero-main">
         ${caStartHereTagHtml(a, isCurrent, grouped)}
@@ -14716,7 +14724,7 @@ function caActivityCardHtml(a){
      given from the board's "Who" picker all look the same. Not for a CAS
      student: every card is optional for them, and fading the whole list
      would make nothing stand out. */
-  const quiet = !done && !caStudentIsCAS() && caIsOptional(a);
+  const quiet = caQuietOptional(a, done);
   // Undated activities only reach a screen under dev bypass (caIsVisible
   // gates students on the date) — but an empty chip renders as a stray amber
   // dash, on the printed handout as much as on screen, so skip it entirely.
@@ -14914,7 +14922,7 @@ function caCheckCardHtml(a){
   const done = classActivities[a.id] === true;
   const open = caOpenId === a.id;
   const dateLabel = caFormatDate(caDate(a));
-  return `<details class="ca-card ec-card" ${open ? 'open' : ''} data-id="${escAttr(a.id)}" ontoggle="caOnToggle(this)">
+  return `<details class="ca-card ec-card${caQuietOptional(a, done) ? ' ca-card--optional' : ''}" ${open ? 'open' : ''} data-id="${escAttr(a.id)}" ontoggle="caOnToggle(this)">
     <summary class="ca-card-summary" onclick="caCardMarkOpening(this)">
       ${dateLabel ? `<span class="ca-chip">${escHtml(dateLabel)}</span>` : ''}
       <span class="ca-card-titlewrap"><span class="ca-card-title"><span data-i18n="check.prefix">${escHtml(t('check.prefix'))}</span> &middot; ${escHtml(caTitle(a))}</span>${caCheckMetaHtml(a)}</span>

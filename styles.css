@@ -3131,6 +3131,10 @@ span.tab-count-held{margin-left:4px}
 .ca-card--hero[open] .ca-hero-cta{display:none}
 .ca-card--hero[open] .ca-hero-side--cta-only{display:none}
 .ca-card--hero-check{border-left-color:var(--blue-text)}
+/* Today cards and exit checks with the Optional tag take the same grey edge
+   as list cards (caQuietOptional, app.js) — placed after the hero colours so
+   it wins over them, the older-hero tints included. */
+.ca-card--hero.ca-card--optional,.ca-card--hero-check.ca-card--optional{border-left-color:var(--border2)}
 .ca-start-tag--check{background:var(--blue-bg);color:var(--blue-text)}
 /* The little disclosure triangle reads as redundant next to a full-width
    CTA — the hero's affordance to expand is the button itself. */
@@ -3272,6 +3276,7 @@ body.games-open{overflow:hidden}
 .lq-screen .games-shell{max-width:760px;padding:18px 16px 40px}
 @media (max-width:480px){.lq-screen .games-shell{padding:12px 10px 30px}}
 .games-topbar{display:grid;grid-template-columns:1fr auto 1fr;align-items:center;gap:12px;margin-bottom:18px}
+.games-topbar > .games-exit{justify-self:start}   /* Live quiz's single Back button (index.html) */
 .games-topbar-btns{justify-self:start;display:flex;flex-wrap:wrap;gap:8px}
 .games-topbar-btns .games-exit[hidden]{display:none}
 .games-topbar-btns .games-exit--games{background:rgba(255,255,255,0.22)}

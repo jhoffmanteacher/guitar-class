@@ -591,7 +591,14 @@ async function walk(base, chromePort, label) {
     if (j(exits.game) !== '[true,true]') events.push({ step: 'games-exits', kind: 'games-exits', text: `a game shows [Main site, All games] = ${j(exits.game)} (want [true,true])` });
     if (!exits.afterAll.open || !exits.afterAll.hub || j(exits.afterAll.btns) !== '[true,false]') events.push({ step: 'games-exits', kind: 'games-exits', text: `All games did not land on the hub: ${j(exits.afterAll)}` });
     if (gamesClosed !== true) events.push({ step: 'games-exits', kind: 'games-exits', text: 'Main site did not close the games screen' });
+    const wantLabels = await run('games-exit-labels', `[t('btn.toMainSite'), t('games.common.allGames')].map(x => '\u2190 ' + x)`, 50);
+    if (wantLabels && j(exits.labels.map(x => x.replace(/\s+/g, ' '))) !== j(wantLabels)) events.push({ step: 'games-exits', kind: 'games-exits', text: `exit labels ${j(exits.labels)} (want ${j(wantLabels)})` });
   }
+  /* The Live quiz screen shares .games-topbar but keeps ONE bare .games-exit
+     (index.html). 8a4376f dropped the rule that sized it to its text, and its
+     Back pill stretched across the whole grid column (84px → 306px). */
+  const lqBack = await run('lq-back-width', `(() => { const s = document.getElementById('live-quiz-screen'); const was = s.hidden; s.hidden = false; const b = s.querySelector('.games-topbar > .games-exit'); const w = b ? b.getBoundingClientRect().width : -1; s.hidden = was; return w; })()`, 50);
+  if (typeof lqBack === 'number' && (lqBack < 0 || lqBack > 160)) events.push({ step: 'lq-back-width', kind: 'lq-back-width', text: `Live quiz Back button is ${Math.round(lqBack)}px wide (want it sized to its text, ≤160px)` });
   /* The quiet "optional" edge (2026-11-01): every card that shows the Optional tag
      gets it — teacher flag, optional-in-its-data, or the board's Who picker — and
      a CAS student, for whom every card is optional, gets none. Cards are rendered
@@ -601,7 +608,20 @@ async function walk(base, chromePort, label) {
     const data = all.find(a => a.optional === true), req = all.find(a => a.optional !== true && a.id !== (data && data.id));
     if (!data || !req) return { missing: true };
     const keep = { f: optionalActivityIds, m: activityForMe, c: classActivities, p: periodOverride, s: studentPeriod };
-    const cls = a => { const d = document.createElement('div'); d.innerHTML = caActivityCardHtml(a); const c = d.firstElementChild; return { edge: c.classList.contains('ca-card--optional'), tag: !!c.querySelector('.ca-optional-tag') }; };
+    const read = html => { const d = document.createElement('div'); d.innerHTML = html; const c = d.firstElementChild; return { edge: c.classList.contains('ca-card--optional'), tag: !!c.querySelector('.ca-optional-tag') }; };
+    /* Every renderer that can draw the Optional tag: the list card, the Today
+       (hero) card, and both exit-check cards — the list card alone missed the
+       Today and check cards on 2026-11-01. Each must agree with the list card. */
+    const chk = (window.CLASS_ACTIVITIES || []).find(a => a.kind === 'check');
+    const cls = a => { const r = read(caActivityCardHtml(a)), h = read(caHeroCardHtml(a, true, true));
+      if (h.edge !== r.edge || h.tag !== r.tag) return { edge: 'today card ' + JSON.stringify(h), tag: 'list card ' + JSON.stringify(r) };
+      if (chk) { const was = optionalActivityIds[chk.id], wasDone = classActivities[chk.id]; optionalActivityIds = Object.assign({}, optionalActivityIds, { [chk.id]: r.tag });
+        if (classActivities[a.id] === true) classActivities = Object.assign({}, classActivities, { [chk.id]: true });
+        const c1 = read(caCheckCardHtml(chk)), c2 = read(caHeroCheckHtml(chk, true, true));
+        optionalActivityIds = Object.assign({}, optionalActivityIds, { [chk.id]: was }); if (was === undefined) delete optionalActivityIds[chk.id];
+        classActivities = Object.assign({}, classActivities, { [chk.id]: wasDone }); if (wasDone === undefined) delete classActivities[chk.id];
+        if (c1.edge !== r.edge || c2.edge !== r.edge) return { edge: 'check cards ' + JSON.stringify([c1, c2]), tag: 'list card ' + JSON.stringify(r) }; }
+      return r; };
     try {
       optionalActivityIds = {}; activityForMe = {}; classActivities = {}; periodOverride = ''; studentPeriod = '';
       const out = { data: cls(data), req: cls(req) };
