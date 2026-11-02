@@ -8,6 +8,7 @@ see `WORKFLOW.md` and the git commit log.
 ## 2026-11-02 — Low E and A notes and power chords: speeds above 40 BPM
 
 - **"Low E and A Notes in Time" and "Power Chords on the Low E and A Strings in Time" now go up to 80 BPM.** With Show answer on, the speed still climbs by itself up to 40 BPM. Press Faster to go past 40, 5 BPM at a time, up to 80. In the scored levels, Level 5 now speeds up 5 BPM each time you pass it, up to 80.
+- **The speed sliders on "Notes on the Low E String", "Notes on the A String, Then Happy Birthday" and "A String Notes — Cards and Play-Along" go up to 80 BPM too.** They still start at 20 BPM and the steps still say to stop at 40. Drag the slider further if you want it faster.
 
 ## 2026-11-02 — Sweet Child power-chord card: shorter intro
 

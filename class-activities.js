@@ -1378,7 +1378,7 @@ window.CLASS_ACTIVITIES = [
         text: 'Play the four dot notes below — open E, then the dots at frets 3, 5 and 7. Say each name out loud while it rings.\nYou\'ve got it when: E–G–A–B in order, three times through, saying each name out loud.',
         text_es: 'Toca abajo las cuatro notas de los puntos — E al aire, y después los puntos de los trastes 3, 5 y 7. Di cada nombre en voz alta mientras suena.\nLo tienes cuando: E–G–A–B en orden, tres veces seguidas, diciendo cada nombre en voz alta.',
         tab: {
-          bpm: 20, minBpm: 20, maxBpm: 40,   // 20–40 BPM, same as ca-23 (Jonathan, 2026-10-19)
+          bpm: 20, minBpm: 20, maxBpm: 80,   // slider 20–80; the directions stop at 40, past that is the student's choice (Jonathan, 2026-11-02)
           caption: 'The dot notes · E G A B',
           caption_es: 'Las notas de los puntos · E G A B',
           notes: [
@@ -1395,7 +1395,7 @@ window.CLASS_ACTIVITIES = [
         text: 'Fill in the rest of the row — F at fret 1, C at fret 8, D at fret 10, and E at the double dot at fret 12. Play the notes below, up and back, saying every name as you land it.\nYou\'ve got it when: E F G A B C D E and back, three times through, every name out loud.',
         text_es: 'Completa el resto de la fila — F en el traste 1, C en el traste 8, D en el traste 10 y E en el punto doble del traste 12. Toca las notas de abajo, subiendo y bajando, diciendo el nombre de cada una al caer en ella.\nLo tienes cuando: E F G A B C D E y de regreso, tres veces seguidas, cada nombre en voz alta.',
         tab: {
-          bpm: 20, minBpm: 20, maxBpm: 40,   // 20–40 BPM, same as ca-23 (Jonathan, 2026-10-19)
+          bpm: 20, minBpm: 20, maxBpm: 80,   // slider 20–80; the directions stop at 40, past that is the student's choice (Jonathan, 2026-11-02)
           caption: 'E to E · up and back',
           caption_es: 'De E a E · subir y bajar',
           phrases: [
@@ -1474,7 +1474,7 @@ window.CLASS_ACTIVITIES = [
         text: 'Play the notes below and say each name out loud as you play it.\nYou\'ve got it when: three times through, every name out loud.',
         text_es: 'Toca las notas de abajo y di cada nombre en voz alta mientras la tocas.\nLo tienes cuando: tres veces completas, cada nombre en voz alta.',
         tab: {
-          bpm: 20, minBpm: 20, maxBpm: 40,   // 20–40 BPM, same as ca-23 (Jonathan, 2026-10-19)
+          bpm: 20, minBpm: 20, maxBpm: 80,   // slider 20–80; the directions stop at 40, past that is the student's choice (Jonathan, 2026-11-02)
           // Off the site-wide paging default: "three times through" means all
           // three phrases, and there's no Play tab/snippet syncing a page turn
           // — paging would hide "Coming down" behind an unmentioned Next
@@ -1544,7 +1544,7 @@ window.CLASS_ACTIVITIES = [
         text: 'Pluck the open low E, then the open A, back and forth — no fretting hand yet. Only one string should ring each pluck.\nYou\'ve got it when: three clean reps in a row, one string per pluck.',
         text_es: 'Pulsa la cuerda Mi grave al aire, luego la cuerda La al aire, ida y vuelta — todavía sin la mano de trastear. Solo debe sonar una cuerda por pulsación.\nLo tienes cuando: tres veces seguidas y limpias, una cuerda por pulsación.',
         tab: {
-          bpm: 20, minBpm: 20, maxBpm: 40,   // 20–40 BPM, same as ca-23 (Jonathan, 2026-10-19)
+          bpm: 20, minBpm: 20, maxBpm: 80,   // slider 20–80; the directions stop at 40, past that is the student's choice (Jonathan, 2026-11-02)
           caption: 'String crossing · open strings only',
           caption_es: 'Cruce de cuerdas · solo cuerdas al aire',
           notes: [
@@ -1561,7 +1561,7 @@ window.CLASS_ACTIVITIES = [
         text: 'Lines 3 and 4, now on the A string — every note stays inside the first seven frets.<ul><li>Line 3: finger 4 reaches fret 7 on the A string, then finger 3 drops to fret 4</li><li>Line 4 stays down in that same spot on the A string</li><li>C♯ (“C sharp”), fret 4, is the one new name</li></ul>You\'ve got it when: Line 3 into Line 4, three times through, without stopping.',
         text_es: 'Líneas 3 y 4, ahora en la cuerda La — todas las notas se quedan dentro de los primeros siete trastes.<ul><li>Línea 3: el dedo 4 alcanza el traste 7 de la cuerda La, y luego el dedo 3 baja al traste 4</li><li>La Línea 4 se queda en ese mismo lugar de la cuerda La</li><li>C♯ (“C sostenido”), traste 4, es el único nombre nuevo</li></ul>Lo tienes cuando: de la Línea 3 a la Línea 4, tres veces seguidas, sin detenerte.',
         tab: {
-          bpm: 20, minBpm: 20, maxBpm: 40,   // 20–40 BPM, same as ca-23 (Jonathan, 2026-10-19)
+          bpm: 20, minBpm: 20, maxBpm: 80,   // slider 20–80; the directions stop at 40, past that is the student's choice (Jonathan, 2026-11-02)
           caption: 'Second half · the A-string way',
           caption_es: 'Segunda mitad · la versión con la cuerda La',
           phrases: [
@@ -1599,7 +1599,7 @@ window.CLASS_ACTIVITIES = [
         text: 'The whole song the A-string way — Lines 1 and 2 stay on the low E, 3 and 4 cross to the A string. Start at 20 BPM.<ul><li>Say each A-string note out loud as you land it</li><li>Every clean pass, raise the BPM by 5, up to 40 — then play it once more with your eyes closed</li></ul>You\'ve got it when: the whole song without stopping, every A-string note named out loud, at 40 BPM.',
         text_es: 'La canción completa en la versión con la cuerda La — las Líneas 1 y 2 se quedan en la Mi grave, 3 y 4 cruzan a la cuerda La. Empieza en 20 BPM.<ul><li>Di en voz alta cada nota de la cuerda La al caer en ella</li><li>Cada pasada limpia, sube el BPM 5 puntos, hasta 40 — y después tócala una vez más con los ojos cerrados</li></ul>Lo tienes cuando: la canción completa sin detenerte, nombrando en voz alta cada nota de la cuerda La, a 40 BPM.',
         tab: {
-          bpm: 20, minBpm: 20, maxBpm: 40,   // 20–40 BPM, same as ca-23 (Jonathan, 2026-10-19)
+          bpm: 20, minBpm: 20, maxBpm: 80,   // slider 20–80; the directions stop at 40, past that is the student's choice (Jonathan, 2026-11-02)
           // Off the site-wide paging default, same reason as ca-1's whole-song
           // step: "the whole song without stopping" can't have a Next click
           // hidden between Line 2 and Line 3.
@@ -1665,8 +1665,9 @@ window.CLASS_ACTIVITIES = [
      which introduces the A-string names. Four steps — a short review with
      the tab player, the natural-note deck, a play-along up and back at 20
      BPM, then a skip-a-note play-along that climbs to 40 BPM. All three
-     note activities (ca-11, ca-17, ca-22) run 20–40 BPM, the same range
-     as ca-23 (Jonathan, 2026-10-19).
+     note activities (ca-11, ca-17, ca-22) start at 20 BPM and their directions
+     stop at 40, like ca-23 (Jonathan, 2026-10-19). The sliders go to 80
+     (2026-11-02): a student who wants it faster drags it there.
      Technique ladder: one pass in order, recall with no tab, in time with
      the player, out of order in time. ca-17 is untouched. */
   {
@@ -1683,7 +1684,7 @@ window.CLASS_ACTIVITIES = [
         text: 'Press Play tab and say each name out loud as it plays.',
         text_es: 'Presiona Tocar el tab y di cada nombre en voz alta mientras suena.',
         tab: {
-          bpm: 20, minBpm: 20, maxBpm: 40,   // 20–40 BPM, same as ca-23 (Jonathan, 2026-10-19)
+          bpm: 20, minBpm: 20, maxBpm: 80,   // slider 20–80; the directions stop at 40, past that is the student's choice (Jonathan, 2026-11-02)
           caption: 'A to A · going up',
           caption_es: 'De A a A · subiendo',
           notes: [
@@ -1711,7 +1712,7 @@ window.CLASS_ACTIVITIES = [
         text: 'Play along with the tab and say each name out loud.\nYou\'ve got it when: up and back twice with the player, no missed notes. Then raise it 5 BPM each time, up to 40.',
         text_es: 'Toca a la par de la tablatura y di cada nombre en voz alta.\nLo tienes cuando: subes y bajas dos veces con el reproductor, sin notas perdidas. Después súbelo 5 BPM cada vez, hasta 40.',
         tab: {
-          bpm: 20, minBpm: 20, maxBpm: 40,   // 20–40 BPM, same as ca-23 (Jonathan, 2026-10-19)
+          bpm: 20, minBpm: 20, maxBpm: 80,   // slider 20–80; the directions stop at 40, past that is the student's choice (Jonathan, 2026-11-02)
           caption: 'A to A · up and back',
           caption_es: 'De A a A · subiendo y bajando',
           phrases: [
@@ -1752,7 +1753,7 @@ window.CLASS_ACTIVITIES = [
         text: 'The jumps are the hard part — say the next name before your hand moves.\nYou\'ve got it when: one pass at 20 BPM, no missed notes. Then raise it 5 BPM each clean pass, up to 40. Missed a jump? Drill just those two notes, then restart the line.',
         text_es: 'Los saltos son la parte difícil — di el siguiente nombre antes de mover la mano.\nLo tienes cuando: una pasada en 20 BPM, sin notas perdidas. Después sube 5 BPM en cada pasada limpia, hasta 40. ¿Fallaste un salto? Practica solo esas dos notas y empieza la línea otra vez.',
         tab: {
-          bpm: 20, minBpm: 20, maxBpm: 40,   // 20–40 BPM, same as ca-23 (Jonathan, 2026-10-19)
+          bpm: 20, minBpm: 20, maxBpm: 80,   // slider 20–80; the directions stop at 40, past that is the student's choice (Jonathan, 2026-11-02)
           caption: 'Skip a note · A to A, up and back',
           caption_es: 'Salta una nota · de A a A, subiendo y bajando',
           phrases: [
