@@ -2934,8 +2934,9 @@ window.CLASS_ACTIVITIES = [
      then the student turns Show answer off for the five scored levels
      (naturals 20 → 30 BPM → half the beats, then the ♯ notes). Listening
      Coach starts off. Technique ladder: one position slow → the same move
-     across the neck → the whole neck at tempo. Every speed is 20–40 BPM
-     (Jonathan, 2026-10-19): Level 5 speeds up 5 BPM a pass, up to 40. Engine: renderNoteCall in app.js. Follows ca-11
+     across the neck → the whole neck at tempo. Speeds start at 20–40 BPM
+     (Jonathan, 2026-10-19): Level 5 speeds up 5 BPM a pass, and Faster in the
+     play-along goes on to 80 (2026-11-02: up to 80, was 40). Engine: renderNoteCall in app.js. Follows ca-11
      / ca-17 / ca-22, which teach the names. */
   {
     id:    'ca-23',

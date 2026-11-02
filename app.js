@@ -8671,14 +8671,15 @@ function erCheckOff(key){
    stays lit to the end of beat 4, then the next name. It runs until Stop.
    Every NC_ANS_EVERY notes it steps up NC_ANS_BPM (20 BPM = the answer
    after 6 s … 40 BPM = after 3 s; a new student starts at 20 and it never
-   goes past 40 — Jonathan, 2026-10-19, was 40 → 120); "Slower" steps back one right away and
-   restarts the count, "Faster" steps up one the same way. No score, no levels, no unlocks. The speed a student
+   speeds up on its own past 40 — Jonathan, 2026-10-19, was 40 → 120); "Slower" steps back one right away and
+   restarts the count, "Faster" steps up one the same way, and is the only way
+   past 40, up to 80 (Jonathan, 2026-11-02). No score, no levels, no unlocks. The speed a student
    reached is remembered per chunk. Notes: natural, or "With ♯ notes".
 
    SHOW ANSWER OFF — the scored levels (NC_LEVELS): naturals 20 → 30 BPM →
    half the beats, then the ♯ notes join at 30 BPM, then half the beats
    again. 10 notes a round, 8 unlocks the next level; clearing Level 5 adds
-   5 BPM to Level 5, up to 40 (Jonathan, 2026-10-19: 20 → 40 max; was
+   5 BPM to Level 5, up to 80 (Jonathan, 2026-11-02; 2026-10-19: 20 → 40 max; was
    60 → 80, +10 with a 160 ceiling). A miss shows where the note lives, comes
    back 3 notes later, and is listed at the end.
 
@@ -8700,7 +8701,7 @@ function erCheckOff(key){
 const NC_ROUND = 10;
 const NC_PASS = 8;
 const NC_COUNT_IN = 4;
-const NC_FASTER = 5, NC_MAX_BPM = 40;
+const NC_FASTER = 5, NC_MAX_BPM = 80;
 const NC_LEVELS = [
   { pile: 'naturals', bpm: 20, beats: 4 },
   { pile: 'naturals', bpm: 30, beats: 4 },
@@ -8710,11 +8711,14 @@ const NC_LEVELS = [
 ];
 /* Play-along ladder. Each note is 4 beats and the answer lights on beat 3,
    so the wait before the answer is 2 beats: 6 s at 20 BPM, 3 s at 40.
-   20 → 40 in steps of 5 since 2026-10-19 (Jonathan); a saved speed above
-   40 loads as 40. The speed is SAVED as a
+   20 → 40 in steps of 5 since 2026-10-19 (Jonathan). The count speeds up on
+   its own only to NC_ANS_AUTO_MAX; Faster goes on to 80 (Jonathan,
+   2026-11-02: "allow the user to set the speed above 40"). A saved speed above
+   80 loads as 80. The speed is SAVED as a
    BPM (ansBpm), not a ladder index, so a step added later moves nobody;
    saves from before that hold only the index `ans` into NC_ANS_BPM_V1. */
-const NC_ANS_BPM = [20, 25, 30, 35, 40];
+const NC_ANS_BPM = [20, 25, 30, 35, 40, 45, 50, 55, 60, 65, 70, 75, 80];
+const NC_ANS_AUTO_MAX = 40;   // the automatic speed-up stops here; only Faster goes past it
 const NC_ANS_BPM_V1 = [40, 50, 60, 70, 80, 90, 100, 120];
 const NC_ANS_START = 20;   // where a student with no saved speed begins
 const NC_ANS_START_POWER = 30;   // ca-43 (power chords) begins at 30 BPM (Jonathan, 2026-11-02)
@@ -9188,7 +9192,7 @@ function ncAnsBoundary(st){
     if(sp) sp.textContent = ncAnsMeta(st.L.bpm);
   }
   st.sinceUp++;
-  if(st.sinceUp >= NC_ANS_EVERY && st.prog.ans < NC_ANS_BPM.length - 1) st.pendingStep = st.prog.ans + 1;
+  if(st.sinceUp >= NC_ANS_EVERY && NC_ANS_BPM[st.prog.ans] < NC_ANS_AUTO_MAX) st.pendingStep = st.prog.ans + 1;
 }
 /* Slower: one step down, taking effect as the next name lands; the count to
    the next speed-up starts over from there. */

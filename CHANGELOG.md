@@ -5,6 +5,10 @@ Notable changes to the Guitar Class site. Newest first.
 For the full session-by-session history (and the reasoning behind each change),
 see `WORKFLOW.md` and the git commit log.
 
+## 2026-11-02 — Low E and A notes and power chords: speeds above 40 BPM
+
+- **"Low E and A Notes in Time" and "Power Chords on the Low E and A Strings in Time" now go up to 80 BPM.** With Show answer on, the speed still climbs by itself up to 40 BPM. Press Faster to go past 40, 5 BPM at a time, up to 80. In the scored levels, Level 5 now speeds up 5 BPM each time you pass it, up to 80.
+
 ## 2026-11-02 — Sweet Child power-chord card: shorter intro
 
 - **The intro on "Sweet Child O' Mine — The Whole Song in Power Chords" no longer says you already play the song as single notes.** It starts with what you do today: play the whole song in power chords, the same roots with two more strings added.
