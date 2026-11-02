@@ -20,7 +20,10 @@ see `WORKFLOW.md` and the git commit log.
   week starts Monday." It used to say something like "10 more keeps your streak"
   on a Sunday when you had already played 20 minutes.
 - **Practice minutes: "No streak yet"** instead of "0-week streak" when you have
-  no streak.
+  no streak. The "Longest: 0 weeks" line under it is gone too (it shows again once
+  you have had a streak).
+- **Change Up: the "Pick different loop" button** at the end of a round has room
+  around its words, like the one in Power Chord Switch.
 
 ## 2026-11-01 — Practice minutes
 

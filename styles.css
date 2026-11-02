@@ -2385,10 +2385,10 @@ body.rail-collapsed .rail-tools .tool-popup{
 .cc-beats{display:flex;gap:8px;margin:6px 0 10px}
 .cc-pip{width:14px;height:14px;border-radius:50%;background:var(--bg3);border:1px solid var(--border2)}
 .cc-pip.on{background:var(--green-text);border-color:var(--green-text)}
-.cc-change-loop{margin-top:8px}
-/* Power Chord Switch's done screen: .tp-btn has no side padding of its own (it
-   is built to stretch in a row), so alone on a line the label touched the border. */
-#cc-body.cc-power .cc-change-loop{padding:10px 20px}
+/* "Pick different chords / loops" on both games' done screens: .tp-btn has no side
+   padding of its own (it is built to stretch in a row), so alone on a line the
+   label touched the border. */
+.cc-change-loop{margin-top:8px;padding:10px 20px}
 #cc-body .coach-chip.pending{opacity:0.8}
 
 /* ── Resource viewer: floating mini-player (replaces the right-side panel).

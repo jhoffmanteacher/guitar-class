@@ -80,6 +80,21 @@
 
 ## Open work
 
+- [ ] **2026-11-02 — `tools/smoke.mjs` flakes after its page reload (cause not
+  found).** On this Mac, about 4 of 9 runs on 2026-11-02 reported errors that the
+  baseline did not, all right after the Power Chord walk's `Page.navigate` reload:
+  `module 3 failed to load ReferenceError: chordDiagramSVG is not defined`
+  (`app.js:5745`, a set render; `guitar-diagrams.js` is a `defer` script that runs
+  before `app.js`), `NOTES is not defined` (`tuner.js`), `Cannot access 'shRaf'
+  before initialization`, and once a Fret Zap walk finding no buttons. A debug copy
+  that printed every failed local request (the NOISE filter hides `net::ERR`) showed
+  none, so it is not a failed fetch. Other runs of the same tree were clean (0
+  errors). Nothing in the diff touches those globals. If it shows up in a push
+  check, rerun once on a quiet machine (`pkill -f headless=new` first); if it
+  persists, look at the service worker's first-load cache and the fixed sleeps
+  around `devBypass()` in `powerSwitchWalk`.
+
+
 - [x] **2026-11-02 — Power Chord Switch setup overflowed with a "Best today"
   score (DONE).** "Best today: 60 BPM" joined the tempo row, the speed and tempo
   groups no longer fit side by side, and the setup grew to 698px on a 657px
@@ -96,9 +111,9 @@
   Spanish title broke between "Mi" and "grave" at 20 of them without the fix; the
   English one did not break at any width tried, so it is covered by the no-break
   space pin), and the done-screen button's padding. Change Up's done-screen
-  "Pick different chords" button (the same `.cc-change-loop` class) still has no
-  side padding — left alone because Change Up was not to change; one line of CSS
-  (`.cc-change-loop{padding:10px 20px}`) if wanted.
+  "Pick different loop" button (the same `.cc-change-loop` class) got the same
+  padding 2026-11-02 at Jonathan's word: the rule is now unscoped, and smoke checks
+  both games' buttons in EN + ES.
 
 
 - [ ] **2026-11-01 — Song popularity counter (Jonathan: "a counter on the
@@ -177,10 +192,9 @@
     left said "can't" (1.64% of reachable Saturday/Sunday states); now compared in
     seconds, pm-e2e pins 1 s / 59 s cases (red on the old comparison). R1-2 FIXED —
     checks 1cg: `weeklyGoalMinutes` must be ≤ 7 × `dailyCapMinutes` (else every
-    week says "can't"). Left, LOW, for Jonathan: (a) the Streak tile still prints
-    "Longest: 0 weeks" under "No streak yet", and "No streak yet" sits over
-    "Longest: 5 weeks" after a streak was lost — hide Longest at 0 / say "No streak
-    right now"? (b) a live OLD tab still running 70ef823 keeps rewriting
+    week says "can't"). Jonathan chose (a) "hide Longest at 0" — DONE 2026-11-02 (the empty line keeps
+    its height; "No streak yet" over "Longest: 5 weeks" after a lost streak stays).
+    Left, LOW: (b) a live OLD tab still running 70ef823 keeps rewriting
     `pm:q:<uid>`, which a new page adopts and deletes: those seconds can count 2–3
     times until that tab closes (daily cap bounds it; accepted as "liberal"). (c)
     `weekReach` is covered by pm-e2e only (not in checks.mjs): 8 mutants of it

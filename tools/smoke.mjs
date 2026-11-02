@@ -503,6 +503,12 @@ async function powerSwitchWalk(page, run, events, stats, base) {
       const btn = document.querySelector('#cc-body .cc-change-loop'), cs = btn && getComputedStyle(btn);
       return { padL: cs && parseFloat(cs.paddingLeft), padR: cs && parseFloat(cs.paddingRight), text: btn && btn.textContent.trim() }; })()`, 300);
     if (!c2 || !c2.text || c2.padL < 12 || c2.padR < 12) fail('cosmetic (' + lang + ')', `the done screen's "${c2 && c2.text}" button has ${c2 && c2.padL}px / ${c2 && c2.padR}px side padding — it needs 12px or more`);
+    /* Change Up's done screen carries the same button on the same class (2026-11-02). */
+    const c3 = await run('pw:cosmetic:cu-button:' + lang, `(() => { gamesShow('cc'); ccPickProg(1); cc.changes = [{ from: 'C', to: 'G', result: 'miss' }]; cc.bpm = 60; ccRenderDone();
+      const btn = document.querySelector('#cc-body .cc-change-loop'), cs = btn && getComputedStyle(btn);
+      return { power: document.getElementById('cc-body').classList.contains('cc-power'), padL: cs && parseFloat(cs.paddingLeft), padR: cs && parseFloat(cs.paddingRight), text: btn && btn.textContent.trim() }; })()`, 300);
+    if (!c3 || !c3.text || c3.power) fail('cosmetic (' + lang + ')', 'Change Up\'s done screen did not draw its "Pick different loop" button in Change Up mode, so its padding cannot be checked');
+    else if (c3.padL < 12 || c3.padR < 12) fail('cosmetic (' + lang + ')', `Change Up's done-screen "${c3.text}" button has ${c3.padL}px / ${c3.padR}px side padding \u2014 it needs 12px or more`);
     stats.powerCosmetic = (stats.powerCosmetic || 0) + 1;
     stats.powerTitleWidths = (stats.powerTitleWidths || 0) + widths;
   }

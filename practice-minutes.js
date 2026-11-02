@@ -921,7 +921,7 @@
       +   '<div class="pm-tile-sub">' + esc(weekSub) + '</div></div>'
       + '<div class="pm-tile"><div class="pm-tile-h">' + esc(tr('pm.tileStreak')) + '</div>'
       +   '<div class="pm-tile-row"><span class="pm-streak pm-streak-lg' + (w.hit ? ' pm-on' : '') + '">' + FLAME + '</span><b>' + esc(streakWords('pm.tileStreakVal', st.streak)) + '</b></div>'
-      +   '<div class="pm-tile-sub">' + esc(plural('pm.tileLongest', st.longest)) + '</div></div>'
+      +   '<div class="pm-tile-sub">' + (st.longest > 0 ? esc(plural('pm.tileLongest', st.longest)) : '') + '</div></div>'   // "Longest: 0 weeks" under "No streak yet" says nothing; the line keeps its height (.pm-tile-sub min-height)
       + '<div class="pm-tile"><div class="pm-tile-h">' + esc(tr('pm.tileToday')) + '</div>'
       +   '<div class="pm-tile-row"><b class="pm-today">' + mins(dayTotal(d)) + '</b><span class="pm-today-u">' + esc(tr('pm.min')) + '</span></div>'
       +   '<div class="pm-tile-sub">' + esc(tr('pm.tileAll', { n: mins(allTimeSeconds()) })) + '</div></div>'
