@@ -11432,7 +11432,10 @@ function songsLibraryOpen(id){
   try {
     if(currentUser && db && !isGatePreviewer() && typeof firebase !== 'undefined' && firebase.firestore && firebase.firestore.FieldValue)
       db.collection('progress').doc(currentUser.uid)
-        .set({ songOpens: { [String(id)]: firebase.firestore.FieldValue.increment(1) } }, { merge: true })
+        /* name/email ride along, as flushSave() sends them on every save: a
+           doc that a click creates (a new student whose first progress read
+           failed) must not show as a nameless row in the console (review R1-3). */
+        .set({ name: currentUser.displayName || '', email: currentUser.email || '', songOpens: { [String(id)]: firebase.firestore.FieldValue.increment(1) } }, { merge: true })
         .catch(() => {});
   } catch(e) {}
   songsHubOpenCard(id);

@@ -84,14 +84,18 @@
   teacher dashboard ... how many times each of those songs has been clicked on
   by a student"; chose "students + total opens").** A click on a "More Play
   Along songs" row (name or Play Along) runs `songsLibraryOpen(id)` (app.js):
-  `{ songOpens: { <id>: increment(1) } }` merged into the student's OWN
+  `{ name, email, songOpens: { <id>: increment(1) } }` merged into the student's OWN
   `progress/{uid}` — atomic, outside `flushSave()`'s payload (so 1bo's
   failed-load wipe cannot reach it), and allowed by the existing rules (no
   console paste). Not counted: teacher account, dev bypass, signed out, Core
   rows, opens from In-Class Activities or a link. The console's **Songs** view
   shows "Opened: N students · M opens" per song (`teacherFetchStudents` keeps
   whole counts 1..1000 only — student-written). Check **1ch** renders the rows
-  and clicks every button (5 mutants red). Counts start 2026-11-01. The extra
+  and clicks every button, renders the console's Songs view with fake rows (3
+  exact count lines, an archived student left out) and opens the card in 4
+  failure modes (db null, Firestore not loaded, a write that throws, a refused
+  write — it must carry a .catch); 10 mutants red. Reviewed same day
+  (site-reviewer-deep: ship; emulator 14/14 on the real rules). Counts start 2026-11-01. The extra
   songs already counted toward practice minutes (all six use `-backing-`
   tracks; measured 8 s / 8 s on ca-36 and ca-42 from the Songs page) — no
   change needed there.

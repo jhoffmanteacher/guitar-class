@@ -8404,7 +8404,7 @@ async function checkSongPopularity(ctx) {
       const out = { rows: [], who: {} };
       try {
         isGatePreviewer = () => false;
-        currentUser = { uid: 'stu-1', email: 'stu@x.test' };
+        currentUser = { uid: 'stu-1', email: 'stu@x.test', displayName: 'Stu' };
         /* No HTML parser here: take each row's onclick attributes out of the
            markup and un-escape them the way the browser does before running. */
         const unAttr = v => v.replace(/&quot;/g, '"').replace(/&#39;/g, "'").replace(/&lt;/g, '<').replace(/&gt;/g, '>').replace(/&amp;/g, '&');
@@ -8421,7 +8421,7 @@ async function checkSongPopularity(ctx) {
           out.who[k] = { writes: log.length, opened: opened.slice() };
         }
         out.lib = lib.map(a => a.id);
-      } finally { currentUser = keep.u; db = keep.d; songsHubOpenCard = keep.h; window.firebase = keep.f; isGatePreviewer = keep.gp; if (lentEmail) delete globalThis.TEACHER_EMAIL; }
+      } finally { currentUser = keep.u; db = keep.d; songsHubOpenCard = keep.h; if (keep.f === undefined) delete window.firebase; else window.firebase = keep.f; isGatePreviewer = keep.gp; if (lentEmail) delete globalThis.TEACHER_EMAIL; }
       return JSON.stringify(out);
     })()`);
     rows = JSON.parse(rows);
@@ -8433,8 +8433,8 @@ async function checkSongPopularity(ctx) {
     if (r.n !== 2) flag(`library row ${i + 1} has ${r.n} buttons (want the name and Play Along)`);
     r.res.forEach((x, j) => {
       const w = x.log[0];
-      const okWrite = x.log.length === 1 && w.c === 'progress' && w.id === 'stu-1' && w.merge && w.data && w.data.songOpens && Object.keys(w.data.songOpens).length === 1 && w.data.songOpens[x.opened[0]] && w.data.songOpens[x.opened[0]].__inc === 1 && Object.keys(w.data).length === 1;
-      if (!okWrite) flag(`library row ${i + 1}, button ${j + 1}: wrote ${JSON.stringify(x.log)} (want exactly one { songOpens: { <id>: increment(1) } } merge-write to progress/stu-1)`);
+      const okWrite = x.log.length === 1 && w.c === 'progress' && w.id === 'stu-1' && w.merge && w.data && w.data.songOpens && Object.keys(w.data.songOpens).length === 1 && w.data.songOpens[x.opened[0]] && w.data.songOpens[x.opened[0]].__inc === 1 && Object.keys(w.data).sort().join() === 'email,name,songOpens' && w.data.email === 'stu@x.test';
+      if (!okWrite) flag(`library row ${i + 1}, button ${j + 1}: wrote ${JSON.stringify(x.log)} (want exactly one { name, email, songOpens: { <id>: increment(1) } } merge-write to progress/stu-1)`);
       if (x.opened.length !== 1) flag(`library row ${i + 1}, button ${j + 1}: opened ${JSON.stringify(x.opened)} (want the card once)`);
     });
   });
@@ -8458,7 +8458,7 @@ async function checkSongPopularity(ctx) {
     songsPlayAlongCard = () => stand;
     try {
       [...String(songsPlayAlongBtn('the-cure') || '').matchAll(/onclick="([^"]*)"/g)].forEach(m => new Function(unAttr(m[1]))());
-    } finally { db = keepDb; songsHubOpenCard = keepH; currentUser = keepU; isGatePreviewer = keepGp; songsPlayAlongCard = keepCard; window.firebase = keepFb; }
+    } finally { db = keepDb; songsHubOpenCard = keepH; currentUser = keepU; isGatePreviewer = keepGp; songsPlayAlongCard = keepCard; if (keepFb === undefined) delete window.firebase; else window.firebase = keepFb; }
     return JSON.stringify({ writes, clicks });
   })()`));
   if (core.clicks === 0) flag('no Core song Play Along button rendered \u2014 1ch cannot prove Core rows do not count');
@@ -8481,7 +8481,62 @@ async function checkSongPopularity(ctx) {
   const so = Object.fromEntries(got.map(x => [x.uid, x.songOpens]));
   const want = { a: { 'ca-36': 3, 'ca-42': 5, 'ca-39': 2, 'ca-34': 1000 }, b: {}, c: {} };
   if (JSON.stringify(so) !== JSON.stringify(want)) flag(`teacherFetchStudents songOpens = ${JSON.stringify(so)}, want ${JSON.stringify(want)} (whole counts 1..1000 only)`);
-  if (bad === 0) ok(`${rows.rows.length} library rows rendered, ${rows.rows.length * 2} buttons clicked \u2014 each writes one songOpens increment(1) merge to the student's own progress doc and opens its card; the teacher, the dev bypass and a signed-out visitor write nothing; ${core.clicks} Core Play Along clicks write nothing; the console keeps 4 of 8 doctored counts (3, "5"\u21925, 2.9\u21922, 1e9\u21921000)`);
+
+  /* The console's Songs view itself (renderTeacherSongs) with fake rows: students
+     who opened, total opens, an archived student left out, 1 vs many wording. */
+  {
+    const pick = name => { const m = new RegExp(`function\\s+${name}\\s*\\(`).exec(tsrc); return m ? tsrc.slice(m.index, tsrc.indexOf('{', m.index)) + jsFunctionBody(tsrc, name) : ''; };
+    const fns = ['renderTeacherSongs', 'teacherActivityTitle', 'teacherActivityRenamed', 'teacherActivityRetired', 'teacherActivityDeleted', 'teacherActivityArchived'].map(pick).join('\n');
+    const html = run(`(() => { ${fns}
+      const box = { innerHTML: '', querySelector: () => null };
+      const document = { getElementById: () => box };
+      let teacherView = 'songs', activityEditId = null;
+      const cfg = { archived: { 'u-arch': true } };
+      const loadTeacherClassConfig = () => ({ then: f => f(cfg) });
+      const allStudentsRaw = [
+        { uid: 'u-a', songOpens: { 'ca-36': 5, 'ca-42': 1 }, classActivities: {} },
+        { uid: 'u-b', songOpens: { 'ca-36': 3 }, classActivities: {} },
+        { uid: 'u-arch', songOpens: { 'ca-36': 100, 'ca-42': 9 }, classActivities: {} },
+        { uid: 'u-none', songOpens: {}, classActivities: {} } ];
+      renderTeacherSongs();
+      return box.innerHTML;
+    })()`);
+    const popOf = id => { const m = new RegExp('data-id="' + id + '"[\\s\\S]*?$').exec(''); const i = html.indexOf('<span class="t-songs-id">' + id + '</span>'); const j = html.indexOf('t-songs-pop', i); return i < 0 || j < 0 ? null : html.slice(html.indexOf('>', j) + 1, html.indexOf('</span>', j)); };
+    const want = { 'ca-36': 'Opened: 2 students · 8 opens', 'ca-42': 'Opened: 1 student · 1 open', 'ca-37': 'Opened: 0 students · 0 opens' };
+    for (const [id, w] of Object.entries(want)) { const got = popOf(id); if (got !== w) flag(`console Songs view, ${id}: "${got}" (want "${w}")`); }
+  }
+
+  /* The card opens whatever the write does (db not ready, Firestore not loaded,
+     a write that throws, a write the rules refuse — it must carry a .catch). */
+  {
+    const r = JSON.parse(run(`(() => {
+      const keep = { u: currentUser, d: db, h: songsHubOpenCard, f: window.firebase, gp: isGatePreviewer };
+      const out = {};
+      const lib = (window.CLASS_ACTIVITIES || []).filter(caIsLibrarySong);
+      const inc = n => ({ __inc: n });
+      try {
+        isGatePreviewer = () => false; currentUser = { uid: 'stu-1', email: 'stu@x.test' };
+        for (const mode of ['db null', 'no firebase', 'set throws', 'set rejects']) {
+          let opened = 0, caught = false, threw = null;
+          songsHubOpenCard = () => { opened++; };
+          window.firebase = mode === 'no firebase' ? undefined : { firestore: Object.assign(() => db, { FieldValue: { increment: inc } }) };
+          db = mode === 'db null' ? null : { collection: () => ({ doc: () => ({ set: () => {
+            if (mode === 'set throws') throw new Error('sync');
+            if (mode === 'set rejects') return { then() { return this; }, catch(fn) { caught = typeof fn === 'function'; return this; } };
+            return { then() { return this; }, catch() { return this; } };
+          } }) }) };
+          try { songsLibraryOpen(lib[0].id); } catch (e) { threw = e.message; }
+          out[mode] = { opened, caught, threw };
+        }
+      } finally { currentUser = keep.u; db = keep.d; songsHubOpenCard = keep.h; if (keep.f === undefined) delete window.firebase; else window.firebase = keep.f; isGatePreviewer = keep.gp; }
+      return JSON.stringify(out);
+    })()`));
+    for (const [mode, v] of Object.entries(r)) {
+      if (v.opened !== 1 || v.threw) flag(`${mode}: the card opened ${v.opened} time(s)${v.threw ? ', threw ' + v.threw : ''} (want once, nothing thrown)`);
+      if (mode === 'set rejects' && !v.caught) flag('set rejects: the write promise has no .catch — a refused write raises the global error banner');
+    }
+  }
+  if (bad === 0) ok(`${rows.rows.length} library rows rendered, ${rows.rows.length * 2} buttons clicked \u2014 each writes one songOpens increment(1) merge to the student's own progress doc and opens its card; the teacher, the dev bypass and a signed-out visitor write nothing; ${core.clicks} Core Play Along clicks write nothing; the console keeps 4 of 8 doctored counts (3, "5"\u21925, 2.9\u21922, 1e9\u21921000); the console Songs view draws 3 exact count lines (an archived student left out); the card opens in 4 failure modes`);
 }
 
 /* 1cd. NOTE CALL POWER CHORDS (ca-43, Jonathan 2026-10-30). The student

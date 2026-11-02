@@ -571,7 +571,8 @@ async function teacherFetchStudents(){
       // one student writing a number there would blank every view.
       // songOpens (app.js songsLibraryOpen): student-written, and the rules
       // don't type-check progress/{uid} — keep only whole counts 1..1000 per
-      // song, so one doctored doc can't swamp the Songs view's totals.
+      // song, so a doctored doc adds at most 1000 to a song's opens (and 1 to
+      // its students).
       const opensRaw=(data.songOpens&&typeof data.songOpens==='object')?data.songOpens:{};
       const songOpens={};
       Object.keys(opensRaw).forEach(k=>{ const n=Math.floor(Number(opensRaw[k])); if(Number.isFinite(n)&&n>0) songOpens[k]=Math.min(n,1000); });
