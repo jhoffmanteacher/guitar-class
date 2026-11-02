@@ -414,7 +414,11 @@ async function powerSwitchWalk(page, run, events, stats, base) {
     const s = st && st.getBoundingClientRect(), b = bpm && bpm.getBoundingClientRect();
     return { shown: sc.clientHeight > 0, innerH: window.innerHeight, scrollH: sc.scrollHeight, clientH: sc.clientHeight, start: s && { top: Math.round(s.top), bottom: Math.round(s.bottom) }, tempoBottom: b && Math.round(b.bottom), bar: !!document.querySelector('#cc-body .cc-startbar .coach-start'),
       charts: [...document.querySelectorAll('#cc-body .cc-col-pic .cc-dia svg')].map(e => { const r = e.getBoundingClientRect(); return { top: Math.round(r.top), w: Math.round(r.width) }; }),
-      cols: [...document.querySelectorAll('#cc-body .cc-groups .cc-group')].map(e => Math.round(e.getBoundingClientRect().top)) }; })()`;
+      cols: [...document.querySelectorAll('#cc-body .cc-groups .cc-group')].map(e => Math.round(e.getBoundingClientRect().top)),
+      bodyOverflow: document.getElementById('cc-body').scrollWidth > document.getElementById('cc-body').clientWidth, colOverflow: [...document.querySelectorAll('#cc-body .cc-groups .cc-group, #cc-body .cc-col-set, #cc-body .cc-col-pic')].filter(e => e.scrollWidth > e.clientWidth).length,
+      colWidths: [...document.querySelectorAll('#cc-body .cc-groups .cc-group')].map(e => Math.round(e.getBoundingClientRect().width)),
+      clipped: [...document.querySelectorAll('#cc-body .cc-groups .ts-btn')].filter(e => e.scrollWidth > e.clientWidth || e.scrollHeight > e.clientHeight).map(e => e.textContent.trim().slice(0, 30)),
+      chartTops: [...new Set([...document.querySelectorAll('#cc-body .cc-col-pic .cc-dia')].map(e => Math.round(e.getBoundingClientRect().top)))].length }; })()`;
   const defaults = `(() => { gamesShow('power'); const rowAt = document.querySelector('#cc-body [onclick*="ccPickRate"]'), progAt = document.querySelector('#cc-body [onclick*="ccPickProg"]'), bpmAt = document.querySelector('#cc-body [onclick*="ccNudgeBpm"]');
     return { rate: CC_RATES[cc.rateIdx].id, prog: cc.progIdx, random: !!CC_POWER_PROGRESSIONS[0].random, active: [...document.querySelectorAll('#cc-body .ts-btn.active')].length,
       speedFirst: !!(rowAt && progAt && (rowAt.compareDocumentPosition(progAt) & Node.DOCUMENT_POSITION_FOLLOWING)), tempoFirst: !!(bpmAt && progAt && (bpmAt.compareDocumentPosition(progAt) & Node.DOCUMENT_POSITION_FOLLOWING)) }; })()`;
@@ -424,14 +428,22 @@ async function powerSwitchWalk(page, run, events, stats, base) {
     if (m.tempoBottom == null || m.tempoBottom > m.innerH) fail(step, `the tempo row ends at ${m.tempoBottom}px on a ${m.innerH}px screen`);
     if (!m.bar) fail(step, 'Start is not inside .cc-startbar');
     if (m.scrollH > m.clientH) fail(step, `the setup is ${m.scrollH}px tall on a ${m.clientH}px screen — Power Chord Switch's two columns must fit without scrolling`);
-    if (m.cols.length !== 4 || new Set(m.cols).size !== 1) fail(step, `the pair groups are not four columns on one row (tops: ${m.cols.join(', ')})`);
-    if (m.charts.length && (m.charts.length !== 2 || m.charts[0].top !== m.charts[1].top || Math.min(...m.charts.map(c => c.w)) < 200)) fail(step, `the two charts are not side by side and 200px or wider: ${JSON.stringify(m.charts)}`);
+    if (m.cols.length !== 5 || new Set(m.cols).size !== 1) fail(step, `the choices are not five columns (four pair groups and Songs) on one row (tops: ${m.cols.join(', ')})`);
+    if (m.bodyOverflow || m.colOverflow) fail(step, `something overflows sideways: #cc-body ${m.bodyOverflow}, ${m.colOverflow} column(s) wider than their box`);
+    if (m.clipped.length) fail(step, `a button label is clipped: ${m.clipped.join(' | ')}`);
+    /* A song draws every distinct chord of its walk (7 or 5), in at most two rows, each box 100px or wider; a pair keeps its two charts side by side at 200px or wider (the 150px floor of diagram-size:power is separate). */
+    if (m.charts.length > 2) { if (Math.min(...m.charts.map(c => c.w)) < 100 || m.chartTops > 2) fail(step, `the song's chart boxes are not in two rows of 100px or wider: ${m.charts.length} boxes, ${m.chartTops} rows, widths ${m.charts.map(c => c.w).join(',')}`); }
+    else if (m.charts.length && (m.charts.length !== 2 || m.charts[0].top !== m.charts[1].top || Math.min(...m.charts.map(c => c.w)) < 200)) fail(step, `the two charts are not side by side and 200px or wider: ${JSON.stringify(m.charts)}`);
     stats.powerLayouts = (stats.powerLayouts || 0) + 1;
   };
   await page.send('Emulation.setDeviceMetricsOverride', size);
   await sleep(400);
   await run('pw:route', `ensureCoachJs().then(() => goExploreHash('games'))`, 1500);
-  for (const [name, expr] of [['the default', `gamesShow('power')`], ['a fixed pair', `gamesShow('power'); ccPickProg(1)`], ['a jump pair', `gamesShow('power'); ccPickProg(7)`]]) {
+  /* The song buttons (2026-11-02) are measured like the pairs: each one picked, English and Spanish, with and without a "Best today" score. */
+  const songIdx = (await run('pw:song-idx', `CC_POWER_PROGRESSIONS.map((p, i) => p.song ? i : -1).filter(i => i >= 0)`, 10)) || [];
+  const views = [['the default', `gamesShow('power')`], ['a fixed pair', `gamesShow('power'); ccPickProg(1)`], ['a jump pair', `gamesShow('power'); ccPickProg(7)`], ...songIdx.map((i, n) => [`song ${n + 1}`, `gamesShow('power'); ccPickProg(${i})`])];
+  if (songIdx.length !== 2) fail('songs', `Power Chord Switch has ${songIdx.length} song buttons, expected 2`);
+  for (const [name, expr] of views) {
     await run('pw:show:' + name, expr, 500);
     const m = await run('pw:measure:' + name, measure, 10);
     check(name, m);
@@ -451,12 +463,14 @@ async function powerSwitchWalk(page, run, events, stats, base) {
       foot: f && { top: Math.round(f.top), bottom: Math.round(f.bottom) }, groupsTop: Math.round(document.querySelector('#cc-body .cc-groups .cc-group').getBoundingClientRect().top) }; })()`;
   for (const lang of ['en', 'es']) {
     await run('pw:lang:' + lang, `setLang(${JSON.stringify(lang)})`, 400);
-    for (const [name, expr] of [['the default', `gamesShow('power')`], ['a fixed pair', `gamesShow('power'); ccPickProg(1)`], ['a jump pair', `gamesShow('power'); ccPickProg(7)`]]) {
+    for (const [name, expr] of views) {
       const step = `${name} with a best score (${lang})`;
       await run('pw:best:show:' + step, expr, 300);
       await run('pw:best:clearscore:' + step, `(() => { Object.keys(sessionStorage).filter(k => k.indexOf('ccBest:') === 0).forEach(k => sessionStorage.removeItem(k)); ccRenderSetup(); return 1; })()`, 150);
+      check(`${name} without a score (${lang})`, await run('pw:best:nostart:' + step, measure, 10));
       const pre = await run('pw:best:pre:' + step, `Math.round(document.querySelector('#cc-body .cc-groups .cc-group').getBoundingClientRect().top)`, 10);
       await run('pw:best:set:' + step, `(() => { const k = ccBestKey(ccProgs()[cc.progIdx], cc.rateIdx); sessionStorage.setItem(k, String(CC_BPM_MAX)); ccRenderSetup(); return k; })()`, 300);
+      check(step, await run('pw:best:start:' + step, measure, 10));
       const m = await run('pw:best:measure:' + step, bestMeasure, 10);
       if (!m || !m.shown) { fail(step, 'the games screen is not on screen \u2014 the measurement would be of a hidden panel'); continue; }
       if (!m.best || !m.bestVisible) fail(step, `the "Best today" score is not on screen (text: ${JSON.stringify(m.best)}) \u2014 this check cannot show the setup fits with one`);
@@ -768,10 +782,10 @@ async function walk(base, chromePort, label) {
       gamesShow('cc');
       const ccFirst = pills()[0].textContent.trim(), ccActive = active();
       gamesShow('power');
-      /* Power Chord Switch offers pairs only (the computer's pick, then 11 fixed
-         pairs): every choice but the first has two chords, and the speed row is
-         clicked for real and remembered across the reopen. */
-      const twoOnly = pills().slice(1).every(b => b.textContent.split('↔').length === 2);
+      /* Power Chord Switch offers the computer's pick, 11 fixed pairs and (2026-11-02) 2 song buttons: every choice but the first and the songs
+         has two chords, and the speed row is clicked for real and remembered across the reopen. */
+      const songPills = pills().filter(b => b.querySelector('.cc-rate-sub'));
+      const twoOnly = songPills.length === 2 && pills().slice(1).filter(b => !b.querySelector('.cc-rate-sub')).every(b => b.textContent.split('↔').length === 2);
       const speedBtns = [...document.querySelectorAll('#cc-body [onclick*="ccPickRate"]')];
       speedBtns[1].click();
       gamesShow('hub'); gamesShow('power');
@@ -779,12 +793,69 @@ async function walk(base, chromePort, label) {
       ccPickRate(2);   // back to every beat for the steps after this one
       return { n, want, again, ccFirst, ccActive, twoOnly, speedCount: speedBtns.length, rate };
     })()`, 400);
-    if (r && (r.n !== 12 || r.again.length !== 1 || r.again[0] !== r.want || r.ccActive.length !== 1 || r.ccActive[0] !== r.ccFirst)) {
-      events.push({ step: 'power:pick-and-reopen', kind: 'power-loop-memory', text: `${r.n} choices (want 12); picked "${r.want}", reopened on "${r.again.join('|')}"; Change Up opened on "${r.ccActive.join('|')}", its first loop is "${r.ccFirst}"` });
+    if (r && (r.n !== 14 || r.again.length !== 1 || r.again[0] !== r.want || r.ccActive.length !== 1 || r.ccActive[0] !== r.ccFirst)) {
+      events.push({ step: 'power:pick-and-reopen', kind: 'power-loop-memory', text: `${r.n} choices (want 14: the computer's pick, 11 pairs, 2 songs); picked "${r.want}", reopened on "${r.again.join('|')}"; Change Up opened on "${r.ccActive.join('|')}", its first loop is "${r.ccFirst}"` });
     }
     if (r && (!r.twoOnly || r.speedCount !== 3 || r.rate !== 'half')) {
-      events.push({ step: 'power:pairs-and-speed', kind: 'power-pairs-and-speed', text: `Power Chord Switch: every fixed choice is a pair: ${r.twoOnly}; ${r.speedCount} speed buttons (want 3); after clicking "Every 2 beats" and reopening it ran at "${r.rate}"` });
+      events.push({ step: 'power:pairs-and-speed', kind: 'power-pairs-and-speed', text: `Power Chord Switch: every fixed choice that is not one of the 2 songs is a pair: ${r.twoOnly}; ${r.speedCount} speed buttons (want 3); after clicking "Every 2 beats" and reopening it ran at "${r.rate}"` });
     }
+  }
+  /* Power Chord Switch's SONG buttons (2026-11-02), clicked and run for real:
+     1. each song picked, the game left and reopened: the same song is still picked, and Start reads its chord count (22 / 12);
+     2. a round started on the real engine (fake mic) and then driven on a fake clock: ccBeatTick is stepped through EVERY slot; at each one exactly
+        one .cc-dia.cur exists and it is the box of that slot's key (the two A5 boxes of Sweet Child included), and "next:" is never empty;
+     3. 200 draws of "Two random chords" (the real Start path) never draw a song. */
+  if (views.includes('power')) {
+    /* The charts are measured at the Chromebook's real window, as the layout checks above are. */
+    await page.send('Emulation.setDeviceMetricsOverride', { width: 1366, height: 657, deviceScaleFactor: 1, mobile: false });
+    await sleep(300);
+    const songStep = (step, text) => events.push({ step: 'power:songs:' + step, kind: 'power-songs', text });
+    const idxs = (await run('power:songs:idx', `CC_POWER_PROGRESSIONS.map((p, i) => p.song ? i : -1).filter(i => i >= 0)`, 10)) || [];
+    if (idxs.length !== 2) songStep('count', `${idxs.length} song buttons, expected 2`);
+    stats.songs = 0;
+    for (const i of idxs) {
+      const r = await run('power:songs:reopen:' + i, `(() => { const p = CC_POWER_PROGRESSIONS[${i}];
+        gamesShow('power'); ccPickProg(${i}); gamesShow('hub'); gamesShow('power');
+        const active = [...document.querySelectorAll('#cc-body .cc-group .ts-btn.active')].filter(b => /ccPickProg/.test(b.getAttribute('onclick') || '')).map(b => b.textContent.trim());
+        const start = document.querySelector('#cc-body .coach-start'), want = t('games.cc.startButton', { slots: p.chords.length });
+        return { song: p.song, n: p.chords.length, idx: cc.progIdx, active, start: start && start.textContent.trim(), want }; })()`, 300);
+      if (!r || r.idx !== i || r.active.length !== 1 || !/(Sweet Child|the cure)/.test(r.active[0]) || !r.start || !r.start.includes(r.want)) {
+        songStep('reopen', `${r && r.song}: picked choice ${i}, reopened on ${r && r.idx} "${r && r.active.join('|')}"; Start reads "${r && r.start}", expected "${r && r.want}"`);
+      }
+      /* The round itself. Speed "Every beat" (CC_RATES index 2): slot k is beat k. */
+      await run('power:songs:start:' + i, `(() => { gamesShow('power'); ccPickProg(${i}); ccPickRate(2); ccStart(); return 1; })()`, 900);
+      const phase = await run('power:songs:wait:' + i, `new Promise(r => { const t0 = Date.now(); const f = () => (cc && cc.phase === 'countin') || Date.now() - t0 > 8000 ? r(cc && cc.phase) : setTimeout(f, 50); f(); })`, 50);
+      if (phase !== 'countin') { songStep('start', `the round did not reach its count-in (phase "${phase}") for choice ${i}`); await run('power:songs:stop:' + i, `ccStop(); 1`, 50); continue; }
+      const walked = await run('power:songs:ticks:' + i, `(() => {
+        cancelAnimationFrame(ccRaf); ccRaf = null; (cc.timeouts || []).forEach(clearTimeout);
+        cc.phase = 'play'; ccRenderPlay();
+        const bad = [], seqLen = cc.seq.length, lastOne = t('games.cc.lastOne');
+        const keys = new Set(cc.seq);
+        const boxes = document.querySelectorAll('#cc-body .cc-col-pic .cc-dia').length;
+        for (let k = 0; k < cc.slots; k++){
+          ccBeatTick(k * cc.bpc);
+          const cur = [...document.querySelectorAll('.cc-dia.cur')].map(e => e.id), next = document.getElementById('cc-next').textContent;
+          if (cur.length !== 1 || cur[0] !== 'cc-dia-' + cc.seq[k]) bad.push('slot ' + k + ' lights [' + cur.join(',') + '], expected cc-dia-' + cc.seq[k]);
+          if (!next.trim()) bad.push('slot ' + k + ' has an empty "next:" line');
+          if ((k + 1 < cc.slots) === (next === lastOne)) bad.push('slot ' + k + ' next: "' + next + '"');
+          if (document.getElementById('cc-chord').dataset.key !== cc.seq[k]) bad.push('slot ' + k + ' big chord key ' + document.getElementById('cc-chord').dataset.key);
+        }
+        const overflow = document.getElementById('cc-body').scrollWidth > document.getElementById('cc-body').clientWidth;
+        const rects = [...document.querySelectorAll('#cc-body .cc-col-pic .cc-dia')].map(e => e.getBoundingClientRect());
+        const rows = new Set(rects.map(r => Math.round(r.top))).size;
+        ccStop();
+        return { slots: seqLen, distinct: keys.size, boxes, bad, overflow, minW: Math.round(Math.min(...rects.map(r => r.width))), rows };
+      })()`, 200);
+      if (!walked || walked.bad.length || walked.boxes !== walked.distinct || walked.overflow || walked.minW < 100 || walked.rows !== 1) {
+        songStep('ticks', `choice ${i}: ${walked && walked.slots} slots, ${walked && walked.boxes} boxes for ${walked && walked.distinct} chords, rows ${walked && walked.rows}, narrowest ${walked && walked.minW}px, sideways overflow ${walked && walked.overflow}; ${walked && walked.bad.slice(0, 4).join('; ')}`);
+      } else stats.songs += walked.slots;
+    }
+    const draws = await run('power:songs:draws', `(() => { gamesShow('power'); const songs = new Set(CC_POWER_PROGRESSIONS.filter(p => p.song).map(p => [...p.chords].sort().join())), bad = [];
+      for (let i = 0; i < 200; i++){ const d = ccPickChords(CC_POWER_PROGRESSIONS[0]); if (d.length !== 2 || d.includes('A5o') || songs.has([...d].sort().join())) bad.push(d.join('>')); }
+      return bad; })()`, 50);
+    if (draws && draws.length) songStep('draws', `"Two random chords" drew a song in ${draws.length} of 200 draws (${draws.slice(0, 3).join(', ')})`);
+    stats.songDraws = 200;
+    await page.send('Emulation.clearDeviceMetricsOverride');
   }
   await run('games-hub-again', `openGamesScreen()`, 600);
   await run('lang-es-games', `setLang('es')`, 600);
@@ -841,7 +912,7 @@ try {
   const norm = e => `${e.kind}|${e.step.replace(/^(en|es):/, '')}|${e.kind === 'bad-handler' ? '' : e.text}`;
   const baseCount = new Map(); (base ? base.errors : []).forEach(e => baseCount.set(norm(e), Math.max(baseCount.get(norm(e)) || 0, e.kind === 'bad-handler' ? +e.text : 1)));
   const report = base ? now.errors.filter(e => (e.kind === 'bad-handler' ? +e.text : 1) > (baseCount.get(norm(e)) || 0)) : now.errors;
-  say(`smoke: ${now.stats.sets} sets in ${now.stats.modules} modules (EN + ES), ${now.stats.games} game views, ${now.stats.buttons} inline handlers compiled${now.stats.chordCards ? `, ${now.stats.chordCards} chord-grid cards walked (cursor, lap, layout at 1366/390/360, lyric sheet${now.stats.bassClicks ? `, bass switch clicked on ${now.stats.bassClicks}` : ''}${now.stats.recordingClicks ? `, recording switch clicked, reloaded and flipped back on ${now.stats.recordingClicks}` : ''}${now.stats.chordSkipped ? `; ${now.stats.chordSkipped.join(', ')} is teacher-only and not walked` : ''})` : ''}${now.stats.noteCallSteps ? `, ${now.stats.noteCallSteps} Note Call power-chord steps (EN + ES: six strings, taps on low E and A only, a hit and a miss)` : ''}${now.stats.powerLayouts ? `, Power Chord Switch at 1366\u00d7657 (Start and tempo on screen: ${now.stats.powerLayouts} views, incl. after a reload${now.stats.powerBestLayouts ? `; with a "Best today" score, EN + ES, no scrolling and the privacy line on screen: ${now.stats.powerBestLayouts} views` : ''}${now.stats.powerCosmetic ? `; "low E" title kept together at ${now.stats.powerTitleWidths} window widths and the done-screen button padded, EN + ES: ${now.stats.powerCosmetic}` : ''})` : ''}${now.stats.changeUpLayouts ? `, Change Up at 1366\u00d7657 (Start on screen, no scrolling: ${now.stats.changeUpLayouts} views)` : ''}${now.stats.quizLayouts ? `, Chord Blitz (both directions) and Fret Zap at 1366\u00d7657 (picture left, 2\u00d72 answers right, no scroll: ${now.stats.quizLayouts} views)` : ''}`);
+  say(`smoke: ${now.stats.sets} sets in ${now.stats.modules} modules (EN + ES), ${now.stats.games} game views, ${now.stats.buttons} inline handlers compiled${now.stats.chordCards ? `, ${now.stats.chordCards} chord-grid cards walked (cursor, lap, layout at 1366/390/360, lyric sheet${now.stats.bassClicks ? `, bass switch clicked on ${now.stats.bassClicks}` : ''}${now.stats.recordingClicks ? `, recording switch clicked, reloaded and flipped back on ${now.stats.recordingClicks}` : ''}${now.stats.chordSkipped ? `; ${now.stats.chordSkipped.join(', ')} is teacher-only and not walked` : ''})` : ''}${now.stats.noteCallSteps ? `, ${now.stats.noteCallSteps} Note Call power-chord steps (EN + ES: six strings, taps on low E and A only, a hit and a miss)` : ''}${now.stats.powerLayouts ? `, Power Chord Switch at 1366\u00d7657 (Start and tempo on screen: ${now.stats.powerLayouts} views, incl. after a reload${now.stats.powerBestLayouts ? `; with a "Best today" score, EN + ES, no scrolling and the privacy line on screen: ${now.stats.powerBestLayouts} views` : ''}${now.stats.songs ? `; song buttons picked and reopened, ${now.stats.songs} slots of both song rounds stepped on a fake clock (one lit chart each, the two A5 boxes included), ${now.stats.songDraws} random draws, none a song` : ""}${now.stats.powerCosmetic ? `; "low E" title kept together at ${now.stats.powerTitleWidths} window widths and the done-screen button padded, EN + ES: ${now.stats.powerCosmetic}` : ''})` : ''}${now.stats.changeUpLayouts ? `, Change Up at 1366\u00d7657 (Start on screen, no scrolling: ${now.stats.changeUpLayouts} views)` : ''}${now.stats.quizLayouts ? `, Chord Blitz (both directions) and Fret Zap at 1366\u00d7657 (picture left, 2\u00d72 answers right, no scroll: ${now.stats.quizLayouts} views)` : ''}`);
   if (base) say(`smoke: ${BASELINE} had ${base.errors.length} error event(s); this checkout has ${now.errors.length}`);
   if (report.length) {
     exitCode = 1;

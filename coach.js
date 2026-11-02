@@ -3082,19 +3082,42 @@ const CC_BPM_MIN = 40, CC_BPM_MAX = 140;
    could make four jumps the list does not teach, F5-D5, G5-B5, A5-B5, A5-C5).
    `group` is what the hand does between the chords: 'low' slides along the
    low E string, 'a' along the A string, 'jump' changes strings (checks.mjs
-   1ca proves every pair does what its group says). */
+   1ca proves every pair does what its group says).
+
+   SONGS (2026-11-02): `group: 'song'` is not a pair. One button runs through
+   every chord switch in a song's power-chord card in one round: `chords` is the
+   WALK (the shortest walk from the song's first chord that covers every switch
+   of `card`, found by a breadth-first search; checks.mjs "1ck" re-runs the
+   search and proves the walk against the card). The walk sets the round's length
+   (ccStart), and the speed row still sets how many beats each chord lasts.
+   Songs sit at the END of the array, so a remembered pick (`pwProg`, an index)
+   still names the same pair. ccRandomPair never draws one, and 1ca skips them.
+   `shapes` holds a key that is not a CHORD_DIAGRAMS name; `base` is the
+   CHORD_DIAGRAMS chord with the same three pitches (grading and the pitch
+   lookups use it).
+   A5 comes in two shapes in Sweet Child O' Mine: 'A5o' (open A string, frets 2
+   on D and G) next to C5, B5 and E5, as ca-33 plays it, and 'A5' (low E, fret 5)
+   next to G5. The fret-5 A5 next to G5 is a deliberate departure from ca-33,
+   which plays the open shape there too: Jonathan's call, 2026-11-02. "the cure"
+   uses only the game's normal shapes. */
 const CC_POWER_PROGRESSIONS = [
   { group: 'random', random: true, randomKey: 'RANDOM2P', chords: ['F5','G5'] },
   { group: 'low',  chords: ['F5','G5'] }, { group: 'low',  chords: ['G5','A5'] }, { group: 'low',  chords: ['F5','A5'] },
   { group: 'a',    chords: ['B5','C5'] }, { group: 'a',    chords: ['C5','D5'] }, { group: 'a',    chords: ['B5','D5'] },
   { group: 'jump', chords: ['G5','C5'] }, { group: 'jump', chords: ['A5','D5'] }, { group: 'jump', chords: ['G5','D5'] },
-  { group: 'jump', chords: ['F5','C5'] }, { group: 'jump', chords: ['F5','B5'] }
+  { group: 'jump', chords: ['F5','C5'] }, { group: 'jump', chords: ['F5','B5'] },
+  { group: 'song', song: 'sweet-child-o-mine', card: 'ca-33', titleKey: 'games.pw.song.sweetChild',
+    chords: ['D5','C5','G5','D5','C5','D5','C5','B5','A5o','C5','B5','A5o','E5','C5','B5','A5o','E5','G5','D5','G5','A5','G5'],
+    shapes: { A5o: { position: 0, base: 'A5', chord: [[6,'x',''],[5,0,0],[4,2,1],[3,2,2],[2,'x',''],[1,'x','']] } } },
+  { group: 'song', song: 'the-cure', card: 'ca-30', titleKey: 'games.pw.song.theCure',
+    chords: ['A5','C5','A5','C5','F5','C5','G5','F5','C5','G5','D5','F5'] }
 ];
 const CC_POWER_GROUPS = [
   { id: 'random', titleKey: 'games.pw.group.random' },
   { id: 'low',  titleKey: 'games.pw.group.low' },
   { id: 'a',    titleKey: 'games.pw.group.a' },
-  { id: 'jump', titleKey: 'games.pw.group.jump' }
+  { id: 'jump', titleKey: 'games.pw.group.jump' },
+  { id: 'song', titleKey: 'games.pw.group.songs' }
 ];
 
 let cc = null, ccRaf = null;
@@ -3111,18 +3134,61 @@ function ccGameKey(){ return ccIsPower() ? 'pw' : 'cc'; }
 /* Where a power chord's root sits, read off the chord's own diagram so the
    hint can't drift from the picture: the first string that isn't muted is the
    root (the 3-finger shapes mute everything below it). */
-function pwRoot(name){
-  const cfg = (typeof CHORD_DIAGRAMS !== 'undefined') ? CHORD_DIAGRAMS[name] : null;
+/* A song round's own shapes (CC_POWER_PROGRESSIONS[i].shapes) win over the
+   library: `shapes` is that map, or null for a pair. */
+function pwShape(name, shapes){
+  if (shapes && Object.prototype.hasOwnProperty.call(shapes, name) && shapes[name] && Array.isArray(shapes[name].chord)) return shapes[name];
+  return (typeof CHORD_DIAGRAMS !== 'undefined') ? CHORD_DIAGRAMS[name] : null;
+}
+/* The chord a shape key stands for in the library ('A5o' is the open A5: the
+   same three pitches as A5 at the low E string's fret 5). Pitch lookups and the
+   grading's pitch classes read this name. */
+function pwBaseName(name, shapes){
+  const own = shapes && Object.prototype.hasOwnProperty.call(shapes, name) && shapes[name];
+  return own && own.base ? own.base : name;
+}
+/* What a student reads for a chord key: every key shows as itself except the
+   open A5, which says so ("A5 (open)" / "A5 (al aire)"). The ONE place a key
+   becomes text: the big chord, "next:", chips and their tooltips, chart labels
+   and the done screen's "which switch hurt most" all go through it. Element
+   ids are built from the KEY, never from this. */
+const PW_NAMED_KEYS = { A5o: 'games.pw.chord.a5open' };
+function pwChordName(key){
+  return Object.prototype.hasOwnProperty.call(PW_NAMED_KEYS, key) ? t(PW_NAMED_KEYS[key]) : String(key);
+}
+/* The big chord name: "A5 (open)" with the bracket on its own smaller line
+   (a span, so textContent still reads "A5 (open)"). */
+function pwChordHtml(key){
+  const m = pwChordName(key).match(/^(.*?) (\(.*\))$/);
+  return m ? `${escHtml(m[1])} <span class="cc-chord-sub">${escHtml(m[2])}</span>` : escHtml(pwChordName(key));
+}
+function pwRoot(name, shapes){
+  const cfg = pwShape(name, shapes);
   const r = cfg && cfg.chord.find(c => c[1] !== 'x');
   return r ? { string: r[0], fret: r[1] } : null;
 }
+/* The fret the fingers sit on in an open shape (the root string rings open):
+   the first fretted string's fret. 2 for E5 and for the open A5. */
+function pwFingerFret(name, shapes){
+  const cfg = pwShape(name, shapes);
+  const f = cfg && cfg.chord.find(c => c[1] !== 'x' && c[1] > 0);
+  return f ? f[1] : 0;
+}
 const PW_STRING_KEYS = { 6: 'games.wait.string.lowE', 5: 'games.wait.string.a' };
 /* "slide up 2 frets" along one string, "move to the A string, fret 3" when the
-   shape changes strings. '' when either chord has no diagram or nothing moves. */
-function pwMoveHint(from, to){
-  const a = pwRoot(from), b = pwRoot(to);
+   shape changes strings. '' when either chord has no diagram or nothing moves.
+   Two rules for the open shapes (E5 and the open A5, root on fret 0): going TO
+   one says which string rings open and where the fingers go; going FROM one to
+   a fretted shape always uses the string form, even on the same string ("slide
+   up 3 frets" is wrong when the hand is not in a shape yet). `shapes` is the
+   round's own shapes (a song), if any. */
+function pwMoveHint(from, to, shapes){
+  const a = pwRoot(from, shapes), b = pwRoot(to, shapes);
   if (!a || !b) return '';
-  if (a.string !== b.string){
+  if (b.fret === 0){
+    return PW_STRING_KEYS[b.string] ? t('games.pw.move.open', { string: t(PW_STRING_KEYS[b.string]), fret: pwFingerFret(to, shapes) }) : '';
+  }
+  if (a.string !== b.string || a.fret === 0){
     return PW_STRING_KEYS[b.string] ? t('games.pw.move.string', { string: t(PW_STRING_KEYS[b.string]), fret: b.fret }) : '';
   }
   const d = b.fret - a.fret;
@@ -3152,7 +3218,7 @@ function ccRandomFour(){
 /* Power Chord Switch's "computer picks": one of the listed pairs (never one
    the list does not teach), its two chords in a random order. */
 function ccRandomPair(){
-  const listed = CC_POWER_PROGRESSIONS.filter(p => !p.random);
+  const listed = CC_POWER_PROGRESSIONS.filter(p => !p.random && p.group !== 'song');
   const pair = listed[Math.floor(Math.random() * listed.length)].chords.slice();
   return Math.random() < 0.5 ? pair : pair.reverse();
 }
@@ -3172,7 +3238,9 @@ function ccRoundChords(progDef, again){
 }
 /* A random loop has its own best per game (Random 4 and Power Chord Switch's
    random pair would otherwise share one session key). */
-function ccBestKey(prog, rateIdx){ const rid = CC_RATES[rateIdx] ? CC_RATES[rateIdx].id : 'bar'; return 'ccBest:' + (prog.random ? (prog.randomKey || 'RANDOM4') : prog.chords.join('-')) + ':' + rid; }
+/* A song has its own key ('SONG:' + slug), so the same walk at the same speed
+   keeps one best; a pair's key is its chords, as it always was. */
+function ccBestKey(prog, rateIdx){ const rid = CC_RATES[rateIdx] ? CC_RATES[rateIdx].id : 'bar'; return 'ccBest:' + (prog.random ? (prog.randomKey || 'RANDOM4') : prog.song ? 'SONG:' + prog.song : prog.chords.join('-')) + ':' + rid; }
 
 /* mode: 'power' = Power Chord Switch; anything else (the hub passes nothing)
    = Change Up. */
@@ -3230,7 +3298,7 @@ function ccDiagramsHtml(chords, curName, idPrefix, shapes){
       ? chordDiagramSVG(own).replace(/width="\d+"\s+height="\d+"/, '')
       : localChordSvg(n);
     if (!svg) return '';
-    return `<div class="chord-box cc-dia${n === curName ? ' cur' : ''}" id="${pre}-${escAttr(n)}">${svg}<div class="chord-box-label">${escHtml(n)}</div></div>`;
+    return `<div class="chord-box cc-dia${n === curName ? ' cur' : ''}" id="${pre}-${escAttr(n)}">${svg}<div class="chord-box-label">${escHtml(pwChordName(n))}</div></div>`;
   }).join('');
   return boxes ? `<div class="chord-diagrams cc-diagrams">${boxes}</div>` : '';
 }
@@ -3248,7 +3316,7 @@ function ccRenderSetup(msg){
   const pills = groups.map(([inGroup, title]) =>
     `<div class="cc-group"><div class="cc-group-title">${title}</div><div class="fret-levels">` +
     ccProgs().map((pr, i) => !inGroup(pr) ? '' :
-      `<button type="button" class="ts-btn${i === cc.progIdx ? ' active' : ''}" onclick="ccPickProg(${i})">${pr.random ? '&#x1F3B2; ' + t(power ? 'games.pw.randomPair' : 'games.cc.randomFour') : escHtml(pr.chords.join(pr.chords.length === 2 ? ' ↔ ' : ' – '))}</button>`
+      `<button type="button" class="ts-btn${i === cc.progIdx ? ' active' : ''}" onclick="ccPickProg(${i})">${pr.song ? escHtml(t(pr.titleKey)) + `<span class="cc-rate-sub">${escHtml(t('games.pw.songSub', { n: pr.chords.length }))}</span>` : pr.random ? '&#x1F3B2; ' + t(power ? 'games.pw.randomPair' : 'games.cc.randomFour') : escHtml(pr.chords.join(pr.chords.length === 2 ? ' ↔ ' : ' – '))}</button>`
     ).join('') + `</div></div>`
   ).join('');
   const prog = ccProgs()[cc.progIdx];
@@ -3295,10 +3363,15 @@ function ccRenderSetup(msg){
      charts push Start below a 657px screen once a loop is picked (Friday check
      R1-3, Jonathan 2026-10-31). Power Chord Switch's two columns fit 657px, so
      its bar is static (#cc-body.cc-power .cc-startbar). */
-  const startBtn = `<button type="button" class="coach-start" onclick="ccStart()">&#x25B6; ${t('games.cc.startButton', { slots: rate.slots })}</button>`;
+  /* A song's round is its whole walk, whatever the speed: the label counts that. */
+  const startBtn = `<button type="button" class="coach-start" onclick="ccStart()">&#x25B6; ${t('games.cc.startButton', { slots: prog.song ? prog.chords.length : rate.slots })}</button>`;
+  /* A song's preview draws each distinct chord of the walk once, in two rows
+     (styles.css .cc-song-pic); a pair keeps today's two large charts. */
   const pic = prog.random
     ? `<div class="coach-note">&#x1F3B2; ${t(power ? 'games.pw.randomNote' : 'games.cc.randomNote')}</div>`
-    : ccDiagramsHtml(prog.chords, null);
+    : prog.song
+      ? `<div class="cc-song-pic">${ccDiagramsHtml(prog.chords, null, undefined, prog.shapes)}</div>`
+      : ccDiagramsHtml(prog.chords, null);
   const tip = `<div class="coach-tip">&#x1F92B; ${t(power ? 'games.pw.tip' : 'games.cc.tip', { rate: tipRate })}</div>`;
   const note = msg ? `<div class="coach-note">${escHtml(msg)}</div>` : '';
   /* Power Chord Switch uses the width of the games screen: the settings (speed,
@@ -3321,6 +3394,25 @@ function ccRenderSetup(msg){
      the chosen loop's charts right: styles.css .cc-open-setup); its count-in,
      play and done screens keep the 560px column, so ccStart takes the class off. */
   body.classList.toggle('cc-open-setup', !power);
+}
+
+/* The round a Start builds from the chosen loop, its chords and the speed.
+   A song plays its walk ONCE: the walk is the round (the speed row still sets
+   the beats each chord lasts). Pairs and random loops keep the speed's own slot
+   count and cycle their chords. `classes` (the pitch classes the grading reads)
+   come from each chord's BASE name: 'A5o' is graded as A5, which has the same
+   three pitches (checks.mjs 1ck proves the equality). Split out of ccStart so
+   the check can run it without a microphone. */
+function ccRoundPlan(progDef, prog, rate){
+  const song = !!progDef.song, shapes = progDef.shapes || null;
+  const slots = song ? prog.length : rate.slots;
+  const seq = song ? prog.slice() : Array.from({ length: slots }, (_, i) => prog[i % prog.length]);
+  const classes = {};
+  prog.forEach(n => {
+    const midis = (typeof chordMidis === 'function') ? chordMidis(pwBaseName(n, shapes)) : [];
+    classes[n] = midis.map(m => ((m % 12) + 12) % 12);
+  });
+  return { song, shapes, slots, seq, classes };
 }
 
 async function ccStart(again){
@@ -3352,13 +3444,9 @@ async function ccStart(again){
   const prog = ccRoundChords(progDef, again === true);
   cc.chords = prog;   // the actual chords this round (a random loop differs each Start; Again replays them in Power Chord Switch)
   const rate = CC_RATES[cc.rateIdx] || CC_RATES[0];
-  cc.bpc = rate.bpc; cc.slots = rate.slots;
-  cc.seq = Array.from({ length: cc.slots }, (_, i) => prog[i % prog.length]);
-  cc.classes = {};
-  prog.forEach(n => {
-    const midis = (typeof chordMidis === 'function') ? chordMidis(n) : [];
-    cc.classes[n] = midis.map(m => ((m % 12) + 12) % 12);
-  });
+  const plan = ccRoundPlan(progDef, prog, rate);
+  cc.song = plan.song; cc.shapes = plan.shapes;
+  cc.bpc = rate.bpc; cc.slots = plan.slots; cc.seq = plan.seq; cc.classes = plan.classes;
   cc.changes = [];
   for (let s = 1; s < cc.slots; s++){
     cc.changes.push({ beat: s * cc.bpc, from: cc.seq[s - 1], to: cc.seq[s], result: null, pend: null });
@@ -3368,8 +3456,8 @@ async function ccStart(again){
   cc.phase = 'countin';
   ccBody().classList.remove('cc-open-setup');
   ccBody().innerHTML = ccIsPower()
-    ? `<div class="cc-cols cc-cols-play"><div class="cc-col-set"><div class="coach-count" id="cc-count">&nbsp;</div></div>` +
-      `<div class="cc-col-pic">${ccDiagramsHtml(prog, prog[0])}</div></div>`
+    ? `<div class="cc-cols cc-cols-play${cc.song ? ' cc-cols-song' : ''}"><div class="cc-col-set"><div class="coach-count" id="cc-count">&nbsp;</div></div>` +
+      `<div class="cc-col-pic">${ccDiagramsHtml(prog, prog[0], undefined, cc.shapes)}</div></div>`
     : `<div class="coach-count" id="cc-count">&nbsp;</div>` + ccDiagramsHtml(prog, prog[0]);
   coachCountIn(cc, 'cc-count', () => {
     if (cc && cc.phase === 'countin'){ cc.phase = 'play'; ccRenderPlay(); }
@@ -3382,21 +3470,21 @@ function ccRenderPlay(){
   const body = ccBody();
   if (!body || !cc) return;
   const chips = cc.changes.map((c, i) =>
-    `<span class="coach-chip pending" id="cc-chip-${i}" title="${escAttr(t('games.cc.changeTooltip', { from: c.from, to: c.to }))}">${escHtml(c.to)}</span>`
+    `<span class="coach-chip pending" id="cc-chip-${i}" title="${escAttr(t('games.cc.changeTooltip', { from: pwChordName(c.from), to: pwChordName(c.to) }))}">${escHtml(pwChordName(c.to))}</span>`
   ).join('');
   const now = `<div class="cc-now">
-       <div class="cc-chord" id="cc-chord">${escHtml(cc.seq[0])}</div>
+       <div class="cc-chord" id="cc-chord" data-key="${escAttr(cc.seq[0])}">${pwChordHtml(cc.seq[0])}</div>
        <div class="cc-next" id="cc-next">${escHtml(ccNextText(0))}</div>
      </div>
      <div class="cc-beats" id="cc-beats"><span class="cc-pip"></span><span class="cc-pip"></span><span class="cc-pip"></span><span class="cc-pip"></span></div>`;
-  const charts = ccDiagramsHtml(cc.chords, cc.seq[0]);
+  const charts = ccDiagramsHtml(cc.chords, cc.seq[0], undefined, cc.shapes);
   const rest = `<div class="coach-strip">${chips}</div>
      <div class="coach-live"><span class="coach-live-dot"></span>${t('games.cc.strumEveryBeat')}</div>
      <button type="button" class="tp-btn coach-stop" onclick="ccFinish()">&#x25A0; ${t('games.common.stop')}</button>`;
   /* Power Chord Switch: the chord, "next" and the beat pips on the left, the
      two charts large on the right (styles.css .cc-cols-play). */
   body.innerHTML = ccIsPower()
-    ? `<div class="cc-cols cc-cols-play"><div class="cc-col-set">${now}${rest}</div><div class="cc-col-pic">${charts}</div></div>`
+    ? `<div class="cc-cols cc-cols-play${cc.song ? ' cc-cols-song' : ''}"><div class="cc-col-set">${now}${rest}</div><div class="cc-col-pic">${charts}</div></div>`
     : now + charts + rest;
 }
 
@@ -3405,8 +3493,8 @@ function ccRenderPlay(){
 function ccNextText(slotIdx){
   if (slotIdx + 1 >= cc.slots) return t('games.cc.lastOne');
   const to = cc.seq[slotIdx + 1];
-  const hint = ccIsPower() ? pwMoveHint(cc.seq[slotIdx], to) : '';
-  return t('games.common.next') + ' ' + to + (hint ? ' — ' + hint : '');
+  const hint = ccIsPower() ? pwMoveHint(cc.seq[slotIdx], to, cc.shapes) : '';
+  return t('games.common.next') + ' ' + pwChordName(to) + (hint ? ' — ' + hint : '');
 }
 
 function ccBeatTick(cur){
@@ -3414,8 +3502,10 @@ function ccBeatTick(cur){
   if (slotIdx >= cc.slots) return;
   const chordEl = document.getElementById('cc-chord');
   const nextEl = document.getElementById('cc-next');
-  if (chordEl && chordEl.textContent !== cc.seq[slotIdx]){
-    chordEl.textContent = cc.seq[slotIdx];
+  /* Compared by KEY (data-key), not by the text: 'A5o' reads "A5 (open)". */
+  if (chordEl && chordEl.dataset.key !== cc.seq[slotIdx]){
+    chordEl.dataset.key = cc.seq[slotIdx];
+    chordEl.innerHTML = pwChordHtml(cc.seq[slotIdx]);
     document.querySelectorAll('.cc-dia').forEach(el => el.classList.remove('cur'));
     const dia = document.getElementById('cc-dia-' + cc.seq[slotIdx]);
     if (dia) dia.classList.add('cur');
@@ -3610,7 +3700,7 @@ function ccRenderDone(){
   const tally = {};
   cc.changes.forEach(c => {
     if (c.result !== 'ok'){
-      const k = c.from + ' → ' + c.to;
+      const k = pwChordName(c.from) + ' → ' + pwChordName(c.to);
       tally[k] = (tally[k] || 0) + 1;
     }
   });
@@ -3642,7 +3732,7 @@ function ccRenderDone(){
     advice = t('games.cc.advice.low');
   }
   const chips = cc.changes.map(c =>
-    `<span class="coach-chip ${c.result === 'ok' ? 'ok' : c.result === 'off' ? 'wrong' : 'miss'}">${escHtml(c.to)}</span>`
+    `<span class="coach-chip ${c.result === 'ok' ? 'ok' : c.result === 'off' ? 'wrong' : 'miss'}">${escHtml(pwChordName(c.to))}</span>`
   ).join('');
   const rec = r >= 0.85 ? 'up' : r >= 0.5 ? 'same' : 'down';
   body.innerHTML =

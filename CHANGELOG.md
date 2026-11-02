@@ -5,6 +5,13 @@ Notable changes to the Guitar Class site. Newest first.
 For the full session-by-session history (and the reasoning behind each change),
 see `WORKFLOW.md` and the git commit log.
 
+## 2026-11-02 — Power Chord Switch: song buttons
+
+- **Power Chord Switch has a Songs column.** Sweet Child O' Mine and "the cure" each have one button that runs through every power-chord switch in the song, one time through: 22 chords for Sweet Child, 12 for "the cure". Pick the speed and the tempo the same way as for a pair.
+- **In Sweet Child you play A5 two ways.** Open (A string open, fingers on fret 2) next to C5, B5 and E5, and at fret 5 on the low E string next to G5. The open one shows as "A5 (open)". The hint under the chord tells you where to go next, for example "open low E string, fingers on fret 2".
+- **The setup shows every chord of the song once**, and the play screen shows them in one row with the current chord in the green box.
+- The line under "Best today" no longer makes the pair buttons jump a few pixels when a score appears.
+
 ## 2026-11-02 — In class: today's activities in the order you do them
 
 - **Today's activities now go lowest number first.** When there are two or

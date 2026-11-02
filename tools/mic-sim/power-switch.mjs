@@ -104,7 +104,8 @@ function trial(from, to, scenario, seed, gate){
   return ch.result === 'off' ? 'off' : (nReadings >= 3 ? 'ok·tone' : 'ok·timing');
 }
 
-const PAIRS = [...new Set(LOOPS.flatMap(l => l.chords.map((c, i) => c + '>' + l.chords[(i + 1) % l.chords.length])))].map(s => s.split('>'));
+// Pairs only: a song entry (group "song", 2026-11-02) is a 22- or 12-chord walk with shapes this simulator has no roots for (E5, the open A5).
+const PAIRS = [...new Set(LOOPS.filter(l => l.group !== "song").flatMap(l => l.chords.map((c, i) => c + '>' + l.chords[(i + 1) % l.chords.length])))].map(s => s.split('>'));
 const POWER_RAW = new Function('return ' + (constLine('RNW_POWER_CLARITY').replace(/^const \w+ = |;$/g, '') || '0.55'))();
 const GATES = POWER_GATE ? [['custom ' + JSON.stringify(POWER_GATE), POWER_GATE]] : [['0.55 (Change Up)', 0.55], ['RNW_POWER_CLARITY ' + JSON.stringify(POWER_RAW), POWER_RAW]];
 console.log(`${file} · ${PAIRS.length} adjacent chord pairs · harmonics ${opt('harm') || 'std'} · ${TRIALS} trials each`);

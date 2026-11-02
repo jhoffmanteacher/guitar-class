@@ -111,6 +111,10 @@ ear. This is chord *timing*, not BPM:
   (two beats each, "where do we go") `| E` to the end — E starts on bar
   178, not 177 (Jonathan's chord chart, confirmed by a per-beat bass
   reading of both mixes, 2026-10-15). ca-28 and ca-33 carry it.
+  Power Chord Switch has a whole-song button (2026-11-02) whose walk is
+  checked against ca-33 / ca-30 by checks.mjs (1ck). Sweet Child's button plays
+  A5 at low-E fret 5 next to G5 and open elsewhere (Jonathan's call), while
+  ca-33 plays it open throughout. Don't "fix" the button to match ca-33.
 - **Let It Be** — verse `C–G–Am–F`, **two beats per chord**, ~71–76 BPM.
 - **"the cure"** — **FOUR felt beats per chord, one full bar** (track reads
   144 BPM but feels ~72). This line said "two felt beats per chord" until
@@ -119,6 +123,9 @@ ear. This is chord *timing*, not BPM:
   against the record by ear, so this was the outlier. At two beats a chord
   would be 1.67 s and every snippet window would be half the length it is.
   Tell students "big slow beats, about 72."
+  Power Chord Switch has a whole-song button (2026-11-02) whose walk is
+  checked against ca-30 by checks.mjs (1ck); "the cure" uses only the game's
+  normal shapes there.
   **The verse and the chorus are EIGHT bars each** (Jonathan, 2026-09-18) —
   verse `Am · C · Am · C`, then `F · C · F · C`; chorus `Dm · F · C · G`,
   played twice. **The chorus IS the four-chord loop played through

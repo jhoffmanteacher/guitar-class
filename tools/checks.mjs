@@ -10545,6 +10545,7 @@ function checkCoachVerdicts() {
   const text = id => (bodies[id] || '').replace(/<[^>]+>/g, ' ').replace(/&[#\w]+;/g, ' ').replace(/\s+/g, ' ');
   const rep = (n, s) => Array(n).fill(s);
   const right = s => s === 'ok' || s === 'oct';
+  let songCounts = null;
   const counts = { reports: 0, descs: 0, nrLevels: 0, doneScreens: 0, pwLoops: 0, pwHints: 0, pwViews: 0, pwMemory: 0, pwGates: 0 };
   try {
     /* Coach report. [mode, slot states, timing offset ms, must show Great line, must show "all counted"] */
@@ -10747,6 +10748,9 @@ function checkCoachVerdicts() {
         p[1][1] === p[0][1] + 2 && p[2][1] === p[0][1] + 2 && p[1][0] === p[0][0] - 1 && p[2][0] === p[0][0] - 2;
     };
     for (const lp of LOOPS) {
+      /* A song is not a pair (2026-11-02): its walk is 22 or 12 chords with a shape of its own. Skipped here ON PURPOSE and
+         proved by 1ck below (its card, its switches, its shortest walk, its hints); the other groups are checked as before. */
+      if (lp.group === 'song') { counts.pwSongEntries = (counts.pwSongEntries || 0) + 1; continue; }
       counts.pwLoops++;
       const name = lp.chords.join(' – ');
       if (lp.chords.length !== 2) flag(`1ca: Power Chord Switch loop ${name} has ${lp.chords.length} chords — the game is two chords`);
@@ -10781,7 +10785,7 @@ function checkCoachVerdicts() {
        is untouched and the two never share a best-score key. */
     if (!LOOPS[0] || !LOOPS[0].random) flag('1ca: Power Chord Switch does not open with "the computer picks" as its first choice');
     if (run('typeof CC_POWER_RANDOM_POOL') !== 'undefined') flag("1ca: CC_POWER_RANDOM_POOL is back \u2014 the computer must draw from the listed pairs, never from a pool of single chords (it could draw a pair the list does not teach)");
-    const LISTED = LOOPS.filter(l => !l.random).map(l => l.chords);
+    const LISTED = LOOPS.filter(l => !l.random && l.group !== 'song').map(l => l.chords);
     const pairKey = d => [...d].sort().join('');
     const listedKeys = new Set(LISTED.map(pairKey));
     if (LISTED.length !== 11 || listedKeys.size !== 11) flag(`1ca: Power Chord Switch lists ${LISTED.length} pairs (${listedKeys.size} different), pinned at 11 \u2014 change the pin and the draw's maths on purpose`);
@@ -10833,7 +10837,7 @@ function checkCoachVerdicts() {
     if (!/#cb-body \.cb-cols,#fz-body \.cb-cols\{display:grid;grid-template-columns:/.test(css)) flag('1ca: styles.css lost the two-column play screen of Chord Blitz and Fret Zap (.cb-cols)');
     if (!/\.lq-screen \.games-shell\{max-width:760px;/.test(css)) flag('1ca: styles.css lost .lq-screen .games-shell{max-width:760px} \u2014 the live quiz would widen with the games');
     if (!/#cc-body\.cc-open-setup \.cc-cols\{display:grid;grid-template-columns:/.test(css) || !/#cc-body\.cc-open-setup \.cc-up-groups\{display:grid;grid-template-columns:repeat\(3,/.test(css)) flag("1ca: styles.css lost Change Up's wide setup (.cc-open-setup .cc-up-groups / .cc-cols)");
-    if (!/#cc-body\.cc-power \.cc-cols\{display:grid;grid-template-columns:/.test(css) || !/#cc-body\.cc-power \.cc-groups\{display:grid;grid-template-columns:repeat\(4,/.test(css)) flag('1ca: styles.css lost Power Chord Switch\'s two-column layout (.cc-cols) or its four pair columns (.cc-groups)');
+    if (!/#cc-body\.cc-power \.cc-cols\{display:grid;grid-template-columns:/.test(css) || !/#cc-body\.cc-power \.cc-groups\{display:grid;grid-template-columns:repeat\(5,/.test(css)) flag('1ca: styles.css lost Power Chord Switch\'s two-column layout (.cc-cols) or its five choice columns (.cc-groups: four pair groups and Songs)');
     for (const lang of ['en', 'es']) {
       run(`setLang(${JSON.stringify(lang)})`);
       run(`ccSetup('power')`);
@@ -10959,6 +10963,7 @@ function checkCoachVerdicts() {
       run(`setLang(${JSON.stringify(lang)})`);
       const nextWord = run(`t('games.common.next')`), lastOne = run(`t('games.cc.lastOne')`);
       LOOPS.forEach((lp, i) => {
+        if (lp.group === 'song') return;   // a song's play screen and every beat tick are run in 1ck
         run(`ccSetup('power'); cc.progIdx = ${i}; cc.chords = ${JSON.stringify(lp.chords)}; cc.bpc = 1; cc.slots = 16;
           cc.seq = Array.from({ length: 16 }, (_, k) => cc.chords[k % cc.chords.length]);
           cc.changes = Array.from({ length: 15 }, (_, k) => ({ from: cc.seq[k], to: cc.seq[k + 1], result: null }));
@@ -10975,12 +10980,201 @@ function checkCoachVerdicts() {
         }
       });
     }
+    /* ── 1ck. Power Chord Switch's SONG buttons (2026-11-02) ──────────────────
+       Each song is ONE button that runs through every chord switch its
+       power-chord card plays, in one round (coach.js CC_POWER_PROGRESSIONS,
+       group 'song'). "A switch" = two different chords one after the other
+       INSIDE a section of the card's notes, in playing order. NOT counted: a
+       lap's wrap-around (a section that repeats), or the step from one section
+       to the next — the card never plays those as a chord change, and counting
+       them would add D5→A5, G5→E5 … that the song's card does not teach.
+       Proved here, each from the data and by running coach.js (not by reading it):
+       1. the card exists and is the song's (card.track === song);
+       2. the walk starts on the card's first chord;
+       3. every switch in the walk is one the card plays;
+       4. every switch the card plays is in the walk (A5o counts as A5);
+       5. Sweet Child: the open A5 ('A5o') sits only between C5, B5 and E5, the
+          fret-5 A5 only next to G5 (Jonathan's call, 2026-11-02), and both are used;
+       6. every key in the walk has a diagram that draws six strings;
+       7. A5o's pitches equal A5's, and so do the pitch classes the grading reads;
+       8. the walk is a SHORTEST such walk (a breadth-first search over (chord,
+          switches covered) is re-run here);
+       then: the round is the walk (any speed), the Start label and the button's
+       second line say the count, the "next:" hint on every one of the 32 switches
+       is the move the DIAGRAMS show (both languages; independent of pwMoveHint),
+       no player-facing text shows the key "A5o", a done screen names it
+       "A5 (open)", the computer's pick never draws a song, each song has its own
+       best-score key and the existing pair keys are unchanged, and the songs sit
+       at the END of the list so a remembered pick still names the same pair.
+       Totals are pinned: 2 songs, 13 + 8 switches, 22 + 12 chords. */
+    const SONGS = LOOPS.map((l, i) => ({ ...l, idx: i })).filter(l => l.group === 'song');
+    const CARDS = JSON.parse(run(`JSON.stringify(CLASS_ACTIVITIES.filter(a => ${JSON.stringify(SONGS.map(s => s.card))}.includes(a.id)))`));
+    const song = { songs: 0, cardSwitches: 0, walkChords: 0, hints: 0, screens: 0 };
+    const baseOf = (k, s) => (s.shapes && s.shapes[k] && s.shapes[k].base) || k;
+    const sw = (a, b) => `${a}>${b}`;
+    const cardSwitchSet = card => {
+      const set = new Set();
+      for (const sec of card.card.sections) {
+        const seq = sec.notes.map(n => n.note);
+        for (let i = 1; i < seq.length; i++) if (seq[i] !== seq[i - 1]) set.add(sw(seq[i - 1], seq[i]));
+      }
+      return set;
+    };
+    /* The walk's nodes are SHAPES, so a card switch with A5 is split by the rule in the work order: the open A5 ('A5o') next to C5, B5 and E5, the fret-5 A5 next to G5. */
+    const shapedEdge = (e, s) => {
+      const [a, b] = e.split('>');
+      if (!(s.shapes && s.shapes.A5o)) return e;
+      const pick = (x, other) => (x === 'A5' ? (['C5', 'B5', 'E5'].includes(other) ? 'A5o' : other === 'G5' ? 'A5' : '?') : x);
+      return sw(pick(a, b), pick(b, a));
+    };
+    const shortestWalk = (cardSet, first, s) => {
+      const edges = [...new Set([...cardSet].map(e => shapedEdge(e, s)))].sort(), id = new Map(edges.map((e, i) => [e, i]));
+      const full = (1 << edges.length) - 1;
+      let frontier = [[first, 0]]; const seen = new Set([first + '|0']);
+      for (let len = 1; len < 200; len++) {
+        const next = [];
+        for (const [c, m] of frontier) for (const e of edges) {
+          const [a, b] = e.split('>'); if (a !== c) continue;
+          const m2 = m | (1 << id.get(e)), key = b + '|' + m2;
+          if (m2 === full) return len + 1;   // chords in the walk
+          if (!seen.has(key)) { seen.add(key); next.push([b, m2]); }
+        }
+        frontier = next;
+      }
+      return null;
+    };
+    if (SONGS.length === 0) flag('1ck: Power Chord Switch has no song entries (group "song")');
+    const firstSong = LOOPS.findIndex(l => l.group === 'song');
+    if (firstSong < 0 || LOOPS.slice(firstSong).some(l => l.group !== 'song') || LOOPS.slice(0, firstSong).some(l => l.group === 'song')) flag('1ck: the songs must sit at the END of CC_POWER_PROGRESSIONS — inserting them earlier changes what a remembered pick (pwProg, an index) points at');
+    const DIAG_ALL = JSON.parse(run('JSON.stringify(CHORD_DIAGRAMS)'));
+    const songShape = (k, s) => (s.shapes && s.shapes[k]) || DIAG_ALL[k];
+    const rootFor = (k, s) => { const sh = songShape(k, s); const r = sh && sh.chord.find(c => c[1] !== 'x'); return r ? { string: r[0], fret: r[1] } : null; };
+    const fingerFret = (k, s) => { const sh = songShape(k, s); const f = sh && sh.chord.find(c => c[1] !== 'x' && c[1] > 0); return f ? f[1] : 0; };
+    const songHint = (a, b, lang, s) => {
+      const x = rootFor(a, s), y = rootFor(b, s);
+      if (!x || !y) return null;
+      const str = n => (n === 6 ? (lang === 'en' ? 'low E' : 'Mi grave') : lang === 'en' ? 'A' : 'La');
+      if (y.fret === 0) return lang === 'en' ? `open ${str(y.string)} string, fingers on fret ${fingerFret(b, s)}` : `cuerda ${str(y.string)} al aire, dedos en el traste ${fingerFret(b, s)}`;
+      if (x.string !== y.string || x.fret === 0) return lang === 'en' ? `move to the ${str(y.string)} string, fret ${y.fret}` : `pasa a la cuerda ${str(y.string)}, traste ${y.fret}`;
+      const d = y.fret - x.fret, n = Math.abs(d);
+      if (!d) return '';
+      return lang === 'en' ? `slide ${d > 0 ? 'up' : 'down'} ${n} ${n === 1 ? 'fret' : 'frets'}` : `${d > 0 ? 'sube' : 'baja'} ${n} ${n === 1 ? 'traste' : 'trastes'}`;
+    };
+    for (const s of SONGS) {
+      song.songs++;
+      const tag = `1ck: ${s.song}`;
+      const card = CARDS.find(c => c.id === s.card);
+      if (!card || !card.card || !Array.isArray(card.card.sections)) { flag(`${tag}: its card ${s.card} does not exist`); continue; }
+      if (card.card.track !== s.song) flag(`${tag}: card ${s.card} plays track "${card.card.track}", not "${s.song}"`);
+      const cardSet = cardSwitchSet(card); song.cardSwitches += cardSet.size;
+      const walk = s.chords; song.walkChords += walk.length;
+      const first = card.card.sections[0].notes[0].note;
+      if (walk[0] !== first) flag(`${tag}: the walk starts on ${walk[0]}, the card's first chord is ${first}`);
+      const walkSet = new Set();
+      for (let i = 1; i < walk.length; i++) {
+        const e = sw(baseOf(walk[i - 1], s), baseOf(walk[i], s));
+        if (walk[i] === walk[i - 1]) flag(`${tag}: the walk holds ${walk[i]} across a change (position ${i})`);
+        if (!cardSet.has(e)) flag(`${tag}: the walk plays ${walk[i - 1]} → ${walk[i]} (position ${i}), a switch card ${s.card} never plays`);
+        walkSet.add(e);
+      }
+      for (const e of cardSet) if (!walkSet.has(e)) flag(`${tag}: card ${s.card} plays ${e.replace('>', ' → ')} and the walk never does`);
+      for (const k of new Set(walk)) {
+        const sh = songShape(k, s);
+        if (!sh || !Array.isArray(sh.chord) || sh.chord.length !== 6) flag(`${tag}: ${k} has no diagram (a shapes entry or CHORD_DIAGRAMS)`);
+      }
+      const best = shortestWalk(cardSet, first, s);
+      if (best !== walk.length) flag(`${tag}: the walk has ${walk.length} chords, the shortest walk that covers the card's ${cardSet.size} switches (with the shape rule) has ${best}`);
+      if (s.song === 'sweet-child-o-mine') {
+        let open = 0, low = 0;
+        walk.forEach((k, i) => {
+          const near = [walk[i - 1], walk[i + 1]].filter(Boolean);
+          if (k === 'A5o') { open++; if (near.some(n => !['C5', 'B5', 'E5'].includes(n))) flag(`${tag}: the open A5 at position ${i} sits next to ${near.join(', ')} — it belongs only next to C5, B5 or E5`); }
+          if (k === 'A5') { low++; if (near.some(n => n !== 'G5')) flag(`${tag}: the fret-5 A5 at position ${i} sits next to ${near.join(', ')} — it belongs only next to G5`); }
+        });
+        if (!open || !low) flag(`${tag}: the walk uses the open A5 ${open}× and the fret-5 A5 ${low}× — both must be used`);
+        const a5o = s.shapes && s.shapes.A5o;
+        if (!a5o || a5o.base !== 'A5') flag(`${tag}: A5o has no shape with base "A5"`);
+        else {
+          const pitches = ch => run(`JSON.stringify(chordSpecMidis(${JSON.stringify(ch)}))`);
+          if (pitches(a5o.chord) !== run('JSON.stringify(chordMidis("A5"))')) flag(`${tag}: the open A5 plays ${pitches(a5o.chord)}, the library A5 plays ${run('JSON.stringify(chordMidis("A5"))')}`);
+        }
+      } else if (s.shapes || walk.some(k => !DIAG_ALL[k])) flag(`${tag}: it must use the game's normal shapes only (CHORD_DIAGRAMS), no shapes of its own`);
+      /* The round is the walk at every speed; the grading's pitch classes for A5o are A5's. */
+      for (let r = 0; r < 3; r++) {
+        const plan = JSON.parse(run(`JSON.stringify(ccRoundPlan(CC_POWER_PROGRESSIONS[${s.idx}], CC_POWER_PROGRESSIONS[${s.idx}].chords, CC_RATES[${r}]))`));
+        if (plan.slots !== walk.length || plan.seq.join() !== walk.join() || !plan.song) flag(`${tag}: at speed ${r} the round is ${plan.slots} slots, expected the walk's ${walk.length}`);
+        for (const k of new Set(walk)) if (JSON.stringify(plan.classes[k]) !== JSON.stringify(plan.classes[baseOf(k, s)] || plan.classes[k])) flag(`${tag}: ${k} would be graded on ${JSON.stringify(plan.classes[k])}, not ${baseOf(k, s)}'s ${JSON.stringify(plan.classes[baseOf(k, s)])}`);
+        if (s.shapes && s.shapes.A5o) {
+          const libA5 = JSON.parse(run('JSON.stringify(chordMidis("A5").map(m => ((m % 12) + 12) % 12))'));
+          if (JSON.stringify(plan.classes.A5o) !== JSON.stringify(libA5)) flag(`${tag}: A5o is graded on ${JSON.stringify(plan.classes.A5o)}, A5 on ${JSON.stringify(libA5)}`);
+        }
+      }
+      const pair = JSON.parse(run(`JSON.stringify(ccRoundPlan(CC_POWER_PROGRESSIONS[1], CC_POWER_PROGRESSIONS[1].chords, CC_RATES[1]))`));
+      if (pair.slots !== 12 || pair.song) flag(`${tag}: a pair's round changed (${pair.slots} slots at "Every 2 beats", expected 12)`);
+      /* Setup, play, done: both languages. */
+      for (const lang of ['en', 'es']) {
+        run(`setLang(${JSON.stringify(lang)})`);
+        const sub = run(`t('games.pw.songSub', { n: ${walk.length} })`), title = run(`t(${JSON.stringify(s.titleKey)})`);
+        for (let r = 0; r < 3; r++) {
+          run(`ccSetup('power'); ccPickRate(${r}); ccPickProg(${s.idx})`); song.screens++;
+          const setup = bodies['cc-body'], flat = text('cc-body');
+          const startLabel = run(`t('games.cc.startButton', { slots: ${walk.length} })`);
+          if (!setup.includes(`${startLabel}</button>`)) flag(`${tag} (${lang}, speed ${r}): the Start button does not read "${startLabel}"`);
+          if (!flat.includes(String(sub).replace(/\s+/g, ' ')) || !flat.includes(String(title).replace(/\s+/g, ' '))) flag(`${tag} (${lang}): the button does not show "${title}" and "${sub}"`);
+          const boxes = (setup.match(/id="cc-dia-[^"]+"/g) || []);
+          if (boxes.length !== new Set(walk).size) flag(`${tag} (${lang}): the chart preview draws ${boxes.length} boxes, the walk has ${new Set(walk).size} distinct chords`);
+          if (/A5o/.test(flat) || (s.shapes && s.shapes.A5o && !flat.includes(run(`pwChordName('A5o')`).replace(/\s+/g, ' ')))) flag(`${tag} (${lang}): the setup shows the key "A5o", or never names it "${run(`pwChordName('A5o')`)}"`);
+        }
+        run(`ccSetup('power'); ccPickProg(${s.idx}); cc.chords = CC_POWER_PROGRESSIONS[${s.idx}].chords; cc.shapes = CC_POWER_PROGRESSIONS[${s.idx}].shapes || null; cc.bpc = 1; cc.slots = cc.chords.length; cc.seq = cc.chords.slice();
+          cc.changes = Array.from({ length: cc.slots - 1 }, (_, k) => ({ from: cc.seq[k], to: cc.seq[k + 1], result: null })); ccRenderPlay();`);
+        const nextWord = run(`t('games.common.next')`), lastOne = run(`t('games.cc.lastOne')`);
+        const shownName = k => run(`pwChordName(${JSON.stringify(k)})`);
+        for (let k = 0; k < walk.length; k++) {
+          run(`ccBeatTick(${k})`);
+          const hint = k + 1 < walk.length ? songHint(walk[k], walk[k + 1], lang, s) : null;
+          const want = k + 1 >= walk.length ? lastOne : `${nextWord} ${shownName(walk[k + 1])} — ${hint}`;
+          const got = els['cc-next'].textContent;
+          if (hint === '' || (k + 1 < walk.length && !hint)) flag(`${tag} (${lang}): no hint worked out for ${walk[k]} → ${walk[k + 1]}`);
+          if (got !== want) flag(`${tag} (${lang}) slot ${k}: "next:" shows "${got}", the diagrams say "${want}"`);
+          if (els['cc-chord'].dataset.key !== walk[k]) flag(`${tag} (${lang}) slot ${k}: the big chord's key is "${els['cc-chord'].dataset.key}", expected ${walk[k]}`);
+          if (k + 1 < walk.length) { song.hints++; }
+          if (/A5o/.test(got)) flag(`${tag} (${lang}) slot ${k}: "next:" shows the key "A5o"`);
+        }
+        const play = bodies['cc-body'].replace(/\s(id|data-key|onclick)="[^"]*"/g, '');
+        if (/A5o/.test(play)) flag(`${tag} (${lang}): the play screen shows the key "A5o" (outside ids)`);
+        /* Done screen: every change missed, so the tally names the worst switch. */
+        run(`cc.phase = 'play'; cc.bpm = 60; cc.rateIdx = 2; cc.changes.forEach(c => { c.result = 'miss'; }); ccRenderDone();`); song.screens++;
+        const doneHtml = bodies['cc-body'], doneText = text('cc-body');
+        if (/A5o/.test(doneHtml.replace(/\s(id|data-key|onclick)="[^"]*"/g, ''))) flag(`${tag} (${lang}): the done screen shows the key "A5o"`);
+        if (s.shapes && s.shapes.A5o && !doneText.includes(shownName('A5o').replace(/\s+/g, ' '))) flag(`${tag} (${lang}): the done screen never says "${shownName('A5o')}"`);
+        if (s.shapes && s.shapes.A5o) {
+          /* 5 misses of 21 (a 76% round, so the advice names the worst switch): both A5o → E5 changes (the worst, twice) and three others once each. */
+          run(`cc.changes.forEach(c => { c.result = (c.from === 'A5o' && c.to === 'E5') ? 'miss' : 'ok'; }); [0, 1, 2].forEach(i => { cc.changes[i].result = 'miss'; }); ccRenderDone();`);
+          const adv = text('cc-body'), wantTally = `${shownName('A5o')} → E5`.replace(/s+/g, ' ');
+          if (!adv.includes(wantTally)) flag(`${tag} (${lang}): the done screen's "which switch hurt most" does not read "${wantTally}" (got: ${adv.slice(0, 200)})`);
+        }
+      }
+    }
+    run(`setLang('en')`);
+    /* The computer never picks a song, best keys, pair keys unchanged. */
+    const songDraws = JSON.parse(run(`JSON.stringify(Array.from({ length: 2000 }, () => ccRandomPair()))`));
+    const pairKeys = new Set(LOOPS.filter(l => l.group !== 'song' && !l.random).map(l => [...l.chords].sort().join()));
+    if (songDraws.some(d => d.length !== 2 || !pairKeys.has([...d].sort().join()))) flag('1ck: ccRandomPair drew something that is not a listed pair (a song?)');
+    const bestKeys = SONGS.map(s => run(`ccBestKey(CC_POWER_PROGRESSIONS[${s.idx}], 2)`));
+    if (new Set(bestKeys).size !== SONGS.length || bestKeys.some((k, i) => k !== `ccBest:SONG:${SONGS[i].song}:beat`)) flag(`1ck: song best-score keys are ${JSON.stringify(bestKeys)}, expected ccBest:SONG:<slug>:beat, one each`);
+    const pk = run(`ccBestKey({ chords: ['F5', 'G5'] }, 2)`);
+    if (pk !== 'ccBest:F5-G5:beat') flag(`1ck: a pair's best-score key changed to "${pk}" (a student's saved bests would be lost)`);
+    const SONG_PIN = { songs: 2, cardSwitches: 21, walkChords: 34, hints: 32 * 2 };
+    for (const [k, n] of Object.entries(SONG_PIN)) if (song[k] !== n) flag(`1ck: ${song[k]} ${k}, pinned ${n} — the check went partly blind (or grew: re-pin on purpose)`);
+    if (song.screens !== 2 * 2 * 4) flag(`1ck: rendered ${song.screens} song screens, pinned 16`);
+    songCounts = song;
     run(`setLang('en'); cc = null; ccStop();`);
   } catch (e) { flag(`1ca: rendering threw (${e.message}) — a coach.js function was renamed or now needs more of the page`); return; }
 
   for (const [k, n] of Object.entries(EXPECT)) {
     if (counts[k] !== n) flag(`1ca: rendered ${counts[k]} ${k}, pinned ${n} — the check went partly blind (or grew: re-pin EXPECT on purpose)`);
   }
+  if (bad === 0 && songCounts) { head('1ck. Power Chord Switch song buttons: each walk is checked against its card and run'); ok(`${songCounts.songs} songs (13 + 8 card switches, 22 + 12 chords; each walk is the shortest that covers the card, starts on its first chord and uses no switch it does not play; Sweet Child's open A5 only next to C5/B5/E5, the fret-5 A5 only next to G5, same pitches as A5); ${songCounts.hints} "next:" hints (EN+ES) match the diagrams, ${songCounts.screens} setup/done screens never show the key "A5o", the round is the walk at all three speeds, the computer never picks a song, best keys are per song and the pair keys are unchanged`); }
   if (bad === 0) ok(`${counts.reports} Coach reports, ${counts.descs} chord-card descriptions, ${counts.nrLevels} Note Runner levels ×2 and ${counts.doneScreens} arcade done screens read true; Power Chord Switch: ${counts.pwLoops} loops are three-finger shapes in the right group, ${counts.pwDraws} random draws all listed pairs (11 of 11 and both orders seen), the Again button replays the pair and Start draws, Start sticks in Change Up and not in Power Chord Switch (two columns that fit 657px), Every beat is the first speed button there, the live quiz keeps its 760px shell, ${counts.pwHints} slide hints match the diagrams (EN+ES), ${counts.pwViews} screens/rounds, ${counts.pwMemory} remembered tempo/speed pairs and ${counts.pwGates} pitch gates keep it apart from Change Up`);
 }
 
@@ -11097,7 +11291,8 @@ function checkPracticeMinutes(i18nTable) {
     tabs++;
     if (!(j >= 0 && k > j && e > k)) fail(`tabs/${f} must load journey.js, then ../practice-minutes-config.js, then ../practice-minutes.js (Song Journey playback is counted)`);
   }
-  const app = strip(read('app.js') || ''), jr = strip(read('tabs/journey.js') || ''), eng = read('practice-minutes.js') || '';
+  /* CRLF to LF first: a Windows checkout (core.autocrlf) writes app.js with CRLF, and the function-body patterns below end on a bare newline. */
+  const app = strip((read('app.js') || '').replace(/\r\n/g, '\n')), jr = strip((read('tabs/journey.js') || '').replace(/\r\n/g, '\n')), eng = read('practice-minutes.js') || '';
   if (!/window\.PM_HOST\s*=\s*\{[\s\S]{0,400}?ui:\s*true[\s\S]{0,500}?period:\s*\(\)\s*=>\s*periodOverride\s*\|\|\s*studentPeriod/.test(app)) fail('app.js: window.PM_HOST (ui:true, effective period = periodOverride || studentPeriod) is missing');
   if (!/window\.PM_HOST\s*=\s*\{[\s\S]{0,200}?ui:\s*false/.test(jr)) fail('tabs/journey.js: window.PM_HOST (ui:false) is missing — Song Journey playback would not count');
   const sync = /function caSyncTopbar\(\)\{[\s\S]*?\n\}\n/.exec(app);
