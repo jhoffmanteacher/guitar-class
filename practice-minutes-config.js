@@ -2,8 +2,10 @@
    PRACTICE MINUTES — settings you can edit.   (2026-11-01; simplified the same day)
 
    Read by practice-minutes.js, which counts the seconds a student spends
-   playing a backing track (class-activity practice cards, Song Journey
-   play-alongs, the Songs-page library). It is a visible, ungraded signal:
+   working on the site — modules, class activities, Song Journey pages, the
+   Songs library, the tools: anything playing, or a click, key, scroll, sound
+   or open mic in the last 2 minutes (since 2026-11-03; backing tracks only
+   before). It is a visible, ungraded signal:
    nothing here feeds a grade. No page edits this file — change a number,
    run `node tools/checks.mjs`, push.
 

@@ -11217,7 +11217,7 @@ function checkCoachVerdicts() {
    The browser half (strip, recap, toast, My progress, 1366×657, both languages,
    a real <audio>) is tools/pm-e2e.mjs — it needs Chrome, so it is run by hand.
    ════════════════════════════════════════════════════════════════════ */
-const PM_SIM_PIN = 142;
+const PM_SIM_PIN = 159;
 function checkPracticeMinutes(i18nTable) {
   head('1cg. Practice minutes: the engine is run; the rules cap, heartbeat shape, wiring and strings are pinned');
   let bad = 0;
@@ -11320,7 +11320,8 @@ function checkPracticeMinutes(i18nTable) {
   if (!sync || !/caIsCard\(a\)\s*&&\s*window\.PM\s*\?\s*PM\.stripHtml\(\)/.test(sync[0]) || !/PM\.onCardOpen\(\)/.test(sync[0])) fail('app.js caSyncTopbar(): the strip (PM.stripHtml) and PM.onCardOpen() hooks are missing');
   const mp = /function renderMyProgress\(\)\{[\s\S]*?\n\}\n/.exec(app);
   if (!mp || !/PM\.renderProgress\(document\.getElementById\('pm-progress'\)\)/.test(mp[0])) fail('app.js renderMyProgress(): PM.renderProgress(#pm-progress) is missing');
-  if (!/HTMLMediaElement\.prototype\.play\s*=/.test(eng) || !/-backing-/.test(eng)) fail('practice-minutes.js: the play() observer or the backing-track filter is missing');
+  /* Since 2026-11-03 all site work counts (no backing-track filter); the 2-minute window is pinned by pm-sim section 12. */
+  if (!/HTMLMediaElement\.prototype\.play\s*=/.test(eng)) fail('practice-minutes.js: the play() observer is missing');
   if (/\.pause\(|\.play\(\)\.|\.loop\s*=|\.src\s*=|currentTime\s*=/.test(strip(eng).replace(/origPlay\.apply\(this, arguments\)/g, ''))) fail('practice-minutes.js must only WATCH playback (found a pause/play/loop/src/currentTime write)');
 
   // 5. strings

@@ -5,6 +5,11 @@ Notable changes to the Guitar Class site. Newest first.
 For the full session-by-session history (and the reasoning behind each change),
 see `WORKFLOW.md` and the git commit log.
 
+## 2026-11-03 — Practice minutes: all your work on the site counts
+
+- **Practice minutes now count everything you do on the site, not only playing a backing track.** Modules, class activities, Song Journey pages, the Songs page, the tuner, the metronome, the games and videos all count. A minute counts while something is playing, or while you clicked, typed or scrolled in the last 2 minutes, or while the tuner or a game is listening to your guitar. The page must be open on your screen and you must be signed in.
+- **The goal and the limit are the same.** 30 minutes a week keeps your streak. Up to 20 minutes a day count.
+
 ## 2026-11-03 — "the cure" and Sweet Child: lyrics and chords with the band
 
 - **Two new practice cards: '"the cure" — Lyrics and Chords' and "Sweet Child O' Mine — Lyrics and Chords."** Each shows the song's power-chord sheet with the lyrics, like the Watchtower one. Press Play song and a dot moves to each chord as the band plays it. Tap a section, or any chord on the sheet, to start the song there. Same speeds and Guitar switch as the power-chord cards.

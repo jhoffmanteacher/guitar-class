@@ -1030,6 +1030,24 @@
       elements are seen by wrapping `HTMLMediaElement.prototype.play` (it only
       observes). NOT counted: metronome, ear trainer, games, note strums,
       the student's own recording, YouTube. Cap `dailyCapMinutes` (20) per day.
+      **2026-11-03 — ALL SITE WORK COUNTS (Jonathan: "any work inside the
+      website from modules to other class activities should count towards
+      minutes and streaks"; reverses the backing-tracks-only rule above).**
+      Rule he picked from three: a second counts while ANY audible
+      `<audio>`/`<video>` plays, OR the student showed a sign of work in the last
+      2 minutes (`ACTIVE_MS`): pointerdown/pointermove/keydown/wheel/scroll/
+      touchstart/input on the document, a Web Audio `start()` (metronome, games,
+      strums, trainer — `AudioScheduledSourceNode.prototype.start` wrapped, observe
+      only), a live mic track from `getUserMedia` (`MediaDevices.prototype` wrapped,
+      observe only); 10 minutes (`FRAME_ACTIVE_MS`) while focus sits in an
+      embedded video iframe. Tab visible + signed in as before. Goal 30/week and
+      cap 20/day kept (his call, same day) — classwork alone will often meet the
+      goal. The recap pill and the "N playing" heartbeat stay tied to SOUND: a
+      `play` run inside the counting session opens while something is audible and
+      ends 2 s after it stops (the old card count-in grace); the session itself ends
+      2 s after counting stops and flushes. `isBacking()` is gone. pm-sim
+      section 12 (17 assertions; PM_SIM_PIN 142 → 159). The strip still shows only
+      on practice cards; My progress shows the totals.
       **Storage:** `minutes/{uid}/days/{date}` `{seconds}`, `minutes/{uid}/weeks/{ISO week}`
       `{seconds, goalSeconds, hit}`, added with `increment()`; queued in
       localStorage, ONE KEY PER PAGE (`pm:q:<uid>:<pageId>`; a page adopts only a

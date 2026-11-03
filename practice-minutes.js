@@ -1,27 +1,37 @@
 /* ══════════════════════════════════════════════════════════════════════
-   PRACTICE MINUTES — the engine.   (2026-11-01)   Settings: practice-minutes-config.js
+   PRACTICE MINUTES — the engine.   (2026-11-01; all site work counts since 2026-11-03)
+   Settings: practice-minutes-config.js
 
-   WHAT IT COUNTS. Seconds of real BACKING-TRACK playback, anywhere on the
-   site: a class-activity practice or snippet card, a Song Journey play-along
-   (tabs/*.html), the Songs-page library (which opens a practice card or a
-   Journey page), a local backing track in the resource viewer. NOT the
-   metronome, the ear trainer, the games, guitar-note strums, the student's
-   own recording played back, or a YouTube video — only an <audio> element
-   whose file is audio/…-backing-… counts (isBacking()).
-
-   A second of wall-clock time counts only while ALL of these hold:
-     · a backing-track element is playing — not paused, not ended, not muted
-       (the Guitar toggle's twin plays muted beside the audible one), has
-       data buffered, and its currentTime is moving (a stalled download is
-       not practice);
+   WHAT IT COUNTS (Jonathan, 2026-11-03: "any work inside the website from
+   modules to other class activities should count towards minutes and
+   streaks"; it was backing tracks only before). A second of wall-clock time
+   counts while ALL of these hold:
+     · the student is WORKING on the site — any one of:
+         – any <audio>/<video> element is playing: not paused, not ended, not
+           muted (the Guitar toggle's twin plays muted beside the audible one),
+           data buffered, currentTime moving (audible()). Backing tracks, the
+           student's own recording, a note file, a local video — all of it;
+         – the student clicked, tapped, typed, scrolled or moved the pointer
+           in the last ACTIVE_MS (2 minutes — Jonathan's pick, 2026-11-03:
+           reading a step and then playing it for a minute still counts);
+         – the site made a sound through Web Audio (metronome, games, strums,
+           the ear trainer) in the last ACTIVE_MS;
+         – a microphone the site opened is live (tuner, Coach, a game that
+           listens for notes): the student is playing into it;
+         – focus is inside an embedded video (a YouTube lesson): a click
+           there never reaches this page, so the window is FRAME_ACTIVE_MS
+           (10 minutes) from the click instead;
      · the tab is visible (Page Visibility API);
      · a student is signed in (never the ?teacher console).
-   Two elements playing at once (a lap's "spare", the Guitar twin) are still
-   one second. Nothing here starts, loops or changes playback: the engine only
-   watches. When a song ends the element is ended/paused, so counting stops
-   until the student presses Play again. (A Journey page's player loops by
-   itself, as it always has; it counts while it plays, and the daily cap
-   bounds a loop left running.)
+   Two things at once are still one second. Nothing here starts, loops or
+   changes playback or the mic: the engine only watches (play(),
+   getUserMedia() and Web Audio start() are wrapped and pass through
+   untouched). The daily cap bounds a tab left open with a song looping or a
+   mic on.
+
+   Two things stay tied to SOUND, as before: the recap pill ("+N min") opens
+   when playback stops (a `play` run inside the counting session), and the
+   heartbeat behind "N playing" is written only while something is audible.
 
    HOW IT FINDS THE ELEMENTS. Practice and snippet cards play from detached
    `new Audio()` elements, which fire no event a document listener can see, so
@@ -191,8 +201,14 @@
   var DEAD_LINK_MS = 30000;
   var host = null;
   var S = null;                       // per-student state, rebuilt when the uid changes
-  var media = new Set();              // backing-track elements seen playing
+  var media = new Set();              // audio/video elements seen playing
   var timer = 0, lastTick = 0, idleSec = 0, session = null;
+  var play = null, playIdle = 0;      // a run of audible playback inside the session: the recap reports it
+  /* WORKING (2026-11-03): counting goes on this long after the last sign of work —
+     a click, key, scroll or pointer move, a Web Audio sound, an open mic. */
+  var ACTIVE_MS = 120000, FRAME_ACTIVE_MS = 600000;
+  var lastActive = -Infinity;         // now() of the last sign of work
+  var mics = [];                      // streams getUserMedia() handed the site (watched, never touched)
   var lastBeat = 0, lastFlush = 0, lastPersist = 0, lastAdopt = 0, deniedUntil = 0, queueTimer = 0;
   var sid = '';                       // random id for this browser session (heartbeats)
   var pid = '';                       // random id for this page (its own queue key)
@@ -324,7 +340,7 @@
         // Anything a closed page left goes out now (a later tick would do, but a student who only opens a card never plays).
         setTimeout(function(){ if(S === st){ adopt(); if(!st.loaded && Object.keys(heldDays()).length) load(); } }, 0);
       }
-      session = null; idleSec = 0;
+      session = null; idleSec = 0; play = null; playIdle = 0;
     }
     return S;
   }
@@ -361,11 +377,6 @@
   /* ════════════════════════════════════════════════════════════════════
      FINDING THE PLAYING ELEMENTS
      ════════════════════════════════════════════════════════════════════ */
-  function isBacking(el){
-    var s = '';
-    try { s = el.currentSrc || el.src || ''; } catch(e) {}
-    return /\/audio\/[^\/?#]*-backing-[^\/?#]*\.(mp3|m4a|wav|ogg)/i.test(s);
-  }
   function note(el){
     if(!el) return;
     if(!el.__pmL && el.addEventListener){
@@ -386,8 +397,59 @@
     };
     HTMLMediaElement.prototype.__pmWrapped = true;
   }
+  /* Signs of work (2026-11-03). Each only stamps the time and wakes the tick. */
+  function markActive(){
+    lastActive = now();
+    if(!timer && uid()) ensureTimer();
+  }
+  function activeWindow(){
+    var a = typeof document !== 'undefined' && document.activeElement;
+    return (a && a.tagName === 'IFRAME') ? FRAME_ACTIVE_MS : ACTIVE_MS;
+  }
+  /* A mic is live while one of its audio tracks is: the tuner, Coach and the
+     games stop their tracks when they close, which ends it. */
+  function micLive(){
+    var live = false;
+    mics = mics.filter(function(s){
+      var tr = [];
+      try { tr = s.getAudioTracks(); } catch(e) {}
+      var on = tr.some(function(t){ return t.readyState === 'live'; });
+      if(on && tr.some(function(t){ return t.readyState === 'live' && t.enabled; })) live = true;
+      return on;
+    });
+    return live;
+  }
+  if(typeof MediaDevices !== 'undefined' && MediaDevices.prototype.getUserMedia && !MediaDevices.prototype.__pmWrapped){
+    var origGUM = MediaDevices.prototype.getUserMedia;
+    MediaDevices.prototype.getUserMedia = function(){
+      var p = origGUM.apply(this, arguments);
+      try { p.then(function(s){ if(s && mics.indexOf(s) < 0){ mics.push(s); markActive(); } }, function(){}); } catch(e) {}
+      return p;
+    };
+    MediaDevices.prototype.__pmWrapped = true;
+  }
+  if(typeof AudioScheduledSourceNode !== 'undefined' && !AudioScheduledSourceNode.prototype.__pmWrapped){
+    var origStart = AudioScheduledSourceNode.prototype.start;
+    AudioScheduledSourceNode.prototype.start = function(){
+      try { markActive(); } catch(e) {}
+      return origStart.apply(this, arguments);
+    };
+    AudioScheduledSourceNode.prototype.__pmWrapped = true;
+  }
   if(typeof document !== 'undefined'){
-    document.addEventListener('playing', function(e){ if(e.target && e.target.tagName === 'AUDIO') note(e.target); }, true);
+    ['pointerdown', 'pointermove', 'keydown', 'wheel', 'scroll', 'touchstart', 'input'].forEach(function(ev){
+      document.addEventListener(ev, markActive, { capture: true, passive: true });
+    });
+  }
+  if(typeof window !== 'undefined' && window.addEventListener){
+    /* Focus moving into an embedded video (a click on YouTube) blurs this window. */
+    window.addEventListener('blur', function(){
+      var a = typeof document !== 'undefined' && document.activeElement;
+      if(a && a.tagName === 'IFRAME') markActive();
+    });
+  }
+  if(typeof document !== 'undefined'){
+    document.addEventListener('playing', function(e){ if(e.target && (e.target.tagName === 'AUDIO' || e.target.tagName === 'VIDEO')) note(e.target); }, true);
     document.addEventListener('visibilitychange', function(){
       /* Chrome fires this right AFTER pagehide when a page closes: keep the
          leaving key pagehide wrote, and start no commit the dying page cannot finish. */
@@ -396,7 +458,6 @@
     });
   }
   function audible(el){
-    if(!isBacking(el)) return false;
     if(el.paused || el.ended || el.error || el.muted || el.volume < 0.001 || el.readyState < 3) return false;
     var moved = el.__pmT === undefined || el.currentTime !== el.__pmT;
     el.__pmT = el.currentTime;
@@ -404,7 +465,7 @@
   }
 
   /* ════════════════════════════════════════════════════════════════════
-     THE TICK — once a second while anything backing-track-ish may be playing
+     THE TICK — once a second while anything may be playing or the student is working
      ════════════════════════════════════════════════════════════════════ */
   function ensureTimer(){
     if(timer || typeof setInterval === 'undefined') return;
@@ -422,26 +483,38 @@
       if(audible(el)) anyAudible = true;
       else if(el.paused || el.ended || el.error){ media.delete(el); el.__pmT = undefined; }
     });
+    if(micLive()) lastActive = t;
     var visible = typeof document === 'undefined' || document.visibilityState !== 'hidden';
-    if(st && anyAudible && visible){
+    var working = anyAudible || t - lastActive <= activeWindow();
+    var counting = !!(st && working && visible);
+    /* A practice card's section button pauses the song for a 3-5 s count-in;
+       while its player is still live (pcState, app.js), that is not the end of
+       a play run (or of a session) — Stop clears pcState and ends it 2 s later. */
+    var cardLive = typeof pcState !== 'undefined' && !!pcState;
+    if(counting){
       idleSec = 0;
+      ensureTimer();                 // back on a visible tab inside the window: the timer stopped while hidden
       if(!session){ session = { counted: 0, startedAt: Date.now() }; refreshToken(); }   // the unload write needs a token under an hour old
+      if(anyAudible){
+        playIdle = 0;
+        if(!play) play = { counted: 0 };
+        if(t - lastBeat >= HEARTBEAT_MS) beat(t);    // "N playing": only while sound is on
+      }
       if(!st.loaded && !st.loading) load();
-      if(t - lastBeat >= HEARTBEAT_MS) beat(t);
       addSeconds(dt);
       if(t - lastFlush >= FLUSH_MS) flush();
     } else {
       idleSec += dt;
-      /* A practice card's section button pauses the song for a 3-5 s count-in;
-         while its player is still live (pcState, app.js), that is not the end of
-         a session — Stop clears pcState and ends it 2 s later as before. */
-      var cardLive = typeof pcState !== 'undefined' && !!pcState;
       if(session && idleSec >= 2 && !(cardLive && idleSec < 30)) endSession();
+    }
+    if(play && !(counting && anyAudible)){
+      playIdle += dt;
+      if(playIdle >= 2 && !(cardLive && playIdle < 30)) endPlay();
     }
     if(t - lastPersist >= PERSIST_MS) persist();
     if(st && t - lastAdopt >= ADOPT_MS){ lastAdopt = t; adopt(); }
     uiTick();
-    if(!media.size && !session && idleSec >= 2) stopTimer();
+    if(!media.size && !session && !play && idleSec >= 2) stopTimer();
   }
 
   function addSeconds(dt){
@@ -457,16 +530,24 @@
     var before = weekTotals()[w] || 0, goal = calc.goalSeconds(c, w);
     st.pend[d] = (st.pend[d] || 0) + n;
     session.counted += n;
+    if(play) play.counted += n;
     if(goal > 0 && before < goal && before + n >= goal) goalCrossed(w);
   }
 
   function endSession(){
-    var s = session;
     session = null; idleSec = 0;
-    if(!S) return;
+    if(!S){ play = null; playIdle = 0; return; }
     persist();
     flush();
-    if(s) recapMaybe(s);
+    if(play) endPlay();
+  }
+  /* Playback stopped: the recap reports the minutes counted while it played.
+     Not a flush — the session (still counting while the student works) sends
+     them every FLUSH_MS and when it ends. */
+  function endPlay(){
+    var p = play;
+    play = null; playIdle = 0;
+    if(p && S) recapMaybe(p);
   }
 
   /* ════════════════════════════════════════════════════════════════════
@@ -972,7 +1053,7 @@
     renderProgress: renderProgress,
     flush: flush, load: function(){ return sync() ? load() : Promise.resolve(); },
     status: function(){ return sync() ? status() : null; },
-    _pollLive: pollLive, _session: function(){ return session; },
+    _pollLive: pollLive, _session: function(){ return session; }, _play: function(){ return play; },
     _state: function(){ return S; }, _session: function(){ return session; }, _tick: tick, _media: media, _end: endSession, _buildOps: buildOps
   };
 })();

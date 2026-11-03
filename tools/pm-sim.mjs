@@ -130,8 +130,13 @@ function makeWorld(opts = {}) {
     play() { this.paused = false; return Promise.resolve(); }
     pause() { this.paused = true; }
   }
+  /* 2026-11-03: the signs of work the engine watches — Web Audio start(), getUserMedia(). */
+  class FakeSource { start() { this.started = true; } }
+  class FakeMediaDevices {
+    getUserMedia() { const tr = { readyState: 'live', enabled: true }; return Promise.resolve({ getAudioTracks: () => [tr], track: tr }); }
+  }
   const documentStub = {
-    visibilityState: 'visible',
+    visibilityState: 'visible', activeElement: null,
     addEventListener: (ev, fn) => { (listeners['doc:' + ev] ||= []).push(fn); },
     querySelector: () => null, querySelectorAll: () => [], getElementById: () => null,
   };
@@ -143,6 +148,7 @@ function makeWorld(opts = {}) {
   };
   const ctx = vm.createContext({
     window: windowStub, document: documentStub, HTMLMediaElement: FakeAudio, firebase,
+    AudioScheduledSourceNode: FakeSource, MediaDevices: FakeMediaDevices,
     localStorage: mkStorage(store), sessionStorage: mkStorage(session),
     navigator: { get onLine() { return net.online; } },
     performance: { now: () => clock.perf },
@@ -211,7 +217,9 @@ function makeWorld(opts = {}) {
     q.forEach((x) => { if (applyOps(x.ops)) { landed++; x.res(); } else { refused++; x.rej(Object.assign(new Error('cap'), { code: 'permission-denied' })); } });
     return { landed, refused };
   }
-  return { __timers: timers, drain, releaseReads, ctx, PM, clock, net, server, log, store, session, listeners, documentStub, windowStub, FakeAudio, run, settle, track, playing, user, firebase, db };
+  /* A student's input: fire the engine's document listener for that event. */
+  const input = (ev = 'pointerdown') => (listeners['doc:' + ev] || []).forEach((f) => f({ type: ev }));
+  return { input, FakeSource, FakeMediaDevices, __timers: timers, drain, releaseReads, ctx, PM, clock, net, server, log, store, session, listeners, documentStub, windowStub, FakeAudio, run, settle, track, playing, user, firebase, db };
 }
 /* Everything counted so far: queued + already acknowledged by the server. */
 /* The page's queue key: pm:q:<uid>:<pageId>. */
@@ -355,7 +363,8 @@ console.log('3. what counts');
   const b = w2.track('blob:https://x/abc'); b.play();
   const yt = w2.track('https://example.com/song.mp3'); yt.play();
   await w2.run(30, (i) => { [g, b, yt].forEach((e) => { e.currentTime += 1; }); });
-  check('a guitar-note file, a recording blob and a non-backing mp3 count 0 s', sec(w2) === 0 && !Object.keys(w2.PM._state()?.days || {}).length);
+  // 2026-11-03 (Jonathan: all work on the site counts): any audible element counts, once per second.
+  check('a guitar-note file, a recording blob and a non-backing mp3 playing together count ≈ 30 s in 30 s (any site audio counts; still once per second)', sec(w2) >= 28 && sec(w2) <= 30, 'counted ' + sec(w2));
 
   const w3 = makeWorld();
   const p = w3.track(); p.play();
@@ -1118,6 +1127,95 @@ const commitFetch = (w, from) => w.log.fetches.slice(from).find((x) => /document
   check('a leftover pm:q:<uid> key (no page id, no `at`) is adopted and sent: its 45 s reach the server', (sh.server.days[todayStr]?.seconds || 0) === 45, 'server ' + (sh.server.days[todayStr]?.seconds || 0));
   check('…and the key is removed', !('pm:q:uid-A' in sh.store), JSON.stringify(Object.keys(sh.store)));
   check('…another student\'s keys (uid-B, and uid-AB whose name starts with uid-A) are not touched', sh.store['pm:q:uid-B'] === JSON.stringify({ days: { [todayStr]: 30 } }) && sh.store['pm:q:uid-AB'] === JSON.stringify({ days: { [todayStr]: 20 } }));
+}
+
+/* ═══════════ 12. All work on the site counts (2026-11-03) ═══════════
+   Jonathan: "any work inside the website from modules to other class activities should
+   count towards minutes and streaks". Rule he picked: counting goes on while the student
+   did something in the last 2 minutes (click, key, scroll, pointer, a Web Audio sound, an
+   open mic), or anything is playing — tab visible, student signed in. */
+console.log('12. all site work counts');
+{
+  const w = makeWorld();
+  w.PM._state();
+  w.input('pointerdown');
+  await w.run(420);
+  check('one click and nothing else counts ≈ 2 minutes (118–121 s), then nothing over the next 5 minutes', sec(w) >= 118 && sec(w) <= 121, 'counted ' + sec(w));
+  check('…and the 1 s timer stops once the student is idle', w.__timers.filter((t) => t.ms === 1000).length === 0, w.__timers.map((t) => t.ms).join());
+
+  const evs = ['pointerdown', 'pointermove', 'keydown', 'wheel', 'scroll', 'touchstart', 'input'];
+  const got = [];
+  for (const ev of evs) { const x = makeWorld(); x.PM._state(); x.input(ev); await x.run(200); got.push(sec(x)); }
+  check(`each of the ${evs.length} input events alone (${evs.join(', ')}) starts ≈ 2 minutes of counting`, got.every((n) => n >= 118 && n <= 121), got.join());
+
+  const w2 = makeWorld();
+  w2.PM._state();
+  await w2.run(600, (i) => { if (i % 60 === 0) w2.input('keydown'); });
+  check('a key press once a minute for 10 minutes counts ≈ 10 minutes (595–600 s)', sec(w2) >= 595 && sec(w2) <= 600, 'counted ' + sec(w2));
+
+  const w3 = makeWorld();
+  w3.PM._state();
+  w3.input('pointerdown');
+  w3.documentStub.visibilityState = 'hidden';
+  await w3.run(30);
+  check('a click, then the tab is hidden: nothing counts while hidden', sec(w3) === 0, 'counted ' + sec(w3));
+  w3.documentStub.visibilityState = 'visible';
+  (w3.listeners['doc:visibilitychange'] || []).forEach((f) => f());
+  await w3.run(200);
+  check('…visible again inside the 2 minutes: the rest of the window counts (≈ 90 s; the waking tick may add its capped 2 s)', sec(w3) >= 88 && sec(w3) <= 92, 'counted ' + sec(w3));
+
+  const w4 = makeWorld({ signedOut: true });
+  w4.input('pointerdown');
+  await w4.run(60, () => w4.input('pointermove'));
+  check('nobody signed in (or the ?teacher console): clicks count nothing, store nothing, start no timer', w4.PM._state() === null && !Object.keys(w4.store).some((k) => k.startsWith('pm:q')) && w4.__timers.filter((t) => t.ms === 1000).length === 0);
+
+  const w5 = makeWorld();
+  w5.PM._state();
+  const src = new w5.FakeSource();
+  await w5.run(300, () => src.start());
+  const at300 = sec(w5);
+  await w5.run(300);
+  check('a Web Audio sound every second (the metronome) for 5 minutes, no clicks: ≈ 5 minutes, then 2 more after the last click (≈ 420 s)', at300 >= 298 && sec(w5) >= 416 && sec(w5) <= 421, at300 + ' → ' + sec(w5));
+  check('…and the start() call still reaches the real one', src.started === true);
+
+  const w6 = makeWorld();
+  w6.PM._state();
+  const stream = await new w6.FakeMediaDevices().getUserMedia({ audio: true });
+  await w6.run(360);
+  const mic6 = sec(w6);
+  stream.track.readyState = 'ended';
+  await w6.run(300);
+  check('an open mic (tuner, Coach, a game) with no clicks counts while live (6 min ≈ 360 s), then 2 minutes after it closes (≈ 480 s)', mic6 >= 358 && sec(w6) >= 476 && sec(w6) <= 481, mic6 + ' → ' + sec(w6));
+  check('…getUserMedia still hands the stream back untouched', typeof stream.getAudioTracks === 'function' && stream.getAudioTracks()[0] === stream.track);
+
+  const w7 = makeWorld();
+  w7.PM._state();
+  w7.input('pointerdown');
+  w7.documentStub.activeElement = { tagName: 'IFRAME' };
+  (w7.listeners['win:blur'] || []).forEach((f) => f());
+  await w7.run(900);
+  check('a click into an embedded video (focus in the iframe): counts 10 minutes, then stops (≈ 600 s of 900)', sec(w7) >= 598 && sec(w7) <= 601, 'counted ' + sec(w7));
+
+  const w8 = makeWorld();
+  w8.PM._state();
+  await w8.run(100, (i) => { if (i % 30 === 0) w8.input('scroll'); });
+  check('counting from clicks alone writes no heartbeat ("N playing" stays about sound)', w8.log.heartbeats.length === 0 && sec(w8) >= 98, w8.log.heartbeats.length + ' beats, ' + sec(w8) + ' s');
+
+  const w9 = makeWorld();
+  w9.PM._state();
+  const a9 = w9.track(); w9.input('pointerdown'); a9.play();
+  await w9.run(40, w9.playing(a9));
+  check('a song with a click: a play run is open while it plays', !!w9.PM._play() && w9.PM._play().counted >= 38);
+  a9.pause();
+  await w9.run(3);
+  check('…Stop ends the play run 2 s later (the recap moment) while the session keeps counting inside the 2-minute window', w9.PM._play() === null && !!w9.PM._session());
+  await w9.run(200);
+  check('…and counting ends 2 minutes after the click (≈ 120 s in all), not 2 minutes after the song', sec(w9) >= 118 && sec(w9) <= 121 && !w9.PM._session(), 'counted ' + sec(w9));
+
+  const w10 = makeWorld();
+  w10.PM._state();
+  await w10.run(1800, (i) => { if (i % 30 === 0) w10.input('pointerdown'); });
+  check('half an hour of clicking still stops at the daily cap (1200 s)', sec(w10) === 1200, 'counted ' + sec(w10));
 }
 
 console.log(`\n${failed ? '✗' : '✓'} pm-sim: ${passed} passed, ${failed} failed`);

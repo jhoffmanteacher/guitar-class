@@ -8,7 +8,7 @@
    stays session-only (same behavior the page always had). */
 var fbUser = null, fbDb = null, saveTimer = null, dirty = false;
 /* Practice minutes (../practice-minutes.js, loaded after this file) counts
-   backing-track playback on this page too. It asks for the signed-in student
+   the student's work on this page too. It asks for the signed-in student
    (only once the Firestore SDK has landed, so a write can actually go out),
    the Firestore handle, and the period: the teacher's correction cached by
    app.js, else the answer on the progress doc read below. No UI here. */
