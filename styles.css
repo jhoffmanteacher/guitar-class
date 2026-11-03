@@ -2866,6 +2866,10 @@ body.ca-full:has(#class-activities-screen:not([hidden])) .app-layout .main{zoom:
    shared .tab is block-level and full-width, and the default system is already
    sized to read from a music stand, so no size-up here. */
 .ca-step-detail .tab{margin:12px 0 8px}
+/* A step's video button (step.video) comes right after the step text in both
+   renderers — on its own line, not glued to the last sentence (ca-46, the
+   first activity with a video step, 2026-11-03). */
+.ca-step-detail > .rp-trigger,.ca-prev-step > .rp-trigger{display:flex;width:fit-content;margin:10px 0 4px}
 .ca-step-done-row{margin-top:10px}
 .ca-step-donebtn{font-family:inherit;font-size:0.8438rem;font-weight:600;padding:7px 14px;border-radius:16px;border:1px solid var(--ca-accent);background:transparent;color:var(--ca-accent);cursor:pointer}
 .ca-step-donebtn:hover{background:var(--ca-accent-bg)}

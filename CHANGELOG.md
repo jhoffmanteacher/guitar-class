@@ -5,6 +5,11 @@ Notable changes to the Guitar Class site. Newest first.
 For the full session-by-session history (and the reasoning behind each change),
 see `WORKFLOW.md` and the git commit log.
 
+## 2026-11-03 — New class activity: the Down, Down-Up, Up-Down-Up strum
+
+- **New activity: "Strum Pattern — Down, Down-Up, Up-Down-Up."** Four short steps, one at a time: count it and hear it with Play tab, play it on muted strings, play it on D5, then play along with a "Sweet Child O' Mine" video lesson from 10:20 on D5, C5 and G5. Your hand moves down and up the whole time and misses the strings on the first + and on 3.
+- A video button in a class activity step now sits on its own line under the directions.
+
 ## 2026-11-03 — Practice minutes: all your work on the site counts
 
 - **Practice minutes now count everything you do on the site, not only playing a backing track.** Modules, class activities, Song Journey pages, the Songs page, the tuner, the metronome, the games and videos all count. A minute counts while something is playing, or while you clicked, typed or scrolled in the last 2 minutes, or while the tuner or a game is listening to your guitar. The page must be open on your screen and you must be signed in.
