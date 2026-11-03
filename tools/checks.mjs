@@ -8898,11 +8898,11 @@ function checkSheetCards() {
     if (!existsSync(join(ROOT, c.sheet))) flag(`${w}: ${c.sheet} is not in the repo — the card would say the sheet did not load`);
     // sheetColumns (2026-11-03, ca-44): 1 = one column of chords over lyrics; left out = two columns. Any other value would read as two.
     if (c.sheetColumns !== undefined && c.sheetColumns !== 1) flag(`${w}: card.sheetColumns is ${JSON.stringify(c.sheetColumns)} — it is 1 (a one-column sheet) or left out (two columns)`);
-    /* sheetNamedAgain (2026-11-03, ca-45): English section labels whose
-       first chord the sheet names again although it is still ringing — the
-       dot steps onto that name. Each must be a section of this card that
-       really starts on the chord before it (else it is a plain change and
-       naming it again would count it twice). */
+    /* sheetNamedAgain (2026-11-03, ca-45): English section labels where the
+       sheet names the first chord of EVERY lap, even when it is still
+       ringing — the dot steps onto that name. Each must be a section of this
+       card with at least one lap that starts on the chord still ringing
+       (else the entry does nothing). */
     const again = c.sheetNamedAgain === undefined ? [] : c.sheetNamedAgain;
     if (!Array.isArray(again) || again.some(l => typeof l !== 'string')) flag(`${w}: card.sheetNamedAgain should be a list of section labels`);
     const secs = Array.isArray(c.sections) ? c.sections : [];
@@ -8912,8 +8912,12 @@ function checkSheetCards() {
       const reps = Number.isInteger(s && s.reps) ? s.reps : 1;
       const named = Array.isArray(again) && again.includes(s.label);
       const first = (s.notes || [])[0];
-      if (named && (!first || first.rest || first.note !== prev)) flag(`${w}: card.sheetNamedAgain names "${s.label}", but it does not start on the chord still ringing (${prev}) — it is a change already`);
-      for (let r = 0; r < reps; r++) (s.notes || []).forEach((nt, ni) => { if (!nt.rest && (nt.note !== prev || (named && r === 0 && ni === 0))) { changes++; prev = nt.note; } });
+      let ringing = 0;
+      for (let r = 0; r < reps; r++) (s.notes || []).forEach((nt, ni) => {
+        if (named && ni === 0 && first && !first.rest && nt.note === prev) ringing++;
+        if (!nt.rest && (nt.note !== prev || (named && ni === 0))) { changes++; prev = nt.note; }
+      });
+      if (named && ringing === 0) flag(`${w}: card.sheetNamedAgain names "${s.label}", but no lap of it starts on the chord still ringing — every lap is a change already`);
     }
     if (!Number.isInteger(c.sheetChords)) flag(`${w}: card.sheetChords should say how many chord names the sheet has (the notes make ${changes} chord changes)`);
     else if (c.sheetChords !== changes) flag(`${w}: the notes make ${changes} chord changes but card.sheetChords is ${c.sheetChords} — the dot would walk onto the wrong chords. Fix the notes, or the sheet and this number`);

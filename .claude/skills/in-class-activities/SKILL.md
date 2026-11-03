@@ -434,9 +434,12 @@ wide gaps in a chord line would split it into two columns). Three sheet
 cards: ca-38 (ca-29's sections, 224 names), ca-44 (ca-30's, 94), ca-45
 (ca-33's, 143) — each shares its play-along card's sections by reference,
 joined in one IIFE after the array. A chord still ringing at a line start
-gets NO name on the sheet (it is not a change): Sweet Child's web copy
-(Jonathan, 2026-11-03) leaves those D5s off and was fixed to ca-33's
-chords, so it differs from his Drive handout on purpose. **Sheet chord n = the card's n-th chord
+gets NO name on the sheet (it is not a change) — unless its section is
+listed in **`card.sheetNamedAgain`**, which names the first chord of every
+lap of that section (ca-45: Intro, both verses, both riffs keep his D5s,
+152 names for 143 changes). Sweet Child's web copy (Jonathan, 2026-11-03)
+was fixed to ca-33's chords from Solo 2 on, so it differs from his Drive
+handout on purpose. **Sheet chord n = the card's n-th chord
 CHANGE**, so the sheet needs exactly one name per change; `sheetChords`
 pins the count and **1bf2** holds the notes to it, and the console preview
 says so if the PDF itself doesn't match (the dot is then left off). The dot

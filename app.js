@@ -13920,9 +13920,10 @@ async function pcSheetPage(page, one){
 /* Which sheet chord each note of the card is: tok[si][rep][ni]. A rest is not a
    chord on the sheet: the dot stays on the chord before it. The count
    goes up at every chord CHANGE across the whole song, laps included —
-   and at the first chord of a section named in card.sheetNamedAgain
-   (Jonathan, 2026-11-03: Sweet Child's sheet writes D5 at the start of
-   each verse, where the D5 is still ringing from before). */
+   and at the first chord of every lap of a section named in
+   card.sheetNamedAgain (Jonathan, 2026-11-03: Sweet Child's sheet writes
+   D5 at the start of each intro line, verse half and riff lap, where the
+   D5 is still ringing from before). */
 function pcSheetMap(L){
   const tok = [], start = [];
   let n = -1, prev = null;
@@ -13930,7 +13931,7 @@ function pcSheetMap(L){
     tok[si] = [];
     for(let r = 0; r < S.reps; r++){
       tok[si][r] = S.notes.map((nt, ni) => {
-        if(!nt.rest && (nt.note !== prev || (S.nameAgain && r === 0 && ni === 0))){ n++; prev = nt.note; start[n] = { si, rep: r, name: nt.note }; }
+        if(!nt.rest && (nt.note !== prev || (S.nameAgain && ni === 0))){ n++; prev = nt.note; start[n] = { si, rep: r, name: nt.note }; }
         return n;
       });
     }
