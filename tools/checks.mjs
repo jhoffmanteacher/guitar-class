@@ -7367,11 +7367,12 @@ function checkBeatsClaimMatchesTab() {
    renumber can move it out from under the check — the 2026-10-12
    Modules 4/5 swap did exactly that — and the other places would stay
    green on their own. CURE_CHORUS_PLACES pins how many places it
-   reads: the practice-card chorus sections (ca-18, ca-24, ca-30 today),
-   the module play-along, and the Journey page's two tabs. Bump it only
-   when a place is deliberately added or removed.
+   reads: the practice-card chorus sections (ca-18, ca-24, ca-30, and
+   ca-44 — the lyric sheet, which plays ca-30's sections, 2026-11-03), the
+   module play-along, and the Journey page's two tabs. Bump it only when a
+   place is deliberately added or removed.
    ════════════════════════════════════════════════════════════════════ */
-const CURE_CHORUS_PLACES = 6;
+const CURE_CHORUS_PLACES = 7;
 function checkCureChorusOrder() {
   head('1az. "the cure" chorus stays in root order D F C G, twice');
   let checked = 0, bad = 0;
@@ -8159,7 +8160,7 @@ function checkRecordingVersions(ctx) {
       else if (v.track === a.card.track) flag(vw + ': plays the same track as the card \u2014 a recording version is another track');
       if (!v.card || typeof v.card !== 'object' || !Array.isArray(v.card.sections) || !v.card.sections.length) flag(vw + ': needs a card with sections (the build at the end of class-activities.js fills it in)');
       else {
-        for (const k of ['checks', 'track', 'sheet', 'sheetChords', 'wholeSong', 'slowest']) {
+        for (const k of ['checks', 'track', 'sheet', 'sheetChords', 'sheetColumns', 'wholeSong', 'slowest']) {
           if (k in v.card) flag(vw + ': card.' + k + ' \u2014 a version changes what the card shows, not its checks or how it plays (the card\'s own ' + k + ' stays; a version\'s track is recordingVersions.' + r + '.track)');
         }
         if (has(v.card.caption) && !has(v.card.caption_es)) flag(vw + ': card.caption has no caption_es');
@@ -8871,6 +8872,7 @@ function checkNoteCallPower(ctx) {
    Node; the preview compares the PDF itself):
    - the PDF exists under sheets/ and pdf.js is vendored where app.js loads it;
    - `sheetChords` is set and equals the chord changes the notes make;
+   - `sheetColumns` is 1 or left out (ca-44 is the one-column sheet);
    - the renderer is wired: caCardBodyHtml() builds pcSheetHtml(), pcFrame()
      feeds pcSheetStrip(), pcStop() calls pcSheetStopped(). */
 function checkSheetCards() {
@@ -8893,6 +8895,8 @@ function checkSheetCards() {
     if (a.view !== 'card') flag(`${w}: card.sheet only renders on a view:'card' activity`);
     if (typeof c.sheet !== 'string' || !/^sheets\/[^/]+\.pdf$/i.test(c.sheet)) { flag(`${w}: card.sheet "${c.sheet}" should be a PDF in sheets/ (sheets/<name>.pdf)`); continue; }
     if (!existsSync(join(ROOT, c.sheet))) flag(`${w}: ${c.sheet} is not in the repo — the card would say the sheet did not load`);
+    // sheetColumns (2026-11-03, ca-44): 1 = one column of chords over lyrics; left out = two columns. Any other value would read as two.
+    if (c.sheetColumns !== undefined && c.sheetColumns !== 1) flag(`${w}: card.sheetColumns is ${JSON.stringify(c.sheetColumns)} — it is 1 (a one-column sheet) or left out (two columns)`);
     let changes = 0, prev = null;
     for (const s of (Array.isArray(c.sections) ? c.sections : [])) {
       const reps = Number.isInteger(s && s.reps) ? s.reps : 1;

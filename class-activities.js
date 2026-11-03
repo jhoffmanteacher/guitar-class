@@ -226,6 +226,14 @@
                                            // console preview checks the PDF. A
                                            // sheet card has no `journey` — it is
                                            // not its layer's play-along (1bn).
+                                           // Every page of the PDF is read and
+                                           // stacked (2026-11-03).
+       sheetColumns: 1,                    // optional (ca-44, 2026-11-03): the
+                                           // sheet is ONE column of chords over
+                                           // lyrics — read line by line, no
+                                           // gutter. Left out = two columns,
+                                           // each page left column first (ca-38,
+                                           // ca-45).
        sections: [{                        // back to back, in song order
          label, label_es,                  // the tap-to-start button ("Chorus")
          caption, caption_es,              // the heading over its tab page
@@ -6055,6 +6063,83 @@ window.CLASS_ACTIVITIES = [
     // No help ladder: a practice card is its checks and nothing else (Jonathan, 2026-10-07).
     steps: [],
   },
+  /* "the cure" — Lyrics and Chords (Jonathan, 2026-11-03: "build those two"
+     — the lyric-sheet play-alongs for "the cure" and Sweet Child, after
+     ca-38). ca-30 shown as Jonathan's own power-chord sheet
+     (sheets/the-cure.pdf, from his "the cure (power chords)" Word doc,
+     2026-10-16), with the dot stepping through ca-30's rhythm. The web copy
+     leaves off the doc's "CHORDS" legend line, which is not a chord change;
+     nothing else changed — his 94 chord names are ca-30's 94 changes as
+     written. One column over three pages: card.sheetColumns 1. Sections are
+     ca-30's by reference, joined after the array. */
+  {
+    id:    'ca-44',
+    view:  'card',    // one screen: Play song + sheet + checks — see CARD above
+    title:    '"the cure" — Lyrics and Chords',
+    title_es: '"the cure" — Letra y acordes',
+    intro:    'Play the whole song in power chords from the chord sheet. The dot shows the chord to play and keeps the beat.',
+    intro_es: 'Toca la canción completa con acordes de potencia desde la hoja de acordes. El punto muestra el acorde que tocas y marca el tiempo.',
+    card: {
+      wholeSong: true,  // stops at the end of the song instead of looping
+      track: 'the-cure',
+      slowest: true,    // four-way speed control: Slowest / Slower / Slow / Normal
+      sheet: 'sheets/the-cure.pdf',
+      sheetColumns: 1,  // one column of chords over lyrics, three pages
+      sheetChords: 94,  // chord names on the sheet = chord changes in the notes (checks.mjs 1bf2)
+      caption:    'Lyrics and chords · 4 big beats per chord',
+      caption_es: 'Letra y acordes · 4 tiempos lentos por acorde',
+      sections: null,   // ca-30's — joined after the array, below
+      checks: [
+        { label: 'The whole song, slower', label_es: 'La canción completa, más lenta',
+          text:    'Use the speed the card starts on, or one stop slower. Play the whole song with the band from the sheet, intro to the end, without stopping.',
+          text_es: 'Usa la velocidad con la que empieza la tarjeta, o una posición más lenta. Toca la canción completa con la banda desde la hoja, de la intro al final, sin detenerte.' },
+        { levelUp: true,
+          text:    'Slide the speed all the way right, to Normal. Play the whole song with the band from the sheet, intro to the end, without stopping.',
+          text_es: 'Desliza la velocidad hasta la derecha, a «Normal». Toca la canción completa con la banda desde la hoja, de la intro al final, sin detenerte.' }
+      ]
+    },
+    // No help ladder: a practice card is its checks and nothing else (Jonathan, 2026-10-07).
+    steps: [],
+  },
+  /* Sweet Child O' Mine — Lyrics and Chords (Jonathan, 2026-11-03, with
+     ca-44). ca-33 shown as Jonathan's power-chord sheet
+     (sheets/sweet-child-o-mine.pdf, from his "Sweet Child O' Mine (power
+     chords)" Word doc, 2026-10-16). His chords came from his open-chord
+     draft and did not follow the record; his call (2026-11-03) was to fix the
+     web copy's chord NAMES to ca-33, lyrics untouched: a D5 still ringing at
+     a line start is left off (intro laps 2-3, both verses, both riffs),
+     Solo 2 and every outro lap end C5 D5 G5 in one bar, the outro runs seven
+     laps, and the ending is E5 | G5 | A5 | G5 A5 | E5 — the A#5 and its
+     diagram are gone. 143 names = ca-33's 143 changes. Two columns over two
+     pages. Sections are ca-33's by reference, joined after the array. */
+  {
+    id:    'ca-45',
+    view:  'card',    // one screen: Play song + sheet + checks — see CARD above
+    title:    'Sweet Child O\' Mine — Lyrics and Chords',
+    title_es: 'Sweet Child O\' Mine — Letra y acordes',
+    intro:    'Play the whole song in power chords from the chord sheet. The dot shows the chord to play and keeps the beat.',
+    intro_es: 'Toca la canción completa con acordes de potencia desde la hoja de acordes. El punto muestra el acorde que tocas y marca el tiempo.',
+    card: {
+      wholeSong: true,  // stops at the end of the song instead of looping
+      track: 'sweet-child-o-mine',
+      slowest: true,    // four-way speed control: Slowest / Slower / Slow / Normal
+      sheet: 'sheets/sweet-child-o-mine.pdf',
+      sheetChords: 143, // chord names on the sheet = chord changes in the notes (checks.mjs 1bf2)
+      caption:    'Lyrics and chords · each verse chord lasts 2 bars',
+      caption_es: 'Letra y acordes · cada acorde de la estrofa dura 2 compases',
+      sections: null,   // ca-33's — joined after the array, below
+      checks: [
+        { label: 'The whole song, slower', label_es: 'La canción completa, más lenta',
+          text:    'Use the speed the card starts on, or one stop slower. Play the whole song with the band from the sheet, intro to the end, without stopping.',
+          text_es: 'Usa la velocidad con la que empieza la tarjeta, o una posición más lenta. Toca la canción completa con la banda desde la hoja, de la intro al final, sin detenerte.' },
+        { levelUp: true,
+          text:    'Slide the speed all the way right, to Normal. Play the whole song with the band from the sheet, intro to the end, without stopping.',
+          text_es: 'Desliza la velocidad hasta la derecha, a «Normal». Toca la canción completa con la banda desde la hoja, de la intro al final, sin detenerte.' }
+      ]
+    },
+    // No help ladder: a practice card is its checks and nothing else (Jonathan, 2026-10-07).
+    steps: [],
+  },
   /* Ella — Play Along (Jonathan, 2026-10-19: "draft a play along for ella
      by junior h as well", with the record). A practice card on the RECORD
      (track 'ella' in app.js — its comment has how the grid and the song map
@@ -6797,12 +6882,16 @@ window.CLASS_ACTIVITIES = [
   },
 ];
 
-/* ca-38 plays ca-29's sections from its chord sheet (see ca-38 above). The
-   same array, not a copy: the two cards can't drift apart. */
+/* Each lyric-sheet card plays its play-along card's sections from its chord
+   sheet (see ca-38, ca-44, ca-45 above): ca-38 is ca-29's, ca-44 ca-30's,
+   ca-45 ca-33's. The same array, not a copy: a sheet card can't drift from
+   its play-along. */
 (function(){
   const list = window.CLASS_ACTIVITIES;
-  const from = list.find(a => a.id === 'ca-29'), to = list.find(a => a.id === 'ca-38');
-  if(from && to) to.card.sections = from.card.sections;
+  [['ca-29', 'ca-38'], ['ca-30', 'ca-44'], ['ca-33', 'ca-45']].forEach(([f, t]) => {
+    const from = list.find(a => a.id === f), to = list.find(a => a.id === t);
+    if(from && to) to.card.sections = from.card.sections;
+  });
 })();
 
 /* All Along the Watchtower — the Neil Young version of ca-26, ca-29 and ca-40

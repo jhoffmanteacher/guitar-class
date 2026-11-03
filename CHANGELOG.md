@@ -5,6 +5,11 @@ Notable changes to the Guitar Class site. Newest first.
 For the full session-by-session history (and the reasoning behind each change),
 see `WORKFLOW.md` and the git commit log.
 
+## 2026-11-03 — "the cure" and Sweet Child: lyrics and chords with the band
+
+- **Two new practice cards: '"the cure" — Lyrics and Chords' and "Sweet Child O' Mine — Lyrics and Chords."** Each shows the song's power-chord sheet with the lyrics, like the Watchtower one. Press Play song and a dot moves to each chord as the band plays it. Tap a section, or any chord on the sheet, to start the song there. Same speeds and Guitar switch as the power-chord cards.
+- **The Sweet Child sheet follows the recording.** A chord is written only where it changes, Solo 2 and the "where do we go" part end each lap with C5 D5 G5 in one bar, and the song ends E5, G5, A5, G5 A5, E5.
+
 ## 2026-11-02 — Low E and A notes and power chords: speeds above 40 BPM
 
 - **"Low E and A Notes in Time" and "Power Chords on the Low E and A Strings in Time" now go up to 80 BPM.** With Show answer on, the speed still climbs by itself up to 40 BPM. Press Faster to go past 40, 5 BPM at a time, up to 80. In the scored levels, Level 5 now speeds up 5 BPM each time you pass it, up to 80.

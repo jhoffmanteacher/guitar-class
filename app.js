@@ -13843,55 +13843,78 @@ function pcSheetLoadPdfjs(){
     return window.pdfjsLib;
   });
 }
-/* One parse per PDF: its first page, and every chord name on it in reading
-   order, in PDF points with y running down the page. */
+/* One parse per PDF: EVERY page (2026-11-03 — "the cure" runs to three
+   pages, Sweet Child to two; ca-38 is one), and every chord name on them in
+   reading order. The pages are stacked into one tall sheet: each is cropped
+   to its words (pages share one left/right edge so they line up) and placed
+   under the one before, so a token's x0/y0 are in that sheet's PDF points
+   and `crop` is the whole stack ({ x: 0, y: 0, w, h }). Reading order is
+   page by page, and on a page column by column — or, with `cols` 1
+   (card.sheetColumns: 1, a one-column chord-over-lyric sheet), line by line
+   with no column split: a chord line's wide gaps are not a gutter there. */
 const pcSheetModels = {};
-function pcSheetModel(url){
-  if(pcSheetModels[url]) return pcSheetModels[url];
-  pcSheetModels[url] = pcSheetLoadPdfjs().then(async lib => {
+function pcSheetModel(url, cols){
+  const one = cols === 1, key = url + (one ? '#1' : '');
+  if(pcSheetModels[key]) return pcSheetModels[key];
+  pcSheetModels[key] = pcSheetLoadPdfjs().then(async lib => {
     const doc = await lib.getDocument(url).promise;
-    const page = await doc.getPage(1);
-    const vp = page.getViewport({ scale: 1 });
-    const tc = await page.getTextContent();
-    const words = [];
-    tc.items.forEach(it => {
-      if(!it.str || !it.str.trim()) return;
-      const [a, b, , d, e, f] = it.transform;
-      const size = Math.hypot(a, b) || Math.abs(d) || it.height || 10;
-      const cw = it.width / it.str.length;   // the sheets are Courier: every character is one width
-      const re = /\S+/g; let m;
-      while((m = re.exec(it.str))){
-        const x0 = e + m.index * cw, x1 = x0 + m[0].length * cw;
-        const r = vp.convertToViewportRectangle([x0, f - size * 0.22, x1, f + size * 0.78]);
-        words.push({ s: m[0], x0: Math.min(r[0], r[2]), x1: Math.max(r[0], r[2]), y0: Math.min(r[1], r[3]), y1: Math.max(r[1], r[3]) });
-      }
+    const pages = [];
+    for(let pn = 1; pn <= doc.numPages; pn++) pages.push(await pcSheetPage(await doc.getPage(pn), one));
+    const all = pages.flatMap(P => P.words);
+    if(!all.length) throw new Error('the PDF has no text — save it from Word, not as a scan');
+    const pad = 14, W = Math.max(...pages.map(P => P.width));
+    const x = Math.max(0, Math.min(...all.map(w => w.x0)) - pad);
+    const w = Math.min(W, Math.max(...all.map(w2 => w2.x1)) + pad) - x;
+    let top = 0;
+    const toks = [];
+    pages.forEach(P => {
+      if(!P.words.length){ P.top = null; return; }
+      P.y = Math.max(0, Math.min(...P.words.map(w2 => w2.y0)) - pad);
+      P.h = Math.min(P.height, Math.max(...P.words.map(w2 => w2.y1)) + pad) - P.y;
+      P.top = top; top += P.h;
+      P.toks.forEach(T => toks.push({ name: T.name, x0: T.x0 - x, x1: T.x1 - x, y0: T.y0 - P.y + P.top, y1: T.y1 - P.y + P.top }));
     });
-    if(!words.length) throw new Error('the PDF has no text — save it from Word, not as a scan');
-    // Lines by baseline; a wide gap past the middle of the page starts a second column.
-    const byY = new Map();
-    words.forEach(w => { const k = Math.round(w.y1); (byY.get(k) || byY.set(k, []).get(k)).push(w); });
-    const segs = [];
-    byY.forEach(ws => {
-      ws.sort((p, q) => p.x0 - q.x0);
-      let cur = [ws[0]];
-      for(let i = 1; i < ws.length; i++){
-        if(ws[i].x0 - ws[i - 1].x1 > vp.width * 0.08 && ws[i].x0 > vp.width * 0.4){ segs.push(cur); cur = []; }
-        cur.push(ws[i]);
-      }
-      segs.push(cur);
-    });
-    const lines = segs.filter(ws => ws.every(w => PC_SHEET_CHORD_RE.test(w.s)));
-    lines.forEach(ws => { ws.col = ws[0].x0 > vp.width * 0.45 ? 1 : 0; });
-    lines.sort((p, q) => p.col - q.col || p[0].y0 - q[0].y0);
-    const toks = lines.flatMap(ws => ws.map(w => ({ name: w.s, x0: w.x0, x1: w.x1, y0: w.y0, y1: w.y1 })));
-    const pad = 14;
-    const crop = { x: Math.max(0, Math.min(...words.map(w => w.x0)) - pad), y: Math.max(0, Math.min(...words.map(w => w.y0)) - pad) };
-    crop.w = Math.min(vp.width, Math.max(...words.map(w => w.x1)) + pad) - crop.x;
-    crop.h = Math.min(vp.height, Math.max(...words.map(w => w.y1)) + pad) - crop.y;
-    return { page, toks, crop };
+    return { pages: pages.filter(P => P.top !== null).map(P => ({ page: P.page, x, y: P.y, h: P.h, top: P.top })), toks, crop: { x: 0, y: 0, w, h: top } };
   });
-  pcSheetModels[url].catch(() => { delete pcSheetModels[url]; });   // a failed load can be tried again
-  return pcSheetModels[url];
+  pcSheetModels[key].catch(() => { delete pcSheetModels[key]; });   // a failed load can be tried again
+  return pcSheetModels[key];
+}
+/* One page of a sheet: its words and its chord names in reading order, in
+   that page's PDF points with y running down the page. */
+async function pcSheetPage(page, one){
+  const vp = page.getViewport({ scale: 1 });
+  const tc = await page.getTextContent();
+  const words = [];
+  tc.items.forEach(it => {
+    if(!it.str || !it.str.trim()) return;
+    const [a, b, , d, e, f] = it.transform;
+    const size = Math.hypot(a, b) || Math.abs(d) || it.height || 10;
+    const cw = it.width / it.str.length;   // the sheets are Courier: every character is one width
+    const re = /\S+/g; let m;
+    while((m = re.exec(it.str))){
+      const x0 = e + m.index * cw, x1 = x0 + m[0].length * cw;
+      const r = vp.convertToViewportRectangle([x0, f - size * 0.22, x1, f + size * 0.78]);
+      words.push({ s: m[0], x0: Math.min(r[0], r[2]), x1: Math.max(r[0], r[2]), y0: Math.min(r[1], r[3]), y1: Math.max(r[1], r[3]) });
+    }
+  });
+  // Lines by baseline; on a two-column sheet a wide gap past the middle of the page starts the second column.
+  const byY = new Map();
+  words.forEach(w => { const k = Math.round(w.y1); (byY.get(k) || byY.set(k, []).get(k)).push(w); });
+  const segs = [];
+  byY.forEach(ws => {
+    ws.sort((p, q) => p.x0 - q.x0);
+    let cur = [ws[0]];
+    for(let i = 1; i < ws.length; i++){
+      if(!one && ws[i].x0 - ws[i - 1].x1 > vp.width * 0.08 && ws[i].x0 > vp.width * 0.4){ segs.push(cur); cur = []; }
+      cur.push(ws[i]);
+    }
+    segs.push(cur);
+  });
+  const lines = segs.filter(ws => ws.every(w => PC_SHEET_CHORD_RE.test(w.s)));
+  lines.forEach(ws => { ws.col = !one && ws[0].x0 > vp.width * 0.45 ? 1 : 0; });
+  lines.sort((p, q) => p.col - q.col || p[0].y0 - q[0].y0);
+  const toks = lines.flatMap(ws => ws.map(w => ({ name: w.s, x0: w.x0, x1: w.x1, y0: w.y0, y1: w.y1 })));
+  return { page, width: vp.width, height: vp.height, words, toks };
 }
 /* Which sheet chord each note of the card is: tok[si][rep][ni]. A rest is not a
    chord on the sheet: the dot stays on the chord before it. The count
@@ -13970,7 +13993,7 @@ async function pcSheetDraw(paperOrCol){
   const job = paper._sheetJob = (paper._sheetJob || 0) + 1;
   const msg = text => { let m = paper.querySelector('.pc-sheet-msg'); if(!m){ m = document.createElement('p'); m.className = 'pc-sheet-msg'; paper.appendChild(m); } m.textContent = text; m.hidden = !text; };
   let model;
-  try { model = await pcSheetModel(a.card.sheet); }
+  try { model = await pcSheetModel(a.card.sheet, a.card.sheetColumns); }
   catch(e){ if(paper._sheetJob === job) msg(t('ca.sheetFailed')); return; }
   if(paper._sheetJob !== job || !paper.isConnected) return;
   const avail = col.clientWidth;
@@ -13985,10 +14008,22 @@ async function pcSheetDraw(paperOrCol){
     canvas.setAttribute('aria-label', t('ca.sheetAlt'));
     paper.insertBefore(canvas, paper.firstChild);
   }
-  const vp = model.page.getViewport({ scale: scale * dpr, offsetX: -crop.x * scale * dpr, offsetY: -crop.y * scale * dpr });
+  const k = scale * dpr;
   const off = document.createElement('canvas');   // draw off screen, then swap — no blank flash on a redraw
-  off.width = Math.floor(crop.w * scale * dpr); off.height = Math.floor(crop.h * scale * dpr);
-  try { await model.page.render({ canvasContext: off.getContext('2d'), viewport: vp }).promise; }
+  off.width = Math.floor(crop.w * k); off.height = Math.floor(crop.h * k);
+  /* Each page on a canvas of its own, then placed under the one before
+     (pdf.js paints a page's whole canvas white, so pages can't share one). */
+  try {
+    const ctx = off.getContext('2d');
+    for(const P of model.pages){
+      const pc = document.createElement('canvas');
+      pc.width = off.width; pc.height = Math.max(1, Math.floor(P.h * k));
+      const vp = P.page.getViewport({ scale: k, offsetX: -P.x * k, offsetY: -P.y * k });
+      await P.page.render({ canvasContext: pc.getContext('2d'), viewport: vp }).promise;
+      if(paper._sheetJob !== job) return;
+      ctx.drawImage(pc, 0, Math.floor(P.top * k));
+    }
+  }
   catch(e){ if(paper._sheetJob === job) msg(t('ca.sheetFailed')); return; }
   if(paper._sheetJob !== job || !paper.isConnected) return;
   canvas.width = off.width; canvas.height = off.height;
