@@ -465,6 +465,19 @@
            // the push on a finger outside 1-4.
            notes: [ { string: 'E', fret: 0, note: 'E', midi: 40 } ],
          },
+         // Optional — a drawn strum pattern instead of a tab (ca-46,
+         // Jonathan 2026-11-03): arrows over the count, the chord name over
+         // each bar, ▶ Play strum sounds it with the tab's cursor. Built by
+         // buildStrum() in app.js for both step renderers; checks.mjs 1d
+         // recomputes every chord's midi from its frets.
+         strum: {
+           caption: '…', caption_es: '…',
+           pattern: 'D.DU.UDU',   // 8 eighth notes (1 + 2 + 3 + 4 +): D down, U up,
+                                  // . the hand moves but misses, - a stop (the hand
+                                  // waits for the next 1); starts on D or U
+           chords: { D5: { frets: [['A', 5], ['D', 7], ['G', 7]], midi: [50, 57, 62] } },
+           bars: ['D5', 'D5'],    // one chord name per bar, each one in `chords`
+         },
          // Optional — the real backing track, looping the exact bars this
          // step drills, so a student practising eight bars of the verse
          // hears those eight bars over and over instead of being turned
@@ -6890,14 +6903,16 @@ window.CLASS_ACTIVITIES = [
     ],
   },
   /* ca-46 — the D D U U D U strum (Jonathan, 2026-11-03): a short
-     stand-alone rhythm ladder — count it, muted strings, one chord, then
+     stand-alone rhythm ladder — count it, muted strings, the chord changes, then
      play along with The Stellar Guitarist's "Sweet Child O' Mine" lesson
      from 10:20 (oEmbed-verified 2026-11-03: "Sweet Child O' Mine - Guns &
      Roses Guitar Lesson Tutorial [Beginner Strumming & Easy Chords]").
      The hand moves down on every number and up on every "+"; the strums
-     land on 1, 2, +, +, 4, + — so the tab's beats are 1, ½, 1, ½, ½, ½
-     (4 per bar) and Play tab sounds the rhythm. No `journey`: it is a
-     strum drill, not a Song Journey layer. */
+     land on 1, 2, +, +, 4, +. Steps 1 and 3 draw it with `strum`
+     (buildStrum in app.js — arrows over the count, chord names over the
+     bars, ▶ Play strum sounds it), not a tab (Jonathan, 2026-11-03). Step 3
+     is the verse order D5 C5 G5 D5, one bar each, ahead of the play-along.
+     No `journey`: it is a strum drill, not a Song Journey layer. */
   {
     id:    'ca-46',
     view:  'focus',   // one step at a time — see VIEW above
@@ -6907,33 +6922,16 @@ window.CLASS_ACTIVITIES = [
       {
         label:    'Learn — Count it',
         label_es: 'Aprende — Cuéntalo',
-        text:    'Count 1 + 2 + 3 + 4 +. Your hand goes down on each number and up on each +, the whole time. It misses the strings on the first + and on 3. Press Play tab to hear it.',
-        text_es: 'Cuenta 1 + 2 + 3 + 4 +. Tu mano baja en cada número y sube en cada +, todo el tiempo. No toca las cuerdas en el primer + ni en el 3. Presiona «Tocar el tab» para escucharlo.',
-        tab: {
+        text:    'Count 1 + 2 + 3 + 4 +. Your hand goes down on each number and up on each +, the whole time. On each dot it misses the strings. Press Play strum to hear it. Hard to get? <a href="#class-activities/ca-47">Learn it in chunks</a>.',
+        text_es: 'Cuenta 1 + 2 + 3 + 4 +. Tu mano baja en cada número y sube en cada +, todo el tiempo. En cada punto no toca las cuerdas. Presiona «Tocar el rasgueo» para escucharlo. ¿Te cuesta? <a href="#class-activities/ca-47">Apréndelo por partes</a>.',
+        strum: {
           caption:    'D5 · the pattern 2 times',
           caption_es: 'D5 · el patrón 2 veces',
-          phrases: [
-            { label:    'Down · Down-Up · Up-Down-Up',
-              label_es: 'Abajo · abajo-arriba · arriba-abajo-arriba',
-              notes: [
-                { frets: [['A', 5], ['D', 7], ['G', 7]], note: 'D5', midi: [50, 57, 62] },
-                { frets: [['A', 5], ['D', 7], ['G', 7]], note: 'D5', midi: [50, 57, 62], beats: 0.5 },
-                { frets: [['A', 5], ['D', 7], ['G', 7]], note: 'D5', midi: [50, 57, 62] },
-                { frets: [['A', 5], ['D', 7], ['G', 7]], note: 'D5', midi: [50, 57, 62], beats: 0.5 },
-                { frets: [['A', 5], ['D', 7], ['G', 7]], note: 'D5', midi: [50, 57, 62], beats: 0.5 },
-                { frets: [['A', 5], ['D', 7], ['G', 7]], note: 'D5', midi: [50, 57, 62], beats: 0.5 }
-              ] },
-            { label:    'Down · Down-Up · Up-Down-Up',
-              label_es: 'Abajo · abajo-arriba · arriba-abajo-arriba',
-              notes: [
-                { frets: [['A', 5], ['D', 7], ['G', 7]], note: 'D5', midi: [50, 57, 62] },
-                { frets: [['A', 5], ['D', 7], ['G', 7]], note: 'D5', midi: [50, 57, 62], beats: 0.5 },
-                { frets: [['A', 5], ['D', 7], ['G', 7]], note: 'D5', midi: [50, 57, 62] },
-                { frets: [['A', 5], ['D', 7], ['G', 7]], note: 'D5', midi: [50, 57, 62], beats: 0.5 },
-                { frets: [['A', 5], ['D', 7], ['G', 7]], note: 'D5', midi: [50, 57, 62], beats: 0.5 },
-                { frets: [['A', 5], ['D', 7], ['G', 7]], note: 'D5', midi: [50, 57, 62], beats: 0.5 }
-              ] }
-          ]
+          pattern: 'D.DU.UDU',   // 8 eighth notes: D down, U up, . hand moves but misses
+          chords: {
+            D5: { frets: [['A', 5], ['D', 7], ['G', 7]], midi: [50, 57, 62] }
+          },
+          bars: ['D5', 'D5'],
         },
       },
       {
@@ -6943,35 +6941,20 @@ window.CLASS_ACTIVITIES = [
         text_es: 'Apoya la mano de trastear suavemente sobre las seis cuerdas para que no suenen. Rasguea el patrón y di «abajo, abajo-arriba, arriba-abajo-arriba». Lo tienes cuando: lo tocas 8 veces seguidas y tu mano nunca deja de moverse. ¿Tu mano se detiene en el 3? Sigue moviéndola y no toques las cuerdas.',
       },
       {
-        label:    'Practice — On D5',
-        label_es: 'Practica — En D5',
-        text:    'Put finger 1 on fret 5 of the A string, finger 3 on fret 7 of the D string and finger 4 on fret 7 of the G string. Play the pattern with Play tab. You\'ve got it when: you play the tab 4 times through without stopping. Falling behind? Lower the BPM by 10.',
-        text_es: 'Pon el dedo 1 en el traste 5 de la cuerda La, el dedo 3 en el traste 7 de la cuerda Re y el dedo 4 en el traste 7 de la cuerda Sol. Toca el patrón con «Tocar el tab». Lo tienes cuando: tocas la tablatura 4 veces completa sin detenerte. ¿Te quedas atrás? Baja el BPM 10.',
-        tab: {
-          caption:    'D5 · the pattern 2 times',
-          caption_es: 'D5 · el patrón 2 veces',
-          phrases: [
-            { label:    'Down · Down-Up · Up-Down-Up',
-              label_es: 'Abajo · abajo-arriba · arriba-abajo-arriba',
-              notes: [
-                { frets: [['A', 5], ['D', 7], ['G', 7]], note: 'D5', midi: [50, 57, 62] },
-                { frets: [['A', 5], ['D', 7], ['G', 7]], note: 'D5', midi: [50, 57, 62], beats: 0.5 },
-                { frets: [['A', 5], ['D', 7], ['G', 7]], note: 'D5', midi: [50, 57, 62] },
-                { frets: [['A', 5], ['D', 7], ['G', 7]], note: 'D5', midi: [50, 57, 62], beats: 0.5 },
-                { frets: [['A', 5], ['D', 7], ['G', 7]], note: 'D5', midi: [50, 57, 62], beats: 0.5 },
-                { frets: [['A', 5], ['D', 7], ['G', 7]], note: 'D5', midi: [50, 57, 62], beats: 0.5 }
-              ] },
-            { label:    'Down · Down-Up · Up-Down-Up',
-              label_es: 'Abajo · abajo-arriba · arriba-abajo-arriba',
-              notes: [
-                { frets: [['A', 5], ['D', 7], ['G', 7]], note: 'D5', midi: [50, 57, 62] },
-                { frets: [['A', 5], ['D', 7], ['G', 7]], note: 'D5', midi: [50, 57, 62], beats: 0.5 },
-                { frets: [['A', 5], ['D', 7], ['G', 7]], note: 'D5', midi: [50, 57, 62] },
-                { frets: [['A', 5], ['D', 7], ['G', 7]], note: 'D5', midi: [50, 57, 62], beats: 0.5 },
-                { frets: [['A', 5], ['D', 7], ['G', 7]], note: 'D5', midi: [50, 57, 62], beats: 0.5 },
-                { frets: [['A', 5], ['D', 7], ['G', 7]], note: 'D5', midi: [50, 57, 62], beats: 0.5 }
-              ] }
-          ]
+        label:    'Practice — D5, C5, G5',
+        label_es: 'Practica — D5, C5, G5',
+        text:    'Play one bar of each chord and change on the 1. Press Play strum to hear it first. You\'ve got it when: you play the four bars 4 times through and the pattern never stops at a change. Late on a change? Lower the BPM by 10.',
+        text_es: 'Toca un compás de cada acorde y cambia en el 1. Presiona «Tocar el rasgueo» para escucharlo primero. Lo tienes cuando: tocas los cuatro compases 4 veces completos y el patrón nunca se detiene en un cambio. ¿Llegas tarde al cambio? Baja el BPM 10.',
+        strum: {
+          caption:    'D5 · C5 · G5 · D5 · one bar each',
+          caption_es: 'D5 · C5 · G5 · D5 · un compás cada uno',
+          pattern: 'D.DU.UDU',   // 8 eighth notes: D down, U up, . hand moves but misses
+          chords: {
+            D5: { frets: [['A', 5], ['D', 7], ['G', 7]], midi: [50, 57, 62] },
+            C5: { frets: [['A', 3], ['D', 5], ['G', 5]], midi: [48, 55, 60] },
+            G5: { frets: [['E', 3], ['A', 5], ['D', 5]], midi: [43, 50, 55] }
+          },
+          bars: ['D5', 'C5', 'G5', 'D5'],
         },
       },
       {
@@ -6981,6 +6964,74 @@ window.CLASS_ACTIVITIES = [
         text_es: 'Toca con el video desde 10:20 con D5, C5 y G5. Cambia de acorde cuando él cambia. Lo tienes cuando: el patrón sigue sin parar en cada cambio de acorde, hasta el final. ¿Te perdiste? Deja de rasguear, cuenta con él y vuelve a entrar en el 1.',
         video: { id: '0ASVeXINKYM', start: 620,
                  label: 'Play-along — starts at 10:20', label_es: 'Toca con el video — empieza en 10:20' },
+      },
+    ],
+  },
+  /* ca-47 — the D D U U D U strum in chunks (Jonathan, 2026-11-03: "teach
+     three strums and then stop, then add one and then stop. keep adding on" —
+     "a separate path for students to choose"). ca-46 step 1 links here for a
+     student who wants it in smaller pieces; the last step sends them back to
+     ca-46 step 3. Each chunk ends in a stop ('-' in the pattern: no arrow,
+     the hand waits for the next 1). */
+  {
+    id:    'ca-47',
+    view:  'focus',   // one step at a time — see VIEW above
+    title:    'Strum Pattern in Chunks',
+    title_es: 'Patrón de rasgueo por partes',
+    intro:    'Learn Down, Down-Up, Up-Down-Up a few strums at a time. Each step adds one strum.',
+    intro_es: 'Aprende abajo, abajo-arriba, arriba-abajo-arriba pocos rasgueos a la vez. Cada paso agrega un rasgueo.',
+    steps: [
+      {
+        label:    'Practice — 3 strums',
+        label_es: 'Practica — 3 rasgueos',
+        text:    'Strum Down, Down-Up on D5, then stop and wait for the next 1. You\'ve got it when: you play it 4 times in a row and each one starts on 1. Rushing the stop? Count 3, 4 out loud.',
+        text_es: 'Rasguea abajo, abajo-arriba en D5 y luego para y espera el siguiente 1. Lo tienes cuando: lo tocas 4 veces seguidas y cada vez empiezas en el 1. ¿Te adelantas en la pausa? Cuenta 3, 4 en voz alta.',
+        strum: {
+          caption:    'D5 · Down, Down-Up, stop',
+          caption_es: 'D5 · abajo, abajo-arriba, para',
+          pattern: 'D.DU----',
+          chords: { D5: { frets: [['A', 5], ['D', 7], ['G', 7]], midi: [50, 57, 62] } },
+          bars: ['D5', 'D5'],
+        },
+      },
+      {
+        label:    'Practice — Add an up',
+        label_es: 'Practica — Agrega un arriba',
+        text:    'Add an up on the + after 3. Your hand moves down on 3 but misses the strings. You\'ve got it when: you play it 4 times in a row and each one starts on 1. Hitting the strings on 3? Move your hand a little farther from the strings.',
+        text_es: 'Agrega un arriba en el + después del 3. Tu mano baja en el 3 pero no toca las cuerdas. Lo tienes cuando: lo tocas 4 veces seguidas y cada vez empiezas en el 1. ¿Tocas las cuerdas en el 3? Aleja un poco la mano de las cuerdas.',
+        strum: {
+          caption:    'D5 · 4 strums, stop',
+          caption_es: 'D5 · 4 rasgueos, para',
+          pattern: 'D.DU.U--',
+          chords: { D5: { frets: [['A', 5], ['D', 7], ['G', 7]], midi: [50, 57, 62] } },
+          bars: ['D5', 'D5'],
+        },
+      },
+      {
+        label:    'Practice — Add a down',
+        label_es: 'Practica — Agrega un abajo',
+        text:    'Add a down on 4. You\'ve got it when: you play it 4 times in a row and each one starts on 1. Late on the 1? Lower the BPM by 10.',
+        text_es: 'Agrega un abajo en el 4. Lo tienes cuando: lo tocas 4 veces seguidas y cada vez empiezas en el 1. ¿Llegas tarde al 1? Baja el BPM 10.',
+        strum: {
+          caption:    'D5 · 5 strums, stop',
+          caption_es: 'D5 · 5 rasgueos, para',
+          pattern: 'D.DU.UD-',
+          chords: { D5: { frets: [['A', 5], ['D', 7], ['G', 7]], midi: [50, 57, 62] } },
+          bars: ['D5', 'D5'],
+        },
+      },
+      {
+        label:    'Practice — The whole pattern',
+        label_es: 'Practica — El patrón completo',
+        text:    'Add the last up. Now there is no stop: your hand moves the whole time. You\'ve got it when: you play it 8 times in a row without stopping. Then go back to Strum Pattern — Down, Down-Up, Up-Down-Up and start at step 3.',
+        text_es: 'Agrega el último arriba. Ahora no hay pausa: tu mano se mueve todo el tiempo. Lo tienes cuando: lo tocas 8 veces seguidas sin detenerte. Luego vuelve a Patrón de rasgueo — abajo, abajo-arriba, arriba-abajo-arriba y empieza en el paso 3.',
+        strum: {
+          caption:    'D5 · the whole pattern',
+          caption_es: 'D5 · el patrón completo',
+          pattern: 'D.DU.UDU',
+          chords: { D5: { frets: [['A', 5], ['D', 7], ['G', 7]], midi: [50, 57, 62] } },
+          bars: ['D5', 'D5'],
+        },
       },
     ],
   },

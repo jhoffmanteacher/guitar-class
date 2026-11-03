@@ -5,6 +5,12 @@ Notable changes to the Guitar Class site. Newest first.
 For the full session-by-session history (and the reasoning behind each change),
 see `WORKFLOW.md` and the git commit log.
 
+## 2026-11-03 — Strum patterns drawn with arrows, and the strum in chunks
+
+- **"Strum Pattern — Down, Down-Up, Up-Down-Up" now draws the pattern instead of a tab.** Each bar shows a down or up arrow on each count (1 + 2 + 3 + 4 +), a dot where your hand moves but misses the strings, and the chord name over the bar. Press Play strum to hear it; the arrow being played lights up.
+- **Step 3 is now D5, C5, G5, D5, one bar each**, so you practice the pattern through the chord changes before the play-along.
+- **New activity: "Strum Pattern in Chunks."** It builds the pattern a few strums at a time: 3 strums and stop, then 4, then 5, then the whole pattern. Step 1 of the main strum activity links to it.
+
 ## 2026-11-03 — New class activity: the Down, Down-Up, Up-Down-Up strum
 
 - **New activity: "Strum Pattern — Down, Down-Up, Up-Down-Up."** Four short steps, one at a time: count it and hear it with Play tab, play it on muted strings, play it on D5, then play along with a "Sweet Child O' Mine" video lesson from 10:20 on D5, C5 and G5. Your hand moves down and up the whole time and misses the strings on the first + and on 3.

@@ -2425,6 +2425,8 @@ function renderTeacherActivityDetail(id){
     // activity, not wait out the same delay a student would.
     // defaultLinesPerPage: same two-rows-a-page default the student card uses.
     if(s.tab) media.push(buildTab(s.tab,{keyPrefix:`bpm:ca-preview:${a.id}:${si}:tab`,suppressCoach:true,noRevealDelay:true,defaultLinesPerPage:CA_TAB_LINES_PER_PAGE}));
+    // The drawn strum pattern (step.strum) — same builder as caStepHtml().
+    if(s.strum && typeof buildStrum==='function') media.push(buildStrum(s.strum,{keyPrefix:`bpm:ca-preview:${a.id}:${si}:strum`}));
     /* The backing-track snippet, from the SAME builder the student card uses
        (buildSnippet in app.js, loaded before this file) — a step field with
        one renderer can't go invisible on one side of it, which is the whole

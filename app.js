@@ -2112,6 +2112,84 @@ function buildTab(spec, opts){
   }
   return (hasRevealDelay && !(opts && opts.noRevealDelay)) ? wrapTabReveal(html, spec.revealDelay, keyPrefix) : html;
 }
+/* ── Strum pattern (a class-activity step's `strum` field, ca-46 —
+   Jonathan, 2026-11-03: "draw the strum pattern … and just name the chords
+   D5 C5, etc. instead of showing tab"). Each bar is eight slots, one per
+   eighth note (1 + 2 + 3 + 4 +): a down arrow, an up arrow, a faint dot
+   where the hand keeps moving but misses the strings, or nothing at all for
+   '-', a stop — the hand waits for the next 1 (ca-47, the pattern built up in
+   chunks: Jonathan, 2026-11-03). The chord name sits
+   over the first slot of its bar, the count under every slot.
+     strum: { caption, caption_es, pattern: 'D.DU.UDU', bpm?,
+              chords: { D5: { frets: [['A',5],['D',7],['G',7]], midi: [50,57,62] } },
+              bars: ['D5', 'C5', …] }        // one chord name per bar
+   It is a `.tab` on purpose, so it gets the tab's header, ▶ Play / BPM row
+   and the playSequence cursor (`[data-seq]` + .beat-now) for free — no new
+   audio code. Each strum is one sequence entry that rings until the next
+   strum (a missed slot adds half a beat), so the sound is the pattern and
+   the cursor lands on every arrow. ONE builder, called by both step
+   renderers (caStepHtml in app.js, renderTeacherActivityDetail in
+   teacher.js) — checks.mjs 1d pins both calls. */
+const STRUM_SLOTS = 8;   // eighth notes in a 4/4 bar
+const STRUM_COUNT = ['1', '+', '2', '+', '3', '+', '4', '+'];
+const STRUM_BARS_PER_ROW = 2;
+function strumSequence(spec){
+  /* [{ bar, slot, dir, midi, beats }] — one per strum, in order. */
+  const pat = String(spec.pattern || '');
+  const bars = Array.isArray(spec.bars) ? spec.bars : [];
+  const hits = [];
+  bars.forEach((name, b) => {
+    for(let k = 0; k < STRUM_SLOTS; k++){
+      const c = pat[k];
+      if(c !== 'D' && c !== 'U') continue;
+      const ch = spec.chords && spec.chords[name];
+      hits.push({ bar: b, slot: k, dir: c, midi: ch && Array.isArray(ch.midi) ? ch.midi.map(Number) : [], at: b * STRUM_SLOTS + k });
+    }
+  });
+  const end = bars.length * STRUM_SLOTS;
+  hits.forEach((h, i) => { h.beats = ((i + 1 < hits.length ? hits[i + 1].at : end) - h.at) / 2; });
+  return hits;
+}
+function buildStrum(spec, opts){
+  if(!spec || !Array.isArray(spec.bars) || !spec.bars.length) return '';
+  const keyPrefix = (opts && opts.keyPrefix) || '';
+  const hits = strumSequence(spec);
+  const seqOf = {};
+  hits.forEach((h, i) => { seqOf[h.at] = i; });
+  const title = (spec.caption && tf(spec, 'caption')) || t('strum.label');
+  const headHtml = `<div class="tab-head"><span class="tab-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" style="width:1em;height:1em;vertical-align:-0.15em"><path d="M9 18V5l12-2v13"/><circle cx="6" cy="18" r="3"/><circle cx="18" cy="16" r="3"/></svg></span><span class="tab-title">${escHtml(title)}</span><span class="tab-kind">${t('strum.label')}</span></div>`;
+  let controlsHtml = '';
+  if(hits.length && keyPrefix){
+    const bpm = readStoredBpm(keyPrefix, spec.bpm || 60);
+    const midis = hits.map(h => (h.beats !== 1 ? { midi: h.midi, beats: h.beats } : h.midi));
+    controlsHtml = `<div class="tab-controls"><span class="bpm-control-group">`
+      + `<button type="button" class="play-seq-btn" data-midis="${escAttr(JSON.stringify(midis))}" onclick="playSequenceFromGroup(this)" title="${escAttr(t('strum.playTitle'))}">&#x25B6; ${t('strum.play')}</button>`
+      + renderBpmControl(keyPrefix, bpm, spec.minBpm || 40, spec.maxBpm || 120)
+      + `</span></div>`;
+  }
+  const pat = String(spec.pattern || '');
+  const rows = [];
+  for(let b0 = 0; b0 < spec.bars.length; b0 += STRUM_BARS_PER_ROW){
+    const cells = [];
+    for(let b = b0; b < Math.min(b0 + STRUM_BARS_PER_ROW, spec.bars.length); b++){
+      for(let k = 0; k < STRUM_SLOTS; k++){
+        const at = b * STRUM_SLOTS + k;
+        const c = pat[k];
+        const seq = seqOf[at];
+        const seqAttr = seq === undefined ? '' : ` data-seq="${seq}"`;
+        const stop = c === '-';
+        const dirWord = c === 'D' ? t('strum.down') : c === 'U' ? t('strum.up') : stop ? t('strum.stop') : t('strum.miss');
+        const arrow = c === 'D' ? '&#x2193;' : c === 'U' ? '&#x2191;' : stop ? '' : '&middot;';
+        cells.push(`<div class="strum-cell${k === 0 ? ' strum-cell--bar' : ''}${seq === undefined ? ' strum-cell--miss' : ''}${stop ? ' strum-cell--stop' : ''}"${seqAttr}>`
+          + `<span class="strum-chord">${k === 0 ? escHtml(String(spec.bars[b])) : ''}</span>`
+          + `<span class="strum-dir" role="img" aria-label="${escAttr(dirWord)}">${arrow}</span>`
+          + `<span class="strum-count">${STRUM_COUNT[k]}</span></div>`);
+      }
+    }
+    rows.push(`<div class="strum-row" style="--strum-cols:${cells.length}">${cells.join('')}</div>`);
+  }
+  return `<div class="tab tab--strum">${headHtml}<div class="tab-body">${controlsHtml}<div class="strum-board">${rows.join('')}</div></div></div>`;
+}
 /* Hides a just-built tab (`wrapTabReveal`) until caArmTabReveals() has let
    its `revealDelay` seconds pass, then fades it in. `hidden` short-circuits
    the animation while it's off-screen; body.print-activity overrides it
@@ -12719,6 +12797,9 @@ function caStepHtml(a, step, si, isOpen, isDone){
   }
   // defaultLinesPerPage: a long tab shows two rows at a time (buildPagedTabBody).
   if(step.tab) parts.push(buildTab(step.tab, { keyPrefix: `bpm:ca:${a.id}:${si}:tab`, defaultLinesPerPage: CA_TAB_LINES_PER_PAGE }));
+  /* A drawn strum pattern (step.strum, ca-46) — ONE builder, buildStrum(),
+     shared with renderTeacherActivityDetail() in teacher.js. */
+  if(step.strum) parts.push(buildStrum(step.strum, { keyPrefix: `bpm:ca:${a.id}:${si}:strum` }));
   /* Right under the tab on purpose: the snippet is those same bars played by
      the band, so the two read as one pair. ONE builder, shared with
      teacher.js's renderTeacherActivityDetail() — see buildSnippet(). */

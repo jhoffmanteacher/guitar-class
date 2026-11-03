@@ -618,6 +618,60 @@ async function twoColumnQuizWalk(page, run, events, stats) {
   await page.send('Emulation.clearDeviceMetricsOverride');
 }
 
+/* Drawn strum patterns (step.strum, buildStrum — ca-46, 2026-11-03). Every
+   class-activity step with a `strum`, in English and Spanish, on its own
+   Focus step: one cell per eighth note (8 per bar), an arrow cell numbered
+   0..N-1 for every D / U in the pattern and none for a dot, the chord name over
+   the first cell of each bar, the same columns in every row, nothing sticking
+   out sideways at 1366 or 390 px; then ▶ Play strum lights one arrow and Stop
+   puts the button back. A checkout without strum steps skips it. */
+async function strumWalk(page, run, events, stats) {
+  const list = await run('strum:list', `typeof buildStrum === 'function' ? CLASS_ACTIVITIES.filter(a => !a.teacherOnly && (a.steps || []).some(s => s.strum)).map(a => ({ id: a.id, steps: a.steps.map((s, i) => s.strum ? { i, pattern: s.strum.pattern, bars: s.strum.bars } : null).filter(Boolean) })) : []`, 10);
+  if (!list || !list.length) return;
+  const fail = (w, text) => events.push({ step: 'strum:' + w, kind: 'strum', text });
+  const metrics = (w, h) => page.send('Emulation.setDeviceMetricsOverride', { width: w, height: h, deviceScaleFactor: 1, mobile: false });
+  await run('strum:open', 'openClassActivitiesScreen()', 600);
+  for (const lang of ['en', 'es']) {
+    await run('strum:' + lang, `setLang('${lang}')`, 600);
+    for (const a of list) {
+      await run('strum:focus:' + a.id, `caFocusActivity('${a.id}')`, 700);
+      for (const st of a.steps) {
+        const w = `${a.id} step ${st.i + 1} ${lang}`;
+        await run('strum:go:' + w, `caFocusGo('${a.id}', ${st.i})`, 600);
+        const hits = [...String(st.pattern)].filter(c => c === 'D' || c === 'U').length * st.bars.length;
+        const probe = `(() => { const li = document.querySelector('.ca-card[open] .ca-step[data-idx="${st.i}"]'); const bd = li && li.querySelector('.strum-board'); if (!bd || !bd.offsetParent) return null;
+          const rows = [...bd.querySelectorAll('.strum-row')]; const cells = [...bd.querySelectorAll('.strum-cell')];
+          const xs = rows.map(r => [...r.children].map(c => Math.round(c.getBoundingClientRect().left)));
+          return { cells: cells.length, seqs: cells.filter(c => c.hasAttribute('data-seq')).map(c => +c.getAttribute('data-seq')),
+            names: cells.map(c => c.querySelector('.strum-chord').textContent).filter(Boolean),
+            aligned: xs.every(x => x.every((v, k) => v === xs[0][k])), over: bd.scrollWidth - bd.clientWidth, docOver: document.documentElement.scrollWidth - document.documentElement.clientWidth }; })()`;
+        const m = await run('strum:probe:' + w, probe, 10);
+        if (!m) { fail(w, 'no strum board on screen'); continue; }
+        if (m.cells !== st.bars.length * 8) fail(w, `${m.cells} cells for ${st.bars.length} bars, not ${st.bars.length * 8}`);
+        if (JSON.stringify(m.seqs) !== JSON.stringify([...Array(hits).keys()])) fail(w, `arrow cells numbered ${JSON.stringify(m.seqs)}, not 0..${hits - 1}`);
+        if (JSON.stringify(m.names) !== JSON.stringify(st.bars)) fail(w, `chord names ${JSON.stringify(m.names)}, not ${JSON.stringify(st.bars)}`);
+        if (!m.aligned) fail(w, 'the columns do not line up from row to row');
+        if (m.over > 0 || m.docOver > 0) fail(w, `sticks out sideways at 1366 px (${m.over} / ${m.docOver})`);
+        await metrics(390, 800); await sleep(400);
+        const n = await run('strum:narrow:' + w, probe, 10);
+        if (!n || n.over > 0 || n.docOver > 0 || !n.aligned) fail(w, 'at 390 px: ' + JSON.stringify(n && { over: n.over, docOver: n.docOver, aligned: n.aligned }));
+        await metrics(1366, 657); await sleep(400);
+        if (lang === 'en') {
+          await run('strum:play:' + w, `document.querySelector('.ca-card[open] .ca-step[data-idx="${st.i}"] .tab--strum .play-seq-btn').click()`, 1300);
+          const lit = await run('strum:lit:' + w, `[...document.querySelectorAll('.ca-card[open] .ca-step[data-idx="${st.i}"] .strum-cell.beat-now')].map(c => +c.getAttribute('data-seq'))`, 10);
+          if (!lit || lit.length !== 1 || !(lit[0] >= 1 && lit[0] < hits)) fail(w, 'after 1.3 s of ▶ Play strum the lit arrows are ' + JSON.stringify(lit) + ', expected one, past the first');
+          await run('strum:stop:' + w, `document.querySelector('.ca-card[open] .ca-step[data-idx="${st.i}"] .tab--strum .play-seq-btn').click()`, 300);
+          const idle = await run('strum:idle:' + w, `(() => { const b = document.querySelector('.ca-card[open] .ca-step[data-idx="${st.i}"] .tab--strum .play-seq-btn'); return !b.classList.contains('playing') && b.textContent.includes(t('strum.play')); })()`, 10);
+          if (!idle) fail(w, 'Stop did not put ▶ Play strum back');
+        }
+        stats.strumSteps = (stats.strumSteps || 0) + 1;
+      }
+    }
+  }
+  await run('strum:en', "setLang('en')", 600);
+  await run('strum:close', `(document.querySelectorAll('.ca-card[open]').forEach(c => { c.open = false; }), 1)`, 100);
+}
+
 async function walk(base, chromePort, label) {
   const page = await openPage(chromePort);
   let step = 'boot'; const events = []; const stats = { sets: 0, modules: 0, games: 0, buttons: 0 };
@@ -879,6 +933,7 @@ async function walk(base, chromePort, label) {
   await twoColumnQuizWalk(page, run, events, stats);
   await noteCallWalk(page, run, events, stats, base);
   await recordingWalk(page, run, events, stats, base);
+  await strumWalk(page, run, events, stats);
   await page.close();
   return { label, stats, errors: events.filter(e => !NOISE.test(e.text || '')) };
 }
@@ -912,7 +967,7 @@ try {
   const norm = e => `${e.kind}|${e.step.replace(/^(en|es):/, '')}|${e.kind === 'bad-handler' ? '' : e.text}`;
   const baseCount = new Map(); (base ? base.errors : []).forEach(e => baseCount.set(norm(e), Math.max(baseCount.get(norm(e)) || 0, e.kind === 'bad-handler' ? +e.text : 1)));
   const report = base ? now.errors.filter(e => (e.kind === 'bad-handler' ? +e.text : 1) > (baseCount.get(norm(e)) || 0)) : now.errors;
-  say(`smoke: ${now.stats.sets} sets in ${now.stats.modules} modules (EN + ES), ${now.stats.games} game views, ${now.stats.buttons} inline handlers compiled${now.stats.chordCards ? `, ${now.stats.chordCards} chord-grid cards walked (cursor, lap, layout at 1366/390/360, lyric sheet${now.stats.bassClicks ? `, bass switch clicked on ${now.stats.bassClicks}` : ''}${now.stats.recordingClicks ? `, recording switch clicked, reloaded and flipped back on ${now.stats.recordingClicks}` : ''}${now.stats.chordSkipped ? `; ${now.stats.chordSkipped.join(', ')} is teacher-only and not walked` : ''})` : ''}${now.stats.noteCallSteps ? `, ${now.stats.noteCallSteps} Note Call power-chord steps (EN + ES: six strings, taps on low E and A only, a hit and a miss)` : ''}${now.stats.powerLayouts ? `, Power Chord Switch at 1366\u00d7657 (Start and tempo on screen: ${now.stats.powerLayouts} views, incl. after a reload${now.stats.powerBestLayouts ? `; with a "Best today" score, EN + ES, no scrolling and the privacy line on screen: ${now.stats.powerBestLayouts} views` : ''}${now.stats.songs ? `; song buttons picked and reopened, ${now.stats.songs} slots of both song rounds stepped on a fake clock (one lit chart each, the two A5 boxes included), ${now.stats.songDraws} random draws, none a song` : ""}${now.stats.powerCosmetic ? `; "low E" title kept together at ${now.stats.powerTitleWidths} window widths and the done-screen button padded, EN + ES: ${now.stats.powerCosmetic}` : ''})` : ''}${now.stats.changeUpLayouts ? `, Change Up at 1366\u00d7657 (Start on screen, no scrolling: ${now.stats.changeUpLayouts} views)` : ''}${now.stats.quizLayouts ? `, Chord Blitz (both directions) and Fret Zap at 1366\u00d7657 (picture left, 2\u00d72 answers right, no scroll: ${now.stats.quizLayouts} views)` : ''}`);
+  say(`smoke: ${now.stats.sets} sets in ${now.stats.modules} modules (EN + ES), ${now.stats.games} game views, ${now.stats.buttons} inline handlers compiled${now.stats.chordCards ? `, ${now.stats.chordCards} chord-grid cards walked (cursor, lap, layout at 1366/390/360, lyric sheet${now.stats.bassClicks ? `, bass switch clicked on ${now.stats.bassClicks}` : ''}${now.stats.recordingClicks ? `, recording switch clicked, reloaded and flipped back on ${now.stats.recordingClicks}` : ''}${now.stats.chordSkipped ? `; ${now.stats.chordSkipped.join(', ')} is teacher-only and not walked` : ''})` : ''}${now.stats.noteCallSteps ? `, ${now.stats.noteCallSteps} Note Call power-chord steps (EN + ES: six strings, taps on low E and A only, a hit and a miss)` : ''}${now.stats.powerLayouts ? `, Power Chord Switch at 1366\u00d7657 (Start and tempo on screen: ${now.stats.powerLayouts} views, incl. after a reload${now.stats.powerBestLayouts ? `; with a "Best today" score, EN + ES, no scrolling and the privacy line on screen: ${now.stats.powerBestLayouts} views` : ''}${now.stats.songs ? `; song buttons picked and reopened, ${now.stats.songs} slots of both song rounds stepped on a fake clock (one lit chart each, the two A5 boxes included), ${now.stats.songDraws} random draws, none a song` : ""}${now.stats.powerCosmetic ? `; "low E" title kept together at ${now.stats.powerTitleWidths} window widths and the done-screen button padded, EN + ES: ${now.stats.powerCosmetic}` : ''})` : ''}${now.stats.changeUpLayouts ? `, Change Up at 1366\u00d7657 (Start on screen, no scrolling: ${now.stats.changeUpLayouts} views)` : ''}${now.stats.quizLayouts ? `, Chord Blitz (both directions) and Fret Zap at 1366\u00d7657 (picture left, 2\u00d72 answers right, no scroll: ${now.stats.quizLayouts} views)` : ''}${now.stats.strumSteps ? `, ${now.stats.strumSteps} strum-pattern steps (EN + ES: cells, arrows, chord names, columns, 1366 and 390 px; Play strum lights an arrow and Stop resets)` : ''}`);
   if (base) say(`smoke: ${BASELINE} had ${base.errors.length} error event(s); this checkout has ${now.errors.length}`);
   if (report.length) {
     exitCode = 1;

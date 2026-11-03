@@ -3996,6 +3996,7 @@ function checkI18nCompleteness(manifest, allSets, reviewsByModule, moduleSongsBy
 function validateClassActivities() {
   head('1d. In-Class Activities data');
   let src;
+  let strumSteps = 0;   // steps with a drawn strum pattern (step.strum)
   try { src = readFileSync(join(ROOT, 'class-activities.js'), 'utf8'); }
   catch { err('class-activities.js is missing'); problems++; return; }
 
@@ -4222,6 +4223,24 @@ function validateClassActivities() {
           if (!s.video.id || /placeholder/i.test(s.video.id)) { err(`${sWhere}: video.id is missing or a placeholder — verify via oEmbed before shipping (see CLAUDE.md "Videos")`); problems++; }
           if (s.video.label) reqEs(sWhere, s.video, 'label');
         }
+        /* A drawn strum pattern (step.strum, buildStrum in app.js — ca-46,
+           2026-11-03): eight eighth-note slots of D / U / . / - (a stop, ca-47), starting on a
+           strum (the first sequence entry plays at once); every bar names a
+           chord in `chords`; every chord's midi recomputed from its frets. */
+        if (s.strum) {
+          strumSteps++;
+          const mWhere = `${sWhere} · strum`;
+          reqEs(mWhere, s.strum, 'caption');
+          if (!/^[DU][DU.\-]{7}$/.test(String(s.strum.pattern || ''))) { err(`${mWhere}: pattern "${s.strum.pattern}" must be 8 slots of D, U, . or - and start on D or U`); problems++; }
+          const chords = (s.strum.chords && typeof s.strum.chords === 'object') ? s.strum.chords : {};
+          if (!Array.isArray(s.strum.bars) || !s.strum.bars.length) { err(`${mWhere}: "bars" should be a non-empty array of chord names`); problems++; }
+          else s.strum.bars.forEach((name, bi) => { if (!chords[name]) { err(`${mWhere} · bars[${bi}]: "${name}" is not in "chords"`); problems++; } });
+          Object.keys(chords).forEach(name => {
+            const c = chords[name] || {};
+            if (!Array.isArray(c.frets)) { err(`${mWhere} · chords.${name}: needs "frets"`); problems++; return; }
+            caChordProblems({ frets: c.frets, midi: c.midi, note: name }).forEach(p => { err(`${mWhere} · chords.${name}: ${p}`); problems++; });
+          });
+        }
         if (s.tab) {
           const tWhere = `${sWhere} · tab`;
           reqEs(tWhere, s.tab, 'caption');
@@ -4264,9 +4283,18 @@ function validateClassActivities() {
      failing a push over one would force a pointless retype every time an
      activity is added or retired. Ids are still unique (checked above) and
      that is the one thing progress is keyed to. */
+  /* Both step renderers draw step.strum through the one builder — a field
+     wired into one renderer is invisible in the other (CLAUDE.md, "TWO step
+     renderers"). Only checked while some step uses it. */
+  if (strumSteps) {
+    const appSrc = readFileSync(join(ROOT, 'app.js'), 'utf8');
+    const tchSrc = readFileSync(join(ROOT, 'teacher.js'), 'utf8');
+    if (!/if\(step\.strum\) parts\.push\(buildStrum\(step\.strum,/.test(appSrc)) { err('1d: caStepHtml() in app.js no longer draws step.strum with buildStrum()'); problems++; }
+    if (!/if\(s\.strum && typeof buildStrum==='function'\) media\.push\(buildStrum\(s\.strum,/.test(tchSrc)) { err('1d: renderTeacherActivityDetail() in teacher.js no longer draws step.strum with buildStrum()'); problems++; }
+  }
   const numbered = activities.filter(a => a && a.kind !== 'check');
   const checks = activities.length - numbered.length;
-  if (problems === 0) ok(`${activities.length} class activit${activities.length === 1 ? 'y' : 'ies'} (${checks} exit check${checks === 1 ? '' : 's'}) — all valid; order lives on the console board`);
+  if (problems === 0) ok(`${activities.length} class activit${activities.length === 1 ? 'y' : 'ies'} (${checks} exit check${checks === 1 ? '' : 's'}) — all valid; order lives on the console board; ${strumSteps} strum step${strumSteps === 1 ? '' : 's'}, both renderers draw them`);
   checkExitChecks(activities);
   checkActivityTitleNumbers(activities);
   checkActivityDeckAnswers(activities);
@@ -10053,7 +10081,7 @@ function checkCardCaptionWords() {
    one-sided label is itself the bug (dots in one language, none in the
    other), so it fails outright now rather than being skipped. Bump when a
    card genuinely adds or removes a got-it sentence in both languages. */
-const REP_COUNT_FIELDS = 416;   // 2026-11-03: ca-46 strum pattern, three Practice steps (+3). 2026-10-21: m3w2 three-note power chords, two appended steps (+2). 2026-10-16: Module 5 clean-up, the Lauren Bateman watch step gets a countable got-it (+1). 2026-10-16: ca-34's three power-chord step texts (text_power, +3). 2026-10-14: ca-34 rebuilt — D chord and whole-song steps (+1), then requinto intro and outro steps (+2). 2026-10-13: ca-34 Las Mañanitas, four Practice steps (+4). 2026-10-12: m6-m8 Smoke on the Water watch step + A-shape watch card get a countable got-it (+2). 2026-10-12: 17 Challenge cards in Modules 9-11 get a countable got-it (+17, see 1ar2). 2026-10-07: part cards lose their help ladders too (-8). 2026-10-07: whole-song cards lose their help ladders (-13). 2026-10-06: m12w3 melody-on-top gets a countable got-it (+1). 2026-10-05: ca-27 Luna (+1) and ca-28 Sweet Child (+2) whole songs; ca-29..ca-33 power-chord whole songs (+6). 2026-10-01: ca-13/ca-19/ca-20 as practice cards (-7), ca-25 Seven Nation Army whole song (+2), ca-21 Lines 2 and 4 restored (+2), ca-26 Watchtower whole song (+1)
+const REP_COUNT_FIELDS = 420;   // 2026-11-03: ca-47 strum pattern in chunks, four Practice steps (+4). 2026-11-03: ca-46 strum pattern, three Practice steps (+3). 2026-10-21: m3w2 three-note power chords, two appended steps (+2). 2026-10-16: Module 5 clean-up, the Lauren Bateman watch step gets a countable got-it (+1). 2026-10-16: ca-34's three power-chord step texts (text_power, +3). 2026-10-14: ca-34 rebuilt — D chord and whole-song steps (+1), then requinto intro and outro steps (+2). 2026-10-13: ca-34 Las Mañanitas, four Practice steps (+4). 2026-10-12: m6-m8 Smoke on the Water watch step + A-shape watch card get a countable got-it (+2). 2026-10-12: 17 Challenge cards in Modules 9-11 get a countable got-it (+17, see 1ar2). 2026-10-07: part cards lose their help ladders too (-8). 2026-10-07: whole-song cards lose their help ladders (-13). 2026-10-06: m12w3 melody-on-top gets a countable got-it (+1). 2026-10-05: ca-27 Luna (+1) and ca-28 Sweet Child (+2) whole songs; ca-29..ca-33 power-chord whole songs (+6). 2026-10-01: ca-13/ca-19/ca-20 as practice cards (-7), ca-25 Seven Nation Army whole song (+2), ca-21 Lines 2 and 4 restored (+2), ca-26 Watchtower whole song (+1)
 function checkRepCountParity(sets, ctx) {
   head('1bg. Rep-count dots agree between English and Spanish');
   if (!ctx) { err('1bg cannot run — render context unavailable'); problems++; return; }

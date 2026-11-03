@@ -2866,6 +2866,22 @@ body.ca-full:has(#class-activities-screen:not([hidden])) .app-layout .main{zoom:
    shared .tab is block-level and full-width, and the default system is already
    sized to read from a music stand, so no size-up here. */
 .ca-step-detail .tab{margin:12px 0 8px}
+/* A drawn strum pattern (buildStrum, step.strum — ca-46): two bars to a row,
+   one column per eighth note. min-width:0 keeps the columns equal. The
+   playing strum lights up through the shared .beat-now class. */
+.strum-board{display:flex;flex-direction:column;gap:10px;margin-top:4px}
+.strum-row{display:grid;grid-template-columns:repeat(var(--strum-cols),minmax(0,1fr));border:1px solid var(--border);border-radius:var(--radius-sm);overflow:hidden}
+.strum-cell{min-width:0;display:flex;flex-direction:column;align-items:center;padding:4px 0 6px;border-left:1px solid transparent}
+.strum-cell--bar{border-left-color:var(--border)}
+.strum-cell--bar:first-child{border-left-color:transparent}
+.strum-chord{height:1.4em;line-height:1.4;font-weight:700;font-size:1rem;color:var(--blue-text);align-self:flex-start;padding-left:6px;white-space:nowrap}
+.strum-dir{font-size:1.75rem;font-weight:700;line-height:1.1;height:1.1em;color:var(--text)}
+.strum-cell--miss .strum-dir{color:var(--text3)}
+/* '-' — a stop: no arrow, the count faded, so the empty part of the bar reads as waiting. */
+.strum-cell--stop .strum-count{color:var(--text3);font-weight:400}
+.strum-count{font-size:0.875rem;font-weight:600;color:var(--text2);margin-top:2px}
+.strum-cell.beat-now{background:var(--blue-bg)}
+.strum-cell.beat-now .strum-dir{color:var(--blue-text)}
 /* A step's video button (step.video) comes right after the step text in both
    renderers — on its own line, not glued to the last sentence (ca-46, the
    first activity with a video step, 2026-11-03). */

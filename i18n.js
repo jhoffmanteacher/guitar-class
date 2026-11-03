@@ -962,6 +962,14 @@
     'tab.restStop':          { en: 'Stop', es: 'Para' },
     'tab.playFinger':        { en: 'Finger {n} · play {note}', es: 'Dedo {n} · tocar {note}' },
     'tab.defaultTitle':      { en: 'Tab', es: 'Tab' },
+    // A drawn strum pattern (a class-activity step's `strum` field — buildStrum() in app.js).
+    'strum.label':           { en: 'Strum', es: 'Rasgueo' },
+    'strum.play':            { en: 'Play strum', es: 'Tocar el rasgueo' },
+    'strum.playTitle':       { en: 'Play this strum pattern', es: 'Tocar este patrón de rasgueo' },
+    'strum.down':            { en: 'Down', es: 'Abajo' },
+    'strum.up':              { en: 'Up', es: 'Arriba' },
+    'strum.miss':            { en: 'Hand moves but misses the strings', es: 'La mano se mueve pero no toca las cuerdas' },
+    'strum.stop':            { en: 'Stop and wait', es: 'Para y espera' },
     'tab.showTabLabel':      { en: 'Show TAB:', es: 'Mostrar TAB:' },
     // Paged tab (a tab spec's `linesPerPage`) — buildPagedTabBody()/tabShowPage() in app.js
     'tab.pageOf':            { en: 'Page {a} of {n}', es: 'Página {a} de {n}' },
