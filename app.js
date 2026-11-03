@@ -13512,7 +13512,8 @@ function pcLayout(a){
        section.chordGrid:false to opt one out) — see CHORD GRID below. */
     const out = { s, notes, fromBar: Math.max(1, s.fromBar || 1), bars: Math.max(1, s.bars || 1),
                   reps: Math.max(1, s.reps || 1), seqOff: seq, beatEnds: [],
-                  grid: !!(c.chordGrid && s.chordGrid !== false), every: !!c.everyStrum, quietRest: c.restWord === false };
+                  grid: !!(c.chordGrid && s.chordGrid !== false), every: !!c.everyStrum, quietRest: c.restWord === false,
+                  nameAgain: !!(c.sheet && Array.isArray(c.sheetNamedAgain) && c.sheetNamedAgain.includes(s.label)) };   // see pcSheetMap
     out.bass = out.grid && c.__bass ? c.__bass : null;   // alternating bass, drawn on the grid only — see BASS NOTES
     let acc = 0;
     notes.forEach(n => { acc += n.beats > 0 ? n.beats : 1; out.beatEnds.push(acc); });
@@ -13918,15 +13919,18 @@ async function pcSheetPage(page, one){
 }
 /* Which sheet chord each note of the card is: tok[si][rep][ni]. A rest is not a
    chord on the sheet: the dot stays on the chord before it. The count
-   goes up at every chord CHANGE across the whole song, laps included. */
+   goes up at every chord CHANGE across the whole song, laps included —
+   and at the first chord of a section named in card.sheetNamedAgain
+   (Jonathan, 2026-11-03: Sweet Child's sheet writes D5 at the start of
+   each verse, where the D5 is still ringing from before). */
 function pcSheetMap(L){
   const tok = [], start = [];
   let n = -1, prev = null;
   L.sections.forEach((S, si) => {
     tok[si] = [];
     for(let r = 0; r < S.reps; r++){
-      tok[si][r] = S.notes.map(nt => {
-        if(!nt.rest && nt.note !== prev){ n++; prev = nt.note; start[n] = { si, rep: r, name: nt.note }; }
+      tok[si][r] = S.notes.map((nt, ni) => {
+        if(!nt.rest && (nt.note !== prev || (S.nameAgain && r === 0 && ni === 0))){ n++; prev = nt.note; start[n] = { si, rep: r, name: nt.note }; }
         return n;
       });
     }

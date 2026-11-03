@@ -234,6 +234,11 @@
                                            // gutter. Left out = two columns,
                                            // each page left column first (ca-38,
                                            // ca-45).
+       sheetNamedAgain: ['Verse 1'],       // optional (ca-45, 2026-11-03): sections
+                                           // whose first chord the sheet names
+                                           // again although it is still ringing
+                                           // from before; the dot steps onto it.
+                                           // Counts in sheetChords (1bf2).
        sections: [{                        // back to back, in song order
          label, label_es,                  // the tap-to-start button ("Chorus")
          caption, caption_es,              // the heading over its tab page
@@ -6107,10 +6112,13 @@ window.CLASS_ACTIVITIES = [
      chords)" Word doc, 2026-10-16). His chords came from his open-chord
      draft and did not follow the record; his call (2026-11-03) was to fix the
      web copy's chord NAMES to ca-33, lyrics untouched: a D5 still ringing at
-     a line start is left off (intro laps 2-3, both verses, both riffs),
+     a line start is left off (intro laps 2-3, the second half of each verse,
+     both riffs) — except that each verse opens on its D5 (Jonathan, same
+     day: "the D5 is missing from the beginning of each verse"), which
+     card.sheetNamedAgain tells the dot to step onto,
      Solo 2 and every outro lap end C5 D5 G5 in one bar, the outro runs seven
      laps, and the ending is E5 | G5 | A5 | G5 A5 | E5 — the A#5 and its
-     diagram are gone. 143 names = ca-33's 143 changes. Two columns over two
+     diagram are gone. 145 names = ca-33's 143 changes + the 2 verse D5s. Two columns over two
      pages. Sections are ca-33's by reference, joined after the array. */
   {
     id:    'ca-45',
@@ -6124,7 +6132,8 @@ window.CLASS_ACTIVITIES = [
       track: 'sweet-child-o-mine',
       slowest: true,    // four-way speed control: Slowest / Slower / Slow / Normal
       sheet: 'sheets/sweet-child-o-mine.pdf',
-      sheetChords: 143, // chord names on the sheet = chord changes in the notes (checks.mjs 1bf2)
+      sheetNamedAgain: ['Verse 1', 'Verse 2'],   // each verse opens on the sheet's D5, though the D5 is still ringing (Jonathan, 2026-11-03)
+      sheetChords: 145, // chord names on the sheet = chord changes in the notes + the 2 above (checks.mjs 1bf2)
       caption:    'Lyrics and chords · each verse chord lasts 2 bars',
       caption_es: 'Letra y acordes · cada acorde de la estrofa dura 2 compases',
       sections: null,   // ca-33's — joined after the array, below
