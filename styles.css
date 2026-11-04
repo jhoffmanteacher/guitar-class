@@ -4472,6 +4472,7 @@ body.lq-invite-open{overflow:hidden}
 .pm-tile-sub{font-size:0.8125rem;color:var(--pm-muted);min-height:1.2em}
 .pm-streak-lg .pm-flame-svg{width:34px;height:34px}
 .pm-tile-row .pm-today{font-size:2.25rem;line-height:1;color:var(--live)}
+.pm-tile-row .pm-rank{font-size:1.75rem;white-space:nowrap}
 .pm-today-u{font-size:0.9375rem;font-weight:600;color:var(--pm-muted);align-self:flex-end;padding-bottom:4px}
 .pm-sec-h{font-size:0.8125rem;font-weight:700;color:var(--pm-muted);margin:16px 0 8px}
 .pm-bars{display:flex;gap:10px;align-items:flex-end}

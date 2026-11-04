@@ -1205,6 +1205,18 @@
       is now 4 × 16 min, plus a new 3-days-at-the-cap run: 2400 s not hit, 3600 s hit);
       pm-e2e re-derived for each reach branch (Sunday 50/60, Saturday 40|39/60, Friday
       and Saturday from 0, 53/60 strip and recap, "60/60 min" widest strip).
+      *2026-11-04 — class rank on My progress ("N/total", Jonathan).* New collection
+      `minutesBoard/{uid}` `{ seconds }` (all-time confirmed seconds = the sum of the
+      weeks docs); every signed-in student reads it, only the owner writes it, no delete,
+      cap `400 * dailyCapSeconds()`. **Its rules block must be published BEFORE the code
+      goes live** (until then the write and read are refused quietly and the tile is just
+      absent). Engine: `publishBoard()` (after a load and after a confirmed flush, at most
+      once per 2 min, only when the number changed, one trailing timer so the end of a
+      session is not left out) and `loadBoard()` / `rankInfo()` (reads the whole
+      collection, kept 20 min in memory and in `pm:b:<uid>`; rank = 1 + others with
+      strictly more; under 60 s = no number). Costs one read per student per refresh
+      (about 150 reads); the Spark limit is 50,000 reads a day. pm-sim section 13 (+21).
+      HONEST LIMIT: a student at DevTools can claim any number up to the cap.
       *Open item, Jonathan's call: remove the heartbeat.* "N playing" was
       dropped from the screen, but the engine still writes a `heartbeats/{sessionId}`
       record (`{ period, lastSeen }`) about every 30 s while audio plays, and nothing reads

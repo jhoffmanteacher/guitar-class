@@ -42,7 +42,8 @@
    WHAT IT STORES (Firestore; firestore.rules has the matching blocks).
      minutes/{uid}/days/{YYYY-MM-DD}  { seconds }                 (capped per day)
      minutes/{uid}/weeks/{YYYY-Www}   { seconds, goalSeconds, hit }
-   Nothing else: no heartbeat, no live count (see NO LIVE COUNT below).
+      minutesBoard/{uid}               { seconds }                 (the class rank; see CLASS RANK)
+  Nothing else: no heartbeat, no live count (see NO LIVE COUNT below).
    Seconds are kept whole; the display floors to whole minutes. They are added
    with increment(), so two tabs or two devices never overwrite each other.
 
@@ -84,7 +85,19 @@
    the Firebase console (WORKFLOW.md, "Practice minutes"); checks.mjs 1cg and
    pm-sim sections 6 and 8 fail if a heartbeat or a live count comes back.
 
-   EVERYTHING A STUDENT SEES is behind PRACTICE_MINUTES_CONFIG.uiOn and lives
+   CLASS RANK (2026-11-04, Jonathan: "a ranking for students ... N/total"). My progress shows
+  "N/total": N = 1 + how many students have more all-time minutes, total = how many students
+  have a board doc. minutesBoard/{uid} holds ONE number, the student's all-time seconds the
+  server has confirmed (the sum of their weeks docs) — no name, no period; a uid is opaque and
+  a student cannot read progress/{uid} to map one back. The student's own page writes it after
+  a load and after a confirmed flush, at most once per BOARD_MS, and only when the number
+  changed; every signed-in student may read the collection (that is the whole point), nobody
+  but the owner writes it, nobody deletes. It is a decoration like the rest of this file: a
+  failed write or read changes nothing about counting, and the rank tile simply stays away.
+  HONEST LIMIT: a student at DevTools can write any number up to the rules' cap for themselves.
+  Reads cost one document per student, so the board is kept 20 minutes (localStorage) per student.
+
+  EVERYTHING A STUDENT SEES is behind PRACTICE_MINUTES_CONFIG.uiOn and lives
    in the second half of this file (strip, recap, toast, My progress). The first
    half has no DOM beyond the media listeners.
    ══════════════════════════════════════════════════════════════════════ */
@@ -216,7 +229,8 @@
   function freshState(uid){
     newestGen[uid] = ++stateGen;
     return { uid: uid, gen: stateGen, days: {}, weeks: {}, pend: {}, inflight: null, flushP: null, frac: 0, loaded: false, loading: null, flushing: false,
-             loadRetryAt: 0, toastWeek: '', pendingToast: false, lastRecapAt: 0 };
+             loadRetryAt: 0, toastWeek: '', pendingToast: false, lastRecapAt: 0,
+             boardSent: -1, boardAt: 0, boardRetryAt: 0, boardTimer: 0, board: null, boardLoading: null };
   }
   function ls(k, v){
     try {
@@ -575,6 +589,7 @@
       cacheServer();
       trimToCap();
       st.loading = null;
+      publishBoard(st);
       if(!noFlush) flush();
       uiNow();
     }).catch(function(err){
@@ -666,7 +681,7 @@
       st.flushing = false; st.inflight = null;
       if(S !== st) settleAfterSwitch(st, snap, true);
       if(S === st){
-        applyConfirmed(ops); persist(); cacheServer(); uiNow(); refreshToken();
+        applyConfirmed(ops); persist(); cacheServer(); uiNow(); refreshToken(); publishBoard(st);
         // Seconds counted while this commit was in flight (a stalled connection) go out now, not at the next Play. Not while still counting: that keeps the 60 s rhythm.
         if(!session && takePending()) setTimeout(function(){ if(S === st) flush(); }, 0);
       }
@@ -725,6 +740,66 @@
       if(JSON.stringify(st.pend) === before){ deniedUntil = Date.now() + DENIED_BACKOFF_MS; return false; }
       return flush();      // the queue was trimmed: one more try (a second refusal lands here again with nothing left to trim, and backs off)
     });
+  }
+
+  /* ── CLASS RANK (see the header): publish my number, read everyone's ── */
+  var BOARD_MS = 120000, BOARD_KEEP_MS = 1200000;
+  /* All-time seconds the SERVER has confirmed: the sum of the weeks docs (queued seconds are not in it). */
+  function confirmedSeconds(st){
+    var t = 0;
+    Object.keys(st.weeks).forEach(function(w){ t += st.weeks[w].seconds || 0; });
+    return t;
+  }
+  /* One small write, only when the number changed, at most once per BOARD_MS. A refusal (the
+     rules not published yet) backs off like the minutes writes do; nothing else is affected. */
+  function publishBoard(st){
+    if(!st || S !== st || !st.loaded) return;
+    var n = confirmedSeconds(st);
+    if(n === st.boardSent || Date.now() < st.boardRetryAt) return;
+    var wait = BOARD_MS - (Date.now() - st.boardAt);
+    if(wait > 0){
+      /* Too soon after the last write: try once more when the wait is over, so the end of a session is not left unpublished.
+         One timer at most; it fires once and is dropped with the state (S !== st). */
+      if(!st.boardTimer && typeof setTimeout !== 'undefined') st.boardTimer = setTimeout(function(){ st.boardTimer = 0; publishBoard(st); }, wait + 50);
+      return;
+    }
+    st.boardAt = Date.now();
+    dbP().then(function(db){ return db.collection('minutesBoard').doc(st.uid).set({ seconds: n }); }).then(function(){
+      st.boardSent = n;
+    }, function(err){
+      st.boardRetryAt = Date.now() + (err && err.code === 'permission-denied' ? DENIED_BACKOFF_MS : LOAD_RETRY_MS);
+    });
+  }
+  /* Everyone else's seconds (my own doc is left out: my live total is used instead). Kept in
+     memory for BOARD_KEEP_MS and in localStorage under this student's id, so reopening My
+     progress does not read the whole class again. Resolves to the cache, or null if unreadable. */
+  function loadBoard(){
+    var st = S;
+    if(!st) return Promise.resolve(null);
+    if(!st.board){
+      var c = lsJson('pm:b:' + st.uid);
+      if(c && c.others && typeof c.at === 'number' && Math.abs(Date.now() - c.at) < BOARD_KEEP_MS) st.board = c;
+    }
+    if(st.board && Math.abs(Date.now() - st.board.at) < BOARD_KEEP_MS) return Promise.resolve(st.board);
+    if(st.boardLoading) return st.boardLoading;
+    st.boardLoading = dbP().then(function(db){ return db.collection('minutesBoard').get(); }).then(function(snap){
+      var others = [];
+      snap.forEach(function(doc){ if(doc.id !== st.uid) others.push(Math.max(0, +(doc.data() || {}).seconds || 0)); });
+      st.board = { at: Date.now(), others: others };
+      ls('pm:b:' + st.uid, JSON.stringify(st.board));
+      return st.board;
+    }).catch(function(){ return null; }).then(function(b){ st.boardLoading = null; return b; });
+    return st.boardLoading;
+  }
+  /* N/total for the student on screen, or null while the board is not known. total counts me.
+     Ties share a rank (1 + the number who have MORE). Under a minute of practice there is no
+     rank yet: n is null, and the tile says so instead of "1/140" for every student on day one. */
+  function rankInfo(){
+    var b = S && S.loaded && S.board;
+    if(!b) return null;
+    var mine = allTimeSeconds(), higher = 0;
+    b.others.forEach(function(s){ if(s > mine) higher++; });
+    return { n: mine < 60 ? null : higher + 1, total: b.others.length + 1 };
   }
 
   /* An ID token kept fresh for the unload write (getIdToken is async, and
@@ -979,8 +1054,20 @@
     if(!host_el) return;
     if(!uiOn()){ host_el.hidden = true; host_el.innerHTML = ''; return; }
     host_el.hidden = false;
-    if(!S.loaded && !S.loading) load().then(function(){ if(!host_el.hidden && host_el.isConnected) host_el.innerHTML = progressHtml(); });
+    var again = function(){ if(!host_el.hidden && host_el.isConnected) host_el.innerHTML = progressHtml(); };
+    if(!S.loaded && !S.loading) load().then(again);
+    /* The rank tile needs the board AND the student's own numbers; draw again when the board arrives. */
+    var st0 = S;
+    loadBoard().then(function(b){ if(b && S === st0) again(); });
     host_el.innerHTML = progressHtml();
+  }
+  /* "N/total" by all-time minutes; nothing at all until the board has been read (or when it cannot be). */
+  function rankTile(){
+    var r = rankInfo();
+    if(!r || r.total < 2) return '';
+    return '<div class="pm-tile"><div class="pm-tile-h">' + esc(tr('pm.tileRank')) + '</div>'
+      + '<div class="pm-tile-row"><b class="pm-today pm-rank">' + esc(tr('pm.tileRankVal', { n: r.n === null ? '–' : r.n, total: r.total })) + '</b></div>'
+      + '<div class="pm-tile-sub">' + esc(tr(r.n === null ? 'pm.tileRankNone' : 'pm.tileRankSub')) + '</div></div>';
   }
   function progressHtml(){
     var c = cfg(), st = status(), w = st.week, d = today();
@@ -998,6 +1085,7 @@
       + '<div class="pm-tile"><div class="pm-tile-h">' + esc(tr('pm.tileToday')) + '</div>'
       +   '<div class="pm-tile-row"><b class="pm-today">' + mins(dayTotal(d)) + '</b><span class="pm-today-u">' + esc(tr('pm.min')) + '</span></div>'
       +   '<div class="pm-tile-sub">' + esc(tr('pm.tileAll', { n: mins(allTimeSeconds()) })) + '</div></div>'
+      + rankTile()
       + '</div>';
     /* This week by day: Monday to Sunday for every student. A day with no practice is an
        empty bar, never a miss marker (the goal is for the whole week). */
@@ -1045,6 +1133,7 @@
     flush: flush, load: function(){ return sync() ? load() : Promise.resolve(); },
     status: function(){ return sync() ? status() : null; },
     _session: function(){ return session; }, _play: function(){ return play; },
+    _rank: function(){ return sync() ? rankInfo() : null; }, _loadBoard: function(){ return sync() ? loadBoard() : Promise.resolve(null); },
     _state: function(){ return S; }, _session: function(){ return session; }, _tick: tick, _media: media, _end: endSession, _buildOps: buildOps
   };
 })();

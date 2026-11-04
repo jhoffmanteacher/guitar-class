@@ -100,14 +100,15 @@ await ev(`(async () => { for (const r of await navigator.serviceWorker.getRegist
 /* An in-page student and Firestore. The engine's host is replaced; everything
    else (the wrapped play(), the tick, the strip, the pills, the page) is real. */
 await ev(`(() => {
-  window.__fs = { days: {}, weeks: {}, commits: [], hb: [] };
+  window.__fs = { days: {}, weeks: {}, commits: [], hb: [], board: {}, boardDenied: false };
   const inc = (n) => ({ __inc: n });
   const col = (kind) => ({
     get: () => Promise.resolve({ forEach: (fn) => Object.keys(window.__fs[kind]).forEach((k) => fn({ id: k, data: () => window.__fs[kind][k] })) }),
     where: () => ({ get: () => Promise.resolve({ forEach: (fn) => Object.keys(window.__fs.days).forEach((k) => fn({ id: k, data: () => window.__fs.days[k] })) }) }),
     doc: (id) => ({ path: kind + '/' + id, set: () => Promise.resolve() }),
   });
-  const db = { collection: (c) => ({ doc: (uid) => ({ collection: (k) => { const o = col(k); const d = o.doc; o.doc = (i) => ({ path: k + '/' + i }); return o; } }), doc: (i) => ({ set: (d) => { window.__fs.hb.push({ id: i, d }); return Promise.resolve(); } }) }),
+  const board = { get: () => window.__fs.boardDenied ? Promise.reject(Object.assign(new Error('denied'), { code: 'permission-denied' })) : Promise.resolve({ forEach: (fn) => Object.keys(window.__fs.board).forEach((k) => fn({ id: k, data: () => window.__fs.board[k] })) }), doc: (i) => ({ set: (d) => { window.__fs.board[i] = d; return Promise.resolve(); } }) };
+  const db = { collection: (c) => c === 'minutesBoard' ? board : ({ doc: (uid) => ({ collection: (k) => { const o = col(k); const d = o.doc; o.doc = (i) => ({ path: k + '/' + i }); return o; } }), doc: (i) => ({ set: (d) => { window.__fs.hb.push({ id: i, d }); return Promise.resolve(); } }) }) ,
     batch: () => { const ops = []; return { set: (r, d) => ops.push([r.path, d]), commit: () => { ops.forEach(([p, d]) => { const [k, i] = p.split('/'); const cur = window.__fs[k][i] || {}; window.__fs[k][i] = Object.assign({}, cur, d, { seconds: (cur.seconds || 0) + d.seconds.__inc }); }); window.__fs.commits.push(ops.length); return Promise.resolve(); } }; } };
   window.__who = 'e2e-student';   // the signed-in student's uid; null = nobody (the tests below sign out and switch students)
   const fb = window.firebase || {};
@@ -291,6 +292,43 @@ await ev(`renderMyProgress(); document.getElementById('pm-progress').scrollIntoV
 const mpEs = await ev(`(() => { const p = document.getElementById('pm-progress'); return { tiles: [...p.querySelectorAll('.pm-tile')].map(t => t.innerText.replace(/\\s+/g, ' ').trim()), bars: [...p.querySelectorAll('.pm-bar')].map(b => b.getAttribute('aria-label')), cap: p.querySelector('.pm-cap').innerText, title: p.querySelector('.pm-panel-h').innerText, overflow: document.documentElement.scrollWidth > document.documentElement.clientWidth }; })()`);
 check('Spanish My progress: tiles, weekdays and caption are Spanish, no overflow', /^Esta semana .*53 de 60 min Con 7 más mantienes tu racha$/.test(mpEs.tiles[0]) && /^Racha Racha de 5 semanas La más larga: 5 semanas$/.test(mpEs.tiles[1]) && new RegExp(`^Hoy ${expDays[dowNow]} min En total: \\d+ min$`).test(mpEs.tiles[2]) && mpEs.bars.length === 7 && mpEs.bars.every((b, i) => b.startsWith(['Lun', 'Mar', 'Mié', 'Jue', 'Vie', 'Sáb', 'Dom'][i] + ':')) && mpEs.cap === 'Llama = lograste la meta de la semana. Los descansos no cuentan.' && !mpEs.overflow, mpEs);
 await shot('6-my-progress-es');
+
+/* ── Class rank (2026-11-04): a 4th tile, "N/total" by all-time minutes ──
+   The board is seeded RELATIVE to the student's own seconds so the answer is known without the engine:
+   10 students with more, 5 with exactly the same (ties do not push me down), 20 with less, and a stale doc of my own
+   that must be ignored. So: 11th of 36. */
+console.log('class rank');
+await ev(`setLang('en')`); await sleep(500);
+await ev(`(() => { const s = PM._state(); let mine = 0; Object.values(s.weeks).forEach(w => mine += w.seconds || 0); Object.values(s.pend).forEach(n => mine += n);
+  const b = {}; for (let i = 0; i < 10; i++) b['more' + i] = { seconds: mine + 60 * (i + 1) }; for (let i = 0; i < 5; i++) b['same' + i] = { seconds: mine };
+  for (let i = 0; i < 20; i++) b['less' + i] = { seconds: Math.max(0, mine - 60 * (i + 1)) }; b['e2e-student'] = { seconds: 999999 };
+  window.__fs.board = b; window.__mine = mine; s.board = null; s.boardLoading = null; try { localStorage.removeItem('pm:b:e2e-student'); } catch (e) {} renderMyProgress(); return mine; })()`);
+await sleep(700);
+await ev(`document.getElementById('pm-progress').scrollIntoView({block:'start'})`); await sleep(300);
+const rk = await ev(`(() => { const p = document.getElementById('pm-progress'), t = [...p.querySelectorAll('.pm-tile')]; const last = t[t.length - 1]; const r = last ? last.getBoundingClientRect() : null;
+  return { n: t.length, text: last ? last.innerText.replace(/\\s+/g, ' ').trim() : '', tops: t.map(x => Math.round(x.getBoundingClientRect().top)), right: r ? Math.round(r.right) : 0, panelRight: Math.round(p.getBoundingClientRect().right),
+    val: last ? { sw: last.querySelector('.pm-rank').scrollWidth, cw: last.clientWidth } : null, overflow: document.documentElement.scrollWidth > document.documentElement.clientWidth }; })()`);
+console.log('    ', JSON.stringify(rk));
+check('Class rank: a 4th tile reading "Class rank 11/36 By all-time minutes" (10 above me, 5 tied, 20 below, my stale doc ignored)', rk.n === 4 && rk.text === 'Class rank 11/36 By all-time minutes', rk);
+check('…all four tiles sit on ONE row at 1366×657, the number fits its tile, nothing scrolls sideways', rk.tops.every((x) => x === rk.tops[0]) && rk.val.sw <= rk.val.cw && !rk.overflow && rk.right <= rk.panelRight, rk);
+await shot('7-my-progress-rank-en');
+await ev(`setLang('es')`); await sleep(700);
+await ev(`renderMyProgress(); document.getElementById('pm-progress').scrollIntoView({block:'start'})`); await sleep(500);
+const rkEs = await ev(`(() => { const t = [...document.querySelectorAll('#pm-progress .pm-tile')]; const tops = t.map(x => Math.round(x.getBoundingClientRect().top)); return { n: t.length, text: t[t.length - 1].innerText.replace(/\\s+/g, ' ').trim(), oneRow: tops.every((x) => x === tops[0]), overflow: document.documentElement.scrollWidth > document.documentElement.clientWidth }; })()`);
+check('Spanish: "Lugar en la clase 11/36 Por minutos en total", one row, no sideways scroll', rkEs.n === 4 && rkEs.text === 'Lugar en la clase 11/36 Por minutos en total' && rkEs.oneRow && !rkEs.overflow, rkEs);
+await shot('8-my-progress-rank-es');
+await ev(`setLang('en')`); await sleep(400);
+/* 142 students and first place: the widest value the tile must hold. */
+await ev(`(() => { const s = PM._state(), b = {}; for (let i = 0; i < 141; i++) b['x' + i] = { seconds: 0 }; window.__fs.board = b; s.board = null; s.boardLoading = null; try { localStorage.removeItem('pm:b:e2e-student'); } catch (e) {} renderMyProgress(); return true; })()`);
+await sleep(700);
+const wide = await ev(`(() => { const t = [...document.querySelectorAll('#pm-progress .pm-tile')], last = t[t.length - 1], tops = t.map(x => Math.round(x.getBoundingClientRect().top)); return { text: last.innerText.replace(/\\s+/g, ' ').trim(), oneRow: tops.every((x) => x === tops[0]), fits: last.querySelector('.pm-rank').scrollWidth <= last.clientWidth }; })()`);
+check('1/142 (the widest the tile holds) reads "1/142", fits its tile and stays on the row', /^Class rank 1\/142 /.test(wide.text) && wide.oneRow && wide.fits, wide);
+/* Rules not published: the read is refused, the tile just is not there, the panel still draws. */
+await ev(`(() => { const s = PM._state(); window.__fs.boardDenied = true; s.board = null; s.boardLoading = null; try { localStorage.removeItem('pm:b:e2e-student'); } catch (e) {} renderMyProgress(); return true; })()`);
+await sleep(700);
+const denied = await ev(`[...document.querySelectorAll('#pm-progress .pm-tile')].length`);
+check('board unreadable (rules not published): back to the 3 tiles, no error on the page', denied === 3, denied);
+await ev(`window.__fs.boardDenied = false; window.__fs.board = {}; const st = PM._state(); st.board = null; st.boardLoading = null; try { localStorage.removeItem('pm:b:e2e-student'); } catch (e) {} true`);
 
 /* ── An impossible "N more" and "0-week streak" (2026-11-01) ──
    The goal is 60 min (30 until 2026-11-04) and a day counts at most 20. On a Sunday

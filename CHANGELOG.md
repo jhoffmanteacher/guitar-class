@@ -9,6 +9,13 @@ see `WORKFLOW.md` and the git commit log.
 
 - **The Sweet Child Song Journey page now has the whole intro riff in Layer 6.** It is 8 bars, played twice, with eight notes in every bar like the record. Only the first note changes from bar to bar, so it is shown in blue.
 
+## 2026-11-04 — Your class rank is on My progress
+
+- **My progress now shows your rank in the class**, like "4/142". It is your place out of all students, by total practice minutes. 1/142 means the most minutes.
+- **If two students have the same minutes, they share the same place.**
+- **You need 1 minute of practice to get a place.** Until then the card says so.
+- **Your place can be up to 20 minutes behind.** It updates when you open My progress again later.
+
 ## 2026-11-04 — The weekly practice goal is now 60 minutes
 
 - **Your weekly practice goal is now 60 minutes.** It was 30. A day still counts at most 20 minutes, so you need at least 3 days to reach it.

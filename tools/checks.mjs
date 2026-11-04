@@ -11660,7 +11660,7 @@ async function checkPwTakeEvaluator() {
    The browser half (strip, recap, toast, My progress, 1366×657, both languages,
    a real <audio>) is tools/pm-e2e.mjs — it needs Chrome, so it is run by hand.
    ════════════════════════════════════════════════════════════════════ */
-const PM_SIM_PIN = 154;
+const PM_SIM_PIN = 175;
 function checkPracticeMinutes(i18nTable) {
   head('1cg. Practice minutes: the engine is run; the rules cap, no heartbeat, wiring and strings are pinned');
   let bad = 0;
@@ -11735,6 +11735,15 @@ function checkPracticeMinutes(i18nTable) {
       }
       if (!/hasOnly\(\['seconds'\]\)/.test(days) || !/<= dailyCapSeconds\(\)/.test(days)) fail("minutes days rule must be { seconds } only and capped at dailyCapSeconds()");
       if (!/hasOnly\(\['seconds', 'goalSeconds', 'hit'\]\)/.test(weeks) || !/hit is bool/.test(weeks)) fail("minutes weeks rule must be { seconds, goalSeconds, hit } only, hit a bool");
+    }
+    /* The class rank (2026-11-04): ONE number per student, readable by every signed-in student, writable by its owner only. */
+    const board = block('minutesBoard/{userId}');
+    if (!board) fail('firestore.rules: the minutesBoard/{userId} block (the class rank) is missing — practice-minutes.js reads and writes it');
+    else {
+      if (!/allow read:\s*if isSignedIn\(\)/.test(board)) fail('minutesBoard rule: read must be `if isSignedIn()` (every student reads the class to work out a rank)');
+      if (/isTeacher|\bdelete\b|allow\s+write/.test(board)) fail('minutesBoard rule allows the teacher, delete or a blanket write');
+      if (!/allow create, update:\s*if pmOwner\(userId\)/.test(board)) fail('minutesBoard rule: create/update must be owner-only (pmOwner(userId))');
+      if (!/hasOnly\(\['seconds'\]\)/.test(board) || !/seconds is number/.test(board) || !/seconds >= 0/.test(board) || !/seconds <= 400 \* dailyCapSeconds\(\)/.test(board)) fail("minutesBoard rule must be { seconds } only, a number from 0 to 400 * dailyCapSeconds()");
     }
     /* Only for the change that INTRODUCES the blocks: while HEAD's rules do not
        have them yet, everything above them must be byte-for-byte HEAD's (the

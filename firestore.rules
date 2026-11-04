@@ -38,6 +38,7 @@ rules_version = '2';
                       the audio) — student creates their own, teacher
                       reads and deletes
      micTakesMeta/count  the public "how many takes so far" counter
+     minutesBoard/{uid}  one number per student, readable by every signed-in student (class rank)
 
    Anything not matched below is denied by default. Do not add a catch-all.
    ══════════════════════════════════════════════════════════════════════ */
@@ -346,6 +347,28 @@ service cloud.firestore {
             && request.resource.data.goalSeconds >= 0
             && request.resource.data.goalSeconds <= 86400
             && request.resource.data.hit is bool;
+    }
+
+    /* ── CLASS RANK (2026-11-04; practice-minutes.js, "CLASS RANK") ───────
+       minutesBoard/{uid}  { seconds } — the student's all-time practice
+       seconds, so My progress can say "N/total". Every signed-in student
+       reads the whole collection (that is how a rank is worked out); only
+       that uid writes its own doc, with that one field, a number from 0 to
+       400 days of the daily cap. No delete. What it exposes: an opaque uid
+       and a number — no name, no period, and a student cannot read
+       progress/{uid} to turn a uid into a person. The teacher reads it
+       like any signed-in user.
+       HONEST LIMIT: a student at DevTools can write any number up to the
+       cap for themselves and so claim first place; nothing reads this for
+       a grade, and the minutes themselves are bounded by the rules above.
+       ⚠ Must be published BEFORE (or with) the site code that writes it. */
+    match /minutesBoard/{userId} {
+      allow read: if isSignedIn();
+      allow create, update: if pmOwner(userId)
+            && request.resource.data.keys().hasOnly(['seconds'])
+            && request.resource.data.seconds is number
+            && request.resource.data.seconds >= 0
+            && request.resource.data.seconds <= 400 * dailyCapSeconds();
     }
 
     /* heartbeats/{sessionId}  { period, lastSeen } — the "N playing" count.
