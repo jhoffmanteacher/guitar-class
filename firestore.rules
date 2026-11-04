@@ -34,7 +34,7 @@ rules_version = '2';
                       student writes their own row of
      issueReports/*   student-filed problem reports
      micTakes/*       consented mic recordings of one Listening Coach /
-                      Note Runner take (+ a chunks/{i} subcollection of
+                      Note Runner / Power Chord Switch take (+ a chunks/{i} subcollection of
                       the audio) — student creates their own, teacher
                       reads and deletes
      micTakesMeta/count  the public "how many takes so far" counter
@@ -268,14 +268,14 @@ service cloud.firestore {
     }
     match /micTakes/{takeId} {
       allow create, update: if isSignedIn()
-                            && takeId.matches(request.auth.uid + '-(coach|nr)')
+                            && takeId.matches(request.auth.uid + '-(coach|nr|pw)')
                             && request.resource.data.uid == request.auth.uid
                             && micSamplingOn();
       allow read, delete:   if isTeacher();
 
       match /chunks/{chunkId} {
         allow create, update: if isSignedIn()
-                              && takeId.matches(request.auth.uid + '-(coach|nr)')
+                              && takeId.matches(request.auth.uid + '-(coach|nr|pw)')
                               && micSamplingOn()
                               && request.resource.data.keys().hasOnly(['i','pcm'])
                               && request.resource.data.pcm is bytes

@@ -15,6 +15,17 @@ see `WORKFLOW.md` and the git commit log.
 
 - **Step 1 (3 strums) no longer has a "You've got it when" line or the count-out-loud tip.** It says to strum Down, Down-Up on D5, then stop and wait for the next 1.
 
+## 2026-11-03 — Power Chord Switch: the song switches are easier, and there is a BPM button while you play
+
+- **The Songs column now has a button for each song.** Sweet Child O' Mine and "the cure" each open a list of the chord switches in that song: 10 for Sweet Child, 6 for "the cure". The old button that played the whole song in one go is gone. It was too hard.
+- **Each switch is a short practice.** Pick one, for example D5 and C5, and go back and forth 4 times. Then you do it again, faster, and again, faster still: 3 rounds. They start at the tempo you set and each round is 15 BPM faster (60, 75, 90). If you set 115 BPM or more, round 1 starts at 110 so all three rounds can still get faster. You hear 4 count-in clicks before each round.
+- **There are BPM buttons while you play.** Under the beat dots, −5 and +5 change the tempo of the rounds still to come. The round you are playing keeps its speed. In the last round the buttons are off.
+- **The done screen lists each round.** For example "Round 2 · 75 BPM: 6 of 7". "Best today" is the fastest round you got right.
+- **The Songs list has a "Chord pairs" button** to go back to the pairs.
+- **You see each change right away.** After every change a big line under the beat dots says how it went: "✓ C5 — right", "✗ C5 — wrong chord" (on time, but the chord sounded wrong) or "– C5 — no strum heard". Each small box also has the same ✓, ✗ or – sign now, not only a colour.
+- **The done screen counts them.** For example "✓ 18 right · ✗ 2 on time, chord sounded wrong · – 1 no strum heard".
+- **Power Chord Switch can save your take for your teacher,** like the Listening Coach and Note Runner. It asks once, shows a red "Recording this take" label while it records, and only saves a game you play to the end. A recording is at most 30 seconds, so the last part of a long game may not be in it. Say "No thanks" and nothing is saved.
+
 ## 2026-11-03 — Strum patterns drawn with arrows, and the strum in chunks
 
 - **"Strum Pattern — Down, Down-Up, Up-Down-Up" now draws the pattern instead of a tab.** Each bar shows a down or up arrow on each count (1 + 2 + 3 + 4 +), a dot where your hand moves but misses the strings, and the chord name over the bar. Press Play strum to hear it; the arrow being played lights up.
