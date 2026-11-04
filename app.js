@@ -2121,8 +2121,9 @@ function buildTab(spec, opts){
    D5 C5, etc. instead of showing tab"). Each bar is eight slots, one per
    eighth note (1 + 2 + 3 + 4 +): a down arrow, an up arrow, a faint dot
    where the hand keeps moving but misses the strings, or nothing at all for
-   '-', a stop — the hand waits for the next 1 (ca-47, the pattern built up in
-   chunks: Jonathan, 2026-11-03). The chord name sits
+   '-', a stop — the hand waits for the next 1 (built for ca-47 on 2026-11-03;
+   no card uses it since 2026-11-04, when ca-47's chunks went to dots so the
+   hand never stops). The chord name sits
    over the first slot of its bar, the count under every slot.
      strum: { caption, caption_es, pattern: 'D.DU.UDU', bpm?,
               chords: { D5: { frets: [['A',5],['D',7],['G',7]], midi: [50,57,62] } },

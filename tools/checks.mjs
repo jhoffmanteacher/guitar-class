@@ -4224,7 +4224,7 @@ function validateClassActivities() {
           if (s.video.label) reqEs(sWhere, s.video, 'label');
         }
         /* A drawn strum pattern (step.strum, buildStrum in app.js — ca-46,
-           2026-11-03): eight eighth-note slots of D / U / . / - (a stop, ca-47), starting on a
+           2026-11-03): eight eighth-note slots of D / U / . / - (a stop; no card uses it), starting on a
            strum (the first sequence entry plays at once); every bar names a
            chord in `chords`; every chord's midi recomputed from its frets. */
         if (s.strum) {

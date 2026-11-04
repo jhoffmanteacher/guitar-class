@@ -5,6 +5,11 @@ Notable changes to the Guitar Class site. Newest first.
 For the full session-by-session history (and the reasoning behind each change),
 see `WORKFLOW.md` and the git commit log.
 
+## 2026-11-04 — Strum Pattern in Chunks: your hand never stops
+
+- **In "Strum Pattern in Chunks" your hand keeps moving the whole time.** Each step plays a few strums, and for the rest of the bar your hand keeps swinging down and up but misses the strings (the dots). Each step adds one strum until the whole pattern is there.
+- **The last step links back to "Strum Pattern — Down, Down-Up, Up-Down-Up".** Press Got it on its steps 1 and 2, then start step 3.
+
 ## 2026-11-04 — Your minutes are on the Games screen too, and "N playing" is gone
 
 - **The Games screen now shows your practice minutes.** The ring and flame are in its top bar, on the right. Click them to open My progress.
