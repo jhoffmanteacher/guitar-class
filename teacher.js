@@ -4876,29 +4876,50 @@ function micEvalTake(pcm, R, d, deps){
 
 /* A Power Chord Switch take (micTakes/<uid>-pw, coach.js ccRecMeta). It holds
    no pitch readings, so it is measured for what the audio says on its own:
-   was there a strum where each change was due, against the site's verdict.
-   Same row shape as micEvalTake (the console table and eval-takes read both),
-   plus `kind: 'pw'` and `rounds`.
+   was there a strum where the site listened for each change, against the
+   site's verdict. Same row shape as micEvalTake (the console table and
+   eval-takes read both), plus `kind: 'pw'` and `rounds`.
    A song switch is three rounds (`stage` 0..2), each at its own tempo (`bpm`
-   on every change) and each with its own count-in; a pair is one round.
-   Round k's listen start is its first change's due time minus `bpc` beats
-   (coach.js ccBeginStage: change s is due s x bpc beats after it, from s = 1),
-   and its four beeps were scheduled 4..1 beats before that.
+   on every change) and with its own count-in; a pair is one round. Round k's
+   listen start is its first change's due time minus `bpc` beats (coach.js
+   ccBeginStage: change s is due s x bpc beats after it, from s = 1); its four
+   beeps were scheduled 4..1 beats before that.
      - Mic delay: beeps 2-4 of each round, found the way micEvalTake finds them
        (each > CLICK_EACH x its own tone's background, onsets within
        CLICK_JITTER), give where they landed (lag); the site's events against
-       the audio's attacks give the site's clock vs the recording's (map, over
-       the whole take); ideal = lag + map, as in micEvalTake, and skew = ideal -
-       the saved micLatencyMs.
-     - Per change: an attack inside the site's own match window (ccLoop `win`:
-       half a beat, at least 220 ms, at most half the gap between changes)
-       around where an on-the-click strum lands, against the site's verdict:
-         agree            site ok/off, a strum is there
-         detector-missed  site miss, but a strum is there
-         false-hit        site ok/off, no strum there (a chord left ringing, noise)
-         silent-miss      site miss, no strum there (not played)
-     - A change whose window runs past the end of the audio (the 30 s cap, or
-       a Stop) is not judged: `dropped`.
+       the audio's attacks give the site's clock vs the recording's (map, the
+       whole take); ideal = lag + map, as in micEvalTake; skew = ideal - the
+       saved micLatencyMs. Beeps can be missing: speaker muted, headphones, or
+       a student strumming over the count-in.
+     - The site's own window, replayed: ccLoop takes a strum for the first open
+       change with |its beat - rel| <= win (inclusive), rel = played time -
+       listenStart - gridOffset, win = half a beat, at least 220 ms, at most
+       half the gap between changes; gridOffset moves a quarter of the way to
+       each strum's nearest beat (from 0 each round), AFTER rel is taken. Every
+       strum it heard is in `events` (played time), so the match and the
+       gridOffset are run again here, and on the recording the window sits at
+       due + gridOffset + micLatencyMs - map. With no map (fewer than 3 heard
+       strums found in the audio) the window is centred on the beeps' lag, else
+       on the setting: `rounds[].centre` says which ('site' / 'beeps' / 'setting').
+     - Per change, against the site's verdict:
+         agree            site ok/off, a strum in its window
+         false-hit        site ok/off, no strum in it (a chord left ringing, noise)
+         detector-missed  site miss, but a strum in it
+         off-window       site miss, none in it, but a strum (in the audio, or
+                          heard by the site) up to a quarter beat outside it (never
+                          past half the gap between changes), or that near the
+                          beat the student heard (the beeps): played early or
+                          late, or the delay setting put the window off the strum
+         silent-miss      site miss, nothing near (not played, or further off)
+       `replayMismatch` counts changes where the replayed match and the saved
+       verdict disagree (0 unless the site's rule and this copy differ).
+     - A change whose window runs past the end of the audio (the 30 s cap, or a
+       Stop) is not judged: `dropped`.
+     - Every number here was written by the student's browser and is not checked
+       by the rules: a change with an impossible time, round or tempo (outside
+       coach.js CC_BPM_MIN..CC_BPM_MAX, CC_LADDER_ROUNDS, CC_RATES' bpc; checks.mjs
+       1cl pins these copies) is left out and counted in `ignored`, and every loop
+       is bounded by the number of changes, so a crafted take cannot hang the console.
    Whether a strum was the RIGHT chord is not measured here.
    Proved on synthetic takes with known answers: tools/mic-sim/fake-pw-take.mjs,
    checks.mjs 1cl. */
@@ -4911,22 +4932,33 @@ function micEvalTakePw(pcm, R, d, deps){
   const pct = (a, q) => { if (!a.length) return null; const b = Array.from(a).sort((p, q2) => p - q2); return b[Math.min(b.length - 1, Math.floor(q * b.length))]; };
   const med = a => pct(a, 0.5);
   const num = v => typeof v === 'number' && isFinite(v);
-  const lat = Number(d.micLatencyMs) || 0;
-  const bpc = Number(d.bpc) > 0 ? Number(d.bpc) : 1;
-  const stageBpms = Array.isArray(d.stageBpms) ? d.stageBpms : [];
-  const stageOf = o => num(o.stage) && o.stage >= 0 ? Math.floor(o.stage) : 0;
-  const expected = (Array.isArray(d.expected) ? d.expected : []).filter(e => e && typeof e === 'object' && num(e.t));
-  const events = (Array.isArray(d.events) ? d.events : []).filter(ev => ev && typeof ev === 'object' && num(ev.t));
+  const BPM_MIN = 40, BPM_MAX = 140, ROUNDS = 3, BPCS = [1, 2, 4];
   const endMs = s2ms(N);
+  const inSpan = t => num(t) && t >= -60000 && t <= endMs + 60000;
+  const lat = num(d.micLatencyMs) && Math.abs(d.micLatencyMs) <= 5000 ? d.micLatencyMs : 0;
+  const bpc = BPCS.indexOf(d.bpc) >= 0 ? d.bpc : 0;
+  const stageBpms = Array.isArray(d.stageBpms) ? d.stageBpms : [];
+  const stageOf = o => o.stage == null ? 0 : o.stage;
+  let ignored = 0;
+  const expected = [];
+  (Array.isArray(d.expected) ? d.expected : []).forEach((e, k) => {
+    if (!e || typeof e !== 'object') return;
+    const st = stageOf(e);
+    if (!bpc || !inSpan(e.t) || !Number.isInteger(st) || st < 0 || st >= ROUNDS){ ignored++; return; }
+    expected.push({ e, k, stage: st });
+  });
+  const events = (Array.isArray(d.events) ? d.events : []).filter(ev => ev && typeof ev === 'object' && inSpan(ev.t));
 
   /* ── the rounds, from the changes' stages ── */
   const byStage = {};
-  expected.forEach((e, k) => { const s = stageOf(e); (byStage[s] = byStage[s] || []).push({ e, k }); });
-  const rounds = Object.keys(byStage).map(Number).sort((a, b) => a - b).map(stage => {
+  expected.forEach(c => { (byStage[c.stage] = byStage[c.stage] || []).push(c); });
+  const rounds = [];
+  Object.keys(byStage).map(Number).sort((a, b) => a - b).forEach(stage => {
     const list = byStage[stage].sort((a, b) => a.e.t - b.e.t);
     const bpm = Number(list[0].e.bpm) || Number(stageBpms[stage]) || Number(d.bpm) || 0;
-    const beat = bpm > 0 ? 60000 / bpm : 0;
-    return { stage, bpm, beat, list, listen: list[0].e.t - bpc * beat, clicks: { found: false } };
+    if (!(bpm >= BPM_MIN && bpm <= BPM_MAX)){ ignored += list.length; return; }
+    const beat = 60000 / bpm;
+    rounds.push({ stage, bpm, beat, list, listen: list[0].e.t - bpc * beat, win: Math.min(beat * bpc * 0.5, Math.max(220, beat * 0.5)), clicks: { found: false } });
   });
 
   /* ── each round's count-in ── */
@@ -4934,7 +4966,6 @@ function micEvalTakePw(pcm, R, d, deps){
   const halfS = ms2s(20), stepS = ms2s(4);
   const fOf = j => j === 3 ? 990 : 660;
   rounds.forEach(rd => {
-    if (!(rd.beat > 0)) return;
     const B = ms2s(rd.beat), c1 = rd.listen - 4 * rd.beat;
     // each tone's background over this count-in only (the last round's chord may still ring into it)
     const bgA = Math.max(0, ms2s(c1 - 200)), bgB = Math.min(N, ms2s(rd.listen + 200));
@@ -4973,47 +5004,75 @@ function micEvalTakePw(pcm, R, d, deps){
     for (const o of onsets){ const dd = Math.abs(o.ms - ms); if (dd <= win && (!b || dd < Math.abs(b.ms - ms))) b = o; }
     return b;
   };
-  const maps = [], mapsBy = {};
-  events.forEach(ev => {
-    const o = nearOnset(ev.t + lat, 120);
-    if (!o) return;
-    maps.push(ev.t + lat - o.ms);
-    (mapsBy[stageOf(ev)] = mapsBy[stageOf(ev)] || []).push(ev.t + lat - o.ms);
-  });
+  const maps = [];
+  events.forEach(ev => { const o = nearOnset(ev.t + lat, 120); if (o) maps.push(ev.t + lat - o.ms); });
   const mapMs = maps.length >= 3 ? med(maps) : null;
   const lags = rounds.filter(rd => rd.clicks.found).map(rd => rd.clicks.lagMs);
   const takeLag = lags.length ? med(lags) : null;
 
-  /* ── every change: a strum in the recording, against the site's verdict ── */
+  /* ── ccLoop's matching, replayed on the strums it heard ── */
+  rounds.forEach(rd => {
+    const evs = events.filter(ev => stageOf(ev) === rd.stage).sort((a, b) => a.t - b.t);
+    const at = rd.list.map(c => c.e.t - rd.listen);        // each change's c.beat * beatMs
+    rd.match = rd.list.map(() => null);
+    rd.timeline = [];                                       // [played, gridOffset after it]
+    rd.evs = evs;
+    let goff = 0;
+    evs.forEach(ev => {
+      const rel = ev.t - rd.listen - goff;
+      // the first open change within win of rel (the list is in time order; at most a few qualify)
+      let lo = 0, hi = at.length;
+      while (lo < hi){ const m = (lo + hi) >> 1; if (at[m] < rel - rd.win) lo = m + 1; else hi = m; }
+      for (let k = lo, n = 0; k < at.length && at[k] <= rel + rd.win && n < 8; k++, n++){
+        if (!rd.match[k]){ rd.match[k] = { t: ev.t, goff }; break; }
+      }
+      const dev = rel - Math.round(rel / rd.beat) * rd.beat;
+      if (Math.abs(dev) < rd.beat * 0.5) goff += dev * 0.25;
+      rd.timeline.push([ev.t, goff]);
+    });
+  });
+
+  /* ── every change: a strum where the site listened, against its verdict ── */
   const notes = [];
   rounds.forEach(rd => {
-    // where an on-the-click strum lands in the recording: this round's beeps, else the take's, else the setting
+    // the student's grid (the beeps): this round's, else the take's, else the setting less the map
     rd.offs = rd.clicks.found ? rd.clicks.lagMs : takeLag != null ? takeLag : (mapMs != null ? lat - mapMs : lat);
-    const half = rd.beat > 0 ? Math.min(rd.beat * bpc * 0.5, Math.max(220, rd.beat * 0.5)) : 300;
+    rd.centre = mapMs != null ? 'site' : rd.clicks.found || takeLag != null ? 'beeps' : 'setting';
+    const half = rd.win, gap = bpc * rd.beat, reach = Math.min(gap / 2, half + rd.beat / 4);
+    const out = dd => Math.abs(dd) > half && Math.abs(dd) <= reach;
     rd.dropped = 0;
-    rd.list.forEach(({ e, k }) => {
-      const want = e.t + rd.offs;
+    rd.list.forEach(({ e, k }, idx) => {
+      // the gridOffset the site judged this change with: its strum's, else the one after every strum before the window opened
+      let goff = 0;
+      if (rd.match[idx]) goff = rd.match[idx].goff;
+      else for (const p of rd.timeline){ if (p[0] < e.t - half) goff = p[1]; else break; }
+      const siteAt = e.t + goff;                            // the window's centre on the site's "played" clock
+      const want = rd.centre === 'site' ? siteAt + lat - mapMs : e.t + rd.offs;
       if (want + half > endMs){ rd.dropped++; return; }
       let o = null;
-      for (const on of onsets){ const dd = on.ms - want; if (dd >= -half && dd < half && (!o || Math.abs(dd) < Math.abs(o.ms - want))) o = on; }
+      for (const on of onsets){ const dd = on.ms - want; if (Math.abs(dd) <= half && (!o || Math.abs(dd) < Math.abs(o.ms - want))) o = on; }
       const at = o ? o.ms : want;
       let pk = 0; for (let h = Math.floor(at / 5); h < Math.floor((at + 150) / 5) && h < nH; h++) if (h >= 0 && env[h] > pk) pk = env[h];
       const site = e.verdict === 'ok' ? 'right' : e.verdict === 'off' ? 'wrong' : 'miss';
       const heard = site !== 'miss';
-      const cat = o ? (heard ? 'agree' : 'detector-missed') : (heard ? 'false-hit' : 'silent-miss');
+      let cat = o ? (heard ? 'agree' : 'detector-missed') : heard ? 'false-hit' : 'silent-miss';
+      if (cat === 'silent-miss'){
+        const heardBeat = rd.clicks.found || takeLag != null ? e.t + rd.offs : null;
+        if (onsets.some(on => out(on.ms - want) || (heardBeat != null && Math.abs(on.ms - want) > half && Math.abs(on.ms - heardBeat) <= reach)) ||
+            rd.evs.some(ev => out(ev.t - siteAt))) cat = 'off-window';
+      }
       notes.push({ i: num(e.i) ? e.i : k, stage: rd.stage, site, played: !!o, onsetMs: o ? r1(o.ms - want) : null,
-        snrDb: r1(dB(pk) - level.floorDb), replay: o ? 'present' : 'none', why: { cat } });
+        snrDb: r1(dB(pk) - level.floorDb), replay: o ? 'present' : 'none', siteHeard: !!rd.match[idx], why: { cat } });
     });
   });
   const cnt = f => notes.filter(f).length;
   const roundRows = rounds.map(rd => {
     const ns = notes.filter(n => n.stage === rd.stage), c = cat => ns.filter(n => n.why.cat === cat).length;
-    const mk = mapsBy[rd.stage] || [];
-    const out = { stage: rd.stage, bpm: rd.bpm || null, n: ns.length, dropped: rd.dropped,
-      agree: c('agree'), detectorMissed: c('detector-missed'), falseHit: c('false-hit'), silentMiss: c('silent-miss'),
+    const out = { stage: rd.stage, bpm: rd.bpm, n: ns.length, dropped: rd.dropped, centre: rd.centre,
+      agree: c('agree'), detectorMissed: c('detector-missed'), falseHit: c('false-hit'), offWindow: c('off-window'), silentMiss: c('silent-miss'),
       clickFound: rd.clicks.found, clickSnrDb: rd.clicks.snrDb == null ? null : rd.clicks.snrDb,
       clickLagMs: rd.clicks.found ? rd.clicks.lagMs : null, clickDiag: rd.clicks.each ? { each: rd.clicks.each, jitterMs: rd.clicks.jitterMs } : null,
-      mapMs: mk.length >= 3 ? r1(med(mk)) : null, mapN: mk.length, idealMs: null, skewMs: null };
+      idealMs: null, skewMs: null };
     if (out.clickLagMs != null && mapMs != null){ out.idealMs = r1(out.clickLagMs + mapMs); out.skewMs = r1(out.clickLagMs + mapMs - lat); }
     return out;
   });
@@ -5033,13 +5092,17 @@ function micEvalTakePw(pcm, R, d, deps){
     siteRight: cnt(n => n.site === 'right'), siteWrong: cnt(n => n.site === 'wrong'), siteUnclear: 0, siteMiss: cnt(n => n.site === 'miss'),
     replayPresent: cnt(n => n.played),
     agree: cnt(n => n.why.cat === 'agree'),
-    // the site said miss, but there is a strum in the recording
+    // the site said miss, but there is a strum in its window
     detectorMissed: cnt(n => n.why.cat === 'detector-missed'),
-    // the site heard a strum (ok or off), the recording has none
+    // the site heard a strum (ok or off), its window in the recording has none
     falseHit: cnt(n => n.why.cat === 'false-hit'),
-    // the site said miss and there is no strum: not played
+    // the site said miss: the strum was just outside its window (too early or late)
+    offWindow: cnt(n => n.why.cat === 'off-window'),
+    // the site said miss and nothing is near: not played
     silentMiss: cnt(n => n.why.cat === 'silent-miss'),
     dropped: rounds.reduce((a, rd) => a + rd.dropped, 0),
+    ignored,
+    replayMismatch: cnt(n => n.siteHeard !== (n.site !== 'miss')),
     siteRightReplayNot: cnt(n => n.site === 'right' && !n.played),
     offPitch: {}, unclearSiteReadings: null, presentSiteReadings: null, secondLook: 0, lookWould: 0, lookWouldPresent: 0,
     why: notes.reduce((h, n) => { h[n.why.cat] = (h[n.why.cat] || 0) + 1; return h; }, {}),
@@ -5049,19 +5112,18 @@ function micEvalTakePw(pcm, R, d, deps){
     medianAbsOnsetMs: r1(med(notes.filter(n => n.onsetMs != null).map(n => Math.abs(n.onsetMs)))),
     lowH1H2Db: null, lowN: 0
   };
-  // strums and beeps on no beat of any round's grid (other guitars, noise)
+  // strums and beeps on no beat of the student's grid (other guitars, noise); at most every beat of every change
   const grid = [];
   rounds.forEach(rd => {
-    if (!(rd.beat > 0)) return;
-    const last = rd.list[rd.list.length - 1].e.t, tol = Math.max(150, rd.beat * 0.35);
-    for (let m = -4; rd.listen + m * rd.beat <= last + (bpc - 0.5) * rd.beat; m++) grid.push([rd.listen + m * rd.beat + rd.offs, tol]);
+    const last = rd.list[rd.list.length - 1].e.t, tol = Math.max(150, rd.beat * 0.35), maxM = rd.list.length * bpc + 4;
+    for (let m = -4; m <= maxM && rd.listen + m * rd.beat <= last + (bpc - 0.5) * rd.beat; m++) grid.push([rd.listen + m * rd.beat + rd.offs, tol]);
   });
   const extra = onsets.filter(on => !grid.some(g => Math.abs(g[0] - on.ms) < g[1])).length;
-  const startMs = rounds.length && rounds[0].beat > 0 ? rounds[0].listen - 4 * rounds[0].beat + rounds[0].offs : 0;
+  const startMs = rounds.length ? rounds[0].listen - 4 * rounds[0].beat + rounds[0].offs : 0;
   const playMs = Math.max(1, endMs - startMs);
   return {
     kind: 'pw', level, latency, notes: summary, perNote: notes, rounds: roundRows,
-    room: { extraOnsetsPerMin: Math.round(extra / playMs * 60000), onsets: onsets.length }
+    room: { extraOnsetsPerMin: Math.round(extra / playMs * 60000), extra, onsets: onsets.length }
   };
 }
 
@@ -5115,21 +5177,28 @@ function micEvalText(rows){
   ].map((v, k) => pad(v, cols[k][1])).join(' '));
   // Power Chord Switch rows (micEvalTakePw) get a second table, one line per round
   const pw = rows.filter(r => r.kind === 'pw');
-  const pwCols = [['take', 5], ['game', 16], ['round', 5], ['bpm', 4], ['chg', 4], ['agree', 5], ['detMiss', 7], ['false', 5], ['silent', 6], ['drop', 4],
-    ['click', 6], ['lag', 5], ['ideal', 6], ['skew', 5], ['map', 5]];
-  const pwText = !pw.length ? '' : '\n\nPower Chord Switch, one line per round (in the table above, its "notes" are chord changes; inAud = a strum is in the recording):\n' +
+  const pwCols = [['take', 5], ['game', 16], ['round', 5], ['bpm', 4], ['chg', 4], ['agree', 5], ['detMiss', 7], ['false', 5], ['offWin', 6], ['silent', 6], ['drop', 4],
+    ['centre', 7], ['click', 6], ['lag', 5], ['ideal', 6], ['skew', 6], ['map', 5]];
+  const pwOdd = pw.filter(r => r.notes.ignored || r.notes.replayMismatch).map(r => r.take + ': ' +
+    [r.notes.ignored ? r.notes.ignored + ' changes ignored (impossible time, round or tempo in the saved data)' : '',
+      r.notes.replayMismatch ? r.notes.replayMismatch + " changes where the site's rule, run again on its own strums, does not give its saved verdict" : ''].filter(Boolean).join('; '));
+  const pwText = !pw.length ? '' : '\n\nPower Chord Switch, one line per round (in the table above, its "notes" are chord changes; inAud = a strum in the site\'s window):\n' +
     [pwCols.map(c => pad(c[0], c[1])).join(' ')].concat(...pw.map(r => (r.rounds || []).map(g => [
-      r.take, r.game, g.stage + 1, g.bpm, g.n, g.agree, g.detectorMissed, g.falseHit, g.silentMiss, g.dropped,
-      g.clickFound ? g.clickSnrDb : 'none', g.clickLagMs, g.idealMs, g.skewMs, r.latency.mapMs
-    ].map((v, k) => pad(v, pwCols[k][1])).join(' ')))).join('\n') + `
+      r.take, r.game, g.stage + 1, g.bpm, g.n, g.agree, g.detectorMissed, g.falseHit, g.offWindow, g.silentMiss, g.dropped,
+      g.centre, g.clickFound ? g.clickSnrDb : 'none', g.clickLagMs, g.idealMs, g.skewMs, r.latency.mapMs
+    ].map((v, k) => pad(v, pwCols[k][1])).join(' ')))).concat(pwOdd).join('\n') + `
 
 chg         changes judged (the site's verdict against the recording)
-agree       the site heard a strum (right or wrong chord) and there is one in the recording
-detMiss     the site said no strum, but there is one in the recording
-false       the site heard a strum, but the recording has none there (a chord left ringing, noise)
-silent      no strum in the site's verdict or in the recording (not played)
+agree       the site heard a strum (right or wrong chord) and there is one in its window
+detMiss     the site said no strum, but there is one in its window
+false       the site heard a strum, but its window in the recording has none (a chord left ringing, noise)
+offWin      the site said no strum; one is just outside its window, or near the beat the student heard (early, late, or the delay setting is off)
+silent      no strum near the change (not played, or further off)
 drop        changes past the end of the recording (the 30 s cap, or Stop): not judged
-click/lag/ideal/skew  as above, from this round's own count-in; map = the site's clock vs the recording's, whole take`;
+centre      where the site's window was put on the recording: site = its own beat, replayed from the strums it heard
+            (needs 3 strums found in the audio); beeps = the count-in's lag; setting = the delay setting alone
+click/lag/ideal/skew  as above, from this round's own count-in ("none": speaker muted, headphones, or strums over the count-in);
+            map = the site's clock vs the recording's, whole take`;
   return [head].concat(lines).join('\n') + `
 
 floor/loud  raw mic level, dBFS (10th / 99th percentile of 20 ms windows)
@@ -5206,16 +5275,20 @@ function teacherMicEvalHtml(){
     const pw = f => pwRows.reduce((a, r) => a + (f(r) || 0), 0);
     const pn = pw(r => r.notes.n), agree = pw(r => r.notes.agree), pMiss = pw(r => r.notes.detectorMissed);
     const pFalse = pw(r => r.notes.falseHit), pSilent = pw(r => r.notes.silentMiss), pDrop = pw(r => r.notes.dropped);
+    const pOff = pw(r => r.notes.offWindow), pIgn = pw(r => r.notes.ignored), pOdd = pw(r => r.notes.replayMismatch);
     lines.push(`Power Chord Switch: ${pn} chord ${pn === 1 ? 'change' : 'changes'} in ${pwRows.length} ${pwRows.length === 1 ? 'recording' : 'recordings'}` +
       (pDrop ? ` (${pDrop} more came after the recording stopped, at 30 seconds or at Stop, and ${pDrop === 1 ? 'was' : 'were'} not checked)` : '') +
-      `. The site and the recording agree on <b>${agree + pSilent}</b> of ${pn} (${agree} strummed, ${pSilent} not played). ` +
-      `<b>${pMiss}</b> ${pMiss === 1 ? 'strum is' : 'strums are'} in the recording, but the site heard no strum there. ` +
-      `On <b>${pFalse}</b> ${pFalse === 1 ? 'change' : 'changes'} the site heard a strum that is not in the recording (a chord left ringing, or noise).`);
+      (pIgn ? ` (${pIgn} more ${pIgn === 1 ? 'was' : 'were'} left out: the saved time, round or tempo is impossible)` : '') +
+      `. The site and the recording agree on <b>${agree + pSilent}</b> of ${pn} (${agree} strummed where the site listened, ${pSilent} not played). ` +
+      `<b>${pOff}</b> ${pOff === 1 ? 'was' : 'were'} strummed just outside the site's window (early, late, or the delay setting is off), so the site said missed. ` +
+      `<b>${pMiss}</b> ${pMiss === 1 ? 'strum is' : 'strums are'} where the site listened, but the site heard no strum there. ` +
+      `On <b>${pFalse}</b> ${pFalse === 1 ? 'change' : 'changes'} the site heard a strum that is not in the recording (a chord left ringing, or noise).` +
+      (pOdd ? ` On ${pOdd} ${pOdd === 1 ? 'change' : 'changes'} the site's own rule, run again on the strums it heard, does not give the verdict it saved.` : ''));
   }
   lines.push(
     withClicks.length
       ? `Mic delay: the count-in beeps were heard in ${withClicks.length} recordings. The delay setting in use was ${v(med(withClicks.map(r => r.latency.settingMs)))} ms; the recordings say it should be about <b>${v(med(withClicks.map(r => r.latency.idealMs)))} ms</b>.`
-      : 'Mic delay: the count-in beeps were not heard in any recording (speaker muted or headphones), so the delay could not be measured.',
+      : `Mic delay: the count-in beeps were not heard in any recording (speaker muted or headphones${pwRows.length ? ', or in Power Chord Switch strumming over the count-in' : ''}), so the delay could not be measured.`,
     `Loudest notes: ${v(med(rows.map(r => r.level.loudDb)))} dB (0 is the maximum). ${clipped ? `<b>${clipped}</b> recordings were too loud and clipped.` : 'None clipped.'}`
   );
   // micEvalWhy's categories, summed — why the notes the site did not count weren't counted
@@ -5232,14 +5305,19 @@ function teacherMicEvalHtml(){
   if(looked) lines.push(`<b>${looked}</b> ${looked === 1 ? 'note was' : 'notes were'} counted right by the second look (the site listened a little longer to a note it could not read at first).`);
   const tr = rows.map((r, i) => {
     const nb = r.notes, L = r.latency, isPw = r.kind === 'pw';
-    // a Power Chord Switch row: each round's own "should be" on hover, and the strums the site heard that the recording does not have
-    const perRound = isPw ? ` title="${escAttr('Should be, per round: ' + (r.rounds || []).map(g => g.idealMs == null ? '?' : g.idealMs + ' ms').join(' · '))}"` : '';
+    // a Power Chord Switch row: each round's own "should be" and where its windows were put, on hover; the strums the site heard that the
+    // recording does not have; the strums just outside the site's window
+    const placed = { site: "the site's own beat", beeps: 'the beeps', setting: 'the delay setting alone' };
+    const perRound = isPw ? ` title="${escAttr((r.rounds || []).map(g => 'Round ' + (g.stage + 1) + ': ' +
+      (g.idealMs != null ? 'should be ' + g.idealMs + ' ms' : g.clickFound ? 'beeps found, delay not measured' : 'no beeps found (speaker muted, headphones, or strums over the count-in)') +
+      '; windows placed by ' + (placed[g.centre] || '?')).join(' · '))}"` : '';
     const falseHit = isPw && nb.falseHit ? ` · <b>${nb.falseHit}</b> heard, not there` : '';
+    const offWin = isPw && nb.offWindow ? ` · <b>${nb.offWindow}</b> off the beat` : '';
     return `<tr><td class="nc" title="${escAttr(teacherMicEvalNames[i] || '')}">${escHtml(r.take + ' · ' + (teacherMicEvalNames[i] || ''))}</td>`+
       `<td>${escHtml(r.game)}</td><td title="${escAttr(r.device.micLabel)}">${escHtml(r.device.chromebook ? 'Chromebook' : r.device.os)}</td>`+
       `<td>${v(r.level.loudDb)} / ${v(r.level.floorDb)}${r.level.clipPct > 0.01 ? ' <b>clipped</b>' : ''}</td>`+
       `<td${perRound}>${L.clickFound ? v(L.settingMs) + ' → ' + v(L.idealMs) : v(L.settingMs) + ' → ?'}</td>`+
-      `<td>${nb.siteRight} / ${nb.n}</td><td>${nb.replayPresent} / ${nb.n}${falseHit}</td><td>${nb.detectorMissed}</td><td>${nb.silentMiss}</td>`+
+      `<td>${nb.siteRight} / ${nb.n}</td><td>${nb.replayPresent} / ${nb.n}${falseHit}</td><td>${nb.detectorMissed}${offWin}</td><td>${nb.silentMiss}</td>`+
       `<td>${teacherMicOffText(nb.offPitch)}</td><td>${v(nb.lowH1H2Db)}</td></tr>`;
   }).join('');
   return `<div class="tg-note" style="margin-top:8px">${lines.join('<br>')}</div>
@@ -5247,7 +5325,7 @@ function teacherMicEvalHtml(){
     <div class="tg-note"><button class="tp-btn primary" style="flex:none;padding:8px 16px;margin-right:10px" onclick="teacherMicEvalDownload()">Download results</button>
       The file has the measurements only — no audio and no names. <br>
       <i>In the recording</i>: the site's own pitch detection, run again on the saved audio, finds the note clearly. <i>Played, not counted</i>: a loud, clear note the site did not count right. <i>Not played</i>: the site said missed and there is no note there. <i>Heard instead</i>: notes that rang clearly but at a different pitch — "−1 ×6" means six notes came out one semitone low (the same number again and again usually means the guitar is out of tune). <i>Delay</i>: "?" means the count-in beeps were not in the recording (speaker muted or headphones). <i>Low strings</i>: the low note's own pitch against the octave above it — very negative means this mic loses the low end.${pwRows.length ? `<br>
-      <i>Power Chord Switch</i> rows count chord changes, not notes. <i>In the recording</i>: there is a strum within about half a beat of when the change was due (which chord was strummed is not checked); "heard, not there": the site heard a strum the recording does not have. <i>Played, not counted</i>: a strum the site did not hear. <i>Not played</i>: neither the site nor the recording has a strum. Hover the delay to see each round's.` : ''}</div>`;
+      <i>Power Chord Switch</i> rows count chord changes, not notes. <i>In the recording</i>: a strum inside the site's own window for the change (about half a beat around the beat as the site was tracking it; which chord was strummed is not checked); "heard, not there": the site heard a strum its window in the recording does not have. <i>Played, not counted</i>: a strum in the site's window that the site did not hear; "off the beat": a strum just outside the window, or near the beat the student heard, so the site said missed (played early or late, or the delay setting is off). <i>Not played</i>: no strum near the change. <i>Delay</i>: hover it to see each round's, and how its windows were placed; "no beeps found" can also mean the student strummed over the count-in.` : ''}</div>`;
 }
 function teacherMicOffText(h){
   const ks = Object.keys(h || {}).sort((a, b) => h[b] - h[a]);

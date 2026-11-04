@@ -52,9 +52,16 @@ Jonathan, in class or at home:
 
 **Why:** "Evaluate all recordings" (teacher console → Mic recordings) measures Listening
 Coach and Note Runner takes against what the site heard (accuracy, mic delay, levels,
-clicks). It now skips Power Chord Switch takes (`teacherMicEvaluate` filters
-`d.mode !== 'pw'`), so there is no way to tell whether the game's grading matches the
+clicks). It used to skip Power Chord Switch takes (`teacherMicEvaluate` filtered
+`d.mode !== 'pw'`), so there was no way to tell whether the game's grading matches the
 audio. That is what Jonathan wants to improve.
+
+**Status (2026-11-04): built.** Commits "Evaluate Power Chord Switch takes: micEvalTakePw,
+synthetic takes with planted answers, check 1cl" and "Power Chord Switch evaluator: judge
+in the site's own window…". The evaluator judges each change in the site's own window
+(replayed from the strums it logged), not around the beeps; see the comment above
+`micEvalTakePw`. It is proven on synthetic takes only (`tools/mic-sim/fake-pw-take.mjs`,
+check 1cl); a real take from Track A is still needed for "done" below.
 
 **What a saved take holds** (`coach.js` `ccRecMeta`, `micRecSaveNow`): audio (24 kHz mono,
 at most 30 s, starts a little before the first count-in click) and these fields:

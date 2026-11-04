@@ -91,17 +91,23 @@ tuning pass — ideally on the real classroom recordings the teacher console's
   evaluator.
 - Power Chord Switch takes (`mode: 'pw'`, 2026-11-04): `micEvalTakePw` in
   teacher.js. No pitch readings are saved with them, so per change it asks
-  only "is there a strum in the recording where the change was due" against
-  the site's verdict — agree / detector-missed / false-hit / silent-miss —
-  and finds each round's own count-in (up to three rounds, each at its own
-  tempo) for the mic delay. Changes past the end of the audio (the 30 s cap,
-  Stop) are counted as `dropped`, not judged. Which chord was strummed is not
-  checked.
-- `fake-pw-take.mjs <out-folder>` — eight synthetic Power Chord Switch takes
-  with planted answers (loud, quiet, 50 and 250 ms mic delay, cut by the
-  30 s cap, a one-round pair, every 2 beats and Stopped, no beeps) plus
-  `truth.json`. checks.mjs 1cl builds the same takes in memory and pins the
-  evaluator's answers to the planted ones.
+  only "is there a strum in the recording where the SITE listened" — its own
+  window, replayed from the strums it logged (ccLoop's gridOffset and match)
+  — against the site's verdict: agree / detector-missed / false-hit /
+  off-window (just outside the window, or near the beat the student heard) /
+  silent-miss. Each round's own count-in (up to three rounds, each at its
+  own tempo) gives the mic delay. Changes past the end of the audio (the
+  30 s cap, Stop) are counted as `dropped`, not judged; changes with an
+  impossible time, round or tempo as `ignored`. Which chord was strummed is
+  not checked.
+- `fake-pw-take.mjs <out-folder>` — fifteen synthetic Power Chord Switch
+  takes (loud, quiet, 50 and 250 ms mic delay, cut by the 30 s cap, a pair
+  with a neighbour's guitar, every 2 beats and Stopped, no beeps with the
+  setting right and wrong, 140 BPM every beat and every bar with strums at
+  the window's edges, a site that hears nothing, three wrong-setting / late
+  cases) plus `truth.json`. The site's verdicts are not planted: ccLoop's
+  rule is run on the strums the site hears. checks.mjs 1cl builds the same
+  takes in memory and pins the evaluator's answers to the truth.
 - `yin-eq.mjs <old coach.js> <new coach.js>` — proves coachDetectPitch
   output is identical. Old file: `git show dfaeedc:coach.js > /tmp/coach-old.js`.
 - `sim.mjs <old> <new>` — old vs new coachReadFrame at 13–60 fps.

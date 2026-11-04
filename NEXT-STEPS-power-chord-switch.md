@@ -76,7 +76,12 @@ line); `tools/smoke.mjs` walks all 16 switches in a real browser.
    Also open one take's data and check `expected` has 21 entries, each with a
    time, a verdict (`ok` / `off` / `miss`), a round and a BPM, and that
    `complete` is `true` or `false`.
-2. **Build the teacher-console evaluator for Power Chord Switch takes.** "Evaluate all recordings" skips these takes today. Goal: for
+2. **Build the teacher-console evaluator for Power Chord Switch takes.** Built 2026-11-04
+   (commits "Evaluate Power Chord Switch takes: micEvalTakePw, synthetic takes with planted
+   answers, check 1cl" and "Power Chord Switch evaluator: judge in the site's own window…"):
+   "Evaluate all recordings" now measures these takes (teacher.js `micEvalTakePw`, check
+   1cl). It is proven on synthetic takes only (`tools/mic-sim/fake-pw-take.mjs`); a real
+   take from item 1 (Track A) is still needed before trusting its numbers. Original goal: for
    each saved take, compare what the site graded (`expected`, `events`) with what is
    really in the audio, per round: strums the game missed, "right" changes with no
    strum, and the mic delay from the three count-ins. Design, sub-steps and checks
@@ -157,7 +162,7 @@ what was done in the same push:
   + 2) now turn it red.
 - Ladder from a base of 115 BPM or more was not "each round faster". **Fixed:**
   round 1 starts at most at 110 (110 / 125 / 140).
-- `tools/mic-sim/eval-takes.mjs` now skips Power Chord Switch takes; comments
+- `tools/mic-sim/eval-takes.mjs` then skipped Power Chord Switch takes (it measures them since 2026-11-04, item 2); comments
   and the changelog that over-claimed were corrected; asking for consent from
   the done screen no longer forgets a replay.
 - Left as is: the three wordings for "on time but the chord sounded wrong"

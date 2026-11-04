@@ -11393,32 +11393,51 @@ function checkCoachVerdicts() {
    1cl. POWER CHORD SWITCH TAKES ARE MEASURED (2026-11-04) — teacher.js
    micEvalTakePw, what the console's "Evaluate all recordings" does with a
    saved Power Chord Switch take (coach.js ccRecMeta): per change, is there a
-   strum in the recording where the change was due, against the site's
-   verdict; per round, its own count-in for the mic delay.
-   RUN, not read. tools/mic-sim/fake-pw-take.mjs builds eight takes with
-   PLANTED answers (loud and clipping; quiet; 50 and 250 ms mic delay, the
-   second with overtones on the beep pitch; cut by the 30 s cap; a one-round
-   pair; every 2 beats and Stopped; no beeps). Each goes through micEvalRow,
-   lifted out of teacher.js with what it calls, and:
+   strum where the SITE listened (its own window, replayed from the strums it
+   logged: ccLoop's gridOffset and match), against its verdict; per round,
+   its own count-in for the mic delay.
+   RUN, not read. tools/mic-sim/fake-pw-take.mjs builds 15 takes whose site
+   verdicts come from ccLoop's rule run on the strums the site hears (not
+   planted): loud and clipping; quiet; 50 and 250 ms mic delay (overtones on
+   the beep pitch); cut by the 30 s cap with one window ending 100 ms past the
+   end and a different lag each round; a one-round pair with a neighbour's
+   guitar; every 2 beats and Stopped; no beeps (setting right, and setting
+   wrong); 110-140 BPM every beat (the bpc cap binds) and 140 BPM every bar
+   (the 220 ms floor binds), with strums 25 ms inside and outside the window's
+   edges and one 3 ms from it; a site that hears nothing (judged on the
+   beeps); and the review's three cases (wrong setting both ways, late strums
+   only on the changes). Each goes through micEvalRow, lifted out of teacher.js
+   with what it calls, and:
      · every change's category (agree / detector-missed / false-hit /
-       silent-miss, or dropped past the audio's end) must be the planted one,
-       and the row's counts must be the per-change ones;
-     · every round with beeps finds them at the planted lag ± 10 ms, with the
-       ideal delay (lag + map) ± 10 ms; a round with none says none;
-     · the totals are pinned (PW_EVAL_PIN): a fixture or a category that goes
-       missing fails here.
-   Then the console summary (teacherMicEvalHtml) is rendered on all eight, on
-   one alone (1 vs many wording) and mixed with a Coach row whose note counts
-   must not take in the changes; the terminal table (micEvalText) must list
-   every round; teacherMicEvaluate itself is RUN on two takes with a stubbed
-   page and must measure both (no Power Chord Switch filter); and
-   tools/mic-sim/eval-takes.mjs is run on one take written to a temp folder.
+       off-window / silent-miss, or dropped past the audio's end) and every
+       site verdict count must be the truth's; the row's counts must be the
+       per-change ones; replaying the site's rule gives its saved verdicts;
+     · every round: tempo, changes judged and dropped, where its windows were
+       put (site / beeps / setting); beeps found at the planted lag ± 10 ms,
+       ideal and skew ± 10 ms (none, and no skew, where they cannot be
+       measured); the take's ideal and skew the same way; onsets off the
+       student's grid counted exactly;
+     · totals pinned (PW_EVAL_PIN): a fixture or a category that goes missing
+       fails here.
+   Then the console summary (teacherMicEvalHtml) is rendered on all of them,
+   on three alone (1-vs-many wording: was/were, strum is/strums are) and next
+   to a Coach row whose note counts must not take in the changes, and every
+   round's hover (its "should be" and how its windows were placed) is read;
+   micEvalText's per-round table is parsed column by column and its legend
+   read; teacherMicEvaluate itself is RUN on two takes with a stubbed page;
+   tools/mic-sim/eval-takes.mjs is run on one take written to a temp folder
+   and must list exactly its changes that do not agree; two crafted takes (a
+   change at t = 1e300, a round at 1e9 BPM — student-written, the rules do
+   not check them) run in a child process with 128 MB and must finish fast and
+   say what was left out; and the limits micEvalTakePw keeps (tempo, rounds,
+   beats per chord) must equal coach.js's.
    micEvalTake (Coach / Note Runner) is not run here: its rows were proved
    byte-identical by a differential when micEvalSignal was split out of it.
    ════════════════════════════════════════════════════════════════════ */
-const PW_EVAL_PIN = { takes: 8, rounds: 21, changes: 155, judged: 148, dropped: 7, agree: 121, 'detector-missed': 9, 'false-hit': 9, 'silent-miss': 9, clickRounds: 18, noClickRounds: 3, htmlChecks: 3, evaluateRun: 2, evalTakesRun: 1 };
+const PW_EVAL_PIN = { takes: 15, rounds: 34, changes: 240, judged: 231, dropped: 9, agree: 162, 'detector-missed': 30, 'false-hit': 11, 'off-window': 14, 'silent-miss': 14,
+  clickRounds: 28, noClickRounds: 6, siteCentred: 31, beepCentred: 3, extra: 30, htmlChecks: 5, hovers: 34, textRounds: 34, evaluateRun: 2, evalTakesLines: 3, crafted: 2 };
 async function checkPwTakeEvaluator() {
-  head('1cl. Power Chord Switch takes: the evaluator is run on takes with planted answers');
+  head('1cl. Power Chord Switch takes: the evaluator is run on takes whose site verdicts come from ccLoop\'s own rule');
   let bad = 0;
   const fail = m => { err('1cl: ' + m); problems++; bad++; };
   let fx, extract;
@@ -11428,13 +11447,14 @@ async function checkPwTakeEvaluator() {
   } catch (e) { fail(`could not load tools/mic-sim/fake-pw-take.mjs or extract.mjs (${e.message})`); return; }
   const tSrc = readFileSync(join(ROOT, 'teacher.js'), 'utf8'), aSrc = readFileSync(join(ROOT, 'app.js'), 'utf8'), cSrc = readFileSync(join(ROOT, 'coach.js'), 'utf8');
   const constOf = n => { const m = cSrc.match(new RegExp('^const ' + n + '\\s*=\\s*([^;]+);', 'm')); if (!m) throw new Error('no ' + n + ' in coach.js'); return `const ${n} = ${m[1].trim()};`; };
+  const lift = names => names.map(n => (tSrc.includes('async function ' + n + '(') ? 'async ' : '') + extract(tSrc, n)).join('\n');
+  const EVAL_FNS = ['micEvalSignal', 'micEvalTake', 'micEvalTakePw', 'micEvalMicName', 'micEvalDevice', 'micEvalRow'];
   let core;
   try {
     const esc = ['escAttr', 'escHtml'].map(n => { const m = aSrc.match(new RegExp('^const ' + n + ' = .*;$', 'm')); if (!m) throw new Error('no ' + n + ' in app.js'); return m[0]; }).join('\n');
     const consts = ['COACH_PITCH_GATE', 'COACH_MIC_GAIN', 'COACH_ATTACK_SKIP', 'COACH_EVENT_TAIL', 'COACH_ONSET_REFRACT', 'COACH_MATCH_FRAC', 'COACH_MATCH_MIN_MS', 'COACH_VOTE_TOL'].map(constOf).join('\n');
-    const fns = ['micEvalSignal', 'micEvalTake', 'micEvalTakePw', 'micEvalMicName', 'micEvalDevice', 'micEvalRow', 'micEvalText', 'teacherMicEvalHtml', 'teacherMicOffText', 'teacherMicEvaluate']
-      .map(n => (tSrc.includes('async function ' + n + '(') ? 'async ' : '') + extract(tSrc, n)).join('\n');
-    /* teacherMicEvaluate's page: ctx gives the takes, their audio, the result box and the clock. */
+    const fns = lift(EVAL_FNS.concat(['micEvalText', 'teacherMicEvalHtml', 'teacherMicOffText', 'teacherMicEvaluate']));
+    /* teacherMicEvaluate's page: ctx gives the takes, their audio and the result box. */
     core = new Function('ctx', `${esc}\n${consts}\nconst coachDetectPitch = () => -1;\n` +
       'let teacherMicEvalRows = [], teacherMicEvalNames = [], teacherView = "mic", teacherMicTakes = ctx.takes || [];\n' +
       'const document = ctx.document, ensureCoachJs = async () => {}, teacherMicChunks = ctx.chunks, micTakeDate = () => null, setTimeout = f => f();\n' +
@@ -11443,11 +11463,14 @@ async function checkPwTakeEvaluator() {
   } catch (e) { fail(`could not lift the evaluator out of teacher.js (${e.message})`); return; }
   const ev = core({});
   const deps = new Function(constOf('COACH_PITCH_GATE') + constOf('COACH_MIC_GAIN') + 'return { GATE: COACH_PITCH_GATE, GAIN: COACH_MIC_GAIN, detectPitch: () => -1 };')();
-  const CATS = ['agree', 'detector-missed', 'false-hit', 'silent-miss'], KEY = { agree: 'agree', 'detector-missed': 'detectorMissed', 'false-hit': 'falseHit', 'silent-miss': 'silentMiss' };
-  const tot = { takes: 0, rounds: 0, changes: 0, judged: 0, dropped: 0, agree: 0, 'detector-missed': 0, 'false-hit': 0, 'silent-miss': 0, clickRounds: 0, noClickRounds: 0, htmlChecks: 0, evaluateRun: 0, evalTakesRun: 0 };
+  const CATS = ['agree', 'detector-missed', 'false-hit', 'off-window', 'silent-miss'];
+  const KEY = { agree: 'agree', 'detector-missed': 'detectorMissed', 'false-hit': 'falseHit', 'off-window': 'offWindow', 'silent-miss': 'silentMiss' };
+  const tot = Object.fromEntries(Object.keys(PW_EVAL_PIN).map(k => [k, 0]));
   const rows = [], names = [], takes = [];
+  const near = (a, b) => a != null && b != null && Math.abs(a - b) <= 10;
+  const medHi = a => { const b = a.slice().sort((p, q) => p - q); return b[Math.floor(b.length / 2)]; };
 
-  // 1. every planted answer
+  // 1. every take against its truth
   for (const f of fx.PW_FIXTURES) {
     let take, row;
     try { take = fx.makePwTake(f); row = ev.micEvalRow('T' + String(rows.length + 1).padStart(2, '0'), take.meta, take.pcm, deps); }
@@ -11459,59 +11482,97 @@ async function checkPwTakeEvaluator() {
       tot.changes++;
       const g = got.has(c.i) ? got.get(c.i) : 'dropped';
       if (g === 'dropped') tot.dropped++; else if (CATS.includes(g)) tot[g]++;
-      if (g !== c.cat) fail(`${f.name}: change ${c.i} (round ${c.stage + 1}${c.kind ? ', ' + c.kind : ''}) came out "${g}", planted "${c.cat}"`);
+      if (g !== c.cat) fail(`${f.name}: change ${c.i} (round ${c.stage + 1}${c.kind ? ', ' + c.kind + ', site ' + c.verdict : ''}) came out "${g}", truth "${c.cat}"`);
     }
     tot.judged += row.notes.n;
-    const judged = take.truth.changes.filter(c => c.cat !== 'dropped').length;
-    if (row.notes.n !== judged || row.perNote.length !== judged || row.notes.dropped !== take.truth.changes.length - judged) fail(`${f.name}: ${row.notes.n} changes judged and ${row.notes.dropped} dropped, planted ${judged} and ${take.truth.changes.length - judged}`);
+    const judged = take.truth.changes.filter(c => c.cat !== 'dropped');
+    if (row.notes.n !== judged.length || row.perNote.length !== judged.length || row.notes.dropped !== take.truth.changes.length - judged.length) fail(`${f.name}: ${row.notes.n} changes judged and ${row.notes.dropped} dropped, truth ${judged.length} and ${take.truth.changes.length - judged.length}`);
     for (const cat of CATS) if (row.notes[KEY[cat]] !== row.perNote.filter(n => n.why.cat === cat).length || (row.notes.why[cat] || 0) !== row.notes[KEY[cat]]) fail(`${f.name}: the row's ${KEY[cat]} (${row.notes[KEY[cat]]}) is not its per-change count`);
-    if (row.rounds.length !== take.truth.rounds.length) { fail(`${f.name}: ${row.rounds.length} rounds, planted ${take.truth.rounds.length}`); continue; }
+    const vs = { siteRight: 'ok', siteWrong: 'off', siteMiss: 'miss' };
+    for (const [k, v] of Object.entries(vs)) { const want = judged.filter(c => c.verdict === v).length; if (row.notes[k] !== want) fail(`${f.name}: ${k} ${row.notes[k]}, the site's verdicts give ${want}`); }
+    if (row.notes.replayMismatch !== 0 || row.notes.ignored !== 0) fail(`${f.name}: replaying ccLoop's rule disagrees with ${row.notes.replayMismatch} saved verdicts, ${row.notes.ignored} changes ignored`);
+    if (row.room.extra !== take.truth.extra) { fail(`${f.name}: ${row.room.extra} onsets off the student's grid, truth ${take.truth.extra}`); } else tot.extra += row.room.extra;
+    if (row.rounds.length !== take.truth.rounds.length) { fail(`${f.name}: ${row.rounds.length} rounds, truth ${take.truth.rounds.length}`); continue; }
     take.truth.rounds.forEach((t, k) => {
       const r = row.rounds[k];
       tot.rounds++;
-      if (r.stage !== t.stage || r.bpm !== t.bpm || r.n !== t.n || r.dropped !== t.dropped) fail(`${f.name} round ${k + 1}: ${r.n} judged / ${r.dropped} dropped at ${r.bpm} BPM, planted ${t.n} / ${t.dropped} at ${t.bpm}`);
+      if (r.centre === 'site') tot.siteCentred++; else if (r.centre === 'beeps') tot.beepCentred++;
+      if (r.stage !== t.stage || r.bpm !== t.bpm || r.n !== t.n || r.dropped !== t.dropped || r.centre !== t.centre) fail(`${f.name} round ${k + 1}: ${r.n} judged / ${r.dropped} dropped at ${r.bpm} BPM, windows by ${r.centre}; truth ${t.n} / ${t.dropped} at ${t.bpm}, by ${t.centre}`);
       if (t.clicks) {
         if (r.clickFound) tot.clickRounds++;
-        if (!r.clickFound || Math.abs(r.clickLagMs - t.lagMs) > 10 || r.idealMs == null || Math.abs(r.idealMs - t.idealMs) > 10) fail(`${f.name} round ${k + 1}: beeps ${r.clickFound ? 'at ' + r.clickLagMs + ' ms, ideal ' + r.idealMs : 'not found'}; planted at ${t.lagMs} ms, ideal ${t.idealMs}`);
+        const measurable = take.truth.mapKnown;
+        if (!r.clickFound || !near(r.clickLagMs, t.lagMs) || (measurable ? !near(r.idealMs, t.idealMs) || !near(r.skewMs, t.skewMs) : r.idealMs != null || r.skewMs != null))
+          fail(`${f.name} round ${k + 1}: beeps ${r.clickFound ? 'at ' + r.clickLagMs + ' ms, ideal ' + r.idealMs + ', skew ' + r.skewMs : 'not found'}; truth ${t.lagMs} ms, ideal ${measurable ? t.idealMs : 'unmeasurable'}, skew ${measurable ? t.skewMs : 'unmeasurable'}`);
       } else {
         if (!r.clickFound) tot.noClickRounds++;
-        if (r.clickFound || r.idealMs != null) fail(`${f.name} round ${k + 1}: found beeps (${r.clickLagMs} ms) in a take with none`);
+        if (r.clickFound || r.idealMs != null || r.skewMs != null) fail(`${f.name} round ${k + 1}: found beeps (${r.clickLagMs} ms) in a take with none`);
       }
     });
-    const t0 = take.truth.rounds[0];
-    if (t0.clicks ? (row.latency.idealMs == null || Math.abs(row.latency.idealMs - t0.idealMs) > 10) : (row.latency.clickFound || row.latency.idealMs != null)) fail(`${f.name}: the take's mic delay should be ${t0.clicks ? 'about ' + t0.idealMs + ' ms' : 'unmeasured (no beeps)'}, got ${row.latency.idealMs}`);
+    const tc = take.truth.rounds.filter(t => t.clicks);
+    const wantLag = tc.length ? medHi(tc.map(t => t.lagMs)) : null, mapKnown = take.truth.mapKnown;
+    const wantIdeal = wantLag != null && mapKnown ? wantLag + f.map : null, wantSkew = wantIdeal != null ? wantIdeal - f.lat : null;
+    if (wantIdeal == null ? row.latency.idealMs != null || row.latency.skewMs != null : !near(row.latency.idealMs, wantIdeal) || !near(row.latency.skewMs, wantSkew))
+      fail(`${f.name}: the take's mic delay should be ${wantIdeal == null ? 'unmeasured' : wantIdeal + ' ms (skew ' + wantSkew + ')'}, got ${row.latency.idealMs} (skew ${row.latency.skewMs})`);
   }
   if (!rows.length) { fail('no take was measured'); return; }
+  const byName = nm => rows[names.indexOf(nm)];
 
-  // 2. the console summary, on all of them, one alone, and next to a Coach row
+  // 2. the console summary: all of them, three alone, and next to a Coach row
   const sum = (rs, k) => rs.reduce((a, r) => a + r.notes[k], 0);
-  const flat = h => h.replace(/<[^>]+>/g, '');
+  const flat = h => h.replace(/<[^>]+>/g, '').replace(/&#39;/g, "'").replace(/&quot;/g, '"').replace(/&amp;/g, '&');
   const pwLine = rs => {
-    const n = sum(rs, 'n'), ag = sum(rs, 'agree'), dm = sum(rs, 'detectorMissed'), fh = sum(rs, 'falseHit'), sm = sum(rs, 'silentMiss'), dr = sum(rs, 'dropped');
-    return [`Power Chord Switch: ${n} chord ${n === 1 ? 'change' : 'changes'} in ${rs.length} ${rs.length === 1 ? 'recording' : 'recordings'}${dr ? ` (${dr} more came after` : '.'}`,
-      `agree on ${ag + sm} of ${n} (${ag} strummed, ${sm} not played)`, `${dm} ${dm === 1 ? 'strum is' : 'strums are'} in the recording, but the site heard no strum there`,
+    const n = sum(rs, 'n'), ag = sum(rs, 'agree'), dm = sum(rs, 'detectorMissed'), fh = sum(rs, 'falseHit'), ow = sum(rs, 'offWindow'), sm = sum(rs, 'silentMiss'), dr = sum(rs, 'dropped');
+    return [`Power Chord Switch: ${n} chord ${n === 1 ? 'change' : 'changes'} in ${rs.length} ${rs.length === 1 ? 'recording' : 'recordings'}${dr ? ` (${dr} more came after the recording stopped, at 30 seconds or at Stop, and ${dr === 1 ? 'was' : 'were'} not checked)` : ''}.`,
+      `agree on ${ag + sm} of ${n} (${ag} strummed where the site listened, ${sm} not played)`,
+      `${ow} ${ow === 1 ? 'was' : 'were'} strummed just outside the site's window`,
+      `${dm} ${dm === 1 ? 'strum is' : 'strums are'} where the site listened, but the site heard no strum there`,
       `On ${fh} ${fh === 1 ? 'change' : 'changes'} the site heard a strum that is not in the recording`];
   };
   const coachRow = { take: 'C1', period: '3', game: 'Coach melody', device: { os: 'Windows', chromebook: false, micLabel: 'Mic' }, frame: {},
     level: { loudDb: -20, floorDb: -60, clipPct: 0 }, latency: { settingMs: 50, clickFound: false },
     notes: { n: 16, siteRight: 13, replayPresent: 14, detectorMissed: 1, silentMiss: 1, why: { counted: 13, wrong: 1, 'no-onset': 2 }, offPitch: {}, lowH1H2Db: null, secondLook: 0 } };
-  const one = rows[names.indexOf('pw-pair')];
-  for (const [what, rs, nm, extra] of [['all eight', rows, names, []], ['one alone', [one], ['pw-pair'], []],
-    ['next to a Coach row', [coachRow].concat(rows), ['coach'].concat(names), ['The site counted 13 of 16 notes right', 'for 14 of 16', 'Why 2 notes were not counted']]]) {
+  const PLACED = { site: "the site's own beat", beeps: 'the beeps', setting: 'the delay setting alone' };
+  const renders = [['all', rows, names, []]].concat(['pw-pair', 'pw-fast-bar', 'pw-every2-stop'].map(nm => [nm + ' alone', [byName(nm)], [nm], []]),
+    [['next to a Coach row', [coachRow].concat(rows), ['coach'].concat(names), ['The site counted 13 of 16 notes right', 'for 14 of 16', 'Why 2 notes were not counted']]]);
+  for (const [what, rs, nm, extra] of renders) {
     const h = ev.html(rs, nm), text = flat(h), pw = rs.filter(r => r.kind === 'pw');
     tot.htmlChecks++;
     for (const want of pwLine(pw).concat(extra)) if (!text.includes(want)) fail(`the console summary (${what}) does not say "${want}"`);
+    if (/does not give the verdict it saved/.test(text)) fail(`the console summary (${what}) says the replayed rule disagrees with the saved verdicts`);
     if (rs.length === pw.length && /notes right|notes were not counted/.test(text)) fail(`the console summary (${what}) counts chord changes as notes`);
-    const trs = (h.match(/<tr><td class="nc"/g) || []).length, perRound = (h.match(/title="Should be, per round: /g) || []).length;
+    const trs = (h.match(/<tr><td class="nc"/g) || []).length;
     const heardNot = (h.match(/ heard, not there/g) || []).length, wantHeardNot = pw.filter(r => r.notes.falseHit).length;
-    if (trs !== rs.length || perRound !== pw.length || heardNot !== wantHeardNot) fail(`the console table (${what}) has ${trs} rows (want ${rs.length}), ${perRound} per-round delays (want ${pw.length}), ${heardNot} "heard, not there" (want ${wantHeardNot})`);
-    pw.forEach(r => { const cell = r.latency.clickFound ? `${r.latency.settingMs} → ${r.latency.idealMs}` : `${r.latency.settingMs} → ?`; if (!text.includes(cell)) fail(`the console table (${what}) lacks ${r.game}'s delay "${cell}"`); });
+    const offBeat = (h.match(/ off the beat</g) || []).length, wantOffBeat = pw.filter(r => r.notes.offWindow).length;
+    if (trs !== rs.length || heardNot !== wantHeardNot || offBeat !== wantOffBeat) fail(`the console table (${what}) has ${trs} rows (want ${rs.length}), ${heardNot} "heard, not there" (want ${wantHeardNot}), ${offBeat} "off the beat" (want ${wantOffBeat})`);
+    if (what !== 'all') continue;
+    // every round's hover: its own "should be" (not the lag) and how its windows were placed
+    pw.forEach(r => {
+      const shown = !r.latency.clickFound ? '?' : r.latency.idealMs == null ? '—' : String(r.latency.idealMs);
+      const cell = (h.match(new RegExp(`<td title="([^"]*)">${r.latency.settingMs} → ${shown === '?' ? '\\?' : shown}</td>`)) || [])[1];
+      if (!cell) { fail(`the console table lacks ${r.take}'s delay cell "${r.latency.settingMs} → ${shown}" with a per-round hover`); return; }
+      const title = flat(cell);
+      r.rounds.forEach(g => {
+        const want = `Round ${g.stage + 1}: ` + (g.idealMs != null ? `should be ${g.idealMs} ms` : g.clickFound ? 'beeps found, delay not measured' : 'no beeps found (speaker muted, headphones, or strums over the count-in)') + `; windows placed by ${PLACED[g.centre]}`;
+        if (title.includes(want)) tot.hovers++; else fail(`${r.take}'s delay hover does not say "${want}" ("${title}")`);
+      });
+    });
   }
 
-  // 3. the terminal table lists every round
+  // 3. the terminal table: every round, column by column, and its legend
   const txt = ev.micEvalText(rows), part = txt.split('Power Chord Switch, one line per round')[1] || '';
-  const roundLines = part.split('\n').filter(l => /^T\d\d +Switch /.test(l)).length;
-  if (roundLines !== tot.rounds) fail(`micEvalText lists ${roundLines} Power Chord Switch rounds, the takes have ${tot.rounds}`);
+  const COLS = ['take', 'Switch', 'prog', 'round', 'bpm', 'chg', 'agree', 'detMiss', 'false', 'offWin', 'silent', 'drop', 'centre', 'click', 'lag', 'ideal', 'skew', 'map'];
+  part.split('\n').filter(l => /^T\d\d +Switch /.test(l)).forEach(l => {
+    const c = Object.fromEntries(l.trim().split(/\s+/).map((v, k) => [COLS[k], v]));
+    const r = rows.find(x => x.take === c.take), take = r && takes[rows.indexOf(r)], t = take && take.truth.rounds[+c.round - 1];
+    if (!t) { fail(`micEvalText's round line "${l.trim()}" names no round of ${c.take}`); return; }
+    const ch = take.truth.changes.filter(x => x.stage === t.stage), cn = cat => String(ch.filter(x => x.cat === cat).length);
+    const num = v => v === '-' ? null : +v;
+    const ok = c.bpm === String(t.bpm) && c.chg === String(t.n) && c.drop === String(t.dropped) && c.centre === t.centre &&
+      c.agree === cn('agree') && c.detMiss === cn('detector-missed') && c.false === cn('false-hit') && c.offWin === cn('off-window') && c.silent === cn('silent-miss') &&
+      (t.clicks ? near(num(c.lag), t.lagMs) : c.click === 'none') && (t.clicks && take.truth.mapKnown ? near(num(c.ideal), t.idealMs) && near(num(c.skew), t.skewMs) : c.ideal === '-' && c.skew === '-');
+    if (ok) tot.textRounds++; else fail(`micEvalText's line for ${c.take} round ${c.round} reads "${l.trim()}"; truth: ${t.bpm} BPM, ${t.n} judged, ${['agree', 'detector-missed', 'false-hit', 'off-window', 'silent-miss'].map(cn).join('/')}, ${t.dropped} dropped, ${t.centre}, lag ${t.clicks ? t.lagMs : 'none'}, ideal ${t.idealMs}, skew ${t.skewMs}`);
+  });
+  for (const k of ['chg', 'agree', 'detMiss', 'false', 'offWin', 'silent', 'drop', 'centre']) if (!new RegExp('^' + k + ' +\\S', 'm').test(part)) fail(`micEvalText's Power Chord Switch legend lost its "${k}" line`);
 
   // 4. Evaluate-all, run: two takes, their audio in two chunks each, a stubbed result box
   try {
@@ -11524,20 +11585,45 @@ async function checkPwTakeEvaluator() {
     if (tot.evaluateRun !== 2 || /Could not measure|not measured/.test(text) || want.some(w => !text.includes(w))) fail(`"Evaluate all recordings" run on 2 Power Chord Switch takes measured ${tot.evaluateRun} (${text.slice(0, 160)}…)`);
   } catch (e) { fail(`"Evaluate all recordings" threw (${e.message})`); }
 
-  // 5. tools/mic-sim/eval-takes.mjs on one take, on disk
+  // 5. tools/mic-sim/eval-takes.mjs on one take, on disk: the pair, and exactly its changes that do not agree
   const tmp = mkdtempSync(join(tmpdir(), 'gc-1cl-'));
   try {
-    const t = takes[names.indexOf('pw-pair')];
+    const t = takes[names.indexOf('pw-pair')], one = byName('pw-pair');
     writeFileSync(join(tmp, 'pw-pair.wav'), fx.wavBytes(t.pcm));
     writeFileSync(join(tmp, 'pw-pair.json'), JSON.stringify(t.meta));
     const r = spawnSync(process.execPath, [join(ROOT, 'tools', 'mic-sim', 'eval-takes.mjs'), tmp], { encoding: 'utf8', timeout: 120000 });
     const lineRe = new RegExp(`^T01 .*Switch ${t.meta.progression} .* ${one.notes.siteRight}/${one.notes.n} +${one.notes.replayPresent}/${one.notes.n} `, 'm');
-    if (r.status === 0 && /Power Chord Switch, one line per round/.test(r.stdout) && lineRe.test(r.stdout) && !/not measured/.test(r.stderr || '')) tot.evalTakesRun++;
-    else fail(`tools/mic-sim/eval-takes.mjs did not measure a Power Chord Switch take (exit ${r.status}): ${(r.stderr || r.stdout || '').trim().split('\n').slice(-3).join(' / ')}`);
+    const listed = (r.stdout.match(new RegExp(`^T01 +Switch ${t.meta.progression} +\\d+ +(right|wrong|miss) `, 'gm')) || []).length;
+    const wantListed = one.perNote.filter(n => n.why.cat !== 'agree').length;
+    tot.evalTakesLines = listed;
+    if (r.status !== 0 || !/Power Chord Switch, one line per round/.test(r.stdout) || !lineRe.test(r.stdout) || listed !== wantListed)
+      fail(`tools/mic-sim/eval-takes.mjs on a Power Chord Switch take (exit ${r.status}): ${listed} changes listed, want the ${wantListed} that do not agree — ${(r.stderr || '').trim().split('\n').slice(-2).join(' / ')}`);
   } finally { rmSync(tmp, { recursive: true, force: true }); }
 
+  // 6. crafted takes cannot hang the console: a child process with 128 MB and a time limit
+  const pair = takes[names.indexOf('pw-pair')].meta;
+  const crafted = [['a change at t = 1e300', d => { d.expected[3].t = 1e300; }, 1], ['a round at 1e9 BPM', d => { d.expected.forEach(e => { e.bpm = 1e9; }); d.stageBpms = [1e9]; d.bpm = 1e9; }, pair.expected.length]];
+  for (const [what, edit, wantIgnored] of crafted) {
+    const d = JSON.parse(JSON.stringify(pair)); edit(d);
+    const code = `${lift(EVAL_FNS)}\nconst d = ${JSON.stringify(d).replace(/null/g, 'null')};\n` +
+      'let s = 7; const pcm = new Int16Array(24000 * 20); for (let i = 0; i < pcm.length; i++){ s = (s * 1664525 + 1013904223) >>> 0; pcm[i] = (s >>> 20) - 2048; }\n' +
+      `const t0 = Date.now(); const row = micEvalRow('X', d, pcm, { GATE: 0.004, GAIN: 3, detectPitch: () => -1 });\n` +
+      'console.log(JSON.stringify({ ms: Date.now() - t0, ignored: row.notes.ignored, n: row.notes.n }));';
+    const r = spawnSync(process.execPath, ['--max-old-space-size=128', '-'], { input: code, encoding: 'utf8', timeout: 20000 });
+    let out = null; try { out = JSON.parse((r.stdout || '').trim().split('\n').pop()); } catch {}
+    if (r.status === 0 && out && out.ms < 3000 && out.ignored === wantIgnored) tot.crafted++;
+    else fail(`a crafted take (${what}) ${r.error && r.error.code === 'ETIMEDOUT' ? 'ran past 20 s' : r.status !== 0 ? 'crashed (' + ((r.stderr || '').match(/(heap out of memory|RangeError[^\n]*|Error[^\n]*)/) || ['exit ' + r.status])[0] + ')' : 'took ' + (out && out.ms) + ' ms / ignored ' + (out && out.ignored) + ' changes, want under 3000 ms and ' + wantIgnored}`);
+  }
+
+  // 7. the limits micEvalTakePw keeps are coach.js's
+  const lim = (jsFunctionBody(tSrc, 'micEvalTakePw') || '').match(/const BPM_MIN = (\d+), BPM_MAX = (\d+), ROUNDS = (\d+), BPCS = \[([\d, ]+)\];/);
+  const cc = { min: +(cSrc.match(/^const CC_BPM_MIN = (\d+), CC_BPM_MAX = (\d+);/m) || [])[1], max: +(cSrc.match(/^const CC_BPM_MIN = (\d+), CC_BPM_MAX = (\d+);/m) || [])[2],
+    rounds: +(cSrc.match(/^const CC_LADDER_ROUNDS = (\d+)/m) || [])[1], bpcs: ((cSrc.match(/^const CC_RATES = \[([\s\S]*?)\n\];/m) || [])[1] || '').match(/bpc: \d+/g) };
+  const bpcs = cc.bpcs ? cc.bpcs.map(s => +s.slice(5)).sort((a, b) => a - b).join(', ') : '?';
+  if (!lim || +lim[1] !== cc.min || +lim[2] !== cc.max || +lim[3] !== cc.rounds || lim[4] !== bpcs) fail(`micEvalTakePw's limits (${lim ? lim.slice(1).join(' / ') : 'not found'}) are not coach.js's CC_BPM_MIN / CC_BPM_MAX / CC_LADDER_ROUNDS / CC_RATES bpc (${cc.min} / ${cc.max} / ${cc.rounds} / ${bpcs})`);
+
   for (const [k, n] of Object.entries(PW_EVAL_PIN)) if (tot[k] !== n) fail(`${tot[k]} ${k}, pinned ${n} — the check went partly blind (or the fixtures changed: re-pin PW_EVAL_PIN on purpose)`);
-  if (bad === 0) ok(`${tot.takes} synthetic takes, ${tot.rounds} rounds, ${tot.changes} changes: all ${tot.judged} judged ones match their planted answer (${tot.agree} agree, ${tot['detector-missed']} detector-missed, ${tot['false-hit']} false-hit, ${tot['silent-miss']} silent-miss) and ${tot.dropped} past the end are dropped; beeps found in ${tot.clickRounds} of ${tot.clickRounds} rounds that have them (lag and ideal delay within 10 ms), none in the ${tot.noClickRounds} without; the console summary read in ${tot.htmlChecks} renders, Evaluate-all run measures ${tot.evaluateRun} of 2 takes, eval-takes.mjs measures ${tot.evalTakesRun}`);
+  if (bad === 0) ok(`${tot.takes} synthetic takes, ${tot.rounds} rounds, ${tot.changes} changes: all ${tot.judged} judged ones match the truth (${tot.agree} agree, ${tot['detector-missed']} detector-missed, ${tot['false-hit']} false-hit, ${tot['off-window']} off-window, ${tot['silent-miss']} silent-miss) and ${tot.dropped} past the end are dropped; windows on the site's own beat in ${tot.siteCentred} rounds, on the beeps in ${tot.beepCentred}; beeps found in ${tot.clickRounds} of ${tot.clickRounds} rounds that have them (lag, ideal and skew within 10 ms), none in the ${tot.noClickRounds} without; ${tot.extra} off-grid onsets counted exactly; ${tot.htmlChecks} console renders, ${tot.hovers} round hovers and ${tot.textRounds} terminal round lines read; Evaluate-all run measures ${tot.evaluateRun} of 2 takes; eval-takes.mjs lists the pair's ${tot.evalTakesLines} changes that do not agree; ${tot.crafted} crafted takes finish fast in 128 MB; the limits match coach.js`);
 }
 
 /* ════════════════════════════════════════════════════════════════════
