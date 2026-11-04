@@ -5,6 +5,13 @@ Notable changes to the Guitar Class site. Newest first.
 For the full session-by-session history (and the reasoning behind each change),
 see `WORKFLOW.md` and the git commit log.
 
+## 2026-11-04 — The weekly practice goal is now 60 minutes
+
+- **Your weekly practice goal is now 60 minutes.** It was 30. A day still counts at most 20 minutes, so you need at least 3 days to reach it.
+- **The ring and the minutes in the top bar show the new goal,** for example "12/60 min". My progress shows it too.
+- **This week's minutes still count toward the new goal.** If you already had 30 minutes this week, you need 30 more.
+- **Start early in the week.** If you have no minutes yet on Saturday, you can't reach the goal that week.
+
 ## 2026-11-04 — Power Chord Switch is the first game
 
 - **Power Chord Switch is now the first card on the Games screen**, at the top left of the guitar games.

@@ -25,8 +25,11 @@ var PRACTICE_MINUTES_CONFIG = {
 
   /* The weekly goal, in minutes. It is FLAT: the same number in every counted
      week, for every student, whichever days they practise. (There is no
-     per-section schedule and no proration.) */
-  weeklyGoalMinutes: 30,
+     per-section schedule and no proration.) 60 since 2026-11-04 (30 before):
+     with the 20-minute daily cap a week needs at least 3 days to reach it.
+     checks.mjs 1cg fails a goal above 7 x dailyCapMinutes; tools/pm-sim.mjs
+     and tools/pm-e2e.mjs pin this value: change them with it. */
+  weeklyGoalMinutes: 60,
 
   /* The most minutes counted in one day. Playing past it does not count.
      ⚠ firestore.rules has the same number in seconds (dailyCapSeconds(),

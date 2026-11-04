@@ -1010,7 +1010,7 @@
 
 ## Recently shipped (post-archive)
 
-- [x] **2026-11-01 — Practice minutes (student view only; display switched ON the same day: `uiOn: true`, `streakStartWeek: '2026-W45'`, goal 30).**
+- [x] **2026-11-01 — Practice minutes (student view only; display switched ON the same day: `uiOn: true`, `streakStartWeek: '2026-W45'`, goal 30; 60 since 2026-11-04).**
       Counts seconds of real backing-track playback and shows a weekly goal, a
       week streak and "N playing". Counting and writing ship LIVE; nothing is
       drawn until `uiOn` is set to `true` in `practice-minutes-config.js`.
@@ -1191,6 +1191,20 @@
       `app.js` and `tabs/journey.js` is now dead but left in place. 1cg pins the
       heartbeats rules block as "gone, or exactly as shipped". Step 2 waits for step 1
       to be live.
+      *2026-11-04 — weekly goal 30 → 60 minutes (Jonathan), at once.* `weeklyGoalMinutes`
+      60; the daily cap stays 20 (`dailyCapSeconds()` 1200, rules and indexes unchanged),
+      so a week needs at least 3 days at the cap (60 ≤ 7 × 20, the 1cg range check). Not
+      retroactive: `calc.status` re-scores from the current goal, but `streakStartWeek`
+      is 2026-W45 (this week) so no finished week counts yet, and W44 held only Sun
+      11-01 (≤ 1200 s, never a hit at 30 either). A student already past 30 this week
+      drops back to "N/60" (ring blue, flame dim, streak 0 until 60); their stored week
+      doc keeps `hit: true` (sticky by design) beside `goalSeconds: 3600` on the next
+      flush — a snapshot nothing reads. Their `pm:t:<uid>` already says W45, so the
+      "Week goal hit" pill does not show again when they reach 60 this week (the tile
+      and the recap still say it). pm-sim 154/154 (every 1800 s became 3600 s; section 5
+      is now 4 × 16 min, plus a new 3-days-at-the-cap run: 2400 s not hit, 3600 s hit);
+      pm-e2e re-derived for each reach branch (Sunday 50/60, Saturday 40|39/60, Friday
+      and Saturday from 0, 53/60 strip and recap, "60/60 min" widest strip).
       *Open item, Jonathan's call: remove the heartbeat.* "N playing" was
       dropped from the screen, but the engine still writes a `heartbeats/{sessionId}`
       record (`{ period, lastSeen }`) about every 30 s while audio plays, and nothing reads

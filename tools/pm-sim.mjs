@@ -261,13 +261,13 @@ console.log('1. calendar maths');
   // The goal is flat and there are no meeting days: nothing a student does on any weekday changes it.
   check('the shipped config has no meeting-day, no-school, short-week or semester-range keys (they were removed)', !['meetingDays', 'defaultMeetingDays', 'noSchool', 'shortWeeks', 'semesters'].some((k) => k in w.ctx.PRACTICE_MINUTES_CONFIG));
   let zero = [], odd = [], weeks = 0;
-  for (let wk = '2026-W36'; wk <= '2027-W26'; wk = calc.weekAdd(wk, 1)) { weeks++; const g = calc.goalSeconds(c, wk); if (g === 0) zero.push(wk); else if (g !== 1800) odd.push(wk + '=' + g); }
-  check(`the goal is a flat 1800 s (30 min) in all ${weeks - zero.length} counted weeks of 2026-27 — no proration anywhere`, odd.length === 0 && weeks > 40, odd.join());
+  for (let wk = '2026-W36'; wk <= '2027-W26'; wk = calc.weekAdd(wk, 1)) { weeks++; const g = calc.goalSeconds(c, wk); if (g === 0) zero.push(wk); else if (g !== 3600) odd.push(wk + '=' + g); }
+  check(`the goal is a flat 3600 s (60 min) in all ${weeks - zero.length} counted weeks of 2026-27 — no proration anywhere`, odd.length === 0 && weeks > 40, odd.join());
   check('exactly the five prefilled weeks are skipped (goal 0): Thanksgiving, both winter-break weeks, mid-winter break, spring break',
     eq(zero, ['2026-W48', '2026-W52', '2026-W53', '2027-W07', '2027-W15']), zero.join());
   check('each skipWeeks entry is a Monday and maps to its own week: 2026-11-23, 2026-12-21, 2026-12-28, 2027-02-15, 2027-04-12',
     eq(c.skipWeeks, ['2026-11-23', '2026-12-21', '2026-12-28', '2027-02-15', '2027-04-12']) && c.skipWeeks.every((d) => calc.parse(d).getDay() === 1));
-  check('Veterans Day week (Wed 11 Nov) is an ordinary week with the full goal (the no-school list is gone)', calc.goalSeconds(c, '2026-W46') === 1800);
+  check('Veterans Day week (Wed 11 Nov) is an ordinary week with the full goal (the no-school list is gone)', calc.goalSeconds(c, '2026-W46') === 3600);
   check('semester 2 starts Mon 2027-01-04: the week of Dec 28 is semester 1, the week of Jan 4 is semester 2',
     c.semester2Start === '2027-01-04' && calc.semesterOf(c, '2026-W53') === 0 && calc.semesterOf(c, '2027-W01') === 1 && calc.semesterOf(c, '2026-W36') === 0 && calc.semesterOf(c, '2027-W26') === 1);
   check('a goal in minutes is a whole number of minutes whatever weeklyGoalMinutes is (20 → 1200 s, 45 → 2700 s)', calc.goalSeconds({ ...c, weeklyGoalMinutes: 20 }, '2026-W45') === 1200 && calc.goalSeconds({ ...c, weeklyGoalMinutes: 45 }, '2026-W45') === 2700);
@@ -282,7 +282,7 @@ console.log('2. week streak');
   const wk = (n) => calc.weekAdd('2026-W36', n);                          // W36 = Mon 31 Aug 2026
   const mk = (pattern, today) => {                                         // 'H' hit, 'x' miss, '.' = no play
     const m = {};
-    pattern.split('').forEach((ch, i) => { if (ch === 'H') m[wk(i)] = 1800; else if (ch === 'x') m[wk(i)] = 600; });
+    pattern.split('').forEach((ch, i) => { if (ch === 'H') m[wk(i)] = 3600; else if (ch === 'x') m[wk(i)] = 600; });
     return calc.status(base, m, today);
   };
   const T = (n) => calc.ymd(calc.addDays(calc.weekMonday(wk(n)), 2));      // a Wednesday of week n
@@ -305,20 +305,20 @@ console.log('2. week streak');
   check('…and the free miss is then spent by the first miss inside the streak: x H H x H x → 0', s.streak === 0, 'got ' + s.streak);
   // A skipped week in the middle: passed over, and its minutes still count.
   const brk = { ...base, skipWeeks: [calc.ymd(calc.weekMonday(wk(2)))] };
-  const m2 = {}; m2[wk(0)] = 1800; m2[wk(1)] = 1800; m2[wk(2)] = 100; m2[wk(3)] = 1800;
+  const m2 = {}; m2[wk(0)] = 3600; m2[wk(1)] = 3600; m2[wk(2)] = 100; m2[wk(3)] = 3600;
   s = calc.status(brk, m2, T(4));
   check('a skipped week between two hits neither counts nor breaks (even with a poor week of minutes in it): streak 3', s.streak === 3, 'got ' + s.streak);
   check('…and it shows as "break" in the 8-week row', s.history.some((h) => h.state === 'break'));
   check('…and its minutes are still in the row (100 s)', s.history.find((h) => h.state === 'break').secs === 100);
   // Free miss is per SEMESTER, split on semester2Start.
-  const m3 = {}; [0, 2, 3, 5].forEach((i) => { m3[wk(i)] = 1800; }); m3[wk(1)] = 100; m3[wk(4)] = 100;
+  const m3 = {}; [0, 2, 3, 5].forEach((i) => { m3[wk(i)] = 3600; }); m3[wk(1)] = 100; m3[wk(4)] = 100;
   s = calc.status({ ...base, semester2Start: calc.ymd(calc.weekMonday(wk(4))) }, m3, T(6));
   check('one miss in each of two semesters is forgiven twice: H x H H x H → streak 4', s.streak === 4, 'got ' + s.streak);
   s = calc.status(base, m3, T(6));
   check('the same pattern inside ONE semester resets at the second miss: streak 1', s.streak === 1, 'got ' + s.streak);
   // The shipped dates: the free miss resets on Mon 2027-01-04.
   const real = w.PM.cfg();
-  const rs = { '2026-W50': 1800, '2026-W51': 100, '2027-W01': 100, '2027-W02': 1800 };            // hit · miss · (2 skipped weeks) · miss · hit
+  const rs = { '2026-W50': 3600, '2026-W51': 100, '2027-W01': 100, '2027-W02': 3600 };           // hit · miss · (2 skipped weeks) · miss · hit
   s = calc.status(real, rs, '2027-01-13');
   check('shipped dates: the Dec miss uses semester 1\'s free miss, the Jan 4 miss uses semester 2\'s (the two winter-break weeks are skipped): streak 2', s.streak === 2 && s.week.hit, 'got ' + s.streak);
   s = calc.status({ ...real, semester2Start: '' }, rs, '2027-01-13');
@@ -326,16 +326,16 @@ console.log('2. week streak');
   // Longest.
   s = mk('HHHxxHH', T(7));
   check('longest streak is remembered after a reset (3), current 2', s.longest === 3 && s.streak === 2, s.longest + '/' + s.streak);
-  // Flat goal: 1800 hits, 1799 misses, whatever the week looks like.
-  s = calc.status(base, { [wk(0)]: 1800 }, T(1));
-  check('1800 s is a hit', s.streak === 1);
-  s = calc.status(base, { [wk(0)]: 1799 }, T(1));
-  check('…and 1799 s is a miss (the free miss keeps streak 0 → 0, no hit)', s.streak === 0 && s.history.find((h) => h.id === wk(0)).state === 'missed');
+  // Flat goal: 3600 hits, 3599 misses, whatever the week looks like.
+  s = calc.status(base, { [wk(0)]: 3600 }, T(1));
+  check('3600 s is a hit', s.streak === 1);
+  s = calc.status(base, { [wk(0)]: 3599 }, T(1));
+  check('…and 3599 s is a miss (the free miss keeps streak 0 → 0, no hit)', s.streak === 0 && s.history.find((h) => h.id === wk(0)).state === 'missed');
   // streakStartWeek.
-  s = calc.status({ ...base, streakStartWeek: wk(2) }, { [wk(0)]: 1800, [wk(1)]: 1800, [wk(2)]: 1800 }, T(3));
+  s = calc.status({ ...base, streakStartWeek: wk(2) }, { [wk(0)]: 3600, [wk(1)]: 3600, [wk(2)]: 3600 }, T(3));
   check('streakStartWeek ignores earlier weeks', s.streak === 1, 'got ' + s.streak);
   // The week in progress is before streakStartWeek: a hit is still a hit, but it is not a streak week.
-  s = calc.status({ ...base, streakStartWeek: wk(5) }, { [wk(2)]: 1800 }, T(2));
+  s = calc.status({ ...base, streakStartWeek: wk(5) }, { [wk(2)]: 3600 }, T(2));
   check('this week is before streakStartWeek: the goal is hit (ring, message) but the streak stays 0, like every earlier week', s.week.hit && s.streak === 0 && s.longest === 0);
   // History is 8 squares ending on this week.
   s = mk('HH', T(2));
@@ -343,9 +343,9 @@ console.log('2. week streak');
   // No data at all.
   s = calc.status(base, {}, T(1));
   check('a brand-new student: streak 0, longest 0, no crash', s.streak === 0 && s.longest === 0);
-  // The week in progress is a skipped one: minutes show, no goal, nothing is hit.
-  s = calc.status(brk, { [wk(2)]: 2400 }, T(2));
-  check('during a skipped week the minutes (2400 s) still show, the goal shown is the normal one, and it is never a hit', s.week.isBreak && s.week.secs === 2400 && s.week.goal === 1800 && !s.week.hit && s.streak === 0);
+  // The week in progress is a skipped one: minutes show, no goal, nothing is hit — even above the normal goal.
+  s = calc.status(brk, { [wk(2)]: 4200 }, T(2));
+  check('during a skipped week the minutes (4200 s, more than the normal goal) still show, the goal shown is the normal one, and it is never a hit', s.week.isBreak && s.week.secs === 4200 && s.week.goal === 3600 && !s.week.hit && s.streak === 0);
 }
 
 /* ═══════════ 3. Counting ═══════════ */
@@ -434,7 +434,7 @@ console.log('4. daily cap and the pending-write queue');
   check('flushed every 60 s while counting (≈ 20 commits for 20 counted minutes)', w.log.commits.length >= 18 && w.log.commits.length <= 24, w.log.commits.length + ' commits');
   check('the server ends with exactly the capped total, never more', (w.server.days[todayStr]?.seconds || 0) + (st.pend[todayStr] || 0) === 1200);
   const wk = w.server.weeks['2026-W47'];
-  check('the week doc rolls up { seconds, goalSeconds: 1800, hit: false } (1200 < 1800)', wk && wk.goalSeconds === 1800 && wk.hit === false && wk.seconds === (w.server.days[todayStr].seconds), JSON.stringify(wk));
+  check('the week doc rolls up { seconds, goalSeconds: 3600, hit: false } (1200 < 3600)', wk && wk.goalSeconds === 3600 && wk.hit === false && wk.seconds === (w.server.days[todayStr].seconds), JSON.stringify(wk));
   check('every commit writes ONLY days/{date}.seconds and weeks/{id}.{seconds,goalSeconds,(hit)}',
     w.log.commits.every((c) => c.every((o) => /^minutes\/uid-A\/(days|weeks)\//.test(o.path) && (/days/.test(o.path) ? eq(Object.keys(o.data), ['seconds']) : (['seconds', 'goalSeconds'].every((k) => k in o.data) && Object.keys(o.data).every((k) => ['seconds', 'goalSeconds', 'hit'].includes(k)))))));
 }
@@ -529,7 +529,7 @@ console.log('4. daily cap and the pending-write queue');
   const dayW = body.writes.find((x) => /\/days\//.test(x.update.name));
   const weekW = body.writes.find((x) => /\/weeks\//.test(x.update.name));
   check('…increment transforms for the day and the week doc; the week carries goalSeconds (hit only when it must: the doc is new to this device, or the goal was hit)',
-    dayW && dayW.updateTransforms[0].increment.integerValue > 0 && weekW && weekW.update.fields.goalSeconds.integerValue === '1800' && !('hit' in weekW.update.fields) && eq(weekW.updateMask.fieldPaths, ['goalSeconds']));
+    dayW && dayW.updateTransforms[0].increment.integerValue > 0 && weekW && weekW.update.fields.goalSeconds.integerValue === '3600' && !('hit' in weekW.update.fields) && eq(weekW.updateMask.fieldPaths, ['goalSeconds']));
   check('…and what it sent leaves the queue (not sent twice next visit)', Object.values(w.PM._state().pend).reduce((x, y) => x + y, 0) === 0 && !qKey(w));
 }
 {
@@ -548,11 +548,11 @@ console.log('4. daily cap and the pending-write queue');
 /* ═══════════ 5. Goal ═══════════ */
 console.log('5. the weekly goal');
 {
-  // Hit the goal across several days: 4 days × 8 min = 32 min ≥ 30 in the week.
+  // Hit the goal across several days, each one under the 20-minute daily cap: 4 days × 16 min = 64 min ≥ 60 in the week.
   const w = makeWorld();
   const a = w.track(); a.play();
   for (let day = 0; day < 4; day++) {
-    await w.run(8 * 60, w.playing(a));
+    await w.run(16 * 60, w.playing(a));
     a.pause();
     await w.run(5, w.playing(a));
     w.clock.ms += 24 * 3600 * 1000; w.clock.perf += 24 * 3600 * 1000;      // jump to the same time the next day
@@ -561,9 +561,28 @@ console.log('5. the weekly goal');
   await w.run(3, w.playing(a));
   await w.PM.flush(); await w.settle();
   const wk = w.server.weeks['2026-W47'];
-  check('four 8-minute days add up in the week doc and flip hit=true at 1800 s', wk && wk.seconds >= 1800 && wk.hit === true, JSON.stringify(wk));
-  check('each day is its own doc: four days of exactly 480 s (plus the 3 s tail of the fifth morning)', Object.values(w.server.days).filter((d) => d.seconds === 480).length === 4 && Object.values(w.server.days).every((d) => d.seconds <= 480), JSON.stringify(w.server.days));
+  check('four 16-minute days add up in the week doc and flip hit=true at 3600 s', wk && wk.seconds >= 3600 && wk.hit === true, JSON.stringify(wk));
+  check('each day is its own doc: four days of exactly 960 s (plus the 3 s tail of the fifth morning)', Object.values(w.server.days).filter((d) => d.seconds === 960).length === 4 && Object.values(w.server.days).every((d) => d.seconds <= 960), JSON.stringify(w.server.days));
   check('status() says this week is hit and the streak is 1', w.PM.status().week.hit === true && w.PM.status().streak === 1);
+}
+{
+  // The fewest days (goal 60 since 2026-11-04): a day counts at most 20 minutes, so the goal takes 3 days at the cap.
+  // Each day plays 22 minutes (2 past the cap, not counted). After two days the week is short; the third reaches exactly 3600 s.
+  const w = makeWorld();
+  const a = w.track(); a.play();
+  const after = [];
+  for (let day = 0; day < 3; day++) {
+    await w.run(22 * 60, w.playing(a));
+    a.pause();
+    await w.run(5, w.playing(a));
+    await w.PM.flush(); await w.settle();
+    const s = w.PM.status(), doc = w.server.weeks['2026-W47'];
+    after.push({ secs: s.week.secs, hit: s.week.hit, docSecs: doc && doc.seconds, docHit: doc && doc.hit });
+    w.clock.ms += 24 * 3600 * 1000; w.clock.perf += 24 * 3600 * 1000;      // jump to the same time the next day
+    a.play();
+  }
+  check('two days at the 20-minute cap: 2400 s, not hit (in status() and in the week doc)', after[1].secs === 2400 && after[1].hit === false && after[1].docSecs === 2400 && after[1].docHit === false, JSON.stringify(after));
+  check('the third day at the cap makes exactly 3600 s: the goal is hit, in status() and in the week doc', after[2].secs === 3600 && after[2].hit === true && after[2].docSecs === 3600 && after[2].docHit === true, JSON.stringify(after));
 }
 
 /* ═══════════ 6. No heartbeat (removed 2026-11-04: "N playing" had left the strip and nothing read it) ═══════════ */
@@ -585,7 +604,7 @@ console.log('7. defaults');
   const w = makeWorld();
   check('shipped config: uiOn is true (on since 2026-11-01; flip this and the config together)', w.ctx.PRACTICE_MINUTES_CONFIG.uiOn === true);
   check('shipped config: streaks start fresh at 2026-W45', w.ctx.PRACTICE_MINUTES_CONFIG.streakStartWeek === '2026-W45');
-  check('shipped config: goal 30, cap 20, semester 2 starts 2027-01-04, five skip weeks', w.ctx.PRACTICE_MINUTES_CONFIG.weeklyGoalMinutes === 30 && w.ctx.PRACTICE_MINUTES_CONFIG.dailyCapMinutes === 20
+  check('shipped config: goal 60 (30 until 2026-11-04), cap 20, semester 2 starts 2027-01-04, five skip weeks', w.ctx.PRACTICE_MINUTES_CONFIG.weeklyGoalMinutes === 60 && w.ctx.PRACTICE_MINUTES_CONFIG.dailyCapMinutes === 20
     && w.ctx.PRACTICE_MINUTES_CONFIG.semester2Start === '2027-01-04' && w.ctx.PRACTICE_MINUTES_CONFIG.skipWeeks.length === 5);
   const off = makeWorld({ ui: true, config: { uiOn: false } });
   check('uiOn false (a page with a UI host) → stripHtml() is empty', off.PM.stripHtml() === '');
@@ -756,12 +775,12 @@ const shared = () => ({ clock: { ms: new Date(2026, 10, 16, 9, 0, 0).getTime(), 
 {
   // R1-7: a stale copy on another device must not flip a stored hit from true back to false.
   const sh = shared();
-  sh.server.weeks['2026-W47'] = { seconds: 1700, goalSeconds: 1800, hit: false };
+  sh.server.weeks['2026-W47'] = { seconds: 3500, goalSeconds: 3600, hit: false };
   sh.server.days['2026-11-16'] = { seconds: 0 };
   const sh1 = { ...sh, store: {} }, sh2 = { ...sh, store: {} };
   const d1 = makeWorld(sh1), d2 = makeWorld(sh2);
   const a = d1.track(), b = d2.track(); a.play();
-  await runAll([d1, d2], 5, () => { if (!a.paused) a.currentTime += 1; });   // both load: hit false, 1700 s
+  await runAll([d1, d2], 5, () => { if (!a.paused) a.currentTime += 1; });   // both load: hit false, 3500 s
   await d1.PM.load(); await d2.PM.load();
   d1.PM._state().pend[todayStr] = 150;                                      // device 1 crosses the goal
   await d1.PM.flush(); await runAll([d1, d2], 2);
@@ -792,7 +811,7 @@ const shared = () => ({ clock: { ms: new Date(2026, 10, 16, 9, 0, 0).getTime(), 
   // The goal does not depend on the student's period (or on having none): 4th, 7th, CAS, nothing chosen yet.
   const goals = [];
   for (const period of ['4', '7', 'CAS', '']) { const wd = makeWorld({ period }); const a = wd.track(); a.play(); await wd.run(3, wd.playing(a)); goals.push(wd.PM.status().week.goal); }
-  check('the week goal is 1800 s for period 4, 7, CAS and "none chosen yet" alike', goals.every((g) => g === 1800), goals.join());
+  check('the week goal is 3600 s for period 4, 7, CAS and "none chosen yet" alike', goals.every((g) => g === 3600), goals.join());
 }
 
 /* ═══════════ 10. Friday check 2026-11-01 (R2-*, PD-*) ═══════════ */
@@ -1037,12 +1056,12 @@ const commitFetch = (w, from) => w.log.fetches.slice(from).find((x) => /document
   sh.net.stall = true; w.PM.flush(); await w.settle();                      // a commit in flight…
   await runAll([w], 10, () => { if (!a.paused) a.currentTime += 1; });      // …and 10 more seconds queued after it
   const st = w.PM._state(), flying = sumOf(st.inflight && st.inflight.snap), queuedNow = sumOf(st.pend), wk = calcWeek(w);
-  st.weeks[wk] = { seconds: 1800 - queuedNow - Math.ceil(flying / 2), goalSeconds: 1800, hit: false };
+  st.weeks[wk] = { seconds: 3600 - queuedNow - Math.ceil(flying / 2), goalSeconds: 3600, hit: false };
   const base = st.weeks[wk].seconds;                                        // read before pagehide: the keepalive folds its seconds in
   const f0 = w.log.fetches.length;
   leaveLikeChrome(w);
   const ka = commitFetch(w, f0);
-  const premise = flying > 5 && queuedNow > 5 && base + queuedNow < 1800 && base + queuedNow + flying >= 1800;
+  const premise = flying > 5 && queuedNow > 5 && base + queuedNow < 3600 && base + queuedNow + flying >= 3600;
   check('pagehide with a commit in flight that, with the queued seconds, passes the goal: the keepalive marks the week hit', premise && !!ka && /"hit":\{"booleanValue":true\}/.test(ka.init.body), `premise ${premise} (stored ${base}, in flight ${flying}, queued ${queuedNow}); ` + (ka ? ka.init.body.slice(0, 220) : 'no keepalive'));
 }
 {

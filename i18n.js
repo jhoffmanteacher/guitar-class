@@ -639,7 +639,7 @@
     // The status strip in the main top bar and the Games bar (index.html #pm-header, #pm-games; the tooltip is pm.openProgress).
     'pm.openProgress':    { en: 'Open My progress', es: 'Abrir Mi progreso' },
     // The top bar has to hold the title, Find, Español and a long name on one row in Spanish
-    // (Jonathan, 2026-11-03, STOP B): the strip says "12/30 min" with no "this week"; the ring and the My progress tile say the rest.
+    // (Jonathan, 2026-11-03, STOP B): the strip says "12/60 min" with no "this week"; the ring and the My progress tile say the rest.
     'pm.weekMin':         { en: '{done}/{goal} min', es: '{done}/{goal} min' },
     'pm.weekMinBreak':    { en: '{done} min', es: '{done} min' },
     // Streak of 0: the flame's label and the My progress tile say this instead of "0-week streak".

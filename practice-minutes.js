@@ -93,7 +93,7 @@
 
   /* ── Config, with a default for any key that is missing ── */
   var DEFAULTS = {
-    uiOn: false, weeklyGoalMinutes: 30, dailyCapMinutes: 20,
+    uiOn: false, weeklyGoalMinutes: 60, dailyCapMinutes: 20,
     skipWeeks: [], semester2Start: '', streakStartWeek: '',
     recapMinSeconds: 60, recapGapSeconds: 180, recapShowSeconds: 6, toastSeconds: 3
   };
@@ -803,7 +803,7 @@
   function stripInner(){
     var st = status(), w = st.week;
     var done = mins(w.secs), goal = mins(w.goal);
-    /* The strip shows at most the goal ("30/30"): a long week must not widen it and push
+    /* The strip shows at most the goal ("60/60"): a long week must not widen it and push
        the title, Find, Español and the user area off the one-row top bar. My progress
        shows the true minutes. A week with no class has no goal: minutes only. */
     var weekTxt = w.isBreak ? tr('pm.weekMinBreak', { done: done }) : tr('pm.weekMin', { done: Math.min(done, goal), goal: goal });
