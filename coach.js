@@ -2768,15 +2768,17 @@ const GAME_ICO = {
   buildchord: gIco('<rect x="3" y="4" width="18" height="16" rx="2"/><path d="M9 4v16M15 4v16M3 12h18"/><circle cx="6" cy="8" r="1.8" fill="currentColor" stroke="none"/><circle cx="18" cy="16" r="1.8" fill="currentColor" stroke="none"/>'),
 };
 
+/* The order here is the order of the cards on the Games page (each section keeps it).
+   Power Chord Switch is first (Jonathan, 2026-11-04). */
 const GAMES_META = [
-  { key:'fret',     cls:'gc-hunt',     ico:GAME_ICO.fret,       titleKey:'games.fret.title',  guitar:true,  descKey:'games.fret.desc',
-    body:'fret-body', setup:() => fretStart() },
-  { key:'cc',       cls:'gc-change',   ico:GAME_ICO.cc,         titleKey:'games.cc.title',    guitar:true,  descKey:'games.cc.desc',
-    body:'cc-body', setup:() => ccSetup() },
   /* Power Chord Switch runs Change Up's engine (ccSetup('power')) and shares
      its #cc-body, as Finger Gym shares Note Runner's #nr-body. */
   { key:'power',    cls:'gc-power',    ico:GAME_ICO.power,      titleKey:'games.pw.title',    guitar:true,  descKey:'games.pw.desc',
     body:'cc-body', setup:() => ccSetup('power') },
+  { key:'fret',     cls:'gc-hunt',     ico:GAME_ICO.fret,       titleKey:'games.fret.title',  guitar:true,  descKey:'games.fret.desc',
+    body:'fret-body', setup:() => fretStart() },
+  { key:'cc',       cls:'gc-change',   ico:GAME_ICO.cc,         titleKey:'games.cc.title',    guitar:true,  descKey:'games.cc.desc',
+    body:'cc-body', setup:() => ccSetup() },
   { key:'radar',   cls:'gc-radar',    ico:GAME_ICO.radar,      titleKey:'games.radar.title', guitar:true,  descKey:'games.radar.desc',
     body:'sr-body', setup:() => srSetup() },
   { key:'roulette', cls:'gc-roulette', ico:GAME_ICO.roulette,   titleKey:'games.rr.title',    guitar:true,  descKey:'games.rr.desc',

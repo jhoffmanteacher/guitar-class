@@ -5,6 +5,10 @@ Notable changes to the Guitar Class site. Newest first.
 For the full session-by-session history (and the reasoning behind each change),
 see `WORKFLOW.md` and the git commit log.
 
+## 2026-11-04 — Power Chord Switch is the first game
+
+- **Power Chord Switch is now the first card on the Games screen**, at the top left of the guitar games.
+
 ## 2026-11-04 — Strum Pattern in Chunks: your hand never stops
 
 - **Play the chunks on muted strings or on D5 — you choose.** Muted: rest your fretting hand lightly on all six strings so they don't ring. Play strum still plays it on D5.
