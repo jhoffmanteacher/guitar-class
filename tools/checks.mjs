@@ -11404,7 +11404,8 @@ function checkCoachVerdicts() {
    { period, lastSeen } and no uid, the minutes block must stay owner-only with
    no delete, every script tag is in place in order, every pm.* string the engine
    asks for exists in English AND Spanish (and every one is used), and the three
-   hooks into app.js / journey.js are still there.
+   hooks into app.js / index.html / journey.js are still there (the strip is ONE hidden <button id="pm-header"> in the main top bar,
+   shown by PM.syncHeader() on every #user-area paint path, and caSyncTopbar() must not draw it a second time).
    The browser half (strip, recap, toast, My progress, 1366×657, both languages,
    a real <audio>) is tools/pm-e2e.mjs — it needs Chrome, so it is run by hand.
    ════════════════════════════════════════════════════════════════════ */
@@ -11507,8 +11508,32 @@ function checkPracticeMinutes(i18nTable) {
   const app = strip((read('app.js') || '').replace(/\r\n/g, '\n')), jr = strip((read('tabs/journey.js') || '').replace(/\r\n/g, '\n')), eng = read('practice-minutes.js') || '';
   if (!/window\.PM_HOST\s*=\s*\{[\s\S]{0,400}?ui:\s*true[\s\S]{0,500}?period:\s*\(\)\s*=>\s*periodOverride\s*\|\|\s*studentPeriod/.test(app)) fail('app.js: window.PM_HOST (ui:true, effective period = periodOverride || studentPeriod) is missing');
   if (!/window\.PM_HOST\s*=\s*\{[\s\S]{0,200}?ui:\s*false/.test(jr)) fail('tabs/journey.js: window.PM_HOST (ui:false) is missing — Song Journey playback would not count');
+  /* The strip lives in the MAIN top bar only (2026-11-03): a hidden <button> in index.html's header, filled by
+     PM.syncHeader() wherever app.js paints #user-area. It must never also be drawn in a practice card's bar. */
   const sync = /function caSyncTopbar\(\)\{[\s\S]*?\n\}\n/.exec(app);
-  if (!sync || !/caIsCard\(a\)\s*&&\s*window\.PM\s*\?\s*PM\.stripHtml\(\)/.test(sync[0]) || !/PM\.onCardOpen\(\)/.test(sync[0])) fail('app.js caSyncTopbar(): the strip (PM.stripHtml) and PM.onCardOpen() hooks are missing');
+  if (!sync) fail('app.js: caSyncTopbar() not found');
+  else if (/stripHtml|onCardOpen|pm-strip/.test(sync[0])) fail('app.js caSyncTopbar(): must not draw the practice-minutes strip (PM.stripHtml / PM.onCardOpen / pm-strip) — it lives in the main top bar only, so it can never show twice');
+  const hdrM = /<header class="header">[\s\S]*?<\/header>/.exec(idx);
+  const hdrBtn = hdrM && /<button\b[^>]*\bid="pm-header"[^>]*>/.exec(hdrM[0]);
+  if (!hdrBtn) fail('index.html: <button id="pm-header"> is missing from <header class="header"> (the practice-minutes strip)');
+  else {
+    if (!/\bclass="(?:[^"]*\s)?pm-strip(?:\s[^"]*)?"/.test(hdrBtn[0])) fail('index.html #pm-header must carry class pm-strip (refreshStrip() rewrites every .pm-strip)');
+    if (!/\bhidden\b/.test(hdrBtn[0].replace(/"[^"]*"/g, '""'))) fail('index.html #pm-header must be hidden by default (PM.syncHeader() shows it for a signed-in student only)');
+    if (!/\bonclick="toggleMyProgress\(\)"/.test(hdrBtn[0])) fail('index.html #pm-header must open My progress with onclick="toggleMyProgress()"');
+    if (!/data-i18n-attr="title:pm\.openProgress"/.test(hdrBtn[0])) fail('index.html #pm-header needs its tooltip: data-i18n-attr="title:pm.openProgress"');
+  }
+  if (!/function toggleMyProgress\(\)\{/.test(app)) fail('app.js: toggleMyProgress() is missing (the header strip calls it)');
+  /* Every place that paints #user-area must tell the strip. showApp (the signed-in app) shows it; the sign-in wall, signed out and the paused
+     screen hide it (the teacher console goes through the first of them, and PM_HOST.user() is null there). */
+  const paints = [...app.matchAll(/getElementById\('user-area'\)\.innerHTML\s*=[^\n]*\n([^\n]*\n)?/g)];
+  if (paints.length !== 4) fail(`app.js paints #user-area in ${paints.length} places; 1cg expects 4 (sign-in, signed out, paused, showApp) — each must call PM.syncHeader(), then update this count`);
+  const shows = paints.filter(m => /PM\.syncHeader\(true\)/.test(m[0])).length, hides = paints.filter(m => /PM\.syncHeader\(false\)/.test(m[0])).length;
+  if (shows !== 1 || hides !== 3) fail(`app.js: after each #user-area paint PM.syncHeader() must follow — showApp true (1), the other three false (3); found ${shows} true, ${hides} false`);
+  if (!/function showApp\(user\)\{[\s\S]*?PM\.syncHeader\(true\)/.test(app)) fail('app.js showApp(): PM.syncHeader(true) is missing');
+  const tpaints = [...strip((read('teacher.js') || '').replace(/\r\n/g, '\n')).matchAll(/getElementById\('user-area'\)\.innerHTML\s*=[^\n]*\n([^\n]*\n)?/g)];
+  if (tpaints.length !== 2 || tpaints.some(m => !/PM\.syncHeader\(false\)/.test(m[0]))) fail(`teacher.js paints #user-area in ${tpaints.length} places (expected 2); each must be followed by PM.syncHeader(false) — the console must never show the strip`);
+  if (!/function anchorRect\(\)\{[^}]*getElementById\('pm-header'\)/.test(eng) || /page-topbar|ca-screen/.test(strip(eng))) fail('practice-minutes.js: the toast and recap must anchor to #pm-header (not a practice card\'s bar)');
+  if (!/syncHeader:\s*syncHeader/.test(eng) || /onCardOpen/.test(strip(eng))) fail('practice-minutes.js: PM.syncHeader must be public and PM.onCardOpen gone');
   const mp = /function renderMyProgress\(\)\{[\s\S]*?\n\}\n/.exec(app);
   if (!mp || !/PM\.renderProgress\(document\.getElementById\('pm-progress'\)\)/.test(mp[0])) fail('app.js renderMyProgress(): PM.renderProgress(#pm-progress) is missing');
   /* Since 2026-11-03 all site work counts (no backing-track filter); the 2-minute window is pinned by pm-sim section 12. */
@@ -11521,6 +11546,8 @@ function checkPracticeMinutes(i18nTable) {
     const K = new Set(Object.keys(i18nTable).filter(k => k.startsWith('pm.')));
     const used = new Set(); let litCount = 0;
     for (const mm of strip(eng).matchAll(/'(pm\.[A-Za-z0-9.]+)'/g)) { litCount++; used.add(mm[1]); }
+    /* A key the engine never names but index.html wires by data-i18n-attr (the header strip's tooltip) is used too. */
+    for (const mm of idx.matchAll(/data-i18n-attr="([^"]*)"/g)) for (const pair of mm[1].split(';')) { const key = (pair.split(':')[1] || '').trim(); if (key.startsWith('pm.')) { litCount++; used.add(key); } }
     for (const u of used) if (!(K.has(u) || (K.has(u + '.one') && K.has(u + '.many')))) fail(`practice-minutes.js asks for i18n key '${u}' that i18n.js does not have (or has only one of .one/.many)`);
     for (const k of K) { const base = k.replace(/\.(one|many)$/, ''); if (!used.has(k) && !used.has(base)) fail(`i18n.js has '${k}' that practice-minutes.js never uses (dead string)`); }
     for (const k of K) { const e = i18nTable[k]; if (!e || !e.en || !e.es) fail(`i18n key '${k}' needs both en and es`); }

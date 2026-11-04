@@ -814,6 +814,7 @@ if(auth) auth.onAuthStateChanged(async user=>{
     window.__authBootPending = true;
     setAuthWallChecking(SW_UPDATE_BOOT ? 'auth.updating' : 'auth.loading');
     document.getElementById('user-area').innerHTML = userHeaderHtml(user);
+    if(window.PM) PM.syncHeader(false);   // hidden until showApp: no app behind it yet, and never on the teacher console
     startAuthStallTimer();   // ...but don't strand them there if the load never finishes
     try{
       if(IS_TEACHER_MODE){ await ensureTeacherJs(); showTeacherApp(user); clearAuthStallTimer(); }
@@ -857,6 +858,7 @@ if(auth) auth.onAuthStateChanged(async user=>{
     document.getElementById('fab-group').style.display='none';
     document.getElementById('search-btn').style.display='none';
     document.getElementById('user-area').innerHTML=`<button class="btn-sign" onclick="signIn()" data-i18n="header.signIn">${t('header.signIn')}</button>`;
+    if(window.PM) PM.syncHeader(false);   // signed out: the practice-minutes strip goes with the student
   }
 });
 
@@ -888,6 +890,7 @@ function showPausedScreen(user){
     `</div>`;
   el.style.display='block';
   document.getElementById('user-area').innerHTML=userHeaderHtml(user);
+  if(window.PM) PM.syncHeader(false);   // a paused student has no My progress to open
 }
 
 function showApp(user){
@@ -896,6 +899,7 @@ function showApp(user){
   document.getElementById('fab-group').style.display='flex';
   document.getElementById('search-btn').style.display='flex';
   document.getElementById('user-area').innerHTML=userHeaderHtml(user);
+  if(window.PM) PM.syncHeader(true);   // practice minutes in the top bar (uiOn, a student, not the console)
   renderAll();
   applyGamesAccess();
   // The activity gate (see caBlockers/applyActivityGate) — computed before
@@ -15366,13 +15370,9 @@ function caSyncTopbar(){
     + optTag
     + (steps || (prog ? `<span class="ca-bar-prog">${escHtml(prog)}</span>` : ''))
     + (caIsCard(a) ? `<button type="button" class="ca-bar-stop" onclick="pcStop()" hidden>&#x25A0; ${escHtml(t('ca.snipStop'))}</button>` : '')
-    /* Practice minutes: week ring, streak flame and "N playing", right side of
-       a practice card's bar. '' unless uiOn (practice-minutes-config.js). */
-    + (caIsCard(a) && window.PM ? PM.stripHtml() : '')
     + (tools ? `<span class="ca-bar-tools">${tools}</span>` : '');
   bar.hidden = false;
   title.hidden = true;
-  if(caIsCard(a) && window.PM) PM.onCardOpen();
   if(refocusFull){ const b = bar.querySelector('.ca-bar-full'); if(b) b.focus({ preventScroll: true }); }
   pcSyncBarStop();
 }

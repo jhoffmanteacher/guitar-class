@@ -163,10 +163,12 @@ async function showTeacherApp(user){
   if(user.email!==TEACHER_EMAIL){
     document.getElementById('teacher-denied').style.display='block';
     document.getElementById('user-area').innerHTML=userHeaderHtml(user);
+    if(window.PM) PM.syncHeader(false);   // the console never shows the practice-minutes strip
     return;
   }
   document.getElementById('teacher-app').style.display='block';
   document.getElementById('user-area').innerHTML=userHeaderHtml(user);
+  if(window.PM) PM.syncHeader(false);   // same: hidden on the console (PM_HOST.user() is null there too)
   // "Trouble spots" is a class-wide view, not per-set — added here (rather than
   // in index.html) so the whole feature stays contained to this file. Guarded
   // so re-entering teacher mode doesn't insert it twice.

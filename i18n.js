@@ -636,10 +636,13 @@
     'pm.title':           { en: 'Practice minutes', es: 'Minutos de práctica' },
     'pm.min':             { en: 'min', es: 'min' },
     'pm.close':           { en: 'Close', es: 'Cerrar' },
-    // The status strip in a practice card's top bar.
+    // The status strip in the main top bar (index.html #pm-header; its tooltip is pm.openProgress).
+    'pm.openProgress':    { en: 'Open My progress', es: 'Abrir Mi progreso' },
     'pm.playing':         { en: '{n} playing', es: '{n} tocando' },
-    'pm.weekMin':         { en: '{done}/{goal} min this week', es: '{done}/{goal} min esta semana' },
-    'pm.weekMinBreak':    { en: '{done} min this week', es: '{done} min esta semana' },
+    // The top bar has to hold the title, Find, Español and a long name on one row in Spanish
+    // (Jonathan, 2026-11-03, STOP B): the strip says "12/30 min" with no "this week"; the ring and the My progress tile say the rest.
+    'pm.weekMin':         { en: '{done}/{goal} min', es: '{done}/{goal} min' },
+    'pm.weekMinBreak':    { en: '{done} min', es: '{done} min' },
     // Streak of 0: the flame's label and the My progress tile say this instead of "0-week streak".
     'pm.streakNone':      { en: 'No streak yet', es: 'Aún no tienes racha' },
     // The goal cannot be reached any more this week: the daily cap leaves too few minutes. My progress tile and the recap card.

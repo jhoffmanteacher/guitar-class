@@ -691,6 +691,74 @@ async function strumWalk(page, run, events, stats) {
   await run('strum:close', `(document.querySelectorAll('.ca-card[open]').forEach(c => { c.open = false; }), 1)`, 100);
 }
 
+/* The practice-minutes strip in the main top bar (2026-11-03). The site's own host has no Firebase user under the dev
+   bypass, so the engine is given a fake signed-in student and a do-nothing Firestore (what tools/pm-e2e.mjs does, smaller:
+   this walk is about WHERE the strip is, not what it counts). Looks at six views in both languages at 1366x657 and at
+   390 px: the strip is a button, shown, nothing sideways-scrolls, and a practice card has exactly ONE .pm-strip, none in its
+   own bar. Games is the one full-screen layer (z 120) over the whole header, so there the strip is in the page but covered,
+   like Find and Sign out. Clicking it opens My progress (and a second click keeps it open); after a reload it comes back. */
+async function pmHeaderWalk(page, run, events, stats) {
+  const fail = (w, text) => events.push({ step: 'pm-header:' + w, kind: 'pm-header', text });
+  const metrics = (w, h) => page.send('Emulation.setDeviceMetricsOverride', { width: w, height: h, deviceScaleFactor: 1, mobile: false });
+  const FAKE = `(() => { window.__pmWho = 'smoke-pm-student'; const doc = { collection: () => ({ get: () => Promise.resolve({ forEach() {} }), where: () => ({ get: () => Promise.resolve({ forEach() {} }) }), doc: () => ({ set: () => Promise.resolve() }) }), set: () => Promise.resolve() };
+    const db = { collection: () => ({ doc: () => doc }), batch: () => ({ set() {}, commit: () => Promise.resolve() }) };
+    PM.setHost({ ui: true, user: () => window.__pmWho ? { uid: window.__pmWho, getIdToken: () => Promise.resolve('tok') } : null, db: () => db, period: () => '7' });
+    PRACTICE_MINUTES_CONFIG.uiOn = true; PM.syncHeader(true); return true; })()`;
+  if (!(await run('pm-header:present', `!!window.PM && !!document.getElementById('pm-header')`, 50))) { fail('boot', 'no PM engine or no #pm-header on the page'); return; }
+  await metrics(1366, 657);
+  await run('pm-header:fake-student', FAKE, 600);
+  const card = await run('pm-header:card', `(() => { const a = CLASS_ACTIVITIES.find(x => x.view === 'card' && !x.teacherOnly && (caIsVisible(x) || caIsPlayAlongOnly(x))); return a ? a.id : null; })()`, 20);
+  const views = [['Modules', 'returnToPractice()'], ['In class', 'toggleClassActivities()'], ['Songs', 'toggleSongsHub()'], ['Games', 'toggleGames()'], ['My progress', 'toggleMyProgress()'], ['a practice card', card ? `openClassActivitiesScreen(${JSON.stringify(card)})` : '0']];
+  const probe = `(() => { const h = document.getElementById('pm-header'), r = h.getBoundingClientRect(); const hit = document.elementFromPoint(r.left + r.width / 2, r.top + r.height / 2);
+    return { shown: !h.hidden && !!h.getClientRects().length, isButton: h.tagName === 'BUTTON' && /(^|\\s)pm-strip(\\s|$)/.test(h.className), text: h.innerText.replace(/\\s+/g, ' ').trim(), onTop: h.contains(hit), strips: document.querySelectorAll('.pm-strip').length, inCardBar: document.querySelectorAll('#ca-bar-open .pm-strip').length,
+      over: document.documentElement.scrollWidth - document.documentElement.clientWidth, hdrH: Math.round(document.querySelector('.header').getBoundingClientRect().height), tip: h.title }; })()`;
+  for (const [w, h] of [[1366, 657], [390, 844]]) {
+    await metrics(w, h); await sleep(300);
+    for (const lang of ['en', 'es']) {
+      await run(`pm-header:${lang}`, `setLang('${lang}')`, 500);
+      for (const [name, call] of views) {
+        const label = `${name} ${lang} ${w}px`;
+        await run(`pm-header:go:${label}`, call, 900);
+        const m = await run(`pm-header:probe:${label}`, probe, 10);
+        if (!m) { fail(label, 'probe failed'); continue; }
+        if (!m.shown || !m.isButton) fail(label, 'the strip is not a shown button: ' + JSON.stringify(m));
+        else if (name !== 'Games' && !m.onTop) fail(label, 'something covers the strip: ' + JSON.stringify(m));
+        else if (name === 'Games' && m.onTop) fail(label, 'Games is expected to be a full-screen layer over the header; it is not any more — update this walk and the CHANGELOG/WORKFLOW notes');
+        if (m.strips !== 1) fail(label, `${m.strips} .pm-strip elements, expected exactly 1`);
+        if (m.inCardBar) fail(label, 'a strip is also drawn in the practice card\'s bar');
+        if (m.over > 0) fail(label, `the page scrolls sideways by ${m.over}px`);
+        if (w === 1366 && lang === 'en' && !/^(\d+ playing )?\d+\/\d+ min \d+$/.test(m.text)) fail(label, 'strip text is ' + JSON.stringify(m.text));
+        if (w === 1366 && m.hdrH > 56) fail(label, `the top bar is ${m.hdrH}px tall (one row is ≤ 56px)`);
+        if (m.tip !== (lang === 'en' ? 'Open My progress' : 'Abrir Mi progreso')) fail(label, 'tooltip is ' + JSON.stringify(m.tip));
+        stats.pmHeaderViews = (stats.pmHeaderViews || 0) + 1;
+      }
+    }
+  }
+  await metrics(1366, 657); await sleep(300);
+  await run('pm-header:en', `setLang('en')`, 400);
+  await run('pm-header:to-card', card ? `openClassActivitiesScreen(${JSON.stringify(card)})` : '0', 900);
+  await run('pm-header:click', `document.getElementById('pm-header').click()`, 900);
+  const open1 = await run('pm-header:open1', `!document.getElementById('my-progress-screen').hasAttribute('hidden')`, 10);
+  if (!open1) fail('click', 'clicking the strip did not open My progress');
+  await run('pm-header:click2', `document.getElementById('pm-header').click()`, 700);
+  if (!(await run('pm-header:open2', `!document.getElementById('my-progress-screen').hasAttribute('hidden')`, 10))) fail('click', 'a second click closed My progress (it must only scroll to the top)');
+  stats.pmHeaderClicks = 2;
+  /* A reload: the dev bypass is gone with the page, so sign in again; the strip must come back and still open My progress. */
+  const loadedAgain = new Promise(r => page.on(m => { if (m === 'Page.loadEventFired') r(); }));
+  await run('pm-header:reload', `location.reload()`, 10);
+  await Promise.race([loadedAgain, sleep(15000)]); await sleep(3500);
+  await run('pm-header:devBypass', `devBypass()`, 3500);
+  await run('pm-header:fake-student-2', FAKE, 800);
+  const back = await run('pm-header:after-reload', `(() => { const h = document.getElementById('pm-header'); return !h.hidden && !!h.getClientRects().length; })()`, 10);
+  if (!back) fail('reload', 'after a reload and a new sign-in the strip is not showing');
+  await run('pm-header:click3', `document.getElementById('pm-header').click()`, 900);
+  if (!(await run('pm-header:open3', `!document.getElementById('my-progress-screen').hasAttribute('hidden')`, 10))) fail('reload', 'after a reload, clicking the strip did not open My progress');
+  stats.pmHeaderReload = true;
+  /* Signed out: hidden at once and empty. */
+  await run('pm-header:out', `(() => { window.__pmWho = null; PM.syncHeader(false); return true; })()`, 200);
+  if (!(await run('pm-header:out-check', `(() => { const h = document.getElementById('pm-header'); return h.hidden && h.innerHTML === '' && !h.getClientRects().length; })()`, 10))) fail('signed-out', 'the strip is still showing with nobody signed in');
+}
+
 async function walk(base, chromePort, label) {
   const page = await openPage(chromePort);
   let step = 'boot'; const events = []; const stats = { sets: 0, modules: 0, games: 0, buttons: 0 };
@@ -985,6 +1053,7 @@ async function walk(base, chromePort, label) {
   await noteCallWalk(page, run, events, stats, base);
   await recordingWalk(page, run, events, stats, base);
   await strumWalk(page, run, events, stats);
+  await pmHeaderWalk(page, run, events, stats);
   await page.close();
   return { label, stats, errors: events.filter(e => !NOISE.test(e.text || '')) };
 }
@@ -1018,7 +1087,7 @@ try {
   const norm = e => `${e.kind}|${e.step.replace(/^(en|es):/, '')}|${e.kind === 'bad-handler' ? '' : e.text}`;
   const baseCount = new Map(); (base ? base.errors : []).forEach(e => baseCount.set(norm(e), Math.max(baseCount.get(norm(e)) || 0, e.kind === 'bad-handler' ? +e.text : 1)));
   const report = base ? now.errors.filter(e => (e.kind === 'bad-handler' ? +e.text : 1) > (baseCount.get(norm(e)) || 0)) : now.errors;
-  say(`smoke: ${now.stats.sets} sets in ${now.stats.modules} modules (EN + ES), ${now.stats.games} game views, ${now.stats.buttons} inline handlers compiled${now.stats.chordCards ? `, ${now.stats.chordCards} chord-grid cards walked (cursor, lap, layout at 1366/390/360, lyric sheet${now.stats.bassClicks ? `, bass switch clicked on ${now.stats.bassClicks}` : ''}${now.stats.recordingClicks ? `, recording switch clicked, reloaded and flipped back on ${now.stats.recordingClicks}` : ''}${now.stats.chordSkipped ? `; ${now.stats.chordSkipped.join(', ')} is teacher-only and not walked` : ''})` : ''}${now.stats.noteCallSteps ? `, ${now.stats.noteCallSteps} Note Call power-chord steps (EN + ES: six strings, taps on low E and A only, a hit and a miss)` : ''}${now.stats.powerLayouts ? `, Power Chord Switch at 1366\u00d7657 (Start and tempo on screen: ${now.stats.powerLayouts} views, incl. after a reload${now.stats.powerBestLayouts ? `; with a "Best today" score, EN + ES, no scrolling and the privacy line on screen: ${now.stats.powerBestLayouts} views` : ''}${now.stats.songs ? `; song buttons picked and reopened, ${now.stats.songs} song-switch rounds (16 switches x 3) run on a fake clock: round tempos, the BPM buttons, the play screen fitting 657px, one lit chart per chord, the done screen with 21 changes, ${now.stats.songDraws} random draws, none a song` : ""}${now.stats.powerCosmetic ? `; "low E" title kept together at ${now.stats.powerTitleWidths} window widths and the done-screen button padded, EN + ES: ${now.stats.powerCosmetic}` : ''})` : ''}${now.stats.changeUpLayouts ? `, Change Up at 1366\u00d7657 (Start on screen, no scrolling: ${now.stats.changeUpLayouts} views)` : ''}${now.stats.quizLayouts ? `, Chord Blitz (both directions) and Fret Zap at 1366\u00d7657 (picture left, 2\u00d72 answers right, no scroll: ${now.stats.quizLayouts} views)` : ''}${now.stats.strumSteps ? `, ${now.stats.strumSteps} strum-pattern steps (EN + ES: cells, arrows, chord names, columns, 1366 and 390 px; Play strum lights an arrow, clicks every beat and sounds down strums louder; Play clicks opens the Metronome at 60 BPM; Stop resets)` : ''}`);
+  say(`smoke: ${now.stats.sets} sets in ${now.stats.modules} modules (EN + ES), ${now.stats.games} game views, ${now.stats.buttons} inline handlers compiled${now.stats.chordCards ? `, ${now.stats.chordCards} chord-grid cards walked (cursor, lap, layout at 1366/390/360, lyric sheet${now.stats.bassClicks ? `, bass switch clicked on ${now.stats.bassClicks}` : ''}${now.stats.recordingClicks ? `, recording switch clicked, reloaded and flipped back on ${now.stats.recordingClicks}` : ''}${now.stats.chordSkipped ? `; ${now.stats.chordSkipped.join(', ')} is teacher-only and not walked` : ''})` : ''}${now.stats.noteCallSteps ? `, ${now.stats.noteCallSteps} Note Call power-chord steps (EN + ES: six strings, taps on low E and A only, a hit and a miss)` : ''}${now.stats.powerLayouts ? `, Power Chord Switch at 1366\u00d7657 (Start and tempo on screen: ${now.stats.powerLayouts} views, incl. after a reload${now.stats.powerBestLayouts ? `; with a "Best today" score, EN + ES, no scrolling and the privacy line on screen: ${now.stats.powerBestLayouts} views` : ''}${now.stats.songs ? `; song buttons picked and reopened, ${now.stats.songs} song-switch rounds (16 switches x 3) run on a fake clock: round tempos, the BPM buttons, the play screen fitting 657px, one lit chart per chord, the done screen with 21 changes, ${now.stats.songDraws} random draws, none a song` : ""}${now.stats.powerCosmetic ? `; "low E" title kept together at ${now.stats.powerTitleWidths} window widths and the done-screen button padded, EN + ES: ${now.stats.powerCosmetic}` : ''})` : ''}${now.stats.changeUpLayouts ? `, Change Up at 1366\u00d7657 (Start on screen, no scrolling: ${now.stats.changeUpLayouts} views)` : ''}${now.stats.quizLayouts ? `, Chord Blitz (both directions) and Fret Zap at 1366\u00d7657 (picture left, 2\u00d72 answers right, no scroll: ${now.stats.quizLayouts} views)` : ''}${now.stats.pmHeaderViews ? `, practice-minutes strip in the top bar: ${now.stats.pmHeaderViews} view checks (6 views x EN/ES x 1366 and 390 px: a shown button, nothing over it but the full-screen Games layer, one strip, no sideways scroll), ${now.stats.pmHeaderClicks} clicks open My progress, back after a reload, hidden when signed out` : ''}${now.stats.strumSteps ? `, ${now.stats.strumSteps} strum-pattern steps (EN + ES: cells, arrows, chord names, columns, 1366 and 390 px; Play strum lights an arrow, clicks every beat and sounds down strums louder; Play clicks opens the Metronome at 60 BPM; Stop resets)` : ''}`);
   if (base) say(`smoke: ${BASELINE} had ${base.errors.length} error event(s); this checkout has ${now.errors.length}`);
   if (report.length) {
     exitCode = 1;

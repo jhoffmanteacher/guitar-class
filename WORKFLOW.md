@@ -1020,8 +1020,9 @@
       `tools/pm-e2e.mjs` (real Chrome at 1366×657, screenshots; by hand),
       `tools/pm-rules-test.mjs` (the rules against the Firestore emulator; by
       hand), `firestore.indexes.json` (one composite index). Hooks: `window.PM_HOST`
-      in `app.js` (ui:true) and `tabs/journey.js` (ui:false), `PM.stripHtml()` +
-      `PM.onCardOpen()` in `caSyncTopbar()`, `PM.renderProgress()` in
+      in `app.js` (ui:true) and `tabs/journey.js` (ui:false), `PM.syncHeader()`
+      on every `#user-area` paint path (the strip is the `#pm-header` button in the main top
+      bar; it was in a practice card's bar until 2026-11-04), `PM.renderProgress()` in
       `renderMyProgress()`, a `<div id="pm-progress">` in index.html, two script
       tags in index.html and in all six `tabs/*.html`.
       **What counts:** an `<audio>` whose file is `audio/…-backing-…`, playing
@@ -1100,8 +1101,8 @@
       are a snapshot for later use). The prefilled skip weeks (Thanksgiving, two
       winter-break weeks, mid-winter break, spring break) and the semester date
       came from the work order, not from a calendar: check them against the district's.
-      **Layout:** with the strip showing, Full screen folds to its icon
-      (the phone-width rule) so the bar stays one row in Spanish. **Limits:**
+      **Layout:** (until 2026-11-04 the strip sat in a practice card's bar and Full
+      screen folded to its icon; it no longer does, see below). **Limits:**
       a Journey page's player loops by itself and counts while it plays (the
       daily cap bounds it); the heartbeat count can be inflated by anyone
       signed in, and anyone signed in can list the heartbeats collection
@@ -1113,6 +1114,50 @@
       is forgiven; the games card already shows a 🔥 day streak, so a
       second flame (weeks) may confuse; `--streak-dim` is 2.5:1 on its
       background (the one graphic under 3:1, on purpose — "dim").
+      **2026-11-04 — the strip moved to the main top bar, every page.** Work order
+      `WO-practice-minutes-header.md`. All work counts, so the number has to be
+      where the work is. **Where:** `<button id="pm-header" class="pm-strip
+      pm-strip-header" hidden>` first in the header's right-hand group
+      (`index.html`); `PM.syncHeader(show)` fills and shows it when `uiOn()` + host
+      `ui:true` + a student (`uiOn()` runs `sync()`, so a new student's state is built
+      before anything is drawn: a shared Chromebook never shows the last student's
+      numbers) and hides and empties it otherwise. `app.js` calls it after each of its
+      four `#user-area` paints (`showApp` = `true`; the sign-in wall, signed out and the
+      paused screen = `false`) and `teacher.js` after its two (`false`; `PM_HOST.user()`
+      is null on the console anyway). `refreshStrip()` hides and empties
+      `#pm-header` rather than removing it, never un-hides it and never fills a hidden
+      one. A click calls `toggleMyProgress()` (opens, or scrolls to the top; never
+      closes). **Gone from the practice card's bar:** `caSyncTopbar()` no longer draws
+      it, `PM.onCardOpen` is removed, the card-bar CSS that made room for it is removed
+      (Full screen has its word back; the bar measured identical to `uiOn:false`, EN +
+      ES). Journey pages are untouched (`ui:false`). **Pills:** the toast (centred under
+      the strip) and the recap (right edge in line with the strip's) drop down on any
+      page, kept inside the window; `anchorRect()` is the strip's rect, or `null` if the
+      strip is hidden OR covered (`elementFromPoint`), `followStrip()` removes a pill
+      when that goes null, and `uiTick()` (1 s) shows a toast that was held back. The
+      recap still opens only when a play run ends (engine rule, unchanged).
+      **STOP A (a scrolled practice card): passed.** The header is outside the scrolled
+      `#main-content`, and the card's sticky bar sits at top 49px under it (z 50 vs 20),
+      so nothing covers the strip (measured with `elementFromPoint` at the strip's centre
+      after scrolling a 2,900px card to the bottom). No stacking was changed.
+      **STOP B (Spanish, long name, "N playing" showing): failed as first built**, and
+      Jonathan chose to shorten the week text. `pm.weekMin` is now "{done}/{goal} min"
+      (was "… min this week"), `pm.weekMinBreak` "{done} min". Measured at 1366×657
+      with "N playing" showing: Spanish holds one row for names up to 21 characters
+      (10 as first built; 55 with no strip), English up to 45 (35 as built; 61 with no
+      strip). Longer names wrap the title and the bar grows 49 → 70px; not fixed (a
+      different choice would have been to drop "N playing", 23/48, or both, 35/56).
+      **Games** is a full-screen layer (`.games-screen`, z 120) over the whole page, so
+      the strip is covered there with Find, Español and Sign out; a pill is not drawn
+      under it and a toast waits. Left as is: raising it would change stacking.
+      **Cost:** `ensureStripWork()` now runs for every signed-in student on every page:
+      one aggregation query per 30 s per visible tab for "N playing", all class. Accepted;
+      the interval is unchanged. **Tests:** checks.mjs 1cg pins the new wiring (16
+      mutations, 16 red); `tools/pm-e2e.mjs` is re-pointed at the header and gained module-page pills,
+      signed-out, student-switch and `?teacher` cases (it was already red at two points
+      on origin/main after the 2026-11-03 engine change: a recap now needs a PLAY run,
+      `PM._play().counted`, and a session starts at the first click); `tools/smoke.mjs`
+      walks the strip on 6 views x EN/ES x 1366/390 px, the click and a reload.
 
 - [x] **2026-10-31 — "Hear It First": a hidden adaptive ear + fretboard trainer.**
       Work order `WO-hear-it-first.md` (kept out of the repo). For Jonathan's

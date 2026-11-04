@@ -5,6 +5,12 @@ Notable changes to the Guitar Class site. Newest first.
 For the full session-by-session history (and the reasoning behind each change),
 see `WORKFLOW.md` and the git commit log.
 
+## 2026-11-04 — Your practice minutes are now in the top bar
+
+- **Your practice minutes are now in the top bar on every page.** The ring shows this week's minutes and the flame shows your streak. Click it to open My progress. They're no longer in the bar on top of a practice card.
+- **The week text is shorter:** it says "12/30 min" now, with no "this week", so the top bar has room for your name.
+- **"Week goal hit" and "+N min" now drop down from the top bar on any page.** The "+N min" box still shows only when a song stops.
+
 ## 2026-11-04 — Power Chord Switch: a game you stop is saved too
 
 - **If you say yes to saving your take, a Power Chord Switch game you stop early is saved too**, as long as it recorded at least 10 seconds. A shorter stop is not saved, so it does not replace your last full take. Leaving the screen still saves nothing.

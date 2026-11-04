@@ -7,8 +7,8 @@
    Firestore, opens a real practice card, presses its real Play button on a real
    backing-track mp3, and looks at what a student would see:
 
-     · the status strip in the card's sticky bar (one row, right side)
-     · the recap card, the week-goal toast
+     · the status strip in the MAIN top bar (index.html #pm-header, on every page; 2026-11-03)
+     · the recap card and the week-goal toast, dropping down from it on any page
      · the My progress tiles, bars and 8-week row, in English and Spanish
      · colours read back from the browser (getComputedStyle), not assumed
      · uiOn:false draws nothing at all
@@ -109,11 +109,11 @@ await ev(`(() => {
   });
   const db = { collection: (c) => ({ doc: (uid) => ({ collection: (k) => { const o = col(k); const d = o.doc; o.doc = (i) => ({ path: k + '/' + i }); return o; } }), doc: (i) => ({ set: (d) => { window.__fs.hb.push({ id: i, d }); return Promise.resolve(); } }) }),
     batch: () => { const ops = []; return { set: (r, d) => ops.push([r.path, d]), commit: () => { ops.forEach(([p, d]) => { const [k, i] = p.split('/'); const cur = window.__fs[k][i] || {}; window.__fs[k][i] = Object.assign({}, cur, d, { seconds: (cur.seconds || 0) + d.seconds.__inc }); }); window.__fs.commits.push(ops.length); return Promise.resolve(); } }; } };
-  const fakeUser = { uid: 'e2e-student', getIdToken: () => Promise.resolve('tok') };
+  window.__who = 'e2e-student';   // the signed-in student's uid; null = nobody (the tests below sign out and switch students)
   const fb = window.firebase || {};
   if (!fb.firestore) { window.firebase = Object.assign(fb, { firestore: Object.assign(() => db, { FieldValue: { increment: inc, serverTimestamp: () => ({}) }, FieldPath: { documentId: () => '__name__' } }) }); }
   window.__period = '7';
-  PM.setHost({ ui: true, user: () => fakeUser, db: () => db, period: () => window.__period });
+  PM.setHost({ ui: true, user: () => window.__who ? { uid: window.__who, getIdToken: () => Promise.resolve('tok') } : null, db: () => db, period: () => window.__period });
   window.__aggN = 14;
   const of = window.fetch; window.fetch = (u, i) => /runAggregationQuery/.test(u) ? Promise.resolve({ json: () => Promise.resolve([{ result: { aggregateFields: { n: { integerValue: String(window.__aggN) } } } }]) }) : of(u, i);
   return true;
@@ -139,7 +139,9 @@ const card = await ev(`(() => { const a = CLASS_ACTIVITIES.find(x => x.view === 
 check('found a practice card to open', !!card, card);
 await ev(`openClassActivitiesScreen(${JSON.stringify(card)})`); await sleep(1200);
 check('the card is open with its sticky bar', await ev(`!!document.querySelector('#ca-bar-open .ca-bar-name') && !document.getElementById('ca-bar-open').hidden`));
-check('uiOn:false → no strip in the bar', await ev(`document.querySelectorAll('.pm-strip').length`) === 0);
+await ev(`PM.syncHeader(true)`);
+check('uiOn:false → the header strip stays hidden and empty', await ev(`(() => { const h = document.getElementById('pm-header'); return !!h && h.hidden && h.innerHTML === '' && !h.getClientRects().length; })()`));
+check('uiOn:false → no strip anywhere in the bar either', await ev(`document.querySelectorAll('#ca-bar-open .pm-strip').length`) === 0);
 await ev(`openMyProgressScreen && (location.hash = '#my-progress')`); await sleep(800);
 check('uiOn:false → My progress shows no minutes panel', await ev(`document.getElementById('pm-progress').hidden === true && document.getElementById('pm-progress').innerHTML === ''`));
 await ev(`openClassActivitiesScreen(${JSON.stringify(card)})`); await sleep(1200);
@@ -147,16 +149,19 @@ await ev(`openClassActivitiesScreen(${JSON.stringify(card)})`); await sleep(1200
 /* ── a real Play on a real backing track ── */
 console.log('uiOn true, real playback');
 await seedWeeks([1900, 1900, 1900]);           // three hit weeks before this one → streak 3 once it is hit
-await ev(`PRACTICE_MINUTES_CONFIG.uiOn = true; PM.onCardOpen(); caSyncTopbar();`); await sleep(500);
+await ev(`PRACTICE_MINUTES_CONFIG.uiOn = true; PM.syncHeader(true); caSyncTopbar();`); await sleep(500);
 await ev(`(() => { const s = PM._state(); s.loaded = true; s.weeks = JSON.parse(JSON.stringify(window.__fs.weeks)); s.weeks[PM.calc.weekIdOf(PM.calc.ymd(new Date()))] = { seconds: 23 * 60 - 6, goalSeconds: 1800, hit: false }; return true; })()`);   // 22:54 earlier this week; 6 s of real play will make 23:00
 await ev(`document.querySelector('.ca-card[open] .pc-play').click()`);
-await waitFor(`PM._session() && PM._session().counted >= 6`);
+await waitFor(`PM._play() && PM._session().counted >= 6`);
+/* Since 2026-11-03 the session starts at the first click, before this Play; wait for the week itself to reach 23:00 (the test set it 6 s short). */
+await waitFor(`PM.status().week.secs >= 23 * 60`, 15000);
 const st = await ev(`(() => { const s = PM._state(), d = PM.calc.ymd(new Date()); return { pend: s.pend[d], playing: !!(pcState && pcState.audio && !pcState.audio.paused), src: pcState && pcState.audio && pcState.audio.currentSrc, counted: PM._session() && PM._session().counted }; })()`);
 check('the real Play counted seconds from a real <audio> (detached element, wrapped play())', st.counted >= 6 && st.counted <= 12 && /-backing-/.test(st.src || ''), st);
 await ev(`PM._state().live = 14; PM.refreshStrip(true)`); await sleep(300);
-const bar = await ev(`(() => { const b = document.querySelector('.ca-screen .page-topbar'), s = document.querySelector('.pm-strip'); const r = s.getBoundingClientRect(), br = b.getBoundingClientRect(); const items = [...s.children].map(c => c.className); return { barH: Math.round(br.height), stripTop: Math.round(r.top - br.top), stripH: Math.round(r.height), stripRight: Math.round(br.right - r.right), items, text: s.innerText.replace(/\\s+/g, ' '), docOverflow: document.documentElement.scrollWidth > document.documentElement.clientWidth, barOverflow: b.scrollWidth > b.clientWidth }; })()`);
-check('the strip is in the existing bar: one row (bar ≤ 56px), no horizontal overflow', bar.barH <= 56 && !bar.docOverflow && !bar.barOverflow, bar);
-check('three items: live, week ring, streak flame — and only text "14 playing 23/30 min this week 3"', bar.items.join() === 'pm-live,pm-week,pm-streak' && bar.text === '14 playing 23/30 min this week 3', bar);
+const bar = await ev(`(() => { const b = document.querySelector('.header'), s = document.getElementById('pm-header'); const r = s.getBoundingClientRect(), br = b.getBoundingClientRect(); const items = [...s.children].map(c => c.className); return { barH: Math.round(br.height), stripTop: Math.round(r.top - br.top), stripH: Math.round(r.height), strips: document.querySelectorAll('.pm-strip').length, stripsInCardBar: document.querySelectorAll('#ca-bar-open .pm-strip').length, tag: s.tagName, items, text: s.innerText.replace(/\\s+/g, ' '), docOverflow: document.documentElement.scrollWidth > document.documentElement.clientWidth, barOverflow: b.scrollWidth > b.clientWidth }; })()`);
+check('the strip is in the main top bar (a button): one row (bar ≤ 56px), no horizontal overflow', bar.tag === 'BUTTON' && bar.barH <= 56 && !bar.docOverflow && !bar.barOverflow, bar);
+check('exactly ONE .pm-strip on an open practice card, and none in the card bar', bar.strips === 1 && bar.stripsInCardBar === 0, bar);
+check('three items: live, week ring, streak flame — and only text "14 playing 23/30 min 3"', bar.items.join() === 'pm-live,pm-week,pm-streak' && bar.text === '14 playing 23/30 min 3', bar);
 const col1 = await ev(`(() => { const q = (s, p) => getComputedStyle(document.querySelector(s))[p]; return { ring: q('.pm-strip .pm-ring-fg', 'stroke'), dot: q('.pm-strip .pm-dot', 'backgroundColor'), flame: q('.pm-strip .pm-streak', 'color'), strip: q('.pm-strip', 'backgroundColor'), text: q('.pm-strip .pm-week span', 'color'), dash: q('.pm-strip .pm-ring-fg', 'strokeDashoffset'), anim: q('.pm-strip .pm-dot', 'animationName') }; })()`);
 check('goal not hit: ring blue #5AA9FF, dot green #3DDC97, flame DIM (#7A5236)', col1.ring === 'rgb(90, 169, 255)' && col1.dot === 'rgb(61, 220, 151)' && col1.flame === 'rgb(122, 82, 54)', col1);
 check('the dot pulses', /pm-pulse/.test(col1.anim), col1.anim);
@@ -181,34 +186,34 @@ const toastKept = await ev(`PM._state().toastWeek === PM.calc.weekIdOf(PM.calc.y
 check('…and is remembered for the week (once per week per student)', toastKept);
 
 /* Stop → recap (session ≥ 60 s needed: lift the session's counted seconds) */
-await ev(`PM._session().counted = 5 * 60 + 2`);
+await ev(`PM._session().counted = 5 * 60 + 2; PM._play() && (PM._play().counted = 5 * 60 + 2)`);
 await ev(`pcStop()`); await sleep(3500);
 const recap = await ev(`(() => { const r = document.getElementById('pm-recap'); return r ? { text: r.innerText.replace(/\\s+/g, ' ').trim(), bg: getComputedStyle(r).backgroundColor, color: getComputedStyle(r.querySelector('.pm-recap-big')).color } : null; })()`);
 check('Stop shows the recap: "+5 min" and "This week: 30 of 30 min. That makes 4 weeks in a row."', recap && /^✕ \+5 min This week: 30 of 30 min\. That makes 4 weeks in a row\.$/.test(recap.text), recap);
 await shot('3-recap-en');
-const bbox = await ev(`(() => { const r = document.getElementById('pm-recap').getBoundingClientRect(), b = document.querySelector('.ca-screen .page-topbar').getBoundingClientRect(); return { top: Math.round(r.top), barBottom: Math.round(b.bottom), right: Math.round(r.right), vw: innerWidth, fits: r.right <= innerWidth && r.left >= 0 }; })()`);
-check('the recap sits right under the bar and inside the window', bbox.fits && bbox.top >= bbox.barBottom, bbox);
+const bbox = await ev(`(() => { const r = document.getElementById('pm-recap').getBoundingClientRect(), b = document.getElementById('pm-header').getBoundingClientRect(); return { top: Math.round(r.top), barBottom: Math.round(b.bottom), right: Math.round(r.right), stripRight: Math.round(b.right), vw: innerWidth, fits: r.right <= innerWidth && r.left >= 0 }; })()`);
+check('the recap drops down under the header strip, right edge in line with the strip\'s, inside the window', bbox.fits && bbox.top >= bbox.barBottom && Math.abs(bbox.right - bbox.stripRight) <= 1, bbox);
 await sleep(6500);
 check('the recap closes itself after 6 s', await ev(`!document.getElementById('pm-recap')`));
 /* a second stop inside 3 minutes: no second recap */
-await ev(`document.querySelector('.ca-card[open] .pc-play').click()`); await waitFor(`!!PM._session()`);
-await ev(`PM._session().counted = 120`); await ev(`pcStop()`); await sleep(3500);
+await ev(`document.querySelector('.ca-card[open] .pc-play').click()`); await waitFor(`!!PM._play()`);
+await ev(`PM._session().counted = 120; PM._play() && (PM._play().counted = 120)`); await ev(`pcStop()`); await sleep(3500);
 check('at most one recap per 3 minutes', await ev(`!document.getElementById('pm-recap')`));
 /* a short session: none */
-await ev(`PM._state().lastRecapAt = 0; document.querySelector('.ca-card[open] .pc-play').click()`); await waitFor(`!!PM._session()`);
-await ev(`PM._session().counted = 40`); await ev(`pcStop()`); await sleep(3500);
+await ev(`PM._state().lastRecapAt = 0; document.querySelector('.ca-card[open] .pc-play').click()`); await waitFor(`!!PM._play()`);
+await ev(`PM._session().counted = 40; PM._play() && (PM._play().counted = 40)`); await ev(`pcStop()`); await sleep(3500);
 check('a session under 60 s gets no recap', await ev(`!document.getElementById('pm-recap')`));
 /* the close button */
-await ev(`PM._state().lastRecapAt = 0; document.querySelector('.ca-card[open] .pc-play').click()`); await waitFor(`!!PM._session()`);
-await ev(`PM._session().counted = 90`); await ev(`pcStop()`); await sleep(3500);
+await ev(`PM._state().lastRecapAt = 0; document.querySelector('.ca-card[open] .pc-play').click()`); await waitFor(`!!PM._play()`);
+await ev(`PM._session().counted = 90; PM._play() && (PM._play().counted = 90)`); await ev(`pcStop()`); await sleep(3500);
 await ev(`document.querySelector('#pm-recap .pm-recap-x').click()`);
 check('the close button dismisses the recap', await ev(`!document.getElementById('pm-recap')`));
 
 /* ── The recap line before the goal is hit: "7 more keeps your 3-week streak." ── */
 await seedWeeks([1900, 1900, 1900]);
 await ev(`(() => { const s = PM._state(), d = PM.calc.ymd(new Date()); s.loaded = true; s.weeks = JSON.parse(JSON.stringify(window.__fs.weeks)); s.pend = {}; s.days = {}; s.weeks[PM.calc.weekIdOf(d)] = { seconds: 23 * 60, goalSeconds: 1800, hit: false }; s.lastRecapAt = 0; PM.refreshStrip(true); return true; })()`);
-await ev(`document.querySelector('.ca-card[open] .pc-play').click()`); await waitFor(`!!PM._session()`);
-await ev(`PM._session().counted = 5 * 60`); await ev(`pcStop()`); await sleep(3500);
+await ev(`document.querySelector('.ca-card[open] .pc-play').click()`); await waitFor(`!!PM._play()`);
+await ev(`PM._session().counted = 5 * 60; PM._play() && (PM._play().counted = 5 * 60)`); await ev(`pcStop()`); await sleep(3500);
 const r2 = await ev(`(document.getElementById('pm-recap') || {}).innerText`);
 check('before the goal: "This week: 23 of 30 min. 7 more keeps your 3-week streak."', /This week: 23 of 30 min\. 7 more keeps your 3-week streak\./.test(r2 || ''), r2);
 await shot('3b-recap-before-goal-en');
@@ -219,23 +224,38 @@ console.log('Spanish');
 await ev(`setLang('es')`); await sleep(800);
 await ev(`(() => { const s = PM._state(); s.weeks[PM.calc.weekIdOf(PM.calc.ymd(new Date()))] = { seconds: 23 * 60, goalSeconds: 1800, hit: false }; s.pend = {}; return true; })()`);
 await ev(`caSyncTopbar(); PM._state().live = 14; PM.refreshStrip(true)`); await sleep(300);
-const es = await ev(`(() => { const s = document.querySelector('.pm-strip'); const b = document.querySelector('.ca-screen .page-topbar'); return { text: s.innerText.replace(/\\s+/g, ' '), aria: s.querySelector('.pm-streak').getAttribute('aria-label'), barH: Math.round(b.getBoundingClientRect().height), overflow: document.documentElement.scrollWidth > document.documentElement.clientWidth }; })()`);
-check('Spanish strip: "14 tocando 23/30 min esta semana 3", flame label "racha de 3 semanas", one row', es.text === '14 tocando 23/30 min esta semana 3' && es.aria === 'racha de 3 semanas' && es.barH <= 56 && !es.overflow, es);
+const es = await ev(`(() => { const s = document.querySelector('.pm-strip'); const b = document.querySelector('.header'); return { text: s.innerText.replace(/\\s+/g, ' '), aria: s.querySelector('.pm-streak').getAttribute('aria-label'), barH: Math.round(b.getBoundingClientRect().height), overflow: document.documentElement.scrollWidth > document.documentElement.clientWidth }; })()`);
+check('Spanish strip: "14 tocando 23/30 min 3", flame label "racha de 3 semanas", one row', es.text === '14 tocando 23/30 min 3' && es.aria === 'racha de 3 semanas' && es.barH <= 56 && !es.overflow, es);
 await shot('4-strip-es');
 
-/* ── The bar stays ONE row at 1366×657, whatever is in it ── */
-console.log('sticky bar width');
+/* ── STOP B (2026-11-03): the main top bar stays ONE row at 1366×657 in Spanish with the widest strip
+   ("N playing" showing, goal hit) and a long name. As first built, "30/30 min esta semana" wrapped the title in Spanish at an
+   11-character name (49px → 70px); the strip now says "30/30 min". The practice card's own bar lost the strip: still one row. ── */
+console.log('top bar width');
 const rows = [];
+await ev(`(() => { const s = PM._state(); s.live = 25; s.weeks[PM.calc.weekIdOf(PM.calc.ymd(new Date()))] = { seconds: 1800, goalSeconds: 1800, hit: true }; return true; })()`);
+for (const lang of ['en', 'es']) {
+  await ev(`setLang('${lang}')`); await sleep(500);
+  for (const nm of ['Dev User', 'Ana María Gómez', 'Maximiliano Fernández']) {
+    await ev(`document.querySelector('.user-name').textContent = ${JSON.stringify(nm)}; PM.refreshStrip(true)`); await sleep(200);
+    const h = await ev(`Math.round(document.querySelector('.header').getBoundingClientRect().height)`);
+    rows.push(`${lang}/${nm.length}ch=${h}`);
+  }
+  await ev(`document.querySelector('.user-name').textContent = 'Dev User'`);
+}
+check('the top bar is one row (≤ 56px) with the widest strip in EN and ES × names of 8, 15 and 21 characters', rows.every((r) => +r.split('=')[1] <= 56) && rows.length === 6, rows);
+const cardRows = [];
 for (const lang of ['en', 'es']) {
   await ev(`setLang('${lang}')`); await sleep(500);
   for (const stop of [false, true]) for (const opt of [false, true]) {
     const withTag = opt ? "const tag = document.createElement('span'); tag.className = 'ca-optional-tag'; tag.textContent = t('ca.optional'); n.after(tag);" : '';
-    await ev(`(() => { caSyncTopbar(); PM._state().live = 14; PM.refreshStrip(true); const n = document.querySelector('#ca-bar-open .ca-bar-name'); ${withTag} document.querySelector('#ca-bar-open .ca-bar-stop').hidden = ${!stop}; return true; })()`); await sleep(250);
+    await ev(`(() => { caSyncTopbar(); const n = document.querySelector('#ca-bar-open .ca-bar-name'); ${withTag} document.querySelector('#ca-bar-open .ca-bar-stop').hidden = ${!stop}; return true; })()`); await sleep(250);
     const h = await ev(`Math.round(document.querySelector('#class-activities-screen .page-topbar').getBoundingClientRect().height)`);
-    rows.push(`${lang}${stop ? '+stop' : ''}${opt ? '+optional' : ''}=${h}`);
+    const lab = await ev(`Math.round(document.querySelector('#ca-bar-open .ca-bar-full-lab').getBoundingClientRect().width)`);
+    cardRows.push(`${lang}${stop ? '+stop' : ''}${opt ? '+optional' : ''}=${h}${lab > 20 ? '' : '(label clipped)'}`);
   }
 }
-check('with the strip the bar is one row (≤ 56px) in EN/ES × Stop shown/hidden × Optional tag', rows.every((r) => +r.split('=')[1] <= 56) && rows.length === 8, rows);
+check('the practice card\'s bar is one row (≤ 56px) and Full screen has its word back, EN/ES × Stop shown/hidden × Optional tag', cardRows.every((r) => +r.split('=')[1].split('(')[0] <= 56 && !/clipped/.test(r)) && cardRows.length === 8, cardRows);
 await ev(`setLang('en'); caSyncTopbar()`);
 
 /* ── My progress ── */
@@ -338,15 +358,15 @@ check('a first hit week is still "1-week streak" / "Racha de 1 semana"', /^Strea
 /* On the practice card: the flame's label, and the Stop recap. */
 await ev(`setLang('en'); openClassActivitiesScreen(${JSON.stringify(card)})`); await sleep(1500);
 await tilesAt(5, 0, [], 'en'); await ev(`openClassActivitiesScreen(${JSON.stringify(card)})`); await sleep(1200);
-await ev(`PM.onCardOpen(); caSyncTopbar(); PM.refreshStrip(true)`); await sleep(300);
+await ev(`PM.syncHeader(true); caSyncTopbar(); PM.refreshStrip(true)`); await sleep(300);
 const flameNone = await ev(`(document.querySelector('.pm-strip .pm-streak') || {}).getAttribute ? document.querySelector('.pm-strip .pm-streak').getAttribute('aria-label') : null`);
-check('the card bar\'s flame is labelled "No streak yet" with no streak (screen readers did hear "0-week streak")', flameNone === 'No streak yet', flameNone);
+check('the header\'s flame is labelled "No streak yet" with no streak (screen readers did hear "0-week streak")', flameNone === 'No streak yet', flameNone);
 await shiftClock('2026-11-29T10:00:00');
 await ev(`(() => { const s = PM._state(), d = PM.calc.ymd(new Date()), cur = PM.calc.weekIdOf(d); s.pend = {}; s.days = {}; s.weeks = {}; s.loaded = true; s.lastRecapAt = 0;
   for (let i = 1; i <= 3; i++) s.weeks[PM.calc.weekAdd(cur, -i)] = { seconds: 1900, goalSeconds: 1800, hit: true };
   s.weeks[cur] = { seconds: 20 * 60, goalSeconds: 1800, hit: false }; s.days[d] = 20 * 60; PM.refreshStrip(true); return true; })()`);
-await ev(`document.querySelector('.ca-card[open] .pc-play').click()`); await waitFor(`!!PM._session()`);
-await ev(`PM._session().counted = 5 * 60`); await ev(`pcStop()`); await sleep(3500);
+await ev(`document.querySelector('.ca-card[open] .pc-play').click()`); await waitFor(`!!PM._play()`);
+await ev(`PM._session().counted = 5 * 60; PM._play() && (PM._play().counted = 5 * 60)`); await ev(`pcStop()`); await sleep(3500);
 const recapOut = await ev(`(document.getElementById('pm-recap') || {}).innerText`);
 check('Stop on a Sunday at the cap: the recap says "You can’t reach the goal this week. A new week starts Monday." (not "10 more keeps your 3-week streak.")', /^✕ \+5 min This week: 20 of 30 min\. You can.t reach the goal this week\. A new week starts Monday\.$/.test((recapOut || '').replace(/\s+/g, ' ').trim()), recapOut);
 await ev(`document.getElementById('pm-recap') && document.getElementById('pm-recap').remove(); window.Date = window.__B; true`);
@@ -356,14 +376,14 @@ await ev(`location.hash = '#my-progress'`); await sleep(600);
 console.log('review follow-ups');
 await ev(`(() => { const s = PM._state(), cur = PM.calc.weekIdOf(PM.calc.ymd(new Date())); s.weeks = {}; for (let i = 1; i <= 12; i++) s.weeks[PM.calc.weekAdd(cur, -i)] = { seconds: 1900, goalSeconds: 1800, hit: true }; s.weeks[cur] = { seconds: 100 * 60, goalSeconds: 1800, hit: true }; s.days = {}; s.pend = {}; s.live = 25; return true; })()`);
 await ev(`window.__period = '7'; setLang('es'); location.hash = '#class-activities/${card}'; openClassActivitiesScreen(${JSON.stringify(card)})`); await sleep(1000);
-await ev(`(() => { caSyncTopbar(); PM.refreshStrip(true); const n = document.querySelector('#ca-bar-open .ca-bar-name'); const tag = document.createElement('span'); tag.className = 'ca-optional-tag'; tag.textContent = t('ca.optional'); n.after(tag); document.querySelector('#ca-bar-open .ca-bar-stop').hidden = false; return true; })()`); await sleep(300);
-const worst = await ev(`(() => ({ h: Math.round(document.querySelector('#class-activities-screen .page-topbar').getBoundingClientRect().height), text: document.querySelector('.pm-strip').innerText.replace(/\\s+/g, ' ') }))()`);
-check('widest strip (ES, Optional tag, Stop showing, 25 playing, 100+ min, 12-week streak) stays one row; the strip never shows more than the goal', worst.h <= 56 && /^25 tocando 30\/30 min esta semana 13$/.test(worst.text), worst);
+await ev(`(() => { caSyncTopbar(); PM.refreshStrip(true); document.querySelector('.user-name').textContent = 'Ana María Gómez'; return true; })()`); await sleep(300);
+const worst = await ev(`(() => ({ h: Math.round(document.querySelector('.header').getBoundingClientRect().height), text: document.querySelector('.pm-strip').innerText.replace(/\\s+/g, ' ') }))()`);
+check('widest strip (ES, 25 playing, 100+ min, 12-week streak, a 15-character name) keeps the top bar one row; the strip never shows more than the goal', worst.h <= 56 && /^25 tocando 30\/30 min 13$/.test(worst.text), worst);
 await shot('7-widest-strip-es');
 await ev(`(() => { const cur = PM.calc.weekIdOf(PM.calc.ymd(new Date())), mon = PM.calc.weekMonday(cur), sun = PM.calc.addDays(mon, 6); PRACTICE_MINUTES_CONFIG.skipWeeks.push(PM.calc.ymd(mon)); PM._state().weeks[cur] = { seconds: 40 * 60, goalSeconds: 0, hit: false }; PM.refreshStrip(true); return true; })()`);
 await ev(`setLang('en'); PM.refreshStrip(true)`); await sleep(300);
 const brk = await ev(`(() => ({ strip: document.querySelector('.pm-strip .pm-week').innerText.trim(), flame: getComputedStyle(document.querySelector('.pm-strip .pm-streak')).color, dash: parseFloat(getComputedStyle(document.querySelector('.pm-strip .pm-ring-fg')).strokeDashoffset) }))()`);
-check('a skipped week: "40 min this week" (no goal, no "/30"), empty ring, flame not lit', brk.strip === '40 min this week' && brk.flame === 'rgb(122, 82, 54)' && brk.dash > 43, brk);
+check('a skipped week: "40 min" (no goal, no "/30"), empty ring, flame not lit', brk.strip === '40 min' && brk.flame === 'rgb(122, 82, 54)' && brk.dash > 43, brk);
 await ev(`location.hash = '#my-progress'`); await sleep(900);
 await ev(`renderMyProgress()`); await sleep(300);
 const bt = await ev(`(() => { const p = document.getElementById('pm-progress'); return { tile: p.querySelector('.pm-tile').innerText.replace(/\\s+/g, ' ').trim(), tips: [...p.querySelectorAll('.pm-sq')].map(b => b.getAttribute('aria-label')) }; })()`);
@@ -380,37 +400,112 @@ for (const per of ['4', 'CAS', '']) {
   check(`period ${per || '(none chosen)'}: the same seven bars, Mon–Sun`, lab === 'Mon,Tue,Wed,Thu,Fri,Sat,Sun', lab);
 }
 
-/* ── The pills belong to a SHOWN practice card (2026-11-01 Friday check, PD-3/PD-4
-   and the review of that fix): leaving the card screen without Stop must not make
-   an unseen recap that starts the 3-minute gap; a goal crossed off the card waits
-   for the next card; a recap goes on a language switch and when the card goes. ── */
+/* ── The pills belong to the header strip (2026-11-03): they show on ANY page the strip is on, and go when it hides.
+   The recap still opens only when a play run ends (a song stops); that rule is the engine's and did not change. ── */
+console.log('pills on any page');
 await ev(`window.__period = '7'; setLang('en'); PRACTICE_MINUTES_CONFIG.skipWeeks = []; PRACTICE_MINUTES_CONFIG.streakStartWeek = ''; PRACTICE_MINUTES_CONFIG.uiOn = true`);
 await seedWeeks([1900, 1900, 1900]);
 await ev(`window.__pills = []; new MutationObserver((ms) => { for (const m of ms) for (const n of m.addedNodes) if (n.id === 'pm-recap' || n.id === 'pm-toast') window.__pills.push(n.id); }).observe(document.body, { childList: true }); true`);
 await ev(`openClassActivitiesScreen(${JSON.stringify(card)})`); await sleep(1500);
-await ev(`PM.onCardOpen(); caSyncTopbar(); (() => { const s = PM._state(); s.loaded = true; s.weeks = JSON.parse(JSON.stringify(window.__fs.weeks)); s.days = {}; s.pend = {}; s.lastRecapAt = 0; return true; })()`); await sleep(300);
-await ev(`document.querySelector('.ca-card[open] .pc-play').click()`); await waitFor(`PM._session() && PM._session().counted >= 3`);
+await ev(`PM.syncHeader(true); caSyncTopbar(); (() => { const s = PM._state(); s.loaded = true; s.weeks = JSON.parse(JSON.stringify(window.__fs.weeks)); s.days = {}; s.pend = {}; s.lastRecapAt = 0; return true; })()`); await sleep(300);
+await ev(`document.querySelector('.ca-card[open] .pc-play').click()`); await waitFor(`PM._play() && PM._session().counted >= 3`);
 const pillSrc = await ev(`pcState.audio.currentSrc`);
-await ev(`PM._session().counted = 150; location.hash = '#my-progress'`); await sleep(3800);
-const lv = await ev(`({ lastRecapAt: PM._state().lastRecapAt, pills: window.__pills.slice() })`);
-check('left the card screen while playing (no Stop): no unseen recap, so the 3-minute gap is not started', lv.lastRecapAt === 0 && !lv.pills.length, lv);
-await ev(`window.__pills = []; openClassActivitiesScreen(${JSON.stringify(card)})`); await sleep(1500);
-await ev(`document.querySelector('.ca-card[open] .pc-play').click()`); await waitFor(`PM._session() && PM._session().counted >= 2`);
-await ev(`PM._session().counted = 150; pcStop()`); await sleep(3500);
+await ev(`PM._session().counted = 150; PM._play() && (PM._play().counted = 150); location.hash = '#my-progress'`); await sleep(3800);
+const lv = await ev(`({ lastRecapAt: PM._state().lastRecapAt, pills: window.__pills.slice(), onProgress: !document.getElementById('my-progress-screen').hasAttribute('hidden') })`);
+check('leaving the card for My progress while a song plays stops the song, and the recap drops down from the header there', lv.onProgress && lv.pills.includes('pm-recap') && lv.lastRecapAt > 0, lv);
+await ev(`document.getElementById('pm-recap') && document.getElementById('pm-recap').remove(); window.__pills = []; PM._state().lastRecapAt = 0; openClassActivitiesScreen(${JSON.stringify(card)})`); await sleep(1500);
+await ev(`document.querySelector('.ca-card[open] .pc-play').click()`); await waitFor(`PM._play() && PM._session().counted >= 2`);
+await ev(`PM._session().counted = 150; PM._play() && (PM._play().counted = 150); pcStop()`); await sleep(3500);
 const recapUp = await ev(`!!document.getElementById('pm-recap')`);
-check('…so the recap after the next session on the card shows', recapUp);
+check('…and a recap after the next session on the card shows too', recapUp);
 await ev(`setLang('es')`); await sleep(400);
 check('…and a language switch removes it (it would stay in the old language)', recapUp && !(await ev(`!!document.getElementById('pm-recap')`)), recapUp ? 'still there' : 'no recap to remove');
 await ev(`setLang('en')`); await sleep(300);
+
+/* The goal crossed while a backing track plays on a MODULE page: the toast drops down from the header there. */
+await ev(`returnToPractice()`); await sleep(1500);
+check('Modules page: the header strip is showing', await ev(`!!document.getElementById('pm-header').getClientRects().length && !document.getElementById('pm-header').hidden`));
 await ev(`(() => { const s = PM._state(), d = PM.calc.ymd(new Date()); s.weeks[PM.calc.weekIdOf(d)] = { seconds: 1800 - 4, goalSeconds: 1800, hit: false }; s.days = {}; s.pend = {}; s.toastWeek = ''; s.pendingToast = false; s.lastRecapAt = 0; try { localStorage.removeItem('pm:t:e2e-student'); } catch(e) {} return true; })()`);
-await ev(`location.hash = '#my-progress'`); await sleep(1500);
 await ev(`window.__pills = []; window.__a = new Audio(${JSON.stringify(pillSrc)}); window.__a.play(); true`);
-await waitFor(`PM._state().pendingToast === ${JSON.stringify(todayWeek)} || PM._state().toastWeek !== ''`, 15000); await sleep(800);
-const off = await ev(`({ pending: PM._state().pendingToast, toastWeek: PM._state().toastWeek, pills: window.__pills.slice() })`);
-await ev(`window.__a.pause(); true`); await sleep(2500);
-await ev(`openClassActivitiesScreen(${JSON.stringify(card)})`); await sleep(2000);
-const on = await ev(`!!document.getElementById('pm-toast')`);
-check('the week goal crossed on My progress (a backing track playing there): no toast made unseen; it shows at the next practice card', !off.pills.length && off.toastWeek === '' && on, { off, toastOnCard: on });
+await waitFor(`!!document.getElementById('pm-toast')`, 15000);
+const modToast = await ev(`(() => { const t = document.getElementById('pm-toast'), h = document.getElementById('pm-header'); if (!t) return null; const r = t.getBoundingClientRect(), hr = h.getBoundingClientRect(); return { text: t.innerText, top: Math.round(r.top), headerBottom: Math.round(hr.bottom), centreDelta: Math.round((r.left + r.width / 2) - (hr.left + hr.width / 2)), inside: r.left >= 0 && r.right <= innerWidth, onModules: !!document.getElementById('practice-nav-btn').getAttribute('aria-current') }; })()`);
+check('the week goal crossed on a MODULE page: the toast drops down centred under the header strip, inside the window', modToast && /Week goal hit/.test(modToast.text) && modToast.top >= modToast.headerBottom && Math.abs(modToast.centreDelta) <= 2 && modToast.inside && modToast.onModules, modToast);
+await shot('8-toast-on-module-page-en');
+await ev(`window.__a.pause(); PM._play() && (PM._play().counted = 150); true`); await sleep(3500);
+await shot('8b-recap-on-module-page-en');
+const modRecap = await ev(`(() => { const t = document.getElementById('pm-recap'), h = document.getElementById('pm-header'); if (!t) return null; const r = t.getBoundingClientRect(), hr = h.getBoundingClientRect(); return { top: Math.round(r.top), headerBottom: Math.round(hr.bottom), rightDelta: Math.round(r.right - hr.right), inside: r.left >= 0 && r.right <= innerWidth }; })()`);
+check('a song stopping on a MODULE page: the recap drops down under the header strip, right edge in line with it', modRecap && modRecap.top >= modRecap.headerBottom && Math.abs(modRecap.rightDelta) <= 1 && modRecap.inside, modRecap);
+await ev(`document.getElementById('pm-recap') && document.getElementById('pm-recap').remove(); true`);
+
+/* ── The strip on every view, and the click ── */
+console.log('every view');
+await ev(`setLang('en'); PM._state().live = 0; PM.refreshStrip(true)`);
+const views = [['Modules', `returnToPractice()`], ['In class', `toggleClassActivities()`], ['Songs', `toggleSongsHub()`], ['Games', `toggleGames()`], ['My progress', `toggleMyProgress()`], ['a practice card', `openClassActivitiesScreen(${JSON.stringify(card)})`]];
+const seen = [];
+for (const lang of ['en', 'es']) {
+  await ev(`setLang('${lang}')`); await sleep(400);
+  for (const [name, call] of views) {
+    await ev(call); await sleep(900);
+    const v = await ev(`(() => { const h = document.getElementById('pm-header'), r = h.getBoundingClientRect(); const hit = document.elementFromPoint(r.left + r.width / 2, r.top + r.height / 2); return { shown: !h.hidden && !!h.getClientRects().length, onTop: h.contains(hit), strips: document.querySelectorAll('.pm-strip').length, over: document.documentElement.scrollWidth > document.documentElement.clientWidth, title: h.title }; })()`);
+    /* Games is a full-screen layer (z 120) over the whole page: the strip is in the page but covered, like Find, Español and Sign out. */
+    seen.push(v.shown && (name === 'Games' ? !v.onTop : v.onTop) && v.strips === 1 && !v.over && v.title === (lang === 'en' ? 'Open My progress' : 'Abrir Mi progreso'));
+    if (!seen[seen.length - 1]) console.log('    ✗ view', lang, name, JSON.stringify(v));
+  }
+}
+check('the strip is visible, on top (nothing covers it), the only one, with its tooltip and no sideways scroll, on Modules / In class / Songs / My progress / a practice card, EN + ES; on Games the full-screen layer covers it with the rest of the header', seen.length === 12 && seen.every(Boolean), seen);
+/* A goal crossed while Games covers the header: no toast is drawn under it and the once-a-week toast is not used up; it shows when the header is back. */
+await ev(`setLang('en'); toggleGames()`); await sleep(1200);
+await ev(`(() => { const s = PM._state(), d = PM.calc.ymd(new Date()); s.weeks[PM.calc.weekIdOf(d)] = { seconds: 1800 - 4, goalSeconds: 1800, hit: false }; s.days = {}; s.pend = {}; s.toastWeek = ''; s.pendingToast = false; try { localStorage.removeItem('pm:t:e2e-student'); } catch(e) {} window.__a = new Audio(${JSON.stringify(pillSrc)}); window.__a.play(); return true; })()`);
+await waitFor(`PM._state().pendingToast === PM.calc.weekIdOf(PM.calc.ymd(new Date())) || PM._state().toastWeek !== ''`, 15000); await sleep(800);
+const underGames = await ev(`({ pending: PM._state().pendingToast, used: PM._state().toastWeek, toast: !!document.getElementById('pm-toast') })`);
+check('the week goal crossed on the full-screen Games layer: no toast is drawn under it and the week\'s toast is not used up', !underGames.toast && underGames.used === '' && !!underGames.pending, underGames);
+await ev(`window.__a.pause(); true`);
+await ev(`returnToPractice()`); await waitFor(`!!document.getElementById('pm-toast')`, 8000);
+check('…it shows as soon as the header is back (a module page)', await ev(`!!document.getElementById('pm-toast')`));
+await ev(`document.getElementById('pm-toast') && document.getElementById('pm-toast').remove(); true`);
+await ev(`setLang('en')`); await sleep(300);
+await ev(`openClassActivitiesScreen(${JSON.stringify(card)})`); await sleep(1200);
+await ev(`document.getElementById('pm-header').click()`); await sleep(1000);
+check('clicking the strip (from a practice card) opens My progress', await ev(`!document.getElementById('my-progress-screen').hasAttribute('hidden')`));
+await ev(`document.getElementById('my-progress-screen').scrollTop = 0; (document.getElementById('main-content') || {}).scrollTop = 300; document.getElementById('pm-header').click()`); await sleep(1200);
+check('clicking it again does not close My progress (it scrolls to the top)', await ev(`!document.getElementById('my-progress-screen').hasAttribute('hidden')`));
+await shot('9-my-progress-after-strip-click-en');
+await ev(`setLang('es'); returnToPractice()`); await sleep(1200); await shot('9b-module-page-header-es'); await ev(`setLang('en')`);
+
+/* ── Signed out, and a different student on the same Chromebook ── */
+console.log('signed out and student switch');
+await ev(`setLang('en'); returnToPractice()`); await sleep(800);
+await ev(`(() => { const s = PM._state(); s.loaded = true; s.weeks = {}; s.days = {}; s.pend = {}; s.weeks[PM.calc.weekIdOf(PM.calc.ymd(new Date()))] = { seconds: 23 * 60, goalSeconds: 1800, hit: false }; PM.syncHeader(true); return true; })()`);
+check('student A is signed in: the strip shows A\'s 23 minutes', /(^|\s)23\/30 min/.test(await ev(`document.getElementById('pm-header').innerText.replace(/\\s+/g, ' ')`)));
+/* B signs in: B's own numbers from the first frame, never A's. A's 23 minutes live only in A's state; B's 10 are in B's cached copy
+   (pm:c:<uid>, which sync() reads when it builds B's state; the in-page fake Firestore cannot answer a load). */
+await ev(`(() => { const cur = PM.calc.weekIdOf(PM.calc.ymd(new Date())); localStorage.setItem('pm:c:e2e-student-b', JSON.stringify({ days: {}, weeks: { [cur]: { seconds: 600, goalSeconds: 1800, hit: false } } })); return true; })()`);
+const swB = await ev(`(() => { window.__who = 'e2e-student-b'; PM.syncHeader(true); return document.getElementById('pm-header').innerText.replace(/\\s+/g, ' '); })()`);
+check('student B signs in on the same page: the very first paint is B\'s 10 minutes, not A\'s 23', !/23/.test(swB) && /(^|\s)10\/30 min/.test(swB), swB);
+/* signed out: no student → hidden. The tick alone hides it (a path that forgot to call syncHeader); then a pill goes with it. */
+await ev(`(() => { const s = PM._state(); s.lastRecapAt = 0; window.__pills = []; return true; })()`);
+await ev(`openClassActivitiesScreen(${JSON.stringify(card)})`); await sleep(1500);
+await ev(`document.querySelector('.ca-card[open] .pc-play').click()`); await waitFor(`PM._play() && PM._session().counted >= 2`);
+await ev(`PM._session().counted = 150; PM._play() && (PM._play().counted = 150); pcStop()`); await sleep(3500);
+check('B stopped a song: the recap shows', await ev(`!!document.getElementById('pm-recap')`));
+await ev(`window.__who = null; true`); await sleep(2200);
+check('signed out (no student): the strip hides itself within the next tick, empty, and the recap goes with it', await ev(`(() => { const h = document.getElementById('pm-header'); return h.hidden && h.innerHTML === '' && !document.getElementById('pm-recap'); })()`));
+await ev(`PM.syncHeader(true)`);
+check('…and syncHeader(true) with nobody signed in keeps it hidden', await ev(`document.getElementById('pm-header').hidden`));
+await ev(`window.__who = 'e2e-student'; PM.syncHeader(true)`); await sleep(400);
+check('student A signs back in: the strip returns', await ev(`!document.getElementById('pm-header').hidden && !!document.getElementById('pm-header').innerHTML`));
+
+/* ── ?teacher: the console never shows the strip (PM_HOST.user() is null there). Real host, no fake. ── */
+console.log('?teacher');
+await send('Page.navigate', { url: `http://127.0.0.1:${port}/index.html?teacher` });
+for (let i = 0; i < 80; i++) { if (await ev(`typeof devBypass === 'function' && !!document.getElementById('dev-bypass-btn') && document.readyState === 'complete'`).catch(() => false)) break; await sleep(250); }
+await sleep(3500);
+await ev(`devBypass()`); await sleep(2500);
+const tch = await ev(`(() => { const h = document.getElementById('pm-header'); PM.syncHeader(true); return { teacher: IS_TEACHER_MODE, hidden: h.hidden, empty: h.innerHTML === '', shown: !!h.getClientRects().length, strips: [...document.querySelectorAll('.pm-strip')].filter(e => e.getClientRects().length).length }; })()`);
+await sleep(2500);
+const tch2 = await ev(`(() => { const h = document.getElementById('pm-header'); return h.hidden && h.innerHTML === ''; })()`);
+check('?teacher: IS_TEACHER_MODE is on and no strip is shown, even after syncHeader(true) and two more seconds', tch.teacher && tch.hidden && tch.empty && !tch.shown && tch.strips === 0 && tch2, { tch, tch2 });
+await shot('10-teacher-no-strip');
 
 check('no uncaught exceptions on the page', consoleErrors.length === 0, consoleErrors.slice(0, 3));
 console.log(`\n${fail ? '✗' : '✓'} pm-e2e: ${pass} passed, ${fail} failed — screenshots in ${OUT}`);

@@ -4409,23 +4409,27 @@ body.lq-invite-open{overflow:hidden}
   --pm-surface:#171b24;--pm-tile:#212837;--pm-text:#f3f5f9;--pm-muted:#b4bccb;
   --pm-track:#3a4152;--pm-grey:#5f697f;
 }
-/* The status strip: right end of the practice card's sticky bar, no new row. */
+/* The status strip: lives in the main top bar (index.html #pm-header), see .pm-strip-header below. */
 .pm-strip{flex-shrink:0;align-self:center;margin-left:auto;display:inline-flex;align-items:center;gap:9px;
   background:var(--pm-surface);color:var(--pm-text);border-radius:16px;padding:3px 9px;
   font-size:0.8125rem;font-weight:600;line-height:1.4;white-space:nowrap}
-.ca-bar-stop:not([hidden]) ~ .pm-strip{margin-left:0}
-/* The strip must not add a row (1366×657). Spanish ("Todas las actividades",
-   "Pantalla completa", "Detener") needs ~130px more than the bar has, so while
-   the strip is there Full screen folds to its icon — the same rules the phone
-   width already uses (the word stays as the button's accessible name) — and the
-   card name ellipsizes sooner. Measured at 1366 in both languages, Stop showing
-   and hidden: one 48–52px row. */
-.ca-bar-open:has(.pm-strip) .ca-bar-full{padding:6px 9px}
-.ca-bar-open:has(.pm-strip) .ca-bar-full-lab{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap}
-.ca-bar-open:has(.pm-strip){column-gap:8px}
-.ca-bar-open:has(.pm-strip) .ca-bar-name{flex-basis:4ch;min-width:4ch}
-@media (max-width:760px){.ca-bar-open:has(.pm-strip) .ca-bar-name{min-width:0}}
-.pm-strip ~ .ca-bar-tools{margin-left:0}
+.pm-strip[hidden]{display:none}
+/* The strip in the main top bar (index.html #pm-header, a button that opens My
+   progress). It keeps its own always-dark pill, so every colour above reads the
+   same on the brand bar as it did in the card bar; this variant adds the
+   button reset, a pale edge so the pill sits on the brand colour like the Find
+   and Español buttons, and hover / focus. */
+.pm-strip-header{margin-left:0;border:0;font-family:inherit;cursor:pointer;position:relative;
+  box-shadow:0 0 0 1px rgba(255,255,255,0.30)}
+.pm-strip-header:hover{background:var(--pm-tile);box-shadow:0 0 0 1px rgba(255,255,255,0.65)}
+.pm-strip-header:focus-visible{outline:2px solid #fff;outline-offset:2px}
+/* Phone width (out of scope, but the strip must not break the header): ring and
+   flame + number only. The words are clipped, never display:none, so they stay
+   the button's accessible name. */
+@media (max-width:760px){
+  .pm-strip-header{gap:6px;padding:3px 7px}
+  .pm-strip-header .pm-live,.pm-strip-header .pm-week>span{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap}
+}
 .pm-live,.pm-week{display:inline-flex;align-items:center;gap:6px}
 .pm-dot{width:8px;height:8px;border-radius:50%;background:var(--live);flex-shrink:0;animation:pm-pulse 1.8s ease-out infinite}
 @keyframes pm-pulse{0%{box-shadow:0 0 0 0 rgba(61,220,151,0.55)}70%,100%{box-shadow:0 0 0 7px rgba(61,220,151,0)}}
@@ -4440,8 +4444,8 @@ body.lq-invite-open{overflow:hidden}
 .pm-streak.pm-on{color:var(--streak)}
 .pm-streak b{color:var(--pm-text);font-weight:700}
 .pm-flame-svg{width:16px;height:16px;flex-shrink:0}
-/* Pills that float under the bar (placed by practice-minutes.js). z 54: above
-   the sticky bar (50), under the phone drawer (60). */
+/* Pills that drop down from the header strip (placed by practice-minutes.js). z 54: above
+   the practice card's sticky bar (50) and the header (20), under the phone drawer (60). */
 .pm-toast{position:fixed;z-index:54;transform:translateX(-50%);display:inline-flex;align-items:center;gap:6px;
   background:var(--pm-surface);color:var(--pm-text);border-radius:20px;padding:8px 16px;font-size:0.9375rem;font-weight:700;
   box-shadow:0 6px 20px rgba(0,0,0,0.3);animation:pm-in 0.25s ease-out;max-width:calc(100vw - 16px)}
