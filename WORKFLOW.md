@@ -1178,6 +1178,48 @@
       toast is measured from the middle of the window so a strip at the right edge (Games)
       does not squeeze it into a narrow column.
 
+      **PICK UP HERE (written 2026-11-04 for a move to a new machine).**
+      *State:* everything above is live on `main` (last commit `fe196aa`; the strip is
+      in the top bar and on the Games screen, "N playing" is gone). Nothing is half done
+      and nothing is waiting on a console paste. `pm-e2e` 84/84, `pm-sim` 159/159, smoke
+      clean, full `checks.mjs` green.
+      *Open item, Jonathan's call, not started: remove the heartbeat.* "N playing" was
+      dropped from the screen, but the engine still writes a `heartbeats/{sessionId}`
+      record (`{ period, lastSeen }`) about every 30 s while audio plays, and nothing reads
+      it. Why remove it: writes for nothing, dead code in the counting half, and the
+      records are listable by any signed-in user with a creation time (a session-start log
+      per period; the TTL policy on `lastSeen` was never set, so they pile up). Do it in
+      this order:
+      1. **Code, no console paste.** In `practice-minutes.js` delete the heartbeat writer
+         (`beat()` and its `lastBeat` check in the tick, `HEARTBEAT_MS`, `randHex` if only it uses
+         it, the `pmSid` session id), `pollLive()` and its `_pollLive` export, `S.live` /
+         `S.liveAt`, and `liveMinCount` (DEFAULTS and `practice-minutes-config.js`). Remove
+         the heartbeat and aggregation-query tests from `tools/pm-sim.mjs` (about lines
+         600-640, and the heartbeat write tests) and lower `PM_SIM_PIN` in
+         `tools/checks.mjs` to the new count; drop the heartbeat-rules pin and the
+         `liveMinCount` range check in 1cg; drop the `runAggregationQuery` fake in
+         `tools/pm-e2e.mjs`. Counting, `flush()`, the queue and the keepalive do not change.
+      2. **Rules, needs Jonathan's Firebase console paste** (GitHub Pages does not deploy
+         `firestore.rules`): delete the `heartbeats/{sessionId}` block and its comment from
+         `firestore.rules`, and the `heartbeats` composite index from
+         `firestore.indexes.json`. Only after step 1 is live, so no write is ever refused.
+         Old `heartbeats` documents can be deleted in the console; they are harmless once
+         nobody can read them.
+      *Review:* this edits the counting half, `pm-sim` and `firestore.rules`, so it is
+      **Always Reviewed the same day** (`site-reviewer-deep`, failing scenario first), not
+      Fast. Proof to bring: `pm-sim` and `pm-e2e` pass, 1cg pins broken in a scratch copy
+      and red, a play session still counts and flushes the same seconds as before.
+      *Other loose ends from this work:* the Live quiz overlay has no minutes strip
+      (left on purpose); a held-back toast needs the 1 s tick, which runs only while the
+      student is working (fine in practice); a Spanish name over 35 characters, or an
+      English one over 56, still wraps the top bar from 49 to 70px.
+      *On a new machine:* clone the repo, `git config core.hooksPath .githooks`, Node 22+
+      (global `WebSocket`) and Google Chrome for `tools/pm-e2e.mjs` and `tools/smoke.mjs`
+      (pass `--chrome <path>` if it is not in the usual place); use a git worktree
+      (`git worktree add ../guitar-class-<name> -b work-<name> origin/main`) if another
+      session is open. Claude's memory notes live in `~/.claude/projects/…/memory/`, NOT in
+      the repo, so they do not travel: this entry and `CLAUDE.md` are the record.
+
 - [x] **2026-10-31 — "Hear It First": a hidden adaptive ear + fretboard trainer.**
       Work order `WO-hear-it-first.md` (kept out of the repo). For Jonathan's
       own ear on an electric guitar: hear a tone and find it, see a fret and
