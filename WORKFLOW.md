@@ -1183,7 +1183,15 @@
       in the top bar and on the Games screen, "N playing" is gone). Nothing is half done
       and nothing is waiting on a console paste. `pm-e2e` 84/84, `pm-sim` 159/159, smoke
       clean, full `checks.mjs` green.
-      *Open item, Jonathan's call, not started: remove the heartbeat.* "N playing" was
+      *Update 2026-11-04, later:* **step 1 below is DONE on branch `work-heartbeat`,
+      NOT yet live** (two commits: "Practice minutes: remove the heartbeat writer…" and
+      its review fixes). `pm-sim` is now 152/152 (the heartbeat tests became "no
+      heartbeat" / "no live count" runs; section 8 draws a stub strip), `pm-e2e` 84/84.
+      `period()` and its `pm:p:<uid>` cache left the engine too; `PM_HOST.period` in
+      `app.js` and `tabs/journey.js` is now dead but left in place. 1cg pins the
+      heartbeats rules block as "gone, or exactly as shipped". Step 2 waits for step 1
+      to be live.
+      *Open item, Jonathan's call: remove the heartbeat.* "N playing" was
       dropped from the screen, but the engine still writes a `heartbeats/{sessionId}`
       record (`{ period, lastSeen }`) about every 30 s while audio plays, and nothing reads
       it. Why remove it: writes for nothing, dead code in the counting half, and the
@@ -1201,8 +1209,10 @@
          `tools/pm-e2e.mjs`. Counting, `flush()`, the queue and the keepalive do not change.
       2. **Rules, needs Jonathan's Firebase console paste** (GitHub Pages does not deploy
          `firestore.rules`): delete the `heartbeats/{sessionId}` block and its comment from
-         `firestore.rules`, and the `heartbeats` composite index from
-         `firestore.indexes.json`. Only after step 1 is live, so no write is ever refused.
+         `firestore.rules`, the `heartbeats` composite index from
+         `firestore.indexes.json`, and the `== heartbeats` section of
+         `tools/pm-rules-test.mjs` (about lines 85-110, plus its header line). Only
+         after step 1 is live, so no write is ever refused.
          Old `heartbeats` documents can be deleted in the console; they are harmless once
          nobody can read them.
       *Review:* this edits the counting half, `pm-sim` and `firestore.rules`, so it is
@@ -1212,7 +1222,11 @@
       *Other loose ends from this work:* the Live quiz overlay has no minutes strip
       (left on purpose); a held-back toast needs the 1 s tick, which runs only while the
       student is working (fine in practice); a Spanish name over 35 characters, or an
-      English one over 56, still wraps the top bar from 49 to 70px.
+      English one over 56, still wraps the top bar from 49 to 70px. Not fixed
+      (pre-existing): `tools/pm-e2e.mjs` (about line 110) defines `doc` twice in its
+      in-page fake Firestore, so the second (a leftover heartbeat recorder) wins and
+      the fake never loads or flushes minutes; removing it alone makes the batch fake
+      compute NaN with the real `FieldValue.increment`.
       *On a new machine:* clone the repo, `git config core.hooksPath .githooks`, Node 22+
       (global `WebSocket`) and Google Chrome for `tools/pm-e2e.mjs` and `tools/smoke.mjs`
       (pass `--chrome <path>` if it is not in the usual place); use a git worktree

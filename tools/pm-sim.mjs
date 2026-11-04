@@ -134,10 +134,15 @@ function makeWorld(opts = {}) {
   class FakeMediaDevices {
     getUserMedia() { const tr = { readyState: 'live', enabled: true }; return Promise.resolve({ getAudioTracks: () => [tr], track: tr }); }
   }
+  /* opts.strip: the page has a #pm-header strip (hidden, as index.html ships it), so syncHeader(), refreshStrip()
+     and the 1 s uiTick() really draw it. Its rects are empty, so no toast or recap pill is ever anchored to it. */
+  const stripEl = opts.strip ? { id: 'pm-header', hidden: true, innerHTML: '', getClientRects: () => [], getBoundingClientRect: () => ({}), contains: () => false } : null;
   const documentStub = {
     visibilityState: 'visible', activeElement: null,
     addEventListener: (ev, fn) => { (listeners['doc:' + ev] ||= []).push(fn); },
-    querySelector: () => null, querySelectorAll: () => [], getElementById: () => null,
+    querySelector: () => null,
+    querySelectorAll: (sel) => (stripEl && sel === '.pm-strip' ? [stripEl] : []),
+    getElementById: (id) => (stripEl && id === 'pm-header' ? stripEl : null),
   };
   const windowStub = {
     PM_HOST: null,
@@ -217,7 +222,7 @@ function makeWorld(opts = {}) {
   }
   /* A student's input: fire the engine's document listener for that event. */
   const input = (ev = 'pointerdown') => (listeners['doc:' + ev] || []).forEach((f) => f({ type: ev }));
-  return { input, FakeSource, FakeMediaDevices, __timers: timers, drain, releaseReads, ctx, PM, clock, net, server, log, store, session, listeners, documentStub, windowStub, FakeAudio, run, settle, track, playing, user, firebase, db };
+  return { stripEl, input, FakeSource, FakeMediaDevices, __timers: timers, drain, releaseReads, ctx, PM, clock, net, server, log, store, session, listeners, documentStub, windowStub, FakeAudio, run, settle, track, playing, user, firebase, db };
 }
 /* Everything counted so far: queued + already acknowledged by the server. */
 /* The page's queue key: pm:q:<uid>:<pageId>. */
@@ -596,10 +601,11 @@ console.log('7. defaults');
 /* ═══════════ 8. No "N playing" lookup (removed 2026-11-04) ═══════════ */
 console.log('8. no live count');
 {
-  const w = makeWorld({ ui: true, config: { uiOn: true } });
+  const w = makeWorld({ ui: true, config: { uiOn: true }, strip: true });
+  w.PM.syncHeader(true); w.PM.stripHtml();
   const a = w.track(); a.play();
   await w.run(95, w.playing(a));
-  w.PM.refreshStrip(true); w.PM.syncHeader(true); await w.settle();
+  check('(sanity) the strip really is drawn: #pm-header shown with the week ring and the flame', w.stripEl.hidden === false && /pm-week/.test(w.stripEl.innerHTML) && /pm-streak/.test(w.stripEl.innerHTML), w.stripEl.hidden + ' ' + w.stripEl.innerHTML.slice(0, 80));
   check('a 95 s play session with the display on makes no network call of its own (no REST count query; the keepalive goes only on pagehide)', w.log.fetches.length === 0, w.log.fetches.map((x) => x.url).join());
   check('PM has no _pollLive and the config no liveMinCount', w.PM._pollLive === undefined && !('liveMinCount' in w.PM.cfg()) && !('liveMinCount' in w.ctx.PRACTICE_MINUTES_CONFIG));
 }

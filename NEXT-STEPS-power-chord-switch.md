@@ -84,23 +84,27 @@ line); `tools/smoke.mjs` walks all 16 switches in a real browser.
 
 ## Not Power Chord Switch, but waiting: remove the practice-minutes heartbeat
 
-Jonathan asked for this note here so it is not lost. It is Jonathan's call and
-**not started**. The full plan is the "PICK UP HERE" entry under "Practice
+Jonathan asked for this note here so it is not lost. **Step 1 is DONE on branch
+`work-heartbeat`, NOT yet live** (2026-11-04: two commits, "Practice minutes:
+remove the heartbeat writer…" and its review fixes; `pm-sim` 152/152, `pm-e2e`
+84/84). Step 2 waits until step 1 is live. The full plan is the "PICK UP HERE" entry under "Practice
 minutes" in `WORKFLOW.md` (written 2026-11-04); read it before touching anything.
 In short: "N playing" is gone from the screen, but the engine in
-`practice-minutes.js` still writes a `heartbeats/{sessionId}` record
+`practice-minutes.js` on `main` still writes a `heartbeats/{sessionId}` record
 (`{ period, lastSeen }`) about every 30 s while audio plays, and nothing reads
 it. The records pile up (the TTL policy was never set) and any signed-in user
 can list them.
-- **Step 1 (code, no console paste):** delete the heartbeat writer, `pollLive()`,
+- **Step 1 (code, no console paste; DONE on `work-heartbeat`, not live):** delete the heartbeat writer, `pollLive()`,
   `S.live` / `S.liveAt` and `liveMinCount`; remove the heartbeat tests in
   `tools/pm-sim.mjs`, lower `PM_SIM_PIN` in `tools/checks.mjs`, drop the 1cg
   heartbeat-rules pin and the `liveMinCount` check, drop the aggregation fake
   in `tools/pm-e2e.mjs`. Counting, `flush()`, the queue and the keepalive do not change.
 - **Step 2 (only after step 1 is live; needs Jonathan's Firebase console
   paste):** delete the `heartbeats/{sessionId}` block from `firestore.rules` and
-  the `heartbeats` index from `firestore.indexes.json`. Old `heartbeats` documents
-  can then be deleted in the console.
+  the `heartbeats` index from `firestore.indexes.json`, and the `== heartbeats`
+  section of `tools/pm-rules-test.mjs` (about lines 85-110, plus its header
+  line). checks.mjs 1cg accepts the block only whole or gone. Old `heartbeats`
+  documents can then be deleted in the console.
 - **Always Reviewed the same day** (`site-reviewer-deep`; it edits the counting
   half, `pm-sim` and `firestore.rules`). Proof: `pm-sim` and `pm-e2e` pass, the
   1cg pins broken in a scratch copy go red, a play session counts and flushes

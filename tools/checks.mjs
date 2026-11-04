@@ -11402,8 +11402,8 @@ function checkCoachVerdicts() {
    daily cap must equal the config's (a mismatch is silent — every write over the
    rule's number is refused), the heartbeat writer and the "N playing" count query
    (removed 2026-11-04) must not come back in the engine or the config (the
-   heartbeats rules block stays until it is deleted in the Firebase console, and is
-   no longer pinned), the minutes block must stay owner-only with
+   heartbeats rules block stays until it is deleted in the Firebase console, and
+   until then must be absent or exactly the shipped block), the minutes block must stay owner-only with
    no delete, every script tag is in place in order, every pm.* string the engine
    asks for exists in English AND Spanish (and every one is used), and the three
    hooks into app.js / index.html / journey.js are still there (the strip is ONE hidden <button id="pm-header"> in the main top bar,
@@ -11411,7 +11411,7 @@ function checkCoachVerdicts() {
    The browser half (strip, recap, toast, My progress, 1366×657, both languages,
    a real <audio>) is tools/pm-e2e.mjs — it needs Chrome, so it is run by hand.
    ════════════════════════════════════════════════════════════════════ */
-const PM_SIM_PIN = 151;
+const PM_SIM_PIN = 152;
 function checkPracticeMinutes(i18nTable) {
   head('1cg. Practice minutes: the engine is run; the rules cap, no heartbeat, wiring and strings are pinned');
   let bad = 0;
@@ -11455,9 +11455,11 @@ function checkPracticeMinutes(i18nTable) {
       if (new RegExp('\\b' + k + '\\b').test(strip(read('practice-minutes.js') || ''))) fail(`practice-minutes.js still reads '${k}'`);
     }
     if (/\b(calc\.meetings|normalMeetings|calc\.days)\b/.test(strip(read('practice-minutes.js') || ''))) fail('practice-minutes.js still has meeting-day maths (calc.meetings / normalMeetings / calc.days)');
-    /* The heartbeat behind "N playing" was removed 2026-11-04 (nothing read it). Comments are stripped, so history notes may name it. */
+    /* The heartbeat behind "N playing" was removed 2026-11-04 (nothing read it), with period() and its pm:p:<uid> cache (only the
+       heartbeat read them). Comments are stripped, end-of-line ones too, so history notes may name it; the https:// URLs survive. */
     if ('liveMinCount' in cfg) fail("practice-minutes-config.js has 'liveMinCount': \"N playing\" and its heartbeat were removed 2026-11-04");
-    const hbHit = /\b(heartbeats?|runAggregationQuery|pollLive|liveMinCount|pmSid|HEARTBEAT_MS)\b/i.exec(strip(read('practice-minutes.js') || ''));
+    const engCode = strip(read('practice-minutes.js') || '').replace(/([;,{}()\]])[ \t]+\/\/.*$/gm, '$1');
+    const hbHit = /\b(?:heartbeats?|runAggregationQuery|pollLive|liveMinCount|pmSid|HEARTBEAT_MS|period)\b|pm:p:/i.exec(engCode);
     if (hbHit) fail(`practice-minutes.js has '${hbHit[0]}': the heartbeat writer and the "N playing" count query were removed 2026-11-04 and must not come back`);
     const cap = rules && /function dailyCapSeconds\(\)\s*\{\s*return\s+(\d+);\s*\}/.exec(rules);
     if (!cap) fail('firestore.rules: dailyCapSeconds() not found — the cap check cannot run (renamed? update this check with it)');
@@ -11468,6 +11470,12 @@ function checkPracticeMinutes(i18nTable) {
   if (rules) {
     // The block's own brace is the last one on its match line (the path has {params} before it).
     const block = name => { const i = rules.indexOf(`match /${name}`); if (i < 0) return null; let d = 0, j = rules.lastIndexOf('{', rules.indexOf('\n', i)); for (let k = j; k < rules.length; k++) { if (rules[k] === '{') d++; else if (rules[k] === '}') { d--; if (!d) return strip(rules.slice(i, k + 1)); } } return null; };
+    /* The heartbeats block outlives its writer until Jonathan deletes it in the console (step 2). Until then it is frozen: ABSENT
+       (step 2 done) or exactly the shipped block, whitespace aside. A loosened rule on a collection nothing uses would go unseen. */
+    const HB_SHIPPED = "match /heartbeats/{sessionId} { allow read: if isSignedIn(); allow create, update: if isSignedIn() && sessionId.matches('^[0-9a-f]{24}$') && request.resource.data.keys().hasOnly(['period', 'lastSeen']) && request.resource.data.keys().hasAll(['period', 'lastSeen']) && request.resource.data.period in ['4', '7', 'CAS'] && request.resource.data.lastSeen == request.time; }";
+    const hbMatches = (strip(rules).match(/match\s+\/heartbeats\b/g) || []).length;
+    const hb = block('heartbeats/{sessionId}');
+    if (hbMatches > 1 || (hbMatches === 1 && (!hb || hb.replace(/\s+/g, ' ').trim() !== HB_SHIPPED))) fail('firestore.rules: the heartbeats block may only be deleted whole (step 2 of the heartbeat removal), never edited or added to — nothing writes heartbeats since 2026-11-04');
     const mins = block('minutes/{userId}/{document=**}'), days = block('minutes/{userId}/days/{day}'), weeks = block('minutes/{userId}/weeks/{week}');
     if (!mins || !days || !weeks) fail('firestore.rules: the three minutes/{userId} blocks (tree read, days, weeks) must all be present');
     else {
@@ -11503,7 +11511,7 @@ function checkPracticeMinutes(i18nTable) {
   }
   /* CRLF to LF first: a Windows checkout (core.autocrlf) writes app.js with CRLF, and the function-body patterns below end on a bare newline. */
   const app = strip((read('app.js') || '').replace(/\r\n/g, '\n')), jr = strip((read('tabs/journey.js') || '').replace(/\r\n/g, '\n')), eng = read('practice-minutes.js') || '';
-  if (!/window\.PM_HOST\s*=\s*\{[\s\S]{0,400}?ui:\s*true[\s\S]{0,500}?period:\s*\(\)\s*=>\s*periodOverride\s*\|\|\s*studentPeriod/.test(app)) fail('app.js: window.PM_HOST (ui:true, effective period = periodOverride || studentPeriod) is missing');
+  if (!/window\.PM_HOST\s*=\s*\{[\s\S]{0,400}?ui:\s*true/.test(app)) fail('app.js: window.PM_HOST (ui:true) is missing');
   if (!/window\.PM_HOST\s*=\s*\{[\s\S]{0,200}?ui:\s*false/.test(jr)) fail('tabs/journey.js: window.PM_HOST (ui:false) is missing — Song Journey playback would not count');
   /* The strip lives in the MAIN top bar only (2026-11-03): a hidden <button> in index.html's header, filled by
      PM.syncHeader() wherever app.js paints #user-area. It must never also be drawn in a practice card's bar. */
@@ -11559,7 +11567,7 @@ function checkPracticeMinutes(i18nTable) {
     for (const k of K) { const e = i18nTable[k]; if (!e || !e.en || !e.es) fail(`i18n key '${k}' needs both en and es`); }
     if (!bad) console.log(`${C.dim}      ${K.size} pm.* strings, ${litCount} references, ${tabs} Journey pages${C.reset}`);
   }
-  if (!bad) ok(`engine run: ${m[1]} simulation assertions pass (pinned); rules cap = config cap (${cfg ? cfg.dailyCapMinutes * 60 : '?'} s); no heartbeat or "N playing" query in the engine or config; minutes rules owner-only, no delete; older rules untouched; hooks, script order and strings in place`);
+  if (!bad) ok(`engine run: ${m[1]} simulation assertions pass (pinned); rules cap = config cap (${cfg ? cfg.dailyCapMinutes * 60 : '?'} s); no heartbeat or "N playing" query in the engine or config, the heartbeats rules block ${/match\s+\/heartbeats\b/.test(strip(rules || '')) ? 'unchanged' : 'gone'}; minutes rules owner-only, no delete; older rules untouched; hooks, script order and strings in place`);
 }
 
 (async function main() {
