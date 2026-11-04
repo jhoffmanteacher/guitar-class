@@ -5,6 +5,10 @@ Notable changes to the Guitar Class site. Newest first.
 For the full session-by-session history (and the reasoning behind each change),
 see `WORKFLOW.md` and the git commit log.
 
+## 2026-11-04 — Power Chord Switch: a game you stop is saved too
+
+- **If you say yes to saving your take, a Power Chord Switch game you stop early is saved too**, as long as it recorded at least 10 seconds. A shorter stop is not saved, so it does not replace your last full take. Leaving the screen still saves nothing.
+
 ## 2026-11-04 — Strum steps: Play clicks, and Play strum keeps the beat
 
 - **Every strum step (the Down, Down-Up, Up-Down-Up activity and Strum Pattern in Chunks) has a new "Play clicks" button.** It opens the Metronome at 60 BPM in 4/4 and starts it. Use its slider and Stop like any time you use the Metronome.

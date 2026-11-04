@@ -11265,7 +11265,7 @@ function checkCoachVerdicts() {
     song.recChecks = 0;
     run(`globalThis.__saves = []; globalThis.__starts = 0; globalThis.__orig = { micRecStop, micRecSave, micRecStart, micRecShouldAsk, micRecAbort, micRecWanted };
       /* The stand-ins keep micRec honest: a stop after coachMicOff (which aborts) finds nothing to save. */
-      micRecStart = (mode) => { __starts++; micRec = { live: true, mode, n: 1 }; return true; };
+      micRecStart = (mode) => { __starts++; micRec = { live: true, mode, n: (globalThis.__recSec || 30), srcRate: 1 }; return true; };
       micRecStop = () => { const r = micRec; micRec = null; return r; };
       micRecAbort = () => { micRec = null; };
       micRecSave = (rec, meta) => { __saves.push(meta); };`);
@@ -11284,7 +11284,16 @@ function checkCoachVerdicts() {
       if (m.expected.length !== 21 || m.expected.some(e => !Number.isFinite(e.t) || !['ok', 'off', 'miss'].includes(e.verdict) || ![0, 1, 2].includes(e.stage))) flag(`1ck: the saved take lists ${m.expected.length} changes (expected 21, each with a time, a verdict and a round)`);
       if (!Array.isArray(m.events)) flag('1ck: the saved take has no events list');
     }
-    if (take('power', 'ccFinish(false);').saves.length !== 0) flag('1ck: a game that was Stopped early was saved (it must be thrown away, as in Note Runner)');
+    if (full.saves.length === 1 && full.saves[0].fields.complete !== true) flag('1ck: a game played to the end is not marked complete:true in the saved take');
+    /* Save on Stop (2026-11-04): a Stopped game with enough audio is saved, marked complete:false; one with almost none is dropped,
+       because each student has ONE take per game and a new take overwrites it. */
+    run('globalThis.__recSec = 20;');
+    const stopLong = take('power', 'ccFinish(false);');
+    if (stopLong.saves.length !== 1 || stopLong.saves[0].fields.complete !== false) flag(`1ck: a game Stopped after 20 s of audio saved ${stopLong.saves.length} takes (complete:${stopLong.saves[0] && stopLong.saves[0].fields.complete}), expected 1 with complete:false`);
+    run('globalThis.__recSec = 3;');
+    if (take('power', 'ccFinish(false);').saves.length !== 0) flag('1ck: a game Stopped after 3 s of audio was saved (it would overwrite the last full take with a stub)');
+    run('globalThis.__recSec = 30;');
+    if (!/const MICREC_MIN_STOPPED_SEC = 10;/.test(readFileSync(join(ROOT, 'coach.js'), 'utf8'))) flag('1ck: MICREC_MIN_STOPPED_SEC is no longer 10');
     const cu = take('open', 'ccFinish(true);');
     if (cu.saves.length !== 0 || cu.starts !== 0) flag(`1ck: Change Up started ${cu.starts} captures and saved ${cu.saves.length} takes — it must never record`);
     /* The red label is on every screen of a recorded take (each screen replaces #cc-body); every round starts on a clean grid (a leftover
@@ -11368,7 +11377,7 @@ function checkCoachVerdicts() {
     if (pk !== 'ccBest:F5-G5:beat') flag(`1ck: a pair's best-score key changed to "${pk}" (a student's saved bests would be lost)`);
     const pairPlan = JSON.parse(run(`JSON.stringify(ccRoundPlan(CC_POWER_PROGRESSIONS[1], CC_POWER_PROGRESSIONS[1].chords, CC_RATES[1]))`));
     if (pairPlan.slots !== 12 || pairPlan.ladder || pairPlan.rounds !== 1) flag(`1ck: a pair's round changed (${pairPlan.slots} slots at "Every 2 beats", expected 12, one round)`);
-    const SONG_PIN = { recChecks: 17, songs: 2, entries: 16, cardSwitches: 16, hints: 16 * 7 * 2, setups: 16 * 3 * 2, dones: 16 * 2, rounds: 16 * 3, nudges: 16 * 2 };
+    const SONG_PIN = { recChecks: 18, songs: 2, entries: 16, cardSwitches: 16, hints: 16 * 7 * 2, setups: 16 * 3 * 2, dones: 16 * 2, rounds: 16 * 3, nudges: 16 * 2 };
     for (const [k, n] of Object.entries(SONG_PIN)) if (song[k] !== n) flag(`1ck: ${song[k]} ${k}, pinned ${n} — the check went partly blind (or grew: re-pin on purpose)`);
     songCounts = song;
     run(`setLang('en'); cc = null; ccStop();`);

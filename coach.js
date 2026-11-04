@@ -1651,6 +1651,7 @@ function coachMicOff(){
    and the dev bypass never upload. Every way out of a take ends up in
    coachMicOff(), which tears the capture down. */
 const MICREC_MAX_SEC = 30;
+const MICREC_MIN_STOPPED_SEC = 10;   // a Stopped Power Chord Switch game is saved only past this much audio (see ccFinish)
 const MICREC_RATE = 24000;            // saved sample rate: 16-bit mono
 const MICREC_CHUNK = 600000;          // bytes per chunks/{i} doc (Firestore's cap is 1 MB)
 const MICREC_ASK_KEY = 'micRecConsent';
@@ -3579,10 +3580,10 @@ function ccRecBadge(){
 /* What a saved Power Chord Switch take needs beside the audio: every change's
    due time and verdict (all rounds) and every strum heard. Event times are when
    the strum was PLAYED (arrival - micLatencyMs). */
-function ccRecMeta(){
+function ccRecMeta(complete){
   const progDef = ccProgs()[cc.progIdx] || {};
   return {
-    fields: { game: 'pw', progression: cc.chords.join('-'), song: progDef.song || null, ladder: !!cc.ladder,
+    fields: { game: 'pw', complete: complete === true, progression: cc.chords.join('-'), song: progDef.song || null, ladder: !!cc.ladder,
               bpm: cc.stageBpms[0], stageBpms: cc.stageBpms.slice(), bpc: cc.bpc, eventTimes: 'played (arrival - micLatencyMs)' },
     expected: cc.changes.map((c, i) => ({ i, t: c.t, from: c.from, to: c.to, stage: c.stage == null ? 0 : c.stage, bpm: c.bpm, verdict: c.result })),
     events: (cc.evLog || []).slice()
@@ -3894,8 +3895,11 @@ function ccFinish(complete){
   // timer runs out on its own with the guitar silent).
   if (complete && ccOk > 0) awardArcadeXp(cc.isNewBest);
   ccRenderDone();
-  // A game played to the end is saved; a Stopped one is thrown away (as in Note Runner).
-  if (rec && complete) micRecSave(rec, ccRecMeta());
+  /* A game played to the end is saved, and so is a Stopped one (Jonathan, 2026-11-04: "save it on stop too")
+     — marked complete:false in the take. A Stopped one needs MICREC_MIN_STOPPED_SEC of audio: each student
+     has ONE take per game and a new take overwrites it, so an accidental Stop must not replace a full take
+     (or use up the collection counter) with two seconds of count-in. Leaving the screen still drops it. */
+  if (rec && (complete || rec.n / rec.srcRate >= MICREC_MIN_STOPPED_SEC)) micRecSave(rec, ccRecMeta(complete));
 }
 
 function ccRenderDone(){

@@ -27,8 +27,11 @@ below. Delete or rewrite it when the list is done.
    881px tall on a 657px screen.
 4. **Saved student audio** (`micRecStart('pw')`): same consent flow as the
    Listening Coach and Note Runner (one question per device, the red "Recording
-   this take" label on every screen of a take, saved only when a game is played
-   to the end, never for Change Up). One capture covers all three rounds and is
+   this take" label on every screen of a take, saved when a game is played to
+   the end, and also when it is Stopped after at least 10 s of audio
+   (`MICREC_MIN_STOPPED_SEC`, 2026-11-04; the take says `complete: false`;
+   a shorter Stop is dropped so a stub never overwrites a full take; leaving
+   the screen still drops it); never for Change Up). One capture covers all three rounds and is
    cut at the existing 30-second cap. Jonathan said **no on/off button**: none
    was added. The label still carries the existing small "Stop saving my takes"
    link (the consent opt-out the other two games have). Remove it from the
