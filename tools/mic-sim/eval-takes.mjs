@@ -1,8 +1,11 @@
 /* Evaluate consented mic recordings (micTakes) on downloaded files — the
    same measurements as the teacher console's "Evaluate all recordings"
-   button (Mic recordings view), whose functions (micEvalTake, micEvalRow,
-   micEvalDevice, micEvalText in teacher.js) this pulls out and runs. See the
-   comment above micEvalTake for what is measured and why.
+   button (Mic recordings view), whose functions (micEvalSignal, micEvalTake,
+   micEvalTakePw, micEvalRow, micEvalDevice, micEvalText in teacher.js) this
+   pulls out and runs. See the comments above micEvalTake (Listening Coach,
+   Note Runner) and micEvalTakePw (Power Chord Switch: strums against the
+   site's verdicts, per round) for what is measured and why. Synthetic takes
+   with known answers: fake-take.mjs, fake-pw-take.mjs.
 
    Input: the console's "Download WAV" + "Download data" files, pairs sharing
    a base name (mic-coach-Name-2026-10-08-10-00.wav + .json):
@@ -25,7 +28,7 @@ const depsSrc = `{ GATE: ${constOf('COACH_PITCH_GATE')}, GAIN: ${constOf('COACH_
   MATCH_FRAC: ${constOf('COACH_MATCH_FRAC')}, MATCH_MIN_MS: ${constOf('COACH_MATCH_MIN_MS')}, VOTE_TOL: ${constOf('COACH_VOTE_TOL')},
   detectPitch: (function(){ let coachYinD = null; ${pitchSrc}\n return coachDetectPitch; })() }`;
 const teacherSrc = fs.readFileSync(path.join(root, 'teacher.js'), 'utf8');
-const core = new Function(['micEvalTake', 'micEvalMicName', 'micEvalDevice', 'micEvalRow', 'micEvalText'].map(n => extract(teacherSrc, n)).join('\n') +
+const core = new Function(['micEvalSignal', 'micEvalTake', 'micEvalTakePw', 'micEvalMicName', 'micEvalDevice', 'micEvalRow', 'micEvalText'].map(n => extract(teacherSrc, n)).join('\n') +
   '\nreturn { micEvalTake, micEvalDevice, micEvalRow, micEvalText };')();
 
 const args = process.argv.slice(2);
@@ -72,7 +75,6 @@ wavs.forEach((w, k) => {
   try {
     const { pcm, rate } = readWav(w);
     const d = JSON.parse(fs.readFileSync(j, 'utf8'));
-    if (d.mode === 'pw'){ console.warn(label + ' (' + path.basename(w) + '): Power Chord Switch take — not measured (the evaluator knows Coach and Note Runner notes)'); return; }
     d.sampleRate = rate;
     rows.push(core.micEvalRow(label, d, pcm, deps));
     console.error(label + ' = ' + path.basename(w));
@@ -91,11 +93,13 @@ function whyText(rows){
   rows.forEach(r => (r.perNote || []).forEach(n => {
     const w = n.why || {};
     tot[w.cat] = (tot[w.cat] || 0) + 1;
-    const g = r.game.indexOf('Coach') === 0 ? 'Coach' : 'Note Runner';
+    const g = r.game.indexOf('Coach') === 0 ? 'Coach' : r.kind === 'pw' ? 'Power Chord Switch' : 'Note Runner';
     (totBy[g] = totBy[g] || {})[w.cat] = (totBy[g][w.cat] || 0) + 1;
-    if (w.cat === 'counted' || w.cat === 'wrong') return;
-    const detail = [w.detail, w.devMs != null ? (w.devMs > 0 ? '+' : '') + w.devMs + 'ms' : null,
-      w.audio != null ? 'audio ' + (w.audio ? 'yes' + (w.audioDevMs != null ? ' ' + (w.audioDevMs > 0 ? '+' : '') + w.audioDevMs : '') : 'no') : null].filter(Boolean).join(' ');
+    // a Power Chord Switch change (teacher.js micEvalTakePw): listed unless the site and the recording agree
+    if (w.cat === 'counted' || w.cat === 'wrong' || w.cat === 'agree') return;
+    const detail = r.kind === 'pw' ? 'round ' + (n.stage + 1) + (n.onsetMs != null ? ' strum ' + (n.onsetMs > 0 ? '+' : '') + n.onsetMs + 'ms' : '')
+      : [w.detail, w.devMs != null ? (w.devMs > 0 ? '+' : '') + w.devMs + 'ms' : null,
+        w.audio != null ? 'audio ' + (w.audio ? 'yes' + (w.audioDevMs != null ? ' ' + (w.audioDevMs > 0 ? '+' : '') + w.audioDevMs : '') : 'no') : null].filter(Boolean).join(' ');
     out.push([r.take, r.game, n.i, n.site, w.cat, detail, w.siteN, w.winN, w.lateN, w.lateHit, w.share, n.replay, n.exact].map((v, k) => pad(v, cols[k][1])).join(' '));
   }));
   const fmt = h => Object.entries(h).sort((a, b) => b[1] - a[1]).map(([k, v]) => k + ' ' + v).join(' · ');

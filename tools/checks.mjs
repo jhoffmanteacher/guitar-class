@@ -36,7 +36,7 @@
 import { readFileSync, writeFileSync, readdirSync, mkdtempSync, rmSync, existsSync, statSync } from 'node:fs';
 import { spawnSync, spawn } from 'node:child_process';
 import { createHash } from 'node:crypto';
-import { fileURLToPath } from 'node:url';
+import { fileURLToPath, pathToFileURL } from 'node:url';
 import { dirname, join } from 'node:path';
 import { audioHashMap, renderAudioBlock, AUDIO_BLOCK_RE, AUDIO_CACHE_NAME, AUDIO_HASH_CACHE_NAME } from './sw-audio-map.mjs';
 import { tmpdir, cpus } from 'node:os';
@@ -11342,8 +11342,7 @@ function checkCoachVerdicts() {
     if (!/if \(micRec && micRec\.live\) cc\.evLog\.push\(\{ t: at - lat, stage: cc\.stage \}\)/.test(loopCode)) flag('1ck: ccLoop no longer logs each strum heard (cc.evLog) while a take is recording');
     const rulesTxt = readFileSync(join(ROOT, 'firestore.rules'), 'utf8');
     if ((rulesTxt.match(/takeId\.matches\(request\.auth\.uid \+ '-\(coach\|nr\|pw\)'\)/g) || []).length !== 2 || /\(coach\|nr\|pw\)[^']/.test(rulesTxt.replace(/\(coach\|nr\|pw\)'\)/g, ''))) flag("1ck: firestore.rules must accept exactly the take id '<uid>-(coach|nr|pw)' on the take AND its chunks (two anchored matches, no wildcard after the id) — publish it in the console before the code writes");
-    const evalSrc = jsFunctionBody(readFileSync(join(ROOT, 'teacher.js'), 'utf8'), 'teacherMicEvaluate');
-    if (!evalSrc || !/teacherMicTakes\.filter\(d => d\.mode !== 'pw'\)/.test(stripJsComments(evalSrc))) flag('1ck: Evaluate-all in teacher.js no longer skips Power Chord Switch takes (the evaluator only knows Coach and Note Runner)');
+    /* Evaluate-all MEASURES Power Chord Switch takes since 2026-11-04 (teacher.js micEvalTakePw): 1cl runs it. */
     /* The clearer feedback. */
     for (const lang of ['en', 'es']) {
       run(`setLang(${JSON.stringify(lang)}); ccSetup('power'); cc.phase = 'play'; cc.ladder = false; cc.bpm = 60; cc.rateIdx = 2; cc.bpc = 1;
@@ -11388,6 +11387,157 @@ function checkCoachVerdicts() {
   }
   if (bad === 0 && songCounts) { head('1ck. Power Chord Switch song switches: each activity is checked against its card and the three rounds are run'); ok(`${songCounts.songs} songs, ${songCounts.entries} switch activities (${songCounts.cardSwitches} distinct card switches, each once; Sweet Child's open A5 only next to C5/B5/E5, the fret-5 A5 only next to G5, same pitches as A5); the ladder run for every one (${songCounts.rounds} round changes: 60/75/90 BPM, 21 changes, the BPM buttons ${songCounts.nudges} times: only later rounds, 40..140, off in the last); ${songCounts.hints} "next:" hints (EN+ES) match the diagrams, ${songCounts.setups} setup and ${songCounts.dones} done screens never show the key "A5o", the computer never picks a song, best keys are per switch and the pair keys are unchanged`); }
   if (bad === 0) ok(`${counts.reports} Coach reports, ${counts.descs} chord-card descriptions, ${counts.nrLevels} Note Runner levels ×2 and ${counts.doneScreens} arcade done screens read true; Power Chord Switch: ${counts.pwLoops} loops are three-finger shapes in the right group, ${counts.pwDraws} random draws all listed pairs (11 of 11 and both orders seen), the Again button replays the pair and Start draws, Start sticks in Change Up and not in Power Chord Switch (two columns that fit 657px), Every beat is the first speed button there, the live quiz keeps its 760px shell, ${counts.pwHints} slide hints match the diagrams (EN+ES), ${counts.pwViews} screens/rounds, ${counts.pwMemory} remembered tempo/speed pairs and ${counts.pwGates} pitch gates keep it apart from Change Up`);
+}
+
+/* ════════════════════════════════════════════════════════════════════
+   1cl. POWER CHORD SWITCH TAKES ARE MEASURED (2026-11-04) — teacher.js
+   micEvalTakePw, what the console's "Evaluate all recordings" does with a
+   saved Power Chord Switch take (coach.js ccRecMeta): per change, is there a
+   strum in the recording where the change was due, against the site's
+   verdict; per round, its own count-in for the mic delay.
+   RUN, not read. tools/mic-sim/fake-pw-take.mjs builds eight takes with
+   PLANTED answers (loud and clipping; quiet; 50 and 250 ms mic delay, the
+   second with overtones on the beep pitch; cut by the 30 s cap; a one-round
+   pair; every 2 beats and Stopped; no beeps). Each goes through micEvalRow,
+   lifted out of teacher.js with what it calls, and:
+     · every change's category (agree / detector-missed / false-hit /
+       silent-miss, or dropped past the audio's end) must be the planted one,
+       and the row's counts must be the per-change ones;
+     · every round with beeps finds them at the planted lag ± 10 ms, with the
+       ideal delay (lag + map) ± 10 ms; a round with none says none;
+     · the totals are pinned (PW_EVAL_PIN): a fixture or a category that goes
+       missing fails here.
+   Then the console summary (teacherMicEvalHtml) is rendered on all eight, on
+   one alone (1 vs many wording) and mixed with a Coach row whose note counts
+   must not take in the changes; the terminal table (micEvalText) must list
+   every round; teacherMicEvaluate itself is RUN on two takes with a stubbed
+   page and must measure both (no Power Chord Switch filter); and
+   tools/mic-sim/eval-takes.mjs is run on one take written to a temp folder.
+   micEvalTake (Coach / Note Runner) is not run here: its rows were proved
+   byte-identical by a differential when micEvalSignal was split out of it.
+   ════════════════════════════════════════════════════════════════════ */
+const PW_EVAL_PIN = { takes: 8, rounds: 21, changes: 155, judged: 148, dropped: 7, agree: 121, 'detector-missed': 9, 'false-hit': 9, 'silent-miss': 9, clickRounds: 18, noClickRounds: 3, htmlChecks: 3, evaluateRun: 2, evalTakesRun: 1 };
+async function checkPwTakeEvaluator() {
+  head('1cl. Power Chord Switch takes: the evaluator is run on takes with planted answers');
+  let bad = 0;
+  const fail = m => { err('1cl: ' + m); problems++; bad++; };
+  let fx, extract;
+  try {
+    fx = await import(pathToFileURL(join(ROOT, 'tools', 'mic-sim', 'fake-pw-take.mjs')).href);
+    ({ extract } = await import(pathToFileURL(join(ROOT, 'tools', 'mic-sim', 'extract.mjs')).href));
+  } catch (e) { fail(`could not load tools/mic-sim/fake-pw-take.mjs or extract.mjs (${e.message})`); return; }
+  const tSrc = readFileSync(join(ROOT, 'teacher.js'), 'utf8'), aSrc = readFileSync(join(ROOT, 'app.js'), 'utf8'), cSrc = readFileSync(join(ROOT, 'coach.js'), 'utf8');
+  const constOf = n => { const m = cSrc.match(new RegExp('^const ' + n + '\\s*=\\s*([^;]+);', 'm')); if (!m) throw new Error('no ' + n + ' in coach.js'); return `const ${n} = ${m[1].trim()};`; };
+  let core;
+  try {
+    const esc = ['escAttr', 'escHtml'].map(n => { const m = aSrc.match(new RegExp('^const ' + n + ' = .*;$', 'm')); if (!m) throw new Error('no ' + n + ' in app.js'); return m[0]; }).join('\n');
+    const consts = ['COACH_PITCH_GATE', 'COACH_MIC_GAIN', 'COACH_ATTACK_SKIP', 'COACH_EVENT_TAIL', 'COACH_ONSET_REFRACT', 'COACH_MATCH_FRAC', 'COACH_MATCH_MIN_MS', 'COACH_VOTE_TOL'].map(constOf).join('\n');
+    const fns = ['micEvalSignal', 'micEvalTake', 'micEvalTakePw', 'micEvalMicName', 'micEvalDevice', 'micEvalRow', 'micEvalText', 'teacherMicEvalHtml', 'teacherMicOffText', 'teacherMicEvaluate']
+      .map(n => (tSrc.includes('async function ' + n + '(') ? 'async ' : '') + extract(tSrc, n)).join('\n');
+    /* teacherMicEvaluate's page: ctx gives the takes, their audio, the result box and the clock. */
+    core = new Function('ctx', `${esc}\n${consts}\nconst coachDetectPitch = () => -1;\n` +
+      'let teacherMicEvalRows = [], teacherMicEvalNames = [], teacherView = "mic", teacherMicTakes = ctx.takes || [];\n' +
+      'const document = ctx.document, ensureCoachJs = async () => {}, teacherMicChunks = ctx.chunks, micTakeDate = () => null, setTimeout = f => f();\n' +
+      `${fns}\nreturn { micEvalRow, micEvalText, evaluate: teacherMicEvaluate, html: (rows, names) => { teacherMicEvalRows = rows; teacherMicEvalNames = names; return teacherMicEvalHtml(); } };`);
+    core({});
+  } catch (e) { fail(`could not lift the evaluator out of teacher.js (${e.message})`); return; }
+  const ev = core({});
+  const deps = new Function(constOf('COACH_PITCH_GATE') + constOf('COACH_MIC_GAIN') + 'return { GATE: COACH_PITCH_GATE, GAIN: COACH_MIC_GAIN, detectPitch: () => -1 };')();
+  const CATS = ['agree', 'detector-missed', 'false-hit', 'silent-miss'], KEY = { agree: 'agree', 'detector-missed': 'detectorMissed', 'false-hit': 'falseHit', 'silent-miss': 'silentMiss' };
+  const tot = { takes: 0, rounds: 0, changes: 0, judged: 0, dropped: 0, agree: 0, 'detector-missed': 0, 'false-hit': 0, 'silent-miss': 0, clickRounds: 0, noClickRounds: 0, htmlChecks: 0, evaluateRun: 0, evalTakesRun: 0 };
+  const rows = [], names = [], takes = [];
+
+  // 1. every planted answer
+  for (const f of fx.PW_FIXTURES) {
+    let take, row;
+    try { take = fx.makePwTake(f); row = ev.micEvalRow('T' + String(rows.length + 1).padStart(2, '0'), take.meta, take.pcm, deps); }
+    catch (e) { fail(`${f.name}: ${e.message}`); continue; }
+    tot.takes++; rows.push(row); names.push(f.name); takes.push(take);
+    if (row.kind !== 'pw' || row.game !== 'Switch ' + take.meta.progression) { fail(`${f.name}: micEvalRow did not measure it as a Power Chord Switch take (kind ${row.kind}, game "${row.game}")`); continue; }
+    const got = new Map(row.perNote.map(n => [n.i, n.why && n.why.cat]));
+    for (const c of take.truth.changes) {
+      tot.changes++;
+      const g = got.has(c.i) ? got.get(c.i) : 'dropped';
+      if (g === 'dropped') tot.dropped++; else if (CATS.includes(g)) tot[g]++;
+      if (g !== c.cat) fail(`${f.name}: change ${c.i} (round ${c.stage + 1}${c.kind ? ', ' + c.kind : ''}) came out "${g}", planted "${c.cat}"`);
+    }
+    tot.judged += row.notes.n;
+    const judged = take.truth.changes.filter(c => c.cat !== 'dropped').length;
+    if (row.notes.n !== judged || row.perNote.length !== judged || row.notes.dropped !== take.truth.changes.length - judged) fail(`${f.name}: ${row.notes.n} changes judged and ${row.notes.dropped} dropped, planted ${judged} and ${take.truth.changes.length - judged}`);
+    for (const cat of CATS) if (row.notes[KEY[cat]] !== row.perNote.filter(n => n.why.cat === cat).length || (row.notes.why[cat] || 0) !== row.notes[KEY[cat]]) fail(`${f.name}: the row's ${KEY[cat]} (${row.notes[KEY[cat]]}) is not its per-change count`);
+    if (row.rounds.length !== take.truth.rounds.length) { fail(`${f.name}: ${row.rounds.length} rounds, planted ${take.truth.rounds.length}`); continue; }
+    take.truth.rounds.forEach((t, k) => {
+      const r = row.rounds[k];
+      tot.rounds++;
+      if (r.stage !== t.stage || r.bpm !== t.bpm || r.n !== t.n || r.dropped !== t.dropped) fail(`${f.name} round ${k + 1}: ${r.n} judged / ${r.dropped} dropped at ${r.bpm} BPM, planted ${t.n} / ${t.dropped} at ${t.bpm}`);
+      if (t.clicks) {
+        if (r.clickFound) tot.clickRounds++;
+        if (!r.clickFound || Math.abs(r.clickLagMs - t.lagMs) > 10 || r.idealMs == null || Math.abs(r.idealMs - t.idealMs) > 10) fail(`${f.name} round ${k + 1}: beeps ${r.clickFound ? 'at ' + r.clickLagMs + ' ms, ideal ' + r.idealMs : 'not found'}; planted at ${t.lagMs} ms, ideal ${t.idealMs}`);
+      } else {
+        if (!r.clickFound) tot.noClickRounds++;
+        if (r.clickFound || r.idealMs != null) fail(`${f.name} round ${k + 1}: found beeps (${r.clickLagMs} ms) in a take with none`);
+      }
+    });
+    const t0 = take.truth.rounds[0];
+    if (t0.clicks ? (row.latency.idealMs == null || Math.abs(row.latency.idealMs - t0.idealMs) > 10) : (row.latency.clickFound || row.latency.idealMs != null)) fail(`${f.name}: the take's mic delay should be ${t0.clicks ? 'about ' + t0.idealMs + ' ms' : 'unmeasured (no beeps)'}, got ${row.latency.idealMs}`);
+  }
+  if (!rows.length) { fail('no take was measured'); return; }
+
+  // 2. the console summary, on all of them, one alone, and next to a Coach row
+  const sum = (rs, k) => rs.reduce((a, r) => a + r.notes[k], 0);
+  const flat = h => h.replace(/<[^>]+>/g, '');
+  const pwLine = rs => {
+    const n = sum(rs, 'n'), ag = sum(rs, 'agree'), dm = sum(rs, 'detectorMissed'), fh = sum(rs, 'falseHit'), sm = sum(rs, 'silentMiss'), dr = sum(rs, 'dropped');
+    return [`Power Chord Switch: ${n} chord ${n === 1 ? 'change' : 'changes'} in ${rs.length} ${rs.length === 1 ? 'recording' : 'recordings'}${dr ? ` (${dr} more came after` : '.'}`,
+      `agree on ${ag + sm} of ${n} (${ag} strummed, ${sm} not played)`, `${dm} ${dm === 1 ? 'strum is' : 'strums are'} in the recording, but the site heard no strum there`,
+      `On ${fh} ${fh === 1 ? 'change' : 'changes'} the site heard a strum that is not in the recording`];
+  };
+  const coachRow = { take: 'C1', period: '3', game: 'Coach melody', device: { os: 'Windows', chromebook: false, micLabel: 'Mic' }, frame: {},
+    level: { loudDb: -20, floorDb: -60, clipPct: 0 }, latency: { settingMs: 50, clickFound: false },
+    notes: { n: 16, siteRight: 13, replayPresent: 14, detectorMissed: 1, silentMiss: 1, why: { counted: 13, wrong: 1, 'no-onset': 2 }, offPitch: {}, lowH1H2Db: null, secondLook: 0 } };
+  const one = rows[names.indexOf('pw-pair')];
+  for (const [what, rs, nm, extra] of [['all eight', rows, names, []], ['one alone', [one], ['pw-pair'], []],
+    ['next to a Coach row', [coachRow].concat(rows), ['coach'].concat(names), ['The site counted 13 of 16 notes right', 'for 14 of 16', 'Why 2 notes were not counted']]]) {
+    const h = ev.html(rs, nm), text = flat(h), pw = rs.filter(r => r.kind === 'pw');
+    tot.htmlChecks++;
+    for (const want of pwLine(pw).concat(extra)) if (!text.includes(want)) fail(`the console summary (${what}) does not say "${want}"`);
+    if (rs.length === pw.length && /notes right|notes were not counted/.test(text)) fail(`the console summary (${what}) counts chord changes as notes`);
+    const trs = (h.match(/<tr><td class="nc"/g) || []).length, perRound = (h.match(/title="Should be, per round: /g) || []).length;
+    const heardNot = (h.match(/ heard, not there/g) || []).length, wantHeardNot = pw.filter(r => r.notes.falseHit).length;
+    if (trs !== rs.length || perRound !== pw.length || heardNot !== wantHeardNot) fail(`the console table (${what}) has ${trs} rows (want ${rs.length}), ${perRound} per-round delays (want ${pw.length}), ${heardNot} "heard, not there" (want ${wantHeardNot})`);
+    pw.forEach(r => { const cell = r.latency.clickFound ? `${r.latency.settingMs} → ${r.latency.idealMs}` : `${r.latency.settingMs} → ?`; if (!text.includes(cell)) fail(`the console table (${what}) lacks ${r.game}'s delay "${cell}"`); });
+  }
+
+  // 3. the terminal table lists every round
+  const txt = ev.micEvalText(rows), part = txt.split('Power Chord Switch, one line per round')[1] || '';
+  const roundLines = part.split('\n').filter(l => /^T\d\d +Switch /.test(l)).length;
+  if (roundLines !== tot.rounds) fail(`micEvalText lists ${roundLines} Power Chord Switch rounds, the takes have ${tot.rounds}`);
+
+  // 4. Evaluate-all, run: two takes, their audio in two chunks each, a stubbed result box
+  try {
+    const box = { innerHTML: '' }, pick = ['pw-pair', 'pw-every2-stop'].map(nm => takes[names.indexOf(nm)]);
+    const page = core({ takes: pick.map((t, k) => Object.assign({ id: 'fake-' + k }, t.meta)), document: { getElementById: id => id === 't-mic-eval' ? box : null },
+      chunks: async d => { const t = pick[+d.id.slice(5)], b = new Uint8Array(t.pcm.buffer.slice(0)), h = (b.length >> 2) << 1; return [b.subarray(0, h), b.subarray(h)]; } });
+    await page.evaluate();
+    const text = flat(box.innerHTML), want = pwLine(pick.map(t => rows[takes.indexOf(t)]));
+    tot.evaluateRun = (box.innerHTML.match(/<tr><td class="nc"/g) || []).length;
+    if (tot.evaluateRun !== 2 || /Could not measure|not measured/.test(text) || want.some(w => !text.includes(w))) fail(`"Evaluate all recordings" run on 2 Power Chord Switch takes measured ${tot.evaluateRun} (${text.slice(0, 160)}…)`);
+  } catch (e) { fail(`"Evaluate all recordings" threw (${e.message})`); }
+
+  // 5. tools/mic-sim/eval-takes.mjs on one take, on disk
+  const tmp = mkdtempSync(join(tmpdir(), 'gc-1cl-'));
+  try {
+    const t = takes[names.indexOf('pw-pair')];
+    writeFileSync(join(tmp, 'pw-pair.wav'), fx.wavBytes(t.pcm));
+    writeFileSync(join(tmp, 'pw-pair.json'), JSON.stringify(t.meta));
+    const r = spawnSync(process.execPath, [join(ROOT, 'tools', 'mic-sim', 'eval-takes.mjs'), tmp], { encoding: 'utf8', timeout: 120000 });
+    const lineRe = new RegExp(`^T01 .*Switch ${t.meta.progression} .* ${one.notes.siteRight}/${one.notes.n} +${one.notes.replayPresent}/${one.notes.n} `, 'm');
+    if (r.status === 0 && /Power Chord Switch, one line per round/.test(r.stdout) && lineRe.test(r.stdout) && !/not measured/.test(r.stderr || '')) tot.evalTakesRun++;
+    else fail(`tools/mic-sim/eval-takes.mjs did not measure a Power Chord Switch take (exit ${r.status}): ${(r.stderr || r.stdout || '').trim().split('\n').slice(-3).join(' / ')}`);
+  } finally { rmSync(tmp, { recursive: true, force: true }); }
+
+  for (const [k, n] of Object.entries(PW_EVAL_PIN)) if (tot[k] !== n) fail(`${tot[k]} ${k}, pinned ${n} — the check went partly blind (or the fixtures changed: re-pin PW_EVAL_PIN on purpose)`);
+  if (bad === 0) ok(`${tot.takes} synthetic takes, ${tot.rounds} rounds, ${tot.changes} changes: all ${tot.judged} judged ones match their planted answer (${tot.agree} agree, ${tot['detector-missed']} detector-missed, ${tot['false-hit']} false-hit, ${tot['silent-miss']} silent-miss) and ${tot.dropped} past the end are dropped; beeps found in ${tot.clickRounds} of ${tot.clickRounds} rounds that have them (lag and ideal delay within 10 ms), none in the ${tot.noClickRounds} without; the console summary read in ${tot.htmlChecks} renders, Evaluate-all run measures ${tot.evaluateRun} of 2 takes, eval-takes.mjs measures ${tot.evalTakesRun}`);
 }
 
 /* ════════════════════════════════════════════════════════════════════
@@ -11656,6 +11806,7 @@ function checkPracticeMinutes(i18nTable) {
   checkSiteMadeClick();
   checkLiveQuizTimerRepaint();
   checkCoachVerdicts();
+  await checkPwTakeEvaluator();
   checkPracticeMinutes(i18nTable);
   await checkBackingLoudness();
   if (!SKIP_LINKS) await checkLinks();
