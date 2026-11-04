@@ -4200,12 +4200,13 @@ async function renderTeacherMic(){
       · Collected so far: <b>${count}</b>
       <button class="tg-seg-btn" onclick="teacherResetMicCount()">Reset counter</button>
     </div>
-    <div class="tg-note">When this is on, each student is asked once per device before a Listening Coach check or a Note Runner round. Only students who say “Yes, save it” are recorded, with a red label on screen while it records. Each student keeps one take per game; a newer take replaces it. Students load the setting when they open the site.</div>`;
+    <div class="tg-note">When this is on, each student is asked once per device before a Listening Coach check, a Note Runner round or a Power Chord Switch game. Only students who say “Yes, save it” are recorded, with a red label on screen while it records. Each student keeps one take per game; a newer take replaces it. Students load the setting when they open the site.</div>`;
   if(readErr){ box.innerHTML = ctl + `<div class="t-loading">${escHtml(readErr)}</div>`; return; }
   if(!takes.length){ box.innerHTML = ctl + '<div class="t-loading">No recordings yet.</div>'; return; }
   const rows = takes.map((d, i) => {
     const saved = micTakeDate(d), when = saved ? saved.toLocaleString() : '—';
     const game = d.mode === 'nr' ? 'Note Runner' + (d.level != null ? ' · level ' + (Number(d.level) + 1) : '')
+               : d.mode === 'pw' ? 'Power Chord Switch' + (d.progression ? ' · ' + d.progression : '')
                                  : 'Listening Coach' + (d.coachMode ? ' · ' + d.coachMode : '');
     const exp = micTakeExpected(d);
     const right = exp.filter(e => ['ok','oct','perfect','good'].indexOf(e.verdict) >= 0).length;
@@ -4377,7 +4378,7 @@ async function teacherMicDownloadAll(){
 }
 async function teacherMicDelete(i){
   const d = teacherMicTakes[i]; if(!d) return;
-  if(!confirm(`Delete ${d.name || 'this student'}’s ${d.mode === 'nr' ? 'Note Runner' : 'Listening Coach'} recording? This cannot be undone.`)) return;
+  if(!confirm(`Delete ${d.name || 'this student'}’s ${d.mode === 'nr' ? 'Note Runner' : d.mode === 'pw' ? 'Power Chord Switch' : 'Listening Coach'} recording? This cannot be undone.`)) return;
   try{
     await ensureDb();
     const ref = db.collection('micTakes').doc(d.id);
@@ -4883,7 +4884,7 @@ function micEvalRow(label, d, pcm, deps){
   const a = micEvalTake(pcm, d.sampleRate || 24000, d, deps);
   return Object.assign({
     take: label, period: d.period || '', savedAt: d.savedAt || null,
-    game: d.mode === 'nr' ? 'Note Runner L' + ((d.level | 0) + 1) + (d.chords ? ' chords' : '') : 'Coach ' + (d.coachMode || ''),
+    game: d.mode === 'nr' ? 'Note Runner L' + ((d.level | 0) + 1) + (d.chords ? ' chords' : '') : d.mode === 'pw' ? 'Switch ' + (d.progression || '') : 'Coach ' + (d.coachMode || ''),
     bpm: d.bpm || null, durationSec: d.durationSec || null, lang: d.lang || '',
     device: micEvalDevice(d), frame: { meanMs: d.frameMeanMs == null ? null : d.frameMeanMs, maxMs: d.frameMaxMs == null ? null : d.frameMaxMs }
   }, a);
@@ -4933,8 +4934,10 @@ async function teacherMicEvaluate(){
   const deps = { detectPitch: coachDetectPitch, GATE: COACH_PITCH_GATE, GAIN: COACH_MIC_GAIN,
     ATTACK_SKIP: COACH_ATTACK_SKIP, EVENT_TAIL: COACH_EVENT_TAIL, REFRACT: COACH_ONSET_REFRACT,
     MATCH_FRAC: COACH_MATCH_FRAC, MATCH_MIN_MS: COACH_MATCH_MIN_MS, VOTE_TOL: COACH_VOTE_TOL };
-  const takes = teacherMicTakes.slice();
-  const rows = [], names = [], fails = [];
+  /* Evaluate-all measures Listening Coach and Note Runner takes (it knows their notes); a Power Chord Switch take is listened to or downloaded. */
+  const takes = teacherMicTakes.filter(d => d.mode !== 'pw');
+  const skippedPw = teacherMicTakes.length - takes.length;
+  const rows = [], names = [], fails = skippedPw ? [skippedPw + ' Power Chord Switch recording' + (skippedPw === 1 ? ' is' : 's are') + ' not measured (download the WAV to listen)'] : [];
   for(let k = 0; k < takes.length; k++){
     const d = takes[k], label = 'T' + String(k + 1).padStart(2, '0');
     const live = document.getElementById('t-mic-eval');

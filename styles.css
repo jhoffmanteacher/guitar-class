@@ -2277,14 +2277,29 @@ body.rail-collapsed .rail-tools .tool-popup{
 #cc-body.cc-power .cc-groups .fret-levels{flex-direction:column;align-items:stretch;gap:6px}
 #cc-body.cc-power .cc-groups .ts-btn{white-space:normal;text-align:center;min-width:0}
 #cc-body.cc-power .cc-col-set,#cc-body.cc-power .cc-col-pic{min-width:0}
-/* Songs (2026-11-02): the fifth column. A song button is two lines like a speed button, and its label may wrap in the narrow column. */
+/* Songs (2026-11-03): the fifth column has one button per song (two lines, the second counts the switches); it opens the songs view, which lists
+   every switch of both songs in rows under the song's name, with a back button to the pairs. */
 #cc-body.cc-power .cc-groups .ts-btn .cc-rate-sub{white-space:normal}
-/* A picked song's chart preview: every distinct chord of its walk once, four to a row (7 chords = 2 rows, 5 = 2 rows), each box 100px or wider.
-   Four columns for every song, not "half of them": 5 chords in 3 columns made each chart 156px wide and the right column 78px taller than the screen. */
-#cc-body.cc-power .cc-song-pic{min-width:0}
-#cc-body.cc-power .cc-song-pic .cc-diagrams{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:8px 10px}
-#cc-body.cc-power .cc-song-pic .cc-diagrams .cc-dia{min-width:0}
-#cc-body.cc-power .cc-song-pic .cc-dia .chord-box-label,#cc-body.cc-power .cc-cols-song .cc-dia .chord-box-label{font-size:1rem}
+#cc-body.cc-power .cc-groups.cc-groups-songs{display:block}
+#cc-body.cc-power .cc-groups .cc-songs .fret-levels{flex-direction:row;flex-wrap:wrap;align-items:center;gap:6px}
+#cc-body.cc-power .cc-groups .cc-songs .ts-btn{flex:0 0 auto;padding:4px 10px;min-height:30px;white-space:nowrap}
+#cc-body.cc-power .cc-groups .cc-songs .fret-levels{margin-bottom:4px}
+#cc-body.cc-power .cc-groups .cc-songs .cc-song-name{margin:2px 0}
+#cc-body.cc-power .cc-groups .cc-songs .cc-back{margin-bottom:4px}
+.cc-breakdown{font-size:0.875rem;font-weight:600;margin:6px 0;text-align:center}
+.cc-song-name{font-size:0.8125rem;font-weight:600;color:var(--text2);margin:4px 0}
+/* A song switch's rounds: "Round 2 of 3 · 75 BPM" on the count-in and play screens, each round's score on the done screen. */
+.cc-stage{font-size:1rem;font-weight:600;margin:0 0 4px}
+.cc-play-bpm{display:flex;flex-wrap:wrap;align-items:center;gap:2px 12px;margin:6px 0}
+.cc-play-bpm .cc-stage{margin:0}
+.cc-play-bpm .coach-bpm-row{margin:0}
+#cc-body .micrec-on{margin-left:0}
+/* The last change, large, on the Power Chord Switch play screen: a fixed-height row (always drawn) so the chips below it never move. */
+.cc-last{font-size:1.5rem;font-weight:700;line-height:1.2;min-height:2.4rem;padding:2px 10px;margin:0 0 4px;border-radius:8px;border:2px solid transparent;display:flex;align-items:center}
+.cc-last.ok{background:var(--green-bg);color:var(--green-text);border-color:var(--green-text)}
+.cc-last.wrong{background:var(--amber-bg);color:var(--amber-text);border-color:var(--amber-text)}
+.cc-last.miss{background:var(--red-bg);color:var(--red-text);border-color:var(--red-text)}
+.cc-rounds{display:flex;flex-wrap:wrap;gap:4px 16px;justify-content:center;font-size:0.9375rem;font-weight:600;margin:6px 0}
 #cc-body.cc-power .cc-speedtempo{display:flex;flex-wrap:wrap;gap:0 32px;align-items:flex-start}
 /* "Best today" under the -5/+5 row, one line tall whether or not there is a score. */
 /* A fixed 18px tall, not min-height: the empty line's strut and the 12.5px score inside it made lines of 21px, 22px and 18px in different fonts, so the choices jumped when a score appeared (2026-11-02). */
@@ -2307,10 +2322,6 @@ body.rail-collapsed .rail-tools .tool-popup{
 #cc-body.cc-power .cc-cols-play .cc-beats{gap:14px;margin:10px 0 18px}
 #cc-body.cc-power .cc-cols-play .cc-pip{width:30px;height:30px}
 #cc-body.cc-power .cc-cols-play .coach-live{font-size:1rem}
-/* A song round draws every distinct chord of the walk (7 in Sweet Child) in one row, so the picture column is wider and each chart smaller; the chord name sits in a narrower left column, with a bracket such as (open) on its own line. */
-#cc-body.cc-power .cc-cols-song{grid-template-columns:minmax(0,3fr) minmax(0,8fr);gap:12px 20px}
-#cc-body.cc-power .cc-cols-song .cc-diagrams{gap:6px}
-#cc-body.cc-power .cc-cols-song .cc-next{font-size:1.125rem}
 .cc-chord-sub{display:block;font-size:0.3em;font-weight:600;line-height:1.2}
 /* Below 900px wide (not the Chromebook) Power Chord Switch is one column again,
    as it was before the two-column layout: 180px charts side by side, the pair
@@ -2331,10 +2342,6 @@ body.rail-collapsed .rail-tools .tool-popup{
   #cc-body.cc-power .cc-cols-play .cc-beats{gap:8px;margin:6px 0 10px}
   #cc-body.cc-power .cc-cols-play .cc-pip{width:14px;height:14px}
   #cc-body.cc-power .cc-cols-play .coach-live{font-size:inherit}
-  #cc-body.cc-power .cc-song-pic .cc-diagrams .cc-dia svg{width:100%}
-  #cc-body.cc-power .cc-cols-song .cc-diagrams{flex-wrap:wrap;justify-content:flex-start;gap:6px}
-  #cc-body.cc-power .cc-cols-song .cc-diagrams .cc-dia svg{width:72px}
-  #cc-body.cc-power .cc-cols-song .cc-next{font-size:0.875rem}
 }
 /* Change Up's setup (2026-10-31): the three loop lists side by side across the
    top, then the settings (speed, tempo, Start) on the left and the chosen loop's

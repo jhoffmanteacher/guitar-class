@@ -414,10 +414,11 @@ async function powerSwitchWalk(page, run, events, stats, base) {
     const s = st && st.getBoundingClientRect(), b = bpm && bpm.getBoundingClientRect();
     return { shown: sc.clientHeight > 0, innerH: window.innerHeight, scrollH: sc.scrollHeight, clientH: sc.clientHeight, start: s && { top: Math.round(s.top), bottom: Math.round(s.bottom) }, tempoBottom: b && Math.round(b.bottom), bar: !!document.querySelector('#cc-body .cc-startbar .coach-start'),
       charts: [...document.querySelectorAll('#cc-body .cc-col-pic .cc-dia svg')].map(e => { const r = e.getBoundingClientRect(); return { top: Math.round(r.top), w: Math.round(r.width) }; }),
-      cols: [...document.querySelectorAll('#cc-body .cc-groups .cc-group')].map(e => Math.round(e.getBoundingClientRect().top)),
+      cols: [...document.querySelectorAll('#cc-body .cc-groups .cc-group')].map(e => Math.round(e.getBoundingClientRect().top)), songBtns: document.querySelectorAll('#cc-body .cc-songs .ts-btn:not(.cc-back)').length,
       bodyOverflow: document.getElementById('cc-body').scrollWidth > document.getElementById('cc-body').clientWidth, colOverflow: [...document.querySelectorAll('#cc-body .cc-groups .cc-group, #cc-body .cc-col-set, #cc-body .cc-col-pic')].filter(e => e.scrollWidth > e.clientWidth).length,
       colWidths: [...document.querySelectorAll('#cc-body .cc-groups .cc-group')].map(e => Math.round(e.getBoundingClientRect().width)),
       clipped: [...document.querySelectorAll('#cc-body .cc-groups .ts-btn')].filter(e => e.scrollWidth > e.clientWidth || e.scrollHeight > e.clientHeight).map(e => e.textContent.trim().slice(0, 30)),
+      parts: ['.cc-speedtempo', '.cc-groups', '.cc-startbar', '.coach-foot', '.cc-col-set', '.cc-col-pic'].map(s => { const e = document.querySelector('#cc-body ' + s); return s + '=' + (e ? Math.round(e.getBoundingClientRect().height) : '-'); }).join(' '), prog: typeof cc !== 'undefined' && cc ? cc.progIdx : null,
       chartTops: [...new Set([...document.querySelectorAll('#cc-body .cc-col-pic .cc-dia')].map(e => Math.round(e.getBoundingClientRect().top)))].length }; })()`;
   const defaults = `(() => { gamesShow('power'); const rowAt = document.querySelector('#cc-body [onclick*="ccPickRate"]'), progAt = document.querySelector('#cc-body [onclick*="ccPickProg"]'), bpmAt = document.querySelector('#cc-body [onclick*="ccNudgeBpm"]');
     return { rate: CC_RATES[cc.rateIdx].id, prog: cc.progIdx, random: !!CC_POWER_PROGRESSIONS[0].random, active: [...document.querySelectorAll('#cc-body .ts-btn.active')].length,
@@ -427,13 +428,12 @@ async function powerSwitchWalk(page, run, events, stats, base) {
     if (!m.start || m.start.top < 0 || m.start.bottom > m.innerH) fail(step, `Start sits at ${m.start && m.start.top}-${m.start && m.start.bottom}px on a ${m.innerH}px screen — it must be fully on screen (see .cc-startbar)`);
     if (m.tempoBottom == null || m.tempoBottom > m.innerH) fail(step, `the tempo row ends at ${m.tempoBottom}px on a ${m.innerH}px screen`);
     if (!m.bar) fail(step, 'Start is not inside .cc-startbar');
-    if (m.scrollH > m.clientH) fail(step, `the setup is ${m.scrollH}px tall on a ${m.clientH}px screen — Power Chord Switch's two columns must fit without scrolling`);
-    if (m.cols.length !== 5 || new Set(m.cols).size !== 1) fail(step, `the choices are not five columns (four pair groups and Songs) on one row (tops: ${m.cols.join(', ')})`);
+    if (m.scrollH > m.clientH) fail(step, `the setup is ${m.scrollH}px tall on a ${m.clientH}px screen — Power Chord Switch's two columns must fit without scrolling (pick ${m.prog}; ${m.parts})`);
+    if (!((m.cols.length === 5 && new Set(m.cols).size === 1 && m.songBtns === 0) || (m.cols.length === 0 && m.songBtns === 16))) fail(step, `the choices are neither five columns on one row (four pair groups and Songs) nor the 16 song switches (column tops: ${m.cols.join(', ')}; ${m.songBtns} song buttons)`);
     if (m.bodyOverflow || m.colOverflow) fail(step, `something overflows sideways: #cc-body ${m.bodyOverflow}, ${m.colOverflow} column(s) wider than their box`);
     if (m.clipped.length) fail(step, `a button label is clipped: ${m.clipped.join(' | ')}`);
-    /* A song draws every distinct chord of its walk (7 or 5), in at most two rows, each box 100px or wider; a pair keeps its two charts side by side at 200px or wider (the 150px floor of diagram-size:power is separate). */
-    if (m.charts.length > 2) { if (Math.min(...m.charts.map(c => c.w)) < 100 || m.chartTops > 2) fail(step, `the song's chart boxes are not in two rows of 100px or wider: ${m.charts.length} boxes, ${m.chartTops} rows, widths ${m.charts.map(c => c.w).join(',')}`); }
-    else if (m.charts.length && (m.charts.length !== 2 || m.charts[0].top !== m.charts[1].top || Math.min(...m.charts.map(c => c.w)) < 200)) fail(step, `the two charts are not side by side and 200px or wider: ${JSON.stringify(m.charts)}`);
+    /* A pair and a song switch both keep their two charts side by side at 200px or wider (the 150px floor of diagram-size:power is separate). */
+    if (m.charts.length && (m.charts.length !== 2 || m.charts[0].top !== m.charts[1].top || Math.min(...m.charts.map(c => c.w)) < 200)) fail(step, `the two charts are not side by side and 200px or wider: ${JSON.stringify(m.charts)}`);
     stats.powerLayouts = (stats.powerLayouts || 0) + 1;
   };
   await page.send('Emulation.setDeviceMetricsOverride', size);
@@ -441,8 +441,10 @@ async function powerSwitchWalk(page, run, events, stats, base) {
   await run('pw:route', `ensureCoachJs().then(() => goExploreHash('games'))`, 1500);
   /* The song buttons (2026-11-02) are measured like the pairs: each one picked, English and Spanish, with and without a "Best today" score. */
   const songIdx = (await run('pw:song-idx', `CC_POWER_PROGRESSIONS.map((p, i) => p.song ? i : -1).filter(i => i >= 0)`, 10)) || [];
-  const views = [['the default', `gamesShow('power')`], ['a fixed pair', `gamesShow('power'); ccPickProg(1)`], ['a jump pair', `gamesShow('power'); ccPickProg(7)`], ...songIdx.map((i, n) => [`song ${n + 1}`, `gamesShow('power'); ccPickProg(${i})`])];
-  if (songIdx.length !== 2) fail('songs', `Power Chord Switch has ${songIdx.length} song buttons, expected 2`);
+  /* Three of the 16 song switches are measured: the first, one with the open A5 (its label is the longest) and the last. */
+  const songViews = songIdx.length === 16 ? [songIdx[0], songIdx[4], songIdx[15]] : [];
+  const views = [['the default', `sessionStorage.removeItem('pwProg'); gamesShow('power')`], ['a fixed pair', `gamesShow('power'); ccPickProg(1)`], ['a jump pair', `gamesShow('power'); ccPickProg(7)`], ...songViews.map((i, n) => [`song switch ${n + 1}`, `gamesShow('power'); ccPickProg(${i})`])];
+  if (songIdx.length !== 16) fail('songs', `Power Chord Switch has ${songIdx.length} song switches, expected 16`);
   for (const [name, expr] of views) {
     await run('pw:show:' + name, expr, 500);
     const m = await run('pw:measure:' + name, measure, 10);
@@ -460,7 +462,7 @@ async function powerSwitchWalk(page, run, events, stats, base) {
   const bestMeasure = `(() => { const sc = document.getElementById('games-screen'), g = [...document.querySelectorAll('#cc-body .cc-speedtempo > .cc-group')].map(e => Math.round(e.getBoundingClientRect().top)),
     best = document.querySelector('#cc-body .cc-best'), foot = document.querySelector('#cc-body .coach-foot'), f = foot && foot.getBoundingClientRect(), b = best && best.getBoundingClientRect();
     return { shown: sc.clientHeight > 0, innerH: window.innerHeight, scrollH: sc.scrollHeight, clientH: sc.clientHeight, groupTops: g, best: best ? best.textContent.trim() : null, bestVisible: !!(b && b.width > 0 && b.bottom <= window.innerHeight),
-      foot: f && { top: Math.round(f.top), bottom: Math.round(f.bottom) }, groupsTop: Math.round(document.querySelector('#cc-body .cc-groups .cc-group').getBoundingClientRect().top) }; })()`;
+      foot: f && { top: Math.round(f.top), bottom: Math.round(f.bottom) }, groupsTop: Math.round(document.querySelector('#cc-body .cc-groups').getBoundingClientRect().top) }; })()`;
   for (const lang of ['en', 'es']) {
     await run('pw:lang:' + lang, `setLang(${JSON.stringify(lang)})`, 400);
     for (const [name, expr] of views) {
@@ -468,7 +470,7 @@ async function powerSwitchWalk(page, run, events, stats, base) {
       await run('pw:best:show:' + step, expr, 300);
       await run('pw:best:clearscore:' + step, `(() => { Object.keys(sessionStorage).filter(k => k.indexOf('ccBest:') === 0).forEach(k => sessionStorage.removeItem(k)); ccRenderSetup(); return 1; })()`, 150);
       check(`${name} without a score (${lang})`, await run('pw:best:nostart:' + step, measure, 10));
-      const pre = await run('pw:best:pre:' + step, `Math.round(document.querySelector('#cc-body .cc-groups .cc-group').getBoundingClientRect().top)`, 10);
+      const pre = await run('pw:best:pre:' + step, `Math.round(document.querySelector('#cc-body .cc-groups').getBoundingClientRect().top)`, 10);
       await run('pw:best:set:' + step, `(() => { const k = ccBestKey(ccProgs()[cc.progIdx], cc.rateIdx); sessionStorage.setItem(k, String(CC_BPM_MAX)); ccRenderSetup(); return k; })()`, 300);
       check(step, await run('pw:best:start:' + step, measure, 10));
       const m = await run('pw:best:measure:' + step, bestMeasure, 10);
@@ -489,7 +491,7 @@ async function powerSwitchWalk(page, run, events, stats, base) {
      share the games screen), so it is measured at every width from 1366 down to
      920 in steps of 6, not only at 1366. */
   const titleProbe = `(() => {
-      gamesShow('power');
+      sessionStorage.removeItem('pwProg'); gamesShow('power');
       const title = [...document.querySelectorAll('#cc-body .cc-groups .cc-group-title')].find(e => /low[\\s\\u00a0]E|Mi[\\s\\u00a0]grave/.test(e.textContent));
       if (!title) return { found: false };
       const n = title.firstChild, txt = n.textContent, m = txt.match(/(low)[\\s\\u00a0](E)|(Mi)[\\s\\u00a0](grave)/), a = m.index, mid = a + (m[1] || m[3]).length, end = mid + 1 + (m[2] || m[4]).length;
@@ -772,8 +774,9 @@ async function walk(base, chromePort, label) {
      separate remembered choices, ccSk). A checkout without the game skips it. */
   if (views.includes('power')) {
     const r = await run('power:pick-and-reopen', `(() => {
-      const pills = () => [...document.querySelectorAll('#cc-body .cc-group .ts-btn')].filter(b => /ccPickProg/.test(b.getAttribute('onclick') || ''));
+      const pills = () => [...document.querySelectorAll('#cc-body .cc-group .ts-btn, #cc-body .cc-songs .ts-btn')].filter(b => /ccPickProg/.test(b.getAttribute('onclick') || ''));
       const active = () => pills().filter(b => b.classList.contains('active')).map(b => b.textContent.trim());
+      sessionStorage.removeItem('pwProg');
       gamesShow('power');
       const n = pills().length, want = pills()[3].textContent.trim();
       pills()[3].click();
@@ -782,10 +785,9 @@ async function walk(base, chromePort, label) {
       gamesShow('cc');
       const ccFirst = pills()[0].textContent.trim(), ccActive = active();
       gamesShow('power');
-      /* Power Chord Switch offers the computer's pick, 11 fixed pairs and (2026-11-02) 2 song buttons: every choice but the first and the songs
-         has two chords, and the speed row is clicked for real and remembered across the reopen. */
-      const songPills = pills().filter(b => b.querySelector('.cc-rate-sub'));
-      const twoOnly = songPills.length === 2 && pills().slice(1).filter(b => !b.querySelector('.cc-rate-sub')).every(b => b.textContent.split('↔').length === 2);
+      /* Power Chord Switch offers the computer's pick, 11 fixed pairs and (2026-11-03) 16 song switches: every choice but the first has two chords,
+         and the speed row is clicked for real and remembered across the reopen. */
+      const twoOnly = pills().length === 12 && pills().slice(1).every(b => b.textContent.split('↔').length === 2);
       const speedBtns = [...document.querySelectorAll('#cc-body [onclick*="ccPickRate"]')];
       speedBtns[1].click();
       gamesShow('hub'); gamesShow('power');
@@ -793,67 +795,95 @@ async function walk(base, chromePort, label) {
       ccPickRate(2);   // back to every beat for the steps after this one
       return { n, want, again, ccFirst, ccActive, twoOnly, speedCount: speedBtns.length, rate };
     })()`, 400);
-    if (r && (r.n !== 14 || r.again.length !== 1 || r.again[0] !== r.want || r.ccActive.length !== 1 || r.ccActive[0] !== r.ccFirst)) {
-      events.push({ step: 'power:pick-and-reopen', kind: 'power-loop-memory', text: `${r.n} choices (want 14: the computer's pick, 11 pairs, 2 songs); picked "${r.want}", reopened on "${r.again.join('|')}"; Change Up opened on "${r.ccActive.join('|')}", its first loop is "${r.ccFirst}"` });
+    if (r && (r.n !== 12 || r.again.length !== 1 || r.again[0] !== r.want || r.ccActive.length !== 1 || r.ccActive[0] !== r.ccFirst)) {
+      events.push({ step: 'power:pick-and-reopen', kind: 'power-loop-memory', text: `${r.n} choices on the Chord pairs view (want 12: the computer's pick, 11 pairs); picked "${r.want}", reopened on "${r.again.join('|')}"; Change Up opened on "${r.ccActive.join('|')}", its first loop is "${r.ccFirst}"` });
     }
     if (r && (!r.twoOnly || r.speedCount !== 3 || r.rate !== 'half')) {
-      events.push({ step: 'power:pairs-and-speed', kind: 'power-pairs-and-speed', text: `Power Chord Switch: every fixed choice that is not one of the 2 songs is a pair: ${r.twoOnly}; ${r.speedCount} speed buttons (want 3); after clicking "Every 2 beats" and reopening it ran at "${r.rate}"` });
+      events.push({ step: 'power:pairs-and-speed', kind: 'power-pairs-and-speed', text: `Power Chord Switch: every fixed choice is a pair (12 in all): ${r.twoOnly}; ${r.speedCount} speed buttons (want 3); after clicking "Every 2 beats" and reopening it ran at "${r.rate}"` });
     }
   }
-  /* Power Chord Switch's SONG buttons (2026-11-02), clicked and run for real:
-     1. each song picked, the game left and reopened: the same song is still picked, and Start reads its chord count (22 / 12);
-     2. a round started on the real engine (fake mic) and then driven on a fake clock: ccBeatTick is stepped through EVERY slot; at each one exactly
-        one .cc-dia.cur exists and it is the box of that slot's key (the two A5 boxes of Sweet Child included), and "next:" is never empty;
-     3. 200 draws of "Two random chords" (the real Start path) never draw a song. */
+  /* Power Chord Switch's SONG switches (2026-11-03), clicked and run for real, all 16:
+     1. each picked, the game left and reopened: the same one is still picked, and Start reads its rounds ("Start — 3 rounds");
+     2. a game started on the real engine (fake mic) and driven on a fake clock: round 1's count-in and play screen say "Round 1 of 3 · 60 BPM", the play
+        screen fits the 657px window (no scrolling, Stop and the BPM buttons on screen), ccBeatTick is stepped through all 8 chords (exactly one .cc-dia.cur,
+        the box of that chord, "next:" never empty); then round 2 and round 3 are started the way the engine starts them (ccStageEnd): each at its own tempo,
+        the BPM buttons on the play screen move only the rounds still to come (and are off in round 3);
+     3. 200 draws of "Two random chords" (the real Start path) are always one of the listed pairs. */
   if (views.includes('power')) {
-    /* The charts are measured at the Chromebook's real window, as the layout checks above are. */
     await page.send('Emulation.setDeviceMetricsOverride', { width: 1366, height: 657, deviceScaleFactor: 1, mobile: false });
     await sleep(300);
     const songStep = (step, text) => events.push({ step: 'power:songs:' + step, kind: 'power-songs', text });
     const idxs = (await run('power:songs:idx', `CC_POWER_PROGRESSIONS.map((p, i) => p.song ? i : -1).filter(i => i >= 0)`, 10)) || [];
-    if (idxs.length !== 2) songStep('count', `${idxs.length} song buttons, expected 2`);
+    if (idxs.length !== 16) songStep('count', `${idxs.length} song switches, expected 16`);
     stats.songs = 0;
     for (const i of idxs) {
       const r = await run('power:songs:reopen:' + i, `(() => { const p = CC_POWER_PROGRESSIONS[${i}];
-        gamesShow('power'); ccPickProg(${i}); gamesShow('hub'); gamesShow('power');
-        const active = [...document.querySelectorAll('#cc-body .cc-group .ts-btn.active')].filter(b => /ccPickProg/.test(b.getAttribute('onclick') || '')).map(b => b.textContent.trim());
-        const start = document.querySelector('#cc-body .coach-start'), want = t('games.cc.startButton', { slots: p.chords.length });
-        return { song: p.song, n: p.chords.length, idx: cc.progIdx, active, start: start && start.textContent.trim(), want }; })()`, 300);
-      if (!r || r.idx !== i || r.active.length !== 1 || !/(Sweet Child|the cure)/.test(r.active[0]) || !r.start || !r.start.includes(r.want)) {
-        songStep('reopen', `${r && r.song}: picked choice ${i}, reopened on ${r && r.idx} "${r && r.active.join('|')}"; Start reads "${r && r.start}", expected "${r && r.want}"`);
+        setLang('en'); gamesShow('power'); ccPickProg(${i}); gamesShow('hub'); gamesShow('power');
+        const active = [...document.querySelectorAll('#cc-body .cc-groups .ts-btn.active')].filter(b => /ccPickProg/.test(b.getAttribute('onclick') || '')).map(b => b.textContent.trim());
+        const start = document.querySelector('#cc-body .coach-start'), want = t('games.pw.ladder.start', { n: 3 });
+        return { song: p.song, chords: p.chords.join('-'), idx: cc.progIdx, active, start: start && start.textContent.trim(), want }; })()`, 300);
+      if (!r || r.idx !== i || r.active.length !== 1 || r.active[0].split('↔').length !== 2 || !r.start || !r.start.includes(r.want)) {
+        songStep('reopen', `${r && r.song} ${r && r.chords}: picked choice ${i}, reopened on ${r && r.idx} "${r && r.active.join('|')}"; Start reads "${r && r.start}", expected "${r && r.want}"`);
       }
-      /* The round itself. Speed "Every beat" (CC_RATES index 2): slot k is beat k. */
-      await run('power:songs:start:' + i, `(() => { gamesShow('power'); ccPickProg(${i}); ccPickRate(2); ccStart(); return 1; })()`, 900);
+      /* The game itself. Speed "Every beat" (CC_RATES index 2): chord k is beat k. */
+      await run('power:songs:start:' + i, `(() => { gamesShow('power'); ccPickProg(${i}); ccPickRate(2); cc.bpm = 60; ccStart(); return 1; })()`, 900);
       const phase = await run('power:songs:wait:' + i, `new Promise(r => { const t0 = Date.now(); const f = () => (cc && cc.phase === 'countin') || Date.now() - t0 > 8000 ? r(cc && cc.phase) : setTimeout(f, 50); f(); })`, 50);
-      if (phase !== 'countin') { songStep('start', `the round did not reach its count-in (phase "${phase}") for choice ${i}`); await run('power:songs:stop:' + i, `ccStop(); 1`, 50); continue; }
+      if (phase !== 'countin') { songStep('start', `the game did not reach its count-in (phase "${phase}") for choice ${i}`); await run('power:songs:stop:' + i, `ccStop(); 1`, 50); continue; }
       const walked = await run('power:songs:ticks:' + i, `(() => {
-        cancelAnimationFrame(ccRaf); ccRaf = null; (cc.timeouts || []).forEach(clearTimeout);
-        cc.phase = 'play'; ccRenderPlay();
-        const bad = [], seqLen = cc.seq.length, lastOne = t('games.cc.lastOne');
-        const keys = new Set(cc.seq);
-        const boxes = document.querySelectorAll('#cc-body .cc-col-pic .cc-dia').length;
+        const halt = () => { cancelAnimationFrame(ccRaf); ccRaf = null; (cc.timeouts || []).forEach(clearTimeout); };
+        const bad = [], sc = document.getElementById('games-screen');
+        const stageOf = () => (document.getElementById('cc-stage') || {}).textContent;
+        const play = () => { halt(); cc.phase = 'play'; ccRenderPlay(); };
+        const fits = (label) => {
+          const stop = document.querySelector('#cc-body .coach-stop'), nb = document.querySelector('#cc-body [onclick*="ccNudgeNext"]');
+          const sb = stop && stop.getBoundingClientRect().bottom, bb = nb && nb.getBoundingClientRect().bottom;
+          if (sc.scrollHeight > sc.clientHeight) bad.push(label + ': the play screen is ' + sc.scrollHeight + 'px tall on a ' + sc.clientHeight + 'px screen (' + ['.cc-col-set', '.cc-col-pic', '.cc-chord', '.cc-next', '.cc-beats', '.cc-last', '.coach-strip', '.coach-live', '.cc-play-bpm', '.coach-stop', '.games-topbar'].map(s => { const e = document.querySelector('#cc-body ' + s) || document.querySelector(s); return s + '=' + (e ? Math.round(e.getBoundingClientRect().height) : '-'); }).join(' ') + ')');
+          if (!stop || sb > window.innerHeight) bad.push(label + ': Stop ends at ' + Math.round(sb) + 'px of ' + window.innerHeight);
+          if (!nb || bb > window.innerHeight) bad.push(label + ': the BPM buttons end at ' + Math.round(bb) + 'px of ' + window.innerHeight);
+          if (document.getElementById('cc-body').scrollWidth > document.getElementById('cc-body').clientWidth) bad.push(label + ': sideways overflow');
+        };
+        if (stageOf() !== 'Round 1 of 3 · 60 BPM') bad.push('count-in 1 says "' + stageOf() + '"');
+        play();
+        if (stageOf() !== 'Round 1 of 3 · 60 BPM') bad.push('play 1 says "' + stageOf() + '"');
+        fits('round 1');
+        const lastOne = t('games.cc.lastOne');
         for (let k = 0; k < cc.slots; k++){
           ccBeatTick(k * cc.bpc);
           const cur = [...document.querySelectorAll('.cc-dia.cur')].map(e => e.id), next = document.getElementById('cc-next').textContent;
-          if (cur.length !== 1 || cur[0] !== 'cc-dia-' + cc.seq[k]) bad.push('slot ' + k + ' lights [' + cur.join(',') + '], expected cc-dia-' + cc.seq[k]);
-          if (!next.trim()) bad.push('slot ' + k + ' has an empty "next:" line');
-          if ((k + 1 < cc.slots) === (next === lastOne)) bad.push('slot ' + k + ' next: "' + next + '"');
-          if (document.getElementById('cc-chord').dataset.key !== cc.seq[k]) bad.push('slot ' + k + ' big chord key ' + document.getElementById('cc-chord').dataset.key);
+          if (cur.length !== 1 || cur[0] !== 'cc-dia-' + cc.seq[k]) bad.push('chord ' + k + ' lights [' + cur.join(',') + '], expected cc-dia-' + cc.seq[k]);
+          if (!next.trim()) bad.push('chord ' + k + ' has an empty "next:" line');
+          if ((k + 1 < cc.slots) === (next === lastOne)) bad.push('chord ' + k + ' next: "' + next + '"');
         }
-        const overflow = document.getElementById('cc-body').scrollWidth > document.getElementById('cc-body').clientWidth;
         const rects = [...document.querySelectorAll('#cc-body .cc-col-pic .cc-dia')].map(e => e.getBoundingClientRect());
-        const rows = new Set(rects.map(r => Math.round(r.top))).size;
+        if (rects.length !== 2 || Math.min(...rects.map(r => r.width)) < 100) bad.push('the charts: ' + rects.length + ' boxes, narrowest ' + Math.round(Math.min(...rects.map(r => r.width))));
+        document.querySelector('#cc-body [onclick="ccNudgeNext(5)"]').click();
+        if (cc.stageBpms.join() !== '60,80,95') bad.push('+5 gave rounds ' + cc.stageBpms.join('/'));
+        document.querySelector('#cc-body [onclick="ccNudgeNext(-5)"]').click();
+        cc.changes.forEach(c => { c.result = 'ok'; });
+        ccStageEnd(); halt();
+        if (cc.stage !== 1 || Math.round(cc.beatMs) !== 800 || stageOf() !== 'Round 2 of 3 · 75 BPM') bad.push('round 2 is stage ' + cc.stage + ' at ' + Math.round(cc.beatMs) + ' ms, says "' + stageOf() + '"');
+        play(); fits('round 2');
+        cc.changes.forEach(c => { c.result = 'ok'; });
+        ccStageEnd(); halt();
+        if (cc.stage !== 2 || Math.round(cc.beatMs) !== 667 || stageOf() !== 'Round 3 of 3 · 90 BPM') bad.push('round 3 is stage ' + cc.stage + ' at ' + Math.round(cc.beatMs) + ' ms, says "' + stageOf() + '"');
+        play();
+        const off = [...document.querySelectorAll('#cc-body [onclick*="ccNudgeNext"]')].map(b => b.disabled);
+        if (off.length !== 2 || !off.every(Boolean)) bad.push('round 3: the BPM buttons are not both off (' + off.join(',') + ')');
+        fits('round 3');
+        cc.changes.forEach(c => { c.result = 'ok'; });
+        ccStageEnd(); halt();
+        const done = cc.phase === 'done' && cc.changes.length === 21 && document.querySelectorAll('#cc-body .cc-rounds span').length === 3;
+        if (!done) bad.push('after round 3 the game is ' + cc.phase + ' with ' + cc.changes.length + ' changes and ' + document.querySelectorAll('#cc-body .cc-rounds span').length + ' round lines');
         ccStop();
-        return { slots: seqLen, distinct: keys.size, boxes, bad, overflow, minW: Math.round(Math.min(...rects.map(r => r.width))), rows };
-      })()`, 200);
-      if (!walked || walked.bad.length || walked.boxes !== walked.distinct || walked.overflow || walked.minW < 100 || walked.rows !== 1) {
-        songStep('ticks', `choice ${i}: ${walked && walked.slots} slots, ${walked && walked.boxes} boxes for ${walked && walked.distinct} chords, rows ${walked && walked.rows}, narrowest ${walked && walked.minW}px, sideways overflow ${walked && walked.overflow}; ${walked && walked.bad.slice(0, 4).join('; ')}`);
-      } else stats.songs += walked.slots;
+        return { bad };
+      })()`, 300);
+      if (!walked || walked.bad.length) songStep('rounds', `choice ${i}: ${walked && walked.bad.slice(0, 5).join('; ')}`);
+      else stats.songs += 3;
     }
-    const draws = await run('power:songs:draws', `(() => { gamesShow('power'); const songs = new Set(CC_POWER_PROGRESSIONS.filter(p => p.song).map(p => [...p.chords].sort().join())), bad = [];
-      for (let i = 0; i < 200; i++){ const d = ccPickChords(CC_POWER_PROGRESSIONS[0]); if (d.length !== 2 || d.includes('A5o') || songs.has([...d].sort().join())) bad.push(d.join('>')); }
+    const draws = await run('power:songs:draws', `(() => { gamesShow('power'); const listed = new Set(CC_POWER_PROGRESSIONS.filter(p => !p.random && p.group !== 'song').map(p => [...p.chords].sort().join())), bad = [];
+      for (let i = 0; i < 200; i++){ const d = ccPickChords(CC_POWER_PROGRESSIONS[0]); if (d.length !== 2 || d.includes('A5o') || !listed.has([...d].sort().join())) bad.push(d.join('>')); }
       return bad; })()`, 50);
-    if (draws && draws.length) songStep('draws', `"Two random chords" drew a song in ${draws.length} of 200 draws (${draws.slice(0, 3).join(', ')})`);
+    if (draws && draws.length) songStep('draws', `"Two random chords" drew something that is not a listed pair in ${draws.length} of 200 draws (${draws.slice(0, 3).join(', ')})`);
     stats.songDraws = 200;
     await page.send('Emulation.clearDeviceMetricsOverride');
   }
@@ -912,7 +942,7 @@ try {
   const norm = e => `${e.kind}|${e.step.replace(/^(en|es):/, '')}|${e.kind === 'bad-handler' ? '' : e.text}`;
   const baseCount = new Map(); (base ? base.errors : []).forEach(e => baseCount.set(norm(e), Math.max(baseCount.get(norm(e)) || 0, e.kind === 'bad-handler' ? +e.text : 1)));
   const report = base ? now.errors.filter(e => (e.kind === 'bad-handler' ? +e.text : 1) > (baseCount.get(norm(e)) || 0)) : now.errors;
-  say(`smoke: ${now.stats.sets} sets in ${now.stats.modules} modules (EN + ES), ${now.stats.games} game views, ${now.stats.buttons} inline handlers compiled${now.stats.chordCards ? `, ${now.stats.chordCards} chord-grid cards walked (cursor, lap, layout at 1366/390/360, lyric sheet${now.stats.bassClicks ? `, bass switch clicked on ${now.stats.bassClicks}` : ''}${now.stats.recordingClicks ? `, recording switch clicked, reloaded and flipped back on ${now.stats.recordingClicks}` : ''}${now.stats.chordSkipped ? `; ${now.stats.chordSkipped.join(', ')} is teacher-only and not walked` : ''})` : ''}${now.stats.noteCallSteps ? `, ${now.stats.noteCallSteps} Note Call power-chord steps (EN + ES: six strings, taps on low E and A only, a hit and a miss)` : ''}${now.stats.powerLayouts ? `, Power Chord Switch at 1366\u00d7657 (Start and tempo on screen: ${now.stats.powerLayouts} views, incl. after a reload${now.stats.powerBestLayouts ? `; with a "Best today" score, EN + ES, no scrolling and the privacy line on screen: ${now.stats.powerBestLayouts} views` : ''}${now.stats.songs ? `; song buttons picked and reopened, ${now.stats.songs} slots of both song rounds stepped on a fake clock (one lit chart each, the two A5 boxes included), ${now.stats.songDraws} random draws, none a song` : ""}${now.stats.powerCosmetic ? `; "low E" title kept together at ${now.stats.powerTitleWidths} window widths and the done-screen button padded, EN + ES: ${now.stats.powerCosmetic}` : ''})` : ''}${now.stats.changeUpLayouts ? `, Change Up at 1366\u00d7657 (Start on screen, no scrolling: ${now.stats.changeUpLayouts} views)` : ''}${now.stats.quizLayouts ? `, Chord Blitz (both directions) and Fret Zap at 1366\u00d7657 (picture left, 2\u00d72 answers right, no scroll: ${now.stats.quizLayouts} views)` : ''}`);
+  say(`smoke: ${now.stats.sets} sets in ${now.stats.modules} modules (EN + ES), ${now.stats.games} game views, ${now.stats.buttons} inline handlers compiled${now.stats.chordCards ? `, ${now.stats.chordCards} chord-grid cards walked (cursor, lap, layout at 1366/390/360, lyric sheet${now.stats.bassClicks ? `, bass switch clicked on ${now.stats.bassClicks}` : ''}${now.stats.recordingClicks ? `, recording switch clicked, reloaded and flipped back on ${now.stats.recordingClicks}` : ''}${now.stats.chordSkipped ? `; ${now.stats.chordSkipped.join(', ')} is teacher-only and not walked` : ''})` : ''}${now.stats.noteCallSteps ? `, ${now.stats.noteCallSteps} Note Call power-chord steps (EN + ES: six strings, taps on low E and A only, a hit and a miss)` : ''}${now.stats.powerLayouts ? `, Power Chord Switch at 1366\u00d7657 (Start and tempo on screen: ${now.stats.powerLayouts} views, incl. after a reload${now.stats.powerBestLayouts ? `; with a "Best today" score, EN + ES, no scrolling and the privacy line on screen: ${now.stats.powerBestLayouts} views` : ''}${now.stats.songs ? `; song buttons picked and reopened, ${now.stats.songs} song-switch rounds (16 switches x 3) run on a fake clock: round tempos, the BPM buttons, the play screen fitting 657px, one lit chart per chord, the done screen with 21 changes, ${now.stats.songDraws} random draws, none a song` : ""}${now.stats.powerCosmetic ? `; "low E" title kept together at ${now.stats.powerTitleWidths} window widths and the done-screen button padded, EN + ES: ${now.stats.powerCosmetic}` : ''})` : ''}${now.stats.changeUpLayouts ? `, Change Up at 1366\u00d7657 (Start on screen, no scrolling: ${now.stats.changeUpLayouts} views)` : ''}${now.stats.quizLayouts ? `, Chord Blitz (both directions) and Fret Zap at 1366\u00d7657 (picture left, 2\u00d72 answers right, no scroll: ${now.stats.quizLayouts} views)` : ''}`);
   if (base) say(`smoke: ${BASELINE} had ${base.errors.length} error event(s); this checkout has ${now.errors.length}`);
   if (report.length) {
     exitCode = 1;

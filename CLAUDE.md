@@ -171,6 +171,8 @@ sweep, moving/adding/removing a section or step. Jonathan says "review this" / "
 
 **Effort**: agent `xhigh` for deep review, else `high`; never `max`. Session: `medium` routine, `high` bug fixes / JS / keyed-MC, `xhigh` danger-zone and sweeps; a tier above the session → ask for `/effort`. Report real numbers, not the premise; name the prior decision a request reverses.
 
+**"Next steps for Power Chord Switch"** → read `NEXT-STEPS-power-chord-switch.md` (repo root) first: what shipped 2026-11-03, the console paste still owed, what is not built.
+
 New unrelated topic → AskUserQuestion once: fresh chat or continue?
 
 Full text of trimmed rules: `WORKFLOW.md` → "(trim 2)".
