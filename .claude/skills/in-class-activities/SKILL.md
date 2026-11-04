@@ -801,6 +801,20 @@ every step with a one-line note instead. A new STEP field still goes in both
 renderers; `caStepHtml` has a focus branch for the head and the nav row, so
 anything added there must land in both of its branches too.
 
+**Paths (`paths` on a Focus-view activity, 2026-11-04 — ca-46) are
+activity-level too**: ONE flat `steps` array, a step tagged `path: '<key>'`
+belongs to that path, an untagged step is shared and follows whichever path
+the student took. `caRoute(a)` gives the flat indices on the student's route;
+every tick / BPM / drill key still hangs off the flat index, so switching
+paths loses nothing. The student card shows the chooser (`caPathChooserHtml`)
+until a pick is saved (`<id>:path:<key>` in caSteps, `caPickPath`); the
+console preview draws the same chooser (`{preview:true}`, inert buttons),
+groups the full list by path and walks a path in "Preview as student"
+(`taFocusPreviewPath`). checks.mjs 1d validates the data and pins both
+renderers; 1am/1bb size the activity by its longest route; `tools/smoke.mjs`
+(`pathsWalk`) clicks through it in both languages. The PATHS note atop
+`class-activities.js` is the schema.
+
 **Practice card (`view: 'card'`, 2026-09-27) is a whole card body, not a step
 field** — same shape as an exit check: ONE renderer, `caCardBodyHtml(a, opts)`
 in app.js, reached by `caActivityCardHtml`/`caHeroCardHtml` for students

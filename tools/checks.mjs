@@ -3993,10 +3993,25 @@ function checkI18nCompleteness(manifest, allSets, reviewsByModule, moduleSongsBy
    `number` that IS present still has to be a positive integer, since a
    string or a zero there would sort as garbage.
    ════════════════════════════════════════════════════════════════════ */
+/* The steps a student on a paths activity's longest route meets (the PATHS
+   note atop class-activities.js): the longest path's own steps plus the
+   shared ones, in file order. Without `paths` it is the flat array. Used by
+   1am and 1bb, which size an activity by what one student walks. */
+function caLongestRoute(a) {
+  const steps = (a && Array.isArray(a.steps)) ? a.steps : [];
+  if (!a || !Array.isArray(a.paths) || !a.paths.length) return steps;
+  let best = [];
+  for (const p of a.paths) {
+    const route = steps.filter(s => s && (!s.path || s.path === p.key));
+    if (route.length > best.length) best = route;
+  }
+  return best;
+}
 function validateClassActivities() {
   head('1d. In-Class Activities data');
   let src;
   let strumSteps = 0;   // steps with a drawn strum pattern (step.strum)
+  let pathActivities = 0;   // activities with `paths` (a chooser, then one path's steps + the shared ones)
   try { src = readFileSync(join(ROOT, 'class-activities.js'), 'utf8'); }
   catch { err('class-activities.js is missing'); problems++; return; }
 
@@ -4206,6 +4221,32 @@ function validateClassActivities() {
         if (!hasVal(f.obj[twin])) { err(`${where}${f.path}: ${f.k} has no ${twin} — write both, or the switch shows the other version's words in one language`); problems++; }
       }
     }
+    /* PATHS (`paths` + `path` on steps — ca-46, 2026-11-04; the PATHS note
+       atop class-activities.js, caRoute in app.js): Focus view only; two or
+       more paths with unique lower-case keys, each with label / blurb and
+       their Spanish twins and at least one step; every step's `path` names a
+       listed path. A student's route is one path's steps plus the shared
+       (untagged) ones, so the pick is what makes the card walkable. */
+    const pathKeys = new Set();
+    if ('paths' in a) {
+      if (!Array.isArray(a.paths) || a.paths.length < 2) { err(`${where}: "paths" needs two or more paths`); problems++; }
+      else {
+        if (a.view !== 'focus') { err(`${where}: "paths" needs view: 'focus' — the chooser and the route are Focus-view only`); problems++; }
+        a.paths.forEach((p, pi) => {
+          const pWhere = `${where} · paths[${pi}]`;
+          if (!p || typeof p !== 'object') { err(`${pWhere}: not an object`); problems++; return; }
+          if (!/^[a-z][a-z0-9-]*$/.test(String(p.key || ''))) { err(`${pWhere}: key "${p.key}" should be lower-case letters, digits and hyphens`); problems++; }
+          else if (pathKeys.has(p.key)) { err(`${pWhere}: key "${p.key}" is used twice`); problems++; }
+          else pathKeys.add(p.key);
+          reqEs(pWhere, p, 'label');
+          reqEs(pWhere, p, 'blurb');
+          if (!hasVal(p.label)) { err(`${pWhere}: a path needs a label (the chooser card's name)`); problems++; }
+          const own = (Array.isArray(a.steps) ? a.steps : []).filter(s => s && s.path === p.key).length;
+          if (!own) { err(`${pWhere}: path "${p.key}" has no steps — tag at least one step with path: '${p.key}'`); problems++; }
+        });
+        pathActivities++;
+      }
+    }
     if (isCheck) { /* no steps — see 1y */ }
     /* A practice card has no help ladder: `steps: []` (Jonathan,
        2026-10-07). Every other activity needs its steps. */
@@ -4214,6 +4255,10 @@ function validateClassActivities() {
       a.steps.forEach((s, si) => {
         const sWhere = `${where} · steps[${si}]`;
         if (!s || typeof s !== 'object') { err(`${sWhere}: not an object`); problems++; return; }
+        if ('path' in s) {
+          if (!('paths' in a)) { err(`${sWhere}: path "${s.path}" on an activity with no "paths"`); problems++; }
+          else if (!pathKeys.has(s.path)) { err(`${sWhere}: path "${s.path}" is not one of the activity's paths (${[...pathKeys].join(', ')})`); problems++; }
+        }
         reqEs(sWhere, s, 'text');
         reqEs(sWhere, s, 'label');   // optional step head ("Step 4: Tune it back")
         if ('figure' in s || 'figureAlt' in s || 'figureAlt_es' in s) {
@@ -4234,6 +4279,7 @@ function validateClassActivities() {
           if (!/^[DU][DU.\-]{7}$/.test(String(s.strum.pattern || ''))) { err(`${mWhere}: pattern "${s.strum.pattern}" must be 8 slots of D, U, . or - and start on D or U`); problems++; }
           const chords = (s.strum.chords && typeof s.strum.chords === 'object') ? s.strum.chords : {};
           if (!Array.isArray(s.strum.bars) || !s.strum.bars.length) { err(`${mWhere}: "bars" should be a non-empty array of chord names`); problems++; }
+          if ('barsPerRow' in s.strum && ![1, 2, 4].includes(s.strum.barsPerRow)) { err(`${mWhere}: barsPerRow ${s.strum.barsPerRow} — 1, 2 or 4 (buildStrum draws two a row by default)`); problems++; }
           else s.strum.bars.forEach((name, bi) => { if (!chords[name]) { err(`${mWhere} · bars[${bi}]: "${name}" is not in "chords"`); problems++; } });
           Object.keys(chords).forEach(name => {
             const c = chords[name] || {};
@@ -4303,7 +4349,19 @@ function validateClassActivities() {
   }
   const numbered = activities.filter(a => a && a.kind !== 'check');
   const checks = activities.length - numbered.length;
-  if (problems === 0) ok(`${activities.length} class activit${activities.length === 1 ? 'y' : 'ies'} (${checks} exit check${checks === 1 ? '' : 's'}) — all valid; order lives on the console board; ${strumSteps} strum step${strumSteps === 1 ? '' : 's'}, both renderers draw them`);
+  /* Both renderers draw a paths activity through the one chooser builder
+     (caPathChooserHtml) and walk the same route split (caPathSteps /
+     caSharedSteps) — the student card in caCardBodyBlockHtml, the console
+     preview in renderTeacherActivityDetail. A field wired into one side only
+     is invisible on the other (CLAUDE.md, two renderers). */
+  if (pathActivities) {
+    const appSrc = readFileSync(join(ROOT, 'app.js'), 'utf8');
+    const tchSrc = readFileSync(join(ROOT, 'teacher.js'), 'utf8');
+    if (!/\$\{chooser \? caPathChooserHtml\(a\) : caPathRowHtml\(a\)\}/.test(appSrc)) { err('1d: caCardBodyBlockHtml() in app.js no longer draws the path chooser / the "Change path" row'); problems++; }
+    if (!/const stepsHtml = \(card \|\| chooser\) \? '' : route\.map\(\(si, pos\) => caStepHtml\(a, steps\[si\], si, si === openStepIdx/.test(appSrc)) { err('1d: caCardBodyBlockHtml() in app.js no longer walks caRoute(a) with the step\'s flat index as the key'); problems++; }
+    if (!/caPathChooserHtml\(a,\{preview:true\}\)/.test(tchSrc) || !/caPathSteps\(a,pathKey\)\.concat\(caSharedSteps\(a\)\)/.test(tchSrc)) { err('1d: renderTeacherActivityDetail() in teacher.js no longer draws the path chooser and walks the route by path'); problems++; }
+  }
+  if (problems === 0) ok(`${activities.length} class activit${activities.length === 1 ? 'y' : 'ies'} (${checks} exit check${checks === 1 ? '' : 's'}) — all valid; order lives on the console board; ${strumSteps} strum step${strumSteps === 1 ? '' : 's'}, both renderers draw them; ${pathActivities} with paths, both renderers draw the chooser`);
   checkExitChecks(activities);
   checkActivityTitleNumbers(activities);
   checkActivityDeckAnswers(activities);
@@ -6918,8 +6976,9 @@ function checkActivitySize() {
   let flagged = 0;
   for (const a of activities) {
     if (!a || a.kind === 'check' || !Array.isArray(a.steps)) continue;
-    const stepCount = a.steps.length;
-    const words = a.steps.reduce((n, s) => {
+    // A paths activity (ca-46) is as long as its LONGEST route: one path's steps plus the shared ones.
+    const stepCount = caLongestRoute(a).length;
+    const words = caLongestRoute(a).reduce((n, s) => {
       const stripped = ((s && s.text) || '').replace(/<[^>]+>/g, ' ').trim();
       return n + (stripped ? stripped.split(/\s+/).length : 0);
     }, 0);
@@ -7650,7 +7709,8 @@ function checkFourStepsAndPaging() {
     if (!a || a.kind === 'check' || !Array.isArray(a.steps)) continue;
     checked++;
     // A practice card's steps are its help ladder — counted the same way.
-    if (a.steps.length > 4) over.push(`${a.id} (${a.steps.length})`);
+    const routeLen = caLongestRoute(a).length;   // a paths activity: its longest route, not the flat array
+    if (routeLen > 4) over.push(`${a.id} (${routeLen})`);
   }
   if (over.length) warn(`1bb (soft rule): ${over.length} class activit${over.length === 1 ? 'y has' : 'ies have'} more than four steps — ${over.join(', ')}. Fine when Jonathan asked for it; keep new cards to four where you can.`);
   const strip = f => { try { return readFileSync(join(ROOT, f), 'utf8').replace(/\/\*[\s\S]*?\*\//g, '').replace(/\/\/[^\n]*/g, ''); } catch { return ''; } };
@@ -10090,7 +10150,7 @@ function checkCardCaptionWords() {
    one-sided label is itself the bug (dots in one language, none in the
    other), so it fails outright now rather than being skipped. Bump when a
    card genuinely adds or removes a got-it sentence in both languages. */
-const REP_COUNT_FIELDS = 419;   // 2026-11-04: ca-47 step 1 loses its got-it and tip (-1). 2026-11-03: ca-47 strum pattern in chunks, four Practice steps (+4). 2026-11-03: ca-46 strum pattern, three Practice steps (+3). 2026-10-21: m3w2 three-note power chords, two appended steps (+2). 2026-10-16: Module 5 clean-up, the Lauren Bateman watch step gets a countable got-it (+1). 2026-10-16: ca-34's three power-chord step texts (text_power, +3). 2026-10-14: ca-34 rebuilt — D chord and whole-song steps (+1), then requinto intro and outro steps (+2). 2026-10-13: ca-34 Las Mañanitas, four Practice steps (+4). 2026-10-12: m6-m8 Smoke on the Water watch step + A-shape watch card get a countable got-it (+2). 2026-10-12: 17 Challenge cards in Modules 9-11 get a countable got-it (+17, see 1ar2). 2026-10-07: part cards lose their help ladders too (-8). 2026-10-07: whole-song cards lose their help ladders (-13). 2026-10-06: m12w3 melody-on-top gets a countable got-it (+1). 2026-10-05: ca-27 Luna (+1) and ca-28 Sweet Child (+2) whole songs; ca-29..ca-33 power-chord whole songs (+6). 2026-10-01: ca-13/ca-19/ca-20 as practice cards (-7), ca-25 Seven Nation Army whole song (+2), ca-21 Lines 2 and 4 restored (+2), ca-26 Watchtower whole song (+1)
+const REP_COUNT_FIELDS = 420;   // 2026-11-04: ca-47 merged into ca-46 as its chunks path (-3 ca-47, -3 old ca-46, +7: full 2, chunks 3, shared 2). 2026-11-04: ca-47 step 1 loses its got-it and tip (-1). 2026-11-03: ca-47 strum pattern in chunks, four Practice steps (+4). 2026-11-03: ca-46 strum pattern, three Practice steps (+3). 2026-10-21: m3w2 three-note power chords, two appended steps (+2). 2026-10-16: Module 5 clean-up, the Lauren Bateman watch step gets a countable got-it (+1). 2026-10-16: ca-34's three power-chord step texts (text_power, +3). 2026-10-14: ca-34 rebuilt — D chord and whole-song steps (+1), then requinto intro and outro steps (+2). 2026-10-13: ca-34 Las Mañanitas, four Practice steps (+4). 2026-10-12: m6-m8 Smoke on the Water watch step + A-shape watch card get a countable got-it (+2). 2026-10-12: 17 Challenge cards in Modules 9-11 get a countable got-it (+17, see 1ar2). 2026-10-07: part cards lose their help ladders too (-8). 2026-10-07: whole-song cards lose their help ladders (-13). 2026-10-06: m12w3 melody-on-top gets a countable got-it (+1). 2026-10-05: ca-27 Luna (+1) and ca-28 Sweet Child (+2) whole songs; ca-29..ca-33 power-chord whole songs (+6). 2026-10-01: ca-13/ca-19/ca-20 as practice cards (-7), ca-25 Seven Nation Army whole song (+2), ca-21 Lines 2 and 4 restored (+2), ca-26 Watchtower whole song (+1)
 function checkRepCountParity(sets, ctx) {
   head('1bg. Rep-count dots agree between English and Spanish');
   if (!ctx) { err('1bg cannot run — render context unavailable'); problems++; return; }

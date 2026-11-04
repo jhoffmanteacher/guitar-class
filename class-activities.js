@@ -80,6 +80,24 @@
    became practice cards, below. 2026-10-01: every remaining step ladder —
    ca-1 to ca-8, ca-11, ca-12, ca-17 — got Focus view too.)
 
+   PATHS — `paths: [{ key, label, label_es, blurb, blurb_es }, …]` plus
+   `path: '<key>'` on the steps that belong to each path (Jonathan,
+   2026-11-04; ca-46). Focus view only. ONE flat `steps` array, as always:
+   a tagged step is on its path, an untagged step is SHARED and comes after
+   whichever path the student took. The student picks on a chooser card —
+   one card per path with its label, blurb, the path's first `strum` board
+   as a silent preview, its step names (the shared ones in grey) and a
+   Start button — then walks that path's steps and the shared ones, one at
+   a time; "Change path" over the steps brings the chooser back. Ticks,
+   BPM and drill state hang off a step's FLAT index as before, so a step
+   keeps its tick however it is reached and switching paths loses nothing.
+   The pick itself is saved with the ticks (`<id>:path:<key>` in caSteps).
+   `key` is lower-case letters/digits/hyphens, unique in the activity;
+   every path needs at least one step and every `path` tag must name a
+   listed path (checks.mjs 1d). 1bb counts the longest route (one path +
+   the shared steps), not the flat array. caRoute / caPathChooserHtml in
+   app.js; the console preview groups the steps by path.
+
    CHORD VERSIONS — `chordVersions: { power: { <chord>: { frets, note,
    midi } } }` (optional; Jonathan, 2026-10-16: ca-34, ca-35). The card gets
    a Full chords / Power chords switch. In power mode every chord note whose
@@ -316,6 +334,9 @@
    `ca-16` ("Happy Birthday — The A-String Way") went the same way on
    2026-09-16: its steps were merged into `ca-17`, after the A-string note
    names. Same orphan-key story for anyone who had ticked it.
+   `ca-47` ("Strum Pattern in Chunks") was merged into `ca-46` as its
+   "chunks" path on 2026-11-04 (no student had opened either); the next new
+   activity is `ca-48`.
 
    ORDER AND MODULE PLACEMENT LIVE ON THE CONSOLE BOARD, NOT IN THIS FILE
    (2026-09-16). config/class.activityBoard — { id -> { module, pos } },
@@ -477,6 +498,7 @@
                                   // waits for the next 1); starts on D or U
            chords: { D5: { frets: [['A', 5], ['D', 7], ['G', 7]], midi: [50, 57, 62] } },
            bars: ['D5', 'D5'],    // one chord name per bar, each one in `chords`
+           barsPerRow: 4,         // optional: 1, 2 or 4 bars to a row (default 2)
          },
          // Optional — the real backing track, looping the exact bars this
          // step drills, so a student practising eight bars of the verse
@@ -6902,31 +6924,67 @@ window.CLASS_ACTIVITIES = [
       },
     ],
   },
-  /* ca-46 — the D D U U D U strum (Jonathan, 2026-11-03): a short
-     stand-alone rhythm ladder — count it, muted strings, the chord changes, then
-     play along with The Stellar Guitarist's "Sweet Child O' Mine" lesson
-     from 10:20 (oEmbed-verified 2026-11-03: "Sweet Child O' Mine - Guns &
-     Roses Guitar Lesson Tutorial [Beginner Strumming & Easy Chords]").
-     The hand moves down on every number and up on every "+"; the strums
-     land on 1, 2, +, +, 4, +. Steps 1 and 3 draw it with `strum`
-     (buildStrum in app.js — arrows over the count, chord names over the
-     bars, ▶ Play strum sounds it), not a tab (Jonathan, 2026-11-03). Step 3
-     is the verse order D5 C5 G5 D5, one bar each, ahead of the play-along.
-     No `journey`: it is a strum drill, not a Song Journey layer. */
+  /* ca-46 — the D D U U D U strum (Jonathan, 2026-11-03), ONE activity with
+     TWO PATHS since 2026-11-04 ("merge them into one activity where the user
+     picks the path they'd like to take with a preview of each"): it absorbed
+     ca-47 ("Strum Pattern in Chunks", retired — see RETIRED IDS). The hand
+     moves down on every number and up on every "+"; the strums land on
+     1, 2, +, +, 4, +. Every board is drawn with `strum` (buildStrum in
+     app.js — arrows over the count, chord names over the bars, ▶ Play strum
+     sounds it), not a tab (Jonathan, 2026-11-03).
+
+     PATHS (see PATHS atop this file): the student picks on a chooser card
+     with a preview of each. `path: 'full'` — muted strings, then D5 ringing:
+     the whole pattern from the first strum. `path: 'chunks'` (Jonathan,
+     2026-11-03: "teach three strums and then stop, then add one and then
+     stop. keep adding on" — "a separate path for students to choose"): 3
+     strums, add an up, add a down, the whole pattern. The hand never stops
+     on the chunks path: the part of the bar a chunk doesn't play yet is dots
+     — the hand swings and misses — not a '-' stop (Jonathan, 2026-11-04,
+     after an evaluation: stopping the hand trained the opposite of the
+     pattern). Its first step has no got-it line on purpose (Jonathan,
+     a52d087). Muted strings or D5 is the student's choice there (Jonathan,
+     2026-11-04: "provide choice"); Play strum sounds D5 either way. Both
+     paths then meet on the SHARED steps (no `path`): D5 C5 G5 D5, TWO bars
+     each like the record's verse (song-facts: "two bars each" — it was one
+     bar each until 2026-11-04), then the play-along with The Stellar
+     Guitarist's "Sweet Child O' Mine" lesson from 10:20 (oEmbed-verified
+     2026-11-03: "Sweet Child O' Mine - Guns & Roses Guitar Lesson Tutorial
+     [Beginner Strumming & Easy Chords]"; the 10:20 start is Jonathan's).
+     The "+" is said "and" — glossed once, in the caption of each path's
+     first board (2026-11-04). No `journey`: it is a strum drill, not a
+     Song Journey layer. Ticks are keyed by flat index, so the chunks steps
+     are 3..6 whatever the student's route reads. */
   {
     id:    'ca-46',
     view:  'focus',   // one step at a time — see VIEW above
     title:    'Strum Pattern — Down, Down-Up, Up-Down-Up',
     title_es: 'Patrón de rasgueo — abajo, abajo-arriba, arriba-abajo-arriba',
+    intro:    'Learn one strum pattern, then play it through the chords of "Sweet Child O\' Mine" with a video.',
+    intro_es: 'Aprende un patrón de rasgueo y luego tócalo con los acordes de "Sweet Child O\' Mine" con un video.',
+    paths: [
+      { key: 'full',
+        label:    'The whole pattern',
+        label_es: 'El patrón completo',
+        blurb:    'Play all six strums from the start: muted strings first, then on D5.',
+        blurb_es: 'Toca los seis rasgueos desde el principio: primero con las cuerdas apagadas y luego en D5.' },
+      { key: 'chunks',
+        label:    'In chunks',
+        label_es: 'Por partes',
+        blurb:    'Start with three strums and add one at a time, until the pattern is there.',
+        blurb_es: 'Empieza con tres rasgueos y agrega uno a la vez, hasta tener el patrón.' },
+    ],
     steps: [
+      /* ── Path "full" ── */
       {
-        label:    'Learn — Count it',
-        label_es: 'Aprende — Cuéntalo',
-        text:    'Count 1 + 2 + 3 + 4 +. Your hand goes down on each number and up on each +, the whole time. On each dot it misses the strings. Press Play strum to hear it. Hard to get? <a href="#class-activities/ca-47">Learn it in chunks</a>.',
-        text_es: 'Cuenta 1 + 2 + 3 + 4 +. Tu mano baja en cada número y sube en cada +, todo el tiempo. En cada punto no toca las cuerdas. Presiona «Tocar el rasgueo» para escucharlo. ¿Te cuesta? <a href="#class-activities/ca-47">Apréndelo por partes</a>.',
+        path: 'full',
+        label:    'Practice — Muted strings',
+        label_es: 'Practica — Cuerdas apagadas',
+        text:    'Rest your fretting hand lightly on all six strings so they don\'t ring. Strum: down on each number, up on each +, and miss the strings on each dot. You\'ve got it when: you play it 8 times in a row and your hand never stops. Hand stops on 3? Keep it moving and miss the strings.',
+        text_es: 'Apoya la mano de trastear suavemente sobre las seis cuerdas para que no suenen. Rasguea: abajo en cada número, arriba en cada + y sin tocar las cuerdas en cada punto. Lo tienes cuando: lo tocas 8 veces seguidas y tu mano nunca se detiene. ¿Tu mano se detiene en el 3? Sigue moviéndola y no toques las cuerdas.',
         strum: {
-          caption:    'D5 · the pattern 2 times',
-          caption_es: 'D5 · el patrón 2 veces',
+          caption:    'Muted strings · count "1 and 2 and 3 and 4 and" (the + is "and")',
+          caption_es: 'Cuerdas apagadas · cuenta «1 y 2 y 3 y 4 y» (el + es «y»)',
           pattern: 'D.DU.UDU',   // 8 eighth notes: D down, U up, . hand moves but misses
           chords: {
             D5: { frets: [['A', 5], ['D', 7], ['G', 7]], midi: [50, 57, 62] }
@@ -6935,70 +6993,38 @@ window.CLASS_ACTIVITIES = [
         },
       },
       {
-        label:    'Practice — Muted strings',
-        label_es: 'Practica — Cuerdas apagadas',
-        text:    'Lay your fretting hand lightly on all six strings so they don\'t ring. Strum the pattern and say "Down, Down-Up, Up-Down-Up." You\'ve got it when: you play it 8 times in a row and your hand never stops moving. Hand stops on 3? Keep it moving and just miss the strings.',
-        text_es: 'Apoya la mano de trastear suavemente sobre las seis cuerdas para que no suenen. Rasguea el patrón y di «abajo, abajo-arriba, arriba-abajo-arriba». Lo tienes cuando: lo tocas 8 veces seguidas y tu mano nunca deja de moverse. ¿Tu mano se detiene en el 3? Sigue moviéndola y no toques las cuerdas.',
-      },
-      {
-        label:    'Practice — D5, C5, G5',
-        label_es: 'Practica — D5, C5, G5',
-        text:    'Play one bar of each chord and change on the 1. Press Play strum to hear it first. You\'ve got it when: you play the four bars 4 times through and the pattern never stops at a change. Late on a change? Lower the BPM by 10.',
-        text_es: 'Toca un compás de cada acorde y cambia en el 1. Presiona «Tocar el rasgueo» para escucharlo primero. Lo tienes cuando: tocas los cuatro compases 4 veces completos y el patrón nunca se detiene en un cambio. ¿Llegas tarde al cambio? Baja el BPM 10.',
+        path: 'full',
+        label:    'Practice — D5',
+        label_es: 'Practica — D5',
+        text:    'Hold D5 and let it ring. Same pattern: down on each number, up on each +, miss on each dot. You\'ve got it when: you play it 8 times in a row and every strum rings. Muffled strings? Arch your fingers so each one presses only its own string.',
+        text_es: 'Toca D5 y deja que suene. El mismo patrón: abajo en cada número, arriba en cada +, sin tocar en cada punto. Lo tienes cuando: lo tocas 8 veces seguidas y cada rasgueo suena. ¿Cuerdas apagadas sin querer? Arquea los dedos para que cada uno pise solo su cuerda.',
         strum: {
-          caption:    'D5 · C5 · G5 · D5 · one bar each',
-          caption_es: 'D5 · C5 · G5 · D5 · un compás cada uno',
-          pattern: 'D.DU.UDU',   // 8 eighth notes: D down, U up, . hand moves but misses
+          caption:    'D5 · the pattern 2 times',
+          caption_es: 'D5 · el patrón 2 veces',
+          pattern: 'D.DU.UDU',
           chords: {
-            D5: { frets: [['A', 5], ['D', 7], ['G', 7]], midi: [50, 57, 62] },
-            C5: { frets: [['A', 3], ['D', 5], ['G', 5]], midi: [48, 55, 60] },
-            G5: { frets: [['E', 3], ['A', 5], ['D', 5]], midi: [43, 50, 55] }
+            D5: { frets: [['A', 5], ['D', 7], ['G', 7]], midi: [50, 57, 62] }
           },
-          bars: ['D5', 'C5', 'G5', 'D5'],
+          bars: ['D5', 'D5'],
         },
       },
+      /* ── Path "chunks" ── */
       {
-        label:    'Practice — Play along',
-        label_es: 'Practica — Toca con el video',
-        text:    'Play along from 10:20 with D5, C5 and G5. Change chords when he does. You\'ve got it when: the pattern keeps going through every chord change, to the end of the play-along. Lost? Stop strumming, count with him and come back in on 1.',
-        text_es: 'Toca con el video desde 10:20 con D5, C5 y G5. Cambia de acorde cuando él cambia. Lo tienes cuando: el patrón sigue sin parar en cada cambio de acorde, hasta el final. ¿Te perdiste? Deja de rasguear, cuenta con él y vuelve a entrar en el 1.',
-        video: { id: '0ASVeXINKYM', start: 620,
-                 label: 'Play-along — starts at 10:20', label_es: 'Toca con el video — empieza en 10:20' },
-      },
-    ],
-  },
-  /* ca-47 — the D D U U D U strum in chunks (Jonathan, 2026-11-03: "teach
-     three strums and then stop, then add one and then stop. keep adding on" —
-     "a separate path for students to choose"). ca-46 step 1 links here for a
-     student who wants it in smaller pieces; the last step sends them back to
-     ca-46 step 3 (with a link). The hand never stops: the part of the bar a
-     chunk doesn't play yet is dots — the hand swings and misses — not a
-     '-' stop (Jonathan, 2026-11-04, after an evaluation: stopping the hand
-     trained the opposite of the pattern). Step 1 has no got-it line on
-     purpose (Jonathan, a52d087). Muted strings or D5 is the student's
-     choice (Jonathan, 2026-11-04: "provide choice"); Play strum sounds D5. */
-  {
-    id:    'ca-47',
-    view:  'focus',   // one step at a time — see VIEW above
-    title:    'Strum Pattern in Chunks',
-    title_es: 'Patrón de rasgueo por partes',
-    intro:    'Learn Down, Down-Up, Up-Down-Up a few strums at a time, on muted strings or on D5. Your hand never stops; each step adds one strum.',
-    intro_es: 'Aprende abajo, abajo-arriba, arriba-abajo-arriba pocos rasgueos a la vez, con las cuerdas apagadas o en D5. Tu mano nunca se detiene; cada paso agrega un rasgueo.',
-    steps: [
-      {
+        path: 'chunks',
         label:    'Practice — 3 strums',
         label_es: 'Practica — 3 rasgueos',
         text:    'Pick one: rest your fretting hand lightly on all six strings so they don\'t ring, or hold D5. Strum Down, Down-Up. Then keep your hand moving down and up, but miss the strings until the next 1.',
         text_es: 'Elige uno: apoya la mano de trastear suavemente sobre las seis cuerdas para que no suenen, o toca D5. Rasguea abajo, abajo-arriba. Luego sigue moviendo la mano hacia abajo y hacia arriba, pero sin tocar las cuerdas hasta el siguiente 1.',
         strum: {
-          caption:    '3 strums, then swing',
-          caption_es: '3 rasgueos, luego mueve la mano',
+          caption:    '3 strums, then swing · count "1 and 2 and 3 and 4 and" (the + is "and")',
+          caption_es: '3 rasgueos, luego mueve la mano · cuenta «1 y 2 y 3 y 4 y» (el + es «y»)',
           pattern: 'D.DU....',
           chords: { D5: { frets: [['A', 5], ['D', 7], ['G', 7]], midi: [50, 57, 62] } },
           bars: ['D5', 'D5'],
         },
       },
       {
+        path: 'chunks',
         label:    'Practice — Add an up',
         label_es: 'Practica — Agrega un arriba',
         text:    'Add an up on the + after 3. Your hand moves down on 3 but misses the strings. You\'ve got it when: you play it 4 times in a row and your hand never stops. Hitting the strings on 3? Move your hand a little farther from the strings.',
@@ -7012,6 +7038,7 @@ window.CLASS_ACTIVITIES = [
         },
       },
       {
+        path: 'chunks',
         label:    'Practice — Add a down',
         label_es: 'Practica — Agrega un abajo',
         text:    'Add a down on 4. You\'ve got it when: you play it 4 times in a row and your hand never stops. Late on the 1? Lower the BPM by 10.',
@@ -7025,10 +7052,11 @@ window.CLASS_ACTIVITIES = [
         },
       },
       {
+        path: 'chunks',
         label:    'Practice — The whole pattern',
         label_es: 'Practica — El patrón completo',
-        text:    'Add the last up. Your hand moves the same way as before; now it hits the strings on every arrow. You\'ve got it when: you play it 8 times in a row without stopping. Then open <a href="#class-activities/ca-46">Strum Pattern — Down, Down-Up, Up-Down-Up</a>, press Got it on steps 1 and 2, and start step 3.',
-        text_es: 'Agrega el último arriba. Tu mano se mueve igual que antes; ahora toca las cuerdas en cada flecha. Lo tienes cuando: lo tocas 8 veces seguidas sin detenerte. Luego abre <a href="#class-activities/ca-46">Patrón de rasgueo — abajo, abajo-arriba, arriba-abajo-arriba</a>, presiona «Lo tengo» en los pasos 1 y 2 y empieza el paso 3.',
+        text:    'Add the last up. Your hand moves the same way as before; now it hits the strings on every arrow. You\'ve got it when: you play it 8 times in a row without stopping.',
+        text_es: 'Agrega el último arriba. Tu mano se mueve igual que antes; ahora toca las cuerdas en cada flecha. Lo tienes cuando: lo tocas 8 veces seguidas sin detenerte.',
         strum: {
           caption:    'The whole pattern',
           caption_es: 'El patrón completo',
@@ -7036,6 +7064,33 @@ window.CLASS_ACTIVITIES = [
           chords: { D5: { frets: [['A', 5], ['D', 7], ['G', 7]], midi: [50, 57, 62] } },
           bars: ['D5', 'D5'],
         },
+      },
+      /* ── Shared — both paths end here ── */
+      {
+        label:    'Practice — D5, C5, G5',
+        label_es: 'Practica — D5, C5, G5',
+        text:    'Play each chord for two bars and change on the 1, like the song. Press Play strum to hear it first. You\'ve got it when: you play the eight bars 4 times through and the pattern never stops at a change. Late on a change? Lower the BPM by 10.',
+        text_es: 'Toca cada acorde dos compases y cambia en el 1, como en la canción. Presiona «Tocar el rasgueo» para escucharlo primero. Lo tienes cuando: tocas los ocho compases 4 veces completos y el patrón nunca se detiene en un cambio. ¿Llegas tarde al cambio? Baja el BPM 10.',
+        strum: {
+          caption:    'D5 · C5 · G5 · D5 · two bars each',
+          caption_es: 'D5 · C5 · G5 · D5 · dos compases cada uno',
+          pattern: 'D.DU.UDU',   // 8 eighth notes: D down, U up, . hand moves but misses
+          chords: {
+            D5: { frets: [['A', 5], ['D', 7], ['G', 7]], midi: [50, 57, 62] },
+            C5: { frets: [['A', 3], ['D', 5], ['G', 5]], midi: [48, 55, 60] },
+            G5: { frets: [['E', 3], ['A', 5], ['D', 5]], midi: [43, 50, 55] }
+          },
+          bars: ['D5', 'D5', 'C5', 'C5', 'G5', 'G5', 'D5', 'D5'],
+          barsPerRow: 4,   // a row per two chords — eight bars fit the screen
+        },
+      },
+      {
+        label:    'Practice — Play along',
+        label_es: 'Practica — Toca con el video',
+        text:    'Play along from 10:20 with D5, C5 and G5. Change chords when he does. You\'ve got it when: the pattern keeps going through every chord change, to the end of the play-along. Lost? Stop strumming, count with him and come back in on 1.',
+        text_es: 'Toca con el video desde 10:20 con D5, C5 y G5. Cambia de acorde cuando él cambia. Lo tienes cuando: el patrón sigue sin parar en cada cambio de acorde, hasta el final. ¿Te perdiste? Deja de rasguear, cuenta con él y vuelve a entrar en el 1.',
+        video: { id: '0ASVeXINKYM', start: 620,
+                 label: 'Play-along — starts at 10:20', label_es: 'Toca con el video — empieza en 10:20' },
       },
     ],
   },

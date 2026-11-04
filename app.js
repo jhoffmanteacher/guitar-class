@@ -2205,9 +2205,13 @@ function buildStrum(spec, opts){
   }
   const pat = String(spec.pattern || '');
   const rows = [];
-  for(let b0 = 0; b0 < spec.bars.length; b0 += STRUM_BARS_PER_ROW){
+  /* `barsPerRow: 4` on the spec (ca-46's eight-bar chord step, 2026-11-04):
+     a row per two chords, so eight bars read as a chord chart and fit a
+     657px screen; the default is two. checks.mjs 1d allows 1, 2 or 4. */
+  const perRow = [1, 2, 4].includes(Number(spec.barsPerRow)) ? Number(spec.barsPerRow) : STRUM_BARS_PER_ROW;
+  for(let b0 = 0; b0 < spec.bars.length; b0 += perRow){
     const cells = [];
-    for(let b = b0; b < Math.min(b0 + STRUM_BARS_PER_ROW, spec.bars.length); b++){
+    for(let b = b0; b < Math.min(b0 + perRow, spec.bars.length); b++){
       for(let k = 0; k < STRUM_SLOTS; k++){
         const at = b * STRUM_SLOTS + k;
         const c = pat[k];
@@ -12545,7 +12549,7 @@ function caFreePlayGames(){
 function caMarkRowHtml(a, done, markLabel){
   // Focus view: Mark complete waits for the last step (Jonathan, 2026-09-27).
   // An already-complete card keeps it on every step, so it can be un-marked.
-  if(caIsFocus(a) && !done && caFocusIdx(a) < (a.steps || []).length - 1) return '';
+  if(caIsFocus(a) && !done && caRoutePos(a, caFocusIdx(a)) < caRoute(a).length - 1) return '';
   /* --finish: the "I'm done" buttons are green site-wide (2026-10-31, with
      "Got it — next step" and the module ladder's "Mark done"). .ca-mark-btn
      alone stays orange for its other uses (exit-check Start/Retake, the
@@ -12680,13 +12684,19 @@ function caNumHtml(num){
 function caCardBodyBlockHtml(a, done, focus, card){
   const openStepIdx = focus ? caFocusIdx(a)
     : caStepOpen[a.id] !== undefined ? caStepOpen[a.id] : caDefaultOpenStep(a);
-  const stepsHtml = card ? '' : (a.steps || []).map((s, si) => caStepHtml(a, s, si, si === openStepIdx, caStepDone[`${a.id}:${si}`] === true)).join('');
+  /* A paths activity (caHasPaths) before the student has picked: the chooser
+     stands where the steps go, and the intro shows above it as on Step 1. */
+  const chooser = !card && caChooserUp(a);
+  const steps = a.steps || [];
+  const route = caRoute(a);   // flat step indices on the student's route — see PATHS
+  const stepsHtml = (card || chooser) ? '' : route.map((si, pos) => caStepHtml(a, steps[si], si, si === openStepIdx, caStepDone[`${a.id}:${si}`] === true, { pos, total: route.length })).join('');
   const markLabel = done ? t('ca.completed') : t('ca.markComplete');
   return `<div class="ca-card-body">
-      ${card ? caCardBodyHtml(a) : caKeySwitchHtml(a) + caChordSwitchHtml(a) + caIntroHtml(a, focus, openStepIdx)}
+      ${card ? caCardBodyHtml(a) : caKeySwitchHtml(a) + caChordSwitchHtml(a) + caIntroHtml(a, focus, chooser ? 0 : openStepIdx)}
+      ${chooser ? caPathChooserHtml(a) : caPathRowHtml(a)}
       ${stepsHtml && focus ? caFocusDotsHtml(a, openStepIdx) : ''}
       ${stepsHtml ? `<ol class="ca-steps">${stepsHtml}</ol>` : ''}
-      ${caMarkRowHtml(a, done, markLabel)}
+      ${chooser ? '' : caMarkRowHtml(a, done, markLabel)}
     </div>`;
 }
 /* The card sits under caTodayHeadHtml, which carries the label and the date —
@@ -12799,9 +12809,10 @@ function caResetRevealsIfNewDay(){
   caRevealsDay = who;
   if(typeof caRevealedTabs !== 'undefined') caRevealedTabs.clear();
 }
+// The first not-done step on the student's route (a flat index), -1 = all done.
 function caDefaultOpenStep(a){
-  const steps = a.steps || [];
-  for(let i=0;i<steps.length;i++) if(caStepDone[`${a.id}:${i}`] !== true) return i;
+  const route = caRoute(a);
+  for(const i of route) if(caStepDone[`${a.id}:${i}`] !== true) return i;
   return -1;
 }
 function caStepStatusHtml(n, isDone){ return isDone ? '&#x2713;' : String(n); }
@@ -12824,9 +12835,15 @@ function caStepHeadText(step, si, total){
   const label = step && step.label ? tf(step, 'label') : '';
   return label ? `${n}: ${label}` : n;
 }
-function caStepHtml(a, step, si, isOpen, isDone){
+/* `si` is the step's FLAT index in a.steps — every key (ticks, BPM, drill
+   state) hangs off it. `opts.pos` / `opts.total` are where the step sits on
+   the student's ROUTE (caRoute): the same thing except on a paths activity,
+   where the head reads "Step 2 of 6" by route, not by file position. */
+function caStepHtml(a, step, si, isOpen, isDone, opts){
   const parts = [];
   const focus = caIsFocus(a);
+  const pos = (opts && opts.pos !== undefined) ? opts.pos : si;
+  const total = (opts && opts.total) || (a.steps || []).length;
   /* width/height reserve the figure's box before the SVG arrives — without
      them the card jumps as each one loads. Every img/ca-*.svg is drawn on the
      same 640x244 board; checks.mjs (1v) fails the push if one isn't, and if
@@ -12875,16 +12892,16 @@ function caStepHtml(a, step, si, isOpen, isDone){
   if(focus){
     return `<li class="ca-step${isDone ? ' ca-step-done' : ''}${isOpen ? '' : ' ca-step-collapsed'}" data-idx="${si}">`
       + `<div class="ca-step-head ca-step-head--focus" tabindex="-1">`
-      + `<span class="ca-step-status" aria-hidden="true">${caStepStatusHtml(si + 1, isDone)}</span>`
-      + `<span class="ca-step-label">${escHtml(caStepHeadText(step, si, (a.steps || []).length))}</span>`
+      + `<span class="ca-step-status" aria-hidden="true">${caStepStatusHtml(pos + 1, isDone)}</span>`
+      + `<span class="ca-step-label">${escHtml(caStepHeadText(step, pos, total))}</span>`
       + `</div>`
       + `<div class="ca-step-detail">${detailHtml}</div>`
       + `</li>`;
   }
   return `<li class="ca-step${isDone ? ' ca-step-done' : ''}${isOpen ? '' : ' ca-step-collapsed'}" data-idx="${si}">`
     + `<button type="button" class="ca-step-head" aria-expanded="${isOpen}" onclick="caToggleStepOpen(this)">`
-    + `<span class="ca-step-status" aria-hidden="true">${caStepStatusHtml(si + 1, isDone)}</span>`
-    + `<span class="ca-step-label">${escHtml(caStepHeadText(step, si))}</span>`
+    + `<span class="ca-step-status" aria-hidden="true">${caStepStatusHtml(pos + 1, isDone)}</span>`
+    + `<span class="ca-step-label">${escHtml(caStepHeadText(step, pos))}</span>`
     + `<span class="ca-step-chev" aria-hidden="true">&#9656;</span>`
     + `</button>`
     + `<div class="ca-step-detail">${detailHtml}</div>`
@@ -12908,14 +12925,103 @@ function caStepHtml(a, step, si, isOpen, isDone){
    to leave the screen. Print is unaffected: printActivity() uncollapses
    every step, and the dots and nav are print:none. */
 function caIsFocus(a){ return !!(a && a.view === 'focus'); }
-// The step on screen: the one the student last moved to, else the first
-// not-done step, else (all done) the last step.
+/* ── PATHS (`paths` on a Focus-view activity — Jonathan, 2026-11-04: "merge
+   them into one activity where the user picks the path they'd like to take
+   with a preview of each") ──
+   One activity, two (or more) ways through its first steps. The data stays
+   ONE flat `steps` array: a step tagged `path: '<key>'` belongs to that path,
+   an untagged step is shared and comes after whichever path was taken (the
+   tail). `paths: [{ key, label, label_es, blurb, blurb_es }]` names the
+   choices. Every tick, BPM and drill key still hangs off the step's flat
+   index, so a step keeps its tick whichever way it is reached and switching
+   paths loses nothing.
+
+   The student's ROUTE (caRoute) is the flat indices of the shared steps plus
+   the chosen path's own, in file order; Focus view walks the route, and the
+   head reads "Step 2 of 6" by route position. Before a choice the card shows
+   the CHOOSER (caPathChooserHtml) in place of the steps: one card per path
+   with its label, blurb, the first drawn strum of that path (buildStrum with
+   no controls) and its step names, then the shared steps, and a Start
+   button. The pick is saved with the step ticks — the key
+   `<id>:path:<key>` in caSteps (caPickPath), so it follows the student to
+   any Chromebook and reloads with them. "Change path" (caPathRowHtml) clears
+   it and brings the chooser back; ticks stay. Counts shown before a choice
+   (the collapsed card's "N steps", the hero dots) use the first path.
+
+   Both renderers: the console preview (renderTeacherActivityDetail in
+   teacher.js) draws the same chooser and groups the step list by path.
+   checks.mjs 1d validates `paths` / `path`; 1bb counts the longest route. */
+function caHasPaths(a){ return !!(a && Array.isArray(a.paths) && a.paths.length); }
+function caPathKey(a){
+  if(!caHasPaths(a)) return '';
+  const p = a.paths.find(x => caStepDone[`${a.id}:path:${x.key}`] === true);
+  return p ? p.key : '';
+}
+function caChooserUp(a){ return caHasPaths(a) && !caPathKey(a) && !caIsCard(a); }
+// The flat indices of the steps on the student's route, in file order.
+function caRoute(a){
+  const steps = (a && a.steps) || [];
+  if(!caHasPaths(a)) return steps.map((s, i) => i);
+  const key = caPathKey(a) || a.paths[0].key;
+  return steps.map((s, i) => (!s.path || s.path === key) ? i : -1).filter(i => i >= 0);
+}
+function caRoutePos(a, si){ return caRoute(a).indexOf(si); }
+// The flat indices of one path's own steps, and of the shared tail.
+function caPathSteps(a, key){ return ((a && a.steps) || []).map((s, i) => s.path === key ? i : -1).filter(i => i >= 0); }
+function caSharedSteps(a){ return ((a && a.steps) || []).map((s, i) => !s.path ? i : -1).filter(i => i >= 0); }
+function caPickPath(id, key){
+  const a = (window.CLASS_ACTIVITIES || []).find(x => x.id === id);
+  if(!a || !caHasPaths(a)) return;
+  if(IS_TEACHER_MODE) return;   // the console preview picks nothing for real (its buttons are disabled too)
+  stopCardAudio();
+  a.paths.forEach(p => {
+    const k = `${id}:path:${p.key}`;
+    const want = key !== null && key !== undefined && p.key === key;
+    if((caStepDone[k] === true) !== want) onCaStepChange(k, want);
+  });
+  delete caStepOpen[id];   // land on the route's first not-done step
+  caRevealedTabs.clear();
+  caOpenId = id;
+  renderClassActivities();
+  caScrollToActivity(id);
+}
+function caPathChooserHtml(a, opts){
+  const inert = !!(opts && opts.preview);   // the console preview: Start buttons shown, disabled
+  const steps = a.steps || [];
+  const shared = caSharedSteps(a);
+  const cards = a.paths.map(p => {
+    const own = caPathSteps(a, p.key);
+    const pv = own.map(i => steps[i]).find(s => s && s.strum);
+    const board = pv ? `<div class="ca-path-preview">${buildStrum(pv.strum, {})}</div>` : '';   // silent: no keyPrefix, so no buttons
+    // The step names as the heads will read them, without the "Step N:" part.
+    const li = (i, pos, cls) => `<li${cls ? ` class="${cls}"` : ''}>${escHtml((steps[i] && steps[i].label) ? tf(steps[i], 'label') : t('ca.stepLabel', {n: pos + 1}))}</li>`;
+    const list = own.map((i, pos) => li(i, pos, '')).concat(shared.map((i, k) => li(i, own.length + k, 'ca-path-shared'))).join('');
+    const n = own.length + shared.length;
+    return `<div class="ca-path">
+      <div class="ca-path-head"><span class="ca-path-name">${escHtml(tf(p, 'label'))}</span><span class="ca-path-count">${escHtml(n === 1 ? t('ca.stepCount1') : t('ca.stepCount', {n}))}</span></div>
+      ${p.blurb ? `<p class="ca-path-blurb">${escHtml(tf(p, 'blurb'))}</p>` : ''}
+      ${board}
+      <ol class="ca-path-steps">${list}</ol>
+      <button type="button" class="ca-focus-next ca-path-start"${inert ? ' disabled' : ''} onclick="caPickPath(${jsonAttrArg(a.id)},${jsonAttrArg(p.key)})">${escHtml(t('ca.pathStart'))} &#x25B6;</button>
+    </div>`;
+  }).join('');
+  return `<div class="ca-paths"><p class="ca-paths-title">${escHtml(t('ca.pathPick'))}</p><div class="ca-paths-grid">${cards}</div></div>`;
+}
+// "Path: In chunks · Change path" over the steps of a paths activity.
+function caPathRowHtml(a){
+  if(!caHasPaths(a) || caChooserUp(a) || caIsCard(a)) return '';
+  const p = a.paths.find(x => x.key === caPathKey(a));
+  if(!p) return '';
+  return `<div class="ca-path-row"><span class="ca-path-current">${escHtml(t('ca.pathCurrent', {name: tf(p, 'label')}))}</span><button type="button" class="ca-path-change" onclick="caPickPath(${jsonAttrArg(a.id)},null)">${escHtml(t('ca.pathChange'))}</button></div>`;
+}
+// The step on screen (a flat index): the one the student last moved to, else
+// the first not-done step on the route, else (all done) the route's last step.
 function caFocusIdx(a){
-  const n = (a.steps || []).length;
+  const route = caRoute(a);
   const cur = caStepOpen[a.id];
-  if(cur !== undefined && cur >= 0 && cur < n) return cur;
+  if(cur !== undefined && route.includes(cur)) return cur;
   const next = caDefaultOpenStep(a);
-  return next >= 0 ? next : n - 1;
+  return next >= 0 ? next : (route.length ? route[route.length - 1] : -1);
 }
 /* The intro on a Focus-view card shows with Step 1 only (Jonathan,
    2026-10-10: "maximize the view for class activities on chromebook
@@ -12936,25 +13042,30 @@ function caIntroHtml(a, focus, openStepIdx){
 }
 function caFocusDotsHtml(a, cur){
   const steps = a.steps || [];
-  const reach = caDefaultOpenStep(a);   // first not-done step; -1 = all done
-  const dots = steps.map((st, si) => {
+  const route = caRoute(a);
+  const reach = caDefaultOpenStep(a);   // first not-done step (flat); -1 = all done
+  const reachPos = route.indexOf(reach);
+  const dots = route.map((si, pos) => {
+    const st = steps[si];
     const done = caStepDone[`${a.id}:${si}`] === true;
     // A finished activity never re-locks: once the activity is complete,
     // every step button stays open, whatever its saved ticks say.
-    const locked = classActivities[a.id] !== true && reach >= 0 && si > reach;
+    const locked = classActivities[a.id] !== true && reachPos >= 0 && pos > reachPos;
     const cls = `ca-focus-dot${done ? ' is-done' : ''}${si === cur ? ' is-now' : ''}`;
-    const label = escAttr(caStepHeadText(st, si, steps.length));
+    const label = escAttr(caStepHeadText(st, pos, route.length));
     return `<button type="button" class="${cls}" onclick="caFocusGo('${escAttr(a.id)}',${si})"`
       + `${si === cur ? ' aria-current="step"' : ''}${locked ? ` disabled title="${escAttr(t('ca.focusLocked'))}"` : ` title="${label}"`}`
-      + ` aria-label="${label}">${done ? '&#x2713; ' : ''}${si + 1}</button>`;
+      + ` aria-label="${label}">${done ? '&#x2713; ' : ''}${pos + 1}</button>`;
   }).join('');
   return `<div class="ca-focus-dots" role="group" aria-label="${escAttr(t('ca.focusDotsAria'))}">${dots}</div>`;
 }
 function caFocusNavHtml(a, si, isDone){
   const id = escAttr(a.id);
-  const last = si >= (a.steps || []).length - 1;
-  const back = si > 0
-    ? `<button type="button" class="ca-focus-back" onclick="caFocusGo('${id}',${si - 1})">&#x25C0; ${escHtml(t('ca.stepLabel', {n: si}))}</button>`
+  const route = caRoute(a);
+  const pos = route.indexOf(si);
+  const last = pos >= route.length - 1;
+  const back = pos > 0
+    ? `<button type="button" class="ca-focus-back" onclick="caFocusGo('${id}',${route[pos - 1]})">&#x25C0; ${escHtml(t('ca.stepLabel', {n: pos}))}</button>`
     : '';
   const label = isDone ? (last ? `&#x2713; ${escHtml(t('ca.focusDone'))}` : `${escHtml(t('ca.focusGoNext'))} &#x25B6;`)
     : (last ? escHtml(t('ca.focusLast')) : `${escHtml(t('ca.focusNext'))} &#x25B6;`);
@@ -12994,14 +13105,17 @@ function caFocusGotIt(id, si){
   if(now - caFocusGotItAt < 400) return;
   caFocusGotItAt = now;
   const key = `${id}:${si}`;
-  const last = si >= (a.steps || []).length - 1;
+  const route = caRoute(a);
+  const pos = route.indexOf(si);
+  const last = pos >= route.length - 1;
+  const next = last ? si : route[pos + 1];
   if(caStepDone[key] === true){
     if(last) onCaStepChange(key, false);
-    caFocusGo(id, last ? si : si + 1);
+    caFocusGo(id, next);
     return;
   }
   onCaStepChange(key, true);
-  caFocusGo(id, last ? si : si + 1);
+  caFocusGo(id, next);
 }
 /* An activity that names a Song Journey page (`journey: '<slug>'`, see the
    JOURNEY note atop class-activities.js) gets a link button under its steps
@@ -13446,7 +13560,8 @@ function caCheckKey(a, c, ci){ return `${a.id}:c${(c && Number.isInteger(c.slot)
    disagree about what finishing means. */
 function caTickKeys(a){
   if(caIsCard(a)) return caCardChecks(a).map((c, ci) => caCheckKey(a, c, ci));
-  return ((a && a.steps) || []).map((s, si) => `${a.id}:${si}`);
+  // A paths activity counts the steps on the student's route (caRoute).
+  return caRoute(a).map(si => `${a.id}:${si}`);
 }
 function caRequiredTickKeys(a){
   if(caIsCard(a)) return caCardChecks(a).map((c, ci) => (c && c.levelUp) ? null : caCheckKey(a, c, ci)).filter(Boolean);
@@ -15353,7 +15468,7 @@ function caSyncTopbar(){
      for "n of m done". styles.css hides the card's own copy while the card
      is the open one (.ca-solo-card). Every step move re-renders and every
      render ends in this function, so the two copies can't disagree. */
-  const steps = caIsFocus(a) && (a.steps || []).length > 1
+  const steps = caIsFocus(a) && caRoute(a).length > 1 && !caChooserUp(a)
     ? `<div class="ca-bar-steps">${caFocusDotsHtml(a, caFocusIdx(a))}</div>` : '';
   /* The open card's own title row is hidden on screen (styles.css, .ca-solo-
      card), and the Optional tag lives in it — so it rides in the bar too, or

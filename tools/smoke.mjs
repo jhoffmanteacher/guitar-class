@@ -645,7 +645,7 @@ async function twoColumnQuizWalk(page, run, events, stats) {
    out sideways at 1366 or 390 px; then ▶ Play strum lights one arrow and Stop
    puts the button back. A checkout without strum steps skips it. */
 async function strumWalk(page, run, events, stats) {
-  const list = await run('strum:list', `typeof buildStrum === 'function' ? CLASS_ACTIVITIES.filter(a => !a.teacherOnly && (a.steps || []).some(s => s.strum)).map(a => ({ id: a.id, steps: a.steps.map((s, i) => s.strum ? { i, pattern: s.strum.pattern, bars: s.strum.bars } : null).filter(Boolean) })) : []`, 10);
+  const list = await run('strum:list', `typeof buildStrum === 'function' ? CLASS_ACTIVITIES.filter(a => !a.teacherOnly && (a.steps || []).some(s => s.strum)).map(a => ({ id: a.id, steps: a.steps.map((s, i) => s.strum ? { i, pattern: s.strum.pattern, bars: s.strum.bars, path: s.path || '' } : null).filter(Boolean) })) : []`, 10);
   if (!list || !list.length) return;
   const fail = (w, text) => events.push({ step: 'strum:' + w, kind: 'strum', text });
   const metrics = (w, h) => page.send('Emulation.setDeviceMetricsOverride', { width: w, height: h, deviceScaleFactor: 1, mobile: false });
@@ -656,6 +656,8 @@ async function strumWalk(page, run, events, stats) {
       await run('strum:focus:' + a.id, `caFocusActivity('${a.id}')`, 700);
       for (const st of a.steps) {
         const w = `${a.id} step ${st.i + 1} ${lang}`;
+        // A step on a path (ca-46) is on screen only once that path is picked — see pathsWalk.
+        if (st.path) await run('strum:path:' + w, `caPickPath('${a.id}', '${st.path}')`, 600);
         await run('strum:go:' + w, `caFocusGo('${a.id}', ${st.i})`, 600);
         const hits = [...String(st.pattern)].filter(c => c === 'D' || c === 'U').length * st.bars.length;
         const probe = `(() => { const li = document.querySelector('.ca-card[open] .ca-step[data-idx="${st.i}"]'); const bd = li && li.querySelector('.strum-board'); if (!bd || !bd.offsetParent) return null;
@@ -706,6 +708,87 @@ async function strumWalk(page, run, events, stats) {
   }
   await run('strum:en', "setLang('en')", 600);
   await run('strum:close', `(document.querySelectorAll('.ca-card[open]').forEach(c => { c.open = false; }), 1)`, 100);
+}
+
+/* Paths (`paths` on a Focus-view activity — ca-46, 2026-11-04). For every
+   paths activity, in both languages: the open card shows the chooser (one
+   .ca-path per path, each with a silent strum preview with no buttons and a
+   step list of its route's length, a Start button) and no steps or dots;
+   Start on path 1 shows that route's steps (dots = route length, "Step 1 of
+   N" by route), the "Path: …" row and no chooser; Got it ticks the first step
+   and moves to the second; Change path brings the chooser back; Start on
+   path 2 shows ITS route with no tick carried over, and a tick on its first
+   step then survives a switch back to path 1 and forward again (ticks hang
+   off the flat index). The pick itself is saved in caSteps as <id>:path:<key>
+   and only one path key is ever set. Finally the pick is cleared so the walk
+   leaves nothing behind. A checkout without paths activities skips it. */
+async function pathsWalk(page, run, events, stats) {
+  const list = await run('paths:list', `typeof caHasPaths === 'function' ? CLASS_ACTIVITIES.filter(a => !a.teacherOnly && caHasPaths(a)).map(a => ({ id: a.id, keys: a.paths.map(p => p.key), routes: a.paths.map(p => a.steps.filter(s => !s.path || s.path === p.key).length), own: a.paths.map(p => a.steps.findIndex(s => s.path === p.key)) })) : []`, 10);
+  if (!list || !list.length) return;
+  const fail = (w, text) => events.push({ step: 'paths:' + w, kind: 'paths', text });
+  await run('paths:open', 'openClassActivitiesScreen()', 600);
+  const q = (id) => `document.querySelector('.ca-card[data-id="${id}"]')`;
+  const state = (id) => `(() => { const c = ${q(id)}; if (!c || !c.open) return null; const paths = [...c.querySelectorAll('.ca-path')];
+    return { paths: paths.map(p => ({ preview: !!p.querySelector('.ca-path-preview .strum-board'), buttons: p.querySelectorAll('.ca-path-preview button').length, listed: p.querySelectorAll('.ca-path-steps li').length, start: !!p.querySelector('.ca-path-start:not([disabled])') })),
+      steps: c.querySelectorAll('.ca-step').length, shown: [...c.querySelectorAll('.ca-step:not(.ca-step-collapsed)')].map(li => +li.dataset.idx), head: (c.querySelector('.ca-step:not(.ca-step-collapsed) .ca-step-label') || {}).textContent || '',
+      dots: document.querySelectorAll('.ca-bar-steps .ca-focus-dot').length, row: (c.querySelector('.ca-path-current') || {}).textContent || '', change: !!c.querySelector('.ca-path-change'), mark: !!c.querySelector('.ca-mark-btn'),
+      picks: Object.keys(caStepDone).filter(k => k.startsWith('${id}:path:')), ticks: Object.keys(caStepDone).filter(k => /^${id}:\\d+$/.test(k)).map(k => +k.split(':')[1]).sort((x, y) => x - y) }; })()`;
+  for (const lang of ['en', 'es']) {
+    await run('paths:' + lang, `setLang('${lang}')`, 600);
+    for (const a of list) {
+      const w = `${a.id} ${lang}`;
+      const [k1, k2] = a.keys;
+      await run('paths:clear:' + w, `(() => { caPickPath('${a.id}', null); ['${k1}', '${k2}'].forEach(k => { delete caStepDone['${a.id}:path:' + k]; }); a = CLASS_ACTIVITIES.find(x => x.id === '${a.id}'); a.steps.forEach((s, i) => { delete caStepDone['${a.id}:' + i]; }); })()`, 100);
+      await run('paths:focus:' + w, `caFocusActivity('${a.id}')`, 700);
+      const s0 = await run('paths:chooser:' + w, state(a.id), 10);
+      if (!s0) { fail(w, 'the card did not open'); continue; }
+      if (s0.paths.length !== a.keys.length) fail(w, `chooser shows ${s0.paths.length} paths, not ${a.keys.length}`);
+      s0.paths.forEach((p, i) => {
+        if (!p.preview) fail(w, `path ${i + 1} has no strum preview`);
+        if (p.buttons) fail(w, `path ${i + 1}'s preview has ${p.buttons} buttons — it should be silent`);
+        if (p.listed !== a.routes[i]) fail(w, `path ${i + 1} lists ${p.listed} steps, its route has ${a.routes[i]}`);
+        if (!p.start) fail(w, `path ${i + 1} has no live Start button`);
+      });
+      if (s0.steps || s0.dots || s0.change || s0.mark) fail(w, `the chooser shows steps/dots/Change path/Mark complete: ${JSON.stringify({ steps: s0.steps, dots: s0.dots, change: s0.change, mark: s0.mark })}`);
+      if (s0.picks.length) fail(w, 'a path is picked before the student picked one: ' + s0.picks.join(','));
+      await run('paths:start1:' + w, `${q(a.id)}.querySelector('.ca-path .ca-path-start').click()`, 700);
+      const s1 = await run('paths:route1:' + w, state(a.id), 10);
+      if (!s1 || s1.paths.length) fail(w, 'Start on path 1 did not replace the chooser');
+      else {
+        if (s1.steps !== a.routes[0]) fail(w, `path 1 renders ${s1.steps} steps, not its route's ${a.routes[0]}`);
+        if (s1.dots !== a.routes[0]) fail(w, `path 1 shows ${s1.dots} step buttons, not ${a.routes[0]}`);
+        if (JSON.stringify(s1.shown) !== JSON.stringify([a.own[0]])) fail(w, `path 1 opens on step ${JSON.stringify(s1.shown)}, not its first own step ${a.own[0]}`);
+        if (!/\b1\b/.test(s1.head) || !s1.head.includes(String(a.routes[0]))) fail(w, `path 1's first head reads "${s1.head}", not "Step 1 of ${a.routes[0]}"`);
+        if (!s1.change || !s1.row) fail(w, 'no "Path: … · Change path" row on path 1');
+        if (JSON.stringify(s1.picks) !== JSON.stringify([`${a.id}:path:${k1}`])) fail(w, 'saved pick after Start on path 1: ' + JSON.stringify(s1.picks));
+        if (s1.mark) fail(w, 'Mark complete shows on path 1\'s first step');
+      }
+      await run('paths:gotit1:' + w, `${q(a.id)}.querySelector('.ca-step:not(.ca-step-collapsed) .ca-focus-next').click()`, 700);
+      const s2 = await run('paths:after-gotit:' + w, state(a.id), 10);
+      if (!s2 || JSON.stringify(s2.ticks) !== JSON.stringify([a.own[0]])) fail(w, 'Got it on path 1 step 1 ticked ' + JSON.stringify(s2 && s2.ticks) + ', not ' + a.own[0]);
+      if (!s2 || s2.shown[0] === a.own[0]) fail(w, 'Got it did not move to the second step of path 1');
+      await run('paths:change:' + w, `${q(a.id)}.querySelector('.ca-path-change').click()`, 700);
+      const s3 = await run('paths:chooser-again:' + w, state(a.id), 10);
+      if (!s3 || s3.paths.length !== a.keys.length || s3.picks.length) fail(w, 'Change path did not bring the chooser back with no pick: ' + JSON.stringify(s3 && { paths: s3.paths.length, picks: s3.picks }));
+      await run('paths:start2:' + w, `${q(a.id)}.querySelectorAll('.ca-path .ca-path-start')[1].click()`, 700);
+      const s4 = await run('paths:route2:' + w, state(a.id), 10);
+      if (!s4 || s4.paths.length) fail(w, 'Start on path 2 did not replace the chooser');
+      else {
+        if (s4.steps !== a.routes[1] || s4.dots !== a.routes[1]) fail(w, `path 2 renders ${s4.steps} steps / ${s4.dots} buttons, not ${a.routes[1]}`);
+        if (JSON.stringify(s4.shown) !== JSON.stringify([a.own[1]])) fail(w, `path 2 opens on step ${JSON.stringify(s4.shown)}, not its first own step ${a.own[1]} (path 1's tick must not carry over)`);
+        if (JSON.stringify(s4.picks) !== JSON.stringify([`${a.id}:path:${k2}`])) fail(w, 'saved pick after Start on path 2: ' + JSON.stringify(s4.picks));
+      }
+      await run('paths:gotit2:' + w, `${q(a.id)}.querySelector('.ca-step:not(.ca-step-collapsed) .ca-focus-next').click()`, 700);
+      await run('paths:back-to-1:' + w, `caPickPath('${a.id}', '${k1}')`, 700);
+      const s5 = await run('paths:route1-again:' + w, state(a.id), 10);
+      if (!s5 || JSON.stringify(s5.ticks) !== JSON.stringify([a.own[0], a.own[1]].sort((x, y) => x - y))) fail(w, 'after a tick on each path the ticks are ' + JSON.stringify(s5 && s5.ticks) + ', expected both first steps');
+      if (!s5 || s5.shown[0] === a.own[0] || s5.shown[0] === a.own[1]) fail(w, 'back on path 1 the open step is ' + JSON.stringify(s5 && s5.shown) + ', expected its second step (the first is ticked)');
+      await run('paths:clear-end:' + w, `(() => { caPickPath('${a.id}', null); const a = CLASS_ACTIVITIES.find(x => x.id === '${a.id}'); a.steps.forEach((s, i) => { delete caStepDone['${a.id}:' + i]; }); })()`, 300);
+      stats.pathsActivities = (stats.pathsActivities || 0) + 1;
+    }
+  }
+  await run('paths:en', "setLang('en')", 600);
+  await run('paths:close', `(document.querySelectorAll('.ca-card[open]').forEach(c => { c.open = false; }), 1)`, 100);
 }
 
 /* The practice-minutes strip in the main top bar (2026-11-03). The site's own host has no Firebase user under the dev
@@ -1073,6 +1156,7 @@ async function walk(base, chromePort, label) {
   await noteCallWalk(page, run, events, stats, base);
   await recordingWalk(page, run, events, stats, base);
   await strumWalk(page, run, events, stats);
+  await pathsWalk(page, run, events, stats);
   await pmHeaderWalk(page, run, events, stats);
   await page.close();
   return { label, stats, errors: events.filter(e => !NOISE.test(e.text || '')) };
@@ -1107,7 +1191,7 @@ try {
   const norm = e => `${e.kind}|${e.step.replace(/^(en|es):/, '')}|${e.kind === 'bad-handler' ? '' : e.text}`;
   const baseCount = new Map(); (base ? base.errors : []).forEach(e => baseCount.set(norm(e), Math.max(baseCount.get(norm(e)) || 0, e.kind === 'bad-handler' ? +e.text : 1)));
   const report = base ? now.errors.filter(e => (e.kind === 'bad-handler' ? +e.text : 1) > (baseCount.get(norm(e)) || 0)) : now.errors;
-  say(`smoke: ${now.stats.sets} sets in ${now.stats.modules} modules (EN + ES), ${now.stats.games} game views, ${now.stats.buttons} inline handlers compiled${now.stats.chordCards ? `, ${now.stats.chordCards} chord-grid cards walked (cursor, lap, layout at 1366/390/360, lyric sheet${now.stats.bassClicks ? `, bass switch clicked on ${now.stats.bassClicks}` : ''}${now.stats.recordingClicks ? `, recording switch clicked, reloaded and flipped back on ${now.stats.recordingClicks}` : ''}${now.stats.chordSkipped ? `; ${now.stats.chordSkipped.join(', ')} is teacher-only and not walked` : ''})` : ''}${now.stats.noteCallSteps ? `, ${now.stats.noteCallSteps} Note Call power-chord steps (EN + ES: six strings, taps on low E and A only, a hit and a miss)` : ''}${now.stats.powerLayouts ? `, a pair play screen says its BPM (${now.stats.pairPlay || 0} run), Power Chord Switch at 1366\u00d7657 (Start and tempo on screen: ${now.stats.powerLayouts} views, incl. after a reload${now.stats.powerBestLayouts ? `; with a "Best today" score, EN + ES, no scrolling and the privacy line on screen: ${now.stats.powerBestLayouts} views` : ''}${now.stats.songs ? `; song buttons picked and reopened, ${now.stats.songs} song-switch rounds (16 switches x 3) run on a fake clock: round tempos, the BPM buttons, the play screen fitting 657px, one lit chart per chord, the done screen with 21 changes, ${now.stats.songDraws} random draws, none a song` : ""}${now.stats.powerCosmetic ? `; "low E" title kept together at ${now.stats.powerTitleWidths} window widths and the done-screen button padded, EN + ES: ${now.stats.powerCosmetic}` : ''})` : ''}${now.stats.changeUpLayouts ? `, Change Up at 1366\u00d7657 (Start on screen, no scrolling: ${now.stats.changeUpLayouts} views)` : ''}${now.stats.quizLayouts ? `, Chord Blitz (both directions) and Fret Zap at 1366\u00d7657 (picture left, 2\u00d72 answers right, no scroll: ${now.stats.quizLayouts} views)` : ''}${now.stats.pmHeaderViews ? `, practice-minutes strip in the top bar: ${now.stats.pmHeaderViews} view checks (6 views x EN/ES x 1366 and 390 px: a shown button, exactly one strip on top, the Games bar's own on Games, no sideways scroll), ${now.stats.pmHeaderClicks} clicks open My progress, back after a reload, hidden when signed out` : ''}${now.stats.strumSteps ? `, ${now.stats.strumSteps} strum-pattern steps (EN + ES: cells, arrows, chord names, columns, 1366 and 390 px; Play strum lights an arrow, clicks every beat and sounds down strums louder; Play clicks opens the Metronome at 60 BPM; Stop resets)` : ''}`);
+  say(`smoke: ${now.stats.sets} sets in ${now.stats.modules} modules (EN + ES), ${now.stats.games} game views, ${now.stats.buttons} inline handlers compiled${now.stats.chordCards ? `, ${now.stats.chordCards} chord-grid cards walked (cursor, lap, layout at 1366/390/360, lyric sheet${now.stats.bassClicks ? `, bass switch clicked on ${now.stats.bassClicks}` : ''}${now.stats.recordingClicks ? `, recording switch clicked, reloaded and flipped back on ${now.stats.recordingClicks}` : ''}${now.stats.chordSkipped ? `; ${now.stats.chordSkipped.join(', ')} is teacher-only and not walked` : ''})` : ''}${now.stats.noteCallSteps ? `, ${now.stats.noteCallSteps} Note Call power-chord steps (EN + ES: six strings, taps on low E and A only, a hit and a miss)` : ''}${now.stats.powerLayouts ? `, a pair play screen says its BPM (${now.stats.pairPlay || 0} run), Power Chord Switch at 1366\u00d7657 (Start and tempo on screen: ${now.stats.powerLayouts} views, incl. after a reload${now.stats.powerBestLayouts ? `; with a "Best today" score, EN + ES, no scrolling and the privacy line on screen: ${now.stats.powerBestLayouts} views` : ''}${now.stats.songs ? `; song buttons picked and reopened, ${now.stats.songs} song-switch rounds (16 switches x 3) run on a fake clock: round tempos, the BPM buttons, the play screen fitting 657px, one lit chart per chord, the done screen with 21 changes, ${now.stats.songDraws} random draws, none a song` : ""}${now.stats.powerCosmetic ? `; "low E" title kept together at ${now.stats.powerTitleWidths} window widths and the done-screen button padded, EN + ES: ${now.stats.powerCosmetic}` : ''})` : ''}${now.stats.changeUpLayouts ? `, Change Up at 1366\u00d7657 (Start on screen, no scrolling: ${now.stats.changeUpLayouts} views)` : ''}${now.stats.quizLayouts ? `, Chord Blitz (both directions) and Fret Zap at 1366\u00d7657 (picture left, 2\u00d72 answers right, no scroll: ${now.stats.quizLayouts} views)` : ''}${now.stats.pmHeaderViews ? `, practice-minutes strip in the top bar: ${now.stats.pmHeaderViews} view checks (6 views x EN/ES x 1366 and 390 px: a shown button, exactly one strip on top, the Games bar's own on Games, no sideways scroll), ${now.stats.pmHeaderClicks} clicks open My progress, back after a reload, hidden when signed out` : ''}${now.stats.strumSteps ? `, ${now.stats.strumSteps} strum-pattern steps (EN + ES: cells, arrows, chord names, columns, 1366 and 390 px; Play strum lights an arrow, clicks every beat and sounds down strums louder; Play clicks opens the Metronome at 60 BPM; Stop resets)` : ''}${now.stats.pathsActivities ? `, ${now.stats.pathsActivities} paths-activity walks (EN + ES: chooser with a silent preview and step list per path, Start, route length, Got it, Change path, ticks kept across a switch, one saved pick)` : ''}`);
   if (base) say(`smoke: ${BASELINE} had ${base.errors.length} error event(s); this checkout has ${now.errors.length}`);
   if (report.length) {
     exitCode = 1;

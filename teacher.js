@@ -298,6 +298,8 @@ async function showTeacherApp(user){
       if(focusToggle){ taFocusPreviewOn[focusToggle.dataset.id]=!taFocusPreviewOn[focusToggle.dataset.id]; renderTeacherActivityDetail(focusToggle.dataset.id); return; }
       const focusGo=e.target.closest('[data-ta-focus-go]');
       if(focusGo){ taFocusPreviewIdx[focusGo.dataset.id]=Number(focusGo.dataset.idx); renderTeacherActivityDetail(focusGo.dataset.id); return; }
+      const focusPath=e.target.closest('[data-ta-focus-path]');
+      if(focusPath){ taFocusPreviewPath[focusPath.dataset.id]=focusPath.dataset.key; taFocusPreviewIdx[focusPath.dataset.id]=0; renderTeacherActivityDetail(focusPath.dataset.id); return; }
       const clearAll=e.target.closest('[data-clear-all-blockers]');
       if(clearAll){ teacherClearAllBlockers(clearAll.dataset.uid); return; }
       // ── The activity board (renderTeacherActivities) ──
@@ -968,6 +970,7 @@ let activityEditId=null;
    stepping through a preview marks nothing done for real. */
 let taFocusPreviewOn={};
 let taFocusPreviewIdx={};
+let taFocusPreviewPath={};   // id -> path key picked in the preview (paths activities); first path when unset
 /* ── Archive / Delete (Class activities view) ──────────────────────────
    Two console-only ways to take an activity out of circulation, both stored
    on config/class like every other knob in this view:
@@ -2407,7 +2410,7 @@ function renderTeacherActivityDetail(id){
   const place=teacherActivityPlace(a.id);
   /* One step's inner content — shared by the full-list preview and the
      "Preview as student" single-step view below, so the two can't drift. */
-  const stepInnerHtml=(s,si)=>{
+  const stepInnerHtml=(s,si,pos)=>{
     const media=[];
     /* width/height: see caStepHtml() in app.js — same 640x244 board, and
        checks.mjs (1v) fails the push if the two renderers disagree. */
@@ -2447,12 +2450,33 @@ function renderTeacherActivityDetail(id){
     // Step head mirrors caStepHtml()/caStepHeadText() in app.js — "Step 4",
     // or "Step 4: Tune it back" when the step carries an optional label.
     // English only, like the rest of this preview.
-    const head=`Step ${si+1}${s.label?`: ${escHtml(s.label)}`:''}`;
+    // `pos` is the step's place on its route (paths); the flat `si` keys everything else.
+    const head=`Step ${(pos===undefined?si:pos)+1}${s.label?`: ${escHtml(s.label)}`:''}`;
     return `<div class="tr-name">${head}</div>${wrapGotItWhen(s.text||'')}${media.join('')}`;
   };
-  const stepsHtml=(a.steps||[]).map((s,si)=>
-    `<div class="tr-card ca-prev-step" style="margin-bottom:12px">${stepInnerHtml(s,si)}</div>`
-  ).join('');
+  /* Paths (`paths` — caRoute / caPathChooserHtml in app.js, 2026-11-04): the
+     full list shows the chooser students see first (its Start buttons do
+     nothing here), then every step grouped under its path, the shared tail
+     last, each numbered the way its path's route reads it ("Step 3" is the
+     third step a student on that path meets). Without paths it is the plain
+     flat list, as before. */
+  const hasPaths=typeof caHasPaths==='function'&&caHasPaths(a);
+  const stepCard=(s,si,pos)=>`<div class="tr-card ca-prev-step" style="margin-bottom:12px">${stepInnerHtml(s,si,pos)}</div>`;
+  const stepsHtml=!hasPaths?(a.steps||[]).map((s,si)=>stepCard(s,si,si)).join('')
+    :(()=>{
+      const steps=a.steps||[];
+      const shared=caSharedSteps(a);
+      const chooser=`<div class="tg-note">Students pick a path first. This is the chooser they see (its buttons do nothing here):</div><div class="ca-prev-paths">${caPathChooserHtml(a,{preview:true})}</div>`;
+      const groups=a.paths.map(p=>{
+        const own=caPathSteps(a,p.key);
+        return `<div class="stu-section-head">Path: ${escHtml(p.label||p.key)} <span style="opacity:.55;font-size:.72em">(${own.length} step${own.length===1?'':'s'}, then the shared ones)</span></div>`
+          +own.map((si,pos)=>stepCard(steps[si],si,pos)).join('');
+      }).join('');
+      const longest=Math.max(0,...a.paths.map(p=>caPathSteps(a,p.key).length));
+      const tail=shared.length?`<div class="stu-section-head">Then, on every path</div>`
+        +shared.map((si,k)=>`<div class="tg-note" style="margin:0 0 4px">Step ${longest+k+1} on the longest path; ${a.paths.map(p=>`${escHtml(p.label||p.key)}: step ${caPathSteps(a,p.key).length+k+1}`).join(', ')}.</div>`+stepCard(steps[si],si,longest+k)).join(''):'';
+      return chooser+groups+tail;
+    })();
   /* "Preview as student" (2026-09-29): the same steps, shown the real way a
      focus-view activity shows them — one on screen, numbered step buttons
      above it, Previous/Next below. Local-only index (taFocusPreviewIdx), no
@@ -2461,14 +2485,20 @@ function renderTeacherActivityDetail(id){
      1 and 2 first. */
   const focusPreviewHtml=()=>{
     const steps=a.steps||[];
-    const n=steps.length;
+    /* Paths: a local-only path pick (taFocusPreviewPath, the first path by
+       default) and the route it gives — the same caPathSteps / caSharedSteps
+       split the student card walks. `cur` is a ROUTE position here. */
+    const pathKey=hasPaths?(a.paths.find(p=>p.key===taFocusPreviewPath[a.id])||a.paths[0]).key:'';
+    const route=hasPaths?caPathSteps(a,pathKey).concat(caSharedSteps(a)):steps.map((s,si)=>si);
+    const n=route.length;
     const cur=Math.min(Math.max(taFocusPreviewIdx[a.id]||0,0),Math.max(n-1,0));
-    const pips=steps.map((s,si)=>`<button type="button" class="ca-focus-dot${si===cur?' is-now':''}" data-ta-focus-go data-id="${escAttr(a.id)}" data-idx="${si}" title="Step ${si+1}${s.label?`: ${escAttr(s.label)}`:''}">${si+1}</button>`).join('');
+    const pathPick=hasPaths?`<div class="tg-seg" style="margin-bottom:10px">${a.paths.map(p=>`<button type="button" class="tg-seg-btn${p.key===pathKey?' on':''}" data-ta-focus-path data-id="${escAttr(a.id)}" data-key="${escAttr(p.key)}" aria-pressed="${p.key===pathKey}">Path: ${escHtml(p.label||p.key)}</button>`).join('')}</div>`:'';
+    const pips=route.map((si,pos)=>`<button type="button" class="ca-focus-dot${pos===cur?' is-now':''}" data-ta-focus-go data-id="${escAttr(a.id)}" data-idx="${pos}" title="Step ${pos+1}${steps[si].label?`: ${escAttr(steps[si].label)}`:''}">${pos+1}</button>`).join('');
     const last=cur>=n-1;
     const back=cur>0?`<button type="button" class="ca-focus-back" data-ta-focus-go data-id="${escAttr(a.id)}" data-idx="${cur-1}">&#x25C0; Previous</button>`:'';
     const next=`<button type="button" class="ca-focus-next" data-ta-focus-go data-id="${escAttr(a.id)}" data-idx="${last?cur:cur+1}">${last?'Last step':'Next step &#x25B6;'}</button>`;
-    return `<div class="ca-focus-dots" role="group" aria-label="Steps" style="margin-bottom:10px">${pips}</div>`
-      + `<div class="tr-card ca-prev-step">${n?stepInnerHtml(steps[cur],cur):'No steps on this activity yet.'}</div>`
+    return pathPick+`<div class="ca-focus-dots" role="group" aria-label="Steps" style="margin-bottom:10px">${pips}</div>`
+      + `<div class="tr-card ca-prev-step">${n?stepInnerHtml(steps[route[cur]],route[cur],cur):'No steps on this activity yet.'}</div>`
       + `<div class="ca-focus-nav">${back}${next}</div>`;
   };
   box.innerHTML=`${back}

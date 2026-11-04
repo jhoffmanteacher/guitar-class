@@ -2922,6 +2922,34 @@ body.ca-full:has(#class-activities-screen:not([hidden])) .app-layout .main{zoom:
 .ca-focus-back:hover{background:var(--bg2)}
 .ca-focus-next{margin-left:auto;font-family:inherit;font-size:1rem;font-weight:700;min-height:44px;padding:10px 22px;border:0;border-radius:12px;background:var(--green-text);color:var(--bg);cursor:pointer}
 .ca-focus-next.is-done{background:var(--green-bg);color:var(--green-text)}
+/* Paths (`paths` on a Focus-view activity — caPathChooserHtml in app.js,
+   2026-11-04): the chooser is one card per path, side by side at 1366 px,
+   each with its name, a line, the path's first strum board as a silent
+   preview (no buttons; drawn smaller), its step names (the shared tail in
+   grey) and a Start button. .ca-path-row is the "Path: … · Change path"
+   line over the steps once a path is picked. */
+.ca-paths{margin:10px 0 4px}
+.ca-paths-title{margin:0 0 10px;font-weight:700;font-size:1.0625rem}
+.ca-paths-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:14px}
+@media(max-width:760px){.ca-paths-grid{grid-template-columns:minmax(0,1fr)}}
+.ca-path{min-width:0;display:flex;flex-direction:column;gap:8px;padding:14px 16px 16px;border:1px solid var(--border);border-radius:var(--radius);background:var(--bg2)}
+.ca-path-head{display:flex;align-items:baseline;justify-content:space-between;gap:10px}
+.ca-path-name{font-weight:700;font-size:1.0625rem}
+.ca-path-count{font-size:0.8125rem;color:var(--text2);white-space:nowrap}
+.ca-path-blurb{margin:0;color:var(--text)}
+.ca-path-preview .tab{margin:0}
+.ca-path-preview .tab-head{display:none}
+.ca-path-preview .strum-dir{font-size:1.25rem}
+.ca-path-preview .strum-chord{font-size:0.875rem}
+.ca-path-preview .strum-count{font-size:0.75rem}
+.ca-path-steps{margin:0;padding-left:22px;color:var(--text)}
+.ca-path-steps li{margin:2px 0}
+.ca-path-steps .ca-path-shared{color:var(--text2)}
+.ca-path-start{margin-left:0;margin-top:auto;align-self:flex-start}
+.ca-path-start:disabled{opacity:.55;cursor:default}
+.ca-path-row{display:flex;align-items:center;gap:12px;margin:6px 0 2px;color:var(--text2);font-size:0.9375rem}
+.ca-path-change{font-family:inherit;font-size:0.875rem;padding:4px 10px;border:1px solid var(--border);border-radius:8px;background:var(--bg3);color:var(--text2);cursor:pointer}
+.ca-path-change:hover{border-color:var(--brand);color:var(--text)}
 /* Practice card (`view: 'card'` — caCardBodyHtml in app.js, 2026-09-27).
    One Play song button, a Slower / Normal switch, the song's tab with one
    page per section, the checks, and the help ladder folded underneath.

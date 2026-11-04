@@ -465,6 +465,12 @@
     'ca.focusDone':            { en: 'Done', es: 'Hecho' },
     'ca.focusDotsAria':        { en: 'Steps', es: 'Pasos' },
     'ca.focusLocked':          { en: 'Finish the step before this one first.', es: 'Primero termina el paso anterior.' },
+    // Paths (`paths` on a Focus-view activity — caPathChooserHtml / caPathRowHtml
+    // in app.js, 2026-11-04): the student picks a way through the first steps.
+    'ca.pathPick':             { en: 'Pick your path', es: 'Elige tu camino' },
+    'ca.pathStart':            { en: 'Start this path', es: 'Empezar este camino' },
+    'ca.pathCurrent':          { en: 'Path: {name}', es: 'Camino: {name}' },
+    'ca.pathChange':           { en: 'Change path', es: 'Cambiar de camino' },
     'ca.print':                { en: 'Print this activity', es: 'Imprimir esta actividad' },
     'ca.printTitle':           { en: 'Print this activity as a handout', es: 'Imprimir esta actividad como hoja de trabajo' },
 

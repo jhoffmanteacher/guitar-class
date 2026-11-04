@@ -5,6 +5,15 @@ Notable changes to the Guitar Class site. Newest first.
 For the full session-by-session history (and the reasoning behind each change),
 see `WORKFLOW.md` and the git commit log.
 
+## 2026-11-04 — Strum pattern: one activity, pick your path
+
+- **"Strum Pattern — Down, Down-Up, Up-Down-Up" and "Strum Pattern in Chunks" are now one activity.** When you open it you pick a path first. Each path card shows its name, a line about it, its first strum board and its list of steps, with a Start button.
+- **The whole pattern:** muted strings, then D5. **In chunks:** 3 strums, add an up, add a down, the whole pattern — on muted strings or on D5, you choose. Both paths then meet on the same two steps: D5, C5, G5 with the pattern, then the play-along video.
+- **The chords step is two bars per chord now, like the song** — D5 D5 C5 C5 G5 G5 D5 D5, four bars to a row.
+- **"Change path" is above the steps.** It brings the path cards back; every step you ticked keeps its tick. Your pick is saved with your progress.
+- **The count is spelled out once:** the first board of each path says to count "1 and 2 and 3 and 4 and" — the + is "and."
+- **Shorter directions** on the muted-strings step and the last chunks step (it no longer tells you to open another activity).
+
 ## 2026-11-04 — "Sweet Child O' Mine" page: the whole intro riff
 
 - **The Sweet Child Song Journey page now has the whole intro riff in Layer 6.** It is 8 bars, played twice, with eight notes in every bar like the record. Only the first note changes from bar to bar, so it is shown in blue.
