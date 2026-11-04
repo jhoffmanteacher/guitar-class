@@ -18,7 +18,7 @@ var PRACTICE_MINUTES_CONFIG = {
   /* THE SWITCH FOR EVERYTHING A STUDENT SEES. false = the site still counts
      minutes and writes them (so you gather two weeks of data first) but draws
      nothing: no status strip, no recap, no toast, nothing on My progress.
-     true = all of it appears. ("N playing" was dropped 2026-11-04: the UI no longer looks it up.)
+     true = all of it appears. ("N playing" and its liveMinCount knob were removed 2026-11-04.)
      ON since 2026-11-01. (checks.mjs 1cg / tools/pm-sim.mjs pin this value: flip
      both together.) */
   uiOn: true,
@@ -59,7 +59,6 @@ var PRACTICE_MINUTES_CONFIG = {
   streakStartWeek: '2026-W45',   // the first full week with the display on (Mon 2026-11-02): streaks start here
 
   /* ── Smaller knobs ── */
-  liveMinCount: 3,        // UNUSED since 2026-11-04 ("N playing" is no longer shown); kept so the 1cg range check and pm-sim still hold
   recapMinSeconds: 60,    // a session shorter than this gets no recap
   recapGapSeconds: 180,   // at most one recap per this many seconds
   recapShowSeconds: 6,    // the recap closes itself after this long

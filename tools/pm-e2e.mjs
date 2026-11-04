@@ -114,8 +114,6 @@ await ev(`(() => {
   if (!fb.firestore) { window.firebase = Object.assign(fb, { firestore: Object.assign(() => db, { FieldValue: { increment: inc, serverTimestamp: () => ({}) }, FieldPath: { documentId: () => '__name__' } }) }); }
   window.__period = '7';
   PM.setHost({ ui: true, user: () => window.__who ? { uid: window.__who, getIdToken: () => Promise.resolve('tok') } : null, db: () => db, period: () => window.__period });
-  window.__aggN = 14;
-  const of = window.fetch; window.fetch = (u, i) => /runAggregationQuery/.test(u) ? Promise.resolve({ json: () => Promise.resolve([{ result: { aggregateFields: { n: { integerValue: String(window.__aggN) } } } }]) }) : of(u, i);
   return true;
 })()`);
 const todayWeek = await ev(`PM.calc.weekIdOf(PM.calc.ymd(new Date()))`);
@@ -157,7 +155,7 @@ await waitFor(`PM._play() && PM._session().counted >= 6`);
 await waitFor(`PM.status().week.secs >= 23 * 60`, 15000);
 const st = await ev(`(() => { const s = PM._state(), d = PM.calc.ymd(new Date()); return { pend: s.pend[d], playing: !!(pcState && pcState.audio && !pcState.audio.paused), src: pcState && pcState.audio && pcState.audio.currentSrc, counted: PM._session() && PM._session().counted }; })()`);
 check('the real Play counted seconds from a real <audio> (detached element, wrapped play())', st.counted >= 6 && st.counted <= 12 && /-backing-/.test(st.src || ''), st);
-await ev(`PM._state().live = 14; PM.refreshStrip(true)`); await sleep(300);
+await ev(`PM.refreshStrip(true)`); await sleep(300);
 const bar = await ev(`(() => { const b = document.querySelector('.header'), s = document.getElementById('pm-header'); const r = s.getBoundingClientRect(), br = b.getBoundingClientRect(); const items = [...s.children].map(c => c.className); return { barH: Math.round(br.height), stripTop: Math.round(r.top - br.top), stripH: Math.round(r.height), strips: [...document.querySelectorAll('.pm-strip')].filter(e => { if (e.hidden || !e.getClientRects().length) return false; const q = e.getBoundingClientRect(), t = document.elementFromPoint(q.left + q.width / 2, q.top + q.height / 2); return t && e.contains(t); }).map(e => e.id).length, stripsInCardBar: document.querySelectorAll('#ca-bar-open .pm-strip').length, tag: s.tagName, items, text: s.innerText.replace(/\\s+/g, ' '), docOverflow: document.documentElement.scrollWidth > document.documentElement.clientWidth, barOverflow: b.scrollWidth > b.clientWidth }; })()`);
 check('the strip is in the main top bar (a button): one row (bar ≤ 56px), no horizontal overflow', bar.tag === 'BUTTON' && bar.barH <= 56 && !bar.docOverflow && !bar.barOverflow, bar);
 check('exactly ONE strip showing on an open practice card (the header one; the Games one is in a hidden screen), and none in the card bar', bar.strips === 1 && bar.stripsInCardBar === 0, bar);
@@ -167,10 +165,8 @@ check('goal not hit: ring blue #5AA9FF, flame DIM (#7A5236)', col1.ring === 'rgb
 check('the ring is 23/30 full (dashoffset = circumference × (1 − 23/30))', Math.abs(parseFloat(col1.dash) - 2 * Math.PI * 7 * (1 - 23 / 30)) < 0.5, col1.dash);
 await shot('1-strip-not-hit-en');
 
-/* live < 3 hides the item entirely */
-await ev(`PM._state().live = 2; PM.refreshStrip(true)`);
-check('"N playing" is gone even with 14 playing (2026-11-04): no .pm-live, no "playing" in either strip', await ev(`PM._state().live = 14; PM.refreshStrip(true); !document.querySelector('.pm-live') && !/playing|tocando/.test(document.getElementById('pm-header').innerText + document.getElementById('pm-games').innerText)`));
-await ev(`PM._state().live = 14; PM.refreshStrip(true)`);
+/* "N playing" and its live count were removed (2026-11-04): the engine has no PM._pollLive and its state no live / liveAt */
+check('"N playing" is gone (2026-11-04): no .pm-live, no "playing" in either strip, and no live count in the engine', await ev(`PM.refreshStrip(true); !document.querySelector('.pm-live') && !/playing|tocando/.test(document.getElementById('pm-header').innerText + document.getElementById('pm-games').innerText) && PM._pollLive === undefined && !('live' in PM._state()) && !('liveAt' in PM._state())`));
 
 /* Cross the goal: 7 more minutes → toast + yellow ring + orange flame */
 await ev(`(() => { const s = PM._state(), d = PM.calc.ymd(new Date()); s.weeks[PM.calc.weekIdOf(d)].seconds += 7 * 60 - 5; return true; })()`);
@@ -222,17 +218,17 @@ await ev(`document.getElementById('pm-recap') && document.getElementById('pm-rec
 console.log('Spanish');
 await ev(`setLang('es')`); await sleep(800);
 await ev(`(() => { const s = PM._state(); s.weeks[PM.calc.weekIdOf(PM.calc.ymd(new Date()))] = { seconds: 23 * 60, goalSeconds: 1800, hit: false }; s.pend = {}; return true; })()`);
-await ev(`caSyncTopbar(); PM._state().live = 14; PM.refreshStrip(true)`); await sleep(300);
+await ev(`caSyncTopbar(); PM.refreshStrip(true)`); await sleep(300);
 const es = await ev(`(() => { const s = document.querySelector('.pm-strip'); const b = document.querySelector('.header'); return { text: s.innerText.replace(/\\s+/g, ' '), aria: s.querySelector('.pm-streak').getAttribute('aria-label'), barH: Math.round(b.getBoundingClientRect().height), overflow: document.documentElement.scrollWidth > document.documentElement.clientWidth }; })()`);
 check('Spanish strip: "23/30 min 3", flame label "racha de 3 semanas", one row', es.text === '23/30 min 3' && es.aria === 'racha de 3 semanas' && es.barH <= 56 && !es.overflow, es);
 await shot('4-strip-es');
 
 /* ── STOP B (2026-11-03): the main top bar stays ONE row at 1366×657 in Spanish with the widest strip
-   ("N playing" showing, goal hit) and a long name. As first built, "30/30 min esta semana" wrapped the title in Spanish at an
+   (goal hit; "N playing" was part of it until 2026-11-04) and a long name. As first built, "30/30 min esta semana" wrapped the title in Spanish at an
    11-character name (49px → 70px); the strip now says "30/30 min". The practice card's own bar lost the strip: still one row. ── */
 console.log('top bar width');
 const rows = [];
-await ev(`(() => { const s = PM._state(); s.live = 25; s.weeks[PM.calc.weekIdOf(PM.calc.ymd(new Date()))] = { seconds: 1800, goalSeconds: 1800, hit: true }; return true; })()`);
+await ev(`(() => { const s = PM._state(); s.weeks[PM.calc.weekIdOf(PM.calc.ymd(new Date()))] = { seconds: 1800, goalSeconds: 1800, hit: true }; return true; })()`);
 for (const lang of ['en', 'es']) {
   await ev(`setLang('${lang}')`); await sleep(500);
   for (const nm of ['Dev User', 'Ana María Gómez', 'Maximiliano Fernández', 'Maximiliano Fernández-Rodríguez']) {
@@ -259,7 +255,7 @@ await ev(`setLang('en'); caSyncTopbar()`);
 
 /* ── My progress ── */
 console.log('My progress');
-await ev(`PM._state().live = 0; setLang('en'); location.hash = '#my-progress'`); await sleep(1200);
+await ev(`setLang('en'); location.hash = '#my-progress'`); await sleep(1200);
 await ev(`(() => { const s = PM._state(), d = PM.calc.ymd(new Date()); s.pend = {}; s.days = {}; s.weeks = {}; const cur = PM.calc.weekIdOf(d);
   const set = (i, secs) => { s.weeks[PM.calc.weekAdd(cur, i)] = { seconds: secs, goalSeconds: 1800, hit: secs >= 1800 }; };
   set(-1, 1900); set(-2, 1900); set(-3, 1900); set(-4, 400); set(-5, 1900); set(-6, 1900); set(-7, 0);
@@ -373,7 +369,7 @@ await ev(`location.hash = '#my-progress'`); await sleep(600);
 
 /* ── Review findings: the widest strip, a skipped week, a week that never counted ── */
 console.log('review follow-ups');
-await ev(`(() => { const s = PM._state(), cur = PM.calc.weekIdOf(PM.calc.ymd(new Date())); s.weeks = {}; for (let i = 1; i <= 12; i++) s.weeks[PM.calc.weekAdd(cur, -i)] = { seconds: 1900, goalSeconds: 1800, hit: true }; s.weeks[cur] = { seconds: 100 * 60, goalSeconds: 1800, hit: true }; s.days = {}; s.pend = {}; s.live = 25; return true; })()`);
+await ev(`(() => { const s = PM._state(), cur = PM.calc.weekIdOf(PM.calc.ymd(new Date())); s.weeks = {}; for (let i = 1; i <= 12; i++) s.weeks[PM.calc.weekAdd(cur, -i)] = { seconds: 1900, goalSeconds: 1800, hit: true }; s.weeks[cur] = { seconds: 100 * 60, goalSeconds: 1800, hit: true }; s.days = {}; s.pend = {}; return true; })()`);
 await ev(`window.__period = '7'; setLang('es'); location.hash = '#class-activities/${card}'; openClassActivitiesScreen(${JSON.stringify(card)})`); await sleep(1000);
 await ev(`(() => { caSyncTopbar(); PM.refreshStrip(true); document.querySelector('.user-name').textContent = 'Ana María Gómez'; return true; })()`); await sleep(300);
 const worst = await ev(`(() => ({ h: Math.round(document.querySelector('.header').getBoundingClientRect().height), text: document.querySelector('.pm-strip').innerText.replace(/\\s+/g, ' ') }))()`);
@@ -438,7 +434,7 @@ await ev(`document.getElementById('pm-recap') && document.getElementById('pm-rec
 
 /* ── The strip on every view, and the click ── */
 console.log('every view');
-await ev(`setLang('en'); PM._state().live = 0; PM.refreshStrip(true)`);
+await ev(`setLang('en'); PM.refreshStrip(true)`);
 const views = [['Modules', `returnToPractice()`], ['In class', `toggleClassActivities()`], ['Songs', `toggleSongsHub()`], ['Games', `toggleGames()`], ['My progress', `toggleMyProgress()`], ['a practice card', `openClassActivitiesScreen(${JSON.stringify(card)})`]];
 const seen = [];
 for (const lang of ['en', 'es']) {

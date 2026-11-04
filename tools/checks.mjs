@@ -11396,12 +11396,14 @@ function checkCoachVerdicts() {
    The engine is RUN, not read: tools/pm-sim.mjs loads the real config and engine
    into a sandbox with a fake clock, fake <audio>, fake network and fake Firestore
    and plays sessions (what counts, the cap, offline and unload, a refusal by the
-   rules, the heartbeat, the week/streak maths against an independent ISO-week
+   rules, no heartbeat, the week/streak maths against an independent ISO-week
    algorithm). The count of assertions is pinned so deleting one to get green
    fails here. The rest are source pins for things a run cannot see: the rules'
    daily cap must equal the config's (a mismatch is silent — every write over the
-   rule's number is refused), the heartbeat block must keep carrying nothing but
-   { period, lastSeen } and no uid, the minutes block must stay owner-only with
+   rule's number is refused), the heartbeat writer and the "N playing" count query
+   (removed 2026-11-04) must not come back in the engine or the config (the
+   heartbeats rules block stays until it is deleted in the Firebase console, and is
+   no longer pinned), the minutes block must stay owner-only with
    no delete, every script tag is in place in order, every pm.* string the engine
    asks for exists in English AND Spanish (and every one is used), and the three
    hooks into app.js / index.html / journey.js are still there (the strip is ONE hidden <button id="pm-header"> in the main top bar,
@@ -11409,9 +11411,9 @@ function checkCoachVerdicts() {
    The browser half (strip, recap, toast, My progress, 1366×657, both languages,
    a real <audio>) is tools/pm-e2e.mjs — it needs Chrome, so it is run by hand.
    ════════════════════════════════════════════════════════════════════ */
-const PM_SIM_PIN = 159;
+const PM_SIM_PIN = 151;
 function checkPracticeMinutes(i18nTable) {
-  head('1cg. Practice minutes: the engine is run; the rules cap, heartbeat shape, wiring and strings are pinned');
+  head('1cg. Practice minutes: the engine is run; the rules cap, no heartbeat, wiring and strings are pinned');
   let bad = 0;
   const fail = m => { err(m); problems++; bad++; };
   const read = f => { try { return readFileSync(join(ROOT, f), 'utf8'); } catch { return null; } };
@@ -11435,7 +11437,7 @@ function checkPracticeMinutes(i18nTable) {
   if (cfg) {
     const num = (k, lo, hi) => { if (typeof cfg[k] !== 'number' || !isFinite(cfg[k]) || cfg[k] < lo || cfg[k] > hi) fail(`config.${k} must be a number from ${lo} to ${hi} (is ${JSON.stringify(cfg[k])})`); };
     if (typeof cfg.uiOn !== 'boolean') fail('config.uiOn must be true or false');
-    num('weeklyGoalMinutes', 1, 600); num('dailyCapMinutes', 1, 240); num('liveMinCount', 1, 100);
+    num('weeklyGoalMinutes', 1, 600); num('dailyCapMinutes', 1, 240);
     /* A goal above 7 days of the daily cap can never be reached: every week would say "You can't reach the goal this week" (2026-11-02 review). */
     if (typeof cfg.weeklyGoalMinutes === 'number' && typeof cfg.dailyCapMinutes === 'number' && cfg.weeklyGoalMinutes > 7 * cfg.dailyCapMinutes) fail(`config.weeklyGoalMinutes (${cfg.weeklyGoalMinutes}) is more than 7 x dailyCapMinutes (${cfg.dailyCapMinutes}): no student could ever reach the goal`);
     const dateRe = /^\d{4}-\d{2}-\d{2}$/;
@@ -11453,6 +11455,10 @@ function checkPracticeMinutes(i18nTable) {
       if (new RegExp('\\b' + k + '\\b').test(strip(read('practice-minutes.js') || ''))) fail(`practice-minutes.js still reads '${k}'`);
     }
     if (/\b(calc\.meetings|normalMeetings|calc\.days)\b/.test(strip(read('practice-minutes.js') || ''))) fail('practice-minutes.js still has meeting-day maths (calc.meetings / normalMeetings / calc.days)');
+    /* The heartbeat behind "N playing" was removed 2026-11-04 (nothing read it). Comments are stripped, so history notes may name it. */
+    if ('liveMinCount' in cfg) fail("practice-minutes-config.js has 'liveMinCount': \"N playing\" and its heartbeat were removed 2026-11-04");
+    const hbHit = /\b(heartbeats?|runAggregationQuery|pollLive|liveMinCount|pmSid|HEARTBEAT_MS)\b/i.exec(strip(read('practice-minutes.js') || ''));
+    if (hbHit) fail(`practice-minutes.js has '${hbHit[0]}': the heartbeat writer and the "N playing" count query were removed 2026-11-04 and must not come back`);
     const cap = rules && /function dailyCapSeconds\(\)\s*\{\s*return\s+(\d+);\s*\}/.exec(rules);
     if (!cap) fail('firestore.rules: dailyCapSeconds() not found — the cap check cannot run (renamed? update this check with it)');
     else if (+cap[1] !== cfg.dailyCapMinutes * 60) fail(`firestore.rules dailyCapSeconds() is ${cap[1]} but practice-minutes-config.js dailyCapMinutes × 60 is ${cfg.dailyCapMinutes * 60}: every day above the smaller number is refused by the database. Change both, and re-publish the rules`);
@@ -11462,15 +11468,6 @@ function checkPracticeMinutes(i18nTable) {
   if (rules) {
     // The block's own brace is the last one on its match line (the path has {params} before it).
     const block = name => { const i = rules.indexOf(`match /${name}`); if (i < 0) return null; let d = 0, j = rules.lastIndexOf('{', rules.indexOf('\n', i)); for (let k = j; k < rules.length; k++) { if (rules[k] === '{') d++; else if (rules[k] === '}') { d--; if (!d) return strip(rules.slice(i, k + 1)); } } return null; };
-    const hb = block('heartbeats/{sessionId}');
-    if (!hb) fail('firestore.rules: match /heartbeats/{sessionId} not found');
-    else {
-      if (!/keys\(\)\.hasOnly\(\['period', 'lastSeen'\]\)/.test(hb)) fail("heartbeats rule must reject every field but period and lastSeen: request.resource.data.keys().hasOnly(['period', 'lastSeen'])");
-      if (!/lastSeen == request\.time/.test(hb)) fail('heartbeats rule must pin lastSeen to the server clock (== request.time)');
-      if (/request\.auth\.uid|\buid\b|userId/.test(hb)) fail('heartbeats rule mentions the uid — the doc id must be a random session id, never a uid');
-      if (!/\[0-9a-f\]\{24\}/.test(hb)) fail('heartbeats rule must require a 24-hex session id');
-      if (/allow[^;]*\bdelete\b|allow\s+write/.test(hb)) fail('heartbeats rule must not allow delete or blanket write');
-    }
     const mins = block('minutes/{userId}/{document=**}'), days = block('minutes/{userId}/days/{day}'), weeks = block('minutes/{userId}/weeks/{week}');
     if (!mins || !days || !weeks) fail('firestore.rules: the three minutes/{userId} blocks (tree read, days, weeks) must all be present');
     else {
@@ -11562,7 +11559,7 @@ function checkPracticeMinutes(i18nTable) {
     for (const k of K) { const e = i18nTable[k]; if (!e || !e.en || !e.es) fail(`i18n key '${k}' needs both en and es`); }
     if (!bad) console.log(`${C.dim}      ${K.size} pm.* strings, ${litCount} references, ${tabs} Journey pages${C.reset}`);
   }
-  if (!bad) ok(`engine run: ${m[1]} simulation assertions pass (pinned); rules cap = config cap (${cfg ? cfg.dailyCapMinutes * 60 : '?'} s); heartbeat rule carries only { period, lastSeen } with no uid; minutes rules owner-only, no delete; older rules untouched; hooks, script order and strings in place`);
+  if (!bad) ok(`engine run: ${m[1]} simulation assertions pass (pinned); rules cap = config cap (${cfg ? cfg.dailyCapMinutes * 60 : '?'} s); no heartbeat or "N playing" query in the engine or config; minutes rules owner-only, no delete; older rules untouched; hooks, script order and strings in place`);
 }
 
 (async function main() {

@@ -29,9 +29,8 @@
    untouched). The daily cap bounds a tab left open with a song looping or a
    mic on.
 
-   Two things stay tied to SOUND, as before: the recap pill ("+N min") opens
-   when playback stops (a `play` run inside the counting session), and the
-   heartbeat behind "N playing" is written only while something is audible.
+   One thing stays tied to SOUND, as before: the recap pill ("+N min") opens
+   when playback stops (a `play` run inside the counting session).
 
    HOW IT FINDS THE ELEMENTS. Practice and snippet cards play from detached
    `new Audio()` elements, which fire no event a document listener can see, so
@@ -43,7 +42,7 @@
    WHAT IT STORES (Firestore; firestore.rules has the matching blocks).
      minutes/{uid}/days/{YYYY-MM-DD}  { seconds }                 (capped per day)
      minutes/{uid}/weeks/{YYYY-Www}   { seconds, goalSeconds, hit }
-     heartbeats/{sessionId}           { period, lastSeen }        (see below)
+   Nothing else: no heartbeat, no live count (see NO LIVE COUNT below).
    Seconds are kept whole; the display floors to whole minutes. They are added
    with increment(), so two tabs or two devices never overwrite each other.
 
@@ -79,12 +78,11 @@
    device just wrote. Two pages of one student on a frozen tab (over 3 minutes
    with no stamp refresh) can be adopted while still alive.
 
-   LIVE COUNT. While counting, a heartbeat { period, lastSeen } is written
-   every 30 s to heartbeats/<random per-browser-session id> — never the uid, no
-   other field (Firestore cannot make a collection readable "as a count only",
-   so the docs carry nothing worth reading). The strip counts the docs of the
-   student's period with lastSeen in the last 60 s. Needs a composite index
-   (firestore.indexes.json). Switched off with uiOn.
+   NO LIVE COUNT (2026-11-04). "N playing" left the strip, then its
+   heartbeats/{sessionId} writer and the count query left the engine: nothing
+   read them. firestore.rules keeps its heartbeats block until it is deleted in
+   the Firebase console (WORKFLOW.md, "Practice minutes"); checks.mjs 1cg and
+   pm-sim sections 6 and 8 fail if a heartbeat or a live count comes back.
 
    EVERYTHING A STUDENT SEES is behind PRACTICE_MINUTES_CONFIG.uiOn and lives
    in the second half of this file (strip, recap, toast, My progress). The first
@@ -97,7 +95,7 @@
   var DEFAULTS = {
     uiOn: false, weeklyGoalMinutes: 30, dailyCapMinutes: 20,
     skipWeeks: [], semester2Start: '', streakStartWeek: '',
-    liveMinCount: 3, recapMinSeconds: 60, recapGapSeconds: 180, recapShowSeconds: 6, toastSeconds: 3
+    recapMinSeconds: 60, recapGapSeconds: 180, recapShowSeconds: 6, toastSeconds: 3
   };
   function cfg(){
     var c = (typeof PRACTICE_MINUTES_CONFIG !== 'undefined' && PRACTICE_MINUTES_CONFIG) || {};
@@ -194,7 +192,7 @@
   /* ════════════════════════════════════════════════════════════════════
      STATE
      ════════════════════════════════════════════════════════════════════ */
-  var HEARTBEAT_MS = 30000, FLUSH_MS = 60000, PERSIST_MS = 5000, DENIED_BACKOFF_MS = 300000, LOAD_RETRY_MS = 30000;
+  var FLUSH_MS = 60000, PERSIST_MS = 5000, DENIED_BACKOFF_MS = 300000, LOAD_RETRY_MS = 30000;
   var STALE_QUEUE_MS = 180000, QUEUE_FRESH_MS = 10000, ADOPT_MS = 30000;
   /* A commit unanswered this long means the link is dead (captive portal, ISP
      down): no keepalive goes out beside it (keepaliveFlush). */
@@ -209,8 +207,7 @@
   var ACTIVE_MS = 120000, FRAME_ACTIVE_MS = 600000;
   var lastActive = -Infinity;         // now() of the last sign of work
   var mics = [];                      // streams getUserMedia() handed the site (watched, never touched)
-  var lastBeat = 0, lastFlush = 0, lastPersist = 0, lastAdopt = 0, deniedUntil = 0, queueTimer = 0;
-  var sid = '';                       // random id for this browser session (heartbeats)
+  var lastFlush = 0, lastPersist = 0, lastAdopt = 0, deniedUntil = 0, queueTimer = 0;
   var pid = '';                       // random id for this page (its own queue key)
   var leavingPage = false;            // pagehide ran; cleared if the page comes back (back/forward cache)
   var leftInflight = {};              // uid -> seconds a signed-out state still has on the wire (see sync)
@@ -219,7 +216,7 @@
   function freshState(uid){
     newestGen[uid] = ++stateGen;
     return { uid: uid, gen: stateGen, days: {}, weeks: {}, pend: {}, inflight: null, flushP: null, frac: 0, loaded: false, loading: null, flushing: false,
-             loadRetryAt: 0, live: 0, liveAt: 0, toastWeek: '', pendingToast: false, lastRecapAt: 0 };
+             loadRetryAt: 0, toastWeek: '', pendingToast: false, lastRecapAt: 0 };
   }
   function ls(k, v){
     try {
@@ -240,11 +237,6 @@
   function getHost(){ return host || (typeof window !== 'undefined' && window.PM_HOST) || null; }
   function hostUser(){ var h = getHost(); return h && h.user ? h.user() : null; }
   function uid(){ var u = hostUser(); return u ? u.uid : null; }
-  function period(){
-    var h = getHost(), p = h && h.period ? h.period() : '', u = uid();
-    if(p){ if(u) ls('pm:p:' + u, p); return p; }
-    return u ? (ls('pm:p:' + u) || '') : '';
-  }
   function dbP(){ var h = getHost(); return h && h.db ? Promise.resolve(h.db()) : Promise.reject(new Error('no db')); }
   function FV(){ return firebase.firestore.FieldValue; }
 
@@ -498,7 +490,6 @@
       if(anyAudible){
         playIdle = 0;
         if(!play) play = { counted: 0 };
-        if(t - lastBeat >= HEARTBEAT_MS) beat(t);    // "N playing": only while sound is on
       }
       if(!st.loaded && !st.loading) load();
       addSeconds(dt);
@@ -551,7 +542,7 @@
   }
 
   /* ════════════════════════════════════════════════════════════════════
-     FIRESTORE — load, flush, heartbeat
+     FIRESTORE — load, flush
 
      One rule keeps the numbers honest: READING and WRITING never overlap. flush()
      does nothing while load() runs; load() first waits for a commit that is
@@ -787,22 +778,6 @@
     window.addEventListener('online', function(){ if(sync()){ if(!S.loaded) load(); else flush(); } });
   }
 
-  function beat(t){
-    lastBeat = t;
-    var p = period();
-    if(!p || (typeof navigator !== 'undefined' && navigator.onLine === false)) return;
-    if(!sid){
-      try { sid = sessionStorage.getItem('pmSid') || ''; } catch(e) {}
-      if(!sid){
-        sid = randHex(12);
-        try { sessionStorage.setItem('pmSid', sid); } catch(e) {}
-      }
-    }
-    dbP().then(function(db){
-      return db.collection('heartbeats').doc(sid).set({ period: p, lastSeen: FV().serverTimestamp() });
-    }).catch(function(){});
-  }
-
   /* ════════════════════════════════════════════════════════════════════
      EVERYTHING BELOW IS WHAT A STUDENT SEES — all of it behind uiOn
      ════════════════════════════════════════════════════════════════════ */
@@ -894,41 +869,6 @@
     if(!S) return;
     if(!S.loaded && !S.loading) load();
     toastMaybe();
-  }
-  /* NOT STARTED BY THE UI any more (2026-11-04, "N playing" dropped): kept, with the heartbeat writer
-     above, because pm-sim runs them; removing both is a follow-up that also touches firestore.rules.
-     The count is ONE aggregation query over REST (runAggregationQuery, count) —
-     the compat SDK this site loads has no count(), and reading every matching
-     heartbeat doc on every poll would cost a read per player per poll for the
-     whole class. The same rule as a list applies (any signed-in user); the
-     query needs the composite index in firestore.indexes.json. Any failure
-     (no index yet, offline, no token) hides the "N playing" item. */
-  function pollLive(){
-    var st = S, p = period();
-    if(!st || !p || !uiOn() || (typeof navigator !== 'undefined' && navigator.onLine === false) || typeof fetch === 'undefined') return;
-    var h = getHost(), u = h && h.user && h.user();
-    if(!u || typeof u.getIdToken !== 'function') return;
-    var cutoff = new Date(Date.now() - 60000).toISOString();
-    var body = { structuredAggregationQuery: {
-      structuredQuery: {
-        from: [{ collectionId: 'heartbeats' }],
-        where: { compositeFilter: { op: 'AND', filters: [
-          { fieldFilter: { field: { fieldPath: 'period' }, op: 'EQUAL', value: { stringValue: p } } },
-          { fieldFilter: { field: { fieldPath: 'lastSeen' }, op: 'GREATER_THAN', value: { timestampValue: cutoff } } }
-        ] } }
-      },
-      aggregations: [{ alias: 'n', count: {} }]
-    } };
-    u.getIdToken().then(function(tok){
-      return fetch('https://firestore.googleapis.com/v1/projects/' + firebaseConfig.projectId + '/databases/(default)/documents:runAggregationQuery', {
-        method: 'POST', headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + tok }, body: JSON.stringify(body)
-      });
-    }).then(function(r){ return r.json(); }).then(function(j){
-      var n = +(((j[0] || {}).result || {}).aggregateFields || {}).n.integerValue;
-      if(S !== st) return;
-      st.live = isFinite(n) ? n : 0; st.liveAt = Date.now();
-      refreshStrip();
-    }).catch(function(){ if(S === st){ st.live = 0; refreshStrip(); } });
   }
   /* Every second while the strip is up: keep it current, and show a week-goal toast that was held back
      (the strip was covered or the tab hidden when the goal was crossed). */
@@ -1104,7 +1044,7 @@
     renderProgress: renderProgress,
     flush: flush, load: function(){ return sync() ? load() : Promise.resolve(); },
     status: function(){ return sync() ? status() : null; },
-    _pollLive: pollLive, _session: function(){ return session; }, _play: function(){ return play; },
+    _session: function(){ return session; }, _play: function(){ return play; },
     _state: function(){ return S; }, _session: function(){ return session; }, _tick: tick, _media: media, _end: endSession, _buildOps: buildOps
   };
 })();

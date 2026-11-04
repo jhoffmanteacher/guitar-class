@@ -38,9 +38,11 @@ function makeWorld(opts = {}) {
   let timerId = 1;
   const store = opts.store || {}, session = opts.session || {};   // pass store/clock/server/net to make a second tab or device
   const listeners = {};
-  const net = opts.net || { online: true, denied: false, commitDelay: 0, aggregate: 5 };
-  const server = opts.server || { days: {}, weeks: {}, heartbeats: {} };   // what Firestore holds
-  const log = { commits: [], heartbeats: [], fetches: [] };
+  const net = opts.net || { online: true, denied: false, commitDelay: 0 };
+  const server = opts.server || { days: {}, weeks: {} };   // what Firestore holds
+  /* sets: every single-document set(), on ANY path. The minutes go in one batch, so this
+     stays empty; the heartbeats/{sessionId} writer removed 2026-11-04 landed here. */
+  const log = { commits: [], sets: [], fetches: [] };
 
   class FakeDate extends Date {
     constructor(...a) { if (a.length) super(...a); else super(clock.ms); }
@@ -58,10 +60,7 @@ function makeWorld(opts = {}) {
     doc: (id) => ({
       path: path + '/' + id,
       collection: (sub) => dbCollection(path + '/' + id + '/' + sub),
-      set: (data) => {
-        if (path === 'heartbeats') { log.heartbeats.push({ id, data }); return Promise.resolve(); }
-        return Promise.resolve();
-      },
+      set: (data) => { log.sets.push({ path, id, data }); return Promise.resolve(); },
     }),
     get: () => net.denyReads ? (net.reads = (net.reads || 0) + 1, Promise.reject(Object.assign(new Error('denied'), { code: 'permission-denied' }))) : reply(() => ({
       forEach: (fn) => {
@@ -159,7 +158,6 @@ function makeWorld(opts = {}) {
     clearTimeout: (id) => { const i = timers.findIndex((t) => t.id === id); if (i >= 0) timers.splice(i, 1); },
     fetch: (url, init) => {
       log.fetches.push({ url, init });
-      if (/runAggregationQuery$/.test(url)) return Promise.resolve({ ok: true, json: () => Promise.resolve([{ result: { aggregateFields: { n: { integerValue: String(net.aggregate) } } } }]) });
       /* net.applyKeepalive (opt-in, section 10): the keepalive :commit really lands on
          the fake server under the same rules as a batch — unless the link is down
          (offline, net.keepaliveFails). Off, a keepalive changes nothing (sections 1–9). */
@@ -563,31 +561,17 @@ console.log('5. the weekly goal');
   check('status() says this week is hit and the streak is 1', w.PM.status().week.hit === true && w.PM.status().streak === 1);
 }
 
-/* ═══════════ 6. Heartbeat ═══════════ */
-console.log('6. heartbeats');
+/* ═══════════ 6. No heartbeat (removed 2026-11-04: "N playing" had left the strip and nothing read it) ═══════════ */
+console.log('6. no heartbeat');
 {
-  const w = makeWorld();
+  const w = makeWorld({ ui: true, config: { uiOn: true } });
   const a = w.track(); a.play();
   await w.run(95, w.playing(a));
-  const hb = w.log.heartbeats;
-  check('a heartbeat about every 30 s while counting (95 s → 4)', hb.length >= 3 && hb.length <= 4, hb.length + ' sent');
-  check('the doc holds ONLY { period, lastSeen } and period is the student\'s section', hb.every((h) => eq(Object.keys(h.data).sort(), ['lastSeen', 'period']) && h.data.period === '7'));
-  check('lastSeen is the SERVER timestamp (the rules require it to equal request.time)', hb.every((h) => h.data.lastSeen && h.data.lastSeen.__server === true));
-  check('the id is 24 hex characters, the same all session, and is NOT the uid', hb.every((h) => /^[0-9a-f]{24}$/.test(h.id) && h.id === hb[0].id && !h.id.includes('uid')));
-  check('the id lives in sessionStorage only', /^[0-9a-f]{24}$/.test(w.session.pmSid) && !Object.values(w.store).some((v) => String(v).includes(w.session.pmSid)));
-  const w2 = makeWorld({ period: '' });
-  const b = w2.track(); b.play();
-  await w2.run(65, w2.playing(b));
-  check('no period chosen yet → no heartbeat (the doc needs one), minutes still count', w2.log.heartbeats.length === 0 && sec(w2) + (w2.PM._state().days[todayStr] || 0) >= 60);
-  const w3 = makeWorld();
-  const c = w3.track(); c.play();
-  w3.net.online = false;
-  await w3.run(65, w3.playing(c));
-  check('offline: no heartbeat attempts', w3.log.heartbeats.length === 0);
-  const w4 = makeWorld();
-  const d = w4.track(); d.play(); d.pause();
-  await w4.run(65, w4.playing(d));
-  check('nothing playing → no heartbeat', w4.log.heartbeats.length === 0);
+  const minutes = (w.server.days[todayStr]?.seconds || 0) + Object.values(w.PM._state().pend).reduce((x, y) => x + y, 0);
+  check('95 s of audible play counts (≥ 93 s) and writes no single document anywhere — no heartbeats/{id}, only the minutes batch', w.log.sets.length === 0 && w.log.commits.length >= 1 && minutes >= 93,
+    w.log.sets.length + ' single-doc sets (' + w.log.sets.map((x) => x.path).join() + '), ' + minutes + ' s');
+  check('nothing goes into sessionStorage (no pmSid session id)', Object.keys(w.session).length === 0, Object.keys(w.session).join());
+  check('the state carries no live count (no live / liveAt)', !('live' in w.PM._state()) && !('liveAt' in w.PM._state()));
 }
 
 /* ═══════════ 7. uiOn is off by default and counting does not need it ═══════════ */
@@ -609,28 +593,15 @@ console.log('7. defaults');
 }
 
 
-/* ═══════════ 8. The "N playing" lookup (uiOn) ═══════════ */
-console.log('8. live count');
+/* ═══════════ 8. No "N playing" lookup (removed 2026-11-04) ═══════════ */
+console.log('8. no live count');
 {
   const w = makeWorld({ ui: true, config: { uiOn: true } });
   const a = w.track(); a.play();
-  await w.run(3, w.playing(a));
-  w.net.aggregate = 7;
-  w.PM._pollLive(); await w.settle();
-  const f = w.log.fetches.find((x) => /runAggregationQuery$/.test(x.url));
-  check('one REST runAggregationQuery (a count — about one read, not one per player)', !!f && f.init.method === 'POST' && new RegExp((process.env.PM_PROJECT || 'guitar-class-test') + '/databases/\\(default\\)/documents:runAggregationQuery$').test(f.url));
-  const body = f && JSON.parse(f.init.body).structuredAggregationQuery;
-  const filt = body && body.structuredQuery.where.compositeFilter.filters;
-  check('…over heartbeats, period == the student\'s period ("7") and lastSeen > ~60 s ago',
-    body && body.structuredQuery.from[0].collectionId === 'heartbeats' && filt[0].fieldFilter.value.stringValue === '7'
-    && filt[1].fieldFilter.op === 'GREATER_THAN' && Math.abs(Date.parse(filt[1].fieldFilter.value.timestampValue) - (w.clock.ms - 60000)) < 5000 && body.aggregations[0].count);
-  check('…with the student\'s bearer token', f && f.init.headers.Authorization === 'Bearer tok-uid-A');
-  check('…and the answer (7) is stored for the strip', w.PM._state().live === 7);
-  if (process.env.PM_DUMP) writeFileSync(process.env.PM_DUMP + '/agg.json', JSON.stringify({ url: f.url, init: f.init }));
-  const off = makeWorld({ ui: true, config: { uiOn: false } });
-  const b = off.track(); b.play(); await off.run(3, off.playing(b));
-  off.PM._pollLive(); await off.settle();
-  check('uiOn false → the lookup never runs (no reads for a hidden feature)', !off.log.fetches.some((x) => /runAggregationQuery/.test(x.url)));
+  await w.run(95, w.playing(a));
+  w.PM.refreshStrip(true); w.PM.syncHeader(true); await w.settle();
+  check('a 95 s play session with the display on makes no network call of its own (no REST count query; the keepalive goes only on pagehide)', w.log.fetches.length === 0, w.log.fetches.map((x) => x.url).join());
+  check('PM has no _pollLive and the config no liveMinCount', w.PM._pollLive === undefined && !('liveMinCount' in w.PM.cfg()) && !('liveMinCount' in w.ctx.PRACTICE_MINUTES_CONFIG));
 }
 
 /* ═══════════ 9. Regressions from the adversarial review (R1-1 … R1-10) ═══════════ */
@@ -653,7 +624,7 @@ function leaveLikeChrome(w) {
   w.documentStub.visibilityState = 'hidden';
   for (const f of w.listeners['doc:visibilitychange'] || []) f();
 }
-const shared = () => ({ clock: { ms: new Date(2026, 10, 16, 9, 0, 0).getTime(), perf: 5000 }, store: {}, server: { days: {}, weeks: {}, heartbeats: {} }, net: { online: true, denied: false, aggregate: 5 } });
+const shared = () => ({ clock: { ms: new Date(2026, 10, 16, 9, 0, 0).getTime(), perf: 5000 }, store: {}, server: { days: {}, weeks: {} }, net: { online: true, denied: false } });
 {
   // R1-1: the connection is "up" (navigator.onLine true) but nothing is answered. The SDK keeps every commit and delivers them all on reconnect.
   for (const stall of [65, 185, 300]) {
@@ -1199,7 +1170,7 @@ console.log('12. all site work counts');
   const w8 = makeWorld();
   w8.PM._state();
   await w8.run(100, (i) => { if (i % 30 === 0) w8.input('scroll'); });
-  check('counting from clicks alone writes no heartbeat ("N playing" stays about sound)', w8.log.heartbeats.length === 0 && sec(w8) >= 98, w8.log.heartbeats.length + ' beats, ' + sec(w8) + ' s');
+  check('counting from clicks alone counts (≈ 100 s) and writes no single document', w8.log.sets.length === 0 && sec(w8) >= 98, w8.log.sets.length + ' sets, ' + sec(w8) + ' s');
 
   const w9 = makeWorld();
   w9.PM._state();
