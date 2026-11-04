@@ -60,7 +60,11 @@ line); `tools/smoke.mjs` walks all 16 switches in a real browser.
   yes has played a game to the end (or stopped one after 10 s). Mic collection
   has to be switched on there for any take to be asked for or saved.
 
-## Next steps (Jonathan chose 1 and 2, 2026-11-04)
+## Next steps (Jonathan chose 1, 2 and 4, 2026-11-04; plus the heartbeat removal)
+
+**A step-by-step plan for a fresh chat, with agent and worktree guidance, is in
+`PLAN-next-chat-power-chord-switch.md`** (Jonathan may start it with the word
+"ultracode" to allow a multi-agent workflow). The list below is the short version.
 
 1. **Check that saved takes really arrive.** Teacher console → Mic recordings
    (collection must be switched on there). After a student who said yes has
@@ -80,6 +84,13 @@ line); `tools/smoke.mjs` walks all 16 switches in a real browser.
    "on time but the chord sounded wrong" has three variants (verdict says
    "messy", count line "chord sounded wrong", big line "wrong chord"); unify
    them if students are confused.
+
+3. **Build the teacher-console evaluator for Power Chord Switch takes** (item 4 of
+   the earlier list). "Evaluate all recordings" skips these takes today. Goal: for
+   each saved take, compare what the site graded (`expected`, `events`) with what is
+   really in the audio, per round: strums the game missed, "right" changes with no
+   strum, and the mic delay from the three count-ins. Design, sub-steps and checks
+   are in the plan file (Track C).
 
 ## Not Power Chord Switch, but waiting: remove the practice-minutes heartbeat
 
@@ -107,12 +118,6 @@ can list them.
 
 ## Later (not chosen yet)
 
-- **Teacher console cannot measure Power Chord Switch takes.** "Evaluate all
-  recordings" skips them (it only knows Coach and Note Runner notes). The list
-  shows them, and WAV / data download work. Writing a Power Chord Switch
-  evaluator (strum onsets vs. the change times in `expected`) is the next
-  accuracy step; the data is saved for it (`expected` = each change's due time,
-  verdict, round and BPM; `events` = every strum heard).
 - **A real mic check is not built.** Neither Note Runner nor Power Chord Switch
   has one; Note Runner has only a mic-delay slider (`nrOffset`). Power Chord
   Switch already uses that saved delay but shows no slider.
