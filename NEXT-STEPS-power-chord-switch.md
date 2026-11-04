@@ -60,7 +60,7 @@ line); `tools/smoke.mjs` walks all 16 switches in a real browser.
   yes has played a game to the end (or stopped one after 10 s). Mic collection
   has to be switched on there for any take to be asked for or saved.
 
-## Next steps (Jonathan chose 1, 2 and 4, 2026-11-04; plus the heartbeat removal)
+## Next steps (Jonathan chose these on 2026-11-04: saved takes arrive, the evaluator, and the heartbeat removal)
 
 **A step-by-step plan for a fresh chat, with agent and worktree guidance, is in
 `PLAN-next-chat-power-chord-switch.md`** (Jonathan may start it with the word
@@ -76,17 +76,7 @@ line); `tools/smoke.mjs` walks all 16 switches in a real browser.
    Also open one take's data and check `expected` has 21 entries, each with a
    time, a verdict (`ok` / `off` / `miss`), a round and a BPM, and that
    `complete` is `true` or `false`.
-2. **Watch the big feedback line in a real class.** After every graded change a
-   large line under the beat dots says "✓ C5 — right" / "✗ C5 — wrong chord" /
-   "– C5 — no strum heard". Measured to fit the 1366×657 Chromebook screen in
-   English and Spanish, but nobody has used it with a guitar. Ask: can a student
-   read it in time? Does the colour (green / amber / red) help? The wording for
-   "on time but the chord sounded wrong" has three variants (verdict says
-   "messy", count line "chord sounded wrong", big line "wrong chord"); unify
-   them if students are confused.
-
-3. **Build the teacher-console evaluator for Power Chord Switch takes** (item 4 of
-   the earlier list). "Evaluate all recordings" skips these takes today. Goal: for
+2. **Build the teacher-console evaluator for Power Chord Switch takes.** "Evaluate all recordings" skips these takes today. Goal: for
    each saved take, compare what the site graded (`expected`, `events`) with what is
    really in the audio, per round: strums the game missed, "right" changes with no
    strum, and the mic delay from the three count-ins. Design, sub-steps and checks
@@ -117,6 +107,14 @@ can list them.
   the same seconds as before.
 
 ## Later (not chosen yet)
+
+- **Skipped on purpose (Jonathan, 2026-11-04): watching the big feedback line in a
+  real class.** It is measured to fit the 1366×657 screen in English and Spanish, but
+  nobody has used it with a guitar. If students ever say they cannot read it in
+  time, the wording for "on time but the chord sounded wrong" also has three
+  variants (verdict "messy", count line "chord sounded wrong", big line "wrong
+  chord") that could be unified (`games.cc.verdict.okMessy*`, `games.cc.breakdown`,
+  `games.pw.last.wrong`).
 
 - **A real mic check is not built.** Neither Note Runner nor Power Chord Switch
   has one; Note Runner has only a mic-delay slider (`nrOffset`). Power Chord

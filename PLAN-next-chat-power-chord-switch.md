@@ -1,9 +1,9 @@
 # Plan for a new chat — Power Chord Switch next steps + heartbeat removal
 
 Written 2026-11-04 for a fresh Claude Code session (any machine). Jonathan chose:
-**1** check that saved takes arrive, **2** watch the big feedback line in class,
-**4** a teacher-console evaluator for Power Chord Switch takes, plus the **practice-minutes
-heartbeat removal**. Read `NEXT-STEPS-power-chord-switch.md` (what shipped, why) and
+**1** check that saved takes arrive and **4** a teacher-console evaluator for Power Chord
+Switch takes, plus the **practice-minutes heartbeat removal**. He **skipped 2** (watching the
+big feedback line in a real class) on 2026-11-04; there is no Track B. Read `NEXT-STEPS-power-chord-switch.md` (what shipped, why) and
 `CLAUDE.md` first; the heartbeat plan is the "PICK UP HERE" entry under "Practice
 minutes" in `WORKFLOW.md`.
 
@@ -14,7 +14,7 @@ Say one of:
   (the `Workflow` tool only runs when Jonathan opts in with that word, or says "use a
   workflow" / "fan out agents"; without it, use the `Agent` tool for the tracks below
   one or two at a time).
-- or "Do track B only" (any single track works on its own).
+- or "Do track C only" (any single track works on its own).
 
 Session effort: `high` (the evaluator and the heartbeat are JS + rules work); the
 reviewers run at `xhigh` (`site-reviewer-deep`) where marked.
@@ -24,13 +24,12 @@ reviewers run at `xhigh` (`site-reviewer-deep`) where marked.
 | Track | What | Who can do it | Touches | Review |
 |---|---|---|---|---|
 | **A** (item 1) | Saved takes really arrive | Jonathan in the teacher console; an agent audits the save path | read-only for the agent | none (no change) unless a bug is found |
-| **B** (item 2) | Big feedback line holds up in class | Jonathan with a guitar; an agent prepares screenshots and fixes found problems | `coach.js` `ccShowLast`, `styles.css` `.cc-last`, `i18n.js` | Fast, unless a fix touches `ccLoop` |
 | **C** (item 4) | Evaluator for Power Chord Switch takes | Agents (sub-steps below) | `teacher.js` (`micEval*`), `tools/mic-sim/*`, `tools/checks.mjs` | **Reviewed same day**, `site-reviewer` high (new kind of check) |
 | **D** (heartbeat) | Remove the practice-minutes heartbeat | Agents for step 1; **Jonathan's console paste for step 2** | `practice-minutes.js`, `practice-minutes-config.js`, `tools/pm-sim.mjs`, `tools/pm-e2e.mjs`, `tools/checks.mjs` (1cg), `firestore.rules`, `firestore.indexes.json` | **Always Reviewed**, `site-reviewer-deep` (failing scenario first) |
 
 C and D are independent (different files, except both edit `tools/checks.mjs` in
 different sections: 1ck / 1ca vs 1cg) and can run in parallel in separate git
-worktrees. A and B need a person at a Chromebook and are not agent work.
+worktrees. A needs a person in the teacher console and is not agent work.
 
 ### Track A — saved takes arrive (item 1)
 
@@ -48,17 +47,6 @@ Jonathan, in class or at home:
    in BOTH `micTakes` and `chunks`; collection on; the consent question was answered
    "yes" on that device; the student is not the teacher account or a gate previewer.
    Agent help, read-only: audit `micRecSaveNow` and `ccFinish` in `coach.js`.
-
-### Track B — the big feedback line (item 2)
-
-Jonathan with a guitar at the Chromebook (1366×657): after every graded change the line
-under the beat dots should read "✓ C5 — right" (green), "✗ C5 — wrong chord" (amber) or
-"– C5 — no strum heard" (red) fast enough to use. Questions to answer: readable in time
-at 60 BPM every beat? colours distinguishable? wording OK in Spanish?
-If something needs changing, an agent can: unify the three phrasings of "on time but the
-chord sounded wrong" (`games.cc.verdict.okMessy*`, `games.cc.breakdown`,
-`games.pw.last.wrong`), change size/colour in `styles.css` (`.cc-last`), then re-measure
-with the real-Chrome script in "Measuring the play screen" below (it must still fit 657px).
 
 ### Track C — evaluator for Power Chord Switch takes (item 4)
 
@@ -155,11 +143,11 @@ flushes the same seconds as before (differential against `origin/main`).
   made by an agent are re-derived on the real code. The reviewers get the pinned commit
   and the instruction to break it, not to confirm.
 - Per-track checklist from `CLAUDE.md`: `checks.mjs` green, a `CHANGELOG.md` entry only
-  if a student can see the change (Track B may; C and D are teacher/engine only), the
+  if a student can see the change (C and D are teacher/engine only), the
   Spanish twin for any new student text, break-it proof for any new check, `git fetch` and
   `git log HEAD..origin/main` right before pushing, `node tools/checks.mjs --live` after.
 
-## Measuring the play screen (Track B)
+## Measuring the play screen (only if the play screen is ever changed)
 
 `node <script> "<repo path>" "<output folder>"` with a real-Chrome script that opens the
 site through the dev bypass at 1366×657, walks all 16 song switches in English and
