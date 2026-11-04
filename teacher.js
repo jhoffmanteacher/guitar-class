@@ -4918,8 +4918,12 @@ function micEvalTake(pcm, R, d, deps){
      - Every number here was written by the student's browser and is not checked
        by the rules: a change with an impossible time, round or tempo (outside
        coach.js CC_BPM_MIN..CC_BPM_MAX, CC_LADDER_ROUNDS, CC_RATES' bpc; checks.mjs
-       1cl pins these copies) is left out and counted in `ignored`, and every loop
-       is bounded by the number of changes, so a crafted take cannot hang the console.
+       1cl pins these copies) is left out and counted in `ignored`. No loop then runs
+       on a saved number alone: the grid loop stops at the number of beats the
+       changes span, the replay is events x a binary search, and the per-change
+       searches grow with changes x (onsets + events) — onsets are capped by the
+       30 s of audio, changes and events by the size of a Firestore document
+       (1 MB), so a crafted take is slow at worst, never endless.
    Whether a strum was the RIGHT chord is not measured here.
    Proved on synthetic takes with known answers: tools/mic-sim/fake-pw-take.mjs,
    checks.mjs 1cl. */
@@ -5062,7 +5066,7 @@ function micEvalTakePw(pcm, R, d, deps){
             rd.evs.some(ev => out(ev.t - siteAt))) cat = 'off-window';
       }
       notes.push({ i: num(e.i) ? e.i : k, stage: rd.stage, site, played: !!o, onsetMs: o ? r1(o.ms - want) : null,
-        snrDb: r1(dB(pk) - level.floorDb), replay: o ? 'present' : 'none', siteHeard: !!rd.match[idx], why: { cat } });
+        snrDb: r1(dB(pk) - level.floorDb), replay: o ? 'present' : 'none', siteHeard: !!rd.match[idx], gridOffsetMs: r1(goff), why: { cat } });
     });
   });
   const cnt = f => notes.filter(f).length;
@@ -5180,8 +5184,8 @@ function micEvalText(rows){
   const pwCols = [['take', 5], ['game', 16], ['round', 5], ['bpm', 4], ['chg', 4], ['agree', 5], ['detMiss', 7], ['false', 5], ['offWin', 6], ['silent', 6], ['drop', 4],
     ['centre', 7], ['click', 6], ['lag', 5], ['ideal', 6], ['skew', 6], ['map', 5]];
   const pwOdd = pw.filter(r => r.notes.ignored || r.notes.replayMismatch).map(r => r.take + ': ' +
-    [r.notes.ignored ? r.notes.ignored + ' changes ignored (impossible time, round or tempo in the saved data)' : '',
-      r.notes.replayMismatch ? r.notes.replayMismatch + " changes where the site's rule, run again on its own strums, does not give its saved verdict" : ''].filter(Boolean).join('; '));
+    [r.notes.ignored ? r.notes.ignored + (r.notes.ignored === 1 ? ' change' : ' changes') + ' ignored (impossible time, round or tempo in the saved data)' : '',
+      r.notes.replayMismatch ? r.notes.replayMismatch + (r.notes.replayMismatch === 1 ? ' change' : ' changes') + " where the site's rule, run again on its own strums, does not give its saved verdict" : ''].filter(Boolean).join('; '));
   const pwText = !pw.length ? '' : '\n\nPower Chord Switch, one line per round (in the table above, its "notes" are chord changes; inAud = a strum in the site\'s window):\n' +
     [pwCols.map(c => pad(c[0], c[1])).join(' ')].concat(...pw.map(r => (r.rounds || []).map(g => [
       r.take, r.game, g.stage + 1, g.bpm, g.n, g.agree, g.detectorMissed, g.falseHit, g.offWindow, g.silentMiss, g.dropped,

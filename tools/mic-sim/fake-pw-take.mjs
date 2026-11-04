@@ -39,7 +39,12 @@
      in:late / in:early / out:late / out:early   strummed 25 ms inside / outside
                the edge of the site's own window (where the site's grid is)
      at:N      strummed N ms from the centre of the site's window
-   `deaf`: the site hears nothing at all (every change 'miss').
+     beyond:F  strummed F beats past the late edge of the site's window
+     pre:in:late  the site hears noise between the raw window edge and its (late)
+               window, then a strum 25 ms inside the late edge
+   `deaf`: the site hears nothing at all (every change 'miss'). `drift`: every strum
+   slides from on the beat to `drift` ms late over the take. `flipVerdict`: that
+   change's saved verdict is flipped after the rule gave it (truth.mismatch).
    truth: per change, dropped (its window runs past the audio's end) or
      agree            site ok/off, a strum in the site's window
      false-hit        site ok/off, no strum in it
@@ -84,11 +89,11 @@ export const PW_FIXTURES = [
     lag: [130, 160, 145], lat: 100, start: 746, seed: 15,
     plan: { 2: 'detmiss', 6: 'silent', 9: 'held', 15: 'off', 19: 'detmiss', 20: 'held' } },
   { ...base, name: 'pw-pair', desc: 'a pair: one round, 15 changes at 70 BPM, with a neighbour\'s guitar', bpms: [70], slots: 16, chords: ['F5', 'G5'], song: null,
-    lag: 160, map: 20, lat: 150, seed: 16, extras: [5150, 9100, 14800],
+    lag: 160, map: 20, lat: 150, seed: 16, extras: [5150, 9100, 14800], flipVerdict: 5,
     plan: { 3: 'held', 7: 'detmiss', 10: 'silent', 12: 'late:-200' } },
   { ...base, name: 'pw-every2-stop', desc: 'every 2 beats (strums between the changes), Stopped in round 2', bpms: [90, 105, 120], bpc: 2, chords: ['A5', 'C5'],
     lag: 110, lat: 100, seed: 17, stopAt: { stage: 1, afterChange: 3, plusMs: 600 },
-    plan: { 1: 'held', 4: 'silent', 8: 'detmiss', 9: 'out:late', 10: 'in:early' } },
+    plan: { 1: 'held', 3: 'beyond:0.2', 4: 'silent', 8: 'detmiss', 9: 'out:late', 10: 'in:early' } },
   { ...base, name: 'pw-noclicks', desc: 'headphones: no beeps in the audio; setting right', bpms: [90, 105, 120], chords: ['E5', 'G5'],
     lag: 120, map: 30, lat: 150, clickAmp: 0, seed: 18,
     plan: { 3: 'detmiss', 8: 'held', 13: 'silent' } },
@@ -109,7 +114,9 @@ export const PW_FIXTURES = [
   { ...base, name: 'pw-late-low-setting', desc: 'reviewer case 2: setting 100 ms (should be 285), every 2 beats, strumming only on the changes, 200 ms behind the beeps: outside the site window, inside one centred on the beeps', bpms: [120], bpc: 2, slots: 6, chords: ['A5', 'D5'], song: null,
     lag: 250, map: 35, lat: 100, onlyChanges: true, allDev: 200, seed: 24, plan: {} },
   { ...base, name: 'pw-late-every2', desc: 'reviewer case 3: setting right, every 2 beats, strumming only on the changes, 300 ms late', bpms: [120], bpc: 2, slots: 6, chords: ['F5', 'G5'], song: null,
-    lag: 120, lat: 145, onlyChanges: true, allDev: 300, seed: 25, plan: {} }
+    lag: 120, lat: 145, onlyChanges: true, allDev: 300, seed: 25, plan: {} },
+  { ...base, name: 'pw-drift', desc: 'a pair at 60 BPM whose strums drift from on the beat to 300 ms late: the gridOffset of the site follows them far', bpms: [60], slots: 16, chords: ['G5', 'D5'], song: null,
+    lag: 120, lat: 145, drift: 300, seed: 26, plan: { 5: 'in:late', 8: 'silent', 10: 'pre:in:late', 11: 'detmiss', 13: 'pre:in:late' } }
 ];
 
 export function makePwTake(o){
@@ -118,6 +125,7 @@ export function makePwTake(o){
   const S = ms => Math.round(ms / 1000 * R);
   const lagOf = k => Array.isArray(o.lag) ? o.lag[k] : o.lag;
   const allDev = o.allDev || 0;
+  let driftAt = () => 0;
 
   /* ── the site's timeline ── */
   const rounds = [];
@@ -133,6 +141,8 @@ export function makePwTake(o){
   }
   const lastRound = rounds[rounds.length - 1];
   const gameEnd = stopMs != null ? stopMs : lastRound.listen + (o.slots * o.bpc + 1) * lastRound.beat;
+  // `drift`: the student slides from on the beat (first beat) to `drift` ms late (last beat)
+  if (o.drift) driftAt = due => o.drift * Math.max(0, Math.min(1, (due - rounds[0].listen) / (gameEnd - rounds[0].listen)));
   const audioEnd = Math.min(CAP_MS, gameEnd + 150);
   const N = S(audioEnd);
 
@@ -186,15 +196,23 @@ export function makePwTake(o){
     for (let m = 0; m < o.slots * o.bpc; m++){
       const due = rd.listen + m * rd.beat;
       if (stopMs != null && due > stopMs) break;
-      while (extras.length && extras[0] < due + rd.lag - 60){ const ms = extras.shift(); pluck(ms, ms + o.map >= rd.listen ? rd : null); }
       const ch = bySlotBeat[m];
       if (o.onlyChanges && !ch && m !== 0) continue;
       const chord = o.chords[Math.floor(m / o.bpc) % 2];
-      let kind = ch ? ch.kind : 'ok', attack = due + rd.lag + allDev + (rnd() - 0.5) * 24, deliberate = false;
+      let kind = ch ? ch.kind : 'ok', attack = due + rd.lag + allDev + driftAt(due) + (rnd() - 0.5) * 24, deliberate = false;
+      // the site hears onsets in time order: a pluck before this beat's strum first
+      while (extras.length && extras[0] < attack - 30){ const ms = extras.shift(); pluck(ms, ms + o.map >= rd.listen ? rd : null); }
       const site = X => ch.t + rd.goffNow() + X + o.lat - o.map;   // X ms from the centre of the site's window, on the audio clock
-      if (/^late:/.test(kind)) attack = due + rd.lag + allDev + +kind.slice(5);
+      if (/^late:/.test(kind)) attack = due + rd.lag + allDev + driftAt(due) + +kind.slice(5);
+      if (kind === 'pre:in:late'){
+        // noise the site hears after the raw window edge (due - win) but before its window opens (gridOffset is late), then a strum 25 ms inside its late edge
+        if (rd.goffNow() < 80) throw new Error(o.name + ': change ' + ch.i + ' needs a gridOffset over 80 ms for pre:in:late (has ' + Math.round(rd.goffNow()) + ')');
+        if (!o.deaf) rd.siteHear(ch.t - rd.win + 20, false);
+        kind = 'in:late';
+      }
       else if (/^(in|out):(late|early)$/.test(kind)){ const [io, side] = kind.split(':'); attack = site((side === 'late' ? 1 : -1) * (io === 'in' ? rd.win - 25 : rd.win + 25)); deliberate = true; }
       else if (/^at:/.test(kind)){ attack = site(+kind.slice(3)); deliberate = true; }
+      else if (/^beyond:/.test(kind)){ attack = site(rd.win + +kind.slice(7) * rd.beat); deliberate = true; }
       if (kind === 'silent'){ mute(attack - 40); continue; }
       if (kind === 'held'){ if (!o.deaf) rd.siteHear(ch.t + rd.goffNow() + 10, false); continue; }
       if (kind === 'noise:out'){ if (!o.deaf) rd.siteHear(ch.t + rd.goffNow() + rd.win + 25, false); continue; }
@@ -232,6 +250,8 @@ export function makePwTake(o){
     rd.changes.forEach(ch => {
       const after = stopMs != null && ch.t > stopMs;
       ch.verdict = after || !ch.match ? 'miss' : ch.match.sharp ? 'off' : 'ok';
+      // `flipVerdict`: a saved verdict that the rule of the site does not give (micEvalTakePw replayMismatch must notice)
+      if (o.flipVerdict === ch.i) ch.verdict = ch.verdict === 'miss' ? 'ok' : 'miss';
       expected.push({ i: ch.i, t: Math.round(ch.t * 10) / 10, from: ch.from, to: ch.to, stage: ch.stage, bpm: ch.bpm, verdict: ch.verdict });
       // the gridOffset the site's window had: the one its strum was judged with, else the one after every onset before the window opened
       const prior = rd.onsets.filter(on => on.played < ch.t - rd.win);
@@ -250,7 +270,7 @@ export function makePwTake(o){
       const out = d => Math.abs(d) > rd.win && Math.abs(d) <= reach;
       const near = attacks.some(a => Math.abs(a.ms - centre) > rd.win && (out(a.ms - centre) || (heardBeat != null && Math.abs(a.ms - heardBeat) <= reach))) ||
         events.some(ev => ev.stage === rd.stage && Math.abs(ev.t - siteCentre) > rd.win && Math.abs(ev.t - siteCentre) <= reach);
-      truth.changes.push({ i: ch.i, stage: ch.stage, kind: after ? 'after-stop' : ch.kind, verdict: ch.verdict, replayHeard: !!ch.match && !after,
+      truth.changes.push({ i: ch.i, stage: ch.stage, kind: after ? 'after-stop' : ch.kind, verdict: ch.verdict, replayHeard: !!ch.match && !after, goff,
         cat: inWin ? (heard ? 'agree' : 'detector-missed') : heard ? 'false-hit' : near ? 'off-window' : 'silent-miss' });
     });
     truth.rounds.push({ stage: rd.stage, bpm: rd.bpm, n, dropped, clicks: o.clickAmp > 0 && rd.c1 + 3 * rd.beat + rd.lag + 80 < audioEnd, centre: centreKind,
@@ -269,6 +289,7 @@ export function makePwTake(o){
     return d >= 0;
   }).length;
   truth.mapKnown = mapKnown;
+  truth.mismatch = truth.changes.filter(c => c.cat !== 'dropped' && c.replayHeard !== (c.verdict !== 'miss')).length;
   const meta = {
     game: 'pw', complete: stopMs == null, progression: o.chords.join('-'), song: o.song, ladder: o.bpms.length > 1,
     bpm: o.bpms[0], stageBpms: o.bpms.slice(), bpc: o.bpc, eventTimes: 'played (arrival - micLatencyMs)',
