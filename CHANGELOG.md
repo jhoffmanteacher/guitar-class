@@ -5,6 +5,12 @@ Notable changes to the Guitar Class site. Newest first.
 For the full session-by-session history (and the reasoning behind each change),
 see `WORKFLOW.md` and the git commit log.
 
+## 2026-11-04 — Strum steps: Play clicks, and Play strum keeps the beat
+
+- **Every strum step (the Down, Down-Up, Up-Down-Up activity and Strum Pattern in Chunks) has a new "Play clicks" button.** It opens the Metronome at 60 BPM in 4/4 and starts it. Use its slider and Stop like any time you use the Metronome.
+- **"Play strum" now clicks on every beat the whole time**, with a higher click on 1, so you can hear where each strum falls.
+- **Down strums sound a little louder than up strums.**
+
 ## 2026-11-04 — Strum Pattern in Chunks: step 1 is shorter
 
 - **Step 1 (3 strums) no longer has a "You've got it when" line or the count-out-loud tip.** It says to strum Down, Down-Up on D5, then stop and wait for the next 1.

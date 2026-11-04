@@ -2150,6 +2150,35 @@ function strumSequence(spec){
   hits.forEach((h, i) => { h.beats = ((i + 1 < hits.length ? hits[i + 1].at : end) - h.at) / 2; });
   return hits;
 }
+/* ▶ Play clicks (Jonathan, 2026-11-04: "each one should have a play clicks
+   option too", then "could play clicks just open the metronome on the site at
+   60bpm?"): opens the rail's Metronome tool at 60 BPM in 4/4 and starts it.
+   It is the student's tool from then on — their own Start/Stop and slider —
+   so nothing here stops it (the same rule as caAutoStartMetro). Play strum
+   stops first so the two never sound together. A page without the tool (the
+   teacher console preview) does nothing. */
+const STRUM_METRO_BPM = 60;
+/* ▶ Play strum (Jonathan, 2026-11-04: "the play strum should have clicks going
+   the whole time too to make it clear. the downstrums could have slight
+   accents as well"): a click on every beat (the 1 higher) from the button's
+   data-clicks count, and each down strum a little louder than each up strum. */
+const STRUM_DOWN_GAIN = 1.25;
+const STRUM_UP_GAIN = 0.8;
+const STRUM_CLICK_GAIN = 1.2;
+function strumOpenMetro(){
+  stopPlaySeq();
+  const slider = document.getElementById('bpm-slider');
+  const pop = document.getElementById('metro-popup');
+  if(!slider || !pop || typeof startMetro !== 'function' || typeof togglePopup !== 'function') return;
+  /* One tick later: fab-tools.js closes every tool popup on a click outside
+     them, and its listener runs after this button's handler — opening here
+     would be undone by the very click that opened it. */
+  setTimeout(() => { if(!pop.classList.contains('open')) togglePopup('metro'); }, 0);
+  slider.value = STRUM_METRO_BPM;
+  onBpmSlider(String(STRUM_METRO_BPM));
+  if(typeof setMetroMeter === 'function' && typeof getMetroMeter === 'function' && getMetroMeter() !== 4) setMetroMeter(4);
+  if(!metroRunning) startMetro();
+}
 function buildStrum(spec, opts){
   if(!spec || !Array.isArray(spec.bars) || !spec.bars.length) return '';
   const keyPrefix = (opts && opts.keyPrefix) || '';
@@ -2161,9 +2190,10 @@ function buildStrum(spec, opts){
   let controlsHtml = '';
   if(hits.length && keyPrefix){
     const bpm = readStoredBpm(keyPrefix, spec.bpm || 60);
-    const midis = hits.map(h => (h.beats !== 1 ? { midi: h.midi, beats: h.beats } : h.midi));
+    const midis = hits.map(h => ({ midi: h.midi, beats: h.beats, down: h.dir === 'D' }));
     controlsHtml = `<div class="tab-controls"><span class="bpm-control-group">`
-      + `<button type="button" class="play-seq-btn" data-midis="${escAttr(JSON.stringify(midis))}" onclick="playSequenceFromGroup(this)" title="${escAttr(t('strum.playTitle'))}">&#x25B6; ${t('strum.play')}</button>`
+      + `<button type="button" class="play-seq-btn" data-midis="${escAttr(JSON.stringify(midis))}" data-clicks="${spec.bars.length * 4}" onclick="playSequenceFromGroup(this)" title="${escAttr(t('strum.playTitle'))}">&#x25B6; ${t('strum.play')}</button>`
+      + `<button type="button" class="play-seq-btn strum-clicks-btn" onclick="strumOpenMetro()" title="${escAttr(t('strum.clicksTitle'))}">&#x25B6; ${t('strum.clicks')}</button>`
       + renderBpmControl(keyPrefix, bpm, spec.minBpm || 40, spec.maxBpm || 120)
       + `</span></div>`;
   }
@@ -10649,7 +10679,7 @@ function startPlaySequence(midis, bpm, btnEl, synthOnly){
     cursor += beats * interval;
     return setTimeout(() => {
       const list = Array.isArray(pitches) ? pitches : [pitches];
-      const vg = chordGain(list.length);
+      const vg = chordGain(list.length) * (hasBeats && m.down === true ? STRUM_DOWN_GAIN : hasBeats && m.down === false ? STRUM_UP_GAIN : 1);
       if(playSeqState){
         playSeqDamp(playSeqState.voices);
         playSeqState.voices = list.map(x => playNote(Number(x), vg, 0, synthOnly));
@@ -10673,6 +10703,13 @@ function startPlaySequence(midis, bpm, btnEl, synthOnly){
       }
     }, at);
   });
+  /* A button with data-clicks (▶ Play strum) also clicks on every beat the whole time. */
+  const nClicks = btnEl && btnEl.dataset ? parseInt(btnEl.dataset.clicks, 10) : 0;
+  if(nClicks > 0){
+    for(let k = 0; k < nClicks; k++){
+      timeouts.push(setTimeout(() => { pcClick(getAudioCtx().currentTime, k % 4 === 0, false, STRUM_CLICK_GAIN); }, k * interval));
+    }
+  }
   timeouts.push(setTimeout(() => stopPlaySeq(true), cursor));
   const idleHtml = btnEl ? btnEl.innerHTML : null;
   playSeqState = { timeouts, btn: btnEl, idleHtml, tabRoot, voices: [] };

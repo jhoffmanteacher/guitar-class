@@ -4291,6 +4291,15 @@ function validateClassActivities() {
     const tchSrc = readFileSync(join(ROOT, 'teacher.js'), 'utf8');
     if (!/if\(step\.strum\) parts\.push\(buildStrum\(step\.strum,/.test(appSrc)) { err('1d: caStepHtml() in app.js no longer draws step.strum with buildStrum()'); problems++; }
     if (!/if\(s\.strum && typeof buildStrum==='function'\) media\.push\(buildStrum\(s\.strum,/.test(tchSrc)) { err('1d: renderTeacherActivityDetail() in teacher.js no longer draws step.strum with buildStrum()'); problems++; }
+    /* ▶ Play clicks on every strum board (2026-11-04): it opens the rail Metronome at 60 BPM
+       in 4/4 and starts it. The smoke test clicks it for real; this pins the wiring. */
+    const sm = appSrc.match(/function strumOpenMetro\(\)\{([\s\S]*?)\n\}/);
+    if (!/class="play-seq-btn strum-clicks-btn" onclick="strumOpenMetro\(\)"/.test(appSrc)) { err('1d: buildStrum() no longer draws the ▶ Play clicks button (strum-clicks-btn → strumOpenMetro())'); problems++; }
+    if (!/data-clicks="\$\{spec\.bars\.length \* 4\}"/.test(appSrc) || !/down: h\.dir === 'D'/.test(appSrc)) { err('1d: ▶ Play strum no longer carries data-clicks (4 per bar) and a down flag per strum'); problems++; }
+    if (!/const nClicks = btnEl && btnEl\.dataset \? parseInt\(btnEl\.dataset\.clicks, 10\) : 0;/.test(appSrc) || !/m\.down === true \? STRUM_DOWN_GAIN : hasBeats && m\.down === false \? STRUM_UP_GAIN/.test(appSrc) || !/const STRUM_DOWN_GAIN = 1\.25;/.test(appSrc) || !/const STRUM_UP_GAIN = 0\.8;/.test(appSrc)) { err('1d: startPlaySequence() no longer clicks every beat for a data-clicks button or accents down strums'); problems++; }
+    if (!/const STRUM_METRO_BPM = 60;/.test(appSrc)) { err('1d: STRUM_METRO_BPM is no longer 60 (Jonathan: Play clicks opens the metronome at 60 BPM)'); problems++; }
+    if (!sm || !/setTimeout\(\(\) => \{ if\(!pop\.classList\.contains\('open'\)\) togglePopup\('metro'\); \}, 0\)/.test(sm[1]) || !/onBpmSlider\(String\(STRUM_METRO_BPM\)\)/.test(sm[1]) || !/setMetroMeter\(4\)/.test(sm[1]) || !/startMetro\(\)/.test(sm[1])) { err('1d: strumOpenMetro() must open the Metronome popup, set STRUM_METRO_BPM, put the meter on 4/4 and start it'); problems++; }
+    if (!/'strum\.clicks':\s*\{ en: 'Play clicks', es: 'Tocar clics' \}/.test(readFileSync(join(ROOT, 'i18n.js'), 'utf8'))) { err('1d: i18n strum.clicks (Play clicks / Tocar clics) is missing'); problems++; }
   }
   const numbered = activities.filter(a => a && a.kind !== 'check');
   const checks = activities.length - numbered.length;
