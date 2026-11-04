@@ -10535,7 +10535,7 @@ async function checkBackingLoudness() {
    ════════════════════════════════════════════════════════════════════ */
 function checkCoachVerdicts() {
   head('1ca. Coach and arcade verdict lines are true at 0, 1 and many');
-  const EXPECT = { reports: 20, descs: 20, nrLevels: 15, doneScreens: 88, pwLoops: 12, pwHints: 44, pwViews: 32, pwMemory: 2, pwGates: 3 };
+  const EXPECT = { reports: 20, descs: 20, nrLevels: 15, doneScreens: 88, pwLoops: 12, pwHints: 44, pwViews: 32, pwMemory: 3, pwGates: 3 };
   let bad = 0;
   const flag = m => { err(m); problems++; bad++; };
   const bodies = {};
@@ -10981,7 +10981,11 @@ function checkCoachVerdicts() {
     run(`ccSetup()`);
     const ccMemory = { bpm: run('cc.bpm'), rate: run('cc.rateIdx') };
     counts.pwMemory += 2;
-    if (pwMemory.bpm !== 75 || pwMemory.rate !== 1) flag(`1ca: Power Chord Switch reopened at ${pwMemory.bpm} BPM, speed ${pwMemory.rate}; it was set to 75 BPM (60 + 5 + the Again button's 10), speed 1 (it opens on 2, every beat, so only a remembered pick gives 1)`);
+    /* Power Chord Switch OPENS on 55 BPM (Jonathan, 2026-11-04: 5 slower than the 60 it opened on); Change Up opens on 60. A fresh session, nothing remembered. */
+    const pwOpens = JSON.parse(run(`sessionStorage.removeItem('pwBpm'); sessionStorage.removeItem('ccBpm'); const __a = (ccSetup('power'), cc.bpm), __b = (ccSetup(), cc.bpm); JSON.stringify({ pw: __a, cc: __b, start: CC_POWER_START_BPM })`));
+    counts.pwMemory += 1;
+    if (pwOpens.pw !== 55 || pwOpens.start !== 55 || pwOpens.cc !== 60) flag(`1ca: a fresh Power Chord Switch opens on ${pwOpens.pw} BPM (CC_POWER_START_BPM ${pwOpens.start}) and Change Up on ${pwOpens.cc}; they must be 55 and 60`);
+    if (pwMemory.bpm !== 70 || pwMemory.rate !== 1) flag(`1ca: Power Chord Switch reopened at ${pwMemory.bpm} BPM, speed ${pwMemory.rate}; it was set to 70 BPM (55 + 5 + the Again button's 10), speed 1 (it pwOpens on 2, every beat, so only a remembered pick gives 1)`);
     if (ccMemory.bpm !== 60 || ccMemory.rate !== 0) flag(`1ca: Change Up opened at ${ccMemory.bpm} BPM, speed ${ccMemory.rate} after Power Chord Switch's tempo was changed — it must keep its own (60, 0)`);
     /* The pitch gate each game reads strums with. ccLoop is run once per mode
        against a stubbed mic reader, and records the third argument it hands to

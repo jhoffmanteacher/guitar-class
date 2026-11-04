@@ -9,6 +9,13 @@ see `WORKFLOW.md` and the git commit log.
 
 - **The Sweet Child Song Journey page now has the whole intro riff in Layer 6.** It is 8 bars, played twice, with eight notes in every bar like the record. Only the first note changes from bar to bar, so it is shown in blue.
 
+## 2026-11-04 — Power Chord Switch starts 5 BPM slower and shows its BPM
+
+- **Power Chord Switch now starts at 55 BPM.** It was 60. The +5 and −5 buttons still change it.
+- **A song switch starts its 3 rounds at 55, 70 and 85 BPM.** They were 60, 75 and 90.
+- **The play screen now shows the BPM** under the chord charts, for example "55 BPM".
+- **If you already picked a tempo this session, it stays.**
+
 ## 2026-11-04 — Your class rank is on My progress
 
 - **My progress now shows your rank in the class**, like "4/142". It is your place out of all students, by total practice minutes. 1/142 means the most minutes.

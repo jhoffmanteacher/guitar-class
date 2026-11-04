@@ -3076,6 +3076,10 @@ const CC_RATES = [
    row is still there to slow it down. */
 const CC_BEAT_IDX = CC_RATES.findIndex(r => r.id === 'beat');
 const CC_BPM_MIN = 40, CC_BPM_MAX = 140;
+/* The tempo Power Chord Switch opens on (2026-11-04, Jonathan: 5 BPM slower than the 60 it opened on). A song switch's three
+   rounds start from it (55 / 70 / 85); Change Up still opens on 60. A tempo the student already picked this session
+   (sessionStorage pwBpm) wins. */
+const CC_POWER_START_BPM = 55;
 /* A song switch (CC_POWER_PROGRESSIONS, `ladder`) is 3 rounds, each CC_LADDER_STEP
    BPM faster than the last, of CC_LADDER_SLOTS chords each: 4 back-and-forths. */
 const CC_LADDER_ROUNDS = 3, CC_LADDER_STEP = 15, CC_LADDER_SLOTS = 8;
@@ -3279,14 +3283,14 @@ function ccBestKey(prog, rateIdx){ const rid = CC_RATES[rateIdx] ? CC_RATES[rate
 function ccSetup(mode){
   const power = mode === 'power';
   const sk = power ? 'pw' : 'cc';
-  let progIdx = 0, bpm = 60, rateIdx = 0;
+  let progIdx = 0, bpm = power ? CC_POWER_START_BPM : 60, rateIdx = 0;
   try {
     progIdx = parseInt(sessionStorage.getItem(sk + 'Prog'), 10);
     bpm = parseInt(sessionStorage.getItem(sk + 'Bpm'), 10);
     rateIdx = parseInt(sessionStorage.getItem(sk + 'Rate'), 10);
   } catch(e){}
   if (!(progIdx >= 0 && progIdx < (power ? CC_POWER_PROGRESSIONS : CC_PROGRESSIONS).length)) progIdx = 0;
-  if (!(bpm >= CC_BPM_MIN && bpm <= CC_BPM_MAX)) bpm = 60;
+  if (!(bpm >= CC_BPM_MIN && bpm <= CC_BPM_MAX)) bpm = power ? CC_POWER_START_BPM : 60;
   if (!(rateIdx >= 0 && rateIdx < CC_RATES.length)) rateIdx = power ? CC_BEAT_IDX : 0;   // Power Chord Switch opens on every beat
   cc = { phase: 'setup', mode: power ? 'power' : 'open', progIdx, rateIdx, bpm, micOn: false, timeouts: [] };
   ccRenderSetup();
@@ -3634,13 +3638,15 @@ function ccRenderPlay(){
   /* The last change, large: ✓ right, ✗ on time but the chord sounded wrong, – no strum heard. The row is always drawn (empty until the first change is
      graded). Power Chord Switch only. It and the BPM buttons sit under the charts: the left column is already the taller one. */
   const lastLine = ccIsPower() ? '<div class="cc-last" id="cc-last" aria-live="polite">&nbsp;</div>' : '';
+  /* A pair has one tempo for the whole round: the play screen says what it is (a song switch's line above already does, per round). */
+  const pairBpm = ccIsPower() && !cc.ladder ? `<div class="cc-play-bpm"><div class="cc-stage" id="cc-stage">${cc.stageBpms ? cc.stageBpms[0] : cc.bpm} BPM</div></div>` : '';
   const rest = `<div class="coach-strip">${chips}</div>
      <div class="coach-live"><span class="coach-live-dot"></span>${t('games.cc.strumEveryBeat')}</div>
      <button type="button" class="tp-btn coach-stop" onclick="ccFinish()">&#x25A0; ${t('games.common.stop')}</button>`;
   /* Power Chord Switch: the chord, "next" and the beat pips on the left, the
      two charts large on the right (styles.css .cc-cols-play). */
   body.innerHTML = ccIsPower()
-    ? `<div class="cc-cols cc-cols-play"><div class="cc-col-set">${ccRecBadge()}${now}${rest}</div><div class="cc-col-pic">${charts}${lastLine}${bpmCtl}</div></div>`
+    ? `<div class="cc-cols cc-cols-play"><div class="cc-col-set">${ccRecBadge()}${now}${rest}</div><div class="cc-col-pic">${charts}${lastLine}${bpmCtl}${pairBpm}</div></div>`
     : now + charts + rest;
 }
 
