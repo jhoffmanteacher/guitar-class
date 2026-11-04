@@ -822,19 +822,18 @@
       + '<circle class="pm-ring-fg" cx="10" cy="10" r="7" transform="rotate(-90 10 10)" stroke-dasharray="' + CIRC.toFixed(2) + '" stroke-dashoffset="' + (CIRC * (1 - f)).toFixed(2) + '"/></svg>';
   }
 
-  /* ── The status strip: the #pm-header button, first in the main top bar (index.html) ── */
+  /* ── The status strip: the #pm-header button, first in the main top bar, and its twin #pm-games in the
+     Games screen's bar (index.html; the Games screen is a full-screen layer that covers the header).
+     "N playing" was dropped 2026-11-04 (Jonathan): the strip is the week ring and the streak flame. ── */
   function stripInner(){
     var st = status(), w = st.week;
-    var live = (S.live >= cfg().liveMinCount)
-      ? '<span class="pm-live"><i class="pm-dot" aria-hidden="true"></i>' + esc(tr('pm.playing', { n: S.live })) + '</span>' : '';
     var done = mins(w.secs), goal = mins(w.goal);
     /* The strip shows at most the goal ("30/30"): a long week must not widen it and push
        the title, Find, Español and the user area off the one-row top bar. My progress
        shows the true minutes. A week with no class has no goal: minutes only. */
     var weekTxt = w.isBreak ? tr('pm.weekMinBreak', { done: done }) : tr('pm.weekMin', { done: Math.min(done, goal), goal: goal });
     var flameLabel = streakWords('pm.streak', st.streak);
-    return live
-      + '<span class="pm-week">' + ringSvg(w.goal && !w.isBreak ? w.secs / w.goal : 0, w.hit) + '<span>' + esc(weekTxt) + '</span></span>'
+    return '<span class="pm-week">' + ringSvg(w.goal && !w.isBreak ? w.secs / w.goal : 0, w.hit) + '<span>' + esc(weekTxt) + '</span></span>'
       + '<span class="pm-streak' + (w.hit ? ' pm-on' : '') + '" role="img" aria-label="' + esc(flameLabel) + '">' + FLAME + '<b>' + st.streak + '</b></span>';
   }
   function stripHtml(){
@@ -843,16 +842,23 @@
     return '<span class="pm-strip" role="group">' + stripInner() + '</span>';
   }
   var stripKey = '';
-  /* The one strip is #pm-header: it stays in the page and is hidden and emptied,
-     never removed. refreshStrip never un-hides it (only syncHeader does, so the
-     paused screen and the sign-in wall stay clear) and never fills a hidden one. */
+  /* The strips are #pm-header (main top bar) and #pm-games (Games screen bar). They stay in the page
+     and are hidden and emptied, never removed. refreshStrip never un-hides one (only syncHeader does,
+     so the paused screen and the sign-in wall stay clear) and never fills a hidden one. */
+  var HOST_STRIPS = ['pm-header', 'pm-games'];
+  function hostStrips(){
+    var out = [];
+    if(typeof document === 'undefined') return out;
+    HOST_STRIPS.forEach(function(id){ var e = document.getElementById(id); if(e) out.push(e); });
+    return out;
+  }
   function refreshStrip(force){
     var els = typeof document !== 'undefined' ? document.querySelectorAll('.pm-strip') : [];
     if(!els.length) return;
     if(!uiOn()){
       stripKey = '';
       Array.prototype.forEach.call(els, function(e){
-        if(e.id === 'pm-header'){ e.hidden = true; e.innerHTML = ''; } else e.remove();
+        if(HOST_STRIPS.indexOf(e.id) >= 0){ e.hidden = true; e.innerHTML = ''; } else e.remove();
       });
       return;
     }
@@ -862,8 +868,7 @@
     Array.prototype.forEach.call(els, function(e){ if(!e.hidden) e.innerHTML = html; });
   }
   function stripPresent(){
-    var h = typeof document !== 'undefined' ? document.getElementById('pm-header') : null;
-    return !!(h && !h.hidden);
+    return hostStrips().some(function(e){ return !e.hidden; });
   }
   /* app.js calls this wherever it paints #user-area. show = true (the default)
      on the signed-in app (showApp); false on the sign-in wall, the paused screen,
@@ -873,31 +878,26 @@
      anything is drawn, so a shared Chromebook never shows the last student's
      numbers). */
   function syncHeader(show){
-    var el = typeof document !== 'undefined' ? document.getElementById('pm-header') : null;
-    if(!el) return;
-    if(show === false || !uiOn()){ el.hidden = true; el.innerHTML = ''; stripKey = ''; return; }
-    el.hidden = false;
+    var els = hostStrips();
+    if(!els.length) return;
+    if(show === false || !uiOn()){
+      els.forEach(function(e){ e.hidden = true; e.innerHTML = ''; });
+      stripKey = '';
+      return;
+    }
+    els.forEach(function(e){ e.hidden = false; });
     refreshStrip(true);
     ensureStripWork();
   }
-  /* The strip needs the server's numbers and the live count; start them when the
-     strip is first drawn, and keep the count fresh while it is on screen (one
-     aggregation query every HEARTBEAT_MS on a visible tab, all class: accepted
-     2026-11-03 when the strip moved to every page). */
-  var liveTimer = 0;
+  /* The strip needs the server's numbers: load them when it is first drawn. */
   function ensureStripWork(){
     if(!S) return;
     if(!S.loaded && !S.loading) load();
-    if(!liveTimer && typeof setInterval !== 'undefined'){
-      pollLive();
-      liveTimer = setInterval(function(){
-        if(!stripPresent()){ clearInterval(liveTimer); liveTimer = 0; return; }
-        if(document.visibilityState !== 'hidden') pollLive();
-      }, HEARTBEAT_MS);
-    }
     toastMaybe();
   }
-  /* The count is ONE aggregation query over REST (runAggregationQuery, count) —
+  /* NOT STARTED BY THE UI any more (2026-11-04, "N playing" dropped): kept, with the heartbeat writer
+     above, because pm-sim runs them; removing both is a follow-up that also touches firestore.rules.
+     The count is ONE aggregation query over REST (runAggregationQuery, count) —
      the compat SDK this site loads has no count(), and reading every matching
      heartbeat doc on every poll would cost a read per player per poll for the
      whole class. The same rule as a list applies (any signed-in user); the
@@ -940,21 +940,26 @@
   function uiNow(){ uiTick(); }
 
   /* ── Pills that drop down from the header strip ── */
-  /* The strip is on screen only while #pm-header is shown (a student signed in
-     on the main site; getClientRects is empty for display:none or an ancestor
-     that is) AND nothing sits over it: the Games screen is a full-screen layer
-     (z 120) that covers the whole header, so a pill made there would be drawn
-     under it and its once-a-week toast used up unseen. Null otherwise: the pill
-     then waits, or goes. */
-  function anchorRect(){
-    var h = typeof document !== 'undefined' ? document.getElementById('pm-header') : null;
-    if(!h || h.hidden || !h.getClientRects().length) return null;
-    var r = h.getBoundingClientRect(), hit = document.elementFromPoint(r.left + r.width / 2, r.top + r.height / 2);
-    return (hit && h.contains(hit)) ? r : null;
+  /* The strip a pill drops from: the first of #pm-header / #pm-games that is shown AND has nothing over
+     it (getClientRects is empty for display:none or an ancestor that is; elementFromPoint at its centre
+     must land inside it). The header is covered by the Games screen (a full-screen layer, z 120), whose own
+     bar carries #pm-games instead. Null when neither is: the pill then waits, or goes. */
+  function anchorStrip(){
+    var els = hostStrips();
+    for(var i = 0; i < els.length; i++){
+      var h = els[i];
+      if(h.hidden || !h.getClientRects().length) continue;
+      var r = h.getBoundingClientRect(), hit = document.elementFromPoint(r.left + r.width / 2, r.top + r.height / 2);
+      if(hit && h.contains(hit)) return h;
+    }
+    return null;
   }
+  function anchorRect(){ var h = anchorStrip(); return h ? h.getBoundingClientRect() : null; }
+  /* A pill dropped from the Games bar must sit above the Games layer (z 120); from the header, the CSS z 54. */
+  function pillZ(el){ var h = anchorStrip(); el.style.zIndex = h && h.id === 'pm-games' ? '130' : ''; }
   function removeEl(id){ var e = document.getElementById(id); if(e) e.remove(); }
-  /* The toast and recap belong to the header strip: gone when it hides (sign-out)
-     or the language changes. */
+  /* The toast and recap belong to the strip they dropped from: gone when it hides (sign-out)
+     or is covered, or the language changes. */
   function stripShown(){ return !!anchorRect(); }
   function followStrip(el){
     var iv = setInterval(function(){
@@ -983,7 +988,9 @@
     el.id = 'pm-toast'; el.className = 'pm-toast'; el.setAttribute('role', 'status');
     el.innerHTML = FLAME + '<span>' + esc(s.streak >= 2 ? tr('pm.toastHit', { n: s.streak }) : tr('pm.toastHit1')) + '</span>';
     el.style.top = Math.round(bar.bottom + 8) + 'px';
+    el.style.left = Math.round(window.innerWidth / 2) + 'px';   // measured from the middle: a strip near the right edge must not squeeze it into a narrow column
     document.body.appendChild(el);
+    pillZ(el);
     /* Centred under the strip, kept inside the window (the CSS centres on left with translateX(-50%)). */
     var half = el.offsetWidth / 2, cx = bar.left + bar.width / 2;
     el.style.left = Math.round(Math.max(8 + half, Math.min(window.innerWidth - 8 - half, cx))) + 'px';
@@ -1016,6 +1023,7 @@
     var toast = document.getElementById('pm-toast');
     el.style.top = Math.round((toast ? toast.getBoundingClientRect().bottom : bar.bottom) + 8) + 'px';
     document.body.appendChild(el);
+    pillZ(el);
     /* Right edge in line with the strip's, kept inside the window. */
     var rw = el.offsetWidth;
     el.style.left = Math.max(8, Math.min(Math.round(bar.right - rw), window.innerWidth - 8 - rw)) + 'px';

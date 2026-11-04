@@ -5,6 +5,11 @@ Notable changes to the Guitar Class site. Newest first.
 For the full session-by-session history (and the reasoning behind each change),
 see `WORKFLOW.md` and the git commit log.
 
+## 2026-11-04 — Your minutes are on the Games screen too, and "N playing" is gone
+
+- **The Games screen now shows your practice minutes.** The ring and flame are in its top bar, on the right. Click them to open My progress.
+- **"N playing" is gone.** The top bar now shows only the ring and the flame, so a long name fits on one row.
+
 ## 2026-11-04 — Your practice minutes are now in the top bar
 
 - **Your practice minutes are now in the top bar on every page.** The ring shows this week's minutes and the flame shows your streak. Click it to open My progress. They're no longer in the bar on top of a practice card.

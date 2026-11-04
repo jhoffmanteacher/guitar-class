@@ -1158,6 +1158,25 @@
       on origin/main after the 2026-11-03 engine change: a recap now needs a PLAY run,
       `PM._play().counted`, and a session starts at the first click); `tools/smoke.mjs`
       walks the strip on 6 views x EN/ES x 1366/390 px, the click and a reload.
+      **2026-11-04, later the same day (Jonathan: "drop it and add this to games screen";
+      he chose "the minutes strip"):** (1) **"N playing" is dropped** from the strip: no
+      `.pm-live`, no `pm.playing` string, `ensureStripWork()` no longer starts the 30 s
+      poll (so the poll-cost note above is now void). `pollLive()`, the heartbeat writer,
+      `S.live`, `liveMinCount` and the heartbeats rules block are LEFT IN PLACE (the
+      counting half, pinned by pm-sim 159/159): a follow-up could remove them with their
+      rules and sim tests, but that is a `firestore.rules` change (console paste) and the
+      writer still does one write per student per 30 s of audible playback for nobody to
+      read. (2) **The Games screen has its own twin**, `<button id="pm-games" class="pm-strip
+      pm-strip-games">` in `.games-topbar` (right cell), because `.games-screen` (z 120)
+      covers the whole header. `HOST_STRIPS = ['pm-header','pm-games']`; `syncHeader()`
+      shows/hides both, `refreshStrip()` fills both, `anchorStrip()` picks the first one
+      that is shown and on top (`elementFromPoint`), and a pill dropped from the Games strip
+      gets z-index 130 (above the Games layer). A click calls `toggleMyProgress()`, whose
+      hash route closes Games. The Live quiz overlay (`#live-quiz-screen`) is NOT given a
+      strip. (3) STOP B capacity, remeasured: with the short week text and no "N playing"
+      Spanish holds one row to 35-character names, English to 56 (was 21 and 45). (4) The
+      toast is measured from the middle of the window so a strip at the right edge (Games)
+      does not squeeze it into a narrow column.
 
 - [x] **2026-10-31 — "Hear It First": a hidden adaptive ear + fretboard trainer.**
       Work order `WO-hear-it-first.md` (kept out of the repo). For Jonathan's

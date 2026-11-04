@@ -158,19 +158,18 @@ await waitFor(`PM.status().week.secs >= 23 * 60`, 15000);
 const st = await ev(`(() => { const s = PM._state(), d = PM.calc.ymd(new Date()); return { pend: s.pend[d], playing: !!(pcState && pcState.audio && !pcState.audio.paused), src: pcState && pcState.audio && pcState.audio.currentSrc, counted: PM._session() && PM._session().counted }; })()`);
 check('the real Play counted seconds from a real <audio> (detached element, wrapped play())', st.counted >= 6 && st.counted <= 12 && /-backing-/.test(st.src || ''), st);
 await ev(`PM._state().live = 14; PM.refreshStrip(true)`); await sleep(300);
-const bar = await ev(`(() => { const b = document.querySelector('.header'), s = document.getElementById('pm-header'); const r = s.getBoundingClientRect(), br = b.getBoundingClientRect(); const items = [...s.children].map(c => c.className); return { barH: Math.round(br.height), stripTop: Math.round(r.top - br.top), stripH: Math.round(r.height), strips: document.querySelectorAll('.pm-strip').length, stripsInCardBar: document.querySelectorAll('#ca-bar-open .pm-strip').length, tag: s.tagName, items, text: s.innerText.replace(/\\s+/g, ' '), docOverflow: document.documentElement.scrollWidth > document.documentElement.clientWidth, barOverflow: b.scrollWidth > b.clientWidth }; })()`);
+const bar = await ev(`(() => { const b = document.querySelector('.header'), s = document.getElementById('pm-header'); const r = s.getBoundingClientRect(), br = b.getBoundingClientRect(); const items = [...s.children].map(c => c.className); return { barH: Math.round(br.height), stripTop: Math.round(r.top - br.top), stripH: Math.round(r.height), strips: [...document.querySelectorAll('.pm-strip')].filter(e => { if (e.hidden || !e.getClientRects().length) return false; const q = e.getBoundingClientRect(), t = document.elementFromPoint(q.left + q.width / 2, q.top + q.height / 2); return t && e.contains(t); }).map(e => e.id).length, stripsInCardBar: document.querySelectorAll('#ca-bar-open .pm-strip').length, tag: s.tagName, items, text: s.innerText.replace(/\\s+/g, ' '), docOverflow: document.documentElement.scrollWidth > document.documentElement.clientWidth, barOverflow: b.scrollWidth > b.clientWidth }; })()`);
 check('the strip is in the main top bar (a button): one row (bar ≤ 56px), no horizontal overflow', bar.tag === 'BUTTON' && bar.barH <= 56 && !bar.docOverflow && !bar.barOverflow, bar);
-check('exactly ONE .pm-strip on an open practice card, and none in the card bar', bar.strips === 1 && bar.stripsInCardBar === 0, bar);
-check('three items: live, week ring, streak flame — and only text "14 playing 23/30 min 3"', bar.items.join() === 'pm-live,pm-week,pm-streak' && bar.text === '14 playing 23/30 min 3', bar);
-const col1 = await ev(`(() => { const q = (s, p) => getComputedStyle(document.querySelector(s))[p]; return { ring: q('.pm-strip .pm-ring-fg', 'stroke'), dot: q('.pm-strip .pm-dot', 'backgroundColor'), flame: q('.pm-strip .pm-streak', 'color'), strip: q('.pm-strip', 'backgroundColor'), text: q('.pm-strip .pm-week span', 'color'), dash: q('.pm-strip .pm-ring-fg', 'strokeDashoffset'), anim: q('.pm-strip .pm-dot', 'animationName') }; })()`);
-check('goal not hit: ring blue #5AA9FF, dot green #3DDC97, flame DIM (#7A5236)', col1.ring === 'rgb(90, 169, 255)' && col1.dot === 'rgb(61, 220, 151)' && col1.flame === 'rgb(122, 82, 54)', col1);
-check('the dot pulses', /pm-pulse/.test(col1.anim), col1.anim);
+check('exactly ONE strip showing on an open practice card (the header one; the Games one is in a hidden screen), and none in the card bar', bar.strips === 1 && bar.stripsInCardBar === 0, bar);
+check('two items: week ring and streak flame — and only text "23/30 min 3" (no "N playing")', bar.items.join() === 'pm-week,pm-streak' && bar.text === '23/30 min 3', bar);
+const col1 = await ev(`(() => { const q = (s, p) => getComputedStyle(document.querySelector(s))[p]; return { ring: q('.pm-strip .pm-ring-fg', 'stroke'), flame: q('.pm-strip .pm-streak', 'color'), strip: q('.pm-strip', 'backgroundColor'), text: q('.pm-strip .pm-week span', 'color'), dash: q('.pm-strip .pm-ring-fg', 'strokeDashoffset') }; })()`);
+check('goal not hit: ring blue #5AA9FF, flame DIM (#7A5236)', col1.ring === 'rgb(90, 169, 255)' && col1.flame === 'rgb(122, 82, 54)', col1);
 check('the ring is 23/30 full (dashoffset = circumference × (1 − 23/30))', Math.abs(parseFloat(col1.dash) - 2 * Math.PI * 7 * (1 - 23 / 30)) < 0.5, col1.dash);
 await shot('1-strip-not-hit-en');
 
 /* live < 3 hides the item entirely */
 await ev(`PM._state().live = 2; PM.refreshStrip(true)`);
-check('"N playing" is hidden entirely under 3', await ev(`!document.querySelector('.pm-live')`));
+check('"N playing" is gone even with 14 playing (2026-11-04): no .pm-live, no "playing" in either strip', await ev(`PM._state().live = 14; PM.refreshStrip(true); !document.querySelector('.pm-live') && !/playing|tocando/.test(document.getElementById('pm-header').innerText + document.getElementById('pm-games').innerText)`));
 await ev(`PM._state().live = 14; PM.refreshStrip(true)`);
 
 /* Cross the goal: 7 more minutes → toast + yellow ring + orange flame */
@@ -225,7 +224,7 @@ await ev(`setLang('es')`); await sleep(800);
 await ev(`(() => { const s = PM._state(); s.weeks[PM.calc.weekIdOf(PM.calc.ymd(new Date()))] = { seconds: 23 * 60, goalSeconds: 1800, hit: false }; s.pend = {}; return true; })()`);
 await ev(`caSyncTopbar(); PM._state().live = 14; PM.refreshStrip(true)`); await sleep(300);
 const es = await ev(`(() => { const s = document.querySelector('.pm-strip'); const b = document.querySelector('.header'); return { text: s.innerText.replace(/\\s+/g, ' '), aria: s.querySelector('.pm-streak').getAttribute('aria-label'), barH: Math.round(b.getBoundingClientRect().height), overflow: document.documentElement.scrollWidth > document.documentElement.clientWidth }; })()`);
-check('Spanish strip: "14 tocando 23/30 min 3", flame label "racha de 3 semanas", one row', es.text === '14 tocando 23/30 min 3' && es.aria === 'racha de 3 semanas' && es.barH <= 56 && !es.overflow, es);
+check('Spanish strip: "23/30 min 3", flame label "racha de 3 semanas", one row', es.text === '23/30 min 3' && es.aria === 'racha de 3 semanas' && es.barH <= 56 && !es.overflow, es);
 await shot('4-strip-es');
 
 /* ── STOP B (2026-11-03): the main top bar stays ONE row at 1366×657 in Spanish with the widest strip
@@ -236,14 +235,14 @@ const rows = [];
 await ev(`(() => { const s = PM._state(); s.live = 25; s.weeks[PM.calc.weekIdOf(PM.calc.ymd(new Date()))] = { seconds: 1800, goalSeconds: 1800, hit: true }; return true; })()`);
 for (const lang of ['en', 'es']) {
   await ev(`setLang('${lang}')`); await sleep(500);
-  for (const nm of ['Dev User', 'Ana María Gómez', 'Maximiliano Fernández']) {
+  for (const nm of ['Dev User', 'Ana María Gómez', 'Maximiliano Fernández', 'Maximiliano Fernández-Rodríguez']) {
     await ev(`document.querySelector('.user-name').textContent = ${JSON.stringify(nm)}; PM.refreshStrip(true)`); await sleep(200);
     const h = await ev(`Math.round(document.querySelector('.header').getBoundingClientRect().height)`);
     rows.push(`${lang}/${nm.length}ch=${h}`);
   }
   await ev(`document.querySelector('.user-name').textContent = 'Dev User'`);
 }
-check('the top bar is one row (≤ 56px) with the widest strip in EN and ES × names of 8, 15 and 21 characters', rows.every((r) => +r.split('=')[1] <= 56) && rows.length === 6, rows);
+check('the top bar is one row (≤ 56px) with the widest strip in EN and ES × names of 8, 15, 21 and 31 characters (35 fits in Spanish, 56 in English)', rows.every((r) => +r.split('=')[1] <= 56) && rows.length === 8, rows);
 const cardRows = [];
 for (const lang of ['en', 'es']) {
   await ev(`setLang('${lang}')`); await sleep(500);
@@ -378,7 +377,7 @@ await ev(`(() => { const s = PM._state(), cur = PM.calc.weekIdOf(PM.calc.ymd(new
 await ev(`window.__period = '7'; setLang('es'); location.hash = '#class-activities/${card}'; openClassActivitiesScreen(${JSON.stringify(card)})`); await sleep(1000);
 await ev(`(() => { caSyncTopbar(); PM.refreshStrip(true); document.querySelector('.user-name').textContent = 'Ana María Gómez'; return true; })()`); await sleep(300);
 const worst = await ev(`(() => ({ h: Math.round(document.querySelector('.header').getBoundingClientRect().height), text: document.querySelector('.pm-strip').innerText.replace(/\\s+/g, ' ') }))()`);
-check('widest strip (ES, 25 playing, 100+ min, 12-week streak, a 15-character name) keeps the top bar one row; the strip never shows more than the goal', worst.h <= 56 && /^25 tocando 30\/30 min 13$/.test(worst.text), worst);
+check('widest strip (ES, 100+ min, 12-week streak, a 15-character name) keeps the top bar one row; the strip never shows more than the goal', worst.h <= 56 && /^30\/30 min 13$/.test(worst.text), worst);
 await shot('7-widest-strip-es');
 await ev(`(() => { const cur = PM.calc.weekIdOf(PM.calc.ymd(new Date())), mon = PM.calc.weekMonday(cur), sun = PM.calc.addDays(mon, 6); PRACTICE_MINUTES_CONFIG.skipWeeks.push(PM.calc.ymd(mon)); PM._state().weeks[cur] = { seconds: 40 * 60, goalSeconds: 0, hit: false }; PM.refreshStrip(true); return true; })()`);
 await ev(`setLang('en'); PM.refreshStrip(true)`); await sleep(300);
@@ -446,22 +445,23 @@ for (const lang of ['en', 'es']) {
   await ev(`setLang('${lang}')`); await sleep(400);
   for (const [name, call] of views) {
     await ev(call); await sleep(900);
-    const v = await ev(`(() => { const h = document.getElementById('pm-header'), r = h.getBoundingClientRect(); const hit = document.elementFromPoint(r.left + r.width / 2, r.top + r.height / 2); return { shown: !h.hidden && !!h.getClientRects().length, onTop: h.contains(hit), strips: document.querySelectorAll('.pm-strip').length, over: document.documentElement.scrollWidth > document.documentElement.clientWidth, title: h.title }; })()`);
-    /* Games is a full-screen layer (z 120) over the whole page: the strip is in the page but covered, like Find, Español and Sign out. */
-    seen.push(v.shown && (name === 'Games' ? !v.onTop : v.onTop) && v.strips === 1 && !v.over && v.title === (lang === 'en' ? 'Open My progress' : 'Abrir Mi progreso'));
+    const v = await ev(`(() => { const top = [...document.querySelectorAll('.pm-strip')].filter(e => { if (e.hidden || !e.getClientRects().length) return false; const q = e.getBoundingClientRect(), t = document.elementFromPoint(q.left + q.width / 2, q.top + q.height / 2); return t && e.contains(t); }).map(e => e.id); const h = document.getElementById(${JSON.stringify(name === 'Games' ? 'pm-games' : 'pm-header')}); return { shown: !h.hidden && !!h.getClientRects().length, top, over: document.documentElement.scrollWidth > document.documentElement.clientWidth, title: h.title }; })()`);
+    /* Games is a full-screen layer (z 120) over the whole page, header included: its own bar carries #pm-games. Exactly one strip is on top in every view. */
+    seen.push(v.shown && v.top.length === 1 && v.top[0] === (name === 'Games' ? 'pm-games' : 'pm-header') && !v.over && v.title === (lang === 'en' ? 'Open My progress' : 'Abrir Mi progreso'));
     if (!seen[seen.length - 1]) console.log('    ✗ view', lang, name, JSON.stringify(v));
   }
 }
-check('the strip is visible, on top (nothing covers it), the only one, with its tooltip and no sideways scroll, on Modules / In class / Songs / My progress / a practice card, EN + ES; on Games the full-screen layer covers it with the rest of the header', seen.length === 12 && seen.every(Boolean), seen);
-/* A goal crossed while Games covers the header: no toast is drawn under it and the once-a-week toast is not used up; it shows when the header is back. */
+check('exactly one strip is showing and on top (nothing covers it), with its tooltip and no sideways scroll, on Modules / In class / Songs / Games (the Games bar\'s own) / My progress / a practice card, EN + ES', seen.length === 12 && seen.every(Boolean), seen);
+/* A goal crossed on the Games screen: the toast drops from the Games bar's strip, above the Games layer. */
 await ev(`setLang('en'); toggleGames()`); await sleep(1200);
 await ev(`(() => { const s = PM._state(), d = PM.calc.ymd(new Date()); s.weeks[PM.calc.weekIdOf(d)] = { seconds: 1800 - 4, goalSeconds: 1800, hit: false }; s.days = {}; s.pend = {}; s.toastWeek = ''; s.pendingToast = false; try { localStorage.removeItem('pm:t:e2e-student'); } catch(e) {} window.__a = new Audio(${JSON.stringify(pillSrc)}); window.__a.play(); return true; })()`);
 await waitFor(`PM._state().pendingToast === PM.calc.weekIdOf(PM.calc.ymd(new Date())) || PM._state().toastWeek !== ''`, 15000); await sleep(800);
-const underGames = await ev(`({ pending: PM._state().pendingToast, used: PM._state().toastWeek, toast: !!document.getElementById('pm-toast') })`);
-check('the week goal crossed on the full-screen Games layer: no toast is drawn under it and the week\'s toast is not used up', !underGames.toast && underGames.used === '' && !!underGames.pending, underGames);
+const onGames = await ev(`(() => { const t = document.getElementById('pm-toast'), g = document.getElementById('pm-games'); if (!t) return null; const r = t.getBoundingClientRect(), gr = g.getBoundingClientRect(), hit = document.elementFromPoint(r.left + r.width / 2, r.top + r.height / 2); return { top: Math.round(r.top), stripBottom: Math.round(gr.bottom), visible: t.contains(hit), inside: r.left >= 0 && r.right <= innerWidth, z: getComputedStyle(t).zIndex, used: PM._state().toastWeek !== '' }; })()`);
+check('the week goal crossed on the Games screen: the toast drops under the Games bar\'s strip and is on top of the Games layer', onGames && onGames.top >= onGames.stripBottom && onGames.visible && onGames.inside && onGames.used, onGames);
+await shot('8c-toast-on-games-en');
 await ev(`window.__a.pause(); true`);
-await ev(`returnToPractice()`); await waitFor(`!!document.getElementById('pm-toast')`, 8000);
-check('…it shows as soon as the header is back (a module page)', await ev(`!!document.getElementById('pm-toast')`));
+await ev(`document.getElementById('pm-games').click()`); await sleep(1200);
+check('clicking the Games bar\'s strip closes Games and opens My progress', await ev(`document.getElementById('games-screen').hasAttribute('hidden') && !document.getElementById('my-progress-screen').hasAttribute('hidden')`));
 await ev(`document.getElementById('pm-toast') && document.getElementById('pm-toast').remove(); true`);
 await ev(`setLang('en')`); await sleep(300);
 await ev(`openClassActivitiesScreen(${JSON.stringify(card)})`); await sleep(1200);
@@ -489,7 +489,7 @@ await ev(`document.querySelector('.ca-card[open] .pc-play').click()`); await wai
 await ev(`PM._session().counted = 150; PM._play() && (PM._play().counted = 150); pcStop()`); await sleep(3500);
 check('B stopped a song: the recap shows', await ev(`!!document.getElementById('pm-recap')`));
 await ev(`window.__who = null; true`); await sleep(2200);
-check('signed out (no student): the strip hides itself within the next tick, empty, and the recap goes with it', await ev(`(() => { const h = document.getElementById('pm-header'); return h.hidden && h.innerHTML === '' && !document.getElementById('pm-recap'); })()`));
+check('signed out (no student): both strips hide themselves within the next tick, empty, and the recap goes with it', await ev(`(() => { return ['pm-header', 'pm-games'].every((i) => { const h = document.getElementById(i); return h.hidden && h.innerHTML === ''; }) && !document.getElementById('pm-recap'); })()`));
 await ev(`PM.syncHeader(true)`);
 check('…and syncHeader(true) with nobody signed in keeps it hidden', await ev(`document.getElementById('pm-header').hidden`));
 await ev(`window.__who = 'e2e-student'; PM.syncHeader(true)`); await sleep(400);

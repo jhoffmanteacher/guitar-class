@@ -636,9 +636,8 @@
     'pm.title':           { en: 'Practice minutes', es: 'Minutos de práctica' },
     'pm.min':             { en: 'min', es: 'min' },
     'pm.close':           { en: 'Close', es: 'Cerrar' },
-    // The status strip in the main top bar (index.html #pm-header; its tooltip is pm.openProgress).
+    // The status strip in the main top bar and the Games bar (index.html #pm-header, #pm-games; the tooltip is pm.openProgress).
     'pm.openProgress':    { en: 'Open My progress', es: 'Abrir Mi progreso' },
-    'pm.playing':         { en: '{n} playing', es: '{n} tocando' },
     // The top bar has to hold the title, Find, Español and a long name on one row in Spanish
     // (Jonathan, 2026-11-03, STOP B): the strip says "12/30 min" with no "this week"; the ring and the My progress tile say the rest.
     'pm.weekMin':         { en: '{done}/{goal} min', es: '{done}/{goal} min' },

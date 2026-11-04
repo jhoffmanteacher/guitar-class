@@ -11532,7 +11532,16 @@ function checkPracticeMinutes(i18nTable) {
   if (!/function showApp\(user\)\{[\s\S]*?PM\.syncHeader\(true\)/.test(app)) fail('app.js showApp(): PM.syncHeader(true) is missing');
   const tpaints = [...strip((read('teacher.js') || '').replace(/\r\n/g, '\n')).matchAll(/getElementById\('user-area'\)\.innerHTML\s*=[^\n]*\n([^\n]*\n)?/g)];
   if (tpaints.length !== 2 || tpaints.some(m => !/PM\.syncHeader\(false\)/.test(m[0]))) fail(`teacher.js paints #user-area in ${tpaints.length} places (expected 2); each must be followed by PM.syncHeader(false) — the console must never show the strip`);
-  if (!/function anchorRect\(\)\{[^}]*getElementById\('pm-header'\)/.test(eng) || /page-topbar|ca-screen/.test(strip(eng))) fail('practice-minutes.js: the toast and recap must anchor to #pm-header (not a practice card\'s bar)');
+  if (!/var HOST_STRIPS = \['pm-header', 'pm-games'\]/.test(eng) || !/function anchorStrip\(\)\{[\s\S]*?hostStrips\(\)[\s\S]*?elementFromPoint[\s\S]*?h\.contains\(hit\)\) return h;/.test(eng) || /page-topbar|ca-screen/.test(strip(eng))) fail('practice-minutes.js: the toast and recap must anchor to #pm-header or #pm-games, whichever is shown and not covered (not a practice card\'s bar)');
+  if (/pm-live|pm-dot|pm\.playing/.test(strip(eng))) fail('practice-minutes.js: "N playing" (.pm-live / pm.playing) was dropped 2026-11-04 and must not come back in the strip');
+  const gamesM = /<div class="games-screen" id="games-screen"[\s\S]*?<div class="games-stage">/.exec(idx);
+  const gBtn = gamesM && /<button\b[^>]*\bid="pm-games"[^>]*>/.exec(gamesM[0]);
+  if (!gBtn) fail('index.html: <button id="pm-games"> is missing from the Games screen\'s bar (the header strip is covered there)');
+  else {
+    if (!/\bclass="(?:[^"]*\s)?pm-strip(?:\s[^"]*)?"/.test(gBtn[0])) fail('index.html #pm-games must carry class pm-strip');
+    if (!/\bhidden\b/.test(gBtn[0].replace(/"[^"]*"/g, '""'))) fail('index.html #pm-games must be hidden by default');
+    if (!/\bonclick="toggleMyProgress\(\)"/.test(gBtn[0]) || !/data-i18n-attr="title:pm\.openProgress"/.test(gBtn[0])) fail('index.html #pm-games must open My progress (toggleMyProgress) and carry the tooltip title:pm.openProgress');
+  }
   if (!/syncHeader:\s*syncHeader/.test(eng) || /onCardOpen/.test(strip(eng))) fail('practice-minutes.js: PM.syncHeader must be public and PM.onCardOpen gone');
   const mp = /function renderMyProgress\(\)\{[\s\S]*?\n\}\n/.exec(app);
   if (!mp || !/PM\.renderProgress\(document\.getElementById\('pm-progress'\)\)/.test(mp[0])) fail('app.js renderMyProgress(): PM.renderProgress(#pm-progress) is missing');
