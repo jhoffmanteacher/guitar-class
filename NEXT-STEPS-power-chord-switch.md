@@ -60,7 +60,52 @@ line); `tools/smoke.mjs` walks all 16 switches in a real browser.
   yes has played a game to the end (or stopped one after 10 s). Mic collection
   has to be switched on there for any take to be asked for or saved.
 
-## Next steps (not done)
+## Next steps (Jonathan chose 1 and 2, 2026-11-04)
+
+1. **Check that saved takes really arrive.** Teacher console → Mic recordings
+   (collection must be switched on there). After a student who said yes has
+   finished a Power Chord Switch game, or stopped one after at least 10 s, a
+   row "Power Chord Switch · <chords>" should appear, with Download WAV / Download
+   data working. Nobody has seen a real take arrive yet. If none appear: the
+   rules paste first (`micTakes` and `chunks` must say `(coach|nr|pw)`), then
+   mic collection on, then the student's consent answer (asked once per device).
+   Also open one take's data and check `expected` has 21 entries, each with a
+   time, a verdict (`ok` / `off` / `miss`), a round and a BPM, and that
+   `complete` is `true` or `false`.
+2. **Watch the big feedback line in a real class.** After every graded change a
+   large line under the beat dots says "✓ C5 — right" / "✗ C5 — wrong chord" /
+   "– C5 — no strum heard". Measured to fit the 1366×657 Chromebook screen in
+   English and Spanish, but nobody has used it with a guitar. Ask: can a student
+   read it in time? Does the colour (green / amber / red) help? The wording for
+   "on time but the chord sounded wrong" has three variants (verdict says
+   "messy", count line "chord sounded wrong", big line "wrong chord"); unify
+   them if students are confused.
+
+## Not Power Chord Switch, but waiting: remove the practice-minutes heartbeat
+
+Jonathan asked for this note here so it is not lost. It is Jonathan's call and
+**not started**. The full plan is the "PICK UP HERE" entry under "Practice
+minutes" in `WORKFLOW.md` (written 2026-11-04); read it before touching anything.
+In short: "N playing" is gone from the screen, but the engine in
+`practice-minutes.js` still writes a `heartbeats/{sessionId}` record
+(`{ period, lastSeen }`) about every 30 s while audio plays, and nothing reads
+it. The records pile up (the TTL policy was never set) and any signed-in user
+can list them.
+- **Step 1 (code, no console paste):** delete the heartbeat writer, `pollLive()`,
+  `S.live` / `S.liveAt` and `liveMinCount`; remove the heartbeat tests in
+  `tools/pm-sim.mjs`, lower `PM_SIM_PIN` in `tools/checks.mjs`, drop the 1cg
+  heartbeat-rules pin and the `liveMinCount` check, drop the aggregation fake
+  in `tools/pm-e2e.mjs`. Counting, `flush()`, the queue and the keepalive do not change.
+- **Step 2 (only after step 1 is live; needs Jonathan's Firebase console
+  paste):** delete the `heartbeats/{sessionId}` block from `firestore.rules` and
+  the `heartbeats` index from `firestore.indexes.json`. Old `heartbeats` documents
+  can then be deleted in the console.
+- **Always Reviewed the same day** (`site-reviewer-deep`; it edits the counting
+  half, `pm-sim` and `firestore.rules`). Proof: `pm-sim` and `pm-e2e` pass, the
+  1cg pins broken in a scratch copy go red, a play session counts and flushes
+  the same seconds as before.
+
+## Later (not chosen yet)
 
 - **Teacher console cannot measure Power Chord Switch takes.** "Evaluate all
   recordings" skips them (it only knows Coach and Note Runner notes). The list
@@ -82,7 +127,6 @@ line); `tools/smoke.mjs` walks all 16 switches in a real browser.
   (house rule). Look at `games.pw.ladder.*`, `games.pw.songSub`,
   `games.pw.view.pairs`, `games.cc.breakdown` in `i18n.js` if a student reports
   odd wording.
-- **Review status:** see the last section.
 
 ## Review status
 
