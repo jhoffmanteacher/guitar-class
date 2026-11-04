@@ -1641,8 +1641,9 @@ function coachMicOff(){
        one-time question (localStorage, keyed by uid so the next student on
        a shared Chromebook is asked for themselves — "No thanks" is never
        asked again).
-   Then a Listening Coach take or a Note Runner round (not a Finger Gym
-   round, which shares Note Runner's engine) records the RAW mic
+   Then a Listening Coach take, a Note Runner round (not a Finger Gym
+   round, which shares Note Runner's engine) or a Power Chord Switch game
+   (not Change Up) records the RAW mic
    (before COACH_MIC_GAIN and the filters) from the count-in to the end, at
    most MICREC_MAX_SEC, with a visible "Recording this take for your
    teacher" label the whole time, and saves it to micTakes/<uid>-<mode>
@@ -1683,7 +1684,7 @@ function micRecAskHtml(game){
 function micRecConsent(yes, game){
   try { localStorage.setItem(micRecAskKey(), yes ? 'yes' : 'no'); } catch(e){}
   micRecFootSync();
-  if (game === 'nr') nrStart(); else if (game === 'pw') ccStart(); else coachStartCheck();
+  if (game === 'nr') nrStart(); else if (game === 'pw') ccStart(!!(cc && cc.pendingAgain)); else coachStartCheck();
 }
 function micRecBadgeHtml(){
   return `<div class="micrec-on" id="micrec-on"><span class="micrec-dot"></span>${escHtml(t('micrec.recording'))}<button type="button" class="micrec-stop" title="${escAttr(t('micrec.stopTitle'))}" onclick="micRecRevoke()">${escHtml(t('micrec.stop'))}</button></div>`;
@@ -3075,8 +3076,11 @@ const CC_BPM_MIN = 40, CC_BPM_MAX = 140;
 /* A song switch (CC_POWER_PROGRESSIONS, `ladder`) is 3 rounds, each CC_LADDER_STEP
    BPM faster than the last, of CC_LADDER_SLOTS chords each: 4 back-and-forths. */
 const CC_LADDER_ROUNDS = 3, CC_LADDER_STEP = 15, CC_LADDER_SLOTS = 8;
+/* The three round tempos. The first round's tempo is the base, but never above CC_BPM_MAX minus two steps (110): from a base of 125 the
+   rounds were 125 / 140 / 140, and "each round faster" was not true. */
 function ccLadderBpms(base){
-  return Array.from({ length: CC_LADDER_ROUNDS }, (_, k) => Math.min(CC_BPM_MAX, base + k * CC_LADDER_STEP));
+  const first = Math.min(base, CC_BPM_MAX - (CC_LADDER_ROUNDS - 1) * CC_LADDER_STEP);
+  return Array.from({ length: CC_LADDER_ROUNDS }, (_, k) => first + k * CC_LADDER_STEP);
 }
 
 /* POWER CHORD SWITCH (hub key 'power') — this same engine on the
@@ -3490,7 +3494,7 @@ async function ccStart(again){
   /* Power Chord Switch records consented takes like the Listening Coach and Note
      Runner (micRec*; Change Up never does): the one-time question comes first,
      and its answer starts the game (micRecConsent). */
-  if (ccIsPower() && micRecShouldAsk() && ccBody()){ ccBody().innerHTML = micRecAskHtml('pw'); return; }
+  if (ccIsPower() && micRecShouldAsk() && ccBody()){ cc.pendingAgain = again === true; ccBody().innerHTML = micRecAskHtml('pw'); return; }
   coachClose();
   fretStop();
   coachEvictTuner();
@@ -3567,7 +3571,8 @@ function ccBeginStage(){
 
 /* The red "Recording this take for your teacher" label, drawn on every screen of a
    take (each screen replaces #cc-body), and only while a Power Chord Switch capture
-   is really running (it stops at micRec's 30 s cap, and the label goes with it). */
+   is really running. A capture ends at micRec's 30 s cap, and the label goes with it: a three-round game at the default speed is
+   recorded until about the middle of round 3, a slow or every-bar game for less. */
 function ccRecBadge(){
   return micRec && micRec.live && micRec.mode === 'pw' ? micRecBadgeHtml() : '';
 }
@@ -3607,7 +3612,7 @@ function ccRenderPlay(){
   const body = ccBody();
   if (!body || !cc) return;
   const chips = cc.changes.map((c, i) =>
-    `<span class="coach-chip pending" id="cc-chip-${i}" title="${escAttr(t('games.cc.changeTooltip', { from: pwChordName(c.from), to: pwChordName(c.to) }))}">${escHtml(pwChordName(c.to))}</span>`
+    `<span class="coach-chip pending" id="cc-chip-${i}" title="${escAttr(t('games.cc.changeTooltip', { from: pwChordName(c.from), to: pwChordName(c.to) }))}">${ccChipInner(c)}</span>`
   ).join('');
   const now = `<div class="cc-now">
        <div class="cc-chord" id="cc-chord" data-key="${escAttr(cc.seq[0])}">${pwChordHtml(cc.seq[0])}</div>
@@ -3624,16 +3629,15 @@ function ccRenderPlay(){
          <button type="button" class="tp-btn" onclick="ccNudgeNext(5)"${lastRound ? ' disabled' : ''}>+5</button>
        </div></div>` : '';
   /* The last change, large: ✓ right, ✗ on time but the chord sounded wrong, – no strum heard. The row is always drawn (empty until the first change is
-     graded) so nothing below it jumps. Power Chord Switch only. */
+     graded). Power Chord Switch only. It and the BPM buttons sit under the charts: the left column is already the taller one. */
   const lastLine = ccIsPower() ? '<div class="cc-last" id="cc-last" aria-live="polite">&nbsp;</div>' : '';
-  const rest = `${lastLine}<div class="coach-strip">${chips}</div>
+  const rest = `<div class="coach-strip">${chips}</div>
      <div class="coach-live"><span class="coach-live-dot"></span>${t('games.cc.strumEveryBeat')}</div>
-     ${bpmCtl}
      <button type="button" class="tp-btn coach-stop" onclick="ccFinish()">&#x25A0; ${t('games.common.stop')}</button>`;
   /* Power Chord Switch: the chord, "next" and the beat pips on the left, the
      two charts large on the right (styles.css .cc-cols-play). */
   body.innerHTML = ccIsPower()
-    ? `<div class="cc-cols cc-cols-play"><div class="cc-col-set">${ccRecBadge()}${now}${rest}</div><div class="cc-col-pic">${charts}</div></div>`
+    ? `<div class="cc-cols cc-cols-play"><div class="cc-col-set">${ccRecBadge()}${now}${rest}</div><div class="cc-col-pic">${charts}${lastLine}${bpmCtl}</div></div>`
     : now + charts + rest;
 }
 
@@ -3663,7 +3667,14 @@ function ccBeatTick(cur){
   document.querySelectorAll('#cc-beats .cc-pip').forEach((el, i) => el.classList.toggle('on', i === beatInBar));
 }
 
-/* A change's chip says it in a symbol as well as a colour: ✓ right, ✗ on time but the chord sounded wrong, – no strum heard. */
+/* A play-screen chip in Power Chord Switch: the symbol sits in a box of fixed width, hidden while the change is not graded yet, so a chip does not
+   get wider (and the strip wrap, and Stop move) when its result arrives. Change Up's chips stay the chord's name. */
+function ccChipInner(c){
+  if (!ccIsPower()) return escHtml(pwChordName(c.to));
+  const sym = c.result === 'off' ? '\u2717' : c.result === 'miss' ? '\u2013' : '\u2713';
+  return `<span class="cc-sym${c.result ? '' : ' hid'}">${sym}</span>${escHtml(pwChordName(c.to))}`;
+}
+/* The done screen's chip: ✓ right, ✗ on time but the chord sounded wrong, – no strum heard (also a colour). */
 function ccChipText(c){
   return (c.result === 'ok' ? '\u2713 ' : c.result === 'off' ? '\u2717 ' : c.result === 'miss' ? '\u2013 ' : '') + pwChordName(c.to);
 }
@@ -3671,7 +3682,7 @@ function ccChipRefresh(i){
   const el = document.getElementById('cc-chip-' + i);
   if (el){
     el.className = 'coach-chip ' + (cc.changes[i].result === 'ok' ? 'ok' : cc.changes[i].result === 'off' ? 'wrong' : cc.changes[i].result === 'miss' ? 'miss' : 'pending');
-    el.textContent = ccChipText(cc.changes[i]);
+    el.innerHTML = ccChipInner(cc.changes[i]);
   }
   ccShowLast(cc.changes[i]);
 }

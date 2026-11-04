@@ -818,7 +818,7 @@ async function walk(base, chromePort, label) {
     stats.songs = 0;
     for (const i of idxs) {
       const r = await run('power:songs:reopen:' + i, `(() => { const p = CC_POWER_PROGRESSIONS[${i}];
-        setLang('en'); gamesShow('power'); ccPickProg(${i}); gamesShow('hub'); gamesShow('power');
+        setLang(${idxs.indexOf(i) % 2 ? "'es'" : "'en'"}); gamesShow('power'); ccPickProg(${i}); gamesShow('hub'); gamesShow('power');
         const active = [...document.querySelectorAll('#cc-body .cc-groups .ts-btn.active')].filter(b => /ccPickProg/.test(b.getAttribute('onclick') || '')).map(b => b.textContent.trim());
         const start = document.querySelector('#cc-body .coach-start'), want = t('games.pw.ladder.start', { n: 3 });
         return { song: p.song, chords: p.chords.join('-'), idx: cc.progIdx, active, start: start && start.textContent.trim(), want }; })()`, 300);
@@ -826,7 +826,7 @@ async function walk(base, chromePort, label) {
         songStep('reopen', `${r && r.song} ${r && r.chords}: picked choice ${i}, reopened on ${r && r.idx} "${r && r.active.join('|')}"; Start reads "${r && r.start}", expected "${r && r.want}"`);
       }
       /* The game itself. Speed "Every beat" (CC_RATES index 2): chord k is beat k. */
-      await run('power:songs:start:' + i, `(() => { gamesShow('power'); ccPickProg(${i}); ccPickRate(2); cc.bpm = 60; ccStart(); return 1; })()`, 900);
+      await run('power:songs:start:' + i, `(() => { ${idxs.indexOf(i) % 3 === 0 ? "isGatePreviewer = () => false; micSampling = { on: true, max: 40 }; micTakesCount = 0; localStorage.setItem(micRecAskKey(), 'yes');" : ''} gamesShow('power'); ccPickProg(${i}); ccPickRate(2); cc.bpm = 60; ccStart(); return 1; })()`, 900);
       const phase = await run('power:songs:wait:' + i, `new Promise(r => { const t0 = Date.now(); const f = () => (cc && cc.phase === 'countin') || Date.now() - t0 > 8000 ? r(cc && cc.phase) : setTimeout(f, 50); f(); })`, 50);
       if (phase !== 'countin') { songStep('start', `the game did not reach its count-in (phase "${phase}") for choice ${i}`); await run('power:songs:stop:' + i, `ccStop(); 1`, 50); continue; }
       const walked = await run('power:songs:ticks:' + i, `(() => {
@@ -842,9 +842,13 @@ async function walk(base, chromePort, label) {
           if (!nb || bb > window.innerHeight) bad.push(label + ': the BPM buttons end at ' + Math.round(bb) + 'px of ' + window.innerHeight);
           if (document.getElementById('cc-body').scrollWidth > document.getElementById('cc-body').clientWidth) bad.push(label + ': sideways overflow');
         };
-        if (stageOf() !== 'Round 1 of 3 · 60 BPM') bad.push('count-in 1 says "' + stageOf() + '"');
+        const stageTxt = (n, b) => t('games.pw.ladder.stage', { n, total: 3, bpm: b });
+        if (stageOf() !== stageTxt(1, 60)) bad.push('count-in 1 says "' + stageOf() + '"');
         play();
-        if (stageOf() !== 'Round 1 of 3 · 60 BPM') bad.push('play 1 says "' + stageOf() + '"');
+        if (stageOf() !== stageTxt(1, 60)) bad.push('play 1 says "' + stageOf() + '"');
+        const widest = () => cc.changes.forEach((c, k) => { c.result = 'off'; ccChipRefresh(k); });   // every chip graded, with the widest symbol and the longest line
+        fits('round 1 (nothing graded)');
+        widest();
         fits('round 1');
         const lastOne = t('games.cc.lastOne');
         for (let k = 0; k < cc.slots; k++){
@@ -861,15 +865,15 @@ async function walk(base, chromePort, label) {
         document.querySelector('#cc-body [onclick="ccNudgeNext(-5)"]').click();
         cc.changes.forEach(c => { c.result = 'ok'; });
         ccStageEnd(); halt();
-        if (cc.stage !== 1 || Math.round(cc.beatMs) !== 800 || stageOf() !== 'Round 2 of 3 · 75 BPM') bad.push('round 2 is stage ' + cc.stage + ' at ' + Math.round(cc.beatMs) + ' ms, says "' + stageOf() + '"');
-        play(); fits('round 2');
+        if (cc.stage !== 1 || Math.round(cc.beatMs) !== 800 || stageOf() !== stageTxt(2, 75)) bad.push('round 2 is stage ' + cc.stage + ' at ' + Math.round(cc.beatMs) + ' ms, says "' + stageOf() + '"');
+        play(); widest(); fits('round 2');
         cc.changes.forEach(c => { c.result = 'ok'; });
         ccStageEnd(); halt();
-        if (cc.stage !== 2 || Math.round(cc.beatMs) !== 667 || stageOf() !== 'Round 3 of 3 · 90 BPM') bad.push('round 3 is stage ' + cc.stage + ' at ' + Math.round(cc.beatMs) + ' ms, says "' + stageOf() + '"');
+        if (cc.stage !== 2 || Math.round(cc.beatMs) !== 667 || stageOf() !== stageTxt(3, 90)) bad.push('round 3 is stage ' + cc.stage + ' at ' + Math.round(cc.beatMs) + ' ms, says "' + stageOf() + '"');
         play();
         const off = [...document.querySelectorAll('#cc-body [onclick*="ccNudgeNext"]')].map(b => b.disabled);
         if (off.length !== 2 || !off.every(Boolean)) bad.push('round 3: the BPM buttons are not both off (' + off.join(',') + ')');
-        fits('round 3');
+        widest(); fits('round 3');
         cc.changes.forEach(c => { c.result = 'ok'; });
         ccStageEnd(); halt();
         const done = cc.phase === 'done' && cc.changes.length === 21 && document.querySelectorAll('#cc-body .cc-rounds span').length === 3;

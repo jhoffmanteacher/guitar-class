@@ -4141,7 +4141,7 @@ async function renderTeacherReports(){
    for your teacher" label showing the whole time. It stops asking once
    `max` takes are saved (micTakesMeta/count).
 
-   Each take is micTakes/<uid>-<coach|nr>: the metadata on the doc, the
+   Each take is micTakes/<uid>-<coach|nr|pw>: the metadata on the doc, the
    audio (24 kHz 16-bit mono, at most 30 s) in chunks/{i}. Download WAV
    puts the chunks back together into a .wav right here in the browser;
    Download data is the doc as JSON (what was expected and when, what the
@@ -4401,7 +4401,7 @@ async function teacherMicDelete(i){
        VOTE_TOL        the COACH_* constants of the same names, for
                        micEvalWhy (defaults inside it if a runner omits them)
 
-   What one take tells us (micTakes/<uid>-<coach|nr>, see coach.js micRec*):
+   What one take tells us (micTakes/<uid>-<coach|nr|pw>, see coach.js micRec*; a pw take is only listed and downloaded, never measured):
    the RAW mic from the count-in to the end, 24 kHz 16-bit mono, plus every
    expected note (time + verdict the site gave) and every event the site
    heard. Times in the JSON are performance.now() made relative to the

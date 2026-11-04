@@ -72,6 +72,7 @@ wavs.forEach((w, k) => {
   try {
     const { pcm, rate } = readWav(w);
     const d = JSON.parse(fs.readFileSync(j, 'utf8'));
+    if (d.mode === 'pw'){ console.warn(label + ' (' + path.basename(w) + '): Power Chord Switch take — not measured (the evaluator knows Coach and Note Runner notes)'); return; }
     d.sampleRate = rate;
     rows.push(core.micEvalRow(label, d, pcm, deps));
     console.error(label + ' = ' + path.basename(w));

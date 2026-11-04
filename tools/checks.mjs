@@ -11226,10 +11226,14 @@ function checkCoachVerdicts() {
        question comes first and its answer starts the game; the rules accept the take id; the teacher console names the take and does not try to measure it.
        The done screen counts what went right and wrong, and every chip carries a symbol as well as a colour. */
     song.recChecks = 0;
-    run(`globalThis.__saves = []; globalThis.__starts = 0; globalThis.__orig = { micRecStop, micRecSave, micRecStart, micRecShouldAsk };
-      micRecStop = () => ({ n: 1, mode: 'pw' }); micRecSave = (rec, meta) => { __saves.push(meta); }; micRecStart = () => { __starts++; return true; };`);
+    run(`globalThis.__saves = []; globalThis.__starts = 0; globalThis.__orig = { micRecStop, micRecSave, micRecStart, micRecShouldAsk, micRecAbort, micRecWanted };
+      /* The stand-ins keep micRec honest: a stop after coachMicOff (which aborts) finds nothing to save. */
+      micRecStart = (mode) => { __starts++; micRec = { live: true, mode, n: 1 }; return true; };
+      micRecStop = () => { const r = micRec; micRec = null; return r; };
+      micRecAbort = () => { micRec = null; };
+      micRecSave = (rec, meta) => { __saves.push(meta); };`);
     const take = (mode, finish) => {
-      run(`__saves = []; __starts = 0; setLang('en'); currentUser = { uid: 'pw-check' }; games = {}; ccSetup(${JSON.stringify(mode)}); ccPickRate(2); ccPickProg(${mode === 'power' ? SONGS[0].idx : 1}); cc.bpm = 60; ccPrepare(false); ccBeginStage();
+      run(`micRec = null; __saves = []; __starts = 0; setLang('en'); currentUser = { uid: 'pw-check' }; games = {}; ccSetup(${JSON.stringify(mode)}); cc.micOn = true; ccPickRate(2); ccPickProg(${mode === 'power' ? SONGS[0].idx : 1}); cc.bpm = 60; ccPrepare(false); ccBeginStage();
         cc.phase = 'play'; cc.changes.forEach(c => { c.result = 'ok'; }); ${finish}`);
       song.recChecks++;
       return JSON.parse(run('JSON.stringify({ saves: __saves, starts: __starts })'));
@@ -11246,18 +11250,54 @@ function checkCoachVerdicts() {
     if (take('power', 'ccFinish(false);').saves.length !== 0) flag('1ck: a game that was Stopped early was saved (it must be thrown away, as in Note Runner)');
     const cu = take('open', 'ccFinish(true);');
     if (cu.saves.length !== 0 || cu.starts !== 0) flag(`1ck: Change Up started ${cu.starts} captures and saved ${cu.saves.length} takes — it must never record`);
-    run('micRecStop = __orig.micRecStop; micRecSave = __orig.micRecSave; micRecStart = __orig.micRecStart;');
+    /* The red label is on every screen of a recorded take (each screen replaces #cc-body); every round starts on a clean grid (a leftover
+       gridOffset or onset time from round 1 would grade round 2 late); a ladder is always three rising tempos; and a student who said yes is not
+       told "nothing is recorded" on any Power Chord Switch screen (Change Up, which never records, still says it). */
+    run(`micRec = null; setLang('en'); ccSetup('power'); ccPickRate(2); ccPickProg(${SONGS[0].idx}); cc.bpm = 60; ccPrepare(false); ccBeginStage();`);
+    const hasLabel = () => /id="micrec-on"/.test(bodies['cc-body']);
+    const seen = [hasLabel()];
+    run(`cc.phase = 'play'; ccRenderPlay();`); seen.push(hasLabel());
+    run(`cc.gridOffset = 123; cc.lastOnsetT = 5; cc.smoothRms = 9; cc.smoothHf = 9; cc.lastPitchT = 7; cc.lastBeat = 11; cc.changes.forEach(c => { c.result = 'ok'; }); ccStageEnd();`);
+    seen.push(hasLabel());
+    run(`cc.phase = 'play'; ccRenderPlay();`); seen.push(hasLabel());
+    song.recChecks++;
+    if (!seen.every(Boolean)) flag(`1ck: the "Recording this take" label is missing on screen(s) ${seen.map((v, i) => (v ? '' : ['round 1 count-in', 'round 1 play', 'round 2 count-in', 'round 2 play'][i])).filter(Boolean).join(', ')} of a recorded take`);
+    const fresh = run('JSON.stringify([cc.gridOffset, cc.lastOnsetT, cc.smoothRms, cc.smoothHf, cc.lastPitchT, cc.lastBeat])');
+    if (fresh !== JSON.stringify([0, -1e9, 0, 0, 0, -1])) flag(`1ck: round 2 starts with a leftover grid from round 1 (gridOffset, lastOnsetT, smoothRms, smoothHf, lastPitchT, lastBeat = ${fresh})`);
+    const ladders = JSON.parse(run('JSON.stringify(Array.from({ length: 21 }, (_, k) => ccLadderBpms(40 + k * 5)))'));
+    song.recChecks++;
+    ladders.forEach((l, k) => { if (!(l[0] < l[1] && l[1] < l[2]) || l[2] > 140 || l[0] > 40 + k * 5 || l[0] < 40) flag(`1ck: a base of ${40 + k * 5} BPM gives rounds ${l.join('/')} — three rising tempos between 40 and 140 are needed`); });
+    if (JSON.stringify(ladders[0]) !== '[40,55,70]' || JSON.stringify(ladders[4]) !== '[60,75,90]' || JSON.stringify(ladders[18]) !== '[110,125,140]' || JSON.stringify(ladders[20]) !== '[110,125,140]') flag(`1ck: ladder tempos for bases 40/60/130/140 are ${[0, 4, 18, 20].map(i => ladders[i].join('/')).join(' | ')}`);
+    run(`micRecWanted = () => true;`);
+    const foot = (setup, kind) => {
+      run(setup); song.recChecks++;
+      return { html: bodies['cc-body'], flat: text('cc-body'), kind };
+    };
+    const footRec = String(run(`t('coach.footRec')`)).replace(/\s+/g, ' '), footNone = String(run(`t('coach.foot')`)).replace(/\s+/g, ' ');
+    const screens = [
+      foot(`ccSetup('power'); ccPickProg(1);`, 'Power Chord Switch setup'),
+      foot(`ccSetup('power'); cc.phase = 'play'; cc.ladder = false; cc.bpm = 60; cc.rateIdx = 2; cc.bpc = 1; cc.changes = [{ from: 'F5', to: 'G5', result: 'ok' }]; ccRenderDone();`, 'Power Chord Switch done screen')
+    ];
+    for (const sc of screens) if (!/data-rec/.test(sc.html) || !sc.flat.includes(footRec) || sc.flat.includes(footNone)) flag(`1ck: the ${sc.kind} does not tell a student who said yes that takes are saved (data-rec, "${footRec.slice(0, 40)}…")`);
+    const cuScreen = foot(`ccSetup('open');`, 'Change Up setup');
+    if (/data-rec/.test(cuScreen.html) || cuScreen.flat.includes(footRec) || !cuScreen.flat.includes(footNone)) flag('1ck: Change Up never records, so its footer must keep saying nothing is recorded');
+    run(`micRecWanted = __orig.micRecWanted;`);
+    run('micRecStop = __orig.micRecStop; micRecSave = __orig.micRecSave; micRecStart = __orig.micRecStart; micRecAbort = __orig.micRecAbort; micRec = null;');
     /* The question first: with an unanswered consent, Start asks and does not start. */
-    run("micRecShouldAsk = () => true; ccSetup('power'); ccStart();"); song.recChecks++;
+    run("micRecShouldAsk = () => true; ccSetup('power'); ccStart(true);"); song.recChecks++;
     if (!/micRecConsent\(true,'pw'\)/.test(bodies['cc-body']) || run('cc.phase') !== 'setup') flag('1ck: Start with an unanswered consent does not ask first (or started anyway)');
+    if (run('cc.pendingAgain') !== true) flag('1ck: a replay (Again) that has to ask the consent question forgets it was a replay');
     run('micRecShouldAsk = __orig.micRecShouldAsk;');
     const consentBody = jsFunctionBody(readFileSync(join(ROOT, 'coach.js'), 'utf8'), 'micRecConsent'), startSrc = jsFunctionBody(readFileSync(join(ROOT, 'coach.js'), 'utf8'), 'ccStart');
-    if (!consentBody || !/game === 'pw'\) ccStart\(\)/.test(consentBody)) flag("1ck: micRecConsent does not start Power Chord Switch for game 'pw'");
-    if (!startSrc || !/ccIsPower\(\) && micRecShouldAsk\(\)/.test(stripJsComments(startSrc))) flag('1ck: ccStart must ask the consent question for Power Chord Switch only (Change Up never records)');
+    if (!consentBody || !/game === 'pw'\) ccStart\(!!\(cc && cc\.pendingAgain\)\)/.test(consentBody)) flag("1ck: micRecConsent does not start Power Chord Switch for game 'pw' (passing on whether it was a replay)");
+    const startCode = startSrc ? stripJsComments(startSrc) : '';
+    if (!/if \(ccIsPower\(\) && micRecShouldAsk\(\) && ccBody\(\)\)\{/.test(startCode) || (startCode.match(/micRecShouldAsk/g) || []).length !== 1) flag('1ck: ccStart must ask the consent question for Power Chord Switch only, in one place (Change Up never records)');
+    const loopCode = stripJsComments(jsFunctionBody(readFileSync(join(ROOT, 'coach.js'), 'utf8'), 'ccLoop') || '');
+    if (!/if \(micRec && micRec\.live\) cc\.evLog\.push\(\{ t: at - lat, stage: cc\.stage \}\)/.test(loopCode)) flag('1ck: ccLoop no longer logs each strum heard (cc.evLog) while a take is recording');
     const rulesTxt = readFileSync(join(ROOT, 'firestore.rules'), 'utf8');
-    if ((rulesTxt.match(/\(coach\|nr\|pw\)/g) || []).length !== 2) flag("1ck: firestore.rules must accept the take id '-pw' on the take AND its chunks (two matches of (coach|nr|pw)) — publish it in the console before the code writes");
+    if ((rulesTxt.match(/takeId\.matches\(request\.auth\.uid \+ '-\(coach\|nr\|pw\)'\)/g) || []).length !== 2 || /\(coach\|nr\|pw\)[^']/.test(rulesTxt.replace(/\(coach\|nr\|pw\)'\)/g, ''))) flag("1ck: firestore.rules must accept exactly the take id '<uid>-(coach|nr|pw)' on the take AND its chunks (two anchored matches, no wildcard after the id) — publish it in the console before the code writes");
     const evalSrc = jsFunctionBody(readFileSync(join(ROOT, 'teacher.js'), 'utf8'), 'teacherMicEvaluate');
-    if (!evalSrc || !/d\.mode !== 'pw'/.test(evalSrc)) flag('1ck: Evaluate-all in teacher.js no longer skips Power Chord Switch takes (the evaluator only knows Coach and Note Runner)');
+    if (!evalSrc || !/teacherMicTakes\.filter\(d => d\.mode !== 'pw'\)/.test(stripJsComments(evalSrc))) flag('1ck: Evaluate-all in teacher.js no longer skips Power Chord Switch takes (the evaluator only knows Coach and Note Runner)');
     /* The clearer feedback. */
     for (const lang of ['en', 'es']) {
       run(`setLang(${JSON.stringify(lang)}); ccSetup('power'); cc.phase = 'play'; cc.ladder = false; cc.bpm = 60; cc.rateIdx = 2; cc.bpc = 1;
@@ -11291,7 +11331,7 @@ function checkCoachVerdicts() {
     if (pk !== 'ccBest:F5-G5:beat') flag(`1ck: a pair's best-score key changed to "${pk}" (a student's saved bests would be lost)`);
     const pairPlan = JSON.parse(run(`JSON.stringify(ccRoundPlan(CC_POWER_PROGRESSIONS[1], CC_POWER_PROGRESSIONS[1].chords, CC_RATES[1]))`));
     if (pairPlan.slots !== 12 || pairPlan.ladder || pairPlan.rounds !== 1) flag(`1ck: a pair's round changed (${pairPlan.slots} slots at "Every 2 beats", expected 12, one round)`);
-    const SONG_PIN = { recChecks: 12, songs: 2, entries: 16, cardSwitches: 16, hints: 16 * 7 * 2, setups: 16 * 3 * 2, dones: 16 * 2, rounds: 16 * 3, nudges: 16 * 2 };
+    const SONG_PIN = { recChecks: 17, songs: 2, entries: 16, cardSwitches: 16, hints: 16 * 7 * 2, setups: 16 * 3 * 2, dones: 16 * 2, rounds: 16 * 3, nudges: 16 * 2 };
     for (const [k, n] of Object.entries(SONG_PIN)) if (song[k] !== n) flag(`1ck: ${song[k]} ${k}, pinned ${n} — the check went partly blind (or grew: re-pin on purpose)`);
     songCounts = song;
     run(`setLang('en'); cc = null; ccStop();`);
