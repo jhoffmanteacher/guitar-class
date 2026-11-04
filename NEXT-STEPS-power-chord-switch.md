@@ -115,6 +115,23 @@ can list them.
   1cg pins broken in a scratch copy go red, a play session counts and flushes
   the same seconds as before.
 
+## Open finding (Jonathan, 2026-11-04): room noise scores a right chord
+
+Jonathan played with no guitar and the game showed "right". Cause, read in the code
+(`ccLoop`, `ccResolvePend`, `coach.js`): any loudness jump above a very low floor
+(`CHK_ONSET_FLOOR` 0.003, HF 0.0008) is a "strum"; at the default every-beat 60 BPM each
+change's window is +-500 ms, so a noise anywhere lands in one; with fewer than 3 pitch
+readings the change "counts on timing alone" and is graded `ok`. A real low-E strum also
+gives under 3 readings, which is why it is lenient on purpose. The game's own count-in
+beeps are not the cause (grading starts after them). **Jonathan chose to MEASURE before
+changing anything:** the false-hit number in the console's Evaluate-all (a change the site
+graded right where the audio has no strum) on real student takes. Then choose between
+"no readable pitch, no tick" (real low-E strums turn red) and a higher onset floor (soft
+strums missed). Both touch `coach.js` detection: Always Reviewed, run
+`tools/mic-sim/power-switch.mjs` first. Collection needs a real non-teacher account (the
+teacher and the dev bypass never record), and the "stop after" number raised above the
+count (23 of 40 on 2026-11-04; Coach and Note Runner takes count too).
+
 ## Later (not chosen yet)
 
 - **Skipped on purpose (Jonathan, 2026-11-04): watching the big feedback line in a
