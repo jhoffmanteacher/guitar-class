@@ -6984,8 +6984,8 @@ window.CLASS_ACTIVITIES = [
       {
         label:    'Practice — 3 strums',
         label_es: 'Practica — 3 rasgueos',
-        text:    'Strum Down, Down-Up on D5, then stop and wait for the next 1. You\'ve got it when: you play it 4 times in a row and each one starts on 1. Rushing the stop? Count 3, 4 out loud.',
-        text_es: 'Rasguea abajo, abajo-arriba en D5 y luego para y espera el siguiente 1. Lo tienes cuando: lo tocas 4 veces seguidas y cada vez empiezas en el 1. ¿Te adelantas en la pausa? Cuenta 3, 4 en voz alta.',
+        text:    'Strum Down, Down-Up on D5, then stop and wait for the next 1.',
+        text_es: 'Rasguea abajo, abajo-arriba en D5 y luego para y espera el siguiente 1.',
         strum: {
           caption:    'D5 · Down, Down-Up, stop',
           caption_es: 'D5 · abajo, abajo-arriba, para',

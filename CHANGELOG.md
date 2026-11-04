@@ -5,6 +5,10 @@ Notable changes to the Guitar Class site. Newest first.
 For the full session-by-session history (and the reasoning behind each change),
 see `WORKFLOW.md` and the git commit log.
 
+## 2026-11-04 — Strum Pattern in Chunks: step 1 is shorter
+
+- **Step 1 (3 strums) no longer has a "You've got it when" line or the count-out-loud tip.** It says to strum Down, Down-Up on D5, then stop and wait for the next 1.
+
 ## 2026-11-03 — Strum patterns drawn with arrows, and the strum in chunks
 
 - **"Strum Pattern — Down, Down-Up, Up-Down-Up" now draws the pattern instead of a tab.** Each bar shows a down or up arrow on each count (1 + 2 + 3 + 4 +), a dot where your hand moves but misses the strings, and the chord name over the bar. Press Play strum to hear it; the arrow being played lights up.
