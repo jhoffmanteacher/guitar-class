@@ -2269,7 +2269,7 @@ const JOURNEY_TAB_COUNTS = {
   'let-it-be.html': 12,
   'luna.html': 13,
   'seven-nation-army.html': 11,
-  'sweet-child-o-mine.html': 12,
+  'sweet-child-o-mine.html': 13,
   'the-cure.html': 13,
 };
 /* ════════════════════════════════════════════════════════════════════

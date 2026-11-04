@@ -5,6 +5,10 @@ Notable changes to the Guitar Class site. Newest first.
 For the full session-by-session history (and the reasoning behind each change),
 see `WORKFLOW.md` and the git commit log.
 
+## 2026-11-04 — "Sweet Child O' Mine" page: the whole intro riff
+
+- **The Sweet Child Song Journey page now has the whole intro riff in Layer 6.** It is 8 bars, played twice, with eight notes in every bar like the record. Only the first note changes from bar to bar, so it is shown in blue.
+
 ## 2026-11-04 — The weekly practice goal is now 60 minutes
 
 - **Your weekly practice goal is now 60 minutes.** It was 30. A day still counts at most 20 minutes, so you need at least 3 days to reach it.
