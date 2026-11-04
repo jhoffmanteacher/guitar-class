@@ -11660,7 +11660,7 @@ async function checkPwTakeEvaluator() {
    The browser half (strip, recap, toast, My progress, 1366×657, both languages,
    a real <audio>) is tools/pm-e2e.mjs — it needs Chrome, so it is run by hand.
    ════════════════════════════════════════════════════════════════════ */
-const PM_SIM_PIN = 175;
+const PM_SIM_PIN = 184;
 function checkPracticeMinutes(i18nTable) {
   head('1cg. Practice minutes: the engine is run; the rules cap, no heartbeat, wiring and strings are pinned');
   let bad = 0;
@@ -11737,7 +11737,14 @@ function checkPracticeMinutes(i18nTable) {
       if (!/hasOnly\(\['seconds', 'goalSeconds', 'hit'\]\)/.test(weeks) || !/hit is bool/.test(weeks)) fail("minutes weeks rule must be { seconds, goalSeconds, hit } only, hit a bool");
     }
     /* The class rank (2026-11-04): ONE number per student, readable by every signed-in student, writable by its owner only. */
+    /* The block is pinned WHOLE (whitespace and comments aside), like the heartbeats block: pattern checks alone let an extra
+       `allow update: if isSignedIn();`, a `|| true`, or a second `match /minutesBoard/{u}` through (2026-11-04 review). It is
+       the block Jonathan published to the Firebase console, so a change here is a change to what must be re-pasted. */
+    const MB_SHIPPED = "match /minutesBoard/{userId} { allow read: if isSignedIn(); allow create, update: if pmOwner(userId) && request.resource.data.keys().hasOnly(['seconds']) && request.resource.data.seconds is number && request.resource.data.seconds >= 0 && request.resource.data.seconds <= 400 * dailyCapSeconds(); }";
+    const mbMatches = (strip(rules).match(/match\s+\/minutesBoard\b/g) || []).length;
     const board = block('minutesBoard/{userId}');
+    if (mbMatches !== 1) fail(`firestore.rules has ${mbMatches} match blocks for /minutesBoard (exactly one is allowed)`);
+    else if (board && board.replace(/\s+/g, ' ').trim() !== MB_SHIPPED) fail('firestore.rules: the minutesBoard block differs from the one shipped and published. If this is on purpose, change MB_SHIPPED here with it and tell Jonathan to paste the rules again');
     if (!board) fail('firestore.rules: the minutesBoard/{userId} block (the class rank) is missing — practice-minutes.js reads and writes it');
     else {
       if (!/allow read:\s*if isSignedIn\(\)/.test(board)) fail('minutesBoard rule: read must be `if isSignedIn()` (every student reads the class to work out a rank)');

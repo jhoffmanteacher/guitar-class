@@ -44,7 +44,7 @@ function makeWorld(opts = {}) {
   /* sets: every single-document set() on ANY path EXCEPT minutesBoard/{uid}, which goes to
      log.board. The minutes go in one batch, so this stays empty; the heartbeats/{sessionId}
      writer removed 2026-11-04 landed here, and anything but the board landing here fails. */
-  const log = { commits: [], sets: [], fetches: [], board: [] };
+  const log = { commits: [], sets: [], fetches: [], board: [], boardRefused: [] };
 
   class FakeDate extends Date {
     constructor(...a) { if (a.length) super(...a); else super(clock.ms); }
@@ -61,14 +61,25 @@ function makeWorld(opts = {}) {
   const dbCollection = (path) => ({
     doc: (id) => ({
       path: path + '/' + id,
+      /* minutesBoard/{uid}.get(): the page looks at its own doc once, before its first write. */
+      get: () => {
+        if (path !== 'minutesBoard') return Promise.reject(new Error('doc.get is only faked for minutesBoard'));
+        if (net.boardDenied) { log.boardRefused.push({ id, get: true }); return Promise.reject(Object.assign(new Error('denied'), { code: 'permission-denied' })); }
+        (log.boardGets ||= []).push(id);
+        return Promise.resolve({ exists: server.board[id] !== undefined, data: () => server.board[id] });
+      },
       collection: (sub) => dbCollection(path + '/' + id + '/' + sub),
-      set: (data) => {
+      set: (data, o) => {
         if (path === 'minutesBoard') {
-          /* The rules: only { seconds }, a number 0..400 x 1200; net.boardDenied = the rules are not published. */
-          if (net.boardDenied) return Promise.reject(Object.assign(new Error('denied'), { code: 'permission-denied' }));
-          const ok = eq(Object.keys(data), ['seconds']) && typeof data.seconds === 'number' && data.seconds >= 0 && data.seconds <= 400 * 1200;
-          if (!ok) return Promise.reject(Object.assign(new Error('rules'), { code: 'permission-denied' }));
-          log.board.push({ id, data }); server.board[id] = { seconds: data.seconds };
+          /* The rules: the document that results is only { seconds }, a number 0..400 x 1200 (an increment({__inc}) merged
+             onto the stored value, as Firestore does); net.boardDenied = the rules are not published. Every attempt is logged. */
+          (log.boardTries ||= []).push({ id, data, o });
+          if (net.boardDenied) { log.boardRefused.push({ id, data }); return Promise.reject(Object.assign(new Error('denied'), { code: 'permission-denied' })); }
+          const inc = data && data.seconds && typeof data.seconds === 'object' ? data.seconds.__inc : undefined;
+          const result = inc !== undefined ? (server.board[id]?.seconds || 0) + inc : data && data.seconds;
+          const ok = eq(Object.keys(data || {}), ['seconds']) && (inc === undefined || (o && o.merge === true)) && typeof result === 'number' && result >= 0 && result <= 400 * 1200;
+          if (!ok) { log.boardRefused.push({ id, data }); return Promise.reject(Object.assign(new Error('rules'), { code: 'permission-denied' })); }
+          log.board.push({ id, data }); server.board[id] = { seconds: result };
           return Promise.resolve();
         }
         log.sets.push({ path, id, data }); return Promise.resolve();
@@ -1241,8 +1252,9 @@ console.log('13. class rank');
   await w.run(130);
   await w.PM.flush(); await w.settle();
   await w.run(130);
-  check('after a flush the board doc exists and is exactly { seconds: <number> }', w.log.board.length >= 1 && w.log.board.every((b) => eq(Object.keys(b.data), ['seconds']) && typeof b.data.seconds === 'number' && b.id === 'uid-A'), JSON.stringify(w.log.board));
-  check('…its number is the sum of the weeks docs the server holds (the confirmed seconds), not the queued ones', boardOf(w) && boardOf(w).seconds > 0 && boardOf(w).seconds <= weekSum(w), JSON.stringify(boardOf(w)) + ' vs weeks ' + weekSum(w));
+  check('the board doc exists; every write is { seconds } only on uid-A: the first creates it at an absolute number (the server\'s sum), later ones are increments', w.log.board.length >= 2 && eq(Object.keys(w.log.board[0].data), ['seconds']) && typeof w.log.board[0].data.seconds === 'number'
+    && w.log.board.slice(1).every((b) => eq(Object.keys(b.data), ['seconds']) && typeof b.data.seconds === 'object' && b.data.seconds.__inc > 0) && w.log.board.every((b) => b.id === 'uid-A'), JSON.stringify(w.log.board));
+  check('…after the last write the board holds exactly the weeks docs\' sum (the confirmed seconds)', boardOf(w) && boardOf(w).seconds > 0 && boardOf(w).seconds === weekSum(w), JSON.stringify(boardOf(w)) + ' vs weeks ' + weekSum(w));
   const n0 = w.log.board.length;
   await w.run(300);
   check('idle for 5 minutes with nothing new to confirm: no further board writes', w.log.board.length === n0, n0 + ' → ' + w.log.board.length);
@@ -1253,6 +1265,7 @@ console.log('13. class rank');
   wl.PM._state();
   await wl.run(1300, (i) => { if (i % 30 === 0) wl.input('pointerdown'); });
   check('a 20-minute day (≈ 20 flushes) writes the board at most once per 2 minutes (≤ 11 writes)', wl.log.board.length >= 2 && wl.log.board.length <= 11, wl.log.board.length + ' writes, ' + wl.log.commits.length + ' commits');
+  check('…and with seconds still queued the board never runs ahead of what the server confirmed (≤ the weeks docs\' sum)', boardOf(wl).seconds <= weekSum(wl) && boardOf(wl).seconds > 0, boardOf(wl).seconds + ' vs ' + weekSum(wl));
 
   // The rules are not published: the minutes still count and land in full; the board retries at most every 5 minutes.
   const wd = makeWorld({ net: { online: true, denied: false, boardDenied: true } });
@@ -1260,9 +1273,42 @@ console.log('13. class rank');
   await wd.run(1300, (i) => { if (i % 30 === 0) wd.input('pointerdown'); });
   await wd.PM.flush(); await wd.settle();
   check('with the board rules unpublished the minutes still all land (server = counted)', weekSum(wd) === sec(wd) && weekSum(wd) >= 1190, weekSum(wd) + ' vs ' + sec(wd));
-  check('…and the refused board write is retried only every 5 minutes (not on every flush); nothing is stored', wd.log.board.length === 0 && Object.keys(wd.server.board).length === 0);
+  check('…the refused board attempts are retried only every 5 minutes (1 to 5 in a 22-minute day, not one per flush); nothing is stored', wd.log.board.length === 0 && Object.keys(wd.server.board).length === 0 && wd.log.boardRefused.length >= 1 && wd.log.boardRefused.length <= 5, wd.log.boardRefused.length + ' refused');
   const wdState = wd.PM._state();
-  check('…and the refusal does not mark the number as sent', wdState.boardSent === -1 && wdState.boardRetryAt > 0);
+  check('…and the refusal does not mark the board ready, and what is owed is kept', wdState.boardReady === false && wdState.boardRetryAt > 0 && wdState.boardOwed > 0, JSON.stringify({ ready: wdState.boardReady, owed: wdState.boardOwed }));
+
+  // Two pages of ONE student (the main tab and a Journey tab): the board ADDS, it is never "whichever page wrote last".
+  const sh2 = shared();
+  const pMain = makeWorld(sh2), pJourney = makeWorld(sh2);
+  pMain.PM._state(); pMain.input('pointerdown'); await pMain.run(3);                         // the main tab has loaded and created the board doc
+  pJourney.PM._state(); pJourney.input('pointerdown'); await pJourney.run(130); await pJourney.PM.flush(); await pJourney.settle();   // a Journey tab works 2 minutes
+  pMain.input('pointerdown'); await pMain.run(100); await pMain.PM.flush(); await pMain.settle();                                   // then the main tab works 100 s more
+  await pMain.run(130); await pJourney.run(130); await pMain.run(130);                       // the main tab's session ended in there; its last write waits out the 2-minute spacing
+  const both = weekSum(pJourney);
+  check('two pages of one student: the board holds both pages\' minutes, exactly the weeks docs\' sum (not the last page\'s own total)', both >= 200 && sh2.server.board['uid-A'] && sh2.server.board['uid-A'].seconds === both, 'board ' + JSON.stringify(sh2.server.board['uid-A']) + ' vs weeks ' + both);
+
+  // The first write of a page looks at the doc. A student who already has minutes (from before the board existed) and no doc:
+  // the doc is CREATED at everything the server has confirmed, history included, then grows with the minutes.
+  const wfw0 = makeWorld({ server: { days: {}, weeks: { '2026-W46': { seconds: 3000, goalSeconds: 3600, hit: false } }, board: {} } });
+  wfw0.PM._state(); wfw0.input('pointerdown'); await wfw0.run(130); await wfw0.PM.flush(); await wfw0.settle(); await wfw0.run(130);
+  check('a student with 3000 s of history and no board doc: the doc is created at the full 3000 s, then grows (= the weeks docs\' sum)', weekSum(wfw0) >= 3100 && boardOf(wfw0).seconds === weekSum(wfw0) && typeof wfw0.log.board[0].data.seconds === 'number' && wfw0.log.board[0].data.seconds === 3000, JSON.stringify(boardOf(wfw0)) + ' vs ' + weekSum(wfw0) + '; first write ' + JSON.stringify(wfw0.log.board[0] && wfw0.log.board[0].data));
+  // A doc that exists is never overwritten by a page, only added to (whatever else wrote it, another device included, stays).
+  const wfw1 = makeWorld({ server: { days: {}, weeks: { '2026-W46': { seconds: 3000, goalSeconds: 3600, hit: false } }, board: { 'uid-A': { seconds: 500 } } } });
+  wfw1.PM._state(); wfw1.input('pointerdown'); await wfw1.run(130); await wfw1.PM.flush(); await wfw1.settle(); await wfw1.run(130);
+  const added = weekSum(wfw1) - 3000;
+  check('an existing board doc (500 s) is only ever added to: 500 + this page\'s confirmed seconds, never replaced by this page\'s total', added >= 100 && boardOf(wfw1).seconds === 500 + added && wfw1.log.board.every((x) => typeof x.data.seconds === 'object' && x.data.seconds.__inc > 0), JSON.stringify(boardOf(wfw1)) + ' added ' + added + '; writes ' + JSON.stringify(wfw1.log.board.map((x) => x.data.seconds)));
+  check('…and the page looks at its own doc exactly once, before its first write', (wfw1.log.boardGets || []).length === 1 && wfw1.log.boardGets[0] === 'uid-A' && (wfw0.log.boardGets || []).length === 1, JSON.stringify(wfw1.log.boardGets) + ' ' + JSON.stringify(wfw0.log.boardGets));
+
+  // A page whose load FAILED does not know the real total: its flushes publish nothing.
+  const wnl = makeWorld({ net: { online: true, denied: false, denyReads: true } });
+  wnl.PM._state(); wnl.input('pointerdown'); await wnl.run(130); await wnl.PM.flush(); await wnl.settle();
+  check('a page whose load was refused but whose minutes still landed writes nothing to the board (it does not know the total)', weekSum(wnl) > 0 && !(wnl.log.boardTries || []).length && !(wnl.log.boardGets || []).length, weekSum(wnl) + ' s landed, ' + (wnl.log.boardTries || []).length + ' board tries');
+
+  // The teacher's own account (signed in on a normal page, or on a projected Journey page) is never on the board.
+  const wte = makeWorld({ uid: 'uid-T', server: { days: {}, weeks: {}, board: { 'uid-B': { seconds: 300 } } } });
+  wte.user.email = 'teacher@example.org'; vm.runInContext("var TEACHER_EMAIL = 'teacher@example.org';", wte.ctx);
+  wte.PM._state(); wte.input('pointerdown'); await wte.run(130); await wte.PM.flush(); await wte.settle(); await wte.run(130); await wte.PM._loadBoard();
+  check('the teacher\'s account counts its minutes but writes nothing to the board and gets no rank', weekSum(wte) > 0 && !(wte.log.boardTries || []).length && wte.PM._rank() === null, weekSum(wte) + ' s, ' + (wte.log.boardTries || []).length + ' tries, rank ' + JSON.stringify(wte.PM._rank()));
 
   // The rank: 1 + the number of OTHER students with strictly more seconds; total counts me; my own doc is ignored.
   const sv = () => ({ days: {}, weeks: {}, board: { 'uid-B': { seconds: 100 }, 'uid-C': { seconds: 300 }, 'uid-D': { seconds: 600 }, 'uid-E': { seconds: 5000 }, 'uid-A': { seconds: 99999 } } });
@@ -1282,6 +1328,10 @@ console.log('13. class rank');
   wt.PM._state().board = null; wt.store['pm:b:uid-A'] = undefined; delete wt.store['pm:b:uid-A'];
   await wt.PM._loadBoard();
   check('a tie shares the rank (two others with exactly my seconds: I am 1st of 3, not 3rd)', wt.PM._rank() && wt.PM._rank().n === 1 && wt.PM._rank().total === 3, JSON.stringify(wt.PM._rank()));
+  // The tie is by the whole minutes the screen shows: 179 s and 120 s both read "2 min" (a tie), 180 s reads "3 min" (above).
+  const wm = makeWorld({ server: { days: {}, weeks: {}, board: { 'uid-B': { seconds: 179 }, 'uid-C': { seconds: 180 } } } });
+  wm.PM._state(); wm.input('pointerdown'); await wm.run(130); await wm.PM.flush(); await wm.settle(); await wm.PM._loadBoard();
+  check('179 s and 180 s against my 120 s: the 179 s student reads "2 min" like me (tie), the 180 s one is ahead: I am 2nd of 3', Math.floor(sec(wm) / 60) === 2 && wm.PM._rank() && wm.PM._rank().n === 2 && wm.PM._rank().total === 3, JSON.stringify(wm.PM._rank()) + ' mine ' + sec(wm));
   const wz = makeWorld({ server: sv() });
   wz.PM._state();
   await wz.PM.load(); await wz.PM._loadBoard();
@@ -1291,7 +1341,7 @@ console.log('13. class rank');
   const bn = await wn.PM._loadBoard();
   check('a board that cannot be read (rules unpublished): no rank, nothing thrown', bn === null && wn.PM._rank() === null);
 
-  // The board is read once, then kept 20 minutes (memory and this student's localStorage key), then read again.
+  // The board is read once, then kept 3 hours (memory and this student's localStorage key), then read again.
   const wc = makeWorld({ server: sv() });
   wc.PM._state();
   await wc.PM._loadBoard(); await wc.PM._loadBoard(); await wc.PM._loadBoard();
@@ -1300,10 +1350,13 @@ console.log('13. class rank');
   const wc2 = makeWorld({ server: sv(), store: wc.store, clock: wc.clock });
   wc2.PM._state();
   await wc2.PM._loadBoard();
-  check('a new page of the same student inside 20 minutes reuses the stored copy (no read)', !wc2.net.boardReads, 'reads ' + wc2.net.boardReads);
-  wc.clock.ms += 21 * 60 * 1000; wc.clock.perf += 21 * 60 * 1000;
+  check('a new page of the same student inside 3 hours reuses the stored copy (no read)', !wc2.net.boardReads, 'reads ' + wc2.net.boardReads);
+  wc.clock.ms += 170 * 60 * 1000; wc.clock.perf += 170 * 60 * 1000;
   await wc.PM._loadBoard();
-  check('…and 21 minutes later reads the class again', wc.net.boardReads === 2, 'reads ' + wc.net.boardReads);
+  check('…still the same copy 170 minutes later (a whole class period; a read is one document per student)', wc.net.boardReads === 1, 'reads ' + wc.net.boardReads);
+  wc.clock.ms += 11 * 60 * 1000; wc.clock.perf += 11 * 60 * 1000;
+  await wc.PM._loadBoard();
+  check('…and 181 minutes later reads the class again', wc.net.boardReads === 2, 'reads ' + wc.net.boardReads);
   const wo = makeWorld({ uid: 'uid-Z', server: sv(), store: wc.store, clock: wc.clock });
   wo.PM._state();
   await wo.PM._loadBoard();

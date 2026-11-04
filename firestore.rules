@@ -354,13 +354,19 @@ service cloud.firestore {
        seconds, so My progress can say "N/total". Every signed-in student
        reads the whole collection (that is how a rank is worked out); only
        that uid writes its own doc, with that one field, a number from 0 to
-       400 days of the daily cap. No delete. What it exposes: an opaque uid
-       and a number — no name, no period, and a student cannot read
-       progress/{uid} to turn a uid into a person. The teacher reads it
-       like any signed-in user.
-       HONEST LIMIT: a student at DevTools can write any number up to the
-       cap for themselves and so claim first place; nothing reads this for
-       a grade, and the minutes themselves are bounded by the rules above.
+       400 days of the daily cap. No delete. What it exposes: a uid and a
+       number — no name and no period in this doc, and a student cannot read
+       progress/{uid} to turn a uid into a person. NOT FULLY ANONYMOUS: the
+       live quiz keeps each player's name under the same uid in
+       liveQuiz/current.scores, which every signed-in student reads, so a
+       student who looks can match a quiz name to a board number (accepted
+       by Jonathan, 2026-11-04). The teacher reads it like any signed-in user.
+       HONEST LIMITS: a student at DevTools can write any number up to the
+       cap for themselves and so claim first place; any Google account that
+       signs in once adds 1 to the total (no domain rule, Jonathan's call);
+       nothing reads this for a grade, and the minutes themselves are
+       bounded by the rules above. (Comment wording only changed after the
+       first publish: no re-paste is needed for it.)
        ⚠ Must be published BEFORE (or with) the site code that writes it. */
     match /minutesBoard/{userId} {
       allow read: if isSignedIn();

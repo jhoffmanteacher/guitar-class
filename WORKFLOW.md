@@ -1210,13 +1210,25 @@
       weeks docs); every signed-in student reads it, only the owner writes it, no delete,
       cap `400 * dailyCapSeconds()`. **Its rules block must be published BEFORE the code
       goes live** (until then the write and read are refused quietly and the tile is just
-      absent). Engine: `publishBoard()` (after a load and after a confirmed flush, at most
-      once per 2 min, only when the number changed, one trailing timer so the end of a
-      session is not left out) and `loadBoard()` / `rankInfo()` (reads the whole
-      collection, kept 20 min in memory and in `pm:b:<uid>`; rank = 1 + others with
-      strictly more; under 60 s = no number). Costs one read per student per refresh
-      (about 150 reads); the Spark limit is 50,000 reads a day. pm-sim section 13 (+21).
-      HONEST LIMIT: a student at DevTools can claim any number up to the cap.
+      absent). Engine: `publishBoard()` (a page only ever ADDS: `increment(owed)` merged,
+      where `owed` = seconds the server confirmed since its last write; the first write of
+      a page looks at the doc and CREATES it at the whole confirmed sum, history included,
+      if it is missing; at most once per 2 min, one trailing timer so the end of a session
+      is not left out; never for the teacher's account) and `loadBoard()` / `rankInfo()`
+      (reads the whole collection, kept 3 hours in memory and in `pm:b:<uid>`; rank = 1 +
+      others with more WHOLE minutes; under 60 s = no number). A plain "write my total"
+      was tried first and the review showed it loses minutes when a Journey tab and the
+      main tab both work. Costs one read per student per refresh (about 150 reads, at
+      most one per 3 hours); the Spark limit is 50,000 reads a day, shared with the rest
+      of the site: if the class grows or the project is on Spark, replace the full read
+      with a count query. pm-sim section 13. Honest limits (also in the engine header and
+      the rules): a student at DevTools can claim any number up to the cap; any Google
+      account that signs in once adds 1 to the total (Jonathan chose no domain rule); the
+      live quiz keeps player NAMES under the same uid in `liveQuiz/current.scores`, so a
+      student who looks can match a name to a board number (Jonathan accepted this,
+      2026-11-04); a page that closes within 2 minutes of its last confirmed seconds
+      leaves them off the board; pm-e2e's fake `minutes` collection has a duplicate `doc`
+      key (since 70ef823) so the e2e never runs the board WRITE, only the read and the tile.
       *Open item, Jonathan's call: remove the heartbeat.* "N playing" was
       dropped from the screen, but the engine still writes a `heartbeats/{sessionId}`
       record (`{ period, lastSeen }`) about every 30 s while audio plays, and nothing reads

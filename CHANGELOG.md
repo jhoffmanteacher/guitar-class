@@ -12,9 +12,9 @@ see `WORKFLOW.md` and the git commit log.
 ## 2026-11-04 — Your class rank is on My progress
 
 - **My progress now shows your rank in the class**, like "4/142". It is your place out of all students, by total practice minutes. 1/142 means the most minutes.
-- **If two students have the same minutes, they share the same place.**
+- **If two students show the same minutes, they share the same place.**
 - **You need 1 minute of practice to get a place.** Until then the card says so.
-- **Your place can be up to 20 minutes behind.** It updates when you open My progress again later.
+- **Places update every few hours.** A classmate's newest minutes can take a while to show.
 
 ## 2026-11-04 — The weekly practice goal is now 60 minutes
 

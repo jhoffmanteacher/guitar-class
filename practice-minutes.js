@@ -86,16 +86,22 @@
    pm-sim sections 6 and 8 fail if a heartbeat or a live count comes back.
 
    CLASS RANK (2026-11-04, Jonathan: "a ranking for students ... N/total"). My progress shows
-  "N/total": N = 1 + how many students have more all-time minutes, total = how many students
-  have a board doc. minutesBoard/{uid} holds ONE number, the student's all-time seconds the
-  server has confirmed (the sum of their weeks docs) — no name, no period; a uid is opaque and
-  a student cannot read progress/{uid} to map one back. The student's own page writes it after
-  a load and after a confirmed flush, at most once per BOARD_MS, and only when the number
-  changed; every signed-in student may read the collection (that is the whole point), nobody
-  but the owner writes it, nobody deletes. It is a decoration like the rest of this file: a
-  failed write or read changes nothing about counting, and the rank tile simply stays away.
-  HONEST LIMIT: a student at DevTools can write any number up to the rules' cap for themselves.
-  Reads cost one document per student, so the board is kept 20 minutes (localStorage) per student.
+   "N/total": N = 1 + how many students have more whole minutes all time, total = how many students
+   have a board doc. minutesBoard/{uid} holds ONE number, the student's all-time seconds the server
+   has confirmed: no name, no period. A uid is opaque here, BUT NOT FULLY ANONYMOUS: the live quiz
+   keeps each player's name under the same uid in liveQuiz/current.scores, readable by every signed-in
+   student, so a student who looks can match a quiz name to a board number (accepted by Jonathan,
+   2026-11-04; the tile itself shows only your own place). The student's own page writes it (see
+   publishBoard: created at the server's sum, then increments only), at most once per BOARD_MS; every
+   signed-in student may read the collection (that is the whole point), nobody but the owner writes it,
+   nobody deletes. The teacher's account is never written or ranked. It is a decoration like the rest
+   of this file: a failed write or read changes nothing about counting, and the rank tile stays away.
+   HONEST LIMITS: a student at DevTools can write any number up to the rules' cap for themselves; any
+   Google account that signs in once adds 1 to the total (no domain rule, Jonathan's call); a page
+   that closes within 2 minutes of its last confirmed seconds leaves them off the board (nothing adds
+   them later, so the board can run a little behind the minutes); two pages that both create a missing
+   doc in the same instant can undercount once. Reads cost one document per student, so the board is
+   kept 3 hours (memory and localStorage) per student.
 
   EVERYTHING A STUDENT SEES is behind PRACTICE_MINUTES_CONFIG.uiOn and lives
    in the second half of this file (strip, recap, toast, My progress). The first
@@ -230,7 +236,7 @@
     newestGen[uid] = ++stateGen;
     return { uid: uid, gen: stateGen, days: {}, weeks: {}, pend: {}, inflight: null, flushP: null, frac: 0, loaded: false, loading: null, flushing: false,
              loadRetryAt: 0, toastWeek: '', pendingToast: false, lastRecapAt: 0,
-             boardSent: -1, boardAt: 0, boardRetryAt: 0, boardTimer: 0, board: null, boardLoading: null };
+             boardReady: false, boardOwed: 0, boardBusy: false, boardAt: 0, boardRetryAt: 0, boardTimer: 0, board: null, boardLoading: null };
   }
   function ls(k, v){
     try {
@@ -638,7 +644,10 @@
   function applyConfirmed(ops){
     ops.forEach(function(o){
       if(o.kind === 'day') S.days[o.id] = (S.days[o.id] || 0) + o.inc;
-      else S.weeks[o.id] = { seconds: ((S.weeks[o.id] && S.weeks[o.id].seconds) || 0) + o.inc, goalSeconds: o.goalSeconds, hit: o.hit || !!(S.weeks[o.id] && S.weeks[o.id].hit) };
+      else {
+        S.weeks[o.id] = { seconds: ((S.weeks[o.id] && S.weeks[o.id].seconds) || 0) + o.inc, goalSeconds: o.goalSeconds, hit: o.hit || !!(S.weeks[o.id] && S.weeks[o.id].hit) };
+        S.boardOwed += o.inc;          // the class board is owed these seconds (see publishBoard)
+      }
     });
   }
   function takePending(){
@@ -743,36 +752,64 @@
   }
 
   /* ── CLASS RANK (see the header): publish my number, read everyone's ── */
-  var BOARD_MS = 120000, BOARD_KEEP_MS = 1200000;
-  /* All-time seconds the SERVER has confirmed: the sum of the weeks docs (queued seconds are not in it). */
+  var BOARD_MS = 120000, BOARD_KEEP_MS = 10800000;
+  /* All-time seconds the SERVER has confirmed, as THIS page knows them: the sum of its weeks docs. Right straight after a
+     load; after that another page of the same student (a Journey tab) can have added seconds this page never saw. */
   function confirmedSeconds(st){
     var t = 0;
     Object.keys(st.weeks).forEach(function(w){ t += st.weeks[w].seconds || 0; });
     return t;
   }
-  /* One small write, only when the number changed, at most once per BOARD_MS. A refusal (the
-     rules not published yet) backs off like the minutes writes do; nothing else is affected. */
+  /* The teacher's own account is never on the board (a Journey page projected in class would otherwise rank first). */
+  function isTeacherUser(){
+    var u = hostUser();
+    return !!(u && typeof TEACHER_EMAIL !== 'undefined' && u.email === TEACHER_EMAIL);
+  }
+  /* A page only ever ADDS to the board: increment(seconds the server confirmed since this page's last write), merged
+     into the student's one doc. Two pages of one student (the main tab and a Journey tab) therefore add up; with a plain
+     "write my total" the last page to write would replace the other's minutes with its own copy of the total.
+     The one exception is the very first write of a page, which looks at the doc: if it does not exist yet it is CREATED
+     at everything the server has confirmed (the minutes from before the board existed too); if it exists the page just adds.
+     At most one write in flight and one per BOARD_MS; a trailing timer (dropped with the state) writes what a throttled
+     call could not, so the end of a session is not left out. A refusal (the rules not published yet) backs off like the
+     minutes writes do and keeps what is owed; nothing else is affected. */
   function publishBoard(st){
-    if(!st || S !== st || !st.loaded) return;
-    var n = confirmedSeconds(st);
-    if(n === st.boardSent || Date.now() < st.boardRetryAt) return;
-    var wait = BOARD_MS - (Date.now() - st.boardAt);
+    if(!st || S !== st || !st.loaded || isTeacherUser()) return;
+    if(st.boardReady && !(st.boardOwed > 0)) return;
+    if(Date.now() < st.boardRetryAt) return;
+    var wait = st.boardBusy ? BOARD_MS : BOARD_MS - (Date.now() - st.boardAt);
     if(wait > 0){
-      /* Too soon after the last write: try once more when the wait is over, so the end of a session is not left unpublished.
-         One timer at most; it fires once and is dropped with the state (S !== st). */
       if(!st.boardTimer && typeof setTimeout !== 'undefined') st.boardTimer = setTimeout(function(){ st.boardTimer = 0; publishBoard(st); }, wait + 50);
       return;
     }
     st.boardAt = Date.now();
-    dbP().then(function(db){ return db.collection('minutesBoard').doc(st.uid).set({ seconds: n }); }).then(function(){
-      st.boardSent = n;
+    st.boardBusy = true;
+    var sent = 0;
+    dbP().then(function(db){
+      var ref = db.collection('minutesBoard').doc(st.uid);
+      var add = function(){
+        sent = st.boardOwed;
+        return sent > 0 ? ref.set({ seconds: FV().increment(sent) }, { merge: true }) : null;
+      };
+      if(st.boardReady) return add();
+      return ref.get().then(function(snap){
+        if(snap.exists) return add();
+        sent = st.boardOwed;
+        return ref.set({ seconds: confirmedSeconds(st) });
+      }).then(function(){ st.boardReady = true; });
+    }).then(function(){
+      st.boardBusy = false;
+      st.boardOwed = Math.max(0, st.boardOwed - sent);
+      if(st.boardOwed > 0) publishBoard(st);      // more was confirmed while this write was out: the timer takes it
     }, function(err){
+      st.boardBusy = false;
       st.boardRetryAt = Date.now() + (err && err.code === 'permission-denied' ? DENIED_BACKOFF_MS : LOAD_RETRY_MS);
     });
   }
   /* Everyone else's seconds (my own doc is left out: my live total is used instead). Kept in
-     memory for BOARD_KEEP_MS and in localStorage under this student's id, so reopening My
-     progress does not read the whole class again. Resolves to the cache, or null if unreadable. */
+     memory for BOARD_KEEP_MS (3 hours: a read is one document per student) and in localStorage
+     under this student's id, so reopening My progress does not read the whole class again.
+     Resolves to the cache, or null if unreadable. */
   function loadBoard(){
     var st = S;
     if(!st) return Promise.resolve(null);
@@ -792,14 +829,15 @@
     return st.boardLoading;
   }
   /* N/total for the student on screen, or null while the board is not known. total counts me.
-     Ties share a rank (1 + the number who have MORE). Under a minute of practice there is no
-     rank yet: n is null, and the tile says so instead of "1/140" for every student on day one. */
+     The same whole minutes the screen shows decide a tie: two students who both read "12 min" share a
+     place (1 + the number with MORE whole minutes). Under a minute of practice there is no rank yet: n is
+     null, and the tile says so instead of "1/140" for every student on day one. */
   function rankInfo(){
     var b = S && S.loaded && S.board;
-    if(!b) return null;
-    var mine = allTimeSeconds(), higher = 0;
-    b.others.forEach(function(s){ if(s > mine) higher++; });
-    return { n: mine < 60 ? null : higher + 1, total: b.others.length + 1 };
+    if(!b || isTeacherUser()) return null;
+    var all = allTimeSeconds(), mine = Math.floor(all / 60), higher = 0;
+    b.others.forEach(function(s){ if(Math.floor(s / 60) > mine) higher++; });
+    return { n: all < 60 ? null : higher + 1, total: b.others.length + 1 };
   }
 
   /* An ID token kept fresh for the unload write (getIdToken is async, and
