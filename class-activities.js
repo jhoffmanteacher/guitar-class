@@ -6975,23 +6975,24 @@ window.CLASS_ACTIVITIES = [
      chunk doesn't play yet is dots — the hand swings and misses — not a
      '-' stop (Jonathan, 2026-11-04, after an evaluation: stopping the hand
      trained the opposite of the pattern). Step 1 has no got-it line on
-     purpose (Jonathan, a52d087). */
+     purpose (Jonathan, a52d087). Muted strings or D5 is the student's
+     choice (Jonathan, 2026-11-04: "provide choice"); Play strum sounds D5. */
   {
     id:    'ca-47',
     view:  'focus',   // one step at a time — see VIEW above
     title:    'Strum Pattern in Chunks',
     title_es: 'Patrón de rasgueo por partes',
-    intro:    'Learn Down, Down-Up, Up-Down-Up a few strums at a time. Your hand never stops; each step adds one strum.',
-    intro_es: 'Aprende abajo, abajo-arriba, arriba-abajo-arriba pocos rasgueos a la vez. Tu mano nunca se detiene; cada paso agrega un rasgueo.',
+    intro:    'Learn Down, Down-Up, Up-Down-Up a few strums at a time, on muted strings or on D5. Your hand never stops; each step adds one strum.',
+    intro_es: 'Aprende abajo, abajo-arriba, arriba-abajo-arriba pocos rasgueos a la vez, con las cuerdas apagadas o en D5. Tu mano nunca se detiene; cada paso agrega un rasgueo.',
     steps: [
       {
         label:    'Practice — 3 strums',
         label_es: 'Practica — 3 rasgueos',
-        text:    'Strum Down, Down-Up on D5. Then keep your hand moving down and up, but miss the strings until the next 1.',
-        text_es: 'Rasguea abajo, abajo-arriba en D5. Luego sigue moviendo la mano hacia abajo y hacia arriba, pero sin tocar las cuerdas hasta el siguiente 1.',
+        text:    'Pick one: rest your fretting hand lightly on all six strings so they don\'t ring, or hold D5. Strum Down, Down-Up. Then keep your hand moving down and up, but miss the strings until the next 1.',
+        text_es: 'Elige uno: apoya la mano de trastear suavemente sobre las seis cuerdas para que no suenen, o toca D5. Rasguea abajo, abajo-arriba. Luego sigue moviendo la mano hacia abajo y hacia arriba, pero sin tocar las cuerdas hasta el siguiente 1.',
         strum: {
-          caption:    'D5 · 3 strums, then swing',
-          caption_es: 'D5 · 3 rasgueos, luego mueve la mano',
+          caption:    '3 strums, then swing',
+          caption_es: '3 rasgueos, luego mueve la mano',
           pattern: 'D.DU....',
           chords: { D5: { frets: [['A', 5], ['D', 7], ['G', 7]], midi: [50, 57, 62] } },
           bars: ['D5', 'D5'],
@@ -7003,8 +7004,8 @@ window.CLASS_ACTIVITIES = [
         text:    'Add an up on the + after 3. Your hand moves down on 3 but misses the strings. You\'ve got it when: you play it 4 times in a row and your hand never stops. Hitting the strings on 3? Move your hand a little farther from the strings.',
         text_es: 'Agrega un arriba en el + después del 3. Tu mano baja en el 3 pero no toca las cuerdas. Lo tienes cuando: lo tocas 4 veces seguidas y tu mano nunca se detiene. ¿Tocas las cuerdas en el 3? Aleja un poco la mano de las cuerdas.',
         strum: {
-          caption:    'D5 · 4 strums, then swing',
-          caption_es: 'D5 · 4 rasgueos, luego mueve la mano',
+          caption:    '4 strums, then swing',
+          caption_es: '4 rasgueos, luego mueve la mano',
           pattern: 'D.DU.U..',
           chords: { D5: { frets: [['A', 5], ['D', 7], ['G', 7]], midi: [50, 57, 62] } },
           bars: ['D5', 'D5'],
@@ -7016,8 +7017,8 @@ window.CLASS_ACTIVITIES = [
         text:    'Add a down on 4. You\'ve got it when: you play it 4 times in a row and your hand never stops. Late on the 1? Lower the BPM by 10.',
         text_es: 'Agrega un abajo en el 4. Lo tienes cuando: lo tocas 4 veces seguidas y tu mano nunca se detiene. ¿Llegas tarde al 1? Baja el BPM 10.',
         strum: {
-          caption:    'D5 · 5 strums, then swing',
-          caption_es: 'D5 · 5 rasgueos, luego mueve la mano',
+          caption:    '5 strums, then swing',
+          caption_es: '5 rasgueos, luego mueve la mano',
           pattern: 'D.DU.UD.',
           chords: { D5: { frets: [['A', 5], ['D', 7], ['G', 7]], midi: [50, 57, 62] } },
           bars: ['D5', 'D5'],
@@ -7029,8 +7030,8 @@ window.CLASS_ACTIVITIES = [
         text:    'Add the last up. Your hand moves the same way as before; now it hits the strings on every arrow. You\'ve got it when: you play it 8 times in a row without stopping. Then open <a href="#class-activities/ca-46">Strum Pattern — Down, Down-Up, Up-Down-Up</a>, press Got it on steps 1 and 2, and start step 3.',
         text_es: 'Agrega el último arriba. Tu mano se mueve igual que antes; ahora toca las cuerdas en cada flecha. Lo tienes cuando: lo tocas 8 veces seguidas sin detenerte. Luego abre <a href="#class-activities/ca-46">Patrón de rasgueo — abajo, abajo-arriba, arriba-abajo-arriba</a>, presiona «Lo tengo» en los pasos 1 y 2 y empieza el paso 3.',
         strum: {
-          caption:    'D5 · the whole pattern',
-          caption_es: 'D5 · el patrón completo',
+          caption:    'The whole pattern',
+          caption_es: 'El patrón completo',
           pattern: 'D.DU.UDU',
           chords: { D5: { frets: [['A', 5], ['D', 7], ['G', 7]], midi: [50, 57, 62] } },
           bars: ['D5', 'D5'],

@@ -7,6 +7,7 @@ see `WORKFLOW.md` and the git commit log.
 
 ## 2026-11-04 — Strum Pattern in Chunks: your hand never stops
 
+- **Play the chunks on muted strings or on D5 — you choose.** Muted: rest your fretting hand lightly on all six strings so they don't ring. Play strum still plays it on D5.
 - **In "Strum Pattern in Chunks" your hand keeps moving the whole time.** Each step plays a few strums, and for the rest of the bar your hand keeps swinging down and up but misses the strings (the dots). Each step adds one strum until the whole pattern is there.
 - **The last step links back to "Strum Pattern — Down, Down-Up, Up-Down-Up".** Press Got it on its steps 1 and 2, then start step 3.
 
