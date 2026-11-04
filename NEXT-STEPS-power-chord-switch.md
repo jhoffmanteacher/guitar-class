@@ -1,10 +1,13 @@
 # Power Chord Switch — where we stopped (2026-11-03)
 
-> **STATUS: this work is on the branch `pcs-pending-smoke`, NOT on `main`.**
-> Jonathan's rule for this push was "push when the smoke tests are done". The
-> last full smoke run on the final code was killed by the computer running out
-> of memory, so it never finished. Nothing here is deployed yet. First step on
-> any machine with enough memory (see "Finish the push" below).
+> **STATUS (2026-11-04): shipped.** The branch `pcs-pending-smoke` was merged into
+> `main` on 2026-11-03 (merge commit ca932f2): smoke on the merged tree was clean
+> against the origin/main baseline, the full checks passed, and Jonathan
+> published `firestore.rules` (take id `(coach|nr|pw)`). The same day a second
+> change landed (e5e0bef): a Stopped game with at least 10 s of audio is saved
+> too, with `complete:false` in the take (a shorter Stop, or leaving the screen,
+> still drops it). Only the "Next steps (not done)" list below is still open.
+> The branch `pcs-pending-smoke` can be deleted on GitHub.
 
 Read this when Jonathan asks "what are the next steps for the Power Chord
 Switch activity". It is the hand-off from the session that built the changes
@@ -49,45 +52,13 @@ Checks: `tools/checks.mjs` section **1ck** was rewritten (every switch against
 its card, the three rounds run, the BPM buttons, recorded takes, the feedback
 line); `tools/smoke.mjs` walks all 16 switches in a real browser.
 
-## Finish the push (first thing)
+## Done in the Firebase console
 
-1. `git fetch`, then `git checkout pcs-pending-smoke` (or `git merge` it into a
-   fresh `main`; `git log HEAD..origin/main` first to see whether other
-   sessions pushed meanwhile; `sw.js`'s `CACHE_VERSION` line may then conflict:
-   take either side and run `node tools/checks.mjs`, which rewrites it).
-2. `node tools/checks.mjs --skip-links` (expect "all checks passed"), then
-   `node tools/smoke.mjs --baseline origin/main` (a real browser, about 4
-   minutes, needs a few GB free: close other programs). Expect
-   "no JavaScript errors beyond the baseline". The older smoke runs on this
-   branch's earlier states: the last complete one (before the review fixes)
-   was clean against the baseline; after the review fixes only the real-Chrome
-   measurement of all 16 switches (EN + ES, with and without the recording
-   label, every chip graded: tallest 657px, Stop on screen) and the offline
-   checks (12 mutations red) were done.
-3. If smoke is clean: fast-forward `main` to the branch, push, run
-   `node tools/checks.mjs --live` (after `git pull origin main`). Delete the
-   `pcs-pending-smoke` branch (local and `origin`) and this STATUS block.
-4. If smoke shows a Power Chord Switch height or layout error, the likely spots
-   are `.cc-last` / `.cc-play-bpm` under the charts and `--cc-chart-h` in
-   `styles.css` (`.cc-cols-play`).
-
-## Must do (Jonathan, in the Firebase console)
-
-- **Publish `firestore.rules`** — Jonathan said he will do this from another
-  machine (so: pull first, then Firebase console → Firestore → Rules → paste
-  the whole `firestore.rules` file from the repo → Publish). GitHub Pages does
-  not deploy it. **Not done yet as of this push.** Until it is, a Power Chord
-  Switch take fails to save, quietly: the student sees nothing wrong, and the
-  footer still says "each take is saved". **If mic collection is already on
-  (teacher console → Mic recordings), every consenting student's Power Chord
-  Switch game uploads up to 600 KB of audio that the server rejects until the
-  rules are pasted. Paste the rules soon, or switch collection off until then.**
-  The change is the take id `(coach|nr)` → `(coach|nr|pw)`, twice. After he says
-  it is published: delete this item, and check the teacher console → Mic
-  recordings shows a Power Chord Switch take once a student with consent has
-  played a game to the end.
-- Collection must be switched on (teacher console → Mic recordings) for any
-  Power Chord Switch take to be asked for or saved.
+- `firestore.rules` with the `-pw` take id was published by Jonathan (per the
+  merge commit message, 2026-11-03). Still worth one look: teacher console →
+  Mic recordings should list a Power Chord Switch take once a student who said
+  yes has played a game to the end (or stopped one after 10 s). Mic collection
+  has to be switched on there for any take to be asked for or saved.
 
 ## Next steps (not done)
 
