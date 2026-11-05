@@ -11840,7 +11840,7 @@ async function checkPwTakeEvaluator() {
    The browser half (strip, recap, toast, My progress, 1366×657, both languages,
    a real <audio>) is tools/pm-e2e.mjs — it needs Chrome, so it is run by hand.
    ════════════════════════════════════════════════════════════════════ */
-const PM_SIM_PIN = 268;
+const PM_SIM_PIN = 273;
 function checkPracticeMinutes(i18nTable) {
   head('1cg. Practice minutes: the engine is run; the rules cap, no heartbeat, wiring and strings are pinned');
   let bad = 0;
@@ -11942,6 +11942,17 @@ function checkPracticeMinutes(i18nTable) {
        block is a change Jonathan must re-paste. */
     const TAG_SHIPPED = "match /minutes/{userId}/meta/board { allow create: if pmOwner(userId) && request.resource.data.keys().hasOnly(['id']) && request.resource.data.id is string && request.resource.data.id.matches('^[0-9a-f]{32}$'); }";
     const WB_SHIPPED = "match /weekBoard/{tag} { allow read: if isSignedIn(); allow create, update: if isSignedIn() && tag == get(/databases/$(database)/documents/minutes/$(request.auth.uid)/meta/board).data.id && request.resource.data.keys().hasOnly(['week', 'period', 'seconds']) && request.resource.data.keys().hasAll(['week', 'period', 'seconds']) && request.resource.data.week is string && request.resource.data.week.matches('^[0-9]{4}-W[0-9]{2}$') && request.resource.data.period in ['4', '7', 'CAS'] && request.resource.data.seconds is number && request.resource.data.seconds >= 0 && request.resource.data.seconds <= 7 * dailyCapSeconds(); }";
+    /* The rest of the minutes tree is pinned too (2026-11-04 review): a tree block of `allow read, update: if pmOwner(userId)` would let a
+       student change their own tag and skip the day cap; a second `match /minutes/{u}/meta/{doc}` or a catch-all `match /{path=**}/meta/{doc}`
+       would overlap the tag block. Exactly four `match /minutes/` blocks (tree read, days, weeks, the tag), the tree block whole, and no match
+       that starts with a wildcard (the rules header already says "do not add a catch-all"). */
+    const TREE_SHIPPED = "match /minutes/{userId}/{document=**} { allow read: if pmOwner(userId); }";
+    const treeBlock = block('minutes/{userId}/{document=**}');
+    if (!treeBlock || treeBlock.replace(/\s+/g, ' ').trim() !== TREE_SHIPPED) fail('firestore.rules: the minutes/{userId}/{document=**} block must be exactly `allow read: if pmOwner(userId);` (read only, owner only) — a wider one lets a student change their tag or skip the day cap');
+    const minutesMatches = (strip(rules).match(/match\s+\/minutes\//g) || []).length;
+    if (minutesMatches !== 4) fail(`firestore.rules has ${minutesMatches} match blocks under /minutes/ (exactly 4: the tree read, days, weeks and the Top 5 tag); update this count and TAG_SHIPPED with any new one`);
+    const wildcardFirst = (strip(rules).match(/match\s+\/\{[^}]*\}/g) || []);
+    if (wildcardFirst.length) fail(`firestore.rules has a match that starts with a wildcard (${wildcardFirst[0]}): a catch-all overlaps every block above it`);
     const tagMatches = (strip(rules).match(/match\s+\/minutes\/\{userId\}\/meta\b/g) || []).length;
     const tagBlock = block('minutes/{userId}/meta/board');
     if (tagMatches !== 1 || !tagBlock) fail(`firestore.rules has ${tagMatches} match blocks for minutes/{userId}/meta (exactly one is allowed: the Top 5 name tag, create-only)`);

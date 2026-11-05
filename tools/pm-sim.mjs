@@ -167,7 +167,7 @@ function makeWorld(opts = {}) {
           if (wm) { log.wkGets = (log.wkGets || 0) + 1; return Promise.resolve({ exists: server.weeks[wm[1]] !== undefined, data: () => server.weeks[wm[1]] }); }
           const id = idOf(ref); log.wbGets++; reads[id] = server.wbVer[id] || 0; return Promise.resolve({ exists: server.wb[id] !== undefined, data: () => server.wb[id] });
         },
-        set: (ref, data) => { const mu = metaOf(ref); writes.push(mu ? { meta: mu, data } : { id: idOf(ref), data }); return tx; },
+        set: (ref, data) => { const mu = metaOf(ref); if (!mu) log.wbTrySets = (log.wbTrySets || []).concat([ref.path]); writes.push(mu ? { meta: mu, data } : { id: idOf(ref), data }); return tx; },
       };
       const out = await fn(tx);   // the real SDK resolves with what the callback returned
       if (net.wbBeforeCommit) net.wbBeforeCommit(attempt);
@@ -1537,7 +1537,7 @@ console.log('14. top 5 of the week');
   await wte.run(130, (i) => { if (i % 30 === 0) wte.input('pointerdown'); }); await wte.PM.flush(); await wte.settle();
   check('the teacher\'s account counts its minutes but writes nothing to the weekBoard, reads nothing and gets no place', weekOf(wte) > minOf(15) && !wte.log.wbTx && !wte.net.wbReads && wte.PM._top5() === null && !wte.server.wb['uid-T'], `${wte.log.wbTx} tx ${wte.net.wbReads} reads`);
 
-  // The write: this week's server-confirmed seconds, { week, period, seconds } on my uid, raised only.
+  // The write: this week's server-confirmed seconds, { week, period, seconds } under my private tag, raised only.
   const ww = makeWorld({ period: '4', server: { days: {}, weeks: {}, board: {}, wb: {} } });
   ww.PM._state(); ww.input('pointerdown'); await ww.run(130); await ww.PM.flush(); await ww.settle(); await ww.run(130);
   check('a student who played writes the doc of their own tag exactly { week, period, seconds } — this week, their period, a whole number equal to the weeks doc', ww.log.wbWrites.length >= 1
@@ -1603,7 +1603,7 @@ console.log('14. top 5 of the week');
   const out = await draw(minOf(15), [minOf(20), minOf(20), minOf(20), minOf(20), minOf(20)]);
   check('ranked but out: no medal in the strip; the tile has the dashed medal, "N more min to Top 5" and the period', !/pm-top5/.test(out.strip) && /pm-top5-off/.test(out.h.innerHTML) && /pm\.top5Need/.test(out.h.innerHTML) && /pm\.top5Sub/.test(out.h.innerHTML) && /pm\.top5Off/.test(out.h.innerHTML), out.h.innerHTML.slice(-300));
   const und = await draw(minOf(4), [minOf(20)]);
-  check('under 10 minutes: no medal; "Play 10 min to get ranked" and "N to go"', !/pm-top5/.test(und.strip) && /pm\.top5Under/.test(und.h.innerHTML) && /pm\.top5ToGo/.test(und.h.innerHTML), und.h.innerHTML.slice(-300));
+  check('under 10 minutes: no medal; "Practice 10 min to get ranked" and "N min to go"', !/pm-top5/.test(und.strip) && /pm\.top5Under/.test(und.h.innerHTML) && /pm\.top5ToGo/.test(und.h.innerHTML), und.h.innerHTML.slice(-300));
   const unk = await draw(minOf(15), [minOf(20)], { net: { online: true, denied: false, wbReadDenied: true } });
   check('the class cannot be read: no Top 5 tile and no medal at all, the rest of the panel still draws', !/pm-top5/.test(unk.strip) && !/pm\.top5/.test(unk.h.innerHTML) && /pm\.tileWeek/.test(unk.h.innerHTML));
   const nop = await draw(minOf(15), [minOf(20)], { period: '' });
@@ -1766,6 +1766,7 @@ console.log('16. the Top 5 board holds no name');
 {
   // Jonathan, 2026-11-04: no per-period minutes tied to a name, readable by anyone. The board is keyed by a private random tag, never the uid.
   const W = '2026-W47', TAG = 'a1b2c3d4e5f60718293a4b5c6d7e8f90', HEX = /^[0-9a-f]{32}$/;
+  const minOf = (m) => m * 60;
   const wk = (secs) => ({ [W]: { seconds: secs, goalSeconds: 3600, hit: false } });
   const mk = (extra = {}) => makeWorld({ period: '4', server: { days: {}, weeks: wk(900), board: {}, wb: {} }, ...extra });
   const w = mk();
@@ -1773,12 +1774,18 @@ console.log('16. the Top 5 board holds no name');
   const tag = w.server.meta['uid-A'] && w.server.meta['uid-A'].id;
   const everything = JSON.stringify({ wb: w.server.wb, wbWrites: w.log.wbWrites });
   check('a student who played: the board has ONE doc, its id is a 32-hex random tag, and neither the id nor any field contains the uid', Object.keys(w.server.wb).length === 1 && HEX.test(Object.keys(w.server.wb)[0]) && Object.keys(w.server.wb)[0] === tag && !/uid-A/.test(everything) && eq(Object.keys(w.server.wb[tag]).sort(), ['period', 'seconds', 'week']), JSON.stringify(w.server.wb));
-  check('…the tag is kept in the student\'s own doc minutes/{uid}/meta/board as { id } only, and in localStorage pm:i:<uid>; it was made once (one create)', eq(Object.keys(w.server.meta['uid-A']), ['id']) && w.store['pm:i:uid-A'] === tag && (w.log.tagWrites || []).length === 1, JSON.stringify({ meta: w.server.meta, ls: w.store['pm:i:uid-A'], creates: (w.log.tagWrites || []).length }));
-  // Two students on one server never share a tag, and each ranks the other as "someone else" by tag.
+  check('…the tag is kept in the student\'s own doc minutes/{uid}/meta/board as { id } only, made once (one create), and NOWHERE in localStorage (a shared Chromebook would hand it to the next student)', eq(Object.keys(w.server.meta['uid-A']), ['id']) && (w.log.tagWrites || []).length === 1 && w.PM._state().tag === tag && !Object.keys(w.store).some((k) => /pm:i:/.test(k)) && !Object.values(w.store).some((v) => String(v).includes(tag)), JSON.stringify({ meta: w.server.meta, creates: (w.log.tagWrites || []).length, keys: Object.keys(w.store) }));
+  // The tag is RANDOM: not derived from the uid, and exactly the 16 bytes the page's crypto handed out.
+  const fresh = () => ({ days: {}, weeks: wk(900), board: {}, wb: {}, meta: {} });
+  const r1 = makeWorld({ period: '4', server: fresh() }), r2 = makeWorld({ period: '4', server: fresh() });
+  const got = []; for (const r of [r1, r2]) { const real = r.windowStub.crypto.getRandomValues; r.windowStub.crypto.getRandomValues = (a) => { const o = real(a); if (a.length === 16) got.push(Array.from(a).map((b) => (b < 16 ? '0' : '') + b.toString(16)).join('')); return o; }; }
+  for (const r of [r1, r2]) { r.PM._state(); await r.PM.load(); await r.settle(); await r.run(5); }
+  const t1 = r1.server.meta['uid-A'].id, t2 = r2.server.meta['uid-A'].id;
+  check('the same uid on two fresh servers gets two DIFFERENT tags (a tag worked out from the uid would repeat)', HEX.test(t1) && HEX.test(t2) && t1 !== t2, t1 + ' vs ' + t2);
+  check('…and each tag is exactly the hex of the 16 bytes the page\'s crypto.getRandomValues handed out (all 16 used, nothing mixed in)', got.length === 2 && t1 === got[0] && t2 === got[1], JSON.stringify({ got, t1, t2 }));
+  // Two students on one server never share a tag, and each page leaves its OWN doc out of "the others" by its tag.
   const srv = { days: {}, weeks: wk(minOf(15)), board: {}, wb: {}, meta: {} };
-  function minOf(m) { return m * 60; }
   const sA = makeWorld({ period: '4', server: srv }), sB = makeWorld({ period: '4', uid: 'uid-B', server: srv });
-  srv.weeks = { [W]: { seconds: minOf(15), goalSeconds: 3600, hit: false } };
   sA.PM._state(); await sA.PM.load(); await sA.settle(); await sA.run(5);
   srv.weeks[W].seconds = minOf(20); sB.PM._state(); await sB.PM.load(); await sB.settle(); await sB.run(5);
   await sA.PM._loadWeek(); await sB.PM._loadWeek(); await sA.settle();
@@ -1791,26 +1798,41 @@ console.log('16. the Top 5 board holds no name');
   const pA = makeWorld({ ...sh, store: {}, period: '4' }), pB = makeWorld({ ...sh, store: {}, period: '4' });
   pA.PM._state(); pB.PM._state(); await Promise.all([pA.PM.load(), pB.PM.load()]); await pA.settle(); await pA.run(5);
   const creates = (pA.log.tagWrites || []).length + (pB.log.tagWrites || []).length;
-  check('two pages of one student opening at the same moment: ONE tag is made (the second sees the first\'s), both pages keep the same one, one board doc', creates === 1 && Object.keys(sh.server.meta).length === 1 && pA.store['pm:i:uid-A'] === pB.store['pm:i:uid-A'] && pA.store['pm:i:uid-A'] === sh.server.meta['uid-A'].id && Object.keys(sh.server.wb).length === 1, JSON.stringify({ creates, meta: sh.server.meta, a: pA.store['pm:i:uid-A'], b: pB.store['pm:i:uid-A'] }));
-  // A page of the same student with the tag already saved asks for nothing.
-  const pc = makeWorld({ period: '4', store: { 'pm:i:uid-A': tag }, server: { days: {}, weeks: wk(600), board: {}, wb: {}, meta: { 'uid-A': { id: tag } } } });
-  pc.PM._state(); await pc.PM.load(); await pc.settle(); await pc.run(5);
-  check('a page that already has the tag saved does not read or make it again (no tag transaction) and writes under it', !pc.log.metaGets && !!pc.server.wb[tag], JSON.stringify({ metaGets: pc.log.metaGets, docs: Object.keys(pc.server.wb) }));
-  // A saved tag that is not the server's (the student's data was reset): the refused write clears it, and the next attempt reads the right one.
-  const st = makeWorld({ period: '4', store: { 'pm:i:uid-A': 'f'.repeat(32) }, server: { days: {}, weeks: wk(600), board: {}, wb: {}, meta: { 'uid-A': { id: TAG } } } });
-  st.PM._state(); await st.PM.load(); await st.settle(); await st.run(5);
-  const refused = st.log.wbRefused.length, cleared = !st.store['pm:i:uid-A'];
+  check('two pages of one student opening at the same moment: ONE tag is made (the second sees the first\'s), both pages hold the same one, one board doc', creates === 1 && Object.keys(sh.server.meta).length === 1 && pA.PM._state().tag === pB.PM._state().tag && pA.PM._state().tag === sh.server.meta['uid-A'].id && Object.keys(sh.server.wb).length === 1, JSON.stringify({ creates, meta: sh.server.meta, a: pA.PM._state().tag, b: pB.PM._state().tag }));
+  // One read of the tag per page, however many times the board is read and written.
+  const pc = makeWorld({ period: '4', server: { days: {}, weeks: wk(600), board: {}, wb: {}, meta: { 'uid-A': { id: TAG } } } });
+  pc.PM._state(); await pc.PM.load(); await pc.settle(); await pc.PM._loadWeek(); await pc.run(130, (i) => { if (i % 30 === 0) pc.input('pointerdown'); }); await pc.PM.flush(); await pc.settle(); await pc.run(130);
+  check('a page reads its tag ONCE (memory), however many times the class is read and the doc written, and writes under it', pc.log.metaGets === 1 && pc.log.wbWrites.length >= 1 && pc.log.wbWrites.every((x) => x.id === TAG), JSON.stringify({ metaGets: pc.log.metaGets, writes: pc.log.wbWrites.length }));
+  // A tag in memory that is not the server's (the student's data was reset): the refused write clears it, and the next attempt reads the right one.
+  const st = makeWorld({ period: '4', server: { days: {}, weeks: wk(600), board: {}, wb: {}, meta: { 'uid-A': { id: TAG } } } });
+  st.PM.status(); st.PM._state().tag = 'f'.repeat(32); await st.PM.load(); await st.settle(); await st.run(5);
+  const refused = st.log.wbRefused.length, cleared = st.PM._state().tag === '';
   st.clock.ms += 6 * 60 * 1000; st.clock.perf += 6 * 60 * 1000; st.PM._publishWeek(); await st.settle();
-  check('a stale saved tag: the write is refused, the saved tag is cleared, and 5 minutes later the right tag is read and used', refused === 1 && cleared && !!st.server.wb[TAG] && st.store['pm:i:uid-A'] === TAG && !st.server.wb['f'.repeat(32)], JSON.stringify({ refused, cleared, docs: Object.keys(st.server.wb), ls: st.store['pm:i:uid-A'] }));
-  // No crypto in the page: no tag, so nothing is written and nothing is read for the Top 5 (never a uid-keyed fallback).
+  check('a stale tag in memory: the write is refused, the tag is cleared, and 5 minutes later the right tag is read and used', refused === 1 && cleared && !!st.server.wb[TAG] && st.PM._state().tag === TAG && !st.server.wb['f'.repeat(32)], JSON.stringify({ refused, cleared, docs: Object.keys(st.server.wb) }));
+  // No crypto in the page: no tag, so nothing is written, nothing is even ATTEMPTED on the board, and nothing is read (never a uid-keyed fallback).
   const nc = makeWorld({ noCrypto: true, period: '4', server: { days: {}, weeks: wk(600), board: {}, wb: {}, meta: {} } });
   nc.PM._state(); await nc.PM.load(); await nc.settle(); await nc.PM._loadWeek(); await nc.run(5);
-  check('a page without window.crypto makes no tag: no board doc, no tag doc, no class read, no place — and the minutes still count', eq(nc.server.wb, {}) && eq(nc.server.meta, {}) && !nc.net.wbReads && nc.PM._top5() === null && nc.PM.status().week.secs === 600, JSON.stringify({ wb: nc.server.wb, meta: nc.server.meta }));
+  check('a page without window.crypto makes no tag: no board doc, no tag doc, no board write even attempted, no class read, no place — and the minutes still count', eq(nc.server.wb, {}) && eq(nc.server.meta, {}) && !(nc.log.wbTrySets || []).length && !nc.net.wbReads && nc.PM._top5() === null && nc.PM.status().week.secs === 600, JSON.stringify({ tries: nc.log.wbTrySets, wb: nc.server.wb, meta: nc.server.meta }));
   // The teacher's account never makes a tag.
   const te = makeWorld({ uid: 'uid-T', period: '4', server: { days: {}, weeks: wk(600), board: {}, wb: {}, meta: {} } });
   te.user.email = 'teacher@example.org'; vm.runInContext("var TEACHER_EMAIL = 'teacher@example.org';", te.ctx);
   te.PM._state(); await te.PM.load(); await te.settle(); await te.PM._loadWeek(); await te.run(5);
   check('the teacher\'s account makes no tag and writes no board doc', eq(te.server.meta, {}) && eq(te.server.wb, {}), JSON.stringify(te.server.meta));
+  // A student with no class period makes no tag (nothing to publish).
+  const np = makeWorld({ period: '', server: { days: {}, weeks: wk(600), board: {}, wb: {}, meta: {} } });
+  np.PM._state(); await np.PM.load(); await np.settle(); await np.PM._loadWeek(); await np.run(5);
+  check('a student whose class period is not answered yet makes no tag', eq(np.server.meta, {}) && eq(np.server.wb, {}), JSON.stringify(np.server.meta));
+  // The reconnect: the online event clears the 30 s wait on a failed class read, so it is asked again at once.
+  const ol = makeWorld({ ui: true, strip: true, config: { uiOn: true }, period: '4', server: { days: {}, weeks: wk(minOf(15)), board: {}, wb: { 'uid-O0': { week: W, period: '4', seconds: minOf(20) } }, meta: {} } });
+  ol.PM._state(); await ol.PM.load(); await ol.settle(); ol.net.online = false; ol.PM.syncHeader(true); await ol.settle(); await ol.run(3, (i) => ol.input('pointerdown'));
+  ol.net.online = true; for (const f of ol.listeners['win:online'] || []) f(); const before = ol.net.wbReads || 0;
+  await ol.run(3, (i) => ol.input('pointerdown')); await ol.settle();
+  check('a failed class read waits 30 s, but the Wi-Fi coming back (the online event) asks again within 3 s, and the place arrives', (ol.net.wbReads || 0) > before && ol.PM._top5() !== null, JSON.stringify({ before, after: ol.net.wbReads, top5: ol.PM._top5() }));
+  // One minute to go reads in the singular in both languages (Spanish: "Falta 1 min", not "Faltan 1 min").
+  const one = makeWorld({ ui: true, strip: true, config: { uiOn: true }, period: '4', server: { days: {}, weeks: wk(599), board: {}, wb: { 'uid-O0': { week: W, period: '4', seconds: minOf(20) } }, meta: {} } });
+  one.PM._state(); one.PM.syncHeader(true); await one.PM.load(); await one.settle(); await one.PM._loadWeek(); await one.settle();
+  const ho = { hidden: true, innerHTML: '', isConnected: true }; one.PM.renderProgress(ho); await one.settle();
+  check('9:59 (1 minute to be ranked): the tile uses the singular key pm.top5ToGoOne, not the plural', /pm\.top5ToGoOne/.test(ho.innerHTML) && !/pm\.top5ToGo[^O]/.test(ho.innerHTML), ho.innerHTML.slice(-160));
 }
 
 console.log(`\n${failed ? '✗' : '✓'} pm-sim: ${passed} passed, ${failed} failed`);

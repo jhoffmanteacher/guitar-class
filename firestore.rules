@@ -383,10 +383,10 @@ service cloud.firestore {
 
        minutes/{uid}/meta/board  { id } — the student's private name tag: 32
        random hex characters the student's own page makes once. Create-only
-       (never changed, never deleted), and only this student (or the teacher,
-       who reads like anyone) can read it: the existing minutes/{uid}/** read
-       rule above is owner-only. It is the ONLY link between a person and
-       their tag.
+       (never changed, never deleted). Only this student reads it: the
+       minutes/{uid}/** read rule above is owner-only, not even the teacher.
+       The page keeps it in memory only (not localStorage). It is the only
+       link between a person and their tag.
 
        weekBoard/{tag}  { week, period, seconds } — the practice seconds of
        ONE ISO week ('2026-W45') for the student who holds that tag, and their
@@ -394,23 +394,33 @@ service cloud.firestore {
        period's Top 5 this week. Every signed-in account reads the collection
        (the site queries one week + one period). A write is allowed only when
        the doc id IS the writer's own tag (the rule reads the writer's
-       minutes/{uid}/meta/board), with exactly those three fields: a week id,
-       a period the site knows, and a number from 0 to seven days of the daily
-       cap. A new week overwrites last week's doc (one doc per student, ever).
-       No delete.
+       minutes/{uid}/meta/board; a missing doc denies), with exactly those
+       three fields: a week id, a period the site knows, and a number from 0 to
+       seven days of the daily cap. A new week overwrites last week's doc (one
+       doc per student, ever). No delete.
 
-       What a reader sees: a random tag, a period, a week and a number. No
-       uid, no name, no email. The live quiz keeps names under uids, but a uid
-       cannot be turned into a tag: that link exists only in the student's own
-       private doc. NOT PROVABLY ANONYMOUS: someone who watches this
-       collection and minutesBoard (which IS keyed by uid) with listeners could
-       match the two by the moment each changes. Closing that means keying
-       minutesBoard by the tag too, or a server that does the ranking.
+       What a reader sees here: a random tag, a period, a week and a number.
+       No uid, no name, no email.
+
+       ⚠ KNOWN WEAKNESS (open, Jonathan decides): minutesBoard (the class rank,
+       above) is keyed by uid and holds ALL-TIME seconds. While counting is
+       young (it began 2026-11-01) all-time and this-week seconds are nearly
+       the same number, so anyone signed in who reads minutesBoard, this
+       collection and liveQuiz/current.scores (uid -> name) can match a tag to
+       a uid by VALUE (measured on the real engine: 58 of 60 students from one
+       read of each) and so tie a name to a period and week minutes. Closing
+       it means keying the class rank by the tag too and making minutesBoard
+       unreadable, or a server that does the ranking. Likewise
+       config/class.periodOverrides[uid] is readable by every student and
+       already ties a name to a period for corrected students.
+
        HONEST LIMITS: a student at DevTools can write any number up to the cap
-       for themselves and place themselves in any period or week, and, since a
-       tag cannot be proven unique, could claim another student's tag from the
-       public list and overwrite that one doc (raise it to the cap: the same
-       as inventing a student of their own); nothing reads this for a grade.
+       for themselves and place themselves in any period or week. A tag cannot
+       be proven unique: any account may create its meta doc with ANY 32-hex id
+       (including another student's public tag) and then write that board doc,
+       so one account can LOWER or REMOVE one other student's entry (their page
+       repairs it on its next confirmed write or reload). Nothing reads this
+       for a grade.
        ⚠ Must be published BEFORE (or with) the site code that writes it. */
     match /minutes/{userId}/meta/board {
       allow create: if pmOwner(userId)

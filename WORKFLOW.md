@@ -1015,12 +1015,21 @@
       their own class period; ties share a place; 10 minutes needed (`top5MinMinutes`); each student sees only their own place.
       **Standing rule from Jonathan (2026-11-04): no per-period minutes tied to a name, readable by anyone.** The live quiz keeps names under uids
       (`liveQuiz/current.scores`, read by every signed-in account), so the board is NOT keyed by uid: `weekBoard/{tag}` holds `{week, period, seconds}`
-      under a private random 32-hex tag that lives only in the student's own owner-only, create-only doc `minutes/{uid}/meta/board` (+ `pm:i:<uid>`).
+      under a private random 32-hex tag that lives only in the student's own owner-only, create-only doc `minutes/{uid}/meta/board` (page memory
+      only, never localStorage: a shared Chromebook would leak uid -> tag).
       A board write is allowed only under the writer's own tag (the rule reads that doc). Both blocks are pinned whole in checks.mjs 1cg
-      (`TAG_SHIPPED`, `WB_SHIPPED`). Read from the SERVER only (`get({source:'server'})`): offline, a plain get() answers empty from the cache
-      (measured on the real SDK), which also bit `load()` and `loadBoard()` and is fixed there. Not provably anonymous: `minutesBoard` is still
-      keyed by uid, so a coder watching both collections could match them by update time; closing that needs `minutesBoard` keyed by the tag too,
-      or a server (Cloud Function) doing the ranking. Accepted limits are in the rules comment. Tests: pm-sim sections 14-16, pm-e2e "top 5".
+      (`TAG_SHIPPED`, `WB_SHIPPED`, plus the tree block, exactly 4 `match /minutes/` blocks and no wildcard-first match). Read from the SERVER only
+      (`get({source:'server'})`): offline, a plain get() answers empty from the cache (measured on the real SDK), which also bit `load()` and
+      `loadBoard()` and is fixed there.
+      **OPEN, Jonathan decides: not anonymous yet.** `minutesBoard` is still keyed by uid with ALL-TIME seconds. While counting is young (began
+      2026-11-01) all-time and this-week seconds are nearly equal, so anyone signed in who reads `minutesBoard`, `weekBoard` and
+      `liveQuiz/current.scores` can match tag -> uid -> name by VALUE (measured: 58 of 60 students from one read each). Not a timing attack.
+      Fix = key the class rank by the tag too (a `total` field on the board doc) and make `minutesBoard` unreadable + delete its uid docs in the
+      console, or drop the class rank tile; or a server (Cloud Function, Blaze plan) doing the ranking. Also already live:
+      `config/class.periodOverrides[uid]` is readable by every student and ties a name to a period for corrected students.
+      Known limit: a tag cannot be proven unique, so any account can claim another's public tag and lower/remove that one entry (fix would be a
+      create-only reverse index `boardTags/{tag}` with `existsAfter`; not built: the rules emulator needs Java, which this Mac lacks).
+      `tools/pm-rules-test.mjs` has NO cases for `minutesBoard`, `weekBoard` or `meta/board` yet. Tests: pm-sim sections 14-16, pm-e2e "top 5".
 - [x] **2026-11-01 — Practice minutes (student view only; display switched ON the same day: `uiOn: true`, `streakStartWeek: '2026-W45'`, goal 30; 60 since 2026-11-04).**
       Counts seconds of real backing-track playback and shows a weekly goal, a
       week streak and "N playing". Counting and writing ship LIVE; nothing is

@@ -668,12 +668,12 @@ const inCol = await ev(`(() => { const m = document.querySelector('#pm-progress 
 await t5Scenario(15, [20, 20, 20, 20, 20, 15]); await ev(`renderMyProgress()`); await sleep(1000);
 const outCol = await ev(`(() => { const m = document.querySelector('#pm-progress .pm-top5'), cs = getComputedStyle(m); return { color: cs.color, style: cs.borderTopStyle, border: cs.borderTopColor }; })()`);
 check('the tile medal is lavender and solid when in (44 px), grey and dashed when out', inCol.color === 'rgb(183, 156, 255)' && inCol.style === 'solid' && inCol.w === 44 && outCol.style === 'dashed' && outCol.color !== 'rgb(183, 156, 255)', { inCol, outCol });
-/* What the student's page wrote: this week's seconds for period 4 under their uid, nothing else. */
+/* What the student's page wrote: this week's seconds for period 4 under their private tag (never the uid), nothing else. */
 await t5Scenario(15, [20], true);
 await ev(`(() => { const s = PM._state(); s.loaded = false; s.loading = null; s.wbSent = ''; s.wbAt = 0; return PM.load(); })()`); await sleep(1500);
-const wrote = await ev(`({ writes: window.__fs.wbWrites, meta: window.__fs.meta, docs: Object.keys(window.__fs.wb), ls: localStorage.getItem('pm:i:e2e-student') })`);
-check('a student with no tag yet: the page makes ONE private tag (32 hex, kept as minutes/{uid}/meta/board { id } and in pm:i:<uid>) and writes the board under it: { week, period "4", seconds 900 }',
-  wrote.writes.length === 1 && /^[0-9a-f]{32}$/.test(wrote.writes[0].id) && wrote.meta && wrote.meta.id === wrote.writes[0].id && Object.keys(wrote.meta).join() === 'id' && wrote.ls === wrote.meta.id
+const wrote = await ev(`({ writes: window.__fs.wbWrites, meta: window.__fs.meta, docs: Object.keys(window.__fs.wb), lsHasTag: !!(window.__fs.meta && Object.keys(localStorage).some((k) => (localStorage.getItem(k) || '').includes(window.__fs.meta.id) || k.includes(window.__fs.meta.id))) })`);
+check('a student with no tag yet: the page makes ONE private tag (32 hex, kept as minutes/{uid}/meta/board { id }, NOT in localStorage) and writes the board under it: { week, period "4", seconds 900 }',
+  wrote.writes.length === 1 && /^[0-9a-f]{32}$/.test(wrote.writes[0].id) && wrote.meta && wrote.meta.id === wrote.writes[0].id && Object.keys(wrote.meta).join() === 'id' && wrote.lsHasTag === false
   && wrote.writes[0].d.week === wk5 && wrote.writes[0].d.period === '4' && wrote.writes[0].d.seconds === 900 && Object.keys(wrote.writes[0].d).length === 3, wrote);
 check('the board holds NO name: no doc id, no field and nothing the page wrote contains the uid ("e2e-student")', !/e2e-student/.test(JSON.stringify({ docs: wrote.docs, writes: wrote.writes })), wrote);
 /* Rules not published: the board cannot be read; no medal, no tile, no toast, no error on the page. */

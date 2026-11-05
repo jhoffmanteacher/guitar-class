@@ -693,6 +693,7 @@
     'pm.top5Sub':         { en: '{period}, this week', es: '{period}, esta semana' },
     'pm.top5Under':       { en: 'Practice {n} min to get ranked', es: 'Practica {n} min para tener un lugar' },
     'pm.top5ToGo':        { en: '{n} min to go', es: 'Faltan {n} min' },
+    'pm.top5ToGoOne':     { en: '1 min to go', es: 'Falta 1 min' },
     'pm.top5Toast':       { en: 'Top 5 in {period} this week!', es: '¡Top 5 en {period} esta semana!' },
     'pm.period4':         { en: 'Period 4', es: 'Periodo 4' },
     'pm.period7':         { en: 'Period 7', es: 'Periodo 7' },

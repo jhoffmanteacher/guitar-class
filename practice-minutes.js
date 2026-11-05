@@ -120,8 +120,8 @@
    only ever RAISES the number inside one week + period (a page with an older copy never lowers what another
    page wrote); a new week or a changed period overwrites it. At most one write per WB_MS. The class's docs for this week + period are read with one query
    (equality filters only: no composite index) and kept WB_KEEP_MS (15 min) in memory and localStorage,
-   so a period of 30 reads about 30 documents per student per 15 minutes on screen. NOT FULLY ANONYMOUS,
-   like the class rank: the doc carries the uid and the period. The teacher's account is never written
+   so a period of 30 reads about 30 documents per student per 15 minutes on screen. KNOWN WEAKNESS (open, Jonathan decides): minutesBoard (the class rank) is still keyed by the uid, and the two boards hold nearly the same
+   number while counting is young, so a reader who joins them by value links a tag to a uid (and the live quiz links a uid to a name). The teacher's account is never written
    or ranked. A failed write or read changes nothing about counting; the medal and the tile stay away.
    HONEST LIMITS: a student at DevTools can write any number up to the rules' week cap for themselves (and
    choose their period). A device whose clock is a week BEHIND replaces the doc with its own week when it loads, and
@@ -883,10 +883,12 @@
     return PERIOD_KEYS.hasOwnProperty(p) ? p : '';
   }
   /* The student's private Top 5 NAME TAG: 32 random hex characters, made once by the student's own page and kept in
-     minutes/{uid}/meta/board { id } (create-only; only the student reads it) and in localStorage pm:i:<uid>. The
-     weekBoard's docs are keyed by it, never by the uid, so nothing readable by other accounts joins a name (the live quiz
-     keeps names under uids) to a period and minutes. Resolves to the tag, or '' (offline, refused, no crypto): then
-     nothing is read or written for the Top 5. create = make it when the student has none yet. */
+     minutes/{uid}/meta/board { id } (create-only; only the student reads it). It is kept in MEMORY only, never in
+     localStorage: on a shared Chromebook the next student would read the previous student's uid and tag there and
+     could follow that board doc. One read per page load. The weekBoard's docs are keyed by it, never by the uid, so
+     nothing readable by other accounts joins a name (the live quiz keeps names under uids) to a period and minutes.
+     Resolves to the tag, or '' (no crypto; offline and refused reject): then nothing is read or written for the
+     Top 5. create = make it when the student has none yet. */
   var TAG_RE = /^[0-9a-f]{32}$/;
   function randomTag(){
     try {
@@ -902,8 +904,6 @@
     var st = S;
     if(!st) return Promise.resolve('');
     if(TAG_RE.test(st.tag)) return Promise.resolve(st.tag);
-    var c = ls('pm:i:' + st.uid);
-    if(c && TAG_RE.test(c)){ st.tag = c; return Promise.resolve(c); }
     if(st.tagP) return st.tagP;
     if(Date.now() < st.tagRetryAt) return Promise.reject({ code: 'permission-denied' });   // refused a moment ago (rules not published): the writer and the reader share ONE wait
     st.tagP = dbP().then(function(db){
@@ -922,7 +922,7 @@
       });
     }).then(function(id){
       st.tagP = null;
-      if(S === st && TAG_RE.test(id)){ st.tag = id; ls('pm:i:' + st.uid, id); return id; }
+      if(S === st && TAG_RE.test(id)){ st.tag = id; return id; }
       return '';
     }, function(err){
       st.tagP = null;
@@ -971,7 +971,7 @@
     }, function(err){
       st.wbBusy = false;
       st.wbRetryAt = Date.now() + (err && err.code === 'permission-denied' ? DENIED_BACKOFF_MS : LOAD_RETRY_MS);
-      if(err && err.code === 'permission-denied'){ st.tag = ''; ls('pm:i:' + st.uid, null); }   // the saved tag may be stale (the student's data was reset): read it again next time
+      if(err && err.code === 'permission-denied') st.tag = '';   // the tag in memory may be stale (the student's data was reset): read it again next time
     });
   }
   /* Everyone else's seconds this week in my period (my own doc is left out, by my tag: my live total is used instead).
@@ -1331,7 +1331,7 @@
     if(!t) return '';
     var row, sub;
     if(t.top){ row = tr('pm.top5You', { n: t.n, period: tr(PERIOD_KEYS[t.period]) }); sub = tr('pm.top5Reset'); }
-    else if(t.under){ row = tr('pm.top5Under', { n: t.min }); sub = tr('pm.top5ToGo', { n: t.toRank }); }
+    else if(t.under){ row = tr('pm.top5Under', { n: t.min }); sub = t.toRank === 1 ? tr('pm.top5ToGoOne') : tr('pm.top5ToGo', { n: t.toRank }); }
     else { row = tr('pm.top5Need', { n: t.need }); sub = tr('pm.top5Sub', { period: tr(PERIOD_KEYS[t.period]) }); }
     return '<div class="pm-tile"><div class="pm-tile-h">' + esc(tr('pm.top5Label')) + '</div>'
       + '<div class="pm-tile-row">' + top5Mark('pm-top5-md' + (t.top ? '' : ' pm-top5-off'), tr(t.top ? 'pm.top5Label' : 'pm.top5Off')) + '<b>' + esc(row) + '</b></div>'
