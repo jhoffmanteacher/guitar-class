@@ -3384,9 +3384,9 @@ the literal complaint would have.
 ## Power Chord Switch: where we stopped (moved here from NEXT-STEPS-power-chord-switch.md, 2026-11-05)
 
 Jonathan moved this file into WORKFLOW.md and deleted it. Still open: the room-noise decision
-(he will decide later; the what-if is built and live) and the last piece of the heartbeat removal
-(the emulator run of `tools/pm-rules-test.mjs` on a machine with Java 21; his console paste of the
-heartbeats-free `firestore.rules` is DONE, see below).
+(he will decide later; the what-if is built and live). The practice-minutes heartbeat removal is
+finished: his console paste and the emulator run (49 passed, 0 failed) are both DONE; only the
+optional console cleanup of old `heartbeats` documents and the index is left (see below).
 Settled and not to be re-raised: the 30 s cap, the real-guitar mic check, the three wordings,
 no Note Runner mic check. The original title read "Power Chord Switch — where we stopped (2026-11-03)".
 
@@ -3486,9 +3486,9 @@ Jonathan asked for this note here so it is not lost. **Step 1 is DONE and LIVE**
 the section out of `tools/pm-rules-test.mjs`, and check 1cg now requires both to stay gone.
 The console paste is DONE too: Jonathan reported on 2026-11-05 that he published the new
 `firestore.rules` (his word; not compared against the console afterwards. An earlier paste
-the same day still had the block and did not count). Still left: the emulator run (last
-bullet below), and optionally deleting the old `heartbeats` documents and the `heartbeats`
-composite index in the console.** The full plan is the "PICK UP HERE" entry under "Practice
+the same day still had the block and did not count). The emulator run is DONE too (last
+bullet below: 49 passed, 0 failed). Still left, optional: deleting the old `heartbeats`
+documents and the `heartbeats` composite index in the console.** The full plan is the "PICK UP HERE" entry under "Practice
 minutes" in `WORKFLOW.md` (written 2026-11-04); read it before touching anything.
 In short: "N playing" is gone from the screen and (since step 1) the engine no longer
 writes the `heartbeats/{sessionId}` record (`{ period, lastSeen }`, about every 30 s
@@ -3506,18 +3506,12 @@ since the new rules were published (2026-11-05) nobody can read or write them.
   block and the index to stay gone, exactly one `match /databases/{database}/documents`
   wrapper, and no shipped page or script naming a `heartbeats` collection. Old `heartbeats`
   documents and the console's `heartbeats` index can be deleted once the new rules are published.
-- **STILL TO DO (Jonathan, on a machine with Java 21): run the Firestore emulator test
-  `tools/pm-rules-test.mjs` once against the new `firestore.rules`.** It has never run since
-  step 2 (2026-11-05): no Java on the Windows machine or on the Mac (checked 2026-11-05;
-  `brew install --cask temurin@21` would add it), so neither the session nor the
-  `site-reviewer-deep` review could run it. Steps are in the header of that file (an empty
-  scratch folder OUTSIDE the repo, `npm i firebase-tools @firebase/rules-unit-testing
-  firebase@10.12.2`, a `firebase.json` with the Firestore emulator on port 8089, then
-  `npx firebase emulators:exec --only firestore --project demo-gc "node pm-rules-test.mjs firestore.rules"`).
-  Expect `0 failed`; the pass count will be below the old 66 (the heartbeats section is gone). Two tests
-  are new and unproven: `heartbeats/{id} is gone: a signed-in write is refused` and `…a signed-in
-  read of the collection is refused`. If either fails, the block is not really gone from the rules the
-  emulator loaded. When it passes, put the new count in the header's "Last run:" line and delete this item.
+- **Emulator run (DONE 2026-11-05):** `tools/pm-rules-test.mjs` against the real Firestore
+  emulator and the committed `firestore.rules` (byte-identical copy): **49 passed, 0 failed.**
+  The two new tests (`heartbeats/{id} is gone: a signed-in write is refused` and `…a signed-in
+  read of the collection is refused`) both passed, so the block is really gone from the rules the
+  emulator loaded. The Mac had no Homebrew and no Java; a Temurin 21 JRE tarball in a scratch
+  folder did the job. The header of the test file has the new count and the recipe.
 - **Always Reviewed the same day** (`site-reviewer-deep`; it edits the counting
   half, `pm-sim` and `firestore.rules`). Proof: `pm-sim` and `pm-e2e` pass, the
   1cg pins broken in a scratch copy go red, a play session counts and flushes

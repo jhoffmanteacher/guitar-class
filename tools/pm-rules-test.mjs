@@ -6,8 +6,11 @@
    It tries every allow and deny in the minutes/{uid}/days|weeks blocks (the daily
    cap, the exact field lists, another student, the
    teacher, signed out, delete, a bad id) and then re-checks one rule on each
-   OLDER path to show they still behave. Last run: 66 passed, 0 failed (before the heartbeats
-   section was removed 2026-11-05; it needs Java, so it has not been re-run since).
+   OLDER path to show they still behave. Last run: 2026-11-05, 49 passed, 0 failed, against
+   the firestore.rules with the heartbeats block gone (the earlier run, 66 passed, had the
+   heartbeats section). No Homebrew and no system Java on the Mac that day: a Temurin 21 JRE
+   tarball (adoptium.net, sha256 checked) unpacked into a scratch folder with JAVA_HOME and PATH
+   pointed at it worked. If npm fails with EACCES in ~/.npm/_cacache, add `--cache <scratch>/npm-cache`.
 
    To run it, in an empty scratch folder (NOT inside the repo):
      npm init -y
