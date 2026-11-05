@@ -1034,8 +1034,8 @@
       all-time sum on its first publish), so `total` is small at first. Also still true: `config/class.periodOverrides[uid]` is readable by every student
       and gives a period (never a name).
       Known limit: a tag cannot be proven unique, so any account can claim another's public tag and lower/remove that one entry (fix would be a
-      create-only reverse index `boardTags/{tag}` with `existsAfter`; not built: the rules emulator needs Java, which this Mac lacks).
-      `tools/pm-rules-test.mjs` has NO cases for `minutesBoard`, `weekBoard` or `meta/board` yet. Tests: pm-sim sections 14-16, pm-e2e "top 5".
+      create-only reverse index `boardTags/{tag}` with `existsAfter`; not built; the emulator now runs here, and two cases in `tools/pm-rules-test.mjs` pin this limit so they flip when it is fixed).
+      `tools/pm-rules-test.mjs` has cases for `minutesBoard` (no rules), `weekBoard`, `rankBoard` and `meta/board` since 2026-11-05 (117 passed, 0 failed; 12 deliberate breaks of the rules each turned a case red). Other tests: pm-sim sections 14-16, pm-e2e "top 5".
 - [x] **2026-11-01 — Practice minutes (student view only; display switched ON the same day: `uiOn: true`, `streakStartWeek: '2026-W45'`, goal 30; 60 since 2026-11-04).**
       Counts seconds of real backing-track playback and shows a weekly goal, a
       week streak and "N playing". Counting and writing ship LIVE; nothing is
@@ -3396,7 +3396,7 @@ no Note Runner mic check. The original title read "Power Chord Switch — where 
 > published `firestore.rules` (take id `(coach|nr|pw)`). The same day a second
 > change landed (e5e0bef): a Stopped game with at least 10 s of audio is saved
 > too, with `complete:false` in the take (a shorter Stop, or leaving the screen,
-> still drops it). Only the "Next steps (not done)" list below is still open.
+> still drops it). Only the room-noise decision (Next steps, item 3) is still open.
 > The branch `pcs-pending-smoke` can be deleted on GitHub.
 
 Read this when Jonathan asks "what are the next steps for the Power Chord
@@ -3450,31 +3450,31 @@ line); `tools/smoke.mjs` walks all 16 switches in a real browser.
   yes has played a game to the end (or stopped one after 10 s). Mic collection
   has to be switched on there for any take to be asked for or saved.
 
-### Next steps (Jonathan chose these on 2026-11-04: saved takes arrive, the evaluator, and the heartbeat removal)
+### Next steps (rewritten 2026-11-05; the list Jonathan chose on 2026-11-04 is done)
 
 (The separate step-by-step plan file for a fresh chat was deleted on 2026-11-04 at
 Jonathan's request; this list is the plan.)
 
-1. **Check that saved takes really arrive.** Teacher console → Mic recordings
-   (collection must be switched on there). After a student who said yes has
-   finished a Power Chord Switch game, or stopped one after at least 10 s, a
-   row "Power Chord Switch · <chords>" should appear, with Download WAV / Download
-   data working. Nobody has seen a real take arrive yet. If none appear: the
-   rules paste first (`micTakes` and `chunks` must say `(coach|nr|pw)`), then
-   mic collection on, then the student's consent answer (asked once per device).
-   Also open one take's data and check `expected` has 21 entries, each with a
-   time, a verdict (`ok` / `off` / `miss`), a round and a BPM, and that
-   `complete` is `true` or `false`.
-2. **Build the teacher-console evaluator for Power Chord Switch takes.** Built 2026-11-04
-   (commits "Evaluate Power Chord Switch takes: micEvalTakePw, synthetic takes with planted
-   answers, check 1cl" and "Power Chord Switch evaluator: judge in the site's own window…"):
-   "Evaluate all recordings" now measures these takes (teacher.js `micEvalTakePw`, check
-   1cl). It is proven on synthetic takes only (`tools/mic-sim/fake-pw-take.mjs`); a real
-   take from item 1 (Track A) is still needed before trusting its numbers. Original goal: for
-   each saved take, compare what the site graded (`expected`, `events`) with what is
-   really in the audio, per round: strums the game missed, "right" changes with no
-   strum, and the mic delay from the three count-ins. Design, sub-steps and checks
-   are in the plan file (Track C).
+1. **Saved takes arrive: DONE.** On 2026-11-04 "Evaluate all recordings" in the teacher
+   console read 25 saved takes, 12 of them Power Chord Switch (results below, "First
+   real-take results"). If a class ever shows none: the rules paste first (`micTakes` and
+   `chunks` must say `(coach|nr|pw)`), then mic collection on in the console, then the
+   student's consent answer (asked once per device).
+2. **The evaluator for Power Chord Switch takes: DONE.** `micEvalTakePw` (teacher.js,
+   check 1cl) was built 2026-11-04, proven on synthetic takes (`tools/mic-sim/fake-pw-take.mjs`)
+   and then run on those 12 real takes. For each saved take it compares what the site graded
+   (`expected`, `events`) with what is in the audio, per round: strums the game missed,
+   "right" changes with no strum, and the mic delay from the three count-ins (about -73 ms on
+   Chromebook internal mics).
+3. **OPEN, Jonathan's call, no date: room noise scores a right chord.** Nothing to do until he
+   asks. The measurement is in "Open finding" and "First real-take results" below. Where it
+   stands: a higher onset floor is ruled out; "no readable pitch, no tick" and stricter
+   strum ratios are the two options left, and the "Strum what-if" table in the console
+   (Evaluate all recordings) is the tool for the second. This section does not record what that
+   table showed on the 3 noisy real takes; look at it before choosing. Either option touches
+   `coach.js` detection: xhigh, Always Reviewed, run `tools/mic-sim/power-switch.mjs` first.
+4. **Nothing else is waiting.** Settled and not to be raised again: see "Later (not chosen
+   yet)" below (the 30 s cap, the real mic check, the three wordings, no Note Runner check).
 
 ### Not Power Chord Switch, but waiting: remove the practice-minutes heartbeat
 
