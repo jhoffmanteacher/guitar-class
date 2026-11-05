@@ -83,8 +83,8 @@
 
    NO LIVE COUNT (2026-11-04). "N playing" left the strip, then its
    heartbeats/{sessionId} writer and the count query left the engine: nothing
-   read them. firestore.rules keeps its heartbeats block until it is deleted in
-   the Firebase console (WORKFLOW.md, "Practice minutes"); checks.mjs 1cg and
+   read them. The heartbeats rules block and index were deleted 2026-11-05;
+   checks.mjs 1cg and
    pm-sim sections 6 and 8 fail if a heartbeat or a live count comes back.
 
    CLASS RANK (2026-11-04, Jonathan: "a ranking for students ... N/total"). My progress shows

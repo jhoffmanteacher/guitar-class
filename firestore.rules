@@ -454,30 +454,5 @@ service cloud.firestore {
             && request.resource.data.seconds >= 0
             && request.resource.data.seconds <= 400 * dailyCapSeconds();
     }
-
-    /* heartbeats/{sessionId}  { period, lastSeen } — the "N playing" count.
-       Firestore cannot make a collection readable "as a count only": a count
-       query needs the same read permission as reading the docs. So the docs
-       carry nothing worth reading. The id is a random string made once per
-       browser session (sessionStorage) — never a uid, and nothing here maps
-       back to one. The only fields are the class period and a server
-       timestamp; any other field is refused. Any signed-in user may read, so
-       the client can count the docs of its own period whose lastSeen is in
-       the last 60 s (needs the composite index in firestore.indexes.json).
-       lastSeen must equal the server's clock, so it cannot be backdated or
-       forged forward. No delete (old docs age out of the 60 s window; a TTL
-       policy on lastSeen can clear them — see APPLY-practice-minutes.md).
-       HONEST LIMIT: anyone signed in can write a heartbeat for a session id
-       they invent, so the count can be inflated; it is a decoration, and it
-       is hidden below three players. */
-    match /heartbeats/{sessionId} {
-      allow read: if isSignedIn();
-      allow create, update: if isSignedIn()
-            && sessionId.matches('^[0-9a-f]{24}$')
-            && request.resource.data.keys().hasOnly(['period', 'lastSeen'])
-            && request.resource.data.keys().hasAll(['period', 'lastSeen'])
-            && request.resource.data.period in ['4', '7', 'CAS']
-            && request.resource.data.lastSeen == request.time;
-    }
   }
 }

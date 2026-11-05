@@ -11962,8 +11962,7 @@ async function checkPwTakeEvaluator() {
    daily cap must equal the config's (a mismatch is silent — every write over the
    rule's number is refused), the heartbeat writer and the "N playing" count query
    (removed 2026-11-04) must not come back in the engine or the config (the
-   heartbeats rules block stays until it is deleted in the Firebase console, and
-   until then must be absent or exactly the shipped block), the minutes block must stay owner-only with
+   heartbeats rules block and index were deleted 2026-11-05 and must stay gone), the minutes block must stay owner-only with
    no delete, every script tag is in place in order, every pm.* string the engine
    asks for exists in English AND Spanish (and every one is used), and the three
    hooks into app.js / index.html / journey.js are still there (the strip is ONE hidden <button id="pm-header"> in the main top bar,
@@ -12035,12 +12034,11 @@ function checkPracticeMinutes(i18nTable) {
     // The block's own brace is the last one on its match line (the path has {params} before it).
     /* The scan is over the rules with COMMENTS STRIPPED: a commented-out copy of a shipped block must not stand in for a loosened real one (2026-11-05 review). */
     const block = name => { const live = strip(rules); const i = live.indexOf(`match /${name}`); if (i < 0) return null; let d = 0, j = live.lastIndexOf('{', live.indexOf('\n', i)); for (let k = j; k < live.length; k++) { if (live[k] === '{') d++; else if (live[k] === '}') { d--; if (!d) return live.slice(i, k + 1); } } return null; };
-    /* The heartbeats block outlives its writer until Jonathan deletes it in the console (step 2). Until then it is frozen: ABSENT
-       (step 2 done) or exactly the shipped block, whitespace aside. A loosened rule on a collection nothing uses would go unseen. */
-    const HB_SHIPPED = "match /heartbeats/{sessionId} { allow read: if isSignedIn(); allow create, update: if isSignedIn() && sessionId.matches('^[0-9a-f]{24}$') && request.resource.data.keys().hasOnly(['period', 'lastSeen']) && request.resource.data.keys().hasAll(['period', 'lastSeen']) && request.resource.data.period in ['4', '7', 'CAS'] && request.resource.data.lastSeen == request.time; }";
+    /* The heartbeats block and index were deleted from the repo 2026-11-05 (step 2 of the removal). Nothing writes or reads
+       heartbeats, so both must stay GONE: a rule on a collection nothing uses would go unseen. */
     const hbMatches = (strip(rules).match(/match\s+\/heartbeats\b/g) || []).length;
-    const hb = block('heartbeats/{sessionId}');
-    if (hbMatches > 1 || (hbMatches === 1 && (!hb || hb.replace(/\s+/g, ' ').trim() !== HB_SHIPPED))) fail('firestore.rules: the heartbeats block may only be deleted whole (step 2 of the heartbeat removal), never edited or added to — nothing writes heartbeats since 2026-11-04');
+    if (hbMatches) fail('firestore.rules: a heartbeats block is back — it was deleted 2026-11-05 (step 2 of the heartbeat removal) and nothing writes or reads heartbeats');
+    if (/"collectionGroup"\s*:\s*"heartbeats"/.test(read('firestore.indexes.json') || '')) fail('firestore.indexes.json: the heartbeats index is back — it was deleted 2026-11-05');
     const mins = block('minutes/{userId}/{document=**}'), days = block('minutes/{userId}/days/{day}'), weeks = block('minutes/{userId}/weeks/{week}');
     if (!mins || !days || !weeks) fail('firestore.rules: the three minutes/{userId} blocks (tree read, days, weeks) must all be present');
     else {
@@ -12168,7 +12166,7 @@ function checkPracticeMinutes(i18nTable) {
     for (const k of K) { const e = i18nTable[k]; if (!e || !e.en || !e.es) fail(`i18n key '${k}' needs both en and es`); }
     if (!bad) console.log(`${C.dim}      ${K.size} pm.* strings, ${litCount} references, ${tabs} Journey pages${C.reset}`);
   }
-  if (!bad) ok(`engine run: ${m[1]} simulation assertions pass (pinned); rules cap = config cap (${cfg ? cfg.dailyCapMinutes * 60 : '?'} s); no heartbeat or "N playing" query in the engine or config, the heartbeats rules block ${/match\s+\/heartbeats\b/.test(strip(rules || '')) ? 'unchanged' : 'gone'}; minutes rules owner-only, no delete; older rules untouched; hooks, script order and strings in place`);
+  if (!bad) ok(`engine run: ${m[1]} simulation assertions pass (pinned); rules cap = config cap (${cfg ? cfg.dailyCapMinutes * 60 : '?'} s); no heartbeat or "N playing" query in the engine or config, the heartbeats rules block and index gone; minutes rules owner-only, no delete; older rules untouched; hooks, script order and strings in place`);
 }
 
 (async function main() {

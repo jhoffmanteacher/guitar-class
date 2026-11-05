@@ -3,11 +3,11 @@
    (2026-11-01). Not part of checks.mjs: it needs Java and a few npm packages
    the repo deliberately does not carry.
 
-   It tries every allow and deny in the new minutes/{uid}/days|weeks and
-   heartbeats/{sessionId} blocks (the daily cap, the exact field lists, a uid or
-   cardId in a heartbeat, a client-chosen timestamp, another student, the
+   It tries every allow and deny in the minutes/{uid}/days|weeks blocks (the daily
+   cap, the exact field lists, a client-chosen timestamp, another student, the
    teacher, signed out, delete, a bad id) and then re-checks one rule on each
-   OLDER path to show they still behave. Last run: 66 passed, 0 failed.
+   OLDER path to show they still behave. Last run: 66 passed, 0 failed (before the heartbeats
+   section was removed 2026-11-05; it needs Java, so it has not been re-run since).
 
    To run it, in an empty scratch folder (NOT inside the repo):
      npm init -y
@@ -37,7 +37,6 @@ const T = env.authenticatedContext('teacher', { email: 'jhoffman@seq.org', email
 const N = env.unauthenticatedContext().firestore();
 const day = (db, uid, d) => db.doc(`minutes/${uid}/days/${d}`);
 const wk = (db, uid, w) => db.doc(`minutes/${uid}/weeks/${w}`);
-const hb = (db, id) => db.doc(`heartbeats/${id}`);
 
 if (which.includes('orig')) {
   console.log('== existing rules, baseline');
@@ -81,32 +80,8 @@ if (which.includes('orig')) {
   await t('signed out cannot read', () => day(N, 'uidA', '2026-11-16').get(), false);
   await t('nothing else under minutes is writable (minutes/uidA/other/x)', () => A.doc('minutes/uidA/other/x').set({ seconds: 1 }), false);
   await t('nor the parent doc minutes/uidA', () => A.doc('minutes/uidA').set({ seconds: 1 }), false);
-
-  console.log('== heartbeats');
-  const id = 'a1b2c3d4e5f60718293a4b5c';
-  await t('{ period, lastSeen: serverTimestamp } with a random 24-hex id', () => hb(A, id).set({ period: '7', lastSeen: FV.serverTimestamp() }), true);
-  await t('…again (update)', () => hb(A, id).set({ period: '7', lastSeen: FV.serverTimestamp() }), true);
-  await t('period CAS', () => hb(B, 'ffffffffffffffffffffffff').set({ period: 'CAS', lastSeen: FV.serverTimestamp() }), true);
-  await t('period 4', () => hb(B, 'eeeeeeeeeeeeeeeeeeeeeeee').set({ period: '4', lastSeen: FV.serverTimestamp() }), true);
-  await t('a uid-shaped id refused', () => hb(A, 'uidA').set({ period: '7', lastSeen: FV.serverTimestamp() }), false);
-  await t('a uid-length id of other characters refused', () => hb(A, 'ABCDEFGHIJKLMNOPQRSTUVWX').set({ period: '7', lastSeen: FV.serverTimestamp() }), false);
-  await t('extra field uid refused', () => hb(A, id).set({ period: '7', lastSeen: FV.serverTimestamp(), uid: 'uidA' }), false);
-  await t('extra field cardId refused', () => hb(A, id).set({ period: '7', lastSeen: FV.serverTimestamp(), cardId: 'ca-3' }), false);
-  await t('extra field section refused', () => hb(A, id).set({ period: '7', lastSeen: FV.serverTimestamp(), section: 'x' }), false);
-  await t('missing lastSeen refused', () => hb(A, id).set({ period: '7' }), false);
-  await t('missing period refused', () => hb(A, id).set({ lastSeen: FV.serverTimestamp() }), false);
-  await t('period "9" refused', () => hb(A, id).set({ period: '9', lastSeen: FV.serverTimestamp() }), false);
-  await t('a client-chosen timestamp refused (must be the server clock)', () => hb(A, id).set({ period: '7', lastSeen: TS.fromMillis(Date.now() + 3600000) }), false);
-  await t('a backdated timestamp refused', () => hb(A, id).set({ period: '7', lastSeen: TS.fromMillis(0) }), false);
-  await t('signed out cannot write', () => hb(N, id).set({ period: '7', lastSeen: FV.serverTimestamp() }), false);
-  await t('no delete', () => hb(A, id).delete(), false);
-  await t('any signed-in user reads a heartbeat', () => hb(B, id).get(), true);
-  const cutoff = TS.fromMillis(Date.now() - 60000);
-  await t('the client\'s count query: period == and lastSeen > cutoff (docs path)', () => B.collection('heartbeats').where('period', '==', '7').where('lastSeen', '>', cutoff).get(), true);
-  const q = B.collection('heartbeats').where('period', '==', '7').where('lastSeen', '>', cutoff);
-  console.log('     compat count() available:', typeof q.count);
-  if (typeof q.count === 'function') await t('…and as count()', () => q.count().get(), true);
-  await t('signed out cannot read heartbeats', () => N.collection('heartbeats').get(), false);
+  await t('heartbeats/{id} is gone: no write, no read (the block was deleted 2026-11-05)', async () => { await A.doc('heartbeats/a1b2c3d4e5f60718293a4b5c').set({ period: '7', lastSeen: FV.serverTimestamp() }); }, false);
+  await t('…and a signed-in read of the collection is refused', () => B.collection('heartbeats').get(), false);
 }
 console.log('== existing rules still behave (baseline checks on every older path)');
 await t('progress: own read+write', async () => { await A.doc('progress/uidA').set({ x: 1 }); return A.doc('progress/uidA').get(); }, true);

@@ -3478,9 +3478,14 @@ Jonathan's request; this list is the plan.)
 Jonathan asked for this note here so it is not lost. **Step 1 is DONE and LIVE**
 (2026-11-04: `5144c6c` and its review fixes are on `main`; the live
 `practice-minutes.js` has no `pollLive` or `liveMinCount`, checked 2026-11-05; the
-`work-heartbeat` branch is gone). **Only step 2 is left: it needs Jonathan's Firebase
-console paste.** (2026-11-05: Jonathan published the repo's `firestore.rules` AS IT IS, still
-with the heartbeats block, so step 2 is not done.) The full plan is the "PICK UP HERE" entry under "Practice
+`work-heartbeat` branch is gone). **Step 2: the repo edits are DONE (2026-11-05, this
+commit): the `heartbeats` block is out of `firestore.rules`, the index out of
+`firestore.indexes.json`, the section out of `tools/pm-rules-test.mjs`, and check 1cg now
+requires both to stay gone. Still left: Jonathan's Firebase console paste of the new
+`firestore.rules` (Firestore → Rules → paste → Publish), then optionally delete the old
+`heartbeats` documents and the `heartbeats` composite index in the console.** (Earlier on
+2026-11-05 Jonathan published the rules while they still had the block, so that paste does
+not count.) The full plan is the "PICK UP HERE" entry under "Practice
 minutes" in `WORKFLOW.md` (written 2026-11-04); read it before touching anything.
 In short: "N playing" is gone from the screen, but the engine in
 `practice-minutes.js` on `main` still writes a `heartbeats/{sessionId}` record
