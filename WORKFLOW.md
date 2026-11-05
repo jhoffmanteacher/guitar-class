@@ -1021,12 +1021,14 @@
       (`TAG_SHIPPED`, `WB_SHIPPED`, plus the tree block, exactly 4 `match /minutes/` blocks and no wildcard-first match). Read from the SERVER only
       (`get({source:'server'})`): offline, a plain get() answers empty from the cache (measured on the real SDK), which also bit `load()` and
       `loadBoard()` and is fixed there.
-      **OPEN, Jonathan decides: not anonymous yet.** `minutesBoard` is still keyed by uid with ALL-TIME seconds. While counting is young (began
-      2026-11-01) all-time and this-week seconds are nearly equal, so anyone signed in who reads `minutesBoard`, `weekBoard` and
-      `liveQuiz/current.scores` can match tag -> uid -> name by VALUE (measured: 58 of 60 students from one read each). Not a timing attack.
-      Fix = key the class rank by the tag too (a `total` field on the board doc) and make `minutesBoard` unreadable + delete its uid docs in the
-      console, or drop the class rank tile; or a server (Cloud Function, Blaze plan) doing the ranking. Also already live:
-      `config/class.periodOverrides[uid]` is readable by every student and ties a name to a period for corrected students.
+      **Closed 2026-11-05 (Jonathan's pick: take the names out of the live quiz).** `minutesBoard` is still uid-keyed with ALL-TIME seconds, nearly equal
+      to this week's while counting is young, so anyone signed in could match a `weekBoard` tag to a uid by VALUE (measured: 58 of 60 students from
+      one read each). That no longer reaches a person: `liveQuiz/current.scores` (read by every signed-in account) carries NO name now, only
+      `{pts, right, answered, last, lastRight}` per uid; names live in the teacher-only `answers/{uid}` docs and the wall builds its leaderboard from them
+      (`lqNames()`, `lqRankedNamed()`); a student's end screen shows other players as "Student". checks.mjs **1cm** runs the real scoring/views and
+      fails the push if a name returns. Never publish a name next to a uid again. Also still true: `config/class.periodOverrides[uid]` is readable by
+      every student and gives a period (never a name). A rank board keyed by the tag too was built and PARKED as `~/Downloads/rankboard-parked.patch`
+      on Jonathan's Mac (a diff against fec6a1e; the idea: `rankBoard/{tag}`, no rules block for `minutesBoard`) in case he wants the belt-and-braces version later.
       Known limit: a tag cannot be proven unique, so any account can claim another's public tag and lower/remove that one entry (fix would be a
       create-only reverse index `boardTags/{tag}` with `existsAfter`; not built: the rules emulator needs Java, which this Mac lacks).
       `tools/pm-rules-test.mjs` has NO cases for `minutesBoard`, `weekBoard` or `meta/board` yet. Tests: pm-sim sections 14-16, pm-e2e "top 5".

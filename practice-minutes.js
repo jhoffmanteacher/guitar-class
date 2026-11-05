@@ -120,8 +120,9 @@
    only ever RAISES the number inside one week + period (a page with an older copy never lowers what another
    page wrote); a new week or a changed period overwrites it. At most one write per WB_MS. The class's docs for this week + period are read with one query
    (equality filters only: no composite index) and kept WB_KEEP_MS (15 min) in memory and localStorage,
-   so a period of 30 reads about 30 documents per student per 15 minutes on screen. KNOWN WEAKNESS (open, Jonathan decides): minutesBoard (the class rank) is still keyed by the uid, and the two boards hold nearly the same
-   number while counting is young, so a reader who joins them by value links a tag to a uid (and the live quiz links a uid to a name). The teacher's account is never written
+   so a period of 30 reads about 30 documents per student per 15 minutes on screen. Left open on purpose (2026-11-05): minutesBoard (the class rank) is still keyed by the uid, so a
+   reader could join it to this board by value (all-time and this-week seconds are nearly equal while counting is young); no name is next to a uid
+   anywhere readable, because the live quiz's public scores carry none any more (checks.mjs 1cm). The teacher's account is never written
    or ranked. A failed write or read changes nothing about counting; the medal and the tile stay away.
    HONEST LIMITS: a student at DevTools can write any number up to the rules' week cap for themselves (and
    choose their period). A device whose clock is a week BEHIND replaces the doc with its own week when it loads, and

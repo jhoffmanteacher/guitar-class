@@ -115,12 +115,17 @@ service cloud.firestore {
        only at reveal) and the running scores. Every signed-in student
        reads it, which is what makes the game live.
 
-       What that exposes: the `scores` map — every player's display name
-       and points — is readable by any signed-in student, the same
-       trade-off config/class already makes for its uid maps. It is a
-       leaderboard shown on the classroom wall, so this is not a leak of
-       anything private; note that it is class-wide and readable from
-       anywhere, not just from the room.
+       What that exposes: the `scores` map — every player's POINTS, keyed by
+       uid — is readable by any signed-in account. It carries NO NAME
+       (2026-11-05, Jonathan: no per-period minutes tied to a name, readable
+       by anyone): names stay in answers/{uid} below (teacher-only), and the
+       projected wall, which is the teacher's own screen, builds its
+       leaderboard from those. Before that the scores map held every
+       player's display name next to the uid, which tied every uid-keyed doc
+       on the site (config/class's uid maps, the class rank, the minutes
+       boards) to a person; the Top 5 board is keyed by a private tag as
+       well, in case a name is ever published again. checks.mjs 1cm runs the
+       scoring and fails the push if a name gets back into this doc.
 
        Scoped to the specific "current" doc rather than liveQuiz/{doc}, for
        the same reason config/class is: a wildcard would open every future
@@ -402,17 +407,16 @@ service cloud.firestore {
        What a reader sees here: a random tag, a period, a week and a number.
        No uid, no name, no email.
 
-       ⚠ KNOWN WEAKNESS (open, Jonathan decides): minutesBoard (the class rank,
-       above) is keyed by uid and holds ALL-TIME seconds. While counting is
-       young (it began 2026-11-01) all-time and this-week seconds are nearly
-       the same number, so anyone signed in who reads minutesBoard, this
-       collection and liveQuiz/current.scores (uid -> name) can match a tag to
-       a uid by VALUE (measured on the real engine: 58 of 60 students from one
-       read of each) and so tie a name to a period and week minutes. Closing
-       it means keying the class rank by the tag too and making minutesBoard
-       unreadable, or a server that does the ranking. Likewise
-       config/class.periodOverrides[uid] is readable by every student and
-       already ties a name to a period for corrected students.
+       minutesBoard (the class rank, above) is still keyed by uid with
+       ALL-TIME seconds, nearly the same number as this week's while counting
+       is young, so a reader can match a tag to a uid by VALUE (measured on the
+       real engine: 58 of 60 students from one read of each). That no longer
+       reaches a person: the live quiz's public scores carry no name any more
+       (2026-11-05; see liveQuiz/current above, checks.mjs 1cm), so there is no
+       name next to any uid in anything a student or an outsider can read.
+       The tag is the second lock: if a name is ever published again, this
+       board still does not join to it directly. config/class.periodOverrides
+       is keyed by uid and gives a period, never a name.
 
        HONEST LIMITS: a student at DevTools can write any number up to the cap
        for themselves and place themselves in any period or week. A tag cannot

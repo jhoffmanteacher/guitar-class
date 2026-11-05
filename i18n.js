@@ -2795,6 +2795,7 @@
     'lq.answerIs':           { en: 'Answer: {answer}', es: 'Respuesta: {answer}' },
     'lq.points':             { en: '{n} points', es: '{n} puntos' },
     'lq.rank':               { en: 'Place {n} of {total}', es: 'Lugar {n} de {total}' },
+    'lq.student':            { en: 'Student', es: 'Estudiante' },
     'lq.finalTitle':         { en: 'Final scores', es: 'Puntajes finales' },
     /* The projected stage's own chrome. The room reads the wall together, so
        these go up in both languages through lqBilingual() like the quiz text

@@ -24,6 +24,10 @@ a time, in `liveQuiz/current` (+ an `answers/{uid}` subcollection).
   octaves both count (`correctIds`). The board is `app.js`'s
   `fgBoardSvg(sid, kind, opts)` behind a `typeof` guard — the fret UI
   only ever renders on `index.html`, never on a Journey page.
+- **The public session doc carries NO player name** (2026-11-05, Jonathan: no per-period minutes tied to a name, readable by anyone). `liveQuiz/current.scores` is
+  `{uid: {pts, right, answered, last, lastRight}}`, read by every signed-in account, so a name next to a uid there would tie every uid-keyed doc on the site to a person.
+  Names live only in the teacher-only `answers/{uid}` docs; the wall builds its leaderboard from them (`lqNames()` / `lqRankedNamed()`); a student's own end screen shows other
+  players as "Student". `checks.mjs` 1cm runs the real scoring and views and fails the push if a name gets back in. Never copy `a.name` into `scores`.
 - **Nothing on the stage may reveal the answer before the reveal.** During a
   question the projector shows the prompt and an answered-count, nothing else.
   Any new stage content gets checked against that.

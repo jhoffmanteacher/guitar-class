@@ -5,6 +5,10 @@ Notable changes to the Guitar Class site. Newest first.
 For the full session-by-session history (and the reasoning behind each change),
 see `WORKFLOW.md` and the git commit log.
 
+## 2026-11-05 — Live quiz: other players' names are not shown on your screen
+
+- **At the end of a live quiz, your own screen shows the top 5 as "Student" ("Estudiante") next to their points. Your own row shows your name.** The classroom wall still shows every name, as before. Names are no longer stored where every signed-in account can read them.
+
 ## 2026-11-04 — Recording question: Yes is the big button
 
 - **In the "Save this take as a recording?" question, the Yes button is now the large main button across the row.** "No thanks" sits below it as a normal-size button, easy to see and press. The words and what each button does are the same.

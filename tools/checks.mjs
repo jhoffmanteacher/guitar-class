@@ -5051,6 +5051,70 @@ function checkLiveQuizTimerRepaint() {
 }
 
 /* ════════════════════════════════════════════════════════════════════
+   1cm. LIVE QUIZ — the public session doc holds NO name (Jonathan, 2026-11-05)
+   liveQuiz/current is read by every signed-in account, and its `scores` map is
+   keyed by uid. A display name there ties every other uid-keyed doc on the site
+   (the class rank, the minutes boards, config/class's uid maps, the Top 5) to a
+   person; Jonathan's rule is that no per-period minutes may be tied to a name,
+   readable by anyone. Names live only in the teacher-only answers/{uid} docs,
+   and the projected wall (the teacher's screen) builds its leaderboard from
+   them. EXECUTES the real live-quiz.js in a VM and (1) scores a round for rows
+   that carry names, on top of an OLDER session doc whose scores still hold one,
+   and fails if a name survives in what would be written; (2) draws the student's
+   end screen from scores that still hold names and fails if another player's
+   name appears (the student's own is fine); (3) draws the wall's end screen and
+   roster from the teacher's answer docs and fails if the names are NOT there (the
+   wall must keep showing them).
+   ════════════════════════════════════════════════════════════════════ */
+function checkLiveQuizNoNames() {
+  head('1cm. Live quiz: the student-readable session doc holds no name');
+  let bad = 0, cases = 0;
+  const flag = m => { err(`1cm: ${m}`); problems++; bad++; };
+  const box = {
+    console: { log() {}, warn() {}, error() {} },
+    performance: { now: () => 1e6 },
+    setInterval: () => 1, clearInterval() {}, setTimeout: () => 1, clearTimeout() {},
+    localStorage: { getItem: () => null, setItem() {} }, sessionStorage: { getItem: () => null, setItem() {} },
+    document: { hidden: false, getElementById: () => null, querySelectorAll: () => [], addEventListener() {},
+      body: { classList: { add() {}, remove() {} }, appendChild() {} }, createElement: () => ({}), contains: () => false },
+    t: k => k, tIn: k => k, escHtml: x => String(x), escAttr: x => String(x), applyI18n() {}, firebase: {}
+  };
+  box.window = { addEventListener() {} };
+  try {
+    vm.createContext(box);
+    vm.runInContext(readFileSync(join(ROOT, 'live-quiz.js'), 'utf8'), box, { filename: 'live-quiz.js' });
+    vm.runInContext('var currentUser = { uid: "me", displayName: "Me Myself" };', box);
+  } catch (e) { flag(`live-quiz.js would not load in the test VM: ${e.message}`); return; }
+  const run = code => vm.runInContext(code, box);
+  const NAMES = ['Alice Zebra', 'Old Leftover', 'Bob Yak'];
+  try {
+    // (1) scoring: rows with names, over an older doc whose scores still carry one
+    const scored = JSON.parse(run(`JSON.stringify(lqScoreRound(
+      { sessionId: 'S1', speedBonus: false, scores: { old1: { name: 'Old Leftover', pts: 500, right: 1, answered: 1 } } },
+      [ { uid: 'u1', name: 'Alice Zebra', choice: 'a', ms: 900 }, { uid: 'u2', name: 'Bob Yak', choice: 'b', ms: 1200 }, { uid: 'me', name: 'Me Myself', choice: 'a', ms: 700 } ],
+      a => a.choice === 'a', ['a', 'b']))`));
+    cases++;
+    const wrote = JSON.stringify(scored.scores);
+    for (const n of [...NAMES, 'Me Myself']) if (wrote.includes(n)) flag(`scoring wrote the name "${n}" into the public scores: ${wrote}`);
+    if (/"name"/.test(wrote)) flag(`scoring wrote a "name" key into the public scores: ${wrote}`);
+    if (!(scored.scores.u1 && scored.scores.u1.pts > 0 && scored.scores.old1 && scored.scores.old1.pts === 500)) flag(`scoring no longer carries points forward: ${wrote}`);
+    // (2) the student's end screen, from scores that (wrongly, older game) still hold names
+    const mine = run(`lqStudentEndedHtml({ scores: { me: { name: 'Me Myself', pts: 900 }, u1: { name: 'Alice Zebra', pts: 1000 }, u2: { name: 'Bob Yak', pts: 800 }, old1: { name: 'Old Leftover', pts: 500 } } })`);
+    cases++;
+    for (const n of NAMES) if (mine.includes(n)) flag(`the student's end screen shows another player's name "${n}"`);
+    if (!mine.includes('Me Myself')) flag("the student's end screen no longer shows their own name");
+    if (!mine.includes('lq.student')) flag("the student's end screen does not label the other players (lq.student)");
+    // (3) the wall: names come from the teacher's answer docs, and are still shown
+    run(`lqTSession = { sessionId: 'S1', scores: { u1: { pts: 1000 }, u2: { pts: 800 } } }; lqTAnswers = [ { sessionId: 'S1', uid: 'u1', name: 'Alice Zebra', qIndex: -1 }, { sessionId: 'S1', uid: 'u2', name: 'Bob Yak', qIndex: -1 } ];`);
+    const wall = run('lqStageEndedHtml(lqTSession)'), roster = JSON.stringify(run('lqRoster(lqTSession)'));
+    cases++;
+    for (const n of ['Alice Zebra', 'Bob Yak']) { if (!wall.includes(n)) flag(`the wall's end screen lost the name "${n}" (it must keep showing names, from the teacher-only answers)`); if (!roster.includes(n)) flag(`the lobby roster lost the name "${n}"`); }
+  } catch (e) { flag(`a live-quiz view threw: ${e.message}`); return; }
+  if (cases !== 3) flag(`ran ${cases} cases, pinned at 3`);
+  if (bad === 0) ok(`scoring writes no name (even over an older doc that held one), the student's end screen shows no other player's name, and the wall + lobby still show every name from the teacher-only answers (3 cases)`);
+}
+
+/* ════════════════════════════════════════════════════════════════════
    1g. DUPLICATE TOP-LEVEL GLOBALS — a same-named top-level function in two
    shipped classic scripts silently lets whichever loads LAST win, with no
    error (see fab-tools.js/app.js's flashClass history). Two mirrors are
@@ -12129,6 +12193,7 @@ function checkPracticeMinutes(i18nTable) {
   await checkJourneyReadySave();
   checkSiteMadeClick();
   checkLiveQuizTimerRepaint();
+  checkLiveQuizNoNames();
   checkCoachVerdicts();
   await checkPwTakeEvaluator();
   checkPracticeMinutes(i18nTable);

@@ -42,7 +42,9 @@
                    teacher picked from the control strip, written when the
                    question opens. null for an mc quiz.
        tally       {choiceId: count}, written only at reveal
-       scores      {uid: {name, pts, right, answered, last, lastRight}}
+       scores      {uid: {pts, right, answered, last, lastRight}} — NO name:
+                   every signed-in account reads this doc (names are in
+                   answers/{uid}, teacher-only; lqNames() feeds the wall)
        speedBonus  false ⇒ every correct answer is worth the same
        limitSec    0 ⇒ no countdown
 
@@ -241,6 +243,22 @@ function lqPoints(ms, s){
   const raw = Number(ms);
   const m = Number.isFinite(raw) ? Math.max(0, Math.min(limit, raw)) : limit;
   return Math.round(LQ_MAX_POINTS * (1 - 0.5 * (m / limit)));
+}
+/* Names live ONLY in the teacher-only answer docs (answers/{uid}, readable by the teacher; a student reads just their own). The public session
+   doc's `scores` map carries NO name (Jonathan, 2026-11-05): every signed-in account reads it, and a name next to a uid there ties every other
+   uid-keyed board on the site (minutes, class rank, Top 5, the teacher's uid maps) to a person. The projected wall is the teacher's screen, so it
+   gets its names from here. */
+function lqNames(s){
+  const m = {};
+  if(!s) return m;
+  lqTAnswers.forEach(a => { if(a && a.sessionId === s.sessionId && a.uid && a.name) m[a.uid] = a.name; });
+  return m;
+}
+// The wall's leaderboard: the public scores plus the teacher's own names (ties read alphabetically, as before).
+function lqRankedNamed(s){
+  const names = lqNames(s), withNames = {};
+  Object.keys(s.scores || {}).forEach(uid => { withNames[uid] = Object.assign({}, s.scores[uid], { name: names[uid] || '' }); });
+  return lqRanked(withNames);
 }
 // uid → rank, highest points first. Ties share the lower rank number, the
 // way a scoreboard reads out loud ("two of you tied for second").
@@ -794,7 +812,8 @@ function lqLbRowHtml(r, cls){
 function lqStudentEndedHtml(s){
   const rows = lqRanked(s.scores);
   const me = rows.find(r => r.uid && r.uid === lqUid()) || null;
-  const top = rows.slice(0, 5).map(r => lqLbRowHtml(r, 'lq-lb-row' + (me && r.uid === me.uid ? ' me' : ''))).join('');
+  // Other players are "Student": the public scores carry no names (and an older game's leftover names are never drawn). Your own row shows your own name.
+  const top = rows.slice(0, 5).map(r => lqLbRowHtml(Object.assign({}, r, { name: (me && r.uid === me.uid) ? lqName() : t('lq.student') }), 'lq-lb-row' + (me && r.uid === me.uid ? ' me' : ''))).join('');
   const mine = me
     ? `<div class="lq-final-me"><div class="lq-final-rank" data-i18n="lq.rank" data-i18n-params="${escAttr(JSON.stringify({n:me.rank,total:rows.length}))}">${escHtml(t('lq.rank',{n:me.rank,total:rows.length}))}</div>`
       + `<div class="lq-final-pts" data-i18n="lq.points" data-i18n-params="${escAttr(JSON.stringify({n:me.pts||0}))}">${escHtml(t('lq.points',{n:me.pts||0}))}</div></div>`
@@ -1062,7 +1081,7 @@ function lqRoster(s){
   if(!s) return [];
   const seen = new Map();
   lqTAnswers.forEach(a => { if(a && a.sessionId === s.sessionId && a.uid) seen.set(a.uid, a.name || ''); });
-  Object.keys(s.scores || {}).forEach(uid => { if(!seen.has(uid)) seen.set(uid, (s.scores[uid] || {}).name || ''); });
+  Object.keys(s.scores || {}).forEach(uid => { if(!seen.has(uid)) seen.set(uid, ''); });   // a scored player whose answer doc is gone: no name to show
   return [...seen.entries()].map(([uid, name]) => ({ uid, name }));
 }
 
@@ -1151,7 +1170,7 @@ function lqStageRevealHtml(s, quiz){
   if(lqType(quiz) === 'fret') return lqStageFretRevealHtml(s, quiz);
   const c = lqChoice(quiz, s.correct);
   const answer = c ? lqBilingual(c.key, 'lq-st-answer') : '';
-  const board = lqRanked(s.scores).slice(0, 5).map(r => lqLbRowHtml(r)).join('');
+  const board = lqRankedNamed(s).slice(0, 5).map(r => lqLbRowHtml(r)).join('');
   return lqBilingualParams('lq.stageAnswerLabel', 'lq-st-qnum', {n: Number(s.qIndex) + 1}, {n: Number(s.qIndex) + 1})
     + answer
     + `<div class="lq-st-split">${lqTallyHtml(s, quiz, null)}<ol class="lq-lb lq-lb-stage">${board}</ol></div>`;
@@ -1179,14 +1198,14 @@ function lqStageFretRevealHtml(s, quiz){
   const correctIds = lqCorrectIds(s);
   const answer = correctIds.length ? lqFretBilingualAnswer(correctIds) : '';
   const board = `<div class="lq-board" id="lq-st-board">${typeof fgBoardSvg === 'function' ? fgBoardSvg('lqst', null, { strings: quiz.strings, hit: false }) : ''}</div>`;
-  const lb = lqRanked(s.scores).slice(0, 5).map(r => lqLbRowHtml(r)).join('');
+  const lb = lqRankedNamed(s).slice(0, 5).map(r => lqLbRowHtml(r)).join('');
   return lqBilingualParams('lq.stageAnswerLabel', 'lq-st-qnum', {n: Number(s.qIndex) + 1}, {n: Number(s.qIndex) + 1})
     + answer
     + `<div class="lq-st-split">${board}<div>${lqTallyHtml(s, quiz, null)}<ol class="lq-lb lq-lb-stage">${lb}</ol></div></div>`;
 }
 
 function lqStageEndedHtml(s){
-  const rows = lqRanked(s.scores);
+  const rows = lqRankedNamed(s);
   const board = rows.slice(0, 10).map(r => lqLbRowHtml(r)).join('');
   return lqBilingual('lq.finalTitle', 'lq-st-title') + `<ol class="lq-lb lq-lb-stage">${board}</ol>`;
 }
@@ -1375,6 +1394,7 @@ function lqScoreRound(s, rows, isRight, tallyKeys, isValidId){
   // student who sat this one out doesn't see the previous "+1000" again.
   Object.keys(s.scores || {}).forEach(uid => {
     scores[uid] = Object.assign({}, s.scores[uid], { last: 0, lastRight: null });
+    delete scores[uid].name;     // a game from before 2026-11-05 may have left one: the public doc carries no name
   });
   rows.forEach(a => {
     if(!a.uid) return;
@@ -1385,8 +1405,7 @@ function lqScoreRound(s, rows, isRight, tallyKeys, isValidId){
     }
     const right = isRight(a);
     const pts = right ? lqPoints(a.ms, s) : 0;
-    const cur = scores[a.uid] || { name: a.name || '', pts: 0, right: 0, answered: 0 };
-    cur.name = a.name || cur.name || '';
+    const cur = scores[a.uid] || { pts: 0, right: 0, answered: 0 };    // NO name here: this doc is read by every signed-in account
     cur.pts = (cur.pts || 0) + pts;
     cur.right = (cur.right || 0) + (right ? 1 : 0);
     cur.answered = (cur.answered || 0) + 1;
