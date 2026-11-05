@@ -3471,8 +3471,12 @@ Jonathan's request; this list is the plan.)
    stands: a higher onset floor is ruled out; "no readable pitch, no tick" and stricter
    strum ratios are the two options left, and the "Strum what-if" table in the console
    (Evaluate all recordings) is the tool for the second. This section does not record what that
-   table showed on the 3 noisy real takes; look at it before choosing. Either option touches
-   `coach.js` detection: xhigh, Always Reviewed, run `tools/mic-sim/power-switch.mjs` first.
+   table showed on the 3 noisy real takes; look at it before choosing. Takes saved from
+   2026-11-05 carry the pitch readings (see "Pitch readings in the saved take"), so the cost of
+   "no readable pitch, no tick" on real strums can be measured once new takes are in and the
+   evaluator reads them (not built yet). Either option touches
+   `coach.js` detection: xhigh, Always Reviewed, run `tools/mic-sim/power-switch.mjs` first
+   (repaired 2026-11-05: it had crashed on `PW_A5_OPEN` since the Songs column was added).
 4. **Nothing else is waiting.** Settled and not to be raised again: see "Later (not chosen
    yet)" below (the 30 s cap, the real mic check, the three wordings, no Note Runner check).
 
@@ -3548,8 +3552,8 @@ count (23 of 40 on 2026-11-04; Coach and Note Runner takes count too).
   the soft real strums too.
 - **"No readable pitch, no tick" reaches only part of it.** It can touch only the 34 false
   hits graded right. The other 18 were graded wrong, which already needs 3+ readings. What
-  it costs real low-E strums cannot be measured from saved takes (no pitch readings are
-  saved).
+  it costs real low-E strums could not be measured from these 12 takes (they carry no pitch
+  readings). Takes saved from 2026-11-05 on do: see "Pitch readings in the saved take" below.
 - **Lead (tested by the what-if below):** the site's rule (`ccLoop`: full-band
   `rms > CHK_ONSET_FLOOR && rms > smoothRms * CHK_ONSET_RATIO` 1.4, or the HF channel
   `* CHK_HF_RATIO` 1.7) fires on a ~3 dB jump. The evaluator's onset finder
@@ -3610,7 +3614,29 @@ and the terminal text, and was broken 14 ways in a scratch copy (see the commit 
 
 What it does NOT answer: the what-if says what the site's rule would hear, not whether
 the strum was the right chord, and not what "no readable pitch, no tick" would do to
-real low-E strums.
+real low-E strums. The second now has the data it needs in new takes (next section); the
+console does not use it yet.
+
+#### Pitch readings in the saved take (added 2026-11-05)
+
+Each entry of a Power Chord Switch take's `expected` list now has a `readings` field, and the
+take's top-level `changeReadings` says what it means (`coach.js` `ccResolvePend` keeps the
+readings, `ccRecMeta` saves them, rounded to 2 places, midi numbers):
+
+- `null`: no strum was heard in that change's window (graded `miss`);
+- `[]`: a strum was heard but no pitch could be read (graded `ok` on timing alone, as always
+  with fewer than 3 readings);
+- `[45.12, 45.02, ...]`: the readings the chord check used. 3 or more are needed for a chord
+  verdict (`ok` or `off`); fewer pass on timing alone.
+
+So "no readable pitch, no tick" can be priced from a take: count the changes with fewer than 3
+readings that the site graded `ok`, split by the evaluator's own label (`agree` = a real strum
+that would be lost, `false-hit` = noise that would be removed). **Not built:** the console and
+`eval-takes.mjs` do not read `readings` yet. Takes saved before 2026-11-05 have no `readings`
+key: treat that as unknown, never as `null`. No rules change was needed (`micTakes` has no field
+list). Grading is untouched: the old and new `ccResolvePend` gave the same verdict on 20,000 of
+20,000 random changes. Check 1ck runs the real `ccResolvePend` and `ccRecMeta` and reads the
+saved take back (21 of 21 changes; six deliberate breaks each turned it red).
 
 ### Later (not chosen yet)
 

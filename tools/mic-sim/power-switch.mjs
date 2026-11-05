@@ -36,7 +36,7 @@ const fns = ['coachReadFrame', 'coachDetectPitch', 'coachPitchReadings', 'coachS
 const POWER_GATE = opt('clarity') ? JSON.parse(opt('clarity')) : null;
 const loopsJson = src.match(/const CC_POWER_PROGRESSIONS = (\[[\s\S]*?\n\]);/);
 if (!loopsJson) { console.error('no CC_POWER_PROGRESSIONS in ' + file); process.exit(2); }
-const LOOPS = new Function('return ' + loopsJson[1])();
+const LOOPS = new Function(constLine('PW_A5_OPEN') + '\nreturn ' + loopsJson[1])();   // the song loops name the open-A5 shape (added with the Songs column)
 
 const body = `let micRec=null,coachHfRms=0,coachBgRms=0,coachBgPrev=0,coachOnsetAt=0,coachReadCtx=null,coachReadCtxT=0,coachYinD=null,coachSmoothA=0.18;
 const tunerMedian=a=>{const b=[...a].sort((x,y)=>x-y);return b[Math.floor(b.length/2)];};

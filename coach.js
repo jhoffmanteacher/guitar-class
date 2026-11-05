@@ -3588,10 +3588,13 @@ function ccRecBadge(){
    the strum was PLAYED (arrival - micLatencyMs). */
 function ccRecMeta(complete){
   const progDef = ccProgs()[cc.progIdx] || {};
+  const r2 = x => Math.round(x * 100) / 100;
   return {
     fields: { game: 'pw', complete: complete === true, progression: cc.chords.join('-'), song: progDef.song || null, ladder: !!cc.ladder,
-              bpm: cc.stageBpms[0], stageBpms: cc.stageBpms.slice(), bpc: cc.bpc, eventTimes: 'played (arrival - micLatencyMs)' },
-    expected: cc.changes.map((c, i) => ({ i, t: c.t, from: c.from, to: c.to, stage: c.stage == null ? 0 : c.stage, bpm: c.bpm, verdict: c.result })),
+              bpm: cc.stageBpms[0], stageBpms: cc.stageBpms.slice(), bpc: cc.bpc, eventTimes: 'played (arrival - micLatencyMs)',
+              changeReadings: 'per change: null = no strum in its window; [] = a strum but no pitch could be read; else the midi readings its chord check used (under 3 passes on timing alone)' },
+    expected: cc.changes.map((c, i) => ({ i, t: c.t, from: c.from, to: c.to, stage: c.stage == null ? 0 : c.stage, bpm: c.bpm, verdict: c.result,
+      readings: c.readings ? c.readings.map(r2) : null })),
     events: (cc.evLog || []).slice()
   };
 }
@@ -3707,6 +3710,10 @@ function ccShowLast(c){
 function ccResolvePend(ch){
   const p = ch.pend;
   ch.pend = null;
+  /* Kept for the saved take (ccRecMeta), not used for grading: the pitch readings this change's
+     chord check had. [] = a strum was heard but no pitch could be read. A change that never got
+     a pend (no strum in its window) keeps no readings at all. */
+  ch.readings = p.readings.slice();
   let toneOk = null;
   /* Chord-tone vote (same rule as the Coach's chord checks): a strum is
      polyphonic, so readings hop between chord tones — any single-pitch

@@ -5007,8 +5007,10 @@ function micEvalStrumHits(frames, rule, ratio, hfRatio){
   return out;
 }
 
-/* A Power Chord Switch take (micTakes/<uid>-pw, coach.js ccRecMeta). It holds
-   no pitch readings, so it is measured for what the audio says on its own:
+/* A Power Chord Switch take (micTakes/<uid>-pw, coach.js ccRecMeta). Takes saved
+   from 2026-11-05 hold each change's pitch readings (expected[].readings); this
+   does not read them (yet) and older takes have none, so it is measured for what
+   the audio says on its own:
    was there a strum where the site listened for each change, against the
    site's verdict. Same row shape as micEvalTake (the console table and
    eval-takes read both), plus `kind: 'pw'` and `rounds`.

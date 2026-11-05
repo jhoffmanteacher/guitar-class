@@ -11480,6 +11480,34 @@ function checkCoachVerdicts() {
       if (!Array.isArray(m.events)) flag('1ck: the saved take has no events list');
     }
     if (full.saves.length === 1 && full.saves[0].fields.complete !== true) flag('1ck: a game played to the end is not marked complete:true in the saved take');
+    /* Pitch readings in the take (2026-11-05): ccResolvePend keeps the readings a change's chord check had and ccRecMeta saves them, so the
+       console can ask what "no readable pitch, no tick" would do to a take. The real ccResolvePend and ccRecMeta are run on three kinds of change
+       per round (no strum in its window, a strum with no pitch read, a strum with four readings) and the saved take is read back: null, [] and
+       the readings rounded to 2 places, in the right slots of all 21; no key missing (Firestore refuses undefined); the grading unchanged
+       (no strum = miss, no pitch read = ok on timing alone). */
+    song.readingChecks = 0;
+    const rd = take('power', `const feed = [null, [], [45.123, 45.02, 45.98, 47.0]];
+      for (let r = 0; r < 3; r++) {
+        cc.phase = "play";
+        cc.changes.forEach((c, i) => { c.result = null; c.readings = undefined; const f = feed[i % 3]; c.pend = f ? { t: 0, readings: f.slice() } : null; });
+        ccStageEnd();
+      }`);
+    if (rd.saves.length !== 1) flag(`1ck: the readings take saved ${rd.saves.length} takes, expected 1`);
+    else {
+      const m = rd.saves[0];
+      if (typeof m.fields.changeReadings !== 'string' || m.fields.changeReadings.length < 40) flag('1ck: the saved take does not say what its per-change readings mean (fields.changeReadings)');
+      if (m.expected.length !== 21) flag(`1ck: the readings take lists ${m.expected.length} changes, expected 21`);
+      m.expected.forEach((e, k) => {
+        const kind = (k % 7) % 3;
+        const want = kind === 0 ? null : kind === 1 ? [] : [45.12, 45.02, 45.98, 47];
+        if (!Object.prototype.hasOwnProperty.call(e, 'readings')) { flag(`1ck: saved change ${k} has no readings key (undefined is refused by Firestore, null is not)`); return; }
+        if (JSON.stringify(e.readings) !== JSON.stringify(want)) flag(`1ck: saved change ${k} (${['no strum', 'a strum, no pitch read', 'four readings'][kind]}) saved readings ${JSON.stringify(e.readings)}, expected ${JSON.stringify(want)}`);
+        if (kind === 0 && e.verdict !== 'miss') flag(`1ck: saved change ${k} had no strum and is graded "${e.verdict}", expected miss`);
+        if (kind === 1 && e.verdict !== 'ok') flag(`1ck: saved change ${k} had a strum but no pitch read and is graded "${e.verdict}", expected ok (on timing alone)`);
+        if (kind === 2 && !['ok', 'off'].includes(e.verdict)) flag(`1ck: saved change ${k} had four readings and is graded "${e.verdict}"`);
+        song.readingChecks++;
+      });
+    }
     /* Save on Stop (2026-11-04): a Stopped game with enough audio is saved, marked complete:false; one with almost none is dropped,
        because each student has ONE take per game and a new take overwrites it. */
     run('globalThis.__recSec = 20;');
@@ -11571,7 +11599,7 @@ function checkCoachVerdicts() {
     if (pk !== 'ccBest:F5-G5:beat') flag(`1ck: a pair's best-score key changed to "${pk}" (a student's saved bests would be lost)`);
     const pairPlan = JSON.parse(run(`JSON.stringify(ccRoundPlan(CC_POWER_PROGRESSIONS[1], CC_POWER_PROGRESSIONS[1].chords, CC_RATES[1]))`));
     if (pairPlan.slots !== 12 || pairPlan.ladder || pairPlan.rounds !== 1) flag(`1ck: a pair's round changed (${pairPlan.slots} slots at "Every 2 beats", expected 12, one round)`);
-    const SONG_PIN = { recChecks: 18, songs: 2, entries: 16, cardSwitches: 16, hints: 16 * 7 * 2, setups: 16 * 3 * 2, dones: 16 * 2, rounds: 16 * 3, nudges: 16 * 2 };
+    const SONG_PIN = { recChecks: 19, readingChecks: 21, songs: 2, entries: 16, cardSwitches: 16, hints: 16 * 7 * 2, setups: 16 * 3 * 2, dones: 16 * 2, rounds: 16 * 3, nudges: 16 * 2 };
     for (const [k, n] of Object.entries(SONG_PIN)) if (song[k] !== n) flag(`1ck: ${song[k]} ${k}, pinned ${n} — the check went partly blind (or grew: re-pin on purpose)`);
     songCounts = song;
     run(`setLang('en'); cc = null; ccStop();`);
@@ -11580,7 +11608,7 @@ function checkCoachVerdicts() {
   for (const [k, n] of Object.entries(EXPECT)) {
     if (counts[k] !== n) flag(`1ca: rendered ${counts[k]} ${k}, pinned ${n} — the check went partly blind (or grew: re-pin EXPECT on purpose)`);
   }
-  if (bad === 0 && songCounts) { head('1ck. Power Chord Switch song switches: each activity is checked against its card and the three rounds are run'); ok(`${songCounts.songs} songs, ${songCounts.entries} switch activities (${songCounts.cardSwitches} distinct card switches, each once; Sweet Child's open A5 only next to C5/B5/E5, the fret-5 A5 only next to G5, same pitches as A5); the ladder run for every one (${songCounts.rounds} round changes: 60/75/90 BPM, 21 changes, the BPM buttons ${songCounts.nudges} times: only later rounds, 40..140, off in the last); ${songCounts.hints} "next:" hints (EN+ES) match the diagrams, ${songCounts.setups} setup and ${songCounts.dones} done screens never show the key "A5o", the computer never picks a song, best keys are per switch and the pair keys are unchanged`); }
+  if (bad === 0 && songCounts) { head('1ck. Power Chord Switch song switches: each activity is checked against its card and the three rounds are run'); ok(`${songCounts.songs} songs, ${songCounts.entries} switch activities (${songCounts.cardSwitches} distinct card switches, each once; Sweet Child's open A5 only next to C5/B5/E5, the fret-5 A5 only next to G5, same pitches as A5); the ladder run for every one (${songCounts.rounds} round changes: 60/75/90 BPM, 21 changes, the BPM buttons ${songCounts.nudges} times: only later rounds, 40..140, off in the last); ${songCounts.hints} "next:" hints (EN+ES) match the diagrams, ${songCounts.setups} setup and ${songCounts.dones} done screens never show the key "A5o", the computer never picks a song, best keys are per switch and the pair keys are unchanged; a saved take carries each change's pitch readings (${songCounts.readingChecks} of 21 changes read back: no strum null, strum with no pitch [], four readings rounded; grading unchanged)`); }
   if (bad === 0) ok(`${counts.reports} Coach reports, ${counts.descs} chord-card descriptions, ${counts.nrLevels} Note Runner levels ×2 and ${counts.doneScreens} arcade done screens read true; Power Chord Switch: ${counts.pwLoops} loops are three-finger shapes in the right group, ${counts.pwDraws} random draws all listed pairs (11 of 11 and both orders seen), the Again button replays the pair and Start draws, Start sticks in Change Up and not in Power Chord Switch (two columns that fit 657px), Every beat is the first speed button there, the live quiz keeps its 760px shell, ${counts.pwHints} slide hints match the diagrams (EN+ES), ${counts.pwViews} screens/rounds, ${counts.pwMemory} remembered tempo/speed pairs and ${counts.pwGates} pitch gates keep it apart from Change Up`);
 }
 
