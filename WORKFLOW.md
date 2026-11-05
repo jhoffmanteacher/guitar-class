@@ -1021,20 +1021,19 @@
       (`TAG_SHIPPED`, `WB_SHIPPED`, plus the tree block, exactly 4 `match /minutes/` blocks and no wildcard-first match). Read from the SERVER only
       (`get({source:'server'})`): offline, a plain get() answers empty from the cache (measured on the real SDK), which also bit `load()` and
       `loadBoard()` and is fixed there.
-      **Mostly closed 2026-11-05 (Jonathan's pick: take the names out of the live quiz); one channel OPEN.** `minutesBoard` is still uid-keyed with
-      ALL-TIME seconds, nearly equal to this week's while counting is young, so anyone signed in can match a `weekBoard` tag to a uid by VALUE
-      (measured: 58 of 60 students from one read each). That reaches no NAME for an outsider: `liveQuiz/current.scores` (read by every signed-in
-      account) carries NO name now, only `{pts, right, answered, last, lastRight}` per uid (a whitelist copy: `lqPublicScore`); names live in the
-      teacher-only `answers/{uid}` docs and the wall builds its leaderboard from them (`lqNames()`, `lqRankedNamed()`); a student's end screen shows
-      other players as "Student". The writers REPLACE the field (`set(..., {mergeFields})`): a plain merge is deep and kept old names in the doc.
-      checks.mjs **1cm** runs the real writers against a doc that merges like Firestore, starting from an older game full of names, plus the views
-      and the `answers` rules. Never publish a name next to a uid again. **ONE-TIME: the old session doc still holds the last game's names until the
-      next Reveal/End/Close/Start writes it; delete the `scores` field of `liveQuiz/current` in the Firebase console (or press Start then Close).**
-      **OPEN (round-3 review): a person in the ROOM sees the wall's names with points and can read the public uid -> points, which links the top
-      players' uids to names (simulated: ~half of a speed-scored 30-student game, never wrong), and from a uid the value join above reaches period and
-      minutes. Options: the parked tag-keyed class rank (`~/Downloads/rankboard-parked.patch`: `rankBoard/{tag}`, no rules block for `minutesBoard`),
-      or public scores keyed by a per-game random token the student writes in its answer doc.** Also: `config/class.periodOverrides[uid]` is readable by
-      every student and gives a period (never a name).
+      **Closed 2026-11-05 (Jonathan's picks: take the names out of the live quiz, then also key the class rank by the tag).** (1) `liveQuiz/current.scores`
+      (read by every signed-in account) carries NO name: only `{pts, right, answered, last, lastRight}` per uid (a whitelist copy, `lqPublicScore`);
+      names live in the teacher-only `answers/{uid}` docs and the wall builds its leaderboard from them (`lqNames()`, `lqRankedNamed()`); a student's end
+      screen shows other players as "Student". The writers REPLACE the field (`set(..., {mergeFields})`): a plain merge is deep and kept old names in
+      the doc. checks.mjs **1cm** runs the real writers against a doc that merges like Firestore, starting from an older game full of names, plus the
+      views and the `answers` rules. (2) The class rank moved from `minutesBoard/{uid}` to `rankBoard/{tag}` (same private tag as the Top 5);
+      `minutesBoard` has NO rules block any more and 1cg fails the push if one comes back. A person in the room can still line the wall's names and points
+      up with the public uid -> points (a uid, a name and points), but no uid reaches minutes or a period. Never publish a name next to a uid, or
+      minutes next to a uid, again. **ONE-TIME after deploying: delete the `scores` field of `liveQuiz/current` in the Firebase console (the last game's
+      names stay in it until a Reveal/End/Close/Start writes it); the old `minutesBoard` docs are unreachable and can be deleted whenever.**
+      Visible side effect: the class rank (N/total) restarts as students open the site (each page creates its `rankBoard` doc at the server's confirmed
+      all-time sum on its first publish), so `total` is small at first. Also still true: `config/class.periodOverrides[uid]` is readable by every student
+      and gives a period (never a name).
       Known limit: a tag cannot be proven unique, so any account can claim another's public tag and lower/remove that one entry (fix would be a
       create-only reverse index `boardTags/{tag}` with `existsAfter`; not built: the rules emulator needs Java, which this Mac lacks).
       `tools/pm-rules-test.mjs` has NO cases for `minutesBoard`, `weekBoard` or `meta/board` yet. Tests: pm-sim sections 14-16, pm-e2e "top 5".

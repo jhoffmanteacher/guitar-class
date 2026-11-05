@@ -40,10 +40,10 @@ function makeWorld(opts = {}) {
   const listeners = {};
   const net = opts.net || { online: true, denied: false, commitDelay: 0 };
   const server = opts.server || { days: {}, weeks: {} };   // what Firestore holds
-  server.board ||= {};                                       // minutesBoard/{uid}: { seconds } (the class rank)
+  server.board ||= {};                                       // rankBoard/{tag}: { seconds } (the class rank, keyed by the private tag)
   server.wb ||= {}; server.wbVer ||= {};                     // weekBoard/{tag}: { week, period, seconds } (the Top 5, keyed by a private tag) and a version counter per doc
   server.meta ||= {}; server.metaVer ||= {};                 // minutes/{uid}/meta/board: { id } (the private tag, create-only, owner-only)
-  /* sets: every single-document set() on ANY path EXCEPT minutesBoard/{uid}, which goes to
+  /* sets: every single-document set() on ANY path EXCEPT rankBoard/{tag}, which goes to
      log.board. The minutes go in one batch, so this stays empty; the heartbeats/{sessionId}
      writer removed 2026-11-04 landed here, and anything but the board landing here fails. */
   const log = { getOpts: [], commits: [], sets: [], fetches: [], board: [], boardRefused: [], wbWrites: [], wbRefused: [], wbGets: 0, wbRetries: 0, wbTx: 0, wbQueries: [] };
@@ -85,22 +85,23 @@ function makeWorld(opts = {}) {
   /* The real SDK offline (measured, 10.12.2): a plain get() RESOLVES with an empty answer from the cache; { source: 'server' } rejects 'unavailable'.
      Every get() here is logged in log.getOpts so a test can see which reads asked the server. */
   const offlineGet = (opts) => opts && opts.source === 'server' ? Promise.reject(Object.assign(new Error('Failed to get documents from server.'), { code: 'unavailable' })) : Promise.resolve({ forEach: () => {} });
-  const dbCollection = (path) => ({
+  const dbCollection = (path) => (path === 'minutesBoard' && (log.minutesBoardTouched = (log.minutesBoardTouched || 0) + 1), {
     doc: (id) => ({
       path: path + '/' + id,
-      /* minutesBoard/{uid}.get(): the page looks at its own doc once, before its first write. */
+      /* rankBoard/{tag}.get(): the page looks at its own doc once, before its first write. */
       get: () => {
-        if (path !== 'minutesBoard') return Promise.reject(new Error('doc.get is only faked for minutesBoard'));
+        if (path !== 'rankBoard') return Promise.reject(new Error('doc.get is only faked for rankBoard'));
         if (net.boardDenied) { log.boardRefused.push({ id, get: true }); return Promise.reject(Object.assign(new Error('denied'), { code: 'permission-denied' })); }
         (log.boardGets ||= []).push(id);
         return Promise.resolve({ exists: server.board[id] !== undefined, data: () => server.board[id] });
       },
       collection: (sub) => dbCollection(path + '/' + id + '/' + sub),
       set: (data, o) => {
-        if (path === 'minutesBoard') {
+        if (path === 'rankBoard') {
           /* The rules: the document that results is only { seconds }, a number 0..400 x 1200 (an increment({__inc}) merged
              onto the stored value, as Firestore does); net.boardDenied = the rules are not published. Every attempt is logged. */
           (log.boardTries ||= []).push({ id, data, o });
+          if (!(server.meta[user.uid] && server.meta[user.uid].id === id)) { log.boardRefused.push({ id, data, notYours: true }); return Promise.reject(Object.assign(new Error('not your tag'), { code: 'permission-denied' })); }
           if (net.boardDenied) { log.boardRefused.push({ id, data }); return Promise.reject(Object.assign(new Error('denied'), { code: 'permission-denied' })); }
           const inc = data && data.seconds && typeof data.seconds === 'object' ? data.seconds.__inc : undefined;
           const result = inc !== undefined ? (server.board[id]?.seconds || 0) + inc : data && data.seconds;
@@ -112,10 +113,10 @@ function makeWorld(opts = {}) {
         log.sets.push({ path, id, data }); return Promise.resolve();
       },
     }),
-    get: (opts) => (log.getOpts.push({ path, opts: opts || null }), net.online === false) ? offlineGet(opts) : (path === 'minutesBoard' && (net.boardDenied || net.denyBoardRead)) ? Promise.reject(Object.assign(new Error('denied'), { code: 'permission-denied' }))
+    get: (opts) => (log.getOpts.push({ path, opts: opts || null }), net.online === false) ? offlineGet(opts) : (path === 'rankBoard' && (net.boardDenied || net.denyBoardRead)) ? Promise.reject(Object.assign(new Error('denied'), { code: 'permission-denied' }))
       : net.denyReads ? (net.reads = (net.reads || 0) + 1, Promise.reject(Object.assign(new Error('denied'), { code: 'permission-denied' }))) : reply(() => ({
       forEach: (fn) => {
-        if (path === 'minutesBoard') { net.boardReads = (net.boardReads || 0) + 1; Object.keys(server.board).forEach((k) => fn(docSnap(k, server.board[k]))); return; }
+        if (path === 'rankBoard') { net.boardReads = (net.boardReads || 0) + 1; Object.keys(server.board).forEach((k) => fn(docSnap(k, server.board[k]))); return; }
         const bag = path.endsWith('/days') ? server.days : path.endsWith('/weeks') ? server.weeks : {};
         Object.keys(bag).forEach((k) => fn(docSnap(k, bag[k])));
       },
@@ -1308,11 +1309,13 @@ console.log('12. all site work counts');
   check('half an hour of clicking still stops at the daily cap (1200 s)', sec(w10) === 1200, 'counted ' + sec(w10));
 }
 
-/* ═══════════ 13. Class rank: minutesBoard/{uid} (2026-11-04) ═══════════ */
+/* ═══════════ 13. Class rank: rankBoard/{tag} (2026-11-05; was minutesBoard/{uid}) ═══════════ */
 console.log('13. class rank');
 {
   const weekSum = (w) => Object.values(w.server.weeks).reduce((a, b) => a + b.seconds, 0);
-  const boardOf = (w) => w.server.board['uid-A'];
+  const TAGX = 'c0ffee00c0ffee00c0ffee00c0ffee00';   // a student's private tag, for worlds that start with one made
+  const tagOf = (w) => (w.server.meta['uid-A'] || {}).id;
+  const boardOf = (w) => w.server.board[tagOf(w)];
 
   // The write: one number, the server-confirmed all-time seconds, only when it changed, not more than once per 2 minutes.
   const w = makeWorld();
@@ -1321,13 +1324,13 @@ console.log('13. class rank');
   await w.run(130);
   await w.PM.flush(); await w.settle();
   await w.run(130);
-  check('the board doc exists; every write is { seconds } only on uid-A: the first creates it at an absolute number (the server\'s sum), later ones are increments', w.log.board.length >= 2 && eq(Object.keys(w.log.board[0].data), ['seconds']) && typeof w.log.board[0].data.seconds === 'number'
-    && w.log.board.slice(1).every((b) => eq(Object.keys(b.data), ['seconds']) && typeof b.data.seconds === 'object' && b.data.seconds.__inc > 0) && w.log.board.every((b) => b.id === 'uid-A'), JSON.stringify(w.log.board));
+  check('the board doc exists; every write is { seconds } only under the own tag of the student: the first creates it at an absolute number (the server\'s sum), later ones are increments', w.log.board.length >= 2 && eq(Object.keys(w.log.board[0].data), ['seconds']) && typeof w.log.board[0].data.seconds === 'number'
+    && w.log.board.slice(1).every((b) => eq(Object.keys(b.data), ['seconds']) && typeof b.data.seconds === 'object' && b.data.seconds.__inc > 0) && w.log.board.every((b) => b.id === tagOf(w) && b.id !== 'uid-A'), JSON.stringify(w.log.board));
   check('…after the last write the board holds exactly the weeks docs\' sum (the confirmed seconds)', boardOf(w) && boardOf(w).seconds > 0 && boardOf(w).seconds === weekSum(w), JSON.stringify(boardOf(w)) + ' vs weeks ' + weekSum(w));
   const n0 = w.log.board.length;
   await w.run(300);
   check('idle for 5 minutes with nothing new to confirm: no further board writes', w.log.board.length === n0, n0 + ' → ' + w.log.board.length);
-  check('the board write is a single-document set on minutesBoard only; no other path is ever set()', w.log.sets.length === 0 && w.log.board.every((b) => typeof b.id === 'string'), w.log.sets.length + ' other sets');
+  check('the board write is a single-document set on rankBoard only; no other path is ever set()', w.log.sets.length === 0 && w.log.board.every((b) => typeof b.id === 'string'), w.log.sets.length + ' other sets');
 
   // Many flushes in a long session: at most one board write per 2 minutes (a 20-minute day is ≤ 11 writes).
   const wl = makeWorld();
@@ -1354,19 +1357,19 @@ console.log('13. class rank');
   pMain.input('pointerdown'); await pMain.run(100); await pMain.PM.flush(); await pMain.settle();                                   // then the main tab works 100 s more
   await pMain.run(130); await pJourney.run(130); await pMain.run(130);                       // the main tab's session ended in there; its last write waits out the 2-minute spacing
   const both = weekSum(pJourney);
-  check('two pages of one student: the board holds both pages\' minutes, exactly the weeks docs\' sum (not the last page\'s own total)', both >= 200 && sh2.server.board['uid-A'] && sh2.server.board['uid-A'].seconds === both, 'board ' + JSON.stringify(sh2.server.board['uid-A']) + ' vs weeks ' + both);
+  check('two pages of one student: the board holds both pages\' minutes, exactly the weeks docs\' sum (not the last page\'s own total)', both >= 200 && sh2.server.board[tagOf(pMain)] && sh2.server.board[tagOf(pMain)].seconds === both, 'board ' + JSON.stringify(sh2.server.board[tagOf(pMain)]) + ' vs weeks ' + both);
 
   // The first write of a page looks at the doc. A student who already has minutes (from before the board existed) and no doc:
   // the doc is CREATED at everything the server has confirmed, history included, then grows with the minutes.
   const wfw0 = makeWorld({ server: { days: {}, weeks: { '2026-W46': { seconds: 3000, goalSeconds: 3600, hit: false } }, board: {} } });
   wfw0.PM._state(); wfw0.input('pointerdown'); await wfw0.run(130); await wfw0.PM.flush(); await wfw0.settle(); await wfw0.run(130);
-  check('a student with 3000 s of history and no board doc: the doc is created at the full 3000 s, then grows (= the weeks docs\' sum)', weekSum(wfw0) >= 3100 && boardOf(wfw0).seconds === weekSum(wfw0) && typeof wfw0.log.board[0].data.seconds === 'number' && wfw0.log.board[0].data.seconds === 3000, JSON.stringify(boardOf(wfw0)) + ' vs ' + weekSum(wfw0) + '; first write ' + JSON.stringify(wfw0.log.board[0] && wfw0.log.board[0].data));
+  check('a student with 3000 s of history and no board doc: the doc is created at the whole history (3000 s plus the few seconds counted while the tag was made), then grows (= the weeks docs\' sum)', weekSum(wfw0) >= 3100 && boardOf(wfw0).seconds === weekSum(wfw0) && typeof wfw0.log.board[0].data.seconds === 'number' && wfw0.log.board[0].data.seconds >= 3000 && wfw0.log.board[0].data.seconds <= 3030, JSON.stringify(boardOf(wfw0)) + ' vs ' + weekSum(wfw0) + '; first write ' + JSON.stringify(wfw0.log.board[0] && wfw0.log.board[0].data));
   // A doc that exists is never overwritten by a page, only added to (whatever else wrote it, another device included, stays).
-  const wfw1 = makeWorld({ server: { days: {}, weeks: { '2026-W46': { seconds: 3000, goalSeconds: 3600, hit: false } }, board: { 'uid-A': { seconds: 500 } } } });
+  const wfw1 = makeWorld({ server: { days: {}, weeks: { '2026-W46': { seconds: 3000, goalSeconds: 3600, hit: false } }, board: { [TAGX]: { seconds: 500 } }, meta: { 'uid-A': { id: TAGX } } } });
   wfw1.PM._state(); wfw1.input('pointerdown'); await wfw1.run(130); await wfw1.PM.flush(); await wfw1.settle(); await wfw1.run(130);
   const added = weekSum(wfw1) - 3000;
   check('an existing board doc (500 s) is only ever added to: 500 + this page\'s confirmed seconds, never replaced by this page\'s total', added >= 100 && boardOf(wfw1).seconds === 500 + added && wfw1.log.board.every((x) => typeof x.data.seconds === 'object' && x.data.seconds.__inc > 0), JSON.stringify(boardOf(wfw1)) + ' added ' + added + '; writes ' + JSON.stringify(wfw1.log.board.map((x) => x.data.seconds)));
-  check('…and the page looks at its own doc exactly once, before its first write', (wfw1.log.boardGets || []).length === 1 && wfw1.log.boardGets[0] === 'uid-A' && (wfw0.log.boardGets || []).length === 1, JSON.stringify(wfw1.log.boardGets) + ' ' + JSON.stringify(wfw0.log.boardGets));
+  check('…and the page looks at its own doc exactly once, before its first write', (wfw1.log.boardGets || []).length === 1 && wfw1.log.boardGets[0] === TAGX && (wfw0.log.boardGets || []).length === 1, JSON.stringify(wfw1.log.boardGets) + ' ' + JSON.stringify(wfw0.log.boardGets));
 
   // A page whose load FAILED does not know the real total: its flushes publish nothing.
   const wnl = makeWorld({ net: { online: true, denied: false, denyReads: true } });
@@ -1380,7 +1383,7 @@ console.log('13. class rank');
   check('the teacher\'s account counts its minutes but writes nothing to the board and gets no rank', weekSum(wte) > 0 && !(wte.log.boardTries || []).length && wte.PM._rank() === null, weekSum(wte) + ' s, ' + (wte.log.boardTries || []).length + ' tries, rank ' + JSON.stringify(wte.PM._rank()));
 
   // The rank: 1 + the number of OTHER students with strictly more seconds; total counts me; my own doc is ignored.
-  const sv = () => ({ days: {}, weeks: {}, board: { 'uid-B': { seconds: 100 }, 'uid-C': { seconds: 300 }, 'uid-D': { seconds: 600 }, 'uid-E': { seconds: 5000 }, 'uid-A': { seconds: 99999 } } });
+  const sv = () => ({ days: {}, weeks: {}, board: { 'uid-B': { seconds: 100 }, 'uid-C': { seconds: 300 }, 'uid-D': { seconds: 600 }, 'uid-E': { seconds: 5000 }, [TAGX]: { seconds: 99999 } }, meta: { 'uid-A': { id: TAGX } } });
   const wr = makeWorld({ server: sv() });
   wr.PM._state();
   wr.input('pointerdown');
@@ -1529,7 +1532,7 @@ console.log('14. top 5 of the week');
     const wn = makeWorld({ server: { days: {}, weeks: wk(minOf(15)), board: {}, wb: {} }, ...o });
     wn.PM._state(); await wn.PM.load(); await wn.settle(); await wn.PM._loadWeek();
     await wn.run(130, (i) => { if (i % 30 === 0) wn.input('pointerdown'); }); await wn.PM.flush(); await wn.settle();
-    check(`${label}: no weekBoard transaction, no read, no place — and the minutes still count`, !wn.log.wbTx && !wn.net.wbReads && wn.PM._top5() === null && weekOf(wn) > minOf(15), `${wn.log.wbTx} tx, ${wn.net.wbReads} reads, ${JSON.stringify(wn.PM._top5())}`);
+    check(`${label}: no Top 5 board write attempted, no class read, no place — and the minutes still count`, !(wn.log.wbTrySets || []).length && !wn.net.wbReads && wn.PM._top5() === null && weekOf(wn) > minOf(15), `${wn.log.wbTx} tx, ${wn.net.wbReads} reads, ${JSON.stringify(wn.PM._top5())}`);
   }
   const wte = makeWorld({ uid: 'uid-T', period: '4', server: { days: {}, weeks: wk(minOf(15)), board: {}, wb: { 'uid-B': wbDoc(minOf(30)) } } });
   wte.user.email = 'teacher@example.org'; vm.runInContext("var TEACHER_EMAIL = 'teacher@example.org';", wte.ctx);
@@ -1579,7 +1582,7 @@ console.log('14. top 5 of the week');
   check('a student moved from period 7 to 4 (a teacher\'s correction): the doc is rewritten as period 4 at the new number, even though it is lower', eq(own(pc), wbDoc(600, W, '4')), JSON.stringify(own(pc)));
   const nz = makeWorld({ period: '4', server: { days: {}, weeks: {}, board: {}, wb: {} } });
   nz.PM._state(); await nz.PM.load(); await nz.settle(); await nz.run(5);
-  check('a student with nothing this week writes nothing (no doc of zeros)', !nz.log.wbTx && eq(nz.server.wb, {}), `${nz.log.wbTx} tx`);
+  check('a student with nothing this week writes nothing to the Top 5 board (no doc of zeros)', !(nz.log.wbTrySets || []).length && eq(nz.server.wb, {}), `${nz.log.wbTx} tx`);
 
   // The rules are not published (or refuse the write): minutes still count and land; the retry waits 5 minutes; the read is retried every 30 s at most.
   const wd = makeWorld({ period: '4', net: { online: true, denied: false, wbDenied: true, wbReadDenied: true } });
@@ -1757,9 +1760,9 @@ console.log('15. offline reads');
   // The class rank board: an empty offline answer would hide the tile for 3 hours.
   const w4 = makeWorld({ server, net: { online: false, denied: false } });
   w4.PM._state(); const bOff = await w4.PM._loadBoard(); await w4.settle();
-  check('the rank board read offline fails (null), nothing is cached, and it asked the server', bOff === null && !w4.store['pm:b:uid-A'] && w4.log.getOpts.filter((g) => g.path === 'minutesBoard').every((g) => g.opts && g.opts.source === 'server') && w4.log.getOpts.some((g) => g.path === 'minutesBoard'), JSON.stringify(w4.log.getOpts));
+  check('the rank board read offline fails (null) at the tag step: nothing is cached and nothing is read from the cache', bOff === null && !w4.store['pm:b:uid-A'] && !w4.log.getOpts.some((g) => g.path === 'rankBoard'), JSON.stringify(w4.log.getOpts));
   w4.net.online = true; await w4.PM.load(); await w4.PM._loadBoard(); await w4.settle();
-  check('…back online it reads the board: 3 students (me + 2), not an empty class', !!w4.PM._rank() && w4.PM._rank().total === 3, JSON.stringify(w4.PM._rank()));
+  check('…back online it reads the board FROM THE SERVER: 3 students (me + 2), not an empty class', !!w4.PM._rank() && w4.PM._rank().total === 3 && w4.log.getOpts.filter((g) => g.path === 'rankBoard').length >= 1 && w4.log.getOpts.filter((g) => g.path === 'rankBoard').every((g) => g.opts && g.opts.source === 'server'), JSON.stringify({ rank: w4.PM._rank(), opts: w4.log.getOpts }));
 }
 
 console.log('16. the Top 5 board holds no name');
@@ -1821,7 +1824,7 @@ console.log('16. the Top 5 board holds no name');
   // A student with no class period makes no tag (nothing to publish).
   const np = makeWorld({ period: '', server: { days: {}, weeks: wk(600), board: {}, wb: {}, meta: {} } });
   np.PM._state(); await np.PM.load(); await np.settle(); await np.PM._loadWeek(); await np.run(5);
-  check('a student whose class period is not answered yet makes no tag', eq(np.server.meta, {}) && eq(np.server.wb, {}), JSON.stringify(np.server.meta));
+  check('a student whose class period is not answered yet still gets a tag (the class rank needs one) but no Top 5 board doc and no Top 5 read', !!np.server.meta['uid-A'] && /^[0-9a-f]{32}$/.test(np.server.meta['uid-A'].id) && eq(np.server.wb, {}) && !np.net.wbReads, JSON.stringify(np.server.meta));
   // The reconnect: the online event clears the 30 s wait on a failed class read, so it is asked again at once.
   const ol = makeWorld({ ui: true, strip: true, config: { uiOn: true }, period: '4', server: { days: {}, weeks: wk(minOf(15)), board: {}, wb: { 'uid-O0': { week: W, period: '4', seconds: minOf(20) } }, meta: {} } });
   ol.PM._state(); await ol.PM.load(); await ol.settle(); ol.net.online = false; ol.PM.syncHeader(true); await ol.settle(); await ol.run(3, (i) => ol.input('pointerdown'));
@@ -1833,6 +1836,21 @@ console.log('16. the Top 5 board holds no name');
   one.PM._state(); one.PM.syncHeader(true); await one.PM.load(); await one.settle(); await one.PM._loadWeek(); await one.settle();
   const ho = { hidden: true, innerHTML: '', isConnected: true }; one.PM.renderProgress(ho); await one.settle();
   check('9:59 (1 minute to be ranked): the tile uses the singular key pm.top5ToGoOne, not the plural', /pm\.top5ToGoOne/.test(ho.innerHTML) && !/pm\.top5ToGo[^O]/.test(ho.innerHTML), ho.innerHTML.slice(-160));
+  // The class rank (rankBoard) is keyed by the same private tag: no uid in it, and the old uid-keyed minutesBoard is never touched (it has no rules block).
+  const rk = { days: {}, weeks: wk(minOf(15)), board: {}, wb: {}, meta: {} };
+  const rA = makeWorld({ period: '4', server: rk }), rB = makeWorld({ period: '4', uid: 'uid-B', server: rk });
+  rA.PM._state(); await rA.PM.load(); await rA.settle(); await rA.run(5);
+  rB.PM._state(); await rB.PM.load(); await rB.settle(); await rB.run(5);
+  const bkeys = Object.keys(rk.board);
+  check('the class rank board holds one doc per student under the private tags (the same tags as the Top 5), no uid in any id', bkeys.length === 2 && bkeys.every((k) => HEX.test(k)) && !/uid-/.test(bkeys.join()) && eq(bkeys.sort(), [rk.meta['uid-A'].id, rk.meta['uid-B'].id].sort()) && Object.values(rk.board).every((d) => eq(Object.keys(d), ['seconds'])), JSON.stringify({ board: rk.board, meta: rk.meta }));
+  check('the engine never touches the old uid-keyed minutesBoard (no rules block: every access would be refused)', !rA.log.minutesBoardTouched && !rB.log.minutesBoardTouched, String(rA.log.minutesBoardTouched));
+  await rA.PM._loadBoard(); await rA.settle();
+  check('a page ranks itself against the OTHER tag in the rank board, leaving its own out: total 2, my place by whole minutes', !!rA.PM._rank() && rA.PM._rank().total === 2, JSON.stringify(rA.PM._rank()));
+  // No crypto: nothing is attempted on either board.
+  const rn = makeWorld({ noCrypto: true, period: '4', server: { days: {}, weeks: wk(600), board: {}, wb: {}, meta: {} } });
+  rn.PM._state(); await rn.PM.load(); await rn.settle(); await rn.PM._loadBoard(); await rn.run(130, (i) => { if (i % 30 === 0) rn.input('pointerdown'); }); await rn.PM.flush(); await rn.settle();
+  check('a page without window.crypto: no rank-board write is even attempted, no rank, no tag — and the minutes still count', !(rn.log.boardTries || []).length && !(rn.log.boardGets || []).length && eq(rn.server.board, {}) && eq(rn.server.meta, {}) && rn.PM._rank() === null && weekSumAll(rn) >= 600, JSON.stringify({ tries: rn.log.boardTries, meta: rn.server.meta }));
+  function weekSumAll(w) { return Object.values(w.server.weeks).reduce((a, b) => a + b.seconds, 0); }
 }
 
 console.log(`\n${failed ? '✗' : '✓'} pm-sim: ${passed} passed, ${failed} failed`);

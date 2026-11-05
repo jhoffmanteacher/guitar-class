@@ -11971,7 +11971,7 @@ async function checkPwTakeEvaluator() {
    The browser half (strip, recap, toast, My progress, 1366×657, both languages,
    a real <audio>) is tools/pm-e2e.mjs — it needs Chrome, so it is run by hand.
    ════════════════════════════════════════════════════════════════════ */
-const PM_SIM_PIN = 273;
+const PM_SIM_PIN = 277;
 function checkPracticeMinutes(i18nTable) {
   head('1cg. Practice minutes: the engine is run; the rules cap, no heartbeat, wiring and strings are pinned');
   let bad = 0;
@@ -12051,22 +12051,17 @@ function checkPracticeMinutes(i18nTable) {
       if (!/hasOnly\(\['seconds'\]\)/.test(days) || !/<= dailyCapSeconds\(\)/.test(days)) fail("minutes days rule must be { seconds } only and capped at dailyCapSeconds()");
       if (!/hasOnly\(\['seconds', 'goalSeconds', 'hit'\]\)/.test(weeks) || !/hit is bool/.test(weeks)) fail("minutes weeks rule must be { seconds, goalSeconds, hit } only, hit a bool");
     }
-    /* The class rank (2026-11-04): ONE number per student, readable by every signed-in student, writable by its owner only. */
-    /* The block is pinned WHOLE (whitespace and comments aside), like the heartbeats block: pattern checks alone let an extra
-       `allow update: if isSignedIn();`, a `|| true`, or a second `match /minutesBoard/{u}` through (2026-11-04 review). It is
-       the block Jonathan published to the Firebase console, so a change here is a change to what must be re-pasted. */
-    const MB_SHIPPED = "match /minutesBoard/{userId} { allow read: if isSignedIn(); allow create, update: if pmOwner(userId) && request.resource.data.keys().hasOnly(['seconds']) && request.resource.data.seconds is number && request.resource.data.seconds >= 0 && request.resource.data.seconds <= 400 * dailyCapSeconds(); }";
+    /* The class rank (2026-11-05): ONE number per student keyed by the private Top 5 tag, never the uid. The uid-keyed minutesBoard (2026-11-04) is GONE:
+       its all-time seconds were nearly equal to this week's, so joining it to the tag board by value linked tags to uids (and the live quiz links
+       uids to names). It must keep NO rules block at all (default deny), and rankBoard is pinned WHOLE below. */
     const mbMatches = (strip(rules).match(/match\s+\/minutesBoard\b/g) || []).length;
-    const board = block('minutesBoard/{userId}');
-    if (mbMatches !== 1) fail(`firestore.rules has ${mbMatches} match blocks for /minutesBoard (exactly one is allowed)`);
-    else if (board && board.replace(/\s+/g, ' ').trim() !== MB_SHIPPED) fail('firestore.rules: the minutesBoard block differs from the one shipped and published. If this is on purpose, change MB_SHIPPED here with it and tell Jonathan to paste the rules again');
-    if (!board) fail('firestore.rules: the minutesBoard/{userId} block (the class rank) is missing — practice-minutes.js reads and writes it');
-    else {
-      if (!/allow read:\s*if isSignedIn\(\)/.test(board)) fail('minutesBoard rule: read must be `if isSignedIn()` (every student reads the class to work out a rank)');
-      if (/isTeacher|\bdelete\b|allow\s+write/.test(board)) fail('minutesBoard rule allows the teacher, delete or a blanket write');
-      if (!/allow create, update:\s*if pmOwner\(userId\)/.test(board)) fail('minutesBoard rule: create/update must be owner-only (pmOwner(userId))');
-      if (!/hasOnly\(\['seconds'\]\)/.test(board) || !/seconds is number/.test(board) || !/seconds >= 0/.test(board) || !/seconds <= 400 \* dailyCapSeconds\(\)/.test(board)) fail("minutesBoard rule must be { seconds } only, a number from 0 to 400 * dailyCapSeconds()");
-    }
+    if (mbMatches !== 0) fail(`firestore.rules has ${mbMatches} match block(s) for /minutesBoard: it must have none (a uid-keyed board next to the tag boards can be joined to them by value; Jonathan's rule, 2026-11-05)`);
+    if (/['"`.]minutesBoard\b|collection\('minutesBoard'\)/.test(strip(read('practice-minutes.js') || ''))) fail("practice-minutes.js still reads or writes 'minutesBoard' (the class rank moved to rankBoard/{tag})");
+    const RB_SHIPPED = "match /rankBoard/{tag} { allow read: if isSignedIn(); allow create, update: if isSignedIn() && tag == get(/databases/$(database)/documents/minutes/$(request.auth.uid)/meta/board).data.id && request.resource.data.keys().hasOnly(['seconds']) && request.resource.data.seconds is number && request.resource.data.seconds >= 0 && request.resource.data.seconds <= 400 * dailyCapSeconds(); }";
+    const rbMatches = (strip(rules).match(/match\s+\/rankBoard\b/g) || []).length;
+    const rboard = block('rankBoard/{tag}');
+    if (rbMatches !== 1 || !rboard) fail(`firestore.rules has ${rbMatches} match blocks for /rankBoard (exactly one is allowed; practice-minutes.js reads and writes the class rank there)`);
+    else if (rboard.replace(/\s+/g, ' ').trim() !== RB_SHIPPED) fail('firestore.rules: the rankBoard block differs from the one shipped. If this is on purpose, change RB_SHIPPED here with it and tell Jonathan to paste the rules again');
     /* The Top 5 board (2026-11-04, redesigned the same day: Jonathan wants NO per-period minutes tied to a name, readable by anyone): two blocks,
        pinned WHOLE like minutesBoard. The board's docs are keyed by a private random tag, never a uid; the tag lives only in the student's own
        owner-only doc minutes/{uid}/meta/board, and a write to the board must be to the doc whose id is the writer's own tag. A change to either

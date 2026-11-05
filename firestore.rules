@@ -125,10 +125,11 @@ service cloud.firestore {
        on the site (config/class's uid maps, the class rank, the minutes
        boards) to a person; the Top 5 board is keyed by a private tag as
        well, in case a name is ever published again. checks.mjs 1cm runs the
-       writers and fails the push if a name gets back into this doc. OPEN: a
+       writers and fails the push if a name gets back into this doc. A
        person in the room sees the wall's names with points and can read this
        doc's uid -> points, so the top players' uids can be lined up with their
-       names (see the Top 5 header below for the options).
+       names; from a uid nothing reaches minutes or a period (rankBoard and
+       weekBoard are keyed by a private tag, minutesBoard has no rules block).
 
        Scoped to the specific "current" doc rather than liveQuiz/{doc}, for
        the same reason config/class is: a wildcard would open every future
@@ -358,34 +359,9 @@ service cloud.firestore {
             && request.resource.data.hit is bool;
     }
 
-    /* ── CLASS RANK (2026-11-04; practice-minutes.js, "CLASS RANK") ───────
-       minutesBoard/{uid}  { seconds } — the student's all-time practice
-       seconds, so My progress can say "N/total". Every signed-in student
-       reads the whole collection (that is how a rank is worked out); only
-       that uid writes its own doc, with that one field, a number from 0 to
-       400 days of the daily cap. No delete. What it exposes: a uid and a
-       number — no name and no period in this doc, and a student cannot read
-       progress/{uid} to turn a uid into a person. Until 2026-11-05 the live quiz
-       kept each player's name under the same uid in liveQuiz/current.scores
-       (accepted by Jonathan, 2026-11-04); it no longer does. A person in the
-       ROOM can still line the wall's names and points up with the public
-       uid -> points (see liveQuiz/current above; open). The teacher reads
-       this like any signed-in user.
-       HONEST LIMITS: a student at DevTools can write any number up to the
-       cap for themselves and so claim first place; any Google account that
-       signs in once adds 1 to the total (no domain rule, Jonathan's call);
-       nothing reads this for a grade, and the minutes themselves are
-       bounded by the rules above. (Comment wording only changed after the
-       first publish: no re-paste is needed for it.)
-       ⚠ Must be published BEFORE (or with) the site code that writes it. */
-    match /minutesBoard/{userId} {
-      allow read: if isSignedIn();
-      allow create, update: if pmOwner(userId)
-            && request.resource.data.keys().hasOnly(['seconds'])
-            && request.resource.data.seconds is number
-            && request.resource.data.seconds >= 0
-            && request.resource.data.seconds <= 400 * dailyCapSeconds();
-    }
+    /* minutesBoard/{uid} (the uid-keyed class rank, 2026-11-04) HAS NO RULES BLOCK ANY MORE (2026-11-05): with no match, every read and
+       write is denied. Jonathan's rule (no minutes tied to a name, readable by anyone) ruled the uid out: see rankBoard below. Its old docs
+       are unreachable and can be deleted in the Firebase console. Do not add a block for it back. */
 
     /* ── TOP 5 (2026-11-04; practice-minutes.js, "TOP 5") ────────────────
        Jonathan, 2026-11-04: no per-period minutes tied to a name, readable by
@@ -412,21 +388,14 @@ service cloud.firestore {
        What a reader sees here: a random tag, a period, a week and a number.
        No uid, no name, no email.
 
-       minutesBoard (the class rank, above) is still keyed by uid with
-       ALL-TIME seconds, nearly the same number as this week's while counting
-       is young, so a reader can match a tag to a uid by VALUE (measured on the
-       real engine: 58 of 60 students from one read of each). That reaches no
-       NAME for an outsider: the live quiz's public scores carry no name any
-       more (2026-11-05; checks.mjs 1cm runs the writers), so no doc anyone
-       signed in can read has a name next to a uid. ⚠ OPEN (Jonathan decides):
-       a person in the ROOM sees the wall's names with their points and can
-       read the public uid -> points, which links the top players' uids to
-       names (simulated: about half of a speed-scored 30-student game, never a
-       wrong link), and from a uid the value join above reaches period and
-       minutes. Closing it: key the class rank by this tag too (a parked
-       patch, ~/Downloads/rankboard-parked.patch), or key the public scores
-       by a per-game token. config/class.periodOverrides is keyed by uid and
-       gives a period, never a name.
+       The class rank is keyed by the same tag (rankBoard, below) and the
+       uid-keyed minutesBoard is gone, so neither board holds anything that
+       joins to a uid: a person in the ROOM who lines the wall's names and
+       points up with the public liveQuiz uid -> points learns a uid, a name
+       and points, and still cannot reach minutes or a period from that uid.
+       config/class.periodOverrides[uid] is readable by every student and
+       does tie a uid to a period for the students the teacher corrected
+       (a period, never a name, and not part of this change).
 
        HONEST LIMITS: a student at DevTools can write any number up to the cap
        for themselves and place themselves in any period or week. A tag cannot
@@ -454,6 +423,33 @@ service cloud.firestore {
             && request.resource.data.seconds is number
             && request.resource.data.seconds >= 0
             && request.resource.data.seconds <= 7 * dailyCapSeconds();
+    }
+
+    /* ── CLASS RANK (2026-11-05; practice-minutes.js, "CLASS RANK") ───────
+       rankBoard/{tag}  { seconds } — the student's all-time practice
+       seconds, so My progress can say "N/total". It replaces the uid-keyed
+       minutesBoard: keyed by the SAME private tag as weekBoard, so no uid
+       or name is in it, and so the two boards cannot be joined to a person
+       (before, this week's and all-time seconds were nearly the same number
+       and minutesBoard was keyed by uid, so a plain value match linked a tag
+       to a uid, and the live quiz links a uid to a name). Every signed-in
+       account reads the whole collection (that is how a rank is worked
+       out); a write is allowed only under the writer's own tag, with that
+       one field, a number from 0 to 400 days of the daily cap. No delete.
+       HONEST LIMITS: as weekBoard (a student at DevTools can claim first
+       place for themselves; a tag cannot be proven unique, so one account can
+       overwrite one other student's entry; any Google account that signs in
+       once adds 1 to the total: no domain rule, Jonathan's call). Nothing
+       reads this for a grade.
+       ⚠ Must be published BEFORE (or with) the site code that writes it. */
+    match /rankBoard/{tag} {
+      allow read: if isSignedIn();
+      allow create, update: if isSignedIn()
+            && tag == get(/databases/$(database)/documents/minutes/$(request.auth.uid)/meta/board).data.id
+            && request.resource.data.keys().hasOnly(['seconds'])
+            && request.resource.data.seconds is number
+            && request.resource.data.seconds >= 0
+            && request.resource.data.seconds <= 400 * dailyCapSeconds();
     }
 
     /* heartbeats/{sessionId}  { period, lastSeen } — the "N playing" count.

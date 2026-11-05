@@ -42,7 +42,7 @@
    WHAT IT STORES (Firestore; firestore.rules has the matching blocks).
      minutes/{uid}/days/{YYYY-MM-DD}  { seconds }                 (capped per day)
      minutes/{uid}/weeks/{YYYY-Www}   { seconds, goalSeconds, hit }
-      minutesBoard/{uid}               { seconds }                 (the class rank; see CLASS RANK)
+      rankBoard/{tag}                  { seconds }                 (the class rank, keyed by the private tag, not the uid; see CLASS RANK)
       weekBoard/{tag}                  { week, period, seconds }   (this week's Top 5, keyed by a private random tag, not the uid; see TOP 5)
       minutes/{uid}/meta/board         { id }                      (the tag: create-only, owner-only)
   Nothing else: no heartbeat, no live count (see NO LIVE COUNT below).
@@ -89,14 +89,17 @@
 
    CLASS RANK (2026-11-04, Jonathan: "a ranking for students ... N/total"). My progress shows
    "N/total": N = 1 + how many students have more whole minutes all time, total = how many students
-   have a board doc. minutesBoard/{uid} holds ONE number, the student's all-time seconds the server
-   has confirmed: no name, no period. A uid is opaque here. Until 2026-11-05 the live quiz kept each player's
-   name under the same uid in liveQuiz/current.scores (accepted by Jonathan, 2026-11-04); it no longer does, but the
-   wall's names with points can still be lined up in the room with the public uid -> points (open; see the rules file). The tile
-   itself shows only your own place. The student's own page writes it (see
+   have a board doc. rankBoard/{tag} holds ONE number, the student's all-time seconds the server
+   has confirmed: no name, no period, and (since 2026-11-05) NO UID: it is keyed by the student's private
+   random name tag (see boardTag), like the Top 5 board. It was minutesBoard/{uid} until then; Jonathan's rule
+   (no minutes tied to a name, readable by anyone) ruled the uid out: the live quiz kept each player's name under
+   the uid in liveQuiz/current.scores (names are gone from it too, 2026-11-05) and the wall's names with points can
+   still be lined up in the room with its public uid -> points, and this-week and all-time minutes are nearly the
+   same number while counting is young, so a uid-keyed board could be joined by value to the tag board. minutesBoard has no rules block
+   any more (nothing reads or writes it); its old docs can be deleted in the console. The student's own page writes it (see
    publishBoard: created at the server's sum, then increments only), at most once per BOARD_MS; every
-   signed-in student may read the collection (that is the whole point), nobody but the owner writes it,
-   nobody deletes. The teacher's account is never written or ranked. It is a decoration like the rest
+   signed-in student may read the collection (that is the whole point), a write must be under the writer's own
+   tag, nobody deletes. The teacher's account is never written or ranked. It is a decoration like the rest
    of this file: a failed write or read changes nothing about counting, and the rank tile stays away.
    HONEST LIMITS: a student at DevTools can write any number up to the rules' cap for themselves; any
    Google account that signs in once adds 1 to the total (no domain rule, Jonathan's call); a page
@@ -120,10 +123,7 @@
    only ever RAISES the number inside one week + period (a page with an older copy never lowers what another
    page wrote); a new week or a changed period overwrites it. At most one write per WB_MS. The class's docs for this week + period are read with one query
    (equality filters only: no composite index) and kept WB_KEEP_MS (15 min) in memory and localStorage,
-   so a period of 30 reads about 30 documents per student per 15 minutes on screen. Left open on purpose (2026-11-05): minutesBoard (the class rank) is still keyed by the uid, so a
-   reader could join it to this board by value (all-time and this-week seconds are nearly equal while counting is young); no name is next to a uid
-   in any doc readable by students, because the live quiz's public scores carry none any more (checks.mjs 1cm); a person in the room can still
-   line the wall up with uid -> points (open). The teacher's account is never written
+   so a period of 30 reads about 30 documents per student per 15 minutes on screen. Neither board has a uid (the class rank is keyed by the tag too, since 2026-11-05). The teacher's account is never written
    or ranked. A failed write or read changes nothing about counting; the medal and the tile stay away.
    HONEST LIMITS: a student at DevTools can write any number up to the rules' week cap for themselves (and
    choose their period). A device whose clock is a week BEHIND replaces the doc with its own week when it loads, and
@@ -820,8 +820,10 @@
     st.boardAt = Date.now();
     st.boardBusy = true;
     var sent = 0;
-    dbP().then(function(db){
-      var ref = db.collection('minutesBoard').doc(st.uid);
+    boardTag(true).then(function(tag){
+      if(!tag) throw { code: 'unavailable' };     // no tag (offline, refused, no crypto): nothing is written, and never under the uid
+      return dbP().then(function(db){ return db.collection('rankBoard').doc(tag); });
+    }).then(function(ref){
       var add = function(){
         sent = st.boardOwed;
         return sent > 0 ? ref.set({ seconds: FV().increment(sent) }, { merge: true }) : null;
@@ -854,9 +856,13 @@
     }
     if(st.board && Math.abs(Date.now() - st.board.at) < BOARD_KEEP_MS) return Promise.resolve(st.board);
     if(st.boardLoading) return st.boardLoading;
-    st.boardLoading = dbP().then(function(db){ return db.collection('minutesBoard').get({ source: 'server' }); }).then(function(snap){   // server: an offline plain get() answers empty and the rank tile would vanish for 3 hours
-      var others = [];
-      snap.forEach(function(doc){ if(doc.id !== st.uid) others.push(Math.max(0, +(doc.data() || {}).seconds || 0)); });
+    st.boardLoading = boardTag(true).then(function(tag){
+      if(!tag) throw { code: 'unavailable' };     // my own doc cannot be told from the others' without my tag
+      /* source 'server': an offline plain get() answers empty and the rank tile would vanish for 3 hours. */
+      return dbP().then(function(db){ return db.collection('rankBoard').get({ source: 'server' }); }).then(function(snap){ return { snap: snap, tag: tag }; });
+    }).then(function(x){
+      var snap = x.snap, others = [];
+      snap.forEach(function(doc){ if(doc.id !== x.tag) others.push(Math.max(0, +(doc.data() || {}).seconds || 0)); });
       st.board = { at: Date.now(), others: others };
       ls('pm:b:' + st.uid, JSON.stringify(st.board));
       return st.board;

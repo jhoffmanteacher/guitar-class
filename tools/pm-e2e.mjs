@@ -118,7 +118,7 @@ await ev(`(() => {
     const writes = []; const tx = { get: (r) => { const [k, i] = r.path.split('/'); const d = k === 'weeks' ? window.__fs.weeks[i] : k === 'meta' ? window.__fs.meta : window.__fs.wb[i]; return Promise.resolve({ exists: d !== undefined, data: () => d }); }, set: (r, d) => { writes.push([r.path.split('/'), d]); return tx; } };
     return Promise.resolve(fn(tx)).then((out) => { writes.forEach(([[k, i], d]) => { if (k === 'meta') { if (window.__fs.meta) throw Object.assign(new Error('create-only'), { code: 'permission-denied' }); window.__fs.meta = Object.assign({}, d); }
       else { if (!window.__fs.meta || window.__fs.meta.id !== i) throw Object.assign(new Error('not your tag'), { code: 'permission-denied' }); window.__fs.wb[i] = Object.assign({}, d); window.__fs.wbWrites.push({ id: i, d: Object.assign({}, d) }); } }); return out; }); };
-  const db = { runTransaction, collection: (c) => c === 'weekBoard' ? wbCol : c === 'minutesBoard' ? board : ({ doc: (uid) => ({ collection: (k) => { const o = col(k); const d = o.doc; o.doc = (i) => ({ path: k + '/' + i }); return o; } }), doc: (i) => ({ set: (d) => { window.__fs.hb.push({ id: i, d }); return Promise.resolve(); } }) }) ,
+  const db = { runTransaction, collection: (c) => c === 'weekBoard' ? wbCol : c === 'rankBoard' ? board : ({ doc: (uid) => ({ collection: (k) => { const o = col(k); const d = o.doc; o.doc = (i) => ({ path: k + '/' + i }); return o; } }), doc: (i) => ({ set: (d) => { window.__fs.hb.push({ id: i, d }); return Promise.resolve(); } }) }) ,
     batch: () => { const ops = []; return { set: (r, d) => ops.push([r.path, d]), commit: () => { ops.forEach(([p, d]) => { const [k, i] = p.split('/'); const cur = window.__fs[k][i] || {}; window.__fs[k][i] = Object.assign({}, cur, d, { seconds: (cur.seconds || 0) + d.seconds.__inc }); }); window.__fs.commits.push(ops.length); return Promise.resolve(); } }; } };
   window.__who = 'e2e-student';   // the signed-in student's uid; null = nobody (the tests below sign out and switch students)
   const fb = window.firebase || {};
@@ -311,7 +311,8 @@ console.log('class rank');
 await ev(`setLang('en')`); await sleep(500);
 await ev(`(() => { const s = PM._state(); let mine = 0; Object.values(s.weeks).forEach(w => mine += w.seconds || 0); Object.values(s.pend).forEach(n => mine += n);
   const b = {}; for (let i = 0; i < 10; i++) b['more' + i] = { seconds: mine + 60 * (i + 1) }; for (let i = 0; i < 5; i++) b['same' + i] = { seconds: mine };
-  for (let i = 0; i < 20; i++) b['less' + i] = { seconds: Math.max(0, mine - 60 * (i + 1)) }; b['e2e-student'] = { seconds: 999999 };
+  for (let i = 0; i < 20; i++) b['less' + i] = { seconds: Math.max(0, mine - 60 * (i + 1)) }; const meta = window.__fs.meta || (window.__fs.meta = { id: 'ab'.repeat(16) }); s.tag = meta.id; s.tagP = null;   // my own stale doc, under MY tag (the board is keyed by the private tag, never the uid): it must be ignored
+  b[meta.id] = { seconds: 999999 };
   window.__fs.board = b; window.__mine = mine; s.board = null; s.boardLoading = null; try { localStorage.removeItem('pm:b:e2e-student'); } catch (e) {} renderMyProgress(); return mine; })()`);
 await sleep(700);
 await ev(`document.getElementById('pm-progress').scrollIntoView({block:'start'})`); await sleep(300);
@@ -570,10 +571,10 @@ await ev(`(() => {
       else { if (!window.__fs.meta || window.__fs.meta.id !== i) throw Object.assign(new Error('not your tag'), { code: 'permission-denied' }); window.__fs.wb[i] = Object.assign({}, d); window.__fs.wbWrites.push({ id: i, d: Object.assign({}, d) }); } }); return out; }); };
   const sub = (kind) => ({ get: () => Promise.resolve({ forEach: (fn) => Object.keys(window.__fs[kind]).forEach((k) => fn({ id: k, data: () => window.__fs[kind][k] })) }),
     where: () => ({ get: () => Promise.resolve({ forEach: (fn) => Object.keys(window.__fs.days).forEach((k) => fn({ id: k, data: () => window.__fs.days[k] })) }) }), doc: (i) => ({ path: kind + '/' + i }) });
-  /* minutesBoard: 20 other students, so the Class rank tile is there and My progress has FIVE tiles. */
+  /* rankBoard (the class rank, keyed by the private tag): 20 other students, so the Class rank tile is there and My progress has FIVE tiles. */
   const bd = {}; for (let i = 0; i < 20; i++) bd['b' + i] = { seconds: 600 * (i + 1) };
   const board = { get: () => Promise.resolve({ forEach: (fn) => Object.keys(bd).forEach((k) => fn({ id: k, data: () => bd[k] })) }), doc: () => ({ set: () => Promise.resolve(), get: () => Promise.resolve({ exists: false }) }) };
-  const db = { runTransaction, collection: (c) => c === 'weekBoard' ? wbCol : c === 'minutesBoard' ? board : ({ doc: (uid) => ({ collection: (k) => sub(k) }) }),
+  const db = { runTransaction, collection: (c) => c === 'weekBoard' ? wbCol : c === 'rankBoard' ? board : ({ doc: (uid) => ({ collection: (k) => sub(k) }) }),
     batch: () => { const ops = []; return { set: (r, d) => ops.push([r.path, d]), commit: () => Promise.resolve() }; } };
   const fb = window.firebase || {};
   if (!fb.firestore) { window.firebase = Object.assign(fb, { firestore: Object.assign(() => db, { FieldValue: { increment: (n) => ({ __inc: n }), serverTimestamp: () => ({}) }, FieldPath: { documentId: () => '__name__' } }) }); }
@@ -679,7 +680,7 @@ check('the board holds NO name: no doc id, no field and nothing the page wrote c
 /* Rules not published: the board cannot be read; no medal, no tile, no toast, no error on the page. */
 await t5Scenario(15, [20]); await ev(`window.__fs.wbDenied = true; PM.syncHeader(true); renderMyProgress(); location.hash = '#my-progress'`); await sleep(1500);
 const den = await ev(`({ tiles: document.querySelectorAll('#pm-progress .pm-tile').length, medal: !!document.querySelector('.pm-top5'), toast: !!document.getElementById('pm-toast') })`);
-check('weekBoard unreadable (rules not published): 4 tiles, no medal anywhere, no toast', den.tiles === 4 && !den.medal && !den.toast, den);
+check('rules not published (no private tag can be made): only the three minutes tiles, no Class rank and no Top 5 tile, no medal anywhere, no toast, no error on the page', den.tiles === 3 && !den.medal && !den.toast, den);
 
 /* Phone width is out of scope for new work, but the medal must not break what is already there: no sideways scroll, the strip and the medal inside the window, My progress readable. */
 await send('Emulation.setDeviceMetricsOverride', { width: 390, height: 844, deviceScaleFactor: 1, mobile: true });
