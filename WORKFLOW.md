@@ -1209,8 +1209,9 @@
       in the top bar and on the Games screen, "N playing" is gone). Nothing is half done
       and nothing is waiting on a console paste. `pm-e2e` 84/84, `pm-sim` 159/159, smoke
       clean, full `checks.mjs` green.
-      *Update 2026-11-05:* step 1 below is LIVE on `main` (the branch is gone; only step 2,
-      the console paste, is left). *Earlier 2026-11-04 note:* **step 1 below was DONE on
+      *Update 2026-11-05:* step 1 below is LIVE on `main` (the branch is gone) and step 2 is
+      done, console paste included (only the emulator run is left; see "Not Power Chord Switch,
+      but waiting" further down). *Earlier 2026-11-04 note:* **step 1 below was DONE on
       branch `work-heartbeat`** (two commits: "Practice minutes: remove the heartbeat writer…" and
       its review fixes). `pm-sim` is now 152/152 (the heartbeat tests became "no
       heartbeat" / "no live count" runs; section 8 draws a stub strip), `pm-e2e` 84/84.
@@ -3383,8 +3384,9 @@ the literal complaint would have.
 ## Power Chord Switch: where we stopped (moved here from NEXT-STEPS-power-chord-switch.md, 2026-11-05)
 
 Jonathan moved this file into WORKFLOW.md and deleted it. Still open: the room-noise decision
-(he will decide later; the what-if is built and live) and heartbeat step 2 (his Firebase console
-paste: on 2026-11-05 he published `firestore.rules` as it is, heartbeats block included).
+(he will decide later; the what-if is built and live) and the last piece of the heartbeat removal
+(the emulator run of `tools/pm-rules-test.mjs` on a machine with Java 21; his console paste of the
+heartbeats-free `firestore.rules` is DONE, see below).
 Settled and not to be re-raised: the 30 s cap, the real-guitar mic check, the three wordings,
 no Note Runner mic check. The original title read "Power Chord Switch — where we stopped (2026-11-03)".
 
@@ -3479,26 +3481,26 @@ Jonathan's request; this list is the plan.)
 Jonathan asked for this note here so it is not lost. **Step 1 is DONE and LIVE**
 (2026-11-04: `5144c6c` and its review fixes are on `main`; the live
 `practice-minutes.js` has no `pollLive` or `liveMinCount`, checked 2026-11-05; the
-`work-heartbeat` branch is gone). **Step 2: the repo edits are DONE (2026-11-05, this
-commit): the `heartbeats` block is out of `firestore.rules`, the index out of
-`firestore.indexes.json`, the section out of `tools/pm-rules-test.mjs`, and check 1cg now
-requires both to stay gone. Still left: Jonathan's Firebase console paste of the new
-`firestore.rules` (Firestore → Rules → paste → Publish), then optionally delete the old
-`heartbeats` documents and the `heartbeats` composite index in the console.** (Earlier on
-2026-11-05 Jonathan published the rules while they still had the block, so that paste does
-not count.) The full plan is the "PICK UP HERE" entry under "Practice
+`work-heartbeat` branch is gone). **Step 2: the repo edits are DONE (2026-11-05): the
+`heartbeats` block is out of `firestore.rules`, the index out of `firestore.indexes.json`,
+the section out of `tools/pm-rules-test.mjs`, and check 1cg now requires both to stay gone.
+The console paste is DONE too: Jonathan reported on 2026-11-05 that he published the new
+`firestore.rules` (his word; not compared against the console afterwards. An earlier paste
+the same day still had the block and did not count). Still left: the emulator run (last
+bullet below), and optionally deleting the old `heartbeats` documents and the `heartbeats`
+composite index in the console.** The full plan is the "PICK UP HERE" entry under "Practice
 minutes" in `WORKFLOW.md` (written 2026-11-04); read it before touching anything.
 In short: "N playing" is gone from the screen and (since step 1) the engine no longer
 writes the `heartbeats/{sessionId}` record (`{ period, lastSeen }`, about every 30 s
-while audio played). Old records still sit in the console (the TTL policy was never set)
-and, until the new rules are published, any signed-in user can list them.
+while audio played). Old records still sit in the console (the TTL policy was never set);
+since the new rules were published (2026-11-05) nobody can read or write them.
 - **Step 1 (code, no console paste; DONE, live since 2026-11-04):** delete the heartbeat writer, `pollLive()`,
   `S.live` / `S.liveAt` and `liveMinCount`; remove the heartbeat tests in
   `tools/pm-sim.mjs`, lower `PM_SIM_PIN` in `tools/checks.mjs`, drop the 1cg
   heartbeat-rules pin and the `liveMinCount` check, drop the aggregation fake
   in `tools/pm-e2e.mjs`. Counting, `flush()`, the queue and the keepalive do not change.
-- **Step 2 (repo edits DONE 2026-11-05, commit "Practice minutes heartbeat removal, step 2";
-  the console paste is still Jonathan's):** the `heartbeats/{sessionId}` block is out of
+- **Step 2 (DONE 2026-11-05: repo edits in commit "Practice minutes heartbeat removal, step 2";
+  Jonathan published the new rules the same day):** the `heartbeats/{sessionId}` block is out of
   `firestore.rules`, the `heartbeats` index out of `firestore.indexes.json`, and the
   `== heartbeats` section out of `tools/pm-rules-test.mjs`. checks.mjs 1cg now requires the
   block and the index to stay gone, exactly one `match /databases/{database}/documents`
@@ -3506,7 +3508,8 @@ and, until the new rules are published, any signed-in user can list them.
   documents and the console's `heartbeats` index can be deleted once the new rules are published.
 - **STILL TO DO (Jonathan, on a machine with Java 21): run the Firestore emulator test
   `tools/pm-rules-test.mjs` once against the new `firestore.rules`.** It has never run since
-  step 2 (2026-11-05): no Java on the Windows machine, so neither the session nor the
+  step 2 (2026-11-05): no Java on the Windows machine or on the Mac (checked 2026-11-05;
+  `brew install --cask temurin@21` would add it), so neither the session nor the
   `site-reviewer-deep` review could run it. Steps are in the header of that file (an empty
   scratch folder OUTSIDE the repo, `npm i firebase-tools @firebase/rules-unit-testing
   firebase@10.12.2`, a `firebase.json` with the Firestore emulator on port 8089, then
