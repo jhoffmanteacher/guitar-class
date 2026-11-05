@@ -337,7 +337,8 @@
    `ca-47` ("Strum Pattern in Chunks") was merged into `ca-46` as its
    "chunks" path on 2026-11-04 (no student had opened either); `ca-48` is
    "Call the Chord" (2026-11-05); `ca-49` is "Name the Power Chord"
-   (2026-11-05); the next new activity is `ca-50`.
+   (2026-11-05); `ca-50` is "Call the Chord: "the cure"" (2026-11-05);
+   the next new activity is `ca-51`.
 
    ORDER AND MODULE PLACEMENT LIVE ON THE CONSOLE BOARD, NOT IN THIS FILE
    (2026-09-16). config/class.activityBoard — { id -> { module, pos } },
@@ -7170,6 +7171,43 @@ window.CLASS_ACTIVITIES = [
         label:    'Practice — Both ways, frets 0 to 12',
         label_es: 'Practica — En los dos sentidos, trastes 0 a 12',
         drill: { type: 'pcname', mode: 'both', minFret: 0, maxFret: 12 },
+      },
+    ],
+  },
+  /* Call the Chord — "the cure" (2026-11-05; Day 38, which Jonathan turned into a
+     practice day: "you propose something"). The same Follow and Call drill as
+     ca-48 on the song's own play-along card (ca-30, the same sections ca-44's
+     lyric sheet reads): the verses (A5 C5 F5, four beats a chord) and the
+     chorus (D5 F5 C5 G5). Data only — no new engine. Luna has two chords and
+     Seven Nation Army is a one-bar riff whose changes come closer than a beat,
+     so neither makes a fair Call step. Focus view, label + drill on every step,
+     no text. Engine: renderChordCall in app.js; checks.mjs 1cn pins all eight
+     drills of ca-48 and ca-50. */
+  {
+    id:    'ca-50',
+    view:  'focus',   // one step at a time — see VIEW above
+    title:    'Call the Chord: "the cure"',
+    title_es: 'Di el acorde: "the cure"',
+    steps: [
+      {
+        label:    'Practice — "the cure" verses, follow',
+        label_es: 'Practica — Estrofas de "the cure", seguir',
+        drill: { type: 'chordcall', card: 'ca-30', section: '2 Verses', mode: 'follow' },
+      },
+      {
+        label:    'Practice — "the cure" verses, call',
+        label_es: 'Practica — Estrofas de "the cure", decir',
+        drill: { type: 'chordcall', card: 'ca-30', section: '2 Verses', mode: 'call' },
+      },
+      {
+        label:    'Practice — "the cure" chorus, follow',
+        label_es: 'Practica — Coro de "the cure", seguir',
+        drill: { type: 'chordcall', card: 'ca-30', section: 'Chorus 1', mode: 'follow' },
+      },
+      {
+        label:    'Practice — "the cure" chorus, call',
+        label_es: 'Practica — Coro de "the cure", decir',
+        drill: { type: 'chordcall', card: 'ca-30', section: 'Chorus 1', mode: 'call' },
       },
     ],
   },

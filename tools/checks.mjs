@@ -9097,7 +9097,8 @@ function checkNoteCallPower(ctx) {
    source check can see decides whether that works, so this EXECUTES the real
    app.js in the 0b context:
    - the data: ca-48 has four chordcall drills (Watchtower and Sweet Child, each
-     Follow and Call), each naming a card and a section that exist, with the
+     Follow and Call) and ca-50 four more ("the cure": its verses and its chorus,
+     each Follow and Call), each naming a card and a section that exist, with the
      number of changes, the pass line and the chord buttons pinned; no other
      activity uses the type;
    - every change in every section, at both speeds (the slow file and the fast
@@ -9116,9 +9117,9 @@ function checkNoteCallPower(ctx) {
      cancelled (so the page does not scroll);
    - every chc.* string the setup, play and done screens show exists in English
      and Spanish and none defined is unused.
-   Pinned: 4 drills, the change counts below, 37 chc.* keys. */
+   Pinned: 8 drills, the change counts below, 38 chc.* keys. */
 function checkChordCall(ctx) {
-  head('1cn. Call the chord (ca-48): windows, taps, the hidden chord, the space bar');
+  head('1cn. Call the chord (ca-48, ca-50): windows, taps, the hidden chord, the space bar');
   let bad = 0;
   const flag = m => { err(m); problems++; bad++; };
   if (!ctx) { flag('1cn cannot run — the 0b render context is unavailable'); return; }
@@ -9127,10 +9128,15 @@ function checkChordCall(ctx) {
   const EXPECT = {
     keys: 38,
     drills: [
-      { card: 'ca-29', section: 'Verse 1', mode: 'follow', n: 32, passAt: 32, chords: ['A5', 'G5', 'F5'] },
-      { card: 'ca-29', section: 'Verse 1', mode: 'call',   n: 10, passAt: 8,  chords: ['A5', 'G5', 'F5'] },
-      { card: 'ca-33', section: 'Verse 1', mode: 'follow', n: 7,  passAt: 7,  chords: ['D5', 'C5', 'G5'] },
-      { card: 'ca-33', section: 'Intro',   mode: 'call',   n: 10, passAt: 8,  chords: ['D5', 'C5', 'G5'] },
+      { id: 'ca-48', card: 'ca-29', section: 'Verse 1', mode: 'follow', n: 32, passAt: 32, chords: ['A5', 'G5', 'F5'] },
+      { id: 'ca-48', card: 'ca-29', section: 'Verse 1', mode: 'call',   n: 10, passAt: 8,  chords: ['A5', 'G5', 'F5'] },
+      { id: 'ca-48', card: 'ca-33', section: 'Verse 1', mode: 'follow', n: 7,  passAt: 7,  chords: ['D5', 'C5', 'G5'] },
+      { id: 'ca-48', card: 'ca-33', section: 'Intro',   mode: 'call',   n: 10, passAt: 8,  chords: ['D5', 'C5', 'G5'] },
+      // ca-50 (Day 38, a practice day): "the cure" — its verses are A5 C5 F5, its chorus D5 F5 C5 G5, four beats a chord. Luna (two chords) and Seven Nation Army (a riff, changes under a beat apart) do not fit a Call step.
+      { id: 'ca-50', card: 'ca-30', section: '2 Verses', mode: 'follow', n: 16, passAt: 16, chords: ['A5', 'C5', 'F5'] },
+      { id: 'ca-50', card: 'ca-30', section: '2 Verses', mode: 'call',   n: 10, passAt: 8,  chords: ['A5', 'C5', 'F5'] },
+      { id: 'ca-50', card: 'ca-30', section: 'Chorus 1', mode: 'follow', n: 12, passAt: 12, chords: ['D5', 'F5', 'C5', 'G5'] },
+      { id: 'ca-50', card: 'ca-30', section: 'Chorus 1', mode: 'call',   n: 10, passAt: 8,  chords: ['D5', 'F5', 'C5', 'G5'] },
     ],
   };
   const stats = { drills: 0, changes: 0, windows: 0, cut: 0, sheet: 0, taps: 0, samples: 0, screens: 0, keys: 0 };
@@ -9139,24 +9145,26 @@ function checkChordCall(ctx) {
   const acts = run('window.CLASS_ACTIVITIES || []');
   const all = [];
   for (const a of acts) (a.steps || []).forEach((st, i) => { if (st && st.drill && st.drill.type === 'chordcall') all.push({ id: a.id, i, d: st.drill }); });
-  const c48 = acts.find(a => a.id === 'ca-48');
-  if (!c48) { flag('ca-48 is gone — 1cn checks its four drills'); return; }
-  if (all.some(x => x.id !== 'ca-48')) flag('chordcall drills outside ca-48 (' + [...new Set(all.map(x => x.id))].join(', ') + ') — 1cn pins ca-48 only; give the new one its pin on purpose');
+  for (const id of ['ca-48', 'ca-50']) {
+    const c = acts.find(a => a.id === id);
+    if (!c) { flag(id + ' is gone — 1cn checks its four drills'); return; }
+    if ((c.steps || []).some(s => s.text) || c.view !== 'focus' || (c.steps || []).length !== 4) flag(id + ' must be a Focus-view activity of four steps with no text on any step (the widget carries its own directions)');
+  }
+  if (all.some(x => x.id !== 'ca-48' && x.id !== 'ca-50')) flag('chordcall drills outside ca-48 and ca-50 (' + [...new Set(all.map(x => x.id))].join(', ') + ') — 1cn pins those two; give the new one its pin on purpose');
   if (all.length !== EXPECT.drills.length) flag('1cn sees ' + all.length + ' chordcall drills, pinned at ' + EXPECT.drills.length);
-  if ((c48.steps || []).some(s => s.text) || c48.view !== 'focus') flag('ca-48 must be a Focus-view activity with no text on any step (the widget carries its own directions)');
   EXPECT.drills.forEach((e, i) => {
     const d = all[i] && all[i].d;
-    if (!d || d.card !== e.card || d.section !== e.section || d.mode !== e.mode) flag('ca-48 step ' + (i + 1) + ': expected ' + J({ card: e.card, section: e.section, mode: e.mode }) + ', got ' + J(d));
+    if (!d || all[i].id !== e.id || d.card !== e.card || d.section !== e.section || d.mode !== e.mode) flag(e.id + ' drill ' + (i + 1) + ': expected ' + J({ id: e.id, card: e.card, section: e.section, mode: e.mode }) + ', got ' + J(d && { id: all[i].id, card: d.card, section: d.section, mode: d.mode }));
   });
 
   // Every change, both speeds.
   const walk = JSON.parse(run(`(function(){
     const out = [];
-    ${J(all.map(x => x.d))}.forEach(d => {
+    ${J(all)}.forEach(({ id, i, d }) => {
       const M = chcModel(d);
-      if(!M){ out.push({ d, missing: true }); return; }
+      if(!M){ out.push({ id, i, d, missing: true }); return; }
       const sheet = pcSheetMap(M.L).start.filter(x => x.si === M.si).map(x => x.name);
-      const row = { d, n: M.n, passAt: M.passAt, chords: M.chords, names: M.targets.map(x => x.name), sheet, tiers: [] };
+      const row = { id, i, d, n: M.n, passAt: M.passAt, chords: M.chords, names: M.targets.map(x => x.name), sheet, tiers: [] };
       [true, false].forEach(slow => {
         const win = snippetWindow(M.L.tr, { fromBar: M.S.fromBar, bars: M.S.bars * M.S.reps }, slow);
         const w = chcWindows(win, M.targets, M.bpb);
@@ -9168,7 +9176,7 @@ function checkChordCall(ctx) {
   })()`));
   walk.forEach((r, ri) => {
     const e = EXPECT.drills[ri] || {};
-    const tag = 'ca-48 step ' + (ri + 1) + ' (' + (r.d.card + ' ' + r.d.section + ' ' + r.d.mode) + ')';
+    const tag = r.id + ' step ' + (r.i + 1) + ' (' + (r.d.card + ' ' + r.d.section + ' ' + r.d.mode) + ')';
     if (r.missing) { flag(tag + ': chcModel returned null — the card or the section is not there'); return; }
     stats.drills++;
     if (r.n !== e.n) flag(tag + ': ' + r.n + ' changes, pinned at ' + e.n);

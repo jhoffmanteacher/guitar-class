@@ -10,6 +10,12 @@ see `WORKFLOW.md` and the git commit log.
 - **In Power Chord Switch, a noise in the room has to be much louder to count.** Before, a voice, a bump, a chair, or the last chord still ringing could count as a right change when you had not strummed. Most of those no longer count. A very soft strum, or one without a clear pick sound, can now show "no strum heard": strum a little firmer and keep the guitar close to the mic. Change Up and the other mic games are not changed.
 - **When several strums were not heard, the end screen now says so.** In Power Chord Switch, if at least two changes show "no strum heard" and they outnumber the changes where the chord sounded wrong, the end screen shows "Some strums were not heard. Strum a little firmer, and keep the guitar close to the mic." instead of "Drop 10 BPM and try again". The headline reads "N of M changes worked" instead of "this speed is too fast for now", and the big button is "Again" at the same speed. One missed strum, or a game with mostly wrong chords, keeps the old advice. Change Up is not changed.
 
+## 2026-11-05 — New activity: Call the Chord: "the cure"
+
+- **"Call the Chord: "the cure"" ("Di el acorde: "the cure"")** is the same game as Call the Chord, on "the cure". Four steps: the verses (A5, C5, F5) and the chorus (D5, F5, C5, G5), each as Follow and Call.
+- **Follow:** tap the next chord, or press the space bar, in the last beat before the band changes to it. Hit every change two rounds in a row.
+- **Call:** the next chord is hidden. Tap its name in the last beat before the change. 8 of 10 finishes the step.
+
 ## 2026-11-05 — New activity: Name the Power Chord
 
 - **"Name the Power Chord" ("Nombra el acorde de potencia")** has four steps. A power chord is named after its root, and the root is on the low E or A string. So the chord's name is the note's name plus a 5. You do not need a guitar or the mic.
