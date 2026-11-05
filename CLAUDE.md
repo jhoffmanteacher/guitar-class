@@ -1,6 +1,7 @@
 # Guitar Class Website — Claude Instructions
 
 Operative rules only. History and the *why*: `WORKFLOW.md` ("Moved from CLAUDE.md" sections).
+What is open right now: `WORKFLOW.md` → "Where things stand" (top of the file).
 
 ## Start here — the short list (read this even if you read nothing else)
 

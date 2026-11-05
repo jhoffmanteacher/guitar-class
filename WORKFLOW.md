@@ -25,6 +25,50 @@
 
 ---
 
+## Where things stand (updated 2026-11-05)
+
+Start here. Each line says where the detail is. Update this block whenever an item opens or closes; the
+sections below hold the history and the reasons.
+
+**Jonathan's decisions (no date)**
+- **Power Chord Switch room noise:** do nothing, a stricter strum ratio, or "no readable pitch, no tick".
+  The numbers on the 12 real takes (ratio 2.2: 30 of 52 false hits removed, 4 of 132 real strums lost) are under
+  "Power Chord Switch: where we stopped" → "First real-take results". Any change is a `coach.js` detection change:
+  Always Reviewed, run `tools/mic-sim/power-switch.mjs` first.
+
+**Waiting on students' recordings**
+- **The Pitch-rule table** (teacher console → Mic recordings → Evaluate all recordings) needs takes saved after
+  2026-11-05, which carry `expected[].readings`. It needs mic collection switched on in the console and its "stop
+  after" number above the count (23 of 40 on 2026-11-04), a real student account, the consent answer, and a game
+  played to the end or stopped after 10 s. Older takes are left out of that table and counted. Jonathan keeps the 25
+  takes saved so far (12 Power Chord Switch) outside the repo: the files carry student names.
+
+**Optional leftovers (Jonathan's)**
+- The console's `heartbeats` composite index (Firestore → Indexes, the only index). Nothing uses it; see
+  "Practice-minutes heartbeat removal (not Power Chord Switch): DONE".
+
+**Automatic**
+- The Friday check (Fridays 11 PM Pacific; next 2026-11-06) reviews the two Fast commits from 2026-11-05:
+  `b958165` (pitch readings saved in takes) and `ce5096e` (the Pitch-rule table).
+
+**Finished recently (don't redo)**
+- Practice-minutes heartbeat removal: code, rules, emulator test and the old collections (2026-11-05); the old
+  `minutesBoard` collection deleted too. The class rank and the Top 5 are keyed by a private tag, so no uid sits next
+  to minutes.
+- `tools/pm-rules-test.mjs`: 179 emulator cases (minutes, the boards, recorded takes, their audio chunks, the take
+  counter). It needs Java 21: on Jonathan's Mac it is at `~/tools/java` (not on PATH; the recipe is in the file's
+  header). One known leniency is pinned, not fixed: a chunk with no `i` field is accepted.
+
+**Not re-reviewed on 2026-11-05**
+- The 7 unchecked top-level items and 6 nested ones under "Open work" below (the smoke flake after reload, the song
+  popularity counter, three Friday-check items, the cloud review, "pushed in a hurry"). Read them there; this block
+  does not summarize them.
+
+**Settled, don't re-raise:** the 30 s take cap, the real-guitar mic check, the three "chord sounded wrong"
+wordings, no Note Runner mic check (see "Later (not chosen yet)").
+
+---
+
 ## Working conventions
 
 - **Two Claude sessions at once → each in its own git worktree.** Both machines
