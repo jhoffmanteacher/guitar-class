@@ -1029,7 +1029,7 @@
       `minutesBoard` has NO rules block any more and 1cg fails the push if one comes back. A person in the room can still line the wall's names and points
       up with the public uid -> points (a uid, a name and points), but no uid reaches minutes. Never publish a name next to a uid, or
       minutes next to a uid, again. **ONE-TIME after deploying: delete the `scores` field of `liveQuiz/current` in the Firebase console (the last game's
-      names stay in it until a Reveal/End/Close/Start writes it); the old `minutesBoard` docs are unreachable and can be deleted whenever.**
+      names stay in it until a Reveal/End/Close/Start writes it); the old `minutesBoard` docs were unreachable and DELETED in the console on 2026-11-05 (the whole collection; Jonathan asked).**
       Visible side effect: the class rank (N/total) restarts as students open the site (each page creates its `rankBoard` doc at the server's confirmed
       all-time sum on its first publish), so `total` is small at first. Also still true: `config/class.periodOverrides[uid]` is readable by every student
       and gives a period (never a name).
@@ -3386,7 +3386,8 @@ the literal complaint would have.
 Jonathan moved this file into WORKFLOW.md and deleted it. Still open: the room-noise decision
 (he will decide later; the what-if is built and live). The practice-minutes heartbeat removal is
 finished: his console paste and the emulator run (49 passed, 0 failed) are both DONE; only the
-optional console cleanup of old `heartbeats` documents and the index is left (see below).
+the old `heartbeats` and `minutesBoard` documents were deleted in the console on 2026-11-05; only the
+`heartbeats` composite index may still be there (optional, see below).
 Settled and not to be re-raised: the 30 s cap, the real-guitar mic check, the three wordings,
 no Note Runner mic check. The original title read "Power Chord Switch — where we stopped (2026-11-03)".
 
@@ -3492,8 +3493,9 @@ the section out of `tools/pm-rules-test.mjs`, and check 1cg now requires both to
 The console paste is DONE too: Jonathan reported on 2026-11-05 that he published the new
 `firestore.rules` (his word; not compared against the console afterwards. An earlier paste
 the same day still had the block and did not count). The emulator run is DONE too (last
-bullet below: 49 passed, 0 failed). Still left, optional: deleting the old `heartbeats`
-documents and the `heartbeats` composite index in the console.** The full plan is the "PICK UP HERE" entry under "Practice
+bullet below: 49 passed, 0 failed). The old `heartbeats` collection was deleted in the console
+on 2026-11-05 (Jonathan asked; the console's own "Delete collection", typing the name to confirm).
+Still left, optional: the `heartbeats` composite index (Indexes tab; not looked at or touched).** The full plan is the "PICK UP HERE" entry under "Practice
 minutes" in `WORKFLOW.md` (written 2026-11-04); read it before touching anything.
 In short: "N playing" is gone from the screen and (since step 1) the engine no longer
 writes the `heartbeats/{sessionId}` record (`{ period, lastSeen }`, about every 30 s
