@@ -3462,7 +3462,8 @@ below. Delete or rewrite it when the list is done.
    `CC_POWER_PROGRESSIONS`, group `song`). One activity per distinct switch in
    the song's card: Sweet Child O' Mine 10 (ca-33), "the cure" 6 (ca-30).
    Each is a **ladder**: 3 rounds of 4 back-and-forths (8 chords), 15 BPM faster
-   each round (60 / 75 / 90 from the base tempo), a 4-click count-in before each
+   each round (60 / 75 / 90 from the base tempo; since 2026-11-05 5 BPM faster, 30 / 35 / 40 from the new 30 BPM
+   start, Jonathan: "don't increase it so quickly"), a 4-click count-in before each
    round. Jonathan's words: "practice the actual chord switches in the songs by
    going back and forth between each change 4 times at slower to faster tempos."
 2. **BPM buttons on the play screen** (−5 / +5, under the beat dots): they move

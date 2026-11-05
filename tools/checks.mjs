@@ -11317,7 +11317,7 @@ async function checkBackingLoudness() {
    ════════════════════════════════════════════════════════════════════ */
 function checkCoachVerdicts() {
   head('1ca. Coach and arcade verdict lines are true at 0, 1 and many');
-  const EXPECT = { reports: 20, descs: 20, nrLevels: 15, doneScreens: 88, pwLoops: 12, pwHints: 44, pwViews: 32, pwMemory: 3, pwGates: 3 };
+  const EXPECT = { reports: 20, descs: 20, nrLevels: 15, doneScreens: 88, pwLoops: 12, pwHints: 44, pwViews: 32, pwMemory: 6, pwGates: 3 };
   let bad = 0;
   const flag = m => { err(m); problems++; bad++; };
   const bodies = {};
@@ -11754,21 +11754,32 @@ function checkCoachVerdicts() {
     if (run('cc.progIdx') !== 0) flag(`1ca: picking Power Chord Switch loop 4 moved Change Up's remembered loop to ${run('cc.progIdx')}`);
     run(`ccSetup('power');`);
     if (run('cc.progIdx') !== 3) flag(`1ca: Power Chord Switch forgot its remembered loop (got ${run('cc.progIdx')}, picked 3)`);
-    /* ...and its own tempo and speed, including the "Again at +10 BPM" button
-       (ccAgain re-starts the round, so ccStart is stubbed for that one call). */
+    /* ...and its own tempo and speed, including the done screen's −5 / +5 row: it takes more than one tap (Jonathan, 2026-11-05), and
+       Again plays the tempo it shows (ccAgain re-starts the round, so ccStart is stubbed for that one call). */
     run(`ccSetup('power'); ccNudgeBpm(5); ccPickRate(1); globalThis.__realStart = ccStart; ccStart = () => {};
-      cc.phase = 'done'; ccAgain(10); ccStart = __realStart;`);
+      cc.phase = 'done'; cc.nextBpm = cc.bpm; ccDoneNudge(5); ccDoneNudge(5); ccAgain(0); ccStart = __realStart;`);
     run(`ccSetup('power')`);
     const pwMemory = { bpm: run('cc.bpm'), rate: run('cc.rateIdx') };
     run(`ccSetup()`);
     const ccMemory = { bpm: run('cc.bpm'), rate: run('cc.rateIdx') };
     counts.pwMemory += 2;
-    /* Power Chord Switch OPENS on 55 BPM (Jonathan, 2026-11-04: 5 slower than the 60 it opened on); Change Up opens on 60. A fresh session, nothing remembered. */
+    /* Power Chord Switch OPENS on 30 BPM (Jonathan, 2026-11-05; 55 from 2026-11-04); Change Up opens on 60. A fresh session, nothing remembered. */
     const pwOpens = JSON.parse(run(`sessionStorage.removeItem('pwBpm'); sessionStorage.removeItem('ccBpm'); const __a = (ccSetup('power'), cc.bpm), __b = (ccSetup(), cc.bpm); JSON.stringify({ pw: __a, cc: __b, start: CC_POWER_START_BPM })`));
     counts.pwMemory += 1;
-    if (pwOpens.pw !== 55 || pwOpens.start !== 55 || pwOpens.cc !== 60) flag(`1ca: a fresh Power Chord Switch opens on ${pwOpens.pw} BPM (CC_POWER_START_BPM ${pwOpens.start}) and Change Up on ${pwOpens.cc}; they must be 55 and 60`);
-    if (pwMemory.bpm !== 70 || pwMemory.rate !== 1) flag(`1ca: Power Chord Switch reopened at ${pwMemory.bpm} BPM, speed ${pwMemory.rate}; it was set to 70 BPM (55 + 5 + the Again button's 10), speed 1 (it pwOpens on 2, every beat, so only a remembered pick gives 1)`);
+    if (pwOpens.pw !== 30 || pwOpens.start !== 30 || pwOpens.cc !== 60) flag(`1ca: a fresh Power Chord Switch opens on ${pwOpens.pw} BPM (CC_POWER_START_BPM ${pwOpens.start}) and Change Up on ${pwOpens.cc}; they must be 30 and 60`);
+    if (pwMemory.bpm !== 45 || pwMemory.rate !== 1) flag(`1ca: Power Chord Switch reopened at ${pwMemory.bpm} BPM, speed ${pwMemory.rate}; it was set to 45 BPM (30 + 5, then the done screen's +5 tapped twice and Again), speed 1 (it opens on 2, every beat, so only a remembered pick gives 1)`);
     if (ccMemory.bpm !== 60 || ccMemory.rate !== 0) flag(`1ca: Change Up opened at ${ccMemory.bpm} BPM, speed ${ccMemory.rate} after Power Chord Switch's tempo was changed — it must keep its own (60, 0)`);
+    /* The floor: −5 taps never take Power Chord Switch below 30 (Change Up's floor stays 40). */
+    run(`ccSetup('power'); cc.phase = 'done'; cc.nextBpm = 40; for (let k = 0; k < 5; k++) ccDoneNudge(-5);`);
+    if (run('cc.nextBpm') !== 30) flag(`1ca: five −5 taps from 40 on the Power Chord Switch done screen gave ${run('cc.nextBpm')} BPM, want 30 (its floor)`);
+    /* Each tap shows the new tempo, on the row and on the Again button. */
+    if (els['cc-done-bpm'].textContent !== '30 BPM' || !String(els['cc-done-again'].innerHTML).includes(String(run(`t('games.common.again', { bpm: 30 })`)))) flag(`1ca: after the −5 taps the done screen shows "${els['cc-done-bpm'].textContent}" and Again reads "${els['cc-done-again'].innerHTML}", want 30 BPM on both`);
+    run(`ccSetup('power'); for (let k = 0; k < 10; k++) ccNudgeBpm(-5);`);
+    if (run('cc.bpm') !== 30) flag(`1ca: ten −5 taps on the Power Chord Switch setup gave ${run('cc.bpm')} BPM, want 30 (its floor)`);
+    run(`ccSetup(); for (let k = 0; k < 10; k++) ccNudgeBpm(-5);`);
+    if (run('cc.bpm') !== 40) flag(`1ca: ten −5 taps on the Change Up setup gave ${run('cc.bpm')} BPM, want 40 (its floor)`);
+    counts.pwMemory += 3;
+    run(`sessionStorage.removeItem('pwBpm'); sessionStorage.removeItem('ccBpm');`);
     /* The pitch gate each game reads strums with. ccLoop is run once per mode
        against a stubbed mic reader, and records the third argument it hands to
        coachPitchReadings: Change Up (with no mode, and with 'open') must keep
@@ -11957,41 +11968,41 @@ function checkCoachVerdicts() {
         run(`setLang('en'); currentUser = { uid: 'pw-check' }; games = {}; ccSetup('power'); ccPickRate(2); ccPickProg(${e.idx}); cc.bpm = 60; ccPrepare(false); ccBeginStage();`);
         const st = () => JSON.parse(run('JSON.stringify({ stage: cc.stage, phase: cc.phase, bpms: cc.stageBpms, beatMs: cc.beatMs, n: cc.changes.length, fresh: cc.changes.every(c => c.result === null), log: cc.stageLog.length })'));
         let s0 = st();
-        if (JSON.stringify(s0.bpms) !== '[60,75,90]' || s0.stage !== 0 || s0.phase !== 'countin' || s0.beatMs !== 1000 || s0.n !== 7) flag(`${etag}: Start gave ${JSON.stringify(s0)}, expected rounds at [60,75,90], round 1 counting in at 1000 ms a beat with 7 changes`);
+        if (JSON.stringify(s0.bpms) !== '[60,65,70]' || s0.stage !== 0 || s0.phase !== 'countin' || s0.beatMs !== 1000 || s0.n !== 7) flag(`${etag}: Start gave ${JSON.stringify(s0)}, expected rounds at [60,65,70], round 1 counting in at 1000 ms a beat with 7 changes`);
         if (!text('cc-body').includes('Round 1 of 3 · 60 BPM')) flag(`${etag}: the count-in does not say "Round 1 of 3 · 60 BPM" (${text('cc-body').slice(0, 80)})`);
-        /* The play screen's BPM buttons: only the rounds still to come, inside 40..140. */
+        /* The play screen's BPM buttons: only the rounds still to come, inside 30..140 (Power Chord Switch's floor). */
         run(`cc.phase = 'play'; ccRenderPlay();`);
-        if (!/id="cc-next-bpm">Next round: 75 BPM</.test(bodies['cc-body']) || !/onclick="ccNudgeNext\(5\)"[^>]*>\+5</.test(bodies['cc-body'])) flag(`${etag}: the play screen has no "Next round: 75 BPM" with its +5 button`);
+        if (!/id="cc-next-bpm">Next round: 65 BPM</.test(bodies['cc-body']) || !/onclick="ccNudgeNext\(5\)"[^>]*>\+5</.test(bodies['cc-body'])) flag(`${etag}: the play screen has no "Next round: 65 BPM" with its +5 button`);
         if (/ccNudgeNext\([-−]?5\)" disabled/.test(bodies['cc-body'])) flag(`${etag}: the BPM buttons are disabled in round 1`);
         run(`ccNudgeNext(5)`); song.nudges++;
-        if (run('JSON.stringify(cc.stageBpms)') !== '[60,80,95]') flag(`${etag}: +5 on the play screen left the rounds at ${run('JSON.stringify(cc.stageBpms)')}, expected [60,80,95]`);
-        if (els['cc-next-bpm'].textContent !== 'Next round: 80 BPM') flag(`${etag}: after +5 the readout says "${els['cc-next-bpm'].textContent}"`);
+        if (run('JSON.stringify(cc.stageBpms)') !== '[60,70,75]') flag(`${etag}: +5 on the play screen left the rounds at ${run('JSON.stringify(cc.stageBpms)')}, expected [60,70,75]`);
+        if (els['cc-next-bpm'].textContent !== 'Next round: 70 BPM') flag(`${etag}: after +5 the readout says "${els['cc-next-bpm'].textContent}"`);
         run(`for (let i = 0; i < 40; i++) ccNudgeNext(5);`);
         if (Math.max(...JSON.parse(run('JSON.stringify(cc.stageBpms)'))) > 140) flag(`${etag}: the BPM buttons went past 140: ${run('JSON.stringify(cc.stageBpms)')}`);
         run(`for (let i = 0; i < 60; i++) ccNudgeNext(-5);`);
-        if (Math.min(...JSON.parse(run('JSON.stringify(cc.stageBpms.slice(1))'))) < 40 || run('cc.stageBpms[0]') !== 60) flag(`${etag}: the BPM buttons went under 40, or moved the round being played: ${run('JSON.stringify(cc.stageBpms)')}`);
-        run(`cc.stageBpms = [60, 75, 90];`);
+        if (Math.min(...JSON.parse(run('JSON.stringify(cc.stageBpms.slice(1))'))) < 30 || run('cc.stageBpms[0]') !== 60) flag(`${etag}: the BPM buttons went under 30, or moved the round being played: ${run('JSON.stringify(cc.stageBpms)')}`);
+        run(`cc.stageBpms = [60, 65, 70];`);
         /* Round 1 → 2: this round's changes are kept, the next starts at its own tempo. */
         run(`cc.changes.forEach(c => { c.result = 'ok'; }); ccStageEnd();`);
         s0 = st(); song.rounds++;
-        if (s0.stage !== 1 || s0.phase !== 'countin' || s0.beatMs !== 800 || s0.n !== 7 || !s0.fresh || s0.log !== 1) flag(`${etag}: after round 1 the state is ${JSON.stringify(s0)}, expected round 2 counting in at 800 ms a beat with 7 fresh changes and 1 round kept`);
-        if (!text('cc-body').includes('Round 2 of 3 · 75 BPM')) flag(`${etag}: round 2's count-in does not say "Round 2 of 3 · 75 BPM"`);
+        if (s0.stage !== 1 || s0.phase !== 'countin' || s0.beatMs !== 60000 / 65 || s0.n !== 7 || !s0.fresh || s0.log !== 1) flag(`${etag}: after round 1 the state is ${JSON.stringify(s0)}, expected round 2 counting in at 60000/65 ms a beat with 7 fresh changes and 1 round kept`);
+        if (!text('cc-body').includes('Round 2 of 3 · 65 BPM')) flag(`${etag}: round 2's count-in does not say "Round 2 of 3 · 65 BPM"`);
         run(`cc.phase = 'play'; ccRenderPlay(); cc.changes.forEach((c, i) => { c.result = i === 0 ? 'miss' : 'ok'; }); ccStageEnd();`);
         s0 = st(); song.rounds++;
-        if (s0.stage !== 2 || s0.beatMs !== 60000 / 90 || s0.log !== 2) flag(`${etag}: after round 2 the state is ${JSON.stringify(s0)}, expected round 3 at 90 BPM with 2 rounds kept`);
+        if (s0.stage !== 2 || s0.beatMs !== 60000 / 70 || s0.log !== 2) flag(`${etag}: after round 2 the state is ${JSON.stringify(s0)}, expected round 3 at 70 BPM with 2 rounds kept`);
         run(`cc.phase = 'play'; ccRenderPlay();`);
         if (!/id="cc-next-bpm">Last round</.test(bodies['cc-body']) || (bodies['cc-body'].match(/ disabled>/g) || []).length !== 2) flag(`${etag}: in the last round the BPM buttons are not both disabled with "Last round" beside them`);
         run(`ccNudgeNext(5)`); song.nudges++;
-        if (run('JSON.stringify(cc.stageBpms)') !== '[60,75,90]') flag(`${etag}: +5 in the last round moved ${run('JSON.stringify(cc.stageBpms)')}`);
+        if (run('JSON.stringify(cc.stageBpms)') !== '[60,65,70]') flag(`${etag}: +5 in the last round moved ${run('JSON.stringify(cc.stageBpms)')}`);
         /* Round 3 → done: all 21 changes, scored at the fastest round with 85% right. */
         run(`cc.changes.forEach(c => { c.result = 'ok'; }); ccStageEnd();`); song.rounds++;
         const fin = JSON.parse(run('JSON.stringify({ phase: cc.phase, n: cc.changes.length, log: cc.stageLog.length, score: ccScoreBpm(), best: cc.isNewBest, saved: games.pw && games.pw.bestBpm })'));
-        if (fin.phase !== 'done' || fin.n !== 21 || fin.log !== 3 || fin.score !== 90 || fin.best !== true || fin.saved !== 90) flag(`${etag}: the finished game is ${JSON.stringify(fin)}, expected done, 21 changes, 3 rounds, scored at 90 BPM and saved as the best`);
+        if (fin.phase !== 'done' || fin.n !== 21 || fin.log !== 3 || fin.score !== 70 || fin.best !== true || fin.saved !== 70) flag(`${etag}: the finished game is ${JSON.stringify(fin)}, expected done, 21 changes, 3 rounds, scored at 70 BPM and saved as the best`);
         const doneTxt = text('cc-body');
-        for (const w of ['Round 1 · 60 BPM: 7 of 7', 'Round 2 · 75 BPM: 6 of 7', 'Round 3 · 90 BPM: 7 of 7', 'Again from 60 BPM']) if (!doneTxt.includes(w)) flag(`${etag}: the done screen does not say "${w}"`);
+        for (const w of ['Round 1 · 60 BPM: 7 of 7', 'Round 2 · 65 BPM: 6 of 7', 'Round 3 · 70 BPM: 7 of 7', 'Again from 65 BPM']) if (!doneTxt.includes(w)) flag(`${etag}: the done screen does not say "${w}"`);
         /* Scores: round 3 not clean → round 2's tempo; no round clean → 0. */
-        const score = marks => run(`cc.ladder = true; cc.stageBpms = [60, 75, 90]; cc.stageLog = ${JSON.stringify(marks)}.map((n, k) => ({ bpm: cc.stageBpms[k], changes: Array.from({ length: 7 }, (_, i) => ({ result: i < n ? 'ok' : 'miss' })) })); ccScoreBpm()`);
-        if (score([7, 7, 4]) !== 75 || score([7, 5, 7]) !== 90 || score([4, 4, 4]) !== 0 || score([6, 7, 3]) !== 75) flag(`${etag}: ccScoreBpm gave ${score([7, 7, 4])}/${score([7, 5, 7])}/${score([4, 4, 4])}/${score([6, 7, 3])}, expected 75/90/0/75`);
+        const score = marks => run(`cc.ladder = true; cc.stageBpms = [60, 65, 70]; cc.stageLog = ${JSON.stringify(marks)}.map((n, k) => ({ bpm: cc.stageBpms[k], changes: Array.from({ length: 7 }, (_, i) => ({ result: i < n ? 'ok' : 'miss' })) })); ccScoreBpm()`);
+        if (score([7, 7, 4]) !== 65 || score([7, 5, 7]) !== 70 || score([4, 4, 4]) !== 0 || score([6, 7, 3]) !== 65) flag(`${etag}: ccScoreBpm gave ${score([7, 7, 4])}/${score([7, 5, 7])}/${score([4, 4, 4])}/${score([6, 7, 3])}, expected 65/70/0/65`);
         /* Stop during round 2's count-in: round 1 is reported, round 2 (never played) is not. */
         run(`ccSetup('power'); ccPickProg(${e.idx}); cc.bpm = 60; ccPrepare(false); ccBeginStage(); cc.changes.forEach(c => { c.result = 'ok'; }); ccStageEnd(); ccFinish(false);`);
         const early = JSON.parse(run('JSON.stringify({ n: cc.changes.length, ok: cc.changes.filter(c => c.result === "ok").length, log: cc.stageLog.length })'));
@@ -12015,7 +12026,7 @@ function checkCoachVerdicts() {
             const startLabel = run(`t('games.pw.ladder.start', { n: 3 })`);
             if (!setup.includes(`${startLabel}</button>`)) flag(`${etag}, speed ${r}: the Start button does not read "${startLabel}"`);
             if (!flat.includes(String(title).replace(/\s+/g, ' '))) flag(`${etag}: the setup does not show the song's name "${title}"`);
-            const ladderLine = [1, 2, 3].map(n => run(`t('games.pw.ladder.roundBpm', { n: ${n}, bpm: ${[60, 75, 90][n - 1]} })`)).join(' · ');
+            const ladderLine = [1, 2, 3].map(n => run(`t('games.pw.ladder.roundBpm', { n: ${n}, bpm: ${[60, 65, 70][n - 1]} })`)).join(' · ');
             if (!flat.includes(ladderLine)) flag(`${etag}: the setup does not list the three tempos ("${ladderLine}")`);
             const boxes = (setup.match(/id="cc-dia-[^"]+"/g) || []);
             if (boxes.length !== 2) flag(`${etag}: the chart preview draws ${boxes.length} boxes, a switch has 2`);
@@ -12035,7 +12046,7 @@ function checkCoachVerdicts() {
           }
           if (/A5o/.test(bodies['cc-body'].replace(/\s(id|data-key|onclick)="[^"]*"/g, ''))) flag(`${etag}: the play screen shows the key "A5o" (outside ids)`);
           /* Done screen: three rounds, every change missed, then a round that hurt on one switch. */
-          run(`cc.phase = 'play'; cc.stageLog = [60, 75, 90].map(b => ({ bpm: b, changes: Array.from({ length: 7 }, (_, i) => ({ from: cc.seq[i], to: cc.seq[i + 1], result: 'miss' })) })); cc.changes = cc.stageLog.reduce((a, sg) => a.concat(sg.changes), []); ccRenderDone();`); song.dones++;
+          run(`cc.phase = 'play'; cc.stageLog = [60, 65, 70].map(b => ({ bpm: b, changes: Array.from({ length: 7 }, (_, i) => ({ from: cc.seq[i], to: cc.seq[i + 1], result: 'miss' })) })); cc.changes = cc.stageLog.reduce((a, sg) => a.concat(sg.changes), []); ccRenderDone();`); song.dones++;
           const doneHtml = bodies['cc-body'], doneText = text('cc-body');
           if (/A5o/.test(doneHtml.replace(/\s(id|data-key|onclick)="[^"]*"/g, ''))) flag(`${etag}: the done screen shows the key "A5o"`);
           if (e.shapes && e.shapes.A5o && !doneText.includes(shownName('A5o').replace(/\s+/g, ' '))) flag(`${etag}: the done screen never says "${shownName('A5o')}"`);
@@ -12066,7 +12077,7 @@ function checkCoachVerdicts() {
     if (full.saves.length !== 1) flag(`1ck: a game played to the end saved ${full.saves.length} takes, expected 1`);
     else {
       const m = full.saves[0];
-      if (m.fields.game !== 'pw' || JSON.stringify(m.fields.stageBpms) !== '[60,75,90]' || m.fields.bpm !== 60 || m.fields.progression !== SONGS[0].chords.join('-')) flag(`1ck: the saved take's fields are ${JSON.stringify(m.fields)}`);
+      if (m.fields.game !== 'pw' || JSON.stringify(m.fields.stageBpms) !== '[60,65,70]' || m.fields.bpm !== 60 || m.fields.progression !== SONGS[0].chords.join('-')) flag(`1ck: the saved take's fields are ${JSON.stringify(m.fields)}`);
       if (m.expected.length !== 21 || m.expected.some(e => !Number.isFinite(e.t) || !['ok', 'off', 'miss'].includes(e.verdict) || ![0, 1, 2].includes(e.stage))) flag(`1ck: the saved take lists ${m.expected.length} changes (expected 21, each with a time, a verdict and a round)`);
       if (!Array.isArray(m.events)) flag('1ck: the saved take has no events list');
     }
@@ -12161,31 +12172,41 @@ function checkCoachVerdicts() {
     song.hintChecks = 0;
     const doneText = (mode, lang, results) => {
       const [f, g] = mode === 'power' ? ['F5', 'G5'] : ['C', 'G'];
-      run(`micRec = null; setLang(${JSON.stringify(lang)}); ccSetup(${JSON.stringify(mode)}); ccPickRate(2); ccPickProg(1); ccPrepare(false); ccBeginStage(); cc.phase = 'play';
-        cc.changes = ${JSON.stringify(results.map((r, i) => ({ from: i % 2 ? g : f, to: i % 2 ? f : g, result: r })))}; ccRenderDone();`);
-      return { txt: text('cc-body'), big: (/class="coach-start" onclick="ccAgain\((-?\d+)\)"/.exec(bodies['cc-body'] || '') || [])[1] };
+      run(`micRec = null; setLang(${JSON.stringify(lang)}); ccSetup(${JSON.stringify(mode)}); cc.bpm = 60; ccPickRate(2); ccPickProg(1); ccPrepare(false); ccBeginStage(); cc.phase = 'play';
+        cc.changes = ${JSON.stringify(results.map((r, i) => ({ from: i % 2 ? g : f, to: i % 2 ? f : g, result: r })))}; cc.nextBpm = null; ccRenderDone();`);
+      const html = bodies['cc-body'] || '';
+      /* Change Up: the highlighted one of its three buttons (ccAgain's argument). Power Chord Switch has one Again button and a −5 / +5
+         row (2026-11-05): what it recommends is the tempo that row opens on, minus the tempo just played; the row's readout and the
+         Again label must both show it. */
+      if (mode !== 'power') return { txt: text('cc-body'), big: (/class="coach-start" onclick="ccAgain\((-?\d+)\)"/.exec(html) || [])[1] };
+      const next = run('cc.nextBpm'), shown = (/id="cc-done-bpm">(\d+) BPM</.exec(html) || [])[1], again = /id="cc-done-again" onclick="ccAgain\(0\)"/.test(html) && html.includes(String(run('ccDoneAgainText()')));
+      return { txt: text('cc-body'), big: +shown === next && again ? String(next - 60) : `readout ${shown} / nextBpm ${next} / Again label ${again}` };
     };
     const times = (n, r) => Array(n).fill(r);
-    const WORDS = { en: { hint: 'Strum a little firmer, and keep the guitar close to the mic', low: 'Drop 10 BPM and try again', fast: 'this speed is too fast for now', up: 'Level up: try it 10 BPM faster' },
-      es: { hint: 'Rasguea un poco más fuerte y mantén la guitarra cerca del micrófono', low: 'Baja 10 BPM e inténtalo de nuevo', fast: 'esta velocidad es demasiado rápida por ahora', up: 'Sube de nivel: pruébalo 10 BPM más rápido' } };
-    // [game, results, shows the hint, shows "Drop 10 BPM", the highlighted big button (ccAgain's argument: -10, 0 or 10), why]
+    /* Power Chord Switch's tempo steps are 5 (2026-11-05), Change Up's 10. */
+    const WORDS = { en: { hint: 'Strum a little firmer, and keep the guitar close to the mic', low: n => `Drop ${n} BPM and try again`, fast: 'this speed is too fast for now', up: n => `Level up: try it ${n} BPM faster` },
+      es: { hint: 'Rasguea un poco más fuerte y mantén la guitarra cerca del micrófono', low: n => `Baja ${n} BPM e inténtalo de nuevo`, fast: 'esta velocidad es demasiado rápida por ahora', up: n => `Sube de nivel: pruébalo ${n} BPM más rápido` } };
+    // [game, results, shows the hint, shows "Drop N BPM", the recommended step (Change Up: the highlighted ccAgain(-10/0/10); Power Chord Switch: the done row's tempo minus 60: -5/0/5), why]
     const hintCases = [
       ['power', [...times(4, 'ok'), ...times(12, 'miss')], true, false, '0', '4 right, 12 not heard'],
       ['power', [...times(10, 'ok'), ...times(6, 'miss')], true, false, '0', '10 right, 6 not heard (between half and 85%)'],
       ['power', times(16, 'miss'), true, false, '0', 'nothing heard'],
-      ['power', [...times(4, 'ok'), ...times(2, 'miss'), ...times(10, 'off')], false, true, '-10', '2 not heard but 10 wrong chords'],
-      ['power', [...times(5, 'ok'), ...times(5, 'miss'), ...times(5, 'off')], false, true, '-10', 'not heard ties wrong chords'],
+      ['power', [...times(4, 'ok'), ...times(2, 'miss'), ...times(10, 'off')], false, true, '-5', '2 not heard but 10 wrong chords'],
+      ['power', [...times(5, 'ok'), ...times(5, 'miss'), ...times(5, 'off')], false, true, '-5', 'not heard ties wrong chords'],
       ['power', [...times(10, 'ok'), 'miss', ...times(5, 'off')], false, false, '0', 'a single miss among wrong chords'],
       ['power', [...times(3, 'ok'), 'miss'], false, false, '0', 'one miss and nothing else wrong'],
-      ['power', [...times(14, 'ok'), ...times(2, 'miss')], false, false, '10', '14 of 16 right'],
-      ['power', times(16, 'ok'), false, false, '10', 'all right'],
+      ['power', [...times(14, 'ok'), ...times(2, 'miss')], false, false, '5', '14 of 16 right'],
+      ['power', times(16, 'ok'), false, false, '5', 'all right'],
       ['open', [...times(4, 'ok'), ...times(12, 'miss')], false, true, '-10', 'Change Up keeps its advice and its button']];
     for (const lang of ['en', 'es']) {
       const W = WORDS[lang];
       for (const [mode, results, wantHint, wantLow, wantBig, why] of hintCases) {
         const { txt: raw, big } = doneText(mode, lang, results), txt = raw.replace(/\s+/g, ' ');
-        const gotHint = txt.includes(W.hint), gotLow = txt.includes(W.low);
-        if (gotHint !== wantHint || gotLow !== wantLow) flag(`1ck (${lang}): the ${mode === 'power' ? 'Power Chord Switch' : 'Change Up'} done screen after "${why}" shows the firmer hint: ${gotHint} (want ${wantHint}), "${W.low}": ${gotLow} (want ${wantLow})`);
+        const step = mode === 'power' ? 5 : 10, low = W.low(step), up = W.up(step);
+        const gotHint = txt.includes(W.hint), gotLow = txt.includes(low);
+        if (gotHint !== wantHint || gotLow !== wantLow) flag(`1ck (${lang}): the ${mode === 'power' ? 'Power Chord Switch' : 'Change Up'} done screen after "${why}" shows the firmer hint: ${gotHint} (want ${wantHint}), "${low}": ${gotLow} (want ${wantLow})`);
+        // "Level up: try it N BPM faster" is said exactly when the step up is recommended, and never with the other step's number
+        if (txt.includes(up) !== (+wantBig > 0) || txt.includes(W.up(15 - step)) || txt.includes(W.low(15 - step))) flag(`1ck (${lang}): the ${mode === 'power' ? 'Power Chord Switch' : 'Change Up'} done screen after "${why}" says "${up}": ${txt.includes(up)} (want ${+wantBig > 0}), or names the other game's ${15 - step} BPM step`);
         if (wantHint && gotLow) flag(`1ck (${lang}): "${why}" shows both the hint and the tempo advice`);
         // the headline agrees with the advice: "this speed is too fast" is said exactly when "Drop 10 BPM" is
         if (txt.includes(W.fast) !== wantLow) flag(`1ck (${lang}): the ${mode === 'power' ? 'Power Chord Switch' : 'Change Up'} done screen after "${why}" says "${W.fast}": ${txt.includes(W.fast)}, want ${wantLow} (it must agree with the tempo advice)`);
@@ -12219,10 +12240,11 @@ function checkCoachVerdicts() {
     if (!seen.every(Boolean)) flag(`1ck: the "Recording this take" label is missing on screen(s) ${seen.map((v, i) => (v ? '' : ['round 1 count-in', 'round 1 play', 'round 2 count-in', 'round 2 play'][i])).filter(Boolean).join(', ')} of a recorded take`);
     const fresh = run('JSON.stringify([cc.gridOffset, cc.lastOnsetT, cc.smoothRms, cc.smoothHf, cc.lastPitchT, cc.lastBeat])');
     if (fresh !== JSON.stringify([0, -1e9, 0, 0, 0, -1])) flag(`1ck: round 2 starts with a leftover grid from round 1 (gridOffset, lastOnsetT, smoothRms, smoothHf, lastPitchT, lastBeat = ${fresh})`);
-    const ladders = JSON.parse(run('JSON.stringify(Array.from({ length: 21 }, (_, k) => ccLadderBpms(40 + k * 5)))'));
+    /* Bases 30..140 in 5s. Each round is 5 BPM faster (2026-11-05, Jonathan: "don't increase it so quickly"; it was 15). */
+    const ladders = JSON.parse(run('JSON.stringify(Array.from({ length: 23 }, (_, k) => ccLadderBpms(30 + k * 5)))'));
     song.recChecks++;
-    ladders.forEach((l, k) => { if (!(l[0] < l[1] && l[1] < l[2]) || l[2] > 140 || l[0] > 40 + k * 5 || l[0] < 40) flag(`1ck: a base of ${40 + k * 5} BPM gives rounds ${l.join('/')} — three rising tempos between 40 and 140 are needed`); });
-    if (JSON.stringify(ladders[0]) !== '[40,55,70]' || JSON.stringify(ladders[4]) !== '[60,75,90]' || JSON.stringify(ladders[18]) !== '[110,125,140]' || JSON.stringify(ladders[20]) !== '[110,125,140]') flag(`1ck: ladder tempos for bases 40/60/130/140 are ${[0, 4, 18, 20].map(i => ladders[i].join('/')).join(' | ')}`);
+    ladders.forEach((l, k) => { if (!(l[0] < l[1] && l[1] < l[2]) || l[2] > 140 || l[0] > 30 + k * 5 || l[0] < 30 || l[1] - l[0] !== 5 || l[2] - l[1] !== 5) flag(`1ck: a base of ${30 + k * 5} BPM gives rounds ${l.join('/')} — three tempos 5 apart between 30 and 140 are needed`); });
+    if (JSON.stringify(ladders[0]) !== '[30,35,40]' || JSON.stringify(ladders[6]) !== '[60,65,70]' || JSON.stringify(ladders[20]) !== '[130,135,140]' || JSON.stringify(ladders[22]) !== '[130,135,140]') flag(`1ck: ladder tempos for bases 30/60/130/140 are ${[0, 6, 20, 22].map(i => ladders[i].join('/')).join(' | ')}`);
     run(`micRecWanted = () => true;`);
     const foot = (setup, kind) => {
       run(setup); song.recChecks++;
@@ -12729,10 +12751,10 @@ async function checkPwTakeEvaluator() {
 
   // 7. the limits micEvalTakePw keeps are coach.js's
   const lim = (jsFunctionBody(tSrc, 'micEvalTakePw') || '').match(/const BPM_MIN = (\d+), BPM_MAX = (\d+), ROUNDS = (\d+), BPCS = \[([\d, ]+)\];/);
-  const cc = { min: +(cSrc.match(/^const CC_BPM_MIN = (\d+), CC_BPM_MAX = (\d+);/m) || [])[1], max: +(cSrc.match(/^const CC_BPM_MIN = (\d+), CC_BPM_MAX = (\d+);/m) || [])[2],
+  const cc = { min: +(cSrc.match(/^const CC_POWER_BPM_MIN = (\d+);/m) || [])[1], max: +(cSrc.match(/^const CC_BPM_MIN = (\d+), CC_BPM_MAX = (\d+);/m) || [])[2],
     rounds: +(cSrc.match(/^const CC_LADDER_ROUNDS = (\d+)/m) || [])[1], bpcs: ((cSrc.match(/^const CC_RATES = \[([\s\S]*?)\n\];/m) || [])[1] || '').match(/bpc: \d+/g) };
   const bpcs = cc.bpcs ? cc.bpcs.map(s => +s.slice(5)).sort((a, b) => a - b).join(', ') : '?';
-  if (!lim || +lim[1] !== cc.min || +lim[2] !== cc.max || +lim[3] !== cc.rounds || lim[4] !== bpcs) fail(`micEvalTakePw's limits (${lim ? lim.slice(1).join(' / ') : 'not found'}) are not coach.js's CC_BPM_MIN / CC_BPM_MAX / CC_LADDER_ROUNDS / CC_RATES bpc (${cc.min} / ${cc.max} / ${cc.rounds} / ${bpcs})`);
+  if (!lim || +lim[1] !== cc.min || +lim[2] !== cc.max || +lim[3] !== cc.rounds || lim[4] !== bpcs) fail(`micEvalTakePw's limits (${lim ? lim.slice(1).join(' / ') : 'not found'}) are not coach.js's CC_POWER_BPM_MIN / CC_BPM_MAX / CC_LADDER_ROUNDS / CC_RATES bpc (${cc.min} / ${cc.max} / ${cc.rounds} / ${bpcs})`);
 
   // 8. micEvalTake (Coach / Note Runner): a note whose window runs past the end of the audio is dropped, not judged (the rule for a change)
   {

@@ -3051,7 +3051,8 @@ window.addEventListener('gc-langchange', function(){
    every bar; the game grades each CHANGE: did a strum land on beat 1 of
    the new bar, and does it ring like the new chord's notes (hedged, never
    a claimed chord name). Levels are the loop length: 2 chords back and
-   forth → 3 → 4. Pass a round (≥85%) and it offers +10 BPM; best clean
+   forth → 3 → 4. Pass a round (≥85%) and it offers +10 BPM (Power Chord
+   Switch: +5, on its done screen's −5 / +5 row); best clean
    tempo per loop is remembered for the session.
    ════════════════════════════════════════════════════════════════════ */
 
@@ -3085,15 +3086,21 @@ const CC_RATES = [
    row is still there to slow it down. */
 const CC_BEAT_IDX = CC_RATES.findIndex(r => r.id === 'beat');
 const CC_BPM_MIN = 40, CC_BPM_MAX = 140;
-/* The tempo Power Chord Switch opens on (2026-11-04, Jonathan: 5 BPM slower than the 60 it opened on). A song switch's three
-   rounds start from it (55 / 70 / 85); Change Up still opens on 60. A tempo the student already picked this session
+/* Power Chord Switch goes down to 30 BPM (2026-11-05, Jonathan: "start at 30 bpm"); Change Up keeps 40. */
+const CC_POWER_BPM_MIN = 30;
+function ccBpmMin(){ return ccIsPower() ? CC_POWER_BPM_MIN : CC_BPM_MIN; }
+/* The tempo Power Chord Switch opens on (2026-11-05, Jonathan: 30 BPM; it was 55 from 2026-11-04, 60 before). A song switch's three
+   rounds start from it (30 / 35 / 40); Change Up still opens on 60. A tempo the student already picked this session
    (sessionStorage pwBpm) wins. */
-const CC_POWER_START_BPM = 55;
+const CC_POWER_START_BPM = 30;
 /* A song switch (CC_POWER_PROGRESSIONS, `ladder`) is 3 rounds, each CC_LADDER_STEP
-   BPM faster than the last, of CC_LADDER_SLOTS chords each: 4 back-and-forths. */
-const CC_LADDER_ROUNDS = 3, CC_LADDER_STEP = 15, CC_LADDER_SLOTS = 8;
-/* The three round tempos. The first round's tempo is the base, but never above CC_BPM_MAX minus two steps (110): from a base of 125 the
-   rounds were 125 / 140 / 140, and "each round faster" was not true. */
+   BPM faster than the last, of CC_LADDER_SLOTS chords each: 4 back-and-forths.
+   The step was 15 until 2026-11-05 (Jonathan: "don't increase it so quickly"). */
+const CC_LADDER_ROUNDS = 3, CC_LADDER_STEP = 5, CC_LADDER_SLOTS = 8;
+/* How far the tempo moves per tap on Power Chord Switch's done screen (Change Up's buttons move 10). */
+const CC_POWER_AGAIN_STEP = 5;
+/* The three round tempos. The first round's tempo is the base, but never above CC_BPM_MAX minus two steps (130): with the old 15 step, a
+   base of 125 gave rounds 125 / 140 / 140, and "each round faster" was not true. */
 function ccLadderBpms(base){
   const first = Math.min(base, CC_BPM_MAX - (CC_LADDER_ROUNDS - 1) * CC_LADDER_STEP);
   return Array.from({ length: CC_LADDER_ROUNDS }, (_, k) => first + k * CC_LADDER_STEP);
@@ -3299,7 +3306,7 @@ function ccSetup(mode){
     rateIdx = parseInt(sessionStorage.getItem(sk + 'Rate'), 10);
   } catch(e){}
   if (!(progIdx >= 0 && progIdx < (power ? CC_POWER_PROGRESSIONS : CC_PROGRESSIONS).length)) progIdx = 0;
-  if (!(bpm >= CC_BPM_MIN && bpm <= CC_BPM_MAX)) bpm = power ? CC_POWER_START_BPM : 60;
+  if (!(bpm >= (power ? CC_POWER_BPM_MIN : CC_BPM_MIN) && bpm <= CC_BPM_MAX)) bpm = power ? CC_POWER_START_BPM : 60;
   if (!(rateIdx >= 0 && rateIdx < CC_RATES.length)) rateIdx = power ? CC_BEAT_IDX : 0;   // Power Chord Switch opens on every beat
   cc = { phase: 'setup', mode: power ? 'power' : 'open', progIdx, rateIdx, bpm, micOn: false, timeouts: [] };
   ccRenderSetup();
@@ -3334,7 +3341,7 @@ function ccPickRate(i){
 
 function ccNudgeBpm(d){
   if (!cc) return;
-  cc.bpm = Math.min(CC_BPM_MAX, Math.max(CC_BPM_MIN, cc.bpm + d));
+  cc.bpm = Math.min(CC_BPM_MAX, Math.max(ccBpmMin(), cc.bpm + d));
   try { sessionStorage.setItem(ccSk('Bpm'), String(cc.bpm)); } catch(e){}
   const el = document.getElementById('cc-bpm-readout');
   if (el) el.textContent = cc.bpm + ' BPM';
@@ -3516,6 +3523,7 @@ async function ccStart(again){
   coachEvictTuner();
   const session = cc;
   cc.phase = 'starting';
+  cc.nextBpm = null;   // the done screen's tempo row opens fresh after each game (ccRenderDone)
   if (!coachStream && !(await coachAcquireMic())){
     if (cc === session){ cc.phase = 'setup'; ccRenderSetup(coachMicFailMsg('games.cc.micDenied')); }
     return;
@@ -3618,7 +3626,7 @@ function ccStageText(){
 function ccNudgeNext(d){
   if (!cc || !cc.ladder || cc.phase !== 'play' || cc.stage >= CC_LADDER_ROUNDS - 1) return;
   for (let k = cc.stage + 1; k < CC_LADDER_ROUNDS; k++){
-    cc.stageBpms[k] = Math.min(CC_BPM_MAX, Math.max(CC_BPM_MIN, cc.stageBpms[k] + d));
+    cc.stageBpms[k] = Math.min(CC_BPM_MAX, Math.max(ccBpmMin(), cc.stageBpms[k] + d));
   }
   const el = document.getElementById('cc-next-bpm');
   if (el) el.textContent = ccNextBpmText();
@@ -3962,7 +3970,7 @@ function ccRenderDone(){
   let verdict, advice;
   if (r >= 0.85){
     verdict = '&#x1F31F; ' + t('games.cc.verdict.great', { ok, total });
-    advice = t('games.cc.advice.great');
+    advice = t(ccIsPower() ? 'games.pw.advice.great' : 'games.cc.advice.great');
     try {
       const k = ccBestKey(prog, cc.rateIdx);
       const best = parseInt(sessionStorage.getItem(k), 10) || 0;
@@ -3982,7 +3990,7 @@ function ccRenderDone(){
     advice = firmer ? t('games.pw.advice.firmer') : worst ? t('games.cc.advice.practiceWorst', { worst, early }) : t('games.cc.advice.tryAgainSteady');
   } else {
     verdict = '&#x1F3B8; ' + t(firmer ? 'games.cc.verdict.ok' : 'games.cc.verdict.low', { ok, total });
-    advice = firmer ? t('games.pw.advice.firmer') : t('games.cc.advice.low');
+    advice = firmer ? t('games.pw.advice.firmer') : t(ccIsPower() ? 'games.pw.advice.low' : 'games.cc.advice.low');
   }
   const chips = cc.changes.map(c =>
     `<span class="coach-chip ${c.result === 'ok' ? 'ok' : c.result === 'off' ? 'wrong' : 'miss'}">${escHtml(ccChipText(c))}</span>`
@@ -3992,6 +4000,26 @@ function ccRenderDone(){
   const breakdown = `<div class="cc-breakdown">${escHtml(t('games.cc.breakdown', { ok, off, miss: nMiss }))}</div>`;
   const rec = firmer ? 'same' : r >= 0.85 ? 'up' : r >= 0.5 ? 'same' : 'down';
   /* A song switch: how each round went, at its own tempo. */
+  /* Power Chord Switch (2026-11-05, Jonathan: the button should take more than one click and show the tempo): a −5 / +5 row
+     with the tempo between, as on the setup screen, and one big "Again at N BPM" that plays it. The row opens on the tempo the
+     advice names (5 up after 85%, 5 down after under half, else the same); cc.nextBpm is set once per finished game (ccStart
+     clears it), so drawing the screen again does not move it a second time. Change Up keeps its three buttons. */
+  if (ccIsPower() && cc.nextBpm == null)
+    cc.nextBpm = Math.min(CC_BPM_MAX, Math.max(CC_POWER_BPM_MIN, cc.bpm + (rec === 'up' ? CC_POWER_AGAIN_STEP : rec === 'down' ? -CC_POWER_AGAIN_STEP : 0)));
+  const actions = ccIsPower()
+    ? `<div class="coach-bpm-row">
+         <button type="button" class="tp-btn" onclick="ccDoneNudge(${-CC_POWER_AGAIN_STEP})">&#x2212;${CC_POWER_AGAIN_STEP}</button>
+         <span class="coach-bpm-readout" id="cc-done-bpm">${cc.nextBpm} BPM</span>
+         <button type="button" class="tp-btn" onclick="ccDoneNudge(${CC_POWER_AGAIN_STEP})">+${CC_POWER_AGAIN_STEP}</button>
+       </div>
+       <div class="coach-actions">
+         <button type="button" class="coach-start" id="cc-done-again" onclick="ccAgain(0)">&#x21BB; ${ccDoneAgainText()}</button>
+       </div>`
+    : `<div class="coach-actions">
+       <button type="button" class="${rec === 'down' ? 'coach-start' : 'tp-btn'}" onclick="ccAgain(-10)">&#x2B07; ${t('games.common.bpmDown10')}</button>
+       <button type="button" class="${rec === 'same' ? 'coach-start' : 'tp-btn'}" onclick="ccAgain(0)">&#x21BB; ${t('games.common.again', { bpm: cc.bpm })}</button>
+       <button type="button" class="${rec === 'up' ? 'coach-start' : 'tp-btn'}" onclick="ccAgain(10)">&#x2B06; ${t('games.common.bpmUp10')}</button>
+     </div>`;
   const rounds = cc.ladder ? '<div class="cc-rounds">' + cc.stageLog.map((sg, k) =>
     `<span>${escHtml(t('games.pw.ladder.roundResult', { n: k + 1, bpm: sg.bpm, ok: sg.changes.filter(c => c.result === 'ok').length, total: sg.changes.length }))}</span>`).join('') + '</div>' : '';
   body.innerHTML =
@@ -4000,18 +4028,28 @@ function ccRenderDone(){
      ${breakdown}
      <div class="coach-strip">${chips}</div>
      <div class="coach-crit-note">${escHtml(advice)}</div>
-     <div class="coach-actions">
-       <button type="button" class="${rec === 'down' ? 'coach-start' : 'tp-btn'}" onclick="ccAgain(-10)">&#x2B07; ${t('games.common.bpmDown10')}</button>
-       <button type="button" class="${rec === 'same' ? 'coach-start' : 'tp-btn'}" onclick="ccAgain(0)">&#x21BB; ${cc.ladder ? t('games.pw.ladder.again', { bpm: cc.bpm }) : t('games.common.again', { bpm: cc.bpm })}</button>
-       <button type="button" class="${rec === 'up' ? 'coach-start' : 'tp-btn'}" onclick="ccAgain(10)">&#x2B06; ${t('games.common.bpmUp10')}</button>
-     </div>
+     ${actions}
      <button type="button" class="tp-btn cc-change-loop" onclick="ccSetup(${jsonAttrArg(cc.mode || '')})">${t(ccIsPower() ? 'games.pw.pickDifferent' : 'games.cc.pickDifferentLoop')}</button>
      ${coachFootHtml(ccIsPower())}</div>`;
 }
 
+/* "Again at 35 BPM" (a pair) / "Again from 35 BPM" (a song switch: its first round). */
+function ccDoneAgainText(){
+  return cc.ladder ? t('games.pw.ladder.again', { bpm: cc.nextBpm }) : t('games.common.again', { bpm: cc.nextBpm });
+}
+/* Power Chord Switch's done-screen −5 / +5: only moves the tempo shown; "Again" plays it. */
+function ccDoneNudge(d){
+  if (!cc || cc.phase !== 'done' || !ccIsPower() || cc.nextBpm == null) return;
+  cc.nextBpm = Math.min(CC_BPM_MAX, Math.max(CC_POWER_BPM_MIN, cc.nextBpm + d));
+  const el = document.getElementById('cc-done-bpm');
+  if (el) el.textContent = cc.nextBpm + ' BPM';
+  const again = document.getElementById('cc-done-again');
+  if (again) again.innerHTML = '&#x21BB; ' + escHtml(ccDoneAgainText());
+}
 function ccAgain(d){
   if (!cc || cc.phase !== 'done') return;   // a second tap while the first is starting
-  cc.bpm = Math.min(CC_BPM_MAX, Math.max(CC_BPM_MIN, cc.bpm + d));
+  if (ccIsPower() && cc.nextBpm != null) cc.bpm = cc.nextBpm;
+  cc.bpm = Math.min(CC_BPM_MAX, Math.max(ccBpmMin(), cc.bpm + d));
   try { sessionStorage.setItem(ccSk('Bpm'), String(cc.bpm)); } catch(e){}
   cc.phase = 'setup';
   ccStart(true);

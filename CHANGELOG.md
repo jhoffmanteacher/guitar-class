@@ -5,6 +5,12 @@ Notable changes to the Guitar Class site. Newest first.
 For the full session-by-session history (and the reasoning behind each change),
 see `WORKFLOW.md` and the git commit log.
 
+## 2026-11-05 — Power Chord Switch: starts at 30 BPM and speeds up by 5
+
+- **Power Chord Switch now starts at 30 BPM** (it was 55). You can go down to 30 BPM. Change Up still starts at 60.
+- **A song switch's three rounds go up 5 BPM each:** 30, 35, 40 (before: 15 each, so 55, 70, 85).
+- **The end screen has a −5 / +5 row with the tempo between them.** Press −5 or +5 as many times as you want, and the number changes each time. Then press "Again at N" to play at that tempo. After a good game the row starts 5 BPM faster; after a game under half right it starts 5 BPM slower. The advice now says "5 BPM" too. Change Up keeps its −10 / Again / +10 buttons.
+
 ## 2026-11-05 — Power Chord Switch: noise in the room counts less
 
 - **In Power Chord Switch, a noise in the room has to be much louder to count.** Before, a voice, a bump, a chair, or the last chord still ringing could count as a right change when you had not strummed. Most of those no longer count. A very soft strum, or one without a clear pick sound, can now show "no strum heard": strum a little firmer and keep the guitar close to the mic. Change Up and the other mic games are not changed.

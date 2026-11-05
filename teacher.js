@@ -5053,7 +5053,7 @@ function micEvalStrumHits(frames, rule, ratio, hfRatio){
        Stop) is not judged: `dropped`.
      - Every number here was written by the student's browser and is not checked
        by the rules: a change with an impossible time, round or tempo (outside
-       coach.js CC_BPM_MIN..CC_BPM_MAX, CC_LADDER_ROUNDS, CC_RATES' bpc; checks.mjs
+       coach.js CC_POWER_BPM_MIN..CC_BPM_MAX, CC_LADDER_ROUNDS, CC_RATES' bpc; checks.mjs
        1cl pins these copies) is left out and counted in `ignored`. No loop then runs
        on a saved number alone: the grid loop stops at the number of beats the
        changes span, the replay is events x a binary search, and the per-change
@@ -5092,7 +5092,7 @@ function micEvalTakePw(pcm, R, d, deps){
   const pct = (a, q) => { if (!a.length) return null; const b = Array.from(a).sort((p, q2) => p - q2); return b[Math.min(b.length - 1, Math.floor(q * b.length))]; };
   const med = a => pct(a, 0.5);
   const num = v => typeof v === 'number' && isFinite(v);
-  const BPM_MIN = 40, BPM_MAX = 140, ROUNDS = 3, BPCS = [1, 2, 4];
+  const BPM_MIN = 30, BPM_MAX = 140, ROUNDS = 3, BPCS = [1, 2, 4];
   const endMs = s2ms(N);
   const inSpan = t => num(t) && t >= -60000 && t <= endMs + 60000;
   const lat = num(d.micLatencyMs) && Math.abs(d.micLatencyMs) <= 5000 ? d.micLatencyMs : 0;
