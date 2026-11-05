@@ -3470,8 +3470,9 @@ Jonathan's request; this list is the plan.)
    asks. The measurement is in "Open finding" and "First real-take results" below. Where it
    stands: a higher onset floor is ruled out; "no readable pitch, no tick" and stricter
    strum ratios are the two options left, and the "Strum what-if" table in the console
-   (Evaluate all recordings) is the tool for the second. This section does not record what that
-   table showed on the 3 noisy real takes; look at it before choosing. Takes saved from
+   (Evaluate all recordings) is the tool for the second. What it showed on the 12 real takes
+   (2026-11-05) is under "First real-take results" below: ratio 2.2 removes 30 of 52 false hits
+   and loses 4 of 132 real strums. Takes saved from
    2026-11-05 carry the pitch readings (see "Pitch readings in the saved take"), so the cost of
    "no readable pitch, no tick" on real strums can be read off the console's "Pitch-rule
    what-if" table once new takes are in. Either option touches
@@ -3547,6 +3548,16 @@ count (23 of 40 on 2026-11-04; Coach and Note Runner takes count too).
 - **3 PCS takes hold 38 of the 52 false hits.** The site heard a strum at almost every
   change, but the recording has only 5-8 strum attacks in 21-30 s. This is the room-noise
   finding above, measured: it is a few rooms (or mics), not every take.
+- **The strum what-if on those 12 takes (read from Jonathan's `mic-eval-2026-11-05.json`, 2026-11-05;
+  186 changes judged, 52 false hits, 132 real strums).** At the site's own ratios (1.4 / 1.7) the replay
+  gives the site's yes/no on 183 of 186 changes, so it can be trusted. Stricter ratios, false hits removed /
+  real strums lost: **1.8 / 2.19: 14 / 1; 2.2 / 2.67: 30 / 4; 2.6 / 3.16: 38 / 9.** The 3 noisy takes (T01,
+  T10, T12) hold 38 of the 52 false hits; at 2.2 they lose 26 false hits and **0** real strums, at 2.6 they
+  lose 30 and 1. The real strums lost are in the other takes: at 2.2 in T06 (1), T08 (1) and T11 (2); at 2.6
+  also in T03, T04 and T09. So a stricter ratio mostly helps the noisy rooms and costs the soft strummers
+  in the clean ones. "Lost" means the replay no longer hears the strum, so the game would grade that change a
+  miss. 12 takes, 3 of them noisy: a small sample. Not decided (Jonathan's call). The zip of all 25 takes is
+  in Jonathan's Downloads (`mic-recordings-2026-11-05.zip`, 12 of them Power Chord Switch, none with pitch readings).
 - **A higher absolute onset floor is ruled out:** 48 of 52 false hits AND 55 of 132 real
   strums are under 15 dB above the room floor, so any floor that removes the noise removes
   the soft real strums too.
