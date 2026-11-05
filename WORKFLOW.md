@@ -1028,7 +1028,7 @@
       the doc. checks.mjs **1cm** runs the real writers against a doc that merges like Firestore, starting from an older game full of names, plus the
       views and the `answers` rules. (2) The class rank moved from `minutesBoard/{uid}` to `rankBoard/{tag}` (same private tag as the Top 5);
       `minutesBoard` has NO rules block any more and 1cg fails the push if one comes back. A person in the room can still line the wall's names and points
-      up with the public uid -> points (a uid, a name and points), but no uid reaches minutes or a period. Never publish a name next to a uid, or
+      up with the public uid -> points (a uid, a name and points), but no uid reaches minutes. Never publish a name next to a uid, or
       minutes next to a uid, again. **ONE-TIME after deploying: delete the `scores` field of `liveQuiz/current` in the Firebase console (the last game's
       names stay in it until a Reveal/End/Close/Start writes it); the old `minutesBoard` docs are unreachable and can be deleted whenever.**
       Visible side effect: the class rank (N/total) restarts as students open the site (each page creates its `rankBoard` doc at the server's confirmed

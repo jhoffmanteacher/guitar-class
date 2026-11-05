@@ -1371,6 +1371,18 @@ console.log('13. class rank');
   check('an existing board doc (500 s) is only ever added to: 500 + this page\'s confirmed seconds, never replaced by this page\'s total', added >= 100 && boardOf(wfw1).seconds === 500 + added && wfw1.log.board.every((x) => typeof x.data.seconds === 'object' && x.data.seconds.__inc > 0), JSON.stringify(boardOf(wfw1)) + ' added ' + added + '; writes ' + JSON.stringify(wfw1.log.board.map((x) => x.data.seconds)));
   check('…and the page looks at its own doc exactly once, before its first write', (wfw1.log.boardGets || []).length === 1 && wfw1.log.boardGets[0] === TAGX && (wfw0.log.boardGets || []).length === 1, JSON.stringify(wfw1.log.boardGets) + ' ' + JSON.stringify(wfw0.log.boardGets));
 
+  // The doc EXISTS and ready; a run of increments is refused (rules, then fixed); what was owed is kept and a later write brings the board level with the minutes.
+  // (The first write of a page creates the doc at the whole confirmed sum, which hides a lost increment: this case is the one that does not.)
+  const wrf = makeWorld({ server: { days: {}, weeks: { '2026-W46': { seconds: 3000, goalSeconds: 3600, hit: false } }, board: { [TAGX]: { seconds: 3000 } }, meta: { 'uid-A': { id: TAGX } } } });
+  wrf.PM._state(); wrf.input('pointerdown'); await wrf.run(130); await wrf.PM.flush(); await wrf.settle(); await wrf.run(130);
+  const ready0 = wrf.PM._state().boardReady;
+  wrf.net.boardDenied = true; wrf.input('pointerdown'); await wrf.run(130); await wrf.PM.flush(); await wrf.settle(); await wrf.run(130);
+  const refusedN = wrf.log.boardRefused.length, owedKept = wrf.PM._state().boardOwed > 0;
+  wrf.net.boardDenied = false; wrf.clock.ms += 6 * 60 * 1000; wrf.clock.perf += 6 * 60 * 1000;
+  wrf.input('pointerdown'); await wrf.run(130); await wrf.PM.flush(); await wrf.settle(); await wrf.run(130);
+  const addedR = weekSum(wrf) - 3000;
+  check('an existing board doc: increments refused for a while (rules), what is owed is kept, and after the wait the board is level with the minutes again (3000 + everything confirmed)', ready0 === true && refusedN >= 1 && owedKept && addedR >= 300 && boardOf(wrf).seconds === 3000 + addedR, JSON.stringify({ ready0, refusedN, owedKept, board: boardOf(wrf), added: addedR }));
+
   // A page whose load FAILED does not know the real total: its flushes publish nothing.
   const wnl = makeWorld({ net: { online: true, denied: false, denyReads: true } });
   wnl.PM._state(); wnl.input('pointerdown'); await wnl.run(130); await wnl.PM.flush(); await wnl.settle();
@@ -1380,7 +1392,7 @@ console.log('13. class rank');
   const wte = makeWorld({ uid: 'uid-T', server: { days: {}, weeks: {}, board: { 'uid-B': { seconds: 300 } } } });
   wte.user.email = 'teacher@example.org'; vm.runInContext("var TEACHER_EMAIL = 'teacher@example.org';", wte.ctx);
   wte.PM._state(); wte.input('pointerdown'); await wte.run(130); await wte.PM.flush(); await wte.settle(); await wte.run(130); await wte.PM._loadBoard();
-  check('the teacher\'s account counts its minutes but writes nothing to the board and gets no rank', weekSum(wte) > 0 && !(wte.log.boardTries || []).length && wte.PM._rank() === null, weekSum(wte) + ' s, ' + (wte.log.boardTries || []).length + ' tries, rank ' + JSON.stringify(wte.PM._rank()));
+  check('the teacher\'s account counts its minutes but writes nothing to the board, makes NO private tag, reads nothing and gets no rank', weekSum(wte) > 0 && !(wte.log.boardTries || []).length && eq(wte.server.meta, {}) && !wte.net.boardReads && wte.PM._rank() === null, weekSum(wte) + ' s, ' + (wte.log.boardTries || []).length + ' tries, rank ' + JSON.stringify(wte.PM._rank()));
 
   // The rank: 1 + the number of OTHER students with strictly more seconds; total counts me; my own doc is ignored.
   const sv = () => ({ days: {}, weeks: {}, board: { 'uid-B': { seconds: 100 }, 'uid-C': { seconds: 300 }, 'uid-D': { seconds: 600 }, 'uid-E': { seconds: 5000 }, [TAGX]: { seconds: 99999 } }, meta: { 'uid-A': { id: TAGX } } });

@@ -38,7 +38,9 @@ rules_version = '2';
                       the audio) — student creates their own, teacher
                       reads and deletes
      micTakesMeta/count  the public "how many takes so far" counter
-     minutesBoard/{uid}  one number per student, readable by every signed-in student (class rank)
+     rankBoard/{tag}, weekBoard/{tag}  the class rank and the Top 5, keyed by a private
+                      name tag (minutes/{uid}/meta/board), readable by every signed-in
+                      account. minutesBoard/{uid} has NO block (denied).
 
    Anything not matched below is denied by default. Do not add a catch-all.
    ══════════════════════════════════════════════════════════════════════ */
@@ -128,8 +130,8 @@ service cloud.firestore {
        writers and fails the push if a name gets back into this doc. A
        person in the room sees the wall's names with points and can read this
        doc's uid -> points, so the top players' uids can be lined up with their
-       names; from a uid nothing reaches minutes or a period (rankBoard and
-       weekBoard are keyed by a private tag, minutesBoard has no rules block).
+       names; from a uid nothing reaches minutes (rankBoard and weekBoard
+       are keyed by a private tag, minutesBoard has no rules block).
 
        Scoped to the specific "current" doc rather than liveQuiz/{doc}, for
        the same reason config/class is: a wildcard would open every future
@@ -438,8 +440,9 @@ service cloud.firestore {
        one field, a number from 0 to 400 days of the daily cap. No delete.
        HONEST LIMITS: as weekBoard (a student at DevTools can claim first
        place for themselves; a tag cannot be proven unique, so one account can
-       overwrite one other student's entry; any Google account that signs in
-       once adds 1 to the total: no domain rule, Jonathan's call). Nothing
+       overwrite one other student's entry, and UNLIKE weekBoard the victim's
+       page never repairs this one: it only adds; any Google account that signs
+       in once adds 1 to the total: no domain rule, Jonathan's call). Nothing
        reads this for a grade.
        ⚠ Must be published BEFORE (or with) the site code that writes it. */
     match /rankBoard/{tag} {

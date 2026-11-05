@@ -11971,7 +11971,7 @@ async function checkPwTakeEvaluator() {
    The browser half (strip, recap, toast, My progress, 1366×657, both languages,
    a real <audio>) is tools/pm-e2e.mjs — it needs Chrome, so it is run by hand.
    ════════════════════════════════════════════════════════════════════ */
-const PM_SIM_PIN = 277;
+const PM_SIM_PIN = 278;
 function checkPracticeMinutes(i18nTable) {
   head('1cg. Practice minutes: the engine is run; the rules cap, no heartbeat, wiring and strings are pinned');
   let bad = 0;
@@ -12033,7 +12033,8 @@ function checkPracticeMinutes(i18nTable) {
   // 3. the rules blocks
   if (rules) {
     // The block's own brace is the last one on its match line (the path has {params} before it).
-    const block = name => { const i = rules.indexOf(`match /${name}`); if (i < 0) return null; let d = 0, j = rules.lastIndexOf('{', rules.indexOf('\n', i)); for (let k = j; k < rules.length; k++) { if (rules[k] === '{') d++; else if (rules[k] === '}') { d--; if (!d) return strip(rules.slice(i, k + 1)); } } return null; };
+    /* The scan is over the rules with COMMENTS STRIPPED: a commented-out copy of a shipped block must not stand in for a loosened real one (2026-11-05 review). */
+    const block = name => { const live = strip(rules); const i = live.indexOf(`match /${name}`); if (i < 0) return null; let d = 0, j = live.lastIndexOf('{', live.indexOf('\n', i)); for (let k = j; k < live.length; k++) { if (live[k] === '{') d++; else if (live[k] === '}') { d--; if (!d) return live.slice(i, k + 1); } } return null; };
     /* The heartbeats block outlives its writer until Jonathan deletes it in the console (step 2). Until then it is frozen: ABSENT
        (step 2 done) or exactly the shipped block, whitespace aside. A loosened rule on a collection nothing uses would go unseen. */
     const HB_SHIPPED = "match /heartbeats/{sessionId} { allow read: if isSignedIn(); allow create, update: if isSignedIn() && sessionId.matches('^[0-9a-f]{24}$') && request.resource.data.keys().hasOnly(['period', 'lastSeen']) && request.resource.data.keys().hasAll(['period', 'lastSeen']) && request.resource.data.period in ['4', '7', 'CAS'] && request.resource.data.lastSeen == request.time; }";

@@ -849,7 +849,7 @@
      Resolves to the cache, or null if unreadable. */
   function loadBoard(){
     var st = S;
-    if(!st) return Promise.resolve(null);
+    if(!st || isTeacherUser()) return Promise.resolve(null);   // the teacher never makes a tag, reads or writes the rank
     if(!st.board){
       var c = lsJson('pm:b:' + st.uid);
       if(c && c.others && typeof c.at === 'number' && Math.abs(Date.now() - c.at) < BOARD_KEEP_MS) st.board = c;
@@ -896,7 +896,7 @@
      could follow that board doc. One read per page load. The weekBoard's docs are keyed by it, never by the uid, so
      nothing readable by other accounts joins a name (the live quiz kept names under uids until 2026-11-05) to a period and minutes.
      Resolves to the tag, or '' (no crypto; offline and refused reject): then nothing is read or written for the
-     Top 5. create = make it when the student has none yet. */
+     Top 5 or the class rank. create = make it when the student has none yet. */
   var TAG_RE = /^[0-9a-f]{32}$/;
   function randomTag(){
     try {
