@@ -42,6 +42,12 @@
      beyond:F  strummed F beats past the late edge of the site's window
      pre:in:late  the site hears noise between the raw window edge and its (late)
                window, then a strum 25 ms inside the late edge
+   `readings: true` saves the pitch readings the way coach.js ccRecMeta does (takes from 2026-11-05):
+   per change null when the verdict is 'miss', 4 readings for 'off' (a wrong verdict needs 3+), and for 'ok'
+   0, 1, 2, 3 or 5 readings by [0, 1, 2, 3, 5][change index % 5] (under 3 = passed on timing alone).
+   Without it the take has no `readings` key at all, like a take saved before. The truth then holds
+   `pitch`: what the evaluator's pitch-rule column must say, worked out here from the planted counts
+   and the truth categories (not from teacher.js).
    `deaf`: the site hears nothing at all (every change 'miss'). `drift`: every strum
    slides from on the beat to `drift` ms late over the take. `flipVerdict`: that
    change's saved verdict is flipped after the rule gave it (truth.mismatch).
@@ -95,10 +101,10 @@ export const pwWin = (beat, bpc) => Math.min(beat * bpc * 0.5, Math.max(220, bea
 
 const base = { song: 'fake-song', bpc: 1, slots: 8, map: 25, amp: 0.12, clickAmp: 0.03, noise: 0.002 };
 export const PW_FIXTURES = [
-  { ...base, name: 'pw-loud', desc: 'loud, clips; 3 rounds 90/105/120', bpms: [90, 105, 120], chords: ['G5', 'C5'],
+  { ...base, readings: true, name: 'pw-loud', desc: 'loud, clips; 3 rounds 90/105/120', bpms: [90, 105, 120], chords: ['G5', 'C5'],
     lag: 120, lat: 145, amp: 0.55, clickAmp: 0.06, seed: 11,
     plan: { 1: 'off', 3: 'detmiss', 5: 'late:120', 8: 'held', 11: 'silent', 14: 'late:-110', 17: 'detmiss' } },
-  { ...base, name: 'pw-quiet', desc: 'quiet mic; 3 rounds 90/105/120', bpms: [90, 105, 120], chords: ['A5', 'D5'],
+  { ...base, readings: true, name: 'pw-quiet', desc: 'quiet mic; 3 rounds 90/105/120', bpms: [90, 105, 120], chords: ['A5', 'D5'],
     lag: 140, map: 30, lat: 120, amp: 0.025, clickAmp: 0.006, noise: 0.0006, seed: 12,
     plan: { 0: 'detmiss', 4: 'held', 7: 'silent', 10: 'off', 13: 'late:130', 20: 'silent' } },
   { ...base, name: 'pw-delay50', desc: 'short mic delay (50 ms), setting 0; 3 rounds 90/105/120', bpms: [90, 105, 120], chords: ['F5', 'G5'],
@@ -110,10 +116,10 @@ export const PW_FIXTURES = [
   { ...base, name: 'pw-cap', desc: 'default 60/75/90: cut by the 30 s cap in round 3 (one window ends 100 ms past the end); the beeps land later each round (130/160/145 ms)', bpms: [60, 75, 90], chords: ['G5', 'C5'],
     lag: [130, 160, 145], lat: 100, start: 746, seed: 15,
     plan: { 2: 'detmiss', 6: 'silent', 9: 'held', 15: 'off', 19: 'detmiss', 20: 'held' } },
-  { ...base, name: 'pw-pair', desc: 'a pair: one round, 15 changes at 70 BPM, with a neighbour\'s guitar', bpms: [70], slots: 16, chords: ['F5', 'G5'], song: null,
+  { ...base, readings: true, name: 'pw-pair', desc: 'a pair: one round, 15 changes at 70 BPM, with a neighbour\'s guitar', bpms: [70], slots: 16, chords: ['F5', 'G5'], song: null,
     lag: 160, map: 20, lat: 150, seed: 16, extras: [5150, 9100, 14800], flipVerdict: 5,
     plan: { 3: 'held', 7: 'detmiss', 10: 'silent', 12: 'late:-200' } },
-  { ...base, name: 'pw-every2-stop', desc: 'every 2 beats (strums between the changes), Stopped in round 2', bpms: [90, 105, 120], bpc: 2, chords: ['A5', 'C5'],
+  { ...base, readings: true, name: 'pw-every2-stop', desc: 'every 2 beats (strums between the changes), Stopped in round 2', bpms: [90, 105, 120], bpc: 2, chords: ['A5', 'C5'],
     lag: 110, lat: 100, seed: 17, stopAt: { stage: 1, afterChange: 3, plusMs: 600 },
     plan: { 1: 'held', 3: 'beyond:0.2', 4: 'silent', 8: 'detmiss', 9: 'out:late', 10: 'in:early' } },
   { ...base, name: 'pw-noclicks', desc: 'headphones: no beeps in the audio; setting right', bpms: [90, 105, 120], chords: ['E5', 'G5'],
@@ -139,7 +145,7 @@ export const PW_FIXTURES = [
     lag: 120, lat: 145, onlyChanges: true, allDev: 300, seed: 25, plan: {} },
   { ...base, name: 'pw-drift', desc: 'a pair at 60 BPM whose strums drift from on the beat to 300 ms late: the gridOffset of the site follows them far', bpms: [60], slots: 16, chords: ['G5', 'D5'], song: null,
     lag: 120, lat: 145, drift: 300, seed: 26, plan: { 5: 'in:late', 8: 'silent', 10: 'pre:in:late', 11: 'detmiss', 13: 'pre:in:late' } },
-  { ...base, name: 'pw-room-noise', desc: 'every 2 beats at 140 BPM (the window is its 220 ms floor; the mic delay setting 325 ms puts the site 300 ms from the audio: a replay that ignores it misses every window), room noise, no strums at all: low-frequency bursts 1.6 / 2.0 / 2.38 / 2.9 x the room, each one graded by the site (the 2026-11-04 finding)', bpms: [140], bpc: 2, slots: 16, chords: ['G5', 'C5'], song: null, start: 1000,
+  { ...base, readings: true, name: 'pw-room-noise', desc: 'every 2 beats at 140 BPM (the window is its 220 ms floor; the mic delay setting 325 ms puts the site 300 ms from the audio: a replay that ignores it misses every window), room noise, no strums at all: low-frequency bursts 1.6 / 2.0 / 2.38 / 2.9 x the room, each one graded by the site (the 2026-11-04 finding)', bpms: [140], bpc: 2, slots: 16, chords: ['G5', 'C5'], song: null, start: 1000,
     lag: 120, map: 25, lat: 325, clickAmp: 0, noise: 0.004, rumble: 0.03, noStrums: true, frameMs: 50, seed: 31,
     plan: { 0: 'burst:1.6', 1: 'burst:2.0', 2: 'burst:2.38', 3: 'burst:2.9', 5: 'burst:2.9', 6: 'burst:2.38', 8: 'burst:2.0', 9: 'burst:1.6', 11: 'burst:2.38', 12: 'burst:2.9', 14: 'burst:1.6' } },
   { ...base, name: 'pw-soft-strums', desc: 'soft real strums over a loud room: pick attacks the evaluator finds, about 2.5 / 2.9 / 3.5 x the room on the attack channel, 1.2 to 1.6 x on the full band', bpms: [140], bpc: 2, slots: 16, chords: ['A5', 'D5'], song: null, start: 1000,
@@ -337,7 +343,10 @@ export function makePwTake(o){
       ch.verdict = after || !ch.match ? 'miss' : ch.match.sharp ? 'off' : 'ok';
       // `flipVerdict`: a saved verdict that the rule of the site does not give (micEvalTakePw replayMismatch must notice)
       if (o.flipVerdict === ch.i) ch.verdict = ch.verdict === 'miss' ? 'ok' : 'miss';
-      expected.push({ i: ch.i, t: Math.round(ch.t * 10) / 10, from: ch.from, to: ch.to, stage: ch.stage, bpm: ch.bpm, verdict: ch.verdict });
+      ch.readings = !o.readings ? undefined : ch.verdict === 'miss' ? null
+        : Array.from({ length: ch.verdict === 'off' ? 4 : [0, 1, 2, 3, 5][ch.i % 5] }, (_, j) => Math.round((ROOT[ch.to] + j * 0.07) * 100) / 100);
+      expected.push(Object.assign({ i: ch.i, t: Math.round(ch.t * 10) / 10, from: ch.from, to: ch.to, stage: ch.stage, bpm: ch.bpm, verdict: ch.verdict },
+        o.readings ? { readings: ch.readings } : {}));
       // the gridOffset the site's window had: the one its strum was judged with, else the one after every onset before the window opened
       const prior = rd.onsets.filter(on => on.played < ch.t - rd.win);
       const goff = ch.match ? ch.match.goff : prior.length ? prior[prior.length - 1].goffAfter : 0;
@@ -356,6 +365,7 @@ export function makePwTake(o){
       const near = attacks.some(a => Math.abs(a.ms - centre) > rd.win && (out(a.ms - centre) || (heardBeat != null && Math.abs(a.ms - heardBeat) <= reach))) ||
         events.some(ev => ev.stage === rd.stage && Math.abs(ev.t - siteCentre) > rd.win && Math.abs(ev.t - siteCentre) <= reach);
       truth.changes.push({ i: ch.i, stage: ch.stage, kind: after ? 'after-stop' : ch.kind, verdict: ch.verdict, replayHeard: !!ch.match && !after, goff,
+        readingsN: ch.readings ? ch.readings.length : null,
         cat: inWin ? (heard ? 'agree' : 'detector-missed') : heard ? 'false-hit' : near ? 'off-window' : 'silent-miss' });
     });
     truth.rounds.push({ stage: rd.stage, bpm: rd.bpm, n, dropped, clicks: o.clickAmp > 0 && rd.c1 + 3 * rd.beat + rd.lag + 80 < audioEnd, centre: centreKind,
@@ -403,11 +413,22 @@ export function makePwTake(o){
       return r;
     }) };
   }
+  /* The pitch rule's column ("no readable pitch, no tick"): of the changes graded right, those with under 3 readings would lose their tick.
+     Worked out here from the planted counts and the categories above. null for a take with no readings (an older take). */
+  {
+    const jd = truth.changes.filter(c => c.cat !== 'dropped'), right = jd.filter(c => c.verdict === 'ok'), low = c => c.readingsN < 3;
+    truth.pitch = !o.readings ? null : {
+      right: right.length, withPitch: right.filter(c => !low(c)).length, timingOnly: right.filter(low).length, unknown: 0,
+      falseHits: jd.filter(c => c.cat === 'false-hit').length, agree: jd.filter(c => c.cat === 'agree').length,
+      falseHitsRemoved: right.filter(c => c.cat === 'false-hit' && low(c)).length, realLost: right.filter(c => c.cat === 'agree' && low(c)).length
+    };
+  }
   truth.mapKnown = mapKnown;
   truth.mismatch = truth.changes.filter(c => c.cat !== 'dropped' && c.replayHeard !== (c.verdict !== 'miss')).length;
   const meta = {
     game: 'pw', complete: stopMs == null, progression: o.chords.join('-'), song: o.song, ladder: o.bpms.length > 1,
     bpm: o.bpms[0], stageBpms: o.bpms.slice(), bpc: o.bpc, eventTimes: 'played (arrival - micLatencyMs)',
+    ...(o.readings ? { changeReadings: 'per change: null = no strum in its window; [] = a strum but no pitch could be read; else the midi readings its chord check used (under 3 passes on timing alone)' } : {}),
     expected, events, uid: 'fake', name: 'Fake Student', period: '3', mode: 'pw',
     micLatencyMs: o.lat, sampleRate: R, srcSampleRate: 48000, durationSec: Math.round(N / R * 100) / 100,
     micLabel: 'Internal Microphone (Built-in)',

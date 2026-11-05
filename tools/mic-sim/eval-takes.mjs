@@ -29,8 +29,8 @@ const depsSrc = `{ GATE: ${constOf('COACH_PITCH_GATE')}, GAIN: ${constOf('COACH_
   detectPitch: (function(){ let coachYinD = null; ${pitchSrc}\n return coachDetectPitch; })() }`;
 const teacherSrc = fs.readFileSync(path.join(root, 'teacher.js'), 'utf8');
 const core = new Function(['micEvalSignal', 'micEvalTake', 'micEvalTakePw', 'micEvalStrumRule', 'micEvalStrumFrames', 'micEvalStrumHits', 'micEvalMicName', 'micEvalDevice', 'micEvalRow',
-  'micEvalWhatIfSummary', 'micEvalWhatIfText', 'micEvalText'].map(n => extract(teacherSrc, n)).join('\n') +
-  '\nreturn { micEvalTake, micEvalDevice, micEvalRow, micEvalText, micEvalWhatIfSummary };')();
+  'micEvalWhatIfSummary', 'micEvalWhatIfText', 'micEvalPitchSummary', 'micEvalPitchText', 'micEvalText'].map(n => extract(teacherSrc, n)).join('\n') +
+  '\nreturn { micEvalTake, micEvalDevice, micEvalRow, micEvalText, micEvalWhatIfSummary, micEvalPitchSummary };')();
 
 const args = process.argv.slice(2);
 
@@ -117,6 +117,6 @@ function whyText(rows){
   return out.join('\n');
 }
 if (jsonOut){
-  fs.writeFileSync(jsonOut, JSON.stringify({ generated: new Date().toISOString(), takes: rows.length, strumWhatIf: core.micEvalWhatIfSummary(rows), rows }, null, 1));
+  fs.writeFileSync(jsonOut, JSON.stringify({ generated: new Date().toISOString(), takes: rows.length, strumWhatIf: core.micEvalWhatIfSummary(rows), pitchRule: core.micEvalPitchSummary(rows), rows }, null, 1));
   console.error('wrote ' + jsonOut);
 }

@@ -3473,8 +3473,8 @@ Jonathan's request; this list is the plan.)
    (Evaluate all recordings) is the tool for the second. This section does not record what that
    table showed on the 3 noisy real takes; look at it before choosing. Takes saved from
    2026-11-05 carry the pitch readings (see "Pitch readings in the saved take"), so the cost of
-   "no readable pitch, no tick" on real strums can be measured once new takes are in and the
-   evaluator reads them (not built yet). Either option touches
+   "no readable pitch, no tick" on real strums can be read off the console's "Pitch-rule
+   what-if" table once new takes are in. Either option touches
    `coach.js` detection: xhigh, Always Reviewed, run `tools/mic-sim/power-switch.mjs` first
    (repaired 2026-11-05: it had crashed on `PW_A5_OPEN` since the Songs column was added).
 4. **Nothing else is waiting.** Settled and not to be raised again: see "Later (not chosen
@@ -3614,8 +3614,7 @@ and the terminal text, and was broken 14 ways in a scratch copy (see the commit 
 
 What it does NOT answer: the what-if says what the site's rule would hear, not whether
 the strum was the right chord, and not what "no readable pitch, no tick" would do to
-real low-E strums. The second now has the data it needs in new takes (next section); the
-console does not use it yet.
+real low-E strums. The second is answered from new takes by the pitch-rule table (next section).
 
 #### Pitch readings in the saved take (added 2026-11-05)
 
@@ -3631,12 +3630,24 @@ readings, `ccRecMeta` saves them, rounded to 2 places, midi numbers):
 
 So "no readable pitch, no tick" can be priced from a take: count the changes with fewer than 3
 readings that the site graded `ok`, split by the evaluator's own label (`agree` = a real strum
-that would be lost, `false-hit` = noise that would be removed). **Not built:** the console and
-`eval-takes.mjs` do not read `readings` yet. Takes saved before 2026-11-05 have no `readings`
-key: treat that as unknown, never as `null`. No rules change was needed (`micTakes` has no field
-list). Grading is untouched: the old and new `ccResolvePend` gave the same verdict on 20,000 of
+that would be lost, `false-hit` = noise that would be removed). **Built 2026-11-05: the
+"Pitch-rule what-if" table** under the strum what-if (Evaluate all recordings), the same table in
+the terminal (`node tools/mic-sim/eval-takes.mjs`), and `pitchRule` in both downloads
+(`micEvalTakePw` `pitch`, `micEvalPitchSummary` / `micEvalPitchText` / `teacherMicPitchHtml` in
+teacher.js). Per take and in total: *graded right*; of those *3+ readings* (the rule keeps the
+tick) and *timing alone* (under 3: the rule would remove the tick); *false hits* and *real strums*
+(the same counts as the strum what-if, so the two tables compare); and the last column
+"−N · lost M": N false hits that lose their tick, M real strums that lose theirs. A wrong verdict
+already needs 3+ readings, so the rule never touches those. Takes saved before 2026-11-05 have no
+`readings` key: they are left out of the table and counted ("N takes have no readings"), never
+read as `null` or as zero readings. No rules change was needed (`micTakes` has no field list). Grading is untouched: the old and new `ccResolvePend` gave the same verdict on 20,000 of
 20,000 random changes. Check 1ck runs the real `ccResolvePend` and `ccRecMeta` and reads the
-saved take back (21 of 21 changes; six deliberate breaks each turned it red).
+saved take back (21 of 21 changes; six deliberate breaks each turned it red). Check 1cl proves
+the table: 5 synthetic takes plant known reading counts (`readings: true` in `fake-pw-take.mjs`,
+the truth worked out there from the planted counts, not from teacher.js) and the 13 others have
+none; 64 graded right, 39 on timing alone, and the console table, the terminal text, the download
+and `eval-takes.mjs` all say the same numbers (ten deliberate breaks each turned it red). The
+numbers in those synthetic takes are planted, so they say nothing about real students.
 
 ### Later (not chosen yet)
 

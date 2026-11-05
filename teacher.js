@@ -5008,9 +5008,9 @@ function micEvalStrumHits(frames, rule, ratio, hfRatio){
 }
 
 /* A Power Chord Switch take (micTakes/<uid>-pw, coach.js ccRecMeta). Takes saved
-   from 2026-11-05 hold each change's pitch readings (expected[].readings); this
-   does not read them (yet) and older takes have none, so it is measured for what
-   the audio says on its own:
+   from 2026-11-05 hold each change's pitch readings (expected[].readings); only
+   the `pitch` column below reads them, older takes have none, and the measurement
+   itself is what the audio says on its own:
    was there a strum where the site listened for each change, against the
    site's verdict. Same row shape as micEvalTake (the console table and
    eval-takes read both), plus `kind: 'pw'` and `rounds`.
@@ -5068,6 +5068,15 @@ function micEvalStrumHits(frames, rule, ratio, hfRatio){
    strum) and realLost (an agree change that no longer has one); `reproduced` =
    changes where the replay at that ratio hears what the site heard (the
    current-ratio row says how far the replay can be trusted). Measurement only.
+   `pitch` (null for a take saved before 2026-11-05, which has no expected[].readings):
+   what "no readable pitch, no tick" would do, from the pitch readings each change's chord
+   check had (coach.js ccResolvePend). The site grades a strum right on timing alone when it
+   got under 3 readings; the rule would not tick those. Of the changes graded right: `withPitch`
+   (3+ readings, kept) and `timingOnly` (under 3, would lose the tick); of those timing-only
+   ones `realLost` are changes the recording agrees were strummed and `falseHitsRemoved` are
+   false hits (noise, a chord left ringing). `falseHits` and `agree` are the same denominators
+   as the strum what-if's. `unknown` = graded right with no usable readings list. A wrong
+   verdict already needs 3+ readings, so the rule never touches those. Measurement only.
    Proved on synthetic takes with known answers: tools/mic-sim/fake-pw-take.mjs,
    checks.mjs 1cl. */
 function micEvalTakePw(pcm, R, d, deps){
@@ -5214,11 +5223,19 @@ function micEvalTakePw(pcm, R, d, deps){
         if (onsets.some(on => out(on.ms - want) || (heardBeat != null && Math.abs(on.ms - want) > half && Math.abs(on.ms - heardBeat) <= reach)) ||
             rd.evs.some(ev => out(ev.t - siteAt))) cat = 'off-window';
       }
-      judged.push({ rk, idx, cat, site });
+      judged.push({ rk, idx, cat, site, rn: Array.isArray(e.readings) ? e.readings.length : null });
       notes.push({ i: num(e.i) ? e.i : k, stage: rd.stage, site, played: !!o, onsetMs: o ? r1(o.ms - want) : null,
         snrDb: r1(dB(pk) - level.floorDb), replay: o ? 'present' : 'none', siteHeard: !!rd.match[idx], gridOffsetMs: r1(goff), why: { cat } });
     });
   });
+  /* ── pitch rule: "no readable pitch, no tick", from the readings the take saved (null for an older take) ── */
+  let pitch = null;
+  if (judged.some(j => j.rn != null)){
+    const right = judged.filter(j => j.site === 'right'), known = right.filter(j => j.rn != null), low = list => list.filter(j => j.rn < 3);
+    pitch = { right: right.length, withPitch: known.length - low(known).length, timingOnly: low(known).length, unknown: right.length - known.length,
+      falseHits: judged.filter(j => j.cat === 'false-hit').length, agree: judged.filter(j => j.cat === 'agree').length,
+      falseHitsRemoved: low(known.filter(j => j.cat === 'false-hit')).length, realLost: low(known.filter(j => j.cat === 'agree')).length };
+  }
   /* ── what-if: the site's strum rule, replayed on the audio, at the site's ratios and stricter ones ── */
   let whatIf = null;
   const rule = judged.length ? micEvalStrumRule(deps.strum) : null;
@@ -5308,7 +5325,7 @@ function micEvalTakePw(pcm, R, d, deps){
   const startMs = rounds.length ? rounds[0].listen - 4 * rounds[0].beat + rounds[0].offs : 0;
   const playMs = Math.max(1, endMs - startMs);
   return {
-    kind: 'pw', level, latency, notes: summary, perNote: notes, rounds: roundRows, whatIf,
+    kind: 'pw', level, latency, notes: summary, perNote: notes, rounds: roundRows, whatIf, pitch,
     room: { extraOnsetsPerMin: Math.round(extra / playMs * 60000), extra, onsets: onsets.length }
   };
 }
@@ -5382,6 +5399,37 @@ lost M      of the agree changes, M would no longer fire (a real strum, now too 
 The first column is the site's own ratios: ${w.totals.perCandidate[0].reproduced} of ${w.totals.judged} changes get the same yes/no there as the site gave (the replay's own error: its frame times and sample rate are assumed).`;
 }
 
+/* The pitch rule (micEvalTakePw `pitch`), summed: one line per Power Chord Switch take that saved its readings, and the totals. Takes saved before
+   2026-11-05 have none: `without` counts them. Used by the console table, the download and the terminal. No names: the take labels only. */
+function micEvalPitchSummary(rows){
+  const pw = rows.filter(r => r.kind === 'pw'), has = pw.filter(r => r.pitch);
+  if (!has.length) return null;
+  const F = ['right', 'withPitch', 'timingOnly', 'unknown', 'falseHits', 'agree', 'falseHitsRemoved', 'realLost'];
+  const pick = p => { const o = {}; F.forEach(k => { o[k] = p[k] || 0; }); return o; };
+  const totals = { takes: has.length }; F.forEach(k => { totals[k] = has.reduce((a, r) => a + (r.pitch[k] || 0), 0); });
+  return { rule: 'a change the site graded right on timing alone (under 3 pitch readings) would not be ticked', without: pw.length - has.length,
+    takes: has.map(r => Object.assign({ take: r.take, game: r.game }, pick(r.pitch))), totals };
+}
+function micEvalPitchText(rows){
+  const w = micEvalPitchSummary(rows);
+  if (!w) return '';
+  const pad = (v, n) => { const t = v == null ? '-' : String(v); return t.length >= n ? t : t + ' '.repeat(n - t.length); };
+  const line = (label, t) => [pad(label, 5), pad(t.right, 6), pad(t.withPitch, 6), pad(t.timingOnly, 7), pad(t.falseHits, 6), pad(t.agree, 6), pad('-' + t.falseHitsRemoved + ' / lost ' + t.realLost, 14)].join(' ');
+  const head = [pad('take', 5), pad('right', 6), pad('tone', 6), pad('timing', 7), pad('false', 6), pad('agree', 6), pad('no pitch, no tick', 14)].join(' ');
+  return '\n\nPitch-rule what-if (measurement only, the game does not change): "no readable pitch, no tick" = a change the site graded right on timing alone (under 3 pitch readings) would not count. From the readings each take saved' +
+    (w.without ? `; ${w.without} Power Chord Switch ${w.without === 1 ? 'take has' : 'takes have'} none (saved before 2026-11-05) and ${w.without === 1 ? 'is' : 'are'} left out` : '') + '.\n' +
+    [head].concat(w.takes.map(t => line(t.take, t)), line('all', w.totals)).join('\n') + `
+
+right       changes the site graded right
+tone        of those, 3 or more pitch readings (the rule keeps them)
+timing      of those, under 3 readings: they passed on timing alone (the rule would not tick them)
+false       changes the site graded where the recording has no strum (same count as the strum what-if)
+agree       changes the site and the recording agree were strummed (same count as the strum what-if)
+-N          of the false hits, N were graded right on timing alone: the rule would remove those ticks
+lost M      of the agree changes, M were graded right on timing alone: real strums that would lose their tick${w.totals.unknown ? `
+${w.totals.unknown} changes graded right have no usable readings list and are in none of those counts.` : ''}`;
+}
+
 // A plain-text table of the rows, for the console / terminal.
 function micEvalText(rows){
   const pad = (v, w) => { const s = v == null ? '-' : String(v); return s.length >= w ? s.slice(0, w) : s + ' '.repeat(w - s.length); };
@@ -5434,7 +5482,7 @@ oct         notes where the octave above outvoted the real note
 snr         median note level above the room floor (dB)
 cents       median tuning of the notes heard (cents off the written note)
 h1h2        low-string notes: fundamental vs 2nd harmonic (dB; very negative = the mic loses the low end)
-xtra/m      onsets per minute that are not near any expected note (other guitars, noise)` + pwText + micEvalWhatIfText(rows);
+xtra/m      onsets per minute that are not near any expected note (other guitars, noise)` + pwText + micEvalWhatIfText(rows) + micEvalPitchText(rows);
 }
 
 /* "Evaluate all recordings": every take through micEvalRow with the site's
@@ -5545,7 +5593,7 @@ function teacherMicEvalHtml(){
       `<td>${teacherMicOffText(nb.offPitch)}</td><td>${v(nb.lowH1H2Db)}</td></tr>`;
   }).join('');
   return `<div class="tg-note" style="margin-top:8px">${lines.join('<br>')}</div>
-    <div class="t-grid-wrap"><table><thead><tr><th class="nc">Take</th><th>Game</th><th>Device</th><th>Loud / room (dB)</th><th>Delay set → should be (ms)</th><th>Site counted right</th><th>In the recording</th><th>Played, not counted</th><th>Not played</th><th>Heard instead</th><th>Low strings (dB)</th></tr></thead><tbody>${tr}</tbody></table></div>${teacherMicWhatIfHtml(rows)}
+    <div class="t-grid-wrap"><table><thead><tr><th class="nc">Take</th><th>Game</th><th>Device</th><th>Loud / room (dB)</th><th>Delay set → should be (ms)</th><th>Site counted right</th><th>In the recording</th><th>Played, not counted</th><th>Not played</th><th>Heard instead</th><th>Low strings (dB)</th></tr></thead><tbody>${tr}</tbody></table></div>${teacherMicWhatIfHtml(rows)}${teacherMicPitchHtml(rows)}
     <div class="tg-note"><button class="tp-btn primary" style="flex:none;padding:8px 16px;margin-right:10px" onclick="teacherMicEvalDownload()">Download results</button>
       The file has the measurements only — no audio and no names. <br>
       <i>In the recording</i>: the site's own pitch detection, run again on the saved audio, finds the note clearly. <i>Played, not counted</i>: a loud, clear note the site did not count right. <i>Not played</i>: the site said missed and there is no note there. <i>Heard instead</i>: notes that rang clearly but at a different pitch — "−1 ×6" means six notes came out one semitone low (the same number again and again usually means the guitar is out of tune). <i>Delay</i>: "?" means the count-in beeps were not in the recording (speaker muted or headphones). <i>Low strings</i>: the low note's own pitch against the octave above it — very negative means this mic loses the low end.${pwRows.length ? `<br>
@@ -5564,6 +5612,18 @@ function teacherMicWhatIfHtml(rows){
     <div class="t-grid-wrap"><table><thead><tr><th class="nc">Take</th><th>False hits</th><th>Real strums</th>${w.candidates.map((c, k) => `<th>${k ? 'Ratio' : 'Site’s ratio'} ${c.ratio} (HF ${c.hfRatio})</th>`).join('')}</tr></thead><tbody>${body}</tbody></table></div>
     <div class="tg-note">At the site's own ratio the replay gives the same yes/no as the site on ${t0.reproduced} of ${w.totals.judged} changes; the rest is the replay's own error (it assumes steady frame times and the 48 kHz rate).</div>`;
 }
+/* The pitch rule as a small table (micEvalPitchSummary), under the strum what-if: per Power Chord Switch take that saved its readings, how many changes the
+   site graded right with 3+ readings and on timing alone, and what "no readable pitch, no tick" would remove or cost. */
+function teacherMicPitchHtml(rows){
+  const w = micEvalPitchSummary(rows);
+  if(!w) return '';
+  const cells = t => `<td>${t.right}</td><td>${t.withPitch}</td><td>${t.timingOnly}</td><td>${t.falseHits}</td><td>${t.agree}</td>`;
+  const body = w.takes.map(t => `<tr><td class="nc wf">${escHtml(t.take)}</td>${cells(t)}<td>−${t.falseHitsRemoved} · lost ${t.realLost}</td></tr>`).join('') +
+    `<tr><td class="nc wf"><b>All ${w.totals.takes}</b></td>${cells(w.totals).replace(/<td>(\d+)<\/td>/g, '<td><b>$1</b></td>')}<td><b>−${w.totals.falseHitsRemoved} · lost ${w.totals.realLost}</b></td></tr>`;
+  return `<div class="tg-note" style="margin-top:10px"><b>Pitch-rule what-if</b> (measurement only; the game does not change). "No readable pitch, no tick": a change the site graded right on timing alone, with under 3 pitch readings, would not count.
+    <i>−N</i>: false hits that were graded right on timing alone, so their ticks would go. <i>lost M</i>: real strums (the site and the recording agree) that were graded right on timing alone and would lose their tick.${w.without ? ` ${w.without} Power Chord Switch ${w.without === 1 ? 'take has' : 'takes have'} no readings (saved before 2026-11-05) and ${w.without === 1 ? 'is' : 'are'} left out.` : ''}</div>
+    <div class="t-grid-wrap"><table><thead><tr><th class="nc">Take</th><th>Graded right</th><th>3+ readings</th><th>Timing alone</th><th>False hits</th><th>Real strums</th><th>No pitch, no tick</th></tr></thead><tbody>${body}</tbody></table></div>`;
+}
 function teacherMicOffText(h){
   const ks = Object.keys(h || {}).sort((a, b) => h[b] - h[a]);
   if(!ks.length) return '—';
@@ -5572,7 +5632,7 @@ function teacherMicOffText(h){
 function teacherMicEvalDownload(){
   if(!teacherMicEvalRows.length) return;
   teacherMicSaveFile('mic-eval-' + new Date().toISOString().slice(0, 10) + '.json',
-    new Blob([JSON.stringify({ generated: new Date().toISOString(), takes: teacherMicEvalRows.length, strumWhatIf: micEvalWhatIfSummary(teacherMicEvalRows), rows: teacherMicEvalRows }, null, 1)], { type: 'application/json' }));
+    new Blob([JSON.stringify({ generated: new Date().toISOString(), takes: teacherMicEvalRows.length, strumWhatIf: micEvalWhatIfSummary(teacherMicEvalRows), pitchRule: micEvalPitchSummary(teacherMicEvalRows), rows: teacherMicEvalRows }, null, 1)], { type: 'application/json' }));
 }
 
 /* ── Students view (roster bar chart + per-student detail) ───────────────
