@@ -359,7 +359,7 @@ async function chordCallWalk(page, run, events, stats, base) {
 /* Name the power chord (ca-49, 2026-11-05). checks.mjs 1co recomputes every
    answer and runs the state machine; this is the real page, in English and
    Spanish: step 1 is a Note Call on frets 5-12, steps 2-4 are the pcname drill.
-   Each opens with Show answer ON (the pinned default), the switch clicks both
+   Each opens with Show answer ON on a language's first step (the pinned default; the choice is then remembered per browser), the switch clicks both
    ways, Start deals a card, a REAL click on the right chord button (name) or
    the right fret's hit zone (fret, either string) scores a hit and a wrong one
    a miss that waits for Next, Stop puts the setup screen back, and a round is
@@ -385,6 +385,7 @@ async function powerNameWalk(page, run, events, stats, base) {
   let steps = 0;
   const NAMES12 = ['E5', 'F5', 'F♯5', 'G5', 'G♯5', 'A5', 'A♯5', 'B5', 'C5', 'C♯5', 'D5', 'D♯5'];
   for (const lang of ['en', 'es']) {
+    await run('pwn:clear:' + lang, `(function(){ try { localStorage.removeItem('pwnAnswer'); } catch (e) {} return 1; })()`, 10);   // a language's first pcname step opens on the default
     await run('pwn:' + lang, `setLang('${lang}')`, 600);
     await run('pwn:focus:' + lang, "caFocusActivity('ca-49')", 700);
     // Step 1: Note Call, frets 5-12.
@@ -397,7 +398,9 @@ async function powerNameWalk(page, run, events, stats, base) {
       await run('pwn:go:' + w, `caFocusGo('ca-49', ${i})`, 600);
       const s0 = await run('pwn:state0:' + w, state(i), 10);
       if (!s0) { fail(w, 'the drill is not on the step'); continue; }
-      if (s0.answer !== true || s0.pressed[0] !== 'true' || s0.pressed[1] !== 'false') fail(w, `opens with Show answer ${JSON.stringify(s0.pressed)}, not On`);
+      // The first step of a language opens on the default (On). The choice is remembered per browser, like Note Call's: after the Off clicked on step 2 the later steps open Off.
+      const wantOn = i === 1;
+      if (s0.answer !== wantOn || s0.pressed[0] !== String(wantOn) || s0.pressed[1] !== String(!wantOn)) fail(w, `opens with Show answer ${JSON.stringify(s0.pressed)}, expected ${wantOn ? 'On (the default)' : 'Off (the choice made on step 2)'}`);
       if (!s0.hasStart || s0.phase !== 'setup') fail(w, 'opens on ' + s0.phase);
       await run('pwn:off:' + w, `${q(i, '[data-pwn-answer="0"]')}.click()`, 100);
       const so = await run('pwn:off-state:' + w, state(i), 10);
