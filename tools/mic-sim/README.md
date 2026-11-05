@@ -99,9 +99,17 @@ tuning pass — ideally on the real classroom recordings the teacher console's
   own tempo) gives the mic delay. Changes past the end of the audio (the
   30 s cap, Stop) are counted as `dropped`, not judged; changes with an
   impossible time, round or tempo as `ignored`. Which chord was strummed is
-  not checked.
-- `fake-pw-take.mjs <out-folder>` — fifteen synthetic Power Chord Switch
-  takes (loud, quiet, 50 and 250 ms mic delay, cut by the 30 s cap, a pair
+  not checked. **Strum what-if** (2026-11-04, measurement only): the same
+  function replays the SITE's own strum rule over the audio at its ratios and
+  stricter ones (`whatIf`; the numbers and the text of `ccLoop`,
+  `coachReadFrame` and `coachSmooth` are read from coach.js at run time) and
+  counts the false hits that would stop firing and the real strums that would
+  stop with them. eval-takes.mjs prints it after the tables and `--json`
+  carries it as `strumWhatIf`. A Coach / Note Runner note whose window runs
+  past the end of the audio is `dropped` there too (`micEvalTake`).
+- `fake-pw-take.mjs <out-folder>` — eighteen synthetic Power Chord Switch
+  takes (two of them for the what-if, with answers measured on the audio: room
+  noise and no strums, and soft real strums over a loud room; then loud, quiet, 50 and 250 ms mic delay, cut by the 30 s cap, a pair
   with a neighbour's guitar, every 2 beats and Stopped, no beeps with the
   setting right and wrong, 140 BPM every beat and every bar with strums at
   the window's edges, a site that hears nothing, three wrong-setting / late

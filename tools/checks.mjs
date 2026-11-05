@@ -11460,7 +11460,7 @@ function checkCoachVerdicts() {
    strum where the SITE listened (its own window, replayed from the strums it
    logged: ccLoop's gridOffset and match), against its verdict; per round,
    its own count-in for the mic delay.
-   RUN, not read. tools/mic-sim/fake-pw-take.mjs builds 15 takes whose site
+   RUN, not read. tools/mic-sim/fake-pw-take.mjs builds 18 takes (the what-if's two are described below) whose site
    verdicts come from ccLoop's rule run on the strums the site hears (not
    planted): loud and clipping; quiet; 50 and 250 ms mic delay (overtones on
    the beep pitch); cut by the 30 s cap with one window ending 100 ms past the
@@ -11502,11 +11502,31 @@ function checkCoachVerdicts() {
    not check them) run in a child process with 128 MB and must finish fast and
    say what was left out; and the limits micEvalTakePw keeps (tempo, rounds,
    beats per chord) must equal coach.js's.
-   micEvalTake (Coach / Note Runner) is not run here: its rows were proved
+   THE STRUM WHAT-IF (2026-11-04; teacher.js micEvalStrumRule / Frames / Hits,
+   micEvalTakePw `whatIf`, the table under Evaluate-all, "Download results"):
+   the site's own strum rule replayed over the audio at its ratios and stricter
+   ones. Two more takes, with answers MEASURED on the audio (fake-pw-take.mjs
+   PW_WHATIF): room noise and no strums (low bursts 1.6 / 2.0 / 2.38 / 3.0 x
+   the room, all graded by the site: 11 false hits; the stricter ratios must
+   remove 3 / 5 / 8 of them) and soft real strums over a loud room (15 agree
+   changes; the stricter ratios must lose 0 / 5 / 10). Every candidate's counts
+   (false hits, removed, agree, lost, reproduced) must be the truth's; the
+   rule's numbers come from coach.js (CHK_*, COACH_LVL_*, ccLoop's own condition
+   is compiled and run, coachSmooth is run as it is), the candidate list starts
+   at coach.js's own ratios; on every take the what-if's false hits and agree
+   changes equal the row's; the summary the console table, the terminal and the
+   download share is summed again independently; the table and the terminal
+   text are parsed; the download carries it and no names. A copy of coach.js
+   whose strum rule has changed shape makes the what-if null, which fails here.
+   micEvalTake's dropped notes (a note whose window runs past the end of the
+   audio is not judged, as for a change) are run on a Coach and a Note Runner
+   take cut short.
+   micEvalTake (Coach / Note Runner) is otherwise not run here: its rows were proved
    byte-identical by a differential when micEvalSignal was split out of it.
    ════════════════════════════════════════════════════════════════════ */
-const PW_EVAL_PIN = { takes: 16, rounds: 35, changes: 255, judged: 246, dropped: 9, agree: 173, 'detector-missed': 32, 'false-hit': 11, 'off-window': 15, 'silent-miss': 15,
-  mismatch: 1, gridOffsets: 246, farGridOffsets: 41, clickRounds: 29, noClickRounds: 6, siteCentred: 32, beepCentred: 3, extra: 31, htmlChecks: 5, hovers: 35, textRounds: 35, evaluateRun: 2, evalTakesLines: 4, crafted: 2 };
+const PW_EVAL_PIN = { takes: 18, rounds: 37, changes: 285, judged: 276, dropped: 9, agree: 188, 'detector-missed': 32, 'false-hit': 22, 'off-window': 15, 'silent-miss': 19,
+  mismatch: 1, gridOffsets: 276, farGridOffsets: 41, clickRounds: 29, noClickRounds: 8, siteCentred: 33, beepCentred: 3, extra: 31, htmlChecks: 5, hovers: 37, textRounds: 37, evaluateRun: 2, evalTakesLines: 4, crafted: 2,
+  whatIfTakes: 18, whatIfCandidates: 72, whatIfTruth: 8, whatIfRows: 43, dropNotes: 2 };
 async function checkPwTakeEvaluator() {
   head('1cl. Power Chord Switch takes: the evaluator is run on takes whose site verdicts come from ccLoop\'s own rule');
   let bad = 0;
@@ -11518,22 +11538,31 @@ async function checkPwTakeEvaluator() {
   } catch (e) { fail(`could not load tools/mic-sim/fake-pw-take.mjs or extract.mjs (${e.message})`); return; }
   const tSrc = readFileSync(join(ROOT, 'teacher.js'), 'utf8'), aSrc = readFileSync(join(ROOT, 'app.js'), 'utf8'), cSrc = readFileSync(join(ROOT, 'coach.js'), 'utf8');
   const constOf = n => { const m = cSrc.match(new RegExp('^const ' + n + '\\s*=\\s*([^;]+);', 'm')); if (!m) throw new Error('no ' + n + ' in coach.js'); return `const ${n} = ${m[1].trim()};`; };
+  // a number from a (possibly several-per-line) `const A = 1, B = 2;` of coach.js
+  const numOf = n => { const m = cSrc.match(new RegExp('^const [^\\n]*?\\b' + n + '\\s*=\\s*([\\d.]+)', 'm')); if (!m) throw new Error('no ' + n + ' in coach.js'); return Number(m[1]); };
+  const STRUM_NUMS = { FLOOR: 'CHK_ONSET_FLOOR', RATIO: 'CHK_ONSET_RATIO', HF_FLOOR: 'CHK_HF_FLOOR', HF_RATIO: 'CHK_HF_RATIO', REFRACT: 'COACH_ONSET_REFRACT', WIN: 'COACH_LVL_WIN', HOP: 'COACH_LVL_HOP', CATCHUP: 'COACH_CATCHUP_MAX_MS' };
+  const strumDeps = (src = cSrc) => ({ consts: Object.fromEntries(Object.entries(STRUM_NUMS).map(([k, n]) => [k, numOf(n)])),
+    ccLoopSrc: extract(src, 'ccLoop'), readFrameSrc: extract(src, 'coachReadFrame'), smoothSrc: extract(src, 'coachSmooth') });
   const lift = names => names.map(n => (tSrc.includes('async function ' + n + '(') ? 'async ' : '') + extract(tSrc, n)).join('\n');
-  const EVAL_FNS = ['micEvalSignal', 'micEvalTake', 'micEvalTakePw', 'micEvalMicName', 'micEvalDevice', 'micEvalRow'];
+  const EVAL_FNS = ['micEvalSignal', 'micEvalTake', 'micEvalTakePw', 'micEvalStrumRule', 'micEvalStrumFrames', 'micEvalStrumHits', 'micEvalMicName', 'micEvalDevice', 'micEvalRow'];
   let core;
   try {
     const esc = ['escAttr', 'escHtml'].map(n => { const m = aSrc.match(new RegExp('^const ' + n + ' = .*;$', 'm')); if (!m) throw new Error('no ' + n + ' in app.js'); return m[0]; }).join('\n');
-    const consts = ['COACH_PITCH_GATE', 'COACH_MIC_GAIN', 'COACH_ATTACK_SKIP', 'COACH_EVENT_TAIL', 'COACH_ONSET_REFRACT', 'COACH_MATCH_FRAC', 'COACH_MATCH_MIN_MS', 'COACH_VOTE_TOL'].map(constOf).join('\n');
-    const fns = lift(EVAL_FNS.concat(['micEvalText', 'teacherMicEvalHtml', 'teacherMicOffText', 'teacherMicEvaluate']));
+    const consts = ['COACH_PITCH_GATE', 'COACH_MIC_GAIN', 'COACH_ATTACK_SKIP', 'COACH_EVENT_TAIL', 'COACH_ONSET_REFRACT', 'COACH_MATCH_FRAC', 'COACH_MATCH_MIN_MS', 'COACH_VOTE_TOL'].map(constOf).join('\n') + '\n' +
+      ['CHK_ONSET_FLOOR', 'CHK_ONSET_RATIO', 'CHK_HF_FLOOR', 'CHK_HF_RATIO', 'COACH_LVL_WIN', 'COACH_LVL_HOP', 'COACH_CATCHUP_MAX_MS'].map(n => `const ${n} = ${numOf(n)};`).join('\n') +
+      // teacherMicEvaluate reads String(ccLoop / coachReadFrame / coachSmooth): the real coach.js functions, never called here
+      '\n' + ['ccLoop', 'coachReadFrame', 'coachSmooth'].map(n => extract(cSrc, n)).join('\n');
+    const fns = lift(EVAL_FNS.concat(['micEvalWhatIfSummary', 'micEvalWhatIfText', 'micEvalText', 'teacherMicEvalHtml', 'teacherMicWhatIfHtml', 'teacherMicOffText', 'teacherMicEvaluate']));
     /* teacherMicEvaluate's page: ctx gives the takes, their audio and the result box. */
     core = new Function('ctx', `${esc}\n${consts}\nconst coachDetectPitch = () => -1;\n` +
       'let teacherMicEvalRows = [], teacherMicEvalNames = [], teacherView = "mic", teacherMicTakes = ctx.takes || [];\n' +
       'const document = ctx.document, ensureCoachJs = async () => {}, teacherMicChunks = ctx.chunks, micTakeDate = () => null, setTimeout = f => f();\n' +
-      `${fns}\nreturn { micEvalRow, micEvalText, evaluate: teacherMicEvaluate, html: (rows, names) => { teacherMicEvalRows = rows; teacherMicEvalNames = names; return teacherMicEvalHtml(); } };`);
+      `${fns}\nreturn { micEvalRow, micEvalText, micEvalWhatIfSummary, evaluate: teacherMicEvaluate, html: (rows, names) => { teacherMicEvalRows = rows; teacherMicEvalNames = names; return teacherMicEvalHtml(); } };`);
     core({});
   } catch (e) { fail(`could not lift the evaluator out of teacher.js (${e.message})`); return; }
   const ev = core({});
   const deps = new Function(constOf('COACH_PITCH_GATE') + constOf('COACH_MIC_GAIN') + 'return { GATE: COACH_PITCH_GATE, GAIN: COACH_MIC_GAIN, detectPitch: () => -1 };')();
+  deps.strum = strumDeps();
   const CATS = ['agree', 'detector-missed', 'false-hit', 'off-window', 'silent-miss'];
   const KEY = { agree: 'agree', 'detector-missed': 'detectorMissed', 'false-hit': 'falseHit', 'off-window': 'offWindow', 'silent-miss': 'silentMiss' };
   const tot = Object.fromEntries(Object.keys(PW_EVAL_PIN).map(k => [k, 0]));
@@ -11566,6 +11595,30 @@ async function checkPwTakeEvaluator() {
     for (const [k, v] of Object.entries(vs)) { const want = judged.filter(c => c.verdict === v).length; if (row.notes[k] !== want) fail(`${f.name}: ${k} ${row.notes[k]}, the site's verdicts give ${want}`); }
     if (row.notes.replayMismatch !== take.truth.mismatch || row.notes.ignored !== 0) fail(`${f.name}: replaying ccLoop's rule disagrees with ${row.notes.replayMismatch} saved verdicts (truth ${take.truth.mismatch}), ${row.notes.ignored} changes ignored`);
     tot.mismatch += row.notes.replayMismatch;
+    // the strum what-if: the site's own ratios first, then the stricter ones; counts agree with the row, and with the measured truth where there is one
+    {
+      const wi = row.whatIf, wc = fx.pwWhatIfCandidates(), st = deps.strum.consts;
+      if (fx.PW_WHATIF.fullBase !== st.RATIO || fx.PW_WHATIF.hfBase !== st.HF_RATIO) fail(`${f.name}: fake-pw-take.mjs PW_WHATIF starts at ${fx.PW_WHATIF.fullBase} / ${fx.PW_WHATIF.hfBase}, coach.js's strum ratios are ${st.RATIO} / ${st.HF_RATIO}`);
+      if (!wi || !Array.isArray(wi.candidates) || wi.candidates.length !== wc.length) fail(`${f.name}: the row has no strum what-if (null when coach.js's strum rule is not the shape micEvalStrumRule reads)`);
+      else {
+        tot.whatIfTakes++;
+        wi.candidates.forEach((c, k) => {
+          tot.whatIfCandidates++;
+          if (c.ratio !== wc[k].ratio || c.hfRatio !== wc[k].hfRatio) fail(`${f.name}: what-if candidate ${k + 1} is ${c.ratio} / ${c.hfRatio}, want ${wc[k].ratio} / ${wc[k].hfRatio}`);
+          if (c.judged !== row.notes.n || c.falseHits !== row.notes.falseHit || c.agree !== row.notes.agree || c.falseHitsRemoved > c.falseHits || c.realLost > c.agree || c.reproduced > c.judged || c.falseHitsRemoved < 0 || c.realLost < 0)
+            fail(`${f.name}: what-if candidate ${c.ratio} says ${c.judged} judged / ${c.falseHits} false hits (${c.falseHitsRemoved} removed) / ${c.agree} agree (${c.realLost} lost); the row has ${row.notes.n} / ${row.notes.falseHit} / ${row.notes.agree}`);
+          const tw = take.truth.whatIf && take.truth.whatIf.candidates[k];
+          if (tw) {
+            tot.whatIfTruth++;
+            for (const key of ['judged', 'reproduced', 'falseHits', 'falseHitsRemoved', 'agree', 'realLost']) if (c[key] !== tw[key]) fail(`${f.name}: what-if at ${c.ratio} / ${c.hfRatio}: ${key} ${c[key]}, the audio's measured truth ${tw[key]}`);
+            /* Strums heard in the rounds' play phase: every planted event once (a refractory of 140 ms), and at most 2 more per take: a slow rumble can
+               rise again after the refractory and fire a second time (the site's rule does the same). Without the refractory it is dozens. */
+            if (c.strums < tw.strums || c.strums > tw.strums + 2) fail(`${f.name}: what-if at ${c.ratio} / ${c.hfRatio} heard ${c.strums} strums; the audio has ${tw.strums} events that fire (at most 2 more are allowed)`);
+          }
+        });
+        if (wi.candidates[0].ratio !== st.RATIO || wi.candidates[0].hfRatio !== st.HF_RATIO) fail(`${f.name}: the first what-if candidate is not the site's own ratios (${st.RATIO} / ${st.HF_RATIO})`);
+      }
+    }
     if (row.room.extra !== take.truth.extra) { fail(`${f.name}: ${row.room.extra} onsets off the student's grid, truth ${take.truth.extra}`); } else tot.extra += row.room.extra;
     if (row.rounds.length !== take.truth.rounds.length) { fail(`${f.name}: ${row.rounds.length} rounds, truth ${take.truth.rounds.length}`); continue; }
     take.truth.rounds.forEach((t, k) => {
@@ -11634,6 +11687,42 @@ async function checkPwTakeEvaluator() {
     });
   }
 
+  // 2b. the what-if summary the table, the terminal and the download share: summed again here, no names
+  {
+    const ws = ev.micEvalWhatIfSummary(rows), pwRows = rows.filter(r => r.kind === 'pw'), nC = pwRows[0].whatIf.candidates.length;
+    if (!ws || ws.takes.length !== pwRows.length || ws.candidates.length !== nC) fail(`micEvalWhatIfSummary has ${ws ? ws.takes.length : 'no'} takes of ${pwRows.length}`);
+    else {
+      for (let k = 0; k < nC; k++) {
+        const want = { falseHitsRemoved: 0, realLost: 0, reproduced: 0 };
+        pwRows.forEach(r => { for (const key of Object.keys(want)) want[key] += r.whatIf.candidates[k][key]; });
+        const got = ws.totals.perCandidate[k];
+        if (Object.keys(want).some(key => got[key] !== want[key])) fail(`the what-if totals at candidate ${k + 1} are ${JSON.stringify(got)}, summed again ${JSON.stringify(want)}`); else tot.whatIfRows++;
+      }
+      if (ws.totals.falseHits !== sum(pwRows, 'falseHit') || ws.totals.agree !== sum(pwRows, 'agree') || ws.totals.judged !== sum(pwRows, 'n')) fail(`the what-if totals (${ws.totals.falseHits} false hits, ${ws.totals.agree} agree, ${ws.totals.judged} judged) are not the rows' (${sum(pwRows, 'falseHit')}, ${sum(pwRows, 'agree')}, ${sum(pwRows, 'n')})`); else tot.whatIfRows++;
+      if (/Fake Student|"fake"|uid|name/i.test(JSON.stringify(ws).replace(/"take":"T\d\d"|"game":"[^"]*"/g, ''))) fail('the what-if summary (it goes in the download) carries a name or a uid');
+      // the console table: one row per take, then the totals row; every cell is "−removed · lost N"
+      const html = ev.html(rows, names), cells = [...html.matchAll(new RegExp('<tr><td class="nc wf">(T\\d\\d|<b>All \\d+</b>)</td><td>(?:<b>)?(\\d+)(?:</b>)?</td><td>(?:<b>)?(\\d+)(?:</b>)?</td>((?:<td>(?:<b>)?−\\d+ · lost \\d+(?:</b>)?</td>){' + nC + '})</tr>', 'g'))];
+      if (cells.length !== pwRows.length + 1) fail(`the what-if table has ${cells.length} rows, want ${pwRows.length + 1} (one per take and the totals)`);
+      cells.forEach(m => {
+        const t = m[1].startsWith('<b>') ? null : ws.takes.find(x => x.take === m[1]), per = t ? t.perCandidate : ws.totals.perCandidate;
+        const want = per.map(c => `−${c.falseHitsRemoved} · lost ${c.realLost}`), got = [...m[4].matchAll(/−\d+ · lost \d+/g)].map(x => x[0]);
+        if (+m[2] !== (t ? t.falseHits : ws.totals.falseHits) || +m[3] !== (t ? t.agree : ws.totals.agree) || want.join('|') !== got.join('|')) fail(`the what-if table row ${m[1]} reads ${m[2]} / ${m[3]} / ${got.join(' ')}; the summary has ${want.join(' ')}`); else tot.whatIfRows++;
+      });
+      // the terminal text: the same numbers
+      const tline = ev.micEvalText(rows).split('Strum what-if')[1] || '';
+      const trows = tline.split('\n').filter(l => /^(T\d\d|all) /.test(l));
+      if (trows.length !== pwRows.length + 1) fail(`the terminal what-if has ${trows.length} lines, want ${pwRows.length + 1}`);
+      trows.forEach(l => {
+        const c = l.trim().split(/\s+/), lab = c[0], t = lab === 'all' ? null : ws.takes.find(x => x.take === lab), per = t ? t.perCandidate : ws.totals.perCandidate;
+        const got = [...l.matchAll(/-(\d+) \/ lost (\d+)/g)].map(x => `${x[1]}/${x[2]}`), want = per.map(x => `${x.falseHitsRemoved}/${x.realLost}`);
+        if (got.join(' ') !== want.join(' ') || +c[1] !== (t ? t.falseHits : ws.totals.falseHits) || +c[2] !== (t ? t.agree : ws.totals.agree)) fail(`the terminal what-if line "${l.trim()}" does not match the summary (${want.join(' ')})`); else tot.whatIfRows++;
+      });
+      if (!/ratios \(first column\)|first column is the site's own ratios/.test(ev.micEvalText(rows))) fail("the terminal what-if lost its note saying the first column is the site's own ratios");
+    }
+    // "Download results" carries it (and the rows, which have no names)
+    if (!/function teacherMicEvalDownload\(\)\{[\s\S]*?strumWhatIf: micEvalWhatIfSummary\(teacherMicEvalRows\)[\s\S]*?rows: teacherMicEvalRows/.test(tSrc)) fail('teacherMicEvalDownload does not put the what-if summary in the file');
+  }
+
   // 3. the terminal table: every round, column by column, and its legend
   const txt = ev.micEvalText(rows), part = txt.split('Power Chord Switch, one line per round')[1] || '';
   const COLS = ['take', 'Switch', 'prog', 'round', 'bpm', 'chg', 'agree', 'detMiss', 'false', 'offWin', 'silent', 'drop', 'centre', 'click', 'lag', 'ideal', 'skew', 'map'];
@@ -11699,8 +11788,35 @@ async function checkPwTakeEvaluator() {
   const bpcs = cc.bpcs ? cc.bpcs.map(s => +s.slice(5)).sort((a, b) => a - b).join(', ') : '?';
   if (!lim || +lim[1] !== cc.min || +lim[2] !== cc.max || +lim[3] !== cc.rounds || lim[4] !== bpcs) fail(`micEvalTakePw's limits (${lim ? lim.slice(1).join(' / ') : 'not found'}) are not coach.js's CC_BPM_MIN / CC_BPM_MAX / CC_LADDER_ROUNDS / CC_RATES bpc (${cc.min} / ${cc.max} / ${cc.rounds} / ${bpcs})`);
 
+  // 8. micEvalTake (Coach / Note Runner): a note whose window runs past the end of the audio is dropped, not judged (the rule for a change)
+  {
+    const tmp2 = mkdtempSync(join(tmpdir(), 'gc-1cl-note-'));
+    try {
+      for (const mode of ['coach', 'nr']) {
+        const base = join(tmp2, mode), LAG = 140;
+        const r = spawnSync(process.execPath, [join(ROOT, 'tools', 'mic-sim', 'fake-take.mjs'), base, String(LAG), '25', mode], { encoding: 'utf8', timeout: 60000 });
+        if (r.status !== 0) { fail(`fake-take.mjs (${mode}) exit ${r.status}: ${(r.stderr || '').trim().slice(-120)}`); continue; }
+        const wav = readFileSync(base + '.wav'), meta = JSON.parse(readFileSync(base + '.json', 'utf8'));
+        const all = new Int16Array(wav.buffer.slice(wav.byteOffset + 44, wav.byteOffset + wav.length)), CUT = 8900;
+        const cut = all.slice(0, Math.round(CUT / 1000 * meta.sampleRate)), half = Math.min(meta.beatMs * 0.5, 400);
+        const late = e => e.t + LAG + half > CUT;
+        // no note may sit within 40 ms of the cut: the lag is measured, not planted
+        if (meta.expected.some(e => Math.abs(e.t + LAG + half - CUT) < 40)) { fail(`fake-take (${mode}): a note's window ends within 40 ms of the cut (too close to call)`); continue; }
+        const wantDrop = meta.expected.filter(late).length, wantN = meta.expected.length - wantDrop;
+        const whole = ev.micEvalRow('N0', meta, all, deps), part = ev.micEvalRow('N1', meta, cut, deps);
+        const lastI = Math.max(...part.perNote.map(n => n.i));
+        if (whole.notes.dropped !== 0 || whole.notes.n !== meta.expected.length) fail(`${mode}: the whole take dropped ${whole.notes.dropped} notes and judged ${whole.notes.n} of ${meta.expected.length}`);
+        else if (part.notes.dropped !== wantDrop || part.notes.n !== wantN || part.perNote.length !== wantN || meta.expected[lastI] && late(meta.expected[lastI])) fail(`${mode}: cut at ${CUT} ms: ${part.notes.dropped} dropped and ${part.notes.n} judged; want ${wantDrop} and ${wantN} (the last judged note is ${lastI})`);
+        else if (!(part.notes.medianSnrDb > -60)) fail(`${mode}: the cut take's median level is ${part.notes.medianSnrDb} dB: notes past the end were measured as silence`);
+        else tot.dropNotes++;
+      }
+    } finally { rmSync(tmp2, { recursive: true, force: true }); }
+  }
+  const noteHtml = /\$\{sum\(r => r\.notes\.dropped\)\} more \$\{sum\(r => r\.notes\.dropped\) === 1 \? 'note' : 'notes'\} came after the recording stopped/.test(tSrc);
+  if (!noteHtml) fail('the console summary no longer says how many Coach / Note Runner notes came after the recording stopped');
+
   for (const [k, n] of Object.entries(PW_EVAL_PIN)) if (tot[k] !== n) fail(`${tot[k]} ${k}, pinned ${n} — the check went partly blind (or the fixtures changed: re-pin PW_EVAL_PIN on purpose)`);
-  if (bad === 0) ok(`${tot.takes} synthetic takes, ${tot.rounds} rounds, ${tot.changes} changes: all ${tot.judged} judged ones match the truth (${tot.agree} agree, ${tot['detector-missed']} detector-missed, ${tot['false-hit']} false-hit, ${tot['off-window']} off-window, ${tot['silent-miss']} silent-miss) and ${tot.dropped} past the end are dropped; windows on the site's own beat in ${tot.siteCentred} rounds, on the beeps in ${tot.beepCentred}; beeps found in ${tot.clickRounds} of ${tot.clickRounds} rounds that have them (lag, ideal and skew within 10 ms), none in the ${tot.noClickRounds} without; ${tot.extra} off-grid onsets counted exactly; ${tot.htmlChecks} console renders, ${tot.hovers} round hovers and ${tot.textRounds} terminal round lines read; Evaluate-all run measures ${tot.evaluateRun} of 2 takes; eval-takes.mjs lists the pair's ${tot.evalTakesLines} changes that do not agree; ${tot.gridOffsets} replayed gridOffsets within 2 ms of the site's (${tot.farGridOffsets} over 100 ms); ${tot.mismatch} flipped saved verdict caught by the replay; ${tot.crafted} crafted takes finish fast in 128 MB; the limits match coach.js`);
+  if (bad === 0) ok(`${tot.takes} synthetic takes, ${tot.rounds} rounds, ${tot.changes} changes: all ${tot.judged} judged ones match the truth (${tot.agree} agree, ${tot['detector-missed']} detector-missed, ${tot['false-hit']} false-hit, ${tot['off-window']} off-window, ${tot['silent-miss']} silent-miss) and ${tot.dropped} past the end are dropped; windows on the site's own beat in ${tot.siteCentred} rounds, on the beeps in ${tot.beepCentred}; beeps found in ${tot.clickRounds} of ${tot.clickRounds} rounds that have them (lag, ideal and skew within 10 ms), none in the ${tot.noClickRounds} without; ${tot.extra} off-grid onsets counted exactly; ${tot.htmlChecks} console renders, ${tot.hovers} round hovers and ${tot.textRounds} terminal round lines read; Evaluate-all run measures ${tot.evaluateRun} of 2 takes; eval-takes.mjs lists the pair's ${tot.evalTakesLines} changes that do not agree; ${tot.gridOffsets} replayed gridOffsets within 2 ms of the site's (${tot.farGridOffsets} over 100 ms); ${tot.mismatch} flipped saved verdict caught by the replay; ${tot.crafted} crafted takes finish fast in 128 MB; the limits match coach.js; strum what-if: ${tot.whatIfTakes} takes x 4 candidates (${tot.whatIfCandidates}) with counts equal to the rows', ${tot.whatIfTruth} candidates of the 2 measured room-noise / soft-strum takes equal the audio's truth, ${tot.whatIfRows} summary / table / terminal numbers re-summed; ${tot.dropNotes} of 2 Coach / Note Runner takes cut short drop the notes past the end`);
 }
 
 /* ════════════════════════════════════════════════════════════════════

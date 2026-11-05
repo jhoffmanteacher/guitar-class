@@ -62,9 +62,8 @@ line); `tools/smoke.mjs` walks all 16 switches in a real browser.
 
 ## Next steps (Jonathan chose these on 2026-11-04: saved takes arrive, the evaluator, and the heartbeat removal)
 
-**A step-by-step plan for a fresh chat, with agent and worktree guidance, is in
-`PLAN-next-chat-power-chord-switch.md`** (Jonathan may start it with the word
-"ultracode" to allow a multi-agent workflow). The list below is the short version.
+(The separate step-by-step plan file for a fresh chat was deleted on 2026-11-04 at
+Jonathan's request; this list is the plan.)
 
 1. **Check that saved takes really arrive.** Teacher console → Mic recordings
    (collection must be switched on there). After a student who said yes has
@@ -131,6 +130,82 @@ strums missed). Both touch `coach.js` detection: Always Reviewed, run
 `tools/mic-sim/power-switch.mjs` first. Collection needs a real non-teacher account (the
 teacher and the dev bypass never record), and the "stop after" number raised above the
 count (23 of 40 on 2026-11-04; Coach and Note Runner takes count too).
+
+### First real-take results (2026-11-04, "Evaluate all recordings": 25 takes, 12 of them Power Chord Switch)
+
+- **9 PCS takes: the site and the audio agree.** 14 false hits out of 141 changes. The
+  site-vs-recording offset is steady at about -73 ms on Chromebook internal mics.
+- **3 PCS takes hold 38 of the 52 false hits.** The site heard a strum at almost every
+  change, but the recording has only 5-8 strum attacks in 21-30 s. This is the room-noise
+  finding above, measured: it is a few rooms (or mics), not every take.
+- **A higher absolute onset floor is ruled out:** 48 of 52 false hits AND 55 of 132 real
+  strums are under 15 dB above the room floor, so any floor that removes the noise removes
+  the soft real strums too.
+- **"No readable pitch, no tick" reaches only part of it.** It can touch only the 34 false
+  hits graded right. The other 18 were graded wrong, which already needs 3+ readings. What
+  it costs real low-E strums cannot be measured from saved takes (no pitch readings are
+  saved).
+- **Lead (tested by the what-if below):** the site's rule (`ccLoop`: full-band
+  `rms > CHK_ONSET_FLOOR && rms > smoothRms * CHK_ONSET_RATIO` 1.4, or the HF channel
+  `* CHK_HF_RATIO` 1.7) fires on a ~3 dB jump. The evaluator's onset finder
+  (`micEvalSignal`: HF jump > 2.2x its base and > 4x the take's HF floor) found the real
+  strums in the 9 good takes and almost none in the 3 bad ones. Two different channels:
+  room rumble, voices and thumps jump the full-band level but not the pick-attack channel.
+- **Coach / Note Runner takes had a second problem** (fixed in the same push): 42 of 64
+  Note Runner notes sat past the 30 s cap, and `micEvalTake` measured them as silence
+  (median level -141.6 dB). A note whose window runs past the end of the audio is now
+  `dropped`, not judged (`notes.dropped`; the console says how many), the same rule as
+  for a Power Chord Switch change.
+
+### The strum what-if (built 2026-11-04; MEASUREMENT ONLY, how the game grades is unchanged)
+
+Where: `teacher.js` `micEvalTakePw` -> `whatIf`; the small table under the Evaluate-all
+results ("Strum what-if"); `strumWhatIf` in "Download results" (take labels only, no
+names, no uids); the same table in the terminal from
+`node tools/mic-sim/eval-takes.mjs <folder>`.
+
+What it does: replays the site's own strum rule over each Power Chord Switch recording,
+at the site's ratios (full-band 1.4, HF 1.7) and at stricter ones (full-band 1.8 / 2.2 /
+2.6, the HF ratio scaled the same: 2.19 / 2.67 / 3.16). Nothing is copied by hand:
+the `CHK_*`, `COACH_ONSET_REFRACT`, `COACH_LVL_WIN/HOP`, `COACH_CATCHUP_MAX_MS` numbers
+and the TEXT of `ccLoop`, `coachReadFrame` and `coachSmooth` are read from `coach.js` at
+run time (`ccLoop`'s own condition is compiled and run with the candidate ratio passed in;
+`coachSmooth` is run as it is; the easing base, its step and the arrival fraction are read
+out of `coachReadFrame`). If `coach.js` no longer has that shape the what-if is `null` and
+check 1cl turns red. Each replayed strum is put back on the site's clock and matched to the
+changes the way `ccLoop` does (window, gridOffset). Per candidate and take:
+
+- **false hits removed**: a change the site graded right or wrong where the audio has no
+  strum (`false-hit`) that no longer has a strum at that ratio;
+- **real strums lost**: a change where the site and the audio agree (`agree`) that no
+  longer has a strum at that ratio;
+- **reproduced**: changes where the replay at that ratio gives the same yes / no as the
+  site did. The first column (the site's own ratios) is the replay's error bar: if it
+  reproduces few of the site's verdicts, trust the other columns less.
+
+How to read it: pick the ratio where "removed" is large and "lost" small. The cost of a
+stricter ratio is soft real strums, and a student whose strums were graded right on timing
+alone would turn red. Choosing and changing the ratios is `coach.js` detection:
+**xhigh, Always Reviewed**, run `tools/mic-sim/power-switch.mjs` first; this task did not
+touch `coach.js`.
+
+What the replay assumes (and cannot know): the student's real frame times (it uses a
+steady frame every `frameMeanMs` of the take, clamped to 16.7-150 ms) and the analyser's
+48 kHz samples (the take is 24 kHz: the window length is scaled, the absolute HF floor is
+not). The smoothing runs through the whole take, where the site resets it each round and
+warms it during the count-in. A take with no `srcSampleRate` is read as 48000.
+
+Proof: `tools/mic-sim/fake-pw-take.mjs` has two takes whose truth is MEASURED on the
+audio: `pw-room-noise` (no strums at all; low-frequency bursts 1.6 / 2.0 / 2.38 / 3.0 x
+the room, each graded by the site: 11 false hits; the stricter ratios must remove
+3 / 5 / 8) and `pw-soft-strums` (15 real soft strums over a loud room, found by the
+evaluator on the attack channel: the stricter ratios must lose 0 / 5 / 10). Check 1cl
+compares every candidate count with that truth, re-sums the summary, parses the table
+and the terminal text, and was broken 14 ways in a scratch copy (see the commit message).
+
+What it does NOT answer: the what-if says what the site's rule would hear, not whether
+the strum was the right chord, and not what "no readable pitch, no tick" would do to
+real low-E strums.
 
 ## Later (not chosen yet)
 

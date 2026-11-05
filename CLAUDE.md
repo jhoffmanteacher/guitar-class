@@ -171,7 +171,7 @@ sweep, moving/adding/removing a section or step. Jonathan says "review this" / "
 
 **Effort**: agent `xhigh` for deep review, else `high`; never `max`. Session: `medium` routine, `high` bug fixes / JS / keyed-MC, `xhigh` danger-zone and sweeps; a tier above the session → ask for `/effort`. Report real numbers, not the premise; name the prior decision a request reverses.
 
-**"Next steps for Power Chord Switch"** → read `NEXT-STEPS-power-chord-switch.md` (repo root) first: what shipped 2026-11-03, the chosen next steps (check saved takes arrive; a teacher-console evaluator for these takes; watching the big feedback line in class was skipped on purpose), the waiting practice-minutes heartbeat removal, and what is not built. A plan for a fresh chat (tracks, agents, worktrees) is `PLAN-next-chat-power-chord-switch.md`.
+**"Next steps for Power Chord Switch"** → read `NEXT-STEPS-power-chord-switch.md` (repo root) first: what shipped 2026-11-03, the chosen next steps (check saved takes arrive; a teacher-console evaluator for these takes; watching the big feedback line in class was skipped on purpose), the waiting practice-minutes heartbeat removal, and what is not built.
 
 New unrelated topic → AskUserQuestion once: fresh chat or continue?
 

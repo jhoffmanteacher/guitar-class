@@ -28,12 +28,18 @@ const depsSrc = `{ GATE: ${constOf('COACH_PITCH_GATE')}, GAIN: ${constOf('COACH_
   MATCH_FRAC: ${constOf('COACH_MATCH_FRAC')}, MATCH_MIN_MS: ${constOf('COACH_MATCH_MIN_MS')}, VOTE_TOL: ${constOf('COACH_VOTE_TOL')},
   detectPitch: (function(){ let coachYinD = null; ${pitchSrc}\n return coachDetectPitch; })() }`;
 const teacherSrc = fs.readFileSync(path.join(root, 'teacher.js'), 'utf8');
-const core = new Function(['micEvalSignal', 'micEvalTake', 'micEvalTakePw', 'micEvalMicName', 'micEvalDevice', 'micEvalRow', 'micEvalText'].map(n => extract(teacherSrc, n)).join('\n') +
-  '\nreturn { micEvalTake, micEvalDevice, micEvalRow, micEvalText };')();
+const core = new Function(['micEvalSignal', 'micEvalTake', 'micEvalTakePw', 'micEvalStrumRule', 'micEvalStrumFrames', 'micEvalStrumHits', 'micEvalMicName', 'micEvalDevice', 'micEvalRow',
+  'micEvalWhatIfSummary', 'micEvalWhatIfText', 'micEvalText'].map(n => extract(teacherSrc, n)).join('\n') +
+  '\nreturn { micEvalTake, micEvalDevice, micEvalRow, micEvalText, micEvalWhatIfSummary };')();
 
 const args = process.argv.slice(2);
 
 const deps = new Function('return ' + depsSrc)();
+// The site's own strum rule for the Power Chord Switch what-if (teacher.js micEvalStrumRule): its numbers and the text of three coach.js functions
+const numOf = n => { const m = coachSrc.match(new RegExp('^const [^\\n]*?\\b' + n + '\\s*=\\s*([\\d.]+)', 'm')); if (!m) throw new Error('no ' + n + ' in coach.js'); return Number(m[1]); };
+deps.strum = { consts: { FLOOR: numOf('CHK_ONSET_FLOOR'), RATIO: numOf('CHK_ONSET_RATIO'), HF_FLOOR: numOf('CHK_HF_FLOOR'), HF_RATIO: numOf('CHK_HF_RATIO'),
+  REFRACT: numOf('COACH_ONSET_REFRACT'), WIN: numOf('COACH_LVL_WIN'), HOP: numOf('COACH_LVL_HOP'), CATCHUP: numOf('COACH_CATCHUP_MAX_MS') },
+  ccLoopSrc: extract(coachSrc, 'ccLoop'), readFrameSrc: extract(coachSrc, 'coachReadFrame'), smoothSrc: extract(coachSrc, 'coachSmooth') };
 
 let jsonOut = null;
 const inputs = [];
@@ -111,6 +117,6 @@ function whyText(rows){
   return out.join('\n');
 }
 if (jsonOut){
-  fs.writeFileSync(jsonOut, JSON.stringify({ generated: new Date().toISOString(), takes: rows.length, rows }, null, 1));
+  fs.writeFileSync(jsonOut, JSON.stringify({ generated: new Date().toISOString(), takes: rows.length, strumWhatIf: core.micEvalWhatIfSummary(rows), rows }, null, 1));
   console.error('wrote ' + jsonOut);
 }

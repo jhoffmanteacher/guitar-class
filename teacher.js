@@ -4687,10 +4687,17 @@ function micEvalTake(pcm, R, d, deps){
   const offs = clicks.lagMs != null ? clicks.lagMs : (mapMs != null ? lat - mapMs : lat);
   const floorDb = level.floorDb;
   const notes = [];
+  /* A note whose window runs past the end of the audio (the 30 s cap, or Stop)
+     is not judged: `dropped`, the rule micEvalTakePw keeps for a change. Real
+     takes (2026-11-04) had 42 of 64 Note Runner notes past the cap, which
+     read as "no pluck" and gave a median level of -141.6 dB. */
+  const endMs = s2ms(N);
+  let dropped = 0;
   expected.forEach((e, i) => {
     if (e.t == null) return;
     const want = e.t + offs;
     const half = Math.min(beat ? beat * 0.5 : 300, 400);
+    if (want + half > endMs){ dropped++; return; }
     let o = null;
     for (const on of onsets){ const dd = on.ms - want; if (dd >= -half && dd < half && (!o || Math.abs(dd) < Math.abs(o.ms - want))) o = on; }
     const at = o ? o.ms : want;
@@ -4862,7 +4869,7 @@ function micEvalTake(pcm, R, d, deps){
   const startMs = expected.length && expected[0].t != null ? expected[0].t + offs : 0;
   const playMs = Math.max(1, s2ms(N) - startMs);
   const summary = {
-    n: notes.length,
+    n: notes.length, dropped,
     siteRight: cnt(n => n.site === 'right'), siteWrong: cnt(n => n.site === 'wrong'),
     siteUnclear: cnt(n => n.site === 'unclear'), siteMiss: cnt(n => n.site === 'miss'),
     replayPresent: cnt(n => n.replay === 'present'),
@@ -4902,6 +4909,102 @@ function micEvalTake(pcm, R, d, deps){
     level, latency, notes: summary, perNote: notes,
     room: { extraOnsetsPerMin: Math.round(extra / playMs * 60000), onsets: onsets.length }
   };
+}
+
+/* The site's own strum rule, replayed over a recording (a WHAT-IF: nothing
+   here changes how the game grades). Lifted from coach.js at run time, never
+   copied by hand: deps.strum = { consts, ccLoopSrc, readFrameSrc, smoothSrc }
+     consts         CHK_ONSET_FLOOR / _RATIO, CHK_HF_FLOOR / _RATIO,
+                    COACH_ONSET_REFRACT, COACH_LVL_WIN, COACH_LVL_HOP,
+                    COACH_CATCHUP_MAX_MS, as FLOOR RATIO HF_FLOOR HF_RATIO
+                    REFRACT WIN HOP CATCHUP
+     ccLoopSrc      the text of ccLoop: its `if ((rms > ... ) && at - ... >
+                    COACH_ONSET_REFRACT)` condition is compiled and RUN here,
+                    with the two ratios passed in
+     readFrameSrc   the text of coachReadFrame: the easing's base and step
+                    (coachSmoothA = 1 - Math.pow(b, dt / step)) and the arrival
+                    fraction are read from it; the window arithmetic (RMS and
+                    first-difference level of 1024 samples every 512, the
+                    loudest window of the frame's fresh audio) is written out
+                    in micEvalStrumFrames, and the source must still contain
+                    every line it mirrors, or this returns null
+     smoothSrc      the text of coachSmooth, run as it is
+   Returns null when coach.js no longer has the shape this expects (checks.mjs
+   1cl turns red then), so a what-if is never run against a rule it did not
+   read. What it cannot know: the student's real frame times (it uses a steady
+   frame every d.frameMeanMs) and the analyser's own 48 kHz samples (the take is
+   24 kHz; the window length is scaled, the first-difference level is not). */
+function micEvalStrumRule(sp){
+  if (!sp || !sp.consts || !sp.ccLoopSrc || !sp.readFrameSrc || !sp.smoothSrc) return null;
+  const c = sp.consts;
+  for (const k of ['FLOOR', 'RATIO', 'HF_FLOOR', 'HF_RATIO', 'REFRACT', 'WIN', 'HOP', 'CATCHUP']) if (!(Number(c[k]) > 0)) return null;
+  const lp = String(sp.ccLoopSrc), rf = String(sp.readFrameSrc);
+  // (\u007b is the opening brace: a bare one in this regex would confuse the tools that lift this function out by counting braces)
+  const cond = lp.match(/if \((\(rms > CHK_ONSET_FLOOR[\s\S]*?COACH_ONSET_REFRACT)\)\u007b/);
+  if (!cond || /\/\/|\/\*/.test(cond[1])) return null;
+  // what ccLoop does after the condition holds, and the order of it
+  if (!/cc\.lastOnsetT = at;/.test(lp) || lp.indexOf('coachSmooth(cc, rms, coachHfRms);') < lp.indexOf('cc.lastOnsetT = at;')) return null;
+  const alpha = rf.match(/coachSmoothA = 1 - Math\.pow\(([\d.]+), dt \/ ([\d.]+)\)/);
+  const arrive = rf.match(/w\.rms >= rms \* ([\d.]+) \|\| w\.hf >= hf \* \1\)/);
+  for (const need of ['Math.sqrt(sum / N)', 'Math.sqrt(dsum / N)', 'const d = v - buf[i - 1];', 'sum += v * v;', 'dsum += d * d;',
+    'end > L - fresh + COACH_LVL_HOP && end - N >= 1', 'gapMs <= COACH_CATCHUP_MAX_MS', 'fresh = Math.round(gapMs / 1000 * sr)',
+    'const dt = Math.max(0, Math.min(gapMs, 1000));']) if (rf.indexOf(need) < 0) return null;
+  if (!alpha || !arrive) return null;
+  let fires, smoothFn;
+  try {
+    fires = new Function('rms', 'coachHfRms', 'cc', 'at', 'CHK_ONSET_FLOOR', 'CHK_ONSET_RATIO', 'CHK_HF_FLOOR', 'CHK_HF_RATIO', 'COACH_ONSET_REFRACT', 'return ' + cond[1] + ';');
+    smoothFn = new Function('let coachSmoothA = 0;\n' + sp.smoothSrc + '\nreturn function(st, r, h, a){ coachSmoothA = a; coachSmooth(st, r, h); };')();
+  } catch (e){ return null; }
+  const base = Number(alpha[1]), step = Number(alpha[2]);
+  return {
+    FLOOR: Number(c.FLOOR), RATIO: Number(c.RATIO), HF_FLOOR: Number(c.HF_FLOOR), HF_RATIO: Number(c.HF_RATIO), REFRACT: Number(c.REFRACT),
+    WIN: Number(c.WIN), HOP: Number(c.HOP), CATCHUP: Number(c.CATCHUP), ARRIVE: Number(arrive[1]),
+    // does the frame (rms, hf, at ms) make an onset, with these two ratios, given this loop's levels
+    fires: (rms, hf, st, at, ratio, hfRatio) => !!fires(rms, hf, st, at, c.FLOOR, ratio, c.HF_FLOOR, hfRatio, c.REFRACT),
+    smooth: (st, rms, hf, dtMs) => smoothFn(st, rms, hf, 1 - Math.pow(base, dtMs / step))
+  };
+}
+
+/* The levels the site's loop would have read from this recording: one frame
+   every frameMs, each the loudest of the 1024-sample (at the analyser's rate)
+   windows, one every 512, that end in the audio since the last frame
+   (coachReadFrame), and the moment its jump arrived (the oldest window already
+   near the frame's peak). x = the take as floats at R; srcRate = the
+   analyser's rate. Independent of the ratios: computed once per take. */
+function micEvalStrumFrames(x, R, srcRate, frameMs, rule){
+  const k = R / srcRate, N = Math.max(8, Math.round(rule.WIN * k)), HOP = Math.max(1, Math.round(rule.HOP * k));
+  const step = Math.max(1, Math.round(frameMs / 1000 * R));
+  const fresh = frameMs <= rule.CATCHUP ? Math.round(frameMs / 1000 * R) : 0;
+  const dt = Math.min(frameMs, 1000);
+  const frames = [];
+  for (let L = step; L <= x.length; L += step){
+    let rms = 0, hf = 0;
+    const wins = [];
+    for (let end = L; end === L || (end > L - fresh + HOP && end - N >= 1); end -= HOP){
+      if (end - N < 1) break;
+      let sum = 0, dsum = 0;
+      for (let i = end - N; i < end; i++){ const v = x[i]; sum += v * v; const d = v - x[i - 1]; dsum += d * d; }
+      const w = { end, rms: Math.sqrt(sum / N), hf: Math.sqrt(dsum / N) };
+      wins.push(w);
+      if (w.rms > rms) rms = w.rms;
+      if (w.hf > hf) hf = w.hf;
+    }
+    if (!wins.length) continue;
+    let arr = wins[0];
+    for (let j = wins.length - 1; j >= 0; j--){ const w = wins[j]; if (w.rms >= rms * rule.ARRIVE || w.hf >= hf * rule.ARRIVE){ arr = w; break; } }
+    frames.push({ at: arr.end / R * 1000, rms, hf, dt });
+  }
+  return frames;
+}
+
+/* The strums (recording ms) the site's rule would have heard at these two ratios. */
+function micEvalStrumHits(frames, rule, ratio, hfRatio){
+  const st = { smoothRms: 0, smoothHf: 0, lastOnsetT: -1e9 }, out = [];
+  for (const f of frames){
+    if (rule.fires(f.rms, f.hf, st, f.at, ratio, hfRatio)){ st.lastOnsetT = f.at; out.push(f.at); }
+    rule.smooth(st, f.rms, f.hf, f.dt);
+  }
+  return out;
 }
 
 /* A Power Chord Switch take (micTakes/<uid>-pw, coach.js ccRecMeta). It holds
@@ -4955,10 +5058,18 @@ function micEvalTake(pcm, R, d, deps){
        30 s of audio, changes and events by the size of a Firestore document
        (1 MB), so a crafted take is slow at worst, never endless.
    Whether a strum was the RIGHT chord is not measured here.
+   `whatIf` (only when deps.strum is given; see micEvalStrumRule): the site's own
+   strum rule replayed over the audio at its current ratios and at stricter ones
+   (full-band 1.8 / 2.2 / 2.6, the HF ratio scaled the same), each replayed
+   strum put back on the site's clock and matched to the changes the way ccLoop
+   does. Per candidate: falseHitsRemoved (a false-hit change that no longer has a
+   strum) and realLost (an agree change that no longer has one); `reproduced` =
+   changes where the replay at that ratio hears what the site heard (the
+   current-ratio row says how far the replay can be trusted). Measurement only.
    Proved on synthetic takes with known answers: tools/mic-sim/fake-pw-take.mjs,
    checks.mjs 1cl. */
 function micEvalTakePw(pcm, R, d, deps){
-  const { N, env, nH, level, onsets, tone } = micEvalSignal(pcm, R, deps);
+  const { x, N, env, nH, level, onsets, tone } = micEvalSignal(pcm, R, deps);
   const ms2s = ms => Math.round(ms / 1000 * R);
   const s2ms = s => s / R * 1000;
   const dB = v => 20 * Math.log10(Math.max(v, 1e-9));
@@ -5045,12 +5156,11 @@ function micEvalTakePw(pcm, R, d, deps){
   const takeLag = lags.length ? med(lags) : null;
 
   /* ── ccLoop's matching, replayed on the strums it heard ── */
-  rounds.forEach(rd => {
-    const evs = events.filter(ev => stageOf(ev) === rd.stage).sort((a, b) => a.t - b.t);
+  // evs = [{ t: played ms }] of one round, in time order; returns the strum each change took and the gridOffset after every strum
+  const matchRound = (rd, evs) => {
     const at = rd.list.map(c => c.e.t - rd.listen);        // each change's c.beat * beatMs
-    rd.match = rd.list.map(() => null);
-    rd.timeline = [];                                       // [played, gridOffset after it]
-    rd.evs = evs;
+    const match = rd.list.map(() => null);
+    const timeline = [];                                    // [played, gridOffset after it]
     let goff = 0;
     evs.forEach(ev => {
       const rel = ev.t - rd.listen - goff;
@@ -5058,20 +5168,27 @@ function micEvalTakePw(pcm, R, d, deps){
       let lo = 0, hi = at.length;
       while (lo < hi){ const m = (lo + hi) >> 1; if (at[m] < rel - rd.win) lo = m + 1; else hi = m; }
       for (let k = lo, n = 0; k < at.length && at[k] <= rel + rd.win && n < 8; k++, n++){
-        if (!rd.match[k]){ rd.match[k] = { t: ev.t, goff }; break; }
+        if (!match[k]){ match[k] = { t: ev.t, goff }; break; }
       }
       const dev = rel - Math.round(rel / rd.beat) * rd.beat;
       if (Math.abs(dev) < rd.beat * 0.5) goff += dev * 0.25;
-      rd.timeline.push([ev.t, goff]);
+      timeline.push([ev.t, goff]);
     });
+    return { match, timeline };
+  };
+  rounds.forEach(rd => {
+    const evs = events.filter(ev => stageOf(ev) === rd.stage).sort((a, b) => a.t - b.t);
+    const m = matchRound(rd, evs);
+    rd.match = m.match; rd.timeline = m.timeline; rd.evs = evs;
   });
 
   /* ── every change: a strum where the site listened, against its verdict ── */
-  const notes = [];
-  rounds.forEach(rd => {
+  const notes = [], judged = [];
+  rounds.forEach((rd, rk) => {
     // the student's grid (the beeps): this round's, else the take's, else the setting less the map
     rd.offs = rd.clicks.found ? rd.clicks.lagMs : takeLag != null ? takeLag : (mapMs != null ? lat - mapMs : lat);
     rd.centre = mapMs != null ? 'site' : rd.clicks.found || takeLag != null ? 'beeps' : 'setting';
+    rd.shift = rd.centre === 'site' ? lat - mapMs : rd.offs;       // recording ms = the site's played ms + shift
     const half = rd.win, gap = bpc * rd.beat, reach = Math.min(gap / 2, half + rd.beat / 4);
     const out = dd => Math.abs(dd) > half && Math.abs(dd) <= reach;
     rd.dropped = 0;
@@ -5095,10 +5212,43 @@ function micEvalTakePw(pcm, R, d, deps){
         if (onsets.some(on => out(on.ms - want) || (heardBeat != null && Math.abs(on.ms - want) > half && Math.abs(on.ms - heardBeat) <= reach)) ||
             rd.evs.some(ev => out(ev.t - siteAt))) cat = 'off-window';
       }
+      judged.push({ rk, idx, cat, site });
       notes.push({ i: num(e.i) ? e.i : k, stage: rd.stage, site, played: !!o, onsetMs: o ? r1(o.ms - want) : null,
         snrDb: r1(dB(pk) - level.floorDb), replay: o ? 'present' : 'none', siteHeard: !!rd.match[idx], gridOffsetMs: r1(goff), why: { cat } });
     });
   });
+  /* ── what-if: the site's strum rule, replayed on the audio, at the site's ratios and stricter ones ── */
+  let whatIf = null;
+  const rule = judged.length ? micEvalStrumRule(deps.strum) : null;
+  if (rule){
+    const srcRate = num(d.srcSampleRate) && d.srcSampleRate >= 8000 && d.srcSampleRate <= 192000 ? d.srcSampleRate : 48000;
+    const frameMs = num(d.frameMeanMs) && d.frameMeanMs > 0 ? Math.min(150, Math.max(1000 / 60, d.frameMeanMs)) : 50;
+    const frames = micEvalStrumFrames(x, R, srcRate, frameMs, rule);
+    // a round's play phase on the site's clock: from its listen start to the next round's count-in
+    rounds.forEach((rd, k) => { rd.end = k + 1 < rounds.length ? rounds[k + 1].listen - 4 * rounds[k + 1].beat : Infinity; });
+    const ratios = [rule.RATIO].concat([1.8, 2.2, 2.6].filter(v => v > rule.RATIO));
+    const candidates = ratios.map(ratio => {
+      const hfRatio = Math.round(rule.HF_RATIO * ratio / rule.RATIO * 100) / 100;
+      const hits = micEvalStrumHits(frames, rule, ratio, hfRatio);
+      const evsBy = rounds.map(() => []);
+      hits.forEach(r => {
+        for (let k = 0; k < rounds.length; k++){
+          const p = r - rounds[k].shift;
+          if (p >= rounds[k].listen && p < rounds[k].end){ evsBy[k].push({ t: p }); break; }
+        }
+      });
+      const matches = rounds.map((rd, k) => matchRound(rd, evsBy[k]).match);
+      const c = { ratio, hfRatio, strums: evsBy.reduce((a, l) => a + l.length, 0), judged: judged.length, reproduced: 0, falseHits: 0, falseHitsRemoved: 0, agree: 0, realLost: 0 };
+      judged.forEach(j => {
+        const fires = !!matches[j.rk][j.idx];
+        if (fires === (j.site !== 'miss')) c.reproduced++;
+        if (j.cat === 'false-hit'){ c.falseHits++; if (!fires) c.falseHitsRemoved++; }
+        if (j.cat === 'agree'){ c.agree++; if (!fires) c.realLost++; }
+      });
+      return c;
+    });
+    whatIf = { frameMs: Math.round(frameMs * 10) / 10, srcRate, frames: frames.length, candidates };
+  }
   const cnt = f => notes.filter(f).length;
   const roundRows = rounds.map(rd => {
     const ns = notes.filter(n => n.stage === rd.stage), c = cat => ns.filter(n => n.why.cat === cat).length;
@@ -5156,7 +5306,7 @@ function micEvalTakePw(pcm, R, d, deps){
   const startMs = rounds.length ? rounds[0].listen - 4 * rounds[0].beat + rounds[0].offs : 0;
   const playMs = Math.max(1, endMs - startMs);
   return {
-    kind: 'pw', level, latency, notes: summary, perNote: notes, rounds: roundRows,
+    kind: 'pw', level, latency, notes: summary, perNote: notes, rounds: roundRows, whatIf,
     room: { extraOnsetsPerMin: Math.round(extra / playMs * 60000), extra, onsets: onsets.length }
   };
 }
@@ -5194,6 +5344,40 @@ function micEvalRow(label, d, pcm, deps){
     bpm: d.bpm || null, durationSec: d.durationSec || null, lang: d.lang || '',
     device: micEvalDevice(d), frame: { meanMs: d.frameMeanMs == null ? null : d.frameMeanMs, maxMs: d.frameMaxMs == null ? null : d.frameMaxMs }
   }, a);
+}
+
+/* The strum what-if (micEvalTakePw `whatIf`), summed: one line per Power Chord
+   Switch take, one column per candidate ratio, and the totals. Used by the
+   console table, the download and the terminal. No names: the take labels only. */
+function micEvalWhatIfSummary(rows){
+  const pw = rows.filter(r => r.kind === 'pw' && r.whatIf && r.whatIf.candidates && r.whatIf.candidates.length);
+  if (!pw.length) return null;
+  const cands = pw[0].whatIf.candidates.map(c => ({ ratio: c.ratio, hfRatio: c.hfRatio }));
+  const same = pw.filter(r => r.whatIf.candidates.length === cands.length && r.whatIf.candidates.every((c, k) => c.ratio === cands[k].ratio && c.hfRatio === cands[k].hfRatio));
+  const sum = (list, k, f) => list.reduce((a, r) => a + (r.whatIf.candidates[k][f] || 0), 0);
+  const per = (r, k) => { const c = r.whatIf.candidates[k]; return { falseHitsRemoved: c.falseHitsRemoved, realLost: c.realLost, reproduced: c.reproduced, strums: c.strums }; };
+  return {
+    candidates: cands,
+    takes: same.map(r => ({ take: r.take, game: r.game, frameMs: r.whatIf.frameMs, judged: r.whatIf.candidates[0].judged,
+      falseHits: r.whatIf.candidates[0].falseHits, agree: r.whatIf.candidates[0].agree, perCandidate: cands.map((c, k) => per(r, k)) })),
+    totals: { takes: same.length, judged: sum(same, 0, 'judged'), falseHits: sum(same, 0, 'falseHits'), agree: sum(same, 0, 'agree'),
+      perCandidate: cands.map((c, k) => ({ falseHitsRemoved: sum(same, k, 'falseHitsRemoved'), realLost: sum(same, k, 'realLost'), reproduced: sum(same, k, 'reproduced') })) }
+  };
+}
+function micEvalWhatIfText(rows){
+  const w = micEvalWhatIfSummary(rows);
+  if (!w) return '';
+  const pad = (v, n) => { const t = v == null ? '-' : String(v); return t.length >= n ? t : t + ' '.repeat(n - t.length); };
+  const head = [pad('take', 5), pad('false', 6), pad('agree', 6)].concat(w.candidates.map(c => pad('x' + c.ratio + '/' + c.hfRatio, 14))).join(' ');
+  const line = (label, f, a, cs) => [pad(label, 5), pad(f, 6), pad(a, 6)].concat(cs.map(c => pad('-' + c.falseHitsRemoved + ' / lost ' + c.realLost, 14))).join(' ');
+  return '\n\nStrum what-if (measurement only, the game does not change): the site\'s own strum rule replayed on each Power Chord Switch recording at the site\'s ratios (first column) and stricter ones, full-band ratio / HF ratio.\n' +
+    [head].concat(w.takes.map(t => line(t.take, t.falseHits, t.agree, t.perCandidate)), line('all', w.totals.falseHits, w.totals.agree, w.totals.perCandidate)).join('\n') + `
+
+false       changes the site graded right or wrong where the recording has no strum
+agree       changes the site and the recording agree were strummed
+-N          of the false hits, N would not fire at that ratio (no strum left in the window)
+lost M      of the agree changes, M would no longer fire (a real strum, now too soft for the rule)
+The first column is the site's own ratios: ${w.totals.perCandidate[0].reproduced} of ${w.totals.judged} changes get the same yes/no there as the site gave (the replay's own error: its frame times and sample rate are assumed).`;
 }
 
 // A plain-text table of the rows, for the console / terminal.
@@ -5248,7 +5432,7 @@ oct         notes where the octave above outvoted the real note
 snr         median note level above the room floor (dB)
 cents       median tuning of the notes heard (cents off the written note)
 h1h2        low-string notes: fundamental vs 2nd harmonic (dB; very negative = the mic loses the low end)
-xtra/m      onsets per minute that are not near any expected note (other guitars, noise)` + pwText;
+xtra/m      onsets per minute that are not near any expected note (other guitars, noise)` + pwText + micEvalWhatIfText(rows);
 }
 
 /* "Evaluate all recordings": every take through micEvalRow with the site's
@@ -5263,7 +5447,10 @@ async function teacherMicEvaluate(){
   catch(e){ box.innerHTML = '<div class="t-loading">Could not load the listening code — check your connection and try again.</div>'; return; }
   const deps = { detectPitch: coachDetectPitch, GATE: COACH_PITCH_GATE, GAIN: COACH_MIC_GAIN,
     ATTACK_SKIP: COACH_ATTACK_SKIP, EVENT_TAIL: COACH_EVENT_TAIL, REFRACT: COACH_ONSET_REFRACT,
-    MATCH_FRAC: COACH_MATCH_FRAC, MATCH_MIN_MS: COACH_MATCH_MIN_MS, VOTE_TOL: COACH_VOTE_TOL };
+    MATCH_FRAC: COACH_MATCH_FRAC, MATCH_MIN_MS: COACH_MATCH_MIN_MS, VOTE_TOL: COACH_VOTE_TOL,
+    // the site's own strum rule, for the what-if (micEvalStrumRule): its constants and the text of the three functions, read at run time
+    strum: { consts: { FLOOR: CHK_ONSET_FLOOR, RATIO: CHK_ONSET_RATIO, HF_FLOOR: CHK_HF_FLOOR, HF_RATIO: CHK_HF_RATIO, REFRACT: COACH_ONSET_REFRACT,
+      WIN: COACH_LVL_WIN, HOP: COACH_LVL_HOP, CATCHUP: COACH_CATCHUP_MAX_MS }, ccLoopSrc: String(ccLoop), readFrameSrc: String(coachReadFrame), smoothSrc: String(coachSmooth) } };
   /* Every take: micEvalRow measures a Power Chord Switch take with micEvalTakePw (strums against the site's verdicts), the rest with micEvalTake. */
   const takes = teacherMicTakes.slice();
   const rows = [], names = [], fails = [];
@@ -5304,7 +5491,8 @@ function teacherMicEvalHtml(){
   const lines = [`${rows.length} recordings, ${cbooks} of them on a Chromebook.`];
   if(noteRows.length) lines.push(
     `The site counted <b>${right}</b> of ${n} notes right. The notes are clearly in the recordings for <b>${inAud}</b> of ${n}.`,
-    `<b>${detMiss}</b> ${detMiss === 1 ? 'note was' : 'notes were'} clearly played and loud, but the site did not count ${detMiss === 1 ? 'it' : 'them'} right. <b>${silent}</b> missed ${silent === 1 ? 'note was' : 'notes were'} not played at all.`);
+    `<b>${detMiss}</b> ${detMiss === 1 ? 'note was' : 'notes were'} clearly played and loud, but the site did not count ${detMiss === 1 ? 'it' : 'them'} right. <b>${silent}</b> missed ${silent === 1 ? 'note was' : 'notes were'} not played at all.` +
+    (sum(r => r.notes.dropped) ? ` ${sum(r => r.notes.dropped)} more ${sum(r => r.notes.dropped) === 1 ? 'note' : 'notes'} came after the recording stopped (30 seconds, or Stop) and ${sum(r => r.notes.dropped) === 1 ? 'was' : 'were'} not checked.` : ''));
   if(pwRows.length){
     const pw = f => pwRows.reduce((a, r) => a + (f(r) || 0), 0);
     const pn = pw(r => r.notes.n), agree = pw(r => r.notes.agree), pMiss = pw(r => r.notes.detectorMissed);
@@ -5355,11 +5543,24 @@ function teacherMicEvalHtml(){
       `<td>${teacherMicOffText(nb.offPitch)}</td><td>${v(nb.lowH1H2Db)}</td></tr>`;
   }).join('');
   return `<div class="tg-note" style="margin-top:8px">${lines.join('<br>')}</div>
-    <div class="t-grid-wrap"><table><thead><tr><th class="nc">Take</th><th>Game</th><th>Device</th><th>Loud / room (dB)</th><th>Delay set → should be (ms)</th><th>Site counted right</th><th>In the recording</th><th>Played, not counted</th><th>Not played</th><th>Heard instead</th><th>Low strings (dB)</th></tr></thead><tbody>${tr}</tbody></table></div>
+    <div class="t-grid-wrap"><table><thead><tr><th class="nc">Take</th><th>Game</th><th>Device</th><th>Loud / room (dB)</th><th>Delay set → should be (ms)</th><th>Site counted right</th><th>In the recording</th><th>Played, not counted</th><th>Not played</th><th>Heard instead</th><th>Low strings (dB)</th></tr></thead><tbody>${tr}</tbody></table></div>${teacherMicWhatIfHtml(rows)}
     <div class="tg-note"><button class="tp-btn primary" style="flex:none;padding:8px 16px;margin-right:10px" onclick="teacherMicEvalDownload()">Download results</button>
       The file has the measurements only — no audio and no names. <br>
       <i>In the recording</i>: the site's own pitch detection, run again on the saved audio, finds the note clearly. <i>Played, not counted</i>: a loud, clear note the site did not count right. <i>Not played</i>: the site said missed and there is no note there. <i>Heard instead</i>: notes that rang clearly but at a different pitch — "−1 ×6" means six notes came out one semitone low (the same number again and again usually means the guitar is out of tune). <i>Delay</i>: "?" means the count-in beeps were not in the recording (speaker muted or headphones). <i>Low strings</i>: the low note's own pitch against the octave above it — very negative means this mic loses the low end.${pwRows.length ? `<br>
       <i>Power Chord Switch</i> rows count chord changes, not notes. <i>In the recording</i>: a strum inside the site's own window for the change (about half a beat around the beat as the site was tracking it; which chord was strummed is not checked); "heard, not there": the site heard a strum its window in the recording does not have. <i>Played, not counted</i>: a strum in the site's window that the site did not hear; "off the beat": a strum just outside the window, or near the beat the student heard, so the site said missed (played early or late, or the delay setting is off). <i>Not played</i>: no strum near the change. <i>Delay</i>: hover it to see each round's, and how its windows were placed; "no beeps found" can also mean the student strummed over the count-in.` : ''}</div>`;
+}
+/* The strum what-if as a small table (micEvalWhatIfSummary): per Power Chord Switch take and ratio, "-N" false hits that would not fire and "lost M" real strums that would stop firing. */
+function teacherMicWhatIfHtml(rows){
+  const w = micEvalWhatIfSummary(rows);
+  if(!w) return '';
+  const cell = c => `<td>−${c.falseHitsRemoved} · lost ${c.realLost}</td>`;
+  const body = w.takes.map(t => `<tr><td class="nc wf">${escHtml(t.take)}</td><td>${t.falseHits}</td><td>${t.agree}</td>${t.perCandidate.map(cell).join('')}</tr>`).join('') +
+    `<tr><td class="nc wf"><b>All ${w.totals.takes}</b></td><td><b>${w.totals.falseHits}</b></td><td><b>${w.totals.agree}</b></td>${w.totals.perCandidate.map(c => `<td><b>−${c.falseHitsRemoved} · lost ${c.realLost}</b></td>`).join('')}</tr>`;
+  const t0 = w.totals.perCandidate[0];
+  return `<div class="tg-note" style="margin-top:10px"><b>Strum what-if</b> (measurement only; the game does not change). The site's own strum rule, run again on each Power Chord Switch recording at its own ratio and at stricter ones.
+    <i>−N</i>: false hits (the site heard a strum the recording does not have) that would no longer fire. <i>lost M</i>: real strums (the site and the recording agree) that would stop firing.</div>
+    <div class="t-grid-wrap"><table><thead><tr><th class="nc">Take</th><th>False hits</th><th>Real strums</th>${w.candidates.map((c, k) => `<th>${k ? 'Ratio' : 'Site’s ratio'} ${c.ratio} (HF ${c.hfRatio})</th>`).join('')}</tr></thead><tbody>${body}</tbody></table></div>
+    <div class="tg-note">At the site's own ratio the replay gives the same yes/no as the site on ${t0.reproduced} of ${w.totals.judged} changes; the rest is the replay's own error (it assumes steady frame times and the 48 kHz rate).</div>`;
 }
 function teacherMicOffText(h){
   const ks = Object.keys(h || {}).sort((a, b) => h[b] - h[a]);
@@ -5369,7 +5570,7 @@ function teacherMicOffText(h){
 function teacherMicEvalDownload(){
   if(!teacherMicEvalRows.length) return;
   teacherMicSaveFile('mic-eval-' + new Date().toISOString().slice(0, 10) + '.json',
-    new Blob([JSON.stringify({ generated: new Date().toISOString(), takes: teacherMicEvalRows.length, rows: teacherMicEvalRows }, null, 1)], { type: 'application/json' }));
+    new Blob([JSON.stringify({ generated: new Date().toISOString(), takes: teacherMicEvalRows.length, strumWhatIf: micEvalWhatIfSummary(teacherMicEvalRows), rows: teacherMicEvalRows }, null, 1)], { type: 'application/json' }));
 }
 
 /* ── Students view (roster bar chart + per-student detail) ───────────────

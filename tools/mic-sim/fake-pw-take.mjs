@@ -45,6 +45,28 @@
    `deaf`: the site hears nothing at all (every change 'miss'). `drift`: every strum
    slides from on the beat to `drift` ms late over the take. `flipVerdict`: that
    change's saved verdict is flipped after the rule gave it (truth.mismatch).
+   Room-noise and soft-strum takes (for the strum what-if, teacher.js
+   micEvalStrumRule): the room is steady white noise (`noise`) plus a low rumble
+   (`rumble`); the site's strum rule fires on a loudness jump over its smoothed
+   level, so:
+     burst:J   no strum: a 300 ms burst of LOW-frequency noise whose level is J x
+               the room's, on a frame boundary of the site's 50 ms frames
+               (`frameMs`); the site hears it (it jumps the full-band level,
+               not the pick-attack channel) and grades the change; the recording
+               has no strum there (the evaluator's onset finder reads the pick
+               attack channel)
+     soft:A    a real strum of amplitude A on a frame boundary, with a pick
+               scrape that jumps the attack channel, `tau` seconds of ring
+     `noStrums`  no strum anywhere else; `skipFirst`  none on beat 0;
+     `tailMs`    that much quiet room after the game (the evaluator's attack
+               floor is the quiet 20th percentile of the take, so a soft strum
+               over a loud room is still a pick attack to it).
+   Their truth is MEASURED on the audio, not planted: for each such event the
+   jump over the room's level of the full-band and the attack channel
+   (this file's own window arithmetic, the loudest of the four 512-sample
+   windows that end in the frame after it), and with it whether the site's rule
+   fires at each candidate ratio (PW_WHATIF); `truth.whatIf` has the totals per
+   candidate. A jump within 6% of a threshold is refused (too close to call).
    truth: per change, dropped (its window runs past the audio's end) or
      agree            site ok/off, a strum in the site's window
      false-hit        site ok/off, no strum in it
@@ -116,8 +138,17 @@ export const PW_FIXTURES = [
   { ...base, name: 'pw-late-every2', desc: 'reviewer case 3: setting right, every 2 beats, strumming only on the changes, 300 ms late', bpms: [120], bpc: 2, slots: 6, chords: ['F5', 'G5'], song: null,
     lag: 120, lat: 145, onlyChanges: true, allDev: 300, seed: 25, plan: {} },
   { ...base, name: 'pw-drift', desc: 'a pair at 60 BPM whose strums drift from on the beat to 300 ms late: the gridOffset of the site follows them far', bpms: [60], slots: 16, chords: ['G5', 'D5'], song: null,
-    lag: 120, lat: 145, drift: 300, seed: 26, plan: { 5: 'in:late', 8: 'silent', 10: 'pre:in:late', 11: 'detmiss', 13: 'pre:in:late' } }
+    lag: 120, lat: 145, drift: 300, seed: 26, plan: { 5: 'in:late', 8: 'silent', 10: 'pre:in:late', 11: 'detmiss', 13: 'pre:in:late' } },
+  { ...base, name: 'pw-room-noise', desc: 'every 2 beats at 140 BPM (the window is its 220 ms floor; the mic delay setting 325 ms puts the site 300 ms from the audio: a replay that ignores it misses every window), room noise, no strums at all: low-frequency bursts 1.6 / 2.0 / 2.38 / 2.9 x the room, each one graded by the site (the 2026-11-04 finding)', bpms: [140], bpc: 2, slots: 16, chords: ['G5', 'C5'], song: null, start: 1000,
+    lag: 120, map: 25, lat: 325, clickAmp: 0, noise: 0.004, rumble: 0.03, noStrums: true, frameMs: 50, seed: 31,
+    plan: { 0: 'burst:1.6', 1: 'burst:2.0', 2: 'burst:2.38', 3: 'burst:2.9', 5: 'burst:2.9', 6: 'burst:2.38', 8: 'burst:2.0', 9: 'burst:1.6', 11: 'burst:2.38', 12: 'burst:2.9', 14: 'burst:1.6' } },
+  { ...base, name: 'pw-soft-strums', desc: 'soft real strums over a loud room: pick attacks the evaluator finds, about 2.5 / 2.9 / 3.5 x the room on the attack channel, 1.2 to 1.6 x on the full band', bpms: [140], bpc: 2, slots: 16, chords: ['A5', 'D5'], song: null, start: 1000,
+    lag: 300, map: 25, lat: 335, clickAmp: 0, noise: 0.004, rumble: 0.03, tau: 0.25, pf: 0.1, onlyChanges: true, skipFirst: true, frameMs: 50, tailMs: 8000, seed: 32,
+    plan: { 0: 'soft:0.01219', 1: 'soft:0.01467', 2: 'soft:0.01876', 3: 'soft:0.01262', 4: 'soft:0.01303', 5: 'soft:0.01896', 6: 'soft:0.01231', 7: 'soft:0.01561', 8: 'soft:0.01665', 9: 'soft:0.01239', 10: 'soft:0.01471', 11: 'soft:0.01911', 12: 'soft:0.01179', 13: 'soft:0.01568', 14: 'soft:0.01790' } }
 ];
+// The candidate ratios the strum what-if tries: the site's own (coach.js CHK_ONSET_RATIO 1.4, CHK_HF_RATIO 1.7) and stricter ones; the attack-channel ratio scales the same way
+export const PW_WHATIF = { full: [1.4, 1.8, 2.2, 2.6], hfBase: 1.7, fullBase: 1.4, floor: 0.003, hfFloor: 0.0008, margin: 0.06 };
+export const pwWhatIfCandidates = () => PW_WHATIF.full.map(r => ({ ratio: r, hfRatio: Math.round(PW_WHATIF.hfBase * r / PW_WHATIF.fullBase * 100) / 100 }));
 
 export function makePwTake(o){
   let seed = o.seed || 1;
@@ -143,7 +174,8 @@ export function makePwTake(o){
   const gameEnd = stopMs != null ? stopMs : lastRound.listen + (o.slots * o.bpc + 1) * lastRound.beat;
   // `drift`: the student slides from on the beat (first beat) to `drift` ms late (last beat)
   if (o.drift) driftAt = due => o.drift * Math.max(0, Math.min(1, (due - rounds[0].listen) / (gameEnd - rounds[0].listen)));
-  const audioEnd = Math.min(CAP_MS, gameEnd + 150);
+  const audioEnd = Math.min(CAP_MS, gameEnd + 150 + (o.tailMs || 0));
+  const gameAudioEnd = Math.min(CAP_MS, gameEnd + 150);
   const N = S(audioEnd);
 
   /* ── the audio ── */
@@ -159,14 +191,15 @@ export function makePwTake(o){
   function strum(atMs, rootMidi, amp){
     [0, 7, 12].forEach((off, k) => {
       const f = 440 * Math.pow(2, (rootMidi + off - 69) / 12);
-      (o.harm || [1, 0.5, 0.25]).forEach((a, h) => partial(atMs + k * 12, f * (h + 1), amp * a / 2, 0.8));
+      (o.harm || [1, 0.5, 0.25]).forEach((a, h) => partial(atMs + k * 12, f * (h + 1), amp * a / 2 * (o.pf == null ? 1 : o.pf), o.tau || 0.8));
     });
     const s0 = S(atMs);
-    for (let i = 0; i < S(12) && s0 + i < N; i++) if (s0 + i >= 0) strums[s0 + i] += (rnd() - 0.5) * amp * 2 * (1 - i / S(12));
+    for (let i = 0; i < S(12) && s0 + i < N; i++) if (s0 + i >= 0) strums[s0 + i] += (rnd() - 0.5) * amp * 2 * (1 - i / S(12)) * (o.sf == null ? 1 : o.sf);
   }
   // a muted change: the strings are stopped 40 ms before it, so what is ringing dies within ~0.1 s
   const mute = ms => { const m0 = Math.max(0, S(ms)); for (let i = m0; i < N; i++){ const k = Math.exp(-(i - m0) / R / 0.02); if (k < 1e-6){ strums.fill(0, i); break; } strums[i] *= k; } };
 
+  const bursts = [], planted = [];   // what-if events: { ms, J } room bursts; { ch, kind, ms } every burst / soft strum with its change
   const attacks = [];          // every pick attack in the audio: { ms, deliberate }
   const events = [];           // what the site logged (played time, stage)
   /* ccLoop, one onset at a time (played = arrival - micLatencyMs) */
@@ -198,6 +231,7 @@ export function makePwTake(o){
       if (stopMs != null && due > stopMs) break;
       const ch = bySlotBeat[m];
       if (o.onlyChanges && !ch && m !== 0) continue;
+      if (o.skipFirst && m === 0) continue;
       const chord = o.chords[Math.floor(m / o.bpc) % 2];
       let kind = ch ? ch.kind : 'ok', attack = due + rd.lag + allDev + driftAt(due) + (rnd() - 0.5) * 24, deliberate = false;
       // the site hears onsets in time order: a pluck before this beat's strum first
@@ -213,6 +247,22 @@ export function makePwTake(o){
       else if (/^(in|out):(late|early)$/.test(kind)){ const [io, side] = kind.split(':'); attack = site((side === 'late' ? 1 : -1) * (io === 'in' ? rd.win - 25 : rd.win + 25)); deliberate = true; }
       else if (/^at:/.test(kind)){ attack = site(+kind.slice(3)); deliberate = true; }
       else if (/^beyond:/.test(kind)){ attack = site(rd.win + +kind.slice(7) * rd.beat); deliberate = true; }
+      const burstM = /^burst:([\d.]+)$/.exec(kind), softM = /^soft:([\d.]+)$/.exec(kind);
+      if (burstM){
+        // low-frequency room noise, on a 50 ms frame boundary, 10 ms after the centre of the site's window; the site hears it
+        const b = Math.ceil((ch.t + rd.goffNow() + 10 + o.lat - o.map) / 50) * 50;
+        bursts.push({ ms: b, J: +burstM[1] }); planted.push({ ch, kind, ms: b });
+        if (!o.deaf) rd.siteHear(b + o.map - o.lat, false);
+        continue;
+      }
+      if (softM){
+        attack = Math.ceil(attack / 50) * 50;
+        strum(attack, ROOT[chord], +softM[1]);
+        attacks.push({ ms: attack, deliberate: false }); planted.push({ ch, kind, ms: attack });
+        if (!o.deaf) rd.siteHear(attack + o.map - o.lat, false);
+        continue;
+      }
+      if (o.noStrums && kind !== 'held' && kind !== 'silent') continue;
       if (kind === 'silent'){ mute(attack - 40); continue; }
       if (kind === 'held'){ if (!o.deaf) rd.siteHear(ch.t + rd.goffNow() + 10, false); continue; }
       if (kind === 'noise:out'){ if (!o.deaf) rd.siteHear(ch.t + rd.goffNow() + rd.win + 25, false); continue; }
@@ -224,7 +274,42 @@ export function makePwTake(o){
   });
   extras.forEach(ms => pluck(ms, null));
   const x = new Float32Array(N);
-  for (let i = 0; i < N; i++) x[i] = strums[i] + (rnd() - 0.5) * o.noise;
+  // the room: white noise plus a low rumble (one-pole filtered); after the game, `tailMs` of the room quiet
+  const gameN = S(gameAudioEnd);
+  let rum = 0;
+  for (let i = 0; i < N; i++){
+    const q = i < gameN ? 1 : 0.25;
+    if (o.rumble) rum += ((rnd() - 0.5) * 2 * o.rumble * q - rum) * 0.05;
+    x[i] = strums[i] + (rnd() - 0.5) * o.noise * q + rum;
+  }
+  /* The what-if's truth: the room's level as the site's frames read it (the loudest of four 512-sample windows ending in each 50 ms frame), measured
+     on a stretch with nothing played (200-2400 ms), then each planted event's jump over it. This file's own arithmetic, not micEvalStrumFrames'. */
+  const frameLevel = (buf, endS) => {
+    let f = 0, h = 0;
+    for (let j = 0; j < 4; j++){
+      const e = endS - j * 256; if (e - 512 < 1) continue;
+      let sq = 0, dq = 0;
+      for (let i = e - 512; i < e; i++){ sq += buf[i] * buf[i]; const dd = buf[i] - buf[i - 1]; dq += dd * dd; }
+      f = Math.max(f, Math.sqrt(sq / 512)); h = Math.max(h, Math.sqrt(dq / 512));
+    }
+    return { f, h };
+  };
+  let roomF = 0, roomH = 0, roomN = 0;
+  if (planted.length){
+    for (let e = Math.ceil(S(200) / 1200) * 1200 + 1200; e <= S(2400); e += 1200){ const l = frameLevel(x, e); roomF += l.f; roomH += l.h; roomN++; }
+    roomF /= roomN; roomH /= roomN;
+    // a burst: low-frequency noise (one-pole filtered) scaled so the frame holding it is J x the room on the full band
+    bursts.forEach(bu => {
+      const s0 = S(bu.ms), n = S(300), unit = new Float32Array(n), base0 = x.slice(s0, s0 + n);
+      let y = 0, sq = 0;
+      for (let i = 0; i < n; i++){ y += ((rnd() - 0.5) - y) * 0.02; unit[i] = y; sq += y * y; }
+      // the frame holding it reads the loudest of four windows: search the scale until the frame's jump is J (it only rises with the scale)
+      const put = k => { for (let i = 0; i < n && s0 + i < N; i++) x[s0 + i] = base0[i] + unit[i] * k; return frameLevel(x, s0 + 1200).f / roomF; };
+      let lo = 0, hi = roomF * 20 / Math.sqrt(sq / n);
+      for (let it = 0; it < 40; it++){ const mid = (lo + hi) / 2; if (put(mid) < bu.J) lo = mid; else hi = mid; }
+      put((lo + hi) / 2);
+    });
+  }
   const clickMs = [];
   if (o.clickAmp > 0) rounds.forEach(rd => {
     for (let j = 0; j < 4; j++){
@@ -288,6 +373,36 @@ export function makePwTake(o){
     if (Math.abs(d) < 8) throw new Error(o.name + ': an onset ' + Math.round(d) + ' ms from the grid tolerance (too close to call)');
     return d >= 0;
   }).length;
+  if (planted.length){
+    const cands = pwWhatIfCandidates(), M = PW_WHATIF.margin;
+    const events2 = planted.map(pl => {
+      const l = frameLevel(x, S(pl.ms) + 1200), full = l.f / roomF, hf = l.h / roomH;
+      const fires = cands.map(c => {
+        const close = (v, t) => Math.abs(v - t) < M * t;
+        if ((close(full, c.ratio) && !(hf > c.hfRatio * (1 + M))) || (close(hf, c.hfRatio) && !(full > c.ratio * (1 + M))))
+          throw new Error(o.name + ': change ' + pl.ch.i + ' (' + pl.kind + ') jumps ' + full.toFixed(2) + ' full-band / ' + hf.toFixed(2) + ' attack channel, within ' + (M * 100) + '% of the ' + c.ratio + ' / ' + c.hfRatio + ' thresholds (too close to call)');
+        return (full > c.ratio && roomF > PW_WHATIF.floor) || (hf > c.hfRatio && roomH > PW_WHATIF.hfFloor);
+      });
+      if (!fires[0]) throw new Error(o.name + ': change ' + pl.ch.i + ' (' + pl.kind + ') would not fire at the site\'s own ratios (' + full.toFixed(2) + ' / ' + hf.toFixed(2) + ') yet the site is made to hear it');
+      // what the evaluator must make of it: a soft strum is a pick attack (attack channel over its 2.2 x base), room noise is not
+      if (/^soft/.test(pl.kind) && hf < 2.2 * (1 + M)) throw new Error(o.name + ': change ' + pl.ch.i + ' (' + pl.kind + ') jumps the attack channel only ' + hf.toFixed(2) + ' x: the evaluator would not find it');
+      if (/^burst/.test(pl.kind) && hf > 2.0) throw new Error(o.name + ': change ' + pl.ch.i + ' (' + pl.kind + ') jumps the attack channel ' + hf.toFixed(2) + ' x: not room noise');
+      return { i: pl.ch.i, kind: pl.kind, full: Math.round(full * 100) / 100, hf: Math.round(hf * 100) / 100, fires };
+    });
+    const byCh = new Map(events2.map(e => [e.i, e]));
+    truth.whatIf = { frameMs: o.frameMs, roomRms: roomF, roomHf: roomH, events: events2, candidates: cands.map((c, k) => {
+      const r = { ...c, strums: events2.filter(e => e.fires[k]).length, judged: 0, reproduced: 0, falseHits: 0, falseHitsRemoved: 0, agree: 0, realLost: 0 };
+      truth.changes.forEach(tc => {
+        if (tc.cat === 'dropped') return;
+        r.judged++;
+        const ev = byCh.get(tc.i), fires = ev ? ev.fires[k] : false;
+        if (fires === (tc.verdict !== 'miss')) r.reproduced++;
+        if (tc.cat === 'false-hit'){ r.falseHits++; if (!fires) r.falseHitsRemoved++; }
+        if (tc.cat === 'agree'){ r.agree++; if (!fires) r.realLost++; }
+      });
+      return r;
+    }) };
+  }
   truth.mapKnown = mapKnown;
   truth.mismatch = truth.changes.filter(c => c.cat !== 'dropped' && c.replayHeard !== (c.verdict !== 'miss')).length;
   const meta = {
@@ -297,7 +412,7 @@ export function makePwTake(o){
     micLatencyMs: o.lat, sampleRate: R, srcSampleRate: 48000, durationSec: Math.round(N / R * 100) / 100,
     micLabel: 'Internal Microphone (Built-in)',
     userAgent: 'Mozilla/5.0 (X11; CrOS x86_64 16093.68.0) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/129.0.0.0 Safari/537.36',
-    frameMeanMs: 48.2, frameMaxMs: 131, lang: 'en', chunks: 2, savedAt: '2026-11-04T17:00:00.000Z'
+    frameMeanMs: o.frameMs || 48.2, frameMaxMs: 131, lang: 'en', chunks: 2, savedAt: '2026-11-04T17:00:00.000Z'
   };
   return { pcm, meta, truth };
 }
