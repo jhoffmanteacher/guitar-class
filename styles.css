@@ -3,6 +3,9 @@
    the former px sizes (e.g. 0.9375rem = 15px), not a re-design. */
 @font-face{font-family:'Fraunces';src:url('fonts/fraunces.woff2') format('woff2');
   font-weight:400 700;font-display:swap}
+/* The Top 5 medal only (practice minutes). Subset to the four letters it draws: T O P 5 (SIL OFL 1.1, The Rubik Project Authors). */
+@font-face{font-family:'Rubik Mono One';src:url('fonts/rubik-mono-one-top5.woff2') format('woff2');
+  font-weight:400;font-display:swap}
 *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
 /* Site-wide keyboard focus indicator (a11y) */
 :focus-visible{outline:2px solid var(--blue-text);outline-offset:2px}
@@ -4442,6 +4445,7 @@ body.lq-invite-open{overflow:hidden}
   --mins:#5AA9FF;--live:#3DDC97;--streak:#FF8A3D;--goal:#FFC93C;--streak-dim:#7A5236;
   --pm-surface:#171b24;--pm-tile:#212837;--pm-text:#f3f5f9;--pm-muted:#b4bccb;
   --pm-track:#3a4152;--pm-grey:#5f697f;
+  --rank:#B79CFF;
 }
 /* The status strip: lives in the main top bar (index.html #pm-header), see .pm-strip-header below. */
 .pm-strip{flex-shrink:0;align-self:center;margin-left:auto;display:inline-flex;align-items:center;gap:9px;
@@ -4493,6 +4497,21 @@ body.lq-invite-open{overflow:hidden}
   color:var(--text2);font-size:1rem;cursor:pointer}
 .pm-recap-x:hover{background:var(--bg3)}
 @media (prefers-reduced-motion:reduce){.pm-toast,.pm-recap{animation:none}}
+/* Top 5 (2026-11-04): a round medal, "TOP" over a big "5". --rank (lavender) means "Top 5" and nothing else:
+   yellow stays the week-goal moment's alone. On --pm-surface / --pm-tile it measures about 7.5 / 6.6 : 1.
+   -sm sits in the strip, -lg in the toast, -md on the My progress tile; -off is the dashed "not yet" medal. */
+.pm-top5{display:inline-flex;flex-direction:column;align-items:center;justify-content:center;flex-shrink:0;
+  box-sizing:border-box;border-radius:50%;background:#0b0d12;color:var(--rank);border:2px solid var(--rank);
+  font-family:'Rubik Mono One',sans-serif;font-weight:400;line-height:1;letter-spacing:0}
+.pm-top5 b{font-weight:400}
+.pm-top5-sm{width:22px;height:22px;font-size:5.5px;border-width:1.5px}
+.pm-top5-sm b{font-size:10px}
+.pm-top5-lg{width:34px;height:34px;font-size:7px}
+.pm-top5-lg b{font-size:15px}
+.pm-top5-md{width:44px;height:44px;font-size:9px}
+.pm-top5-md b{font-size:19px}
+.pm-top5-off{background:transparent;color:var(--pm-muted);border:2px dashed var(--pm-grey)}
+.pm-toast-top5{gap:10px}
 /* My progress */
 .pm-progress{margin:0 0 18px}
 .pm-panel{background:var(--pm-surface);color:var(--pm-text);border-radius:14px;padding:16px}

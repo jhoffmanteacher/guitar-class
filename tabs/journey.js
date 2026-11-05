@@ -11,8 +11,8 @@ var fbUser = null, fbDb = null, saveTimer = null, dirty = false;
    the student's work on this page too. It asks for the signed-in student
    (only once the Firestore SDK has landed, so a write can actually go out)
    and the Firestore handle. No UI here. `period` (and pmDocPeriod, which
-   feeds it) is no longer read: the heartbeat that used it was removed
-   2026-11-04 (the code is left in place). */
+   feeds it) is read by the Top 5 (2026-11-04): a Journey page writes this
+   week's minutes under the student's class period too. */
 var pmDocPeriod = '', pmDocPeriodUid = '';
 window.PM_HOST = {
   ui: false,

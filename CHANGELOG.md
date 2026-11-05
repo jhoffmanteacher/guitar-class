@@ -9,6 +9,13 @@ see `WORKFLOW.md` and the git commit log.
 
 - **In the "Save this take as a recording?" question, the Yes button is now the large main button across the row.** "No thanks" sits below it as a normal-size button, easy to see and press. The words and what each button does are the same.
 
+## 2026-11-04 — Top 5 of the week, by class period
+
+- **A "TOP 5" medal** shows in the minutes strip at the top when you are one of the five students with the most practice minutes this week in your class period. The week starts over every Monday.
+- **You need 10 minutes this week to be ranked.** Students tied on minutes share a place.
+- **A pill drops down the first time you make the Top 5 in a week:** "Top 5 in 4th period this week!"
+- **My progress has a Top 5 tile.** In the Top 5 it shows your place ("#3 in 4th period"). Out of it, it shows how many more minutes get you in, or how many minutes until you are ranked. You only ever see your own place — no names and no one else's minutes.
+
 ## 2026-11-04 — Strum pattern: one activity, pick your path
 
 - **"Strum Pattern — Down, Down-Up, Up-Down-Up" and "Strum Pattern in Chunks" are now one activity.** When you open it you pick a path first. Each path card shows its name, a line about it, its first strum board and its list of steps, with a Start button.

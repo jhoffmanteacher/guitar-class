@@ -11876,6 +11876,8 @@ function checkPracticeMinutes(i18nTable) {
       cfg.skipWeeks.forEach(d => { if (!monday(d)) fail(`config.skipWeeks entry ${JSON.stringify(d)} must be a Monday, 'YYYY-MM-DD'`); });
       if (new Set(cfg.skipWeeks).size !== cfg.skipWeeks.length) fail('config.skipWeeks has a repeated date');
     }
+    /* Top 5 (2026-11-04): a minimum above the weekly goal would be odd but reachable; above 7 days of the cap, never. */
+    if (typeof cfg.top5MinMinutes !== 'number' || !isFinite(cfg.top5MinMinutes) || cfg.top5MinMinutes < 0 || cfg.top5MinMinutes > cfg.weeklyGoalMinutes) fail(`config.top5MinMinutes must be a number from 0 to weeklyGoalMinutes (is ${JSON.stringify(cfg.top5MinMinutes)})`);
     if (cfg.semester2Start !== '' && !monday(cfg.semester2Start)) fail("config.semester2Start must be '' or a Monday, 'YYYY-MM-DD'");
     if (cfg.streakStartWeek && !/^\d{4}-W\d{2}$/.test(cfg.streakStartWeek)) fail("config.streakStartWeek must be '' or an ISO week like '2026-W48'");
     /* The goal is flat: these settings were removed on purpose and must not creep back into the config or the engine. */
@@ -11884,11 +11886,13 @@ function checkPracticeMinutes(i18nTable) {
       if (new RegExp('\\b' + k + '\\b').test(strip(read('practice-minutes.js') || ''))) fail(`practice-minutes.js still reads '${k}'`);
     }
     if (/\b(calc\.meetings|normalMeetings|calc\.days)\b/.test(strip(read('practice-minutes.js') || ''))) fail('practice-minutes.js still has meeting-day maths (calc.meetings / normalMeetings / calc.days)');
-    /* The heartbeat behind "N playing" was removed 2026-11-04 (nothing read it), with period() and its pm:p:<uid> cache (only the
-       heartbeat read them). Comments are stripped, end-of-line ones too, so history notes may name it; the https:// URLs survive. */
+    /* The heartbeat behind "N playing" was removed 2026-11-04 (nothing read it), with its pm:p:<uid> period cache. The engine
+       reads PM_HOST.period() again since the Top 5 (2026-11-04, ranked by class period), so 'period' itself is no longer a
+       heartbeat sign and left this list; the heartbeat words and the pm:p: cache stay banned. Comments are stripped, end-of-line
+       ones too, so history notes may name it; the https:// URLs survive. */
     if ('liveMinCount' in cfg) fail("practice-minutes-config.js has 'liveMinCount': \"N playing\" and its heartbeat were removed 2026-11-04");
     const engCode = strip(read('practice-minutes.js') || '').replace(/([;,{}()\]])[ \t]+\/\/.*$/gm, '$1');
-    const hbHit = /\b(?:heartbeats?|runAggregationQuery|pollLive|liveMinCount|pmSid|HEARTBEAT_MS|period)\b|pm:p:/i.exec(engCode);
+    const hbHit = /\b(?:heartbeats?|runAggregationQuery|pollLive|liveMinCount|pmSid|HEARTBEAT_MS)\b|pm:p:/i.exec(engCode);
     if (hbHit) fail(`practice-minutes.js has '${hbHit[0]}': the heartbeat writer and the "N playing" count query were removed 2026-11-04 and must not come back`);
     const cap = rules && /function dailyCapSeconds\(\)\s*\{\s*return\s+(\d+);\s*\}/.exec(rules);
     if (!cap) fail('firestore.rules: dailyCapSeconds() not found — the cap check cannot run (renamed? update this check with it)');
@@ -11932,6 +11936,12 @@ function checkPracticeMinutes(i18nTable) {
       if (!/allow create, update:\s*if pmOwner\(userId\)/.test(board)) fail('minutesBoard rule: create/update must be owner-only (pmOwner(userId))');
       if (!/hasOnly\(\['seconds'\]\)/.test(board) || !/seconds is number/.test(board) || !/seconds >= 0/.test(board) || !/seconds <= 400 \* dailyCapSeconds\(\)/.test(board)) fail("minutesBoard rule must be { seconds } only, a number from 0 to 400 * dailyCapSeconds()");
     }
+    /* The Top 5 board (2026-11-04): pinned WHOLE like minutesBoard. A change here is a change Jonathan must re-paste. */
+    const WB_SHIPPED = "match /weekBoard/{userId} { allow read: if isSignedIn(); allow create, update: if pmOwner(userId) && request.resource.data.keys().hasOnly(['week', 'period', 'seconds']) && request.resource.data.keys().hasAll(['week', 'period', 'seconds']) && request.resource.data.week is string && request.resource.data.week.matches('^[0-9]{4}-W[0-9]{2}$') && request.resource.data.period in ['4', '7', 'CAS'] && request.resource.data.seconds is number && request.resource.data.seconds >= 0 && request.resource.data.seconds <= 7 * dailyCapSeconds(); }";
+    const wbMatches = (strip(rules).match(/match\s+\/weekBoard\b/g) || []).length;
+    const wboard = block('weekBoard/{userId}');
+    if (wbMatches !== 1 || !wboard) fail(`firestore.rules has ${wbMatches} match blocks for /weekBoard (exactly one is allowed; practice-minutes.js reads and writes it for the Top 5)`);
+    else if (wboard.replace(/\s+/g, ' ').trim() !== WB_SHIPPED) fail('firestore.rules: the weekBoard block differs from the one shipped. If this is on purpose, change WB_SHIPPED here with it and tell Jonathan to paste the rules again');
     /* Only for the change that INTRODUCES the blocks: while HEAD's rules do not
        have them yet, everything above them must be byte-for-byte HEAD's (the
        order was "new match blocks only"). Once they are committed this stands

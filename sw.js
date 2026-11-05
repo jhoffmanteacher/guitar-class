@@ -218,6 +218,7 @@ const ASSETS = [
   './404.html',
   './styles.css',
   './fonts/fraunces.woff2',
+  './fonts/rubik-mono-one-top5.woff2',
   './i18n.js',
   './guitar-diagrams.js',
   './class-activities.js',

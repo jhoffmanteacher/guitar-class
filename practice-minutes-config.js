@@ -61,6 +61,14 @@ var PRACTICE_MINUTES_CONFIG = {
      so the streak starts fresh. '' = count from the student's first week. */
   streakStartWeek: '2026-W45',   // the first full week with the display on (Mon 2026-11-02): streaks start here
 
+  /* TOP 5 (2026-11-04). The students with the most practice minutes THIS week
+     (Monday to Sunday), ranked inside their own class period, get a "TOP 5" medal
+     in the strip and on My progress. Each student sees only their own place.
+     Ties share a place. A student needs at least this many minutes this week to
+     be ranked at all, so Monday morning is not a giveaway. 0 = no minimum.
+     (checks.mjs 1cg wants a number from 0 to the weekly goal.) */
+  top5MinMinutes: 10,
+
   /* ── Smaller knobs ── */
   recapMinSeconds: 60,    // a session shorter than this gets no recap
   recapGapSeconds: 180,   // at most one recap per this many seconds

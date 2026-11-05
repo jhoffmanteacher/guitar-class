@@ -43,6 +43,7 @@
      minutes/{uid}/days/{YYYY-MM-DD}  { seconds }                 (capped per day)
      minutes/{uid}/weeks/{YYYY-Www}   { seconds, goalSeconds, hit }
       minutesBoard/{uid}               { seconds }                 (the class rank; see CLASS RANK)
+      weekBoard/{uid}                  { week, period, seconds }   (this week's Top 5; see TOP 5)
   Nothing else: no heartbeat, no live count (see NO LIVE COUNT below).
    Seconds are kept whole; the display floors to whole minutes. They are added
    with increment(), so two tabs or two devices never overwrite each other.
@@ -103,6 +104,23 @@
    doc in the same instant can undercount once. Reads cost one document per student, so the board is
    kept 3 hours (memory and localStorage) per student.
 
+   TOP 5 (2026-11-04, Jonathan: "a top 5 icon for the top 5 minutes users per week, starting from
+   each Monday, by class period"). A round "TOP 5" medal in the strip and on My progress, and a toast the
+   first time a student enters it in a week. Ranked by THIS week's whole minutes (Monday to Sunday, the
+   same ISO week as the goal) among the students of the same class period (PM_HOST.period(): '4', '7' or
+   'CAS'; no period answered yet = no Top 5). Ties share a place, so more than five can wear it. A student
+   needs config.top5MinMinutes (10) this week to be ranked at all, so Monday morning is not a giveaway.
+   Each student sees ONLY their own place (Jonathan, 2026-11-04: "just their own rank"): no names, no one
+   else's minutes on screen. weekBoard/{uid} holds { week, period, seconds } — this week's seconds the
+   server confirmed, written by a transaction that only ever RAISES the number inside one week (a page
+   with an older copy never lowers what another page wrote); a new week or a changed period overwrites
+   it. At most one write per WB_MS. The class's docs for this week + period are read with one query
+   (equality filters only: no composite index) and kept WB_KEEP_MS (15 min) in memory and localStorage,
+   so a period of 30 reads about 30 documents per student per 15 minutes on screen. NOT FULLY ANONYMOUS,
+   like the class rank: the doc carries the uid and the period. The teacher's account is never written
+   or ranked. A failed write or read changes nothing about counting; the medal and the tile stay away.
+   HONEST LIMIT: a student at DevTools can write any number up to the rules' week cap for themselves.
+
   EVERYTHING A STUDENT SEES is behind PRACTICE_MINUTES_CONFIG.uiOn and lives
    in the second half of this file (strip, recap, toast, My progress). The first
    half has no DOM beyond the media listeners.
@@ -114,7 +132,8 @@
   var DEFAULTS = {
     uiOn: false, weeklyGoalMinutes: 60, dailyCapMinutes: 20,
     skipWeeks: [], semester2Start: '', streakStartWeek: '',
-    recapMinSeconds: 60, recapGapSeconds: 180, recapShowSeconds: 6, toastSeconds: 3
+    recapMinSeconds: 60, recapGapSeconds: 180, recapShowSeconds: 6, toastSeconds: 3,
+    top5MinMinutes: 10
   };
   function cfg(){
     var c = (typeof PRACTICE_MINUTES_CONFIG !== 'undefined' && PRACTICE_MINUTES_CONFIG) || {};
@@ -236,7 +255,8 @@
     newestGen[uid] = ++stateGen;
     return { uid: uid, gen: stateGen, days: {}, weeks: {}, pend: {}, inflight: null, flushP: null, frac: 0, loaded: false, loading: null, flushing: false,
              loadRetryAt: 0, toastWeek: '', pendingToast: false, lastRecapAt: 0,
-             boardReady: false, boardOwed: 0, boardBusy: false, boardAt: 0, boardRetryAt: 0, boardTimer: 0, board: null, boardLoading: null };
+             boardReady: false, boardOwed: 0, boardBusy: false, boardAt: 0, boardRetryAt: 0, boardTimer: 0, board: null, boardLoading: null,
+             wbSent: '', wbBusy: false, wbAt: 0, wbRetryAt: 0, wbTimer: 0, wb: null, wbLoading: null, wbLoadRetryAt: 0, top5Week: '' };
   }
   function ls(k, v){
     try {
@@ -345,6 +365,7 @@
         var c = lsJson('pm:c:' + u);
         if(c){ S.days = c.days || {}; S.weeks = c.weeks || {}; }
         S.toastWeek = ls('pm:t:' + u) || '';
+        S.top5Week = ls('pm:t5:' + u) || '';
         S.lastRecapAt = 0;
         idToken = ''; idTokenUid = '';
         refreshToken();
@@ -596,6 +617,7 @@
       trimToCap();
       st.loading = null;
       publishBoard(st);
+      publishWeek(st);
       if(!noFlush) flush();
       uiNow();
     }).catch(function(err){
@@ -690,7 +712,7 @@
       st.flushing = false; st.inflight = null;
       if(S !== st) settleAfterSwitch(st, snap, true);
       if(S === st){
-        applyConfirmed(ops); persist(); cacheServer(); uiNow(); refreshToken(); publishBoard(st);
+        applyConfirmed(ops); persist(); cacheServer(); uiNow(); refreshToken(); publishBoard(st); publishWeek(st);
         // Seconds counted while this commit was in flight (a stalled connection) go out now, not at the next Play. Not while still counting: that keeps the 60 s rhythm.
         if(!session && takePending()) setTimeout(function(){ if(S === st) flush(); }, 0);
       }
@@ -840,6 +862,94 @@
     return { n: all < 60 ? null : higher + 1, total: b.others.length + 1 };
   }
 
+  /* ── TOP 5 (see the header): publish this week's number, read my period's, work out my place ── */
+  var WB_MS = 120000, WB_KEEP_MS = 900000, TOP_N = 5;
+  var PERIOD_KEYS = { '4': 'pm.period4', '7': 'pm.period7', 'CAS': 'pm.periodCAS' };
+  /* The student's class period as the host page knows it, or '' (not answered yet, or a value the rules refuse). */
+  function hostPeriod(){
+    var h = getHost(), p = '';
+    try { p = h && typeof h.period === 'function' ? String(h.period() || '') : ''; } catch(e) { p = ''; }
+    return PERIOD_KEYS.hasOwnProperty(p) ? p : '';
+  }
+  /* weekBoard/{uid} = { week, period, seconds }: this week's seconds the server confirmed, as THIS page knows them.
+     A transaction reads the doc first and writes only when the number goes UP inside the same week and period (two
+     pages of one student: the one with the older copy leaves the other's number alone), or the week or period changed.
+     Throttled like publishBoard: one write per WB_MS, a trailing timer for the last one; a refusal backs off. */
+  function publishWeek(st){
+    if(!st || S !== st || !st.loaded || isTeacherUser()) return;
+    var p = hostPeriod();
+    if(!p) return;
+    var w = calc.weekIdOf(today()), secs = (st.weeks[w] && st.weeks[w].seconds) || 0, key = w + '|' + p + '|' + secs;
+    if(!(secs > 0) || key === st.wbSent) return;
+    if(Date.now() < st.wbRetryAt) return;
+    var wait = st.wbBusy ? WB_MS : WB_MS - (Date.now() - st.wbAt);
+    if(wait > 0){
+      if(!st.wbTimer && typeof setTimeout !== 'undefined') st.wbTimer = setTimeout(function(){ st.wbTimer = 0; publishWeek(st); }, wait + 50);
+      return;
+    }
+    st.wbAt = Date.now();
+    st.wbBusy = true;
+    dbP().then(function(db){
+      var ref = db.collection('weekBoard').doc(st.uid);
+      return db.runTransaction(function(t){
+        return t.get(ref).then(function(snap){
+          var d = snap.exists ? (snap.data() || {}) : null;
+          if(d && d.week === w && d.period === p && (+d.seconds || 0) >= secs) return;
+          t.set(ref, { week: w, period: p, seconds: secs });
+        });
+      });
+    }).then(function(){
+      st.wbBusy = false;
+      st.wbSent = key;
+    }, function(err){
+      st.wbBusy = false;
+      st.wbRetryAt = Date.now() + (err && err.code === 'permission-denied' ? DENIED_BACKOFF_MS : LOAD_RETRY_MS);
+    });
+  }
+  /* Everyone else's seconds this week in my period (my own doc is left out: my live total is used instead).
+     Kept WB_KEEP_MS in memory and in localStorage under this student's id. Resolves to the cache, or null. */
+  function loadWeek(){
+    var st = S;
+    if(!st || isTeacherUser()) return Promise.resolve(null);
+    var p = hostPeriod(), w = calc.weekIdOf(today());
+    if(!p) return Promise.resolve(null);
+    var fresh = function(b){ return !!(b && b.week === w && b.period === p && Array.isArray(b.others) && typeof b.at === 'number' && Math.abs(Date.now() - b.at) < WB_KEEP_MS); };
+    if(!fresh(st.wb)){ var c = lsJson('pm:w:' + st.uid); if(fresh(c)) st.wb = c; }
+    if(fresh(st.wb)) return Promise.resolve(st.wb);
+    if(st.wbLoading) return st.wbLoading;
+    if(Date.now() < st.wbLoadRetryAt) return Promise.resolve(null);
+    st.wbLoading = dbP().then(function(db){
+      return db.collection('weekBoard').where('week', '==', w).where('period', '==', p).get();
+    }).then(function(snap){
+      var others = [];
+      snap.forEach(function(doc){ if(doc.id !== st.uid) others.push(Math.max(0, +(doc.data() || {}).seconds || 0)); });
+      st.wb = { at: Date.now(), week: w, period: p, others: others };
+      ls('pm:w:' + st.uid, JSON.stringify(st.wb));
+      return st.wb;
+    }).catch(function(){
+      st.wbLoadRetryAt = Date.now() + LOAD_RETRY_MS;
+      return null;
+    }).then(function(b){ st.wbLoading = null; return b; });
+    return st.wbLoading;
+  }
+  /* My place this week, from my live seconds (weekSecs, counted seconds not yet sent included) and the cached board,
+     or null while it is not known (no period, the board not read yet, the teacher). Whole minutes decide, like the
+     class rank: everyone who reads "12 min" shares a place, and n = 1 + how many have MORE. top = ranked (at least
+     top5MinMinutes) and fewer than TOP_N ahead. need = minutes to catch the fifth place (only when ranked and out). */
+  function top5Info(weekSecs){
+    var st = S, b = st && st.loaded && st.wb;
+    if(!b || isTeacherUser()) return null;
+    var p = hostPeriod(), w = calc.weekIdOf(today());
+    if(!p || b.week !== w || b.period !== p) return null;
+    var min = Math.max(0, Math.round(+cfg().top5MinMinutes || 0)), mine = Math.floor((weekSecs || 0) / 60);
+    var others = b.others.map(function(s){ return Math.floor(s / 60); }).sort(function(a, z){ return z - a; });
+    var higher = 0;
+    others.forEach(function(m){ if(m > mine) higher++; });
+    var top = mine >= min && higher < TOP_N;
+    var need = (!top && mine >= min) ? Math.max(1, others[TOP_N - 1] - mine) : 0;
+    return { top: top, n: higher + 1, under: mine < min, min: min, toRank: Math.max(0, min - mine), need: need, period: p, week: w };
+  }
+
   /* An ID token kept fresh for the unload write (getIdToken is async, and
      pagehide cannot wait for it). It is tied to the student it was issued to:
      a token from the previous student on a shared Chromebook must never be sent
@@ -920,9 +1030,14 @@
        the title, Find, Español and the user area off the one-row top bar. My progress
        shows the true minutes. A week with no class has no goal: minutes only. */
     var weekTxt = w.isBreak ? tr('pm.weekMinBreak', { done: done }) : tr('pm.weekMin', { done: Math.min(done, goal), goal: goal });
-    var flameLabel = streakWords('pm.streak', st.streak);
+    var flameLabel = streakWords('pm.streak', st.streak), t5 = top5Info(w.secs);
     return '<span class="pm-week">' + ringSvg(w.goal && !w.isBreak ? w.secs / w.goal : 0, w.hit) + '<span>' + esc(weekTxt) + '</span></span>'
-      + '<span class="pm-streak' + (w.hit ? ' pm-on' : '') + '" role="img" aria-label="' + esc(flameLabel) + '">' + FLAME + '<b>' + st.streak + '</b></span>';
+      + '<span class="pm-streak' + (w.hit ? ' pm-on' : '') + '" role="img" aria-label="' + esc(flameLabel) + '">' + FLAME + '<b>' + st.streak + '</b></span>'
+      + (t5 && t5.top ? top5Mark('pm-top5-sm', tr('pm.top5Label')) : '');
+  }
+  /* The Top 5 medal: "TOP" over a big "5" (the same in both languages, like a logo); the words are in aria-label. */
+  function top5Mark(cls, label){
+    return '<span class="pm-top5 ' + cls + '" role="img" aria-label="' + esc(label) + '"><span aria-hidden="true">TOP</span><b aria-hidden="true">5</b></span>';
   }
   function stripHtml(){
     if(!uiOn()) return '';
@@ -981,14 +1096,16 @@
   function ensureStripWork(){
     if(!S) return;
     if(!S.loaded && !S.loading) load();
+    loadWeek();
     toastMaybe();
   }
   /* Every second while the strip is up: keep it current, and show a week-goal toast that was held back
      (the strip was covered or the tab hidden when the goal was crossed). */
   function uiTick(){
     if(!stripPresent()) return;
+    if(S && S.loaded && !S.wbLoading && document.visibilityState !== 'hidden') loadWeek();   // a resolved cache while fresh; one query when stale
     refreshStrip();
-    if(document.visibilityState !== 'hidden') toastMaybe();
+    if(document.visibilityState !== 'hidden'){ toastMaybe(); top5ToastMaybe(); }
   }
   function uiNow(){ uiTick(); }
 
@@ -1036,10 +1153,14 @@
     var w = st.pendingToast;
     st.pendingToast = false; st.toastWeek = w; ls('pm:t:' + st.uid, w);
     var s = status();
+    dropToast(bar, '', FLAME + '<span>' + esc(s.streak >= 2 ? tr('pm.toastHit', { n: s.streak }) : tr('pm.toastHit1')) + '</span>');
+  }
+  /* The pill under the strip, shared by the week-goal toast and the Top 5 toast (one id: a new one replaces the old). */
+  function dropToast(bar, cls, inner){
     removeEl('pm-toast');
     var el = document.createElement('div');
-    el.id = 'pm-toast'; el.className = 'pm-toast'; el.setAttribute('role', 'status');
-    el.innerHTML = FLAME + '<span>' + esc(s.streak >= 2 ? tr('pm.toastHit', { n: s.streak }) : tr('pm.toastHit1')) + '</span>';
+    el.id = 'pm-toast'; el.className = 'pm-toast' + (cls ? ' ' + cls : ''); el.setAttribute('role', 'status');
+    el.innerHTML = inner;
     el.style.top = Math.round(bar.bottom + 8) + 'px';
     el.style.left = Math.round(window.innerWidth / 2) + 'px';   // measured from the middle: a strip near the right edge must not squeeze it into a narrow column
     document.body.appendChild(el);
@@ -1049,6 +1170,19 @@
     el.style.left = Math.round(Math.max(8 + half, Math.min(window.innerWidth - 8 - half, cx))) + 'px';
     followStrip(el);
     setTimeout(function(){ el.remove(); }, cfg().toastSeconds * 1000);
+  }
+  /* "Top 5 in 4th period this week!" — once per week, the first time the student is in it with the strip on screen.
+     It waits while the week-goal toast is up (both on one tick: the goal first, this one a few seconds later). */
+  function top5ToastMaybe(){
+    var st = S;
+    if(!st || !uiOn() || st.top5Week === calc.weekIdOf(today())) return;     // already shown this week: nothing to work out
+    var t = top5Info(status().week.secs);
+    if(!t || !t.top || st.top5Week === t.week) return;
+    if(st.pendingToast || document.getElementById('pm-toast')) return;
+    var bar = anchorRect();
+    if(!bar) return;
+    st.top5Week = t.week; ls('pm:t5:' + st.uid, t.week);
+    dropToast(bar, 'pm-toast-top5', top5Mark('pm-top5-lg', tr('pm.top5Label')) + '<span>' + esc(tr('pm.top5Toast', { period: tr(PERIOD_KEYS[t.period]) })) + '</span>');
   }
 
   function recapMaybe(s){
@@ -1097,6 +1231,7 @@
     /* The rank tile needs the board AND the student's own numbers; draw again when the board arrives. */
     var st0 = S;
     loadBoard().then(function(b){ if(b && S === st0) again(); });
+    loadWeek().then(function(b){ if(b && S === st0) again(); });
     host_el.innerHTML = progressHtml();
   }
   /* "N/total" by all-time minutes; nothing at all until the board has been read (or when it cannot be). */
@@ -1106,6 +1241,18 @@
     return '<div class="pm-tile"><div class="pm-tile-h">' + esc(tr('pm.tileRank')) + '</div>'
       + '<div class="pm-tile-row"><b class="pm-today pm-rank">' + esc(tr('pm.tileRankVal', { n: r.n === null ? '–' : r.n, total: r.total })) + '</b></div>'
       + '<div class="pm-tile-sub">' + esc(tr(r.n === null ? 'pm.tileRankNone' : 'pm.tileRankSub')) + '</div></div>';
+  }
+  /* My place in my period's Top 5 this week; nothing until the week board has been read (or when it cannot be). */
+  function top5Tile(weekSecs){
+    var t = top5Info(weekSecs);
+    if(!t) return '';
+    var row, sub;
+    if(t.top){ row = tr('pm.top5You', { n: t.n, period: tr(PERIOD_KEYS[t.period]) }); sub = tr('pm.top5Reset'); }
+    else if(t.under){ row = tr('pm.top5Under', { n: t.min }); sub = tr('pm.top5ToGo', { n: t.toRank }); }
+    else { row = tr('pm.top5Need', { n: t.need }); sub = tr('pm.top5Sub', { period: tr(PERIOD_KEYS[t.period]) }); }
+    return '<div class="pm-tile"><div class="pm-tile-h">' + esc(tr('pm.top5Label')) + '</div>'
+      + '<div class="pm-tile-row">' + top5Mark('pm-top5-md' + (t.top ? '' : ' pm-top5-off'), tr(t.top ? 'pm.top5Label' : 'pm.top5Off')) + '<b>' + esc(row) + '</b></div>'
+      + '<div class="pm-tile-sub">' + esc(sub) + '</div></div>';
   }
   function progressHtml(){
     var c = cfg(), st = status(), w = st.week, d = today();
@@ -1124,6 +1271,7 @@
       +   '<div class="pm-tile-row"><b class="pm-today">' + mins(dayTotal(d)) + '</b><span class="pm-today-u">' + esc(tr('pm.min')) + '</span></div>'
       +   '<div class="pm-tile-sub">' + esc(tr('pm.tileAll', { n: mins(allTimeSeconds()) })) + '</div></div>'
       + rankTile()
+      + top5Tile(w.secs)
       + '</div>';
     /* This week by day: Monday to Sunday for every student. A day with no practice is an
        empty bar, never a miss marker (the goal is for the whole week). */
@@ -1171,7 +1319,8 @@
     flush: flush, load: function(){ return sync() ? load() : Promise.resolve(); },
     status: function(){ return sync() ? status() : null; },
     _session: function(){ return session; }, _play: function(){ return play; },
-    _rank: function(){ return sync() ? rankInfo() : null; }, _loadBoard: function(){ return sync() ? loadBoard() : Promise.resolve(null); },
+    _rank: function(){ return sync() ? rankInfo() : null; },
+    _top5: function(){ return sync() ? top5Info(status().week.secs) : null; }, _loadWeek: function(){ return sync() ? loadWeek() : Promise.resolve(null); }, _loadBoard: function(){ return sync() ? loadBoard() : Promise.resolve(null); },
     _state: function(){ return S; }, _session: function(){ return session; }, _tick: tick, _media: media, _end: endSession, _buildOps: buildOps
   };
 })();

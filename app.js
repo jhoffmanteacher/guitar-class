@@ -192,9 +192,8 @@ let periodOverride = '';   // config/class.periodOverrides[uid] — teacher's co
    The engine is page-agnostic — the Journey pages host it too — so this is the
    whole of what it asks of the main site: who is signed in (never the ?teacher
    console, and only a real Firebase user, so the localhost dev bypass counts
-   nothing), the Firestore handle, and "draw the UI". `period` below is no
-   longer read: the heartbeat that used it was removed 2026-11-04 (the field
-   is left in place). Every callback reads app state when called, so nothing here runs before
+   nothing), the Firestore handle, and "draw the UI". `period` below is read by the Top 5 (2026-11-04): this
+   week's minutes are ranked inside the student's class period. Every callback reads app state when called, so nothing here runs before
    sign-in. practice-minutes.js loads after this file and picks the object up. */
 window.PM_HOST = {
   ui: true,
