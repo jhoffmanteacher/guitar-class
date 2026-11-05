@@ -3951,6 +3951,14 @@ function ccRenderDone(){
   });
   const worst = Object.keys(tally).sort((a, b) => tally[b] - tally[a])[0] || null;
 
+  /* Power Chord Switch hears a strum only when it jumps the level by CC_POWER_* (2026-11-05), so a soft strum, or one without a clear pick sound,
+     shows "no strum heard". When at least two changes went that way and they outnumber the "chord sounded wrong" ones, below 85% right, the
+     headline, the advice and the big button all stop pointing at the tempo: "this speed is too fast" and "Drop 10 BPM" do nothing for a strum
+     that was not heard. The advice says to strum a little firmer; the headline is the plain "N of M changes worked"; the big button is "Again"
+     at the same speed. One miss alone is not enough (it may be a slip), and a game at 85% or better keeps its "Level up". Change Up keeps all
+     of it. */
+  const unheard = total - ok - off;
+  const firmer = ccIsPower() && r < 0.85 && unheard >= 2 && unheard > off;
   let verdict, advice;
   if (r >= 0.85){
     verdict = '&#x1F31F; ' + t('games.cc.verdict.great', { ok, total });
@@ -3971,10 +3979,10 @@ function ccRenderDone(){
   } else if (r >= 0.5){
     const early = t(cc.bpc >= 4 ? 'games.cc.early.bar' : cc.bpc === 2 ? 'games.cc.early.half' : 'games.cc.early.beat');
     verdict = '&#x1F4AA; ' + (off ? t(off === 1 ? 'games.cc.verdict.okMessyOne' : 'games.cc.verdict.okMessy', { ok, total, off }) : t('games.cc.verdict.ok', { ok, total }));
-    advice = worst ? t('games.cc.advice.practiceWorst', { worst, early }) : t('games.cc.advice.tryAgainSteady');
+    advice = firmer ? t('games.pw.advice.firmer') : worst ? t('games.cc.advice.practiceWorst', { worst, early }) : t('games.cc.advice.tryAgainSteady');
   } else {
-    verdict = '&#x1F3B8; ' + t('games.cc.verdict.low', { ok, total });
-    advice = t('games.cc.advice.low');
+    verdict = '&#x1F3B8; ' + t(firmer ? 'games.cc.verdict.ok' : 'games.cc.verdict.low', { ok, total });
+    advice = firmer ? t('games.pw.advice.firmer') : t('games.cc.advice.low');
   }
   const chips = cc.changes.map(c =>
     `<span class="coach-chip ${c.result === 'ok' ? 'ok' : c.result === 'off' ? 'wrong' : 'miss'}">${escHtml(ccChipText(c))}</span>`
@@ -3982,7 +3990,7 @@ function ccRenderDone(){
   /* What the chips mean, in numbers: right, on time but the chord sounded wrong, no strum heard. */
   const nMiss = total - ok - off;
   const breakdown = `<div class="cc-breakdown">${escHtml(t('games.cc.breakdown', { ok, off, miss: nMiss }))}</div>`;
-  const rec = r >= 0.85 ? 'up' : r >= 0.5 ? 'same' : 'down';
+  const rec = firmer ? 'same' : r >= 0.85 ? 'up' : r >= 0.5 ? 'same' : 'down';
   /* A song switch: how each round went, at its own tempo. */
   const rounds = cc.ladder ? '<div class="cc-rounds">' + cc.stageLog.map((sg, k) =>
     `<span>${escHtml(t('games.pw.ladder.roundResult', { n: k + 1, bpm: sg.bpm, ok: sg.changes.filter(c => c.result === 'ok').length, total: sg.changes.length }))}</span>`).join('') + '</div>' : '';

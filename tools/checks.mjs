@@ -11851,6 +11851,46 @@ function checkCoachVerdicts() {
     for (const line of ['const onsetRatio = ccIsPower() ? CC_POWER_ONSET_RATIO : CHK_ONSET_RATIO;', 'const hfRatio = ccIsPower() ? CC_POWER_HF_RATIO : CHK_HF_RATIO;'])
       if (!ccLoopSrc.includes(line)) flag(`1ck: ccLoop no longer chooses its strum ratios with exactly "${line}" (the game alone must decide; re-pin on purpose)`);
     if (full.saves.length === 1 && (full.saves[0].fields.onsetRatio !== R.pw || full.saves[0].fields.hfRatio !== R.pwHf)) flag(`1ck: the saved take records strum ratios ${full.saves[0].fields.onsetRatio} / ${full.saves[0].fields.hfRatio}, want ${R.pw} / ${R.pwHf}`);
+    /* The "strum a little firmer" hint (2026-11-05). Power Chord Switch hears a strum only above its own, stricter ratios, so a soft strum shows "no strum
+       heard", and "Drop 10 BPM and try again" (what the done screen said below half right, whatever the cause) cannot help it. The real done screen is
+       rendered in both languages: the hint replaces the tempo advice when at least two changes went unheard and they outnumber the "chord sounded wrong"
+       ones, below 85% right, in Power Chord Switch only; a single miss, a tie, mostly wrong chords, a game at 85% or better and Change Up keep what they had. */
+    song.hintChecks = 0;
+    const doneText = (mode, lang, results) => {
+      const [f, g] = mode === 'power' ? ['F5', 'G5'] : ['C', 'G'];
+      run(`micRec = null; setLang(${JSON.stringify(lang)}); ccSetup(${JSON.stringify(mode)}); ccPickRate(2); ccPickProg(1); ccPrepare(false); ccBeginStage(); cc.phase = 'play';
+        cc.changes = ${JSON.stringify(results.map((r, i) => ({ from: i % 2 ? g : f, to: i % 2 ? f : g, result: r })))}; ccRenderDone();`);
+      return { txt: text('cc-body'), big: (/class="coach-start" onclick="ccAgain\((-?\d+)\)"/.exec(bodies['cc-body'] || '') || [])[1] };
+    };
+    const times = (n, r) => Array(n).fill(r);
+    const WORDS = { en: { hint: 'Strum a little firmer, and keep the guitar close to the mic', low: 'Drop 10 BPM and try again', fast: 'this speed is too fast for now', up: 'Level up: try it 10 BPM faster' },
+      es: { hint: 'Rasguea un poco más fuerte y mantén la guitarra cerca del micrófono', low: 'Baja 10 BPM e inténtalo de nuevo', fast: 'esta velocidad es demasiado rápida por ahora', up: 'Sube de nivel: pruébalo 10 BPM más rápido' } };
+    // [game, results, shows the hint, shows "Drop 10 BPM", the highlighted big button (ccAgain's argument: -10, 0 or 10), why]
+    const hintCases = [
+      ['power', [...times(4, 'ok'), ...times(12, 'miss')], true, false, '0', '4 right, 12 not heard'],
+      ['power', [...times(10, 'ok'), ...times(6, 'miss')], true, false, '0', '10 right, 6 not heard (between half and 85%)'],
+      ['power', times(16, 'miss'), true, false, '0', 'nothing heard'],
+      ['power', [...times(4, 'ok'), ...times(2, 'miss'), ...times(10, 'off')], false, true, '-10', '2 not heard but 10 wrong chords'],
+      ['power', [...times(5, 'ok'), ...times(5, 'miss'), ...times(5, 'off')], false, true, '-10', 'not heard ties wrong chords'],
+      ['power', [...times(10, 'ok'), 'miss', ...times(5, 'off')], false, false, '0', 'a single miss among wrong chords'],
+      ['power', [...times(3, 'ok'), 'miss'], false, false, '0', 'one miss and nothing else wrong'],
+      ['power', [...times(14, 'ok'), ...times(2, 'miss')], false, false, '10', '14 of 16 right'],
+      ['power', times(16, 'ok'), false, false, '10', 'all right'],
+      ['open', [...times(4, 'ok'), ...times(12, 'miss')], false, true, '-10', 'Change Up keeps its advice and its button']];
+    for (const lang of ['en', 'es']) {
+      const W = WORDS[lang];
+      for (const [mode, results, wantHint, wantLow, wantBig, why] of hintCases) {
+        const { txt: raw, big } = doneText(mode, lang, results), txt = raw.replace(/\s+/g, ' ');
+        const gotHint = txt.includes(W.hint), gotLow = txt.includes(W.low);
+        if (gotHint !== wantHint || gotLow !== wantLow) flag(`1ck (${lang}): the ${mode === 'power' ? 'Power Chord Switch' : 'Change Up'} done screen after "${why}" shows the firmer hint: ${gotHint} (want ${wantHint}), "${W.low}": ${gotLow} (want ${wantLow})`);
+        if (wantHint && gotLow) flag(`1ck (${lang}): "${why}" shows both the hint and the tempo advice`);
+        // the headline agrees with the advice: "this speed is too fast" is said exactly when "Drop 10 BPM" is
+        if (txt.includes(W.fast) !== wantLow) flag(`1ck (${lang}): the ${mode === 'power' ? 'Power Chord Switch' : 'Change Up'} done screen after "${why}" says "${W.fast}": ${txt.includes(W.fast)}, want ${wantLow} (it must agree with the tempo advice)`);
+        if (big !== wantBig) flag(`1ck (${lang}): the ${mode === 'power' ? 'Power Chord Switch' : 'Change Up'} done screen after "${why}" highlights the button ccAgain(${big}), want ccAgain(${wantBig})`);
+        song.hintChecks++;
+      }
+    }
+    run("setLang('en');");
     /* Save on Stop (2026-11-04): a Stopped game with enough audio is saved, marked complete:false; one with almost none is dropped,
        because each student has ONE take per game and a new take overwrites it. */
     run('globalThis.__recSec = 20;');
@@ -11942,7 +11982,7 @@ function checkCoachVerdicts() {
     if (pk !== 'ccBest:F5-G5:beat') flag(`1ck: a pair's best-score key changed to "${pk}" (a student's saved bests would be lost)`);
     const pairPlan = JSON.parse(run(`JSON.stringify(ccRoundPlan(CC_POWER_PROGRESSIONS[1], CC_POWER_PROGRESSIONS[1].chords, CC_RATES[1]))`));
     if (pairPlan.slots !== 12 || pairPlan.ladder || pairPlan.rounds !== 1) flag(`1ck: a pair's round changed (${pairPlan.slots} slots at "Every 2 beats", expected 12, one round)`);
-    const SONG_PIN = { recChecks: 19, readingChecks: 21, ratioChecks: 165, songs: 2, entries: 16, cardSwitches: 16, hints: 16 * 7 * 2, setups: 16 * 3 * 2, dones: 16 * 2, rounds: 16 * 3, nudges: 16 * 2 };
+    const SONG_PIN = { recChecks: 19, readingChecks: 21, ratioChecks: 165, hintChecks: 20, songs: 2, entries: 16, cardSwitches: 16, hints: 16 * 7 * 2, setups: 16 * 3 * 2, dones: 16 * 2, rounds: 16 * 3, nudges: 16 * 2 };
     for (const [k, n] of Object.entries(SONG_PIN)) if (song[k] !== n) flag(`1ck: ${song[k]} ${k}, pinned ${n} — the check went partly blind (or grew: re-pin on purpose)`);
     songCounts = song;
     run(`setLang('en'); cc = null; ccStop();`);
@@ -11951,7 +11991,7 @@ function checkCoachVerdicts() {
   for (const [k, n] of Object.entries(EXPECT)) {
     if (counts[k] !== n) flag(`1ca: rendered ${counts[k]} ${k}, pinned ${n} — the check went partly blind (or grew: re-pin EXPECT on purpose)`);
   }
-  if (bad === 0 && songCounts) { head('1ck. Power Chord Switch song switches: each activity is checked against its card and the three rounds are run'); ok(`${songCounts.songs} songs, ${songCounts.entries} switch activities (${songCounts.cardSwitches} distinct card switches, each once; Sweet Child's open A5 only next to C5/B5/E5, the fret-5 A5 only next to G5, same pitches as A5); the ladder run for every one (${songCounts.rounds} round changes: 60/75/90 BPM, 21 changes, the BPM buttons ${songCounts.nudges} times: only later rounds, 40..140, off in the last); ${songCounts.hints} "next:" hints (EN+ES) match the diagrams, ${songCounts.setups} setup and ${songCounts.dones} done screens never show the key "A5o", the computer never picks a song, best keys are per switch and the pair keys are unchanged; a saved take carries each change's pitch readings (${songCounts.readingChecks} of 21 changes read back: no strum null, strum with no pitch [], four readings rounded; grading unchanged); the real ccLoop run on scripted frames: Power Chord Switch grades a strum with its own ratios (2.2 / 2.67) and Change Up with the shared ones (1.4 / 1.7) — ${songCounts.ratioChecks} runs just below and above every threshold: Change Up as a pair and as the computer's pick at three speeds, and Power Chord Switch as a song switch (all three rounds), a pair and the computer's pick at three speeds, with a recording live and without; the two lines that choose the ratios are pinned by text; and the saved take records the ratios`); }
+  if (bad === 0 && songCounts) { head('1ck. Power Chord Switch song switches: each activity is checked against its card and the three rounds are run'); ok(`${songCounts.songs} songs, ${songCounts.entries} switch activities (${songCounts.cardSwitches} distinct card switches, each once; Sweet Child's open A5 only next to C5/B5/E5, the fret-5 A5 only next to G5, same pitches as A5); the ladder run for every one (${songCounts.rounds} round changes: 60/75/90 BPM, 21 changes, the BPM buttons ${songCounts.nudges} times: only later rounds, 40..140, off in the last); ${songCounts.hints} "next:" hints (EN+ES) match the diagrams, ${songCounts.setups} setup and ${songCounts.dones} done screens never show the key "A5o", the computer never picks a song, best keys are per switch and the pair keys are unchanged; a saved take carries each change's pitch readings (${songCounts.readingChecks} of 21 changes read back: no strum null, strum with no pitch [], four readings rounded; grading unchanged); the real ccLoop run on scripted frames: Power Chord Switch grades a strum with its own ratios (2.2 / 2.67) and Change Up with the shared ones (1.4 / 1.7) — ${songCounts.ratioChecks} runs just below and above every threshold: Change Up as a pair and as the computer's pick at three speeds, and Power Chord Switch as a song switch (all three rounds), a pair and the computer's pick at three speeds, with a recording live and without; the two lines that choose the ratios are pinned by text; and the saved take records the ratios; the done screen's "strum a little firmer" hint shows exactly when it is true (${songCounts.hintChecks} renders, EN + ES: nothing heard, many heard, a single miss, a tie, mostly wrong chords, 85% and better, Change Up)`); }
   if (bad === 0) ok(`${counts.reports} Coach reports, ${counts.descs} chord-card descriptions, ${counts.nrLevels} Note Runner levels ×2 and ${counts.doneScreens} arcade done screens read true; Power Chord Switch: ${counts.pwLoops} loops are three-finger shapes in the right group, ${counts.pwDraws} random draws all listed pairs (11 of 11 and both orders seen), the Again button replays the pair and Start draws, Start sticks in Change Up and not in Power Chord Switch (two columns that fit 657px), Every beat is the first speed button there, the live quiz keeps its 760px shell, ${counts.pwHints} slide hints match the diagrams (EN+ES), ${counts.pwViews} screens/rounds, ${counts.pwMemory} remembered tempo/speed pairs and ${counts.pwGates} pitch gates keep it apart from Change Up`);
 }
 

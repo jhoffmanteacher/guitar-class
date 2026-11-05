@@ -8,6 +8,7 @@ see `WORKFLOW.md` and the git commit log.
 ## 2026-11-05 — Power Chord Switch: noise in the room counts less
 
 - **In Power Chord Switch, a noise in the room has to be much louder to count.** Before, a voice, a bump, a chair, or the last chord still ringing could count as a right change when you had not strummed. Most of those no longer count. A very soft strum, or one without a clear pick sound, can now show "no strum heard": strum a little firmer and keep the guitar close to the mic. Change Up and the other mic games are not changed.
+- **When several strums were not heard, the end screen now says so.** In Power Chord Switch, if at least two changes show "no strum heard" and they outnumber the changes where the chord sounded wrong, the end screen shows "Some strums were not heard. Strum a little firmer, and keep the guitar close to the mic." instead of "Drop 10 BPM and try again". The headline reads "N of M changes worked" instead of "this speed is too fast for now", and the big button is "Again" at the same speed. One missed strum, or a game with mostly wrong chords, keeps the old advice. Change Up is not changed.
 
 ## 2026-11-05 — New activity: Call the Chord
 

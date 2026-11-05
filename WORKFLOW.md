@@ -3729,10 +3729,16 @@ noisy rooms.
   1.8 / 2.19 37% (the replay on the 12 real takes: 1.8 removes 14 of 52 false hits and loses 1 real strum, 2.2 removes
   30 and loses 4; 2.0 was not replayed). So the strums that can now be missed are soft ones and ones without a clear
   pick attack (a thumb or a finger). The 12 real takes put that at 4 of 132; they do not cover the cases under "To
-  watch" in "Where things stand". The game's own words do not help a student whose strums are missed: below half
-  right the done screen says "Drop 10 BPM and try again" (`games.cc.advice.low`) whatever the cause, and the
-  "strum a little firmer" advice exists only in the CHANGELOG. A Power Chord Switch hint for that case would be a
-  new English + Spanish string pair: Jonathan's call, not made.
+  watch" in "Where things stand". The game says so in its own words (2026-11-05, Jonathan asked for it): on the Power Chord Switch done
+  screen, when at least two changes show "no strum heard" and they outnumber the "chord sounded wrong" ones, below 85% right,
+  the advice is `games.pw.advice.firmer` ("Some strums were not heard. Strum a little firmer, and keep the guitar close to the
+  mic." / "No se oyeron algunos rasgueos. Rasguea un poco más fuerte y mantén la guitarra cerca del micrófono."), the headline
+  is the plain `games.cc.verdict.ok` ("N of M changes worked") instead of "this speed is too fast for now", and the big
+  button is "Again" at the same speed instead of "-10 BPM". It replaces the line in place (same height, one line at 1366x657,
+  both languages, pairs and the 21-change song switch). One miss alone, a tie, mostly wrong chords, 85% and better, and
+  Change Up keep what they had. The condition is decided once, before the headline (`firmer` in `ccRenderDone`). Check 1ck
+  renders the real done screen in both languages for ten situations (20 renders: headline, advice and highlighted button);
+  twelve deliberate breaks each turned it red.
 - **Checks:** 1ck runs the real `ccLoop` on scripted frames just below and above every threshold, in Change Up (a
   pair and the computer's pick, three speeds) and in Power Chord Switch (a song switch in all three rounds, a pair and
   the computer's pick, three speeds, with a recording live and without; 165 runs), pins the two lines that choose the

@@ -1762,6 +1762,8 @@
       es: 'Sube de nivel: pruébalo 10 BPM más rápido.' },
     'games.cc.advice.low': { en: 'Drop 10 BPM and try again.',
       es: 'Baja 10 BPM e inténtalo de nuevo.' },
+    'games.pw.advice.firmer': { en: 'Some strums were not heard. Strum a little firmer, and keep the guitar close to the mic.',
+      es: 'No se oyeron algunos rasgueos. Rasguea un poco más fuerte y mantén la guitarra cerca del micrófono.' },
     'games.cc.advice.practiceWorst': { en: 'Practice just {worst} on its own — {early}.',
       es: 'Practica solo {worst} por separado — {early}.' },
     'games.cc.advice.tryAgainSteady': { en: 'Try it again at this speed until it feels steady.',
