@@ -3504,6 +3504,17 @@ and, until the new rules are published, any signed-in user can list them.
   block and the index to stay gone, exactly one `match /databases/{database}/documents`
   wrapper, and no shipped page or script naming a `heartbeats` collection. Old `heartbeats`
   documents and the console's `heartbeats` index can be deleted once the new rules are published.
+- **STILL TO DO (Jonathan, on a machine with Java 21): run the Firestore emulator test
+  `tools/pm-rules-test.mjs` once against the new `firestore.rules`.** It has never run since
+  step 2 (2026-11-05): no Java on the Windows machine, so neither the session nor the
+  `site-reviewer-deep` review could run it. Steps are in the header of that file (an empty
+  scratch folder OUTSIDE the repo, `npm i firebase-tools @firebase/rules-unit-testing
+  firebase@10.12.2`, a `firebase.json` with the Firestore emulator on port 8089, then
+  `npx firebase emulators:exec --only firestore --project demo-gc "node pm-rules-test.mjs firestore.rules"`).
+  Expect `0 failed`; the pass count will be below the old 66 (the heartbeats section is gone). Two tests
+  are new and unproven: `heartbeats/{id} is gone: a signed-in write is refused` and `…a signed-in
+  read of the collection is refused`. If either fails, the block is not really gone from the rules the
+  emulator loaded. When it passes, put the new count in the header's "Last run:" line and delete this item.
 - **Always Reviewed the same day** (`site-reviewer-deep`; it edits the counting
   half, `pm-sim` and `firestore.rules`). Proof: `pm-sim` and `pm-e2e` pass, the
   1cg pins broken in a scratch copy go red, a play session counts and flushes
