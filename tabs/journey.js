@@ -19,13 +19,15 @@ window.PM_HOST = {
   user: function(){ return (fbUser && fbDb && typeof firebase !== 'undefined') ? firebase.auth().currentUser : null; },
   db: function(){ return fbDb; },
   period: function(){
+    var known = false;
     try {
       var c = JSON.parse(localStorage.getItem('caPeriodOverride') || 'null');
-      if(c && fbUser && c.uid === fbUser.uid && c.v) return c.v;
+      if(c && fbUser && c.uid === fbUser.uid){ if(c.v) return c.v; known = true; }
     } catch(e) {}
-    /* Only the answer read for THIS student: a Journey tab left open across a
-       shared-Chromebook switch must not hand the next student the last one's. */
-    return (fbUser && pmDocPeriodUid === fbUser.uid) ? pmDocPeriod : '';
+    /* The student's own answer counts only once THIS device has read their teacher's override (the main page stores it for every student,
+       empty or not): a device that has not, answering 7 where the main page says 4, would flip the Top 5 doc's period back and forth.
+       Only the answer read for THIS student: a Journey tab left open across a shared-Chromebook switch must not hand the next student the last one's. */
+    return (known && fbUser && pmDocPeriodUid === fbUser.uid) ? pmDocPeriod : '';
   }
 };
 /* A rating clicked before Firebase auth resolved — flush it as soon as

@@ -4500,7 +4500,7 @@ body.lq-invite-open{overflow:hidden}
 .pm-recap-x:hover{background:var(--bg3)}
 @media (prefers-reduced-motion:reduce){.pm-toast,.pm-recap{animation:none}}
 /* Top 5 (2026-11-04): a round medal, "TOP" over a big "5". --rank (lavender) means "Top 5" and nothing else:
-   yellow stays the week-goal moment's alone. On --pm-surface / --pm-tile it measures about 7.5 / 6.6 : 1.
+   yellow stays the week-goal moment's alone. On --pm-surface / --pm-tile / the medal's own #0b0d12 it measures 7.56 / 6.47 / 8.53 : 1 (all pass AA).
    -sm sits in the strip, -lg in the toast, -md on the My progress tile; -off is the dashed "not yet" medal. */
 .pm-top5{display:inline-flex;flex-direction:column;align-items:center;justify-content:center;flex-shrink:0;
   box-sizing:border-box;border-radius:50%;background:#0b0d12;color:var(--rank);border:2px solid var(--rank);

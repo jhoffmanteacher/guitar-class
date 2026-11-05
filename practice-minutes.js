@@ -43,7 +43,8 @@
      minutes/{uid}/days/{YYYY-MM-DD}  { seconds }                 (capped per day)
      minutes/{uid}/weeks/{YYYY-Www}   { seconds, goalSeconds, hit }
       minutesBoard/{uid}               { seconds }                 (the class rank; see CLASS RANK)
-      weekBoard/{uid}                  { week, period, seconds }   (this week's Top 5; see TOP 5)
+      weekBoard/{tag}                  { week, period, seconds }   (this week's Top 5, keyed by a private random tag, not the uid; see TOP 5)
+      minutes/{uid}/meta/board         { id }                      (the tag: create-only, owner-only)
   Nothing else: no heartbeat, no live count (see NO LIVE COUNT below).
    Seconds are kept whole; the display floors to whole minutes. They are added
    with increment(), so two tabs or two devices never overwrite each other.
@@ -111,15 +112,22 @@
    'CAS'; no period answered yet = no Top 5). Ties share a place, so more than five can wear it. A student
    needs config.top5MinMinutes (10) this week to be ranked at all, so Monday morning is not a giveaway.
    Each student sees ONLY their own place (Jonathan, 2026-11-04: "just their own rank"): no names, no one
-   else's minutes on screen. weekBoard/{uid} holds { week, period, seconds } — this week's seconds the
-   server confirmed, written by a transaction that only ever RAISES the number inside one week (a page
-   with an older copy never lowers what another page wrote); a new week or a changed period overwrites
-   it. At most one write per WB_MS. The class's docs for this week + period are read with one query
+   else's minutes on screen. weekBoard/{tag} holds { week, period, seconds } — keyed by the student's PRIVATE random
+   name tag (minutes/{uid}/meta/board, see boardTag()), never the uid: Jonathan, 2026-11-04, wants no per-period minutes
+   tied to a name, readable by anyone, and the live quiz keeps names under uids. This week's total as the
+   SERVER holds it (the transaction reads minutes/{uid}/weeks/{week}, which every page of the student adds
+   to, so a Journey tab opened in a new tab does not publish a smaller copy), written by a transaction that
+   only ever RAISES the number inside one week + period (a page with an older copy never lowers what another
+   page wrote); a new week or a changed period overwrites it. At most one write per WB_MS. The class's docs for this week + period are read with one query
    (equality filters only: no composite index) and kept WB_KEEP_MS (15 min) in memory and localStorage,
    so a period of 30 reads about 30 documents per student per 15 minutes on screen. NOT FULLY ANONYMOUS,
    like the class rank: the doc carries the uid and the period. The teacher's account is never written
    or ranked. A failed write or read changes nothing about counting; the medal and the tile stay away.
-   HONEST LIMIT: a student at DevTools can write any number up to the rules' week cap for themselves.
+   HONEST LIMITS: a student at DevTools can write any number up to the rules' week cap for themselves (and
+   choose their period). A device whose clock is a week BEHIND replaces the doc with its own week when it loads, and
+   a clock AHEAD writes a week the real clock cannot overwrite until it arrives; both heal at the next confirmed
+   write from a correct clock and are accepted (school Chromebooks keep time; the guard that fixes one breaks the
+   other). Offline, a plain query get() answers EMPTY from the cache, so every read here asks the server.
 
   EVERYTHING A STUDENT SEES is behind PRACTICE_MINUTES_CONFIG.uiOn and lives
    in the second half of this file (strip, recap, toast, My progress). The first
@@ -256,7 +264,7 @@
     return { uid: uid, gen: stateGen, days: {}, weeks: {}, pend: {}, inflight: null, flushP: null, frac: 0, loaded: false, loading: null, flushing: false,
              loadRetryAt: 0, toastWeek: '', pendingToast: false, lastRecapAt: 0,
              boardReady: false, boardOwed: 0, boardBusy: false, boardAt: 0, boardRetryAt: 0, boardTimer: 0, board: null, boardLoading: null,
-             wbSent: '', wbBusy: false, wbAt: 0, wbRetryAt: 0, wbTimer: 0, wb: null, wbLoading: null, wbLoadRetryAt: 0, top5Week: '' };
+             wbSent: '', wbBusy: false, wbAt: 0, wbRetryAt: 0, wbTimer: 0, wb: null, wbLoading: null, wbLoadRetryAt: 0, top5Week: '', tag: '', tagP: null, tagRetryAt: 0 };
   }
   function ls(k, v){
     try {
@@ -602,9 +610,12 @@
       Object.keys(held).forEach(function(d){ if(d < from) from = d; });
       return dbP().then(function(db){
         var base = db.collection('minutes').doc(st.uid);
+        /* source 'server': offline, a plain get() RESOLVES with an EMPTY answer from the cache (the real SDK, 10.12.2, measured offline and with
+           firestore.googleapis.com blocked), which this would take for "no minutes yet": week 0, streak 0, the saved copy overwritten, and no
+           second read once the Wi-Fi is back. A server read rejects instead, and the catch below tries again later. */
         return Promise.all([
-          base.collection('weeks').get(),
-          base.collection('days').where(firebase.firestore.FieldPath.documentId(), '>=', from).get()
+          base.collection('weeks').get({ source: 'server' }),
+          base.collection('days').where(firebase.firestore.FieldPath.documentId(), '>=', from).get({ source: 'server' })
         ]);
       });
     }).then(function(r){
@@ -841,7 +852,7 @@
     }
     if(st.board && Math.abs(Date.now() - st.board.at) < BOARD_KEEP_MS) return Promise.resolve(st.board);
     if(st.boardLoading) return st.boardLoading;
-    st.boardLoading = dbP().then(function(db){ return db.collection('minutesBoard').get(); }).then(function(snap){
+    st.boardLoading = dbP().then(function(db){ return db.collection('minutesBoard').get({ source: 'server' }); }).then(function(snap){   // server: an offline plain get() answers empty and the rank tile would vanish for 3 hours
       var others = [];
       snap.forEach(function(doc){ if(doc.id !== st.uid) others.push(Math.max(0, +(doc.data() || {}).seconds || 0)); });
       st.board = { at: Date.now(), others: others };
@@ -871,7 +882,56 @@
     try { p = h && typeof h.period === 'function' ? String(h.period() || '') : ''; } catch(e) { p = ''; }
     return PERIOD_KEYS.hasOwnProperty(p) ? p : '';
   }
-  /* weekBoard/{uid} = { week, period, seconds }: this week's seconds the server confirmed, as THIS page knows them.
+  /* The student's private Top 5 NAME TAG: 32 random hex characters, made once by the student's own page and kept in
+     minutes/{uid}/meta/board { id } (create-only; only the student reads it) and in localStorage pm:i:<uid>. The
+     weekBoard's docs are keyed by it, never by the uid, so nothing readable by other accounts joins a name (the live quiz
+     keeps names under uids) to a period and minutes. Resolves to the tag, or '' (offline, refused, no crypto): then
+     nothing is read or written for the Top 5. create = make it when the student has none yet. */
+  var TAG_RE = /^[0-9a-f]{32}$/;
+  function randomTag(){
+    try {
+      var c = typeof window !== 'undefined' && window.crypto;
+      if(!c || typeof c.getRandomValues !== 'function') return '';
+      var a = new Uint8Array(16), out = '';
+      c.getRandomValues(a);
+      for(var i = 0; i < a.length; i++) out += (a[i] < 16 ? '0' : '') + a[i].toString(16);
+      return TAG_RE.test(out) ? out : '';
+    } catch(e) { return ''; }
+  }
+  function boardTag(create){
+    var st = S;
+    if(!st) return Promise.resolve('');
+    if(TAG_RE.test(st.tag)) return Promise.resolve(st.tag);
+    var c = ls('pm:i:' + st.uid);
+    if(c && TAG_RE.test(c)){ st.tag = c; return Promise.resolve(c); }
+    if(st.tagP) return st.tagP;
+    if(Date.now() < st.tagRetryAt) return Promise.reject({ code: 'permission-denied' });   // refused a moment ago (rules not published): the writer and the reader share ONE wait
+    st.tagP = dbP().then(function(db){
+      var ref = db.collection('minutes').doc(st.uid).collection('meta').doc('board');
+      /* A transaction: two pages of one student opening at once must end up with ONE tag (the second sees the first's). */
+      return db.runTransaction(function(t){
+        return t.get(ref).then(function(snap){
+          var have = snap.exists ? String((snap.data() || {}).id || '') : '';
+          if(TAG_RE.test(have)) return have;
+          if(!create) return '';
+          var id = randomTag();
+          if(!id) return '';
+          t.set(ref, { id: id });
+          return id;
+        });
+      });
+    }).then(function(id){
+      st.tagP = null;
+      if(S === st && TAG_RE.test(id)){ st.tag = id; ls('pm:i:' + st.uid, id); return id; }
+      return '';
+    }, function(err){
+      st.tagP = null;
+      if(err && err.code === 'permission-denied') st.tagRetryAt = Date.now() + DENIED_BACKOFF_MS;
+      throw err;     // the caller's own catch decides its wait
+    });
+    return st.tagP;
+  }
+  /* weekBoard/{tag} = { week, period, seconds }: this week's total, as the SERVER holds it (see the header).
      A transaction reads the doc first and writes only when the number goes UP inside the same week and period (two
      pages of one student: the one with the older copy leaves the other's number alone), or the week or period changed.
      Throttled like publishBoard: one write per WB_MS, a trailing timer for the last one; a refusal backs off. */
@@ -889,13 +949,20 @@
     }
     st.wbAt = Date.now();
     st.wbBusy = true;
-    dbP().then(function(db){
-      var ref = db.collection('weekBoard').doc(st.uid);
+    boardTag(true).then(function(tag){
+      if(!tag) throw { code: 'unavailable' };
+      return dbP().then(function(db){ return { db: db, tag: tag }; });
+    }).then(function(x){
+      var db = x.db, ref = db.collection('weekBoard').doc(x.tag), wref = db.collection('minutes').doc(st.uid).collection('weeks').doc(w);
       return db.runTransaction(function(t){
-        return t.get(ref).then(function(snap){
-          var d = snap.exists ? (snap.data() || {}) : null;
-          if(d && d.week === w && d.period === p && (+d.seconds || 0) >= secs) return;
-          t.set(ref, { week: w, period: p, seconds: secs });
+        return Promise.all([t.get(ref), t.get(wref)]).then(function(r){
+          var d = r[0].exists ? (r[0].data() || {}) : null;
+          /* What goes out is the week total the SERVER holds (every page of this student adds to it), not this page's own copy: a Journey tab
+             opened in a new tab never re-reads its week, so its copy misses what the main tab counted. At least this page's confirmed seconds. */
+          var sv = r[1].exists ? Math.max(0, Math.round(+(r[1].data() || {}).seconds || 0)) : 0;
+          var n = Math.min(Math.max(secs, sv), 7 * Math.round(+cfg().dailyCapMinutes * 60));
+          if(d && d.week === w && d.period === p && (+d.seconds || 0) >= n) return;
+          t.set(ref, { week: w, period: p, seconds: n });
         });
       });
     }).then(function(){
@@ -904,9 +971,10 @@
     }, function(err){
       st.wbBusy = false;
       st.wbRetryAt = Date.now() + (err && err.code === 'permission-denied' ? DENIED_BACKOFF_MS : LOAD_RETRY_MS);
+      if(err && err.code === 'permission-denied'){ st.tag = ''; ls('pm:i:' + st.uid, null); }   // the saved tag may be stale (the student's data was reset): read it again next time
     });
   }
-  /* Everyone else's seconds this week in my period (my own doc is left out: my live total is used instead).
+  /* Everyone else's seconds this week in my period (my own doc is left out, by my tag: my live total is used instead).
      Kept WB_KEEP_MS in memory and in localStorage under this student's id. Resolves to the cache, or null. */
   function loadWeek(){
     var st = S;
@@ -918,16 +986,21 @@
     if(fresh(st.wb)) return Promise.resolve(st.wb);
     if(st.wbLoading) return st.wbLoading;
     if(Date.now() < st.wbLoadRetryAt) return Promise.resolve(null);
-    st.wbLoading = dbP().then(function(db){
-      return db.collection('weekBoard').where('week', '==', w).where('period', '==', p).get();
-    }).then(function(snap){
-      var others = [];
-      snap.forEach(function(doc){ if(doc.id !== st.uid) others.push(Math.max(0, +(doc.data() || {}).seconds || 0)); });
+    st.wbLoading = boardTag(true).then(function(tag){
+      if(!tag) throw { code: 'unavailable' };     // no tag yet (offline, refused): my own doc cannot be told from the others', so read nothing
+      return dbP().then(function(db){
+        /* source 'server': offline, a plain query get() RESOLVES with an empty answer from the cache (the real SDK, 10.12.2), which would read as "nobody else
+           has minutes" and show a false Top 5; a server read rejects instead. */
+        return db.collection('weekBoard').where('week', '==', w).where('period', '==', p).get({ source: 'server' });
+      }).then(function(snap){ return { snap: snap, tag: tag }; });
+    }).then(function(x){
+      var snap = x.snap, others = [];
+      snap.forEach(function(doc){ if(doc.id !== x.tag) others.push(Math.max(0, +(doc.data() || {}).seconds || 0)); });
       st.wb = { at: Date.now(), week: w, period: p, others: others };
       ls('pm:w:' + st.uid, JSON.stringify(st.wb));
       return st.wb;
-    }).catch(function(){
-      st.wbLoadRetryAt = Date.now() + LOAD_RETRY_MS;
+    }).catch(function(err){
+      st.wbLoadRetryAt = Date.now() + (err && err.code === 'permission-denied' ? DENIED_BACKOFF_MS : LOAD_RETRY_MS);   // rules not published yet: ask every 5 minutes, not every 30 s
       return null;
     }).then(function(b){
       st.wbLoading = null;
@@ -1004,7 +1077,8 @@
   if(typeof window !== 'undefined'){
     window.addEventListener('pagehide', function(){ leavingPage = true; if(S){ keepaliveFlush(); persist(); } });
     window.addEventListener('pageshow', function(e){ if(e && e.persisted){ leavingPage = false; if(S) persist(); } });
-    window.addEventListener('online', function(){ if(sync()){ if(!S.loaded) load(); else flush(); } });
+    /* A reconnect is a reason to try now: an offline load is refused (source 'server') and waits LOAD_RETRY_MS, which would hold the queue back after the Wi-Fi returns. */
+    window.addEventListener('online', function(){ if(sync()){ S.wbLoadRetryAt = 0; if(!S.loaded){ S.loadRetryAt = 0; load(); } else flush(); } });
   }
 
   /* ════════════════════════════════════════════════════════════════════
@@ -1180,7 +1254,7 @@
     followStrip(el);
     setTimeout(function(){ el.remove(); }, cfg().toastSeconds * 1000);
   }
-  /* "Top 5 in 4th period this week!" — once per week, the first time the student is in it with the strip on screen.
+  /* "Top 5 in Period 4 this week!" — once per week, the first time the student is in it with the strip on screen.
      It waits while the week-goal toast is up (both on one tick: the goal first, this one a few seconds later). */
   function top5ToastMaybe(){
     var st = S;
@@ -1329,7 +1403,7 @@
     status: function(){ return sync() ? status() : null; },
     _session: function(){ return session; }, _play: function(){ return play; },
     _rank: function(){ return sync() ? rankInfo() : null; },
-    _top5: function(){ return sync() ? top5Info(status().week.secs) : null; }, _loadWeek: function(){ return sync() ? loadWeek() : Promise.resolve(null); }, _loadBoard: function(){ return sync() ? loadBoard() : Promise.resolve(null); },
+    _top5: function(){ return sync() ? top5Info(status().week.secs) : null; }, _publishWeek: function(){ if(sync()) publishWeek(S); }, _loadWeek: function(){ return sync() ? loadWeek() : Promise.resolve(null); }, _loadBoard: function(){ return sync() ? loadBoard() : Promise.resolve(null); },
     _state: function(){ return S; }, _session: function(){ return session; }, _tick: tick, _media: media, _end: endSession, _buildOps: buildOps
   };
 })();

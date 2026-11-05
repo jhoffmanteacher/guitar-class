@@ -11840,7 +11840,7 @@ async function checkPwTakeEvaluator() {
    The browser half (strip, recap, toast, My progress, 1366×657, both languages,
    a real <audio>) is tools/pm-e2e.mjs — it needs Chrome, so it is run by hand.
    ════════════════════════════════════════════════════════════════════ */
-const PM_SIM_PIN = 238;
+const PM_SIM_PIN = 268;
 function checkPracticeMinutes(i18nTable) {
   head('1cg. Practice minutes: the engine is run; the rules cap, no heartbeat, wiring and strings are pinned');
   let bad = 0;
@@ -11936,10 +11936,18 @@ function checkPracticeMinutes(i18nTable) {
       if (!/allow create, update:\s*if pmOwner\(userId\)/.test(board)) fail('minutesBoard rule: create/update must be owner-only (pmOwner(userId))');
       if (!/hasOnly\(\['seconds'\]\)/.test(board) || !/seconds is number/.test(board) || !/seconds >= 0/.test(board) || !/seconds <= 400 \* dailyCapSeconds\(\)/.test(board)) fail("minutesBoard rule must be { seconds } only, a number from 0 to 400 * dailyCapSeconds()");
     }
-    /* The Top 5 board (2026-11-04): pinned WHOLE like minutesBoard. A change here is a change Jonathan must re-paste. */
-    const WB_SHIPPED = "match /weekBoard/{userId} { allow read: if isSignedIn(); allow create, update: if pmOwner(userId) && request.resource.data.keys().hasOnly(['week', 'period', 'seconds']) && request.resource.data.keys().hasAll(['week', 'period', 'seconds']) && request.resource.data.week is string && request.resource.data.week.matches('^[0-9]{4}-W[0-9]{2}$') && request.resource.data.period in ['4', '7', 'CAS'] && request.resource.data.seconds is number && request.resource.data.seconds >= 0 && request.resource.data.seconds <= 7 * dailyCapSeconds(); }";
+    /* The Top 5 board (2026-11-04, redesigned the same day: Jonathan wants NO per-period minutes tied to a name, readable by anyone): two blocks,
+       pinned WHOLE like minutesBoard. The board's docs are keyed by a private random tag, never a uid; the tag lives only in the student's own
+       owner-only doc minutes/{uid}/meta/board, and a write to the board must be to the doc whose id is the writer's own tag. A change to either
+       block is a change Jonathan must re-paste. */
+    const TAG_SHIPPED = "match /minutes/{userId}/meta/board { allow create: if pmOwner(userId) && request.resource.data.keys().hasOnly(['id']) && request.resource.data.id is string && request.resource.data.id.matches('^[0-9a-f]{32}$'); }";
+    const WB_SHIPPED = "match /weekBoard/{tag} { allow read: if isSignedIn(); allow create, update: if isSignedIn() && tag == get(/databases/$(database)/documents/minutes/$(request.auth.uid)/meta/board).data.id && request.resource.data.keys().hasOnly(['week', 'period', 'seconds']) && request.resource.data.keys().hasAll(['week', 'period', 'seconds']) && request.resource.data.week is string && request.resource.data.week.matches('^[0-9]{4}-W[0-9]{2}$') && request.resource.data.period in ['4', '7', 'CAS'] && request.resource.data.seconds is number && request.resource.data.seconds >= 0 && request.resource.data.seconds <= 7 * dailyCapSeconds(); }";
+    const tagMatches = (strip(rules).match(/match\s+\/minutes\/\{userId\}\/meta\b/g) || []).length;
+    const tagBlock = block('minutes/{userId}/meta/board');
+    if (tagMatches !== 1 || !tagBlock) fail(`firestore.rules has ${tagMatches} match blocks for minutes/{userId}/meta (exactly one is allowed: the Top 5 name tag, create-only)`);
+    else if (tagBlock.replace(/\s+/g, ' ').trim() !== TAG_SHIPPED) fail('firestore.rules: the minutes/{userId}/meta/board block differs from the one shipped. If this is on purpose, change TAG_SHIPPED here with it and tell Jonathan to paste the rules again');
     const wbMatches = (strip(rules).match(/match\s+\/weekBoard\b/g) || []).length;
-    const wboard = block('weekBoard/{userId}');
+    const wboard = block('weekBoard/{tag}');
     if (wbMatches !== 1 || !wboard) fail(`firestore.rules has ${wbMatches} match blocks for /weekBoard (exactly one is allowed; practice-minutes.js reads and writes it for the Top 5)`);
     else if (wboard.replace(/\s+/g, ' ').trim() !== WB_SHIPPED) fail('firestore.rules: the weekBoard block differs from the one shipped. If this is on purpose, change WB_SHIPPED here with it and tell Jonathan to paste the rules again');
     /* Only for the change that INTRODUCES the blocks: while HEAD's rules do not

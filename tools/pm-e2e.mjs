@@ -100,7 +100,7 @@ await ev(`(async () => { for (const r of await navigator.serviceWorker.getRegist
 /* An in-page student and Firestore. The engine's host is replaced; everything
    else (the wrapped play(), the tick, the strip, the pills, the page) is real. */
 await ev(`(() => {
-  window.__fs = { days: {}, weeks: {}, commits: [], hb: [], board: {}, boardDenied: false, wb: {}, wbWrites: [], wbDenied: false };
+  window.__fs = { days: {}, weeks: {}, commits: [], hb: [], board: {}, boardDenied: false, wb: {}, wbWrites: [], wbDenied: false, meta: undefined };
   const inc = (n) => ({ __inc: n });
   const col = (kind) => ({
     get: () => Promise.resolve({ forEach: (fn) => Object.keys(window.__fs[kind]).forEach((k) => fn({ id: k, data: () => window.__fs[kind][k] })) }),
@@ -114,8 +114,10 @@ await ev(`(() => {
   const op_eq = (f, d) => f[1] === '==' && d[f[0]] === f[2];
   const wbCol = { where: (a, op, b) => wbQuery([[a, op, b]]), doc: (i) => ({ path: 'weekBoard/' + i }) };
   const runTransaction = (fn) => { if (window.__fs.wbDenied) return Promise.reject(Object.assign(new Error('denied'), { code: 'permission-denied' }));
-    const writes = []; const tx = { get: (r) => { const d = window.__fs.wb[r.path.split('/')[1]]; return Promise.resolve({ exists: d !== undefined, data: () => d }); }, set: (r, d) => { writes.push([r.path.split('/')[1], d]); return tx; } };
-    return Promise.resolve(fn(tx)).then(() => { writes.forEach(([i, d]) => { window.__fs.wb[i] = Object.assign({}, d); window.__fs.wbWrites.push({ id: i, d: Object.assign({}, d) }); }); }); };
+    /* The rules: the tag doc (minutes/{uid}/meta/board) is create-only; a board doc may be written only under the writer's own tag. */
+    const writes = []; const tx = { get: (r) => { const [k, i] = r.path.split('/'); const d = k === 'weeks' ? window.__fs.weeks[i] : k === 'meta' ? window.__fs.meta : window.__fs.wb[i]; return Promise.resolve({ exists: d !== undefined, data: () => d }); }, set: (r, d) => { writes.push([r.path.split('/'), d]); return tx; } };
+    return Promise.resolve(fn(tx)).then((out) => { writes.forEach(([[k, i], d]) => { if (k === 'meta') { if (window.__fs.meta) throw Object.assign(new Error('create-only'), { code: 'permission-denied' }); window.__fs.meta = Object.assign({}, d); }
+      else { if (!window.__fs.meta || window.__fs.meta.id !== i) throw Object.assign(new Error('not your tag'), { code: 'permission-denied' }); window.__fs.wb[i] = Object.assign({}, d); window.__fs.wbWrites.push({ id: i, d: Object.assign({}, d) }); } }); return out; }); };
   const db = { runTransaction, collection: (c) => c === 'weekBoard' ? wbCol : c === 'minutesBoard' ? board : ({ doc: (uid) => ({ collection: (k) => { const o = col(k); const d = o.doc; o.doc = (i) => ({ path: k + '/' + i }); return o; } }), doc: (i) => ({ set: (d) => { window.__fs.hb.push({ id: i, d }); return Promise.resolve(); } }) }) ,
     batch: () => { const ops = []; return { set: (r, d) => ops.push([r.path, d]), commit: () => { ops.forEach(([p, d]) => { const [k, i] = p.split('/'); const cur = window.__fs[k][i] || {}; window.__fs[k][i] = Object.assign({}, cur, d, { seconds: (cur.seconds || 0) + d.seconds.__inc }); }); window.__fs.commits.push(ops.length); return Promise.resolve(); } }; } };
   window.__who = 'e2e-student';   // the signed-in student's uid; null = nobody (the tests below sign out and switch students)
@@ -556,13 +558,16 @@ await sleep(3500);
 await ev(`devBypass()`); await sleep(3500);
 await ev(`(async () => { for (const r of await navigator.serviceWorker.getRegistrations()) await r.unregister(); for (const k of await caches.keys()) await caches.delete(k); })()`);
 await ev(`(() => {
-  window.__fs = { days: {}, weeks: {}, commits: [], hb: [], board: {}, boardDenied: false, wb: {}, wbWrites: [], wbDenied: false };
+  window.__fs = { days: {}, weeks: {}, commits: [], hb: [], board: {}, boardDenied: false, wb: {}, wbWrites: [], wbDenied: false, meta: undefined };
   const op_eq = (f, d) => f[1] === '==' && d[f[0]] === f[2];
   const wbQuery = (fl) => ({ where: (a, op, b) => wbQuery(fl.concat([[a, op, b]])), get: () => window.__fs.wbDenied ? Promise.reject(Object.assign(new Error('denied'), { code: 'permission-denied' }))
     : Promise.resolve({ forEach: (fn) => Object.keys(window.__fs.wb).filter((k) => fl.every((f) => op_eq(f, window.__fs.wb[k]))).forEach((k) => fn({ id: k, data: () => window.__fs.wb[k] })) }) });
   const wbCol = { where: (a, op, b) => wbQuery([[a, op, b]]), doc: (i) => ({ path: 'weekBoard/' + i }) };
-  const runTransaction = (fn) => { const writes = []; const tx = { get: (r) => { const d = window.__fs.wb[r.path.split('/')[1]]; return Promise.resolve({ exists: d !== undefined, data: () => d }); }, set: (r, d) => { writes.push([r.path.split('/')[1], d]); return tx; } };
-    return Promise.resolve(fn(tx)).then(() => { writes.forEach(([i, d]) => { window.__fs.wb[i] = Object.assign({}, d); window.__fs.wbWrites.push({ id: i, d: Object.assign({}, d) }); }); }); };
+  const runTransaction = (fn) => { if (window.__fs.wbDenied) return Promise.reject(Object.assign(new Error('denied'), { code: 'permission-denied' }));
+    /* The rules: the tag doc (minutes/{uid}/meta/board) is create-only; a board doc may be written only under the writer's own tag. */
+    const writes = []; const tx = { get: (r) => { const [k, i] = r.path.split('/'); const d = k === 'weeks' ? window.__fs.weeks[i] : k === 'meta' ? window.__fs.meta : window.__fs.wb[i]; return Promise.resolve({ exists: d !== undefined, data: () => d }); }, set: (r, d) => { writes.push([r.path.split('/'), d]); return tx; } };
+    return Promise.resolve(fn(tx)).then((out) => { writes.forEach(([[k, i], d]) => { if (k === 'meta') { if (window.__fs.meta) throw Object.assign(new Error('create-only'), { code: 'permission-denied' }); window.__fs.meta = Object.assign({}, d); }
+      else { if (!window.__fs.meta || window.__fs.meta.id !== i) throw Object.assign(new Error('not your tag'), { code: 'permission-denied' }); window.__fs.wb[i] = Object.assign({}, d); window.__fs.wbWrites.push({ id: i, d: Object.assign({}, d) }); } }); return out; }); };
   const sub = (kind) => ({ get: () => Promise.resolve({ forEach: (fn) => Object.keys(window.__fs[kind]).forEach((k) => fn({ id: k, data: () => window.__fs[kind][k] })) }),
     where: () => ({ get: () => Promise.resolve({ forEach: (fn) => Object.keys(window.__fs.days).forEach((k) => fn({ id: k, data: () => window.__fs.days[k] })) }) }), doc: (i) => ({ path: kind + '/' + i }) });
   /* minutesBoard: 20 other students, so the Class rank tile is there and My progress has FIVE tiles. */
@@ -578,15 +583,16 @@ await ev(`(() => {
   return true; })()`);
 const wk5 = await ev(`PM.calc.weekIdOf(PM.calc.ymd(new Date()))`);
 /* One scenario: my minutes, the minutes of the others in period 4, and (optionally) a student of period 7 who must not count. */
-const t5Scenario = (mine, others) => ev(`(() => {
-  const w = ${JSON.stringify(wk5)}, f = window.__fs; f.wb = {}; f.wbWrites = []; f.wbDenied = false;
+const TAGE = '0123456789abcdef0123456789abcdef';   // the student's private Top 5 name tag (32 hex), for scenarios that start with one made
+const t5Scenario = (mine, others, fresh = false) => ev(`(() => {
+  const w = ${JSON.stringify(wk5)}, f = window.__fs; f.wb = {}; f.wbWrites = []; f.wbDenied = false; f.meta = ${fresh} ? undefined : { id: ${JSON.stringify(TAGE)} };
   ${JSON.stringify(others)}.forEach((m, i) => { f.wb['o' + i] = { week: w, period: '4', seconds: m * 60 }; });
   f.wb['far7'] = { week: w, period: '7', seconds: 999 * 60 }; f.wb['old4'] = { week: PM.calc.weekAdd(w, -1), period: '4', seconds: 999 * 60 };
   f.weeks = {}; f.days = {}; f.weeks[w] = { seconds: ${mine} * 60, goalSeconds: 3600, hit: ${mine} >= 60 };
   PM.status(); const s = PM._state(); s.weeks = {}; s.days = {}; s.pend = {}; s.weeks[w] = { seconds: ${mine} * 60, goalSeconds: 3600, hit: ${mine} >= 60 }; s.loaded = true;
   s.wb = null; s.wbLoading = null; s.wbLoadRetryAt = 0; s.wbSent = ''; s.wbAt = 0; s.wbRetryAt = 0; s.top5Week = ''; s.toastWeek = ''; s.pendingToast = false;
-  s.board = null; s.boardLoading = null;
-  ['pm:w:', 'pm:t5:', 'pm:t:', 'pm:b:'].forEach((k) => { try { localStorage.removeItem(k + 'e2e-student'); } catch (e) {} });
+  s.board = null; s.boardLoading = null; s.tag = ''; s.tagP = null; s.tagRetryAt = 0;
+  ['pm:w:', 'pm:t5:', 'pm:t:', 'pm:b:', 'pm:i:'].forEach((k) => { try { localStorage.removeItem(k + 'e2e-student'); } catch (e) {} });
   document.getElementById('pm-toast') && document.getElementById('pm-toast').remove(); return true; })()`);
 const medalInfo = (id) => ev(`(() => { const h = document.getElementById(${JSON.stringify(id)}), m = h && h.querySelector('.pm-top5'); if (!m) return null; const r = m.getBoundingClientRect(), hr = h.getBoundingClientRect(), cs = getComputedStyle(m);
   return { w: Math.round(r.width), h: Math.round(r.height), font: cs.fontFamily, color: cs.color, label: m.getAttribute('aria-label'), stripH: Math.round(hr.height), after: [...h.children].map((c) => c.className.split(' ')[0]) }; })()`);
@@ -598,7 +604,7 @@ await t5Scenario(15, [20, 15, 15, 10, 9]);
 await ev(`PM.syncHeader(true)`);
 await waitFor(`!!document.getElementById('pm-toast')`, 15000); await sleep(400);
 const toastIn = await ev(`(() => { const t = document.getElementById('pm-toast'); if (!t) return null; const r = t.getBoundingClientRect(), h = document.getElementById('pm-header').getBoundingClientRect(); return { text: t.innerText.replace(/\\s+/g, ' ').trim(), top: Math.round(r.top), headerBottom: Math.round(h.bottom), inside: r.left >= 0 && r.right <= innerWidth, medal: !!t.querySelector('.pm-top5-lg'), bg: getComputedStyle(t).backgroundColor }; })()`);
-check('in the Top 5: one toast drops under the header strip: the medal and "Top 5 in 4th period this week!"', toastIn && toastIn.text === 'TOP 5 Top 5 in 4th period this week!' && toastIn.medal && toastIn.top >= toastIn.headerBottom && toastIn.inside, toastIn);
+check('in the Top 5: one toast drops under the header strip: the medal and "Top 5 in Period 4 this week!"', toastIn && toastIn.text === 'TOP 5 Top 5 in Period 4 this week!' && toastIn.medal && toastIn.top >= toastIn.headerBottom && toastIn.inside, toastIn);
 await shot('11-top5-toast-en');
 await sleep(3400);
 check('…the toast leaves after about 3 s and is remembered for the week (pm:t5)', await ev(`!document.getElementById('pm-toast') && PM._state().top5Week === ${JSON.stringify(wk5)} && localStorage.getItem('pm:t5:e2e-student') === ${JSON.stringify(wk5)}`));
@@ -642,9 +648,9 @@ const tile = () => ev(`(() => { const t = [...document.querySelectorAll('#pm-pro
     overflow: document.documentElement.scrollWidth > document.documentElement.clientWidth, rowFits: last ? [...last.querySelectorAll('.pm-tile-row b, .pm-tile-sub')].every((e) => e.scrollWidth <= e.clientWidth + 1) : false }; })()`);
 const openProgress = async () => { await ev(`setLang('en'); location.hash = '#my-progress'`); await sleep(500); };
 const states = [
-  ['in', 15, [20, 15, 15, 10, 9], { en: 'Top 5 this week TOP 5 #2 in 4th period Starts over every Monday', es: 'Top 5 de la semana TOP 5 #2 en 4.º periodo Empieza de nuevo cada lunes', off: false }],
-  ['out', 15, [20, 20, 20, 20, 20, 15], { en: 'Top 5 this week TOP 5 5 more min to Top 5 4th period, this week', es: 'Top 5 de la semana TOP 5 5 min más para el Top 5 4.º periodo, esta semana', off: true }],
-  ['under', 4, [20, 15], { en: 'Top 5 this week TOP 5 Play 10 min to get ranked 6 to go', es: 'Top 5 de la semana TOP 5 Toca 10 min para tener un lugar Faltan 6', off: true }],
+  ['in', 15, [20, 15, 15, 10, 9], { en: 'Top 5 this week TOP 5 #2 in Period 4 Starts over every Monday', es: 'Top 5 de la semana TOP 5 #2 en Periodo 4 Empieza de nuevo cada lunes', off: false }],
+  ['out', 15, [20, 20, 20, 20, 20, 15], { en: 'Top 5 this week TOP 5 5 more min to Top 5 Period 4, this week', es: 'Top 5 de la semana TOP 5 5 min más para el Top 5 Periodo 4, esta semana', off: true }],
+  ['under', 4, [20, 15], { en: 'Top 5 this week TOP 5 Practice 10 min to get ranked 6 min to go', es: 'Top 5 de la semana TOP 5 Practica 10 min para tener un lugar Faltan 6 min', off: true }],
 ];
 for (const [name, mine, others, want] of states) {
   for (const lang of ['en', 'es']) {
@@ -663,10 +669,13 @@ await t5Scenario(15, [20, 20, 20, 20, 20, 15]); await ev(`renderMyProgress()`); 
 const outCol = await ev(`(() => { const m = document.querySelector('#pm-progress .pm-top5'), cs = getComputedStyle(m); return { color: cs.color, style: cs.borderTopStyle, border: cs.borderTopColor }; })()`);
 check('the tile medal is lavender and solid when in (44 px), grey and dashed when out', inCol.color === 'rgb(183, 156, 255)' && inCol.style === 'solid' && inCol.w === 44 && outCol.style === 'dashed' && outCol.color !== 'rgb(183, 156, 255)', { inCol, outCol });
 /* What the student's page wrote: this week's seconds for period 4 under their uid, nothing else. */
-await t5Scenario(15, [20]);
+await t5Scenario(15, [20], true);
 await ev(`(() => { const s = PM._state(); s.loaded = false; s.loading = null; s.wbSent = ''; s.wbAt = 0; return PM.load(); })()`); await sleep(1500);
-const wrote = await ev(`window.__fs.wbWrites`);
-check('the student\'s own page wrote weekBoard/e2e-student = { week, period "4", seconds 900 } through the transaction', wrote.length === 1 && wrote[0].id === 'e2e-student' && wrote[0].d.week === wk5 && wrote[0].d.period === '4' && wrote[0].d.seconds === 900 && Object.keys(wrote[0].d).length === 3, wrote);
+const wrote = await ev(`({ writes: window.__fs.wbWrites, meta: window.__fs.meta, docs: Object.keys(window.__fs.wb), ls: localStorage.getItem('pm:i:e2e-student') })`);
+check('a student with no tag yet: the page makes ONE private tag (32 hex, kept as minutes/{uid}/meta/board { id } and in pm:i:<uid>) and writes the board under it: { week, period "4", seconds 900 }',
+  wrote.writes.length === 1 && /^[0-9a-f]{32}$/.test(wrote.writes[0].id) && wrote.meta && wrote.meta.id === wrote.writes[0].id && Object.keys(wrote.meta).join() === 'id' && wrote.ls === wrote.meta.id
+  && wrote.writes[0].d.week === wk5 && wrote.writes[0].d.period === '4' && wrote.writes[0].d.seconds === 900 && Object.keys(wrote.writes[0].d).length === 3, wrote);
+check('the board holds NO name: no doc id, no field and nothing the page wrote contains the uid ("e2e-student")', !/e2e-student/.test(JSON.stringify({ docs: wrote.docs, writes: wrote.writes })), wrote);
 /* Rules not published: the board cannot be read; no medal, no tile, no toast, no error on the page. */
 await t5Scenario(15, [20]); await ev(`window.__fs.wbDenied = true; PM.syncHeader(true); renderMyProgress(); location.hash = '#my-progress'`); await sleep(1500);
 const den = await ev(`({ tiles: document.querySelectorAll('#pm-progress .pm-tile').length, medal: !!document.querySelector('.pm-top5'), toast: !!document.getElementById('pm-toast') })`);

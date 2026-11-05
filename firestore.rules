@@ -378,22 +378,50 @@ service cloud.firestore {
     }
 
     /* ── TOP 5 (2026-11-04; practice-minutes.js, "TOP 5") ────────────────
-       weekBoard/{uid}  { week, period, seconds } — the student's practice
-       seconds for ONE ISO week ('2026-W45') and their class period, so the
-       site can tell a student whether they are in their period's Top 5 this
-       week. Every signed-in student reads the collection (the site queries
-       one week + one period); only that uid writes its own doc, with exactly
-       those three fields: a week id, a period the site knows, and a number
-       from 0 to seven days of the daily cap. A new week overwrites last
-       week's doc (one doc per student, ever). No delete. What it exposes: a
-       uid, a period and a number — no name; the same live-quiz caveat as
-       minutesBoard above applies. The screen shows each student only their
-       own place. HONEST LIMIT: a student at DevTools can write any number up
-       to the cap for themselves; nothing reads this for a grade.
+       Jonathan, 2026-11-04: no per-period minutes tied to a name, readable by
+       anyone. So the Top 5 board has NO uid and no name in it.
+
+       minutes/{uid}/meta/board  { id } — the student's private name tag: 32
+       random hex characters the student's own page makes once. Create-only
+       (never changed, never deleted), and only this student (or the teacher,
+       who reads like anyone) can read it: the existing minutes/{uid}/** read
+       rule above is owner-only. It is the ONLY link between a person and
+       their tag.
+
+       weekBoard/{tag}  { week, period, seconds } — the practice seconds of
+       ONE ISO week ('2026-W45') for the student who holds that tag, and their
+       class period, so the site can tell a student whether they are in their
+       period's Top 5 this week. Every signed-in account reads the collection
+       (the site queries one week + one period). A write is allowed only when
+       the doc id IS the writer's own tag (the rule reads the writer's
+       minutes/{uid}/meta/board), with exactly those three fields: a week id,
+       a period the site knows, and a number from 0 to seven days of the daily
+       cap. A new week overwrites last week's doc (one doc per student, ever).
+       No delete.
+
+       What a reader sees: a random tag, a period, a week and a number. No
+       uid, no name, no email. The live quiz keeps names under uids, but a uid
+       cannot be turned into a tag: that link exists only in the student's own
+       private doc. NOT PROVABLY ANONYMOUS: someone who watches this
+       collection and minutesBoard (which IS keyed by uid) with listeners could
+       match the two by the moment each changes. Closing that means keying
+       minutesBoard by the tag too, or a server that does the ranking.
+       HONEST LIMITS: a student at DevTools can write any number up to the cap
+       for themselves and place themselves in any period or week, and, since a
+       tag cannot be proven unique, could claim another student's tag from the
+       public list and overwrite that one doc (raise it to the cap: the same
+       as inventing a student of their own); nothing reads this for a grade.
        ⚠ Must be published BEFORE (or with) the site code that writes it. */
-    match /weekBoard/{userId} {
+    match /minutes/{userId}/meta/board {
+      allow create: if pmOwner(userId)
+            && request.resource.data.keys().hasOnly(['id'])
+            && request.resource.data.id is string
+            && request.resource.data.id.matches('^[0-9a-f]{32}$');
+    }
+    match /weekBoard/{tag} {
       allow read: if isSignedIn();
-      allow create, update: if pmOwner(userId)
+      allow create, update: if isSignedIn()
+            && tag == get(/databases/$(database)/documents/minutes/$(request.auth.uid)/meta/board).data.id
             && request.resource.data.keys().hasOnly(['week', 'period', 'seconds'])
             && request.resource.data.keys().hasAll(['week', 'period', 'seconds'])
             && request.resource.data.week is string

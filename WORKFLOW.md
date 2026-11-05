@@ -1010,6 +1010,17 @@
 
 ## Recently shipped (post-archive)
 
+- [x] **2026-11-04 — Practice minutes: Top 5 of the week, by class period (needs a `firestore.rules` paste).**
+      A "TOP 5" medal in the strip, a once-a-week toast and a fifth My progress tile for the students with the most minutes THIS ISO week inside
+      their own class period; ties share a place; 10 minutes needed (`top5MinMinutes`); each student sees only their own place.
+      **Standing rule from Jonathan (2026-11-04): no per-period minutes tied to a name, readable by anyone.** The live quiz keeps names under uids
+      (`liveQuiz/current.scores`, read by every signed-in account), so the board is NOT keyed by uid: `weekBoard/{tag}` holds `{week, period, seconds}`
+      under a private random 32-hex tag that lives only in the student's own owner-only, create-only doc `minutes/{uid}/meta/board` (+ `pm:i:<uid>`).
+      A board write is allowed only under the writer's own tag (the rule reads that doc). Both blocks are pinned whole in checks.mjs 1cg
+      (`TAG_SHIPPED`, `WB_SHIPPED`). Read from the SERVER only (`get({source:'server'})`): offline, a plain get() answers empty from the cache
+      (measured on the real SDK), which also bit `load()` and `loadBoard()` and is fixed there. Not provably anonymous: `minutesBoard` is still
+      keyed by uid, so a coder watching both collections could match them by update time; closing that needs `minutesBoard` keyed by the tag too,
+      or a server (Cloud Function) doing the ranking. Accepted limits are in the rules comment. Tests: pm-sim sections 14-16, pm-e2e "top 5".
 - [x] **2026-11-01 — Practice minutes (student view only; display switched ON the same day: `uiOn: true`, `streakStartWeek: '2026-W45'`, goal 30; 60 since 2026-11-04).**
       Counts seconds of real backing-track playback and shows a weekly goal, a
       week streak and "N playing". Counting and writing ship LIVE; nothing is
