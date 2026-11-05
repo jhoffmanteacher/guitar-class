@@ -4,7 +4,7 @@
    the repo deliberately does not carry.
 
    It tries every allow and deny in the minutes/{uid}/days|weeks blocks (the daily
-   cap, the exact field lists, a client-chosen timestamp, another student, the
+   cap, the exact field lists, another student, the
    teacher, signed out, delete, a bad id) and then re-checks one rule on each
    OLDER path to show they still behave. Last run: 66 passed, 0 failed (before the heartbeats
    section was removed 2026-11-05; it needs Java, so it has not been re-run since).
@@ -80,7 +80,7 @@ if (which.includes('orig')) {
   await t('signed out cannot read', () => day(N, 'uidA', '2026-11-16').get(), false);
   await t('nothing else under minutes is writable (minutes/uidA/other/x)', () => A.doc('minutes/uidA/other/x').set({ seconds: 1 }), false);
   await t('nor the parent doc minutes/uidA', () => A.doc('minutes/uidA').set({ seconds: 1 }), false);
-  await t('heartbeats/{id} is gone: no write, no read (the block was deleted 2026-11-05)', async () => { await A.doc('heartbeats/a1b2c3d4e5f60718293a4b5c').set({ period: '7', lastSeen: FV.serverTimestamp() }); }, false);
+  await t('heartbeats/{id} is gone: a signed-in write is refused (the block was deleted 2026-11-05)', async () => { await A.doc('heartbeats/a1b2c3d4e5f60718293a4b5c').set({ period: '7', lastSeen: FV.serverTimestamp() }); }, false);
   await t('…and a signed-in read of the collection is refused', () => B.collection('heartbeats').get(), false);
 }
 console.log('== existing rules still behave (baseline checks on every older path)');

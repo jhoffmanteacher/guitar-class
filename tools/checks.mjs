@@ -12038,7 +12038,26 @@ function checkPracticeMinutes(i18nTable) {
        heartbeats, so both must stay GONE: a rule on a collection nothing uses would go unseen. */
     const hbMatches = (strip(rules).match(/match\s+\/heartbeats\b/g) || []).length;
     if (hbMatches) fail('firestore.rules: a heartbeats block is back — it was deleted 2026-11-05 (step 2 of the heartbeat removal) and nothing writes or reads heartbeats');
-    if (/"collectionGroup"\s*:\s*"heartbeats"/.test(read('firestore.indexes.json') || '')) fail('firestore.indexes.json: the heartbeats index is back — it was deleted 2026-11-05');
+    /* Exactly one wrapper: a full-path match (`match /databases/{database}/documents/heartbeats/{id}`, or a `/{c}/{d}` catch-all) written
+       directly in the service would slip past the two `match /…` patterns here and the wildcard pin below (2026-11-05 review). */
+    const wrappers = strip(rules).match(/match\s+\/databases(?:\/(?:\{[^}]*\}|[^\s\/{]+))*/g) || [];
+    if (wrappers.length !== 1 || wrappers[0].replace(/\s+/g, ' ').trim() !== 'match /databases/{database}/documents') fail('firestore.rules: there must be exactly one `match /databases/{database}/documents` wrapper (a full-path match skips the heartbeats and catch-all pins)');
+    /* The index file is parsed, not grepped: a unicode escape, a broken file or a missing one must not pass. */
+    try {
+      const ix = JSON.parse(read('firestore.indexes.json') || '');
+      if (!Array.isArray(ix.indexes) || !Array.isArray(ix.fieldOverrides)) fail('firestore.indexes.json must keep `indexes` and `fieldOverrides` as arrays');
+      else if ([...ix.indexes, ...ix.fieldOverrides].some(x => x && x.collectionGroup === 'heartbeats')) fail('firestore.indexes.json: the heartbeats index is back — it was deleted 2026-11-05');
+    } catch (e) { fail(`firestore.indexes.json is missing or not valid JSON: ${e.message}`); }
+    /* No shipped page or script may name the collection: once the rules are published, a surviving writer or reader is refused with no
+       error shown. Comments are stripped; the pattern wants a quote or slash right before the word, so the singular prose "heartbeat" in
+       module-11.js / mood-chart.html does not match. practice-minutes.js has its own, wider ban above. */
+    {
+      const shipped = [...readdirSync(ROOT).filter(f => /\.(js|html)$/.test(f)), ...(existsSync(join(ROOT, 'tabs')) ? readdirSync(join(ROOT, 'tabs')).filter(f => /\.(js|html)$/.test(f)).map(f => `tabs/${f}`) : [])];
+      for (const f of shipped) {
+        const code = (read(f) || '').replace(/\/\*[\s\S]*?\*\//g, '').replace(/<!--[\s\S]*?-->/g, '').replace(/^\s*\/\/.*$/gm, '');
+        if (/['"`\/]heartbeats\b/.test(code)) fail(`${f} names a heartbeats collection: it was deleted from the rules 2026-11-05, so a read or write there is refused with no error shown`);
+      }
+    }
     const mins = block('minutes/{userId}/{document=**}'), days = block('minutes/{userId}/days/{day}'), weeks = block('minutes/{userId}/weeks/{week}');
     if (!mins || !days || !weeks) fail('firestore.rules: the three minutes/{userId} blocks (tree read, days, weeks) must all be present');
     else {

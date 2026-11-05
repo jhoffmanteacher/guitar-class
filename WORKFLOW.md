@@ -172,9 +172,8 @@
     (written by 70ef823, about 10:33–11:36 on 2026-11-01) and removes it; another
     student's key, even one whose uid starts with this one's, is left alone. A rare
     double is fine (counting is liberal). Red on the old engine in pm-sim.
-  - [ ] PD-6: with the "N playing" item, Spanish + Stop + Opcional squeezes the
-    card name in the bar to ~55px ("La…"). Appears only once the heartbeats
-    index exists.
+  - [x] PD-6 (closed 2026-11-05: "N playing" and the heartbeats index are gone, so
+    the squeeze cannot appear).
   - [ ] The bar's flame is orange only when this week is hit; My progress's flame
     whenever the streak is above 0 — pick one.
   - [x] Impossible tips — DONE 2026-11-02: `weekReach()` (practice-minutes.js):
@@ -208,8 +207,8 @@
     week of 2026-11-23. Not a site bug — make its dates fixed.
   - [ ] `tools/smoke.mjs` draws no practice-minutes UI (dev bypass has no host
     user), and `tools/pm-rules-test.mjs` needs the emulator (not run from the
-    cloud). The heartbeats composite index must exist in the console or "N
-    playing" stays hidden (harmless).
+    cloud). (The old note about the heartbeats composite index is void: "N
+    playing" and the index were removed 2026-11-05.)
 
 - [ ] **2026-11-01 — Friday check (Fast commits `a615925`..`65898ce`): one
   small tidy-up left.** `site-reviewer` found no student-visible bug at 1366×657.
@@ -1257,7 +1256,9 @@
       2026-11-04); a page that closes within 2 minutes of its last confirmed seconds
       leaves them off the board; pm-e2e's fake `minutes` collection has a duplicate `doc`
       key (since 70ef823) so the e2e never runs the board WRITE, only the read and the tile.
-      *Open item, Jonathan's call: remove the heartbeat.* "N playing" was
+      *[DONE: step 1 on 2026-11-04 (5144c6c, edb60e6, 3d87f7d); step 2's repo edits on
+      2026-11-05; only Jonathan's console paste is left. Do not redo the steps below; the
+      text is kept as history.]* *Open item, Jonathan's call: remove the heartbeat.* "N playing" was
       dropped from the screen, but the engine still writes a `heartbeats/{sessionId}`
       record (`{ period, lastSeen }`) about every 30 s while audio plays, and nothing reads
       it. Why remove it: writes for nothing, dead code in the counting half, and the
@@ -3487,22 +3488,22 @@ requires both to stay gone. Still left: Jonathan's Firebase console paste of the
 2026-11-05 Jonathan published the rules while they still had the block, so that paste does
 not count.) The full plan is the "PICK UP HERE" entry under "Practice
 minutes" in `WORKFLOW.md` (written 2026-11-04); read it before touching anything.
-In short: "N playing" is gone from the screen, but the engine in
-`practice-minutes.js` on `main` still writes a `heartbeats/{sessionId}` record
-(`{ period, lastSeen }`) about every 30 s while audio plays, and nothing reads
-it. The records pile up (the TTL policy was never set) and any signed-in user
-can list them.
+In short: "N playing" is gone from the screen and (since step 1) the engine no longer
+writes the `heartbeats/{sessionId}` record (`{ period, lastSeen }`, about every 30 s
+while audio played). Old records still sit in the console (the TTL policy was never set)
+and, until the new rules are published, any signed-in user can list them.
 - **Step 1 (code, no console paste; DONE, live since 2026-11-04):** delete the heartbeat writer, `pollLive()`,
   `S.live` / `S.liveAt` and `liveMinCount`; remove the heartbeat tests in
   `tools/pm-sim.mjs`, lower `PM_SIM_PIN` in `tools/checks.mjs`, drop the 1cg
   heartbeat-rules pin and the `liveMinCount` check, drop the aggregation fake
   in `tools/pm-e2e.mjs`. Counting, `flush()`, the queue and the keepalive do not change.
-- **Step 2 (step 1 is live, so this is next; needs Jonathan's Firebase console
-  paste):** delete the `heartbeats/{sessionId}` block from `firestore.rules` and
-  the `heartbeats` index from `firestore.indexes.json`, and the `== heartbeats`
-  section of `tools/pm-rules-test.mjs` (about lines 85-110, plus its header
-  line). checks.mjs 1cg accepts the block only whole or gone. Old `heartbeats`
-  documents can then be deleted in the console.
+- **Step 2 (repo edits DONE 2026-11-05, commit "Practice minutes heartbeat removal, step 2";
+  the console paste is still Jonathan's):** the `heartbeats/{sessionId}` block is out of
+  `firestore.rules`, the `heartbeats` index out of `firestore.indexes.json`, and the
+  `== heartbeats` section out of `tools/pm-rules-test.mjs`. checks.mjs 1cg now requires the
+  block and the index to stay gone, exactly one `match /databases/{database}/documents`
+  wrapper, and no shipped page or script naming a `heartbeats` collection. Old `heartbeats`
+  documents and the console's `heartbeats` index can be deleted once the new rules are published.
 - **Always Reviewed the same day** (`site-reviewer-deep`; it edits the counting
   half, `pm-sim` and `firestore.rules`). Proof: `pm-sim` and `pm-e2e` pass, the
   1cg pins broken in a scratch copy go red, a play session counts and flushes
