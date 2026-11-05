@@ -24,6 +24,14 @@
    serves the repo itself, so Python and a separate server are not needed.
    Network noise (Firebase, Google, YouTube) is ignored — it is offline-safe.
 
+   If it seems hung (2026-11-04): it prints NOTHING until the walk ends (3-4
+   minutes on a quiet Mac), so do not pipe it through `tail`; redirect to a file
+   and read that. Do not run it while another session's pm-e2e.mjs or the Stop
+   hook's checks.mjs are running: the load starves it. On Chrome 156 it really
+   did hang (browser near idle, 10+ minutes); updating to Chrome 157 fixed it.
+   If it hangs again, suspect the browser version first. Kill leftovers with
+   `pkill -f gc-smoke-chrome`.
+
    Proved to be able to fail: against 194696b it reports 60+ dead video-button
    handlers; against the fixed tree it reports none. */
 import { createServer } from 'node:http';
