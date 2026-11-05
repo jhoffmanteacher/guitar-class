@@ -336,7 +336,8 @@
    names. Same orphan-key story for anyone who had ticked it.
    `ca-47` ("Strum Pattern in Chunks") was merged into `ca-46` as its
    "chunks" path on 2026-11-04 (no student had opened either); `ca-48` is
-   "Call the Chord" (2026-11-05); the next new activity is `ca-49`.
+   "Call the Chord" (2026-11-05); `ca-49` is "Name the Power Chord"
+   (2026-11-05); the next new activity is `ca-50`.
 
    ORDER AND MODULE PLACEMENT LIVE ON THE CONSOLE BOARD, NOT IN THIS FILE
    (2026-09-16). config/class.activityBoard — { id -> { module, pos } },
@@ -7131,6 +7132,44 @@ window.CLASS_ACTIVITIES = [
         label:    'Practice — Sweet Child, call',
         label_es: 'Practica — Sweet Child, decir',
         drill: { type: 'chordcall', card: 'ca-33', section: 'Intro', mode: 'call' },
+      },
+    ],
+  },
+  /* Name the Power Chord (work order 2026-11-05, widget C; Day 39, power chord
+     names from a chart). A power chord is named after its root, and the root is
+     on the low E or A string — so the chord's name is the note's name plus a 5.
+     Note Call's board and names (ncPool, sdNoteAt) with chord names, and no
+     mic. Step 1 is Note Call on frets 5 to 12 (the frets ca-23's first two
+     steps do not reach together; ca-23 itself is untouched, its steps are
+     keyed). Steps 2-4 are the new `pcname` drill: fret to name, name to fret,
+     both ways on the whole neck. Focus view, label + drill on every step, no
+     text: the widget carries its own directions and its pass line (8 of 10
+     with Show answer off). Engine: renderPowerName in app.js. */
+  {
+    id:    'ca-49',
+    view:  'focus',   // one step at a time — see VIEW above
+    title:    'Name the Power Chord',
+    title_es: 'Nombra el acorde de potencia',
+    steps: [
+      {
+        label:    'Practice — Notes, frets 5 to 12',
+        label_es: 'Practica — Notas, trastes 5 a 12',
+        drill: { type: 'notecall', strings: ['lowE', 'A'], minFret: 5, maxFret: 12 },
+      },
+      {
+        label:    'Practice — Fret to name, frets 0 to 7',
+        label_es: 'Practica — Del traste al nombre, trastes 0 a 7',
+        drill: { type: 'pcname', mode: 'name', minFret: 0, maxFret: 7 },
+      },
+      {
+        label:    'Practice — Name to fret, frets 0 to 7',
+        label_es: 'Practica — Del nombre al traste, trastes 0 a 7',
+        drill: { type: 'pcname', mode: 'fret', minFret: 0, maxFret: 7 },
+      },
+      {
+        label:    'Practice — Both ways, frets 0 to 12',
+        label_es: 'Practica — En los dos sentidos, trastes 0 a 12',
+        drill: { type: 'pcname', mode: 'both', minFret: 0, maxFret: 12 },
       },
     ],
   },

@@ -10,6 +10,15 @@ see `WORKFLOW.md` and the git commit log.
 - **In Power Chord Switch, a noise in the room has to be much louder to count.** Before, a voice, a bump, a chair, or the last chord still ringing could count as a right change when you had not strummed. Most of those no longer count. A very soft strum, or one without a clear pick sound, can now show "no strum heard": strum a little firmer and keep the guitar close to the mic. Change Up and the other mic games are not changed.
 - **When several strums were not heard, the end screen now says so.** In Power Chord Switch, if at least two changes show "no strum heard" and they outnumber the changes where the chord sounded wrong, the end screen shows "Some strums were not heard. Strum a little firmer, and keep the guitar close to the mic." instead of "Drop 10 BPM and try again". The headline reads "N of M changes worked" instead of "this speed is too fast for now", and the big button is "Again" at the same speed. One missed strum, or a game with mostly wrong chords, keeps the old advice. Change Up is not changed.
 
+## 2026-11-05 — New activity: Name the Power Chord
+
+- **"Name the Power Chord" ("Nombra el acorde de potencia")** has four steps. A power chord is named after its root, and the root is on the low E or A string. So the chord's name is the note's name plus a 5. You do not need a guitar or the mic.
+- **Step 1 is Note Call on frets 5 to 12**, on the low E and A strings.
+- **Fret to name:** a dot lights up on the board. Pick the chord's name from 12 buttons in fret order (E5, F5, F♯5 … D♯5).
+- **Name to fret:** a chord name comes up. Tap its root on the board. The root can be on the low E string or the A string, so a right fret on either one counts. After your tap, every right fret lights up.
+- **Frets 0 to 7 first, then the whole neck (0 to 12).** The last step mixes both ways.
+- **Show answer is on to start.** The answer is lit and nothing is scored. Turn it off for 10 cards. 8 of 10 finishes the step. A wrong answer shows the right one and waits for Next. Nothing is saved: every round starts new.
+
 ## 2026-11-05 — New activity: Call the Chord
 
 - **"Call the Chord" ("Di el acorde")** has four steps: Watchtower follow, Watchtower call, Sweet Child follow, Sweet Child call. The record plays one part of the song. You get ready for each chord change one beat before the band reaches it. You do not need a guitar.

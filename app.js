@@ -7981,6 +7981,7 @@ function renderShuffleDrill(drill, key, wid){
   if(drill && drill.type === 'ear')  return renderEarDrill(drill, key, wid);
   if(drill && drill.type === 'notecall') return renderNoteCall(drill, key, wid);
   if(drill && drill.type === 'chordcall') return renderChordCall(drill, key);
+  if(drill && drill.type === 'pcname') return renderPowerName(drill, key);
   if(!drill || drill.type !== 'shuffle') return '';
   const prev = shuffleDrills[key];
   if(prev && prev.tick) clearInterval(prev.tick);
@@ -10031,6 +10032,309 @@ function chcStopAll(){
   });
 }
 
+/* ── Name the power chord (step.drill, type 'pcname') ────────────────────
+   The no-guitar, no-mic rung under "power chord names from a chart": a power
+   chord is named after its root, the root sits on the low E or A string, so the
+   chord's name is the note's name plus a 5. (Work order 2026-11-05, widget C.)
+   It is Note Call's board and names with chord names in place of note names,
+   and it runs both ways.
+
+   Module-data schema:
+     drill: { type:'pcname', mode:'name'|'fret'|'both', minFret:0, maxFret:7 }
+   The strings are always the low E and A (the two root strings). The board
+   always shows frets 0-12 (fgBoardSvg); outside the step's range it is greyed
+   and takes no taps.
+
+   name:  a root lights on the board (a "?" on a low E or A string). The student
+          picks its chord name from 12 buttons laid out in fret order (E5 F5 F♯5
+          ... D♯5), not alphabetical.
+   fret:  a chord name shows. The student taps its root on the board; the right
+          fret on EITHER string is a hit (B5 is low E fret 7 and A string fret 2),
+          and after the tap every right fret lights green, so the student sees
+          the other one.
+   both:  each card is one or the other, shuffled.
+
+   Show answer (ON by default, remembered per browser): a play-along, nothing
+   scored. The right button (name) or the right frets (fret) are lit from the
+   start; the student taps the lit answer and the next card comes up. OFF: 10
+   cards, the first answer counts, 8 of 10 finishes the step. A miss shows the
+   answer and waits for Next; a hit moves on by itself.
+
+   Names are Note Call's own, sharps with the ♯ sign, never flats (SD_NOTE_NAMES,
+   sdNoteAt); a power chord is that name + '5', as in ncPool. Nothing is saved:
+   the score is per attempt, on screen. Teacher preview plays the same. */
+const PWN_ROUND = 10, PWN_PASS = 8, PWN_ADVANCE_MS = 650;
+const PWN_STRINGS = ['lowE', 'A'];
+/* The twelve chord names in fret order from the open low E string. */
+const PWN_NAMES = SD_NOTE_NAMES.slice(4).concat(SD_NOTE_NAMES.slice(0, 4)).map(n => n + '5');
+const powerNames = {};
+function pwnBox(key){ return document.getElementById('pwn-' + key); }
+const pwnPrefAnswer = () => ncPref('pwnAnswer', true);
+
+/* Pure: every (string, chord name) the range holds with the frets it sits on,
+   and the chord names laid out as cards for each mode. Shares ncPool. */
+function pwnPool(minFret, maxFret){
+  return ncPool({ strings: PWN_STRINGS, power: true, minFret, maxFret }, 'all');
+}
+/* Pure: where each chord name can be played in the range — [{ k, f }]. */
+function pwnSpots(pool){
+  const by = {};
+  pool.forEach(p => { (by[p.note] = by[p.note] || []).push(...p.frets.map(f => ({ k: p.str, f }))); });
+  return by;
+}
+/* Pure: the cards of one round. Each is { mode, str, note, frets } — name cards
+   are one string's root (the board lights those frets), fret cards are a chord
+   name (any spot of it answers). Never the same chord twice in a row, every
+   chord of the range before one repeats. */
+function pwnDeal(cfg, n, rnd){
+  const pool = pwnPool(cfg.minFret, cfg.maxFret);
+  const rand = rnd || Math.random;
+  const shuffle = a => { for(let i = a.length - 1; i > 0; i--){ const j = Math.floor(rand() * (i + 1)); [a[i], a[j]] = [a[j], a[i]]; } return a; };
+  const out = [];
+  let bag = [];
+  while(out.length < n){
+    if(!bag.length) bag = shuffle(pool.slice());
+    let i = bag.findIndex(p => !out.length || p.note !== out[out.length - 1].note);
+    if(i < 0){                                        // only the chord just dealt is left (it is on both strings): top the bag up
+      bag = bag.concat(shuffle(pool.slice()));
+      i = bag.findIndex(p => p.note !== out[out.length - 1].note);
+    }
+    const p = bag.splice(i, 1)[0];
+    const mode = cfg.mode === 'both' ? (rand() < 0.5 ? 'name' : 'fret') : cfg.mode;
+    out.push({ mode, str: p.str, note: p.note, frets: p.frets.slice() });
+  }
+  return out;
+}
+
+function renderPowerName(drill, key){
+  if(powerNames[key]) pwnStop(key);
+  const mode = drill.mode === 'fret' || drill.mode === 'both' ? drill.mode : 'name';
+  const cfg = { mode, minFret: drill.minFret != null ? drill.minFret : 0, maxFret: drill.maxFret != null ? drill.maxFret : 7 };
+  powerNames[key] = { key, cfg, phase: 'setup', answer: pwnPrefAnswer() };
+  return `<div class="sdr pwnr" id="pwn-${escAttr(key)}" onclick="pwnClick(event)">${pwnSetupHtml(key)}</div>`;
+}
+function pwnHeadHtml(st, right){
+  const c = st.cfg;
+  return `<div class="sdr-head"><span>${escHtml(t('pwn.head', { min: c.minFret, max: c.maxFret }))}</span><span class="sdr-meta">${escHtml(right)}</span></div>`;
+}
+function pwnModeWord(st){ return t(st.cfg.mode === 'name' ? 'pwn.modeName' : st.cfg.mode === 'fret' ? 'pwn.modeFret' : 'pwn.modeBoth'); }
+function pwnSetupHtml(key){
+  const st = powerNames[key];
+  if(!st) return '';
+  const on = st.answer;
+  const pill = (val, label) => `<button type="button" class="sdr-pill${on === val ? ' active' : ''}" aria-pressed="${on === val}" data-pwn-answer="${val ? 1 : 0}">${escHtml(label)}</button>`;
+  return pwnHeadHtml(st, pwnModeWord(st)) +
+    `<div class="sdr-body">` +
+      `<div class="sdr-intro">${escHtml(t(st.cfg.mode === 'name' ? 'pwn.introName' : st.cfg.mode === 'fret' ? 'pwn.introFret' : 'pwn.introBoth'))}</div>` +
+      `<div class="nc-toggles"><div class="nc-toggle"><span class="nc-toggle-label">${escHtml(t('pwn.answer'))}</span>${pill(true, t('pwn.on'))}${pill(false, t('pwn.off'))}</div></div>` +
+      `<div class="nc-how">${escHtml(t(on ? 'pwn.howAnswer' : 'pwn.howScored'))}</div>` +
+      `<button type="button" class="sdr-start" data-pwn-start="1">&#x25B6; ${escHtml(t('pwn.start'))}</button>` +
+      `<div class="sdr-best">${escHtml(t('pwn.passLine', { pass: PWN_PASS, total: PWN_ROUND }))}</div>` +
+    `</div>`;
+}
+function pwnBoardHtml(st, card){
+  const c = st.cfg;
+  return fgBoardSvg(st.key, null, {
+    strings: ['A', 'lowE'],                          // the A string above the low E, as on every two-string board
+    hit: card.mode === 'fret',                       // a name card takes no taps on the board: the answer is a button
+    hitStrings: PWN_STRINGS,
+    clickFn: 'pwnTap',
+    noteAt: (k, f) => card.mode === 'fret' ? sdNoteAt(k, f) + '5' : '',
+    shade: [c.minFret, c.maxFret]
+  });
+}
+function pwnPlayHtml(key){
+  const st = powerNames[key], card = st.cards[st.idx];
+  const names = card.mode === 'name'
+    ? `<div class="pwn-names" role="group" aria-label="${escAttr(t('pwn.pickAria'))}">` +
+        PWN_NAMES.map(n => `<button type="button" class="pwn-name" data-pwn-pick="${escAttr(n)}">${escHtml(n)}</button>`).join('') + `</div>`
+    : '';
+  const prompt = card.mode === 'fret'
+    ? `<div class="nc-card pwn-card"><span class="nc-kicker">${escHtml(t('pwn.findRoot'))}</span><span class="nc-note">${escHtml(card.note)}</span></div>`
+    : `<div class="nc-card pwn-card"><span class="nc-kicker">${escHtml(t('pwn.whichChord'))}</span><span class="nc-str">${escHtml(t('ncp.onString', { string: ncStrName(card.str) }))}</span></div>`;
+  return pwnHeadHtml(st, st.answer ? t('pwn.metaAnswer') : t('pwn.metaScored')) +
+    `<div class="sdr-body pwn-play">` +
+      prompt +
+      `<div class="sdr-fb nc-fb pwn-fb" id="pwn-fb-${escAttr(key)}" aria-live="polite"></div>` +
+      `<div class="nc-board pwn-board" id="pwn-board-${escAttr(key)}">${pwnBoardHtml(st, card)}</div>` +
+      names +
+      `<div class="nc-foot"><div class="fret-dots nc-dots" id="pwn-dots-${escAttr(key)}"></div>` +
+        `<button type="button" class="sdr-btn2 pwn-next" id="pwn-next-${escAttr(key)}" data-pwn-next="1" hidden>${escHtml(t('pwn.next'))}</button>` +
+        `<button type="button" class="sdr-btn2" data-pwn-stop="1">${escHtml(t('pwn.stop'))}</button></div>` +
+    `</div>`;
+}
+/* One handler for the whole drill; the board's hit zones call pwnTap. */
+function pwnClick(ev){
+  const box = ev.currentTarget;
+  const el = ev.target && ev.target.closest ? ev.target.closest('[data-pwn-start],[data-pwn-stop],[data-pwn-answer],[data-pwn-pick],[data-pwn-next],[data-pwn-again]') : null;
+  if(!el || !box) return;
+  const key = box.id.replace(/^pwn-/, '');
+  if(el.hasAttribute('data-pwn-start') || el.hasAttribute('data-pwn-again')) pwnStart(key);
+  else if(el.hasAttribute('data-pwn-stop')) pwnQuit(key);
+  else if(el.hasAttribute('data-pwn-answer')) pwnSetAnswer(key, el.getAttribute('data-pwn-answer') === '1');
+  else if(el.hasAttribute('data-pwn-pick')) pwnPick(key, el.getAttribute('data-pwn-pick'));
+  else if(el.hasAttribute('data-pwn-next')) pwnNext(key);
+}
+function pwnSetAnswer(key, on){
+  const st = powerNames[key];
+  if(!st || st.phase === 'play') return;
+  st.answer = on;
+  ncSetPref('pwnAnswer', on);
+  pwnRepaint(key, st.phase === 'done' ? pwnDoneHtml(key) : pwnSetupHtml(key));
+}
+function pwnRepaint(key, html){ const b = pwnBox(key); if(b) b.innerHTML = html; }
+
+function pwnStart(key){
+  const st = powerNames[key];
+  if(!st || st.phase === 'play') return;
+  pwnStopAll();                                      // one round at a time on the page
+  Object.assign(st, { phase: 'play', cards: pwnDeal(st.cfg, PWN_ROUND), idx: 0, res: [], locked: false, timer: 0 });
+  pwnRepaint(key, pwnPlayHtml(key));
+  pwnShowCard(st);
+}
+/* What a new card shows on the board: a name card lights its root(s) as "?"; with
+   Show answer on, the right button (name) or frets (fret) are lit too. */
+function pwnMark(key, k, f, cls, text){
+  const m = document.getElementById(`fgm-${key}-${k}-${f}`);
+  if(!m) return;
+  m.classList.add(cls);
+  if(text != null){ const tx = m.querySelector('text'); if(tx) tx.textContent = text; }
+}
+function pwnShowCard(st){
+  const key = st.key, card = st.cards[st.idx];
+  st.locked = false;
+  if(card.mode === 'name') card.frets.forEach(f => pwnMark(key, card.str, f, 'pwn-ask', '?'));
+  if(st.answer){
+    if(card.mode === 'name'){ const b = pwnBox(key).querySelector(`[data-pwn-pick="${card.note}"]`); if(b) b.classList.add('pwn-lit'); }
+    else pwnSpotsOf(st, card).forEach(s => pwnMark(key, s.k, s.f, 'pwn-lit'));
+  }
+  pwnPaintDots(st);
+}
+/* Every spot a chord name sits on in the step's range, on both strings. */
+function pwnSpotsOf(st, card){ return pwnSpots(pwnPool(st.cfg.minFret, st.cfg.maxFret))[card.note] || []; }
+function pwnPaintDots(st){
+  const el = document.getElementById('pwn-dots-' + st.key);
+  if(!el || st.answer) { if(el) el.innerHTML = ''; return; }
+  el.innerHTML = st.cards.map((_, i) => {
+    const r = st.res[i];
+    return `<span class="fret-dot${r === 'hit' ? ' hit' : r ? ' miss' : i === st.idx ? ' cur' : ''}"></span>`;
+  }).join('');
+}
+function pwnFeedback(st, cls, text){
+  const fb = document.getElementById('pwn-fb-' + st.key);
+  if(fb){ fb.className = 'sdr-fb nc-fb pwn-fb' + (cls ? ' ' + cls : ''); fb.textContent = text; }
+}
+/* The answer to a name card: a button was picked. */
+function pwnPick(key, name){
+  const st = powerNames[key];
+  if(!st || st.phase !== 'play' || st.locked) return;
+  const card = st.cards[st.idx];
+  if(card.mode !== 'name') return;
+  const right = name === card.note;
+  const btn = pwnBox(key).querySelector(`[data-pwn-pick="${name}"]`);
+  if(st.answer){
+    if(!right){ if(btn) btn.classList.add('pwn-bad'); pwnFeedback(st, 'miss', t('pwn.fbWrongName', { pick: name })); return; }
+    st.locked = true;
+    pwnResolveCard(st, 'hit', null);
+    return;
+  }
+  st.locked = true;
+  if(btn) btn.classList.add(right ? 'pwn-good' : 'pwn-bad');
+  pwnResolveCard(st, right ? 'hit' : 'miss', name);
+}
+/* The answer to a fret card: a tap on the board. */
+function pwnTap(sid, k, f){
+  const st = powerNames[sid];
+  if(!st || st.phase !== 'play' || st.locked) return;
+  const card = st.cards[st.idx];
+  if(card.mode !== 'fret') return;
+  const right = sdNoteAt(k, f) + '5' === card.note;
+  if(st.answer){
+    if(!right){ ncMark(sid, k, f, 'fg-bad'); pwnFeedback(st, 'miss', t('pwn.fbWrongFret', { pick: sdNoteAt(k, f) + '5' })); return; }
+    st.locked = true;
+    pwnResolveCard(st, 'hit', null);
+    return;
+  }
+  st.locked = true;
+  ncMark(sid, k, f, right ? 'fg-good' : 'fg-bad');
+  pwnResolveCard(st, right ? 'hit' : 'miss', sdNoteAt(k, f) + '5', { k, f });
+}
+/* A card is answered: say so, light the right answer (all of them), and move on
+   after a hit or wait for Next after a miss. */
+function pwnResolveCard(st, res, pick, tap){
+  const key = st.key, card = st.cards[st.idx];
+  st.res[st.idx] = res;
+  const spots = pwnSpotsOf(st, card);
+  const where = spots.map(s => t('pwn.spot', { string: ncStrName(s.k), fret: s.f })).join(' / ');
+  if(card.mode === 'name'){
+    card.frets.forEach(f => pwnMark(key, card.str, f, 'pwn-lit', card.note));
+    const btn = pwnBox(key).querySelector(`[data-pwn-pick="${card.note}"]`); if(btn) btn.classList.add('pwn-good');
+  } else {
+    spots.forEach(s => { ncMark(key, s.k, s.f, 'fg-good'); pwnMark(key, s.k, s.f, 'pwn-lit'); });
+  }
+  if(res === 'hit') pwnFeedback(st, 'hit', st.answer ? t('pwn.fbHitAnswer', { chord: card.note }) : t('pwn.fbHit', { chord: card.note, where }));
+  else pwnFeedback(st, 'miss', t(card.mode === 'name' ? 'pwn.fbMissName' : 'pwn.fbMissFret', { chord: card.note, pick: pick || '', where }));
+  pwnPaintDots(st);
+  if(res === 'hit') st.timer = setTimeout(() => { if(powerNames[key] === st && st.phase === 'play' && pwnBox(key)) pwnNext(key); }, st.answer ? 350 : PWN_ADVANCE_MS);
+  else { const nx = document.getElementById('pwn-next-' + key); if(nx) nx.hidden = false; }
+}
+function pwnNext(key){
+  const st = powerNames[key];
+  if(!st || st.phase !== 'play') return;
+  if(st.timer){ clearTimeout(st.timer); st.timer = 0; }
+  if(!st.locked) return;
+  st.idx++;
+  if(!st.answer && st.idx >= st.cards.length){ pwnFinish(key); return; }
+  if(st.answer && st.idx >= st.cards.length){ st.cards = st.cards.concat(pwnDeal(st.cfg, PWN_ROUND)); }   // the play-along never runs out
+  pwnRepaint(key, pwnPlayHtml(key));
+  pwnShowCard(st);
+}
+function pwnFinish(key){
+  const st = powerNames[key];
+  if(!st) return;
+  if(st.timer){ clearTimeout(st.timer); st.timer = 0; }
+  st.phase = 'done';
+  st.hits = st.res.filter(r => r === 'hit').length;
+  pwnRepaint(key, pwnDoneHtml(key));
+}
+function pwnDoneHtml(key){
+  const st = powerNames[key];
+  const hits = st.hits || 0, pass = hits >= PWN_PASS;
+  const miss = [];
+  st.cards.forEach((c, i) => { if(st.res[i] === 'miss') miss.push(c); });
+  const SHOW = 4;
+  const rows = miss.slice(0, SHOW).map(c => {
+    const where = pwnSpotsOf(st, c).map(s => t('pwn.spot', { string: ncStrName(s.k), fret: s.f })).join(' / ');
+    return `<div class="sdr-drill-row"><span>${escHtml(c.note)}</span><span class="sdr-meta">${escHtml(where)}</span></div>`;
+  }).join('') + (miss.length > SHOW ? `<div class="sdr-drill-row"><span>${escHtml(t('pwn.moreMissed', { n: miss.length - SHOW }))}</span></div>` : '');
+  const on = st.answer;
+  const pill = (val, label) => `<button type="button" class="sdr-pill${on === val ? ' active' : ''}" aria-pressed="${on === val}" data-pwn-answer="${val ? 1 : 0}">${escHtml(label)}</button>`;
+  return pwnHeadHtml(st, pwnModeWord(st)) +
+    `<div class="sdr-body">` +
+      `<div class="sdr-score">${escHtml(t('pwn.score', { n: hits, total: PWN_ROUND }))}</div>` +
+      `<div class="sdr-verdict ${pass ? 'good' : 'mid'}">${escHtml(t(pass ? 'pwn.verdictPass' : 'pwn.verdictAgain', { pass: PWN_PASS, total: PWN_ROUND }))}</div>` +
+      `<div class="sdr-actions"><button type="button" class="sdr-start" data-pwn-again="1">&#x25B6; ${escHtml(t('pwn.again'))}</button></div>` +
+      `<div class="nc-toggles"><div class="nc-toggle"><span class="nc-toggle-label">${escHtml(t('pwn.answer'))}</span>${pill(true, t('pwn.on'))}${pill(false, t('pwn.off'))}</div></div>` +
+      (rows ? `<div class="sdr-drill"><div class="sdr-drill-title">${escHtml(t('pwn.practiceThese'))}</div>${rows}</div>` : '') +
+    `</div>`;
+}
+function pwnStop(key){
+  const st = powerNames[key];
+  if(!st) return;
+  if(st.timer){ clearTimeout(st.timer); st.timer = 0; }
+}
+function pwnQuit(key){
+  const st = powerNames[key];
+  if(!st) return;
+  pwnStop(key);
+  st.phase = 'setup';
+  pwnRepaint(key, pwnSetupHtml(key));
+}
+/* Every running round back to its setup screen: stopCardAudio and the hidden-tab path call this, like ncStopAll. */
+function pwnStopAll(){
+  Object.keys(powerNames).forEach(k => { if(powerNames[k].phase === 'play') pwnQuit(k); });
+}
+
 /* ── "Keep it sharp" spaced-review card ──
    Up to 3 skills marked "I've got it!" (that have a practice panel), oldest
    last-practice first; anything already practiced today is considered sharp.
@@ -11013,6 +11317,7 @@ function stopCardAudio(){
   snipStop();   // a looping backing-track snippet is site-generated sound as well
   pcStop();     // …and so is a practice card's song (view:'card')
   chcStopAll();  // …and a Call the chord round: its song, count-in and space-bar listener
+  pwnStopAll();  // …and a Name the power chord round's pending advance (a focus-view Next re-renders the card under it)
   ncStopAll();  //…and a Note Call round's clicks (and its mic, if the Coach is on) —
                 // a focus-view Next re-renders the card, which would orphan its loop
   chordStrumTimeouts.forEach(clearTimeout);
@@ -16632,6 +16937,7 @@ document.addEventListener('visibilitychange', () => {
     if(!(IS_TEACHER_MODE && pcState && pcState.wholeSong)) pcStop();
     if(typeof ncStopAll === 'function') ncStopAll();
     if(typeof chcStopAll === 'function') chcStopAll();
+    if(typeof pwnStopAll === 'function') pwnStopAll();
     flushOnHide();
     return;
   }

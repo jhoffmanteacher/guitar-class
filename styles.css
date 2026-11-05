@@ -4067,6 +4067,30 @@ body.games-open{overflow:hidden}
 .chcr .sdr-drill{margin-top:10px}
 .chcr .nc-dots{flex-wrap:wrap;max-width:420px}
 .chcr .fret-dot{flex:none}
+/* ── Name the power chord (step.drill 'pcname') — Note Call's board with chord
+   names, tapped or picked. Same purple drill frame (.sdr); the 12 names sit in
+   two rows of six so the card, board, names and feedback fit 1366x657. ── */
+.pwn-play{padding-top:8px}
+.pwn-card{margin:0 auto 6px;height:72px;min-width:200px;width:fit-content}
+.pwn-card .nc-note{font-size:2.25rem}
+.pwn-fb{min-height:1.4em;margin-bottom:2px}
+.pwnr .pwn-board{max-width:640px}
+.pwn-names{display:grid;grid-template-columns:repeat(6,minmax(56px,84px));gap:6px;justify-content:center;margin:2px auto 8px}
+.pwn-name{min-height:40px;padding:0 6px;border-radius:10px;background:var(--bg);color:var(--text);
+  border:2px solid var(--border2);font:inherit;font-size:1.0625rem;font-weight:700;cursor:pointer}
+.pwn-name:hover{border-color:var(--purple-accent)}
+.pwn-name.pwn-lit{border-color:var(--green-text);background:var(--green-bg)}
+.pwn-name.pwn-good{border-color:var(--green-text);background:var(--green-bg);color:var(--green-text)}
+.pwn-name.pwn-bad{border-color:var(--red-text);background:var(--red-bg);color:var(--red-text)}
+/* The prompted root (a name card) and the right answer, drawn on the board. */
+.pwn-board .fg-marker.pwn-ask,.pwn-board .fg-marker.pwn-lit{opacity:1}
+.pwn-board .fg-marker.pwn-ask circle{fill:var(--purple-bg);stroke:var(--purple-accent)}
+.pwn-board .fg-marker.pwn-ask text{fill:var(--purple-text)}
+.pwn-board .fg-marker.pwn-lit circle{fill:var(--green-bg);stroke:var(--green-text)}
+.pwn-board .fg-marker.pwn-lit text{fill:var(--green-text)}
+.pwn-board .fg-hit:hover{fill:var(--purple-accent);fill-opacity:.12}
+.pwnr .nc-dots{flex-wrap:wrap;max-width:300px}
+.pwnr .fret-dot{flex:none}
 /* "Keep it sharp" spaced-review card — purple = review/self-assessment family */
 .review-slot:empty{display:none}
 .review-card{border:1.5px solid var(--purple-border);background:var(--purple-bg2);border-radius:var(--radius);padding:14px 16px;margin-bottom:14px;box-shadow:var(--shadow-card)}

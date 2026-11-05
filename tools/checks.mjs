@@ -9379,6 +9379,301 @@ function checkChordCall(ctx) {
   if (bad === 0) ok(stats.drills + ' drills; ' + stats.changes + ' of ' + stats.changes + ' changes walked at both speeds (' + (stats.windows - stats.cut) + ' windows of a full beat or more, ' + stats.cut + ' cut by a change closer than a beat); ' + stats.sheet + ' of ' + stats.drills + ' drills\' changes are the lyric sheet\'s own; ' + stats.taps + ' taps (early, in time, late, wrong, none) and ' + stats.samples + ' hidden-chord samples; ' + stats.keys + ' space-bar listeners added and all removed; ' + stats.screens + ' screen sets rendered, EN + ES, ' + EXPECT.keys + ' chc.* strings');
 }
 
+/* 1co. NAME THE POWER CHORD (step.drill 'pcname', ca-49, work order 2026-11-05).
+   A power chord is named after its root, the root is on the low E or A string,
+   so a chord's name is the note's name plus a 5. The drill shows a root on the
+   board and the student picks the name, or shows a name and the student taps the
+   root. A wrong key here does not look broken: it marks a student who was right
+   as wrong (the 1y and 1bi lesson). So the answers are NOT read from the drill:
+   they are recomputed here from the open strings, and the real code is EXECUTED
+   in the 0b context against them:
+   - the data: ca-49 has four steps — Note Call on frets 5-12 (low E and A), then
+     pcname Fret to name 0-7, Name to fret 0-7, Both ways 0-12; no other
+     activity uses pcname; ca-23's four Note Call steps are as they were;
+   - the twelve buttons are the chord names in FRET order from the open low E
+     string, sharps with the ♯ sign as Note Call writes them, never flats;
+   - every (string, chord) card of every range the drills use: its name and its
+     frets match an oracle written here from the open strings (E and A, 40 and 45),
+     every fret of the range on both strings is on exactly one card, and each
+     chord's spots are every place it can be played in the range (B5 is the low E
+     string's fret 7 and the A string's fret 2: either one is a right answer);
+   - the answers, exhaustively: a name card taking each of the 12 names is a hit
+     only for its own, and a fret card taking every fret on both strings is a hit
+     exactly when the oracle says that fret's note + 5 is the chord, scored,
+     Show answer on and off, with the first answer deciding;
+   - the deal: 3000 seeded rounds, 10 cards each, never the same chord twice in
+     a row, every card on a legal fret, Both ways really mixes both card kinds;
+   - the pass line: 8 of 10 is done, 7 is not; a miss waits for Next, a hit moves
+     on by itself; Stop and a hidden tab clear the pending move on;
+   - the default: Show answer is ON for a new drill (tools/smoke.mjs clicks it
+     and reloads);
+   - every pwn.* string the setup, play and done screens show exists in English
+     and Spanish, and none defined is unused.
+   Pinned: 4 steps, 34 pwn.* keys. */
+function checkPowerName(ctx) {
+  head('1co. Name the power chord (ca-49): every answer recomputed, every card, the deal');
+  let bad = 0;
+  const flag = m => { err(m); problems++; bad++; };
+  if (!ctx) { flag('1co cannot run — the 0b render context is unavailable'); return; }
+  const J = JSON.stringify;
+  const run = x => vm.runInContext(x, ctx);
+  const EXPECT = { keys: 34, steps: [
+    { type: 'notecall', strings: ['lowE', 'A'], minFret: 5, maxFret: 12 },
+    { type: 'pcname', mode: 'name', minFret: 0, maxFret: 7 },
+    { type: 'pcname', mode: 'fret', minFret: 0, maxFret: 7 },
+    { type: 'pcname', mode: 'both', minFret: 0, maxFret: 12 },
+  ] };
+  const stats = { steps: 0, cards: 0, answers: 0, deals: 0, rounds: 0, screens: 0, hits: 0 };
+  // The oracle: the twelve names from the open strings, written here and not read from app.js.
+  const NAMES = ['C', 'C♯', 'D', 'D♯', 'E', 'F', 'F♯', 'G', 'G♯', 'A', 'A♯', 'B'];
+  const OPEN = { lowE: 40, A: 45 };
+  const chordAt = (k, f) => NAMES[(OPEN[k] + f) % 12] + '5';
+
+  // The data.
+  const acts = run('window.CLASS_ACTIVITIES || []');
+  const c49 = acts.find(a => a.id === 'ca-49');
+  if (!c49) { flag('ca-49 is gone — 1co checks its four steps'); return; }
+  const uses = [];
+  for (const a of acts) (a.steps || []).forEach(st => { if (st && st.drill && st.drill.type === 'pcname') uses.push(a.id); });
+  if (uses.some(id => id !== 'ca-49')) flag('pcname drills outside ca-49 (' + [...new Set(uses)].join(', ') + ') — 1co pins ca-49 only; give the new one its pin on purpose');
+  if (c49.view !== 'focus' || (c49.steps || []).length !== EXPECT.steps.length || c49.steps.some(s => s.text)) flag('ca-49 must be a Focus-view activity of exactly ' + EXPECT.steps.length + ' steps with no text on any step');
+  EXPECT.steps.forEach((e, i) => {
+    const d = c49.steps[i] && c49.steps[i].drill;
+    if (!d || J(d) !== J(e)) flag('ca-49 step ' + (i + 1) + ': expected ' + J(e) + ', got ' + J(d));
+    else stats.steps++;
+  });
+  const c23 = acts.find(a => a.id === 'ca-23');
+  const R23 = [[0, 5], [5, 8], [8, 12], [0, 12]];
+  if (!c23 || (c23.steps || []).length !== 4 || R23.some(([lo, hi], i) => { const d = c23.steps[i].drill; return !d || d.type !== 'notecall' || d.power || J(d.strings) !== J(['lowE', 'A']) || d.minFret !== lo || d.maxFret !== hi; })) flag('ca-23 is not as it was (four single-note Note Call steps, frets 0-5 / 5-8 / 8-12 / 0-12) — its steps are keyed and a student may have ticked them');
+
+  // The buttons.
+  const names = run('PWN_NAMES');
+  const wantNames = Array.from({ length: 12 }, (_, f) => chordAt('lowE', f));
+  if (J(names) !== J(wantNames)) flag('the twelve chord buttons are ' + J(names) + ', expected the names in fret order from the open low E string ' + J(wantNames));
+  if (names.some(n => /b|#/.test(n.slice(1, 2)))) flag('a chord button is spelled with a flat or a # — Note Call writes sharps with the ♯ sign');
+
+  // Every card of every range, and every spot.
+  const ranges = [...new Set(EXPECT.steps.filter(s => s.type === 'pcname').map(s => s.minFret + '-' + s.maxFret))].map(r => r.split('-').map(Number));
+  for (const [lo, hi] of ranges) {
+    const pool = JSON.parse(run('JSON.stringify(pwnPool(' + lo + ',' + hi + '))'));
+    const seen = {};
+    pool.forEach(p => {
+      stats.cards++;
+      if (!OPEN[p.str]) flag(lo + '-' + hi + ': a card on the ' + p.str + ' string');
+      p.frets.forEach(f => {
+        const key = p.str + ':' + f;
+        if (seen[key]) flag(lo + '-' + hi + ': ' + p.str + ' fret ' + f + ' is on two cards');
+        seen[key] = 1;
+        if (f < lo || f > hi) flag(lo + '-' + hi + ': ' + p.str + ' fret ' + f + ' is outside the range');
+        if (chordAt(p.str, f) !== p.note) flag(lo + '-' + hi + ': ' + p.str + ' fret ' + f + ' is ' + chordAt(p.str, f) + ' but its card says ' + p.note);
+        if (OPEN[p.str] + f !== p.midis[p.frets.indexOf(f)]) flag(lo + '-' + hi + ': ' + p.str + ' fret ' + f + ' has the wrong pitch on its card');
+      });
+    });
+    for (const k of ['lowE', 'A']) for (let f = lo; f <= hi; f++) if (!seen[k + ':' + f]) flag(lo + '-' + hi + ': ' + k + ' fret ' + f + ' is on no card');
+    const spots = JSON.parse(run('JSON.stringify(pwnSpots(pwnPool(' + lo + ',' + hi + ')))'));
+    for (const n of Object.keys(spots)) {
+      const want = [];
+      for (const k of ['lowE', 'A']) for (let f = lo; f <= hi; f++) if (chordAt(k, f) === n) want.push(k + ':' + f);
+      const got = spots[n].map(s => s.k + ':' + s.f).sort();
+      if (J(got) !== J(want.sort())) flag(lo + '-' + hi + ': ' + n + ' is played at ' + J(got) + ', the open strings say ' + J(want));
+    }
+    if (Object.keys(spots).length !== new Set(pool.map(p => p.note)).size) flag(lo + '-' + hi + ': the spots do not cover every chord of the cards');
+    if (lo === 0 && hi === 7) {
+      const b5 = (spots.B5 || []).map(s => s.k + ':' + s.f).sort();
+      if (J(b5) !== J(['A:2', 'lowE:7'])) flag('B5 in frets 0-7 should be the low E string fret 7 and the A string fret 2, got ' + J(b5));
+    }
+  }
+
+  // The deal.
+  const dealOut = JSON.parse(run(`(function(){
+    let seed = 20261105; const rnd = () => (seed = (seed * 1664525 + 1013904223) >>> 0) / 4294967296;
+    const R = { rounds: 0, cards: 0, repeats: 0, badFret: 0, modes: { name: 0, fret: 0 }, both: { name: 0, fret: 0 }, noRound: 0 };
+    for (const [mode, lo, hi, len] of [['name', 0, 7, 10], ['fret', 0, 7, 10], ['both', 0, 12, 10], ['both', 0, 7, 10], ['name', 0, 1, 10], ['fret', 5, 6, 10], ['name', 0, 7, 40], ['both', 0, 12, 40]]) {
+      for (let r = 0; r < 750; r++) {
+        const cards = pwnDeal({ mode, minFret: lo, maxFret: hi }, len, rnd);
+        R.rounds++; if (cards.length !== len) R.noRound++;
+        cards.forEach((c, i) => {
+          R.cards++;
+          if (i && cards[i - 1].note === c.note) R.repeats++;
+          if (c.frets.some(f => f < lo || f > hi)) R.badFret++;
+          if (mode === 'both') R.both[c.mode]++; else R.modes[c.mode]++;
+          if (mode !== 'both' && c.mode !== mode) R.modes.wrong = (R.modes.wrong || 0) + 1;
+        });
+      }
+    }
+    return JSON.stringify(R);
+  })()`));
+  stats.deals = dealOut.cards; stats.rounds = dealOut.rounds;
+  if (dealOut.noRound) flag(dealOut.noRound + ' deals did not hold the cards asked for');
+  if (dealOut.repeats) flag('the same chord came up twice in a row ' + dealOut.repeats + ' times in ' + dealOut.cards + ' cards');
+  if (dealOut.badFret) flag(dealOut.badFret + ' cards sit on a fret outside the step\'s range');
+  if (dealOut.modes.wrong) flag(dealOut.modes.wrong + ' cards were not of the step\'s mode');
+  if (!dealOut.both.name || !dealOut.both.fret) flag('Both ways dealt only one kind of card: ' + J(dealOut.both));
+
+  // The answers, through the real state machine.
+  const recs = {};
+  const origGet = ctx.document.getElementById;
+  const mkEl = id => { const cl = new Set(); const e = { id, textContent: '', innerHTML: '', className: '', hidden: false, isConnected: true, classes: cl,
+    classList: { add(c) { cl.add(c); }, remove(c) { cl.delete(c); }, contains(c) { return cl.has(c); }, toggle(c, on) { on ? cl.add(c) : cl.delete(c); } },
+    querySelector(sel) { const k = 'q:' + id + ':' + sel; return recs[k] || (recs[k] = mkEl(k)); }, querySelectorAll() { return []; } }; return e; };
+  ctx.document.getElementById = id => recs[id] || (recs[id] = mkEl(id));
+  const hadFlash = Object.prototype.hasOwnProperty.call(ctx, 'flashClass');
+  if (!hadFlash) ctx.flashClass = () => {};   // fab-tools.js, not in the context
+  try {
+    const NAMESJ = J(NAMES), OPENJ = J(OPEN);
+    const out = JSON.parse(run(`(function(){
+      const NAMES = ${NAMESJ}, OPEN = ${OPENJ};
+      const chordAt = (k, f) => NAMES[(OPEN[k] + f) % 12] + '5';
+      const R = { bad: [], answers: 0, hits: 0 };
+      const bad = m => { if(R.bad.length < 12) R.bad.push(m); };
+      const mk = (mode, lo, hi, answer) => {
+        renderPowerName({ type: 'pcname', mode, minFret: lo, maxFret: hi }, 'chk');
+        const st = powerNames.chk; st.answer = answer; st.phase = 'play'; st.res = []; st.locked = false; st.timer = 0;
+        return st;
+      };
+      for (const answer of [false, true]) for (const [lo, hi] of [[0, 7], [0, 12]]) {
+        const pool = pwnPool(lo, hi);
+        for (const p of pool) {
+          // name card: every one of the 12 names
+          for (const pick of PWN_NAMES) {
+            const st = mk('name', lo, hi, answer);
+            st.cards = [{ mode: 'name', str: p.str, note: p.note, frets: p.frets.slice() }, { mode: 'name', str: p.str, note: p.note, frets: p.frets.slice() }]; st.idx = 0;
+            pwnPick('chk', pick); R.answers++;
+            const right = pick === p.note;
+            if(answer){ if(right !== (st.res[0] === 'hit')) bad('name card ' + p.note + ' on ' + p.str + ', Show answer on, pick ' + pick + ' resolved ' + st.res[0]); if(!right && st.locked) bad('a wrong pick with Show answer on locked the card'); }
+            else { if((st.res[0] === 'hit') !== right) bad('name card ' + p.note + ' on ' + p.str + ', pick ' + pick + ' scored ' + st.res[0]); if(!st.locked) bad('the first answer did not lock the card'); }
+            if(st.timer) clearTimeout(st.timer);
+            if(right) R.hits++;
+          }
+          // fret card: every fret on both strings
+          for (const k of ['lowE', 'A']) for (let f = 0; f <= 12; f++) {
+            if(f < lo || f > hi) continue;
+            const st = mk('fret', lo, hi, answer);
+            st.cards = [{ mode: 'fret', str: p.str, note: p.note, frets: p.frets.slice() }, { mode: 'fret', str: p.str, note: p.note, frets: p.frets.slice() }]; st.idx = 0;
+            pwnTap('chk', k, f); R.answers++;
+            const right = chordAt(k, f) === p.note;
+            if(answer){ if(right !== (st.res[0] === 'hit')) bad('fret card ' + p.note + ', Show answer on, tap ' + k + ' ' + f + ' resolved ' + st.res[0]); }
+            else if((st.res[0] === 'hit') !== right) bad('fret card ' + p.note + ', tap ' + k + ' fret ' + f + ' (' + chordAt(k, f) + ') scored ' + st.res[0]);
+            // a second tap after the first never changes it (scored)
+            if(!answer){ const before = st.res[0]; pwnTap('chk', k === 'lowE' ? 'A' : 'lowE', f); if(st.res[0] !== before) bad('a second tap changed the first answer'); }
+            if(st.timer) clearTimeout(st.timer);
+            if(right) R.hits++;
+          }
+        }
+      }
+      return JSON.stringify(R);
+    })()`));
+    for (const m of out.bad) flag(m);
+    stats.answers = out.answers; stats.hits = out.hits;
+
+    // The round: 8 of 10 passes, 7 does not; a hit moves on by itself, a miss waits; Stop clears the move on.
+    const rd = JSON.parse(run(`(function(){
+      const o = { bad: [] };
+      const mkRound = hits => {
+        renderPowerName({ type: 'pcname', mode: 'name', minFret: 0, maxFret: 7 }, 'chk');
+        const st = powerNames.chk; st.answer = false; pwnStart('chk');
+        for (let i = 0; i < PWN_ROUND; i++) { st.idx = i; st.locked = false; const c = st.cards[i]; pwnPick('chk', i < hits ? c.note : PWN_NAMES.find(n => n !== c.note)); if(st.timer){ clearTimeout(st.timer); st.timer = 0; } }
+        pwnFinish('chk');
+        return { st, html: pwnDoneHtml('chk') };
+      };
+      for (const [hits, pass] of [[10, true], [8, true], [7, false], [0, false]]) {
+        const { st, html } = mkRound(hits);
+        if(st.hits !== hits) o.bad.push(hits + ' right answers counted as ' + st.hits);
+        const want = t(pass ? 'pwn.verdictPass' : 'pwn.verdictAgain', { pass: PWN_PASS, total: PWN_ROUND });
+        if(html.indexOf(want) < 0) o.bad.push(hits + ' of 10 should read ' + JSON.stringify(want));
+        if(st.phase !== 'done') o.bad.push('a finished round is ' + st.phase);
+      }
+      // A hit moves on by itself; a miss shows Next and waits.
+      renderPowerName({ type: 'pcname', mode: 'name', minFret: 0, maxFret: 7 }, 'chk');
+      let st = powerNames.chk; st.answer = false; pwnStart('chk');
+      document.getElementById('pwn-next-chk').hidden = true;   // the play screen's HTML starts it hidden; the stub has no HTML
+      pwnPick('chk', st.cards[0].note);
+      if(!st.timer) o.bad.push('a right answer set no move-on');
+      if(document.getElementById('pwn-next-chk').hidden === false) o.bad.push('Next showed after a right answer');
+      pwnStopAll();
+      if(st.timer || st.phase !== 'setup') o.bad.push('pwnStopAll left the move-on or the round running (' + st.phase + ', timer ' + st.timer + ')');
+      renderPowerName({ type: 'pcname', mode: 'name', minFret: 0, maxFret: 7 }, 'chk');
+      st = powerNames.chk; st.answer = false; pwnStart('chk');
+      document.getElementById('pwn-next-chk').hidden = true;
+      pwnPick('chk', PWN_NAMES.find(n => n !== st.cards[0].note));
+      if(st.timer) o.bad.push('a wrong answer moved on by itself');
+      if(document.getElementById('pwn-next-chk').hidden !== false) o.bad.push('Next did not show after a wrong answer');
+      pwnNext('chk');
+      if(st.idx !== 1) o.bad.push('Next did not move to the next card');
+      // The play-along never runs out.
+      renderPowerName({ type: 'pcname', mode: 'fret', minFret: 0, maxFret: 7 }, 'chk');
+      st = powerNames.chk; st.answer = true; pwnStart('chk');
+      for (let i = 0; i < 35; i++) { const c = st.cards[st.idx]; const sp = pwnSpotsOf(st, c)[0]; st.locked = false; pwnTap('chk', sp.k, sp.f); if(st.timer){ clearTimeout(st.timer); st.timer = 0; } pwnNext('chk'); }
+      if(st.phase !== 'play') o.bad.push('the play-along ended after 35 cards (' + st.phase + ')');
+      pwnStopAll(); delete powerNames.chk;
+      return JSON.stringify(o);
+    })()`));
+    for (const m of rd.bad) flag(m);
+
+    // The default: a new drill opens with Show answer on, on its setup screen.
+    const def = JSON.parse(run(`(function(){ const o = {}; ['name', 'fret', 'both'].forEach(m => { renderPowerName({ type: 'pcname', mode: m, minFret: 0, maxFret: 7 }, 'chk3'); const s = powerNames.chk3; const h = pwnSetupHtml('chk3');
+      o[m] = { answer: s.answer, phase: s.phase, onPressed: /aria-pressed="true" data-pwn-answer="1"/.test(h), offPressed: /aria-pressed="true" data-pwn-answer="0"/.test(h) }; delete powerNames.chk3; }); return JSON.stringify(o); })()`));
+    for (const m of ['name', 'fret', 'both']) {
+      const d = def[m];
+      if (d.answer !== true || !d.onPressed || d.offPressed || d.phase !== 'setup') flag('a new ' + m + ' drill does not open on its setup screen with Show answer on (' + J(d) + ') — Show answer ON is the pinned default');
+    }
+
+    // Every pwn.* string, rendered in both languages.
+    const I18N = loadI18nTable();
+    const used = new Set();
+    const origT = ctx.t;
+    ctx.t = (k, p) => { used.add(k); return origT(k, p); };
+    try {
+      for (const lang of ['en', 'es']) {
+        run('setLang(' + J(lang) + ')');
+        run(`(function(){
+          for (const mode of ['name', 'fret', 'both']) for (const answer of [true, false]) {
+            renderPowerName({ type: 'pcname', mode, minFret: 0, maxFret: 12 }, 'chk2');
+            const st = powerNames.chk2; st.answer = answer; pwnSetupHtml('chk2');
+            pwnStart('chk2');
+            // every card kind on the play screen, then each answer message
+            for (const kind of ['name', 'fret']) {
+              st.cards = [{ mode: kind, str: 'lowE', note: 'B5', frets: [7] }, { mode: kind, str: 'lowE', note: 'B5', frets: [7] }]; st.idx = 0; st.res = []; st.locked = false;
+              pwnRepaint('chk2', pwnPlayHtml('chk2')); pwnShowCard(st);
+              if(kind === 'name'){ pwnPick('chk2', 'A5'); st.locked = false; pwnPick('chk2', 'B5'); }
+              else { pwnTap('chk2', 'lowE', 5); st.locked = false; pwnTap('chk2', 'A', 2); }
+              if(st.timer){ clearTimeout(st.timer); st.timer = 0; }
+              st.res = []; st.locked = false; st.answer = false;
+              if(kind === 'name') pwnPick('chk2', 'A5'); else pwnTap('chk2', 'lowE', 5);
+              if(st.timer){ clearTimeout(st.timer); st.timer = 0; }
+              st.answer = answer;
+            }
+            // done: a pass, and a round with more misses than the list shows
+            st.cards = Array.from({ length: PWN_ROUND }, (_, i) => ({ mode: 'name', str: 'lowE', note: PWN_NAMES[i], frets: [i] }));
+            st.res = st.cards.map(() => 'hit'); st.hits = 10; pwnDoneHtml('chk2');
+            st.res = st.cards.map(() => 'miss'); st.hits = 0; pwnDoneHtml('chk2');
+            pwnStopAll(); delete powerNames.chk2;
+          }
+        })()`);
+        stats.screens += 6;
+      }
+    } catch (e) { flag('rendering the Name the power chord screens threw ' + e.message); }
+    finally { ctx.t = origT; try { run('setLang("en")'); } catch { /* best effort */ } }
+    const defined = Object.keys(I18N).filter(k => k.startsWith('pwn.'));
+    const SAME_OK = new Set(['pwn.fbHitAnswer', 'pwn.fbHit']);   // a check mark and a chord name: identical in both languages on purpose
+    for (const k of used) {
+      if (!k.startsWith('pwn.')) continue;
+      if (!I18N[k] || !I18N[k].en || !I18N[k].es) flag('i18n ' + k + ' is missing its English or Spanish');
+      else if (I18N[k].es === I18N[k].en && !SAME_OK.has(k)) flag('i18n ' + k + ': the Spanish is just the English');
+    }
+    for (const k of defined) if (!used.has(k)) flag('i18n ' + k + ' is defined but no Name the power chord screen shows it (dead, or a screen 1co does not reach)');
+    if (defined.length !== EXPECT.keys) flag('1co sees ' + defined.length + ' pwn.* keys, pinned at ' + EXPECT.keys + ' — a new string needs its Spanish and a screen that shows it (update the pin on purpose)');
+  } catch (e) {
+    flag('1co threw: ' + (e && e.message));
+  } finally {
+    ctx.document.getElementById = origGet;
+    if (!hadFlash) delete ctx.flashClass;
+    try { run('Object.keys(powerNames).forEach(k => { delete powerNames[k]; })'); } catch { /* best effort */ }
+  }
+  if (bad === 0) ok(stats.steps + ' steps (Note Call 5-12 + 3 pcname) and ca-23 untouched; ' + stats.cards + ' cards over ' + ranges.map(r => r.join('-')).join(' / ') + ' match the open strings and cover every fret of both strings once; ' + stats.answers + ' answers (every name on every name card, every fret on every fret card, Show answer on and off, ' + stats.hits + ' right) match the oracle; ' + stats.deals + ' cards in ' + stats.rounds + ' seeded rounds never repeat a chord and stay in range; 8 of 10 passes, 7 does not; the move on, Next and Stop behave; Show answer on by default; ' + stats.screens + ' screen sets rendered, EN + ES, ' + EXPECT.keys + ' pwn.* strings');
+}
+
+
 /* 1bf2. LYRIC-SHEET CARDS (card.sheet — ca-38, Jonathan 2026-10-19). The
    card draws a chord sheet PDF and walks a dot over its chord names in
    reading order: name n is the card's n-th chord CHANGE. If the card's
@@ -12771,6 +13066,7 @@ function checkPracticeMinutes(i18nTable) {
   checkRecordingVersions(rcCtx);
   checkNoteCallPower(rcCtx);
   checkChordCall(rcCtx);
+  checkPowerName(rcCtx);
   await checkRosterSkipsTrainerStub();
   await checkSongPopularity(rcCtx);
   checkPowerChordPopups(rcSets, rcCtx);

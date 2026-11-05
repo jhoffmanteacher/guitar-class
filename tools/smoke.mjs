@@ -356,6 +356,117 @@ async function chordCallWalk(page, run, events, stats, base) {
   await run('chc:done', `(document.querySelectorAll('.ca-card[open]').forEach(c => { c.open = false; }), 1)`, 100);
 }
 
+/* Name the power chord (ca-49, 2026-11-05). checks.mjs 1co recomputes every
+   answer and runs the state machine; this is the real page, in English and
+   Spanish: step 1 is a Note Call on frets 5-12, steps 2-4 are the pcname drill.
+   Each opens with Show answer ON (the pinned default), the switch clicks both
+   ways, Start deals a card, a REAL click on the right chord button (name) or
+   the right fret's hit zone (fret, either string) scores a hit and a wrong one
+   a miss that waits for Next, Stop puts the setup screen back, and a round is
+   ended by another step and by a language switch. The Show answer choice is
+   remembered per browser: after a reload it is still what was clicked. A
+   checkout without ca-49 (the baseline) skips it. */
+async function powerNameWalk(page, run, events, stats, base) {
+  const list = await run('pwn:list', `(CLASS_ACTIVITIES.find(a => a.id === 'ca-49') || { steps: [] }).steps.map(s => s.drill || null)`, 10);
+  if (!list || !list.length) return;
+  const fail = (step, text) => events.push({ step: 'pcname:' + step, kind: 'pcname', text });
+  await page.send('Page.navigate', { url: base + '/index.html' });
+  await sleep(3500);
+  await run('pwn:devBypass', 'devBypass()', 3500);
+  for (let i = events.length - 1; i >= 0; i--) if (events[i].step === 'pwn:devBypass' && /ResizeObserver loop/.test(events[i].text)) events.splice(i, 1);
+  await run('pwn:clear', `(function(){ try { localStorage.removeItem('pwnAnswer'); } catch (e) {} return 1; })()`, 10);
+  await run('pwn:open', 'openClassActivitiesScreen()', 600);
+  const K = i => 'ca-49-s' + i;
+  const q = (i, sel) => `document.querySelector('#pwn-${K(i)} ${sel}')`;
+  const state = i => `(() => { const b = document.getElementById('pwn-${K(i)}'); const s = powerNames['${K(i)}']; if (!b || !s) return null;
+    return { phase: s.phase, answer: s.answer, mode: s.cfg.mode, pressed: [...b.querySelectorAll('[data-pwn-answer]')].map(x => x.getAttribute('aria-pressed')), hasStart: !!b.querySelector('[data-pwn-start]'),
+             picks: [...b.querySelectorAll('[data-pwn-pick]')].map(x => x.getAttribute('data-pwn-pick')), hits: b.querySelectorAll('.fg-hit').length, idx: s.idx, res: s.res || [],
+             cardMode: s.cards ? s.cards[s.idx].mode : null, note: s.cards ? s.cards[s.idx].note : null, nextHidden: (document.getElementById('pwn-next-${K(i)}') || { hidden: null }).hidden }; })()`;
+  let steps = 0;
+  const NAMES12 = ['E5', 'F5', 'F♯5', 'G5', 'G♯5', 'A5', 'A♯5', 'B5', 'C5', 'C♯5', 'D5', 'D♯5'];
+  for (const lang of ['en', 'es']) {
+    await run('pwn:' + lang, `setLang('${lang}')`, 600);
+    await run('pwn:focus:' + lang, "caFocusActivity('ca-49')", 700);
+    // Step 1: Note Call, frets 5-12.
+    await run('pwn:go1:' + lang, `caFocusGo('ca-49', 0)`, 600);
+    const nc = await run('pwn:nc:' + lang, `(() => { const s = noteCalls['ca-49-s0']; return s ? { min: s.cfg.minFret, max: s.cfg.maxFret, strings: s.cfg.strings.join(','), power: s.cfg.power, box: !!document.getElementById('ncr-ca-49-s0') } : null; })()`, 10);
+    if (!nc || nc.min !== 5 || nc.max !== 12 || nc.strings !== 'lowE,A' || nc.power || !nc.box) fail(lang + ' step 1', 'the Note Call step is ' + JSON.stringify(nc) + ', expected frets 5-12 on the low E and A strings');
+    steps++;
+    for (let i = 1; i < list.length; i++) {
+      const w = lang + ' step ' + (i + 1);
+      await run('pwn:go:' + w, `caFocusGo('ca-49', ${i})`, 600);
+      const s0 = await run('pwn:state0:' + w, state(i), 10);
+      if (!s0) { fail(w, 'the drill is not on the step'); continue; }
+      if (s0.answer !== true || s0.pressed[0] !== 'true' || s0.pressed[1] !== 'false') fail(w, `opens with Show answer ${JSON.stringify(s0.pressed)}, not On`);
+      if (!s0.hasStart || s0.phase !== 'setup') fail(w, 'opens on ' + s0.phase);
+      await run('pwn:off:' + w, `${q(i, '[data-pwn-answer="0"]')}.click()`, 100);
+      const so = await run('pwn:off-state:' + w, state(i), 10);
+      if (!so || so.answer !== false || so.pressed[1] !== 'true') fail(w, 'clicking Off left answer=' + (so && so.answer));
+      await run('pwn:on:' + w, `${q(i, '[data-pwn-answer="1"]')}.click()`, 100);
+      const sn = await run('pwn:on-state:' + w, state(i), 10);
+      if (!sn || sn.answer !== true || sn.pressed[0] !== 'true') fail(w, 'clicking On left answer=' + (sn && sn.answer));
+      await run('pwn:off2:' + w, `${q(i, '[data-pwn-answer="0"]')}.click()`, 100);
+      // Start (scored): one right answer by a real click, one wrong, then Next.
+      await run('pwn:start:' + w, `${q(i, '[data-pwn-start]')}.click()`, 300);
+      const sp = await run('pwn:play:' + w, state(i), 10);
+      if (!sp || sp.phase !== 'play' || sp.cardMode == null) { fail(w, 'Start did not deal a card: ' + JSON.stringify(sp)); continue; }
+      const mode = list[i].mode;
+      if (mode === 'name' && (JSON.stringify(sp.picks) !== JSON.stringify(NAMES12) || sp.hits !== 0)) fail(w, `name step shows buttons ${JSON.stringify(sp.picks)} and ${sp.hits} board taps; expected the 12 names in fret order and none on the board`);
+      if (mode === 'fret' && (sp.picks.length !== 0 || sp.hits !== 2 * (list[i].maxFret - list[i].minFret + 1))) fail(w, `fret step shows ${sp.picks.length} name buttons and ${sp.hits} board taps; expected none and ${2 * (list[i].maxFret - list[i].minFret + 1)}`);
+      // A right answer, by a real click.
+      const click = (right) => `(() => { const s = powerNames['${K(i)}'], c = s.cards[s.idx];
+        if (c.mode === 'name') { const want = ${right} ? c.note : PWN_NAMES.find(n => n !== c.note); document.querySelector('#pwn-${K(i)} [data-pwn-pick="' + want + '"]').click(); return 'name'; }
+        const spots = pwnSpotsOf(s, c); const bad = [['lowE', 0], ['lowE', 1], ['A', 0], ['A', 1]].find(([k, f]) => sdNoteAt(k, f) + '5' !== c.note);
+        const tgt = ${right} ? spots[0] : { k: bad[0], f: bad[1] };
+        const rect = [...document.querySelectorAll('#pwn-${K(i)} .fg-hit')].find(r => (r.getAttribute('onclick') || '').indexOf("'" + tgt.k + "'," + tgt.f + ")") >= 0);
+        if (!rect) return 'no rect'; rect.dispatchEvent(new MouseEvent('click', { bubbles: true })); return 'fret'; })()`;
+      const r1 = await run('pwn:right:' + w, click(true), 100);
+      const a1 = await run('pwn:right-state:' + w, state(i), 10);
+      if (!a1 || a1.res[0] !== 'hit') fail(w, `a real click on the right answer (${r1}) scored ${a1 && a1.res[0]}`);
+      await sleep(900);   // a hit moves on by itself
+      const a2 = await run('pwn:moved:' + w, state(i), 10);
+      if (!a2 || a2.idx !== 1) fail(w, 'a right answer did not move on by itself (card ' + (a2 && a2.idx) + ')');
+      const r2 = await run('pwn:wrong:' + w, click(false), 100);
+      const a3 = await run('pwn:wrong-state:' + w, state(i), 10);
+      if (!a3 || a3.res[1] !== 'miss' || a3.nextHidden !== false) fail(w, `a real click on a wrong answer (${r2}) scored ${a3 && a3.res[1]} with Next ${a3 && (a3.nextHidden ? 'hidden' : 'shown')}`);
+      await run('pwn:next:' + w, `${q(i, '[data-pwn-next]')}.click()`, 150);
+      const a4 = await run('pwn:next-state:' + w, state(i), 10);
+      if (!a4 || a4.idx !== 2) fail(w, 'Next did not move on (card ' + (a4 && a4.idx) + ')');
+      // Stop: the setup screen.
+      await run('pwn:stop:' + w, `${q(i, '[data-pwn-stop]')}.click()`, 150);
+      const st = await run('pwn:stop-state:' + w, state(i), 10);
+      if (!st || st.phase !== 'setup' || !st.hasStart) fail(w, 'Stop left ' + JSON.stringify(st));
+      // A round ends when the student moves to another step.
+      await run('pwn:restart:' + w, `${q(i, '[data-pwn-start]')}.click()`, 300);
+      await run('pwn:leave:' + w, `caFocusGo('ca-49', ${i === list.length - 1 ? 1 : i + 1})`, 600);
+      const sl = await run('pwn:leave-state:' + w, state(i), 10);
+      if (sl && sl.phase === 'play') fail(w, 'moving to another step left the round running');
+      await run('pwn:back:' + w, `caFocusGo('ca-49', ${i})`, 500);
+      steps++;
+    }
+    // Switching language mid-round ends it.
+    await run('pwn:lang-go:' + lang, `caFocusGo('ca-49', 1); 1`, 500);
+    await run('pwn:lang-start:' + lang, `${q(1, '[data-pwn-start]')}.click()`, 300);
+    await run('pwn:lang-switch:' + lang, `setLang('${lang === 'en' ? 'es' : 'en'}')`, 800);
+    const sw = await run('pwn:lang-state:' + lang, `(() => { const s = powerNames['${K(1)}']; return s ? { phase: s.phase, timer: !!s.timer } : null; })()`, 10);
+    if (sw && (sw.phase === 'play' || sw.timer)) fail(lang + ' language switch', 'switching language left the round running: ' + JSON.stringify(sw));
+  }
+  // Show answer is remembered per browser: the Off clicked above is still Off after a reload, and On comes back when clicked.
+  await run('pwn:reload-pref', `(function(){ try { return localStorage.getItem('pwnAnswer'); } catch (e) { return null; } })()`, 10);
+  await page.send('Page.navigate', { url: base + '/index.html' });
+  await sleep(3500);
+  await run('pwn:devBypass2', 'devBypass()', 3500);
+  for (let i = events.length - 1; i >= 0; i--) if (events[i].step === 'pwn:devBypass2' && /ResizeObserver loop/.test(events[i].text)) events.splice(i, 1);
+  await run('pwn:reopen', 'openClassActivitiesScreen()', 600);
+  await run('pwn:reopen-focus', "caFocusActivity('ca-49')", 700);
+  await run('pwn:reopen-go', "caFocusGo('ca-49', 1)", 600);
+  const rl = await run('pwn:reload-state', state(1), 10);
+  if (!rl || rl.answer !== false || rl.pressed[1] !== 'true') fail('after a reload', 'Show answer is ' + JSON.stringify(rl && rl.pressed) + ' after a reload, expected Off (what was clicked last and remembered)');
+  await run('pwn:restore', `(function(){ try { localStorage.removeItem('pwnAnswer'); } catch (e) {} return 1; })()`, 10);
+  stats.pwnSteps = steps;
+  await run('pwn:done', `(document.querySelectorAll('.ca-card[open]').forEach(c => { c.open = false; }), 1)`, 100);
+}
+
 /* Recording switch (recordingVersions, 2026-10-30 — the Jimi Hendrix / Neil
    Young switch on the Watchtower play-alongs). checks.mjs 1cc renders every
    recording through the real app.js; this clicks the switch for real. For each
@@ -1255,6 +1366,7 @@ async function walk(base, chromePort, label) {
   await twoColumnQuizWalk(page, run, events, stats);
   await noteCallWalk(page, run, events, stats, base);
   await chordCallWalk(page, run, events, stats, base);
+  await powerNameWalk(page, run, events, stats, base);
   await recordingWalk(page, run, events, stats, base);
   await strumWalk(page, run, events, stats);
   await pathsWalk(page, run, events, stats);
@@ -1292,7 +1404,7 @@ try {
   const norm = e => `${e.kind}|${e.step.replace(/^(en|es):/, '')}|${e.kind === 'bad-handler' ? '' : e.text}`;
   const baseCount = new Map(); (base ? base.errors : []).forEach(e => baseCount.set(norm(e), Math.max(baseCount.get(norm(e)) || 0, e.kind === 'bad-handler' ? +e.text : 1)));
   const report = base ? now.errors.filter(e => (e.kind === 'bad-handler' ? +e.text : 1) > (baseCount.get(norm(e)) || 0)) : now.errors;
-  say(`smoke: ${now.stats.sets} sets in ${now.stats.modules} modules (EN + ES), ${now.stats.games} game views, ${now.stats.buttons} inline handlers compiled${now.stats.chordCards ? `, ${now.stats.chordCards} chord-grid cards walked (cursor, lap, layout at 1366/390/360, lyric sheet${now.stats.bassClicks ? `, bass switch clicked on ${now.stats.bassClicks}` : ''}${now.stats.recordingClicks ? `, recording switch clicked, reloaded and flipped back on ${now.stats.recordingClicks}` : ''}${now.stats.chordSkipped ? `; ${now.stats.chordSkipped.join(', ')} is teacher-only and not walked` : ''})` : ''}${now.stats.noteCallSteps ? `, ${now.stats.noteCallSteps} Note Call power-chord steps (EN + ES: six strings, taps on low E and A only, a hit and a miss)` : ''}${now.stats.chordCallRounds ? `, ${now.stats.chordCallRounds} Call the chord steps (EN + ES: Slower by default, the speed switch both ways, Start, a space bar that is cancelled, Stop, a round ended by another step and by a language switch, the default after a reload)` : ''}${now.stats.powerLayouts ? `, a pair play screen says its BPM (${now.stats.pairPlay || 0} run), Power Chord Switch at 1366\u00d7657 (Start and tempo on screen: ${now.stats.powerLayouts} views, incl. after a reload${now.stats.powerBestLayouts ? `; with a "Best today" score, EN + ES, no scrolling and the privacy line on screen: ${now.stats.powerBestLayouts} views` : ''}${now.stats.songs ? `; song buttons picked and reopened, ${now.stats.songs} song-switch rounds (16 switches x 3) run on a fake clock: round tempos, the BPM buttons, the play screen fitting 657px, one lit chart per chord, the done screen with 21 changes, ${now.stats.songDraws} random draws, none a song` : ""}${now.stats.powerCosmetic ? `; "low E" title kept together at ${now.stats.powerTitleWidths} window widths and the done-screen button padded, EN + ES: ${now.stats.powerCosmetic}` : ''})` : ''}${now.stats.changeUpLayouts ? `, Change Up at 1366\u00d7657 (Start on screen, no scrolling: ${now.stats.changeUpLayouts} views)` : ''}${now.stats.quizLayouts ? `, Chord Blitz (both directions) and Fret Zap at 1366\u00d7657 (picture left, 2\u00d72 answers right, no scroll: ${now.stats.quizLayouts} views)` : ''}${now.stats.pmHeaderViews ? `, practice-minutes strip in the top bar: ${now.stats.pmHeaderViews} view checks (6 views x EN/ES x 1366 and 390 px: a shown button, exactly one strip on top, the Games bar's own on Games, no sideways scroll), ${now.stats.pmHeaderClicks} clicks open My progress, back after a reload, hidden when signed out` : ''}${now.stats.strumSteps ? `, ${now.stats.strumSteps} strum-pattern steps (EN + ES: cells, arrows, chord names, columns, 1366 and 390 px; Play strum lights an arrow, clicks every beat and sounds down strums louder; Play clicks opens the Metronome at 60 BPM; Stop resets)` : ''}${now.stats.pathsActivities ? `, ${now.stats.pathsActivities} paths-activity walks (EN + ES: chooser with a silent preview and step list per path, Start, route length, Got it, Change path, ticks kept across a switch, one saved pick)` : ''}`);
+  say(`smoke: ${now.stats.sets} sets in ${now.stats.modules} modules (EN + ES), ${now.stats.games} game views, ${now.stats.buttons} inline handlers compiled${now.stats.chordCards ? `, ${now.stats.chordCards} chord-grid cards walked (cursor, lap, layout at 1366/390/360, lyric sheet${now.stats.bassClicks ? `, bass switch clicked on ${now.stats.bassClicks}` : ''}${now.stats.recordingClicks ? `, recording switch clicked, reloaded and flipped back on ${now.stats.recordingClicks}` : ''}${now.stats.chordSkipped ? `; ${now.stats.chordSkipped.join(', ')} is teacher-only and not walked` : ''})` : ''}${now.stats.noteCallSteps ? `, ${now.stats.noteCallSteps} Note Call power-chord steps (EN + ES: six strings, taps on low E and A only, a hit and a miss)` : ''}${now.stats.pwnSteps ? `, ${now.stats.pwnSteps} Name the power chord steps (EN + ES: Note Call frets 5-12; Show answer on by default and clicked both ways; the 12 buttons in fret order and a real click on a right and a wrong answer on the buttons and the board; Next, Stop, another step, a language switch; the choice remembered after a reload)` : ''}${now.stats.chordCallRounds ? `, ${now.stats.chordCallRounds} Call the chord steps (EN + ES: Slower by default, the speed switch both ways, Start, a space bar that is cancelled, Stop, a round ended by another step and by a language switch, the default after a reload)` : ''}${now.stats.powerLayouts ? `, a pair play screen says its BPM (${now.stats.pairPlay || 0} run), Power Chord Switch at 1366\u00d7657 (Start and tempo on screen: ${now.stats.powerLayouts} views, incl. after a reload${now.stats.powerBestLayouts ? `; with a "Best today" score, EN + ES, no scrolling and the privacy line on screen: ${now.stats.powerBestLayouts} views` : ''}${now.stats.songs ? `; song buttons picked and reopened, ${now.stats.songs} song-switch rounds (16 switches x 3) run on a fake clock: round tempos, the BPM buttons, the play screen fitting 657px, one lit chart per chord, the done screen with 21 changes, ${now.stats.songDraws} random draws, none a song` : ""}${now.stats.powerCosmetic ? `; "low E" title kept together at ${now.stats.powerTitleWidths} window widths and the done-screen button padded, EN + ES: ${now.stats.powerCosmetic}` : ''})` : ''}${now.stats.changeUpLayouts ? `, Change Up at 1366\u00d7657 (Start on screen, no scrolling: ${now.stats.changeUpLayouts} views)` : ''}${now.stats.quizLayouts ? `, Chord Blitz (both directions) and Fret Zap at 1366\u00d7657 (picture left, 2\u00d72 answers right, no scroll: ${now.stats.quizLayouts} views)` : ''}${now.stats.pmHeaderViews ? `, practice-minutes strip in the top bar: ${now.stats.pmHeaderViews} view checks (6 views x EN/ES x 1366 and 390 px: a shown button, exactly one strip on top, the Games bar's own on Games, no sideways scroll), ${now.stats.pmHeaderClicks} clicks open My progress, back after a reload, hidden when signed out` : ''}${now.stats.strumSteps ? `, ${now.stats.strumSteps} strum-pattern steps (EN + ES: cells, arrows, chord names, columns, 1366 and 390 px; Play strum lights an arrow, clicks every beat and sounds down strums louder; Play clicks opens the Metronome at 60 BPM; Stop resets)` : ''}${now.stats.pathsActivities ? `, ${now.stats.pathsActivities} paths-activity walks (EN + ES: chooser with a silent preview and step list per path, Start, route length, Got it, Change path, ticks kept across a switch, one saved pick)` : ''}`);
   if (base) say(`smoke: ${BASELINE} had ${base.errors.length} error event(s); this checkout has ${now.errors.length}`);
   if (report.length) {
     exitCode = 1;
