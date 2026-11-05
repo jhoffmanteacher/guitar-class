@@ -7980,6 +7980,7 @@ function renderShuffleDrill(drill, key, wid){
   if(drill && drill.type === 'deck') return renderDeckDrill(drill, key, wid);
   if(drill && drill.type === 'ear')  return renderEarDrill(drill, key, wid);
   if(drill && drill.type === 'notecall') return renderNoteCall(drill, key, wid);
+  if(drill && drill.type === 'chordcall') return renderChordCall(drill, key);
   if(!drill || drill.type !== 'shuffle') return '';
   const prev = shuffleDrills[key];
   if(prev && prev.tick) clearInterval(prev.tick);
@@ -9606,6 +9607,430 @@ function ncStopAll(){
 }
 function ncMicActive(){ return !!(ncLive && noteCalls[ncLive] && noteCalls[ncLive].micOn); }
 
+/* ── Call the chord (step.drill, type 'chordcall') ───────────────────────
+   The no-guitar rung under "reading a lyric sheet": the record plays one
+   section of a song and the student keeps one beat AHEAD of the chord changes.
+   (Work order 2026-11-05, Day 36.)
+
+   Module-data schema:
+     drill: { type:'chordcall', card:'ca-29', section:'Verse 1', mode:'follow'|'call' }
+   `card` names the practice card whose sections it reads (the SAME objects the
+   card and the lyric sheet read — pcLayout, nothing copied) and `section` is
+   one of that card's section labels. The drill plays that section of the
+   card's own backing track: Jimi's recording, whatever the card's recording
+   switch says (the drill reads the raw entry, not caView).
+
+   A "change" is what the lyric sheet counts as one (pcSheetMap): the first
+   chord of the section, and every chord that differs from the one before it,
+   a rest between two chords not being a change on its own.
+
+   follow: the next chord is shown in a big box. Tap it, or press the space bar,
+           in the last beat before the band reaches it. Pass: every change
+           hit, two rounds in a row.
+   call:   the next chord is HIDDEN; the student picks it from the song's chord
+           buttons in the same beat. A round is the section's first 10 changes
+           (all of them if there are fewer). Pass: 8 of 10.
+
+   The window for change k runs from one beat before it to the change itself
+   (+ CHC_GRACE for the ear's and the screen's own slop). A tap before the window
+   opens is "too early" and does nothing; a tap after it, before the next window
+   opens, is late (a miss that still uses up the change); no tap is a miss. When
+   a change is closer than a beat to the one before it, its window is cut so it
+   opens CHC_GRACE after the previous change (chcWindows; checks.mjs 1ce walks
+   every change). Times are the file's own clock (audio.currentTime) less the
+   output latency, so they are what the student HEARS; the count-in before the
+   audio is counted on a virtual clock so the first change has its beat too.
+   Nothing is saved: the score is per attempt, on screen. Teacher preview plays
+   for real. */
+const CHC_ROUND = 10, CHC_PASS = 8, CHC_PASS_STREAK = 2;
+const CHC_GRACE = 0.06;        // seconds past the change that still count as on it
+const chordCalls = {};
+let chcLive = null;            // key of the drill whose round is running
+let chcKeyFn = null, chcKeyUpFn = null;   // the space-bar listeners, only while a Follow round runs
+
+function chcBox(key){ return document.getElementById('chcr-' + key); }
+
+/* Pure: the changes of one section, in beats from the start of its first lap. */
+function chcTargets(S, bpb){
+  const out = [];
+  let prev = null;
+  for(let rep = 0; rep < S.reps; rep++){
+    let pos = rep * S.bars * bpb;
+    S.notes.forEach(nt => {
+      const len = nt.beats > 0 ? nt.beats : 1;
+      if(!nt.rest && nt.note !== prev){ out.push({ name: nt.note, beat: pos, rep }); prev = nt.note; }
+      pos += len;
+    });
+  }
+  return out;
+}
+/* Pure: one beat's length in the window's own seconds, at bar `bar` (a
+   live-band track has bars of different lengths). */
+function chcBeatSec(win, bpb, bar){
+  const e = win.edges, i = Math.max(0, Math.min(e.length - 2, bar));
+  return (e[i + 1] - e[i]) / bpb;
+}
+/* Pure: { at, open, beatSec } for every target — `at` the change, `open` where
+   its window opens: a beat before, but never earlier than CHC_GRACE after the
+   change before it. */
+function chcWindows(win, targets, bpb){
+  const out = [];
+  targets.forEach((tg, k) => {
+    const at = snipTimeAtBars(win, tg.beat / bpb);
+    const beatSec = chcBeatSec(win, bpb, Math.floor(tg.beat / bpb + 1e-6));
+    const open = Math.max(at - beatSec, k > 0 ? out[k - 1].at + CHC_GRACE : -Infinity);
+    out.push({ at, open, beatSec });
+  });
+  return out;
+}
+/* Pure: everything about one drill that does not move. null when the card or
+   section is not there (checks.mjs 1ce fails the push on that). */
+function chcModel(drill){
+  const act = (window.CLASS_ACTIVITIES || []).find(x => x.id === drill.card);
+  const L = act && pcLayout(act);
+  if(!L) return null;
+  const si = L.sections.findIndex(S => S.s.label === drill.section);
+  if(si < 0) return null;
+  const S = L.sections[si];
+  const bpb = L.tr.beatsPerBar > 0 ? L.tr.beatsPerBar : 4;
+  const all = chcTargets(S, bpb);
+  const call = drill.mode === 'call';
+  const targets = call ? all.slice(0, CHC_ROUND) : all;
+  const chords = [];
+  all.forEach(x => { if(chords.indexOf(x.name) < 0) chords.push(x.name); });
+  const n = targets.length;
+  const passAt = call ? (n >= CHC_ROUND ? CHC_PASS : Math.ceil(n * CHC_PASS / CHC_ROUND)) : n;
+  return { act, L, S, si, bpb, targets, chords, n, passAt, call, song: (tf(act, 'title') || '').split(' — ')[0] };
+}
+
+function renderChordCall(drill, key){
+  const prev = chordCalls[key];
+  if(prev) chcStop(key);
+  const M = chcModel(drill);
+  if(!M) return '';
+  chordCalls[key] = { key, drill, M, phase: 'setup', slow: prev ? prev.slow : true, streak: prev ? prev.streak : 0, msg: '' };
+  return `<div class="sdr chcr" id="chcr-${escAttr(key)}" onpointerdown="chcDown(event)" onclick="chcDown(event)">${chcSetupHtml(key)}</div>`;
+}
+function chcHeadHtml(st, right){
+  return `<div class="sdr-head"><span>${escHtml(t('chc.head', { song: st.M.song, section: tf(st.M.S.s, 'label') }))}</span>` +
+    `<span class="sdr-meta">${escHtml(right)}</span></div>`;
+}
+function chcMeta(st){ return t(st.M.call ? 'chc.metaCall' : 'chc.metaFollow') + ' · ' + t(st.slow ? 'chc.slower' : 'chc.normal'); }
+function chcSpeedHtml(st){
+  const pill = (slow, label) =>
+    `<button type="button" class="sdr-pill${st.slow === slow ? ' active' : ''}" aria-pressed="${st.slow === slow}" data-chc-slow="${slow ? 1 : 0}">${escHtml(label)}</button>`;
+  return `<div class="nc-toggle chc-speed"><span class="nc-toggle-label">${escHtml(t('chc.speed'))}</span>${pill(true, t('chc.slower'))}${pill(false, t('chc.normal'))}</div>`;
+}
+function chcPassLine(st){
+  return st.M.call ? t('chc.passCall', { pass: st.M.passAt, total: st.M.n }) : t('chc.passFollow', { n: CHC_PASS_STREAK });
+}
+function chcSetupHtml(key){
+  const st = chordCalls[key];
+  if(!st) return '';
+  const msg = st.msg ? `<div class="coach-note nc-msg">${escHtml(st.msg)}</div>` : '';
+  const streak = !st.M.call && st.streak > 0 ? `<div class="sdr-best">${escHtml(t('chc.streak', { n: st.streak, total: CHC_PASS_STREAK }))}</div>` : '';
+  return chcHeadHtml(st, chcMeta(st)) +
+    `<div class="sdr-body">` +
+      `<div class="sdr-intro">${escHtml(t(st.M.call ? 'chc.introCall' : 'chc.introFollow'))}</div>` +
+      chcSpeedHtml(st) +
+      msg +
+      `<button type="button" class="sdr-start" data-chc-start="1">&#x25B6; ${escHtml(t('chc.start'))}</button>` +
+      `<div class="sdr-best">${escHtml(chcPassLine(st))}</div>` + streak +
+    `</div>`;
+}
+function chcPlayHtml(key){
+  const st = chordCalls[key], M = st.M;
+  const pips = Array.from({ length: M.bpb }, (_, i) => `<span class="nc-pip${i === 0 ? ' one' : ''}"></span>`).join('');
+  const picks = M.call
+    ? `<div class="chc-picks" role="group" aria-label="${escAttr(t('chc.pickAria'))}">` +
+        M.chords.map(c => `<button type="button" class="chc-pick" data-chc-pick="${escAttr(c)}">${escHtml(c)}</button>`).join('') + `</div>`
+    : '';
+  return chcHeadHtml(st, chcMeta(st)) +
+    `<div class="sdr-body chc-play">` +
+      `<div class="chc-top"><div class="nc-pips" id="chc-pips-${escAttr(key)}">${pips}</div><span class="chc-status" id="chc-status-${escAttr(key)}"></span></div>` +
+      `<div class="chc-stage">` +
+        `<div class="chc-now"><span class="nc-kicker">${escHtml(t('chc.now'))}</span><span class="chc-name" id="chc-now-${escAttr(key)}">&nbsp;</span></div>` +
+        `<button type="button" class="chc-next" id="chc-next-${escAttr(key)}" data-chc-tap="1" aria-label="${escAttr(t(M.call ? 'chc.nextAriaCall' : 'chc.nextAria'))}">` +
+          `<span class="nc-kicker">${escHtml(t('chc.next'))}</span><span class="chc-name" id="chc-nextname-${escAttr(key)}">?</span></button>` +
+      `</div>` +
+      picks +
+      `<div class="sdr-fb nc-fb chc-fb" id="chc-fb-${escAttr(key)}" aria-live="polite"></div>` +
+      `<div class="nc-foot"><div class="fret-dots nc-dots" id="chc-dots-${escAttr(key)}"></div>` +
+      (M.call ? '' : `<span class="chc-keyhint">${escHtml(t('chc.keyHint'))}</span>`) +
+      `<button type="button" class="sdr-btn2" data-chc-stop="1">${escHtml(t('chc.stop'))}</button></div>` +
+    `</div>`;
+}
+
+/* One handler for the whole drill. A tap that must be on time acts on
+   pointerdown (a click waits for the finger to lift); a click is only taken
+   when it came from the keyboard (detail 0), so a mouse press is not counted
+   twice. Everything else — Start, Stop, the speed — acts on click. */
+function chcDown(ev){
+  const box = ev.currentTarget, el = ev.target && ev.target.closest ? ev.target.closest('[data-chc-start],[data-chc-stop],[data-chc-slow],[data-chc-tap],[data-chc-pick],[data-chc-again]') : null;
+  if(!el || !box) return;
+  const key = box.id.replace(/^chcr-/, '');
+  const timed = el.hasAttribute('data-chc-tap') || el.hasAttribute('data-chc-pick');
+  if(timed){
+    if(ev.type === 'click' && ev.detail !== 0) return;
+    chcAct(key, el.hasAttribute('data-chc-pick') ? el.getAttribute('data-chc-pick') : null);
+    return;
+  }
+  if(ev.type !== 'click') return;
+  if(el.hasAttribute('data-chc-start') || el.hasAttribute('data-chc-again')) chcStart(key);
+  else if(el.hasAttribute('data-chc-stop')) chcQuit(key);
+  else if(el.hasAttribute('data-chc-slow')) chcSetSlow(key, el.getAttribute('data-chc-slow') === '1');
+}
+function chcSetSlow(key, slow){
+  const st = chordCalls[key];
+  if(!st || st.phase === 'play') return;
+  st.slow = slow; st.msg = '';
+  chcRepaint(key, st.phase === 'done' ? chcDoneHtml(key) : chcSetupHtml(key));
+}
+function chcRepaint(key, html){ const b = chcBox(key); if(b) b.innerHTML = html; }
+
+function chcStart(key){
+  const st = chordCalls[key];
+  if(!st || st.phase === 'play') return;
+  if(window.coachMicLive) return;                 // never play into a live mic (same guard as pcStart)
+  stopAllDemoAudio();                              // tab player, snippets, practice card, metronome, other drills
+  if(typeof coachInterrupt === 'function') coachInterrupt(t('coach.interrupt.micLost'));
+  try { getAudioCtx().resume(); } catch(e){}
+  const M = st.M;
+  const win = snippetWindow(M.L.tr, { fromBar: M.S.fromBar, bars: M.S.bars * M.S.reps }, st.slow);
+  const audio = new Audio();
+  audio.preload = 'auto';
+  audio.loop = false;
+  audio.src = snippetSrc(M.L.tr, st.slow, false);
+  Object.assign(st, {
+    phase: 'play', msg: '', audio, win, wins: chcWindows(win, M.targets, M.bpb), k: 0, n: M.n, res: [],
+    counting: true, raf: 0, timers: [], clicks: [], goAt: Infinity, allDone: false, shown: '', fbT: 0
+  });
+  chcLive = key;
+  chcRepaint(key, chcPlayHtml(key));
+  chcPaint(st);
+  if(!M.call) chcKeyOn();
+  try { if(document.activeElement && document.activeElement.blur) document.activeElement.blur(); } catch(e){}   // a focused Stop must not eat the space bar
+  audio.addEventListener('error', () => { if(chordCalls[key] === st && st.audio === audio){ chcQuit(key); if(typeof gateToast === 'function') gateToast(t('ca.snipLoadFailed')); } }, { once: true });
+  const begin = () => {
+    if(chordCalls[key] !== st || st.phase !== 'play' || st.audio !== audio) return;
+    try { audio.currentTime = win.start; } catch(e){}
+    chcCountIn(st);
+  };
+  if(audio.readyState >= 1) begin();
+  else audio.addEventListener('loadedmetadata', begin, { once: true });
+  st.raf = requestAnimationFrame(chcFrame);
+}
+/* One bar of the counted beat before the audio comes in, scheduled on the
+   AudioContext up front (chcStop stops the nodes, as pcStop does). */
+function chcCountIn(st){
+  const ctx = getAudioCtx();
+  const n = st.M.bpb;
+  const beat = chcBeatSec(st.win, n, 0);
+  const t0 = ctx.currentTime + 0.1;
+  st.clicks = [];
+  for(let k = 0; k < n; k++) st.clicks.push(pcClick(t0 + k * beat, k === 0, true));
+  st.beatMs = beat * 1000;
+  st.goAt = performance.now() + (0.1 + n * beat) * 1000;
+  st.timers.push(setTimeout(() => { if(chordCalls[st.key] === st && st.phase === 'play') chcGo(st); }, (0.1 + n * beat) * 1000));
+}
+function chcGo(st){
+  st.counting = false;
+  st.audio.play().catch(() => {});
+}
+/* Where the student is in the song, in the window's seconds: what they HEAR,
+   i.e. the decoder's clock less the output latency. Before the audio starts it
+   runs on the clock that ends at the first beat. */
+function chcNow(st){
+  if(st.counting) return st.win.start - (st.goAt - performance.now()) / 1000 - snipLatency();
+  return st.audio.currentTime - snipLatency();
+}
+
+function chcFrame(){
+  const st = chcLive && chordCalls[chcLive];
+  if(!st || st.phase !== 'play') return;
+  const box = chcBox(st.key);
+  if(!box || !box.isConnected){ chcStop(st.key); st.phase = 'setup'; return; }
+  const h = chcNow(st);
+  // A change whose next window has opened without a tap is a miss.
+  while(st.k < st.n){
+    const lim = st.k + 1 < st.n ? st.wins[st.k + 1].open : st.wins[st.k].at + st.wins[st.k].beatSec;
+    if(h >= lim) chcResolve(st, 'none'); else break;
+  }
+  const last = st.wins[st.n - 1];
+  const ended = !st.counting && (st.audio.ended || st.audio.currentTime >= st.win.end - 0.02);
+  if(ended || (st.k >= st.n && h >= last.at + 0.4)){
+    while(st.k < st.n) chcResolve(st, 'none');
+    chcFinish(st.key);
+    return;
+  }
+  chcPaint(st, h);
+  st.raf = requestAnimationFrame(chcFrame);
+}
+/* Repaint only what moved: the box, the chord now sounding, the pips. */
+function chcPaint(st, h){
+  const key = st.key, M = st.M;
+  const nextEl = document.getElementById('chc-next-' + key);
+  if(!nextEl) return;
+  if(h === undefined) h = st.win.start - 1;
+  // The chord sounding now: the last change whose moment has passed.
+  let cur = -1;
+  for(let i = 0; i < st.n; i++) if(st.wins[i].at <= h) cur = i; else break;
+  const pending = st.k < st.n ? st.k : -1;
+  const open = pending >= 0 && h >= st.wins[pending].open && h <= st.wins[pending].at + CHC_GRACE;
+  // A hidden chord (Call) is named only once its change has come.
+  const shown = pending < 0 ? '' : (!M.call || h >= st.wins[pending].at) ? M.targets[pending].name : '?';
+  const sig = cur + '|' + pending + '|' + open + '|' + shown;
+  if(sig !== st.shown){
+    st.shown = sig;
+    const nowEl = document.getElementById('chc-now-' + key);
+    if(nowEl) nowEl.textContent = cur >= 0 ? M.targets[cur].name : ' ';
+    const nm = document.getElementById('chc-nextname-' + key);
+    if(nm) nm.textContent = pending < 0 ? '✓' : shown;
+    nextEl.classList.toggle('open', !!open);
+    chcPaintDots(st);
+  }
+  // The beat pips: the count-in counts 1..n, then the bar's beats.
+  const pips = document.getElementById('chc-pips-' + key);
+  if(pips){
+    let beatIn = -1;
+    if(st.counting){ if(st.goAt !== Infinity && st.beatMs) beatIn = Math.max(0, Math.min(M.bpb - 1, Math.floor(M.bpb - (st.goAt - performance.now()) / st.beatMs))); }
+    else { const b = snipBarsAt(st.win, h); beatIn = Math.max(0, Math.min(M.bpb - 1, Math.floor((b - Math.floor(b)) * M.bpb + 1e-6))); }
+    if(beatIn !== st.pip){
+      st.pip = beatIn;
+      Array.from(pips.children).forEach((p, i) => p.classList.toggle('on', i === beatIn));
+    }
+  }
+  const sEl = document.getElementById('chc-status-' + key);
+  const stat = st.counting ? t('chc.countIn') : '';
+  if(sEl && sEl.textContent !== stat) sEl.textContent = stat;
+}
+function chcPaintDots(st){
+  const el = document.getElementById('chc-dots-' + st.key);
+  if(!el) return;
+  el.innerHTML = Array.from({ length: st.n }, (_, i) => {
+    const r = st.res[i];
+    return `<span class="fret-dot${r === 'hit' ? ' hit' : r ? ' miss' : i === st.k ? ' cur' : ''}"></span>`;
+  }).join('');
+}
+function chcFeedback(st, cls, text){
+  const fb = document.getElementById('chc-fb-' + st.key);
+  if(!fb) return;
+  fb.className = 'sdr-fb nc-fb chc-fb' + (cls ? ' ' + cls : '');
+  fb.textContent = text;
+}
+/* A tap (Follow, pick = null) or a pick (Call) while a round runs. */
+function chcAct(key, pick){
+  const st = chordCalls[key];
+  if(!st || st.phase !== 'play' || st.k >= st.n) return;
+  const h = chcNow(st), w = st.wins[st.k], tg = st.M.targets[st.k];
+  if(h < w.open){ chcFeedback(st, '', t('chc.fbEarly')); return; }
+  if(h > w.at + CHC_GRACE) chcResolve(st, 'late', pick);
+  else if(pick != null && pick !== tg.name) chcResolve(st, 'wrong', pick);
+  else chcResolve(st, 'hit', pick);
+}
+function chcResolve(st, res, pick){
+  const tg = st.M.targets[st.k];
+  if(!tg) return;
+  st.res[st.k] = res;
+  const vars = { chord: tg.name, pick: pick || '' };
+  if(res === 'hit') chcFeedback(st, 'hit', t('chc.fbHit', vars));
+  else if(res === 'late') chcFeedback(st, 'miss', t('chc.fbLate', vars));
+  else if(res === 'wrong') chcFeedback(st, 'miss', t('chc.fbWrong', vars));
+  else chcFeedback(st, 'miss', t('chc.fbNone', vars));
+  st.k++;
+  st.shown = '';
+  chcPaint(st, chcNow(st));
+}
+
+function chcFinish(key){
+  const st = chordCalls[key];
+  if(!st) return;
+  chcStop(key);
+  const M = st.M;
+  const hits = st.res.filter(r => r === 'hit').length;
+  const pass = hits >= M.passAt;
+  if(!M.call) st.streak = pass ? st.streak + 1 : 0;
+  st.phase = 'done';
+  st.hits = hits;
+  chcRepaint(key, chcDoneHtml(key));
+}
+function chcDoneHtml(key){
+  const st = chordCalls[key], M = st.M;
+  const hits = st.hits || 0, pass = hits >= M.passAt;
+  let verdict;
+  if(M.call) verdict = pass ? t('chc.verdictPassCall', { hits, total: M.n }) : t('chc.verdictAgainCall', { pass: M.passAt, total: M.n });
+  else if(pass) verdict = st.streak >= CHC_PASS_STREAK ? t('chc.verdictDone', { n: CHC_PASS_STREAK }) : t('chc.verdictOne', { n: st.streak, total: CHC_PASS_STREAK });
+  else verdict = t('chc.verdictAgain');
+  const why = r => t(r === 'late' ? 'chc.whyLate' : r === 'wrong' ? 'chc.whyWrong' : 'chc.whyNone');
+  /* The first few misses, not all of them: a round of 32 with a bad start would push Go again off a Chromebook screen. */
+  const miss = [];
+  st.res.forEach((r, i) => { if(r !== 'hit') miss.push(i); });
+  const SHOW = 4;
+  const rows = miss.slice(0, SHOW).map(i =>
+    `<div class="sdr-drill-row"><span>${escHtml(t('chc.rowChange', { n: i + 1, chord: M.targets[i].name }))}</span><span class="sdr-meta">${escHtml(why(st.res[i]))}</span></div>`).join('') +
+    (miss.length > SHOW ? `<div class="sdr-drill-row"><span>${escHtml(t('chc.moreMissed', { n: miss.length - SHOW }))}</span></div>` : '');
+  return chcHeadHtml(st, chcMeta(st)) +
+    `<div class="sdr-body">` +
+      `<div class="sdr-score">${escHtml(t('chc.score', { n: hits, total: M.n }))}</div>` +
+      `<div class="sdr-verdict ${pass ? 'good' : 'mid'}">${escHtml(verdict)}</div>` +
+      `<div class="sdr-actions"><button type="button" class="sdr-start" data-chc-again="1">&#x25B6; ${escHtml(t('chc.again'))}</button></div>` +
+      chcSpeedHtml(st) +
+      (rows ? `<div class="sdr-drill"><div class="sdr-drill-title">${escHtml(t('chc.missed'))}</div>${rows}</div>` : '') +
+    `</div>`;
+}
+
+/* The space bar taps the big box during a Follow round. keydown only, never a
+   held key, never from a field, and preventDefault so the page does not scroll.
+   Installed by chcStart, removed by chcStop — every way out goes through chcStop. */
+function chcKeyOn(){
+  chcKeyOff();
+  chcKeyFn = ev => {
+    if(ev.repeat || !(ev.code === 'Space' || ev.key === ' ')) return;
+    const a = document.activeElement, tag = a && a.tagName;
+    if(tag === 'INPUT' || tag === 'TEXTAREA' || tag === 'SELECT' || (a && a.isContentEditable)) return;
+    if(!chcLive || !chordCalls[chcLive] || chordCalls[chcLive].phase !== 'play') return;
+    ev.preventDefault();
+    chcAct(chcLive, null);
+  };
+  document.addEventListener('keydown', chcKeyFn);
+  /* A focused button turns a space-bar KEY-UP into a click in some browsers
+     even when the key-down was cancelled; that click would tap a second time. */
+  chcKeyUpFn = ev => { if(ev.code === 'Space' || ev.key === ' ') ev.preventDefault(); };
+  document.addEventListener('keyup', chcKeyUpFn);
+}
+function chcKeyOff(){
+  if(chcKeyFn){ document.removeEventListener('keydown', chcKeyFn); chcKeyFn = null; }
+  if(chcKeyUpFn){ document.removeEventListener('keyup', chcKeyUpFn); chcKeyUpFn = null; }
+}
+
+/* Stops the song, the count-in, the loop and the key listener. Does not touch
+   the screen — callers pick what to show. */
+function chcStop(key){
+  const st = chordCalls[key];
+  if(!st) return;
+  if(st.raf){ cancelAnimationFrame(st.raf); st.raf = 0; }
+  (st.timers || []).forEach(clearTimeout); st.timers = [];
+  (st.clicks || []).forEach(o => { try { o.stop(0); } catch(e){} try { o.disconnect(); } catch(e){} }); st.clicks = [];
+  if(st.audio){ try { st.audio.pause(); st.audio.src = ''; } catch(e){} st.audio = null; }
+  if(chcLive === key) chcLive = null;
+  chcKeyOff();
+}
+function chcQuit(key){
+  const st = chordCalls[key];
+  if(!st) return;
+  chcStop(key);
+  st.phase = 'setup'; st.msg = '';
+  chcRepaint(key, chcSetupHtml(key));
+}
+/* Every running round, back to its setup screen. Called by stopCardAudio and
+   the hidden-tab path, like ncStopAll. */
+function chcStopAll(){
+  Object.keys(chordCalls).forEach(k => {
+    if(chordCalls[k].phase !== 'play') return;
+    chcQuit(k);
+  });
+}
+
 /* ── "Keep it sharp" spaced-review card ──
    Up to 3 skills marked "I've got it!" (that have a practice panel), oldest
    last-practice first; anything already practiced today is considered sharp.
@@ -10587,7 +11012,8 @@ function stopCardAudio(){
   stopPlaySeq();
   snipStop();   // a looping backing-track snippet is site-generated sound as well
   pcStop();     // …and so is a practice card's song (view:'card')
-  ncStopAll();  // …and a Note Call round's clicks (and its mic, if the Coach is on) —
+  chcStopAll();  // …and a Call the chord round: its song, count-in and space-bar listener
+  ncStopAll();  //…and a Note Call round's clicks (and its mic, if the Coach is on) —
                 // a focus-view Next re-renders the card, which would orphan its loop
   chordStrumTimeouts.forEach(clearTimeout);
   chordStrumTimeouts = [];
@@ -16205,6 +16631,7 @@ document.addEventListener('visibilitychange', () => {
     snipStop();
     if(!(IS_TEACHER_MODE && pcState && pcState.wholeSong)) pcStop();
     if(typeof ncStopAll === 'function') ncStopAll();
+    if(typeof chcStopAll === 'function') chcStopAll();
     flushOnHide();
     return;
   }
@@ -16597,6 +17024,7 @@ if ('serviceWorker' in navigator && location.protocol.startsWith('http')) {
         // A Note Call round in progress (ncLive): its score is only written
         // when the round ends, and a reload drops it mid-level.
         if (ncLive) return 'drill';
+        if (chcLive) return 'drill';
         // A practice card counting in or playing (pcState is set from pcStart
         // until pcStop): a reload cuts the song off mid-line and drops the
         // card's speed / Guitar / Metronome switches.

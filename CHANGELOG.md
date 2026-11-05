@@ -9,6 +9,13 @@ see `WORKFLOW.md` and the git commit log.
 
 - **In Power Chord Switch, a noise in the room has to be much louder to count.** Before, a voice, a bump, a chair, or the last chord still ringing could count as a right change when you had not strummed. Most of those no longer count. A very soft strum, or one without a clear pick sound, can now show "no strum heard": strum a little firmer and keep the guitar close to the mic. Change Up and the other mic games are not changed.
 
+## 2026-11-05 — New activity: Call the Chord
+
+- **"Call the Chord" ("Di el acorde")** has four steps: Watchtower follow, Watchtower call, Sweet Child follow, Sweet Child call. The record plays one part of the song. You get ready for each chord change one beat before the band reaches it. You do not need a guitar.
+- **Follow:** the next chord is in a big box. Tap the box, or press the space bar, in the last beat before the band changes to that chord. To finish the step, hit every change two rounds in a row.
+- **Call:** the next chord is hidden. Tap its name in the last beat before the change. A round is 10 changes, and 8 of 10 finishes the step.
+- **Slower is on to start.** Normal is next to it. After each round the screen shows your score and the changes you missed. Nothing is saved: every round starts new.
+
 ## 2026-11-05 — Live quiz: other players' names are not shown on your screen
 
 - **At the end of a live quiz, your own screen shows the top 5 as "Student" ("Estudiante") next to their points. Your own row shows your name.** The classroom wall still shows every name, as before. Names are no longer saved in the score list that every signed-in account can read.

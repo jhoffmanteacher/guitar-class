@@ -4040,6 +4040,33 @@ body.games-open{overflow:hidden}
 .nc-foot .nc-dots{margin-bottom:0}
 @media(prefers-reduced-motion:reduce){.nc-card.nc-deal{animation:none}.nc-pip{transition:none}}
 @media(max-width:430px){.nc-note{font-size:2.5rem}.nc-card{min-width:124px;height:92px}}
+/* ── Call the chord (step.drill 'chordcall') — the next chord in a big box,
+   tapped (or picked) in the last beat before the change. Same purple drill
+   frame as Note Call (.sdr); kept short so head + box + buttons + feedback fit
+   a 1366x657 Chromebook with the step buttons still on screen. ── */
+.chc-top{display:flex;align-items:center;justify-content:center;gap:14px;min-height:20px;margin-bottom:6px}
+.chc-status{font-size:0.8125rem;font-weight:600;color:var(--text2);min-width:64px;text-align:left}
+.chc-stage{display:flex;align-items:stretch;justify-content:center;gap:16px;margin-bottom:8px;flex-wrap:wrap}
+.chc-now{min-width:110px;height:88px;border-radius:12px;background:var(--bg3);border:2px solid var(--border2);
+  display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px}
+.chc-now .chc-name{font-size:2rem;font-weight:700;line-height:1;color:var(--text2)}
+.chc-next{min-width:170px;height:88px;padding:0 18px;border-radius:12px;background:var(--bg);color:var(--text);
+  border:3px solid var(--text);font:inherit;cursor:pointer;box-shadow:var(--shadow-card);
+  display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;transition:border-color .06s,background .06s}
+.chc-next .chc-name{font-size:3rem;font-weight:700;line-height:1}
+.chc-next.open{border-color:var(--green-text);background:var(--green-bg)}
+.chc-next:focus-visible{outline:3px solid var(--purple-accent);outline-offset:2px}
+.chc-picks{display:flex;gap:10px;justify-content:center;flex-wrap:wrap;margin-bottom:8px}
+.chc-pick{min-width:84px;min-height:48px;padding:0 16px;border-radius:10px;background:var(--bg);color:var(--text);
+  border:2px solid var(--border2);font:inherit;font-size:1.375rem;font-weight:700;cursor:pointer}
+.chc-pick:hover{border-color:var(--purple-accent)}
+.chc-pick:active{background:var(--purple-bg)}
+.chc-fb{min-height:1.4em}
+.chc-keyhint{font-size:0.8125rem;color:var(--text2)}
+.chc-speed{justify-content:center;margin-bottom:10px}
+.chcr .sdr-drill{margin-top:10px}
+.chcr .nc-dots{flex-wrap:wrap;max-width:420px}
+.chcr .fret-dot{flex:none}
 /* "Keep it sharp" spaced-review card — purple = review/self-assessment family */
 .review-slot:empty{display:none}
 .review-card{border:1.5px solid var(--purple-border);background:var(--purple-bg2);border-radius:var(--radius);padding:14px 16px;margin-bottom:14px;box-shadow:var(--shadow-card)}

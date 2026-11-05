@@ -264,6 +264,98 @@ async function chordGridWalk(page, run, events, stats) {
   await run('chord-grid:done', `(typeof caFocusActivity === 'function') ? (document.querySelectorAll('.ca-card[open]').forEach(c => { c.open = false; }), 1) : 0`, 100);
 }
 
+/* Call the chord (ca-48, 2026-11-05). checks.mjs 1cn runs the engine on a fake
+   clock; this is the real page: each of ca-48's four steps, in English and
+   Spanish, opens on its drill with Slower pressed (the pinned default), the
+   Slower / Normal switch clicks both ways, Start begins a round (the song's own
+   audio element, the box, the chord buttons in Call and none in Follow), a real
+   space-bar keydown taps in Follow and is cancelled so the page cannot scroll,
+   Stop puts the setup screen back with the listeners gone, and a round is ended
+   by moving to another step and by switching language. After a reload the
+   speed is back on its default. A checkout without ca-48 (the baseline) skips
+   it. */
+async function chordCallWalk(page, run, events, stats, base) {
+  const list = await run('chc:list', `(CLASS_ACTIVITIES.find(a => a.id === 'ca-48') || { steps: [] }).steps.map(s => s.drill || null)`, 10);
+  if (!list || !list.length) return;
+  const fail = (step, text) => events.push({ step: 'chordcall:' + step, kind: 'chordcall', text });
+  await page.send('Page.navigate', { url: base + '/index.html' });
+  await sleep(3500);
+  await run('chc:devBypass', 'devBypass()', 3500);
+  for (let i = events.length - 1; i >= 0; i--) if (events[i].step === 'chc:devBypass' && /ResizeObserver loop/.test(events[i].text)) events.splice(i, 1);
+  await run('chc:open', 'openClassActivitiesScreen()', 600);
+  const K = i => 'ca-48-s' + i;
+  const q = (i, sel) => `document.querySelector('#chcr-${K(i)} ${sel}')`;
+  const state = i => `(() => { const b = document.getElementById('chcr-${K(i)}'); const s = chordCalls['${K(i)}']; if (!b || !s) return null;
+    return { phase: s.phase, slow: s.slow, call: s.M.call, live: chcLive, keyOn: chcKeyFn !== null, keyUp: chcKeyUpFn !== null,
+             pressed: [...b.querySelectorAll('[data-chc-slow]')].map(x => x.getAttribute('aria-pressed')), hasStart: !!b.querySelector('[data-chc-start]'),
+             picks: b.querySelectorAll('[data-chc-pick]').length, chords: s.M.chords.length, box: (b.querySelector('.chc-next') || {}).id || null,
+             nextName: (document.getElementById('chc-nextname-${K(i)}') || {}).textContent || null, hasAudio: !!s.audio, head: b.querySelector('.sdr-head').textContent }; })()`;
+  let rounds = 0;
+  for (const lang of ['en', 'es']) {
+    await run('chc:' + lang, `setLang('${lang}')`, 600);
+    await run('chc:focus:' + lang, "caFocusActivity('ca-48')", 700);
+    for (let i = 0; i < list.length; i++) {
+      const w = lang + ' step ' + (i + 1);
+      await run('chc:go:' + w, `caFocusGo('ca-48', ${i})`, 600);
+      const s0 = await run('chc:state0:' + w, state(i), 10);
+      if (!s0) { fail(w, 'the Call the chord drill is not on the step'); continue; }
+      if (s0.slow !== true || s0.pressed[0] !== 'true' || s0.pressed[1] !== 'false') fail(w, `opens with the speed ${JSON.stringify(s0.pressed)} (slow=${s0.slow}), not Slower pressed`);
+      if (!s0.hasStart || s0.phase !== 'setup' || s0.live !== null) fail(w, `opens on ${s0.phase} with live=${s0.live}, expected the setup screen with nothing running`);
+      // The speed switch, both ways.
+      await run('chc:normal:' + w, `${q(i, '[data-chc-slow="0"]')}.click()`, 100);
+      const sn = await run('chc:normal-state:' + w, state(i), 10);
+      if (!sn || sn.slow !== false || sn.pressed[1] !== 'true') fail(w, 'clicking Normal left slow=' + (sn && sn.slow));
+      await run('chc:slower:' + w, `${q(i, '[data-chc-slow="1"]')}.click()`, 100);
+      const ss = await run('chc:slower-state:' + w, state(i), 10);
+      if (!ss || ss.slow !== true || ss.pressed[0] !== 'true') fail(w, 'clicking Slower left slow=' + (ss && ss.slow));
+      // Start: a round runs.
+      await run('chc:start:' + w, `${q(i, '[data-chc-start]')}.click()`, 900);
+      const sp = await run('chc:play-state:' + w, state(i), 10);
+      if (!sp || sp.phase !== 'play' || sp.live !== K(i) || !sp.hasAudio || !sp.box) fail(w, 'Start did not begin a round: ' + JSON.stringify(sp));
+      else {
+        if (sp.call) { if (sp.picks !== sp.chords || sp.nextName !== '?') fail(w, `Call shows ${sp.picks} of ${sp.chords} chord buttons and ${JSON.stringify(sp.nextName)} in the box (expected all of them and "?")`); }
+        else {
+          if (sp.picks !== 0) fail(w, 'Follow shows chord buttons');
+          if (!sp.keyOn || !sp.keyUp) fail(w, 'Follow has no space-bar listeners while it runs');
+          // A real space bar: taken (and cancelled so the page does not scroll). Far from any window, so it only says "too early".
+          const sp2 = await run('chc:space:' + w, `(() => { const e = new KeyboardEvent('keydown', { code: 'Space', key: ' ', bubbles: true, cancelable: true }); document.body.dispatchEvent(e); const r = new KeyboardEvent('keydown', { code: 'Space', key: ' ', bubbles: true, cancelable: true, repeat: true }); document.body.dispatchEvent(r); return { prevented: e.defaultPrevented, heldPrevented: r.defaultPrevented }; })()`, 50);
+          if (!sp2 || !sp2.prevented) fail(w, 'a space bar keydown was not cancelled — the page would scroll');
+          if (sp2 && sp2.heldPrevented) fail(w, 'a held space bar (repeat) was cancelled');
+        }
+      }
+      // Stop: back to setup, nothing left running.
+      await run('chc:stop:' + w, `${q(i, '[data-chc-stop]')}.click()`, 150);
+      const st = await run('chc:stop-state:' + w, state(i), 10);
+      if (!st || st.phase !== 'setup' || st.live !== null || st.keyOn || st.keyUp || st.hasAudio || !st.hasStart) fail(w, 'Stop left ' + JSON.stringify(st));
+      // A round ends when the student moves to another step.
+      await run('chc:restart:' + w, `${q(i, '[data-chc-start]')}.click()`, 700);
+      await run('chc:leave:' + w, `caFocusGo('ca-48', ${(i + 1) % list.length})`, 600);
+      const sl = await run('chc:leave-state:' + w, state(i), 10);
+      if (sl && (sl.phase === 'play' || sl.live !== null || sl.keyOn || sl.keyUp || sl.hasAudio)) fail(w, 'moving to another step left the round running: ' + JSON.stringify(sl));
+      await run('chc:back:' + w, `caFocusGo('ca-48', ${i})`, 500);
+      rounds++;
+    }
+    // Switching language mid-round ends it.
+    await run('chc:lang-start:' + lang, `caFocusGo('ca-48', 0); 1`, 500);
+    await run('chc:lang-go:' + lang, `${q(0, '[data-chc-start]')}.click()`, 700);
+    await run('chc:lang-switch:' + lang, `setLang('${lang === 'en' ? 'es' : 'en'}')`, 800);
+    const sw = await run('chc:lang-state:' + lang, `(() => { const s = chordCalls['${K(0)}']; return s ? { phase: s.phase, live: chcLive, keyOn: chcKeyFn !== null, hasAudio: !!s.audio } : null; })()`, 10);
+    if (sw && (sw.phase === 'play' || sw.live !== null || sw.keyOn || sw.hasAudio)) fail(lang + ' language switch', 'switching language left the round running: ' + JSON.stringify(sw));
+  }
+  // After a reload the speed is back on its default.
+  await run('chc:set-normal', `${q(0, '[data-chc-slow="0"]')} ? ${q(0, '[data-chc-slow="0"]')}.click() : 0`, 100);
+  await page.send('Page.navigate', { url: base + '/index.html' });
+  await sleep(3500);
+  await run('chc:devBypass2', 'devBypass()', 3500);
+  for (let i = events.length - 1; i >= 0; i--) if (events[i].step === 'chc:devBypass2' && /ResizeObserver loop/.test(events[i].text)) events.splice(i, 1);
+  await run('chc:reopen', 'openClassActivitiesScreen()', 600);
+  await run('chc:reopen-focus', "caFocusActivity('ca-48')", 700);
+  const rl = await run('chc:reload-state', state(0), 10);
+  if (!rl || rl.slow !== true || rl.pressed[0] !== 'true') fail('after a reload', 'the speed is ' + JSON.stringify(rl && rl.pressed) + ' after a reload, expected the default (Slower)');
+  stats.chordCallRounds = rounds;
+  await run('chc:done', `(document.querySelectorAll('.ca-card[open]').forEach(c => { c.open = false; }), 1)`, 100);
+}
+
 /* Recording switch (recordingVersions, 2026-10-30 — the Jimi Hendrix / Neil
    Young switch on the Watchtower play-alongs). checks.mjs 1cc renders every
    recording through the real app.js; this clicks the switch for real. For each
@@ -1162,6 +1254,7 @@ async function walk(base, chromePort, label) {
   await changeUpWalk(page, run, events, stats);
   await twoColumnQuizWalk(page, run, events, stats);
   await noteCallWalk(page, run, events, stats, base);
+  await chordCallWalk(page, run, events, stats, base);
   await recordingWalk(page, run, events, stats, base);
   await strumWalk(page, run, events, stats);
   await pathsWalk(page, run, events, stats);
@@ -1199,7 +1292,7 @@ try {
   const norm = e => `${e.kind}|${e.step.replace(/^(en|es):/, '')}|${e.kind === 'bad-handler' ? '' : e.text}`;
   const baseCount = new Map(); (base ? base.errors : []).forEach(e => baseCount.set(norm(e), Math.max(baseCount.get(norm(e)) || 0, e.kind === 'bad-handler' ? +e.text : 1)));
   const report = base ? now.errors.filter(e => (e.kind === 'bad-handler' ? +e.text : 1) > (baseCount.get(norm(e)) || 0)) : now.errors;
-  say(`smoke: ${now.stats.sets} sets in ${now.stats.modules} modules (EN + ES), ${now.stats.games} game views, ${now.stats.buttons} inline handlers compiled${now.stats.chordCards ? `, ${now.stats.chordCards} chord-grid cards walked (cursor, lap, layout at 1366/390/360, lyric sheet${now.stats.bassClicks ? `, bass switch clicked on ${now.stats.bassClicks}` : ''}${now.stats.recordingClicks ? `, recording switch clicked, reloaded and flipped back on ${now.stats.recordingClicks}` : ''}${now.stats.chordSkipped ? `; ${now.stats.chordSkipped.join(', ')} is teacher-only and not walked` : ''})` : ''}${now.stats.noteCallSteps ? `, ${now.stats.noteCallSteps} Note Call power-chord steps (EN + ES: six strings, taps on low E and A only, a hit and a miss)` : ''}${now.stats.powerLayouts ? `, a pair play screen says its BPM (${now.stats.pairPlay || 0} run), Power Chord Switch at 1366\u00d7657 (Start and tempo on screen: ${now.stats.powerLayouts} views, incl. after a reload${now.stats.powerBestLayouts ? `; with a "Best today" score, EN + ES, no scrolling and the privacy line on screen: ${now.stats.powerBestLayouts} views` : ''}${now.stats.songs ? `; song buttons picked and reopened, ${now.stats.songs} song-switch rounds (16 switches x 3) run on a fake clock: round tempos, the BPM buttons, the play screen fitting 657px, one lit chart per chord, the done screen with 21 changes, ${now.stats.songDraws} random draws, none a song` : ""}${now.stats.powerCosmetic ? `; "low E" title kept together at ${now.stats.powerTitleWidths} window widths and the done-screen button padded, EN + ES: ${now.stats.powerCosmetic}` : ''})` : ''}${now.stats.changeUpLayouts ? `, Change Up at 1366\u00d7657 (Start on screen, no scrolling: ${now.stats.changeUpLayouts} views)` : ''}${now.stats.quizLayouts ? `, Chord Blitz (both directions) and Fret Zap at 1366\u00d7657 (picture left, 2\u00d72 answers right, no scroll: ${now.stats.quizLayouts} views)` : ''}${now.stats.pmHeaderViews ? `, practice-minutes strip in the top bar: ${now.stats.pmHeaderViews} view checks (6 views x EN/ES x 1366 and 390 px: a shown button, exactly one strip on top, the Games bar's own on Games, no sideways scroll), ${now.stats.pmHeaderClicks} clicks open My progress, back after a reload, hidden when signed out` : ''}${now.stats.strumSteps ? `, ${now.stats.strumSteps} strum-pattern steps (EN + ES: cells, arrows, chord names, columns, 1366 and 390 px; Play strum lights an arrow, clicks every beat and sounds down strums louder; Play clicks opens the Metronome at 60 BPM; Stop resets)` : ''}${now.stats.pathsActivities ? `, ${now.stats.pathsActivities} paths-activity walks (EN + ES: chooser with a silent preview and step list per path, Start, route length, Got it, Change path, ticks kept across a switch, one saved pick)` : ''}`);
+  say(`smoke: ${now.stats.sets} sets in ${now.stats.modules} modules (EN + ES), ${now.stats.games} game views, ${now.stats.buttons} inline handlers compiled${now.stats.chordCards ? `, ${now.stats.chordCards} chord-grid cards walked (cursor, lap, layout at 1366/390/360, lyric sheet${now.stats.bassClicks ? `, bass switch clicked on ${now.stats.bassClicks}` : ''}${now.stats.recordingClicks ? `, recording switch clicked, reloaded and flipped back on ${now.stats.recordingClicks}` : ''}${now.stats.chordSkipped ? `; ${now.stats.chordSkipped.join(', ')} is teacher-only and not walked` : ''})` : ''}${now.stats.noteCallSteps ? `, ${now.stats.noteCallSteps} Note Call power-chord steps (EN + ES: six strings, taps on low E and A only, a hit and a miss)` : ''}${now.stats.chordCallRounds ? `, ${now.stats.chordCallRounds} Call the chord steps (EN + ES: Slower by default, the speed switch both ways, Start, a space bar that is cancelled, Stop, a round ended by another step and by a language switch, the default after a reload)` : ''}${now.stats.powerLayouts ? `, a pair play screen says its BPM (${now.stats.pairPlay || 0} run), Power Chord Switch at 1366\u00d7657 (Start and tempo on screen: ${now.stats.powerLayouts} views, incl. after a reload${now.stats.powerBestLayouts ? `; with a "Best today" score, EN + ES, no scrolling and the privacy line on screen: ${now.stats.powerBestLayouts} views` : ''}${now.stats.songs ? `; song buttons picked and reopened, ${now.stats.songs} song-switch rounds (16 switches x 3) run on a fake clock: round tempos, the BPM buttons, the play screen fitting 657px, one lit chart per chord, the done screen with 21 changes, ${now.stats.songDraws} random draws, none a song` : ""}${now.stats.powerCosmetic ? `; "low E" title kept together at ${now.stats.powerTitleWidths} window widths and the done-screen button padded, EN + ES: ${now.stats.powerCosmetic}` : ''})` : ''}${now.stats.changeUpLayouts ? `, Change Up at 1366\u00d7657 (Start on screen, no scrolling: ${now.stats.changeUpLayouts} views)` : ''}${now.stats.quizLayouts ? `, Chord Blitz (both directions) and Fret Zap at 1366\u00d7657 (picture left, 2\u00d72 answers right, no scroll: ${now.stats.quizLayouts} views)` : ''}${now.stats.pmHeaderViews ? `, practice-minutes strip in the top bar: ${now.stats.pmHeaderViews} view checks (6 views x EN/ES x 1366 and 390 px: a shown button, exactly one strip on top, the Games bar's own on Games, no sideways scroll), ${now.stats.pmHeaderClicks} clicks open My progress, back after a reload, hidden when signed out` : ''}${now.stats.strumSteps ? `, ${now.stats.strumSteps} strum-pattern steps (EN + ES: cells, arrows, chord names, columns, 1366 and 390 px; Play strum lights an arrow, clicks every beat and sounds down strums louder; Play clicks opens the Metronome at 60 BPM; Stop resets)` : ''}${now.stats.pathsActivities ? `, ${now.stats.pathsActivities} paths-activity walks (EN + ES: chooser with a silent preview and step list per path, Start, route length, Got it, Change path, ticks kept across a switch, one saved pick)` : ''}`);
   if (base) say(`smoke: ${BASELINE} had ${base.errors.length} error event(s); this checkout has ${now.errors.length}`);
   if (report.length) {
     exitCode = 1;

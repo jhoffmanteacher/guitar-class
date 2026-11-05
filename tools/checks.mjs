@@ -9091,6 +9091,294 @@ function checkNoteCallPower(ctx) {
   if (bad === 0) ok(EXPECT.power + ' power drills on ca-43 (frets ' + EXPECT.ranges.map(r => r.join('-')).join(' / ') + '); ' + stats.cards + ' cards x 53 pitches = ' + stats.answers + ' answers match the oracle (single-note cards exactly as before); ' + stats.clashCalls + ' ncClash calls match an oracle and ' + stats.deals + ' seeded ncDeal deals (no coach.js loaded) never dealt a clashing card while a clean one existed (' + stats.powerForced + ' of ' + stats.powerDeals + ' power deals had to, every card left clashing; ' + (stats.forced - stats.powerForced) + ' of ' + (stats.deals - stats.powerDeals) + ' single-note); ' + stats.listens + ' ncListen calls (targets, clarity, main and grace fret); ' + stats.micHits + ' mic hits all flagged as the mic; ' + stats.fbRenders + ' hit-feedback renders (a mic hit on a two-fret power card names and flashes both frets; a tap, scored or play-along, a one-fret card and a single note name and flash one); ' + stats.keys + ' of ' + EXPECT.keys + ' ncp.* strings rendered, EN + ES');
 }
 
+/* 1cn. CALL THE CHORD (step.drill 'chordcall', ca-48, work order 2026-11-05).
+   The record plays one section of a play-along card and the student taps (or
+   picks) the next chord in the last beat before the band reaches it. Nothing a
+   source check can see decides whether that works, so this EXECUTES the real
+   app.js in the 0b context:
+   - the data: ca-48 has four chordcall drills (Watchtower and Sweet Child, each
+     Follow and Call), each naming a card and a section that exist, with the
+     number of changes, the pass line and the chord buttons pinned; no other
+     activity uses the type;
+   - every change in every section, at both speeds (the slow file and the fast
+     one): the changes strictly increase and sit inside the played window; each
+     has a window that opens before it and a window of at least one beat, or the
+     window is reported as cut (a change closer than a beat to the one before);
+     the changes are exactly the lyric sheet's own (pcSheetMap) on the same
+     card — the drill reads the data the sheet reads;
+   - the taps, on a fake clock through the real chcAct / chcFrame / chcPaint /
+     chcFinish: a tap before the window opens does nothing, a tap in it is a
+     hit (a wrong pick in Call a miss), one after the change is late, none is a
+     miss when the next window opens; in Call the box says "?" until the change
+     has come (sampled across every change, 20 ms apart) and names it after;
+   - the space-bar listeners: keydown and keyup both come off on Stop, a held
+     key and a key typed in a field do nothing, a real space bar taps and is
+     cancelled (so the page does not scroll);
+   - every chc.* string the setup, play and done screens show exists in English
+     and Spanish and none defined is unused.
+   Pinned: 4 drills, the change counts below, 37 chc.* keys. */
+function checkChordCall(ctx) {
+  head('1cn. Call the chord (ca-48): windows, taps, the hidden chord, the space bar');
+  let bad = 0;
+  const flag = m => { err(m); problems++; bad++; };
+  if (!ctx) { flag('1cn cannot run — the 0b render context is unavailable'); return; }
+  const J = JSON.stringify;
+  const run = x => vm.runInContext(x, ctx);
+  const EXPECT = {
+    keys: 38,
+    drills: [
+      { card: 'ca-29', section: 'Verse 1', mode: 'follow', n: 32, passAt: 32, chords: ['A5', 'G5', 'F5'] },
+      { card: 'ca-29', section: 'Verse 1', mode: 'call',   n: 10, passAt: 8,  chords: ['A5', 'G5', 'F5'] },
+      { card: 'ca-33', section: 'Verse 1', mode: 'follow', n: 7,  passAt: 7,  chords: ['D5', 'C5', 'G5'] },
+      { card: 'ca-33', section: 'Intro',   mode: 'call',   n: 10, passAt: 8,  chords: ['D5', 'C5', 'G5'] },
+    ],
+  };
+  const stats = { drills: 0, changes: 0, windows: 0, cut: 0, sheet: 0, taps: 0, samples: 0, screens: 0, keys: 0 };
+
+  // The data.
+  const acts = run('window.CLASS_ACTIVITIES || []');
+  const all = [];
+  for (const a of acts) (a.steps || []).forEach((st, i) => { if (st && st.drill && st.drill.type === 'chordcall') all.push({ id: a.id, i, d: st.drill }); });
+  const c48 = acts.find(a => a.id === 'ca-48');
+  if (!c48) { flag('ca-48 is gone — 1cn checks its four drills'); return; }
+  if (all.some(x => x.id !== 'ca-48')) flag('chordcall drills outside ca-48 (' + [...new Set(all.map(x => x.id))].join(', ') + ') — 1cn pins ca-48 only; give the new one its pin on purpose');
+  if (all.length !== EXPECT.drills.length) flag('1cn sees ' + all.length + ' chordcall drills, pinned at ' + EXPECT.drills.length);
+  if ((c48.steps || []).some(s => s.text) || c48.view !== 'focus') flag('ca-48 must be a Focus-view activity with no text on any step (the widget carries its own directions)');
+  EXPECT.drills.forEach((e, i) => {
+    const d = all[i] && all[i].d;
+    if (!d || d.card !== e.card || d.section !== e.section || d.mode !== e.mode) flag('ca-48 step ' + (i + 1) + ': expected ' + J({ card: e.card, section: e.section, mode: e.mode }) + ', got ' + J(d));
+  });
+
+  // Every change, both speeds.
+  const walk = JSON.parse(run(`(function(){
+    const out = [];
+    ${J(all.map(x => x.d))}.forEach(d => {
+      const M = chcModel(d);
+      if(!M){ out.push({ d, missing: true }); return; }
+      const sheet = pcSheetMap(M.L).start.filter(x => x.si === M.si).map(x => x.name);
+      const row = { d, n: M.n, passAt: M.passAt, chords: M.chords, names: M.targets.map(x => x.name), sheet, tiers: [] };
+      [true, false].forEach(slow => {
+        const win = snippetWindow(M.L.tr, { fromBar: M.S.fromBar, bars: M.S.bars * M.S.reps }, slow);
+        const w = chcWindows(win, M.targets, M.bpb);
+        row.tiers.push({ slow, start: win.start, end: win.end, w: w.map(x => [x.at, x.open, x.beatSec]), grace: CHC_GRACE });
+      });
+      out.push(row);
+    });
+    return JSON.stringify(out);
+  })()`));
+  walk.forEach((r, ri) => {
+    const e = EXPECT.drills[ri] || {};
+    const tag = 'ca-48 step ' + (ri + 1) + ' (' + (r.d.card + ' ' + r.d.section + ' ' + r.d.mode) + ')';
+    if (r.missing) { flag(tag + ': chcModel returned null — the card or the section is not there'); return; }
+    stats.drills++;
+    if (r.n !== e.n) flag(tag + ': ' + r.n + ' changes, pinned at ' + e.n);
+    if (r.passAt !== e.passAt) flag(tag + ': pass line ' + r.passAt + ', pinned at ' + e.passAt + (r.d.mode === 'call' ? ' (8 of 10)' : ' (every change)'));
+    if (J(r.chords) !== J(e.chords)) flag(tag + ': chord buttons ' + J(r.chords) + ', expected ' + J(e.chords));
+    // The drill reads the sheet's data: its changes are the sheet's for this section (a first chord that carries over from the section before is the drill's, not the sheet's).
+    const nm = r.d.mode === 'follow' ? r.names : run('chcModel(' + J(Object.assign({}, r.d, { mode: 'follow' })) + ').targets.map(x => x.name)');
+    const same = J(nm) === J(r.sheet) || J(nm.slice(1)) === J(r.sheet);
+    if (!same) flag(tag + ': its changes ' + J(nm) + ' are not the lyric sheet\'s own ' + J(r.sheet));
+    else stats.sheet++;
+    for (const tr of r.tiers) {
+      let prevAt = -Infinity;
+      tr.w.forEach(([at, open, beatSec], k) => {
+        stats.changes++; stats.windows++;
+        const lenBeats = (at - open) / beatSec;
+        const lab = tag + ' change ' + (k + 1) + ' (' + (tr.slow ? 'slower' : 'normal') + ')';
+        if (!(at > prevAt)) flag(lab + ': does not come after the change before it');
+        if (at < tr.start - 1e-6 || at > tr.end + 1e-6) flag(lab + ': at ' + at.toFixed(2) + ' s, outside the played window ' + tr.start.toFixed(2) + '-' + tr.end.toFixed(2));
+        if (!(open < at)) flag(lab + ': its window does not open before the change');
+        if (k > 0 && open < prevAt + tr.grace - 1e-9) flag(lab + ': its window opens before the change before it has been given its grace');
+        if (lenBeats < 1 - 1e-6) { stats.cut++; if (lenBeats < 0.5) flag(lab + ': window of ' + lenBeats.toFixed(2) + ' beats — shorter than half a beat is not a fair window'); }
+        prevAt = at;
+      });
+    }
+  });
+
+  // The taps, on a fake clock, through the real functions.
+  const recs = {};
+  const origGet = ctx.document.getElementById, origAdd = ctx.document.addEventListener, origRem = ctx.document.removeEventListener, origAct = ctx.document.activeElement;
+  const mkEl = id => ({ id, textContent: '', innerHTML: '', className: '', children: [], isConnected: true, log: [], classList: { toggle(c, on) { this.owner.log.push(c + ':' + !!on); }, add(){}, remove(){}, contains(){ return false; } } });
+  ctx.document.getElementById = id => recs[id] || (recs[id] = (e => { e.classList.owner = e; return e; })(mkEl(id)));
+  try {
+    const t = JSON.parse(run(`(function(){
+      const R = { bad: [], taps: 0, samples: 0 };
+      const lat = snipLatency();
+      const mk = (mode, card, section) => {
+        const drill = { type: 'chordcall', card, section, mode };
+        const M = chcModel(drill);
+        const win = snippetWindow(M.L.tr, { fromBar: M.S.fromBar, bars: M.S.bars * M.S.reps }, true);
+        const st = { key: 'chk', drill, M, phase: 'play', slow: true, streak: 0, counting: false, win, wins: chcWindows(win, M.targets, M.bpb), k: 0, n: M.n, res: [],
+                     timers: [], clicks: [], shown: '', audio: { currentTime: 0, ended: false, pause(){}, play(){ return Promise.resolve(); } } };
+        chordCalls.chk = st; chcLive = 'chk';
+        return st;
+      };
+      const setH = (st, h) => { st.audio.currentTime = h + lat; };
+      const fb = () => document.getElementById('chc-fb-chk').textContent;
+      const bad = m => R.bad.push(m);
+      // Follow: early / hit / late / none.
+      let st = mk('follow', 'ca-29', 'Verse 1');
+      setH(st, st.wins[0].open - 0.05); chcAct('chk', null); R.taps++;
+      if(st.k !== 0 || st.res.length) bad('Follow: a tap before the window opened was taken (k=' + st.k + ')');
+      setH(st, st.wins[0].open + 0.01); chcAct('chk', null); R.taps++;
+      if(st.res[0] !== 'hit' || st.k !== 1) bad('Follow: a tap just inside the window is ' + st.res[0]);
+      setH(st, st.wins[1].at + CHC_GRACE + 0.01); chcAct('chk', null); R.taps++;
+      if(st.res[1] !== 'late' || st.k !== 2) bad('Follow: a tap after the change is ' + st.res[1] + ', expected late');
+      setH(st, st.wins[2].at); chcAct('chk', null); R.taps++;
+      if(st.res[2] !== 'hit') bad('Follow: a tap exactly on the change is ' + st.res[2]);
+      setH(st, st.wins[3].at + CHC_GRACE - 0.001); chcAct('chk', null); R.taps++;
+      if(st.res[3] !== 'hit') bad('Follow: a tap inside the grace after the change is ' + st.res[3]);
+      setH(st, st.wins[4].open + 0.001); chcFrame();
+      if(st.res.length !== 4 || st.k !== 4) bad('Follow: a frame inside the next window should not resolve the change before it (k=' + st.k + ')');
+      setH(st, st.wins[5].open + 0.001); chcFrame();
+      if(st.res[4] !== 'none' || st.k !== 5) bad('Follow: no tap by the next window should be a miss, got ' + st.res[4] + ' k=' + st.k);
+      // The last change: a miss once a beat has passed.
+      st.k = st.n - 1;
+      setH(st, st.wins[st.n - 1].at + st.wins[st.n - 1].beatSec + 0.01); chcFrame();
+      if(st.res[st.n - 1] !== 'none') bad('Follow: the last change with no tap should be a miss, got ' + st.res[st.n - 1]);
+      // Finish: every change resolved; a perfect round counts towards the streak, a miss resets it.
+      chcStop('chk');
+      st = mk('follow', 'ca-33', 'Verse 1'); st.res = st.M.targets.map(() => 'hit'); st.k = st.n; chcFinish('chk');
+      if(st.phase !== 'done' || st.streak !== 1) bad('Follow: a perfect round should be done with a streak of 1, got ' + st.phase + '/' + st.streak);
+      st = mk('follow', 'ca-33', 'Verse 1'); st.streak = 1; st.res = st.M.targets.map((x, i) => i === 2 ? 'late' : 'hit'); st.k = st.n; chcFinish('chk');
+      if(st.streak !== 0) bad('Follow: a round with a miss should reset the streak, got ' + st.streak);
+      // Call: wrong pick, right pick, hidden until the change.
+      st = mk('call', 'ca-29', 'Verse 1');
+      const wrong = st.M.chords.find(c => c !== st.M.targets[0].name);
+      setH(st, st.wins[0].open + 0.01); chcAct('chk', wrong); R.taps++;
+      if(st.res[0] !== 'wrong') bad('Call: a wrong pick in the window is ' + st.res[0]);
+      setH(st, st.wins[1].open + 0.01); chcAct('chk', st.M.targets[1].name); R.taps++;
+      if(st.res[1] !== 'hit') bad('Call: the right pick in the window is ' + st.res[1]);
+      setH(st, st.wins[2].open - 0.05); chcAct('chk', st.M.targets[2].name); R.taps++;
+      if(st.k !== 2) bad('Call: a pick before the window opened was taken');
+      chcStop('chk');
+      // The box says "?" until the change has come. Every change, sampled 20 ms apart from a beat before it to a beat after.
+      for(const [card, section] of [['ca-29', 'Verse 1'], ['ca-33', 'Intro']]){
+        st = mk('call', card, section);
+        for(let k = 0; k < st.n; k++){
+          st.k = k; st.res = st.res.slice(0, k);
+          const at = st.wins[k].at, pre = st.M.targets[k].name;
+          for(let h = at - 2 * st.wins[k].beatSec; h < at + 0.4; h += 0.02){
+            if(k > 0 && h < st.wins[k - 1].at + 0.05) continue;
+            setH(st, h); st.shown = ''; chcPaint(st, h); R.samples++;
+            const txt = document.getElementById('chc-nextname-chk').textContent;
+            if(h < at && txt !== '?') bad(card + ' ' + section + ' change ' + (k + 1) + ': the box shows ' + JSON.stringify(txt) + ' ' + (at - h).toFixed(3) + ' s before the change');
+            if(h >= at && txt !== pre) bad(card + ' ' + section + ' change ' + (k + 1) + ': the box shows ' + JSON.stringify(txt) + ' after the change, expected ' + pre);
+          }
+        }
+        chcStop('chk');
+      }
+      // The play screen of a Call drill offers every chord and names none in the box.
+      st = mk('call', 'ca-29', 'Verse 1'); st.phase = 'play';
+      const html = chcPlayHtml('chk');
+      if(!/id="chc-nextname-chk">\\?</.test(html)) bad('Call: the first play screen does not open with a "?" in the box');
+      if(st.M.chords.some(c => html.indexOf('data-chc-pick="' + c + '"') < 0)) bad('Call: a chord button is missing from the play screen');
+      delete chordCalls.chk; chcLive = null;
+      return JSON.stringify({ bad: R.bad, taps: R.taps, samples: R.samples });
+    })()`));
+    for (const m of t.bad.slice(0, 8)) flag(m);
+    if (t.bad.length > 8) flag('... and ' + (t.bad.length - 8) + ' more');
+    stats.taps = t.taps; stats.samples = t.samples;
+
+    // The defaults (tools/smoke.mjs clicks the speed switch and reloads): a drill opens on its setup screen, Slower pressed, no streak.
+    const def = JSON.parse(run(`(function(){ const o = {}; ['follow', 'call'].forEach(m => { renderChordCall({ type: 'chordcall', card: 'ca-29', section: 'Verse 1', mode: m }, 'chk3'); const s = chordCalls.chk3; const h = chcSetupHtml('chk3');
+      o[m] = { slow: s.slow, phase: s.phase, streak: s.streak, slowerPressed: /aria-pressed="true" data-chc-slow="1"/.test(h), normalPressed: /aria-pressed="true" data-chc-slow="0"/.test(h) }; delete chordCalls.chk3; }); return JSON.stringify(o); })()`));
+    for (const m of ['follow', 'call']) {
+      const d = def[m];
+      if (d.slow !== true || !d.slowerPressed || d.normalPressed) flag('a new ' + m + ' drill does not open with Slower pressed (slow=' + d.slow + ') — the default is pinned at Slower, the file the room counts to');
+      if (d.phase !== 'setup' || d.streak !== 0) flag('a new ' + m + ' drill opens on ' + d.phase + ' with a streak of ' + d.streak + ', expected the setup screen and 0');
+    }
+
+    // The space bar.
+    const added = [], removed = [];
+    ctx.document.addEventListener = (type, fn) => added.push([type, fn]);
+    ctx.document.removeEventListener = (type, fn) => removed.push([type, fn]);
+    const keyOut = JSON.parse(run(`(function(){
+      const o = { bad: [] };
+      const st = { key: 'chk', M: chcModel({ type: 'chordcall', card: 'ca-29', section: 'Verse 1', mode: 'follow' }), phase: 'play', counting: false, k: 0, n: 3, res: [], wins: [], timers: [], clicks: [], audio: null };
+      chordCalls.chk = st; chcLive = 'chk';
+      const acts = []; const realAct = chcAct; window.chcAct = (k, p) => { acts.push([k, p]); };
+      chcKeyOn();
+      o.keyOnFns = [typeof chcKeyFn, typeof chcKeyUpFn];
+      const ev = (o2) => Object.assign({ code: 'Space', key: ' ', repeat: false, prevented: 0, preventDefault(){ this.prevented++; } }, o2 || {});
+      const e1 = ev(); chcKeyFn(e1);
+      if(acts.length !== 1 || !e1.prevented) o.bad.push('a space bar press did not tap and cancel the page scroll');
+      const e2 = ev({ repeat: true }); chcKeyFn(e2);
+      if(acts.length !== 1 || e2.prevented) o.bad.push('a held space bar (repeat) tapped again or was cancelled');
+      const e3 = ev({ code: 'KeyA', key: 'a' }); chcKeyFn(e3);
+      if(acts.length !== 1 || e3.prevented) o.bad.push('another key tapped');
+      document.activeElement = { tagName: 'INPUT' }; const e4 = ev(); chcKeyFn(e4);
+      if(acts.length !== 1 || e4.prevented) o.bad.push('a space typed in a field tapped or was cancelled');
+      document.activeElement = { tagName: 'TEXTAREA' }; const e5 = ev(); chcKeyFn(e5);
+      document.activeElement = { tagName: 'SELECT' }; const e6 = ev(); chcKeyFn(e6);
+      if(acts.length !== 1 || e5.prevented || e6.prevented) o.bad.push('a space in a textarea or select tapped or was cancelled');
+      document.activeElement = null;
+      const e7 = ev(); chcKeyUpFn(e7);
+      if(!e7.prevented) o.bad.push('the space bar key-up was not cancelled (a focused button would click a second time)');
+      chcStop('chk');
+      o.after = [chcKeyFn, chcKeyUpFn];
+      window.chcAct = realAct; delete chordCalls.chk; chcLive = null;
+      return JSON.stringify(o);
+    })()`));
+    for (const m of keyOut.bad) flag('space bar: ' + m);
+    const types = a => a.map(x => x[0]).sort().join(',');
+    if (types(added) !== 'keydown,keyup') flag('the space-bar listeners added were ' + types(added) + ', expected keydown,keyup');
+    if (types(removed) !== 'keydown,keyup' || added.some(([ty, fn]) => !removed.some(([ty2, fn2]) => ty === ty2 && fn === fn2))) flag('Stop removed ' + types(removed) + ' — every listener the round added must come off, the same function');
+    if (keyOut.after.some(x => x !== null)) flag('chcKeyFn / chcKeyUpFn are not cleared after Stop');
+    stats.keys = added.length;
+
+    // Every chc.* string, rendered in both languages.
+    const I18N = loadI18nTable();
+    const used = new Set();
+    const origT = ctx.t;
+    ctx.t = (k, p) => { used.add(k); return origT(k, p); };
+    try {
+      for (const lang of ['en', 'es']) {
+        run('setLang(' + J(lang) + ')');
+        run(`(function(){
+          for (const [card, section, mode] of [['ca-29', 'Verse 1', 'follow'], ['ca-29', 'Verse 1', 'call']]) {
+            const drill = { type: 'chordcall', card, section, mode };
+            renderChordCall(drill, 'chk2');
+            const st = chordCalls.chk2;
+            st.streak = 1; chcSetupHtml('chk2'); st.msg = 'x'; chcSetupHtml('chk2'); st.msg = '';
+            st.slow = false; chcSetupHtml('chk2'); st.slow = true;
+            Object.assign(st, { phase: 'play', counting: true, goAt: Infinity, win: snippetWindow(st.M.L.tr, { fromBar: st.M.S.fromBar, bars: st.M.S.bars * st.M.S.reps }, true), k: 0, n: st.M.n, res: [], shown: '', timers: [], clicks: [], audio: { currentTime: 0, ended: false, pause(){} } });
+            st.wins = chcWindows(st.win, st.M.targets, st.M.bpb);
+            chcPlayHtml('chk2'); chcPaint(st);
+            ['hit', 'late', 'wrong', 'none'].forEach((r, i) => { st.k = i; st.counting = false; st.audio.currentTime = 0; chcResolve(st, r, 'F5'); });
+            chcAct('chk2', null);
+            st.k = st.n;
+            // done: pass, fail, a streak of 1 and 2, more misses than the list shows
+            const done = (res, streak) => { st.res = res; st.hits = res.filter(x => x === 'hit').length; st.streak = streak; chcDoneHtml('chk2'); };
+            const n = st.M.n;
+            done(Array(n).fill('hit'), 1); done(Array(n).fill('hit'), 2);
+            done(['late', 'wrong', 'none', 'late', 'none', 'wrong'].concat(Array(Math.max(0, n - 6)).fill('hit')), 0);
+            done(Array(n).fill('none'), 0);
+            chcStop('chk2'); delete chordCalls.chk2; chcLive = null;
+          }
+        })()`);
+        stats.screens += 2;
+      }
+    } catch (e) { flag('rendering the Call the chord screens threw ' + e.message); }
+    finally { ctx.t = origT; try { run('setLang("en")'); } catch { /* best effort */ } }
+    const defined = Object.keys(I18N).filter(k => k.startsWith('chc.'));
+    const SAME_OK = new Set(['chc.head', 'chc.normal', 'chc.fbHit']);   // identical in both languages on purpose: a placeholder line, a loanword, a check mark
+    for (const k of used) {
+      if (!k.startsWith('chc.')) continue;
+      if (!I18N[k] || !I18N[k].en || !I18N[k].es) flag('i18n ' + k + ' is missing its English or Spanish');
+      else if (I18N[k].es === I18N[k].en && !SAME_OK.has(k)) flag('i18n ' + k + ': the Spanish is just the English');
+    }
+    for (const k of defined) if (!used.has(k)) flag('i18n ' + k + ' is defined but no Call the chord screen shows it (dead, or a screen 1cn does not reach)');
+    if (defined.length !== EXPECT.keys) flag('1cn sees ' + defined.length + ' chc.* keys, pinned at ' + EXPECT.keys + ' — a new string needs its Spanish and a screen that shows it (update the pin on purpose)');
+  } catch (e) {
+    flag('1cn threw: ' + (e && e.message));
+  } finally {
+    ctx.document.getElementById = origGet; ctx.document.addEventListener = origAdd; ctx.document.removeEventListener = origRem; ctx.document.activeElement = origAct;
+    if (origAct === undefined) delete ctx.document.activeElement;
+  }
+  if (bad === 0) ok(stats.drills + ' drills; ' + stats.changes + ' of ' + stats.changes + ' changes walked at both speeds (' + (stats.windows - stats.cut) + ' windows of a full beat or more, ' + stats.cut + ' cut by a change closer than a beat); ' + stats.sheet + ' of ' + stats.drills + ' drills\' changes are the lyric sheet\'s own; ' + stats.taps + ' taps (early, in time, late, wrong, none) and ' + stats.samples + ' hidden-chord samples; ' + stats.keys + ' space-bar listeners added and all removed; ' + stats.screens + ' screen sets rendered, EN + ES, ' + EXPECT.keys + ' chc.* strings');
+}
+
 /* 1bf2. LYRIC-SHEET CARDS (card.sheet — ca-38, Jonathan 2026-10-19). The
    card draws a chord sheet PDF and walks a dot over its chord names in
    reading order: name n is the card's n-th chord CHANGE. If the card's
@@ -12442,6 +12730,7 @@ function checkPracticeMinutes(i18nTable) {
   checkChordGridCards(rcCtx);
   checkRecordingVersions(rcCtx);
   checkNoteCallPower(rcCtx);
+  checkChordCall(rcCtx);
   await checkRosterSkipsTrainerStub();
   await checkSongPopularity(rcCtx);
   checkPowerChordPopups(rcSets, rcCtx);

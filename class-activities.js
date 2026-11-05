@@ -335,8 +335,8 @@
    2026-09-16: its steps were merged into `ca-17`, after the A-string note
    names. Same orphan-key story for anyone who had ticked it.
    `ca-47` ("Strum Pattern in Chunks") was merged into `ca-46` as its
-   "chunks" path on 2026-11-04 (no student had opened either); the next new
-   activity is `ca-48`.
+   "chunks" path on 2026-11-04 (no student had opened either); `ca-48` is
+   "Call the Chord" (2026-11-05); the next new activity is `ca-49`.
 
    ORDER AND MODULE PLACEMENT LIVE ON THE CONSOLE BOARD, NOT IN THIS FILE
    (2026-09-16). config/class.activityBoard — { id -> { module, pos } },
@@ -7091,6 +7091,46 @@ window.CLASS_ACTIVITIES = [
         text_es: 'Toca con el video desde 10:20 con D5, C5 y G5. Cambia de acorde cuando él cambia. Lo tienes cuando: el patrón sigue sin parar en cada cambio de acorde, hasta el final. ¿Te perdiste? Deja de rasguear, cuenta con él y vuelve a entrar en el 1.',
         video: { id: '0ASVeXINKYM', start: 620,
                  label: 'Play-along — starts at 10:20', label_es: 'Toca con el video — empieza en 10:20' },
+      },
+    ],
+  },
+  /* Call the chord (work order 2026-11-05, widget A; Day 36, reading a lyric
+     sheet). The no-guitar rung under the lyric-sheet play-alongs: the record
+     plays one section of a song and the student keeps one beat AHEAD of the
+     chord changes — Follow shows the next chord in a big box, Call hides it
+     and the student picks it. The drill reads the play-along card's own
+     sections (ca-29 Watchtower, ca-33 Sweet Child; the SAME objects ca-38 and
+     ca-45 read for their lyric sheets), so a change to the card's chords or
+     bars moves the drill too. Focus view, label + drill on every step, no
+     text: the widget carries its own directions and pass line. Engine:
+     renderChordCall in app.js. Sweet Child's Call step uses the Intro, not the
+     Verse: the verse is only 7 changes in two laps, the intro is the same
+     D5 C5 G5 chords in 10, which is what "8 of 10" needs. */
+  {
+    id:    'ca-48',
+    view:  'focus',   // one step at a time — see VIEW above
+    title:    'Call the Chord',
+    title_es: 'Di el acorde',
+    steps: [
+      {
+        label:    'Practice — Watchtower, follow',
+        label_es: 'Practica — Watchtower, seguir',
+        drill: { type: 'chordcall', card: 'ca-29', section: 'Verse 1', mode: 'follow' },
+      },
+      {
+        label:    'Practice — Watchtower, call',
+        label_es: 'Practica — Watchtower, decir',
+        drill: { type: 'chordcall', card: 'ca-29', section: 'Verse 1', mode: 'call' },
+      },
+      {
+        label:    'Practice — Sweet Child verse, follow',
+        label_es: 'Practica — Sweet Child, estrofa, seguir',
+        drill: { type: 'chordcall', card: 'ca-33', section: 'Verse 1', mode: 'follow' },
+      },
+      {
+        label:    'Practice — Sweet Child, call',
+        label_es: 'Practica — Sweet Child, decir',
+        drill: { type: 'chordcall', card: 'ca-33', section: 'Intro', mode: 'call' },
       },
     ],
   },
