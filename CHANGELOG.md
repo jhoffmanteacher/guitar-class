@@ -5,6 +5,10 @@ Notable changes to the Guitar Class site. Newest first.
 For the full session-by-session history (and the reasoning behind each change),
 see `WORKFLOW.md` and the git commit log.
 
+## 2026-11-05 — Power Chord Switch: noise in the room counts less
+
+- **In Power Chord Switch, a strum has to be a little louder to count.** Before, a noise in the room (a voice, a bump, a chair) or the last chord still ringing could count as a right change when you had not strummed. Now it has to be a real strum. If a soft strum shows "no strum heard", strum a little harder and keep the guitar close to the mic. Change Up and the other mic games are not changed.
+
 ## 2026-11-05 — Live quiz: other players' names are not shown on your screen
 
 - **At the end of a live quiz, your own screen shows the top 5 as "Student" ("Estudiante") next to their points. Your own row shows your name.** The classroom wall still shows every name, as before. Names are no longer saved in the score list that every signed-in account can read.

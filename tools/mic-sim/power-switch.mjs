@@ -31,7 +31,7 @@ const src = fs.readFileSync(file, 'utf8');
 const constLine = n => { const m = src.match(new RegExp('^const ' + n + '\\s*=\\s*([^;]+);', 'm')); return m ? `const ${n} = ${m[1]};` : ''; };
 const consts = ['COACH_LVL_WIN', 'COACH_LVL_HOP', 'COACH_CATCHUP_MAX_MS', 'COACH_ATTACK_SKIP', 'COACH_ONSET_REFRACT', 'COACH_EVENT_TAIL',
   'CHK_ONSET_FLOOR', 'CHK_ONSET_RATIO', 'CHK_HF_FLOOR', 'CHK_HF_RATIO', 'COACH_STANDOUT', 'COACH_PITCH_GATE',
-  'COACH_STANDOUT_TARGET', 'RNW_POWER_CLARITY'].map(constLine).join('\n');
+  'COACH_STANDOUT_TARGET', 'RNW_POWER_CLARITY', 'CC_POWER_ONSET_RATIO', 'CC_POWER_HF_RATIO'].map(constLine).join('\n');
 const fns = ['coachReadFrame', 'coachDetectPitch', 'coachPitchReadings', 'coachSmooth', 'ccResolvePend'].map(n => extract(src, n)).join('\n');
 const POWER_GATE = opt('clarity') ? JSON.parse(opt('clarity')) : null;
 const loopsJson = src.match(/const CC_POWER_PROGRESSIONS = (\[[\s\S]*?\n\]);/);
@@ -41,11 +41,13 @@ const LOOPS = new Function(constLine('PW_A5_OPEN') + '\nreturn ' + loopsJson[1])
 const body = `let micRec=null,coachHfRms=0,coachBgRms=0,coachBgPrev=0,coachOnsetAt=0,coachReadCtx=null,coachReadCtxT=0,coachYinD=null,coachSmoothA=0.18;
 const tunerMedian=a=>{const b=[...a].sort((x,y)=>x-y);return b[Math.floor(b.length/2)];};
 ${consts}
+const POW_RATIO = typeof CC_POWER_ONSET_RATIO !== 'undefined' ? CC_POWER_ONSET_RATIO : CHK_ONSET_RATIO;
+const POW_HFRATIO = typeof CC_POWER_HF_RATIO !== 'undefined' ? CC_POWER_HF_RATIO : CHK_HF_RATIO;
 const cc = { classes: {}, changes: [] };
 function ccChipRefresh(){}
 ${fns}
 return { read: coachReadFrame, smooth: coachSmooth, readings: coachPitchReadings, resolve: ccResolvePend, cc, hf: () => coachHfRms, onsetAt: () => coachOnsetAt,
-  K: { TAIL: COACH_EVENT_TAIL, SKIP: COACH_ATTACK_SKIP, REFRACT: COACH_ONSET_REFRACT, FLOOR: CHK_ONSET_FLOOR, RATIO: CHK_ONSET_RATIO, HFFLOOR: CHK_HF_FLOOR, HFRATIO: CHK_HF_RATIO, GATE: COACH_PITCH_GATE, POWER: RNW_POWER_CLARITY } };`;
+  K: { TAIL: COACH_EVENT_TAIL, SKIP: COACH_ATTACK_SKIP, REFRACT: COACH_ONSET_REFRACT, FLOOR: CHK_ONSET_FLOOR, RATIO: CHK_ONSET_RATIO, HFFLOOR: CHK_HF_FLOOR, HFRATIO: CHK_HF_RATIO, PRATIO: POW_RATIO, PHFRATIO: POW_HFRATIO, GATE: COACH_PITCH_GATE, POWER: RNW_POWER_CLARITY } };`;
 const factory = new Function('coachAnalyser', 'coachCtx', 'coachFrameBuf', 'coachUpdateMicLevel', 'performance', body);
 
 function rnd(seed){ return () => (seed = (seed * 1664525 + 1013904223) >>> 0) / 4294967296; }
@@ -62,7 +64,7 @@ const ROOT = { F5: 41, G5: 43, A5: 45, B5: 47, C5: 48, D5: 50 };
 const pcs = n => [ROOT[n], ROOT[n] + 7, ROOT[n] + 12].map(m => m % 12);
 const strum = (buf, startS, root, harm) => [0, 7, 12].forEach((off, i) => addNote(buf, startS + Math.floor(i * 0.035 * SR), root + off, 0.16 * GAIN, harm, 0.8));
 
-function trial(from, to, scenario, seed, gate){
+function trial(from, to, scenario, seed, gate, isPower){
   const r = rnd(seed);
   let vnow = 800;
   const wave = new Float32Array(Math.floor(3.4 * SR));
@@ -87,7 +89,8 @@ function trial(from, to, scenario, seed, gate){
   while (vnow < 4200){
     vnow += 50 * (0.7 + r() * 0.6);
     const rms = F.read(), now = vnow, hf = F.hf(), at = F.onsetAt();
-    if ((rms > K.FLOOR && rms > cc.smoothRms * K.RATIO || hf > K.HFFLOOR && hf > cc.smoothHf * K.HFRATIO) && at - lastOnsetT > K.REFRACT){
+    const onsetRatio = isPower ? K.PRATIO : K.RATIO, hfRatio = isPower ? K.PHFRATIO : K.HFRATIO;   // ccLoop: Power Chord Switch has its own
+    if ((rms > K.FLOOR && rms > cc.smoothRms * onsetRatio || hf > K.HFFLOOR && hf > cc.smoothHf * hfRatio) && at - lastOnsetT > K.REFRACT){
       lastOnsetT = at;
       if (at - LAT > 1900 && !ch.pend && ch.result === null) ch.pend = { t: at, readings: [] };   // only the graded beat counts
     }
@@ -107,10 +110,11 @@ function trial(from, to, scenario, seed, gate){
 // Pairs only: a song entry (group "song", 2026-11-02) is a 22- or 12-chord walk with shapes this simulator has no roots for (E5, the open A5).
 const PAIRS = [...new Set(LOOPS.filter(l => l.group !== "song").flatMap(l => l.chords.map((c, i) => c + '>' + l.chords[(i + 1) % l.chords.length])))].map(s => s.split('>'));
 const POWER_RAW = new Function('return ' + (constLine('RNW_POWER_CLARITY').replace(/^const \w+ = |;$/g, '') || '0.55'))();
-const GATES = POWER_GATE ? [['custom ' + JSON.stringify(POWER_GATE), POWER_GATE]] : [['0.55 (Change Up)', 0.55], ['RNW_POWER_CLARITY ' + JSON.stringify(POWER_RAW), POWER_RAW]];
+// [name, gate, isPower]: Change Up grades with the shared strum ratios, Power Chord Switch with CC_POWER_* (when coach.js has them)
+const GATES = POWER_GATE ? [['custom ' + JSON.stringify(POWER_GATE), POWER_GATE, true]] : [['0.55 (Change Up)', 0.55, false], ['RNW_POWER_CLARITY ' + JSON.stringify(POWER_RAW), POWER_RAW, true]];
 console.log(`${file} · ${PAIRS.length} adjacent chord pairs · harmonics ${opt('harm') || 'std'} · ${TRIALS} trials each`);
 const WANT = { change: 'should pass', held: 'should FAIL (never moved)', sharp: 'should FAIL (one fret off)' };
-for (const [gname, gate] of GATES){
+for (const [gname, gate, isPower] of GATES){
   console.log(`\n── gate ${gname}`);
   for (const scenario of ['change', 'held', 'sharp']){
     const tally = { 'ok·tone': 0, 'ok·timing': 0, off: 0, miss: 0 };
@@ -118,7 +122,7 @@ for (const [gname, gate] of GATES){
        on a real change, a false pass on a held or sharp chord. */
     const pairOff = {};
     for (const [a, b] of PAIRS) for (let s = 1; s <= TRIALS; s++){
-      const v = trial(a, b, scenario, s * 7919 + a.charCodeAt(0) * 31 + b.charCodeAt(0), gate);
+      const v = trial(a, b, scenario, s * 7919 + a.charCodeAt(0) * 31 + b.charCodeAt(0), gate, isPower);
       tally[v]++;
       if (scenario === 'change' ? v === 'off' : (v === 'ok·tone' || v === 'ok·timing')) pairOff[a + '→' + b] = (pairOff[a + '→' + b] || 0) + 1;
     }

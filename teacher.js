@@ -4952,7 +4952,8 @@ function micEvalStrumRule(sp){
   if (!alpha || !arrive) return null;
   let fires, smoothFn;
   try {
-    fires = new Function('rms', 'coachHfRms', 'cc', 'at', 'CHK_ONSET_FLOOR', 'CHK_ONSET_RATIO', 'CHK_HF_FLOOR', 'CHK_HF_RATIO', 'COACH_ONSET_REFRACT', 'return ' + cond[1] + ';');
+    // ccLoop's condition names onsetRatio / hfRatio since 2026-11-05 (Power Chord Switch has its own); the CHK_* names are supplied too, for an older text of it
+    fires = new Function('rms', 'coachHfRms', 'cc', 'at', 'CHK_ONSET_FLOOR', 'CHK_ONSET_RATIO', 'CHK_HF_FLOOR', 'CHK_HF_RATIO', 'COACH_ONSET_REFRACT', 'onsetRatio', 'hfRatio', 'return ' + cond[1] + ';');
     smoothFn = new Function('let coachSmoothA = 0;\n' + sp.smoothSrc + '\nreturn function(st, r, h, a){ coachSmoothA = a; coachSmooth(st, r, h); };')();
   } catch (e){ return null; }
   const base = Number(alpha[1]), step = Number(alpha[2]);
@@ -4960,7 +4961,7 @@ function micEvalStrumRule(sp){
     FLOOR: Number(c.FLOOR), RATIO: Number(c.RATIO), HF_FLOOR: Number(c.HF_FLOOR), HF_RATIO: Number(c.HF_RATIO), REFRACT: Number(c.REFRACT),
     WIN: Number(c.WIN), HOP: Number(c.HOP), CATCHUP: Number(c.CATCHUP), ARRIVE: Number(arrive[1]),
     // does the frame (rms, hf, at ms) make an onset, with these two ratios, given this loop's levels
-    fires: (rms, hf, st, at, ratio, hfRatio) => !!fires(rms, hf, st, at, c.FLOOR, ratio, c.HF_FLOOR, hfRatio, c.REFRACT),
+    fires: (rms, hf, st, at, ratio, hfRatio) => !!fires(rms, hf, st, at, c.FLOOR, ratio, c.HF_FLOOR, hfRatio, c.REFRACT, ratio, hfRatio),
     smooth: (st, rms, hf, dtMs) => smoothFn(st, rms, hf, 1 - Math.pow(base, dtMs / step))
   };
 }
@@ -5068,6 +5069,9 @@ function micEvalStrumHits(frames, rule, ratio, hfRatio){
    strum) and realLost (an agree change that no longer has one); `reproduced` =
    changes where the replay at that ratio hears what the site heard (the
    current-ratio row says how far the replay can be trusted). Measurement only.
+   `strumRatio` { full, hf, saved }: the ratios the take was graded with (saved: from its own fields; else the
+   shared ones, as every older take). `whatIfSkipped`: it was graded with other ratios than the replay starts
+   from (Power Chord Switch's own, 2.2 / 2.67, since 2026-11-05), so it has no `whatIf`.
    `pitch` (null for a take saved before 2026-11-05, which has no expected[].readings):
    what "no readable pitch, no tick" would do, from the pitch readings each change's chord
    check had (coach.js ccResolvePend). The site grades a strum right on timing alone when it
@@ -5239,7 +5243,16 @@ function micEvalTakePw(pcm, R, d, deps){
   /* ── what-if: the site's strum rule, replayed on the audio, at the site's ratios and stricter ones ── */
   let whatIf = null;
   const rule = judged.length ? micEvalStrumRule(deps.strum) : null;
-  if (rule){
+  /* The strum ratios this take was graded with: saved in the take from 2026-11-05 (coach.js ccRecMeta; Power Chord Switch uses its own, stricter
+     ones), else the shared ones, which is what every older take was graded with. The what-if replays STRICTER ratios than the take's own, from the
+     shared ones: a take graded with other ratios is left out of it (`whatIfSkipped`) rather than replayed as if it had been graded with those. */
+  const sc = deps.strum && deps.strum.consts;
+  const ratioOf = v => num(v) && v >= 1 && v <= 10 ? v : null;
+  const ownFull = ratioOf(d.onsetRatio), ownHf = ratioOf(d.hfRatio);
+  const strumRatio = ownFull && ownHf ? { full: ownFull, hf: ownHf, saved: true }
+    : sc && Number(sc.RATIO) > 0 ? { full: Number(sc.RATIO), hf: Number(sc.HF_RATIO), saved: false } : null;
+  const whatIfSkipped = !!(strumRatio && strumRatio.saved && sc && (Math.abs(strumRatio.full - Number(sc.RATIO)) > 1e-9 || Math.abs(strumRatio.hf - Number(sc.HF_RATIO)) > 1e-9));
+  if (rule && !whatIfSkipped){
     const srcRate = num(d.srcSampleRate) && d.srcSampleRate >= 8000 && d.srcSampleRate <= 192000 ? d.srcSampleRate : 48000;
     const frameMs = num(d.frameMeanMs) && d.frameMeanMs > 0 ? Math.min(150, Math.max(1000 / 60, d.frameMeanMs)) : 50;
     const frames = micEvalStrumFrames(x, R, srcRate, frameMs, rule);
@@ -5325,7 +5338,7 @@ function micEvalTakePw(pcm, R, d, deps){
   const startMs = rounds.length ? rounds[0].listen - 4 * rounds[0].beat + rounds[0].offs : 0;
   const playMs = Math.max(1, endMs - startMs);
   return {
-    kind: 'pw', level, latency, notes: summary, perNote: notes, rounds: roundRows, whatIf, pitch,
+    kind: 'pw', level, latency, notes: summary, perNote: notes, rounds: roundRows, whatIf, whatIfSkipped, strumRatio, pitch,
     room: { extraOnsetsPerMin: Math.round(extra / playMs * 60000), extra, onsets: onsets.length }
   };
 }
@@ -5371,11 +5384,13 @@ function micEvalRow(label, d, pcm, deps){
 function micEvalWhatIfSummary(rows){
   const pw = rows.filter(r => r.kind === 'pw' && r.whatIf && r.whatIf.candidates && r.whatIf.candidates.length);
   if (!pw.length) return null;
+  const skipped = rows.filter(r => r.kind === 'pw' && r.whatIfSkipped).length;
   const cands = pw[0].whatIf.candidates.map(c => ({ ratio: c.ratio, hfRatio: c.hfRatio }));
   const same = pw.filter(r => r.whatIf.candidates.length === cands.length && r.whatIf.candidates.every((c, k) => c.ratio === cands[k].ratio && c.hfRatio === cands[k].hfRatio));
   const sum = (list, k, f) => list.reduce((a, r) => a + (r.whatIf.candidates[k][f] || 0), 0);
   const per = (r, k) => { const c = r.whatIf.candidates[k]; return { falseHitsRemoved: c.falseHitsRemoved, realLost: c.realLost, reproduced: c.reproduced, strums: c.strums }; };
   return {
+    skipped,
     candidates: cands,
     takes: same.map(r => ({ take: r.take, game: r.game, frameMs: r.whatIf.frameMs, judged: r.whatIf.candidates[0].judged,
       falseHits: r.whatIf.candidates[0].falseHits, agree: r.whatIf.candidates[0].agree, perCandidate: cands.map((c, k) => per(r, k)) })),
@@ -5385,7 +5400,9 @@ function micEvalWhatIfSummary(rows){
 }
 function micEvalWhatIfText(rows){
   const w = micEvalWhatIfSummary(rows);
-  if (!w) return '';
+  const sk = rows.filter(r => r.kind === 'pw' && r.whatIfSkipped), r0 = sk[0] && sk[0].strumRatio;
+  const skNote = !sk.length ? '' : `${sk.length} Power Chord Switch ${sk.length === 1 ? 'take was' : 'takes were'} graded with the stricter strum ratios ${r0 ? r0.full + ' / ' + r0.hf : ''} that Power Chord Switch has used since 2026-11-05, so ${sk.length === 1 ? 'it is' : 'they are'} not in the strum what-if: it replays stricter ratios than the one a take was graded with.`;
+  if (!w) return skNote ? '\n\nStrum what-if: ' + skNote : '';
   const pad = (v, n) => { const t = v == null ? '-' : String(v); return t.length >= n ? t : t + ' '.repeat(n - t.length); };
   const head = [pad('take', 5), pad('false', 6), pad('agree', 6)].concat(w.candidates.map(c => pad('x' + c.ratio + '/' + c.hfRatio, 14))).join(' ');
   const line = (label, f, a, cs) => [pad(label, 5), pad(f, 6), pad(a, 6)].concat(cs.map(c => pad('-' + c.falseHitsRemoved + ' / lost ' + c.realLost, 14))).join(' ');
@@ -5396,7 +5413,7 @@ false       changes the site graded right or wrong where the recording has no st
 agree       changes the site and the recording agree were strummed
 -N          of the false hits, N would not fire at that ratio (no strum left in the window)
 lost M      of the agree changes, M would no longer fire (a real strum, now too soft for the rule)
-The first column is the site's own ratios: ${w.totals.perCandidate[0].reproduced} of ${w.totals.judged} changes get the same yes/no there as the site gave (the replay's own error: its frame times and sample rate are assumed).`;
+The first column is the site's own ratios: ${w.totals.perCandidate[0].reproduced} of ${w.totals.judged} changes get the same yes/no there as the site gave (the replay's own error: its frame times and sample rate are assumed).` + (skNote ? '\n' + skNote : '');
 }
 
 /* The pitch rule (micEvalTakePw `pitch`), summed: one line per Power Chord Switch take that saved its readings, and the totals. Takes saved before
@@ -5602,7 +5619,9 @@ function teacherMicEvalHtml(){
 /* The strum what-if as a small table (micEvalWhatIfSummary): per Power Chord Switch take and ratio, "-N" false hits that would not fire and "lost M" real strums that would stop firing. */
 function teacherMicWhatIfHtml(rows){
   const w = micEvalWhatIfSummary(rows);
-  if(!w) return '';
+  const sk = rows.filter(r => r.kind === 'pw' && r.whatIfSkipped), r0 = sk[0] && sk[0].strumRatio;
+  const skNote = !sk.length ? '' : `${sk.length} Power Chord Switch ${sk.length === 1 ? 'take was' : 'takes were'} graded with the stricter strum ratios ${r0 ? escHtml(r0.full + ' / ' + r0.hf) : ''} that Power Chord Switch has used since 2026-11-05, so ${sk.length === 1 ? 'it is' : 'they are'} not in this table: it replays stricter ratios than the one a take was graded with.`;
+  if(!w) return skNote ? `<div class="tg-note" style="margin-top:10px"><b>Strum what-if</b> — ${skNote}</div>` : '';
   const cell = c => `<td>−${c.falseHitsRemoved} · lost ${c.realLost}</td>`;
   const body = w.takes.map(t => `<tr><td class="nc wf">${escHtml(t.take)}</td><td>${t.falseHits}</td><td>${t.agree}</td>${t.perCandidate.map(cell).join('')}</tr>`).join('') +
     `<tr><td class="nc wf"><b>All ${w.totals.takes}</b></td><td><b>${w.totals.falseHits}</b></td><td><b>${w.totals.agree}</b></td>${w.totals.perCandidate.map(c => `<td><b>−${c.falseHitsRemoved} · lost ${c.realLost}</b></td>`).join('')}</tr>`;
@@ -5610,7 +5629,7 @@ function teacherMicWhatIfHtml(rows){
   return `<div class="tg-note" style="margin-top:10px"><b>Strum what-if</b> (measurement only; the game does not change). The site's own strum rule, run again on each Power Chord Switch recording at its own ratio and at stricter ones.
     <i>−N</i>: false hits (the site heard a strum the recording does not have) that would no longer fire. <i>lost M</i>: real strums (the site and the recording agree) that would stop firing.</div>
     <div class="t-grid-wrap"><table><thead><tr><th class="nc">Take</th><th>False hits</th><th>Real strums</th>${w.candidates.map((c, k) => `<th>${k ? 'Ratio' : 'Site’s ratio'} ${c.ratio} (HF ${c.hfRatio})</th>`).join('')}</tr></thead><tbody>${body}</tbody></table></div>
-    <div class="tg-note">At the site's own ratio the replay gives the same yes/no as the site on ${t0.reproduced} of ${w.totals.judged} changes; the rest is the replay's own error (it assumes steady frame times and the 48 kHz rate).</div>`;
+    <div class="tg-note">At the site's own ratio the replay gives the same yes/no as the site on ${t0.reproduced} of ${w.totals.judged} changes; the rest is the replay's own error (it assumes steady frame times and the 48 kHz rate).${skNote ? ' ' + skNote : ''}</div>`;
 }
 /* The pitch rule as a small table (micEvalPitchSummary), under the strum what-if: per Power Chord Switch take that saved its readings, how many changes the
    site graded right with 3+ readings and on timing alone, and what "no readable pitch, no tick" would remove or cost. */

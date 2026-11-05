@@ -55,6 +55,15 @@ const CHK_ONSET_FLOOR     = 0.003;  // absolute RMS floor for an onset
 const CHK_ONSET_RATIO     = 1.4;    // RMS jump over the smoothed level
 const CHK_HF_FLOOR        = 0.0008; // absolute floor for the pick-attack channel
 const CHK_HF_RATIO        = 1.7;    // HF jump over its smoothed level
+/* Power Chord Switch ONLY (Jonathan, 2026-11-05): a strum has to jump the level more than the shared
+   ratios above. Measured on 12 real takes (186 changes, 52 false hits, 132 real strums; the console's
+   strum what-if): 1.8 / 2.19 hears 14 fewer false hits and loses 1 real strum, 2.2 / 2.67 hears 30 fewer
+   and loses 4, 2.6 / 3.16 hears 38 fewer and loses 9 (the shared 1.4 / 1.7: none, none). 2.2 is where the
+   trade bends. The false hits are room noise and a chord left ringing; the lost strums are soft ones.
+   Change Up and every other loop keep CHK_ONSET_RATIO / CHK_HF_RATIO. Each saved take records the ratios
+   it was graded with (ccRecMeta), so the console can tell these takes from the older ones. */
+const CC_POWER_ONSET_RATIO = 2.2;   // RMS jump over the smoothed level, Power Chord Switch
+const CC_POWER_HF_RATIO    = 2.67;  // HF jump over its smoothed level (1.7 x 2.2 / 1.4, the what-if's scaling)
 const COACH_ONSET_REFRACT = 140;    // ms — one strum = one onset, not six
 const COACH_ATTACK_SKIP   = 70;     // ms after an onset before pitch readings start —
                                     // the analyser window still holds the pick scrape
@@ -3592,6 +3601,7 @@ function ccRecMeta(complete){
   return {
     fields: { game: 'pw', complete: complete === true, progression: cc.chords.join('-'), song: progDef.song || null, ladder: !!cc.ladder,
               bpm: cc.stageBpms[0], stageBpms: cc.stageBpms.slice(), bpc: cc.bpc, eventTimes: 'played (arrival - micLatencyMs)',
+              onsetRatio: CC_POWER_ONSET_RATIO, hfRatio: CC_POWER_HF_RATIO,
               changeReadings: 'per change: null = no strum in its window; [] = a strum but no pitch could be read; else the midi readings its chord check used (under 3 passes on timing alone)' },
     expected: cc.changes.map((c, i) => ({ i, t: c.t, from: c.from, to: c.to, stage: c.stage == null ? 0 : c.stage, bpm: c.bpm, verdict: c.result,
       readings: c.readings ? c.readings.map(r2) : null })),
@@ -3774,11 +3784,16 @@ function ccLoop(){
        jump for clean separated strums, HF pick-attack channel for a strum
        over the still-ringing previous chord — which is exactly what the
        graded beat-1-of-a-new-bar strum sounds like). Scored at `at - lat`,
-       when it was played — see coachLoop and coachMicLatencyMs. */
+       when it was played — see coachLoop and coachMicLatencyMs.
+       The two jump ratios are Power Chord Switch's own (CC_POWER_*) in that game and the shared
+       CHK_* ones in Change Up. The console's strum what-if (teacher.js micEvalStrumRule) reads
+       the condition below as text, so keep it on these four lines and free of comments. */
+    const onsetRatio = ccIsPower() ? CC_POWER_ONSET_RATIO : CHK_ONSET_RATIO;
+    const hfRatio = ccIsPower() ? CC_POWER_HF_RATIO : CHK_HF_RATIO;
     if ((rms > CHK_ONSET_FLOOR &&
-         rms > cc.smoothRms * CHK_ONSET_RATIO ||
+         rms > cc.smoothRms * onsetRatio ||
          coachHfRms > CHK_HF_FLOOR &&
-         coachHfRms > cc.smoothHf * CHK_HF_RATIO) &&
+         coachHfRms > cc.smoothHf * hfRatio) &&
         at - cc.lastOnsetT > COACH_ONSET_REFRACT){
       cc.lastOnsetT = at;
       if (micRec && micRec.live) cc.evLog.push({ t: at - lat, stage: cc.stage });

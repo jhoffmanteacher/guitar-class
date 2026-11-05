@@ -30,11 +30,13 @@
 Start here. Each line says where the detail is. Update this block whenever an item opens or closes; the
 sections below hold the history and the reasons.
 
-**Jonathan's decisions (no date)**
-- **Power Chord Switch room noise:** do nothing, a stricter strum ratio, or "no readable pitch, no tick".
-  The numbers on the 12 real takes (ratio 2.2: 30 of 52 false hits removed, 4 of 132 real strums lost) are under
-  "Power Chord Switch: where we stopped" → "First real-take results". Any change is a `coach.js` detection change:
-  Always Reviewed, run `tools/mic-sim/power-switch.mjs` first.
+**Decided 2026-11-05: Power Chord Switch room noise**
+- Jonathan chose a stricter strum ratio for Power Chord Switch ONLY: `CC_POWER_ONSET_RATIO` 2.2 and
+  `CC_POWER_HF_RATIO` 2.67 in `coach.js` (Change Up and every other loop keep 1.4 / 1.7). On the 12 real takes the
+  replay says 30 of 52 false hits go and 4 of 132 real strums are lost. Detail, numbers and how to roll it back:
+  "Power Chord Switch: where we stopped" → "Decision (2026-11-05)". "No readable pitch, no tick" was not chosen.
+- **To watch in the next takes:** noisy rooms should show far fewer "heard, not there" changes, and clean takes
+  should not start missing real strums (the "no strum heard" red chip on a soft strummer).
 
 **Waiting on students' recordings**
 - **The Pitch-rule table** (teacher console → Mic recordings → Evaluate all recordings) needs takes saved after
@@ -49,7 +51,8 @@ sections below hold the history and the reasons.
 
 **Automatic**
 - The Friday check (Fridays 11 PM Pacific; next 2026-11-06) reviews the two Fast commits from 2026-11-05:
-  `b958165` (pitch readings saved in takes) and `ce5096e` (the Pitch-rule table).
+  `b958165` (pitch readings saved in takes) and `ce5096e` (the Pitch-rule table). The ratio change was reviewed
+  the same day (always-reviewed: a detection change), so it is not in that list.
 
 **Finished recently (don't redo)**
 - Practice-minutes heartbeat removal: code, rules, emulator test and the old collections (2026-11-05); the old
@@ -3427,8 +3430,8 @@ the literal complaint would have.
 
 ## Power Chord Switch: where we stopped (moved here from NEXT-STEPS-power-chord-switch.md, 2026-11-05)
 
-Jonathan moved this file into WORKFLOW.md and deleted it. Still open: the room-noise decision
-(he will decide later; the what-if is built and live). The practice-minutes heartbeat removal is
+Jonathan moved this file into WORKFLOW.md and deleted it. The room-noise decision was made on 2026-11-05
+(a stricter strum ratio for Power Chord Switch only, see "Decision (2026-11-05)" below). The practice-minutes heartbeat removal is
 finished: his console paste and the emulator run (49 passed, 0 failed) are both DONE; only the
 the old `heartbeats` and `minutesBoard` collections were deleted in the console on 2026-11-05; only the console's
 `heartbeats` composite index is left (optional, see "Practice-minutes heartbeat removal" below).
@@ -3441,7 +3444,7 @@ no Note Runner mic check. The original title read "Power Chord Switch — where 
 > published `firestore.rules` (take id `(coach|nr|pw)`). The same day a second
 > change landed (e5e0bef): a Stopped game with at least 10 s of audio is saved
 > too, with `complete:false` in the take (a shorter Stop, or leaving the screen,
-> still drops it). Only the room-noise decision (Next steps, item 3) is still open.
+> still drops it). Nothing is open except watching the next takes (Next steps, item 3).
 > The branch `pcs-pending-smoke` can be deleted on GitHub.
 
 Read this when Jonathan asks "what are the next steps for the Power Chord
@@ -3511,18 +3514,11 @@ Jonathan's request; this list is the plan.)
    (`expected`, `events`) with what is in the audio, per round: strums the game missed,
    "right" changes with no strum, and the mic delay from the three count-ins (about -73 ms on
    Chromebook internal mics).
-3. **OPEN, Jonathan's call, no date: room noise scores a right chord.** Nothing to do until he
-   asks. The measurement is in "Open finding" and "First real-take results" below. Where it
-   stands: a higher onset floor is ruled out; "no readable pitch, no tick" and stricter
-   strum ratios are the two options left, and the "Strum what-if" table in the console
-   (Evaluate all recordings) is the tool for the second. What it showed on the 12 real takes
-   (2026-11-05) is under "First real-take results" below: ratio 2.2 removes 30 of 52 false hits
-   and loses 4 of 132 real strums. Takes saved from
-   2026-11-05 carry the pitch readings (see "Pitch readings in the saved take"), so the cost of
-   "no readable pitch, no tick" on real strums can be read off the console's "Pitch-rule
-   what-if" table once new takes are in. Either option touches
-   `coach.js` detection: xhigh, Always Reviewed, run `tools/mic-sim/power-switch.mjs` first
-   (repaired 2026-11-05: it had crashed on `PW_A5_OPEN` since the Songs column was added).
+3. **DECIDED 2026-11-05: room noise scores a right chord.** Jonathan chose the stricter strum ratio for Power
+   Chord Switch only (2.2 / 2.67; "Decision (2026-11-05)" below). Not chosen: "no readable pitch, no tick" (the
+   console's "Pitch-rule what-if" table prices it from takes saved after 2026-11-05, if it is ever wanted). To do:
+   look at the next takes (see "Where things stand" → to watch). Any further change to how a strum is heard is a
+   `coach.js` detection change: xhigh, Always Reviewed, run `tools/mic-sim/power-switch.mjs` first.
 4. **Nothing else is waiting.** Settled and not to be raised again: see "Later (not chosen
    yet)" below (the 30 s cap, the real mic check, the three wordings, no Note Runner check).
 
@@ -3546,7 +3542,7 @@ longer writes a `heartbeats/{sessionId}` record.
 
 ### Open finding (Jonathan, 2026-11-04): room noise scores a right chord
 
-**Status 2026-11-05: Jonathan will decide this later.** Nothing to do until he asks; the what-if is built and live.
+**Status 2026-11-05: DECIDED** (a stricter strum ratio for Power Chord Switch only; see "Decision (2026-11-05)" below). The text under this heading is the history.
 
 Jonathan played with no guitar and the game showed "right". Cause, read in the code
 (`ccLoop`, `ccResolvePend`, `coach.js`): any loudness jump above a very low floor
@@ -3681,6 +3677,46 @@ the truth worked out there from the planted counts, not from teacher.js) and the
 none; 64 graded right, 39 on timing alone, and the console table, the terminal text, the download
 and `eval-takes.mjs` all say the same numbers (ten deliberate breaks each turned it red). The
 numbers in those synthetic takes are planted, so they say nothing about real students.
+
+#### Decision (2026-11-05): Power Chord Switch strums need ratio 2.2 / 2.67
+
+Jonathan's pick, after the console's strum what-if on the 12 real takes (186 changes, 52 false hits, 132 real
+strums; replay matches the site on 183 of 186 at the old ratios): 1.8 / 2.19 removes 14 false hits for 1 real strum
+lost; **2.2 / 2.67 removes 30 for 4**; 2.6 / 3.16 removes 38 for 9 (the knee is 2.2: 1.8 → 2.2 buys 5 false hits per
+real strum lost, 2.2 → 2.6 only 1.6). The 3 noisy takes lose 26 false hits and no real strum at 2.2; the 4 lost real
+strums are soft strums in clean takes (T06, T08, T11). The old line in `coach.js` ("marking a correct change wrong is
+the worse error in a room") is why the choice was Jonathan's: this trades a few soft strums for honest feedback in
+noisy rooms.
+
+- **The game (`coach.js`):** `CC_POWER_ONSET_RATIO = 2.2` and `CC_POWER_HF_RATIO = 2.67` (1.7 x 2.2 / 1.4, the
+  what-if's own scaling) sit beside the shared `CHK_ONSET_RATIO` / `CHK_HF_RATIO`. `ccLoop` picks them with
+  `ccIsPower()`: Power Chord Switch uses its own, Change Up (same loop) keeps the shared ones. Listening Coach, Note
+  Runner, Note Call and the other loops read `CHK_*` and are untouched. The condition must stay on those four lines and
+  free of comments: the console reads it as text (below).
+- **What a take records:** `fields.onsetRatio` / `fields.hfRatio` (`ccRecMeta`). A take saved before 2026-11-05
+  has neither and was graded with the shared ratios.
+- **The console (`teacher.js`):** `micEvalStrumRule` compiles ccLoop's own condition with the names `onsetRatio` /
+  `hfRatio` (and the `CHK_*` names, for an older text). The strum what-if replays STRICTER ratios than the take was
+  graded with, starting from the shared ones, so a take graded at 2.2 / 2.67 is left out of it (`row.whatIfSkipped`,
+  `row.strumRatio`) and the table says how many it left out; the rest of the evaluation (categories, rounds, the
+  Pitch-rule table) is unchanged. Ratios outside 1..10 or half missing are never trusted. **Not built:** a strum
+  what-if for takes graded at 2.2 (candidates above 2.2, e.g. 2.6 / 3.16, replayed from the new base); add it if the
+  next takes make it worth deciding on a stricter ratio.
+- **What to expect:** a clean strum in a quiet room grades exactly as before (`tools/mic-sim/power-switch.mjs`,
+  which now uses the Power Chord Switch ratios for its Power Chord Switch gate and the shared ones for Change Up:
+  identical output on the old and new `coach.js`; with the ratios forced to 60 only the Power Chord Switch gate
+  collapses). The change shows only in noisy rooms (fewer false "right" changes) and for soft strums (a few more
+  "no strum heard" chips; the tip already asks for a quiet room and the guitar close to the mic).
+- **Checks:** 1ck runs the real `ccLoop` on scripted frames in both games just below and above every threshold
+  (20 runs) and reads the ratios back from the saved take, and pins 2.2 / 2.67 and 1.4 / 1.7; 1cl proves a take graded
+  at 2.2 / 2.67 is told from the older ones, measured the same, left out of the what-if and counted (10 cases,
+  crafted values refused). Fifteen deliberate breaks (the ratio back to 1.4, Change Up using the new ratios, the loop
+  ignoring them, the attack channel left shared, the take dropping them, a retune without re-pinning, the game test
+  inverted, a comment inside the condition, an unsupplied name, and six evaluator breaks) each turned a check red.
+- **Roll back:** set both `CC_POWER_*` constants to the `CHK_*` values (1.4 / 1.7) and re-pin 1ck (`R.pw` / `R.pwHf`);
+  new takes then record 1.4 / 1.7 and the console treats them as the older ones.
+- **Student-facing:** a `CHANGELOG.md` entry ("noise in the room counts less"). No string changed: the setup tip
+  already says quiet room, guitar close to the mic.
 
 ### Later (not chosen yet)
 
