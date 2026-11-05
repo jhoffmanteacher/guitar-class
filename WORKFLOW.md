@@ -1035,7 +1035,7 @@
       and gives a period (never a name).
       Known limit: a tag cannot be proven unique, so any account can claim another's public tag and lower/remove that one entry (fix would be a
       create-only reverse index `boardTags/{tag}` with `existsAfter`; not built; the emulator now runs here, and two cases in `tools/pm-rules-test.mjs` pin this limit so they flip when it is fixed).
-      `tools/pm-rules-test.mjs` has cases for `minutesBoard` (no rules), `weekBoard`, `rankBoard` and `meta/board` since 2026-11-05 (117 passed, 0 failed; 12 deliberate breaks of the rules each turned a case red). Other tests: pm-sim sections 14-16, pm-e2e "top 5".
+      `tools/pm-rules-test.mjs` has cases for `minutesBoard` (no rules), `weekBoard`, `rankBoard` and `meta/board` since 2026-11-05 (since then also the recorded takes, their audio chunks and the take counter: 179 passed, 0 failed on 2026-11-05; 12 + 16 deliberate breaks of the rules each turned a case red; one known leniency pinned: a chunk with no `i` is accepted, which the console never reads). Other tests: pm-sim sections 14-16, pm-e2e "top 5".
 - [x] **2026-11-01 — Practice minutes (student view only; display switched ON the same day: `uiOn: true`, `streakStartWeek: '2026-W45'`, goal 30; 60 since 2026-11-04).**
       Counts seconds of real backing-track playback and shows a weekly goal, a
       week streak and "N playing". Counting and writing ship LIVE; nothing is

@@ -8,12 +8,24 @@
    in minutes/{uid}/meta/board (the private tag), weekBoard/{tag} (the Top 5) and
    rankBoard/{tag} (the class rank): the shape of each doc, the caps, writing under someone
    else's tag, no uid or name in a board doc, no delete, and minutesBoard having no rules.
+   It also tries the recorded takes (micTakes/{uid}-{coach|nr|pw}, who may save one and only while the
+   teacher has collection on), their audio chunks (the size cap, the exact fields, written before the take
+   doc exists), that only the teacher reads or deletes them, and the micTakesMeta/count counter.
    Then it re-checks one rule on each OLDER path to show they still behave.
-   Last run: 2026-11-05, 117 passed, 0 failed. Each board rule was also broken in a scratch copy
-   (12 breaks: tag check dropped on weekBoard and on rankBoard, a uid field allowed on each,
-   minutesBoard back, tag updatable, tag readable by all, delete allowed on each of three,
-   period 5, a 500-day cap) and every one turned at least one case red. (The first run, 49
-   passed, was before the board cases; 66 passed, with the heartbeats section, before that.)
+   Last run: 2026-11-05, 179 passed, 0 failed. The rules were also broken in scratch copies and every
+   break turned at least one case red: the board rules 12 ways (tag check dropped on weekBoard and on
+   rankBoard, a uid field allowed on each, minutesBoard back, tag updatable, tag readable by all,
+   delete allowed on each of three, period 5, a 500-day cap), and the recording rules 16 ways (the
+   collection switch dropped on a take and on a chunk, any take or chunk id, no uid check, takes or
+   chunks readable by students, a student delete, the size cap raised, any chunk fields, no bytes
+   check, a fourth game name, a string "true" counted as on, the counter taking any increase, any
+   first value, or a public read). (49 passed before the board cases, 66 with the heartbeats
+   section before that.) KNOWN LENIENCY it pins: a chunk with no `i` is accepted (hasOnly lists the
+   allowed fields, it does not require them); the console reads chunks by document id, so nothing
+   depends on `i`. Tightening it would be a firestore.rules change and a console paste.
+   A "delete allowed" break written as one `allow ..., delete: if ... && request.resource...` line is
+   not a real break (request.resource is null on a delete, so the condition errors and denies):
+   write it as a separate `allow delete: if ...` line.
    No Homebrew and no system Java on the Mac that day: a Temurin 21 JRE tarball
    (adoptium.net, sha256 checked) unpacked into a scratch folder with JAVA_HOME and PATH
    pointed at it worked. If npm fails with EACCES in ~/.npm/_cacache, add `--cache <scratch>/npm-cache`.
@@ -180,6 +192,100 @@ if (which.includes('orig')) {
   /* If someone builds the create-only reverse index boardTags/{tag}, these two turn false: flip them then. */
   await t('uidC may create its meta doc with ANOTHER student\'s tag (A\'s)', () => META(C, 'uidC').set({ id: TAGA }), true);
   await t('…and then overwrite A\'s Top 5 entry (A\'s page repairs it on its next write)', () => WB(C, TAGA).set({ week: '2026-W46', period: '7', seconds: 1 }), true);
+
+  /* Recorded takes (coach.js micRecSaveNow), their audio chunks and the take counter. Added 2026-11-05. The app writes the chunks FIRST and the take
+     doc last, and the take doc is the only place a student's id, name and period sit next to the audio, so: who may write what, only while the teacher
+     has collection switched on (config/class.micSampling.on === true), never read back by a student, deleted only by the teacher. The take doc has
+     no field list on purpose (the saved readings of 2026-11-05 needed no rules change): the case with per-change readings pins that. */
+  const sampling = on => env.withSecurityRulesDisabled(c => c.firestore().doc('config/class').set(on === undefined ? { paused: false } : { micSampling: on }));
+  const TAKE = (db, id) => db.doc(`micTakes/${id}`);
+  const CHUNK = (db, id, i) => db.doc(`micTakes/${id}/chunks/${i}`);
+  const bytes = n => firebase.firestore.Blob.fromUint8Array(new Uint8Array(n));
+  const take = (uid, extra) => Object.assign({ uid, name: 'Fake Student', period: '3', mode: 'pw', game: 'pw', complete: true, durationSec: 29.5, chunks: 1, bytes: 1000,
+    expected: [{ i: 0, t: 1000.5, from: 'G5', to: 'C5', stage: 0, bpm: 60, verdict: 'ok', readings: [] }, { i: 1, t: 2000, from: 'C5', to: 'G5', stage: 0, bpm: 60, verdict: 'miss', readings: null },
+      { i: 2, t: 3000, from: 'G5', to: 'C5', stage: 0, bpm: 60, verdict: 'ok', readings: [48.01, 47.98, 48.02, 48] }], events: [{ t: 990.2, stage: 0 }] }, extra || {});
+  await sampling({ on: true });
+  console.log('== micTakes/{uid}-{coach|nr|pw}: who may save a take (collection on)');
+  await t('A saves its own Power Chord Switch take, with per-change readings (null, [] and numbers: no rules change was needed)', () => TAKE(A, 'uidA-pw').set(take('uidA')), true);
+  await t('…and its next take overwrites it (one take per student per game)', () => TAKE(A, 'uidA-pw').set(take('uidA', { complete: false })), true);
+  await t('a Listening Coach take (-coach)', () => TAKE(A, 'uidA-coach').set(take('uidA', { mode: 'coach' })), true);
+  await t('a Note Runner take (-nr)', () => TAKE(A, 'uidA-nr').set(take('uidA', { mode: 'nr' })), true);
+  await t('an unknown game (-xx) refused', () => TAKE(A, 'uidA-xx').set(take('uidA')), false);
+  await t('a game name with something after it (-pwx) refused: the whole id must match', () => TAKE(A, 'uidA-pwx').set(take('uidA')), false);
+  await t('no game at all (uidA) refused', () => TAKE(A, 'uidA').set(take('uidA')), false);
+  await t('an id with nothing after the dash (uidA-) refused', () => TAKE(A, 'uidA-').set(take('uidA')), false);
+  await t('B cannot save under A\'s id', () => TAKE(B, 'uidA-pw').set(take('uidB')), false);
+  await t('A cannot save under B\'s id', () => TAKE(A, 'uidB-pw').set(take('uidA')), false);
+  await t('an id that only ENDS with the writer\'s uid (xuidA-pw) refused', () => TAKE(A, 'xuidA-pw').set(take('uidA')), false);
+  await t('the id is right but uid in the doc is another student\'s refused', () => TAKE(A, 'uidA-pw').set(take('uidB')), false);
+  await t('the id is right but the doc has no uid refused', () => TAKE(A, 'uidA-pw').set({ mode: 'pw' }), false);
+  await t('signed out refused', () => TAKE(N, 'uidA-pw').set(take('uidA')), false);
+
+  console.log('== micTakes: the teacher switches collection on and off (config/class.micSampling.on)');
+  await sampling({ on: false });
+  await t('on:false: A\'s take refused', () => TAKE(A, 'uidA-pw').set(take('uidA')), false);
+  await sampling({ on: 'true' });
+  await t('on:"true" (a string, not true) refused', () => TAKE(A, 'uidA-pw').set(take('uidA')), false);
+  await sampling({});
+  await t('micSampling with no "on" refused', () => TAKE(A, 'uidA-pw').set(take('uidA')), false);
+  await sampling();
+  await t('config/class with no micSampling at all refused', () => TAKE(A, 'uidA-pw').set(take('uidA')), false);
+  await env.withSecurityRulesDisabled(c => c.firestore().doc('config/class').delete());
+  await t('no config/class document at all refused', () => TAKE(A, 'uidA-pw').set(take('uidA')), false);
+  await sampling({ on: false });
+  await t('on:false: a chunk is refused too', () => CHUNK(A, 'uidA-pw', 0).set({ i: 0, pcm: bytes(1000) }), false);
+  await sampling({ on: true });
+  await t('on:true again: the take is accepted', () => TAKE(A, 'uidA-pw').set(take('uidA')), true);
+
+  console.log('== micTakes/{id}/chunks/{i}: the audio');
+  await t('A writes chunk 0 of its take', () => CHUNK(A, 'uidA-pw', 0).set({ i: 0, pcm: bytes(1000) }), true);
+  await t('…the app writes chunks BEFORE the take doc: a chunk under a take that does not exist yet is accepted', () => CHUNK(B, 'uidB-nr', 0).set({ i: 0, pcm: bytes(1000) }), true);   // uidB-nr is never created as a take doc
+  await t('…and overwrites it (update)', () => CHUNK(A, 'uidA-pw', 0).set({ i: 0, pcm: bytes(2000) }), true);
+  await t('chunk 1 and 2 (a 30 s take is three)', async () => { await CHUNK(A, 'uidA-pw', 1).set({ i: 1, pcm: bytes(1000) }); return CHUNK(A, 'uidA-pw', 2).set({ i: 2, pcm: bytes(1000) }); }, true);
+  await t('exactly 750000 bytes (the cap; the app sends 600000)', () => CHUNK(A, 'uidA-pw', 3).set({ i: 3, pcm: bytes(750000) }), true);
+  await t('750001 bytes refused', () => CHUNK(A, 'uidA-pw', 4).set({ i: 4, pcm: bytes(750001) }), false);
+  await t('an extra field (the uid) refused', () => CHUNK(A, 'uidA-pw', 5).set({ i: 5, pcm: bytes(10), uid: 'uidA' }), false);
+  await t('KNOWN LENIENCY: no i is accepted (hasOnly lists the allowed fields, it does not require them; the console reads chunks by document id, never by i)', () => CHUNK(A, 'uidA-pw', 5).set({ pcm: bytes(10) }), true);
+  await t('no pcm refused', () => CHUNK(A, 'uidA-pw', 5).set({ i: 5 }), false);
+  await t('pcm as a string, not bytes, refused', () => CHUNK(A, 'uidA-pw', 5).set({ i: 5, pcm: 'AAAA' }), false);
+  await t('B cannot write a chunk under A\'s take', () => CHUNK(B, 'uidA-pw', 5).set({ i: 5, pcm: bytes(10) }), false);
+  await t('an unknown game under A\'s own uid (uidA-xx) refused', () => CHUNK(A, 'uidA-xx', 0).set({ i: 0, pcm: bytes(10) }), false);
+  await t('signed out refused', () => CHUNK(N, 'uidA-pw', 5).set({ i: 5, pcm: bytes(10) }), false);
+
+  console.log('== micTakes: only the teacher reads or deletes');
+  await t('A cannot read its own take back', () => TAKE(A, 'uidA-pw').get(), false);
+  await t('B cannot read A\'s take', () => TAKE(B, 'uidA-pw').get(), false);
+  await t('a student cannot list the takes', () => A.collection('micTakes').get(), false);
+  await t('signed out cannot read a take', () => TAKE(N, 'uidA-pw').get(), false);
+  await t('A cannot read its own audio back', () => CHUNK(A, 'uidA-pw', 0).get(), false);
+  await t('a student cannot list the chunks', () => A.collection('micTakes/uidA-pw/chunks').get(), false);
+  await t('A cannot delete its own take', () => TAKE(A, 'uidA-pw').delete(), false);
+  await t('A cannot delete its own chunk', () => CHUNK(A, 'uidA-pw', 0).delete(), false);
+  await t('the teacher reads a take', () => TAKE(T, 'uidA-pw').get(), true);
+  await t('the teacher lists the takes', () => T.collection('micTakes').get(), true);
+  await t('the teacher reads a chunk', () => CHUNK(T, 'uidA-pw', 0).get(), true);
+  await t('the teacher lists the chunks', () => T.collection('micTakes/uidA-pw/chunks').get(), true);
+  await t('the teacher deletes a chunk', () => CHUNK(T, 'uidA-pw', 1).delete(), true);
+  await t('the teacher deletes a take', () => TAKE(T, 'uidA-coach').delete(), true);
+  await sampling({ on: false });
+  await t('the teacher can still read and delete with collection off', async () => { await TAKE(T, 'uidA-nr').get(); return TAKE(T, 'uidA-nr').delete(); }, true);
+  await sampling({ on: true });
+
+  console.log('== micTakesMeta/count: the "how many takes so far" counter');
+  await env.withSecurityRulesDisabled(c => c.firestore().doc('micTakesMeta/count').delete());
+  await t('every signed-in account reads it (when missing too)', () => A.doc('micTakesMeta/count').get(), true);
+  await t('signed out cannot read it', () => N.doc('micTakesMeta/count').get(), false);
+  await t('a student cannot create it at 5', () => A.doc('micTakesMeta/count').set({ n: 5 }), false);
+  await t('a student cannot create it at 2', () => A.doc('micTakesMeta/count').set({ n: 2 }), false);
+  await t('a student creates it at 1', () => A.doc('micTakesMeta/count').set({ n: 1 }), true);
+  await t('another student adds exactly 1 (2)', () => B.doc('micTakesMeta/count').set({ n: 2 }), true);
+  await t('a jump to 4 refused', () => B.doc('micTakesMeta/count').set({ n: 4 }), false);
+  await t('staying at 2 refused', () => B.doc('micTakesMeta/count').set({ n: 2 }), false);
+  await t('going back down to 1 refused', () => B.doc('micTakesMeta/count').set({ n: 1 }), false);
+  await t('an extra field refused', () => B.doc('micTakesMeta/count').set({ n: 3, uid: 'uidB' }), false);
+  await t('signed out cannot add', () => N.doc('micTakesMeta/count').set({ n: 3 }), false);
+  await t('the teacher sets it to 40 (any number)', () => T.doc('micTakesMeta/count').set({ n: 40 }), true);
+  await t('the teacher resets it to 0 ("Reset counter")', () => T.doc('micTakesMeta/count').set({ n: 0 }), true);
 }
 console.log('== existing rules still behave (baseline checks on every older path)');
 await t('progress: own read+write', async () => { await A.doc('progress/uidA').set({ x: 1 }); return A.doc('progress/uidA').get(); }, true);
