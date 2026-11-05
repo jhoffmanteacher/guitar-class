@@ -5166,7 +5166,7 @@ async function checkLiveQuizNoNames() {
     void quizMc;
   } catch (e) { flag(`a live-quiz view or writer threw: ${e.message}`); return; }
   // (6) the rules: the answer docs (which hold the names) stay teacher-only to LIST and a student can only GET their own
-  const rulesTxt = readFileSync(join(ROOT, 'firestore.rules'), 'utf8').replace(/\/\*[\s\S]*?\*\//g, '');
+  const rulesTxt = readFileSync(join(ROOT, 'firestore.rules'), 'utf8').replace(/\r\n/g, '\n').replace(/\/\*[\s\S]*?\*\//g, '');   // CRLF on a Windows checkout (autocrlf) would make the '\n      }\n' end-of-block search miss and run the slice to the end of the file
   const ai = rulesTxt.indexOf('match /answers/{userId} {');
   const ablock = ai >= 0 ? rulesTxt.slice(ai, rulesTxt.indexOf('\n      }\n', ai)) : '';
   cases++;
