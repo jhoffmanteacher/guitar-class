@@ -26,9 +26,11 @@
    A "delete allowed" break written as one `allow ..., delete: if ... && request.resource...` line is
    not a real break (request.resource is null on a delete, so the condition errors and denies):
    write it as a separate `allow delete: if ...` line.
-   No Homebrew and no system Java on the Mac that day: a Temurin 21 JRE tarball
-   (adoptium.net, sha256 checked) unpacked into a scratch folder with JAVA_HOME and PATH
-   pointed at it worked. If npm fails with EACCES in ~/.npm/_cacache, add `--cache <scratch>/npm-cache`.
+   The Mac has no Homebrew and no system Java. Java 21 lives at ~/tools/java/jdk-21.0.13+9-jre (a
+   Temurin JRE from adoptium.net, sha256 checked; the tarball and its checksum are in
+   ~/tools/java/download). Use it without installing anything:
+     export JAVA_HOME=~/tools/java/jdk-21.0.13+9-jre/Contents/Home; export PATH="$JAVA_HOME/bin:$PATH"
+   If npm fails with EACCES in ~/.npm/_cacache, add `--cache <scratch>/npm-cache`.
 
    To run it, in an empty scratch folder (NOT inside the repo):
      npm init -y
