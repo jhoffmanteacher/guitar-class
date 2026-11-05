@@ -41,10 +41,11 @@ function makeWorld(opts = {}) {
   const net = opts.net || { online: true, denied: false, commitDelay: 0 };
   const server = opts.server || { days: {}, weeks: {} };   // what Firestore holds
   server.board ||= {};                                       // minutesBoard/{uid}: { seconds } (the class rank)
+  server.wb ||= {}; server.wbVer ||= {};                     // weekBoard/{uid}: { week, period, seconds } (the Top 5) and a version counter per doc
   /* sets: every single-document set() on ANY path EXCEPT minutesBoard/{uid}, which goes to
      log.board. The minutes go in one batch, so this stays empty; the heartbeats/{sessionId}
      writer removed 2026-11-04 landed here, and anything but the board landing here fails. */
-  const log = { commits: [], sets: [], fetches: [], board: [], boardRefused: [] };
+  const log = { commits: [], sets: [], fetches: [], board: [], boardRefused: [], wbWrites: [], wbRefused: [], wbGets: 0, wbRetries: 0, wbTx: 0, wbQueries: [] };
 
   class FakeDate extends Date {
     constructor(...a) { if (a.length) super(...a); else super(clock.ms); }
@@ -58,6 +59,22 @@ function makeWorld(opts = {}) {
   /* net.holdReads: a read is sent but its answer is not given until releaseReads(); it is computed THEN, so it includes anything committed meanwhile. */
   const reply = (fn) => (net.holdReads ? new Promise((res) => (net.heldReads ||= []).push(() => res(fn()))) : Promise.resolve(fn()));
   const releaseReads = () => { const h = net.heldReads || []; net.heldReads = []; net.holdReads = false; h.forEach((f) => f()); };
+  /* weekBoard (the Top 5): a query takes EQUALITY filters only (no composite index is needed for those), chained with .where();
+     net.wbReadDenied = the rules are not published. Every query is logged with its filters; net.wbReads counts the reads. */
+  const wbQuery = (filters) => ({
+    where: (a, op, b) => wbQuery(filters.concat([[a, op, b]])),
+    get: () => {
+      log.wbQueries.push(filters);
+      net.wbReads = (net.wbReads || 0) + 1;
+      if (net.wbReadDenied) return Promise.reject(Object.assign(new Error('denied'), { code: 'permission-denied' }));
+      const bad = filters.some((f) => f[1] !== '==');
+      if (bad) return Promise.reject(Object.assign(new Error('needs an index'), { code: 'failed-precondition' }));
+      return reply(() => ({ forEach: (fn) => { Object.keys(server.wb).filter((k) => filters.every((f) => server.wb[k][f[0]] === f[2])).forEach((k) => fn(docSnap(k, server.wb[k]))); } }));
+    },
+  });
+  /* firestore.rules, weekBoard/{userId}: only that uid; exactly { week, period, seconds }; 'YYYY-Www'; period 4 / 7 / CAS; a number 0..7 x 1200. */
+  const wbRulesOk = (uid, id, d) => uid === id && !!d && eq(Object.keys(d).sort(), ['period', 'seconds', 'week']) && typeof d.week === 'string' && /^[0-9]{4}-W[0-9]{2}$/.test(d.week)
+    && ['4', '7', 'CAS'].includes(d.period) && typeof d.seconds === 'number' && d.seconds >= 0 && d.seconds <= 7 * 1200;
   const dbCollection = (path) => ({
     doc: (id) => ({
       path: path + '/' + id,
@@ -93,7 +110,7 @@ function makeWorld(opts = {}) {
         Object.keys(bag).forEach((k) => fn(docSnap(k, bag[k])));
       },
     })),
-    where: (a, op, b) => ({
+    where: (a, op, b) => path === 'weekBoard' ? wbQuery([[a, op, b]]) : ({
       __where: [a, op, b],
       get: () => net.denyReads ? (net.reads = (net.reads || 0) + 1, Promise.reject(Object.assign(new Error('denied'), { code: 'permission-denied' }))) : reply(() => ({
         forEach: (fn) => { Object.keys(server.days).filter((k) => k >= b).forEach((k) => fn(docSnap(k, server.days[k]))); },
@@ -120,7 +137,32 @@ function makeWorld(opts = {}) {
     log.commits.push(ops.map((o) => ({ path: o.path, data: o.data })));
     return true;
   }
+  /* Firestore's optimistic transaction: the callback reads, the writes are kept and applied at commit; if a document it read changed
+     meanwhile (another page wrote it) the callback runs AGAIN on the new data (up to 5 times). net.wbBeforeCommit(n) is a hook that lets a test
+     write the doc "from another page" between the read and the commit. Only weekBoard is faked; the rules are checked on every write. */
+  const runTransaction = async (fn) => {
+    log.wbTx++;
+    if (net.wbDenied) { log.wbRefused.push({ denied: true }); throw Object.assign(new Error('denied'), { code: 'permission-denied' }); }
+    for (let attempt = 0; attempt < 5; attempt++) {
+      const reads = {}, writes = [];
+      const idOf = (ref) => { if (!/^weekBoard\//.test(ref.path)) throw new Error('transactions are only faked for weekBoard: ' + ref.path); return ref.path.split('/')[1]; };
+      const tx = {
+        get: (ref) => { const id = idOf(ref); log.wbGets++; reads[id] = server.wbVer[id] || 0; return Promise.resolve({ exists: server.wb[id] !== undefined, data: () => server.wb[id] }); },
+        set: (ref, data) => { writes.push({ id: idOf(ref), data }); return tx; },
+      };
+      await fn(tx);
+      if (net.wbBeforeCommit) net.wbBeforeCommit(attempt);
+      if (Object.keys(reads).some((id) => (server.wbVer[id] || 0) !== reads[id])) { log.wbRetries++; continue; }
+      for (const wr of writes) {
+        if (!wbRulesOk(user.uid, wr.id, wr.data)) { log.wbRefused.push(wr); throw Object.assign(new Error('rules'), { code: 'permission-denied' }); }
+      }
+      for (const wr of writes) { server.wb[wr.id] = { ...wr.data }; server.wbVer[wr.id] = (server.wbVer[wr.id] || 0) + 1; log.wbWrites.push({ id: wr.id, data: { ...wr.data } }); }
+      return;
+    }
+    throw Object.assign(new Error('aborted'), { code: 'aborted' });
+  };
   const db = {
+    runTransaction,
     collection: (c) => dbCollection(c),
     batch: () => {
       const ops = [];
@@ -161,13 +203,18 @@ function makeWorld(opts = {}) {
   }
   /* opts.strip: the page has a #pm-header strip (hidden, as index.html ships it), so syncHeader(), refreshStrip()
      and the 1 s uiTick() really draw it. Its rects are empty, so no toast or recap pill is ever anchored to it. */
-  const stripEl = opts.strip ? { id: 'pm-header', hidden: true, innerHTML: '', getClientRects: () => [], getBoundingClientRect: () => ({}), contains: () => false } : null;
+  /* opts.pills (with opts.strip): the strip has a place on screen, and document.createElement / body.appendChild / getElementById('pm-toast') work,
+     so the week-goal toast and the Top 5 toast really drop; world.pills() lists the ones on screen, a pill leaves after its setTimeout. */
+  const onScreen = [];
+  const mkEl = () => ({ style: {}, id: '', className: '', innerHTML: '', offsetWidth: 200, isConnected: true, setAttribute() {}, remove() { this.isConnected = false; const i = onScreen.indexOf(this); if (i >= 0) onScreen.splice(i, 1); } });
+  const stripEl = opts.strip ? { id: 'pm-header', hidden: true, innerHTML: '', getClientRects: () => (opts.pills ? [{}] : []), getBoundingClientRect: () => (opts.pills ? { left: 1000, top: 0, width: 300, height: 40, bottom: 40 } : {}), contains: () => !!opts.pills } : null;
   const documentStub = {
+    createElement: mkEl, body: { appendChild: (e) => { onScreen.push(e); } }, elementFromPoint: () => stripEl,
     visibilityState: 'visible', activeElement: null,
     addEventListener: (ev, fn) => { (listeners['doc:' + ev] ||= []).push(fn); },
     querySelector: () => null,
     querySelectorAll: (sel) => (stripEl && sel === '.pm-strip' ? [stripEl] : []),
-    getElementById: (id) => (stripEl && id === 'pm-header' ? stripEl : null),
+    getElementById: (id) => (stripEl && id === 'pm-header' ? stripEl : onScreen.find((e) => e.id === id && e.isConnected) || null),
   };
   const windowStub = {
     PM_HOST: null,
@@ -247,7 +294,7 @@ function makeWorld(opts = {}) {
   }
   /* A student's input: fire the engine's document listener for that event. */
   const input = (ev = 'pointerdown') => (listeners['doc:' + ev] || []).forEach((f) => f({ type: ev }));
-  return { stripEl, input, FakeSource, FakeMediaDevices, __timers: timers, drain, releaseReads, ctx, PM, clock, net, server, log, store, session, listeners, documentStub, windowStub, FakeAudio, run, settle, track, playing, user, firebase, db };
+  return { stripEl, pills: () => onScreen.slice(), opts, input, FakeSource, FakeMediaDevices, __timers: timers, drain, releaseReads, ctx, PM, clock, net, server, log, store, session, listeners, documentStub, windowStub, FakeAudio, run, settle, track, playing, user, firebase, db };
 }
 /* Everything counted so far: queued + already acknowledged by the server. */
 /* The page's queue key: pm:q:<uid>:<pageId>. */
@@ -1380,6 +1427,203 @@ console.log('13. class rank');
   wal.PM._state(); wal.input('pointerdown'); await wal.run(130); await wal.PM.flush(); await wal.settle();
   const ha = host(); wal.PM.renderProgress(ha); await wal.settle();
   check('alone on the board (total 1) there is nothing to rank against: no tile', !/pm\.tileRank/.test(ha.innerHTML));
+}
+
+console.log('14. top 5 of the week');
+{
+  const W = '2026-W47', WPREV = '2026-W46';   // the sim's clock is Monday 16 Nov 2026 = ISO week 2026-W47
+  const wk = (secs) => ({ [W]: { seconds: secs, goalSeconds: 3600, hit: false } });
+  const wbDoc = (secs, week = W, period = '4') => ({ week, period, seconds: secs });
+  const host = () => ({ hidden: true, innerHTML: '', isConnected: true });
+  const minOf = (m) => m * 60;
+  const weekOf = (w) => Object.values(w.server.weeks).reduce((a, b) => a + b.seconds, 0);
+  const advance = (w, ms) => { w.clock.ms += ms; w.clock.perf += ms; };
+  /* A world for period 4 whose own week holds `mine` seconds and whose weekBoard holds `others` (an array of seconds, period 4, this week)
+     plus `extra` documents; it loads, publishes and reads the class once. */
+  async function top5World(mine, others, extra = {}, o = {}) {
+    const wb = {}; others.forEach((x, i) => { wb['uid-O' + i] = wbDoc(x); });
+    Object.assign(wb, extra);
+    const w = makeWorld({ period: '4', server: { days: {}, weeks: wk(mine), board: {}, wb }, ...o });
+    w.PM._state(); await w.PM.load(); await w.settle(); await w.PM._loadWeek(); await w.settle();
+    return w;
+  }
+  const t5 = async (mine, others, extra) => (await top5World(mine, others, extra)).PM._top5();
+
+  // The place. Whole minutes decide; ties share a place; 10 minutes this week are needed to be ranked.
+  let r = await t5(minOf(15), [minOf(20), minOf(15), minOf(15) + 30, minOf(10), minOf(9)]);
+  check('place: 15 min against 20 / 15 / 15:30 / 10 / 9: one student has more, so I am #2 and in (equal whole minutes share)', r && r.top === true && r.n === 2 && r.under === false, JSON.stringify(r));
+  r = await t5(minOf(15), [minOf(20), minOf(20), minOf(20), minOf(20), minOf(15), minOf(15), minOf(15)]);
+  check('four ahead and three at 15 min including me: I am #5 and in', r && r.top === true && r.n === 5, JSON.stringify(r));
+  r = await t5(minOf(15), [minOf(30), minOf(25), minOf(20), minOf(20), minOf(15), minOf(15), minOf(15), minOf(15), minOf(15)]);
+  check('…more than five tied at 5th: nine students wear it (4 ahead + 5 tied at 15 min) and I am #5 with the other four', r && r.top === true && r.n === 5, JSON.stringify(r));
+  r = await t5(minOf(15), [minOf(20), minOf(20), minOf(20), minOf(20), minOf(20), minOf(15), minOf(15)]);
+  check('five ahead of me: out, #6; I need 5 more minutes (the 5th place has 20, I have 15)', r && r.top === false && r.under === false && r.n === 6 && r.need === 5, JSON.stringify(r));
+  r = await t5(minOf(20), [minOf(20), minOf(20), minOf(20), minOf(20), minOf(20), minOf(21)]);
+  check('one student above me and five tied with me on whole minutes: all share the place, I am #2 and in', r && r.top === true && r.n === 2, JSON.stringify(r));
+  r = await t5(minOf(19) + 59, [minOf(20), minOf(20), minOf(20), minOf(20), minOf(20)]);
+  check('19:59 against five at 20 min: still out, and "1 more min" (never 0)', r && r.top === false && r.need === 1, JSON.stringify(r));
+  r = await t5(599, []);
+  check('9:59 this week is not ranked (under the 10-minute minimum), even alone: "1 to go"', r && r.top === false && r.under === true && r.toRank === 1 && r.min === 10, JSON.stringify(r));
+  r = await t5(600, []);
+  check('exactly 10:00 alone in the period is ranked: #1 and in', r && r.top === true && r.n === 1 && r.under === false, JSON.stringify(r));
+  r = await t5(minOf(12), [minOf(11), minOf(9), 0]);
+  check('12 min against 11 / 9 / 0 (others under the minimum or not): #1 and in', r && r.top === true && r.n === 1, JSON.stringify(r));
+  r = await t5(minOf(5), [minOf(60), minOf(60), minOf(60), minOf(60), minOf(60), minOf(60)]);
+  check('under the minimum AND behind a full Top 5: the line is about the minimum (5 to go), not about catching up', r && r.under === true && r.top === false && r.toRank === 5 && r.need === 0, JSON.stringify(r));
+
+  // The read: one query, equality filters only, this week and my period; other weeks and other periods do not count.
+  const far = { 'uid-P7': wbDoc(minOf(100), W, '7'), 'uid-PCAS': wbDoc(minOf(100), W, 'CAS'), 'uid-PREV': wbDoc(minOf(100), WPREV, '4'), 'uid-A': wbDoc(minOf(999)) };
+  const wq = await top5World(minOf(15), [minOf(20)], far);
+  const rq = wq.PM._top5();
+  check('other periods, last week\'s docs and a stale doc of my own do not count: with only one real classmate I am #2 and in', rq && rq.top === true && rq.n === 2, JSON.stringify(rq));
+  check('…the class is read with ONE query: equality on week and on period only (no index), and the cache holds numbers only (no uids)', wq.log.wbQueries.length === 1 && eq(wq.log.wbQueries[0], [['week', '==', W], ['period', '==', '4']])
+    && eq(JSON.parse(wq.store['pm:w:uid-A']).others, [minOf(20)]) && !/uid-/.test(wq.store['pm:w:uid-A']), JSON.stringify(wq.log.wbQueries) + ' ' + wq.store['pm:w:uid-A']);
+
+  // The cache: 15 minutes in memory and in localStorage under the student's id.
+  const wc = await top5World(minOf(15), [minOf(20)]);
+  await wc.PM._loadWeek(); await wc.PM._loadWeek(); await wc.PM._loadWeek();
+  check('three opens in a row read the period once', wc.net.wbReads === 1, 'reads ' + wc.net.wbReads);
+  const wc2 = makeWorld({ period: '4', server: wc.server, store: wc.store, clock: wc.clock });
+  wc2.PM._state(); await wc2.PM._loadWeek();
+  check('a new page of the same student inside 15 minutes reuses the stored copy (no read)', !wc2.net.wbReads, 'reads ' + wc2.net.wbReads);
+  advance(wc, 14 * 60 * 1000); await wc.PM._loadWeek();
+  check('…14 minutes later still no new read', wc.net.wbReads === 1, 'reads ' + wc.net.wbReads);
+  advance(wc, 2 * 60 * 1000); await wc.PM._loadWeek();
+  check('…16 minutes later one more read', wc.net.wbReads === 2, 'reads ' + wc.net.wbReads);
+  const wo = makeWorld({ uid: 'uid-Z', period: '4', server: wc.server, store: wc.store, clock: wc.clock });
+  wo.PM._state(); await wo.PM._loadWeek();
+  check('another student on the same Chromebook never uses the first student\'s copy (keyed by uid)', wo.net.wbReads === 1, 'reads ' + wo.net.wbReads);
+  const wp = makeWorld({ period: '7', server: wc.server, store: wc.store, clock: wc.clock });
+  wp.PM._state(); await wp.PM._loadWeek();
+  check('…and a copy kept for period 4 is not used once the student is in period 7 (a new read, filtered on 7)', wp.net.wbReads === 1 && eq(wp.log.wbQueries[0][1], ['period', '==', '7']), JSON.stringify(wp.log.wbQueries));
+  advance(wc, 7 * 24 * 3600 * 1000);
+  const reads0 = wc.net.wbReads; wc.PM._state(); await wc.PM._loadWeek();
+  check('…and next Monday the old week\'s copy is not used (a new read for 2026-W48)', wc.net.wbReads === reads0 + 1 && eq(wc.log.wbQueries[wc.log.wbQueries.length - 1][0], ['week', '==', '2026-W48']), JSON.stringify(wc.log.wbQueries[wc.log.wbQueries.length - 1]));
+
+  // No period, a period the rules refuse, the teacher: nothing is written, nothing is read, no place.
+  for (const [label, o] of [['no class period answered yet', { period: '' }], ['a period the rules do not know', { period: '5' }], ['an inherited object key as the period', { period: 'constructor' }]]) {
+    const wn = makeWorld({ server: { days: {}, weeks: wk(minOf(15)), board: {}, wb: {} }, ...o });
+    wn.PM._state(); await wn.PM.load(); await wn.settle(); await wn.PM._loadWeek();
+    await wn.run(130, (i) => { if (i % 30 === 0) wn.input('pointerdown'); }); await wn.PM.flush(); await wn.settle();
+    check(`${label}: no weekBoard transaction, no read, no place — and the minutes still count`, !wn.log.wbTx && !wn.net.wbReads && wn.PM._top5() === null && weekOf(wn) > minOf(15), `${wn.log.wbTx} tx, ${wn.net.wbReads} reads, ${JSON.stringify(wn.PM._top5())}`);
+  }
+  const wte = makeWorld({ uid: 'uid-T', period: '4', server: { days: {}, weeks: wk(minOf(15)), board: {}, wb: { 'uid-B': wbDoc(minOf(30)) } } });
+  wte.user.email = 'teacher@example.org'; vm.runInContext("var TEACHER_EMAIL = 'teacher@example.org';", wte.ctx);
+  wte.PM._state(); await wte.PM.load(); await wte.settle(); await wte.PM._loadWeek();
+  await wte.run(130, (i) => { if (i % 30 === 0) wte.input('pointerdown'); }); await wte.PM.flush(); await wte.settle();
+  check('the teacher\'s account counts its minutes but writes nothing to the weekBoard, reads nothing and gets no place', weekOf(wte) > minOf(15) && !wte.log.wbTx && !wte.net.wbReads && wte.PM._top5() === null && !wte.server.wb['uid-T'], `${wte.log.wbTx} tx ${wte.net.wbReads} reads`);
+
+  // The write: this week's server-confirmed seconds, { week, period, seconds } on my uid, raised only.
+  const ww = makeWorld({ period: '4', server: { days: {}, weeks: {}, board: {}, wb: {} } });
+  ww.PM._state(); ww.input('pointerdown'); await ww.run(130); await ww.PM.flush(); await ww.settle(); await ww.run(130);
+  check('a student who played writes weekBoard/uid-A exactly { week, period, seconds } — this week, their period, a whole number equal to the weeks doc', ww.log.wbWrites.length >= 1
+    && ww.log.wbWrites.every((x) => x.id === 'uid-A' && eq(Object.keys(x.data).sort(), ['period', 'seconds', 'week']) && x.data.week === W && x.data.period === '4' && Number.isInteger(x.data.seconds))
+    && ww.server.wb['uid-A'].seconds === weekOf(ww) && !ww.log.wbRefused.length, JSON.stringify(ww.log.wbWrites) + ' vs weeks ' + weekOf(ww));
+  check('…it is a transaction, never a bare set() (nothing lands in log.sets)', ww.log.sets.length === 0 && ww.log.wbGets >= 1, `${ww.log.sets.length} sets, ${ww.log.wbGets} gets`);
+  const nW = ww.log.wbWrites.length, tx0 = ww.log.wbTx;
+  await ww.run(300);
+  check('idle for 5 minutes with nothing new confirmed: no further weekBoard writes and no transactions', ww.log.wbWrites.length === nW && ww.log.wbTx === tx0, nW + ' → ' + ww.log.wbWrites.length + ', tx ' + tx0 + ' → ' + ww.log.wbTx);
+  const wl = makeWorld({ period: '7', server: { days: {}, weeks: {}, board: {}, wb: {} } });
+  wl.PM._state();
+  await wl.run(1300, (i) => { if (i % 30 === 0) wl.input('pointerdown'); });
+  check('a 20-minute day (≈ 20 flushes) writes the week board at most once per 2 minutes (≤ 11), never ahead of the weeks doc', wl.log.wbWrites.length >= 2 && wl.log.wbWrites.length <= 11 && wl.server.wb['uid-A'].seconds <= weekOf(wl) && wl.server.wb['uid-A'].seconds > 0, wl.log.wbWrites.length + ' writes; ' + JSON.stringify(wl.server.wb['uid-A']) + ' vs ' + weekOf(wl));
+  const mid = wl.server.wb['uid-A'].seconds;
+  await wl.PM.flush(); await wl.settle(); await wl.run(130);
+  check('…and once flushed and the 2 minutes pass, the doc catches up to exactly the weeks doc', wl.server.wb['uid-A'].seconds === weekOf(wl) && wl.server.wb['uid-A'].seconds >= mid, JSON.stringify(wl.server.wb['uid-A']) + ' vs ' + weekOf(wl));
+
+  // Raise-only: a page that holds an OLDER copy never lowers what another page of the same student wrote, in the same week and period.
+  const hi = makeWorld({ period: '4', server: { days: {}, weeks: wk(600), board: {}, wb: { 'uid-A': wbDoc(900) } } });
+  hi.PM._state(); await hi.PM.load(); await hi.settle(); await hi.run(5);
+  check('the doc holds 900 s (another page); this page knows 600 s: the transaction writes nothing and the doc stays 900', hi.log.wbTx >= 1 && hi.log.wbWrites.length === 0 && hi.server.wb['uid-A'].seconds === 900, `${hi.log.wbTx} tx, ${JSON.stringify(hi.server.wb['uid-A'])}`);
+  const lo = makeWorld({ period: '4', server: { days: {}, weeks: wk(600), board: {}, wb: { 'uid-A': wbDoc(300) } } });
+  lo.PM._state(); await lo.PM.load(); await lo.settle(); await lo.run(5);
+  check('the doc holds 300 s and this page knows 600 s: raised to 600', lo.server.wb['uid-A'].seconds === 600 && lo.log.wbWrites.length === 1, JSON.stringify(lo.server.wb['uid-A']));
+  const eqw = makeWorld({ period: '4', server: { days: {}, weeks: wk(600), board: {}, wb: { 'uid-A': wbDoc(600) } } });
+  eqw.PM._state(); await eqw.PM.load(); await eqw.settle(); await eqw.run(5);
+  check('…equal numbers are not rewritten', eqw.log.wbWrites.length === 0, JSON.stringify(eqw.log.wbWrites));
+  // Two pages at the same instant: another page writes 1000 between this page's read and its commit; the transaction runs again and sees it.
+  const race = makeWorld({ period: '4', server: { days: {}, weeks: wk(600), board: {}, wb: { 'uid-A': wbDoc(300) } } });
+  race.net.wbBeforeCommit = (n) => { if (n === 0) { race.server.wb['uid-A'] = wbDoc(1000); race.server.wbVer['uid-A'] = (race.server.wbVer['uid-A'] || 0) + 1; } };
+  race.PM._state(); await race.PM.load(); await race.settle(); await race.run(5);
+  check('another page writes 1000 s between this page\'s read and commit: the transaction retries, sees 1000 ≥ 600, writes nothing — the doc stays 1000', race.log.wbRetries === 1 && race.log.wbWrites.length === 0 && race.server.wb['uid-A'].seconds === 1000, `${race.log.wbRetries} retries ${JSON.stringify(race.server.wb['uid-A'])}`);
+  // A new week or a changed period overwrites, whatever the old number was.
+  const nw = makeWorld({ period: '4', server: { days: {}, weeks: wk(120), board: {}, wb: { 'uid-A': wbDoc(5000, WPREV) } } });
+  nw.PM._state(); await nw.PM.load(); await nw.settle(); await nw.run(5);
+  check('last week\'s doc (5000 s) is overwritten by this week\'s 120 s: one doc per student, the new week starts over', eq(nw.server.wb['uid-A'], wbDoc(120)), JSON.stringify(nw.server.wb['uid-A']));
+  const pc = makeWorld({ period: '4', server: { days: {}, weeks: wk(600), board: {}, wb: { 'uid-A': wbDoc(5000, W, '7') } } });
+  pc.PM._state(); await pc.PM.load(); await pc.settle(); await pc.run(5);
+  check('a student moved from period 7 to 4 (a teacher\'s correction): the doc is rewritten as period 4 at the new number, even though it is lower', eq(pc.server.wb['uid-A'], wbDoc(600, W, '4')), JSON.stringify(pc.server.wb['uid-A']));
+  const nz = makeWorld({ period: '4', server: { days: {}, weeks: {}, board: {}, wb: {} } });
+  nz.PM._state(); await nz.PM.load(); await nz.settle(); await nz.run(5);
+  check('a student with nothing this week writes nothing (no doc of zeros)', !nz.log.wbTx && eq(nz.server.wb, {}), `${nz.log.wbTx} tx`);
+
+  // The rules are not published (or refuse the write): minutes still count and land; the retry waits 5 minutes; the read is retried every 30 s at most.
+  const wd = makeWorld({ period: '4', net: { online: true, denied: false, wbDenied: true, wbReadDenied: true } });
+  wd.PM._state(); await wd.run(1300, (i) => { if (i % 30 === 0) wd.input('pointerdown'); }); await wd.PM.flush(); await wd.settle();
+  check('with the weekBoard rules unpublished the minutes still all land (server = counted)', weekOf(wd) === sec(wd) && weekOf(wd) >= 1190, weekOf(wd) + ' vs ' + sec(wd));
+  check('…refused writes are retried only every 5 minutes (1 to 5 in a 22-minute day), nothing is stored, the engine does not mark the doc sent', wd.log.wbTx >= 1 && wd.log.wbTx <= 5 && eq(wd.server.wb, {}) && wd.PM._state().wbSent === '', wd.log.wbTx + ' tx');
+  const wr = makeWorld({ ui: true, strip: true, config: { uiOn: true }, period: '4', net: { online: true, denied: false, wbDenied: true, wbReadDenied: true }, server: { days: {}, weeks: wk(minOf(15)), board: {}, wb: {} } });
+  wr.PM._state(); wr.PM.syncHeader(true); await wr.PM.load(); await wr.settle(); await wr.run(300, (i) => { if (i % 20 === 0) wr.input('pointerdown'); });
+  check('…and a refused read with the strip up (it asks every second) is retried at most every 30 s: 2 to 11 reads in 5 minutes, no place, no medal', wr.net.wbReads >= 2 && wr.net.wbReads <= 11 && wr.PM._top5() === null && !/pm-top5/.test(wr.stripEl.innerHTML), wr.net.wbReads + ' reads');
+
+  // What is drawn (the sim returns the string keys): the strip medal and the three tiles.
+  const draw = async (mine, others, o = {}) => {
+    const w = makeWorld({ ui: true, strip: true, config: { uiOn: true }, period: '4', ...o, server: { days: {}, weeks: wk(mine), board: {}, wb: Object.fromEntries(others.map((x, i) => ['uid-O' + i, wbDoc(x)])) } });
+    w.PM._state(); w.PM.syncHeader(true); await w.PM.load(); await w.settle(); await w.PM._loadWeek(); await w.settle(); await w.run(2);
+    const h = host(); w.PM.renderProgress(h); await w.settle();
+    return { w, h, strip: w.stripEl.innerHTML };
+  };
+  const inn = await draw(minOf(15), [minOf(20)]);
+  check('in the Top 5: the strip carries the medal (pm-top5-sm, label pm.top5Label) after the flame; the tile says "#2 in 4th period" and "starts over every Monday"', /pm-top5 pm-top5-sm/.test(inn.strip) && /pm\.top5Label/.test(inn.strip) && inn.strip.indexOf('pm-streak') < inn.strip.indexOf('pm-top5')
+    && /pm\.top5You/.test(inn.h.innerHTML) && /pm\.top5Reset/.test(inn.h.innerHTML) && !/pm-top5-off/.test(inn.h.innerHTML), inn.strip.slice(-200));
+  const out = await draw(minOf(15), [minOf(20), minOf(20), minOf(20), minOf(20), minOf(20)]);
+  check('ranked but out: no medal in the strip; the tile has the dashed medal, "N more min to Top 5" and the period', !/pm-top5/.test(out.strip) && /pm-top5-off/.test(out.h.innerHTML) && /pm\.top5Need/.test(out.h.innerHTML) && /pm\.top5Sub/.test(out.h.innerHTML) && /pm\.top5Off/.test(out.h.innerHTML), out.h.innerHTML.slice(-300));
+  const und = await draw(minOf(4), [minOf(20)]);
+  check('under 10 minutes: no medal; "Play 10 min to get ranked" and "N to go"', !/pm-top5/.test(und.strip) && /pm\.top5Under/.test(und.h.innerHTML) && /pm\.top5ToGo/.test(und.h.innerHTML), und.h.innerHTML.slice(-300));
+  const unk = await draw(minOf(15), [minOf(20)], { net: { online: true, denied: false, wbReadDenied: true } });
+  check('the class cannot be read: no Top 5 tile and no medal at all, the rest of the panel still draws', !/pm-top5/.test(unk.strip) && !/pm\.top5/.test(unk.h.innerHTML) && /pm\.tileWeek/.test(unk.h.innerHTML));
+  const nop = await draw(minOf(15), [minOf(20)], { period: '' });
+  check('no class period: no Top 5 tile and no medal', !/pm-top5/.test(nop.strip) && !/pm\.top5/.test(nop.h.innerHTML) && /pm\.tileWeek/.test(nop.h.innerHTML));
+  check('nothing on screen shows another student: no uid anywhere in the strip or the panel', ![inn, out, und].some((x) => /uid-O/.test(x.strip + x.h.innerHTML)), '');
+
+  // A slow connection: the class arrives after the 1 s tick has stopped (2 idle seconds). The arrival itself redraws the strip and sends the toast.
+  const sl = makeWorld({ ui: true, strip: true, pills: true, config: { uiOn: true }, period: '4', server: { days: {}, weeks: wk(minOf(15)), board: {}, wb: { 'uid-O0': wbDoc(minOf(20)) } } });
+  sl.PM._state(); await sl.PM.load(); await sl.settle(); await sl.run(5);
+  sl.net.holdReads = true; sl.PM.syncHeader(true); await sl.settle();
+  check('the class read is still on its way: no medal, no toast yet', !/pm-top5/.test(sl.stripEl.innerHTML) && sl.pills().length === 0, sl.stripEl.innerHTML.slice(-80));
+  sl.releaseReads(); await sl.settle();
+  check('…it lands with the timer stopped (no tick runs): the strip gets its medal and the toast drops on the arrival alone', /pm-top5 pm-top5-sm/.test(sl.stripEl.innerHTML) && sl.pills().length === 1 && sl.store['pm:t5:uid-A'] === W, sl.stripEl.innerHTML.slice(-80) + ' pills ' + sl.pills().length);
+
+  // The toast: once per week, never over the week-goal toast.
+  const tw = makeWorld({ ui: true, strip: true, pills: true, config: { uiOn: true }, period: '4', server: { days: {}, weeks: wk(minOf(15)), board: {}, wb: { 'uid-O0': wbDoc(minOf(20)) } } });
+  tw.PM._state(); tw.PM.syncHeader(true); await tw.PM.load(); await tw.settle(); await tw.run(2);
+  check('in the Top 5 with the strip on screen: the strip reads the class by itself and one toast drops: the medal and pm.top5Toast; remembered under pm:t5:<uid> for this week', tw.pills().length === 1 && /pm-top5-lg/.test(tw.pills()[0].innerHTML) && /pm\.top5Toast/.test(tw.pills()[0].innerHTML) && tw.store['pm:t5:uid-A'] === W && tw.net.wbReads === 1, tw.pills().map((p) => p.innerHTML).join('|').slice(0, 120) + ' reads ' + tw.net.wbReads);
+  await tw.run(8);
+  check('…it leaves after toastSeconds and does not come back the same week', tw.pills().length === 0, tw.pills().length + ' pills');
+  const tw2 = makeWorld({ ui: true, strip: true, pills: true, config: { uiOn: true }, period: '4', server: tw.server, store: tw.store, clock: tw.clock });
+  tw2.PM._state(); tw2.PM.syncHeader(true); await tw2.PM.load(); await tw2.settle(); await tw2.PM._loadWeek(); await tw2.settle(); await tw2.run(5);
+  check('a new page (reload) the same week shows no toast again', tw2.pills().length === 0, tw2.pills().length + ' pills');
+  advance(tw, 7 * 24 * 3600 * 1000);
+  tw.server.weeks['2026-W48'] = { seconds: minOf(15), goalSeconds: 3600, hit: false }; tw.server.wb['uid-O0'] = wbDoc(minOf(20), '2026-W48');
+  const tw3 = makeWorld({ ui: true, strip: true, pills: true, config: { uiOn: true }, period: '4', server: tw.server, store: tw.store, clock: tw.clock });
+  tw3.PM._state(); tw3.PM.syncHeader(true); await tw3.PM.load(); await tw3.settle(); await tw3.PM._loadWeek(); await tw3.settle(); await tw3.run(2);
+  check('next Monday\'s week (2026-W48): the toast comes again, once', tw3.pills().length === 1 && /pm\.top5Toast/.test(tw3.pills()[0].innerHTML) && tw3.store['pm:t5:uid-A'] === '2026-W48', tw3.pills().length + ' pills');
+  const to = makeWorld({ ui: true, strip: true, pills: true, config: { uiOn: true }, period: '4', server: { days: {}, weeks: wk(minOf(15)), board: {}, wb: { 'uid-O0': wbDoc(minOf(20)), 'uid-O1': wbDoc(minOf(20)), 'uid-O2': wbDoc(minOf(20)), 'uid-O3': wbDoc(minOf(20)), 'uid-O4': wbDoc(minOf(20)) } } });
+  to.PM._state(); to.PM.syncHeader(true); await to.PM.load(); await to.settle(); await to.PM._loadWeek(); await to.settle(); await to.run(5);
+  check('not in the Top 5 (five ahead): no toast, and nothing remembered', to.pills().length === 0 && !to.store['pm:t5:uid-A'], to.pills().length + ' pills');
+  // Both are due on ONE tick: 59:50 of 60 minutes, in the Top 5. The strip cannot be anchored (opts.pills false) while the student crosses the
+  // goal, so the goal toast and the Top 5 toast are both held; when the strip is back the goal toast drops first and the Top 5 toast waits it out.
+  const tg = makeWorld({ ui: true, strip: true, pills: false, config: { uiOn: true }, period: '4', server: { days: {}, weeks: wk(3590), board: {}, wb: { 'uid-O0': wbDoc(minOf(20)) } } });
+  tg.PM._state(); tg.PM.syncHeader(true); await tg.PM.load(); await tg.settle(); await tg.PM._loadWeek(); await tg.settle();
+  tg.input('pointerdown');
+  await tg.run(40, (i) => { if (i % 5 === 0) tg.input('pointerdown'); });
+  check('the goal is crossed and the class is read, but the strip is covered: both toasts are held (the goal one pending, the Top 5 one not marked shown)', tg.pills().length === 0 && !!tg.PM._state().pendingToast && !tg.store['pm:t5:uid-A'] && !!tg.PM._top5() && tg.PM._top5().top === true, JSON.stringify({ pills: tg.pills().length, pending: tg.PM._state().pendingToast, t5: tg.store['pm:t5:uid-A'] }));
+  tg.opts.pills = true;
+  const seen = [];
+  await tg.run(12, () => { seen.push(tg.pills().map((x) => (/pm-top5-lg/.test(x.innerHTML) ? 'top5' : 'goal')).join('+')); });
+  const order = seen.filter((x, i) => i === 0 || x !== seen[i - 1]).filter(Boolean);
+  check('the strip comes back with both due on one tick: the goal toast first, never both on screen at once, then the Top 5 toast (in that order)', eq(order, ['goal', 'top5']) && !seen.some((x) => x.includes('+')), JSON.stringify(order) + ' ' + JSON.stringify(seen));
+  check('…and then neither repeats', tg.pills().length === 0 && tg.store['pm:t5:uid-A'] === W && tg.store['pm:t:uid-A'] === W, JSON.stringify({ pills: tg.pills().length, t5: tg.store['pm:t5:uid-A'], t: tg.store['pm:t:uid-A'] }));
 }
 
 console.log(`\n${failed ? '✗' : '✓'} pm-sim: ${passed} passed, ${failed} failed`);

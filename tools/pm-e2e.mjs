@@ -100,7 +100,7 @@ await ev(`(async () => { for (const r of await navigator.serviceWorker.getRegist
 /* An in-page student and Firestore. The engine's host is replaced; everything
    else (the wrapped play(), the tick, the strip, the pills, the page) is real. */
 await ev(`(() => {
-  window.__fs = { days: {}, weeks: {}, commits: [], hb: [], board: {}, boardDenied: false };
+  window.__fs = { days: {}, weeks: {}, commits: [], hb: [], board: {}, boardDenied: false, wb: {}, wbWrites: [], wbDenied: false };
   const inc = (n) => ({ __inc: n });
   const col = (kind) => ({
     get: () => Promise.resolve({ forEach: (fn) => Object.keys(window.__fs[kind]).forEach((k) => fn({ id: k, data: () => window.__fs[kind][k] })) }),
@@ -108,12 +108,20 @@ await ev(`(() => {
     doc: (id) => ({ path: kind + '/' + id, set: () => Promise.resolve() }),
   });
   const board = { get: () => window.__fs.boardDenied ? Promise.reject(Object.assign(new Error('denied'), { code: 'permission-denied' })) : Promise.resolve({ forEach: (fn) => Object.keys(window.__fs.board).forEach((k) => fn({ id: k, data: () => window.__fs.board[k] })) }), doc: (i) => ({ set: (d) => { window.__fs.board[i] = d; return Promise.resolve(); } }) };
-  const db = { collection: (c) => c === 'minutesBoard' ? board : ({ doc: (uid) => ({ collection: (k) => { const o = col(k); const d = o.doc; o.doc = (i) => ({ path: k + '/' + i }); return o; } }), doc: (i) => ({ set: (d) => { window.__fs.hb.push({ id: i, d }); return Promise.resolve(); } }) }) ,
+  /* weekBoard (the Top 5): equality queries chained with .where(), and the raise-only transaction the engine uses to write it. */
+  const wbQuery = (fl) => ({ where: (a, op, b) => wbQuery(fl.concat([[a, op, b]])), get: () => window.__fs.wbDenied ? Promise.reject(Object.assign(new Error('denied'), { code: 'permission-denied' }))
+    : Promise.resolve({ forEach: (fn) => Object.keys(window.__fs.wb).filter((k) => fl.every((f) => op_eq(f, window.__fs.wb[k]))).forEach((k) => fn({ id: k, data: () => window.__fs.wb[k] })) }) });
+  const op_eq = (f, d) => f[1] === '==' && d[f[0]] === f[2];
+  const wbCol = { where: (a, op, b) => wbQuery([[a, op, b]]), doc: (i) => ({ path: 'weekBoard/' + i }) };
+  const runTransaction = (fn) => { if (window.__fs.wbDenied) return Promise.reject(Object.assign(new Error('denied'), { code: 'permission-denied' }));
+    const writes = []; const tx = { get: (r) => { const d = window.__fs.wb[r.path.split('/')[1]]; return Promise.resolve({ exists: d !== undefined, data: () => d }); }, set: (r, d) => { writes.push([r.path.split('/')[1], d]); return tx; } };
+    return Promise.resolve(fn(tx)).then(() => { writes.forEach(([i, d]) => { window.__fs.wb[i] = Object.assign({}, d); window.__fs.wbWrites.push({ id: i, d: Object.assign({}, d) }); }); }); };
+  const db = { runTransaction, collection: (c) => c === 'weekBoard' ? wbCol : c === 'minutesBoard' ? board : ({ doc: (uid) => ({ collection: (k) => { const o = col(k); const d = o.doc; o.doc = (i) => ({ path: k + '/' + i }); return o; } }), doc: (i) => ({ set: (d) => { window.__fs.hb.push({ id: i, d }); return Promise.resolve(); } }) }) ,
     batch: () => { const ops = []; return { set: (r, d) => ops.push([r.path, d]), commit: () => { ops.forEach(([p, d]) => { const [k, i] = p.split('/'); const cur = window.__fs[k][i] || {}; window.__fs[k][i] = Object.assign({}, cur, d, { seconds: (cur.seconds || 0) + d.seconds.__inc }); }); window.__fs.commits.push(ops.length); return Promise.resolve(); } }; } };
   window.__who = 'e2e-student';   // the signed-in student's uid; null = nobody (the tests below sign out and switch students)
   const fb = window.firebase || {};
   if (!fb.firestore) { window.firebase = Object.assign(fb, { firestore: Object.assign(() => db, { FieldValue: { increment: inc, serverTimestamp: () => ({}) }, FieldPath: { documentId: () => '__name__' } }) }); }
-  window.__period = '7';
+  window.__period = '';   // no class period: the Top 5 (a medal, a 5th tile) stays off here; the "top 5" section below sets period 4
   PM.setHost({ ui: true, user: () => window.__who ? { uid: window.__who, getIdToken: () => Promise.resolve('tok') } : null, db: () => db, period: () => window.__period });
   return true;
 })()`);
@@ -416,7 +424,7 @@ await ev(`location.hash = '#my-progress'`); await sleep(600);
 /* ── Review findings: the widest strip, a skipped week, a week that never counted ── */
 console.log('review follow-ups');
 await ev(`(() => { const s = PM._state(), cur = PM.calc.weekIdOf(PM.calc.ymd(new Date())); s.weeks = {}; for (let i = 1; i <= 12; i++) s.weeks[PM.calc.weekAdd(cur, -i)] = { seconds: 3700, goalSeconds: 3600, hit: true }; s.weeks[cur] = { seconds: 100 * 60, goalSeconds: 3600, hit: true }; s.days = {}; s.pend = {}; return true; })()`);
-await ev(`window.__period = '7'; setLang('es'); location.hash = '#class-activities/${card}'; openClassActivitiesScreen(${JSON.stringify(card)})`); await sleep(1000);
+await ev(`window.__period = ''; setLang('es'); location.hash = '#class-activities/${card}'; openClassActivitiesScreen(${JSON.stringify(card)})`); await sleep(1000);
 await ev(`(() => { caSyncTopbar(); PM.refreshStrip(true); document.querySelector('.user-name').textContent = 'Ana María Gómez'; return true; })()`); await sleep(300);
 const worst = await ev(`(() => ({ h: Math.round(document.querySelector('.header').getBoundingClientRect().height), text: document.querySelector('.pm-strip').innerText.replace(/\\s+/g, ' ') }))()`);
 check('widest strip (ES, 100+ min, 12-week streak, a 15-character name) keeps the top bar one row; the strip never shows more than the goal', worst.h <= 56 && /^60\/60 min 13$/.test(worst.text), worst);
@@ -444,7 +452,7 @@ for (const per of ['4', 'CAS', '']) {
 /* ── The pills belong to the header strip (2026-11-03): they show on ANY page the strip is on, and go when it hides.
    The recap still opens only when a play run ends (a song stops); that rule is the engine's and did not change. ── */
 console.log('pills on any page');
-await ev(`window.__period = '7'; setLang('en'); PRACTICE_MINUTES_CONFIG.skipWeeks = []; PRACTICE_MINUTES_CONFIG.streakStartWeek = ''; PRACTICE_MINUTES_CONFIG.uiOn = true`);
+await ev(`window.__period = ''; setLang('en'); PRACTICE_MINUTES_CONFIG.skipWeeks = []; PRACTICE_MINUTES_CONFIG.streakStartWeek = ''; PRACTICE_MINUTES_CONFIG.uiOn = true`);
 await seedWeeks([3700, 3700, 3700]);
 await ev(`window.__pills = []; new MutationObserver((ms) => { for (const m of ms) for (const n of m.addedNodes) if (n.id === 'pm-recap' || n.id === 'pm-toast') window.__pills.push(n.id); }).observe(document.body, { childList: true }); true`);
 await ev(`openClassActivitiesScreen(${JSON.stringify(card)})`); await sleep(1500);
@@ -536,6 +544,146 @@ await ev(`PM.syncHeader(true)`);
 check('…and syncHeader(true) with nobody signed in keeps it hidden', await ev(`document.getElementById('pm-header').hidden`));
 await ev(`window.__who = 'e2e-student'; PM.syncHeader(true)`); await sleep(400);
 check('student A signs back in: the strip returns', await ev(`!document.getElementById('pm-header').hidden && !!document.getElementById('pm-header').innerHTML`));
+
+/* ── Top 5 of the week (2026-11-04) ──
+   The student is in period 4 with 15 minutes this week. The week board is seeded so the answer is known without the engine:
+   in → one student with more (#2); out → five students with more; under → 4 minutes. Looked at in English and Spanish at 1366×657:
+   the medal in the header strip and in the Games bar, the toast, the three tile states, and the one-row top bar with the medal. */
+console.log('top 5');
+await send('Page.navigate', { url: `http://127.0.0.1:${port}/index.html` });
+for (let i = 0; i < 80; i++) { if (await ev(`typeof devBypass === 'function' && !!document.getElementById('dev-bypass-btn') && document.readyState === 'complete'`).catch(() => false)) break; await sleep(250); }
+await sleep(3500);
+await ev(`devBypass()`); await sleep(3500);
+await ev(`(async () => { for (const r of await navigator.serviceWorker.getRegistrations()) await r.unregister(); for (const k of await caches.keys()) await caches.delete(k); })()`);
+await ev(`(() => {
+  window.__fs = { days: {}, weeks: {}, commits: [], hb: [], board: {}, boardDenied: false, wb: {}, wbWrites: [], wbDenied: false };
+  const op_eq = (f, d) => f[1] === '==' && d[f[0]] === f[2];
+  const wbQuery = (fl) => ({ where: (a, op, b) => wbQuery(fl.concat([[a, op, b]])), get: () => window.__fs.wbDenied ? Promise.reject(Object.assign(new Error('denied'), { code: 'permission-denied' }))
+    : Promise.resolve({ forEach: (fn) => Object.keys(window.__fs.wb).filter((k) => fl.every((f) => op_eq(f, window.__fs.wb[k]))).forEach((k) => fn({ id: k, data: () => window.__fs.wb[k] })) }) });
+  const wbCol = { where: (a, op, b) => wbQuery([[a, op, b]]), doc: (i) => ({ path: 'weekBoard/' + i }) };
+  const runTransaction = (fn) => { const writes = []; const tx = { get: (r) => { const d = window.__fs.wb[r.path.split('/')[1]]; return Promise.resolve({ exists: d !== undefined, data: () => d }); }, set: (r, d) => { writes.push([r.path.split('/')[1], d]); return tx; } };
+    return Promise.resolve(fn(tx)).then(() => { writes.forEach(([i, d]) => { window.__fs.wb[i] = Object.assign({}, d); window.__fs.wbWrites.push({ id: i, d: Object.assign({}, d) }); }); }); };
+  const sub = (kind) => ({ get: () => Promise.resolve({ forEach: (fn) => Object.keys(window.__fs[kind]).forEach((k) => fn({ id: k, data: () => window.__fs[kind][k] })) }),
+    where: () => ({ get: () => Promise.resolve({ forEach: (fn) => Object.keys(window.__fs.days).forEach((k) => fn({ id: k, data: () => window.__fs.days[k] })) }) }), doc: (i) => ({ path: kind + '/' + i }) });
+  /* minutesBoard: 20 other students, so the Class rank tile is there and My progress has FIVE tiles. */
+  const bd = {}; for (let i = 0; i < 20; i++) bd['b' + i] = { seconds: 600 * (i + 1) };
+  const board = { get: () => Promise.resolve({ forEach: (fn) => Object.keys(bd).forEach((k) => fn({ id: k, data: () => bd[k] })) }), doc: () => ({ set: () => Promise.resolve(), get: () => Promise.resolve({ exists: false }) }) };
+  const db = { runTransaction, collection: (c) => c === 'weekBoard' ? wbCol : c === 'minutesBoard' ? board : ({ doc: (uid) => ({ collection: (k) => sub(k) }) }),
+    batch: () => { const ops = []; return { set: (r, d) => ops.push([r.path, d]), commit: () => Promise.resolve() }; } };
+  const fb = window.firebase || {};
+  if (!fb.firestore) { window.firebase = Object.assign(fb, { firestore: Object.assign(() => db, { FieldValue: { increment: (n) => ({ __inc: n }), serverTimestamp: () => ({}) }, FieldPath: { documentId: () => '__name__' } }) }); }
+  window.__who = 'e2e-student'; window.__period = '4';
+  PM.setHost({ ui: true, user: () => window.__who ? { uid: window.__who, getIdToken: () => Promise.resolve('tok') } : null, db: () => db, period: () => window.__period });
+  PRACTICE_MINUTES_CONFIG.uiOn = true; PRACTICE_MINUTES_CONFIG.streakStartWeek = ''; PRACTICE_MINUTES_CONFIG.skipWeeks = []; PRACTICE_MINUTES_CONFIG.semester2Start = '';
+  return true; })()`);
+const wk5 = await ev(`PM.calc.weekIdOf(PM.calc.ymd(new Date()))`);
+/* One scenario: my minutes, the minutes of the others in period 4, and (optionally) a student of period 7 who must not count. */
+const t5Scenario = (mine, others) => ev(`(() => {
+  const w = ${JSON.stringify(wk5)}, f = window.__fs; f.wb = {}; f.wbWrites = []; f.wbDenied = false;
+  ${JSON.stringify(others)}.forEach((m, i) => { f.wb['o' + i] = { week: w, period: '4', seconds: m * 60 }; });
+  f.wb['far7'] = { week: w, period: '7', seconds: 999 * 60 }; f.wb['old4'] = { week: PM.calc.weekAdd(w, -1), period: '4', seconds: 999 * 60 };
+  f.weeks = {}; f.days = {}; f.weeks[w] = { seconds: ${mine} * 60, goalSeconds: 3600, hit: ${mine} >= 60 };
+  PM.status(); const s = PM._state(); s.weeks = {}; s.days = {}; s.pend = {}; s.weeks[w] = { seconds: ${mine} * 60, goalSeconds: 3600, hit: ${mine} >= 60 }; s.loaded = true;
+  s.wb = null; s.wbLoading = null; s.wbLoadRetryAt = 0; s.wbSent = ''; s.wbAt = 0; s.wbRetryAt = 0; s.top5Week = ''; s.toastWeek = ''; s.pendingToast = false;
+  s.board = null; s.boardLoading = null;
+  ['pm:w:', 'pm:t5:', 'pm:t:', 'pm:b:'].forEach((k) => { try { localStorage.removeItem(k + 'e2e-student'); } catch (e) {} });
+  document.getElementById('pm-toast') && document.getElementById('pm-toast').remove(); return true; })()`);
+const medalInfo = (id) => ev(`(() => { const h = document.getElementById(${JSON.stringify(id)}), m = h && h.querySelector('.pm-top5'); if (!m) return null; const r = m.getBoundingClientRect(), hr = h.getBoundingClientRect(), cs = getComputedStyle(m);
+  return { w: Math.round(r.width), h: Math.round(r.height), font: cs.fontFamily, color: cs.color, label: m.getAttribute('aria-label'), stripH: Math.round(hr.height), after: [...h.children].map((c) => c.className.split(' ')[0]) }; })()`);
+const barH = () => ev(`Math.round(document.querySelector('.header').getBoundingClientRect().height)`);
+await ev(`setLang('en'); returnToPractice()`); await sleep(600);
+
+/* IN: 15 min against 20 → #2 */
+await t5Scenario(15, [20, 15, 15, 10, 9]);
+await ev(`PM.syncHeader(true)`);
+await waitFor(`!!document.getElementById('pm-toast')`, 15000); await sleep(400);
+const toastIn = await ev(`(() => { const t = document.getElementById('pm-toast'); if (!t) return null; const r = t.getBoundingClientRect(), h = document.getElementById('pm-header').getBoundingClientRect(); return { text: t.innerText.replace(/\\s+/g, ' ').trim(), top: Math.round(r.top), headerBottom: Math.round(h.bottom), inside: r.left >= 0 && r.right <= innerWidth, medal: !!t.querySelector('.pm-top5-lg'), bg: getComputedStyle(t).backgroundColor }; })()`);
+check('in the Top 5: one toast drops under the header strip: the medal and "Top 5 in 4th period this week!"', toastIn && toastIn.text === 'TOP 5 Top 5 in 4th period this week!' && toastIn.medal && toastIn.top >= toastIn.headerBottom && toastIn.inside, toastIn);
+await shot('11-top5-toast-en');
+await sleep(3400);
+check('…the toast leaves after about 3 s and is remembered for the week (pm:t5)', await ev(`!document.getElementById('pm-toast') && PM._state().top5Week === ${JSON.stringify(wk5)} && localStorage.getItem('pm:t5:e2e-student') === ${JSON.stringify(wk5)}`));
+const mIn = await medalInfo('pm-header');
+check('the medal is in the header strip after the flame: 22 × 22, Rubik Mono One, lavender #B79CFF, label "Top 5 this week"', mIn && mIn.w === 22 && mIn.h === 22 && /Rubik Mono One/.test(mIn.font) && mIn.color === 'rgb(183, 156, 255)' && mIn.label === 'Top 5 this week' && mIn.after.join() === 'pm-week,pm-streak,pm-top5', mIn);
+check('…and the font really loaded (the subset woff2 is in document.fonts)', await ev(`document.fonts.check("12px 'Rubik Mono One'", 'TOP5') && [...document.fonts].some((f) => f.family.replace(/["']/g, '') === 'Rubik Mono One' && f.status === 'loaded')`));
+const hdrRows = [];
+for (const lang of ['en', 'es']) {
+  await ev(`setLang('${lang}')`); await sleep(500);
+  for (const nm of ['Dev User', 'Ana María Gómez', 'Maximiliano Fernández', 'Maximiliano Fernández-Rodríguez', 'W'.repeat(60), 'María de los Ángeles Fernández de la Vega y Rodríguez']) {
+    await ev(`document.querySelector('.user-name').textContent = ${JSON.stringify(nm)}; PM.refreshStrip(true)`); await sleep(200);
+    hdrRows.push(`${lang}/${nm.length}ch=${await barH()}`);
+  }
+  await ev(`document.querySelector('.user-name').textContent = 'Dev User'`);
+}
+const nameCut = await ev(`(() => { const n = document.querySelector('.user-name'); n.textContent = 'W'.repeat(60); const r = { cs: getComputedStyle(n).textOverflow, w: Math.round(n.getBoundingClientRect().width), cut: n.scrollWidth > n.clientWidth, medal: !!document.querySelector('#pm-header .pm-top5') }; n.textContent = 'Dev User'; return r; })()`);
+check('with the medal showing, the top bar stays ONE row (≤ 56px): EN + ES × names of 8, 15, 21, 31, 60 (all capital W) and 54 characters; a long name is cut off with an ellipsis at 192px', hdrRows.length === 12 && hdrRows.every((r) => +r.split('=')[1] <= 56) && nameCut.medal && nameCut.cs === 'ellipsis' && nameCut.cut && nameCut.w === 192, { hdrRows, nameCut });
+await ev(`setLang('en')`); await sleep(500);
+await shot('12-top5-strip-medal-en');
+/* Magnified crop of the real 1× render, to judge whether the 5.5px "TOP" reads as a shape (a CSS-scaled render would look sharper than the student's). */
+const crop = await ev(`(() => { const r = document.querySelector('#pm-header .pm-top5').getBoundingClientRect(); return { x: Math.max(0, r.left - 90), y: Math.max(0, r.top - 12), w: r.width + 110, h: r.height + 24 }; })()`);
+const cr = await send('Page.captureScreenshot', { format: 'png', clip: { x: crop.x, y: crop.y, width: crop.w, height: crop.h, scale: 1 } });
+writeFileSync(join(OUT, '12b-top5-strip-crop-1x-en.png'), Buffer.from(cr.data, 'base64'));
+const crZ = await send('Page.captureScreenshot', { format: 'png', clip: { x: crop.x, y: crop.y, width: crop.w, height: crop.h, scale: 6 } });
+writeFileSync(join(OUT, '12c-top5-strip-crop-6x-en.png'), Buffer.from(crZ.data, 'base64'));
+await ev(`setLang('es')`); await sleep(500);
+await shot('13-top5-strip-medal-es');
+await ev(`setLang('en')`); await sleep(400);
+
+/* The Games bar carries the medal too. */
+await ev(`toggleGames()`); await sleep(1200);
+const mGames = await medalInfo('pm-games');
+const gamesBar = await ev(`(() => { const g = document.getElementById('pm-games'); const bar = g.closest('.page-topbar, .games-topbar, header') || g.parentElement; return Math.round(bar.getBoundingClientRect().height); })()`);
+check('the Games bar\'s strip carries the same medal (22 × 22) and its bar stays one row (≤ 56px)', mGames && mGames.w === 22 && mGames.h === 22 && gamesBar <= 56, { mGames, gamesBar });
+await shot('14-top5-games-bar-en');
+await ev(`toggleGames()`); await sleep(800);
+
+/* My progress: the three tile states, each in EN and ES. */
+const tile = () => ev(`(() => { const t = [...document.querySelectorAll('#pm-progress .pm-tile')], p = document.getElementById('pm-progress'); const last = t[t.length - 1]; const tops = t.map((x) => Math.round(x.getBoundingClientRect().top));
+  return { n: t.length, text: last ? last.innerText.replace(/\\s+/g, ' ').trim() : '', oneRow: tops.every((x) => x === tops[0]), right: last ? Math.round(last.getBoundingClientRect().right) : 0, panelRight: Math.round(p.getBoundingClientRect().right), off: !!(last && last.querySelector('.pm-top5-off')),
+    overflow: document.documentElement.scrollWidth > document.documentElement.clientWidth, rowFits: last ? [...last.querySelectorAll('.pm-tile-row b, .pm-tile-sub')].every((e) => e.scrollWidth <= e.clientWidth + 1) : false }; })()`);
+const openProgress = async () => { await ev(`setLang('en'); location.hash = '#my-progress'`); await sleep(500); };
+const states = [
+  ['in', 15, [20, 15, 15, 10, 9], { en: 'Top 5 this week TOP 5 #2 in 4th period Starts over every Monday', es: 'Top 5 de la semana TOP 5 #2 en 4.º periodo Empieza de nuevo cada lunes', off: false }],
+  ['out', 15, [20, 20, 20, 20, 20, 15], { en: 'Top 5 this week TOP 5 5 more min to Top 5 4th period, this week', es: 'Top 5 de la semana TOP 5 5 min más para el Top 5 4.º periodo, esta semana', off: true }],
+  ['under', 4, [20, 15], { en: 'Top 5 this week TOP 5 Play 10 min to get ranked 6 to go', es: 'Top 5 de la semana TOP 5 Toca 10 min para tener un lugar Faltan 6', off: true }],
+];
+for (const [name, mine, others, want] of states) {
+  for (const lang of ['en', 'es']) {
+    await t5Scenario(mine, others);
+    await ev(`setLang('${lang}'); PM.syncHeader(true); renderMyProgress(); location.hash = '#my-progress'`); await sleep(1200);
+    await ev(`document.getElementById('pm-progress').scrollIntoView({block:'start'})`); await sleep(500);
+    const ti = await tile();
+    check(`My progress, ${name}, ${lang.toUpperCase()}: the 5th tile reads "${want[lang]}", all five on one row, nothing sideways`, ti.n === 5 && ti.text === want[lang] && ti.oneRow && ti.off === want.off && !ti.overflow && ti.right <= ti.panelRight && ti.rowFits, ti);
+    await shot(`15-top5-tile-${name}-${lang}`);
+  }
+}
+/* The tile's colours: lavender medal when in; a dashed grey one when out. */
+await t5Scenario(15, [20, 15, 15, 10, 9]); await ev(`setLang('en'); renderMyProgress()`); await sleep(1000);
+const inCol = await ev(`(() => { const m = document.querySelector('#pm-progress .pm-top5'), cs = getComputedStyle(m); return { color: cs.color, border: cs.borderTopColor, style: cs.borderTopStyle, w: Math.round(m.getBoundingClientRect().width) }; })()`);
+await t5Scenario(15, [20, 20, 20, 20, 20, 15]); await ev(`renderMyProgress()`); await sleep(1000);
+const outCol = await ev(`(() => { const m = document.querySelector('#pm-progress .pm-top5'), cs = getComputedStyle(m); return { color: cs.color, style: cs.borderTopStyle, border: cs.borderTopColor }; })()`);
+check('the tile medal is lavender and solid when in (44 px), grey and dashed when out', inCol.color === 'rgb(183, 156, 255)' && inCol.style === 'solid' && inCol.w === 44 && outCol.style === 'dashed' && outCol.color !== 'rgb(183, 156, 255)', { inCol, outCol });
+/* What the student's page wrote: this week's seconds for period 4 under their uid, nothing else. */
+await t5Scenario(15, [20]);
+await ev(`(() => { const s = PM._state(); s.loaded = false; s.loading = null; s.wbSent = ''; s.wbAt = 0; return PM.load(); })()`); await sleep(1500);
+const wrote = await ev(`window.__fs.wbWrites`);
+check('the student\'s own page wrote weekBoard/e2e-student = { week, period "4", seconds 900 } through the transaction', wrote.length === 1 && wrote[0].id === 'e2e-student' && wrote[0].d.week === wk5 && wrote[0].d.period === '4' && wrote[0].d.seconds === 900 && Object.keys(wrote[0].d).length === 3, wrote);
+/* Rules not published: the board cannot be read; no medal, no tile, no toast, no error on the page. */
+await t5Scenario(15, [20]); await ev(`window.__fs.wbDenied = true; PM.syncHeader(true); renderMyProgress(); location.hash = '#my-progress'`); await sleep(1500);
+const den = await ev(`({ tiles: document.querySelectorAll('#pm-progress .pm-tile').length, medal: !!document.querySelector('.pm-top5'), toast: !!document.getElementById('pm-toast') })`);
+check('weekBoard unreadable (rules not published): 4 tiles, no medal anywhere, no toast', den.tiles === 4 && !den.medal && !den.toast, den);
+
+/* Phone width is out of scope for new work, but the medal must not break what is already there: no sideways scroll, the strip and the medal inside the window, My progress readable. */
+await send('Emulation.setDeviceMetricsOverride', { width: 390, height: 844, deviceScaleFactor: 1, mobile: true });
+await t5Scenario(15, [20, 15, 15, 10, 9]);
+await ev(`setLang('en'); PM.syncHeader(true); renderMyProgress(); location.hash = '#my-progress'`); await sleep(1500);
+const ph = await ev(`(() => { const h = document.getElementById('pm-header'), m = h && h.querySelector('.pm-top5'); const r = m ? m.getBoundingClientRect() : null, hr = h.getBoundingClientRect();
+  const tiles = [...document.querySelectorAll('#pm-progress .pm-tile')].map((t) => { const q = t.getBoundingClientRect(); return { l: Math.round(q.left), r: Math.round(q.right) }; });
+  const tp = document.getElementById('pm-toast'), tr = tp ? tp.getBoundingClientRect() : null;
+  return { toastInside: !!tr && tr.left >= 0 && tr.right <= innerWidth, toast: tr ? [Math.round(tr.left), Math.round(tr.right)] : null, overflow: document.documentElement.scrollWidth > document.documentElement.clientWidth, medal: !!m, medalInside: !!r && r.left >= hr.left && r.right <= hr.right && r.right <= innerWidth, stripRight: Math.round(hr.right), win: innerWidth, tiles: tiles.length, tilesInside: tiles.every((q) => q.l >= 0 && q.r <= innerWidth) }; })()`);
+check('phone width (390): the medal is in the strip and inside it, the toast is fully inside the window, nothing scrolls sideways, all five tiles inside the window', ph.toastInside && ph.medal && ph.medalInside && !ph.overflow && ph.stripRight <= ph.win && ph.tiles === 5 && ph.tilesInside, ph);
+await shot('16-top5-phone-390-en');
+await send('Emulation.setDeviceMetricsOverride', { width: 1366, height: 657, deviceScaleFactor: 1, mobile: false });
+await sleep(500);
 
 /* ── ?teacher: the console never shows the strip (PM_HOST.user() is null there). Real host, no fake. ── */
 console.log('?teacher');

@@ -5683,7 +5683,7 @@ function precachedExtraFiles(src) {
    The count of files that only ASSETS brings in is pinned: one more means
    a new kind of precached file, worth a look; one fewer means one moved.
    ════════════════════════════════════════════════════════════════════ */
-const PRECACHED_EXTRA_COUNT = 6;
+const PRECACHED_EXTRA_COUNT = 7;   // 6 + fonts/rubik-mono-one-top5.woff2 (the Top 5 medal, 2026-11-04): a font listed only in ASSETS, like fraunces.woff2
 function checkPrecacheFingerprinted(src, hashed) {
   head('1bt. Every precached file is part of the cache fingerprint');
   const set = new Set(hashed);
@@ -11840,7 +11840,7 @@ async function checkPwTakeEvaluator() {
    The browser half (strip, recap, toast, My progress, 1366×657, both languages,
    a real <audio>) is tools/pm-e2e.mjs — it needs Chrome, so it is run by hand.
    ════════════════════════════════════════════════════════════════════ */
-const PM_SIM_PIN = 184;
+const PM_SIM_PIN = 238;
 function checkPracticeMinutes(i18nTable) {
   head('1cg. Practice minutes: the engine is run; the rules cap, no heartbeat, wiring and strings are pinned');
   let bad = 0;
@@ -11876,7 +11876,7 @@ function checkPracticeMinutes(i18nTable) {
       cfg.skipWeeks.forEach(d => { if (!monday(d)) fail(`config.skipWeeks entry ${JSON.stringify(d)} must be a Monday, 'YYYY-MM-DD'`); });
       if (new Set(cfg.skipWeeks).size !== cfg.skipWeeks.length) fail('config.skipWeeks has a repeated date');
     }
-    /* Top 5 (2026-11-04): a minimum above the weekly goal would be odd but reachable; above 7 days of the cap, never. */
+    /* Top 5 (2026-11-04): the minimum is a number of minutes from 0 to the weekly goal (a minimum above the goal would rank fewer students than the goal moment rewards). */
     if (typeof cfg.top5MinMinutes !== 'number' || !isFinite(cfg.top5MinMinutes) || cfg.top5MinMinutes < 0 || cfg.top5MinMinutes > cfg.weeklyGoalMinutes) fail(`config.top5MinMinutes must be a number from 0 to weeklyGoalMinutes (is ${JSON.stringify(cfg.top5MinMinutes)})`);
     if (cfg.semester2Start !== '' && !monday(cfg.semester2Start)) fail("config.semester2Start must be '' or a Monday, 'YYYY-MM-DD'");
     if (cfg.streakStartWeek && !/^\d{4}-W\d{2}$/.test(cfg.streakStartWeek)) fail("config.streakStartWeek must be '' or an ISO week like '2026-W48'");

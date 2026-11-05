@@ -929,7 +929,13 @@
     }).catch(function(){
       st.wbLoadRetryAt = Date.now() + LOAD_RETRY_MS;
       return null;
-    }).then(function(b){ st.wbLoading = null; return b; });
+    }).then(function(b){
+      st.wbLoading = null;
+      /* The 1 s tick stops after 2 idle seconds, so a read that lands later would leave the strip without its medal (and the
+         toast unsent) until the student's next click: draw again now. Not a loop: the cache is fresh, so uiTick's loadWeek() reads nothing. */
+      if(b && S === st && stripPresent()) uiNow();
+      return b;
+    });
     return st.wbLoading;
   }
   /* My place this week, from my live seconds (weekSecs, counted seconds not yet sent included) and the cached board,
@@ -1167,6 +1173,9 @@
     pillZ(el);
     /* Centred under the strip, kept inside the window (the CSS centres on left with translateX(-50%)). */
     var half = el.offsetWidth / 2, cx = bar.left + bar.width / 2;
+    el.style.left = Math.round(Math.max(8 + half, Math.min(window.innerWidth - 8 - half, cx))) + 'px';
+    /* Moving it gives it more room, so its text can wrap less and the pill grows (a 390px phone: the Top 5 pill ran off the left edge): measure again. */
+    half = el.offsetWidth / 2;
     el.style.left = Math.round(Math.max(8 + half, Math.min(window.innerWidth - 8 - half, cx))) + 'px';
     followStrip(el);
     setTimeout(function(){ el.remove(); }, cfg().toastSeconds * 1000);

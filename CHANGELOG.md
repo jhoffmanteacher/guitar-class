@@ -15,6 +15,7 @@ see `WORKFLOW.md` and the git commit log.
 - **You need 10 minutes this week to be ranked.** Students tied on minutes share a place.
 - **A pill drops down the first time you make the Top 5 in a week:** "Top 5 in 4th period this week!"
 - **My progress has a Top 5 tile.** In the Top 5 it shows your place ("#3 in 4th period"). Out of it, it shows how many more minutes get you in, or how many minutes until you are ranked. You only ever see your own place — no names and no one else's minutes.
+- **A very long name in the top bar is cut off with “…”.** Point at it to see the whole name. The bar stays on one row, also with the new medal.
 
 ## 2026-11-04 — Strum pattern: one activity, pick your path
 

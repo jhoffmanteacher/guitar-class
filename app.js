@@ -464,7 +464,7 @@ function userHeaderHtml(user){
   const av = user.photoURL
     ? `<img src="${escAttr(user.photoURL)}" class="avatar" alt="">`
     : `<div class="avatar-init">${escHtml((user.displayName||'?')[0].toUpperCase())}</div>`;
-  return `${av}<span class="user-name">${escHtml(user.displayName||user.email)}</span><button class="btn-out notranslate" onclick="signOut()" data-i18n="header.signOut" translate="no">${t('header.signOut')}</button>`;
+  return `${av}<span class="user-name" title="${escAttr(user.displayName||user.email)}">${escHtml(user.displayName||user.email)}</span><button class="btn-out notranslate" onclick="signOut()" data-i18n="header.signOut" translate="no">${t('header.signOut')}</button>`;
 }
 
 /* ── Auth ── */
