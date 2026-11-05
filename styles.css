@@ -2123,6 +2123,11 @@ body.rail-collapsed .rail-tools .tool-popup{
 .micrec-ask{padding:12px 14px;border:1px solid var(--border2);border-radius:var(--radius);margin:6px 0}
 .micrec-q{margin:0 0 10px;font-size:0.9375rem;line-height:1.5;color:var(--text)}
 .micrec-btns{display:flex;flex-wrap:wrap;gap:8px}
+/* Yes is the main button (full row, bigger); No stays a normal, readable
+   secondary button below it. Scoped here so .coach-start / .tp-btn are
+   unchanged everywhere else. */
+.micrec-btns .coach-start{flex:1 1 100%;margin-top:0;padding:13px 18px;font-size:1.0625rem;min-height:48px}
+.micrec-btns .tp-btn{flex:0 0 auto;padding:10px 24px}
 .micrec-stop{margin-left:6px;padding:0 2px;border:0;background:none;color:inherit;font:inherit;text-decoration:underline;cursor:pointer}
 .micrec-on{display:inline-flex;align-items:center;gap:6px;margin:0 0 6px 8px;padding:2px 8px;border-radius:999px;font-size:0.75rem;font-weight:600;background:var(--red-bg);color:var(--red-text)}
 .micrec-dot{width:8px;height:8px;border-radius:50%;background:currentColor}

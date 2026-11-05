@@ -5,6 +5,10 @@ Notable changes to the Guitar Class site. Newest first.
 For the full session-by-session history (and the reasoning behind each change),
 see `WORKFLOW.md` and the git commit log.
 
+## 2026-11-04 — Recording question: Yes is the big button
+
+- **In the "Save this take as a recording?" question, the Yes button is now the large main button across the row.** "No thanks" sits below it as a normal-size button, easy to see and press. The words and what each button does are the same.
+
 ## 2026-11-04 — Strum pattern: one activity, pick your path
 
 - **"Strum Pattern — Down, Down-Up, Up-Down-Up" and "Strum Pattern in Chunks" are now one activity.** When you open it you pick a path first. Each path card shows its name, a line about it, its first strum board and its list of steps, with a Start button.
