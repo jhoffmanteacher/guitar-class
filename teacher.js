@@ -5240,7 +5240,7 @@ function micEvalTakePw(pcm, R, d, deps){
       falseHits: judged.filter(j => j.cat === 'false-hit').length, agree: judged.filter(j => j.cat === 'agree').length,
       falseHitsRemoved: low(known.filter(j => j.cat === 'false-hit')).length, realLost: low(known.filter(j => j.cat === 'agree')).length };
   }
-  /* ── what-if: the site's strum rule, replayed on the audio, at the site's ratios and stricter ones ── */
+  /* ── what-if: the site's strum rule, replayed on the audio, at the shared ratios older takes were graded with and stricter ones ── */
   let whatIf = null;
   const rule = judged.length ? micEvalStrumRule(deps.strum) : null;
   /* The strum ratios this take was graded with: saved in the take from 2026-11-05 (coach.js ccRecMeta; Power Chord Switch uses its own, stricter

@@ -11517,13 +11517,15 @@ function checkCoachVerdicts() {
     const R = { cu: ratioConst('CHK_ONSET_RATIO'), cuHf: ratioConst('CHK_HF_RATIO'), pw: ratioConst('CC_POWER_ONSET_RATIO'), pwHf: ratioConst('CC_POWER_HF_RATIO') };
     if (R.pw !== 2.2 || R.pwHf !== 2.67 || R.cu !== 1.4 || R.cuHf !== 1.7) flag(`1ck: the strum ratios are Power Chord Switch ${R.pw} / ${R.pwHf}, shared ${R.cu} / ${R.cuHf}; pinned 2.2 / 2.67 and 1.4 / 1.7 (re-pin on purpose, with the real-take numbers in WORKFLOW.md)`);
     song.ratioChecks = 0;
-    /* One run: a game started this way (mode, which entry, recording or not), one frame whose level jumps by rJ (full band) and hJ (attack channel) over
-       its smoothed level; did ccLoop log an onset? Power Chord Switch is run every way it can start (a song switch or a pair, with a recording live or
-       not: students who said no are not recorded), because the ratios must not depend on any of that. */
-    const strumFires = (mode, prog, live, rJ, hJ) => JSON.parse(run(`(function(){
+    /* One run: a game started this way (mode, which entry, speed, round, recording or not), one frame whose level jumps by rJ (full band) and hJ (attack
+       channel) over its smoothed level; did ccLoop log an onset? The ratios must not depend on how a game was started, so Power Chord Switch is run as a
+       song switch (rounds 1, 2 and 3), as a pair, and as the computer's pick, at three speeds, each with a recording live and without (students who said
+       no are not recorded), and Change Up as a pair and as the computer's pick at three speeds. The two lines that choose the ratios are also pinned by
+       their text, so a ratio keyed on anything else cannot hide in a way none of these runs happens to reach. */
+    const strumFires = (mode, prog, live, rJ, hJ, rate = 2, stage = 0) => JSON.parse(run(`(function(){
       const keep = { rf: coachReadFrame, an: coachAnalyser, hf: coachHfRms, at: coachOnsetAt, pn: performance.now };
       try {
-        micRec = null; setLang('en'); ccSetup(${JSON.stringify(mode)}); ccPickRate(2); ccPickProg(${prog}); cc.bpm = 60; ccPrepare(false); ccBeginStage();
+        micRec = null; setLang('en'); ccSetup(${JSON.stringify(mode)}); ccPickRate(${rate}); ccPickProg(${prog}); cc.bpm = 60; ccPrepare(false); ccBeginStage(); cc.stage = ${stage};
         micRec = ${live ? "{ live: true, mode: 'pw', n: 1, srcRate: 1 }" : 'null'};
         cc.phase = 'play'; cc.smoothRms = 0.01; cc.smoothHf = 0.002; cc.lastOnsetT = -1e9; cc.listenStart = 0; cc.changes = [];
         coachAnalyser = {}; coachReadFrame = () => 0.01 * ${rJ}; coachHfRms = 0.002 * ${hJ}; coachOnsetAt = 5000; performance.now = () => 5000;
@@ -11537,17 +11539,29 @@ function checkCoachVerdicts() {
     // [full-band jump, attack-channel jump]: just below and just above each of the four thresholds, between the two games', and well above all
     const ratioCases = [[1.2, 1.2], [up(R.cu, -0.05), 1], [up(R.cu, 0.05), 1], [1, up(R.cuHf, -0.05)], [1, up(R.cuHf, 0.05)],
       [up(R.pw, -0.05), 1], [up(R.pw, 0.05), 1], [1, up(R.pwHf, -0.05)], [1, up(R.pwHf, 0.05)], [(R.cu + R.pw) / 2, (R.cuHf + R.pwHf) / 2], [3, 3]];
-    const pwStarts = [[SONGS[0].idx, true, 'a song switch, recording'], [SONGS[0].idx, false, 'a song switch, not recording'], [1, true, 'a pair, recording'], [1, false, 'a pair, not recording']];
+    // [entry index, recording live, speed index (0 every bar, 1 every 2 beats, 2 every beat), round 0..2, what it is]
+    const pwStarts = [[SONGS[0].idx, true, 2, 0, 'a song switch, recording'], [SONGS[0].idx, false, 2, 0, 'a song switch, not recording'],
+      [1, true, 2, 0, 'a pair, recording'], [1, false, 2, 0, 'a pair, not recording'], [0, true, 2, 0, "the computer's pick, recording"], [0, false, 2, 0, "the computer's pick, not recording"],
+      [SONGS[0].idx, true, 2, 1, 'a song switch, round 2'], [SONGS[0].idx, true, 2, 2, 'a song switch, round 3'],
+      [1, true, 0, 0, 'a pair, every bar'], [1, true, 1, 0, 'a pair, every 2 beats'], [0, true, 0, 0, "the computer's pick, every bar"]];
+    const cuStarts = [[1, 2, 'a pair, every beat'], [1, 1, 'a pair, every 2 beats'], [1, 0, 'a pair, every bar'], [0, 2, "the computer's pick"]];
     for (const [rJ, hJ] of ratioCases) {
-      const gotCu = strumFires('open', 1, false, rJ, hJ), wantCu = wantFire(rJ, hJ, R.cu, R.cuHf), wantPw = wantFire(rJ, hJ, R.pw, R.pwHf);
-      if (gotCu !== wantCu) flag(`1ck: a strum that jumps the level ${rJ}x (full band) and ${hJ}x (attack channel) fires in Change Up: ${gotCu}, want ${wantCu} (ratios ${R.cu} / ${R.cuHf})`);
-      song.ratioChecks++;
-      for (const [prog, live, what] of pwStarts) {
-        const gotPw = strumFires('power', prog, live, rJ, hJ);
+      const wantCu = wantFire(rJ, hJ, R.cu, R.cuHf), wantPw = wantFire(rJ, hJ, R.pw, R.pwHf);
+      for (const [prog, rate, what] of cuStarts) {
+        const gotCu = strumFires('open', prog, false, rJ, hJ, rate);
+        if (gotCu !== wantCu) flag(`1ck: a strum that jumps the level ${rJ}x (full band) and ${hJ}x (attack channel) fires in Change Up (${what}): ${gotCu}, want ${wantCu} (ratios ${R.cu} / ${R.cuHf})`);
+        song.ratioChecks++;
+      }
+      for (const [prog, live, rate, stage, what] of pwStarts) {
+        const gotPw = strumFires('power', prog, live, rJ, hJ, rate, stage);
         if (gotPw !== wantPw) flag(`1ck: a strum that jumps the level ${rJ}x (full band) and ${hJ}x (attack channel) fires in Power Chord Switch (${what}): ${gotPw}, want ${wantPw} (ratios ${R.pw} / ${R.pwHf})`);
         song.ratioChecks++;
       }
     }
+    // the two lines that choose the ratios, by their text: nothing else may decide it
+    const ccLoopSrc = jsFunctionBody(cSrc2, 'ccLoop') || '';
+    for (const line of ['const onsetRatio = ccIsPower() ? CC_POWER_ONSET_RATIO : CHK_ONSET_RATIO;', 'const hfRatio = ccIsPower() ? CC_POWER_HF_RATIO : CHK_HF_RATIO;'])
+      if (!ccLoopSrc.includes(line)) flag(`1ck: ccLoop no longer chooses its strum ratios with exactly "${line}" (the game alone must decide; re-pin on purpose)`);
     if (full.saves.length === 1 && (full.saves[0].fields.onsetRatio !== R.pw || full.saves[0].fields.hfRatio !== R.pwHf)) flag(`1ck: the saved take records strum ratios ${full.saves[0].fields.onsetRatio} / ${full.saves[0].fields.hfRatio}, want ${R.pw} / ${R.pwHf}`);
     /* Save on Stop (2026-11-04): a Stopped game with enough audio is saved, marked complete:false; one with almost none is dropped,
        because each student has ONE take per game and a new take overwrites it. */
@@ -11640,7 +11654,7 @@ function checkCoachVerdicts() {
     if (pk !== 'ccBest:F5-G5:beat') flag(`1ck: a pair's best-score key changed to "${pk}" (a student's saved bests would be lost)`);
     const pairPlan = JSON.parse(run(`JSON.stringify(ccRoundPlan(CC_POWER_PROGRESSIONS[1], CC_POWER_PROGRESSIONS[1].chords, CC_RATES[1]))`));
     if (pairPlan.slots !== 12 || pairPlan.ladder || pairPlan.rounds !== 1) flag(`1ck: a pair's round changed (${pairPlan.slots} slots at "Every 2 beats", expected 12, one round)`);
-    const SONG_PIN = { recChecks: 19, readingChecks: 21, ratioChecks: 55, songs: 2, entries: 16, cardSwitches: 16, hints: 16 * 7 * 2, setups: 16 * 3 * 2, dones: 16 * 2, rounds: 16 * 3, nudges: 16 * 2 };
+    const SONG_PIN = { recChecks: 19, readingChecks: 21, ratioChecks: 165, songs: 2, entries: 16, cardSwitches: 16, hints: 16 * 7 * 2, setups: 16 * 3 * 2, dones: 16 * 2, rounds: 16 * 3, nudges: 16 * 2 };
     for (const [k, n] of Object.entries(SONG_PIN)) if (song[k] !== n) flag(`1ck: ${song[k]} ${k}, pinned ${n} — the check went partly blind (or grew: re-pin on purpose)`);
     songCounts = song;
     run(`setLang('en'); cc = null; ccStop();`);
@@ -11649,7 +11663,7 @@ function checkCoachVerdicts() {
   for (const [k, n] of Object.entries(EXPECT)) {
     if (counts[k] !== n) flag(`1ca: rendered ${counts[k]} ${k}, pinned ${n} — the check went partly blind (or grew: re-pin EXPECT on purpose)`);
   }
-  if (bad === 0 && songCounts) { head('1ck. Power Chord Switch song switches: each activity is checked against its card and the three rounds are run'); ok(`${songCounts.songs} songs, ${songCounts.entries} switch activities (${songCounts.cardSwitches} distinct card switches, each once; Sweet Child's open A5 only next to C5/B5/E5, the fret-5 A5 only next to G5, same pitches as A5); the ladder run for every one (${songCounts.rounds} round changes: 60/75/90 BPM, 21 changes, the BPM buttons ${songCounts.nudges} times: only later rounds, 40..140, off in the last); ${songCounts.hints} "next:" hints (EN+ES) match the diagrams, ${songCounts.setups} setup and ${songCounts.dones} done screens never show the key "A5o", the computer never picks a song, best keys are per switch and the pair keys are unchanged; a saved take carries each change's pitch readings (${songCounts.readingChecks} of 21 changes read back: no strum null, strum with no pitch [], four readings rounded; grading unchanged); the real ccLoop run on scripted frames: Power Chord Switch grades a strum with its own ratios (2.2 / 2.67) and Change Up with the shared ones (1.4 / 1.7) — ${songCounts.ratioChecks} runs just below and above every threshold: Change Up, and Power Chord Switch as a song switch and as a pair, each with a recording live and without — and the saved take records the ratios`); }
+  if (bad === 0 && songCounts) { head('1ck. Power Chord Switch song switches: each activity is checked against its card and the three rounds are run'); ok(`${songCounts.songs} songs, ${songCounts.entries} switch activities (${songCounts.cardSwitches} distinct card switches, each once; Sweet Child's open A5 only next to C5/B5/E5, the fret-5 A5 only next to G5, same pitches as A5); the ladder run for every one (${songCounts.rounds} round changes: 60/75/90 BPM, 21 changes, the BPM buttons ${songCounts.nudges} times: only later rounds, 40..140, off in the last); ${songCounts.hints} "next:" hints (EN+ES) match the diagrams, ${songCounts.setups} setup and ${songCounts.dones} done screens never show the key "A5o", the computer never picks a song, best keys are per switch and the pair keys are unchanged; a saved take carries each change's pitch readings (${songCounts.readingChecks} of 21 changes read back: no strum null, strum with no pitch [], four readings rounded; grading unchanged); the real ccLoop run on scripted frames: Power Chord Switch grades a strum with its own ratios (2.2 / 2.67) and Change Up with the shared ones (1.4 / 1.7) — ${songCounts.ratioChecks} runs just below and above every threshold: Change Up as a pair and as the computer's pick at three speeds, and Power Chord Switch as a song switch (all three rounds), a pair and the computer's pick at three speeds, with a recording live and without; the two lines that choose the ratios are pinned by text; and the saved take records the ratios`); }
   if (bad === 0) ok(`${counts.reports} Coach reports, ${counts.descs} chord-card descriptions, ${counts.nrLevels} Note Runner levels ×2 and ${counts.doneScreens} arcade done screens read true; Power Chord Switch: ${counts.pwLoops} loops are three-finger shapes in the right group, ${counts.pwDraws} random draws all listed pairs (11 of 11 and both orders seen), the Again button replays the pair and Start draws, Start sticks in Change Up and not in Power Chord Switch (two columns that fit 657px), Every beat is the first speed button there, the live quiz keeps its 760px shell, ${counts.pwHints} slide hints match the diagrams (EN+ES), ${counts.pwViews} screens/rounds, ${counts.pwMemory} remembered tempo/speed pairs and ${counts.pwGates} pitch gates keep it apart from Change Up`);
 }
 
@@ -11795,7 +11809,7 @@ async function checkPwTakeEvaluator() {
     for (const [k, v] of Object.entries(vs)) { const want = judged.filter(c => c.verdict === v).length; if (row.notes[k] !== want) fail(`${f.name}: ${k} ${row.notes[k]}, the site's verdicts give ${want}`); }
     if (row.notes.replayMismatch !== take.truth.mismatch || row.notes.ignored !== 0) fail(`${f.name}: replaying ccLoop's rule disagrees with ${row.notes.replayMismatch} saved verdicts (truth ${take.truth.mismatch}), ${row.notes.ignored} changes ignored`);
     tot.mismatch += row.notes.replayMismatch;
-    // the strum what-if: the site's own ratios first, then the stricter ones; counts agree with the row, and with the measured truth where there is one
+    // the strum what-if: the shared ratios (older takes) first, then the stricter ones; counts agree with the row, and with the measured truth where there is one
     {
       const wi = row.whatIf, wc = fx.pwWhatIfCandidates(), st = deps.strum.consts;
       if (fx.PW_WHATIF.fullBase !== st.RATIO || fx.PW_WHATIF.hfBase !== st.HF_RATIO) fail(`${f.name}: fake-pw-take.mjs PW_WHATIF starts at ${fx.PW_WHATIF.fullBase} / ${fx.PW_WHATIF.hfBase}, coach.js's strum ratios are ${st.RATIO} / ${st.HF_RATIO}`);
@@ -11816,7 +11830,7 @@ async function checkPwTakeEvaluator() {
             if (c.strums < tw.strums || c.strums > tw.strums + 2) fail(`${f.name}: what-if at ${c.ratio} / ${c.hfRatio} heard ${c.strums} strums; the audio has ${tw.strums} events that fire (at most 2 more are allowed)`);
           }
         });
-        if (wi.candidates[0].ratio !== st.RATIO || wi.candidates[0].hfRatio !== st.HF_RATIO) fail(`${f.name}: the first what-if candidate is not the site's own ratios (${st.RATIO} / ${st.HF_RATIO})`);
+        if (wi.candidates[0].ratio !== st.RATIO || wi.candidates[0].hfRatio !== st.HF_RATIO) fail(`${f.name}: the first what-if candidate is not the shared ratios (${st.RATIO} / ${st.HF_RATIO})`);
       }
     }
     // the pitch rule's column ("no readable pitch, no tick"): the row against the generator's own arithmetic from the planted reading counts;

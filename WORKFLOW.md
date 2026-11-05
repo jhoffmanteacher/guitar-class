@@ -35,6 +35,8 @@ sections below hold the history and the reasons.
   `CC_POWER_HF_RATIO` 2.67 in `coach.js` (Change Up and every other loop keep 1.4 / 1.7). On the 12 real takes the
   replay says 30 of 52 false hits go and 4 of 132 real strums are lost. Detail, numbers and how to roll it back:
   "Power Chord Switch: where we stopped" → "Decision (2026-11-05)". "No readable pitch, no tick" was not chosen.
+- **First, after it is live (Jonathan):** a thumb or finger strum take on a test student account at 60 and 120 BPM,
+  then "Evaluate all recordings" and read "Played, not counted" (see "Decision (2026-11-05)").
 - **To watch in the next takes:** noisy rooms should show fewer "heard, not there" changes (22 of the 52 false hits
   still fire at 2.2, so not none), and clean takes should not start missing real strums: read the console's "Played,
   not counted" column (`detector-missed`). Not covered by the 12 real takes, so look at these first: **thumb or
@@ -3606,8 +3608,9 @@ names, no uids); the same table in the terminal from
 `node tools/mic-sim/eval-takes.mjs <folder>`.
 
 What it does: replays the site's own strum rule over each Power Chord Switch recording,
-at the site's ratios (full-band 1.4, HF 1.7) and at stricter ones (full-band 1.8 / 2.2 /
-2.6, the HF ratio scaled the same: 2.19 / 2.67 / 3.16). Nothing is copied by hand:
+at the shared ratios older takes were graded with (full-band 1.4, HF 1.7) and at stricter
+ones (full-band 1.8 / 2.2 / 2.6, the HF ratio scaled the same: 2.19 / 2.67 / 3.16). A take graded with Power Chord
+Switch's own ratios (2.2 / 2.67, from 2026-11-05) is left out of it: see "Decision (2026-11-05)" below. Nothing is copied by hand:
 the `CHK_*`, `COACH_ONSET_REFRACT`, `COACH_LVL_WIN/HOP`, `COACH_CATCHUP_MAX_MS` numbers
 and the TEXT of `ccLoop`, `coachReadFrame` and `coachSmooth` are read from `coach.js` at
 run time (`ccLoop`'s own condition is compiled and run with the candidate ratio passed in;
@@ -3621,7 +3624,7 @@ changes the way `ccLoop` does (window, gridOffset). Per candidate and take:
 - **real strums lost**: a change where the site and the audio agree (`agree`) that no
   longer has a strum at that ratio;
 - **reproduced**: changes where the replay at that ratio gives the same yes / no as the
-  site did. The first column (the site's own ratios) is the replay's error bar: if it
+  site did. The first column (the shared ratios older takes were graded with) is the replay's error bar: if it
   reproduces few of the site's verdicts, trust the other columns less.
 
 How to read it: pick the ratio where "removed" is large and "lost" small. The cost of a
@@ -3692,6 +3695,12 @@ strums are soft strums in clean takes (T06, T08, T11). The old line in `coach.js
 the worse error in a room") is why the choice was Jonathan's: this trades a few soft strums for honest feedback in
 noisy rooms.
 
+- **Jonathan chose 2.2 with the risk in front of him (2026-11-05).** The reviewer found that the 12 real takes do not
+  cover thumb or finger strummers, fast every-beat pairs or slow-frame Chromebooks; offered 1.8 / 2.19 (milder: 14 of
+  52 false hits for 1 lost, keeps about 3 times as many soft strums in the probe) or holding until a thumb take had
+  been recorded, he said to push 2.2. **First thing to do after it is live:** strum a take with a thumb or a finger on
+  a test student account (60 and 120 BPM, every beat), run "Evaluate all recordings" and read "Played, not counted"
+  (`detector-missed`); the new takes are graded at 2.2, so that column is the real loss. If it is bad, roll back.
 - **The game (`coach.js`):** `CC_POWER_ONSET_RATIO = 2.2` and `CC_POWER_HF_RATIO = 2.67` (1.7 x 2.2 / 1.4, the
   what-if's own scaling) sit beside the shared `CHK_ONSET_RATIO` / `CHK_HF_RATIO`. `ccLoop` picks them with
   `ccIsPower()`: Power Chord Switch uses its own, Change Up (same loop) keeps the shared ones. Listening Coach, Note
@@ -3710,19 +3719,24 @@ noisy rooms.
   (`tools/mic-sim/power-switch.mjs`, which now uses the Power Chord Switch ratios for its Power Chord Switch gate and
   the shared ones for Change Up, prints identical output on the old and new `coach.js`; with the ratios forced to 60
   only the Power Chord Switch gate collapses). BUT that simulator's strum carries a pick-scrape burst about 3x the note
-  level, so it cannot show the cost for soft strums. A separate probe (the real `coachReadFrame` / `coachSmooth`, a
-  strum landing over the previous chord still ringing, 12 trials per setting, 2026-11-05, reviewer's script) shows what
-  the ratios do to a strum WITHOUT a sharp pick attack: at equal loudness with no scrape the shared ratios hear 12 of 12
-  and 2.2 / 2.67 hear 0 of 12; at 140 BPM with a weak scrape, 12 vs 9 on 16.7 ms frames and 12 vs 3 on 50 ms frames;
-  a firm pick strum is heard by both. So the strums that can now be missed are soft ones and ones without a clear
+  level, so it cannot show the cost for soft strums. A separate probe, `tools/mic-sim/onset-probe.mjs` (the real
+  `coachReadFrame` / `coachSmooth`, a strum landing over the previous chord still ringing, 12 trials per setting,
+  synthetic strums, so RELATIVE numbers) shows what the ratios do to a strum WITHOUT a sharp pick attack: at 60 BPM
+  and equal loudness with no scrape the shared ratios hear 12 of 12 and 2.2 / 2.67 hear 0 of 12 (at 90 BPM the shared
+  ratios hear 6 to 10 of 12, 2.2 / 2.67 hear 0); at 140 BPM with a weak scrape, 12 vs 9 on 16.7 ms frames and 12 vs 3 on
+  50 ms frames; a firm pick strum is heard by both. Over the settings the shared ratios do not always hear, what each
+  Power Chord Switch ratio still hears, as a share of what the shared ratios hear: 2.2 / 2.67 13%, 2.0 / 2.43 15%,
+  1.8 / 2.19 37% (the replay on the 12 real takes: 1.8 removes 14 of 52 false hits and loses 1 real strum, 2.2 removes
+  30 and loses 4; 2.0 was not replayed). So the strums that can now be missed are soft ones and ones without a clear
   pick attack (a thumb or a finger). The 12 real takes put that at 4 of 132; they do not cover the cases under "To
   watch" in "Where things stand". The game's own words do not help a student whose strums are missed: below half
   right the done screen says "Drop 10 BPM and try again" (`games.cc.advice.low`) whatever the cause, and the
   "strum a little firmer" advice exists only in the CHANGELOG. A Power Chord Switch hint for that case would be a
   new English + Spanish string pair: Jonathan's call, not made.
-- **Checks:** 1ck runs the real `ccLoop` on scripted frames just below and above every threshold, in Change Up and in
-  Power Chord Switch as a song switch and as a pair, each with a recording live and without (55 runs), reads the ratios
-  back from the saved take, and pins 2.2 / 2.67 and 1.4 / 1.7; 1cl proves a take graded at other ratios (on either
+- **Checks:** 1ck runs the real `ccLoop` on scripted frames just below and above every threshold, in Change Up (a
+  pair and the computer's pick, three speeds) and in Power Chord Switch (a song switch in all three rounds, a pair and
+  the computer's pick, three speeds, with a recording live and without; 165 runs), pins the two lines that choose the
+  ratios by their text, reads the ratios back from the saved take, and pins 2.2 / 2.67 and 1.4 / 1.7; 1cl proves a take graded at other ratios (on either
   channel) is told from the older ones, measured the same, left out of the what-if and counted in the console, the terminal
   and both downloads (`strumWhatIfSkipped`), that crafted values are refused, and that the console's own Evaluate-all
   replays older takes from the shared ratios (14 cases). Deliberate breaks each turned a check red: 15 in the first
