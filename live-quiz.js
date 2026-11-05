@@ -260,6 +260,18 @@ function lqRankedNamed(s){
   Object.keys(s.scores || {}).forEach(uid => { withNames[uid] = Object.assign({}, s.scores[uid], { name: names[uid] || '' }); });
   return lqRanked(withNames);
 }
+/* What the PUBLIC session doc may hold per player: numbers and a boolean, nothing else. A copy by whitelist, not "delete the name": a field that is
+   not copied cannot leak, and an older game's leftovers (a `name`, anything else) are dropped. Every writer of `scores` goes through this. */
+function lqPublicScore(e){
+  e = e || {};
+  const num = v => (Number.isFinite(Number(v)) ? Number(v) : 0);
+  return { pts: num(e.pts), right: num(e.right), answered: num(e.answered), last: num(e.last), lastRight: e.lastRight === true ? true : (e.lastRight === false ? false : null) };
+}
+function lqPublicScores(scores){
+  const out = {};
+  Object.keys(scores || {}).forEach(uid => { out[uid] = lqPublicScore(scores[uid]); });
+  return out;
+}
 // uid → rank, highest points first. Ties share the lower rank number, the
 // way a scoreboard reads out loud ("two of you tied for second").
 function lqRanked(scores){
@@ -1126,7 +1138,8 @@ function lqBilingualParams(key, cls, paramsEn, paramsEs){
 }
 
 function lqStageLobbyHtml(s, quiz){
-  const here = lqRoster(s);
+  // Sorted by NAME: the answer docs come back in uid order, so chips in that order would line every uid in the public scores up with a name.
+  const here = lqRoster(s).slice().sort((a, b) => String(a.name || '').localeCompare(String(b.name || '')));
   const chips = here.map(r => `<span class="lq-chip">${escHtml(r.name || '—')}</span>`).join('');
   return lqBilingual(quiz.titleKey, 'lq-st-title')
     + lqBilingual('lq.stageJoin', 'lq-st-join')
@@ -1298,6 +1311,10 @@ function lqToggleFullscreen(){
 // Every teacher write goes through here: one at a time, buttons greyed while
 // it's in flight, and a failed write repaints rather than leaving the strip
 // stuck disabled.
+/* replace === true  → a full set() (a new game: nothing inherited).
+   replace === 'fields' → set() with mergeFields = every key in the patch: each named field is REPLACED whole (a plain merge is DEEP: it keeps
+   every old key inside a map such as `scores`, so a name an older game left there would stay in Firestore). The reveal, end and close writers use it.
+   otherwise → a merge, for the in-game updates. */
 async function lqWrite(patch, replace){
   if(lqTBusy) return false;
   lqTBusy = true; lqPaintControls();
@@ -1306,8 +1323,9 @@ async function lqWrite(patch, replace){
     if(!lqDb) throw new Error('no db');
     // A full set() (no options) for a new game, so it can't inherit a field
     // from the last one; a merge for every in-game update.
-    if(replace) await lqDoc().set(patch);
-    else        await lqDoc().set(patch, { merge: true });
+    if(replace === 'fields') await lqDoc().set(patch, { mergeFields: Object.keys(patch) });
+    else if(replace)         await lqDoc().set(patch);
+    else                     await lqDoc().set(patch, { merge: true });
     return true;
   }catch(e){
     console.warn('[live-quiz] teacher write failed', e);
@@ -1393,8 +1411,7 @@ function lqScoreRound(s, rows, isRight, tallyKeys, isValidId){
   // Carry every known player forward with last round's result cleared, so a
   // student who sat this one out doesn't see the previous "+1000" again.
   Object.keys(s.scores || {}).forEach(uid => {
-    scores[uid] = Object.assign({}, s.scores[uid], { last: 0, lastRight: null });
-    delete scores[uid].name;     // a game from before 2026-11-05 may have left one: the public doc carries no name
+    scores[uid] = Object.assign(lqPublicScore(s.scores[uid]), { last: 0, lastRight: null });   // a WHITELIST copy: no name, and no unknown field, carries forward
   });
   rows.forEach(a => {
     if(!a.uid) return;
@@ -1422,7 +1439,7 @@ async function lqTeacherReveal(correctId){
   if(!lqChoice(quiz, correctId)) return;
   const rows = lqRoundAnswers(s, s.qIndex);
   const { tally, scores } = lqScoreRound(s, rows, a => a.choice === correctId, quiz.choices.map(c => c.id));
-  await lqWrite({ state: 'reveal', correct: correctId, tally, scores });
+  await lqWrite({ state: 'reveal', correct: correctId, tally, scores }, 'fields');
 }
 
 // Octaves both count: every fret on the target string that sounds the
@@ -1439,7 +1456,7 @@ async function lqTeacherRevealFret(){
   const rows = lqRoundAnswers(s, s.qIndex);
   const isValidId = choice => { const p = lqParseFretId(choice); return !!p && quiz.strings.includes(p.string); };
   const { tally, scores } = lqScoreRound(s, rows, a => ids.includes(a.choice), null, isValidId);
-  await lqWrite({ state: 'reveal', correct: ids[0], correctIds: ids, tally, scores });
+  await lqWrite({ state: 'reveal', correct: ids[0], correctIds: ids, tally, scores }, 'fields');
 }
 
 /* End game with a question still OPEN throws that round away: scoring only
@@ -1455,11 +1472,11 @@ async function lqTeacherEnd(){
     if(!window.confirm('This question is still open. If you end the game now, this round is thrown away and nobody gets points for it.\n\n'
       + 'To count it: Cancel, ' + howToScore + ', then End game.\n\nEnd the game now anyway?')) return;
   }
-  await lqWrite({ state: 'ended', correct: null, endedAt: firebase.firestore.FieldValue.serverTimestamp() });
+  await lqWrite({ state: 'ended', correct: null, endedAt: firebase.firestore.FieldValue.serverTimestamp(), scores: lqPublicScores(s.scores) }, 'fields');
 }
 // Takes the game off every student's screen. Scores stay in the doc — it's
 // the state flag students key off, so nothing is destroyed by clearing.
 async function lqTeacherClose(){
   if(!lqTSession) return;
-  await lqWrite({ state: 'off', correct: null, tally: null });
+  await lqWrite({ state: 'off', correct: null, tally: null, scores: lqPublicScores(lqTSession.scores) }, 'fields');
 }

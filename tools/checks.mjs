@@ -5066,7 +5066,7 @@ function checkLiveQuizTimerRepaint() {
    roster from the teacher's answer docs and fails if the names are NOT there (the
    wall must keep showing them).
    ════════════════════════════════════════════════════════════════════ */
-function checkLiveQuizNoNames() {
+async function checkLiveQuizNoNames() {
   head('1cm. Live quiz: the student-readable session doc holds no name');
   let bad = 0, cases = 0;
   const flag = m => { err(`1cm: ${m}`); problems++; bad++; };
@@ -5077,16 +5077,22 @@ function checkLiveQuizNoNames() {
     localStorage: { getItem: () => null, setItem() {} }, sessionStorage: { getItem: () => null, setItem() {} },
     document: { hidden: false, getElementById: () => null, querySelectorAll: () => [], addEventListener() {},
       body: { classList: { add() {}, remove() {} }, appendChild() {} }, createElement: () => ({}), contains: () => false },
-    t: k => k, tIn: k => k, escHtml: x => String(x), escAttr: x => String(x), applyI18n() {}, firebase: {}
+    t: k => k, tIn: k => k, escHtml: x => String(x), escAttr: x => String(x), applyI18n() {}, alert() {},
+    firebase: { firestore: { FieldValue: { serverTimestamp: () => '<ts>' } } }
   };
-  box.window = { addEventListener() {} };
+  box.window = { addEventListener() {}, confirm: () => true };
   try {
     vm.createContext(box);
     vm.runInContext(readFileSync(join(ROOT, 'live-quiz.js'), 'utf8'), box, { filename: 'live-quiz.js' });
     vm.runInContext('var currentUser = { uid: "me", displayName: "Me Myself" };', box);
   } catch (e) { flag(`live-quiz.js would not load in the test VM: ${e.message}`); return; }
   const run = code => vm.runInContext(code, box);
-  const NAMES = ['Alice Zebra', 'Old Leftover', 'Bob Yak'];
+  const NAMES = ['Alice Zebra', 'Old Leftover', 'Bob Yak', 'Cy Xu', 'Alice Z.'];
+  const scan = (where, doc) => {
+    const text = JSON.stringify(doc);
+    for (const n of NAMES) if (text.includes(n)) flag(`${where}: the doc still holds "${n}": ${text.slice(0, 220)}`);
+    if (/"name"|"label"/.test(text)) flag(`${where}: the doc holds a name-like key: ${text.slice(0, 220)}`);
+  };
   try {
     // (1) scoring: rows with names, over an older doc whose scores still carry one
     const scored = JSON.parse(run(`JSON.stringify(lqScoreRound(
@@ -5094,10 +5100,8 @@ function checkLiveQuizNoNames() {
       [ { uid: 'u1', name: 'Alice Zebra', choice: 'a', ms: 900 }, { uid: 'u2', name: 'Bob Yak', choice: 'b', ms: 1200 }, { uid: 'me', name: 'Me Myself', choice: 'a', ms: 700 } ],
       a => a.choice === 'a', ['a', 'b']))`));
     cases++;
-    const wrote = JSON.stringify(scored.scores);
-    for (const n of [...NAMES, 'Me Myself']) if (wrote.includes(n)) flag(`scoring wrote the name "${n}" into the public scores: ${wrote}`);
-    if (/"name"/.test(wrote)) flag(`scoring wrote a "name" key into the public scores: ${wrote}`);
-    if (!(scored.scores.u1 && scored.scores.u1.pts > 0 && scored.scores.old1 && scored.scores.old1.pts === 500)) flag(`scoring no longer carries points forward: ${wrote}`);
+    scan('lqScoreRound', scored.scores);
+    if (!(scored.scores.u1 && scored.scores.u1.pts > 0 && scored.scores.old1 && scored.scores.old1.pts === 500)) flag(`scoring no longer carries points forward: ${JSON.stringify(scored.scores)}`);
     // (2) the student's end screen, from scores that (wrongly, older game) still hold names
     const mine = run(`lqStudentEndedHtml({ scores: { me: { name: 'Me Myself', pts: 900 }, u1: { name: 'Alice Zebra', pts: 1000 }, u2: { name: 'Bob Yak', pts: 800 }, old1: { name: 'Old Leftover', pts: 500 } } })`);
     cases++;
@@ -5109,9 +5113,72 @@ function checkLiveQuizNoNames() {
     const wall = run('lqStageEndedHtml(lqTSession)'), roster = JSON.stringify(run('lqRoster(lqTSession)'));
     cases++;
     for (const n of ['Alice Zebra', 'Bob Yak']) { if (!wall.includes(n)) flag(`the wall's end screen lost the name "${n}" (it must keep showing names, from the teacher-only answers)`); if (!roster.includes(n)) flag(`the lobby roster lost the name "${n}"`); }
-  } catch (e) { flag(`a live-quiz view threw: ${e.message}`); return; }
-  if (cases !== 3) flag(`ran ${cases} cases, pinned at 3`);
-  if (bad === 0) ok(`scoring writes no name (even over an older doc that held one), the student's end screen shows no other player's name, and the wall + lobby still show every name from the teacher-only answers (3 cases)`);
+    // (4) THE WRITERS, against a fake doc that merges like Firestore (a plain merge is DEEP: it keeps every old key inside `scores`). The doc starts as an OLDER game's, full of names.
+    const mcId = run('Object.keys(LIVE_QUIZZES).find(k => (LIVE_QUIZZES[k].type || "mc") === "mc") || ""'), fretId = run('Object.keys(LIVE_QUIZZES).find(k => LIVE_QUIZZES[k].type === "fret") || ""');
+    if (!mcId || !fretId) { flag('the bank needs one mc and one fret quiz to test'); return; }
+    const mcChoice = run(`LIVE_QUIZZES[${JSON.stringify(mcId)}].choices[0].id`);
+    const clone = x => JSON.parse(JSON.stringify(x)), isMap = v => v && typeof v === 'object' && !Array.isArray(v);
+    const deepMerge = (dst, src) => { for (const k of Object.keys(src)) { if (isMap(src[k]) && isMap(dst[k])) deepMerge(dst[k], src[k]); else dst[k] = clone(src[k]); } };
+    let data = {};
+    box.__fake = { set: async (patch, opts) => {
+      if (!opts) data = clone(patch);
+      else if (opts.merge) deepMerge(data, patch);
+      else if (opts.mergeFields) { for (const f of opts.mergeFields) data[f] = clone(patch[f]); }
+      else throw new Error('unknown set options');
+    } };
+    run('lqEnsureDb = async () => {}; lqDb = {}; lqDoc = () => __fake; lqPaintControls = () => {};');
+    const oldDoc = state => ({ sessionId: 'S0', quizId: mcId, state, qIndex: 0, correct: null, correctIds: null, tally: null, target: null, speedBonus: false, limitSec: 0,
+      scores: { u1: { name: 'Alice Zebra', label: 'Alice Z.', pts: 500, right: 1, answered: 1, last: 500, lastRight: true }, u2: { name: 'Bob Yak', pts: 0, right: 0, answered: 1, last: 0, lastRight: false }, u9: { name: 'Old Leftover', pts: 100, right: 1, answered: 1 } } });
+    const answers = [{ sessionId: 'S0', qIndex: 0, uid: 'u1', name: 'Alice Zebra', choice: mcChoice, ms: 900 }, { sessionId: 'S0', qIndex: 0, uid: 'u3', name: 'Cy Xu', choice: mcChoice, ms: 800 }];
+    const setup = (state, extra) => { data = Object.assign(oldDoc(state), extra || {}); run(`lqTSession = ${JSON.stringify(data)}; lqTAnswers = ${JSON.stringify(answers)}; lqTBusy = false;`); };
+    for (const [label, state, extra, call] of [
+      ['mc Reveal', 'question', {}, `lqTeacherReveal(${JSON.stringify(mcChoice)})`],
+      ['fret Reveal', 'question', { quizId: fretId, target: { string: 'lowE', note: 'G' } }, 'lqTeacherRevealFret()'],
+      ['End', 'reveal', {}, 'lqTeacherEnd()'],
+      ['Close', 'ended', {}, 'lqTeacherClose()']
+    ]) {
+      setup(state, extra);
+      try { run(`${call}.then(() => {})`); await new Promise(r => setImmediate(r)); await new Promise(r => setImmediate(r)); } catch (e) { flag(`${label}: the writer threw ${e.message}`); continue; }
+      cases++;
+      scan(`${label} writer (starting from an older game's doc)`, data.scores);
+      if (!data.scores || !data.scores.u1 || data.scores.u1.pts < 500) flag(`${label}: the points were lost: ${JSON.stringify(data.scores)}`);
+    }
+    setup('ended', {});
+    run('lqTeacherStart().then(() => {})'); await new Promise(r => setImmediate(r)); await new Promise(r => setImmediate(r));
+    cases++;
+    if (JSON.stringify(data.scores) !== '{}') flag(`Start did not replace the scores: ${JSON.stringify(data.scores)}`);
+    // (5) the wall's views: names present; the lobby is NOT in uid order (the answer docs come back in uid order, which would line a name up with every uid in the public scores)
+    const quizMc = run(`lqQuiz(${JSON.stringify(mcId)})`);
+    run(`lqTSession = { sessionId: 'S1', state: 'lobby', quizId: ${JSON.stringify(mcId)}, scores: {} }; lqTAnswers = [ { sessionId: 'S1', uid: 'a1', name: 'Zed Zane', qIndex: -1 }, { sessionId: 'S1', uid: 'b2', name: 'Amy Ash', qIndex: -1 }, { sessionId: 'S1', uid: 'c3', name: 'Mia Moe', qIndex: -1 } ];`);
+    const lobby = run(`lqStageLobbyHtml(lqTSession, lqQuiz(${JSON.stringify(mcId)}))`);
+    cases++;
+    const at = n => lobby.indexOf(n);
+    if (at('Amy Ash') < 0 || at('Mia Moe') < 0 || at('Zed Zane') < 0) flag('the wall lobby lost a name');
+    else if (!(at('Amy Ash') < at('Mia Moe') && at('Mia Moe') < at('Zed Zane'))) flag('the wall lobby chips are not sorted by name: in uid order they line every uid in the public scores up with a name');
+    run(`lqTSession = { sessionId: 'S1', state: 'reveal', quizId: ${JSON.stringify(mcId)}, qIndex: 0, correct: ${JSON.stringify(mcChoice)}, tally: {}, scores: { a1: { pts: 900 }, b2: { pts: 700 } } }; lqTAnswers = [ { sessionId: 'S1', uid: 'a1', name: 'Zed Zane', qIndex: 0 }, { sessionId: 'S1', uid: 'b2', name: 'Amy Ash', qIndex: 0 } ];`);
+    const reveal = run(`lqStageRevealHtml(lqTSession, lqQuiz(${JSON.stringify(mcId)}))`);
+    cases++;
+    if (!reveal.includes('Zed Zane') || !reveal.includes('Amy Ash')) flag("the wall's mc reveal lost the names");
+    run(`lqTSession = { sessionId: 'S1', state: 'reveal', quizId: ${JSON.stringify(fretId)}, qIndex: 0, correct: 'lowE:3', correctIds: ['lowE:3', 'lowE:15'], target: { string: 'lowE', note: 'G' }, tally: {}, scores: { a1: { pts: 900 }, b2: { pts: 700 } } };`);
+    const fretReveal = run(`lqStageFretRevealHtml(lqTSession, lqQuiz(${JSON.stringify(fretId)}))`);
+    cases++;
+    if (!fretReveal.includes('Zed Zane') || !fretReveal.includes('Amy Ash')) flag("the wall's fret reveal lost the names");
+    void quizMc;
+  } catch (e) { flag(`a live-quiz view or writer threw: ${e.message}`); return; }
+  // (6) the rules: the answer docs (which hold the names) stay teacher-only to LIST and a student can only GET their own
+  const rulesTxt = readFileSync(join(ROOT, 'firestore.rules'), 'utf8').replace(/\/\*[\s\S]*?\*\//g, '');
+  const ai = rulesTxt.indexOf('match /answers/{userId} {');
+  const ablock = ai >= 0 ? rulesTxt.slice(ai, rulesTxt.indexOf('\n      }\n', ai)) : '';
+  cases++;
+  if (!ablock) flag('firestore.rules: the answers/{userId} block is missing');
+  else {
+    if (!/allow read, delete: if isTeacher\(\);/.test(ablock)) flag('firestore.rules answers: `allow read, delete: if isTeacher();` is gone (the answer docs hold every player\'s name; only the teacher may list them)');
+    if (!/allow get: if isSignedIn\(\) && request\.auth\.uid == userId;/.test(ablock)) flag('firestore.rules answers: a student may only `get` their own doc');
+    const reads = [...ablock.matchAll(/allow\s+([a-z, ]+?):/g)].map(m => m[1].replace(/\s/g, ''));
+    if (reads.some(r => /(^|,)(read|list)(,|$)/.test(r) && r !== 'read,delete')) flag(`firestore.rules answers: an extra read/list rule (${reads.join(' | ')})`);
+  }
+  if (cases !== 12) flag(`ran ${cases} cases, pinned at 12`);
+  if (bad === 0) ok(`no name reaches the public session doc: scoring, the mc + fret Reveal, End and Close writers (against a doc that merges like Firestore, starting from an older game full of names) and Start; the student's end screen shows no other player's name; the wall keeps its names, the lobby is sorted by name, and the answer docs stay teacher-only to list (${cases} cases)`);
 }
 
 /* ════════════════════════════════════════════════════════════════════
@@ -12193,7 +12260,7 @@ function checkPracticeMinutes(i18nTable) {
   await checkJourneyReadySave();
   checkSiteMadeClick();
   checkLiveQuizTimerRepaint();
-  checkLiveQuizNoNames();
+  await checkLiveQuizNoNames();
   checkCoachVerdicts();
   await checkPwTakeEvaluator();
   checkPracticeMinutes(i18nTable);

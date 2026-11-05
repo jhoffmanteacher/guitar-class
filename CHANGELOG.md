@@ -7,7 +7,7 @@ see `WORKFLOW.md` and the git commit log.
 
 ## 2026-11-05 — Live quiz: other players' names are not shown on your screen
 
-- **At the end of a live quiz, your own screen shows the top 5 as "Student" ("Estudiante") next to their points. Your own row shows your name.** The classroom wall still shows every name, as before. Names are no longer stored where every signed-in account can read them.
+- **At the end of a live quiz, your own screen shows the top 5 as "Student" ("Estudiante") next to their points. Your own row shows your name.** The classroom wall still shows every name, as before. Names are no longer saved in the score list that every signed-in account can read.
 
 ## 2026-11-04 — Recording question: Yes is the big button
 

@@ -125,7 +125,10 @@ service cloud.firestore {
        on the site (config/class's uid maps, the class rank, the minutes
        boards) to a person; the Top 5 board is keyed by a private tag as
        well, in case a name is ever published again. checks.mjs 1cm runs the
-       scoring and fails the push if a name gets back into this doc.
+       writers and fails the push if a name gets back into this doc. OPEN: a
+       person in the room sees the wall's names with points and can read this
+       doc's uid -> points, so the top players' uids can be lined up with their
+       names (see the Top 5 header below for the options).
 
        Scoped to the specific "current" doc rather than liveQuiz/{doc}, for
        the same reason config/class is: a wildcard would open every future
@@ -160,9 +163,10 @@ service cloud.firestore {
          type conditions under it pin the CONTENTS, which hasOnly does not:
          without them `ms` could be a string or a wild number, and `name`
          (capped at 60 chars only by lqName() in the client) could be any
-         length — and the teacher's scoring pass copies that name into
-         liveQuiz/current.scores, which the whole class reads. Rendering is
-         escaped everywhere, so this is about junk and abuse, not XSS.
+         length — and the teacher's wall shows that name (it used to be copied
+         into liveQuiz/current.scores, which the whole class reads; since
+         2026-11-05 the public scores carry no name). Rendering is escaped
+         everywhere, so this is about junk and abuse, not XSS.
 
          `ms` is checked as a number rather than an int on purpose: the
          client rounds it today, and a rule that rejected a fractional value
@@ -361,11 +365,12 @@ service cloud.firestore {
        that uid writes its own doc, with that one field, a number from 0 to
        400 days of the daily cap. No delete. What it exposes: a uid and a
        number — no name and no period in this doc, and a student cannot read
-       progress/{uid} to turn a uid into a person. NOT FULLY ANONYMOUS: the
-       live quiz keeps each player's name under the same uid in
-       liveQuiz/current.scores, which every signed-in student reads, so a
-       student who looks can match a quiz name to a board number (accepted
-       by Jonathan, 2026-11-04). The teacher reads it like any signed-in user.
+       progress/{uid} to turn a uid into a person. Until 2026-11-05 the live quiz
+       kept each player's name under the same uid in liveQuiz/current.scores
+       (accepted by Jonathan, 2026-11-04); it no longer does. A person in the
+       ROOM can still line the wall's names and points up with the public
+       uid -> points (see liveQuiz/current above; open). The teacher reads
+       this like any signed-in user.
        HONEST LIMITS: a student at DevTools can write any number up to the
        cap for themselves and so claim first place; any Google account that
        signs in once adds 1 to the total (no domain rule, Jonathan's call);
@@ -410,13 +415,18 @@ service cloud.firestore {
        minutesBoard (the class rank, above) is still keyed by uid with
        ALL-TIME seconds, nearly the same number as this week's while counting
        is young, so a reader can match a tag to a uid by VALUE (measured on the
-       real engine: 58 of 60 students from one read of each). That no longer
-       reaches a person: the live quiz's public scores carry no name any more
-       (2026-11-05; see liveQuiz/current above, checks.mjs 1cm), so there is no
-       name next to any uid in anything a student or an outsider can read.
-       The tag is the second lock: if a name is ever published again, this
-       board still does not join to it directly. config/class.periodOverrides
-       is keyed by uid and gives a period, never a name.
+       real engine: 58 of 60 students from one read of each). That reaches no
+       NAME for an outsider: the live quiz's public scores carry no name any
+       more (2026-11-05; checks.mjs 1cm runs the writers), so no doc anyone
+       signed in can read has a name next to a uid. ⚠ OPEN (Jonathan decides):
+       a person in the ROOM sees the wall's names with their points and can
+       read the public uid -> points, which links the top players' uids to
+       names (simulated: about half of a speed-scored 30-student game, never a
+       wrong link), and from a uid the value join above reaches period and
+       minutes. Closing it: key the class rank by this tag too (a parked
+       patch, ~/Downloads/rankboard-parked.patch), or key the public scores
+       by a per-game token. config/class.periodOverrides is keyed by uid and
+       gives a period, never a name.
 
        HONEST LIMITS: a student at DevTools can write any number up to the cap
        for themselves and place themselves in any period or week. A tag cannot

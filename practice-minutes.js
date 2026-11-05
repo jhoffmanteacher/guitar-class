@@ -90,10 +90,10 @@
    CLASS RANK (2026-11-04, Jonathan: "a ranking for students ... N/total"). My progress shows
    "N/total": N = 1 + how many students have more whole minutes all time, total = how many students
    have a board doc. minutesBoard/{uid} holds ONE number, the student's all-time seconds the server
-   has confirmed: no name, no period. A uid is opaque here, BUT NOT FULLY ANONYMOUS: the live quiz
-   keeps each player's name under the same uid in liveQuiz/current.scores, readable by every signed-in
-   student, so a student who looks can match a quiz name to a board number (accepted by Jonathan,
-   2026-11-04; the tile itself shows only your own place). The student's own page writes it (see
+   has confirmed: no name, no period. A uid is opaque here. Until 2026-11-05 the live quiz kept each player's
+   name under the same uid in liveQuiz/current.scores (accepted by Jonathan, 2026-11-04); it no longer does, but the
+   wall's names with points can still be lined up in the room with the public uid -> points (open; see the rules file). The tile
+   itself shows only your own place. The student's own page writes it (see
    publishBoard: created at the server's sum, then increments only), at most once per BOARD_MS; every
    signed-in student may read the collection (that is the whole point), nobody but the owner writes it,
    nobody deletes. The teacher's account is never written or ranked. It is a decoration like the rest
@@ -114,7 +114,7 @@
    Each student sees ONLY their own place (Jonathan, 2026-11-04: "just their own rank"): no names, no one
    else's minutes on screen. weekBoard/{tag} holds { week, period, seconds } — keyed by the student's PRIVATE random
    name tag (minutes/{uid}/meta/board, see boardTag()), never the uid: Jonathan, 2026-11-04, wants no per-period minutes
-   tied to a name, readable by anyone, and the live quiz keeps names under uids. This week's total as the
+   tied to a name, readable by anyone (the live quiz used to keep names under uids). This week's total as the
    SERVER holds it (the transaction reads minutes/{uid}/weeks/{week}, which every page of the student adds
    to, so a Journey tab opened in a new tab does not publish a smaller copy), written by a transaction that
    only ever RAISES the number inside one week + period (a page with an older copy never lowers what another
@@ -122,7 +122,8 @@
    (equality filters only: no composite index) and kept WB_KEEP_MS (15 min) in memory and localStorage,
    so a period of 30 reads about 30 documents per student per 15 minutes on screen. Left open on purpose (2026-11-05): minutesBoard (the class rank) is still keyed by the uid, so a
    reader could join it to this board by value (all-time and this-week seconds are nearly equal while counting is young); no name is next to a uid
-   anywhere readable, because the live quiz's public scores carry none any more (checks.mjs 1cm). The teacher's account is never written
+   in any doc readable by students, because the live quiz's public scores carry none any more (checks.mjs 1cm); a person in the room can still
+   line the wall up with uid -> points (open). The teacher's account is never written
    or ranked. A failed write or read changes nothing about counting; the medal and the tile stay away.
    HONEST LIMITS: a student at DevTools can write any number up to the rules' week cap for themselves (and
    choose their period). A device whose clock is a week BEHIND replaces the doc with its own week when it loads, and
@@ -887,7 +888,7 @@
      minutes/{uid}/meta/board { id } (create-only; only the student reads it). It is kept in MEMORY only, never in
      localStorage: on a shared Chromebook the next student would read the previous student's uid and tag there and
      could follow that board doc. One read per page load. The weekBoard's docs are keyed by it, never by the uid, so
-     nothing readable by other accounts joins a name (the live quiz keeps names under uids) to a period and minutes.
+     nothing readable by other accounts joins a name (the live quiz kept names under uids until 2026-11-05) to a period and minutes.
      Resolves to the tag, or '' (no crypto; offline and refused reject): then nothing is read or written for the
      Top 5. create = make it when the student has none yet. */
   var TAG_RE = /^[0-9a-f]{32}$/;
