@@ -35,8 +35,11 @@ sections below hold the history and the reasons.
   `CC_POWER_HF_RATIO` 2.67 in `coach.js` (Change Up and every other loop keep 1.4 / 1.7). On the 12 real takes the
   replay says 30 of 52 false hits go and 4 of 132 real strums are lost. Detail, numbers and how to roll it back:
   "Power Chord Switch: where we stopped" → "Decision (2026-11-05)". "No readable pitch, no tick" was not chosen.
-- **To watch in the next takes:** noisy rooms should show far fewer "heard, not there" changes, and clean takes
-  should not start missing real strums (the "no strum heard" red chip on a soft strummer).
+- **To watch in the next takes:** noisy rooms should show fewer "heard, not there" changes (22 of the 52 false hits
+  still fire at 2.2, so not none), and clean takes should not start missing real strums: read the console's "Played,
+  not counted" column (`detector-missed`). Not covered by the 12 real takes, so look at these first: **thumb or
+  finger strummers** (no sharp pick attack), **fast every-beat pairs** (up to 140 BPM; the 12 takes ran at 40-90 BPM,
+  one at 90/105/120), and **Chromebooks that draw slowly** (11 of the 12 takes had 16.7 ms frames, 1 had 33, none 50).
 
 **Waiting on students' recordings**
 - **The Pitch-rule table** (teacher console → Mic recordings → Evaluate all recordings) needs takes saved after
@@ -3683,7 +3686,8 @@ numbers in those synthetic takes are planted, so they say nothing about real stu
 Jonathan's pick, after the console's strum what-if on the 12 real takes (186 changes, 52 false hits, 132 real
 strums; replay matches the site on 183 of 186 at the old ratios): 1.8 / 2.19 removes 14 false hits for 1 real strum
 lost; **2.2 / 2.67 removes 30 for 4**; 2.6 / 3.16 removes 38 for 9 (the knee is 2.2: 1.8 → 2.2 buys 5 false hits per
-real strum lost, 2.2 → 2.6 only 1.6). The 3 noisy takes lose 26 false hits and no real strum at 2.2; the 4 lost real
+real strum lost, 2.2 → 2.6 only 1.6). Of the 30, one is a false hit the replay already drops at the shipped 1.4
+(replay error), so 29 net; 22 of the 52 still fire at 2.2 (T12 keeps 6 of its 12, T01 3 of 13). The 3 noisy takes lose 26 false hits and no real strum at 2.2; the 4 lost real
 strums are soft strums in clean takes (T06, T08, T11). The old line in `coach.js` ("marking a correct change wrong is
 the worse error in a room") is why the choice was Jonathan's: this trades a few soft strums for honest feedback in
 noisy rooms.
@@ -3702,19 +3706,34 @@ noisy rooms.
   Pitch-rule table) is unchanged. Ratios outside 1..10 or half missing are never trusted. **Not built:** a strum
   what-if for takes graded at 2.2 (candidates above 2.2, e.g. 2.6 / 3.16, replayed from the new base); add it if the
   next takes make it worth deciding on a stricter ratio.
-- **What to expect:** a clean strum in a quiet room grades exactly as before (`tools/mic-sim/power-switch.mjs`,
-  which now uses the Power Chord Switch ratios for its Power Chord Switch gate and the shared ones for Change Up:
-  identical output on the old and new `coach.js`; with the ratios forced to 60 only the Power Chord Switch gate
-  collapses). The change shows only in noisy rooms (fewer false "right" changes) and for soft strums (a few more
-  "no strum heard" chips; the tip already asks for a quiet room and the guitar close to the mic).
-- **Checks:** 1ck runs the real `ccLoop` on scripted frames in both games just below and above every threshold
-  (20 runs) and reads the ratios back from the saved take, and pins 2.2 / 2.67 and 1.4 / 1.7; 1cl proves a take graded
-  at 2.2 / 2.67 is told from the older ones, measured the same, left out of the what-if and counted (10 cases,
-  crafted values refused). Fifteen deliberate breaks (the ratio back to 1.4, Change Up using the new ratios, the loop
-  ignoring them, the attack channel left shared, the take dropping them, a retune without re-pinning, the game test
-  inverted, a comment inside the condition, an unsupplied name, and six evaluator breaks) each turned a check red.
-- **Roll back:** set both `CC_POWER_*` constants to the `CHK_*` values (1.4 / 1.7) and re-pin 1ck (`R.pw` / `R.pwHf`);
-  new takes then record 1.4 / 1.7 and the console treats them as the older ones.
+- **What to expect, and the limit of the proof:** a firm pick strum in a quiet room grades exactly as before
+  (`tools/mic-sim/power-switch.mjs`, which now uses the Power Chord Switch ratios for its Power Chord Switch gate and
+  the shared ones for Change Up, prints identical output on the old and new `coach.js`; with the ratios forced to 60
+  only the Power Chord Switch gate collapses). BUT that simulator's strum carries a pick-scrape burst about 3x the note
+  level, so it cannot show the cost for soft strums. A separate probe (the real `coachReadFrame` / `coachSmooth`, a
+  strum landing over the previous chord still ringing, 12 trials per setting, 2026-11-05, reviewer's script) shows what
+  the ratios do to a strum WITHOUT a sharp pick attack: at equal loudness with no scrape the shared ratios hear 12 of 12
+  and 2.2 / 2.67 hear 0 of 12; at 140 BPM with a weak scrape, 12 vs 9 on 16.7 ms frames and 12 vs 3 on 50 ms frames;
+  a firm pick strum is heard by both. So the strums that can now be missed are soft ones and ones without a clear
+  pick attack (a thumb or a finger). The 12 real takes put that at 4 of 132; they do not cover the cases under "To
+  watch" in "Where things stand". The game's own words do not help a student whose strums are missed: below half
+  right the done screen says "Drop 10 BPM and try again" (`games.cc.advice.low`) whatever the cause, and the
+  "strum a little firmer" advice exists only in the CHANGELOG. A Power Chord Switch hint for that case would be a
+  new English + Spanish string pair: Jonathan's call, not made.
+- **Checks:** 1ck runs the real `ccLoop` on scripted frames just below and above every threshold, in Change Up and in
+  Power Chord Switch as a song switch and as a pair, each with a recording live and without (55 runs), reads the ratios
+  back from the saved take, and pins 2.2 / 2.67 and 1.4 / 1.7; 1cl proves a take graded at other ratios (on either
+  channel) is told from the older ones, measured the same, left out of the what-if and counted in the console, the terminal
+  and both downloads (`strumWhatIfSkipped`), that crafted values are refused, and that the console's own Evaluate-all
+  replays older takes from the shared ratios (14 cases). Deliberate breaks each turned a check red: 15 in the first
+  round (the ratio back to 1.4, Change Up using the new ratios, the loop ignoring them, the attack channel left shared,
+  the take dropping them, a retune without re-pinning, the game test inverted, a comment inside the condition, an
+  unsupplied name, six evaluator breaks) and 8 more after the review found the first check blind (Change Up's
+  attack channel on the wrong ratio, the ratios keyed on the song-switch ladder or on a recording being live, the
+  console replaying from the new ratios, either channel dropped from the skip test, either download dropping the count).
+- **Roll back:** set both `CC_POWER_*` constants to the `CHK_*` values (1.4 / 1.7) and change the pin line in 1ck
+  ("the strum ratios are ... pinned 2.2 / 2.67"; the case table works its expectations out from the constants, so
+  nothing else changes). New takes then record 1.4 / 1.7 and the console treats them as the older ones.
 - **Student-facing:** a `CHANGELOG.md` entry ("noise in the room counts less"). No string changed: the setup tip
   already says quiet room, guitar close to the mic.
 

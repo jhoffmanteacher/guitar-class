@@ -152,7 +152,7 @@ export const PW_FIXTURES = [
     lag: 300, map: 25, lat: 335, clickAmp: 0, noise: 0.004, rumble: 0.03, tau: 0.25, pf: 0.1, onlyChanges: true, skipFirst: true, frameMs: 50, tailMs: 8000, seed: 32,
     plan: { 0: 'soft:0.01219', 1: 'soft:0.01467', 2: 'soft:0.01876', 3: 'soft:0.01262', 4: 'soft:0.01303', 5: 'soft:0.01896', 6: 'soft:0.01231', 7: 'soft:0.01561', 8: 'soft:0.01665', 9: 'soft:0.01239', 10: 'soft:0.01471', 11: 'soft:0.01911', 12: 'soft:0.01179', 13: 'soft:0.01568', 14: 'soft:0.01790' } }
 ];
-// The candidate ratios the strum what-if tries: the site's own (coach.js CHK_ONSET_RATIO 1.4, CHK_HF_RATIO 1.7) and stricter ones; the attack-channel ratio scales the same way
+// The candidate ratios the strum what-if tries: the shared ones older takes were graded with (coach.js CHK_ONSET_RATIO 1.4, CHK_HF_RATIO 1.7; Power Chord Switch grades with its own stricter CC_POWER_* since 2026-11-05, and takes graded with those are left out of the what-if) and stricter ones; the attack-channel ratio scales the same way
 export const PW_WHATIF = { full: [1.4, 1.8, 2.2, 2.6], hfBase: 1.7, fullBase: 1.4, floor: 0.003, hfFloor: 0.0008, margin: 0.06 };
 export const pwWhatIfCandidates = () => PW_WHATIF.full.map(r => ({ ratio: r, hfRatio: Math.round(PW_WHATIF.hfBase * r / PW_WHATIF.fullBase * 100) / 100 }));
 

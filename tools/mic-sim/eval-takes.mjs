@@ -117,6 +117,6 @@ function whyText(rows){
   return out.join('\n');
 }
 if (jsonOut){
-  fs.writeFileSync(jsonOut, JSON.stringify({ generated: new Date().toISOString(), takes: rows.length, strumWhatIf: core.micEvalWhatIfSummary(rows), pitchRule: core.micEvalPitchSummary(rows), rows }, null, 1));
+  fs.writeFileSync(jsonOut, JSON.stringify({ generated: new Date().toISOString(), takes: rows.length, strumWhatIf: core.micEvalWhatIfSummary(rows), strumWhatIfSkipped: rows.filter(r => r.kind === 'pw' && r.whatIfSkipped).length, pitchRule: core.micEvalPitchSummary(rows), rows }, null, 1));
   console.error('wrote ' + jsonOut);
 }

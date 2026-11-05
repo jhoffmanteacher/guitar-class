@@ -7,7 +7,7 @@ see `WORKFLOW.md` and the git commit log.
 
 ## 2026-11-05 — Power Chord Switch: noise in the room counts less
 
-- **In Power Chord Switch, a strum has to be a little louder to count.** Before, a noise in the room (a voice, a bump, a chair) or the last chord still ringing could count as a right change when you had not strummed. Now it has to be a real strum. If a soft strum shows "no strum heard", strum a little harder and keep the guitar close to the mic. Change Up and the other mic games are not changed.
+- **In Power Chord Switch, a noise in the room has to be much louder to count.** Before, a voice, a bump, a chair, or the last chord still ringing could count as a right change when you had not strummed. Most of those no longer count. A very soft strum, or one without a clear pick sound, can now show "no strum heard": strum a little firmer and keep the guitar close to the mic. Change Up and the other mic games are not changed.
 
 ## 2026-11-05 — Live quiz: other players' names are not shown on your screen
 

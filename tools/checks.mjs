@@ -11517,26 +11517,36 @@ function checkCoachVerdicts() {
     const R = { cu: ratioConst('CHK_ONSET_RATIO'), cuHf: ratioConst('CHK_HF_RATIO'), pw: ratioConst('CC_POWER_ONSET_RATIO'), pwHf: ratioConst('CC_POWER_HF_RATIO') };
     if (R.pw !== 2.2 || R.pwHf !== 2.67 || R.cu !== 1.4 || R.cuHf !== 1.7) flag(`1ck: the strum ratios are Power Chord Switch ${R.pw} / ${R.pwHf}, shared ${R.cu} / ${R.cuHf}; pinned 2.2 / 2.67 and 1.4 / 1.7 (re-pin on purpose, with the real-take numbers in WORKFLOW.md)`);
     song.ratioChecks = 0;
-    const strumFires = (mode, rJ, hJ) => JSON.parse(run(`(function(){
+    /* One run: a game started this way (mode, which entry, recording or not), one frame whose level jumps by rJ (full band) and hJ (attack channel) over
+       its smoothed level; did ccLoop log an onset? Power Chord Switch is run every way it can start (a song switch or a pair, with a recording live or
+       not: students who said no are not recorded), because the ratios must not depend on any of that. */
+    const strumFires = (mode, prog, live, rJ, hJ) => JSON.parse(run(`(function(){
       const keep = { rf: coachReadFrame, an: coachAnalyser, hf: coachHfRms, at: coachOnsetAt, pn: performance.now };
       try {
-        micRec = null; setLang('en'); ccSetup(${JSON.stringify(mode)}); ccPickRate(2); ccPickProg(${mode === 'power' ? SONGS[0].idx : 1}); cc.bpm = 60; ccPrepare(false); ccBeginStage();
+        micRec = null; setLang('en'); ccSetup(${JSON.stringify(mode)}); ccPickRate(2); ccPickProg(${prog}); cc.bpm = 60; ccPrepare(false); ccBeginStage();
+        micRec = ${live ? "{ live: true, mode: 'pw', n: 1, srcRate: 1 }" : 'null'};
         cc.phase = 'play'; cc.smoothRms = 0.01; cc.smoothHf = 0.002; cc.lastOnsetT = -1e9; cc.listenStart = 0; cc.changes = [];
         coachAnalyser = {}; coachReadFrame = () => 0.01 * ${rJ}; coachHfRms = 0.002 * ${hJ}; coachOnsetAt = 5000; performance.now = () => 5000;
         __ccLoop();   // the real function: this stretch of the check runs with ccLoop stubbed out (saved as __ccLoop, put back below)
         return JSON.stringify(cc.lastOnsetT === 5000);
-      } finally { coachReadFrame = keep.rf; coachAnalyser = keep.an; coachHfRms = keep.hf; coachOnsetAt = keep.at; performance.now = keep.pn; cc = null; ccStop(); }
+      } finally { coachReadFrame = keep.rf; coachAnalyser = keep.an; coachHfRms = keep.hf; coachOnsetAt = keep.at; performance.now = keep.pn; micRec = null; cc = null; ccStop(); }
     })()`));
     const up = (x, d) => Math.round((x + d) * 100) / 100;
-    // [full-band jump, attack-channel jump, fires in Change Up, fires in Power Chord Switch]
-    const ratioCases = [
-      [1.2, 1.2, false, false], [R.cu - 0.05, 1, false, false], [up(R.cu, 0.05), 1, true, false], [1, up(R.cuHf, 0.05), true, false],
-      [up(R.pw, -0.05), 1, true, false], [up(R.pw, 0.05), 1, true, true], [1, up(R.pwHf, -0.05), true, false], [1, up(R.pwHf, 0.05), true, true],
-      [(R.cu + R.pw) / 2, (R.cuHf + R.pwHf) / 2, true, false], [3, 3, true, true]];
-    for (const [rJ, hJ, cu, pw] of ratioCases) {
-      const gotCu = strumFires('open', rJ, hJ), gotPw = strumFires('power', rJ, hJ);
-      if (gotCu !== cu || gotPw !== pw) flag(`1ck: a strum that jumps the level ${rJ}x (full band) and ${hJ}x (attack channel) fires in Change Up: ${gotCu} (want ${cu}), in Power Chord Switch: ${gotPw} (want ${pw})`);
-      song.ratioChecks += 2;
+    // an onset needs the full-band jump over the full-band ratio OR the attack-channel jump over its ratio (the floors are far below these levels)
+    const wantFire = (rJ, hJ, full, hf) => rJ > full || hJ > hf;
+    // [full-band jump, attack-channel jump]: just below and just above each of the four thresholds, between the two games', and well above all
+    const ratioCases = [[1.2, 1.2], [up(R.cu, -0.05), 1], [up(R.cu, 0.05), 1], [1, up(R.cuHf, -0.05)], [1, up(R.cuHf, 0.05)],
+      [up(R.pw, -0.05), 1], [up(R.pw, 0.05), 1], [1, up(R.pwHf, -0.05)], [1, up(R.pwHf, 0.05)], [(R.cu + R.pw) / 2, (R.cuHf + R.pwHf) / 2], [3, 3]];
+    const pwStarts = [[SONGS[0].idx, true, 'a song switch, recording'], [SONGS[0].idx, false, 'a song switch, not recording'], [1, true, 'a pair, recording'], [1, false, 'a pair, not recording']];
+    for (const [rJ, hJ] of ratioCases) {
+      const gotCu = strumFires('open', 1, false, rJ, hJ), wantCu = wantFire(rJ, hJ, R.cu, R.cuHf), wantPw = wantFire(rJ, hJ, R.pw, R.pwHf);
+      if (gotCu !== wantCu) flag(`1ck: a strum that jumps the level ${rJ}x (full band) and ${hJ}x (attack channel) fires in Change Up: ${gotCu}, want ${wantCu} (ratios ${R.cu} / ${R.cuHf})`);
+      song.ratioChecks++;
+      for (const [prog, live, what] of pwStarts) {
+        const gotPw = strumFires('power', prog, live, rJ, hJ);
+        if (gotPw !== wantPw) flag(`1ck: a strum that jumps the level ${rJ}x (full band) and ${hJ}x (attack channel) fires in Power Chord Switch (${what}): ${gotPw}, want ${wantPw} (ratios ${R.pw} / ${R.pwHf})`);
+        song.ratioChecks++;
+      }
     }
     if (full.saves.length === 1 && (full.saves[0].fields.onsetRatio !== R.pw || full.saves[0].fields.hfRatio !== R.pwHf)) flag(`1ck: the saved take records strum ratios ${full.saves[0].fields.onsetRatio} / ${full.saves[0].fields.hfRatio}, want ${R.pw} / ${R.pwHf}`);
     /* Save on Stop (2026-11-04): a Stopped game with enough audio is saved, marked complete:false; one with almost none is dropped,
@@ -11630,7 +11640,7 @@ function checkCoachVerdicts() {
     if (pk !== 'ccBest:F5-G5:beat') flag(`1ck: a pair's best-score key changed to "${pk}" (a student's saved bests would be lost)`);
     const pairPlan = JSON.parse(run(`JSON.stringify(ccRoundPlan(CC_POWER_PROGRESSIONS[1], CC_POWER_PROGRESSIONS[1].chords, CC_RATES[1]))`));
     if (pairPlan.slots !== 12 || pairPlan.ladder || pairPlan.rounds !== 1) flag(`1ck: a pair's round changed (${pairPlan.slots} slots at "Every 2 beats", expected 12, one round)`);
-    const SONG_PIN = { recChecks: 19, readingChecks: 21, ratioChecks: 20, songs: 2, entries: 16, cardSwitches: 16, hints: 16 * 7 * 2, setups: 16 * 3 * 2, dones: 16 * 2, rounds: 16 * 3, nudges: 16 * 2 };
+    const SONG_PIN = { recChecks: 19, readingChecks: 21, ratioChecks: 55, songs: 2, entries: 16, cardSwitches: 16, hints: 16 * 7 * 2, setups: 16 * 3 * 2, dones: 16 * 2, rounds: 16 * 3, nudges: 16 * 2 };
     for (const [k, n] of Object.entries(SONG_PIN)) if (song[k] !== n) flag(`1ck: ${song[k]} ${k}, pinned ${n} — the check went partly blind (or grew: re-pin on purpose)`);
     songCounts = song;
     run(`setLang('en'); cc = null; ccStop();`);
@@ -11639,7 +11649,7 @@ function checkCoachVerdicts() {
   for (const [k, n] of Object.entries(EXPECT)) {
     if (counts[k] !== n) flag(`1ca: rendered ${counts[k]} ${k}, pinned ${n} — the check went partly blind (or grew: re-pin EXPECT on purpose)`);
   }
-  if (bad === 0 && songCounts) { head('1ck. Power Chord Switch song switches: each activity is checked against its card and the three rounds are run'); ok(`${songCounts.songs} songs, ${songCounts.entries} switch activities (${songCounts.cardSwitches} distinct card switches, each once; Sweet Child's open A5 only next to C5/B5/E5, the fret-5 A5 only next to G5, same pitches as A5); the ladder run for every one (${songCounts.rounds} round changes: 60/75/90 BPM, 21 changes, the BPM buttons ${songCounts.nudges} times: only later rounds, 40..140, off in the last); ${songCounts.hints} "next:" hints (EN+ES) match the diagrams, ${songCounts.setups} setup and ${songCounts.dones} done screens never show the key "A5o", the computer never picks a song, best keys are per switch and the pair keys are unchanged; a saved take carries each change's pitch readings (${songCounts.readingChecks} of 21 changes read back: no strum null, strum with no pitch [], four readings rounded; grading unchanged); the real ccLoop run on scripted frames: Power Chord Switch grades a strum with its own ratios (2.2 / 2.67) and Change Up with the shared ones (1.4 / 1.7) — ${songCounts.ratioChecks} runs just below and above every threshold — and the saved take records the ratios`); }
+  if (bad === 0 && songCounts) { head('1ck. Power Chord Switch song switches: each activity is checked against its card and the three rounds are run'); ok(`${songCounts.songs} songs, ${songCounts.entries} switch activities (${songCounts.cardSwitches} distinct card switches, each once; Sweet Child's open A5 only next to C5/B5/E5, the fret-5 A5 only next to G5, same pitches as A5); the ladder run for every one (${songCounts.rounds} round changes: 60/75/90 BPM, 21 changes, the BPM buttons ${songCounts.nudges} times: only later rounds, 40..140, off in the last); ${songCounts.hints} "next:" hints (EN+ES) match the diagrams, ${songCounts.setups} setup and ${songCounts.dones} done screens never show the key "A5o", the computer never picks a song, best keys are per switch and the pair keys are unchanged; a saved take carries each change's pitch readings (${songCounts.readingChecks} of 21 changes read back: no strum null, strum with no pitch [], four readings rounded; grading unchanged); the real ccLoop run on scripted frames: Power Chord Switch grades a strum with its own ratios (2.2 / 2.67) and Change Up with the shared ones (1.4 / 1.7) — ${songCounts.ratioChecks} runs just below and above every threshold: Change Up, and Power Chord Switch as a song switch and as a pair, each with a recording live and without — and the saved take records the ratios`); }
   if (bad === 0) ok(`${counts.reports} Coach reports, ${counts.descs} chord-card descriptions, ${counts.nrLevels} Note Runner levels ×2 and ${counts.doneScreens} arcade done screens read true; Power Chord Switch: ${counts.pwLoops} loops are three-finger shapes in the right group, ${counts.pwDraws} random draws all listed pairs (11 of 11 and both orders seen), the Again button replays the pair and Start draws, Start sticks in Change Up and not in Power Chord Switch (two columns that fit 657px), Every beat is the first speed button there, the live quiz keeps its 760px shell, ${counts.pwHints} slide hints match the diagrams (EN+ES), ${counts.pwViews} screens/rounds, ${counts.pwMemory} remembered tempo/speed pairs and ${counts.pwGates} pitch gates keep it apart from Change Up`);
 }
 
@@ -11716,7 +11726,7 @@ function checkCoachVerdicts() {
    ════════════════════════════════════════════════════════════════════ */
 const PW_EVAL_PIN = { takes: 18, rounds: 37, changes: 285, judged: 276, dropped: 9, agree: 188, 'detector-missed': 32, 'false-hit': 22, 'off-window': 15, 'silent-miss': 19,
   mismatch: 1, gridOffsets: 276, farGridOffsets: 41, clickRounds: 29, noClickRounds: 8, siteCentred: 33, beepCentred: 3, extra: 31, htmlChecks: 5, hovers: 37, textRounds: 37, evaluateRun: 2, evalTakesLines: 4, crafted: 2,
-  whatIfTakes: 18, whatIfCandidates: 72, whatIfTruth: 8, whatIfRows: 43, dropNotes: 2, pitchTakes: 5, pitchNone: 13, pitchRight: 64, pitchTimingOnly: 39, pitchRows: 20, ratioRows: 10 };
+  whatIfTakes: 18, whatIfCandidates: 72, whatIfTruth: 8, whatIfRows: 43, dropNotes: 2, pitchTakes: 5, pitchNone: 13, pitchRight: 64, pitchTimingOnly: 39, pitchRows: 20, ratioRows: 14 };
 async function checkPwTakeEvaluator() {
   head('1cl. Power Chord Switch takes: the evaluator is run on takes whose site verdicts come from ccLoop\'s own rule');
   let bad = 0;
@@ -11747,7 +11757,7 @@ async function checkPwTakeEvaluator() {
     core = new Function('ctx', `${esc}\n${consts}\nconst coachDetectPitch = () => -1;\n` +
       'let teacherMicEvalRows = [], teacherMicEvalNames = [], teacherView = "mic", teacherMicTakes = ctx.takes || [];\n' +
       'const document = ctx.document, ensureCoachJs = async () => {}, teacherMicChunks = ctx.chunks, micTakeDate = () => null, setTimeout = f => f();\n' +
-      `${fns}\nreturn { micEvalRow, micEvalText, micEvalWhatIfSummary, micEvalPitchSummary, evaluate: teacherMicEvaluate, html: (rows, names) => { teacherMicEvalRows = rows; teacherMicEvalNames = names; return teacherMicEvalHtml(); } };`);
+      `${fns}\nreturn { micEvalRow, micEvalText, micEvalWhatIfSummary, micEvalPitchSummary, rows: () => teacherMicEvalRows, evaluate: teacherMicEvaluate, html: (rows, names) => { teacherMicEvalRows = rows; teacherMicEvalNames = names; return teacherMicEvalHtml(); } };`);
     core({});
   } catch (e) { fail(`could not lift the evaluator out of teacher.js (${e.message})`); return; }
   const ev = core({});
@@ -11920,12 +11930,15 @@ async function checkPwTakeEvaluator() {
         const got = [...l.matchAll(/-(\d+) \/ lost (\d+)/g)].map(x => `${x[1]}/${x[2]}`), want = per.map(x => `${x.falseHitsRemoved}/${x.realLost}`);
         if (got.join(' ') !== want.join(' ') || +c[1] !== (t ? t.falseHits : ws.totals.falseHits) || +c[2] !== (t ? t.agree : ws.totals.agree)) fail(`the terminal what-if line "${l.trim()}" does not match the summary (${want.join(' ')})`); else tot.whatIfRows++;
       });
-      if (!/ratios \(first column\)|first column is the site's own ratios/.test(ev.micEvalText(rows))) fail("the terminal what-if lost its note saying the first column is the site's own ratios");
+      if (!/shared ratios \(first column\)/.test(ev.micEvalText(rows)) || !/first column is the shared ratios these takes were graded with/.test(ev.micEvalText(rows))) fail("the terminal what-if lost its note saying the first column is the shared ratios the takes were graded with");
     }
     // "Download results" carries it (and the rows, which have no names)
     if (!/function teacherMicEvalDownload\(\)\{[\s\S]*?strumWhatIf: micEvalWhatIfSummary\(teacherMicEvalRows\)[\s\S]*?rows: teacherMicEvalRows/.test(tSrc)) fail('teacherMicEvalDownload does not put the what-if summary in the file');
     if (!/function teacherMicEvalDownload\(\)\{[\s\S]*?pitchRule: micEvalPitchSummary\(teacherMicEvalRows\)[\s\S]*?rows: teacherMicEvalRows/.test(tSrc)) fail('teacherMicEvalDownload does not put the pitch-rule summary in the file');
     if (!/pitchRule: core\.micEvalPitchSummary\(rows\)/.test(readFileSync(join(ROOT, 'tools', 'mic-sim', 'eval-takes.mjs'), 'utf8'))) fail('eval-takes.mjs --json does not put the pitch-rule summary in the file');
+    // the strum what-if summary is null once every take is graded with other ratios, so the count of takes it left out travels beside it
+    if (!/function teacherMicEvalDownload\(\)\{[\s\S]*?strumWhatIfSkipped: teacherMicEvalRows\.filter\(r => r\.kind === 'pw' && r\.whatIfSkipped\)\.length[\s\S]*?rows: teacherMicEvalRows/.test(tSrc)) fail('teacherMicEvalDownload does not carry how many takes the strum what-if left out');
+    if (!/strumWhatIfSkipped: rows\.filter\(r => r\.kind === 'pw' && r\.whatIfSkipped\)\.length/.test(readFileSync(join(ROOT, 'tools', 'mic-sim', 'eval-takes.mjs'), 'utf8'))) fail('eval-takes.mjs --json does not carry how many takes the strum what-if left out');
 
     // 2c. the pitch rule, summed: the takes that saved readings, the older ones counted as left out, the same numbers in the console table, the terminal and the file
     const ps = ev.micEvalPitchSummary(rows), withP = pwRows.filter(r => r.pitch), F = ['right', 'withPitch', 'timingOnly', 'unknown', 'falseHits', 'agree', 'falseHitsRemoved', 'realLost'];
@@ -11975,6 +11988,11 @@ async function checkPwTakeEvaluator() {
       // a saved ratio equal to the shared ones is a take like any older one
       const same = graded(sc.RATIO, sc.HF_RATIO);
       if (same.whatIfSkipped !== false || !same.whatIf) fail('a take saved with the shared ratios (1.4 / 1.7) lost its strum what-if'); else tot.ratioRows++;
+      // a ratio that differs on one channel only is still another ratio (the attack channel alone, the full band alone)
+      for (const [what, f, h] of [['the attack channel only', sc.RATIO, 2.67], ['the full band only', 2.2, sc.HF_RATIO]]) {
+        const r = graded(f, h);
+        if (r.whatIfSkipped !== true || r.whatIf !== null || !r.strumRatio.saved) fail(`a take graded with other ratios on ${what} (${f} / ${h}) is not left out of the strum what-if (whatIfSkipped ${r.whatIfSkipped})`); else tot.ratioRows++;
+      }
       // crafted values (outside 1..10, or one of the two missing) are never trusted: the shared ratios stand
       for (const [what, d] of [['1e300', { onsetRatio: 1e300, hfRatio: 2.67 }], ['0.5', { onsetRatio: 0.5, hfRatio: 0.5 }], ['only one', { onsetRatio: 2.2 }]]) {
         const r = ev.micEvalRow('N02', Object.assign({}, base.meta, d), base.pcm, deps);
@@ -11985,7 +12003,7 @@ async function checkPwTakeEvaluator() {
       if (!w1 || w1.skipped !== 1 || JSON.stringify(w1.totals) !== JSON.stringify(w0.totals) || w1.takes.length !== w0.takes.length || w0.skipped !== 0) fail(`the what-if summary with one take graded at 2.2 / 2.67: skipped ${w1 && w1.skipped} (want 1), totals ${w1 && JSON.stringify(w1.totals) === JSON.stringify(w0.totals) ? 'unchanged' : 'MOVED'}`);
       else tot.ratioRows++;
       if (ev.micEvalWhatIfSummary([strict]) !== null) fail('a what-if summary of only a take graded at 2.2 / 2.67 is not null'); else tot.ratioRows++;
-      const say = /1 Power Chord Switch take was graded with the stricter strum ratios 2\.2 \/ 2\.67/;
+      const say = /1 Power Chord Switch take was graded with strum ratios 2\.2 \/ 2\.67, not the shared ones the strum what-if starts from/;
       const lone = ev.micEvalText([strict]), loneHtml = ev.html([strict], ['x']), mixed = ev.micEvalText(rows.concat([strict])), mixedHtml = ev.html(rows.concat([strict]), names.concat(['x']));
       if (!say.test(lone) || !say.test(flat(loneHtml)) || !say.test(mixed) || !say.test(flat(mixedHtml))) fail('the console or the terminal does not say that a take graded with the stricter ratios is left out of the strum what-if');
       else tot.ratioRows++;
@@ -12019,6 +12037,14 @@ async function checkPwTakeEvaluator() {
     const text = flat(box.innerHTML), want = pwLine(pick.map(t => rows[takes.indexOf(t)]));
     tot.evaluateRun = (box.innerHTML.match(/<tr><td class="nc"/g) || []).length;
     if (tot.evaluateRun !== 2 || /Could not measure|not measured/.test(text) || want.some(w => !text.includes(w))) fail(`"Evaluate all recordings" run on 2 Power Chord Switch takes measured ${tot.evaluateRun} (${text.slice(0, 160)}…)`);
+    /* The ratios the console itself replays from are its own settings (teacherMicEvaluate's `strum.consts`), which the checks above build from coach.js
+       themselves: read them off the rows the real Evaluate-all produced. They must be the shared ratios older takes were graded with. */
+    for (const r of page.rows()) {
+      const base = r.whatIf && r.whatIf.candidates && r.whatIf.candidates[0];
+      if (!r.strumRatio || r.strumRatio.saved !== false || r.strumRatio.full !== numOf('CHK_ONSET_RATIO') || r.strumRatio.hf !== numOf('CHK_HF_RATIO') || !base || base.ratio !== numOf('CHK_ONSET_RATIO') || base.hfRatio !== numOf('CHK_HF_RATIO'))
+        fail(`"Evaluate all recordings" replays an older take from ratios ${r.strumRatio && r.strumRatio.full} / ${r.strumRatio && r.strumRatio.hf} (first candidate ${base && base.ratio} / ${base && base.hfRatio}); coach.js's shared ones are ${numOf('CHK_ONSET_RATIO')} / ${numOf('CHK_HF_RATIO')}`);
+      else tot.ratioRows++;
+    }
   } catch (e) { fail(`"Evaluate all recordings" threw (${e.message})`); }
 
   // 5. tools/mic-sim/eval-takes.mjs on one take, on disk: the pair, and exactly its changes that do not agree
