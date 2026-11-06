@@ -172,18 +172,14 @@ function metroSchedule(){
     metroAdvance();
   }
 }
-/* Beat 1 of the bar rings out louder and higher — the downbeat you count "1" on
-   — everything else in the bar is the plain click. In 6/8 there are six
-   clicks per bar, the BPM counts the two big beats (metroClickSec), and
-   click 4 — the second big beat — gets a
-   middle accent so the bar is felt in two. Silent while the Coach's mic is
+/* Every click is the same tone — no louder or higher beat 1 (Jonathan,
+   2026-11-06). In 6/8 there are six clicks per bar and the BPM counts the
+   two big beats (metroClickSec). Silent while the Coach's mic is
    live (an audible click would be heard as a note); the dot still flashes. */
 function metroClickAt(at, idx){
   const ctx = toolsGetAudioCtx();
   if(!window.coachMicLive){
-    const accent = idx === 0;
-    const mid = !accent && getMetroMeter() === 6 && idx === 3;
-    toolsBeep(accent ? 1320 : mid ? 1100 : 880, accent ? 0.08 : 0.06, accent ? 0.55 : mid ? 0.47 : 0.4, at, metroGetBus());
+    toolsBeep(880, 0.06, 0.4, at, metroGetBus());
   }
   // The dot flashes when the click is due, not when it was queued.
   const id = setTimeout(() => { metroDotTimers.delete(id); metroFlashDot(); }, Math.max(0, (at - ctx.currentTime) * 1000));
