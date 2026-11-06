@@ -2170,8 +2170,10 @@ const STRUM_METRO_BPM = 60;
 const STRUM_DOWN_GAIN = 1.25;
 const STRUM_UP_GAIN = 0.8;
 const STRUM_CLICK_GAIN = 1.2;
-function strumOpenMetro(){
+function strumOpenMetro(btn){
   stopPlaySeq();
+  /* The card's own BPM slider sets the tempo; STRUM_METRO_BPM is only the fallback. */
+  const wanted = btn ? readGroupBpm(btn, STRUM_METRO_BPM) : STRUM_METRO_BPM;
   const slider = document.getElementById('bpm-slider');
   const pop = document.getElementById('metro-popup');
   if(!slider || !pop || typeof startMetro !== 'function' || typeof togglePopup !== 'function') return;
@@ -2179,8 +2181,8 @@ function strumOpenMetro(){
      them, and its listener runs after this button's handler — opening here
      would be undone by the very click that opened it. */
   setTimeout(() => { if(!pop.classList.contains('open')) togglePopup('metro'); }, 0);
-  slider.value = STRUM_METRO_BPM;
-  onBpmSlider(String(STRUM_METRO_BPM));
+  slider.value = wanted;
+  onBpmSlider(String(slider.value));
   if(typeof setMetroMeter === 'function' && typeof getMetroMeter === 'function' && getMetroMeter() !== 4) setMetroMeter(4);
   if(!metroRunning) startMetro();
 }
@@ -2198,7 +2200,7 @@ function buildStrum(spec, opts){
     const midis = hits.map(h => ({ midi: h.midi, beats: h.beats, down: h.dir === 'D' }));
     controlsHtml = `<div class="tab-controls"><span class="bpm-control-group">`
       + `<button type="button" class="play-seq-btn" data-midis="${escAttr(JSON.stringify(midis))}" data-clicks="${spec.bars.length * 4}" onclick="playSequenceFromGroup(this)" title="${escAttr(t('strum.playTitle'))}">&#x25B6; ${t('strum.play')}</button>`
-      + `<button type="button" class="play-seq-btn strum-clicks-btn" onclick="strumOpenMetro()" title="${escAttr(t('strum.clicksTitle'))}">&#x25B6; ${t('strum.clicks')}</button>`
+      + `<button type="button" class="play-seq-btn strum-clicks-btn" onclick="strumOpenMetro(this)" title="${escAttr(t('strum.clicksTitle'))}">&#x25B6; ${t('strum.clicks')}</button>`
       + renderBpmControl(keyPrefix, bpm, spec.minBpm || 40, spec.maxBpm || 120)
       + `</span></div>`;
   }

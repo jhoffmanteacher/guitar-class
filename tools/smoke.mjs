@@ -986,7 +986,7 @@ async function strumWalk(page, run, events, stats) {
           const gset = rec ? [...new Set(rec.gains)].sort((x, y) => y - x) : [];
           if (!rec || rec.clicks.length < 2 || rec.clicks[0] !== true || rec.clicks[1] !== false) fail(w, '▶ Play strum clicks were ' + JSON.stringify(rec && rec.clicks) + ', expected a click on 1 (higher) then on 2 in the first 1.8 s');
           else if (gset.length !== 2 || Math.abs(gset[0] / gset[1] - 1.25 / 0.8) > 0.02 || rec.gains[0] !== gset[0]) fail(w, 'down/up strum loudness was ' + JSON.stringify(rec.gains) + ', expected a louder first (down) strum and quieter up strums, ratio 1.56');
-          /* ▶ Play clicks opens the site's Metronome at 60 BPM, in 4/4, running (2026-11-04). */
+          /* ▶ Play clicks opens the site's Metronome at the card's slider tempo (60 by default), in 4/4, running (2026-11-04, tempo 2026-11-06). */
           await run('strum:metro-set:' + w, `(() => { const s = document.getElementById('bpm-slider'); s.value = 100; onBpmSlider('100'); if (metroRunning) stopMetro(); })()`, 100);
           await run('strum:clicks:' + w, `document.querySelector('.ca-card[open] .ca-step[data-idx="${st.i}"] .tab--strum .strum-clicks-btn').click()`, 400);
           const mt = await run('strum:metro-state:' + w, `({ open: document.getElementById('metro-popup').classList.contains('open'), bpm: +document.getElementById('bpm-slider').value, shown: document.getElementById('bpm-display').textContent, running: metroRunning, meter: getMetroMeter(), strumStopped: !document.querySelector('.tab--strum .play-seq-btn.playing') })`, 10);

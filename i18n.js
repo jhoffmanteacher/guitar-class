@@ -992,7 +992,7 @@
     'strum.play':            { en: 'Play strum', es: 'Tocar el rasgueo' },
     'strum.playTitle':       { en: 'Play this strum pattern', es: 'Tocar este patrón de rasgueo' },
     'strum.clicks':          { en: 'Play clicks', es: 'Tocar clics' },
-    'strum.clicksTitle':     { en: 'Open the metronome at 60 BPM', es: 'Abrir el metrónomo a 60 BPM' },
+    'strum.clicksTitle':     { en: 'Open the metronome at this tempo', es: 'Abrir el metrónomo a este tempo' },
     'strum.down':            { en: 'Down', es: 'Abajo' },
     'strum.up':              { en: 'Up', es: 'Arriba' },
     'strum.miss':            { en: 'Hand moves but misses the strings', es: 'La mano se mueve pero no toca las cuerdas' },
