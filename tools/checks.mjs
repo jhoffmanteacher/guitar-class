@@ -11317,7 +11317,7 @@ async function checkBackingLoudness() {
    ════════════════════════════════════════════════════════════════════ */
 function checkCoachVerdicts() {
   head('1ca. Coach and arcade verdict lines are true at 0, 1 and many');
-  const EXPECT = { reports: 20, descs: 20, nrLevels: 15, doneScreens: 88, pwLoops: 12, pwHints: 44, pwViews: 34, pwMemory: 6, pwGates: 3 };
+  const EXPECT = { reports: 20, descs: 20, nrLevels: 15, doneScreens: 88, pwLoops: 12, pwHints: 44, pwViews: 34, pwMemory: 6, pwGates: 3, pwBack: 16 };
   let bad = 0;
   const flag = m => { err(m); problems++; bad++; };
   const bodies = {};
@@ -11386,7 +11386,7 @@ function checkCoachVerdicts() {
   const rep = (n, s) => Array(n).fill(s);
   const right = s => s === 'ok' || s === 'oct';
   let songCounts = null;
-  const counts = { reports: 0, descs: 0, nrLevels: 0, doneScreens: 0, pwLoops: 0, pwHints: 0, pwViews: 0, pwMemory: 0, pwGates: 0, pwLive: 0 };
+  const counts = { reports: 0, descs: 0, nrLevels: 0, doneScreens: 0, pwLoops: 0, pwHints: 0, pwViews: 0, pwMemory: 0, pwGates: 0, pwLive: 0, pwBack: 0 };
   try {
     /* Coach report. [mode, slot states, timing offset ms, must show Great line, must show "all counted"] */
     const TAKES = [
@@ -11531,12 +11531,12 @@ function checkCoachVerdicts() {
              pick since 2026-10-30), so each game's done screen says its own word and never the other's. */
           const WORD_LOOP = run(`t('games.cc.pickDifferentLoop')`), WORD_CHORDS = run(`t('games.pw.pickDifferent')`);
           if (!text('cc-body').includes(WORD_LOOP) || text('cc-body').includes(WORD_CHORDS)) flag(`1ca: ${lang} Change Up's done screen does not say "${WORD_LOOP}" (or says Power Chord Switch's "${WORD_CHORDS}")`);
-          /* The same done screen for Power Chord Switch, and its "pick a different
-             loop" button must send you back to Power Chord Switch. */
+          /* The same done screen for Power Chord Switch, and its way back ("Pick different chords",
+             at the top since 2026-11-05: see "the way back to the chords" below) must send you back to Power Chord Switch. */
           shot(`cc = { phase: 'done', mode: 'power', progIdx: 0, rateIdx: 2, bpm: 60, bpc: 1, chords: ['F5', 'G5'], timeouts: [],
             changes: Array.from({ length: 8 }, (_, i) => ({ from: 'F5', to: 'G5', result: i < ${k} ? 'off' : i < ${k} + 4 ? 'ok' : 'miss' })) }; ccRenderDone();`,
             'cc-body', `Power Chord Switch, ${k} messy`, k ? [[MESSY, k]] : []);
-          if (!/ccSetup\(&quot;power&quot;\)/.test(bodies['cc-body'])) flag(`1ca: ${lang} Power Chord Switch's "pick a different loop" button no longer returns to Power Chord Switch`);
+          if (!/ccSetup\(&quot;power&quot;\)/.test(bodies['cc-body'])) flag(`1ca: ${lang} Power Chord Switch's "Pick different chords" button no longer returns to Power Chord Switch`);
           if (!text('cc-body').includes(WORD_CHORDS) || text('cc-body').includes(WORD_LOOP)) flag(`1ca: ${lang} Power Chord Switch's done screen does not say "${WORD_CHORDS}" (or says Change Up's "${WORD_LOOP}") \u2014 it has no loops to pick`);
           if (WORD_CHORDS === WORD_LOOP || /loop|secuencia/i.test(WORD_CHORDS)) flag(`1ca: ${lang} games.pw.pickDifferent reads "${WORD_CHORDS}" \u2014 Power Chord Switch has chords to pick, not loops`);
         }
@@ -11707,6 +11707,8 @@ function checkCoachVerdicts() {
       if ((pw.match(/onclick="ccPickSong\(/g) || []).length !== 2) flag(`1ca: ${lang} Power Chord Switch's pairs view has ${(pw.match(/onclick="ccPickSong\(/g) || []).length} song buttons, expected 2`);
       run(`ccPickProg(3); ccPickProg(${LOOPS.findIndex(l => l.group === 'song')})`);
       const songsView = bodies['cc-body'];
+      /* pillCount counts the ccPickProg buttons: the 16 song switches. The way back (ccPickView) is not one of them: since 2026-11-05 it is the
+         .cc-back-btn at the top of the left column, not a pill in the list (checked in full under "the way back to the chords" below). */
       if (pillCount(songsView) !== SONG_N || !/onclick="ccPickView\('pairs'\)"/.test(songsView)) flag(`1ca: ${lang} Power Chord Switch's songs view lists ${pillCount(songsView)} switches (the data has ${SONG_N}) or has no way back to the pairs`);
       run(`ccPickView('pairs')`);
       if (run('cc.progIdx') !== 3) flag(`1ca: ${lang} the songs view's back button left progIdx ${run('cc.progIdx')}, not the last pair (3)`);
@@ -11756,6 +11758,76 @@ function checkCoachVerdicts() {
       if (POWER_NAME.test(text('cc-body'))) flag(`1ca: ${lang} Change Up shows a power chord ("${text('cc-body').match(POWER_NAME)[0]}")`);
     }
     run(`setLang('en')`);
+    /* The way back to the chords (Jonathan, 2026-11-05: "consistent and at the top and more obvious"). Rendered in EN and ES on the songs
+       view (three switches: the first, the fifth, with the open A5, and the last) and on a pair's and a song switch's done screen. Each must
+       draw exactly ONE way back, and it must be the first interactive element of its screen (the songs view: of its left column,
+       .cc-col-set; the done screen: of the whole report, above the verdict), a <button> whose class is exactly "cc-back-btn" and whose text
+       is exactly "◀ " + games.pw.pickDifferent, so all five read and look the same. Its onclick is RUN: on the songs view it goes back to the
+       last pair picked, on the done screen to Power Chord Switch's setup. The pairs view, Change Up's setup and Change Up's done screen
+       have none (Change Up keeps its "Pick a different loop" at the bottom, after the verdict). tools/smoke.mjs measures it at 1366x657. */
+    {
+      const SONG_IDX = LOOPS.map((l, i) => l.song ? i : -1).filter(i => i >= 0);
+      const decode = s => s.replace(/&#x([0-9a-f]+);/gi, (_, h) => String.fromCodePoint(parseInt(h, 16))).replace(/&quot;/g, '"').replace(/&#39;/g, "'").replace(/&lt;/g, '<').replace(/&gt;/g, '>').replace(/&amp;/g, '&');
+      /* The first interactive element at or after `from`: its tag, class, onclick (un-escaped, as the browser runs it) and text. */
+      const firstCtl = (html, from) => {
+        const m = html.slice(from).match(/<(button|input|select|textarea|a)\b[^>]*>/);
+        if (!m) return null;
+        const start = from + m.index, open = m[0], tag = m[1];
+        const inner = tag === 'input' ? '' : html.slice(start + open.length, html.indexOf(`</${tag}>`, start));
+        return { tag, start, cls: (open.match(/\bclass="([^"]*)"/) || [])[1] || '', onclick: decode((open.match(/\bonclick="([^"]*)"/) || [])[1] || ''), text: decode(inner.replace(/<[^>]+>/g, '')).replace(/\s+/g, ' ').trim() };
+      };
+      const backCount = html => (html.match(/\bcc-back-btn\b/g) || []).length;
+      const oldPill = html => /class="[^"]*\bcc-back\b(?!-)/.test(html);
+      const drawn = [];
+      /* The picks below are remembered (sessionStorage); put them back afterwards so the memory checks that follow start where they did. */
+      run(`globalThis.__pwBackSS = JSON.stringify(sessionStorage._d)`);
+      const isBack = (lang, what, html, b) => {
+        const want = '\u25C0 ' + run(`t('games.pw.pickDifferent')`);
+        if (!b || b.tag !== 'button' || b.cls !== 'cc-back-btn' || b.text !== want) flag(`1ca: ${lang} Power Chord Switch's ${what}: the first control is ${b ? `<${b.tag} class="${b.cls}"> "${b.text}"` : 'missing'}, expected <button class="cc-back-btn"> "${want}"`);
+        if (backCount(html) !== 1) flag(`1ca: ${lang} Power Chord Switch's ${what} draws ${backCount(html)} .cc-back-btn, expected exactly 1`);
+        if (oldPill(html) || /ccPickView\(/.test(html.replace(/<button type="button" class="cc-back-btn"[^>]*>/, ''))) flag(`1ca: ${lang} Power Chord Switch's ${what} still has a second way back (the old "Chord pairs" pill or another ccPickView button)`);
+        if (b) drawn.push(`${b.tag}.${b.cls}|${b.text}|${lang}`);
+        counts.pwBack++;
+      };
+      for (const lang of ['en', 'es']) {
+        run(`setLang(${JSON.stringify(lang)})`);
+        run(`ccSetup('power'); ccPickProg(3)`);
+        if (backCount(bodies['cc-body']) || oldPill(bodies['cc-body']) || /ccPickView\(/.test(bodies['cc-body'])) flag(`1ca: ${lang} Power Chord Switch's pairs view has a way back to the pairs`);
+        counts.pwBack++;
+        for (const k of [0, 4, SONG_IDX.length - 1]) {
+          run(`ccPickProg(3); ccPickProg(${SONG_IDX[k]})`);
+          const html = bodies['cc-body'], col = html.indexOf('<div class="cc-col-set">'), b = col < 0 ? null : firstCtl(html, col);
+          isBack(lang, `songs view (switch ${k + 1})`, html, b);
+          if (b) {
+            run(b.onclick);
+            if (run('cc.progIdx') !== 3 || run('cc.mode') !== 'power') flag(`1ca: ${lang} the songs view's way back ran "${b.onclick}" and left choice ${run('cc.progIdx')} in mode ${run('cc.mode')}, expected the last pair (3) in Power Chord Switch`);
+          }
+        }
+        const ladderLog = `[30, 35, 40].map(bpm => ({ bpm, changes: Array.from({ length: 8 }, (_, i) => ({ from: 'B5', to: 'A5o', result: i % 4 ? 'miss' : 'ok' })) }))`;
+        for (const [what, pick, extra] of [['done screen (a pair)', 1, `cc.ladder = false;`], ['done screen (a song switch)', SONG_IDX[4], `cc.ladder = true; cc.stageLog = ${ladderLog};`]]) {
+          run(`ccSetup('power'); ccPickProg(${pick}); cc.phase = 'done'; cc.nextBpm = null; cc.bpm = 30; cc.bpc = 1; ${extra}
+            cc.changes = cc.ladder ? cc.stageLog.reduce((a, s) => a.concat(s.changes), []) : Array.from({ length: 8 }, (_, i) => ({ from: 'F5', to: 'G5', result: i % 4 ? 'miss' : 'ok' })); ccRenderDone();`);
+          const html = bodies['cc-body'], b = firstCtl(html, 0), verdictAt = html.indexOf('class="coach-overall"');
+          isBack(lang, what, html, b);
+          if (b && (verdictAt < 0 || b.start > verdictAt)) flag(`1ca: ${lang} Power Chord Switch's ${what}: the way back is not above the verdict`);
+          if (/cc-change-loop/.test(html)) flag(`1ca: ${lang} Power Chord Switch's ${what} still draws the bottom .cc-change-loop button`);
+          if (b) {
+            run(`ccPickProg(${SONG_IDX[0]}); cc.phase = 'done';`);
+            run(b.onclick);
+            if (run('cc.phase') !== 'setup' || run('cc.mode') !== 'power') flag(`1ca: ${lang} Power Chord Switch's ${what}: the way back ran "${b.onclick}" and left phase ${run('cc.phase')}, mode ${run('cc.mode')}, expected Power Chord Switch's setup`);
+          }
+        }
+        run(`ccSetup()`);
+        if (backCount(bodies['cc-body']) || oldPill(bodies['cc-body'])) flag(`1ca: ${lang} Change Up's setup draws Power Chord Switch's way back`);
+        run(`ccSetup(); ccPickProg(1); cc.phase = 'done'; cc.bpm = 60; cc.bpc = 4; cc.changes = Array.from({ length: 8 }, () => ({ from: 'C', to: 'G', result: 'miss' })); ccRenderDone();`);
+        const cu = bodies['cc-body'], cuBtn = cu.indexOf('class="tp-btn cc-change-loop"');
+        if (backCount(cu) || cuBtn < 0 || cuBtn < cu.indexOf('class="coach-overall"')) flag(`1ca: ${lang} Change Up's done screen lost its "Pick a different loop" at the bottom, or draws Power Chord Switch's .cc-back-btn`);
+        counts.pwBack += 2;
+      }
+      if (new Set(drawn.map(d => d.replace(/\|[^|]*\|(en|es)$/, ''))).size !== 1) flag(`1ca: Power Chord Switch's ways back differ: ${[...new Set(drawn)].join(' / ')}`);
+      if (drawn.length !== 10) flag(`1ca: the way back was found on ${drawn.length} of 10 screens (3 songs views and 2 done screens, EN + ES)`);
+      run(`setLang('en'); sessionStorage._d = JSON.parse(__pwBackSS); cc = null;`);
+    }
     /* Each game remembers its own loop. */
     run(`ccSetup('power'); ccPickProg(3); ccSetup();`);
     if (run('cc.progIdx') !== 0) flag(`1ca: picking Power Chord Switch loop 4 moved Change Up's remembered loop to ${run('cc.progIdx')}`);
@@ -12424,7 +12496,7 @@ function checkCoachVerdicts() {
     if (counts[k] !== n) flag(`1ca: rendered ${counts[k]} ${k}, pinned ${n} — the check went partly blind (or grew: re-pin EXPECT on purpose)`);
   }
   if (bad === 0 && songCounts) { head('1ck. Power Chord Switch song switches: each activity is checked against its card and the three rounds are run'); ok(`${songCounts.songs} songs, ${songCounts.entries} switch activities (${songCounts.cardSwitches} distinct card switches, each once; Sweet Child's open A5 only next to C5/B5/E5, the fret-5 A5 only next to G5, same pitches as A5); the ladder run for every one (${songCounts.rounds} round changes: 60/75/90 BPM, 21 changes, the BPM buttons ${songCounts.nudges} times: only later rounds, 40..140, off in the last); ${songCounts.hints} "next:" hints (EN+ES) match the diagrams, ${songCounts.setups} setup and ${songCounts.dones} done screens never show the key "A5o", the computer never picks a song, best keys are per switch and the pair keys are unchanged; a saved take carries each change's pitch readings (${songCounts.readingChecks} of 21 changes read back: no strum null, strum with no pitch [], four readings rounded; grading unchanged); the real ccLoop run on scripted frames: Power Chord Switch grades a strum with its own ratios (2.2 / 2.67) and Change Up with the shared ones (1.4 / 1.7) — ${songCounts.ratioChecks} runs just below and above every threshold: Change Up as a pair and as the computer's pick at three speeds, and Power Chord Switch as a song switch (all three rounds), a pair and the computer's pick at three speeds, with a recording live and without; the two lines that choose the ratios are pinned by text; and the saved take records the ratios; the done screen's "strum a little firmer" hint shows exactly when it is true (${songCounts.hintChecks} renders, EN + ES: nothing heard, many heard, a single miss, a tie, mostly wrong chords, 85% and better, Change Up)`); }
-  if (bad === 0) ok(`${counts.reports} Coach reports, ${counts.descs} chord-card descriptions, ${counts.nrLevels} Note Runner levels ×2 and ${counts.doneScreens} arcade done screens read true; Power Chord Switch: ${counts.pwLoops} loops are three-finger shapes in the right group, ${counts.pwDraws} random draws all listed pairs (11 of 11 and both orders seen), the Again button replays the pair and Start draws, Start sticks in Change Up and not in Power Chord Switch (two columns that fit 657px), Every beat is the first speed button there, the live quiz keeps its 760px shell, ${counts.pwHints} slide hints match the diagrams (EN+ES), ${counts.pwViews} screens/rounds, ${counts.pwMemory} remembered tempo/speed pairs and ${counts.pwGates} pitch gates keep it apart from Change Up; tempo controls: setup −5 +5 and a 30..140 slider in steps of 5, the live change keeps the beat the student is on (re-anchored, exact on a fixed clock), holds 30..140, counts the round at its lowest tempo, moves a song switch's later rounds by the same amount, and the saved take says so (${counts.pwLive} assertions)`);
+  if (bad === 0) ok(`${counts.reports} Coach reports, ${counts.descs} chord-card descriptions, ${counts.nrLevels} Note Runner levels ×2 and ${counts.doneScreens} arcade done screens read true; Power Chord Switch: ${counts.pwLoops} loops are three-finger shapes in the right group, ${counts.pwDraws} random draws all listed pairs (11 of 11 and both orders seen), the Again button replays the pair and Start draws, Start sticks in Change Up and not in Power Chord Switch (two columns that fit 657px), Every beat is the first speed button there, the live quiz keeps its 760px shell, ${counts.pwHints} slide hints match the diagrams (EN+ES), ${counts.pwViews} screens/rounds, ${counts.pwMemory} remembered tempo/speed pairs and ${counts.pwGates} pitch gates keep it apart from Change Up; the way back to the chords is one \u25C0 Pick different chords button, first on the songs view and the done screen, run and found absent where it must be (${counts.pwBack} screens, EN + ES); tempo controls: setup −5 +5 and a 30..140 slider in steps of 5, the live change keeps the beat the student is on (re-anchored, exact on a fixed clock), holds 30..140, counts the round at its lowest tempo, moves a song switch's later rounds by the same amount, and the saved take says so (${counts.pwLive} assertions)`);
 }
 
 /* ════════════════════════════════════════════════════════════════════

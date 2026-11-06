@@ -2288,14 +2288,13 @@ body.rail-collapsed .rail-tools .tool-popup{
 #cc-body.cc-power .cc-groups .ts-btn{white-space:normal;text-align:center;min-width:0}
 #cc-body.cc-power .cc-col-set,#cc-body.cc-power .cc-col-pic{min-width:0}
 /* Songs (2026-11-03): the fifth column has one button per song (two lines, the second counts the switches); it opens the songs view, which lists
-   every switch of both songs in rows under the song's name, with a back button to the pairs. */
+   every switch of both songs in rows under the song's name. Its back button to the pairs is .cc-back-btn, at the top of the left column. */
 #cc-body.cc-power .cc-groups .ts-btn .cc-rate-sub{white-space:normal}
 #cc-body.cc-power .cc-groups.cc-groups-songs{display:block}
 #cc-body.cc-power .cc-groups .cc-songs .fret-levels{flex-direction:row;flex-wrap:wrap;align-items:center;gap:6px}
 #cc-body.cc-power .cc-groups .cc-songs .ts-btn{flex:0 0 auto;padding:4px 10px;min-height:30px;white-space:nowrap}
 #cc-body.cc-power .cc-groups .cc-songs .fret-levels{margin-bottom:4px}
 #cc-body.cc-power .cc-groups .cc-songs .cc-song-name{margin:2px 0}
-#cc-body.cc-power .cc-groups .cc-songs .cc-back{margin-bottom:4px}
 .cc-breakdown{font-size:0.875rem;font-weight:600;margin:6px 0;text-align:center}
 .cc-song-name{font-size:0.8125rem;font-weight:600;color:var(--text2);margin:4px 0}
 /* A song switch's rounds: "Round 2 of 3 · 75 BPM" on the count-in and play screens, each round's score on the done screen. */
@@ -2434,10 +2433,16 @@ body.rail-collapsed .rail-tools .tool-popup{
 .cc-beats{display:flex;gap:8px;margin:6px 0 10px}
 .cc-pip{width:14px;height:14px;border-radius:50%;background:var(--bg3);border:1px solid var(--border2)}
 .cc-pip.on{background:var(--green-text);border-color:var(--green-text)}
-/* "Pick different chords / loops" on both games' done screens: .tp-btn has no side
+/* Change Up's "Pick a different loop" at the bottom of its done screen: .tp-btn has no side
    padding of its own (it is built to stretch in a row), so alone on a line the
-   label touched the border. */
+   label touched the border. Power Chord Switch's way back is .cc-back-btn (below). */
 .cc-change-loop{margin-top:8px;padding:10px 20px}
+/* Power Chord Switch's way back to the chords (coach.js pwBackBtnHtml, 2026-11-05): one button with the same words, first on the setup's
+   songs view and first on the done screen. A bordered button in the normal text colour, bold, 44px tall (the site's tap-target size), on its
+   own line at the left. The border is the secondary text colour, not --border2, so it reads as a button in both palettes (the faint 30px
+   pill it replaces did not). */
+#cc-body .cc-back-btn{display:flex;align-items:center;gap:6px;width:max-content;max-width:100%;min-height:44px;margin:0 0 8px;padding:8px 16px;border-radius:var(--radius-sm);border:2px solid var(--text2);background:var(--bg2);color:var(--text);font-family:inherit;font-size:0.9375rem;font-weight:700;line-height:1.2;cursor:pointer;white-space:nowrap}
+#cc-body .cc-back-btn:hover{background:var(--bg3)}
 #cc-body .coach-chip.pending{opacity:0.8}
 
 /* ── Resource viewer: floating mini-player (replaces the right-side panel).

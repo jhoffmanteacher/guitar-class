@@ -5,6 +5,11 @@ Notable changes to the Guitar Class site. Newest first.
 For the full session-by-session history (and the reasoning behind each change),
 see `WORKFLOW.md` and the git commit log.
 
+## 2026-11-05 — Power Chord Switch: one button to get back to the chords
+
+- **The way back to the chords is now one button at the top of the screen, with the same words everywhere: "◀ Pick different chords".** You see it at the top of the end screen, above your score. You also see it at the top of the song list, above the speed buttons, when you pick a song. It takes you back to the chord pairs. It used to be a small "Chord pairs" button inside the song list, and a "Pick different chords" button at the bottom of the end screen.
+- Change Up is not changed: its "Pick a different loop" button stays at the bottom of its end screen.
+
 ## 2026-11-05 — Power Chord Switch: more control over the tempo
 
 - **Before you start:** the tempo now has a slider (30 to 140 BPM, in steps of 5) under the −5 / +5 row. Drag it, or press −5 / +5.

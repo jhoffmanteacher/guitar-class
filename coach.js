@@ -3319,7 +3319,7 @@ function ccSetup(mode){
 function ccPickProg(i){
   if (!cc) return;
   cc.progIdx = i;
-  if (ccIsPower() && !ccProgs()[i].song) cc.lastPair = i;   // the pair the Chord pairs button comes back to
+  if (ccIsPower() && !ccProgs()[i].song) cc.lastPair = i;   // the pair the songs view's back button comes back to
   try { sessionStorage.setItem(ccSk('Prog'), String(i)); } catch(e){}
   ccRenderSetup();
 }
@@ -3334,6 +3334,13 @@ function ccPickSong(slug){
 function ccPickView(v){
   if (!cc || !ccIsPower() || v !== 'pairs') return;
   ccPickProg(cc.lastPair != null ? cc.lastPair : 0);
+}
+/* Power Chord Switch's way back to the chords (Jonathan, 2026-11-05: "consistent and at the top and more obvious"). One button, the same
+   words and the same class (.cc-back-btn), first on its screen: the setup's songs view (top of the left column, back to the last pair,
+   ccPickView) and the done screen (above the verdict, back to the setup, ccSetup). The pairs view has none. `onclick` is a fixed handler
+   written here, never data. Change Up keeps its own "Pick a different loop" at the bottom of its done screen. */
+function pwBackBtnHtml(onclick){
+  return `<button type="button" class="cc-back-btn" onclick="${onclick}"><span aria-hidden="true">&#x25C0;</span> ${escHtml(t('games.pw.pickDifferent'))}</button>`;
 }
 
 function ccPickRate(i){
@@ -3413,7 +3420,8 @@ function ccRenderSetup(msg){
   };
   /* Power Chord Switch has two views of its choices. The pairs view is five columns:
      four pair groups and Songs, whose column has one button per song (it opens the
-     song's switches). The songs view lists every switch of both songs. All 16 switches
+     song's switches). The songs view lists every switch of both songs; its way back to
+     the pairs is pwBackBtnHtml at the top of the left column. All 16 switches
      next to the pairs were 881px tall on a 657px screen. The view follows the pick
      (a song switch is the songs view). */
   const songsView = power && !!ccProgs()[cc.progIdx].song;
@@ -3424,7 +3432,7 @@ function ccRenderSetup(msg){
     return `<button type="button" class="ts-btn" onclick="ccPickSong(${jsonAttrArg(slug)})">${escHtml(t(first.titleKey))}<span class="cc-rate-sub">${escHtml(t('games.pw.songSub', { n: ccProgs().filter(pr => pr.song === slug).length }))}</span></button>`;
   }).join('');
   const pills = songsView
-    ? `<div class="cc-songs"><button type="button" class="ts-btn cc-back" onclick="ccPickView('pairs')">&#x25C0; ${escHtml(t('games.pw.view.pairs'))}</button>${songRows()}</div>`
+    ? `<div class="cc-songs">${songRows()}</div>`
     : groups.map(([inGroup, title], gi) =>
       `<div class="cc-group"><div class="cc-group-title">${title}</div><div class="fret-levels">` + (power && CC_POWER_GROUPS[gi].id === 'song' ? songButtons() : ccProgs().map((pr, i) => inGroup(pr) ? pillOf(pr, i) : '').join('')) + `</div></div>`).join('');
   const viewTabs = '';
@@ -3499,7 +3507,7 @@ function ccRenderSetup(msg){
      in this game that bar does not stick: everything fits on a 657px screen. */
   body.innerHTML = power
     ? `${note}<div class="cc-cols">
-         <div class="cc-col-set"><div class="cc-speedtempo">${speedRow}${tempoRow}</div>${viewTabs}<div class="cc-groups${songsView ? ' cc-groups-songs' : ''}">${pills}</div>${ladderNote}<div class="cc-startbar">${startBtn}</div></div>
+         <div class="cc-col-set">${songsView ? pwBackBtnHtml("ccPickView('pairs')") : ''}<div class="cc-speedtempo">${speedRow}${tempoRow}</div>${viewTabs}<div class="cc-groups${songsView ? ' cc-groups-songs' : ''}">${pills}</div>${ladderNote}<div class="cc-startbar">${startBtn}</div></div>
          <div class="cc-col-pic">${pic}${tip}</div>
        </div>
        ${coachFootHtml(true)}`
@@ -4105,14 +4113,17 @@ function ccRenderDone(){
      </div>`;
   const rounds = cc.ladder ? '<div class="cc-rounds">' + cc.stageLog.map((sg, k) =>
     `<span>${escHtml(t('games.pw.ladder.roundResult', { n: k + 1, bpm: sg.bpm, ok: sg.changes.filter(c => c.result === 'ok').length, total: sg.changes.length }))}</span>`).join('') + '</div>' : '';
+  /* The way back to the setup: Power Chord Switch's is the first thing on the screen (pwBackBtnHtml); Change Up keeps its button at the bottom. */
+  const backTop = ccIsPower() ? pwBackBtnHtml(`ccSetup(${jsonAttrArg('power')})`) : '';
+  const backBottom = ccIsPower() ? '' : `<button type="button" class="tp-btn cc-change-loop" onclick="ccSetup(${jsonAttrArg(cc.mode || '')})">${t('games.cc.pickDifferentLoop')}</button>`;
   body.innerHTML =
-    `<div class="coach-report"><div class="coach-overall">${verdict}</div>
+    `<div class="coach-report">${backTop}<div class="coach-overall">${verdict}</div>
      ${rounds}
      ${breakdown}
      <div class="coach-strip">${chips}</div>
      <div class="coach-crit-note">${escHtml(advice)}</div>
      ${actions}
-     <button type="button" class="tp-btn cc-change-loop" onclick="ccSetup(${jsonAttrArg(cc.mode || '')})">${t(ccIsPower() ? 'games.pw.pickDifferent' : 'games.cc.pickDifferentLoop')}</button>
+     ${backBottom}
      ${coachFootHtml(ccIsPower())}</div>`;
 }
 

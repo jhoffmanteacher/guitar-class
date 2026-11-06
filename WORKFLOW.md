@@ -3471,7 +3471,7 @@ below. Delete or rewrite it when the list is done.
    the rounds still to come, not the round being played; off in round 3.
 3. **Choices layout:** the pairs view keeps five columns (the fifth, Songs, has
    one button per song). A song button opens the **songs view** (all that
-   song's switches, a "Chord pairs" back button). All 16 next to the pairs was
+   song's switches, with a "◀ Pick different chords" back button at the top of the left column since 2026-11-05; it was a "Chord pairs" pill in the list). All 16 next to the pairs was
    881px tall on a 657px screen.
 4. **Saved student audio** (`micRecStart('pw')`): same consent flow as the
    Listening Coach and Note Runner (one question per device, the red "Recording
@@ -3533,6 +3533,11 @@ Power Chord Switch only; Change Up keeps its −5 / +5 and has no slider, no liv
   gridOffset; if gridOffset is really a constant mic lag a very large one-burst change (30 to 140) can cost a change; one ±5 tap costs under 12 ms.
 - **Choice columns (Jonathan, 2026-11-05):** the computer's pick, Songs, then low E / A string / jump (`CC_POWER_GROUPS`, display order only; `CC_POWER_PROGRESSIONS` keeps songs at its END so remembered picks hold). 1ca pins the order on the data and on the drawn screen, EN + ES.
 - **A stale smoke assertion was fixed on the way:** the song-switch walk still expected the old 15 BPM step (80 / 95); it now expects 5 (70 / 75).
+- **One way back to the chords (Jonathan, 2026-11-05: "consistent and at the top and more obvious"):** `pwBackBtnHtml` draws one bold 44px
+  `.cc-back-btn` "◀ Pick different chords" (`games.pw.pickDifferent`) first on the done screen (above the verdict; it replaced the bottom
+  `.cc-change-loop`) and at the top of the songs view's left column (it replaced the in-list "Chord pairs" pill; `games.pw.view.pairs` deleted).
+  The pairs view has none, so the speed and tempo sit 52px lower on the songs view than on the pairs view. Change Up's button is unchanged.
+  1ca renders and runs it (16 screens, EN + ES); smoke measures and clicks it.
 
 ### Next steps (rewritten 2026-11-05; the list Jonathan chose on 2026-11-04 is done)
 
@@ -3803,7 +3808,7 @@ noisy rooms.
   - **No real mic check for Note Runner** (Jonathan: not needed).
 - **Spanish for the new strings** was written in the same edit; no review sheet
   (house rule). Look at `games.pw.ladder.*`, `games.pw.songSub`,
-  `games.pw.view.pairs`, `games.cc.breakdown` in `i18n.js` if a student reports
+  `games.cc.breakdown` in `i18n.js` if a student reports
   odd wording.
 
 ### Review status

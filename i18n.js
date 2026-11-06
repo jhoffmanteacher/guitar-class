@@ -2339,7 +2339,8 @@
       es: 'sube 1 traste' },
     'games.pw.randomNote': { en: 'The computer picks two power chords each round and shows them when you press Start.',
       es: 'La computadora elige dos acordes de potencia en cada ronda y los muestra cuando presionas Empezar.' },
-    // The done screen's way back to the setup screen. Power Chord Switch has chords to pick, not loops (Change Up keeps games.cc.pickDifferentLoop).
+    // Power Chord Switch's one way back to the chords (coach.js pwBackBtnHtml): the same words at the top of the setup's songs view and of the done screen.
+    // Power Chord Switch has chords to pick, not loops (Change Up keeps games.cc.pickDifferentLoop).
     'games.pw.pickDifferent': { en: 'Pick different chords',
       es: 'Elige otros acordes' },
     'games.pw.randomPair': { en: 'Two random chords',
@@ -2350,11 +2351,9 @@
     'games.pw.song.theCure': { en: '"the cure"',
       es: '"the cure"' },
     // A song switch (coach.js, `ladder`): 3 rounds of 4 back-and-forths, each round faster. {bpm} is the round's tempo.
-    // The Songs column on the pairs view: one button per song, the second line counts its switches. The songs view's back button says "Chord pairs".
+    // The Songs column on the pairs view: one button per song, the second line counts its switches. The songs view's back button is games.pw.pickDifferent.
     'games.pw.songSub': { en: '{n} switches',
       es: '{n} cambios' },
-    'games.pw.view.pairs': { en: 'Chord pairs',
-      es: 'Pares de acordes' },
     // The big line on the play screen after each change is graded (coach.js ccShowLast): ✓ right, ✗ on time but the chord sounded wrong, – no strum heard.
     'games.pw.last.ok': { en: '\u2713 {chord} \u2014 right',
       es: '\u2713 {chord} \u2014 bien' },
