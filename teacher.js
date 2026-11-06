@@ -5104,7 +5104,8 @@ function micEvalTakePw(pcm, R, d, deps){
   (Array.isArray(d.expected) ? d.expected : []).forEach((e, k) => {
     if (!e || typeof e !== 'object') return;
     const st = stageOf(e);
-    if (!bpc || !inSpan(e.t) || !Number.isInteger(st) || st < 0 || st >= ROUNDS){ ignored++; return; }
+    // a round whose tempo the student changed while playing (coach.js ccLiveBpm) has no single beat grid to replay: left out, counted as ignored
+    if (!bpc || e.retimed === true || !inSpan(e.t) || !Number.isInteger(st) || st < 0 || st >= ROUNDS){ ignored++; return; }
     expected.push({ e, k, stage: st });
   });
   const events = (Array.isArray(d.events) ? d.events : []).filter(ev => ev && typeof ev === 'object' && inSpan(ev.t));

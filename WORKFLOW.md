@@ -37,6 +37,7 @@ sections below hold the history and the reasons.
   "Power Chord Switch: where we stopped" → "Decision (2026-11-05)". "No readable pitch, no tick" was not chosen.
 - **First, after it is live (Jonathan):** a thumb or finger strum take on a test student account at 60 and 120 BPM,
   then "Evaluate all recordings" and read "Played, not counted" (see "Decision (2026-11-05)").
+- **Tempo controls shipped 2026-11-05** (slider and ±1 on the setup, live −5 −1 +1 +5 while playing): "Power Chord Switch: where we stopped" → "Tempo controls".
 - **To watch in the next takes:** noisy rooms should show fewer "heard, not there" changes (22 of the 52 false hits
   still fire at 2.2, so not none), and clean takes should not start missing real strums: read the console's "Played,
   not counted" column (`detector-missed`). Not covered by the 12 real takes, so look at these first: **thumb or
@@ -3503,6 +3504,26 @@ line); `tools/smoke.mjs` walks all 16 switches in a real browser.
   Mic recordings should list a Power Chord Switch take once a student who said
   yes has played a game to the end (or stopped one after 10 s). Mic collection
   has to be switched on there for any take to be asked for or saved.
+
+### Tempo controls (Jonathan, 2026-11-05: "bpm more controllable by user ... prior to starting and during it")
+
+Power Chord Switch only; Change Up keeps its −5 / +5 and has no slider, no live tempo.
+- **Setup** (`ccRenderSetup`, `ccSetBpm`): the old −5 · tempo · +5 row, and under it −1 · slider (30..140, step 1) · +1. The row of five buttons
+  I tried first wrapped the tempo under the speed row in Spanish and the setup grew to 732px; the slider's row has to be no wider than the old row
+  (the Spanish speed group leaves about 6px). "Best today" moved from under the tempo to under the speed buttons (`.cc-best-line`, still always drawn).
+- **Play** (`ccLiveBpm`, play screen only): −5 −1 +1 +5 under the charts. The grid is re-anchored (`cc.listenStart`) so the beat the student is on does
+  not move; changes still to come get a new `t` and `bpm`, graded ones keep theirs. A song switch's later rounds move by the same amount (so +5 then −5
+  changes nothing); the Next-round buttons (`ccNudgeNext`) still move only later rounds. A song switch's play and count-in screens have shorter charts
+  (`.cc-ladder-play`) because there are two button rows.
+- **Scoring:** a round counts at its LOWEST tempo (`cc.roundLow`, `ccRoundBpm`), in `stageLog`, `ccScoreBpm` and the done screen's "Again" tempo. A pair also
+  remembers the live tempo for the next visit to the setup.
+- **Saved takes:** `bpm` / `stageBpms` are the tempos each round STARTED at; `tempoChanges` lists every live change (`t` on the take's clock); each change of a
+  round that had one carries `retimed: true`. The console's replay (`micEvalTakePw`) skips retimed rounds (counted as ignored) because it assumes one tempo
+  per round. Takes saved before this have none of these fields and read as before. No `firestore.rules` change.
+- **Proofs:** `checks.mjs` 1ca runs the setup controls and the live change on a stubbed clock (position before = after, 30..140, lowest tempo, shifted
+  rounds, the take's fields, the done screen's base tempo); each of four mutations turns it red. 1cl has a crafted retimed take. `smoke.mjs` clicks the
+  setup buttons and slider (EN + ES, 1366×657), the live buttons in a pair and in all 16 song switches.
+- **A stale smoke assertion was fixed on the way:** the song-switch walk still expected the old 15 BPM step (80 / 95); it now expects 5 (70 / 75).
 
 ### Next steps (rewritten 2026-11-05; the list Jonathan chose on 2026-11-04 is done)
 

@@ -11386,7 +11386,7 @@ function checkCoachVerdicts() {
   const rep = (n, s) => Array(n).fill(s);
   const right = s => s === 'ok' || s === 'oct';
   let songCounts = null;
-  const counts = { reports: 0, descs: 0, nrLevels: 0, doneScreens: 0, pwLoops: 0, pwHints: 0, pwViews: 0, pwMemory: 0, pwGates: 0 };
+  const counts = { reports: 0, descs: 0, nrLevels: 0, doneScreens: 0, pwLoops: 0, pwHints: 0, pwViews: 0, pwMemory: 0, pwGates: 0, pwLive: 0 };
   try {
     /* Coach report. [mode, slot states, timing offset ms, must show Great line, must show "all counted"] */
     const TAKES = [
@@ -11780,6 +11780,66 @@ function checkCoachVerdicts() {
     if (run('cc.bpm') !== 40) flag(`1ca: ten −5 taps on the Change Up setup gave ${run('cc.bpm')} BPM, want 40 (its floor)`);
     counts.pwMemory += 3;
     run(`sessionStorage.removeItem('pwBpm'); sessionStorage.removeItem('ccBpm');`);
+    /* Power Chord Switch's tempo controls (Jonathan, 2026-11-05: more control over the BPM before starting and while playing).
+       SETUP: −5 −1 · tempo · +1 +5 and a 30..140 slider; Change Up keeps −5 / +5 and has no slider.
+       PLAY: ccLiveBpm changes the round's tempo at once WITHOUT moving the beat the student is on (the grid is re-anchored), the changes
+       still to come are due at the new tempo, graded ones keep their time, the round counts at its LOWEST tempo, and a take saved after a
+       change says so (retimed rounds are left out of the console's replay). The clock is stubbed, so every number below is exact. */
+    run(`setLang('en'); ccSetup('power')`);
+    const pwSetupHtml = bodies['cc-body'];
+    for (const h of ['ccNudgeBpm(-5)', 'ccNudgeBpm(-1)', 'ccNudgeBpm(1)', 'ccNudgeBpm(5)']) if (!pwSetupHtml.includes(`onclick="${h}"`)) flag(`1ca: Power Chord Switch's setup has no ${h} button`);
+    if (!/ccNudgeBpm\(-1\)[^]*?<input type="range" class="cc-bpm-slider" id="cc-bpm-slider" min="30" max="140" step="1" value="30"[^>]*oninput="ccSetBpm\(this\.value\)">[^]*?ccNudgeBpm\(1\)/.test(pwSetupHtml)) flag('1ca: Power Chord Switch\'s setup has no 30..140 tempo slider calling ccSetBpm(this.value)');
+    run(`ccSetup()`);
+    if (/ccNudgeBpm\(-1\)|ccNudgeBpm\(1\)|cc-bpm-slider/.test(bodies['cc-body'])) flag("1ca: Change Up's setup grew the ±1 buttons or the slider — only Power Chord Switch has them");
+    const setBpm = (mode, v) => run(`ccSetup(${mode ? "'power'" : ''}); ccSetBpm(${v}); cc.bpm`);
+    const setCases = [[true, 87, 87], [true, 1000, 140], [true, -3, 30], [true, 61.6, 62], [true, "'93'", 93], [true, "'abc'", 93], [false, 10, 40], [false, 87, 87]];
+    for (const [pw, v, want] of setCases) { const got = setBpm(pw, v); if (got !== want) flag(`1ca: ccSetBpm(${v}) on ${pw ? 'Power Chord Switch' : 'Change Up'} gave ${got} BPM, want ${want}`); }
+    run(`ccSetup('power'); ccSetBpm(60); ccNudgeBpm(1); ccNudgeBpm(1); ccNudgeBpm(-1);`);
+    if (run('cc.bpm') !== 61 || run(`sessionStorage.getItem('pwBpm')`) !== '61') flag(`1ca: 60 then +1, +1, −1 on the setup gave ${run('cc.bpm')} (remembered ${run(`sessionStorage.getItem('pwBpm')`)}), want 61 and 61`);
+    /* A started round, in the middle of its third beat: 60 BPM, the grid started 2.5 beats ago. */
+    const live = js => JSON.parse(run(`JSON.stringify((function(){ const keep = { pn: performance.now, rf: coachReadFrame, an: coachAnalyser, hf: coachHfRms };
+      performance.now = () => 10000; coachAnalyser = {}; coachReadFrame = () => 0; coachHfRms = 0;
+      try { ${js} } finally { performance.now = keep.pn; coachReadFrame = keep.rf; coachAnalyser = keep.an; coachHfRms = keep.hf; ccStop(); }
+    })())`));
+    const startPair = `sessionStorage.removeItem('pwBpm'); ccSetup('power'); ccPickRate(2); ccPickProg(1); cc.bpm = 60; ccPrepare(false); ccBeginStage(); cc.phase = 'play'; ccRenderPlay(); cc.listenStart = 10000 - 2.5 * cc.beatMs;`;
+    const l1 = live(`${startPair} cc.changes[0].result = 'ok'; const t0 = cc.changes[0].t, tNext = cc.changes[3].t;
+      const pos = () => (10000 - cc.listenStart - cc.gridOffset) / cc.beatMs; const p0 = pos(); ccLiveBpm(30);
+      return { p0, p1: pos(), bpm: cc.stageBpms[0], beatMs: cc.beatMs, low: cc.roundLow, ccBpm: cc.bpm, stored: sessionStorage.getItem('pwBpm'),
+        graded: cc.changes[0].t === t0 && cc.changes[0].bpm === 60, due: cc.changes[3].t === cc.listenStart + cc.changes[3].beat * cc.beatMs, moved: cc.changes[3].t !== tNext, dueBpm: cc.changes[3].bpm,
+        stage: document.getElementById('cc-stage').textContent, tempoLog: cc.tempoLog.length };`);
+    if (Math.abs(l1.p0 - 2.5) > 1e-9 || Math.abs(l1.p1 - l1.p0) > 1e-9) flag(`1ca: +30 BPM mid-round moved the beat the student is on from ${l1.p0} to ${l1.p1} (the grid must be re-anchored)`);
+    if (l1.bpm !== 90 || Math.abs(l1.beatMs - 60000 / 90) > 1e-9 || l1.low !== 60 || l1.ccBpm !== 90 || l1.stored !== '90') flag(`1ca: after +30 from 60 the round is at ${l1.bpm} BPM (beat ${l1.beatMs} ms), lowest ${l1.low}, cc.bpm ${l1.ccBpm}, remembered ${l1.stored}; want 90, ${60000 / 90}, 60, 90, 90`);
+    if (!l1.graded || !l1.due || !l1.moved || l1.dueBpm !== 90) flag(`1ca: after a live tempo change a graded change keeps its time (${l1.graded}), the changes ahead are due on the new grid (${l1.due}), at the new tempo (${l1.moved}, bpm ${l1.dueBpm})`);
+    if (l1.stage !== '90 BPM' || l1.tempoLog !== 1) flag(`1ca: after +30 the play screen's tempo line says "${l1.stage}" and ${l1.tempoLog} change is logged, want "90 BPM" and 1`);
+    const l2 = live(`${startPair} const out = []; for (const d of [30, 1000, -5, -1000, 1, -1, 0]) { ccLiveBpm(d); out.push(cc.stageBpms[0]); } const low = cc.roundLow, n = cc.tempoLog.length, score = ccScoreBpm();
+      cc.phase = 'countin'; const before = cc.stageBpms[0]; ccLiveBpm(5); const noPlay = cc.stageBpms[0] === before; cc.phase = 'play';
+      ccSetup(); cc.phase = 'play'; cc.stageBpms = [60]; cc.changes = []; cc.beatMs = 1000; ccLiveBpm(5); const openMode = cc.stageBpms[0];
+      return { out, low, n, score, noPlay, openMode };`);
+    if (JSON.stringify(l2.out) !== '[90,140,135,30,31,30,30]') flag(`1ca: live changes +30, +1000, −5, −1000, +1, −1, 0 from 60 gave ${JSON.stringify(l2.out)}, want [90,140,135,30,31,30,30] (held to 30..140)`);
+    if (l2.low !== 30 || l2.score !== 30 || l2.n !== 6) flag(`1ca: a pair slowed to 30 mid-round counts at ${l2.score} BPM (lowest ${l2.low}, ${l2.n} logged), want 30, 30 and 6 (a change that moves nothing is not logged)`);
+    if (!l2.noPlay) flag('1ca: ccLiveBpm changed the tempo during the count-in — it works on the play screen only');
+    if (l2.openMode !== 60) flag(`1ca: ccLiveBpm changed Change Up's tempo (${l2.openMode}) — Change Up has no live tempo`);
+    /* A song switch: the rounds after the one being played move by the same amount (a +10 then a −5 keeps the steps, and +5 then −5 changes
+       nothing); the round counts at its lowest tempo. */
+    const l3 = live(`const li = CC_POWER_PROGRESSIONS.findIndex(p => p.ladder); sessionStorage.removeItem('pwBpm'); ccSetup('power'); ccPickRate(2); ccPickProg(li); cc.bpm = 60; ccPrepare(false); ccBeginStage(); cc.phase = 'play'; ccRenderPlay(); cc.listenStart = 10000 - 2.5 * cc.beatMs;
+      const a = cc.stageBpms.slice(); ccLiveBpm(10); const b = cc.stageBpms.slice(); ccLiveBpm(-5); const c = cc.stageBpms.slice(); const nextTxt = document.getElementById('cc-next-bpm').textContent, stageTxt = document.getElementById('cc-stage').textContent;
+      cc.changes.forEach(ch => { ch.result = 'ok'; }); ccStageEnd(); const d = { stage: cc.stage, log: cc.stageLog.map(sg => sg.bpm), beatMs: cc.beatMs, low: cc.roundLow, start: cc.startBpms.slice() };
+      cc.phase = 'play'; ccLiveBpm(1000); const e = cc.stageBpms.slice();
+      return { a, b, c, nextTxt, stageTxt, d, e, bpmUnchanged: cc.bpm, stored: sessionStorage.getItem('pwBpm') };`);
+    if (JSON.stringify(l3.a) !== '[60,65,70]' || JSON.stringify(l3.b) !== '[70,75,80]' || JSON.stringify(l3.c) !== '[65,70,75]') flag(`1ca: a song switch's rounds went ${JSON.stringify(l3.a)}, then +10 live ${JSON.stringify(l3.b)} (want [70,75,80]), then −5 ${JSON.stringify(l3.c)} (want [65,70,75])`);
+    if (l3.nextTxt !== 'Next round: 70 BPM' || l3.stageTxt !== 'Round 1 of 3 · 65 BPM') flag(`1ca: after the live changes a song switch reads "${l3.stageTxt}" and "${l3.nextTxt}"`);
+    if (l3.d.stage !== 1 || JSON.stringify(l3.d.log) !== '[60]' || Math.abs(l3.d.beatMs - 60000 / 70) > 1e-9 || l3.d.low !== 70 || l3.d.start[0] !== 60 || l3.d.start[1] !== 70) flag(`1ca: a song switch round played at 60, sped to 70, then slowed to 65 is logged ${JSON.stringify(l3.d.log)} (want its lowest, [60]); round 2 starts at beat ${l3.d.beatMs} ms (want ${60000 / 70}), lowest ${l3.d.low} (want 70)`);
+    if (JSON.stringify(l3.e) !== '[65,140,140]' || l3.bpmUnchanged !== 60) flag(`1ca: +1000 in round 2 of a song switch left the rounds at ${JSON.stringify(l3.e)} (want [65,140,140]: held at 140, round 1's kept) and cc.bpm ${l3.bpmUnchanged} (want 60: a song switch's base tempo stays the setup's)`);
+    /* The saved take: the start tempo, the changes, and a retimed flag on the rounds that had one; no undefined anywhere (Firestore refuses it). */
+    const l4 = live(`${startPair} const none = ccRecMeta(true); ccLiveBpm(30); ccLiveBpm(-10); const m = ccRecMeta(true);
+      return { none: { bpm: none.fields.bpm, stageBpms: none.fields.stageBpms, retimed: none.expected.some(e => 'retimed' in e), tempo: none.tempoChanges.length }, bpm: m.fields.bpm, stageBpms: m.fields.stageBpms, retimed: m.expected.every(e => e.retimed === true), n: m.expected.length, tempo: m.tempoChanges.map(c => [c.from, c.to]), undef: JSON.stringify(m, (k, v) => v === undefined ? '__undefined__' : v).includes('__undefined__') };`);
+    if (l4.none.bpm !== 60 || JSON.stringify(l4.none.stageBpms) !== '[60]' || l4.none.retimed || l4.none.tempo !== 0) flag(`1ca: a take saved with no live change says ${JSON.stringify(l4.none)}, want start tempo 60, no retimed flag, no tempo changes`);
+    if (l4.bpm !== 60 || JSON.stringify(l4.stageBpms) !== '[60]' || !l4.retimed || !l4.n || JSON.stringify(l4.tempo) !== '[[60,90],[90,80]]' || l4.undef) flag(`1ca: a take saved after 60 → 90 → 80 says start ${l4.bpm} (${JSON.stringify(l4.stageBpms)}), every change retimed ${l4.retimed} of ${l4.n}, tempo changes ${JSON.stringify(l4.tempo)}, undefined values ${l4.undef}; want 60, [60], true, [[60,90],[90,80]], false`);
+    /* The done screen opens on the tempo the round COUNTED at: a round started at 40, sped to 90 and played well (85%+) says 45, not 95. */
+    run(`ccSetup('power'); cc.bpm = 90; cc.roundLow = 40; cc.ladder = false; cc.phase = 'done'; cc.nextBpm = null; cc.changes = ${JSON.stringify(Array.from({ length: 10 }, () => ({ from: 'F5', to: 'G5', result: 'ok' })))}; ccRenderDone();`);
+    if (run('cc.nextBpm') !== 45) flag(`1ca: a pair started at 40, sped to 90 and played well opens the done screen on ${run('cc.nextBpm')} BPM, want 45 (5 above the lowest tempo it ran at)`);
+    counts.pwLive = 38;
+    run(`sessionStorage.removeItem('pwBpm'); sessionStorage.removeItem('ccBpm'); ccSetup('power');`);
     /* The pitch gate each game reads strums with. ccLoop is run once per mode
        against a stubbed mic reader, and records the third argument it hands to
        coachPitchReadings: Change Up (with no mode, and with 'open') must keep
@@ -12317,7 +12377,7 @@ function checkCoachVerdicts() {
     if (counts[k] !== n) flag(`1ca: rendered ${counts[k]} ${k}, pinned ${n} — the check went partly blind (or grew: re-pin EXPECT on purpose)`);
   }
   if (bad === 0 && songCounts) { head('1ck. Power Chord Switch song switches: each activity is checked against its card and the three rounds are run'); ok(`${songCounts.songs} songs, ${songCounts.entries} switch activities (${songCounts.cardSwitches} distinct card switches, each once; Sweet Child's open A5 only next to C5/B5/E5, the fret-5 A5 only next to G5, same pitches as A5); the ladder run for every one (${songCounts.rounds} round changes: 60/75/90 BPM, 21 changes, the BPM buttons ${songCounts.nudges} times: only later rounds, 40..140, off in the last); ${songCounts.hints} "next:" hints (EN+ES) match the diagrams, ${songCounts.setups} setup and ${songCounts.dones} done screens never show the key "A5o", the computer never picks a song, best keys are per switch and the pair keys are unchanged; a saved take carries each change's pitch readings (${songCounts.readingChecks} of 21 changes read back: no strum null, strum with no pitch [], four readings rounded; grading unchanged); the real ccLoop run on scripted frames: Power Chord Switch grades a strum with its own ratios (2.2 / 2.67) and Change Up with the shared ones (1.4 / 1.7) — ${songCounts.ratioChecks} runs just below and above every threshold: Change Up as a pair and as the computer's pick at three speeds, and Power Chord Switch as a song switch (all three rounds), a pair and the computer's pick at three speeds, with a recording live and without; the two lines that choose the ratios are pinned by text; and the saved take records the ratios; the done screen's "strum a little firmer" hint shows exactly when it is true (${songCounts.hintChecks} renders, EN + ES: nothing heard, many heard, a single miss, a tie, mostly wrong chords, 85% and better, Change Up)`); }
-  if (bad === 0) ok(`${counts.reports} Coach reports, ${counts.descs} chord-card descriptions, ${counts.nrLevels} Note Runner levels ×2 and ${counts.doneScreens} arcade done screens read true; Power Chord Switch: ${counts.pwLoops} loops are three-finger shapes in the right group, ${counts.pwDraws} random draws all listed pairs (11 of 11 and both orders seen), the Again button replays the pair and Start draws, Start sticks in Change Up and not in Power Chord Switch (two columns that fit 657px), Every beat is the first speed button there, the live quiz keeps its 760px shell, ${counts.pwHints} slide hints match the diagrams (EN+ES), ${counts.pwViews} screens/rounds, ${counts.pwMemory} remembered tempo/speed pairs and ${counts.pwGates} pitch gates keep it apart from Change Up`);
+  if (bad === 0) ok(`${counts.reports} Coach reports, ${counts.descs} chord-card descriptions, ${counts.nrLevels} Note Runner levels ×2 and ${counts.doneScreens} arcade done screens read true; Power Chord Switch: ${counts.pwLoops} loops are three-finger shapes in the right group, ${counts.pwDraws} random draws all listed pairs (11 of 11 and both orders seen), the Again button replays the pair and Start draws, Start sticks in Change Up and not in Power Chord Switch (two columns that fit 657px), Every beat is the first speed button there, the live quiz keeps its 760px shell, ${counts.pwHints} slide hints match the diagrams (EN+ES), ${counts.pwViews} screens/rounds, ${counts.pwMemory} remembered tempo/speed pairs and ${counts.pwGates} pitch gates keep it apart from Change Up; tempo controls: setup −5 −1 +1 +5 and a 30..140 slider, the live change keeps the beat the student is on (re-anchored, exact on a fixed clock), holds 30..140, counts the round at its lowest tempo, moves a song switch's later rounds by the same amount, and the saved take says so (${counts.pwLive} assertions)`);
 }
 
 /* ════════════════════════════════════════════════════════════════════
@@ -12364,8 +12424,8 @@ function checkCoachVerdicts() {
    micEvalText's per-round table is parsed column by column and its legend
    read; teacherMicEvaluate itself is RUN on two takes with a stubbed page;
    tools/mic-sim/eval-takes.mjs is run on one take written to a temp folder
-   and must list exactly its changes that do not agree; two crafted takes (a
-   change at t = 1e300, a round at 1e9 BPM — student-written, the rules do
+   and must list exactly its changes that do not agree; three crafted takes (a
+   change at t = 1e300, a round at 1e9 BPM, a round retimed while playing — student-written, the rules do
    not check them) run in a child process with 128 MB and must finish fast and
    say what was left out; and the limits micEvalTakePw keeps (tempo, rounds,
    beats per chord) must equal coach.js's.
@@ -12392,7 +12452,7 @@ function checkCoachVerdicts() {
    byte-identical by a differential when micEvalSignal was split out of it.
    ════════════════════════════════════════════════════════════════════ */
 const PW_EVAL_PIN = { takes: 18, rounds: 37, changes: 285, judged: 276, dropped: 9, agree: 188, 'detector-missed': 32, 'false-hit': 22, 'off-window': 15, 'silent-miss': 19,
-  mismatch: 1, gridOffsets: 276, farGridOffsets: 41, clickRounds: 29, noClickRounds: 8, siteCentred: 33, beepCentred: 3, extra: 31, htmlChecks: 5, hovers: 37, textRounds: 37, evaluateRun: 2, evalTakesLines: 4, crafted: 2,
+  mismatch: 1, gridOffsets: 276, farGridOffsets: 41, clickRounds: 29, noClickRounds: 8, siteCentred: 33, beepCentred: 3, extra: 31, htmlChecks: 5, hovers: 37, textRounds: 37, evaluateRun: 2, evalTakesLines: 4, crafted: 3,
   whatIfTakes: 18, whatIfCandidates: 72, whatIfTruth: 8, whatIfRows: 43, dropNotes: 2, pitchTakes: 5, pitchNone: 13, pitchRight: 64, pitchTimingOnly: 39, pitchRows: 20, ratioRows: 14 };
 async function checkPwTakeEvaluator() {
   head('1cl. Power Chord Switch takes: the evaluator is run on takes whose site verdicts come from ccLoop\'s own rule');
@@ -12736,7 +12796,9 @@ async function checkPwTakeEvaluator() {
 
   // 6. crafted takes cannot hang the console: a child process with 128 MB and a time limit
   const pair = takes[names.indexOf('pw-pair')].meta;
-  const crafted = [['a change at t = 1e300', d => { d.expected[3].t = 1e300; }, 1], ['a round at 1e9 BPM', d => { d.expected.forEach(e => { e.bpm = 1e9; }); d.stageBpms = [1e9]; d.bpm = 1e9; }, pair.expected.length]];
+  const crafted = [['a change at t = 1e300', d => { d.expected[3].t = 1e300; }, 1], ['a round at 1e9 BPM', d => { d.expected.forEach(e => { e.bpm = 1e9; }); d.stageBpms = [1e9]; d.bpm = 1e9; }, pair.expected.length],
+    /* A round whose tempo the student changed while playing (coach.js ccLiveBpm, 2026-11-05) has no single beat grid: its changes are skipped and counted as ignored. */
+    ['a round whose tempo was changed while playing', d => { d.expected.forEach(e => { e.retimed = true; }); d.tempoChanges = [{ t: 5000, stage: 0, from: 60, to: 90 }]; }, pair.expected.length]];
   for (const [what, edit, wantIgnored] of crafted) {
     const d = JSON.parse(JSON.stringify(pair)); edit(d);
     const code = `${lift(EVAL_FNS)}\nconst d = ${JSON.stringify(d).replace(/null/g, 'null')};\n` +

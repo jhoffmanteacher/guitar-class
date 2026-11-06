@@ -2322,6 +2322,8 @@
       es: 'Canciones' },
     'games.pw.group.tempo': { en: 'Tempo (beats per minute)',
       es: 'Tempo (pulsos por minuto)' },
+    'games.pw.tempoSliderAria': { en: 'Tempo, beats per minute',
+      es: 'Tempo, pulsos por minuto' },
     'games.pw.move.down': { en: 'slide down {n} frets',
       es: 'baja {n} trastes' },
     'games.pw.move.downOne': { en: 'slide down 1 fret',

@@ -1833,6 +1833,8 @@ async function micRecSaveNow(rec, meta){
   const doc = Object.assign({}, meta.fields);
   doc.expected = (meta.expected || []).map(e => Object.assign({}, e, { t: rel(e.t) }));
   doc.events = (meta.events || []).map(e => Object.assign({}, e, { t: rel(e.t) }));
+  /* Power Chord Switch: the tempo changes made while playing (ccLiveBpm), on the same clock; the field is left out when there were none. */
+  if (meta.tempoChanges && meta.tempoChanges.length) doc.tempoChanges = meta.tempoChanges.map(e => Object.assign({}, e, { t: rel(e.t) }));
   Object.assign(doc, {
     uid: currentUser.uid,
     name: currentUser.displayName || '',
@@ -3341,11 +3343,21 @@ function ccPickRate(i){
 
 function ccNudgeBpm(d){
   if (!cc) return;
-  cc.bpm = Math.min(CC_BPM_MAX, Math.max(ccBpmMin(), cc.bpm + d));
+  ccSetBpm(cc.bpm + d);
+}
+/* The setup tempo, from a button or (Power Chord Switch) the slider: clamped to the game's range, remembered for the session, and shown on
+   the readout, the slider and a song switch's round line without redrawing the screen (a redraw would drop the slider mid-drag). */
+function ccSetBpm(v){
+  if (!cc) return;
+  v = Math.round(Number(v));
+  if (!isFinite(v)) return;
+  cc.bpm = Math.min(CC_BPM_MAX, Math.max(ccBpmMin(), v));
   try { sessionStorage.setItem(ccSk('Bpm'), String(cc.bpm)); } catch(e){}
   const el = document.getElementById('cc-bpm-readout');
   if (el) el.textContent = cc.bpm + ' BPM';
   else ccRenderSetup();
+  const sl = document.getElementById('cc-bpm-slider');
+  if (sl){ sl.value = String(cc.bpm); sl.setAttribute('aria-valuetext', cc.bpm + ' BPM'); }
   const ln = document.getElementById('cc-ladder-note');
   if (ln) ln.innerHTML = ccLadderNoteText(cc.bpm);
 }
@@ -3434,25 +3446,41 @@ function ccRenderSetup(msg){
      .cc-power, two columns); Change Up and the Coach card share
      ccDiagramsHtml. */
   body.classList.toggle('cc-power', power);
-  const speedRow = `<div class="cc-group"><div class="cc-group-title">${t('games.cc.group.speedTitle')}</div><div class="fret-levels">${rateBtnsHtml}</div></div>`;
   const bestChip = best ? `<span class="cc-best">${t('games.common.bestTodayLabel')}: ${best} BPM</span>` : '';
+  /* Power Chord Switch shows "Best today" (it is kept per speed) under the speed buttons, on its own line that is always drawn; it used to sit
+     under the tempo row, which the slider's row now fills (2026-11-05). Change Up keeps it on its -5/+5 row. */
+  const speedRow = `<div class="cc-group"><div class="cc-group-title">${t('games.cc.group.speedTitle')}</div><div class="fret-levels">${rateBtnsHtml}</div>${power ? `<div class="cc-best-line">${bestChip}</div>` : ''}</div>`;
   /* Change Up keeps the score on the -5/+5 row. Power Chord Switch puts it on
-     its own line under that row (.cc-best-line, below): beside the buttons it
+     its own line (.cc-best-line), under the speed buttons since 2026-11-05: beside the tempo buttons it
      made the tempo group too wide to sit next to the speed group, the tempo
      dropped to a line of its own, and the setup grew to 698px on a 657px
-     screen (2026-11-01). */
-  const bpmRow = `<div class="coach-bpm-row">
+     screen (2026-11-01); under the tempo row, the slider's row (2026-11-05) pushed the setup past 657px. */
+  /* Power Chord Switch (2026-11-05, Jonathan: more control over the BPM): the same −5 · tempo · +5 row as ever, and under it a 30..140 slider
+     between −1 and +1 for the fine steps. The group must stay as narrow as the old row: in Spanish the speed buttons leave no more room beside
+     it (one row of five buttons wrapped the tempo under the speed and the setup grew to 732px). Change Up keeps its −5 / +5 alone. */
+  const bpmRow = power
+    ? `<div class="coach-bpm-row">
        <button type="button" class="tp-btn" onclick="ccNudgeBpm(-5)">&#x2212;5</button>
        <span class="coach-bpm-readout" id="cc-bpm-readout">${cc.bpm} BPM</span>
        <button type="button" class="tp-btn" onclick="ccNudgeBpm(5)">+5</button>
-       ${power ? '' : bestChip}
+     </div>
+     <div class="coach-bpm-row cc-bpm-fine">
+       <button type="button" class="tp-btn" onclick="ccNudgeBpm(-1)">&#x2212;1</button>
+       <input type="range" class="cc-bpm-slider" id="cc-bpm-slider" min="${CC_POWER_BPM_MIN}" max="${CC_BPM_MAX}" step="1" value="${cc.bpm}" aria-label="${escAttr(t('games.pw.tempoSliderAria'))}" aria-valuetext="${cc.bpm} BPM" oninput="ccSetBpm(this.value)">
+       <button type="button" class="tp-btn" onclick="ccNudgeBpm(1)">+1</button>
+     </div>`
+    : `<div class="coach-bpm-row">
+       <button type="button" class="tp-btn" onclick="ccNudgeBpm(-5)">&#x2212;5</button>
+       <span class="coach-bpm-readout" id="cc-bpm-readout">${cc.bpm} BPM</span>
+       <button type="button" class="tp-btn" onclick="ccNudgeBpm(5)">+5</button>
+       ${bestChip}
      </div>`;
   /* Power Chord Switch asks "how fast" and the tempo first — they are the whole
      game — then which two chords, all in the left column (the charts have the
      right one); Change Up keeps the loops first and the tempo below. */
   /* The line is always drawn, empty when there is no score yet, so the pair
      buttons below do not jump when a pick with a score is clicked. */
-  const tempoRow = `<div class="cc-group"><div class="cc-group-title">${t('games.pw.group.tempo')}</div>${bpmRow}<div class="cc-best-line">${bestChip}</div></div>`;
+  const tempoRow = `<div class="cc-group"><div class="cc-group-title">${t('games.pw.group.tempo')}</div>${bpmRow}</div>`;
   /* Start sits in .cc-startbar in both games. Change Up's bar sticks to the
      bottom of the scrolling games screen (styles.css .cc-startbar): its 80px
      charts push Start below a 657px screen once a loop is picked (Friday check
@@ -3559,6 +3587,7 @@ function ccPrepare(again){
   cc.ladder = plan.ladder; cc.stage = 0; cc.stageLog = [];
   cc.stageBpms = plan.ladder ? ccLadderBpms(cc.bpm) : [cc.bpm];
   cc.evLog = [];   // every strum heard, for a recorded take (ccRecMeta)
+  cc.tempoLog = []; cc.startBpms = []; cc.retimedStages = [];   // the live tempo changes of this game (ccLiveBpm)
 }
 
 /* Starts the round cc.stage: its changes, its tempo, a count-in at that tempo,
@@ -3575,12 +3604,17 @@ function ccBeginStage(){
     cc.changes.push({ beat: s * cc.bpc, from: cc.seq[s - 1], to: cc.seq[s], result: null, pend: null });
   }
   cc.beatMs = 60000 / cc.stageBpms[cc.stage];
+  /* The tempo this round starts at, and the lowest tempo it runs at once the student changes it while playing (ccLiveBpm). The round is
+     scored and saved at the lowest (ccRoundBpm); a round never changed has the two equal. */
+  cc.roundLow = cc.stageBpms[cc.stage];
+  cc.startBpms = (cc.startBpms || []).slice();
+  cc.startBpms[cc.stage] = cc.stageBpms[cc.stage];
   cc.smoothRms = 0; cc.smoothHf = 0; cc.lastOnsetT = -1e9; cc.lastPitchT = 0; cc.gridOffset = 0; cc.lastBeat = -1;
   cc.phase = 'countin';
   ccBody().classList.remove('cc-open-setup');
   const stageLabel = cc.ladder ? `<div class="cc-stage" id="cc-stage">${escHtml(ccStageText())}</div>` : '';
   ccBody().innerHTML = ccIsPower()
-    ? `<div class="cc-cols cc-cols-play"><div class="cc-col-set">${ccRecBadge()}${stageLabel}<div class="coach-count" id="cc-count">&nbsp;</div></div>` +
+    ? `<div class="cc-cols cc-cols-play${cc.ladder ? ' cc-ladder-play' : ''}"><div class="cc-col-set">${ccRecBadge()}${stageLabel}<div class="coach-count" id="cc-count">&nbsp;</div></div>` +
       `<div class="cc-col-pic">${ccDiagramsHtml(prog, prog[0], undefined, cc.shapes)}</div></div>`
     : `<div class="coach-count" id="cc-count">&nbsp;</div>` + ccDiagramsHtml(prog, prog[0]);
   coachCountIn(cc, 'cc-count', () => {
@@ -3608,15 +3642,20 @@ function ccRecMeta(complete){
   const r2 = x => Math.round(x * 100) / 100;
   return {
     fields: { game: 'pw', complete: complete === true, progression: cc.chords.join('-'), song: progDef.song || null, ladder: !!cc.ladder,
-              bpm: cc.stageBpms[0], stageBpms: cc.stageBpms.slice(), bpc: cc.bpc, eventTimes: 'played (arrival - micLatencyMs)',
+              bpm: ccStartBpms()[0], stageBpms: ccStartBpms(), bpc: cc.bpc, eventTimes: 'played (arrival - micLatencyMs)',
               onsetRatio: CC_POWER_ONSET_RATIO, hfRatio: CC_POWER_HF_RATIO,
               changeReadings: 'per change: null = no strum in its window; [] = a strum but no pitch could be read; else the midi readings its chord check used (under 3 passes on timing alone)' },
-    expected: cc.changes.map((c, i) => ({ i, t: c.t, from: c.from, to: c.to, stage: c.stage == null ? 0 : c.stage, bpm: c.bpm, verdict: c.result,
-      readings: c.readings ? c.readings.map(r2) : null })),
+    expected: cc.changes.map((c, i) => Object.assign({ i, t: c.t, from: c.from, to: c.to, stage: c.stage == null ? 0 : c.stage, bpm: c.bpm, verdict: c.result,
+      readings: c.readings ? c.readings.map(r2) : null }, (cc.retimedStages || []).indexOf(c.stage == null ? 0 : c.stage) >= 0 ? { retimed: true } : {})),
+    tempoChanges: (cc.tempoLog || []).slice(),
     events: (cc.evLog || []).slice()
   };
 }
 
+/* The tempo each round STARTED at, for a saved take: the live changes (ccLiveBpm) move cc.stageBpms. A round not reached yet has its planned tempo. */
+function ccStartBpms(){
+  return cc.stageBpms.map((b, k) => cc.startBpms && cc.startBpms[k] != null ? cc.startBpms[k] : b);
+}
 /* "Round 2 of 3 · 75 BPM" */
 function ccStageText(){
   return t('games.pw.ladder.stage', { n: cc.stage + 1, total: CC_LADDER_ROUNDS, bpm: cc.stageBpms[cc.stage] });
@@ -3630,6 +3669,41 @@ function ccNudgeNext(d){
   }
   const el = document.getElementById('cc-next-bpm');
   if (el) el.textContent = ccNextBpmText();
+}
+/* The tempo a round counts at: its lowest tempo when the student changed it while playing, else the tempo it started at (so a game
+   slowed down mid-way is never credited with the fast start). */
+function ccRoundBpm(){
+  return cc.roundLow != null ? cc.roundLow : cc.ladder && cc.stageBpms ? cc.stageBpms[cc.stage] : cc.bpm;
+}
+/* Power Chord Switch's live tempo (2026-11-05, Jonathan: more control over the BPM, also while playing). Changes the tempo of the round being
+   played, at once, by d BPM. The beat the student is on does not move: the grid's start is re-anchored so the same beat is at the same
+   moment, and the changes still to come are due at the new tempo. Changes already graded keep their time. A tempo outside the game's range
+   is held at it. */
+function ccLiveBpm(d){
+  if (!cc || !ccIsPower() || cc.phase !== 'play') return;
+  const cur = cc.stageBpms[cc.stage];
+  const next = Math.min(CC_BPM_MAX, Math.max(CC_POWER_BPM_MIN, cur + d));
+  if (next === cur) return;
+  const now = performance.now();
+  const oldBeat = cc.beatMs, newBeat = 60000 / next;
+  cc.listenStart = now - cc.gridOffset - (now - cc.listenStart - cc.gridOffset) * newBeat / oldBeat;
+  cc.beatMs = newBeat;
+  cc.stageBpms[cc.stage] = next;
+  cc.roundLow = Math.min(cc.roundLow == null ? next : cc.roundLow, next);
+  cc.changes.forEach(c => { if (c.result === null){ c.t = cc.listenStart + c.beat * cc.beatMs; c.bpm = next; } });
+  if (cc.tempoLog) cc.tempoLog.push({ t: now, stage: cc.stage, from: cur, to: next });
+  if (cc.retimedStages && cc.retimedStages.indexOf(cc.stage) < 0) cc.retimedStages.push(cc.stage);
+  /* A pair's tempo is the one it is played at; the next visit to the setup opens on it. A song switch's rounds are its own. */
+  if (!cc.ladder){ cc.bpm = next; try { sessionStorage.setItem(ccSk('Bpm'), String(next)); } catch(e){} }
+  /* A song switch's rounds each go faster than the one before: the rounds after this one move by the same amount, so the steps between them hold
+     and a +5 undone by a −5 leaves every round where it was (held at 30..140 like the rest). */
+  if (cc.ladder){
+    for (let k = cc.stage + 1; k < CC_LADDER_ROUNDS; k++) cc.stageBpms[k] = Math.min(CC_BPM_MAX, Math.max(CC_POWER_BPM_MIN, cc.stageBpms[k] + (next - cur)));
+    const nb = document.getElementById('cc-next-bpm');
+    if (nb) nb.textContent = ccNextBpmText();
+  }
+  const st = document.getElementById('cc-stage');
+  if (st) st.textContent = cc.ladder ? ccStageText() : next + ' BPM';
 }
 function ccNextBpmText(){
   return cc.stage >= CC_LADDER_ROUNDS - 1 ? t('games.pw.ladder.lastRound')
@@ -3648,9 +3722,18 @@ function ccRenderPlay(){
      </div>
      <div class="cc-beats" id="cc-beats"><span class="cc-pip"></span><span class="cc-pip"></span><span class="cc-pip"></span><span class="cc-pip"></span></div>`;
   const charts = ccDiagramsHtml(cc.chords, cc.seq[0], undefined, cc.shapes);
+  /* The tempo buttons of the round being played (ccLiveBpm): −5 −1 · the tempo · +1 +5. In a pair it is the whole control (the line
+     is the BPM, as before); a song switch puts its round line (#cc-stage) between the buttons, and its next-round buttons under it. */
+  const liveRow = (mid) => `<div class="coach-bpm-row">
+         <button type="button" class="tp-btn" onclick="ccLiveBpm(-5)">&#x2212;5</button>
+         <button type="button" class="tp-btn" onclick="ccLiveBpm(-1)">&#x2212;1</button>
+         ${mid}
+         <button type="button" class="tp-btn" onclick="ccLiveBpm(1)">+1</button>
+         <button type="button" class="tp-btn" onclick="ccLiveBpm(5)">+5</button>
+       </div>`;
   /* A song switch: which round, and the BPM buttons for the rounds still to come. */
   const lastRound = !cc.ladder || cc.stage >= CC_LADDER_ROUNDS - 1;
-  const bpmCtl = cc.ladder ? `<div class="cc-play-bpm"><div class="cc-stage" id="cc-stage">${escHtml(ccStageText())}</div>
+  const bpmCtl = cc.ladder ? `<div class="cc-play-bpm cc-live-bpm">${liveRow(`<span class="cc-stage" id="cc-stage">${escHtml(ccStageText())}</span>`)}
        <div class="coach-bpm-row">
          <button type="button" class="tp-btn" onclick="ccNudgeNext(-5)"${lastRound ? ' disabled' : ''}>&#x2212;5</button>
          <span class="coach-bpm-readout" id="cc-next-bpm">${escHtml(ccNextBpmText())}</span>
@@ -3660,14 +3743,14 @@ function ccRenderPlay(){
      graded). Power Chord Switch only. It and the BPM buttons sit under the charts: the left column is already the taller one. */
   const lastLine = ccIsPower() ? '<div class="cc-last" id="cc-last" aria-live="polite">&nbsp;</div>' : '';
   /* A pair has one tempo for the whole round: the play screen says what it is (a song switch's line above already does, per round). */
-  const pairBpm = ccIsPower() && !cc.ladder ? `<div class="cc-play-bpm"><div class="cc-stage" id="cc-stage">${cc.stageBpms ? cc.stageBpms[0] : cc.bpm} BPM</div></div>` : '';
+  const pairBpm = ccIsPower() && !cc.ladder ? `<div class="cc-play-bpm cc-live-bpm">${liveRow(`<span class="cc-stage" id="cc-stage">${cc.stageBpms ? cc.stageBpms[0] : cc.bpm} BPM</span>`)}</div>` : '';
   const rest = `<div class="coach-strip">${chips}</div>
      <div class="coach-live"><span class="coach-live-dot"></span>${t('games.cc.strumEveryBeat')}</div>
      <button type="button" class="tp-btn coach-stop" onclick="ccFinish()">&#x25A0; ${t('games.common.stop')}</button>`;
   /* Power Chord Switch: the chord, "next" and the beat pips on the left, the
      two charts large on the right (styles.css .cc-cols-play). */
   body.innerHTML = ccIsPower()
-    ? `<div class="cc-cols cc-cols-play"><div class="cc-col-set">${ccRecBadge()}${now}${rest}</div><div class="cc-col-pic">${charts}${lastLine}${bpmCtl}${pairBpm}</div></div>`
+    ? `<div class="cc-cols cc-cols-play${cc.ladder ? ' cc-ladder-play' : ''}"><div class="cc-col-set">${ccRecBadge()}${now}${rest}</div><div class="cc-col-pic">${charts}${lastLine}${bpmCtl}${pairBpm}</div></div>`
     : now + charts + rest;
 }
 
@@ -3881,14 +3964,14 @@ function ccStageEnd(){
     if (c.pend) ccResolvePend(c);
     if (c.result === null) c.result = 'miss';
   });
-  cc.stageLog.push({ bpm: cc.stageBpms[cc.stage], changes: cc.changes });
+  cc.stageLog.push({ bpm: ccRoundBpm(), changes: cc.changes });
   cc.stage++;
   ccBeginStage();
 }
 /* The tempo a finished game is scored at: a pair's is the tempo it ran at; a song
    switch's is its fastest round with 85% of the changes right (0 if none). */
 function ccScoreBpm(){
-  if (!cc.ladder) return cc.bpm;
+  if (!cc.ladder) return ccRoundBpm();
   let top = 0;
   (cc.stageLog || []).forEach(sg => {
     const n = sg.changes.length;
@@ -3915,7 +3998,7 @@ function ccFinish(complete){
   /* A song switch reports all its rounds together. A round whose count-in had not
      finished was never played, so it is left out rather than counted as misses. */
   if (cc.ladder){
-    if (!(cc.phase === 'countin' && cc.stage > 0)) cc.stageLog.push({ bpm: cc.stageBpms[cc.stage], changes: cc.changes });
+    if (!(cc.phase === 'countin' && cc.stage > 0)) cc.stageLog.push({ bpm: ccRoundBpm(), changes: cc.changes });
     cc.changes = cc.stageLog.reduce((a, sg) => a.concat(sg.changes), []);
   }
   const rec = ccIsPower() ? micRecStop() : null;   // before coachMicOff, which drops a running capture
@@ -4005,7 +4088,7 @@ function ccRenderDone(){
      advice names (5 up after 85%, 5 down after under half, else the same); cc.nextBpm is set once per finished game (ccStart
      clears it), so drawing the screen again does not move it a second time. Change Up keeps its three buttons. */
   if (ccIsPower() && cc.nextBpm == null)
-    cc.nextBpm = Math.min(CC_BPM_MAX, Math.max(CC_POWER_BPM_MIN, cc.bpm + (rec === 'up' ? CC_POWER_AGAIN_STEP : rec === 'down' ? -CC_POWER_AGAIN_STEP : 0)));
+    cc.nextBpm = Math.min(CC_BPM_MAX, Math.max(CC_POWER_BPM_MIN, (cc.ladder ? cc.bpm : ccScoreBpm()) + (rec === 'up' ? CC_POWER_AGAIN_STEP : rec === 'down' ? -CC_POWER_AGAIN_STEP : 0)));
   const actions = ccIsPower()
     ? `<div class="coach-bpm-row">
          <button type="button" class="tp-btn" onclick="ccDoneNudge(${-CC_POWER_AGAIN_STEP})">&#x2212;${CC_POWER_AGAIN_STEP}</button>
