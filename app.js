@@ -2201,7 +2201,7 @@ function buildStrum(spec, opts){
     controlsHtml = `<div class="tab-controls"><span class="bpm-control-group">`
       + `<button type="button" class="play-seq-btn" data-midis="${escAttr(JSON.stringify(midis))}" data-clicks="${spec.bars.length * 4}" onclick="playSequenceFromGroup(this)" title="${escAttr(t('strum.playTitle'))}">&#x25B6; ${t('strum.play')}</button>`
       + `<button type="button" class="play-seq-btn strum-clicks-btn" onclick="strumOpenMetro(this)" title="${escAttr(t('strum.clicksTitle'))}">&#x25B6; ${t('strum.clicks')}</button>`
-      + renderBpmControl(keyPrefix, bpm, spec.minBpm || 40, spec.maxBpm || 120)
+      + renderBpmControl(keyPrefix, bpm, spec.minBpm || 40, spec.maxBpm || 125)
       + `</span></div>`;
   }
   const pat = String(spec.pattern || '');

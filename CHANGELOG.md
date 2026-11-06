@@ -8,6 +8,7 @@ see `WORKFLOW.md` and the git commit log.
 ## 2026-11-06 — Strum steps: Play clicks opens the Metronome at your tempo
 
 - **"Play clicks" now opens the Metronome at the tempo on the step's BPM slider.** It used to always open at 60 BPM.
+- **The BPM slider on strum steps now goes up to 125** (it stopped at 120).
 
 ## 2026-11-05 — Power Chord Switch: one button to get back to the chords
 
