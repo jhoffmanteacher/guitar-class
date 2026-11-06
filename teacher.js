@@ -5054,7 +5054,8 @@ function micEvalStrumHits(frames, rule, ratio, hfRatio){
      - Every number here was written by the student's browser and is not checked
        by the rules: a change with an impossible time, round or tempo (outside
        coach.js CC_POWER_BPM_MIN..CC_BPM_MAX, CC_LADDER_ROUNDS, CC_RATES' bpc; checks.mjs
-       1cl pins these copies) is left out and counted in `ignored`. No loop then runs
+       1cl pins these copies) is left out and counted in `ignored`; a change of a round the student retimed while
+       playing (`retimed: true`, coach.js ccLiveBpm) is left out and counted in `retimed`, which is not bad data. No loop then runs
        on a saved number alone: the grid loop stops at the number of beats the
        changes span, the replay is events x a binary search, and the per-change
        searches grow with changes x (onsets + events) — onsets are capped by the
@@ -5099,13 +5100,14 @@ function micEvalTakePw(pcm, R, d, deps){
   const bpc = BPCS.indexOf(d.bpc) >= 0 ? d.bpc : 0;
   const stageBpms = Array.isArray(d.stageBpms) ? d.stageBpms : [];
   const stageOf = o => o.stage == null ? 0 : o.stage;
-  let ignored = 0;
+  let ignored = 0, retimed = 0;
   const expected = [];
   (Array.isArray(d.expected) ? d.expected : []).forEach((e, k) => {
     if (!e || typeof e !== 'object') return;
     const st = stageOf(e);
-    // a round whose tempo the student changed while playing (coach.js ccLiveBpm) has no single beat grid to replay: left out, counted as ignored
-    if (!bpc || e.retimed === true || !inSpan(e.t) || !Number.isInteger(st) || st < 0 || st >= ROUNDS){ ignored++; return; }
+    // a round whose tempo the student changed while playing (coach.js ccLiveBpm) has no single beat grid to replay: left out and counted as `retimed`, not as bad data
+    if (e.retimed === true){ retimed++; return; }
+    if (!bpc || !inSpan(e.t) || !Number.isInteger(st) || st < 0 || st >= ROUNDS){ ignored++; return; }
     expected.push({ e, k, stage: st });
   });
   const events = (Array.isArray(d.events) ? d.events : []).filter(ev => ev && typeof ev === 'object' && inSpan(ev.t));
@@ -5319,6 +5321,7 @@ function micEvalTakePw(pcm, R, d, deps){
     silentMiss: cnt(n => n.why.cat === 'silent-miss'),
     dropped: rounds.reduce((a, rd) => a + rd.dropped, 0),
     ignored,
+    retimed,
     replayMismatch: cnt(n => n.siteHeard !== (n.site !== 'miss')),
     siteRightReplayNot: cnt(n => n.site === 'right' && !n.played),
     offPitch: {}, unclearSiteReadings: null, presentSiteReadings: null, secondLook: 0, lookWould: 0, lookWouldPresent: 0,
@@ -5465,8 +5468,9 @@ function micEvalText(rows){
   const pw = rows.filter(r => r.kind === 'pw');
   const pwCols = [['take', 5], ['game', 16], ['round', 5], ['bpm', 4], ['chg', 4], ['agree', 5], ['detMiss', 7], ['false', 5], ['offWin', 6], ['silent', 6], ['drop', 4],
     ['centre', 7], ['click', 6], ['lag', 5], ['ideal', 6], ['skew', 6], ['map', 5]];
-  const pwOdd = pw.filter(r => r.notes.ignored || r.notes.replayMismatch).map(r => r.take + ': ' +
+  const pwOdd = pw.filter(r => r.notes.ignored || r.notes.retimed || r.notes.replayMismatch).map(r => r.take + ': ' +
     [r.notes.ignored ? r.notes.ignored + (r.notes.ignored === 1 ? ' change' : ' changes') + ' ignored (impossible time, round or tempo in the saved data)' : '',
+      r.notes.retimed ? r.notes.retimed + (r.notes.retimed === 1 ? ' change' : ' changes') + ' left out (the student changed the tempo while playing)' : '',
       r.notes.replayMismatch ? r.notes.replayMismatch + (r.notes.replayMismatch === 1 ? ' change' : ' changes') + " where the site's rule, run again on its own strums, does not give its saved verdict" : ''].filter(Boolean).join('; '));
   const pwText = !pw.length ? '' : '\n\nPower Chord Switch, one line per round (in the table above, its "notes" are chord changes; inAud = a strum in the site\'s window):\n' +
     [pwCols.map(c => pad(c[0], c[1])).join(' ')].concat(...pw.map(r => (r.rounds || []).map(g => [
@@ -5565,10 +5569,11 @@ function teacherMicEvalHtml(){
     const pw = f => pwRows.reduce((a, r) => a + (f(r) || 0), 0);
     const pn = pw(r => r.notes.n), agree = pw(r => r.notes.agree), pMiss = pw(r => r.notes.detectorMissed);
     const pFalse = pw(r => r.notes.falseHit), pSilent = pw(r => r.notes.silentMiss), pDrop = pw(r => r.notes.dropped);
-    const pOff = pw(r => r.notes.offWindow), pIgn = pw(r => r.notes.ignored), pOdd = pw(r => r.notes.replayMismatch);
+    const pOff = pw(r => r.notes.offWindow), pIgn = pw(r => r.notes.ignored), pRet = pw(r => r.notes.retimed), pOdd = pw(r => r.notes.replayMismatch);
     lines.push(`Power Chord Switch: ${pn} chord ${pn === 1 ? 'change' : 'changes'} in ${pwRows.length} ${pwRows.length === 1 ? 'recording' : 'recordings'}` +
       (pDrop ? ` (${pDrop} more came after the recording stopped, at 30 seconds or at Stop, and ${pDrop === 1 ? 'was' : 'were'} not checked)` : '') +
       (pIgn ? ` (${pIgn} more ${pIgn === 1 ? 'was' : 'were'} left out: the saved time, round or tempo is impossible)` : '') +
+      (pRet ? ` (${pRet} more ${pRet === 1 ? 'was' : 'were'} left out: the student changed the tempo while playing)` : '') +
       `. The site and the recording agree on <b>${agree + pSilent}</b> of ${pn} (${agree} strummed where the site listened, ${pSilent} not played). ` +
       `<b>${pOff}</b> ${pOff === 1 ? 'was' : 'were'} strummed just outside the site's window (early, late, or the delay setting is off), so the site said missed. ` +
       `<b>${pMiss}</b> ${pMiss === 1 ? 'strum is' : 'strums are'} where the site listened, but the site heard no strum there. ` +

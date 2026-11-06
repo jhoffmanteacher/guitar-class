@@ -2304,12 +2304,10 @@ body.rail-collapsed .rail-tools .tool-popup{
 .cc-play-bpm .cc-stage{margin:0}
 .cc-play-bpm .coach-bpm-row{margin:0}
 /* Power Chord Switch's tempo slider on the setup screen (30 to 140 BPM): the width of the −5 −1 · tempo · +1 +5 row above it. */
-/* The tempo group's two rows sit close (the setup must fit 657px: see .cc-best-line, which moved under the speed buttons). */
+/* The tempo group's row and slider sit close (the setup must fit 657px: see .cc-best-line, which moved under the speed buttons). */
 #cc-body.cc-power .cc-speedtempo .coach-bpm-row{margin:2px 0}
-.cc-bpm-fine{margin:0}
-#cc-body.cc-power .cc-speedtempo .cc-bpm-fine{margin:0}
-/* The slider takes what is left of the row (width 0 + grow: it adds nothing to the group's width, which stays as wide as the −5 · tempo · +5 row). */
-.cc-bpm-slider{flex:1 1 0;width:0;min-width:0;margin:0;accent-color:var(--purple-text);cursor:pointer}
+/* The slider is as wide as the −5 · tempo · +5 row above it, so the group stays as narrow as the old row (Spanish leaves no more room). */
+.cc-bpm-slider{display:block;width:100%;margin:6px 0 0;accent-color:var(--purple-text);cursor:pointer}
 /* The live tempo row on the play screen: its tempo text is the readout, in the row's own size. */
 .cc-live-bpm .coach-bpm-row .cc-stage{margin:0;min-width:0}
 .cc-live-bpm{flex-direction:column;align-items:flex-start;gap:2px}

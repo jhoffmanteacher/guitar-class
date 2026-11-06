@@ -7,11 +7,12 @@ see `WORKFLOW.md` and the git commit log.
 
 ## 2026-11-05 — Power Chord Switch: more control over the tempo
 
-- **Before you start:** the tempo now has a slider (30 to 140 BPM) with −1 and +1 beside it, under the −5 / +5 row. Drag the slider, or press −1 / +1 to move one beat per minute at a time.
-- **While you play:** four buttons under the charts, −5, −1, +1 and +5, change the tempo right away. The beat you are on does not jump. In a song switch they change the round you are playing and the rounds after it by the same amount. The "Next round" buttons still move only the rounds after this one.
+- **Before you start:** the tempo now has a slider (30 to 140 BPM, in steps of 5) under the −5 / +5 row. Drag it, or press −5 / +5.
+- **While you play:** two buttons under the charts, −5 and +5, change the tempo right away. The beat you are on does not jump. In a song switch they change the round you are playing and the rounds after it by the same amount. The "Next round" buttons still move only the rounds after this one.
 - **The score counts the slowest tempo you played in a round.** If you slow down in the middle, the round counts at the slower tempo.
 - **"Best today" moved under the speed buttons,** because your best is kept for each speed.
 - A song switch's charts are a little shorter while you play, to make room for the two rows of tempo buttons.
+- **The choices are in a new order:** the computer's pick first, then the songs, then the specific chord pairs (slide along the low E string, slide along the A string, jump between strings).
 
 ## 2026-11-05 — Power Chord Switch: starts at 30 BPM and speeds up by 5
 
