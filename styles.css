@@ -4568,10 +4568,13 @@ body.lq-invite-open{overflow:hidden}
 .pm-recap-x:hover{background:var(--bg3)}
 @media (prefers-reduced-motion:reduce){.pm-toast,.pm-recap{animation:none}}
 /* Top 5 (2026-11-04): a round medal, "TOP" over a big "5". --rank (lavender) means "Top 5" and nothing else:
-   yellow stays the week-goal moment's alone. On --pm-surface / --pm-tile / the medal's own #0b0d12 it measures 7.56 / 6.47 / 8.53 : 1 (all pass AA).
+   yellow stays the week-goal moment's alone. 2026-11-06 (Jonathan: "too dark to see"): a SOLID lavender coin with
+   near-black letters and a pale rim + glow, not a dark coin with a lavender ring — it read as a hole in the dark strip.
+   Coin on --pm-surface about 7.5 : 1, letters on the coin about 9.6 : 1.
    -sm sits in the strip, -lg in the toast, -md on the My progress tile; -off is the dashed "not yet" medal. */
 .pm-top5{display:inline-flex;flex-direction:column;align-items:center;justify-content:center;flex-shrink:0;
-  box-sizing:border-box;border-radius:50%;background:#0b0d12;color:var(--rank);border:2px solid var(--rank);
+  box-sizing:border-box;border-radius:50%;background:var(--rank);color:#0b0d12;border:2px solid #EDE5FF;
+  box-shadow:0 0 0 2px rgba(183,156,255,.35),0 0 10px rgba(183,156,255,.55);
   font-family:'Rubik Mono One',sans-serif;font-weight:400;line-height:1;letter-spacing:0}
 .pm-top5 b{font-weight:400}
 .pm-top5-sm{width:22px;height:22px;font-size:5.5px;border-width:1.5px}
@@ -4580,7 +4583,7 @@ body.lq-invite-open{overflow:hidden}
 .pm-top5-lg b{font-size:15px}
 .pm-top5-md{width:44px;height:44px;font-size:9px}
 .pm-top5-md b{font-size:19px}
-.pm-top5-off{background:transparent;color:var(--pm-muted);border:2px dashed var(--pm-grey)}
+.pm-top5-off{background:transparent;color:var(--pm-muted);border:2px dashed var(--pm-grey);box-shadow:none}
 .pm-toast-top5{gap:10px}
 /* My progress */
 .pm-progress{margin:0 0 18px}

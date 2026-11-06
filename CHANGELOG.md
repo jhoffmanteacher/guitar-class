@@ -5,6 +5,10 @@ Notable changes to the Guitar Class site. Newest first.
 For the full session-by-session history (and the reasoning behind each change),
 see `WORKFLOW.md` and the git commit log.
 
+## 2026-11-06 — Top 5 medal is brighter
+
+- **The "TOP 5" medal is now a bright purple coin with dark letters**, so it stands out on the dark minutes strip, in the pill that drops down and on My progress. It was a dark coin with a thin purple ring and was hard to see.
+
 ## 2026-11-06 — Strum steps: Play clicks opens the Metronome at your tempo
 
 - **"Play clicks" now opens the Metronome at the tempo on the step's BPM slider.** It used to always open at 60 BPM.
