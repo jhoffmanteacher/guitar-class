@@ -3088,8 +3088,8 @@ const CC_RATES = [
    row is still there to slow it down. */
 const CC_BEAT_IDX = CC_RATES.findIndex(r => r.id === 'beat');
 const CC_BPM_MIN = 40, CC_BPM_MAX = 140;
-/* Power Chord Switch goes down to 30 BPM (2026-11-05, Jonathan: "start at 30 bpm"); Change Up keeps 40. */
-const CC_POWER_BPM_MIN = 30;
+/* Power Chord Switch goes down to 10 BPM (2026-11-05, Jonathan: "10-140"; it opens on CC_POWER_START_BPM, 30); Change Up keeps 40. */
+const CC_POWER_BPM_MIN = 10;
 function ccBpmMin(){ return ccIsPower() ? CC_POWER_BPM_MIN : CC_BPM_MIN; }
 /* The tempo Power Chord Switch opens on (2026-11-05, Jonathan: 30 BPM; it was 55 from 2026-11-04, 60 before). A song switch's three
    rounds start from it (30 / 35 / 40); Change Up still opens on 60. A tempo the student already picked this session
@@ -3466,7 +3466,7 @@ function ccRenderSetup(msg){
      dropped to a line of its own, and the setup grew to 698px on a 657px
      screen (2026-11-01); under the tempo row, the slider's row (2026-11-05) pushed the setup past 657px. */
   /* Power Chord Switch (2026-11-05, Jonathan: more control over the BPM, in steps of 5): the same −5 · tempo · +5 row as ever, and under it a
-     30..140 slider in steps of 5. The slider takes the width of the group (as wide as the row above it: in Spanish the speed buttons leave
+     10..140 slider in steps of 5. The slider takes the width of the group (as wide as the row above it: in Spanish the speed buttons leave
      no more room beside it). Change Up keeps its −5 / +5 alone. */
   const bpmRow = power
     ? `<div class="coach-bpm-row">

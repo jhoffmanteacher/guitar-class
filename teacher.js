@@ -5093,7 +5093,7 @@ function micEvalTakePw(pcm, R, d, deps){
   const pct = (a, q) => { if (!a.length) return null; const b = Array.from(a).sort((p, q2) => p - q2); return b[Math.min(b.length - 1, Math.floor(q * b.length))]; };
   const med = a => pct(a, 0.5);
   const num = v => typeof v === 'number' && isFinite(v);
-  const BPM_MIN = 30, BPM_MAX = 140, ROUNDS = 3, BPCS = [1, 2, 4];
+  const BPM_MIN = 10, BPM_MAX = 140, ROUNDS = 3, BPCS = [1, 2, 4];
   const endMs = s2ms(N);
   const inSpan = t => num(t) && t >= -60000 && t <= endMs + 60000;
   const lat = num(d.micLatencyMs) && Math.abs(d.micLatencyMs) <= 5000 ? d.micLatencyMs : 0;

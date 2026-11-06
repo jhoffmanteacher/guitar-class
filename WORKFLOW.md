@@ -3507,8 +3507,8 @@ line); `tools/smoke.mjs` walks all 16 switches in a real browser.
 
 ### Tempo controls (Jonathan, 2026-11-05: "bpm more controllable by user ... prior to starting and during it")
 
-Power Chord Switch only; Change Up keeps its −5 / +5 and has no slider, no live tempo.
-- **Setup** (`ccRenderSetup`, `ccSetBpm`): the old −5 · tempo · +5 row, and under it a 30..140 slider in steps of 5 (`ccSetBpm` snaps to a
+Power Chord Switch only; Change Up keeps its −5 / +5 and has no slider, no live tempo. Range 10..140 (floor lowered from 30 on 2026-11-05, Jonathan; it still OPENS on 30; the 140 maximum stays, he considered 80 and said keep 140); the console evaluator's limits (`BPM_MIN` in `micEvalTakePw`) are the same 10..140.
+- **Setup** (`ccRenderSetup`, `ccSetBpm`): the old −5 · tempo · +5 row, and under it a 10..140 slider in steps of 5 (`ccSetBpm` snaps to a
   multiple of 5). Jonathan first got −1 / +1 too and then dropped them ("just by 5s is fine"): no ±1 button anywhere (1ca fails if one returns).
   The group must stay no wider than the old row (the Spanish speed group leaves about 6px); a row of five buttons once wrapped the tempo under the
   speed row and the setup grew to 732px. "Best today" moved from under the tempo to under the speed buttons (`.cc-best-line`, still always drawn).
@@ -3524,7 +3524,7 @@ Power Chord Switch only; Change Up keeps its −5 / +5 and has no slider, no liv
   sentence: "the student changed the tempo while playing"; not `ignored`, which means impossible data) because it assumes one tempo per round. Takes saved
   before this have none of these fields and read as before. No `firestore.rules` change. The take list's BPM column shows the START tempo only.
 - **Proofs:** `checks.mjs` 1ca runs the setup controls and the live change on a stubbed clock (32 counted assertions, pinned): the beat does not move (also with a
-  gridOffset), 30..140, the lowest tempo, shifted and capped rounds, a song switch Stopped in round 2 (ccFinish), only some rounds retimed, a second game starting clean,
+  gridOffset), 10..140, the lowest tempo, shifted and capped rounds, a song switch Stopped in round 2 (ccFinish), only some rounds retimed, a second game starting clean,
   the take's fields through the real `micRecSaveNow` (run up to its dev-bypass log), the done screen's base tempo. 16 mutations were run against it in a scratch copy
   (2026-11-05, results in the commit message). 1cl has crafted retimed takes (a pair, and round 1 of 3). `smoke.mjs` clicks the setup buttons and slider (EN + ES,
   1366×657) and the live buttons in a pair and in all 16 song switches.

@@ -720,15 +720,15 @@ async function powerSwitchWalk(page, run, events, stats, base) {
   }
   await run('pw:pair-play:stop', `(() => { ccStop(); sessionStorage.removeItem('pwBpm'); return 1; })()`, 200);
   /* The done screen's −5 / +5 row (Jonathan, 2026-11-05: the BPM button must take more than one click and show the tempo). Real clicks at
-     1366x657: a game with every change missed opens the row on 30 (5 down, held at the floor); +5 clicked twice shows 40 on the row and on
-     Again, nothing on the screen moves off it; Again starts the next game at 40. */
+     1366x657: a game with every change missed opens the row on 30, the tempo it opened on (nothing was heard, so the advice is "strum a little firmer" and the
+     tempo stays; it is not a slow-down); +5 clicked twice shows 40 on the row and on Again, nothing on the screen moves off it; Again starts the next game at 40. */
   await run('pw:done-row:render', `(() => { sessionStorage.removeItem('pwBpm'); setLang('en'); gamesShow('power'); ccPickProg(1); ccPickRate(2); cc.phase = 'done'; cc.nextBpm = null;
     cc.changes = Array.from({ length: 15 }, (_, i) => ({ from: i % 2 ? 'G5' : 'F5', to: i % 2 ? 'F5' : 'G5', result: 'miss' })); ccRenderDone(); return 1; })()`, 200);
   const dr0 = await run('pw:done-row:before', `(document.getElementById('cc-done-bpm') || {}).textContent`, 50);
   for (let k = 0; k < 2; k++) await run('pw:done-row:click' + k, `(() => { const b = [...document.querySelectorAll('#cc-body button')].find(x => x.textContent.trim() === '+5'); if (b) b.click(); return !!b; })()`, 100);
   const dr = await run('pw:done-row:after', `(() => { const sc = document.getElementById('games-screen'), again = document.getElementById('cc-done-again'), r = again && again.getBoundingClientRect();
     return { readout: (document.getElementById('cc-done-bpm') || {}).textContent, again: again && again.textContent.trim(), scrollH: sc.scrollHeight, clientH: sc.clientHeight, againBottom: r && Math.round(r.bottom), innerH: window.innerHeight }; })()`, 50);
-  if (dr0 !== '30 BPM') fail('done-row', `after a game with every change missed the done screen's row reads "${dr0}", expected "30 BPM" (5 down from 30, held at the floor)`);
+  if (dr0 !== '30 BPM') fail('done-row', `after a game with every change missed the done screen's row reads "${dr0}", expected "30 BPM" (the tempo it opened on: nothing was heard, so the advice is firmer, not slower)`);
   if (!dr || dr.readout !== '40 BPM' || !/Again at 40/.test(dr.again || '')) fail('done-row', `after +5 clicked twice the row reads "${dr && dr.readout}" and the button "${dr && dr.again}", expected 40 on both`);
   else if (dr.scrollH > dr.clientH || dr.againBottom > dr.innerH) fail('done-row', `the done screen is ${dr.scrollH}px tall on a ${dr.clientH}px screen; Again ends at ${dr.againBottom}px of ${dr.innerH}`);
   await run('pw:done-row:again', `(() => { document.getElementById('cc-done-again').click(); return 1; })()`, 900);
