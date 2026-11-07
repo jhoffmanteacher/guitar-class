@@ -9288,6 +9288,10 @@ function checkChordCall(ctx) {
       if(st.res[1] !== 'hit') bad('Call: the right pick in the window is ' + st.res[1]);
       setH(st, st.wins[2].open - 0.05); chcAct('chk', st.M.targets[2].name); R.taps++;
       if(st.k !== 2) bad('Call: a pick before the window opened was taken');
+      // A tap on the "?" box names no chord: in a Call round it is not an answer, in time or not (Friday check 2026-11-06).
+      st.k = 3; st.res = st.res.slice(0, 3);
+      setH(st, st.wins[3].open + 0.01); chcAct('chk', null); R.taps++;
+      if(st.k !== 3 || st.res[3] === 'hit') bad('Call: a tap with no chord picked inside the window passed it (k=' + st.k + ', ' + st.res[3] + ')');
       chcStop('chk');
       // The box says "?" until the change has come. Every change, sampled 20 ms apart from a beat before it to a beat after.
       for(const [card, section] of [['ca-29', 'Verse 1'], ['ca-33', 'Intro']]){
