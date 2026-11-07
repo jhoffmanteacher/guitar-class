@@ -1496,11 +1496,11 @@ console.log('14. top 5 of the week');
   r = await t5(minOf(15), [minOf(30), minOf(25), minOf(20), minOf(20), minOf(15), minOf(15), minOf(15), minOf(15), minOf(15)]);
   check('…more than five tied at 5th: nine students wear it (4 ahead + 5 tied at 15 min) and I am #5 with the other four', r && r.top === true && r.n === 5, JSON.stringify(r));
   r = await t5(minOf(15), [minOf(20), minOf(20), minOf(20), minOf(20), minOf(20), minOf(15), minOf(15)]);
-  check('five ahead of me: out, #6; I need 5 more minutes (the 5th place has 20, I have 15)', r && r.top === false && r.under === false && r.n === 6 && r.need === 5, JSON.stringify(r));
+  check('five ahead of me: out, #6, and no "minutes to catch up" field (dropped 2026-11-06)', r && r.top === false && r.under === false && r.n === 6 && !('need' in r), JSON.stringify(r));
   r = await t5(minOf(20), [minOf(20), minOf(20), minOf(20), minOf(20), minOf(20), minOf(21)]);
   check('one student above me and five tied with me on whole minutes: all share the place, I am #2 and in', r && r.top === true && r.n === 2, JSON.stringify(r));
   r = await t5(minOf(19) + 59, [minOf(20), minOf(20), minOf(20), minOf(20), minOf(20)]);
-  check('19:59 against five at 20 min: still out, and "1 more min" (never 0)', r && r.top === false && r.need === 1, JSON.stringify(r));
+  check('19:59 against five at 20 min: still out (whole minutes: 19 < 20), #6', r && r.top === false && r.n === 6, JSON.stringify(r));
   r = await t5(599, []);
   check('9:59 this week is not ranked (under the 10-minute minimum), even alone: "1 to go"', r && r.top === false && r.under === true && r.toRank === 1 && r.min === 10, JSON.stringify(r));
   r = await t5(600, []);
@@ -1508,7 +1508,7 @@ console.log('14. top 5 of the week');
   r = await t5(minOf(12), [minOf(11), minOf(9), 0]);
   check('12 min against 11 / 9 / 0 (others under the minimum or not): #1 and in', r && r.top === true && r.n === 1, JSON.stringify(r));
   r = await t5(minOf(5), [minOf(60), minOf(60), minOf(60), minOf(60), minOf(60), minOf(60)]);
-  check('under the minimum AND behind a full Top 5: the line is about the minimum (5 to go), not about catching up', r && r.under === true && r.top === false && r.toRank === 5 && r.need === 0, JSON.stringify(r));
+  check('under the minimum AND behind a full Top 5: the line is about the minimum (5 to go), not about catching up', r && r.under === true && r.top === false && r.toRank === 5, JSON.stringify(r));
 
   // The read: one query, equality filters only, this week and my period; other weeks and other periods do not count.
   const far = { 'uid-P7': wbDoc(minOf(100), W, '7'), 'uid-PCAS': wbDoc(minOf(100), W, 'CAS'), 'uid-PREV': wbDoc(minOf(100), WPREV, '4'), [TAG]: wbDoc(minOf(999)) };
@@ -1616,7 +1616,7 @@ console.log('14. top 5 of the week');
   check('in the Top 5: the strip carries the medal (pm-top5-sm, label pm.top5Label) after the flame; the tile says "#2 in Period 4" and "starts over every Monday"', /pm-top5 pm-top5-sm/.test(inn.strip) && /pm\.top5Label/.test(inn.strip) && inn.strip.indexOf('pm-streak') < inn.strip.indexOf('pm-top5')
     && /pm\.top5You/.test(inn.h.innerHTML) && /pm\.top5Reset/.test(inn.h.innerHTML) && !/pm-top5-off/.test(inn.h.innerHTML), inn.strip.slice(-200));
   const out = await draw(minOf(15), [minOf(20), minOf(20), minOf(20), minOf(20), minOf(20)]);
-  check('ranked but out: no medal in the strip; the tile has the dashed medal, "N more min to Top 5" and the period', !/pm-top5/.test(out.strip) && /pm-top5-off/.test(out.h.innerHTML) && /pm\.top5Need/.test(out.h.innerHTML) && /pm\.top5Sub/.test(out.h.innerHTML) && /pm\.top5Off/.test(out.h.innerHTML), out.h.innerHTML.slice(-300));
+  check('ranked but out: no medal in the strip; the tile has the dashed medal, "Not in the Top 5 yet" and "starts over every Monday", and no minutes-to-go line', !/pm-top5/.test(out.strip) && /pm-top5-off/.test(out.h.innerHTML) && /<b>pm\.top5Off/.test(out.h.innerHTML) && /pm\.top5Reset/.test(out.h.innerHTML) && !/pm\.top5(Need|Sub|ToGo)/.test(out.h.innerHTML), out.h.innerHTML.slice(-300));
   const und = await draw(minOf(4), [minOf(20)]);
   check('under 10 minutes: no medal; "Practice 10 min to get ranked" and "N min to go"', !/pm-top5/.test(und.strip) && /pm\.top5Under/.test(und.h.innerHTML) && /pm\.top5ToGo/.test(und.h.innerHTML), und.h.innerHTML.slice(-300));
   const unk = await draw(minOf(15), [minOf(20)], { net: { online: true, denied: false, wbReadDenied: true } });
@@ -1674,7 +1674,7 @@ console.log('14. top 5 of the week');
   check('…every class read asks the server (source "server"): a cached answer is never taken for the class', (off.log.wbQueryOpts || []).length >= 1 && off.log.wbQueryOpts.every((o) => o && o.source === 'server'), JSON.stringify(off.log.wbQueryOpts));
   off.net.online = true; await off.run(35, (i) => { if (i % 10 === 0) off.input('pointerdown'); }); await off.settle();
   const t9 = off.PM._top5();
-  check('…back online it retries within 30 s and the true answer arrives: 9th (8 students have 40 min, I have 15), not in, "25 more min"', !!t9 && t9.top === false && t9.n === 9 && t9.need === 25 && !/pm-top5/.test(off.stripEl.innerHTML), JSON.stringify(t9));
+  check('…back online it retries within 30 s and the true answer arrives: 9th (8 students have 40 min, I have 15), not in', !!t9 && t9.top === false && t9.n === 9 && !/pm-top5/.test(off.stripEl.innerHTML), JSON.stringify(t9));
 
   // R1-2: a Journey tab opened in a new tab never re-reads its week. What is published is the SERVER's week total (read in the transaction), not each page's own copy.
   const shj = shared();
@@ -1885,10 +1885,10 @@ console.log('17. the teacher console\'s Practice minutes view (teacher.js teache
       const min = Math.max(0, Math.round(+c.top5MinMinutes || 0)), mine = Math.floor((weekSecs || 0) / 60);
       const others = othersSecs.map((x) => Math.floor(x / 60)).sort((a, z) => z - a);
       let higher = 0; others.forEach((m) => { if (m > mine) higher++; });
-      const top = mine >= min && higher < 5, need = (!top && mine >= min) ? Math.max(1, others[4] - mine) : 0;
-      return { top, n: higher + 1, under: mine < min, min, toRank: Math.max(0, min - mine), need };
+      const top = mine >= min && higher < 5;   /* 'need' (minutes to catch 5th) left the formula 2026-11-06, on purpose */
+      return { top, n: higher + 1, under: mine < min, min, toRank: Math.max(0, min - mine) };
     };
-    let seed = 20261106; const rnd = () => (seed = (seed * 1103515245 + 12345) % 2147483648) / 2147483648;
+    let seed = 20261106; const rnd = () => (seed = ((Math.imul(seed, 1103515245) + 12345) >>> 0) % 2147483648) / 2147483648;   /* Math.imul: seed * 1103515245 ran past 2^53 and lost its low bits, so the rosters never made a tie at 5th (2026-11-06) */
     const pick = (a) => a[Math.floor(rnd() * a.length)];
     const TIE_MIN = [0, 1, 5, 9, 10, 11, 30, 45, 45, 59, 60, 60, 61, 90, 140];
     const first = calc.parse('2026-11-01').getTime(), last = calc.parse('2027-05-31').getTime();

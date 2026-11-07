@@ -251,8 +251,9 @@
     return { n: (mySecs || 0) < 60 ? null : higher + 1, total: (othersSecs || []).length + 1 };
   };
   /* top5Place(c, myWeekSecs, othersWeekSecs): this week's place inside one class period. top = ranked (at
-     least c.top5MinMinutes this week) and fewer than 5 ahead; under = below that minimum; need = minutes to
-     catch the fifth place (only when ranked and out). */
+     least c.top5MinMinutes this week) and fewer than 5 ahead; under = below that minimum. No "minutes to catch
+     the fifth place": dropped 2026-11-06 (Jonathan: "drop n more minutes entirely") — a big gap only reminds a
+     student how far behind they are. */
   calc.TOP_N = 5;
   calc.top5Place = function(c, myWeekSecs, othersWeekSecs){
     var min = Math.max(0, Math.round(+c.top5MinMinutes || 0)), mine = Math.floor((myWeekSecs || 0) / 60);
@@ -260,8 +261,7 @@
     var higher = 0;
     others.forEach(function(m){ if(m > mine) higher++; });
     var top = mine >= min && higher < calc.TOP_N;
-    var need = (!top && mine >= min) ? Math.max(1, others[calc.TOP_N - 1] - mine) : 0;
-    return { top: top, n: higher + 1, under: mine < min, min: min, toRank: Math.max(0, min - mine), need: need };
+    return { top: top, n: higher + 1, under: mine < min, min: min, toRank: Math.max(0, min - mine) };
   };
 
   /* ════════════════════════════════════════════════════════════════════
@@ -1361,7 +1361,7 @@
     var row, sub;
     if(t.top){ row = tr('pm.top5You', { n: t.n, period: tr(PERIOD_KEYS[t.period]) }); sub = tr('pm.top5Reset'); }
     else if(t.under){ row = tr('pm.top5Under', { n: t.min }); sub = t.toRank === 1 ? tr('pm.top5ToGoOne') : tr('pm.top5ToGo', { n: t.toRank }); }
-    else { row = tr('pm.top5Need', { n: t.need }); sub = tr('pm.top5Sub', { period: tr(PERIOD_KEYS[t.period]) }); }
+    else { row = tr('pm.top5Off'); sub = tr('pm.top5Reset'); }   /* ranked but out: no place, no gap (2026-11-06) */
     return '<div class="pm-tile"><div class="pm-tile-h">' + esc(tr('pm.top5Label')) + '</div>'
       + '<div class="pm-tile-row">' + top5Mark('pm-top5-md' + (t.top ? '' : ' pm-top5-off'), tr(t.top ? 'pm.top5Label' : 'pm.top5Off')) + '<b>' + esc(row) + '</b></div>'
       + '<div class="pm-tile-sub">' + esc(sub) + '</div></div>';

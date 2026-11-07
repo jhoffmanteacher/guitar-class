@@ -689,8 +689,6 @@
     'pm.top5Off':         { en: 'Not in the Top 5 yet', es: 'Todavía no estás en el Top 5' },
     'pm.top5You':         { en: '#{n} in {period}', es: '#{n} en {period}' },
     'pm.top5Reset':       { en: 'Starts over every Monday', es: 'Empieza de nuevo cada lunes' },
-    'pm.top5Need':        { en: '{n} more min to Top 5', es: '{n} min más para el Top 5' },
-    'pm.top5Sub':         { en: '{period}, this week', es: '{period}, esta semana' },
     'pm.top5Under':       { en: 'Practice {n} min to get ranked', es: 'Practica {n} min para tener un lugar' },
     'pm.top5ToGo':        { en: '{n} min to go', es: 'Faltan {n} min' },
     'pm.top5ToGoOne':     { en: '1 min to go', es: 'Falta 1 min' },

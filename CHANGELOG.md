@@ -5,6 +5,10 @@ Notable changes to the Guitar Class site. Newest first.
 For the full session-by-session history (and the reasoning behind each change),
 see `WORKFLOW.md` and the git commit log.
 
+## 2026-11-06 — Top 5 tile: no "minutes to catch up"
+
+- **My progress no longer says how many minutes you need to reach the Top 5.** If you have played 10 minutes this week but are not in the Top 5, the tile just says "Not in the Top 5 yet" and "Starts over every Monday." Under 10 minutes it still says how many minutes until you are ranked.
+
 ## 2026-11-06 — Tuning Simulator: practice reading a tuner before you have a guitar
 
 - **New page: Tuning Simulator.** Open the Tuner and tap **Tuning Simulator** under the tip. You do not need a guitar. It does not use your microphone. The page plays the sound itself.
