@@ -197,7 +197,7 @@ let periodOverride = '';   // config/class.periodOverrides[uid] — teacher's co
    sign-in. practice-minutes.js loads after this file and picks the object up. */
 window.PM_HOST = {
   ui: true,
-  user: () => (typeof IS_TEACHER_MODE !== 'undefined' && IS_TEACHER_MODE) ? null : (auth && auth.currentUser) || null,
+  user: () => ((typeof IS_TEACHER_MODE !== 'undefined' && IS_TEACHER_MODE) || accountPaused) ? null : (auth && auth.currentUser) || null,
   db: () => ensureDb(),
   period: () => periodOverride || studentPeriod || ''
 };
@@ -2157,11 +2157,13 @@ function strumSequence(spec){
 }
 /* ▶ Play clicks (Jonathan, 2026-11-04: "each one should have a play clicks
    option too", then "could play clicks just open the metronome on the site at
-   60bpm?"): opens the rail's Metronome tool at 60 BPM in 4/4 and starts it.
+   60bpm?"), later at the card's own BPM slider: opens the rail's Metronome tool at the
+   slider's tempo (60 if there is none) in 4/4 and starts it.
    It is the student's tool from then on — their own Start/Stop and slider —
    so nothing here stops it (the same rule as caAutoStartMetro). Play strum
-   stops first so the two never sound together. A page without the tool (the
-   teacher console preview) does nothing. */
+   stops first so the two never sound together. The teacher console preview
+   does nothing: the tool sits in the hidden student page, so a metronome
+   started there would click with no Stop on screen. */
 const STRUM_METRO_BPM = 60;
 /* ▶ Play strum (Jonathan, 2026-11-04: "the play strum should have clicks going
    the whole time too to make it clear. the downstrums could have slight
@@ -2171,6 +2173,7 @@ const STRUM_DOWN_GAIN = 1.25;
 const STRUM_UP_GAIN = 0.8;
 const STRUM_CLICK_GAIN = 1.2;
 function strumOpenMetro(btn){
+  if(typeof IS_TEACHER_MODE !== 'undefined' && IS_TEACHER_MODE) return;
   stopPlaySeq();
   /* The card's own BPM slider sets the tempo; STRUM_METRO_BPM is only the fallback. */
   const wanted = btn ? readGroupBpm(btn, STRUM_METRO_BPM) : STRUM_METRO_BPM;
@@ -9925,6 +9928,8 @@ function chcFeedback(st, cls, text){
 function chcAct(key, pick){
   const st = chordCalls[key];
   if(!st || st.phase !== 'play' || st.k >= st.n) return;
+  /* Call mode is answered by naming the chord: a tap on the "?" box with no pick is not an answer (Friday check 2026-11-06). */
+  if(st.M.call && pick == null) return;
   const h = chcNow(st), w = st.wins[st.k], tg = st.M.targets[st.k];
   if(h < w.open){ chcFeedback(st, '', t('chc.fbEarly')); return; }
   if(h > w.at + CHC_GRACE) chcResolve(st, 'late', pick);

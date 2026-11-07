@@ -5,6 +5,16 @@ Notable changes to the Guitar Class site. Newest first.
 For the full session-by-session history (and the reasoning behind each change),
 see `WORKFLOW.md` and the git commit log.
 
+## 2026-11-06 — Fixes from the weekly review
+
+- **Call the Chord: tapping the "?" box no longer counts as an answer.** In the Call steps you have to pick the chord. Before, tapping the box at the right time passed the step without naming anything.
+- **Chord drills no longer say "This step is done."** The step is not ticked until you press **Got it**, so the drills now say "Press Got it to finish this step." (Spanish too.)
+- **Name the Power Chord:** a wrong answer says "The chord is B5, not C5." It said "The root is B5", but the root is B.
+- **Module 8, Challenge 1:** the metronome now clicks the same on every beat, so the direction says counts 1 and 4 are "the first click of every three" instead of "the loud click."
+- **"The cure" lyric sheet (ca-44):** the caption now says C5 and G5 get 2 beats in the refrains and bridge (the rest get 4).
+- **My progress:** the Top 5 medal is read once by a screen reader, not twice.
+- **A paused student no longer earns practice minutes** by moving the mouse on the "Your access is paused" screen.
+
 ## 2026-11-06 — Top 5 tile: no "minutes to catch up"
 
 - **My progress no longer says how many minutes you need to reach the Top 5.** If you have played 10 minutes this week but are not in the Top 5, the tile just says "Not in the Top 5 yet" and "Starts over every Monday." Under 10 minutes it still says how many minutes until you are ranked.

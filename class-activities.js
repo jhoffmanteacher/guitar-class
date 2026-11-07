@@ -6128,8 +6128,8 @@ window.CLASS_ACTIVITIES = [
       sheet: 'sheets/the-cure.pdf',
       sheetColumns: 1,  // one column of chords over lyrics, three pages
       sheetChords: 94,  // chord names on the sheet = chord changes in the notes (checks.mjs 1bf2)
-      caption:    'Lyrics and chords · 4 big beats per chord',
-      caption_es: 'Letra y acordes · 4 tiempos lentos por acorde',
+      caption:    'Lyrics and chords · 4 big beats per chord, 2 for C5 and G5 in the refrains and bridge',
+      caption_es: 'Letra y acordes · 4 tiempos lentos por acorde, 2 para C5 y G5 en los estribillos y el puente',
       sections: null,   // ca-30's — joined after the array, below
       checks: [
         { label: 'The whole song, slower', label_es: 'La canción completa, más lenta',

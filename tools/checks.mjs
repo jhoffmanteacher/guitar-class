@@ -3319,7 +3319,7 @@ function readFieldStrings(file, nameRe) {
 const STUDENT_VALUE_NAME_RE = new RegExp(
   '\\b(text|hint|stuck|levelUp|gotItWhen|explain|forward|subtitle|meta|intro|note|prompt|placeholder|' +
   'label|caption|title|unit|skillFocus|name|module|checklistSub|tabTitle|tabSub|repLabel|bassDirections|' +
-  'choices|choices_es|assessItems|assessItems_es|items|rowLabels|rowLabels_es)(?:_power)?\\s*:\\s*', 'g');   // `_power`: the chord-version twin (caView)
+  'blurb|choices|choices_es|assessItems|assessItems_es|items|rowLabels|rowLabels_es)(?:_power)?\\s*:\\s*', 'g');   // `_power`: the chord-version twin (caView)
 /* The JS files 1w and 1w-t read values from: the module content, class
    activities and — since 2026-10-12 — config-main.js, whose MODULE_MANIFEST
    `name` / `name_es` are the module titles students see on every page (and
@@ -4344,7 +4344,7 @@ function validateClassActivities() {
     if (!/class="play-seq-btn strum-clicks-btn" onclick="strumOpenMetro\(this\)"/.test(appSrc)) { err('1d: buildStrum() no longer draws the ▶ Play clicks button (strum-clicks-btn → strumOpenMetro())'); problems++; }
     if (!/data-clicks="\$\{spec\.bars\.length \* 4\}"/.test(appSrc) || !/down: h\.dir === 'D'/.test(appSrc)) { err('1d: ▶ Play strum no longer carries data-clicks (4 per bar) and a down flag per strum'); problems++; }
     if (!/const nClicks = btnEl && btnEl\.dataset \? parseInt\(btnEl\.dataset\.clicks, 10\) : 0;/.test(appSrc) || !/m\.down === true \? STRUM_DOWN_GAIN : hasBeats && m\.down === false \? STRUM_UP_GAIN/.test(appSrc) || !/const STRUM_DOWN_GAIN = 1\.25;/.test(appSrc) || !/const STRUM_UP_GAIN = 0\.8;/.test(appSrc)) { err('1d: startPlaySequence() no longer clicks every beat for a data-clicks button or accents down strums'); problems++; }
-    if (!/const STRUM_METRO_BPM = 60;/.test(appSrc)) { err('1d: STRUM_METRO_BPM is no longer 60 (Jonathan: Play clicks opens the metronome at 60 BPM)'); problems++; }
+    if (!/const STRUM_METRO_BPM = 60;/.test(appSrc)) { err('1d: STRUM_METRO_BPM is no longer 60 (the fallback tempo for Play clicks when a card has no BPM slider)'); problems++; }
     if (!sm || !/setTimeout\(\(\) => \{ if\(!pop\.classList\.contains\('open'\)\) togglePopup\('metro'\); \}, 0\)/.test(sm[1]) || !/readGroupBpm\(btn, STRUM_METRO_BPM\)/.test(sm[1]) || !/onBpmSlider\(String\(slider\.value\)\)/.test(sm[1]) || !/setMetroMeter\(4\)/.test(sm[1]) || !/startMetro\(\)/.test(sm[1])) { err('1d: strumOpenMetro() must open the Metronome popup, set STRUM_METRO_BPM, put the meter on 4/4 and start it'); problems++; }
     if (!/'strum\.clicks':\s*\{ en: 'Play clicks', es: 'Tocar clics' \}/.test(readFileSync(join(ROOT, 'i18n.js'), 'utf8'))) { err('1d: i18n strum.clicks (Play clicks / Tocar clics) is missing'); problems++; }
   }

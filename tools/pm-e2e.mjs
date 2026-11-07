@@ -610,7 +610,7 @@ await shot('11-top5-toast-en');
 await sleep(3400);
 check('…the toast leaves after about 3 s and is remembered for the week (pm:t5)', await ev(`!document.getElementById('pm-toast') && PM._state().top5Week === ${JSON.stringify(wk5)} && localStorage.getItem('pm:t5:e2e-student') === ${JSON.stringify(wk5)}`));
 const mIn = await medalInfo('pm-header');
-check('the medal is in the header strip after the flame: 22 × 22, Rubik Mono One, lavender #B79CFF, label "Top 5 this week"', mIn && mIn.w === 22 && mIn.h === 22 && /Rubik Mono One/.test(mIn.font) && mIn.color === 'rgb(183, 156, 255)' && mIn.label === 'Top 5 this week' && mIn.after.join() === 'pm-week,pm-streak,pm-top5', mIn);
+check('the medal is in the header strip after the flame: 22 × 22, Rubik Mono One, lavender #B79CFF, label "Top 5 this week"', mIn && mIn.w === 22 && mIn.h === 22 && /Rubik Mono One/.test(mIn.font) && mIn.color === 'rgb(11, 13, 18)' && mIn.label === 'Top 5 this week' && mIn.after.join() === 'pm-week,pm-streak,pm-top5', mIn);
 check('…and the font really loaded (the subset woff2 is in document.fonts)', await ev(`document.fonts.check("12px 'Rubik Mono One'", 'TOP5') && [...document.fonts].some((f) => f.family.replace(/["']/g, '') === 'Rubik Mono One' && f.status === 'loaded')`));
 const hdrRows = [];
 for (const lang of ['en', 'es']) {
@@ -650,7 +650,7 @@ const tile = () => ev(`(() => { const t = [...document.querySelectorAll('#pm-pro
 const openProgress = async () => { await ev(`setLang('en'); location.hash = '#my-progress'`); await sleep(500); };
 const states = [
   ['in', 15, [20, 15, 15, 10, 9], { en: 'Top 5 this week TOP 5 #2 in Period 4 Starts over every Monday', es: 'Top 5 de la semana TOP 5 #2 en Periodo 4 Empieza de nuevo cada lunes', off: false }],
-  ['out', 15, [20, 20, 20, 20, 20, 15], { en: 'Top 5 this week TOP 5 5 more min to Top 5 Period 4, this week', es: 'Top 5 de la semana TOP 5 5 min más para el Top 5 Periodo 4, esta semana', off: true }],
+  ['out', 15, [20, 20, 20, 20, 20, 15], { en: 'Top 5 this week TOP 5 Not in the Top 5 yet Starts over every Monday', es: 'Top 5 de la semana TOP 5 Todavía no estás en el Top 5 Empieza de nuevo cada lunes', off: true }],
   ['under', 4, [20, 15], { en: 'Top 5 this week TOP 5 Practice 10 min to get ranked 6 min to go', es: 'Top 5 de la semana TOP 5 Practica 10 min para tener un lugar Faltan 6 min', off: true }],
 ];
 for (const [name, mine, others, want] of states) {
@@ -668,7 +668,7 @@ await t5Scenario(15, [20, 15, 15, 10, 9]); await ev(`setLang('en'); renderMyProg
 const inCol = await ev(`(() => { const m = document.querySelector('#pm-progress .pm-top5'), cs = getComputedStyle(m); return { color: cs.color, border: cs.borderTopColor, style: cs.borderTopStyle, w: Math.round(m.getBoundingClientRect().width) }; })()`);
 await t5Scenario(15, [20, 20, 20, 20, 20, 15]); await ev(`renderMyProgress()`); await sleep(1000);
 const outCol = await ev(`(() => { const m = document.querySelector('#pm-progress .pm-top5'), cs = getComputedStyle(m); return { color: cs.color, style: cs.borderTopStyle, border: cs.borderTopColor }; })()`);
-check('the tile medal is lavender and solid when in (44 px), grey and dashed when out', inCol.color === 'rgb(183, 156, 255)' && inCol.style === 'solid' && inCol.w === 44 && outCol.style === 'dashed' && outCol.color !== 'rgb(183, 156, 255)', { inCol, outCol });
+check('the tile medal is lavender and solid when in (44 px), grey and dashed when out', inCol.color === 'rgb(11, 13, 18)' && inCol.style === 'solid' && inCol.w === 44 && outCol.style === 'dashed' && outCol.color !== 'rgb(11, 13, 18)', { inCol, outCol });
 /* What the student's page wrote: this week's seconds for period 4 under their private tag (never the uid), nothing else. */
 await t5Scenario(15, [20], true);
 await ev(`(() => { const s = PM._state(); s.loaded = false; s.loading = null; s.wbSent = ''; s.wbAt = 0; return PM.load(); })()`); await sleep(1500);

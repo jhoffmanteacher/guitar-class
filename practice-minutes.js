@@ -1047,7 +1047,7 @@
   /* My place this week, from my live seconds (weekSecs, counted seconds not yet sent included) and the cached board,
      or null while it is not known (no period, the board not read yet, the teacher). Whole minutes decide, like the
      class rank: everyone who reads "12 min" shares a place, and n = 1 + how many have MORE. top = ranked (at least
-     top5MinMinutes) and fewer than calc.TOP_N ahead (calc.top5Place does the counting). need = minutes to catch the fifth place (only when ranked and out). */
+     top5MinMinutes) and fewer than calc.TOP_N ahead (calc.top5Place does the counting). */
   function top5Info(weekSecs){
     var st = S, b = st && st.loaded && st.wb;
     if(!b || isTeacherUser()) return null;
@@ -1363,7 +1363,7 @@
     else if(t.under){ row = tr('pm.top5Under', { n: t.min }); sub = t.toRank === 1 ? tr('pm.top5ToGoOne') : tr('pm.top5ToGo', { n: t.toRank }); }
     else { row = tr('pm.top5Off'); sub = tr('pm.top5Reset'); }   /* ranked but out: no place, no gap (2026-11-06) */
     return '<div class="pm-tile"><div class="pm-tile-h">' + esc(tr('pm.top5Label')) + '</div>'
-      + '<div class="pm-tile-row">' + top5Mark('pm-top5-md' + (t.top ? '' : ' pm-top5-off'), tr(t.top ? 'pm.top5Label' : 'pm.top5Off')) + '<b>' + esc(row) + '</b></div>'
+      + '<div class="pm-tile-row">' + top5Mark('pm-top5-md' + (t.top ? '' : ' pm-top5-off'), tr('pm.top5Label')) + '<b>' + esc(row) + '</b></div>'
       + '<div class="pm-tile-sub">' + esc(sub) + '</div></div>';
   }
   function progressHtml(){

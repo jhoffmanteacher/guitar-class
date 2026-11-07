@@ -5109,7 +5109,10 @@ function micEvalTakePw(pcm, R, d, deps){
   const num = v => typeof v === 'number' && isFinite(v);
   const BPM_MIN = 10, BPM_MAX = 140, ROUNDS = 3, BPCS = [1, 2, 4];
   const endMs = s2ms(N);
-  const inSpan = t => num(t) && t >= -60000 && t <= endMs + 60000;
+  /* A change can fall long after the saved audio ends: the audio is capped at 30 s, and a 3-round song switch at
+     BPM_MIN is 3 x (4 + 32 + 1) beats x 6 s = 666 s. Those are `dropped` (came after the recording stopped), not bad data. */
+  const LATE_MS = ROUNDS * (4 + 8 * 4 + 1) * 60000 / BPM_MIN;
+  const inSpan = t => num(t) && t >= -60000 && t <= endMs + LATE_MS;
   const lat = num(d.micLatencyMs) && Math.abs(d.micLatencyMs) <= 5000 ? d.micLatencyMs : 0;
   const bpc = BPCS.indexOf(d.bpc) >= 0 ? d.bpc : 0;
   const stageBpms = Array.isArray(d.stageBpms) ? d.stageBpms : [];
@@ -5244,14 +5247,14 @@ function micEvalTakePw(pcm, R, d, deps){
         if (onsets.some(on => out(on.ms - want) || (heardBeat != null && Math.abs(on.ms - want) > half && Math.abs(on.ms - heardBeat) <= reach)) ||
             rd.evs.some(ev => out(ev.t - siteAt))) cat = 'off-window';
       }
-      judged.push({ rk, idx, cat, site, rn: Array.isArray(e.readings) ? e.readings.length : null });
+      judged.push({ rk, idx, cat, site, rn: Array.isArray(e.readings) ? e.readings.length : null, saved: 'readings' in e });
       notes.push({ i: num(e.i) ? e.i : k, stage: rd.stage, site, played: !!o, onsetMs: o ? r1(o.ms - want) : null,
         snrDb: r1(dB(pk) - level.floorDb), replay: o ? 'present' : 'none', siteHeard: !!rd.match[idx], gridOffsetMs: r1(goff), why: { cat } });
     });
   });
   /* ── pitch rule: "no readable pitch, no tick", from the readings the take saved (null for an older take) ── */
   let pitch = null;
-  if (judged.some(j => j.rn != null)){
+  if (judged.some(j => j.saved)){
     const right = judged.filter(j => j.site === 'right'), known = right.filter(j => j.rn != null), low = list => list.filter(j => j.rn < 3);
     pitch = { right: right.length, withPitch: known.length - low(known).length, timingOnly: low(known).length, unknown: right.length - known.length,
       falseHits: judged.filter(j => j.cat === 'false-hit').length, agree: judged.filter(j => j.cat === 'agree').length,
