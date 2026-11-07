@@ -4010,7 +4010,7 @@ function ccFinish(complete){
       cc.changes.every(c => c.result !== null || c.pend)) complete = true;
   /* Changes the player never got to are 'miss' only in the data, not strums the mic missed: ccRenderDone leaves them out of the "strum firmer" count.
      That is every change still waiting, and the misses after the last strum the mic heard that fell due in the CC_STOP_REACH_MS before the Stop
-     (ccLoop has already swept those while the hand was going for the Stop button: at 60 BPM a 3 s reach is 3 changes). A finished game, and a song switch
+     (ccLoop has already swept those while the hand was going for the Stop button: at 60 BPM a 3 s reach is 3 changes). A game whose time ran out (ccStageEnd; never a Stop, even one counted as finished above), and a song switch
      stopped in a later round's count-in (that round is left out below), have none. */
   const stopT = performance.now() - coachMicLatencyMs();
   let lastHeard = -1;

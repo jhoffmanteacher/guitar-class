@@ -12531,9 +12531,32 @@ function checkCoachVerdicts() {
       // R3-2: a song switch whose round 1 ended while the hand went for Stop (the count-in has no Stop button): Stop 0.5 s into round 2's play
       const r32 = game(SW, 90, `__t = 25000; __cbs[0](); cc.changes.forEach((c, i) => { c.result = i < 4 ? 'ok' : 'miss'; }); __t = 25000 + 9 * 60000 / 90; ccStageEnd(); __t = cc.listenStart; __cbs[1](); __t += 500; ccFinish(false);`);
       if (r32.txt.includes(HINT) || !r32.html.includes('coach-overall')) flag("1ck R3-2: a song switch Stopped 0.5 s into round 2, round 1's last 3 changes swept while the hand went for Stop, tells the student to strum firmer");
-      // the natural end keeps its misses: a soft strummer at 60 BPM whose last 5 changes were not heard, played to the end
+      // the natural end keeps its misses: a soft strummer at 60 BPM whose last 3 changes were not heard, played to the end
       const nat = game(PAIR, 60, `__t = 25000; __cbs[0](); cc.changes.forEach((c, i) => { c.result = i < 12 ? 'ok' : 'miss'; }); __t = 25000 + 17000; ccStageEnd();`);
       if (!nat.txt.includes(HINT)) flag('1ck R3: a game played to the end with its last 3 strums not heard (all in the last 4 s) no longer shows the hint');
+      // Song-switch round boundaries (review round 4): the previous round's tail gets the window only when nothing of the current round was heard, and only
+      // the round just before; the round-end time is refreshed every round and every game. res() sets results by index (undefined = not reached).
+      const res = arr => `cc.changes.forEach((c, i) => { c.result = ${JSON.stringify(arr)}[i] === undefined ? null : ${JSON.stringify(arr)}[i]; });`;
+      const toR2 = (arr, bpm) => `__t = 25000; __cbs[0](); ${res(arr)} __t = 25000 + 9 * 60000 / ${bpm}; ccStageEnd(); __t = cc.listenStart; __cbs[1]();`;
+      const sw = (name, bpm, body, wantHint) => {
+        const g = game(SW, bpm, body);
+        if (!g.html.includes('coach-overall') || g.txt.includes(HINT) !== wantHint) flag(`1ck round boundary: ${name} ${wantHint ? 'no longer shows' : 'shows'} the strum-firmer hint`);
+        return g;
+      };
+      const ok7 = Array(7).fill('ok'), tail3 = ['ok', 'ok', 'ok', 'ok', 'miss', 'miss', 'miss'];
+      sw("a song switch at 90 BPM Stopped 0.5 s into round 3 after round 2's last 3 changes were swept while the hand went for Stop", 90,
+        `${toR2(ok7, 90)} ${res(tail3)} __t = cc.listenStart + 9 * 60000 / 95; ccStageEnd(); __t = cc.listenStart; __cbs[2](); __t += 500; ccFinish(false);`, false);
+      sw("a song switch at 30 BPM Stopped 0.5 s into round 3 with round 2's last 3 changes swept (only the last is inside the window)", 30,
+        `${toR2(ok7, 30)} ${res(tail3)} __t = cc.listenStart + 9 * 60000 / 35; ccStageEnd(); __t = cc.listenStart; __cbs[2](); __t += 500; ccFinish(false);`, true);
+      sw("an Again game (same cc, a second game) Stopped 0.5 s into its round 2 after unheard strums", 30,
+        `${toR2(ok7, 30)} __t += 500; ccFinish(false); cc.phase = 'setup'; cc.micOn = true; cc.firstPlayAt = null; cc.unreached = 0; __cbs = []; __t = 200000; ccPrepare(true); ccBeginStage();
+         __t = 224000; __cbs[0](); ${res(tail3)} __t = 224000 + 9 * 2000; ccStageEnd(); __t = cc.listenStart; __cbs[1](); __t += 500; ccFinish(false);`, true);
+      sw("a song switch with a strum heard in round 2 (an open check) before the Stop and 3 unheard strums at the end of round 1", 90,
+        `${toR2(tail3, 90)} cc.changes[0].pend = { t: __t + 630, readings: [] }; __t += 700; ccFinish(false);`, true);
+      sw("a song switch whose round 1 has a miss before a heard strum (ok), Stopped 0.5 s into round 2", 90,
+        `${toR2(['ok', 'miss', 'ok', 'ok', 'miss', 'ok', 'miss'], 90)} __t += 500; ccFinish(false);`, true);
+      sw("a song switch whose round 1 has a miss before a heard wrong chord (off), Stopped 0.5 s into round 2", 90,
+        `${toR2(['ok', 'miss', 'ok', 'ok', 'miss', 'off', 'miss'], 90)} __t += 500; ccFinish(false);`, true);
     }
     {
       // near the top: a song switch cannot start above 130, so the Again row and its button must say 130 after a perfect game at 140
@@ -12638,7 +12661,7 @@ function checkCoachVerdicts() {
     if (pk !== 'ccBest:F5-G5:beat') flag(`1ck: a pair's best-score key changed to "${pk}" (a student's saved bests would be lost)`);
     const pairPlan = JSON.parse(run(`JSON.stringify(ccRoundPlan(CC_POWER_PROGRESSIONS[1], CC_POWER_PROGRESSIONS[1].chords, CC_RATES[1]))`));
     if (pairPlan.slots !== 12 || pairPlan.ladder || pairPlan.rounds !== 1) flag(`1ck: a pair's round changed (${pairPlan.slots} slots at "Every 2 beats", expected 12, one round)`);
-    const SONG_PIN = { recChecks: 20, readingChecks: 21, ratioChecks: 165, hintChecks: 20, stopChecks: 26, songs: 2, entries: 16, cardSwitches: 16, hints: 16 * 7 * 2, setups: 16 * 3 * 2, dones: 16 * 2, rounds: 16 * 3, nudges: 16 * 2 };
+    const SONG_PIN = { recChecks: 20, readingChecks: 21, ratioChecks: 165, hintChecks: 20, stopChecks: 32, songs: 2, entries: 16, cardSwitches: 16, hints: 16 * 7 * 2, setups: 16 * 3 * 2, dones: 16 * 2, rounds: 16 * 3, nudges: 16 * 2 };
     for (const [k, n] of Object.entries(SONG_PIN)) if (song[k] !== n) flag(`1ck: ${song[k]} ${k}, pinned ${n} — the check went partly blind (or grew: re-pin on purpose)`);
     songCounts = song;
     run(`setLang('en'); cc = null; ccStop();`);

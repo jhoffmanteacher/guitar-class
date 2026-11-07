@@ -3847,7 +3847,7 @@ noisy rooms.
   mic." / "No se oyeron algunos rasgueos. Rasguea un poco más fuerte y mantén la guitarra cerca del micrófono."), the headline
   is the plain `games.cc.verdict.ok` ("N of M changes worked") instead of "this speed is too fast for now", and the big
   button is "Again" at the same speed instead of "-5 BPM". A Stop leaves out of "no strum heard" the changes the student never
-  reached and the misses after the last strum the mic heard that fell due in the last 4 s before the Stop (`cc.unreached`, `CC_STOP_REACH_MS`; 2026-11-07, review round 2:
+  reached and the misses after the last strum the mic heard that fell due in the last 4 s before the Stop; also after the last change was swept (a Stop is never a natural end), and across a song switch's rounds, where the count-in before the next round's play screen is not counted (the click can only land there) (`cc.unreached`, `CC_STOP_REACH_MS`; 2026-11-07, review round 2:
   at 60 BPM a 3 s reach to the Stop button is 3 changes). It replaces the line in place (same height, one line at 1366x657,
   both languages, pairs and the 21-change song switch). One miss alone, a tie, mostly wrong chords, 85% and better, and
   Change Up keep what they had. The condition is decided once, before the headline (`firmer` in `ccRenderDone`). Check 1ck
