@@ -55,10 +55,27 @@ For each confirmed finding, decide:
   screenshots at 1366×657, Spanish twin, CHANGELOG line if students see it).
   Commit message trailer: `Review: Friday check` (not `Review: Fast`). Before
   pushing, `git fetch` and confirm it's a fast-forward.
-- **Push a branch, don't merge** — when the fix itself would be always-Reviewed
-  (a danger-zone file, a new kind of check, moving/adding/removing a section or
-  step). Run `site-reviewer-deep` on it, push it as `friday-check/<YYYY-MM-DD>`,
-  and say in the report it's waiting for Jonathan.
+- **Fix on a branch, review it, then merge it — all in this run** — when the
+  fix itself is always-Reviewed (a danger-zone file such as `coach.js`, a new
+  kind of check, moving/adding/removing a section or step). Jonathan's
+  standing order (2026-11-07): these reviews happen automatically, he is not
+  asked to start them and the fix does not wait for him.
+  1. Work on branch `friday-check/<YYYY-MM-DD>` (a worktree if another session
+     could be using the checkout), rebased on current `origin/main`.
+  2. Run `site-reviewer-deep` on the fix commit, briefed to try to BREAK it
+     (round 1 of the 2026-11-06 coach.js fix found a real regression and six
+     guards that did not bite). Read its quoted lines yourself, fix what you
+     confirm, prove each new guard goes red when its fix is broken, and run a
+     fresh `site-reviewer-deep` round on the new commit. Repeat until a round
+     finds nothing real, at most 3 rounds.
+  3. A clean round → rebase on `origin/main`, full `node tools/checks.mjs`,
+     fast-forward push to `main`, and `checks.mjs --live` as in step 4.
+     Commit trailer `Review: Friday check`.
+  4. Still not clean after 3 rounds, or a finding that is a product call → do
+     NOT merge: push the branch, put the open finding in WORKFLOW.md's Open
+     work, and say in the report that it is waiting for Jonathan and why.
+  A cloud session cannot start sub-agents the same way: if `site-reviewer-deep`
+  cannot be run, push the branch and report it as waiting (the old behaviour).
 - **Report only, no code** — when the fix is a teaching or content call
   (which notes, which rhythm, what the directions should say), would reverse
   a decision Jonathan made, or you're not sure it's a bug. Add it to

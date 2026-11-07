@@ -3498,8 +3498,10 @@ screenshot checklist — then:
 - **No trigger → no trailer.** Ship as usual.
 - **Friday check:** a scheduled cloud task, Fridays 11:00 PM Pacific, runs
   skill `friday-check` — `site-reviewer` on every `Review: Fast` commit since
-  the last `friday-check-*` tag, fixes pushed to `main`, always-Reviewed fixes
-  on a branch, content calls to Open work, then a new dated tag.
+  the last `friday-check-*` tag, fixes pushed to `main`; an always-Reviewed fix (e.g. coach.js)
+  goes on a branch, gets `site-reviewer-deep` rounds automatically (2026-11-07, Jonathan: reviews
+  happen on their own) and is merged to `main` in the same run once a round finds nothing real
+  (it waits only after 3 rounds or on a product call); content calls to Open work, then a new dated tag.
 
 **Effort per task.** Agents in `.claude/agents/` pin their own effort (auditor, fixer, `site-reviewer` high; `site-reviewer-deep` extra high). For a general-purpose agent pass `effort: "xhigh"` for a review the Triggers send to `site-reviewer-deep`, `"high"` for any other review, auditor or fixer; never `max`. Your own session: `medium` routine edits, `high` bug fixes / shipped JS / keyed-MC content, `xhigh` danger-zone files and sweeps — if the task is a tier higher than the session, say so and ask for `/effort`. Full text: `WORKFLOW.md`.
 
