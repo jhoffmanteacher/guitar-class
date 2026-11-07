@@ -1114,6 +1114,9 @@ wordings, no Note Runner mic check (see "Later (not chosen yet)").
       N3 1cg scanned only the view's block (now the whole of teacher.js: one `collection('minutes')`, no `minutes/` path
       string, no collection/doc call naming days, meta, rankBoard or weekBoard); N4 1cg missed a roster built from the
       filtered rows or from allStudentsRaw directly, and `teacherPmPeriod` was not run (both pinned; it is run on 13 values).
+      **Round 3** confirmed N1–N4 (Manage's order identical to base on 16,171 random rosters) and left one realistic gap,
+      fixed: `collectionGroup` and a spaced `.collection (` are now banned in the whole of teacher.js. Left on purpose
+      (needs a deliberately disguised read in our own code): collection names held in variables.
 - [x] **2026-11-04 — Practice minutes: Top 5 of the week, by class period (needs a `firestore.rules` paste).**
       A "TOP 5" medal in the strip, a once-a-week toast and a fifth My progress tile for the students with the most minutes THIS ISO week inside
       their own class period; ties share a place; 10 minutes needed (`top5MinMinutes`); each student sees only their own place.

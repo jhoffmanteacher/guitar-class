@@ -13260,6 +13260,10 @@ function checkPracticeMinutes(i18nTable) {
       const nMin = (tsrc.match(/collection\(\s*['"`]minutes['"`]\s*\)/g) || []).length;
       const pathStr = tsrc.match(/['"`]\/?minutes\//g) || [];
       const sub = tsrc.match(/(?:collection|doc|collectionGroup)\(\s*['"`][^'"`]*\b(?:days|meta|rankBoard|weekBoard)\b/g) || [];
+      /* collectionGroup anywhere in teacher.js (it would need a wildcard-first rule; the rules refuse it, so it would fail quietly),
+         and a space before a collection/doc call's parenthesis (a spelling the patterns above would not see): both 0 (round-3 review). */
+      if (/collectionGroup/.test(tsrc)) fail('teacher.js uses collectionGroup: the rules have no wildcard-first match (1cg) — read minutes/{uid}/weeks per student');
+      if (/\.(?:collection|doc|collectionGroup)\s+\(/.test(tsrc)) fail('teacher.js writes a collection/doc call with a space before "(": write it as .collection(…) so 1cg can read the path');
       if (nMin !== 1 || pathStr.length || sub.length) fail(`teacher.js reads practice minutes outside minutes/{uid}/weeks: collection('minutes') ${nMin} time(s) (1 allowed)${pathStr.length ? ', a minutes/ path string' : ''}${sub.length ? ', ' + sub.join(' ; ') : ''}`);
     }
     const blk = /\nconst TEACHER_PM_CONCURRENCY=[\s\S]*?\nfunction teacherSetMinutesSort\(/.exec(tsrc);
