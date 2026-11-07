@@ -239,7 +239,7 @@ see `WORKFLOW.md` and the git commit log.
 
 ## 2026-11-02 — Power chords in time: the whole chord shows
 
-- **Power Chords on the Low E and A Strings in Time: the answer shows the whole chord.** When the answer comes up, the board now lights the root, the 5th and the octave, not just the root fret.
+- **Power Chords on the Low E and A Strings in Time: the answer shows the whole chord.** When the answer comes up, the board now lights the root, the 5th and the octave, not just the root fret. The board stops at fret 12, so a root on fret 11 or 12 lights only the root (4 of the 10 cards in "Frets 8 to 12"). The line under the board still says which fret the 5th is on.
 - **Play along starts at 30 BPM** (it was 20) for this activity. Anyone who already picked a speed keeps it.
 
 ## 2026-11-02 — Power Chord Switch setup, practice minutes wording
