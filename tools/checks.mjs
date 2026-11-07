@@ -12396,10 +12396,10 @@ function checkCoachVerdicts() {
        rendered in both languages: the hint replaces the tempo advice when at least two changes went unheard and they outnumber the "chord sounded wrong"
        ones, below 85% right, in Power Chord Switch only; a single miss, a tie, mostly wrong chords, a game at 85% or better and Change Up keep what they had. */
     song.hintChecks = 0;
-    const doneText = (mode, lang, results, stopped) => {
+    const doneText = (mode, lang, results) => {
       const [f, g] = mode === 'power' ? ['F5', 'G5'] : ['C', 'G'];
       run(`micRec = null; setLang(${JSON.stringify(lang)}); ccSetup(${JSON.stringify(mode)}); cc.bpm = 60; ccPickRate(2); ccPickProg(1); ccPrepare(false); ccBeginStage(); cc.phase = 'play';
-        cc.changes = ${JSON.stringify(results.map((r, i) => ({ from: i % 2 ? g : f, to: i % 2 ? f : g, result: r })))}; cc.nextBpm = null; cc.stoppedEarly = ${!!stopped}; ccRenderDone();`);
+        cc.changes = ${JSON.stringify(results.map((r, i) => ({ from: i % 2 ? g : f, to: i % 2 ? f : g, result: r })))}; cc.nextBpm = null; cc.unreached = 0; ccRenderDone();`);
       const html = bodies['cc-body'] || '';
       /* Change Up: the highlighted one of its three buttons (ccAgain's argument). Power Chord Switch has one Again button and a −5 / +5
          row (2026-11-05): what it recommends is the tempo that row opens on, minus the tempo just played; the row's readout and the
@@ -12440,14 +12440,6 @@ function checkCoachVerdicts() {
         song.hintChecks++;
       }
     }
-    /* A Stopped game (Friday check 2026-11-06): the changes never reached are 'miss' in the data, but the mic did not miss them, so the
-       done screen must not tell the student to strum firmer. The same results after a game played to the end still show the hint. */
-    for (const lang of ['en', 'es']) {
-      const stopTxt = doneText('power', lang, [...times(4, 'ok'), ...times(12, 'miss')], true).txt.replace(/\s+/g, ' '), endTxt = doneText('power', lang, [...times(4, 'ok'), ...times(12, 'miss')], false).txt.replace(/\s+/g, ' ');
-      if (stopTxt.includes(WORDS[lang].hint)) flag(`1ck (${lang}): a Stopped game (4 right, the rest never reached) tells the student to strum firmer`);
-      if (!endTxt.includes(WORDS[lang].hint)) flag(`1ck (${lang}): a finished game with 12 of 16 not heard no longer shows the firmer hint`);
-      song.hintChecks++;
-    }
     run("setLang('en');");
     /* Save on Stop (2026-11-04): a Stopped game with enough audio is saved, marked complete:false; one with almost none is dropped,
        because each student has ONE take per game and a new take overwrites it. */
@@ -12463,6 +12455,57 @@ function checkCoachVerdicts() {
     if (!/const MICREC_MIN_STOPPED_SEC = 10;/.test(readFileSync(join(ROOT, 'coach.js'), 'utf8'))) flag('1ck: MICREC_MIN_STOPPED_SEC is no longer 10');
     const cu = take('open', 'ccFinish(true);');
     if (cu.saves.length !== 0 || cu.starts !== 0) flag(`1ck: Change Up started ${cu.starts} captures and saved ${cu.saves.length} takes — it must never record`);
+    /* Real games, Friday check 2026-11-06 (reviewed round 1: the hand-set fields above let six breaks of the Stop fixes through). A game is
+       started with the real ccPrepare / ccBeginStage, the count-in's OWN callback is fired at a faked clock (so firstPlayAt is set by the code,
+       not by this check), and the Stop is the real ccFinish(false). What a Stop must do: save only after MICREC_MIN_STOPPED_SEC (10 s) of play
+       counted from the first count-in's end, in a pair and across a song switch's rounds; say "strum firmer" for changes the mic really missed and
+       not for changes the student never got to; and a song switch near the top must show the tempo it will really play. */
+    song.stopChecks = 0;
+    run(`globalThis.__keepCI = coachCountIn; globalThis.__keepPN = performance.now; globalThis.__t = 1000; globalThis.__cbs = [];
+      coachCountIn = (st, id, cb) => { st.listenStart = __t; __cbs.push(cb); }; performance.now = () => __t;`);
+    const PAIR = 1, SW = SONGS[0].idx;
+    const game = (prog, bpm, body) => {
+      run(`micRec = null; __saves = []; __starts = 0; __cbs = []; __t = 1000; setLang('en'); currentUser = { uid: 'pw-check' }; games = {}; ccSetup('power'); cc.micOn = true; ccPickRate(2); ccPickProg(${prog}); cc.bpm = ${bpm};
+        ccPrepare(false); cc.firstPlayAt = null; cc.unreached = 0; ccBeginStage(); ${body}`);
+      song.stopChecks++;
+      return { saves: JSON.parse(run('JSON.stringify(__saves)')), txt: text('cc-body').replace(/\s+/g, ' '), html: bodies['cc-body'] || '' };
+    };
+    // the count-in ends at 25 s (the 24 s count-in of 10 BPM), play runs from there; results[i] null = a change the student never got to
+    const play = (results, playSec) => `__t = 25000; __cbs[0](); cc.changes.forEach((c, i) => { c.result = ${JSON.stringify(results)}[i] === undefined ? null : ${JSON.stringify(results)}[i]; }); __t = ${25000 + playSec * 1000}; ccFinish(false);`;
+    const HINT = 'Strum a little firmer';
+    const n4 = Array(4).fill('ok');
+    for (const [playSec, want] of [[20, 1], [10, 1], [9.9, 0], [1.6, 0]]) {
+      const g = game(PAIR, 10, play(n4, playSec));
+      if (g.saves.length !== want) flag(`1ck: a pair Stopped ${playSec} s into play (count-in over at 25 s) saved ${g.saves.length} takes, expected ${want} (10 s of play saves)`);
+      if (g.saves.length === 1 && g.saves[0].fields.complete !== false) flag('1ck: a Stopped take is not marked complete:false');
+    }
+    {
+      // 4 right then Stop: the 11 changes never reached are not strums the mic missed; 2 right, 10 not heard, then Stop: the mic did miss those
+      const reached = game(PAIR, 30, play(n4, 20)), missed = game(PAIR, 30, play(['ok', 'ok', ...Array(10).fill('miss')], 20));
+      if (reached.txt.includes(HINT)) flag('1ck: a Stopped game (4 right, 11 changes never reached) tells the student to strum firmer');
+      if (!missed.txt.includes(HINT)) flag('1ck: a Stopped game with 10 strums graded "no strum heard" no longer shows the strum-firmer hint (Stop hid a true hint)');
+    }
+    {
+      // a song switch: the 10 s run from the FIRST count-in's end, across rounds (round 2's own count-in is not a fresh start)
+      const sw2 = game(SW, 30, `__t = 25000; __cbs[0](); cc.changes.forEach(c => { c.result = 'ok'; }); __t = 40000; ccStageEnd(); __cbs[1](); __t = 45000; ccFinish(false);`);
+      if (sw2.saves.length !== 1) flag(`1ck: a song switch Stopped 5 s into round 2 (20 s after the first count-in) saved ${sw2.saves.length} takes, expected 1`);
+      const ci = game(SW, 30, `__t = 25000; __cbs[0](); cc.changes.forEach(c => { c.result = 'ok'; }); __t = 45000; ccStageEnd(); ccFinish(false);`);
+      if (ci.saves.length !== 1) flag(`1ck: a song switch Stopped in round 2's count-in (20 s of play before it) saved ${ci.saves.length} takes, expected 1`);
+      if (ci.txt.includes(HINT)) flag("1ck: a song switch Stopped in round 2's count-in tells the student to strum firmer (round 2 was never played)");
+      const r2 = game(SW, 30, `__t = 25000; __cbs[0](); cc.changes.forEach(c => { c.result = 'ok'; }); __t = 40000; ccStageEnd(); __cbs[1](); cc.changes.forEach((c, i) => { c.result = i === 0 ? 'ok' : 'miss'; }); __t = 45000; ccFinish(false);`);
+      if (!r2.txt.includes(HINT)) flag('1ck: a song switch Stopped in round 2 after 6 strums were not heard no longer shows the strum-firmer hint');
+    }
+    {
+      // near the top: a song switch cannot start above 130, so the Again row and its button must say 130 after a perfect game at 140
+      const top = game(SW, 140, `__t = 25000; __cbs[0](); for (let k = 0; k < 3; k++) { cc.changes.forEach(c => { c.result = 'ok'; }); ccStageEnd(); if (k < 2) __cbs[k + 1](); }`);
+      const shown = (/id="cc-done-bpm">(\d+) BPM</.exec(top.html) || [])[1], label = run('ccDoneAgainText()'), played = run('JSON.stringify(ccLadderBpms(cc.nextBpm))');
+      if (shown !== '130' || !String(label).includes('130') || played !== '[130,135,140]') flag(`1ck: after a perfect song switch at the top the done screen reads ${shown} BPM, its button "${label}", and Again plays ${played}; want 130 and [130,135,140]`);
+    }
+    // ccStart cannot be run here (it waits for the microphone), so the two resets it must make are pinned by their text
+    const ccStartSrc = jsFunctionBody(cSrc2, 'ccStart') || '';
+    for (const line of ['cc.firstPlayAt = null;', 'cc.unreached = 0;'])
+      if (!ccStartSrc.includes(line)) flag(`1ck: ccStart no longer contains "${line}" (a second game would inherit the first game's play time or never-reached count)`);
+    run(`coachCountIn = __keepCI; performance.now = __keepPN; micRec = null; cc = null; ccStop();`);
     /* The red label is on every screen of a recorded take (each screen replaces #cc-body); every round starts on a clean grid (a leftover
        gridOffset or onset time from round 1 would grade round 2 late); a ladder is always three rising tempos; and a student who said yes is not
        told "nothing is recorded" on any Power Chord Switch screen (Change Up, which never records, still says it). */
@@ -12544,7 +12587,7 @@ function checkCoachVerdicts() {
     if (pk !== 'ccBest:F5-G5:beat') flag(`1ck: a pair's best-score key changed to "${pk}" (a student's saved bests would be lost)`);
     const pairPlan = JSON.parse(run(`JSON.stringify(ccRoundPlan(CC_POWER_PROGRESSIONS[1], CC_POWER_PROGRESSIONS[1].chords, CC_RATES[1]))`));
     if (pairPlan.slots !== 12 || pairPlan.ladder || pairPlan.rounds !== 1) flag(`1ck: a pair's round changed (${pairPlan.slots} slots at "Every 2 beats", expected 12, one round)`);
-    const SONG_PIN = { recChecks: 20, readingChecks: 21, ratioChecks: 165, hintChecks: 22, songs: 2, entries: 16, cardSwitches: 16, hints: 16 * 7 * 2, setups: 16 * 3 * 2, dones: 16 * 2, rounds: 16 * 3, nudges: 16 * 2 };
+    const SONG_PIN = { recChecks: 20, readingChecks: 21, ratioChecks: 165, hintChecks: 20, stopChecks: 10, songs: 2, entries: 16, cardSwitches: 16, hints: 16 * 7 * 2, setups: 16 * 3 * 2, dones: 16 * 2, rounds: 16 * 3, nudges: 16 * 2 };
     for (const [k, n] of Object.entries(SONG_PIN)) if (song[k] !== n) flag(`1ck: ${song[k]} ${k}, pinned ${n} — the check went partly blind (or grew: re-pin on purpose)`);
     songCounts = song;
     run(`setLang('en'); cc = null; ccStop();`);
@@ -12553,7 +12596,7 @@ function checkCoachVerdicts() {
   for (const [k, n] of Object.entries(EXPECT)) {
     if (counts[k] !== n) flag(`1ca: rendered ${counts[k]} ${k}, pinned ${n} — the check went partly blind (or grew: re-pin EXPECT on purpose)`);
   }
-  if (bad === 0 && songCounts) { head('1ck. Power Chord Switch song switches: each activity is checked against its card and the three rounds are run'); ok(`${songCounts.songs} songs, ${songCounts.entries} switch activities (${songCounts.cardSwitches} distinct card switches, each once; Sweet Child's open A5 only next to C5/B5/E5, the fret-5 A5 only next to G5, same pitches as A5); the ladder run for every one (${songCounts.rounds} round changes: 60/75/90 BPM, 21 changes, the BPM buttons ${songCounts.nudges} times: only later rounds, 40..140, off in the last); ${songCounts.hints} "next:" hints (EN+ES) match the diagrams, ${songCounts.setups} setup and ${songCounts.dones} done screens never show the key "A5o", the computer never picks a song, best keys are per switch and the pair keys are unchanged; a saved take carries each change's pitch readings (${songCounts.readingChecks} of 21 changes read back: no strum null, strum with no pitch [], four readings rounded; grading unchanged); the real ccLoop run on scripted frames: Power Chord Switch grades a strum with its own ratios (2.2 / 2.67) and Change Up with the shared ones (1.4 / 1.7) — ${songCounts.ratioChecks} runs just below and above every threshold: Change Up as a pair and as the computer's pick at three speeds, and Power Chord Switch as a song switch (all three rounds), a pair and the computer's pick at three speeds, with a recording live and without; the two lines that choose the ratios are pinned by text; and the saved take records the ratios; the done screen's "strum a little firmer" hint shows exactly when it is true (${songCounts.hintChecks} renders, EN + ES: nothing heard, many heard, a single miss, a tie, mostly wrong chords, 85% and better, Change Up)`); }
+  if (bad === 0 && songCounts) { head('1ck. Power Chord Switch song switches: each activity is checked against its card and the three rounds are run'); ok(`${songCounts.songs} songs, ${songCounts.entries} switch activities (${songCounts.cardSwitches} distinct card switches, each once; Sweet Child's open A5 only next to C5/B5/E5, the fret-5 A5 only next to G5, same pitches as A5); the ladder run for every one (${songCounts.rounds} round changes: 60/75/90 BPM, 21 changes, the BPM buttons ${songCounts.nudges} times: only later rounds, 40..140, off in the last); ${songCounts.hints} "next:" hints (EN+ES) match the diagrams, ${songCounts.setups} setup and ${songCounts.dones} done screens never show the key "A5o", the computer never picks a song, best keys are per switch and the pair keys are unchanged; a saved take carries each change's pitch readings (${songCounts.readingChecks} of 21 changes read back: no strum null, strum with no pitch [], four readings rounded; grading unchanged); the real ccLoop run on scripted frames: Power Chord Switch grades a strum with its own ratios (2.2 / 2.67) and Change Up with the shared ones (1.4 / 1.7) — ${songCounts.ratioChecks} runs just below and above every threshold: Change Up as a pair and as the computer's pick at three speeds, and Power Chord Switch as a song switch (all three rounds), a pair and the computer's pick at three speeds, with a recording live and without; the two lines that choose the ratios are pinned by text; and the saved take records the ratios; the done screen's "strum a little firmer" hint shows exactly when it is true (${songCounts.stopChecks} real games (the count-in's own callback at a faked clock, the real Stop: saved only after 10 s of play, across a song switch's rounds; "strum firmer" for strums the mic missed and not for changes never reached; the top song switch says 130), ${songCounts.hintChecks} renders, EN + ES: nothing heard, many heard, a single miss, a tie, mostly wrong chords, 85% and better, Change Up)`); }
   if (bad === 0) ok(`${counts.reports} Coach reports, ${counts.descs} chord-card descriptions, ${counts.nrLevels} Note Runner levels ×2 and ${counts.doneScreens} arcade done screens read true; Power Chord Switch: ${counts.pwLoops} loops are three-finger shapes in the right group, ${counts.pwDraws} random draws all listed pairs (11 of 11 and both orders seen), the Again button replays the pair and Start draws, Start sticks in Change Up and not in Power Chord Switch (two columns that fit 657px), Every beat is the first speed button there, the live quiz keeps its 760px shell, ${counts.pwHints} slide hints match the diagrams (EN+ES), ${counts.pwViews} screens/rounds, ${counts.pwMemory} remembered tempo/speed pairs and ${counts.pwGates} pitch gates keep it apart from Change Up; the way back to the chords is one \u25C0 Pick different chords button, first on the songs view and the done screen, run and found absent where it must be (${counts.pwBack} screens, EN + ES); tempo controls: setup −5 +5 and a 10..140 slider in steps of 5, the live change keeps the beat the student is on (re-anchored, exact on a fixed clock), holds 30..140, counts the round at its lowest tempo, moves a song switch's later rounds by the same amount, and the saved take says so (${counts.pwLive} assertions)`);
 }
 

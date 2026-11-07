@@ -11,8 +11,8 @@ see `WORKFLOW.md` and the git commit log.
 
 ## 2026-11-06 — Power Chord Switch: Stop, saved takes and the Again tempo
 
-- **Stopping a game early no longer says "Strum a little firmer."** The changes you never got to are not strums the mic missed.
-- **A slow game you stop right away no longer replaces your saved take.** The take is saved only after 10 seconds of playing (the count-in does not count; at 10 BPM it alone lasts 24 seconds).
+- **Stopping a game early no longer says "Strum a little firmer" for changes you never got to.** Changes you did play where the mic heard no strum still get the hint.
+- **Stopping a game right away no longer replaces your saved take.** The take is saved only after 10 seconds of playing, counted from the end of the first count-in (at 10 BPM the count-in alone lasts 24 seconds). Stopping a game sooner than that saves nothing, at any tempo.
 - **The Again tempo in a song switch stops at 130 BPM.** A song switch goes up in steps of 5 over three rounds, so 135 played as 130 while the button said 135.
 
 ## 2026-11-06 — Fixes from the weekly review

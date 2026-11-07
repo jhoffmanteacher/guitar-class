@@ -3559,7 +3559,7 @@ async function ccStart(again){
   cc.phase = 'starting';
   cc.nextBpm = null;   // the done screen's tempo row opens fresh after each game (ccRenderDone)
   cc.firstPlayAt = null;
-  cc.stoppedEarly = false;
+  cc.unreached = 0;
   if (!coachStream && !(await coachAcquireMic())){
     if (cc === session){ cc.phase = 'setup'; ccRenderSetup(coachMicFailMsg('games.cc.micDenied')); }
     return;
@@ -4005,6 +4005,9 @@ function ccFinish(complete){
      Stop with a change still ahead of the player stays an early Stop. */
   if (!complete && cc.phase === 'play' && (!cc.ladder || cc.stage >= CC_LADDER_ROUNDS - 1) &&
       cc.changes.every(c => c.result !== null || c.pend)) complete = true;
+  /* Changes the player never got to are 'miss' only in the data, not strums the mic missed: ccRenderDone leaves them out of the "strum firmer" count.
+     A song switch stopped in a later round's count-in leaves that round out altogether (below), so it has none. */
+  cc.unreached = cc.ladder && cc.phase === 'countin' && cc.stage > 0 ? 0 : cc.changes.filter(c => c.result === null && !c.pend).length;
   cc.changes.forEach(c => {
     if (c.pend) ccResolvePend(c);
     if (c.result === null) c.result = 'miss';
@@ -4018,7 +4021,6 @@ function ccFinish(complete){
   const rec = ccIsPower() ? micRecStop() : null;   // before coachMicOff, which drops a running capture
   if (cc.micOn){ coachMicOff(); cc.micOn = false; }
   cc.phase = 'done';
-  cc.stoppedEarly = !complete;   // ccRenderDone: changes never reached are 'miss' only in the data, not strums the mic missed
   const oldBest = (games[ccGameKey()] && games[ccGameKey()].bestBpm) || 0;
   // New-best only counts on a run clean enough to save — ccRenderDone's
   // r >= 0.85 branch is what writes games.cc.bestBpm (games.pw for Power
@@ -4064,8 +4066,8 @@ function ccRenderDone(){
      that was not heard. The advice says to strum a little firmer; the headline is the plain "N of M changes worked"; the big button is "Again"
      at the same speed. One miss alone is not enough (it may be a slip), and a game at 85% or better keeps its "Level up". Change Up keeps all
      of it. */
-  const unheard = total - ok - off;
-  const firmer = ccIsPower() && !cc.stoppedEarly && r < 0.85 && unheard >= 2 && unheard > off;
+  const unheard = total - ok - off - (cc.unreached || 0);   // not the changes a Stop left unplayed
+  const firmer = ccIsPower() && r < 0.85 && unheard >= 2 && unheard > off;
   let verdict, advice;
   if (r >= 0.85){
     verdict = '&#x1F31F; ' + t('games.cc.verdict.great', { ok, total });

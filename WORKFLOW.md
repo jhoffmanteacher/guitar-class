@@ -146,7 +146,10 @@ wordings, no Note Runner mic check (see "Later (not chosen yet)").
   drill bug: 4 of 10 cards in "Frets 8 to 12" and 2 of 24 on the whole neck light only the root, the 2026-11-02 changelog
   line now says so); the smoke Play-clicks slider gap (`smoke.mjs` drags the card slider to 77; with `strumOpenMetro` forced
   to 60 it reports 7 failing steps); check `1d` flags a shared step before a path step (reviewed by `site-reviewer`, 2 minor
-  points fixed). What is left:
+  points fixed). The coach.js fixes (Stop hint, 10 s of play, 130 cap) were reviewed by `site-reviewer-deep` the same day and landed 2026-11-07. What is left:
+  - *Product call (deep review, 2026-11-07):* a Stopped game's headline, tempo advice and breakdown still count the changes never reached as
+    misses: 4 right then Stop reads "4 of 15 — this speed is too fast for now. Drop 5 BPM", and the breakdown says "11 no strum heard".
+    Only the strum-firmer hint leaves them out. Also: the song-switch setup readout says 135 or 140 BPM when round 1 plays 130.
   - *coach.js detection (needs an xhigh review):* at 10 BPM one stray sound moves `gridOffset` by up to 0.73 s
     (`ccLoop`, `cc.gridOffset += dev * 0.25`, uncapped; 123 ms at 60 BPM). Cap the step (for example ±60 ms).
   - *Power Chord Switch UX:* no Stop button during the count-in (24 s per round at 10 BPM); the done-screen advice says
@@ -3521,7 +3524,7 @@ no Note Runner mic check. The original title read "Power Chord Switch — where 
 > `main` on 2026-11-03 (merge commit ca932f2): smoke on the merged tree was clean
 > against the origin/main baseline, the full checks passed, and Jonathan
 > published `firestore.rules` (take id `(coach|nr|pw)`). The same day a second
-> change landed (e5e0bef): a Stopped game with at least 10 s of audio is saved
+> change landed (e5e0bef): a Stopped game with at least 10 s of audio is saved (2026-11-07: now 10 s of PLAY after the first count-in ends)
 > too, with `complete:false` in the take (a shorter Stop, or leaving the screen,
 > still drops it). Nothing is open except watching the next takes (Next steps, item 3).
 > The branch `pcs-pending-smoke` can be deleted on GitHub.
@@ -3549,7 +3552,7 @@ below. Delete or rewrite it when the list is done.
 4. **Saved student audio** (`micRecStart('pw')`): same consent flow as the
    Listening Coach and Note Runner (one question per device, the red "Recording
    this take" label on every screen of a take, saved when a game is played to
-   the end, and also when it is Stopped after at least 10 s of audio
+   the end, and also when it is Stopped after at least 10 s of play (counted from the first count-in's end; was audio length until 2026-11-07)
    (`MICREC_MIN_STOPPED_SEC`, 2026-11-04; the take says `complete: false`;
    a shorter Stop is dropped so a stub never overwrites a full take; leaving
    the screen still drops it); never for Change Up). One capture covers all three rounds and is
