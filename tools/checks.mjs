@@ -4248,6 +4248,20 @@ function validateClassActivities() {
         pathActivities++;
       }
     }
+    /* Shared steps come LAST (the PATHS note in app.js: an untagged step "comes after whichever path was
+       taken (the tail)"). The student's route keeps file order, but the chooser and the console preview list each path's
+       steps and then the shared ones, so a shared step written before a path step is walked in one order and previewed in
+       another (found by the 2026-11-06 Friday check; no card was affected). Needs a tagged step AFTER it to be wrong. */
+    if ('paths' in a && Array.isArray(a.paths) && a.paths.length >= 2 && Array.isArray(a.steps)) {
+      const lastTagged = a.steps.reduce((m, s, si) => (s && s.path ? si : m), -1);
+      a.steps.forEach((s, si) => {
+        /* `!('path' in s)`: a present-but-empty `path` is reported by the steps loop above; one report per bad step. */
+        if (s && typeof s === 'object' && !('path' in s) && si < lastTagged) {
+          err(`${where} · steps[${si}]: a step with no path comes before the path step at steps[${lastTagged}] — the route walks file order but the chooser and the console preview put shared steps last; move it after the last path step (on a card students have used, moving a step shifts the ticks of every step it passes: tag it to a path instead, or move it before the class reaches the card)`);
+          problems++;
+        }
+      });
+    }
     if (isCheck) { /* no steps — see 1y */ }
     /* A practice card has no help ladder: `steps: []` (Jonathan,
        2026-10-07). Every other activity needs its steps. */
@@ -4362,7 +4376,7 @@ function validateClassActivities() {
     if (!/const stepsHtml = \(card \|\| chooser\) \? '' : route\.map\(\(si, pos\) => caStepHtml\(a, steps\[si\], si, si === openStepIdx/.test(appSrc)) { err('1d: caCardBodyBlockHtml() in app.js no longer walks caRoute(a) with the step\'s flat index as the key'); problems++; }
     if (!/caPathChooserHtml\(a,\{preview:true\}\)/.test(tchSrc) || !/caPathSteps\(a,pathKey\)\.concat\(caSharedSteps\(a\)\)/.test(tchSrc)) { err('1d: renderTeacherActivityDetail() in teacher.js no longer draws the path chooser and walks the route by path'); problems++; }
   }
-  if (problems === 0) ok(`${activities.length} class activit${activities.length === 1 ? 'y' : 'ies'} (${checks} exit check${checks === 1 ? '' : 's'}) — all valid; order lives on the console board; ${strumSteps} strum step${strumSteps === 1 ? '' : 's'}, both renderers draw them; ${pathActivities} with paths, both renderers draw the chooser`);
+  if (problems === 0) ok(`${activities.length} class activit${activities.length === 1 ? 'y' : 'ies'} (${checks} exit check${checks === 1 ? '' : 's'}) — all valid; order lives on the console board; ${strumSteps} strum step${strumSteps === 1 ? '' : 's'}, both renderers draw them; ${pathActivities} with paths, both renderers draw the chooser, every shared step after the last path step`);
   checkExitChecks(activities);
   checkActivityTitleNumbers(activities);
   checkActivityDeckAnswers(activities);
