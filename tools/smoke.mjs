@@ -1153,6 +1153,130 @@ async function pmHeaderWalk(page, run, events, stats) {
   if (!(await run('pm-header:out-check', `(() => { const h = document.getElementById('pm-header'); return h.hidden && h.innerHTML === '' && !h.getClientRects().length; })()`, 10))) fail('signed-out', 'the strip is still showing with nobody signed in');
 }
 
+/* Tuning Simulator (tuning-sim.html, 2026-11-06). tools/tuning-sim-proof.mjs runs
+   the round logic 1,000 times; this is the real page, in English and Spanish:
+   it opens on Phase 1 with sound ON and the circle shown (the pinned defaults),
+   one round is played the way a student plays it (click the string's letter,
+   click Up or Down, HOLD the peg button until the needle is green, then the
+   round ends and the next one starts), the keys turn the peg and are cancelled,
+   hiding the tab stops the keys, five more rounds reach Phase 2 (circle faded
+   out, the six plain buttons in string order, the choice saved), a wrong name
+   in Phase 2 brings the circle back for that round only and resets the streak,
+   the sound switch and "Show the circle" switch are clicked both ways, and after
+   a reload Phase 2 is still on with sound back on its default. getUserMedia is
+   counted from before the page loads and must stay at 0. A checkout without
+   tuning-sim.html (the baseline) skips it. */
+async function tuningSimWalk(page, run, events, stats, base) {
+  const exists = await run('tsim:exists', `fetch('tuning-sim.html', { cache: 'no-store' }).then(r => r.ok)`, 10);
+  if (!exists) return;
+  const fail = (w, text) => events.push({ step: 'tsim:' + w, kind: 'tuning-sim', text });
+  const gum = await page.send('Page.addScriptToEvaluateOnNewDocument', { source: `window.__gumCalls = 0; try { const md = navigator.mediaDevices; if (md && md.getUserMedia) { const o = md.getUserMedia.bind(md); md.getUserMedia = function(){ window.__gumCalls++; return o.apply(md, arguments); }; } } catch (e) {}` });
+  const go = async () => {
+    const l = new Promise(r => page.on(m => { if (m === 'Page.loadEventFired') r(); }));
+    await page.send('Page.navigate', { url: base + '/tuning-sim.html' });
+    await Promise.race([l, sleep(10000)]); await sleep(500);
+  };
+  const waitFor = (cond, ms = 6000) => `(async () => { const t0 = Date.now(); const ok = () => (${cond}); while (!ok() && Date.now() - t0 < ${ms}) await new Promise(r => setTimeout(r, 40)); return ok(); })()`;
+  const S = 'TuningSim.S';
+  const nameRight = `(() => { const i = ${S}.round.idx; (document.querySelector('.ans.six[data-name="' + i + '"]') || document.querySelector('.bubble[data-name="' + i + '"]')).click(); return true; })()`;
+  const wayRight = `(() => { document.querySelector('.ans[data-way="' + ${S}.round.answer + '"]').click(); return true; })()`;
+  const toGreen = `(() => { const d = ${S}.round.answer === 'up' ? 1 : -1; let n = 0; while (!${S}.disp.inTune && n++ < 80) TuningSim.tick(d); return ${S}.disp.inTune; })()`;
+  const names = { en: ['low E', 'A', 'D', 'G', 'B', 'high e'], es: ['Mi grave', 'La', 'Re', 'Sol', 'Si', 'Mi aguda'] };
+  const titles = { en: 'Tuning Simulator', es: 'Simulador de afinación' };
+  let rounds = 0, checks = 0;
+  for (const lang of ['en', 'es']) {
+    const W = lang + ': ';
+    await run(`tsim:${lang}:prep`, `(() => { try { localStorage.setItem('gc-lang', '${lang}'); localStorage.removeItem('gc-tuningsim-phase2'); } catch (e) {} return true; })()`, 10);
+    await go();
+    const d0 = await run(`tsim:${lang}:defaults`, `({ ok: typeof TuningSim === 'object', lang: document.documentElement.lang, h1: document.querySelector('h1').textContent, state: ${S}.state, phase: ${S}.phase, sound: ${S}.soundOn, soundSw: document.getElementById('sound-sw').getAttribute('aria-checked'), circleSw: document.getElementById('circle-sw').getAttribute('aria-checked'), circleLocked: document.getElementById('circle-sw').getAttribute('aria-disabled'), nocircle: document.getElementById('strings').classList.contains('nocircle'), bubbles: document.querySelectorAll('.bubble:not(:disabled)').length, six: document.querySelectorAll('.ans.six').length })`, 10);
+    if (!d0 || !d0.ok) { fail(W + 'load', 'tuning-sim.html did not boot (no TuningSim)'); continue; }
+    checks++;
+    if (d0.lang !== lang || d0.h1 !== titles[lang]) fail(W + 'language', `lang "${d0.lang}", heading "${d0.h1}"`);
+    if (d0.state !== 'name' || d0.phase !== 1) fail(W + 'start', `opened in state ${d0.state}, phase ${d0.phase}`);
+    if (d0.sound !== true || d0.soundSw !== 'true') fail(W + 'default-sound', `sound is ${d0.sound} / aria-checked ${d0.soundSw}; the default is ON`);
+    if (d0.circleSw !== 'true' || d0.nocircle || d0.bubbles !== 6 || d0.six !== 0) fail(W + 'default-circle', `Phase 1 should show the circle: switch ${d0.circleSw}, hidden ${d0.nocircle}, ${d0.bubbles} tappable letters, ${d0.six} plain buttons`);
+    if (d0.circleLocked !== 'true') fail(W + 'circle-locked', 'the circle switch should be locked on in Phase 1');
+    const labels = await run(`tsim:${lang}:labels`, `[...document.querySelectorAll('.bubble')].map(b => b.firstChild.textContent.trim())`, 10);
+    if (!labels || labels.join('|') !== names[lang].join('|')) fail(W + 'names', `the six circle names are [${labels}], expected [${names[lang]}]`);
+    // Round 1, played for real: letter, Up/Down, hold the peg until green.
+    await run(`tsim:${lang}:r1:name`, nameRight, 200);
+    if ((await run(`tsim:${lang}:r1:state1`, `({ s: ${S}.state, lcd: document.getElementById('lcd').dataset.mode, note: document.getElementById('note').textContent, letter: TuningSim.STRINGS[${S}.round.idx].note })`, 10)) ) {
+      const r = await run(`tsim:${lang}:r1:read`, `({ s: ${S}.state, lcd: document.getElementById('lcd').dataset.mode, note: document.getElementById('note').textContent, letter: TuningSim.STRINGS[${S}.round.idx].note, voice: ${S}.soundOn })`, 10);
+      if (r.s !== 'read' || r.lcd === 'off' || r.note !== r.letter) fail(W + 'r1:read', `after naming the string: state ${r.s}, LCD ${r.lcd}, letter "${r.note}" vs "${r.letter}"`);
+    }
+    await run(`tsim:${lang}:r1:way`, wayRight, 150);
+    const dir = await run(`tsim:${lang}:r1:dir`, `(${S}.round.answer === 'up' ? 'peg-up' : 'peg-down')`, 10);
+    await run(`tsim:${lang}:r1:hold`, `document.getElementById('${dir}').dispatchEvent(new PointerEvent('pointerdown', { bubbles: true, cancelable: true }))`, 10);
+    const reached = await run(`tsim:${lang}:r1:green`, waitFor(`${S}.disp.inTune`, 9000), 10);
+    await run(`tsim:${lang}:r1:release`, `window.dispatchEvent(new PointerEvent('pointerup'))`, 10);
+    if (!reached) fail(W + 'r1:green', 'holding the peg button never turned the needle green');
+    const fin = await run(`tsim:${lang}:r1:done`, waitFor(`${S}.state === 'between'`, 3500), 10);
+    if (!fin || (await run(`tsim:${lang}:r1:tuned`, `${S}.tuned`, 10)) !== 1) fail(W + 'r1:done', 'a second of green did not end the round and count one string tuned');
+    rounds++;
+    // Keys, on round 2.
+    await run(`tsim:${lang}:r2:new`, `(TuningSim.newRound(), true)`, 100);
+    await run(`tsim:${lang}:r2:name`, nameRight, 100);
+    await run(`tsim:${lang}:r2:way`, wayRight, 100);
+    const k = await run(`tsim:${lang}:r2:keys`, `(() => { const c0 = ${S}.cents; const ev = new KeyboardEvent('keydown', { key: 'ArrowRight', bubbles: true, cancelable: true }); document.dispatchEvent(ev); const c1 = ${S}.cents; const rep = new KeyboardEvent('keydown', { key: 'ArrowRight', bubbles: true, cancelable: true, repeat: true }); document.dispatchEvent(rep); const c2 = ${S}.cents; const ev2 = new KeyboardEvent('keydown', { key: 'ArrowLeft', bubbles: true, cancelable: true }); document.dispatchEvent(ev2); const c3 = ${S}.cents; return { up: c1 - c0, prevented: ev.defaultPrevented && ev2.defaultPrevented, repeatMoved: c2 - c1, down: c3 - c2 }; })()`, 10);
+    if (!k || k.up !== 2 || k.down !== -2 || !k.prevented) fail(W + 'keys', `Right moved ${k && k.up} cents, Left moved ${k && k.down}, arrows cancelled: ${k && k.prevented} (expected +2, -2, true)`);
+    if (k && k.repeatMoved !== 0 && k.repeatMoved !== 2) fail(W + 'keys-repeat', `an immediate key repeat moved ${k.repeatMoved} cents`);
+    const hid = await run(`tsim:${lang}:r2:hidden`, `(() => { Object.defineProperty(document, 'hidden', { configurable: true, get: () => true }); document.dispatchEvent(new Event('visibilitychange')); const c0 = ${S}.cents; document.dispatchEvent(new KeyboardEvent('keydown', { key: 'ArrowRight', bubbles: true, cancelable: true })); const stopped = ${S}.cents === c0; Object.defineProperty(document, 'hidden', { configurable: true, get: () => false }); document.dispatchEvent(new Event('visibilitychange')); const c1 = ${S}.cents; document.dispatchEvent(new KeyboardEvent('keydown', { key: 'ArrowRight', bubbles: true, cancelable: true })); return { stopped, back: ${S}.cents - c1 }; })()`, 10);
+    if (!hid || !hid.stopped || hid.back !== 2) fail(W + 'hidden', `with the tab hidden the arrow key ${hid && hid.stopped ? 'was ignored' : 'still turned the peg'}; after it came back the key moved ${hid && hid.back} cents (expected ignored, then 2)`);
+    await run(`tsim:${lang}:r2:green`, toGreen, 10);
+    await run(`tsim:${lang}:r2:wait`, waitFor(`${S}.state === 'between'`, 3500), 10);
+    rounds++;
+    // Sound switch and the locked circle switch.
+    const sw = await run(`tsim:${lang}:sound`, `(() => { const b = document.getElementById('sound-sw'); b.click(); const off = [${S}.soundOn, b.getAttribute('aria-checked')]; b.click(); return { off, on: [${S}.soundOn, b.getAttribute('aria-checked')] }; })()`, 10);
+    if (!sw || sw.off.join() !== 'false,false' || sw.on.join() !== 'true,true') fail(W + 'sound-switch', `sound switch: off ${sw && sw.off}, on again ${sw && sw.on}`);
+    const lock = await run(`tsim:${lang}:circle-locked`, `(() => { document.getElementById('circle-sw').click(); return [${S}.showCircle, document.getElementById('strings').classList.contains('nocircle')]; })()`, 10);
+    if (!lock || lock[0] !== true || lock[1] !== false) fail(W + 'circle-locked', 'the circle switch changed something in Phase 1');
+    // Rounds 3-6: six named right in a row -> Phase 2.
+    for (let i = 3; i <= 6; i++) {
+      await run(`tsim:${lang}:r${i}:new`, `(TuningSim.newRound(), true)`, 80);
+      await run(`tsim:${lang}:r${i}:name`, nameRight, 80);
+      await run(`tsim:${lang}:r${i}:way`, wayRight, 80);
+      await run(`tsim:${lang}:r${i}:green`, toGreen, 10);
+      await run(`tsim:${lang}:r${i}:wait`, waitFor(`${S}.state === 'between'`, 3500), 10);
+      rounds++;
+      // Phase 2 must wait for the SIXTH right name: still Phase 1, circle still there, after five.
+      if (i < 6) {
+        const early = await run(`tsim:${lang}:r${i}:still-phase1`, `({ phase: ${S}.phase, streak: ${S}.streak, nocircle: document.getElementById('strings').classList.contains('nocircle') })`, 10);
+        if (!early || early.phase !== 1 || early.streak !== i || early.nocircle) fail(W + 'phase2-early', `after ${i} right in a row the page is in phase ${early && early.phase} (streak ${early && early.streak}, circle hidden ${early && early.nocircle}); Phase 2 starts after six`);
+      }
+    }
+    // The 6th name was right, so Phase 2 began at that click.
+    const p2 = await run(`tsim:${lang}:phase2`, `(TuningSim.newRound(), { phase: ${S}.phase, streak: ${S}.streak, saved: (() => { try { return localStorage.getItem('gc-tuningsim-phase2'); } catch (e) { return 'unreadable'; } })(), switchNote: document.getElementById('note2').textContent, nocircle: document.getElementById('strings').classList.contains('nocircle'), six: [...document.querySelectorAll('.ans.six')].map(b => b.textContent), circleSw: document.getElementById('circle-sw').getAttribute('aria-checked'), circleLocked: document.getElementById('circle-sw').getAttribute('aria-disabled') })`, 200);
+    if (!p2 || p2.phase !== 2 || p2.streak !== 6) fail(W + 'phase2', `after six right: phase ${p2 && p2.phase}, streak ${p2 && p2.streak}`);
+    else {
+      checks++;
+      if (p2.saved !== '1') fail(W + 'phase2-saved', `localStorage gc-tuningsim-phase2 is "${p2.saved}", expected "1"`);
+      if (!p2.nocircle || p2.circleSw !== 'false' || p2.circleLocked !== 'false') fail(W + 'phase2-circle', `the circle should be hidden with its switch off and unlocked: hidden ${p2.nocircle}, switch ${p2.circleSw}, locked ${p2.circleLocked}`);
+      if (p2.six.join('|') !== names[lang].join('|')) fail(W + 'phase2-buttons', `the six plain buttons are [${p2.six}], expected [${names[lang]}] in string order`);
+    }
+    // Show the circle: on, then off.
+    const sc = await run(`tsim:${lang}:show-circle`, `(() => { const b = document.getElementById('circle-sw'); b.click(); const on = [${S}.showCircle, document.getElementById('strings').classList.contains('nocircle'), document.querySelectorAll('.ans.six').length]; b.click(); return { on, off: [${S}.showCircle, document.getElementById('strings').classList.contains('nocircle'), document.querySelectorAll('.ans.six').length] }; })()`, 10);
+    if (!sc || sc.on.join() !== 'true,false,0' || sc.off.join() !== 'false,true,6') fail(W + 'show-circle', `"Show the circle": on gave [${sc && sc.on}], off gave [${sc && sc.off}] (expected [true,false,0] then [false,true,6])`);
+    // A wrong name in Phase 2: the circle returns for this round only, and the streak resets.
+    const miss = await run(`tsim:${lang}:miss`, `(() => { const r = ${S}.round.idx, w = (r + 1) % 6; document.querySelector('.ans.six[data-name="' + w + '"]').click(); return { phase: ${S}.phase, streak: ${S}.streak, nocircle: document.getElementById('strings').classList.contains('nocircle'), rightMarked: !!document.querySelector('.bubble.right'), wrongMarked: !!document.querySelector('.bubble.wrong') }; })()`, 10);
+    if (!miss || miss.phase !== 2 || miss.streak !== 0 || miss.nocircle || !miss.rightMarked || !miss.wrongMarked) fail(W + 'phase2-miss', `after a wrong name: ${JSON.stringify(miss)} (expected phase 2, streak 0, circle shown with the right and the wrong one marked)`);
+    await run(`tsim:${lang}:miss:way`, wayRight, 80);
+    await run(`tsim:${lang}:miss:green`, toGreen, 10);
+    await run(`tsim:${lang}:miss:wait`, waitFor(`${S}.state === 'between'`, 3500), 10);
+    const back = await run(`tsim:${lang}:miss:next`, `(TuningSim.newRound(), { phase: ${S}.phase, nocircle: document.getElementById('strings').classList.contains('nocircle') })`, 100);
+    if (!back || back.phase !== 2 || !back.nocircle) fail(W + 'miss-next', 'the round after a Phase 2 miss should hide the circle again and stay in Phase 2');
+    // Reload: Phase 2 remembered, sound back on its default, circle switch off.
+    await go();
+    const rl = await run(`tsim:${lang}:reload`, `({ phase: ${S}.phase, sound: ${S}.soundOn, soundSw: document.getElementById('sound-sw').getAttribute('aria-checked'), circleSw: document.getElementById('circle-sw').getAttribute('aria-checked'), nocircle: document.getElementById('strings').classList.contains('nocircle'), six: document.querySelectorAll('.ans.six').length })`, 10);
+    if (!rl || rl.phase !== 2 || rl.sound !== true || rl.soundSw !== 'true' || rl.circleSw !== 'false' || !rl.nocircle || rl.six !== 6) fail(W + 'reload', `after a reload: ${JSON.stringify(rl)} (expected Phase 2, sound on, circle off, six plain buttons)`);
+    const mic = await run(`tsim:${lang}:mic`, `window.__gumCalls`, 10);
+    if (mic !== 0) fail(W + 'mic', `the page called getUserMedia ${mic} time(s) — it must never ask for the mic`);
+    checks++;
+  }
+  try { await page.send('Page.removeScriptToEvaluateOnNewDocument', { identifier: gum.identifier }); } catch { /* best effort */ }
+  await run('tsim:cleanup', `(() => { try { localStorage.removeItem('gc-tuningsim-phase2'); localStorage.setItem('gc-lang', 'en'); } catch (e) {} return true; })()`, 10);
+  stats.tuningSimRounds = rounds; stats.tuningSimChecks = checks;
+}
+
 async function walk(base, chromePort, label) {
   const page = await openPage(chromePort);
   let step = 'boot'; const events = []; const stats = { sets: 0, modules: 0, games: 0, buttons: 0 };
@@ -1458,6 +1582,7 @@ async function walk(base, chromePort, label) {
   await strumWalk(page, run, events, stats);
   await pathsWalk(page, run, events, stats);
   await pmHeaderWalk(page, run, events, stats);
+  await tuningSimWalk(page, run, events, stats, base);
   await page.close();
   return { label, stats, errors: events.filter(e => !NOISE.test(e.text || '')) };
 }
@@ -1492,6 +1617,7 @@ try {
   const baseCount = new Map(); (base ? base.errors : []).forEach(e => baseCount.set(norm(e), Math.max(baseCount.get(norm(e)) || 0, e.kind === 'bad-handler' ? +e.text : 1)));
   const report = base ? now.errors.filter(e => (e.kind === 'bad-handler' ? +e.text : 1) > (baseCount.get(norm(e)) || 0)) : now.errors;
   say(`smoke: ${now.stats.sets} sets in ${now.stats.modules} modules (EN + ES), ${now.stats.games} game views, ${now.stats.buttons} inline handlers compiled${now.stats.chordCards ? `, ${now.stats.chordCards} chord-grid cards walked (cursor, lap, layout at 1366/390/360, lyric sheet${now.stats.bassClicks ? `, bass switch clicked on ${now.stats.bassClicks}` : ''}${now.stats.recordingClicks ? `, recording switch clicked, reloaded and flipped back on ${now.stats.recordingClicks}` : ''}${now.stats.chordSkipped ? `; ${now.stats.chordSkipped.join(', ')} is teacher-only and not walked` : ''})` : ''}${now.stats.noteCallSteps ? `, ${now.stats.noteCallSteps} Note Call power-chord steps (EN + ES: six strings, taps on low E and A only, a hit and a miss)` : ''}${now.stats.pwnSteps ? `, ${now.stats.pwnSteps} Name the power chord steps (EN + ES: Note Call frets 5-12; Show answer on by default and clicked both ways; the 12 buttons in fret order and a real click on a right and a wrong answer on the buttons and the board; Next, Stop, another step, a language switch; the choice remembered after a reload)` : ''}${now.stats.chordCallRounds ? `, ${now.stats.chordCallRounds} Call the chord steps (EN + ES: Slower by default, the speed switch both ways, Start, a space bar that is cancelled, Stop, a round ended by another step and by a language switch, the default after a reload)` : ''}${now.stats.powerLayouts ? `, a pair play screen says its BPM and its live tempo buttons are clicked (${now.stats.pairPlay || 0} run), the setup's \u22125 / +5 and slider are clicked and measured, EN + ES (${now.stats.tempoSetup || 0} run), the done screen's −5/+5 row clicked twice and Again (${now.stats.doneRow || 0} run), Power Chord Switch at 1366\u00d7657 (Start and tempo on screen: ${now.stats.powerLayouts} views, incl. after a reload${now.stats.powerBestLayouts ? `; with a "Best today" score, EN + ES, no scrolling and the privacy line on screen: ${now.stats.powerBestLayouts} views` : ''}${now.stats.songs ? `; song buttons picked and reopened, ${now.stats.songs} song-switch rounds (16 switches x 3) run on a fake clock: round tempos, the BPM buttons, the play screen fitting 657px, one lit chart per chord, the done screen with 21 changes, ${now.stats.songDraws} random draws, none a song` : ""}${now.stats.powerCosmetic ? `; "low E" title kept together at ${now.stats.powerTitleWidths} window widths and the done-screen button padded, EN + ES: ${now.stats.powerCosmetic}` : ''}${now.stats.powerBack ? `; the way back to the chords measured and clicked on ${now.stats.powerBack} screens (a pair's and a song switch's done screen and the songs view, EN + ES)` : ''})` : ''}${now.stats.changeUpLayouts ? `, Change Up at 1366\u00d7657 (Start on screen, no scrolling: ${now.stats.changeUpLayouts} views)` : ''}${now.stats.quizLayouts ? `, Chord Blitz (both directions) and Fret Zap at 1366\u00d7657 (picture left, 2\u00d72 answers right, no scroll: ${now.stats.quizLayouts} views)` : ''}${now.stats.pmHeaderViews ? `, practice-minutes strip in the top bar: ${now.stats.pmHeaderViews} view checks (6 views x EN/ES x 1366 and 390 px: a shown button, exactly one strip on top, the Games bar's own on Games, no sideways scroll), ${now.stats.pmHeaderClicks} clicks open My progress, back after a reload, hidden when signed out` : ''}${now.stats.strumSteps ? `, ${now.stats.strumSteps} strum-pattern steps (EN + ES: cells, arrows, chord names, columns, 1366 and 390 px; Play strum lights an arrow, clicks every beat and sounds down strums louder; Play clicks opens the Metronome at 60 BPM; Stop resets)` : ''}${now.stats.pathsActivities ? `, ${now.stats.pathsActivities} paths-activity walks (EN + ES: chooser with a silent preview and step list per path, Start, route length, Got it, Change path, ticks kept across a switch, one saved pick)` : ''}`);
+  if (now.stats.tuningSimRounds) say(`smoke: Tuning Simulator (EN + ES): ${now.stats.tuningSimRounds} rounds played (round 1 with a real held peg button), ${now.stats.tuningSimChecks} checkpoints — defaults (sound on, circle shown and locked in Phase 1), the arrow keys and a hidden tab, the sound and circle switches, Phase 2 after six right (saved, six plain buttons in string order), a Phase 2 miss, a reload, and no getUserMedia call`);
   if (base) say(`smoke: ${BASELINE} had ${base.errors.length} error event(s); this checkout has ${now.errors.length}`);
   if (report.length) {
     exitCode = 1;

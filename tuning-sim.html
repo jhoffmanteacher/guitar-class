@@ -1,0 +1,740 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Tuning Simulator</title>
+<meta name="color-scheme" content="light dark">
+<meta name="theme-color" content="#514a7d">
+<meta name="theme-color" media="(prefers-color-scheme: dark)" content="#494370">
+<link rel="icon" type="image/png" href="icon-192.png">
+<link rel="apple-touch-icon" href="apple-touch-icon.png">
+<link rel="manifest" href="manifest.json">
+<style>
+/* Tuning Simulator — practise reading a clip-on tuner before you have a guitar.
+   Standalone page, built like mood-chart.html: no app.js, no i18n.js. It reads
+   localStorage 'gc-lang' and keeps its own en/es table. It never asks for the
+   mic: the page makes its own sound. Palette tokens are copied from styles.css. */
+:root{
+  --bg:#ffffff;--bg2:#faf9f5;--bg3:#f0eee6;
+  --text:#1a1a18;--text2:#5e5e58;--text3:#585852;
+  --border:rgba(0,0,0,0.09);--border2:rgba(0,0,0,0.16);
+  --blue-bg:#e6f1fb;--blue-text:#185fa5;
+  --green-bg:#eaf3de;--green-text:#3b6d11;
+  --amber-bg:#faeeda;--amber-text:#854f0b;
+  --red-bg:#fbe9e7;--red-text:#b3372a;
+  --purple-bg:#eeedfe;--purple-text:#3c3489;--purple-border:#c5c0ee;--purple-accent:#5b52a8;
+  --shadow-raised:0 10px 36px rgba(30,27,70,0.28);
+  --radius:10px;--radius-sm:6px;
+  --string:#8d8a80;--string-wound:#a8794a;
+}
+@media(prefers-color-scheme:dark){
+  :root{
+    --bg:#1e1e1c;--bg2:#272724;--bg3:#313130;
+    --text:#e8e6df;--text2:#9a9a91;--text3:#9e9e95;
+    --border:rgba(255,255,255,0.08);--border2:rgba(255,255,255,0.14);
+    --blue-bg:#0c3a6b;--blue-text:#93c4f0;
+    --green-bg:#1e4208;--green-text:#a8d070;
+    --amber-bg:#4a2a04;--amber-text:#f0b84a;
+    --red-bg:#4a1710;--red-text:#f0968a;
+    --purple-bg:#2b2752;--purple-text:#c7c1f5;--purple-border:#4a4390;--purple-accent:#8f85e8;
+    --shadow-raised:0 10px 36px rgba(0,0,0,0.6);
+    --string:#7d7a70;--string-wound:#b98a58;
+  }
+}
+*{box-sizing:border-box}
+html,body{height:100%}
+body{
+  margin:0;background:var(--bg);color:var(--text);
+  font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;
+  line-height:1.35;
+}
+button{font-family:inherit;color:inherit}
+.wrap{max-width:1140px;margin:0 auto;padding:12px 20px 12px}
+
+/* ── top bar ── */
+.top{display:flex;align-items:flex-start;justify-content:space-between;gap:16px;margin-bottom:10px}
+.crumb{display:inline-flex;align-items:center;gap:6px;font-size:.8125rem;font-weight:600;color:var(--text2);text-decoration:none;padding:3px 10px;border-radius:999px;box-shadow:inset 0 0 0 1px var(--border2)}
+.crumb:hover{color:var(--text);background:var(--bg3)}
+.crumb:focus-visible,.sw:focus-visible,.btn:focus-visible,.bubble:focus-visible,.peg-btn:focus-visible{outline:2px solid var(--purple-accent);outline-offset:2px}
+.top-l{display:flex;flex-wrap:wrap;align-items:baseline;gap:4px 14px}
+h1{font-size:1.5rem;margin:0;letter-spacing:-0.01em;flex-basis:100%}
+.score{margin:0;font-size:.9375rem;color:var(--text2);font-variant-numeric:tabular-nums}
+.top-r{display:flex;gap:8px;flex-shrink:0}
+.sw{display:inline-flex;align-items:center;gap:8px;min-height:44px;padding:0 14px;border-radius:999px;border:1px solid var(--border2);background:var(--bg2);font-size:.875rem;cursor:pointer;color:var(--text2)}
+.sw .knob{width:30px;height:16px;border-radius:999px;background:var(--bg3);box-shadow:inset 0 0 0 1px var(--border2);position:relative;flex-shrink:0;transition:background .15s}
+.sw .knob::after{content:"";position:absolute;top:2px;left:2px;width:12px;height:12px;border-radius:50%;background:var(--text2);transition:transform .15s,background .15s}
+.sw[aria-checked="true"]{color:var(--purple-text);border-color:var(--purple-accent);background:var(--purple-bg)}
+.sw[aria-checked="true"] .knob{background:var(--purple-accent)}
+.sw[aria-checked="true"] .knob::after{transform:translateX(14px);background:#fff}
+.sw[aria-disabled="true"]{opacity:.65;cursor:default}
+
+/* ── layout: tuner left, question right ── */
+.stage{display:grid;grid-template-columns:minmax(0,440px) minmax(0,1fr);gap:28px;align-items:start}
+
+/* ── the clip-on tuner (looks like a Snark: dark body, backlit LCD) ── */
+.snark{background:linear-gradient(#34373c,#1d1f22);border-radius:22px;padding:14px 14px 12px;box-shadow:var(--shadow-raised)}
+.snark-top{display:flex;align-items:center;justify-content:space-between;padding:0 6px 8px}
+.led{width:9px;height:9px;border-radius:50%;background:#3a3f3c;box-shadow:inset 0 0 0 1px rgba(255,255,255,.12)}
+.snark[data-on="1"] .led{background:#59d96a;box-shadow:0 0 8px #59d96a}
+.snark-hz{font-size:.8125rem;color:#a6aca8;font-variant-numeric:tabular-nums;min-height:1.1em}
+.lcd{--lcd:#38403c;--ink:#0b120d;background:var(--lcd);color:var(--ink);border-radius:10px;padding:8px 14px 10px;box-shadow:inset 0 2px 8px rgba(0,0,0,.5);transition:background .25s}
+.lcd[data-mode="off"]{--ink:#7c8781}
+.lcd[data-mode="flat"]{--lcd:#6fb2f0}
+.lcd[data-mode="sharp"]{--lcd:#f2b04a}
+.lcd[data-mode="in"]{--lcd:#6fdc7e}
+.lcd-note{font-size:6.25rem;line-height:1;font-weight:700;text-align:center;height:104px;display:flex;align-items:center;justify-content:center;letter-spacing:-0.02em}
+.lcd-note.pop{animation:simPop .45s ease-out}
+@keyframes simPop{0%{transform:scale(1)}40%{transform:scale(1.14)}100%{transform:scale(1)}}
+.meter{position:relative;padding:14px 8px 0}
+.mtrack{position:relative;height:30px}
+.ticks{position:absolute;left:0;right:0;bottom:0;display:flex;justify-content:space-between;align-items:flex-end;height:18px}
+.ticks i{display:block;width:2px;height:9px;background:var(--ink);border-radius:1px}
+.ticks i.m5{height:13px}
+.ticks i.m0{height:18px;width:3px}
+.needle{position:absolute;bottom:0;left:50%;width:3px;height:30px;background:var(--ink);border-radius:2px;transform:translateX(-50%);transition:left .18s ease-out,opacity .2s}
+.needle::before{content:"";position:absolute;top:-7px;left:50%;transform:translateX(-50%);border-left:6px solid transparent;border-right:6px solid transparent;border-top:9px solid var(--ink)}
+.lcd[data-mode="off"] .needle{left:50%!important;opacity:.35}
+.mlabels{display:flex;justify-content:space-between;font-size:.75rem;font-weight:600;padding:4px 0 0;opacity:.85}
+.lcd-status{text-align:center;font-size:.875rem;font-weight:600;min-height:20px;margin-top:6px}
+
+/* ── the peg ── */
+.peg-panel{display:grid;grid-template-columns:1fr 104px 1fr;gap:10px;align-items:center;margin-top:14px}
+.peg-btn{min-height:76px;border-radius:var(--radius);border:1px solid var(--border2);background:var(--bg2);cursor:pointer;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;font-size:1rem;font-weight:600;touch-action:none;user-select:none;-webkit-user-select:none}
+.peg-btn .gly{font-size:1.5rem;line-height:1}
+.peg-btn small{font-size:.75rem;font-weight:400;color:var(--text2)}
+.peg-btn:hover:not(:disabled){background:var(--bg3)}
+.peg-btn.held{background:var(--purple-bg);border-color:var(--purple-accent);color:var(--purple-text)}
+.peg-btn:disabled{opacity:.5;cursor:default}
+.peg-svg{width:104px;height:104px;display:block}
+.peg-svg g.rot{transform-origin:52px 52px;transition:transform .12s linear}
+.peg-foot{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-top:8px}
+.keys{font-size:.8125rem;color:var(--text2)}
+.btn{min-height:44px;padding:0 16px;border-radius:var(--radius-sm);border:1px solid var(--border2);background:var(--bg2);font-size:.9375rem;cursor:pointer}
+.btn:hover:not(:disabled){background:var(--bg3)}
+.btn:disabled{opacity:.5;cursor:default}
+
+/* ── the question ── */
+.chips{display:flex;gap:8px;margin-bottom:10px}
+.chip{font-size:.8125rem;padding:4px 12px;border-radius:999px;border:1px solid var(--border2);color:var(--text2)}
+.chip.on{background:var(--purple-bg);border-color:var(--purple-accent);color:var(--purple-text);font-weight:600}
+.chip.past{opacity:.6}
+h2{font-size:1.5rem;margin:0 0 2px;line-height:1.2}
+.hint{margin:0 0 10px;color:var(--text2);font-size:.9375rem;min-height:1.3em}
+
+.strings{display:flex;flex-direction:column;gap:2px;background:var(--bg2);border:1px solid var(--border);border-radius:var(--radius);padding:8px 12px}
+.srow{display:grid;grid-template-columns:1fr 112px;align-items:center;gap:12px;height:34px;border-radius:var(--radius-sm);padding:0 6px;transition:background .15s}
+.srow.on{background:var(--purple-bg)}
+.sline{height:var(--th);border-radius:3px;background:var(--string);position:relative}
+.sline.wound{background:var(--string-wound)}
+.srow.on .sline{background:var(--purple-accent);box-shadow:0 0 10px var(--purple-accent)}
+.slot{display:flex;justify-content:flex-start}
+.bubble{min-width:96px;height:30px;padding:0 12px;border-radius:999px;border:1px solid var(--border2);background:var(--bg);font-size:.875rem;font-weight:600;cursor:pointer;display:inline-flex;align-items:center;justify-content:center;gap:6px;white-space:nowrap;transition:opacity .6s,border-color .15s}
+.bubble small{font-weight:400;color:var(--text2)}
+.bubble:hover:not(:disabled){background:var(--bg3)}
+.bubble:disabled{cursor:default}
+.bubble.right{background:var(--green-bg);border-color:var(--green-text);color:var(--green-text)}
+.bubble.wrong{background:var(--red-bg);border-color:var(--red-text);color:var(--red-text)}
+.strings.nocircle .bubble{opacity:0;pointer-events:none}
+
+.answers{min-height:76px;margin-top:10px;display:flex;gap:10px;align-items:stretch}
+.ans{flex:1 1 0;min-height:64px;border-radius:var(--radius);border:1px solid var(--border2);background:var(--bg2);font-size:1.0625rem;font-weight:600;cursor:pointer;padding:0 10px}
+.ans:hover:not(:disabled){background:var(--bg3)}
+.ans.right{background:var(--green-bg);border-color:var(--green-text);color:var(--green-text)}
+.ans.wrong{background:var(--red-bg);border-color:var(--red-text);color:var(--red-text)}
+.ans:focus-visible{outline:2px solid var(--purple-accent);outline-offset:2px}
+.ans.six{min-height:56px;font-size:.9375rem;padding:0 4px}
+.plain{color:var(--text2);font-size:.9375rem;align-self:center}
+.feedback{margin:8px 0 0;min-height:24px;font-size:1rem;color:var(--text)}
+.feedback.note{margin-top:2px;min-height:24px}
+.feedback.bad{color:var(--red-text)}
+.feedback.ok{color:var(--green-text)}
+.feedback.note{color:var(--purple-text)}
+@media(prefers-reduced-motion:reduce){.lcd-note.pop{animation:none}.needle,.peg-svg g.rot,.bubble{transition:none}}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header class="top">
+    <div class="top-l">
+      <a class="crumb" id="back-link" href="index.html">&larr; <span data-t="back">Back to class site</span></a>
+      <h1 data-t="title">Tuning Simulator</h1>
+      <p class="score" id="score" aria-live="polite"></p>
+    </div>
+    <div class="top-r">
+      <button type="button" class="sw" id="sound-sw" role="switch" aria-checked="true"><span class="knob" aria-hidden="true"></span><span id="sound-lbl"></span></button>
+      <button type="button" class="sw" id="circle-sw" role="switch" aria-checked="true"><span class="knob" aria-hidden="true"></span><span data-t="showCircle">Show the circle</span></button>
+    </div>
+  </header>
+
+  <main class="stage">
+    <section class="left" aria-label="Tuner">
+      <div class="snark" id="snark" data-on="0">
+        <div class="snark-top"><span class="led" aria-hidden="true"></span><span class="snark-hz notranslate" id="hz" translate="no"></span></div>
+        <div class="lcd" id="lcd" data-mode="off">
+          <div class="lcd-note notranslate" id="note" translate="no">&mdash;</div>
+          <div class="meter">
+            <div class="mtrack">
+              <div class="ticks" id="ticks" aria-hidden="true"></div>
+              <div class="needle" id="needle"></div>
+            </div>
+            <div class="mlabels"><span data-t="flat">flat</span><span data-t="inTune">in tune</span><span data-t="sharp">sharp</span></div>
+          </div>
+          <div class="lcd-status" id="status" aria-live="polite"></div>
+        </div>
+      </div>
+
+      <div class="peg-panel">
+        <button type="button" class="peg-btn" id="peg-down" data-dir="-1"><span class="gly" aria-hidden="true">&#x27F2;</span><span data-t="loosen">Loosen</span><small data-t="loosenSub">note goes down</small></button>
+        <svg class="peg-svg" viewBox="0 0 104 104" aria-hidden="true">
+          <g class="rot" id="peg-rot">
+            <circle cx="52" cy="52" r="46" fill="#9a9d9f" stroke="#5c5f61" stroke-width="2"/>
+            <g fill="#c7c9ca" stroke="#5c5f61" stroke-width="1.5">
+              <circle cx="52" cy="14" r="11"/><circle cx="85" cy="33" r="11"/><circle cx="85" cy="71" r="11"/>
+              <circle cx="52" cy="90" r="11"/><circle cx="19" cy="71" r="11"/><circle cx="19" cy="33" r="11"/>
+            </g>
+            <circle cx="52" cy="52" r="20" fill="#74777a" stroke="#4d5052" stroke-width="2"/>
+            <rect x="49" y="26" width="6" height="22" rx="3" fill="#f0f0ee"/>
+          </g>
+        </svg>
+        <button type="button" class="peg-btn" id="peg-up" data-dir="1"><span class="gly" aria-hidden="true">&#x27F3;</span><span data-t="tighten">Tighten</span><small data-t="tightenSub">note goes up</small></button>
+      </div>
+      <div class="peg-foot">
+        <button type="button" class="btn" id="pluck" data-t="pluck">Pluck again</button>
+        <span class="keys" data-t="keys">Keys: &larr; loosen &middot; &rarr; tighten</span>
+      </div>
+    </section>
+
+    <section class="right" aria-label="Question">
+      <div class="chips" id="chips"></div>
+      <h2 id="prompt"></h2>
+      <p class="hint" id="hint"></p>
+      <div class="strings" id="strings"></div>
+      <div class="answers" id="answers"></div>
+      <p class="feedback" id="feedback" aria-live="polite"></p>
+      <p class="feedback note" id="note2" aria-live="polite"></p>
+    </section>
+  </main>
+</div>
+
+<script>
+/* ═══ ROUND LOGIC — pure, no DOM. tools/tuning-sim-proof.mjs extracts the text
+   between these two markers and runs it 1,000 times. Keep it free of document
+   and window references. ═══ */
+/* ROUND-LOGIC-START */
+const NOTES = ['C','C#','D','D#','E','F','F#','G','G#','A','A#','B'];
+/* The same six values as STRING_TARGETS in tuner.js, low E first. */
+const STRINGS = [
+  { id:'E2', freq:82.41,  note:'E' },
+  { id:'A2', freq:110.00, note:'A' },
+  { id:'D3', freq:146.83, note:'D' },
+  { id:'G3', freq:196.00, note:'G' },
+  { id:'B3', freq:246.94, note:'B' },
+  { id:'E4', freq:329.63, note:'E' }
+];
+const MIN_DETUNE = 12, MAX_DETUNE = 45;   // cents, flat or sharp; never already green, never a new letter
+const TICK_CENTS = 2;                     // one peg tick
+const PEG_LIMIT = 100;                    // the peg stops here, either way
+const STREAK_TO_PHASE2 = 6;               // one full set of strings named right in a row
+const DONE_MS = 1000;                     // green for this long = tuned
+const DEFAULTS = { soundOn: true, circleShownPhase1: true, circleShownPhase2: false };
+
+function nearestNote(freq){
+  const n = Math.round(12 * Math.log2(freq / 440)) + 69;
+  const exact = 440 * Math.pow(2, (n - 69) / 12);
+  return { name: NOTES[((n % 12) + 12) % 12], cents: Math.round(1200 * Math.log2(freq / exact)) };
+}
+function centsToFreq(idx, cents){ return STRINGS[idx].freq * Math.pow(2, cents / 1200); }
+function pickString(prev, rnd){
+  let i;
+  do { i = Math.floor(rnd() * STRINGS.length); } while (i === prev);
+  return i;
+}
+function pickDetune(rnd){
+  const mag = MIN_DETUNE + Math.floor(rnd() * (MAX_DETUNE - MIN_DETUNE + 1));
+  return (rnd() < 0.5 ? -1 : 1) * mag;
+}
+function rightWay(cents){ return cents < 0 ? 'up' : 'down'; }
+function makeRound(prev, rnd){
+  const idx = pickString(prev, rnd), cents = pickDetune(rnd);
+  return { idx, cents, answer: rightWay(cents), letter: nearestNote(centsToFreq(idx, cents)).name };
+}
+/* Sticky in-tune band, same numbers as tuner.js: enter green inside +-8 cents,
+   leave only outside +-11. */
+function stickyInTune(was, shown){ return was ? Math.abs(shown) <= 11 : Math.abs(shown) < 8; }
+/* ROUND-LOGIC-END */
+
+(function(){
+'use strict';
+
+/* ── language ── */
+let LANG = 'en';
+try { LANG = localStorage.getItem('gc-lang') === 'es' ? 'es' : 'en'; } catch(e){}
+
+/* Words that already exist on the site are copied from i18n.js exactly:
+   tools.flat / inTune / sharp / inTuneStatus / tooHighSharp / tooLowFlat, and the
+   string names (fret.stringLowE 'Mi grave'). Students see the same words here as
+   on the real Tuner. */
+const I = {
+  en: {
+    back:'Back to class site', title:'Tuning Simulator',
+    showCircle:'Show the circle',
+    soundOn:'Sound: on', soundOff:'Sound: off',
+    flat:'flat', inTune:'in tune', sharp:'sharp',
+    stInTune:'In tune ✓', stSharp:'Too high — loosen the peg (sharp)', stFlat:'Too low — tighten the peg (flat)',
+    loosen:'Loosen', loosenSub:'note goes down', tighten:'Tighten', tightenSub:'note goes up',
+    pluck:'Pluck again', keys:'Keys: ← loosen · → tighten',
+    score:'Strings tuned: {n} · Named right: {k} in a row',
+    chip1:'Name it', chip2:'Read the tuner', chip3:'Turn the peg',
+    p1:'Which string is this?', h1a:'Find the string on the picture. Tap its name.', h1b:'Name the string from memory.',
+    p2:'Which way?', h2:'Look at the needle. Is it left or right of the center?',
+    p3:'Turn the peg until the needle is green.', h3:'Hold a button. Keep the needle green for one second.',
+    p4:'In tune. Next string…',
+    up:'Up — tighten', down:'Down — loosen',
+    names:['low E','A','D','G','B','high e'],
+    nameOk:'That is the {a} string.', nameBad:'That is the {a} string, not {b}.',
+    nameBadBack:'That is the {a} string, not {b}. The circle is back for this string.',
+    phase2:'Six in a row. The note circle is hidden now. Name each string from memory.',
+    wayFlat:'The needle is left of center: too low. Tighten to go up.',
+    waySharp:'The needle is right of center: too high. Loosen to go down.',
+    wayWrong:'Other way. ',
+    done:'The {a} string is in tune.'
+  },
+  es: {
+    back:'Volver al sitio de la clase', title:'Simulador de afinación',
+    showCircle:'Mostrar el círculo',
+    soundOn:'Sonido: sí', soundOff:'Sonido: no',
+    flat:'bemol', inTune:'afinado', sharp:'sostenido',
+    stInTune:'Afinado ✓', stSharp:'Muy alta — afloja la clavija (sostenido)', stFlat:'Muy baja — aprieta la clavija (bemol)',
+    loosen:'Aflojar', loosenSub:'la nota baja', tighten:'Apretar', tightenSub:'la nota sube',
+    pluck:'Tocar otra vez', keys:'Teclas: ← aflojar · → apretar',
+    score:'Cuerdas afinadas: {n} · Nombradas bien: {k} seguidas',
+    chip1:'Nómbrala', chip2:'Lee el afinador', chip3:'Gira la clavija',
+    p1:'¿Qué cuerda es esta?', h1a:'Busca la cuerda en el dibujo. Toca su nombre.', h1b:'Nombra la cuerda de memoria.',
+    p2:'¿Hacia dónde?', h2:'Mira la aguja. ¿Está a la izquierda o a la derecha del centro?',
+    p3:'Gira la clavija hasta que la aguja se ponga verde.', h3:'Mantén un botón apretado. Deja la aguja en verde durante un segundo.',
+    p4:'Afinada. Sigue la siguiente cuerda…',
+    up:'Arriba — aprieta', down:'Abajo — afloja',
+    names:['Mi grave','La','Re','Sol','Si','Mi aguda'],
+    nameOk:'Esa es la cuerda {a}.', nameBad:'Esa es la cuerda {a}, no la cuerda {b}.',
+    nameBadBack:'Esa es la cuerda {a}, no la cuerda {b}. El círculo vuelve para esta cuerda.',
+    phase2:'Seis seguidas. El círculo de notas ya no se muestra. Nombra cada cuerda de memoria.',
+    wayFlat:'La aguja está a la izquierda del centro: muy baja. Aprieta para subir.',
+    waySharp:'La aguja está a la derecha del centro: muy alta. Afloja para bajar.',
+    wayWrong:'Al revés. ',
+    done:'La cuerda {a} está afinada.'
+  }
+};
+function T(k, p){
+  let s = (I[LANG] && I[LANG][k] != null) ? I[LANG][k] : I.en[k];
+  if (p) for (const key in p) s = s.split('{' + key + '}').join(p[key]);
+  return s;
+}
+/* A string's name. Spanish shows the note letter too in the circle (La · A);
+   the tuner's big letter always stays a letter. */
+function nameOf(i){ return I[LANG].names[i]; }
+function letterOf(i){ return STRINGS[i].note; }
+
+/* ── saved: only whether this browser has reached Phase 2 ── */
+const PHASE2_KEY = 'gc-tuningsim-phase2';
+function loadPhase2(){ try { return localStorage.getItem(PHASE2_KEY) === '1'; } catch(e){ return false; } }
+function savePhase2(){ try { localStorage.setItem(PHASE2_KEY, '1'); } catch(e){} }
+
+/* ── state ── */
+const S = {
+  phase: loadPhase2() ? 2 : 1,
+  showCircle: false,        // the "Show the circle" switch (Phase 2 only)
+  missRound: false,         // a Phase 2 miss brings the circle back for this round only
+  soundOn: DEFAULTS.soundOn,
+  streak: 0, tuned: 0,
+  state: 'name',            // name | read | turn | between
+  prev: -1, round: null, cents: 0, pegAngle: 0,
+  picked: -1, wayPicked: '', fb: '', fbClass: '', note: '',
+  disp: { shown: null, inTune: false }
+};
+S.showCircle = S.phase === 1 ? DEFAULTS.circleShownPhase1 : DEFAULTS.circleShownPhase2;
+const $ = id => document.getElementById(id);
+const el = { score:$('score'), chips:$('chips'), prompt:$('prompt'), hint:$('hint'), strings:$('strings'), answers:$('answers'),
+  feedback:$('feedback'), note2:$('note2'), snark:$('snark'), lcd:$('lcd'), note:$('note'), needle:$('needle'), status:$('status'), hz:$('hz'),
+  pegRot:$('peg-rot'), pegUp:$('peg-up'), pegDown:$('peg-down'), pluck:$('pluck'), soundSw:$('sound-sw'), circleSw:$('circle-sw') };
+
+function circleVisible(){ return S.phase === 1 || S.showCircle || S.missRound; }
+
+/* ── timers: everything started here is stopped in stopAll() ── */
+let doneTimer = 0, nextTimer = 0, holdTimer = 0, popTimer = 0;
+let holdDir = 0, holdStart = 0, keyDir = 0, keyLast = 0, keyStart = 0;
+
+/* ═══ SOUND — a self-contained plucked-string voice (Karplus-Strong) ═══
+   No files, no playNote(): app.js is not loaded on this page. One buffer per
+   string, made once at the string's target pitch. The voice plays it with a
+   playbackRate, so turning the peg GLIDES the pitch (setTargetAtTime) instead
+   of re-plucking on every tick. */
+let ctx = null, master = null, voice = null;
+const kBuf = {}, kActual = {};
+function ensureCtx(){
+  if (ctx) { if (ctx.state === 'suspended') ctx.resume().catch(()=>{}); return ctx; }
+  const AC = window.AudioContext || window.webkitAudioContext;
+  if (!AC) return null;
+  try { ctx = new AC(); } catch(e){ return null; }
+  master = ctx.createGain(); master.gain.value = 0.32;     // well under the backing tracks
+  master.connect(ctx.destination);
+  return ctx;
+}
+function ksBuffer(i){
+  if (kBuf[i]) return kBuf[i];
+  const sr = ctx.sampleRate, f = STRINGS[i].freq;
+  const L = Math.max(2, Math.round(sr / f - 0.5));       // the averaging filter adds half a sample of delay
+  kActual[i] = sr / (L + 0.5);
+  const n = Math.floor(sr * 3.2);
+  const buf = ctx.createBuffer(1, n, sr), d = buf.getChannelData(0);
+  const ring = new Float32Array(L);
+  let seed = 9301 + i * 977, prevN = 0;
+  for (let k = 0; k < L; k++) {                           // a softened noise burst = the pick
+    seed = (seed * 1103515245 + 12345) & 0x7fffffff;
+    const r = (seed / 0x7fffffff) * 2 - 1;
+    prevN = prevN * 0.4 + r * 0.6; ring[k] = prevN;
+  }
+  const rho = Math.pow(0.001, (L / sr) / 2.4);            // about -60 dB after 2.4 s, on every string
+  let idx = 0, peak = 0;
+  for (let k = 0; k < n; k++) {
+    const a = ring[idx], b = ring[(idx + 1) % L];
+    d[k] = a; if (Math.abs(a) > peak) peak = Math.abs(a);
+    ring[idx] = rho * 0.5 * (a + b);
+    idx = (idx + 1) % L;
+  }
+  const g = peak > 0 ? 0.9 / peak : 1, fade = Math.floor(sr * 0.25);
+  for (let k = 0; k < n; k++) d[k] *= g * (k > n - fade ? (n - k) / fade : 1);
+  kBuf[i] = buf;
+  return buf;
+}
+const LEVEL = [1.7, 1.45, 1.2, 1.05, 0.95, 0.85];        // the low strings are quiet on laptop speakers
+function rateFor(i, cents){ return centsToFreq(i, cents) / kActual[i]; }
+function stopVoice(sec){
+  if (!voice) return;
+  const v = voice; voice = null;
+  try {
+    if (sec > 0 && ctx) { v.g.gain.cancelScheduledValues(ctx.currentTime); v.g.gain.setTargetAtTime(0, ctx.currentTime, sec / 3); v.src.stop(ctx.currentTime + sec); }
+    else v.src.stop();
+  } catch(e){}
+}
+function pluck(i, cents, level){
+  if (!S.soundOn || !ensureCtx()) return;
+  stopVoice(0.05);
+  const buf = ksBuffer(i);
+  const src = ctx.createBufferSource(), g = ctx.createGain();
+  src.buffer = buf; src.playbackRate.value = rateFor(i, cents);
+  g.gain.value = (level || 1) * LEVEL[i];
+  src.connect(g); g.connect(master);
+  src.onended = () => { if (voice && voice.src === src) voice = null; };
+  src.start();
+  voice = { src, g, i, t0: ctx.currentTime };
+}
+function voiceAlive(){ return voice && ctx && ctx.currentTime - voice.t0 < 2.0; }
+function followPitch(){
+  if (!S.soundOn || !S.round) return;
+  if (voiceAlive()) { voice.src.playbackRate.setTargetAtTime(rateFor(voice.i, S.cents), ctx.currentTime, 0.03); }
+  else pluck(S.round.idx, S.cents, 0.6);                  // the note has died away: a soft pluck so you hear where you are
+}
+
+/* ═══ THE TUNER DISPLAY (same rules as tuner.js, in string-lock mode) ═══ */
+function ticksInit(){
+  let h = '';
+  for (let c = -50; c <= 50; c += 5) h += '<i class="' + (c === 0 ? 'm0' : (c % 25 === 0 ? 'm5' : '')) + '"></i>';
+  $('ticks').innerHTML = h;
+}
+function flashPop(){
+  el.note.classList.remove('pop'); void el.note.offsetWidth; el.note.classList.add('pop');
+  clearTimeout(popTimer); popTimer = setTimeout(() => el.note.classList.remove('pop'), 500);
+}
+function lcdOff(){
+  S.disp.shown = null; S.disp.inTune = false;
+  el.snark.dataset.on = '0'; el.lcd.dataset.mode = 'off';
+  el.note.textContent = '—'; el.hz.textContent = '';
+  el.needle.style.left = '50%'; el.status.textContent = '';
+  el.note.classList.remove('pop');
+}
+function updateDisplay(){
+  if (!S.round || (S.state !== 'turn' && S.state !== 'read' && S.state !== 'between')) { lcdOff(); return; }
+  const target = S.round.idx;
+  const freq = centsToFreq(target, S.cents);
+  const cents = Math.round(1200 * Math.log2(freq / STRINGS[target].freq));
+  const clamped = Math.max(-50, Math.min(50, cents));
+  const D = S.disp;
+  if (D.shown === null || Math.abs(clamped - D.shown) >= 2 || (clamped === 0 && D.shown !== 0)) {
+    D.shown = clamped;
+    el.needle.style.left = (50 + clamped) + '%';
+  }
+  el.snark.dataset.on = '1';
+  el.note.textContent = letterOf(target);
+  el.hz.textContent = (Math.round(freq * 10) / 10) + ' Hz';
+  const now = stickyInTune(D.inTune, D.shown);
+  if (now) {
+    if (!D.inTune) flashPop();
+    D.inTune = true; el.lcd.dataset.mode = 'in'; el.status.textContent = T('stInTune');
+  } else if (D.shown > 0) {
+    D.inTune = false; el.lcd.dataset.mode = 'sharp'; el.status.textContent = T('stSharp');
+  } else {
+    D.inTune = false; el.lcd.dataset.mode = 'flat'; el.status.textContent = T('stFlat');
+  }
+  checkGreen();
+}
+function checkGreen(){
+  if (S.state !== 'turn') return;
+  if (S.disp.inTune) { if (!doneTimer) doneTimer = setTimeout(finishRound, DONE_MS); }
+  else if (doneTimer) { clearTimeout(doneTimer); doneTimer = 0; }
+}
+
+/* ═══ ROUNDS ═══ */
+function newRound(){
+  clearTimeout(nextTimer); nextTimer = 0;
+  clearTimeout(doneTimer); doneTimer = 0;
+  stopVoice(0.15);
+  S.round = makeRound(S.prev, Math.random);
+  S.prev = S.round.idx;
+  S.cents = S.round.cents; S.pegAngle = 0;
+  S.picked = -1; S.wayPicked = ''; S.missRound = false;
+  S.state = 'name';
+  S.fb = ''; S.fbClass = '';
+  lcdOff();
+  render();
+  focusFirst();
+}
+function answerName(i){
+  if (S.state !== 'name') return;
+  ensureCtx();
+  const right = S.round.idx;
+  S.picked = i; S.note = '';
+  if (i === right) {
+    S.streak++;
+    S.fb = T('nameOk', { a: nameOf(right) }); S.fbClass = 'ok';
+    if (S.phase === 1 && S.streak >= STREAK_TO_PHASE2) {
+      S.phase = 2; S.showCircle = DEFAULTS.circleShownPhase2; savePhase2();
+      S.note = T('phase2');
+    }
+  } else {
+    S.streak = 0;
+    if (S.phase === 2) { S.missRound = true; S.fb = T('nameBadBack', { a: nameOf(right), b: nameOf(i) }); }
+    else S.fb = T('nameBad', { a: nameOf(right), b: nameOf(i) });
+    S.fbClass = 'bad';
+  }
+  S.state = 'read';
+  updateDisplay();
+  render();
+  pluck(S.round.idx, S.cents, 1);
+  focusFirst();
+}
+function answerWay(w){
+  if (S.state !== 'read') return;
+  S.wayPicked = w;
+  const sentence = S.round.answer === 'up' ? T('wayFlat') : T('waySharp');
+  if (w === S.round.answer) { S.fb = sentence; S.fbClass = 'ok'; }
+  else { S.fb = T('wayWrong') + sentence; S.fbClass = 'bad'; }
+  S.state = 'turn';
+  render();
+  updateDisplay();
+}
+function finishRound(){
+  doneTimer = 0;
+  if (S.state !== 'turn') return;
+  S.state = 'between';
+  S.tuned++;
+  S.fb = T('done', { a: nameOf(S.round.idx) }); S.fbClass = 'ok';
+  stopHold();
+  render();
+  nextTimer = setTimeout(newRound, 1700);
+}
+
+/* ═══ THE PEG ═══ */
+function tick(dir){
+  if (S.state !== 'turn') return;
+  S.cents = Math.max(-PEG_LIMIT, Math.min(PEG_LIMIT, S.cents + dir * TICK_CENTS));
+  S.pegAngle += dir * 14;
+  el.pegRot.style.transform = 'rotate(' + S.pegAngle + 'deg)';
+  followPitch();
+  updateDisplay();
+}
+/* Holding speeds up a little, so a student can overshoot and has to come back. */
+function holdDelay(ms){ return ms < 400 ? 130 : ms < 1000 ? 100 : ms < 1800 ? 72 : 52; }
+function holdLoop(){
+  if (!holdDir) return;
+  tick(holdDir);
+  holdTimer = setTimeout(holdLoop, holdDelay(performance.now() - holdStart));
+}
+function startHold(dir){
+  if (S.state !== 'turn') return;
+  ensureCtx();
+  stopHold();
+  holdDir = dir; holdStart = performance.now();
+  (dir > 0 ? el.pegUp : el.pegDown).classList.add('held');
+  holdLoop();
+}
+function stopHold(){
+  holdDir = 0; clearTimeout(holdTimer); holdTimer = 0;
+  el.pegUp.classList.remove('held'); el.pegDown.classList.remove('held');
+}
+
+/* ═══ RENDER ═══ */
+function esc(s){ return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); }
+function applyStatic(){
+  document.documentElement.lang = LANG;
+  document.title = T('title');
+  document.querySelectorAll('[data-t]').forEach(n => {
+    const k = n.getAttribute('data-t');
+    if (k === 'back') { n.textContent = T('back'); return; }
+    n.textContent = T(k);
+  });
+  el.soundSw.querySelector('#sound-lbl').textContent = S.soundOn ? T('soundOn') : T('soundOff');
+}
+function render(){
+  const st = S.state;
+  el.score.textContent = T('score', { n: S.tuned, k: S.streak });
+  // chips
+  const order = ['name', 'read', 'turn'];
+  const cur = st === 'between' ? 2 : order.indexOf(st);
+  el.chips.innerHTML = ['chip1','chip2','chip3'].map((k, i) =>
+    '<span class="chip' + (i === cur ? ' on' : (i < cur ? ' past' : '')) + '">' + (i + 1) + ' · ' + esc(T(k)) + '</span>').join('');
+  // prompt + hint
+  const p = st === 'name' ? 'p1' : st === 'read' ? 'p2' : st === 'turn' ? 'p3' : 'p4';
+  el.prompt.textContent = T(p);
+  el.hint.textContent = st === 'name' ? (S.phase === 1 ? T('h1a') : T('h1b')) : st === 'read' ? T('h2') : st === 'turn' ? T('h3') : '';
+  // strings picture
+  const show = circleVisible();
+  const th = [5.5, 4.5, 3.6, 2.8, 2.2, 1.6];
+  let sh = '';
+  for (let i = 0; i < 6; i++) {
+    const on = S.round && S.round.idx === i;
+    let cls = 'bubble';
+    if (S.picked >= 0 && S.round) { if (i === S.round.idx) cls += ' right'; else if (i === S.picked) cls += ' wrong'; }
+    const label = LANG === 'es' ? esc(nameOf(i)) + ' <small>' + esc(letterOf(i)) + '</small>' : esc(nameOf(i));
+    const canTap = st === 'name' && show;
+    sh += '<div class="srow' + (on ? ' on' : '') + '"><div class="sline' + (i < 3 ? ' wound' : '') + '" style="--th:' + th[i] + 'px"></div>' +
+      '<div class="slot"><button type="button" class="' + cls + '" data-name="' + i + '"' + (canTap ? '' : ' disabled') + (show ? '' : ' tabindex="-1" aria-hidden="true"') + '>' + label + '</button></div></div>';
+  }
+  el.strings.className = 'strings' + (show ? '' : ' nocircle');
+  el.strings.innerHTML = sh;
+  // answers
+  let ah = '';
+  if (st === 'name') {
+    if (!show) {
+      for (let i = 0; i < 6; i++) ah += '<button type="button" class="ans six" data-name="' + i + '">' + esc(nameOf(i)) + '</button>';
+    }
+  } else if (st === 'read') {
+    ah = '<button type="button" class="ans" data-way="up">' + esc(T('up')) + '</button><button type="button" class="ans" data-way="down">' + esc(T('down')) + '</button>';
+  } else if (st === 'turn') {
+    ['up','down'].forEach(w => {
+      let c = 'ans';
+      if (S.wayPicked === w) c += (w === S.round.answer ? ' right' : ' wrong');
+      else if (w === S.round.answer && S.wayPicked) c += ' right';
+      ah += '<button type="button" class="' + c + '" disabled>' + esc(T(w)) + '</button>';
+    });
+  }
+  el.answers.innerHTML = ah;
+  el.feedback.className = 'feedback ' + S.fbClass;
+  el.feedback.textContent = S.fb;
+  el.note2.textContent = S.note;
+  // controls
+  const turning = st === 'turn';
+  el.pegUp.disabled = !turning; el.pegDown.disabled = !turning;
+  el.pluck.disabled = !(st === 'read' || st === 'turn');
+  el.soundSw.setAttribute('aria-checked', S.soundOn ? 'true' : 'false');
+  el.soundSw.querySelector('#sound-lbl').textContent = S.soundOn ? T('soundOn') : T('soundOff');
+  const p1 = S.phase === 1;
+  el.circleSw.setAttribute('aria-checked', circleVisible() ? 'true' : 'false');
+  el.circleSw.setAttribute('aria-disabled', p1 ? 'true' : 'false');
+}
+function focusFirst(){
+  const b = el.answers.querySelector('button:not(:disabled)') || (S.state === 'name' && el.strings.querySelector('.bubble:not(:disabled)'));
+  if (b && document.activeElement && document.activeElement !== document.body && !document.activeElement.closest('.top')) { try { b.focus({ preventScroll: true }); } catch(e){} }
+}
+
+/* ═══ EVENTS ═══ */
+document.addEventListener('click', e => {
+  const t = e.target.closest('button'); if (!t) return;
+  if (t.dataset.name != null) { answerName(+t.dataset.name); return; }
+  if (t.dataset.way) { ensureCtx(); answerWay(t.dataset.way); return; }
+});
+el.pluck.addEventListener('click', () => {
+  if (S.state !== 'read' && S.state !== 'turn') return;
+  ensureCtx(); pluck(S.round.idx, S.cents, 1);
+});
+el.soundSw.addEventListener('click', () => {
+  S.soundOn = !S.soundOn;
+  if (!S.soundOn) stopVoice(0.05);
+  else ensureCtx();
+  render();
+});
+el.circleSw.addEventListener('click', () => {
+  if (S.phase === 1) return;                               // the circle is part of Phase 1
+  S.showCircle = !S.showCircle;
+  render();
+});
+[el.pegUp, el.pegDown].forEach(b => {
+  b.addEventListener('pointerdown', e => { e.preventDefault(); startHold(+b.dataset.dir); });
+  b.addEventListener('contextmenu', e => e.preventDefault());
+});
+['pointerup','pointercancel'].forEach(ev => window.addEventListener(ev, stopHold));
+window.addEventListener('blur', stopHold);
+
+/* Keyboard — keydown only. Left/Right turn the peg; holding a key keeps turning
+   (the browser's key repeat, paced by the same speed-up as the buttons). Every
+   other repeat is ignored. Ignored while focus is in an input. */
+function onKey(e){
+  const tg = e.target, tag = tg && tg.tagName;
+  if (tag === 'INPUT' || tag === 'TEXTAREA' || tag === 'SELECT' || (tg && tg.isContentEditable)) return;
+  if (e.key !== 'ArrowLeft' && e.key !== 'ArrowRight') return;
+  e.preventDefault();
+  if (S.state !== 'turn') return;
+  const dir = e.key === 'ArrowRight' ? 1 : -1, now = performance.now();
+  if (!e.repeat || dir !== keyDir || now - keyLast > 700) { keyStart = now; }
+  keyDir = dir; keyLast = now;
+  ensureCtx();
+  if (e.repeat && now - (onKey.last || 0) < holdDelay(now - keyStart) - 10) return;
+  onKey.last = now;
+  tick(dir);
+}
+let keysOn = false;
+function keysAttach(){ if (!keysOn) { document.addEventListener('keydown', onKey); keysOn = true; } }
+function keysDetach(){ if (keysOn) { document.removeEventListener('keydown', onKey); keysOn = false; } }
+
+/* Stop everything this page started: voices, timers, listeners. */
+function stopAll(){
+  stopHold();
+  clearTimeout(doneTimer); doneTimer = 0;
+  clearTimeout(nextTimer); nextTimer = 0;
+  clearTimeout(popTimer); popTimer = 0;
+  stopVoice(0);
+  keysDetach();
+  if (ctx) { try { ctx.suspend(); } catch(e){} }
+}
+function resumeAll(){
+  keysAttach();
+  if (S.state === 'between') nextTimer = setTimeout(newRound, 600);
+  else if (S.state === 'turn') checkGreen();
+}
+document.addEventListener('visibilitychange', () => { if (document.hidden) stopAll(); else resumeAll(); });
+window.addEventListener('pagehide', () => { stopAll(); if (ctx) { try { ctx.close(); } catch(e){} ctx = null; } });
+window.addEventListener('pageshow', e => { if (e.persisted) { resumeAll(); } });
+window.addEventListener('storage', e => {
+  if (e.key !== 'gc-lang') return;
+  LANG = e.newValue === 'es' ? 'es' : 'en';
+  applyStatic(); render(); updateDisplay();
+});
+
+/* Back link: hop back to where the student came from instead of stacking a second copy of the site. */
+$('back-link').addEventListener('click', e => {
+  let same = false;
+  try { same = document.referrer && new URL(document.referrer).origin === location.origin; } catch(_){}
+  if (same && history.length > 1) { e.preventDefault(); history.back(); }
+});
+
+/* A hook for tools/smoke.mjs and the proof tool; reads only. */
+window.TuningSim = { S, DEFAULTS, makeRound, nearestNote, STRINGS, MIN_DETUNE, MAX_DETUNE, tick, newRound };
+
+ticksInit();
+applyStatic();
+keysAttach();
+newRound();
+})();
+</script>
+</body>
+</html>

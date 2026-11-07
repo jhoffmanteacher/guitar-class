@@ -1173,6 +1173,8 @@ body.rail-collapsed .rail-tools .tool-popup{
 .tuner-status.sharp{color:var(--amber-text)}
 .tuner-status.flat{color:var(--blue-text)}
 .tuner-tip{text-align:center;font-size:0.75rem;font-style:italic;color:var(--text3);line-height:1.4;margin:-2px 0 10px}
+.tuner-sim-link{display:flex;align-items:center;justify-content:center;min-height:44px;margin:-4px 0 -4px;font-size:0.8125rem;font-weight:600;color:var(--purple-text);text-decoration:underline;text-underline-offset:2px}
+.tuner-sim-link:hover{color:var(--purple-accent)}
 .tuner-strings{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:10px}
 .ts-btn{flex:1;padding:8px 0;min-height:34px;border-radius:var(--radius-sm);border:1px solid var(--border2);background:var(--bg2);font-size:0.8125rem;cursor:pointer;color:var(--text2);font-family:inherit;min-width:0}
 .tuner-strings .ts-btn{flex:1 1 40px;min-width:40px;min-height:44px}

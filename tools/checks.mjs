@@ -76,7 +76,7 @@ try {
 } catch { /* no tabs/ dir yet */ }
 
 const SHELL_FILES = [
-  'index.html', '404.html', 'mood-chart.html', 'styles.css', 'i18n.js', 'guitar-diagrams.js', 'class-activities.js', 'app.js', 'practice-minutes-config.js', 'practice-minutes.js', 'fab-tools.js', 'tuner.js', 'coach.js', 'teacher.js', 'live-quiz.js', 'config-main.js',
+  'index.html', '404.html', 'mood-chart.html', 'tuning-sim.html', 'styles.css', 'i18n.js', 'guitar-diagrams.js', 'class-activities.js', 'app.js', 'practice-minutes-config.js', 'practice-minutes.js', 'fab-tools.js', 'tuner.js', 'coach.js', 'teacher.js', 'live-quiz.js', 'config-main.js',
   'trainer-core.js', 'trainer-audio.js', 'trainer-ui.js', 'trainer-site-adapter.js',
   'firebase-config.js', 'manifest.json', 'icon.svg',
   ...MODULE_FILES,
@@ -1454,6 +1454,7 @@ const CONTRAST_SOURCES = [
   ['styles.css',              'css',  null],
   ['tabs/journey-theme.css',  'css',  null],
   ['mood-chart.html',         'html', null],
+  ['tuning-sim.html',         'html', null],
   // 404.html has no :root of its own — it <link>s styles.css and its inline
   // block reads that palette's tokens.
   ['404.html',                'html', 'styles.css'],
@@ -5561,6 +5562,33 @@ function checkPrecacheCoverage(src) {
   else if (!missing) ok(`all ${refs.size} referenced files exist on disk`);
 }
 
+/* 1cp. Tuning Simulator (tuning-sim.html, 2026-11-06) — pins only. It practises
+   reading a tuner with no guitar and no mic, so: the defaults are the work
+   order's (sound on, circle shown in Phase 1, hidden in Phase 2), the page never
+   asks for the mic, and it loads neither app.js nor tuner.js (tuner.js owns the
+   mic). The round logic itself is run by tools/tuning-sim-proof.mjs (1,000
+   rounds), which is NOT part of this file. */
+function checkTuningSim() {
+  head('1cp. Tuning Simulator: defaults and the no-mic rule are pinned');
+  let src;
+  try { src = readFileSync(join(ROOT, 'tuning-sim.html'), 'utf8'); }
+  catch { err('tuning-sim.html is missing'); problems++; return; }
+  const code = src.replace(/<!--[\s\S]*?-->/g, '').replace(/\/\*[\s\S]*?\*\//g, '').replace(/(^|[^:\\'"`])\/\/[^\n]*/g, '$1');
+  let bad = 0;
+  const m = code.match(/const DEFAULTS = \{([^}]*)\};/);
+  const want = 'soundOn: true, circleShownPhase1: true, circleShownPhase2: false';
+  if (!m || m[1].trim().replace(/\s+/g, ' ') !== want) { err(`tuning-sim.html DEFAULTS must be { ${want} } (found: ${m ? m[1].trim() : 'nothing'})`); problems++; bad++; }
+  if (/getUserMedia|mediaDevices/.test(code)) { err('tuning-sim.html asks for the mic (getUserMedia / mediaDevices) — it must never'); problems++; bad++; }
+  if (/<script\b[^>]*\bsrc=/i.test(code)) { err('tuning-sim.html loads a script file — it is standalone (no app.js, no tuner.js, no i18n.js)'); problems++; bad++; }
+  if (!/S\.soundOn\s*=\s*DEFAULTS\.soundOn/.test(code) && !/soundOn:\s*DEFAULTS\.soundOn/.test(code)) { err('tuning-sim.html does not start its sound switch from DEFAULTS.soundOn'); problems++; bad++; }
+  if (!/S\.showCircle\s*=\s*S\.phase === 1 \? DEFAULTS\.circleShownPhase1 : DEFAULTS\.circleShownPhase2/.test(code)) { err('tuning-sim.html does not start "Show the circle" from the two DEFAULTS'); problems++; bad++; }
+  let idx = ''; try { idx = readFileSync(join(ROOT, 'index.html'), 'utf8').replace(/<!--[\s\S]*?-->/g, ''); } catch {}
+  if (!/<a\b[^>]*href="tuning-sim\.html"[^>]*data-i18n="tools\.tuningSim"/.test(idx)) { err('index.html has no tuner-popup link to tuning-sim.html with data-i18n="tools.tuningSim"'); problems++; bad++; }
+  let i18n = ''; try { i18n = readFileSync(join(ROOT, 'i18n.js'), 'utf8'); } catch {}
+  if (!/'tools\.tuningSim':\s*\{\s*en:\s*'[^']+',\s*es:\s*'[^']+'\s*\}/.test(i18n)) { err("i18n.js has no 'tools.tuningSim' in both en and es"); problems++; bad++; }
+  if (bad === 0) ok('tuning-sim.html: defaults pinned (sound on; circle shown in Phase 1, off in Phase 2), no mic, no script files, linked from the Tuner popup with its en + es label');
+}
+
 /* Journey pages are referenced by ~30 hand-typed 'tabs/*.html' strings across
    module files and config — none previously validated (the link checker only
    covers external URLs). A renamed/removed journey page shipped a 404 with no
@@ -5732,6 +5760,7 @@ function bumpServiceWorker() {
   checkJourneyPaths();
   checkSwAssets(src);
   checkPrecacheCoverage(src);
+  checkTuningSim();
   checkSdkVersion();
   checkFirestoreRules();
 

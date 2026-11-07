@@ -5,6 +5,16 @@ Notable changes to the Guitar Class site. Newest first.
 For the full session-by-session history (and the reasoning behind each change),
 see `WORKFLOW.md` and the git commit log.
 
+## 2026-11-06 — Tuning Simulator: practice reading a tuner before you have a guitar
+
+- **New page: Tuning Simulator.** Open the Tuner and tap **Tuning Simulator** under the tip. You do not need a guitar. It does not use your microphone. The page plays the sound itself.
+- **How a round goes.** One string is lit on the picture. Tap its name. Then read the tuner: is the needle left or right of the center? Tap **Up — tighten** or **Down — loosen**. Then turn the on-screen peg until the needle is green and stays green for one second. Hold **Loosen** or **Tighten**, or press the Left and Right arrow keys. The pitch slides as you turn, so you can go too far and come back. **Pluck again** plays the string where it is now.
+- **The tuner looks like a clip-on tuner:** a big note letter, a row of tick marks with a needle, and a screen that turns blue when the note is too low, amber when it is too high, and green when it is in tune. It uses the same words as the Tuner on this site.
+- **The note circle goes away.** At first the picture shows each string's name. After you name six strings right in a row, the names fade out and you pick from six buttons from memory. A wrong answer brings the names back for that string. **Show the circle** brings them back any time. The site remembers on this computer that you passed this step.
+- **The score line** shows how many strings you tuned and how many you named right in a row. It starts again each time you open the page.
+- **Sound is on** when you open the page. Use **Sound** at the top to turn it off.
+- Spanish: the whole page is in Spanish when the site is.
+
 ## 2026-11-06 — Top 5 medal is brighter
 
 - **The "TOP 5" medal is now a bright purple coin with dark letters**, so it stands out on the dark minutes strip, in the pill that drops down and on My progress. It was a dark coin with a thin purple ring and was hard to see.
