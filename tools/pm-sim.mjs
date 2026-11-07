@@ -1967,5 +1967,56 @@ console.log('17. the teacher console\'s Practice minutes view (teacher.js teache
   }
 }
 
+/* ═══════════ 18. My progress: four rules that only pm-e2e.mjs guarded (Friday check 2026-11-06) ═══════════ */
+console.log('18. My progress rules: can\'t-reach in seconds, "No streak yet" / "right now", the Longest line, the flame');
+{
+  /* A world standing on a fixed day with the given weeks held by the "server"; renders the panel into a fake host and returns its HTML
+     (the strings come back as their keys). prior = seconds of each earlier week, newest first; the streak tile reads them. */
+  const at = (iso, weekSecs, todaySecs, prior, goal = 3600) => {
+    const w = makeWorld({ ui: true, strip: true, config: { uiOn: true }, startMs: new Date(iso).getTime() });
+    w.PM.status();   // the first call makes the student's state
+    const s = w.PM._state(), d = w.PM.calc.ymd(new Date(iso)), cur = w.PM.calc.weekIdOf(d);
+    s.loaded = true; s.pend = {}; s.days = {}; s.weeks = {};
+    prior.forEach((secs, i) => { s.weeks[w.PM.calc.weekAdd(cur, -(i + 1))] = { seconds: secs, goalSeconds: 3600, hit: secs >= 3600 }; });
+    s.weeks[cur] = { seconds: weekSecs, goalSeconds: goal, hit: weekSecs >= goal };
+    if (todaySecs) s.days[d] = todaySecs;
+    const h = { hidden: true, innerHTML: '', isConnected: true };
+    w.PM.renderProgress(h);
+    return { w, html: h.innerHTML, strip: w.PM.stripHtml(), tile: (n) => (h.innerHTML.split('<div class="pm-tile">')[n] || '') };
+  };
+  const SUN = '2026-11-22T10:00:00', WED = '2026-11-18T10:00:00';   // not the Thanksgiving week (2026-11-23), which is a skipped week
+  const streak3 = [3700, 3700, 3700];
+
+  /* 1. "Can't reach" is compared in seconds, not rounded-up minutes. Sunday: room = today's cap (1200 s) minus what today already holds. */
+  const out = (weekSecs, todaySecs) => /pm\.weekOut/.test(at(SUN, weekSecs, todaySecs, streak3).tile(1));
+  check('can\'t reach, in seconds: 1 s short with exactly 1 s of today\'s cap left → still reachable', !out(3599, 1199));
+  check('…1 s short with no cap left → cannot be reached', out(3599, 1200));
+  check('…59 s short with exactly 59 s of cap left → still reachable', !out(3541, 1141));
+  check('…60 s short with 59 s of cap left → cannot be reached', out(3540, 1141));
+  check('…50 of 60 min with today at the cap → cannot be reached; with 10 min of cap left → reachable', out(3000, 1200) && !out(3000, 600));
+
+  /* 2. "No streak yet" (never had one) vs "No streak right now" (lost one: longest above 0) vs a real streak. */
+  const never = at(WED, 300, 0, []), lost = at('2026-12-16T10:00:00', 300, 0, [0, 0, 0, 3700, 3700, 3700])   /* streaks start at 2026-W45: hit Nov 2, 9, 16; Nov 23 is a skipped week; Nov 30 is the free miss; Dec 7 resets it */, live = at(WED, 300, 0, streak3);
+  check('no streak, never had one: the Streak tile says pm.streakNone (not "right now", not "N-week")', /pm\.streakNone\b(?!Now)/.test(never.tile(2)) && !/pm\.streakNoneNow|pm\.tileStreakVal/.test(never.tile(2)), never.tile(2).slice(0, 200));
+  check('a lost streak (3 hit weeks, then two missed ones: streak 0, longest 3): pm.streakNoneNow', /pm\.streakNoneNow/.test(lost.tile(2)) && !/pm\.streakNone\b(?!Now)/.test(lost.tile(2)), lost.tile(2).slice(0, 200));
+  check('a streak going: "N-week streak" (pm.tileStreakVal.many), neither "none" wording', /pm\.tileStreakVal\.many/.test(live.tile(2)) && !/pm\.streakNone/.test(live.tile(2)), live.tile(2).slice(0, 200));
+  check('a streak of exactly 1 uses the .one wording', /pm\.tileStreakVal\.one/.test(at(WED, 3700, 0, []).tile(2)));
+  check('the header flame\'s label follows the same rule: pm.streakNone / pm.streakNoneNow', /aria-label="pm\.streakNone"/.test(never.strip) && /aria-label="pm\.streakNoneNow"/.test(lost.strip), [never.strip.slice(0, 160), lost.strip.slice(0, 160)].join(' | '));
+
+  /* 3. The Longest line is hidden (empty, the tile keeps its height) at 0, and shown above 0. */
+  const longest = (r) => (r.tile(2).match(/<div class="pm-tile-sub">(.*?)<\/div>/) || [])[1];
+  check('Longest hidden at 0: the Streak tile\'s sub-line is empty when there has never been a streak', longest(never) === '', longest(never));
+  check('…and shown above 0: a lost streak and a live one both carry pm.tileLongest', /pm\.tileLongest\.many/.test(longest(lost)) && /pm\.tileLongest\.many/.test(longest(live)), [longest(lost), longest(live)]);
+  check('…"1 week" uses the .one wording', /pm\.tileLongest\.one/.test(longest(at(WED, 3700, 0, []))), longest(at(WED, 3700, 0, [])));
+
+  /* 4. The flame is lit only when THIS week\'s goal is hit — in the My progress tile and in the header strip, whatever the streak. */
+  const lit = (r) => ({ tile: /class="pm-streak pm-streak-lg pm-on"/.test(r.tile(2)), strip: /class="pm-streak pm-on"/.test(r.strip) });
+  check('a 3-week streak but this week at 5 of 60 min: the flame is NOT lit (tile or strip)', eq(lit(live), { tile: false, strip: false }), JSON.stringify(lit(live)));
+  check('no streak and this week at 5 min: not lit', eq(lit(never), { tile: false, strip: false }));
+  const hit = at(WED, 3600, 0, streak3), hitFirst = at(WED, 3600, 0, []);
+  check('this week at 60 of 60 min: lit in the tile AND the strip (with a streak, and as a first hit week)', eq(lit(hit), { tile: true, strip: true }) && eq(lit(hitFirst), { tile: true, strip: true }), JSON.stringify([lit(hit), lit(hitFirst)]));
+  check('59 min 59 s: not lit', eq(lit(at(WED, 3599, 0, streak3)), { tile: false, strip: false }));
+}
+
 console.log(`\n${failed ? '✗' : '✓'} pm-sim: ${passed} passed, ${failed} failed`);
 if (failed) { console.log('failed: ' + fails.join(' | ')); process.exit(1); }
