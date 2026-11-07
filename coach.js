@@ -1660,7 +1660,7 @@ function coachMicOff(){
    and the dev bypass never upload. Every way out of a take ends up in
    coachMicOff(), which tears the capture down. */
 const MICREC_MAX_SEC = 30;
-const MICREC_MIN_STOPPED_SEC = 10;   // a Stopped Power Chord Switch game is saved only past this much audio (see ccFinish)
+const MICREC_MIN_STOPPED_SEC = 10;   // a Stopped Power Chord Switch game is saved only after this many seconds of play, count-in not included (see ccFinish)
 const MICREC_RATE = 24000;            // saved sample rate: 16-bit mono
 const MICREC_CHUNK = 600000;          // bytes per chunks/{i} doc (Firestore's cap is 1 MB)
 const MICREC_ASK_KEY = 'micRecConsent';
@@ -3558,6 +3558,8 @@ async function ccStart(again){
   const session = cc;
   cc.phase = 'starting';
   cc.nextBpm = null;   // the done screen's tempo row opens fresh after each game (ccRenderDone)
+  cc.firstPlayAt = null;
+  cc.stoppedEarly = false;
   if (!coachStream && !(await coachAcquireMic())){
     if (cc === session){ cc.phase = 'setup'; ccRenderSetup(coachMicFailMsg('games.cc.micDenied')); }
     return;
@@ -3624,7 +3626,11 @@ function ccBeginStage(){
       `<div class="cc-col-pic">${ccDiagramsHtml(prog, prog[0], undefined, cc.shapes)}</div></div>`
     : `<div class="coach-count" id="cc-count">&nbsp;</div>` + ccDiagramsHtml(prog, prog[0]);
   coachCountIn(cc, 'cc-count', () => {
-    if (cc && cc.phase === 'countin'){ cc.phase = 'play'; ccRenderPlay(); }
+    if (cc && cc.phase === 'countin'){
+      cc.phase = 'play';
+      if (cc.firstPlayAt == null) cc.firstPlayAt = performance.now();   // the first round's count-in is over: ccFinish measures play time from here
+      ccRenderPlay();
+    }
   });
   /* When each change is due on the performance.now() clock (listenStart is set by
      coachCountIn), for a recorded take. */
@@ -3635,8 +3641,8 @@ function ccBeginStage(){
 
 /* The red "Recording this take for your teacher" label, drawn on every screen of a
    take (each screen replaces #cc-body), and only while a Power Chord Switch capture
-   is really running. A capture ends at micRec's 30 s cap, and the label goes with it: a three-round game at the default speed is
-   recorded until about the middle of round 3, a slow or every-bar game for less. */
+   is really running. A capture ends at micRec's 30 s cap, and the label goes with it: a three-round game at the default speed (30 BPM) is
+   recorded until inside round 2's count-in, a slower game for less. */
 function ccRecBadge(){
   return micRec && micRec.live && micRec.mode === 'pw' ? micRecBadgeHtml() : '';
 }
@@ -4012,6 +4018,7 @@ function ccFinish(complete){
   const rec = ccIsPower() ? micRecStop() : null;   // before coachMicOff, which drops a running capture
   if (cc.micOn){ coachMicOff(); cc.micOn = false; }
   cc.phase = 'done';
+  cc.stoppedEarly = !complete;   // ccRenderDone: changes never reached are 'miss' only in the data, not strums the mic missed
   const oldBest = (games[ccGameKey()] && games[ccGameKey()].bestBpm) || 0;
   // New-best only counts on a run clean enough to save — ccRenderDone's
   // r >= 0.85 branch is what writes games.cc.bestBpm (games.pw for Power
@@ -4025,10 +4032,11 @@ function ccFinish(complete){
   if (complete && ccOk > 0) awardArcadeXp(cc.isNewBest);
   ccRenderDone();
   /* A game played to the end is saved, and so is a Stopped one (Jonathan, 2026-11-04: "save it on stop too")
-     — marked complete:false in the take. A Stopped one needs MICREC_MIN_STOPPED_SEC of audio: each student
+     — marked complete:false in the take. A Stopped one needs MICREC_MIN_STOPPED_SEC of play after the first count-in: each student
      has ONE take per game and a new take overwrites it, so an accidental Stop must not replace a full take
      (or use up the collection counter) with two seconds of count-in. Leaving the screen still drops it. */
-  if (rec && (complete || rec.n / rec.srcRate >= MICREC_MIN_STOPPED_SEC)) micRecSave(rec, ccRecMeta(complete));
+  const playedSec = cc.firstPlayAt == null ? 0 : (performance.now() - cc.firstPlayAt) / 1000;   // time played, not audio length: the audio starts at the count-in, which lasts 24 s at 10 BPM
+  if (rec && (complete || playedSec >= MICREC_MIN_STOPPED_SEC)) micRecSave(rec, ccRecMeta(complete));
 }
 
 function ccRenderDone(){
@@ -4057,7 +4065,7 @@ function ccRenderDone(){
      at the same speed. One miss alone is not enough (it may be a slip), and a game at 85% or better keeps its "Level up". Change Up keeps all
      of it. */
   const unheard = total - ok - off;
-  const firmer = ccIsPower() && r < 0.85 && unheard >= 2 && unheard > off;
+  const firmer = ccIsPower() && !cc.stoppedEarly && r < 0.85 && unheard >= 2 && unheard > off;
   let verdict, advice;
   if (r >= 0.85){
     verdict = '&#x1F31F; ' + t('games.cc.verdict.great', { ok, total });
@@ -4096,7 +4104,7 @@ function ccRenderDone(){
      advice names (5 up after 85%, 5 down after under half, else the same); cc.nextBpm is set once per finished game (ccStart
      clears it), so drawing the screen again does not move it a second time. Change Up keeps its three buttons. */
   if (ccIsPower() && cc.nextBpm == null)
-    cc.nextBpm = Math.min(CC_BPM_MAX, Math.max(CC_POWER_BPM_MIN, (cc.ladder ? (cc.stageLog.length ? cc.stageLog[0].bpm : cc.bpm) : ccScoreBpm()) + (rec === 'up' ? CC_POWER_AGAIN_STEP : rec === 'down' ? -CC_POWER_AGAIN_STEP : 0)));
+    cc.nextBpm = Math.min(ccDoneMaxBpm(), Math.max(CC_POWER_BPM_MIN, (cc.ladder ? (cc.stageLog.length ? cc.stageLog[0].bpm : cc.bpm) : ccScoreBpm()) + (rec === 'up' ? CC_POWER_AGAIN_STEP : rec === 'down' ? -CC_POWER_AGAIN_STEP : 0)));
   const actions = ccIsPower()
     ? `<div class="coach-bpm-row">
          <button type="button" class="tp-btn" onclick="ccDoneNudge(${-CC_POWER_AGAIN_STEP})">&#x2212;${CC_POWER_AGAIN_STEP}</button>
@@ -4132,9 +4140,11 @@ function ccDoneAgainText(){
   return cc.ladder ? t('games.pw.ladder.again', { bpm: cc.nextBpm }) : t('games.common.again', { bpm: cc.nextBpm });
 }
 /* Power Chord Switch's done-screen −5 / +5: only moves the tempo shown; "Again" plays it. */
+/* The highest tempo the done row may show: a song switch's first round tops out two steps below CC_BPM_MAX (ccLadderBpms), so 135 would play as 130. */
+function ccDoneMaxBpm(){ return cc.ladder ? CC_BPM_MAX - (CC_LADDER_ROUNDS - 1) * CC_LADDER_STEP : CC_BPM_MAX; }
 function ccDoneNudge(d){
   if (!cc || cc.phase !== 'done' || !ccIsPower() || cc.nextBpm == null) return;
-  cc.nextBpm = Math.min(CC_BPM_MAX, Math.max(CC_POWER_BPM_MIN, cc.nextBpm + d));
+  cc.nextBpm = Math.min(ccDoneMaxBpm(), Math.max(CC_POWER_BPM_MIN, cc.nextBpm + d));
   const el = document.getElementById('cc-done-bpm');
   if (el) el.textContent = cc.nextBpm + ' BPM';
   const again = document.getElementById('cc-done-again');

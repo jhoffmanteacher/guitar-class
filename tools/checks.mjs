@@ -12294,7 +12294,7 @@ function checkCoachVerdicts() {
       micRecSave = (rec, meta) => { __saves.push(meta); };`);
     const take = (mode, finish) => {
       run(`micRec = null; __saves = []; __starts = 0; setLang('en'); currentUser = { uid: 'pw-check' }; games = {}; ccSetup(${JSON.stringify(mode)}); cc.micOn = true; ccPickRate(2); ccPickProg(${mode === 'power' ? SONGS[0].idx : 1}); cc.bpm = 60; ccPrepare(false); ccBeginStage();
-        cc.phase = 'play'; cc.changes.forEach(c => { c.result = 'ok'; }); ${finish}`);
+        cc.phase = 'play'; cc.firstPlayAt = performance.now() - (globalThis.__playSec || 0) * 1000; cc.changes.forEach(c => { c.result = 'ok'; }); ${finish}`);
       song.recChecks++;
       return JSON.parse(run('JSON.stringify({ saves: __saves, starts: __starts })'));
     };
@@ -12396,10 +12396,10 @@ function checkCoachVerdicts() {
        rendered in both languages: the hint replaces the tempo advice when at least two changes went unheard and they outnumber the "chord sounded wrong"
        ones, below 85% right, in Power Chord Switch only; a single miss, a tie, mostly wrong chords, a game at 85% or better and Change Up keep what they had. */
     song.hintChecks = 0;
-    const doneText = (mode, lang, results) => {
+    const doneText = (mode, lang, results, stopped) => {
       const [f, g] = mode === 'power' ? ['F5', 'G5'] : ['C', 'G'];
       run(`micRec = null; setLang(${JSON.stringify(lang)}); ccSetup(${JSON.stringify(mode)}); cc.bpm = 60; ccPickRate(2); ccPickProg(1); ccPrepare(false); ccBeginStage(); cc.phase = 'play';
-        cc.changes = ${JSON.stringify(results.map((r, i) => ({ from: i % 2 ? g : f, to: i % 2 ? f : g, result: r })))}; cc.nextBpm = null; ccRenderDone();`);
+        cc.changes = ${JSON.stringify(results.map((r, i) => ({ from: i % 2 ? g : f, to: i % 2 ? f : g, result: r })))}; cc.nextBpm = null; cc.stoppedEarly = ${!!stopped}; ccRenderDone();`);
       const html = bodies['cc-body'] || '';
       /* Change Up: the highlighted one of its three buttons (ccAgain's argument). Power Chord Switch has one Again button and a −5 / +5
          row (2026-11-05): what it recommends is the tempo that row opens on, minus the tempo just played; the row's readout and the
@@ -12440,15 +12440,26 @@ function checkCoachVerdicts() {
         song.hintChecks++;
       }
     }
+    /* A Stopped game (Friday check 2026-11-06): the changes never reached are 'miss' in the data, but the mic did not miss them, so the
+       done screen must not tell the student to strum firmer. The same results after a game played to the end still show the hint. */
+    for (const lang of ['en', 'es']) {
+      const stopTxt = doneText('power', lang, [...times(4, 'ok'), ...times(12, 'miss')], true).txt.replace(/\s+/g, ' '), endTxt = doneText('power', lang, [...times(4, 'ok'), ...times(12, 'miss')], false).txt.replace(/\s+/g, ' ');
+      if (stopTxt.includes(WORDS[lang].hint)) flag(`1ck (${lang}): a Stopped game (4 right, the rest never reached) tells the student to strum firmer`);
+      if (!endTxt.includes(WORDS[lang].hint)) flag(`1ck (${lang}): a finished game with 12 of 16 not heard no longer shows the firmer hint`);
+      song.hintChecks++;
+    }
     run("setLang('en');");
     /* Save on Stop (2026-11-04): a Stopped game with enough audio is saved, marked complete:false; one with almost none is dropped,
        because each student has ONE take per game and a new take overwrites it. */
-    run('globalThis.__recSec = 20;');
+    run('globalThis.__recSec = 30; globalThis.__playSec = 20;');
     const stopLong = take('power', 'ccFinish(false);');
-    if (stopLong.saves.length !== 1 || stopLong.saves[0].fields.complete !== false) flag(`1ck: a game Stopped after 20 s of audio saved ${stopLong.saves.length} takes (complete:${stopLong.saves[0] && stopLong.saves[0].fields.complete}), expected 1 with complete:false`);
-    run('globalThis.__recSec = 3;');
+    if (stopLong.saves.length !== 1 || stopLong.saves[0].fields.complete !== false) flag(`1ck: a game Stopped after 20 s of play saved ${stopLong.saves.length} takes (complete:${stopLong.saves[0] && stopLong.saves[0].fields.complete}), expected 1 with complete:false`);
+    run('globalThis.__recSec = 3; globalThis.__playSec = 3;');
     if (take('power', 'ccFinish(false);').saves.length !== 0) flag('1ck: a game Stopped after 3 s of audio was saved (it would overwrite the last full take with a stub)');
-    run('globalThis.__recSec = 30;');
+    /* The audio runs from the count-in, which is 24 s at 10 BPM: 30 s of audio can hold under 2 s of play (Friday check 2026-11-06). */
+    run('globalThis.__recSec = 30; globalThis.__playSec = 1.6;');
+    if (take('power', 'ccFinish(false);').saves.length !== 0) flag('1ck: a game Stopped 1.6 s into play was saved because its audio was 30 s long (the audio is mostly count-in; it would overwrite the last full take with a stub)');
+    run('globalThis.__recSec = 30; globalThis.__playSec = 0;');
     if (!/const MICREC_MIN_STOPPED_SEC = 10;/.test(readFileSync(join(ROOT, 'coach.js'), 'utf8'))) flag('1ck: MICREC_MIN_STOPPED_SEC is no longer 10');
     const cu = take('open', 'ccFinish(true);');
     if (cu.saves.length !== 0 || cu.starts !== 0) flag(`1ck: Change Up started ${cu.starts} captures and saved ${cu.saves.length} takes — it must never record`);
@@ -12533,7 +12544,7 @@ function checkCoachVerdicts() {
     if (pk !== 'ccBest:F5-G5:beat') flag(`1ck: a pair's best-score key changed to "${pk}" (a student's saved bests would be lost)`);
     const pairPlan = JSON.parse(run(`JSON.stringify(ccRoundPlan(CC_POWER_PROGRESSIONS[1], CC_POWER_PROGRESSIONS[1].chords, CC_RATES[1]))`));
     if (pairPlan.slots !== 12 || pairPlan.ladder || pairPlan.rounds !== 1) flag(`1ck: a pair's round changed (${pairPlan.slots} slots at "Every 2 beats", expected 12, one round)`);
-    const SONG_PIN = { recChecks: 19, readingChecks: 21, ratioChecks: 165, hintChecks: 20, songs: 2, entries: 16, cardSwitches: 16, hints: 16 * 7 * 2, setups: 16 * 3 * 2, dones: 16 * 2, rounds: 16 * 3, nudges: 16 * 2 };
+    const SONG_PIN = { recChecks: 20, readingChecks: 21, ratioChecks: 165, hintChecks: 22, songs: 2, entries: 16, cardSwitches: 16, hints: 16 * 7 * 2, setups: 16 * 3 * 2, dones: 16 * 2, rounds: 16 * 3, nudges: 16 * 2 };
     for (const [k, n] of Object.entries(SONG_PIN)) if (song[k] !== n) flag(`1ck: ${song[k]} ${k}, pinned ${n} — the check went partly blind (or grew: re-pin on purpose)`);
     songCounts = song;
     run(`setLang('en'); cc = null; ccStop();`);

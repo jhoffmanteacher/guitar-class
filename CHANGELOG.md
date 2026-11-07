@@ -9,6 +9,12 @@ see `WORKFLOW.md` and the git commit log.
 
 - **"No streak right now" after a streak ends.** If you had a streak and missed a week, the Streak tile and the flame now say "No streak right now" (Spanish: "Ahora no tienes racha") instead of "No streak yet". Your longest streak still shows under it. A new student still sees "No streak yet".
 
+## 2026-11-06 — Power Chord Switch: Stop, saved takes and the Again tempo
+
+- **Stopping a game early no longer says "Strum a little firmer."** The changes you never got to are not strums the mic missed.
+- **A slow game you stop right away no longer replaces your saved take.** The take is saved only after 10 seconds of playing (the count-in does not count; at 10 BPM it alone lasts 24 seconds).
+- **The Again tempo in a song switch stops at 130 BPM.** A song switch goes up in steps of 5 over three rounds, so 135 played as 130 while the button said 135.
+
 ## 2026-11-06 — Fixes from the weekly review
 
 - **Call the Chord: tapping the "?" box no longer counts as an answer.** In the Call steps you have to pick the chord. Before, tapping the box at the right time passed the step without naming anything.
