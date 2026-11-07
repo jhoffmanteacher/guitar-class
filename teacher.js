@@ -413,6 +413,8 @@ async function showTeacherApp(user){
       if(document.hidden) return;
       if(Date.now()-teacherStudentsAt > 15000) teacherRefreshStudents();
       teacherRefreshReportsBadge();
+      // Practice minutes left on screen overnight: repainting runs its day check (a read from an earlier day reads again).
+      if(teacherView==='minutes') renderTeacherMinutes();
     });
     /* Drag and drop for the board. Bound to the same stable shell for the
        same reason as the click listener — the board's innerHTML is replaced
@@ -3828,9 +3830,12 @@ function renderTeacherManage(){
     // LAST, and a sentinel string wouldn't get that (ICU collation puts
     // punctuation ahead of digits, so '~' landed them first).
     const grouped=teacherManageGroup==='period';
-    const perRank=s=>{ const p=teacherStudentPeriod(s); return !p?Infinity : p==='CAS'?8 : Number(p)||9; };   // ||9: a typed-in junk period sorts after 7, not NaN
+    // Exact values only, then the period text: a typed-in junk period ('04', 'constructor') is its own group after CAS, never NaN or interleaved.
+    const perOf=s=>String(teacherStudentPeriod(s)||'');
+    const perRank=s=>{ const p=perOf(s); return p==='4'?4 : p==='7'?7 : p==='CAS'?8 : !p?Infinity : 9; };
+    const perCmp=(a,b)=>(perRank(a)-perRank(b)) || (perOf(a)<perOf(b)?-1:perOf(a)>perOf(b)?1:0);
     const list=(teacherShowArchived?allStudentsRaw:allStudentsRaw.filter(s=>!arch[s.uid]))
-      .sort((a,b)=>(grouped?(perRank(a)-perRank(b)):0)||byName(a,b));
+      .sort((a,b)=>(grouped?perCmp(a,b):0)||byName(a,b));
     if(list.length===0){ box.innerHTML=head+'<div class="t-loading">Every student is archived. Use “Show archived” to bring them back.</div>'; return; }
     const perLabel=p=>!p?'No period':p==='CAS'?'CAS':'Period '+p;
     // Object.create(null) + String(): a period the student typed as 'constructor' would read an inherited key, and the number 4 a group apart from '4'.
@@ -5925,9 +5930,11 @@ function renderTeacherMinutes(){
   const nameOf=s=>s.name||s.email||s.uid.slice(0,8)+'…';
   const byName=(a,b)=>nameOf(a).localeCompare(nameOf(b), undefined, {sensitivity:'base'});
   const perOf=s=>String(teacherStudentPeriod(s)||'');   // a string always: a period stored as the number 4 joins '4', not a group of its own
-  const perRank=s=>{ const p=perOf(s); return !p?Infinity : p==='CAS'?8 : Number(p)||9; };
+  // Exact values only: '04' or ' 4' (typed by the student) is its own group after CAS, never interleaved with Period 4.
+  const perRank=s=>{ const p=perOf(s); return p==='4'?4 : p==='7'?7 : p==='CAS'?8 : !p?Infinity : 9; };
+  const perCmp=(a,b)=>(perRank(a)-perRank(b)) || (perOf(a)<perOf(b)?-1:perOf(a)>perOf(b)?1:0);
   const key=s=>teacherPmSort==='all' ? rows[s.uid].all : rows[s.uid].week;
-  const list=shown.slice().sort((a,b)=>(perRank(a)-perRank(b)) || (teacherPmSort==='name' ? 0 : key(b)-key(a)) || byName(a,b));
+  const list=shown.slice().sort((a,b)=>perCmp(a,b) || (teacherPmSort==='name' ? 0 : key(b)-key(a)) || byName(a,b));
   const perLabel=p=>!p?'No period':p==='CAS'?'CAS':'Period '+p;
   const perCount=Object.create(null); list.forEach(s=>{ const k=perOf(s); perCount[k]=(perCount[k]||0)+1; });
   let lastGroup=null;

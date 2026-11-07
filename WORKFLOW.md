@@ -1108,6 +1108,12 @@ wordings, no Note Runner mic check (see "Later (not chosen yet)").
       R1-6 a refused Refresh after a good read hid the table behind "Publish the rules" (now only when nothing was read).
       R1-7 a read that never answers locked Refresh (20 s ceiling per read). Jonathan's call on the reviewer's projector
       note (one click shows every student's minutes by name): keep it as is, no extra click.
+      **Round 2 (the reviewer re-ran every R1 scenario: all fixed) found 4 more MINOR, all fixed:** N1 a view left on screen
+      past midnight never re-read (coming back to the tab now repaints it, which runs the day check); N2 a period typed as
+      '04' or ' 4' split Period 4 into interleaved groups (exact '4' / '7' / 'CAS' ranks, then the period text; Manage too);
+      N3 1cg scanned only the view's block (now the whole of teacher.js: one `collection('minutes')`, no `minutes/` path
+      string, no collection/doc call naming days, meta, rankBoard or weekBoard); N4 1cg missed a roster built from the
+      filtered rows or from allStudentsRaw directly, and `teacherPmPeriod` was not run (both pinned; it is run on 13 values).
 - [x] **2026-11-04 — Practice minutes: Top 5 of the week, by class period (needs a `firestore.rules` paste).**
       A "TOP 5" medal in the strip, a once-a-week toast and a fifth My progress tile for the students with the most minutes THIS ISO week inside
       their own class period; ties share a place; 10 minutes needed (`top5MinMinutes`); each student sees only their own place.
