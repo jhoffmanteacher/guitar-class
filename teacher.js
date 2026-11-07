@@ -3828,18 +3828,19 @@ function renderTeacherManage(){
     // LAST, and a sentinel string wouldn't get that (ICU collation puts
     // punctuation ahead of digits, so '~' landed them first).
     const grouped=teacherManageGroup==='period';
-    const perRank=s=>{ const p=teacherStudentPeriod(s); return !p?Infinity : p==='CAS'?8 : Number(p); };
+    const perRank=s=>{ const p=teacherStudentPeriod(s); return !p?Infinity : p==='CAS'?8 : Number(p)||9; };   // ||9: a typed-in junk period sorts after 7, not NaN
     const list=(teacherShowArchived?allStudentsRaw:allStudentsRaw.filter(s=>!arch[s.uid]))
       .sort((a,b)=>(grouped?(perRank(a)-perRank(b)):0)||byName(a,b));
     if(list.length===0){ box.innerHTML=head+'<div class="t-loading">Every student is archived. Use “Show archived” to bring them back.</div>'; return; }
     const perLabel=p=>!p?'No period':p==='CAS'?'CAS':'Period '+p;
-    const perCount={}; list.forEach(s=>{ const k=teacherStudentPeriod(s)||''; perCount[k]=(perCount[k]||0)+1; });
+    // Object.create(null) + String(): a period the student typed as 'constructor' would read an inherited key, and the number 4 a group apart from '4'.
+    const perCount=Object.create(null); list.forEach(s=>{ const k=String(teacherStudentPeriod(s)||''); perCount[k]=(perCount[k]||0)+1; });
     let lastGroup=null;
     const rows=list.map(stu=>{
       const name=shownName(stu);
       // A heading row each time the period changes — keyed on the
       // EFFECTIVE period, so correcting one moves the student under it.
-      const g=teacherStudentPeriod(stu)||'';
+      const g=String(teacherStudentPeriod(stu)||'');
       // Escaped: g is the student's own answer when no override is set, and
       // firestore.rules doesn't check what a student writes to progress/{uid}.
       const groupRow=(grouped && g!==lastGroup)?`<tr class="tg-group"><th colspan="6">${escHtml(perLabel(g))} <span>(${perCount[g]})</span></th></tr>`:'';
@@ -5815,6 +5816,7 @@ function teacherStudentCountHtml(tally, universe){
    publish to the student-side boards), whatever the period filter shows.
    The teacher's own account is never read or ranked. */
 const TEACHER_PM_CONCURRENCY=10;
+const TEACHER_PM_READ_MS=20000;   // one student's weeks read that has not answered by then fails the whole read (Refresh retries)
 const TEACHER_PM_PERIODS={'4':true,'7':true,'CAS':true};
 let teacherPmSort='week';      // 'week' | 'all' | 'name' — This week is the default (pinned in checks.mjs 1cg)
 let teacherPmData=null;        // { at, weeks: { uid: { 'YYYY-Www': seconds } } } — the last good read
@@ -5828,7 +5830,8 @@ function teacherPmIsTeacher(s){
 // Everyone whose minutes are read and ranked: the whole roster but the teacher.
 function teacherPmRoster(){ return (allStudentsRaw||[]).filter(s=>s&&s.uid&&!teacherPmIsTeacher(s)); }
 // The period the student side ranks a Top 5 in: the same override-first value (PM_HOST.period), 4 / 7 / CAS only.
-function teacherPmPeriod(s){ const p=String(teacherStudentPeriod(s)||''); return TEACHER_PM_PERIODS[p]?p:''; }
+// Own keys only: a period the student typed as 'constructor' or 'toString' is no period (hostPeriod() in the engine agrees).
+function teacherPmPeriod(s){ const p=String(teacherStudentPeriod(s)||''); return Object.prototype.hasOwnProperty.call(TEACHER_PM_PERIODS,p)?p:''; }
 async function teacherLoadMinutes(){
   const gen=++teacherPmGen;
   const roster=teacherPmRoster();
@@ -5839,7 +5842,7 @@ async function teacherLoadMinutes(){
   const worker=async()=>{
     while(!stop && next<roster.length){
       const s=roster[next++];
-      const snap=await db.collection('minutes').doc(s.uid).collection('weeks').get({source:'server'});
+      const snap=await withTimeout(db.collection('minutes').doc(s.uid).collection('weeks').get({source:'server'}), TEACHER_PM_READ_MS);
       const m={};
       snap.forEach(d=>{ if(/^\d{4}-W\d{2}$/.test(d.id)) m[d.id]=Math.max(0, +((d.data()||{}).seconds)||0); });
       out[s.uid]=m;
@@ -5899,34 +5902,41 @@ function renderTeacherMinutes(){
   // The student list is not in yet (the first progress read is out): nothing to read minutes for. loadAllStudents repaints this view.
   if(!teacherStudentsAt){ box.innerHTML=`<div class="t-loading">${teacherRefreshFailed?'Could not load the student list.':'Loading the student list…'}</div>`; return; }
   const roster=teacherPmRoster();
-  // First open, or students on the roster that the last read did not cover: read now. Never after a failure (Refresh retries).
-  if(!teacherPmLoading && !teacherPmError && (!teacherPmData || roster.some(s=>!teacherPmData.weeks[s.uid]))){ teacherLoadMinutes(); return; }
+  /* Read now: on the first open, when the roster has students the last read did not cover, or when the last read is from
+     an earlier day (a console left open over a weekend would otherwise show Friday's week as this one). Never after a
+     failure (Refresh retries). */
+  const nowYmd=PM.calc.ymd(new Date());
+  if(!teacherPmLoading && !teacherPmError && (!teacherPmData || PM.calc.ymd(new Date(teacherPmData.at))!==nowYmd || roster.some(s=>!teacherPmData.weeks[s.uid]))){ teacherLoadMinutes(); return; }
   const seg=(v,label)=>`<button class="tg-seg-btn ${teacherPmSort===v?'on':''}" data-pm-sort="${v}">${label}</button>`;
-  const at=teacherPmData ? new Date(teacherPmData.at).toLocaleTimeString([], {hour:'numeric', minute:'2-digit'}) : '';
+  // "3:58 PM" today; "Fri, Nov 6, 3:58 PM" from an earlier day (kept after a failed refresh), so old numbers never pass for today's.
+  const atD=teacherPmData ? new Date(teacherPmData.at) : null;
+  const at=!atD ? '' : PM.calc.ymd(atD)===nowYmd ? atD.toLocaleTimeString([], {hour:'numeric', minute:'2-digit'}) : atD.toLocaleString([], {weekday:'short', month:'short', day:'numeric', hour:'numeric', minute:'2-digit'});
   const when = teacherPmLoading ? (teacherPmData ? `Practice minutes as of ${at} · refreshing…` : 'Loading practice minutes…')
-    : teacherPmError==='failed' ? (teacherPmData ? `Could not refresh — showing practice minutes as of ${at}` : 'Could not load practice minutes.')
-    : teacherPmData && teacherPmError!=='denied' ? `Practice minutes as of ${at}` : '';
+    : teacherPmError ? (teacherPmData ? `Could not refresh — showing practice minutes as of ${at}` : teacherPmError==='failed' ? 'Could not load practice minutes.' : '')
+    : teacherPmData ? `Practice minutes as of ${at}` : '';
   const head=`<div class="pm-t-bar"><span class="tg-class-lbl">Sort</span><div class="tg-seg">${seg('week','This week')}${seg('all','All time')}${seg('name','Name')}</div>`+
     `<button type="button" class="tg-seg-btn pm-t-refresh" data-pm-refresh ${teacherPmLoading?'disabled':''}>Refresh</button><span class="pm-t-when" data-pm-when>${escHtml(when)}</span></div>`;
-  if(teacherPmError==='denied'){ box.innerHTML=head+'<div class="t-loading" data-pm-denied>Publish the new Firestore rules to see practice minutes (Firebase console → Firestore → Rules).</div>'; return; }
+  // Refused with nothing read yet: the rules are not published. A refusal AFTER a good read keeps the table ("Could not refresh").
+  if(teacherPmError==='denied' && !teacherPmData){ box.innerHTML=head+'<div class="t-loading" data-pm-denied>Publish the new Firestore rules to see practice minutes (Firebase console → Firestore → Rules).</div>'; return; }
   if(!teacherPmData){ box.innerHTML=head; return; }
   const shown=allStudents.filter(s=>s&&s.uid&&!teacherPmIsTeacher(s)&&teacherPmData.weeks[s.uid]);
   if(!shown.length){ box.innerHTML=head+'<div class="t-loading">No students to show.</div>'; return; }
-  const rows=teacherPmCompute(roster.filter(s=>teacherPmData.weeks[s.uid]).map(s=>({uid:s.uid, period:teacherPmPeriod(s)})), teacherPmData.weeks, PM.cfg(), PM.calc.ymd(new Date()), PM.calc);
+  const rows=teacherPmCompute(roster.filter(s=>teacherPmData.weeks[s.uid]).map(s=>({uid:s.uid, period:teacherPmPeriod(s)})), teacherPmData.weeks, PM.cfg(), PM.calc.ymd(atD), PM.calc);   // as of the read, like the stamp
   const nameOf=s=>s.name||s.email||s.uid.slice(0,8)+'…';
   const byName=(a,b)=>nameOf(a).localeCompare(nameOf(b), undefined, {sensitivity:'base'});
-  const perRank=s=>{ const p=teacherStudentPeriod(s); return !p?Infinity : p==='CAS'?8 : Number(p)||9; };
+  const perOf=s=>String(teacherStudentPeriod(s)||'');   // a string always: a period stored as the number 4 joins '4', not a group of its own
+  const perRank=s=>{ const p=perOf(s); return !p?Infinity : p==='CAS'?8 : Number(p)||9; };
   const key=s=>teacherPmSort==='all' ? rows[s.uid].all : rows[s.uid].week;
   const list=shown.slice().sort((a,b)=>(perRank(a)-perRank(b)) || (teacherPmSort==='name' ? 0 : key(b)-key(a)) || byName(a,b));
   const perLabel=p=>!p?'No period':p==='CAS'?'CAS':'Period '+p;
-  const perCount={}; list.forEach(s=>{ const k=teacherStudentPeriod(s)||''; perCount[k]=(perCount[k]||0)+1; });
+  const perCount=Object.create(null); list.forEach(s=>{ const k=perOf(s); perCount[k]=(perCount[k]||0)+1; });
   let lastGroup=null;
   const body=list.map(stu=>{
-    const g=teacherStudentPeriod(stu)||'';
+    const g=perOf(stu);
     // Escaped: g is the student's own answer when no override is set.
     const groupRow=g!==lastGroup?`<tr class="tg-group"><th colspan="8">${escHtml(perLabel(g))} <span>(${perCount[g]})</span></th></tr>`:'';
     lastGroup=g;
-    const name=nameOf(stu), p=teacherStudentPeriod(stu);
+    const name=nameOf(stu), p=g;
     return `${groupRow}<tr data-pm-uid="${escAttr(stu.uid)}"><td class="tg-name" title="${escAttr(name)}">${escHtml(name)}</td><td class="tg-eff">${p?escHtml(p==='CAS'?'CAS':'P'+p):'—'}</td>${teacherPmRowCells(rows[stu.uid])}</tr>`;
   }).join('');
   const c=PM.cfg();

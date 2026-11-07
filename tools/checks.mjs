@@ -13260,8 +13260,23 @@ function checkPracticeMinutes(i18nTable) {
       const b = blk[0];
       const reads = [...b.matchAll(/db\.collection\('([^']+)'\)((?:\.(?:doc|collection)\([^)]*\))*)\.get\(([^)]*)\)/g)];
       if (reads.length !== 1 || reads[0][1] !== 'minutes' || !/^\.doc\(s\.uid\)\.collection\('weeks'\)$/.test(reads[0][2]) || !/source\s*:\s*'server'/.test(reads[0][3])) fail(`teacher.js Practice minutes: it must make exactly one kind of read, db.collection('minutes').doc(s.uid).collection('weeks').get({source:'server'}) (found ${reads.length}: ${reads.map(x => x[0]).join(' ; ') || 'none'})`);
-      const named = (b.match(/['"`](?:days|meta|board|rankBoard|weekBoard|progress|config)['"`/]/g) || []);
+      /* A path written as a string or template literal (db.doc(`minutes/${uid}/days/…`), collection('…/meta')) counts too: one .get( in
+         the whole block and no db.doc( (2026-11-06 review R1-4). */
+      const named = (b.match(/['"`\/](?:days|meta|board|rankBoard|weekBoard|progress|config)\b/g) || []);
       if (named.length) fail(`teacher.js Practice minutes names ${named.join(', ')}: it reads minutes/{uid}/weeks only (never the tag or the boards)`);
+      const gets = (b.match(/\.get\(/g) || []).length;
+      if (gets !== 1 || /\bdb\.doc\(/.test(b)) fail(`teacher.js Practice minutes: exactly one read call (.get( found ${gets} time(s)${/\bdb\.doc\(/.test(b) ? ', and a db.doc( path read' : ''}) — the weeks list per student`);
+      /* Ranks and Top 5 count the WHOLE roster, never the rows the period filter shows (R1-5): the compute call takes roster.filter(…). */
+      if (!/teacherPmCompute\(roster\.filter\(/.test(b)) fail('teacher.js renderTeacherMinutes(): teacherPmCompute must be given the whole roster (roster.filter(...)), not the filtered rows');
+      /* The teacher's own account is never read or ranked (R1-5): run teacherPmRoster() with a teacher doc found by email and one by uid. */
+      try {
+        const fn = /\nfunction teacherPmIsTeacher\(s\)\{[\s\S]*?\n\}\n/.exec(b), rf = /\nfunction teacherPmRoster\(\)\{[^\n]*\n/.exec(b);
+        if (!fn || !rf) throw new Error('teacherPmIsTeacher / teacherPmRoster not found');
+        const sb = { allStudentsRaw: [{ uid: 'stu1', email: 's1@example.test' }, { uid: 'tByEmail', email: 'teacher@example.test' }, { uid: 'me', email: 'other@example.test' }, null, { uid: '' }], currentUser: { uid: 'me' }, TEACHER_EMAIL: 'teacher@example.test' };
+        vm.createContext(sb);
+        vm.runInContext(fn[0] + rf[0] + '\n;globalThis.__R = teacherPmRoster().map(s => s.uid);', sb);
+        if (JSON.stringify(sb.__R) !== '["stu1"]') fail(`teacher.js teacherPmRoster() must leave out the teacher (by TEACHER_EMAIL and by the signed-in uid) and empty rows: got ${JSON.stringify(sb.__R)}`);
+      } catch (e) { fail('teacher.js teacherPmRoster() did not run: ' + e.message); }
       if (/collectionGroup|\.set\(|\.update\(|\.delete\(|\.add\(|runTransaction|\.batch\(|onSnapshot|teacherWriteConfig/.test(b)) fail('teacher.js Practice minutes: read only — no set/update/delete/add/transaction/batch/listener/config write');
       if (/setInterval|setTimeout/.test(b)) fail('teacher.js Practice minutes: no timer — it reads when the view opens and on Refresh only');
     }

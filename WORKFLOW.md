@@ -1098,6 +1098,16 @@ wordings, no Note Runner mic check (see "Later (not chosen yet)").
       rank / Top 5 formulas, and 190 students through the REAL student page; 7 mutations of the console or engine maths
       each turned it red. 1cg pins the button, the default sort, the dispatch and the weeks-only server read with no
       write and no timer (8 breaks, each red). `tools/smoke.mjs` does not drive the console, so nothing was added there.
+      **Review (site-reviewer-deep, same day): 2 major + 5 minor, all fixed, none a student leak.** R1-1 a Windows (CRLF)
+      `teacher.js` failed pm-sim section 17 (now normalised). R1-2 a console left open over a weekend showed Friday's numbers
+      as today's: the view re-reads when its read is from an earlier day, works the numbers out as of the read, and stamps
+      "Fri, Dec 11, 3:58 PM" when it is not today. R1-3 a period the student typed as `constructor` got a Top 5 place the
+      student never sees, and the number 4 made its own group: own-key lookup and string group keys (Manage had the same
+      group-count bug; fixed there too). R1-4 the 1cg read pin missed reads written as path strings; R1-5 nothing pinned
+      "ranks count the whole roster" or "the teacher is never ranked" (1cg now checks both; the teacher filter is RUN).
+      R1-6 a refused Refresh after a good read hid the table behind "Publish the rules" (now only when nothing was read).
+      R1-7 a read that never answers locked Refresh (20 s ceiling per read). Jonathan's call on the reviewer's projector
+      note (one click shows every student's minutes by name): keep it as is, no extra click.
 - [x] **2026-11-04 — Practice minutes: Top 5 of the week, by class period (needs a `firestore.rules` paste).**
       A "TOP 5" medal in the strip, a once-a-week toast and a fifth My progress tile for the students with the most minutes THIS ISO week inside
       their own class period; ties share a place; 10 minutes needed (`top5MinMinutes`); each student sees only their own place.

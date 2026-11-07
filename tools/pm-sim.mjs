@@ -1874,7 +1874,7 @@ console.log('17. the teacher console\'s Practice minutes view (teacher.js teache
          against a board that holds every student;
      (b) the same rosters: calc.rankPlace / calc.top5Place equal those old formulas on the student page's own inputs;
      (c) a sample of rosters run through the REAL engine, one student page per student (load, read the boards, place). */
-  const TEACHER_SRC = readFileSync(join(ROOT, 'teacher.js'), 'utf8');
+  const TEACHER_SRC = readFileSync(join(ROOT, 'teacher.js'), 'utf8').replace(/\r\n/g, '\n');   // a Windows (CRLF) checkout too
   const fm = /\nfunction teacherPmCompute\([\s\S]*?\n}\n/.exec(TEACHER_SRC);
   check('teacher.js has teacherPmCompute (the console\'s Practice minutes maths)', !!fm);
   if (fm) {

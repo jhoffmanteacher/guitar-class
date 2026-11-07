@@ -381,10 +381,13 @@ service cloud.firestore {
        (never changed, never deleted). Only this student reads it: the
        minutes/{uid}/** read rule above is owner-only, not even the teacher.
        (Since 2026-11-06 the teacher reads minutes/{uid}/weeks/* — the
-       console's Practice minutes view — but still not this doc: the tag
-       would tie a person to the boards, and the console never reads the
-       boards.) The page keeps it in memory only (not localStorage). It is
-       the only link between a person and their tag.
+       console's Practice minutes view — but still not this doc, and the
+       console never reads the boards. The teacher's account COULD now line
+       a student's week total up with a weekBoard doc by value; that shows
+       the teacher nothing the console does not already show by name, and
+       gives no student anything.) The page keeps it in memory only (not
+       localStorage). For every account but the teacher it is the only link
+       between a person and their tag.
 
        weekBoard/{tag}  { week, period, seconds } — the practice seconds of
        ONE ISO week ('2026-W45') for the student who holds that tag, and their
