@@ -141,27 +141,20 @@ wordings, no Note Runner mic check (see "Later (not chosen yet)").
 ## Open work
 
 - [ ] **2026-11-06 — Friday check: left for Jonathan (not fixed; all confirmed by the reviewers unless marked plausible).**
-  The fixes that were safe shipped the same day (see the 2026-11-06 "Fixes from the weekly review" changelog entry);
-  the coach.js fixes wait on branch `friday-check/2026-11-06`. What is left:
-  - *Wording call:* after a lost streak the Top 5/My progress tile reads "No streak yet" over "Longest: 5 weeks"
-    (`practice-minutes.js` `streakWords`; reachable from about 2026-11-23). Suggested: "No streak right now" /
-    "Ahora no tienes racha" when streak is 0 and longest is above 0. `pm-e2e.mjs` line ~406 pins today's pairing.
-  - *Pin gap:* four My progress rules are guarded only by `tools/pm-e2e.mjs` (not run by `checks.mjs`): can't-reach
-    compared in seconds, "No streak yet", the Longest line hidden at 0, the flame lit only on a goal hit. Four mutants
-    passed `pm-sim` 285/285. Add a `pm-sim` section that renders `progressHtml` for those cases.
+  Done 2026-11-07 (worktree `guitar-class-open`): the "No streak right now" wording (93cb1dc); the My progress pin gap
+  (`pm-sim` section 18, 17 assertions, `PM_SIM_PIN` 285 -> 302, 12 mutants all red); ca-43 (a board limit at fret 12, not a
+  drill bug: 4 of 10 cards in "Frets 8 to 12" and 2 of 24 on the whole neck light only the root, the 2026-11-02 changelog
+  line now says so); the smoke Play-clicks slider gap (`smoke.mjs` drags the card slider to 77; with `strumOpenMetro` forced
+  to 60 it reports 7 failing steps); check `1d` flags a shared step before a path step (reviewed by `site-reviewer`, 2 minor
+  points fixed). What is left:
   - *coach.js detection (needs an xhigh review):* at 10 BPM one stray sound moves `gridOffset` by up to 0.73 s
     (`ccLoop`, `cc.gridOffset += dev * 0.25`, uncapped; 123 ms at 60 BPM). Cap the step (for example ±60 ms).
   - *Power Chord Switch UX:* no Stop button during the count-in (24 s per round at 10 BPM); the done-screen advice says
     "5 BPM faster" at 140 (pair) and 130 (song switch) although the tempo cannot go up.
-  - *ca-43 (Power chord Note Call):* roots at frets 11-12 cannot light the 5th and octave (the board draws frets 0-12):
-    4 of 10 cards in step 3 and 2 of 24 in step 4 light the root only; the 2026-11-02 changelog line overstates it.
-  - *New kind of check (needs a reviewer):* `1d` should flag a step with no `path` that comes before a `path` step; the
-    student route keeps file order but the chooser and the console preview put shared steps last. No card is affected today.
   - *Product calls:* Follow steps pass by tapping every 250 ms (early taps cost nothing); "Play strum" does not stop a running
     Metronome and still accents beat 1 after "every click the same"; the Tuning Simulator's "Which way?" screen already
     shows "Too low — tighten the peg" (the answer); Name the Power Chord resets its round when the tab is hidden;
     `styles.css` `.ca-paths-grid` adds a 760px breakpoint; two devices can save different path picks.
-  - *Test gap:* `smoke.mjs` leaves the Play-clicks slider at its default 60, so it cannot tell "follows the slider" from "always 60".
 
 - [ ] **2026-11-02 — `tools/smoke.mjs` flakes after its page reload (cause not
   found).** On this Mac, about 4 of 9 runs on 2026-11-02 reported errors that the
