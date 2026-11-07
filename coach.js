@@ -3994,6 +3994,7 @@ function ccScoreBpm(){
   return top;
 }
 
+const CC_STOP_REACH_MS = 4000;   // a Stop within this long of a change falling due is read as "reaching for Stop", not "the mic missed it" (ccFinish)
 function ccFinish(complete){
   if (!cc || (cc.phase !== 'play' && cc.phase !== 'countin')) return;
   cc.timeouts.forEach(clearTimeout);
@@ -4006,8 +4007,14 @@ function ccFinish(complete){
   if (!complete && cc.phase === 'play' && (!cc.ladder || cc.stage >= CC_LADDER_ROUNDS - 1) &&
       cc.changes.every(c => c.result !== null || c.pend)) complete = true;
   /* Changes the player never got to are 'miss' only in the data, not strums the mic missed: ccRenderDone leaves them out of the "strum firmer" count.
-     A song switch stopped in a later round's count-in leaves that round out altogether (below), so it has none. */
-  cc.unreached = cc.ladder && cc.phase === 'countin' && cc.stage > 0 ? 0 : cc.changes.filter(c => c.result === null && !c.pend).length;
+     That is every change still waiting, and the misses after the last strum the mic heard that fell due in the CC_STOP_REACH_MS before the Stop
+     (ccLoop has already swept those while the hand was going for the Stop button: at 60 BPM a 3 s reach is 3 changes). A finished game, and a song switch
+     stopped in a later round's count-in (that round is left out below), have none. */
+  const stopT = performance.now() - coachMicLatencyMs();
+  let lastHeard = -1;
+  cc.changes.forEach((c, i) => { if (c.pend || c.result === 'ok' || c.result === 'off') lastHeard = i; });
+  cc.unreached = complete || (cc.ladder && cc.phase === 'countin' && cc.stage > 0) ? 0
+    : cc.changes.filter((c, i) => (c.result === null && !c.pend) || (i > lastHeard && c.result === 'miss' && stopT - c.t < CC_STOP_REACH_MS)).length;
   cc.changes.forEach(c => {
     if (c.pend) ccResolvePend(c);
     if (c.result === null) c.result = 'miss';
