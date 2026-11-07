@@ -5086,7 +5086,7 @@ function micEvalStrumHits(frames, rule, ratio, hfRatio){
    current-ratio row says how far the replay can be trusted). Measurement only.
    `strumRatio` { full, hf, saved }: the ratios the take was graded with (saved: from its own fields; else the
    shared ones, as every older take). `whatIfSkipped`: it was graded with other ratios than the replay starts
-   from (Power Chord Switch's own, 2.2 / 2.67, since 2026-11-05), so it has no `whatIf`.
+   from (Power Chord Switch's own: 2.2 / 2.67 from 2026-11-05, 1.8 / 2.19 from 2026-11-07), so it has no `whatIf`.
    `pitch` (null for a take saved before 2026-11-05, which has no expected[].readings):
    what "no readable pitch, no tick" would do, from the pitch readings each change's chord
    check had (coach.js ccResolvePend). The site grades a strum right on timing alone when it

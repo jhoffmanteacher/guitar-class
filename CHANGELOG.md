@@ -5,6 +5,10 @@ Notable changes to the Guitar Class site. Newest first.
 For the full session-by-session history (and the reasoning behind each change),
 see `WORKFLOW.md` and the git commit log.
 
+## 2026-11-07 — Power Chord Switch hears softer strums again
+
+- **A strum does not have to be quite as loud to count in Power Chord Switch.** Since 2026-11-05 it sometimes did not hear a real strum, mostly in slow games (started at 35 to 40 BPM). "No strum heard" should now show less often on strums you really played. A noise in the room may count as a strum a little more often than last week, but less often than before 2026-11-05. Change Up is unchanged.
+
 ## 2026-11-07 — Streak wording
 
 - **"No streak right now" after a streak ends.** If you had a streak and missed a week, the Streak tile and the flame now say "No streak right now" (Spanish: "Ahora no tienes racha") instead of "No streak yet". Your longest streak still shows under it. A new student still sees "No streak yet".

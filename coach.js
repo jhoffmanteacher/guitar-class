@@ -61,9 +61,14 @@ const CHK_HF_RATIO        = 1.7;    // HF jump over its smoothed level
    and loses 4, 2.6 / 3.16 hears 38 fewer and loses 9 (the shared 1.4 / 1.7: none, none). 2.2 is where the
    trade bends. The false hits are room noise and a chord left ringing; the lost strums are soft ones.
    Change Up and every other loop keep CHK_ONSET_RATIO / CHK_HF_RATIO. Each saved take records the ratios
-   it was graded with (ccRecMeta), so the console can tell these takes from the older ones. */
-const CC_POWER_ONSET_RATIO = 2.2;   // RMS jump over the smoothed level, Power Chord Switch
-const CC_POWER_HF_RATIO    = 2.67;  // HF jump over its smoothed level (1.7 x 2.2 / 1.4, the what-if's scaling)
+   it was graded with (ccRecMeta), so the console can tell these takes from the older ones.
+   Lowered 2.2 / 2.67 -> 1.8 / 2.19 on 2026-11-07 (Jonathan), from "Evaluate all recordings" on 34 takes. At 2.2 (14 takes) false hits were
+   12 of 97 (27% at 1.4) but 6 of 75 real strums were missed, 5 of them at 35-40 BPM, normal loudness, 175-300 ms early (the previous chord
+   still ringing). The what-if on the 7 takes graded at 1.4: 1.8 removes 11 of 31 false hits and loses 0 of 81 real strums; 2.2 removes 21 and
+   loses 3. For students who were playing, both leave the same 4 false hits. "No readable pitch, no tick" was rejected (removes 2 of 12 false
+   hits, loses 10 of 46 real rights). Roll back: set the two numbers below back to 2.2 / 2.67 and re-pin 1ck and check 2d in tools/checks.mjs. */
+const CC_POWER_ONSET_RATIO = 1.8;   // RMS jump over the smoothed level, Power Chord Switch
+const CC_POWER_HF_RATIO    = 2.19;  // HF jump over its smoothed level (1.7 x 1.8 / 1.4, the what-if's scaling)
 const COACH_ONSET_REFRACT = 140;    // ms — one strum = one onset, not six
 const COACH_ATTACK_SKIP   = 70;     // ms after an onset before pitch readings start —
                                     // the analyser window still holds the pick scrape

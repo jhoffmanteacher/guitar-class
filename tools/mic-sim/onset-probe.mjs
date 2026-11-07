@@ -57,7 +57,8 @@ function trial({ gap, g, scrape, frameMs, seed, harm, n, spread, noise }){
 }
 const HARMS = { std: [1, 0.5, 0.25], weak: [0.3, 1, 0.5] };
 const T = +(process.argv[3] || 20);
-console.log('gap s | last strum gain | scrape | frame ms | spread s -> fired (shared 1.4/1.7) vs (PCS 2.2/2.67) of ' + T);
+const num = n => (src.match(new RegExp('^const ' + n + '\\s*=\\s*([\\d.]+)', 'm')) || [])[1];   // the ratios as coach.js has them now
+console.log('gap s | last strum gain | scrape | frame ms | spread s -> fired (shared ' + num('CHK_ONSET_RATIO') + '/' + num('CHK_HF_RATIO') + ') vs (PCS ' + num('CC_POWER_ONSET_RATIO') + '/' + num('CC_POWER_HF_RATIO') + ') of ' + T);
 for (const frameMs of [16.7, 50]) for (const gap of [1.0, 0.667, 0.429]) for (const g of [1, 0.6, 0.4]) for (const scrape of [1, 0.25, 0]) for (const spread of [0.035, 0.08]){
   let a = 0, b = 0;
   for (let s = 1; s <= T; s++){ const [x, y] = trial({ gap, g, scrape, frameMs, seed: s * 7919, harm: HARMS.std, n: 4, spread, noise: 0.004 }); a += x; b += y; }

@@ -37,26 +37,25 @@ sections below hold the history and the reasons.
 - Then open **Practice minutes** in the console and check a student or two against their My progress (rank can
   differ slightly: see "Recently shipped" → 2026-11-06 Practice minutes in the teacher console).
 
-**Decided 2026-11-05: Power Chord Switch room noise**
-- Jonathan chose a stricter strum ratio for Power Chord Switch ONLY: `CC_POWER_ONSET_RATIO` 2.2 and
-  `CC_POWER_HF_RATIO` 2.67 in `coach.js` (Change Up and every other loop keep 1.4 / 1.7). On the 12 real takes the
-  replay says 30 of 52 false hits go and 4 of 132 real strums are lost. Detail, numbers and how to roll it back:
-  "Power Chord Switch: where we stopped" → "Decision (2026-11-05)". "No readable pitch, no tick" was not chosen.
+**Power Chord Switch strum ratio (2.2 / 2.67 on 2026-11-05; 1.8 / 2.19 since 2026-11-07)**
+- **Changed 2026-11-07 to 1.8 / 2.19** ("Decision (2026-11-07)": 2.2 missed 6 of 75 real strums on 34 takes). Jonathan chose a stricter strum ratio for Power Chord Switch ONLY: `CC_POWER_ONSET_RATIO` 2.2 and
+  `CC_POWER_HF_RATIO` 2.67 in `coach.js` on 2026-11-05 (Change Up and every other loop keep 1.4 / 1.7). On the 12 real takes the
+  replay says 30 of 52 false hits go and 4 of 132 real strums are lost. Lowered to 1.8 / 2.19 on 2026-11-07. Detail, numbers and how to roll it back:
+  "Power Chord Switch: where we stopped" → "Decision (2026-11-07)" (then "Decision (2026-11-05)"). "No readable pitch, no tick" was rejected on 2026-11-07: do not build it.
 - **First, after it is live (Jonathan):** a thumb or finger strum take on a test student account at 60 and 120 BPM,
   then "Evaluate all recordings" and read "Played, not counted" (see "Decision (2026-11-05)").
 - **Tempo controls shipped 2026-11-05** (a slider on the setup, live −5 / +5 while playing, steps of 5): "Power Chord Switch: where we stopped" → "Tempo controls".
-- **To watch in the next takes:** noisy rooms should show fewer "heard, not there" changes (22 of the 52 false hits
-  still fire at 2.2, so not none), and clean takes should not start missing real strums: read the console's "Played,
-  not counted" column (`detector-missed`). Not covered by the 12 real takes, so look at these first: **thumb or
+- **To watch in the next takes (from 2026-11-07):** "Played, not counted" (`detector-missed`) at 35-40 BPM should fall;
+  "heard, not there" will rise a little in noisy rooms (on the 7 takes graded at 1.4, 20 of 31 false hits still fire at
+  1.8, 10 at 2.2). Not covered by the real takes, so look at these first: **thumb or
   finger strummers** (no sharp pick attack), **fast every-beat pairs** (up to 140 BPM; the 12 takes ran at 40-90 BPM,
   one at 90/105/120), and **Chromebooks that draw slowly** (11 of the 12 takes had 16.7 ms frames, 1 had 33, none 50).
 
-**Waiting on students' recordings**
-- **The Pitch-rule table** (teacher console → Mic recordings → Evaluate all recordings) needs takes saved after
-  2026-11-05, which carry `expected[].readings`. It needs mic collection switched on in the console and its "stop
-  after" number above the count (23 of 40 on 2026-11-04), a real student account, the consent answer, and a game
-  played to the end or stopped after 10 s. Older takes are left out of that table and counted. Jonathan keeps the 25
-  takes saved so far (12 Power Chord Switch) outside the repo: the files carry student names.
+**Recordings**
+- **The Pitch-rule table** (teacher console → Mic recordings → Evaluate all recordings) was read on 10 takes with saved
+  pitch readings on 2026-11-07 and the rule was rejected (it removes 2 of 12 false hits and loses 10 of 46 real rights).
+  The table stays in the console. Jonathan keeps the 34 takes saved so far (21 Power Chord Switch) outside the repo
+  (`~/Documents/mic-recordings-2026-11-07.zip`): the files carry student names.
 
 **Optional leftovers (Jonathan's)**
 - The console's `heartbeats` composite index (Firestore → Indexes, the only index). Nothing uses it; see
@@ -3634,7 +3633,7 @@ Jonathan's request; this list is the plan.)
    "right" changes with no strum, and the mic delay from the three count-ins (about -73 ms on
    Chromebook internal mics).
 3. **DECIDED 2026-11-05: room noise scores a right chord.** Jonathan chose the stricter strum ratio for Power
-   Chord Switch only (2.2 / 2.67; "Decision (2026-11-05)" below). Not chosen: "no readable pitch, no tick" (the
+   Chord Switch only (2.2 / 2.67 from 2026-11-05, 1.8 / 2.19 from 2026-11-07; "Decision (2026-11-07)" below). Not chosen: "no readable pitch, no tick" (the
    console's "Pitch-rule what-if" table prices it from takes saved after 2026-11-05, if it is ever wanted). To do:
    look at the next takes (see "Where things stand" → to watch). Any further change to how a strum is heard is a
    `coach.js` detection change: xhigh, Always Reviewed, run `tools/mic-sim/power-switch.mjs` first.
@@ -3661,7 +3660,7 @@ longer writes a `heartbeats/{sessionId}` record.
 
 ### Open finding (Jonathan, 2026-11-04): room noise scores a right chord
 
-**Status 2026-11-05: DECIDED** (a stricter strum ratio for Power Chord Switch only; see "Decision (2026-11-05)" below). The text under this heading is the history.
+**Status 2026-11-07: changed again to 1.8 / 2.19** (see "Decision (2026-11-07)" below, written before "Decision (2026-11-05)"). **Status 2026-11-05: DECIDED** (a stricter strum ratio for Power Chord Switch only; see "Decision (2026-11-05)" below). The text under this heading is the history.
 
 Jonathan played with no guitar and the game showed "right". Cause, read in the code
 (`ccLoop`, `ccResolvePend`, `coach.js`): any loudness jump above a very low floor
@@ -3724,7 +3723,7 @@ names, no uids); the same table in the terminal from
 What it does: replays the site's own strum rule over each Power Chord Switch recording,
 at the shared ratios older takes were graded with (full-band 1.4, HF 1.7) and at stricter
 ones (full-band 1.8 / 2.2 / 2.6, the HF ratio scaled the same: 2.19 / 2.67 / 3.16). A take graded with Power Chord
-Switch's own ratios (2.2 / 2.67, from 2026-11-05) is left out of it: see "Decision (2026-11-05)" below. Nothing is copied by hand:
+Switch's own ratios (2.2 / 2.67 from 2026-11-05, 1.8 / 2.19 from 2026-11-07) is left out of it: see "Decision (2026-11-05)" below. Nothing is copied by hand:
 the `CHK_*`, `COACH_ONSET_REFRACT`, `COACH_LVL_WIN/HOP`, `COACH_CATCHUP_MAX_MS` numbers
 and the TEXT of `ccLoop`, `coachReadFrame` and `coachSmooth` are read from `coach.js` at
 run time (`ccLoop`'s own condition is compiled and run with the candidate ratio passed in;
@@ -3797,6 +3796,31 @@ the truth worked out there from the planted counts, not from teacher.js) and the
 none; 64 graded right, 39 on timing alone, and the console table, the terminal text, the download
 and `eval-takes.mjs` all say the same numbers (ten deliberate breaks each turned it red). The
 numbers in those synthetic takes are planted, so they say nothing about real students.
+
+#### Decision (2026-11-07): Power Chord Switch strum ratio 2.2 / 2.67 -> 1.8 / 2.19
+
+Jonathan, from "Evaluate all recordings" on 34 takes on 2026-11-07 (the zip is `~/Documents/mic-recordings-2026-11-07.zip`):
+
+- **At 2.2 / 2.67 (14 takes):** false hits 12 of 97 (27% at 1.4), but **6 of 75 real strums were missed**; 5 of those 6 were at 35-40 BPM, at
+  normal loudness, 175-300 ms early (probably the previous chord still ringing).
+- **The what-if on the 7 takes graded at 1.4 / 1.7 (re-run 2026-11-07 with `tools/mic-sim/eval-takes.mjs` on the same zip, same numbers):**
+  1.8 / 2.19 removes **11 of 31** false hits and loses **0 of 81** real strums; 2.2 / 2.67 removes 21 and loses 3; 2.6 / 3.16 removes 26 and loses 6.
+  For students who were playing, both leave the same 4 false hits.
+- **"No readable pitch, no tick" (`pitchRule`):** removes 2 of 12 false hits and loses 10 of 46 real rights. **Rejected: do not build it.**
+- **Change:** `CC_POWER_ONSET_RATIO` 2.2 -> **1.8** and `CC_POWER_HF_RATIO` 2.67 -> **2.19** in `coach.js` (Change Up and every other loop keep 1.4 / 1.7).
+  Check 1ck (`tools/checks.mjs`, the `R.pw` pin line) is re-pinned to 1.8 / 2.19; the broken versions (2.2/2.67, 1.4/1.7, one number wrong) each turn it red. Check 2d (inside 1cl) does
+  not read the constants: it proves the console treats a take graded at 1.8 / 2.19 or at 2.2 / 2.67 (14 real takes) as graded with other ratios than the replay's start.
+  `tools/mic-sim/power-switch.mjs` gives byte-identical output before and after on std, mid and weak: that tool grades the pitch check on loud synthetic strums, so
+  it does not measure the strum ratio. The measuring checks are 1ck (the real `ccLoop` just below and above each threshold) and the real-take replay above.
+- **Takes:** takes saved after this version reaches a browser (the deploy plus its service-worker update) record 1.8 / 2.19; takes from 2026-11-05 until then record 2.2 / 2.67; older ones the shared 1.4 / 1.7. The console's strum
+  what-if skips the first two kinds (it starts from the shared ratios), and says how many it left out.
+- **Roll back:** set the two constants back to 2.2 / 2.67 and re-pin the 1ck `R.pw` line.
+- **What the replay cannot show (deep review):** the console's strum what-if skips the 14 takes graded at 2.2, so no replay measures what 1.8 does to the 6 missed real strums that
+  motivated the change. Replayed anyway in a scratch copy, all 6 still fire at 2.2 (the replay matches the site's yes/no on only 85 of 97 changes there, 111 of 113 on the 1.4 takes), so it does not
+  reproduce those misses. The case for 1.8 rests on the 7 takes graded at 1.4 (2.2 loses 3 of 81, 1.8 loses 0); the next takes are the real test. One of the five slow misses is a take that clips
+  14.9% of its samples, so "normal loudness" does not fit that one.
+- **Watch next:** "Played, not counted" (`detector-missed`) on new takes should fall at 35-40 BPM; false hits will rise a little in noisy rooms (the 3 noisy
+  takes of 2026-11-04 lost 26 false hits at 2.2; at 1.8 fewer). Not tested on a thumb or finger strum.
 
 #### Decision (2026-11-05): Power Chord Switch strums need ratio 2.2 / 2.67
 
