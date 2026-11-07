@@ -12,7 +12,11 @@
    teacher has collection on), their audio chunks (the size cap, the exact fields, written before the take
    doc exists), that only the teacher reads or deletes them, and the micTakesMeta/count counter.
    Then it re-checks one rule on each OLDER path to show they still behave.
-   Last run: 2026-11-05, 179 passed, 0 failed. The rules were also broken in scratch copies and every
+   2026-11-06: the teacher may READ minutes/{uid}/weeks/* (the console's Practice minutes view) and
+   nothing else under minutes/ — a "minutes/{uid}/weeks: the teacher reads" section pins it.
+   Last run: 2026-11-06, 191 passed, 0 failed (179 before the teacher-weeks section). Three scratch breaks of the
+   2026-11-06 rule each turned cases red: the new read line dropped (2 red), a teacher read on the whole tree (6 red),
+   a teacher write on weeks (3 red). Earlier (2026-11-05, 179 passed, 0 failed): The rules were also broken in scratch copies and every
    break turned at least one case red: the board rules 12 ways (tag check dropped on weekBoard and on
    rankBoard, a uid field allowed on each, minutesBoard back, tag updatable, tag readable by all,
    delete allowed on each of three, period 5, a 500-day cap), and the recording rules 16 ways (the
@@ -100,7 +104,20 @@ if (which.includes('orig')) {
   await t('owner queries own days by document id (the client\'s load)', () => A.collection('minutes/uidA/days').where(firebase.firestore.FieldPath.documentId(), '>=', '2026-11-16').get(), true);
   await t('another student cannot read', () => day(B, 'uidA', '2026-11-16').get(), false);
   await t('another student cannot list', () => B.collection('minutes/uidA/weeks').get(), false);
-  await t('the teacher cannot read', () => day(T, 'uidA', '2026-11-16').get(), false);
+  await t('the teacher cannot read a day', () => day(T, 'uidA', '2026-11-16').get(), false);
+  console.log('== minutes/{uid}/weeks: the teacher reads (2026-11-06, the console\'s Practice minutes view) and nothing else');
+  await t('the teacher reads another student\'s week doc', () => wk(T, 'uidA', '2026-W47').get(), true);
+  await t('the teacher lists a student\'s weeks (the console\'s real read, from the server)', () => T.collection('minutes/uidA/weeks').get(), true);
+  await t('the teacher cannot list a student\'s days', () => T.collection('minutes/uidA/days').get(), false);
+  await t('the teacher cannot read meta/board (the tag)', () => T.doc('minutes/uidA/meta/board').get(), false);
+  await t('the teacher cannot write a week doc', () => wk(T, 'uidA', '2026-W47').set({ seconds: 60, goalSeconds: 3600, hit: false }), false);
+  await t('the teacher cannot increment a week doc', () => wk(T, 'uidA', '2026-W47').set({ seconds: FV.increment(60) }, { merge: true }), false);
+  await t('the teacher cannot delete a week doc', () => wk(T, 'uidA', '2026-W47').delete(), false);
+  await t('another student cannot read a week doc', () => wk(B, 'uidA', '2026-W47').get(), false);
+  await t('signed out cannot read a week doc', () => wk(N, 'uidA', '2026-W47').get(), false);
+  await t('an account with the teacher\'s email but email_verified false cannot read a week', () => env.authenticatedContext('fakeT', { email: 'jhoffman@seq.org', email_verified: false }).firestore().doc('minutes/uidA/weeks/2026-W47').get(), false);
+  await t('the teacher cannot read the parent doc minutes/uidA', () => T.doc('minutes/uidA').get(), false);
+  await t('the teacher cannot read some other subcollection (minutes/uidA/other/x)', () => T.doc('minutes/uidA/other/x').get(), false);
   await t('signed out cannot read', () => day(N, 'uidA', '2026-11-16').get(), false);
   await t('nothing else under minutes is writable (minutes/uidA/other/x)', () => A.doc('minutes/uidA/other/x').set({ seconds: 1 }), false);
   await t('nor the parent doc minutes/uidA', () => A.doc('minutes/uidA').set({ seconds: 1 }), false);

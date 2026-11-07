@@ -1865,5 +1865,107 @@ console.log('16. the Top 5 board holds no name');
   function weekSumAll(w) { return Object.values(w.server.weeks).reduce((a, b) => a + b.seconds, 0); }
 }
 
+console.log('17. the teacher console\'s Practice minutes view (teacher.js teacherPmCompute, 2026-11-06)');
+{
+  /* The console works out every student's week, streak, class rank and Top 5 place from the weeks docs (it never reads the boards
+     or the tags). It must give the numbers each student's own page gives. Three proofs, all on MADE-UP rosters:
+     (a) 600 random rosters: the console's status is calc.status for every student, and its rank / Top 5 equal the student page's
+         formulas exactly as they stood in rankInfo / top5Info BEFORE they moved into calc.rankPlace / calc.top5Place (2026-11-06),
+         against a board that holds every student;
+     (b) the same rosters: calc.rankPlace / calc.top5Place equal those old formulas on the student page's own inputs;
+     (c) a sample of rosters run through the REAL engine, one student page per student (load, read the boards, place). */
+  const TEACHER_SRC = readFileSync(join(ROOT, 'teacher.js'), 'utf8');
+  const fm = /\nfunction teacherPmCompute\([\s\S]*?\n}\n/.exec(TEACHER_SRC);
+  check('teacher.js has teacherPmCompute (the console\'s Practice minutes maths)', !!fm);
+  if (fm) {
+    const compute = new Function(fm[0] + '\nreturn teacherPmCompute;')();
+    const w0 = makeWorld(); const calc = w0.PM.calc, c = w0.PM.cfg();
+    const refRank = (all, others) => { const mine = Math.floor(all / 60); let higher = 0; others.forEach((x) => { if (Math.floor(x / 60) > mine) higher++; }); return { n: all < 60 ? null : higher + 1, total: others.length + 1 }; };
+    const refTop5 = (weekSecs, othersSecs) => {
+      const min = Math.max(0, Math.round(+c.top5MinMinutes || 0)), mine = Math.floor((weekSecs || 0) / 60);
+      const others = othersSecs.map((x) => Math.floor(x / 60)).sort((a, z) => z - a);
+      let higher = 0; others.forEach((m) => { if (m > mine) higher++; });
+      const top = mine >= min && higher < 5, need = (!top && mine >= min) ? Math.max(1, others[4] - mine) : 0;
+      return { top, n: higher + 1, under: mine < min, min, toRank: Math.max(0, min - mine), need };
+    };
+    let seed = 20261106; const rnd = () => (seed = (seed * 1103515245 + 12345) % 2147483648) / 2147483648;
+    const pick = (a) => a[Math.floor(rnd() * a.length)];
+    const TIE_MIN = [0, 1, 5, 9, 10, 11, 30, 45, 45, 59, 60, 60, 61, 90, 140];
+    const first = calc.parse('2026-11-01').getTime(), last = calc.parse('2027-05-31').getTime();
+    function roster(i) {
+      const today = calc.ymd(new Date(first + Math.floor(rnd() * ((last - first) / 86400000 + 1)) * 86400000));
+      const cur = calc.weekIdOf(today), n = 1 + Math.floor(rnd() * 40), st = [];
+      for (let k = 0; k < n; k++) {
+        const weeks = {}, kind = rnd();
+        if (kind < 0.12) { /* nothing yet */ }
+        else if (kind < 0.22) weeks[cur] = Math.floor(rnd() * 60);                                       // under a minute
+        else for (let w = '2026-W44'; w <= cur; w = calc.weekAdd(w, 1)) {
+          if (rnd() < 0.3) continue;
+          const m = rnd() < 0.6 ? pick(TIE_MIN) : Math.floor(rnd() * 141);
+          weeks[w] = Math.min(8400, m * 60 + (rnd() < 0.5 ? 0 : Math.floor(rnd() * 60)));
+        }
+        st.push({ uid: 'r' + i + '-s' + k, period: pick(['4', '7', 'CAS', '']), weeks });
+      }
+      return { today, cur, st };
+    }
+    const sum = (w) => Object.values(w).reduce((a, b) => a + b, 0);
+    let students = 0, okStatus = 0, okRank = 0, okTotal = 0, okTop5 = 0, okCalc = 0, rosters = 0, breakWeeks = 0, ties5 = 0, noPeriod = 0, under1 = 0;
+    const bad = [];
+    const R = [];
+    for (let i = 0; i < 600; i++) {
+      const r = roster(i); R.push(r); rosters++;
+      const weeks = {}; r.st.forEach((s) => { weeks[s.uid] = s.weeks; });
+      const rows = compute(r.st.map((s) => ({ uid: s.uid, period: s.period })), weeks, c, r.today, calc);
+      if (calc.goalSeconds(c, r.cur) === 0) breakWeeks++;
+      const ranked = r.st.filter((s) => sum(s.weeks) >= 60).length;
+      r.st.forEach((s) => {
+        students++;
+        const row = rows[s.uid], all = sum(s.weeks), wk = s.weeks[r.cur] || 0;
+        const st = calc.status(c, s.weeks, r.today);
+        if (eq(row.status, st) && row.all === all && row.week === wk && row.week === st.week.secs && row.last === (s.weeks[calc.weekAdd(r.cur, -1)] || 0)) okStatus++; else bad.push('status ' + s.uid);
+        const others = r.st.filter((o) => o !== s).map((o) => sum(o.weeks));      // a board that holds EVERY other student (sub-minute ones too)
+        const ref = refRank(all, others);
+        if (row.rank.n === ref.n) okRank++; else bad.push('rank ' + s.uid + ' ' + row.rank.n + ' vs ' + ref.n);
+        if (row.rankTotal === ranked) okTotal++; else bad.push('total ' + s.uid);
+        if (all < 60) under1++;
+        const same = r.st.filter((o) => o !== s && o.period && o.period === s.period).map((o) => o.weeks[r.cur] || 0);
+        const refT = s.period ? refTop5(wk, same) : null;
+        if (eq(row.top5, refT)) okTop5++; else bad.push('top5 ' + s.uid + ' ' + JSON.stringify(row.top5) + ' vs ' + JSON.stringify(refT));
+        if (!s.period) noPeriod++;
+        if (refT && refT.top && refT.n === 5 && same.some((x) => Math.floor(x / 60) === Math.floor(wk / 60))) ties5++;
+        if (eq(calc.rankPlace(all, others), ref) && eq(calc.top5Place(c, wk, same), refTop5(wk, same))) okCalc++; else bad.push('calc ' + s.uid);
+      });
+    }
+    check(`console week / last week / all time / streak = calc.status for every student: ${okStatus} of ${students} (${rosters} rosters, ${breakWeeks} on a break week)`, okStatus === students && students > 5000 && breakWeeks > 0, bad.slice(0, 3).join(' | '));
+    check(`console class rank = the student page's rank (pre-2026-11-06 formula, every student on the board): ${okRank} of ${students} (${under1} under 1 minute, "—")`, okRank === students && under1 > 0, bad.slice(0, 3).join(' | '));
+    check(`console rank total = students with at least 1 minute: ${okTotal} of ${students}`, okTotal === students, bad.slice(0, 3).join(' | '));
+    check(`console Top 5 = the student page's place in their own period (pre-2026-11-06 formula): ${okTop5} of ${students} (${noPeriod} with no period; ${ties5} sharing #5 with a tie)`, okTop5 === students && noPeriod > 0 && ties5 > 0, bad.slice(0, 3).join(' | '));
+    check(`calc.rankPlace / calc.top5Place = the old rankInfo / top5Info formulas: ${okCalc} of ${students}`, okCalc === students, bad.slice(0, 3).join(' | '));
+
+    // (c) the real engine, one student page per student, on the first rosters of up to 15 students (made-up tags, fake server)
+    let pages = 0, okPages = 0; const badP = [];
+    const tagOf2 = (uid) => { let h = ''; for (const ch of uid) h += ch.charCodeAt(0).toString(16).padStart(2, '0'); return h.padStart(32, '0').slice(-32); };   // one distinct made-up tag per uid
+    for (const r of R.filter((x) => x.st.length <= 15).slice(0, 25)) {
+      const weeks = {}; r.st.forEach((s) => { weeks[s.uid] = s.weeks; });
+      const rows = compute(r.st.map((s) => ({ uid: s.uid, period: s.period })), weeks, c, r.today, calc);
+      const p = calc.parse(r.today);
+      if (new Set(r.st.map((o) => tagOf2(o.uid))).size !== r.st.length) { badP.push('two made-up tags collide in roster ' + r.st[0].uid); pages++; continue; }
+      for (const s of r.st) {
+        const board = {}, wb = {};
+        r.st.forEach((o) => { board[tagOf2(o.uid)] = { seconds: sum(o.weeks) }; if (o.period) wb[tagOf2(o.uid)] = { week: r.cur, period: o.period, seconds: o.weeks[r.cur] || 0 }; });
+        const sw = {}; Object.keys(s.weeks).forEach((k) => { sw[k] = { seconds: s.weeks[k], goalSeconds: 3600, hit: false }; });
+        const w = makeWorld({ uid: s.uid, period: s.period, clock: { ms: new Date(p.getFullYear(), p.getMonth(), p.getDate(), 12, 0, 0).getTime(), perf: 5000 }, server: { days: {}, weeks: sw, board, wb, meta: { [s.uid]: { id: tagOf2(s.uid) } } } });
+        w.PM._state(); await w.PM.load(); await w.settle(); await w.PM._loadBoard(); await w.PM._loadWeek(); await w.settle();
+        pages++;
+        const row = rows[s.uid], st = w.PM.status(), rk = w.PM._rank(), t5 = w.PM._top5();
+        const ok = st && eq(st, row.status) && rk && rk.n === row.rank.n && rk.total === r.st.length
+          && (s.period ? (t5 && t5.top === row.top5.top && t5.n === row.top5.n && t5.under === row.top5.under) : t5 === null);
+        if (ok) okPages++; else badP.push(s.uid + ' ' + JSON.stringify({ rk, row: row.rank, t5, top5: row.top5 }));
+      }
+    }
+    check(`the REAL student page (load, boards, place) agrees with the console on streak, week, rank and Top 5: ${okPages} of ${pages} students`, okPages === pages && pages > 100, badP.slice(0, 2).join(' | '));
+  }
+}
+
 console.log(`\n${failed ? '✗' : '✓'} pm-sim: ${passed} passed, ${failed} failed`);
 if (failed) { console.log('failed: ' + fails.join(' | ')); process.exit(1); }

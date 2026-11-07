@@ -1277,6 +1277,16 @@ body.rail-collapsed .rail-tools .tool-popup{
 .tg-group th{padding-top:16px;font-size:0.8125rem;color:var(--text);border-bottom:2px solid var(--border2)}
 .tg-group th span{font-weight:400;color:var(--text2)}
 .tg-eff{color:var(--text2);white-space:nowrap}
+/* Practice minutes view (teacher.js renderTeacherMinutes, 2026-11-06): sort + Refresh bar, number cells. */
+.pm-t-bar{display:flex;align-items:center;flex-wrap:wrap;gap:10px;margin:0 0 12px}
+.pm-t-bar .tg-class-lbl{font-size:0.875rem}
+.pm-t-refresh{border:1px solid var(--border2);border-radius:16px}
+.pm-t-refresh:disabled{opacity:0.5;cursor:default}
+.pm-t-when{font-size:0.8125rem;color:var(--text2)}
+.pm-t-table td.pm-t-num,.pm-t-table th:nth-child(n+3){white-space:nowrap}
+.pm-t-hit{color:var(--green-text);font-weight:700}
+.pm-t-break{color:var(--text2)}
+.pm-t-top5{font-weight:700}
 /* Manage view's Period column + the "set" marker that says the shown value
    is the teacher's correction rather than the student's own answer. */
 .tg-period{white-space:nowrap}

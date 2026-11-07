@@ -179,6 +179,10 @@ async function showTeacherApp(user){
   if(toggle && !toggle.querySelector('[data-view="students"]')){
     toggle.insertAdjacentHTML('beforeend', `<button class="t-vt" data-view="students" onclick="setTeacherView('students')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="8" r="4"/><path d="M4 20c0-4 4-6 8-6s8 2 8 6"/></svg> Students</button>`);
   }
+  // Practice minutes (2026-11-06) — every student's minutes, streak, rank and Top 5; renderTeacherMinutes.
+  if(toggle && !toggle.querySelector('[data-view="minutes"]')){
+    toggle.insertAdjacentHTML('beforeend', `<button class="t-vt" data-view="minutes" onclick="setTeacherView('minutes')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="13" r="8"/><path d="M12 9v4l2.5 2.5"/><path d="M9 2h6"/></svg> Practice minutes</button>`);
+  }
   if(toggle && !toggle.querySelector('[data-view="manage"]')){
     toggle.insertAdjacentHTML('beforeend', `<button class="t-vt" data-view="manage" onclick="setTeacherView('manage')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="3"/><path d="M12 2v3M12 19v3M4.2 4.2l2.1 2.1M17.7 17.7l2.1 2.1M2 12h3M19 12h3M4.2 19.8l2.1-2.1M17.7 6.3l2.1-2.1"/></svg> Manage</button>`);
   }
@@ -254,6 +258,9 @@ async function showTeacherApp(user){
     shell.addEventListener('click', e=>{
       if(e.target.closest('[data-refresh-students]')){ teacherRefreshStudents({manual:true}); teacherRefreshReportsBadge(); return; }
       if(e.target.closest('[data-back-to-students]')){ backToStudentsRoster(); return; }
+      const pmSort=e.target.closest('[data-pm-sort]');
+      if(pmSort){ teacherSetMinutesSort(pmSort.dataset.pmSort); return; }
+      if(e.target.closest('[data-pm-refresh]')){ if(!teacherPmLoading){ teacherPmError=''; teacherLoadMinutes(); } return; }
       const games=e.target.closest('[data-set-games]');
       if(games){ teacherSetStudentGames(games.dataset.uid, games.dataset.state); return; }
       if(e.target.closest('[data-toggle-archived]')){ teacherToggleShowArchived(); return; }
@@ -640,7 +647,7 @@ async function loadAllStudents(){
 const TEACHER_REFRESH_MS=60000;
 const TEACHER_AUTO_REFRESH_VIEWS=['activities','students','skills','responses','trouble'];
 // Views where student progress isn't on screen at all — no Refresh bar.
-const TEACHER_NO_REFRESH_BAR_VIEWS=['livequiz','mic','reports','tsongs'];
+const TEACHER_NO_REFRESH_BAR_VIEWS=['livequiz','mic','reports','tsongs','minutes'];   // minutes: its own Refresh (renderTeacherMinutes)
 let teacherStudentsAt=0;          // when the roster on screen was read (ms); 0 = not yet
 let teacherRefreshing=false;      // a read is out — no overlapping fetches
 let teacherRefreshFailed=false;   // the last read failed; the screen shows the older roster
@@ -1009,7 +1016,7 @@ function applyTeacherViewChrome(v){
   const legend=document.getElementById('t-legend'); if(legend) legend.style.display = v==='skills' ? '' : 'none';
   // Games, Trouble-spots and Students are all class-wide, not per-week —
   // hide the week tabs and the skill summary while any of them is showing.
-  const classWide = v==='games'||v==='trouble'||v==='students'||v==='manage'||v==='activities'||v==='reports'||v==='livequiz'||v==='mic'||v==='songs'||v==='tsongs';
+  const classWide = v==='games'||v==='trouble'||v==='students'||v==='minutes'||v==='manage'||v==='activities'||v==='reports'||v==='livequiz'||v==='mic'||v==='songs'||v==='tsongs';
   const tabs=document.getElementById('t-week-tabs'); if(tabs) tabs.style.display = classWide ? 'none' : '';
   const summ=document.getElementById('t-summary'); if(summ) summ.style.display = classWide ? 'none' : '';
 }
@@ -1078,6 +1085,7 @@ function renderTeacherBody(){
   else if(teacherView==='responses') renderTeacherResponses();
   else if(teacherView==='trouble') renderTeacherTrouble();
   else if(teacherView==='students') studentDetailUid ? renderTeacherStudentDetail(studentDetailUid) : renderTeacherStudents();
+  else if(teacherView==='minutes') renderTeacherMinutes();
   else if(teacherView==='manage') renderTeacherManage();
   else if(teacherView==='activities') renderTeacherActivities();
   else if(teacherView==='songs') renderTeacherSongs();
@@ -5789,6 +5797,149 @@ function teacherStudentCountHtml(tally, universe){
   const mod=tally.furthest===0?'&mdash;':'M'+tally.furthest;
   return `<div class="stu-right" title="${escAttr(tip.join(' '))}"><span class="stu-mod">${mod}</span><span class="stu-count">${tally.got} / ${universe.total}</span></div>`;
 }
+/* ── Practice minutes (2026-11-06) ───────────────────────────────────────
+   Every student's practice minutes, streak, class rank and Top 5 place, for
+   the teacher only (Jonathan: "where do I see students' minutes and rank?").
+   READ ONLY: it reads minutes/{uid}/weeks/* for each student on the roster
+   (firestore.rules lets the teacher's account read those docs and nothing
+   else under minutes/) and writes nothing anywhere. It never reads days,
+   meta/board (the private tag), rankBoard or weekBoard: rank and Top 5 are
+   worked out here from the weeks docs, with the engine's own pure maths
+   (PM.calc.status, PM.calc.rankPlace, PM.calc.top5Place), so a student's
+   numbers can't be worked out two ways.
+   Read when the view opens and on its Refresh button only: no timer, no
+   listener. The result is kept in memory until Refresh. Cost: one read per
+   weeks doc, about (students × weeks since 2026-11-01) per open/Refresh.
+   Server reads only (an offline get() answers empty from the cache).
+   Ranks count the whole roster (archived students too: their pages still
+   publish to the student-side boards), whatever the period filter shows.
+   The teacher's own account is never read or ranked. */
+const TEACHER_PM_CONCURRENCY=10;
+const TEACHER_PM_PERIODS={'4':true,'7':true,'CAS':true};
+let teacherPmSort='week';      // 'week' | 'all' | 'name' — This week is the default (pinned in checks.mjs 1cg)
+let teacherPmData=null;        // { at, weeks: { uid: { 'YYYY-Www': seconds } } } — the last good read
+let teacherPmLoading=false;
+let teacherPmError='';         // '' | 'denied' (rules not published) | 'failed'
+let teacherPmGen=0;            // a newer read drops an older one
+function teacherPmIsTeacher(s){
+  const me=(typeof currentUser!=='undefined'&&currentUser)||null;
+  return (typeof TEACHER_EMAIL!=='undefined' && s.email===TEACHER_EMAIL) || !!(me && me.uid && s.uid===me.uid);
+}
+// Everyone whose minutes are read and ranked: the whole roster but the teacher.
+function teacherPmRoster(){ return (allStudentsRaw||[]).filter(s=>s&&s.uid&&!teacherPmIsTeacher(s)); }
+// The period the student side ranks a Top 5 in: the same override-first value (PM_HOST.period), 4 / 7 / CAS only.
+function teacherPmPeriod(s){ const p=String(teacherStudentPeriod(s)||''); return TEACHER_PM_PERIODS[p]?p:''; }
+async function teacherLoadMinutes(){
+  const gen=++teacherPmGen;
+  const roster=teacherPmRoster();
+  teacherPmLoading=true;
+  if(teacherView==='minutes') renderTeacherMinutes();
+  const out={};
+  let next=0, stop=false;
+  const worker=async()=>{
+    while(!stop && next<roster.length){
+      const s=roster[next++];
+      const snap=await db.collection('minutes').doc(s.uid).collection('weeks').get({source:'server'});
+      const m={};
+      snap.forEach(d=>{ if(/^\d{4}-W\d{2}$/.test(d.id)) m[d.id]=Math.max(0, +((d.data()||{}).seconds)||0); });
+      out[s.uid]=m;
+    }
+  };
+  let err=null;
+  try{
+    await ensureDb();
+    if(!db) throw new Error('no db');
+    await Promise.all(Array.from({length:Math.min(TEACHER_PM_CONCURRENCY, roster.length)}, ()=>worker().catch(e=>{ stop=true; throw e; })));
+  }catch(e){ err=e; }
+  if(gen!==teacherPmGen) return;
+  teacherPmLoading=false;
+  if(err){
+    teacherPmError=(err&&err.code==='permission-denied')?'denied':'failed';
+    if(teacherPmError==='failed') console.warn('[guitar-class] practice minutes read failed', err);
+  } else {
+    teacherPmError='';
+    teacherPmData={at:Date.now(), weeks:out};
+  }
+  if(teacherView==='minutes') renderTeacherMinutes();
+}
+/* The numbers for every student read, worked out the way their own page does.
+   PURE: students = [{uid, period}] (period already 4 / 7 / CAS or ''), weeks =
+   { uid: { weekId: seconds } }, c = PM.cfg(), today = 'YYYY-MM-DD'. checks.mjs
+   1cg runs it against the engine's own functions. Returns { uid: row }. */
+function teacherPmCompute(students, weeks, c, today, calc){
+  const cur=calc.weekIdOf(today), prev=calc.weekAdd(cur,-1);
+  const rows={};
+  students.forEach(s=>{
+    const w=weeks[s.uid]||{};
+    let all=0; Object.keys(w).forEach(k=>{ all+=w[k]||0; });
+    rows[s.uid]={uid:s.uid, period:s.period, status:calc.status(c, w, today), all, week:w[cur]||0, last:w[prev]||0};
+  });
+  const list=students.map(s=>rows[s.uid]);
+  // Class rank: everyone else with at least one minute; total = students with at least one minute.
+  const ranked=list.filter(r=>r.all>=60);
+  list.forEach(r=>{ r.rank=calc.rankPlace(r.all, ranked.filter(o=>o!==r).map(o=>o.all)); r.rankTotal=ranked.length; });
+  // Top 5: this week's seconds of the others in the same period.
+  list.forEach(r=>{ r.top5=r.period ? calc.top5Place(c, r.week, list.filter(o=>o!==r && o.period===r.period).map(o=>o.week)) : null; });
+  return rows;
+}
+function teacherPmRowCells(r){
+  const mins=s=>Math.floor((s||0)/60);
+  const wk=r.status.week;
+  const week = wk.isBreak
+    ? `${mins(wk.secs)} min <span class="pm-t-break">· break</span>`
+    : `${mins(wk.secs)} / ${mins(wk.goal)} min${wk.hit?' <span class="pm-t-hit" title="Goal hit">✓</span>':''}`;
+  const rank = r.rank.n===null ? '—' : `${r.rank.n} / ${r.rankTotal}`;
+  const top5 = !r.top5 ? '' : r.top5.under ? '<span title="Under the Top 5 minimum this week">—</span>' : r.top5.top ? `<span class="pm-t-top5">#${r.top5.n}</span>` : '';
+  return `<td class="pm-t-num">${week}</td><td class="pm-t-num">${mins(r.last)} min</td><td class="pm-t-num">${r.status.streak} ${r.status.streak===1?'week':'weeks'}</td><td class="pm-t-num">${mins(r.all)} min</td><td class="pm-t-num">${rank}</td><td class="pm-t-num">${top5}</td>`;
+}
+function renderTeacherMinutes(){
+  const box=document.getElementById('t-grid-container');
+  if(!box) return;
+  if(!(window.PM && PM.calc && PM.calc.rankPlace)){ box.innerHTML='<div class="t-loading">Practice minutes did not load on this page. Reload to try again.</div>'; return; }
+  // The student list is not in yet (the first progress read is out): nothing to read minutes for. loadAllStudents repaints this view.
+  if(!teacherStudentsAt){ box.innerHTML=`<div class="t-loading">${teacherRefreshFailed?'Could not load the student list.':'Loading the student list…'}</div>`; return; }
+  const roster=teacherPmRoster();
+  // First open, or students on the roster that the last read did not cover: read now. Never after a failure (Refresh retries).
+  if(!teacherPmLoading && !teacherPmError && (!teacherPmData || roster.some(s=>!teacherPmData.weeks[s.uid]))){ teacherLoadMinutes(); return; }
+  const seg=(v,label)=>`<button class="tg-seg-btn ${teacherPmSort===v?'on':''}" data-pm-sort="${v}">${label}</button>`;
+  const at=teacherPmData ? new Date(teacherPmData.at).toLocaleTimeString([], {hour:'numeric', minute:'2-digit'}) : '';
+  const when = teacherPmLoading ? (teacherPmData ? `Practice minutes as of ${at} · refreshing…` : 'Loading practice minutes…')
+    : teacherPmError==='failed' ? (teacherPmData ? `Could not refresh — showing practice minutes as of ${at}` : 'Could not load practice minutes.')
+    : teacherPmData && teacherPmError!=='denied' ? `Practice minutes as of ${at}` : '';
+  const head=`<div class="pm-t-bar"><span class="tg-class-lbl">Sort</span><div class="tg-seg">${seg('week','This week')}${seg('all','All time')}${seg('name','Name')}</div>`+
+    `<button type="button" class="tg-seg-btn pm-t-refresh" data-pm-refresh ${teacherPmLoading?'disabled':''}>Refresh</button><span class="pm-t-when" data-pm-when>${escHtml(when)}</span></div>`;
+  if(teacherPmError==='denied'){ box.innerHTML=head+'<div class="t-loading" data-pm-denied>Publish the new Firestore rules to see practice minutes (Firebase console → Firestore → Rules).</div>'; return; }
+  if(!teacherPmData){ box.innerHTML=head; return; }
+  const shown=allStudents.filter(s=>s&&s.uid&&!teacherPmIsTeacher(s)&&teacherPmData.weeks[s.uid]);
+  if(!shown.length){ box.innerHTML=head+'<div class="t-loading">No students to show.</div>'; return; }
+  const rows=teacherPmCompute(roster.filter(s=>teacherPmData.weeks[s.uid]).map(s=>({uid:s.uid, period:teacherPmPeriod(s)})), teacherPmData.weeks, PM.cfg(), PM.calc.ymd(new Date()), PM.calc);
+  const nameOf=s=>s.name||s.email||s.uid.slice(0,8)+'…';
+  const byName=(a,b)=>nameOf(a).localeCompare(nameOf(b), undefined, {sensitivity:'base'});
+  const perRank=s=>{ const p=teacherStudentPeriod(s); return !p?Infinity : p==='CAS'?8 : Number(p)||9; };
+  const key=s=>teacherPmSort==='all' ? rows[s.uid].all : rows[s.uid].week;
+  const list=shown.slice().sort((a,b)=>(perRank(a)-perRank(b)) || (teacherPmSort==='name' ? 0 : key(b)-key(a)) || byName(a,b));
+  const perLabel=p=>!p?'No period':p==='CAS'?'CAS':'Period '+p;
+  const perCount={}; list.forEach(s=>{ const k=teacherStudentPeriod(s)||''; perCount[k]=(perCount[k]||0)+1; });
+  let lastGroup=null;
+  const body=list.map(stu=>{
+    const g=teacherStudentPeriod(stu)||'';
+    // Escaped: g is the student's own answer when no override is set.
+    const groupRow=g!==lastGroup?`<tr class="tg-group"><th colspan="8">${escHtml(perLabel(g))} <span>(${perCount[g]})</span></th></tr>`:'';
+    lastGroup=g;
+    const name=nameOf(stu), p=teacherStudentPeriod(stu);
+    return `${groupRow}<tr data-pm-uid="${escAttr(stu.uid)}"><td class="tg-name" title="${escAttr(name)}">${escHtml(name)}</td><td class="tg-eff">${p?escHtml(p==='CAS'?'CAS':'P'+p):'—'}</td>${teacherPmRowCells(rows[stu.uid])}</tr>`;
+  }).join('');
+  const c=PM.cfg();
+  box.innerHTML=head+
+    `<div class="tg-grid-wrap" data-tview="minutes"><table class="tg-table pm-t-table"><thead><tr><th>Student</th><th>Period</th><th>This week</th><th>Last week</th><th>Streak</th><th>All time</th><th>Class rank</th><th>Top 5</th></tr></thead><tbody>${body}</tbody></table></div>`+
+    `<div class="tr-meta" style="margin-top:10px">This week: minutes / the ${Math.round(c.weeklyGoalMinutes)}-minute goal (Monday to Sunday); ✓ = goal hit; "break" = a week off, no goal. Class rank counts every student with at least 1 minute, whatever the period filter shows. Top 5 is inside the student's period, this week; "—" = under ${Math.round(+c.top5MinMinutes||0)} minutes this week. A student's own screen reads the rank from a board that can trail by a few minutes and counts only students who have opened the site since Nov 5, so their rank may differ slightly from this one. This one is the true number.</div>`;
+}
+function teacherSetMinutesSort(v){
+  if(v!=='week' && v!=='all' && v!=='name') return;
+  teacherPmSort=v;
+  if(teacherView==='minutes') renderTeacherMinutes();
+}
+
 function renderTeacherStudents(){
   const box=document.getElementById('t-grid-container');
   if(allStudents.length===0){ box.innerHTML='<div class="t-loading">No student data yet — students need to sign in and check off skills first.</div>'; return; }

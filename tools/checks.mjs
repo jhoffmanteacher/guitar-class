@@ -13011,15 +13011,16 @@ async function checkPwTakeEvaluator() {
    daily cap must equal the config's (a mismatch is silent — every write over the
    rule's number is refused), the heartbeat writer and the "N playing" count query
    (removed 2026-11-04) must not come back in the engine or the config (the
-   heartbeats rules block and index were deleted 2026-11-05 and must stay gone), the minutes block must stay owner-only with
-   no delete, every script tag is in place in order, every pm.* string the engine
+   heartbeats rules block and index were deleted 2026-11-05 and must stay gone), the minutes blocks must stay owner-only for writes with
+   no delete (the teacher READS minutes/{uid}/weeks and nothing else since 2026-11-06: WEEKS_SHIPPED), the teacher console's
+   Practice minutes view stays a weeks-only server read with no write or timer (its maths is run in pm-sim section 17), every script tag is in place in order, every pm.* string the engine
    asks for exists in English AND Spanish (and every one is used), and the three
    hooks into app.js / index.html / journey.js are still there (the strip is ONE hidden <button id="pm-header"> in the main top bar,
    shown by PM.syncHeader() on every #user-area paint path, and caSyncTopbar() must not draw it a second time).
    The browser half (strip, recap, toast, My progress, 1366×657, both languages,
    a real <audio>) is tools/pm-e2e.mjs — it needs Chrome, so it is run by hand.
    ════════════════════════════════════════════════════════════════════ */
-const PM_SIM_PIN = 278;
+const PM_SIM_PIN = 285;
 function checkPracticeMinutes(i18nTable) {
   head('1cg. Practice minutes: the engine is run; the rules cap, no heartbeat, wiring and strings are pinned');
   let bad = 0;
@@ -13110,13 +13111,19 @@ function checkPracticeMinutes(i18nTable) {
     const mins = block('minutes/{userId}/{document=**}'), days = block('minutes/{userId}/days/{day}'), weeks = block('minutes/{userId}/weeks/{week}');
     if (!mins || !days || !weeks) fail('firestore.rules: the three minutes/{userId} blocks (tree read, days, weeks) must all be present');
     else {
+      /* The teacher reads minutes/{uid}/weeks/* (2026-11-06: the console's Practice minutes view) and NOTHING ELSE under minutes/:
+         the tree and days blocks keep no isTeacher at all (days would show when a student practised; the tree would reach the tag,
+         the only link between a person and the boards). The weeks block is pinned WHOLE (WEEKS_SHIPPED) so its one teacher line
+         stays `allow read: if isTeacher();` — never a teacher write, never a wider grant. */
       for (const [n, b] of [['tree', mins], ['days', days], ['weeks', weeks]]) {
-        if (/isTeacher/.test(b)) fail(`minutes ${n} rule lets the teacher in — the spec says only that signed-in uid`);
+        if (n !== 'weeks' && /isTeacher/.test(b)) fail(`minutes ${n} rule lets the teacher in — only minutes/{uid}/weeks is teacher-readable (2026-11-06)`);
         if (!/pmOwner\(userId\)/.test(b)) fail(`minutes ${n} rule is not owner-only (pmOwner(userId))`);
         if (/\bdelete\b|allow\s+write/.test(b)) fail(`minutes ${n} rule allows delete or blanket write`);
       }
       if (!/hasOnly\(\['seconds'\]\)/.test(days) || !/<= dailyCapSeconds\(\)/.test(days)) fail("minutes days rule must be { seconds } only and capped at dailyCapSeconds()");
       if (!/hasOnly\(\['seconds', 'goalSeconds', 'hit'\]\)/.test(weeks) || !/hit is bool/.test(weeks)) fail("minutes weeks rule must be { seconds, goalSeconds, hit } only, hit a bool");
+      const WEEKS_SHIPPED = "match /minutes/{userId}/weeks/{week} { allow read: if isTeacher(); allow create, update: if pmOwner(userId) && week.matches('^[0-9]{4}-W[0-9]{2}$') && request.resource.data.keys().hasOnly(['seconds', 'goalSeconds', 'hit']) && request.resource.data.keys().hasAll(['seconds', 'goalSeconds', 'hit']) && request.resource.data.seconds is number && request.resource.data.seconds >= 0 && request.resource.data.seconds <= 7 * dailyCapSeconds() && request.resource.data.goalSeconds is number && request.resource.data.goalSeconds >= 0 && request.resource.data.goalSeconds <= 86400 && request.resource.data.hit is bool; }";
+      if (weeks.replace(/\s+/g, ' ').trim() !== WEEKS_SHIPPED) fail('firestore.rules: the minutes/{userId}/weeks block differs from the one shipped (teacher READ only, 2026-11-06). If this is on purpose, change WEEKS_SHIPPED here with it and tell Jonathan to paste the rules again');
     }
     /* The class rank (2026-11-05): ONE number per student keyed by the private Top 5 tag, never the uid. The uid-keyed minutesBoard (2026-11-04) is GONE:
        its all-time seconds were nearly equal to this week's, so joining it to the tag board by value linked tags to uids (and the live quiz links
@@ -13234,7 +13241,32 @@ function checkPracticeMinutes(i18nTable) {
     for (const k of K) { const e = i18nTable[k]; if (!e || !e.en || !e.es) fail(`i18n key '${k}' needs both en and es`); }
     if (!bad) console.log(`${C.dim}      ${K.size} pm.* strings, ${litCount} references, ${tabs} Journey pages${C.reset}`);
   }
-  if (!bad) ok(`engine run: ${m[1]} simulation assertions pass (pinned); rules cap = config cap (${cfg ? cfg.dailyCapMinutes * 60 : '?'} s); no heartbeat or "N playing" query in the engine or config, the heartbeats rules block and index gone; minutes rules owner-only, no delete; older rules untouched; hooks, script order and strings in place`);
+  // 6. the teacher console's Practice minutes view (2026-11-06; teacher.js). Its maths is run in pm-sim section 17.
+  /* Pinned defaults: the button sits right after Students in the view toggle, the view opens sorted by This week, and it is wired into
+     renderTeacherBody. Its read path is pinned too: it lists minutes/{uid}/weeks from the SERVER and touches nothing else — no days, no
+     meta/board (the tag), no rankBoard/weekBoard, no collectionGroup (1cg forbids the wildcard-first rule it would need), and no write of
+     any kind. firestore.rules lets the teacher read the weeks docs only (WEEKS_SHIPPED above). */
+  {
+    const tsrc = strip((read('teacher.js') || '').replace(/\r\n/g, '\n'));
+    const iStu = tsrc.indexOf(`querySelector('[data-view="students"]')`), iMin = tsrc.indexOf(`querySelector('[data-view="minutes"]')`), iMan = tsrc.indexOf(`querySelector('[data-view="manage"]')`);
+    if (iMin < 0 || !/data-view="minutes" onclick="setTeacherView\('minutes'\)"[^`]*> Practice minutes<\/button>/.test(tsrc)) fail('teacher.js: the "Practice minutes" view-toggle button (data-view="minutes") is missing');
+    else if (!(iStu >= 0 && iStu < iMin && iMin < iMan)) fail('teacher.js: the "Practice minutes" button must be added right after "Students" and before "Manage"');
+    if (!/\nlet teacherPmSort='week';/.test(tsrc)) fail("teacher.js: the Practice minutes view must open sorted by This week (let teacherPmSort='week';)");
+    const bodyFn = /\nfunction renderTeacherBody\(\)\{[\s\S]*?\n\}\n/.exec(tsrc);
+    if (!bodyFn || !/else if\(teacherView==='minutes'\) renderTeacherMinutes\(\);/.test(bodyFn[0])) fail('teacher.js renderTeacherBody(): the minutes view is not dispatched to renderTeacherMinutes()');
+    const blk = /\nconst TEACHER_PM_CONCURRENCY=[\s\S]*?\nfunction teacherSetMinutesSort\(/.exec(tsrc);
+    if (!blk) fail('teacher.js: the Practice minutes block (TEACHER_PM_CONCURRENCY … teacherSetMinutesSort) was not found');
+    else {
+      const b = blk[0];
+      const reads = [...b.matchAll(/db\.collection\('([^']+)'\)((?:\.(?:doc|collection)\([^)]*\))*)\.get\(([^)]*)\)/g)];
+      if (reads.length !== 1 || reads[0][1] !== 'minutes' || !/^\.doc\(s\.uid\)\.collection\('weeks'\)$/.test(reads[0][2]) || !/source\s*:\s*'server'/.test(reads[0][3])) fail(`teacher.js Practice minutes: it must make exactly one kind of read, db.collection('minutes').doc(s.uid).collection('weeks').get({source:'server'}) (found ${reads.length}: ${reads.map(x => x[0]).join(' ; ') || 'none'})`);
+      const named = (b.match(/['"`](?:days|meta|board|rankBoard|weekBoard|progress|config)['"`/]/g) || []);
+      if (named.length) fail(`teacher.js Practice minutes names ${named.join(', ')}: it reads minutes/{uid}/weeks only (never the tag or the boards)`);
+      if (/collectionGroup|\.set\(|\.update\(|\.delete\(|\.add\(|runTransaction|\.batch\(|onSnapshot|teacherWriteConfig/.test(b)) fail('teacher.js Practice minutes: read only — no set/update/delete/add/transaction/batch/listener/config write');
+      if (/setInterval|setTimeout/.test(b)) fail('teacher.js Practice minutes: no timer — it reads when the view opens and on Refresh only');
+    }
+  }
+  if (!bad) ok(`engine run: ${m[1]} simulation assertions pass (pinned; incl. the teacher console's Practice minutes maths); console view pinned (button after Students, This week default, weeks-only server read, no write); rules cap = config cap (${cfg ? cfg.dailyCapMinutes * 60 : '?'} s); no heartbeat or "N playing" query in the engine or config, the heartbeats rules block and index gone; minutes rules owner-only, no delete; older rules untouched; hooks, script order and strings in place`);
 }
 
 (async function main() {

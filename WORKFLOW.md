@@ -25,10 +25,17 @@
 
 ---
 
-## Where things stand (updated 2026-11-05)
+## Where things stand (updated 2026-11-07)
 
 Start here. Each line says where the detail is. Update this block whenever an item opens or closes; the
 sections below hold the history and the reasons.
+
+**Waiting on Jonathan: the Practice minutes console view (shipped 2026-11-07)**
+- **Paste `firestore.rules` into Firebase console → Firestore → Rules → Publish.** The one change: the teacher's
+  account may READ `minutes/{uid}/weeks/*` (nothing else under `minutes/`). Until then the console's new
+  **Practice minutes** view shows one line, "Publish the new Firestore rules…", and nothing else breaks.
+- Then open **Practice minutes** in the console and check a student or two against their My progress (rank can
+  differ slightly: see "Recently shipped" → 2026-11-06 Practice minutes in the teacher console).
 
 **Decided 2026-11-05: Power Chord Switch room noise**
 - Jonathan chose a stricter strum ratio for Power Chord Switch ONLY: `CC_POWER_ONSET_RATIO` 2.2 and
@@ -64,8 +71,8 @@ sections below hold the history and the reasons.
 - Practice-minutes heartbeat removal: code, rules, emulator test and the old collections (2026-11-05); the old
   `minutesBoard` collection deleted too. The class rank and the Top 5 are keyed by a private tag, so no uid sits next
   to minutes.
-- `tools/pm-rules-test.mjs`: 179 emulator cases (minutes, the boards, recorded takes, their audio chunks, the take
-  counter). It needs Java 21: on Jonathan's Mac it is at `~/tools/java` (not on PATH; the recipe is in the file's
+- `tools/pm-rules-test.mjs`: 191 emulator cases since 2026-11-06 (179 before; minutes, the teacher's weeks-only
+  read, the boards, recorded takes, their audio chunks, the take counter). It needs Java 21: on Jonathan's Mac it is at `~/tools/java` (not on PATH; the recipe is in the file's
   header). One known leniency is pinned, not fixed: a chunk with no `i` field is accepted.
 
 **Not re-reviewed on 2026-11-05**
@@ -1062,6 +1069,35 @@ wordings, no Note Runner mic check (see "Later (not chosen yet)").
 
 ## Recently shipped (post-archive)
 
+- [x] **2026-11-06 — Practice minutes in the teacher console (needs a `firestore.rules` paste).** Jonathan: "where do I see
+      students' minutes and rank?" A **Practice minutes** button after Students in the console's view toggle
+      (`renderTeacherMinutes()`, `teacher.js`): one row per student, grouped by period like Manage (`perRank`), with This week
+      ("42 / 60 min" ✓, or "N min · break"), Last week, Streak, All time, Class rank ("N / total", "—" under 1 minute) and
+      Top 5 ("#3" inside the period this week; "—" under `top5MinMinutes`; blank with no period). Sort: This week (default,
+      pinned in 1cg) · All time · Name. English only (the console's labels are). The student detail page is unchanged.
+      Jonathan picked all four defaults at STOP 0 and approved the layout at STOP 2 (made-up students only).
+      **Reads:** `minutes/{uid}/weeks` for every student on the roster (the teacher's own account left out), from the
+      SERVER, 10 at a time, when the view opens and on its own Refresh only (no timer, no listener; kept in memory until
+      Refresh; "as of 3:58 PM"). Cost: one read per weeks doc, about students × weeks since 2026-11-01 per open/Refresh.
+      Never `collectionGroup('weeks')` (it needs a wildcard-first rule; 1cg forbids it). Writes NOTHING.
+      **It never reads the boards or the tags:** rank and Top 5 are worked out from the weeks docs with the engine's own
+      maths, moved into pure `calc.rankPlace()` / `calc.top5Place()` (the student page's `rankInfo` / `top5Info` call
+      them too; pm-sim's 278 older checks gave byte-identical output before and after the move). Rank counts the whole
+      roster (archived students too), whatever the period filter shows; total = students with at least 1 minute.
+      **Known difference (a note under the table says so):** a student's own rank comes from `rankBoard`, which can trail by
+      a few minutes and counts only students who opened the site since 2026-11-05, so it can differ slightly; the console's
+      is the true number.
+      **Rules change (the only Firestore change):** `allow read: if isTeacher();` in the `minutes/{userId}/weeks/{week}`
+      block. `days`, `meta/board` (the tag) and the owner-only tree block are untouched; still exactly 4 `match /minutes/`
+      blocks. 1cg used to ban `isTeacher` in all three minutes blocks; now the tree and days blocks still do and the weeks
+      block is pinned whole (`WEEKS_SHIPPED`). Emulator: 191 passed, 0 failed (12 new cases); three scratch breaks of the
+      rule each turned cases red. **Order:** the view handles unpublished rules (one line, "Publish the new Firestore
+      rules…"), so code before the paste breaks nothing.
+      **Proofs:** pm-sim section 17 (PM_SIM_PIN 278 → 285) runs `teacherPmCompute` from `teacher.js` on 600 made-up
+      rosters (11,683 students: break weeks, ties for 5th, no period, under 1 minute) against `calc.status` and the old
+      rank / Top 5 formulas, and 190 students through the REAL student page; 7 mutations of the console or engine maths
+      each turned it red. 1cg pins the button, the default sort, the dispatch and the weeks-only server read with no
+      write and no timer (8 breaks, each red). `tools/smoke.mjs` does not drive the console, so nothing was added there.
 - [x] **2026-11-04 — Practice minutes: Top 5 of the week, by class period (needs a `firestore.rules` paste).**
       A "TOP 5" medal in the strip, a once-a-week toast and a fifth My progress tile for the students with the most minutes THIS ISO week inside
       their own class period; ties share a place; 10 minutes needed (`top5MinMinutes`); each student sees only their own place.
@@ -1164,6 +1200,8 @@ wordings, no Note Runner mic check (see "Later (not chosen yet)").
       **`firestore.rules` changed (new blocks only) → needs the console paste
       BEFORE the code is live, or every write is refused** (the client keeps
       refused seconds and retries every 5 min, so a late paste loses nothing).
+      **2026-11-06:** the teacher's account may READ `minutes/{uid}/weeks/*`
+      (the console's Practice minutes view; one more paste): see that entry.
       `dailyCapSeconds()` in the rules must equal `dailyCapMinutes × 60` (1cg).
       **Rules (all in the config; simplified 2026-11-01 by work order):** the goal
       is FLAT, `weeklyGoalMinutes` in every counted week for every student, whatever

@@ -46,6 +46,9 @@
       weekBoard/{tag}                  { week, period, seconds }   (this week's Top 5, keyed by a private random tag, not the uid; see TOP 5)
       minutes/{uid}/meta/board         { id }                      (the tag: create-only, owner-only)
   Nothing else: no heartbeat, no live count (see NO LIVE COUNT below).
+  Who else reads them: only the teacher console's Practice minutes view (teacher.js, 2026-11-06), which reads
+  minutes/{uid}/weeks/* for every student (the one teacher grant under minutes/ in firestore.rules) and works the
+  rank and Top 5 out itself with calc.rankPlace / calc.top5Place; it never reads days, meta/board or either board.
    Seconds are kept whole; the display floors to whole minutes. They are added
    with increment(), so two tabs or two devices never overwrite each other.
 
@@ -235,6 +238,30 @@
       week: { id: cur, secs: curSecs, goal: isBreak ? normalGoal : curGoal, isBreak: isBreak, hit: hit },
       streak: streak, streakBefore: streakBefore, longest: longest, history: history
     };
+  };
+
+  /* CLASS RANK and TOP 5 places — pure functions of numbers (2026-11-06). The student's page (rankInfo,
+     top5Info below) and the teacher console's Practice minutes view (teacher.js) both call these, so the
+     two can never work out a place two ways. Whole minutes decide: everyone who reads "12 min" shares a
+     place, and n = 1 + how many others have MORE whole minutes.
+     rankPlace(mySecs, othersSecs): n = null under one minute of practice; total = others + me. */
+  calc.rankPlace = function(mySecs, othersSecs){
+    var mine = Math.floor((mySecs || 0) / 60), higher = 0;
+    (othersSecs || []).forEach(function(s){ if(Math.floor(s / 60) > mine) higher++; });
+    return { n: (mySecs || 0) < 60 ? null : higher + 1, total: (othersSecs || []).length + 1 };
+  };
+  /* top5Place(c, myWeekSecs, othersWeekSecs): this week's place inside one class period. top = ranked (at
+     least c.top5MinMinutes this week) and fewer than 5 ahead; under = below that minimum; need = minutes to
+     catch the fifth place (only when ranked and out). */
+  calc.TOP_N = 5;
+  calc.top5Place = function(c, myWeekSecs, othersWeekSecs){
+    var min = Math.max(0, Math.round(+c.top5MinMinutes || 0)), mine = Math.floor((myWeekSecs || 0) / 60);
+    var others = (othersWeekSecs || []).map(function(s){ return Math.floor(s / 60); }).sort(function(a, z){ return z - a; });
+    var higher = 0;
+    others.forEach(function(m){ if(m > mine) higher++; });
+    var top = mine >= min && higher < calc.TOP_N;
+    var need = (!top && mine >= min) ? Math.max(1, others[calc.TOP_N - 1] - mine) : 0;
+    return { top: top, n: higher + 1, under: mine < min, min: min, toRank: Math.max(0, min - mine), need: need };
   };
 
   /* ════════════════════════════════════════════════════════════════════
@@ -876,13 +903,11 @@
   function rankInfo(){
     var b = S && S.loaded && S.board;
     if(!b || isTeacherUser()) return null;
-    var all = allTimeSeconds(), mine = Math.floor(all / 60), higher = 0;
-    b.others.forEach(function(s){ if(Math.floor(s / 60) > mine) higher++; });
-    return { n: all < 60 ? null : higher + 1, total: b.others.length + 1 };
+    return calc.rankPlace(allTimeSeconds(), b.others);
   }
 
   /* ── TOP 5 (see the header): publish this week's number, read my period's, work out my place ── */
-  var WB_MS = 120000, WB_KEEP_MS = 900000, TOP_N = 5;
+  var WB_MS = 120000, WB_KEEP_MS = 900000;
   var PERIOD_KEYS = { '4': 'pm.period4', '7': 'pm.period7', 'CAS': 'pm.periodCAS' };
   /* The student's class period as the host page knows it, or '' (not answered yet, or a value the rules refuse). */
   function hostPeriod(){
@@ -1022,19 +1047,15 @@
   /* My place this week, from my live seconds (weekSecs, counted seconds not yet sent included) and the cached board,
      or null while it is not known (no period, the board not read yet, the teacher). Whole minutes decide, like the
      class rank: everyone who reads "12 min" shares a place, and n = 1 + how many have MORE. top = ranked (at least
-     top5MinMinutes) and fewer than TOP_N ahead. need = minutes to catch the fifth place (only when ranked and out). */
+     top5MinMinutes) and fewer than calc.TOP_N ahead (calc.top5Place does the counting). need = minutes to catch the fifth place (only when ranked and out). */
   function top5Info(weekSecs){
     var st = S, b = st && st.loaded && st.wb;
     if(!b || isTeacherUser()) return null;
     var p = hostPeriod(), w = calc.weekIdOf(today());
     if(!p || b.week !== w || b.period !== p) return null;
-    var min = Math.max(0, Math.round(+cfg().top5MinMinutes || 0)), mine = Math.floor((weekSecs || 0) / 60);
-    var others = b.others.map(function(s){ return Math.floor(s / 60); }).sort(function(a, z){ return z - a; });
-    var higher = 0;
-    others.forEach(function(m){ if(m > mine) higher++; });
-    var top = mine >= min && higher < TOP_N;
-    var need = (!top && mine >= min) ? Math.max(1, others[TOP_N - 1] - mine) : 0;
-    return { top: top, n: higher + 1, under: mine < min, min: min, toRank: Math.max(0, min - mine), need: need, period: p, week: w };
+    var r = calc.top5Place(cfg(), weekSecs, b.others);
+    r.period = p; r.week = w;
+    return r;
   }
 
   /* An ID token kept fresh for the unload write (getIdToken is async, and
