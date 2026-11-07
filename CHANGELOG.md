@@ -5,6 +5,10 @@ Notable changes to the Guitar Class site. Newest first.
 For the full session-by-session history (and the reasoning behind each change),
 see `WORKFLOW.md` and the git commit log.
 
+## 2026-11-07 — Streak wording
+
+- **"No streak right now" after a streak ends.** If you had a streak and missed a week, the Streak tile and the flame now say "No streak right now" (Spanish: "Ahora no tienes racha") instead of "No streak yet". Your longest streak still shows under it. A new student still sees "No streak yet".
+
 ## 2026-11-06 — Fixes from the weekly review
 
 - **Call the Chord: tapping the "?" box no longer counts as an answer.** In the Call steps you have to pick the chord. Before, tapping the box at the right time passed the step without naming anything.

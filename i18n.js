@@ -650,6 +650,8 @@
     'pm.weekMinBreak':    { en: '{done} min', es: '{done} min' },
     // Streak of 0: the flame's label and the My progress tile say this instead of "0-week streak".
     'pm.streakNone':      { en: 'No streak yet', es: 'Aún no tienes racha' },
+    // A streak that was lost (longest is above 0): "yet" would be wrong.
+    'pm.streakNoneNow':   { en: 'No streak right now', es: 'Ahora no tienes racha' },
     // The goal cannot be reached any more this week: the daily cap leaves too few minutes. My progress tile and the recap card.
     'pm.weekOut':         { en: 'You can’t reach the goal this week. A new week starts Monday.', es: 'Esta semana ya no puedes llegar a la meta. El lunes empieza una semana nueva.' },
     'pm.streak.one':      { en: '{n}-week streak', es: 'racha de {n} semana' },

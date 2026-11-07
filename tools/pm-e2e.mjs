@@ -403,7 +403,7 @@ await tilesAt(5, 0, [], 'en'); await ev(`document.getElementById('pm-progress').
 check('no streak: the Streak tile says "No streak yet" and nothing else (it said "0-week streak" over "Longest: 0 weeks")', /^Streak No streak yet$/.test(none[1]), none);
 check('Spanish, no streak: "Aún no tienes racha" (not "Racha de 0 semanas")', /^Racha Aún no tienes racha$/.test(noneEs[1]), noneEs);
 const lost = await ev(`(() => { setLang('en'); const s = PM._state(), d = PM.calc.ymd(new Date()), cur = PM.calc.weekIdOf(d); s.weeks = {}; s.pend = {}; s.days = {}; [1, 2, 3, 4, 5].forEach(i => { s.weeks[PM.calc.weekAdd(cur, -(i + 8))] = { seconds: 3700, goalSeconds: 3600, hit: true }; }); s.weeks[cur] = { seconds: 300, goalSeconds: 3600, hit: false }; renderMyProgress(); return [...document.querySelectorAll('#pm-progress .pm-tile')].map(t => t.innerText.replace(/\\s+/g, ' ').trim()); })()`);
-check('a streak that was lost: "No streak yet" over "Longest: 5 weeks" — the Longest line stays when it is above 0', /^Streak No streak yet Longest: 5 weeks$/.test(lost[1]), lost);
+check('a streak that was lost: "No streak right now" over "Longest: 5 weeks" — the Longest line stays when it is above 0', /^Streak No streak right now Longest: 5 weeks$/.test(lost[1]), lost);
 const tileH = await ev(`[...document.querySelectorAll('#pm-progress .pm-tile')].map(t => Math.round(t.getBoundingClientRect().height))`);
 check('the three tiles stay the same height with the Longest line empty', tileH.length === 3 && new Set(tileH).size === 1, tileH);
 check('a first hit week is still "1-week streak" / "Racha de 1 semana"', /^Streak 1-week streak /.test(one[1]) && /^Racha Racha de 1 semana /.test(oneEs[1]), [one, oneEs]);

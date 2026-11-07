@@ -436,8 +436,8 @@
     var need = w.goal - w.secs;                                    // seconds: the comparison must not round up to a whole minute first (a student 1 s short with 1 s of room can still reach it)
     return { more: Math.max(1, Math.ceil(need / 60)), out: need > room };
   }
-  /* "No streak yet" instead of "0-week streak". */
-  function streakWords(base, n){ return n > 0 ? plural(base, n) : tr('pm.streakNone'); }
+  /* "No streak yet" instead of "0-week streak"; "No streak right now" once a streak has been lost (longest above 0). */
+  function streakWords(base, n, longest){ return n > 0 ? plural(base, n) : tr(longest > 0 ? 'pm.streakNoneNow' : 'pm.streakNone'); }
   function allTimeSeconds(){
     var t = 0, m = weekTotals();
     Object.keys(m).forEach(function(w){ t += m[w]; });
@@ -1139,7 +1139,7 @@
        the title, Find, Español and the user area off the one-row top bar. My progress
        shows the true minutes. A week with no class has no goal: minutes only. */
     var weekTxt = w.isBreak ? tr('pm.weekMinBreak', { done: done }) : tr('pm.weekMin', { done: Math.min(done, goal), goal: goal });
-    var flameLabel = streakWords('pm.streak', st.streak), t5 = top5Info(w.secs);
+    var flameLabel = streakWords('pm.streak', st.streak, st.longest), t5 = top5Info(w.secs);
     return '<span class="pm-week">' + ringSvg(w.goal && !w.isBreak ? w.secs / w.goal : 0, w.hit) + '<span>' + esc(weekTxt) + '</span></span>'
       + '<span class="pm-streak' + (w.hit ? ' pm-on' : '') + '" role="img" aria-label="' + esc(flameLabel) + '">' + FLAME + '<b>' + st.streak + '</b></span>'
       + (t5 && t5.top ? top5Mark('pm-top5-sm', tr('pm.top5Label')) : '');
@@ -1377,7 +1377,7 @@
       +   '<div class="pm-tile-row">' + ringSvg(w.goal && !w.isBreak ? w.secs / w.goal : 0, w.hit, 'pm-ring-lg') + '<b>' + esc(w.isBreak ? tr('pm.tileWeekValBreak', { done: mins(w.secs) }) : tr('pm.tileWeekVal', { done: mins(w.secs), goal: mins(w.goal) })) + '</b></div>'
       +   '<div class="pm-tile-sub">' + esc(weekSub) + '</div></div>'
       + '<div class="pm-tile"><div class="pm-tile-h">' + esc(tr('pm.tileStreak')) + '</div>'
-      +   '<div class="pm-tile-row"><span class="pm-streak pm-streak-lg' + (w.hit ? ' pm-on' : '') + '">' + FLAME + '</span><b>' + esc(streakWords('pm.tileStreakVal', st.streak)) + '</b></div>'
+      +   '<div class="pm-tile-row"><span class="pm-streak pm-streak-lg' + (w.hit ? ' pm-on' : '') + '">' + FLAME + '</span><b>' + esc(streakWords('pm.tileStreakVal', st.streak, st.longest)) + '</b></div>'
       +   '<div class="pm-tile-sub">' + (st.longest > 0 ? esc(plural('pm.tileLongest', st.longest)) : '') + '</div></div>'   // "Longest: 0 weeks" under "No streak yet" says nothing; the line keeps its height (.pm-tile-sub min-height)
       + '<div class="pm-tile"><div class="pm-tile-h">' + esc(tr('pm.tileToday')) + '</div>'
       +   '<div class="pm-tile-row"><b class="pm-today">' + mins(dayTotal(d)) + '</b><span class="pm-today-u">' + esc(tr('pm.min')) + '</span></div>'
