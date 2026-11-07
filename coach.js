@@ -3980,6 +3980,7 @@ function ccStageEnd(){
   });
   cc.stageLog.push({ bpm: ccRoundBpm(), changes: cc.changes });
   cc.stage++;
+  cc.roundEndT = performance.now();
   ccBeginStage();
 }
 /* The tempo a finished game is scored at: a pair's is the lowest tempo it ran at (ccRoundBpm); a song
@@ -3997,6 +3998,7 @@ function ccScoreBpm(){
 const CC_STOP_REACH_MS = 4000;   // a Stop within this long of a change falling due is read as "reaching for Stop", not "the mic missed it" (ccFinish)
 function ccFinish(complete){
   if (!cc || (cc.phase !== 'play' && cc.phase !== 'countin')) return;
+  const ended = complete === true;   // ccStageEnd: the last round ran out (a Stop is never this)
   cc.timeouts.forEach(clearTimeout);
   cc.timeouts = [];
   if (ccRaf){ cancelAnimationFrame(ccRaf); ccRaf = null; }
@@ -4013,8 +4015,16 @@ function ccFinish(complete){
   const stopT = performance.now() - coachMicLatencyMs();
   let lastHeard = -1;
   cc.changes.forEach((c, i) => { if (c.pend || c.result === 'ok' || c.result === 'off') lastHeard = i; });
-  cc.unreached = complete || (cc.ladder && cc.phase === 'countin' && cc.stage > 0) ? 0
+  cc.unreached = ended || (cc.ladder && cc.phase === 'countin' && cc.stage > 0) ? 0
     : cc.changes.filter((c, i) => (c.result === null && !c.pend) || (i > lastHeard && c.result === 'miss' && stopT - c.t < CC_STOP_REACH_MS)).length;
+  /* A Stop early in a later round, before any strum of it was heard: the hand may have left in the round before (the count-in has no Stop button, so the
+     click waits for this round's play screen). The count-in is not reach time. */
+  if (!ended && cc.ladder && cc.phase === 'play' && cc.stage > 0 && lastHeard < 0 && cc.stageLog.length && cc.roundEndT != null){
+    const prev = cc.stageLog[cc.stageLog.length - 1].changes, gap = cc.listenStart - cc.roundEndT;
+    let prevHeard = -1;
+    prev.forEach((c, i) => { if (c.result === 'ok' || c.result === 'off') prevHeard = i; });
+    cc.unreached += prev.filter((c, i) => i > prevHeard && c.result === 'miss' && stopT - gap - c.t < CC_STOP_REACH_MS).length;
+  }
   cc.changes.forEach(c => {
     if (c.pend) ccResolvePend(c);
     if (c.result === null) c.result = 'miss';
@@ -4069,7 +4079,7 @@ function ccRenderDone(){
 
   /* Power Chord Switch hears a strum only when it jumps the level by CC_POWER_* (2026-11-05), so a soft strum, or one without a clear pick sound,
      shows "no strum heard". When at least two changes went that way and they outnumber the "chord sounded wrong" ones, below 85% right, the
-     headline, the advice and the big button all stop pointing at the tempo: "this speed is too fast" and "Drop 10 BPM" do nothing for a strum
+     headline, the advice and the big button all stop pointing at the tempo: "this speed is too fast" and "Drop 5 BPM" do nothing for a strum
      that was not heard. The advice says to strum a little firmer; the headline is the plain "N of M changes worked"; the big button is "Again"
      at the same speed. One miss alone is not enough (it may be a slip), and a game at 85% or better keeps its "Level up". Change Up keeps all
      of it. */

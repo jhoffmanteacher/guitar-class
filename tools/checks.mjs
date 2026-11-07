@@ -12510,6 +12510,30 @@ function checkCoachVerdicts() {
       // the hand going for Stop: at 60 BPM the changes that fell due in the last seconds were swept as misses before the Stop, and are not strums the mic missed
       const reach = game(PAIR, 60, `__t = 25000; __cbs[0](); cc.changes.forEach((c, i) => { c.result = i < 4 ? 'ok' : i < 9 ? 'miss' : null; }); __t = 33000; ccFinish(false);`);
       if (reach.txt.includes(HINT)) flag('1ck: a Stop 3 s after the last strum (4 right, the changes since then swept as misses) tells the student to strum firmer');
+      // misses BEFORE the last heard strum are real even inside the window (i > lastHeard), with a heard strum being ok, off or an open check
+      const WORKED = 'changes worked';
+      for (const [res, pendAt, what] of [[['ok', 'miss', 'ok', 'miss', 'ok'], -1, 'ok'], [['ok', 'miss', 'miss', null], 3, 'an open check'], [['ok', 'miss', 'miss', 'off'], -1, 'off']]) {
+        const g = game(PAIR, 60, `__t = 25000; __cbs[0](); cc.changes.forEach((c, i) => { c.result = ${JSON.stringify(res)}[i] === undefined ? null : ${JSON.stringify(res)}[i]; }); if (${pendAt} >= 0) cc.changes[${pendAt}].pend = { t: __t, readings: [] }; __t = 30500; ccFinish(false);`);
+        if (!g.txt.includes(HINT) || !g.html.includes('coach-overall')) flag(`1ck R3: 2 misses inside the last 4 s but before a heard strum (${what}) no longer show the hint`);
+      }
+      // the window, at 120 BPM (change i due at 25000 + (i + 1) * 500; the Stop's clock is 50 ms behind): 2 misses due 3.4 s and 3.9 s before the Stop are a reach,
+      // 2 due 4.0 s and 4.5 s before it are not (CC_STOP_REACH_MS is 4000 and the test is <)
+      const edge = (stopT) => game(PAIR, 120, `__t = 25000; __cbs[0](); cc.changes.forEach((c, i) => { c.result = i < 4 ? 'ok' : i < 6 ? 'miss' : null; }); __t = ${stopT} + 50; ccFinish(false);`);
+      const inW = edge(25000 + 6 * 500 + 3400), outW = edge(25000 + 6 * 500 + 4000);
+      if (inW.txt.includes(HINT) || !inW.html.includes('coach-overall')) flag('1ck R3: 2 misses that fell due 3.4 s and 3.9 s before the Stop (a reach) show the hint');
+      if (!outW.txt.includes(HINT)) flag('1ck R3: 2 misses that fell due 4.0 s and 4.5 s before the Stop no longer show the hint (window wider than 4 s, or <= for <)');
+      // a song switch Stopped early in round 2's PLAY: round 2's changes were never reached
+      const r2early = game(SW, 30, `__t = 25000; __cbs[0](); cc.changes.forEach(c => { c.result = 'ok'; }); __t = 43000; ccStageEnd(); __t = cc.listenStart; __cbs[1](); __t += 500; ccFinish(false);`);
+      if (r2early.txt.includes(HINT) || !r2early.html.includes('coach-overall')) flag("1ck R3: a song switch Stopped 0.5 s into round 2's play (round 1 all right) tells the student to strum firmer");
+      // R3-1: a Stop after the last change was swept (the 'every change graded' rule makes it complete) is still a Stop: 12 right at 90 BPM, the last 3 swept while the hand went for Stop
+      const r31 = game(PAIR, 90, `__t = 25000; __cbs[0](); cc.changes.forEach((c, i) => { c.result = i < 12 ? 'ok' : 'miss'; }); __t = 25000 + 15 * 60000 / 90 + 700; ccFinish(false);`);
+      if (r31.txt.includes(HINT) || !r31.html.includes('coach-overall')) flag('1ck R3-1: a Stop 0.7 s after the last change was swept (12 right, the last 3 not played) tells the student to strum firmer');
+      // R3-2: a song switch whose round 1 ended while the hand went for Stop (the count-in has no Stop button): Stop 0.5 s into round 2's play
+      const r32 = game(SW, 90, `__t = 25000; __cbs[0](); cc.changes.forEach((c, i) => { c.result = i < 4 ? 'ok' : 'miss'; }); __t = 25000 + 9 * 60000 / 90; ccStageEnd(); __t = cc.listenStart; __cbs[1](); __t += 500; ccFinish(false);`);
+      if (r32.txt.includes(HINT) || !r32.html.includes('coach-overall')) flag("1ck R3-2: a song switch Stopped 0.5 s into round 2, round 1's last 3 changes swept while the hand went for Stop, tells the student to strum firmer");
+      // the natural end keeps its misses: a soft strummer at 60 BPM whose last 5 changes were not heard, played to the end
+      const nat = game(PAIR, 60, `__t = 25000; __cbs[0](); cc.changes.forEach((c, i) => { c.result = i < 12 ? 'ok' : 'miss'; }); __t = 25000 + 17000; ccStageEnd();`);
+      if (!nat.txt.includes(HINT)) flag('1ck R3: a game played to the end with its last 3 strums not heard (all in the last 4 s) no longer shows the hint');
     }
     {
       // near the top: a song switch cannot start above 130, so the Again row and its button must say 130 after a perfect game at 140
@@ -12614,7 +12638,7 @@ function checkCoachVerdicts() {
     if (pk !== 'ccBest:F5-G5:beat') flag(`1ck: a pair's best-score key changed to "${pk}" (a student's saved bests would be lost)`);
     const pairPlan = JSON.parse(run(`JSON.stringify(ccRoundPlan(CC_POWER_PROGRESSIONS[1], CC_POWER_PROGRESSIONS[1].chords, CC_RATES[1]))`));
     if (pairPlan.slots !== 12 || pairPlan.ladder || pairPlan.rounds !== 1) flag(`1ck: a pair's round changed (${pairPlan.slots} slots at "Every 2 beats", expected 12, one round)`);
-    const SONG_PIN = { recChecks: 20, readingChecks: 21, ratioChecks: 165, hintChecks: 20, stopChecks: 17, songs: 2, entries: 16, cardSwitches: 16, hints: 16 * 7 * 2, setups: 16 * 3 * 2, dones: 16 * 2, rounds: 16 * 3, nudges: 16 * 2 };
+    const SONG_PIN = { recChecks: 20, readingChecks: 21, ratioChecks: 165, hintChecks: 20, stopChecks: 26, songs: 2, entries: 16, cardSwitches: 16, hints: 16 * 7 * 2, setups: 16 * 3 * 2, dones: 16 * 2, rounds: 16 * 3, nudges: 16 * 2 };
     for (const [k, n] of Object.entries(SONG_PIN)) if (song[k] !== n) flag(`1ck: ${song[k]} ${k}, pinned ${n} — the check went partly blind (or grew: re-pin on purpose)`);
     songCounts = song;
     run(`setLang('en'); cc = null; ccStop();`);
