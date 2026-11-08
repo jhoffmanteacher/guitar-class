@@ -5582,7 +5582,11 @@ function checkPrecacheCoverage(src) {
    asks for the mic, and it loads neither app.js nor tuner.js (tuner.js owns the
    mic). The round logic itself is run by tools/tuning-sim-proof.mjs (1,000
    rounds), which is NOT part of this file; the circle's drawing direction is run
-   here too (2026-11-08). */
+   here too (2026-11-08). Review round 2 (2026-11-08) added pins on the lines that
+   DRAW and TURN (notes at ringPt(i), one arrow, the peg's turn and its two icons,
+   Space/Enter, focus after a key, a held Enter, green only when done, the peg-foot
+   layout), the answer sentences' way words, where a miss is counted, and the Module 1
+   note-circle figure and its step. tools/smoke.mjs runs the same things for real. */
 function checkTuningSim() {
   head('1cp. Tuning Simulator: defaults, levels and the no-mic rule are pinned');
   let src;
@@ -5638,10 +5642,13 @@ function checkTuningSim() {
   try { I = vm.runInContext('(' + im[1] + ')', vm.createContext({})); } catch (e) { err(`tuning-sim.html: could not read the en/es word table (${e && e.message})`); problems++; bad++; }
   const DIR_WORDS = {
     en: { tightenTurn: 'turn counterclockwise', loosenTurn: 'turn clockwise', keys: 'Keys: ← counterclockwise (tighten) · → clockwise (loosen)',
-      h2n: 'The tuner shows a different letter than the string. Find both letters on the circle. Counterclockwise ↺ is up. Clockwise ↻ is down.', ringUp: '↺ up', ringDown: '↻ down' },
+      h2n: 'The tuner shows a different letter than the string. Find both letters on the circle. Counterclockwise ↺ is up. Clockwise ↻ is down.', ringUp: '↺ up', ringDown: '↻ down',
+      up: 'Up — tighten', down: 'Down — loosen' },
     es: { tightenTurn: 'gira en sentido antihorario', loosenTurn: 'gira en sentido horario', keys: 'Teclas: ← en sentido antihorario (apretar) · → en sentido horario (aflojar)',
-      h2n: 'El afinador muestra una letra distinta a la de la cuerda. Busca las dos letras en el círculo. En sentido antihorario ↺ es subir. En sentido horario ↻ es bajar.', ringUp: '↺ sube', ringDown: '↻ baja' }
+      h2n: 'El afinador muestra una letra distinta a la de la cuerda. Busca las dos letras en el círculo. En sentido antihorario ↺ es subir. En sentido horario ↻ es bajar.', ringUp: '↺ sube', ringDown: '↻ baja',
+      up: 'Sube — aprieta', down: 'Baja — afloja' }
   };
+  const dirWordCount = Object.values(DIR_WORDS).reduce((n, o) => n + Object.keys(o).length, 0);
   let words = 0;
   if (I) for (const lang of ['en', 'es']) for (const [k, want] of Object.entries(DIR_WORDS[lang])) {
     if (I[lang] && I[lang][k] === want) words++; else { dirBad++; err(`tuning-sim.html ${lang} ${k} is "${I[lang] && I[lang][k]}" — the direction words are pinned as one set: "${want}"`); }
@@ -5659,9 +5666,84 @@ function checkTuningSim() {
   /* A miss (wrong name or wrong way) restarts the three-clean-rounds count; the level-up line names the NEW level's top distance. */
   const missOk = (code.match(/S\.roundClean = false;/g) || []).length === 2 && /S\.roundClean = true;/.test(code) && /S\.clean = S\.roundClean \? S\.clean \+ 1 : 0;/.test(code);
   if (!missOk) { bad++; problems++; err('tuning-sim.html: a wrong name and a wrong way must each set S.roundClean = false, newRound() sets it true, and finishRound() does S.clean = S.roundClean ? S.clean + 1 : 0 (a miss starts the count again)'); }
+  /* WHERE the two misses are: the wrong branch of each answer, with the right/wrong test on the real answer. */
+  if (!/if \(i === right\) \{[^]*?\} else \{\s*S\.streak = 0; S\.roundClean = false;/.test(code) || !/if \(w === S\.round\.answer\) \{ S\.fb = sentence; S\.fbClass = 'ok'; \}\s*else \{ S\.fb = T\('wayWrong'\) \+ sentence; S\.fbClass = 'bad'; S\.roundClean = false; \}/.test(code)) { bad++; problems++; err("tuning-sim.html: S.roundClean = false must sit in the WRONG branch of answerName (if (i === right) … else { S.streak = 0; S.roundClean = false; …) and of answerWay (if (w === S.round.answer) { …'ok' } else { …'bad'; S.roundClean = false; })"); }
+  /* 2026-11-08 (review round 2): the circle as DRAWN and the peg as turned, pinned on the lines that do it.
+     tools/smoke.mjs measures the drawn notes and arrow in a real browser; these fail without one. */
+  const pin = (re, what) => { if (!re.test(code)) { dirBad++; err(`tuning-sim.html: ${what}`); return 0; } return 1; };
+  let pins = 0;
+  if (lvl && lvl.NOTES.join() === 'C,C#,D,D#,E,F,F#,G,G#,A,A#,B') pins++; else { dirBad++; err(`tuning-sim.html NOTES is [${lvl && lvl.NOTES}], expected C,C#,D,D#,E,F,F#,G,G#,A,A#,B`); }
+  pins += pin(/NOTES\.forEach\(\(n, i\) => \{ const \[x, y\] = ringPt\(i, RR\); h \+= '<g class="rn" data-note="' \+ n \+ '"><circle cx="' \+ x\.toFixed\(1\) \+ '" cy="' \+ y\.toFixed\(1\)/, "ringInit must draw note i (data-note n) at ringPt(i, RR), the checked function");
+  const dSets = (code.match(/\.setAttribute\('d',/g) || []).length, arcSets = (code.match(/arc\.setAttribute\('d', ringArc\(/g) || []).length;
+  if (dSets !== 2 || arcSets !== 1 || !/arc\.setAttribute\('d', ''\)/.test(code)) { dirBad++; err(`tuning-sim.html: the arrow's path must be set in exactly two places, once from ringArc(…, up) and once to '' (found ${arcSets} ringArc, ${dSets} in all)`); } else pins++;
+  pins += pin(/S\.pegAngle -= dir \* c \* DEG_PER_CENT;/, 'tick() must turn the peg S.pegAngle -= dir * c * DEG_PER_CENT (Tighten, dir 1, turns it counterclockwise: CSS rotate() is clockwise for positive degrees)');
+  pins += pin(/const DEG_PER_CENT = [1-9]\d*;/, 'DEG_PER_CENT must be a positive whole number of degrees');
+  pins += pin(/id="peg-up" data-dir="1"[^]*?id="peg-down" data-dir="-1"/, 'Tighten (#peg-up, the left button) must be data-dir="1" and Loosen (#peg-down) data-dir="-1"');
+  pins += pin(/b\.addEventListener\('click', e => \{ if \(e\.detail === 0 && S\.state === 'turn'\) \{ ensureCtx\(\); tick\(\+b\.dataset\.dir, TICK_CENTS\); \} \}\);/, "Space/Enter on Tighten or Loosen must turn the peg one tick (the click handler with e.detail === 0), and a mouse click must not tick a second time");
+  pins += pin(/g\.classList\.toggle\('done', n === tgt && n === cur && S\.disp\.inTune\)/, "ringRender must mark .rn.done only on the string's note while the tuner shows it AND it is in tune");
+  pins += pin(/\.peg-foot \.btn\{white-space:nowrap;flex-shrink:0\}/, '"Pluck again" must stay on one line: .peg-foot .btn{white-space:nowrap;flex-shrink:0}');
+  pins += pin(/<div class="peg-foot">\s*<button type="button" class="btn" id="pluck"/, '"Pluck again" (#pluck, class btn) must be the first thing in .peg-foot');
+  pins += pin(/\.peg-panel \.peg-btn\{align-self:stretch\}/, 'Tighten and Loosen must stay the same height: .peg-panel .peg-btn{align-self:stretch}');
+  pins += pin(/if \(lost \? !lastKey : a\.closest\('\.top'\)\) return;/, 'focusFirst() must move the focus only after a key press, never after a mouse click or out of the top bar');
+  pins += pin(/if \(!e\.repeat\) keyOn = e\.target;\s*else if \(e\.target !== keyOn\) e\.preventDefault\(\);/, 'a held Enter must count only on the control it went down on (else it answers the next question by itself)');
+  /* Green on the circle only once the string is done: every .rn rule that paints green also needs .done. */
+  const css = (code.match(/<style>([\s\S]*?)<\/style>/) || [])[1] || '';
+  const greenRn = [...css.matchAll(/([^{}]+)\{([^{}]*)\}/g)].filter(([, sel, body]) => /\.rn\b/.test(sel) && /var\(--green-(?:bg|text)\)/.test(body));
+  const greenBad = greenRn.flatMap(([, sel]) => sel.split(',').map(s => s.trim()).filter(s => /\.rn\b/.test(s) && !/\.done\b/.test(s)));
+  if (greenBad.length || greenRn.length < 2) { dirBad++; err(`tuning-sim.html: a note on the circle is green without .done (${greenBad.join(' | ') || `${greenRn.length} green .rn rules, expected the circle and its letter`}) — green means the string is tuned`); } else pins++;
+  /* The two peg icons: sweep flag 1 is clockwise on screen, and each scale(-1,1) mirrors it. Tighten's must turn counterclockwise, Loosen's clockwise. */
+  const iconTurn = id => {
+    const b = (src.match(new RegExp(`<button[^>]*id="${id}"[^>]*>[\\s\\S]*?</svg>`)) || [''])[0];
+    const sw = (b.match(/<path class="arc" d="M[\d.\s]+A\s*[\d.]+\s+[\d.]+\s+[\d.]+\s+[01]\s+([01])\s/) || [])[1];
+    return sw == null ? 'no arc' : ((+sw) ^ ((b.match(/scale\(-1,\s*1\)/g) || []).length % 2)) ? 'clockwise' : 'counterclockwise';
+  };
+  if (iconTurn('peg-up') !== 'counterclockwise' || iconTurn('peg-down') !== 'clockwise') { dirBad++; err(`tuning-sim.html: the Tighten icon turns ${iconTurn('peg-up')} and the Loosen icon ${iconTurn('peg-down')} (expected counterclockwise, clockwise)`); } else pins++;
+  /* The answer sentences: an "up" sentence says up and Tighten, a "down" one down and Loosen, never the other way's words. */
+  const WAY = { en: { up: [/\bup\b/, /\bTighten\b/], down: [/\bdown\b/, /\bLoosen\b/] }, es: { up: [/\b(?:arriba|sube|subir)\b/i, /\bAprieta\b/], down: [/\b(?:abajo|bajar)\b/i, /\bAfloja\b/] } };
+  let ways = 0;
+  if (I) for (const lang of ['en', 'es']) for (const [k, w] of [['wayUpN', 'up'], ['wayFlat', 'up'], ['wayDownN', 'down'], ['waySharp', 'down']]) {
+    const s = String(I[lang] && I[lang][k]), other = w === 'up' ? 'down' : 'up';
+    if (WAY[lang][w].every(re => re.test(s)) && !WAY[lang][other].some(re => re.test(s))) ways++;
+    else { dirBad++; err(`tuning-sim.html ${lang} ${k} is "${s}" — it must say ${w} with ${w === 'up' ? 'Tighten / Aprieta' : 'Loosen / Afloja'}, and none of the ${other} words`); }
+  }
+  if (pins !== 15 || ways !== 8) { dirBad++; err(`tuning-sim.html: ${pins} of 15 drawing/peg/keyboard pins and ${ways} of 8 answer sentences held (every one must)`); }
+  /* The Module 1 note-circle figure and its step ("Right needle, wrong letter") turn the same way as this page. */
+  const FIG = { en: ['HIGHER = tighten ↺', '↻ LOWER = loosen', '3+ steps away? stop and ask'], es: ['MÁS AGUDA = aprieta ↺', '↻ MÁS GRAVE = afloja', '¿3+ pasos de distancia? detente y pregunta'] };
+  const CIRCLE = ['E', 'F', 'F#', 'G', 'G#', 'A', 'A#', 'B', 'C', 'C#', 'D', 'D#'];
+  let figs = 0;
+  for (const lang of ['en', 'es']) {
+    let svg = ''; try { svg = readFileSync(join(ROOT, 'img', `m1-note-circle-${lang}.svg`), 'utf8'); } catch {}
+    const why = [];
+    const g = svg.match(/<circle cx="([\d.]+)" cy="([\d.]+)" r="140"/), cx = g ? +g[1] : NaN, cy = g ? +g[2] : NaN;
+    const nodes = [...svg.matchAll(/<circle cx="([\d.]+)" cy="([\d.]+)" r="24" fill="([^"]+)"[^>]*\/>\s*<text[^>]*>([^<]+)<\/text>/g)].map(m => ({ a: Math.atan2(cy - +m[2], +m[1] - cx) * 180 / Math.PI, fill: m[3].toLowerCase(), n: m[4] }));
+    if (nodes.map(x => x.n).join() !== CIRCLE.join()) why.push(`the letters are [${nodes.map(x => x.n)}], expected [${CIRCLE}] in drawing order`);
+    else {
+      if (Math.abs(nodes[0].a - 90) > 0.5) why.push(`E sits at ${nodes[0].a.toFixed(1)} degrees, not the top`);
+      const off = nodes.filter((x, i) => Math.abs((((nodes[(i + 1) % 12].a - x.a) % 360) + 540) % 360 - 180 - 30) > 0.5).map(x => x.n);
+      if (off.length) why.push(`the letter after ${off.join(', ')} is not 30 degrees COUNTERCLOCKWISE`);
+      const blue = nodes.filter(x => x.fill === '#1f4e79').map(x => x.n).sort().join();
+      if (blue !== 'A,B,D,E,G') why.push(`the blue letters are [${blue}], expected the string letters A,B,D,E,G`);
+    }
+    const arrow = svg.match(/<path d="M\s*[\d.]+\s+[\d.]+\s+A\s*[\d.]+\s+[\d.]+\s+[\d.]+\s+[01]\s+([01])\s[^"]*"[^>]*stroke="#3b6d11"/);
+    if (!arrow || arrow[1] !== '0') why.push(`the green "higher" arrow's sweep flag is ${arrow ? arrow[1] : 'missing'} (0 = counterclockwise)`);
+    for (const t of FIG[lang]) if (!svg.includes('>' + t + '</text>')) why.push(`no label "${t}"`);
+    if (why.length) { dirBad++; err(`img/m1-note-circle-${lang}.svg: ${why.join('; ')}`); } else figs++;
+  }
+  let m1 = ''; try { m1 = readFileSync(join(ROOT, 'module-1.js'), 'utf8'); } catch {}
+  const si = m1.indexOf("label: 'Right needle, wrong letter'"), m1step = si >= 0 ? m1.slice(si, m1.indexOf('skills:', si)) : '';
+  const m1f = k => (m1step.match(new RegExp(`\\n\\s*${k}: '((?:[^'\\\\]|\\\\.)*)'`)) || [])[1] || '';
+  const m1alt = (k, lang) => (m1f(k).match(new RegExp(`<img src="img/m1-note-circle-${lang}\\.svg" alt="([^"]*)"`)) || [])[1] || '';
+  const M1 = { en: { alt: m1alt('text', 'en'), hint: m1f('hint'), yes: /counterclockwise/, no: /(?<!counter)clockwise/i }, es: { alt: m1alt('text_es', 'es'), hint: m1f('hint_es'), yes: /en sentido antihorario/, no: /(?<!anti)horario/i } };
+  let m1ok = 0;
+  for (const lang of ['en', 'es']) for (const part of ['alt', 'hint']) {
+    const s = M1[lang][part];
+    if (M1[lang].yes.test(s) && !M1[lang].no.test(s)) m1ok++;
+    else { dirBad++; err(`module-1.js "Right needle, wrong letter" ${lang} ${part === 'alt' ? `figure alt (img/m1-note-circle-${lang}.svg)` : part} is "${s.slice(0, 90)}…" — it must say the circle goes ${lang === 'en' ? 'counterclockwise' : 'en sentido antihorario'}, and never the plain other word`); }
+  }
   if (!/S\.level\+\+; S\.clean = 0; saveLevel\(\); leveled = true;\s*S\.note = T\('levelUp', \{ l: S\.level, m: LEVELS\[S\.level - 1\]\.max \}\);/.test(code) || !I || !['en', 'es'].every(l => /\{l\}/.test(I[l].levelUp) && /\{m\}/.test(I[l].levelUp))) { bad++; problems++; err("tuning-sim.html: the level-up line must be T('levelUp', { l: S.level, m: LEVELS[S.level - 1].max }) right after S.level++, and both languages' levelUp must use {l} and {m}"); }
+  if (figs !== 2 || m1ok !== 4) { dirBad++; err(`the Module 1 note circle: ${figs} of 2 figures and ${m1ok} of 4 alt/hint texts go counterclockwise (every one must)`); }
   if (dirBad) { problems++; bad++; }
-  if (bad === 0) ok(`tuning-sim.html: defaults pinned (sound on; string names shown in Phase 1, off in Phase 2; level 1 first; the four levels), no mic, no script files, and a card on the Games page with the no-guitar games; the circle runs counterclockwise (12 of 12 notes, 120 of 120 arrows), ${words} of 12 direction words (EN + ES) and the arrow keys pinned; ${twins} data-t/data-tl uses have both languages; a miss restarts the clean count; the level-up line names the new level`);
+  if (bad === 0) ok(`tuning-sim.html: defaults pinned (sound on; string names shown in Phase 1, off in Phase 2; level 1 first; the four levels), no mic, no script files, and a card on the Games page with the no-guitar games; the circle runs counterclockwise (12 of 12 notes, 120 of 120 arrows), ${words} of ${dirWordCount} direction words (EN + ES), ${ways} of 8 answer sentences say the way with its verb, and the arrow keys pinned; ${pins} of 15 drawing/peg/keyboard lines pinned (notes drawn at ringPt(i), one arrow, the peg's turn and icons, Space/Enter, focus, green only when done, the peg-foot layout); the Module 1 figure (${figs} of 2) and its step (${m1ok} of 4 alt/hint) go counterclockwise; ${twins} data-t/data-tl uses have both languages; a miss restarts the clean count, from the wrong branch of each answer; the level-up line names the new level`);
 }
 
 /* Journey pages are referenced by ~30 hand-typed 'tabs/*.html' strings across
