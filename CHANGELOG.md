@@ -16,7 +16,8 @@ see `WORKFLOW.md` and the git commit log.
 - **The note circle in Module 1 now goes up counterclockwise, like the Tuning Simulator.** In "Right needle, wrong letter" the picture reads "HIGHER = tighten ↺" and "↻ LOWER = loosen". Before, the picture went the other way.
 - **The keyboard works on Tighten and Loosen.** Press Space or Enter on a button to turn the peg one small step. After you answer with the keyboard, the next button is ready, so you do not need the mouse.
 - **Clearer Spanish.** The buttons say "gira en sentido antihorario" and "gira en sentido horario", and the answers say "Sube — aprieta" and "Baja — afloja", the same words as the circle.
-- **A clearer level-up line.** For example: "Level 4. Now a string can start up to 5 notes away from its own note. Use the circle to choose Up or Down."
+- **A clearer level-up line.** For example: "Level 4. Now a string can start up to 5 steps from its own note. Use the circle to choose Up or Down."
+- **The Module 1 note circle says "3+ steps away? stop and ask"** (Spanish: "¿3+ pasos de distancia? detente y pregunta"). Before, the picture said 2+, but the step says to stop only when the tuner is more than 2 notes away.
 - **"Pluck again" fits on one line.**
 
 ## 2026-11-07 — Power Chord Switch and Change Up: Stop early, and the screen no longer says "too fast"
