@@ -743,8 +743,6 @@
     'tools.timerLengthAria':{ en: 'Timer length', es: 'Duración del temporizador' },
     'tools.tunerStringAria':{ en: 'Which string to tune', es: 'Qué cuerda afinar' },
     'tools.tuner':         { en: 'Tuner', es: 'Afinador' },
-    // The link under the Tuner's tip: opens tuning-sim.html (no mic, no guitar).
-    'tools.tuningSim':     { en: 'Tuning Simulator', es: 'Simulador de afinación' },
     // Dock labels (navigability work order 2026-09-23, item 8): short words
     // that fit a 4-across dock at ~55px each. The popup titles above stay full.
     'tools.dockTuner':         { en: 'Tuner', es: 'Afinar' },

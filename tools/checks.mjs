@@ -5602,11 +5602,7 @@ function checkTuningSim() {
   if (!/function clampLevel\(n\)\{[^}]*\? n : 1;/.test(code) || !/S\.level\s*=\s*loadLevel\(\)/.test(code)) { err('tuning-sim.html must start a first visit on level 1 (clampLevel falls back to 1; S.level = loadLevel())'); problems++; bad++; }
   let coachSrc = ''; try { coachSrc = readFileSync(join(ROOT, 'coach.js'), 'utf8'); } catch {}
   if (!/key:'tuningsim'[^}]*href:'tuning-sim\.html'/.test(coachSrc)) { err("coach.js GAMES_META has no { key:'tuningsim', …, href:'tuning-sim.html' } card — the Tuning Simulator lives on the Games page for now"); problems++; bad++; }
-  let idx = ''; try { idx = readFileSync(join(ROOT, 'index.html'), 'utf8').replace(/<!--[\s\S]*?-->/g, ''); } catch {}
-  if (!/<a\b[^>]*href="tuning-sim\.html"[^>]*data-i18n="tools\.tuningSim"/.test(idx)) { err('index.html has no tuner-popup link to tuning-sim.html with data-i18n="tools.tuningSim"'); problems++; bad++; }
-  let i18n = ''; try { i18n = readFileSync(join(ROOT, 'i18n.js'), 'utf8'); } catch {}
-  if (!/'tools\.tuningSim':\s*\{\s*en:\s*'[^']+',\s*es:\s*'[^']+'\s*\}/.test(i18n)) { err("i18n.js has no 'tools.tuningSim' in both en and es"); problems++; bad++; }
-  if (bad === 0) ok('tuning-sim.html: defaults pinned (sound on; string names shown in Phase 1, off in Phase 2; level 1 first; the four levels), no mic, no script files, linked from the Tuner popup with its en + es label, and a card on the Games page');
+  if (bad === 0) ok('tuning-sim.html: defaults pinned (sound on; string names shown in Phase 1, off in Phase 2; level 1 first; the four levels), no mic, no script files, and a card on the Games page (no longer linked from the Tuner popup)');
 }
 
 /* Journey pages are referenced by ~30 hand-typed 'tabs/*.html' strings across
