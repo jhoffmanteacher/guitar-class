@@ -151,6 +151,8 @@ export const PW_FIXTURES = [
     lag: 120, lat: 145, drift: 300, seed: 26, plan: { 5: 'in:late', 8: 'silent', 10: 'pre:in:late', 11: 'detmiss', 13: 'pre:in:late' } },
   { ...base, name: 'pw-drift-old', desc: 'pw-drift as an older take: saved before the grid step cap (no gridStepCapMs), so the site moved its grid uncapped and the console must replay it that way', bpms: [60], slots: 16, chords: ['G5', 'D5'], song: null,
     lag: 120, lat: 145, drift: 300, seed: 26, uncapped: true, plan: { 5: 'in:late', 8: 'silent', 10: 'pre:in:late', 11: 'detmiss', 13: 'pre:in:late' } },
+  { ...base, name: 'pw-drift-40', desc: 'pw-drift saved with another cap (40 ms, as if the number were changed later): the console must replay it at the take\'s own 40, not at the current constant', bpms: [60], slots: 16, chords: ['G5', 'D5'], song: null,
+    lag: 120, lat: 145, drift: 300, seed: 26, capMs: 40, plan: { 5: 'in:late', 8: 'silent', 10: 'pre:in:late', 11: 'detmiss', 13: 'pre:in:late' } },
   { ...base, readings: true, name: 'pw-room-noise', desc: 'every 2 beats at 140 BPM (the window is its 220 ms floor; the mic delay setting 325 ms puts the site 300 ms from the audio: a replay that ignores it misses every window), room noise, no strums at all: low-frequency bursts 1.6 / 2.0 / 2.38 / 2.9 x the room, each one graded by the site (the 2026-11-04 finding)', bpms: [140], bpc: 2, slots: 16, chords: ['G5', 'C5'], song: null, start: 1000,
     lag: 120, map: 25, lat: 325, clickAmp: 0, noise: 0.004, rumble: 0.03, noStrums: true, frameMs: 50, seed: 31,
     plan: { 0: 'burst:1.6', 1: 'burst:2.0', 2: 'burst:2.38', 3: 'burst:2.9', 5: 'burst:2.9', 6: 'burst:2.38', 8: 'burst:2.0', 9: 'burst:1.6', 11: 'burst:2.38', 12: 'burst:2.9', 14: 'burst:1.6' } },
@@ -221,7 +223,7 @@ export function makePwTake(o){
     rd.siteHear = (played, sharp) => {
       const rel = played - rd.listen - goff;
       const bi = Math.round(rel / rd.beat), dev = rel - bi * rd.beat, before = goff;
-      if (Math.abs(dev) < rd.beat * 0.5) goff += o.uncapped ? dev * 0.25 : Math.max(-GRID_STEP_CAP_MS, Math.min(GRID_STEP_CAP_MS, dev * 0.25));
+      if (Math.abs(dev) < rd.beat * 0.5) goff += o.uncapped ? dev * 0.25 : Math.max(-(o.capMs || GRID_STEP_CAP_MS), Math.min(o.capMs || GRID_STEP_CAP_MS, dev * 0.25));
       const ch = rd.changes.find(c => !c.match && Math.abs(c.s * o.bpc * rd.beat - rel) <= rd.win);
       if (ch) ch.match = { played, sharp, goff: before };
       rd.onsets.push({ played, goffAfter: goff });
@@ -434,7 +436,7 @@ export function makePwTake(o){
   const meta = {
     game: 'pw', complete: stopMs == null, progression: o.chords.join('-'), song: o.song, ladder: o.bpms.length > 1,
     bpm: o.bpms[0], stageBpms: o.bpms.slice(), bpc: o.bpc, eventTimes: 'played (arrival - micLatencyMs)',
-    ...(o.uncapped ? {} : { gridStepCapMs: GRID_STEP_CAP_MS }),   // an `uncapped` take is one saved before 2026-11-07: no such field, graded on the uncapped grid
+    ...(o.uncapped ? {} : { gridStepCapMs: o.capMs || GRID_STEP_CAP_MS }),   // an `uncapped` take is one saved before 2026-11-07: no such field, graded on the uncapped grid
     ...(o.readings ? { changeReadings: 'per change: null = no strum in its window; [] = a strum but no pitch could be read; else the midi readings its chord check used (under 3 passes on timing alone)' } : {}),
     expected, events, uid: 'fake', name: 'Fake Student', period: '3', mode: 'pw',
     micLatencyMs: o.lat, sampleRate: R, srcSampleRate: 48000, durationSec: Math.round(N / R * 100) / 100,

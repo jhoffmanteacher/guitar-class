@@ -160,13 +160,13 @@ wordings, no Note Runner mic check (see "Later (not chosen yet)").
     10-140 BPM, Change Up 40-140, every beat and every bar, 19 kinds of player, 240,768 graded changes; "right" is the true answer).
     **No cap leaves all grading alone.** At 60 ms, 30 BPM and above: 72 changes that were wrong turned right and **4 that were right turned wrong**.
     **67 of the 72 and all 4 come from one very loose player** (strums spread 0.2 beat, up to 0.49 beat off, **no stray sounds**: each far-off
-    strum acts like a stray sound); stray sounds among steadier players account for 5. Below 30 BPM: 20 turned right, 1 wrong (18 of the 20 from
+    strum acts like a stray sound); the other 5 come from a slightly less loose player (spread 0.15 beat) with stray sounds. Below 30 BPM: 20 turned right, 1 wrong (18 of the 20 from
     that player). In grading a stray sound rarely matters at any cap, because a change's window is half a beat; **for a stray sound the cap mostly
-    keeps the beat dots still**, which is what the CHANGELOG says. Other caps, same games (right to wrong / wrong to right, 30 BPM and above): 40 ms
+    keeps the beat dots still**, which is what the CHANGELOG says. Other caps, same games (wrong to right / right to wrong, 30 BPM and above): 40 ms
     164 / 4, 50 ms 104 / 4, 80 ms 47 / 4, **100 ms 22 / 0**, 150 ms 3 / 2. (An earlier run that clipped every strum to 0.45 beat from its beat saw
     25 / 0 at 60 ms; the clip hid the cost.) **A judgment call for you:** by these counts 40 or 50 ms would fix more than 60 at the same four
-    wrong ones; 60 was kept because it is the suggested value, the grid catches up faster, and 40's four include an on-time player with stray sounds
-    (1 more). 100 ms never turned a right change wrong but fixes a third as many. Say if you want another number (one line, plus the pin in 1ck).
+    wrong ones; 60 was kept because it is the suggested value and the grid catches up faster. (Two of 40's four involve stray sounds, an on-time player and a late
+    one; all four of 50's come from the very loose player, so that argument counts against 40 only.) 100 ms never turned a right change wrong but fixes a third as many. Say if you want another number (one line, plus the pin in 1ck).
     Catch-up is slower (strums until the grid is within 50 ms of a steady offset, old / capped): 10 BPM 0.2 beat late 12 / 22, 10 BPM 0.4 beat
     late 14 / 42, 15 BPM 0.4 beat 13 / 29, 20 BPM 0.3 beat 11 / 17, 30 BPM 0.4 beat 10 / 15 (reviewer's measurement); at 60 BPM and up almost no
     difference. The grid still follows a player 150 ms late on every beat (148 ms after 16 strums, as before). A player 1.5% fast or slow ends within
@@ -177,6 +177,11 @@ wordings, no Note Runner mic check (see "Later (not chosen yet)").
     `coach.js`. No `firestore.rules` change (the take's fields are not pinned). Check `1ck` runs the real `ccLoop` (48 runs, a stray sound with no change
     open and with the change due next taking it), reads the saved take's field and pins the number, the line and the console's reading of it; `1cl`
     pins the older-take fixture (`pw-drift-old`, whose grid differs from its twin's); thirteen broken versions in all each turn one of them red.
+    **Status (2026-11-07): three deep-review rounds, NOT merged to main.** Round 1 found two major problems (old takes replayed capped; the guard could not see
+    a taken strum), round 2 two guard gaps and a wrong explanation of the sim numbers, round 3 one wrong label in the paragraph above plus three more guard
+    gaps (the console's use of the saved number, a second uncapped assignment, the field in the document `micRecSaveNow` writes) and an understated
+    CHANGELOG range. All are fixed in the last commit on the branch, and each fix has a mutant that turns a check red; that last commit has NOT been
+    reviewed again. By the Friday-check rule (not clean after three rounds) it waits for you: a fourth review round, or merge as is.
     Not decided here: the Listening Coach (`coach.js` `coachMatchEvent`, `gridDelta = dev * 0.15`) is uncapped; its window is 0.9 beat, so one stray
     sound at its 30 BPM floor can move its grid up to 270 ms (the nearest event wins, which limits it). Left alone.
   - *Power Chord Switch UX, still open:* the done-screen advice says "Level up: try it 5 BPM faster" at 140 (a pair) and 130 (a song
