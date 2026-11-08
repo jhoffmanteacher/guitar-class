@@ -5578,7 +5578,7 @@ function checkPrecacheCoverage(src) {
 
 /* 1cp. Tuning Simulator (tuning-sim.html, 2026-11-06) — pins only. It practises
    reading a tuner with no guitar and no mic, so: the defaults are the work
-   order's (sound on, circle shown in Phase 1, hidden in Phase 2), the page never
+   order's (sound on, string names shown in Phase 1, hidden in Phase 2), the page never
    asks for the mic, and it loads neither app.js nor tuner.js (tuner.js owns the
    mic). The round logic itself is run by tools/tuning-sim-proof.mjs (1,000
    rounds), which is NOT part of this file. */
