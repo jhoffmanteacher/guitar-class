@@ -1190,9 +1190,9 @@ wordings, no Note Runner mic check (see "Later (not chosen yet)").
       Move-to / Assign-to options, `teacherActivityPlace()` and the board's hints; "Module" everywhere else (Skills grid,
       Students, Manage, Trouble spots, Teacher view songs, load warnings, the student site). Labels only.
       **Decisions made under the work order (Jonathan delegated them):** sidebar marks with `aria-current` (not
-      `aria-pressed`); list counts follow the console's period filter (on All they equal the sum of the board's per-period
-      lines); the third count is "Not started", not "not opened" (nothing records an open; "started" = a step/check tick
-      in `caSteps`, which the roster read now keeps — same doc, no new read); the list auto-picks the newest card students
+      `aria-pressed`); list counts follow the console's period filter (on All they equal the sum of the board's P4 / P7 / CAS /
+      Unassigned lines; a student whose stored period is something else is counted here and on no board line); the third count is "Not started", not "not opened" (nothing records an open; "started" = a step/check tick
+      in `caSteps`, which the roster read now keeps — same doc, no new read; a path pick alone is not a start); the list auto-picks the newest card students
       can see now (else the first row), so the console opens on a preview; switching rows calls `stopCardAudio()` (only
       the preview can be playing on this view); a Built card's Settings shows only what the board shows for it (Assign
       to, name, Songs, Archive/Delete), an archived one only Restore/Delete; library songs and Teacher view songs opened
@@ -1204,7 +1204,16 @@ wordings, no Note Runner mic check (see "Later (not chosen yet)").
       Back to a student and to Songs, no sideways scroll at 1366/1920/390, dark-mode colours; six deliberate breakages
       each turned it red (list rebuilt on pick, Preview rebuilt on a write, tab count not repainted, default filter,
       board option saying Module, no `aria-current`). Run it after any console layout change:
-      `node tools/console-layout-smoke.mjs [--shots <dir>]`.
+      `node tools/console-layout-smoke.mjs [--shots <dir>]`. `smoke.mjs --baseline origin/main`: 0 errors on both.
+      **Review (Reviewed, not Fast — Jonathan's call for this order):** `site-reviewer` found no major; fixed in the
+      last commit: Songs and back dropped the list's pick (R1-1); a Who-limited exit check's note and table counted the
+      whole class while its tab counted its students (R1-2, `teacherCheckLiveParts` now uses the Who list); a path pick
+      counted as "started" (R1-4); Arrange board had no Back while loading (R1-6); a fold during a search was stored
+      unseen (R1-8, folds are ignored while searching); row counts are now worked out only for the rows drawn (R1-9).
+      The smoke gained the three promises it did not check (R1-3): every assigned card's row count equals the board's
+      doneSummary under All and P4 (62 compared, incl. a Who-limited card and an archived student), the list keeps its
+      scroll through a write and both refreshes, and both refreshes keep the Preview element; plus the Who-limited exit
+      check's tab and note agree. Each of those four turned red when its code was broken.
 - [x] **2026-11-06 — Practice minutes in the teacher console (needs a `firestore.rules` paste).** Jonathan: "where do I see
       students' minutes and rank?" A **Practice minutes** button after Students in the console's view toggle
       (`renderTeacherMinutes()`, `teacher.js`): one row per student, grouped by period like Manage (`perRank`), with This week

@@ -1070,7 +1070,9 @@ function setTeacherView(v){
   if(teacherView==='tsongs' && v!=='tsongs' && typeof stopCardAudio==='function') stopCardAudio();
   teacherView=v;
   if(v==='students') studentDetailUid=null; // clicking the tab always starts back at the roster
-  if(v==='songs'){ activityDetailId=null; activityEditId=null; } // the tab always starts back at the list, nothing mid-rename
+  // Songs always starts back at its list, nothing mid-rename. An activity
+  // picked in the Class activities list stays picked for the way back.
+  if(v==='songs'){ if(activityDetailFrom!=='activities') activityDetailId=null; activityEditId=null; }
   /* Class activities opens on its list + detail split. The activity picked
      there stays picked when you come back to the tab; one opened from
      somewhere else (Songs, a student's page) does not. */
@@ -1702,7 +1704,9 @@ function renderTeacherActivities(opts){
   // Swapping in the one-line "Loading…" box first collapsed the page, so the
   // browser clamped the scroll to the top on every click.
   const keepY = box.querySelector('.t-board') ? window.scrollY : null;
-  if(!cached && keepY===null) box.innerHTML='<div class="t-loading">Loading…</div>';
+  // The way back is on screen while the board loads (or fails to).
+  const backBar=`<div class="ta-board-bar"><button type="button" class="stu-back" data-ta-board-back>&#x2190; Back to list</button></div>`;
+  if(!cached && keepY===null) box.innerHTML=backBar+'<div class="t-loading">Loading…</div>';
   (cached ? Promise.resolve(teacherClassConfig) : loadTeacherClassConfig()).then(async cfg=>{
     if(teacherView!=='activities') return;   // switched views mid-flight
     if(!cfg) return;                         // superseded by a newer toggle
@@ -1712,13 +1716,13 @@ function renderTeacherActivities(opts){
     // First ever board render: place what's already published, then paint.
     if(!cfg.activityBoardSeeded && !boardMigrating){
       if(!teacherClassConfigReadOk){
-        box.innerHTML='<div class="t-loading">Could not read the class settings, so the activity board hasn\'t been set up yet — check your connection and reload.</div>';
+        box.innerHTML=backBar+'<div class="t-loading">Could not read the class settings, so the activity board hasn\'t been set up yet — check your connection and reload.</div>';
         return;
       }
       const done=await teacherMigrateActivityBoard(cfg);
       if(teacherView!=='activities' || !activityBoardMode) return;
       if(!done && !cfg.activityBoardSeeded){
-        box.innerHTML='<div class="t-loading">Could not set up the activity board — reload to try again.</div>';
+        box.innerHTML=backBar+'<div class="t-loading">Could not set up the activity board — reload to try again.</div>';
         return;
       }
     }
@@ -2044,13 +2048,16 @@ function teacherUnitName(mn){
    students the card is for (its Who picker), done = classActivities[id], or
    a turned-in result for an exit check. Read off allStudents, so they follow
    the console's period filter — on All they add up the board's P4 / P7 /
-   CAS / Unassigned lines; on P4 they are the board's P4 line. */
+   CAS / Unassigned lines (a student whose stored period is anything else is
+   on no board line but is counted here); on P4 they are the board's P4
+   line. "Started" = a step or check tick (`<id>:<n>` / `<id>:c<n>` in
+   caSteps); a path pick (`<id>:path:<key>`) alone is not a start. */
 function teacherActivityDoneCounts(a, cfg){
   const forIt=allStudents.filter(s=>teacherActivityForStudent(a, s.uid, cfg));
   const isDone=a.kind==='check' ? (s=>!!(s.exitChecks||{})[a.id]) : (s=>(s.classActivities||{})[a.id]===true);
   const done=forIt.filter(isDone);
   const pre=a.id+':';
-  const started=a.kind==='check' ? [] : forIt.filter(s=>!isDone(s) && Object.keys(s.caSteps||{}).some(k=>k.startsWith(pre) && s.caSteps[k]));
+  const started=a.kind==='check' ? [] : forIt.filter(s=>!isDone(s) && Object.keys(s.caSteps||{}).some(k=>k.startsWith(pre) && !k.startsWith(pre+'path:') && s.caSteps[k]));
   return {total:forIt.length, done:done.length, started:started.length, results:a.kind==='check'?done.map(s=>s.exitChecks[a.id]):[]};
 }
 /* Every card the list can show, with what its row and the filters need. */
@@ -2065,7 +2072,7 @@ function teacherActivityListModel(cfg){
     rows[a.id]={a, id:a.id, title:teacherActivityTitle(a,cfg), num:view.number[a.id]||null, unit, assigned:unit!==null,
       date:dates[a.id]||'', hidden:hidden[a.id]===true, optional:teacherActivityOptional(a.id,cfg),
       archived:teacherActivityArchived(a.id,cfg), deleted:teacherActivityDeleted(a.id,cfg), pin:pins.indexOf(a.id),
-      isCheck:a.kind==='check', counts:unit!==null?teacherActivityDoneCounts(a,cfg):null};
+      isCheck:a.kind==='check', assignedCounts:unit!==null};
   });
   // Units, newest first: each placed unit's live cards newest first (the
   // board's default), its archived ones after them; Unsorted, then Built.
@@ -2115,8 +2122,10 @@ function teacherActivityRowHtml(r){
   const num=r.isCheck ? '<span class="ta-row-num ta-row-check">Check</span>' : `<span class="ta-row-num">${r.num?'#'+r.num:'—'}</span>`;
   const when=r.date ? teacherShortDate(r.date) : (r.pin>=0 ? 'Pinned' : 'No date');
   let bar='';
-  if(r.counts){
-    const c=r.counts, pct=c.total?Math.round(c.done/c.total*100):0;
+  // Counted here, for the rows actually drawn — not for every card on every
+  // keystroke of a search.
+  if(r.assignedCounts){
+    const c=teacherActivityDoneCounts(r.a, teacherClassConfig), pct=c.total?Math.round(c.done/c.total*100):0;
     bar=`<span class="ta-row-done"><span class="ta-bar" aria-hidden="true"><i style="width:${pct}%"></i></span>${c.done}/${c.total} ${r.isCheck?'turned in':'done'}</span>`;
   }
   const sel=r.id===activityDetailId;
@@ -2142,7 +2151,7 @@ function teacherActivityListBodyHtml(cfg){
     return html || `<div class="ta-list-empty">${q?'Nothing matches that search.':'No activities yet.'}</div>`;
   }
   const ids=teacherActivityFilterIds(model, activityListFilter).filter(id=>teacherActivityMatches(R[id], q));
-  const empty={week:'Nothing is released this week.', pins:'Nothing is pinned. Use Pin to Keep practicing on an activity.', undated:'Every assigned activity has a date.', all:'No activities yet.'}[activityListFilter];
+  const empty={week:'Nothing is dated this week.', pins:'Nothing is pinned. Use Pin to Keep practicing on an activity.', undated:'Every assigned activity has a date.', all:'No activities yet.'}[activityListFilter];
   return ids.length ? ids.map(id=>teacherActivityRowHtml(R[id])).join('') : `<div class="ta-list-empty">${q?'Nothing matches that search.':empty}</div>`;
 }
 function teacherActivityListHeadHtml(){
@@ -2170,6 +2179,9 @@ function teacherSetActivityFilter(f){
   teacherPaintActivityList(true);
 }
 function teacherToggleUnit(key){
+  // While a search is typed every unit with a match is shown open; a fold
+  // then would be stored unseen and spring on the teacher later.
+  if(activityListQuery.trim()) return;
   const head=document.querySelector(`#t-grid-container [data-ta-unit="${CSS.escape(key)}"]`);
   activityUnitOpen[key]=!(head && head.getAttribute('aria-expanded')==='true');
   teacherPaintActivityList(false);
@@ -3149,7 +3161,10 @@ function teacherCheckLiveParts(a){
     ? `Q${i+1}: ${escHtml((it.notes||[]).map(n=>n.fret).join(' '))} &rarr; ${escHtml(String(it.answer.fret))}`
     : `Q${i+1}: fret ${escHtml(String(it.fret))} = ${escHtml(it.answer)}`);
   const withRes=[], without=[];
-  allStudents.forEach(s=>{
+  // Only the students the check is for (the board's Who picker), like
+  // teacherActivityGridHtml and the board's done lines.
+  const forIt=allStudents.filter(s=>teacherActivityForStudent(a,s.uid,teacherClassConfig));
+  forIt.forEach(s=>{
     const r=(s.exitChecks||{})[a.id];
     if(r) withRes.push({s,r}); else without.push(s);
   });
@@ -3183,13 +3198,13 @@ function teacherCheckLiveParts(a){
       +missed.map(m=>`<td style="text-align:center">${m}</td>`).join('')+`<td></td></tr>`
     : '';
   const noneRows=without.map(s=>`<tr style="opacity:.55"><td class="nc">${escHtml(s.name||s.email||'(no name)')}</td><td colspan="${2+items.length}">not turned in</td>${clearCell(s)}</tr>`).join('');
-  const table=allStudents.length
+  const table=forIt.length
     ? `<div class="t-grid-wrap"><table><thead><tr><th class="nc">Student</th><th>Score</th><th>Date</th>${heads.map(h=>`<th>${h}</th>`).join('')}<th>Gate</th></tr></thead>`
       +`<tbody>${bodyRows}${missRow}${noneRows}</tbody></table></div>`
     : '<div class="t-loading">No student data yet — students need to sign in first.</div>';
   return {
-    note: `${escHtml(teacherActivityPlace(a.id))} ${dateNote}. ${withRes.length} of ${allStudents.length} turned in. Checks take no #number — they never enter the course's numbered run.`,
-    grid: teacherDoneRollHtml(a, [...allStudents].sort((x,y)=>String(x.name||x.email||'').localeCompare(String(y.name||y.email||''))), s=>!!(s.exitChecks||{})[a.id])
+    note: `${escHtml(teacherActivityPlace(a.id))} ${dateNote}. ${withRes.length} of ${forIt.length} turned in. Checks take no #number — they never enter the course's numbered run.`,
+    grid: teacherDoneRollHtml(a, [...forIt].sort((x,y)=>String(x.name||x.email||'').localeCompare(String(y.name||y.email||''))), s=>!!(s.exitChecks||{})[a.id])
       +table,
   };
 }
@@ -3966,8 +3981,8 @@ async function teacherSetActivityClear(uid, id, state){
     if(had) teacherClassConfig.activityClears[uid][id]=prev; else delete teacherClassConfig.activityClears[uid][id];
     teacherConfigSaveFailed(e, 'Could not save that change — check your connection and Firestore rules.');
   }
-  // activityDetailId outlives a switch to the Students tab (only the
-  // Activities tab resets it), so check the view too — a Clear on a
+  // activityDetailId outlives a switch to the Students tab (the Class
+  // activities list keeps its pick), so check the view too — a Clear on a
   // student's page must repaint that page, not jump to the last activity.
   // On an activity's page only the Students part repaints (the Clear buttons
   // live there): rebuilding the whole page stopped a song playing in its

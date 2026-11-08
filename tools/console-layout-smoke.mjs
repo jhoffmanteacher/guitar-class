@@ -140,9 +140,13 @@ const STUB = String.raw`(() => {
   students.forEach(s => store.set('progress/' + s.uid, s));
   const who = {};
   if (has('ca-48')) who['ca-48'] = { 'stub-uid-01': true, 'stub-uid-02': true, 'stub-uid-13': true };
+  // A Who-limited exit check: its Students tab must count only these three.
+  if (has('ca-15')) who['ca-15'] = { 'stub-uid-03': true, 'stub-uid-14': true, 'stub-uid-25': true };
   store.set('config/class', { configVersion: 1, gamesEnabled: true, gameOverrides: {}, activityBoard: board, activityBoardSeeded: true,
     activityDates: dates, hiddenActivities: has('ca-22') ? { 'ca-22': true } : {}, optionalActivities: has('ca-23') ? { 'ca-23': true } : {},
-    archivedActivities: has('ca-30') ? { 'ca-30': true } : {}, activityPins: ['ca-25', 'ca-46'].filter(has), activityStudents: who });
+    archivedActivities: has('ca-30') ? { 'ca-30': true } : {}, activityPins: ['ca-25', 'ca-46'].filter(has), activityStudents: who,
+    // One archived student: off every count, the list's and the board's alike.
+    archived: { 'stub-uid-05': true } });
   const clone = v => v === undefined ? v : JSON.parse(JSON.stringify(v));
   const merge = (dst, src) => { Object.keys(src).forEach(k => { const v = src[k];
     if (v && v.__del) delete dst[k];
@@ -381,6 +385,59 @@ async function main() {
       }
     }
 
+    // ── The list's counts are the board's (doneSummary), under All and under P4 ──
+    {
+      const cmp = async () => js(`(() => { const cfg = teacherClassConfig, acts = teacherActivityListActivities(cfg), kit = teacherActivityCtlKit(cfg, acts);
+        const per = { '4': 'P4', '7': 'P7', 'CAS': 'CAS', 'none': 'Unassigned', all: null }[teacherPeriodFilter];
+        const bad = []; let n = 0;
+        acts.filter(a => kit.view.assigned[a.id]).forEach(a => {
+          const html = kit.doneSummary(a); let done = 0, total = 0;
+          for (const m of html.matchAll(/<strong>([^:<]+): (\\d+) \\/ (\\d+) (?:done|turned in)/g)) if (!per || m[1] === per) { done += +m[2]; total += +m[3]; }
+          const c = teacherActivityDoneCounts(a, cfg); n++;
+          if (c.done !== done || c.total !== total) bad.push(a.id + ' list ' + c.done + '/' + c.total + ' board ' + done + '/' + total);
+          const row = document.querySelector('[data-ta-pick][data-id="' + a.id + '"] .ta-row-done');
+          if (row && !row.innerText.startsWith(c.done + '/' + c.total + ' ')) bad.push(a.id + ' row reads ' + row.innerText);
+        });
+        return { n, bad }; })()`);
+      await js(`document.querySelector('[data-ta-filter="all"]').click()`); await sleep(100);
+      const all = await cmp();
+      await js(`teacherSetPeriodFilter('4')`); await sleep(300);
+      const p4 = await cmp();
+      await js(`teacherSetPeriodFilter('all')`); await sleep(300);
+      if (!all.n || all.bad.length) fail('counts:all', all.n + ' cards, ' + all.bad.slice(0, 4).join('; '));
+      if (!p4.n || p4.bad.length) fail('counts:P4', p4.n + ' cards, ' + p4.bad.slice(0, 4).join('; '));
+      stats.counts = all.n + p4.n;
+      // A Who-limited exit check: the tab, the chips and the note all count the same three students.
+      await js(`document.querySelector('[data-ta-pick][data-id="ca-15"]').click()`); await sleep(200);
+      const chk = await js(`({ tab: document.querySelector('[data-ta-tab="students"]').innerText.trim(), note: document.querySelector('[data-ta-pane="students"] [data-ta-live="note"]').innerText,
+        rows: document.querySelectorAll('[data-ta-pane="students"] [data-ta-live="grid"] tbody tr').length })`);
+      const tabN = (/(\d+)\/(\d+)/.exec(chk.tab) || []), noteN = (/(\d+) of (\d+) turned in/.exec(chk.note) || []);
+      if (tabN[2] !== '3' || noteN[2] !== '3' || tabN[1] !== noteN[1]) fail('counts:who-check', 'ca-15 tab ' + chk.tab + ', note "' + (noteN[0] || chk.note.slice(0, 80)) + '"');
+    }
+
+    // ── A write and a refresh keep the list's scroll and the Preview ──
+    {
+      await js(`document.querySelector('[data-ta-filter="all"]').click()`); await sleep(100);
+      await js(`document.querySelector('[data-ta-pick][data-id="ca-18"]').click()`); await sleep(200);
+      await js(`document.querySelector('[data-ta-tab="settings"]').click()`); await sleep(60);
+      const y0 = await js(`(() => { const b = document.querySelector('[data-ta-list-body]'); b.scrollTop = 600; window.__prevEl = document.querySelector('[data-ta-pane="preview"]').firstElementChild; return b.scrollTop; })()`);
+      if (y0 < 300) fail('scroll', 'the list could only scroll to ' + y0 + 'px');
+      await js(`document.querySelector('[data-ta-pane="settings"] [data-set-activity-hidden][data-state="hide"]').click()`); await sleep(400);
+      const y1 = await js(`document.querySelector('[data-ta-list-body]').scrollTop`);
+      if (y1 !== y0) fail('scroll', 'a Settings write moved the list from ' + y0 + ' to ' + y1);
+      await js(`document.querySelector('[data-ta-pane="settings"] [data-set-activity-hidden][data-state="show"]').click()`); await sleep(400);
+      for (const manual of [false, true]) {
+        const r = await js(`(async () => { document.activeElement && document.activeElement.blur && document.activeElement.blur(); const at = teacherStudentsAt = teacherStudentsAt - 70000;
+          await teacherRefreshStudents(${manual ? '{ manual: true }' : ''}); await new Promise(r => setTimeout(r, 400));
+          return { ran: teacherStudentsAt !== at, same: document.querySelector('[data-ta-pane="preview"]').firstElementChild === window.__prevEl, y: document.querySelector('[data-ta-list-body]').scrollTop }; })()`);
+        const what = manual ? 'the Refresh button' : 'the minute refresh';
+        if (!r.ran) fail('refresh', what + ' did not run');
+        if (!r.same) fail('refresh', what + ' rebuilt the Preview (a song playing there would stop)');
+        if (r.y !== y0) fail('refresh', what + ' moved the list from ' + y0 + ' to ' + r.y);
+        stats.refreshes = (stats.refreshes || 0) + 1;
+      }
+    }
+
     // ── Arrange board and back ──
     {
       const n0 = pageErrors.length;
@@ -492,7 +549,7 @@ async function main() {
     proc.kill('SIGKILL'); srv.close();
     try { rmSync(prof, { recursive: true, force: true }); } catch { /* best effort */ }
   }
-  console.log(`console-layout-smoke: ${stats.views} sidebar views, ${stats.activities} activities opened (practice card, focus, paths, exit check) x ${stats.tabs / Math.max(stats.activities, 1)} tabs = ${stats.tabs} tab switches, ${stats.filters} filters, ${stats.folds} folds, ${stats.searches} searches, ${stats.writes} Settings writes with the Preview kept, ${stats.repaint} Students repaint, ${stats.board} board round trip, ${stats.backs} Backs`);
+  console.log(`console-layout-smoke: ${stats.views} sidebar views, ${stats.activities} activities opened (practice card, focus, paths, exit check) x ${stats.tabs / Math.max(stats.activities, 1)} tabs = ${stats.tabs} tab switches, ${stats.filters} filters, ${stats.folds} folds, ${stats.searches} searches, ${stats.writes} Settings writes with the Preview kept, ${stats.repaint} Students repaint, ${stats.counts || 0} list counts equal to the board's (All + P4), ${stats.refreshes || 0} refreshes with the Preview and list scroll kept, ${stats.board} board round trip, ${stats.backs} Backs`);
   if (stats.widths) console.log(`  column widths at 1366: sidebar ${Math.round(stats.widths.at1366.side)}, list ${Math.round(stats.widths.at1366.list)}, detail ${Math.round(stats.widths.at1366.detail)}; at 1920: ${Math.round(stats.widths.at1920.side)}, ${Math.round(stats.widths.at1920.list)}, ${Math.round(stats.widths.at1920.detail)}`);
   if (stats.shots.length) console.log('  screenshots:\n    ' + stats.shots.join('\n    '));
   if (fails.length) { console.log(`\x1b[31m✗ ${fails.length} problem(s):\x1b[0m\n  ` + fails.join('\n  ')); process.exit(1); }
