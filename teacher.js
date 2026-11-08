@@ -1402,12 +1402,12 @@ function teacherActivityPlace(id){
   if(a && caIsTeacherSong(a, cfg.classSongs||{}))
     return 'A Teacher view songs card \u2014 no student sees it until you use Move to Class activities.'+noGate;
   const view=teacherBoardView(cfg);
-  if(!view.assigned[id]) return 'Built \u2014 not assigned to a module yet, so no student sees it.';
+  if(!view.assigned[id]) return 'Built \u2014 not assigned to a unit yet, so no student sees it.';
   const sec=view.sections.find(s=>s.ids.includes(id)||s.retiredIds.includes(id));
   const mn=sec?sec.module:0;
   const manifest=(typeof MODULE_MANIFEST!=='undefined')?MODULE_MANIFEST:[];
   const mod=manifest.find(m=>m.num===mn);
-  const where=mn===0?'Unsorted':(mod?`Module ${mn} \u2014 ${mod.name}`:`Module ${mn}`);
+  const where=mn===0?'Unsorted':(mod?`Unit ${mn} \u2014 ${mod.name}`:`Unit ${mn}`);
   if(teacherActivityDeleted(id,cfg)) return `${where} \u00b7 deleted \u2014 no number, and students don't see it.`;
   if(teacherActivityArchived(id,cfg)) return `${where} \u00b7 archived \u2014 no number, and students don't see it.`;
   const n=view.number[id];
@@ -1643,7 +1643,7 @@ function teacherActivityCtlKit(cfg, activities){
   // name, which is what a drag onto empty space does too.
   const moveSelect=(a,label,curModule)=>{
     const opts=[`<option value="">${escHtml(label)}</option>`,`<option value="0"${curModule===0?' disabled':''}>Unsorted</option>`]
-      .concat(manifest.map(m=>`<option value="${m.num}"${curModule===m.num?' disabled':''}>Module ${m.num} — ${escHtml(m.name)}</option>`));
+      .concat(manifest.map(m=>`<option value="${m.num}"${curModule===m.num?' disabled':''}>Unit ${m.num} — ${escHtml(m.name)}</option>`));
     return `<select class="t-board-move" data-move-activity data-id="${escAttr(a.id)}" aria-label="${escAttr(label+' '+teacherActivityTitle(a,cfg))}">${opts.join('')}</select>`;
   };
 
@@ -1797,12 +1797,12 @@ function renderTeacherActivities(opts){
       const retireBtns=teacherActivityDeleted(a.id,cfg)
         ? `<button class="tg-seg-btn" data-set-activity-archived data-id="${escAttr(a.id)}" data-state="restore" title="Put this activity back — it returns undated, so set a date to publish it again">Restore</button>`
         : (teacherActivityArchived(a.id,cfg)
-          ? `<button class="tg-seg-btn" data-set-activity-archived data-id="${escAttr(a.id)}" data-state="restore" title="Put this activity back in this module, where it was, with its date and name">Restore</button>`
+          ? `<button class="tg-seg-btn" data-set-activity-archived data-id="${escAttr(a.id)}" data-state="restore" title="Put this activity back in this unit, where it was, with its date and name">Restore</button>`
             +`<button class="tg-seg-btn t-act-danger" data-delete-activity data-id="${escAttr(a.id)}" title="Clear this activity's date, name and gate clears, and take it off the board">Delete</button>`
           : `<button class="tg-seg-btn" data-set-activity-archived data-id="${escAttr(a.id)}" data-state="archive" title="Take this off students' In-Class Activities page but keep its place, date and name">Archive</button>`);
       const moveBtns=(isRetired || !boardCanReorder()) ? '' :
-        `<button class="tg-seg-btn" data-board-bump data-id="${escAttr(a.id)}" data-dir="up" title="Move up within this module" aria-label="Move up">&#x25B2;</button>`
-        +`<button class="tg-seg-btn" data-board-bump data-id="${escAttr(a.id)}" data-dir="down" title="Move down within this module" aria-label="Move down">&#x25BC;</button>`;
+        `<button class="tg-seg-btn" data-board-bump data-id="${escAttr(a.id)}" data-dir="up" title="Move up within this unit" aria-label="Move up">&#x25B2;</button>`
+        +`<button class="tg-seg-btn" data-board-bump data-id="${escAttr(a.id)}" data-dir="down" title="Move down within this unit" aria-label="Move down">&#x25BC;</button>`;
       // Not draggable once retired: every other move control is hidden on
       // these, and a stray drag would rewrite the very slot Restore uses to
       // put the card back where it was.
@@ -1867,7 +1867,7 @@ function renderTeacherActivities(opts){
     const sectionHtml=mn=>{
       const sec=sectionsById[mn]||{module:mn, ids:[], retiredIds:[]};
       const mod=manifest.find(m=>m.num===mn);
-      const label=mn===0?'Unsorted':`Module ${mn} — ${escHtml(mod?mod.name:'(unknown module)')}`;
+      const label=mn===0?'Unsorted':`Unit ${mn} — ${escHtml(mod?mod.name:'(unknown unit)')}`;
       const closed=boardSectionClosed[mn]===true;
       const cards=sortIds(sec.ids).map(id=>byId[id]).filter(Boolean).map(assignedCard).join('');
       const arch=sortIds(sec.retiredIds).map(id=>byId[id]).filter(Boolean);
@@ -1906,7 +1906,7 @@ function renderTeacherActivities(opts){
     const assignedHtml=`<section class="t-board-assigned">`
       +`<div class="t-board-head">Assigned to students (${assignedCount})</div>`
       +`<div class="t-board-hint">This is the order students read them in, and where the #numbers come from.`
-      +(hiddenModules>0?` ${hiddenModules} empty module${hiddenModules===1?'' :'s'} not shown — use “Assign to…” on a card to put something in one.`:'')
+      +(hiddenModules>0?` ${hiddenModules} empty unit${hiddenModules===1?'' :'s'} not shown — use “Assign to…” on a card to put something in one.`:'')
       +`</div>`
       +sortBar
       +sectionOrder.map(sectionHtml).join('')
@@ -1955,13 +1955,13 @@ function renderTeacherActivities(opts){
     // the keepY it took when it started can be a scroll the teacher has left.
     const paintY=oldBuilt ? window.scrollY : keepY;
     box.innerHTML=`<div class="ta-board-bar"><button type="button" class="stu-back" data-ta-board-back>&#x2190; Back to list</button>`
-      +`<span class="ta-board-bar-note">Arrange board: drag cards into modules, renumber, assign and archive. The list is where you check and set up one activity.</span></div>`
-      +`<div class="tg-note">Drag a built activity into a module to assign it. It goes live for students on its release date.</div>`
+      +`<span class="ta-board-bar-note">Arrange board: drag cards into units, renumber, assign and archive. The list is where you check and set up one activity.</span></div>`
+      +`<div class="tg-note">Drag a built activity into a unit to assign it. It goes live for students on its release date.</div>`
       +pinsHtml
       +`<details class="tg-help" data-board-help${boardHelpOpen?' open':''}><summary>How this page works</summary>`
-      +`<div class="tg-note">A card shows to students only when all four are true: it is <strong>assigned</strong> to a module here, its <strong>release date</strong> has arrived, it is not <strong>Hidden</strong>, and it is not <strong>Archived</strong>. Publish now dates it today; scheduling a later day holds it until then; Unpublish clears the date. A card's date stays editable once it's live, so you can move it to another day without unpublishing first — type a future day and it goes back to Scheduled. Use Hidden to pull back something already live, then un-hide any time — the date and the Hidden switch are independent, either one hides. <strong>Hide all</strong> on a module's heading sets every card in it to Hidden at once (<strong>Show all</strong> undoes it); after that, any one card can still be set back to Visible on its own.<br><br>`
+      +`<div class="tg-note">A card shows to students only when all four are true: it is <strong>assigned</strong> to a unit here, its <strong>release date</strong> has arrived, it is not <strong>Hidden</strong>, and it is not <strong>Archived</strong>. Publish now dates it today; scheduling a later day holds it until then; Unpublish clears the date. A card's date stays editable once it's live, so you can move it to another day without unpublishing first — type a future day and it goes back to Scheduled. Use Hidden to pull back something already live, then un-hide any time — the date and the Hidden switch are independent, either one hides. <strong>Hide all</strong> on a unit's heading sets every card in it to Hidden at once (<strong>Show all</strong> undoes it); after that, any one card can still be set back to Visible on its own.<br><br>`
       +`<strong>Required / Optional</strong> decides whether a live card sends students to In-Class Activities when they sign in. Neither one locks any part of the site. Until a student finishes a Required card (the default) or you clear it for them, In-Class Activities opens first when they sign in, Today's activity shows it ahead of Optional cards, and the console marks them Pending. An Optional card still shows, tagged “Optional”, and students can still do it and mark it done, but it never opens first and never counts as Pending. Switch it either way at any time.<br><br>`
-      +`<strong>Archive</strong> takes a card off students' In-Class Activities page for good but keeps its place in its module, its date and its name, so Restore puts it back exactly where it was (unpinned, if it was pinned). Archived cards hold no #number, so the ones after them count down by one. <strong>Delete</strong> also clears the date, rename and per-student gate clears, and takes the card off the board entirely — it comes back in Built, blank, to be placed and published from scratch. Neither one removes the activity from the site's code (only an update does) and neither touches what students have already finished, so the Done counts survive both.<br><br>`
+      +`<strong>Archive</strong> takes a card off students' In-Class Activities page for good but keeps its place in its unit, its date and its name, so Restore puts it back exactly where it was (unpinned, if it was pinned). Archived cards hold no #number, so the ones after them count down by one. <strong>Delete</strong> also clears the date, rename and per-student gate clears, and takes the card off the board entirely — it comes back in Built, blank, to be placed and published from scratch. Neither one removes the activity from the site's code (only an update does) and neither touches what students have already finished, so the Done counts survive both.<br><br>`
       +`<strong>Pin</strong> puts an assigned card on the <strong>Keep practicing</strong> row at the top of students' In-Class Activities page, up to ${TEACHER_PINS_MAX} cards, in the order you pinned them — for a card you reuse on many days, so you don't have to re-date it. A pin needs no release date. It never blocks the site and never counts as one of today's activities, and a pinned card stays on the row on the days it is also one of today's activities. Hidden, Archive and Delete still win (Archive and Delete also unpin, and Restore does not pin it again). Students' Done marks are untouched.<br><br>`
       +`<strong>Un-assign</strong> sends a card back to Built without clearing anything. The &#x270E; renames an activity for everyone, in both languages, until the Spanish twin ships. Copy link gives you a URL that opens the site straight to that one activity, card already open — paste it into Classroom. Type over a <strong>#number</strong> to move a card to that position; a number inside a title, like Finger Gym 2, is part of the name and stays put.</div></details>`
       +`<div class="t-board">${builtHtml}${assignedHtml}</div>`;
@@ -3883,7 +3883,7 @@ function teacherRetiredBanner(id){
   const cfg=teacherClassConfig;
   if(!teacherActivityRetired(id,cfg)) return '';
   const del=teacherActivityDeleted(id,cfg);
-  return `<div class="tg-note"><strong>${del?'Deleted':'Archived'}.</strong> Students don't see this activity and it doesn't gate the site${del?' — and its date, rename, place on the board and gate clears have been cleared':''}. Restore it in this activity's Settings tab, or on Arrange board${del?' — it\'s in Built, under “Archived / deleted”':' — it\'s under “Archived” inside its module'}.</div>`;
+  return `<div class="tg-note"><strong>${del?'Deleted':'Archived'}.</strong> Students don't see this activity and it doesn't gate the site${del?' — and its date, rename, place on the board and gate clears have been cleared':''}. Restore it in this activity's Settings tab, or on Arrange board${del?' — it\'s in Built, under “Archived / deleted”':' — it\'s under “Archived” inside its unit'}.</div>`;
 }
 // The Gate column for a CAS student on the activity/check detail grids:
 // every activity is optional for CAS (teacherBlockersFor), so a Clear

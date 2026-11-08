@@ -1158,6 +1158,53 @@ wordings, no Note Runner mic check (see "Later (not chosen yet)").
 
 ## Recently shipped (post-archive)
 
+- [x] **2026-11-08 — Teacher console redesign, Layout A (work order `OPUSPLAN-teacher-console-layout-2026-11-08.md`).**
+      Console only; students see nothing new (no CHANGELOG entry). Config plumbing untouched (hard rule 2): every new
+      control carries the same `data-*` attribute as its twin on the board, so the same delegated listener calls the same
+      writer. **Phase 1, the shell:** the row of 13 view buttons (`#t-viewtoggle`) is gone; a grouped left sidebar
+      (`#t-side`, built from `TEACHER_NAV` by `teacherNavHtml()`) replaces it — Teach (Class activities, Songs, Teacher view
+      songs, Live quiz) · Students (Students, Skills grid, Trouble spots, Practice minutes, Responses) · Set up (Manage,
+      Games) · Tools (Mic recordings, Reports + its unread badge). No "Modules" item. The current item gets `.on` and
+      `aria-current="page"` (`applyTeacherViewChrome`). A slim top bar keeps the title, the period filter, Refresh and
+      Student view. Sidebar 216px, sticky under the site header; below 900px it becomes one sideways-scrolling strip.
+      The console already opened on Class activities (since 2026-10); the static markup now agrees. 1cg's pin on the
+      Practice minutes button reads `TEACHER_NAV` now (Students group, after Students, before Manage).
+      **Phase 2, Class activities = list + tabbed detail** (`teacherRenderActivityScreen`, `teacher.js`). Three screens
+      under one view (`teacherActivityScreen()`): `split` (default), `board` ("Arrange board" = today's board, unchanged,
+      plus a Back to list bar) and `detail` (opened from a Songs row or a student's "Blocked by" row: the same tabs alone,
+      Back returns to that Songs list / that student). The list: search (title, `#N`, or id), filters Units (default) /
+      This week (Mon–Sun) / Keep practicing (pin order) / Not dated (assigned, not retired) / All; Units groups "Unit N —
+      name", newest unit first and the only one open, then Unsorted, then "Built — not assigned yet". Rows: #N (or Check),
+      date / "Pinned" / "No date", title, tags (Hidden, Optional, Scheduled, Pinned, Archived, Deleted, Not assigned) and a
+      done bar for assigned cards. Picking a row repaints the detail only (same list element, same scroll). The detail:
+      "Unit N · #num · Released <date> · <view type>", title, Copy link, Pin to Keep practicing, More (Rename…, Hide/Show,
+      Un-assign, Open Arrange board, Archive/Restore/Delete). Tabs Preview (default) · Students N/M · Settings, all three
+      in the page (`hidden` toggles), last tab remembered for the session. Preview = what `renderTeacherActivityDetail`
+      drew (practice card, focus toggle, paths, switches, Level up, Journey, notes as one-line `.ta-info`). Students =
+      three counts (done / started / not started) + the roll + the per-student table in the same `[data-ta-live]` boxes;
+      `teacherRepaintActivityStudents` also repaints the counts and the tab's N/M. Settings = the board's per-card
+      controls from one shared builder, `teacherActivityCtlKit(cfg, activities)` (the board's closures, hoisted; the board
+      calls it too). A write repaints the list, header, Settings and Students and never the Preview
+      (`teacherSoftRepaintDetail`), so a song playing there keeps playing; the minute refresh repaints the list rows and
+      the Students boxes only. **Phase 3:** "Unit N" in the list, the detail header, the board's section headings, its
+      Move-to / Assign-to options, `teacherActivityPlace()` and the board's hints; "Module" everywhere else (Skills grid,
+      Students, Manage, Trouble spots, Teacher view songs, load warnings, the student site). Labels only.
+      **Decisions made under the work order (Jonathan delegated them):** sidebar marks with `aria-current` (not
+      `aria-pressed`); list counts follow the console's period filter (on All they equal the sum of the board's per-period
+      lines); the third count is "Not started", not "not opened" (nothing records an open; "started" = a step/check tick
+      in `caSteps`, which the roster read now keeps — same doc, no new read); the list auto-picks the newest card students
+      can see now (else the first row), so the console opens on a preview; switching rows calls `stopCardAudio()` (only
+      the preview can be playing on this view); a Built card's Settings shows only what the board shows for it (Assign
+      to, name, Songs, Archive/Delete), an archived one only Restore/Delete; library songs and Teacher view songs opened
+      from Songs get a Settings tab that points back to their own tab; below 1100px the list stacks above the detail;
+      the Songs view's "Opened:" label wraps below 900px (it pushed a 390px page 32px sideways before this change).
+      **Proof:** `tools/console-layout-smoke.mjs` (new; stub Firestore, 30 fake students in P4/P7/CAS, seeded board; no
+      live data): 13 sidebar views, 4 activities (practice card, focus, paths, exit check) × 3 tabs, 5 filters, 2 folds,
+      3 searches, 6 Settings writes with the Preview element kept, the Students repaint, Arrange board and back,
+      Back to a student and to Songs, no sideways scroll at 1366/1920/390, dark-mode colours; six deliberate breakages
+      each turned it red (list rebuilt on pick, Preview rebuilt on a write, tab count not repainted, default filter,
+      board option saying Module, no `aria-current`). Run it after any console layout change:
+      `node tools/console-layout-smoke.mjs [--shots <dir>]`.
 - [x] **2026-11-06 — Practice minutes in the teacher console (needs a `firestore.rules` paste).** Jonathan: "where do I see
       students' minutes and rank?" A **Practice minutes** button after Students in the console's view toggle
       (`renderTeacherMinutes()`, `teacher.js`): one row per student, grouped by period like Manage (`perRank`), with This week

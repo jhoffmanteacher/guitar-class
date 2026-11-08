@@ -1,0 +1,501 @@
+#!/usr/bin/env node
+/* Teacher console layout smoke test (Layout A, 2026-11-08).
+
+   Boots the real teacher console (index.html?teacher=true + teacher.js) in
+   headless Chrome against a STUB Firestore — 30 fake students ("Test Student
+   01" …) over periods 4, 7 and CAS, and a seeded config/class board. It never
+   signs in and never reads live data (work-order hard rule: no real student
+   names, emails or ids anywhere — not in a log, not in a screenshot).
+
+     node tools/console-layout-smoke.mjs                 run the walk, print counts
+     node tools/console-layout-smoke.mjs --shots <dir>   also save screenshots there
+     node tools/console-layout-smoke.mjs --chrome <path> Chrome binary (or CHROME=…)
+
+   What it does, and fails on:
+     - clicks every sidebar item and checks that view renders with no page
+       error, that exactly that item is marked current, and that no view
+       scrolls the page sideways at 1366 px;
+     - opens a practice card, a focus-view activity, a paths activity and an
+       exit check from the list, and switches all three tabs on each
+       (Preview is the default, the other two panes are hidden, the tab
+       remembered for the next activity);
+     - switches every list filter, folds a unit shut and open again, searches
+       by title and by #number, and uses Arrange board and Back to list;
+     - checks that clicking a row does not rebuild the list (same element,
+       same scroll position) and that the Students tab repaints after
+       teacherRepaintActivityStudents (a student marked done in the stub shows
+       up in the tab's count and the roll);
+     - writes through the Settings tab (Hidden, Optional, Pin) and checks the
+       stub's config/class changed and the Preview pane was NOT rebuilt;
+     - opens an activity from a student's "Blocked by" row and from Songs and
+       checks Back returns there;
+     - measures sideways scroll at 390 px.
+   Needs Node 22+ (global WebSocket) and Chrome or Chromium; serves the repo
+   itself. Takes about 20 seconds. */
+import { createServer } from 'node:http';
+import { spawn } from 'node:child_process';
+import { mkdtempSync, mkdirSync, readFileSync, writeFileSync, existsSync, statSync, rmSync } from 'node:fs';
+import { tmpdir, platform } from 'node:os';
+import { join, extname, normalize, resolve, dirname } from 'node:path';
+import { fileURLToPath } from 'node:url';
+import net from 'node:net';
+
+const ROOT = resolve(dirname(fileURLToPath(import.meta.url)), '..');
+const args = process.argv.slice(2);
+const opt = (name) => { const i = args.indexOf(name); return i >= 0 ? args[i + 1] : null; };
+const SHOTS = opt('--shots');
+const MIME = { '.html': 'text/html; charset=utf-8', '.js': 'text/javascript; charset=utf-8', '.css': 'text/css; charset=utf-8',
+  '.json': 'application/json', '.svg': 'image/svg+xml', '.png': 'image/png', '.jpg': 'image/jpeg', '.mp3': 'audio/mpeg',
+  '.woff2': 'font/woff2', '.pdf': 'application/pdf', '.webmanifest': 'application/manifest+json' };
+
+function findChrome() {
+  const given = opt('--chrome') || process.env.CHROME;
+  if (given) return given;
+  const c = platform() === 'darwin'
+    ? ['/Applications/Google Chrome.app/Contents/MacOS/Google Chrome', '/Applications/Chromium.app/Contents/MacOS/Chromium']
+    : platform() === 'win32'
+      ? [process.env['ProgramFiles'] + '\\Google\\Chrome\\Application\\chrome.exe', process.env['ProgramFiles(x86)'] + '\\Google\\Chrome\\Application\\chrome.exe']
+      : ['/usr/bin/google-chrome', '/usr/bin/chromium', '/usr/bin/chromium-browser'];
+  return c.find(p => p && existsSync(p));
+}
+const freePort = () => new Promise((res, rej) => { const s = net.createServer(); s.listen(0, '127.0.0.1', () => { const p = s.address().port; s.close(() => res(p)); }); s.on('error', rej); });
+const sleep = (ms) => new Promise(r => setTimeout(r, ms));
+function serve(dir) {
+  const srv = createServer((req, res) => {
+    let p = decodeURIComponent((req.url || '/').split('?')[0].split('#')[0]);
+    if (p.endsWith('/')) p += 'index.html';
+    // No service worker here: it would cache-first the shell across runs.
+    if (p === '/sw.js') { res.writeHead(404); res.end(); return; }
+    const f = normalize(join(dir, p));
+    if (!f.startsWith(dir) || !existsSync(f) || !statSync(f).isFile()) { res.writeHead(404); res.end('not found'); return; }
+    res.writeHead(200, { 'content-type': MIME[extname(f).toLowerCase()] || 'application/octet-stream' });
+    res.end(readFileSync(f));
+  });
+  return new Promise(r => srv.listen(0, '127.0.0.1', () => r({ srv, port: srv.address().port })));
+}
+async function openPage(port) {
+  const t = await (await fetch(`http://127.0.0.1:${port}/json/new?about:blank`, { method: 'PUT' })).json();
+  const ws = new WebSocket(t.webSocketDebuggerUrl);
+  await new Promise((r, j) => { ws.onopen = r; ws.onerror = j; });
+  let id = 0; const pending = new Map(); const handlers = [];
+  ws.onmessage = e => {
+    const m = JSON.parse(e.data);
+    if (m.id && pending.has(m.id)) { const { res, rej } = pending.get(m.id); pending.delete(m.id); m.error ? rej(new Error(JSON.stringify(m.error))) : res(m.result); }
+    else if (m.method) handlers.forEach(h => h(m.method, m.params));
+  };
+  const send = (method, params = {}) => new Promise((res, rej) => { const i = ++id; pending.set(i, { res, rej }); ws.send(JSON.stringify({ id: i, method, params })); });
+  const evalJs = async (expression) => {
+    const r = await send('Runtime.evaluate', { expression, returnByValue: true, awaitPromise: true });
+    if (r.exceptionDetails) throw new Error((r.exceptionDetails.exception && r.exceptionDetails.exception.description) || JSON.stringify(r.exceptionDetails));
+    return r.result.value;
+  };
+  return { send, evalJs, on: h => handlers.push(h), close: async () => { try { ws.close(); await fetch(`http://127.0.0.1:${port}/json/close/${t.id}`); } catch { /* gone */ } } };
+}
+// Network noise that says nothing about our code (the page tries Firebase and Google; nothing is signed in).
+const NOISE = /firebase|firestore|googleapis|gstatic|google\.com|youtube|ytimg|net::ERR|Failed to fetch|ERR_|auth\/|identitytoolkit|favicon|Content Security|websocket|WebChannel|offline|Could not reach|NotAllowedError|play\(\) request|AbortError|NotSupportedError|The play\(\)|sw\.js|ServiceWorker/i;
+
+/* The stub: an in-memory Firestore with the calls the console makes (get on a
+   doc or a collection, a transaction that merges a patch with FieldValue.delete
+   sentinels), plus the seed. Runs in the page. Every name is fake. */
+const STUB = String.raw`(() => {
+  const DEL = { __del: true };
+  const store = new Map();
+  window.__store = store;
+  const periods = ['4', '7', 'CAS'];
+  const ids = CLASS_ACTIVITIES.map(a => a.id);
+  const has = id => ids.includes(id);
+  const board = {};
+  const place = (mod, list) => list.filter(has).forEach((id, i) => { board[id] = { module: mod, pos: i + 1 }; });
+  place(1, ['ca-1', 'ca-2', 'ca-3', 'ca-4', 'ca-5', 'ca-6', 'ca-7', 'ca-8', 'ca-11', 'ca-14']);
+  place(2, ['ca-10', 'ca-12', 'ca-13', 'ca-15', 'ca-17', 'ca-18', 'ca-19', 'ca-20']);
+  place(3, ['ca-21', 'ca-22', 'ca-23', 'ca-24', 'ca-25', 'ca-26', 'ca-29', 'ca-30']);
+  place(4, ['ca-43', 'ca-46', 'ca-48', 'ca-49']);
+  place(0, ['ca-50']);
+  const day = n => { const d = new Date(); d.setDate(d.getDate() + n); return dayStr(d); };
+  const dates = {};
+  const dated = ['ca-1', 'ca-2', 'ca-3', 'ca-4', 'ca-5', 'ca-6', 'ca-7', 'ca-8', 'ca-11', 'ca-14', 'ca-10', 'ca-12', 'ca-13', 'ca-15', 'ca-17', 'ca-18', 'ca-19', 'ca-20', 'ca-21', 'ca-22', 'ca-24', 'ca-25', 'ca-26', 'ca-43'];
+  dated.filter(has).forEach((id, i) => { dates[id] = day(i - dated.length - 6); });
+  if (has('ca-46')) dates['ca-46'] = day(0);
+  if (has('ca-48')) dates['ca-48'] = day(-1);
+  if (has('ca-49')) dates['ca-49'] = day(5);
+  const students = [];
+  for (let i = 1; i <= 30; i++) {
+    const n = String(i).padStart(2, '0');
+    const period = i <= 12 ? '4' : i <= 24 ? '7' : 'CAS';
+    const done = {}, steps = {};
+    Object.keys(dates).forEach((id, k) => { if ((i * 7 + k * 3) % 5 < 3) done[id] = true; else if ((i + k) % 3 === 0) steps[id + ':0'] = true; });
+    const exitChecks = {};
+    ['ca-14', 'ca-15'].filter(has).forEach((cid, ci) => {
+      if (i % 4 === ci) return;
+      const items = (CLASS_ACTIVITIES.find(a => a.id === cid).check || {}).items || [];
+      const type = (CLASS_ACTIVITIES.find(a => a.id === cid).check || {}).type;
+      const picks = items.map((it, q) => ((i + q) % 4 === 0) ? 'x' : (type === 'nextNote' ? String(it.answer.fret) : it.answer));
+      const score = picks.filter((p, q) => p !== 'x').length;
+      exitChecks[cid] = { score, total: items.length, at: day(-3), picks };
+      delete done[cid];
+    });
+    students.push({ uid: 'stub-uid-' + n, name: 'Test Student ' + n, email: 'student' + n + '@example.test', period,
+      classActivities: done, caSteps: steps, exitChecks, skills: {}, responses: {}, migrations: { swap45: true } });
+  }
+  students.forEach(s => store.set('progress/' + s.uid, s));
+  const who = {};
+  if (has('ca-48')) who['ca-48'] = { 'stub-uid-01': true, 'stub-uid-02': true, 'stub-uid-13': true };
+  store.set('config/class', { configVersion: 1, gamesEnabled: true, gameOverrides: {}, activityBoard: board, activityBoardSeeded: true,
+    activityDates: dates, hiddenActivities: has('ca-22') ? { 'ca-22': true } : {}, optionalActivities: has('ca-23') ? { 'ca-23': true } : {},
+    archivedActivities: has('ca-30') ? { 'ca-30': true } : {}, activityPins: ['ca-25', 'ca-46'].filter(has), activityStudents: who });
+  const clone = v => v === undefined ? v : JSON.parse(JSON.stringify(v));
+  const merge = (dst, src) => { Object.keys(src).forEach(k => { const v = src[k];
+    if (v && v.__del) delete dst[k];
+    else if (v && typeof v === 'object' && !Array.isArray(v)) { if (!dst[k] || typeof dst[k] !== 'object' || Array.isArray(dst[k])) dst[k] = {}; merge(dst[k], v); }
+    else dst[k] = clone(v); }); return dst; };
+  const snapOf = p => ({ exists: store.has(p), data: () => clone(store.get(p)), id: p.split('/').pop(), ref: docRef(p) });
+  function docRef(p){ return { path: p, get: async () => snapOf(p),
+    set: async (d, o) => { store.set(p, o && o.merge ? merge(clone(store.get(p) || {}), d) : clone(d)); },
+    update: async d => store.set(p, merge(clone(store.get(p) || {}), d)), delete: async () => store.delete(p), collection: n => colRef(p + '/' + n) }; }
+  function colRef(p){ const q = { doc: id => docRef(p + '/' + id), orderBy: () => q, limit: () => q, where: () => q,
+    get: async () => { const docs = [...store.keys()].filter(k => k.startsWith(p + '/') && k.slice(p.length + 1).indexOf('/') < 0).map(snapOf);
+      return { docs, empty: !docs.length, size: docs.length, forEach: f => docs.forEach(f) }; } }; return q; }
+  const fdb = { collection: n => colRef(n), runTransaction: async fn => fn({ get: r => r.get(), set: (r, d, o) => r.set(d, o), update: (r, d) => r.update(d) }) };
+  window.db = fdb; try { db = fdb; } catch (e) {}
+  window.ensureDb = async () => fdb; try { ensureDb = window.ensureDb; } catch (e) {}
+  window.firebase = window.firebase || {};
+  firebase.firestore = Object.assign(firebase.firestore || {}, { FieldValue: { serverTimestamp: () => 'ts', delete: () => DEL, increment: n => n } });
+  window.confirm = () => true; window.alert = m => { window.__alerts = (window.__alerts || []).concat(String(m)); };
+  window.prompt = () => null;
+  try { navigator.clipboard.writeText = async () => {}; } catch (e) {}
+  return students.length;
+})()`;
+
+async function main() {
+  const chrome = findChrome();
+  if (!chrome) { console.error('console-layout-smoke: no Chrome/Chromium found — pass --chrome <path> or set CHROME'); process.exit(2); }
+  if (typeof WebSocket === 'undefined') { console.error('console-layout-smoke: needs Node 22+ (global WebSocket)'); process.exit(2); }
+  if (SHOTS) mkdirSync(SHOTS, { recursive: true });
+  const { srv, port } = await serve(ROOT);
+  const prof = mkdtempSync(join(tmpdir(), 'gc-console-chrome-'));
+  const cdp = await freePort();
+  const proc = spawn(chrome, ['--headless=new', `--remote-debugging-port=${cdp}`, `--user-data-dir=${prof}`, '--no-first-run', '--disable-gpu',
+    '--autoplay-policy=no-user-gesture-required', 'about:blank'], { stdio: 'ignore' });
+  const fails = [];
+  const stats = { views: 0, activities: 0, tabs: 0, filters: 0, folds: 0, searches: 0, board: 0, repaint: 0, writes: 0, backs: 0, shots: [] };
+  const fail = (step, msg) => fails.push(step + ': ' + msg);
+  let page;
+  try {
+    for (let i = 0; i < 60; i++) { try { await fetch(`http://127.0.0.1:${cdp}/json/version`); break; } catch { await sleep(250); } }
+    page = await openPage(cdp);
+    const pageErrors = [];
+    page.on((method, params) => {
+      if (method === 'Runtime.exceptionThrown') { const d = params.exceptionDetails; pageErrors.push((d.exception && d.exception.description) || d.text); }
+      if (method === 'Runtime.consoleAPICalled' && params.type === 'error') pageErrors.push(params.args.map(a => a.value || a.description || '').join(' '));
+    });
+    await page.send('Runtime.enable'); await page.send('Page.enable');
+    const size = async (w, h) => page.send('Emulation.setDeviceMetricsOverride', { width: w, height: h, deviceScaleFactor: 1, mobile: false });
+    const shot = async (name) => {
+      if (!SHOTS) return;
+      const r = await page.send('Page.captureScreenshot', { format: 'png' });
+      const f = join(SHOTS, name + '.png'); writeFileSync(f, Buffer.from(r.data, 'base64')); stats.shots.push(f);
+    };
+    const js = (expr) => page.evalJs(expr);
+    const errsSince = (n) => pageErrors.slice(n).filter(t => !NOISE.test(t || ''));
+    await size(1366, 768);
+    await page.send('Page.navigate', { url: `http://127.0.0.1:${port}/index.html?teacher=true` });
+    for (let i = 0; i < 80; i++) { await sleep(150); if (await js(`typeof ensureTeacherJs === 'function' && typeof CLASS_ACTIVITIES !== 'undefined'`).catch(() => false)) break; }
+    await js(`ensureTeacherJs()`);
+    for (let i = 0; i < 80; i++) { await sleep(100); if (await js(`typeof showTeacherApp === 'function'`)) break; }
+    const nStu = await js(STUB);
+    await js(`showTeacherApp({ uid: 'stub-teacher', email: TEACHER_EMAIL, displayName: 'Teacher' }).catch(e => { window.__showErr = e.message; })`);
+    for (let i = 0; i < 80; i++) { await sleep(100); if (await js(`!!document.querySelector('#t-grid-container [data-ta-list]')`)) break; }
+    const boot = await js(`({ err: window.__showErr || null, view: teacherView, side: document.querySelectorAll('#t-side [data-view]').length,
+      current: [...document.querySelectorAll('#t-side [aria-current="page"]')].map(b => b.dataset.view),
+      list: !!document.querySelector('[data-ta-list]'), rows: document.querySelectorAll('[data-ta-pick]').length,
+      picked: activityDetailId, students: allStudentsRaw.length })`);
+    if (boot.err) fail('boot', 'showTeacherApp threw ' + boot.err);
+    if (boot.view !== 'activities' || !boot.list) fail('boot', 'the console did not open on the Class activities list (view ' + boot.view + ')');
+    if (boot.side !== 13) fail('boot', 'the sidebar has ' + boot.side + ' items, expected 13');
+    if (JSON.stringify(boot.current) !== '["activities"]') fail('boot', 'the current sidebar item is ' + JSON.stringify(boot.current));
+    if (boot.students !== nStu) fail('boot', 'the console read ' + boot.students + ' students, the stub has ' + nStu);
+    await sleep(300);
+    await shot('01-console-on-load-1366');
+
+    // ── Every sidebar item ──
+    const views = await js(`[...document.querySelectorAll('#t-side [data-view]')].map(b => b.dataset.view)`);
+    for (const v of views) {
+      const n0 = pageErrors.length;
+      await js(`document.querySelector('#t-side [data-view="${v}"]').click()`);
+      await sleep(v === 'activities' ? 400 : 250);
+      const r = await js(`({ view: teacherView, cur: [...document.querySelectorAll('#t-side [aria-current="page"]')].map(b => b.dataset.view),
+        text: document.getElementById('t-grid-container').innerText.length, sideways: document.documentElement.scrollWidth - document.documentElement.clientWidth,
+        legend: getComputedStyle(document.getElementById('t-legend')).display, tabs: getComputedStyle(document.getElementById('t-week-tabs')).display })`);
+      if (r.view !== v) fail('view:' + v, 'teacherView is ' + r.view);
+      if (JSON.stringify(r.cur) !== JSON.stringify([v])) fail('view:' + v, 'current item ' + JSON.stringify(r.cur));
+      if (!r.text) fail('view:' + v, 'rendered nothing');
+      if (r.sideways > 0) fail('view:' + v, 'page scrolls sideways by ' + r.sideways + 'px at 1366');
+      if ((v === 'skills') !== (r.legend !== 'none' && r.tabs !== 'none')) fail('view:' + v, 'the Skills grid legend/set tabs are ' + r.legend + '/' + r.tabs);
+      const e = errsSince(n0); if (e.length) fail('view:' + v, 'page error: ' + e[0]);
+      stats.views++;
+      if (v === 'skills') await shot('05-skills-grid-1366');
+      if (v === 'manage') await shot('06-manage-1366');
+    }
+    await js(`setTeacherView('activities')`); await sleep(400);
+
+    // ── Filters, folds, search ──
+    const filters = await js(`[...document.querySelectorAll('[data-ta-filter]')].map(b => b.dataset.taFilter)`);
+    if (JSON.stringify(filters) !== JSON.stringify(['units', 'week', 'pins', 'undated', 'all'])) fail('filters', 'filter buttons are ' + JSON.stringify(filters));
+    const defFilter = await js(`document.querySelector('[data-ta-filter][aria-pressed="true"]')?.dataset.taFilter`);
+    if (defFilter !== 'units') fail('filters', 'the default filter is ' + defFilter);
+    const units = await js(`(() => { const h = [...document.querySelectorAll('[data-ta-unit]')]; return h.map(x => ({ key: x.dataset.taUnit, open: x.getAttribute('aria-expanded') === 'true', text: x.innerText.replace(/\\s+/g, ' ').trim() })); })()`);
+    if (!units.length || !/^Unit 4\b/.test(units[0].text) || !units[0].open || units.slice(1).some(u => u.open)) fail('units', 'expected Unit 4 first and the only one open: ' + JSON.stringify(units.map(u => u.text + (u.open ? ' (open)' : ''))));
+    if (units.some(u => /Module/.test(u.text))) fail('units', 'a unit heading says Module: ' + units.map(u => u.text).join(' | '));
+    for (const f of filters) {
+      const n0 = pageErrors.length;
+      await js(`document.querySelector('[data-ta-filter="${f}"]').click()`); await sleep(120);
+      const r = await js(`({ rows: document.querySelectorAll('[data-ta-list-body] [data-ta-pick]').length, on: document.querySelector('[data-ta-filter][aria-pressed="true"]')?.dataset.taFilter, heads: document.querySelectorAll('[data-ta-list-body] [data-ta-unit]').length })`);
+      if (r.on !== f) fail('filter:' + f, 'pressed is ' + r.on);
+      if (f !== 'units' && r.heads) fail('filter:' + f, 'a flat filter shows ' + r.heads + ' unit headings');
+      if (f === 'pins' && r.rows !== 2) fail('filter:pins', r.rows + ' rows, the stub pins 2');
+      if (f === 'all' && r.rows < 30) fail('filter:all', 'only ' + r.rows + ' rows');
+      const e = errsSince(n0); if (e.length) fail('filter:' + f, 'page error: ' + e[0]);
+      stats.filters++;
+    }
+    await js(`document.querySelector('[data-ta-filter="units"]').click()`); await sleep(120);
+    for (const step of ['shut', 'open']) {
+      const r = await js(`(() => { const h = document.querySelector('[data-ta-unit="1"]'); h.click(); const h2 = document.querySelector('[data-ta-unit="1"]'); return { open: h2.getAttribute('aria-expanded') === 'true', rows: h2.closest('.ta-unit').querySelectorAll('[data-ta-pick]').length }; })()`);
+      // Unit 1 starts shut (only the newest is open): the first click opens it, the second shuts it.
+      const wantOpen = step === 'shut';
+      if (r.open !== wantOpen || (wantOpen ? r.rows === 0 : r.rows !== 0)) fail('fold', `after click ${step === 'shut' ? 1 : 2} Unit 1 is ${r.open ? 'open' : 'shut'} with ${r.rows} rows`);
+      stats.folds++;
+    }
+    const search = async (q) => js(`(() => { const box = document.querySelector('[data-ta-search]'); box.value = ${JSON.stringify(q)}; box.dispatchEvent(new Event('input', { bubbles: true }));
+      return [...document.querySelectorAll('[data-ta-list-body] [data-ta-pick]')].map(r => r.dataset.id); })()`);
+    const byNum = await js(`(() => { const v = teacherBoardView(teacherClassConfig); const id = Object.keys(v.number).find(k => v.number[k] === 5); return id; })()`);
+    const s1 = await search('#5');
+    if (!byNum || !s1.includes(byNum)) fail('search', '"#5" found ' + JSON.stringify(s1) + ', expected ' + byNum);
+    stats.searches++;
+    const title18 = await js(`teacherActivityTitle(CLASS_ACTIVITIES.find(a => a.id === 'ca-18'), teacherClassConfig)`);
+    const word = title18.split(/\s+/).filter(w => w.length > 4)[0] || title18;
+    const s2 = await search(word);
+    if (!s2.includes('ca-18')) fail('search', JSON.stringify(word) + ' did not find ca-18 (' + JSON.stringify(s2) + ')');
+    stats.searches++;
+    const s3 = await search('zzzz no such activity');
+    if (s3.length) fail('search', 'nonsense matched ' + s3.length);
+    const empty = await js(`!!document.querySelector('[data-ta-list-body] .ta-list-empty')`);
+    if (!empty) fail('search', 'no "nothing matches" line for an empty search');
+    stats.searches++;
+    await search('');
+
+    // ── Open four kinds of activity; switch every tab ──
+    const kinds = [['card', 'ca-18'], ['focus', 'ca-21'], ['paths', 'ca-46'], ['check', 'ca-14']];
+    let firstPick = true;
+    for (const [kind, id] of kinds) {
+      const n0 = pageErrors.length;
+      await js(`document.querySelector('[data-ta-filter="all"]').click()`); await sleep(80);
+      const before = await js(`(() => { const body = document.querySelector('[data-ta-list-body]'); body.scrollTop = 200; window.__listEl = body; window.__listY = body.scrollTop; return body.scrollTop; })()`);
+      await js(`document.querySelector('[data-ta-pick][data-id="${id}"]').click()`); await sleep(250);
+      const r = await js(`(() => { const body = document.querySelector('[data-ta-list-body]');
+        const tabs = [...document.querySelectorAll('[data-ta-tab]')].map(t => ({ tab: t.dataset.taTab, sel: t.getAttribute('aria-selected') === 'true', text: t.innerText.trim() }));
+        const panes = [...document.querySelectorAll('[data-ta-pane]')].map(p => ({ pane: p.dataset.taPane, hidden: p.hidden }));
+        return { picked: activityDetailId, sameList: body === window.__listEl, scroll: body.scrollTop, sel: [...document.querySelectorAll('[data-ta-pick].is-sel')].map(x => x.dataset.id),
+          tabs, panes, head: (document.querySelector('[data-ta-head]') || {}).innerText || '' }; })()`);
+      if (r.picked !== id) fail('open:' + kind, 'picked is ' + r.picked);
+      if (!r.sameList) fail('open:' + kind, 'clicking a row rebuilt the list');
+      if (r.scroll !== before) fail('open:' + kind, 'the list scrolled from ' + before + ' to ' + r.scroll);
+      if (JSON.stringify(r.sel) !== JSON.stringify([id])) fail('open:' + kind, 'selected rows ' + JSON.stringify(r.sel));
+      if (JSON.stringify(r.tabs.map(t => t.tab)) !== '["preview","students","settings"]') fail('open:' + kind, 'tabs are ' + JSON.stringify(r.tabs));
+      if (firstPick && !(r.tabs[0] && r.tabs[0].sel)) fail('open:' + kind, 'Preview is not the default tab');
+      if (!/^Students \d+\/\d+$/.test((r.tabs[1] || {}).text || '')) fail('open:' + kind, 'Students tab label is ' + JSON.stringify((r.tabs[1] || {}).text));
+      if (!/Unit \d|Unsorted/.test(r.head) || /Module/.test(r.head)) fail('open:' + kind, 'header says ' + JSON.stringify(r.head.slice(0, 120)));
+      firstPick = false;
+      for (const tab of ['preview', 'students', 'settings']) {
+        await js(`document.querySelector('[data-ta-tab="${tab}"]').click()`); await sleep(120);
+        const t = await js(`(() => { const p = [...document.querySelectorAll('[data-ta-pane]')]; const vis = p.filter(x => !x.hidden);
+          return { vis: vis.map(x => x.dataset.taPane), sel: [...document.querySelectorAll('[data-ta-tab][aria-selected="true"]')].map(x => x.dataset.taTab), len: vis[0] ? vis[0].innerText.length : 0,
+            card: !!(vis[0] && vis[0].querySelector('.pc')), check: !!(vis[0] && vis[0].querySelector('[id^="ec-preview-body-"]')), live: vis[0] ? vis[0].querySelectorAll('[data-ta-live]').length : 0,
+            sideways: document.documentElement.scrollWidth - document.documentElement.clientWidth }; })()`);
+        if (JSON.stringify(t.vis) !== JSON.stringify([tab]) || JSON.stringify(t.sel) !== JSON.stringify([tab])) fail(`tab:${kind}:${tab}`, 'visible ' + JSON.stringify(t.vis) + ', selected ' + JSON.stringify(t.sel));
+        if (!t.len) fail(`tab:${kind}:${tab}`, 'the pane is empty');
+        if (tab === 'preview' && kind === 'card' && !t.card) fail('tab:card:preview', 'no practice card in the Preview');
+        if (tab === 'preview' && kind === 'check' && !t.check) fail('tab:check:preview', 'no exit-check preview');
+        if (tab === 'students' && !t.live) fail(`tab:${kind}:students`, 'no [data-ta-live] boxes in the Students pane');
+        if (t.sideways > 0) fail(`tab:${kind}:${tab}`, 'page scrolls sideways by ' + t.sideways + 'px');
+        stats.tabs++;
+        if (SHOTS && kind === 'card') await shot(`02-units-${id}-${tab}-1366`);
+      }
+      // The tab is remembered: the next activity opens on Settings (the last one clicked).
+      const e = errsSince(n0); if (e.length) fail('open:' + kind, 'page error: ' + e[0]);
+      stats.activities++;
+    }
+    const remembered = await js(`(() => { document.querySelector('[data-ta-pick][data-id="ca-21"]').click(); return document.querySelector('[data-ta-tab][aria-selected="true"]')?.dataset.taTab; })()`);
+    if (remembered !== 'settings') fail('tab-memory', 'the next activity opened on ' + remembered + ', not the last tab used (settings)');
+
+    // ── Students tab repaints after teacherRepaintActivityStudents ──
+    {
+      await js(`document.querySelector('[data-ta-pick][data-id="ca-21"]').click()`); await sleep(150);
+      await js(`document.querySelector('[data-ta-tab="students"]').click()`); await sleep(80);
+      const r = await js(`(() => {
+        const label = () => document.querySelector('[data-ta-tab="students"]').innerText.trim();
+        const doneCol = () => (document.querySelector('[data-ta-pane="students"] .ta-roll-done .ta-roll-head') || {}).innerText || '';
+        const before = { label: label(), done: doneCol() };
+        const s = allStudents.find(x => (x.classActivities || {})['ca-21'] !== true);
+        if (!s) return { skip: true };
+        s.classActivities = Object.assign({}, s.classActivities, { 'ca-21': true });
+        teacherRepaintActivityStudents('ca-21');
+        return { before, after: { label: label(), done: doneCol() }, name: s.name }; })()`);
+      if (r.skip) fail('repaint', 'every stub student already finished ca-21');
+      else {
+        const n = t => Number((/(\d+)\//.exec(t) || [])[1]);
+        const d = t => Number((/\((\d+)\)/.exec(t) || [])[1]);
+        if (n(r.after.label) !== n(r.before.label) + 1) fail('repaint', 'tab label went ' + r.before.label + ' -> ' + r.after.label);
+        if (d(r.after.done) !== d(r.before.done) + 1) fail('repaint', 'Done column went ' + r.before.done + ' -> ' + r.after.done);
+        stats.repaint++;
+      }
+      const rowAfter = await js(`(document.querySelector('[data-ta-pick][data-id="ca-21"] .ta-row-done') || {}).innerText || ''`);
+      if (!/\d+\/\d+ done/.test(rowAfter)) fail('repaint', 'the list row reads ' + JSON.stringify(rowAfter));
+    }
+
+    // ── Settings writes: the stub changes, the Preview is not rebuilt ──
+    {
+      await js(`document.querySelector('[data-ta-pick][data-id="ca-18"]').click()`); await sleep(200);
+      await js(`window.__prevEl = document.querySelector('[data-ta-pane="preview"]').firstElementChild`);
+      await js(`document.querySelector('[data-ta-tab="settings"]').click()`); await sleep(60);
+      const steps = [
+        ['hidden', `[data-ta-pane="settings"] [data-set-activity-hidden][data-state="hide"]`, `(__store.get('config/class').hiddenActivities || {})['ca-18'] === true`],
+        ['shown', `[data-ta-pane="settings"] [data-set-activity-hidden][data-state="show"]`, `!(__store.get('config/class').hiddenActivities || {})['ca-18']`],
+        ['optional', `[data-ta-pane="settings"] [data-set-activity-optional][data-state="optional"]`, `(__store.get('config/class').optionalActivities || {})['ca-18'] === true`],
+        ['required', `[data-ta-pane="settings"] [data-set-activity-optional][data-state="required"]`, `(__store.get('config/class').optionalActivities || {})['ca-18'] === false || !('ca-18' in (__store.get('config/class').optionalActivities || {}))`],
+        ['pin', `[data-ta-head] [data-set-activity-pin][data-state="on"]`, `(__store.get('config/class').activityPins || []).includes('ca-18')`],
+        ['unpin', `[data-ta-head] [data-set-activity-pin][data-state="off"]`, `!(__store.get('config/class').activityPins || []).includes('ca-18')`],
+      ];
+      for (const [name, sel, ok] of steps) {
+        const n0 = pageErrors.length;
+        const found = await js(`(() => { const b = document.querySelector(${JSON.stringify(sel)}); if (!b) return false; b.click(); return true; })()`);
+        if (!found) { fail('write:' + name, 'no control ' + sel); continue; }
+        await sleep(350);
+        const r = await js(`({ ok: ${ok}, same: document.querySelector('[data-ta-pane="preview"]').firstElementChild === window.__prevEl, alerts: (window.__alerts || []).length,
+          tab: document.querySelector('[data-ta-tab][aria-selected="true"]')?.dataset.taTab })`);
+        if (!r.ok) fail('write:' + name, 'config/class in the stub did not change');
+        if (!r.same) fail('write:' + name, 'the Preview pane was rebuilt (a song playing there would stop)');
+        if (r.alerts) fail('write:' + name, 'an alert: ' + await js(`window.__alerts.join(' | ')`));
+        if (r.tab !== 'settings') fail('write:' + name, 'the tab jumped to ' + r.tab);
+        const e = errsSince(n0); if (e.length) fail('write:' + name, 'page error: ' + e[0]);
+        stats.writes++;
+      }
+    }
+
+    // ── Arrange board and back ──
+    {
+      const n0 = pageErrors.length;
+      await js(`document.querySelector('[data-ta-board-open]').click()`);
+      for (let i = 0; i < 30; i++) { await sleep(100); if (await js(`!!document.querySelector('.t-board')`)) break; }
+      const r = await js(`({ board: !!document.querySelector('.t-board'), cards: document.querySelectorAll('.t-board [data-board-card]').length, back: !!document.querySelector('[data-ta-board-back]'),
+        secs: [...document.querySelectorAll('.t-board-sechead')].map(x => x.innerText.replace(/\\s+/g, ' ').trim()),
+        opts: [...document.querySelectorAll('.t-board [data-move-activity] option')].slice(0, 4).map(o => o.textContent),
+        sideways: document.documentElement.scrollWidth - document.documentElement.clientWidth })`);
+      if (!r.board || r.cards < 20) fail('board', 'Arrange board showed ' + r.cards + ' cards');
+      if (!r.back) fail('board', 'no Back to list button');
+      if (r.secs.some(t => /Module/.test(t)) || !r.secs.some(t => /^Unit \d/.test(t))) fail('board', 'section headings: ' + JSON.stringify(r.secs));
+      if (r.opts.some(t => /Module/.test(t))) fail('board', 'move-to options say Module: ' + JSON.stringify(r.opts));
+      if (r.sideways > 0) fail('board', 'page scrolls sideways by ' + r.sideways + 'px');
+      await shot('03-arrange-board-1366');
+      await js(`document.querySelector('[data-ta-board-back]').click()`); await sleep(300);
+      const b = await js(`({ list: !!document.querySelector('[data-ta-list]'), picked: activityDetailId, sel: document.querySelector('[data-ta-pick].is-sel')?.dataset.id })`);
+      if (!b.list || b.sel !== b.picked) fail('board', 'Back to list did not return to the list with the picked activity (' + JSON.stringify(b) + ')');
+      // A card's Preview button on the board opens it in the list.
+      await js(`document.querySelector('[data-ta-board-open]').click()`);
+      for (let i = 0; i < 30; i++) { await sleep(100); if (await js(`!!document.querySelector('.t-board')`)) break; }
+      await js(`document.querySelector('.t-board [data-open-activity][data-id="ca-13"]').click()`); await sleep(300);
+      const c = await js(`({ list: !!document.querySelector('[data-ta-list]'), picked: activityDetailId })`);
+      if (!c.list || c.picked !== 'ca-13') fail('board', 'Preview on the board did not open ca-13 in the list (' + JSON.stringify(c) + ')');
+      const e = errsSince(n0); if (e.length) fail('board', 'page error: ' + e[0]);
+      stats.board++;
+    }
+
+    // ── Opened from elsewhere: Back returns there ──
+    {
+      const n0 = pageErrors.length;
+      const uid = await js(`(() => { const s = allStudents.find(x => teacherBlockersFor(x, teacherClassConfig).length); return s ? s.uid : null; })()`);
+      if (!uid) fail('from-student', 'no stub student has a blocker');
+      else {
+        await js(`openStudentDetail(${JSON.stringify(uid)})`); await sleep(200);
+        const opened = await js(`(() => { const r = document.querySelector('#t-grid-container [data-open-activity]'); if (!r) return null; r.click(); return r.dataset.id; })()`);
+        await sleep(250);
+        const r = await js(`({ screen: teacherActivityScreen(), tabs: document.querySelectorAll('[data-ta-tab]').length, back: (document.querySelector('[data-back-to-activities]') || {}).innerText || '', cur: document.querySelector('#t-side [aria-current="page"]')?.dataset.view })`);
+        if (!opened || r.screen !== 'detail' || r.tabs !== 3) fail('from-student', 'Blocked by row opened ' + JSON.stringify(r));
+        if (r.cur !== 'students') fail('from-student', 'sidebar marks ' + r.cur);
+        await js(`document.querySelector('[data-back-to-activities]').click()`); await sleep(200);
+        const back = await js(`({ view: teacherView, uid: studentDetailUid })`);
+        if (back.view !== 'students' || back.uid !== uid) fail('from-student', 'Back went to ' + JSON.stringify(back));
+        else stats.backs++;
+      }
+      await js(`setTeacherView('songs')`);
+      for (let i = 0; i < 30; i++) { await sleep(100); if (await js(`!!document.querySelector('#t-grid-container [data-open-activity]')`)) break; }
+      const sid = await js(`(() => { const r = document.querySelector('#t-grid-container [data-open-activity]'); if (!r) return null; r.click(); return r.dataset.id; })()`);
+      await sleep(250);
+      const r = await js(`({ screen: teacherActivityScreen(), tabs: document.querySelectorAll('[data-ta-tab]').length, cur: document.querySelector('#t-side [aria-current="page"]')?.dataset.view })`);
+      if (!sid || r.screen !== 'detail' || r.tabs !== 3 || r.cur !== 'songs') fail('from-songs', 'a Songs row opened ' + JSON.stringify(r));
+      await js(`document.querySelector('[data-back-to-activities]').click()`); await sleep(300);
+      const back = await js(`teacherView`);
+      if (back !== 'songs') fail('from-songs', 'Back went to ' + back); else stats.backs++;
+      const e = errsSince(n0); if (e.length) fail('from-elsewhere', 'page error: ' + e[0]);
+    }
+
+    // ── 1920×1080 and 390 px ──
+    await js(`setTeacherView('activities')`); await sleep(400);
+    await js(`document.querySelector('[data-ta-filter="units"]').click()`); await sleep(100);
+    await js(`(document.querySelector('[data-ta-pick][data-id="ca-18"]') || document.querySelector('[data-ta-pick]')).click()`); await sleep(200);
+    await js(`document.querySelector('[data-ta-tab="preview"]').click()`); await sleep(100);
+    await size(1920, 1080); await sleep(300);
+    const wide = await js(`({ sideways: document.documentElement.scrollWidth - document.documentElement.clientWidth, list: document.querySelector('[data-ta-list]').getBoundingClientRect().width, side: document.getElementById('t-side').getBoundingClientRect().width, detail: document.querySelector('[data-ta-detail]').getBoundingClientRect().width })`);
+    if (wide.sideways > 0) fail('1920', 'page scrolls sideways by ' + wide.sideways + 'px');
+    await shot('07-console-1920');
+    for (const tab of ['students', 'settings']) { await js(`document.querySelector('[data-ta-tab="${tab}"]').click()`); await sleep(120); await shot(`08-${tab}-1920`); }
+    await js(`setTeacherView('skills')`); await sleep(200); await shot('09-skills-grid-1920');
+    await js(`setTeacherView('manage')`); await sleep(300); await shot('10-manage-1920');
+    await js(`setTeacherView('activities')`); await sleep(300);
+    await js(`document.querySelector('[data-ta-board-open]').click()`); await sleep(500); await shot('11-arrange-board-1920');
+    await js(`document.querySelector('[data-ta-board-back]').click()`); await sleep(300);
+    await size(1366, 768); await sleep(200);
+    const at1366 = await js(`({ list: document.querySelector('[data-ta-list]').getBoundingClientRect().width, side: document.getElementById('t-side').getBoundingClientRect().width, detail: document.querySelector('[data-ta-detail]').getBoundingClientRect().width })`);
+    await size(390, 844); await sleep(300);
+    const narrow = [];
+    for (const v of views) {
+      await js(`setTeacherView('${v}')`); await sleep(v === 'activities' ? 400 : 200);
+      const sw = await js(`document.documentElement.scrollWidth - document.documentElement.clientWidth`);
+      if (sw > 0) narrow.push(v + ' +' + sw + 'px');
+    }
+    await js(`setTeacherView('activities')`); await sleep(400);
+    await shot('12-console-390');
+    for (const tab of ['preview', 'students', 'settings']) {
+      await js(`document.querySelector('[data-ta-tab="${tab}"]').click()`); await sleep(120);
+      const sw = await js(`document.documentElement.scrollWidth - document.documentElement.clientWidth`);
+      if (sw > 0) narrow.push('activities/' + tab + ' +' + sw + 'px');
+    }
+    if (narrow.length) fail('390', 'sideways scroll at 390px: ' + narrow.join(', '));
+    // Dark mode: the console is drawn on the palette tokens, so it follows prefers-color-scheme like the rest of the site.
+    await size(1366, 768);
+    await page.send('Emulation.setEmulatedMedia', { features: [{ name: 'prefers-color-scheme', value: 'dark' }] });
+    await sleep(200);
+    const dark = await js(`['[data-ta-list]', '#t-side', '[data-ta-pane]:not([hidden])'].map(q => { const c = getComputedStyle(document.querySelector(q)); return q + ' ' + c.backgroundColor + ' / ' + c.color; })`);
+    // Light text on a dark ground: the text channel average must beat the background's (a transparent pane reads as the dark body).
+    for (const line of dark) {
+      const [bg, fg] = line.split(' ').slice(1).join(' ').split(' / ').map(c => (c.match(/\d+(\.\d+)?/g) || []).slice(0, 3).map(Number));
+      const avg = v => v.reduce((x, y) => x + y, 0) / 3;
+      const transparent = /rgba\(0, 0, 0, 0\)/.test(line);
+      if ((!transparent && avg(bg) > 80) || avg(fg) < 150) fail('dark', 'not dark-mode colours: ' + line);
+    }
+    await shot('13-dark-1366');
+    for (const tab of ['students', 'settings']) { await js(`document.querySelector('[data-ta-tab="${tab}"]').click()`); await sleep(120); await shot(`14-dark-${tab}-1366`); }
+    await page.send('Emulation.setEmulatedMedia', { features: [] });
+    stats.widths = { at1366, at1920: wide };
+    const late = errsSince(0); if (late.length) fail('page', late.length + ' page error(s), first: ' + late[0]);
+  } finally {
+    try { if (page) await page.close(); } catch { /* gone */ }
+    proc.kill('SIGKILL'); srv.close();
+    try { rmSync(prof, { recursive: true, force: true }); } catch { /* best effort */ }
+  }
+  console.log(`console-layout-smoke: ${stats.views} sidebar views, ${stats.activities} activities opened (practice card, focus, paths, exit check) x ${stats.tabs / Math.max(stats.activities, 1)} tabs = ${stats.tabs} tab switches, ${stats.filters} filters, ${stats.folds} folds, ${stats.searches} searches, ${stats.writes} Settings writes with the Preview kept, ${stats.repaint} Students repaint, ${stats.board} board round trip, ${stats.backs} Backs`);
+  if (stats.widths) console.log(`  column widths at 1366: sidebar ${Math.round(stats.widths.at1366.side)}, list ${Math.round(stats.widths.at1366.list)}, detail ${Math.round(stats.widths.at1366.detail)}; at 1920: ${Math.round(stats.widths.at1920.side)}, ${Math.round(stats.widths.at1920.list)}, ${Math.round(stats.widths.at1920.detail)}`);
+  if (stats.shots.length) console.log('  screenshots:\n    ' + stats.shots.join('\n    '));
+  if (fails.length) { console.log(`\x1b[31m✗ ${fails.length} problem(s):\x1b[0m\n  ` + fails.join('\n  ')); process.exit(1); }
+  console.log('\x1b[32m✓ console layout smoke passed\x1b[0m');
+}
+main().catch(e => { console.error(e); process.exit(1); });
