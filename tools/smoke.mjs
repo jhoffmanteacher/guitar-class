@@ -1191,6 +1191,14 @@ async function pmHeaderWalk(page, run, events, stats) {
    has the 12 letters with the string and the tuner marked, the arrow appears after
    Up or Down and turns counterclockwise for Up, clockwise for Down, Tighten turns the peg counterclockwise and raises the note, there are no
    answer buttons while turning, and green on the wrong letter does not end the round.
+   The notes are measured where they are DRAWN (C at the top, each next one 30 degrees
+   counterclockwise) and the arrow's two ends on the tuner's note and the string's.
+   Then real key presses and clicks (CDP Input events, 2026-11-08): a held Enter on a
+   name answers only the name and the focus moves on to Up; Enter on the right way
+   moves it to that peg button; Space and Enter on Tighten turn one tick each and a
+   mouse click exactly one; a mouse answer does not move the focus. A ?level=2 look that
+   levels up keeps a saved level 4, ?level=9 opens on the saved level, and at level 1
+   the string's note on the circle turns green (.rn.done) only once it is in tune.
    getUserMedia is counted from before the page loads and must stay at 0. A checkout
    without tuning-sim.html (the baseline) skips it. */
 async function tuningSimWalk(page, run, events, stats, base) {
@@ -1198,9 +1206,9 @@ async function tuningSimWalk(page, run, events, stats, base) {
   if (!exists) return;
   const fail = (w, text) => events.push({ step: 'tsim:' + w, kind: 'tuning-sim', text });
   const gum = await page.send('Page.addScriptToEvaluateOnNewDocument', { source: `window.__gumCalls = 0; try { const md = navigator.mediaDevices; if (md && md.getUserMedia) { const o = md.getUserMedia.bind(md); md.getUserMedia = function(){ window.__gumCalls++; return o.apply(md, arguments); }; } } catch (e) {}` });
-  const go = async () => {
+  const go = async (q = '') => {
     const l = new Promise(r => page.on(m => { if (m === 'Page.loadEventFired') r(); }));
-    await page.send('Page.navigate', { url: base + '/tuning-sim.html' });
+    await page.send('Page.navigate', { url: base + '/tuning-sim.html' + q });
     await Promise.race([l, sleep(10000)]); await sleep(500);
   };
   const waitFor = (cond, ms = 6000) => `(async () => { const t0 = Date.now(); const ok = () => (${cond}); while (!ok() && Date.now() - t0 < ${ms}) await new Promise(r => setTimeout(r, 40)); return ok(); })()`;
@@ -1213,6 +1221,22 @@ async function tuningSimWalk(page, run, events, stats, base) {
      next (counterclockwise positive; y points down in SVG), and how far any point strays from the first point's radius
      (a flipped sweep flag bulges the arrow across the circle instead of along it). */
   const arcTurn = `(() => { const p = document.getElementById('rarc'), g = document.querySelector('#ring .rguide'), len = p.getTotalLength(), cx = +g.getAttribute('cx'), cy = +g.getAttribute('cy'); let turn = 0, off = 0, prev = null, r0 = 0; for (let k = 0; k <= 16; k++) { const q = p.getPointAtLength(len * k / 16), ang = Math.atan2(cy - q.y, q.x - cx) * 180 / Math.PI, d = Math.hypot(q.x - cx, q.y - cy); if (prev === null) r0 = d; else turn += ((ang - prev) % 360 + 540) % 360 - 180; off = Math.max(off, Math.abs(d - r0)); prev = ang; } return { deg: Math.round(turn), off: Math.round(off * 10) / 10 }; })()`;
+  /* Where the circle's notes are DRAWN (each .rn circle's angle round the ring's centre, counterclockwise positive): C at the top,
+     each next note 30 degrees counterclockwise; and how far the drawn arrow's two ends sit from the tuner's start note and the string's note. */
+  const ringGeom = `(() => { const g = document.querySelector('#ring .rguide'), cx = +g.getAttribute('cx'), cy = +g.getAttribute('cy'), ang = (x, y) => Math.atan2(cy - y, x - cx) * 180 / Math.PI, norm = d => ((d % 360) + 540) % 360 - 180, at = {}; document.querySelectorAll('#ring .rn').forEach(n => { const c = n.querySelector('circle'); at[n.getAttribute('data-note')] = ang(+c.getAttribute('cx'), +c.getAttribute('cy')); }); const N = ['C','C#','D','D#','E','F','F#','G','G#','A','A#','B'], off = N.filter((n, i) => !(Math.abs(norm(at[N[(i + 1) % 12]] - at[n]) - 30) <= 0.5)); const r = ${S}.round, p = document.getElementById('rarc'), len = p.getTotalLength(), a = p.getPointAtLength(0), b = p.getPointAtLength(len); return { off, top: Math.round(at.C), start: Math.round(Math.abs(norm(ang(a.x, a.y) - at[r.letter]))), end: Math.round(Math.abs(norm(ang(b.x, b.y) - at[r.target]))) }; })()`;
+  /* Real key presses and mouse clicks (CDP Input events): the browser's own Space/Enter activation, auto-repeat, focus and pointer events. */
+  const key = (type, k, autoRepeat = false) => { const e = k === 'Enter'; return page.send('Input.dispatchKeyEvent', { type, key: e ? 'Enter' : ' ', code: e ? 'Enter' : 'Space', windowsVirtualKeyCode: e ? 13 : 32, nativeVirtualKeyCode: e ? 13 : 32, ...(type === 'keyDown' ? { text: e ? '\r' : ' ', unmodifiedText: e ? '\r' : ' ', autoRepeat } : {}) }); };
+  const press = async (k, repeats = 0) => { await key('keyDown', k); for (let i = 0; i < repeats; i++) await key('keyDown', k, true); await key('keyUp', k); await sleep(80); };
+  const clickAt = async (w, sel) => {
+    const at = await run(w, `(() => { const b = document.querySelector(${JSON.stringify(sel)}); if (!b) return null; b.scrollIntoView({ block: 'center' }); const q = b.getBoundingClientRect(); return { x: q.left + q.width / 2, y: q.top + q.height / 2 }; })()`, 10);
+    if (!at) return false;
+    await page.send('Input.dispatchMouseEvent', { type: 'mouseMoved', x: at.x, y: at.y });
+    await page.send('Input.dispatchMouseEvent', { type: 'mousePressed', x: at.x, y: at.y, button: 'left', buttons: 1, clickCount: 1 });
+    await page.send('Input.dispatchMouseEvent', { type: 'mouseReleased', x: at.x, y: at.y, button: 'left', buttons: 0, clickCount: 1 });
+    await sleep(80); return true;
+  };
+  const focusWhere = `(() => { const a = document.activeElement; return !a || a === document.body ? 'body' : a.id || (a.dataset.way ? 'way:' + a.dataset.way : a.dataset.name != null ? 'name:' + a.dataset.name : a.className); })()`;
+  const nameSel = `(() => { const i = ${S}.round.idx; return document.querySelector('.ans.six[data-name="' + i + '"]') ? '.ans.six[data-name="' + i + '"]' : '.bubble[data-name="' + i + '"]'; })()`;
   const names = { en: ['low E', 'A', 'D', 'G', 'B', 'high e'], es: ['Mi grave', 'La', 'Re', 'Sol', 'Si', 'mi aguda'] };   // the glossary's "mi aguda" (lower case, as fret.stringHighE; 9c6f642)
   const titles = { en: 'Tuning Simulator', es: 'Simulador de afinación' };
   let rounds = 0, checks = 0;
@@ -1320,9 +1344,11 @@ async function tuningSimWalk(page, run, events, stats, base) {
       if (rd.steps < 3 || rd.steps > 5) fail(W + 'lv4:steps', `level 4 started ${rd.steps} steps away, expected 3 to 5`);
     }
     await run(`tsim:${lang}:lv4:way`, wayRight, 150);
-    const tn = await run(`tsim:${lang}:lv4:turn`, `(() => { const r = ${S}.round, up = document.getElementById('peg-up'), dn = document.getElementById('peg-down'); return { arc: document.getElementById('rarc').getAttribute('d'), c1: document.getElementById('rc1').textContent, buttons: document.querySelectorAll('.answers button').length, upLeft: up.getBoundingClientRect().left < dn.getBoundingClientRect().left, upText: up.textContent, dnText: dn.textContent, steps: r.steps, answer: r.answer, turn: ${arcTurn} }; })()`, 10);
+    const tn = await run(`tsim:${lang}:lv4:turn`, `(() => { const r = ${S}.round, up = document.getElementById('peg-up'), dn = document.getElementById('peg-down'); return { arc: document.getElementById('rarc').getAttribute('d'), c1: document.getElementById('rc1').textContent, buttons: document.querySelectorAll('.answers button').length, upLeft: up.getBoundingClientRect().left < dn.getBoundingClientRect().left, upText: up.textContent, dnText: dn.textContent, steps: r.steps, answer: r.answer, turn: ${arcTurn}, geom: ${ringGeom} }; })()`, 10);
     if (!tn || !tn.arc || !tn.c1.includes(String(tn.steps))) fail(W + 'lv4:arc', `after answering the circle's arrow is "${tn && tn.arc}" and its label "${tn && tn.c1}" (expected an arrow and ${tn && tn.steps} steps)`);
     if (tn && (!tn.turn || tn.turn.off > 2 || Math.abs(tn.turn.deg - (tn.answer === 'up' ? 30 : -30) * tn.steps) > 3)) fail(W + 'lv4:arc-direction', `the arrow for ${tn.answer} (${tn.steps} steps) turns ${tn.turn && tn.turn.deg} degrees round the circle and strays ${tn.turn && tn.turn.off} px off it; expected ${(tn.answer === 'up' ? 30 : -30) * tn.steps} (+ = counterclockwise: Up turns counterclockwise, Down clockwise) along the circle`);
+    if (tn && (!tn.geom || tn.geom.off.length || Math.abs(tn.geom.top - 90) > 1)) fail(W + 'ring-drawn', `the circle's notes as drawn: C at ${tn.geom && tn.geom.top} degrees (expected 90, the top); the note after [${tn.geom && tn.geom.off}] is not 30 degrees counterclockwise`);
+    if (tn && tn.geom && (tn.geom.start > 2 || tn.geom.end > 2)) fail(W + 'arc-ends', `the drawn arrow starts ${tn.geom.start} degrees from the tuner's start note (${tn && tn.answer}) and ends ${tn.geom.end} degrees from the string's note (expected on both, within 2)`);
     if (tn && tn.buttons !== 0) fail(W + 'lv4:no-answers', `${tn.buttons} answer buttons are still on screen while turning the peg`);
     if (tn && (!tn.upLeft || !tn.upText.includes(word.ccw) || tn.dnText.includes(word.ccw) || !tn.dnText.includes(word.cw))) fail(W + 'peg-labels', `Tighten must be the left button and say "${word.ccw}", Loosen "${word.cw}" (left first: ${tn && tn.upLeft}; "${tn && tn.upText}" / "${tn && tn.dnText}")`);
     const pegDir = await run(`tsim:${lang}:lv4:dir`, `(() => { const c0 = ${S}.cents, a0 = ${S}.pegAngle; TuningSim.tick(1); const up = ${S}.cents - c0, ang = ${S}.pegAngle - a0, tr = document.getElementById('peg-rot').style.transform; TuningSim.tick(-1); return { up, ang, tr, back: ${S}.cents - c0 }; })()`, 10);
@@ -1342,6 +1368,59 @@ async function tuningSimWalk(page, run, events, stats, base) {
     rounds++;
     const mic = await run(`tsim:${lang}:mic`, `window.__gumCalls`, 10);
     if (mic !== 0) fail(W + 'mic', `the page called getUserMedia ${mic} time(s) — it must never ask for the mic`);
+    checks++;
+    /* The keyboard and the mouse, for real (review round 2, 2026-11-08). A held Enter on the string's name (1 press,
+       4 auto-repeats) answers the name only and the focus moves to the first answer; Enter on the right way moves it
+       to the peg button for that way; on Tighten, Space and Enter each turn one tick and one mouse click exactly one;
+       a mouse answer leaves the focus alone (no jump). */
+    await go();
+    await run(`tsim:${lang}:kb:focus-name`, `(() => { const i = ${S}.round.idx; (document.querySelector('.ans.six[data-name="' + i + '"]') || document.querySelector('.bubble[data-name="' + i + '"]')).focus(); return true; })()`, 10);
+    await press('Enter', 4);
+    const kb1 = await run(`tsim:${lang}:kb:held-enter`, `({ state: ${S}.state, way: ${S}.wayPicked, focus: ${focusWhere} })`, 10);
+    if (!kb1 || kb1.state !== 'read' || kb1.way !== '') fail(W + 'held-enter', `a held Enter (1 press + 4 repeats) on the string's name: state ${kb1 && kb1.state}, Up/Down picked "${kb1 && kb1.way}" (expected read and nothing picked: a repeat must not answer the next question)`);
+    else if (kb1.focus !== 'way:up') fail(W + 'kb-focus-name', `after naming the string with Enter the focus is on ${kb1.focus}, expected the first answer (way:up)`);
+    await run(`tsim:${lang}:kb:focus-way`, `(document.querySelector('.ans[data-way="' + ${S}.round.answer + '"]').focus(), true)`, 10);
+    await press('Enter');
+    const kb2 = await run(`tsim:${lang}:kb:way`, `({ state: ${S}.state, way: ${S}.wayPicked, answer: ${S}.round.answer, focus: ${focusWhere} })`, 10);
+    if (!kb2 || kb2.state !== 'turn' || kb2.way !== kb2.answer) fail(W + 'kb-way', `Enter on the right way: state ${kb2 && kb2.state}, picked "${kb2 && kb2.way}" (expected turn and ${kb2 && kb2.answer})`);
+    else if (kb2.focus !== (kb2.answer === 'up' ? 'peg-up' : 'peg-down')) fail(W + 'kb-focus-peg', `after answering ${kb2.answer} with Enter the focus is on ${kb2.focus}, expected ${kb2.answer === 'up' ? 'peg-up' : 'peg-down'} (the button that turns that way)`);
+    // Far from green, so no tick can end the round.
+    await run(`tsim:${lang}:kb:far`, `(${S}.cents = -300, TuningSim.tick(0), document.getElementById('peg-up').focus(), true)`, 10);
+    const cents = w => run(`tsim:${lang}:kb:${w}`, `${S}.cents`, 10);
+    const c0 = await cents('c0'); await press(' '); const c1 = await cents('space'); await press('Enter'); const c2 = await cents('enter');
+    await clickAt(`tsim:${lang}:kb:click`, '#peg-up'); const c3 = await cents('click');
+    if ([c1 - c0, c2 - c1, c3 - c2].join() !== '2,2,2') fail(W + 'peg-keys', `on Tighten: Space moved ${c1 - c0} cents, Enter ${c2 - c1}, one mouse click ${c3 - c2} (expected 2, 2 and 2: one tick each)`);
+    await run(`tsim:${lang}:mouse:new`, `(TuningSim.newRound(), document.activeElement && document.activeElement.blur(), true)`, 50);
+    await clickAt(`tsim:${lang}:mouse:name`, await run(`tsim:${lang}:mouse:sel`, nameSel, 10));
+    const ms = await run(`tsim:${lang}:mouse:focus`, `({ state: ${S}.state, focus: ${focusWhere} })`, 10);
+    if (!ms || ms.state !== 'read' || ms.focus !== 'body') fail(W + 'mouse-focus', `after naming the string with a mouse click: state ${ms && ms.state}, focus on ${ms && ms.focus} (expected read, and the focus not moved: body)`);
+    checks++;
+    /* The saved level: a teacher's ?level=2 look plus a level-up never lowers a saved 4; ?level=9 opens on the saved level. */
+    await run(`tsim:${lang}:lvl:save4`, `(localStorage.setItem('gc-tuningsim-level', '4'), true)`, 10);
+    await go('?level=2');
+    await run(`tsim:${lang}:lvl:two-clean`, `(${S}.clean = 2, ${S}.level)`, 10);   // CLEAN_TO_LEVEL_UP is 3: one clean round levels up
+    await run(`tsim:${lang}:lvl:name`, nameRight, 80);
+    await run(`tsim:${lang}:lvl:way`, wayRight, 80);
+    await run(`tsim:${lang}:lvl:green`, toGreen, 10);
+    await run(`tsim:${lang}:lvl:wait`, waitFor(`${S}.state === 'between'`, 3500), 10);
+    const sv = await run(`tsim:${lang}:lvl:saved`, `({ level: ${S}.level, saved: localStorage.getItem('gc-tuningsim-level'), note: document.getElementById('note2').textContent })`, 10);
+    if (!sv || sv.level !== 3 || sv.saved !== '4') fail(W + 'level-not-lowered', `a ?level=2 look that levels up: now level ${sv && sv.level}, saved "${sv && sv.saved}" (expected 3, and the saved 4 kept)`);
+    else if (!sv.note.includes(lang === 'en' ? 'up to 4 steps' : 'hasta 4 pasos')) fail(W + 'level-up-line', `the level-up line is "${sv.note}" (expected it to say ${lang === 'en' ? '"up to 4 steps"' : '"hasta 4 pasos"'})`);
+    await go('?level=9');
+    const l9 = await run(`tsim:${lang}:lvl:nine`, `${S}.level`, 10);
+    if (l9 !== 4) fail(W + 'level-9', `?level=9 opened on level ${l9}, expected the saved level 4`);
+    checks++;
+    /* Green on the circle only once the string is done: at level 1 the tuner shows the string's own letter, out of tune. */
+    await go('?level=1');
+    const greenFill = `(() => { const c = document.createElementNS('http://www.w3.org/2000/svg', 'circle'); c.style.fill = 'var(--green-bg)'; document.getElementById('ring').appendChild(c); const v = getComputedStyle(c).fill; c.remove(); return v; })()`;
+    const mark = `(() => { const t = document.querySelector('#ring .rn[data-note="' + ${S}.round.target + '"]'); return { tgtCur: t.classList.contains('tgt') && t.classList.contains('cur'), done: [...document.querySelectorAll('#ring .rn.done')].map(n => n.getAttribute('data-note')), green: getComputedStyle(t.querySelector('circle')).fill === ${greenFill}, inTune: ${S}.disp.inTune, target: ${S}.round.target }; })()`;
+    await run(`tsim:${lang}:done:name`, nameRight, 80);
+    const d1 = await run(`tsim:${lang}:done:before`, mark, 10);
+    await run(`tsim:${lang}:done:way`, wayRight, 80);
+    await run(`tsim:${lang}:done:green`, toGreen, 10);
+    const d2 = await run(`tsim:${lang}:done:after`, mark, 10);
+    if (!d1 || !d1.tgtCur || d1.inTune || d1.done.length || d1.green) fail(W + 'green-early', `level 1 before tuning: ${JSON.stringify(d1)} (expected the string's note marked tgt and cur, not done and not green)`);
+    if (!d2 || !d2.inTune || d2.done.join() !== d2.target || !d2.green) fail(W + 'green-done', `level 1 once in tune: ${JSON.stringify(d2)} (expected the string's note marked done and green)`);
     checks++;
   }
   try { await page.send('Page.removeScriptToEvaluateOnNewDocument', { identifier: gum.identifier }); } catch { /* best effort */ }
@@ -1689,7 +1768,7 @@ try {
   const baseCount = new Map(); (base ? base.errors : []).forEach(e => baseCount.set(norm(e), Math.max(baseCount.get(norm(e)) || 0, e.kind === 'bad-handler' ? +e.text : 1)));
   const report = base ? now.errors.filter(e => (e.kind === 'bad-handler' ? +e.text : 1) > (baseCount.get(norm(e)) || 0)) : now.errors;
   say(`smoke: ${now.stats.sets} sets in ${now.stats.modules} modules (EN + ES), ${now.stats.games} game views, ${now.stats.buttons} inline handlers compiled${now.stats.chordCards ? `, ${now.stats.chordCards} chord-grid cards walked (cursor, lap, layout at 1366/390/360, lyric sheet${now.stats.bassClicks ? `, bass switch clicked on ${now.stats.bassClicks}` : ''}${now.stats.recordingClicks ? `, recording switch clicked, reloaded and flipped back on ${now.stats.recordingClicks}` : ''}${now.stats.chordSkipped ? `; ${now.stats.chordSkipped.join(', ')} is teacher-only and not walked` : ''})` : ''}${now.stats.noteCallSteps ? `, ${now.stats.noteCallSteps} Note Call power-chord steps (EN + ES: six strings, taps on low E and A only, a hit and a miss)` : ''}${now.stats.pwnSteps ? `, ${now.stats.pwnSteps} Name the power chord steps (EN + ES: Note Call frets 5-12; Show answer on by default and clicked both ways; the 12 buttons in fret order and a real click on a right and a wrong answer on the buttons and the board; Next, Stop, another step, a language switch; the choice remembered after a reload)` : ''}${now.stats.chordCallRounds ? `, ${now.stats.chordCallRounds} Call the chord steps (EN + ES: Slower by default, the speed switch both ways, Start, a space bar that is cancelled, Stop, a round ended by another step and by a language switch, the default after a reload)` : ''}${now.stats.powerLayouts ? `, a pair play screen says its BPM and its live tempo buttons are clicked (${now.stats.pairPlay || 0} run), the setup's \u22125 / +5 and slider are clicked and measured, EN + ES (${now.stats.tempoSetup || 0} run), the done screen's −5/+5 row clicked twice and Again (${now.stats.doneRow || 0} run), Power Chord Switch at 1366\u00d7657 (Start and tempo on screen: ${now.stats.powerLayouts} views, incl. after a reload${now.stats.powerBestLayouts ? `; with a "Best today" score, EN + ES, no scrolling and the privacy line on screen: ${now.stats.powerBestLayouts} views` : ''}${now.stats.songs ? `; song buttons picked and reopened, ${now.stats.songs} song-switch rounds (16 switches x 3) run on a fake clock: round tempos, the BPM buttons, the play screen fitting 657px, one lit chart per chord, the done screen with 21 changes, ${now.stats.songDraws} random draws, none a song` : ""}${now.stats.powerCosmetic ? `; "low E" title kept together at ${now.stats.powerTitleWidths} window widths and the done-screen button padded, EN + ES: ${now.stats.powerCosmetic}` : ''}${now.stats.powerBack ? `; the way back to the chords measured and clicked on ${now.stats.powerBack} screens (a pair's and a song switch's done screen and the songs view, EN + ES)` : ''})` : ''}${now.stats.changeUpLayouts ? `, Change Up at 1366\u00d7657 (Start on screen, no scrolling: ${now.stats.changeUpLayouts} views)` : ''}${now.stats.quizLayouts ? `, Chord Blitz (both directions) and Fret Zap at 1366\u00d7657 (picture left, 2\u00d72 answers right, no scroll: ${now.stats.quizLayouts} views)` : ''}${now.stats.pmHeaderViews ? `, practice-minutes strip in the top bar: ${now.stats.pmHeaderViews} view checks (6 views x EN/ES x 1366 and 390 px: a shown button, exactly one strip on top, the Games bar's own on Games, no sideways scroll), ${now.stats.pmHeaderClicks} clicks open My progress, back after a reload, hidden when signed out` : ''}${now.stats.strumSteps ? `, ${now.stats.strumSteps} strum-pattern steps (EN + ES: cells, arrows, chord names, columns, 1366 and 390 px; Play strum lights an arrow, clicks every beat and sounds down strums louder; Play clicks opens the Metronome at 60 BPM, and again at the card's slider once it is dragged; Stop resets)` : ''}${now.stats.pathsActivities ? `, ${now.stats.pathsActivities} paths-activity walks (EN + ES: chooser with a silent preview and step list per path, Start, route length, Got it, Change path, ticks kept across a switch, one saved pick)` : ''}`);
-  if (now.stats.tuningSimRounds) say(`smoke: Tuning Simulator (EN + ES): ${now.stats.tuningSimRounds} rounds played (round 1 with a real held peg button), ${now.stats.tuningSimChecks} checkpoints — defaults (sound on, string names shown and locked in Phase 1, level 1), the arrow keys (Left = counterclockwise = tighten) and a hidden tab, three clean rounds per level (saved), the sound and string-names switches, Phase 2 after six right (saved, six plain buttons in string order), a Phase 2 miss, a reload, level 4 (another letter on the tuner, the circle of notes and its arrow, which turns counterclockwise for Up and clockwise for Down, Tighten turns counterclockwise, the held button speeds up, green on the wrong letter does not finish) and no getUserMedia call`);
+  if (now.stats.tuningSimRounds) say(`smoke: Tuning Simulator (EN + ES): ${now.stats.tuningSimRounds} rounds played (round 1 with a real held peg button), ${now.stats.tuningSimChecks} checkpoints — defaults (sound on, string names shown and locked in Phase 1, level 1), the arrow keys (Left = counterclockwise = tighten) and a hidden tab, three clean rounds per level (saved), the sound and string-names switches, Phase 2 after six right (saved, six plain buttons in string order), a Phase 2 miss, a reload, level 4 (another letter on the tuner, the circle of notes and its arrow, which turns counterclockwise for Up and clockwise for Down, Tighten turns counterclockwise, the held button speeds up, green on the wrong letter does not finish), the notes and arrow as drawn, real keys and clicks (a held Enter answers once, focus after a key, Space/Enter/click = one tick), the saved level never lowered, green on the circle only when done, and no getUserMedia call`);
   if (base) say(`smoke: ${BASELINE} had ${base.errors.length} error event(s); this checkout has ${now.errors.length}`);
   if (report.length) {
     exitCode = 1;
