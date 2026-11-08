@@ -7,8 +7,8 @@ see `WORKFLOW.md` and the git commit log.
 
 ## 2026-11-08 — Power Chord Switch and Change Up: the Stop click, and a Stop after a silent stretch
 
-- **The click of the Stop button is no longer counted as a strum.** Before, at "Every beat" and "Every 2 beats", pressing Stop could count the click as a change: after 4 right changes the screen could read "5 of 5 changes worked" with a check on a change you never played, or "5 of 15 — this speed is too fast" with "Drop 5 BPM". Now it reads "4 of 4 changes worked before you stopped."
-- **If changes went by with no strum heard, then you press Stop, the screen says "No strum was heard before you stopped."** Before, it said "You stopped before the first change." even when several changes had already gone by. That line now shows only when no change had come yet. Spanish: "No se oyó ningún rasgueo antes de que pararas."
+- **The click of the Stop button is no longer counted as a strum.** Before, pressing Stop could count the click as a change (at "Every beat" every time): after 4 right changes the screen could read "5 of 5 changes worked" with a check on a change you never played, or "5 of 15 — this speed is too fast" with "Drop 5 BPM". Now it reads "4 of 4 changes worked before you stopped."
+- **If changes went by and you press Stop, the screen says what was true.** Before, it said "You stopped before the first change." even when several changes had already gone by. Now: "No strum was heard before you stopped." if the mic heard nothing at all, "No change was heard before you stopped." if it heard you strum the first chord but no change, and "You stopped before the first change." only when no change had come yet. The first two have no "not reached" count under them. Spanish: "No se oyó ningún rasgueo antes de que pararas." / "No se oyó ningún cambio antes de que pararas."
 
 ## 2026-11-08 — Tuning Simulator: green means done, and the Module 1 note circle turns the same way
 

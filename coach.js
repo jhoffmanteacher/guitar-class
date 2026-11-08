@@ -3637,6 +3637,7 @@ function ccPrepare(again){
   cc.ladder = plan.ladder; cc.stage = 0; cc.stageLog = [];
   cc.stageBpms = plan.ladder ? ccLadderBpms(cc.bpm) : [cc.bpm];
   cc.evLog = [];   // every strum heard, for a recorded take (ccRecMeta)
+  cc.onsetCount = 0;   // every sound ccLoop took for a strum, in all rounds of this game (ccFinish: was anything heard at all?)
   cc.tempoLog = []; cc.startBpms = []; cc.retimedStages = [];   // the live tempo changes of this game (ccLiveBpm)
 }
 
@@ -3945,6 +3946,7 @@ function ccLoop(){
         at - cc.lastOnsetT > COACH_ONSET_REFRACT){
       cc.prevOnsetT = cc.lastOnsetT;   // ccFinish ignores an onset in the last 300 ms before a Stop (the Stop click itself) and uses this one
       cc.lastOnsetT = at;
+      cc.onsetCount++;
       if (micRec && micRec.live) cc.evLog.push({ t: at - lat, stage: cc.stage });
       const rel = at - lat - cc.listenStart - cc.gridOffset;
       const beatIdx = Math.round(rel / cc.beatMs);
@@ -4047,10 +4049,16 @@ function ccFinish(complete){
   cc.timeouts.forEach(clearTimeout);
   cc.timeouts = [];
   if (ccRaf){ cancelAnimationFrame(ccRaf); ccRaf = null; }
-  /* The Stop click is a sound too, and ccLoop may already have matched it to a change as an open check (at "Every beat" and "Every 2 beats" any moment is
-     inside some change's window). An open check whose onset arrived in the last 300 ms before a Stop is that click, as in lastOnsetEff below: drop it, so
-     the change counts as never played and not as a strum (review round 3). pend.t is the onset's arrival time, the clock of cc.lastOnsetT. */
-  if (!ended){ const nowT = performance.now(); cc.changes.forEach(c => { if (c.pend && c.pend.t > nowT - 300) c.pend = null; }); }
+  /* The Stop click is a sound too, and ccLoop may already have matched it to a change as an open check (a click inside a change's window: always at "Every beat", about
+     half the time at "Every 2 beats", a quarter at "Every bar"). A sound that arrived in the last 300 ms before a Stop, the latest one heard, is that click, as in lastOnsetEff
+     below: its open check is dropped, so the change counts as never played and not as a strum, and its event leaves the saved take (the console replays the take's events).
+     Only THAT onset's check: a real strum a little before the click keeps its own (review rounds 3 and 4). pend.t is the onset's arrival time, the clock of cc.lastOnsetT. */
+  const clickOnsetT = !ended && cc.lastOnsetT > performance.now() - 300 ? cc.lastOnsetT : null;
+  if (clickOnsetT !== null){
+    cc.changes.forEach(c => { if (c.pend && c.pend.t === clickOnsetT) c.pend = null; });
+    const clickLat = coachMicLatencyMs();
+    cc.evLog = (cc.evLog || []).filter(e => Math.abs(e.t + clickLat - clickOnsetT) > 0.5);
+  }
   /* Stop once every change has been played or graded is the natural "I'm
      done" — after the last change the round only runs on to the end of the
      last chord plus one beat (ccLoop) — so that counts as a finished round.
@@ -4077,6 +4085,7 @@ function ccFinish(complete){
   cc.unreached = neverReached.length;
   /* Nothing had fallen due yet at the Stop (no earlier round either): "before the first change" is true. Otherwise changes went by in silence (ccRenderDone). */
   cc.noneDue = (cc.stageLog || []).length === 0 && (cc.phase === 'countin' || cc.changes.every(c => c.t > stopT));
+  cc.noStrum = (cc.onsetCount || 0) - (clickOnsetT !== null ? 1 : 0) <= 0;   // no strum at all in the whole game, the Stop click not counted
   /* A Stop early in a later round, before any strum of it was heard: the hand may have left in the round before (the count-in has no Stop button, so the
      click waits for this round's play screen). The count-in is not reach time. */
   if (!ended && cc.ladder && cc.phase === 'play' && cc.stage > 0 && lastHeard < 0 && cc.stageLog.length && cc.roundEndT != null){
@@ -4159,7 +4168,7 @@ function ccRenderDone(){
   const stoppedClean = allReachedRight && !noneReached && r < 0.85;     // the headline and advice only below 85%: from there on the "great" screen is right
   let verdict, advice;
   if (noneReached){
-    verdict = '&#x1F3B8; ' + t(cc.noneDue ? 'games.cc.verdict.stoppedEarly' : 'games.cc.verdict.stoppedSilent');
+    verdict = '&#x1F3B8; ' + (cc.noneDue ? t('games.cc.verdict.stoppedEarly') : cc.noStrum ? t('games.cc.verdict.stoppedSilent') : t('games.cc.verdict.stoppedNoChange'));
     advice = t('games.cc.advice.stoppedEarly');
   } else if (stoppedClean){
     verdict = '&#x1F44D; ' + t(reachedN === 1 ? 'games.cc.verdict.stoppedOne' : 'games.cc.verdict.stopped', { ok, reached: reachedN });
@@ -4196,7 +4205,7 @@ function ccRenderDone(){
   ).join('');
   /* What the chips mean, in numbers: right, on time but the chord sounded wrong, no strum heard. */
   const nMiss = total - ok - off - (allReachedRight ? cc.unreached : 0);
-  const breakdown = `<div class="cc-breakdown">${escHtml(t('games.cc.breakdown', { ok, off, miss: nMiss }) + (allReachedRight ? t('games.cc.breakdown.left', { left: cc.unreached }) : ''))}</div>`;
+  const breakdown = noneReached && !cc.noneDue ? '' : `<div class="cc-breakdown">${escHtml(t('games.cc.breakdown', { ok, off, miss: nMiss }) + (allReachedRight ? t('games.cc.breakdown.left', { left: cc.unreached }) : ''))}</div>`;
   const rec = firmer || stoppedClean || noneReached ? 'same' : r >= 0.85 ? 'up' : r >= 0.5 ? 'same' : 'down';
   /* A song switch: how each round went, at its own tempo. */
   /* Power Chord Switch (2026-11-05, Jonathan: the button should take more than one click and show the tempo): a −5 / +5 row

@@ -1889,6 +1889,8 @@
       es: '{ok} de {reached} cambios funcionaron antes de que pararas.' },
     'games.cc.verdict.stoppedEarly': { en: 'You stopped before the first change.',
       es: 'Paraste antes del primer cambio.' },
+    'games.cc.verdict.stoppedNoChange': { en: 'No change was heard before you stopped.',
+      es: 'No se oyó ningún cambio antes de que pararas.' },
     'games.cc.verdict.stoppedSilent': { en: 'No strum was heard before you stopped.',
       es: 'No se oyó ningún rasgueo antes de que pararas.' },
     'games.cc.verdict.stoppedOne': { en: '{ok} of {reached} change worked before you stopped.',

@@ -158,10 +158,15 @@ wordings, no Note Runner mic check (see "Later (not chosen yet)").
     before), a game played to the end, a Stop in a later round's count-in.
     **How "never reached" is decided** (`ccFinish`, `c.neverReached`): a change waiting, or a miss that fell due in the 4 s (`CC_STOP_REACH_MS`) before the Stop, after the last
     graded strum, AND after the last strum the mic heard (`cc.lastOnsetT`; a late strum outside every window means the student tried that change). A sound in the last 300 ms before the
-    Stop is the Stop click and is ignored (`cc.prevOnsetT` is the onset before it); an open pitch check that click started is dropped in `ccFinish` too (review round 3, 2026-11-08: at
-    "Every beat" and "Every 2 beats" `ccLoop` had matched the click to a change, so a Stop after 4 right read "5 of 5" or "5 of 15, too fast"; 1ck runs the real `ccLoop` for it).
-    **Changes that fell due in silence** (2026-11-08, Jonathan): if any change had fallen due at the Stop and none was reached, the headline is "No strum was heard before you stopped."
-    (`games.cc.verdict.stoppedSilent`; ES "No se oyó ningún rasgueo antes de que pararas."; `cc.noneDue` false), same advice; "You stopped before the first change." only when none had fallen due. A song switch's previous round uses its own last strum (`cc.prevLastOnsetT`, saved in `ccStageEnd`) and
+    Stop is the Stop click and is ignored (`cc.prevOnsetT` is the onset before it); the open pitch check that click started is dropped in `ccFinish` too, and its event leaves the saved take (review rounds 3-4, 2026-11-08: when the click lands inside a change's window (always at
+    "Every beat", about half the time at "Every 2 beats", a quarter at "Every bar") `ccLoop` had matched it to a change, so a Stop after 4 right read "5 of 5" or "5 of 15, too fast"; only the LATEST onset's check
+    is dropped, so a real strum just before the click keeps its own; 1ck runs the real `ccLoop` for all of it). **Known and left alone (round 4, R4-2):** a Stop within about 300 ms of the final strum's arrival
+    (the arrival clock, so up to roughly 300 ms plus the mic delay after it was played) counts that strum as the click: a game whose last change was strummed that late loses its XP, "complete" and best (120 of 420 simulated
+    Stops at 150 and 250 ms) and the last chip goes grey. The alternative (skip the drop when the game would be complete) credits a click in the last change's window as a played change (56 of 56). Not changed: a hand cannot strum and press Stop that fast.
+    **Changes that fell due before the Stop with none reached** (2026-11-08, Jonathan chose the first wording; the second is mine, round 4): if no strum at all was heard in the game
+    (`cc.noStrum`: `cc.onsetCount`, the Stop click not counted) the headline is "No strum was heard before you stopped." (`games.cc.verdict.stoppedSilent`; ES "No se oyó ningún rasgueo antes de que pararas."); if strums were heard but no change
+    (the first chord strummed, then frozen) it is "No change was heard before you stopped." (`stoppedNoChange`; ES "No se oyó ningún cambio antes de que pararas."); "You stopped before the first change." only when none had
+    fallen due (`cc.noneDue`: no earlier round and every change still ahead). All three keep the same advice; the first two draw no "N not reached" breakdown under the headline (it contradicted it). A song switch's previous round uses its own last strum (`cc.prevLastOnsetT`, saved in `ccStageEnd`) and
     is skipped when a strum was already heard in the new round.
     **Open product call (Jonathan, not decided):** any OTHER sound after a change fell due (room noise, a neighbour's guitar, a hand muting the strings) also counts as "the student tried it",
     so in a noisy room the clean screen gives way to the old "too fast" one. The round-2 reviewer measured one noise onset per second at Every bar / Every 2 beats: the clean screen survives in 72-76

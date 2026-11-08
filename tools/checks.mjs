@@ -12858,9 +12858,53 @@ function checkCoachVerdicts() {
       const click120 = clickAt(120), click250 = clickAt(250), click400 = clickAt(400);
       for (const [g, ms] of [[click120, 120], [click250, 250]]) if (!g.txt.includes('3 of 3 changes worked before you stopped.')) flag(`1ck R2-1: a click ${ms} ms before the Stop (the Stop click) turns "3 of 3 changes worked before you stopped." into: ${g.txt.slice(0, 160)}`);
       if (click400.txt.includes('before you stopped')) flag('1ck R2-1: a sound 400 ms before the Stop (a strum, not the click) after change 4 fell due still reads "before you stopped"');
-      // R3-1 (review round 3): the same Stop click, heard by the REAL ccLoop. At "Every beat" and "Every 2 beats" any moment is inside some change's window, so ccLoop matches the
+      // ---- review round 4: scripted runs of the REAL ccLoop. hit(t) = a strum played at t (the clock of c.t); stopAt(t) = the Stop pressed at t. Results of the first changes are set by hand.
+      const loopGame = (mode, prog, bpm, rate, body, recLive) => {
+        run(`micRec = ${recLive ? '{ live: true, mode: "power", n: 30, srcRate: 1 }' : 'null'}; __saves = []; __starts = 0; __cbs = []; __t = 1000; setLang('en'); currentUser = { uid: 'pw-check' }; games = {}; ccSetup(${JSON.stringify(mode)}); cc.micOn = true; ccPickRate(${rate}); ccPickProg(${prog}); cc.bpm = ${bpm};
+          ccPrepare(false); cc.firstPlayAt = null; cc.unreached = 0; ccBeginStage(); __t = 25000; __cbs[0](); ${recLive ? 'cc.firstPlayAt = 1000;' : ''}
+          (function(){ const keep = { rf: coachReadFrame, an: coachAnalyser, hf: coachHfRms, at: coachOnsetAt, pr: coachPitchReadings };
+            try { const lat = coachMicLatencyMs();
+              coachPitchReadings = () => []; coachAnalyser = {}; coachHfRms = 0; cc.smoothRms = 0.01; cc.smoothHf = 0;
+              const hit = t => { __t = t + lat; cc.smoothRms = 0.01; coachReadFrame = () => 0.05; coachOnsetAt = __t; __ccLoop(); };
+              const stopAt = t => { __t = t + lat; ccFinish(false); };
+              ${body}
+            } finally { coachReadFrame = keep.rf; coachAnalyser = keep.an; coachHfRms = keep.hf; coachOnsetAt = keep.at; coachPitchReadings = keep.pr; }
+          })();`);
+        song.stopChecks++;
+        return { txt: text('cc-body').replace(/\s+/g, ' '), html: bodies['cc-body'] || '', saves: JSON.parse(run('JSON.stringify(__saves)')) };
+      };
+      // R4-1: the first chord was strummed (heard), the change was missed, Stop: "No strum was heard" would be false. Three speeds; not the silent line, not "before the first change", and no "not reached" count under it.
+      for (const [rate, label, strumBeat, stopBeat] of [[0, 'Every bar', 0.1, 5.5], [2, 'Every beat', 0.1, 2.5], [1, 'Every 2 beats', 0.1, 4.5]]) {
+        const fz = loopGame('power', PAIR, 60, rate, `const c0 = cc.changes[0], b = cc.beatMs, ls = cc.listenStart; hit(ls + ${strumBeat} * b); stopAt(ls + ${stopBeat} * b);`);
+        if (!fz.txt.includes('No change was heard before you stopped.') || fz.txt.includes('No strum was heard') || fz.txt.includes('before the first change') || fz.txt.includes('not reached') || fz.txt.includes(TOOFAST))
+          flag(`1ck R4-1: ${label}: the first chord strummed (heard), no change heard, then Stop must read "No change was heard before you stopped." (not "No strum was heard"; no "not reached" count): ${fz.txt.slice(0, 220)}`);
+      }
+      { const sl4 = loopGame('power', PAIR, 60, 2, `const b = cc.beatMs, ls = cc.listenStart; stopAt(ls + 2.5 * b);`);
+        if (!sl4.txt.includes('No strum was heard before you stopped.') || sl4.txt.includes('not reached')) flag(`1ck R4-1: nothing heard at all, two changes due, then Stop must read "No strum was heard before you stopped." with no "not reached" count under it: ${sl4.txt.slice(0, 200)}`);
+        // the Stop click alone (the only sound) is not a strum: still the silent line
+        const ck4 = loopGame('power', PAIR, 60, 2, `const b = cc.beatMs, ls = cc.listenStart; hit(ls + 2.4 * b); stopAt(ls + 2.5 * b);`);
+        if (!ck4.txt.includes('No strum was heard before you stopped.')) flag(`1ck R4-1: a Stop click as the only sound heard turns the silent line into: ${ck4.txt.slice(0, 200)}`); }
+      // R4-3: a REAL strum on change 5 (inside its window) and the click 180 ms later, the Stop 100 ms after the click: only the click's check is dropped, so "5 of 5", not "4 of 15 - too fast, Drop 5 BPM"
+      for (const [rate, bpm, mode] of [[2, 60, 'power'], [2, 90, 'power'], [1, 60, 'power'], [2, 60, 'open']]) {
+        const sc = loopGame(mode, mode === 'open' ? 0 : PAIR, bpm, rate, `cc.changes.forEach((c, i) => { c.result = i < 4 ? 'ok' : null; }); const c4 = cc.changes[4]; cc.lastOnsetT = cc.changes[3].t + 40 + lat; hit(c4.t + 150); hit(c4.t + 330); stopAt(c4.t + 430);`);
+        if (!sc.txt.includes('5 of 5 changes worked before you stopped.') || sc.txt.includes('too fast') || sc.txt.includes('Drop '))
+          flag(`1ck R4-3: ${mode === 'open' ? 'Change Up' : 'Power Chord Switch'} at ${bpm} BPM (speed ${rate}): a real strum on change 5, the Stop click 180 ms later, must read "5 of 5 changes worked before you stopped.": ${sc.txt.slice(0, 200)}`);
+      }
+      // Change Up: the click is dropped there too (the same ccLoop and ccFinish)
+      for (const [rate, beatsAfter] of [[2, 1.5], [2, 2.2], [1, 1.7]]) {
+        const cu = loopGame('open', 0, 60, rate, `cc.changes.forEach((c, i) => { c.result = i < 4 ? 'ok' : null; }); const c3 = cc.changes[3].t; cc.lastOnsetT = c3 + 40 + lat; hit(c3 + ${beatsAfter} * cc.beatMs - 120); stopAt(c3 + ${beatsAfter} * cc.beatMs);`);
+        if (!cu.txt.includes('4 of 4 changes worked before you stopped.') || cu.txt.includes('too fast')) flag(`1ck R4-3: Change Up, speed ${rate}, 4 right then the Stop click ${beatsAfter} beats after the last strum: ${cu.txt.slice(0, 200)}`);
+      }
+      // R4-5: the dropped click leaves the saved take too: the take's events hold only the real strums (the console replays them)
+      { const ev = loopGame('power', PAIR, 60, 2, `cc.changes.forEach((c, i) => { c.result = i < 4 ? 'ok' : null; }); const c3 = cc.changes[3].t; cc.lastOnsetT = c3 + 40 + lat; hit(c3 + 1000 + 300); hit(c3 + 1000 + 700); stopAt(c3 + 1000 + 800);`, true);
+        const m = ev.saves[0];
+        if (!m || !Array.isArray(m.events) || m.events.length !== 1) flag(`1ck R4-5: a take Stopped right after a real strum and the Stop click saves ${m && m.events ? m.events.length : 'no'} events, expected 1 (the click is not a strum in the saved take): ${JSON.stringify(m && m.events).slice(0, 160)}`); }
+      // R4-6 (M9): a song switch whose round 1 went by in silence (every change swept), Stopped 0.3 beats into round 2: changes HAD fallen due, so "before the first change" is false; no strum at all was heard
+      { const m9 = loopGame('power', SW, 130, 2, `cc.changes.forEach(c => { c.result = 'miss'; }); __t = cc.listenStart + 9 * cc.beatMs; ccStageEnd(); __t = cc.listenStart; __cbs[1](); stopAt(cc.listenStart + 0.3 * cc.beatMs);`);
+        if (!m9.txt.includes('No strum was heard before you stopped.') || m9.txt.includes('before the first change')) flag(`1ck R4-6: a song switch whose round 1 went by in silence, Stopped 0.3 beats into round 2, must read "No strum was heard before you stopped.": ${m9.txt.slice(0, 260)}`); }
+      // R3-1 (review round 3): the same Stop click, heard by the REAL ccLoop. When the click lands inside a change's window (always at "Every beat", half the time at "Every 2 beats", a quarter at "Every bar") ccLoop matches the
       // click to a change as an open check and ccFinish used to grade it (a ✓ on a change never played; "5 of 15, too fast" after 4 right). R2-1 above sets the onset times by hand and
-      // never runs ccLoop, at the one speed (Every bar) where the click cannot take a change. 4 right, then the click 120 ms before the Stop, `beatsAfter` beats after change 4's strum.
+      // never runs ccLoop. 4 right, then the click 120 ms before the Stop, `beatsAfter` beats after change 4's strum.
       const loopClick = (rate, beatsAfter, clickMs) => gameR(PAIR, 60, rate, `__t = 25000; __cbs[0](); cc.changes.forEach((c, i) => { c.result = i < 4 ? 'ok' : null; });
         (function(){ const keep = { rf: coachReadFrame, an: coachAnalyser, hf: coachHfRms, at: coachOnsetAt, pr: coachPitchReadings };
           try { const lat = coachMicLatencyMs(), c3 = cc.changes[3].t;
@@ -13035,7 +13079,7 @@ function checkCoachVerdicts() {
     if (pk !== 'ccBest:F5-G5:beat') flag(`1ck: a pair's best-score key changed to "${pk}" (a student's saved bests would be lost)`);
     const pairPlan = JSON.parse(run(`JSON.stringify(ccRoundPlan(CC_POWER_PROGRESSIONS[1], CC_POWER_PROGRESSIONS[1].chords, CC_RATES[1]))`));
     if (pairPlan.slots !== 12 || pairPlan.ladder || pairPlan.rounds !== 1) flag(`1ck: a pair's round changed (${pairPlan.slots} slots at "Every 2 beats", expected 12, one round)`);
-    const SONG_PIN = { recChecks: 20, readingChecks: 21, ratioChecks: 165, gridChecks: 60, hintChecks: 20, topChecks: 50, stopChecks: 73, songs: 2, entries: 16, cardSwitches: 16, hints: 16 * 7 * 2, setups: 16 * 3 * 2, dones: 16 * 2, rounds: 16 * 3, nudges: 16 * 2 };
+    const SONG_PIN = { recChecks: 20, readingChecks: 21, ratioChecks: 165, gridChecks: 60, hintChecks: 20, topChecks: 50, stopChecks: 87, songs: 2, entries: 16, cardSwitches: 16, hints: 16 * 7 * 2, setups: 16 * 3 * 2, dones: 16 * 2, rounds: 16 * 3, nudges: 16 * 2 };
     for (const [k, n] of Object.entries(SONG_PIN)) if (song[k] !== n) flag(`1ck: ${song[k]} ${k}, pinned ${n} — the check went partly blind (or grew: re-pin on purpose)`);
     songCounts = song;
     run(`setLang('en'); cc = null; ccStop();`);
