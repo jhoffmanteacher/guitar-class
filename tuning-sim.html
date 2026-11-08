@@ -153,8 +153,11 @@ h2{font-size:1.5rem;margin:0 0 2px;line-height:1.2}
 .rn.tgt text{fill:var(--purple-text)}
 .rn.cur circle{fill:var(--amber-bg);stroke:var(--amber-text);stroke-width:3.5}
 .rn.cur text{fill:var(--amber-text)}
-.rn.tgt.cur circle{fill:var(--green-bg);stroke:var(--green-text)}
-.rn.tgt.cur text{fill:var(--green-text)}
+/* On the string's letter but not in tune yet: the string's purple ring, the tuner's amber fill. Green only once it is done. */
+.rn.tgt.cur circle{fill:var(--amber-bg);stroke:var(--purple-accent)}
+.rn.tgt.cur text{fill:var(--amber-text)}
+.rn.tgt.cur.done circle{fill:var(--green-bg);stroke:var(--green-text)}
+.rn.tgt.cur.done text{fill:var(--green-text)}
 .rarc{fill:none;stroke:var(--purple-accent);stroke-width:3;stroke-linecap:round}
 .ahead{fill:var(--purple-accent)}
 .rc1{fill:var(--text);font-size:15px;font-weight:700;text-anchor:middle;font-family:inherit}
@@ -524,7 +527,7 @@ function followPitch(){
 
 /* ═══ THE CIRCLE OF NOTES ═══
    The 12 notes round a ring. Going UP is counterclockwise, the same way the peg turns to tighten.
-   Purple = the string's note, amber = the note the tuner shows now; both on one note = green.
+   Purple = the string's note, amber = the note the tuner shows now; green = on the string's note AND in tune (done).
    After the student answers Up or Down, an arrow shows the short way round from where the tuner started. */
 const RC = 112, RR = 88, RA = 58;
 const ringNodes = [];
@@ -541,7 +544,7 @@ function stepsText(n){ return T(n === 1 ? 'step1' : 'stepN', { n }); }
 function ringRender(){
   const r = S.round, known = !!r && S.state !== 'name';
   const tgt = known ? r.target : '', cur = known && S.disp.letter ? S.disp.letter : '';
-  ringNodes.forEach(g => { const n = g.getAttribute('data-note'); g.classList.toggle('tgt', n === tgt); g.classList.toggle('cur', n === cur); });
+  ringNodes.forEach(g => { const n = g.getAttribute('data-note'); g.classList.toggle('tgt', n === tgt); g.classList.toggle('cur', n === cur); g.classList.toggle('done', n === tgt && n === cur && S.disp.inTune); });
   const arc = $('rarc'), c1 = $('rc1'), c2 = $('rc2');
   if (known && r.steps > 0 && (S.state === 'turn' || S.state === 'between')) {
     const a = NOTES.indexOf(r.letter), b = NOTES.indexOf(r.target), up = r.answer === 'up';
