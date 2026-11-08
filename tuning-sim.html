@@ -831,7 +831,16 @@ el.namesSw.addEventListener('click', () => {
      click (detail >= 1) already turned the peg on pointerdown, so it is skipped. */
   b.addEventListener('click', e => { if (e.detail === 0 && S.state === 'turn') { ensureCtx(); tick(+b.dataset.dir, TICK_CENTS); } });
 });
-document.addEventListener('keydown', () => { lastKey = true; }, true);
+/* Holding Enter repeats the key, and the browser clicks the focused button on every repeat. An answer
+   moves the focus on (focusFirst), so a held Enter would answer the next question by itself. A repeat
+   counts only on the control the key went down on (holding Enter on Tighten still keeps turning). */
+let keyOn = null;
+document.addEventListener('keydown', e => {
+  lastKey = true;
+  if (e.key !== 'Enter' && e.key !== ' ') return;
+  if (!e.repeat) keyOn = e.target;
+  else if (e.target !== keyOn) e.preventDefault();
+}, true);
 document.addEventListener('pointerdown', () => { lastKey = false; }, true);
 ['pointerup','pointercancel'].forEach(ev => window.addEventListener(ev, stopHold));
 window.addEventListener('blur', stopHold);
