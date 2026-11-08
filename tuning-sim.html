@@ -664,6 +664,7 @@ function answerWay(w){
   S.state = 'turn';
   render();
   updateDisplay();
+  focusFirst();
 }
 function finishRound(){
   doneTimer = 0;
@@ -784,9 +785,16 @@ function render(){
   el.namesSw.setAttribute('aria-disabled', p1 ? 'true' : 'false');
   ringRender();
 }
+/* After an answer the clicked button is re-rendered away and focus falls to <body>. A keyboard
+   user then gets the next control (the answers, or the peg button for the right way while
+   turning). Never on page load or after a mouse click on the page, never out of the top bar. */
+let lastKey = false;
 function focusFirst(){
-  const b = el.answers.querySelector('button:not(:disabled)') || (S.state === 'name' && el.strings.querySelector('.bubble:not(:disabled)'));
-  if (b && document.activeElement && document.activeElement !== document.body && !document.activeElement.closest('.top')) { try { b.focus({ preventScroll: true }); } catch(e){} }
+  const a = document.activeElement, lost = !a || a === document.body;
+  if (lost ? !lastKey : a.closest('.top')) return;
+  const b = el.answers.querySelector('button:not(:disabled)') || (S.state === 'name' && el.strings.querySelector('.bubble:not(:disabled)')) ||
+    (S.state === 'turn' && (S.round.answer === 'up' ? el.pegUp : el.pegDown));
+  if (b) { try { b.focus({ preventScroll: true }); } catch(e){} }
 }
 
 /* ═══ EVENTS ═══ */
@@ -813,7 +821,12 @@ el.namesSw.addEventListener('click', () => {
 [el.pegUp, el.pegDown].forEach(b => {
   b.addEventListener('pointerdown', e => { e.preventDefault(); startHold(+b.dataset.dir); });
   b.addEventListener('contextmenu', e => e.preventDefault());
+  /* Space or Enter on a focused button: one short step, like a short press. A mouse or touch
+     click (detail >= 1) already turned the peg on pointerdown, so it is skipped. */
+  b.addEventListener('click', e => { if (e.detail === 0 && S.state === 'turn') { ensureCtx(); tick(+b.dataset.dir, TICK_CENTS); } });
 });
+document.addEventListener('keydown', () => { lastKey = true; }, true);
+document.addEventListener('pointerdown', () => { lastKey = false; }, true);
 ['pointerup','pointercancel'].forEach(ev => window.addEventListener(ev, stopHold));
 window.addEventListener('blur', stopHold);
 
