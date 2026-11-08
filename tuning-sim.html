@@ -107,6 +107,7 @@ h1{font-size:1.5rem;margin:0;letter-spacing:-0.01em;flex-basis:100%}
 .peg-btn .pl svg polygon{fill:currentColor}
 .peg-btn small{font-size:.75rem;font-weight:400;color:var(--text2);line-height:1.25;text-align:center}
 .peg-btn small b{font-weight:600;color:var(--text)}
+.peg-panel .peg-btn{align-self:stretch}   /* both buttons the same height when one label wraps (Spanish "gira en sentido antihorario") */
 .peg-btn:hover:not(:disabled){background:var(--bg3)}
 .peg-btn.held{background:var(--purple-bg);border-color:var(--purple-accent);color:var(--purple-text)}
 .peg-btn.held small,.peg-btn.held small b{color:var(--purple-text)}
@@ -114,6 +115,8 @@ h1{font-size:1.5rem;margin:0;letter-spacing:-0.01em;flex-basis:100%}
 .peg-svg{width:104px;height:104px;display:block}
 .peg-svg g.rot{transform-origin:52px 52px;transition:transform .12s linear}
 .peg-foot{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-top:8px}
+/* "Pluck again" stays on one line; the keys line wraps instead. */
+.peg-foot .btn{white-space:nowrap;flex-shrink:0}
 .keys{font-size:.8125rem;color:var(--text2)}
 .btn{min-height:44px;padding:0 16px;border-radius:var(--radius-sm);border:1px solid var(--border2);background:var(--bg2);font-size:.9375rem;cursor:pointer}
 .btn:hover:not(:disabled){background:var(--bg3)}
