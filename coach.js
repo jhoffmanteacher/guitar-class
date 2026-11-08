@@ -3659,7 +3659,7 @@ function ccBeginStage(){
   cc.roundLow = cc.stageBpms[cc.stage];
   cc.startBpms = (cc.startBpms || []).slice();
   cc.startBpms[cc.stage] = cc.stageBpms[cc.stage];
-  cc.smoothRms = 0; cc.smoothHf = 0; cc.lastOnsetT = -1e9; cc.lastPitchT = 0; cc.gridOffset = 0; cc.lastBeat = -1;
+  cc.smoothRms = 0; cc.smoothHf = 0; cc.lastOnsetT = -1e9; cc.prevOnsetT = -1e9; cc.lastPitchT = 0; cc.gridOffset = 0; cc.lastBeat = -1;
   cc.phase = 'countin';
   ccBody().classList.remove('cc-open-setup');
   const stageLabel = cc.ladder ? `<div class="cc-stage" id="cc-stage">${escHtml(ccStageText())}</div>` : '';
@@ -3943,6 +3943,7 @@ function ccLoop(){
          coachHfRms > CHK_HF_FLOOR &&
          coachHfRms > cc.smoothHf * hfRatio) &&
         at - cc.lastOnsetT > COACH_ONSET_REFRACT){
+      cc.prevOnsetT = cc.lastOnsetT;   // ccFinish ignores an onset in the last 300 ms before a Stop (the Stop click itself) and uses this one
       cc.lastOnsetT = at;
       if (micRec && micRec.live) cc.evLog.push({ t: at - lat, stage: cc.stage });
       const rel = at - lat - cc.listenStart - cc.gridOffset;
@@ -4053,7 +4054,7 @@ function ccFinish(complete){
   if (!complete && cc.phase === 'play' && (!cc.ladder || cc.stage >= CC_LADDER_ROUNDS - 1) &&
       cc.changes.every(c => c.result !== null || c.pend)) complete = true;
   /* Changes the player never got to are 'miss' only in the data, not strums the mic missed: ccRenderDone leaves them out of the "strum firmer" count.
-     That is every change still waiting, and the misses after the last strum the mic heard that fell due in the CC_STOP_REACH_MS before the Stop
+     That is every change still waiting and not yet due before the last strum the mic heard, and the misses after that strum that fell due in the CC_STOP_REACH_MS before the Stop
      (ccLoop has already swept those while the hand was going for the Stop button: at 60 BPM a 3 s reach is 3 changes). A game whose time ran out (ccStageEnd; never a Stop, even one counted as finished above), and a song switch
      stopped in a later round's count-in (that round is left out below), have none. */
   const stopT = performance.now() - coachMicLatencyMs();
@@ -4061,8 +4062,11 @@ function ccFinish(complete){
   cc.changes.forEach((c, i) => { if (c.pend || c.result === 'ok' || c.result === 'off') lastHeard = i; });
   /* A strum the mic heard AFTER a change fell due means the student reached it, even if the strum landed outside every window (a late one): that change
      is not "never reached" (a student who strums late and gives up must still get the old screen). lastStrumT is that strum's played time (cc.lastOnsetT is
-     when it arrived, minus the mic latency, as stopT is), in the clock of c.t; -1e9 when no strum was heard this round. */
-  const lastStrumT = cc.lastOnsetT - coachMicLatencyMs();
+     when it arrived, minus the mic latency, as stopT is), in the clock of c.t; -1e9 when no strum was heard this round. A sound in the last 300 ms before the
+     Stop is the Stop click (a hand cannot strum and then reach the button that fast), so it does not count: the one before it does (review round 2). */
+  const stopLat = coachMicLatencyMs();
+  const lastOnsetEff = cc.lastOnsetT - stopLat > stopT - 300 ? cc.prevOnsetT : cc.lastOnsetT;
+  const lastStrumT = lastOnsetEff - stopLat;
   const neverReached = ended || (cc.ladder && cc.phase === 'countin' && cc.stage > 0) ? []
     : cc.changes.filter((c, i) => i > lastHeard && c.t > lastStrumT && ((c.result === null && !c.pend) || (c.result === 'miss' && stopT - c.t < CC_STOP_REACH_MS)));
   neverReached.forEach(c => { c.neverReached = true; });   // ccRenderDone draws these as "not reached", not as "no strum heard", when everything the student did reach was right
@@ -4075,7 +4079,7 @@ function ccFinish(complete){
     prev.forEach((c, i) => { if (c.result === 'ok' || c.result === 'off') prevHeard = i; });
     /* The previous round's own last strum (saved when that round ended) and any strum already heard in this round both mean the hand did not go for Stop. */
     const prevStrumT = (cc.prevLastOnsetT == null ? -1e9 : cc.prevLastOnsetT) - coachMicLatencyMs();
-    const prevUn = cc.lastOnsetT > 0 ? [] : prev.filter((c, i) => i > prevHeard && c.t > prevStrumT && c.result === 'miss' && stopT - gap - c.t < CC_STOP_REACH_MS);
+    const prevUn = lastOnsetEff > 0 ? [] : prev.filter((c, i) => i > prevHeard && c.t > prevStrumT && c.result === 'miss' && stopT - gap - c.t < CC_STOP_REACH_MS);
     prevUn.forEach(c => { c.neverReached = true; });
     cc.unreached += prevUn.length;
   }
@@ -4211,7 +4215,7 @@ function ccRenderDone(){
      </div>`;
   /* When everything reached was right, a round counts only the changes reached in it, and a round with none left is not listed ("4 of 4" next to "Round 1: 4 of 7" read as a contradiction). */
   const roundRows = cc.ladder ? cc.stageLog.map((sg, k) => ({ k, sg, shown: allReachedRight ? sg.changes.filter(c => !c.neverReached) : sg.changes })).filter(x => x.shown.length) : [];
-  const rounds = cc.ladder ? '<div class="cc-rounds">' + roundRows.map(({ k, sg, shown }) =>
+  const rounds = cc.ladder && roundRows.length ? '<div class="cc-rounds">' + roundRows.map(({ k, sg, shown }) =>
     `<span>${escHtml(t('games.pw.ladder.roundResult', { n: k + 1, bpm: sg.bpm, ok: shown.filter(c => c.result === 'ok').length, total: shown.length }))}</span>`).join('') + '</div>' : '';
   /* The way back to the setup: Power Chord Switch's is the first thing on the screen (pwBackBtnHtml); Change Up keeps its button at the bottom. */
   const backTop = ccIsPower() ? pwBackBtnHtml(`ccSetup(${jsonAttrArg('power')})`) : '';
@@ -4249,6 +4253,7 @@ function ccDoneNudge(d){
 }
 function ccAgain(d){
   if (!cc || cc.phase !== 'done') return;   // a second tap while the first is starting
+  cc.heldPairBpm = null;                    // the tempo held across a song-switch look is over once a game is played
   if (ccIsPower() && cc.nextBpm != null) cc.bpm = cc.nextBpm;
   cc.bpm = Math.min(CC_BPM_MAX, Math.max(ccBpmMin(), cc.bpm + d));
   try { sessionStorage.setItem(ccSk('Bpm'), String(cc.bpm)); } catch(e){}

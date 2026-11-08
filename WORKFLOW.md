@@ -146,15 +146,28 @@ wordings, no Note Runner mic check (see "Later (not chosen yet)").
   line now says so); the smoke Play-clicks slider gap (`smoke.mjs` drags the card slider to 77; with `strumOpenMetro` forced
   to 60 it reports 7 failing steps); check `1d` flags a shared step before a path step (reviewed by `site-reviewer`, 2 minor
   points fixed). The coach.js fixes (Stop hint, 10 s of play, 130 cap) were reviewed by `site-reviewer-deep` the same day and landed 2026-11-07. What is left:
-  - [x] *Stopped-game headline + song-switch setup tempo (DECIDED 2026-11-07 by Jonathan, built 2026-11-07):* a Stop with changes still ahead, where every change
-    the student reached was right (`ok === total - cc.unreached`, `cc.unreached > 0`, under 85% of all changes), now reads "N of M changes worked before you stopped."
-    (M = the changes reached) and "Every change you got to worked. Play it again and go all the way." (`games.cc.verdict.stopped`, `games.cc.advice.stopped`, EN + ES),
-    in both games: no "too fast", no "Drop 5 BPM"; the breakdown's "no strum heard" is 0; the never-reached chips are grey (`coach-chip pending`, flagged
-    `c.neverReached` in `ccFinish`, including the previous round's swept tail in a song switch); the tempo row stays on the tempo played. NOT changed: a Stop where any
-    reached change was wrong or not heard, a game played to the end, a Stop with nothing reached (first count-in), 85% or better of all changes. Still true there:
-    a Stopped game with some wrong or unheard changes counts the never-reached ones in its headline fraction and breakdown (Jonathan's call covered only the all-right case).
-    Song-switch setup: the tempo readout, slider top and session tempo stop at 130 (`ccSetupMaxBpm`); a tempo of 135 or 140 picked for a pair comes down to 130 when a
-    song switch is picked. Check `1ck` runs 9 real games and a setup walk for this; eight broken versions each turn it red.
+  - [x] *Stopped-game headline + song-switch setup tempo (DECIDED 2026-11-07 by Jonathan, built and merged the same day after two deep-review rounds):*
+    **A Stop with changes still ahead, where every change the student reached was right** (`ok === total - cc.unreached`, `cc.unreached > 0`), in both games:
+    below 85% of all changes it reads "N of M changes worked before you stopped." (M = reached; "1 of 1 change" at one) and "Every change you reached worked. Play it
+    again, to the end." (`games.cc.verdict.stopped`/`stoppedOne`, `games.cc.advice.stopped`, EN + ES): no "too fast", no "Drop 5 BPM" (Change Up: "Drop 10 BPM"). At 85% or
+    better of all changes the good-score headline stays. At ANY score the never-reached changes are grey (`coach-chip notreached`, opacity .45, no mark), the breakdown's
+    "no strum heard" leaves them out and ends with "· N not reached" (`games.cc.breakdown.left`), a song switch's rounds line counts only the changes reached (a round with none
+    is not listed), and the tempo row stays on the tempo played. **A Stop before the first change** (nothing reached; Jonathan chose the neutral screen): "You stopped before the first
+    change." / "Play it again, to the end." (`games.cc.verdict.stoppedEarly`, `advice.stoppedEarly`; ES "Paraste antes del primer cambio." / "Tócalo otra vez, hasta el final."), no tempo
+    advice, no XP or best, row unchanged. NOT changed: a Stop where any reached change was wrong or not heard (its fraction, chips and breakdown count the never-reached ones as
+    before), a game played to the end, a Stop in a later round's count-in.
+    **How "never reached" is decided** (`ccFinish`, `c.neverReached`): a change waiting, or a miss that fell due in the 4 s (`CC_STOP_REACH_MS`) before the Stop, after the last
+    graded strum, AND after the last strum the mic heard (`cc.lastOnsetT`; a late strum outside every window means the student tried that change). A sound in the last 300 ms before the
+    Stop is the Stop click and is ignored (`cc.prevOnsetT` is the onset before it). A song switch's previous round uses its own last strum (`cc.prevLastOnsetT`, saved in `ccStageEnd`) and
+    is skipped when a strum was already heard in the new round.
+    **Open product call (Jonathan, not decided):** any OTHER sound after a change fell due (room noise, a neighbour's guitar, a hand muting the strings) also counts as "the student tried it",
+    so in a noisy room the clean screen gives way to the old "too fast" one. The round-2 reviewer measured one noise onset per second at Every bar / Every 2 beats: the clean screen survives in 72-76
+    of 96 games with this rule, 89-93 of 96 without it; without the rule a student who strums late and gives up gets "4 of 4 worked". Kept: the conservative one (no praise that is not earned).
+    **Known and left alone:** a song switch whose round 1 was silent, Stopped within about 0.2 s of round 2's play screen at 130 BPM, reads the neutral screen after a whole round was played
+    (round 1's swept tail counts as a reach; reviewer R2-3, rare). The done screen's height at 1366x657 was reasoned, not measured: the breakdown line may wrap once (about +20 px).
+    **Song-switch setup:** the tempo readout, slider top and session tempo stop at 130 (`ccSetupMaxBpm`); a pair's 135 / 140 comes down on a song switch and comes back when a pair is picked
+    again unless a tempo was set on the song switch (`cc.heldPairBpm`, cleared by `ccSetBpm`, `ccAgain`, and a new `ccSetup`). Check `1ck` runs about 23 real games for the Stop cases (hand-set results
+    with the strum times set the way `ccLoop` sets them) and a setup walk; every broken version of the new code (22 in two rounds) turns it red.
   - [x] *coach.js detection:* **Grid step cap (2026-11-07, branch `coach-open`).** `ccLoop` moved `gridOffset` by a quarter of a strum's distance
     from the nearest beat, uncapped: one stray sound half a beat off moved it 749 ms at 10 BPM (499 at 15, 250 at 30, 125 at 60). It now moves
     `CC_GRID_STEP_CAP_MS` = 60 ms at most, in both games (`teacher.js` `micEvalTakePw` replays each take with the `gridStepCapMs` it saved; none = uncapped).

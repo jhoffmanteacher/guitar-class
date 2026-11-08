@@ -1892,7 +1892,7 @@
     'games.cc.verdict.stoppedOne': { en: '{ok} of {reached} change worked before you stopped.',
       es: '{ok} de {reached} cambio funcionó antes de que pararas.' },
     'games.cc.breakdown.left': { en: ' \u00b7 {left} not reached',
-      es: ' \u00b7 {left} sin llegar' },
+      es: ' \u00b7 {left} sin alcanzar' },
     'games.cc.verdict.okMessy': { en: '{ok} of {total} changes worked ({off} were on time but sounded messy).',
       es: '{ok} de {total} cambios funcionaron ({off} llegaron a tiempo pero sonaron desordenados).' },
     'games.cc.verdict.okMessyOne': { en: '{ok} of {total} changes worked (1 was on time but sounded messy).',
